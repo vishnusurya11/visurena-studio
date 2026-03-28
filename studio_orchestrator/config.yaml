@@ -1,0 +1,48 @@
+# Studio Orchestrator Configuration
+
+database:
+  path: "D:\\Projects\\GlobalDatabases\\visurena_studio.db"
+
+llm:
+  provider: "ollama"
+  ollama:
+    model: "gpt-oss:20b"
+    base_url: "http://localhost:11434"
+  openrouter:
+    model: "gpt-oss/20b"
+    api_key: ""
+
+tts:
+  device: "cuda"
+  precision: "bfloat16"
+  model_size: "1.7B"
+  narrator_voice: "Ryan"
+  narration_mode: "single_narrator"
+  pause_between_speakers_ms: 500
+  pause_within_speaker_ms: 250
+
+comfyui:
+  base_url: "http://127.0.0.1:8188"
+  timeout: 300
+  workflow_dir: "D:\\Projects\\KingdomOfViSuReNa\\alpha\\house_of_novels\\workflows"
+
+youtube:
+  category_id: "24"
+  privacy_status: "private"
+  credentials_path: "D:\\Projects\\KingdomOfViSuReNa\\alpha\\house_of_novels\\credentials"
+
+artifacts:
+  base_dir: "artifacts"
+  cleanup_after_days: 30
+
+production:
+  lead_days: 3
+  retry:
+    max_attempts: 3
+    backoff_seconds: [5, 30, 120]
+  timeouts:
+    script: 60
+    audio: 600
+    images: 900
+    video: 600
+    upload: 300

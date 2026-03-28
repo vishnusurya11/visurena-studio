@@ -1,0 +1,39 @@
+[project]
+name = "studio-orchestrator"
+version = "0.1.0"
+description = "Content scheduling and production pipeline for Visurena Studio"
+requires-python = ">=3.13"
+authors = [
+    { name = "Vishnu Surya" }
+]
+dependencies = [
+    "pydantic==2.11.7",
+    "pydantic-settings==2.10.1",
+    "pyyaml==6.0.2",
+    "langchain==1.2.13",
+    "langchain-ollama==1.0.1",
+    "langchain-openai==1.1.12",
+    "httpx==0.28.1",
+    "websocket-client==1.8.0",
+    "google-api-python-client==2.169.0",
+    "google-auth-httplib2==0.2.0",
+    "google-auth-oauthlib==1.2.1",
+    "imageio-ffmpeg==0.5.1",
+    "numpy==2.3.0",
+    "soundfile==0.13.1",
+]
+
+[project.optional-dependencies]
+dev = ["pytest==8.3.5", "ruff==0.11.12"]
+tts = ["torch==2.7.1", "qwen-tts==0.3.1"]
+lora = ["torch==2.7.1", "qwen-tts==0.3.1", "peft==0.16.2"]
+
+[project.scripts]
+studio = "studio_orchestrator.cli:main"
+
+[tool.uv]
+package = true
+
+[tool.ruff]
+line-length = 100
+target-version = "py313"

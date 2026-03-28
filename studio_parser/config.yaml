@@ -1,0 +1,19 @@
+llm:
+  provider: "ollama"
+  ollama:
+    model: "gpt-oss:20b"
+    base_url: "http://localhost:11434"
+  openrouter:
+    model: "gpt-oss/20b"
+    api_key: ""  # Override via STUDIO_PARSER_OPENROUTER_API_KEY
+
+database:
+  path: "D:\\Projects\\GlobalDatabases\\visurena_studio.db"
+
+paths:
+  output_dir: "D:\\Projects\\KingdomOfViSuReNa\\alpha\\visurena_studio\\studio_parser\\output"
+
+parsing:
+  min_paragraph_length: 10
+  llm_timeout_seconds: 120
+  llm_fallback_to_deterministic: true
