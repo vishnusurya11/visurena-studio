@@ -218,6 +218,9 @@ def render(book_dir: Path, title: str) -> Path:
             "color": color, "route": route,
         }
 
+    night = plt.Rectangle((0, 0), 1, 1, transform=ax.transAxes, color="#0a1730",
+                          alpha=0.0, zorder=0)
+    ax.add_patch(night)
     fig.text(0.5, 0.955, title, color="#f2f6fb", fontsize=25, ha="center",
              fontweight="bold")
     act_text = fig.text(0.5, 0.902, "", color="#8fb4dd", fontsize=14.5, ha="center",
@@ -294,9 +297,11 @@ def render(book_dir: Path, title: str) -> Path:
             art["tag"].set_va("bottom" if math.sin(angle) >= 0 else "top")
             art["tag"].set_alpha(1.0 if visible else 0.4)
 
+        hour = (scene or {}).get("hour")
+        night.set_alpha(0.30 if hour is not None and not (6 <= hour < 20) else 0.0)
         act_text.set_text("PART I — LONDON, 1881" if track == "main"
                           else "PART II — UTAH  ·  Jefferson Hope's story")
-        stamp = (scene or {}).get("date_display") or ""
+        stamp = (scene or {}).get("when_display") or ""
         mark = {"stated": "", "stated-partial": "", "approx": " (approx.)",
                 "approx-partial": " (approx.)"}.get((scene or {}).get("date_confidence"), "")
         clock_text.set_text(f"{stamp}{mark}" if stamp else "")

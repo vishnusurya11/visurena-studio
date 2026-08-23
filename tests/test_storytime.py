@@ -83,3 +83,49 @@ def test_parse_offset_rejects_absurd_spans():
 
 def test_format_date_is_readable():
     assert st.format_date(date(1881, 3, 4)) == "4 March 1881"
+
+
+# --- time of day: keep the book's precision, not just DAY/NIGHT ---
+
+
+@pytest.mark.parametrize("text,label,hour", [
+    ("this morning", "morning", 9),
+    ("on the following morning", "morning", 9),
+    ("at noon", "noon", 12),
+    ("noon exactly", "noon", 12),
+    ("That very evening", "evening", 19),
+    ("after ten at night", "night", 22),
+    ("in the afternoon", "afternoon", 15),
+    ("at daybreak", "dawn", 6),
+    ("at midnight", "midnight", 0),
+    ("long into the watches of the night", "night", 22),
+])
+def test_parse_time_of_day(text, label, hour):
+    assert st.parse_time_of_day(text) == (label, hour)
+
+
+def test_parse_time_of_day_reads_a_clock():
+    assert st.parse_time_of_day("at three o'clock in the morning") == ("early hours", 3)
+    assert st.parse_time_of_day("ten at night") == ("night", 22)
+
+
+def test_bare_clock_hour_is_not_guessed_into_the_evening():
+    """No AM/PM context -> keep the stated hour rather than presuming."""
+    assert st.parse_time_of_day("at eight o'clock") == ("morning", 8)
+
+
+def test_parse_time_of_day_none_when_absent():
+    assert st.parse_time_of_day("for a week") is None
+    assert st.parse_time_of_day("") is None
+
+
+def test_finest_time_of_day_prefers_precision():
+    """A clock time beats a vague part of day."""
+    assert st.finest_time_of_day(["in the morning", "at noon"]) == ("noon", 12)
+    assert st.finest_time_of_day(["from morning to night"]) is not None
+
+
+def test_daylight_from_hour():
+    assert st.daylight(9) == "DAY"
+    assert st.daylight(22) == "NIGHT"
+    assert st.daylight(3) == "NIGHT"

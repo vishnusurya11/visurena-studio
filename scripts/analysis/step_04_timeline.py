@@ -159,6 +159,36 @@ def _scene_offset(scene: dict):
     return best or (None, None)
 
 
+def assign_time_of_day(scenes: list[dict]) -> list[dict]:
+    """Keep the precision the book gives.
+
+    Extraction records DAY/NIGHT (the film-breakdown binary), but the text is finer —
+    "noon exactly", "after ten at night", "That very evening" — and 9 scenes were
+    marked UNKNOWN while carrying exactly such evidence. Each scene now gets
+    `clock` (a readable label), `hour` (for ordering and daylight), and a `time_of_day`
+    repaired from the evidence when extraction left it UNKNOWN. A scene with no
+    evidence inherits the previous scene's clock only within the same day."""
+    last_by_day: dict[tuple[str, int], tuple[str, int]] = {}
+    for scene in scenes:
+        phrases = [e.get("text", "") for e in scene.get("time_evidence", [])
+                   if e.get("type") in ("time_of_day", "date", "ordering")]
+        parsed = storytime.finest_time_of_day(phrases)
+        key = (scene["track"], scene.get("day", 0))
+        if parsed is None and scene.get("time_of_day") in ("DAY", "NIGHT"):
+            parsed = ("daytime", 12) if scene["time_of_day"] == "DAY" else ("night", 22)
+        if parsed is None:
+            parsed = last_by_day.get(key)          # carry within the day only
+            scene["clock_confidence"] = "carried" if parsed else "unknown"
+        else:
+            scene["clock_confidence"] = "stated"
+            last_by_day[key] = parsed
+        scene["clock"] = parsed[0] if parsed else None
+        scene["hour"] = parsed[1] if parsed else None
+        if parsed:
+            scene["time_of_day"] = storytime.daylight(parsed[1])
+    return scenes
+
+
 def assign_dates(scenes: list[dict]) -> list[dict]:
     """Real calendar dates from the book's own words (owner: no artificial 'Day N').
 
@@ -311,12 +341,17 @@ def build_day_axis(scenes: list[dict]) -> list[dict]:
             slot = (index + 1) / (total + 1)
             nudge = 0.12 if scene.get("time_of_day") == "NIGHT" else 0.0
             scene["t"] = day + min(0.98, slot * 0.85 + nudge)
+    assign_time_of_day(scenes)
     assign_dates(scenes)
     for scene in scenes:
         scene.pop("_advances", None)
         if not scene.get("date_display") and scene.get("date"):
             value = date.fromisoformat(scene["date"])
             scene["date_display"] = f"{value.day} {value.strftime('%B')} {value.year}"
+        if scene.get("clock") and scene.get("date_display"):
+            scene["when_display"] = f"{scene['date_display']}, {scene['clock']}"
+        else:
+            scene["when_display"] = scene.get("date_display") or scene.get("clock") or ""
     return scenes
 
 

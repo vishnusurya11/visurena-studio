@@ -127,3 +127,79 @@ def parse_offset(text: str) -> timedelta | None:
 
 def format_date(value: date) -> str:
     return f"{value.day} {value.strftime('%B')} {value.year}"
+
+
+# --- time of day -----------------------------------------------------------------
+# DAY/NIGHT is the film-breakdown convention, but the book is more precise than that
+# ("noon exactly", "after ten at night", "That very evening"). Keep the precision:
+# a label for display and an hour for ordering/daylight.
+
+_PARTS = [                                   # longest / most specific first
+    ("midnight", "midnight", 0),
+    ("daybreak", "dawn", 6), ("break of day", "dawn", 6), ("sunrise", "dawn", 6),
+    ("dawn", "dawn", 6),
+    ("noon", "noon", 12), ("midday", "noon", 12),
+    ("afternoon", "afternoon", 15),
+    ("evening", "evening", 19), ("dusk", "dusk", 20), ("sunset", "dusk", 20),
+    ("twilight", "dusk", 20), ("nightfall", "dusk", 20),
+    ("morning", "morning", 9), ("forenoon", "morning", 9),
+    ("night", "night", 22),
+]
+
+_CLOCK = re.compile(
+    r"\b(\d{1,2}|one|two|three|four|five|six|seven|eight|nine|ten|eleven|twelve)"
+    r"\s*(?:o'clock|o’clock|:\d{2})", re.IGNORECASE)
+
+
+def _label_for_hour(hour: int) -> str:
+    if hour < 5:
+        return "early hours"
+    if hour < 12:
+        return "morning"
+    if hour == 12:
+        return "noon"
+    if hour < 17:
+        return "afternoon"
+    if hour < 21:
+        return "evening"
+    return "night"
+
+
+def parse_time_of_day(text: str) -> tuple[str, int] | None:
+    """'after ten at night' -> ('night', 22); 'at noon' -> ('noon', 12)."""
+    low = (text or "").lower()
+    if not low.strip():
+        return None
+    part = next(((label, hour) for token, label, hour in _PARTS
+                 if re.search(rf"\b{re.escape(token)}\b", low)), None)
+    clock = _CLOCK.search(low)
+    if clock:
+        raw = clock.group(1)
+        hour = int(raw) if raw.isdigit() else _SMALL.get(raw, 0)
+        if 1 <= hour <= 12:
+            if part and part[1] >= 12 and hour < 12:      # "ten at night"
+                hour += 12
+            elif not part and hour < 8:                    # bare small hour -> evening
+                hour += 12
+            return _label_for_hour(hour), hour
+    return part
+
+
+def finest_time_of_day(texts: list[str]) -> tuple[str, int] | None:
+    """The most precise time-of-day among several phrases (a clock beats a part)."""
+    best = None
+    for text in texts:
+        parsed = parse_time_of_day(text)
+        if not parsed:
+            continue
+        precise = bool(_CLOCK.search((text or "").lower())) or parsed[0] in (
+            "noon", "midnight", "dawn", "dusk")
+        rank = 2 if precise else 1
+        if best is None or rank > best[0]:
+            best = (rank, parsed)
+    return best[1] if best else None
+
+
+def daylight(hour: int) -> str:
+    """The film-breakdown binary, derived from the hour."""
+    return "DAY" if 6 <= hour < 20 else "NIGHT"
