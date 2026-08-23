@@ -159,6 +159,51 @@ def _scene_offset(scene: dict):
     return best or (None, None)
 
 
+def fill_location_gaps(scenes: list[dict], locations: dict) -> int:
+    """Ask an agent to place scenes the matcher could not. Returns how many it filled.
+
+    Code interpolates an hour happily but can never interpolate a PLACE — the midpoint
+    of two locations is meaningless. An agent reading the scene and its neighbours can,
+    so gaps (and only gaps) go to it. Guardrails: an id that is not in the canonical
+    list is refused rather than trusted; an agent failure leaves the gap as a gap; and
+    every filled value is marked `inferred`, never mixed in with stated evidence.
+    "This scene happens nowhere" is a correct answer for summary sweeps and
+    reflections, and is recorded as `none`."""
+    from agents import gap_filler
+
+    for scene in scenes:
+        scene.setdefault("location_confidence",
+                         "stated" if scene.get("location_id") else "unknown")
+    filled = 0
+    for index, scene in enumerate(scenes):
+        if scene.get("location_id"):
+            continue
+        previous = next((scenes[j] for j in range(index - 1, -1, -1)
+                         if scenes[j].get("location_id")), None)
+        following = next((scenes[j] for j in range(index + 1, len(scenes))
+                          if scenes[j].get("location_id")), None)
+        try:
+            placement = gap_filler.place(scene, previous, following, locations)
+        except Exception as exc:                       # never let a gap break the run
+            scene["location_reasoning"] = f"agent unavailable: {exc}"
+            continue
+        scene["location_reasoning"] = placement.reasoning
+        if placement.location_id is None:
+            scene["location_confidence"] = "none"
+        elif placement.location_id in locations:
+            scene["location_id"] = placement.location_id
+            scene["location_confidence"] = "inferred"
+            scene["location_inference_confidence"] = placement.confidence
+            filled += 1
+        else:
+            scene["location_confidence"] = "unknown"   # refuse an invented id
+        if scene.get("time_of_day") in (None, "UNKNOWN") and \
+                placement.time_of_day in ("DAY", "NIGHT"):
+            scene["time_of_day"] = placement.time_of_day
+            scene["clock_confidence"] = "inferred"
+    return filled
+
+
 def assign_time_of_day(scenes: list[dict]) -> list[dict]:
     """Keep the precision the book gives.
 
@@ -527,10 +572,14 @@ def _ref(segment: dict) -> dict:
 # --- runner ----------------------------------------------------------------------
 
 
-def solve(scenes: list[dict], registry: dict) -> dict:
+def solve(scenes: list[dict], registry: dict, *, fill_gaps: bool = True) -> dict:
     locations = {loc["id"]: loc for loc in registry["locations"]}
     scenes = apply_region_track(partition(scenes), locations)
     scenes = build_day_axis(scenes)
+    if fill_gaps:
+        filled = fill_location_gaps(scenes, locations)
+        if filled:
+            build_day_axis(scenes)          # re-derive with the newly placed scenes
     scenes = drop_narrator_contamination(scenes)
     worldlines = build_worldlines(scenes)
     contradictions = find_contradictions(worldlines, locations)

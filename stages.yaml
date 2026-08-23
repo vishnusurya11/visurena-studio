@@ -121,6 +121,12 @@ stages:
           - id: "04_04"
             name: contradict
             desc: Bilocation sweep + travel-feasibility (alibi query, 1881 cab speeds).
+          - id: "04_06"
+            name: fill_gaps
+            desc: gap_filler agent places scenes the matcher could not, reading the
+              scene and its neighbours. Code can interpolate an hour but never a
+              PLACE. Answers marked `inferred`; "happens nowhere" is a valid answer;
+              an id outside the canonical list is refused.
           - id: "04_05"
             name: emit
             desc: analysis/timeline.json - the video's and the UI's input.
