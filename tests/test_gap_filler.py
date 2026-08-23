@@ -35,17 +35,30 @@ def test_gap_is_filled_and_marked_inferred(monkeypatch):
     assert "Baker Street" in scenes[1]["location_reasoning"]
 
 
-def test_agent_may_answer_no_location(monkeypatch):
-    """A summary sweep has NO place — the agent must be free to say so."""
+def test_every_scene_ends_up_placed(monkeypatch):
+    """Owner rule: abstaining is not on offer — a summary sweep still gets the most
+    consequential place in its span."""
     monkeypatch.setattr(gap_filler, "place",
                         lambda *a, **k: gap_filler.Placement(
-                            location_id=None, time_of_day="UNKNOWN", confidence="high",
-                            reasoning="a backstory sweep across many countries"))
+                            location_id="baker", time_of_day="DAY", confidence="low",
+                            reasoning="a backstory sweep; Baker Street is the anchor"))
     scenes = _scenes()
-    filled = s04.fill_location_gaps(scenes, {"baker": {"name": "221B"}})
-    assert filled == 0
-    assert scenes[1]["location_id"] is None
-    assert scenes[1]["location_confidence"] == "none"
+    s04.fill_location_gaps(scenes, {"baker": {"name": "221B"}})
+    assert all(s["location_id"] for s in scenes)
+    assert scenes[1]["location_inference_confidence"] == "low"
+
+
+def test_a_scene_missing_only_its_time_is_still_filled(monkeypatch):
+    monkeypatch.setattr(gap_filler, "place",
+                        lambda *a, **k: gap_filler.Placement(
+                            location_id="baker", time_of_day="NIGHT",
+                            confidence="medium", reasoning="continues an evening scene"))
+    scenes = _scenes()
+    scenes[0]["time_of_day"] = "UNKNOWN"
+    s04.fill_location_gaps(scenes, {"baker": {"name": "221B"}})
+    assert scenes[0]["time_of_day"] == "NIGHT"
+    assert scenes[0]["location_id"] == "baker"          # its stated place is kept
+    assert scenes[0]["location_confidence"] == "stated"
 
 
 def test_resolved_scenes_are_never_touched(monkeypatch):

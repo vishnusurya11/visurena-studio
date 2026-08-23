@@ -159,16 +159,23 @@ def _scene_offset(scene: dict):
     return best or (None, None)
 
 
+WINDOW = 3          # scenes of context handed to the gap filler on each side
+
+
 def fill_location_gaps(scenes: list[dict], locations: dict) -> int:
-    """Ask an agent to place scenes the matcher could not. Returns how many it filled.
+    """Give every scene a location and a time, asking an agent for the ones the
+    deterministic pipeline could not resolve. Returns how many it filled.
 
     Code interpolates an hour happily but can never interpolate a PLACE — the midpoint
-    of two locations is meaningless. An agent reading the scene and its neighbours can,
-    so gaps (and only gaps) go to it. Guardrails: an id that is not in the canonical
-    list is refused rather than trusted; an agent failure leaves the gap as a gap; and
-    every filled value is marked `inferred`, never mixed in with stated evidence.
-    "This scene happens nowhere" is a correct answer for summary sweeps and
-    reflections, and is recorded as `none`."""
+    of two locations is meaningless. An agent reading the scene and the surrounding
+    sequence can, so gaps (and only gaps) go to it.
+
+    Owner decision 2026-08-23: **every scene must end up with a location and a time.**
+    Downstream consumers need a place per scene, so the agent always commits rather
+    than abstaining. Guardrails remain: an id outside the canonical list is refused
+    rather than trusted, an agent failure leaves the gap rather than crashing, and
+    everything filled is marked `inferred` with the reasoning stored beside it, so
+    inference is always separable from stated evidence."""
     from agents import gap_filler
 
     for scene in scenes:
@@ -176,29 +183,27 @@ def fill_location_gaps(scenes: list[dict], locations: dict) -> int:
                          "stated" if scene.get("location_id") else "unknown")
     filled = 0
     for index, scene in enumerate(scenes):
-        if scene.get("location_id"):
+        needs_place = not scene.get("location_id")
+        needs_time = scene.get("time_of_day") in (None, "UNKNOWN")
+        if not (needs_place or needs_time):
             continue
-        previous = next((scenes[j] for j in range(index - 1, -1, -1)
-                         if scenes[j].get("location_id")), None)
-        following = next((scenes[j] for j in range(index + 1, len(scenes))
-                          if scenes[j].get("location_id")), None)
+        before = [s for s in scenes[max(0, index - WINDOW):index]]
+        after = [s for s in scenes[index + 1:index + 1 + WINDOW]]
         try:
-            placement = gap_filler.place(scene, previous, following, locations)
+            placement = gap_filler.place(scene, before, after, locations)
         except Exception as exc:                       # never let a gap break the run
             scene["location_reasoning"] = f"agent unavailable: {exc}"
             continue
         scene["location_reasoning"] = placement.reasoning
-        if placement.location_id is None:
-            scene["location_confidence"] = "none"
-        elif placement.location_id in locations:
-            scene["location_id"] = placement.location_id
-            scene["location_confidence"] = "inferred"
-            scene["location_inference_confidence"] = placement.confidence
-            filled += 1
-        else:
-            scene["location_confidence"] = "unknown"   # refuse an invented id
-        if scene.get("time_of_day") in (None, "UNKNOWN") and \
-                placement.time_of_day in ("DAY", "NIGHT"):
+        if needs_place:
+            if placement.location_id in locations:
+                scene["location_id"] = placement.location_id
+                scene["location_confidence"] = "inferred"
+                scene["location_inference_confidence"] = placement.confidence
+                filled += 1
+            else:
+                scene["location_confidence"] = "unknown"   # refuse an invented id
+        if needs_time and placement.time_of_day in ("DAY", "NIGHT"):
             scene["time_of_day"] = placement.time_of_day
             scene["clock_confidence"] = "inferred"
     return filled

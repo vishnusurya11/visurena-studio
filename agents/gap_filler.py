@@ -2,9 +2,13 @@
 
 Code can interpolate an hour (between morning and evening lies afternoon) but it can
 NEVER interpolate a place: the midpoint of two locations is meaningless. An agent that
-reads the scene can. Called only for the handful of gaps, and its answers are labelled
-`inferred` so they never masquerade as stated evidence — including the answer "this
-scene happens nowhere", which is correct for summary sweeps and reflections.
+reads the scene can.
+
+Owner decision 2026-08-23: **every scene must get a location and a time** — downstream
+consumers (the map video, per-location files, continuity checks) need a place for every
+scene, so abstaining is not offered. The agent commits to the best-supported answer and
+records its confidence and reasoning; answers are labelled `inferred` so they never
+masquerade as stated evidence.
 """
 
 from __future__ import annotations
@@ -21,8 +25,8 @@ SKILL_PATH = Path(__file__).parent / "skills" / "gap_filler.md"
 
 
 class Placement(BaseModel):
-    location_id: str | None
-    time_of_day: str
+    location_id: str          # required — every scene happens somewhere
+    time_of_day: str          # required — DAY or NIGHT, never UNKNOWN
     confidence: str
     reasoning: str
 
@@ -41,9 +45,13 @@ def _brief(scene: dict | None) -> dict | None:
             "clock": scene.get("clock"), "summary": scene.get("summary")}
 
 
-def place(scene: dict, previous: dict | None, following: dict | None,
+def place(scene: dict, before: list[dict], after: list[dict],
           locations: dict, usage: dict | None = None) -> Placement:
-    """Infer where (and when) one unresolved scene happens."""
+    """Decide where and when one unresolved scene happens.
+
+    `before`/`after` are windows of surrounding scenes (already resolved where
+    possible), not just the immediate neighbours — a scene's place is often settled by
+    the shape of the whole sequence rather than the one line either side."""
     catalogue = [{"id": lid, "name": loc["name"], "region": loc.get("region")}
                  for lid, loc in locations.items()]
     payload = {
@@ -51,10 +59,11 @@ def place(scene: dict, previous: dict | None, following: dict | None,
                            "characters": scene.get("characters", []),
                            "time_evidence": [e.get("text") for e in
                                              scene.get("time_evidence", [])][:8]},
-        "previous_scene": _brief(previous),
-        "following_scene": _brief(following),
+        "scenes_before": [_brief(s) for s in before],
+        "scenes_after": [_brief(s) for s in after],
         "canonical_locations": catalogue,
     }
-    prompt = (f"{load_skill()}\n\n--- SCENE AND ITS NEIGHBOURS ---\n"
-              f"{json.dumps(payload, ensure_ascii=False)}\n\nPlace this scene.")
+    prompt = (f"{load_skill()}\n\n--- SCENE AND ITS SURROUNDING SEQUENCE ---\n"
+              f"{json.dumps(payload, ensure_ascii=False)}\n\n"
+              f"Give this scene a location and a time of day.")
     return llm.structured(TIER, prompt, Placement, usage=usage)
