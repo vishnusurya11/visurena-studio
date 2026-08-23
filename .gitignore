@@ -6,6 +6,8 @@ __pycache__/
 dist/
 build/
 *.egg
+media/
+higgsfield_export/
 
 # Virtual environments
 .venv/
@@ -27,6 +29,10 @@ Thumbs.db
 # Artifacts (production outputs)
 studio_orchestrator/artifacts/
 
+# Command Center derived state (sha cache + generated thumbnails).
+# Fully regenerable from the production trees; safe to delete at any time.
+visurena_command_center/.cache/
+
 # Credentials (never commit)
 credentials/
 *.json.bak
@@ -44,4 +50,7 @@ output/
 
 # Gstack
 .gstack/
-.claude/
+# Book library (content + derived artifacts; DB is the catalog)
+library/
+views/
+logs/

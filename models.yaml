@@ -1,0 +1,31 @@
+# models.yaml — THE model configuration. Agents ask for a TIER, never a model.
+# Switching provider/model = edit here, zero code changes.
+#
+# Current choice (owner, 2026-08-23): OpenAI API direct — credits to use within 2 months.
+# Later: flip a tier's provider to lmstudio/ollama/openrouter and everything follows.
+
+default_tier: workhorse
+
+tiers:
+  workhorse:              # validators, extraction drafts — cheap and fast
+    provider: openai
+    model: gpt-5.6-luna   # $0.20/M in, $1.20/M out (after July 2026 price cut)
+    params:
+      reasoning_effort: none   # Luna requires this for function tools on chat/completions
+  reasoning:              # future: timeline arbitration, character arcs — strong model
+    provider: openai
+    model: gpt-5.6-terra  # mid tier of the 5.6 series; swap to sol for hardest work
+
+providers:
+  openai:
+    base_url: https://api.openai.com/v1
+    api_key_env: OPENAI_API_KEY
+  openrouter:
+    base_url: https://openrouter.ai/api/v1
+    api_key_env: OPENROUTER_API_KEY
+  lmstudio:
+    base_url: http://localhost:1234/v1
+    api_key_env: null          # local server needs no key
+  ollama:
+    host: http://localhost:11434
+    api_key_env: null

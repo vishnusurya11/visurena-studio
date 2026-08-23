@@ -1,0 +1,279 @@
+"""Step 02 — extract: the analysis crew works each chapter (design: crew model,
+owner-approved 2026-08-23).
+
+02_01 breakdown   1st AD cuts scenes            -> call sheet     (LLM, per chapter)
+02_02 specialists script supervisor / casting / story / dialogue   (LLM, 4 per chapter)
+02_03 assemble    merge crew outputs by scene number -> analysis/extraction/ch_NN.json
+02_04 checks      python: schema, anchors in range, quotes verbatim (grounding)
+02_05 audit       auditor spot-checks chapters vs their extraction  (LLM)
+02_06 improve     re-run flagged (chapter x dimension) specialists; max 2 rounds
+
+Resume: chapters whose extraction file already exists are skipped (delete the
+file to force re-extraction). Names/times recorded AS WRITTEN — steps 03/04
+standardize and solve.
+"""
+
+from __future__ import annotations
+
+import json
+import re
+from pathlib import Path
+
+from studio import db, llm, paths, tracking
+
+STEP_ID = "02"
+NAME = "extract"
+
+# --- configuration (hardcoded; no CLI args by convention) ---
+RUN_UNTIL = "02_06"     # last substep to execute: "02_01" .. "02_06"
+AUDIT_CHAPTERS = 3      # spot-audit count (first / middle / last); 0 = audit none
+MAX_IMPROVE_ROUNDS = 2
+
+_WS = re.compile(r"\s+")
+
+SPECIALISTS = ("time", "characters", "events", "dialogue")  # dimension keys
+
+
+def _load_chapters(book_dir: Path) -> list[dict]:
+    """Real chapters (part > 0) from source/, in order. ch_00 has no story."""
+    manifest = json.loads((book_dir / "source" / "book.json").read_text(encoding="utf-8"))
+    chapters = []
+    for entry in manifest["chapters"]:
+        if entry["part"] > 0:
+            chapters.append(json.loads(
+                (book_dir / "source" / entry["file"]).read_text(encoding="utf-8")))
+    return chapters
+
+
+def _extraction_path(book_dir: Path, n: int) -> Path:
+    return book_dir / "analysis" / "extraction" / f"ch_{n:02d}.json"
+
+
+def _norm(text: str) -> str:
+    return _WS.sub(" ", text).strip().lower()
+
+
+def assemble(call_sheet, time_report, cast_report, event_report, dialogue_report) -> dict:
+    """Merge the crew's outputs by scene number. Pure code — no LLM."""
+    by_scene = {
+        "time": {s.n: s for s in time_report.scenes},
+        "cast": {s.n: s for s in cast_report.scenes},
+        "events": {s.n: s for s in event_report.scenes},
+        "dialogue": {s.n: s for s in dialogue_report.scenes},
+    }
+    scenes = []
+    for scene in call_sheet.scenes:
+        time_s = by_scene["time"].get(scene.n)
+        cast_s = by_scene["cast"].get(scene.n)
+        events_s = by_scene["events"].get(scene.n)
+        dlg_s = by_scene["dialogue"].get(scene.n)
+        scenes.append({
+            "n": scene.n,
+            "para_start": scene.para_start,
+            "para_end": scene.para_end,
+            "type": scene.type,
+            "location_text": scene.location_text,
+            "int_ext": scene.int_ext,
+            "time_of_day": scene.time_of_day,
+            "story_day": scene.story_day,
+            "frame": scene.frame.model_dump() if scene.frame else None,
+            "summary": scene.summary,
+            "boundary_reason": scene.boundary_reason,
+            "time_evidence": [e.model_dump() for e in time_s.time_evidence] if time_s else [],
+            "state_changes": [c.model_dump() for c in time_s.state_changes] if time_s else [],
+            "characters": [c.model_dump() for c in cast_s.characters] if cast_s else [],
+            "events": [e.model_dump() for e in events_s.events] if events_s else [],
+            "dialogue": [x.model_dump() for x in dlg_s.exchanges] if dlg_s else [],
+        })
+    return {"chapter": call_sheet.chapter, "pov": call_sheet.pov.model_dump(),
+            "scenes": scenes}
+
+
+def check_extraction(extraction: dict, chapter: dict) -> list[dict]:
+    """Deterministic grounding checks. Returns violations (dimension-tagged) —
+    structural problems raise instead."""
+    para_count = len(chapter["paragraphs"])
+    para_text = {p["n"]: _norm(p["text"]) for p in chapter["paragraphs"]}
+    violations = []
+    for scene in extraction["scenes"]:
+        if not (1 <= scene["para_start"] <= scene["para_end"] <= para_count):
+            raise ValueError(f"ch {extraction['chapter']} scene {scene['n']}: "
+                             f"paragraph range outside chapter")
+        scene_text = " ".join(para_text[n] for n in
+                              range(scene["para_start"], scene["para_end"] + 1))
+        for dimension, items, field in (
+            ("events", scene["events"], "quote"),
+            ("time", scene["state_changes"], "quote"),
+            ("time", scene["time_evidence"], "text"),
+            ("dialogue", scene["dialogue"], "notable_quote"),
+        ):
+            for item in items:
+                if item[field] and _norm(item[field]) not in scene_text:
+                    violations.append({"chapter": extraction["chapter"],
+                                       "scene": scene["n"], "dimension": dimension,
+                                       "note": f"not verbatim in scene: {item[field][:60]!r}"})
+    return violations
+
+
+def _run_crew(chapter: dict, tracker) -> dict:
+    """One chapter through 1st AD + the four specialists -> assembled extraction."""
+    from agents import (casting_director, dialogue_editor, scene_breakdown,
+                        script_supervisor, story_analyst)
+    n = chapter["n"]
+    usage_total = 0
+    usage = {}
+    print(f"    ch {n:>2} breakdown...", end="", flush=True)
+    call_sheet = scene_breakdown.analyze(chapter, usage=usage)
+    usage_total += usage.get("total_tokens", 0)
+    print(f" {len(call_sheet.scenes)} scenes", flush=True)
+    reports = {}
+    for key, module in (("time", script_supervisor), ("characters", casting_director),
+                        ("events", story_analyst), ("dialogue", dialogue_editor)):
+        usage = {}
+        print(f"    ch {n:>2} {key}...", flush=True)
+        tracker.log(f"ch {n}: running {key}", step_id="02_02")
+        reports[key] = module.analyze(chapter, call_sheet, usage=usage)
+        usage_total += usage.get("total_tokens", 0)
+    tracker.log(f"ch {n}: {len(call_sheet.scenes)} scenes, tokens={usage_total}",
+                step_id="02_02")
+    return assemble(call_sheet, reports["time"], reports["characters"],
+                    reports["events"], reports["dialogue"])
+
+
+def _rerun_dimension(chapter: dict, extraction: dict, dimension: str) -> dict:
+    """Improve remedy: re-run ONE specialist for one chapter, keep the rest."""
+    from agents import (casting_director, dialogue_editor, scene_breakdown,
+                        script_supervisor, story_analyst)
+    call_sheet = scene_breakdown.CallSheet.model_validate(
+        {"chapter": extraction["chapter"], "pov": extraction["pov"],
+         "scenes": [{"n": s["n"], "para_start": s["para_start"],
+                     "para_end": s["para_end"], "location_text": s["location_text"],
+                     "summary": s["summary"]} for s in extraction["scenes"]]})
+    modules = {"time": script_supervisor, "characters": casting_director,
+               "events": story_analyst, "dialogue": dialogue_editor}
+    report = modules[dimension].analyze(chapter, call_sheet)
+    fields = {"time": ("time_evidence", "state_changes"), "characters": ("characters",),
+              "events": ("events",), "dialogue": ("dialogue",)}[dimension]
+    by_n = {s.n: s for s in report.scenes}
+    for scene in extraction["scenes"]:
+        fresh = by_n.get(scene["n"])
+        if fresh is None:
+            continue
+        if dimension == "time":
+            scene["time_evidence"] = [e.model_dump() for e in fresh.time_evidence]
+            scene["state_changes"] = [c.model_dump() for c in fresh.state_changes]
+        elif dimension == "characters":
+            scene["characters"] = [c.model_dump() for c in fresh.characters]
+        elif dimension == "events":
+            scene["events"] = [e.model_dump() for e in fresh.events]
+        else:
+            scene["dialogue"] = [x.model_dump() for x in fresh.exchanges]
+    return extraction
+
+
+def _audit_sample(chapters: list[dict]) -> list[dict]:
+    if AUDIT_CHAPTERS <= 0 or not chapters:
+        return []
+    if len(chapters) <= AUDIT_CHAPTERS:
+        return chapters
+    return [chapters[0], chapters[len(chapters) // 2], chapters[-1]][:AUDIT_CHAPTERS]
+
+
+def run(codex_id: str) -> None:
+    conn = db.get_connection()
+    db.get_codex(conn, codex_id)
+    book_dir = paths.book_dir(codex_id)
+    tracker = tracking.Tracker(conn, codex_id, "analysis")
+    chapters = _load_chapters(book_dir)
+    out_dir = book_dir / "analysis" / "extraction"
+    out_dir.mkdir(parents=True, exist_ok=True)
+    todo = [c for c in chapters if not _extraction_path(book_dir, c["n"]).exists()]
+    print(f"[{STEP_ID}] {NAME}: {len(chapters)} chapters, {len(todo)} to extract "
+          f"(existing skipped)  run_id={tracker.run_id}  until={RUN_UNTIL}")
+
+    with tracker.step("02_01"), tracker.step("02_02"), tracker.step("02_03"):
+        for chapter in todo:
+            extraction = _run_crew(chapter, tracker)
+            # WRITE IMMEDIATELY (resume rule): a crash at ch N keeps ch 1..N-1 paid work
+            _extraction_path(book_dir, chapter["n"]).write_text(
+                json.dumps(extraction, ensure_ascii=False, indent=2), encoding="utf-8")
+            print(f"  ch {chapter['n']:>2}: {len(extraction['scenes'])} scenes -> written")
+    if RUN_UNTIL < "02_04":
+        return
+
+    for round_no in range(1 + MAX_IMPROVE_ROUNDS):
+        with tracker.step("02_04"):
+            violations = []
+            for chapter in chapters:
+                path = _extraction_path(book_dir, chapter["n"])
+                extraction = json.loads(path.read_text(encoding="utf-8"))
+                violations += check_extraction(extraction, chapter)
+            for v in violations:
+                tracker.log(f"grounding: ch={v['chapter']} scene={v['scene']} "
+                            f"dim={v['dimension']}: {v['note']}",
+                            level="WARNING", step_id="02_04")
+        print(f"  02_04 checks: {len(violations)} grounding violation(s)")
+        if RUN_UNTIL < "02_05":
+            return
+
+        # Grounding violations are logged and reported but do NOT gate the stage:
+        # a paraphrased quote does not corrupt the who/where/when data downstream
+        # steps consume. Only auditor-flagged issues drive the improve loop.
+        issues = []
+        with tracker.step("02_05"):
+            from agents import extraction_auditor
+            for chapter in _audit_sample(chapters):
+                extraction = json.loads(
+                    _extraction_path(book_dir, chapter["n"]).read_text(encoding="utf-8"))
+                usage = {}
+                try:
+                    verdict = extraction_auditor.audit(chapter, extraction, usage=usage)
+                except llm.ContentFiltered as exc:
+                    tracker.log(f"audit ch {chapter['n']}: content-filtered, skipped: {exc}",
+                                level="WARNING", step_id="02_05")
+                    print(f"  02_05 audit ch {chapter['n']}: SKIPPED (content filter)")
+                    continue
+                tracker.log(f"audit ch {chapter['n']}: ok={verdict.ok} "
+                            f"({usage.get('total_tokens')} tokens): {verdict.summary}",
+                            step_id="02_05")
+                for issue in verdict.issues:
+                    tracker.log(f"issue ch={issue.chapter} scene={issue.scene} "
+                                f"dim={issue.dimension} sev={issue.severity}: {issue.note}",
+                                level="WARNING", step_id="02_05")
+                    issues.append({"chapter": issue.chapter, "scene": issue.scene,
+                                   "dimension": issue.dimension, "note": issue.note})
+                print(f"  02_05 audit ch {chapter['n']}: ok={verdict.ok} "
+                      f"issues={len(verdict.issues)}")
+        if not issues:
+            print(f"  {STEP_ID} extract: clean")
+            return
+        if round_no == MAX_IMPROVE_ROUNDS:
+            tracker.log(f"{len(issues)} issue(s) remain after {MAX_IMPROVE_ROUNDS} rounds; "
+                        f"proceeding (logged for review)", level="WARNING", step_id="02_06")
+            print(f"  {STEP_ID} extract: {len(issues)} issue(s) remain after "
+                  f"{MAX_IMPROVE_ROUNDS} rounds — logged, proceeding")
+            return
+        if RUN_UNTIL < "02_06":
+            return
+
+        with tracker.step("02_06"):
+            targets = sorted({(i["chapter"], i["dimension"]) for i in issues
+                              if i["dimension"] in SPECIALISTS})
+            if not targets:
+                raise ValueError(f"issues have no re-runnable dimension: {issues[:3]}")
+            for ch_n, dimension in targets:
+                chapter = next(c for c in chapters if c["n"] == ch_n)
+                path = _extraction_path(book_dir, ch_n)
+                extraction = json.loads(path.read_text(encoding="utf-8"))
+                try:
+                    extraction = _rerun_dimension(chapter, extraction, dimension)
+                except llm.ContentFiltered as exc:
+                    tracker.log(f"re-run {dimension} ch {ch_n}: content-filtered, keeping "
+                                f"existing extraction: {exc}", level="WARNING",
+                                step_id="02_06")
+                    continue
+                path.write_text(json.dumps(extraction, ensure_ascii=False, indent=2),
+                                encoding="utf-8")
+                tracker.log(f"round {round_no + 1}: re-ran {dimension} on ch {ch_n}",
+                            step_id="02_06")
+        print(f"  02_06 improve: re-ran {len(targets)} (chapter x dimension); re-checking")

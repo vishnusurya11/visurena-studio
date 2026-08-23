@@ -1,0 +1,174 @@
+# stages.yaml — THE registry of every stage, step, and substep in the studio.
+#
+# Rules (docs/db/EVENT_MODEL.md):
+#   - File order = execution order. Runners never hardcode the pipeline shape.
+#   - ids are fixed-width 2-digit segments (01, 01_01, 01_01_01); text sort = pipeline order.
+#   - ids are stable once events reference them. Insertions get a sub-level, never renumbering.
+#   - A level nearing 99 means restructure into a sub-level, not more digits.
+#   - Adding a stage/step/substep = edit this file + add the script. Nothing else changes.
+
+stages:
+
+  analysis:
+    steps:
+      - id: "01"
+        name: ingest
+        script: step_01_ingest
+        desc: EPUB -> clean numbered text. Deterministic, zero LLM. Establishes the
+          (chapter, paragraph) coordinate system every later claim anchors to.
+        substeps:
+          - id: "01_01"
+            name: read_source
+            desc: Open the EPUB (zip + spine, stdlib); parse OPF metadata (title, author)
+              + spine + TOC; pull raw XHTML per spine document. In memory.
+          - id: "01_02"
+            name: clean
+            desc: Drop non-content docs (cover, TOC page, colophon); strip Project
+              Gutenberg license boilerplate; strip HTML -> plain paragraphs. In memory.
+          - id: "01_03"
+            name: chapterize
+            desc: Map cleaned docs onto the TOC; capture parts + front matter (preface
+              if present); number chapters 1..N continuous across parts, paragraphs
+              1..M within each. Writes analysis/chapters/ch_NN.json.
+          - id: "01_04"
+            name: finalize
+            desc: PYTHON CHECKS (hard rules, free) - counts match TOC, no empty chapters,
+              contiguous numbering, sane word counts; source sha256; write the manifest
+              analysis/book.json (title, author, parts, chapter list). Fails loudly.
+          - id: "01_05"
+            name: agent_check
+            desc: STRANDS AGENT REVIEW (local model, judgment calls) - reads the manifest
+              + chapter samples; flags what rules cannot catch (boilerplate leakage,
+              broken chapter boundaries, wrong title, garbled text). Verdict + issue
+              list -> event; details -> log.
+          - id: "01_06"
+            name: improve
+            desc: Apply the agent's findings - adjust clean/chapterize parameters (e.g.
+              boilerplate markers, chapter boundary fixes) and re-run 01_02..01_05.
+              Max 2 improvement rounds; still failing -> step fails loudly for owner.
+              Agent never edits outputs directly - it steers the deterministic code.
+
+      - id: "02"
+        name: extract
+        script: step_02_extract
+        desc: DEEP pass by the ANALYSIS CREW - specialized agents per dimension, working
+          from a shared scene breakdown. Names/times AS WRITTEN; evidence quotes on all.
+        substeps:
+          - id: "02_01"
+            name: breakdown
+            desc: 1st AD (scene_breakdown agent) cuts each chapter into scenes with
+              paragraph ranges, location-as-written, POV -> the call sheet.
+          - id: "02_02"
+            name: specialists
+            desc: Per chapter, from the call sheet - script_supervisor (TIME evidence +
+              continuity state changes), casting_director (who is in scene),
+              story_analyst (events), dialogue_editor (who speaks to whom).
+          - id: "02_03"
+            name: assemble
+            desc: PURE CODE - merge crew outputs by scene number ->
+              analysis/extraction/ch_NN.json. Resume skips chapters already extracted.
+          - id: "02_04"
+            name: python_checks
+            desc: Deterministic grounding - anchors in range, every quote verbatim in its
+              scene's source paragraphs. Violations feed the improve loop.
+          - id: "02_05"
+            name: agent_check
+            desc: extraction_auditor spot-audits chapters (full text vs extraction) -
+              completeness + faithfulness per dimension.
+          - id: "02_06"
+            name: improve
+            desc: Re-run flagged (chapter x dimension) specialists only; reassemble,
+              re-check. Max 2 rounds; then loud failure for owner.
+
+      - id: "03"
+        name: standardize
+        script: step_03_standardize
+        desc: Extracted surface forms -> canonical entities with aliases AND map
+          coordinates; every scene tagged with canonical ids. Never re-reads the book.
+        substeps:
+          - id: "03_01"
+            name: collect
+            desc: Gather every character/location surface form + chapters + counts (code).
+          - id: "03_02"
+            name: resolve
+            desc: entity_resolver agent merges forms -> canonical characters and
+              locations WITH lat/lon (coordinates make the timeline renderable).
+          - id: "03_03"
+            name: remap
+            desc: Tag every scene with canonical ids -> analysis/scenes.json (code).
+          - id: "03_04"
+            name: checks
+            desc: Coverage + coordinate + orphan-id checks (code).
+
+      - id: "04"
+        name: timeline
+        script: step_04_timeline
+        desc: Solve story-time -> WORLDLINES (which character at which location at what
+          story time) + contradictions. Deterministic, zero LLM.
+        substeps:
+          - id: "04_01"
+            name: partition
+            desc: Split into narrative tracks - main frame vs embedded flashback
+              (TLEX subordinated timeline), at chapter granularity.
+          - id: "04_02"
+            name: dayaxis
+            desc: Merge per-chapter story_day counters into a track-global day axis
+              via the evidence cascade (explicit offset > NIGHT->DAY > continuity).
+          - id: "04_03"
+            name: worldlines
+            desc: Per character - observed / in-transit / presumed segments; frame
+              narrator excluded from the tale told to them.
+          - id: "04_04"
+            name: contradict
+            desc: Bilocation sweep + travel-feasibility (alibi query, 1881 cab speeds).
+          - id: "04_05"
+            name: emit
+            desc: analysis/timeline.json - the video's and the UI's input.
+
+      - id: "05"
+        name: consolidate
+        script: step_05_consolidate
+        desc: Per-character and per-location files WITH EVOLUTION over the story
+          (physical, mental, wardrobe, condition) - the building blocks for audiobook,
+          songs, video.
+        substeps:
+          - id: "05_01"
+            name: gather
+            desc: Per entity - journey, state changes, quotes, companions (code).
+          - id: "05_02"
+            name: profile
+            desc: profile_writer agent writes physical/mental/voice/arc + evolution
+              lists FROM the dossier only (never re-reads the book).
+          - id: "05_03"
+            name: emit
+            desc: analysis/characters/<id>.json and analysis/locations/<id>.json.
+          - id: "05_04"
+            name: checks
+            desc: Every entity has a non-empty journey/scene list (code).
+
+      - id: "06"
+        name: verify
+        script: step_06_verify
+        desc: Whole-chain QC. Deterministic, zero cost. Proves the acceptance test -
+          "which character is at which location at what story time" - is answerable.
+        substeps:
+          - id: "06_01"
+            name: integrity
+            desc: Every artifact present; counts agree across steps.
+          - id: "06_02"
+            name: coverage
+            desc: Scene/location/character resolution rates; every location geo-coded.
+          - id: "06_03"
+            name: timeline
+            desc: Worldline queryability per story day + contradiction summary.
+          - id: "06_04"
+            name: report
+            desc: analysis/qc_report.json + printed verdict.
+
+  # future stages — same shape, scripts in scripts/<stage>/
+  # audiobook:
+  #   steps: []
+  # music:
+  #   steps: []
+  # video:
+  #   steps: []

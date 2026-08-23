@@ -1,0 +1,26 @@
+[project]
+name = "visurena-studio"
+version = "0.1.0"
+description = "Visurena Studio - AI content studio: books to audiobooks, shorts, songs, novels"
+requires-python = ">=3.12"
+dependencies = [
+    "imageio-ffmpeg==0.6.0",
+    "matplotlib==3.10.7",
+    "pyyaml==6.0.2",
+    "strands-agents[ollama,openai]==1.53.0",
+]
+
+[dependency-groups]
+dev = [
+    "pytest==8.4.1",
+]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["studio"]
