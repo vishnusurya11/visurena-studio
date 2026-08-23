@@ -17,13 +17,26 @@ Group the surface forms that refer to the SAME person into one entity:
 
 Rules:
 - Merge only what the evidence supports. If the narrator is Watson, "I" is Watson.
+- **Two different proper names are two different people.** Murray is not Williams.
+  Merge named figures ONLY where the text states the identity — and then say which
+  reveal states it, in `merged_because`.
 - **Masked identities**: if the text reveals that one figure IS another (the cabman is
   Jefferson Hope), merge them and record BOTH names in aliases.
 - Do NOT merge two different people who share a description ("the constable" x2 may be
   different constables) — leave the generic form as its own `unnamed` entity.
+- **Same word, different world.** A common noun keeps the sense of the passage it
+  appears in. Watson's "many other officers" are army officers in Afghanistan and have
+  nothing to do with the London police; "the men" on a Utah trail are not the Baker
+  Street irregulars. Before aliasing a role noun to a standing group, check that the
+  group is actually present in that part of the book. When two passages use the same
+  word for different people, the word belongs to NEITHER canonical entity.
 - Drop pure generics that are not characters ("a medical board", "a paternal
   government", "a great train of wounded sufferers").
 - Groups ("the Mormons", "the Four", "the police") are `role: group` entities — keep.
+- **A one-word alias must be a name.** "Young" earns its place as Brigham Young's alias;
+  "men", "women", "he", "her" do not belong in any alias list. Bare pronouns and bare
+  plurals refer by context, and you are working without the context — you cannot resolve
+  them, so leave them out rather than guess.
 
 ## Locations
 
@@ -49,9 +62,12 @@ Portsmouth 50.80,-1.09 · Netley 50.87,-1.36
 
 Rules:
 - Merge vague forms into the specific place when they clearly refer to it ("our
-  lodgings", "the sitting-room" → 221B Baker Street).
-- A scene listing several places ("India, Afghanistan, Peshawar, England, London") is a
-  SUMMARY sweep — canonicalize it to the single most important one and note the rest
-  in aliases.
+  lodgings", "the sitting-room" → 221B Baker Street). But a room name that any house
+  could have ("the sitting-room", "the bedroom") is a WEAK alias — attach it only to the
+  building the book overwhelmingly means by it, never to two.
+- A span listing several places ("India, Afghanistan, Peshawar, England, London") is a
+  route, not a place. **Give each place its own canonical entity**; do not bury the
+  others in one entity's aliases. A later step walks the route leg by leg, and it can
+  only do that if the legs exist as places.
 - Never invent a coordinate for a place you cannot place: use `region: other` with the
   best guess and `approximate: true`.

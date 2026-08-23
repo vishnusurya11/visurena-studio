@@ -209,6 +209,87 @@ def fill_location_gaps(scenes: list[dict], locations: dict) -> int:
     return filled
 
 
+def _mentioned_locations(text: str, locations: dict) -> set[str]:
+    """Canonical ids whose name or an alias appears verbatim in a span's location text."""
+    low = (text or "").lower()
+    if not low.strip():
+        return set()
+    found = set()
+    for lid, loc in locations.items():
+        for form in [loc.get("name", "")] + list(loc.get("aliases") or []):
+            form = (form or "").strip().lower()
+            if len(form) < 3:
+                continue
+            if re.search(rf"(?<!\w){re.escape(form)}(?!\w)", low):
+                found.add(lid)
+                break
+    return found
+
+
+def journey_candidates(scenes: list[dict], locations: dict) -> list[int]:
+    """Indices of spans worth asking the tracer about.
+
+    Cheap and deliberately conservative: a span qualifies only when its own location
+    text names places in TWO OR MORE different regions. Two rooms of one house, or a
+    street and the city containing it, are one place written at two zooms — asking about
+    those would burn a call to be told what we already know."""
+    candidates = []
+    for index, scene in enumerate(scenes):
+        regions = {locations[lid].get("region")
+                   for lid in _mentioned_locations(scene.get("location_text"), locations)}
+        regions.discard(None)
+        if len(regions) >= 2:
+            candidates.append(index)
+    return candidates
+
+
+def _span_text(scene: dict, chapters: dict | None) -> str:
+    """The span's own prose. A route cannot be read off a summary — the summary is
+    exactly what flattened it away."""
+    paragraphs = (chapters or {}).get(scene["chapter"])
+    start, end = scene.get("para_start"), scene.get("para_end")
+    if not paragraphs or not start or not end:
+        return scene.get("summary", "")
+    return "\n\n".join(paragraphs[start - 1:end])
+
+
+def trace_journeys(scenes: list[dict], locations: dict,
+                   chapters: dict | None = None) -> int:
+    """Give travelling spans an ordered route. Returns how many became journeys.
+
+    Owner question 2026-08-23, on the opening of A Study in Scarlet: is it a flashback,
+    or Watson in London remembering? Neither — the passage has no narrating vantage
+    point at all, and its four paragraphs carry him across two years and six places. One
+    `location_id` cannot hold that, so a travelling span keeps its single primary place
+    AND gains `legs`; worldlines then walk the legs, so he moves instead of teleporting."""
+    from agents import journey_tracer
+
+    traced = 0
+    for index in journey_candidates(scenes, locations):
+        scene = scenes[index]
+        before = scenes[max(0, index - WINDOW):index]
+        after = scenes[index + 1:index + 1 + WINDOW]
+        try:
+            journey = journey_tracer.trace(scene, _span_text(scene, chapters),
+                                           before, after, locations)
+        except Exception as exc:                    # never let a route break the run
+            scene["journey_reasoning"] = f"agent unavailable: {exc}"
+            continue
+        scene["journey_reasoning"] = journey.reasoning
+        legs = [leg for leg in journey.legs if leg.location_id in locations]
+        if not journey.is_journey or len(legs) < 2:
+            continue                                # one place is a placement, not a route
+        scene["legs"] = [{"order": i + 1, "location_id": leg.location_id,
+                          "when": leg.when, "event": leg.event,
+                          "time_of_day": leg.time_of_day}
+                         for i, leg in enumerate(legs)]
+        if journey.primary_location_id in locations:
+            scene["location_id"] = journey.primary_location_id
+        scene["location_confidence"] = "traversal"
+        traced += 1
+    return traced
+
+
 def assign_time_of_day(scenes: list[dict]) -> list[dict]:
     """Keep the precision the book gives.
 
@@ -489,18 +570,37 @@ def build_worldlines(scenes: list[dict]) -> dict[str, list[dict]]:
     for index, scene in enumerate(scenes):
         if not scene["location_id"]:
             continue
-        for character in scene["characters"]:
-            observed[character].append({
-                "scene_index": index, "track": scene["track"], "t": scene["t"],
-                "day": scene["day"], "location_id": scene["location_id"],
-                "chapter": scene["chapter"], "scene": scene["scene"],
-                "summary": scene["summary"],
-            })
+        for point in _scene_points(scene, index, scenes):
+            for character in scene["characters"]:
+                observed[character].append({"scene_index": index, **point})
     worldlines = {}
     for character, points in observed.items():
         points.sort(key=lambda p: (p["track"] != "main", p["t"], p["scene_index"]))
         worldlines[character] = _segments(points)
     return worldlines
+
+
+def _slot_width(scene: dict, index: int, scenes: list[dict]) -> float:
+    """How much of the time axis belongs to this scene before the next one on its track
+    claims it. Legs are laid out inside this width and never spill past it, so adding a
+    route can never reorder the book."""
+    following = next((s for s in scenes[index + 1:] if s["track"] == scene["track"]), None)
+    if following is None:
+        return 1.0
+    return max(0.0, following["t"] - scene["t"]) * 0.9
+
+
+def _scene_points(scene: dict, index: int, scenes: list[dict]) -> list[dict]:
+    """Where this scene puts its characters: one point, or one per leg when it travels."""
+    common = {"track": scene["track"], "day": scene["day"],
+              "chapter": scene["chapter"], "scene": scene["scene"]}
+    legs = scene.get("legs")
+    if not legs:
+        return [{**common, "t": scene["t"], "location_id": scene["location_id"],
+                 "summary": scene["summary"]}]
+    step = _slot_width(scene, index, scenes) / len(legs)
+    return [{**common, "t": scene["t"] + i * step, "location_id": leg["location_id"],
+             "summary": leg["event"]} for i, leg in enumerate(legs)]
 
 
 def _segments(points: list[dict]) -> list[dict]:
@@ -577,7 +677,8 @@ def _ref(segment: dict) -> dict:
 # --- runner ----------------------------------------------------------------------
 
 
-def solve(scenes: list[dict], registry: dict, *, fill_gaps: bool = True) -> dict:
+def solve(scenes: list[dict], registry: dict, *, fill_gaps: bool = True,
+          chapters: dict | None = None) -> dict:
     locations = {loc["id"]: loc for loc in registry["locations"]}
     scenes = apply_region_track(partition(scenes), locations)
     scenes = build_day_axis(scenes)
@@ -585,6 +686,7 @@ def solve(scenes: list[dict], registry: dict, *, fill_gaps: bool = True) -> dict
         filled = fill_location_gaps(scenes, locations)
         if filled:
             build_day_axis(scenes)          # re-derive with the newly placed scenes
+        trace_journeys(scenes, locations, chapters)
     scenes = drop_narrator_contamination(scenes)
     worldlines = build_worldlines(scenes)
     contradictions = find_contradictions(worldlines, locations)

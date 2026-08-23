@@ -80,16 +80,42 @@ def build_alias_index(registry: dict) -> tuple[dict, dict]:
     return char_index, loc_index
 
 
+def _run_starts_at(words: list[str], tokens: list[str]) -> bool:
+    """Do `tokens` appear as a contiguous run of whole words inside `words`?"""
+    span = len(tokens)
+    return any(words[i:i + span] == tokens for i in range(len(words) - span + 1))
+
+
 def _match(text: str, index: dict) -> str | None:
-    """Exact normalized match, else containment either way (longest wins)."""
+    """Exact normalized match, else the longest alias present as WHOLE WORDS.
+
+    Two rules, both learned the hard way in the 2026-08-23 audit:
+
+    1. **Words, not letters.** This did raw substring containment, so "me" matched
+       inside "medical", "men" inside "regiment" and "government", and the narrator's
+       one-letter alias "i" matched any form containing the letter i. 298 of the book's
+       902 character references — a third — were silently assigned to the wrong person.
+    2. **A one-word alias only ever matches exactly.** Whole-word matching alone still
+       lets "Young" claim "a young girl" and "men" claim "the two men". A single word
+       carries too little identity to be recognised inside a phrase it did not write; if
+       the form is not the alias, it is somebody else.
+
+    An unmatched form returns None, and that gap is the honest answer — a walk-on
+    ("a railway porter") has no canonical identity to find."""
     key = _norm(text)
     if not key:
         return None
     if key in index:
         return index[key]
-    hits = [(len(k), v) for k, v in index.items()
-            if k and (k in key or key in k) and abs(len(k) - len(key)) < 25]
-    return max(hits)[1] if hits else None
+    words = key.split()
+    best = None
+    for alias, entity in index.items():
+        tokens = alias.split()
+        if len(tokens) < 2 or not _run_starts_at(words, tokens):
+            continue
+        if best is None or len(tokens) > best[0]:
+            best = (len(tokens), entity)
+    return best[1] if best else None
 
 
 def remap_scenes(extractions: list[dict], registry: dict) -> list[dict]:
