@@ -39,3 +39,7 @@ anchored.
   another) — the outermost speaker holds the mic.
 - Don't merge quotes across paragraphs when continuity is uncertain — separate.
 - Don't paraphrase in `notable_quote` — verbatim or nothing.
+
+## Completeness (required)
+
+Return **one entry for EVERY scene number in the breakdown**, in order — including scenes where your dimension is empty (return the scene with an empty list). A missing scene number is read downstream as missing data, not as 'nothing there'.

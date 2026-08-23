@@ -89,6 +89,24 @@ def assemble(call_sheet, time_report, cast_report, event_report, dialogue_report
             "scenes": scenes}
 
 
+def find_coverage_gaps(extraction: dict) -> list[tuple[str, int]]:
+    """Scenes a specialist never answered for.
+
+    Defect found 2026-08-23: specialists return a LIST of per-scene entries and
+    nothing required one entry PER SCENE, so a partial answer was silently filled
+    with empties — ch3's whole murder scene ended up with no characters. Assemble
+    can't tell 'nobody present' from 'never answered', so we check coverage here."""
+    gaps = []
+    for scene in extraction["scenes"]:
+        if scene.get("type") == "nonscene":
+            continue
+        if not scene["characters"]:
+            gaps.append(("characters", scene["n"]))
+        if not scene["events"]:
+            gaps.append(("events", scene["n"]))
+    return gaps
+
+
 def check_extraction(extraction: dict, chapter: dict) -> list[dict]:
     """Deterministic grounding checks. Returns violations (dimension-tagged) —
     structural problems raise instead."""
@@ -204,22 +222,32 @@ def run(codex_id: str) -> None:
     for round_no in range(1 + MAX_IMPROVE_ROUNDS):
         with tracker.step("02_04"):
             violations = []
+            gaps = []
             for chapter in chapters:
                 path = _extraction_path(book_dir, chapter["n"])
                 extraction = json.loads(path.read_text(encoding="utf-8"))
                 violations += check_extraction(extraction, chapter)
+                for dimension, scene_n in find_coverage_gaps(extraction):
+                    gaps.append({"chapter": chapter["n"], "scene": scene_n,
+                                 "dimension": dimension,
+                                 "note": "specialist returned no entry for this scene"})
+            for gap in gaps:
+                tracker.log(f"coverage gap: ch={gap['chapter']} scene={gap['scene']} "
+                            f"dim={gap['dimension']}", level="WARNING", step_id="02_04")
             for v in violations:
                 tracker.log(f"grounding: ch={v['chapter']} scene={v['scene']} "
                             f"dim={v['dimension']}: {v['note']}",
                             level="WARNING", step_id="02_04")
-        print(f"  02_04 checks: {len(violations)} grounding violation(s)")
+        print(f"  02_04 checks: {len(violations)} grounding violation(s), "
+              f"{len(gaps)} coverage gap(s)")
         if RUN_UNTIL < "02_05":
             return
 
         # Grounding violations are logged and reported but do NOT gate the stage:
         # a paraphrased quote does not corrupt the who/where/when data downstream
         # steps consume. Only auditor-flagged issues drive the improve loop.
-        issues = []
+        # Coverage gaps DO gate: a scene with no cast is missing data, not noise.
+        issues = list(gaps)
         with tracker.step("02_05"):
             from agents import extraction_auditor
             for chapter in _audit_sample(chapters):

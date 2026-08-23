@@ -15,10 +15,12 @@ from __future__ import annotations
 
 import json
 import math
+import re
+from datetime import date, timedelta
 from collections import Counter, defaultdict
 from pathlib import Path
 
-from studio import db, paths, tracking
+from studio import db, paths, storytime, tracking
 
 STEP_ID = "04"
 NAME = "timeline"
@@ -97,20 +99,224 @@ def _new_day(prev: dict, scene: dict) -> bool:
     return False
 
 
+_YEAR_RE = re.compile(r"\b(1[6-9]\d{2})\b")
+
+
+def _stated_year(scene: dict) -> int | None:
+    """An absolute year the TEXT states, numeric OR spelled out
+    ("August 4th, 1860"; "eighteen hundred and forty-seven")."""
+    for evidence in scene.get("time_evidence", []):
+        if evidence.get("type") != "date":
+            continue
+        text = evidence.get("text") or ""
+        match = _YEAR_RE.search(text)
+        if match:
+            return int(match.group(1))
+        spelled = re.search(r"((?:eighteen|nineteen|seventeen)[\s-]+hundred"
+                            r"(?:[\s-]+and)?(?:[\s-]+[a-z-]+)*)", text.lower())
+        if spelled:
+            value = storytime.words_to_number(spelled.group(1))
+            if value and 1600 <= value <= 1999:
+                return value
+    return None
+
+
+def _plausible_years(scenes: list[dict]) -> set[int]:
+    """Years the NARRATIVE happens in, not every year a character mentions.
+
+    Defect found 2026-08-23: a line of dialogue about "in 1642" anchored a scene to
+    the seventeenth century. Keep only years clustered with the rest — an aside about
+    a distant century is not this book's clock."""
+    stated = [y for y in (_stated_year(s) for s in scenes) if y]
+    if not stated:
+        return set()
+    ordered = sorted(stated)
+    median = ordered[len(ordered) // 2]
+    return {y for y in stated if abs(y - median) <= 60}
+
+
+def _date_anchor(scene: dict, allowed_years: set[int], context_year: int | None):
+    """A real calendar date this scene STATES, if any ("August 4th, 1860")."""
+    for evidence in scene.get("time_evidence", []):
+        if evidence.get("type") != "date":
+            continue
+        parsed = storytime.parse_date(evidence.get("text") or "",
+                                      default_year=context_year)
+        if parsed and parsed.year in allowed_years:
+            return parsed, evidence["text"]
+    return None, None
+
+
+def _scene_offset(scene: dict):
+    """The largest clock-advancing duration this scene states ("Three weeks")."""
+    best = None
+    for evidence in scene.get("time_evidence", []):
+        if evidence.get("type") not in ("duration", "date", "ordering"):
+            continue
+        span = storytime.parse_offset(evidence.get("text") or "")
+        if span and (best is None or span > best[0]):
+            best = (span, evidence["text"])
+    return best or (None, None)
+
+
+def assign_dates(scenes: list[dict]) -> list[dict]:
+    """Real calendar dates from the book's own words (owner: no artificial 'Day N').
+
+    Only dates the text STATES are anchors. Scenes between two anchors are
+    INTERPOLATED across the gap and marked approximate; scenes outside any anchor
+    pair carry only what the text gives (a month/day, or nothing).
+
+    Deliberately NOT additive chaining: summing every duration a scene mentions
+    ("for a week", "some weeks" — usually describing the past, not advancing the
+    clock) pushed A Study in Scarlet into 1912 on the first attempt. The research is
+    explicit: no arithmetic across vague gaps. Interpolation states less and is right.
+
+    Each scene records `date_confidence`: `stated` | `approx` | `unknown`."""
+    allowed_years = _plausible_years(scenes)
+    by_track: dict[str, list[dict]] = defaultdict(list)
+    for scene in scenes:
+        scene["date"] = None
+        scene["date_display"] = None
+        scene["date_confidence"] = "unknown"
+        scene["date_evidence"] = None
+        by_track[scene["track"]].append(scene)
+
+    for track, sequence in by_track.items():
+        anchors = []
+        for index, scene in enumerate(sequence):
+            stated, source = _date_anchor(scene, allowed_years, None)
+            if stated:
+                scene["date"] = stated.isoformat()
+                scene["date_confidence"] = "stated"
+                scene["date_evidence"] = source
+                anchors.append((index, stated))
+        _interpolate(sequence, anchors)
+
+    # A bare year mentioned in narration ("the year 1878", when Watson took his
+    # degree) dates a MEMORY, not the scene — using it as an anchor put the London
+    # investigation in 1878. Where the text gives only a day and month ("the 4th of
+    # March"), show exactly that and say the year is unstated.
+    for sequence in by_track.values():
+        if any(s["date_confidence"] == "stated" for s in sequence):
+            continue
+        anchor = next(((s, _month_day(s)) for s in sequence if _month_day(s)), None)
+        if anchor is None:
+            continue
+        anchor_scene, partial = anchor
+        base_day = anchor_scene["day"]
+        try:
+            base = date(1900, MONTH_NUMBERS[partial.split()[-1].lower()],
+                        int(partial.split()[0]) if partial.split()[0].isdigit() else 1)
+        except (KeyError, ValueError):
+            continue
+        for scene in sequence:
+            shifted = base + timedelta(days=scene["day"] - base_day)
+            scene["date_display"] = f"{shifted.day} {shifted.strftime('%B')}"
+            scene["date_confidence"] = ("stated-partial" if scene is anchor_scene
+                                        else "approx-partial")
+            scene["date_evidence"] = (f"{partial} stated; year not given in the text"
+                                      if scene is anchor_scene
+                                      else f"day {scene['day'] - base_day:+d} from {partial}")
+    return scenes
+
+
+MONTH_NUMBERS = {m: i + 1 for i, m in enumerate(
+    ["january", "february", "march", "april", "may", "june", "july",
+     "august", "september", "october", "november", "december"])}
+
+
+_MONTH_DAY = re.compile(
+    r"\b(?:(\d{1,2})(?:st|nd|rd|th)?\s+of\s+)?"
+    r"(january|february|march|april|may|june|july|august|september|october|"
+    r"november|december)\b(?:\s+(\d{1,2})(?:st|nd|rd|th)?)?", re.IGNORECASE)
+
+
+def _month_day(scene: dict) -> str | None:
+    """'the 4th of March' -> '4 March'. Year deliberately absent when unstated."""
+    for evidence in scene.get("time_evidence", []):
+        match = _MONTH_DAY.search(evidence.get("text") or "")
+        if match:
+            day = match.group(1) or match.group(3)
+            month = match.group(2).capitalize()
+            return f"{day} {month}" if day else month
+    return None
+
+
+def _interpolate(sequence: list[dict], anchors: list[tuple[int, object]]) -> None:
+    """Fill scenes between stated dates by position; mark them approximate."""
+    if not anchors:
+        return
+    for (i0, d0), (i1, d1) in zip(anchors, anchors[1:]):
+        span_scenes = i1 - i0
+        span_days = (d1 - d0).days
+        if span_scenes <= 1:
+            continue
+        for offset in range(1, span_scenes):
+            scene = sequence[i0 + offset]
+            if scene["date_confidence"] == "stated":
+                continue
+            step = round(span_days * offset / span_scenes)
+            scene["date"] = (d0 + timedelta(days=step)).isoformat()
+            scene["date_confidence"] = "approx"
+            scene["date_evidence"] = (f"between {d0.isoformat()} and {d1.isoformat()}")
+    first_index, first_date = anchors[0]
+    for scene in sequence[:first_index]:
+        scene["date"] = first_date.isoformat()
+        scene["date_confidence"] = "approx"
+        scene["date_evidence"] = f"before {first_date.isoformat()}"
+    last_index, last_date = anchors[-1]
+    for offset, scene in enumerate(sequence[last_index + 1:], start=1):
+        scene["date"] = (last_date + timedelta(days=offset)).isoformat()
+        scene["date_confidence"] = "approx"
+        scene["date_evidence"] = f"after {last_date.isoformat()}"
+
+
 def build_day_axis(scenes: list[dict]) -> list[dict]:
-    """Per-track global day numbers; every scene also gets a monotonic `t` position
-    (day + fraction from time_of_day) — the video's clock."""
+    """Per-track day numbers, a STRICTLY MONOTONIC `t` per scene, and REAL DATES
+    where the book states or implies them.
+
+    Defects fixed 2026-08-23 (found by auditing output against the book):
+    - every scene in a chapter collapsed onto one `t` (day + time-of-day only), which
+      erased intra-day order and manufactured false 'bilocation' contradictions;
+    - time-of-day could push a later scene EARLIER than the one before it;
+    - stated dates were captured then ignored, so a 34-year flashback read as 14 days.
+    Telling order now dominates `t`; time-of-day only nudges within the slot; and the
+    calendar comes from the text (see assign_dates)."""
     day_by_track = defaultdict(lambda: 1)
     prev_by_track: dict[str, dict] = {}
-    fraction = {"DAY": 0.45, "NIGHT": 0.85, "UNKNOWN": 0.6}
+    allowed_years = _plausible_years(scenes)
+    year_by_track: dict[str, int | None] = {}
+
     for scene in scenes:
         track = scene["track"]
         prev = prev_by_track.get(track)
-        if prev is not None and _new_day(prev, scene):
+        scene["_advances"] = prev is not None and _new_day(prev, scene)
+        if scene["_advances"]:
             day_by_track[track] += 1
         scene["day"] = day_by_track[track]
-        scene["t"] = scene["day"] + fraction.get(scene.get("time_of_day"), 0.6)
+        stated = _stated_year(scene)
+        if stated in allowed_years:
+            year_by_track[track] = stated
+        scene["year"] = year_by_track.get(track)
         prev_by_track[track] = scene
+
+    # second pass: telling order inside each day decides `t`, so it is strictly
+    # increasing; NIGHT scenes sit slightly later within their slot.
+    per_day: dict[tuple[str, int], list[dict]] = defaultdict(list)
+    for scene in scenes:
+        per_day[(scene["track"], scene["day"])].append(scene)
+    for (_, day), in_day in per_day.items():
+        total = len(in_day)
+        for index, scene in enumerate(in_day):
+            slot = (index + 1) / (total + 1)
+            nudge = 0.12 if scene.get("time_of_day") == "NIGHT" else 0.0
+            scene["t"] = day + min(0.98, slot * 0.85 + nudge)
+    assign_dates(scenes)
+    for scene in scenes:
+        scene.pop("_advances", None)
+        if not scene.get("date_display") and scene.get("date"):
+            value = date.fromisoformat(scene["date"])
+            scene["date_display"] = f"{value.day} {value.strftime('%B')} {value.year}"
     return scenes
 
 
@@ -136,7 +342,7 @@ def drop_narrator_contamination(scenes: list[dict]) -> list[dict]:
         for track, seen in per_track.items():
             other = sum(v for t, v in per_track.items() if t != track)
             share = seen / max(1, track_sizes[track])
-            if other >= 5 * seen and share < 0.25:
+            if other >= 3 * seen and share < 0.25:
                 contaminated.add((character, track))
 
     # (b) the FRAME NARRATOR is never inside the tale told to them. The main track's

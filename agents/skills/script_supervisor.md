@@ -45,3 +45,7 @@ a wound acquired or noticeably healed is.
   timeline; note it only if the scene's PRESENT state changes (someone learning it
   IS a knowledge change).
 - Don't force precision: null/unknown beats a guess, every time.
+
+## Completeness (required)
+
+Return **one entry for EVERY scene number in the breakdown**, in order — including scenes where your dimension is empty (return the scene with an empty list). A missing scene number is read downstream as missing data, not as 'nothing there'.

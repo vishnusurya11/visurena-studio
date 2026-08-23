@@ -1,18 +1,15 @@
 """Timeline video — characters moving between locations as story time advances.
 
 THE acceptance test for the analysis stage (owner, 2026-08-23): if the timeline can
-drive this, the analysis is real. Renders analysis/timeline.json as a 2D map animation:
-locations are labeled points at real lat/lon, character dots sit at them and travel
-between them as the story clock runs.
+drive this, the analysis is real.
 
-Design follows docs/analysis/research/11_narrative_map_animation.md:
-  - act-based region switch (London frame / Utah flashback) — no wasted split screen
-  - direct moving labels, not a detached legend
-  - eased interpolation + fading comet trails
-  - honest uncertainty: inferred transits are dashed/translucent
-  - persistent story clock (day + chapter + track)
+DESIGN v2 (owner feedback: "locations should be big, scale doesn't need to be accurate"):
+a SCHEMATIC map, not a survey map. Locations are large labeled nodes spread to fill the
+frame (seeded from real geography, then relaxed apart so nothing clusters); characters
+are dots that sit visibly INSIDE the node they occupy and travel along a drawn route
+when they move. The active scene's location glows.
 
-Zero cost, fully local. mp4 via bundled ffmpeg, GIF fallback on Windows.
+Zero cost, fully local. mp4 via bundled ffmpeg, GIF fallback.
 
 Run: uv run python -m scripts.analysis.timeline_video
 """
@@ -27,18 +24,24 @@ import matplotlib
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 from matplotlib import animation
-from matplotlib.lines import Line2D
+from matplotlib.patches import Ellipse, FancyArrowPatch
 
 # --- configuration (hardcoded; no CLI args by convention) ---
 CODEX_ID = "20260822113400"
 FPS = 24
-SECONDS_PER_STORY_DAY = 2.2      # time-warp: the book's tempo is wildly uneven
-MAX_CHARACTERS = 8               # legibility ceiling from storyline-vis practice
-TRAIL_DAYS = 1.6                 # comet-trail memory
+SECONDS_PER_SCENE = 0.75      # even pacing; total length = scenes x this
+MAX_CHARACTERS = 7
+MAX_PLACES_PER_ACT = 9        # keep the map readable: the act's busiest places
 OUT_STEM = "timeline_video"
 
-PALETTE = ["#e6194b", "#4363d8", "#3cb44b", "#f58231", "#911eb4",
-           "#42d4f4", "#f032e6", "#bfef45"]
+BG = "#0b0f16"
+NODE_FACE = "#1b2534"
+NODE_EDGE = "#33465e"
+NODE_ACTIVE = "#2c4a6e"
+NODE_ACTIVE_EDGE = "#7fb2e5"
+
+PALETTE = ["#ff4d6d", "#4cc9f0", "#80ed99", "#ffd166", "#c77dff",
+           "#ff9f1c", "#00d4d8"]
 
 
 def load_timeline(book_dir: Path) -> dict:
@@ -46,258 +49,259 @@ def load_timeline(book_dir: Path) -> dict:
 
 
 def pick_characters(timeline: dict) -> list[str]:
-    """The most-travelled characters — those whose worldlines carry the story."""
     scored = sorted(timeline["worldlines"].items(),
                     key=lambda kv: (-len({s["location_id"] for s in kv[1]}), -len(kv[1])))
     return [cid for cid, _ in scored[:MAX_CHARACTERS]]
 
 
-def act_cast(timeline: dict, act: dict, candidates: list[str]) -> set[str]:
-    """Only characters actually OBSERVED in this act appear in it — a flashback cast
-    must never ghost through the frame act at a stale position."""
+def act_cast(timeline: dict, act: dict, candidates: list[str]) -> list[str]:
+    """Only characters actually observed in this act appear in it."""
     lo, hi = act["chapters"]
-    cast = set()
-    for cid in candidates:
-        for segment in timeline["worldlines"].get(cid, []):
-            if (segment["kind"] == "observed" and segment["track"] == act["track"]
-                    and lo <= segment.get("chapter", -1) <= hi):
-                cast.add(cid)
-                break
-    return cast
+    return [cid for cid in candidates
+            if any(s["kind"] == "observed" and s["track"] == act["track"]
+                   and lo <= s.get("chapter", -1) <= hi
+                   for s in timeline["worldlines"].get(cid, []))]
 
 
-def build_track_plan(timeline: dict) -> list[dict]:
-    """Telling order = acts. Each act is a contiguous run of chapters on one track."""
+def build_acts(timeline: dict) -> list[dict]:
     scenes = sorted(timeline["scenes"], key=lambda s: (s["chapter"], s["scene"]))
     acts, current = [], None
     for scene in scenes:
         if current is None or scene["track"] != current["track"]:
             current = {"track": scene["track"], "chapters": [], "t_min": scene["t"],
-                       "t_max": scene["t"], "regions": set()}
+                       "t_max": scene["t"]}
             acts.append(current)
         current["chapters"].append(scene["chapter"])
         current["t_min"] = min(current["t_min"], scene["t"])
         current["t_max"] = max(current["t_max"], scene["t"])
-        current["regions"].add(scene.get("region", "other"))
     for act in acts:
         act["chapters"] = (min(act["chapters"]), max(act["chapters"]))
     return acts
 
 
-def frame_schedule(acts: list[dict]) -> list[dict]:
-    """One entry per rendered frame: which act, and the story time inside it."""
-    frames = []
-    for index, act in enumerate(acts):
-        span = max(0.6, act["t_max"] - act["t_min"])
-        count = max(FPS, int(span * SECONDS_PER_STORY_DAY * FPS))
-        for i in range(count):
-            frames.append({"act": index,
-                           "t": act["t_min"] + span * (i / max(1, count - 1))})
-    return frames
+def act_places(timeline: dict, act: dict) -> list[str]:
+    """The act's busiest locations — a readable map, not every pin."""
+    lo, hi = act["chapters"]
+    counts: dict[str, int] = {}
+    for scene in timeline["scenes"]:
+        if (scene["track"] == act["track"] and lo <= scene["chapter"] <= hi
+                and scene["location_id"]):
+            counts[scene["location_id"]] = counts.get(scene["location_id"], 0) + 1
+    return [lid for lid, _ in sorted(counts.items(), key=lambda kv: -kv[1])
+            [:MAX_PLACES_PER_ACT]]
+
+
+def layout(place_ids: list[str], locations: dict) -> dict[str, tuple[float, float]]:
+    """SCHEMATIC layout: seed from real geography, then relax nodes apart so they fill
+    the frame. Accurate distance is explicitly NOT a goal (owner) — legibility is."""
+    if not place_ids:
+        return {}
+    lats = [locations[i]["lat"] for i in place_ids]
+    lons = [locations[i]["lon"] for i in place_ids]
+    span_lat = max(1e-6, max(lats) - min(lats))
+    span_lon = max(1e-6, max(lons) - min(lons))
+    points = {lid: [0.10 + 0.80 * (locations[lid]["lon"] - min(lons)) / span_lon,
+                    0.14 + 0.72 * (locations[lid]["lat"] - min(lats)) / span_lat]
+              for lid in place_ids}
+    min_gap = 0.32 if len(place_ids) <= 6 else 0.25
+    for _ in range(300):
+        for a in place_ids:
+            for b in place_ids:
+                if a >= b:
+                    continue
+                dx = points[b][0] - points[a][0]
+                dy = points[b][1] - points[a][1]
+                dist = math.hypot(dx, dy) or 0.001
+                if dist < min_gap:
+                    push = (min_gap - dist) / 2
+                    ux, uy = dx / dist, dy / dist
+                    points[a][0] -= ux * push; points[a][1] -= uy * push
+                    points[b][0] += ux * push; points[b][1] += uy * push
+        for lid in place_ids:
+            points[lid][0] = min(0.90, max(0.10, points[lid][0]))
+            points[lid][1] = min(0.84, max(0.14, points[lid][1]))
+    return {lid: (p[0], p[1]) for lid, p in points.items()}
 
 
 def ease(x: float) -> float:
-    """Smoothstep — natural motion between locations."""
     x = min(1.0, max(0.0, x))
     return x * x * (3 - 2 * x)
 
 
-def project(location: dict, region_bounds: dict) -> tuple[float, float]:
-    """Equirectangular projection, scaled per region so each act fills the frame."""
-    lat0, lat1, lon0, lon1 = region_bounds
-    span_lat = max(0.02, lat1 - lat0)
-    span_lon = max(0.02, lon1 - lon0)
-    x = (location["lon"] - lon0) / span_lon
-    y = (location["lat"] - lat0) / span_lat
-    return x, y
-
-
-def _median(values: list[float]) -> float:
-    ordered = sorted(values)
-    mid = len(ordered) // 2
-    return ordered[mid] if len(ordered) % 2 else (ordered[mid - 1] + ordered[mid]) / 2
-
-
-def core_locations(locations: list[dict]) -> list[dict]:
-    """Drop far outliers so the map frames where the story ACTUALLY happens.
-    (Watson's Afghanistan backstory must not squash London into a dot.)"""
-    if len(locations) < 4:
-        return locations
-    clat = _median([loc["lat"] for loc in locations])
-    clon = _median([loc["lon"] for loc in locations])
-    spread = [(abs(loc["lat"] - clat) + abs(loc["lon"] - clon), loc) for loc in locations]
-    typical = _median([d for d, _ in spread]) or 0.05
-    kept = [loc for d, loc in spread if d <= max(typical * 4, 0.08)]
-    return kept or locations
-
-
-def bounds_for(locations: list[dict]) -> tuple[float, float, float, float]:
-    locations = core_locations(locations)
-    lats = [loc["lat"] for loc in locations] or [0]
-    lons = [loc["lon"] for loc in locations] or [0]
-    pad_lat = max(0.012, (max(lats) - min(lats)) * 0.22)
-    pad_lon = max(0.012, (max(lons) - min(lons)) * 0.22)
-    return (min(lats) - pad_lat, max(lats) + pad_lat,
-            min(lons) - pad_lon, max(lons) + pad_lon)
-
-
-def position_at(segments: list[dict], t: float, track: str, locations: dict,
-                bounds) -> tuple[tuple[float, float] | None, str]:
-    """Where is this character at story time t on this track? Returns (xy, kind)."""
+def where(segments: list[dict], t: float, track: str, places: set[str]):
+    """(origin, target, progress, kind) for a character at story time t."""
     active = [s for s in segments if s["track"] == track
               and s["t_start"] - 0.01 <= t <= s["t_end"] + 0.01]
     if not active:
-        past = [s for s in segments if s["track"] == track and s["t_end"] < t]
-        if not past:
-            return None, "absent"
-        last = max(past, key=lambda s: s["t_end"])
-        loc = locations.get(last.get("to_location_id") or last["location_id"])
-        return (project(loc, bounds) if loc else None), "stale"
+        return None, None, 0.0, "absent"
     segment = active[0]
-    origin = locations.get(segment["location_id"])
-    if not origin:
-        return None, "absent"
-    if segment["kind"] == "in-transit" and segment.get("to_location_id"):
-        target = locations.get(segment["to_location_id"])
-        if target:
-            span = max(1e-6, segment["t_end"] - segment["t_start"])
-            progress = ease((t - segment["t_start"]) / span)
-            ax_, ay = project(origin, bounds)
-            bx, by = project(target, bounds)
-            return (ax_ + (bx - ax_) * progress, ay + (by - ay) * progress), "transit"
-    return project(origin, bounds), segment["kind"]
+    origin = segment["location_id"]
+    if origin not in places:
+        return None, None, 0.0, "absent"
+    if segment["kind"] == "in-transit" and segment.get("to_location_id") in places:
+        span = max(1e-6, segment["t_end"] - segment["t_start"])
+        return origin, segment["to_location_id"], \
+            ease((t - segment["t_start"]) / span), "transit"
+    return origin, None, 0.0, segment["kind"]
 
 
-def scene_at(scenes: list[dict], t: float, track: str) -> dict | None:
+def scene_at(scenes: list[dict], t: float, track: str):
     candidates = [s for s in scenes if s["track"] == track and s["t"] <= t + 0.05]
     return max(candidates, key=lambda s: s["t"]) if candidates else None
+
+
+def wrap(name: str, width: int = 15, max_lines: int = 3) -> str:
+    lines, line = [], ""
+    for word in name.split():
+        if len(line) + len(word) > width:
+            lines.append(line); line = word
+        else:
+            line = f"{line} {word}".strip()
+    lines.append(line)
+    return "\n".join(lines[:max_lines])
 
 
 def render(book_dir: Path, title: str) -> Path:
     timeline = load_timeline(book_dir)
     locations = timeline["locations"]
-    characters = pick_characters(timeline)
-    names = {cid: timeline["characters"].get(cid, {}).get("name", cid) for cid in characters}
-    acts = build_track_plan(timeline)
-    frames = frame_schedule(acts)
+    candidates = pick_characters(timeline)
+    acts = build_acts(timeline)
+    plans = []
+    for act in acts:
+        ids = [i for i in act_places(timeline, act) if i in locations]
+        plans.append({"places": ids, "pos": layout(ids, locations),
+                      "cast": act_cast(timeline, act, candidates)})
 
-    act_casts = [act_cast(timeline, act, characters) for act in acts]
-    act_locations, act_bounds = [], []
+    frames = []
     for index, act in enumerate(acts):
-        used = {s["location_id"] for s in timeline["scenes"]
-                if s["track"] == act["track"] and s["location_id"]
-                and act["chapters"][0] <= s["chapter"] <= act["chapters"][1]}
-        in_act = [locations[i] for i in used if i in locations]
-        in_act = core_locations(in_act) or list(locations.values())
-        act_locations.append(in_act)
-        act_bounds.append(bounds_for(in_act))
+        lo, hi = act["chapters"]
+        in_act = sorted((s for s in timeline["scenes"] if s["track"] == act["track"]
+                         and lo <= s["chapter"] <= hi),
+                        key=lambda s: (s["chapter"], s["scene"]))
+        for scene in in_act:
+            for step in range(max(2, int(SECONDS_PER_SCENE * FPS))):
+                frames.append({"act": index, "t": scene["t"], "scene": scene,
+                               "sub": step / max(1, int(SECONDS_PER_SCENE * FPS) - 1)})
 
     fig, ax = plt.subplots(figsize=(16, 9), dpi=110)
-    fig.patch.set_facecolor("#0e1117")
-    ax.set_facecolor("#0e1117")
-    ax.set_xlim(-0.08, 1.08)
-    ax.set_ylim(-0.08, 1.08)
+    fig.patch.set_facecolor(BG); ax.set_facecolor(BG)
+    ax.set_xlim(0, 1); ax.set_ylim(0, 1)
     ax.set_xticks([]); ax.set_yticks([])
     for spine in ax.spines.values():
         spine.set_visible(False)
 
-    place_dots = ax.scatter([], [], s=70, c="#39424e", marker="o", zorder=2)
-    place_labels = [ax.text(0, 0, "", color="#8b98a8", fontsize=8, ha="center",
-                            va="top", zorder=2) for _ in range(40)]
-    artists: dict[str, dict] = {}
-    for i, cid in enumerate(characters):
+    node_r = 0.085                       # radius in Y; X is scaled for 16:9
+    aspect = 9 / 16
+    nodes, node_labels = [], []
+    for _ in range(MAX_PLACES_PER_ACT):
+        circle = Ellipse((0, 0), width=node_r * 2 * aspect, height=node_r * 2,
+                         facecolor=NODE_FACE, edgecolor=NODE_EDGE,
+                         lw=2.2, zorder=2, visible=False)
+        ax.add_patch(circle)
+        nodes.append(circle)
+        node_labels.append(ax.text(0, 0, "", color="#c2d2e4", fontsize=12,
+                                   ha="center", va="center", zorder=4,
+                                   fontweight="bold", visible=False))
+
+    artists = {}
+    for i, cid in enumerate(candidates):
         color = PALETTE[i % len(PALETTE)]
+        route = FancyArrowPatch((0, 0), (0.001, 0.001), arrowstyle="-", color=color,
+                                lw=2.0, alpha=0.0, zorder=1)
+        ax.add_patch(route)
         artists[cid] = {
-            "trail": ax.plot([], [], color=color, lw=1.6, alpha=0.35, zorder=3)[0],
-            "dot": ax.plot([], [], "o", color=color, ms=13, zorder=5,
-                           markeredgecolor="white", markeredgewidth=0.8)[0],
-            "tag": ax.text(0, 0, names[cid], color=color, fontsize=10, zorder=6,
-                           ha="center", va="bottom", fontweight="bold"),
-            "history": [],
-            "color": color,
+            "dot": ax.plot([], [], "o", color=color, ms=18, zorder=6,
+                           markeredgecolor=BG, markeredgewidth=2.2)[0],
+            "tag": ax.text(0, 0, timeline["characters"].get(cid, {}).get("name", cid),
+                           color=color, fontsize=11.5, zorder=7, ha="center",
+                           va="center", fontweight="bold"),
+            "color": color, "route": route,
         }
 
-    title_text = fig.text(0.5, 0.955, title, color="#e8eef6", fontsize=19,
-                          ha="center", fontweight="bold")
-    clock_text = fig.text(0.5, 0.915, "", color="#9fb3c8", fontsize=13, ha="center")
-    scene_text = fig.text(0.5, 0.045, "", color="#7f8fa4", fontsize=11, ha="center")
-    act_text = fig.text(0.035, 0.93, "", color="#c9d6e4", fontsize=12, ha="left",
+    fig.text(0.5, 0.955, title, color="#f2f6fb", fontsize=25, ha="center",
+             fontweight="bold")
+    act_text = fig.text(0.5, 0.902, "", color="#8fb4dd", fontsize=14.5, ha="center",
                         fontweight="bold")
-    night = plt.Rectangle((-0.1, -0.1), 1.3, 1.3, color="#0a1c3d", alpha=0.0, zorder=1)
-    ax.add_patch(night)
+    clock_text = fig.text(0.05, 0.902, "", color="#dbe6f3", fontsize=16, ha="left",
+                          fontweight="bold")
+    scene_text = fig.text(0.5, 0.035, "", color="#93a4b8", fontsize=13, ha="center")
 
-    state = {"act": -1}
-
-    def update(frame_index: int):
-        frame = frames[frame_index]
+    def update(index: int):
+        frame = frames[index]
         act = acts[frame["act"]]
-        if frame["act"] != state["act"]:          # act change = new map, new bounds
-            state["act"] = frame["act"]
-            for art in artists.values():
-                art["history"] = []
-                art["trail"].set_data([], [])
-        bounds = act_bounds[frame["act"]]
+        plan = plans[frame["act"]]
         track = act["track"]
-        here = act_locations[frame["act"]]
+        positions, places = plan["pos"], set(plan["places"])
+        scene = frame.get("scene") or scene_at(timeline["scenes"], frame["t"], track)
+        active_place = scene["location_id"] if scene else None
 
-        xs, ys = [], []
-        placed: list[tuple[float, float]] = []
-        for i, label in enumerate(place_labels):
-            if i < len(here):
-                x, y = project(here[i], bounds)
-                xs.append(x); ys.append(y)
-                drop = 0.030
-                while any(abs(px - x) < 0.11 and abs(py - (y - drop)) < 0.022
-                          for px, py in placed):
-                    drop += 0.026
-                placed.append((x, y - drop))
-                label.set_position((x, y - drop))
-                label.set_text(here[i]["name"][:26])
-                label.set_alpha(0.85)
-            else:
-                label.set_alpha(0)
-        place_dots.set_offsets(list(zip(xs, ys)) or [(0, 0)])
+        for slot, node in enumerate(nodes):
+            label = node_labels[slot]
+            if slot >= len(plan["places"]):
+                node.set_visible(False); label.set_visible(False)
+                continue
+            lid = plan["places"][slot]
+            x, y = positions[lid]
+            live = lid == active_place
+            node.set_center((x, y)); node.set_visible(True)
+            grow = 1.12 if live else 1.0
+            node.set_width(node_r * 2 * aspect * grow)
+            node.set_height(node_r * 2 * grow)
+            node.set_facecolor(NODE_ACTIVE if live else NODE_FACE)
+            node.set_edgecolor(NODE_ACTIVE_EDGE if live else NODE_EDGE)
+            node.set_linewidth(3.6 if live else 2.2)
+            label.set_position((x, y)); label.set_text(wrap(locations[lid]["name"]))
+            label.set_color("#eaf3ff" if live else "#c2d2e4")
+            label.set_visible(True)
 
-        scene = scene_at(timeline["scenes"], frame["t"], track)
-        cast = act_casts[frame["act"]]
+        cast = plan["cast"]
         for cid, art in artists.items():
+            art["route"].set_alpha(0.0)
             if cid not in cast:
                 art["dot"].set_alpha(0); art["tag"].set_alpha(0)
-                art["trail"].set_alpha(0)
-                art["history"] = []
                 continue
-            xy, kind = position_at(timeline["worldlines"].get(cid, []), frame["t"],
-                                   track, locations, bounds)
-            if xy is None:
+            origin, target, progress, kind = where(
+                timeline["worldlines"].get(cid, []), frame["t"], track, places)
+            if origin is None:
                 art["dot"].set_alpha(0); art["tag"].set_alpha(0)
-                art["trail"].set_alpha(0)
                 continue
-            slot = sorted(cast).index(cid) if cid in cast else 0
-            angle = 2 * math.pi * slot / max(1, len(cast))
-            x = xy[0] + 0.055 * math.cos(angle)
-            y = xy[1] + 0.048 * math.sin(angle)
+            slot = cast.index(cid)
+            angle = 2 * math.pi * slot / max(1, len(cast)) - math.pi / 2
+            ox_off = node_r * 1.0 * aspect * math.cos(angle)
+            oy_off = node_r * 1.0 * math.sin(angle)
+            ox, oy = positions[origin]
+            x, y = ox + ox_off, oy + oy_off
+            if target:
+                tx, ty = positions[target]
+                x += (tx + ox_off - x) * progress
+                y += (ty + oy_off - y) * progress
+                art["route"].set_positions((ox, oy), (tx, ty))
+                art["route"].set_alpha(0.5)
             art["dot"].set_data([x], [y])
-            above = math.sin(angle) >= 0
-            art["tag"].set_position((x, y + (0.026 if above else -0.040)))
-            art["tag"].set_va("bottom" if above else "top")
-            alpha = {"observed": 1.0, "transit": 0.95, "presumed": 0.5,
-                     "stale": 0.0, "absent": 0.0}.get(kind, 0.6)
-            art["dot"].set_alpha(alpha); art["tag"].set_alpha(min(1.0, alpha + 0.1))
-            art["dot"].set_markersize(15 if kind == "observed" else 11)
-            art["history"].append((frame["t"], x, y))
-            recent = [(hx, hy) for ht, hx, hy in art["history"]
-                      if frame["t"] - ht <= TRAIL_DAYS]
-            art["trail"].set_data([p[0] for p in recent], [p[1] for p in recent])
-            art["trail"].set_alpha(0.32 if kind != "stale" else 0.12)
+            visible = kind in ("observed", "transit")
+            art["dot"].set_alpha(1.0 if visible else 0.4)
+            art["dot"].set_markersize(20 if kind == "observed" else 16)
+            # label pushed radially OUTWARD past the node edge — names never collide
+            lx = ox + node_r * 1.95 * aspect * math.cos(angle)
+            ly = oy + node_r * 1.62 * math.sin(angle)
+            if target:
+                tx, ty = positions[target]
+                lx += (tx + node_r * 1.95 * aspect * math.cos(angle) - lx) * progress
+                ly += (ty + node_r * 1.62 * math.sin(angle) - ly) * progress
+            art["tag"].set_position((lx, ly))
+            art["tag"].set_ha("left" if math.cos(angle) > 0.25 else
+                              ("right" if math.cos(angle) < -0.25 else "center"))
+            art["tag"].set_va("bottom" if math.sin(angle) >= 0 else "top")
+            art["tag"].set_alpha(1.0 if visible else 0.4)
 
+        act_text.set_text("PART I — LONDON, 1881" if track == "main"
+                          else "PART II — UTAH  ·  Jefferson Hope's story")
+        stamp = (scene or {}).get("date_display") or ""
+        mark = {"stated": "", "stated-partial": "", "approx": " (approx.)",
+                "approx-partial": " (approx.)"}.get((scene or {}).get("date_confidence"), "")
+        clock_text.set_text(f"{stamp}{mark}" if stamp else "")
         if scene:
-            night.set_alpha(0.32 if scene.get("time_of_day") == "NIGHT" else 0.0)
-            scene_text.set_text(f"Ch {scene['chapter']} · {scene['summary'][:110]}")
-        label = "PART I — LONDON, 1881" if track == "main" else \
-                "PART II — THE COUNTRY OF THE SAINTS (told by Jefferson Hope)"
-        act_text.set_text(label)
-        clock_text.set_text(f"Story day {int(frame['t']):>2}   ·   chapters "
-                            f"{act['chapters'][0]}–{act['chapters'][1]}")
+            scene_text.set_text(f"Chapter {scene['chapter']}  ·  {scene['summary'][:120]}")
         return []
 
     anim = animation.FuncAnimation(fig, update, frames=len(frames), blit=False,
@@ -307,8 +311,8 @@ def render(book_dir: Path, title: str) -> Path:
         import imageio_ffmpeg
         plt.rcParams["animation.ffmpeg_path"] = imageio_ffmpeg.get_ffmpeg_exe()
         out = out_dir / f"{OUT_STEM}.mp4"
-        anim.save(out, writer=animation.FFMpegWriter(fps=FPS, bitrate=3600))
-    except Exception as exc:                                   # Windows-safe fallback
+        anim.save(out, writer=animation.FFMpegWriter(fps=FPS, bitrate=4200))
+    except Exception as exc:
         print(f"  mp4 writer unavailable ({exc}); writing GIF")
         out = out_dir / f"{OUT_STEM}.gif"
         anim.save(out, writer=animation.PillowWriter(fps=12))

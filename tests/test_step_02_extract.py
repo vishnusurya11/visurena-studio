@@ -93,3 +93,27 @@ def test_rerun_dimension_replaces_only_that_dimension(monkeypatch):
     result = s02._rerun_dimension(_chapter(), extraction, "time")
     assert result["scenes"][1]["time_evidence"][0]["text"] == "Two days later"  # replaced
     assert result["scenes"][1]["events"][0]["summary"].startswith("They drive")  # untouched
+
+
+# --- completeness: specialists must answer for EVERY scene (defect found 2026-08-23) ---
+
+
+def test_missing_specialist_scenes_are_detected():
+    call_sheet = _call_sheet()                      # 2 scenes
+    time_report, cast, events, dialogue = _reports()
+    cast.scenes = []                                # specialist answered for none
+    extraction = s02.assemble(call_sheet, time_report, cast, events, dialogue)
+    gaps = s02.find_coverage_gaps(extraction)
+    assert ("characters", 1) in gaps and ("characters", 2) in gaps
+
+
+def test_no_gaps_when_specialists_cover_every_scene():
+    call_sheet = _call_sheet()
+    time_report, cast, events, dialogue = _reports()
+    for n in (1, 2):
+        if not any(s.n == n for s in cast.scenes):
+            cast.scenes.append(casting_director.SceneCast(n=n, characters=[
+                casting_director.CastMember(name_text="X", presence="present",
+                                            role="agent", para_first=1)]))
+    extraction = s02.assemble(call_sheet, time_report, cast, events, dialogue)
+    assert not [g for g in s02.find_coverage_gaps(extraction) if g[0] == "characters"]

@@ -58,3 +58,33 @@ def test_run_until_step_stops_early(capsys, monkeypatch, tmp_path):
     out = capsys.readouterr().out
     assert "step 01" in out and "step 02" not in out
     assert "stopping after step 01" in out
+
+
+# --- timeline time model (defects found 2026-08-23) ---
+
+
+def test_scenes_in_one_chapter_get_distinct_times():
+    from scripts.analysis import step_04_timeline as s04
+    scenes = [{"chapter": 1, "scene": n, "track": "main", "time_of_day": "DAY",
+               "story_day": 1, "time_evidence": [], "location_id": "x",
+               "characters": []} for n in range(1, 5)]
+    solved = s04.build_day_axis(scenes)
+    times = [s["t"] for s in solved]
+    assert len(set(times)) == len(times)          # no two scenes share an instant
+    assert times == sorted(times)                 # telling order preserved
+
+
+def test_absolute_dates_anchor_the_axis():
+    from scripts.analysis import step_04_timeline as s04
+    scenes = [
+        {"chapter": 8, "scene": 1, "track": "flashback", "time_of_day": "DAY",
+         "story_day": 1, "location_id": "x", "characters": [],
+         "time_evidence": [{"type": "date", "text": "May 4th, 1847"}]},
+        {"chapter": 12, "scene": 1, "track": "flashback", "time_of_day": "DAY",
+         "story_day": 1, "location_id": "x", "characters": [],
+         "time_evidence": [{"type": "date", "text": "August 4th, 1860"}]},
+    ]
+    solved = s04.build_day_axis(scenes)
+    assert solved[0]["year"] == 1847
+    assert solved[1]["year"] == 1860
+    assert solved[1]["t"] > solved[0]["t"]

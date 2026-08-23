@@ -39,3 +39,7 @@ Salient beats, not every verb: capture every event that moves the story, changes
 state, or would appear in a faithful scene summary — typically 3–10 per scene. When
 several micro-actions form one beat ("rose, crossed the room, and opened the door"),
 record the beat once with the fullest quote.
+
+## Completeness (required)
+
+Return **one entry for EVERY scene number in the breakdown**, in order — including scenes where your dimension is empty (return the scene with an empty list). A missing scene number is read downstream as missing data, not as 'nothing there'.
