@@ -168,25 +168,60 @@ def assign_time_of_day(scenes: list[dict]) -> list[dict]:
     `clock` (a readable label), `hour` (for ordering and daylight), and a `time_of_day`
     repaired from the evidence when extraction left it UNKNOWN. A scene with no
     evidence inherits the previous scene's clock only within the same day."""
-    last_by_day: dict[tuple[str, int], tuple[str, int]] = {}
     for scene in scenes:
         phrases = [e.get("text", "") for e in scene.get("time_evidence", [])
                    if e.get("type") in ("time_of_day", "date", "ordering")]
         parsed = storytime.finest_time_of_day(phrases)
-        key = (scene["track"], scene.get("day", 0))
         if parsed is None and scene.get("time_of_day") in ("DAY", "NIGHT"):
             parsed = ("daytime", 12) if scene["time_of_day"] == "DAY" else ("night", 22)
-        if parsed is None:
-            parsed = last_by_day.get(key)          # carry within the day only
-            scene["clock_confidence"] = "carried" if parsed else "unknown"
-        else:
             scene["clock_confidence"] = "stated"
-            last_by_day[key] = parsed
-        scene["clock"] = parsed[0] if parsed else None
+        elif parsed is not None:
+            scene["clock_confidence"] = "stated"
+        else:
+            scene["clock_confidence"] = "unknown"
         scene["hour"] = parsed[1] if parsed else None
-        if parsed:
-            scene["time_of_day"] = storytime.daylight(parsed[1])
+        scene["clock"] = parsed[0] if parsed else None
+
+    by_day: dict[tuple[str, int], list[dict]] = defaultdict(list)
+    for scene in scenes:
+        by_day[(scene["track"], scene.get("day", 0))].append(scene)
+    for in_day in by_day.values():
+        _infer_hours_within_day(in_day)
+
+    for scene in scenes:
+        if scene["hour"] is not None:
+            scene["clock"] = scene["clock"] or storytime._label_for_hour(scene["hour"])
+            scene["time_of_day"] = storytime.daylight(scene["hour"])
     return scenes
+
+
+def _infer_hours_within_day(in_day: list[dict]) -> None:
+    """Place unstated scenes by where they SIT between the stated ones.
+
+    A scene between a morning scene and an evening one is an afternoon scene; scenes
+    after the last stated time drift later; scenes before the first drift earlier.
+    Never crosses a day boundary (each day is inferred independently), and a stated
+    hour is never overwritten."""
+    known = [(i, s["hour"]) for i, s in enumerate(in_day) if s["hour"] is not None]
+    if not known:
+        return
+    for (i0, h0), (i1, h1) in zip(known, known[1:]):      # between two stated times
+        if i1 - i0 < 2:
+            continue
+        span = max(h1 - h0, 0)
+        for offset in range(1, i1 - i0):
+            scene = in_day[i0 + offset]
+            step = span * offset / (i1 - i0)
+            scene["hour"] = min(23, int(round(h0 + max(step, offset * 0.5))))
+            scene["clock_confidence"] = "inferred"
+    first_index, first_hour = known[0]
+    for back, scene in enumerate(reversed(in_day[:first_index]), start=1):
+        scene["hour"] = max(0, first_hour - back)
+        scene["clock_confidence"] = "inferred"
+    last_index, last_hour = known[-1]
+    for forward, scene in enumerate(in_day[last_index + 1:], start=1):
+        scene["hour"] = min(23, last_hour + forward)
+        scene["clock_confidence"] = "inferred"
 
 
 def assign_dates(scenes: list[dict]) -> list[dict]:

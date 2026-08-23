@@ -25,6 +25,27 @@ not inferences. "Unknown" is a correct, preferred answer over a guess.**
 - Times inside dreams, memories, plans, or hypotheticals: still record, but say so in
   `anchor` (e.g. "in Hope's recollection") — they are side-track evidence.
 
+## Implied time of day — read the room, don't shrug
+
+The text usually tells you the hour without naming it. Record these as time evidence
+with `type: time_of_day`, quoting the phrase VERBATIM:
+
+- **Meals and routine**: breakfast / "before breakfast" -> morning; luncheon -> midday;
+  dinner, supper -> evening; "dressed for the day", "rose late" -> morning.
+- **Light**: lamps or candles lit, gas turned up, "the room was dark", curtains drawn
+  -> evening or night; "sunlight streamed in", "the sun was low" -> day / late day.
+- **Habits and traffic**: the post arrives, papers delivered, shops open, "the streets
+  were thronged" -> daytime; "the streets were deserted", night-watchmen, "the last
+  train" -> night.
+- **Sleep**: waking, rising, being roused from bed -> morning or the small hours;
+  going to bed, "sat up long after" -> night.
+- **Continuity words**: "presently", "an hour later", "after a while" — these place the
+  scene RELATIVE to the one before; record them so the pipeline can chain the sequence.
+
+If a scene gives no time signal at all, say nothing rather than guessing — the pipeline
+places such scenes by where they SIT between the scenes that do carry a time. Your job
+is to report signals, never to invent an hour.
+
 ## Continuity ledger — state changes per scene
 
 Record each change of state with its VERBATIM quote:

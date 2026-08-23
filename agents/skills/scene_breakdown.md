@@ -65,7 +65,12 @@ with the same world/time/characters, is NOT a scene change.
 - `location_text`: the place AS WRITTEN in the text, most specific first with its
   container ("the sitting-room, 221B Baker Street"). For nonscenes, the covered ground.
 - `int_ext`: INT / EXT / UNKNOWN.
-- `time_of_day`: DAY / NIGHT / UNKNOWN — best inference from the text only.
+- `time_of_day`: DAY / NIGHT / UNKNOWN. **Infer it — do not default to UNKNOWN.**
+  The text rarely announces the hour but nearly always implies it: breakfast, lamps
+  being lit, sunlight, deserted streets, characters rising or going to bed, a scene
+  continuing straight on from the one before. Use UNKNOWN only when the passage gives
+  no signal at all AND no neighbouring scene settles it (a scene that continues an
+  evening conversation is NIGHT, not UNKNOWN).
 - `story_day`: in-world day counter within this chapter, starting at 1; bump it when
   the story crosses into a new day; null if genuinely undeterminable.
 - `frame`: only for embedded scenes (see above), else null.
@@ -76,8 +81,14 @@ with the same world/time/characters, is NOT a scene change.
 
 ## Discipline
 
-Copy location/time wording FROM THE TEXT — never invent specifics the text doesn't
-state (UNKNOWN is a correct answer). Do not interpret or resolve times ("that evening"
-stays uninterpreted — a later step solves the timeline). Paragraph precision is
-sufficient; place the boundary at the paragraph where the new scene's establishing
-material begins.
+Copy **location** wording FROM THE TEXT — never invent a place the text doesn't name.
+
+**Time is different**: you may and should INFER whether a scene is DAY or NIGHT from
+what the passage shows (see `time_of_day` above), because a scene always happens at
+some hour even when the prose doesn't say so. What you must NOT do is resolve a time
+into a date or a clock reading — "that evening" stays "that evening"; a later step
+chains scenes into calendar dates. Report the daylight state; leave the arithmetic
+alone.
+
+Paragraph precision is sufficient; place the boundary at the paragraph where the new
+scene's establishing material begins.

@@ -88,3 +88,46 @@ def test_absolute_dates_anchor_the_axis():
     assert solved[0]["year"] == 1847
     assert solved[1]["year"] == 1860
     assert solved[1]["t"] > solved[0]["t"]
+
+
+# --- time-of-day inference from surrounding scenes (owner request 2026-08-23) ---
+
+
+def _scene(n, chapter=1, day=1, evidence=(), tod=None):
+    return {"chapter": chapter, "scene": n, "track": "main", "day": day,
+            "story_day": day, "location_id": "x", "characters": [],
+            "time_of_day": tod or "UNKNOWN",
+            "time_evidence": [{"type": "time_of_day", "text": t} for t in evidence]}
+
+
+def test_gap_between_two_stated_times_is_interpolated():
+    from scripts.analysis import step_04_timeline as s04
+    scenes = [_scene(1, evidence=["in the morning"]), _scene(2), _scene(3),
+              _scene(4, evidence=["that evening"])]
+    s04.assign_time_of_day(scenes)
+    hours = [s["hour"] for s in scenes]
+    assert hours[0] == 9 and hours[-1] == 19
+    assert hours[0] < hours[1] <= hours[2] < hours[-1]      # afternoon-ish, in order
+    assert scenes[1]["clock_confidence"] == "inferred"
+
+
+def test_scene_after_a_stated_time_advances_within_the_day():
+    from scripts.analysis import step_04_timeline as s04
+    scenes = [_scene(1, evidence=["at noon"]), _scene(2), _scene(3)]
+    s04.assign_time_of_day(scenes)
+    assert scenes[0]["hour"] == 12
+    assert scenes[1]["hour"] > 12 and scenes[2]["hour"] > scenes[1]["hour"]
+
+
+def test_scene_before_the_first_stated_time_is_inferred_earlier():
+    from scripts.analysis import step_04_timeline as s04
+    scenes = [_scene(1), _scene(2, evidence=["that evening"])]
+    s04.assign_time_of_day(scenes)
+    assert scenes[0]["hour"] is not None and scenes[0]["hour"] < 19
+
+
+def test_inference_never_crosses_a_day_boundary():
+    from scripts.analysis import step_04_timeline as s04
+    scenes = [_scene(1, day=1, evidence=["at midnight"]), _scene(2, day=2)]
+    s04.assign_time_of_day(scenes)
+    assert scenes[1]["hour"] != 0            # a new day does not inherit midnight
