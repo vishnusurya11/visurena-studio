@@ -130,3 +130,28 @@ def test_leg_points_stay_inside_their_scene_slot(monkeypatch):
     points = [s for s in worldlines["john_watson"] if s["kind"] == "observed"]
     assert all(p["t_start"] < 1.0 for p in points[:3])
     assert points[3]["t_start"] == 1.0
+
+
+def test_consecutive_legs_are_not_a_bilocation(monkeypatch):
+    """A route's legs are sequential BY CONSTRUCTION. Reading them as 'two places at
+    overlapping story time' would have the tracer manufacture the very contradictions
+    the timeline exists to catch."""
+    monkeypatch.setattr(jt, "trace", lambda *a, **k: _journey())
+    scenes = [_sweep(), {**_sweep(), "scene": 2, "t": 0.2,
+                         "location_text": "the Criterion Bar", "location_id": "london"}]
+    s04.trace_journeys(scenes[:1], LOCATIONS)
+    worldlines = s04.build_worldlines(scenes)
+    coords = {"maiwand": {"lat": 32.0, "lon": 65.0}, "peshawar": {"lat": 34.0, "lon": 71.6},
+              "london": {"lat": 51.5, "lon": -0.13}, "baker": {"lat": 51.5, "lon": -0.16}}
+    assert [c for c in s04.find_contradictions(worldlines, coords)
+            if c["type"] == "bilocation"] == []
+
+
+def test_an_observation_ends_when_the_next_one_begins():
+    """The 0.12 dwell is a default, not a floor — a tight slot shortens it."""
+    scenes = [{"chapter": 1, "scene": 1, "track": "main", "day": 1, "t": 0.0,
+               "location_id": "a", "summary": "x", "characters": ["c"]},
+              {"chapter": 1, "scene": 2, "track": "main", "day": 1, "t": 0.05,
+               "location_id": "b", "summary": "y", "characters": ["c"]}]
+    observed = [s for s in s04.build_worldlines(scenes)["c"] if s["kind"] == "observed"]
+    assert observed[0]["t_end"] == 0.05

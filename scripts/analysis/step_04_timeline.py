@@ -303,13 +303,18 @@ def assign_time_of_day(scenes: list[dict]) -> list[dict]:
         phrases = [e.get("text", "") for e in scene.get("time_evidence", [])
                    if e.get("type") in ("time_of_day", "date", "ordering")]
         parsed = storytime.finest_time_of_day(phrases)
+        precision = storytime.finest_precision(phrases)
         if parsed is None and scene.get("time_of_day") in ("DAY", "NIGHT"):
+            # DAY -> 12 and NIGHT -> 22 are PLACEHOLDERS, not readings. Labelling them
+            # "stated" launders a default into evidence, and the alibi query below then
+            # treats the placeholder as a measurement.
             parsed = ("daytime", 12) if scene["time_of_day"] == "DAY" else ("night", 22)
-            scene["clock_confidence"] = "stated"
+            precision, scene["clock_confidence"] = "binary", "approx"
         elif parsed is not None:
             scene["clock_confidence"] = "stated"
         else:
-            scene["clock_confidence"] = "unknown"
+            precision, scene["clock_confidence"] = None, "unknown"
+        scene["clock_precision"] = precision
         scene["hour"] = parsed[1] if parsed else None
         scene["clock"] = parsed[0] if parsed else None
 
@@ -593,7 +598,9 @@ def _slot_width(scene: dict, index: int, scenes: list[dict]) -> float:
 def _scene_points(scene: dict, index: int, scenes: list[dict]) -> list[dict]:
     """Where this scene puts its characters: one point, or one per leg when it travels."""
     common = {"track": scene["track"], "day": scene["day"],
-              "chapter": scene["chapter"], "scene": scene["scene"]}
+              "chapter": scene["chapter"], "scene": scene["scene"],
+              "hour": scene.get("hour"),
+              "clock_precision": scene.get("clock_precision")}
     legs = scene.get("legs")
     if not legs:
         return [{**common, "t": scene["t"], "location_id": scene["location_id"],
@@ -603,21 +610,38 @@ def _scene_points(scene: dict, index: int, scenes: list[dict]) -> list[dict]:
              "summary": leg["event"]} for i, leg in enumerate(legs)]
 
 
+DWELL = 0.12            # how long an observation holds when nothing follows it soon
+
+
+def _observed_end(point: dict, nxt: dict | None) -> float:
+    """An observation ends when the next one begins, or after a short dwell.
+
+    DWELL is a default, not a floor. Treating it as a floor made a route's own legs
+    overlap each other — and the contradiction finder then reported Watson as being at
+    Netley and in India at the same moment, manufacturing the very bilocations the
+    timeline exists to catch."""
+    dwell = point["t"] + DWELL
+    if nxt is None or nxt["track"] != point["track"]:
+        return dwell
+    return min(dwell, nxt["t"])
+
+
 def _segments(points: list[dict]) -> list[dict]:
     segments = []
     for i, point in enumerate(points):
+        nxt = points[i + 1] if i + 1 < len(points) else None
         segments.append({
             "kind": "observed", "track": point["track"],
-            "t_start": point["t"], "t_end": point["t"] + 0.12,
+            "t_start": point["t"], "t_end": _observed_end(point, nxt),
             "location_id": point["location_id"], "day": point["day"],
+            "hour": point.get("hour"), "clock_precision": point.get("clock_precision"),
             "chapter": point["chapter"], "scene": point["scene"],
             "evidence": point["summary"][:160], "confidence": "attested",
         })
-        if i + 1 < len(points):
-            nxt = points[i + 1]
+        if nxt is not None:
             if nxt["track"] != point["track"]:
                 continue
-            gap_start, gap_end = point["t"] + 0.12, nxt["t"]
+            gap_start, gap_end = _observed_end(point, nxt), nxt["t"]
             if gap_end <= gap_start:
                 continue
             moved = nxt["location_id"] != point["location_id"]
@@ -643,6 +667,35 @@ def _miles(a: dict, b: dict) -> float:
     return 3958.8 * 2 * math.asin(math.sqrt(h))
 
 
+# A `clock-reversed` finding means a time phrase was attached to the scene that MENTIONS
+# it rather than the scene it NAMES — Gregson recounting an errand "after twelve o'clock"
+# does not make the recounting happen at noon. Telling order cannot settle which of the
+# two scenes borrowed its hour, so this is not fixable here: extraction has to record,
+# per phrase, whether it refers to this scene's own now. Until then these surface as
+# findings, which is the honest place for them. An earlier attempt to resolve them by
+# forcing hours to run forwards within a day flattened 25 of 92 scenes and let placeholder
+# hours override stated readings — a guess must never overwrite evidence.
+
+
+def _hours_between(a: dict, b: dict) -> float | None:
+    """Elapsed hours between two observations, or None when the book never says.
+
+    Read off the STORY clock (day + hour), never off `t`. `t` is the telling-order axis:
+    it orders scenes, it does not measure them. Multiplying a `t` gap by 24 produced
+    "0.3 mi in 0.0 h" for every pair of adjacent London scenes — 17 contradictions that
+    were entirely an artefact of the unit.
+
+    Both ends must be clock READINGS. Two scenes the book merely calls "morning" are an
+    ordering, not a measurement, and no alibi can be tested against them."""
+    if a.get("clock_precision") != "reading" or b.get("clock_precision") != "reading":
+        return None
+    if a.get("hour") is None or b.get("hour") is None:
+        return None
+    if a.get("day") is None or b.get("day") is None:
+        return None
+    return (b["day"] - a["day"]) * 24 + (b["hour"] - a["hour"])
+
+
 def find_contradictions(worldlines: dict, locations: dict) -> list[dict]:
     """Bilocation (same character, same time, two places) + travel feasibility
     (the alibi query: could they physically have made the trip?)."""
@@ -660,8 +713,17 @@ def find_contradictions(worldlines: dict, locations: dict) -> list[dict]:
             loc_a, loc_b = locations.get(a["location_id"]), locations.get(b["location_id"])
             if not (loc_a and loc_b) or a["location_id"] == b["location_id"]:
                 continue
+            hours = _hours_between(a, b)
+            if hours is None:
+                continue                    # the book never says — and unknown is not a lie
+            if hours < 0:
+                problems.append({
+                    "type": "clock-reversed", "character": character,
+                    "a": _ref(a), "b": _ref(b),
+                    "note": f"the clock runs backwards {abs(hours):.1f} h between these "
+                            f"scenes — no speed of travel resolves it"})
+                continue
             miles = _miles(loc_a, loc_b)
-            hours = max(0.0, (b["t_start"] - a["t_end"])) * 24
             if miles <= MAX_LOCAL_MILES and hours * CAB_MPH < miles:
                 problems.append({
                     "type": "travel-infeasible", "character": character,
@@ -702,6 +764,16 @@ def solve(scenes: list[dict], registry: dict, *, fill_gaps: bool = True,
             "characters": {c["id"]: c for c in registry["characters"]}}
 
 
+def _chapter_prose(book_dir: Path) -> dict[int, list[str]]:
+    """chapter number -> its paragraphs, for spans the tracer must read in full."""
+    prose = {}
+    for path in sorted((book_dir / "source" / "chapters").glob("ch_*.json")):
+        data = json.loads(path.read_text(encoding="utf-8"))
+        number = int(path.stem.split("_")[1])
+        prose[number] = [p["text"] for p in data.get("paragraphs", [])]
+    return prose
+
+
 def run(codex_id: str) -> None:
     conn = db.get_connection()
     book_dir = paths.book_dir(codex_id)
@@ -717,7 +789,7 @@ def run(codex_id: str) -> None:
 
     with tracker.step("04_01"), tracker.step("04_02"), tracker.step("04_03"), \
             tracker.step("04_04"), tracker.step("04_05"):
-        timeline = solve(scenes, registry)
+        timeline = solve(scenes, registry, chapters=_chapter_prose(book_dir))
         out_path.write_text(json.dumps(timeline, ensure_ascii=False, indent=2),
                             encoding="utf-8")
 

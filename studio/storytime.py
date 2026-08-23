@@ -185,6 +185,30 @@ def parse_time_of_day(text: str) -> tuple[str, int] | None:
     return part
 
 
+_RANK = {"reading": 2, "part": 1}
+
+
+def time_precision(text: str) -> str | None:
+    """How sharply the text fixes the hour.
+
+    `reading` — a point on the clock ("six o'clock", "noon", "midnight"): the elapsed
+    time between two of these is genuinely known.
+    `part` — a stretch of the day ("that evening", "in the morning"): an ordering, not
+    a measurement. Two scenes both "in the morning" may be minutes or hours apart.
+    `None` — no time signal at all.
+
+    The distinction is not cosmetic: only a pair of readings can answer "could they have
+    got there in time?". Asking it of two parts invents a contradiction out of vagueness.
+    """
+    parsed = parse_time_of_day(text)
+    if parsed is None:
+        return None
+    if _CLOCK.search((text or "").lower()) or parsed[0] in (
+            "noon", "midnight", "dawn", "dusk"):
+        return "reading"
+    return "part"
+
+
 def finest_time_of_day(texts: list[str]) -> tuple[str, int] | None:
     """The most precise time-of-day among several phrases (a clock beats a part)."""
     best = None
@@ -192,12 +216,19 @@ def finest_time_of_day(texts: list[str]) -> tuple[str, int] | None:
         parsed = parse_time_of_day(text)
         if not parsed:
             continue
-        precise = bool(_CLOCK.search((text or "").lower())) or parsed[0] in (
-            "noon", "midnight", "dawn", "dusk")
-        rank = 2 if precise else 1
+        rank = _RANK[time_precision(text)]
         if best is None or rank > best[0]:
             best = (rank, parsed)
     return best[1] if best else None
+
+
+def finest_precision(texts: list[str]) -> str | None:
+    """The sharpest precision among several phrases."""
+    found = [time_precision(t) for t in texts]
+    found = [f for f in found if f]
+    if not found:
+        return None
+    return max(found, key=lambda f: _RANK[f])
 
 
 def daylight(hour: int) -> str:
