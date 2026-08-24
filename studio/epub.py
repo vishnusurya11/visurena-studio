@@ -28,6 +28,13 @@ _BLOCK_TAGS = HEADING_TAGS | {"p", "div", "li", "blockquote", "table"} | _CELL_T
 # render inside the sentence and must NOT break it.
 _LINE_BREAK_TAGS = {"br", "hr"}
 
+# The break marker must be something the source text can NEVER contain. A newline is
+# not: the XHTML's own cosmetic wrapping at ~70 columns then survives as hard line
+# breaks — 2,668 of them in one book. NUL cannot appear in XML character data, so it
+# marks a real <br/> and nothing else. (chr(0), not an escape — a literal NUL in a
+# source file is a syntax error, not a constant.)
+_BREAK = chr(0)
+
 
 def read_epub(path) -> dict:
     """Whole book in one call: {title, author, spine: [{href, raw_html}], toc}.
@@ -181,7 +188,7 @@ class _BlockParser(HTMLParser):
         if tag in _SKIP_TAGS:
             self._skip_depth += 1
         elif tag in _LINE_BREAK_TAGS:
-            self._buf.append("\n")
+            self._buf.append(_BREAK)
         elif tag in _BLOCK_TAGS:
             self.close_pending()
             self._kind = "heading" if tag in HEADING_TAGS else "para"
@@ -214,6 +221,6 @@ def _normalize_lines(raw: str, kind: str) -> str:
     four lines should not arrive downstream as one. A heading is the exception: a title
     broken across two lines for typography ("CHAPTER I.<br/>MR. SHERLOCK HOLMES.") is
     still one title."""
-    lines = [" ".join(line.split()) for line in raw.split("\n")]
+    lines = [" ".join(line.split()) for line in raw.split(_BREAK)]
     lines = [line for line in lines if line]
     return (" " if kind == "heading" else "\n").join(lines)

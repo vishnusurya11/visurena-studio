@@ -135,3 +135,18 @@ def test_ordinary_long_words_and_punctuation_are_fine():
         {"n": 1, "text": "The counter-revolutionaries' incomprehensibilities—dashes, "
                          "em—dashes, U.S.A., McDonald, and 3.14159 all pass."}]}]
     s01._check_chapters(chapters, 1)
+
+
+def test_source_file_line_wrapping_is_not_a_line_break():
+    """Regression, same day: the <br/> fix used '\n' as its marker, so the XHTML's own
+    cosmetic wrapping at ~70 columns became hard line breaks — 2,668 of them across one
+    book. A break marker must be something source text cannot produce."""
+    blocks = epub.html_to_blocks(
+        "<p>he said, commiseratingly, after he had listened to my\nmisfortunes.</p>")
+    assert blocks[0]["text"] == \
+        "he said, commiseratingly, after he had listened to my misfortunes."
+
+
+def test_a_real_br_still_breaks_the_line():
+    blocks = epub.html_to_blocks("<p>Line one,\n still line one.<br/>Line two.</p>")
+    assert blocks[0]["text"] == "Line one, still line one.\nLine two."

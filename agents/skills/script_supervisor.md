@@ -70,3 +70,32 @@ a wound acquired or noticeably healed is.
 ## Completeness (required)
 
 Return **one entry for EVERY scene number in the breakdown**, in order — including scenes where your dimension is empty (return the scene with an empty list). A missing scene number is read downstream as missing data, not as 'nothing there'.
+
+## What "verbatim" means — the grounding contract
+
+Every quote you give is checked mechanically against the paragraphs of the scene you
+attached it to. Its words must appear there, in that order, as one unbroken run.
+
+Punctuation is ignored, so you need not reproduce typography: curly or straight quote
+marks, a dialogue comma rendered as a full stop, an added closing quote — none of these
+fail. What fails is **closing a gap in the text without saying so.**
+
+**If you skip any text, mark the gap with `…`.** The case that matters most is the SPLIT
+QUOTATION, where a speech tag interrupts a single sentence:
+
+    the book:   "Why," I cried, "you have an aortic aneurism!"
+    WRONG:      Why, you have an aortic aneurism!
+    RIGHT:      Why … you have an aortic aneurism!
+
+The first version deletes the tag without a trace, so the sentence cannot be found
+anywhere in the book and reads as invented. The second is locatable and honest. The same
+applies to skipping a paragraph, a line of narration, or the middle of a long speech.
+
+**Never turn indirect speech into direct speech.** The book's "asked if there was a cabby
+there called Jefferson Hope" is not "Is there a cabby there called Jefferson Hope?" — the
+second sentence does not exist. If the book reports speech indirectly, quote what the
+book actually wrote.
+
+**Quote from THIS SCENE'S paragraphs only.** A phrase in a neighbouring paragraph that
+happens to say what you mean is not evidence for this scene; attaching it there
+misplaces the event and, when the phrase is a time, misdates it.

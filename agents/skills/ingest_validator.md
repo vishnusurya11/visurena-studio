@@ -36,6 +36,11 @@ A `[cut]` marker is OUR sampling, NEVER a defect. Judge boundaries only by the u
 edge: a `last_paragraph` whose FINAL words stop mid-sentence is a real problem; text
 missing on the `[cut]` side is not.
 
+**A chapter ending on a quotation, a line of verse, a letter, an epigraph, or a single
+line of dialogue is not a defect under ANY of the checks below.** A parser cannot invent
+that ending — the author wrote it. Judge how a chapter ends by whether the sentence
+finishes, never by whether it feels like a satisfying close.
+
 Paragraphs may also contain real newlines. Verse, letters and telegrams are
 line-structured, and the parser preserves those lines on purpose. A newline inside a
 paragraph is not damage.
@@ -60,9 +65,13 @@ paragraph is not damage.
 5. **Parts** — do part assignments look coherent with the part and chapter titles? Watch
    for a chapter mis-filed as a structural division, and for a part boundary that falls
    in the wrong place.
-6. **Completeness** — against the manifest: gaps in numbering, a chapter with a
-   suspiciously tiny paragraph/word count relative to its siblings, an obviously
-   missing epilogue/final chapter (e.g. the last chapter ends the book mid-story).
+6. **Completeness** — against the manifest: gaps in numbering, or a chapter with a
+   suspiciously tiny paragraph/word count relative to its siblings. Evidence of a
+   missing chapter is a GAP IN THE MANIFEST, not your taste in endings. A book may
+   legitimately close on a quotation, a line of verse, a letter, a foreign-language
+   epigraph, or a single line of dialogue — Victorian novels do it constantly, and a
+   parser cannot cause it. Only call the book incomplete when the numbering or the
+   counts show something absent.
 7. **Metadata** — title and author plausible for this text?
 
 ## How to answer

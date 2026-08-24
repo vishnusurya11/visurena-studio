@@ -17,6 +17,7 @@ from __future__ import annotations
 
 import json
 import re
+import unicodedata
 from pathlib import Path
 
 from studio import db, llm, paths, tracking
@@ -107,18 +108,72 @@ def find_coverage_gaps(extraction: dict) -> list[tuple[str, int]]:
     return gaps
 
 
+_ELISION = re.compile(r"\u2026|\.\.\.|\n")
+_MIN_FRAGMENT = 3        # words; a shorter piece of an elided quote proves nothing
+
+
+def _words(text: str) -> list[str]:
+    """What the text SAYS, stripped of how it is typeset.
+
+    Grounding asks whether the book contains these words in this order. It does not
+    ask whether the agent reproduced the typesetting: a closing quotation mark it added
+    to round off an utterance, a dialogue comma rendered as a full stop, curly quotes
+    against straight ones. Comparing normalized substrings conflated the two and
+    reported 316 violations on a book with no fabricated quote in it — 285 of them
+    (90%) fully present in their own scene, differing only in punctuation."""
+    return re.findall(r"[a-z0-9]+", unicodedata.normalize("NFKD", text or "").casefold())
+
+
+def _contains_run(haystack: list[str], needle: list[str]) -> bool:
+    span = len(needle)
+    return bool(span) and any(haystack[i:i + span] == needle
+                              for i in range(len(haystack) - span + 1))
+
+
+def is_grounded(quote: str, source: str) -> bool:
+    """Does `source` say the words of `quote`, in order?
+
+    An elision — "..." or a paragraph break — is allowed and splits the quote into
+    fragments, each of which must appear. That is what a partial quotation IS, and the
+    agents use it constantly for long passages. Fragments under `_MIN_FRAGMENT` words
+    are ignored: "he" appearing somewhere is not evidence of anything. A quote with no
+    elision must appear whole, however short — 'presently' and 'last night' were real
+    findings that a short-phrase exemption would have hidden."""
+    haystack = _words(source)
+    pieces = [_words(f) for f in _ELISION.split(quote or "")]
+    pieces = [f for f in pieces if f]
+    if not pieces:
+        return False
+    if len(pieces) == 1:
+        return _contains_run(haystack, pieces[0])
+    return all(_contains_run(haystack, f) for f in pieces if len(f) >= _MIN_FRAGMENT)
+
+
+def _locate(quote: str, chapter: dict) -> int | None:
+    """Which paragraph of the chapter really contains this quote, if any."""
+    for para in chapter["paragraphs"]:
+        if is_grounded(quote, para["text"]):
+            return para["n"]
+    return None
+
+
 def check_extraction(extraction: dict, chapter: dict) -> list[dict]:
     """Deterministic grounding checks. Returns violations (dimension-tagged) —
-    structural problems raise instead."""
+    structural problems raise instead.
+
+    Two distinct failures, reported as such. `wrong-scene` means the words ARE in the
+    chapter but not in the paragraphs this scene claims — a mis-attribution, and the
+    signal that produced today's `clock-reversed` timeline findings. `ungrounded` means
+    the chapter does not contain them at all."""
     para_count = len(chapter["paragraphs"])
-    para_text = {p["n"]: _norm(p["text"]) for p in chapter["paragraphs"]}
     violations = []
     for scene in extraction["scenes"]:
         if not (1 <= scene["para_start"] <= scene["para_end"] <= para_count):
             raise ValueError(f"ch {extraction['chapter']} scene {scene['n']}: "
                              f"paragraph range outside chapter")
-        scene_text = " ".join(para_text[n] for n in
-                              range(scene["para_start"], scene["para_end"] + 1))
+        scene_text = " ".join(
+            p["text"] for p in chapter["paragraphs"]
+            if scene["para_start"] <= p["n"] <= scene["para_end"])
         for dimension, items, field in (
             ("events", scene["events"], "quote"),
             ("time", scene["state_changes"], "quote"),
@@ -126,10 +181,20 @@ def check_extraction(extraction: dict, chapter: dict) -> list[dict]:
             ("dialogue", scene["dialogue"], "notable_quote"),
         ):
             for item in items:
-                if item[field] and _norm(item[field]) not in scene_text:
-                    violations.append({"chapter": extraction["chapter"],
-                                       "scene": scene["n"], "dimension": dimension,
-                                       "note": f"not verbatim in scene: {item[field][:60]!r}"})
+                quote = item[field]
+                if not quote or is_grounded(quote, scene_text):
+                    continue
+                found_at = _locate(quote, chapter)
+                if found_at is not None:
+                    note = (f"belongs to paragraph {found_at}, outside this scene's "
+                            f"{scene['para_start']}-{scene['para_end']}: {quote[:60]!r}")
+                    kind = "wrong-scene"
+                else:
+                    note = f"not in the chapter text: {quote[:60]!r}"
+                    kind = "ungrounded"
+                violations.append({"chapter": extraction["chapter"],
+                                   "scene": scene["n"], "dimension": dimension,
+                                   "kind": kind, "note": note})
     return violations
 
 
