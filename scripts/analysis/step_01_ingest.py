@@ -47,6 +47,7 @@ ADJUSTMENTS = {"strip_pg_phrases": False}
 # safe auto-remedy and ESCALATE to the owner. The table grows from real failures.
 REMEDIES = {
     "boilerplate": "strip_pg_phrases",
+    "structure": None,      # the parser found no divisions — needs a human, not a knob
     "boundary": None, "garbled": None, "front_matter": None,
     "parts": None, "completeness": None, "metadata": None,
 }
@@ -130,7 +131,11 @@ def _keep_content(blocks: list[dict], started: bool, ended: bool):
 # --- 01_03 chapterize ---
 
 
-_PART_RE = re.compile(r"^(part|book|volume)\b", re.IGNORECASE)
+# "Part" opens a PART only when a number follows it. Without that, a chapter titled
+# "Part of the Plan" was filed as a structural division of the book.
+_ORDINAL = (r"[ivxlcdm]+|\d+|one|two|three|four|five|six|seven|eight|nine|ten|"
+            r"eleven|twelve|first|second|third|fourth|fifth")
+_PART_RE = re.compile(rf"^(part|book|volume)\s+({_ORDINAL})\b", re.IGNORECASE)
 
 
 def _normalize(title: str) -> str:
@@ -213,8 +218,41 @@ def _write_chapters(chapters: list[dict], out_dir: Path) -> None:
 # --- 01_04 finalize (python checks + manifest) ---
 
 
+_MOJIBAKE = re.compile(r"[\ufffd\u00c2\u00e3]|\u00e2\u20ac")
+_RAW_TAG = re.compile(r"<\s*/?\s*[a-z][a-z0-9]*(\s[^<>]*)?>", re.IGNORECASE)
+_ENTITY = re.compile(r"&(?:[a-z]+|#\d+);", re.IGNORECASE)
+_LONG_TOKEN = 34         # longest real English word in this corpus class is ~30
+
+
+def _garbled(text: str) -> str | None:
+    """Mechanical corruption, described. None when the text is clean.
+
+    These five checks used to live only in the validator SKILL — which is handed each
+    chapter's FIRST and LAST paragraph and nothing else, so damage in paragraph 30 was
+    invisible to the one check that claimed to look for it. Mechanical damage is
+    mechanical: check it here, over every paragraph, and leave the agent the judgement
+    calls it is actually equipped to make."""
+    if _MOJIBAKE.search(text):
+        return "mojibake"
+    if _RAW_TAG.search(text):
+        return "raw html tag"
+    if _ENTITY.search(text):
+        return "unresolved html entity"
+    longest = max((w for w in text.split()), key=len, default="")
+    if len(longest.strip("\u2014-")) > _LONG_TOKEN:
+        return f"impossibly long token {longest[:40]!r} (text glued together?)"
+    return None
+
+
 def _check_chapters(chapters: list[dict], expected: int | None) -> None:
     real = [c for c in chapters if c["part"] > 0]
+    if not real:
+        # The expectation is derived from the TOC, so an empty TOC expected zero
+        # chapters and zero chapters matched: a check that could not fail. The whole
+        # novel arrived as one "Front matter" blob and step 01 reported checks PASS.
+        raise ValueError(
+            "no chapters were found — every paragraph landed in front matter. "
+            "The TOC was empty or no body heading matched it.")
     if expected is not None and len(real) != expected:
         raise ValueError(f"chapter count {len(real)} != expected {expected}")
     for ch in chapters:
@@ -222,8 +260,14 @@ def _check_chapters(chapters: list[dict], expected: int | None) -> None:
             raise ValueError(f"chapter {ch['n']} is empty")
         if [p["n"] for p in ch["paragraphs"]] != list(range(1, len(ch["paragraphs"]) + 1)):
             raise ValueError(f"chapter {ch['n']} paragraph numbering not contiguous")
-        if any(_PG_PHRASE.search(p["text"]) for p in ch["paragraphs"]):
-            raise ValueError(f"PG boilerplate leaked into chapter {ch['n']}")
+        for para in ch["paragraphs"]:
+            if _PG_PHRASE.search(para["text"]):
+                raise ValueError(f"PG boilerplate leaked into chapter {ch['n']} "
+                                 f"paragraph {para['n']}")
+            damage = _garbled(para["text"])
+            if damage:
+                raise ValueError(f"garbled text in chapter {ch['n']} "
+                                 f"paragraph {para['n']}: {damage}")
 
 
 def finalize(chapters: list[dict], out_dir: Path, source_path: Path,
