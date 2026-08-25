@@ -88,44 +88,72 @@ def read_source(source_path: Path) -> dict:
 # --- 01_02 clean ---
 
 
+MIN_RETENTION = 0.5      # of the input's words; a PG header+footer is ~2,700
+
+
+def check_retention(words_in: int, words_out: int) -> None:
+    """Cleaning may trim boilerplate. It may not delete the book.
+
+    The expectation here is the INPUT word count — it comes from OUTSIDE the thing
+    being checked, which is the whole point. Every check that compared the output
+    against a number derived from the same parse could not fail, and did not."""
+    if words_in and words_out < words_in * MIN_RETENTION:
+        raise ValueError(
+            f"cleaning retained only {words_out} of {words_in} words "
+            f"({words_out / words_in:.0%}) — boilerplate stripping removed content")
+
+
+def _is_marker(text: str) -> bool:
+    """A bare `*** START/END OF THE PROJECT GUTENBERG EBOOK ***` line.
+
+    Older Gutenberg files predate the `pg-boilerplate` wrapper, so the marker arrives
+    as an ordinary paragraph. Only THAT LINE is dropped. The previous code used the
+    marker as a global state machine — everything after an END, in any later document,
+    was discarded — which is what turned 379 KB of Sherlock Holmes into 0 words. A
+    trailing licence section is back matter and is dropped by classification, where a
+    wrong answer costs one division rather than the book."""
+    return bool(_PG_START.search(text) or _PG_END.search(text))
+
+
+def _is_cover(doc: dict, index: int) -> bool:
+    """Spine position 0 is the cover wrapper in 11/11 books of the corpus."""
+    return index == 0 and "wrap" in doc["href"].lower()
+
+
 def clean(raw: dict) -> dict:
-    """Content docs only: drop cover/toc/colophon; keep only text between the PG
-    *** START *** and *** END *** markers — tracked GLOBALLY across docs, because
-    the license usually lives in its own doc after the END marker."""
-    parsed = [(item, epub.html_to_blocks(item["raw_html"])) for item in raw["spine"]]
-    started = not any(_PG_START.search(b["text"]) for _, blocks in parsed for b in blocks)
-    ended = False
+    """Blocks per document, with publisher boilerplate removed.
+
+    Owner-facing rule, learned the hard way: **never drop a whole spine document as
+    chrome.** The `*** START OF THE PROJECT GUTENBERG EBOOK ***` marker lives in spine
+    document #1 in 11/11 books, and the old code tracked that marker across documents —
+    so dropping #1 meant the started-flag never flipped and every later document was
+    discarded. Sherlock Holmes went in at 379 KB and came out at 0 words.
+
+    Document #1 is also not merely a title page: it carries real narrative in 3 of 11
+    books — 17.9% of Pride and Prejudice, 10.0% of Moby-Dick, and 63.7% of The Yellow
+    Wallpaper. And in Pride and Prejudice and Moby-Dick the inline contents table lives
+    in that same file as chapters I-X, so a "this document looks like a table of
+    contents" heuristic is equally fatal.
+
+    So: keep every document but the cover, and drop boilerplate by ELEMENT — the two
+    `class="pg-boilerplate"` blocks, measured at exactly two per book across 75. A book
+    with no such markup is untouched, so the logic is inert rather than fail-closed."""
     docs = []
-    for item, blocks in parsed:
-        if ended or _NONCONTENT_HREF.search(item["href"]) or _is_chrome_doc(blocks):
+    for index, item in enumerate(raw["spine"]):
+        if _is_cover(item, index):
             continue
-        kept, started, ended = _keep_content(blocks, started, ended)
+        blocks = [b for b in epub.html_to_blocks(item["raw_html"])
+                  if not _is_marker(b["text"])]
         if ADJUSTMENTS["strip_pg_phrases"]:
-            kept = [b for b in kept if not _PG_PHRASE.search(b["text"])]
-        if kept:
-            docs.append({"href": item["href"], "blocks": kept})
+            blocks = [b for b in blocks
+                      if b["kind"] == "heading" or not _PG_PHRASE.search(b["text"])]
+        if blocks:
+            docs.append({"href": item["href"], "blocks": blocks})
     return {"title": raw["title"], "author": raw["author"], "docs": docs}
 
 
-def _is_chrome_doc(blocks: list[dict]) -> bool:
-    """A doc that is navigation chrome, not story: its headings say CONTENTS
-    (the PG contents page's link table would otherwise glob into front matter)."""
-    return any(b["kind"] == "heading" and _normalize(b["text"]) == "contents"
-               for b in blocks)
-
-
-def _keep_content(blocks: list[dict], started: bool, ended: bool):
-    """One doc's blocks filtered by the global START/END marker state."""
-    kept = []
-    for block in blocks:
-        if not started:
-            started = bool(_PG_START.search(block["text"]))
-        elif _PG_END.search(block["text"]):
-            ended = True
-            break
-        else:
-            kept.append(block)
-    return kept, started, ended
+def _word_count(blocks) -> int:
+    return sum(len(b["text"].split()) for b in blocks)
 
 
 # --- 01_03 chapterize ---

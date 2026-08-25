@@ -36,15 +36,21 @@ def test_html_to_blocks_kinds():
 # --- 01_02 clean ---
 
 
-def test_clean_drops_license_doc_and_strips_pg_header(fixture_epub):
+def test_clean_strips_pg_boilerplate_but_keeps_the_document(fixture_epub):
+    """The header is dropped by ELEMENT; the document that held it survives with its
+    prose. Dropping the document is what deleted a whole novel."""
     raw = epub.read_epub(fixture_epub)
     clean = s01.clean(raw)
-    hrefs = [d["href"] for d in clean["docs"]]
-    assert "license.xhtml" not in hrefs      # after *** END *** -> empty -> dropped
-    assert "nav.xhtml" not in hrefs
     front = next(d for d in clean["docs"] if d["href"] == "front.xhtml")
     texts = [b["text"] for b in front["blocks"]]
     assert texts == ["This preface paragraph introduces the tale to the reader."]
+
+
+def test_clean_strips_the_footer_licence(fixture_epub):
+    clean = s01.clean(epub.read_epub(fixture_epub))
+    texts = [b["text"] for d in clean["docs"] for b in d["blocks"]]
+    assert not any("License terms" in t for t in texts)
+    assert not any("PROJECT GUTENBERG EBOOK" in t.upper() for t in texts)
 
 
 # --- 01_03 chapterize ---
@@ -146,14 +152,25 @@ def test_flat_toc_chapterize_assigns_parts_and_matches_short_part_heading(tmp_pa
     assert real[2]["title"] == "CHAPTER I. ON THE GREAT ALKALI PLAIN."
 
 
-def test_clean_strips_license_doc_after_end_marker_globally(fixture_epub):
-    raw = epub.read_epub(fixture_epub)
-    # move the END marker into the last content doc; the license doc has no marker
-    raw["spine"][-1]["raw_html"] = "<html><body><p>Pure license text here.</p></body></html>"
-    raw["spine"][-2]["raw_html"] += "<p>*** END OF THE PROJECT GUTENBERG EBOOK ***</p>"
-    clean = s01.clean(raw)
-    all_text = " ".join(b["text"] for d in clean["docs"] for b in d["blocks"])
-    assert "Pure license text" not in all_text  # docs after END are dropped globally
+def test_a_bare_marker_line_is_dropped_without_taking_the_book_with_it():
+    """Older Gutenberg files carry the marker as a plain paragraph rather than inside a
+    `pg-boilerplate` element. Only that LINE goes.
+
+    The previous behaviour — discard every document after an END marker — is what this
+    test used to assert, and it is what turned 379 KB of Sherlock Holmes into 0 words:
+    the START marker sits in document #1, so dropping that document meant the
+    started-flag never flipped and everything after it was thrown away."""
+    raw = {"title": "T", "author": "A", "toc": [], "spine": [
+        {"href": "c1.xhtml",
+         "raw_html": "<html><body>"
+                     "<p>*** START OF THE PROJECT GUTENBERG EBOOK WHATEVER ***</p>"
+                     "<p>The story begins.</p>"
+                     "<p>*** END OF THE PROJECT GUTENBERG EBOOK WHATEVER ***</p>"
+                     "</body></html>"},
+        {"href": "c2.xhtml", "raw_html": "<html><body><p>And continues.</p></body></html>"},
+    ]}
+    texts = [b["text"] for d in s01.clean(raw)["docs"] for b in d["blocks"]]
+    assert texts == ["The story begins.", "And continues."]
 
 
 # --- 01_06 improve: deterministic remedy playbook (no agent) ---
@@ -209,7 +226,16 @@ def test_head_title_text_never_becomes_a_paragraph():
     assert [(b["kind"], b["text"]) for b in blocks] == [("para", "Real text.")]
 
 
-def test_clean_drops_contents_doc(fixture_epub):
+def test_clean_keeps_the_contents_document(fixture_epub):
+    """Owner-facing rule: never drop a spine document as chrome. Pride and Prejudice
+    and Moby-Dick keep their inline contents table in the SAME file as chapters I-X,
+    so dropping "the contents document" costs 17.9% and 10.0% of those books."""
+    raw = epub.read_epub(fixture_epub)
+    hrefs = [d["href"] for d in s01.clean(raw)["docs"]]
+    assert "contents.xhtml" in hrefs
+
+
+def _unused_test_clean_drops_contents_doc(fixture_epub):
     raw = epub.read_epub(fixture_epub)
     clean = s01.clean(raw)
     hrefs = [d["href"] for d in clean["docs"]]

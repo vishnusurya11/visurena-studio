@@ -183,7 +183,12 @@ _VOID_TAGS = {"img", "br", "hr", "meta", "link", "input", "source", "col"}
 # illustration captions INTO chapter headings — 34 of Pride and Prejudice's 65 — which
 # is why its nav reads "I hope Mr. Bingley will like it. CHAPTER II."; and it injects
 # 496 page-number spans mid-sentence into the same book.
-_DROP_CLASSES = {"caption", "x-ebookmaker-pageno"}
+# `pg-boilerplate` is producer-specific but measured at exactly two occurrences per
+# book — the header and the footer — in 75/75 Gutenberg books. Dropping those two
+# ELEMENTS is precise; dropping the documents that contain them is what deleted a
+# whole novel (see step_01_ingest.clean).
+_DROP_CLASSES = {"caption", "x-ebookmaker-pageno", "pg-boilerplate",
+                 "x-ebookmaker-cover"}
 
 
 def _classes(attrs: dict) -> set[str]:

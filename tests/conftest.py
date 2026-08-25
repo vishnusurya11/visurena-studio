@@ -48,8 +48,11 @@ _NAV = """<html xmlns="http://www.w3.org/1999/xhtml" xmlns:epub="http://www.idpf
 </body></html>"""
 
 _FRONT = """<html><body>
-<p>The Project Gutenberg eBook of A Study in Scarlet</p>
-<p>*** START OF THE PROJECT GUTENBERG EBOOK A STUDY IN SCARLET ***</p>
+<header class="pg-boilerplate pgheader" id="pg-header">
+<h1>The Project Gutenberg eBook of A Study in Scarlet</h1>
+<div id="pg-start-separator">
+<span>*** START OF THE PROJECT GUTENBERG EBOOK A STUDY IN SCARLET ***</span>
+</div></header>
 <p>This preface paragraph introduces the tale to the reader.</p>
 </body></html>"""
 
@@ -77,8 +80,12 @@ _PART2 = """<html><body>
 </body></html>"""
 
 _LICENSE = """<html><body>
-<p>*** END OF THE PROJECT GUTENBERG EBOOK A STUDY IN SCARLET ***</p>
+<section class="pg-boilerplate pgfooter" id="pg-footer">
+<div id="pg-end-separator">
+<span>*** END OF THE PROJECT GUTENBERG EBOOK A STUDY IN SCARLET ***</span>
+</div>
 <p>Updated editions will replace the previous one. Full License terms follow.</p>
+</section>
 </body></html>"""
 
 
