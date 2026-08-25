@@ -191,3 +191,11 @@ def test_lint_all_labels_problems_with_their_scene_number():
     problems = s04.lint_all([_scene(number=7)], {})
     assert problems == []            # a clean scene has none...
     assert all(p.startswith("scene ") for p in s04.lint_all([_scene(number=7)], {}))
+
+
+def test_the_format_substep_checks_balance_not_only_format():
+    """Regression guard: balance_problems must stay wired into 04_05. A check nobody
+    calls is a comment."""
+    from pathlib import Path
+    source = Path("scripts/screenplay/step_04_render.py").read_text(encoding="utf-8")
+    assert "problems += balance_problems(" in source

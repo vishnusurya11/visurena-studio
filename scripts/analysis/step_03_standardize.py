@@ -15,7 +15,7 @@ import json
 from collections import defaultdict
 from pathlib import Path
 
-from studio import db, names, paths, screenformat, tracking
+from studio import db, names, paths, screenformat, synopsis, tracking
 
 STEP_ID = "03"
 NAME = "standardize"
@@ -96,6 +96,11 @@ def remap_scenes(extractions: list[dict], registry: dict) -> list[dict]:
                 "location_text": scene.get("location_text", ""),
                 "int_ext": screenformat.normalize_int_ext(scene.get("int_ext")),
                 "characters": present,
+                # A synopsis ASSERTS what the book says, so it is analysis work, and
+                # it is computed once here rather than per screenplay target.
+                "synopsis": synopsis.compose(scene.get("summary", ""),
+                                             scene.get("events") or [],
+                                             scene.get("state_changes") or []),
                 "story_day": scene.get("story_day"),
                 "time_of_day": scene.get("time_of_day", "UNKNOWN"),
                 "frame": scene.get("frame"),

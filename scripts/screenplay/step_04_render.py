@@ -137,8 +137,62 @@ def run(codex_id: str, target_name: str = "feature") -> None:
     with tracker.step("04_05"):
         problems = lint_all(screenplay.scenes, display)
         problems += budget_problems(screenplay, load_target(target_name))
+        problems += balance_problems(screenplay.scenes)
         for problem in problems:
             tracker.log(f"render: {problem}", level="WARNING", step_id="04_05")
-    print(f"  04_05 format: {len(problems)} problem(s)")
+    shares = [action_share(sc) for sc in screenplay.scenes] or [0.0]
+    print(f"  04_05 format: {len(problems)} problem(s) | action share "
+          f"min {min(shares):.0%} mean {sum(shares) / len(shares):.0%}")
     for problem in problems[:5]:
         print(f"         - {problem}")
+
+
+MAX_VOLLEY = 8               # consecutive dialogue elements with nothing staged between
+
+
+def action_share(scene: Scene) -> float:
+    """Share of a scene's elements that stage something. A measurement, not a verdict."""
+    if not scene.elements:
+        return 0.0
+    return sum(1 for e in scene.elements if e.kind == "action") / len(scene.elements)
+
+
+def _longest_volley(scene: Scene) -> int:
+    """Longest run of dialogue with no action between. Transitions do not break it —
+    a CUT TO: stages nothing, and counting it would launder an unstaged scene."""
+    longest = run = 0
+    for element in scene.elements:
+        run = run + 1 if element.kind == "dialogue" else (0 if element.kind == "action"
+                                                          else run)
+        longest = max(longest, run)
+    return longest
+
+
+def balance_problems(scenes: list[Scene], max_volley: int = MAX_VOLLEY) -> list[str]:
+    """A screenplay is not a transcript.
+
+    The screenwriter is handed a dialogue list, and a model handed a list of lines will
+    return a list of lines. Nothing else in this pipeline was checking that anything is
+    STAGED. Two checks, both of which need no corpus to justify:
+
+      * a scene with dialogue and no action at all is a radio play
+      * an unbroken volley is dialogue nobody has bothered to put in a room
+
+    Deliberately NOT checked: an action:dialogue ratio. There is no measured ratio in
+    the craft references, and a fabricated threshold would be worse than no threshold.
+    """
+    problems = []
+    for scene in scenes:
+        if not scene.elements:
+            problems.append(f"scene {scene.number}: no elements at all")
+            continue
+        speaks = any(e.kind == "dialogue" for e in scene.elements)
+        stages = any(e.kind == "action" for e in scene.elements)
+        if speaks and not stages:
+            problems.append(f"scene {scene.number}: dialogue but no action — nobody "
+                            f"moves and nothing is seen")
+        volley = _longest_volley(scene)
+        if volley > max_volley:
+            problems.append(f"scene {scene.number}: {volley} consecutive dialogue "
+                            f"elements with nothing staged between them")
+    return problems

@@ -28,7 +28,7 @@ import hashlib
 import json
 from pathlib import Path
 
-from studio import db, names, paths, screenformat, tracking
+from studio import db, names, paths, screenformat, synopsis, tracking
 
 STEP_ID = "01"
 NAME = "dossier"
@@ -143,6 +143,11 @@ def join_scene(scene: dict, extraction: dict, char_index: dict,
         "speaking": _speaking(dialogue),
         "events": found.get("events") or [],
         "summary": scene.get("summary") or "",
+        # Analysis owns this. The fallback exists only so a book analysed before the
+        # field existed still gets one, without re-running a paid step to backfill it.
+        "synopsis": scene.get("synopsis") or synopsis.compose(
+            scene.get("summary") or "", found.get("events") or [],
+            scene.get("state_changes") or []),
         "para_start": scene.get("para_start"),
         "para_end": scene.get("para_end"),
     }

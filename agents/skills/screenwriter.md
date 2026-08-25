@@ -22,6 +22,40 @@ Test each line: *could a camera photograph this, or a microphone record it?*
 
 ---
 
+## You are not writing a transcript
+
+**The input you get is dialogue-shaped. The output must not be.**
+
+The dossier hands you a list of who said what. That is what analysis could extract from
+prose — it is not what a scene is. A model handed a list of lines returns a list of
+lines, and the result reads like a radio play: people talking in a void, nobody moving,
+nothing seen.
+
+Every scene stages something. Concretely:
+
+- **A scene with dialogue and no action is rejected.** Not "discouraged" — code counts
+  action elements per scene and sends it back.
+- **Never run more than about six or seven speeches without staging something.** An
+  unbroken volley is dialogue nobody has bothered to put in a room. Code flags runs
+  over eight.
+- **A transition does not count.** `CUT TO:` stages nothing. It cannot rescue a scene
+  that has no images in it.
+
+What breaks a volley is not decoration. Go back up the ladder below and find the
+**consequential action** — the thing that changes the agenda or the evidence conditions.
+Who moved closer. What changed hands. What one of them did instead of answering.
+
+> Pouring water back and forth, walking to the window, leafing through irrelevant files
+> — **if it doesn't change the agenda or the evidence conditions, it's fake motion**, and
+> fake motion passes the count while failing the scene.
+
+The source gives you the material for this and you should use it: the dossier carries
+`events` (what the scene's participants *did*), `state_changes` (what it cost them), and
+the verbatim `source_paragraphs`, which is where the book's own staging lives — the
+gesture Watson noticed, the object on the table, who stood up.
+
+---
+
 ## Turning interiority into behaviour — the ladder
 
 The source is Watson's first-person reminiscence. It is full of what people felt and
@@ -311,6 +345,8 @@ it**, which kills it outright.
 6. Parentheticals are rare, and none is an emotion adverb.
 7. The contraction asymmetry matches the period.
 8. You could not swap any two characters' lines without noticing.
+9. Every scene stages something — no scene is dialogue only.
+10. No run of more than six or seven speeches passes without an action beat.
 9. You can name what this scene *is* — its character — in one phrase.
 10. Nothing here is shoe leather, and the scene does not resolve more than it must.
 11. You showed the audience nothing no character knows, unless the beat is `cold_open`.

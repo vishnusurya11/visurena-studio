@@ -205,3 +205,20 @@ def test_extractor_sentinels_stay_unresolved():
         {"speaker_text": "_group", "notable_quote": "Hear, hear."}]}]}
     scenes = s01.join([TIMELINE_SCENE], {2: extraction}, REGISTRY)
     assert all(line["speaker_id"] is None for line in scenes[0]["dialogue"])
+
+
+def test_dossier_prefers_the_synopsis_analysis_already_wrote():
+    """Analysis owns the synopsis. If it is there, the dossier must not recompute it."""
+    scene = {**TIMELINE_SCENE, "synopsis": "Written upstream. Two sentences worth."}
+    scenes = s01.join([scene], {2: EXTRACTION}, REGISTRY)
+    assert scenes[0]["synopsis"] == "Written upstream. Two sentences worth."
+
+
+def test_dossier_backfills_a_synopsis_for_a_book_analysed_before_the_field_existed():
+    scenes = s01.join([TIMELINE_SCENE], {2: EXTRACTION}, REGISTRY)
+    assert scenes[0]["synopsis"].startswith("They inspect the rooms.")
+
+
+def test_the_backfilled_synopsis_uses_the_events_extraction_found():
+    scenes = s01.join([TIMELINE_SCENE], {2: EXTRACTION}, REGISTRY)
+    assert "share rooms" in scenes[0]["synopsis"]
