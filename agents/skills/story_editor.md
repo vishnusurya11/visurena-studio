@@ -162,6 +162,86 @@ yourself.
 
 ---
 
+## The opening beat and the final beat are one decision
+
+**Choose the opening last, after the ending is fixed.** Every school agrees on this and no
+one disagrees — Field ("KNOW YOUR ENDING! … determine the ending, then design your
+opening"), Snyder (opening and final images are "bookends… a plus and a minus"), and Mazin,
+who rejects both of them ("**The beginning is the end, the end is the beginning. Know them
+both.**"). You are in the rare position of knowing the ending before you start. Use it.
+
+**Name the opening and the final beat as a pair, and state the pairing in one line.** If you
+cannot state it, you have not finished.
+
+Four hard rules for the opening beat:
+
+1. **It may not be a `nonscene`.** A novel's chapter one is written for a reader who already
+   bought the book; it routinely opens on summary or biography. Find the one staged moment
+   inside it, route it to `omitted`, or mark the opening `invented_connective`.
+2. **It must end on a reversal.** *"I always feel like your openings need punchlines… You
+   need to land something surprising."* A soldier raises his rifle at the old woman — and
+   shoots the cow. This is checkable: name the reversal.
+3. **It may not require the logline.** You know where the story is going; the audience does
+   not. A beat that is only interesting once you know the ending is not an opening. This is
+   the failure an adapter holding the whole book commits by default.
+4. **Cap the cast.** Field's own worst-script memory is *"fifteen characters introduced
+   within the first ten pages. I didn't know who or what the story was about."* Snyder's
+   rule is "introduced **or hinted at**" — reference is not introduction.
+
+**State a `difficulty` for the opening** — how much the audience must hold without
+explanation. *"It's good if the first scene gives the audience a difficulty level."* The
+screenwriter downstream needs to know how much withholding is licensed.
+
+**If you mark a beat `cold_open`, it must be unmovable.** *"If you're starting in some brand
+new place, it would be very hard to slide this anywhere else."* A cold open earns a unique
+privilege — it can show the audience something no character knows — so it must earn it: if
+the beat could sit anywhere else in the script, it is just the first scene.
+
+**Spend more revision on the opening than on anything else.** This is the one place the
+gurus and their loudest critic agree: *"I will spend twice as long on the first ten pages as
+I do on the last ten pages."*
+
+---
+
+## What to protect when the budget bites
+
+Rank order, from a working screenwriter on adaptation specifically:
+
+> "**Your goal in writing an adaptation absolutely cannot be to 'preserve the source material
+> onto the screen.' It must be to 'make an effective film based upon the source material.'**"
+
+| element | treatment |
+|---|---|
+| **basic situation** | *"Identify the basic situation. Keep the basic situation."* |
+| **characters and their relationships** | *"If you can maintain the essence of the characterizations and character relationships, you've won half the battle."* |
+| **tone, theme, genre** | preserve — these are what the audience remembers feeling |
+| **plot** | *"**plot is the least important element to retain.** The events which occur must remain malleable."* |
+
+Invented scenes are allowed and expected — but *"scenes which are changed, and new scenes
+invented, must continue to feel as though they live in the world of the original property."*
+
+The test of the whole plan: **"the true measure of success is whether you're able to
+duplicate in the film medium the experience the audience felt with the property in its
+original form."**
+
+**Goal is not task.** The goal is internal, universal, and shared with the audience; the
+**task** is external, particular, imposed, and usually repellent to the protagonist's
+nature. *"There are many films with the goal 'to find your way home.' But there's only one
+film where a girl clicks together a pair of ruby slippers."* Name the task, and prefer one
+whose resolution is a physical action: *"You could literally turn the sound down, and
+graphically see the story play itself out to its completion."*
+
+Default tasks are a symptom that you skipped this work: run across town, rescue the girl,
+kill the villain, defuse the bomb — and worst, **the hero comes to a decision.** *"It's
+usually just not very filmic to watch somebody change their minds… it's almost guaranteed to
+take place in a script that has a 'passive lead' problem."*
+
+**Widows and orphans.** *"Widows are setups that have no payoffs, because the payoffs have
+been cut. Orphans are payoffs that have no setups."* Every cut creates one or the other
+unless you check.
+
+---
+
 ## Before you return, check
 
 1. The spine is one sentence, and every beat hangs off it.
@@ -172,3 +252,9 @@ yourself.
 6. The beat count and runtime are inside the target's window.
 7. Each beat is classified `transfer` or `adaptation proper`.
 8. No character appears who is not in the registry.
+9. The opening beat and the final beat are named as a pair, and the pairing is stated.
+10. The opening beat is not a `nonscene`, ends on a named reversal, and is interesting
+    to someone who has not read the logline.
+11. The task is named, and its resolution is a physical action you could watch with the
+    sound off.
+12. No cut left a widow (setup without payoff) or an orphan (payoff without setup).

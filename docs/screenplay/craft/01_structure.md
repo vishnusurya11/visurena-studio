@@ -467,11 +467,120 @@ temptation runs entirely the other way.
 
 | gap | status |
 |---|---|
-| Scott Myers's beat names and page positions | **[M]** — no source verification; highest-value follow-up |
+| Scott Myers | **CLOSED — see §11.** The names I had from memory were another teacher's. |
 | Yorke's book text (the fractal and midpoint sentences) | site/quote level only; use Gulino's fractal sentence instead |
 | Vogler's three-act diagram mapping | **[M]** — the memo has none |
-| Field's Mid-Point and Pinch page numbers | secondary only; they're in the *Workbook* |
-| Snyder's "Six Things That Need Fixing" | widely reported, unverified |
+| Field's Mid-Point and Pinch page numbers | **BLOCKED** — they are in the *Workbook*, which is lending-restricted with search-inside closed. See `04_openings.md` GAPS. |
+| Snyder's "Six Things That Need Fixing" | **CLOSED** — verbatim in `04_openings.md` §4 |
 | Chris Soth's eight mini-movie names | **[M]** — and his version imports a low point Gulino rejects |
 | Frank Daniel's "24 sequences" / "central question" | **NOT FOUND — do not publish** |
-| Rossio columns "Twelve Sequences", "Deep Story", "Bulletproof" | **do not exist** |
+| Rossio columns "Twelve Sequences", "Deep Story", "Bulletproof" | **CONFIRMED do not exist** — the real 60-column index is in `05_rossio.md` |
+
+---
+
+## 11. Scott Myers — Narrative Throughline
+
+**A correction, and it is the reason unverified memory is marked `[M]` in this file.**
+An earlier draft carried Myers's beats from recall as *Lock In · First Culmination ·
+Main Culmination*. A search of **8,206 indexed post URLs plus the pre-2015 archive found
+zero occurrences of "culmination" anywhere in his writing.** Those names belong to a
+different teacher's paradigm. **[P — corrected]**
+
+His paradigm has a name — **Narrative Throughline** — and its distinctive move is that it
+is *two* tracks, not one:
+
+> "Narrative Throughline looks at the screenplay universe as two parts:
+> The External World of Actions and Dialogue, what I call the **Plotline**.
+> The Internal World of Intention and Subtext, what I call the **Themeline**.
+> **The Plotline has 10 major plot points. The Themeline has 4 movements** in the
+> Protagonist's transformation."
+
+### His brick — plot emerges from character
+
+> "If they begin the story-crafting process with a plot paradigm where the 'break into Act
+> Two' needs to happen on page 25… **That is the way of a formulaic script.**
+> In my view, where a writer should start the process is here: The Characters.
+> **Begin with characters. End with characters. Find the story in between. That's my
+> mantra.**"
+
+And his critique of the field, the sharpest one-line statement of what §6 documents:
+
+> "Syd Field, Robert McKee, Blake Snyder, and Dan Harmon… these approaches to story
+> structure **reduce structure to plot. That is only half the story!**"
+
+### The ten Plotline points
+
+**Opening · Hook · Lock** (Act One) · **Deconstruction Test · Transition ·
+Reconstruction Test · All Is Lost** (Act Two) · **On The Offensive · Final Struggle ·
+Denouement** (Act Three).
+
+The two Act One definitions are the useful ones, because they separate what most
+paradigms conflate:
+
+> **The Hook** — "Something big happens which jumbles the Protagonist's world… The Reader
+> gets an indication what the story will be."
+> **The Lock** — "A significant event which twists the plot in a new direction… Set-up is
+> locked down: **The Reader knows what the story will be.**"
+> Compressed: **"The Hook = Something Happens. The Lock = The First Big Ramification of
+> Something Happening."**
+
+Page positions exist in one 2009 post, on a **120-page** basis (not 110):
+Opening 1–5 · Hook 10–15 · Lock 25–30 · First Test 40–45 · Transition 55–60 ·
+Second Test 70–75 · All Is Lost 85–90 · Final Struggle/Denouement 110–120.
+
+**Encode his disclaimer with the numbers or don't encode them:**
+
+> "**There isn't one right way to tell a story.** … due to the influence primarily of Syd
+> Field and Save the Cat, there is a certain amount of conventional wisdom about how and
+> when certain things should happen. **Ultimately, that is bull shit.** … **Write your
+> story the way YOUR STORY NEEDS TO BE TOLD!** … **Stories are ORGANIC.**"
+
+### The four Themeline movements
+
+**Disunity (Act One) → Deconstruction (Act 2A) → Reconstruction (Act 2B) → Unity (Act
+Three)** — the *unity arc*. The Protagonist "starts off in a state of Disunity: they are
+living their life one way, when they should be living it differently."
+
+His midpoint metaphor is the best in the literature:
+
+> "imagine two planets: One called **Disunity**, the other **Unity**. For the first half of
+> the story, the Protagonist feels the 'gravitational pull' of Disunity… After the
+> Midpoint, the Protagonist transitions into the Unity planet's sphere of influence."
+
+### Nemesis, not antagonist — and the reason is functional
+
+> "**Character = Function.** … **There needs to be some sort of Nemesis *function* — a
+> specific character or otherwise — that provides opposition to the Protagonist.**"
+
+That is the payoff: "antagonist" implies a person; a **Nemesis can be a psyche**. His
+*(500) Days of Summer* reading: *"Tom's Nemesis is not a physical character, but rather an
+internal psychological dynamic — his overly romanticized view of love."* This matters
+directly for a Holmes adaptation, where the opposition is often a puzzle rather than a man.
+
+The generative question:
+
+> "**Want drama? Ask your Protagonist: What do you fear the most? Then put them in a story
+> where they have to confront that fear: Their Nemesis.**"
+
+Three qualities of a worthy Nemesis: **powerful** · **significant** (tied to this
+Protagonist's specific psyche) · **entertaining**. And: *"Where you want to create
+**identification** with the Protagonist, you want to create **fascination** with the
+Nemesis."*
+
+### End every sequence with a question
+
+The most usable sequence rule he has, and it maps onto the story editor's `boundary_event`:
+
+> "**pose a question at the end of every sequence**… (1) sum up the end point of each
+> sequence, thus capping off the mini-story, and (2) provide a natural transition into the
+> next… **The last scene in the sequence closes the door on that set of scenes. The
+> question the scene raises at the end opens the door to the next sequence.**"
+
+*Up*: end of the Opening → *"How to fulfill the promise to Ellie?"* End of the Hook →
+*"What is Carl going to do now?"*
+
+### The arithmetic worth keeping
+
+> "If a movie screenplay is between 90–120 pages and the average scene is 1½–2 pages long,
+> that means you write between **60–90 scenes per script**. That means in a very real and
+> fundamental way, **screenwriting is scene-writing**."

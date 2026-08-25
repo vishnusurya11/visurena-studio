@@ -250,6 +250,57 @@ dramatized. **Do not invent a scene the book never staged.**
 
 ---
 
+## Give the scene a character
+
+Before you write a line, answer one question: **what sort of character could this scene
+have that would best tell the story?** Some scenes play as seduction scenes with no
+seduction in them; some are about power, or control, or dominance, with none of those words
+spoken.
+
+This is the step that separates a written scene from a transcribed one. The failure it
+prevents is not a bad scene — it is a **null** one:
+
+> "It's not whether you did a good job or you did a bad job. **I maintain you didn't do the
+> job at all. There's no way to even judge the scene, because it's null.** There is no voice,
+> no tone, no spin, no atmosphere, no... anything. … **There's nothing there that they'd have
+> to pay someone to write, it's a scene anyone could do.**"
+
+**"A scene anyone could do" is your default output.** A dossier of who is present, where,
+and what happens will produce exactly that unless you decide what the scene *is* first.
+
+**Every scene is a situation** — a clear, understandable one, with immediacy, an imperative,
+and consequences. Anything that is not a situation is **shoe leather**: arrivals, walks,
+handoffs, scenes whose only job is to move a person from A to B or tell the audience a
+fact.
+
+**Leave the scene incomplete.** *"Most scenes need to be at least somewhat incomplete in
+order to propel the story; one fights the impulse to make each scene individually
+satisfying."* The momentum in a scene comes from what happened off-screen that the audience
+must catch up on — *"the way to make a boring movie is to show everything."*
+
+---
+
+## Point of view is a hard constraint, and the cold open is its only exception
+
+**POV tells you which scenes you are allowed to write, and which you are not.** The source
+is Watson's first-person narration: the novel cannot show you a room Watson is not in. When
+the plan gives you a beat Watson does not witness, that is a deliberate adaptation choice —
+write it, but know you are spending something. *"The more limited the point of view, the
+more elegant, and effective, your story."*
+
+**One licence, and only one.** If the beat is marked `cold_open`, you may show the audience
+something no character knows or discovers — a cold open *"reveals a mystery to the audience
+with nobody in between."* Everywhere else in the screenplay, mysteries are discovered by
+characters and revealed through them. Do not take this licence unasked; a first-person
+source makes it constantly tempting and almost always wrong.
+
+**Fate favours the antagonist.** If the plot needs the hero to catch a break, don't give it
+at the best possible moment — give it at the worst. And the real repair for a convenient
+discovery: **make the coincidence spring from the same action that created the need for
+it**, which kills it outright.
+
+---
+
 ## Before you return, check
 
 1. Every sentence is an image, an action, a sound, or a line of dialogue.
@@ -260,3 +311,6 @@ dramatized. **Do not invent a scene the book never staged.**
 6. Parentheticals are rare, and none is an emotion adverb.
 7. The contraction asymmetry matches the period.
 8. You could not swap any two characters' lines without noticing.
+9. You can name what this scene *is* — its character — in one phrase.
+10. Nothing here is shoe leather, and the scene does not resolve more than it must.
+11. You showed the audience nothing no character knows, unless the beat is `cold_open`.
