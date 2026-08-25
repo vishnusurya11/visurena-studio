@@ -50,7 +50,7 @@ def refresh_slug(scene: Scene) -> Scene:
 def measure(scene: Scene, display: dict) -> Scene:
     """page_eighths and duration are MEASURED here, never asked of an agent."""
     scene = refresh_slug(scene)
-    eighths = fountain.page_eighths(fountain.render_scene(scene, display))
+    eighths = fountain.page_eighths(scene)
     scene.page_eighths = eighths
     scene.duration_s = round(eighths / 8 * SECONDS_PER_PAGE, 1)
     return scene

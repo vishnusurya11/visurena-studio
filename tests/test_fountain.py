@@ -96,8 +96,10 @@ def test_lint_flags_a_scene_the_parser_reads_as_fewer_elements():
 
 
 def test_page_eighths_of_an_empty_scene_is_never_zero():
-    """A slugline occupies the page even with nothing under it."""
-    assert fountain.page_eighths(fountain.render_scene(_scene([]), {})) >= 1
+    """A slugline occupies the page even with nothing under it. Takes the SCENE now,
+    not the rendered text: measurement needs the element types to know each one's wrap
+    width, which is the fix for the 36% undercount."""
+    assert fountain.page_eighths(_scene([])) >= 1
 
 
 # --- scene numbers -----------------------------------------------------------------

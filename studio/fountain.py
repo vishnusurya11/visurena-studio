@@ -15,6 +15,7 @@ every line it writes, parses its own output, and asserts the two agree.
 from __future__ import annotations
 
 import io
+import textwrap
 
 from studio.screenplay_spec import Scene
 
@@ -88,10 +89,52 @@ def parsed_types(text: str) -> list[str]:
     return [type(obj).__name__ for obj in parse(io.StringIO(text))]
 
 
-def page_eighths(text: str) -> int:
+# Characters per rendered row, per element, at 12pt Courier on US Letter. Derived from
+# screenplain's own ParagraphStyle indents rather than from a style guide, because these
+# are the widths the PDF we actually ship is laid out at.
+# test_the_widths_match_screenplain_geometry notices if that ever changes.
+WIDTH = {"action": 61, "slug": 61, "transition": 61,
+         "dialogue": 36, "parenthetical": 48, "character": 42}
+
+BLANK_AFTER = 1          # every element is followed by a blank line on the page
+
+
+def wrap(text: str, width: int) -> list[str]:
+    """Break on words, exactly as the page does. Never mid-word."""
+    return textwrap.wrap(text or "", width=width) or [""]
+
+
+def wrapped_rows(text: str, width: int) -> int:
+    """How many rows this string occupies. A blank line still occupies one."""
+    return len(wrap(text, width))
+
+
+def rendered_rows(scene: Scene) -> int:
+    """Rows this scene costs on the page.
+
+    Counting SOURCE lines instead of rendered rows undercounted the first real
+    screenplay by 36% — 25.12 estimated against a 39-page PDF — because 18% of lines
+    exceeded their width and the longest was 496 characters. Dialogue is the worst case
+    and the most common: it wraps at 36 characters, not 61.
+    """
+    rows = wrapped_rows(scene.slug.text, WIDTH["slug"]) + BLANK_AFTER
+    for element in scene.elements:
+        if element.kind == "dialogue":
+            rows += 1 + BLANK_AFTER                       # the character cue
+            if element.parenthetical:
+                rows += wrapped_rows(element.parenthetical, WIDTH["parenthetical"])
+            rows += wrapped_rows(element.text, WIDTH["dialogue"])
+        elif element.kind == "transition":
+            rows += wrapped_rows(element.text, WIDTH["transition"])
+        else:
+            rows += wrapped_rows(element.text, WIDTH["action"])
+        rows += BLANK_AFTER
+    return rows
+
+
+def page_eighths(scene: Scene) -> int:
     """Rendered length in eighths of a page. Code measures; agents are never asked."""
-    lines = len(text.splitlines())
-    return max(1, round(lines / EIGHTH))
+    return max(1, round(rendered_rows(scene) / EIGHTH))
 
 
 def lint(text: str, intended: list[str]) -> list[str]:
