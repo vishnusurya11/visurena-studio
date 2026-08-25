@@ -7,6 +7,8 @@ half-finished dossier would be grounded in nothing.
 
 from __future__ import annotations
 
+from pathlib import Path
+
 import pytest
 
 import screenplay
@@ -99,10 +101,11 @@ class _FakeStep:
     """A step module that records it ran, without touching a library folder."""
 
     def __init__(self, step_id: str, name: str, explode: bool = False):
-        self.STEP_ID, self.NAME, self.explode, self.ran = step_id, name, explode, False
+        self.STEP_ID, self.NAME, self.explode = step_id, name, explode
+        self.ran, self.target = False, None
 
-    def run(self, codex_id: str) -> None:
-        self.ran = True
+    def run(self, codex_id: str, target_name: str | None = None) -> None:
+        self.ran, self.target = True, target_name
         if self.explode:
             raise RuntimeError("step failed")
 
@@ -154,3 +157,40 @@ def test_completing_the_final_step_completes_the_stage(conn, monkeypatch):
     screenplay.process(conn, codex_id)
     assert db.get_codex(conn, codex_id)["screenplay_status"] == "completed"
     assert db.codex_ready_for_stage(conn, "screenplay", "05", "analysis", "06") == []
+
+
+def test_the_hardcoded_target_reaches_every_step(conn, monkeypatch):
+    """One analysis feeds many screenplays, so the target is what the steps are for."""
+    codex_id = _book(conn, "Targeted", "20260825000014")
+    step = _FakeStep("01", "dossier")
+    monkeypatch.setattr(screenplay, "load_steps", lambda *a, **k: [step])
+    screenplay.process(conn, codex_id)
+    assert step.target == screenplay.TARGET
+
+
+def test_every_registry_step_imports_and_agrees_about_its_id():
+    """The whole pipeline now exists, so load the whole thing."""
+    steps = screenplay.load_steps(run_until="05")
+    assert [s.STEP_ID for s in steps] == ["01", "02", "03", "04", "05"]
+    assert [s.NAME for s in steps] == ["dossier", "plan", "draft", "render", "verify"]
+
+
+def test_every_step_accepts_the_uniform_signature():
+    import inspect
+    for step in screenplay.load_steps(run_until="05"):
+        params = list(inspect.signature(step.run).parameters)
+        assert params[:2] == ["codex_id", "target_name"], step.NAME
+
+
+def test_the_committed_default_does_not_spend_money():
+    """Step 02 onward buys agent calls. No default in this repo may spend because
+    somebody ran the file; raising RUN_UNTIL_STEP is a deliberate, planned act."""
+    assert screenplay.RUN_UNTIL_STEP == "01"
+
+
+def test_free_steps_are_exactly_the_ones_that_call_no_agent():
+    """01 dossier and 04 render are pure code. If that ever stops being true, the
+    guardrail above is lying about what is free."""
+    for name in ("step_01_dossier", "step_04_render"):
+        source = (Path("scripts/screenplay") / f"{name}.py").read_text(encoding="utf-8")
+        assert "llm.structured" not in source and "from agents import" not in source

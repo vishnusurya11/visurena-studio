@@ -271,13 +271,22 @@ stages:
         desc: Code, zero LLM, byte-stable. Always re-runs - it is free.
         substeps:
           - id: "04_01"
-            name: fountain
-            desc: Writes <target>/screenplay.fountain - the human artifact.
+            name: json
+            desc: Writes <target>/screenplay.json - THE ARTIFACT. Every downstream stage
+              reads this. Fountain is LOSSY (no provenance, no source refs, no camera
+              fields), so nothing may parse it back to recover a fact.
           - id: "04_02"
+            name: fountain
+            desc: Writes screenplay.fountain, rendered FROM the json, never assembled.
+          - id: "04_03"
+            name: pdf
+            desc: Writes screenplay.pdf via screenplain - industry geometry, Courier 12.
+              NOTE `python -m screenplain` does not work; the API is the only entry.
+          - id: "04_04"
             name: elements
             desc: Writes elements.json - flat shot list keyed (scene, shot) for the
-              future video stage.
-          - id: "04_03"
+              future video stage. A generated VIEW; screenplay.json wins on conflict.
+          - id: "04_05"
             name: format
             desc: ROUND-TRIP LINT - parse our own output and assert the parser's typing
               matches the intent, line by line. Fountain falls back to Action on anything

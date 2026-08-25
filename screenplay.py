@@ -37,7 +37,10 @@ REQUIRES_STEP_ID = "06"
 
 # --- configuration (hardcoded; no CLI args by convention) ---
 TARGET = "feature"        # which target to build; targets.yaml will hold the configs
-RUN_UNTIL_STEP = "01"     # only step 01 is built; raise as steps land ("05" = full)
+# The committed default is the FREE prefix. Step 02 onward buys agent calls, and no
+# default in this repo may spend money because someone ran the file. Raise this
+# deliberately, after an itemized spend plan: "05" runs the whole pipeline.
+RUN_UNTIL_STEP = "01"
 POLL_SECONDS = None       # None = single scan and exit; e.g. 300 = daemon mode
 
 
@@ -80,7 +83,7 @@ def run_step(conn, codex_id: str, step) -> None:
     """
     db.add_event(conn, codex_id, STAGE, step.STEP_ID, "started")
     try:
-        step.run(codex_id)
+        step.run(codex_id, TARGET)
     except Exception as exc:
         db.add_event(conn, codex_id, STAGE, step.STEP_ID, "failed", detail=str(exc)[:200])
         raise

@@ -208,7 +208,8 @@ def build(book_dir: Path) -> tuple[dict, list[str], list[str]]:
     return dossier, problems, warnings
 
 
-def run(codex_id: str) -> None:
+def run(codex_id: str, target_name: str | None = None) -> None:
+    """The dossier is per BOOK, shared by every target, so target_name is ignored."""
     conn = db.get_connection()
     book_dir = paths.book_dir(codex_id)
     tracker = tracking.Tracker(conn, codex_id, "screenplay")

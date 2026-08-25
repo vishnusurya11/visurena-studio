@@ -1,0 +1,25 @@
+# targets.yaml — one analysis feeds MANY screenplays. A target is the budget.
+#
+# Adaptation is fixed-budget allocation, not compression: every measured screenplay
+# lands in 22-33k words regardless of source size. A longer novel does not get a longer
+# film, it gets a higher cut rate. These numbers are the budget the story editor is
+# told and the renderer measures against.
+
+targets:
+  feature:
+    runtime_min: 100
+    pages: 100                # one page ~ one minute
+    beats: [18, 26]           # sequences, not scenes (~4.5 slug lines each)
+    style: "period feature, 1887, restrained"
+
+  episode10:
+    runtime_min: 10
+    pages: 10
+    beats: [3, 5]
+    style: "single sequence, one dramatic question"
+
+  short60:
+    runtime_min: 1
+    pages: 1
+    beats: [1, 1]
+    style: "one scene, one reversal"

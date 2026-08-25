@@ -1,0 +1,138 @@
+"""Fountain rendering — and the lint that exists because Fountain cannot reject.
+
+Verified on this machine: the parser falls back to Action on anything unrecognised, so
+a syntactically broken screenplay parses "fine" and renders a wrong PDF. Two elements
+misparsed, no error, no warning:
+
+    INT. HALL - DAY          -> Slug     ok
+    THE DOOR BURSTS OPEN     -> swallowed as the CHARACTER CUE
+    Anna stands there,       -> Dialog   wrong
+
+No Fountain linter exists in any language. So the emitter knows the intended type of
+every line it writes, parses its own output, and asserts the two agree.
+"""
+
+from __future__ import annotations
+
+import io
+
+from studio.screenplay_spec import Scene
+
+LINES_PER_PAGE = 55          # US Letter, 12pt Courier, industry margins
+EIGHTH = LINES_PER_PAGE / 8
+
+
+def cue(character: str | None, display: dict) -> str:
+    """The name printed above a line. Canonical id in, screen cue out."""
+    if not character:
+        return ""
+    return display.get(character, character.replace("_", " ")).upper()
+
+
+def _dialogue_block(element, display: dict, contd: bool) -> list[str]:
+    name = cue(element.character, display)
+    head = f"{name} (CONT'D)" if contd else name
+    block = [head]
+    if element.parenthetical:
+        block.append(f"({element.parenthetical.strip('()')})")
+    block.append(element.text)
+    return block
+
+
+def render_scene(scene: Scene, display: dict) -> str:
+    """One scene as Fountain. Every line's intended type is knowable from the source."""
+    out = [scene.slug.text.upper(), ""]
+    last_speaker = None
+    for element in scene.elements:
+        if element.kind == "dialogue":
+            out += _dialogue_block(
+                element, display,
+                # `is not None` matters: two unnamed lines are not the same speaker,
+                # and the first line of a scene is never a continuation.
+                contd=element.character is not None
+                and element.character == last_speaker)
+            last_speaker = element.character
+        elif element.kind == "transition":
+            out.append(f"> {element.text.upper().rstrip()}"
+                       if not element.text.upper().rstrip().endswith("TO:")
+                       else element.text.upper().rstrip())
+            last_speaker = None
+        else:
+            out.append(element.text)
+        out.append("")
+    return "\n".join(out).rstrip() + "\n"
+
+
+def intended_types(scene: Scene, display: dict) -> list[str]:
+    """The type we MEANT each non-blank line to be, in render order."""
+    kinds = ["Slug"]
+    for element in scene.elements:
+        if element.kind == "dialogue":
+            kinds.append("Dialog")
+        elif element.kind == "transition":
+            kinds.append("Transition")
+        else:
+            kinds.append("Action")
+    return kinds
+
+
+def parsed_types(text: str) -> list[str]:
+    """What screenplain's parser actually makes of it."""
+    from screenplain.parsers.fountain import parse
+    return [type(obj).__name__ for obj in parse(io.StringIO(text))]
+
+
+def page_eighths(text: str) -> int:
+    """Rendered length in eighths of a page. Code measures; agents are never asked."""
+    lines = len(text.splitlines())
+    return max(1, round(lines / EIGHTH))
+
+
+def lint(text: str, intended: list[str]) -> list[str]:
+    """Compare what we MEANT each element to be against what the parser makes of it.
+
+    This signature is the whole design. Fountain cannot reject, so there is no error to
+    catch — the only available evidence of a misparse is the disagreement between the
+    emitter's intent and the parser's typing. Linting raw text alone is impossible:
+    'THE DOOR BURSTS OPEN' and 'SHERLOCK HOLMES' are the same string shape, and only
+    the writer knows which one is a character.
+    """
+    got = parsed_types(text)
+    problems = []
+    for index, want in enumerate(intended):
+        have = got[index] if index < len(got) else "(missing)"
+        if have != want:
+            problems.append(f"element {index}: intended {want}, parsed {have}"
+                            f" — near {_near(text, index)!r}")
+    if len(got) > len(intended):
+        problems.append(f"parser produced {len(got)} elements, we wrote {len(intended)}")
+    return problems
+
+
+def _near(text: str, index: int) -> str:
+    """A locating snippet for a problem report — the reader needs a place, not a count."""
+    blocks = [b.strip() for b in text.split(chr(10) + chr(10)) if b.strip()]
+    return blocks[index][:48] if index < len(blocks) else ""
+
+
+def lint_scene(scene: Scene, display: dict) -> list[str]:
+    """Render one scene and assert the parser agrees with the emitter about every line."""
+    return lint(render_scene(scene, display), intended_types(scene, display))
+
+
+def render(scenes: list[Scene], display: dict, title: str = "",
+           author: str = "") -> str:
+    """The whole screenplay. A projection of screenplay.json, never the source."""
+    head = []
+    if title:
+        head = [f"Title: {title}", f"Author: {author}", ""]
+    return "\n".join(head) + "\n\n".join(render_scene(s, display) for s in scenes)
+
+
+def to_pdf(text: str, path) -> None:
+    """Industry geometry via screenplain. NOTE: `python -m screenplain` does NOT work —
+    the package has no __main__. The API is the only entry point."""
+    from screenplain.export.pdf import to_pdf as _to_pdf
+    from screenplain.parsers.fountain import parse
+    with open(path, "wb") as out:
+        _to_pdf(parse(io.StringIO(text)), out)
