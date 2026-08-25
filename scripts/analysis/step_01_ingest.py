@@ -156,6 +156,131 @@ def _word_count(blocks) -> int:
     return sum(len(b["text"].split()) for b in blocks)
 
 
+# --- 01_03_01 candidates ---------------------------------------------------------
+#
+# Code enumerates every place a division COULD open; an agent decides which ones do;
+# code slices between the survivors. The enumerator's contract is COMPLETENESS, not
+# precision — a candidate it misses is one nothing downstream can recover — so it is
+# deliberately generous, and every discriminator it computes is handed on as evidence
+# rather than applied as a hidden threshold.
+
+PREVIEW_WORDS = 15
+
+_SERIES = {"chapter": "chapter", "chap": "chapter", "stave": "chapter",
+           "canto": "chapter", "letter": "letter", "part": "part", "book": "part",
+           "volume": "part", "vol": "part", "act": "act", "scene": "scene"}
+
+_WORD_ORDINALS = {w: i + 1 for i, w in enumerate(
+    "one two three four five six seven eight nine ten eleven twelve thirteen "
+    "fourteen fifteen sixteen seventeen eighteen nineteen twenty".split())}
+
+_ROMAN_VALUES = {"i": 1, "v": 5, "x": 10, "l": 50, "c": 100, "d": 500, "m": 1000}
+
+# The numeral may be glued to its word ("CHAPTERXXVII.") and the word may be preceded
+# by a caption Ebookmaker glued on ("I hope Mr. Bingley will like it. CHAPTER II.") —
+# so this SEARCHES rather than matches. Anchoring it scores 0 of Pride and Prejudice's
+# 61 chapters; searching scores 61.
+_SERIES_RE = re.compile(
+    r"\b(" + "|".join(_SERIES) + r")\.?\s*"
+    r"([ivxlcdm]+|\d+|" + "|".join(_WORD_ORDINALS) + r")\b", re.IGNORECASE)
+_BARE_RE = re.compile(r"^([ivxlcdm]{1,7}|\d{1,3})\.?$", re.IGNORECASE)
+# A numeral opening the heading, with the title after it: "I. A SCANDAL IN BOHEMIA".
+# Neither pattern above sees this — no series word, and the heading is not ONLY a
+# numeral — and Sherlock Holmes scores 3 of its 12 stories without it.
+_LEADING_RE = re.compile(r"^([ivxlcdm]{1,7}|\d{1,3})\.\s+\S", re.IGNORECASE)
+MAX_ORDINAL = 200        # a numeral above this is a word that looks Roman ("MIX.")
+
+
+def _roman(text: str) -> int | None:
+    total = previous = 0
+    for char in reversed(text.lower()):
+        value = _ROMAN_VALUES.get(char)
+        if value is None:
+            return None
+        total += -value if value < previous else value
+        previous = max(previous, value)
+    return total or None
+
+
+def _numeral(token: str) -> int | None:
+    token = token.lower()
+    if token.isdigit():
+        return int(token)
+    return _WORD_ORDINALS.get(token) or _roman(token)
+
+
+def parse_heading(text: str) -> tuple[str | None, int | None]:
+    """(series, ordinal) read from the heading's own words.
+
+    Numbers must be READ, never assigned by position: numbering candidates by their
+    order among non-junk TOC entries means one misclassified entry shifts every later
+    chapter, which is how Dracula's spaced-out title page consumed chapter 1."""
+    match = _SERIES_RE.search(text or "")
+    if match:
+        ordinal = _numeral(match.group(2))
+        if ordinal:
+            return _SERIES[match.group(1).lower()], ordinal
+    stripped = (text or "").strip()
+    bare = _BARE_RE.match(stripped) or _LEADING_RE.match(stripped)
+    if bare:
+        ordinal = _numeral(bare.group(1))
+        if ordinal and ordinal <= MAX_ORDINAL:
+            return "bare", ordinal
+    return None, None
+
+
+def _flatten(book: dict) -> list[tuple[int, str, int, dict]]:
+    return [(d, doc["href"], b, block)
+            for d, doc in enumerate(book["docs"])
+            for b, block in enumerate(doc["blocks"])]
+
+
+def _basename(href: str) -> str:
+    return (href or "").split("#")[0].split("/")[-1]
+
+
+def enumerate_candidates(book: dict, toc: list[dict]) -> list[dict]:
+    """Every heading in the cleaned stream, with the evidence for judging it."""
+    stream = _flatten(book)
+    heads = [i for i, (_, _, _, blk) in enumerate(stream) if blk["kind"] == "heading"]
+
+    anchors: dict[tuple[str, str], int] = {}
+    for order, index in enumerate(heads):
+        _, href, _, blk = stream[index]
+        for anchor_id in blk.get("ids", []):
+            anchors.setdefault((_basename(href), anchor_id), order)
+    titles = {_normalize(e["title"]): e for e in toc}
+
+    candidates = []
+    for order, index in enumerate(heads):
+        doc_index, href, block_index, blk = stream[index]
+        stop = heads[order + 1] if order + 1 < len(heads) else len(stream)
+        following = [b["text"] for _, _, _, b in stream[index + 1:stop]
+                     if b["kind"] == "para"]
+        words = " ".join(following).split()
+        series, ordinal = parse_heading(blk["text"])
+        signals = []
+        resolved = any(anchors.get((_basename(e["href"]), e["href"].partition("#")[2]))
+                       == order for e in toc if "#" in (e["href"] or ""))
+        if resolved:
+            signals.append("toc_anchor")
+        if _normalize(blk["text"]) in titles:
+            signals.append("toc_title")
+        if series:
+            signals.append("heading_numeral")
+        candidates.append({
+            "id": f"h{order + 1:03d}",
+            "doc_index": doc_index, "block_index": block_index, "href": href,
+            "text": blk["text"],
+            "preview": " ".join(words[:PREVIEW_WORDS]),
+            "words_after": len(words),
+            "anchor_resolved": resolved,
+            "series": series, "ordinal": ordinal,
+            "signals": signals,
+        })
+    return candidates
+
+
 # --- 01_03 chapterize ---
 
 
