@@ -178,3 +178,134 @@ stages:
   #   steps: []
   # video:
   #   steps: []
+
+  # ---------------------------------------------------------------------------------
+  # STAGE 02 — screenplay.  PLANNED, NOT BUILT.  Design: docs/screenplay/DESIGN.md
+  #
+  # Analysis ASSERTS what the book says; a screenplay INVENTS. Never put an inventing
+  # step inside an asserting stage — the grounding apparatus that makes analysis
+  # trustworthy would stop meaning anything. One analysis feeds MANY screenplays, so
+  # this stage is keyed on (book, target), and targets live in targets.yaml.
+  #
+  # Step ids are STAGE-SCOPED: events key on (codex_id, stage, step_id), so
+  # screenplay/01 never collides with analysis/01. "Stage 02" is this stage's position
+  # in the studio, which file order already encodes.
+  # ---------------------------------------------------------------------------------
+
+  screenplay:
+    steps:
+      - id: "01"
+        name: dossier
+        script: step_01_dossier
+        desc: Join what analysis scattered into one record per source scene. Code, zero
+          LLM. Reads timeline.json (NOT scenes.json - 27 of 92 scenes are UNKNOWN
+          there) and re-attaches int_ext, dialogue, events and pov, which survive only
+          in analysis/extraction/. Per BOOK, shared by every target.
+        substeps:
+          - id: "01_01"
+            name: gather
+            desc: Read the six analysis/source artifact families; hash them into
+              input_sha256 (the resume key).
+          - id: "01_02"
+            name: join
+            desc: Resolve surface names to canonical ids via registry aliases; attach
+              int_ext / dialogue / events / pov from extraction; build CHARACTER cues;
+              carry verbatim paragraph spans for is_grounded().
+          - id: "01_03"
+            name: checks
+            desc: Every scene has int_ext, a location name, DAY|NIGHT; every speaking
+              character resolves to a registry id. WARN (never fail) on a speaking
+              character with no profile.voice - 15 of 23 lack one today.
+          - id: "01_04"
+            name: emit
+            desc: Writes screenplay/dossier.json.
+
+      - id: "02"
+        name: plan
+        script: step_02_plan
+        desc: What survives, and in what order. ONE agent call per target. Adaptation is
+          fixed-budget allocation, not compression - every screenplay lands in
+          22-33k words regardless of source size.
+        substeps:
+          - id: "02_01"
+            name: brief
+            desc: Code assembles the target config plus a scene index (~40 words per
+              scene, ~5k tokens for 92 scenes).
+          - id: "02_02"
+            name: select
+            desc: AGENT story_editor (reasoning tier) -> ScreenplayPlan. Groups scenes
+              into SEQUENCES (~4.5 slug lines each), not one beat per scene.
+          - id: "02_03"
+            name: checks
+            desc: Code - every beat's (chapter, scene) exists; roster is a subset of the
+              registry; budget within target; EVERY source scene is either inside a beat
+              or listed in `omitted` with a reason. Silent dropping is the failure mode.
+          - id: "02_04"
+            name: emit
+            desc: Writes <target>/plan.json plus source_fingerprint.
+
+      - id: "03"
+        name: draft
+        script: step_03_draft
+        desc: The paid work. Two agent calls per beat, each scene file written the moment
+          it exists so a crash at beat N keeps 1..N-1.
+        substeps:
+          - id: "03_01"
+            name: write
+            desc: AGENT screenwriter (reasoning) -> the ordered element stream. Owns
+              action AND dialogue - they interleave, so one writer owns both. Every
+              dialogue element carries provenance verbatim|adapted|invented.
+          - id: "03_02"
+            name: shoot
+            desc: AGENT shot_designer (workhorse) -> shots attached to element INDICES in
+              the frozen stream. Separate agent because it merges mechanically and can be
+              re-run alone without paying to rewrite dialogue.
+          - id: "03_03"
+            name: assemble
+            desc: Code - sluglines, CONT'D/CONTINUOUS, page_eighths, scene numbering.
+              Never asked of an agent; models cannot count rendered lines.
+
+      - id: "04"
+        name: render
+        script: step_04_render
+        desc: Code, zero LLM, byte-stable. Always re-runs - it is free.
+        substeps:
+          - id: "04_01"
+            name: fountain
+            desc: Writes <target>/screenplay.fountain - the human artifact.
+          - id: "04_02"
+            name: elements
+            desc: Writes elements.json - flat shot list keyed (scene, shot) for the
+              future video stage.
+          - id: "04_03"
+            name: format
+            desc: ROUND-TRIP LINT - parse our own output and assert the parser's typing
+              matches the intent, line by line. Fountain falls back to Action on anything
+              unrecognised, so a parser NEVER rejects; silent misparse is the normal
+              failure. Plus runtime/page budget vs the target.
+
+      - id: "05"
+        name: verify
+        script: step_05_verify
+        desc: Deterministic guards first, one agent over a sample second. Nothing here
+          scores; findings must be located and quotable.
+        substeps:
+          - id: "05_01"
+            name: guards
+            desc: G1 coordinate (every source ref exists) - G2 roster (character exists
+              AND the timeline puts them there) - G3 place-and-time (narrowing DAY->DAWN
+              allowed, contradiction refused) - G4 verbatim-claim (a failed is_grounded()
+              DOWNGRADES to adapted and counts, never fails).
+          - id: "05_02"
+            name: audit
+            desc: AGENT adaptation_auditor (workhorse) over K=3 sampled scenes. Checks
+              CONTRADICTION, never difference. An issue whose book_quote fails
+              is_grounded() is dropped before the improve loop - the auditor cannot
+              manufacture evidence.
+          - id: "05_03"
+            name: improve
+            desc: Re-run ONE dimension (write | shoot) for blocking findings only.
+              MAX_IMPROVE_ROUNDS = 2, then log and proceed.
+          - id: "05_04"
+            name: report
+            desc: Writes <target>/qc_report.json.
