@@ -54,3 +54,9 @@ output/
 library/
 views/
 logs/
+
+# Research agents occasionally drop scratch downloads in the repo root.
+# Never commit them — one was a full copyrighted book text (2026-08-25).
+/*.txt
+/*.html
+!requirements*.txt
