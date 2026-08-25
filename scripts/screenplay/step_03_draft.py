@@ -11,7 +11,7 @@ import json
 from pathlib import Path
 
 from agents import screenwriter, shot_designer
-from studio import db, paths, tracking
+from studio import db, names, paths, tracking
 from studio.screenplay_spec import (Scene, SceneDraft, ScreenplayPlan, ShotPlan, Slug,
                                     SceneRef)
 
@@ -21,9 +21,18 @@ NAME = "draft"
 TIME_NARROWING = {"DAY": {"DAY", "DAWN", "DUSK"}, "NIGHT": {"NIGHT", "DUSK"}}
 
 
+SLUG_PREFIX = {"INT": "INT.", "EXT": "EXT.", "INT/EXT": "INT./EXT.",
+               # Fountain recognises a scene heading by its PREFIX. "UNKNOWN." is not
+               # one, so the parser typed two of the first real render's 22 slugs as
+               # Action and the scenes silently lost their headings. INT is the safer
+               # fallback: an interior slug on an exterior scene is a continuity note,
+               # an exterior slug on an interior one implies a place we never had.
+               "UNKNOWN": "INT."}
+
+
 def slug_text(int_ext: str, location_name: str, time: str) -> str:
     """The printed line. Upper case is a Fountain requirement, not a house style."""
-    head = "INT./EXT." if int_ext == "INT/EXT" else f"{int_ext}."
+    head = SLUG_PREFIX.get(int_ext, "INT.")
     return f"{head} {location_name} - {time}".upper()
 
 
@@ -40,10 +49,17 @@ def build_slug(scenes: list[dict], locations: dict) -> Slug:
 
 
 def paragraphs_for(book_dir: Path, scenes: list[dict]) -> dict:
-    """The verbatim source spans a `verbatim` claim will be checked against."""
+    """The verbatim source spans a `verbatim` claim will be checked against.
+
+    NOTE the path: chapters live under source/, not analysis/. This looked in
+    analysis/chapters/ on the first real run, silently returned {}, and the result was
+    that the screenwriter never saw a word of the book while all 259 verbatim claims
+    were checked against an empty string and downgraded. A join that returns nothing
+    looks exactly like a join that found nothing.
+    """
     out: dict = {}
     for scene in scenes:
-        chapter_path = book_dir / "analysis" / "chapters" / f"ch_{scene['chapter']:02d}.json"
+        chapter_path = book_dir / "source" / "chapters" / f"ch_{scene['chapter']:02d}.json"
         if not chapter_path.exists():
             continue
         paras = json.loads(chapter_path.read_text(encoding="utf-8")).get("paragraphs", [])
@@ -54,6 +70,22 @@ def paragraphs_for(book_dir: Path, scenes: list[dict]) -> dict:
     return out
 
 
+def canonical_cue(character: str | None, registry: list[dict]) -> str | None:
+    """Resolve whatever the writer put in `character` back to a canonical id.
+
+    The skill asks for ids; the writer returns "Sherlock Holmes", because that is what a
+    screenplay cue looks like. Eighteen characters were reported "not in the registry"
+    who are plainly in it. Resolve rather than scold — and keep an unresolvable cue,
+    because a walk-on with a line is still a line and G2 will report it honestly.
+    """
+    if not character:
+        return character
+    ids = {entity["id"] for entity in registry}
+    if character in ids:
+        return character
+    return names.match_alias(character, names.build_index(registry)) or character
+
+
 def source_scenes(dossier: dict, beat) -> list[dict]:
     wanted = [(r.chapter, r.scene) for r in beat.source]
     by_key = {(s["chapter"], s["scene"]): s for s in dossier["scenes"]}
@@ -61,8 +93,10 @@ def source_scenes(dossier: dict, beat) -> list[dict]:
 
 
 def assemble(beat, number: int, draft: SceneDraft, shots: ShotPlan,
-             scenes: list[dict], locations: dict) -> Scene:
-    """Code owns sluglines, numbering and measurement. Never asked of an agent."""
+             scenes: list[dict], locations: dict, registry: list[dict] | None = None) -> Scene:
+    """Code owns sluglines, numbering, cue resolution and measurement."""
+    for element in draft.elements:
+        element.character = canonical_cue(element.character, registry or [])
     return Scene(
         number=number,
         beat_id=beat.id,
@@ -115,7 +149,8 @@ def run(codex_id: str, target_name: str = "feature") -> None:
                 slug.model_dump(mode="json"),
                 locations.get(slug.location_id, {}).get("visual"), usage=usage)
         with tracker.step("03_03"):
-            scene = assemble(beat, number, draft, shots, scenes, locations)
+            scene = assemble(beat, number, draft, shots, scenes, locations,
+                             dossier["characters"])
             path.write_text(scene.model_dump_json(indent=2), encoding="utf-8")
         written += 1
         tracker.log(f"beat {beat.id}: {len(draft.elements)} elements, "

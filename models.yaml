@@ -12,9 +12,15 @@ tiers:
     model: gpt-5.6-luna   # $0.20/M in, $1.20/M out (after July 2026 price cut)
     params:
       reasoning_effort: none   # Luna requires this for function tools on chat/completions
-  reasoning:              # future: timeline arbitration, character arcs — strong model
+  reasoning:              # timeline arbitration, story editing, screenwriting
     provider: openai
-    model: gpt-5.6-terra  # mid tier of the 5.6 series; swap to sol for hardest work
+    # 2026-08-25: pinned to luna for the first screenplay run because terra has NO
+    # recorded price here, and the owner approved a $0.26 plan computed at luna rates.
+    # Spending an unknown multiple of an approved figure is not an approved spend.
+    # Flip back to gpt-5.6-terra once its rate is known and re-priced.
+    model: gpt-5.6-luna
+    params:
+      reasoning_effort: none
 
 providers:
   openai:

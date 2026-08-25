@@ -32,8 +32,24 @@ def display_names(dossier: dict) -> dict:
     return {c["id"]: c["name"] for c in dossier["characters"]}
 
 
+def refresh_slug(scene: Scene) -> Scene:
+    """Re-derive the printed slug line from its own structured fields.
+
+    slug.text is a PROJECTION of int_ext + location_name + time, so storing it and
+    trusting it makes the same fact true in two places, and they drift. Re-deriving at
+    render means a fix to the formatting reaches artifacts already bought, instead of
+    requiring a paid re-draft to repair a string code owns anyway.
+    """
+    from scripts.screenplay.step_03_draft import slug_text
+
+    scene.slug.text = slug_text(scene.slug.int_ext, scene.slug.location_name,
+                                scene.slug.time)
+    return scene
+
+
 def measure(scene: Scene, display: dict) -> Scene:
     """page_eighths and duration are MEASURED here, never asked of an agent."""
+    scene = refresh_slug(scene)
     eighths = fountain.page_eighths(fountain.render_scene(scene, display))
     scene.page_eighths = eighths
     scene.duration_s = round(eighths / 8 * SECONDS_PER_PAGE, 1)

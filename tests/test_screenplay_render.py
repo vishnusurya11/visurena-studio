@@ -199,3 +199,35 @@ def test_the_format_substep_checks_balance_not_only_format():
     from pathlib import Path
     source = Path("scripts/screenplay/step_04_render.py").read_text(encoding="utf-8")
     assert "problems += balance_problems(" in source
+
+
+def test_an_unknown_int_ext_still_renders_a_parseable_slugline():
+    """Found on the first real render: int_ext UNKNOWN produced
+    'UNKNOWN. 221B BAKER STREET - DAY', which Fountain does not recognise as a scene
+    heading and silently typed as Action. Two of 22 scenes lost their slug."""
+    assert s03.slug_text("UNKNOWN", "221B Baker Street", "DAY").startswith("INT.")
+
+
+def test_the_unknown_fallback_is_interior_not_a_guess_at_exterior():
+    """INT is the safer default: an interior slug on an exterior scene is a continuity
+    note, an exterior slug on an interior one implies a location we never had."""
+    assert s03.slug_text("UNKNOWN", "A Hall", "DAY") == "INT. A HALL - DAY"
+
+
+def test_a_scene_with_unknown_int_ext_passes_the_lint():
+    from studio.screenplay_spec import Slug
+    slug = Slug(int_ext="UNKNOWN", location_id="x", location_name="Hall", time="DAY",
+                text=s03.slug_text("UNKNOWN", "Hall", "DAY"))
+    scene = Scene(number=1, beat_id="b1", slug=slug,
+                  elements=[ScriptElement(kind="action", text="He turns.")])
+    assert s04.lint_all([scene], {}) == []
+
+
+def test_render_repairs_a_stale_slug_line_in_an_already_bought_scene():
+    """The paid artifact stored 'UNKNOWN. 221B BAKER STREET - DAY'. Re-deriving means
+    the fix reaches it without re-buying the scene."""
+    from studio.screenplay_spec import Slug
+    stale = Slug(int_ext="UNKNOWN", location_id="x", location_name="221B Baker Street",
+                 time="DAY", text="UNKNOWN. 221B BAKER STREET - DAY")
+    scene = s04.refresh_slug(Scene(number=1, beat_id="b1", slug=stale))
+    assert scene.slug.text == "INT. 221B BAKER STREET - DAY"
