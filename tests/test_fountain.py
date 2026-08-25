@@ -21,8 +21,9 @@ def _scene(elements, number=1):
 
 
 def test_slugline_is_upper_case():
+    """number=1 is the default in _scene, so the heading carries its scene number."""
     out = fountain.render_scene(_scene([]), {})
-    assert out.splitlines()[0] == "INT. 221B BAKER STREET - NIGHT"
+    assert out.splitlines()[0] == ".1. INT. 221B BAKER STREET - NIGHT"
 
 
 def test_action_renders_as_a_plain_paragraph():
@@ -97,3 +98,51 @@ def test_lint_flags_a_scene_the_parser_reads_as_fewer_elements():
 def test_page_eighths_of_an_empty_scene_is_never_zero():
     """A slugline occupies the page even with nothing under it."""
     assert fountain.page_eighths(fountain.render_scene(_scene([]), {})) >= 1
+
+
+# --- scene numbers -----------------------------------------------------------------
+#
+# Numbering is a SHOOTING SCRIPT convention. A spec script - what a writer sends out -
+# carries no numbers; they are added when a script goes into production, because
+# department heads reference scenes by number. Ours is a shooting script by definition:
+# elements.json is keyed (scene, shot) and the video stage addresses scenes by number.
+#
+# screenplain PARSES Fountain's #1# syntax into a scene_number attribute but its PDF
+# exporter never prints it, which is why the first real render had no numbers on the
+# page at all. The forced-scene-heading form puts the number in the printed text.
+
+def test_scene_number_appears_on_the_slugline():
+    out = fountain.render_scene(_scene([], number=4), {})
+    assert out.splitlines()[0].startswith(".4. INT.")
+
+
+def test_the_rendered_number_survives_parsing_as_a_slug():
+    """The leading dot is a force marker and is consumed, so the page reads
+    '4. INT. 221B BAKER STREET - NIGHT' and the parser still calls it a Slug."""
+    text = fountain.render_scene(_scene([], number=4), {})
+    assert fountain.parsed_types(text)[0] == "Slug"
+
+
+def test_numbering_does_not_break_the_round_trip_lint():
+    scene = _scene([ScriptElement(kind="action", text="He turns.")], number=9)
+    assert fountain.lint_scene(scene, {}) == []
+
+
+def test_the_stored_slug_text_stays_clean_of_the_number():
+    """The number lives on Scene.number. Baking it into slug.text would make one fact
+    true in two places, which is the drift the slug re-derivation already fixed once."""
+    scene = _scene([], number=4)
+    fountain.render_scene(scene, {})
+    assert scene.slug.text == "INT. 221B BAKER STREET - NIGHT"
+
+
+def test_a_scene_numbered_zero_renders_unnumbered():
+    """0 is 'unset', not a scene called zero."""
+    assert fountain.render_scene(_scene([], number=0), {}).splitlines()[0] == \
+        "INT. 221B BAKER STREET - NIGHT"
+
+
+def test_every_scene_in_a_full_render_is_numbered():
+    scenes = [_scene([], number=n) for n in (1, 2, 3)]
+    text = fountain.render(scenes, {})
+    assert all(f".{n}. INT." in text for n in (1, 2, 3))

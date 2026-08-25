@@ -41,7 +41,13 @@ def _dialogue_block(element, display: dict, contd: bool) -> list[str]:
 
 def render_scene(scene: Scene, display: dict) -> str:
     """One scene as Fountain. Every line's intended type is knowable from the source."""
-    out = [scene.slug.text.upper(), ""]
+    # Fountain's #n# syntax parses but screenplain's PDF exporter never prints it, so
+    # the number goes in the heading TEXT via a forced scene heading: the leading dot
+    # is consumed as the force marker and the page reads "4. INT. HALL - DAY".
+    # The number is NOT stored in slug.text — it lives on Scene.number, and one fact
+    # true in two places is the drift the slug re-derivation already had to fix once.
+    heading = scene.slug.text.upper()
+    out = [f".{scene.number}. {heading}" if scene.number else heading, ""]
     last_speaker = None
     for element in scene.elements:
         if element.kind == "dialogue":
