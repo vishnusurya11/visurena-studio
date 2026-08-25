@@ -39,21 +39,23 @@ def test_an_empty_author_field_is_omitted_not_printed_blank():
     assert "Author:" not in text
 
 
+def _body_text(text: str) -> str:
+    import io
+    from screenplain.parsers.fountain import parse
+    return " ".join(str(line) for obj in parse(io.StringIO(text))
+                    for line in getattr(obj, "lines", []))
+
+
 def test_the_title_page_actually_parses_as_a_title_page():
-    """The only test that matters here: does screenplain see a title page?"""
-    import io
-    from screenplain.parsers.fountain import parse
+    """Do the title lines stay OUT of the body? When the block failed to terminate,
+    "Title:", "Author:" and the first scene heading all arrived as action on page 1."""
     text = fountain.render([_scene([])], {}, title="A Study in Scarlet", author="Doyle")
-    objects = list(parse(io.StringIO(text)))
-    assert type(objects[0]).__name__ == "Slug", \
-        f"first object is {type(objects[0]).__name__}, so the title block leaked into the body"
+    body = _body_text(text)
+    assert "A Study in Scarlet" not in body and "Doyle" not in body
 
 
-def test_a_titleless_render_still_parses():
-    import io
-    from screenplain.parsers.fountain import parse
-    text = fountain.render([_scene([])], {})
-    assert type(list(parse(io.StringIO(text)))[0]).__name__ == "Slug"
+def test_a_titleless_render_still_parses_its_first_heading():
+    assert "INT. 221B BAKER STREET" in _body_text(fountain.render([_scene([])], {}))
 
 
 # --- dialogue must contain only what the actor says --------------------------------

@@ -136,7 +136,13 @@ def run(codex_id: str, target_name: str = "feature") -> None:
           f"{screenplay.totals.pages} pages, {screenplay.totals.runtime_s / 60:.0f} min")
 
     with tracker.step("04_02"):
-        text = fountain.render(screenplay.scenes, display, title=title)
+        # Bold headings ON for this pipeline: our output is a SHOOTING script (it is
+        # numbered, and elements.json addresses scenes by number), and bold headings
+        # make scene boundaries scannable on a device. It is an accepted modern option,
+        # not the classic standard - Trottier calls it "perfectly okay, but completely
+        # unnecessary" - so it lives here as a house choice, not in the renderer default.
+        text = fountain.render(screenplay.scenes, display, title=title,
+                               bold_heading=True)
         (out / "screenplay.fountain").write_text(text, encoding="utf-8")
     print(f"  04_02 fountain: {len(text.splitlines())} lines")
 

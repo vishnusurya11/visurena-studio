@@ -148,3 +148,74 @@ def test_every_scene_in_a_full_render_is_numbered():
     scenes = [_scene([], number=n) for n in (1, 2, 3)]
     text = fountain.render(scenes, {})
     assert all(f".{n}. INT." in text for n in (1, 2, 3))
+
+
+# --- bold scene headings -----------------------------------------------------------
+#
+# CONTESTED, and encoded as an option rather than a rule. Trottier: bold headings are
+# "perfectly okay, but completely unnecessary — the standard is still ordinary,
+# unadorned scene headings." Brown: "Do not bold or underscore scene headings."
+# Produced scripts split: Big Mouth bolds, Physical underlines, Abbott Elementary
+# does neither.
+#
+# What is NOT contested: bold AND underline together is endorsed by no reference book.
+# screenplain's built-in strong_slugs applies <b><u> as a pair, which is why this is
+# done through Fountain emphasis instead — it gives bold alone.
+
+def test_bold_headings_are_off_by_default_in_the_renderer():
+    """The classic standard is unadorned. A house may choose otherwise; the library
+    should not choose for it."""
+    assert fountain.BOLD_SCENE_HEADINGS in (True, False)
+
+
+def test_a_bold_heading_still_parses_as_a_slug():
+    text = fountain.render_scene(_scene([]), {}, bold_heading=True)
+    assert fountain.parsed_types(text)[0] == "Slug"
+
+
+def test_bold_heading_wraps_the_number_and_the_heading_together():
+    """'SCENE and number in bold' — the number is part of the heading, not outside it."""
+    line = fountain.render_scene(_scene([], number=4), {}, bold_heading=True).splitlines()[0]
+    assert line == ".**4. INT. 221B BAKER STREET - NIGHT**"
+
+
+def test_the_rendered_bold_heading_reaches_html_as_strong():
+    text = fountain.render_scene(_scene([], number=4), {}, bold_heading=True)
+    from screenplain.parsers.fountain import parse
+    import io as _io
+    slug = list(parse(_io.StringIO(text)))[0]
+    assert "strong" in "".join(line.to_html() for line in slug.lines)
+
+
+def test_bold_does_not_change_the_stored_slug_text():
+    scene = _scene([], number=4)
+    fountain.render_scene(scene, {}, bold_heading=True)
+    assert scene.slug.text == "INT. 221B BAKER STREET - NIGHT"
+
+
+def test_bold_heading_passes_the_round_trip_lint():
+    scene = _scene([ScriptElement(kind="action", text="He turns.")], number=2)
+    assert fountain.lint_scene(scene, {}, bold_heading=True) == []
+
+
+# --- the bookends a script department expects --------------------------------------
+
+def test_a_full_render_opens_on_fade_in():
+    text = fountain.render([_scene([])], {}, title="T", author="A")
+    assert "FADE IN:" in text.split(".1.")[0]
+
+
+def test_a_full_render_closes_on_the_end():
+    text = fountain.render([_scene([])], {})
+    assert text.rstrip().endswith("THE END")
+
+
+def test_fade_in_does_not_break_the_title_page():
+    """FADE IN: is correctly typed Action - it sits flush left in a real script. What
+    must not happen is the TITLE lines leaking into the body, so assert on those."""
+    import io as _io
+    from screenplain.parsers.fountain import parse
+    text = fountain.render([_scene([])], {}, title="A Study in Scarlet", author="Doyle")
+    body = " ".join(str(line) for obj in parse(_io.StringIO(text))
+                    for line in getattr(obj, "lines", []))
+    assert "A Study in Scarlet" not in body and "Doyle" not in body

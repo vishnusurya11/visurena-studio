@@ -40,15 +40,20 @@ def _dialogue_block(element, display: dict, contd: bool) -> list[str]:
     return block
 
 
-def render_scene(scene: Scene, display: dict) -> str:
+def render_scene(scene: Scene, display: dict, bold_heading: bool | None = None) -> str:
     """One scene as Fountain. Every line's intended type is knowable from the source."""
+    bold = BOLD_SCENE_HEADINGS if bold_heading is None else bold_heading
     # Fountain's #n# syntax parses but screenplain's PDF exporter never prints it, so
     # the number goes in the heading TEXT via a forced scene heading: the leading dot
     # is consumed as the force marker and the page reads "4. INT. HALL - DAY".
     # The number is NOT stored in slug.text — it lives on Scene.number, and one fact
     # true in two places is the drift the slug re-derivation already had to fix once.
     heading = scene.slug.text.upper()
-    out = [f".{scene.number}. {heading}" if scene.number else heading, ""]
+    numbered = f"{scene.number}. {heading}" if scene.number else heading
+    # A forced heading (leading dot) is needed for the number; the emphasis marks go
+    # INSIDE it so the number and the heading bold together, as one line.
+    line = f".**{numbered}**" if bold else (f".{numbered}" if scene.number else heading)
+    out = [line, ""]
     last_speaker = None
     for element in scene.elements:
         if element.kind == "dialogue":
@@ -97,6 +102,14 @@ WIDTH = {"action": 61, "slug": 61, "transition": 61,
          "dialogue": 36, "parenthetical": 48, "character": 42}
 
 BLANK_AFTER = 1          # every element is followed by a blank line on the page
+
+# Bold scene headings are CONTESTED, so this is an option and not a rule. Trottier:
+# "perfectly okay, but completely unnecessary - the standard is still ordinary,
+# unadorned scene headings." Brown: "Do not bold or underscore scene headings."
+# Produced scripts split down the middle. What no reference book endorses is bold AND
+# underline together, which is exactly what screenplain's strong_slugs setting applies
+# as a pair - so this is done through Fountain emphasis, which gives bold alone.
+BOLD_SCENE_HEADINGS = False
 
 
 def wrap(text: str, width: int) -> list[str]:
@@ -164,9 +177,9 @@ def _near(text: str, index: int) -> str:
     return blocks[index][:48] if index < len(blocks) else ""
 
 
-def lint_scene(scene: Scene, display: dict) -> list[str]:
+def lint_scene(scene: Scene, display: dict, bold_heading: bool | None = None) -> list[str]:
     """Render one scene and assert the parser agrees with the emitter about every line."""
-    return lint(render_scene(scene, display), intended_types(scene, display))
+    return lint(render_scene(scene, display, bold_heading), intended_types(scene, display))
 
 
 def title_page(title: str = "", author: str = "", **fields) -> str:
@@ -187,10 +200,16 @@ def title_page(title: str = "", author: str = "", **fields) -> str:
 
 
 def render(scenes: list[Scene], display: dict, title: str = "",
-           author: str = "", **fields) -> str:
+           author: str = "", bold_heading: bool | None = None, **fields) -> str:
     """The whole screenplay. A projection of screenplay.json, never the source."""
-    body = "\n\n".join(render_scene(s, display) for s in scenes)
-    return title_page(title, author, **fields) + body
+    body = "\n\n".join(
+        render_scene(s, display, bold_heading) for s in scenes)
+    # The bookends a script department expects and the first render had none of:
+    # FADE IN: opens, THE END closes. Brown: "Standard practice is to begin the script
+    # with the words FADE IN:" and to end with FADE OUT. then THE END, centered.
+    opening = "FADE IN:\n\n"
+    closing = "\n\n> FADE OUT.\n\n> THE END"
+    return title_page(title, author, **fields) + opening + body + closing
 
 
 def to_pdf(text: str, path) -> None:
