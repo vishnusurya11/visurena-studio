@@ -57,7 +57,7 @@ def get_connection(db_path: str | Path = DB_PATH) -> sqlite3.Connection:
 # Per-stage summary columns on codex (owner design: 3 per stage — status, started,
 # updated). Denormalized at-a-glance view; the events table stays the detailed record.
 # New stages get their trio here when they are built.
-STAGES = ("analysis",)
+STAGES = ("analysis", "screenplay")
 STAGE_STATUSES = ("pending", "running", "completed", "failed")
 
 
@@ -221,6 +221,31 @@ def codex_pending_stage(
         " SELECT 1 FROM events e WHERE e.codex_id = c.id AND e.stage = ?"
         " AND e.step_id = ? AND e.event = 'completed') ORDER BY c.id",
         (stage, final_step_id),
+    )
+    return [row["id"] for row in rows]
+
+
+def codex_ready_for_stage(
+    conn: sqlite3.Connection,
+    stage: str,
+    final_step_id: str,
+    after_stage: str,
+    after_final_step_id: str,
+) -> list[str]:
+    """Books that finished `after_stage` but have not finished `stage`.
+
+    A dependent stage (screenplay needs analysis) cannot use codex_pending_stage:
+    that returns every book that has not done the stage, including books with no
+    analysis at all. Building a screenplay on a half-finished dossier grounds it in
+    nothing, so the prerequisite is part of the query, not a caller's courtesy check.
+    """
+    rows = conn.execute(
+        "SELECT c.id FROM codex c WHERE EXISTS ("
+        " SELECT 1 FROM events e WHERE e.codex_id = c.id AND e.stage = ?"
+        " AND e.step_id = ? AND e.event = 'completed') AND NOT EXISTS ("
+        " SELECT 1 FROM events e WHERE e.codex_id = c.id AND e.stage = ?"
+        " AND e.step_id = ? AND e.event = 'completed') ORDER BY c.id",
+        (after_stage, after_final_step_id, stage, final_step_id),
     )
     return [row["id"] for row in rows]
 

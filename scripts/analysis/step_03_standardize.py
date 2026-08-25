@@ -12,11 +12,10 @@ Output: analysis/registry.json (+ per-scene canonical ids in analysis/scenes.jso
 from __future__ import annotations
 
 import json
-import re
 from collections import defaultdict
 from pathlib import Path
 
-from studio import db, paths, screenformat, tracking
+from studio import db, names, paths, screenformat, tracking
 
 STEP_ID = "03"
 NAME = "standardize"
@@ -24,11 +23,9 @@ NAME = "standardize"
 RUN_UNTIL = "03_04"
 MAX_FORMS = 220          # cap surface forms sent to the resolver (cost guard)
 
-_WS = re.compile(r"[^a-z0-9 ]+")
-
-
-def _norm(text: str) -> str:
-    return _WS.sub("", (text or "").lower()).strip()
+# The matcher lives in studio/names.py: screenplay step 01 resolves the same surface
+# forms against the same registry, and one implementation is the whole point.
+_norm = names.normalize
 
 
 def load_extractions(book_dir: Path) -> list[dict]:
@@ -70,52 +67,12 @@ def _rank(forms: dict, key: str) -> list[dict]:
 
 def build_alias_index(registry: dict) -> tuple[dict, dict]:
     """Normalized surface form -> canonical id, for characters and locations."""
-    char_index, loc_index = {}, {}
-    for entity in registry["characters"]:
-        for form in [entity["name"], *entity["aliases"]]:
-            char_index[_norm(form)] = entity["id"]
-    for entity in registry["locations"]:
-        for form in [entity["name"], *entity["aliases"]]:
-            loc_index[_norm(form)] = entity["id"]
-    return char_index, loc_index
+    return (names.build_index(registry["characters"]),
+            names.build_index(registry["locations"]))
 
 
-def _run_starts_at(words: list[str], tokens: list[str]) -> bool:
-    """Do `tokens` appear as a contiguous run of whole words inside `words`?"""
-    span = len(tokens)
-    return any(words[i:i + span] == tokens for i in range(len(words) - span + 1))
-
-
-def _match(text: str, index: dict) -> str | None:
-    """Exact normalized match, else the longest alias present as WHOLE WORDS.
-
-    Two rules, both learned the hard way in the 2026-08-23 audit:
-
-    1. **Words, not letters.** This did raw substring containment, so "me" matched
-       inside "medical", "men" inside "regiment" and "government", and the narrator's
-       one-letter alias "i" matched any form containing the letter i. 298 of the book's
-       902 character references — a third — were silently assigned to the wrong person.
-    2. **A one-word alias only ever matches exactly.** Whole-word matching alone still
-       lets "Young" claim "a young girl" and "men" claim "the two men". A single word
-       carries too little identity to be recognised inside a phrase it did not write; if
-       the form is not the alias, it is somebody else.
-
-    An unmatched form returns None, and that gap is the honest answer — a walk-on
-    ("a railway porter") has no canonical identity to find."""
-    key = _norm(text)
-    if not key:
-        return None
-    if key in index:
-        return index[key]
-    words = key.split()
-    best = None
-    for alias, entity in index.items():
-        tokens = alias.split()
-        if len(tokens) < 2 or not _run_starts_at(words, tokens):
-            continue
-        if best is None or len(tokens) > best[0]:
-            best = (len(tokens), entity)
-    return best[1] if best else None
+_run_starts_at = names.run_starts_at
+_match = names.match_alias
 
 
 def remap_scenes(extractions: list[dict], registry: dict) -> list[dict]:

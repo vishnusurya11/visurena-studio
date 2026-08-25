@@ -47,6 +47,23 @@ def load_steps(stage: str = STAGE) -> list:
     return steps
 
 
+def run_step(conn, codex_id: str, step) -> None:
+    """Run one step, bracketed by STEP-LEVEL events.
+
+    Steps write their own SUBSTEP events (01_01, 01_02 …) via Tracker. Nothing wrote the
+    step id itself, so codex_pending_stage — which keys on exactly that — never matched
+    and a finished book stayed pending forever. The runner owns this event because the
+    runner is what decides a step is done. Same code in screenplay.py, deliberately.
+    """
+    db.add_event(conn, codex_id, STAGE, step.STEP_ID, "started")
+    try:
+        step.run(codex_id)
+    except Exception as exc:
+        db.add_event(conn, codex_id, STAGE, step.STEP_ID, "failed", detail=str(exc)[:200])
+        raise
+    db.add_event(conn, codex_id, STAGE, step.STEP_ID, "completed")
+
+
 def process(conn, codex_id: str) -> None:
     """Run the stage's steps for one book, stopping after RUN_UNTIL_STEP.
 
@@ -58,7 +75,7 @@ def process(conn, codex_id: str) -> None:
     try:
         for step in load_steps():
             print(f"--- step {step.STEP_ID} ({step.NAME}) ---")
-            step.run(codex_id)
+            run_step(conn, codex_id, step)
             last_run = step.STEP_ID
             if RUN_UNTIL_STEP and step.STEP_ID >= RUN_UNTIL_STEP:
                 print(f"=== stopping after step {step.STEP_ID} (RUN_UNTIL_STEP) ===")

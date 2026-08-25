@@ -88,3 +88,56 @@ def test_a_one_word_alias_never_matches_by_containment():
 def test_an_unmatched_form_stays_unmatched():
     """A walk-on with no canonical identity is a gap, and a gap is the honest answer."""
     assert s03._match("a slip-shod elderly woman", _chars()) is None
+
+
+# --- the bare-surname gap (2026-08-25) ---------------------------------------------
+#
+# The registry stores canonical names with titles ("Dr. John Watson") but prose says
+# "Watson". `match_alias` correctly refuses — a one-word alias must match exactly — so
+# 160 of 549 dialogue lines (29%) lost their speaker on the first real dossier run.
+#
+# The fallback must not reopen the 2026-08-23 hole. It is safe only because it is
+# UNIQUENESS-CHECKED: a surname shared by two characters resolves to neither.
+
+from studio import names
+
+CAST = [
+    {"id": "john_watson", "name": "Dr. John Watson", "aliases": ["I", "Dr. Watson"]},
+    {"id": "sherlock_holmes", "name": "Sherlock Holmes", "aliases": ["my companion"]},
+    {"id": "john_ferrier", "name": "John Ferrier", "aliases": []},
+    {"id": "lucy_ferrier", "name": "Lucy Ferrier", "aliases": []},
+]
+
+
+def test_bare_surname_resolves_when_it_is_unique():
+    index = names.build_surname_index(CAST)
+    assert names.match_alias("Watson", index) == "john_watson"
+
+
+def test_shared_surname_resolves_to_nobody():
+    """Two Ferriers. Guessing between them would be worse than the gap."""
+    index = names.build_surname_index(CAST)
+    assert names.match_alias("Ferrier", index) is None
+
+
+def test_full_name_without_the_title_resolves():
+    index = names.build_surname_index(CAST)
+    assert names.match_alias("John Watson", index) == "john_watson"
+
+
+def test_surname_index_never_contains_a_title():
+    index = names.build_surname_index(CAST)
+    assert "dr" not in index and "mr" not in index
+
+
+def test_surname_index_does_not_swallow_a_longer_phrase():
+    """Still whole-word-exact for one-word keys: 'Watson' must not claim 'young Watson's
+    landlady'. The rule that fixed the original bug is not relaxed here."""
+    index = names.build_surname_index(CAST)
+    assert names.match_alias("Watson's landlady", index) is None
+
+
+def test_surname_index_is_only_a_fallback_not_a_replacement():
+    """It carries surnames, not the alias vocabulary — callers try match_alias first."""
+    index = names.build_surname_index(CAST)
+    assert names.match_alias("my companion", index) is None
