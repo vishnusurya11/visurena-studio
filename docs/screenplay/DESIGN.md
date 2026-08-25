@@ -92,7 +92,7 @@ in the studio, which file order in `stages.yaml` already encodes.
 | `01` | `dossier` | **code**, zero LLM | `screenplay/dossier.json` | file + `input_sha256` |
 | `02` | `plan` | agent ×1 | `<target>/plan.json` | file + fingerprint(dossier + target block) |
 | `03` | `draft` | agents ×2 per beat | `<target>/scenes/sc_NNNN.json` | **per-scene file** — the paid unit |
-| `04` | `render` | **code**, zero LLM | `<target>/screenplay.fountain`, `elements.json` | none — free, always re-render |
+| `04` | `render` | **code**, zero LLM | `<target>/screenplay.json` (**the artifact**), `.fountain`, `.pdf`, `elements.json` | none — free, always re-render |
 | `05` | `verify` | code + agent | `<target>/qc_report.json` | file |
 
 ### Substeps
@@ -120,10 +120,12 @@ in the studio, which file order in `stages.yaml` already encodes.
   03_02 shoot      AGENT shot_designer -> shots[]
   03_03 assemble   code: sluglines, CONT'D/CONTINUOUS, page_eighths, scene numbering
 
-04 render                                       (code)
-  04_01 fountain   screenplay.fountain — the human artifact
-  04_02 elements   elements.json — flat shot list keyed (scene, shot) for the video stage
-  04_03 format     round-trip lint + runtime/page budget vs the target
+04 render                                       (code, zero LLM)
+  04_01 json       screenplay.json — THE ARTIFACT. Every downstream stage reads this.
+  04_02 fountain   screenplay.fountain — rendered FROM the json, never hand-assembled
+  04_03 pdf        screenplay.pdf — screenplain, industry geometry, Courier 12
+  04_04 elements   elements.json — flat shot list keyed (scene, shot) for the video stage
+  04_05 format     round-trip lint + runtime/page budget vs the target
 
 05 verify                                       (code + 1 agent over K scenes)
   05_01 guards     coordinate / roster / place-and-time / verbatim-claim
@@ -150,9 +152,10 @@ library/<codex_id>_<slug>/screenplay/
   short60/
     plan.json
     scenes/sc_0001.json …          # one paid unit per file
-    screenplay.json
-    screenplay.fountain
-    elements.json
+    screenplay.json               # THE ARTIFACT — machine-readable, agents read this
+    screenplay.fountain           # rendered from the json
+    screenplay.pdf                # rendered from the fountain — the human artifact
+    elements.json                 # flat (scene, shot) index for the video stage
     qc_report.json
   episode10/ …
   feature/   …
@@ -192,7 +195,7 @@ can be re-run alone when the shot language is wrong, without paying to rewrite d
 | dialogue writer | fails the orthogonality test (above) |
 | format validator agent | Fountain is a grammar. `re.match` validates it free and deterministically. An LLM here makes the one byte-stable artifact nondeterministic. |
 | continuity supervisor | every question is already answered by data or arithmetic. `step_06_verify.who_is_where()` exists. |
-| PDF renderer | `screenplain` is MIT, pure Python, uv-native, **verified working headless on this machine**, with genuine industry geometry. |
+| PDF renderer | `screenplain[PDF]==0.11.0` is MIT, pure Python, uv-native, **now a pinned dependency and verified end-to-end on this machine** — correct element typing, Courier embedded, real industry geometry. Called through the Python API (`parsers.fountain.parse` → `export.pdf.to_pdf`); `python -m screenplain` does not work, there is no `__main__`. |
 | a coverage/quality score | any scalar will be gamed by the next prompt tweak and read as truth by nobody |
 
 ---
@@ -246,6 +249,81 @@ def test_element_schema_is_provider_safe():
 ```
 
 Flip to the union, run that test, keep it if it passes.
+
+### `screenplay.json` is the artifact; `.fountain` and `.pdf` are renders
+
+**The direction of travel is one-way and never reversed:**
+
+```
+scenes/sc_0001.json …  ->  screenplay.json  ->  screenplay.fountain  ->  screenplay.pdf
+   (paid, per beat)         (the artifact)        (a projection)         (for humans)
+```
+
+Nothing downstream ever parses Fountain to recover a fact. **Fountain is lossy by
+construction** — it throws away `provenance`, `source`, `location_id`, every camera field,
+and the distinction between a character id and the cue text printed on the page. Anything a
+later stage needs must be in the JSON, because it cannot be got back out of the render.
+
+The PDF is the *human* artifact and nothing reads it at all.
+
+```python
+class Slug(BaseModel):
+    int_ext: IntExt                   # INT | EXT | INT/EXT
+    location_id: str                  # canonical id from the registry
+    location_name: str                # as printed on the page
+    time: TimeOfDay                   # DAY | NIGHT | DAWN | DUSK | CONTINUOUS | …
+    text: str                         # the rendered line: "INT. 221B BAKER STREET - NIGHT"
+
+class Shot(BaseModel):
+    index: int
+    covers: tuple[int, int]           # inclusive element-index range in this scene
+    setup: str                        # "medium close-up, Holmes" — spelled out, no MCU
+    term: str | None                  # "dolly in" — null when no vocabulary term fits
+    visual_consequence: str           # "parallax shifts, foreground slides past frame edges"
+    axis_side: Literal["A", "B"]      # which side of the action line
+    looks_screen: dict[str, str]      # character id -> "left" | "right"
+    travel_direction: str | None      # "left" | "right" for anything moving
+    crosses_axis: bool = False
+    licensed_by: int | None           # the neutral shot that permits a crossing
+
+class Scene(BaseModel):
+    number: int                       # 1-based, as numbered on the page
+    beat_id: str                      # which plan beat produced it
+    slug: Slug
+    cast: list[str]                   # canonical character ids present
+    speaking: list[str]               # subset of cast with dialogue
+    elements: list[ScriptElement]     # the ordered stream — action, dialogue, transition
+    shots: list[Shot]
+    source: list[SceneRef]            # (chapter, scene) coordinates this covers
+    transfer: Literal["transfer", "adaptation_proper"]
+    page_eighths: int                 # measured by code after rendering
+    duration_s: float                 # page_eighths / 8 * 60
+
+class Screenplay(BaseModel):
+    title: str
+    source_work: str
+    target: str                       # "feature" | "episode10" | "short60"
+    source_fingerprint: str           # hash of the analysis artifacts it was built from
+    scenes: list[Scene]
+    omitted: list[Omission]           # every source scene not used, with a reason
+    totals: Totals                    # pages, runtime, scene count, cast size
+```
+
+**Why each field is there rather than derivable:**
+
+| field | who needs it downstream |
+|---|---|
+| `location_id`, `cast` | the video stage, to reuse a location look and a character reference across scenes |
+| `shots[]` with `visual_consequence` | prompt assembly — the term alone does not survive the text channel |
+| `axis_side`, `looks_screen` | screen-direction continuity, which no model can enforce |
+| `provenance`, `source` | the auditor, and the grounding guard |
+| `page_eighths`, `duration_s` | budget arithmetic, measured not asked |
+| `transfer` | knowing which scenes were built from nothing when a QC pass flags one |
+| `source_fingerprint` | invalidating the whole target when analysis upstream changes |
+
+**`elements.json` is a flattened view of the same data**, keyed `(scene, shot)` so the
+video stage can iterate shots without walking the scene tree. It is generated, never
+edited — if the two ever disagree, `screenplay.json` wins.
 
 ### `page_eighths` is derived by code, never asked of an agent
 
@@ -516,6 +594,8 @@ the contract, never hand-written drift"*), never by reading the real 4.2 MB
 |---|---|
 | `test_screenplay_spec.py` | validator rejects dialogue without a character, action with a parenthetical, `verbatim` without a source; **`test_element_schema_is_provider_safe()`** |
 | `test_fountain.py` | golden render; `page_eighths`; slugline casing; `CONT'D`; **round-trip type assertion** |
+| `test_screenplay_json.py` | `screenplay.json` round-trips through the model; `elements.json` is derivable from it; a field present in the json survives into `.fountain` **or is explicitly listed as render-lossy** |
+| `test_pdf.py` | `screenplain` parses our emitted Fountain into the intended element types and writes a `%PDF` header — offline, no network, no spend |
 | `test_step_01_dossier.py` | the join; `int_ext` pulled from extraction; UNKNOWN time never reaches the dossier |
 | `test_screenplay_guards.py` | G1–G4, including DAY→DAWN **accepted** and DAY→NIGHT **rejected**, and a `timeline.contradictions` scene downgraded to advisory |
 | `test_screenwriter.py` | per-scene file written immediately (crash at beat 3 keeps 1–2); `ContentFiltered` skips one beat and continues |
