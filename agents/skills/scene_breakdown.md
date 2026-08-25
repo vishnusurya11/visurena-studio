@@ -64,7 +64,11 @@ with the same world/time/characters, is NOT a scene change.
 - `type`: `"scene"` or `"nonscene"`.
 - `location_text`: the place AS WRITTEN in the text, most specific first with its
   container ("the sitting-room, 221B Baker Street"). For nonscenes, the covered ground.
-- `int_ext`: INT / EXT / UNKNOWN.
+- `int_ext`: exactly one of `INT`, `EXT`, `INT/EXT`, `UNKNOWN` — copy one of those
+  four strings. `INT/EXT` is a single value meaning the scene straddles both (a doorway,
+  a carriage window); it is not two values joined. Do not invent combinations such as
+  `EXT / UNKNOWN`: if either half is unreadable the answer is `UNKNOWN`.
+  Prefer a real answer — a scene indoors is `INT` even when the prose never says so.
 - `time_of_day`: DAY / NIGHT / UNKNOWN. **Infer it — do not default to UNKNOWN.**
   The text rarely announces the hour but nearly always implies it: breakfast, lamps
   being lit, sunlight, deserted streets, characters rising or going to bed, a scene

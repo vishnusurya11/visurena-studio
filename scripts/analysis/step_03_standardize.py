@@ -16,7 +16,7 @@ import re
 from collections import defaultdict
 from pathlib import Path
 
-from studio import db, paths, tracking
+from studio import db, paths, screenformat, tracking
 
 STEP_ID = "03"
 NAME = "standardize"
@@ -137,6 +137,7 @@ def remap_scenes(extractions: list[dict], registry: dict) -> list[dict]:
                 "type": scene.get("type", "scene"),
                 "location_id": _match(scene.get("location_text", ""), loc_index),
                 "location_text": scene.get("location_text", ""),
+                "int_ext": screenformat.normalize_int_ext(scene.get("int_ext")),
                 "characters": present,
                 "story_day": scene.get("story_day"),
                 "time_of_day": scene.get("time_of_day", "UNKNOWN"),
