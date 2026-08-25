@@ -176,6 +176,30 @@ _SKIP_TAGS = {"head", "title", "style", "script"}  # never content (first real-r
 # each xhtml's <title> "Book | Project Gutenberg" leaked in as a paragraph)
 
 
+_VOID_TAGS = {"img", "br", "hr", "meta", "link", "input", "source", "col"}
+
+# Content that renders beside the prose rather than as part of it. Ebookmaker glues
+# illustration captions INTO chapter headings — 34 of Pride and Prejudice's 65 — which
+# is why its nav reads "I hope Mr. Bingley will like it. CHAPTER II."; and it injects
+# 496 page-number spans mid-sentence into the same book.
+_DROP_CLASSES = {"caption", "x-ebookmaker-pageno"}
+
+
+def _classes(attrs: dict) -> set[str]:
+    return set((attrs.get("class") or "").split())
+
+
+def _drop_cap(attrs: dict) -> str:
+    """An image standing in for a single letter contributes that letter.
+
+    Pride and Prejudice sets the opening capital of 60 of its 61 chapters as an image,
+    so every chapter began a letter short: "R. BENNET was among the earliest...". A
+    one-character `alt` is a drop cap; anything longer is a described illustration and
+    is not part of the prose."""
+    alt = (attrs.get("alt") or "").strip()
+    return alt if len(alt) == 1 else ""
+
+
 class _BlockParser(HTMLParser):
     def __init__(self):
         super().__init__(convert_charrefs=True)
@@ -185,10 +209,17 @@ class _BlockParser(HTMLParser):
         self._skip_depth = 0
 
     def handle_starttag(self, tag, attrs):
-        if tag in _SKIP_TAGS:
-            self._skip_depth += 1
+        if self._skip_depth:                  # inside dropped content
+            if tag not in _VOID_TAGS:         # track nesting so we close at the right depth
+                self._skip_depth += 1
+            return
+        attrs = dict(attrs)
+        if tag == "img":
+            self._buf.append(_drop_cap(attrs))
         elif tag in _LINE_BREAK_TAGS:
             self._buf.append(_BREAK)
+        elif tag in _SKIP_TAGS or _classes(attrs) & _DROP_CLASSES:
+            self._skip_depth = 1
         elif tag in _BLOCK_TAGS:
             self.close_pending()
             self._kind = "heading" if tag in HEADING_TAGS else "para"
@@ -197,8 +228,8 @@ class _BlockParser(HTMLParser):
         self.handle_starttag(tag, attrs)      # <br/> never reaches handle_starttag
 
     def handle_endtag(self, tag):
-        if tag in _SKIP_TAGS:
-            self._skip_depth = max(0, self._skip_depth - 1)
+        if self._skip_depth:
+            self._skip_depth -= 1
         elif tag in _BLOCK_TAGS:
             self.close_pending()
 
