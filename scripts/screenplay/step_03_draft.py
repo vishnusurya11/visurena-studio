@@ -185,3 +185,33 @@ def run(codex_id: str, target_name: str = "feature") -> None:
         print(f"  beat {beat.id} -> sc_{number:04d}.json "
               f"({len(draft.elements)} elements, {len(shots.shots)} shots)")
     print(f"  03 draft: {written} written, {reused} reused from disk")
+
+
+def repair_scene(scene, registry: list[dict]) -> Scene:
+    """Apply cue and speech fixes to a scene that has ALREADY been paid for.
+
+    The three readers found defects that live in the drafted element stream, not in the
+    renderer — a sentinel printed as a character, one man under three cues, novel
+    narration inside speeches. Fixing the writer's prompt only helps the NEXT draft, and
+    a re-draft costs money, so these are repaired in place where they can be.
+
+    A speech whose cue cannot be a character becomes ACTION rather than being dropped:
+    `_unknowable` was words pinned to a bedspread, which is an insert, and losing the
+    words would be worse than mislabelling them.
+    """
+    from studio import quotes
+
+    for element in scene.elements:
+        if element.kind != "dialogue":
+            continue
+        element.text = quotes.clean(element.text) or element.text
+        cue = canonical_cue(element.character, registry)
+        if cue is None:
+            element.kind = "action"
+            element.character = None
+            element.parenthetical = None
+        else:
+            element.character = cue
+    scene.speaking = sorted({e.character for e in scene.elements
+                             if e.kind == "dialogue" and e.character})
+    return scene

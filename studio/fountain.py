@@ -133,7 +133,9 @@ def rendered_rows(scene: Scene) -> int:
     rows = wrapped_rows(scene.slug.text, WIDTH["slug"]) + BLANK_AFTER
     for element in scene.elements:
         if element.kind == "dialogue":
-            rows += 1 + BLANK_AFTER                       # the character cue
+            # The cue sits DIRECTLY above its line — no blank between them. Counting one
+            # there added a phantom row per speech, which at 274 speeches was five pages.
+            rows += 1                                     # the character cue
             if element.parenthetical:
                 rows += wrapped_rows(element.parenthetical, WIDTH["parenthetical"])
             rows += wrapped_rows(element.text, WIDTH["dialogue"])
@@ -142,12 +144,19 @@ def rendered_rows(scene: Scene) -> int:
         else:
             rows += wrapped_rows(element.text, WIDTH["action"])
         rows += BLANK_AFTER
-    return rows
+    # The renderer strips the blank after the LAST element; the blank that separates
+    # this scene from the next belongs to the document, not to the scene. Removing it
+    # here is what makes rendered_rows exactly equal render_scene's line count, which
+    # is the property test_the_model_matches_the_renderer_row_for_row pins down.
+    return rows - BLANK_AFTER
+
+
+SCENE_SEPARATOR = 1      # the blank line between one scene and the next
 
 
 def page_eighths(scene: Scene) -> int:
     """Rendered length in eighths of a page. Code measures; agents are never asked."""
-    return max(1, round(rendered_rows(scene) / EIGHTH))
+    return max(1, round((rendered_rows(scene) + SCENE_SEPARATOR) / EIGHTH))
 
 
 def lint(text: str, intended: list[str]) -> list[str]:

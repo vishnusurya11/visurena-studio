@@ -10,6 +10,12 @@ the meaning — a **transition**.
 
 ---
 
+> **A note on the examples below.** Every quoted failure in this file is real — it comes
+> from a screenplay this pipeline actually produced, and from three professional readers
+> who took it apart. The names in them are incidental. **The rules are about adaptation,
+> not about any one book**, and every one of them was written to be true of a whaling
+> voyage, a Gothic epistolary novel, or a bedroom with yellow wallpaper.
+
 ## The one rule everything else derives from
 
 **A screenplay may contain only four things: images, action, sound, dialogue.**
@@ -52,14 +58,16 @@ Who moved closer. What changed hands. What one of them did instead of answering.
 The source gives you the material for this and you should use it: the dossier carries
 `events` (what the scene's participants *did*), `state_changes` (what it cost them), and
 the verbatim `source_paragraphs`, which is where the book's own staging lives — the
-gesture Watson noticed, the object on the table, who stood up.
+gesture the narrator noticed, the object on the table, who stood up.
 
 ---
 
 ## Turning interiority into behaviour — the ladder
 
-The source is Watson's first-person reminiscence. It is full of what people felt and
-thought. Climb this ladder and **stop at the first rung that works**:
+Prose is made of exactly the interiority the screen cannot show — what people felt,
+thought, remembered and concluded. That is true of every novel you will be given, and it
+is the adaptation problem in one sentence. Climb this ladder and **stop at the first rung
+that works**:
 
 1. **Consequential action** — he doesn't say the address; he opens the door with the old key
 2. **Contestable evidence** — a torn page, a scar, who is holding the object
@@ -372,35 +380,43 @@ Mislabelling `verbatim` is the one failure that bounces your scene back.
 
 ---
 
-## Period — 1887
+## Register — derive it from the source, never from the century
 
-The rule is **not** to write old-sounding English. It is that characters **possess the
-common knowledge of their era, so they never say what they could never think.**
+**The rule is not to write old-sounding English.** It is that characters **possess the
+common knowledge of their world, so they never say what they could never think.** That
+holds whether the source is 1818 Geneva, 1851 Nantucket, 1892 Transylvania, or a
+1915 bedroom with yellow wallpaper.
 
-**Contractions — the received wisdom is wrong.** Victorian dialogue contracts constantly.
-Match the source's asymmetry:
+**You are given the source's own paragraphs. They are the register authority — not your
+impression of the era, and not a style guide.** Before writing a line, read what you were
+given and answer four questions from the text in front of you:
 
-- **negative contractions DOMINATE**: `don't` over `do not`, `won't` over `will not`
-- **pronoun contractions are the MINORITY**: prefer `I have` to `I've`, `it is` to `it's`
-- Use pronoun contractions (`I'm`, `I've`) to mark a speaker **down** the social register
+1. **How does this source contract?** Count it, do not assume it. Most 19th-century
+   prose contracts negatives constantly (`don't`, `won't`) while keeping pronoun forms
+   full (`I have`, `it is`) — the received wisdom that "period means no contractions" is
+   simply wrong. But a source may not follow that at all, and the source wins.
+2. **What carries the period here?** Usually modal verbs and forms of address, rarely
+   courtesy words. If a word feels period to you, check whether the source actually uses
+   it and how often — a flourish that appears three times in a whole novel is not a
+   voice, it is a tic you would be inventing.
+3. **How does this source mark class or origin?** Almost always by **grammar**, not
+   vocabulary — `ain't`, `we was`, dropped g's, double negation. Use it **only for
+   characters the source marks that way**, and keep heavy idiolect on minor characters:
+   mark a lead that heavily and you have written caricature.
+4. **What is the naming convention?** Whether a first name is ordinary or a marked event
+   is a fact about this society, and it differs between a London consulting room, a
+   Utah farm, and a whaling deck.
 
-Writing "do not" everywhere is pastiche. Writing "I'm gonna" is anachronism. Sit between.
+**Never add an archaism the source does not use. Nothing you invent is safe.**
 
-**The period is carried by modal verbs and forms of address, not by courtesy words.**
-Lean on `shall`, `should`, `ought`. Use `pray` sparingly — it appears three times in the
-whole source. `Mr.` / `Miss` / `sir` / `Doctor`; a Christian name is a **marked event**.
+**Check the collocation, not the word.** The anachronisms that survive a spellcheck are
+ordinary words in modern senses — `focus on`, `contact` as a verb, `relationship` in the
+romantic sense, sentence-adverb `hopefully`, `okay`, `teenager`. A bare-word test passes
+all of them.
 
-**Never put "your obedient servant" in a mouth** — it is a letter subscription only.
-**Never add an archaism the source doesn't use.** Nothing you invent is safe.
-
-**Class is marked by grammar, not vocabulary** — `ain't`, `we was`, `them ones`, `goin'`,
-`o'`, double negation. **Only for characters the source marks that way.** Holmes and
-Watson use none of it. And heavy idiolect belongs to minor characters; mark a lead that
-heavily and you have written caricature.
-
-**Check the collocation, not the word.** `focus on`, `contact` as a verb, `relationship`
-in the romantic sense, sentence-adverb `hopefully` all pass a bare-word test and still
-betray you. Also barred: `okay`, `teenager`, `boyfriend`/`girlfriend`.
+> **The failure this prevents:** pastiche in one direction, anachronism in the other.
+> Writing "do not" everywhere is costume. Writing "I'm gonna" is a time traveller. The
+> source's own asymmetry is the only reliable guide, and you have the source.
 
 ---
 
@@ -469,11 +485,15 @@ must catch up on — *"the way to make a boring movie is to show everything."*
 
 ## Point of view is a hard constraint, and the cold open is its only exception
 
-**POV tells you which scenes you are allowed to write, and which you are not.** The source
-is Watson's first-person narration: the novel cannot show you a room Watson is not in. When
-the plan gives you a beat Watson does not witness, that is a deliberate adaptation choice —
-write it, but know you are spending something. *"The more limited the point of view, the
-more elegant, and effective, your story."*
+**POV tells you which scenes you are allowed to write, and which you are not.**
+
+Read the dossier's `narration` field: it records who tells this book and in what person.
+A first-person or limited-third source **cannot show you a room its narrator is not in**,
+and that limit is a form the novel obeys on every page. When the plan hands you a beat
+the narrator does not witness, that is a deliberate adaptation choice — write it, but
+know you are spending something. An omniscient source spends nothing there, and gets no
+elegance back either: *"The more limited the point of view, the more elegant, and
+effective, your story."*
 
 **One licence, and only one.** If the beat is marked `cold_open`, you may show the audience
 something no character knows or discovers — a cold open *"reveals a mystery to the audience

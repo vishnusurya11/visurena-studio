@@ -143,3 +143,49 @@ def test_an_ordinary_walk_on_cue_survives():
     """A porter with a line is still a line. Only sentinels and collectives go."""
     from scripts.screenplay.step_03_draft import canonical_cue
     assert canonical_cue("Wiggins", []) == "Wiggins"
+
+
+# --- repairing scenes already paid for ---------------------------------------------
+
+def test_repair_cleans_a_speech_carrying_its_own_attribution():
+    from scripts.screenplay.step_03_draft import repair_scene
+    scene = _scene([ScriptElement(kind="dialogue", character="john_ferrier",
+                                  text='"It is so," answered John Ferrier.')])
+    repair_scene(scene, [{"id": "john_ferrier", "name": "John Ferrier", "aliases": []}])
+    assert scene.elements[0].text == "It is so."
+
+
+def test_repair_resolves_a_bare_surname_cue():
+    from scripts.screenplay.step_03_draft import repair_scene
+    scene = _scene([ScriptElement(kind="dialogue", character="Watson", text="Quite.")])
+    repair_scene(scene, [{"id": "john_watson", "name": "Dr. John Watson", "aliases": []}])
+    assert scene.elements[0].character == "john_watson"
+
+
+def test_repair_turns_a_sentinel_speech_into_action():
+    """`_unknowable` was text pinned to a bedspread, printed as a character's line.
+    It is an insert, not a speaker — and dropping the line would lose the words."""
+    from scripts.screenplay.step_03_draft import repair_scene
+    scene = _scene([ScriptElement(kind="dialogue", character="_unknowable",
+                                  text="Twenty-nine days are given you.")])
+    repair_scene(scene, [])
+    assert scene.elements[0].kind == "action"
+    assert "Twenty-nine days" in scene.elements[0].text
+
+
+def test_repair_recomputes_the_speaking_list():
+    from scripts.screenplay.step_03_draft import repair_scene
+    scene = _scene([ScriptElement(kind="dialogue", character="Watson", text="Quite.")])
+    scene.speaking = ["Watson"]
+    repair_scene(scene, [{"id": "john_watson", "name": "Dr. John Watson", "aliases": []}])
+    assert scene.speaking == ["john_watson"]
+
+
+def test_repair_leaves_an_already_correct_scene_untouched():
+    from scripts.screenplay.step_03_draft import repair_scene
+    scene = _scene([ScriptElement(kind="dialogue", character="john_watson",
+                                  text="You have been in Afghanistan.")])
+    scene.speaking = ["john_watson"]
+    before = scene.model_dump_json()
+    repair_scene(scene, [{"id": "john_watson", "name": "Dr. John Watson", "aliases": []}])
+    assert scene.model_dump_json() == before

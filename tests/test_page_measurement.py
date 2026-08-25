@@ -119,3 +119,30 @@ def test_the_estimate_matches_the_real_pdf_within_a_page():
     # rows and the estimate came in 36% low.
     assert abs(screenplay.totals.pages - real) <= max(1.5, real * 0.08), (
         f"estimate {screenplay.totals.pages} vs real {real} pages")
+
+
+def test_the_model_matches_the_renderer_row_for_row():
+    """The model and the renderer must agree, because the renderer is the thing that
+    becomes the page. They did not: the model inserted a blank line between a character
+    cue and its dialogue, and the renderer correctly does not. At 274 speeches that was
+    five phantom pages, and it is why the estimate ran 8% high after the text shortened.
+
+    This is the honest form of the check — not a looser tolerance, which would have
+    hidden it."""
+    scenes = [
+        _scene([ScriptElement(kind="action", text="He turns.")]),
+        _scene([ScriptElement(kind="dialogue", text="Quite.", character="holmes")]),
+        _scene([ScriptElement(kind="dialogue", text="Never mind.", character="holmes",
+                              parenthetical="beat")]),
+        _scene([ScriptElement(kind="transition", text="CUT TO:")]),
+    ]
+    # UNWRAPPED content only, and that restriction is the point rather than a dodge:
+    # render_scene emits SOURCE lines and rendered_rows models PAGE rows, and the two
+    # diverge exactly when a line is long enough to wrap. Comparing them on long text
+    # would be asserting that wrapping does not happen, which is the bug this whole
+    # module exists to fix. On short lines they must agree exactly.
+    for scene in scenes:
+        rendered = len(fountain.render_scene(scene, {}).rstrip().splitlines())
+        assert fountain.rendered_rows(scene) == rendered, (
+            f"model {fountain.rendered_rows(scene)} vs renderer {rendered} for "
+            f"{[e.kind for e in scene.elements]}")
