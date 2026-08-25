@@ -30,8 +30,7 @@ def test_read_epub_toc_levels(fixture_epub):
 
 def test_html_to_blocks_kinds():
     blocks = epub.html_to_blocks("<h2>Title</h2><p>One two.</p><p>  </p>")
-    assert blocks == [{"kind": "heading", "text": "Title"},
-                      {"kind": "para", "text": "One two."}]
+    assert [(b["kind"], b["text"]) for b in blocks] ==         [("heading", "Title"), ("para", "One two.")]
 
 
 # --- 01_02 clean ---
@@ -207,7 +206,7 @@ def test_head_title_text_never_becomes_a_paragraph():
     blocks = epub.html_to_blocks(
         "<html><head><title>Book | Project Gutenberg</title><style>p{}</style></head>"
         "<body><p>Real text.</p></body></html>")
-    assert blocks == [{"kind": "para", "text": "Real text."}]
+    assert [(b["kind"], b["text"]) for b in blocks] == [("para", "Real text.")]
 
 
 def test_clean_drops_contents_doc(fixture_epub):

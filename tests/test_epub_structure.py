@@ -31,7 +31,8 @@ def test_verse_keeps_its_lines():
 def test_a_heading_split_by_br_joins_on_one_line():
     """'CHAPTER I.<br/> MR. SHERLOCK HOLMES.' is one title, not two lines."""
     blocks = epub.html_to_blocks("<h2>CHAPTER I.<br/>MR. SHERLOCK HOLMES.</h2>")
-    assert blocks[0] == {"kind": "heading", "text": "CHAPTER I. MR. SHERLOCK HOLMES."}
+    assert blocks[0]["kind"] == "heading"
+    assert blocks[0]["text"] == "CHAPTER I. MR. SHERLOCK HOLMES."
 
 
 def test_table_cells_do_not_run_together():
@@ -43,7 +44,7 @@ def test_table_cells_do_not_run_together():
 def test_inline_emphasis_still_stays_inside_its_sentence():
     """<i> renders inline — it must NOT split a sentence into pieces."""
     blocks = epub.html_to_blocks("<p>He was <i>quite</i> certain.</p>")
-    assert blocks == [{"kind": "para", "text": "He was quite certain."}]
+    assert [(b["kind"], b["text"]) for b in blocks] ==         [("para", "He was quite certain.")]
 
 
 # --- an EPUB2 book still has a table of contents -----------------------------------

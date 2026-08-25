@@ -8,6 +8,7 @@ from __future__ import annotations
 
 import posixpath
 import zipfile
+from collections import Counter
 from html.parser import HTMLParser
 from xml.etree import ElementTree
 
@@ -200,6 +201,29 @@ def _drop_cap(attrs: dict) -> str:
     return alt if len(alt) == 1 else ""
 
 
+MIN_DEPTH_ENTRIES = 3        # a level carrying fewer entries than this is not the unit
+
+
+def boundary_depth(entries: list[dict]) -> int | None:
+    """Which nav nesting level holds the book's divisions: the shallowest one that
+    actually carries the book.
+
+    Only 3 of 11 books nest at all, and in two of those the nesting is noise rather
+    than structure — Sherlock Holmes has three depth-2 sections inside story I alone,
+    Moby-Dick has sub-headings inside chapters 100 and 108. Treating every nav entry as
+    a division promotes those to chapters; this keeps them inside their parent.
+
+    A share-of-the-nav threshold was tried first and is wrong: in a deeply nested book
+    the deepest level holds most of the entries, so Shakespeare's 812 SCENES outvoted
+    its 44 works. Entry count alone gets every book in the corpus right, and it is one
+    threshold instead of two."""
+    levels = Counter(entry["level"] for entry in entries)
+    if not levels:
+        return None
+    qualifying = [lv for lv in sorted(levels) if levels[lv] >= MIN_DEPTH_ENTRIES]
+    return qualifying[0] if qualifying else min(levels)
+
+
 class _BlockParser(HTMLParser):
     def __init__(self):
         super().__init__(convert_charrefs=True)
@@ -207,6 +231,7 @@ class _BlockParser(HTMLParser):
         self._buf: list[str] = []
         self._kind = "para"
         self._skip_depth = 0
+        self._pending_ids: list[str] = []
 
     def handle_starttag(self, tag, attrs):
         if self._skip_depth:                  # inside dropped content
@@ -214,6 +239,11 @@ class _BlockParser(HTMLParser):
                 self._skip_depth += 1
             return
         attrs = dict(attrs)
+        if attrs.get("id"):
+            # Held until a block is actually emitted, so a wrapper's id lands on the
+            # heading it wraps — the Ebookmaker case, and the difference between
+            # resolving 27% of this corpus's nav anchors and resolving 100%.
+            self._pending_ids.append(attrs["id"])
         if tag == "img":
             self._buf.append(_drop_cap(attrs))
         elif tag in _LINE_BREAK_TAGS:
@@ -240,7 +270,9 @@ class _BlockParser(HTMLParser):
     def close_pending(self):
         text = _normalize_lines("".join(self._buf), self._kind)
         if text:
-            self.blocks.append({"kind": self._kind, "text": text})
+            self.blocks.append({"kind": self._kind, "text": text,
+                                "ids": self._pending_ids})
+            self._pending_ids = []       # only a real block consumes the ids
         self._buf = []
         self._kind = "para"
 

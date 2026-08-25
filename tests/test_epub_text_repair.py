@@ -62,7 +62,8 @@ def test_an_illustration_caption_is_stripped_from_a_heading():
             '<span class="caption">I hope Mr. Bingley will like it.</span>'
             '<br/><br/>CHAPTER II.</h2>')
     blocks = epub.html_to_blocks(html)
-    assert blocks[0] == {"kind": "heading", "text": "CHAPTER II."}
+    assert blocks[0]["kind"] == "heading"
+    assert blocks[0]["text"] == "CHAPTER II."
 
 
 def test_a_heading_split_by_br_joins_on_one_line():
@@ -82,15 +83,15 @@ def test_non_breaking_spaces_normalize_to_ordinary_spaces():
 
 def test_an_empty_heading_is_discarded():
     """Two of P&P's 65 h2 elements extract to ''."""
-    assert epub.html_to_blocks('<h2><img alt="" src="x.jpg"/></h2><p>Body.</p>') == \
-        [{"kind": "para", "text": "Body."}]
+    blocks = epub.html_to_blocks('<h2><img alt="" src="x.jpg"/></h2><p>Body.</p>')
+    assert [(b['kind'], b['text']) for b in blocks] == [('para', 'Body.')]
 
 
 # --- what must not regress ----------------------------------------------------------
 
 def test_inline_emphasis_still_stays_inside_its_sentence():
-    assert epub.html_to_blocks("<p>He was <i>quite</i> certain.</p>") == \
-        [{"kind": "para", "text": "He was quite certain."}]
+    blocks = epub.html_to_blocks('<p>He was <i>quite</i> certain.</p>')
+    assert [(b['kind'], b['text']) for b in blocks] == [('para', 'He was quite certain.')]
 
 
 def test_a_real_br_in_a_paragraph_still_breaks_the_line():
