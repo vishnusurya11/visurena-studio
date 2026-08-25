@@ -55,20 +55,65 @@ thought. Climb this ladder and **stop at the first rung that works**:
 
 ---
 
-## Action blocks
+## Action blocks — the shape IS the instrument
 
 Present tense. Active voice. Third person.
 
-**Measured from a produced feature: mean 2.0 lines, 92% at three lines or fewer, nothing
-over six.** Soft limit 3, hard limit 4, absolute ceiling 6. Break longer action into
-separate blocks — **each block is a candidate shot**, and a paragraph break reads as a cut.
+> **The physical shape of the action block is your only instrument for controlling the
+> reader's reading speed — and reading speed is the only proxy you have for screen time.**
 
-Banned: passive voice · "starts to" / "begins to" · adverb-stacking · camera direction ·
-naming a shot · restating the location already in the slugline · describing what a
-character thinks or feels.
+Every rule below is a tactic for buying or spending reader-seconds.
 
-Character introductions: NAME in caps on first appearance only, plus age and one line.
-`EDWARD BLOOM, 40's and handsome.` Not a paragraph.
+**One image per sentence. Each period implies a cut.** A paragraph break is a new angle.
+
+**Measured across 47 produced screenplays, 1.09M words of action:**
+
+| | |
+|---|---|
+| median **sentence** | **6 words** (44% are 5 or fewer) |
+| median **paragraph** | **2 lines** — 77% are two lines or fewer |
+| paragraphs over 4 lines | **6%** |
+| adverbs | 7.5 per 1,000 words ≈ **one per page** |
+| words in ALL CAPS | ~5.7% ≈ **one word in twenty** |
+
+**Four lines is not the target — it is the outer bound of the top 6%.** The working shape
+of a professional page is **a two-line paragraph made of six-word sentences.**
+
+```
+Empty, cavernous.
+Circular, jammed with instruments.
+All of them idle.
+Console chairs for two.
+Empty.
+```
+
+**Verbs: plain ones connect, vivid ones spend.** `looks` and `walks` are the #1 and #5 most
+frequent verbs in professional action writing — do not hunt them out of existence. Keep the
+prose neutral, then spend a precise verb on the beat you want the reader to slow down for:
+
+> "A yank of the chain ruptures the carotid artery. It jets blood.
+> The blood hits the office wall, **drumming hollowly.**"
+
+Nine paragraphs of neutral prose, then four exact words. That is the budget working.
+
+**"We see" is not banned.** 45 of 46 measured scripts use it, median 8 times. It is
+legitimate when it specifies the frame, its boundary, or where the camera is —
+*"All we see of the prisoner is his dark hair disappearing into the car."* It is noise when
+it merely announces that a thing happens: *"We see John enter"* → **"John enters."**
+
+Genuinely avoid: passive voice · "starts to" / "begins to" when you mean the completed
+action · restating the location already in the slugline · describing what a character
+thinks or feels.
+
+**Sound gets first claim on the caps budget**, and prefer onomatopoeia to labels:
+`a fog-muffled CRUMP-!` beats "a crashing sound."
+
+**Character introductions deliver a contradiction, a trajectory, or a relational fact —
+never a physical inventory.** Length ranges from three words to a paragraph; both work.
+
+> "**This is Moss.**"
+> "Meet MARTIN RIGGS. **You wouldn't know by looking at him that he's one of the deadliest
+> men alive. In fact, he looks a little like a bag person.**"
 
 ---
 
@@ -208,7 +253,7 @@ dramatized. **Do not invent a scene the book never staged.**
 ## Before you return, check
 
 1. Every sentence is an image, an action, a sound, or a line of dialogue.
-2. No action block over 4 lines; most at 2.
+2. Median sentence near 6 words; median paragraph 2 lines; nothing over 4 without cause.
 3. Every `verbatim` line is copied exactly, elisions marked `…`.
 4. No line states the scene's own subtext.
 5. Every fact a character delivers is *used* by them to get something.
