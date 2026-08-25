@@ -80,10 +80,37 @@ def canonical_cue(character: str | None, registry: list[dict]) -> str | None:
     """
     if not character:
         return character
+    if not is_speakable(character):
+        return None
     ids = {entity["id"] for entity in registry}
     if character in ids:
         return character
-    return names.match_alias(character, names.build_index(registry)) or character
+    index = names.build_index(registry)
+    surnames = names.build_surname_index(registry)
+    return (names.match_alias(character, index)
+            or names.match_alias(character, surnames)
+            or character)
+
+
+# Extraction's own sentinels for "I could not tell who spoke". `_unknowable` reached
+# the printed page as a character and would have gone on the call sheet.
+SENTINEL_PREFIX = "_"
+# A cue is the name production calls an actor. It is never a crowd, and never a plot
+# fact: THE RETIRED SERGEANT OF MARINES printed the answer to Holmes's deduction in the
+# left margin of the page on which he performs it.
+COLLECTIVES = {"the mormons", "the crowd", "the men", "the women", "the others",
+               "the group", "everyone", "all", "the party", "the mourners"}
+PLOT_FACT = ("retired sergeant", "the murderer", "the victim", "the killer")
+
+
+def is_speakable(character: str) -> bool:
+    """May this string be a character cue at all?"""
+    key = (character or "").strip().lower()
+    if not key or key.startswith(SENTINEL_PREFIX):
+        return False
+    if key in COLLECTIVES:
+        return False
+    return not any(fact in key for fact in PLOT_FACT)
 
 
 def source_scenes(dossier: dict, beat) -> list[dict]:

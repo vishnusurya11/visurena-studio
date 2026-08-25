@@ -76,6 +76,28 @@ def g4_verbatim(scene: Scene, paragraphs: dict) -> list[str]:
     return problems
 
 
+# Which guard findings stop a build.
+#
+# The first generated screenplay shipped with 121 logged findings and a verdict of
+# REVIEW, and three professional readers then found exactly what those findings named.
+# A script supervisor put it best: "a REVIEW verdict that never gates the render is not
+# a QC step." So the findings that say the page CONTRADICTS its own source now block.
+#
+# G4 stays advisory on purpose: a failed grounding downgrades a `verbatim` label to
+# `adapted`. The line is fine, only the claim about it was wrong, and failing a build
+# over a label would teach the writer to stop claiming verbatim at all.
+BLOCKING_KINDS = ("does not exist", "not in the registry", "slug says", "slug at",
+                  "do not place them")
+ADVISORY_KINDS = ("downgraded to adapted",)
+
+
+def blocking(problems: list[str]) -> list[str]:
+    """The subset that must stop the build."""
+    return [p for p in problems
+            if any(k in p for k in BLOCKING_KINDS)
+            and not any(k in p for k in ADVISORY_KINDS)]
+
+
 def sample(scenes: list, k: int = K_SAMPLED) -> list:
     """First, middle, last. A sample the reader can predict is a sample they can check."""
     if len(scenes) <= k:
@@ -152,10 +174,22 @@ def run(codex_id: str, target_name: str = "feature") -> None:
     print(f"  05_02 audit: {len(issues)} issue(s) kept, {dropped} ungrounded dropped")
 
     with tracker.step("05_04"):
-        report = {"guards": problems, "issues": issues,
+        blockers = blocking(problems)
+        report = {"guards": problems,
+                  "blocking": blockers,
+                  "issues": issues,
                   "ungrounded_dropped": dropped,
                   "totals": screenplay.totals.model_dump(),
-                  "verdict": "PASS" if not problems and not issues else "REVIEW"}
+                  "verdict": ("FAIL" if blockers or any(
+                      i["severity"] == "blocking" for i in issues)
+                      else "REVIEW" if problems or issues else "PASS")}
         (out / "qc_report.json").write_text(
             json.dumps(report, ensure_ascii=False, indent=2), encoding="utf-8")
-    print(f"  05_04 report: {report['verdict']}")
+    print(f"  05_04 report: {report['verdict']} "
+          f"({len(blockers)} blocking / {len(problems)} total)")
+    for problem in blockers[:5]:
+        print(f"         BLOCKING - {problem}")
+    if report["verdict"] == "FAIL":
+        raise ValueError(
+            f"{len(blockers)} blocking finding(s); first: {blockers[0]}. "
+            f"A verdict that never gates the render is not a QC step.")

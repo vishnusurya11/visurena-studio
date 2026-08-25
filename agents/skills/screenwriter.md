@@ -151,6 +151,86 @@ never a physical inventory.** Length ranges from three words to a paragraph; bot
 
 ---
 
+## Introduce every character, once, and never name one before you do
+
+**In the first screenplay this pipeline produced, not one principal was introduced.**
+Holmes — the most recognisable character in English detective fiction — entered as
+*"A young man springs up with a test-tube in his hand."* No caps, no name, no age, no
+image. The only capitalised introduction in 39 pages was `A POLICE OFFICER`, a walk-on
+with no lines. The casting director got an introduction for the spear-carrier and
+nothing for the lead.
+
+**On first appearance:** the name in CAPS, an age, and **one photographable detail that
+is a fact about the person, not their face.** Never a physical inventory.
+
+> `SHERLOCK HOLMES, 30s, sleeves pushed back, hands mottled with sticking-plaster.`
+
+**And a name may not appear in action before that introduction.** The first draft wrote
+*"Inside, Drebber lies on the bare floor"* — on the page where identifying the body is
+the scene's whole business. It wrote *"Ferrier lowers the bundle"* two pages before he
+says *"My name is John Ferrier."* If the audience cannot know the name yet, the action
+does not know it either: **THE DEAD MAN**, then `DREBBER` once he is named on screen.
+
+---
+
+## Fake motion: the disease you will actually commit
+
+Not purple prose. Not adverbs. The first draft had none of those. It had this:
+
+> **64 of its 267 action lines were somebody looking at somebody.**
+> `looks` ×18 · `turns` ×15 · `watches` ×11 · `studies` ×8
+
+> Watson looks back toward the hospital. Stamford continues toward the crossing.
+> Watson watches the door close. Then he turns to Holmes.
+> Watson reads the note aloud. Holmes watches his face, not the page.
+> Holmes watches the pen touch paper.
+
+**None of that is an event.** Strike all sixty-four and the story loses nothing — the
+editor cuts to a reaction whether or not you typed it. A gaze is only an action when
+what is seen changes something: *he sees the ring and stops talking* is an event;
+*he looks at her* is a stage direction for a camera that was going to be there anyway.
+
+**Before you write a look, ask what it costs somebody.** If nothing, cut it.
+
+---
+
+## Unfilmable, in disguise
+
+You will not write "he thinks." You will write these instead, and they are the same sin
+in better clothes — every one is from the first draft:
+
+| written | why a camera cannot photograph it |
+|---|---|
+| The bargain is concluded on the spot. | a legal state |
+| His questions have found their mark. | an inference about a mind |
+| Rance remains seated, unconvinced and uneasy. | two interior states in one clause |
+| Holmes taps the cab window, already laying the bait. | intention; there is no bait in shot |
+| The woman's face holds. | an actor's note, not an image |
+| Holmes gives Watson the smallest sign. | unphotographable because unspecified — WHAT sign? |
+| His face is hard with the failure. | the cause is invisible |
+| The answer closes around Lucy. | an abstraction performing a physical act |
+| Lucy remains at the gate, holding the promise in the empty road. | she is holding nothing |
+| Hope stumbles past him, performing drunkenness. | direction to the actor smuggled into action |
+| A placid smile remains upon his face. | he is dead; a corpse's face is set |
+
+---
+
+## Vary the shape, or the page has no gear left
+
+The first draft's action was clean and completely uniform: **158 of 267 lines were
+exactly two sentences — 59% — and no paragraph in 39 pages exceeded three lines.**
+Every beat was `Subject verbs object. Subject verbs object.` for the whole script.
+
+That reads as a metronome, and a metronome has no emphasis. **When the murder finally
+arrived it was written in the same cadence as a man studying a walking stick.**
+
+The measured professional shape (47 scripts, 1.09M words) is a *distribution*, not a
+constant: median sentence 6 words, median paragraph 2 lines, **6% run over four**. That
+6% is where the emphasis lives. Spend a one-line paragraph on the beat that must land.
+Let one run long when the moment is dense. **Uniformity is the failure, not length.**
+
+---
+
 ## Dialogue
 
 **Every line is an action.** Beneath each one, know the character's desire, intent, and
@@ -198,6 +278,79 @@ emotion adverb.
 **Speeches run short.** Median 8 words in the source. If a speech exceeds three sentences,
 break it with action, interruption or counter-dialogue — unless the length *is* the
 character (a liar over-explaining, a bully filibustering).
+
+---
+
+## Keep the concrete half
+
+**This is the pattern that made the first draft sound like nobody.** Given a speech from
+the source, it kept the abstract half and cut the concrete, rude, or funny half — every
+time, without exception:
+
+| the source | what the draft kept | what died |
+|---|---|---|
+| "Except that!" … "**If a herd of buffaloes had passed along there could not be a greater mess.**" | `Except that!` | the insult — and now the line points at nothing |
+| "I have no time for trifles," … **then with a smile, "Excuse my rudeness."** | `I have no time for trifles,` | the recovery. It kept the rudeness and cut the charm — the wrong half of a two-part gesture |
+| the full deduction: six feet, square-toed boots, **a Trichinopoly cigar, three old shoes and one new one, long fingernails** | `There has been murder done, and the murderer was a man.` | the aria. It kept the downbeat and cut everything that makes it land |
+
+**The concrete half is the half that is castable, quotable and specific.** When you
+compress a speech, cut toward the image and the insult, never toward the summary. A
+speech reduced to its abstract clause is a speech nobody can perform.
+
+---
+
+## Dialogue contains only what the actor says aloud
+
+The source hands you prose. Prose wraps speech in narration, and the narration must not
+reach the page. The first draft printed all of this under character cues:
+
+> `"It is so," answered John Ferrier.`
+> `"Kiss it and make it well," she said, with perfect gravity, showing the injured part up to him.`
+> `"Brother Ferrier," he said, taking a seat, and eyeing the farmer keenly from under his light-coloured eyelashes,`
+
+An actor reads *"answered John Ferrier"* aloud. Use the dossier's **`speech`** field,
+which is already cleaned; `notable_quote` is the raw prose and exists for grounding, not
+for the page.
+
+**A speech never ends on a comma.** Thirty did. That comma is the punctuation of
+`"No data yet," said Holmes` with the tag amputated — and **the manner it carried is
+yours to convert**, not to discard:
+
+- it changes how the line is *read* → a parenthetical, sparingly
+- it changes what is *on screen* → an action beat
+- it changes neither → nothing at all
+
+**One cue, one speaker, one uninterrupted block.** The first draft split fifteen single
+sentences across two cues with nothing between them — `MRS. SAWYER` / `MRS. SAWYER
+(CONT'D)` breaking one sentence in half — and once merged two characters under one cue,
+so Ferrier answered his own question. Split a speech only when an action beat separates
+it, and the second block must begin a new sentence.
+
+---
+
+## Deductions: plant, withhold, pay
+
+A detective story's product is the audience playing along. That needs three beats **in
+this order**:
+
+1. **PLANT** — the audience SEES the evidence and does not know what it means
+2. **WITHHOLD** — the detective reacts and does not explain
+3. **PAY** — the explanation arrives and the audience recognises what it already saw
+
+The first draft ran them backwards or not at all. It wrote *"A great blue anchor marks
+the back of the man's hand"* **in the same beat** where Holmes says *"It was easier to
+know it than to explain why I knew it"* — handing over half the answer visually while
+refusing the other half verbally. The audience never got to play.
+
+**And the payment must contain its reasons.** The draft's summation was a list of nouns:
+
+> ❌ `The cab marks showed a vehicle. The garden showed two men. The face supplied the
+> fear. The smell supplied the poison. The ring supplied the woman.`
+
+There is not one *because* in it. The source had the joints — *"I satisfied myself that
+it was a cab and not a private carriage **by the narrow gauge of the wheels**"* — and
+the draft kept the nouns and threw away the reasons. **A deduction without its mechanism
+is an assertion.**
 
 ---
 
@@ -337,16 +490,29 @@ it**, which kills it outright.
 
 ## Before you return, check
 
+**The page**
 1. Every sentence is an image, an action, a sound, or a line of dialogue.
-2. Median sentence near 6 words; median paragraph 2 lines; nothing over 4 without cause.
-3. Every `verbatim` line is copied exactly, elisions marked `…`.
-4. No line states the scene's own subtext.
-5. Every fact a character delivers is *used* by them to get something.
-6. Parentheticals are rare, and none is an emotion adverb.
-7. The contraction asymmetry matches the period.
-8. You could not swap any two characters' lines without noticing.
-9. Every scene stages something — no scene is dialogue only.
-10. No run of more than six or seven speeches passes without an action beat.
-9. You can name what this scene *is* — its character — in one phrase.
-10. Nothing here is shoe leather, and the scene does not resolve more than it must.
-11. You showed the audience nothing no character knows, unless the beat is `cold_open`.
+2. Nothing in action is unphotographable — no bargains concluded, no marks found,
+   no interior states, no notes to the actor.
+3. No line is a bare look. Every gaze costs somebody something.
+4. The action paragraphs are not all the same shape.
+5. Every character is introduced once, in CAPS, with an age and one photographable
+   detail — and no name appears in action before that introduction.
+
+**The dialogue**
+6. No narration is inside a speech, and no speech ends on a comma.
+7. One cue, one speaker, one uninterrupted block.
+8. No line states the scene's own subtext, and every fact delivered is *used*.
+9. Parentheticals are rare, and none is an emotion adverb.
+10. The contraction asymmetry matches the period.
+11. You could not swap any two characters' lines without noticing.
+12. Where you compressed a speech, you cut toward the image, not the summary.
+
+**The scene**
+13. You can name what this scene *is* — its character — in one phrase.
+14. Every scene stages something. No scene is dialogue only, and no run of more than
+    six or seven speeches passes without an action beat.
+15. Nothing here is shoe leather, and the scene does not resolve more than it must.
+16. Every deduction plants before it pays, and every payment carries its reasons.
+17. Every `verbatim` line is copied exactly, elisions marked `…`.
+18. You showed the audience nothing no character knows, unless the beat is `cold_open`.

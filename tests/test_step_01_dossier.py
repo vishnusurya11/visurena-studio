@@ -222,3 +222,21 @@ def test_dossier_backfills_a_synopsis_for_a_book_analysed_before_the_field_exist
 def test_the_backfilled_synopsis_uses_the_events_extraction_found():
     scenes = s01.join([TIMELINE_SCENE], {2: EXTRACTION}, REGISTRY)
     assert "share rooms" in scenes[0]["synopsis"]
+
+
+def test_dialogue_carries_a_cleaned_speech_field():
+    """`notable_quote` keeps the prose as written, for grounding. `speech` is what an
+    actor can say. Three readers caught the writer copying the former to the page."""
+    extraction = {**EXTRACTION, "scenes": [{**EXTRACTION_SCENE, "dialogue": [{
+        "speaker_text": "my companion",
+        "notable_quote": '"It is so," answered John Ferrier.'}]}]}
+    line = s01.join([TIMELINE_SCENE], {2: extraction}, REGISTRY)[0]["dialogue"][0]
+    assert line["speech"] == "It is so."
+    assert line["notable_quote"] == '"It is so," answered John Ferrier.'
+
+
+def test_a_dangling_attribution_comma_is_gone_from_speech():
+    extraction = {**EXTRACTION, "scenes": [{**EXTRACTION_SCENE, "dialogue": [
+        {"speaker_text": "my companion", "notable_quote": "No data yet,"}]}]}
+    line = s01.join([TIMELINE_SCENE], {2: extraction}, REGISTRY)[0]["dialogue"][0]
+    assert line["speech"] == "No data yet."

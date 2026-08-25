@@ -161,3 +161,34 @@ coined word no downstream system recognises.
 8. `axis_side`, `looks_screen` and `travel_direction` are set on every shot, and nothing
    crosses the axis without `crosses_axis: true` and a named neutral shot.
 9. No shot splits a paragraph.
+
+---
+
+## A shot list is not a transcription of the action
+
+**The first shot list this pipeline produced was 411 shots, and 368 of them — 89.5% —
+were locked-off.** One shot per line of action, in order. A production reader called it
+what it was: *"a transcription of the action, not a coverage plan. There is no
+master-and-coverage structure, no shot serving a scene rather than a sentence."*
+
+That is the failure mode of keying shots to element indices: it makes one-shot-per-line
+the path of least resistance, and the result is a 40-minute film in which nine of every
+ten setups are static.
+
+**Cover the scene, not the sentence.**
+
+- **Start with the master.** One shot that holds the geography of the whole scene —
+  who is where, and what the space is. Everything else is a cut inside it.
+- **A shot may cover many elements.** A two-hander running eight speeches is often
+  three setups — master, and one over-the-shoulder each way — not eight shots. Your
+  `covers_start`/`covers_end` range exists precisely so one setup can span a run.
+- **Spend the moving shots.** The default is still locked-off (see above), but a scene
+  with no move at all is a scene with no emphasis. One earned move per scene is a
+  reasonable rhythm; one per line is noise.
+- **Insert what the scene turns on.** A ring, a pill-box, a word scrawled on a wall —
+  if the plot pivots on an object, it gets its own shot. The first list had no inserts
+  at all.
+
+**The test:** could an editor cut this scene from your list? If every shot is a
+one-to-one restatement of a line, they have no options and no coverage — they have a
+storyboard of the script, which is not the same thing.

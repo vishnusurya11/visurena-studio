@@ -135,3 +135,37 @@ def test_an_issue_whose_quote_is_not_in_the_source_is_dropped():
     kept = s05.keep_grounded_issues([_issue("he was in Vienna")],
                                     ["At that time he was in London."])
     assert kept == []
+
+
+# --- the process finding: a REVIEW verdict that never gates is not a QC step -------
+
+def test_guards_are_split_into_blocking_and_advisory():
+    """121 findings were logged and the document rendered and shipped anyway. Some of
+    those findings are advisory by design (a downgraded verbatim claim); the ones that
+    say the slug contradicts its own source are not."""
+    assert hasattr(s05, "BLOCKING_KINDS")
+
+
+def test_a_slug_contradicting_its_source_blocks():
+    scene = _scene(slug=SLUG.model_copy(update={"time": "NIGHT"}))
+    source = {"chapter": 1, "scene": 1, "time_of_day": "DAY", "location_id": "221b"}
+    problems = s05.g3_place_and_time(scene, [source])
+    assert s05.blocking(problems) == problems
+
+
+def test_a_downgraded_verbatim_claim_is_advisory_not_blocking():
+    """The line is fine; only its label was wrong. This must never stop a build."""
+    scene = _scene(elements=[ScriptElement(
+        kind="dialogue", text="Elementary", character="holmes",
+        provenance="verbatim", source=SceneRef(chapter=1, scene=1))])
+    problems = s05.g4_verbatim(scene, {"1:1": ["nothing of the kind"]})
+    assert problems and s05.blocking(problems) == []
+
+
+def test_an_invented_coordinate_blocks():
+    assert s05.blocking(s05.g1_coordinates(_scene(), set())) != []
+
+
+def test_a_character_outside_the_registry_blocks():
+    problems = s05.g2_roster(_scene(), set(), {1: {"holmes"}})
+    assert s05.blocking(problems) != []

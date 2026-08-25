@@ -169,13 +169,28 @@ def lint_scene(scene: Scene, display: dict) -> list[str]:
     return lint(render_scene(scene, display), intended_types(scene, display))
 
 
+def title_page(title: str = "", author: str = "", **fields) -> str:
+    """A Fountain title block, or nothing.
+
+    Two rules, both learned by shipping a broken page 1: a key with an EMPTY value is
+    not a title field, it is a line of body text; and the block must be closed by a
+    BLANK LINE or Fountain keeps reading and swallows the first scene heading too. The
+    first render printed "Title: ...", "Author:" and a literal ".1." as three lines of
+    action, because both rules were broken at once.
+    """
+    rows = [(key.replace("_", " ").title(), value)
+            for key, value in (("title", title), ("author", author), *fields.items())
+            if str(value or "").strip()]
+    if not rows:
+        return ""
+    return "".join(f"{k}: {v}\n" for k, v in rows) + "\n"
+
+
 def render(scenes: list[Scene], display: dict, title: str = "",
-           author: str = "") -> str:
+           author: str = "", **fields) -> str:
     """The whole screenplay. A projection of screenplay.json, never the source."""
-    head = []
-    if title:
-        head = [f"Title: {title}", f"Author: {author}", ""]
-    return "\n".join(head) + "\n\n".join(render_scene(s, display) for s in scenes)
+    body = "\n\n".join(render_scene(s, display) for s in scenes)
+    return title_page(title, author, **fields) + body
 
 
 def to_pdf(text: str, path) -> None:

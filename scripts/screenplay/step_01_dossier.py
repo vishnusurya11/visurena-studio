@@ -28,7 +28,7 @@ import hashlib
 import json
 from pathlib import Path
 
-from studio import db, names, paths, screenformat, synopsis, tracking
+from studio import db, names, paths, quotes, screenformat, synopsis, tracking
 
 STEP_ID = "01"
 NAME = "dossier"
@@ -95,6 +95,10 @@ def _resolve_dialogue(lines: list[dict], char_index: dict, surnames: dict) -> li
     for line in lines:
         resolved.append({
             **line,
+            # What the actor says, with the novel's narration removed. Handing the
+            # writer `"It is so," answered John Ferrier.` is how that reached the page
+            # under a character cue, verbatim, in three readers' notes.
+            "speech": quotes.clean(line.get("notable_quote") or ""),
             "speaker_id": _resolve(line.get("speaker_text"), char_index, surnames),
             "addressee_id": _resolve(line.get("addressee_text"), char_index, surnames),
         })

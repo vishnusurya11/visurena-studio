@@ -242,6 +242,54 @@ unless you check.
 
 ---
 
+## Three failures the first plan committed, all of them yours to prevent
+
+**1. Four beats were the same beat twice.**
+
+The first plan produced 22 beats and four of them were duplicates: beats 1 and 2 both
+staged Stamford introducing Watson to Holmes; 3 and 4 both staged Watson challenging the
+commissionaire deduction; 21 and 22 both staged Holmes and Watson reading the newspaper
+credit; 20 restaged an arrest the audience had already watched.
+
+Worse, **3 and 4 ran in the wrong order** — the reaction preceded the question. Watson
+said *"It is simple enough as you explain it"* in beat 3 and asked *"How in the world did
+you deduce that?"* in beat 4.
+
+Before you return: **read your beat list as a stranger would, in order.** Any two beats
+whose one-line intent could be swapped without anyone noticing are one beat. Any beat
+whose `boundary_event` is already true when it begins is out of order.
+
+**2. The lead was off screen for 38% of the film.**
+
+Beats 12 through 19 — 36% of the page count — contained neither Holmes nor Watson. In a
+Sherlock Holmes film. That is not a flashback, it is an intermission.
+
+**Track your protagonist's absence.** A lead may leave for a sequence. A lead may not
+leave for a third of the running time, and if your source's structure demands it — as
+Doyle's Part II does — that is the strongest possible signal to **interleave rather than
+block**: break the excursion into fragments, each triggered by something the lead is
+holding or asking in the present.
+
+**3. Time ran backwards with no device.**
+
+A man found dead in beat 5 was murdered in beat 18, and **nothing in the plan said so.**
+No `flashback` mark, no framing device, no bridge. The audience is simply asked to watch
+a corpse get up.
+
+Any beat that departs the story's present **must** be marked `flashback: true`, and its
+`boundary_event` must name what returns us. If you cannot name the bridge, the beat is
+not ready.
+
+---
+
+## The plan is where a duplicate is cheap
+
+Every one of the above cost a paid draft call to discover and would have cost another to
+fix. You are the only stage that sees all the beats at once — code can check coordinates
+and budgets, but only you can see that beat 21 and beat 22 are the same scene.
+
+---
+
 ## Before you return, check
 
 1. The spine is one sentence, and every beat hangs off it.
@@ -258,3 +306,8 @@ unless you check.
 11. The task is named, and its resolution is a physical action you could watch with the
     sound off.
 12. No cut left a widow (setup without payoff) or an orphan (payoff without setup).
+13. No two beats stage the same event, and no beat's boundary is already true when it
+    starts.
+14. The protagonist is not absent for more than one sequence.
+15. Every beat that leaves the story's present is marked `flashback` and names its
+    bridge back.
