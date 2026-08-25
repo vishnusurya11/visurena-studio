@@ -60,3 +60,9 @@ logs/
 /*.txt
 /*.html
 !requirements*.txt
+
+# Research agents keep dropping scratch downloads in the repo root. A full
+# copyrighted book text was nearly committed once; a Google Books error blob was
+# committed today. Agents are told to use the scratch dir; this is the backstop.
+/*.json
+!package.json
