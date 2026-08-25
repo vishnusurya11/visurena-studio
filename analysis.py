@@ -19,7 +19,7 @@ from pathlib import Path
 
 import yaml
 
-from studio import db
+from studio import db, llm, spend
 
 REGISTRY_PATH = Path("stages.yaml")
 STAGE = "analysis"
@@ -57,7 +57,10 @@ def run_step(conn, codex_id: str, step) -> None:
     """
     db.add_event(conn, codex_id, STAGE, step.STEP_ID, "started")
     try:
-        step.run(codex_id)
+        # Every paid call inside this block is attributed to (book, stage, step) with
+        # no cooperation from the step itself — see studio/llm.spend_context.
+        with llm.spend_context(conn, codex_id, STAGE, step.STEP_ID):
+            step.run(codex_id)
     except Exception as exc:
         db.add_event(conn, codex_id, STAGE, step.STEP_ID, "failed", detail=str(exc)[:200])
         raise
@@ -85,7 +88,25 @@ def process(conn, codex_id: str) -> None:
         raise
     if last_run == FINAL_STEP_ID:
         db.mark_stage(conn, codex_id, STAGE, "completed")
+    report_spend(conn, codex_id)
     print(f"=== ANALYSIS done | codex_id={codex_id} ===")
+
+
+def report_spend(conn, codex_id: str) -> dict:
+    """Print what this book actually cost, per step. Never let a spend be invisible."""
+    totals = spend.total(conn, codex_id)
+    if not totals["calls"]:
+        return totals
+    print(f"--- spend | {totals['calls']} call(s), "
+          f"{totals['input_tokens']:,} in / {totals['output_tokens']:,} out, "
+          f"${totals['cost_usd']:.4f}"
+          + (f" (+{totals['unpriced_calls']} UNPRICED)" if totals["unpriced_calls"]
+             else "") + " ---")
+    for step_id, row in spend.by_step(conn, codex_id, STAGE).items():
+        print(f"      step {step_id}: {row['calls']:4} call(s)  "
+              f"{row['input_tokens']:>9,} in  {row['output_tokens']:>8,} out  "
+              f"${row['cost_usd']:.4f}")
+    return totals
 
 
 def scan_once(conn) -> list[str]:

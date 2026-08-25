@@ -6,6 +6,16 @@
 
 default_tier: workhorse
 
+# Rates in USD per MILLION tokens. Nothing may be priced from memory: an unlisted model
+# records its tokens and a NULL cost rather than a confident zero, because an unknown
+# cost silently becoming $0.00 is how a spend estimate turns into a lie.
+rates:
+  gpt-5.6-luna:
+    input_per_m: 0.20
+    output_per_m: 1.20
+  # gpt-5.6-terra: rate UNKNOWN. Add it here once confirmed; until then any run on
+  # terra reports unpriced calls instead of a total.
+
 tiers:
   workhorse:              # validators, extraction drafts — cheap and fast
     provider: openai

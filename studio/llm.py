@@ -12,6 +12,7 @@ from __future__ import annotations
 
 import os
 import time
+from contextlib import contextmanager
 from pathlib import Path
 from types import SimpleNamespace
 
@@ -155,6 +156,50 @@ class _NativeStructuredCaller:
         )
 
 
+# --- spend recording -------------------------------------------------------------
+#
+# Recording lives HERE, at the single place every paid call passes through, because the
+# alternative was asking each step to remember `usage={}` — and the steps that forgot
+# are why this project has 64 log files and no cost history at all.
+#
+# It is best-effort by design: a failure to record must never break a call that already
+# succeeded and already cost money. Losing the receipt is bad; losing the work is worse.
+
+_SPEND: dict = {}
+
+
+@contextmanager
+def spend_context(conn, codex_id: str, stage: str, step_id: str):
+    """Attribute every call made inside this block to one (book, stage, step)."""
+    previous = dict(_SPEND)
+    _SPEND.update(conn=conn, codex_id=codex_id, stage=stage, step_id=step_id)
+    try:
+        yield
+    finally:
+        _SPEND.clear()
+        _SPEND.update(previous)
+
+
+def model_for(tier: str) -> str | None:
+    """The concrete model a tier resolves to right now, for the spend record."""
+    try:
+        return resolve_tier(tier).get("model")
+    except Exception:
+        return None
+
+
+def _record_spend(tier: str, usage: dict) -> None:
+    if not _SPEND.get("conn") or not usage:
+        return
+    try:
+        from studio import spend
+        spend.record(_SPEND["conn"], _SPEND["codex_id"], _SPEND["stage"],
+                     _SPEND["step_id"], tier, model_for(tier),
+                     usage.get("input_tokens", 0), usage.get("output_tokens", 0))
+    except Exception:                      # never break a call that already succeeded
+        pass
+
+
 def structured(tier: str, prompt: str, schema, *, retries: int = 3,
                transient_retries: int = 2, usage: dict | None = None, _agent=None):
     """One structured-output call: validated `schema` instance back, or raises.
@@ -168,7 +213,10 @@ def structured(tier: str, prompt: str, schema, *, retries: int = 3,
     agent = _agent or _NativeStructuredCaller(tier)
     for attempt in range(transient_retries + 1):
         try:
-            return _structured_once(agent, prompt, schema, retries, usage, tier)
+            local: dict = {} if usage is None else usage
+            result = _structured_once(agent, prompt, schema, retries, local, tier)
+            _record_spend(tier, local)
+            return result
         except (StructuredOutputException, ContentFiltered):
             raise
         except Exception:
