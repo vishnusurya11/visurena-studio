@@ -8,8 +8,8 @@ was ingested cleanly. You are judging THE PARSER'S WORK, never the book's litera
 
 - `manifest`: title, author, parts, and the chapter index (numbers, titles, paragraph and
   word counts).
-- `chapter_samples`: for each chapter — title, paragraph_count, `first_paragraph`,
-  `last_paragraph`.
+- `chapter_samples`: for each chapter — title, paragraph_count, `opens_with`,
+  `ends_with`.
 
 **You see two paragraphs per chapter and the shape of the rest.** That is the whole of
 your evidence. So the checks below are the ones those two paragraphs plus the manifest
@@ -23,18 +23,23 @@ damage is usually in the middle of a chapter, which you never see. If you happen
 such damage in one of your two paragraphs, report it — but never go looking for it, and
 never report an absence of it as a finding.
 
-## How samples are cut — READ CAREFULLY
+## What you are shown — READ CAREFULLY
 
-Long paragraphs are sliced by the pipeline, and the sliced side is marked `[cut]`:
+**`opens_with` is the chapter's first sentence, WHOLE. `ends_with` is its last sentence,
+WHOLE.** Neither is truncated by us.
 
-- `first_paragraph` shows the chapter's TRUE BEGINNING; a trailing `[cut]` means we
-  removed the rest of the paragraph.
-- `last_paragraph` shows the chapter's TRUE ENDING; a leading `[cut]` means we removed
-  the start of the paragraph.
+That is the entire point of this section. The sampler used to send 300 characters with a
+`[cut]` marker on the sliced side, and three books failed on verdicts reading *"the
+unmarked ending cannot be judged"* — because you cannot decide whether a chapter stops
+mid-sentence while looking at a sentence we chopped in half.
 
-A `[cut]` marker is OUR sampling, NEVER a defect. Judge boundaries only by the unmarked
-edge: a `last_paragraph` whose FINAL words stop mid-sentence is a real problem; text
-missing on the `[cut]` side is not.
+So now:
+
+- **If `ends_with` stops mid-sentence, that is the BOOK stopping mid-sentence.** It is
+  real damage and worth an issue.
+- **If `opens_with` starts mid-sentence, that is real too.**
+- You are seeing one sentence from each end, not the whole paragraph. **Absence of
+  context is not evidence of damage** — do not infer a problem from what you cannot see.
 
 **A chapter ending on a quotation, a line of verse, a letter, an epigraph, or a single
 line of dialogue is not a defect under ANY of the checks below.** A parser cannot invent

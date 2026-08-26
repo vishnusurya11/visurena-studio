@@ -9,6 +9,7 @@ cannot express. Verdict is structured; the caller decides what to do with it
 from __future__ import annotations
 
 import json
+import re
 from pathlib import Path
 
 from pydantic import BaseModel
@@ -41,15 +42,63 @@ class Verdict(BaseModel):
     summary: str
 
 
-def _edge(text: str, side: str) -> str:
-    """Sample the EDGE that matters: a first paragraph's beginning, a last
-    paragraph's ENDING. The sliced side is marked [cut] so the judge never
-    mistakes our truncation for the book's (real-run false positive, 2026-08-23)."""
-    if len(text) <= _SAMPLE_CHARS:
-        return text
-    if side == "start":
-        return text[:_SAMPLE_CHARS] + " [cut]"
-    return "[cut] " + text[-_SAMPLE_CHARS:]
+MAX_SENTENCE = 400       # one runaway sentence must not blow up a per-book prompt
+# Split only where a new sentence actually STARTS. Splitting on every [.!?] breaks
+# dialogue: `"...?" he asked.` is one sentence, and a lowercase word after a
+# closing quote is a speech tag continuing it, not a new sentence beginning.
+_SENTENCE_END = re.compile(r'(?<=[.!?])["\'\u201d\u2019)\]]?\s+(?=["\u201c\u2018(]?[A-Z])')
+
+
+# A period after one of these is an abbreviation, not a sentence end. Peter Pan chapter 2
+# was reported as opening with the single word "Mrs." because a capital followed it - a
+# sampler that manufactures the damage it is looking for is worse than no sampler.
+ABBREVIATIONS = {
+    "mr", "mrs", "ms", "dr", "st", "prof", "rev", "hon", "sr", "jr", "capt", "col",
+    "gen", "lt", "sgt", "maj", "messrs", "vs", "etc", "cf", "no", "nos", "fig", "vol",
+    "ch", "pp", "viz", "approx", "inst", "ult",
+}
+
+
+def _ends_in_abbreviation(text: str) -> bool:
+    """Is this fragment's final word an abbreviation rather than a sentence end?
+
+    A single initial counts too: "J. M. Barrie" must not become three sentences.
+    """
+    word = (text or "").split()[-1] if text.split() else ""
+    if not word.endswith("."):
+        return False
+    stem = word[:-1].strip("\"'“”()")
+    return stem.lower() in ABBREVIATIONS or (len(stem) == 1 and stem.isalpha())
+
+
+def _sentences(text: str) -> list[str]:
+    parts = [p for p in _SENTENCE_END.split((text or "").strip()) if p]
+    merged: list[str] = []
+    for part in parts:
+        if merged and _ends_in_abbreviation(merged[-1]):
+            merged[-1] = f"{merged[-1]} {part}"      # the split was an abbreviation
+        else:
+            merged.append(part)
+    return merged
+
+
+def first_sentence(text: str) -> str:
+    """The opening sentence, WHOLE.
+
+    The sampler used to send 300 characters with a [cut] marker on the sliced side, and
+    three books then failed on boundary verdicts reading "the unmarked ending cannot be
+    judged". You cannot ask whether a chapter opens mid-sentence by showing a sentence
+    chopped in half - the judged edge must never be our own truncation.
+    """
+    parts = _sentences(text)
+    return parts[0][:MAX_SENTENCE] if parts else ""
+
+
+def last_sentence(text: str) -> str:
+    """The closing sentence, WHOLE. Text that genuinely stops mid-sentence comes back
+    stopping mid-sentence, which is the damage this check exists to find."""
+    parts = _sentences(text)
+    return parts[-1][-MAX_SENTENCE:] if parts else ""
 
 
 def _sample(chapter: dict) -> dict:
@@ -62,8 +111,11 @@ def _sample(chapter: dict) -> dict:
         # An empty chapter is legitimate: the n==0 front-matter sentinel is empty for
         # any book that opens straight on Chapter 1. Indexing it unconditionally killed
         # a Frankenstein parse that had already passed every check.
-        "first_paragraph": _edge(paragraphs[0]["text"], "start") if paragraphs else "",
-        "last_paragraph": _edge(paragraphs[-1]["text"], "end") if paragraphs else "",
+        #
+        # WHOLE sentences, never truncations - the edge being judged must be the book's,
+        # not ours.
+        "opens_with": first_sentence(paragraphs[0]["text"]) if paragraphs else "",
+        "ends_with": last_sentence(paragraphs[-1]["text"]) if paragraphs else "",
     }
 
 

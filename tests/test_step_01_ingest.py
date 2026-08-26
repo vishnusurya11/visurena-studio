@@ -193,11 +193,6 @@ def test_plan_remedies_known_kind_returns_actions():
     assert actions == ["strip_pg_phrases"]
 
 
-def test_plan_remedies_unknown_kind_escalates():
-    with pytest.raises(ValueError, match="no safe auto-remedy"):
-        s01.plan_remedies([_issue("boundary")])
-
-
 def test_apply_remedies_flips_adjustment():
     s01.apply_remedies(["strip_pg_phrases"])
     assert s01.ADJUSTMENTS["strip_pg_phrases"] is True
@@ -259,12 +254,6 @@ def test_plan_remedies_applies_fixable_before_escalating():
     assert s01.plan_remedies(issues) == ["strip_pg_phrases"]  # fix what we can, re-check
 
 
-def test_plan_remedies_escalates_only_when_nothing_fixable():
-    with pytest.raises(ValueError, match="no safe auto-remedy"):
-        s01.plan_remedies([_issue("front_matter"), _issue("boundary")])
-
-
-
 def test_expected_chapters_derived_from_toc(chapterized, fixture_epub):
     chapters, parts_meta, out_dir = chapterized
     manifest = s01.finalize(chapters, out_dir, fixture_epub, title="t", author="a",
@@ -277,3 +266,15 @@ def test_toc_expectation_mismatch_fails_loud(chapterized, fixture_epub):
     with pytest.raises(ValueError, match="chapter count"):
         s01.finalize(chapters, out_dir, fixture_epub, title="t", author="a",
                      expected_chapters=None, toc_expected=9, parts=parts_meta)
+
+
+def test_plan_remedies_returns_actions_and_never_raises():
+    """Supersedes two escalation tests. plan_remedies is now a PLANNER, not a gate:
+    it returns what it can fix and says nothing about what it cannot. The gate is
+    finalize()'s mechanical checks, which measure every paragraph."""
+    from agents.ingest_validator import Issue
+    from scripts.analysis.step_01_ingest import plan_remedies
+    assert plan_remedies([Issue(kind="wholly-unknown", chapter=1,
+                                severity="blocking", note="n")]) == []
+    assert plan_remedies([Issue(kind="boilerplate", chapter=0,
+                                severity="minor", note="n")]) == ["strip_pg_phrases"]

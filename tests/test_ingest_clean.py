@@ -417,3 +417,42 @@ def test_genuinely_glued_text_is_still_caught():
 def test_a_normal_sentence_is_clean():
     from scripts.analysis.step_01_ingest import _garbled
     assert _garbled("It was the best of times, it was the worst of times.") is None
+
+
+# --- boilerplate vs a transcriber's note (2026-08-26) ------------------------------
+#
+# Moby Dick carries a front-matter note reading "This text is a combination of etexts,
+# one from the now-defunct ERIS project at Virginia Tech and one from Project
+# Gutenberg." That is a publication note about the edition - exactly the kind of thing
+# front matter is FOR - and the boilerplate check killed the whole ingest over it.
+#
+# Boilerplate in a CHAPTER is real damage: it means the license text was chapterized as
+# prose. In front matter it is just an honest note about provenance.
+
+def _chapters_with(text, n):
+    return [{"n": 0, "part": 0, "title": "Front matter",
+             "paragraphs": [{"n": 1, "text": "ordinary front matter"}]},
+            {"n": 1, "part": 0, "title": "Chapter I",
+             "paragraphs": [{"n": 1, "text": "prose"}]}] if n is None else \
+           [{"n": n, "part": 0, "title": "T",
+             "paragraphs": [{"n": 1, "text": text}]}]
+
+
+def test_boilerplate_inside_a_chapter_still_fails():
+    import pytest
+    from scripts.analysis.step_01_ingest import _check_chapters
+    chapters = [{"n": 0, "part": 0, "title": "F", "paragraphs": []},
+                {"n": 1, "part": 0, "title": "A", "paragraphs": [
+                    {"n": 1, "text": "START OF THE PROJECT GUTENBERG EBOOK MOBY DICK"}]}]
+    with pytest.raises(ValueError, match="boilerplate"):
+        _check_chapters(chapters, 1)
+
+
+def test_a_transcribers_note_in_front_matter_is_allowed():
+    from scripts.analysis.step_01_ingest import _check_chapters
+    chapters = [{"n": 0, "part": 0, "title": "Front matter", "paragraphs": [
+                    {"n": 1, "text": "This text is a combination of etexts, one from "
+                                     "the now-defunct ERIS project and one from "
+                                     "Project Gutenberg."}]},
+                {"n": 1, "part": 0, "title": "A", "paragraphs": [{"n": 1, "text": "x"}]}]
+    _check_chapters(chapters, 1)      # must not raise
