@@ -36,11 +36,17 @@ SPECIALISTS = ("time", "characters", "events", "dialogue")  # dimension keys
 
 
 def _load_chapters(book_dir: Path) -> list[dict]:
-    """Real chapters (part > 0) from source/, in order. ch_00 has no story."""
+    """Real chapters from source/, in order. The n == 0 sentinel has no story.
+
+    Selected by `n`, NOT by `part`. Selecting on part returned NOTHING for any book
+    without Parts, so step 02 reported "0 chapters, 0 to extract" and exited CLEAN -
+    and steps 03 to 06 then ran on an empty extraction and produced an empty analysis.
+    Third place this assumption was found; the other two are in step_01_ingest and
+    step_06_verify."""
     manifest = json.loads((book_dir / "source" / "book.json").read_text(encoding="utf-8"))
     chapters = []
     for entry in manifest["chapters"]:
-        if entry["part"] > 0:
+        if entry["n"] > 0:
             chapters.append(json.loads(
                 (book_dir / "source" / entry["file"]).read_text(encoding="utf-8")))
     return chapters
@@ -262,6 +268,19 @@ def _audit_sample(chapters: list[dict]) -> list[dict]:
     return [chapters[0], chapters[len(chapters) // 2], chapters[-1]][:AUDIT_CHAPTERS]
 
 
+def runnable_targets(issues, chapters) -> list:
+    """(chapter, dimension) pairs this run can actually re-run.
+
+    The auditor returns a chapter NUMBER and can name one absent from this run's list -
+    a hallucinated number, or a chapter filtered upstream. `next(...)` raised
+    StopIteration and killed the step AFTER the extraction had been bought and written,
+    losing paid work over a bad index. An agent's output is input, not a guarantee.
+    """
+    known = {c["n"] for c in chapters}
+    return sorted({(i["chapter"], i["dimension"]) for i in issues
+                   if i["dimension"] in SPECIALISTS and i["chapter"] in known})
+
+
 def run(codex_id: str) -> None:
     conn = db.get_connection()
     db.get_codex(conn, codex_id)
@@ -350,12 +369,16 @@ def run(codex_id: str) -> None:
             return
 
         with tracker.step("02_06"):
-            targets = sorted({(i["chapter"], i["dimension"]) for i in issues
-                              if i["dimension"] in SPECIALISTS})
+            targets = runnable_targets(issues, chapters)
             if not targets:
-                raise ValueError(f"issues have no re-runnable dimension: {issues[:3]}")
+                tracker.log(f"no re-runnable dimension in {len(issues)} issue(s); "
+                            f"logging and proceeding", level="WARNING", step_id="02_06")
+                print(f"  02_06 improve: {len(issues)} issue(s) with no re-runnable "
+                      f"dimension - logged, proceeding")
+                return
+            by_number = {c["n"]: c for c in chapters}
             for ch_n, dimension in targets:
-                chapter = next(c for c in chapters if c["n"] == ch_n)
+                chapter = by_number[ch_n]
                 path = _extraction_path(book_dir, ch_n)
                 extraction = json.loads(path.read_text(encoding="utf-8"))
                 try:

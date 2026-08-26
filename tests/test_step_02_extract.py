@@ -117,3 +117,87 @@ def test_no_gaps_when_specialists_cover_every_scene():
                                             role="agent", para_first=1)]))
     extraction = s02.assemble(call_sheet, time_report, cast, events, dialogue)
     assert not [g for g in s02.find_coverage_gaps(extraction) if g[0] == "characters"]
+
+
+# --- the part > 0 assumption, third occurrence (2026-08-26) ------------------------
+#
+# load_chapters selected `part > 0`, so on any book without Parts it returned NOTHING
+# and step 02 reported "0 chapters, 0 to extract" and exited CLEAN. Steps 03-06 then ran
+# on an empty extraction and produced an empty analysis, and only step 06 noticed - as
+# "extraction files 0 != chapters 3", five steps downstream of the cause.
+#
+# Front matter is the n == 0 sentinel. That is the discriminator, and it holds for every
+# book. Same fix already applied in step_01_ingest._check_chapters and step_06_verify.
+
+def test_chapters_are_selected_by_n_not_by_part(tmp_path):
+    import json
+    from scripts.analysis.step_02_extract import _load_chapters
+    source = tmp_path / "source"
+    (source / "chapters").mkdir(parents=True)
+    for n in (0, 1, 2):
+        (source / "chapters" / f"ch_{n:02d}.json").write_text(
+            json.dumps({"n": n, "part": 0, "title": f"c{n}",
+                        "paragraphs": [{"n": 1, "text": "x"}]}), encoding="utf-8")
+    (source / "book.json").write_text(json.dumps({"chapters": [
+        {"n": n, "part": 0, "file": f"chapters/ch_{n:02d}.json"} for n in (0, 1, 2)]}),
+        encoding="utf-8")
+    assert [c["n"] for c in _load_chapters(source.parent)] == [1, 2]
+
+
+def test_front_matter_is_still_excluded(tmp_path):
+    import json
+    from scripts.analysis.step_02_extract import _load_chapters
+    source = tmp_path / "source"
+    (source / "chapters").mkdir(parents=True)
+    (source / "chapters" / "ch_00.json").write_text(
+        json.dumps({"n": 0, "part": 0, "title": "Front matter",
+                    "paragraphs": [{"n": 1, "text": "preface"}]}), encoding="utf-8")
+    (source / "book.json").write_text(json.dumps({"chapters": [
+        {"n": 0, "part": 0, "file": "chapters/ch_00.json"}]}), encoding="utf-8")
+    assert _load_chapters(source.parent) == []
+
+
+def test_a_book_with_parts_still_loads_every_chapter(tmp_path):
+    import json
+    from scripts.analysis.step_02_extract import _load_chapters
+    source = tmp_path / "source"
+    (source / "chapters").mkdir(parents=True)
+    for n, part in ((0, 0), (1, 1), (2, 2)):
+        (source / "chapters" / f"ch_{n:02d}.json").write_text(
+            json.dumps({"n": n, "part": part, "title": "t",
+                        "paragraphs": [{"n": 1, "text": "x"}]}), encoding="utf-8")
+    (source / "book.json").write_text(json.dumps({"chapters": [
+        {"n": n, "part": p, "file": f"chapters/ch_{n:02d}.json"}
+        for n, p in ((0, 0), (1, 1), (2, 2))]}), encoding="utf-8")
+    assert [c["n"] for c in _load_chapters(source.parent)] == [1, 2]
+
+
+def test_an_issue_naming_an_unknown_chapter_is_skipped_not_fatal():
+    """The auditor returns a chapter NUMBER, and it can name one that is not in this
+    run's chapter list - a hallucinated number, or a chapter filtered out upstream.
+    `next(...)` raised StopIteration and killed the whole step AFTER the extraction had
+    already been bought and written. An agent's output is input, not a guarantee."""
+    from scripts.analysis.step_02_extract import runnable_targets
+    chapters = [{"n": 1}, {"n": 2}]
+    issues = [{"chapter": 1, "dimension": "time"},
+              {"chapter": 99, "dimension": "time"},
+              {"chapter": 2, "dimension": "characters"}]
+    assert runnable_targets(issues, chapters) == [(1, "time"), (2, "characters")]
+
+
+def test_an_unknown_dimension_is_skipped():
+    from scripts.analysis.step_02_extract import runnable_targets
+    issues = [{"chapter": 1, "dimension": "vibes"}, {"chapter": 1, "dimension": "time"}]
+    assert runnable_targets(issues, [{"n": 1}]) == [(1, "time")]
+
+
+def test_targets_are_deduplicated_and_ordered():
+    from scripts.analysis.step_02_extract import runnable_targets
+    issues = [{"chapter": 2, "dimension": "time"}, {"chapter": 1, "dimension": "time"},
+              {"chapter": 2, "dimension": "time"}]
+    assert runnable_targets(issues, [{"n": 1}, {"n": 2}]) == [(1, "time"), (2, "time")]
+
+
+def test_no_runnable_targets_returns_empty_rather_than_raising():
+    from scripts.analysis.step_02_extract import runnable_targets
+    assert runnable_targets([{"chapter": 99, "dimension": "time"}], [{"n": 1}]) == []
