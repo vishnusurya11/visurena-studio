@@ -356,8 +356,15 @@ def chapterize(book: dict, toc: list[dict], out_dir: Path):
                 chapters[-1]["paragraphs"].append({"n": para_n, "text": block["text"]})
     if not chapters[0]["paragraphs"]:
         chapters.pop(0)
+    # Fold BEFORE writing. Folding after the files existed renumbered the in-memory list
+    # while the on-disk ch_NN.json kept the old numbers, so the manifest pointed at the
+    # wrong files - which the 01_05 agent check caught, correctly, as "the title page
+    # was split and misassigned".
+    unfolded = chapters
+    chapters = fold_empty_headings(chapters)
+    expected = folded_expectation(len(chapter_ords), unfolded, chapters)
     _write_chapters(chapters, out_dir)
-    return chapters, parts_meta, len(chapter_ords)  # TOC's own chapter count = expectation
+    return chapters, parts_meta, expected
 
 
 def _write_chapters(chapters: list[dict], out_dir: Path) -> None:
@@ -397,8 +404,52 @@ def _garbled(text: str) -> str | None:
     return None
 
 
+def fold_empty_headings(chapters: list[dict]) -> list[dict]:
+    """A heading with no text before the next heading is part of that heading.
+
+    Frankenstein sets its own title across two lines - "Frankenstein;" and "or, the
+    Modern Prometheus" - so the first became a chapter with zero paragraphs and ingest
+    died on "chapter 1 is empty" for a book it had otherwise parsed correctly. A wrapped
+    title is common in Gutenberg HTML and it is not a chapter boundary.
+
+    The n==0 front-matter sentinel is exempt: it anchors the coordinate system and later
+    steps expect it whether or not the book has front matter.
+    """
+    folded: list[dict] = []
+    carry = ""
+    for chapter in chapters:
+        if chapter["n"] > 0 and not chapter["paragraphs"]:
+            carry = f"{carry} {chapter['title']}".strip() if carry else chapter["title"]
+            continue                       # fold forward into the next real chapter
+        title = f"{carry} {chapter['title']}".strip() if carry else chapter["title"]
+        folded.append({**chapter, "title": title})
+        carry = ""
+    for number, chapter in enumerate(c for c in folded if c["n"] > 0):
+        chapter["n"] = number + 1
+    return folded
+
+
+def folded_expectation(expected: int | None, before: list[dict],
+                       after: list[dict]) -> int | None:
+    """Move the TOC expectation by however many headings were folded away.
+
+    The expectation comes from the TOC, which counts a wrapped title as two entries.
+    Folding merges them, so the actual count drops and a comparison against the unfolded
+    expectation fails on a book that parsed correctly. Fixing one side of a comparison
+    and not the other is how checks in this repo have been broken before.
+    """
+    if expected is None:
+        return None
+    removed = len([c for c in before if c["n"] > 0]) - len([c for c in after if c["n"] > 0])
+    return max(0, expected - removed)
+
+
 def _check_chapters(chapters: list[dict], expected: int | None) -> None:
-    real = [c for c in chapters if c["part"] > 0]
+    # `n > 0`, NOT `part > 0`. Front matter is the n==0 sentinel; a PART is optional and
+    # most novels have none. Using part as the discriminator meant any book without
+    # Parts - Frankenstein, Dracula, Metamorphosis - died here claiming every paragraph
+    # landed in front matter, on books it had just chapterized correctly.
+    real = [c for c in chapters if c["n"] > 0]
     if not real:
         # The expectation is derived from the TOC, so an empty TOC expected zero
         # chapters and zero chapters matched: a check that could not fail. The whole
@@ -409,7 +460,9 @@ def _check_chapters(chapters: list[dict], expected: int | None) -> None:
     if expected is not None and len(real) != expected:
         raise ValueError(f"chapter count {len(real)} != expected {expected}")
     for ch in chapters:
-        if not ch["paragraphs"]:
+        # The n==0 front-matter sentinel may legitimately be empty: a book that opens
+        # straight on Chapter 1 has no front matter, and that is not a defect.
+        if not ch["paragraphs"] and ch["n"] > 0:
             raise ValueError(f"chapter {ch['n']} is empty")
         if [p["n"] for p in ch["paragraphs"]] != list(range(1, len(ch["paragraphs"]) + 1)):
             raise ValueError(f"chapter {ch['n']} paragraph numbering not contiguous")

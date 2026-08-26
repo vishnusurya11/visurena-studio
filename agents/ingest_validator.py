@@ -59,8 +59,11 @@ def _sample(chapter: dict) -> dict:
         "part": chapter["part"],
         "title": chapter["title"],
         "paragraph_count": len(paragraphs),
-        "first_paragraph": _edge(paragraphs[0]["text"], "start"),
-        "last_paragraph": _edge(paragraphs[-1]["text"], "end"),
+        # An empty chapter is legitimate: the n==0 front-matter sentinel is empty for
+        # any book that opens straight on Chapter 1. Indexing it unconditionally killed
+        # a Frankenstein parse that had already passed every check.
+        "first_paragraph": _edge(paragraphs[0]["text"], "start") if paragraphs else "",
+        "last_paragraph": _edge(paragraphs[-1]["text"], "end") if paragraphs else "",
     }
 
 

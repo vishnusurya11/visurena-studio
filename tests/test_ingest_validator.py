@@ -98,3 +98,21 @@ def test_samples_take_edges_with_cut_markers(tmp_path):
     text = iv.build_input(src)
     assert "and so it ended properly." in text     # true ending visible to the judge
     assert "[cut]" in text                          # our slice explicitly marked
+
+
+def test_sampling_an_empty_chapter_does_not_crash():
+    """A book that opens straight on Chapter 1 has an empty front-matter sentinel, and
+    the sampler indexed paragraphs[0] unconditionally. Frankenstein crashed here after
+    its checks had already PASSED - the validator killed a successful parse."""
+    from agents.ingest_validator import _sample
+    sample = _sample({"n": 0, "part": 0, "title": "Front matter", "paragraphs": []})
+    assert sample["paragraph_count"] == 0
+    assert sample["first_paragraph"] == "" and sample["last_paragraph"] == ""
+
+
+def test_sampling_a_one_paragraph_chapter_uses_it_for_both_edges():
+    from agents.ingest_validator import _sample
+    sample = _sample({"n": 1, "part": 0, "title": "A",
+                      "paragraphs": [{"text": "only one"}]})
+    assert "only one" in sample["first_paragraph"]
+    assert "only one" in sample["last_paragraph"]

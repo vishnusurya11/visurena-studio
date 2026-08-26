@@ -32,7 +32,7 @@ def _load(book_dir: Path, name: str):
 def integrity(book_dir: Path) -> tuple[list[str], dict]:
     problems, facts = [], {}
     manifest = json.loads((book_dir / "source" / "book.json").read_text(encoding="utf-8"))
-    facts["chapters"] = len([c for c in manifest["chapters"] if c["part"] > 0])
+    facts["chapters"] = len([c for c in manifest["chapters"] if c["n"] > 0])
     extraction_files = sorted((book_dir / "analysis" / "extraction").glob("ch_*.json"))
     facts["extraction_files"] = len(extraction_files)
     if facts["extraction_files"] != facts["chapters"]:
