@@ -389,3 +389,31 @@ def test_a_book_with_one_heading_per_chapter_is_unaffected():
 def test_an_empty_ordinal_map_counts_zero():
     from scripts.analysis.step_01_ingest import chapter_count
     assert chapter_count({}) == 0
+
+
+# --- garbled-text false positives (2026-08-26) -------------------------------------
+#
+# The long-token check stripped dashes only from the ENDS of a token, so a legitimate
+# hyphenated compound counted as one long word. Dracula's "two-pages-to-the-week-with-
+# Sunday-squeezed-in-a-corner" and Peter Pan's em-dashed "but-I-am-too-tired-to-bring-
+# it" both tripped it. Glued text has no separators; a compound is separators.
+
+def test_a_long_hyphenated_compound_is_not_garbled():
+    from scripts.analysis.step_01_ingest import _garbled
+    assert _garbled("a two-pages-to-the-week-with-Sunday-squeezed-in-a-corner diary") is None
+
+
+def test_an_em_dashed_run_is_not_garbled():
+    from scripts.analysis.step_01_ingest import _garbled
+    assert _garbled("but\u2014I\u2014am\u2014too\u2014tired\u2014to\u2014bring\u2014it") is None
+
+
+def test_genuinely_glued_text_is_still_caught():
+    """The bug this check exists for: words run together with no separator at all."""
+    from scripts.analysis.step_01_ingest import _garbled
+    assert _garbled("thequickbrownfoxjumpedoverthelazydogandkeptonrunning") is not None
+
+
+def test_a_normal_sentence_is_clean():
+    from scripts.analysis.step_01_ingest import _garbled
+    assert _garbled("It was the best of times, it was the worst of times.") is None

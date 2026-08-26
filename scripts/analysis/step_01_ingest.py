@@ -53,12 +53,25 @@ REMEDIES = {
 }
 
 
+# Issue kinds that are worth recording but must not stop a correct parse.
+#
+# Once the cartographer got the chapters right, Pride and Prejudice and Tom Sawyer still
+# failed on front matter - and both had every chapter correct, 61 of 61 for P&P. Their
+# "problem" is a real 225-paragraph Saintsbury preface. Front matter having content is
+# what front matter IS.
+#
+# structure, boundary and garbled stay blocking, because those say the TEXT is wrong.
+ADVISORY_KINDS = ("front_matter", "metadata", "parts")
+
+
 def plan_remedies(issues) -> list[str]:
     """Issues -> adjustment actions. Applies every fixable remedy and lets the
     re-run's agent verdict re-judge (fixing one cause often clears several issues).
     Escalates ONLY when no issue has any safe remedy."""
     actions, unfixable = [], []
     for issue in issues:
+        if issue.kind in ADVISORY_KINDS:
+            continue
         action = REMEDIES.get(issue.kind)
         if action and action not in actions:
             actions.append(action)
@@ -335,6 +348,43 @@ def _lookup(key: str, table: dict) -> int | None:
     return hits.pop() if len(hits) == 1 else None
 
 
+def chapters_from_map(book: dict, book_map) -> list[dict]:
+    """Assemble chapters from the cartographer's map. No TOC text matching.
+
+    The deterministic path matched TOC entry text against body heading text, which works
+    only when they correspond one to one - true for 3 of 8 books tested. Here every
+    heading already carries a ROLE, so a chapter simply opens at each heading whose role
+    is `chapter`, and none of the five ways a TOC and a body disagree can break it.
+
+    Prose under a non-chapter heading is NOT discarded. A closing note is not a chapter,
+    but its words are still part of the book, and silent loss is the failure mode of
+    every join in this pipeline.
+    """
+    roles = {d.candidate_id: d.role for d in book_map.divisions}
+    stream = _flatten(book)
+    heading_order = [i for i, (_, _, _, b) in enumerate(stream) if b["kind"] == "heading"]
+    role_at = {index: roles.get(f"h{order + 1:03d}")
+               for order, index in enumerate(heading_order)}
+
+    chapters = [{"n": 0, "part": 0, "title": "Front matter", "paragraphs": []}]
+    part_now = 0
+    for index, (_, _, _, block) in enumerate(stream):
+        role = role_at.get(index)
+        if block["kind"] == "heading" and role == "part":
+            part_now += 1
+        elif block["kind"] == "heading" and role == "chapter":
+            chapters.append({"n": len([c for c in chapters if c["n"] > 0]) + 1,
+                             "part": part_now, "title": block["text"],
+                             "paragraphs": []})
+        elif block["kind"] == "para":
+            paragraphs = chapters[-1]["paragraphs"]
+            paragraphs.append({"n": len(paragraphs) + 1, "text": block["text"]})
+    # An agent's output is INPUT, not a guarantee. The skill tells it not to mark a
+    # heading `chapter` when no prose follows, and Moby Dick shows it does anyway - so
+    # the same fold that handles a wrapped title handles a mis-mapped one.
+    return fold_empty_headings(chapters)
+
+
 def chapterize(book: dict, toc: list[dict], out_dir: Path):
     """Walk blocks in spine order; headings matching TOC open parts/chapters;
     front matter before chapter 1 becomes chapter 0 (part 0)."""
@@ -417,7 +467,13 @@ def _garbled(text: str) -> str | None:
     if _ENTITY.search(text):
         return "unresolved html entity"
     longest = max((w for w in text.split()), key=len, default="")
-    if len(longest.strip("\u2014-")) > _LONG_TOKEN:
+    # Measure the longest RUN OF LETTERS, not the longest whitespace-delimited
+    # token. A hyphenated or em-dashed compound is separators; glued text is the
+    # absence of them. Stripping dashes only from the ENDS made every long
+    # compound look glued - Dracula and Peter Pan both died on real prose.
+    longest = max(re.split(r"[\u2014\u2013\-\u2010\u2011/]+", longest) or [""],
+                  key=len, default="")
+    if len(longest) > _LONG_TOKEN:
         return f"impossibly long token {longest[:40]!r} (text glued together?)"
     return None
 
@@ -594,6 +650,55 @@ def finalize(chapters: list[dict], out_dir: Path, source_path: Path,
 # --- runner ---
 
 
+def map_chapters(book: dict, toc: list[dict], out_dir: Path, tracker=None):
+    """Map the book's divisions with the cartographer, then assemble from the map.
+
+    The deterministic TOC-text matcher worked on 3 of 8 books and failed 5 different
+    ways. Rather than keep two paths and a rule for choosing between them, the agent is
+    the path: it costs about $0.002 a book and answers the question the matcher could
+    not - which of these headings is actually a chapter.
+
+    The deterministic count is still computed and LOGGED as a cross-check. It is no
+    longer the authority, but a disagreement is worth seeing.
+    """
+    from agents import book_cartographer
+
+    candidates = enumerate_candidates(book, toc)
+    usage: dict = {}
+    book_map = book_cartographer.map_book(candidates, toc, usage=usage)
+    chapters = chapters_from_map(book, book_map)
+    real = [c for c in chapters if c["n"] > 0]
+
+    if tracker:
+        tracker.log(f"cartographer: {book_map.structure}", step_id="01_03")
+        for missing in book_map.missing:
+            tracker.log(f"cartographer MISSING division {missing.expected_ordinal} "
+                        f"inside {missing.inside_candidate_id}: {missing.evidence}",
+                        level="WARNING", step_id="01_03")
+        _, ords, _ = _toc_parts_and_chapters(toc, book["title"])
+        if len(set(ords.values())) != len(real):
+            tracker.log(f"cross-check: TOC matching would have given "
+                        f"{len(set(ords.values()))} chapters, the map gives {len(real)}",
+                        step_id="01_03")
+    print(f"  01_03 cartographer: {book_map.structure[:96]}")
+    for missing in book_map.missing:
+        print(f"         MISSING division {missing.expected_ordinal} "
+              f"inside {missing.inside_candidate_id}")
+    _write_chapters(chapters, out_dir)
+    parts_meta = _parts_meta_from(chapters)
+    return chapters, parts_meta, len(real)
+
+
+def _parts_meta_from(chapters: list[dict]) -> list[dict]:
+    """Part records derived from what the map actually produced."""
+    seen: dict[int, dict] = {}
+    for chapter in chapters:
+        if chapter["part"] > 0 and chapter["part"] not in seen:
+            seen[chapter["part"]] = {"n": chapter["part"],
+                                     "title": f"Part {chapter['part']}"}
+    return list(seen.values())
+
+
 def _pass(tracker, raw, book_dir, source):
     """One pass of 01_02..01_05. Returns the agent Verdict, or None if RUN_UNTIL
     stopped before 01_05. Does not raise on a bad verdict — the improve loop decides."""
@@ -607,7 +712,8 @@ def _pass(tracker, raw, book_dir, source):
         return None
 
     with tracker.step("01_03"):
-        chapters, parts_meta, toc_expected = chapterize(book, raw["toc"], book_dir / "source")
+        chapters, parts_meta, toc_expected = map_chapters(book, raw["toc"],
+                                                          book_dir / "source", tracker)
         for ch in chapters:
             words = sum(len(p["text"].split()) for p in ch["paragraphs"])
             tracker.log(f"chapter n={ch['n']} part={ch['part']} paras="

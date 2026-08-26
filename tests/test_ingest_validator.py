@@ -116,3 +116,52 @@ def test_sampling_a_one_paragraph_chapter_uses_it_for_both_edges():
                       "paragraphs": [{"text": "only one"}]})
     assert "only one" in sample["first_paragraph"]
     assert "only one" in sample["last_paragraph"]
+
+
+# --- advisory issue kinds (2026-08-26) ---------------------------------------------
+#
+# Once the cartographer got the CHAPTERS right, two books still failed on front matter:
+# Pride and Prejudice carries a real 225-paragraph Saintsbury preface and Tom Sawyer a
+# 203-paragraph one. Both had every chapter correct - 61 of 61 for P&P. Front matter
+# having content is what front matter IS, so blocking a whole ingest on it stops a
+# correct parse over a matter of taste.
+#
+# Structure, boundary and garbled stay blocking: those say the TEXT is wrong.
+
+def test_a_front_matter_issue_does_not_block_the_ingest():
+    from scripts.analysis.step_01_ingest import ADVISORY_KINDS, plan_remedies
+    from agents.ingest_validator import Issue
+    assert "front_matter" in ADVISORY_KINDS
+    plan_remedies([Issue(kind="front_matter", chapter=0, severity="minor", note="preface present")])
+
+
+def test_a_structural_issue_still_blocks():
+    import pytest
+    from scripts.analysis.step_01_ingest import plan_remedies
+    from agents.ingest_validator import Issue
+    with pytest.raises(ValueError, match="no safe auto-remedy"):
+        plan_remedies([Issue(kind="structure", chapter=1, severity="minor", note="no divisions found")])
+
+
+def test_a_garbled_issue_still_blocks():
+    import pytest
+    from scripts.analysis.step_01_ingest import plan_remedies
+    from agents.ingest_validator import Issue
+    with pytest.raises(ValueError, match="no safe auto-remedy"):
+        plan_remedies([Issue(kind="garbled", chapter=3, severity="minor", note="mojibake")])
+
+
+def test_a_fixable_issue_still_returns_its_remedy():
+    from scripts.analysis.step_01_ingest import plan_remedies
+    from agents.ingest_validator import Issue
+    assert plan_remedies([Issue(kind="boilerplate", chapter=0, severity="minor", note="pg text")]) == \
+        ["strip_pg_phrases"]
+
+
+def test_an_advisory_issue_alongside_a_blocking_one_still_blocks():
+    import pytest
+    from scripts.analysis.step_01_ingest import plan_remedies
+    from agents.ingest_validator import Issue
+    with pytest.raises(ValueError):
+        plan_remedies([Issue(kind="front_matter", chapter=0, severity="minor", note="preface"),
+                       Issue(kind="structure", chapter=1, severity="minor", note="no divisions")])
