@@ -362,7 +362,25 @@ def chapterize(book: dict, toc: list[dict], out_dir: Path):
     # was split and misassigned".
     unfolded = chapters
     chapters = fold_empty_headings(chapters)
-    expected = folded_expectation(len(chapter_ords), unfolded, chapters)
+    # The contents page is prose-shaped but is not prose. Drop it before the count is
+    # taken, so the expectation and the reality are computed over the same set.
+    chapters = drop_contents_pages(chapters, [t["title"] for t in toc])
+    # HONEST STATE, 2026-08-26: this expectation is right for 2 of 7 books and I stopped
+    # patching it rather than trade one book against another.
+    #
+    # The adjustment is needed by Frankenstein and Metamorphosis (a wrapped title really
+    # does remove a chapter) and wrong for Dracula (whose folded heading shared an
+    # ordinal that chapter_count already collapses). Removing it fixed Dracula's
+    # expectation and immediately broke Metamorphosis. That is whack-a-mole, and it is
+    # the symptom of a wrong model rather than a missing case.
+    #
+    # The real problem is upstream and is the same one in every remaining failure: TOC
+    # entries and body headings do not correspond one-to-one. Dracula opens "D R A C U
+    # L A" and "NOTE" as chapters; Peter Pan finds 17 of 18; Pride and Prejudice finds
+    # 27 of 61. Counting is not the fix - MATCHING is. See docs/analysis for the
+    # cartographer work this belongs to.
+    folded_only = fold_empty_headings(unfolded)
+    expected = folded_expectation(len(chapter_ords), unfolded, folded_only)
     _write_chapters(chapters, out_dir)
     return chapters, parts_meta, expected
 
@@ -402,6 +420,78 @@ def _garbled(text: str) -> str | None:
     if len(longest.strip("\u2014-")) > _LONG_TOKEN:
         return f"impossibly long token {longest[:40]!r} (text glued together?)"
     return None
+
+
+# TOC entries that are apparatus, not chapters. Matched on the WHOLE normalized entry,
+# never as a substring: "The Contents of the Casket" is a chapter.
+NOT_A_CHAPTER = {
+    "contents", "table of contents", "title page", "titlepage", "cover", "colophon",
+    "index", "illustrations", "list of illustrations", "transcriber's note",
+    "transcribers note", "note", "advertisement", "frontispiece",
+}
+
+
+def chapter_count(chapter_ords: dict) -> int:
+    """How many CHAPTERS the TOC describes - not how many heading texts it lists.
+
+    chapter_ords maps every heading text to an ordinal, so a chapter announced by two
+    headings contributes two keys. Dracula lists "D R A C U L A" and "CHAPTER I ..."
+    both pointing at chapter 2, so counting keys claimed 29 chapters in a 28-chapter
+    book and failed a parse that was correct.
+    """
+    return len(set(chapter_ords.values()))
+
+
+def chapter_titles(toc: list[dict]) -> list[str]:
+    """TOC entries that are actually chapters.
+
+    The expectation and the body must be cleaned the SAME way. Adjusting the TOC count
+    by what was removed from the body only works when the removed thing was counted in
+    the TOC - and a contents page never is, which is why a correct 29-chapter Dracula
+    failed against an expectation wrongly shrunk to 28.
+    """
+    kept = []
+    for entry in toc:
+        title = (entry.get("title") or "").strip()
+        key = _normalize(title)
+        if not key or key in NOT_A_CHAPTER:
+            continue
+        if key.startswith("the full project gutenberg"):
+            continue
+        kept.append(title)
+    return kept
+
+
+CONTENTS_MATCH = 0.6     # share of a chapter's paragraphs that must BE toc entries
+
+
+def is_contents_page(chapter: dict, toc_titles: list[str]) -> bool:
+    """Is this chapter the book's table of contents, ingested as prose?
+
+    Frankenstein's chapter 1 arrived as 28 paragraphs reading "Letter 1", "Letter 2",
+    ... "Chapter 24". No heuristic about word count or page position is needed, and
+    none would generalise: the contents page is the one whose PARAGRAPHS ARE THE TOC'S
+    OWN ENTRY TITLES. A chapter that merely opens with "Chapter 1" and then contains
+    prose does not match, because the share is measured over every paragraph.
+    """
+    paragraphs = chapter.get("paragraphs") or []
+    if not paragraphs or not toc_titles:
+        return False
+    titles = {_normalize(t) for t in toc_titles}
+    hits = sum(1 for p in paragraphs if _normalize(p.get("text", "")) in titles)
+    return hits / len(paragraphs) >= CONTENTS_MATCH
+
+
+def drop_contents_pages(chapters: list[dict], toc_titles: list[str]) -> list[dict]:
+    """Remove contents pages and renumber. The n==0 sentinel is never dropped: it
+    anchors the coordinate system every later step reads."""
+    kept = [c for c in chapters
+            if c["n"] == 0 or not is_contents_page(c, toc_titles)]
+    if len(kept) == len(chapters):
+        return chapters
+    for number, chapter in enumerate(c for c in kept if c["n"] > 0):
+        chapter["n"] = number + 1
+    return kept
 
 
 def fold_empty_headings(chapters: list[dict]) -> list[dict]:

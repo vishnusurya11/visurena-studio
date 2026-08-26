@@ -260,3 +260,132 @@ def test_chapter_files_are_written_with_the_folded_numbering(tmp_path):
     _write_chapters(folded, tmp_path)
     written = sorted(p.name for p in (tmp_path / "chapters").glob("ch_*.json"))
     assert written == ["ch_00.json", "ch_01.json"]
+
+
+# --- the contents page (2026-08-26) ------------------------------------------------
+#
+# Frankenstein's chapter 1 came out as 28 "paragraphs" reading "Letter 1", "Letter 2",
+# ... "Chapter 24". That is the book's table of contents ingested as prose. It is
+# detectable without a heuristic about page position or word count: a chapter whose
+# paragraphs ARE the TOC's own entry titles is the contents page.
+
+TOC_TITLES = ["Letter 1", "Letter 2", "Chapter 1", "Chapter 2", "Chapter 3"]
+
+
+def _ch(texts, n=1):
+    return {"n": n, "part": 0, "title": "Contents",
+            "paragraphs": [{"n": i, "text": t} for i, t in enumerate(texts, 1)]}
+
+
+def test_a_chapter_made_of_toc_entries_is_the_contents_page():
+    from scripts.analysis.step_01_ingest import is_contents_page
+    assert is_contents_page(_ch(TOC_TITLES), TOC_TITLES)
+
+
+def test_real_prose_is_not_the_contents_page():
+    from scripts.analysis.step_01_ingest import is_contents_page
+    prose = ["You will rejoice to hear that no disaster has accompanied the "
+             "commencement of an enterprise which you have regarded with such evil "
+             "forebodings.", "I arrived here yesterday."]
+    assert not is_contents_page(_ch(prose), TOC_TITLES)
+
+
+def test_a_chapter_that_merely_mentions_a_chapter_title_is_not_contents():
+    from scripts.analysis.step_01_ingest import is_contents_page
+    mixed = ["Chapter 1", "It was a dark and stormy night, and the wind howled on.",
+             "He walked for a long while without speaking to anyone at all."]
+    assert not is_contents_page(_ch(mixed), TOC_TITLES)
+
+
+def test_matching_ignores_case_and_punctuation():
+    from scripts.analysis.step_01_ingest import is_contents_page
+    assert is_contents_page(_ch(["LETTER 1.", "letter 2", "Chapter 1"]), TOC_TITLES)
+
+
+def test_an_empty_chapter_is_not_the_contents_page():
+    from scripts.analysis.step_01_ingest import is_contents_page
+    assert not is_contents_page(_ch([]), TOC_TITLES)
+
+
+def test_the_front_matter_sentinel_is_never_treated_as_contents():
+    """Dropping n==0 would remove the coordinate anchor every later step expects."""
+    from scripts.analysis.step_01_ingest import drop_contents_pages
+    chapters = [_ch(TOC_TITLES, n=0), _ch(["Real prose here, at some length."], n=1)]
+    assert [c["n"] for c in drop_contents_pages(chapters, TOC_TITLES)] == [0, 1]
+
+
+def test_dropping_contents_renumbers_the_survivors():
+    from scripts.analysis.step_01_ingest import drop_contents_pages
+    chapters = [
+        {"n": 0, "part": 0, "title": "Front matter", "paragraphs": []},
+        _ch(TOC_TITLES, n=1),
+        _ch(["Real prose here, at some length, with actual sentences in it."], n=2),
+    ]
+    kept = drop_contents_pages(chapters, TOC_TITLES)
+    assert [c["n"] for c in kept] == [0, 1] and len(kept) == 2
+
+
+def test_a_book_with_no_contents_page_is_untouched():
+    from scripts.analysis.step_01_ingest import drop_contents_pages
+    chapters = [{"n": 0, "part": 0, "title": "F", "paragraphs": []},
+                _ch(["Real prose, long enough to be prose."], n=1)]
+    assert drop_contents_pages(chapters, TOC_TITLES) == chapters
+
+
+# --- the expectation must be cleaned like the body (2026-08-26) --------------------
+#
+# Third time this repo has hit the same shape: a check whose two sides are derived
+# differently. `folded_expectation` adjusted the TOC count by what was removed from the
+# BODY, which is only correct when the removed thing was also counted in the TOC.
+#
+# Dracula's contents page was produced as a chapter and dropped - correctly - but
+# "Contents" was never in the TOC's chapter count, so subtracting it made a correct body
+# count of 29 fail against a wrongly-shrunk expectation of 28.
+#
+# The fix is to clean the EXPECTATION at its source instead of patching it afterwards.
+
+def test_a_contents_entry_is_not_counted_as_a_chapter():
+    from scripts.analysis.step_01_ingest import chapter_titles
+    toc = [{"title": "Contents"}, {"title": "Chapter I"}, {"title": "Chapter II"}]
+    assert chapter_titles(toc) == ["Chapter I", "Chapter II"]
+
+
+def test_front_and_back_matter_entries_are_not_chapters():
+    from scripts.analysis.step_01_ingest import chapter_titles
+    toc = [{"title": "Title Page"}, {"title": "Chapter I"},
+           {"title": "THE FULL PROJECT GUTENBERG LICENSE"}]
+    assert chapter_titles(toc) == ["Chapter I"]
+
+
+def test_a_real_chapter_named_like_matter_is_kept():
+    """'The Contents of the Casket' is a chapter, not a contents page. Matching must be
+    on the WHOLE entry, never a substring - the mistake that cost 298 character
+    references in step 03."""
+    from scripts.analysis.step_01_ingest import chapter_titles
+    toc = [{"title": "Contents"}, {"title": "The Contents of the Casket"}]
+    assert chapter_titles(toc) == ["The Contents of the Casket"]
+
+
+def test_matching_ignores_case_and_spacing():
+    from scripts.analysis.step_01_ingest import chapter_titles
+    assert chapter_titles([{"title": "  CONTENTS  "}, {"title": "Chapter I"}]) == \
+        ["Chapter I"]
+
+
+def test_the_expectation_counts_chapters_not_alias_keys():
+    """`chapter_ords` maps every TOC heading TEXT to a chapter ordinal, so two headings
+    for the same chapter are two keys. Dracula's TOC lists "D R A C U L A" and
+    "CHAPTER I ..." both pointing at chapter 2, so len(keys) claimed 29 chapters where
+    the book has 28, and a correct parse failed."""
+    from scripts.analysis.step_01_ingest import chapter_count
+    assert chapter_count({"d r a c u l a": 2, "chapter i": 2, "chapter ii": 3}) == 2
+
+
+def test_a_book_with_one_heading_per_chapter_is_unaffected():
+    from scripts.analysis.step_01_ingest import chapter_count
+    assert chapter_count({"chapter i": 1, "chapter ii": 2, "chapter iii": 3}) == 3
+
+
+def test_an_empty_ordinal_map_counts_zero():
+    from scripts.analysis.step_01_ingest import chapter_count
+    assert chapter_count({}) == 0
