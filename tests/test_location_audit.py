@@ -109,3 +109,38 @@ def test_the_previous_location_is_labelled_as_previous_not_proposed():
 
 def json_keys(payload):
     return " ".join(payload.keys())
+
+
+# --- the analysis-level audit ------------------------------------------------------
+
+def test_a_small_book_is_sampled_whole():
+    from scripts.analysis.audit_locations import stratified
+    scenes = [{"n": i} for i in range(10)]
+    assert stratified(scenes, 25) == scenes
+
+
+def test_the_sample_spans_the_whole_book():
+    """Evenly spaced, not random: location errors cluster positionally - a flashback
+    block, the last chapter - and a random sample can miss a whole run of them."""
+    from scripts.analysis.audit_locations import stratified
+    scenes = [{"n": i} for i in range(100)]
+    got = stratified(scenes, 5)
+    assert got[0]["n"] == 0 and got[-1]["n"] == 99 and len(got) == 5
+
+
+def test_the_sample_is_the_requested_size():
+    from scripts.analysis.audit_locations import stratified
+    assert len(stratified([{"n": i} for i in range(100)], 25)) == 25
+
+
+def test_scene_text_carries_the_named_place_as_a_claim_not_an_answer():
+    """The text NAMING a place is the weakest evidence and the commonest source of a
+    wrong answer, so it is labelled rather than presented as fact."""
+    from scripts.analysis.audit_locations import scene_text
+    lines = scene_text({"synopsis": "They talk.", "location_text": "Utah"})
+    assert any("the text names" in line for line in lines)
+
+
+def test_scene_text_survives_a_scene_with_nothing():
+    from scripts.analysis.audit_locations import scene_text
+    assert scene_text({}) == []

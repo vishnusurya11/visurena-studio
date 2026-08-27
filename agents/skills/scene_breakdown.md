@@ -96,3 +96,22 @@ alone.
 
 Paragraph precision is sufficient; place the boundary at the paragraph where the new
 scene's establishing material begins.
+
+---
+
+## Record the most specific place the scene actually plays in
+
+`location_text` is copied from the text, and that is right. But when the text names
+several places at different sizes, **record the smallest one the whole scene happens
+in**, not the largest and not the first.
+
+An audit of three books found the recurring failure is a scene filed under a container:
+a chapter that says *"at Ingolstadt … in the vaults and charnel-houses"* is a scene in
+**the vaults**, and recording "Ingolstadt" loses the only place a camera could stand.
+
+Equally, do not record a room the scene leaves. If characters move from the nursery to
+the stairs to the street, the scene is the **house**, not the nursery.
+
+And the trap that produced the clearest wrong answer in the whole audit: **a letter
+happens where it is written.** Frankenstein's opening names England, and is written from
+St Petersburg. Record where the characters are, never where the text points.

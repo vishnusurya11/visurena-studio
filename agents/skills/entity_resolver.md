@@ -71,3 +71,35 @@ Rules:
   only do that if the legs exist as places.
 - Never invent a coordinate for a place you cannot place: use `region: other` with the
   best guess and `approximate: true`.
+
+---
+
+## Interiors need their own entries, or every scene inside them is mis-placed
+
+An audit of three books by independent judges found the same gap five times: the
+registry held a town, and the scene happened in a room the registry had no entry for.
+
+> `ingolstadt` — the scene is in **the vaults and charnel-houses**
+> `orkney_island` — the scene is in **Victor's laboratory**
+> `geneva` — the scene is in **a barn**
+> `ireland_harbour_town` — the scene is in **a prison**
+
+Each of those was then filed under the town, which is a place no camera can stand in.
+**A settlement entry does not cover the interiors inside it.**
+
+So: **when the text names a room, a building, or an enclosed place, it earns its own
+canonical location** — even if it also sits inside a town you have already created, and
+even if it appears once. A location used by a single scene is not clutter; a scene filed
+under a county is a scene nobody can shoot or place on a map.
+
+Give the interior the containing settlement's coordinates. Being unable to geocode a barn
+is not a reason to file the scene under the county.
+
+**Vehicles are locations too.** A cab, a carriage, a ship's cabin, a railway compartment
+— a camera can be inside one, characters spend whole scenes there, and *"in a cab
+returning to Baker Street"* came back from the audit as a place the registry lacked.
+
+**The names to be most careful with are the ones that sound like locations and are not:**
+a country, a county, a state, an island, a region. Those belong in the registry only when
+a scene genuinely plays ACROSS them — a voyage, a crossing, a pursuit over open country —
+never as the home for a scene that happens in one room.

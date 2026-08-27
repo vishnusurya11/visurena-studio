@@ -51,3 +51,57 @@ long confessions by night).
   from context) | `low` (a judgement call between plausible options).
 - `reasoning`: one sentence naming the evidence, quoting the deciding phrase where you
   can. If your confidence is low, say what the alternative was.
+
+---
+
+## Granularity — the error that produced most of the wrong answers
+
+Three books were audited by independent judges, 25 scenes each. Of every location they
+overturned, **almost all were the right area at the wrong SIZE**, in both directions:
+
+| the pipeline said | the judges said | which way it was wrong |
+|---|---|---|
+| `ingolstadt` (a town) | the vaults and charnel-houses | too big |
+| `orkney_island` | Victor's laboratory | too big |
+| `geneva` | a barn | too big |
+| `darling_house_nursery` | `darling_house` | too small — the scene leaves the nursery |
+| `utah_mountains` | Eagle Cañon | too big |
+| `evian` | `geneva` | the wrong town entirely |
+
+**The rule: name the smallest place that contains the WHOLE scene.**
+
+Two tests, and a place must pass both:
+
+1. **Does everything in this scene happen there?** If characters move from the nursery
+   to the stairs to the street, the nursery is too small — the house, or the street, is
+   the answer.
+2. **Could a camera be set up there?** If the answer names a town, an island, a county
+   or a country, it is too big — you cannot set up in Ingolstadt. Name the building, the
+   room, the road, the clearing.
+
+A settlement is a legitimate location **only for a scene that genuinely plays across it**
+— a chase through streets, an arrival seen from outside. Not for a scene that happens in
+one room inside it.
+
+---
+
+## A scene happens where the CHARACTERS ARE, not where the text points
+
+The single clearest wrong answer in the audit: Frankenstein's opening was placed in
+**England**. It is a letter written **from St Petersburg** *to* England. The pipeline
+followed where the text pointed instead of where the writer sat.
+
+- A **letter** happens where it is WRITTEN, not where it is sent or read.
+- A **memory** or a told story happens where the TELLING happens.
+- A **destination** not yet reached is not the location. They are still on the road.
+- A place named in dialogue is not the location. A man in a London room recalling
+  Afghanistan is in **London**.
+
+## A journey is a place
+
+*"In a cab returning to Holmes's"* came back as a registry gap, because a vehicle in
+motion had no entry. It is a real location and a camera can be inside it.
+
+When a scene plays in transit, the location is **the vehicle or the road**, not the
+destination. If the scene both travels and arrives, give the place where most of it
+plays and say so.
