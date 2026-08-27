@@ -281,6 +281,38 @@ def runnable_targets(issues, chapters) -> list:
                    if i["dimension"] in SPECIALISTS and i["chapter"] in known})
 
 
+def extract_chapters(todo: list[dict], book_dir, tracker) -> tuple[list[dict], list[int]]:
+    """Extract each chapter, writing immediately. Returns (extractions, skipped).
+
+    A chapter the provider REFUSES is skipped, not fatal. Three of five books died with
+    "rejected by the content filter", one of them 90% through at $0.93 of paid work,
+    because this loop let ContentFiltered escape. A provider refusing one chapter of Moby
+    Dick is not a reason to lose the other 134.
+
+    It is recorded loudly rather than swallowed: an analysis that looks complete and is
+    quietly missing a chapter is worse than one that failed.
+    """
+    done, skipped = [], []
+    for chapter in todo:
+        try:
+            extraction = _run_crew(chapter, tracker)
+        except llm.ContentFiltered as exc:
+            skipped.append(chapter["n"])
+            if tracker:
+                tracker.log(f"ch {chapter['n']}: REFUSED by the content filter, skipped: "
+                            f"{exc}", level="WARNING", step_id="02_02")
+            print(f"  ch {chapter['n']:>2}: SKIPPED (content filter)")
+            continue
+        # WRITE IMMEDIATELY (resume rule): a crash at ch N keeps ch 1..N-1 paid work
+        path = _extraction_path(book_dir, chapter["n"])
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_text(json.dumps(extraction, ensure_ascii=False, indent=2),
+                        encoding="utf-8")
+        done.append(extraction)
+        print(f"  ch {chapter['n']:>2}: {len(extraction['scenes'])} scenes -> written")
+    return done, skipped
+
+
 def run(codex_id: str) -> None:
     conn = db.get_connection()
     db.get_codex(conn, codex_id)
@@ -294,12 +326,10 @@ def run(codex_id: str) -> None:
           f"(existing skipped)  run_id={tracker.run_id}  until={RUN_UNTIL}")
 
     with tracker.step("02_01"), tracker.step("02_02"), tracker.step("02_03"):
-        for chapter in todo:
-            extraction = _run_crew(chapter, tracker)
-            # WRITE IMMEDIATELY (resume rule): a crash at ch N keeps ch 1..N-1 paid work
-            _extraction_path(book_dir, chapter["n"]).write_text(
-                json.dumps(extraction, ensure_ascii=False, indent=2), encoding="utf-8")
-            print(f"  ch {chapter['n']:>2}: {len(extraction['scenes'])} scenes -> written")
+        _, filtered = extract_chapters(todo, book_dir, tracker)
+    if filtered:
+        print(f"  02_03: {len(filtered)} chapter(s) refused by the content filter: "
+              f"{filtered}")
     if RUN_UNTIL < "02_04":
         return
 

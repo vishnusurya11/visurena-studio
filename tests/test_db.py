@@ -208,3 +208,32 @@ def test_mark_stage_rejects_unknown_status(conn):
     codex_id = db.insert_codex(conn, "Dracula")
     with pytest.raises(ValueError):
         db.mark_stage(conn, codex_id, "analysis", "exploded")
+
+
+def test_a_batch_of_books_can_be_registered_in_one_second(tmp_path):
+    """The codex id is a second-resolution timestamp and collisions bump by +1s. With a
+    retry budget of 5 a batch insert died on the seventh book - registering a 22-book
+    corpus is not an exotic case, it is Tuesday."""
+    conn = db.get_connection(tmp_path / "batch.db")
+    db.init_db(conn)
+    ids = [db.insert_codex(conn, f"Book {i}") for i in range(30)]
+    assert len(set(ids)) == 30
+
+
+def test_ids_stay_the_documented_width_after_bumping(tmp_path):
+    """The codex table CHECKs length(id) = 14; a bump must not change that."""
+    conn = db.get_connection(tmp_path / "w.db")
+    db.init_db(conn)
+    assert all(len(db.insert_codex(conn, f"B{i}")) == 14 for i in range(20))
+
+
+def test_an_explicit_id_still_refuses_to_bump(tmp_path):
+    """An explicit id matches an existing library folder. Bumping it would silently
+    point at the wrong book."""
+    import sqlite3
+    import pytest
+    conn = db.get_connection(tmp_path / "e.db")
+    db.init_db(conn)
+    db.insert_codex(conn, "First", codex_id="20260827000001")
+    with pytest.raises(sqlite3.IntegrityError):
+        db.insert_codex(conn, "Second", codex_id="20260827000001")

@@ -456,3 +456,57 @@ def test_a_transcribers_note_in_front_matter_is_allowed():
                                      "Project Gutenberg."}]},
                 {"n": 1, "part": 0, "title": "A", "paragraphs": [{"n": 1, "text": "x"}]}]
     _check_chapters(chapters, 1)      # must not raise
+
+
+# --- punctuation runs are not words (2026-08-27) -----------------------------------
+#
+# Around the World in Eighty Days died on "impossibly long token '.........................'"
+# - a row of dots, the leader rule from a table of contents or a printed pause. The check
+# splits on dashes but treated a run of dots as one enormous word.
+#
+# A word is letters. The check exists to find LETTERS glued together with no separator.
+
+def test_a_run_of_dots_is_not_a_long_token():
+    from scripts.analysis.step_01_ingest import _garbled
+    assert _garbled("Chapter I " + "." * 40 + " page 1") is None
+
+
+def test_a_run_of_underscores_or_asterisks_is_not_a_long_token():
+    from scripts.analysis.step_01_ingest import _garbled
+    assert _garbled("_" * 50) is None and _garbled("*" * 50) is None
+
+
+def test_glued_letters_are_still_caught():
+    from scripts.analysis.step_01_ingest import _garbled
+    assert _garbled("thequickbrownfoxjumpedoverthelazydogandkeptrunning") is not None
+
+
+def test_a_long_number_is_not_glued_prose():
+    from scripts.analysis.step_01_ingest import _garbled
+    assert _garbled("1234567890123456789012345678901234567890") is None
+
+
+# --- console encoding must never lose a book (2026-08-27) --------------------------
+#
+# Twenty Thousand Leagues died with "'charmap' codec can't encode character '\u2032'".
+# That is a PRINT failing on a Windows cp1252 console - the data was fine, the parse was
+# fine, and the book was lost to a progress message. Any book with a prime, a curly
+# quote or an accent could hit it.
+
+def test_console_safe_never_raises_on_any_unicode():
+    from scripts.analysis.step_01_ingest import console_safe
+    for text in ("30\u2032 45\u2033", "caf\u00e9", "\u201cquoted\u201d",
+                 "\u4e2d\u6587", "plain ascii"):
+        assert isinstance(console_safe(text), str)
+
+
+def test_console_safe_keeps_text_that_encodes_cleanly():
+    from scripts.analysis.step_01_ingest import console_safe
+    assert console_safe("It was the best of times.") == "It was the best of times."
+
+
+def test_console_safe_replaces_rather_than_dropping_the_line():
+    """Losing the character is fine; losing the message is not."""
+    from scripts.analysis.step_01_ingest import console_safe
+    got = console_safe("chapter 30\u2032 title")
+    assert "chapter" in got and "title" in got

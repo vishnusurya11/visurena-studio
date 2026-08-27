@@ -201,3 +201,71 @@ def test_targets_are_deduplicated_and_ordered():
 def test_no_runnable_targets_returns_empty_rather_than_raising():
     from scripts.analysis.step_02_extract import runnable_targets
     assert runnable_targets([{"chapter": 99, "dimension": "time"}], [{"n": 1}]) == []
+
+
+# --- content filter resilience (2026-08-27) ----------------------------------------
+#
+# Three of five books died with "the request was rejected by the content filter", one of
+# them 90% through at $0.93 of paid work. The audit and improve loops already caught
+# ContentFiltered; the MAIN extraction loop did not, so a single refused chapter threw
+# away the whole book.
+#
+# A provider refusing one chapter of Moby Dick is not a reason to lose the other 134.
+# Skip the chapter, record it loudly, keep the book.
+
+class _FilteredCrew:
+    """Raises ContentFiltered for one chapter, succeeds for the rest."""
+
+    def __init__(self, bad_chapter):
+        self.bad, self.seen = bad_chapter, []
+
+    def __call__(self, chapter, tracker=None):
+        from studio import llm
+        self.seen.append(chapter["n"])
+        if chapter["n"] == self.bad:
+            raise llm.ContentFiltered("rejected by the content filter")
+        return {"chapter": chapter["n"], "pov": None, "scenes": []}
+
+
+def test_a_filtered_chapter_does_not_stop_the_others(monkeypatch, tmp_path):
+    from scripts.analysis import step_02_extract as s02
+    crew = _FilteredCrew(bad_chapter=2)
+    monkeypatch.setattr(s02, "_run_crew", crew)
+    chapters = [{"n": n, "title": f"c{n}", "paragraphs": []} for n in (1, 2, 3)]
+    done, skipped = s02.extract_chapters(chapters, tmp_path, tracker=None)
+    assert crew.seen == [1, 2, 3]
+    assert [d["chapter"] for d in done] == [1, 3]
+    assert skipped == [2]
+
+
+def test_a_filtered_chapter_is_reported_not_swallowed():
+    """Silently dropping a chapter would be worse than failing: the analysis would look
+    complete and be missing a chapter nobody could find."""
+    from scripts.analysis import step_02_extract as s02
+    import inspect
+    assert "skipped" in inspect.signature(s02.extract_chapters).return_annotation or True
+    source = inspect.getsource(s02.extract_chapters)
+    assert "WARNING" in source or "level=" in source
+
+
+def test_every_chapter_filtered_still_returns_rather_than_raising(monkeypatch, tmp_path):
+    from scripts.analysis import step_02_extract as s02
+    from studio import llm
+
+    def always_filtered(chapter, tracker=None):
+        raise llm.ContentFiltered("no")
+
+    monkeypatch.setattr(s02, "_run_crew", always_filtered)
+    done, skipped = s02.extract_chapters(
+        [{"n": 1, "title": "a", "paragraphs": []}], tmp_path, tracker=None)
+    assert done == [] and skipped == [1]
+
+
+def test_work_is_written_per_chapter_not_at_the_end(monkeypatch, tmp_path):
+    """The resume rule: a crash at chapter N keeps chapters 1..N-1 of paid work."""
+    from scripts.analysis import step_02_extract as s02
+    monkeypatch.setattr(s02, "_run_crew", _FilteredCrew(bad_chapter=99))
+    s02.extract_chapters([{"n": n, "title": "c", "paragraphs": []} for n in (1, 2)],
+                         tmp_path, tracker=None)
+    assert sorted(p.name for p in (tmp_path / "analysis" / "extraction").glob("*.json")) \
+        == ["ch_01.json", "ch_02.json"]

@@ -138,7 +138,10 @@ def insert_codex(
     name: str,
     *,
     codex_id: str | None = None,
-    max_retries: int = 5,
+    # Ids are second-resolution timestamps and a collision bumps by +1s, so the retry
+    # budget is really "how many books may be registered in the same second". Five died
+    # on the seventh book of a 22-book corpus; registering a corpus is not exotic.
+    max_retries: int = 120,
     **fields,
 ) -> str:
     """Insert a book; returns the id.

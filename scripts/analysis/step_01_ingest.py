@@ -467,6 +467,19 @@ _ENTITY = re.compile(r"&(?:[a-z]+|#\d+);", re.IGNORECASE)
 _LONG_TOKEN = 34         # longest real English word in this corpus class is ~30
 
 
+def console_safe(text: str) -> str:
+    """Text that will survive being printed to whatever console this is.
+
+    Twenty Thousand Leagues was LOST to a progress message: "'charmap' codec can't
+    encode character '′'" on a Windows cp1252 console. The data was fine and the
+    parse was fine. Any book with a prime, a curly quote or an accent could hit it, so
+    printing is made safe rather than each message being made careful.
+    """
+    import sys
+    encoding = getattr(sys.stdout, "encoding", None) or "utf-8"
+    return str(text).encode(encoding, errors="replace").decode(encoding, errors="replace")
+
+
 def _garbled(text: str) -> str | None:
     """Mechanical corruption, described. None when the text is clean.
 
@@ -486,7 +499,11 @@ def _garbled(text: str) -> str | None:
     # token. A hyphenated or em-dashed compound is separators; glued text is the
     # absence of them. Stripping dashes only from the ENDS made every long
     # compound look glued - Dracula and Peter Pan both died on real prose.
-    longest = max(re.split(r"[\u2014\u2013\-\u2010\u2011/]+", longest) or [""],
+    # A word is LETTERS. This check exists to find letters glued together with no
+    # separator, so anything that is not a letter is a separator - dashes, slashes,
+    # and runs of dots, underscores or asterisks. A table-of-contents leader row
+    # ("Chapter I .......... 1") killed a clean book as one 40-character word.
+    longest = max(re.split(r"[^A-Za-z\u00c0-\u024f]+", longest) or [""],
                   key=len, default="")
     if len(longest) > _LONG_TOKEN:
         return f"impossibly long token {longest[:40]!r} (text glued together?)"
@@ -741,8 +758,8 @@ def _pass(tracker, raw, book_dir, source):
     print(f"  01_03 chapterize: {len(chapters)} chapters written")
     for ch in chapters:
         words = sum(len(p["text"].split()) for p in ch["paragraphs"])
-        print(f"         ch {ch['n']:>2} part {ch['part']} ¶{len(ch['paragraphs']):>3} "
-              f"w{words:>6}  {ch['title']}")
+        print(console_safe(f"         ch {ch['n']:>2} part {ch['part']} "
+                           f"¶{len(ch['paragraphs']):>3} w{words:>6}  {ch['title']}"))
     if RUN_UNTIL < "01_04":
         return None
 
@@ -807,8 +824,9 @@ def run(codex_id: str) -> None:
         for entry in raw["toc"]:
             tracker.log(f"toc L{entry['level']}: {entry['title']!r} -> {entry['href']}",
                         step_id="01_01")
-    print(f"  01_01 read_source: title={raw['title']!r} author={raw['author']!r} "
-          f"spine_docs={len(raw['spine'])} toc_entries={len(raw['toc'])}")
+    print(console_safe(f"  01_01 read_source: title={raw['title']!r} "
+                       f"author={raw['author']!r} spine_docs={len(raw['spine'])} "
+                       f"toc_entries={len(raw['toc'])}"))
     if RUN_UNTIL < "01_02":
         return
 
