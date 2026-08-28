@@ -52,6 +52,58 @@ def _load_chapters(book_dir: Path) -> list[dict]:
     return chapters
 
 
+def clamp_scene_range(scene: dict, para_count: int) -> tuple[dict | None, str | None]:
+    """Fit a scene's paragraph range to the chapter, or drop it.
+
+    Five of thirty books died on "paragraph range outside chapter" - the breakdown agent
+    returned a para_end past the end of the chapter and a raise threw away every other
+    scene in the book, along with the paid extraction already on disk.
+
+    Clamp what overlaps the chapter. DROP what does not: clamping 40-50 into 10-10 would
+    invent a scene that is not there, and a wrong scene is worse than a missing one
+    because nothing downstream can tell it is wrong.
+    """
+    start, end = scene.get("para_start"), scene.get("para_end")
+    if not isinstance(start, int) or not isinstance(end, int) or start > end:
+        return None, f"scene {scene.get('n')}: unusable range {start}-{end}, dropped"
+    if start > para_count or end < 1:
+        return None, f"scene {scene.get('n')}: range {start}-{end} is outside a "                     f"{para_count}-paragraph chapter, dropped"
+    fixed = max(1, start), min(para_count, end)
+    if fixed == (start, end):
+        return scene, None
+    return ({**scene, "para_start": fixed[0], "para_end": fixed[1]},
+            f"scene {scene.get('n')}: range {start}-{end} clamped to "
+            f"{fixed[0]}-{fixed[1]} ({para_count} paragraphs)")
+
+
+def repair_ranges(extraction: dict, chapter: dict) -> tuple[dict, list[str]]:
+    """Clamp or drop every out-of-range scene. Returns the extraction and what changed."""
+    para_count = len(chapter["paragraphs"])
+    scenes, notes = [], []
+    for scene in extraction.get("scenes", []):
+        fixed, note = clamp_scene_range(scene, para_count)
+        if note:
+            notes.append(note)
+        if fixed is not None:
+            scenes.append(fixed)
+    return {**extraction, "scenes": scenes}, notes
+
+
+def extractions_on_disk(chapters: list[dict], book_dir: Path) -> list[tuple[dict, dict]]:
+    """(chapter, extraction) pairs for chapters that HAVE an extraction file.
+
+    A chapter the content filter refused has no file. Three books died on
+    FileNotFoundError for exactly that - the skip was half a fix and this is the other
+    half, which I should have written at the same time.
+    """
+    pairs = []
+    for chapter in chapters:
+        path = _extraction_path(book_dir, chapter["n"])
+        if path.exists():
+            pairs.append((chapter, json.loads(path.read_text(encoding="utf-8"))))
+    return pairs
+
+
 def _extraction_path(book_dir: Path, n: int) -> Path:
     return book_dir / "analysis" / "extraction" / f"ch_{n:02d}.json"
 
@@ -175,16 +227,24 @@ def check_extraction(extraction: dict, chapter: dict) -> list[dict]:
     violations = []
     for scene in extraction["scenes"]:
         if not (1 <= scene["para_start"] <= scene["para_end"] <= para_count):
-            raise ValueError(f"ch {extraction['chapter']} scene {scene['n']}: "
-                             f"paragraph range outside chapter")
+            # repair_ranges clamps or drops these at write time, so reaching here means
+            # an extraction written before that existed. Skip the scene rather than
+            # throwing away the book - the other scenes are still good.
+            violations.append({"chapter": extraction["chapter"], "scene": scene["n"],
+                               "dimension": "breakdown", "kind": "range",
+                               "note": "paragraph range outside chapter"})
+            continue
         scene_text = " ".join(
             p["text"] for p in chapter["paragraphs"]
             if scene["para_start"] <= p["n"] <= scene["para_end"])
+        # .get, not [] - a specialist that returns nothing for a dimension leaves the
+        # key absent, and a KeyError here would throw away a whole book's extraction over
+        # one missing list. Same lesson as the range and the refused chapter.
         for dimension, items, field in (
-            ("events", scene["events"], "quote"),
-            ("time", scene["state_changes"], "quote"),
-            ("time", scene["time_evidence"], "text"),
-            ("dialogue", scene["dialogue"], "notable_quote"),
+            ("events", scene.get("events") or [], "quote"),
+            ("time", scene.get("state_changes") or [], "quote"),
+            ("time", scene.get("time_evidence") or [], "text"),
+            ("dialogue", scene.get("dialogue") or [], "notable_quote"),
         ):
             for item in items:
                 quote = item[field]
@@ -303,6 +363,14 @@ def extract_chapters(todo: list[dict], book_dir, tracker) -> tuple[list[dict], l
                             f"{exc}", level="WARNING", step_id="02_02")
             print(f"  ch {chapter['n']:>2}: SKIPPED (content filter)")
             continue
+        # Repair BEFORE writing, so nothing downstream ever sees a bad range and the
+        # repair is not re-done on every resume.
+        extraction, notes = repair_ranges(extraction, chapter)
+        for note in notes:
+            if tracker:
+                tracker.log(f"ch {chapter['n']}: {note}", level="WARNING",
+                            step_id="02_01")
+            print(f"  ch {chapter['n']:>2}: {note}")
         # WRITE IMMEDIATELY (resume rule): a crash at ch N keeps ch 1..N-1 paid work
         path = _extraction_path(book_dir, chapter["n"])
         path.parent.mkdir(parents=True, exist_ok=True)
@@ -337,9 +405,10 @@ def run(codex_id: str) -> None:
         with tracker.step("02_04"):
             violations = []
             gaps = []
-            for chapter in chapters:
-                path = _extraction_path(book_dir, chapter["n"])
-                extraction = json.loads(path.read_text(encoding="utf-8"))
+            # Only chapters that HAVE an extraction. A chapter the content filter
+            # refused has no file, and this read is what actually killed Beowulf,
+            # Tom Sawyer and Pride and Prejudice.
+            for chapter, extraction in extractions_on_disk(chapters, book_dir):
                 violations += check_extraction(extraction, chapter)
                 for dimension, scene_n in find_coverage_gaps(extraction):
                     gaps.append({"chapter": chapter["n"], "scene": scene_n,
@@ -364,9 +433,8 @@ def run(codex_id: str) -> None:
         issues = list(gaps)
         with tracker.step("02_05"):
             from agents import extraction_auditor
-            for chapter in _audit_sample(chapters):
-                extraction = json.loads(
-                    _extraction_path(book_dir, chapter["n"]).read_text(encoding="utf-8"))
+            present = extractions_on_disk(_audit_sample(chapters), book_dir)
+            for chapter, extraction in present:
                 usage = {}
                 try:
                     verdict = extraction_auditor.audit(chapter, extraction, usage=usage)
@@ -410,6 +478,8 @@ def run(codex_id: str) -> None:
             for ch_n, dimension in targets:
                 chapter = by_number[ch_n]
                 path = _extraction_path(book_dir, ch_n)
+                if not path.exists():
+                    continue          # refused by the content filter; nothing to re-run
                 extraction = json.loads(path.read_text(encoding="utf-8"))
                 try:
                     extraction = _rerun_dimension(chapter, extraction, dimension)

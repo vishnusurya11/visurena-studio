@@ -69,12 +69,20 @@ def test_check_extraction_flags_fabricated_quote():
     assert violations[0]["scene"] == 2
 
 
-def test_check_extraction_raises_on_bad_para_range():
-    extraction = s02.assemble(_call_sheet(), *_reports())
-    extraction["scenes"][0]["para_end"] = 99
-    with pytest.raises(ValueError, match="paragraph range"):
-        s02.check_extraction(extraction, _chapter())
+def test_check_extraction_reports_a_bad_range_instead_of_raising():
+    """Supersedes test_check_extraction_raises_on_bad_para_range.
 
+    It used to raise, and that raise killed five of thirty books outright - the paid
+    extraction was already on disk and every other scene in the book was good. It is now
+    a reported violation, which is what the improve loop is for, and repair_ranges stops
+    most of them ever reaching here."""
+    from scripts.analysis.step_02_extract import check_extraction
+    chapter = {"n": 1, "paragraphs": [{"n": i, "text": f"p{i}"} for i in range(1, 6)]}
+    extraction = {"chapter": 1, "scenes": [
+        {"n": 1, "para_start": 1, "para_end": 99, "events": [], "characters": [],
+         "dialogue": [], "time_evidence": []}]}
+    violations = check_extraction(extraction, chapter)
+    assert any(v.get("kind") == "range" for v in violations)
 
 def test_audit_sample_first_middle_last():
     chapters = [{"n": i} for i in range(1, 15)]
@@ -269,3 +277,122 @@ def test_work_is_written_per_chapter_not_at_the_end(monkeypatch, tmp_path):
                          tmp_path, tracker=None)
     assert sorted(p.name for p in (tmp_path / "analysis" / "extraction").glob("*.json")) \
         == ["ch_01.json", "ch_02.json"]
+
+
+# --- an out-of-range paragraph loses one scene, not the book (2026-08-28) ----------
+#
+# Five of thirty books died on "paragraph range outside chapter": Turn of the Screw,
+# The Invisible Man, 20,000 Leagues, Robinson Crusoe, Moby Dick. The scene_breakdown
+# agent returned a para_end past the end of the chapter, and a raise threw away every
+# other scene in the book along with the paid extraction already on disk.
+#
+# Same lesson as the content filter and the auditor's bad chapter index: an agent's
+# output is INPUT. Clamp what can be clamped, drop what cannot, record both, keep going.
+
+CHAPTER = {"n": 1, "paragraphs": [{"n": i, "text": f"para {i}"} for i in range(1, 11)]}
+
+
+def test_a_range_running_past_the_end_is_clamped():
+    from scripts.analysis.step_02_extract import clamp_scene_range
+    scene, note = clamp_scene_range({"n": 1, "para_start": 8, "para_end": 40}, 10)
+    assert scene["para_end"] == 10 and note
+
+
+def test_a_range_starting_before_one_is_clamped():
+    from scripts.analysis.step_02_extract import clamp_scene_range
+    scene, note = clamp_scene_range({"n": 1, "para_start": 0, "para_end": 5}, 10)
+    assert scene["para_start"] == 1 and note
+
+
+def test_a_valid_range_is_untouched_and_unremarked():
+    from scripts.analysis.step_02_extract import clamp_scene_range
+    scene, note = clamp_scene_range({"n": 1, "para_start": 2, "para_end": 5}, 10)
+    assert (scene["para_start"], scene["para_end"]) == (2, 5) and note is None
+
+
+def test_a_range_entirely_past_the_chapter_is_dropped_not_clamped():
+    """Clamping 40-50 into 10-10 would invent a scene that is not there."""
+    from scripts.analysis.step_02_extract import clamp_scene_range
+    scene, note = clamp_scene_range({"n": 1, "para_start": 40, "para_end": 50}, 10)
+    assert scene is None and note
+
+
+def test_an_inverted_range_is_dropped():
+    from scripts.analysis.step_02_extract import clamp_scene_range
+    scene, _ = clamp_scene_range({"n": 1, "para_start": 8, "para_end": 3}, 10)
+    assert scene is None
+
+
+def test_repairing_an_extraction_keeps_the_good_scenes():
+    from scripts.analysis.step_02_extract import repair_ranges
+    extraction = {"chapter": 1, "scenes": [
+        {"n": 1, "para_start": 1, "para_end": 4},
+        {"n": 2, "para_start": 5, "para_end": 99},
+        {"n": 3, "para_start": 40, "para_end": 50}]}
+    fixed, notes = repair_ranges(extraction, CHAPTER)
+    assert [s["n"] for s in fixed["scenes"]] == [1, 2]
+    assert fixed["scenes"][1]["para_end"] == 10
+    assert len(notes) == 2
+
+
+def test_a_chapter_whose_every_scene_is_bad_returns_no_scenes_not_an_error():
+    from scripts.analysis.step_02_extract import repair_ranges
+    fixed, notes = repair_ranges(
+        {"chapter": 1, "scenes": [{"n": 1, "para_start": 90, "para_end": 99}]}, CHAPTER)
+    assert fixed["scenes"] == [] and notes
+
+
+# --- a skipped chapter leaves no file, and readers must expect that ----------------
+#
+# Beowulf, Tom Sawyer and Pride and Prejudice died on FileNotFoundError for an
+# extraction the content filter had refused. The skip was my fix; the readers that
+# assume every chapter has a file were the other half of it, and I only wrote one half.
+
+def test_the_audit_sample_skips_chapters_with_no_extraction(tmp_path):
+    from scripts.analysis.step_02_extract import extractions_on_disk
+    (tmp_path / "analysis" / "extraction").mkdir(parents=True)
+    import json
+    for n in (1, 3):
+        (tmp_path / "analysis" / "extraction" / f"ch_{n:02d}.json").write_text(
+            json.dumps({"chapter": n, "scenes": []}), encoding="utf-8")
+    chapters = [{"n": 1}, {"n": 2}, {"n": 3}]
+    assert [c["n"] for c, _ in extractions_on_disk(chapters, tmp_path)] == [1, 3]
+
+
+def test_no_extraction_file_is_read_without_checking_it_exists():
+    """Guard on the code itself. The content-filter skip means a chapter may have no
+    file, and every unguarded read is a book that dies at 90% with the work on disk.
+    Three books died this way; this test is why a fourth will not."""
+    import re
+    from pathlib import Path
+    source = Path("scripts/analysis/step_02_extract.py").read_text(encoding="utf-8")
+    for match in re.finditer(r"_extraction_path\([^)]*\)\.read_text", source):
+        window = source[max(0, match.start() - 400):match.start()]
+        assert "exists()" in window or "extractions_on_disk" in window, \
+            f"unguarded extraction read near: {source[match.start()-90:match.start()+40]!r}"
+
+
+def test_every_violation_carries_the_keys_its_consumers_read():
+    """A violation with the wrong key shape failed three books instantly with
+    KeyError: 'note' - after I had just fixed those same three books. The shape is a
+    contract between producer and consumer and nothing was checking it."""
+    from scripts.analysis.step_02_extract import check_extraction
+    chapter = {"n": 1, "paragraphs": [{"n": i, "text": f"p{i}"} for i in range(1, 6)]}
+    extraction = {"chapter": 1, "scenes": [
+        {"n": 1, "para_start": 1, "para_end": 99, "events": [], "characters": [],
+         "dialogue": [], "time_evidence": []},
+        {"n": 2, "para_start": 1, "para_end": 2, "events": [
+            {"summary": "x", "quote": "nowhere in the text at all"}],
+         "characters": [], "dialogue": [], "time_evidence": []}]}
+    for violation in check_extraction(extraction, chapter):
+        assert {"chapter", "scene", "dimension", "kind", "note"} <= set(violation), \
+            f"violation missing keys: {violation}"
+
+
+def test_a_scene_missing_a_dimension_key_does_not_kill_the_check():
+    """A specialist that returns nothing leaves the key absent. A KeyError here would
+    throw away a whole book's extraction over one missing list."""
+    from scripts.analysis.step_02_extract import check_extraction
+    chapter = {"n": 1, "paragraphs": [{"n": 1, "text": "p1"}]}
+    extraction = {"chapter": 1, "scenes": [{"n": 1, "para_start": 1, "para_end": 1}]}
+    assert check_extraction(extraction, chapter) == []
