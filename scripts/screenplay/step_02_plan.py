@@ -14,7 +14,7 @@ import yaml
 
 from agents import story_editor
 from studio import db, paths, tracking
-from studio.screenplay_spec import ScreenplayPlan
+from studio.screenplay_spec import Omission, SceneRef, ScreenplayPlan
 
 STEP_ID = "02"
 NAME = "plan"
@@ -70,6 +70,37 @@ def resolve_protagonist(name: str, characters: list[dict]) -> str | None:
 
 def _refs(plan: ScreenplayPlan) -> set:
     return {(r.chapter, r.scene) for beat in plan.beats for r in beat.source}
+
+
+# Above this share of the book left unaccounted, the editor has not planned anything and
+# sweeping it up would hide a real failure rather than tolerate a slip.
+MAX_UNACCOUNTED = 0.25
+
+
+def account_for_every_scene(plan: ScreenplayPlan, dossier: dict) -> int:
+    """Sweep scenes the editor forgot into `omitted`, with a reason that says so.
+
+    Black Beauty died on one unaccounted scene out of two hundred. The rule is right -
+    silent dropping is THE failure mode of adaptation - but the invariant it protects is
+    that every scene stays VISIBLE, and code can satisfy that. What it cannot do is
+    choose, so the reason says plainly that nobody did.
+    """
+    known = {(s["chapter"], s["scene"]) for s in dossier["scenes"]}
+    accounted = _refs(plan) | {(o.source.chapter, o.source.scene) for o in plan.omitted}
+    missing = sorted(known - accounted)
+    if not missing:
+        return 0
+    if known and len(missing) / len(known) > MAX_UNACCOUNTED:
+        raise ValueError(
+            f"the editor did not account for {len(missing)} of {len(known)} scenes "
+            f"({len(missing) / len(known):.0%}) - that is not a slip, it is an "
+            f"unplanned book")
+    for chapter, scene in missing:
+        plan.omitted.append(Omission(
+            source=SceneRef(chapter=chapter, scene=scene),
+            reason="not accounted for by the story editor; swept in by code so the "
+                   "scene stays visible - nobody chose to cut it"))
+    return len(missing)
 
 
 def check(plan: ScreenplayPlan, dossier: dict, target: dict) -> list[str]:
@@ -148,6 +179,12 @@ def run(codex_id: str, target_name: str = "feature") -> None:
               f"| tokens {usage.get('input_tokens')}in/{usage.get('output_tokens')}out")
 
     with tracker.step("02_03"):
+        swept = account_for_every_scene(plan, dossier)
+        if swept:
+            tracker.log(f"swept {swept} unaccounted scene(s) into omitted",
+                        level="WARNING", step_id="02_03")
+            print(f"  02_03 checks: swept {swept} scene(s) the editor did not account "
+                  f"for into `omitted`")
         problems = check(plan, dossier, target)
         for problem in problems:
             tracker.log(f"plan: {problem}", level="ERROR", step_id="02_03")

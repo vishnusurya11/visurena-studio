@@ -205,3 +205,69 @@ def test_there_are_never_more_beats_than_source_scenes():
     from scripts.screenplay.step_02_plan import beat_window
     _, high = beat_window({"beats": [18, 26]}, source_scenes=5)
     assert high <= 5
+
+
+# --- unaccounted scenes (2026-08-28) -----------------------------------------------
+#
+# Black Beauty died on "scene (26, 8) is in no beat and not in `omitted`". The rule is
+# right - silent dropping is THE failure mode of adaptation - but the editor missing one
+# scene of two hundred should not cost the book.
+#
+# Code can satisfy the invariant the check exists to protect: sweep the unaccounted
+# scenes into `omitted` with a machine-written reason that says plainly nobody chose it.
+# The scene stays visible, which is the whole point, and the book survives.
+#
+# Above a threshold it still fails, because an editor that ignored half the book has not
+# planned anything and sweeping that up would hide a real failure.
+
+def _plan_missing(n_missing, n_total=20):
+    from studio.screenplay_spec import Beat, SceneRef, ScreenplayPlan
+    covered = n_total - n_missing
+    beats = [Beat(id="b1", intent="i", unifying_aspect="u", protagonist="watson",
+                  objective="to o", boundary_event="e", transfer="transfer",
+                  reversal="r",
+                  source=[SceneRef(chapter=1, scene=i) for i in range(1, covered + 1)])]
+    return ScreenplayPlan(spine="s", logline="l", opening_beat_id="b1",
+                          final_beat_id="b1", bookend="paired", beats=beats)
+
+
+def _dossier(n_total=20):
+    return {"scenes": [{"chapter": 1, "scene": i} for i in range(1, n_total + 1)],
+            "characters": [{"id": "watson", "name": "Dr Watson"}], "locations": []}
+
+
+def test_a_few_unaccounted_scenes_are_swept_into_omitted():
+    from scripts.screenplay.step_02_plan import account_for_every_scene
+    plan = _plan_missing(2)
+    swept = account_for_every_scene(plan, _dossier())
+    assert swept == 2
+    assert len(plan.omitted) == 2
+
+
+def test_the_swept_reason_says_nobody_chose_it():
+    from scripts.screenplay.step_02_plan import account_for_every_scene
+    plan = _plan_missing(1)
+    account_for_every_scene(plan, _dossier())
+    assert "not accounted for" in plan.omitted[0].reason.lower()
+
+
+def test_a_plan_that_accounts_for_everything_is_untouched():
+    from scripts.screenplay.step_02_plan import account_for_every_scene
+    plan = _plan_missing(0)
+    assert account_for_every_scene(plan, _dossier()) == 0
+
+
+def test_an_editor_that_ignored_most_of_the_book_still_fails():
+    """Sweeping that up would hide a real planning failure."""
+    from scripts.screenplay.step_02_plan import account_for_every_scene
+    import pytest
+    with pytest.raises(ValueError, match="did not account"):
+        account_for_every_scene(_plan_missing(15), _dossier())
+
+
+def test_after_sweeping_the_check_passes():
+    from scripts.screenplay.step_02_plan import account_for_every_scene, check
+    plan, dossier = _plan_missing(2), _dossier()
+    account_for_every_scene(plan, dossier)
+    assert not [p for p in check(plan, dossier, {"pages": 100, "beats": [1, 4]})
+                if "silent drop" in p]
