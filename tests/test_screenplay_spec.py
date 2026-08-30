@@ -340,3 +340,69 @@ def test_a_transition_may_not_carry_a_character():
 def test_dialogue_still_requires_its_character():
     with pytest.raises(ValidationError):
         ScriptElement(kind="dialogue", text="Quite.")
+
+
+# --- the wire model is permissive; the stored model is strict (2026-08-28) ---------
+#
+# The strict rules caught a real bug (68 action lines carrying a character) and then
+# caused one: the writer returned a dialogue element with no character and the whole
+# scene died mid-book, discarding the paid call.
+#
+# A contract is for what we STORE. A model's reply is INPUT - the fifth time that lesson
+# has cost a book here. RawElement receives whatever comes back; repair_element makes it
+# conform or drops it; ScriptElement stays strict for everything downstream.
+
+def test_the_wire_model_accepts_dialogue_with_no_character():
+    from studio.screenplay_spec import RawElement
+    assert RawElement(kind="dialogue", text="Quite.").character is None
+
+
+def test_the_wire_model_accepts_an_action_with_a_character():
+    from studio.screenplay_spec import RawElement
+    assert RawElement(kind="action", text="He sits.", character="watson")
+
+
+def test_repair_drops_a_character_from_an_action():
+    from studio.screenplay_spec import RawElement, repair_element
+    got = repair_element(RawElement(kind="action", text="He sits.", character="watson"))
+    assert got is not None and got.character is None
+
+
+def test_repair_turns_speakerless_dialogue_into_action():
+    """The words are real; only the attribution is missing. Dropping the line would
+    lose content, and guessing a speaker would invent one."""
+    from studio.screenplay_spec import RawElement, repair_element
+    got = repair_element(RawElement(kind="dialogue", text="Who goes there?"))
+    assert got.kind == "action" and "Who goes there?" in got.text
+
+
+def test_repair_drops_an_element_with_no_text():
+    from studio.screenplay_spec import RawElement, repair_element
+    assert repair_element(RawElement(kind="action", text="   ")) is None
+
+
+def test_repair_downgrades_a_verbatim_claim_with_no_source():
+    """A verbatim label with nothing to check it against is a claim, not evidence."""
+    from studio.screenplay_spec import RawElement, repair_element
+    got = repair_element(RawElement(kind="dialogue", text="x", character="a",
+                                    provenance="verbatim"))
+    assert got.provenance == "adapted"
+
+
+def test_repair_moves_a_parenthetical_off_a_non_dialogue_element():
+    from studio.screenplay_spec import RawElement, repair_element
+    got = repair_element(RawElement(kind="action", text="He turns.",
+                                    parenthetical="beat"))
+    assert got.parenthetical is None
+
+
+def test_a_repaired_element_always_satisfies_the_strict_contract():
+    from studio.screenplay_spec import RawElement, repair_element
+    raws = [RawElement(kind="dialogue", text="a"),
+            RawElement(kind="action", text="b", character="x", emotion="sad"),
+            RawElement(kind="transition", text="CUT TO:", character="y"),
+            RawElement(kind="dialogue", text="c", character="z", provenance="verbatim")]
+    for raw in raws:
+        got = repair_element(raw)
+        if got is not None:
+            ScriptElement.model_validate(got.model_dump())      # must not raise

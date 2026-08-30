@@ -27,6 +27,47 @@ def load_target(name: str) -> dict:
         return yaml.safe_load(fh)["targets"][name]
 
 
+SCENES_PER_SEQUENCE = 4.5      # Coppola's notebook: 50 sections over 225 slug lines
+
+
+def beat_window(target: dict, source_scenes: int) -> tuple[int, int]:
+    """How many beats this book can honestly support, capped by the target.
+
+    Metamorphosis failed on "8 beats outside target window 18-26". It is a novella with
+    21 source scenes, and demanding 18 sequences of it would mean sequences of one scene
+    each - which is not what a sequence is.
+
+    So the expectation follows from the SOURCE, and the target's window is a cap on
+    ambition rather than a floor a short book must somehow meet.
+    """
+    low, high = target["beats"]
+    supportable = max(1, round(source_scenes / SCENES_PER_SEQUENCE))
+    if supportable >= low:
+        return low, high                      # the book can fill the target
+    # The ratio sets an EXPECTATION, not a ceiling. 18 beats over 37 scenes is two
+    # scenes to a sequence - tight, but a real choice for a short work. The ceiling is
+    # the source itself: there cannot be more sequences than there are scenes.
+    return max(1, supportable // 2), max(1, min(high, source_scenes))
+
+
+def resolve_protagonist(name: str, characters: list[dict]) -> str | None:
+    """A canonical id for whatever the editor called the protagonist.
+
+    It returns "Alice" and "Buck" - names, because that is what a person calls a
+    protagonist - and demanding an id failed two books outright while the registry
+    plainly contained them. Same resolution the character cues use, same reason.
+    """
+    from studio import names as name_index
+
+    if not name:
+        return None
+    ids = {c["id"] for c in characters}
+    if name in ids:
+        return name
+    return (name_index.match_alias(name, name_index.build_index(characters))
+            or name_index.match_alias(name, name_index.build_surname_index(characters)))
+
+
 def _refs(plan: ScreenplayPlan) -> set:
     return {(r.chapter, r.scene) for beat in plan.beats for r in beat.source}
 
@@ -40,15 +81,19 @@ def check(plan: ScreenplayPlan, dossier: dict, target: dict) -> list[str]:
     for ref in sorted(used - known):
         problems.append(f"beat cites a scene that does not exist: {ref}")
     for beat in plan.beats:
-        if beat.protagonist not in ids:
+        resolved = resolve_protagonist(beat.protagonist, dossier["characters"])
+        if resolved is None:
             problems.append(f"beat {beat.id}: protagonist {beat.protagonist!r} "
                             f"is not in the registry")
+        else:
+            beat.protagonist = resolved      # normalise in place; the plan is stored
     accounted = used | {(o.source.chapter, o.source.scene) for o in plan.omitted}
     for ref in sorted(known - accounted):
         problems.append(f"scene {ref} is in no beat and not in `omitted` — silent drop")
-    low, high = target["beats"]
+    low, high = beat_window(target, len(known))
     if not low <= len(plan.beats) <= high:
-        problems.append(f"{len(plan.beats)} beats outside target window {low}-{high}")
+        problems.append(f"{len(plan.beats)} beats outside window {low}-{high} "
+                        f"for {len(known)} source scenes")
     return problems + check_opening(plan)
 
 

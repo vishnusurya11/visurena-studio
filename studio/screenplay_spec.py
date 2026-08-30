@@ -61,9 +61,54 @@ class ScriptElement(BaseModel):
         return self
 
 
+class RawElement(BaseModel):
+    """What an agent is ALLOWED to return. Permissive by design.
+
+    The strict rules on ScriptElement caught a real bug - 68 action lines carrying a
+    character - and then caused one: the writer returned a dialogue element with no
+    character and the whole scene died mid-book, discarding the paid call.
+
+    A contract governs what we STORE. A model's reply is INPUT, and this is the fifth
+    time that lesson has cost a book in this pipeline. Receive anything here; make it
+    conform in repair_element; keep ScriptElement strict for everything downstream.
+    """
+    kind: Kind
+    text: str
+    character: str | None = None
+    parenthetical: str | None = None
+    emotion: str | None = None
+    provenance: Prov = "invented"
+    source: SceneRef | None = None
+    dual: bool = False
+
+
+def repair_element(raw: RawElement) -> ScriptElement | None:
+    """Make one returned element conform, or drop it. None means unusable.
+
+    Speakerless dialogue becomes ACTION rather than being dropped: the words are real
+    and only the attribution is missing, so dropping loses content and guessing a
+    speaker invents one.
+    """
+    text = (raw.text or "").strip()
+    if not text:
+        return None
+    kind, character = raw.kind, raw.character
+    parenthetical, emotion = raw.parenthetical, raw.emotion
+    if kind == "dialogue" and not character:
+        kind, parenthetical, emotion = "action", None, None
+    if kind != "dialogue":
+        character = parenthetical = emotion = None
+    provenance = raw.provenance
+    if provenance == "verbatim" and raw.source is None:
+        provenance = "adapted"          # a claim with nothing to check it against
+    return ScriptElement(kind=kind, text=text, character=character,
+                         parenthetical=parenthetical, emotion=emotion,
+                         provenance=provenance, source=raw.source, dual=raw.dual)
+
+
 class SceneDraft(BaseModel):
-    """What the screenwriter returns for ONE beat."""
-    elements: list[ScriptElement]
+    """What the screenwriter returns for ONE scene. Permissive - see RawElement."""
+    elements: list[RawElement]
 
 
 class Beat(BaseModel):

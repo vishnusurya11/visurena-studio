@@ -12,8 +12,8 @@ from pathlib import Path
 
 from agents import screenwriter, shot_designer
 from studio import db, names, paths, tracking
-from studio.screenplay_spec import (Scene, SceneDraft, ScreenplayPlan, ShotPlan, Slug,
-                                    SceneRef)
+from studio.screenplay_spec import (Scene, SceneDraft, ScreenplayPlan, ShotPlan,
+                                    SceneRef, Slug, repair_element)
 
 STEP_ID = "03"
 NAME = "draft"
@@ -164,20 +164,22 @@ def assemble(beat, number: int, draft: SceneDraft, shots: ShotPlan,
     `slug` is passed when a beat was split into units - the unit's own heading, true of
     everything under it, rather than the whole beat's.
     """
-    for element in draft.elements:
-        element.character = canonical_cue(element.character, registry or [])
-        if element.kind != "dialogue":
-            # An action line carrying a character is not a cue; it leaked into cast
-            # lists and shot rows in the shipped screenplay.
-            element.character = None
+    # The draft is a WIRE model - permissive, because a model's reply is input. Repair
+    # each element into the strict stored contract, dropping only what is unusable.
+    elements = []
+    for raw in draft.elements:
+        raw.character = canonical_cue(raw.character, registry or [])
+        fixed = repair_element(raw)
+        if fixed is not None:
+            elements.append(fixed)
     return Scene(
         number=number,
         beat_id=beat.id,
         slug=slug or build_slug(scenes, locations),
         cast=sorted({c for s in scenes for c in s.get("cast", [])}),
-        speaking=sorted({e.character for e in draft.elements
+        speaking=sorted({e.character for e in elements
                          if e.kind == "dialogue" and e.character}),
-        elements=draft.elements,
+        elements=elements,
         shots=shots.shots,
         source=[SceneRef(chapter=s["chapter"], scene=s["scene"]) for s in scenes],
         transfer=beat.transfer,

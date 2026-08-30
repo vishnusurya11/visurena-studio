@@ -65,12 +65,14 @@ def test_an_explicitly_omitted_scene_is_accepted():
     assert s02.check(plan, DOSSIER, TARGET) == []
 
 
-def test_too_many_beats_for_the_target_is_caught():
-    beats = [_beat(bid=f"b{i}", refs=((1, 1),)) for i in range(6)]
+def test_too_many_beats_is_still_caught():
+    """The window is derived now, so the message changed - but overrunning it must
+    still fail. TARGET allows 1-4 beats and the source has 3 scenes."""
+    beats = [_beat(bid=f"b{i}", refs=((1, 1),)) for i in range(9)]
     plan = _plan(beats, omitted=[
         Omission(source=SceneRef(chapter=c, scene=s), reason="cut")
         for c, s in ((1, 2), (2, 1))])
-    assert any("outside target window" in p for p in s02.check(plan, DOSSIER, TARGET))
+    assert any("outside window" in p for p in s02.check(plan, DOSSIER, TARGET))
 
 
 # --- the opening/ending pair -------------------------------------------------------
@@ -109,3 +111,97 @@ def test_scene_index_truncates_summaries_to_keep_the_book_in_one_prompt():
     scenes = [{"chapter": 1, "scene": 1, "summary": "word " * 200, "dialogue": []}]
     row = story_editor.scene_index(scenes, summary_words=40)[0]
     assert len(row["summary"].split()) == 40
+
+
+# --- the beat window must fit the SOURCE, not just the target (2026-08-28) ---------
+#
+# Metamorphosis failed with "8 beats outside target window 18-26". It is a 22,000-word
+# novella with 21 source scenes, and 8 beats is right for it. Demanding 18 sequences of
+# a book that has 21 scenes would mean sequences of one scene each, which is not what a
+# sequence is.
+#
+# Coppola's notebook is the ratio: 50 sections over 225 slug lines, about 4.5 scenes to
+# a sequence. So the expected beat count follows from the SOURCE, and the target's window
+# is a cap on ambition rather than a floor a short book must meet.
+
+def test_a_novella_is_not_asked_for_feature_length_beat_counts():
+    from scripts.screenplay.step_02_plan import beat_window
+    low, high = beat_window({"beats": [18, 26]}, source_scenes=21)
+    assert low <= 8 <= high
+
+
+def test_a_full_length_novel_keeps_the_targets_window():
+    from scripts.screenplay.step_02_plan import beat_window
+    assert beat_window({"beats": [18, 26]}, source_scenes=92) == (18, 26)
+
+
+def test_the_window_never_exceeds_the_target():
+    """The target is a budget. A long book does not get to overrun it."""
+    from scripts.screenplay.step_02_plan import beat_window
+    _, high = beat_window({"beats": [18, 26]}, source_scenes=400)
+    assert high == 26
+
+
+def test_the_window_is_never_below_one():
+    from scripts.screenplay.step_02_plan import beat_window
+    low, high = beat_window({"beats": [18, 26]}, source_scenes=2)
+    assert low >= 1 and high >= low
+
+
+def test_a_book_with_no_scenes_still_yields_a_usable_window():
+    from scripts.screenplay.step_02_plan import beat_window
+    low, high = beat_window({"beats": [18, 26]}, source_scenes=0)
+    assert low >= 1 and high >= low
+
+
+def test_the_check_uses_the_derived_window():
+    from scripts.screenplay.step_02_plan import check
+    from studio.screenplay_spec import Beat, Omission, SceneRef, ScreenplayPlan
+    dossier = {"scenes": [{"chapter": 1, "scene": n} for n in range(1, 22)],
+               "characters": [{"id": "gregor"}], "locations": []}
+    beats = [Beat(id=f"b{i}", intent="i", unifying_aspect="u", protagonist="gregor",
+                  objective="to o", boundary_event="e", transfer="transfer",
+                  reversal="r", source=[SceneRef(chapter=1, scene=i)])
+             for i in range(1, 9)]
+    plan = ScreenplayPlan(spine="s", logline="l", opening_beat_id="b1",
+                          final_beat_id="b8", bookend="paired", beats=beats,
+                          omitted=[Omission(source=SceneRef(chapter=1, scene=n),
+                                            reason="cut") for n in range(9, 22)])
+    assert not [p for p in check(plan, dossier, {"pages": 100, "beats": [18, 26]})
+                if "beats outside" in p]
+
+
+def test_a_protagonist_given_by_name_resolves_to_its_id():
+    """The editor returns "Alice" and "Buck" - names, because that is what a person
+    calls a protagonist. Demanding a canonical id failed two books outright when the
+    registry plainly contained them."""
+    from scripts.screenplay.step_02_plan import resolve_protagonist
+    registry = [{"id": "alice", "name": "Alice", "aliases": []},
+                {"id": "buck", "name": "Buck", "aliases": ["the dog"]}]
+    assert resolve_protagonist("Alice", registry) == "alice"
+    assert resolve_protagonist("the dog", registry) == "buck"
+
+
+def test_an_id_the_editor_got_right_passes_through():
+    from scripts.screenplay.step_02_plan import resolve_protagonist
+    assert resolve_protagonist("alice", [{"id": "alice", "name": "Alice"}]) == "alice"
+
+
+def test_a_genuinely_unknown_protagonist_still_fails():
+    from scripts.screenplay.step_02_plan import resolve_protagonist
+    assert resolve_protagonist("Moriarty", [{"id": "alice", "name": "Alice"}]) is None
+
+
+def test_the_upper_bound_allows_more_beats_than_the_ratio_suggests():
+    """18 beats over 37 source scenes is two scenes to a sequence - tight, but a real
+    choice for a short work. The ratio sets an EXPECTATION, not a ceiling; the ceiling
+    is the source itself."""
+    from scripts.screenplay.step_02_plan import beat_window
+    low, high = beat_window({"beats": [18, 26]}, source_scenes=37)
+    assert low <= 18 <= high
+
+
+def test_there_are_never_more_beats_than_source_scenes():
+    from scripts.screenplay.step_02_plan import beat_window
+    _, high = beat_window({"beats": [18, 26]}, source_scenes=5)
+    assert high <= 5
