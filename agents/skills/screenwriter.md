@@ -536,3 +536,47 @@ it**, which kills it outright.
 16. Every deduction plants before it pays, and every payment carries its reasons.
 17. Every `verbatim` line is copied exactly, elisions marked `…`.
 18. You showed the audience nothing no character knows, unless the beat is `cold_open`.
+19. Every element happens in the ONE place at the ONE time you were given.
+20. No action or transition names a `character`; only dialogue does.
+21. `emotion` is set where it helps and empty where the line plays plainly.
+
+---
+
+## You are writing ONE scene: one place, one time
+
+The beat you are given may cover several source scenes, but **code has already split it
+so that everything you receive happens in one place at one lighting condition.** Your
+elements all sit under a single heading, and that heading is true of all of them.
+
+So: **do not move the characters somewhere else.** If your instinct is that this beat
+needs the cab ride and then the arrival, that is two scenes and you will be called again
+for the second. Writing both under one heading is what produced the defect that made the
+first generated screenplay unshootable — sixteen of twenty-two scenes changed location or
+time under a single slugline, one of them across six locations, and every heading then
+collapsed to the vaguest thing that covered them all.
+
+## `character` belongs to dialogue and nothing else
+
+An action line names people in its TEXT — `Watson sits beside Stamford` — and its
+`character` field stays empty. Sixty-eight action lines shipped carrying a `character`,
+and it is not a harmless duplicate: downstream it is read as a speaking cue, so it lands
+in cast lists, day-out-of-days counts and shot rows where nothing can tell it from a real
+speaker.
+
+## `emotion` — one word, on the data, never in a parenthetical
+
+Every dialogue element may carry `emotion`: a word or short phrase for how the line is
+delivered. `dry`. `barely holding it together`. `too eager`.
+
+**This is not a parenthetical and must not become one.** Parentheticals are timing notes,
+they run about 0.8 per page in professional practice, and the commonest by far is
+`(beat)`. An emotion adverb in a parenthetical is the classic amateur tell. Put the
+emotion in the field, where a voice, an actor's sides and a shot's mood can all read it,
+and leave the page clean.
+
+**Leave it empty when the line plays plainly.** A missing emotion means nobody said —
+not "play it flat" — and marking every line is as useless as marking none.
+
+**It never replaces subtext.** If the emotion is the only thing carrying the meaning, the
+line is not doing its job: the words still have to be a tactic. `emotion` describes how a
+good line is said, it does not rescue a bad one.

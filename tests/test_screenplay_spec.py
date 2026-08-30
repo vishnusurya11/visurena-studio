@@ -295,3 +295,48 @@ def test_verbatim_with_a_source_is_accepted():
 def test_adapted_needs_no_source():
     assert ScriptElement(kind="dialogue", text="x", character="a",
                          provenance="adapted").source is None
+
+
+# --- emotion on dialogue (2026-08-28) ----------------------------------------------
+#
+# Owner asked for it, and it belongs on the DATA rather than in the text: a downstream
+# voice, an actor's sides, and a shot's mood all want it, and none of them should have
+# to parse it back out of a parenthetical.
+#
+# It is deliberately NOT a parenthetical. Parentheticals are timing notes and are rare in
+# professional practice (0.81 per page, commonest is "(beat)"); an emotion adverb in one
+# is the classic amateur tell. This keeps the information and keeps it off the page.
+
+def test_dialogue_may_carry_an_emotion():
+    element = ScriptElement(kind="dialogue", text="Quite.", character="holmes",
+                            emotion="dry")
+    assert element.emotion == "dry"
+
+
+def test_emotion_defaults_to_none_rather_than_neutral():
+    """A missing emotion is 'nobody said', not 'the actor should play it flat'."""
+    assert ScriptElement(kind="dialogue", text="x", character="a").emotion is None
+
+
+def test_action_may_not_carry_an_emotion():
+    """Emotion belongs to a speaker. An action line has no one to feel it."""
+    with pytest.raises(ValidationError):
+        ScriptElement(kind="action", text="He turns.", emotion="angry")
+
+
+def test_an_action_may_not_carry_a_character():
+    """Found in the shipped screenplay.json: an action line with
+    character='john_watson'. It is not a cue, it leaks into cast lists and shot rows,
+    and nothing downstream can tell it from a real speaker."""
+    with pytest.raises(ValidationError):
+        ScriptElement(kind="action", text="Watson sits.", character="john_watson")
+
+
+def test_a_transition_may_not_carry_a_character():
+    with pytest.raises(ValidationError):
+        ScriptElement(kind="transition", text="CUT TO:", character="holmes")
+
+
+def test_dialogue_still_requires_its_character():
+    with pytest.raises(ValidationError):
+        ScriptElement(kind="dialogue", text="Quite.")

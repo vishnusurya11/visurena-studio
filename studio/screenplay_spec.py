@@ -31,6 +31,11 @@ class ScriptElement(BaseModel):
     text: str
     character: str | None = None       # dialogue only — canonical character id
     parenthetical: str | None = None
+    # Emotion lives on the DATA, never in a parenthetical. A downstream voice, an
+    # actor's sides and a shot's mood all want it, and none should have to parse it back
+    # out of the page — while an emotion adverb in a parenthetical is the classic
+    # amateur tell. One word or a short phrase: "dry", "barely holding it together".
+    emotion: str | None = None         # dialogue only
     provenance: Prov = "invented"
     source: SceneRef | None = None     # required when provenance == "verbatim"
     dual: bool = False
@@ -44,6 +49,13 @@ class ScriptElement(BaseModel):
             raise ValueError("a dialogue element must name its character")
         if self.kind != "dialogue" and self.parenthetical:
             raise ValueError("only dialogue may carry a parenthetical")
+        if self.kind != "dialogue" and self.character:
+            # Found in a shipped screenplay: an action line carrying
+            # character="john_watson". It is not a cue, and it leaks into cast lists
+            # and shot rows where nothing can tell it from a real speaker.
+            raise ValueError(f"only dialogue may name a character; {self.kind} may not")
+        if self.kind != "dialogue" and self.emotion:
+            raise ValueError("emotion belongs to a speaker; an action has none")
         if self.provenance == "verbatim" and self.source is None:
             raise ValueError("a verbatim claim must cite the scene it came from")
         return self

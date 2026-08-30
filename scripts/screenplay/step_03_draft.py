@@ -48,6 +48,43 @@ def build_slug(scenes: list[dict], locations: dict) -> Slug:
                 time=time, text=slug_text(int_ext, name, time))
 
 
+def split_beat(scenes: list[dict], locations: dict) -> list[dict]:
+    """Break one beat into the scenes a slugline can honestly describe.
+
+    A beat is a SEQUENCE - Coppola's 50 sections became 225 slug lines - and rendering
+    one beat as one scene produced the top finding of every reader who looked at the
+    output: 16 of 22 scenes changed location or time under a single heading, one of them
+    across six locations. A heading covering six places collapses to the vaguest thing
+    covering them all, which is exactly how INT. UTAH happened.
+
+    The unit is ONE PLACE AT ONE LIGHTING CONDITION - the same rule a strip board uses,
+    because that is what a heading is for. A→B→A is three scenes, not two: each return
+    is a new setup.
+
+    A scene with NO location does not split off on its own. It continues the current
+    unit, because splitting on a gap would manufacture headings nobody can shoot.
+    """
+    if not scenes:
+        return [{"sources": [], "slug": build_slug([], locations)}]
+
+    units: list[dict] = []
+    current_key = None
+    for scene in scenes:
+        location, time = scene.get("location_id"), scene.get("time_of_day")
+        key = (location, time)
+        if location is None and units:
+            units[-1]["sources"].append(scene)      # unplaced: stay where we are
+            continue
+        if not units or key != current_key:
+            units.append({"sources": [scene]})
+            current_key = key
+        else:
+            units[-1]["sources"].append(scene)
+    for unit in units:
+        unit["slug"] = build_slug(unit["sources"], locations)
+    return units
+
+
 def paragraphs_for(book_dir: Path, scenes: list[dict]) -> dict:
     """The verbatim source spans a `verbatim` claim will be checked against.
 
@@ -120,14 +157,23 @@ def source_scenes(dossier: dict, beat) -> list[dict]:
 
 
 def assemble(beat, number: int, draft: SceneDraft, shots: ShotPlan,
-             scenes: list[dict], locations: dict, registry: list[dict] | None = None) -> Scene:
-    """Code owns sluglines, numbering, cue resolution and measurement."""
+             scenes: list[dict], locations: dict, registry: list[dict] | None = None,
+             slug=None) -> Scene:
+    """Code owns sluglines, numbering, cue resolution and measurement.
+
+    `slug` is passed when a beat was split into units - the unit's own heading, true of
+    everything under it, rather than the whole beat's.
+    """
     for element in draft.elements:
         element.character = canonical_cue(element.character, registry or [])
+        if element.kind != "dialogue":
+            # An action line carrying a character is not a cue; it leaked into cast
+            # lists and shot rows in the shipped screenplay.
+            element.character = None
     return Scene(
         number=number,
         beat_id=beat.id,
-        slug=build_slug(scenes, locations),
+        slug=slug or build_slug(scenes, locations),
         cast=sorted({c for s in scenes for c in s.get("cast", [])}),
         speaking=sorted({e.character for e in draft.elements
                          if e.kind == "dialogue" and e.character}),
@@ -157,33 +203,40 @@ def run(codex_id: str, target_name: str = "feature") -> None:
     locations = {loc["id"]: loc for loc in dossier["locations"]}
     target = {"style": ""}
 
-    written, reused = 0, 0
-    for number, beat in enumerate(plan.beats, start=1):
-        path = scene_path(out, number)
-        if path.exists():                       # resume key = the OUTPUT's existence
-            reused += 1
-            continue
+    written, reused, number = 0, 0, 0
+    for beat in plan.beats:
         scenes = source_scenes(dossier, beat)
-        usage: dict = {}
-        with tracker.step("03_01"):
-            draft = screenwriter.write(beat.model_dump(mode="json"), dossier,
-                                       paragraphs_for(book_dir, scenes), target,
-                                       usage=usage)
-        with tracker.step("03_02"):
-            slug = build_slug(scenes, locations)
-            shots = shot_designer.design(
-                [e.model_dump(mode="json") for e in draft.elements],
-                slug.model_dump(mode="json"),
-                locations.get(slug.location_id, {}).get("visual"), usage=usage)
-        with tracker.step("03_03"):
-            scene = assemble(beat, number, draft, shots, scenes, locations,
-                             dossier["characters"])
-            path.write_text(scene.model_dump_json(indent=2), encoding="utf-8")
-        written += 1
-        tracker.log(f"beat {beat.id}: {len(draft.elements)} elements, "
-                    f"{len(shots.shots)} shots, usage {usage}", step_id="03_03")
-        print(f"  beat {beat.id} -> sc_{number:04d}.json "
-              f"({len(draft.elements)} elements, {len(shots.shots)} shots)")
+        # A beat is a SEQUENCE, and one heading must be true of everything under it.
+        # Splitting here rather than after the writing means each unit is ONE place at
+        # ONE time - which is what a screenwriter writes and what a strip board needs.
+        units = split_beat(scenes, locations)
+        for unit in units:
+            number += 1
+            path = scene_path(out, number)
+            if path.exists():               # resume key = the OUTPUT's existence
+                reused += 1
+                continue
+            unit_scenes, slug = unit["sources"], unit["slug"]
+            usage: dict = {}
+            with tracker.step("03_01"):
+                draft = screenwriter.write(
+                    beat.model_dump(mode="json"), dossier,
+                    paragraphs_for(book_dir, unit_scenes), target,
+                    usage=usage)
+            with tracker.step("03_02"):
+                shots = shot_designer.design(
+                    [e.model_dump(mode="json") for e in draft.elements],
+                    slug.model_dump(mode="json"),
+                    locations.get(slug.location_id, {}).get("visual"), usage=usage)
+            with tracker.step("03_03"):
+                scene = assemble(beat, number, draft, shots, unit_scenes, locations,
+                                 dossier["characters"], slug=slug)
+                path.write_text(scene.model_dump_json(indent=2), encoding="utf-8")
+            written += 1
+            tracker.log(f"beat {beat.id} unit {number}: {len(draft.elements)} elements, "
+                        f"{len(shots.shots)} shots, usage {usage}", step_id="03_03")
+            print(f"  beat {beat.id} -> sc_{number:04d} {slug.text[:46]} "
+                  f"({len(draft.elements)} el, {len(shots.shots)} shots)")
     print(f"  03 draft: {written} written, {reused} reused from disk")
 
 
@@ -203,6 +256,10 @@ def repair_scene(scene, registry: list[dict]) -> Scene:
 
     for element in scene.elements:
         if element.kind != "dialogue":
+            # An action or transition line carrying a character is not a cue. 68 of
+            # them shipped, leaking into cast lists and shot rows.
+            element.character = None
+            element.emotion = None
             continue
         element.text = quotes.clean(element.text) or element.text
         cue = canonical_cue(element.character, registry)
