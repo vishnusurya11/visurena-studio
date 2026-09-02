@@ -246,3 +246,21 @@ its own internal boundary rather than on the music grid. The workable shape is
 to prompt the second shot, then let `beatmap`'s onset grid pick which side of
 the internal cut each trailer shot comes from — treat it as two takes in one
 file, not as a pre-cut sequence.
+
+## H3 generates audio, and this pipeline throws it away
+
+The base checkpoint is `fl2va` — first-last to video **and audio** — so every
+clip arrives with a diegetic track (measured −39.8 LUFS on a rendered take).
+`extract()` drops it with `-an`.
+
+That is defensible: trailer practice is to discard production audio and
+rebuild, and a literary-register cut is carried by one music cue. But it is
+free material. The shape worth trying is the standard priority stack —
+narration, dialogue, **source audio**, music, added SFX — with the clip's own
+track sitting low under the bed and ducked, so a door or a carriage lands
+under the music instead of the bed carrying every moment alone.
+
+Do not mix it in flat. Levels across generated takes vary by roughly the same
+spread as generated speech, so each take needs its own gain before the mix,
+and the ducker threshold is an ABSOLUTE level — per-source normalisation has
+to happen before it, not after.
