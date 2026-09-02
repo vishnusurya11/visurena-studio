@@ -15,8 +15,9 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 
 from studio.trailer_edit import cut_points, lengths_of
-from studio.trailer_plan import (arc_for, lead_of, leading_characters,
-                                 pick_scenes, quotable_lines)
+from studio.trailer_plan import (action_featuring, arc_for, lead_of,
+                                 leading_characters, pick_scenes,
+                                 quotable_lines)
 from studio.trailer_spec import MusicBed, RefSheet, ShotSpec, TrailerBeat, TrailerPlan
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -34,7 +35,8 @@ def beat_from_scene(scene: dict, index: int, position: float, refs: dict,
     cast = lead_of(scene, ranking, available)
     lines = [l for l in quotable_lines(scene) if l["character"] in cast]
     chosen = lines[0] if lines else None
-    action = next((e["text"] for e in scene["elements"] if e["kind"] == "action"), "")
+    names = [refs[f"char-{c}"]["name"] for c in cast if f"char-{c}" in refs]
+    action = action_featuring(scene, names)
     return TrailerBeat(
         beat_id=f"B{index:02d}", scene_number=scene["number"], arc=arc_for(position),
         location_id=slug["location_id"], cast=cast,

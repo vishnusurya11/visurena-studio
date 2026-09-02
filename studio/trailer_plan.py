@@ -141,3 +141,22 @@ def lead_of(scene: dict, ranking: list[str], available: set[str]) -> list[str]:
         return []
     order = {who: index for index, who in enumerate(ranking)}
     return [min(present, key=lambda who: order.get(who, len(ranking)))]
+
+
+def action_featuring(scene: dict, names: list[str]) -> str:
+    """The scene's action line that shows the character we are binding.
+
+    A shot carrying Holmes's reference and the line "Gregson sits in the
+    arm-chair" tells the model two different things about who is on screen.
+    Taking the first action line produced exactly that, so prefer one that
+    names the person the shot is actually bound to.
+    """
+    actions = [e["text"] for e in scene.get("elements", [])
+               if e.get("kind") == "action" and e.get("text")]
+    if not actions:
+        return scene.get("slug", {}).get("text", "")
+    for action in actions:
+        if any(part.lower() in action.lower()
+               for name in names for part in name.split() if len(part) > 3):
+            return action
+    return actions[0]

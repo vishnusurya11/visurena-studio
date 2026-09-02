@@ -249,3 +249,28 @@ class TestTheTrailerIsAboutItsBook:
     def test_an_empty_scene_binds_nobody(self):
         from studio.trailer_plan import lead_of
         assert lead_of({"cast": []}, ["holmes"], {"holmes"}) == []
+
+
+class TestActionMatchesTheBoundCharacter:
+    def test_the_line_featuring_the_bound_character_wins(self):
+        from studio.trailer_plan import action_featuring
+        scene = {"elements": [{"kind": "action", "text": "Gregson sits in the arm-chair."},
+                              {"kind": "action", "text": "Holmes takes the pill-box."}]}
+        assert action_featuring(scene, ["Sherlock Holmes"]) == "Holmes takes the pill-box."
+
+    def test_the_first_line_is_the_fallback(self):
+        from studio.trailer_plan import action_featuring
+        scene = {"elements": [{"kind": "action", "text": "Rain falls on the street."}]}
+        assert action_featuring(scene, ["Sherlock Holmes"]) == "Rain falls on the street."
+
+    def test_a_scene_with_no_action_falls_back_to_its_slug(self):
+        from studio.trailer_plan import action_featuring
+        scene = {"elements": [], "slug": {"text": "INT. 221B BAKER STREET - DAY"}}
+        assert action_featuring(scene, []) == "INT. 221B BAKER STREET - DAY"
+
+    def test_short_name_particles_do_not_match_everything(self):
+        """Matching on "a" or "de" would make every line look like a hit."""
+        from studio.trailer_plan import action_featuring
+        scene = {"elements": [{"kind": "action", "text": "A door closes."},
+                              {"kind": "action", "text": "Utterson looks up."}]}
+        assert action_featuring(scene, ["a de Utterson"]) == "Utterson looks up."
