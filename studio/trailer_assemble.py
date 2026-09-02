@@ -14,17 +14,44 @@ from __future__ import annotations
 import subprocess
 from pathlib import Path
 
-def segment_start(usage: int, of_uses: int, need: float, available: float) -> float:
+def _ffmpeg(command: list[str], what: str) -> None:
+    """Run ffmpeg and, on failure, say WHY.
+
+    capture_output swallows stderr, so a failed encode surfaced only as a bare
+    CalledProcessError with the command echoed back -- unactionable.  ffmpeg
+    always explains itself; the explanation just has to be let through.
+    """
+    result = subprocess.run(command, capture_output=True, text=True, errors="replace")
+    if result.returncode != 0:
+        raise RuntimeError(f"{what} failed: " + result.stderr.strip()[-800:])
+
+
+HEAD_TRIM = 2.6
+"""Seconds discarded from the head of every take.
+
+Measured on the first bound clip: H3's reference-to-video path OPENS on the
+reference image itself and animates it -- for roughly 2.1s the shot is the
+character standing on the plain grey sheet backdrop -- before moving into the
+scene.  That is the binding working, not failing; the reference is being held
+hard.  But it is unusable footage, and cutting a trailer shot from it would
+put a photographer's backdrop on screen.
+"""
+
+
+def segment_start(usage: int, of_uses: int, need: float, available: float,
+                  head: float = HEAD_TRIM) -> float:
     """Where in a take to start this use of it.
 
-    Uses are spread evenly across whatever room the take has left after the
-    shot length is taken out, so a beat seen three times shows three genuinely
-    different moments rather than three clamped to the same frame.
+    Uses are spread evenly across whatever room the take has after the head
+    trim and the shot length are taken out, so a beat seen three times shows
+    three genuinely different moments rather than three clamped to one frame.
     """
-    room = max(available - need, 0.0)
-    if room <= 0 or of_uses <= 1:
-        return 0.0
-    return round(min(usage, of_uses - 1) / (of_uses - 1) * room, 3)
+    room = max(available - head - need, 0.0)
+    if room <= 0:
+        return min(head, max(available - need, 0.0))
+    if of_uses <= 1:
+        return round(head + room / 2, 3)
+    return round(head + min(usage, of_uses - 1) / (of_uses - 1) * room, 3)
 
 
 def clip_seconds(video: Path) -> float:
@@ -48,13 +75,13 @@ def extract(video: Path, start: float, seconds: float, output: Path,
     mismatched streams into something that plays wrong.
     """
     output.parent.mkdir(parents=True, exist_ok=True)
-    subprocess.run(
+    _ffmpeg(
         ["ffmpeg", "-y", "-v", "error", "-ss", f"{start:.3f}", "-i", str(video),
          "-t", f"{seconds:.3f}", "-an",
          "-vf", (f"scale={width}:{height}:force_original_aspect_ratio=increase,"
                  f"crop={width}:{height},fps={fps},format=yuv420p"),
-         "-c:v", "libx264", "-preset", "medium", "-crf", "16", str(output)],
-        check=True, capture_output=True)
+         "-c:v", "libx264", "-preset", "fast", "-crf", "17", str(output)],
+        f"extracting {output.name}")
     return output
 
 
@@ -74,12 +101,12 @@ def title_card(title: str, output: Path, seconds: float, width: int, height: int
             f"x=(w-text_w)/2:y=(h-text_h)/2:line_spacing=12")
     if font:
         draw += f":fontfile='{font}'"
-    subprocess.run(
+    _ffmpeg(
         ["ffmpeg", "-y", "-v", "error", "-f", "lavfi",
          "-i", f"color=c=black:s={width}x{height}:r={fps}:d={seconds:.3f}",
-         "-vf", f"{draw},format=yuv420p", "-c:v", "libx264", "-preset", "medium",
+         "-vf", f"{draw},format=yuv420p", "-c:v", "libx264", "-preset", "fast",
          "-crf", "16", "-t", f"{seconds:.3f}", str(output)],
-        check=True, capture_output=True)
+        "rendering the title card")
     return output
 
 
@@ -88,10 +115,10 @@ def concat(segments: list[Path], output: Path) -> Path:
     listing = output.with_suffix(".txt")
     listing.write_text(
         "\n".join(f"file '{p.as_posix()}'" for p in segments), encoding="utf-8")
-    subprocess.run(
+    _ffmpeg(
         ["ffmpeg", "-y", "-v", "error", "-f", "concat", "-safe", "0",
          "-i", str(listing), "-c", "copy", str(output)],
-        check=True, capture_output=True)
+        "concatenating the shots")
     return output
 
 
@@ -116,9 +143,9 @@ def mix(picture: Path, bed: Path, cues: list[tuple[float, Path]], output: Path) 
         mixed.append(f"[{label}]")
     parts.append(f"{''.join(mixed)}amix=inputs={len(mixed)}:normalize=0,"
                  f"alimiter=limit=0.891,loudnorm=I=-14:TP=-1.0[out]")
-    subprocess.run(
+    _ffmpeg(
         ["ffmpeg", "-y", "-v", "error", *inputs, "-filter_complex", ";".join(parts),
          "-map", "0:v", "-map", "[out]", "-c:v", "copy", "-c:a", "aac", "-b:a", "256k",
          "-ar", "48000", "-shortest", str(output)],
-        check=True, capture_output=True)
+        "mixing the trailer")
     return output

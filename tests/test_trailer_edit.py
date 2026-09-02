@@ -61,8 +61,11 @@ class TestReuseShowsDifferentMoments:
         starts = [segment_start(u, 3, 2.5, 10.1) for u in range(3)]
         assert len(set(starts)) == 3
 
-    def test_a_single_use_starts_at_the_head(self):
-        assert segment_start(0, 1, 2.5, 10.1) == 0.0
+    def test_a_single_use_takes_from_the_middle_of_the_take(self):
+        """Not the head -- the head is the animated reference sheet."""
+        from studio.trailer_assemble import HEAD_TRIM
+        start = segment_start(0, 1, 2.5, 10.1)
+        assert HEAD_TRIM <= start <= 10.1 - 2.5
 
     def test_a_take_with_no_room_does_not_seek_past_its_end(self):
         assert segment_start(2, 3, 10.0, 10.0) == 0.0
@@ -97,3 +100,24 @@ class TestSheetLanguageNeverReachesAShot:
         sheet = character_prompt("A small wiry man.", "Fog and gaslight.")
         built = shot_prompt("Style.", [sheet], "a lane", "He turns.", "hit", 2.0)
         assert not is_scene_safe(built)
+
+
+class TestHeadTrim:
+    """H3 r2v opens on the reference sheet; no shot may come from there."""
+
+    def test_no_use_starts_inside_the_reference_leak(self):
+        from studio.trailer_assemble import HEAD_TRIM, segment_start
+        starts = [segment_start(u, 3, 2.5, 10.12) for u in range(3)]
+        assert all(s >= HEAD_TRIM for s in starts)
+
+    def test_a_single_use_also_clears_the_leak(self):
+        from studio.trailer_assemble import HEAD_TRIM, segment_start
+        assert segment_start(0, 1, 2.5, 10.12) >= HEAD_TRIM
+
+    def test_uses_still_show_different_moments(self):
+        from studio.trailer_assemble import segment_start
+        assert len({segment_start(u, 3, 2.0, 10.12) for u in range(3)}) == 3
+
+    def test_a_take_too_short_to_trim_does_not_seek_past_its_end(self):
+        from studio.trailer_assemble import segment_start
+        assert segment_start(0, 1, 3.0, 3.0) == 0.0
