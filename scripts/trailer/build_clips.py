@@ -9,6 +9,7 @@ cheapest per usable second, so long takes are both better craft and cheaper.
 from __future__ import annotations
 
 import json
+import subprocess
 import sys
 from pathlib import Path
 
@@ -28,6 +29,20 @@ arithmetic behind the mushy, smeared look.  Two independent published sources
 call four a draft mode."""
 
 
+def is_complete(video: Path) -> bool:
+    """True when a file is not just present but finished and readable.
+
+    An existence check is not a completeness check.  mp4 writes its index last,
+    so a render interrupted mid-copy leaves a file that looks done, gets
+    skipped as done, and silently poisons the cut with an unreadable take.
+    """
+    if not video.exists() or video.stat().st_size < 10_000:
+        return False
+    result = subprocess.run(["ffmpeg", "-v", "error", "-i", str(video), "-f", "null", "-"],
+                            capture_output=True, text=True, errors="replace")
+    return not result.stderr.strip()
+
+
 def main(book_glob: str, trailer_id: str = "main") -> None:
     book = next(p for p in (ROOT / "library").iterdir() if p.name.startswith(book_glob))
     out = book / "trailer" / trailer_id
@@ -40,9 +55,12 @@ def main(book_glob: str, trailer_id: str = "main") -> None:
 
     for index, beat in enumerate(plan["beats"]):
         dest = clips_dir / f"{beat['beat_id']}.mp4"
-        if dest.exists():
+        if is_complete(dest):
             print(f"  {beat['beat_id']} exists, skipping")
             continue
+        if dest.exists():
+            print(f"  {beat['beat_id']} is present but unreadable; re-rendering")
+            dest.unlink()
         char_ids = [f"char-{c}" for c in beat["cast"] if f"char-{c}" in refs]
         loc_id = f"loc-{beat['location_id']}"
         slots = char_ids + ([loc_id] if loc_id in refs else [])
