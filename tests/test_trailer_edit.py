@@ -153,3 +153,33 @@ class TestGradeMatching:
     def test_a_zero_deviation_clip_does_not_divide_by_zero(self):
         from studio.trailer_assemble import grade_to
         assert grade_to(60.0, 0.0, 60.0, 40.0)
+
+
+class TestTitleCard:
+    """Typography fails silently; the checks have to be explicit."""
+
+    def test_the_font_is_asserted_to_exist(self):
+        """libass substitutes a missing face without a word of warning."""
+        import studio.trailer_assemble as assemble
+        from pathlib import Path
+        original = assemble.TITLE_FONT_FILE
+        assemble.TITLE_FONT_FILE = Path("C:/Windows/Fonts/DefinitelyNotAFont.ttf")
+        try:
+            import pytest
+            with pytest.raises(RuntimeError, match="title font missing"):
+                assemble.ass_title("X", 3.0, 1344, 768)
+        finally:
+            assemble.TITLE_FONT_FILE = original
+
+    def test_the_card_carries_letter_spacing(self):
+        from studio.trailer_assemble import ass_title
+        assert ",22,0," in ass_title("A Study in Scarlet", 3.0, 1344, 768)
+
+    def test_an_apostrophe_survives(self):
+        """drawtext's inline text= silently drops these; ASS must not."""
+        from studio.trailer_assemble import ass_title
+        assert "KEEPER'S" in ass_title("The Keeper's Lantern", 3.0, 1344, 768)
+
+    def test_the_card_fades(self):
+        from studio.trailer_assemble import ass_title
+        assert "\fad(" in ass_title("X", 3.0, 1344, 768)

@@ -11,7 +11,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 
 from studio.sfx import impact, sub_drop
 from studio.trailer_assemble import (clip_seconds, concat, extract, grade_to,
-                                     luma_stats, mix, segment_start, title_card)
+                                     luma_stats, mix, segment_start, title_card_ass)
 from studio.trailer_cut import FINAL_HOLD, is_uniform
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -63,8 +63,8 @@ def build(book_glob: str, trailer_id: str = "main") -> Path:
     if is_uniform(lengths):
         raise SystemExit("REFUSED: every shot is the same length -- the amateur tell")
 
-    segments.append(title_card(plan["title"], work / "title.mp4",
-                               FINAL_HOLD, width, height, fps))
+    segments.append(title_card_ass(plan["title"], work / "title.mp4",
+                                   FINAL_HOLD, width, height, fps))
     picture = concat(segments, work / "picture.mp4")
 
     music = book / plan["music"]["rel_path"]

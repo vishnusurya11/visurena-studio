@@ -183,3 +183,52 @@ def grade_to(mean: float, deviation: float, hero_mean: float,
     contrast = max(0.75, min(1.35, hero_deviation / max(deviation, 1e-3)))
     brightness = (hero_mean - mean * contrast) / 255.0
     return (f"eq=contrast={contrast:.4f}:brightness={max(-0.3, min(0.3, brightness)):.4f}")
+
+
+TITLE_FONT = "Bookman Old Style"
+TITLE_FONT_FILE = Path("C:/Windows/Fonts/BOOKOS.TTF")
+"""libass substitutes a missing font WITHOUT WARNING -- the same silent
+failure as PIL's default bitmap face, on the one frame the audience reads.
+So the file is asserted to exist before the card is rendered."""
+
+
+def ass_title(title: str, seconds: float, width: int, height: int,
+              tracking: int = 22, fade_ms: int = 700) -> str:
+    """An ASS subtitle file body for the title card.
+
+    Letter-spacing is the whole point: tracking is what separates a title that
+    was designed from one that was typed, and drawtext cannot do it at all.
+    """
+    if not TITLE_FONT_FILE.exists():
+        raise RuntimeError(f"title font missing: {TITLE_FONT_FILE}; libass would "
+                           "silently substitute another face")
+    end = f"{int(seconds // 3600)}:{int(seconds // 60) % 60:02d}:{seconds % 60:05.2f}"
+    return (
+        "[Script Info]\nScriptType: v4.00+\n"
+        f"PlayResX: {width}\nPlayResY: {height}\nWrapStyle: 2\n\n"
+        "[V4+ Styles]\n"
+        "Format: Name, Fontname, Fontsize, PrimaryColour, OutlineColour, BackColour,"
+        " Bold, Italic, Underline, StrikeOut, ScaleX, ScaleY, Spacing, Angle,"
+        " BorderStyle, Outline, Shadow, Alignment, MarginL, MarginR, MarginV, Encoding\n"
+        f"Style: Card,{TITLE_FONT},{height // 13},&H00FFFFFF,&H00000000,&H00000000,"
+        f"0,0,0,0,100,100,{tracking},0,1,0,0,5,60,60,60,1\n\n"
+        "[Events]\nFormat: Layer, Start, End, Style, Name, MarginL, MarginR,"
+        " MarginV, Effect, Text\n"
+        f"Dialogue: 0,0:00:00.00,{end},Card,,0,0,0,,"
+        f"{{\fad({fade_ms},{fade_ms})}}{title.upper()}\n")
+
+
+def title_card_ass(title: str, output: Path, seconds: float, width: int,
+                   height: int, fps: int) -> Path:
+    """The title, tracked and faded, held on black."""
+    output.parent.mkdir(parents=True, exist_ok=True)
+    script = output.with_suffix(".ass")
+    script.write_text(ass_title(title, seconds, width, height), encoding="utf-8")
+    escaped = str(script).replace("\\", "/").replace(":", r"\:")
+    _ffmpeg(
+        ["ffmpeg", "-y", "-v", "error", "-f", "lavfi",
+         "-i", f"color=c=black:s={width}x{height}:r={fps}:d={seconds:.3f}",
+         "-vf", f"ass='{escaped}',format=yuv420p", "-c:v", "libx264",
+         "-preset", "fast", "-crf", "16", "-t", f"{seconds:.3f}", str(output)],
+        "rendering the tracked title card")
+    return output
