@@ -16,7 +16,8 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 
 from studio.comfy import run, stage_image
 from studio.h3 import NATIVE_H, NATIVE_W, frames_for
-from studio.trailer_shot import shot_prompt
+from studio.trailer_refs import visual_description
+from studio.trailer_shot import is_scene_safe, shot_prompt
 
 ROOT = Path(__file__).resolve().parents[2]
 CLIP_SECONDS = 10.0
@@ -31,8 +32,9 @@ def main(book_glob: str, trailer_id: str = "main") -> None:
     book = next(p for p in (ROOT / "library").iterdir() if p.name.startswith(book_glob))
     out = book / "trailer" / trailer_id
     plan = json.loads((out / "plan.json").read_text(encoding="utf-8"))
-    refs = {r["ref_id"]: r for r in plan["refs"]}
-    style = json.loads((book / "refs/refs.json").read_text(encoding="utf-8"))["palette"]
+    refs_doc = json.loads((book / "refs/refs.json").read_text(encoding="utf-8"))
+    refs = {r["ref_id"]: r for r in refs_doc["refs"]}
+    style = refs_doc["palette"]
     clips_dir = out / "clips"
     clips_dir.mkdir(parents=True, exist_ok=True)
 
@@ -47,10 +49,15 @@ def main(book_glob: str, trailer_id: str = "main") -> None:
         if not slots:
             print(f"  {beat['beat_id']} SKIPPED: nothing to bind to")
             continue
+        described = [visual_description(refs[c]["physical"]) for c in char_ids]
+        for who, text in zip(char_ids, described):
+            if not is_scene_safe(text):
+                raise SystemExit(
+                    f"REFUSED: {who}'s description carries reference-sheet "
+                    f"language, which would animate a character sheet: {text[:120]}")
         values = {
             "prompt": shot_prompt(
-                style, [refs[c]["prompt"].split("sharp focus.")[-1].split("No text")[0].strip()
-                        for c in char_ids],
+                style, described,
                 refs[loc_id]["name"] if loc_id in refs else beat["location_id"],
                 beat["image_prompt"], beat["arc"], CLIP_SECONDS),
             "width": NATIVE_W, "height": NATIVE_H,

@@ -75,3 +75,25 @@ class TestDetectionThresholds:
 
     def test_the_final_hold_outlasts_every_arc_target(self):
         assert FINAL_HOLD > max(target_length(p / 100) for p in range(100))
+
+
+class TestSheetLanguageNeverReachesAShot:
+    """A shot prompt describes a person in a place, not a photograph of them."""
+
+    def test_a_sheet_prompt_is_rejected(self):
+        from studio.trailer_refs import character_prompt
+        from studio.trailer_shot import is_scene_safe
+        sheet = character_prompt("A tall lean man, hawk-nosed.", "Muted London grey.")
+        assert not is_scene_safe(sheet)
+
+    def test_a_plain_physical_description_passes(self):
+        from studio.trailer_shot import is_scene_safe
+        assert is_scene_safe("A tall lean man of about thirty, thin hawk-like nose.")
+
+    def test_the_shot_prompt_built_from_a_sheet_prompt_is_caught(self):
+        """The exact bug: the sheet prompt reaching shot_prompt unnoticed."""
+        from studio.trailer_refs import character_prompt
+        from studio.trailer_shot import is_scene_safe, shot_prompt
+        sheet = character_prompt("A small wiry man.", "Fog and gaslight.")
+        built = shot_prompt("Style.", [sheet], "a lane", "He turns.", "hit", 2.0)
+        assert not is_scene_safe(built)

@@ -41,9 +41,16 @@ def picture_roll(count: int) -> str:
 def shot_prompt(style: str, physical: list[str], place: str, action: str,
                 arc: str, seconds: float) -> str:
     """One H3 shot prompt: subject, place, action, camera, then the negatives."""
-    people = " ".join(physical)
-    subject = (f"The person in <Picture 1> is {people}" if physical
-               else "No people are visible.")
+    described = [d for d in physical if d and d.strip()]
+    if described:
+        subject = f"The person in <Picture 1> is {' '.join(described)}"
+    elif physical:
+        # The book never says what they look like.  The reference image is
+        # then the ONLY statement of identity, and inventing prose here would
+        # contradict it rather than reinforce it.
+        subject = "The person shown in <Picture 1> appears in this scene."
+    else:
+        subject = "No people are visible."
     return (
         f"{style} {subject} "
         f"The location is {place}. "
@@ -51,3 +58,21 @@ def shot_prompt(style: str, physical: list[str], place: str, action: str,
         f"The shot runs {seconds:.1f} seconds as one continuous take with no cuts. "
         f"{NO_TYPE}"
     )
+
+
+SHEET_WORDS = ("character reference", "mid-grey backdrop", "studio light",
+               "facing camera", "full figure", "no cast shadows", "turnaround")
+"""Language that belongs on a reference SHEET and must never reach a shot.
+
+A reference sheet prompt and a shot prompt describe opposite things: one wants
+a person centred on grey with flat light, the other wants them inside a scene.
+Feeding the sheet prompt to the video model asks it to animate a character
+sheet.  That happened -- a fragile `split("sharp focus.")` silently failed to
+match and passed the entire sheet prompt through as the character description.
+"""
+
+
+def is_scene_safe(description: str) -> bool:
+    """True when a description says who someone is, not how to photograph them."""
+    lowered = description.lower()
+    return not any(word in lowered for word in SHEET_WORDS)
