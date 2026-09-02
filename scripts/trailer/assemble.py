@@ -38,7 +38,6 @@ def build(book_glob: str, trailer_id: str = "main") -> Path:
     print(f"  hero look: luma {hero_mean:.1f}/{hero_deviation:.1f} "
           f"from {len(stats)} clips spanning {means[0]:.1f}-{means[-1]:.1f}")
 
-    uses = Counter(shot["beat_id"] for shot in plan["shots"])
     seen: Counter = Counter()
     segments: list[Path] = []
     missing: list[str] = []
@@ -60,15 +59,22 @@ def build(book_glob: str, trailer_id: str = "main") -> Path:
         """The beat's own take, or a stand-in chosen deterministically."""
         return beat_id if beat_id in have else have[order % len(have)]
 
+    # Resolve every shot to the take it will actually use BEFORE counting, so
+    # a take standing in for several beats still spreads its segments across
+    # its whole length instead of reusing one moment.
+    resolved = {shot["index"]: source_for(shot["beat_id"], shot["index"])
+                for shot in plan["shots"]}
+    uses = Counter(resolved.values())
+
     for shot in plan["shots"]:
-        actual = source_for(shot["beat_id"], shot["index"])
+        actual = resolved[shot["index"]]
         source = out / "clips" / f"{actual}.mp4"
         if not source.exists():
             missing.append(shot["beat_id"])
             continue
         usage = seen[actual]
         seen[actual] += 1
-        start = segment_start(usage, max(uses[shot["beat_id"]], seen[actual]),
+        start = segment_start(usage, uses[actual],
                               shot["seconds"], clip_seconds(source))
         mean, deviation = stats[actual]
         segments.append(extract(source, start, shot["seconds"],

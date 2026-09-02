@@ -398,3 +398,12 @@ class TestAssemblyDegradesRatherThanRefusing:
     def test_a_nearly_complete_set_is_accepted(self):
         beats, have = 11, 9
         assert have >= max(4, beats * 0.6)
+
+
+class TestSubstituteTakesStillSpread:
+    def test_a_take_standing_in_for_many_beats_spreads_across_its_length(self):
+        """Counting the ORIGINAL beats would reuse one moment repeatedly."""
+        from studio.trailer_assemble import segment_start
+        starts = [segment_start(u, 6, 2.0, 10.12) for u in range(6)]
+        assert len(set(starts)) == 6
+        assert starts == sorted(starts)
