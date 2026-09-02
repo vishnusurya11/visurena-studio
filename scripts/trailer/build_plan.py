@@ -104,6 +104,22 @@ def main(book_glob: str, trailer_id: str = "main") -> None:
         music=MusicBed(rel_path=cue["rel_path"], seconds=cue["seconds"],
                        sections=9, cuts=cue["grid"]))
 
+    # A trailer must contain the story's lead.  Every mechanical gate passed a
+    # Study in Scarlet plan that never once showed Sherlock Holmes, because
+    # nothing was checking for him -- the checks only gate what they measure.
+    lead = ranking[0] if ranking else None
+    if lead and f"char-{lead}" in refs:
+        appearances = sum(lead in beat.cast for beat in beats)
+        if appearances < max(2, len(beats) // 4):
+            raise SystemExit(
+                f"REFUSED: {lead} leads this story but appears in only "
+                f"{appearances} of {len(beats)} beats")
+    # Every register of the arc must be represented, or there is no climax.
+    missing = {"quiet", "build", "hit"} - {beat.arc for beat in beats}
+    if missing:
+        raise SystemExit(f"REFUSED: the trailer has no {sorted(missing)} beats; "
+                         "it rises to nothing")
+
     unbound = plan.unbound_shots()
     if unbound:
         raise SystemExit(f"REFUSED: {len(unbound)} shots show a character with no "

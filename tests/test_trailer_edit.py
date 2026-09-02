@@ -213,3 +213,39 @@ class TestEpithets:
         lawyer = described_as({"name": "Mr. Utterson", "aliases": ["the lawyer"],
                                "profile": {"physical": ""}})
         assert butler != lawyer and butler and lawyer
+
+
+class TestTheTrailerIsAboutItsBook:
+    """Content checks. Every mechanical gate passed a Holmes-less Holmes trailer."""
+
+    def test_the_arc_spans_every_register(self):
+        from studio.trailer_plan import arc_for
+        registers = {arc_for(i / 10) for i in range(11)}
+        assert {"quiet", "build", "hit", "aftermath"} <= registers
+
+    def test_positions_taken_over_scenes_never_reach_a_climax(self):
+        """The exact bug: 11 beats over 22 scenes capped position at 0.48."""
+        from studio.trailer_plan import arc_for
+        wrong = {arc_for(i / 21) for i in range(11)}
+        assert "hit" not in wrong
+
+    def test_the_most_central_character_is_the_one_bound(self):
+        from studio.trailer_plan import lead_of
+        assert lead_of({"cast": ["watson", "holmes"]},
+                       ["holmes", "watson"], {"holmes", "watson"}) == ["holmes"]
+
+    def test_a_character_without_a_reference_is_not_bound(self):
+        from studio.trailer_plan import lead_of
+        assert lead_of({"cast": ["watson", "holmes"]},
+                       ["holmes", "watson"], {"watson"}) == ["watson"]
+
+    def test_ranking_counts_presence_and_speech(self):
+        from studio.trailer_plan import leading_characters
+        scenes = [{"cast": ["holmes", "watson"], "speaking": ["holmes"]},
+                  {"cast": ["watson"], "speaking": []},
+                  {"cast": ["holmes"], "speaking": ["holmes"]}]
+        assert leading_characters(scenes)[0] == "holmes"
+
+    def test_an_empty_scene_binds_nobody(self):
+        from studio.trailer_plan import lead_of
+        assert lead_of({"cast": []}, ["holmes"], {"holmes"}) == []
