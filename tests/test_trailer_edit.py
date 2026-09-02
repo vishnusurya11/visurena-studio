@@ -121,3 +121,35 @@ class TestHeadTrim:
     def test_a_take_too_short_to_trim_does_not_seek_past_its_end(self):
         from studio.trailer_assemble import segment_start
         assert segment_start(0, 1, 3.0, 3.0) == 0.0
+
+
+class TestGradeMatching:
+    """The prompt cannot lock exposure; post can."""
+
+    def test_a_clip_already_matching_the_hero_is_left_alone(self):
+        from studio.trailer_assemble import grade_to
+        assert grade_to(60.0, 40.0, 60.0, 40.0) == "eq=contrast=1.0000:brightness=0.0000"
+
+    def test_a_dark_clip_is_brightened(self):
+        from studio.trailer_assemble import grade_to
+        assert "brightness=0." in grade_to(40.0, 40.0, 70.0, 40.0)
+
+    def test_a_flat_clip_gains_contrast(self):
+        """Matching the mean alone leaves flat clips flat, and flat reads cheap."""
+        from studio.trailer_assemble import grade_to
+        filt = grade_to(60.0, 20.0, 60.0, 45.0)
+        assert float(filt.split("contrast=")[1].split(":")[0]) > 1.0
+
+    def test_contrast_is_clamped_so_noise_is_not_amplified(self):
+        from studio.trailer_assemble import grade_to
+        filt = grade_to(60.0, 1.0, 60.0, 90.0)
+        assert float(filt.split("contrast=")[1].split(":")[0]) <= 1.35
+
+    def test_brightness_is_clamped(self):
+        from studio.trailer_assemble import grade_to
+        filt = grade_to(5.0, 40.0, 250.0, 40.0)
+        assert abs(float(filt.split("brightness=")[1])) <= 0.3
+
+    def test_a_zero_deviation_clip_does_not_divide_by_zero(self):
+        from studio.trailer_assemble import grade_to
+        assert grade_to(60.0, 0.0, 60.0, 40.0)

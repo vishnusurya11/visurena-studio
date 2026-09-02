@@ -67,7 +67,7 @@ def clip_seconds(video: Path) -> float:
 
 
 def extract(video: Path, start: float, seconds: float, output: Path,
-            width: int, height: int, fps: int) -> Path:
+            width: int, height: int, fps: int, grade: str = "") -> Path:
     """Cut one shot out of a take, conformed to the trailer's single format.
 
     Every shot is forced to the same size, rate and pixel format here.  The
@@ -79,7 +79,8 @@ def extract(video: Path, start: float, seconds: float, output: Path,
         ["ffmpeg", "-y", "-v", "error", "-ss", f"{start:.3f}", "-i", str(video),
          "-t", f"{seconds:.3f}", "-an",
          "-vf", (f"scale={width}:{height}:force_original_aspect_ratio=increase,"
-                 f"crop={width}:{height},fps={fps},format=yuv420p"),
+                 f"crop={width}:{height},fps={fps},{grade + ',' if grade else ''}"
+                 f"format=yuv420p"),
          "-c:v", "libx264", "-preset", "fast", "-crf", "17", str(output)],
         f"extracting {output.name}")
     return output
@@ -149,3 +150,36 @@ def mix(picture: Path, bed: Path, cues: list[tuple[float, Path]], output: Path) 
          "-ar", "48000", "-shortest", str(output)],
         "mixing the trailer")
     return output
+
+
+def luma_stats(video: Path) -> tuple[float, float]:
+    """(mean, standard deviation) of luma across a clip, 0-255.
+
+    Measured across the 2026-08-25 clips, frame-average luma spanned
+    42.9 to 96.6 out of 255 despite a verbatim `grade` string in every prompt.
+    The prompt buys intent, not exposure -- so the look is matched in post,
+    against one hero clip, which is the only method that actually works.
+    """
+    result = subprocess.run(
+        ["ffmpeg", "-v", "error", "-i", str(video), "-vf",
+         "scale=160:90,format=gray", "-f", "rawvideo", "-"],
+        capture_output=True)
+    if not result.stdout:
+        raise RuntimeError(f"could not read luma from {video}")
+    import numpy as np
+    pixels = np.frombuffer(result.stdout, dtype=np.uint8).astype(np.float32)
+    return float(pixels.mean()), float(pixels.std())
+
+
+def grade_to(mean: float, deviation: float, hero_mean: float,
+             hero_deviation: float) -> str:
+    """An ffmpeg filter matching one clip's exposure and contrast to the hero.
+
+    Matching the SPREAD as well as the mean matters: correcting brightness
+    alone leaves the flat clips flat, and flatness is what reads as cheap.
+    Contrast is clamped because pushing a genuinely low-contrast clip hard
+    just amplifies its noise.
+    """
+    contrast = max(0.75, min(1.35, hero_deviation / max(deviation, 1e-3)))
+    brightness = (hero_mean - mean * contrast) / 255.0
+    return (f"eq=contrast={contrast:.4f}:brightness={max(-0.3, min(0.3, brightness)):.4f}")
