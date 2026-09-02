@@ -65,3 +65,40 @@ mean less repetition and more variety; fewer would lean harder on the motif.
 - **No SeedVR2 upscale, no title typography beyond a plain centred card.**
   `libass` would give real tracking and fades in one filter; the font must be
   asserted to exist first, because libass substitutes a missing one silently.
+
+---
+
+## Later in the night — decisions taken after seeing output
+
+**Character collision is only partly solved, and I stopped short deliberately.**
+Seven Jekyll reference sheets came back as near-identical Victorian gentlemen,
+because Stevenson never describes any of them and an empty description gives
+every character the same prompt. Three fixes went in, in increasing order of
+invention: the book's own epithets ("the solemn butler", "the lawyer", "a
+little man"), period dress implied by role, and — only where the book is
+silent — invented distinguishing marks. Poole, the policeman and the maid now
+separate clearly. Jekyll, Hyde and Utterson still converge: Krea 2 has a
+strong prior for the period that this much text does not overcome.
+
+I stopped there rather than keep spending GPU on prompt variations, because
+the clips were the long pole and the returns had visibly flattened. The
+documented real fix is a trained character LoRA — musubi-tuner supports Krea 2
+natively and it is the only method whose fidelity does not decay with shot
+count. That is the first thing I would do next.
+
+What *does* work is the thing that was broken: one character holds one face
+across every shot bound to them.
+
+**The reference leak.** H3's r2v path opens on the reference image and
+animates it for ~2.1s before moving into the scene. Every take now discards
+its first 2.6s. That is the binding working, held hard — but it means a 10.12s
+take yields ~7.5s of usable footage, which is what sets the clip budget.
+
+**Beat selection stayed mechanical, and it was wrong twice before it was
+right.** The first plan for A Study in Scarlet contained no Sherlock Holmes
+and never reached a climax; the first for Jekyll and Hyde had nine beats of
+Utterson and no Hyde. Both passed every mechanical gate, because the gates
+checked binding and cutting, not *whether the trailer was about the book*.
+Gates for protagonist presence and a complete arc now exist. I still think an
+LLM pass over beat selection would beat the arithmetic — it would cost cents,
+and it is the clearest place to spend money next.
