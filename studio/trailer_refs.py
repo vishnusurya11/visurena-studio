@@ -34,8 +34,15 @@ NO_TYPE = "No text, no lettering, no signage, no watermark, no subtitles."
 
 
 def character_prompt(physical: str, palette: str) -> str:
-    """A reference sheet prompt: house style, sheet framing, then the person."""
-    return " ".join([STYLE, palette, SHEET_FRAME, physical.strip(), NO_TYPE])
+    """A reference sheet prompt, THE PERSON FIRST.
+
+    Order matters more than content here.  With the style block leading, seven
+    characters came back as the same Victorian gentleman: the palette and the
+    period dominated, and the description trailing at the end barely
+    registered.  Naming who this is before saying how to photograph them is
+    what separates them.
+    """
+    return " ".join([physical.strip(), SHEET_FRAME, STYLE, palette, NO_TYPE])
 
 
 def location_prompt(described: str, palette: str) -> str:
