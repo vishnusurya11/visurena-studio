@@ -168,3 +168,28 @@ default when the prompt says nothing about the camera, so always say something.
 5. `assemble.py` — cut, title on the measured hit, synthesised sound, mix.
 
 Cost: zero. Everything is local GPU; no paid API is involved at any step.
+
+## Observed on the first bound run — read before the next one
+
+**The reference leak is real and it is the binding working.** H3's r2v path
+opens on the reference image and animates it — for ~2.1s the shot is the
+character standing on the grey sheet backdrop — then moves into the scene.
+Every take gives up its first 2.6s (`HEAD_TRIM`). Budget for it: a 10.12s take
+yields ~7.5s of usable footage.
+
+**Character binding is much stronger than location binding.** With
+`char-*` on `ref_image_1` and `loc-*` on `ref_image_2`, the person is held
+hard and unmistakably; the place is *blended*. A bar interior plate plus the
+slug name "the Criterion Bar" produced an arcade carrying the bar's tables and
+gaslights. Treat the location ref as a palette and texture cue, not a set.
+
+**H3 invents lettering even when told not to.** The Criterion plate contains
+no text whatsoever, and the rendered clip still put "CRISTERION" on a sign.
+`NO_TYPE` is in every prompt and did not prevent it. At 1.4–4s a shot this is
+usually below notice; do not spend renders fighting it. If a word must be
+legible, F12 is the rule: typeless plate, composite the type in post.
+
+**Location plates come back populated.** `PLATE_FRAME` says "no people, no
+figures" and the Criterion plate returned a room full of drinkers. It happens
+to flatter this location, but it means those extras can bind into shots. If a
+plate must be empty, verify it rather than trusting the prompt.
