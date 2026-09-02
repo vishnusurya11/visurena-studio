@@ -193,3 +193,37 @@ legible, F12 is the rule: typeless plate, composite the type in post.
 figures" and the Criterion plate returned a room full of drinkers. It happens
 to flatter this location, but it means those extras can bind into shots. If a
 plate must be empty, verify it rather than trusting the prompt.
+
+## Content bugs no mechanical gate will catch for you
+
+Every gate in this pipeline passed a plan for *A Study in Scarlet* that
+contained no Sherlock Holmes and rose to no climax. The plan was fully bound,
+correctly cut, properly graded — and for a different story. **A check gates
+only what it measures.** Three that had to be added:
+
+- **Bind the story's lead, not `cast[0]`.** Rank characters by presence across
+  the whole book (`leading_characters`) and bind the most central one present
+  in each scene. Refuse a plan where the lead appears in almost no beats.
+- **Take the arc position from the BEAT index, not the scene index.** Eleven
+  beats over twenty-two scenes caps position at 0.48, below the `hit`
+  threshold, so every beat comes back `quiet` or `build` and nothing peaks.
+  Refuse a plan missing any register.
+- **Choose reference sheets by story-wide ranking, not by sampling scenes.**
+  Sampling gave *Jekyll and Hyde* a reference set with no Henry Jekyll — he
+  ranks second in the book but did not speak in the twelve scenes drawn — and
+  spent a sheet on Enfield, who ranks sixth.
+
+Sampling was wrong twice for the same reason: **a sample of scenes is not a
+measure of centrality**, and centrality is what a trailer needs.
+
+Two more coherence rules, cheap and worth it:
+
+- **The action line must feature the character the shot is bound to.** Holmes's
+  reference under the line "Gregson sits in the arm-chair" tells the model two
+  different things about who is on screen. Preferring a line that names the
+  bound character also happens to land the book's own famous opening.
+- **Character COLLISION is the identity problem wearing different clothes.**
+  Where a book never describes anyone, generating from the profile alone gives
+  every character the same generic prompt and therefore the same face. Use the
+  book's epithets — "the solemn butler", "the lawyer", "a little man" — which
+  are the author describing someone in the fewest words they thought necessary.
