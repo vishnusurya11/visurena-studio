@@ -108,7 +108,7 @@ def build(book_glob: str, trailer_id: str = "main") -> Path:
     cues = [(max(hit_at - 2.4, 0.0), sub_drop(work / "sub.wav")),
             (hit_at, impact(work / "hit.wav"))]
     final = out / f"TRAILER-{book.name.split('_', 1)[1]}.mp4"
-    mix(picture, music, cues, final)
+    mix(picture, music, cues, final, seconds=clip_seconds(picture))
     print(f"{len(segments)} shots, card at {title_at:.1f}s holding "
           f"{card_seconds:.1f}s, cue hit at {hit_at:.1f}s -> {final}")
     return final

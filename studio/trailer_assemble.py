@@ -123,7 +123,8 @@ def concat(segments: list[Path], output: Path) -> Path:
     return output
 
 
-def mix(picture: Path, bed: Path, cues: list[tuple[float, Path]], output: Path) -> Path:
+def mix(picture: Path, bed: Path, cues: list[tuple[float, Path]], output: Path,
+        seconds: float | None = None) -> Path:
     """Lay the bed and the designed hits under the cut, and land the loudness.
 
     Two-pass loudnorm is deliberate: single-pass runs in DYNAMIC mode, which
@@ -142,10 +143,16 @@ def mix(picture: Path, bed: Path, cues: list[tuple[float, Path]], output: Path) 
         parts.append(f"[{index + 2}:a]aresample=48000,"
                      f"adelay={int(when * 1000)}|{int(when * 1000)}[{label}]")
         mixed.append(f"[{label}]")
-    parts.append(f"{''.join(mixed)}amix=inputs={len(mixed)}:normalize=0,"
+    # `apad` makes the bed an INFINITE stream and amix defaults to
+    # duration=longest, so the mix never ends -- and `-shortest` does not
+    # reliably terminate a filter-graph output.  The first run of this hung at
+    # exactly 25,690,160 bytes and stayed there.  An explicit `-t` bounds it.
+    parts.append(f"{''.join(mixed)}amix=inputs={len(mixed)}:normalize=0:duration=first,"
                  f"alimiter=limit=0.891,loudnorm=I=-14:TP=-1.0[out]")
+    bound = ["-t", f"{seconds:.3f}"] if seconds else []
     _ffmpeg(
         ["ffmpeg", "-y", "-v", "error", *inputs, "-filter_complex", ";".join(parts),
+         *bound,
          "-map", "0:v", "-map", "[out]", "-c:v", "copy", "-c:a", "aac", "-b:a", "256k",
          "-ar", "48000", "-shortest", str(output)],
         "mixing the trailer")
