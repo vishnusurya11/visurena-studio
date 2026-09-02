@@ -126,3 +126,48 @@ def visual_description(physical: str, limit: int = VISUAL_LIMIT) -> str:
         if len(". ".join(kept)) >= limit:
             break
     return (". ".join(kept) + ".") if kept else ""
+
+
+VOID_EPITHETS = ("the latter", "our friend", "our old friend", "the former",
+                 "a friend", "his friend", "the other", "the man", "the fellow",
+                 "the person", "my gentleman", "the young man", "this fellow")
+"""Epithets that name a relationship rather than a person.  "our old friend"
+describes no one; "the solemn butler" describes someone completely."""
+
+
+def epithets(aliases: list[str], name: str) -> list[str]:
+    """The descriptive names a book uses for someone, as description.
+
+    This is the fix for CHARACTER COLLISION.  Where a book never describes
+    anyone -- Stevenson never says what Utterson looks like -- generating
+    refs from the profile alone produced four indistinguishable Victorian
+    gentlemen for Hyde, Utterson, Poole and Enfield.
+
+    But the book DID say: "the solemn butler", "the lawyer", "a little man",
+    "a maid servant".  An epithet is the author describing a character in the
+    fewest words they thought necessary, and it separates them instantly.
+    """
+    # Only an alias IDENTICAL to the name is redundant.  Sharing a word with
+    # it is not: an unnamed character's "name" may itself be an epithet -- the
+    # housemaid is called "the maid" -- and filtering on shared words then
+    # discarded "a maid servant", which is the one alias that adds anything.
+    spoken = name.lower().strip(".,")
+    found: list[str] = []
+    for alias in aliases:
+        clean = alias.strip().rstrip(".")
+        lowered = clean.lower()
+        if not lowered.startswith(("a ", "an ", "the ")):
+            continue
+        if lowered in VOID_EPITHETS or lowered == spoken:
+            continue
+        if clean not in found:
+            found.append(clean)
+    return found
+
+
+def described_as(character: dict) -> str:
+    """One line combining what the book calls someone with how it describes them."""
+    tags = epithets(character.get("aliases", []), character.get("name", ""))
+    physical = visual_description((character.get("profile") or {}).get("physical", ""))
+    lead = f"{character.get('name', 'A person')}, {', '.join(tags[:3])}." if tags else ""
+    return " ".join(part for part in (lead, physical) if part).strip()

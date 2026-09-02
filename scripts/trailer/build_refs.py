@@ -17,8 +17,8 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 
 from studio.comfy import run
 from studio.trailer_plan import pick_scenes, speaking_characters, unique_locations
-from studio.trailer_refs import (character_prompt, load_json, location_prompt,
-                                 physical_of, ref_id_for)
+from studio.trailer_refs import (character_prompt, described_as, load_json,
+                                 location_prompt, physical_of, ref_id_for)
 
 LIBRARY = Path(__file__).resolve().parents[2] / "library"
 SEED_BASE = 40000
@@ -80,7 +80,10 @@ def main(book_id: str, palette: str, scene_count: int = 12) -> None:
             print(f"  SKIP character {char_id}: no analysis")
             continue
         character = load_json(path)
-        physical = physical_of(character)
+        # The epithets a book uses ARE its description of someone.  Without
+        # them, four characters the text never describes came back as four
+        # identical Victorian gentlemen.
+        physical = described_as(character) or physical_of(character)
         prompt = character_prompt(physical, palette)
         ref_id = ref_id_for("character", char_id)
         dest = refs_root / "characters" / f"{ref_id}.png"

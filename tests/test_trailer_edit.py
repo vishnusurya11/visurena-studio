@@ -183,3 +183,33 @@ class TestTitleCard:
     def test_the_card_fades(self):
         from studio.trailer_assemble import ass_title
         assert "\fad(" in ass_title("X", 3.0, 1344, 768)
+
+
+class TestEpithets:
+    """A book that never describes someone still names them descriptively."""
+
+    def test_a_descriptive_epithet_is_kept(self):
+        from studio.trailer_refs import epithets
+        assert "the solemn butler" in epithets(["Poole", "the solemn butler"], "Poole")
+
+    def test_a_relationship_is_not_a_description(self):
+        from studio.trailer_refs import epithets
+        assert epithets(["our old friend", "a friend", "the latter"], "Enfield") == []
+
+    def test_a_bare_name_is_not_an_epithet(self):
+        from studio.trailer_refs import epithets
+        assert epithets(["Mr. Utterson", "Utterson"], "Mr. Utterson") == []
+
+    def test_an_epithet_survives_sharing_a_word_with_the_name(self):
+        """The housemaid's own name is "the maid"; "a maid servant" still counts."""
+        from studio.trailer_refs import epithets
+        found = epithets(["the maid", "a maid servant", "the housemaid"], "the maid")
+        assert "a maid servant" in found and "the maid" not in found
+
+    def test_two_characters_the_book_never_describes_still_differ(self):
+        from studio.trailer_refs import described_as
+        butler = described_as({"name": "Poole", "aliases": ["the solemn butler"],
+                               "profile": {"physical": ""}})
+        lawyer = described_as({"name": "Mr. Utterson", "aliases": ["the lawyer"],
+                               "profile": {"physical": ""}})
+        assert butler != lawyer and butler and lawyer
