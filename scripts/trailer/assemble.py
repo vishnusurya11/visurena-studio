@@ -33,7 +33,13 @@ def build(book_glob: str, trailer_id: str = "main") -> Path:
     if not stats:
         raise SystemExit(f"REFUSED: no clips rendered under {out / 'clips'}")
     means = sorted(mean for mean, _ in stats.values())
-    hero_mean = max(means[len(means) // 2], 58.0)
+    # The floor is 32, not something brighter.  Measured across 50 released
+    # trailers the MEDIAN frame-average luma is 28/255, with the 5th
+    # percentile at 3.2 -- trailers are dark, and the picture goes to
+    # near-black repeatedly.  A floor of 58 would have washed out exactly the
+    # Victorian gloom these two books want.  It exists only so a batch that
+    # came back almost black is lifted to somewhere legible.
+    hero_mean = max(means[len(means) // 2], 32.0)
     hero_deviation = sorted(dev for _, dev in stats.values())[len(stats) // 2]
     print(f"  hero look: luma {hero_mean:.1f}/{hero_deviation:.1f} "
           f"from {len(stats)} clips spanning {means[0]:.1f}-{means[-1]:.1f}")

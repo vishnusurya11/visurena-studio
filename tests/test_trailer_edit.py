@@ -430,3 +430,29 @@ class TestFraming:
         from studio.trailer_shot import shot_prompt
         built = shot_prompt("S.", [], "a lane", "Rain falls.", "quiet", 2.0)
         assert "waist up" not in built
+
+
+class TestTheHeroLookIsDark:
+    """Measured across 50 released trailers: median frame luma is 28/255."""
+
+    FLOOR = 32.0
+
+    def test_the_floor_sits_near_the_corpus_median(self):
+        assert 25.0 <= self.FLOOR <= 40.0
+
+    def test_a_dark_batch_is_lifted_only_to_the_floor(self):
+        means = [11.9, 24.9, 20.0]
+        assert max(sorted(means)[len(means) // 2], self.FLOOR) == self.FLOOR
+
+    def test_a_bright_batch_keeps_its_own_median(self):
+        """The floor is a floor, not a target -- it must not pull bright work down."""
+        means = [70.0, 85.0, 90.0]
+        assert max(sorted(means)[len(means) // 2], self.FLOOR) == 85.0
+
+    def test_clips_converge_on_the_hero(self):
+        from studio.trailer_assemble import grade_to
+        for mean in (11.9, 24.9, 48.4):
+            filt = grade_to(mean, 37.9, self.FLOOR, 37.9)
+            contrast = float(filt.split("contrast=")[1].split(":")[0])
+            bright = float(filt.split("brightness=")[1])
+            assert abs((mean * contrast + bright * 255) - self.FLOOR) < 0.5
