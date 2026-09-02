@@ -59,7 +59,7 @@ def main(book_glob: str, trailer_id: str = "main") -> None:
             "prompt": shot_prompt(
                 style, described,
                 refs[loc_id]["name"] if loc_id in refs else beat["location_id"],
-                beat["image_prompt"], beat["arc"], CLIP_SECONDS),
+                beat["image_prompt"], beat["arc"], CLIP_SECONDS, index),
             "width": NATIVE_W, "height": NATIVE_H,
             "frames": frames_for(CLIP_SECONDS), "steps": STEPS,
             "seed": 51000 + index * 7,

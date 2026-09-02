@@ -18,15 +18,45 @@ from __future__ import annotations
 NO_TYPE = ("All frames free of text: no signage, no lettering, no subtitles, "
            "no watermarks, no captions, no on-screen writing.")
 
-CAMERA = {
-    "quiet": "The camera pushes in with small amplitude at slow speed.",
-    "build": "The camera tracks with small amplitude at slow speed.",
-    "hit": "The camera pushes in with large amplitude at fast speed.",
-    "aftermath": "The camera is static, holding the frame.",
+CAMERA: dict[str, tuple[str, ...]] = {
+    "quiet": (
+        "The camera pushes in with small amplitude at slow speed.",
+        "The camera is a static shot, the frame perfectly still.",
+        "The camera tilts down with small amplitude at slow speed.",
+    ),
+    "build": (
+        "The camera tracks left with small amplitude at slow speed.",
+        "The camera arcs around the subject at slow speed.",
+        "The camera pushes in with large amplitude at slow speed.",
+    ),
+    "hit": (
+        "The camera pushes in with large amplitude at fast speed.",
+        "The camera shakes slightly, handheld, at fast speed.",
+        "The camera pulls out with large amplitude at fast speed.",
+    ),
+    "aftermath": (
+        "The camera is a static shot, the frame perfectly still.",
+        "The camera pulls out with small amplitude at slow speed.",
+    ),
 }
-"""H3's documented motion vocabulary, one per position in the arc.  Written as
-natural English inside the shot, which the guide requires -- stacked labels at
-the end of a sentence are off-spec."""
+"""H3's documented motion vocabulary, several per register.
+
+Written as prose with amplitude and speed, which the guide requires -- stacked
+labels at the end of a sentence are off-spec, and `[Push in]` bracket syntax
+is the HOSTED Hailuo dialect that does nothing here.
+
+Several per register rather than one because uniform treatment across every
+shot is itself the pattern an audience detects, and a slow drifting push is
+the single most recognisable tell of generated video.  H3 also drifts by
+default when the prompt says nothing about the camera, so a static frame must
+be asked for explicitly.
+"""
+
+
+def camera_for(arc: str, index: int) -> str:
+    """A camera move for this beat: right register, varied within it."""
+    moves = CAMERA.get(arc) or CAMERA["build"]
+    return moves[index % len(moves)]
 
 
 def picture_roll(count: int) -> str:
@@ -39,7 +69,7 @@ def picture_roll(count: int) -> str:
 
 
 def shot_prompt(style: str, physical: list[str], place: str, action: str,
-                arc: str, seconds: float) -> str:
+                arc: str, seconds: float, index: int = 0) -> str:
     """One H3 shot prompt: subject, place, action, camera, then the negatives."""
     described = [d for d in physical if d and d.strip()]
     if described:
@@ -54,7 +84,7 @@ def shot_prompt(style: str, physical: list[str], place: str, action: str,
     return (
         f"{style} {subject} "
         f"The location is {place}. "
-        f"{action} {CAMERA.get(arc, CAMERA['build'])} "
+        f"{action} {camera_for(arc, index)} "
         f"The shot runs {seconds:.1f} seconds as one continuous take with no cuts. "
         f"{NO_TYPE}"
     )

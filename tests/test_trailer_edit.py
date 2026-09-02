@@ -344,3 +344,30 @@ class TestTheTitleLandsOnTheHit:
         from studio.trailer_cut import FINAL_HOLD
         assert all(self.card_seconds(80.0, h) >= FINAL_HOLD
                    for h in (10.0, 79.0, 80.0, 95.0))
+
+
+class TestCameraVariety:
+    """A slow drifting push on every shot is the tell of generated video."""
+
+    def test_consecutive_beats_in_one_register_differ(self):
+        from studio.trailer_shot import camera_for
+        assert len({camera_for("build", i) for i in range(3)}) == 3
+
+    def test_the_register_still_governs(self):
+        from studio.trailer_shot import camera_for
+        assert all("fast speed" in camera_for("hit", i) for i in range(3))
+        assert not any("fast speed" in camera_for("quiet", i) for i in range(3))
+
+    def test_a_static_frame_can_be_asked_for(self):
+        """H3 drifts by default when the prompt says nothing about the camera."""
+        from studio.trailer_shot import camera_for
+        assert any("static" in camera_for("quiet", i) for i in range(3))
+
+    def test_an_unknown_register_still_yields_a_camera(self):
+        from studio.trailer_shot import camera_for
+        assert camera_for("nonsense", 0)
+
+    def test_no_bracket_syntax_anywhere(self):
+        """[Push in] is the hosted Hailuo dialect and does nothing on H3."""
+        from studio.trailer_shot import CAMERA
+        assert not [m for moves in CAMERA.values() for m in moves if "[" in m]
