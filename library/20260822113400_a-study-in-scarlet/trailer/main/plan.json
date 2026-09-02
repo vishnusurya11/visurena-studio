@@ -1,0 +1,695 @@
+{
+ "trailer_id": "main",
+ "book_id": "20260822113400_a-study-in-scarlet",
+ "title": "A Study in Scarlet",
+ "kind": "main",
+ "width": 1344,
+ "height": 768,
+ "fps": 24,
+ "refs": [
+  {
+   "ref_id": "char-sherlock_holmes",
+   "kind": "character",
+   "name": "Sherlock Holmes",
+   "prompt": "Cinematic live-action photograph, anamorphic widescreen, natural film grain, photoreal, no stylisation, no illustration. Muted desaturated palette of soot-black, gaslight amber and cold London grey; 1881 London; practical Victorian light sources, fog, deep shadow. Full-body character reference on a plain neutral mid-grey backdrop, even soft studio light, no cast shadows, neutral expression, facing camera, sharp focus, full figure head to feet in frame. The dossier gives limited physical description. Holmes has hands mottled with pieces of plaster and discoloured by strong acids from his chemical work. He pricks a finger while collecting blood and covers it with a small plaster. He is able to travel rapidly, conduct close physical examinations, follow a suspect, handcuff a cabman, and help restrain him. His clothing is not generally described; during the investigation he is associated with a hansom cab and later with the rooms at 221b Baker Street. No text, no lettering, no signage, no watermark, no subtitles.",
+   "rel_path": "refs/characters/char-sherlock_holmes.png"
+  },
+  {
+   "ref_id": "char-john_watson",
+   "kind": "character",
+   "name": "Dr. John Watson",
+   "prompt": "Cinematic live-action photograph, anamorphic widescreen, natural film grain, photoreal, no stylisation, no illustration. Muted desaturated palette of soot-black, gaslight amber and cold London grey; 1881 London; practical Victorian light sources, fog, deep shadow. Full-body character reference on a plain neutral mid-grey backdrop, even soft studio light, no cast shadows, neutral expression, facing camera, sharp focus, full figure head to feet in frame. The dossier identifies Watson as an army surgeon and later as Dr. Watson. He served with the Berkshires in Afghanistan, was wounded by a Jezail bullet at Maiwand, survived enteric fever, and was sent to England to recover his health. His body is therefore demonstrably injured and medically convalescent at the beginning of the recorded London events. The dossier gives no height, build, hair, eye colour, age, or detailed clothing. No text, no lettering, no signage, no watermark, no subtitles.",
+   "rel_path": "refs/characters/char-john_watson.png"
+  },
+  {
+   "ref_id": "char-g_lestrade",
+   "kind": "character",
+   "name": "Lestrade",
+   "prompt": "Cinematic live-action photograph, anamorphic widescreen, natural film grain, photoreal, no stylisation, no illustration. Muted desaturated palette of soot-black, gaslight amber and cold London grey; 1881 London; practical Victorian light sources, fog, deep shadow. Full-body character reference on a plain neutral mid-grey backdrop, even soft studio light, no cast shadows, neutral expression, facing camera, sharp focus, full figure head to feet in frame. The dossier provides no description of Lestrade’s age, build, face, hair, clothing, or distinguishing physical features. He is identified as a well-known detective and appears in professional investigative settings. No text, no lettering, no signage, no watermark, no subtitles.",
+   "rel_path": "refs/characters/char-g_lestrade.png"
+  },
+  {
+   "ref_id": "char-tobias_gregson",
+   "kind": "character",
+   "name": "Tobias Gregson",
+   "prompt": "Cinematic live-action photograph, anamorphic widescreen, natural film grain, photoreal, no stylisation, no illustration. Muted desaturated palette of soot-black, gaslight amber and cold London grey; 1881 London; practical Victorian light sources, fog, deep shadow. Full-body character reference on a plain neutral mid-grey backdrop, even soft studio light, no cast shadows, neutral expression, facing camera, sharp focus, full figure head to feet in frame. The dossier provides no description of Gregson’s age, build, face, hair, clothing, or other distinguishing physical features. He is identified as a Scotland Yard detective involved in examining the crime scenes and arresting suspects. No text, no lettering, no signage, no watermark, no subtitles.",
+   "rel_path": "refs/characters/char-tobias_gregson.png"
+  },
+  {
+   "ref_id": "char-stamford",
+   "kind": "character",
+   "name": "Stamford",
+   "prompt": "Cinematic live-action photograph, anamorphic widescreen, natural film grain, photoreal, no stylisation, no illustration. Muted desaturated palette of soot-black, gaslight amber and cold London grey; 1881 London; practical Victorian light sources, fog, deep shadow. Full-body character reference on a plain neutral mid-grey backdrop, even soft studio light, no cast shadows, neutral expression, facing camera, sharp focus, full figure head to feet in frame. Stamford, period-appropriate dress. No text, no lettering, no signage, no watermark, no subtitles.",
+   "rel_path": "refs/characters/char-stamford.png"
+  },
+  {
+   "ref_id": "char-jefferson_hope",
+   "kind": "character",
+   "name": "Jefferson Hope",
+   "prompt": "Cinematic live-action photograph, anamorphic widescreen, natural film grain, photoreal, no stylisation, no illustration. Muted desaturated palette of soot-black, gaslight amber and cold London grey; 1881 London; practical Victorian light sources, fog, deep shadow. Full-body character reference on a plain neutral mid-grey backdrop, even soft studio light, no cast shadows, neutral expression, facing camera, sharp focus, full figure head to feet in frame. The evidence gives no precise age, height, hair colour, eye colour, or build. He is described at one point as a young hunter and later as a tattered, unkempt wanderer with a ghastly white face and fierce, wild eyes. He grows a beard as a disguise. He works as a cabman in London and has the practical skills of a hunter and wilderness traveler. His hands and face are terribly cut and bloodied after escaping through a glass window. He suffers from an aortic aneurism, and exposure and poor food wear down his condition. No text, no lettering, no signage, no watermark, no subtitles.",
+   "rel_path": "refs/characters/char-jefferson_hope.png"
+  },
+  {
+   "ref_id": "loc-221b_baker_street",
+   "kind": "location",
+   "name": "221B Baker Street",
+   "prompt": "Cinematic live-action photograph, anamorphic widescreen, natural film grain, photoreal, no stylisation, no illustration. Muted desaturated palette of soot-black, gaslight amber and cold London grey; 1881 London; practical Victorian light sources, fog, deep shadow. Establishing wide plate of an empty location, no people, no figures, deep focus, even natural light. 221B Baker Street No text, no lettering, no signage, no watermark, no subtitles.",
+   "rel_path": "refs/locations/loc-221b_baker_street.png"
+  },
+  {
+   "ref_id": "loc-criterion_bar",
+   "kind": "location",
+   "name": "Criterion Bar",
+   "prompt": "Cinematic live-action photograph, anamorphic widescreen, natural film grain, photoreal, no stylisation, no illustration. Muted desaturated palette of soot-black, gaslight amber and cold London grey; 1881 London; practical Victorian light sources, fog, deep shadow. Establishing wide plate of an empty location, no people, no figures, deep focus, even natural light. Criterion Bar No text, no lettering, no signage, no watermark, no subtitles.",
+   "rel_path": "refs/locations/loc-criterion_bar.png"
+  },
+  {
+   "ref_id": "loc-number_3_lauriston_gardens",
+   "kind": "location",
+   "name": "3 Lauriston Gardens",
+   "prompt": "Cinematic live-action photograph, anamorphic widescreen, natural film grain, photoreal, no stylisation, no illustration. Muted desaturated palette of soot-black, gaslight amber and cold London grey; 1881 London; practical Victorian light sources, fog, deep shadow. Establishing wide plate of an empty location, no people, no figures, deep focus, even natural light. 3 Lauriston Gardens No text, no lettering, no signage, no watermark, no subtitles.",
+   "rel_path": "refs/locations/loc-number_3_lauriston_gardens.png"
+  },
+  {
+   "ref_id": "loc-hallidays_private_hotel",
+   "kind": "location",
+   "name": "Halliday’s Private Hotel, Little George Street",
+   "prompt": "Cinematic live-action photograph, anamorphic widescreen, natural film grain, photoreal, no stylisation, no illustration. Muted desaturated palette of soot-black, gaslight amber and cold London grey; 1881 London; practical Victorian light sources, fog, deep shadow. Establishing wide plate of an empty location, no people, no figures, deep focus, even natural light. Halliday’s Private Hotel, Little George Street No text, no lettering, no signage, no watermark, no subtitles.",
+   "rel_path": "refs/locations/loc-hallidays_private_hotel.png"
+  },
+  {
+   "ref_id": "loc-great_alkali_plain",
+   "kind": "location",
+   "name": "Great Alkali Plain",
+   "prompt": "Cinematic live-action photograph, anamorphic widescreen, natural film grain, photoreal, no stylisation, no illustration. Muted desaturated palette of soot-black, gaslight amber and cold London grey; 1881 London; practical Victorian light sources, fog, deep shadow. Establishing wide plate of an empty location, no people, no figures, deep focus, even natural light. Great Alkali Plain No text, no lettering, no signage, no watermark, no subtitles.",
+   "rel_path": "refs/locations/loc-great_alkali_plain.png"
+  },
+  {
+   "ref_id": "loc-police_station_chamber",
+   "kind": "location",
+   "name": "Police-station chamber",
+   "prompt": "Cinematic live-action photograph, anamorphic widescreen, natural film grain, photoreal, no stylisation, no illustration. Muted desaturated palette of soot-black, gaslight amber and cold London grey; 1881 London; practical Victorian light sources, fog, deep shadow. Establishing wide plate of an empty location, no people, no figures, deep focus, even natural light. Police-station chamber No text, no lettering, no signage, no watermark, no subtitles.",
+   "rel_path": "refs/locations/loc-police_station_chamber.png"
+  }
+ ],
+ "beats": [
+  {
+   "beat_id": "B00",
+   "scene_number": 1,
+   "arc": "quiet",
+   "location_id": "criterion_bar",
+   "cast": [
+    "john_watson"
+   ],
+   "image_prompt": "A hansom rolls through London traffic.",
+   "motion": "The camera pushes in with small amplitude at slow speed.",
+   "line": "Beating the subjects!",
+   "speaker": "john_watson",
+   "emotion": null
+  },
+  {
+   "beat_id": "B01",
+   "scene_number": 3,
+   "arc": "quiet",
+   "location_id": "221b_baker_street",
+   "cast": [
+    "g_lestrade"
+   ],
+   "image_prompt": "Holmes eats toast at the breakfast table. Watson reads a marked article.",
+   "motion": "The camera pushes in with small amplitude at slow speed.",
+   "line": null,
+   "speaker": null,
+   "emotion": null
+  },
+  {
+   "beat_id": "B02",
+   "scene_number": 5,
+   "arc": "quiet",
+   "location_id": "number_3_lauriston_gardens",
+   "cast": [
+    "g_lestrade"
+   ],
+   "image_prompt": "Holmes leaves the hansom a hundred yards from Number 3.",
+   "motion": "The camera pushes in with small amplitude at slow speed.",
+   "line": "This case will make a stir, sir.",
+   "speaker": "g_lestrade",
+   "emotion": null
+  },
+  {
+   "beat_id": "B03",
+   "scene_number": 7,
+   "arc": "quiet",
+   "location_id": "221b_baker_street",
+   "cast": [
+    "john_watson"
+   ],
+   "image_prompt": "The sitting-room is quiet. Watson waits beside the half-open door.",
+   "motion": "The camera pushes in with small amplitude at slow speed.",
+   "line": "Come in.",
+   "speaker": "john_watson",
+   "emotion": null
+  },
+  {
+   "beat_id": "B04",
+   "scene_number": 9,
+   "arc": "quiet",
+   "location_id": "hallidays_private_hotel",
+   "cast": [
+    "g_lestrade"
+   ],
+   "image_prompt": "Holmes takes the small pill-box from Lestrade. Two pearly-grey pills rest inside.",
+   "motion": "The camera pushes in with small amplitude at slow speed.",
+   "line": "I have them.",
+   "speaker": "g_lestrade",
+   "emotion": null
+  },
+  {
+   "beat_id": "B05",
+   "scene_number": 12,
+   "arc": "quiet",
+   "location_id": "great_alkali_plain",
+   "cast": [
+    "jefferson_hope"
+   ],
+   "image_prompt": "A grey shawl lies beneath a boulder. The desert stretches empty in every direction.",
+   "motion": "The camera pushes in with small amplitude at slow speed.",
+   "line": "You’re not hurt, I hope, miss?",
+   "speaker": "jefferson_hope",
+   "emotion": null
+  },
+  {
+   "beat_id": "B06",
+   "scene_number": 13,
+   "arc": "build",
+   "location_id": "utah",
+   "cast": [],
+   "image_prompt": "The latch CLICKS. Ferrier reaches the door.",
+   "motion": "The camera pushes in with small amplitude at slow speed.",
+   "line": null,
+   "speaker": null,
+   "emotion": null
+  },
+  {
+   "beat_id": "B07",
+   "scene_number": 15,
+   "arc": "build",
+   "location_id": "utah_mountains",
+   "cast": [
+    "jefferson_hope"
+   ],
+   "image_prompt": "Hope leads them through the defiles. The horses pick their way over rock.",
+   "motion": "The camera pushes in with small amplitude at slow speed.",
+   "line": null,
+   "speaker": null,
+   "emotion": null
+  },
+  {
+   "beat_id": "B08",
+   "scene_number": 17,
+   "arc": "build",
+   "location_id": "scotland_yard",
+   "cast": [
+    "jefferson_hope"
+   ],
+   "image_prompt": "Hope’s hand closes around Lucy Ferrier’s marriage ring.",
+   "motion": "The camera pushes in with small amplitude at slow speed.",
+   "line": "That girl that I spoke of was to have married me twenty years ago.",
+   "speaker": "jefferson_hope",
+   "emotion": null
+  },
+  {
+   "beat_id": "B09",
+   "scene_number": 20,
+   "arc": "build",
+   "location_id": "221b_baker_street",
+   "cast": [
+    "jefferson_hope"
+   ],
+   "image_prompt": "Hope’s cab waits at the curb.",
+   "motion": "The camera pushes in with small amplitude at slow speed.",
+   "line": "I can tell my own secrets, but I don’t get other people into trouble.",
+   "speaker": "jefferson_hope",
+   "emotion": null
+  },
+  {
+   "beat_id": "B10",
+   "scene_number": 21,
+   "arc": "build",
+   "location_id": "221b_baker_street",
+   "cast": [
+    "john_watson"
+   ],
+   "image_prompt": "The next evening. Holmes has spread a newspaper across the table.",
+   "motion": "The camera pushes in with small amplitude at slow speed.",
+   "line": "I don’t see that they had very much to do with his capture.",
+   "speaker": "john_watson",
+   "emotion": null
+  }
+ ],
+ "music": {
+  "rel_path": "trailer/music/cue-770301.flac",
+  "seconds": 101.75,
+  "sections": 9,
+  "cuts": [
+   1.65,
+   19.75,
+   24.4,
+   25.25,
+   25.8,
+   28.95,
+   38.15,
+   42.7,
+   47.3,
+   55.3,
+   57.6,
+   58.15,
+   58.7,
+   59.3,
+   61.0,
+   65.6,
+   67.9,
+   70.2,
+   83.95,
+   99.8
+  ]
+ },
+ "shots": [
+  {
+   "beat_id": "B00",
+   "index": 0,
+   "start": 0.0,
+   "seconds": 3.75,
+   "cast": [
+    "john_watson"
+   ],
+   "char_refs": {
+    "john_watson": "char-john_watson"
+   },
+   "loc_ref": "loc-criterion_bar"
+  },
+  {
+   "beat_id": "B01",
+   "index": 1,
+   "start": 3.75,
+   "seconds": 3.75,
+   "cast": [
+    "g_lestrade"
+   ],
+   "char_refs": {
+    "g_lestrade": "char-g_lestrade"
+   },
+   "loc_ref": "loc-221b_baker_street"
+  },
+  {
+   "beat_id": "B02",
+   "index": 2,
+   "start": 7.5,
+   "seconds": 2.925,
+   "cast": [
+    "g_lestrade"
+   ],
+   "char_refs": {
+    "g_lestrade": "char-g_lestrade"
+   },
+   "loc_ref": "loc-number_3_lauriston_gardens"
+  },
+  {
+   "beat_id": "B03",
+   "index": 3,
+   "start": 10.425,
+   "seconds": 2.75,
+   "cast": [
+    "john_watson"
+   ],
+   "char_refs": {
+    "john_watson": "char-john_watson"
+   },
+   "loc_ref": "loc-221b_baker_street"
+  },
+  {
+   "beat_id": "B04",
+   "index": 4,
+   "start": 13.175,
+   "seconds": 2.65,
+   "cast": [
+    "g_lestrade"
+   ],
+   "char_refs": {
+    "g_lestrade": "char-g_lestrade"
+   },
+   "loc_ref": "loc-hallidays_private_hotel"
+  },
+  {
+   "beat_id": "B05",
+   "index": 5,
+   "start": 15.825,
+   "seconds": 2.65,
+   "cast": [
+    "jefferson_hope"
+   ],
+   "char_refs": {
+    "jefferson_hope": "char-jefferson_hope"
+   },
+   "loc_ref": "loc-great_alkali_plain"
+  },
+  {
+   "beat_id": "B06",
+   "index": 6,
+   "start": 18.475,
+   "seconds": 2.65,
+   "cast": [],
+   "char_refs": {},
+   "loc_ref": null
+  },
+  {
+   "beat_id": "B07",
+   "index": 7,
+   "start": 21.125,
+   "seconds": 2.925,
+   "cast": [
+    "jefferson_hope"
+   ],
+   "char_refs": {
+    "jefferson_hope": "char-jefferson_hope"
+   },
+   "loc_ref": null
+  },
+  {
+   "beat_id": "B08",
+   "index": 8,
+   "start": 24.05,
+   "seconds": 3.325,
+   "cast": [
+    "jefferson_hope"
+   ],
+   "char_refs": {
+    "jefferson_hope": "char-jefferson_hope"
+   },
+   "loc_ref": null
+  },
+  {
+   "beat_id": "B09",
+   "index": 9,
+   "start": 27.375,
+   "seconds": 3.325,
+   "cast": [
+    "jefferson_hope"
+   ],
+   "char_refs": {
+    "jefferson_hope": "char-jefferson_hope"
+   },
+   "loc_ref": "loc-221b_baker_street"
+  },
+  {
+   "beat_id": "B10",
+   "index": 10,
+   "start": 30.7,
+   "seconds": 2.7,
+   "cast": [
+    "john_watson"
+   ],
+   "char_refs": {
+    "john_watson": "char-john_watson"
+   },
+   "loc_ref": "loc-221b_baker_street"
+  },
+  {
+   "beat_id": "B00",
+   "index": 11,
+   "start": 33.4,
+   "seconds": 2.675,
+   "cast": [
+    "john_watson"
+   ],
+   "char_refs": {
+    "john_watson": "char-john_watson"
+   },
+   "loc_ref": "loc-criterion_bar"
+  },
+  {
+   "beat_id": "B01",
+   "index": 12,
+   "start": 36.075,
+   "seconds": 2.6,
+   "cast": [
+    "g_lestrade"
+   ],
+   "char_refs": {
+    "g_lestrade": "char-g_lestrade"
+   },
+   "loc_ref": "loc-221b_baker_street"
+  },
+  {
+   "beat_id": "B02",
+   "index": 13,
+   "start": 38.675,
+   "seconds": 2.6,
+   "cast": [
+    "g_lestrade"
+   ],
+   "char_refs": {
+    "g_lestrade": "char-g_lestrade"
+   },
+   "loc_ref": "loc-number_3_lauriston_gardens"
+  },
+  {
+   "beat_id": "B03",
+   "index": 14,
+   "start": 41.275,
+   "seconds": 2.5,
+   "cast": [
+    "john_watson"
+   ],
+   "char_refs": {
+    "john_watson": "char-john_watson"
+   },
+   "loc_ref": "loc-221b_baker_street"
+  },
+  {
+   "beat_id": "B04",
+   "index": 15,
+   "start": 43.775,
+   "seconds": 2.5,
+   "cast": [
+    "g_lestrade"
+   ],
+   "char_refs": {
+    "g_lestrade": "char-g_lestrade"
+   },
+   "loc_ref": "loc-hallidays_private_hotel"
+  },
+  {
+   "beat_id": "B05",
+   "index": 16,
+   "start": 46.275,
+   "seconds": 2.2,
+   "cast": [
+    "jefferson_hope"
+   ],
+   "char_refs": {
+    "jefferson_hope": "char-jefferson_hope"
+   },
+   "loc_ref": "loc-great_alkali_plain"
+  },
+  {
+   "beat_id": "B06",
+   "index": 17,
+   "start": 48.475,
+   "seconds": 2.075,
+   "cast": [],
+   "char_refs": {},
+   "loc_ref": null
+  },
+  {
+   "beat_id": "B07",
+   "index": 18,
+   "start": 50.55,
+   "seconds": 2.075,
+   "cast": [
+    "jefferson_hope"
+   ],
+   "char_refs": {
+    "jefferson_hope": "char-jefferson_hope"
+   },
+   "loc_ref": null
+  },
+  {
+   "beat_id": "B08",
+   "index": 19,
+   "start": 52.625,
+   "seconds": 1.95,
+   "cast": [
+    "jefferson_hope"
+   ],
+   "char_refs": {
+    "jefferson_hope": "char-jefferson_hope"
+   },
+   "loc_ref": null
+  },
+  {
+   "beat_id": "B09",
+   "index": 20,
+   "start": 54.575,
+   "seconds": 1.95,
+   "cast": [
+    "jefferson_hope"
+   ],
+   "char_refs": {
+    "jefferson_hope": "char-jefferson_hope"
+   },
+   "loc_ref": "loc-221b_baker_street"
+  },
+  {
+   "beat_id": "B10",
+   "index": 21,
+   "start": 56.525,
+   "seconds": 1.625,
+   "cast": [
+    "john_watson"
+   ],
+   "char_refs": {
+    "john_watson": "char-john_watson"
+   },
+   "loc_ref": "loc-221b_baker_street"
+  },
+  {
+   "beat_id": "B00",
+   "index": 22,
+   "start": 58.15,
+   "seconds": 1.9,
+   "cast": [
+    "john_watson"
+   ],
+   "char_refs": {
+    "john_watson": "char-john_watson"
+   },
+   "loc_ref": "loc-criterion_bar"
+  },
+  {
+   "beat_id": "B01",
+   "index": 23,
+   "start": 60.05,
+   "seconds": 1.9,
+   "cast": [
+    "g_lestrade"
+   ],
+   "char_refs": {
+    "g_lestrade": "char-g_lestrade"
+   },
+   "loc_ref": "loc-221b_baker_street"
+  },
+  {
+   "beat_id": "B02",
+   "index": 24,
+   "start": 61.95,
+   "seconds": 1.75,
+   "cast": [
+    "g_lestrade"
+   ],
+   "char_refs": {
+    "g_lestrade": "char-g_lestrade"
+   },
+   "loc_ref": "loc-number_3_lauriston_gardens"
+  },
+  {
+   "beat_id": "B03",
+   "index": 25,
+   "start": 63.7,
+   "seconds": 1.9,
+   "cast": [
+    "john_watson"
+   ],
+   "char_refs": {
+    "john_watson": "char-john_watson"
+   },
+   "loc_ref": "loc-221b_baker_street"
+  },
+  {
+   "beat_id": "B04",
+   "index": 26,
+   "start": 65.6,
+   "seconds": 1.85,
+   "cast": [
+    "g_lestrade"
+   ],
+   "char_refs": {
+    "g_lestrade": "char-g_lestrade"
+   },
+   "loc_ref": "loc-hallidays_private_hotel"
+  },
+  {
+   "beat_id": "B05",
+   "index": 27,
+   "start": 67.45,
+   "seconds": 1.85,
+   "cast": [
+    "jefferson_hope"
+   ],
+   "char_refs": {
+    "jefferson_hope": "char-jefferson_hope"
+   },
+   "loc_ref": "loc-great_alkali_plain"
+  },
+  {
+   "beat_id": "B06",
+   "index": 28,
+   "start": 69.3,
+   "seconds": 1.35,
+   "cast": [],
+   "char_refs": {},
+   "loc_ref": null
+  },
+  {
+   "beat_id": "B07",
+   "index": 29,
+   "start": 70.65,
+   "seconds": 1.35,
+   "cast": [
+    "jefferson_hope"
+   ],
+   "char_refs": {
+    "jefferson_hope": "char-jefferson_hope"
+   },
+   "loc_ref": null
+  },
+  {
+   "beat_id": "B08",
+   "index": 30,
+   "start": 72.0,
+   "seconds": 1.35,
+   "cast": [
+    "jefferson_hope"
+   ],
+   "char_refs": {
+    "jefferson_hope": "char-jefferson_hope"
+   },
+   "loc_ref": null
+  },
+  {
+   "beat_id": "B09",
+   "index": 31,
+   "start": 73.35,
+   "seconds": 2.8,
+   "cast": [
+    "jefferson_hope"
+   ],
+   "char_refs": {
+    "jefferson_hope": "char-jefferson_hope"
+   },
+   "loc_ref": "loc-221b_baker_street"
+  },
+  {
+   "beat_id": "B10",
+   "index": 32,
+   "start": 76.15,
+   "seconds": 3.95,
+   "cast": [
+    "john_watson"
+   ],
+   "char_refs": {
+    "john_watson": "char-john_watson"
+   },
+   "loc_ref": "loc-221b_baker_street"
+  }
+ ]
+}

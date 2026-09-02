@@ -1,0 +1,119 @@
+"""A thin, honest client for the local ComfyUI.
+
+Workflows and their manifests are owned by comfy_studio; this module only knows
+how to fill one in and run it.  The manifest's `inject` map is the whole
+interface: a name -> {node, field} pair.  Injecting a name the manifest does
+not declare raises, because a silently-ignored input is how a reference image
+gets "passed" to a workflow that never reads it.
+"""
+from __future__ import annotations
+
+import json
+import shutil
+import time
+import urllib.request
+from pathlib import Path
+from typing import Any
+
+WORKFLOWS = Path("D:/Projects/KingdomOfViSuReNa/alpha/comfy_studio/workflows")
+COMFY_ROOT = Path("D:/Projects/KingdomOfViSuReNa/alpha/ComfyUI_windows_portable/ComfyUI")
+HOST = "http://127.0.0.1:8188"
+
+
+def load_workflow(name: str) -> tuple[dict, dict]:
+    """Return (api-format template, inject map) for a workflow by id."""
+    hits = list(WORKFLOWS.glob(f"*/{name}.json"))
+    if not hits:
+        raise FileNotFoundError(f"no workflow {name!r} under {WORKFLOWS}")
+    manifest = hits[0].with_name(f"{name}.manifest.json")
+    template = json.loads(hits[0].read_text(encoding="utf-8"))
+    inject = json.loads(manifest.read_text(encoding="utf-8"))["inject"]
+    return template, inject
+
+
+def apply_inject(template: dict, inject: dict, values: dict[str, Any]) -> dict:
+    """Set each value on the node/field the manifest names.
+
+    Raises on an undeclared name.  This is the guard that matters: the first
+    trailer failed because ref images were 'passed' to a text-to-image
+    workflow that had nowhere to put them.
+    """
+    out = json.loads(json.dumps(template))
+    for key, value in values.items():
+        if key not in inject:
+            raise KeyError(f"workflow has no inject point {key!r}; has {sorted(inject)}")
+        spec = inject[key]
+        node = out[str(spec["node"])]
+        node["inputs"][spec["field"]] = value
+    return out
+
+
+def stage_image(path: Path) -> str:
+    """Copy an image into ComfyUI's input dir and return the bare filename."""
+    path = Path(path)
+    if not path.exists():
+        raise FileNotFoundError(f"cannot stage missing image: {path}")
+    dest = COMFY_ROOT / "input" / path.name
+    dest.parent.mkdir(parents=True, exist_ok=True)
+    if not dest.exists() or dest.stat().st_mtime < path.stat().st_mtime:
+        shutil.copy2(path, dest)
+    return path.name
+
+
+def submit(workflow: dict) -> str:
+    """Queue a filled-in workflow and return its prompt id."""
+    body = json.dumps({"prompt": workflow}).encode("utf-8")
+    request = urllib.request.Request(
+        f"{HOST}/prompt", data=body, headers={"Content-Type": "application/json"})
+    try:
+        with urllib.request.urlopen(request, timeout=60) as response:
+            return json.loads(response.read())["prompt_id"]
+    except urllib.error.HTTPError as failure:
+        # The rejection body names the node and field; without it a 400 is
+        # unactionable noise.
+        raise RuntimeError(
+            f"ComfyUI rejected the workflow: {failure.read().decode()[:900]}") from None
+
+
+def history(prompt_id: str) -> dict:
+    """The engine's record of one job, or {} while it is still queued."""
+    with urllib.request.urlopen(f"{HOST}/history/{prompt_id}", timeout=60) as response:
+        return json.loads(response.read()).get(prompt_id, {})
+
+
+def outputs_of(record: dict) -> list[Path]:
+    """Absolute paths of every file a finished job wrote."""
+    found: list[Path] = []
+    for node in record.get("outputs", {}).values():
+        for key in ("images", "audio", "video", "gifs"):
+            for item in node.get(key, []):
+                sub = item.get("subfolder", "")
+                found.append(COMFY_ROOT / item.get("type", "output") / sub / item["filename"])
+    return found
+
+
+def wait(prompt_id: str, timeout: float = 3600.0, poll: float = 5.0) -> list[Path]:
+    """Block until a job finishes; raise on engine error or timeout."""
+    deadline = time.time() + timeout
+    while time.time() < deadline:
+        record = history(prompt_id)
+        status = record.get("status", {})
+        if status.get("status_str") == "error":
+            raise RuntimeError(f"{prompt_id} failed: {_first_error(record)}")
+        if status.get("completed"):
+            return outputs_of(record)
+        time.sleep(poll)
+    raise TimeoutError(f"{prompt_id} still running after {timeout}s")
+
+
+def _first_error(record: dict) -> str:
+    for kind, payload in record.get("status", {}).get("messages", []):
+        if kind == "execution_error":
+            return f"{payload.get('node_type')}: {payload.get('exception_message')}"
+    return "unknown error"
+
+
+def run(name: str, values: dict[str, Any], timeout: float = 3600.0) -> list[Path]:
+    """Fill in a workflow by name, run it, and return what it wrote."""
+    template, inject = load_workflow(name)
+    return wait(submit(apply_inject(template, inject, values)), timeout=timeout)

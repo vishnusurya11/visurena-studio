@@ -1,0 +1,66 @@
+#!/usr/bin/env python
+"""Cut the trailer: shots to the measured music, title on the measured hit."""
+from __future__ import annotations
+
+import json
+import sys
+from collections import Counter
+from pathlib import Path
+
+sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
+
+from studio.sfx import impact, sub_drop
+from studio.trailer_assemble import (clip_seconds, concat, extract, mix,
+                                     segment_start, title_card)
+from studio.trailer_cut import FINAL_HOLD, is_uniform
+
+ROOT = Path(__file__).resolve().parents[2]
+
+
+def build(book_glob: str, trailer_id: str = "main") -> Path:
+    book = next(p for p in (ROOT / "library").iterdir() if p.name.startswith(book_glob))
+    out = book / "trailer" / trailer_id
+    plan = json.loads((out / "plan.json").read_text(encoding="utf-8"))
+    work = out / "work"
+    work.mkdir(parents=True, exist_ok=True)
+
+    width, height, fps = plan["width"], plan["height"], plan["fps"]
+    uses = Counter(shot["beat_id"] for shot in plan["shots"])
+    seen: Counter = Counter()
+    segments: list[Path] = []
+    missing: list[str] = []
+
+    for shot in plan["shots"]:
+        source = out / "clips" / f"{shot['beat_id']}.mp4"
+        if not source.exists():
+            missing.append(shot["beat_id"])
+            continue
+        usage = seen[shot["beat_id"]]
+        seen[shot["beat_id"]] += 1
+        start = segment_start(usage, uses[shot["beat_id"]],
+                              shot["seconds"], clip_seconds(source))
+        segments.append(extract(source, start, shot["seconds"],
+                                work / f"s{shot['index']:03d}.mp4", width, height, fps))
+    if missing:
+        raise SystemExit(f"REFUSED: no clip for beats {sorted(set(missing))}")
+
+    lengths = [s["seconds"] for s in plan["shots"]]
+    if is_uniform(lengths):
+        raise SystemExit("REFUSED: every shot is the same length -- the amateur tell")
+
+    segments.append(title_card(plan["title"], work / "title.mp4",
+                               FINAL_HOLD, width, height, fps))
+    picture = concat(segments, work / "picture.mp4")
+
+    music = book / plan["music"]["rel_path"]
+    title_at = sum(lengths)
+    cues = [(max(title_at - 2.2, 0.0), sub_drop(work / "sub.wav")),
+            (title_at, impact(work / "hit.wav"))]
+    final = out / f"TRAILER-{book.name.split('_', 1)[1]}.mp4"
+    mix(picture, music, cues, final)
+    print(f"{len(segments)} shots, {title_at:.1f}s + title -> {final}")
+    return final
+
+
+if __name__ == "__main__":
+    build(sys.argv[1], sys.argv[2] if len(sys.argv) > 2 else "main")
