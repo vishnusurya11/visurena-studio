@@ -227,3 +227,22 @@ Two more coherence rules, cheap and worth it:
   every character the same generic prompt and therefore the same face. Use the
   book's epithets — "the solemn butler", "the lawyer", "a little man" — which
   are the author describing someone in the fewest words they thought necessary.
+
+## The free win not taken this run
+
+A second angle **inside one H3 generation is free** — measured 631s for a
+243-frame two-shot clip against 690s for a single-shot one, the same within
+noise. The prompt grammar for it is `[Shot 2] At 00:05.000,` (marker first,
+milliseconds required; `At 00:05.000, [Shot 2]` is off-spec and is still wrong
+in several job files in the older repo).
+
+This run rendered one continuous take per beat, so eleven beats bought eleven
+setups. Prompting two shots per generation would have bought twenty-two for
+the same GPU time, which is the single largest quality-per-second lever
+available — a trailer's problem is always variety.
+
+The catch is that H3 chooses the exact cut frame, so the clip must be cut on
+its own internal boundary rather than on the music grid. The workable shape is
+to prompt the second shot, then let `beatmap`'s onset grid pick which side of
+the internal cut each trailer shot comes from — treat it as two takes in one
+file, not as a pre-cut sequence.
