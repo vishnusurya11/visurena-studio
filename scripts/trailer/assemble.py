@@ -43,16 +43,34 @@ def build(book_glob: str, trailer_id: str = "main") -> Path:
     segments: list[Path] = []
     missing: list[str] = []
 
+    # Substitute rather than refuse.  A beat whose clip never rendered used to
+    # abort the whole assembly, so one failure at 4am meant no trailer at all
+    # instead of a slightly less varied one.  Below a floor it still refuses,
+    # because a trailer cut from two takes is not a trailer.
+    have = sorted(clip.stem for clip in (out / "clips").glob("*.mp4"))
+    beat_ids = [beat["beat_id"] for beat in plan["beats"]]
+    if len(have) < max(4, len(beat_ids) * 0.6):
+        raise SystemExit(f"REFUSED: only {len(have)} of {len(beat_ids)} beats "
+                         f"rendered; too few to cut from")
+    if len(have) < len(beat_ids):
+        print(f"  WARNING: {len(beat_ids) - len(have)} beats have no clip; "
+              f"their shots fall back to neighbouring takes")
+
+    def source_for(beat_id: str, order: int) -> str:
+        """The beat's own take, or a stand-in chosen deterministically."""
+        return beat_id if beat_id in have else have[order % len(have)]
+
     for shot in plan["shots"]:
-        source = out / "clips" / f"{shot['beat_id']}.mp4"
+        actual = source_for(shot["beat_id"], shot["index"])
+        source = out / "clips" / f"{actual}.mp4"
         if not source.exists():
             missing.append(shot["beat_id"])
             continue
-        usage = seen[shot["beat_id"]]
-        seen[shot["beat_id"]] += 1
-        start = segment_start(usage, uses[shot["beat_id"]],
+        usage = seen[actual]
+        seen[actual] += 1
+        start = segment_start(usage, max(uses[shot["beat_id"]], seen[actual]),
                               shot["seconds"], clip_seconds(source))
-        mean, deviation = stats[shot["beat_id"]]
+        mean, deviation = stats[actual]
         segments.append(extract(source, start, shot["seconds"],
                                 work / f"s{shot['index']:03d}.mp4", width, height, fps,
                                 grade_to(mean, deviation, hero_mean, hero_deviation)))

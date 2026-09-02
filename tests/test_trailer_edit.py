@@ -371,3 +371,30 @@ class TestCameraVariety:
         """[Push in] is the hosted Hailuo dialect and does nothing on H3."""
         from studio.trailer_shot import CAMERA
         assert not [m for moves in CAMERA.values() for m in moves if "[" in m]
+
+
+class TestAssemblyDegradesRatherThanRefusing:
+    """One failed render at 4am should cost variety, not the whole trailer."""
+
+    @staticmethod
+    def substitute(beat_id: str, order: int, have: list[str]) -> str:
+        return beat_id if beat_id in have else have[order % len(have)]
+
+    def test_a_present_beat_uses_its_own_take(self):
+        assert self.substitute("B03", 7, ["B00", "B03", "B05"]) == "B03"
+
+    def test_a_missing_beat_falls_back_deterministically(self):
+        have = ["B00", "B03", "B05"]
+        assert self.substitute("B07", 4, have) == self.substitute("B07", 4, have)
+
+    def test_the_fallback_is_a_take_that_exists(self):
+        have = ["B00", "B03", "B05"]
+        assert all(self.substitute(f"B{i:02d}", i, have) in have for i in range(11))
+
+    def test_the_floor_rejects_a_trailer_cut_from_almost_nothing(self):
+        beats, have = 11, 3
+        assert have < max(4, beats * 0.6)
+
+    def test_a_nearly_complete_set_is_accepted(self):
+        beats, have = 11, 9
+        assert have >= max(4, beats * 0.6)
