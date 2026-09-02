@@ -1,0 +1,844 @@
+{
+ "trailer_id": "main",
+ "book_id": "20260827135504_the-strange-case-of-dr-jekyll-and-mr-hyde",
+ "title": "The strange case of Dr. Jekyll and Mr. Hyde",
+ "kind": "main",
+ "width": 1344,
+ "height": 768,
+ "fps": 24,
+ "refs": [
+  {
+   "ref_id": "char-gabriel_john_utterson",
+   "kind": "character",
+   "name": "Mr. Utterson",
+   "prompt": "Mr. Utterson, the lawyer, the trustee. He is physically capable of extended walks and of helping break down Jekyll’s cabinet door; during that action he carries a heavy kitchen poker. dressed in a sober black professional suit and high collar Full-body character reference on a plain neutral mid-grey backdrop, even soft studio light, no cast shadows, neutral expression, facing camera, sharp focus, full figure head to feet in frame. Cinematic live-action photograph, anamorphic widescreen, natural film grain, photoreal, no stylisation, no illustration. Muted desaturated palette of fog-white, soot-black, bottle-green and sick gaslight amber; late-Victorian London; heavy chiaroscuro, deep shadow, damp air. No text, no lettering, no signage, no watermark, no subtitles.",
+   "rel_path": "refs/characters/char-gabriel_john_utterson.png"
+  },
+  {
+   "ref_id": "char-henry_jekyll",
+   "kind": "character",
+   "name": "Dr. Henry Jekyll",
+   "prompt": "Dr. Henry Jekyll, the doctor, the writer’s benefactor, the master. Jekyll is described as a large, handsome doctor with an established respectable identity and household. His original form has a distinct stature and face, contrasting with Hyde’s shorter, lighter, shrunken figure. During the story he becomes pale, black-eyed, deathly sick, physically weak, feverish, languid, and exhausted. dressed in a good dark coat and waistcoat, a professional man Full-body character reference on a plain neutral mid-grey backdrop, even soft studio light, no cast shadows, neutral expression, facing camera, sharp focus, full figure head to feet in frame. Cinematic live-action photograph, anamorphic widescreen, natural film grain, photoreal, no stylisation, no illustration. Muted desaturated palette of fog-white, soot-black, bottle-green and sick gaslight amber; late-Victorian London; heavy chiaroscuro, deep shadow, damp air. No text, no lettering, no signage, no watermark, no subtitles.",
+   "rel_path": "refs/characters/char-henry_jekyll.png"
+  },
+  {
+   "ref_id": "char-edward_hyde",
+   "kind": "character",
+   "name": "Edward Hyde",
+   "prompt": "Edward Hyde, the murderer, a little man, the person that drew the cheque. A small or little man, repeatedly described as shorter and lighter than Henry Jekyll. In the transformed state, Jekyll observes shrunken limbs and a hand that is corded and hairy. He is associated with respectable clothing and access to Jekyll’s house, a furnished Soho residence, closed cabs, and writing materials. in clothes that fit him badly, ill-kempt Full-body character reference on a plain neutral mid-grey backdrop, even soft studio light, no cast shadows, neutral expression, facing camera, sharp focus, full figure head to feet in frame. Cinematic live-action photograph, anamorphic widescreen, natural film grain, photoreal, no stylisation, no illustration. Muted desaturated palette of fog-white, soot-black, bottle-green and sick gaslight amber; late-Victorian London; heavy chiaroscuro, deep shadow, damp air. No text, no lettering, no signage, no watermark, no subtitles.",
+   "rel_path": "refs/characters/char-edward_hyde.png"
+  },
+  {
+   "ref_id": "char-poole",
+   "kind": "character",
+   "name": "Poole",
+   "prompt": "Poole, the solemn butler, the butler. dressed in plain black household livery of middling height and thickset, thinning sandy hair, with a short greying beard Full-body character reference on a plain neutral mid-grey backdrop, even soft studio light, no cast shadows, neutral expression, facing camera, sharp focus, full figure head to feet in frame. Cinematic live-action photograph, anamorphic widescreen, natural film grain, photoreal, no stylisation, no illustration. Muted desaturated palette of fog-white, soot-black, bottle-green and sick gaslight amber; late-Victorian London; heavy chiaroscuro, deep shadow, damp air. No text, no lettering, no signage, no watermark, no subtitles.",
+   "rel_path": "refs/characters/char-poole.png"
+  },
+  {
+   "ref_id": "char-reginald_lanyon",
+   "kind": "character",
+   "name": "Dr. Lanyon",
+   "prompt": "By chapter 6, he is visibly deteriorated: pale, with fallen flesh, noticeably balder and older. Full-body character reference on a plain neutral mid-grey backdrop, even soft studio light, no cast shadows, neutral expression, facing camera, sharp focus, full figure head to feet in frame. Cinematic live-action photograph, anamorphic widescreen, natural film grain, photoreal, no stylisation, no illustration. Muted desaturated palette of fog-white, soot-black, bottle-green and sick gaslight amber; late-Victorian London; heavy chiaroscuro, deep shadow, damp air. No text, no lettering, no signage, no watermark, no subtitles.",
+   "rel_path": "refs/characters/char-reginald_lanyon.png"
+  },
+  {
+   "ref_id": "char-richard_enfield",
+   "kind": "character",
+   "name": "Mr. Richard Enfield",
+   "prompt": "compact and upright, receding brown hair, clean-shaven with a heavy jaw Full-body character reference on a plain neutral mid-grey backdrop, even soft studio light, no cast shadows, neutral expression, facing camera, sharp focus, full figure head to feet in frame. Cinematic live-action photograph, anamorphic widescreen, natural film grain, photoreal, no stylisation, no illustration. Muted desaturated palette of fog-white, soot-black, bottle-green and sick gaslight amber; late-Victorian London; heavy chiaroscuro, deep shadow, damp air. No text, no lettering, no signage, no watermark, no subtitles.",
+   "rel_path": "refs/characters/char-richard_enfield.png"
+  },
+  {
+   "ref_id": "char-carew_policeman",
+   "kind": "character",
+   "name": "a policeman",
+   "prompt": "a policeman, the officer. in police uniform, a dark tunic with a high collar and custodian helmet tall and spare, close-cropped black hair, with bushy eyebrows and a lined face Full-body character reference on a plain neutral mid-grey backdrop, even soft studio light, no cast shadows, neutral expression, facing camera, sharp focus, full figure head to feet in frame. Cinematic live-action photograph, anamorphic widescreen, natural film grain, photoreal, no stylisation, no illustration. Muted desaturated palette of fog-white, soot-black, bottle-green and sick gaslight amber; late-Victorian London; heavy chiaroscuro, deep shadow, damp air. No text, no lettering, no signage, no watermark, no subtitles.",
+   "rel_path": "refs/characters/char-carew_policeman.png"
+  },
+  {
+   "ref_id": "loc-black_mail_house_door",
+   "kind": "location",
+   "name": "Black Mail House door and adjoining by-street",
+   "prompt": "Cinematic live-action photograph, anamorphic widescreen, natural film grain, photoreal, no stylisation, no illustration. Muted desaturated palette of fog-white, soot-black, bottle-green and sick gaslight amber; late-Victorian London; heavy chiaroscuro, deep shadow, damp air. Establishing wide plate of an empty location, no people, no figures, deep focus, even natural light. Black Mail House door and adjoining by-street No text, no lettering, no signage, no watermark, no subtitles.",
+   "rel_path": "refs/locations/loc-black_mail_house_door.png"
+  },
+  {
+   "ref_id": "loc-carew_murder_lane",
+   "kind": "location",
+   "name": "The lane beside the river",
+   "prompt": "Cinematic live-action photograph, anamorphic widescreen, natural film grain, photoreal, no stylisation, no illustration. Muted desaturated palette of fog-white, soot-black, bottle-green and sick gaslight amber; late-Victorian London; heavy chiaroscuro, deep shadow, damp air. Establishing wide plate of an empty location, no people, no figures, deep focus, even natural light. The lane beside the river No text, no lettering, no signage, no watermark, no subtitles.",
+   "rel_path": "refs/locations/loc-carew_murder_lane.png"
+  },
+  {
+   "ref_id": "loc-jekyll_laboratory",
+   "kind": "location",
+   "name": "Dr. Jekyll’s laboratory building",
+   "prompt": "Cinematic live-action photograph, anamorphic widescreen, natural film grain, photoreal, no stylisation, no illustration. Muted desaturated palette of fog-white, soot-black, bottle-green and sick gaslight amber; late-Victorian London; heavy chiaroscuro, deep shadow, damp air. Establishing wide plate of an empty location, no people, no figures, deep focus, even natural light. Dr. Jekyll’s laboratory building No text, no lettering, no signage, no watermark, no subtitles.",
+   "rel_path": "refs/locations/loc-jekyll_laboratory.png"
+  },
+  {
+   "ref_id": "loc-utterson_house",
+   "kind": "location",
+   "name": "Mr. Utterson’s house and chambers",
+   "prompt": "Cinematic live-action photograph, anamorphic widescreen, natural film grain, photoreal, no stylisation, no illustration. Muted desaturated palette of fog-white, soot-black, bottle-green and sick gaslight amber; late-Victorian London; heavy chiaroscuro, deep shadow, damp air. Establishing wide plate of an empty location, no people, no figures, deep focus, even natural light. Mr. Utterson’s house and chambers No text, no lettering, no signage, no watermark, no subtitles.",
+   "rel_path": "refs/locations/loc-utterson_house.png"
+  },
+  {
+   "ref_id": "loc-jekyll_house",
+   "kind": "location",
+   "name": "Dr. Jekyll’s house and laboratory",
+   "prompt": "Cinematic live-action photograph, anamorphic widescreen, natural film grain, photoreal, no stylisation, no illustration. Muted desaturated palette of fog-white, soot-black, bottle-green and sick gaslight amber; late-Victorian London; heavy chiaroscuro, deep shadow, damp air. Establishing wide plate of an empty location, no people, no figures, deep focus, even natural light. Dr. Jekyll’s house and laboratory No text, no lettering, no signage, no watermark, no subtitles.",
+   "rel_path": "refs/locations/loc-jekyll_house.png"
+  },
+  {
+   "ref_id": "loc-lanyon_house",
+   "kind": "location",
+   "name": "Dr. Lanyon’s house, Cavendish Square",
+   "prompt": "Cinematic live-action photograph, anamorphic widescreen, natural film grain, photoreal, no stylisation, no illustration. Muted desaturated palette of fog-white, soot-black, bottle-green and sick gaslight amber; late-Victorian London; heavy chiaroscuro, deep shadow, damp air. Establishing wide plate of an empty location, no people, no figures, deep focus, even natural light. Dr. Lanyon’s house, Cavendish Square No text, no lettering, no signage, no watermark, no subtitles.",
+   "rel_path": "refs/locations/loc-lanyon_house.png"
+  },
+  {
+   "ref_id": "loc-jekyll_cabinet",
+   "kind": "location",
+   "name": "Dr. Jekyll’s cabinet",
+   "prompt": "Cinematic live-action photograph, anamorphic widescreen, natural film grain, photoreal, no stylisation, no illustration. Muted desaturated palette of fog-white, soot-black, bottle-green and sick gaslight amber; late-Victorian London; heavy chiaroscuro, deep shadow, damp air. Establishing wide plate of an empty location, no people, no figures, deep focus, even natural light. Dr. Jekyll’s cabinet No text, no lettering, no signage, no watermark, no subtitles.",
+   "rel_path": "refs/locations/loc-jekyll_cabinet.png"
+  },
+  {
+   "ref_id": "loc-hyde_soho_rooms",
+   "kind": "location",
+   "name": "Mr. Hyde’s rooms in Soho",
+   "prompt": "Cinematic live-action photograph, anamorphic widescreen, natural film grain, photoreal, no stylisation, no illustration. Muted desaturated palette of fog-white, soot-black, bottle-green and sick gaslight amber; late-Victorian London; heavy chiaroscuro, deep shadow, damp air. Establishing wide plate of an empty location, no people, no figures, deep focus, even natural light. Mr. Hyde’s rooms in Soho No text, no lettering, no signage, no watermark, no subtitles.",
+   "rel_path": "refs/locations/loc-hyde_soho_rooms.png"
+  }
+ ],
+ "beats": [
+  {
+   "beat_id": "B00",
+   "scene_number": 1,
+   "arc": "quiet",
+   "location_id": "black_mail_house_door",
+   "cast": [
+    "gabriel_john_utterson"
+   ],
+   "image_prompt": "GABRIEL JOHN UTTERSON, 50s, a lawyer's gloves folded in one hand, stops beside him.",
+   "motion": "The camera pushes in with small amplitude at slow speed.",
+   "line": "Indeed? … and what was that?",
+   "speaker": "gabriel_john_utterson",
+   "emotion": "quietly sharpened"
+  },
+  {
+   "beat_id": "B01",
+   "scene_number": 4,
+   "arc": "quiet",
+   "location_id": "utterson_house",
+   "cast": [
+    "gabriel_john_utterson"
+   ],
+   "image_prompt": "GABRIEL JOHN UTTERSON, 50s, a candle burning beside his locked safe.",
+   "motion": "The camera pushes in with small amplitude at slow speed.",
+   "line": "If he be Mr. Hyde, … I shall be Mr. Seek.",
+   "speaker": "gabriel_john_utterson",
+   "emotion": "dry resolve"
+  },
+  {
+   "beat_id": "B02",
+   "scene_number": 8,
+   "arc": "quiet",
+   "location_id": "jekyll_house",
+   "cast": [
+    "poole"
+   ],
+   "image_prompt": "Later, in Jekyll’s hall, POOLE, 60s, a servant’s white gloves immaculate, opens the door.",
+   "motion": "The camera pushes in with small amplitude at slow speed.",
+   "line": "Quite right, Mr. Utterson, sir. Mr. Hyde has a key.",
+   "speaker": "poole",
+   "emotion": "matter-of-fact"
+  },
+  {
+   "beat_id": "B03",
+   "scene_number": 12,
+   "arc": "build",
+   "location_id": "carew_murder_lane",
+   "cast": [],
+   "image_prompt": "A moonlit lane. A MAID SERVANT, 20s, watches from an upstairs window.",
+   "motion": "The camera pushes in with small amplitude at slow speed.",
+   "line": null,
+   "speaker": null,
+   "emotion": null
+  },
+  {
+   "beat_id": "B04",
+   "scene_number": 16,
+   "arc": "build",
+   "location_id": "jekyll_cabinet",
+   "cast": [
+    "henry_jekyll"
+   ],
+   "image_prompt": "Guest tilts the second page. The upright hand of Hyde's letter falls into the same shapes as Jekyll's note—only the slope changes.",
+   "motion": "The camera pushes in with small amplitude at slow speed.",
+   "line": null,
+   "speaker": null,
+   "emotion": null
+  },
+  {
+   "beat_id": "B05",
+   "scene_number": 21,
+   "arc": "build",
+   "location_id": "lanyon_house",
+   "cast": [
+    "reginald_lanyon"
+   ],
+   "image_prompt": "Utterson leaves the shut door and crosses to Lanyon’s house.",
+   "motion": "The camera pushes in with small amplitude at slow speed.",
+   "line": "Nothing can be done … ask himself.",
+   "speaker": "reginald_lanyon",
+   "emotion": "final"
+  },
+  {
+   "beat_id": "B06",
+   "scene_number": 23,
+   "arc": "build",
+   "location_id": "utterson_house",
+   "cast": [
+    "gabriel_john_utterson"
+   ],
+   "image_prompt": "Then his door shuts against Mr. Utterson. Once. Twice. A third time.",
+   "motion": "The camera pushes in with small amplitude at slow speed.",
+   "line": "Jekyll is ill, too … Have you seen him?",
+   "speaker": "gabriel_john_utterson",
+   "emotion": "probing"
+  },
+  {
+   "beat_id": "B07",
+   "scene_number": 26,
+   "arc": "hit",
+   "location_id": "jekyll_house",
+   "cast": [
+    "henry_jekyll"
+   ],
+   "image_prompt": "DR. HENRY JEKYLL, 50s, a physician's coat buttoned to the throat, sits beside it like a prisoner taking air.",
+   "motion": "The camera pushes in with small amplitude at slow speed.",
+   "line": "I am very low, Utterson … It will not last long, thank God.",
+   "speaker": "henry_jekyll",
+   "emotion": "dreary"
+  },
+  {
+   "beat_id": "B08",
+   "scene_number": 31,
+   "arc": "hit",
+   "location_id": "jekyll_laboratory",
+   "cast": [
+    "edward_hyde"
+   ],
+   "image_prompt": "Utterson and Poole turn the body over. EDWARD HYDE's face stares up at them. His clothes hang loose on him—Jekyll's clothes.",
+   "motion": "The camera pushes in with small amplitude at slow speed.",
+   "line": "Utterson—for God's sake, have mercy!",
+   "speaker": "edward_hyde",
+   "emotion": "pleading"
+  },
+  {
+   "beat_id": "B09",
+   "scene_number": 42,
+   "arc": "hit",
+   "location_id": "hyde_soho_rooms",
+   "cast": [
+    "edward_hyde"
+   ],
+   "image_prompt": "At Jekyll’s square house, SERVANTS, 30s–60s, stand in the hall. A sealed card bears a description of MR. EDWARD HYDE.",
+   "motion": "The camera pushes in with small amplitude at slow speed.",
+   "line": null,
+   "speaker": null,
+   "emotion": null
+  },
+  {
+   "beat_id": "B10",
+   "scene_number": 44,
+   "arc": "aftermath",
+   "location_id": "hyde_soho_rooms",
+   "cast": [
+    "henry_jekyll"
+   ],
+   "image_prompt": "DR. HENRY JEKYLL, 50s, a nightshirt twisted at the throat, wakes beneath the yellow morning light.",
+   "motion": "The camera pushes in with small amplitude at slow speed.",
+   "line": "O, how I rejoiced to think of it!",
+   "speaker": "henry_jekyll",
+   "emotion": "hollow relief"
+  }
+ ],
+ "music": {
+  "rel_path": "trailer/music/cue-880403.flac",
+  "seconds": 114.0,
+  "sections": 9,
+  "cuts": [
+   0.15,
+   1.25,
+   2.85,
+   13.8,
+   15.9,
+   18.1,
+   22.35,
+   22.9,
+   27.4,
+   31.65,
+   36.4,
+   39.8,
+   40.4,
+   40.9,
+   45.4,
+   49.35,
+   49.9,
+   54.4,
+   56.1,
+   58.6,
+   63.4,
+   72.4,
+   74.8,
+   75.35,
+   81.4,
+   85.9,
+   90.4,
+   94.9,
+   99.4,
+   103.9,
+   107.65,
+   108.15,
+   109.95
+  ],
+  "title_stopdown": 100.65,
+  "title_impact": 103.9
+ },
+ "shots": [
+  {
+   "beat_id": "B00",
+   "index": 0,
+   "start": 0.0,
+   "seconds": 3.75,
+   "cast": [
+    "gabriel_john_utterson"
+   ],
+   "char_refs": {
+    "gabriel_john_utterson": "char-gabriel_john_utterson"
+   },
+   "loc_ref": "loc-black_mail_house_door"
+  },
+  {
+   "beat_id": "B01",
+   "index": 1,
+   "start": 3.75,
+   "seconds": 3.75,
+   "cast": [
+    "gabriel_john_utterson"
+   ],
+   "char_refs": {
+    "gabriel_john_utterson": "char-gabriel_john_utterson"
+   },
+   "loc_ref": "loc-utterson_house"
+  },
+  {
+   "beat_id": "B02",
+   "index": 2,
+   "start": 7.5,
+   "seconds": 2.925,
+   "cast": [
+    "poole"
+   ],
+   "char_refs": {
+    "poole": "char-poole"
+   },
+   "loc_ref": "loc-jekyll_house"
+  },
+  {
+   "beat_id": "B03",
+   "index": 3,
+   "start": 10.425,
+   "seconds": 2.75,
+   "cast": [],
+   "char_refs": {},
+   "loc_ref": "loc-carew_murder_lane"
+  },
+  {
+   "beat_id": "B04",
+   "index": 4,
+   "start": 13.175,
+   "seconds": 2.725,
+   "cast": [
+    "henry_jekyll"
+   ],
+   "char_refs": {
+    "henry_jekyll": "char-henry_jekyll"
+   },
+   "loc_ref": "loc-jekyll_cabinet"
+  },
+  {
+   "beat_id": "B05",
+   "index": 5,
+   "start": 15.9,
+   "seconds": 2.65,
+   "cast": [
+    "reginald_lanyon"
+   ],
+   "char_refs": {
+    "reginald_lanyon": "char-reginald_lanyon"
+   },
+   "loc_ref": "loc-lanyon_house"
+  },
+  {
+   "beat_id": "B06",
+   "index": 6,
+   "start": 18.55,
+   "seconds": 2.65,
+   "cast": [
+    "gabriel_john_utterson"
+   ],
+   "char_refs": {
+    "gabriel_john_utterson": "char-gabriel_john_utterson"
+   },
+   "loc_ref": "loc-utterson_house"
+  },
+  {
+   "beat_id": "B07",
+   "index": 7,
+   "start": 21.2,
+   "seconds": 2.65,
+   "cast": [
+    "henry_jekyll"
+   ],
+   "char_refs": {
+    "henry_jekyll": "char-henry_jekyll"
+   },
+   "loc_ref": "loc-jekyll_house"
+  },
+  {
+   "beat_id": "B08",
+   "index": 8,
+   "start": 23.85,
+   "seconds": 2.65,
+   "cast": [
+    "edward_hyde"
+   ],
+   "char_refs": {
+    "edward_hyde": "char-edward_hyde"
+   },
+   "loc_ref": "loc-jekyll_laboratory"
+  },
+  {
+   "beat_id": "B09",
+   "index": 9,
+   "start": 26.5,
+   "seconds": 2.925,
+   "cast": [
+    "edward_hyde"
+   ],
+   "char_refs": {
+    "edward_hyde": "char-edward_hyde"
+   },
+   "loc_ref": "loc-hyde_soho_rooms"
+  },
+  {
+   "beat_id": "B10",
+   "index": 10,
+   "start": 29.425,
+   "seconds": 2.925,
+   "cast": [
+    "henry_jekyll"
+   ],
+   "char_refs": {
+    "henry_jekyll": "char-henry_jekyll"
+   },
+   "loc_ref": "loc-hyde_soho_rooms"
+  },
+  {
+   "beat_id": "B00",
+   "index": 11,
+   "start": 32.35,
+   "seconds": 3.325,
+   "cast": [
+    "gabriel_john_utterson"
+   ],
+   "char_refs": {
+    "gabriel_john_utterson": "char-gabriel_john_utterson"
+   },
+   "loc_ref": "loc-black_mail_house_door"
+  },
+  {
+   "beat_id": "B01",
+   "index": 12,
+   "start": 35.675,
+   "seconds": 2.7,
+   "cast": [
+    "gabriel_john_utterson"
+   ],
+   "char_refs": {
+    "gabriel_john_utterson": "char-gabriel_john_utterson"
+   },
+   "loc_ref": "loc-utterson_house"
+  },
+  {
+   "beat_id": "B02",
+   "index": 13,
+   "start": 38.375,
+   "seconds": 2.525,
+   "cast": [
+    "poole"
+   ],
+   "char_refs": {
+    "poole": "char-poole"
+   },
+   "loc_ref": "loc-jekyll_house"
+  },
+  {
+   "beat_id": "B03",
+   "index": 14,
+   "start": 40.9,
+   "seconds": 2.675,
+   "cast": [],
+   "char_refs": {},
+   "loc_ref": "loc-carew_murder_lane"
+  },
+  {
+   "beat_id": "B04",
+   "index": 15,
+   "start": 43.575,
+   "seconds": 2.675,
+   "cast": [
+    "henry_jekyll"
+   ],
+   "char_refs": {
+    "henry_jekyll": "char-henry_jekyll"
+   },
+   "loc_ref": "loc-jekyll_cabinet"
+  },
+  {
+   "beat_id": "B05",
+   "index": 16,
+   "start": 46.25,
+   "seconds": 2.6,
+   "cast": [
+    "reginald_lanyon"
+   ],
+   "char_refs": {
+    "reginald_lanyon": "char-reginald_lanyon"
+   },
+   "loc_ref": "loc-lanyon_house"
+  },
+  {
+   "beat_id": "B06",
+   "index": 17,
+   "start": 48.85,
+   "seconds": 2.6,
+   "cast": [
+    "gabriel_john_utterson"
+   ],
+   "char_refs": {
+    "gabriel_john_utterson": "char-gabriel_john_utterson"
+   },
+   "loc_ref": "loc-utterson_house"
+  },
+  {
+   "beat_id": "B07",
+   "index": 18,
+   "start": 51.45,
+   "seconds": 2.5,
+   "cast": [
+    "henry_jekyll"
+   ],
+   "char_refs": {
+    "henry_jekyll": "char-henry_jekyll"
+   },
+   "loc_ref": "loc-jekyll_house"
+  },
+  {
+   "beat_id": "B08",
+   "index": 19,
+   "start": 53.95,
+   "seconds": 2.5,
+   "cast": [
+    "edward_hyde"
+   ],
+   "char_refs": {
+    "edward_hyde": "char-edward_hyde"
+   },
+   "loc_ref": "loc-jekyll_laboratory"
+  },
+  {
+   "beat_id": "B09",
+   "index": 20,
+   "start": 56.45,
+   "seconds": 2.15,
+   "cast": [
+    "edward_hyde"
+   ],
+   "char_refs": {
+    "edward_hyde": "char-edward_hyde"
+   },
+   "loc_ref": "loc-hyde_soho_rooms"
+  },
+  {
+   "beat_id": "B10",
+   "index": 21,
+   "start": 58.6,
+   "seconds": 2.2,
+   "cast": [
+    "henry_jekyll"
+   ],
+   "char_refs": {
+    "henry_jekyll": "char-henry_jekyll"
+   },
+   "loc_ref": "loc-hyde_soho_rooms"
+  },
+  {
+   "beat_id": "B00",
+   "index": 22,
+   "start": 60.8,
+   "seconds": 2.075,
+   "cast": [
+    "gabriel_john_utterson"
+   ],
+   "char_refs": {
+    "gabriel_john_utterson": "char-gabriel_john_utterson"
+   },
+   "loc_ref": "loc-black_mail_house_door"
+  },
+  {
+   "beat_id": "B01",
+   "index": 23,
+   "start": 62.875,
+   "seconds": 2.075,
+   "cast": [
+    "gabriel_john_utterson"
+   ],
+   "char_refs": {
+    "gabriel_john_utterson": "char-gabriel_john_utterson"
+   },
+   "loc_ref": "loc-utterson_house"
+  },
+  {
+   "beat_id": "B02",
+   "index": 24,
+   "start": 64.95,
+   "seconds": 2.075,
+   "cast": [
+    "poole"
+   ],
+   "char_refs": {
+    "poole": "char-poole"
+   },
+   "loc_ref": "loc-jekyll_house"
+  },
+  {
+   "beat_id": "B03",
+   "index": 25,
+   "start": 67.025,
+   "seconds": 1.95,
+   "cast": [],
+   "char_refs": {},
+   "loc_ref": "loc-carew_murder_lane"
+  },
+  {
+   "beat_id": "B04",
+   "index": 26,
+   "start": 68.975,
+   "seconds": 1.95,
+   "cast": [
+    "henry_jekyll"
+   ],
+   "char_refs": {
+    "henry_jekyll": "char-henry_jekyll"
+   },
+   "loc_ref": "loc-jekyll_cabinet"
+  },
+  {
+   "beat_id": "B05",
+   "index": 27,
+   "start": 70.925,
+   "seconds": 1.9,
+   "cast": [
+    "reginald_lanyon"
+   ],
+   "char_refs": {
+    "reginald_lanyon": "char-reginald_lanyon"
+   },
+   "loc_ref": "loc-lanyon_house"
+  },
+  {
+   "beat_id": "B06",
+   "index": 28,
+   "start": 72.825,
+   "seconds": 1.975,
+   "cast": [
+    "gabriel_john_utterson"
+   ],
+   "char_refs": {
+    "gabriel_john_utterson": "char-gabriel_john_utterson"
+   },
+   "loc_ref": "loc-utterson_house"
+  },
+  {
+   "beat_id": "B07",
+   "index": 29,
+   "start": 74.8,
+   "seconds": 1.9,
+   "cast": [
+    "henry_jekyll"
+   ],
+   "char_refs": {
+    "henry_jekyll": "char-henry_jekyll"
+   },
+   "loc_ref": "loc-jekyll_house"
+  },
+  {
+   "beat_id": "B08",
+   "index": 30,
+   "start": 76.7,
+   "seconds": 1.75,
+   "cast": [
+    "edward_hyde"
+   ],
+   "char_refs": {
+    "edward_hyde": "char-edward_hyde"
+   },
+   "loc_ref": "loc-jekyll_laboratory"
+  },
+  {
+   "beat_id": "B09",
+   "index": 31,
+   "start": 78.45,
+   "seconds": 1.75,
+   "cast": [
+    "edward_hyde"
+   ],
+   "char_refs": {
+    "edward_hyde": "char-edward_hyde"
+   },
+   "loc_ref": "loc-hyde_soho_rooms"
+  },
+  {
+   "beat_id": "B10",
+   "index": 32,
+   "start": 80.2,
+   "seconds": 1.75,
+   "cast": [
+    "henry_jekyll"
+   ],
+   "char_refs": {
+    "henry_jekyll": "char-henry_jekyll"
+   },
+   "loc_ref": "loc-hyde_soho_rooms"
+  },
+  {
+   "beat_id": "B00",
+   "index": 33,
+   "start": 81.95,
+   "seconds": 1.85,
+   "cast": [
+    "gabriel_john_utterson"
+   ],
+   "char_refs": {
+    "gabriel_john_utterson": "char-gabriel_john_utterson"
+   },
+   "loc_ref": "loc-black_mail_house_door"
+  },
+  {
+   "beat_id": "B01",
+   "index": 34,
+   "start": 83.8,
+   "seconds": 2.1,
+   "cast": [
+    "gabriel_john_utterson"
+   ],
+   "char_refs": {
+    "gabriel_john_utterson": "char-gabriel_john_utterson"
+   },
+   "loc_ref": "loc-utterson_house"
+  },
+  {
+   "beat_id": "B02",
+   "index": 35,
+   "start": 85.9,
+   "seconds": 1.35,
+   "cast": [
+    "poole"
+   ],
+   "char_refs": {
+    "poole": "char-poole"
+   },
+   "loc_ref": "loc-jekyll_house"
+  },
+  {
+   "beat_id": "B03",
+   "index": 36,
+   "start": 87.25,
+   "seconds": 1.35,
+   "cast": [],
+   "char_refs": {},
+   "loc_ref": "loc-carew_murder_lane"
+  },
+  {
+   "beat_id": "B04",
+   "index": 37,
+   "start": 88.6,
+   "seconds": 1.35,
+   "cast": [
+    "henry_jekyll"
+   ],
+   "char_refs": {
+    "henry_jekyll": "char-henry_jekyll"
+   },
+   "loc_ref": "loc-jekyll_cabinet"
+  },
+  {
+   "beat_id": "B05",
+   "index": 38,
+   "start": 89.95,
+   "seconds": 1.35,
+   "cast": [
+    "reginald_lanyon"
+   ],
+   "char_refs": {
+    "reginald_lanyon": "char-reginald_lanyon"
+   },
+   "loc_ref": "loc-lanyon_house"
+  },
+  {
+   "beat_id": "B06",
+   "index": 39,
+   "start": 91.3,
+   "seconds": 2.8,
+   "cast": [
+    "gabriel_john_utterson"
+   ],
+   "char_refs": {
+    "gabriel_john_utterson": "char-gabriel_john_utterson"
+   },
+   "loc_ref": "loc-utterson_house"
+  },
+  {
+   "beat_id": "B07",
+   "index": 40,
+   "start": 94.1,
+   "seconds": 2.8,
+   "cast": [
+    "henry_jekyll"
+   ],
+   "char_refs": {
+    "henry_jekyll": "char-henry_jekyll"
+   },
+   "loc_ref": "loc-jekyll_house"
+  },
+  {
+   "beat_id": "B08",
+   "index": 41,
+   "start": 96.9,
+   "seconds": 3.75,
+   "cast": [
+    "edward_hyde"
+   ],
+   "char_refs": {
+    "edward_hyde": "char-edward_hyde"
+   },
+   "loc_ref": "loc-jekyll_laboratory"
+  }
+ ]
+}

@@ -99,26 +99,26 @@
    "arc": "quiet",
    "location_id": "criterion_bar",
    "cast": [
-    "john_watson"
+    "sherlock_holmes"
    ],
-   "image_prompt": "A hansom rolls through London traffic.",
+   "image_prompt": "Holmes turns back to the test-tube. He pricks his finger and lets a drop fall into a vessel.",
    "motion": "The camera pushes in with small amplitude at slow speed.",
-   "line": "Beating the subjects!",
-   "speaker": "john_watson",
+   "line": "I’ve found it! I’ve found it.",
+   "speaker": "sherlock_holmes",
    "emotion": null
   },
   {
    "beat_id": "B01",
-   "scene_number": 3,
+   "scene_number": 4,
    "arc": "quiet",
    "location_id": "221b_baker_street",
    "cast": [
-    "g_lestrade"
+    "john_watson"
    ],
-   "image_prompt": "Holmes eats toast at the breakfast table. Watson reads a marked article.",
+   "image_prompt": "Watson reads the note aloud. Holmes watches his face, not the page.",
    "motion": "The camera pushes in with small amplitude at slow speed.",
-   "line": null,
-   "speaker": null,
+   "line": "How in the world did you deduce that?",
+   "speaker": "john_watson",
    "emotion": null
   },
   {
@@ -129,7 +129,7 @@
    "cast": [
     "g_lestrade"
    ],
-   "image_prompt": "Holmes leaves the hansom a hundred yards from Number 3.",
+   "image_prompt": "Inside, Drebber lies on the bare floor, eyes fixed on the stained ceiling. Lestrade stands over him.",
    "motion": "The camera pushes in with small amplitude at slow speed.",
    "line": "This case will make a stir, sir.",
    "speaker": "g_lestrade",
@@ -137,112 +137,114 @@
   },
   {
    "beat_id": "B03",
-   "scene_number": 7,
-   "arc": "quiet",
+   "scene_number": 8,
+   "arc": "build",
    "location_id": "221b_baker_street",
    "cast": [
-    "john_watson"
+    "sherlock_holmes"
    ],
-   "image_prompt": "The sitting-room is quiet. Watson waits beside the half-open door.",
+   "image_prompt": "Holmes offers him a cigar and whiskey. Gregson takes both.",
    "motion": "The camera pushes in with small amplitude at slow speed.",
-   "line": "Come in.",
-   "speaker": "john_watson",
+   "line": "Stangerson too! The plot thickens.",
+   "speaker": "sherlock_holmes",
    "emotion": null
   },
   {
    "beat_id": "B04",
    "scene_number": 9,
-   "arc": "quiet",
+   "arc": "build",
    "location_id": "hallidays_private_hotel",
    "cast": [
-    "g_lestrade"
+    "john_watson"
    ],
-   "image_prompt": "Holmes takes the small pill-box from Lestrade. Two pearly-grey pills rest inside.",
+   "image_prompt": "Watson holds one pill to the light.",
    "motion": "The camera pushes in with small amplitude at slow speed.",
-   "line": "I have them.",
-   "speaker": "g_lestrade",
+   "line": "From their lightness and transparency, I should imagine that they are soluble in water.",
+   "speaker": "john_watson",
    "emotion": null
   },
   {
    "beat_id": "B05",
+   "scene_number": 11,
+   "arc": "build",
+   "location_id": "police_station_chamber",
+   "cast": [
+    "jefferson_hope"
+   ],
+   "image_prompt": "The Inspector writes at a crowded desk.\nHope sits opposite, wrists joined before him.",
+   "motion": "The camera pushes in with small amplitude at slow speed.",
+   "line": "Are you a Doctor?",
+   "speaker": "jefferson_hope",
+   "emotion": null
+  },
+  {
+   "beat_id": "B06",
    "scene_number": 12,
-   "arc": "quiet",
+   "arc": "build",
    "location_id": "great_alkali_plain",
    "cast": [
     "jefferson_hope"
    ],
-   "image_prompt": "A grey shawl lies beneath a boulder. The desert stretches empty in every direction.",
+   "image_prompt": "Hope releases the bridle. Lucy studies him instead of the cattle.",
    "motion": "The camera pushes in with small amplitude at slow speed.",
    "line": "You’re not hurt, I hope, miss?",
    "speaker": "jefferson_hope",
    "emotion": null
   },
   {
-   "beat_id": "B06",
-   "scene_number": 13,
-   "arc": "build",
-   "location_id": "utah",
-   "cast": [],
-   "image_prompt": "The latch CLICKS. Ferrier reaches the door.",
-   "motion": "The camera pushes in with small amplitude at slow speed.",
-   "line": null,
-   "speaker": null,
-   "emotion": null
-  },
-  {
    "beat_id": "B07",
-   "scene_number": 15,
-   "arc": "build",
-   "location_id": "utah_mountains",
+   "scene_number": 18,
+   "arc": "hit",
+   "location_id": "number_3_lauriston_gardens",
    "cast": [
     "jefferson_hope"
    ],
-   "image_prompt": "Hope leads them through the defiles. The horses pick their way over rock.",
+   "image_prompt": "Hope unlocks the house and leads Drebber into the dark front room.",
    "motion": "The camera pushes in with small amplitude at slow speed.",
-   "line": null,
-   "speaker": null,
+   "line": "It’s time to get out.",
+   "speaker": "jefferson_hope",
    "emotion": null
   },
   {
    "beat_id": "B08",
-   "scene_number": 17,
-   "arc": "build",
-   "location_id": "scotland_yard",
+   "scene_number": 19,
+   "arc": "hit",
+   "location_id": "hallidays_private_hotel",
    "cast": [
     "jefferson_hope"
    ],
-   "image_prompt": "Hope’s hand closes around Lucy Ferrier’s marriage ring.",
+   "image_prompt": "Early morning. Hope reaches Stangerson’s room by ladder from the lane.",
    "motion": "The camera pushes in with small amplitude at slow speed.",
-   "line": "That girl that I spoke of was to have married me twenty years ago.",
+   "line": "The same choice. One is death. The other is life.",
    "speaker": "jefferson_hope",
    "emotion": null
   },
   {
    "beat_id": "B09",
-   "scene_number": 20,
-   "arc": "build",
+   "scene_number": 21,
+   "arc": "hit",
    "location_id": "221b_baker_street",
    "cast": [
-    "jefferson_hope"
+    "sherlock_holmes"
    ],
-   "image_prompt": "Hope’s cab waits at the curb.",
+   "image_prompt": "The next evening. Holmes has spread a newspaper across the table.",
    "motion": "The camera pushes in with small amplitude at slow speed.",
-   "line": "I can tell my own secrets, but I don’t get other people into trouble.",
-   "speaker": "jefferson_hope",
+   "line": null,
+   "speaker": null,
    "emotion": null
   },
   {
    "beat_id": "B10",
-   "scene_number": 21,
-   "arc": "build",
+   "scene_number": 22,
+   "arc": "aftermath",
    "location_id": "221b_baker_street",
    "cast": [
     "john_watson"
    ],
-   "image_prompt": "The next evening. Holmes has spread a newspaper across the table.",
+   "image_prompt": "Holmes hands Watson the newspaper.",
    "motion": "The camera pushes in with small amplitude at slow speed.",
-   "line": "I don’t see that they had very much to do with his capture.",
-   "speaker": "john_watson",
+   "line": null,
+   "speaker": null,
    "emotion": null
   }
  ],
@@ -271,7 +273,9 @@
    70.2,
    83.95,
    99.8
-  ]
+  ],
+  "title_stopdown": 80.1,
+  "title_impact": 83.95
  },
  "shots": [
   {
@@ -280,10 +284,10 @@
    "start": 0.0,
    "seconds": 3.75,
    "cast": [
-    "john_watson"
+    "sherlock_holmes"
    ],
    "char_refs": {
-    "john_watson": "char-john_watson"
+    "sherlock_holmes": "char-sherlock_holmes"
    },
    "loc_ref": "loc-criterion_bar"
   },
@@ -293,10 +297,10 @@
    "start": 3.75,
    "seconds": 3.75,
    "cast": [
-    "g_lestrade"
+    "john_watson"
    ],
    "char_refs": {
-    "g_lestrade": "char-g_lestrade"
+    "john_watson": "char-john_watson"
    },
    "loc_ref": "loc-221b_baker_street"
   },
@@ -319,10 +323,10 @@
    "start": 10.425,
    "seconds": 2.75,
    "cast": [
-    "john_watson"
+    "sherlock_holmes"
    ],
    "char_refs": {
-    "john_watson": "char-john_watson"
+    "sherlock_holmes": "char-sherlock_holmes"
    },
    "loc_ref": "loc-221b_baker_street"
   },
@@ -332,10 +336,10 @@
    "start": 13.175,
    "seconds": 2.65,
    "cast": [
-    "g_lestrade"
+    "john_watson"
    ],
    "char_refs": {
-    "g_lestrade": "char-g_lestrade"
+    "john_watson": "char-john_watson"
    },
    "loc_ref": "loc-hallidays_private_hotel"
   },
@@ -350,16 +354,20 @@
    "char_refs": {
     "jefferson_hope": "char-jefferson_hope"
    },
-   "loc_ref": "loc-great_alkali_plain"
+   "loc_ref": "loc-police_station_chamber"
   },
   {
    "beat_id": "B06",
    "index": 6,
    "start": 18.475,
    "seconds": 2.65,
-   "cast": [],
-   "char_refs": {},
-   "loc_ref": null
+   "cast": [
+    "jefferson_hope"
+   ],
+   "char_refs": {
+    "jefferson_hope": "char-jefferson_hope"
+   },
+   "loc_ref": "loc-great_alkali_plain"
   },
   {
    "beat_id": "B07",
@@ -372,7 +380,7 @@
    "char_refs": {
     "jefferson_hope": "char-jefferson_hope"
    },
-   "loc_ref": null
+   "loc_ref": "loc-number_3_lauriston_gardens"
   },
   {
    "beat_id": "B08",
@@ -385,7 +393,7 @@
    "char_refs": {
     "jefferson_hope": "char-jefferson_hope"
    },
-   "loc_ref": null
+   "loc_ref": "loc-hallidays_private_hotel"
   },
   {
    "beat_id": "B09",
@@ -393,10 +401,10 @@
    "start": 27.375,
    "seconds": 3.325,
    "cast": [
-    "jefferson_hope"
+    "sherlock_holmes"
    ],
    "char_refs": {
-    "jefferson_hope": "char-jefferson_hope"
+    "sherlock_holmes": "char-sherlock_holmes"
    },
    "loc_ref": "loc-221b_baker_street"
   },
@@ -419,10 +427,10 @@
    "start": 33.4,
    "seconds": 2.675,
    "cast": [
-    "john_watson"
+    "sherlock_holmes"
    ],
    "char_refs": {
-    "john_watson": "char-john_watson"
+    "sherlock_holmes": "char-sherlock_holmes"
    },
    "loc_ref": "loc-criterion_bar"
   },
@@ -432,10 +440,10 @@
    "start": 36.075,
    "seconds": 2.6,
    "cast": [
-    "g_lestrade"
+    "john_watson"
    ],
    "char_refs": {
-    "g_lestrade": "char-g_lestrade"
+    "john_watson": "char-john_watson"
    },
    "loc_ref": "loc-221b_baker_street"
   },
@@ -458,10 +466,10 @@
    "start": 41.275,
    "seconds": 2.5,
    "cast": [
-    "john_watson"
+    "sherlock_holmes"
    ],
    "char_refs": {
-    "john_watson": "char-john_watson"
+    "sherlock_holmes": "char-sherlock_holmes"
    },
    "loc_ref": "loc-221b_baker_street"
   },
@@ -471,10 +479,10 @@
    "start": 43.775,
    "seconds": 2.5,
    "cast": [
-    "g_lestrade"
+    "john_watson"
    ],
    "char_refs": {
-    "g_lestrade": "char-g_lestrade"
+    "john_watson": "char-john_watson"
    },
    "loc_ref": "loc-hallidays_private_hotel"
   },
@@ -489,16 +497,20 @@
    "char_refs": {
     "jefferson_hope": "char-jefferson_hope"
    },
-   "loc_ref": "loc-great_alkali_plain"
+   "loc_ref": "loc-police_station_chamber"
   },
   {
    "beat_id": "B06",
    "index": 17,
    "start": 48.475,
    "seconds": 2.075,
-   "cast": [],
-   "char_refs": {},
-   "loc_ref": null
+   "cast": [
+    "jefferson_hope"
+   ],
+   "char_refs": {
+    "jefferson_hope": "char-jefferson_hope"
+   },
+   "loc_ref": "loc-great_alkali_plain"
   },
   {
    "beat_id": "B07",
@@ -511,7 +523,7 @@
    "char_refs": {
     "jefferson_hope": "char-jefferson_hope"
    },
-   "loc_ref": null
+   "loc_ref": "loc-number_3_lauriston_gardens"
   },
   {
    "beat_id": "B08",
@@ -524,7 +536,7 @@
    "char_refs": {
     "jefferson_hope": "char-jefferson_hope"
    },
-   "loc_ref": null
+   "loc_ref": "loc-hallidays_private_hotel"
   },
   {
    "beat_id": "B09",
@@ -532,10 +544,10 @@
    "start": 54.575,
    "seconds": 1.95,
    "cast": [
-    "jefferson_hope"
+    "sherlock_holmes"
    ],
    "char_refs": {
-    "jefferson_hope": "char-jefferson_hope"
+    "sherlock_holmes": "char-sherlock_holmes"
    },
    "loc_ref": "loc-221b_baker_street"
   },
@@ -558,10 +570,10 @@
    "start": 58.15,
    "seconds": 1.9,
    "cast": [
-    "john_watson"
+    "sherlock_holmes"
    ],
    "char_refs": {
-    "john_watson": "char-john_watson"
+    "sherlock_holmes": "char-sherlock_holmes"
    },
    "loc_ref": "loc-criterion_bar"
   },
@@ -571,10 +583,10 @@
    "start": 60.05,
    "seconds": 1.9,
    "cast": [
-    "g_lestrade"
+    "john_watson"
    ],
    "char_refs": {
-    "g_lestrade": "char-g_lestrade"
+    "john_watson": "char-john_watson"
    },
    "loc_ref": "loc-221b_baker_street"
   },
@@ -597,10 +609,10 @@
    "start": 63.7,
    "seconds": 1.9,
    "cast": [
-    "john_watson"
+    "sherlock_holmes"
    ],
    "char_refs": {
-    "john_watson": "char-john_watson"
+    "sherlock_holmes": "char-sherlock_holmes"
    },
    "loc_ref": "loc-221b_baker_street"
   },
@@ -610,10 +622,10 @@
    "start": 65.6,
    "seconds": 1.85,
    "cast": [
-    "g_lestrade"
+    "john_watson"
    ],
    "char_refs": {
-    "g_lestrade": "char-g_lestrade"
+    "john_watson": "char-john_watson"
    },
    "loc_ref": "loc-hallidays_private_hotel"
   },
@@ -628,16 +640,20 @@
    "char_refs": {
     "jefferson_hope": "char-jefferson_hope"
    },
-   "loc_ref": "loc-great_alkali_plain"
+   "loc_ref": "loc-police_station_chamber"
   },
   {
    "beat_id": "B06",
    "index": 28,
    "start": 69.3,
    "seconds": 1.35,
-   "cast": [],
-   "char_refs": {},
-   "loc_ref": null
+   "cast": [
+    "jefferson_hope"
+   ],
+   "char_refs": {
+    "jefferson_hope": "char-jefferson_hope"
+   },
+   "loc_ref": "loc-great_alkali_plain"
   },
   {
    "beat_id": "B07",
@@ -650,7 +666,7 @@
    "char_refs": {
     "jefferson_hope": "char-jefferson_hope"
    },
-   "loc_ref": null
+   "loc_ref": "loc-number_3_lauriston_gardens"
   },
   {
    "beat_id": "B08",
@@ -663,7 +679,7 @@
    "char_refs": {
     "jefferson_hope": "char-jefferson_hope"
    },
-   "loc_ref": null
+   "loc_ref": "loc-hallidays_private_hotel"
   },
   {
    "beat_id": "B09",
@@ -671,10 +687,10 @@
    "start": 73.35,
    "seconds": 2.8,
    "cast": [
-    "jefferson_hope"
+    "sherlock_holmes"
    ],
    "char_refs": {
-    "jefferson_hope": "char-jefferson_hope"
+    "sherlock_holmes": "char-sherlock_holmes"
    },
    "loc_ref": "loc-221b_baker_street"
   },
