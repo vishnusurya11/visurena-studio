@@ -19,6 +19,16 @@ import subprocess
 from pathlib import Path
 
 
+HEADROOM = 0.70
+"""Sample-peak ceiling for a synthesised cue, about -3.1 dBFS.
+
+Generous on purpose.  TRUE peak runs above sample peak by a decibel or more,
+and these are summed with a music bed that itself arrives at 0.00 dBTP -- the
+first cut's own impact measured +0.72 dBTP before anything was mixed into it.
+Headroom at the source is the only thing that survives the sum.
+"""
+
+
 def _render(filters: list[str], output: Path, seconds: float) -> Path:
     output.parent.mkdir(parents=True, exist_ok=True)
     command = ["ffmpeg", "-y", "-v", "error"]
@@ -39,7 +49,7 @@ def sub_drop(output: Path, seconds: float = 2.4, start_hz: float = 52.0,
     """
     sweep = (f"aevalsrc='0.95*sin(2*PI*({start_hz}*t + ({end_hz}-{start_hz})"
              f"*t*t/(2*{seconds})))*exp(-1.1*t)':d={seconds}:s=48000:c=stereo")
-    return _render([sweep, "[0:a]alimiter=limit=0.97[out]"], output, seconds)
+    return _render([sweep, "[0:a]alimiter=limit=0.70:level=disabled[out]"], output, seconds)
 
 
 def riser(output: Path, seconds: float = 3.0, start_hz: float = 180.0,
@@ -52,7 +62,7 @@ def riser(output: Path, seconds: float = 3.0, start_hz: float = 180.0,
     graph = (f"[1:a]aformat=channel_layouts=stereo,highpass=f=400,"
              f"volume='pow(t/{seconds},2.2)':eval=frame[n];"
              f"[0:a]volume='pow(t/{seconds},1.8)':eval=frame[s];"
-             f"[s][n]amix=inputs=2:normalize=0,alimiter=limit=0.95[out]")
+             f"[s][n]amix=inputs=2:normalize=0,alimiter=limit=0.70:level=disabled[out]")
     return _render([sweep, noise, graph], output, seconds)
 
 
@@ -66,5 +76,5 @@ def impact(output: Path, seconds: float = 2.4) -> Path:
              "volume='exp(-38*t)':eval=frame[crack];"
              "[0:a]highpass=f=70[mid];[1:a]volume=0.95[low];"
              "[crack][mid][low]amix=inputs=3:normalize=0,"
-             "alimiter=limit=0.97[out]")
+             "alimiter=limit=0.70:level=disabled[out]")
     return _render([body, sub, noise, graph], output, seconds)

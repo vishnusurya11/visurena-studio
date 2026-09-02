@@ -456,3 +456,21 @@ class TestTheHeroLookIsDark:
             contrast = float(filt.split("contrast=")[1].split(":")[0])
             bright = float(filt.split("brightness=")[1])
             assert abs((mean * contrast + bright * 255) - self.FLOOR) < 0.5
+
+
+class TestLimiterAutoLevel:
+    """alimiter re-levels by default, which inverts what a limit does."""
+
+    def test_every_limiter_disables_auto_level(self):
+        import inspect
+        from studio import sfx, trailer_assemble
+        for module in (sfx, trailer_assemble):
+            source = inspect.getsource(module)
+            for line in source.splitlines():
+                if "alimiter=limit=" in line:
+                    assert "level=disabled" in line, line.strip()
+
+    def test_synthesised_cues_leave_true_peak_headroom(self):
+        """They are summed with a bed that itself arrives at 0.00 dBTP."""
+        from studio.sfx import HEADROOM
+        assert HEADROOM <= 0.75

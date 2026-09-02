@@ -11,6 +11,7 @@ reads as a stutter instead of a motif.
 """
 from __future__ import annotations
 
+import json
 import subprocess
 from pathlib import Path
 
@@ -25,6 +26,21 @@ def _ffmpeg(command: list[str], what: str) -> None:
     if result.returncode != 0:
         raise RuntimeError(f"{what} failed: " + result.stderr.strip()[-800:])
 
+
+TARGET_LUFS = -14.0
+"""Integrated loudness for online delivery."""
+
+TARGET_TP = -1.5
+"""True-peak ceiling.  EBU R128 asks for -1.0; -1.5 leaves room for the
+intersample peaks the AAC encoder introduces after this measurement."""
+
+TP_LINEAR = 0.80
+"""A final sample-peak safety net at about -1.9 dBFS.
+
+Note `level=disabled` wherever alimiter is used.  Its auto-level is ON by
+default: it limits and then re-levels the result back up, so LOWERING the
+limit made the mix LOUDER -- peaks went -0.55 -> +0.53 -> +0.95 dBTP across
+three attempts while I kept tightening a limiter that was undoing itself."""
 
 HEAD_TRIM = 2.6
 """Seconds discarded from the head of every take.
@@ -123,6 +139,16 @@ def concat(segments: list[Path], output: Path) -> Path:
     return output
 
 
+def _measure_loudness(command: list[str]) -> dict:
+    """Run a loudnorm analysis pass and return its JSON report."""
+    result = subprocess.run(command, capture_output=True, text=True, errors="replace")
+    tail = result.stderr[result.stderr.rfind("{"):result.stderr.rfind("}") + 1]
+    try:
+        return json.loads(tail)
+    except ValueError:
+        return {}
+
+
 def mix(picture: Path, bed: Path, cues: list[tuple[float, Path]], output: Path,
         seconds: float | None = None) -> Path:
     """Lay the bed and the designed hits under the cut, and land the loudness.
@@ -147,9 +173,31 @@ def mix(picture: Path, bed: Path, cues: list[tuple[float, Path]], output: Path,
     # duration=longest, so the mix never ends -- and `-shortest` does not
     # reliably terminate a filter-graph output.  The first run of this hung at
     # exactly 25,690,160 bytes and stayed there.  An explicit `-t` bounds it.
-    parts.append(f"{''.join(mixed)}amix=inputs={len(mixed)}:normalize=0:duration=first,"
-                 f"alimiter=limit=0.891,loudnorm=I=-14:TP=-1.0[out]")
+    # Measure, compute one exact gain, apply it.  Chaining normalisers does
+    # not work here: ffmpeg's loudnorm only enters LINEAR mode when
+    # measured_LRA <= target_LRA, and a trailer cue's range is far wider than
+    # the default 7 LU -- so it silently falls back to DYNAMIC, re-gains, and
+    # a two-pass attempt came out LOUDER than the single pass (+0.53 dBTP
+    # against -0.55).  alimiter cannot rescue it either, being sample-peak
+    # while the ceiling that matters is true-peak.
+    #
+    # One deterministic gain, bounded by whichever limit binds first, is both
+    # simpler and actually correct.
+    base = f"{''.join(mixed)}amix=inputs={len(mixed)}:normalize=0:duration=first"
     bound = ["-t", f"{seconds:.3f}"] if seconds else []
+    analysis = _measure_loudness(
+        ["ffmpeg", "-v", "info", *inputs, "-filter_complex",
+         f"{base},loudnorm=I={TARGET_LUFS}:TP={TARGET_TP}:print_format=json[out]",
+         *bound, "-map", "[out]", "-f", "null", "-"])
+    gain = 0.0
+    if "input_i" in analysis and "input_tp" in analysis:
+        try:
+            to_target = TARGET_LUFS - float(analysis["input_i"])
+            to_ceiling = TARGET_TP - float(analysis["input_tp"])
+            gain = min(to_target, to_ceiling)
+        except ValueError:
+            gain = 0.0
+    parts.append(f"{base},volume={gain:.2f}dB,alimiter=limit={TP_LINEAR}:level=disabled[out]")
     _ffmpeg(
         ["ffmpeg", "-y", "-v", "error", *inputs, "-filter_complex", ";".join(parts),
          *bound,
