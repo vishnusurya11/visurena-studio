@@ -119,6 +119,11 @@ class MusicBed(BaseModel):
     seconds: float = Field(gt=0.0)
     sections: int = Field(ge=1)
     cuts: list[float] = Field(default_factory=list)
+    title_stopdown: float | None = None
+    title_impact: float | None = None
+    """The measured silence and the hit that follows it.  The title card is cut
+    to these, not to a section plan: the previous trailer's card sat 5.29s
+    before its cue's own impact, so the braam landed inside the button shot."""
 
     @model_validator(mode="after")
     def _cuts_are_ordered_and_inside(self) -> "MusicBed":

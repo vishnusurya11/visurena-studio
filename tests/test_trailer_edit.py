@@ -320,3 +320,27 @@ class TestCharacterCollision:
         two = described_as({"id": "reginald_lanyon", "name": "Dr. Lanyon",
                             "aliases": ["the doctor"], "profile": {"physical": ""}})
         assert one != two
+
+
+class TestTheTitleLandsOnTheHit:
+    """The defect this whole pipeline was built to fix, in miniature."""
+
+    @staticmethod
+    def card_seconds(shots_end: float, hit_at: float, hold: float = 3.0) -> float:
+        return max(hold, (hit_at - shots_end) + hold)
+
+    def test_a_hit_after_the_shots_is_covered_by_the_card(self):
+        card = self.card_seconds(80.1, 83.95)
+        assert 80.1 <= 83.95 <= 80.1 + card
+
+    def test_a_fixed_hold_would_have_missed_it(self):
+        """80.1 + 3.0 = 83.1, and the cue's impact is at 83.95."""
+        assert not 80.1 <= 83.95 <= 80.1 + 3.0
+
+    def test_a_hit_during_the_shots_still_leaves_a_full_hold(self):
+        assert self.card_seconds(80.1, 60.0) == 3.0
+
+    def test_the_card_never_shrinks_below_the_final_hold(self):
+        from studio.trailer_cut import FINAL_HOLD
+        assert all(self.card_seconds(80.0, h) >= FINAL_HOLD
+                   for h in (10.0, 79.0, 80.0, 95.0))

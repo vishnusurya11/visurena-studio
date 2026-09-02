@@ -63,17 +63,24 @@ def build(book_glob: str, trailer_id: str = "main") -> Path:
     if is_uniform(lengths):
         raise SystemExit("REFUSED: every shot is the same length -- the amateur tell")
 
+    # The card must still be on screen when the cue's own hit arrives.  Cutting
+    # it to a fixed hold ended the trailer 0.85s BEFORE the impact -- the same
+    # defect as the previous trailer's 5.29s miss, just smaller.
+    title_at = sum(lengths)
+    hit_at = plan["music"].get("title_impact") or title_at
+    card_seconds = max(FINAL_HOLD, (hit_at - title_at) + FINAL_HOLD)
     segments.append(title_card_ass(plan["title"], work / "title.mp4",
-                                   FINAL_HOLD, width, height, fps))
+                                   card_seconds, width, height, fps))
     picture = concat(segments, work / "picture.mp4")
 
     music = book / plan["music"]["rel_path"]
-    title_at = sum(lengths)
-    cues = [(max(title_at - 2.2, 0.0), sub_drop(work / "sub.wav")),
-            (title_at, impact(work / "hit.wav"))]
+    # The synthesised hit reinforces the cue's hit; it does not compete with it.
+    cues = [(max(hit_at - 2.4, 0.0), sub_drop(work / "sub.wav")),
+            (hit_at, impact(work / "hit.wav"))]
     final = out / f"TRAILER-{book.name.split('_', 1)[1]}.mp4"
     mix(picture, music, cues, final)
-    print(f"{len(segments)} shots, {title_at:.1f}s + title -> {final}")
+    print(f"{len(segments)} shots, card at {title_at:.1f}s holding "
+          f"{card_seconds:.1f}s, cue hit at {hit_at:.1f}s -> {final}")
     return final
 
 

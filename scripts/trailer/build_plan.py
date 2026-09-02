@@ -107,7 +107,9 @@ def main(book_glob: str, trailer_id: str = "main") -> None:
               for r in refs_doc["refs"]],
         beats=beats, shots=shots,
         music=MusicBed(rel_path=cue["rel_path"], seconds=cue["seconds"],
-                       sections=9, cuts=cue["grid"]))
+                       sections=9, cuts=cue["grid"],
+                       title_stopdown=cue["title_stopdown"],
+                       title_impact=cue["title_impact"]))
 
     # A trailer must contain the story's lead.  Every mechanical gate passed a
     # Study in Scarlet plan that never once showed Sherlock Holmes, because
