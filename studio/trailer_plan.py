@@ -160,3 +160,47 @@ def action_featuring(scene: dict, names: list[str]) -> str:
                for name in names for part in name.split() if len(part) > 3):
             return action
     return actions[0]
+
+
+def spread_lead(scene: dict, ranking: list[str], available: set[str],
+                used: dict[str, int]) -> list[str]:
+    """Bind the most central character present, PREFERRING one seen less.
+
+    Binding the single most central character every time gave Jekyll and Hyde
+    nine beats of Utterson and no Hyde at all.  Utterson is correctly the
+    story's centre -- he is the point of view -- but a trailer has to show its
+    ensemble, and above all its title characters.
+
+    Weighting rank against use keeps the lead dominant while letting everyone
+    else through: a character already seen three times loses to one seen none.
+    """
+    present = [c for c in scene.get("cast", []) if c in available]
+    if not present:
+        return []
+    order = {who: index for index, who in enumerate(ranking)}
+    return [min(present, key=lambda who: (used.get(who, 0) * 2
+                                          + order.get(who, len(ranking)) * 0.5))]
+
+
+def diversify_locations(scenes: list[dict], count: int) -> list[dict]:
+    """Pick scenes spanning the story AND as many different places as possible.
+
+    Six of eleven beats in one drawing room is one drawing room, however well
+    the story is covered.
+    """
+    if count >= len(scenes):
+        return list(scenes)
+    windows: list[list[dict]] = [[] for _ in range(count)]
+    for index, scene in enumerate(scenes):
+        windows[min(index * count // len(scenes), count - 1)].append(scene)
+    chosen: list[dict] = []
+    seen: set[str] = set()
+    for window in windows:
+        if not window:
+            continue
+        fresh = [s for s in window
+                 if s.get("slug", {}).get("location_id") not in seen]
+        pick = (fresh or window)[0]
+        seen.add(pick.get("slug", {}).get("location_id"))
+        chosen.append(pick)
+    return chosen
