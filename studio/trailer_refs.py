@@ -166,8 +166,85 @@ def epithets(aliases: list[str], name: str) -> list[str]:
 
 
 def described_as(character: dict) -> str:
-    """One line combining what the book calls someone with how it describes them."""
+    """A visual brief: what the book calls someone, what it says, what they wore.
+
+    Three layers, in decreasing order of authority -- the book's own epithets,
+    its physical description where one exists, then period costume and
+    invented distinguishing marks.  The last layer is there because four
+    characters Stevenson never describes came back as one man four times, and
+    an honest invention beats an accidental clone.
+    """
     tags = epithets(character.get("aliases", []), character.get("name", ""))
     physical = visual_description((character.get("profile") or {}).get("physical", ""))
     lead = f"{character.get('name', 'A person')}, {', '.join(tags[:3])}." if tags else ""
-    return " ".join(part for part in (lead, physical) if part).strip()
+    dress = costume_for(tags)
+    # Invented marks are a FALLBACK, never an addition.  Appended to a real
+    # description they contradict it -- Hyde is "a small young man" and got
+    # "a short greying beard"; Lanyon is "noticeably balder" and got
+    # "close-cropped black hair".  The book always wins where it speaks.
+    marks = "" if physical else distinguishing_marks(
+        character.get("id") or character.get("name", "x"))
+    return " ".join(part for part in (lead, physical, dress, marks) if part).strip()
+
+
+COSTUME: tuple[tuple[tuple[str, ...], str], ...] = (
+    (("butler", "manservant", "valet", "footman"),
+     "dressed in plain black household livery"),
+    (("maid", "housemaid", "servant girl", "housekeeper", "cook"),
+     "dressed in a plain dark servant's dress with a white apron and cap"),
+    (("policeman", "officer", "constable", "inspector", "detective"),
+     "in police uniform, a dark tunic with a high collar and custodian helmet"),
+    (("lawyer", "solicitor", "attorney", "trustee", "notary"),
+     "dressed in a sober black professional suit and high collar"),
+    (("doctor", "physician", "surgeon", "medical"),
+     "dressed in a good dark coat and waistcoat, a professional man"),
+    (("murderer", "little man", "small man", "wanderer", "fugitive"),
+     "in clothes that fit him badly, ill-kempt"),
+    (("hunter", "trapper", "miner", "sailor", "labourer"),
+     "in worn outdoor working clothes"),
+)
+"""Role to period DRESS -- clothing and nothing else.
+
+Deliberately says nothing about hair, age or face, so it can be added to
+a description the book supplies without contradicting it.
+
+This is dress CONVENTION, not a claim about the text: a Victorian butler wore
+livery whether or not his author mentions it.  It exists because character
+COLLISION survived the epithets -- "the solemn butler" and "the lawyer" both
+came back as the same gentleman in the same frock coat, since the style block
+dominates and the epithet gave the model a role it did not translate into an
+image.  Naming the clothes does translate.
+"""
+
+
+def costume_for(tags: list[str]) -> str:
+    """The period dress implied by a character's epithets, if any."""
+    joined = " ".join(tags).lower()
+    for keywords, dress in COSTUME:
+        if any(word in joined for word in keywords):
+            return dress
+    return ""
+
+
+BUILDS = ("tall and spare", "short and heavy-set", "of middling height and thickset",
+          "long-limbed and stooping", "compact and upright", "gaunt and narrow-shouldered")
+HAIR = ("dark hair going grey at the temples", "thinning sandy hair",
+        "a full head of iron-grey hair", "close-cropped black hair",
+        "receding brown hair", "white hair swept back")
+FACE = ("clean-shaven", "with full side-whiskers", "with a trimmed moustache",
+        "with a short greying beard", "clean-shaven with a heavy jaw",
+        "with bushy eyebrows and a lined face")
+
+
+def distinguishing_marks(entity_id: str) -> str:
+    """A stable, arbitrary set of features to tell same-role characters apart.
+
+    Jekyll and Lanyon are both doctors, so costume alone leaves them identical.
+    These are invented, and openly so -- the book supplies nothing, and two
+    indistinguishable men on screen is a worse falsehood than two distinct
+    invented ones.  Derived from the id so a character looks the same in the
+    trailer, the song and the episode.
+    """
+    seed = sum(ord(ch) * (index + 1) for index, ch in enumerate(entity_id))
+    return (f"{BUILDS[seed % len(BUILDS)]}, {HAIR[(seed // 7) % len(HAIR)]}, "
+            f"{FACE[(seed // 13) % len(FACE)]}")

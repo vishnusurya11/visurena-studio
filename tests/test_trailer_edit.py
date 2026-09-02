@@ -274,3 +274,49 @@ class TestActionMatchesTheBoundCharacter:
         scene = {"elements": [{"kind": "action", "text": "A door closes."},
                               {"kind": "action", "text": "Utterson looks up."}]}
         assert action_featuring(scene, ["a de Utterson"]) == "Utterson looks up."
+
+
+class TestCharacterCollision:
+    """Four characters a book never describes must not become one man."""
+
+    def test_role_implies_dress(self):
+        from studio.trailer_refs import costume_for
+        assert "livery" in costume_for(["the solemn butler"])
+        assert "police uniform" in costume_for(["a policeman"])
+
+    def test_an_unknown_role_implies_nothing(self):
+        from studio.trailer_refs import costume_for
+        assert costume_for(["a friend"]) == ""
+
+    def test_dress_never_mentions_hair_or_age(self):
+        """So it can be added to a book description without contradicting it."""
+        from studio.trailer_refs import COSTUME
+        banned = ("hair", "haired", "bearded", "his fifties", "elderly", "young")
+        assert not [d for _, d in COSTUME if any(w in d for w in banned)]
+
+    def test_marks_are_stable_for_one_character(self):
+        from studio.trailer_refs import distinguishing_marks
+        assert distinguishing_marks("poole") == distinguishing_marks("poole")
+
+    def test_marks_differ_between_characters(self):
+        from studio.trailer_refs import distinguishing_marks
+        ids = ["henry_jekyll", "reginald_lanyon", "poole", "richard_enfield"]
+        assert len({distinguishing_marks(i) for i in ids}) == len(ids)
+
+    def test_invented_marks_never_override_the_book(self):
+        """Appending them to a real description contradicted it."""
+        from studio.trailer_refs import described_as
+        described = described_as({"id": "hyde", "name": "Edward Hyde",
+                                  "aliases": ["a little man"],
+                                  "profile": {"physical": "A small young man, "
+                                              "clean-shaven and pale."}})
+        assert "greying beard" not in described
+        assert "small young man" in described
+
+    def test_two_doctors_do_not_come_out_identical(self):
+        from studio.trailer_refs import described_as
+        one = described_as({"id": "henry_jekyll", "name": "Dr. Jekyll",
+                            "aliases": ["the doctor"], "profile": {"physical": ""}})
+        two = described_as({"id": "reginald_lanyon", "name": "Dr. Lanyon",
+                            "aliases": ["the doctor"], "profile": {"physical": ""}})
+        assert one != two
