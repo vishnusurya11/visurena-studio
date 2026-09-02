@@ -16,7 +16,8 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 
 from studio.comfy import run
-from studio.trailer_plan import pick_scenes, speaking_characters, unique_locations
+from studio.trailer_plan import (leading_characters, pick_scenes,
+                                 unique_locations)
 from studio.trailer_refs import (character_prompt, described_as, load_json,
                                  location_prompt, physical_of, ref_id_for)
 
@@ -32,12 +33,20 @@ def book_dir(book_id: str) -> Path:
 
 
 def refs_needed(book: Path, count: int) -> tuple[list[str], list[str]]:
-    """Which characters and locations this book's trailer will have to show."""
+    """Which characters and locations this book's trailer will have to show.
+
+    Characters come from the WHOLE story ranked by presence, not from speakers
+    in a sample of scenes.  Sampling gave Jekyll and Hyde a reference set with
+    no Henry Jekyll in it -- he is second only to Utterson across the book, but
+    happened not to speak in the twelve scenes drawn -- while spending a sheet
+    on Enfield, who ranks sixth.
+    """
     screenplay = load_json(book / "screenplay/feature/screenplay.json")
     scenes = screenplay["scenes"]
-    picked = pick_scenes(scenes, count, None)
-    speakers = [c for c in speaking_characters(picked)][:6]
-    return speakers, unique_locations(picked)[:7]
+    ranked = leading_characters(scenes)
+    have = {p.stem for p in (book / "analysis/characters").glob("*.json")}
+    leads = [c for c in ranked if c in have][:7]
+    return leads, unique_locations(pick_scenes(scenes, count, None))[:8]
 
 
 def describe_location(book: Path, loc_id: str, scenes: list[dict]) -> str:
