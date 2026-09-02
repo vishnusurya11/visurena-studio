@@ -264,3 +264,33 @@ Do not mix it in flat. Levels across generated takes vary by roughly the same
 spread as generated speech, so each take needs its own gain before the mix,
 and the ducker threshold is an ABSOLUTE level — per-source normalisation has
 to happen before it, not after.
+
+## Two ffmpeg traps that cost hours
+
+**`alimiter` re-levels by default.** Its auto-level is ON, so it limits and
+then pushes the result back up. Tightening the limit made the mix *louder* —
+peaks went −0.55 → +0.53 → +0.95 dBTP across three attempts while I lowered
+the ceiling each time. **Always `alimiter=limit=N:level=disabled`.**
+
+Peaks rising as the limit falls is not a tuning problem; it means the model of
+the chain is wrong. Measure the *sources* at that point, not the chain. Doing
+so found the rest of it: the MiniMax bed arrives at **0.00 dBTP**, already
+clipping, and a synthesised impact measured **+0.72 dBTP** before anything was
+mixed with it. No sample-peak limiter downstream can bring that sum under a
+*true*-peak ceiling — headroom has to exist at the source.
+
+**The mix never terminates.** `apad` makes the bed an infinite stream, `amix`
+defaults to `duration=longest`, and `-shortest` does not reliably bound a
+filter-graph output. It ran for 45 minutes at a fixed byte count across two
+attempts, and I misread it once as slow and once as dead. **Bound the output
+with an explicit `-t`** at the picture's measured duration; the same mix then
+finishes in 2 seconds.
+
+A process that neither finishes nor errors is the hardest failure to read,
+because every check short of "did it terminate" returns something reassuring.
+
+**On loudness generally:** do not chain normalisers. `loudnorm` only enters
+linear mode when `measured_LRA <= target_LRA`, and a trailer cue's range is far
+wider than the default 7 LU, so it silently falls back to dynamic and re-gains.
+Measure once, compute one gain, apply it, and keep a disabled-auto-level
+limiter as a net rather than as the mechanism.
