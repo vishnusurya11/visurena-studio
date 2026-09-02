@@ -15,7 +15,8 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 
 from studio.trailer_edit import cut_points, lengths_of
-from studio.trailer_plan import arc_for, pick_scenes, quotable_lines
+from studio.trailer_plan import (arc_for, lead_of, leading_characters,
+                                 pick_scenes, quotable_lines)
 from studio.trailer_spec import MusicBed, RefSheet, ShotSpec, TrailerBeat, TrailerPlan
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -25,10 +26,12 @@ def load(path: Path) -> dict:
     return json.loads(path.read_text(encoding="utf-8"))
 
 
-def beat_from_scene(scene: dict, index: int, position: float, refs: dict) -> TrailerBeat:
+def beat_from_scene(scene: dict, index: int, position: float, refs: dict,
+                    ranking: list[str]) -> TrailerBeat:
     """One trailer beat, traceable to one screenplay scene."""
     slug = scene["slug"]
-    cast = [c for c in scene.get("cast", []) if f"char-{c}" in refs][:1]
+    available = {r[len("char-"):] for r in refs if r.startswith("char-")}
+    cast = lead_of(scene, ranking, available)
     lines = [l for l in quotable_lines(scene) if l["character"] in cast]
     chosen = lines[0] if lines else None
     action = next((e["text"] for e in scene["elements"] if e["kind"] == "action"), "")
@@ -74,9 +77,22 @@ def main(book_glob: str, trailer_id: str = "main") -> None:
         raise SystemExit("chosen cue has no title moment; regenerate the music")
 
     scenes = screenplay["scenes"]
+    ranking = leading_characters(scenes)
     points = cut_points(cue["title_stopdown"], cue["grid"])
-    beats = [beat_from_scene(s, i, i / max(len(scenes) - 1, 1), refs)
-             for i, s in enumerate(pick_scenes(scenes, 11, None))]
+    # Only scenes whose LOCATION has a plate can be rendered at all -- a beat
+    # with nothing to bind to is silently skipped downstream and then leaves a
+    # hole in the cut.  Filter here, where it is visible.
+    usable = [s for s in scenes
+              if f"loc-{s.get('slug', {}).get('location_id')}" in refs]
+    if len(usable) < 6:
+        raise SystemExit(f"only {len(usable)} scenes have a location plate; "
+                         "generate more refs before planning")
+    picked = pick_scenes(usable, 11, ranking[0] if ranking else None)
+    # Position is the beat's place in the TRAILER, not in the screenplay.
+    # Dividing by the scene count capped every beat at 0.48, so no beat ever
+    # reached the "hit" band and the trailer had no climax.
+    beats = [beat_from_scene(s, i, i / max(len(picked) - 1, 1), refs, ranking)
+             for i, s in enumerate(picked)]
     shots = shots_for(beats, points, refs)
 
     plan = TrailerPlan(

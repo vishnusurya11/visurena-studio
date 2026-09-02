@@ -114,3 +114,30 @@ def speaking_characters(scenes: list[dict]) -> list[str]:
             if who not in seen:
                 seen.append(who)
     return seen
+
+
+def leading_characters(scenes: list[dict]) -> list[str]:
+    """Characters ranked by how much of the story they are actually in.
+
+    A trailer that never shows its protagonist is not a trailer for that book,
+    and taking cast[0] produced exactly that: eleven beats of A Study in
+    Scarlet without Sherlock Holmes in any of them.  Ranking by presence and
+    binding the highest-ranked character in each scene fixes it without
+    anyone having to name a protagonist.
+    """
+    appearances: dict[str, int] = {}
+    for scene in scenes:
+        for who in scene.get("cast", []):
+            appearances[who] = appearances.get(who, 0) + 1
+        for who in scene.get("speaking", []):
+            appearances[who] = appearances.get(who, 0) + 1
+    return sorted(appearances, key=lambda who: (-appearances[who], who))
+
+
+def lead_of(scene: dict, ranking: list[str], available: set[str]) -> list[str]:
+    """The one character to bind in a scene: the most central one present."""
+    present = [c for c in scene.get("cast", []) if c in available]
+    if not present:
+        return []
+    order = {who: index for index, who in enumerate(ranking)}
+    return [min(present, key=lambda who: order.get(who, len(ranking)))]
