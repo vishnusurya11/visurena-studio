@@ -59,6 +59,31 @@ def camera_for(arc: str, index: int) -> str:
     return moves[index % len(moves)]
 
 
+FRAMING: dict[str, str] = {
+    "quiet": "A medium shot, the figure from the waist up, filling much of the frame.",
+    "build": "A medium close shot, the face clearly visible and well lit.",
+    "hit": "A close shot, the head and shoulders filling the frame.",
+    "aftermath": "A medium close shot, the face clearly visible.",
+}
+"""How big the person sits in frame.
+
+Faces collapse on wide shots at any resolution, and the driver is HEAD SIZE
+IN FRAME rather than pixel count -- so this is not something more resolution
+fixes.  Saying nothing about framing let the model compose establishing wides
+around the location plate: the first two clips read unmistakably as the
+Criterion and as 221B, and in neither could you see who the person was.
+
+A trailer in the literary register sells faces and a world.  It can afford
+two or three establishing wides -- more than that is itself a named amateur
+tell -- so the wides already rendered are kept and everything after them
+comes in closer.
+"""
+
+
+def framing_for(arc: str) -> str:
+    return FRAMING.get(arc, FRAMING["build"])
+
+
 def picture_roll(count: int) -> str:
     """Name the reference slots so the prompt can address them.
 
@@ -84,6 +109,7 @@ def shot_prompt(style: str, physical: list[str], place: str, action: str,
     return (
         f"{style} {subject} "
         f"The location is {place}. "
+        f"{framing_for(arc) if physical else ''} "
         f"{action} {camera_for(arc, index)} "
         f"The shot runs {seconds:.1f} seconds as one continuous take with no cuts. "
         f"{NO_TYPE}"

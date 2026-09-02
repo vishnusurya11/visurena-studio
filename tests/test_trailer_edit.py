@@ -407,3 +407,26 @@ class TestSubstituteTakesStillSpread:
         starts = [segment_start(u, 6, 2.0, 10.12) for u in range(6)]
         assert len(set(starts)) == 6
         assert starts == sorted(starts)
+
+
+class TestFraming:
+    """Faces collapse in wides, and the driver is head size, not resolution."""
+
+    def test_the_climax_frames_closest(self):
+        from studio.trailer_shot import framing_for
+        assert "close shot" in framing_for("hit")
+
+    def test_every_register_names_a_shot_size(self):
+        from studio.trailer_shot import FRAMING
+        assert all("shot" in text for text in FRAMING.values())
+
+    def test_a_shot_with_a_person_carries_framing(self):
+        from studio.trailer_shot import shot_prompt
+        built = shot_prompt("S.", ["a lean man"], "a room", "He turns.", "hit", 2.0)
+        assert "head and shoulders" in built
+
+    def test_a_shot_with_no_people_does_not(self):
+        """Framing a person who is not there just confuses the model."""
+        from studio.trailer_shot import shot_prompt
+        built = shot_prompt("S.", [], "a lane", "Rain falls.", "quiet", 2.0)
+        assert "waist up" not in built
