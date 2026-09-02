@@ -34,6 +34,17 @@ TARGET_TP = -1.5
 """True-peak ceiling.  EBU R128 asks for -1.0; -1.5 leaves room for the
 intersample peaks the AAC encoder introduces after this measurement."""
 
+LIMITING_DB = 2.0
+"""How much peak limiting the master may do to bring the average up.
+
+Taking the strictly peak-safe gain left Jekyll at -16.2 LUFS, because a cue
+with a braam in it has a high crest factor and the peak constraint binds long
+before the loudness target.  Allowing the limiter to do real gain reduction is
+what mastering IS; the alternative is a correct-but-quiet master.
+
+Bounded, and verified after the fact rather than trusted: the QC gate measures
+the finished file's true peak, so overreach here fails loudly."""
+
 TP_LINEAR = 0.80
 """A final sample-peak safety net at about -1.9 dBFS.
 
@@ -185,18 +196,23 @@ def mix(picture: Path, bed: Path, cues: list[tuple[float, Path]], output: Path,
     # simpler and actually correct.
     base = f"{''.join(mixed)}amix=inputs={len(mixed)}:normalize=0:duration=first"
     bound = ["-t", f"{seconds:.3f}"] if seconds else []
+    # The analysis must run the WHOLE graph, not just its last link.  Passing
+    # `base` alone referenced [bedpad] and [cue0] without the entries that
+    # define them, so ffmpeg errored on undefined labels, the JSON parse
+    # returned {}, and the gain silently defaulted to 0.0 -- leaving every mix
+    # unnormalised while the failure looked like a tuning problem.
     analysis = _measure_loudness(
         ["ffmpeg", "-v", "info", *inputs, "-filter_complex",
-         f"{base},loudnorm=I={TARGET_LUFS}:TP={TARGET_TP}:print_format=json[out]",
+         ";".join(parts + [f"{base},loudnorm=I={TARGET_LUFS}:TP={TARGET_TP}"
+                           f":print_format=json[out]"]),
          *bound, "-map", "[out]", "-f", "null", "-"])
-    gain = 0.0
-    if "input_i" in analysis and "input_tp" in analysis:
-        try:
-            to_target = TARGET_LUFS - float(analysis["input_i"])
-            to_ceiling = TARGET_TP - float(analysis["input_tp"])
-            gain = min(to_target, to_ceiling)
-        except ValueError:
-            gain = 0.0
+    if "input_i" not in analysis or "input_tp" not in analysis:
+        raise RuntimeError(
+            "loudness analysis produced no measurement; refusing to guess a "
+            f"gain. ffmpeg reported: {sorted(analysis) or 'nothing'}")
+    to_target = TARGET_LUFS - float(analysis["input_i"])
+    to_ceiling = TARGET_TP - float(analysis["input_tp"])
+    gain = min(to_target, to_ceiling + LIMITING_DB)
     parts.append(f"{base},volume={gain:.2f}dB,alimiter=limit={TP_LINEAR}:level=disabled[out]")
     _ffmpeg(
         ["ffmpeg", "-y", "-v", "error", *inputs, "-filter_complex", ";".join(parts),
