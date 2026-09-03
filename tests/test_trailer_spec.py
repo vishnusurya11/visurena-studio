@@ -94,7 +94,7 @@ class TestBeatTraceability:
 
 class TestOneAspectRatio:
     def test_dimensions_off_the_canvas_grid_are_rejected(self):
-        with pytest.raises(ValidationError, match="not a multiple of 32"):
+        with pytest.raises(ValidationError, match="would render 1280x768"):
             TrailerPlan(trailer_id="t", book_id="b", title="T", width=1288, height=768)
 
     def test_default_plan_is_native_canvas(self):

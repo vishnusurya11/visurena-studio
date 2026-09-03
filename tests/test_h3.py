@@ -45,9 +45,38 @@ class TestCanvas:
         assert NATIVE_W * NATIVE_H == MAX_PIXELS
 
     def test_off_grid_canvas_is_rejected(self):
-        with pytest.raises(ValueError, match="not a multiple of 32"):
+        # 1280x712 is off the 32 grid, and the node answers with 1376x768.
+        with pytest.raises(ValueError, match="would render 1376x768"):
             check_canvas(1280, 704 + 8)
 
     def test_oversized_canvas_is_rejected_rather_than_silently_scaled(self):
-        with pytest.raises(ValueError, match="exceeds"):
+        # Oversize is area-scaled back to native rather than refused by H3.
+        with pytest.raises(ValueError, match="would render 1344x768"):
             check_canvas(1920, 1088)
+
+
+class TestCanvasIsAFixedPoint:
+    """The guard must model the node's transform, not a property of it."""
+
+    def test_the_native_canvas_is_unchanged_by_the_node(self):
+        from studio.h3 import adapt_canvas
+        assert adapt_canvas(NATIVE_W, NATIVE_H) == (NATIVE_W, NATIVE_H)
+
+    def test_an_undersized_canvas_is_scaled_up_not_honoured(self):
+        """640x384 is a multiple of 32 and under the cap -- and renders 1280x768.
+
+        The short edge is always 768; only the ratio is ours.  The old guard
+        checked "multiple of 32, under the cap" and waved this through.
+        """
+        from studio.h3 import adapt_canvas
+        assert adapt_canvas(640, 384) == (1280, 768)
+
+    def test_the_guard_refuses_a_canvas_the_node_would_rewrite(self):
+        import pytest
+        with pytest.raises(ValueError, match="1280x768"):
+            check_canvas(640, 384)
+
+    def test_a_portrait_canvas_forces_the_short_edge_too(self):
+        from studio.h3 import adapt_canvas
+        assert adapt_canvas(768, 1344) == (768, 1344)
+        assert min(adapt_canvas(432, 768)) == 768

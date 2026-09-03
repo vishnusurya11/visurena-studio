@@ -45,12 +45,41 @@ def seconds_for(frames: int) -> float:
     return frames / FPS
 
 
+def adapt_canvas(width: int, height: int) -> tuple[int, int]:
+    """A port of the node's own `adapt_canvas`, value for value.
+
+    Read the source, not the documentation: this takes only the ASPECT RATIO.
+    The short edge is forced to 768 and the result is area-capped and rounded
+    to 32, so a canvas is never honoured -- it is rewritten, and a request
+    smaller than native is scaled UP rather than refused.
+    """
+    ratio = width / height
+    if ratio >= 1.0:
+        nominal_w, nominal_h = BASE_SHORT_EDGE * ratio, float(BASE_SHORT_EDGE)
+    else:
+        nominal_w, nominal_h = float(BASE_SHORT_EDGE), BASE_SHORT_EDGE / ratio
+    if nominal_w * nominal_h > MAX_PIXELS:
+        scale = math.sqrt(MAX_PIXELS / (nominal_w * nominal_h))
+        nominal_w, nominal_h = nominal_w * scale, nominal_h * scale
+    return (max(CANVAS_MULTIPLE, round(nominal_w / CANVAS_MULTIPLE) * CANVAS_MULTIPLE),
+            max(CANVAS_MULTIPLE, round(nominal_h / CANVAS_MULTIPLE) * CANVAS_MULTIPLE))
+
+
 def check_canvas(width: int, height: int) -> None:
-    """Raise unless the canvas is one H3 will honour rather than rewrite."""
-    if width % CANVAS_MULTIPLE or height % CANVAS_MULTIPLE:
-        raise ValueError(f"{width}x{height} is not a multiple of {CANVAS_MULTIPLE}")
-    if width * height > MAX_PIXELS:
+    """Raise unless the canvas is a FIXED POINT of the node's own transform.
+
+    The previous guard asserted a hand-derived property -- "a multiple of 32,
+    under the pixel cap" -- and the node validates nothing of the sort.  It
+    rewrites.  `check_canvas(640, 384)` passed clean and rendered 1280x768,
+    because 640x384 satisfies both hand-derived conditions and is still not
+    what H3 will draw.
+
+    Asking whether the node would change the canvas cannot be wrong about what
+    the node does, because it asks the node's own function.
+    """
+    adapted = adapt_canvas(width, height)
+    if adapted != (width, height):
         raise ValueError(
-            f"{width}x{height} = {width * height}px exceeds the {MAX_PIXELS}px cap; "
-            "H3 would silently area-scale it back"
+            f"H3 would render {adapted[0]}x{adapted[1]}, not {width}x{height}; "
+            "the short edge is always 768 and only the ratio is yours"
         )
