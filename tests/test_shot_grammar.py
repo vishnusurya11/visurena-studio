@@ -1,6 +1,8 @@
 """Duration bounds size; a move without a destination is drift."""
 from __future__ import annotations
 
+import math
+
 import pytest
 
 from studio.shot_grammar import (ANGLE, BOUND_FLOOR, FRAMING, LADDER, MIN_SECONDS,
@@ -151,3 +153,53 @@ class TestDynamicRangeIsNotPeak:
         from studio.beatmap import dynamic_range
         varied = np.concatenate([np.full(400, -45.0), np.full(400, -10.0)])
         assert dynamic_range(varied) > 30.0
+
+
+class TestQuantisation:
+    """Shots are planned in seconds and rendered in frames; they must agree."""
+
+    def test_a_zero_timestamp_stays_zero(self):
+        from studio.trailer_edit import quantise
+        assert quantise(0.0) == 0.0
+
+    def test_every_boundary_lands_on_a_frame(self):
+        from studio.trailer_edit import cut_points
+        grid = [1.0, 2.5, 4.0, 6.2, 9.9, 14.0, 20.5, 28.0, 35.0, 44.0]
+        for point in cut_points(48.0, grid):
+            assert abs(point * 24 - round(point * 24)) < 1e-9
+
+    def test_the_planned_length_is_what_ffmpeg_will_render(self):
+        """-t truncates to whole frames; 33 truncations drifted 1.28s."""
+        from studio.trailer_edit import cut_points, lengths_of
+        grid = [1.0, 2.5, 4.0, 6.2, 9.9, 14.0, 20.5, 28.0, 35.0, 44.0]
+        for length in lengths_of(cut_points(48.0, grid)):
+            frames = length * 24
+            assert abs(frames - round(frames)) < 1e-6, length
+
+
+def rendered_frames(arg: str, fps: int = 24) -> int:
+    """What ffmpeg actually renders for `-t arg`.
+
+    MEASURED, not assumed: `-t` keeps frames whose timestamp is below t, so
+    the count is ceil(t * fps).  Verified against ffmpeg at 2.208 -> 53,
+    2.2083 -> 53, 2.2292 -> 54, 1.3750 -> 33, 1.3958 -> 34.
+    """
+    return math.ceil(float(arg) * fps)
+
+
+class TestFrameArgument:
+    """`-t` rounds the picture UP to a whole frame.  Ask for the exact one."""
+
+    def test_every_frame_count_survives_the_round_trip(self):
+        from studio.trailer_assemble import frames_arg
+        for n in range(1, 400):
+            assert rendered_frames(frames_arg(n / 24, 24)) == n
+
+    def test_a_fractional_length_renders_the_frames_it_rounds_to(self):
+        """2.21s is 53.04 frames.  The plan must know it will get 53."""
+        from studio.trailer_assemble import frames_arg
+        assert rendered_frames(frames_arg(2.21, 24)) == 53
+
+    def test_zero_stays_zero(self):
+        from studio.trailer_assemble import frames_arg
+        assert float(frames_arg(0.0, 24)) == 0.0

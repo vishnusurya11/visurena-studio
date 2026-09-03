@@ -11,6 +11,8 @@ reads as a stutter instead of a motif.
 """
 from __future__ import annotations
 
+import math
+
 import json
 import subprocess
 from pathlib import Path
@@ -93,6 +95,28 @@ def clip_seconds(video: Path) -> float:
     return 0.0
 
 
+def frames_arg(seconds: float, fps: int = 24) -> str:
+    """The `-t` value that renders exactly the frames this duration names.
+
+    MEASURED against ffmpeg, not assumed: `-t` keeps every frame whose
+    timestamp falls BELOW t, so the rendered count is `ceil(t * fps)` -- `-t
+    2.208` gives 53 frames and `-t 2.2292` gives 54.  A duration therefore
+    rounds the picture UP, never down, and an unquantised plan asks for a
+    fractional frame that the file then rounds to something the plan does not
+    know about.  Thirty-three such roundings drifted the shipped cut by 1.28s.
+
+    N frames means landing in ((N-1)/fps, N/fps] -- an interval open at the
+    bottom and CLOSED at the top, so the decimal has to be truncated rather
+    than rounded.  One frame at 24 fps is 0.0417s and `.4f` rounds it up to
+    0.0417, one ten-thousandth past the top of its own interval, which renders
+    two frames.  Truncating spends 1e-4 of the 4.17e-2 available below.
+    """
+    frames = round(seconds * fps)
+    if frames <= 0:
+        return "0"
+    return f"{math.floor(frames / fps * 10_000) / 10_000:.4f}"
+
+
 def extract(video: Path, start: float, seconds: float, output: Path,
             width: int, height: int, fps: int, grade: str = "") -> Path:
     """Cut one shot out of a take, conformed to the trailer's single format.
@@ -104,7 +128,7 @@ def extract(video: Path, start: float, seconds: float, output: Path,
     output.parent.mkdir(parents=True, exist_ok=True)
     _ffmpeg(
         ["ffmpeg", "-y", "-v", "error", "-ss", f"{start:.3f}", "-i", str(video),
-         "-t", f"{seconds:.3f}", "-an",
+         "-t", frames_arg(seconds, fps), "-an",
          "-vf", (f"scale={width}:{height}:force_original_aspect_ratio=increase,"
                  f"crop={width}:{height},fps={fps},{grade + ',' if grade else ''}"
                  f"format=yuv420p"),
@@ -131,9 +155,9 @@ def title_card(title: str, output: Path, seconds: float, width: int, height: int
         draw += f":fontfile='{font}'"
     _ffmpeg(
         ["ffmpeg", "-y", "-v", "error", "-f", "lavfi",
-         "-i", f"color=c=black:s={width}x{height}:r={fps}:d={seconds:.3f}",
+         "-i", f"color=c=black:s={width}x{height}:r={fps}:d={seconds + 0.5:.3f}",
          "-vf", f"{draw},format=yuv420p", "-c:v", "libx264", "-preset", "fast",
-         "-crf", "16", "-t", f"{seconds:.3f}", str(output)],
+         "-crf", "16", "-t", frames_arg(seconds), str(output)],
         "rendering the title card")
     return output
 
@@ -195,7 +219,7 @@ def mix(picture: Path, bed: Path, cues: list[tuple[float, Path]], output: Path,
     # One deterministic gain, bounded by whichever limit binds first, is both
     # simpler and actually correct.
     base = f"{''.join(mixed)}amix=inputs={len(mixed)}:normalize=0:duration=first"
-    bound = ["-t", f"{seconds:.3f}"] if seconds else []
+    bound = ["-t", frames_arg(seconds)] if seconds else []
     # The analysis must run the WHOLE graph, not just its last link.  Passing
     # `base` alone referenced [bedpad] and [cue0] without the entries that
     # define them, so ffmpeg errored on undefined labels, the JSON parse
@@ -351,9 +375,9 @@ def title_card_ass(title: str, output: Path, seconds: float, width: int,
     escaped = str(script).replace("\\", "/").replace(":", r"\:")
     _ffmpeg(
         ["ffmpeg", "-y", "-v", "error", "-f", "lavfi",
-         "-i", f"color=c=black:s={width}x{height}:r={fps}:d={seconds:.3f}",
+         "-i", f"color=c=black:s={width}x{height}:r={fps}:d={seconds + 0.5:.3f}",
          "-vf", f"ass='{escaped}',format=yuv420p", "-c:v", "libx264",
-         "-preset", "fast", "-crf", "16", "-t", f"{seconds:.3f}", str(output)],
+         "-preset", "fast", "-crf", "16", "-t", frames_arg(seconds), str(output)],
         "rendering the tracked title card")
     return output
 

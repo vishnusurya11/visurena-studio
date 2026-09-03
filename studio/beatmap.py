@@ -123,16 +123,25 @@ def stopdowns(times: np.ndarray, db: np.ndarray, hold: float = 0.4,
 
 
 def title_moment(times: np.ndarray, db: np.ndarray) -> tuple[float, float] | None:
-    """(stopdown, impact) for the title card: the late hit and the silence
-    that sets it up.
+    """(stopdown, impact) for the title card: the late hit and its silence.
 
-    The corpus puts the loudness peak at 80-90% through and the quietest
-    second-half moment at ~92%.  So the title is looked for in the last
-    third, and it is only a title moment if a stopdown precedes it -- an
-    impact with no silence in front of it has nothing to land against.
+    The corpus puts the loudness peak at 80-90% and the quietest second-half
+    moment at ~92%, so the title is looked for in the last third -- and only
+    where a stopdown precedes it, because an impact with no silence in front of
+    it has nothing to land against.
+
+    The hit must also BE one.  `structural_impacts()` ranks by how far the
+    music jumps, which favours a rise out of the intro floor: one shipped cue's
+    title landed on its fourth-loudest event, 2.6 dB BELOW its own P95, because
+    a big rise from near-silence outranked a real braam.  Requiring the moment
+    to reach within 3 dB of P95 asks whether it is loud, not merely sudden.
     """
+    ceiling = float(np.percentile(db, 95))
     for impact in reversed(structural_impacts(times, db, count=6)):
         if not 0.6 <= impact / float(times[-1]) <= 0.95:
+            continue
+        window = int(impact / WINDOW)
+        if float(db[window:window + 20].max()) < ceiling - 3.0:
             continue
         before = [s for s in stopdowns(times, db) if impact - 6.0 <= s < impact]
         if before:

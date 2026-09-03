@@ -42,16 +42,24 @@ def snap(when: float, grid: list[float], tolerance: float = SNAP_TOLERANCE) -> f
 def quantise(seconds: float, fps: int = 24) -> float:
     """Round a duration to a whole number of frames.
 
-    `extract` passes `-t` to ffmpeg, which truncates to whole frames: a shot
-    planned at 1.35s renders as 31 frames = 1.292s.  Thirty-three shots of that
-    error accumulated to **1.28 seconds** of drift between the planned picture
-    and the delivered one, so the title card cut in 1.28s early and the cue's
-    braam landed 5.13s into it instead of 3.85s -- the exact defect this stage
-    exists to prevent, for the third time.
+    `extract` passes `-t` to ffmpeg, which cannot render a fraction of a frame.
+    MEASURED, not assumed: it keeps every frame whose timestamp is below t, so
+    the rendered count is `ceil(t * fps)` and a fractional duration rounds the
+    picture UP -- 1.35s asks for 32.4 frames and gets 33, which is 1.375s.
+    (An earlier note here claimed the opposite, that -t truncates downward.  It
+    does not; the drift was real but its sign was guessed, and the fix that
+    followed from the guess added a frame instead of saving one.)
 
-    Planning in frames means the plan and the file agree by construction.
+    Every rounding is under a frame, and thirty-three of them accumulated to
+    **1.28 seconds** between the planned picture and the delivered one, so the
+    title card cut in early and the cue's braam landed 5.13s into it instead of
+    3.85s.  Planning in frames means the plan and the file agree by
+    construction, whichever way the renderer would have rounded.
     """
-    return max(1, round(seconds * fps)) / fps
+    # No minimum here.  This quantises a TIMESTAMP, and clamping it to one
+    # frame made the cut start at 0.042s instead of 0.0.  The one-frame floor
+    # belongs to durations, and MIN_SHOT already enforces it.
+    return max(0, round(seconds * fps)) / fps
 
 
 def cut_points(duration: float, grid: list[float], start: float = 0.0,
@@ -86,5 +94,15 @@ def cut_points(duration: float, grid: list[float], start: float = 0.0,
     return points
 
 
-def lengths_of(points: list[float]) -> list[float]:
-    return [round(b - a, 3) for a, b in zip(points, points[1:])]
+def lengths_of(points: list[float], fps: int = 24) -> list[float]:
+    """Shot lengths, in whole frames.
+
+    `round(b - a, 3)` looked harmless and was not.  The difference of two
+    frame-aligned points is itself frame-aligned, and three decimals cannot
+    hold it: 53 frames is 2.20833...s, which rounds to 2.208.  That particular
+    value still renders 53 (see `frames_arg` for the measured rule), but the
+    plan is now carrying a number that is not a frame count, and every consumer
+    of it has to guess which way the renderer will go.  Returning frames means
+    nobody guesses.
+    """
+    return [round((b - a) * fps) / fps for a, b in zip(points, points[1:])]

@@ -98,10 +98,11 @@ def build(book_glob: str, trailer_id: str = "main") -> Path:
     # it to a fixed hold ended the trailer 0.85s BEFORE the impact -- the same
     # defect as the previous trailer's 5.29s miss, just smaller.
     # MEASURE the picture; do not trust the plan's arithmetic.  ffmpeg's -t
-    # truncates each shot to whole frames, and thirty-three of those truncations
-    # accumulated to 1.28s of drift -- so the card cut in 1.28s early and the
-    # cue's braam landed 5.13s into it instead of 3.85s.  The plan said one
-    # thing and the file did another, and nothing compared them.
+    # cannot render a fraction of a frame -- it rounds each shot UP to the next
+    # whole one -- and thirty-three of those roundings accumulated to 1.28s of
+    # drift, so the card cut in early and the cue's braam landed 5.13s into it
+    # instead of 3.85s.  The plan said one thing and the file did another, and
+    # nothing compared them.
     shots_only = concat(segments, work / "shots.mp4")
     title_at = clip_seconds(shots_only)
     planned = sum(lengths)
