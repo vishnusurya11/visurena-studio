@@ -32,16 +32,18 @@ def _ffmpeg(command: list[str], what: str) -> None:
 TARGET_LUFS = -14.0
 """Integrated loudness for online delivery."""
 
-TARGET_TP = -1.5
-"""True-peak ceiling.  EBU R128 asks for -1.0; -1.5 leaves room for the
+TARGET_TP = -2.0
+"""True-peak ceiling.  EBU R128 asks for -1.0; -2.0 leaves room for the
 intersample peaks the AAC encoder introduces after this measurement."""
 
-LIMITING_DB = 2.0
+LIMITING_DB = 5.5
 """How much peak limiting the master may do to bring the average up.
 
 Taking the strictly peak-safe gain left Jekyll at -16.2 LUFS, because a cue
 with a braam in it has a high crest factor and the peak constraint binds long
-before the loudness target.  Allowing the limiter to do real gain reduction is
+before the loudness target.  Raised from 2.0 to 3.5 when the tone-matched cue
+arrived at LRA 14.2 against the old 7.0: a wider range is the improvement, and
+it costs exactly this much more limiting to reach the same average.  Allowing the limiter to do real gain reduction is
 what mastering IS; the alternative is a correct-but-quiet master.
 
 Bounded, and verified after the fact rather than trusted: the QC gate measures
