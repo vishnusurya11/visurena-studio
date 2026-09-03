@@ -141,3 +141,33 @@ def caption(tone: Tone) -> str:
         "that the last quarter carries the most attacks of the whole piece, "
         "then stops.",
     ])
+
+
+def caption_stamp(text: str) -> str:
+    """A short hash of the caption that produced a cue.
+
+    Without it `build_music` skipped any seed whose file already existed, so
+    rewriting the caption and re-running kept every cue the OLD caption made
+    and printed a success line -- the same shape as the clip cache keyed on
+    beat id rather than on the recipe.
+    """
+    import hashlib
+
+    return hashlib.sha256(text.encode("utf-8")).hexdigest()[:16]
+
+
+def _stamp_path(cue: Path) -> Path:
+    return cue.with_suffix(".caption.txt")
+
+
+def stamp_cue(cue: Path, stamp: str) -> None:
+    """Record which caption produced this audio, beside the audio."""
+    _stamp_path(cue).write_text(stamp, encoding="utf-8")
+
+
+def cue_is_current(cue: Path, stamp: str) -> bool:
+    """True only when this file was rendered from THIS caption."""
+    path = _stamp_path(cue)
+    if not cue.exists() or not path.exists():
+        return False
+    return path.read_text(encoding="utf-8").strip() == stamp

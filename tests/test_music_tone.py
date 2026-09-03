@@ -105,3 +105,33 @@ class TestLoadTone:
                      "20260827135504_the-strange-case-of-dr-jekyll-and-mr-hyde"):
             tone = load_tone(Path("library") / book)
             assert tone.genre and tone.lead_instrument
+
+
+class TestCueStaleness:
+    """A cue rendered from a different caption is not this book's cue.
+
+    `build_music` skipped any seed whose .flac already existed, so rewriting
+    the caption and re-running would have kept every file made by the old one
+    and reported success -- the same defect as the clip cache keyed on beat id.
+    """
+
+    def test_the_same_caption_gives_the_same_stamp(self):
+        from studio.music_tone import caption_stamp
+        assert caption_stamp(caption(SCARLET)) == caption_stamp(caption(SCARLET))
+
+    def test_a_rewritten_caption_gives_a_different_stamp(self):
+        from studio.music_tone import caption_stamp
+        other = Tone(**{**SCARLET.__dict__, "lead_instrument": "a cor anglais"})
+        assert caption_stamp(caption(SCARLET)) != caption_stamp(caption(other))
+
+    def test_a_cue_with_no_stamp_is_not_current(self, tmp_path):
+        from studio.music_tone import cue_is_current
+        assert not cue_is_current(tmp_path / "cue-1.flac", "abc")
+
+    def test_a_cue_whose_stamp_matches_is_current(self, tmp_path):
+        from studio.music_tone import cue_is_current, stamp_cue
+        cue = tmp_path / "cue-1.flac"
+        cue.write_bytes(b"x")
+        stamp_cue(cue, "abc")
+        assert cue_is_current(cue, "abc")
+        assert not cue_is_current(cue, "def")

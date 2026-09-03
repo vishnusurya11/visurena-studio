@@ -20,7 +20,9 @@ from dataclasses import asdict
 from studio.beatmap import (envelope, late_density, onsets, stopdowns,
                             structural_impacts, title_moment, trailer_fitness)
 from studio.comfy import run
-from studio.music_tone import caption, load_tone, lyrics_plan, sections_for
+from studio.music_tone import (caption, caption_stamp, cue_is_current,
+                               load_tone, lyrics_plan, sections_for,
+                               stamp_cue)
 from studio.trailer_music import PINNED_DURATION
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -66,11 +68,12 @@ def main(book_glob: str, seeds: list[int], seconds: float = 100.0) -> None:
     sections = sections_for(round(seconds / 11.1))
     print(f"  tone: {tone.genre}")
     print(f"  lead: {tone.lead_instrument}")
+    stamp = caption_stamp(caption(tone))
     candidates: list[dict] = []
 
     for seed in seeds:
         dest = dest_dir / f"cue-{seed}.flac"
-        if not dest.exists():
+        if not cue_is_current(dest, stamp):
             print(f"  rendering cue seed={seed} ...")
             written = run("audio_minimax_music_3", {
                 "caption": caption(tone), "lyrics": lyrics_plan(sections, seconds),
@@ -78,6 +81,7 @@ def main(book_glob: str, seeds: list[int], seconds: float = 100.0) -> None:
                 "cfg_scale": 1.7, "top_k": 50, "format": "flac",
                 "filename_prefix": f"CUE-{book.name[:8]}-{seed}"}, timeout=1800)
             dest.write_bytes(written[0].read_bytes())
+            stamp_cue(dest, stamp)
         times, db = envelope(dest)
         moment = title_moment(times, db)
         entry = {"seed": seed, "rel_path": f"trailer/music/{dest.name}",
