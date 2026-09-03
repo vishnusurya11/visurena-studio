@@ -135,3 +135,36 @@ class TestCueStaleness:
         stamp_cue(cue, "abc")
         assert cue_is_current(cue, "abc")
         assert not cue_is_current(cue, "def")
+
+
+class TestSectionNotesAreSelfSufficient:
+    """Padding must not contradict the section it pads.
+
+    `_pad` appended one generic tail to every note, so the Outro's "a hard full
+    stop, one beat of silence" was followed by "nothing hurried, the same idea
+    turned once more before it moves on".  Four cues came back with one or two
+    stopdowns where the old caption produced nine, and every one of them lost
+    its title moment -- the hit the whole title card is cut to.
+    """
+
+    def test_no_section_note_is_padded_with_boilerplate(self):
+        notes = [note for _, note in sections_for(9)]
+        assert len({note[-40:] for note in notes}) == len(notes)
+
+    def test_the_closing_section_is_never_told_to_linger(self):
+        closing = dict(sections_for(9))["Outro"]
+        for contradiction in ("nothing hurried", "turned once more", "holding its shape"):
+            assert contradiction not in closing
+
+    def test_the_closing_section_asks_for_the_stop_and_the_impact(self):
+        """The title card is cut to this.  No stopdown, no title moment, and
+        build_plan refuses the whole trailer."""
+        closing = dict(sections_for(9))["Outro"]
+        assert "silence" in closing and "impact" in closing
+
+    def test_every_note_carries_the_fill_the_model_expects(self):
+        plan = lyrics_plan(sections_for(9), intended_seconds=100.0)
+        for block in plan.split("\n\n"):
+            if block.startswith("["):
+                continue
+            assert len(block.split()) >= 12, block

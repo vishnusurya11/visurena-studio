@@ -30,15 +30,24 @@ on what was documented as the one deterministic length control.
 """
 
 ARC = [
-    ("Intro", "a single sustained low note beneath room tone, almost nothing"),
-    ("Verse", "the lead states its figure plainly, unhurried, alone"),
-    ("Pre-Chorus", "a low pulse enters underneath and will not let the figure go"),
-    ("Chorus", "the first full statement, the whole ensemble committed"),
-    ("Instrumental", "the figure inverted, answered by a second instrument"),
-    ("Bridge", "everything falls away to one instrument in a bare room"),
-    ("Solo", "the lead alone, slower, exposed, the piece at its most naked"),
-    ("Post-Chorus", "everything returns at once, accelerating, harder than before"),
-    ("Outro", "a hard full stop, one beat of silence, one low impact, long decay"),
+    ("Intro",
+     "one sustained low note under audible room tone, nothing else present"),
+    ("Verse",
+     "the lead states its figure plainly and alone, unhurried, no accompaniment"),
+    ("Pre-Chorus",
+     "a low pulse enters beneath it and will not let the figure go"),
+    ("Chorus",
+     "the first full statement, the ensemble committed, weight arriving underneath"),
+    ("Instrumental",
+     "the figure inverted, answered by a second instrument over shifting ground"),
+    ("Bridge",
+     "everything falls away to one instrument in a bare room, reverb gone"),
+    ("Solo",
+     "the lead alone and slower, exposed, every mechanical noise audible"),
+    ("Post-Chorus",
+     "everything returns at once, accelerating, the attacks crowding closer"),
+    ("Outro",
+     "a hard full stop, one beat of total silence, one low impact, long decay"),
 ]
 """Nine executable sections carrying quiet -> build -> hit -> aftermath."""
 
@@ -88,24 +97,14 @@ def sections_for(count: int) -> list[tuple[str, str]]:
 
 def lyrics_plan(sections: list[tuple[str, str]],
                 intended_seconds: float = 100.0) -> str:
-    """The tag-and-parenthetical sheet, padded to the fill the model expects.
+    """The tag-and-parenthetical sheet.
 
     Parentheticals ARE submitted as lyric text, so they stay descriptive rather
     than sung -- but they must be long enough.  A sheet at a third of the
     expected fill leaves the model with nothing to do and it stops early.
     """
-    target = SYLLABLES_PER_SECOND * intended_seconds / max(len(sections), 1)
-    return "\n\n".join(f"[{tag}]\n({_pad(note, target)})" for tag, note in sections)
-
-
-def _pad(note: str, target_syllables: float) -> str:
-    """Lengthen a section note toward the fill the model expects."""
-    tail = (" holding its shape, the room audible around it, nothing hurried, "
-            "the same idea turned once more before it moves on")
-    text = note
-    while _syllables(text) < target_syllables:
-        text += tail
-    return text
+    del intended_seconds  # ARC notes are authored at length
+    return "\n\n".join(f"[{tag}]\n({note})" for tag, note in sections)
 
 
 def _syllables(text: str) -> int:
