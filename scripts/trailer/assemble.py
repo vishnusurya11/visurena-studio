@@ -30,7 +30,18 @@ def build(book_glob: str, trailer_id: str = "main") -> Path:
     # a verbatim grade string in every prompt still gave clips spanning
     # 42.9-96.6 luma -- so it is matched here, against a real clip rather than
     # an invented target, with a floor so a uniformly dark set gets lifted.
-    stats = {clip.stem: luma_stats(clip) for clip in sorted((out / "clips").glob("*.mp4"))}
+    # Only clips THIS plan asks for.  The directory outlives the plan: a
+    # rebuild that produces fewer beats leaves the extra renders behind, and
+    # they were being read into the grade calibration and offered as
+    # substitutes -- last plan's pictures colouring and filling this one's cut.
+    planned = {beat["beat_id"] for beat in plan["beats"]}
+    orphans = sorted(c.stem for c in (out / "clips").glob("*.mp4")
+                     if c.stem not in planned)
+    if orphans:
+        print(f"  ignoring {len(orphans)} clip(s) not in this plan: {', '.join(orphans)}")
+    stats = {clip.stem: luma_stats(clip)
+             for clip in sorted((out / "clips").glob("*.mp4"))
+             if clip.stem in planned}
     if not stats:
         raise SystemExit(f"REFUSED: no clips rendered under {out / 'clips'}")
     means = sorted(mean for mean, _ in stats.values())
@@ -53,7 +64,8 @@ def build(book_glob: str, trailer_id: str = "main") -> Path:
     # abort the whole assembly, so one failure at 4am meant no trailer at all
     # instead of a slightly less varied one.  Below a floor it still refuses,
     # because a trailer cut from two takes is not a trailer.
-    have = sorted(clip.stem for clip in (out / "clips").glob("*.mp4"))
+    have = sorted(clip.stem for clip in (out / "clips").glob("*.mp4")
+                  if clip.stem in planned)
     beat_ids = [beat["beat_id"] for beat in plan["beats"]]
     if len(have) < max(4, len(beat_ids) * 0.6):
         raise SystemExit(f"REFUSED: only {len(have)} of {len(beat_ids)} beats "

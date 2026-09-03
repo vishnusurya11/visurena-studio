@@ -77,10 +77,35 @@ def segment_start(usage: int, of_uses: int, need: float, available: float,
     """
     room = max(available - head - need, 0.0)
     if room <= 0:
-        return min(head, max(available - need, 0.0))
+        return _on_frame(min(head, max(available - need, 0.0)), available, need)
     if of_uses <= 1:
-        return round(head + room / 2, 3)
-    return round(head + min(usage, of_uses - 1) / (of_uses - 1) * room, 3)
+        return _on_frame(head + room / 2, available, need)
+    share = min(usage, of_uses - 1) / (of_uses - 1)
+    return _on_frame(head + share * room, available, need)
+
+
+def _on_frame(start: float, available: float, need: float, fps: int = 24) -> float:
+    """Snap a seek onto the frame grid, DOWNWARD, and keep it inside the take.
+
+    `round(start, 3)` looked like tidying and cost a frame on every single
+    shot -- 23 of 24 in the first assembly, 0.958s of drift, enough for the
+    gate to refuse the build.  `-ss 7.917` lands between frames: ffmpeg begins
+    at the next whole frame, at 7.9583, but `-t` still measures from 7.917, so
+    the 0.041s of fraction is subtracted from the end.  One frame, every time.
+
+    Snapping UP, because the two bounds round in opposite directions.  The head
+    is a FLOOR -- HEAD_TRIM exists to skip the reference leak, and 2.6s floored
+    to a frame is 2.5833s, back inside the leak it was written to avoid.  The
+    tail is a CEILING, so when snapping up would walk off the end of the take we
+    fall back to the last whole frame that still fits.
+    """
+    import math
+
+    latest = max(available - need, 0.0)
+    snapped = math.ceil(min(start, latest) * fps) / fps
+    if snapped > latest:
+        snapped = math.floor(latest * fps) / fps
+    return max(0.0, snapped)
 
 
 def clip_seconds(video: Path) -> float:
@@ -127,7 +152,7 @@ def extract(video: Path, start: float, seconds: float, output: Path,
     """
     output.parent.mkdir(parents=True, exist_ok=True)
     _ffmpeg(
-        ["ffmpeg", "-y", "-v", "error", "-ss", f"{start:.3f}", "-i", str(video),
+        ["ffmpeg", "-y", "-v", "error", "-ss", frames_arg(start, fps), "-i", str(video),
          "-t", frames_arg(seconds, fps), "-an",
          "-vf", (f"scale={width}:{height}:force_original_aspect_ratio=increase,"
                  f"crop={width}:{height},fps={fps},{grade + ',' if grade else ''}"

@@ -27,25 +27,35 @@ def is_cyclic(order: list[str]) -> bool:
 
 
 def allocate(setups: list[str], count: int, hero: int = 3) -> dict[str, int]:
-    """How many shots each setup gets.  Deliberately UNEVEN.
+    """How many shots each setup gets.  Deliberately UNEVEN, and it MEETS count.
 
     Uniform reuse is its own tell -- both shipped plans gave every setup exactly
     three shots, and `is_uniform` refuses that for shot LENGTHS while nothing
     checked it for setup USE.  Real trailers lean on a few images and spend the
     rest once, which reads as emphasis; equal shares read as rationing.
+
+    The caps used to be fixed at 4 and 2, which made nine setups hold 24 shots
+    and no more.  Asked for 31 this returned 24 without complaint, the caller
+    zipped the two lists, and seven cuts -- 18.6 seconds -- vanished into a
+    static title card.  The caps now scale to the demand, so the SHAPE of the
+    unevenness is preserved while the total is whatever was asked for.
     """
+    if not setups:
+        return {}
+    tall, short = 4, 2
+    while tall * min(hero, len(setups)) + short * max(len(setups) - hero, 0) < count:
+        tall += 2
+        short += 1
     uses = {setup: 1 for setup in setups}
     remaining = count - len(setups)
     index = 0
     while remaining > 0:
         setup = setups[index % len(setups)]
-        cap = 4 if index % len(setups) < hero else 2
+        cap = tall if index % len(setups) < hero else short
         if uses[setup] < cap:
             uses[setup] += 1
             remaining -= 1
         index += 1
-        if index > count * 4:
-            break
     return uses
 
 
@@ -58,19 +68,25 @@ def interleave(setups: list[str], count: int, hero: int = 3) -> list[str]:
     """
     if not setups:
         return []
+    if len(setups) == 1 and count > 1:
+        raise ValueError("cannot avoid a repeat with one setup and many shots")
     uses = allocate(setups, count, hero)
     pool = {setup: uses[setup] for setup in setups}
     order: list[str] = []
-    passes = 0
-    while len(order) < count and any(pool.values()):
-        rotated = setups[passes % len(setups):] + setups[:passes % len(setups)]
-        if passes % 2:
-            rotated = list(reversed(rotated))
-        for setup in rotated:
-            if pool[setup] > 0 and len(order) < count:
-                if order and order[-1] == setup:
-                    continue
-                order.append(setup)
-                pool[setup] -= 1
-        passes += 1
-    return order[:count]
+    # Always spend the setup with the most left, never the one just used.  The
+    # previous version walked the setup list in rotated passes and SKIPPED any
+    # setup that would repeat -- so a setup with uses left could be skipped on
+    # every pass and never placed, which is how a request for 31 came back with
+    # 24.  Taking the fullest remaining setup cannot strand one: the setup with
+    # the most uses is only ever blocked by itself, and then only for one step.
+    while len(order) < count:
+        options = [s for s in setups
+                   if pool[s] > 0 and (not order or order[-1] != s)]
+        if not options:
+            raise ValueError(
+                f"{count} shots cannot be ordered from {len(setups)} setups "
+                f"without a repeat; one setup would have to follow itself")
+        pick = max(options, key=lambda s: (pool[s], -setups.index(s)))
+        order.append(pick)
+        pool[pick] -= 1
+    return order

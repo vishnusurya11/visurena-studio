@@ -203,3 +203,44 @@ class TestFrameArgument:
     def test_zero_stays_zero(self):
         from studio.trailer_assemble import frames_arg
         assert float(frames_arg(0.0, 24)) == 0.0
+
+
+class TestSegmentStart:
+    """A seek that lands mid-frame costs a frame, every time."""
+
+    def test_the_start_is_always_on_a_frame(self):
+        from studio.trailer_assemble import segment_start
+        for usage in range(4):
+            for need in (0.5, 1.7083, 2.2083, 3.5417):
+                start = segment_start(usage, 4, need, 10.125)
+                assert abs(start * 24 - round(start * 24)) < 1e-6, (usage, need, start)
+
+    def test_the_shot_never_runs_past_the_end_of_the_take(self):
+        """The last use sits flush with the end; rounding it UP truncated it."""
+        from studio.trailer_assemble import segment_start
+        for need in (0.5, 2.2083, 3.5417):
+            assert segment_start(3, 4, need, 10.125) + need <= 10.125 + 1e-9
+
+    def test_a_take_with_no_room_still_returns_a_usable_start(self):
+        from studio.trailer_assemble import segment_start
+        assert segment_start(0, 1, 10.0, 10.125) >= 0.0
+
+    def test_uses_are_still_spread_across_the_take(self):
+        from studio.trailer_assemble import segment_start
+        starts = [segment_start(u, 3, 2.0, 10.125) for u in range(3)]
+        assert starts[0] < starts[1] < starts[2]
+
+
+class TestSeekArgument:
+    """`-ss` decides which frame is FIRST, so it rounds like `-t` does."""
+
+    def test_a_seek_never_lands_past_the_frame_it_names(self):
+        from studio.trailer_assemble import frames_arg
+        for n in (0, 1, 62, 187, 243):
+            assert float(frames_arg(n / 24, 24)) <= n / 24 + 1e-9
+
+    def test_the_frame_that_cost_three_shots_a_frame_each(self):
+        """187/24 is 7.791666s.  Written '.3f' it becomes 7.792 -- past the
+        frame -- so ffmpeg began at 188 while -t still counted from 7.792."""
+        from studio.trailer_assemble import frames_arg
+        assert float(frames_arg(187 / 24, 24)) <= 187 / 24
