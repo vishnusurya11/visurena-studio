@@ -17,7 +17,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 
 from studio.comfy import run
 from studio.trailer_plan import (leading_characters, pick_scenes,
-                                 unique_locations)
+                                 unique_locations, all_locations)
 from studio.trailer_refs import (character_prompt, described_as, load_json,
                                  location_prompt, physical_of, ref_id_for)
 
@@ -46,7 +46,7 @@ def refs_needed(book: Path, count: int) -> tuple[list[str], list[str]]:
     ranked = leading_characters(scenes)
     have = {p.stem for p in (book / "analysis/characters").glob("*.json")}
     leads = [c for c in ranked if c in have][:7]
-    return leads, unique_locations(pick_scenes(scenes, count, None))[:8]
+    return leads, all_locations(scenes)
 
 
 def describe_location(book: Path, loc_id: str, scenes: list[dict]) -> str:

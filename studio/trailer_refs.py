@@ -285,3 +285,22 @@ def distinguishing_marks(entity_id: str) -> str:
     seed = sum(ord(ch) * (index + 1) for index, ch in enumerate(entity_id))
     return (f"{BUILDS[seed % len(BUILDS)]}, {HAIR[(seed // 7) % len(HAIR)]}, "
             f"{FACE[(seed // 13) % len(FACE)]}")
+
+
+def all_locations(scenes: list[dict]) -> list[str]:
+    """Every place the book goes, in order of first appearance.
+
+     drew places from a SAMPLE of
+    twelve scenes and then capped the result at eight.  A Study in Scarlet has
+    thirteen and got six, which deleted 141 of its 411 authored setups --
+    every one in Utah -- before any ranking ran.  A place with no plate cannot
+    be bound, so no score can rescue it.
+
+    A book has a finite number of places.  Plate all of them.
+    """
+    seen: list[str] = []
+    for scene in scenes:
+        where = (scene.get("slug") or {}).get("location_id")
+        if where and where not in seen:
+            seen.append(where)
+    return seen
