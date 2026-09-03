@@ -368,3 +368,23 @@ def with_iconicity(elements: list[dict], iconicity: dict[int, float],
     for element in elements:
         element["iconicity"] = iconicity.get(element["scene"], 0.0) * weight
     return elements
+
+
+def principal_of(scene_cast: list[str], refs: set[str], lead: str | None,
+                 figure: str | None) -> str | None:
+    """The one character this shot is about, chosen from WHO IS THERE.
+
+    The rule it replaces read `[lead, figure] + scene_cast` and took the first
+    with a sheet, so the lead won every beat by construction and the scene's own
+    cast was decoration.  A Study in Scarlet shipped Holmes in all nine beats,
+    Utah included -- a book he leaves for four chapters.
+
+    Preference among people actually present is fine and is not the same thing:
+    the lead carries a scene when he is IN it, the opposition carries the scenes
+    he is absent from, and that alternation is the structure the trailer is
+    supposed to be showing.
+    """
+    present = [c for c in scene_cast if f"char-{c}" in refs]
+    if not present:
+        return None
+    return min(present, key=lambda c: (c != lead, c != figure, c))

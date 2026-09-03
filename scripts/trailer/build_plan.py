@@ -14,18 +14,20 @@ from __future__ import annotations
 
 import json
 import sys
+from collections import Counter
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 
-from studio.shot_grammar import legible_sizes
+from studio.shot_grammar import FRAMING, camera_for, choose_sizes
+from studio.trailer_dialogue import assign_lines, dialogue_candidates, pick_lines
 from studio.trailer_edit import cut_points, lengths_of
 from studio.trailer_order import allocate, interleave, is_cyclic
 from studio.trailer_plan import arc_for
 from studio.trailer_spec import MusicBed, RefSheet, ShotSpec, TrailerBeat, TrailerPlan
 from studio.trailer_story import (IMAGE_GATE, action_elements, corpus_frequency,
                                   deduplicate, distinctiveness, figure_of,
-                                  lead_of, load_iconicity, people_in,
+                                  lead_of, load_iconicity, people_in, principal_of,
                                   resolution_scenes, turn_of)
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -73,18 +75,22 @@ def pick_setups(scenes: list[dict], refs: dict, count: int) -> list[dict]:
 
 def beat_of(element: dict, index: int, position: float, refs: dict,
             lead: str | None, figure: str | None) -> TrailerBeat:
-    """One beat from one action line, bound to whoever it can carry."""
-    order = [c for c in (lead, figure) if c] + sorted(element["cast"])
-    cast = [c for c in order if f"char-{c}" in refs][:1]
+    """One beat from one action line, cast from WHO IS IN THAT SCENE.
+
+    The camera sentence is derived from this beat's own action line, so a beat
+    that names nothing photographable gets a locked-off frame rather than the
+    twenty-third copy of the same slow push-in.
+    """
+    principal = principal_of(element["cast"], set(refs), lead, figure)
     return TrailerBeat(
         beat_id=f"B{index:02d}", scene_number=element["scene"], arc=arc_for(position),
-        location_id=element["location_id"], cast=cast,
+        location_id=element["location_id"], cast=[principal] if principal else [],
         image_prompt=element["text"],
-        motion="The camera pushes in with small amplitude at slow speed.")
+        motion=camera_for(element["text"], "medium", position))
 
 
 def shots_for(beats: list[TrailerBeat], points: list[float], scenes: dict,
-              refs: dict) -> list[ShotSpec]:
+              refs: dict, lines: list[dict]) -> list[ShotSpec]:
     """Assign beats to cut points WITHOUT repeating the beat sequence.
 
     The previous rule was `beats[index % len(beats)]`, which produced B00..B10
@@ -97,14 +103,30 @@ def shots_for(beats: list[TrailerBeat], points: list[float], scenes: dict,
         raise SystemExit("REFUSED: the shot order repeats its own beat sequence")
     by_id = {b.beat_id: b for b in beats}
 
+    bound = [bool(by_id[i].cast) for i in order]
+    spots = [i / max(len(order) - 1, 1) for i in range(len(order))]
+    sizes = choose_sizes(lengths, bound, spots)
+
+    # Dialogue is placed against the SHOTS, because only a shot knows how long
+    # it lasts, and a line that outlasts its picture is cut off mid-word.
+    slots = [{"beat_id": f"{b}#{i}", "scene": by_id[b].scene_number,
+              "cast": by_id[b].cast, "seconds": s}
+             for i, (b, s) in enumerate(zip(order, lengths))]
+    spoken = assign_lines(slots, lines)
+
     shots: list[ShotSpec] = []
     for index, (start, length, beat_id) in enumerate(zip(points, lengths, order)):
         beat = by_id[beat_id]
         char_refs = {c: f"char-{c}" for c in beat.cast if f"char-{c}" in refs}
         loc_ref = f"loc-{beat.location_id}" if f"loc-{beat.location_id}" in refs else None
+        said = spoken.get(f"{beat_id}#{index}")
         shots.append(ShotSpec(beat_id=beat_id, index=index, start=start,
                               seconds=length, cast=beat.cast,
-                              char_refs=char_refs, loc_ref=loc_ref))
+                              char_refs=char_refs, loc_ref=loc_ref,
+                              size=sizes[index], framing=FRAMING[sizes[index]],
+                              line=said["text"] if said else None,
+                              speaker=said["speaker"] if said else None,
+                              line_span=said["span"] if said else 1))
     return shots
 
 
@@ -153,8 +175,15 @@ def main(book_glob: str, trailer_id: str = "main") -> None:
              for i, e in enumerate(elements)]
     refuse_unbindable(beats, scenes, refs)
 
+    restricted = resolution_scenes(scenes, lead, figure)
+    candidates = dialogue_candidates(scenes, restricted,
+                                     tuple(c for c in (lead, figure) if c))
+    # Offer the placer a deep slate: it can only use a line whose
+    # speaker is on screen with room to finish, so four candidates
+    # yielded one placement.
+    lines = pick_lines(candidates, count=16, per_speaker=5)
     points = cut_points(cue["title_stopdown"], cue["grid"])
-    shots = shots_for(beats, points, screenplay, refs)
+    shots = shots_for(beats, points, screenplay, refs, lines)
 
     if {"quiet", "build", "hit"} - {b.arc for b in beats}:
         raise SystemExit("REFUSED: the trailer never reaches a climax")
@@ -183,7 +212,13 @@ def main(book_glob: str, trailer_id: str = "main") -> None:
           f"{len(shots) / len(beats):.2f} shots per setup")
     print(f"  lead {lead} in {appearances} beats; figure {figure}; "
           f"turn sc{turn['number'] if turn else '?'}")
-    print(f"  {on_grid}/{len(points) - 2} cuts on a measured onset -> {out / 'plan.json'}")
+    spoken = [s for s in shots if s.line]
+    print(f"  {on_grid}/{len(points) - 2} cuts on a measured onset")
+    print(f"  sizes: {', '.join(f'{n}x {s}' for s, n in Counter(s.size for s in shots).most_common())}")
+    print(f"  {len(spoken)} spoken lines, {len({s.motion for s in beats})} distinct "
+          f"camera moves across {len(beats)} beats -> {out / 'plan.json'}")
+    for shot in spoken:
+        print(f"    {shot.beat_id} {shot.speaker}: {shot.line[:64]}")
 
 
 if __name__ == "__main__":

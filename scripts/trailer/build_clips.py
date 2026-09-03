@@ -18,8 +18,10 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 from studio.clip_cache import digest_of, is_current, record
 from studio.comfy import run, stage_image
 from studio.h3 import NATIVE_H, NATIVE_W, frames_for
+from studio.h3_prompt import build as h3_document
+from studio.shot_grammar import FRAMING, LADDER
 from studio.trailer_refs import visual_description
-from studio.trailer_shot import is_scene_safe, shot_prompt
+from studio.trailer_shot import is_scene_safe
 
 ROOT = Path(__file__).resolve().parents[2]
 CLIP_SECONDS = 10.0
@@ -68,11 +70,21 @@ def main(book_glob: str, trailer_id: str = "main") -> None:
                 raise SystemExit(
                     f"REFUSED: {who}'s description carries reference-sheet "
                     f"language, which would animate a character sheet: {text[:120]}")
+        # A clip is a long take the edit cuts SEVERAL sizes out of, so the take
+        # has to contain them.  Open on the widest size any of this beat's
+        # shots asks for and arrive at the tightest, and one render serves the
+        # whole beat.  The old prompt looked framing up by dramatic register,
+        # so every beat in a register got the same frame and the same move.
+        wanted = [s["size"] for s in plan["shots"] if s["beat_id"] == beat["beat_id"]]
+        wanted = sorted(set(wanted) or {"medium"}, key=LADDER.index)
         values = {
-            "prompt": shot_prompt(
-                style, described,
-                refs[loc_id]["name"] if loc_id in refs else beat["location_id"],
-                beat["image_prompt"], beat["arc"], CLIP_SECONDS, index),
+            "prompt": h3_document(
+                style=style,
+                character=" ".join(described),
+                place=refs[loc_id]["name"] if loc_id in refs else beat["location_id"],
+                action=beat["image_prompt"],
+                open_framing=FRAMING[wanted[-1]], close_framing=FRAMING[wanted[0]],
+                camera=beat["motion"], seconds=CLIP_SECONDS, arc=beat["arc"]),
             "width": NATIVE_W, "height": NATIVE_H,
             "frames": frames_for(CLIP_SECONDS), "steps": STEPS,
             "seed": 51000 + index * 7,

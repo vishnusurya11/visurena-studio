@@ -31,8 +31,8 @@ def subject_definitions(character: str | None, place: str) -> str:
     """Declare what each reference is, before anything refers to it."""
     lines = []
     if character:
-        lines.append(f"<Subject 1>: {character} The person whose identity, face, "
-                     f"build and dress the target video must keep.")
+        lines.append(f"<Subject 1>: The person whose identity, face, build and "
+                     f"dress the target video must keep. {character}")
         lines.append(f"<Subject 2>: {place} The location whose architecture, "
                      f"materials and light the target video is set in.")
     else:
@@ -60,3 +60,103 @@ def retention_analysis(has_character: bool) -> str:
     return ("<Subject 1>: attribute_transfer. The palette, materials, period "
             "and quality of light are carried over; the exact architecture "
             "may differ.")
+
+
+SECTIONS = ("subject_definitions", "summary", "retention_analysis",
+            "detailed_description", "overall_soundscape", "non_diegetic_music")
+"""The order H3's own guide specifies.  Order is part of the format."""
+
+TARGET_WORDS = (350, 500)
+
+
+def word_count(text: str) -> int:
+    return len(text.split())
+
+
+def summary(action: str, place: str, seconds: float) -> str:
+    """One paragraph, prefixed with the task type in brackets."""
+    return (f"[Reference to Video] A single continuous {seconds:.0f}-second take. "
+            f"{action.rstrip('.')}, in {place}. The identity of the person in "
+            f"<Subject 1> is preserved exactly; the camera moves once, and the "
+            f"take does not cut.")
+
+
+def detailed_description(character: str, place: str, action: str,
+                         open_framing: str, close_framing: str, camera: str,
+                         seconds: float, style: str) -> str:
+    """The 350-500 word body, opening wide and ending tight.
+
+    Written as one traversal rather than a list of shots, because the clip is a
+    long take that the edit cuts several sizes out of -- so the take has to
+    CONTAIN those sizes, in the order the cut will want them.  Opening on the
+    wider framing and arriving at the tighter one is what makes both available
+    to the editor from one render.
+    """
+    who = (f"The person in <Subject 1>: {character} " if character
+           else "No people are visible in this shot. ")
+    body = [
+        f"{style}",
+        f"The setting is {place}, established in the first moments of the take "
+        f"and held throughout; the geometry of the room does not change.",
+        who,
+        f"The take opens on this framing. {open_framing}",
+        f"The action of the shot is as follows. {action}",
+        f"{camera}",
+        f"As the move completes, the frame arrives at this composition. "
+        f"{close_framing}",
+        f"The light is motivated by a single dominant source within the scene, "
+        f"falling across the subject from one side so that the shadowed side of "
+        f"the face retains detail rather than going to black. Dust and haze in "
+        f"the air catch that light and make its direction visible. Surfaces "
+        f"read as physical materials with weight and age: cloth with a nap, wood "
+        f"with a grain, metal with tarnish, glass with reflections that move as "
+        f"the camera moves.",
+        f"Parallax is visible throughout the move: objects nearest the lens "
+        f"travel across the frame faster than the background behind them, and "
+        f"the relationship between foreground and background changes as the "
+        f"camera travels. This is what makes the movement read as a camera in a "
+        f"real space rather than a still image being scaled.",
+        f"The performance is contained and specific rather than broad. Small "
+        f"movements of the head, the eyes and the hands carry the moment; there "
+        f"is no exaggerated gesture and no acting toward the lens. The subject "
+        f"does not look into the camera at any point.",
+        f"Motion is continuous and physically plausible from the first frame to "
+        f"the last. Nothing in the frame teleports, duplicates, or changes "
+        f"identity partway through. Hands keep five fingers, objects keep their "
+        f"shape, and anything the subject is holding stays in their grip.",
+        f"The entire {seconds:.1f} seconds is one continuous take with no cuts, "
+        f"no dissolves, no speed changes and no camera stops.",
+    ]
+    return " ".join(part.strip() for part in body if part.strip())
+
+
+def soundscape(place: str) -> str:
+    """Ambience and physical sound: what the microphone in the room hears."""
+    return (f"The ambience of {place}, recorded close and dry: the room tone of "
+            f"the space itself, the small physical sounds the action makes -- "
+            f"cloth, footfall, breath, the contact of objects with surfaces. No "
+            f"speech, no crowd, no music within the scene.")
+
+
+def music(arc: str) -> str:
+    """Score the characters cannot hear.  A trailer supplies its own; this
+    section exists to tell H3 NOT to invent one that fights it."""
+    return ("No non-diegetic music. The take is scored externally and any music "
+            "generated here would fight the trailer's own cue.")
+
+
+def build(style: str, character: str, place: str, action: str,
+          open_framing: str, close_framing: str, camera: str,
+          seconds: float, arc: str = "build") -> str:
+    """The whole six-section document, in the order the spec names."""
+    parts = {
+        "subject_definitions": subject_definitions(character or None, place),
+        "summary": summary(action, place, seconds),
+        "retention_analysis": retention_analysis(bool(character)),
+        "detailed_description": detailed_description(
+            character, place, action, open_framing, close_framing, camera,
+            seconds, style),
+        "overall_soundscape": soundscape(place),
+        "non_diegetic_music": music(arc),
+    }
+    return "\n\n".join(f"{name}:\n{parts[name]}" for name in SECTIONS)

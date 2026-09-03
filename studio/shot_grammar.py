@@ -15,6 +15,10 @@ variants of drift is still drift.
 """
 from __future__ import annotations
 
+import re
+
+from studio.trailer_story import IMAGE_GATE
+
 LADDER = ("insert", "extreme_close", "close", "medium_close", "medium",
           "full", "wide", "extreme_wide")
 """Smallest to largest by how much of the world is in frame."""
@@ -110,3 +114,124 @@ def motivated_move(move: str, amplitude: str, speed: str, cause: str,
     if occluder:
         sentence += f", the edge of {occluder} sliding past the frame"
     return sentence + "."
+
+
+TROUGH = 0.85
+"""Where a released trailer's shots reach their shortest, MEASURED over 50 of
+them: 1.50s at the open, 1.33s at the third, 0.54s here.  Size follows, because
+a wide held for half a second is a flash of nothing."""
+
+
+OPENS_AT = "wide"
+CLOSES_AT = "extreme_close"
+"""The trailer opens wide because the audience has no world yet, and ends tight
+because by then the world is known and only the face is new."""
+
+
+def target_size(position: float) -> float:
+    """Where on the ladder this moment wants to sit, as a fractional rung.
+
+    A fractional target rather than an ordering, because an ordering makes the
+    chooser oscillate between the two ends of the ladder -- the first version
+    produced insert, close, insert, close and called it contrast.  Variation
+    has to happen AROUND a moving centre, or it is just alternation.
+    """
+    top, bottom = LADDER.index(OPENS_AT), LADDER.index(CLOSES_AT)
+    return top - (top - bottom) * min(position / TROUGH, 1.0)
+
+
+def _preference(position: float, bound: bool) -> list[str]:
+    """The ladder ordered by distance from where this moment wants to sit."""
+    target = target_size(position)
+    order = sorted(LADDER, key=lambda s: (abs(LADDER.index(s) - target),
+                                          LADDER.index(s)))
+    if bound:
+        floor = LADDER.index(BOUND_FLOOR)
+        order = [s for s in order if LADDER.index(s) <= floor]
+    return order
+
+
+def choose_sizes(lengths: list[float], bound: list[bool],
+                 positions: list[float]) -> list[str]:
+    """One size per shot: legible for its length, and never twice in a row.
+
+    Three constraints, applied in the order they can fail.  Duration is hard --
+    a size that cannot be read in the time available is simply not a candidate.
+    Binding is hard too, in the other direction: a shot carrying a character
+    reference wider than BOUND_FLOOR spends a sheet on a smudge.  Contrast is
+    soft: two rungs apart if the room exists, one rung if it does not, and only
+    a repeat is actually refused.
+    """
+    chosen: list[str] = []
+    for seconds, is_bound, position in zip(lengths, bound, positions):
+        legible = legible_sizes(seconds, bound=False)
+        if is_bound:
+            floor = LADDER.index(BOUND_FLOOR)
+            legible = [s for s in legible if LADDER.index(s) <= floor]
+        if not legible:
+            raise ValueError(
+                f"no size is legible in {seconds}s; the shortest is "
+                f"{min(MIN_SECONDS.values())}s and MIN_SHOT should have caught it")
+        wanted = [s for s in _preference(position, is_bound) if s in legible]
+        previous = chosen[-1] if chosen else None
+        for gap in (2, 1, 0):
+            options = [s for s in wanted
+                       if previous is None or ladder_distance(s, previous) >= gap]
+            if gap == 0:
+                options = [s for s in wanted if s != previous] or wanted
+            if options:
+                chosen.append(options[0])
+                break
+    return chosen
+
+
+NOUN_PHRASE = re.compile(
+    r"((?:\b(?:a|an|the|his|her|its|their|one)\b\s+)?(?:\w+\s+){0,3}%s)",
+    re.I)
+"""Article and up to three modifiers before the noun.  'the phial' and 'a small
+glass phial' are different pictures, and the adjectives are the difference."""
+
+CLAUSE = re.compile(r"\s+(?:and|then|while|as|before|after)\s+|[,;]\s+", re.I)
+
+
+def destination_of(text: str) -> str:
+    """The photographable thing the sentence lands on.
+
+    The LAST gate noun, not the first: an action line moves from where it starts
+    to what it arrives at, and the camera should arrive with it.  "Holmes stoops
+    over the body and lifts a small glass phial" ends on the phial.
+    """
+    matches = list(IMAGE_GATE.finditer(text))
+    if not matches:
+        return ""
+    noun = matches[-1].group(0)
+    found = re.search(NOUN_PHRASE.pattern % re.escape(noun), text, re.I)
+    return found.group(1).strip() if found else noun
+
+
+def cause_of(text: str) -> str:
+    """The action that starts the move: the clause before the destination."""
+    first = CLAUSE.split(text.strip())[0]
+    return first.rstrip(" .,;:")
+
+
+def camera_for(text: str, size: str, position: float) -> str:
+    """A camera sentence for this beat, derived from this beat's own action.
+
+    Move, amplitude and speed follow from the size and the place in the arc,
+    but the CAUSE and the DESTINATION come out of the book -- which is the
+    whole difference between a motivated move and the twenty-three identical
+    drifts that shipped.
+    """
+    destination = destination_of(text)
+    if not destination:
+        return motivated_move("static", "", "", "", "")
+    late = position >= TROUGH
+    if size in ("insert", "extreme_close", "close"):
+        move, amplitude = "pushes in", "small"
+    elif size in ("wide", "extreme_wide"):
+        move, amplitude = "cranes slowly down", "wide"
+    else:
+        move, amplitude = "tracks in", "moderate"
+    speed = "quick" if late else "slow"
+    return motivated_move(move, amplitude, speed, cause_of(text), destination)

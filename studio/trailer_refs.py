@@ -111,6 +111,41 @@ completely unphotographable.  A shot prompt needs the half that a camera can
 see."""
 
 
+CAPABILITY = re.compile(
+    r"\b(?:is |are |was |were )?(?:able to|capable of|can|could)\b", re.I)
+"""A capability is not an appearance.  Holmes shipped with 'able to travel
+rapidly, conduct close physical examinations, follow a suspect, handcuff a
+cabman' as his physical description -- four verbs and not one picture."""
+
+NARRATION = re.compile(
+    r"\b(?:while|during|after|before|then he|then she|and then)\b", re.I)
+"""A sentence that places something in TIME is telling a story, and a reference
+sheet is a single moment with no time in it."""
+
+ACTION_VERB = re.compile(
+    r"\b(?:pricks?|covers?|travels?|follows?|handcuffs?|restrains?|collects?"
+    r"|breaks?|walks?|carries|carried|helps?|conducts?|examines?)\b", re.I)
+
+
+def is_photographable(sentence: str) -> bool:
+    """True when this sentence describes how someone LOOKS.
+
+    Three refusals before the appearance test, because the appearance test is
+    a bag of words and a bag of words cannot tell "he has dark hair" from "he
+    followed the dark-haired man down the street".
+    """
+    clean = sentence.strip().rstrip(".")
+    lowered = clean.lower()
+    if not clean or any(lowered.startswith(o) for o in META_OPENERS):
+        return False
+    if any(word in lowered for word in ABSENCE):
+        return False
+    if CAPABILITY.search(clean) or NARRATION.search(clean) or ACTION_VERB.search(clean):
+        return False
+    return any(re.search(r"\b" + re.escape(w) + r"\b", lowered)
+               for w in APPEARANCE)
+
+
 def visual_description(physical: str, limit: int = VISUAL_LIMIT) -> str:
     """The sentences of a profile that describe how someone LOOKS.
 
@@ -122,12 +157,7 @@ def visual_description(physical: str, limit: int = VISUAL_LIMIT) -> str:
     kept: list[str] = []
     for sentence in SENTENCE_END.split(physical.replace(chr(10), " ")):
         clean = sentence.strip().rstrip(".")
-        lowered = clean.lower()
-        if not clean or any(lowered.startswith(o) for o in META_OPENERS):
-            continue
-        if any(word in lowered for word in ABSENCE):
-            continue
-        if not any(word in lowered for word in APPEARANCE):
+        if not is_photographable(clean):
             continue
         kept.append(clean)
         if len(". ".join(kept)) >= limit:

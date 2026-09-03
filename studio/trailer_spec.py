@@ -87,6 +87,43 @@ class ShotSpec(BaseModel):
     cast: list[str] = Field(default_factory=list)
     char_refs: dict[str, str] = Field(default_factory=dict)
     loc_ref: str | None = None
+    size: str = Field(default="medium", min_length=1)
+    framing: str = Field(default="", description="the size, as an image caption")
+    line: str | None = None
+    speaker: str | None = None
+    line_span: int = Field(default=1, ge=1, le=2)
+    """How many shots the line runs across.  A line starts on the speaker and
+    may carry over ONE cut; that is how a trailer speaks."""
+
+    @model_validator(mode="after")
+    def _size_must_be_legible(self) -> "ShotSpec":
+        """A size the shot has no time to show is a size nobody sees."""
+        from studio.shot_grammar import BOUND_FLOOR, LADDER, MIN_SECONDS
+        if self.size not in MIN_SECONDS:
+            raise ValueError(f"{self.beat_id}: {self.size!r} is not a shot size")
+        if MIN_SECONDS[self.size] > self.seconds:
+            raise ValueError(
+                f"{self.beat_id}: a {self.size} needs {MIN_SECONDS[self.size]}s "
+                f"and this shot is {self.seconds}s")
+        if self.char_refs and LADDER.index(self.size) > LADDER.index(BOUND_FLOOR):
+            raise ValueError(
+                f"{self.beat_id}: a {self.size} carrying a character reference "
+                f"spends a sheet on a face too small to read")
+        return self
+
+    @model_validator(mode="after")
+    def _a_line_needs_a_mouth_and_room(self) -> "ShotSpec":
+        from studio.trailer_dialogue import speech_seconds
+        if self.line and not self.speaker:
+            raise ValueError(f"{self.beat_id}: a line needs a speaker")
+        if self.speaker and self.speaker not in self.cast:
+            raise ValueError(
+                f"{self.beat_id}: {self.speaker!r} speaks but is not in the shot")
+        if self.line and self.line_span == 1                 and speech_seconds(self.line) > self.seconds:
+            raise ValueError(
+                f"{self.beat_id}: the line needs {speech_seconds(self.line)}s, "
+                f"the shot is {self.seconds}s, and it was given no cut to run over")
+        return self
 
     def unbound_cast(self) -> list[str]:
         """Characters this shot will show but carries no reference image for.
