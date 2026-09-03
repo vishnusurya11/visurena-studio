@@ -61,6 +61,31 @@ build prints only a summary, and the parse returned `[]` — which callers
 reported as "0 impacts". `envelope()` now raises rather than returning
 nothing. **A measurement that cannot fail is not a measurement.**
 
+## Subskills
+
+Read the one you need; each carries what was measured rather than assumed.
+
+| | |
+|---|---|
+| `subskills/01-story` | lead, opposition, turn, what stays unanswered, element-level selection |
+| `subskills/02-refs` | reference sheets, identity binding, character collision |
+| `subskills/03-music` | generating the cue and MEASURING what it plays |
+| `subskills/04-shots` | H3 constants, framing, camera, coverage economics, costs |
+| `subskills/05-dialogue` | choosing lines that stand alone, placing them, whether to speak them |
+| `subskills/06-style` | the house look and how to try others |
+| `subskills/07-cards` | title cards, typography, and two silent failures |
+| `subskills/08-assemble` | the cut, the grade, the mix, the gates, three ffmpeg traps |
+
+## Agents
+
+| | |
+|---|---|
+| `trailer-story` | structure and selection, before any render, spends nothing |
+| `trailer-art` | reference sheets and visual register |
+| `trailer-cinematographer` | the clips, ~11 min per setup |
+| `trailer-editor` | cut, grade, mix, cards, QC — free, iterate here |
+
+
 ## The cut
 
 Measured across 50 released trailers (Redfern's US Horror data set, CC-BY):
