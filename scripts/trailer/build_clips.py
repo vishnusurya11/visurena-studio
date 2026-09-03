@@ -24,7 +24,14 @@ from studio.trailer_refs import visual_description
 from studio.trailer_shot import is_scene_safe
 
 ROOT = Path(__file__).resolve().parents[2]
-CLIP_SECONDS = 10.0
+CLIP_SECONDS = 7.0
+"""One shot per take now, so a take needs to hold ONE shot, not four.
+
+At 10.1s a take was 243 frames of which 2.6s was reference leak and roughly 2.5s
+was used -- the rest existed so several shots could be cut from one render, and
+that is precisely what produced four moments of one image instead of four
+images.  7.0s aligns to 175 frames, leaving 4.69s after the head trim against a
+4.0s MAX_SHOT, and renders in appreciably less time."""
 STEPS = 8
 """Eight, not four.  At four steps the final Euler step drops sigma from ~0.72
 to zero -- one step doing three quarters of the denoising -- which is the
