@@ -229,3 +229,101 @@ def select_setups(scenes: list[dict], count: int, lead: str | None,
             used_places[place] = used_places.get(place, 0) + 1
             break
     return chosen
+
+
+IMAGE_GATE = re.compile(
+    r"\b(door|hand|face|window|light|candle|lamp|knife|blood|letter|paper|key"
+    r"|glass|fire|street|stair|mirror|coat|cab|horse|gun|pistol|body|eye|eyes"
+    r"|watch|ring|box|bottle|table|floor|wall|smoke|flame|match|dust|lens|wall"
+    r"|room|road|sky|water|snow|rain|fog|boot|hat|chair|bed|book|knife|axe"
+    r"|stick|salt|phial|jar|tube|card|note|sign|lock|gate|bell|clock|corpse)\b",
+    re.I)
+"""Is there a THING here at all -- a gate, not a score.
+
+Counting matches was measured at 1.10x lift once paragraph length is
+controlled, and below 1.0 in two of four books: it was ranking by LENGTH, since
+longer lines contain more nouns.  The cost was concrete -- "The flame reveals
+RACHE, scrawled in red across the plaster", the title image of A Study in
+Scarlet, scored 3.5 and ranked 165 of 268, because `match`, `flame`, `plaster`
+and `scrawled` were not on the hand-written list.  A word list can gate; it
+cannot rank."""
+
+
+def distinctiveness(text: str, corpus_counts: dict[str, int], total: int) -> float:
+    """How unusual this line's vocabulary is for THIS book.
+
+    An iconic image is an anomaly -- the only word written on a wall in a
+    wordless book, the only white whale.  Rarity is not iconicity on its own
+    (it likes "the commissionaire clicks his heels"), but it is a real signal
+    where a fixed noun list is none, and it needs no model.
+    """
+    import math
+    words = {w for w in re.findall(r"[a-z]{4,}", text.lower()) if w not in STOPWORDS}
+    if not words:
+        return 0.0
+    rarest = sorted(math.log(total / (1 + corpus_counts.get(w, 0))) for w in words)
+    return sum(rarest[-3:]) / 3.0
+
+
+def corpus_frequency(scenes: list[dict]) -> tuple[dict[str, int], int]:
+    """How often each word appears across the book's action lines."""
+    counts: dict[str, int] = {}
+    total = 0
+    for scene in scenes:
+        for element in scene.get("elements", []):
+            if element.get("kind") != "action":
+                continue
+            total += 1
+            for word in {w for w in re.findall(r"[a-z]{4,}",
+                                               (element.get("text") or "").lower())}:
+                counts[word] = counts.get(word, 0) + 1
+    return counts, max(total, 1)
+
+
+def quotable_elements(scenes: list[dict], min_words: int = 3) -> list[dict]:
+    """Dialogue lines as SHOT candidates, not just as speech.
+
+    `action_elements()` filters on kind == "action", which made the most
+    recognisable beat in A Study in Scarlet structurally unreachable: "You have
+    been in Afghanistan, I perceive." can never be selected, because it is
+    dialogue and the image channel never looks at dialogue.
+
+    Recognition is bimodal -- readers remember aphorisms, illustrators draw
+    tableaux, and they are rarely the same moment.  Sampling one mode loses
+    half the material.
+    """
+    found: list[dict] = []
+    for scene in scenes:
+        for index, element in enumerate(scene.get("elements", [])):
+            if element.get("kind") != "dialogue" or not element.get("character"):
+                continue
+            text = (element.get("text") or "").strip()
+            if len(text.split()) < min_words:
+                continue
+            found.append({"scene": scene["number"], "index": index, "text": text,
+                          "speaker": element.get("character"),
+                          "provenance": element.get("provenance"),
+                          "emotion": element.get("emotion"),
+                          "location_id": scene.get("slug", {}).get("location_id"),
+                          "cast": list(people_in(scene))})
+    return found
+
+
+def deduplicate(elements: list[dict], head: int = 60) -> list[dict]:
+    """Drop near-identical lines that live in DIFFERENT scenes.
+
+    One-element-per-scene does not catch these.  Real pairs from the corpus:
+    Jekyll sc 28 and sc 32 both read "measured heaps of white salt wait on
+    glass saucers"; Metamorphosis sc 7 and sc 8 both "Grete lays the violin
+    across her mother's lap".  A trailer built from them shows one frame twice
+    and calls it two shots.
+    """
+    seen: set[str] = set()
+    kept: list[dict] = []
+    for element in elements:
+        key = re.sub(r"[^a-z]", "", element["text"].lower())[:head]
+        if key in seen:
+            continue
+        seen.add(key)
+        kept.append(element)
+    return kept
