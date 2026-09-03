@@ -27,11 +27,17 @@ class TestCardFor:
         card = card_for("sherlock_holmes", {}, "")
         assert all(card.get(slot) for slot in TIER_ONE)
 
-    def test_two_characters_do_not_take_the_same_tier_one_value(self):
+    def test_no_pair_shares_every_tier_one_value(self):
+        """Strict per-slot uniqueness is a stronger claim than the cast needs
+        and, once role-reserved and gendered items are removed, is not always
+        available: eight characters against seven legal neckwear options.  The
+        requirement is that no PAIR is indistinguishable."""
         cards = cards_for(CAST, {})
-        for slot in TIER_ONE:
-            values = [c[slot] for c in cards.values()]
-            assert len(values) == len(set(values)), (slot, values)
+        names = sorted(cards)
+        for i, first in enumerate(names):
+            for second in names[i + 1:]:
+                assert any(cards[first][slot] != cards[second][slot]
+                           for slot in TIER_ONE), (first, second)
 
     def test_it_is_stable_for_the_same_cast(self):
         assert cards_for(CAST, {}) == cards_for(CAST, {})
@@ -83,3 +89,145 @@ class TestRenderCard:
         text = render_card(card_for("sherlock_holmes", {}, "")).lower()
         for comparative in ("taller than", "shorter than", "unlike", "compared"):
             assert comparative not in text
+
+
+class TestGender:
+    """Lucy Ferrier was rendered as a man with a beard.
+
+    `render_card` opened every card with "A man", and the facial-hair slot was
+    filled from a pool of beards and moustaches for the whole cast.  Lucy came
+    back indistinguishable from Tobias Gregson -- 0.541, the worst pair in the
+    book -- because she was drawn as the same kind of object.
+    """
+
+    def test_a_daughter_is_a_woman(self):
+        from studio.cast_card import infer_gender
+        assert infer_gender("Lucy Ferrier",
+                            ["Lucy", "the girl", "his daughter"], "She grew taller") == "woman"
+
+    def test_a_man_is_a_man(self):
+        from studio.cast_card import infer_gender
+        assert infer_gender("John Watson", ["the doctor"], "He is a tall man") == "man"
+
+    def test_an_unknown_is_a_person_not_a_guess(self):
+        from studio.cast_card import infer_gender
+        assert infer_gender("Wiggins", [], "") == "person"
+
+    def test_a_woman_is_never_given_facial_hair(self):
+        from studio.cast_card import card_for, render_card
+        card = card_for("lucy_ferrier", {}, "", gender="woman")
+        assert "beard" not in render_card(card) and "moustache" not in render_card(card)
+
+    def test_a_woman_is_described_as_one(self):
+        from studio.cast_card import card_for, render_card
+        assert render_card(card_for("lucy", {}, "", gender="woman")).startswith("A woman")
+
+    def test_cards_still_separate_when_the_cast_is_mixed(self):
+        from studio.cast_card import cards_for, refuse_collision
+        cards = cards_for(["holmes", "watson", "lucy"], {},
+                          genders={"lucy": "woman"})
+        refuse_collision(cards)
+
+
+class TestTruthBeatsSeparation:
+    """A card that separates the cast by lying about it is not an improvement.
+
+    First run put Sherlock Holmes in a police custodian helmet with a full
+    beard at sixty, and John Watson in a shawl and plain dress at seventy.
+    Every pair was distinct and every card was wrong.  Authority order is: the
+    book's own words, then dress convention for the role, then invention -- and
+    invention only fills a slot the book leaves empty.
+    """
+
+    def test_a_role_specific_item_is_not_handed_to_the_wrong_role(self):
+        from studio.cast_card import ROLE_ITEMS, card_for
+        card = card_for("sherlock_holmes", {}, "a tall lean man", role="detective")
+        assert card["headgear"] not in ROLE_ITEMS["headgear"].get("policeman", ())
+
+    def test_a_policeman_may_have_the_helmet(self):
+        from studio.cast_card import card_for
+        assert "helmet" in card_for("a_constable", {}, "", role="policeman")["headgear"]
+
+    def test_a_man_is_never_put_in_a_dress(self):
+        from studio.cast_card import card_for
+        card = card_for("john_watson", {}, "clean-shaven with a heavy jaw", gender="man")
+        assert "dress" not in card["garment"] and "shawl" not in card["garment"]
+
+    def test_an_unknown_gender_is_not_dressed_as_a_woman(self):
+        """Watson's own description carries no pronoun, so inference returned
+        'person' -- and 'person' must not silently mean 'put them in a gown'."""
+        from studio.cast_card import card_for
+        card = card_for("someone", {}, "", gender="person")
+        assert "dress" not in card["garment"] and "shawl" not in card["garment"]
+
+    def test_the_book_sets_the_age_when_it_says_one(self):
+        from studio.cast_card import card_for
+        card = card_for("x", {}, "a young man of about thirty", gender="man")
+        assert "thirty" in card["age"]
+
+    def test_the_book_beats_invention_on_facial_hair(self):
+        from studio.cast_card import card_for
+        card = card_for("x", {}, "clean-shaven with a heavy jaw", gender="man")
+        assert card["facial_hair"] == "clean-shaven"
+
+
+class TestAgeBand:
+    """Invention must stay inside what the book says.
+
+    John Ferrier is "the old farmer" and "the old man" and got "in his late
+    twenties".  Lucy is "the girl" and got "a bald crown with grey at the
+    temples".  Neither is a near miss; both are a different person.
+    """
+
+    def test_the_old_man_is_old(self):
+        from studio.cast_card import age_band
+        assert age_band("An older man, the old farmer, the old man") == "old"
+
+    def test_the_girl_is_young(self):
+        from studio.cast_card import age_band
+        assert age_band("Lucy is a young child who grows into a young woman") == "young"
+
+    def test_an_unmarked_character_is_neither(self):
+        from studio.cast_card import age_band
+        assert age_band("a man in a coat") == "middle"
+
+    def test_a_young_character_never_gets_an_aged_feature(self):
+        from studio.cast_card import card_for
+        card = card_for("lucy", {}, "the young girl", gender="woman")
+        assert "bald" not in card["hair"] and "white hair" not in card["hair"]
+
+    def test_an_old_character_is_not_given_a_twenties_age(self):
+        from studio.cast_card import card_for
+        card = card_for("ferrier", {}, "the old farmer, the old man", gender="man")
+        assert "twenties" not in card["age"] and "thirty" not in card["age"]
+
+    def test_a_woman_is_not_described_as_in_his_twenties(self):
+        from studio.cast_card import card_for, render_card
+        text = render_card(card_for("lucy", {}, "the young girl", gender="woman"))
+        assert " his " not in text
+
+
+class TestUnmarkedAdults:
+    """A character the book does not age should read as an adult in their
+    prime, not as a lottery across sixty years.
+
+    Holmes and Watson are both described only as capable and active, and came
+    back at sixty and seventy -- older than any reader pictures either of them,
+    and older than the story allows.
+    """
+
+    def test_an_unmarked_adult_is_not_elderly(self):
+        from studio.cast_card import card_for
+        for who in ("sherlock_holmes", "john_watson", "tobias_gregson"):
+            age = card_for(who, {}, "a capable and active man", gender="man")["age"]
+            assert "seventy" not in age and "sixty" not in age, (who, age)
+
+    def test_an_unmarked_adult_is_not_a_youth_either(self):
+        from studio.cast_card import card_for
+        age = card_for("x", {}, "a capable and active man", gender="man")["age"]
+        assert "twenties" not in age
+
+    def test_a_woman_is_not_described_as_clean_shaven(self):
+        from studio.cast_card import card_for, render_card
+        text = render_card(card_for("lucy", {}, "the young girl", gender="woman"))
+        assert "clean-shaven" not in text

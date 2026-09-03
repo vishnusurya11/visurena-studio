@@ -51,3 +51,32 @@ class TestVisualDescription:
 
     def test_word_boundaries_are_respected(self):
         assert not is_photographable("He knew that the room was empty.")
+
+
+class TestCostumeByRole:
+    """"detective" was in the same bucket as "constable", so the world's most
+    famous CONSULTING detective was dressed as a Metropolitan policeman and
+    handed a custodian helmet."""
+
+    def test_a_consulting_detective_is_not_a_policeman(self):
+        from studio.trailer_refs import costume_for
+        assert "police" not in costume_for(["the consulting detective"]).lower()
+
+    def test_a_scotland_yard_inspector_still_is_one(self):
+        from studio.trailer_refs import costume_for
+        assert "police" in costume_for(["the inspector"]).lower()
+
+    def test_a_plain_detective_is_read_as_private(self):
+        from studio.trailer_refs import costume_for
+        assert "police" not in costume_for(["the detective"]).lower()
+
+
+class TestAbsenceSentences:
+    def test_not_otherwise_specified_is_dropped(self):
+        from studio.trailer_refs import is_photographable
+        assert not is_photographable(
+            "Her clothing and facial features are not otherwise specified.")
+
+    def test_not_specified_is_dropped(self):
+        from studio.trailer_refs import is_photographable
+        assert not is_photographable("His exact age and hair are not specified.")

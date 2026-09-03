@@ -18,7 +18,8 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 from studio.comfy import run
 from studio.trailer_plan import (leading_characters, pick_scenes,
                                  unique_locations)
-from studio.cast_card import cards_for, refuse_collision, render_card
+from studio.cast_card import (cards_for, infer_gender, refuse_collision,
+                              render_card)
 from studio.trailer_refs import (all_locations, character_prompt, described_as, load_json,
                                  location_prompt, physical_of, ref_id_for)
 
@@ -91,11 +92,18 @@ def main(book_id: str, palette: str, scene_count: int = 12) -> None:
     # measured 0.540 against a same-person line of 0.363.
     present = [c for c in characters
                if (book / "analysis/characters" / f"{c}.json").exists()]
-    described = {c: described_as(load_json(book / "analysis/characters" / f"{c}.json"))
+    described = {c: physical_of(load_json(book / "analysis/characters" / f"{c}.json"))
                  for c in present}
-    cards = cards_for(present, described)
+    genders = {c: infer_gender(load_json(book / "analysis/characters" / f"{c}.json").get("name", c),
+                               load_json(book / "analysis/characters" / f"{c}.json").get("aliases", []),
+                               described.get(c, ""))
+               for c in present}
+    roles = {c: (load_json(book / "analysis/characters" / f"{c}.json").get("role") or "").lower()
+             for c in present}
+    cards = cards_for(present, described, genders, roles)
     refuse_collision(cards)
-    print(f"  cast card: {len(cards)} characters, every pair distinct")
+    print(f"  cast card: {len(cards)} characters, every pair distinct "
+          f"({sum(g == chr(119)+chr(111)+chr(109)+chr(97)+chr(110) for g in genders.values())} women)")
 
     for index, char_id in enumerate(characters):
         path = book / "analysis/characters" / f"{char_id}.json"

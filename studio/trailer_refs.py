@@ -107,7 +107,9 @@ APPEARANCE = (
 
 ABSENCE = ("no description", "no confirmed", "no precise", "gives no", "does not provide",
            "not provide", "no physical", "without description", "unspecified",
-           "or distinguishing physical features", "or other distinguishing")
+           "or distinguishing physical features", "or other distinguishing",
+           "not otherwise specified", "not specified", "are not given",
+           "no other distinguishing")
 """A sentence that says a description is MISSING is worse than none at all --
 it hands the model the vocabulary of a face while telling it nothing.  Several
 of these books genuinely never describe a character, and the right answer is
@@ -238,8 +240,13 @@ COSTUME: tuple[tuple[tuple[str, ...], str], ...] = (
      "dressed in plain black household livery"),
     (("maid", "housemaid", "servant girl", "housekeeper", "cook"),
      "dressed in a plain dark servant's dress with a white apron and cap"),
-    (("policeman", "officer", "constable", "inspector", "detective"),
+    # "detective" is NOT in this bucket.  A consulting detective is a private
+    # gentleman; putting Sherlock Holmes in a custodian helmet is not a costume
+    # error, it is a different character.  Scotland Yard men keep the uniform.
+    (("policeman", "officer", "constable", "inspector", "sergeant"),
      "in police uniform, a dark tunic with a high collar and custodian helmet"),
+    (("detective", "consulting detective", "private detective", "investigator"),
+     "in a gentleman's day dress, a well-cut coat and high collar"),
     (("lawyer", "solicitor", "attorney", "trustee", "notary"),
      "dressed in a sober black professional suit and high collar"),
     (("doctor", "physician", "surgeon", "medical"),
