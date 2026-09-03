@@ -555,6 +555,20 @@ def named_things(text: str, cap: int = 3) -> int:
     return min(len(found), cap)
 
 
+def shouted_things(text: str, cap: int = 2) -> int:
+    """Words the screenplay set in capitals.
+
+    Screenplay convention capitalises what the audience must notice.  In this
+    book that is thirteen tokens across 268 action lines -- RACHE, RING, CLICK,
+    THROBBING, MURDER, HOPE -- which is a list of its beats written by the
+    adapter and never read by anything.  Rare enough to be a signal and
+    deliberate enough to trust; capped so volume cannot substitute for weight.
+    """
+    import re as _re
+    found = {w for w in _re.findall(r'[A-Z]{4,}', text)} - CAMERA_WORDS
+    return min(len(found), cap)
+
+
 def appearance_scenes(scenes: list[dict]) -> tuple[dict, dict]:
     """First and last scene number for every character."""
     first: dict[str, int] = {}
@@ -598,6 +612,7 @@ def setup_value(candidate: dict, first: dict, last: dict, refs: set[str],
     return (3.0 * is_emphasised(candidate)
             + 2.5 * verbatim_density(candidate)
             + 1.0 * named_things(text)
+            + 2.0 * shouted_things(text)
             + 1.5 * is_entrance_or_exit(candidate, first, last, refs)
             + 1.0 * bound_convergence(candidate, refs)
             - 1.5 * invented_density(candidate)

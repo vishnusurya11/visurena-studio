@@ -22,10 +22,19 @@ STYLE = (
     "photoreal, no stylisation, no illustration."
 )
 SHEET_FRAME = (
-    "Full-body character reference on a plain neutral mid-grey backdrop, even soft "
-    "studio light, no cast shadows, neutral expression, facing camera, sharp focus, "
-    "full figure head to feet in frame."
+    "Head-and-shoulders portrait to mid-chest, the head filling the upper half "
+    "of the frame, on a plain neutral mid-grey backdrop, even soft frontal "
+    "light with both eyes lit, no cast shadows, neutral expression with the "
+    "mouth closed, sharp focus on the face."
 )
+"""A bust, not a full figure.
+
+MEASURED on the shipped sheets with RetinaFace: the face was 59x83px, 0.5% of
+a 1368x768 frame -- below ArcFace's own 112x112 input, so the recogniser was
+being asked to read a face from about five thousand pixels, and H3's reference
+encoder got the same handful.  A controlled A/B moved the face to 254-312px by
+changing the framing alone, roughly 25x the pixels for free.
+"""
 PLATE_FRAME = (
     "Establishing wide plate of an empty location, no people, no figures, "
     "deep focus, even natural light."

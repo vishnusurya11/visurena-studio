@@ -17,8 +17,9 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 
 from studio.comfy import run
 from studio.trailer_plan import (leading_characters, pick_scenes,
-                                 unique_locations, all_locations)
-from studio.trailer_refs import (character_prompt, described_as, load_json,
+                                 unique_locations)
+from studio.cast_card import cards_for, refuse_collision, render_card
+from studio.trailer_refs import (all_locations, character_prompt, described_as, load_json,
                                  location_prompt, physical_of, ref_id_for)
 
 LIBRARY = Path(__file__).resolve().parents[2] / "library"
@@ -83,6 +84,19 @@ def main(book_id: str, palette: str, scene_count: int = 12) -> None:
     refs_root = book / "refs"
     record: list[dict] = []
 
+    # One card per character BEFORE any render, each slot avoiding the values
+    # the rest of the cast has taken, and the whole set refused if any pair is
+    # too alike.  The rule this replaces hashed each id in isolation, so two
+    # characters could land on the same features and did: Watson and Holmes
+    # measured 0.540 against a same-person line of 0.363.
+    present = [c for c in characters
+               if (book / "analysis/characters" / f"{c}.json").exists()]
+    described = {c: described_as(load_json(book / "analysis/characters" / f"{c}.json"))
+                 for c in present}
+    cards = cards_for(present, described)
+    refuse_collision(cards)
+    print(f"  cast card: {len(cards)} characters, every pair distinct")
+
     for index, char_id in enumerate(characters):
         path = book / "analysis/characters" / f"{char_id}.json"
         if not path.exists():
@@ -92,7 +106,7 @@ def main(book_id: str, palette: str, scene_count: int = 12) -> None:
         # The epithets a book uses ARE its description of someone.  Without
         # them, four characters the text never describes came back as four
         # identical Victorian gentlemen.
-        physical = described_as(character) or physical_of(character)
+        physical = render_card(cards[char_id])
         prompt = character_prompt(physical, palette)
         ref_id = ref_id_for("character", char_id)
         dest = refs_root / "characters" / f"{ref_id}.png"

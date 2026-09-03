@@ -116,3 +116,39 @@ class TestSetupValue:
         args = ({}, {}, {"char-sherlock_holmes", "char-g_lestrade"}, {})
         best = max(cands, key=lambda c: setup_value(c, *args))
         assert best["term"] == "dolly in"
+
+
+class TestShoutedThings:
+    """Screenplay convention capitalises what the audience must notice.
+
+    Across A Study in Scarlet's 268 action lines there are exactly thirteen
+    such tokens, and they are a list of the book's beats: RACHE, RING, CLICK
+    (the handcuffs), THROBBING (the aneurism), MURDER, HOPE.  Rare, deliberate,
+    and the score had no term for it -- so the single most remembered image in
+    the book ranked 25th and was never selected.
+    """
+
+    def test_a_shouted_word_is_found(self):
+        from studio.trailer_story import shouted_things
+        assert shouted_things("The flame reveals RACHE across the plaster") == 1
+
+    def test_ordinary_capitalisation_is_not_shouting(self):
+        from studio.trailer_story import shouted_things
+        assert shouted_things("Holmes and Watson enter Baker Street") == 0
+
+    def test_it_is_capped_so_a_long_line_cannot_win_on_volume(self):
+        from studio.trailer_story import shouted_things
+        assert shouted_things("RACHE RING CLICK MURDER HOPE THROBBING", cap=2) == 2
+
+    def test_the_word_written_in_blood_is_selected(self):
+        """The end-to-end claim, on the real book."""
+        import json
+        from pathlib import Path
+        from studio.trailer_story import action_text, select_setups
+        book = Path("library/20260822113400_a-study-in-scarlet")
+        scenes = json.loads((book / "screenplay/feature/screenplay.json")
+                            .read_text(encoding="utf-8"))["scenes"]
+        refs = {r["ref_id"] for r in json.loads(
+            (book / "refs/refs.json").read_text(encoding="utf-8"))["refs"]}
+        chosen = select_setups(scenes, refs, 30)
+        assert any("RACHE" in action_text(c) for c in chosen)
