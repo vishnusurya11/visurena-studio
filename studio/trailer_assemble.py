@@ -256,6 +256,10 @@ def grade_to(mean: float, deviation: float, hero_mean: float,
     return (f"eq=contrast={contrast:.4f}:brightness={max(-0.3, min(0.3, brightness)):.4f}")
 
 
+TITLE_COLOUR = "&H00DAE6ED"
+"""Warm off-white, in ASS BGR order.  Pure white on pure black is the one
+pair a default hands you, and it reads as exactly that."""
+
 TITLE_FONT = "Bookman Old Style"
 TITLE_FONT_FILE = Path("C:/Windows/Fonts/BOOKOS.TTF")
 """libass substitutes a missing font WITHOUT WARNING -- the same silent
@@ -263,30 +267,79 @@ failure as PIL's default bitmap face, on the one frame the audience reads.
 So the file is asserted to exist before the card is rendered."""
 
 
-def ass_title(title: str, seconds: float, width: int, height: int,
-              tracking: int = 22, fade_ms: int = 700) -> str:
-    """An ASS subtitle file body for the title card.
+def wrap_title(title: str, per_line: int = 22) -> list[str]:
+    """Break a title into lines that will fit, keeping names intact.
 
-    Letter-spacing is the whole point: tracking is what separates a title that
-    was designed from one that was typed, and drawtext cannot do it at all.
+    `WrapStyle: 2` disables libass wrapping, so a long title has no way to fail
+    except by running off the frame -- and that is exactly what shipped: the
+    Jekyll card read "GE CASE OF DR. JEKYLL AND", clipped off both edges, with
+    the film's own title unreadable in the delivered file.
+    """
+    honorifics = {"DR", "DR.", "MR", "MR.", "MRS", "MRS.", "ST", "ST.", "MISS"}
+    words = title.upper().split()
+    lines: list[str] = []
+    current: list[str] = []
+    for index, word in enumerate(words):
+        candidate = " ".join(current + [word])
+        # Never end a line on an honorific -- "DR" / "JEKYLL" reads as a typo.
+        dangling = word in honorifics and index + 1 < len(words)
+        if current and len(candidate) > per_line and not dangling:
+            lines.append(" ".join(current))
+            current = [word]
+        elif current and len(candidate) > per_line and dangling:
+            lines.append(" ".join(current))
+            current = [word]
+        else:
+            current.append(word)
+    if current:
+        lines.append(" ".join(current))
+    # Pull a trailing honorific down to the next line rather than stranding it.
+    for i in range(len(lines) - 1):
+        parts = lines[i].split()
+        if parts and parts[-1] in honorifics:
+            lines[i] = " ".join(parts[:-1])
+            lines[i + 1] = parts[-1] + " " + lines[i + 1]
+    return [l for l in lines if l]
+
+
+def ass_title(title: str, seconds: float, width: int, height: int,
+              tracking: int = 13, fade_ms: int = 500) -> str:
+    r"""An ASS subtitle file body for the title card.
+
+    EVERY override string here is a RAW string.  Most of the ASS vocabulary
+    collides with Python escapes -- \fad and \fsp become form feed, \t becomes
+    tab, \bord becomes backspace -- and libass discards an unrecognised block
+    in silence.  The fade was written without an r prefix, so it never fired on
+    a single trailer shipped, and the form feed even split the Dialogue line.
+
+    Tracking is 0.20 em rather than the 0.37 em first used; all-caps display
+    convention is about 0.1 em and film titles push to 0.2-0.3.  MarginL
+    carries an extra `tracking` because libass counts the trailing letter-space
+    of the final glyph in the line width, so a centred tracked line otherwise
+    sits tracking/2 px left of true centre.
     """
     if not TITLE_FONT_FILE.exists():
         raise RuntimeError(f"title font missing: {TITLE_FONT_FILE}; libass would "
                            "silently substitute another face")
     end = f"{int(seconds // 3600)}:{int(seconds // 60) % 60:02d}:{seconds % 60:05.2f}"
-    return (
-        "[Script Info]\nScriptType: v4.00+\n"
-        f"PlayResX: {width}\nPlayResY: {height}\nWrapStyle: 2\n\n"
+    body = r"\N".join(wrap_title(title))
+    fade = r"{\fad(" + f"{fade_ms},{int(fade_ms * 1.6)}" + r")}"
+    header = (
+        "[Script Info]\n"
+        "ScriptType: v4.00+\n"
+        f"PlayResX: {width}\n"
+        f"PlayResY: {height}\n"
+        "WrapStyle: 2\n\n"
         "[V4+ Styles]\n"
         "Format: Name, Fontname, Fontsize, PrimaryColour, OutlineColour, BackColour,"
         " Bold, Italic, Underline, StrikeOut, ScaleX, ScaleY, Spacing, Angle,"
         " BorderStyle, Outline, Shadow, Alignment, MarginL, MarginR, MarginV, Encoding\n"
-        f"Style: Card,{TITLE_FONT},{height // 13},&H00FFFFFF,&H00000000,&H00000000,"
-        f"0,0,0,0,100,100,{tracking},0,1,0,0,5,60,60,60,1\n\n"
-        "[Events]\nFormat: Layer, Start, End, Style, Name, MarginL, MarginR,"
-        " MarginV, Effect, Text\n"
-        f"Dialogue: 0,0:00:00.00,{end},Card,,0,0,0,,"
-        f"{{\fad({fade_ms},{fade_ms})}}{title.upper()}\n")
+        f"Style: Card,{TITLE_FONT},{height // 13},{TITLE_COLOUR},&H00000000,&H00000000,"
+        f"0,0,0,0,100,100,{tracking},0,1,0,0,5,{60 + tracking},60,60,1\n\n"
+        "[Events]\n"
+        "Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV,"
+        " Effect, Text\n")
+    return header + f"Dialogue: 0,0:00:00.00,{end},Card,,0,0,0,,{fade}{body}\n"
 
 
 def title_card_ass(title: str, output: Path, seconds: float, width: int,
@@ -303,3 +356,42 @@ def title_card_ass(title: str, output: Path, seconds: float, width: int,
          "-preset", "fast", "-crf", "16", "-t", f"{seconds:.3f}", str(output)],
         "rendering the tracked title card")
     return output
+
+
+TITLE_SAFE = 0.90
+"""Fraction of frame width the title may occupy.
+
+Nothing measured the card after rendering it, so the Jekyll title shipped
+clipped off BOTH edges -- "GE CASE OF DR. JEKYLL AND" -- with the film's own
+name unreadable in a delivered file.  A card that fits is a card that has been
+measured."""
+
+
+def ink_bounds(frame: Path, width: int, height: int,
+               threshold: int = 40) -> tuple[int, int, int, int]:
+    """(x0, x1, y0, y1) of the lit pixels in a rendered card."""
+    import numpy as np
+    result = subprocess.run(
+        ["ffmpeg", "-v", "error", "-i", str(frame), "-f", "rawvideo",
+         "-pix_fmt", "gray", "-"], capture_output=True)
+    if not result.stdout:
+        raise RuntimeError(f"could not decode {frame}")
+    pixels = np.frombuffer(result.stdout, dtype=np.uint8).reshape(height, width)
+    lit = pixels > threshold
+    if not lit.any():
+        raise RuntimeError(f"{frame} has no visible text at all")
+    cols, rows = np.where(lit.any(axis=0))[0], np.where(lit.any(axis=1))[0]
+    return int(cols[0]), int(cols[-1]), int(rows[0]), int(rows[-1])
+
+
+def card_fits(card: Path, width: int, height: int, at: float = 0.5) -> tuple[bool, str]:
+    """Render a frame of the card and check the type is inside the frame."""
+    frame = card.with_name(card.stem + "-probe.png")
+    _ffmpeg(["ffmpeg", "-y", "-v", "error", "-ss", f"{at:.2f}", "-i", str(card),
+             "-frames:v", "1", str(frame)], "sampling the title card")
+    x0, x1, y0, y1 = ink_bounds(frame, width, height)
+    ink = x1 - x0
+    margin = min(x0, width - x1)
+    note = (f"ink {ink}px of {width} ({ink / width:.0%}), "
+            f"margin {margin}px, rows {y0}-{y1}")
+    return (ink <= TITLE_SAFE * width and margin >= 8), note

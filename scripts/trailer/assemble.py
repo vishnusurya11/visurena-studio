@@ -10,8 +10,9 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 
 from studio.sfx import impact, sub_drop
-from studio.trailer_assemble import (clip_seconds, concat, extract, grade_to,
-                                     luma_stats, mix, segment_start, title_card_ass)
+from studio.trailer_assemble import (card_fits, clip_seconds, concat, extract,
+                                     grade_to, luma_stats, mix, segment_start,
+                                     title_card_ass)
 from studio.trailer_cut import FINAL_HOLD, is_uniform
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -99,8 +100,16 @@ def build(book_glob: str, trailer_id: str = "main") -> Path:
     title_at = sum(lengths)
     hit_at = plan["music"].get("title_impact") or title_at
     card_seconds = max(FINAL_HOLD, (hit_at - title_at) + FINAL_HOLD)
-    segments.append(title_card_ass(plan["title"], work / "title.mp4",
-                                   card_seconds, width, height, fps))
+    card = title_card_ass(plan["title"], work / "title.mp4",
+                          card_seconds, width, height, fps)
+    # Measure the card rather than trusting it.  The Jekyll title shipped
+    # clipped off both edges -- the film's own name unreadable -- because
+    # nothing ever looked at the rendered frame.
+    fits, note = card_fits(card, width, height)
+    if not fits:
+        raise SystemExit(f"REFUSED: the title card does not fit the frame ({note})")
+    print(f"  title card: {note}")
+    segments.append(card)
     picture = concat(segments, work / "picture.mp4")
 
     music = book / plan["music"]["rel_path"]

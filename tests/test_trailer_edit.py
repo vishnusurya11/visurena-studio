@@ -173,7 +173,7 @@ class TestTitleCard:
 
     def test_the_card_carries_letter_spacing(self):
         from studio.trailer_assemble import ass_title
-        assert ",22,0," in ass_title("A Study in Scarlet", 3.0, 1344, 768)
+        assert ",13,0," in ass_title("A Study in Scarlet", 3.0, 1344, 768)
 
     def test_an_apostrophe_survives(self):
         """drawtext's inline text= silently drops these; ASS must not."""
@@ -182,7 +182,7 @@ class TestTitleCard:
 
     def test_the_card_fades(self):
         from studio.trailer_assemble import ass_title
-        assert "\fad(" in ass_title("X", 3.0, 1344, 768)
+        assert r"\fad(" in ass_title("X", 3.0, 1344, 768)
 
 
 class TestEpithets:
