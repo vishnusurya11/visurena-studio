@@ -27,6 +27,20 @@ longer (his Birdman teaser keeps a single 32-second take).  Stretching the
 arc keeps its SHAPE -- the variety and the late acceleration -- while cutting
 the shot count to something a generated pipeline can actually cover."""
 
+MAX_SHOT = 4.0
+"""No shot may run longer than this, wherever the onsets happen to fall.
+
+`cut_points` takes the onset NEAREST the arc's next position, unconditionally,
+which is right when the music is dense and wrong when it is not.  The chosen
+Scarlet cue has ONE onset in its entire eighth decile -- 81.4s to 91.6s -- and
+the corpus arc asks for its fastest cutting at exactly 85-90%.  With nothing
+near to land on, one shot stretched to 7.42 seconds at the climax: a static
+bearded man held for a quarter of the trailer's final third.
+
+The real fix is upstream -- the cue should have been asked for density there,
+and refused for arriving without it.  This is the floor under that.
+"""
+
 MIN_SHOT = 0.4
 """Below this a shot reads as a flash frame rather than an image."""
 
@@ -84,9 +98,12 @@ def cut_points(duration: float, grid: list[float], start: float = 0.0,
         if nominal >= duration - MIN_SHOT:
             break
         ahead = [g for g in usable if g > points[-1] + MIN_SHOT]
-        landed = min(ahead, key=lambda g: abs(g - nominal)) if ahead else nominal
+        ceiling = points[-1] + MAX_SHOT
+        near = [g for g in ahead if g <= ceiling] or ahead
+        landed = min(near, key=lambda g: abs(g - nominal)) if near else nominal
         if landed <= points[-1] + MIN_SHOT:
             landed = points[-1] + target_length(position) * stretch
+        landed = min(landed, ceiling)
         points.append(quantise(landed, fps))
     if duration - points[-1] < MIN_SHOT and len(points) > 1:
         points.pop()

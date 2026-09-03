@@ -19,16 +19,16 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 
-from studio.shot_grammar import FRAMING, camera_for, choose_sizes
+from studio.shot_grammar import (FRAMING, cause_of, choose_sizes,
+                                 destination_of, motivated_move)
 from studio.trailer_dialogue import assign_lines, dialogue_candidates, pick_lines
 from studio.trailer_edit import cut_points, lengths_of
-from studio.trailer_order import allocate, interleave, is_cyclic
+from studio.trailer_order import best_scatter, refuse_repetitive
 from studio.trailer_plan import arc_for
 from studio.trailer_spec import MusicBed, RefSheet, ShotSpec, TrailerBeat, TrailerPlan
-from studio.trailer_story import (IMAGE_GATE, action_elements, corpus_frequency,
-                                  deduplicate, distinctiveness, figure_of,
-                                  lead_of, load_iconicity, people_in, principal_of,
-                                  resolution_scenes, turn_of)
+from studio.trailer_story import (action_text, figure_of, lead_of,
+                                  load_iconicity, people_in, principal_of,
+                                  resolution_scenes, select_setups, turn_of)
 
 ROOT = Path(__file__).resolve().parents[2]
 SETUPS = 18
@@ -36,41 +36,6 @@ SETUPS = 18
 
 def load(path: Path) -> dict:
     return json.loads(path.read_text(encoding="utf-8"))
-
-
-def pick_setups(scenes: list[dict], refs: dict, count: int) -> list[dict]:
-    """Distinct visual setups, chosen from every action line in the book."""
-    lead = lead_of(scenes)
-    figure = figure_of(scenes, lead)
-    banned = resolution_scenes(scenes, lead, figure)
-    counts, total = corpus_frequency(scenes)
-
-    usable = [e for e in deduplicate(action_elements(scenes))
-              if e["scene"] not in banned
-              and IMAGE_GATE.search(e["text"])
-              and f"loc-{e['location_id']}" in refs]
-    if not usable:
-        raise SystemExit("no usable elements: every scene is banned or has no plate")
-
-    windows: list[list[dict]] = [[] for _ in range(count)]
-    span = max(s["number"] for s in scenes)
-    for element in usable:
-        windows[min(int((element["scene"] - 1) / span * count), count - 1)].append(element)
-
-    chosen: list[dict] = []
-    seen_scenes: set[int] = set()
-    places: dict[str, int] = {}
-    for window in windows:
-        ranked = sorted(window, key=lambda e: -distinctiveness(e["text"], counts, total))
-        for element in ranked:
-            place = element["location_id"]
-            if element["scene"] in seen_scenes or places.get(place, 0) >= 2:
-                continue
-            chosen.append(element)
-            seen_scenes.add(element["scene"])
-            places[place] = places.get(place, 0) + 1
-            break
-    return chosen
 
 
 def beat_of(element: dict, index: int, position: float, refs: dict,
@@ -82,11 +47,34 @@ def beat_of(element: dict, index: int, position: float, refs: dict,
     twenty-third copy of the same slow push-in.
     """
     principal = principal_of(element["cast"], set(refs), lead, figure)
+    # The setup's OWN camera term drives the move.  Passing a constant "medium"
+    # here made camera_for return "tracks in" for all nine beats, so every take
+    # was the same push-in -- and a push-in sampled at four offsets is one image
+    # at four focal lengths, which is why 23% of the cut was duplicate frames.
     return TrailerBeat(
         beat_id=f"B{index:02d}", scene_number=element["scene"], arc=arc_for(position),
         location_id=element["location_id"], cast=[principal] if principal else [],
-        image_prompt=element["text"],
-        motion=camera_for(element["text"], "medium", position))
+        image_prompt=action_text(element),
+        motion=move_for(element, position))
+
+
+TERM_MOVE = {"dolly in": ("pushes in", "small"), "handheld": ("follows", "moderate"),
+             "rack focus": ("racks focus", "small"), "pan left": ("pans left", "wide"),
+             "pan right": ("pans right", "wide"), "tilt up": ("tilts up", "wide"),
+             "locked-off": ("static", "")}
+"""The screenplay already chose the move; honour it rather than inventing one."""
+
+
+def move_for(setup: dict, position: float) -> str:
+    """This setup's own camera sentence, from the term the adapter wrote."""
+    move, amplitude = TERM_MOVE.get(setup.get("term", "locked-off"),
+                                    ("pushes in", "small"))
+    if move == "static":
+        return motivated_move("static", "", "", "", "")
+    text = action_text(setup)
+    destination = destination_of(text) or "the subject"
+    return motivated_move(move, amplitude, "quick" if position >= 0.85 else "slow",
+                          cause_of(text), destination)
 
 
 def shots_for(beats: list[TrailerBeat], points: list[float], scenes: dict,
@@ -98,9 +86,11 @@ def shots_for(beats: list[TrailerBeat], points: list[float], scenes: dict,
     times, each pass faster.  That is a loop, and no gate looked for one.
     """
     lengths = lengths_of(points)
-    order = interleave([b.beat_id for b in beats], len(lengths))
-    if is_cyclic(order):
-        raise SystemExit("REFUSED: the shot order repeats its own beat sequence")
+    order = best_scatter([b.beat_id for b in beats], len(lengths))
+    try:
+        refuse_repetitive(order, min_gap=3, max_repeat=3)
+    except ValueError as why:
+        raise SystemExit(f"REFUSED: {why}") from why
     by_id = {b.beat_id: b for b in beats}
 
     bound = [bool(by_id[i].cast) for i in order]
@@ -170,7 +160,16 @@ def main(book_glob: str, trailer_id: str = "main") -> None:
     scenes = screenplay["scenes"]
     lead, figure = lead_of(scenes), figure_of(scenes, lead_of(scenes))
     turn = turn_of(scenes, lead)
-    elements = pick_setups(scenes, refs, SETUPS)
+    # One image per cut.  Professional trailers run one distinct setup every
+    # 2-3 seconds and never reuse one; the shipped cut asked 9 images to carry
+    # 31 shots, which forced 23% of the picture to be frames already seen.
+    wanted = len(cut_points(cue["title_stopdown"], cue["grid"])) - 1
+    elements = select_setups(scenes, set(refs), wanted, load_iconicity(book))
+    if len(elements) < wanted * 0.8:
+        raise SystemExit(
+            f"REFUSED: {wanted} cuts over {len(elements)} setups is "
+            f"{wanted / max(len(elements), 1):.1f} uses per image; render more "
+            f"location plates or cut shorter")
     beats = [beat_of(e, i, i / max(len(elements) - 1, 1), refs, lead, figure)
              for i, e in enumerate(elements)]
     refuse_unbindable(beats, scenes, refs)

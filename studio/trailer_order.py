@@ -141,3 +141,84 @@ def refuse_repetitive(order: list[str], min_gap: int = 5,
         raise ValueError(
             f"a run of {run} shots repeats verbatim; that is the screenplay "
             f"played twice, not a trailer")
+
+
+def widest_feasible_gap(setups: list[str], uses: dict[str, int],
+                        count: int) -> int:
+    """The largest return gap this many images can actually hold.
+
+    Two ceilings.  A gap of g means every window of g+1 shots holds g+1
+    distinct setups, so g <= len(setups) - 2 -- at exactly len(setups) - 1 the
+    only legal order is round robin, which is the loop we are avoiding.  And
+    the most-used setup must fit its uses into the runtime.
+    """
+    top = max(uses.values()) if uses else 1
+    if top < 2:
+        return len(setups)
+    return max(1, min(len(setups) - 2, (count - 1) // (top - 1) - 1))
+
+
+def eligible(setups: list[str], pool: dict[str, int], order: list[str],
+             gap: int) -> list[str]:
+    """Setups that may play next: uses left, cooled off, no repeated pair.
+
+    Banning a repeated PAIR is what stops a long verbatim run before it starts:
+    a run of length k contains k-1 adjacent pairs, so forbidding a repeated
+    pair forbids a repeated run.  One cheap local rule buys the global
+    property that `longest_repeat` measures.
+    """
+    hot = set(order[-gap:]) if gap else set()
+    played = {(a, b) for a, b in zip(order, order[1:])}
+    previous = order[-1] if order else None
+    ready = [s for s in setups if pool[s] > 0 and s not in hot
+             and (previous is None or (previous, s) not in played)]
+    return ready or [s for s in setups if pool[s] > 0 and s != previous]
+
+
+def scatter(setups: list[str], count: int, hero: int = 3,
+            seed: int = 0) -> list[str]:
+    """Order `count` shots so no image returns before `gap` others have played.
+
+    NOT even spacing.  Even spacing of equal shares is round robin, and round
+    robin is precisely the loop that shipped -- B00..B08 three times.  The
+    property wanted is irregular but never soon, so the gap is a floor and the
+    choice within it is random.
+    """
+    from random import Random
+
+    uses = allocate(setups, count, hero)
+    gap = widest_feasible_gap(setups, uses, count)
+    pool, order, rng = dict(uses), [], Random(seed)
+    while len(order) < count:
+        ready = eligible(setups, pool, order, gap)
+        if not ready:
+            raise ValueError(
+                f"{count} shots need more than {len(setups)} setups to keep "
+                f"{gap} shots between returns")
+        pick = max(ready, key=lambda s: (pool[s], rng.random()))
+        order.append(pick)
+        pool[pick] -= 1
+    return order
+
+
+def best_scatter(setups: list[str], count: int, hero: int = 3,
+                 tries: int = 64) -> list[str]:
+    """The widest-spread scatter over several seeds.
+
+    Greedy-with-randomness can corner itself and fall back to the relaxed rule;
+    trying a few seeds and keeping the best costs microseconds.  Seeded, so a
+    plan rebuilds identically.
+    """
+    if not setups:
+        return []
+    orders = [scatter(setups, count, hero, seed) for seed in range(tries)]
+    best = max(orders, key=lambda o: (shortest_return(o), -longest_repeat(o)))
+    # Refuse rather than return a loop.  `eligible` relaxes its own rule when
+    # it corners itself, which is right for one awkward step and wrong as an
+    # outcome: two setups over thirty-one shots can only alternate, and
+    # returning that quietly is how a loop reached the screen with green tests.
+    if shortest_return(best) < 2:
+        raise ValueError(
+            f"{count} shots over {len(setups)} setups cannot avoid showing the "
+            f"same image every other cut; render more setups or cut shorter")
+    return best

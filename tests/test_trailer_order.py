@@ -3,7 +3,9 @@ from __future__ import annotations
 
 import pytest
 
-from studio.trailer_order import allocate, interleave, is_cyclic
+from studio.trailer_order import (allocate, interleave, is_cyclic,
+                                  longest_repeat, refuse_repetitive,
+                                  shortest_return)
 
 
 
@@ -99,3 +101,53 @@ class TestTheGateThatMissedIt:
                  + [f"B{i:02d}" for i in [6, 7, 8, 9, 10, 11, 0, 1, 2, 3, 4, 5]]
                  + [f"B{i:02d}" for i in [0, 3, 6, 9, 1, 4, 7]])
         refuse_repetitive(order, min_gap=3, max_repeat=6)
+
+
+class TestScatter:
+    """Even spacing is round robin, and round robin IS the loop.
+
+    Measured: spreading a uniform allocation by target position returns
+    B00..B08 three times -- exactly the shipped defect -- because the target
+    positions of every setup's k-th use coincide.  Maximum separation over a
+    small pool is the repeated permutation.  The property wanted is irregular
+    but never soon: a FLOOR on the return gap, a ban on repeating a pair, and
+    randomness inside that.
+    """
+
+    def test_it_returns_the_count_asked_for(self):
+        from studio.trailer_order import best_scatter
+        setups = [f"B{i:02d}" for i in range(9)]
+        assert len(best_scatter(setups, 31)) == 31
+
+    def test_it_survives_its_own_repetition_gate(self):
+        """The test that was missing.  Every earlier test checked the gate
+        against a fixture, or the producer against the defeated is_cyclic.
+        Nothing ran the gate on the producer's own output, which is why the
+        suite was green and the trailer was a loop."""
+        from studio.trailer_order import best_scatter
+        for setups in (9, 12, 18, 24):
+            ids = [f"B{i:02d}" for i in range(setups)]
+            order = best_scatter(ids, 31)
+            refuse_repetitive(order, min_gap=3, max_repeat=3)
+
+    def test_it_beats_the_greedy_order_it_replaces(self):
+        from studio.trailer_order import best_scatter
+        setups = [f"B{i:02d}" for i in range(9)]
+        assert shortest_return(best_scatter(setups, 31)) > shortest_return(SHIPPED)
+        assert longest_repeat(best_scatter(setups, 31)) < longest_repeat(SHIPPED)
+
+    def test_one_image_per_cut_needs_no_scattering_at_all(self):
+        from studio.trailer_order import best_scatter
+        setups = [f"B{i:02d}" for i in range(31)]
+        order = best_scatter(setups, 31)
+        assert len(set(order)) == 31
+
+    def test_it_is_deterministic(self):
+        from studio.trailer_order import best_scatter
+        setups = [f"B{i:02d}" for i in range(12)]
+        assert best_scatter(setups, 31) == best_scatter(setups, 31)
+
+    def test_it_says_so_when_the_slate_is_too_thin(self):
+        from studio.trailer_order import best_scatter
+        with pytest.raises(ValueError):
+            best_scatter(["A", "B"], 31)

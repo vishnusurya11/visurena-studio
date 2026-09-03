@@ -15,10 +15,13 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 
-from studio.beatmap import (envelope, onsets, stopdowns, structural_impacts,
-                            title_moment, trailer_fitness)
+from dataclasses import asdict
+
+from studio.beatmap import (envelope, late_density, onsets, stopdowns,
+                            structural_impacts, title_moment, trailer_fitness)
 from studio.comfy import run
-from studio.trailer_music import PINNED_DURATION, caption, lyrics_plan
+from studio.music_tone import caption, load_tone, lyrics_plan, sections_for
+from studio.trailer_music import PINNED_DURATION
 
 ROOT = Path(__file__).resolve().parents[2]
 
@@ -47,10 +50,22 @@ def duration_of(audio: Path) -> float:
     return 0.0
 
 
-def main(book_glob: str, palette: str, seeds: list[int]) -> None:
+def main(book_glob: str, seeds: list[int], seconds: float = 100.0) -> None:
+    """Render candidate cues FOR THIS BOOK and keep the one that measures best.
+
+    `palette` used to be the second argument and it was the book's VISUAL grade
+    string -- colour words, pasted into a music prompt because the two ideas
+    share a word.  It was the only book-specific token in the caption.  The
+    tone is authored per book now, beside the reference sheets, for the same
+    reason those are: it is a decision about the work, not about the render.
+    """
     book = next(p for p in (ROOT / "library").iterdir() if p.name.startswith(book_glob))
     dest_dir = book / "trailer/music"
     dest_dir.mkdir(parents=True, exist_ok=True)
+    tone = load_tone(book)
+    sections = sections_for(round(seconds / 11.1))
+    print(f"  tone: {tone.genre}")
+    print(f"  lead: {tone.lead_instrument}")
     candidates: list[dict] = []
 
     for seed in seeds:
@@ -58,7 +73,7 @@ def main(book_glob: str, palette: str, seeds: list[int]) -> None:
         if not dest.exists():
             print(f"  rendering cue seed={seed} ...")
             written = run("audio_minimax_music_3", {
-                "caption": caption(palette), "lyrics": lyrics_plan(),
+                "caption": caption(tone), "lyrics": lyrics_plan(sections, seconds),
                 "duration": PINNED_DURATION, "seed": seed, "steps": 30,
                 "cfg_scale": 1.7, "top_k": 50, "format": "flac",
                 "filename_prefix": f"CUE-{book.name[:8]}-{seed}"}, timeout=1800)
@@ -68,8 +83,9 @@ def main(book_glob: str, palette: str, seeds: list[int]) -> None:
         entry = {"seed": seed, "rel_path": f"trailer/music/{dest.name}",
                  "seconds": round(float(times[-1]), 2),
                  "lra": loudness_range(dest),
-                 "fitness": round(trailer_fitness(times, db), 1),
+                 "fitness": round(trailer_fitness(times, db, onsets(times, db)), 1),
                  "grid": [round(t, 2) for t in onsets(times, db)],
+                 "late_onsets": late_density(onsets(times, db), float(times[-1])),
                  "impacts": [round(t, 2) for t in structural_impacts(times, db)],
                  "stopdowns": [round(t, 2) for t in stopdowns(times, db)],
                  "title_stopdown": round(moment[0], 2) if moment else None,
@@ -82,10 +98,11 @@ def main(book_glob: str, palette: str, seeds: list[int]) -> None:
     best = max(candidates, key=lambda c: c["fitness"])
     (dest_dir / "cues.json").write_text(
         json.dumps({"chosen": best["seed"], "chosen_path": best["rel_path"],
+                    "caption": caption(tone), "tone": asdict(tone),
                         "candidates": candidates}, indent=1),
         encoding="utf-8")
     print(f"chosen: seed {best['seed']} (fitness {best['fitness']}, title at {best['title_impact']}s)")
 
 
 if __name__ == "__main__":
-    main(sys.argv[1], sys.argv[2], [int(s) for s in sys.argv[3].split(",")])
+    main(sys.argv[1], [int(s) for s in sys.argv[2].split(",")])

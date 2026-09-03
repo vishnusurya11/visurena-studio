@@ -198,37 +198,106 @@ def element_value(element: dict, lead: str | None, figure: str | None) -> float:
     return score
 
 
-def select_setups(scenes: list[dict], count: int, lead: str | None,
-                  figure: str | None, restricted: set[int]) -> list[dict]:
-    """`count` distinct visual setups, spread across the story's shape.
+def select_setups(scenes: list[dict], refs: set[str], count: int,
+                  iconicity: dict | None = None,
+                  max_share: float = 0.35) -> list[dict]:
+    """`count` DISTINCT authored setups, ranked by value and spread by scene.
 
-    One element per setup, at most one per scene, and no location used more
-    than twice -- the previous selector's whole failure was that eleven scenes
-    had to carry thirty-three shots, so each appeared three times over.
+    The rule this replaces took one element per scene and capped each location
+    at two.  For A Study in Scarlet that made NINE the arithmetic maximum --
+    twelve eligible scenes over six locations -- and thirty-one shots were then
+    cut out of those nine, so 23% of the delivered picture was frames already
+    on screen.  Two of them were pixel-identical nineteen seconds apart.
+
+    Selection now draws on `scene["shots"]`: 411 framings the screenplay itself
+    authored, each with an element span, which no trailer code had ever read.
     """
-    candidates = [e for e in action_elements(scenes) if e["scene"] not in restricted]
-    if not candidates:
+    iconicity = iconicity or {}
+    pool = [c for c in authored_setups(scenes)
+            if is_bindable(c, refs) and photographable_setup(c)]
+    if not pool:
         return []
-    windows: list[list[dict]] = [[] for _ in range(count)]
-    span = max(sc["number"] for sc in scenes)
-    for element in candidates:
-        index = min(int((element["scene"] - 1) / span * count), count - 1)
-        windows[index].append(element)
+    first, last = appearance_scenes(scenes)
+    ranked = sorted(pool, key=lambda c: (-setup_value(c, first, last, refs,
+                                                      iconicity),
+                                         c["scene"], c["index"]))
+    return _take_spread(ranked, scene_quota(pool, count), count, max_share)
 
-    chosen: list[dict] = []
-    used_scenes: set[int] = set()
-    used_places: dict[str, int] = {}
-    for window in windows:
-        ranked = sorted(window, key=lambda e: -element_value(e, lead, figure))
-        for element in ranked:
-            place = element["location_id"]
-            if element["scene"] in used_scenes or used_places.get(place, 0) >= 2:
-                continue
-            chosen.append(element)
-            used_scenes.add(element["scene"])
-            used_places[place] = used_places.get(place, 0) + 1
+
+def _take_spread(ranked: list[dict], quota: dict[int, int], count: int,
+                 max_share: float) -> list[dict]:
+    """Best first, but never more than a scene's quota or a place's share."""
+    from collections import Counter
+
+    taken: list[dict] = []
+    per_scene: Counter = Counter()
+    per_place: Counter = Counter()
+    ceiling = max(1, int(count * max_share))
+    for candidate in ranked:
+        if len(taken) >= count:
             break
-    return chosen
+        if per_scene[candidate["scene"]] >= quota.get(candidate["scene"], 1):
+            continue
+        if per_place[candidate["location_id"]] >= ceiling:
+            continue
+        taken.append(candidate)
+        per_scene[candidate["scene"]] += 1
+        per_place[candidate["location_id"]] += 1
+    return _backfill(taken, ranked, count, per_place, ceiling)
+
+
+def _backfill(taken: list[dict], ranked: list[dict], count: int,
+              per_place, ceiling: int) -> list[dict]:
+    """Quotas underfill.  The old selector returned nine for a request of
+    eighteen and printed a success line; take the next best globally instead."""
+    chosen = {(c["scene"], c["index"]) for c in taken}
+    for candidate in ranked:
+        if len(taken) >= count:
+            break
+        key = (candidate["scene"], candidate["index"])
+        if key in chosen or per_place[candidate["location_id"]] >= ceiling:
+            continue
+        taken.append(candidate)
+        chosen.add(key)
+        per_place[candidate["location_id"]] += 1
+    return taken
+
+
+def is_bindable(candidate: dict, refs: set[str]) -> bool:
+    """A location plate exists for this setup's place.
+
+    Worth naming, because it is invisible from inside a score: seven of
+    thirteen locations have no plate, which deletes every Utah setup -- Lucy,
+    the farm, the riders, the alkali plain.  No ranking can rescue a place with
+    no picture to bind to; that is a reference gap, not a selection one.
+    """
+    return f"loc-{candidate['location_id']}" in refs
+
+
+def photographable_setup(candidate: dict) -> bool:
+    """Is there a thing here a camera could point at.
+
+    Gated on the setup prose AND the action it covers: setup prose is camera
+    language, and the objects live in the lines underneath it.
+    """
+    return bool(IMAGE_GATE.search(action_text(candidate)))
+
+
+def scene_quota(pool: list[dict], count: int) -> dict[int, int]:
+    """How many setups each scene may contribute, by its share of the pool.
+
+    A quota lets one ninety-second scene carry five setups -- the body, the
+    ring, the writing on the wall, the objects on the stair, the cab -- which is
+    what a scene that long is worth.  The rule it replaces took exactly one and
+    moved on, which is how the most-remembered image in the book was
+    unreachable.
+    """
+    from collections import Counter
+
+    available = Counter(c["scene"] for c in pool)
+    total = sum(available.values()) or 1
+    return {scene: min(max(1, round(count * n / total)), n)
+            for scene, n in available.items()}
 
 
 IMAGE_GATE = re.compile(
@@ -388,3 +457,148 @@ def principal_of(scene_cast: list[str], refs: set[str], lead: str | None,
     if not present:
         return None
     return min(present, key=lambda c: (c != lead, c != figure, c))
+
+
+# ---------------------------------------------------------------- authored setups
+
+CAMERA_WORDS = {"Locked", "Dolly", "Handheld", "Rack", "Pan", "Tilt", "Close",
+                "Medium", "Wide", "Insert", "Extreme", "Two", "The", "He", "She",
+                "His", "Her", "It", "They", "Inside", "Outside", "Early", "Later"}
+"""Words that appear capitalised in setup prose without naming anything."""
+
+
+def authored_setups(scenes: list[dict]):
+    """Every framing the screenplay already wrote, as a shot candidate.
+
+    411 of them for A Study in Scarlet, against 268 raw action lines -- and each
+    is a camera position with an element span rather than a sentence that
+    happens to contain a photographable noun.  `scene["shots"]` has been in the
+    file since the screenplay stage and no trailer code had ever read it.
+
+    The selector it replaces took at most ONE element per scene and capped each
+    location at two, which made nine setups the arithmetic maximum for this
+    book.  Thirty-one shots were then cut out of those nine.
+    """
+    for scene in scenes:
+        for shot in scene.get("shots") or []:
+            yield {"scene": scene["number"], "index": shot["index"],
+                   "setup": shot["setup"], "term": shot.get("term", "locked-off"),
+                   "location_id": scene["slug"]["location_id"],
+                   "duration_s": scene.get("duration_s", 0.0),
+                   "cast": people_in(scene),
+                   "covers": covered_elements(scene, shot)}
+
+
+def covered_elements(scene: dict, shot: dict) -> list[dict]:
+    """The elements one authored setup puts on screen.
+
+    This join is what makes dialogue reachable from the image channel:
+    `action_elements` filtered `kind == "action"`, so "You have been in
+    Afghanistan, I perceive." could never be chosen as a picture.
+    """
+    start = shot.get("covers_start", 0)
+    end = shot.get("covers_end", start)
+    return scene.get("elements", [])[start:end + 1]
+
+
+def action_text(candidate: dict) -> str:
+    """Setup prose plus the action it covers.
+
+    Gating on the setup prose alone drops most candidates, because setup prose
+    is camera language and the objects live in the lines it covers.
+    """
+    covered = " ".join(e.get("text", "") for e in candidate.get("covers", [])
+                       if e.get("kind") == "action")
+    return f"{candidate.get('setup', '')} {covered}".strip()
+
+
+def is_emphasised(candidate: dict) -> bool:
+    """The adapter spent a camera move here.
+
+    43 of 411 setups carry one, and read as a highlight reel: the dolly toward
+    Watson as Holmes names Afghanistan, the aneurism, the handcuffs, the tilt to
+    the buzzards over Lucy, the two pills.  It is the only signal in the file
+    whose author was deciding EMPHASIS rather than coverage.
+    """
+    return candidate.get("term", "locked-off") != "locked-off"
+
+
+def _density(candidate: dict, mark: str) -> float:
+    covered = candidate.get("covers") or []
+    if not covered:
+        return 0.0
+    return sum(e.get("provenance") == mark for e in covered) / len(covered)
+
+
+def verbatim_density(candidate: dict) -> float:
+    """Share of covered elements the adaptation refused to paraphrase.
+
+    259 of 541 elements are verbatim Doyle.  That is a per-line memorability
+    judgment already made and cached; a ratio rather than a count, so it cannot
+    become a proxy for length.
+    """
+    return _density(candidate, "verbatim")
+
+
+def invented_density(candidate: dict) -> float:
+    """Share invented for the adaptation.  A reader cannot remember these."""
+    return _density(candidate, "invented")
+
+
+def named_things(text: str, cap: int = 3) -> int:
+    """Proper nouns and shouted words, minus the camera vocabulary.
+
+    Catches the icons that carry no camera move -- RACHE, Drebber, Lucy, Baker
+    Street.  Capped so a long setup cannot outrank a sharp one.
+    """
+    found = set(re.findall(r"\b([A-Z][a-z]{2,}|[A-Z]{4,})\b", text)) - CAMERA_WORDS
+    return min(len(found), cap)
+
+
+def appearance_scenes(scenes: list[dict]) -> tuple[dict, dict]:
+    """First and last scene number for every character."""
+    first: dict[str, int] = {}
+    last: dict[str, int] = {}
+    for scene in scenes:
+        for who in people_in(scene):
+            first.setdefault(who, scene["number"])
+            last[who] = scene["number"]
+    return first, last
+
+
+def is_entrance_or_exit(candidate: dict, first: dict, last: dict,
+                        refs: set[str]) -> bool:
+    """Someone the trailer can bind arrives or leaves in this scene.
+
+    Entrances and exits are what a viewer can follow.  The previous cut had no
+    face the eye could track because nothing in selection knew who was new.
+    """
+    return any(f"char-{who}" in refs
+               and candidate["scene"] in (first.get(who), last.get(who))
+               for who in candidate.get("cast", []))
+
+
+def bound_convergence(candidate: dict, refs: set[str], cap: int = 3) -> float:
+    """How much of the frame can actually be identity-bound, 0..1."""
+    bound = sum(1 for who in candidate.get("cast", []) if f"char-{who}" in refs)
+    return min(bound, cap) / cap
+
+
+def setup_value(candidate: dict, first: dict, last: dict, refs: set[str],
+                iconicity: dict) -> float:
+    """How much trailer one authored setup is worth.
+
+    Replaces `distinctiveness`, which averaged the three highest IDF values in a
+    line and SATURATED: 75 of 268 lines tied at the ceiling, so the sort fell
+    back to document order.  RACHE lost to wet grass because wet grass appears
+    earlier in the JSON.  A metric that ties a quarter of its corpus at the top
+    is not ranking anything.
+    """
+    text = action_text(candidate)
+    return (3.0 * is_emphasised(candidate)
+            + 2.5 * verbatim_density(candidate)
+            + 1.0 * named_things(text)
+            + 1.5 * is_entrance_or_exit(candidate, first, last, refs)
+            + 1.0 * bound_convergence(candidate, refs)
+            - 1.5 * invented_density(candidate)
+            + 6.0 * iconicity.get(candidate["scene"], 0.0))

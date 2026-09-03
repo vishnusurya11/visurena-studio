@@ -474,3 +474,32 @@ class TestLimiterAutoLevel:
         """They are summed with a bed that itself arrives at 0.00 dBTP."""
         from studio.sfx import HEADROOM
         assert HEADROOM <= 0.75
+
+
+class TestMaxShot:
+    """One shot ran 7.42s at the 89% position, where the corpus target is 0.54s.
+
+    The cue has a single onset in its whole eighth decile, so `cut_points` --
+    which takes the onset NEAREST the arc's next position, unconditionally --
+    had nothing near to land on and stretched one shot across the gap.  Taking
+    the nearest onset is right; taking an onset four seconds away is not.
+    """
+
+    def test_no_shot_exceeds_the_ceiling(self):
+        from studio.trailer_edit import MAX_SHOT, cut_points, lengths_of
+        sparse = [0.0, 1.0, 2.0, 3.0, 4.0, 30.0, 31.0, 32.0]
+        for length in lengths_of(cut_points(33.0, sparse)):
+            assert length <= MAX_SHOT + 1e-6, length
+
+    def test_a_dense_grid_is_unaffected(self):
+        from studio.trailer_edit import MAX_SHOT, cut_points, lengths_of
+        dense = [i * 0.5 for i in range(1, 160)]
+        lengths = lengths_of(cut_points(78.0, dense))
+        assert max(lengths) <= MAX_SHOT + 1e-6
+
+    def test_the_shots_still_land_on_onsets_where_onsets_exist(self):
+        from studio.trailer_edit import cut_points
+        dense = [i * 0.5 for i in range(1, 160)]
+        points = cut_points(78.0, dense)
+        on = sum(1 for p in points[1:-1] if any(abs(p - g) <= 0.05 for g in dense))
+        assert on == len(points) - 2

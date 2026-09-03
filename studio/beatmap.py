@@ -167,14 +167,34 @@ def dynamic_range(db: np.ndarray) -> float:
     return float(np.percentile(db, 95) - np.percentile(db, 5))
 
 
-def trailer_fitness(times: np.ndarray, db: np.ndarray) -> float:
-    """How usable a cue is as a trailer bed.  Higher is better.
+def late_density(grid: list[float], seconds: float,
+                 low: float = 0.80, high: float = 0.95) -> int:
+    """Onsets in the window where the arc cuts fastest.
 
-    A trailer needs a late hit set up by silence, and a grid an editor can
-    actually choose from.
+    The corpus arc reaches its shortest shots at 85-90%, and `cut_points` can
+    only land on onsets the cue actually contains.  A cue that empties out
+    there cannot be cut to the arc no matter how good its numbers are
+    elsewhere, and the picture silently loses.
     """
-    if title_moment(times, db) is None:
-        return 0.0
+    return sum(1 for onset in grid if low * seconds <= onset <= high * seconds)
+
+
+def trailer_fitness(times, db, grid: list[float] | None = None) -> float:
+    """How cuttable this cue is.
+
+    `dynamic_range * crowding` scored the whole piece and never asked WHERE
+    the events were, so a cue with a hole exactly where the trailer needs its
+    fastest cutting scored as well as one without.  The late-density term is
+    the missing half: it is the difference between a cue you can cut to and a
+    cue you have to fight.
+    """
+    events = len(grid) if grid is not None else 0
+    crowding = 1.0 if 15 <= events <= 120 else 0.5
+    if grid is None:
+        crowding = 1.0
+    late = late_density(grid or [], float(times[-1]))
+    reach = min(late, 4) / 4.0 if grid is not None else 1.0
+    return dynamic_range(db) * crowding * (0.4 + 0.6 * reach)
     grid = len(onsets(times, db))
     crowding = 1.0 if 15 <= grid <= 120 else 0.5
     return dynamic_range(db) * crowding
