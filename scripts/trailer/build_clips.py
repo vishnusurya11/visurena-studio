@@ -15,6 +15,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 
+from studio.clip_cache import digest_of, is_current, record
 from studio.comfy import run, stage_image
 from studio.h3 import NATIVE_H, NATIVE_W, frames_for
 from studio.trailer_refs import visual_description
@@ -55,12 +56,6 @@ def main(book_glob: str, trailer_id: str = "main") -> None:
 
     for index, beat in enumerate(plan["beats"]):
         dest = clips_dir / f"{beat['beat_id']}.mp4"
-        if is_complete(dest):
-            print(f"  {beat['beat_id']} exists, skipping")
-            continue
-        if dest.exists():
-            print(f"  {beat['beat_id']} is present but unreadable; re-rendering")
-            dest.unlink()
         char_ids = [f"char-{c}" for c in beat["cast"] if f"char-{c}" in refs]
         loc_id = f"loc-{beat['location_id']}"
         slots = char_ids + ([loc_id] if loc_id in refs else [])
@@ -83,15 +78,36 @@ def main(book_glob: str, trailer_id: str = "main") -> None:
             "seed": 51000 + index * 7,
             "ref_image_size": "max",
             "filename_prefix": f"TR-{book.name[:8]}-{beat['beat_id']}"}
-        for slot, ref_id in enumerate(slots[:2], start=1):
+        bound = slots[:2]
+        # The recipe is everything that decides what the model draws, and it
+        # is what identifies the clip.  Skipping on the beat ID meant a plan
+        # rebuilt from scratch reused every old render under the new names.
+        recipe = {
+            "prompt": values["prompt"], "refs": bound, "seed": values["seed"],
+            "frames": values["frames"], "steps": values["steps"],
+            "width": values["width"], "height": values["height"],
+            "workflow": "video_minimax_h3_r2v_turbo",
+            "ref_digests": [digest_of(book / refs[r]["rel_path"]) for r in bound]}
+        # Two questions, asked separately: is the file finished, and is it the
+        # file this plan asks for.  Conflating them is what silently shipped
+        # nine of nine Scarlet clips from the previous plan.
+        if is_complete(dest) and is_current(dest, recipe):
+            print(f"  {beat['beat_id']} is current, skipping")
+            continue
+        if dest.exists():
+            reason = "stale" if is_complete(dest) else "unreadable"
+            print(f"  {beat['beat_id']} is {reason}; re-rendering")
+            dest.unlink()
+        for slot, ref_id in enumerate(bound, start=1):
             values[f"ref_image_{slot}"] = stage_image(book / refs[ref_id]["rel_path"])
         print(f"  [{index + 1}/{len(plan['beats'])}] {beat['beat_id']} "
-              f"<- {', '.join(slots[:2])}")
+              f"<- {', '.join(bound)}")
         written = run("video_minimax_h3_r2v_turbo", values, timeout=3600)
         video = next((p for p in written if p.suffix in (".mp4", ".webm")), None)
         if not video:
             raise RuntimeError(f"{beat['beat_id']} produced no video: {written}")
         dest.write_bytes(video.read_bytes())
+        record(dest, recipe)
         print(f"      -> {dest.name}")
 
 
