@@ -29,6 +29,17 @@ about as fine as a cut can be placed anyway."""
 RATE = 22050
 IMPACT_DB = 6.0
 """A rise this big between adjacent windows reads as a hit, not a swell."""
+
+GRID_DB = 4.0
+"""The threshold for the CUT grid, which is a different question.
+
+An impact is a hit you build a title card around; a cut point only has to be a
+moment the music moves.  At 6.0 dB the grid held 20 onsets over 100s -- one
+every 5s -- so a 2.6s shot looking for its nearest onset had to jump seconds to
+find one, and only 6% of the delivered cuts landed on the music at all.  At
+4.0 dB the same cue yields 59, one every 1.7s, which is roughly 1.5 candidates
+per shot: enough to choose from, not so many that "on the grid" stops meaning
+anything."""
 STOPDOWN_DB = 9.0
 """A fall this big reads as the floor dropping out -- Pryn's stopdown."""
 
@@ -57,7 +68,7 @@ def envelope(audio: Path) -> tuple[np.ndarray, np.ndarray]:
 
 
 def onsets(times: np.ndarray, db: np.ndarray, min_gap: float = 0.35,
-           threshold: float = IMPACT_DB) -> list[float]:
+           threshold: float = GRID_DB) -> list[float]:
     """Candidate cut points: moments the music pushes, thinned by `min_gap`.
 
     Thinning matters musically, not just computationally.  Every drum stroke is
@@ -129,17 +140,32 @@ def title_moment(times: np.ndarray, db: np.ndarray) -> tuple[float, float] | Non
     return None
 
 
+def dynamic_range(db: np.ndarray) -> float:
+    """Loud-to-quiet spread that is not just the peak.
+
+    `db.max() - db.min()` looked like dynamic range and was not.  The digital
+    noise floor of every MiniMax cue measures -52.5 to -53.9 dBFS -- a 1.4 dB
+    spread across five cues -- so subtracting the minimum subtracts a constant
+    and the score reduces to `peak + 53`.  The cue selector was ranking by
+    LOUDNESS, which is the wall-of-sound bug it was written to prevent,
+    reappearing inside its own fix.
+
+    P95 - P5 ignores both the floor and the single loudest window: measured on
+    the same five cues it spans 26.1 to 35.9 dB instead of 43.7 to 48.5, and it
+    independently ranks the two cues that were actually shipped first and
+    second.
+    """
+    return float(np.percentile(db, 95) - np.percentile(db, 5))
+
+
 def trailer_fitness(times: np.ndarray, db: np.ndarray) -> float:
     """How usable a cue is as a trailer bed.  Higher is better.
 
-    Loudness range alone is not enough -- it chose a 90-onset cue over one
-    with a clean 20-point grid and a textbook stopdown-into-hit.  What a
-    trailer needs is a late hit set up by silence, and a grid an editor can
+    A trailer needs a late hit set up by silence, and a grid an editor can
     actually choose from.
     """
     if title_moment(times, db) is None:
         return 0.0
     grid = len(onsets(times, db))
-    spread = float(db.max() - db.min())
-    crowding = 1.0 if 8 <= grid <= 40 else 0.4
-    return spread * crowding
+    crowding = 1.0 if 15 <= grid <= 120 else 0.5
+    return dynamic_range(db) * crowding

@@ -34,9 +34,14 @@ def main(books: list[str]) -> int:
     finished: list[str] = []
     for book in books:
         if all(run_step(step, book) for step in STEPS):
-            subprocess.run([sys.executable, "-u",
-                            str(ROOT / "scripts/trailer/qc.py"), book], cwd=ROOT)
-            finished.append(book)
+            # QC's verdict has to mean something.  Its exit code was discarded,
+            # so a book with failing gates was still reported as finished.
+            gate = subprocess.run([sys.executable, "-u",
+                                   str(ROOT / "scripts/trailer/qc.py"), book], cwd=ROOT)
+            if gate.returncode == 0:
+                finished.append(book)
+            else:
+                print(f"!!! {book} built but FAILED QC", flush=True)
         else:
             print(f"!!! {book} did not complete; continuing to the next book",
                   flush=True)

@@ -97,7 +97,20 @@ def build(book_glob: str, trailer_id: str = "main") -> Path:
     # The card must still be on screen when the cue's own hit arrives.  Cutting
     # it to a fixed hold ended the trailer 0.85s BEFORE the impact -- the same
     # defect as the previous trailer's 5.29s miss, just smaller.
-    title_at = sum(lengths)
+    # MEASURE the picture; do not trust the plan's arithmetic.  ffmpeg's -t
+    # truncates each shot to whole frames, and thirty-three of those truncations
+    # accumulated to 1.28s of drift -- so the card cut in 1.28s early and the
+    # cue's braam landed 5.13s into it instead of 3.85s.  The plan said one
+    # thing and the file did another, and nothing compared them.
+    shots_only = concat(segments, work / "shots.mp4")
+    title_at = clip_seconds(shots_only)
+    planned = sum(lengths)
+    drift = abs(title_at - planned)
+    print(f"  picture: planned {planned:.2f}s, measured {title_at:.2f}s "
+          f"(drift {drift:+.3f}s)")
+    if drift > 2.0 / fps:
+        raise SystemExit(f"REFUSED: delivered picture drifts {drift:.3f}s from the "
+                         f"plan; the title would miss the cue's hit")
     hit_at = plan["music"].get("title_impact") or title_at
     card_seconds = max(FINAL_HOLD, (hit_at - title_at) + FINAL_HOLD)
     card = title_card_ass(plan["title"], work / "title.mp4",

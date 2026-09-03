@@ -39,22 +39,50 @@ def snap(when: float, grid: list[float], tolerance: float = SNAP_TOLERANCE) -> f
     return nearest if abs(nearest - when) <= tolerance else when
 
 
+def quantise(seconds: float, fps: int = 24) -> float:
+    """Round a duration to a whole number of frames.
+
+    `extract` passes `-t` to ffmpeg, which truncates to whole frames: a shot
+    planned at 1.35s renders as 31 frames = 1.292s.  Thirty-three shots of that
+    error accumulated to **1.28 seconds** of drift between the planned picture
+    and the delivered one, so the title card cut in 1.28s early and the cue's
+    braam landed 5.13s into it instead of 3.85s -- the exact defect this stage
+    exists to prevent, for the third time.
+
+    Planning in frames means the plan and the file agree by construction.
+    """
+    return max(1, round(seconds * fps)) / fps
+
+
 def cut_points(duration: float, grid: list[float], start: float = 0.0,
-               stretch: float = LITERARY_STRETCH) -> list[float]:
-    """Shot boundaries across a span, following the arc and snapping to music."""
-    points = [start]
+               stretch: float = LITERARY_STRETCH, fps: int = 24) -> list[float]:
+    """Shot boundaries CHOSEN FROM the musical grid, paced by the arc.
+
+    The previous version walked the arc and snapped to an onset only if one
+    happened to lie within 0.3s.  With 20 onsets over 100s that is a hit rate
+    of about 12%, and measured on the shipped cut it was **2 of 33 = 6%**.  The
+    arc was the timeline and the music was decoration, which is the opposite of
+    what this module claims to do.
+
+    Now the arc proposes and the grid disposes: for each step we take the onset
+    NEAREST the arc's next position, unconditionally.  The music therefore owns
+    every cut, and the arc only decides which onset.
+    """
+    usable = [g for g in grid if start < g < duration]
+    points = [quantise(start, fps)]
     while True:
         position = (points[-1] - start) / max(duration - start, 1e-6)
         nominal = points[-1] + target_length(position) * stretch
-        if nominal >= duration - 0.2:
+        if nominal >= duration - MIN_SHOT:
             break
-        landed = snap(nominal, grid)
-        if landed <= points[-1] + 0.2:
+        ahead = [g for g in usable if g > points[-1] + MIN_SHOT]
+        landed = min(ahead, key=lambda g: abs(g - nominal)) if ahead else nominal
+        if landed <= points[-1] + MIN_SHOT:
             landed = points[-1] + target_length(position) * stretch
-        points.append(round(landed, 3))
+        points.append(quantise(landed, fps))
     if duration - points[-1] < MIN_SHOT and len(points) > 1:
-        points.pop()          # absorb a runt tail rather than cutting to it
-    points.append(duration)
+        points.pop()
+    points.append(quantise(duration, fps))
     return points
 
 

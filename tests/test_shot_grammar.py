@@ -121,3 +121,33 @@ class TestBothChannels:
         elements = [{"scene": 1, "text": "The door has no sign."},
                     {"scene": 2, "text": "Fog presses against the cab windows."}]
         assert len(deduplicate(elements)) == 2
+
+
+class TestDynamicRangeIsNotPeak:
+    """max-min looked like range and was peak, because the floor is constant."""
+
+    def test_the_floor_does_not_decide_the_score(self):
+        import numpy as np
+        from studio.beatmap import dynamic_range
+        body = np.concatenate([np.full(400, -40.0), np.full(400, -12.0)])
+        quiet_floor = np.concatenate([body, np.full(10, -120.0)])
+        loud_floor = np.concatenate([body, np.full(10, -55.0)])
+        assert abs(dynamic_range(quiet_floor) - dynamic_range(loud_floor)) < 1.0
+
+    def test_max_minus_min_would_have_been_fooled(self):
+        import numpy as np
+        body = np.concatenate([np.full(400, -40.0), np.full(400, -12.0)])
+        quiet = np.concatenate([body, np.full(10, -120.0)])
+        loud = np.concatenate([body, np.full(10, -55.0)])
+        assert (quiet.max() - quiet.min()) - (loud.max() - loud.min()) > 60
+
+    def test_a_flat_cue_scores_low(self):
+        import numpy as np
+        from studio.beatmap import dynamic_range
+        assert dynamic_range(np.full(800, -14.0)) < 1.0
+
+    def test_a_dynamic_cue_scores_high(self):
+        import numpy as np
+        from studio.beatmap import dynamic_range
+        varied = np.concatenate([np.full(400, -45.0), np.full(400, -10.0)])
+        assert dynamic_range(varied) > 30.0

@@ -327,3 +327,44 @@ def deduplicate(elements: list[dict], head: int = 60) -> list[dict]:
         seen.add(key)
         kept.append(element)
     return kept
+
+
+def load_iconicity(book: "Path") -> dict[int, float]:
+    """Per-scene memorability, from evidence outside the text.
+
+    Text statistics cannot reach this.  Lexical concreteness measures paragraph
+    length; rarity likes "the commissionaire clicks his heels".  What makes a
+    moment iconic is its reproduction history -- whether illustrators drew it,
+    whether readers quote it, whether the culture kept it -- and none of that is
+    in the book.
+
+    So it arrives as DATA, gathered once per book and cached, never recomputed
+    per run.  Shape:
+
+        {"scenes": {"5": {"score": 0.93, "why": "RACHE by matchlight",
+                          "sources": ["illustration index", "reader reviews"]}}}
+
+    A missing file returns {} and selection falls back to the text signals.
+    That fallback is deliberate: a book nobody has written about should still
+    get a trailer, just a less well-aimed one.
+    """
+    import json as _json
+    path = book / "analysis" / "iconicity.json"
+    if not path.exists():
+        return {}
+    doc = _json.loads(path.read_text(encoding="utf-8"))
+    return {int(k): float(v.get("score", 0.0))
+            for k, v in doc.get("scenes", {}).items()}
+
+
+def with_iconicity(elements: list[dict], iconicity: dict[int, float],
+                   weight: float = 6.0) -> list[dict]:
+    """Attach the cached memorability of each element's scene.
+
+    Weighted heavily on purpose.  When we know a moment is one readers carry,
+    that should outrank every text feature -- those were measured at roughly
+    noise, and this is the only signal with evidence behind it.
+    """
+    for element in elements:
+        element["iconicity"] = iconicity.get(element["scene"], 0.0) * weight
+    return elements

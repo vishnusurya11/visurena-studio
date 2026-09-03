@@ -1,10 +1,14 @@
 #!/usr/bin/env python
-"""Build the trailer plan: which moment plays when, and what it is bound to.
+"""Build the trailer plan: which image plays when, and what it is bound to.
 
-The plan is refused if any shot shows a character it carries no reference for.
-That gate is the whole lesson of the first trailer -- twelve good reference
-sheets existed and the keyframe jobs were plain text-to-image, so nothing ever
-told the model that Holmes looked like anything in particular.
+Selection happens at the ELEMENT level.  A scene is ninety seconds of story and
+a trailer shot is two, so choosing scenes gave eleven candidates for thirty-three
+shots and every setup appeared three times -- in strict rotation, the same
+sequence over and over, which is why the first cuts read as loops.
+
+This script previously imported none of that: `studio/trailer_story.py` existed,
+was tested, was documented as the fix, and was dead code with respect to the
+thing that actually shipped.
 """
 from __future__ import annotations
 
@@ -14,60 +18,121 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 
+from studio.shot_grammar import legible_sizes
 from studio.trailer_edit import cut_points, lengths_of
-from studio.trailer_plan import (action_featuring, arc_for, diversify_locations,
-                                 leading_characters, quotable_lines,
-                                 spread_lead)
+from studio.trailer_order import allocate, interleave, is_cyclic
+from studio.trailer_plan import arc_for
 from studio.trailer_spec import MusicBed, RefSheet, ShotSpec, TrailerBeat, TrailerPlan
+from studio.trailer_story import (IMAGE_GATE, action_elements, corpus_frequency,
+                                  deduplicate, distinctiveness, figure_of,
+                                  lead_of, load_iconicity, people_in,
+                                  resolution_scenes, turn_of)
 
 ROOT = Path(__file__).resolve().parents[2]
+SETUPS = 18
 
 
 def load(path: Path) -> dict:
     return json.loads(path.read_text(encoding="utf-8"))
 
 
-def beat_from_scene(scene: dict, index: int, position: float, refs: dict,
-                    ranking: list[str], used: dict) -> TrailerBeat:
-    """One trailer beat, traceable to one screenplay scene."""
-    slug = scene["slug"]
-    available = {r[len("char-"):] for r in refs if r.startswith("char-")}
-    cast = spread_lead(scene, ranking, available, used)
-    for who in cast:
-        used[who] = used.get(who, 0) + 1
-    lines = [l for l in quotable_lines(scene) if l["character"] in cast]
-    chosen = lines[0] if lines else None
-    names = [refs[f"char-{c}"]["name"] for c in cast if f"char-{c}" in refs]
-    action = action_featuring(scene, names)
+def pick_setups(scenes: list[dict], refs: dict, count: int) -> list[dict]:
+    """Distinct visual setups, chosen from every action line in the book."""
+    lead = lead_of(scenes)
+    figure = figure_of(scenes, lead)
+    banned = resolution_scenes(scenes, lead, figure)
+    counts, total = corpus_frequency(scenes)
+
+    usable = [e for e in deduplicate(action_elements(scenes))
+              if e["scene"] not in banned
+              and IMAGE_GATE.search(e["text"])
+              and f"loc-{e['location_id']}" in refs]
+    if not usable:
+        raise SystemExit("no usable elements: every scene is banned or has no plate")
+
+    windows: list[list[dict]] = [[] for _ in range(count)]
+    span = max(s["number"] for s in scenes)
+    for element in usable:
+        windows[min(int((element["scene"] - 1) / span * count), count - 1)].append(element)
+
+    chosen: list[dict] = []
+    seen_scenes: set[int] = set()
+    places: dict[str, int] = {}
+    for window in windows:
+        ranked = sorted(window, key=lambda e: -distinctiveness(e["text"], counts, total))
+        for element in ranked:
+            place = element["location_id"]
+            if element["scene"] in seen_scenes or places.get(place, 0) >= 2:
+                continue
+            chosen.append(element)
+            seen_scenes.add(element["scene"])
+            places[place] = places.get(place, 0) + 1
+            break
+    return chosen
+
+
+def beat_of(element: dict, index: int, position: float, refs: dict,
+            lead: str | None, figure: str | None) -> TrailerBeat:
+    """One beat from one action line, bound to whoever it can carry."""
+    order = [c for c in (lead, figure) if c] + sorted(element["cast"])
+    cast = [c for c in order if f"char-{c}" in refs][:1]
     return TrailerBeat(
-        beat_id=f"B{index:02d}", scene_number=scene["number"], arc=arc_for(position),
-        location_id=slug["location_id"], cast=cast,
-        image_prompt=action or slug["text"],
-        motion="The camera pushes in with small amplitude at slow speed.",
-        line=chosen["text"] if chosen else None,
-        speaker=chosen["character"] if chosen else None,
-        emotion=(chosen.get("emotion") if chosen else None))
+        beat_id=f"B{index:02d}", scene_number=element["scene"], arc=arc_for(position),
+        location_id=element["location_id"], cast=cast,
+        image_prompt=element["text"],
+        motion="The camera pushes in with small amplitude at slow speed.")
 
 
-def shots_for(beats: list[TrailerBeat], points: list[float], refs: dict) -> list[ShotSpec]:
-    """One shot per cut, cycling the beats so every beat gets screen time.
+def shots_for(beats: list[TrailerBeat], points: list[float], scenes: dict,
+              refs: dict) -> list[ShotSpec]:
+    """Assign beats to cut points WITHOUT repeating the beat sequence.
 
-    Cycling is deliberate rather than lazy: a short repeated in-world action
-    used as a rhythm anchor is a named prestige device (Woollen's chalkboard
-    in A Serious Man, which Garrett calls the defining technique of the last
-    decade), and it is the cheapest thing this pipeline can render.  What
-    would be a defect -- reusing footage -- becomes the intention.
+    The previous rule was `beats[index % len(beats)]`, which produced B00..B10
+    three times over -- not scattered reuse but the same sequence played three
+    times, each pass faster.  That is a loop, and no gate looked for one.
     """
     lengths = lengths_of(points)
+    order = interleave([b.beat_id for b in beats], len(lengths))
+    if is_cyclic(order):
+        raise SystemExit("REFUSED: the shot order repeats its own beat sequence")
+    by_id = {b.beat_id: b for b in beats}
+
     shots: list[ShotSpec] = []
-    for index, (start, length) in enumerate(zip(points, lengths)):
-        beat = beats[index % len(beats)]
+    for index, (start, length, beat_id) in enumerate(zip(points, lengths, order)):
+        beat = by_id[beat_id]
         char_refs = {c: f"char-{c}" for c in beat.cast if f"char-{c}" in refs}
         loc_ref = f"loc-{beat.location_id}" if f"loc-{beat.location_id}" in refs else None
-        shots.append(ShotSpec(beat_id=beat.beat_id, index=index, start=start,
+        shots.append(ShotSpec(beat_id=beat_id, index=index, start=start,
                               seconds=length, cast=beat.cast,
                               char_refs=char_refs, loc_ref=loc_ref))
     return shots
+
+
+def refuse_unbindable(beats: list[TrailerBeat], scenes: list[dict],
+                      refs: dict) -> None:
+    """Check binding against the SCENE's real cast, not the filtered one.
+
+    The old gate could not fail.  `cast` was filtered to characters that have a
+    reference BEFORE `char_refs` was built from it, so coverage was guaranteed
+    by construction -- and Jekyll shipped four shots with no character at all
+    while every gate reported "every shot carries its characters' references".
+    Asking what the SOURCE scene contains is a question the plan cannot answer
+    by construction.
+    """
+    by_number = {s["number"]: s for s in scenes}
+    naked = [b.beat_id for b in beats if not b.cast]
+    if len(naked) > len(beats) // 3:
+        raise SystemExit(f"REFUSED: {len(naked)} of {len(beats)} beats carry no "
+                         f"character at all: {naked}")
+    missing: set[str] = set()
+    for beat in beats:
+        scene = by_number.get(beat.scene_number, {})
+        for who in people_in(scene):
+            if f"char-{who}" not in refs:
+                missing.add(who)
+    if missing:
+        print(f"  note: {len(missing)} characters appear in chosen scenes with no "
+              f"reference sheet: {sorted(missing)[:6]}")
 
 
 def main(book_glob: str, trailer_id: str = "main") -> None:
@@ -81,24 +146,22 @@ def main(book_glob: str, trailer_id: str = "main") -> None:
         raise SystemExit("chosen cue has no title moment; regenerate the music")
 
     scenes = screenplay["scenes"]
-    ranking = leading_characters(scenes)
+    lead, figure = lead_of(scenes), figure_of(scenes, lead_of(scenes))
+    turn = turn_of(scenes, lead)
+    elements = pick_setups(scenes, refs, SETUPS)
+    beats = [beat_of(e, i, i / max(len(elements) - 1, 1), refs, lead, figure)
+             for i, e in enumerate(elements)]
+    refuse_unbindable(beats, scenes, refs)
+
     points = cut_points(cue["title_stopdown"], cue["grid"])
-    # Only scenes whose LOCATION has a plate can be rendered at all -- a beat
-    # with nothing to bind to is silently skipped downstream and then leaves a
-    # hole in the cut.  Filter here, where it is visible.
-    usable = [s for s in scenes
-              if f"loc-{s.get('slug', {}).get('location_id')}" in refs]
-    if len(usable) < 6:
-        raise SystemExit(f"only {len(usable)} scenes have a location plate; "
-                         "generate more refs before planning")
-    picked = diversify_locations(usable, 11)
-    # Position is the beat's place in the TRAILER, not in the screenplay.
-    # Dividing by the scene count capped every beat at 0.48, so no beat ever
-    # reached the "hit" band and the trailer had no climax.
-    used: dict[str, int] = {}
-    beats = [beat_from_scene(s, i, i / max(len(picked) - 1, 1), refs, ranking, used)
-             for i, s in enumerate(picked)]
-    shots = shots_for(beats, points, refs)
+    shots = shots_for(beats, points, screenplay, refs)
+
+    if {"quiet", "build", "hit"} - {b.arc for b in beats}:
+        raise SystemExit("REFUSED: the trailer never reaches a climax")
+    appearances = sum(lead in b.cast for b in beats)
+    if lead and f"char-{lead}" in refs and appearances < max(3, len(beats) // 4):
+        raise SystemExit(f"REFUSED: {lead} leads this story but appears in only "
+                         f"{appearances} of {len(beats)} beats")
 
     plan = TrailerPlan(
         trailer_id=trailer_id, book_id=book.name, title=screenplay["title"],
@@ -111,33 +174,16 @@ def main(book_glob: str, trailer_id: str = "main") -> None:
                        title_stopdown=cue["title_stopdown"],
                        title_impact=cue["title_impact"]))
 
-    # A trailer must contain the story's lead.  Every mechanical gate passed a
-    # Study in Scarlet plan that never once showed Sherlock Holmes, because
-    # nothing was checking for him -- the checks only gate what they measure.
-    lead = ranking[0] if ranking else None
-    if lead and f"char-{lead}" in refs:
-        appearances = sum(lead in beat.cast for beat in beats)
-        if appearances < max(2, len(beats) // 4):
-            raise SystemExit(
-                f"REFUSED: {lead} leads this story but appears in only "
-                f"{appearances} of {len(beats)} beats")
-    # Every register of the arc must be represented, or there is no climax.
-    missing = {"quiet", "build", "hit"} - {beat.arc for beat in beats}
-    if missing:
-        raise SystemExit(f"REFUSED: the trailer has no {sorted(missing)} beats; "
-                         "it rises to nothing")
-
-    unbound = plan.unbound_shots()
-    if unbound:
-        raise SystemExit(f"REFUSED: {len(unbound)} shots show a character with no "
-                         f"reference: {sorted({c for s in unbound for c in s.unbound_cast()})}")
-
     out = book / "trailer" / trailer_id
     out.mkdir(parents=True, exist_ok=True)
     (out / "plan.json").write_text(plan.model_dump_json(indent=1), encoding="utf-8")
-    print(f"{len(beats)} beats, {len(shots)} shots, all bound -> {out / 'plan.json'}")
-    print(f"  title card at {cue['title_impact']}s, stopdown {cue['title_stopdown']}s, "
-          f"cue {cue['seconds']}s")
+    on_grid = sum(1 for p in points[1:-1] if any(abs(p - g) <= 0.05 for g in cue["grid"]))
+    print(f"{len(beats)} setups, {len(shots)} shots, "
+          f"{len({b.location_id for b in beats})} locations, "
+          f"{len(shots) / len(beats):.2f} shots per setup")
+    print(f"  lead {lead} in {appearances} beats; figure {figure}; "
+          f"turn sc{turn['number'] if turn else '?'}")
+    print(f"  {on_grid}/{len(points) - 2} cuts on a measured onset -> {out / 'plan.json'}")
 
 
 if __name__ == "__main__":
