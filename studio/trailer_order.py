@@ -90,3 +90,54 @@ def interleave(setups: list[str], count: int, hero: int = 3) -> list[str]:
         order.append(pick)
         pool[pick] -= 1
     return order
+
+
+def shortest_return(order: list[str]) -> int:
+    """The fewest other shots between any image and its own next use.
+
+    `is_cyclic` asked whether the sequence LOOKED like a repeated list, which a
+    ragged opening defeats.  This asks the thing the viewer actually notices:
+    how soon does a picture come back.  B00 at 0, 2 and 4 returns after one
+    other shot, and that is what "the same shot in the first five seconds"
+    means, measured.
+    """
+    last: dict[str, int] = {}
+    gaps = []
+    for index, setup in enumerate(order):
+        if setup in last:
+            gaps.append(index - last[setup] - 1)
+        last[setup] = index
+    return min(gaps) if gaps else len(order)
+
+
+def longest_repeat(order: list[str]) -> int:
+    """The longest run that appears verbatim more than once.
+
+    A trailer may return to an image; it may not replay a SEQUENCE.  The
+    shipped order contained B00..B08 twice end to end and no gate saw it.
+    """
+    best = 0
+    for start in range(len(order)):
+        for length in range(best + 1, len(order) - start + 1):
+            window = order[start:start + length]
+            if any(order[later:later + length] == window
+                   for later in range(start + 1, len(order) - length + 1)):
+                best = length
+            else:
+                break
+    return best
+
+
+def refuse_repetitive(order: list[str], min_gap: int = 5,
+                      max_repeat: int = 4) -> None:
+    """Refuse an order that will read as a loop rather than as a trailer."""
+    gap = shortest_return(order)
+    if gap < min_gap:
+        raise ValueError(
+            f"a shot returns after only {gap} other shot(s); a picture needs "
+            f"at least {min_gap} between uses to read as a return")
+    run = longest_repeat(order)
+    if run > max_repeat:
+        raise ValueError(
+            f"a run of {run} shots repeats verbatim; that is the screenplay "
+            f"played twice, not a trailer")
