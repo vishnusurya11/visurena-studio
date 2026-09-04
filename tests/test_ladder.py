@@ -49,6 +49,22 @@ class TestPasses:
         assert out.rungs == ["seed"]
         assert learned[0].action == "seed" and learned[0].measured == 0.5
 
+    def test_every_learning_carries_what_its_attempt_cost(self):
+        """Scarlet run 6: 31 learnings, every one `seconds: 0.0`.  A rung's
+        cost is the number the budget rung reasons with (`cost_seconds` is a
+        guess of 660 s) and the run never measured it."""
+        learned = []
+        b = budget(); b.start("s")
+        clock = b.clock
+
+        def attempt(rung, i):
+            clock.t += 12.5 if i == 0 else 30.0
+            return 0.5
+        climb(ladder(), "s", attempt=attempt, gate=gate_above(0.75), budget=b,
+              learn=learned.append)
+        assert [l.seconds for l in learned] == [12.5, 30.0, 12.5, 0.0]
+        assert learned[-1].terminal
+
     def test_rungs_are_climbed_in_order_with_their_tries(self):
         seen = []
         b = budget(); b.start("s")

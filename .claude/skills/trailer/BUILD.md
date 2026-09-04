@@ -70,6 +70,13 @@ Evidence: `docs/analysis/research/trailer-music-structure.md`,
   satisfiable by this generator; the pick (1002) is the right trade and the
   fix is upstream: a caption/section sheet the generator obeys, or a tracker
   that reports beat regularity beside downbeat regularity. Retrospect item.
+- run 6 (2026-09-04) reached step 08 and died there, twice: the concat list
+  held repo-relative paths that ffmpeg resolves against the list file's
+  directory (`listing_lines`), and every take was `CLIP_SECONDS` while the
+  plan's final hold outran it, so the cut started inside the reference leak
+  and the picture came up 0.42 s short (`take_seconds`). Every learning also
+  said `seconds: 0.0` -- `climb` now times each attempt. Full account:
+  `docs/analysis/research/trailer-retrospect.md`.
 - measured but not yet re-cut through the new chain: the delivered Scarlet
   master under the new `qc.py` reads 30/45 cuts on beat (onset grid, the
   audio measured rubato), 0/45 on downbeat, 5 target flags, floor pass.

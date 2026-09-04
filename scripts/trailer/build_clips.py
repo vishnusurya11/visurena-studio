@@ -20,6 +20,7 @@ from studio.comfy import run, stage_image
 from studio.h3 import NATIVE_H, NATIVE_W, frames_for
 from studio.h3_prompt import build as h3_document
 from studio.shot_grammar import FRAMING, LADDER
+from studio.trailer_assemble import HEAD_TRIM
 from studio.trailer_refs import visual_description
 from studio.trailer_shot import is_scene_safe
 
@@ -64,6 +65,15 @@ def bound_slots(beat: dict, refs: dict) -> list[str]:
     return (chars + ([loc] if loc in refs else []))[:2]
 
 
+def take_seconds(beat_id: str, plan: dict) -> float:
+    """How long a beat's take must run: the longest shot the cut wants from
+    it, past the head trim, and never under the standard take.  The final
+    hold outruns MAX_SHOT by design; a take that cannot hold it starts the
+    cut inside the reference leak and comes up short (Scarlet run 6)."""
+    longest = max((s["seconds"] for s in plan["shots"] if s["beat_id"] == beat_id), default=0.0)
+    return max(CLIP_SECONDS, longest + HEAD_TRIM)
+
+
 def take_values(beat: dict, plan: dict, refs: dict, style: str, seed: int,
                 tightest: str | None = None) -> dict:
     """What the model is asked for one beat's long take.
@@ -84,14 +94,15 @@ def take_values(beat: dict, plan: dict, refs: dict, style: str, seed: int,
     wanted = sorted({s["size"] for s in plan["shots"] if s["beat_id"] == beat["beat_id"]}
                     or {"medium"}, key=LADDER.index)
     open_size, close = (tightest, tightest) if tightest else (wanted[-1], wanted[0])
+    seconds = take_seconds(beat["beat_id"], plan)
     return {
         "prompt": h3_document(
             style=style, character=" ".join(described),
             place=refs[loc_id]["name"] if loc_id in refs else beat["location_id"],
             action=beat["image_prompt"], open_framing=FRAMING[open_size],
-            close_framing=FRAMING[close], camera=beat["motion"], seconds=CLIP_SECONDS,
+            close_framing=FRAMING[close], camera=beat["motion"], seconds=seconds,
             arc=beat["arc"]),
-        "width": NATIVE_W, "height": NATIVE_H, "frames": frames_for(CLIP_SECONDS),
+        "width": NATIVE_W, "height": NATIVE_H, "frames": frames_for(seconds),
         "steps": STEPS, "seed": seed, "ref_image_size": "max",
         "filename_prefix": f"TR-{beat['beat_id']}"}
 

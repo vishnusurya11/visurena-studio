@@ -14,6 +14,7 @@ from __future__ import annotations
 import math
 
 import json
+import os
 import re
 import subprocess
 from pathlib import Path
@@ -190,11 +191,19 @@ def title_card(title: str, output: Path, seconds: float, width: int, height: int
     return output
 
 
+def listing_lines(segments: list[Path], listing: Path) -> list[str]:
+    """The concat demuxer resolves a relative entry against the LIST FILE's
+    directory, not the cwd -- so every entry is written relative to it.  A
+    repo-relative segment written verbatim doubled its own path (run 6)."""
+    base = listing.resolve().parent
+    return [f"file '{Path(os.path.relpath(p.resolve(), base)).as_posix()}'"
+            for p in segments]
+
+
 def concat(segments: list[Path], output: Path) -> Path:
     """Join the shots with hard cuts and no re-encode."""
     listing = output.with_suffix(".txt")
-    listing.write_text(
-        "\n".join(f"file '{p.as_posix()}'" for p in segments), encoding="utf-8")
+    listing.write_text("\n".join(listing_lines(segments, listing)), encoding="utf-8")
     _ffmpeg(
         ["ffmpeg", "-y", "-v", "error", "-f", "concat", "-safe", "0",
          "-i", str(listing), "-c", "copy", str(output)],

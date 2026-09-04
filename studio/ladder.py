@@ -57,13 +57,15 @@ def climb(ladder: Ladder, step: str, attempt: Callable[[Rung, int], Any], gate: 
                            measured=budget.remaining(step), threshold=rung.cost_seconds,
                            action=ladder.terminal, attempt=n, terminal=True))
             return Outcome(None, taken, terminal=True)
+        started = budget.clock()
         result = attempt(rung, i)
         ok, measured, threshold = gate(result)
         if ok:
             return Outcome(result, taken)
         taken.append(rung.name)
         learn(Learning(step=step, substep=substep, gate=gate_name, measured=measured,
-                       threshold=threshold, action=rung.name, attempt=n + 1))
+                       threshold=threshold, action=rung.name, attempt=n + 1,
+                       seconds=budget.clock() - started))
     learn(Learning(step=step, substep=substep, gate=gate_name, action=ladder.terminal,
                    attempt=len(taken), terminal=True))
     return Outcome(None, taken, terminal=True)

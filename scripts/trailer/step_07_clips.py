@@ -22,7 +22,7 @@ from scripts.trailer.build_clips import (SEED_BASE, bound_slots, is_complete, re
 from studio.clip_cache import is_current
 from studio.describe import (DISTINCT_AT, TIMEOUT, TraitCard, describe, describe_frames,
                              differences, distance, known, patiently, same_look, shared, verifiable)
-from studio.identity_gate import HEAD_LEAK_SECONDS, frame_at, frame_times
+from studio.identity_gate import frame_at, frame_times
 from studio.ladder import Ladder, Rung, climb
 from studio.learnings import Learning
 from studio.trailer_assemble import clip_seconds
@@ -38,6 +38,14 @@ LADDER = Ladder([Rung("reroll_seed", RENDER_SECONDS, tries=2),
 DROPPED = "drop_beat"
 
 
+def ladder_for(beats_left: int) -> Ladder:
+    """The identity ladder priced so a retry is affordable only while every
+    beat after this one can still get its first render.  Run 6 rerolled one
+    beat twice and dropped eight: a retry may cost this beat, never a later one."""
+    reserve = RENDER_SECONDS * (beats_left + 1)
+    return Ladder([Rung(r.name, reserve, tries=r.tries) for r in LADDER.rungs], LADDER.terminal)
+
+
 class TakeFailed(RuntimeError):
     """The renderer produced no video; not a gate, a fact about the machine."""
 
@@ -45,12 +53,6 @@ class TakeFailed(RuntimeError):
 def seed_for(index: int, rung: Rung, i: int) -> int:
     base = SEED_BASE + index * 7
     return base + 5000 * (i + 1) if rung.name == "alternate_setup" else base + 1000 * i
-
-
-def need_seconds(beat_id: str, plan: dict) -> float:
-    """The longest shot the cut wants from this beat, past the reference leak."""
-    longest = max((s["seconds"] for s in plan["shots"] if s["beat_id"] == beat_id), default=0.0)
-    return longest + HEAD_LEAK_SECONDS
 
 
 def reference_of(book: Path, refs: dict, bound: list[str]) -> tuple[str | None, TraitCard | None]:
@@ -162,8 +164,8 @@ def bind_beat(ctx, index: int, beat: dict, plan: dict, refs: dict, style: str) -
         return same_look(result["card"], reference), distance(result["card"], reference), DISTINCT_AT
 
     try:
-        outcome = climb(LADDER, STEP_ID, attempt, gate, ctx.budget, ctx.learn, gate_name="identity",
-                        substep=beat_id)
+        outcome = climb(ladder_for(len(plan["beats"]) - index - 1), STEP_ID, attempt, gate,
+                        ctx.budget, ctx.learn, gate_name="identity", substep=beat_id)
         chosen, capped = (best_of(tries), SHORT_SHOT) if outcome.terminal else (outcome.result, None)
     except TakeFailed as exc:
         chosen, capped = best_of(tries), SHORT_SHOT

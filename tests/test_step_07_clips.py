@@ -19,6 +19,7 @@ from scripts.trailer.build_clips import FRAMING
 from studio import db
 from studio import describe
 from studio.describe import DISTINCT_AT, TIMEOUT, TraitCard
+from studio.identity_gate import HEAD_LEAK_SECONDS
 from studio.learnings import load
 from studio.run_budget import TRAILER_SHARES, Budget
 from studio.trailer_run import RunContext
@@ -203,6 +204,22 @@ class TestBudget:
         assert [r.gate for r in rows] == ["identity", "budget", "budget"]
         assert [r.action for r in rows[1:]] == ["short_shot", step.DROPPED]
 
+    def test_a_retry_never_spends_a_later_beats_first_render(self, tmp_path, rendered):
+        """Scarlet run 6: B12 rerolled twice (33 min) and B14-B21 were dropped
+        with 391 s left.  A retry is affordable only while every beat after
+        this one can still be rendered once; otherwise the beat ships its
+        best take short and the next beat gets its render."""
+        ctx = make_ctx(tmp_path, rendered["clock"], ceiling=2572)  # 07's share: 1500 s
+        rendered["cards"] = [FAR]
+        step.run(ctx.codex_id, ctx)
+        doc = clips_doc(ctx)
+        assert [c["beat_id"] for c in doc["clips"]] == ["B00", "B01"] and doc["dropped"] == []
+        assert doc["clips"][0]["capped"] == step.SHORT_SHOT and doc["clips"][1]["capped"] is None
+        assert len(rendered["calls"]) == 2
+        rows = load(ctx.learnings_path)
+        assert [r.gate for r in rows] == ["identity", "budget"]
+        assert rows[1].threshold == 2 * step.RENDER_SECONDS and rows[1].substep == "B00"
+
     def test_no_time_for_a_first_render_drops_the_remaining_beats(self, tmp_path, rendered):
         ctx = make_ctx(tmp_path, rendered["clock"], ceiling=100)
         step.run(ctx.codex_id, ctx)
@@ -212,21 +229,13 @@ class TestBudget:
         assert {r.gate for r in load(ctx.learnings_path)} == {"budget"}
 
 
-class TestNeedSeconds:
-    def test_the_longest_shot_of_the_beat_plus_the_head_leak(self):
-        plan = {"shots": [{"beat_id": "B00", "seconds": 2.5}, {"beat_id": "B00", "seconds": 1.0},
-                          {"beat_id": "B01", "seconds": 1.5}]}
-        assert step.need_seconds("B00", plan) == pytest.approx(2.5 + step.HEAD_LEAK_SECONDS)
-        assert step.need_seconds("B77", plan) == pytest.approx(step.HEAD_LEAK_SECONDS)
-
-
 class TestMeasure:
     def test_frames_of_samples_three_stills_outside_the_head_leak(self, tmp_path, monkeypatch):
         grabbed = []
         monkeypatch.setattr(step, "frame_at", lambda video, when, dest: grabbed.append(when) or dest)
         found = step.frames_of(tmp_path / "take.mp4", 7.0, tmp_path / "work")
         assert len(found) == 3 and (tmp_path / "work").is_dir()
-        assert all(when > step.HEAD_LEAK_SECONDS for when in grabbed) and grabbed == sorted(grabbed)
+        assert all(when > HEAD_LEAK_SECONDS for when in grabbed) and grabbed == sorted(grabbed)
 
     def test_measure_scores_the_take_by_the_traits_it_shares(self, tmp_path, monkeypatch):
         monkeypatch.setattr(step, "clip_seconds", lambda p: 7.0)

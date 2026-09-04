@@ -124,13 +124,19 @@ beat → location-only shot. fallback: drop the beat, re-walk.
 
 **07 clips** — in: `plan.json`, refs. out: `clips/<setup>.mp4`,
 `clips.json` (trait card per take, `similarity`, `differs`, `known`,
-seconds). gate: three frames after the head leak, laid side by side in ONE
+seconds). A take runs `max(CLIP_SECONDS, longest shot of the beat +
+HEAD_TRIM)` (`build_clips.take_seconds`): the hold outruns MAX_SHOT by
+design, and a take that cannot hold it starts the cut inside the reference
+leak (run 6). gate: three frames after the head leak, laid side by side in ONE
 contact sheet (the VQA node reads only image[0] of a batch) and described by
 the VLM into one card, differ from the reference card in < `DISTINCT_AT` (3)
 traits; a card seeing < 4 traits is accepted `unverifiable` and flagged.
-ladder: seed ×2 → whole-take close-up ×1; terminal: the BEST take capped at
-0.6 s (the cut sources longer shots of that beat from a neighbour). A beat
-is dropped only when no take exists: `budget.can_afford(11 min)` false
+ladder: seed ×2 → whole-take close-up ×1, each rung priced at
+`RENDER_SECONDS × (beats left + 1)` so a retry may cost this beat but never
+a later beat's first render (`ladder_for`; run 6 rerolled B12 twice and
+dropped eight beats); terminal: the BEST take capped at 0.6 s (the cut
+sources longer shots of that beat from a neighbour). A beat is dropped only
+when no take exists: `budget.can_afford(11 min)` false
 before its first render, or the render failed. Every take is kept under
 `clips/takes/`.
 

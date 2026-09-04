@@ -17,9 +17,10 @@ def beat(cast=("holmes",), loc="baker"):
             "image_prompt": "He crosses to the window.", "motion": "The camera pushes in slowly."}
 
 
-def plan(sizes=("medium", "close")):
+def plan(sizes=("medium", "close"), seconds=(2.0, 1.5)):
     return {"beats": [beat()],
-            "shots": [{"beat_id": "B03", "size": s} for s in sizes] + [{"beat_id": "B99", "size": "wide"}]}
+            "shots": [{"beat_id": "B03", "size": s, "seconds": t} for s, t in zip(sizes, seconds)]
+            + [{"beat_id": "B99", "size": "wide", "seconds": 9.0}]}
 
 
 class TestBoundSlots:
@@ -30,6 +31,22 @@ class TestBoundSlots:
     def test_two_slots_at_most(self):
         refs = dict(REFS, **{"char-watson": dict(REFS["char-holmes"], ref_id="char-watson")})
         assert clips.bound_slots(beat(cast=("holmes", "watson")), refs) == ["char-holmes", "char-watson"]
+
+
+class TestTakeSeconds:
+    """Scarlet run 6: the final hold asked 7.667s of B09, every take was
+    `CLIP_SECONDS` (7.29s), so `extract` ran off the end, the cut started at
+    0.0 inside the reference leak, and the picture came up 0.42s short --
+    REFUSED at the drift gate after five hours of rendering."""
+
+    def test_a_take_holds_its_longest_shot_past_the_head_trim(self):
+        long_hold = plan(("medium", "close"), (2.0, 7.667))
+        assert clips.take_seconds("B03", long_hold) == pytest.approx(7.667 + clips.HEAD_TRIM)
+        assert clips.take_values(beat(), long_hold, REFS, "noir", seed=7)["frames"] ==             clips.frames_for(7.667 + clips.HEAD_TRIM)
+
+    def test_short_shots_keep_the_standard_take(self):
+        assert clips.take_seconds("B03", plan()) == clips.CLIP_SECONDS
+        assert clips.take_seconds("B77", plan()) == clips.CLIP_SECONDS
 
 
 class TestTakeValues:

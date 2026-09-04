@@ -1,3 +1,5 @@
+from pathlib import Path
+
 
 
 class TestLimitingHeadroom:
@@ -22,3 +24,25 @@ class TestLimitingHeadroom:
         """Past about 6 dB the limiter is the sound, not the safety net."""
         from studio.trailer_assemble import LIMITING_DB
         assert LIMITING_DB <= 6.0
+
+
+class TestConcatListing:
+    """Scarlet run 6 died in step 08: the blind path hands `assemble` a
+    repo-relative book dir, the listing said `file 'library/.../s000.mp4'`,
+    and ffmpeg's concat demuxer resolves a relative entry against the LIST
+    FILE's directory -- so it looked for work/library/.../work/s000.mp4.
+    Three trailers had shipped from absolute dirs and never hit it."""
+
+    def test_entries_are_relative_to_the_listing_not_the_cwd(self, tmp_path, monkeypatch):
+        from studio.trailer_assemble import listing_lines
+        monkeypatch.chdir(tmp_path)
+        work = Path("library/book/trailer/main/work")
+        work.mkdir(parents=True)
+        lines = listing_lines([work / "s000.mp4", work / "s001.mp4"], work / "shots.txt")
+        assert lines == ["file 's000.mp4'", "file 's001.mp4'"]
+
+    def test_a_segment_outside_the_listing_dir_climbs_to_it(self, tmp_path, monkeypatch):
+        from studio.trailer_assemble import listing_lines
+        monkeypatch.chdir(tmp_path)
+        lines = listing_lines([Path("clips/B00.mp4")], Path("main/work/shots.txt"))
+        assert lines == ["file '../../clips/B00.mp4'"]
