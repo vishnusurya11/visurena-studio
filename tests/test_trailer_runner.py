@@ -59,6 +59,21 @@ class TestReadiness:
         assert db.get_codex(conn, codex_id)["trailer_status"] == "running"
 
 
+class TestOlderDatabase:
+    def test_main_migrates_a_database_made_before_the_stage_existed(self, tmp_path, monkeypatch):
+        """The real library.db predates the trailer columns; the first real run died
+        on `no such column: trailer_status`.  main() owns the migration."""
+        monkeypatch.setattr(db, "STAGES", ("analysis", "screenplay"))
+        connection = db.get_connection(tmp_path / "old.db")
+        db.init_db(connection)
+        codex_id = _book(connection)
+        monkeypatch.setattr(db, "STAGES", ("analysis", "screenplay", "trailer"))
+        monkeypatch.setattr(trailer.paths, "book_dir", lambda cid: tmp_path / "book")
+        monkeypatch.setattr(trailer, "load_steps", lambda: [])
+        trailer.main([codex_id], connection)
+        assert db.get_codex(connection, codex_id)["trailer_status"] == "completed"
+
+
 class TestRegistry:
     def test_ten_steps_in_order(self):
         ids = [s["id"] for s in trailer.load_registry()["steps"]]

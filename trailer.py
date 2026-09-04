@@ -83,6 +83,7 @@ def process(conn, codex_id: str) -> None:
 
 def main(argv: list[str], conn=None) -> None:
     conn = conn or db.get_connection()
+    db.init_db(conn)  # idempotent; adds the stage's columns to a library.db that predates it
     books = argv or ready(conn)
     print(f"trailer: {len(books)} book(s): {books}")
     for codex_id in books:
