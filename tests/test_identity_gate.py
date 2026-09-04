@@ -31,7 +31,7 @@ class FakeDetector:
     def __init__(self, faces):
         self.faces = faces
 
-    def set_input_size(self, size):
+    def setInputSize(self, size):  # the cv2 name; no snake-case alias in 4.13
         pass
 
     def detect(self, image):

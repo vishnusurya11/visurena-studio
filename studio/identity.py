@@ -155,7 +155,7 @@ def detect(session, image: np.ndarray) -> list[tuple[np.ndarray, np.ndarray]]:
     is why it can measure a face but never align one.)
     """
     height, width = image.shape[:2]
-    session.set_input_size([width, height])  # type: ignore[attr-defined]
+    session.setInputSize([width, height])  # type: ignore[attr-defined]
     found, faces = session.detect(image[..., ::-1])  # cv2 API wants BGR
     if faces is None:
         return []
