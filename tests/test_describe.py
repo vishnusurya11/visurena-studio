@@ -43,6 +43,19 @@ class TestVocabulary:
         assert describe.nearest("facial_hair", "a thick moustache") == "moustache"
         assert describe.nearest("age", "elderly") == "old"
 
+    def test_a_vocabulary_word_inside_another_word_is_not_a_reading(self):
+        """'flaxen-haired' read as RED: 'hai-red'.  A reading starts a word."""
+        assert describe.nearest("hair_colour", "flaxen-haired") == "fair"
+        assert describe.nearest("hair_colour", "grey-haired") == "grey"
+
+    def test_unshaven_is_not_clean_shaven(self):
+        """Gregson's card, 'a stubbled unshaven jaw', read as clean-shaven:
+        'shaven' inside 'unshaven'.  Stubble is a beard's first day."""
+        assert describe.nearest("facial_hair", "a stubbled unshaven jaw") == "beard"
+        assert describe.nearest("facial_hair", "unshaven") == "beard"
+        assert describe.nearest("facial_hair", "clean shaven") == "clean-shaven"
+        assert describe.nearest("facial_hair", "shaven") == "clean-shaven"
+
     def test_a_value_off_the_vocabulary_is_refused(self):
         with pytest.raises(ValueError, match="hair_colour"):
             describe.nearest("hair_colour", "iridescent")

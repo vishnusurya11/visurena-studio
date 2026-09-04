@@ -86,6 +86,37 @@ trait card. Two questions, in this order:
 Vocabulary aliasing is not a difference: a deerstalker reads as "cap", a
 tall beaver hat as "top hat" (`describe.NEIGHBOURS`, half a difference).
 
+## The book's own portrait comes first
+
+`analysis/profile.physical` says "limited physical description" for Holmes,
+Gregson and Lestrade, so run 6 INVENTED them: a white-haired, bearded Holmes
+at forty. Doyle wrote the portraits; the analysis lost them. `studio/portrait.py`
+reads them back from `source/chapters/`: a candidate paragraph carries a look
+word (`LOOK`) and names the character, or sits beside one that does, within
+`SPAN` (3) chapters of the first appearance, at most `CAP` (12); the reasoning
+model quotes VERBATIM sentences and fills six slots (age, hair, facial hair,
+headgear, build, complexion) only from those sentences; `verify` refuses any
+sentence not in the book, once with the violation quoted back, then the
+portrait is silent. Silence falls through to the dossier. Cached in
+`refs/portraits.json`.
+
+Two rules the extraction taught (Scarlet, 2026-09-04):
+
+- An alias BY RELATION ("my companion", "his daughter") names whoever the
+  speaker is with, not the character: Watson's portrait came back as Holmes's
+  six feet and hawk nose. `RELATIONAL` aliases are not names.
+- What the book states outranks the rotation (`portrait.stated` →
+  `card_for(stated=)`): "flaxen-haired" in the quoted sentence beside "dark
+  hair swept back" from the pool tells the model two things. A phrase the
+  vocabulary reads whole is the slot as written ("long chestnut hair"); one
+  read in part snaps onto the pool phrase that reads the same and shares the
+  most words ("flaxen-haired" → "receding sandy hair", "about forty-three" →
+  "about forty"); one it cannot read states nothing ("frightened face"),
+  because the fidelity gate reads every slot. A list ("fair face; cheek more
+  ruddy; pale-faced") states its first readable phrase. Build has no reading
+  and is kept as written. `describe.nearest` matches at word starts only:
+  "flaxen-haired" had read as RED.
+
 ## Filter the description before it reaches a shot
 
 `analysis/profile.physical` is a BIOGRAPHY, not a look. "Served with the

@@ -214,6 +214,28 @@ class TestAgeBand:
         card = card_for("ferrier", {}, "the old farmer, the old man", gender="man")
         assert "twenties" not in card["age"] and "thirty" not in card["age"]
 
+    def test_an_unmarked_adult_is_not_white_haired_or_bald(self):
+        """Scarlet run 6: Holmes, unaged by the dossier, drew 'white hair worn
+        long' and 'a full dark beard' from the rotation -- at 'about forty'.
+        The middle band bands hair too: grey, white and bald belong to old."""
+        from studio.cast_card import HAIR, card_for
+        for seed in ("holmes", "gregson", "lestrade", "hope", "stangerson", "drebber", "x"):
+            hair = card_for(seed, {}, "a man in a coat", gender="man")["hair"]
+            assert not any(mark in hair for mark in ("white", "grey", "bald")), (seed, hair)
+        assert any("white" in h for h in HAIR)  # still there for the old
+
+    def test_a_slot_the_book_states_outranks_the_rotation(self):
+        """Gregson: 'flaxen-haired' in the book, 'dark hair swept back' from the
+        rotation, both in one prompt (Scarlet run 6).  What the book states
+        is the card, and it is spent like any other value."""
+        from studio.cast_card import card_for, cards_for
+        card = card_for("gregson", {}, "a man in a coat", gender="man",
+                        stated={"hair": "fair hair parted in the middle", "build": "tall"})
+        assert card["hair"] == "fair hair parted in the middle" and card["build"] == "tall"
+        cards = cards_for(["gregson", "watson"], {}, stated={
+            "gregson": {"hair": "fair hair parted in the middle"}})
+        assert cards["watson"]["hair"] != "fair hair parted in the middle"
+
     def test_a_woman_is_not_described_as_in_his_twenties(self):
         from studio.cast_card import card_for, render_card
         text = render_card(card_for("lucy", {}, "the young girl", gender="woman"))

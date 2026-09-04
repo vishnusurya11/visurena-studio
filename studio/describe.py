@@ -73,8 +73,8 @@ SYNONYMS: dict[str, dict[str, tuple[str, ...]]] = {
     "hair_colour": {"fair": ("blond", "sandy", "flaxen"), "brown": ("chestnut", "auburn"),
                     "red": ("ginger",), "grey": ("silver", "greying"), "none": ("bald",),
                     "dark brown": ("dark",)},
-    "facial_hair": {"clean-shaven": ("none", "no facial hair", "shaven"),
-                    "whiskers": ("sideburn", "muttonchop"), "beard": ("stubble",)},
+    "facial_hair": {"beard": ("stubble", "unshaven"), "whiskers": ("sideburn", "muttonchop"),
+                    "clean-shaven": ("none", "no facial hair", "clean shaven", "shaven")},
     "headgear": {"none": ("bare", "no hat", "hatless"), "cap": ("flat cap", "cloth cap"),
                  "other hat": ("hat", "boater")},
     "complexion": {"pale": ("ashen", "white"), "ruddy": ("florid", "sunburn", "red"),
@@ -84,15 +84,21 @@ SYNONYMS: dict[str, dict[str, tuple[str, ...]]] = {
 }
 
 
+def _starts_a_word(mark: str, said: str) -> bool:
+    """'flaxen-haired' is not red: a reading begins where a word does."""
+    return re.search(rf"(?<![a-z]){re.escape(mark)}", said) is not None
+
+
 def nearest(trait: str, value: str) -> str:
     """The vocabulary entry a free answer points at; raise when none does."""
     said = value.strip().lower()
     pool = sorted(TRAITS[trait], key=len, reverse=True)
     for entry in pool:
-        if said == entry or entry in said:
+        if _starts_a_word(entry, said):
             return entry
+    # Dict order is precedence: "unshaven" carries "shaven", and stubble is a beard.
     for entry, marks in SYNONYMS.get(trait, {}).items():
-        if any(mark in said for mark in marks):
+        if any(_starts_a_word(mark, said) for mark in marks):
             return entry
     raise ValueError(f"{trait}: {value!r} is not one of {TRAITS[trait]}")
 

@@ -21,10 +21,11 @@ from PIL import Image
 
 from scripts.trailer import step_02_refs as step
 from studio import db
-from studio import describe
+from studio import describe, portrait
 from studio.describe import DISTINCT_AT
 from studio.distinguish import expected
 from studio.learnings import load
+from studio.portrait import Portrait
 from studio.trailer_run import RunContext
 
 HOLMES, WATSON = "sherlock_holmes", "john_watson"
@@ -210,6 +211,53 @@ class TestRun:
         step.run(ctx.codex_id, ctx)
         assert refs_doc(ctx)["unbound"] == []
         assert {r.action for r in load(ctx.learnings_path)} == {"accepted_unverifiable"}
+
+
+class TestPortraits:
+    """Scarlet run 6: the dossier said Holmes had 'limited physical description'
+    and the card invented white hair and a beard; chapter 2 says lean and
+    hawk-nosed.  The book's own sentences are the card's authority, asked
+    once per character and kept in refs/portraits.json."""
+    LOOK = ("In height he was rather over six feet, and so excessively lean that he seemed "
+            "to be considerably taller. His eyes were sharp and piercing.")
+
+    def with_source(self, ctx):
+        chapters = ctx.book_dir / "source/chapters"
+        chapters.mkdir(parents=True)
+        (chapters / "ch_01.json").write_text(json.dumps({"n": 1, "paragraphs": [
+            {"n": 1, "text": "Sherlock Holmes rose, a tall man."}, {"n": 2, "text": self.LOOK}]}),
+            encoding="utf-8")
+        return ctx
+
+    def test_the_book_sentences_reach_the_sheet_prompt_and_are_kept(self, ctx, rendered,
+                                                                     monkeypatch):
+        self.with_source(ctx)
+        found = Portrait(sentences=[self.LOOK.split(". ")[0] + "."], build="lean")
+        fake = FakeLLM(found)
+        monkeypatch.setattr(portrait.llm, "structured", fake)
+        step.run(ctx.codex_id, ctx)
+        assert len(fake.prompts) == 1  # Holmes; no paragraph names Watson
+        holmes = next(p for p in sheet_prompts(rendered) if "excessively lean" in p)
+        assert "limited physical description" not in holmes
+        kept = json.loads((ctx.book_dir / "refs/portraits.json").read_text(encoding="utf-8"))
+        assert kept[HOLMES]["build"] == "lean" and kept[WATSON] == Portrait().model_dump()
+        step.cast_cards(ctx.book_dir, [HOLMES, WATSON])
+        assert len(fake.prompts) == 1  # cached: nothing asked again
+
+    def test_a_book_without_source_chapters_asks_nothing(self, ctx, rendered, monkeypatch):
+        fake = FakeLLM()
+        monkeypatch.setattr(portrait.llm, "structured", fake)
+        step.run(ctx.codex_id, ctx)
+        assert fake.prompts == [] and not (ctx.book_dir / "refs/portraits.json").exists()
+
+
+class FakeLLM:
+    def __init__(self, *answers):
+        self.answers, self.prompts = list(answers), []
+
+    def __call__(self, tier, prompt, schema, **kw):
+        self.prompts.append(prompt)
+        return self.answers.pop(0)
 
 
 class TestAttemptShape:

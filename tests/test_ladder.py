@@ -66,6 +66,15 @@ class TestTerminal:
         assert out.terminal and out.result is None
         assert learned[-1].action == "card" and learned[-1].terminal
 
+    def test_every_learning_names_the_substep_it_was_climbed_for(self):
+        """Run 6's two `unbound` learnings say `substep ""`: the retrospect
+        cannot tell which character never bound."""
+        learned = []
+        b = budget(); b.start("s")
+        climb(ladder(), "s", attempt=lambda rung, i: 0.1, gate=gate_above(0.75),
+              budget=b, learn=learned.append, substep="g_lestrade")
+        assert {l.substep for l in learned} == {"g_lestrade"}
+
     def test_no_time_left_goes_terminal_before_retrying(self):
         calls = []
         learned = []

@@ -28,6 +28,7 @@ from studio.describe import (DISTINCT_AT, TIMEOUT, TraitCard, closest, describe,
 from studio.distinguish import disobeyed, distinguish
 from studio.ladder import Ladder, Rung, climb
 from studio.learnings import Learning
+from studio.portrait import physical_text, portraits_for, stated
 from studio.trailer_refs import (character_prompt, load_json, location_prompt, palette_for,
                                  physical_of, ref_id_for)
 from studio.trailer_stage_spec import StorySpec
@@ -52,11 +53,13 @@ def seed_for(index: int, rung: Rung, i: int) -> int:
 def cast_cards(book: Path, characters: list[str]) -> dict[str, dict]:
     """One distinct card per character, from the analysis the book has."""
     docs = {c: load_json(book / "analysis/characters" / f"{c}.json") for c in characters}
-    physical = {c: physical_of(d) for c, d in docs.items()}
+    portraits = portraits_for(book, docs)
+    physical = {c: physical_text(portraits[c], physical_of(d)) for c, d in docs.items()}
     genders = {c: infer_gender(d.get("name", c), d.get("aliases", []), physical[c])
                for c, d in docs.items()}
     roles = {c: (d.get("role") or "").lower() for c, d in docs.items()}
-    return cards_for(characters, physical, genders, roles)
+    return cards_for(characters, physical, genders, roles,
+                     {c: stated(p) for c, p in portraits.items()})
 
 
 def render_sheet(book: Path, char_id: str, card: dict, palette: str, seed: int,
@@ -125,7 +128,8 @@ def bind_one(ctx, book: Path, index: int, char_id: str, card: dict, palette: str
         state.update(other=bound[who], shared=shared(result["card"], bound[who]))
         return False, f"{who}: shares {', '.join(state['shared'])}", DISTINCT_AT
 
-    outcome = climb(LADDER, STEP_ID, attempt, gate, ctx.budget, ctx.learn, gate_name="identity")
+    outcome = climb(LADDER, STEP_ID, attempt, gate, ctx.budget, ctx.learn, gate_name="identity",
+                    substep=char_id)
     if outcome.terminal:
         return None
     bound[char_id] = outcome.result["card"]

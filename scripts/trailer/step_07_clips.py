@@ -162,7 +162,8 @@ def bind_beat(ctx, index: int, beat: dict, plan: dict, refs: dict, style: str) -
         return same_look(result["card"], reference), distance(result["card"], reference), DISTINCT_AT
 
     try:
-        outcome = climb(LADDER, STEP_ID, attempt, gate, ctx.budget, ctx.learn, gate_name="identity")
+        outcome = climb(LADDER, STEP_ID, attempt, gate, ctx.budget, ctx.learn, gate_name="identity",
+                        substep=beat_id)
         chosen, capped = (best_of(tries), SHORT_SHOT) if outcome.terminal else (outcome.result, None)
     except TakeFailed as exc:
         chosen, capped = best_of(tries), SHORT_SHOT

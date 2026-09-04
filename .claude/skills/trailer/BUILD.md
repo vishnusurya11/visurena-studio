@@ -15,7 +15,7 @@ Evidence: `docs/analysis/research/trailer-music-structure.md`,
   (`scripts/trailer/step_01_story.py` … `step_10_deliver.py`) under one 6 h
   wall-clock ceiling; every gate has an adapt ladder and a terminal rung,
   every rung writes `learnings.jsonl`, step 10 writes `manifest.json`.
-- items 1–12 below are built and green (`uv run pytest -q`: 1449 passed,
+- items 1–12 below are built and green (`uv run pytest -q`: 1484 passed,
   4 local deselected, 2026-09-04). Item 13 (vocal path) is not.
 - the identity gate is a TRAIT CARD, not a face recogniser: `studio/describe.py`
   asks the local Qwen3-VL (comfy_studio's `image_qwen3vl_caption` /
@@ -43,6 +43,15 @@ Evidence: `docs/analysis/research/trailer-music-structure.md`,
   comfy_studio's `video_qwen3vl_caption` batches them, and `Qwen3_VQA`
   reads `image[0]` only, so it described a take whose first frame was hands
   holding a note as "face not visible" (run 4, B02).
+- the cast card is BOOK-FIRST: `studio/portrait.py` quotes the book's own
+  portrait sentences (`refs/portraits.json`) and `portrait.stated` fills the
+  slots the book fills, outranking the pool. Run 6 drew a white-haired,
+  bearded Holmes at forty because `profile.physical` said "limited physical
+  description" and the rotation invented the rest; the middle band's hair
+  pool held white and bald. Found on the way: `describe.nearest` matched
+  substrings ("flaxen-hai-RED"; "unshaven" read clean-shaven), and an alias
+  by relation ("my companion") gave Watson Holmes's portrait. Costs one
+  reasoning call per character with candidates (≈ $0.002).
 - step 04 shipped `music_only` on runs 4, 5 and 6 ("no hook fits the first
   slot"): the delivered cue's troughs were 2.6 and 2.0 s and the best hook
   3.3 s. `rank` admits a line at twice the longest slot, `fits` refused it at

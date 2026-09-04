@@ -66,7 +66,9 @@ thesis ≤ 7 syllables, no proper noun, present tense. ladder: agent call ×3
 with the violation quoted back. fallback: register `procedural`, thesis
 `null` (vocal path off), narrator by first-person pronoun ratio.
 
-**02 refs** — in: `story.json`, cast cards. out: `refs/<char>.png`,
+**02 refs** — in: `story.json`, cast cards (the book's own verbatim portrait
+sentences first - `refs/portraits.json` - then the dossier, then the pool;
+a slot the book states outranks the rotation). out: `refs/<char>.png`,
 `refs.json` (a TRAIT CARD per character: age, hair colour/length, facial
 hair, headgear, complexion, build, read by the local VLM `describe.py`;
 plus `closest`/`differs` against the cast bound so far). gate: the sheet

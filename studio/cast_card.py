@@ -107,7 +107,10 @@ BANDED = {
               "facial_hair": ("clean-shaven", "a thin waxed moustache",
                               "a stubbled unshaven jaw")},
     "middle": {"age": ("about thirty-five", "about forty", "about forty-five",
-                       "about fifty")},
+                       "about fifty"),
+               "hair": ("dark hair swept back", "receding sandy hair", "long black hair",
+                        "wavy chestnut hair", "thinning red hair",
+                        "fair hair parted in the middle")},
     "old": {"age": ("about sixty", "about seventy", "about fifty-five"),
             "hair": ("a bald crown with grey at the temples",
                      "close-cropped grey hair", "white hair worn long",
@@ -118,7 +121,9 @@ BANDED = {
 """What is plausible at each end of life.
 
 A bald crown with grey at the temples on a young woman, and late twenties on
-"the old farmer", are not near misses -- they are different people.  Invention
+"the old farmer", are not near misses -- they are different people.  Nor is
+white hair worn long at about forty: Holmes drew it from the rotation
+(Scarlet run 6), so grey, white and bald are the old band's alone.  Invention
 is allowed where the book is silent; it is not allowed to contradict what the
 book does say.
 """
@@ -198,8 +203,11 @@ def _allowed(slot: str, pool: tuple[str, ...], gender: str,
 
 def card_for(entity_id: str, taken: dict[str, set[str]],
              physical: str = "", gender: str = "man",
-             role: str = "") -> dict[str, str]:
+             role: str = "", stated: dict[str, str] | None = None) -> dict[str, str]:
     """One character's eight slots, avoiding every value already spent.
+
+    `stated` is what the book says outright (`portrait.stated`): it outranks
+    the role, the book match and the rotation alike.
 
     Walks the pools in a per-character rotation so the assignment is stable,
     and skips anything another character has taken.  The rotation is what
@@ -220,6 +228,7 @@ def card_for(entity_id: str, taken: dict[str, set[str]],
         options = [v for v in allowed if v not in spent] or allowed
         card[slot] = (for_role[0] if for_role
                       else from_book or options[offset % len(options)])
+    card.update(stated or {})
     card['gender'] = gender
     if gender == 'woman':
         # A beard is an OBJECT, and drawing one on a woman is not a small
@@ -232,14 +241,16 @@ def card_for(entity_id: str, taken: dict[str, set[str]],
 
 def cards_for(cast: list[str], physical: dict[str, str],
               genders: dict[str, str] | None = None,
-              roles: dict[str, str] | None = None) -> dict[str, dict]:
+              roles: dict[str, str] | None = None,
+              stated: dict[str, dict[str, str]] | None = None) -> dict[str, dict]:
     """A card per character, each avoiding what the others have taken."""
     taken: dict[str, set[str]] = {slot: set() for slot in POOLS}
     cards: dict[str, dict] = {}
     for entity_id in cast:
         card = card_for(entity_id, taken, physical.get(entity_id, ""),
                         (genders or {}).get(entity_id, "man"),
-                        (roles or {}).get(entity_id, ""))
+                        (roles or {}).get(entity_id, ""),
+                        (stated or {}).get(entity_id))
         cards[entity_id] = card
         for slot in POOLS:
             taken[slot].add(card[slot])
