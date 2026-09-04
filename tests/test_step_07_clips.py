@@ -162,6 +162,9 @@ class TestRun:
         assert rows[0].action == "accepted_on_timeout" and rows[0].threshold == f"{TIMEOUT}s"
 
     def test_a_face_that_never_binds_ships_its_best_take_short(self, ctx, rendered):
+        """Scarlet run 6: B12 read 4.0 then 3.5 on two seeds -- a seed moves
+        the reading half a trait -- and the third seed cost the cut three
+        beats.  One reroll, then a framing the reader can see the face in."""
         rendered["cards"] = [FAR, MID, FAR]
         step.run(ctx.codex_id, ctx)
         doc = clips_doc(ctx)
@@ -169,9 +172,9 @@ class TestRun:
         assert clip["capped"] == step.SHORT_SHOT and clip["similarity"] == pytest.approx(4 / 7, abs=0.001)
         assert doc["dropped"] == []
         actions = [r.action for r in load(ctx.learnings_path)]
-        assert actions == ["reroll_seed", "reroll_seed", "alternate_setup", "short_shot"]
+        assert actions == ["reroll_seed", "alternate_setup", "short_shot"]
         holmes_calls = [c for c in rendered["calls"] if c["dest"].startswith("B00")]
-        assert len(holmes_calls) == 3
+        assert len(holmes_calls) == 2
         assert holmes_calls[-1]["prompt"].count(FRAMING["close"]) == 2
         assert (ctx.book_dir / clip["rel_path"]).read_bytes() == b"mp4" + str(clip["seed"]).encode()
 

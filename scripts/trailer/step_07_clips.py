@@ -33,8 +33,10 @@ RENDER_SECONDS = 11 * 60
 SHORT_SHOT = 0.6
 """A take whose face never bound may still carry a cut this short: too brief
 to read a wrong face, long enough to keep the beat's place in the metre."""
-LADDER = Ladder([Rung("reroll_seed", RENDER_SECONDS, tries=2),
+LADDER = Ladder([Rung("reroll_seed", RENDER_SECONDS, tries=1),
                  Rung("alternate_setup", RENDER_SECONDS, tries=1)], terminal="short_shot")
+"""One reroll: a seed moves the reading about half a trait (run 6, B12: 4.0
+then 3.5), so the second retry is a framing the reader can see the face in."""
 DROPPED = "drop_beat"
 
 

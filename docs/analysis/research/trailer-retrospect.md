@@ -63,9 +63,11 @@ title_on_downbeat`. Sent to Telegram by hand as a 39 MB copy (defect 4).
 - Identity reroll is the wrong rung for a small distance. B12 read 4.0
   then 3.5 against `DISTINCT_AT` 3 on two seeds: the seed moved it half a
   trait. Two rerolls cost 33 min — three beats' worth — before the third
-  seed bound. The ladder should climb to `alternate_setup` (a framing the
-  reader can see the face in) after ONE reroll, or the gate should admit a
-  take within one notch of the threshold when the beat has no line.
+  seed bound. CLOSED 2026-09-04: the ladder now climbs to `alternate_setup`
+  (a framing the reader can see the face in) after ONE reroll
+  (`test_a_face_that_never_binds_ships_its_best_take_short`). Admitting a
+  take within one notch when the beat has no line stays open until run 7
+  measures how often the close-up binds.
 - Step 03's gate has never passed. Measured over the 16 Scarlet seeds:
   every metre-grid seed scores `title_term` 0.3 and `slot_term` 0.4 (the
   struck-pulse captions produce no pre-title trough and no slot); the one

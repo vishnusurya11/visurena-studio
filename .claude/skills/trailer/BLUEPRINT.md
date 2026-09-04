@@ -131,7 +131,8 @@ leak (run 6). gate: three frames after the head leak, laid side by side in ONE
 contact sheet (the VQA node reads only image[0] of a batch) and described by
 the VLM into one card, differ from the reference card in < `DISTINCT_AT` (3)
 traits; a card seeing < 4 traits is accepted `unverifiable` and flagged.
-ladder: seed ×2 → whole-take close-up ×1, each rung priced at
+ladder: seed ×1 → whole-take close-up ×1 (a seed moves the reading about
+half a trait: B12 read 4.0 then 3.5 in run 6), each rung priced at
 `RENDER_SECONDS × (beats left + 1)` so a retry may cost this beat but never
 a later beat's first render (`ladder_for`; run 6 rerolled B12 twice and
 dropped eight beats); terminal: the BEST take capped at 0.6 s (the cut
