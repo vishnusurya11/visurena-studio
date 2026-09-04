@@ -5,6 +5,20 @@ description: Cut a trailer for a book that has a screenplay - reference-bound sh
 
 # Trailer
 
+## Run it — the blind path
+
+```
+uv run python trailer.py <codex_id>
+```
+One command, one 6-hour ceiling, zero credits, no questions. Read
+`library/<book>/trailer/main/qc.json` and `learnings.jsonl` afterwards.
+The contract every step honours — input, output, gate, adapt ladder,
+fallback, time share — is `BLUEPRINT.md`; what is built vs proposed is
+`BUILD.md`; the registry is the `trailer` stage of `stages.yaml`. Everything
+below this line is for the agent that BUILDS or FIXES a step, not the one
+that runs it.
+
+
 A trailer for a book we have already adapted. Everything here is downstream of
 two bricks; if you only remember two things, remember these.
 

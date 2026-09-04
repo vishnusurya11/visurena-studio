@@ -318,3 +318,68 @@ stages:
           - id: "05_04"
             name: report
             desc: Writes <target>/qc_report.json.
+
+  trailer:
+    # One unattended run per book, on a TIME ceiling (nothing here spends money:
+    # MiniMax Music 3, MiniMax-H3 and Qwen3-TTS all run on the local ComfyUI).
+    # Every step: typed input -> typed output -> a gate that can fail -> an
+    # ADAPT ladder that re-authors to the same FUNCTION -> a terminal fallback.
+    # Every rung taken is a learning (trailer/<id>/learnings.jsonl) for the
+    # retrospect. Blueprint: .claude/skills/trailer/BLUEPRINT.md
+    steps:
+      - id: "01"
+        name: story
+        script: step_01_story
+        desc: Derive lead / figure / turn / resolution from analysis + screenplay
+          (code); narrator, register, thesis (one structured agent call, gated).
+          Writes trailer/<id>/story.json. Fallback register=procedural, thesis=null.
+      - id: "02"
+        name: refs
+        script: step_02_refs
+        desc: Character and location reference sheets, identity-gated. Reroll seed x3,
+          alternate pose x2, then the character is UNBOUND and its setups are excluded.
+      - id: "03"
+        name: music
+        script: step_03_music
+        desc: Render 4 seeds, MEASURE metre + events + slots, rank on fitness. Below
+          floor - 4 more seeds, then re-author the caption in the same register x2,
+          then best-of-all on the onset grid flagged rubato. Writes music/metre.json.
+      - id: "04"
+        name: lines
+        script: step_04_lines
+        desc: Four pools, Wikiquote iconicity (revid cache; offline -> cached/thin),
+          rank, function labels (agent), order hook->answer->threat->title->button.
+          No hook after relabel -> music-only slate, flagged.
+      - id: "05"
+        name: voice
+        script: step_05_voice
+        desc: Design one reference per speaker, clone every slate line, similarity gate
+          >= 0.75. Reroll x3 -> next line of the same function -> card. Measured seconds.
+      - id: "06"
+        name: plan
+        script: step_06_plan
+        desc: Beat walk over the measured metre; setups bound to references; lines
+          assigned to slots from measured seconds. Unbound setup -> alternate in the
+          same beat -> location-only shot. Refuses a plan without the lead in >= 25%.
+      - id: "07"
+        name: clips
+        script: step_07_clips
+        desc: The slow step (~11 min per setup, local GPU). Identity gate per clip.
+          Reroll x2 -> alternate setup same beat -> shot <= 0.6 s -> drop beat. Reads
+          the remaining time budget before every render.
+      - id: "08"
+        name: assemble
+        script: step_08_assemble
+        desc: Cut on the beat list, grade, title on the measured hit, line layer with
+          mid-band duck, synthesised sound, mix. Deterministic; a failure is a bug.
+      - id: "09"
+        name: qc
+        script: step_09_qc
+        desc: Reads the DELIVERED master - tracks its audio, scene-detects its picture,
+          reports on-beat / on-downbeat / L0 / cap / title / line-over-bed. Fail ->
+          re-cut x2 (free) -> ship flagged. Writes qc.json beside the master.
+      - id: "10"
+        name: deliver
+        script: step_10_deliver
+        desc: manifest.json (every rung taken, every measured number), Telegram send
+          (retry x3), learnings closed. Never publishes; the orchestrator does.

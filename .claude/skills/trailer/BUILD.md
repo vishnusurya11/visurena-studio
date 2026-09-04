@@ -48,8 +48,10 @@ Prerequisite for 12 and 13: `01-story` emits `narrator`, `register`, `thesis`
 
 ## Rules of the build
 
-- No item spends a credit. Beat This!, demucs, Qwen3-TTS and Wikiquote are
-  free; MiniMax renders (item 13's seeds) need an itemized plan and a go.
+- Nothing in this chain spends a credit. MiniMax Music 3 and MiniMax-H3
+  run on the local ComfyUI (`studio/comfy.py`); Beat This!, demucs, Qwen3-TTS
+  and Wikiquote are free. The only cost is GPU wall-clock, so the budget of
+  an unattended run is TIME, not money.
 - Every threshold in the skill is a number to beat, not a number to pass:
   a gate is only trusted after it has failed once on a real file.
 - Items 1–4 change which lines are chosen; 5–9 change where cuts land;

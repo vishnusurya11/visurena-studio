@@ -57,7 +57,7 @@ def get_connection(db_path: str | Path = DB_PATH) -> sqlite3.Connection:
 # Per-stage summary columns on codex (owner design: 3 per stage — status, started,
 # updated). Denormalized at-a-glance view; the events table stays the detailed record.
 # New stages get their trio here when they are built.
-STAGES = ("analysis", "screenplay")
+STAGES = ("analysis", "screenplay", "trailer")
 STAGE_STATUSES = ("pending", "running", "completed", "failed")
 
 
