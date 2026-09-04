@@ -67,9 +67,16 @@ with the violation quoted back. fallback: register `procedural`, thesis
 `null` (vocal path off), narrator by first-person pronoun ratio.
 
 **02 refs** — in: `story.json`, cast cards. out: `refs/<char>.png`,
-`refs.json` (identity scores). gate: pairwise identity ≥ threshold from
-`identity.py`. ladder: seed ×3 → alternate pose prompt ×2. fallback:
-character `unbound` → every setup needing it is excluded at 06.
+`refs.json` (a TRAIT CARD per character: age, hair colour/length, facial
+hair, headgear, complexion, build, read by the local VLM `describe.py`;
+plus `closest`/`differs` against the cast bound so far). gate: the sheet
+differs from every bound character in ≥ `DISTINCT_AT` (3) seen traits -
+the `refuse_collision` rule applied to pixels. A card seeing < 4 traits is
+accepted `unverifiable`. The VLM is asked to DESCRIBE in a closed
+vocabulary, never yes/no. ladder: reroll seed ×1 → `distinguish` ×3 (the
+card is rewritten on exactly the traits that matched, to phrases no other
+character holds). fallback: character `unbound` → every setup needing it is
+excluded at 06.
 
 **03 music** — in: `story.json` (register, thesis), `tone.json`. out:
 `music/cue-<seed>.flac`, `music/metre.json` (`Metre` per seed: beats,
@@ -103,8 +110,10 @@ except the hold and the title. ladder: unbound → alternate setup in the same
 beat → location-only shot. fallback: drop the beat, re-walk.
 
 **07 clips** — in: `plan.json`, refs. out: `clips/<setup>.mp4`,
-`clips.json` (identity per clip, seconds). gate: face similarity to
-the reference sheet ≥ 0.363 (SFace), unverifiable faces accepted and flagged.
+`clips.json` (trait card per take, `similarity`, `differs`, `known`,
+seconds). gate: three frames after the head leak, described by the VLM
+into one card, differ from the reference card in < `DISTINCT_AT` (3)
+traits; a card seeing < 4 traits is accepted `unverifiable` and flagged.
 ladder: seed ×2 → whole-take close-up ×1; terminal: the BEST take capped at
 0.6 s (the cut sources longer shots of that beat from a neighbour). A beat
 is dropped only when no take exists: `budget.can_afford(11 min)` false

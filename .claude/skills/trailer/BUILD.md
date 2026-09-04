@@ -15,8 +15,18 @@ Evidence: `docs/analysis/research/trailer-music-structure.md`,
   (`scripts/trailer/step_01_story.py` … `step_10_deliver.py`) under one 6 h
   wall-clock ceiling; every gate has an adapt ladder and a terminal rung,
   every rung writes `learnings.jsonl`, step 10 writes `manifest.json`.
-- items 1–12 below are built and green (`uv run pytest -q`: 1379 passed,
+- items 1–12 below are built and green (`uv run pytest -q`: 1415 passed,
   4 local deselected, 2026-09-04). Item 13 (vocal path) is not.
+- the identity gate is a TRAIT CARD, not a face recogniser: `studio/describe.py`
+  asks the local Qwen3-VL (comfy_studio's `image_qwen3vl_caption` /
+  `video_qwen3vl_caption`) to describe a face in a closed vocabulary of seven
+  at-a-distance traits, and two faces are two people when ≥ `DISTINCT_AT`
+  (3) seen traits differ - `cast_card.refuse_collision` applied to pixels.
+  Steps 02 and 07 gate on it; `studio/distinguish.py` is step 02's second
+  rung, rewriting exactly the matched card slots. The SFace cosine gate
+  (`identity.py`, 0.363) it replaced said only THAT two sheets read alike,
+  so its one rung was another seed: Lestrade collided five times in a row
+  (run 3, 2026-09-04).
 - measured but not yet re-cut through the new chain: the delivered Scarlet
   master under the new `qc.py` reads 30/45 cuts on beat (onset grid, the
   audio measured rubato), 0/45 on downbeat, 5 target flags, floor pass.

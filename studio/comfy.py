@@ -92,8 +92,18 @@ def outputs_of(record: dict) -> list[Path]:
     return found
 
 
-def wait(prompt_id: str, timeout: float = 3600.0, poll: float = 5.0) -> list[Path]:
-    """Block until a job finishes; raise on engine error or timeout."""
+def texts_of(record: dict) -> list[str]:
+    """Every text a finished job reported (PreviewAny-style `{"text": [...]}`
+    entries, e.g. a VLM caption), in node order.  These are not files, so
+    `outputs_of` never sees them."""
+    found: list[str] = []
+    for node_id in sorted(record.get("outputs", {}), key=int):
+        found += [t for t in record["outputs"][node_id].get("text", []) if isinstance(t, str)]
+    return found
+
+
+def wait_record(prompt_id: str, timeout: float = 3600.0, poll: float = 5.0) -> dict:
+    """Block until a job finishes and return its record; raise on engine error or timeout."""
     deadline = time.time() + timeout
     while time.time() < deadline:
         record = history(prompt_id)
@@ -101,9 +111,14 @@ def wait(prompt_id: str, timeout: float = 3600.0, poll: float = 5.0) -> list[Pat
         if status.get("status_str") == "error":
             raise RuntimeError(f"{prompt_id} failed: {_first_error(record)}")
         if status.get("completed"):
-            return outputs_of(record)
+            return record
         time.sleep(poll)
     raise TimeoutError(f"{prompt_id} still running after {timeout}s")
+
+
+def wait(prompt_id: str, timeout: float = 3600.0, poll: float = 5.0) -> list[Path]:
+    """Block until a job finishes; the files it wrote."""
+    return outputs_of(wait_record(prompt_id, timeout, poll))
 
 
 def _first_error(record: dict) -> str:
@@ -117,3 +132,10 @@ def run(name: str, values: dict[str, Any], timeout: float = 3600.0) -> list[Path
     """Fill in a workflow by name, run it, and return what it wrote."""
     template, inject = load_workflow(name)
     return wait(submit(apply_inject(template, inject, values)), timeout=timeout)
+
+
+def run_text(name: str, values: dict[str, Any], timeout: float = 600.0) -> str:
+    """Fill in a text-producing workflow (a VLM caption), run it, and return the text."""
+    template, inject = load_workflow(name)
+    record = wait_record(submit(apply_inject(template, inject, values)), timeout=timeout)
+    return "\n".join(texts_of(record))

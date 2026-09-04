@@ -285,7 +285,8 @@ def render_card(card: dict[str, str]) -> str:
         age = age.replace("in his", "in her")
     beard = ("" if card.get("gender") == "woman"
              else f"{card['facial_hair']}, ")
-    parts = [f"{noun} {age}, {card['complexion']}, {card['hair']},",
+    build = f"{card['build']}, " if card.get("build") else ""
+    parts = [f"{noun} {age}, {build}{card['complexion']}, {card['hair']},",
              f"{beard}wearing {card['headgear']},",
              f"{card['garment']} and {card['neckwear']}."]
     if card.get("book"):

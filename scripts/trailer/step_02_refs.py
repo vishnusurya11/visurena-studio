@@ -1,12 +1,16 @@
-"""Step 02 -- refs: the sheets that bind identity, judged by a recogniser.
+"""Step 02 -- refs: the sheets that bind identity, judged by a vision model.
 
 `build_refs.py` rendered sheets and hoped; a cast that measured as the same
-man shipped once (Watson/Holmes at 0.420).  Here every character sheet is
-embedded and compared with the cast already bound.  A collision climbs the
-ladder -- another seed, then another pose, the FUNCTION (this character,
-distinct) unchanged -- and a character the recogniser cannot separate after
-five more renders is UNBOUND: listed in refs.json, absent from `refs`, so no
-setup downstream can carry it.  The palette is derived from story.json.
+man shipped once (Watson/Holmes at 0.420).  A face recogniser then gated the
+sheets, but a cosine says only THAT two sheets read alike, so its rungs were
+another seed and another pose -- and Lestrade collided five times in a row on
+the same words.  Here every sheet is READ BACK by the local Qwen3-VL into a
+trait card (`studio.describe`) and compared with the cast already bound:
+fewer than DISTINCT_AT traits apart is a collision.  The ladder is one
+reroll, then three `distinguish` rungs that rewrite exactly the traits the
+two sheets share; a character that still collides is UNBOUND: listed in
+refs.json, absent from `refs`, so no setup downstream can carry it.  The
+palette is derived from story.json.
 """
 from __future__ import annotations
 
@@ -14,9 +18,9 @@ import json
 from pathlib import Path
 
 from scripts.trailer.build_refs import describe_location, generate, refs_needed
-from studio.cast_card import cards_for, infer_gender, render_card
-from studio.identity import SFACE, UNVERIFIABLE_BELOW, verdict
-from studio.identity_gate import embed_file, ensure_models, open_sessions, worst_against
+from studio.cast_card import POOLS, cards_for, infer_gender, render_card
+from studio.describe import DISTINCT_AT, TraitCard, closest, describe, same_look, shared, verifiable
+from studio.distinguish import distinguish
 from studio.ladder import Ladder, Rung, climb
 from studio.learnings import Learning
 from studio.trailer_refs import (character_prompt, load_json, location_prompt, palette_for,
@@ -27,10 +31,10 @@ STEP_ID = "02"
 NAME = "refs"
 SEED_BASE = 40000
 RENDER_SECONDS = 30
-POSES = ("Three-quarter view, eyes to camera.",
-         "Head turned toward profile, chin lifted, eyes off camera.")
-LADDER = Ladder([Rung("reroll_seed", RENDER_SECONDS, tries=3),
-                 Rung("alternate_pose", RENDER_SECONDS, tries=2)], terminal="unbound")
+DESCRIBE_SECONDS = 60
+LADDER = Ladder([Rung("reroll_seed", RENDER_SECONDS + DESCRIBE_SECONDS, tries=1),
+                 Rung("distinguish", RENDER_SECONDS + DESCRIBE_SECONDS, tries=3)],
+                terminal="unbound")
 
 
 def seed_for(index: int, rung: Rung, i: int) -> int:
@@ -38,10 +42,6 @@ def seed_for(index: int, rung: Rung, i: int) -> int:
     later try on every rung is a seed no earlier try used."""
     rung_offset = 5000 * LADDER.rungs.index(rung) if rung in LADDER.rungs else 0
     return SEED_BASE + index + rung_offset + 1000 * i
-
-
-def pose_for(rung: Rung, i: int) -> str:
-    return POSES[i % len(POSES)] if rung.name == "alternate_pose" else ""
 
 
 def cast_cards(book: Path, characters: list[str]) -> dict[str, dict]:
@@ -55,8 +55,8 @@ def cast_cards(book: Path, characters: list[str]) -> dict[str, dict]:
 
 
 def render_sheet(book: Path, char_id: str, card: dict, palette: str, seed: int,
-                 pose: str, fresh: bool) -> tuple[Path, str]:
-    physical = f"{render_card(card)} {pose}".strip()
+                 fresh: bool) -> tuple[Path, str]:
+    physical = render_card(card)
     prompt = character_prompt(physical, palette)
     dest = book / "refs/characters" / f"{ref_id_for('character', char_id)}.png"
     if fresh and dest.exists():
@@ -71,48 +71,58 @@ def character_record(char_id: str, name: str, physical: str, prompt: str, path: 
             "rel_path": path.relative_to(book).as_posix(), "identity": identity}
 
 
+def identity_of(card: TraitCard, bound: dict[str, TraitCard]) -> dict:
+    who, differing = closest(card, bound)
+    return {"closest": who, "differs": differing, "traits": card.model_dump()}
+
+
 def bind_one(ctx, book: Path, index: int, char_id: str, card: dict, palette: str,
-             sessions, bound: dict) -> dict | None:
+             bound: dict[str, TraitCard], taken: dict[str, set[str]]) -> dict | None:
     """Climb the ladder for one character; None means unbound."""
+    state = {"card": card, "other": None, "shared": []}
+
     def attempt(rung: Rung, i: int):
         fresh = not (rung is LADDER.rungs[0] and i == 0)
-        path, physical = render_sheet(book, char_id, card, palette, seed_for(index, rung, i),
-                                      pose_for(rung, i), fresh)
-        vector, px = embed_file(sessions, path)
-        return {"path": path, "physical": physical, "vector": vector, "px": px}
+        if rung.name == "distinguish":
+            state["card"] = distinguish(state["card"], state["shared"], state["other"], taken)
+        seed = seed_for(index, rung, i)
+        path, physical = render_sheet(book, char_id, state["card"], palette, seed, fresh)
+        return {"path": path, "physical": physical, "card": describe(path, seed=seed)}
 
     def gate(result):
-        if result["vector"] is None or result["px"] < UNVERIFIABLE_BELOW:
-            ctx.learn(Learning(step=STEP_ID, gate="identity", measured=result["px"],
-                               threshold=UNVERIFIABLE_BELOW, action="accepted_unverifiable"))
-            return True, None, SFACE.same_person_at
-        who, score = worst_against(result["vector"], bound)
-        result["identity"] = {"closest": who, "similarity": round(score, 3)}
-        return verdict(score, result["px"], SFACE) != "fail", round(score, 3), SFACE.same_person_at
+        result["identity"] = identity_of(result["card"], bound)
+        if not verifiable(result["card"]):
+            ctx.learn(Learning(step=STEP_ID, gate="identity", measured=str(result["card"]),
+                               threshold="verifiable", action="accepted_unverifiable"))
+            return True, None, DISTINCT_AT
+        who = result["identity"]["closest"]
+        if who is None or not same_look(result["card"], bound[who]):
+            return True, len(result["identity"]["differs"]), DISTINCT_AT
+        state.update(other=bound[who], shared=shared(result["card"], bound[who]))
+        return False, f"{who}: shares {', '.join(state['shared'])}", DISTINCT_AT
 
     outcome = climb(LADDER, STEP_ID, attempt, gate, ctx.budget, ctx.learn, gate_name="identity")
     if outcome.terminal:
         return None
-    result = outcome.result
-    if result["vector"] is not None:
-        bound[char_id] = result["vector"]
-    return result
+    bound[char_id] = outcome.result["card"]
+    return outcome.result
 
 
-def bind_cast(ctx, book: Path, characters: list[str], palette: str, sessions
+def bind_cast(ctx, book: Path, characters: list[str], palette: str
               ) -> tuple[list[dict], list[str]]:
     cards = cast_cards(book, characters)
-    bound: dict = {}
+    taken = {slot: {c[slot] for c in cards.values()} for slot in POOLS}
+    bound: dict[str, TraitCard] = {}
     records, unbound = [], []
     for index, char_id in enumerate(characters):
-        result = bind_one(ctx, book, index, char_id, cards[char_id], palette, sessions, bound)
+        result = bind_one(ctx, book, index, char_id, cards[char_id], palette, bound, taken)
         if result is None:
             unbound.append(char_id)
             continue
         name = load_json(book / "analysis/characters" / f"{char_id}.json").get("name", char_id)
         records.append(character_record(
             char_id, name, result["physical"], character_prompt(result["physical"], palette),
-            result["path"], book, result.get("identity", {})))
+            result["path"], book, result["identity"]))
     return records, unbound
 
 
@@ -137,8 +147,7 @@ def run(codex_id: str, ctx) -> None:
     palette = palette_for(story.register, story.setting)
     scenes = load_json(book / "screenplay/feature/screenplay.json")["scenes"]
     characters, locations = refs_needed(book, 12)
-    sessions = open_sessions(ensure_models())
-    records, unbound = bind_cast(ctx, book, characters, palette, sessions)
+    records, unbound = bind_cast(ctx, book, characters, palette)
     records += location_records(book, locations, scenes, palette)
     (book / "refs").mkdir(parents=True, exist_ok=True)
     (book / "refs/refs.json").write_text(json.dumps(

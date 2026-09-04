@@ -90,6 +90,12 @@ class TestRenderCard:
         for comparative in ("taller than", "shorter than", "unlike", "compared"):
             assert comparative not in text
 
+    def test_a_build_on_the_card_is_said_with_the_person(self):
+        card = card_for("sherlock_holmes", {}, "")
+        assert "frame" not in render_card(card)
+        text = render_card({**card, "build": "a broad stocky frame"})
+        assert text.startswith("A man") and "a broad stocky frame, " in text
+
 
 class TestGender:
     """Lucy Ferrier was rendered as a man with a beard.
