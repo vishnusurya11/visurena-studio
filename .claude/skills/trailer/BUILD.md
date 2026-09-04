@@ -75,7 +75,10 @@ Evidence: `docs/analysis/research/trailer-music-structure.md`,
   directory (`listing_lines`), and every take was `CLIP_SECONDS` while the
   plan's final hold outran it, so the cut started inside the reference leak
   and the picture came up 0.42 s short (`take_seconds`). Every learning also
-  said `seconds: 0.0` -- `climb` now times each attempt. Full account:
+  said `seconds: 0.0` -- `climb` now times each attempt. Run 6b's master
+  then sat 45 KB over the Telegram Bot API's 50 MiB cap and step 10 sent it
+  three times into a bare TLS EOF: `deliverable` now sends a CRF-20 copy
+  when the master does not fit. Full account:
   `docs/analysis/research/trailer-retrospect.md`.
 - measured but not yet re-cut through the new chain: the delivered Scarlet
   master under the new `qc.py` reads 30/45 cuts on beat (onset grid, the

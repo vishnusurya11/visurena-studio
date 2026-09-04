@@ -29,20 +29,6 @@
    "rel_path": "refs/characters/char-jefferson_hope.png"
   },
   {
-   "ref_id": "char-g_lestrade",
-   "kind": "character",
-   "name": "Lestrade",
-   "prompt": "A man about sixty, a slight wiry frame, a sallow complexion, wavy chestnut hair, a heavy walrus moustache, wearing a black silk top hat, a charcoal frock coat and a stiff wing collar and black stock. The dossier provides no description of Lestrade\u2019s age, build, face, hair, clothing, or distinguishing physical features. He is identified as a well-known detective and appears in professional investigative settings. Head-and-shoulders portrait to mid-chest, the head filling the upper half of the frame, on a plain neutral mid-grey backdrop, even soft frontal light with both eyes lit, no cast shadows, neutral expression with the mouth closed, sharp focus on the face. Cinematic live-action photograph, anamorphic widescreen, natural film grain, photoreal, no stylisation, no illustration. Muted desaturated palette of soot-black, gaslight amber and cold grey, fog, deep shadow; 1881 London; practical period light sources. No text, no lettering, no signage, no watermark, no subtitles.",
-   "rel_path": "refs/characters/char-g_lestrade.png"
-  },
-  {
-   "ref_id": "char-john_ferrier",
-   "kind": "character",
-   "name": "John Ferrier",
-   "prompt": "A man about seventy, a florid weathered face, close-cropped grey hair, grey side-whiskers, wearing a flat tweed cap, a dark green hunting jacket and a black silk scarf. An older man referred to as an \u201cold farmer\u201d and \u201cold man,\u201d with a broad breast and, later, a gaunt, haggard appearance after prolonged privation and fear. He is associated with farming, hunting, guiding, and carrying a money-bag during the escape. His clothing and exact age, hair, face, and other distinguishing features are not specified. He uses or keeps a rusty old shotgun. Head-and-shoulders portrait to mid-chest, the head filling the upper half of the frame, on a plain neutral mid-grey backdrop, even soft frontal light with both eyes lit, no cast shadows, neutral expression with the mouth closed, sharp focus on the face. Cinematic live-action photograph, anamorphic widescreen, natural film grain, photoreal, no stylisation, no illustration. Muted desaturated palette of soot-black, gaslight amber and cold grey, fog, deep shadow; 1881 London; practical period light sources. No text, no lettering, no signage, no watermark, no subtitles.",
-   "rel_path": "refs/characters/char-john_ferrier.png"
-  },
-  {
    "ref_id": "char-lucy_ferrier",
    "kind": "character",
    "name": "Lucy Ferrier",
@@ -151,34 +137,6 @@
  "beats": [
   {
    "beat_id": "B00",
-   "scene_number": 8,
-   "arc": "quiet",
-   "location_id": "221b_baker_street",
-   "cast": [
-    "sherlock_holmes"
-   ],
-   "image_prompt": "Slow dolly in from axis side A toward Gregson as his smile fades and his raised glass stalls, while Holmes registers the new information. Gregson\u2019s smile fades. His glass remains halfway to his mouth.",
-   "motion": "As Slow dolly in from axis side A toward Gregson, the camera pushes in with small amplitude at slow speed toward and his raised glass.",
-   "line": null,
-   "speaker": null,
-   "emotion": null
-  },
-  {
-   "beat_id": "B01",
-   "scene_number": 8,
-   "arc": "quiet",
-   "location_id": "221b_baker_street",
-   "cast": [
-    "sherlock_holmes"
-   ],
-   "image_prompt": "Handheld medium-wide frame from axis side A following Gregson as he springs from the chair and spills the whiskey and water across the table. Gregson springs from his chair. The whiskey and water spill across the table.",
-   "motion": "As Handheld medium-wide frame from axis side A following Gregson, the camera follows with moderate amplitude at slow speed toward water across the table.",
-   "line": null,
-   "speaker": null,
-   "emotion": null
-  },
-  {
-   "beat_id": "B02",
    "scene_number": 4,
    "arc": "quiet",
    "location_id": "221b_baker_street",
@@ -192,7 +150,7 @@
    "emotion": null
   },
   {
-   "beat_id": "B03",
+   "beat_id": "B01",
    "scene_number": 21,
    "arc": "quiet",
    "location_id": "221b_baker_street",
@@ -201,6 +159,34 @@
    ],
    "image_prompt": "Slow dolly in toward Holmes as he explains the difference between action and belief; the newspaper and his tapping hand remain in the foreground.",
    "motion": "As Slow dolly in toward Holmes, the camera pushes in with small amplitude at slow speed toward and his tapping hand.",
+   "line": null,
+   "speaker": null,
+   "emotion": null
+  },
+  {
+   "beat_id": "B02",
+   "scene_number": 4,
+   "arc": "quiet",
+   "location_id": "221b_baker_street",
+   "cast": [
+    "sherlock_holmes"
+   ],
+   "image_prompt": "Locked-off exterior-facing view through the open doorway as Holmes and Watson emerge and the hansom carries them rapidly toward the Brixton Road. A minute later, they are in a hansom, driving furiously for the Brixton Road.",
+   "motion": "The camera is a static shot, the frame perfectly still, locked off.",
+   "line": null,
+   "speaker": null,
+   "emotion": null
+  },
+  {
+   "beat_id": "B03",
+   "scene_number": 4,
+   "arc": "quiet",
+   "location_id": "221b_baker_street",
+   "cast": [
+    "sherlock_holmes"
+   ],
+   "image_prompt": "Slow dolly in toward Holmes as he lifts the broken-seal letter from the table, bringing the letter and his hands into increasing prominence. He lifts a letter from the table. The seal is already broken.",
+   "motion": "As Slow dolly in toward Holmes, the camera pushes in with small amplitude at slow speed toward letter from the table.",
    "line": null,
    "speaker": null,
    "emotion": null
@@ -221,14 +207,14 @@
   },
   {
    "beat_id": "B05",
-   "scene_number": 8,
+   "scene_number": 4,
    "arc": "quiet",
    "location_id": "221b_baker_street",
    "cast": [
     "sherlock_holmes"
    ],
-   "image_prompt": "Slow dolly in from axis side A toward Gregson as his smile fades and his raised glass stalls, while Holmes registers the new information. Gregson\u2019s smile fades. His glass remains halfway to his mouth.",
-   "motion": "As Slow dolly in from axis side A toward Gregson, the camera pushes in with small amplitude at slow speed toward and his raised glass.",
+   "image_prompt": "Locked-off over-the-shoulder view from behind Holmes toward Watson, holding Watson's questioning face and Holmes in the same conversational axis.",
+   "motion": "The camera is a static shot, the frame perfectly still, locked off.",
    "line": null,
    "speaker": null,
    "emotion": null
@@ -255,7 +241,7 @@
    "cast": [
     "sherlock_holmes"
    ],
-   "image_prompt": "Locked-off exterior-facing view through the open doorway as Holmes and Watson emerge and the hansom carries them rapidly toward the Brixton Road. A minute later, they are in a hansom, driving furiously for the Brixton Road.",
+   "image_prompt": "Locked-off two-shot across the table, Watson's admiration answered by Holmes's dry dismissal.",
    "motion": "The camera is a static shot, the frame perfectly still, locked off.",
    "line": null,
    "speaker": null,
@@ -269,62 +255,6 @@
    "cast": [
     "sherlock_holmes"
    ],
-   "image_prompt": "Slow dolly in toward Holmes as he lifts the broken-seal letter from the table, bringing the letter and his hands into increasing prominence. He lifts a letter from the table. The seal is already broken.",
-   "motion": "As Slow dolly in toward Holmes, the camera pushes in with small amplitude at slow speed toward letter from the table.",
-   "line": null,
-   "speaker": null,
-   "emotion": null
-  },
-  {
-   "beat_id": "B09",
-   "scene_number": 8,
-   "arc": "build",
-   "location_id": "221b_baker_street",
-   "cast": [
-    "sherlock_holmes"
-   ],
-   "image_prompt": "Locked-off conversational two-shot from axis side A, with Gregson explaining his theory and Holmes answering him across the room.",
-   "motion": "The camera is a static shot, the frame perfectly still, locked off.",
-   "line": null,
-   "speaker": null,
-   "emotion": null
-  },
-  {
-   "beat_id": "B10",
-   "scene_number": 4,
-   "arc": "build",
-   "location_id": "221b_baker_street",
-   "cast": [
-    "sherlock_holmes"
-   ],
-   "image_prompt": "Locked-off over-the-shoulder view from behind Holmes toward Watson, holding Watson's questioning face and Holmes in the same conversational axis.",
-   "motion": "The camera is a static shot, the frame perfectly still, locked off.",
-   "line": null,
-   "speaker": null,
-   "emotion": null
-  },
-  {
-   "beat_id": "B11",
-   "scene_number": 4,
-   "arc": "build",
-   "location_id": "221b_baker_street",
-   "cast": [
-    "sherlock_holmes"
-   ],
-   "image_prompt": "Locked-off two-shot across the table, Watson's admiration answered by Holmes's dry dismissal.",
-   "motion": "The camera is a static shot, the frame perfectly still, locked off.",
-   "line": null,
-   "speaker": null,
-   "emotion": null
-  },
-  {
-   "beat_id": "B12",
-   "scene_number": 4,
-   "arc": "build",
-   "location_id": "221b_baker_street",
-   "cast": [
-    "sherlock_holmes"
-   ],
    "image_prompt": "Locked-off medium close two-shot of Holmes and Watson beside the table as Holmes weighs the request and finally agrees to investigate.",
    "motion": "The camera is a static shot, the frame perfectly still, locked off.",
    "line": null,
@@ -332,7 +262,7 @@
    "emotion": null
   },
   {
-   "beat_id": "B13",
+   "beat_id": "B09",
    "scene_number": 4,
    "arc": "build",
    "location_id": "221b_baker_street",
@@ -346,21 +276,7 @@
    "emotion": null
   },
   {
-   "beat_id": "B14",
-   "scene_number": 8,
-   "arc": "build",
-   "location_id": "221b_baker_street",
-   "cast": [
-    "sherlock_holmes"
-   ],
-   "image_prompt": "Locked-off medium close-up from axis side A on Gregson as he addresses the room with confident satisfaction.",
-   "motion": "The camera is a static shot, the frame perfectly still, locked off.",
-   "line": null,
-   "speaker": null,
-   "emotion": null
-  },
-  {
-   "beat_id": "B15",
+   "beat_id": "B10",
    "scene_number": 4,
    "arc": "build",
    "location_id": "221b_baker_street",
@@ -374,9 +290,75 @@
    "emotion": null
   },
   {
-   "beat_id": "B16",
+   "beat_id": "B11",
    "scene_number": 21,
    "arc": "build",
+   "location_id": "221b_baker_street",
+   "cast": [
+    "sherlock_holmes"
+   ],
+   "image_prompt": "Locked-off over-the-shoulder view from behind Holmes toward Watson across the table; Watson answers from the same conversational axis.",
+   "motion": "The camera is a static shot, the frame perfectly still, locked off.",
+   "line": null,
+   "speaker": null,
+   "emotion": null
+  },
+  {
+   "beat_id": "B12",
+   "scene_number": 22,
+   "arc": "build",
+   "location_id": "221b_baker_street",
+   "cast": [
+    "sherlock_holmes"
+   ],
+   "image_prompt": "Insert close-up, locked-off camera, Watson unfolds the Echo and reads down the column as the printed credit for Jefferson Hope\u2019s capture remains visible. Watson unfolds the Echo. His eyes move down the column. Lestrade and Gregson receive the credit for Jefferson Hope\u2019s capture.",
+   "motion": "The camera is a static shot, the frame perfectly still, locked off.",
+   "line": null,
+   "speaker": null,
+   "emotion": null
+  },
+  {
+   "beat_id": "B13",
+   "scene_number": 4,
+   "arc": "build",
+   "location_id": "221b_baker_street",
+   "cast": [
+    "sherlock_holmes"
+   ],
+   "image_prompt": "Locked-off wide view of the hall and doorway as Watson snatches up his hat and Holmes opens the door before Watson finishes buttoning his coat. Watson snatches up his hat. Holmes opens the door before he can button his coat.",
+   "motion": "The camera is a static shot, the frame perfectly still, locked off.",
+   "line": null,
+   "speaker": null,
+   "emotion": null
+  },
+  {
+   "beat_id": "B14",
+   "scene_number": 6,
+   "arc": "build",
+   "location_id": "number_46_audley_court",
+   "cast": [],
+   "image_prompt": "Empty plate, nobody in frame. Handheld medium two-shot inside the moving cab as the cab jolts into motion and Watson watches Holmes in the dim light. The cab jolts into motion. Watson watches Holmes in the dim light.",
+   "motion": "As Handheld medium two-shot inside the moving cab, the camera follows with moderate amplitude at slow speed toward in the dim light.",
+   "line": null,
+   "speaker": null,
+   "emotion": null
+  },
+  {
+   "beat_id": "B15",
+   "scene_number": 14,
+   "arc": "hit",
+   "location_id": "ferrier_farm",
+   "cast": [],
+   "image_prompt": "Empty plate, nobody in frame. Handheld close tracking frame beside Hope's hand on Lucy's mule as the animals shift beneath the travellers. Hope keeps one hand on Lucy\u2019s mule. The animals shift beneath them.",
+   "motion": "As Handheld close tracking frame beside Hope's hand on Lucy's mule, the camera follows with moderate amplitude at slow speed toward Hand.",
+   "line": null,
+   "speaker": null,
+   "emotion": null
+  },
+  {
+   "beat_id": "B16",
+   "scene_number": 21,
+   "arc": "hit",
    "location_id": "221b_baker_street",
    "cast": [
     "sherlock_holmes"
@@ -389,13 +371,11 @@
   },
   {
    "beat_id": "B17",
-   "scene_number": 21,
+   "scene_number": 13,
    "arc": "hit",
-   "location_id": "221b_baker_street",
-   "cast": [
-    "sherlock_holmes"
-   ],
-   "image_prompt": "Locked-off over-the-shoulder view from behind Holmes toward Watson across the table; Watson answers from the same conversational axis.",
+   "location_id": "utah",
+   "cast": [],
+   "image_prompt": "Empty plate, nobody in frame. locked-off wide frame of the Utah doorway; the latch clicks and Ferrier reaches the door The latch CLICKS. Ferrier reaches the door.",
    "motion": "The camera is a static shot, the frame perfectly still, locked off.",
    "line": null,
    "speaker": null,
@@ -408,53 +388,15 @@
    "location_id": "utah",
    "cast": [],
    "image_prompt": "Empty plate, nobody in frame. slow pan left from Young's gaze past Ferrier into the empty room Young looks past him. The room is empty.",
-   "motion": "As slow pan left from Young's gaze past Ferrier into the empty room Young looks past him. The room is empty, the camera pans left with wide amplitude at slow speed toward into the empty room.",
+   "motion": "As slow pan left from Young's gaze past Ferrier into the empty room Young looks past him. The room is empty, the camera pans left with wide amplitude at quick speed toward into the empty room.",
    "line": null,
    "speaker": null,
    "emotion": null
   },
   {
    "beat_id": "B19",
-   "scene_number": 21,
-   "arc": "hit",
-   "location_id": "221b_baker_street",
-   "cast": [
-    "sherlock_holmes"
-   ],
-   "image_prompt": "Slow dolly in toward Holmes and the marked newspaper as he assembles the face, smell, ring, and telegram into his chain of evidence; the foreground markings slide subtly past the frame edges.",
-   "motion": "As Slow dolly in toward Holmes, the camera pushes in with small amplitude at slow speed toward ring.",
-   "line": null,
-   "speaker": null,
-   "emotion": null
-  },
-  {
-   "beat_id": "B20",
-   "scene_number": 15,
-   "arc": "hit",
-   "location_id": "utah_mountains",
-   "cast": [],
-   "image_prompt": "Empty plate, nobody in frame. Locked-off medium frame on Hope as he looks to Lucy and Ferrier, then throws his gun over his shoulder. He looks to Lucy and Ferrier. Then throws his gun over his shoulder.",
-   "motion": "The camera is a static shot, the frame perfectly still, locked off.",
-   "line": null,
-   "speaker": null,
-   "emotion": null
-  },
-  {
-   "beat_id": "B21",
-   "scene_number": 18,
-   "arc": "hit",
-   "location_id": "number_3_lauriston_gardens",
-   "cast": [],
-   "image_prompt": "Empty plate, nobody in frame. Close-up from axis side A on blood running from Hope's nose as he marks the wall with the word RACHE. Blood runs from Hope\u2019s nose. He marks the wall: RACHE.",
-   "motion": "The camera is a static shot, the frame perfectly still, locked off.",
-   "line": null,
-   "speaker": null,
-   "emotion": null
-  },
-  {
-   "beat_id": "B22",
    "scene_number": 16,
-   "arc": "aftermath",
+   "arc": "hit",
    "location_id": "salt_lake_city",
    "cast": [],
    "image_prompt": "Empty plate, nobody in frame. Tight locked-off frame on Hope taking Lucy\u2019s hand and pulling the wedding ring from her finger. He takes her hand. He pulls the wedding ring from her finger.",
@@ -464,12 +406,24 @@
    "emotion": null
   },
   {
-   "beat_id": "B23",
+   "beat_id": "B20",
    "scene_number": 12,
    "arc": "aftermath",
    "location_id": "great_alkali_plain",
    "cast": [],
    "image_prompt": "Empty plate, nobody in frame. Medium locked-off frame on Ferrier lowering the bundle as Lucy's face breaks through the cloth. Ferrier lowers the bundle. A child\u2019s face breaks through the cloth.",
+   "motion": "The camera is a static shot, the frame perfectly still, locked off.",
+   "line": null,
+   "speaker": null,
+   "emotion": null
+  },
+  {
+   "beat_id": "B21",
+   "scene_number": 15,
+   "arc": "aftermath",
+   "location_id": "utah_mountains",
+   "cast": [],
+   "image_prompt": "Empty plate, nobody in frame. Locked-off medium frame on Hope as he looks to Lucy and Ferrier, then throws his gun over his shoulder. He looks to Lucy and Ferrier. Then throws his gun over his shoulder.",
    "motion": "The camera is a static shot, the frame perfectly still, locked off.",
    "line": null,
    "speaker": null,
@@ -596,7 +550,7 @@
  },
  "shots": [
   {
-   "beat_id": "B03",
+   "beat_id": "B13",
    "index": 0,
    "start": 0.0,
    "seconds": 3.0833333333333335,
@@ -632,7 +586,7 @@
    "line_span": 1
   },
   {
-   "beat_id": "B05",
+   "beat_id": "B08",
    "index": 2,
    "start": 6.5,
    "seconds": 3.4166666666666665,
@@ -650,7 +604,7 @@
    "line_span": 1
   },
   {
-   "beat_id": "B06",
+   "beat_id": "B12",
    "index": 3,
    "start": 9.916666666666666,
    "seconds": 3.8333333333333335,
@@ -668,7 +622,7 @@
    "line_span": 1
   },
   {
-   "beat_id": "B02",
+   "beat_id": "B11",
    "index": 4,
    "start": 13.75,
    "seconds": 1.4166666666666667,
@@ -686,7 +640,7 @@
    "line_span": 1
   },
   {
-   "beat_id": "B04",
+   "beat_id": "B05",
    "index": 5,
    "start": 15.166666666666666,
    "seconds": 1.625,
@@ -704,7 +658,7 @@
    "line_span": 1
   },
   {
-   "beat_id": "B01",
+   "beat_id": "B02",
    "index": 6,
    "start": 16.791666666666668,
    "seconds": 2.0416666666666665,
@@ -722,7 +676,7 @@
    "line_span": 1
   },
   {
-   "beat_id": "B08",
+   "beat_id": "B04",
    "index": 7,
    "start": 18.833333333333332,
    "seconds": 3.625,
@@ -740,7 +694,7 @@
    "line_span": 1
   },
   {
-   "beat_id": "B09",
+   "beat_id": "B10",
    "index": 8,
    "start": 22.458333333333332,
    "seconds": 1.625,
@@ -776,7 +730,7 @@
    "line_span": 1
   },
   {
-   "beat_id": "B17",
+   "beat_id": "B01",
    "index": 10,
    "start": 25.458333333333332,
    "seconds": 1.625,
@@ -794,7 +748,7 @@
    "line_span": 1
   },
   {
-   "beat_id": "B13",
+   "beat_id": "B03",
    "index": 11,
    "start": 27.083333333333332,
    "seconds": 2.25,
@@ -812,7 +766,7 @@
    "line_span": 1
   },
   {
-   "beat_id": "B15",
+   "beat_id": "B09",
    "index": 12,
    "start": 29.333333333333332,
    "seconds": 1.7083333333333333,
@@ -830,13 +784,17 @@
    "line_span": 1
   },
   {
-   "beat_id": "B23",
+   "beat_id": "B06",
    "index": 13,
    "start": 31.041666666666668,
    "seconds": 2.2083333333333335,
-   "cast": [],
-   "char_refs": {},
-   "loc_ref": "loc-great_alkali_plain",
+   "cast": [
+    "sherlock_holmes"
+   ],
+   "char_refs": {
+    "sherlock_holmes": "char-sherlock_holmes"
+   },
+   "loc_ref": "loc-221b_baker_street",
    "size": "close",
    "framing": "The frame cuts at the collarbone; the head fills half the picture height, the eyes on the upper third, the top of the hair just touching the upper edge.",
    "line": null,
@@ -844,13 +802,13 @@
    "line_span": 1
   },
   {
-   "beat_id": "B20",
+   "beat_id": "B19",
    "index": 14,
    "start": 33.25,
    "seconds": 1.5833333333333333,
    "cast": [],
    "char_refs": {},
-   "loc_ref": "loc-utah_mountains",
+   "loc_ref": "loc-salt_lake_city",
    "size": "medium",
    "framing": "A medium shot cut at the waist; the head fills about a fifth of the picture height.",
    "line": null,
@@ -858,7 +816,7 @@
    "line_span": 1
   },
   {
-   "beat_id": "B18",
+   "beat_id": "B17",
    "index": 15,
    "start": 34.833333333333336,
    "seconds": 3.6666666666666665,
@@ -872,17 +830,13 @@
    "line_span": 1
   },
   {
-   "beat_id": "B16",
+   "beat_id": "B15",
    "index": 16,
    "start": 38.5,
    "seconds": 3.5416666666666665,
-   "cast": [
-    "sherlock_holmes"
-   ],
-   "char_refs": {
-    "sherlock_holmes": "char-sherlock_holmes"
-   },
-   "loc_ref": "loc-221b_baker_street",
+   "cast": [],
+   "char_refs": {},
+   "loc_ref": "loc-ferrier_farm",
    "size": "medium",
    "framing": "A medium shot cut at the waist; the head fills about a fifth of the picture height.",
    "line": null,
@@ -890,24 +844,10 @@
    "line_span": 1
   },
   {
-   "beat_id": "B22",
+   "beat_id": "B16",
    "index": 17,
    "start": 42.041666666666664,
    "seconds": 3.5416666666666665,
-   "cast": [],
-   "char_refs": {},
-   "loc_ref": "loc-salt_lake_city",
-   "size": "wide",
-   "framing": "A wide shot of the whole place, no figure larger than a hand's width in frame. The horizon crosses the frame at eye height.",
-   "line": null,
-   "speaker": null,
-   "line_span": 1
-  },
-  {
-   "beat_id": "B11",
-   "index": 18,
-   "start": 45.583333333333336,
-   "seconds": 0.75,
    "cast": [
     "sherlock_holmes"
    ],
@@ -923,16 +863,26 @@
   },
   {
    "beat_id": "B14",
+   "index": 18,
+   "start": 45.583333333333336,
+   "seconds": 0.75,
+   "cast": [],
+   "char_refs": {},
+   "loc_ref": "loc-number_46_audley_court",
+   "size": "insert",
+   "framing": "The object fills the middle half of the frame, lit by a single source, the background soft and out of focus.",
+   "line": null,
+   "speaker": null,
+   "line_span": 1
+  },
+  {
+   "beat_id": "B21",
    "index": 19,
    "start": 46.333333333333336,
    "seconds": 3.75,
-   "cast": [
-    "sherlock_holmes"
-   ],
-   "char_refs": {
-    "sherlock_holmes": "char-sherlock_holmes"
-   },
-   "loc_ref": "loc-221b_baker_street",
+   "cast": [],
+   "char_refs": {},
+   "loc_ref": "loc-utah_mountains",
    "size": "medium",
    "framing": "A medium shot cut at the waist; the head fills about a fifth of the picture height.",
    "line": null,
@@ -940,13 +890,13 @@
    "line_span": 1
   },
   {
-   "beat_id": "B21",
+   "beat_id": "B20",
    "index": 20,
    "start": 50.083333333333336,
    "seconds": 3.75,
    "cast": [],
    "char_refs": {},
-   "loc_ref": "loc-number_3_lauriston_gardens",
+   "loc_ref": "loc-great_alkali_plain",
    "size": "close",
    "framing": "The frame cuts at the collarbone; the head fills half the picture height, the eyes on the upper third, the top of the hair just touching the upper edge.",
    "line": null,
@@ -954,7 +904,7 @@
    "line_span": 1
   },
   {
-   "beat_id": "B10",
+   "beat_id": "B13",
    "index": 21,
    "start": 53.833333333333336,
    "seconds": 2.3333333333333335,
@@ -972,17 +922,13 @@
    "line_span": 1
   },
   {
-   "beat_id": "B19",
+   "beat_id": "B18",
    "index": 22,
    "start": 56.166666666666664,
    "seconds": 2.8333333333333335,
-   "cast": [
-    "sherlock_holmes"
-   ],
-   "char_refs": {
-    "sherlock_holmes": "char-sherlock_holmes"
-   },
-   "loc_ref": "loc-221b_baker_street",
+   "cast": [],
+   "char_refs": {},
+   "loc_ref": "loc-utah",
    "size": "close",
    "framing": "The frame cuts at the collarbone; the head fills half the picture height, the eyes on the upper third, the top of the hair just touching the upper edge.",
    "line": null,
@@ -990,7 +936,7 @@
    "line_span": 1
   },
   {
-   "beat_id": "B12",
+   "beat_id": "B00",
    "index": 23,
    "start": 59.0,
    "seconds": 2.5833333333333335,
@@ -1008,7 +954,7 @@
    "line_span": 1
   },
   {
-   "beat_id": "B03",
+   "beat_id": "B12",
    "index": 24,
    "start": 61.583333333333336,
    "seconds": 1.9583333333333333,
@@ -1026,7 +972,7 @@
    "line_span": 1
   },
   {
-   "beat_id": "B05",
+   "beat_id": "B08",
    "index": 25,
    "start": 63.541666666666664,
    "seconds": 3.0,
@@ -1044,7 +990,7 @@
    "line_span": 1
   },
   {
-   "beat_id": "B00",
+   "beat_id": "B11",
    "index": 26,
    "start": 66.54166666666667,
    "seconds": 2.9583333333333335,
@@ -1080,7 +1026,7 @@
    "line_span": 1
   },
   {
-   "beat_id": "B06",
+   "beat_id": "B05",
    "index": 28,
    "start": 72.5,
    "seconds": 2.7916666666666665,
@@ -1098,7 +1044,7 @@
    "line_span": 1
   },
   {
-   "beat_id": "B04",
+   "beat_id": "B10",
    "index": 29,
    "start": 75.29166666666667,
    "seconds": 2.1666666666666665,
@@ -1116,7 +1062,7 @@
    "line_span": 1
   },
   {
-   "beat_id": "B08",
+   "beat_id": "B04",
    "index": 30,
    "start": 77.45833333333333,
    "seconds": 1.875,
@@ -1134,7 +1080,7 @@
    "line_span": 1
   },
   {
-   "beat_id": "B01",
+   "beat_id": "B07",
    "index": 31,
    "start": 79.33333333333333,
    "seconds": 1.875,
@@ -1152,7 +1098,7 @@
    "line_span": 1
   },
   {
-   "beat_id": "B09",
+   "beat_id": "B03",
    "index": 32,
    "start": 81.20833333333333,
    "seconds": 1.25,
@@ -1170,7 +1116,7 @@
    "line_span": 1
   },
   {
-   "beat_id": "B17",
+   "beat_id": "B01",
    "index": 33,
    "start": 82.45833333333333,
    "seconds": 1.2083333333333333,
@@ -1188,7 +1134,7 @@
    "line_span": 1
   },
   {
-   "beat_id": "B07",
+   "beat_id": "B06",
    "index": 34,
    "start": 83.66666666666667,
    "seconds": 1.25,
@@ -1206,7 +1152,7 @@
    "line_span": 1
   },
   {
-   "beat_id": "B15",
+   "beat_id": "B09",
    "index": 35,
    "start": 84.91666666666667,
    "seconds": 1.7916666666666667,
@@ -1224,69 +1170,9 @@
    "line_span": 1
   },
   {
-   "beat_id": "B13",
+   "beat_id": "B19",
    "index": 36,
    "start": 86.70833333333333,
-   "seconds": 1.7916666666666667,
-   "cast": [
-    "sherlock_holmes"
-   ],
-   "char_refs": {
-    "sherlock_holmes": "char-sherlock_holmes"
-   },
-   "loc_ref": "loc-221b_baker_street",
-   "size": "close",
-   "framing": "The frame cuts at the collarbone; the head fills half the picture height, the eyes on the upper third, the top of the hair just touching the upper edge.",
-   "line": null,
-   "speaker": null,
-   "line_span": 1
-  },
-  {
-   "beat_id": "B20",
-   "index": 37,
-   "start": 88.5,
-   "seconds": 1.7916666666666667,
-   "cast": [],
-   "char_refs": {},
-   "loc_ref": "loc-utah_mountains",
-   "size": "medium",
-   "framing": "A medium shot cut at the waist; the head fills about a fifth of the picture height.",
-   "line": null,
-   "speaker": null,
-   "line_span": 1
-  },
-  {
-   "beat_id": "B23",
-   "index": 38,
-   "start": 90.29166666666667,
-   "seconds": 1.7916666666666667,
-   "cast": [],
-   "char_refs": {},
-   "loc_ref": "loc-great_alkali_plain",
-   "size": "close",
-   "framing": "The frame cuts at the collarbone; the head fills half the picture height, the eyes on the upper third, the top of the hair just touching the upper edge.",
-   "line": null,
-   "speaker": null,
-   "line_span": 1
-  },
-  {
-   "beat_id": "B18",
-   "index": 39,
-   "start": 92.08333333333333,
-   "seconds": 3.0416666666666665,
-   "cast": [],
-   "char_refs": {},
-   "loc_ref": "loc-utah",
-   "size": "insert",
-   "framing": "The object fills the middle half of the frame, lit by a single source, the background soft and out of focus.",
-   "line": null,
-   "speaker": null,
-   "line_span": 1
-  },
-  {
-   "beat_id": "B22",
-   "index": 40,
-   "start": 95.125,
    "seconds": 1.7916666666666667,
    "cast": [],
    "char_refs": {},
@@ -1298,10 +1184,38 @@
    "line_span": 1
   },
   {
-   "beat_id": "B16",
-   "index": 41,
-   "start": 96.91666666666667,
+   "beat_id": "B15",
+   "index": 37,
+   "start": 88.5,
    "seconds": 1.7916666666666667,
+   "cast": [],
+   "char_refs": {},
+   "loc_ref": "loc-ferrier_farm",
+   "size": "medium",
+   "framing": "A medium shot cut at the waist; the head fills about a fifth of the picture height.",
+   "line": null,
+   "speaker": null,
+   "line_span": 1
+  },
+  {
+   "beat_id": "B17",
+   "index": 38,
+   "start": 90.29166666666667,
+   "seconds": 1.7916666666666667,
+   "cast": [],
+   "char_refs": {},
+   "loc_ref": "loc-utah",
+   "size": "close",
+   "framing": "The frame cuts at the collarbone; the head fills half the picture height, the eyes on the upper third, the top of the hair just touching the upper edge.",
+   "line": null,
+   "speaker": null,
+   "line_span": 1
+  },
+  {
+   "beat_id": "B16",
+   "index": 39,
+   "start": 92.08333333333333,
+   "seconds": 3.0416666666666665,
    "cast": [
     "sherlock_holmes"
    ],
@@ -1316,7 +1230,35 @@
    "line_span": 1
   },
   {
-   "beat_id": "B11",
+   "beat_id": "B21",
+   "index": 40,
+   "start": 95.125,
+   "seconds": 1.7916666666666667,
+   "cast": [],
+   "char_refs": {},
+   "loc_ref": "loc-utah_mountains",
+   "size": "close",
+   "framing": "The frame cuts at the collarbone; the head fills half the picture height, the eyes on the upper third, the top of the hair just touching the upper edge.",
+   "line": null,
+   "speaker": null,
+   "line_span": 1
+  },
+  {
+   "beat_id": "B14",
+   "index": 41,
+   "start": 96.91666666666667,
+   "seconds": 1.7916666666666667,
+   "cast": [],
+   "char_refs": {},
+   "loc_ref": "loc-number_46_audley_court",
+   "size": "insert",
+   "framing": "The object fills the middle half of the frame, lit by a single source, the background soft and out of focus.",
+   "line": null,
+   "speaker": null,
+   "line_span": 1
+  },
+  {
+   "beat_id": "B13",
    "index": 42,
    "start": 98.70833333333333,
    "seconds": 1.7916666666666667,
@@ -1334,13 +1276,13 @@
    "line_span": 1
   },
   {
-   "beat_id": "B21",
+   "beat_id": "B20",
    "index": 43,
    "start": 100.5,
    "seconds": 1.7916666666666667,
    "cast": [],
    "char_refs": {},
-   "loc_ref": "loc-number_3_lauriston_gardens",
+   "loc_ref": "loc-great_alkali_plain",
    "size": "insert",
    "framing": "The object fills the middle half of the frame, lit by a single source, the background soft and out of focus.",
    "line": null,
@@ -1348,17 +1290,13 @@
    "line_span": 1
   },
   {
-   "beat_id": "B14",
+   "beat_id": "B18",
    "index": 44,
    "start": 102.29166666666667,
    "seconds": 0.9166666666666666,
-   "cast": [
-    "sherlock_holmes"
-   ],
-   "char_refs": {
-    "sherlock_holmes": "char-sherlock_holmes"
-   },
-   "loc_ref": "loc-221b_baker_street",
+   "cast": [],
+   "char_refs": {},
+   "loc_ref": "loc-utah",
    "size": "close",
    "framing": "The frame cuts at the collarbone; the head fills half the picture height, the eyes on the upper third, the top of the hair just touching the upper edge.",
    "line": null,
@@ -1366,7 +1304,7 @@
    "line_span": 1
   },
   {
-   "beat_id": "B19",
+   "beat_id": "B12",
    "index": 45,
    "start": 103.20833333333333,
    "seconds": 2.125,
@@ -1384,7 +1322,7 @@
    "line_span": 1
   },
   {
-   "beat_id": "B10",
+   "beat_id": "B00",
    "index": 46,
    "start": 105.33333333333333,
    "seconds": 2.2083333333333335,
@@ -1402,7 +1340,7 @@
    "line_span": 1
   },
   {
-   "beat_id": "B03",
+   "beat_id": "B11",
    "index": 47,
    "start": 107.54166666666667,
    "seconds": 1.7083333333333333,
@@ -1420,7 +1358,7 @@
    "line_span": 1
   },
   {
-   "beat_id": "B12",
+   "beat_id": "B08",
    "index": 48,
    "start": 109.25,
    "seconds": 1.375,
@@ -1438,7 +1376,7 @@
    "line_span": 1
   },
   {
-   "beat_id": "B05",
+   "beat_id": "B02",
    "index": 49,
    "start": 110.625,
    "seconds": 1.7083333333333333,
@@ -1456,7 +1394,7 @@
    "line_span": 1
   },
   {
-   "beat_id": "B02",
+   "beat_id": "B10",
    "index": 50,
    "start": 112.33333333333333,
    "seconds": 0.5833333333333334,
@@ -1474,7 +1412,7 @@
    "line_span": 1
   },
   {
-   "beat_id": "B00",
+   "beat_id": "B05",
    "index": 51,
    "start": 112.91666666666667,
    "seconds": 1.1666666666666667,
@@ -1492,7 +1430,7 @@
    "line_span": 1
   },
   {
-   "beat_id": "B06",
+   "beat_id": "B07",
    "index": 52,
    "start": 114.08333333333333,
    "seconds": 3.5,
@@ -1510,7 +1448,7 @@
    "line_span": 1
   },
   {
-   "beat_id": "B08",
+   "beat_id": "B04",
    "index": 53,
    "start": 117.58333333333333,
    "seconds": 3.5,
@@ -1528,7 +1466,7 @@
    "line_span": 1
   },
   {
-   "beat_id": "B04",
+   "beat_id": "B03",
    "index": 54,
    "start": 121.08333333333333,
    "seconds": 3.4583333333333335,
@@ -1546,7 +1484,7 @@
    "line_span": 1
   },
   {
-   "beat_id": "B09",
+   "beat_id": "B06",
    "index": 55,
    "start": 124.54166666666667,
    "seconds": 3.0,
@@ -1582,7 +1520,7 @@
    "line_span": 1
   },
   {
-   "beat_id": "B07",
+   "beat_id": "B09",
    "index": 57,
    "start": 128.66666666666666,
    "seconds": 7.666666666666667,

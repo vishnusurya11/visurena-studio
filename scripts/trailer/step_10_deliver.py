@@ -27,6 +27,27 @@ NOTIFIER = Path(os.environ.get(
     "D:/Projects/KingdomOfViSuReNa/alpha/comfy_studio/poc/2026-08-25_2k-video-pipeline/"
     "scripts/notify_bench.py"))
 LADDER = Ladder([Rung("send", cost_seconds=30, tries=3)], terminal="undelivered")
+TELEGRAM_LIMIT = 50 * 1024 * 1024
+"""The Bot API's upload cap.  A master 45 KB over it died three times with a
+TLS EOF and no other word (Scarlet run 6b); the library keeps the master
+and Telegram gets a copy that fits."""
+SHRINK_CRF = 20
+
+
+def shrink(master: Path, dest: Path) -> Path:
+    """A smaller re-encode of the master for the send, audio untouched."""
+    dest.parent.mkdir(parents=True, exist_ok=True)
+    subprocess.run(["ffmpeg", "-y", "-v", "error", "-i", str(master), "-c:v", "libx264",
+                    "-preset", "medium", "-crf", str(SHRINK_CRF), "-c:a", "copy",
+                    "-movflags", "+faststart", str(dest)], check=True)
+    return dest
+
+
+def deliverable(master: Path, work: Path) -> Path:
+    """The master itself when it fits the Bot API, else a shrunk copy."""
+    if master.stat().st_size <= TELEGRAM_LIMIT:
+        return master
+    return shrink(master, work / "telegram.mp4")
 
 
 def qc_of(ctx) -> QCReport | None:
@@ -59,15 +80,16 @@ def send(master: Path, caption: str) -> int:
 
 def deliver(ctx, master: Path, caption: str) -> dict:
     attempts = {"n": 0}
+    file = deliverable(master, ctx.out_dir / "work")
 
     def attempt(rung, i):
         attempts["n"] += 1
-        return send(master, caption)
+        return send(file, caption)
 
     outcome = climb(LADDER, STEP_ID, attempt, lambda code: (code == 0, code, 0),
                     ctx.budget, ctx.learn, gate_name="telegram")
     return {"status": "undelivered" if outcome.terminal else "delivered",
-            "attempts": attempts["n"]}
+            "attempts": attempts["n"], "file": file.relative_to(ctx.out_dir).as_posix()}
 
 
 def manifest(ctx, master: Path, qc: QCReport | None) -> dict:

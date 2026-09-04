@@ -14,6 +14,7 @@
     "closest": null,
     "differs": [],
     "traits": {
+     "figure": "man",
      "age": "old",
      "hair_colour": "white",
      "hair_length": "long",
@@ -21,7 +22,7 @@
      "headgear": "bowler",
      "complexion": "fair",
      "build": "average",
-     "description": "The man has a full white beard and long white hair that frames his face. He wears a dark bowler hat, a checkered scarf, and a dark jacket over a dark shirt."
+     "description": "He has a full white beard and long white hair that frames his face. He wears a brown bowler hat, a checkered scarf, and a dark, worn-looking coat."
     }
    }
   },
@@ -43,6 +44,7 @@
      "headgear"
     ],
     "traits": {
+     "figure": "man",
      "age": "middle-aged",
      "hair_colour": "brown",
      "hair_length": "short",
@@ -50,7 +52,7 @@
      "headgear": "cap",
      "complexion": "fair",
      "build": "average",
-     "description": "The man has a stern expression with piercing blue eyes and a neatly trimmed brown moustache. He wears a brown patterned cap and a dark green velvet coat over a white high-collared shirt with a tied cravat."
+     "description": "He has a stern expression with piercing blue eyes and a neatly trimmed brown moustache. He wears a brown patterned cap and a dark green velvet coat over a white high-collared shirt with a tied cravat."
     }
    }
   },
@@ -71,6 +73,7 @@
      "headgear"
     ],
     "traits": {
+     "figure": "man",
      "age": "middle-aged",
      "hair_colour": "black",
      "hair_length": "medium",
@@ -78,62 +81,7 @@
      "headgear": "none",
      "complexion": "fair",
      "build": "average",
-     "description": "The man has a calm, direct gaze with dark eyes and a neutral expression. His dark, medium-length hair is neatly styled, and he wears a brown corduroy jacket over a cream-colored shirt with a tied cravat."
-    }
-   }
-  },
-  {
-   "ref_id": "char-g_lestrade",
-   "kind": "character",
-   "entity_id": "g_lestrade",
-   "name": "Lestrade",
-   "physical": "A man about sixty, a slight wiry frame, a sallow complexion, wavy chestnut hair, a heavy walrus moustache, wearing a black silk top hat, a charcoal frock coat and a stiff wing collar and black stock. The dossier provides no description of Lestrade’s age, build, face, hair, clothing, or distinguishing physical features. He is identified as a well-known detective and appears in professional investigative settings.",
-   "prompt": "A man about sixty, a slight wiry frame, a sallow complexion, wavy chestnut hair, a heavy walrus moustache, wearing a black silk top hat, a charcoal frock coat and a stiff wing collar and black stock. The dossier provides no description of Lestrade’s age, build, face, hair, clothing, or distinguishing physical features. He is identified as a well-known detective and appears in professional investigative settings. Head-and-shoulders portrait to mid-chest, the head filling the upper half of the frame, on a plain neutral mid-grey backdrop, even soft frontal light with both eyes lit, no cast shadows, neutral expression with the mouth closed, sharp focus on the face. Cinematic live-action photograph, anamorphic widescreen, natural film grain, photoreal, no stylisation, no illustration. Muted desaturated palette of soot-black, gaslight amber and cold grey, fog, deep shadow; 1881 London; practical period light sources. No text, no lettering, no signage, no watermark, no subtitles.",
-   "rel_path": "refs/characters/char-g_lestrade.png",
-   "identity": {
-    "closest": "sherlock_holmes",
-    "differs": [
-     "hair_colour",
-     "hair_length",
-     "facial_hair",
-     "headgear"
-    ],
-    "traits": {
-     "age": "old",
-     "hair_colour": "dark brown",
-     "hair_length": "medium",
-     "facial_hair": "moustache",
-     "headgear": "top hat",
-     "complexion": "fair",
-     "build": "average",
-     "description": "The man has a stern expression with deep-set eyes and a prominent mustache. He wears a black top hat, a dark suit, and a bow tie, with his dark brown hair styled in a medium length."
-    }
-   }
-  },
-  {
-   "ref_id": "char-john_ferrier",
-   "kind": "character",
-   "entity_id": "john_ferrier",
-   "name": "John Ferrier",
-   "physical": "A man about seventy, a florid weathered face, close-cropped grey hair, grey side-whiskers, wearing a flat tweed cap, a dark green hunting jacket and a black silk scarf. An older man referred to as an “old farmer” and “old man,” with a broad breast and, later, a gaunt, haggard appearance after prolonged privation and fear. He is associated with farming, hunting, guiding, and carrying a money-bag during the escape. His clothing and exact age, hair, face, and other distinguishing features are not specified. He uses or keeps a rusty old shotgun.",
-   "prompt": "A man about seventy, a florid weathered face, close-cropped grey hair, grey side-whiskers, wearing a flat tweed cap, a dark green hunting jacket and a black silk scarf. An older man referred to as an “old farmer” and “old man,” with a broad breast and, later, a gaunt, haggard appearance after prolonged privation and fear. He is associated with farming, hunting, guiding, and carrying a money-bag during the escape. His clothing and exact age, hair, face, and other distinguishing features are not specified. He uses or keeps a rusty old shotgun. Head-and-shoulders portrait to mid-chest, the head filling the upper half of the frame, on a plain neutral mid-grey backdrop, even soft frontal light with both eyes lit, no cast shadows, neutral expression with the mouth closed, sharp focus on the face. Cinematic live-action photograph, anamorphic widescreen, natural film grain, photoreal, no stylisation, no illustration. Muted desaturated palette of soot-black, gaslight amber and cold grey, fog, deep shadow; 1881 London; practical period light sources. No text, no lettering, no signage, no watermark, no subtitles.",
-   "rel_path": "refs/characters/char-john_ferrier.png",
-   "identity": {
-    "closest": "john_watson",
-    "differs": [
-     "age",
-     "hair_colour",
-     "facial_hair"
-    ],
-    "traits": {
-     "age": "old",
-     "hair_colour": "grey",
-     "hair_length": "short",
-     "facial_hair": "whiskers",
-     "headgear": "cap",
-     "complexion": "fair",
-     "build": "average",
-     "description": "The man has a weathered face with deep wrinkles and a calm, steady gaze. He wears a grey flat cap and a dark green coat with a black scarf tied loosely around his neck."
+     "description": "He has a calm, direct gaze with dark eyes and a neutral expression. His dark, medium-length hair is neatly styled, and he wears a brown corduroy jacket over a white cravat and light-colored shirt."
     }
    }
   },
@@ -148,11 +96,13 @@
    "identity": {
     "closest": "jefferson_hope",
     "differs": [
+     "figure",
      "age",
      "hair_length",
      "headgear"
     ],
     "traits": {
+     "figure": "woman",
      "age": "young",
      "hair_colour": "black",
      "hair_length": "long",
@@ -160,7 +110,7 @@
      "headgear": "other hat",
      "complexion": "fair",
      "build": "average",
-     "description": "She has a youthful face with a neutral expression, dark eyes, and freckles across her nose and cheeks. Her long black hair is partially visible beneath a woven straw hat with a dark band, and she wears a light-colored lace collar under a muted blue cardigan."
+     "description": "She has a solemn expression with dark eyes and freckles across her nose and cheeks. Her long black hair is partially covered by a woven straw hat with a dark band, and she wears a lace collar under a blue knitted cardigan."
     }
    }
   },
@@ -173,13 +123,15 @@
    "prompt": "A man about fifty, a sun-darkened face, a bald crown with grey at the temples, an imperial beard and moustache, wearing a tall beaver hat, a russet riding coat and a high starched collar. The dossier provides no description of Gregson’s age, build, face, hair, clothing, or other distinguishing physical features. He is identified as a Scotland Yard detective involved in examining the crime scenes and arresting suspects. Head-and-shoulders portrait to mid-chest, the head filling the upper half of the frame, on a plain neutral mid-grey backdrop, even soft frontal light with both eyes lit, no cast shadows, neutral expression with the mouth closed, sharp focus on the face. Cinematic live-action photograph, anamorphic widescreen, natural film grain, photoreal, no stylisation, no illustration. Muted desaturated palette of soot-black, gaslight amber and cold grey, fog, deep shadow; 1881 London; practical period light sources. No text, no lettering, no signage, no watermark, no subtitles.",
    "rel_path": "refs/characters/char-tobias_gregson.png",
    "identity": {
-    "closest": "john_watson",
+    "closest": "sherlock_holmes",
     "differs": [
+     "age",
      "hair_colour",
-     "facial_hair",
+     "hair_length",
      "headgear"
     ],
     "traits": {
+     "figure": "man",
      "age": "middle-aged",
      "hair_colour": "grey",
      "hair_length": "short",
@@ -187,7 +139,7 @@
      "headgear": "top hat",
      "complexion": "fair",
      "build": "average",
-     "description": "The man has a serious expression with a full beard and mustache, and his hair is short and grey. He wears a black top hat, a brown coat, a white high collar, and a black tie."
+     "description": "He has a full beard and mustache, with short grey hair visible at his temples. He wears a black top hat, a brown coat, a white collared shirt, and a black tie."
     }
    }
   },
@@ -309,5 +261,8 @@
    "rel_path": "refs/locations/loc-scotland_yard.png"
   }
  ],
- "unbound": []
+ "unbound": [
+  "g_lestrade",
+  "john_ferrier"
+ ]
 }

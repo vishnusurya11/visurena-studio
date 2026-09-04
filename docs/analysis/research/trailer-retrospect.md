@@ -6,8 +6,12 @@ item is closed only by a test that fails on the old behaviour.
 
 ## Run 6 — A Study in Scarlet, 2026-09-04 17:20–22:29 UTC
 
-**Outcome:** no master. Steps 01–07 completed; step 08 crashed. The 14 takes
-it left were assembled afterwards with the two fixes below (see run 6b).
+**Outcome:** no master from the run itself — step 08 crashed. Run 6b
+(23:00 UTC, the same 14 takes with B09 re-rendered long enough for the
+hold) delivered: 136.33 s, drift +0.003 s, 64 cuts, 45% on beat (onset
+grid; baseline 12/35 = 34%), 0% on downbeat, 53% on L0, −14.0 LUFS,
+−1.8 dBTP, floor pass, flags `cuts_on_beat, cuts_on_downbeat, cuts_on_L0,
+title_on_downbeat`. Sent to Telegram by hand as a 39 MB copy (defect 4).
 
 **What the run did**
 
@@ -44,7 +48,13 @@ it left were assembled afterwards with the two fixes below (see run 6b).
    so the budget rung's `cost_seconds` (a 660 s guess) had nothing to
    calibrate against. Fix: every rung learning records the attempt's cost
    from the budget clock (`test_every_learning_carries_what_its_attempt_cost`).
-4. Learnings written by step 07 in this run have an empty `substep`: the
+4. Run 6b's master (14 takes, 52,473,989 bytes) was 45 KB over the Telegram
+   Bot API's 50 MiB cap; three sends died with `EOF occurred in violation
+   of protocol` and step 10 went `undelivered`. A CRF-20 copy (39 MB) went
+   through first time. Fix: `deliverable` sends the master when it fits and
+   a shrunk copy otherwise; the manifest names the file sent
+   (`test_a_master_over_the_bot_limit_sends_a_shrunk_copy`).
+5. Learnings written by step 07 in this run have an empty `substep`: the
    process loaded the code before `fe87828` landed. Not a new defect;
    noted so the run-6 rows are not read as a regression.
 

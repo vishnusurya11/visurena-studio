@@ -151,8 +151,11 @@ ladder: re-cut ×2 with scene-detect threshold lowered and walk stretch
 adjusted (free). fallback: ship with every miss listed under `flags`.
 
 **10 deliver** — in: master, `qc.json`, `learnings.jsonl`. out:
-`manifest.json`, Telegram message with the file and the flags. ladder: send
-×3. fallback: file stays in the library; manifest records `undelivered`.
+`manifest.json`, Telegram message with the file and the flags. The file
+sent is the master when it is ≤ 50 MiB (the Bot API cap) and otherwise a
+CRF-20 copy at `work/telegram.mp4` (`deliverable`; run 6b's master was 45 KB
+over and died with a bare TLS EOF ×3). ladder: send ×3. fallback: file
+stays in the library; manifest records `undelivered`.
 
 ## What the model is allowed to decide
 

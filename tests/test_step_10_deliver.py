@@ -8,6 +8,7 @@ network is touched: the sender is a faked subprocess.
 from __future__ import annotations
 
 import json
+import subprocess
 
 import pytest
 
@@ -61,9 +62,28 @@ class TestRun:
         assert doc["flags"] == []
         assert [r["action"] for r in doc["learnings"]] == ["reroll_seed"]
         assert doc["rungs_by_step"] == {"07": 1}
-        assert doc["delivery"] == {"status": "delivered", "attempts": 1}
+        assert doc["delivery"] == {"status": "delivered", "attempts": 1,
+                                   "file": "TRAILER-scarlet.mp4"}
         assert sender["calls"][0]["master"].name == "TRAILER-scarlet.mp4"
         assert "-14.2" in sender["calls"][0]["caption"]
+
+    def test_a_master_over_the_bot_limit_sends_a_shrunk_copy(self, ctx, sender, monkeypatch):
+        """Scarlet run 6b: the master was 52,473,989 bytes, 45 KB over the
+        Bot API's 50 MiB upload cap; three sends died with a TLS EOF and the
+        run went 'undelivered'.  A 39 MB re-encode went through first time."""
+        (ctx.out_dir / "TRAILER-scarlet.mp4").write_bytes(b"0" * (step.TELEGRAM_LIMIT + 1))
+        shrunk = []
+
+        def shrink(master, dest):
+            dest.parent.mkdir(parents=True, exist_ok=True)
+            dest.write_bytes(b"small"); shrunk.append(master.name); return dest
+        monkeypatch.setattr(step, "shrink", shrink)
+        step.run(ctx.codex_id, ctx)
+        doc = manifest_of(ctx)
+        assert shrunk == ["TRAILER-scarlet.mp4"]
+        assert sender["calls"][0]["master"].name == "telegram.mp4"
+        assert doc["delivery"] == {"status": "delivered", "attempts": 1, "file": "work/telegram.mp4"}
+        assert doc["master"] == "trailer/main/TRAILER-scarlet.mp4"
 
     def test_a_send_that_keeps_failing_leaves_the_file_undelivered(self, ctx, sender):
         sender["codes"] = [3, 3, 3]
@@ -93,3 +113,14 @@ class TestCaption:
         caption = step.caption_for("A Study in Scarlet", QC, ["cuts_on_beat"], {"07": 2})
         assert caption.startswith("A Study in Scarlet")
         assert "cuts_on_beat" in caption and "07: 2" in caption and "-1.3" in caption
+
+
+class TestShrink:
+    def test_the_copy_is_a_playable_file_under_the_limit(self, tmp_path):
+        source = tmp_path / "m.mp4"
+        subprocess.run(["ffmpeg", "-y", "-v", "error", "-f", "lavfi", "-i",
+                        "testsrc=size=320x180:rate=24:duration=1", "-c:v", "libx264",
+                        "-crf", "1", str(source)], check=True)
+        copy = step.shrink(source, tmp_path / "work/telegram.mp4")
+        assert copy.exists() and copy.stat().st_size < source.stat().st_size
+        assert copy.stat().st_size <= step.TELEGRAM_LIMIT
