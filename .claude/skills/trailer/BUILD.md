@@ -15,7 +15,7 @@ Evidence: `docs/analysis/research/trailer-music-structure.md`,
   (`scripts/trailer/step_01_story.py` … `step_10_deliver.py`) under one 6 h
   wall-clock ceiling; every gate has an adapt ladder and a terminal rung,
   every rung writes `learnings.jsonl`, step 10 writes `manifest.json`.
-- items 1–12 below are built and green (`uv run pytest -q`: 1415 passed,
+- items 1–12 below are built and green (`uv run pytest -q`: 1439 passed,
   4 local deselected, 2026-09-04). Item 13 (vocal path) is not.
 - the identity gate is a TRAIT CARD, not a face recogniser: `studio/describe.py`
   asks the local Qwen3-VL (comfy_studio's `image_qwen3vl_caption` /

@@ -16,11 +16,12 @@ from __future__ import annotations
 
 import json
 from pathlib import Path
+from typing import Callable
 
 from scripts.trailer.build_refs import describe_location, generate, refs_needed
 from studio.cast_card import POOLS, cards_for, infer_gender, render_card
-from studio.describe import (DISTINCT_AT, TraitCard, closest, describe, distance, same_look,
-                             shared, verifiable)
+from studio.describe import (DISTINCT_AT, TIMEOUT, TraitCard, closest, describe, distance,
+                             patiently, same_look, shared, verifiable)
 from studio.distinguish import distinguish
 from studio.ladder import Ladder, Rung, climb
 from studio.learnings import Learning
@@ -77,6 +78,13 @@ def identity_of(card: TraitCard, bound: dict[str, TraitCard]) -> dict:
     return {"closest": who, "differs": differing, "traits": card.model_dump()}
 
 
+def timed_out(learn) -> Callable[[str], None]:
+    """The learning a sheet read that outlived TIMEOUT leaves behind (Scarlet
+    run 5: one read took 10:14 and its TimeoutError ended the run here)."""
+    return lambda what: learn(Learning(step=STEP_ID, gate="identity", measured=what,
+                                       threshold=f"{TIMEOUT}s", action="accepted_on_timeout"))
+
+
 def bind_one(ctx, book: Path, index: int, char_id: str, card: dict, palette: str,
              bound: dict[str, TraitCard], taken: dict[str, set[str]]) -> dict | None:
     """Climb the ladder for one character; None means unbound."""
@@ -88,7 +96,8 @@ def bind_one(ctx, book: Path, index: int, char_id: str, card: dict, palette: str
             state["card"] = distinguish(state["card"], state["shared"], state["other"], taken)
         seed = seed_for(index, rung, i)
         path, physical = render_sheet(book, char_id, state["card"], palette, seed, fresh)
-        return {"path": path, "physical": physical, "card": describe(path, seed=seed)}
+        card = patiently(lambda: describe(path, seed=seed), timed_out(ctx.learn))
+        return {"path": path, "physical": physical, "card": card}
 
     def gate(result):
         result["identity"] = identity_of(result["card"], bound)

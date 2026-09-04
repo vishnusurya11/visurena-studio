@@ -136,10 +136,25 @@ class TestDescribe:
         with Image.open(describe.contact_sheet(frames, tmp_path / "sheet.png")) as made:
             assert made.size == (3 * 40 + 40, 30)
 
-    def test_the_live_path_frees_the_engine_before_asking(self, tmp_path, monkeypatch):
+    def test_the_frames_path_frees_the_engine_before_asking(self, tmp_path, monkeypatch):
         """Scarlet run 4 died in step 07: with H3's DiT and text encoder still
         staged, Qwen3-VL loaded offloaded to CPU -- 6:52 to load, 10:23 in all,
         past the 600s gate timeout.  Resident, it answers in about a minute."""
+        frames = frames_in(tmp_path)
+        order = []
+        monkeypatch.setattr(describe.comfy, "stage_image", lambda p: Path(p).name)
+        monkeypatch.setattr(describe.comfy, "free_models", lambda: order.append("free"))
+        monkeypatch.setattr(describe.comfy, "run_text",
+                            lambda name, values, timeout: order.append("ask") or json.dumps(LESTRADE))
+        assert describe.describe_frames(frames) == card()
+        assert order == ["free", "ask"]
+
+    def test_the_still_path_leaves_the_engine_loaded(self, tmp_path, monkeypatch):
+        """Scarlet run 5 died in step 02 the other way: freeing before every
+        sheet read evicted Qwen3-VL too, and each read re-streamed 16 GB off
+        the spinning disk the models live on -- 4s resident, then 3:52, 2:13,
+        10:06.  Only H3's staged models force the eviction; a sheet is read
+        beside the image model, which fits."""
         image = tmp_path / "x.png"
         image.write_bytes(b"png")
         order = []
@@ -148,7 +163,21 @@ class TestDescribe:
         monkeypatch.setattr(describe.comfy, "run_text",
                             lambda name, values, timeout: order.append("ask") or json.dumps(LESTRADE))
         assert describe.describe(image) == card()
-        assert order == ["free", "ask"]
+        assert order == ["ask"]
+
+    def test_patiently_returns_the_card_or_an_unseen_one_after_interrupting(self, monkeypatch):
+        """Retry within the time frame, then degrade and ship: the job is
+        interrupted so it cannot hold the queue, the caller is told, the
+        read comes back unseen."""
+        stopped, told = [], []
+        monkeypatch.setattr(describe.comfy, "interrupt", lambda: stopped.append(True))
+        assert describe.patiently(card, told.append) == card()
+        assert stopped == [] and told == []
+
+        def slow():
+            raise TimeoutError("job-9 still running after 600.0s")
+        assert describe.patiently(slow, told.append) == describe.unseen()
+        assert stopped == [True] and told == ["job-9 still running after 600.0s"]
 
     def test_unseen_is_a_card_that_vouches_for_nothing(self):
         assert describe.known(describe.unseen()) == 0

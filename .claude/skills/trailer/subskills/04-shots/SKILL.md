@@ -72,10 +72,31 @@ recognisable tell of generated video.
 
 ## LoRA
 
-`MiniMax-H3-Ref2VA-Acc-8Step` is matched to the r2v path; the `ckpt850` line is
-FL2V-family. Measured **707s vs 683s — no speed gain**. Quality looked cleaner
-in an UNCONTROLLED probe (different seed and action line); a real A/B is
-outstanding.
+The trailer renders with `minimax_h3_turbo_4step_ema_ckpt850` @0.8 (workflow
+`video_minimax_h3_r2v_turbo`). That LoRA is **FL2V-lineage on a ref2va base**:
+its own author "has not validated r2v quality", so identity retention through
+it is unmeasured. Three Ref2V-lineage alternatives sit in
+`models/loras/minimax_h3/`, all through `video_minimax_h3_r2v_turbo_lxref`
+(dedicated LoRA node, sigma shift video 12 / audio 3):
+
+| LoRA | steps | note |
+|---|---|---|
+| `minimax_h3_ref2v_turbo_8step_v1.0_768p_comfyui_bf16` | 8 | lightx2v, 2026-09-03, ≤768p — matches our 8-step/736p config; users report it keeps references better |
+| `minimax_h3_ref2v_turbo_4step_v0.1_comfyui_bf16` | 4 | lightx2v, earlier |
+| `MiniMax-H3-Ref2VA-Acc-8Step` | 8 | measured **707s vs 683s — no speed gain**; cleaner look in an UNCONTROLLED probe (different seed and action line) |
+
+A look in an uncontrolled probe is not evidence. The controlled A/B is
+`scripts/trailer/lora_ab.py`: one beat, the same seeds through every variant,
+scored by the gate's own metric (trait-card `distance` to the reference sheet,
+bound = distance < DISTINCT_AT) and wall seconds, one JSON line per take in
+`trailer/main/ab/ab.jsonl`. Local GPU only. Run it when no trailer is
+rendering (it shares the GPU):
+
+    uv run python -m scripts.trailer.lora_ab <codex_id> --beat B00 --seeds 3
+
+Switch `build_clips.WORKFLOW` / `take_values` to a variant only on its
+numbers; a take's recipe fingerprint names the workflow and LoRA, so a switch
+re-renders every take (`render_or_reuse`).
 
 OpenVDN's `vdn-minimax-h3` does not apply: text-to-video only (no reference
 conditioning, which is our whole identity mechanism), licence excludes the USA,

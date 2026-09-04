@@ -96,30 +96,34 @@ def take_values(beat: dict, plan: dict, refs: dict, style: str, seed: int,
         "filename_prefix": f"TR-{beat['beat_id']}"}
 
 
-def recipe_for(values: dict, bound: list[str], refs: dict, book: Path) -> dict:
+def recipe_for(values: dict, bound: list[str], refs: dict, book: Path,
+               workflow: str = WORKFLOW) -> dict:
     """Everything that decides what the model draws -- what identifies the clip.
 
     Skipping on the beat ID meant a plan rebuilt from scratch reused every old
-    render under the new names.
+    render under the new names.  A chosen LoRA is named only when there is
+    one, so takes fingerprinted before the choice existed still match.
     """
+    lora = {"lora": values["lora_name"]} if values.get("lora_name") else {}
     return {"prompt": values["prompt"], "refs": bound, "seed": values["seed"],
             "frames": values["frames"], "steps": values["steps"],
-            "width": values["width"], "height": values["height"], "workflow": WORKFLOW,
-            "ref_digests": [digest_of(book / refs[r]["rel_path"]) for r in bound]}
+            "width": values["width"], "height": values["height"], "workflow": workflow,
+            "ref_digests": [digest_of(book / refs[r]["rel_path"]) for r in bound], **lora}
 
 
-def render_take(values: dict, bound: list[str], refs: dict, book: Path, dest: Path) -> Path:
+def render_take(values: dict, bound: list[str], refs: dict, book: Path, dest: Path,
+                workflow: str = WORKFLOW) -> Path:
     """One H3 render, staged references in, the finished mp4 at `dest`."""
     values = dict(values)
     for slot, ref_id in enumerate(bound, start=1):
         values[f"ref_image_{slot}"] = stage_image(book / refs[ref_id]["rel_path"])
-    written = run(WORKFLOW, values, timeout=3600)
+    written = run(workflow, values, timeout=3600)
     video = next((p for p in written if p.suffix in (".mp4", ".webm")), None)
     if not video:
         raise RuntimeError(f"{dest.stem} produced no video: {written}")
     dest.parent.mkdir(parents=True, exist_ok=True)
     dest.write_bytes(video.read_bytes())
-    record(dest, recipe_for(values, bound, refs, book))
+    record(dest, recipe_for(values, bound, refs, book, workflow))
     return dest
 
 

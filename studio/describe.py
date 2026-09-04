@@ -176,11 +176,17 @@ def _ask(name: str, images: dict[str, Path], seed: int, run: Callable,
     raise last
 
 
-def _live() -> Callable:
-    """The engine, with its models unloaded first: Qwen3-VL loaded beside H3's
-    staged DiT and text encoder lands half on the CPU (Scarlet run 4: 6:52 to
-    load, 10:23 to answer, past TIMEOUT); resident, it answers in a minute."""
-    comfy.free_models()
+def _live(free: bool) -> Callable:
+    """The engine, its models unloaded first when `free`.
+
+    Both ways have killed a run.  Run 4, step 07: Qwen3-VL loaded beside H3's
+    staged DiT and text encoder landed half on the CPU -- 6:52 to load, 10:23
+    to answer, past TIMEOUT.  Run 5, step 02: freeing before EVERY read
+    evicted Qwen3-VL too, and each read re-streamed 16 GB off the spinning
+    disk the models live on -- 4s resident, then 3:52, 2:13, 10:06.  So free
+    only where H3 is staged; a sheet is read beside the image model, which fits."""
+    if free:
+        comfy.free_models()
     return comfy.run_text
 
 
@@ -189,9 +195,23 @@ def unseen() -> TraitCard:
     return TraitCard(**{trait: "unclear" for trait in TRAITS})
 
 
+def patiently(ask: Callable[[], TraitCard], on_timeout: Callable[[str], None]) -> TraitCard:
+    """`ask()`, or an unseen card when the model outlives TIMEOUT.
+
+    The policy is retry within the time frame, then degrade and ship: the
+    job is interrupted so it cannot hold the queue, the caller is told what
+    happened, and the read comes back vouching for nothing."""
+    try:
+        return ask()
+    except TimeoutError as slow:
+        comfy.interrupt()
+        on_timeout(str(slow)[:80])
+        return unseen()
+
+
 def describe(image: Path, seed: int = 42, run: Callable | None = None) -> TraitCard:
     """The trait card of the face in one still."""
-    return _ask(IMAGE_WORKFLOW, {"image_1": Path(image)}, seed, run or _live())
+    return _ask(IMAGE_WORKFLOW, {"image_1": Path(image)}, seed, run or _live(free=False))
 
 
 def describe_frames(frames: list[Path], seed: int = 42, run: Callable | None = None) -> TraitCard:
@@ -199,7 +219,7 @@ def describe_frames(frames: list[Path], seed: int = 42, run: Callable | None = N
     frames = [Path(f) for f in frames[:3]]
     # Named after the take: stage_image keeps the bare filename in ComfyUI's input.
     sheet = contact_sheet(frames, frames[0].parent / f"{frames[0].parent.name}-contact.png")
-    return _ask(IMAGE_WORKFLOW, {"image_1": sheet}, seed, run or _live(),
+    return _ask(IMAGE_WORKFLOW, {"image_1": sheet}, seed, run or _live(free=True),
                 prompt=prompt_for(frames=len(frames)))
 
 

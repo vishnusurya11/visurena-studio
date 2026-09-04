@@ -17,6 +17,7 @@ from PIL import Image
 
 from scripts.trailer import step_02_refs as step
 from studio import db
+from studio import describe
 from studio.describe import DISTINCT_AT, TraitCard
 from studio.learnings import load
 from studio.trailer_run import RunContext
@@ -97,6 +98,27 @@ class TestRun:
             f"char-{WATSON}", f"char-{HOLMES}", "loc-baker_street", "loc-brixton_road"}
         assert doc["unbound"] == [] and "1881 London" in doc["palette"]
         assert (ctx.book_dir / "refs/characters" / f"char-{HOLMES}.png").exists()
+
+    def test_a_read_that_outlives_the_timeout_binds_the_sheet_unverified(self, ctx, rendered,
+                                                                          monkeypatch):
+        """Scarlet run 5: the VLM took 10:14 to read one sheet (16 GB re-streamed
+        off the spinning disk) and the TimeoutError ended the run in step 02.
+        Retry, then degrade and ship: interrupt the engine, bind the sheet
+        flagged, go on."""
+        stopped = []
+        monkeypatch.setattr(describe.comfy, "interrupt", lambda: stopped.append(True))
+        readings = iter([A, TimeoutError("job-9 still running after 600.0s")])
+
+        def read(path, seed):
+            got = next(readings)
+            if isinstance(got, Exception):
+                raise got
+            return got
+        monkeypatch.setattr(step, "describe", read)
+        step.run(ctx.codex_id, ctx)
+        assert refs_doc(ctx)["unbound"] == [] and stopped == [True]
+        assert [r.action for r in load(ctx.learnings_path)] == [
+            "accepted_on_timeout", "accepted_unverifiable"]
 
     def test_a_collision_rerolls_the_seed_then_binds(self, ctx, rendered):
         rendered["cards"] = [A, A, B]

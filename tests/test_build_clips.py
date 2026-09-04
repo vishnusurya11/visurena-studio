@@ -52,6 +52,33 @@ class TestTakeValues:
 
 
 class TestRecipe:
+    def test_recipe_names_the_workflow_and_lora_only_when_they_are_not_the_default(self, tmp_path):
+        """Takes on disk were fingerprinted before a LoRA could be chosen; the
+        default render must still match them, and any other must not."""
+        (tmp_path / "refs").mkdir()
+        for name in ("c.png", "l.png"):
+            (tmp_path / "refs" / name).write_bytes(name.encode())
+        values = clips.take_values(beat(), plan(), REFS, "noir", seed=7)
+        plain = clips.recipe_for(values, ["char-holmes", "loc-baker"], REFS, tmp_path)
+        assert "lora" not in plain and plain["workflow"] == clips.WORKFLOW
+        other = clips.recipe_for(dict(values, lora_name="x.safetensors"), ["char-holmes", "loc-baker"],
+                                 REFS, tmp_path, workflow="video_minimax_h3_r2v_turbo_lxref")
+        assert other["lora"] == "x.safetensors" and other["workflow"].endswith("lxref")
+
+    def test_render_take_runs_the_workflow_it_is_given(self, tmp_path, monkeypatch):
+        (tmp_path / "refs").mkdir()
+        for name in ("c.png", "l.png"):
+            (tmp_path / "refs" / name).write_bytes(name.encode())
+        made = tmp_path / "out.mp4"
+        made.write_bytes(b"mp4")
+        seen = {}
+        monkeypatch.setattr(clips, "stage_image", lambda p: p.name)
+        monkeypatch.setattr(clips, "run", lambda name, values, timeout: seen.update(name=name) or [made])
+        values = clips.take_values(beat(), plan(), REFS, "noir", seed=7)
+        dest = tmp_path / "takes/B00-7.mp4"
+        clips.render_take(values, ["char-holmes", "loc-baker"], REFS, tmp_path, dest, workflow="wf-b")
+        assert seen["name"] == "wf-b" and dest.read_bytes() == b"mp4"
+
     def test_recipe_changes_with_seed_and_sheet(self, tmp_path):
         (tmp_path / "refs").mkdir()
         for name in ("c.png", "l.png"):

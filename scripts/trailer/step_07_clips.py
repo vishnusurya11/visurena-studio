@@ -20,9 +20,8 @@ from typing import Callable
 from scripts.trailer.build_clips import (SEED_BASE, bound_slots, is_complete, recipe_for,
                                          render_take, take_values)
 from studio.clip_cache import is_current
-from studio import comfy
 from studio.describe import (DISTINCT_AT, TIMEOUT, TraitCard, describe, describe_frames,
-                             differences, distance, known, same_look, shared, unseen, verifiable)
+                             differences, distance, known, patiently, same_look, shared, verifiable)
 from studio.identity_gate import HEAD_LEAK_SECONDS, frame_at, frame_times
 from studio.ladder import Ladder, Rung, climb
 from studio.learnings import Learning
@@ -83,19 +82,19 @@ def frames_of(video: Path, seconds: float, work: Path) -> list[Path]:
     return [frame_at(video, when, work / f"{when:.2f}.png") for when in frame_times(seconds)]
 
 
+def timed_out(learn: Callable) -> Callable[[str], None]:
+    """The learning a read that outlived TIMEOUT leaves behind."""
+    return lambda what: learn(Learning(step=STEP_ID, gate="identity", measured=what,
+                                       threshold=f"{TIMEOUT}s", action="accepted_on_timeout"))
+
+
 def read_card(frames: list[Path], seed: int, learn: Callable) -> TraitCard:
     """The take's card, or an unseen one when the model outlives TIMEOUT.
 
     Scarlet run 4: one call took 10:23 and its TimeoutError ended the run with
     19 beats unrendered.  Retry, then degrade and ship: the job is interrupted
     so it cannot hold the queue, the take ships flagged, the run goes on."""
-    try:
-        return describe_frames(frames, seed=seed)
-    except TimeoutError as slow:
-        comfy.interrupt()
-        learn(Learning(step=STEP_ID, gate="identity", measured=str(slow)[:80],
-                       threshold=f"{TIMEOUT}s", action="accepted_on_timeout"))
-        return unseen()
+    return patiently(lambda: describe_frames(frames, seed=seed), timed_out(learn))
 
 
 def measure(video: Path, reference: TraitCard | None, work: Path, seed: int,

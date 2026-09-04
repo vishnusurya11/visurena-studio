@@ -17,6 +17,7 @@ from PIL import Image
 from scripts.trailer import step_07_clips as step
 from scripts.trailer.build_clips import FRAMING
 from studio import db
+from studio import describe
 from studio.describe import DISTINCT_AT, TIMEOUT, TraitCard
 from studio.learnings import load
 from studio.run_budget import TRAILER_SHARES, Budget
@@ -148,7 +149,7 @@ class TestRun:
         run with 19 beats unrendered.  The policy is retry, then degrade and
         ship: the engine is interrupted, the take ships flagged, the run goes on."""
         stopped = []
-        monkeypatch.setattr(step.comfy, "interrupt", lambda: stopped.append(True))
+        monkeypatch.setattr(describe.comfy, "interrupt", lambda: stopped.append(True))
 
         def slow(frames, seed):
             raise TimeoutError("job-9 still running after 600.0s")
