@@ -13,6 +13,7 @@ from __future__ import annotations
 import json
 
 from scripts.trailer.build_plan import beat_of, shots_for
+from scripts.trailer.step_07_clips import RENDER_SECONDS
 from studio.ladder import Ladder, Rung, climb
 from studio.trailer_dialogue import dialogue_candidates, pick_lines
 from studio.trailer_edit import LITERARY_STRETCH, plan_cuts
@@ -23,6 +24,9 @@ from studio.trailer_story import load_iconicity, people_in, select_setups
 STEP_ID = "06"
 NAME = "plan"
 LEAD_SHARE_FLOOR = 0.25
+RETRY_RESERVE = 1
+"""Takes left unplanned so one identity reroll anywhere costs no beat: the
+budget rung drops the LAST setups, and the last setups are the climax."""
 STRETCH = (1.0, 1.2, 1.5)
 """Recut attempts lengthen the shots: fewer cuts need fewer clips, so fewer
 neighbouring takes stand in for missing ones.  First setting."""
@@ -48,6 +52,12 @@ def events_of(metre: Metre) -> list[float]:
     """The L0 events the walk must cut on: hits, trough starts, the title."""
     title = [metre.title_hit] if metre.title_hit else []
     return sorted(set(metre.hits) | set(stopdown_starts(metre.stopdowns)) | set(title))
+
+
+def setup_count(cuts: int, ctx) -> int:
+    """One setup per cut, capped by the takes step 07's share still affords."""
+    affordable = int(ctx.budget.remaining("07") // RENDER_SECONDS) - RETRY_RESERVE
+    return max(1, min(cuts, affordable))
 
 
 def setups_for(scenes: list[dict], refs, count: int, iconicity: dict,
@@ -204,7 +214,8 @@ def replan(ctx, attempt: int) -> None:
     stretch = stretch_for(attempt)
     points = plan_cuts(metre, events_of(metre), metre.title_hit or metre.seconds, stretch)
     line_windows, legacy = lines_for(ctx, metre, story, scenes)
-    state = {"beats": setups_for(scenes, found["refs"], len(points) - 1, found["iconicity"],
+    state = {"beats": setups_for(scenes, found["refs"], setup_count(len(points) - 1, ctx),
+                                 found["iconicity"],
                                  story.lead, story.figure), "bad": [], "lead": story.lead}
 
     def attempt_(rung, i):

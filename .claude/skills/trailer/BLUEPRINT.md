@@ -94,7 +94,10 @@ Unattributed line → card without trying.
 
 **06 plan** — in: `metre.json`, `story.json`, `slate.json`, voice seconds,
 screenplay shots. out: `plan.json` (`TrailerPlan`: cut list in beats, setups
-bound to refs, lines in slots). gate: no unbound setup; lead ≥ 25% of beats;
+bound to refs, lines in slots). Setups = one per cut, capped at the takes 07's
+remaining share affords (`remaining("07") // 11 min`, one take held in reserve
+so a reroll costs no beat); `shots_for` scatters them, ≤ 3 shots per take,
+≥ 3 between returns. gate: no unbound setup; lead ≥ 25% of beats;
 every register present; every L0 event cut on; no shot < MIN_SHOT or > cap
 except the hold and the title. ladder: unbound → alternate setup in the same
 beat → location-only shot. fallback: drop the beat, re-walk.

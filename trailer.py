@@ -55,6 +55,9 @@ def run_step(ctx: RunContext, step) -> None:
     try:
         with llm.spend_context(ctx.conn, ctx.codex_id, STAGE, step.STEP_ID):
             step.run(ctx.codex_id, ctx)
+    except SystemExit as exc:  # the CLI scripts REFUSE this way; here it is a failure
+        ctx.tracker.event(step.STEP_ID, "failed", detail=str(exc)[:200])
+        raise RuntimeError(str(exc)) from exc
     except Exception as exc:
         ctx.tracker.event(step.STEP_ID, "failed", detail=str(exc)[:200])
         raise

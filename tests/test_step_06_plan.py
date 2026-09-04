@@ -181,3 +181,16 @@ class TestStep:
         rows = load(ctx.learnings_path)
         assert [r.action for r in rows] == ["select_setups", "alternate_setup_same_beat"]
         assert all(s["char_refs"] or s["loc_ref"] for s in plan_of(ctx)["shots"])
+
+
+class TestBudgetSizesThePlan:
+    """Step 07 renders ~11 min per setup; the plan must not ask for more takes
+    than its share affords, or the budget rung drops the climax beats."""
+
+    def test_setups_are_capped_by_what_step_07_can_afford(self, ctx):
+        from scripts.trailer.step_07_clips import RENDER_SECONDS
+        from studio.run_budget import TRAILER_SHARES, Budget
+        ctx.budget = Budget(6 * 3600, TRAILER_SHARES, clock=lambda: 0.0)
+        affordable = int(ctx.budget.remaining("07") // RENDER_SECONDS)
+        assert step.setup_count(60, ctx) == affordable - step.RETRY_RESERVE
+        assert step.setup_count(5, ctx) == 5

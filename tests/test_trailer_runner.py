@@ -87,6 +87,19 @@ class TestRunStep:
         row = conn.execute("SELECT detail FROM events WHERE event='failed'").fetchone()
         assert "ffmpeg died" in row["detail"]
 
+    def test_a_refusal_that_exits_is_a_failure_not_an_exit(self, conn, tmp_path):
+        """assemble.py and build_plan.py still REFUSE with SystemExit, which is not
+        an Exception: unconverted, it would skip the failed event and leave the
+        stage marked running."""
+        ctx = _ctx(conn, tmp_path)
+
+        def refuse(codex_id, ctx):
+            raise SystemExit("REFUSED: every shot is the same length")
+        with pytest.raises(RuntimeError, match="same length"):
+            trailer.run_step(ctx, _step("08", refuse))
+        row = conn.execute("SELECT detail FROM events WHERE event='failed'").fetchone()
+        assert "same length" in row["detail"]
+
     def test_the_budget_is_opened_for_the_step(self, conn, tmp_path):
         ctx = _ctx(conn, tmp_path)
         seen = {}

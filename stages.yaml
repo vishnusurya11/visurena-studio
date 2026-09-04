@@ -358,9 +358,11 @@ stages:
       - id: "06"
         name: plan
         script: step_06_plan
-        desc: Beat walk over the measured metre; setups bound to references; lines
-          assigned to slots from measured seconds. Unbound setup -> alternate in the
-          same beat -> location-only shot. Refuses a plan without the lead in >= 25%.
+        desc: Beat walk over the measured metre; one setup per cut, capped by the
+          takes step 07's remaining share affords (11 min each, one held in reserve);
+          setups bound to references; lines assigned to slots from measured seconds.
+          Unbound setup -> alternate in the same beat -> location-only shot. Refuses
+          a plan without the lead in >= 25%.
       - id: "07"
         name: clips
         script: step_07_clips
