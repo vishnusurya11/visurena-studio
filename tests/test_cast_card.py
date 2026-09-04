@@ -115,6 +115,13 @@ class TestGender:
         from studio.cast_card import infer_gender
         assert infer_gender("John Watson", ["the doctor"], "He is a tall man") == "man"
 
+    def test_the_word_counts_whatever_punctuation_follows_it(self):
+        """'A tall thin man, clean-shaven' came back 'person': the split kept
+        'man,' as one token and nothing matched."""
+        from studio.cast_card import infer_gender
+        assert infer_gender("X", [], "A tall thin man, clean-shaven.") == "man"
+        assert infer_gender("X", [], "(a woman; grey-eyed)") == "woman"
+
     def test_an_unknown_is_a_person_not_a_guess(self):
         from studio.cast_card import infer_gender
         assert infer_gender("Wiggins", [], "") == "person"

@@ -61,6 +61,31 @@ the text. The real fix is a trained character LoRA (musubi-tuner supports
 Krea 2 natively); it is the only method whose fidelity does not decay with
 shot count.
 
+## The sheet is read back, and judged twice
+
+Every sheet goes to the local VLM (`studio/describe.py`) and comes back as a
+trait card. Two questions, in this order:
+
+1. **Did the render obey its card?** Only on the traits the channel actually
+   expresses - hair colour, hair length, facial hair, headgear
+   (`distinguish.RELIABLE`). Complexion, build and age are DEAD on this
+   channel: run 4's seven sheets read "fair" and "average" against seven
+   different card phrases, and age follows the hair colour. A disobedient
+   render (Lestrade, run 6: card said walrus moustache, render read
+   clean-shaven) is NOT a collision; it goes again as written on a new seed,
+   because rewriting the card would move the character off the book for a
+   fault of the renderer.
+2. **Does it read as someone already bound?** Fewer than `DISTINCT_AT` seen
+   traits apart is a collision, and `distinguish` moves exactly the shared
+   slots to phrases no other character holds. A hair phrase carries a colour
+   AND a length, so both can move it. When the moved slot is one the book's
+   own sentence asserts, that sentence is dropped from the prompt - "a full
+   beard ... A thin man with a heavy walrus moustache" tells the model two
+   things and it obeys whichever it likes.
+
+Vocabulary aliasing is not a difference: a deerstalker reads as "cap", a
+tall beaver hat as "top hat" (`describe.NEIGHBOURS`, half a difference).
+
 ## Filter the description before it reaches a shot
 
 `analysis/profile.physical` is a BIOGRAPHY, not a look. "Served with the

@@ -1,12 +1,16 @@
 """Step 02 of the trailer stage: reference sheets a viewer can tell apart.
 
 Every character sheet is rendered, READ BACK by a vision model into a trait
-card, and judged against the cast already bound: fewer than DISTINCT_AT
-traits apart is a collision.  A collision climbs one reroll, then three
-`distinguish` rungs that rewrite exactly the shared traits; a character that
-still collides is UNBOUND -- in refs.json's `unbound` list, absent from
-`refs`, so every setup needing it is excluded downstream.  Renders and
-descriptions are faked; nothing here touches a GPU or a model file.
+card, and judged twice: did the render OBEY its card on the traits the
+channel can express (a clean-shaven sheet under a prompt that says walrus
+moustache would condition every clip against its own words), and is it
+fewer than DISTINCT_AT traits from anyone already bound (a collision).
+Either failure climbs three `distinguish` rungs -- a collision rewrites
+exactly the shared traits, a disobedient render is asked again as written on
+a new seed; a character that still fails is UNBOUND -- in refs.json's
+`unbound` list, absent from `refs`, so every setup needing it is excluded
+downstream.  Renders are faked and read back as the card they were asked
+for, unless a test queues a drift; nothing here touches a GPU or a model file.
 """
 from __future__ import annotations
 
@@ -18,14 +22,25 @@ from PIL import Image
 from scripts.trailer import step_02_refs as step
 from studio import db
 from studio import describe
-from studio.describe import DISTINCT_AT, TraitCard
+from studio.describe import DISTINCT_AT
+from studio.distinguish import expected
 from studio.learnings import load
 from studio.trailer_run import RunContext
 
 HOLMES, WATSON = "sherlock_holmes", "john_watson"
+DISTINCT = {WATSON: "A stout man with a heavy walrus moustache, a brown bowler hat and fair hair.",
+            HOLMES: "A tall thin man, clean-shaven, with black hair swept back and a top hat."}
+"""Cards that read 3.5 apart when rendered faithfully."""
+CLOSE = {WATSON: "A stout man with a heavy walrus moustache and fair hair.",
+         HOLMES: "A thin man with a heavy walrus moustache and fair hair."}
+"""Cards `cast_card` lets through (a felt hat and a straw boater are different
+words) that the model reads as the same face: distance 0."""
+BLIND = {t: "unclear" for t in ("age", "hair_colour", "hair_length", "headgear", "build")}
+UNSHAVEN = {"facial_hair": "clean-shaven", "hair_colour": "grey"}
+"""What run 6 read off Lestrade's rung-2 render; the card said walrus moustache."""
 
 
-def character(char_id, name, physical="A tall thin man with a hawk nose."):
+def character(char_id, name, physical):
     return {"id": char_id, "name": name, "aliases": [], "role": "protagonist",
             "profile": {"physical": physical}}
 
@@ -36,8 +51,7 @@ def scene(number, cast, loc="baker_street"):
             "elements": [{"kind": "action", "text": "He crosses the room."}]}
 
 
-@pytest.fixture()
-def ctx(tmp_path):
+def make_ctx(tmp_path, physicals):
     conn = db.get_connection(tmp_path / "t.db")
     db.init_db(conn)
     codex_id = db.insert_codex(conn, "Scarlet", codex_id="20260901000002")
@@ -45,7 +59,7 @@ def ctx(tmp_path):
     (book / "analysis/characters").mkdir(parents=True)
     for char_id, name in ((HOLMES, "Sherlock Holmes"), (WATSON, "John Watson")):
         (book / "analysis/characters" / f"{char_id}.json").write_text(
-            json.dumps(character(char_id, name)), encoding="utf-8")
+            json.dumps(character(char_id, name, physicals[char_id])), encoding="utf-8")
     (book / "screenplay/feature").mkdir(parents=True)
     scenes = [scene(1, [WATSON, HOLMES]), scene(2, [HOLMES], "brixton_road"), scene(3, [WATSON])]
     (book / "screenplay/feature/screenplay.json").write_text(
@@ -59,6 +73,16 @@ def ctx(tmp_path):
     return context
 
 
+@pytest.fixture()
+def ctx(tmp_path):
+    return make_ctx(tmp_path, DISTINCT)
+
+
+@pytest.fixture()
+def close_ctx(tmp_path):
+    return make_ctx(tmp_path, CLOSE)
+
+
 def fake_generate(prompt, prefix, seed, dest):
     dest.parent.mkdir(parents=True, exist_ok=True)
     Image.new("RGB", (8, 8)).save(dest)
@@ -67,37 +91,46 @@ def fake_generate(prompt, prefix, seed, dest):
 
 @pytest.fixture()
 def rendered(monkeypatch):
-    """Faked renders and readings: `cards` is consumed per describe call;
-    `prompts` records what each render was asked for."""
-    state = {"cards": [], "prompts": []}
+    """Faked renders, each read back as the card it was asked for.  `drifts`
+    is consumed per describe call: the traits the reading departs from the
+    card on, or None for a faithful read.  `prompts` records every render."""
+    state = {"drifts": [], "prompts": [], "cards": []}
+    real = step.render_sheet
 
     def generate(prompt, prefix, seed, dest):
         state["prompts"].append(prompt)
         return fake_generate(prompt, prefix, seed, dest)
+
+    def render_sheet(book, char_id, card, palette, seed, fresh):
+        state["cards"].append(card)
+        return real(book, char_id, card, palette, seed, fresh)
+
+    def read(path, seed):
+        drift = state["drifts"].pop(0) if state["drifts"] else None
+        return expected(state["cards"][-1]).model_copy(update=drift or {})
     monkeypatch.setattr(step, "generate", generate)
-    monkeypatch.setattr(step, "describe", lambda path, seed: state["cards"].pop(0))
+    monkeypatch.setattr(step, "render_sheet", render_sheet)
+    monkeypatch.setattr(step, "describe", read)
     return state
-
-
-A = TraitCard(age="middle-aged", hair_colour="dark brown", hair_length="short",
-              facial_hair="clean-shaven", headgear="bowler", complexion="sallow", build="slight")
-B = A.model_copy(update={"hair_colour": "fair", "headgear": "none", "build": "stocky"})
-BLIND = A.model_copy(update={t: "unclear" for t in ("age", "hair_colour", "headgear", "build")})
 
 
 def refs_doc(ctx):
     return json.loads((ctx.book_dir / "refs/refs.json").read_text(encoding="utf-8"))
 
 
+def sheet_prompts(rendered):
+    return [p for p in rendered["prompts"] if p.startswith("A man")]
+
+
 class TestRun:
     def test_binds_a_distinct_cast_and_renders_locations(self, ctx, rendered):
-        rendered["cards"] = [A, B]
         step.run(ctx.codex_id, ctx)
         doc = refs_doc(ctx)
         assert {r["ref_id"] for r in doc["refs"]} == {
             f"char-{WATSON}", f"char-{HOLMES}", "loc-baker_street", "loc-brixton_road"}
         assert doc["unbound"] == [] and "1881 London" in doc["palette"]
         assert (ctx.book_dir / "refs/characters" / f"char-{HOLMES}.png").exists()
+        assert load(ctx.learnings_path) == []
 
     def test_a_read_that_outlives_the_timeout_binds_the_sheet_unverified(self, ctx, rendered,
                                                                           monkeypatch):
@@ -107,51 +140,73 @@ class TestRun:
         flagged, go on."""
         stopped = []
         monkeypatch.setattr(describe.comfy, "interrupt", lambda: stopped.append(True))
-        readings = iter([A, TimeoutError("job-9 still running after 600.0s")])
+        faithful = step.describe
+        readings = iter([faithful, None])
 
         def read(path, seed):
             got = next(readings)
-            if isinstance(got, Exception):
-                raise got
-            return got
+            if got is None:
+                raise TimeoutError("job-9 still running after 600.0s")
+            return got(path, seed)
         monkeypatch.setattr(step, "describe", read)
         step.run(ctx.codex_id, ctx)
         assert refs_doc(ctx)["unbound"] == [] and stopped == [True]
         assert [r.action for r in load(ctx.learnings_path)] == [
             "accepted_on_timeout", "accepted_unverifiable"]
 
-    def test_a_collision_rerolls_the_seed_then_binds(self, ctx, rendered):
-        rendered["cards"] = [A, A, B]
+    def test_a_render_that_reads_as_another_character_is_asked_again(self, ctx, rendered):
+        """Holmes' first render comes back looking like Watson: it disobeyed
+        its card, so the same card on another seed reads as written and binds."""
+        rendered["drifts"] = [None, {"facial_hair": "moustache", "headgear": "bowler",
+                                     "hair_colour": "fair"}]
         step.run(ctx.codex_id, ctx)
         doc = refs_doc(ctx)
         assert doc["unbound"] == []
         rows = load(ctx.learnings_path)
         assert [r.action for r in rows] == ["reroll_seed"]
-        assert rows[0].threshold == DISTINCT_AT and WATSON in str(rows[0].measured)
+        assert rows[0].threshold == "faithful" and "facial_hair" in str(rows[0].measured)
         holmes = next(r for r in doc["refs"] if r["entity_id"] == HOLMES)
         assert holmes["identity"]["closest"] == WATSON
-        assert set(holmes["identity"]["differs"]) == {"hair_colour", "headgear", "build"}
-        assert holmes["identity"]["traits"]["hair_colour"] == "fair"
+        assert {"hair_colour", "headgear", "facial_hair"} <= set(holmes["identity"]["differs"])
+        assert holmes["identity"]["traits"]["hair_colour"] == "dark brown"
 
-    def test_distinguish_rewrites_the_shared_traits_into_the_prompt(self, ctx, rendered):
-        rendered["cards"] = [A, A, A, B]
+    def test_a_faithful_collision_is_distinguished_in_the_prompt(self, close_ctx, rendered):
+        """Two cards the words let through but the model reads as one face:
+        a new seed cannot help, the distinguish rung moves the shared traits."""
+        step.run(close_ctx.codex_id, close_ctx)
+        assert refs_doc(close_ctx)["unbound"] == []
+        rows = load(close_ctx.learnings_path)
+        assert [r.action for r in rows] == ["reroll_seed"]  # the first render's rung
+        assert rows[0].threshold == DISTINCT_AT and WATSON in str(rows[0].measured)
+        before, after = sheet_prompts(rendered)[-2:]
+        assert "walrus moustache" in before and "walrus moustache" not in after
+
+    def test_a_disobedient_render_is_asked_again_as_written(self, ctx, rendered):
+        """Scarlet run 6, Lestrade rung 2: the card said walrus moustache, the
+        render was clean-shaven, and the ladder rewrote the card as if Hope
+        had been matched.  A render that ignores its card is not a collision:
+        the same card goes again on the next seed."""
+        rendered["drifts"] = [None, UNSHAVEN, UNSHAVEN]
         step.run(ctx.codex_id, ctx)
         assert refs_doc(ctx)["unbound"] == []
-        assert [r.action for r in load(ctx.learnings_path)] == ["reroll_seed", "distinguish"]
-        before, after = [p for p in rendered["prompts"] if p.startswith("A man")][-2:]
-        assert before != after and "frame," in after  # build, shared, now said outright
+        rows = load(ctx.learnings_path)
+        assert [r.action for r in rows] == ["reroll_seed", "distinguish"]
+        assert all(r.threshold == "faithful" for r in rows)
+        first, second, third = sheet_prompts(rendered)[-3:]
+        assert first == second == third
 
-    def test_a_persistent_collision_unbinds_the_character(self, ctx, rendered):
-        rendered["cards"] = [A] * 5
-        step.run(ctx.codex_id, ctx)
-        doc = refs_doc(ctx)
+    def test_a_persistent_collision_unbinds_the_character(self, close_ctx, rendered):
+        watson = expected(step.cast_cards(close_ctx.book_dir, [WATSON])[WATSON])
+        rendered["drifts"] = [None] + [dict(watson)] * 4
+        step.run(close_ctx.codex_id, close_ctx)
+        doc = refs_doc(close_ctx)
         assert doc["unbound"] == [HOLMES]
         assert f"char-{HOLMES}" not in {r["ref_id"] for r in doc["refs"]}
-        actions = [r.action for r in load(ctx.learnings_path)]
+        actions = [r.action for r in load(close_ctx.learnings_path)]
         assert actions == ["reroll_seed"] + ["distinguish"] * 3 + ["unbound"]
 
     def test_a_face_too_unclear_to_read_is_accepted_and_flagged(self, ctx, rendered):
-        rendered["cards"] = [A, BLIND]
+        rendered["drifts"] = [None, BLIND]
         step.run(ctx.codex_id, ctx)
         assert refs_doc(ctx)["unbound"] == []
         assert {r.action for r in load(ctx.learnings_path)} == {"accepted_unverifiable"}

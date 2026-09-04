@@ -55,14 +55,21 @@ ORDERED: dict[str, tuple[str, ...]] = {
     "build": ("slight", "average", "stocky", "heavy"),
 }
 """Scales whose neighbours read alike at a distance; grey and white too."""
-NEIGHBOURS: set[frozenset[str]] = {frozenset(("grey", "white")), frozenset(("pale", "fair"))} | {
+NEIGHBOURS: set[frozenset[str]] = {
+    frozenset(("grey", "white")), frozenset(("pale", "fair")),
+    frozenset(("cap", "deerstalker")), frozenset(("top hat", "other hat"))} | {
     frozenset(scale[i:i + 2]) for scale in ORDERED.values() for i in range(len(scale) - 1)}
+"""A deerstalker reads as a cap and a tall beaver hat as a top hat (Scarlet
+run 4: 7 of 7 sheets, one notch); vocabulary aliasing is not a difference."""
 SYNONYMS: dict[str, dict[str, tuple[str, ...]]] = {
     "figure": {"woman": ("female", "lady", "girl", "she"), "man": ("male", "gentleman", "boy", "he"),
                "child": ("kid", "infant")},
     "age": {"old": ("elderly", "aged", "senior", "sixt", "sevent"),
             "young": ("youth", "twent", "teen", "boy", "girl"),
             "middle-aged": ("middle", "thirt", "fort", "fift")},
+    "hair_length": {"short": ("close-cropped", "cropped", "receding", "thinning", "crew"),
+                    "medium": ("swept back", "wavy", "parted", "collar"),
+                    "long": ("worn long", "shoulder", "flowing"), "bald": ("shaven head",)},
     "hair_colour": {"fair": ("blond", "sandy", "flaxen"), "brown": ("chestnut", "auburn"),
                     "red": ("ginger",), "grey": ("silver", "greying"), "none": ("bald",),
                     "dark brown": ("dark",)},

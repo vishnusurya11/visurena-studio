@@ -73,9 +73,15 @@ plus `closest`/`differs` against the cast bound so far). gate: the sheet
 differs from every bound character in ≥ `DISTINCT_AT` (3) seen traits -
 the `refuse_collision` rule applied to pixels. A card seeing < 4 traits is
 accepted `unverifiable`. The VLM is asked to DESCRIBE in a closed
-vocabulary, never yes/no. ladder: reroll seed ×1 → `distinguish` ×3 (the
-card is rewritten on exactly the traits that matched, to phrases no other
-character holds). fallback: character `unbound` → every setup needing it is
+vocabulary, never yes/no. A render is judged for FIDELITY first: a card
+whose reading disobeys its own words on a channel-reliable trait (hair
+colour/length, facial hair, headgear - `distinguish.RELIABLE`; complexion,
+build and age are dead on this channel, run 4: 7/7 sheets read fair/average)
+fails `faithful`, not the collision gate. ladder: the first render, then
+`distinguish` ×3 - a collision rewrites exactly the traits that matched, to
+phrases no other character holds, and drops the book's sentence when it
+asserted the moved trait; a disobedient render goes again AS WRITTEN on a
+new seed. fallback: character `unbound` → every setup needing it is
 excluded at 06.
 
 **03 music** — in: `story.json` (register, thesis), `tone.json`. out:

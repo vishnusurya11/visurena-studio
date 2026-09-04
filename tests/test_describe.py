@@ -231,6 +231,14 @@ class TestCompare:
         assert describe.distance(card(), card(headgear="top hat")) == 1.0
         assert describe.distance(card(), TraitCard(**GREGSON)) == 4.0
 
+    def test_a_hat_the_vocabulary_aliases_is_half_a_difference(self):
+        """Scarlet run 4, 7 of 7 sheets: a deerstalker read as 'cap', a tall
+        beaver hat as 'top hat'.  The channel's word for the hat, not a
+        different hat -- and not a render disobeying its card."""
+        assert describe.distance(card(headgear="deerstalker"), card(headgear="cap")) == 0.5
+        assert describe.distance(card(headgear="other hat"), card(headgear="top hat")) == 0.5
+        assert describe.distance(card(headgear="bowler"), card(headgear="cap")) == 1.0
+
     def test_same_look_is_a_distance_under_distinct_at(self):
         assert DISTINCT_AT == 3
         assert describe.same_look(card(), card(build="heavy", age="old"))

@@ -15,7 +15,7 @@ Evidence: `docs/analysis/research/trailer-music-structure.md`,
   (`scripts/trailer/step_01_story.py` … `step_10_deliver.py`) under one 6 h
   wall-clock ceiling; every gate has an adapt ladder and a terminal rung,
   every rung writes `learnings.jsonl`, step 10 writes `manifest.json`.
-- items 1–12 below are built and green (`uv run pytest -q`: 1439 passed,
+- items 1–12 below are built and green (`uv run pytest -q`: 1449 passed,
   4 local deselected, 2026-09-04). Item 13 (vocal path) is not.
 - the identity gate is a TRAIT CARD, not a face recogniser: `studio/describe.py`
   asks the local Qwen3-VL (comfy_studio's `image_qwen3vl_caption` /
@@ -23,7 +23,19 @@ Evidence: `docs/analysis/research/trailer-music-structure.md`,
   at-a-distance traits, and two faces are two people when ≥ `DISTINCT_AT`
   (3) seen traits differ - `cast_card.refuse_collision` applied to pixels.
   Steps 02 and 07 gate on it; `studio/distinguish.py` is step 02's second
-  rung, rewriting exactly the matched card slots. The SFace cosine gate
+  rung, rewriting exactly the matched card slots - and its FIDELITY gate:
+  `expected(card)` is what a faithful render reads back as, `disobeyed`
+  names the `RELIABLE` traits (hair colour/length, facial hair, headgear)
+  the render ignored. Run 6 (2026-09-04): Lestrade's card said walrus
+  moustache, the render read clean-shaven/grey, and the ladder rewrote the
+  card as if Hope had been matched; complexion and build were on every
+  "shares" list and no rung could move them (dead traits: 7/7 sheets read
+  fair/average in run 4), and the hair phrase carried a length no slot
+  owned. A disobedient render now goes again as written; a moved slot the
+  book itself asserted drops the book sentence from the prompt, which had
+  been contradicting the card ("a full beard ... with a heavy walrus
+  moustache"). `cast_card.infer_gender` also tokenised on spaces after
+  dropping only full stops, so "a thin man," was nobody. The SFace cosine gate
   (`identity.py`, 0.363) it replaced said only THAT two sheets read alike,
   so its one rung was another seed: Lestrade collided five times in a row
   (run 3, 2026-09-04). Under the trait card Lestrade bound on the second

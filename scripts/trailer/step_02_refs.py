@@ -6,11 +6,14 @@ sheets, but a cosine says only THAT two sheets read alike, so its rungs were
 another seed and another pose -- and Lestrade collided five times in a row on
 the same words.  Here every sheet is READ BACK by the local Qwen3-VL into a
 trait card (`studio.describe`) and compared with the cast already bound:
-fewer than DISTINCT_AT traits apart is a collision.  The ladder is one
-reroll, then three `distinguish` rungs that rewrite exactly the traits the
-two sheets share; a character that still collides is UNBOUND: listed in
-refs.json, absent from `refs`, so no setup downstream can carry it.  The
-palette is derived from story.json.
+fewer than DISTINCT_AT traits apart is a collision -- and a render that
+DISOBEYED its card on a trait the channel expresses (`studio.distinguish`)
+fails first, since it would condition every clip against its own words.
+The ladder is the first render, then three `distinguish` rungs: a collision
+rewrites exactly the traits the two sheets share, a disobedient render goes
+again as written on a new seed; a character that still fails is UNBOUND:
+listed in refs.json, absent from `refs`, so no setup downstream can carry
+it.  The palette is derived from story.json.
 """
 from __future__ import annotations
 
@@ -22,7 +25,7 @@ from scripts.trailer.build_refs import describe_location, generate, refs_needed
 from studio.cast_card import POOLS, cards_for, infer_gender, render_card
 from studio.describe import (DISTINCT_AT, TIMEOUT, TraitCard, closest, describe, distance,
                              patiently, same_look, shared, verifiable)
-from studio.distinguish import distinguish
+from studio.distinguish import disobeyed, distinguish
 from studio.ladder import Ladder, Rung, climb
 from studio.learnings import Learning
 from studio.trailer_refs import (character_prompt, load_json, location_prompt, palette_for,
@@ -87,12 +90,19 @@ def timed_out(learn) -> Callable[[str], None]:
 
 def bind_one(ctx, book: Path, index: int, char_id: str, card: dict, palette: str,
              bound: dict[str, TraitCard], taken: dict[str, set[str]]) -> dict | None:
-    """Climb the ladder for one character; None means unbound."""
+    """Climb the ladder for one character; None means unbound.
+
+    A render is judged twice.  Did it OBEY its card on the traits the channel
+    can express?  Scarlet run 6: Lestrade's card said walrus moustache, the
+    render came back clean-shaven and grey, and the ladder rewrote the card
+    as if Hope had been matched.  A disobedient render is not a collision:
+    the same card goes again on the next seed.  Only a FAITHFUL render that
+    still reads as someone bound has its shared traits moved."""
     state = {"card": card, "other": None, "shared": []}
 
     def attempt(rung: Rung, i: int):
         fresh = not (rung is LADDER.rungs[0] and i == 0)
-        if rung.name == "distinguish":
+        if rung.name == "distinguish" and state["shared"]:
             state["card"] = distinguish(state["card"], state["shared"], state["other"], taken)
         seed = seed_for(index, rung, i)
         path, physical = render_sheet(book, char_id, state["card"], palette, seed, fresh)
@@ -105,6 +115,10 @@ def bind_one(ctx, book: Path, index: int, char_id: str, card: dict, palette: str
             ctx.learn(Learning(step=STEP_ID, gate="identity", measured=str(result["card"]),
                                threshold="verifiable", action="accepted_unverifiable"))
             return True, None, DISTINCT_AT
+        off = disobeyed(state["card"], result["card"])
+        if off:
+            state.update(other=None, shared=[])
+            return False, f"disobeyed {', '.join(off)}", "faithful"
         who = result["identity"]["closest"]
         if who is None or not same_look(result["card"], bound[who]):
             return True, distance(result["card"], bound[who]) if who else None, DISTINCT_AT

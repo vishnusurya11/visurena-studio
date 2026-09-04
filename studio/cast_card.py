@@ -19,6 +19,8 @@ worst pair to 0.187 by changing nothing but the object list.
 """
 from __future__ import annotations
 
+import re
+
 HEADGEAR = ("a black silk top hat", "a brown bowler hat", "a tweed deerstalker",
             "a soft cloth cap", "a wide-brimmed felt hat", "a bare head",
             "a custodian helmet", "a straw boater", "a fur travelling cap",
@@ -140,7 +142,7 @@ def infer_gender(name: str, aliases: list[str], physical: str) -> str:
     Ferrier is "the girl" and "his daughter" -- and where they do not, the
     honest answer is "person" rather than the majority class.
     """
-    words = set((' '.join(aliases) + ' ' + physical).lower().replace('.', ' ').split())
+    words = set(re.findall(r"[a-z']+", (' '.join(aliases) + ' ' + physical).lower()))
     female = len(words & set(FEMALE_MARKS))
     male = len(words & set(MALE_MARKS))
     if female > male:
