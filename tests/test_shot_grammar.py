@@ -5,6 +5,7 @@ import math
 
 import pytest
 
+from studio import shot_grammar
 from studio.shot_grammar import (ANGLE, BOUND_FLOOR, FRAMING, LADDER, MIN_SECONDS,
                                  ladder_distance, legible_sizes, motivated_move)
 
@@ -28,6 +29,20 @@ class TestDurationBoundsSize:
 
     def test_every_size_has_a_minimum_and_a_phrasing(self):
         assert set(MIN_SECONDS) == set(LADDER) == set(FRAMING)
+
+
+class TestOneFloor:
+    def test_the_edit_floor_is_the_shortest_legible_size(self):
+        """Run 3 of Scarlet died in step 06 on a 0.417 s shot: the beat walk
+        allowed it (MIN_SHOT was 0.4) and the grammar refused it (the shortest
+        size needs 0.5).  One number, owned here, read by the walk."""
+        from studio.trailer_edit import MIN_SHOT
+        assert MIN_SHOT == min(shot_grammar.MIN_SECONDS.values())
+
+    def test_every_length_the_walk_allows_has_a_size(self):
+        from studio.trailer_edit import MIN_SHOT
+        for seconds in (MIN_SHOT, 0.5, 0.7, 4.0):
+            assert shot_grammar.choose_sizes([seconds], [False], [0.0])
 
 
 class TestLadder:

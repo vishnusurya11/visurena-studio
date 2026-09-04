@@ -13,6 +13,7 @@ the arc is what stops every cut landing on every beat, which Lieu warns gets
 """
 from __future__ import annotations
 
+from studio.shot_grammar import MIN_SECONDS
 from studio.trailer_cut import FINAL_HOLD, target_length
 
 SNAP_TOLERANCE = 0.30
@@ -41,8 +42,11 @@ The real fix is upstream -- the cue should have been asked for density there,
 and refused for arriving without it.  This is the floor under that.
 """
 
-MIN_SHOT = 0.4
-"""Below this a shot reads as a flash frame rather than an image."""
+MIN_SHOT = min(MIN_SECONDS.values())
+"""Below this a shot reads as a flash frame rather than an image: the time
+the grammar's smallest size (an insert) needs to be read.  ONE floor -- when
+this was its own 0.4 the walk emitted a 0.417 s shot at 128 BPM and the
+grammar, at 0.5, had no size for it (Scarlet run 3, 2026-09-04)."""
 
 
 def snap(when: float, grid: list[float], tolerance: float = SNAP_TOLERANCE) -> float:
