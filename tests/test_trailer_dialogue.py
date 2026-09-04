@@ -10,7 +10,7 @@ from __future__ import annotations
 
 import pytest
 
-from studio.trailer_dialogue import fits, names_figure, order_lines, speech_seconds
+from studio.trailer_dialogue import DUCK_OVERRUN, MAX_DUCKS, fits, names_figure, order_lines, speech_seconds
 from studio.trailer_stage_spec import SlateLine, Slot
 
 BEAT = 0.5
@@ -50,6 +50,18 @@ class TestFit:
     def test_without_a_grid_the_slot_is_the_seconds(self):
         assert fits(1.9, Slot(start=0.0, end=2.0), None)
         assert not fits(2.1, Slot(start=0.0, end=2.0), None)
+
+    def test_a_line_may_overrun_a_rubato_slot_by_one_release(self):
+        """Scarlet run 6: slots of 2.6 and 2.0 s, the best hook 3.3 s, three
+        runs of music_only.  The bed's mid band ducks under every line for as
+        long as it runs (08-assemble), so a line may end after the trough by
+        up to the ducker's release; it is a duck, and ducks are budgeted."""
+        assert DUCK_OVERRUN == 1.0 and MAX_DUCKS == 2
+        assert fits(3.3, Slot(start=0.0, end=2.6), None, overrun=DUCK_OVERRUN)
+        assert not fits(3.7, Slot(start=0.0, end=2.6), None, overrun=DUCK_OVERRUN)
+
+    def test_on_a_metre_grid_the_return_downbeat_is_never_crossed(self):
+        assert not fits(1.2, Slot(start=0.0, end=2.0), BEAT, overrun=DUCK_OVERRUN)
 
 
 class TestOrder:
@@ -102,6 +114,26 @@ class TestMeasured:
     def test_a_line_is_never_stretched_into_a_slot(self):
         with pytest.raises(ValueError):
             order_lines([AFGHAN, DEATH], slots(1.5, 1.5), "x", beat=BEAT)
+
+
+class TestDucks:
+    RACHE = line("Rache, revenge.", "threat", "jefferson_hope")
+
+    def test_run_6_hook_overruns_its_trough_and_the_threat_sits_inside_its_own(self):
+        assert 2.6 < speech_seconds(AFGHAN.text) <= 2.6 + DUCK_OVERRUN
+        slate = order_lines([AFGHAN, self.RACHE], slots(2.6, 2.0), "jefferson_hope", beat=None)
+        assert [l.text for l in slate.lines] == [AFGHAN.text, self.RACHE.text]
+
+    def test_at_most_two_lines_overrun(self):
+        """Hook and answer each spend a duck; a threat that would need a third
+        is passed over, and the slate is refused for want of one."""
+        long_threat = line("There is a great deal of blood on my hands tonight.", "threat")
+        assert all(speech_seconds(l.text) > 2.6 for l in (AFGHAN, EASIER, long_threat))
+        with pytest.raises(ValueError):
+            order_lines([AFGHAN, EASIER, long_threat], slots(2.6, 2.6, 2.6), "x", beat=None)
+        slate = order_lines([AFGHAN, EASIER, long_threat, self.RACHE], slots(2.6, 2.6, 2.6), "x",
+                            beat=None)
+        assert [l.text for l in slate.lines] == [AFGHAN.text, EASIER.text, self.RACHE.text]
 
 
 class TestFigure:

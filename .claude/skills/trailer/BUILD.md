@@ -43,6 +43,24 @@ Evidence: `docs/analysis/research/trailer-music-structure.md`,
   comfy_studio's `video_qwen3vl_caption` batches them, and `Qwen3_VQA`
   reads `image[0]` only, so it described a take whose first frame was hands
   holding a note as "face not visible" (run 4, B02).
+- step 04 shipped `music_only` on runs 4, 5 and 6 ("no hook fits the first
+  slot"): the delivered cue's troughs were 2.6 and 2.0 s and the best hook
+  3.3 s. `rank` admits a line at twice the longest slot, `fits` refused it at
+  the trough's edge, and `duck_bed` (08) keys a duck on every line for as
+  long as it runs. `order_lines` now grants an overrun of one ducker release
+  (`DUCK_OVERRUN`) to at most `MAX_DUCKS` lines (`test_run_6_troughs_hold_a_
+  hook_that_ducks_and_a_short_threat`). Run 7 is the first with a voice line.
+- step 03 has ended on the terminal `onset_grid` rung every run. Measured
+  over the 16 Scarlet seeds (2026-09-04): every metre-grid seed scores
+  `title_term` 0.3 and `slot_term` 0.4 - the struck-pulse captions produce
+  no pre-title trough and no slot - while the one seed with both (1002,
+  fitness 9.2) reads `bars_in_mode` 0.43. Its beats are 14% in mode and its
+  bars come out 3 or 6 beats (a cue in 3, jittered pulse): folding half-bars
+  lifts it to 0.77, but a jittered beat grid is not a grid to cut on. So the
+  gate `fitness >= 6 AND grid == metre AND slots` has never been jointly
+  satisfiable by this generator; the pick (1002) is the right trade and the
+  fix is upstream: a caption/section sheet the generator obeys, or a tracker
+  that reports beat regularity beside downbeat regularity. Retrospect item.
 - measured but not yet re-cut through the new chain: the delivered Scarlet
   master under the new `qc.py` reads 30/45 cuts on beat (onset grid, the
   audio measured rubato), 0/45 on downbeat, 5 target flags, floor pass.

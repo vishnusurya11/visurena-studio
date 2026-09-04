@@ -99,6 +99,11 @@ speech, narration), `analysis/iconicity.json`. out: `lines/slate.json`
 ≥ 1 hook AND ≥ 1 threat-or-stakes; no line names the figure's identity.
 ladder: label the next 10 ranked lines ×2. fallback: empty slate → music-
 only, flagged. Wikiquote offline → last cached revid → `iconicity: thin`.
+fit: each line is chosen for the slot it occupies, never `atempo`d; on the
+rubato path a line may overrun its trough by one ducker release
+(`DUCK_OVERRUN` 1.0 s) for at most `MAX_DUCKS` (2) lines — the bed ducks
+under it for as long as it runs (08). On the metre grid the return downbeat
+is never crossed.
 
 **05 voice** — in: `slate.json`, cast cards. out: `voice/voices/`,
 `voice/lines/*.wav|json` (measured seconds, similarity). gate: similarity

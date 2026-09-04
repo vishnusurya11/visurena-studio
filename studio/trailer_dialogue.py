@@ -265,6 +265,18 @@ ROLE_KINDS = {"hook": ("hook",), "answer": ("stakes", "exposition"),
               "threat": ("threat", "stakes"), "button": ("button",)}
 """The threat role falls back to stakes because the contract (LineSlate) needs
 a threat OR stakes; a hook with only exposition after it is not a slate."""
+DUCK_OVERRUN = 1.0
+"""How far past its trough a line may run on the rubato path: the ducker's
+release (08-assemble, `sidechaincompress ... release=1000`).  The bed's mid
+band ducks under a line for as long as the line runs, so a line that ends
+within one release of the trough's end is still inside the window one release
+curve governs.  Scarlet run 6: slots of 2.6 and 2.0 s, the best hook 3.3 s,
+music_only three runs in a row -- `rank` admitted the line at twice the
+longest slot and `fits` refused it at the trough's edge."""
+MAX_DUCKS = 2
+"""A line that overruns its trough ducks the loud bed: a hole.  Two at most
+(05-dialogue): the cue was chosen for its dynamic range, and six holes
+destroy it.  A line inside its trough is not a duck."""
 
 
 def names_figure(text: str, figure: str) -> bool:
@@ -274,12 +286,13 @@ def names_figure(text: str, figure: str) -> bool:
     return any(re.search(rf"\b{re.escape(p.capitalize())}\b", text) for p in parts)
 
 
-def fits(seconds: float, slot, beat: float | None) -> bool:
+def fits(seconds: float, slot, beat: float | None, overrun: float = 0.0) -> bool:
     """A line occupies whole beats: it starts on beat 2 of the slot's first bar
-    and ends a beat before the music returns, so a 4-beat slot holds 2.
-    Without a grid (rubato) the slot's seconds are the whole budget."""
+    and ends a beat before the music returns, so a 4-beat slot holds 2; the
+    return is an L0 point and is never crossed.  Without a grid (rubato) the
+    slot's seconds plus any `overrun` the duck budget allows are the budget."""
     if beat is None or beat <= 0:
-        return seconds <= slot.seconds
+        return seconds <= slot.seconds + overrun
     usable = math.floor(slot.seconds / beat + 1e-9) - 2
     return usable > 0 and math.ceil(seconds / beat - 1e-9) <= usable
 
@@ -312,10 +325,22 @@ def role_candidates(role: str, pool: list, hook, figure: str) -> list:
     return found
 
 
-def first_fit(candidates: list, slot, beat: float | None, measured: dict) -> object | None:
+def overruns(line, slot, measured: dict) -> bool:
+    """True when the line ends after its trough: it will duck the bed."""
+    return line_seconds(line, measured) > slot.seconds
+
+
+def allowance(chosen: list, slots: list, measured: dict) -> float:
+    """How far the next line may overrun: one release while ducks remain."""
+    spent = sum(overruns(line, slot, measured) for line, slot in zip(chosen, slots))
+    return DUCK_OVERRUN if spent < MAX_DUCKS else 0.0
+
+
+def first_fit(candidates: list, slot, beat: float | None, measured: dict,
+              overrun: float = 0.0) -> object | None:
     """The first candidate that fits the slot it would occupy; never atempo."""
     for line in candidates:
-        if fits(line_seconds(line, measured), slot, beat):
+        if fits(line_seconds(line, measured), slot, beat, overrun):
             return line
     return None
 
@@ -330,7 +355,7 @@ def fill_roles(hook, pool: list, slots: list, budget: int, figure: str,
         if len(chosen) >= budget:
             break
         pick = first_fit(role_candidates(role, pool, hook, figure), slots[len(chosen)],
-                         beat, measured)
+                         beat, measured, allowance(chosen, slots, measured))
         if pick is not None:
             chosen.append(pick)
             pool = [l for l in pool if l is not pick]
@@ -351,7 +376,8 @@ def order_lines(top: list, slots: list, figure: str, *, measured: dict | None = 
         raise ValueError("no slots: nothing to put a hook in")
     measured, budget = measured or {}, min(len(slots), MAX_LINES)
     pool = [l for l in top if not names_figure(l.text, figure)]
-    hook = first_fit(role_candidates("hook", pool, None, figure), slots[0], beat, measured)
+    hook = first_fit(role_candidates("hook", pool, None, figure), slots[0], beat, measured,
+                     allowance([], slots, measured))
     if hook is None:
         raise ValueError("no hook fits the first slot")
     chosen = fill_roles(hook, [l for l in pool if l is not hook], slots, budget, figure,

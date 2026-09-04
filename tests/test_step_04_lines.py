@@ -140,6 +140,23 @@ class TestRun:
         texts = [l["text"] for l in slate_of(ctx)["lines"]]
         assert NAMES not in texts and "The murderer is Jefferson Hope." not in texts
 
+    def test_run_6_troughs_hold_a_hook_that_ducks_and_a_short_threat(self, ctx, monkeypatch):
+        """Scarlet run 6: an onset grid with troughs of 2.6 and 2.0 s, the
+        best hook 3.3 s -- music_only three runs in a row.  The hook overruns
+        its trough by less than the ducker's release and is taken; the second
+        slot holds the two-word threat inside it."""
+        rubato = {**metre(2.6, 2.0), "grid": "onsets", "downbeats": [], "bars_in_mode": 0.43}
+        write(ctx.book_dir / "trailer/main/music/metre.json", rubato)
+        rules = RULES + [("Rache", "threat")]
+        monkeypatch.setattr(llm, "structured", FakeLabeller(rules=rules))
+        doc = screenplay()
+        doc["scenes"][2]["elements"].append(dialogue(HOPE, "Rache, revenge."))
+        write(ctx.book_dir / "screenplay/feature/screenplay.json", doc)
+        step.run(ctx.codex_id, ctx)
+        slate = LineSlate.model_validate(slate_of(ctx))
+        assert not slate.music_only
+        assert [l.text for l in slate.lines] == [AFGHAN, "Rache, revenge."]
+
     def test_no_hook_after_relabel_ships_music_only_and_learns(self, ctx, monkeypatch):
         fake = FakeLabeller(rules=[("death", "threat")])
         monkeypatch.setattr(llm, "structured", fake)

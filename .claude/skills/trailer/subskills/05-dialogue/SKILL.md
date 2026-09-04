@@ -161,7 +161,16 @@ wanted four). Cap 4. Vocal path only with ≥ 2 stem gaps.
   never a predicted duration. The old `speech_seconds` formula is a
   pre-filter only (skip lines predicted > 2× the longest slot).
 - Duck at most twice; `trailer_fitness()` selected the cue for its dynamic
-  range and six holes destroy it.
+  range and six holes destroy it. A **duck** is a line that ends after its
+  trough: on the rubato path a line may overrun by `DUCK_OVERRUN` (1.0 s,
+  the ducker's release - the bed's mid band is under one release curve
+  either way), and `allowance()` grants that to at most `MAX_DUCKS` (2)
+  lines per slate. A line inside its trough is not a duck. On the metre
+  grid the return downbeat is an L0 point and is never crossed. Scarlet
+  run 6: troughs of 2.6 and 2.0 s, the best hook 3.3 s, music_only three
+  runs in a row - `rank` admitted the line at 2x the longest slot and
+  `fits` refused it at the trough's edge, while `duck_bed` was built to
+  carry exactly that overrun.
 
 ## Cards
 
