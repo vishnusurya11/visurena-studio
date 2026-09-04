@@ -52,6 +52,44 @@ def duration_of(audio: Path) -> float:
     return 0.0
 
 
+def render_cue(book: Path, text: str, seed: int, dest_dir: Path,
+               seconds: float = 100.0) -> Path:
+    """One seed of one caption, rendered once: the stamp keys the cache on the
+    RECIPE, so a rewritten caption re-renders and the same caption does not."""
+    stamp = caption_stamp(text)
+    current = [c for c in dest_dir.glob(f"cue-{seed}.*") if cue_is_current(c, stamp)
+               and c.suffix in (".flac", ".wav", ".mp3")]
+    if current:
+        return current[0]
+    print(f"  rendering cue seed={seed} ...")
+    written = run("audio_minimax_music_3", {
+        "caption": text, "lyrics": lyrics_plan(sections_for(round(seconds / 11.1)), seconds),
+        "duration": PINNED_DURATION, "seed": seed, "steps": 30,
+        "cfg_scale": 1.7, "top_k": 50, "format": "flac",
+        "filename_prefix": f"CUE-{book.name[:8]}-{seed}"}, timeout=1800)
+    dest = dest_dir / f"cue-{seed}{written[0].suffix or '.flac'}"
+    dest.write_bytes(written[0].read_bytes())
+    stamp_cue(dest, stamp)
+    return dest
+
+
+def candidate(dest: Path, seed: int) -> dict:
+    """The measured row for one rendered cue: what `cues.json` ranks on."""
+    times, db = envelope(dest)
+    moment = title_moment(times, db)
+    grid = onsets(times, db)
+    return {"seed": seed, "rel_path": f"trailer/music/{dest.name}",
+            "seconds": round(float(times[-1]), 2),
+            "lra": loudness_range(dest),
+            "fitness": round(trailer_fitness(times, db, grid), 1),
+            "grid": [round(t, 2) for t in grid],
+            "late_onsets": late_density(grid, float(times[-1])),
+            "impacts": [round(t, 2) for t in structural_impacts(times, db)],
+            "stopdowns": [round(t, 2) for t in stopdowns(times, db)],
+            "title_stopdown": round(moment[0], 2) if moment else None,
+            "title_impact": round(moment[1], 2) if moment else None}
+
+
 def main(book_glob: str, seeds: list[int], seconds: float = 100.0) -> None:
     """Render candidate cues FOR THIS BOOK and keep the one that measures best.
 
@@ -65,46 +103,20 @@ def main(book_glob: str, seeds: list[int], seconds: float = 100.0) -> None:
     dest_dir = book / "trailer/music"
     dest_dir.mkdir(parents=True, exist_ok=True)
     tone = load_tone(book)
-    sections = sections_for(round(seconds / 11.1))
     print(f"  tone: {tone.genre}")
     print(f"  lead: {tone.lead_instrument}")
-    stamp = caption_stamp(caption(tone))
     candidates: list[dict] = []
-
     for seed in seeds:
-        dest = dest_dir / f"cue-{seed}.flac"
-        if not cue_is_current(dest, stamp):
-            print(f"  rendering cue seed={seed} ...")
-            written = run("audio_minimax_music_3", {
-                "caption": caption(tone), "lyrics": lyrics_plan(sections, seconds),
-                "duration": PINNED_DURATION, "seed": seed, "steps": 30,
-                "cfg_scale": 1.7, "top_k": 50, "format": "flac",
-                "filename_prefix": f"CUE-{book.name[:8]}-{seed}"}, timeout=1800)
-            dest.write_bytes(written[0].read_bytes())
-            stamp_cue(dest, stamp)
-        times, db = envelope(dest)
-        moment = title_moment(times, db)
-        entry = {"seed": seed, "rel_path": f"trailer/music/{dest.name}",
-                 "seconds": round(float(times[-1]), 2),
-                 "lra": loudness_range(dest),
-                 "fitness": round(trailer_fitness(times, db, onsets(times, db)), 1),
-                 "grid": [round(t, 2) for t in onsets(times, db)],
-                 "late_onsets": late_density(onsets(times, db), float(times[-1])),
-                 "impacts": [round(t, 2) for t in structural_impacts(times, db)],
-                 "stopdowns": [round(t, 2) for t in stopdowns(times, db)],
-                 "title_stopdown": round(moment[0], 2) if moment else None,
-                 "title_impact": round(moment[1], 2) if moment else None}
+        entry = candidate(render_cue(book, caption(tone), seed, dest_dir, seconds), seed)
         print(f"  seed {seed}: {entry['seconds']}s  LRA {entry['lra']} LU  "
               f"fitness {entry['fitness']}  grid {len(entry['grid'])}  "
               f"title {entry['title_impact']}")
         candidates.append(entry)
-
     best = max(candidates, key=lambda c: c["fitness"])
     (dest_dir / "cues.json").write_text(
         json.dumps({"chosen": best["seed"], "chosen_path": best["rel_path"],
                     "caption": caption(tone), "tone": asdict(tone),
-                        "candidates": candidates}, indent=1),
-        encoding="utf-8")
+                    "candidates": candidates}, indent=1), encoding="utf-8")
     print(f"chosen: seed {best['seed']} (fitness {best['fitness']}, title at {best['title_impact']}s)")
 
 

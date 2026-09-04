@@ -15,13 +15,26 @@ dependencies = [
 dev = [
     "pytest==8.4.1",
 ]
+music = [
+    "beat-this==1.1.0",
+    "torch==2.14.0",
+    "torchaudio==2.11.0",
+]
 qc = [
     "onnxruntime==1.24.1",
     "opencv-python-headless==4.13.0.90",
 ]
+voice = [
+    "resemblyzer==0.1.4",
+    "setuptools==80.9.0",
+]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
+# `local` needs the local ComfyUI / a GPU model: free, slow, nondeterministic,
+# and excluded from the default run.  Opt in with `-m local`.
+markers = ["local: needs the local ComfyUI or a model on disk; excluded by default"]
+addopts = "-m 'not local'"
 
 [build-system]
 requires = ["hatchling"]

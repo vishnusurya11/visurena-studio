@@ -10,7 +10,9 @@ fixtures.
 """
 from __future__ import annotations
 
+import json
 import re
+from pathlib import Path
 
 CONNECTIVES = (" until ", " whose ", " before ", " only to ", " and discovers ",
                " to reveal ", " while ", " when he ", " when she ")
@@ -617,3 +619,196 @@ def setup_value(candidate: dict, first: dict, last: dict, refs: set[str],
             + 1.0 * bound_convergence(candidate, refs)
             - 1.5 * invented_density(candidate)
             + 6.0 * iconicity.get(candidate["scene"], 0.0))
+
+
+# ---------------------------------------------------------------- line pools
+
+REFUSED = "refused"
+SIBLING_FLOOR = 0.85
+QUOTED = re.compile("[“\"]([^“”\"]+)[”\"]")
+"""Double marks only: a curly single quote is an apostrophe in most of the
+corpus, and treating it as a mark cut "I’ll" in half."""
+SENTENCE_END = re.compile(r"(?<=[.!?…])(?<!Mr\.)(?<!Dr\.)(?<!Mrs\.)(?<!St\.)\s+")
+POOL_ORDER = ("screenplay", "quotes", "source", "narration")
+
+
+def sentences(text: str, min_words: int = 2) -> list[str]:
+    """Split on sentence ends: the famous clause is often the child of a
+    dull parent, and a slot holds one sentence."""
+    return [s.strip() for s in SENTENCE_END.split(text.strip())
+            if len(s.split()) >= min_words]
+
+
+def _line(text: str, speaker: str | None, pool: str, scene: int | None) -> dict:
+    return {"text": text, "speaker": speaker, "pool": pool, "scene": scene}
+
+
+def screenplay_pool(scenes: list[dict]) -> list[dict]:
+    """Every spoken sentence of the screenplay, with its scene number."""
+    out: list[dict] = []
+    for scene in scenes:
+        for element in scene.get("elements", []):
+            if element.get("kind") != "dialogue" or not element.get("character"):
+                continue
+            out += [_line(s, element["character"], "screenplay", scene["number"])
+                    for s in sentences(element.get("text") or "")]
+    return out
+
+
+def character_quotes(book_dir: Path) -> dict[str, list[str]]:
+    """The analysis stage's judged quotes per character, cleaned to speech."""
+    from studio.quotes import clean
+    found: dict[str, list[str]] = {}
+    for path in sorted((Path(book_dir) / "analysis" / "characters").glob("*.json")):
+        doc = json.loads(path.read_text(encoding="utf-8"))
+        spoken = [clean(q.get("quote", "")) for q in doc.get("quotes", [])]
+        found[doc.get("id", path.stem)] = [s for s in spoken if s]
+    return found
+
+
+def quote_pool(quotes: dict[str, list[str]]) -> list[dict]:
+    return [_line(s, who, "quotes", None)
+            for who, spoken in quotes.items() for raw in spoken for s in sentences(raw)]
+
+
+def alias_index(characters: list[dict]) -> dict:
+    """Registry names, aliases and unambiguous surnames -> id."""
+    from studio.names import build_index, build_surname_index
+    return {**build_index(characters), **build_surname_index(characters)}
+
+
+def known_speech(scenes: list[dict], quotes: dict[str, list[str]]) -> list[tuple[set, str]]:
+    """What we already know somebody said, as word sets: screenplay dialogue
+    and the character quotes, each whole and sentence by sentence."""
+    from studio.iconicity import tokens
+    known: list[tuple[set, str]] = []
+    for line in screenplay_pool(scenes) + quote_pool(quotes):
+        known.append((tokens(line["text"]), line["speaker"]))
+    for scene in scenes:
+        for element in scene.get("elements", []):
+            if element.get("kind") == "dialogue" and element.get("character"):
+                known.append((tokens(element.get("text") or ""), element["character"]))
+    return known
+
+
+def sibling_speaker(spoken: list[str], known: list[tuple[set, str]],
+                    floor: float = SIBLING_FLOOR) -> str | None:
+    """The speaker of any sentence in the paragraph we already know a line
+    of: that is how "the scarlet thread" reaches Holmes."""
+    from studio.iconicity import tokens
+    for sentence in spoken:
+        mine = tokens(sentence)
+        if not mine:
+            continue
+        for theirs, speaker in known:
+            if theirs and len(mine & theirs) / len(mine | theirs) >= floor:
+                return speaker
+    return None
+
+
+def tag_speakers(paragraph: str, index: dict) -> set[str]:
+    """Every character the paragraph's own speech tag names.
+
+    The tag is the prose OUTSIDE the quotation marks, and only when it carries
+    a speech verb.  A one-word alias must appear capitalised there ("Stamford",
+    "I"), so "me" in "he said to me" does not claim the addressee.
+    """
+    from studio.names import run_starts_at
+    from studio.quotes import _SAID
+    outside = QUOTED.sub(" ", paragraph)
+    if not re.search(rf"\b(?:{_SAID})\b", outside, re.I):
+        return set()
+    words = re.sub(r"[^a-z0-9 ]+", "", outside.lower()).split()
+    proper = {p.lower() for p in re.findall(r"\b[A-Z][a-z]*\b", outside)}
+    found = set()
+    for alias, who in index.items():
+        parts = alias.split()
+        if (len(parts) >= 2 and run_starts_at(words, parts)) or \
+                (len(parts) == 1 and alias in proper):
+            found.add(who)
+    return found
+
+
+def attribute(paragraph: str, spoken: list[str], index: dict,
+              known: list[tuple[set, str]]) -> str | None:
+    """Who said the quoted speech: both rules must agree where both fire.
+
+    A tag naming two people, or a tag and a sibling that disagree, is
+    REFUSED -- the paragraph yields no line.  Neither firing is a card.
+    """
+    by_sibling = sibling_speaker(spoken, known)
+    by_tag = tag_speakers(paragraph, index)
+    if len(by_tag) > 1:
+        return REFUSED
+    tagged = next(iter(by_tag), None)
+    if by_sibling and tagged and by_sibling != tagged:
+        return REFUSED
+    return by_sibling or tagged
+
+
+def chapters(book_dir: Path) -> list[dict]:
+    return [json.loads(p.read_text(encoding="utf-8"))
+            for p in sorted((Path(book_dir) / "source" / "chapters").glob("ch_*.json"))]
+
+
+def source_pool(book_dir: Path, index: dict, known: list[tuple[set, str]]) -> list[dict]:
+    """Quoted speech in the source text, attributed or a card."""
+    out: list[dict] = []
+    for chapter in chapters(book_dir):
+        for paragraph in chapter.get("paragraphs", []):
+            spans = QUOTED.findall(paragraph.get("text") or "")
+            spoken = [s for span in spans for s in sentences(span)]
+            if not spoken:
+                continue
+            speaker = attribute(paragraph["text"], spoken, index, known)
+            if speaker == REFUSED:
+                continue
+            out += [_line(s, speaker, "source", None) for s in spoken]
+    return out
+
+
+def narration_pool(book_dir: Path, min_words: int = 4) -> list[dict]:
+    """Sentences of paragraphs with no speech in them.  A card, never a
+    voice: the narrator has a card and reads nothing here."""
+    out: list[dict] = []
+    for chapter in chapters(book_dir):
+        for paragraph in chapter.get("paragraphs", []):
+            text = paragraph.get("text") or ""
+            if QUOTED.search(text):
+                continue
+            out += [_line(s, None, "narration", None) for s in sentences(text, min_words)]
+    return out
+
+
+def dedupe_lines(lines: list[dict], head: int = 60) -> list[dict]:
+    """First pool wins: a screenplay line keeps its scene, the same words
+    found again in the source add nothing."""
+    seen: set[str] = set()
+    kept: list[dict] = []
+    for line in sorted(lines, key=lambda l: POOL_ORDER.index(l["pool"])):
+        key = re.sub(r"[^a-z]", "", line["text"].lower())[:head]
+        if not key or key in seen:
+            continue
+        seen.add(key)
+        kept.append(line)
+    return kept
+
+
+def line_pools(book_dir: Path, narrator: str | None = None) -> list[dict]:
+    """The four pools a trailer line can come from, merged and deduplicated.
+
+    Wikiquote lists 19 quotations for A Study in Scarlet and four survive into
+    the screenplay; the title sentence is in the source text and nowhere else.
+    Narration joins only for a book told by a character (StorySpec.narrator).
+    """
+    book = Path(book_dir)
+    screenplay = json.loads((book / "screenplay/feature/screenplay.json")
+                            .read_text(encoding="utf-8"))
+    registry = json.loads((book / "analysis/registry.json").read_text(encoding="utf-8"))
+    quotes = character_quotes(book)
+    known = known_speech(screenplay["scenes"], quotes)
+    pools = screenplay_pool(screenplay["scenes"]) + quote_pool(quotes)
+    pools += source_pool(book, alias_index(registry["characters"]), known)
+    if narrator and narrator != "omniscient":
+        pools += narration_pool(book)
+    return dedupe_lines(pools)

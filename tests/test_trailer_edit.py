@@ -503,3 +503,72 @@ class TestMaxShot:
         points = cut_points(78.0, dense)
         on = sum(1 for p in points[1:-1] if any(abs(p - g) <= 0.05 for g in dense))
         assert on == len(points) - 2
+
+
+class TestBeatWalk:
+    """Item 8: shot lengths in whole beats, cut on every L0 event, one hold.
+
+    The delivered Scarlet cut landed 12/35 cuts on a beat because the arc
+    was the timeline and the onsets were decoration.  The walk inverts it:
+    the metre is the timeline and the arc only chooses how many beats.
+    """
+
+    @staticmethod
+    def metre(bpm: float, seconds: float = 100.0, title_hit: float | None = None,
+              stopdown: float | None = None):
+        from studio.trailer_stage_spec import Metre
+        beat = 60.0 / bpm
+        beats = [round(i * beat, 4) for i in range(int(seconds / beat))]
+        return Metre(seed=1, rel_path="cue.wav", seconds=seconds, bpm=bpm, bar=4 * beat,
+                     beats=beats, downbeats=beats[::4], bars_in_mode=0.95, grid="metre",
+                     fitness=30.0, title_hit=title_hit,
+                     stopdowns=[stopdown] if stopdown else [])
+
+    def test_walk_never_emits_under_min_shot_at_any_tempo(self):
+        from studio.trailer_edit import MIN_SHOT, lengths_of, plan_cuts
+        for bpm in range(60, 181, 5):
+            m = self.metre(bpm, title_hit=90.0, stopdown=87.0)
+            lengths = lengths_of(plan_cuts(m, [30.0, 60.0, 90.0], 90.0, 2.5))
+            assert min(lengths) >= MIN_SHOT - 1e-6, (bpm, min(lengths))
+
+    def test_walk_cuts_on_every_L0_event(self):
+        from studio.trailer_edit import plan_cuts
+        m = self.metre(110, title_hit=90.0, stopdown=87.0)
+        events = [12.3, 30.0, 45.55, 61.0, 90.0]
+        points = plan_cuts(m, events, 90.0, 2.5)
+        for event in events:
+            assert any(abs(p - event) <= 0.03 for p in points), event
+
+    def test_exactly_one_hold(self):
+        from studio.trailer_edit import lengths_of, max_shot, plan_cuts
+        m = self.metre(120, title_hit=90.0, stopdown=86.5)
+        lengths = lengths_of(plan_cuts(m, [30.0, 60.0, 90.0], 90.0, 2.5))
+        cap = max_shot(m.bar)
+        assert sum(1 for x in lengths if x > cap + 1e-6) == 1
+        assert max(lengths) > cap
+
+    def test_the_hold_covers_the_pre_title_trough(self):
+        from studio.trailer_edit import plan_cuts, hold_span
+        m = self.metre(120, title_hit=90.0, stopdown=86.5)
+        start, end = hold_span(m, 90.0, 4.0)
+        assert start <= 86.5 and end == 90.0
+        assert start in plan_cuts(m, [90.0], 90.0, 2.5)
+
+    def test_a_cue_without_a_title_still_gets_one_hold(self):
+        from studio.trailer_edit import lengths_of, max_shot, plan_cuts
+        m = self.metre(100)
+        lengths = lengths_of(plan_cuts(m, [], 60.0, 2.5))
+        assert sum(1 for x in lengths if x > max_shot(m.bar) + 1e-6) == 1
+
+    def test_shots_are_whole_beats_on_the_grid(self):
+        from studio.trailer_edit import plan_cuts
+        m = self.metre(120, title_hit=90.0, stopdown=86.5)
+        points = plan_cuts(m, [90.0], 90.0, 2.5)
+        half = [round(b + 0.25, 4) for b in m.beats]
+        on = sum(1 for p in points if any(abs(p - g) <= 0.021 for g in m.beats + half))
+        assert on == len(points)
+
+    def test_the_cap_is_a_bar_and_a_quarter_at_slow_tempi(self):
+        from studio.trailer_edit import MAX_SHOT, max_shot
+        assert max_shot(2.0) == MAX_SHOT
+        assert 5.0 <= max_shot(4.0) <= 5.05

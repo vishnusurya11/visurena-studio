@@ -53,60 +53,97 @@ def is_complete(video: Path) -> bool:
     return not result.stderr.strip()
 
 
+WORKFLOW = "video_minimax_h3_r2v_turbo"
+SEED_BASE = 51000
+
+
+def bound_slots(beat: dict, refs: dict) -> list[str]:
+    """The sheets H3 binds: the beat's characters, then its location, two at most."""
+    chars = [f"char-{c}" for c in beat["cast"] if f"char-{c}" in refs]
+    loc = f"loc-{beat['location_id']}"
+    return (chars + ([loc] if loc in refs else []))[:2]
+
+
+def take_values(beat: dict, plan: dict, refs: dict, style: str, seed: int,
+                tightest: str | None = None) -> dict:
+    """What the model is asked for one beat's long take.
+
+    A clip is a long take the edit cuts SEVERAL sizes out of, so the take has
+    to contain them: open on the widest size any of this beat's shots asks for
+    and arrive at the tightest.  `tightest` overrides that arrival -- the
+    identity ladder's alternate setup asks for a face the recogniser can read,
+    and holds that size for the whole take.
+    """
+    char_ids = [r for r in bound_slots(beat, refs) if r.startswith("char-")]
+    described = [visual_description(refs[c]["physical"]) for c in char_ids]
+    for who, text in zip(char_ids, described):
+        if not is_scene_safe(text):
+            raise ValueError(f"{who}'s description carries reference-sheet language, "
+                             f"which would animate a character sheet: {text[:120]}")
+    loc_id = f"loc-{beat['location_id']}"
+    wanted = sorted({s["size"] for s in plan["shots"] if s["beat_id"] == beat["beat_id"]}
+                    or {"medium"}, key=LADDER.index)
+    open_size, close = (tightest, tightest) if tightest else (wanted[-1], wanted[0])
+    return {
+        "prompt": h3_document(
+            style=style, character=" ".join(described),
+            place=refs[loc_id]["name"] if loc_id in refs else beat["location_id"],
+            action=beat["image_prompt"], open_framing=FRAMING[open_size],
+            close_framing=FRAMING[close], camera=beat["motion"], seconds=CLIP_SECONDS,
+            arc=beat["arc"]),
+        "width": NATIVE_W, "height": NATIVE_H, "frames": frames_for(CLIP_SECONDS),
+        "steps": STEPS, "seed": seed, "ref_image_size": "max",
+        "filename_prefix": f"TR-{beat['beat_id']}"}
+
+
+def recipe_for(values: dict, bound: list[str], refs: dict, book: Path) -> dict:
+    """Everything that decides what the model draws -- what identifies the clip.
+
+    Skipping on the beat ID meant a plan rebuilt from scratch reused every old
+    render under the new names.
+    """
+    return {"prompt": values["prompt"], "refs": bound, "seed": values["seed"],
+            "frames": values["frames"], "steps": values["steps"],
+            "width": values["width"], "height": values["height"], "workflow": WORKFLOW,
+            "ref_digests": [digest_of(book / refs[r]["rel_path"]) for r in bound]}
+
+
+def render_take(values: dict, bound: list[str], refs: dict, book: Path, dest: Path) -> Path:
+    """One H3 render, staged references in, the finished mp4 at `dest`."""
+    values = dict(values)
+    for slot, ref_id in enumerate(bound, start=1):
+        values[f"ref_image_{slot}"] = stage_image(book / refs[ref_id]["rel_path"])
+    written = run(WORKFLOW, values, timeout=3600)
+    video = next((p for p in written if p.suffix in (".mp4", ".webm")), None)
+    if not video:
+        raise RuntimeError(f"{dest.stem} produced no video: {written}")
+    dest.parent.mkdir(parents=True, exist_ok=True)
+    dest.write_bytes(video.read_bytes())
+    record(dest, recipe_for(values, bound, refs, book))
+    return dest
+
+
 def main(book_glob: str, trailer_id: str = "main") -> None:
     book = next(p for p in (ROOT / "library").iterdir() if p.name.startswith(book_glob))
     out = book / "trailer" / trailer_id
     plan = json.loads((out / "plan.json").read_text(encoding="utf-8"))
     refs_doc = json.loads((book / "refs/refs.json").read_text(encoding="utf-8"))
     refs = {r["ref_id"]: r for r in refs_doc["refs"]}
-    style = refs_doc["palette"]
     clips_dir = out / "clips"
     clips_dir.mkdir(parents=True, exist_ok=True)
 
     for index, beat in enumerate(plan["beats"]):
         dest = clips_dir / f"{beat['beat_id']}.mp4"
-        char_ids = [f"char-{c}" for c in beat["cast"] if f"char-{c}" in refs]
-        loc_id = f"loc-{beat['location_id']}"
-        slots = char_ids + ([loc_id] if loc_id in refs else [])
-        if not slots:
+        bound = bound_slots(beat, refs)
+        if not bound:
             print(f"  {beat['beat_id']} SKIPPED: nothing to bind to")
             continue
-        described = [visual_description(refs[c]["physical"]) for c in char_ids]
-        for who, text in zip(char_ids, described):
-            if not is_scene_safe(text):
-                raise SystemExit(
-                    f"REFUSED: {who}'s description carries reference-sheet "
-                    f"language, which would animate a character sheet: {text[:120]}")
-        # A clip is a long take the edit cuts SEVERAL sizes out of, so the take
-        # has to contain them.  Open on the widest size any of this beat's
-        # shots asks for and arrive at the tightest, and one render serves the
-        # whole beat.  The old prompt looked framing up by dramatic register,
-        # so every beat in a register got the same frame and the same move.
-        wanted = [s["size"] for s in plan["shots"] if s["beat_id"] == beat["beat_id"]]
-        wanted = sorted(set(wanted) or {"medium"}, key=LADDER.index)
-        values = {
-            "prompt": h3_document(
-                style=style,
-                character=" ".join(described),
-                place=refs[loc_id]["name"] if loc_id in refs else beat["location_id"],
-                action=beat["image_prompt"],
-                open_framing=FRAMING[wanted[-1]], close_framing=FRAMING[wanted[0]],
-                camera=beat["motion"], seconds=CLIP_SECONDS, arc=beat["arc"]),
-            "width": NATIVE_W, "height": NATIVE_H,
-            "frames": frames_for(CLIP_SECONDS), "steps": STEPS,
-            "seed": 51000 + index * 7,
-            "ref_image_size": "max",
-            "filename_prefix": f"TR-{book.name[:8]}-{beat['beat_id']}"}
-        bound = slots[:2]
-        # The recipe is everything that decides what the model draws, and it
-        # is what identifies the clip.  Skipping on the beat ID meant a plan
-        # rebuilt from scratch reused every old render under the new names.
-        recipe = {
-            "prompt": values["prompt"], "refs": bound, "seed": values["seed"],
-            "frames": values["frames"], "steps": values["steps"],
-            "width": values["width"], "height": values["height"],
-            "workflow": "video_minimax_h3_r2v_turbo",
-            "ref_digests": [digest_of(book / refs[r]["rel_path"]) for r in bound]}
+        try:
+            values = take_values(beat, plan, refs, refs_doc["palette"], SEED_BASE + index * 7)
+        except ValueError as exc:
+            raise SystemExit(f"REFUSED: {exc}")
+        values["filename_prefix"] = f"TR-{book.name[:8]}-{beat['beat_id']}"
+        recipe = recipe_for(values, bound, refs, book)
         # Two questions, asked separately: is the file finished, and is it the
         # file this plan asks for.  Conflating them is what silently shipped
         # nine of nine Scarlet clips from the previous plan.
@@ -117,16 +154,8 @@ def main(book_glob: str, trailer_id: str = "main") -> None:
             reason = "stale" if is_complete(dest) else "unreadable"
             print(f"  {beat['beat_id']} is {reason}; re-rendering")
             dest.unlink()
-        for slot, ref_id in enumerate(bound, start=1):
-            values[f"ref_image_{slot}"] = stage_image(book / refs[ref_id]["rel_path"])
-        print(f"  [{index + 1}/{len(plan['beats'])}] {beat['beat_id']} "
-              f"<- {', '.join(bound)}")
-        written = run("video_minimax_h3_r2v_turbo", values, timeout=3600)
-        video = next((p for p in written if p.suffix in (".mp4", ".webm")), None)
-        if not video:
-            raise RuntimeError(f"{beat['beat_id']} produced no video: {written}")
-        dest.write_bytes(video.read_bytes())
-        record(dest, recipe)
+        print(f"  [{index + 1}/{len(plan['beats'])}] {beat['beat_id']} <- {', '.join(bound)}")
+        render_take(values, bound, refs, book, dest)
         print(f"      -> {dest.name}")
 
 

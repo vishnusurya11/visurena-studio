@@ -108,6 +108,13 @@ class TestSlate:
         with pytest.raises(ValidationError):
             LineSlate(lines=[line()] * 4 + [line(function="threat")], iconicity="full")
 
+    def test_the_pool_survives_a_round_trip_and_is_not_spoken(self):
+        slate = LineSlate(lines=[line(), line(function="threat", text="There is death in one")],
+                          iconicity="full", pool=[line(text="Come along.", function="button")])
+        again = LineSlate.model_validate_json(slate.model_dump_json())
+        assert [l.text for l in again.pool] == ["Come along."]
+        assert len(again.spoken()) == 2
+
 
 class TestQC:
     def test_floor_is_derived_from_the_measurements(self):

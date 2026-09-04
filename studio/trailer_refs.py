@@ -320,3 +320,26 @@ def all_locations(scenes: list[dict]) -> list[str]:
         if where and where not in seen:
             seen.append(where)
     return seen
+
+
+PALETTES = {
+    "elegy": "muted desaturated palette of bone white, ash grey and faded umber, low winter light",
+    "gothic": "muted desaturated palette of soot-black, candle amber and cold stone grey, deep shadow",
+    "romance": "muted palette of warm cream, dusk rose and soft brass, window light and lamplight",
+    "coming-of-age": "muted palette of sun-bleached ochre, river green and dust, late-afternoon light",
+    "tragedy": "muted desaturated palette of iron grey, dried-blood red and tallow, hard side light",
+    "procedural": "muted desaturated palette of soot-black, gaslight amber and cold grey, fog, deep shadow",
+    "detective": "muted desaturated palette of soot-black, gaslight amber and cold grey, fog, deep shadow",
+    "comedy": "muted palette of warm cream, sage and brass, bright even daylight",
+    "adventure": "muted palette of sea green, tar black and salt white, hard open-air light",
+}
+"""One grade line per register, so the look is DERIVED from story.json and no
+run ever needs a hand-typed palette.  Every line stays inside the house look
+(06-style): desaturated, practical light, period-appropriate."""
+
+
+def palette_for(register: str, setting: str = "") -> str:
+    """The book's palette line: the register's grade plus its period and place."""
+    base = PALETTES.get(register, PALETTES["procedural"])
+    period = f"; {setting.strip()}" if setting.strip() else ""
+    return f"{base[0].upper()}{base[1:]}{period}; practical period light sources."

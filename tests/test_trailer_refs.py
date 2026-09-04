@@ -36,3 +36,16 @@ class TestEveryPlaceTheBookGoes:
             (Path("library/20260822113400_a-study-in-scarlet")
              / "screenplay/feature/screenplay.json").read_text(encoding="utf-8"))["scenes"]
         assert len(all_locations(scenes)) == 13
+
+
+class TestPaletteFor:
+    def test_every_register_has_a_grade_line(self):
+        from studio.trailer_refs import PALETTES, palette_for
+        from studio.trailer_stage_spec import Register
+        assert set(Register.__args__) == set(PALETTES)
+        assert palette_for("gothic", "1890 Transylvania").endswith("light sources.")
+
+    def test_the_setting_rides_inside_the_line(self):
+        from studio.trailer_refs import palette_for
+        assert "1881 London" in palette_for("detective", "1881 London")
+        assert palette_for("nonsense") == palette_for("procedural")

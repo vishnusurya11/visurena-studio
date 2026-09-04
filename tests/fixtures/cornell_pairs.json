@@ -1,0 +1,2436 @@
+{
+ "source": "Cornell Movie-Quotes Corpus v1.0 (Danescu-Niculescu-Mizil, Cheng, Kleinberg, Lee; ACL 2012), moviequotes.memorable_nonmemorable_pairs.txt",
+ "sample": "every 4th pair in file order (index % 4 == 0), pairs with profanity dropped; 'memorable' is the matched SCRIPT line (same speaker, same word count as its control), never the IMDb form",
+ "pairs": [
+  {
+   "movie": "wild things",
+   "memorable": "My mom would kill me if she knew I took the Rover.",
+   "non_memorable": "I think it was something else... Suzie says the bust was bullshit..."
+  },
+  {
+   "movie": "ordinary people",
+   "memorable": "Well, don't admire people too much. They'll disappoint you sometimes.",
+   "non_memorable": "And I don't know if you're really giving."
+  },
+  {
+   "movie": "ali",
+   "memorable": "Don King talks black, lives white and thinks green! Why you defending him and \"brother\" Herbert?",
+   "non_memorable": "And now they got you up against George Foreman."
+  },
+  {
+   "movie": "mr blandings builds his dream house",
+   "memorable": "...that if I told you, you'd know that he knew that you knew that he knew... that you knew... or something.",
+   "non_memorable": "Well, he didn't say in so many words that ever since you started with that house you haven't turned in a decent piece of copy, but --"
+  },
+  {
+   "movie": "new nightmare",
+   "memorable": "Promise.  Cross my heart.  But until Mommy gets back, Dylan, whatever you do, don't fall asleep.",
+   "non_memorable": "He doesn't have to be awake to be on his feet."
+  },
+  {
+   "movie": "go",
+   "memorable": "If you were any less black, you would be clear.",
+   "non_memorable": "If you let them in here, they will kill you."
+  },
+  {
+   "movie": "grosse pointe blank",
+   "memorable": "Here. Let me put these in some rubbing alcohol.",
+   "non_memorable": "We haven't seen each other since high school."
+  },
+  {
+   "movie": "psycho",
+   "memorable": "I'll lick the stamps.",
+   "non_memorable": "I'm thinking of it."
+  },
+  {
+   "movie": "angel eyes",
+   "memorable": "I got you nectarines because the peaches are hard as rocks.",
+   "non_memorable": "And then we all smiled, and it was a great minute."
+  },
+  {
+   "movie": "pitch black",
+   "memorable": "C'mon, Riddick -- said I'd die for them, not you.",
+   "non_memorable": "We're just here to carry your light, aren't we?"
+  },
+  {
+   "movie": "lone star",
+   "memorable": "You mixed drinks bad as you mix metaphors, you be out of a job.",
+   "non_memorable": "Do either of you have any idea when they stopped using that site as a rifle range?"
+  },
+  {
+   "movie": "tremors",
+   "memorable": "I wouldn't give you a gun if it was World War Three.",
+   "non_memorable": "We go out, we find those damn snake things, we make 'em extinct."
+  },
+  {
+   "movie": "get shorty",
+   "memorable": "I'm the one telling you how it is. That's not too hard to figure out, is it?",
+   "non_memorable": "You're gonna be here, behind 'em when they sit down."
+  },
+  {
+   "movie": "watchmen",
+   "memorable": "Just a matter of time, I suppose. With sudden, blinding speed, Blake WHIPS the SAUCER from under his cup, sending it FLYING like a saw-blade. The Intruder BATS IT out of the air with even quicker reflexes, but the act buys Blake time to pull a PISTOL with a SILENCER from a hollowed out STEREO SPEAKER. He's a pro . but so is our Intruder. Before Blake can get a shot off, the Intruder is already upon him, SNATCHING the gun out of Blake's hand-- --Blake PUNCHES the Intruder in the chest plate--the Intruder drops the gun. Blake fights. Not like an old man, but like the trained killer he is. But the Intruder is much, much faster. Younger. Deadlier. He SMASHES Blake with an elbow to the head. Blake falls. BLOOD blurs his vision. The Intruder picks Blake up off the ground. Brings him to the window with the great New York view. Thirty stories up. Blake looks the Intruder in the eye . and starts laughing. Hysterical.",
+   "non_memorable": "I always thought I knew the punchline."
+  },
+  {
+   "movie": "lord of the rings the two towers",
+   "memorable": "You could have picked a better spot.",
+   "non_memorable": "This is no rabble of mindless Orcs."
+  },
+  {
+   "movie": "lord of the rings the two towers",
+   "memorable": "You�ll find more cheer in a graveyard.",
+   "non_memorable": "I would stay still, if I were you."
+  },
+  {
+   "movie": "lord of the rings the two towers",
+   "memorable": "Why do you lay these troubles on an already troubled mind. Can you not see? Your uncle is wearied by your malcontent, your war-mongering.",
+   "non_memorable": "Late is the hour in which this conjurer chooses to appear."
+  },
+  {
+   "movie": "american splendor",
+   "memorable": "Yes, I consider myself a nerd. And this movie has uplifted me. There's this one scene where a nerd grabs the microphone during a pep rally and announces that he is a nerd and that he is proud of it and stands up for the rights of other nerds. Then, he asks the kids at the pep rally who think they are nerds to come forward... So nearly everyone in the place does. That's the way the movie ends.",
+   "non_memorable": "I already saw it once."
+  },
+  {
+   "movie": "jay and silent bob strike back",
+   "memorable": "You know, I don't get out to the movies much. But I'd have to say Bluntman and Chronic was Blunt-tastic!",
+   "non_memorable": "These men are the leaders of a terrorist organization wanted for the abduction of a monkey."
+  },
+  {
+   "movie": "interview with the vampire: the vampire chronicles",
+   "memorable": "A little child she was, but also a fierce killer, now capable of the ruthless pursuit of blood with all a child's demanding.",
+   "non_memorable": "...and finally, when I could stand it no longer, I stood in an empty desolate street and heard the sound of a child crying."
+  },
+  {
+   "movie": "interview with the vampire: the vampire chronicles",
+   "memorable": "Goodnight, sweet prince, may flights of devils wing you to your rest.",
+   "non_memorable": "Tell me how it came to be that I am this... thing..."
+  },
+  {
+   "movie": "final destination",
+   "memorable": "Shoulda felt up Tammy in the pool, that time...",
+   "non_memorable": "I am... so close to puking, you don't wanna know."
+  },
+  {
+   "movie": "10 things i hate about you",
+   "memorable": "Just because you're beautiful, doesn't mean you can treat people like they don't matter.",
+   "non_memorable": "What kind of 'guy just picks up a girl and carries her away while you're talking to her?"
+  },
+  {
+   "movie": "10 things i hate about you",
+   "memorable": "Wait -- was that?-- Did your hairline just recede?",
+   "non_memorable": "Okay, I'll just sleep but stay awake, okay?"
+  },
+  {
+   "movie": "the bourne ultimatum",
+   "memorable": "You better get a good lawyer.",
+   "non_memorable": "It's better if we do this together."
+  },
+  {
+   "movie": "sex and the city",
+   "memorable": "Okay. I'll talk about it. Your best friends get screwed over by their guys -- how can you not get distant?",
+   "non_memorable": "Seriously -- all I do is work -- and you run off to New York every chance you get."
+  },
+  {
+   "movie": "sex and the city",
+   "memorable": "Well, I'm hardly the last single girl.",
+   "non_memorable": "Enid -- I'm so very flattered but--"
+  },
+  {
+   "movie": "sex and the city",
+   "memorable": "No, but forty is the last age you can see a woman photographed in a wedding gown without the unintended Diane Arbus subtext.",
+   "non_memorable": "It's a once in a lifetime opportunity - so spare me a week of faux soul-searching and just say yes."
+  },
+  {
+   "movie": "sex and the city",
+   "memorable": "Year after year, twenty-something women come to New York City in search of the two \"L's\": labels and love.",
+   "non_memorable": "I had told Louise to put Big in a place where I would never have to hear from him again."
+  },
+  {
+   "movie": "this boy's life",
+   "memorable": "Here I am, you lucky people!",
+   "non_memorable": "It's a test of skill."
+  },
+  {
+   "movie": "star trek nemesis",
+   "memorable": "To absent friends... o family.",
+   "non_memorable": "You have the bridge, Commander."
+  },
+  {
+   "movie": "star trek nemesis",
+   "memorable": "I will always be baffled by the human predilection for piloting vehicles at unsafe velocities.",
+   "non_memorable": "I believe my memory engrams would sense the absence of your specific reactions and behavior."
+  },
+  {
+   "movie": "star trek nemesis",
+   "memorable": "Shall we try some \"unsafe velocities?\"",
+   "non_memorable": "No cold feet, or any other parts of our anatomy."
+  },
+  {
+   "movie": "the wizard of oz",
+   "memorable": "Oh -- unusual weather we're having, ain't it?",
+   "non_memorable": "I'd be monarch of all I survey...."
+  },
+  {
+   "movie": "the wizard of oz",
+   "memorable": "...attention to that man behind the curtain. Go - before I lose my temper! The Great and Powerful ---....",
+   "non_memorable": "Tap - tap - tap - tap - What was that - that - that?"
+  },
+  {
+   "movie": "the wizard of oz",
+   "memorable": "But maybe you'd better not. I've got a witch mad at me, and you might get into trouble.",
+   "non_memorable": "Are you doing that on purpose, or can't you make up your mind?"
+  },
+  {
+   "movie": "man trouble",
+   "memorable": "Jesus, here I am, sitting in the center of a lot of wealth, the escalation in crime couldn't be better, and I'm not turning a damn nickel on it...",
+   "non_memorable": "I want to get a hold of this top private investigator, who's a close, personal friend of mine, okay, and get him to find out who this doctor is."
+  },
+  {
+   "movie": "wall street",
+   "memorable": "The most valuable commodity I know of is information. Wouldn't you agree on that?",
+   "non_memorable": "'Cause they're sheep -- and the sheep get slaughtered."
+  },
+  {
+   "movie": "top gun",
+   "memorable": "Gutsiest move I ever saw.",
+   "non_memorable": "I died enough for one night."
+  },
+  {
+   "movie": "shock treatment",
+   "memorable": "Yes, Betty.  But the false promise of a new dawn is usually followed by a most bloody sunset.",
+   "non_memorable": "...remarkable that his 'Faith Factory' is being financed by an entire nation's indigestion."
+  },
+  {
+   "movie": "austin powers: international man of mystery",
+   "memorable": "All right then...  ...FIVE MILLION DOLLARS!",
+   "non_memorable": "I was therefore by definition only partially frozen."
+  },
+  {
+   "movie": "austin powers: international man of mystery",
+   "memorable": "Really, there's nothing more pathetic than an aging hipster.",
+   "non_memorable": "You're thin, I'm about forty pounds overweight."
+  },
+  {
+   "movie": "all about eve",
+   "memorable": "There never was, there'll never be another like you.",
+   "non_memorable": "I would imagine that only death or destruction could keep her-"
+  },
+  {
+   "movie": "all about eve",
+   "memorable": "The general atmosphere is very Macbethish. What has or is about to happen?",
+   "non_memorable": "I thought you knew... She was put on over a week ago-"
+  },
+  {
+   "movie": "all about eve",
+   "memorable": "And you, I take it, are the Paderewski who plays his concerto on me, the piano? Where is Princess Fire-and-Music?",
+   "non_memorable": "- shows up for an audition when everyone knew I'd be here... and gives a performance!"
+  },
+  {
+   "movie": "batman forever",
+   "memorable": "Has anyone ever told you have a serious impulse control problem?  You know, I simply love what you've done with this place. Heavy Metal with just a touch of House and Garden.",
+   "non_memorable": "Only one spot in Gotham serves these bi- zonal, bi-coastal needs..."
+  },
+  {
+   "movie": "a nightmare on elm street: the dream child",
+   "memorable": "All right, Krueger.  This time it's for keeps.",
+   "non_memorable": "In the dream, she was standing in a room."
+  },
+  {
+   "movie": "you can count on me",
+   "memorable": "Yeah, this is the haute cuisine of garments.",
+   "non_memorable": "I'm glad to see you too, Sammy."
+  },
+  {
+   "movie": "magnolia",
+   "memorable": "Now I'll die and I'll tell you: what? The biggest regret of my life: I let my love go.....",
+   "non_memorable": "And I didn't treat her and the goddamn regret...THE GODDAMN REGRET...and I'll die..."
+  },
+  {
+   "movie": "silence of the lambs",
+   "memorable": "Well, Clarice, have the lambs stopped screaming...?",
+   "non_memorable": "Then why not take your case file?"
+  },
+  {
+   "movie": "silence of the lambs",
+   "memorable": "I don't know. Is it?",
+   "non_memorable": "Next time I'll have to check."
+  },
+  {
+   "movie": "twins",
+   "memorable": "If you're lying to me. I'll be back.",
+   "non_memorable": "We're different parts of a lot of different people."
+  },
+  {
+   "movie": "point break",
+   "memorable": "Fear causes hesitation, and hesitation will cause your worst fears to come true. You project strength to avoid conflict.",
+   "non_memorable": "If you project weakness, you draw aggression... that's how people get hurt."
+  },
+  {
+   "movie": "love & basketball",
+   "memorable": "All's fair in love and basketball. Strip.",
+   "non_memorable": "Coach has us on eleven o'clock curfew."
+  },
+  {
+   "movie": "charade",
+   "memorable": "Have you any idea what these things cost over here?",
+   "non_memorable": "It was our money and we want it back."
+  },
+  {
+   "movie": "war of the worlds",
+   "memorable": "Take care of our kids.",
+   "non_memorable": "You're out of milk."
+  },
+  {
+   "movie": "forrest gump",
+   "memorable": "Well, that's what's left after me saying, \"When I was in China on the All-America Ping-Pong Team, I just loved playing ping-pong with my Flex- O-Ping-Pong Paddle.\" Which everybody knows it isn't true, but Momma says it's just a little white lie so it wouldn't hurt nobody. So, anyway, I'm putting all that on gas, ropes and new nets and a brand-new shrimpin' boat.",
+   "non_memorable": "I made me a promise to Bubba in Vietnam, that as soon as the war was over, we'd go in partners."
+  },
+  {
+   "movie": "forrest gump",
+   "memorable": "Forrest, I never thanked you for saving my life.",
+   "non_memorable": "Well, maybe you should just pray for shrimp."
+  },
+  {
+   "movie": "transformers the movie",
+   "memorable": "We've got to save Prime! Punching...",
+   "non_memorable": "Don't worry, I'm not coming after you."
+  },
+  {
+   "movie": "transformers the movie",
+   "memorable": "And these shall be your minions...",
+   "non_memorable": "Proceed on your way to oblivion."
+  },
+  {
+   "movie": "collateral",
+   "memorable": "Out of options, Max. Take comfort in knowing you never had a choice.",
+   "non_memorable": "And you're not going to screw that up."
+  },
+  {
+   "movie": "collateral",
+   "memorable": "Definitely not from around here.",
+   "non_memorable": "I think he's dead."
+  },
+  {
+   "movie": "schindler's list",
+   "memorable": "Stern, if this factory ever produces a shell that can actually be fired... I'll be very unhappy.",
+   "non_memorable": "If you shoot without thinking, you go to prison and I get paid, that's how it works."
+  },
+  {
+   "movie": "office space",
+   "memorable": "What am I going to do with forty subscriptions to Vibe ?",
+   "non_memorable": "I'm going to take the blame for it, I decided."
+  },
+  {
+   "movie": "fatal instinct",
+   "memorable": "Stay away from my life, my wife, my home and my pets! I'm taking Lana on a vacation and when I come back, I don't ever want to see your face again!",
+   "non_memorable": "I know it's been a tough ordeal... with the trial and everything."
+  },
+  {
+   "movie": "american pie",
+   "memorable": "Please, God. Let this be it.",
+   "non_memorable": "You mean like, strip strip?"
+  },
+  {
+   "movie": "jurassic park",
+   "memorable": "Mr. Hammond is dying to see you guys.",
+   "non_memorable": "There's the Visitor's Center."
+  },
+  {
+   "movie": "synecdoche, new york",
+   "memorable": "Glad to be weirdly close. Millicent and Caden study each other.",
+   "non_memorable": "A minister addresses the mourners."
+  },
+  {
+   "movie": "casino",
+   "memorable": "What are you starin' at, you bald- headed Jew prick?!",
+   "non_memorable": "And listen, don't do anything else crazy, okay?"
+  },
+  {
+   "movie": "titanic",
+   "memorable": "Want to go to a real party?",
+   "non_memorable": "Well, right now my address is the RMS Titanic."
+  },
+  {
+   "movie": "titanic",
+   "memorable": "My, my, my... you shine up like a new penny.",
+   "non_memorable": "Ain't you boys ever rowed before?"
+  },
+  {
+   "movie": "titanic",
+   "memorable": "I saw that in a nickelodean once, and I always wanted to do it.",
+   "non_memorable": "He died in the town he was born in, and never did see it."
+  },
+  {
+   "movie": "star trek v: the final frontier",
+   "memorable": "I've always known... I'll die alone.",
+   "non_memorable": "What... Bones, what are we going to sing?"
+  },
+  {
+   "movie": "existenz",
+   "memorable": "I suppose the smaller caliber pistols would have to fire baby teeth. The tooth fairy could go I into the arms business.",
+   "non_memorable": "As long as you have that, they know where you are."
+  },
+  {
+   "movie": "army of darkness",
+   "memorable": "Why ain't you a sweet little thing? His boney digit caresses her lips.",
+   "non_memorable": "Then my lads, eternal life shall by ours!"
+  },
+  {
+   "movie": "pirates of the caribbean dead man's chest",
+   "memorable": "I challenge Davy Jones.",
+   "non_memorable": "An eternity of servitude."
+  },
+  {
+   "movie": "pirates of the caribbean dead man's chest",
+   "memorable": "So you see, Mercer, every man has a price he will willingly accept. Even for what he hopes never to sell.",
+   "non_memorable": "Your authority as governor, your influence in London, and your loyalty to the East India Trading Company."
+  },
+  {
+   "movie": "pirates of the caribbean dead man's chest",
+   "memorable": "Still rooting for you, mate!",
+   "non_memorable": "If you please: The key."
+  },
+  {
+   "movie": "pirates of the caribbean dead man's chest",
+   "memorable": "It's the Bible. You get credit for trying.",
+   "non_memorable": "We gotta take care of our immortal souls."
+  },
+  {
+   "movie": "star wars",
+   "memorable": "In my experience, there's no such thing as luck.",
+   "non_memorable": "You have taken your first step into a larger world."
+  },
+  {
+   "movie": "star wars",
+   "memorable": "Don't call me a mindless philosopher, you overweight glob of grease! Now come out before somebody sees you.",
+   "non_memorable": "I'm only a droid and not very knowledgeable about such things."
+  },
+  {
+   "movie": "star wars",
+   "memorable": "Help me, Obi-Wan Kenobi. You're my only hope.",
+   "non_memorable": "There are still two more of them out there!"
+  },
+  {
+   "movie": "star wars",
+   "memorable": "There'll be no escape for the Princess this time.",
+   "non_memorable": "I think she was a passenger on our last voyage."
+  },
+  {
+   "movie": "confidence",
+   "memorable": "So I'm dead...",
+   "non_memorable": "But what do I care?"
+  },
+  {
+   "movie": "the postman",
+   "memorable": "Your daughter. Her name is Hope.",
+   "non_memorable": "So you can take us to St. Rose."
+  },
+  {
+   "movie": "the green mile",
+   "memorable": "I just can't see God putting a gift like that in the hands of a man who would kill a child.",
+   "non_memorable": "You're going to have a few hours of quiet time now, so you can reflect on what you did to Del."
+  },
+  {
+   "movie": "the green mile",
+   "memorable": "Wipe you face before you stand up, Dean.",
+   "non_memorable": "John, I should have that just for now."
+  },
+  {
+   "movie": "mumford",
+   "memorable": "I may be young, but Doc can tell you, I'm very immature.",
+   "non_memorable": "The world has never seen what I'm talking about... except maybe in the movies."
+  },
+  {
+   "movie": "hard to kill",
+   "memorable": "How does it feel to know you're about to die?",
+   "non_memorable": "We need that film and we don't need any bullshit --"
+  },
+  {
+   "movie": "the night of the hunter",
+   "memorable": "It's a hard world for little things.",
+   "non_memorable": "Bring them all down here to the kitchen."
+  },
+  {
+   "movie": "the night of the hunter",
+   "memorable": "They abide and they endure.",
+   "non_memorable": "Mind where you shoot, boys!"
+  },
+  {
+   "movie": "slumdog millionaire",
+   "memorable": "I thought we would meet again only in death.",
+   "non_memorable": "I sleep in a bed, not on the street."
+  },
+  {
+   "movie": "dogma",
+   "memorable": "All lines are currently down.",
+   "non_memorable": "You may proceed, mon ami'."
+  },
+  {
+   "movie": "dogma",
+   "memorable": "Jay tells us you're going to sleep with him.",
+   "non_memorable": "If that's the case, then chick with him must be..."
+  },
+  {
+   "movie": "the mummy",
+   "memorable": "Death is only the beginning.",
+   "non_memorable": "What's it look like!"
+  },
+  {
+   "movie": "slither",
+   "memorable": "Open the door, sweetie. I know we don't look so good, but your mommy and daddy love you.",
+   "non_memorable": "You got school tomorrow."
+  },
+  {
+   "movie": "ace ventura pet detective",
+   "memorable": "Who let Dr. Doolittle in? Emilio steps in immediately.",
+   "non_memorable": "This is official police business."
+  },
+  {
+   "movie": "fantastic four",
+   "memorable": "You look like an eighties rock band.",
+   "non_memorable": "I wouldn't be caught dead in that."
+  },
+  {
+   "movie": "blade",
+   "memorable": "Wandered off the beaten path, Doctor?",
+   "non_memorable": "I had to increase the dose."
+  },
+  {
+   "movie": "eternal sunshine of the spotless mind",
+   "memorable": "My embarrassing admission is I really like that you're nice. Right now, anyway. I can't tell from one moment to the next what I'm going to like. But right now I'm glad you said, \"that's okay\" to me. That was nice of you.",
+   "non_memorable": "I just don't think \"nice\" is a particularly interesting thing to be."
+  },
+  {
+   "movie": "halloween",
+   "memorable": "Well, kiddo, I thought you outgrew superstition.",
+   "non_memorable": "I'M baby sitting for the Doyles."
+  },
+  {
+   "movie": "confessions of a dangerous mind",
+   "memorable": "Life was sweet. For a minute.",
+   "non_memorable": "Head of network sales at thirty."
+  },
+  {
+   "movie": "the man who wasn't there",
+   "memorable": "Sooner or later everyone needs a haircut...",
+   "non_memorable": "How could I have been so stupid?"
+  },
+  {
+   "movie": "how to train your dragon",
+   "memorable": "Everything we know about you guys is wrong.",
+   "non_memorable": "Wow, he's better than you ever were."
+  },
+  {
+   "movie": "legally blonde",
+   "memorable": "You think she just woke up one morning and said, \"I think I'll go to law school today!\"?",
+   "non_memorable": "We're defending Brooke Windham, whose very wealthy husband was found shot to death in their Beacon Hill mansion."
+  },
+  {
+   "movie": "next friday",
+   "memorable": "Negro, what the hell you doing to my woman?",
+   "non_memorable": "That's why I'm the king around here."
+  },
+  {
+   "movie": "the breakfast club",
+   "memorable": "That man...is a brownie hound...",
+   "non_memorable": "It makes it crawl back up!"
+  },
+  {
+   "movie": "killing zoe",
+   "memorable": "Sometimes you just need honesty...and security.",
+   "non_memorable": "Because I can get into this vault in half an hour."
+  },
+  {
+   "movie": "cable guy",
+   "memorable": "Free cable is the ultimate aphrodisiac.",
+   "non_memorable": "I got her back for you."
+  },
+  {
+   "movie": "evil dead",
+   "memorable": "I'm gonna check dinner.",
+   "non_memorable": "Why don't you wait until morning."
+  },
+  {
+   "movie": "rush hour 2",
+   "memorable": "Someone better call the police.",
+   "non_memorable": "Don't worry, the plates are safe."
+  },
+  {
+   "movie": "a few good men",
+   "memorable": "Please, spare me the psycho-babble father bullshit. Dawson and Downey'll have their day in court, but they'll have it with another lawyer.",
+   "non_memorable": "We'll work out of my apartment."
+  },
+  {
+   "movie": "land of the dead",
+   "memorable": "We don't negotiate with terrorists. There are other options.",
+   "non_memorable": "Can I offer you a drink?"
+  },
+  {
+   "movie": "mystery of the wax museum",
+   "memorable": "All right, brother. Then you can go to some nice warm place, and I don't mean California.",
+   "non_memorable": "Listen, Jim -- and if you wisecrack while I'm talking I'll crown you with the inkwell."
+  },
+  {
+   "movie": "conspiracy theory",
+   "memorable": "I'm an American and I demand to see Liza Sutton!",
+   "non_memorable": "You're the closest thing I got to a friend around here."
+  },
+  {
+   "movie": "strange days",
+   "memorable": "This is what we laughingly refer to as a plan, right?",
+   "non_memorable": "What was Iris doing riding around with Jeriko wearing a wire?"
+  },
+  {
+   "movie": "strange days",
+   "memorable": "The only time a whore should open her mouth is when she's giving head.",
+   "non_memorable": "I'll be up in a while to help you ring in the New Year."
+  },
+  {
+   "movie": "the graduate",
+   "memorable": "Mrs. Robinson - if you don't mind my saying so - this conversation is getting a little strange. Now I'm sure that Mr. Robinson will be here any minute and -",
+   "non_memorable": "Excuse me - I think I'd just like to check something on the car for a minute -"
+  },
+  {
+   "movie": "the matrix",
+   "memorable": "Find them and destroy them!",
+   "non_memorable": "Can you hear me, Morpheus?"
+  },
+  {
+   "movie": "the wedding date",
+   "memorable": "No, I�m fine, really. Nothing a bottle of Jack and a straight razor can�t fix.",
+   "non_memorable": "And I think I stole that from the back of an in-flight magazine."
+  },
+  {
+   "movie": "the wedding date",
+   "memorable": "I�d rather fight with you than make love to anyone else.",
+   "non_memorable": "That everybody knew and no one respected you enough to tell you?"
+  },
+  {
+   "movie": "the english patient",
+   "memorable": "I wanted to meet a man who could write such a long paper with so few adjectives.",
+   "non_memorable": "We are the real countries, not the boundaries drawn on maps with the names of powerful men..."
+  },
+  {
+   "movie": "indiana jones and the temple of doom",
+   "memorable": "Five minutes, Dr. Jones...",
+   "non_memorable": "No -- don't you see -- crawling --"
+  },
+  {
+   "movie": "the haunting",
+   "memorable": "You find out what you wanted to know, mister?",
+   "non_memorable": "You find out what you wanted to know, mister?"
+  },
+  {
+   "movie": "casablanca",
+   "memorable": "I stick my neck out for nobody.",
+   "non_memorable": "Mistakes like that happen all the time."
+  },
+  {
+   "movie": "casablanca",
+   "memorable": "Of all the gin joints in all the towns in all the world, she walks into mine.",
+   "non_memorable": "Because you knew what it would be like, hiding from the police, running away all the time?"
+  },
+  {
+   "movie": "bachelor party",
+   "memorable": "I just bet my balls and shook on it.",
+   "non_memorable": "I'm going to see what the hell happened."
+  },
+  {
+   "movie": "the thing",
+   "memorable": "Anybody touches me... we go.",
+   "non_memorable": "So help me I mean it!"
+  },
+  {
+   "movie": "signs",
+   "memorable": "It's like War of the Worlds.",
+   "non_memorable": "I'm sorry, what book is this?"
+  },
+  {
+   "movie": "men in black",
+   "memorable": "We got the use of unlimited technology from the entire universe and we cruise around in this?",
+   "non_memorable": "Maybe you're a badass in your hive, but this is New York City."
+  },
+  {
+   "movie": "the last boy scout",
+   "memorable": "If you touch me again... I'll kill you.",
+   "non_memorable": "You're gonna go in the Denny's restaurant and stay there."
+  },
+  {
+   "movie": "a perfect world",
+   "memorable": "Naw, Phillip, I need me a time machine with a loud radio to take me where I'm goin'. Walkin's for squares.",
+   "non_memorable": "'Dear Robert, I just wanted to tell you that me leaving has nothing to do with you."
+  },
+  {
+   "movie": "hellboy",
+   "memorable": "Second date. No tongue!!",
+   "non_memorable": "I hope that hurt."
+  },
+  {
+   "movie": "hellboy",
+   "memorable": "Didn't I kill you already?",
+   "non_memorable": "You can do better than that."
+  },
+  {
+   "movie": "airplane ii: the sequel",
+   "memorable": "I've got to get Ted.  Just don't come apart on me now, Simon.",
+   "non_memorable": "Also, we're heading right for the sun and can't seem to change course."
+  },
+  {
+   "movie": "chasing amy",
+   "memorable": "Since you like chicks, right.. do you just look at yourself in the mirror all the time?",
+   "non_memorable": "She does this big ol' pelvic thrust - cracks my tooth in half, sends it down my throat."
+  },
+  {
+   "movie": "chasing amy",
+   "memorable": "If this is a crush... then I don't know if I could take the real thing if it ever happens.",
+   "non_memorable": "And not in a misplaced affection, puppy-dog way, although I'm sure that's what you'll call it."
+  },
+  {
+   "movie": "city of joy",
+   "memorable": "Close the door. The Godfather has more eyes than a pineapple.",
+   "non_memorable": "We must stand by him as one."
+  },
+  {
+   "movie": "romeo & juliet",
+   "memorable": "A dog of the house of Capulet moves me!",
+   "non_memorable": "They must take it in sense that feel it."
+  },
+  {
+   "movie": "romeo & juliet",
+   "memorable": "Be not so long to speak. I lone to die!",
+   "non_memorable": "That may be, sir, when I may be a wife."
+  },
+  {
+   "movie": "get carter",
+   "memorable": "I've come for you, Margaret.",
+   "non_memorable": "Not till I'm dead, Eric."
+  },
+  {
+   "movie": "get carter",
+   "memorable": "You couldn't win an egg and spoon race, Eric.",
+   "non_memorable": "I bet you could use a drink, could you, Eric?"
+  },
+  {
+   "movie": "game 6",
+   "memorable": "They're always winning. Until they lose.",
+   "non_memorable": "I don't know if I can say that."
+  },
+  {
+   "movie": "bringing out the dead",
+   "memorable": "Don't make me take off my sunglasses.",
+   "non_memorable": "Your friend there just untied the water beggar."
+  },
+  {
+   "movie": "twilight",
+   "memorable": "Maybe he'll adopt me.",
+   "non_memorable": "We left you a message."
+  },
+  {
+   "movie": "star trek iii: the search for spock",
+   "memorable": "Because... the needs of the one outweighed the needs of the many.",
+   "non_memorable": "I know this will come as a pleasant surprise for you..."
+  },
+  {
+   "movie": "pulp fiction",
+   "memorable": "Sprite, good, mind if I have some of your tasty beverage to wash this down with?",
+   "non_memorable": "Now I'm gonna take a wild guess here: you're Brett, right?"
+  },
+  {
+   "movie": "a hard day's night",
+   "memorable": "I'm going parading before it's too late!",
+   "non_memorable": "Well, there you are and watch it with that hoop."
+  },
+  {
+   "movie": "beetle juice",
+   "memorable": "Nice building... Bad paint.  Good lines... bad roof.  Good parking... hmmm???",
+   "non_memorable": "I'm going down to relax."
+  },
+  {
+   "movie": "croupier",
+   "memorable": "Not an enigma, just a contradiction.",
+   "non_memorable": "He suddenly wanted to be rid of it."
+  },
+  {
+   "movie": "croupier",
+   "memorable": "I'll understand if you don't. But I hope you do.",
+   "non_memorable": "Some people I know, they're planning to rob The Golden Lion."
+  },
+  {
+   "movie": "finding nemo",
+   "memorable": "Quick! To the top of Mt. Wannahockaloogie!",
+   "non_memorable": "He's gonna get outta here!"
+  },
+  {
+   "movie": "finding nemo",
+   "memorable": "All drains lead to the ocean, kid.",
+   "non_memorable": "Okay, you gotta be quick."
+  },
+  {
+   "movie": "star trek the motion picture",
+   "memorable": "Of course: we all create God in our own image.",
+   "non_memorable": "All ship's functions going to automatic, Captain."
+  },
+  {
+   "movie": "spanglish",
+   "memorable": "Ahhhhhhh. There are some mistakes you cannot risk when you have kids...Please, are you ready to go?",
+   "non_memorable": "You know, I always think about when you...Oh, there's no point."
+  },
+  {
+   "movie": "star trek vi: the undiscovered country",
+   "memorable": "Don't tell me that was any meteor shower.",
+   "non_memorable": "We have monitored a large explosion in your sector."
+  },
+  {
+   "movie": "star trek vi: the undiscovered country",
+   "memorable": "Guess who is coming to dinner.",
+   "non_memorable": "Captain, shall we raise our shields?"
+  },
+  {
+   "movie": "dead poets society",
+   "memorable": "Keep ripping gentlemen. This is a battle, a war. And the casualties could be your hearts and souls.",
+   "non_memorable": "I like Byron, I give him a 42, but I can't dance to it."
+  },
+  {
+   "movie": "dead poets society",
+   "memorable": "Mr. Meeks, time to inherit the earth. Mr. Pitts, rise above your name.",
+   "non_memorable": "Sounds to me like you're daunted."
+  },
+  {
+   "movie": "being john malkovich",
+   "memorable": "We've been over this. Nobody's looking for a puppeteer in today's wintry economic climate.",
+   "non_memorable": "I'm sure he's a better lover than I ever was."
+  },
+  {
+   "movie": "frequency",
+   "memorable": "I'm still here, Chief.",
+   "non_memorable": "Elvis has left the building."
+  },
+  {
+   "movie": "star trek generations",
+   "memorable": "I hope for your sake that you are initiating a mating ritual.",
+   "non_memorable": "I don't know... he bathed... now he is roaming the ship."
+  },
+  {
+   "movie": "vertigo",
+   "memorable": "Wander separately? Ah, but only one is a wanderer. Two, together, are always going somewhere.",
+   "non_memorable": "Oh, yes, I forgot: It's your occupation, isn't it?"
+  },
+  {
+   "movie": "the exorcist",
+   "memorable": "They've found something... small pieces.",
+   "non_memorable": "At the base of the mound."
+  },
+  {
+   "movie": "die hard",
+   "memorable": "Just remember that when you sign for the tip. They're paying for it, so don't be shy.",
+   "non_memorable": "I'll pull into the parking garage and wait."
+  },
+  {
+   "movie": "die hard",
+   "memorable": "A million terrorists in the world and I kill the one with feet smaller than my sister.",
+   "non_memorable": "After I get my foot out of my mouth, we'll really be cooking, and then I can --"
+  },
+  {
+   "movie": "american gangster",
+   "memorable": "And my company sells a product that's better than the competition's at a price that's lower.",
+   "non_memorable": "So if that dope doesn't arrive, for whatever reason - Cousin or no cousin - don't let me down."
+  },
+  {
+   "movie": "cobb",
+   "memorable": "And I started playing baseball when I was a kid like everybody else only I was better than every- body else. When I was seventeen I started playing for money -- my father didn't approve. He was a great man...",
+   "non_memorable": "The broads're probably lining up right now, waiting for ol' Ty and his buddy Stump."
+  },
+  {
+   "movie": "fargo",
+   "memorable": "You're sayin' - what're you sayin'?",
+   "non_memorable": "If these numbers are right, this looks pretty sweet."
+  },
+  {
+   "movie": "twin peaks",
+   "memorable": "Hyggelig a mote dem. Jeg Heter Laura Palmer.",
+   "non_memorable": "What is the world coming to when you kill a guy for baby laxative?"
+  },
+  {
+   "movie": "the american president",
+   "memorable": "Seven-trillion-dollar communications system at my disposal, you'd think I'd be able to find out if the Packers won.",
+   "non_memorable": "Sydney, I can't challenge the school bully to a fight just because he picked on my girlfriend."
+  },
+  {
+   "movie": "sideways",
+   "memorable": "Quaffable but far from transcendent.",
+   "non_memorable": "You drop this bombshell on me."
+  },
+  {
+   "movie": "dune",
+   "memorable": "Long live the fighters!",
+   "non_memorable": "Activate your weirding modules..."
+  },
+  {
+   "movie": "unforgiven",
+   "memorable": "All you gotta do is pull on the trigger, mister.",
+   "non_memorable": "\"Jim,\" I says, \"You are a liar and a horse thief."
+  },
+  {
+   "movie": "amadeus",
+   "memorable": "That was not Mozart laughing, Father. That was God. That was God! God laughing at me through that obscene giggle. Go on, Signore. Laugh. Rub my nose in it. Show my mediocrity for all to see. You wait! I will laugh at You! Before I leave this earth, I will laugh at You! Amen!",
+   "non_memorable": "And in spite of me, a wonder was revealed."
+  },
+  {
+   "movie": "amadeus",
+   "memorable": "Is her mother still lying on the floor?",
+   "non_memorable": "At last I shall be freed by death!"
+  },
+  {
+   "movie": "notting hill",
+   "memorable": "Bugger this for a bunch of bananas.",
+   "non_memorable": "You think it's the wrong moment."
+  },
+  {
+   "movie": "body of evidence",
+   "memorable": "It gets easier, doesn't it? Once you open the door it never closes.",
+   "non_memorable": "I need to see you right away."
+  },
+  {
+   "movie": "thirteen days",
+   "memorable": "Those goddamn Kennedys are going to destroy this country if we don't do something about this.",
+   "non_memorable": "The Big Red Dog is digging in our back yard, and we're justified in shooting him."
+  },
+  {
+   "movie": "tin cup",
+   "memorable": "My inner child needs spanking.",
+   "non_memorable": "There's a glitch in my swing."
+  },
+  {
+   "movie": "maniac",
+   "memorable": "Not only do I look like Meir- schultz--I AM Meirschultz. I will be a great man.",
+   "non_memorable": "Well, you know, we hate to operate on these cases."
+  },
+  {
+   "movie": "toy story",
+   "memorable": "Yessir, we're next month's garage sale fodder for sure.",
+   "non_memorable": "I hate to break up the staff meeting, but THEY'RE HERE!"
+  },
+  {
+   "movie": "toy story",
+   "memorable": "I think you've had enough tea for today. Let's get you out of here, Buzz.",
+   "non_memorable": "Buzz, come over here and you just tell the nice toys that you're not dead."
+  },
+  {
+   "movie": "the shining",
+   "memorable": "Right, I'll just set my bourbon and advocaat down right there.",
+   "non_memorable": "I'm sure he'll be himself again in the morning."
+  },
+  {
+   "movie": "get low",
+   "memorable": "If you don't listen you won't hear nothing. Bush puts the big skillet on the table and sits down. Buddy is so low he can look under the table and sees how the table legs run right into the top without screws or nails.",
+   "non_memorable": "Say what you'd say right now to my face."
+  },
+  {
+   "movie": "shrek",
+   "memorable": "Do you think maybe he's compensating for something? groans as Donkey doesn't get the joke. He continues walking through the parking",
+   "non_memorable": "The first thing I'm gonna do is build a ten-foot wall around my land."
+  },
+  {
+   "movie": "jennifer eight",
+   "memorable": "I spose I'm drinking myself to sleep. It's Helena's Christmas songs .. they're really pretty ..",
+   "non_memorable": "I know .. ain't it a shame .."
+  },
+  {
+   "movie": "dances with wolves",
+   "memorable": "Were it not for my companion I believe I would be having the time of my life. He is quite possibly the foulest person I have ever met.",
+   "non_memorable": "Do not know how many more are in the vicinity but I am taking steps for another visitation."
+  },
+  {
+   "movie": "american graffiti",
+   "memorable": "Joe College strikes out.",
+   "non_memorable": "Laurie, jeez... Come on."
+  },
+  {
+   "movie": "american graffiti",
+   "memorable": "Sicker than a dog, that's for sure.",
+   "non_memorable": "I knew a man once who got this sick."
+  },
+  {
+   "movie": "blood simple",
+   "memorable": "Jesus, I got a hangover. Want a drink?",
+   "non_memorable": "If you wanna stay here, that's fine."
+  },
+  {
+   "movie": "terminator 2: judgment day",
+   "memorable": "Come with me if you want to live.",
+   "non_memorable": "Skynet begins to learn, at a geometric rate."
+  },
+  {
+   "movie": "terminator 2: judgment day",
+   "memorable": "Now don't take this the wrong way, but you are a terminator, right?",
+   "non_memorable": "She tries to blow up a computer factory, but she got shot and arrested."
+  },
+  {
+   "movie": "beavis and butt-head do america",
+   "memorable": "Why does everyone wanna see my schlong?  I am the one-and-only-almighty-bungholiooo!",
+   "non_memorable": "Where I come from there is no T.P."
+  },
+  {
+   "movie": "sweet smell of success",
+   "memorable": "Mr. Hunsecker, you've got more twists than a barrel of pretzels.",
+   "non_memorable": "Put the whip down and I might respect what you're saying..."
+  },
+  {
+   "movie": "sweet smell of success",
+   "memorable": "Everyone knows Manny Davis... ...except MRS. Manny Davis.",
+   "non_memorable": "It's the charming street urchin's face."
+  },
+  {
+   "movie": "sweet smell of success",
+   "memorable": "The next time you want information, Falco, don't scratch for it like a dog - ask for it like a man!",
+   "non_memorable": "I'm feeling too good to fight with you, but that isn't what I said - I said you snoop."
+  },
+  {
+   "movie": "liar liar",
+   "memorable": "I wish, for just one day, Dad couldn't tell a lie.",
+   "non_memorable": ".If I go in the water right after lunch, will I drown?"
+  },
+  {
+   "movie": "se7en",
+   "memorable": "If John Doe's head splits open, and a U.F.O. flies out, I want you to have expected it.",
+   "non_memorable": "But, if you decide to have the baby, then, at that very instant, when you're absolutely sure... tell him."
+  },
+  {
+   "movie": "lost highway",
+   "memorable": "We've met before, haven't we?",
+   "non_memorable": "In fact, I'm there right now."
+  },
+  {
+   "movie": "donnie darko",
+   "memorable": "I promise that one day things will get better for you.",
+   "non_memorable": "I think I only have a few days left... before they catch me."
+  },
+  {
+   "movie": "swingers",
+   "memorable": "Yeah. This place is dead, anyway.",
+   "non_memorable": "That was pretty cold, dude."
+  },
+  {
+   "movie": "jurassic park iii",
+   "memorable": "Mr. Kirby, trust me, on this island, there is no such thing as safe. We have to get back in this plane...",
+   "non_memorable": "And tell your wife to stop making so much noise!"
+  },
+  {
+   "movie": "state and main",
+   "memorable": "Only second chance I know, chance t'make the same mistake twice.",
+   "non_memorable": "I'm just here to do a job, just like the rest of these..."
+  },
+  {
+   "movie": "kalifornia",
+   "memorable": "I like your hair.",
+   "non_memorable": "We shouldn't be doin' this, Early."
+  },
+  {
+   "movie": "the family man",
+   "memorable": "If you could take a dump some time in this century, then we could go home where it�s warm...",
+   "non_memorable": "Bowlers do it in an alley?...Non profit lawyers do it for free... what is it with these people?"
+  },
+  {
+   "movie": "the apartment",
+   "memorable": "Why do people have to love people, anyway?",
+   "non_memorable": "Will you see that Mr. Sheldrake gets it?"
+  },
+  {
+   "movie": "the apartment",
+   "memorable": "I'd spell it out for you -- only I can't spell.",
+   "non_memorable": "The fellows in the office may get the wrong idea how I found out."
+  },
+  {
+   "movie": "silverado",
+   "memorable": "I don't want to kill you, and you don't want to be dead. Drop your guns.",
+   "non_memorable": "I haven't had a drink of whiskey or slept in a bed for ten days."
+  },
+  {
+   "movie": "bodyguard",
+   "memorable": "They don't wash cars on the parking levels.",
+   "non_memorable": "I thought I might hole up with my dad."
+  },
+  {
+   "movie": "never been kissed",
+   "memorable": "Look, there goes another Lemming. WE ANGLE ON the escalator as Josie and the Girls rise single file out of- FRAME.",
+   "non_memorable": "Last I checked--this was still a free country."
+  },
+  {
+   "movie": "shakespeare in love",
+   "memorable": "Well, that will have them rolling in the aisles.",
+   "non_memorable": "There's a lady knows your play by heart."
+  },
+  {
+   "movie": "shakespeare in love",
+   "memorable": "You will never age for me, nor fade, nor die.",
+   "non_memorable": "I have hurt you and I am sorry for it."
+  },
+  {
+   "movie": "harold and maude",
+   "memorable": "It's all memorabilia, but incidental and not integral, if you know what I mean.",
+   "non_memorable": "That's the influence of the right food, the right exercise, and the right breathing."
+  },
+  {
+   "movie": "true believer",
+   "memorable": "...Do you realize I haven't gotten stoned since the trial started?",
+   "non_memorable": "Repeat drunk drivers, and I'm gonna get 'em all off."
+  },
+  {
+   "movie": "blue velvet",
+   "memorable": "You put your disease in me. your semen. it's hot and full of disease.",
+   "non_memorable": "Oh yes, oh yes, oh yes."
+  },
+  {
+   "movie": "friday the 13th part viii jason takes manhattan",
+   "memorable": "Walking corpses are not real!",
+   "non_memorable": "I'm in charge here!"
+  },
+  {
+   "movie": "almost famous",
+   "memorable": "Look at this. An entire generation of Cinderellas and there's no slipper coming.",
+   "non_memorable": "And you skipped kindergarten because I taught it to you when you were four."
+  },
+  {
+   "movie": "almost famous",
+   "memorable": "Your looks have become a problem.",
+   "non_memorable": "What happened to you last night?"
+  },
+  {
+   "movie": "almost famous",
+   "memorable": "\"Listen to Tommy with a candle burning and you will see your entire future...\"",
+   "non_memorable": "And when he rebels in some strange and odd way, don't blame me."
+  },
+  {
+   "movie": "the planet of the apes",
+   "memorable": "Dr. Zaius! Would an ape make a human doll that talks?",
+   "non_memorable": "Then tell them Dr. Zaius won't leave here alive."
+  },
+  {
+   "movie": "serenity",
+   "memorable": "Half of writing history is hiding the truth. There's something on this rock the Alliance doesn't want known.",
+   "non_memorable": "Mal shoots him in the head, turns back."
+  },
+  {
+   "movie": "serenity",
+   "memorable": "Define \"disappeared\". The Ensign just looks uncomfortable.",
+   "non_memorable": "And sin."
+  },
+  {
+   "movie": "serenity",
+   "memorable": "I am a leaf on the wind, watch how I soar.",
+   "non_memorable": "140 Long as that landing strip is made of fluffy pillows..."
+  },
+  {
+   "movie": "buried",
+   "memorable": "That your ransom video already has 47,000 hits on YouTube. And all the major networks are playing it, including Al Jazeera. So, now your captors have no choice but to follow through.",
+   "non_memorable": "We didn't even know she had been taken hostage."
+  },
+  {
+   "movie": "gods and monsters",
+   "memorable": "You must think the whole world is queer. Well it's not. War sure isn't.",
+   "non_memorable": "I don't like to talk about that."
+  },
+  {
+   "movie": "hellraiser",
+   "memorable": "We had to hear it from his own lips -",
+   "non_memorable": "If he takes another step, we open his throat."
+  },
+  {
+   "movie": "superman",
+   "memorable": "My... mother lives in Hackensack.",
+   "non_memorable": "Will you save my mother first?"
+  },
+  {
+   "movie": "braveheart",
+   "memorable": "My son's loyal wife returns, unkilled by the heathen. So he accepted our bribe.",
+   "non_memorable": "We must sue for a truce, and buy him off."
+  },
+  {
+   "movie": "babel",
+   "memorable": "They look at us like we're monsters.",
+   "non_memorable": "Tell him I couldn't read his lips."
+  },
+  {
+   "movie": "gladiator",
+   "memorable": "What a Caesar you would have made.",
+   "non_memorable": "Well, pretend to be my loving daughter tonight and walk with me to my chamber."
+  },
+  {
+   "movie": "stir of echoes",
+   "memorable": "Look at him. Why doesn't he just lick them when they walk by?",
+   "non_memorable": "She thought she was gonna be a big movie star."
+  },
+  {
+   "movie": "brazil",
+   "memorable": "What have you done with his body?",
+   "non_memorable": "My husband's dead, isn't he?"
+  },
+  {
+   "movie": "godfather",
+   "memorable": "Paulie, pull over. I gotta take a leak.",
+   "non_memorable": "He's already thinking of going to the mattresses."
+  },
+  {
+   "movie": "hellbound hellraiser ii",
+   "memorable": "I recommend amputation.",
+   "non_memorable": "It's coming."
+  },
+  {
+   "movie": "house on haunted hill",
+   "memorable": "Not even for a million dollars, Mr. Price.",
+   "non_memorable": "Now we know how the guest list was made up."
+  },
+  {
+   "movie": "rambo: first blood part ii",
+   "memorable": "... Like you said, he went home.",
+   "non_memorable": "He's not to leave the base."
+  },
+  {
+   "movie": "a walk to remember",
+   "memorable": "'Yes.  You're beautiful.'",
+   "non_memorable": "I haven't been nice to you."
+  },
+  {
+   "movie": "king kong",
+   "memorable": "What are you, Mr. Driscoll, a lion or a chimpanzee?",
+   "non_memorable": "It isn't every woman who would take such a risk."
+  },
+  {
+   "movie": "king kong",
+   "memorable": "They're still trying to find a place for him to sleep.",
+   "non_memorable": "I hope you find it to your liking... it's quite comfortable."
+  },
+  {
+   "movie": "robin hood prince of thieves",
+   "memorable": "How did your uneducated kind ever take Jerusalem?",
+   "non_memorable": "You should not have left without me, Englishman."
+  },
+  {
+   "movie": "the proposal",
+   "memorable": "Larry Ferris! Don't make me call your mother!",
+   "non_memorable": "I need to go to the hospital."
+  },
+  {
+   "movie": "the abyss",
+   "memorable": "I'm coming. Keep your pantyhose on.",
+   "non_memorable": "What's going on?"
+  },
+  {
+   "movie": "ghost world",
+   "memorable": "God, I'm so sick of Seymour.",
+   "non_memorable": "It's a totally normal, average neighborhood!"
+  },
+  {
+   "movie": "meet joe black",
+   "memorable": "Got enough nice pictured, Easter.",
+   "non_memorable": "But I not lonely here."
+  },
+  {
+   "movie": "meet joe black",
+   "memorable": "I wish you could've known my father...",
+   "non_memorable": "We know all that we need to know --"
+  },
+  {
+   "movie": "rebel without a cause",
+   "memorable": "What does he know about Man alone?",
+   "non_memorable": "I guess I'm just no good?"
+  },
+  {
+   "movie": "tron",
+   "memorable": "Bring in the logic probe!!",
+   "non_memorable": "We'll get them, sir..."
+  },
+  {
+   "movie": "cold mountain",
+   "memorable": "Daddy, come inside before you drown!",
+   "non_memorable": "Is there a letter for me?"
+  },
+  {
+   "movie": "cold mountain",
+   "memorable": "So you never wrapped your legs around this Inman?",
+   "non_memorable": "We're careful we'll get through the winter now."
+  },
+  {
+   "movie": "cold mountain",
+   "memorable": "Let's put him in a pot.",
+   "non_memorable": "Is that a yes or a no?"
+  },
+  {
+   "movie": "unbreakable",
+   "memorable": "This is an art gallery my friend. This is piece of art...",
+   "non_memorable": "This is one of seventeen original drawings by Fritz Champion remaining in the world."
+  },
+  {
+   "movie": "the horse whisperer",
+   "memorable": "Who's going to want me now?",
+   "non_memorable": "Who's ever going to want me?"
+  },
+  {
+   "movie": "i am sam",
+   "memorable": "\"All you need is love.\"",
+   "non_memorable": "You wear too much perfume."
+  },
+  {
+   "movie": "the incredibles",
+   "memorable": "Someone needs to teach this hunk of metal a few manners.",
+   "non_memorable": "And I did it without your precious gifts, your oh-so-special powers."
+  },
+  {
+   "movie": "american history x",
+   "memorable": "People look at me...and they see my brother. That's how things have gone since the murder of our father.",
+   "non_memorable": "Little Henry Hastings and his older brother Jerome."
+  },
+  {
+   "movie": "american outlaws",
+   "memorable": "My professional opinion is that you have managed to piss off the wrong bunch of farm boys this time.",
+   "non_memorable": "Rumor has it they gave the sharecroppers of Maddox so much money they were able to build a school."
+  },
+  {
+   "movie": "godzilla",
+   "memorable": "The radiation is not an anomaly, it's the clue. This creature is far too unique on every level to be some lost dinosaur.",
+   "non_memorable": "Especially ones that test for catastrophic hormones or clomiphene citrate."
+  },
+  {
+   "movie": "an education",
+   "memorable": "David, I don't want to lose my virginity to a piece of fruit.",
+   "non_memorable": "And David..... if tomorrow night does happen, it will never happen again, so..."
+  },
+  {
+   "movie": "crying game",
+   "memorable": "Y'see, I'm not a young thing any longer.... Funny the way things go. Don't you find that, Jimmy? Never the way you expected.",
+   "non_memorable": "Don't want any of those looks, Col."
+  },
+  {
+   "movie": "an american werewolf in london",
+   "memorable": "Benjamin, have you ever been severely beaten about the face and neck?",
+   "non_memorable": "Listen, if you get too anxious, call me at the hospital, okay?"
+  },
+  {
+   "movie": "an american werewolf in london",
+   "memorable": "I will not be threatened by a walking meat loaf!",
+   "non_memorable": "It's all right, I know I'm being insane."
+  },
+  {
+   "movie": "jennifer's body",
+   "memorable": "Stop kidnapping my girlfriend!",
+   "non_memorable": "I'm not jello!"
+  },
+  {
+   "movie": "the hitchhiker's guide to the galaxy",
+   "memorable": "If there's anything more important than my ego on this ship, I want it caught and shot now.",
+   "non_memorable": "We've got the police of half the Galaxy after us and we stop to pick up hitchhikers?!"
+  },
+  {
+   "movie": "clerks",
+   "memorable": "Melodrama coming from you seems about as natural as an oral bowel movement.",
+   "non_memorable": "If you want Caitlin, then face Veronica, tell her, and be with Caitlin."
+  },
+  {
+   "movie": "high fidelity",
+   "memorable": "I never thought I would say this, but can I go work now?",
+   "non_memorable": "\"-- I haven't seen Evil Dead II yet,\" yeah, yeah, I hear you --"
+  },
+  {
+   "movie": "event horizon",
+   "memorable": "Everything green on my boards, Skipper.",
+   "non_memorable": "Uh, yeah Coop, I'm still here."
+  },
+  {
+   "movie": "rocknrolla",
+   "memorable": "Tried to poison me the dirty Cossack...",
+   "non_memorable": "That's why he came to me right?"
+  },
+  {
+   "movie": "peeping tom",
+   "memorable": "Take me to your cinema.",
+   "non_memorable": "What am I seeing, Mark?"
+  },
+  {
+   "movie": "the insider",
+   "memorable": "What does that have to do with the price of tea in China?",
+   "non_memorable": "And people like myself and my family are left hung out to dry."
+  },
+  {
+   "movie": "no country for old men",
+   "memorable": "Would you hold still please, sir.",
+   "non_memorable": "Is there something wrong with anything?"
+  },
+  {
+   "movie": "body heat",
+   "memorable": "There are some men, once they get a whiff of it, they'll trail you like a hound.",
+   "non_memorable": "And when Edmund came along when I saw a chance to stop struggling I took it."
+  },
+  {
+   "movie": "lost in space",
+   "memorable": "Sarcasm is the recourse of a weak mind.",
+   "non_memorable": "I shall not be caged like some animal"
+  },
+  {
+   "movie": "lost in space",
+   "memorable": "No more monkey business.",
+   "non_memorable": "The perfect nuclear family."
+  },
+  {
+   "movie": "lost in space",
+   "memorable": "If this in all a dream, why can't there be more girls?",
+   "non_memorable": "Once or twice more and we're going to be dead in space."
+  },
+  {
+   "movie": "sense and sensibility",
+   "memorable": "We were talking of London, ma'am, and all its--diversions.",
+   "non_memorable": "Edward and I have been secretly engaged these five years."
+  },
+  {
+   "movie": "the siege",
+   "memorable": "In this game, the most committed wins.",
+   "non_memorable": "His name is Sheik Ahmed bin Talal."
+  },
+  {
+   "movie": "cruel intentions",
+   "memorable": "Ronald, e-mail's for geeks and pedophiles. Be romantic. Write her another letter.",
+   "non_memorable": "I want to kiss you there."
+  },
+  {
+   "movie": "the jacket",
+   "memorable": "William Starks is dead... I've been to his grave.",
+   "non_memorable": "I looked it up."
+  },
+  {
+   "movie": "major league",
+   "memorable": "Forget the curveball. Go with the heater.",
+   "non_memorable": "I don't want Taylor takin' too many strikes."
+  },
+  {
+   "movie": "demolition man",
+   "memorable": "You are even better live than on laserdisc.  Oh, and the joyjoy way you paused to make a glib witticism before doing battle with that strangely-weaponed Scrap it was so, so...",
+   "non_memorable": "<u>All</u> restaurants are now Taco Bell."
+  },
+  {
+   "movie": "it's a wonderful life",
+   "memorable": "I feel like a bootlegger's wife. Look!",
+   "non_memorable": "Oh, why don't you go home?"
+  },
+  {
+   "movie": "ringu",
+   "memorable": "Tomo-chan told me to watch it.",
+   "non_memorable": "How was work, mommy?"
+  },
+  {
+   "movie": "rocky",
+   "memorable": "I wanna kiss ya -- Ya don't have to kiss me back if ya don't feel like it.",
+   "non_memorable": "Ain't skated since I was fifteen -- That's when I started fightin' -- gotta watch the ankles."
+  },
+  {
+   "movie": "rocky",
+   "memorable": "I wanna kill the friggin' moron who broke the mirror.",
+   "non_memorable": "She's gotta live a little before her body dries up!!"
+  },
+  {
+   "movie": "the departed",
+   "memorable": "I thought I was the liar.",
+   "non_memorable": "I can't be a friend to you."
+  },
+  {
+   "movie": "independence day",
+   "memorable": "A toast to the end of the world.",
+   "non_memorable": "All I did was stumble onto their signal."
+  },
+  {
+   "movie": "man in the iron mask",
+   "memorable": "If I find out the identity of this Jesuit rebel. I will kill both him and the man who told me.",
+   "non_memorable": "Come now, Athos, if Porthos is determined to end his life, then he will certainly manage to find the opportunity."
+  },
+  {
+   "movie": "friday the 13th",
+   "memorable": "What hath God wrought?",
+   "non_memorable": "The Indian used campfires."
+  },
+  {
+   "movie": "fear and loathing in las vegas",
+   "memorable": "You people voted for Hubert Humphrey! You killed Jesus!",
+   "non_memorable": "This foreign made crap -- is sucking our dollar balance dry!"
+  },
+  {
+   "movie": "galaxy quest",
+   "memorable": "I avoided capture using the Mak'tar stealth haze.  Where is everyone?",
+   "non_memorable": "I hope that I'm not breaching protocol but.."
+  },
+  {
+   "movie": "galaxy quest",
+   "memorable": "I see you managed to get your shirt off.",
+   "non_memorable": "Surely they could have fortified the compound against those creatures..."
+  },
+  {
+   "movie": "galaxy quest",
+   "memorable": "By Grabthar's hammer, what a savings.",
+   "non_memorable": "Oh good, there's nothing to eat."
+  },
+  {
+   "movie": "stepmom",
+   "memorable": "I'm sorry you're sick.",
+   "non_memorable": "I saw her in the shower!"
+  },
+  {
+   "movie": "the adventures of ford fairlane",
+   "memorable": "Hebedeebuh.  Hebedeebuh.  Maybe I did die in the explosion.",
+   "non_memorable": "Bottom line's Julian Grendel is doing a little revenge number..."
+  },
+  {
+   "movie": "star trek",
+   "memorable": "It appears you've been keeping rather important information from me.",
+   "non_memorable": "I am trained in the Vulcan martial art of Suus Mahna."
+  },
+  {
+   "movie": "indiana jones and the last crusade",
+   "memorable": "How does one get off this thing?",
+   "non_memorable": "The pen is mightier than the sword."
+  },
+  {
+   "movie": "indiana jones and the last crusade",
+   "memorable": "I'm like a bad penny. I always turn up.",
+   "non_memorable": "\"The Breath of God... Only the penitent man will pass."
+  },
+  {
+   "movie": "indiana jones and the last crusade",
+   "memorable": "My boy, we are Pilgrims in an unholy land.",
+   "non_memorable": "You know, sharing your adventures is an interesting experience."
+  },
+  {
+   "movie": "annie hall",
+   "memorable": "Honey, there's a spider in your bathroom the size of a Buick.",
+   "non_memorable": "Oh, look, look, there's that ... that's -that's my old house."
+  },
+  {
+   "movie": "jfk",
+   "memorable": "Clay Bertrand is Clay Shaw? The guy who used to run the International Trade Mart?",
+   "non_memorable": "What's the other name?"
+  },
+  {
+   "movie": "the crow city of angels",
+   "memorable": "\"Life is just a dream on the way to death.\" I like that.",
+   "non_memorable": "I just wish I understood what they were telling me."
+  },
+  {
+   "movie": "malcolm x",
+   "memorable": "A Muslim must be strikingly upright. Outstanding. So those in the darkness can see the power of the light.",
+   "non_memorable": "But you just another one of them cats strutting down the avenue in your clown suit with all that mess on you."
+  },
+  {
+   "movie": "something's gotta give",
+   "memorable": "These are for you to give me when you apologize.",
+   "non_memorable": "I think you can expect just about anything right now."
+  },
+  {
+   "movie": "sunset blvd",
+   "memorable": "Stars are ageless, aren't they?",
+   "non_memorable": "They're below, waiting for the Princess ..."
+  },
+  {
+   "movie": "the big lebowski",
+   "memorable": "Hey! This is a private residence, man!",
+   "non_memorable": "That gives me a very secure feeling."
+  },
+  {
+   "movie": "star trek: insurrection",
+   "memorable": "I kiss you and you say 'augh'?!",
+   "non_memorable": "Can I get back to you, Worf?"
+  },
+  {
+   "movie": "star trek: insurrection",
+   "memorable": "Straighten your baldric, Commander. On screen...",
+   "non_memorable": "And his friend."
+  },
+  {
+   "movie": "hackers",
+   "memorable": "Never fear. I is here.",
+   "non_memorable": "My name is the Plague."
+  },
+  {
+   "movie": "hackers",
+   "memorable": "Nah. I don't play well with others.",
+   "non_memorable": "It's cool, I'm just looking."
+  },
+  {
+   "movie": "runaway bride",
+   "memorable": "Cindy. Maggie's unmarried cousin.",
+   "non_memorable": "The Sunday School kids will be here soon."
+  },
+  {
+   "movie": "the princess bride",
+   "memorable": "I do not budge. Keep your \"Ho there.\"",
+   "non_memorable": "And this is where we got the job."
+  },
+  {
+   "movie": "village",
+   "memorable": "His will to live is very strong.",
+   "non_memorable": "I sent her because I trust her."
+  },
+  {
+   "movie": "village",
+   "memorable": "We came here to start anew. We are grateful for the time we have been given.",
+   "non_memorable": "What manner of spectacle has caught your attention so splendidly?"
+  },
+  {
+   "movie": "mystery men",
+   "memorable": "May the forks be with us!",
+   "non_memorable": "Not bad for a normal guy!"
+  },
+  {
+   "movie": "drop dead gorgeous",
+   "memorable": "You'd think they'd build the parking lot of America to go with the Mall of America!",
+   "non_memorable": "Well, you know, I think everyone's doing really well considering the fact that she was so young."
+  },
+  {
+   "movie": "the crow",
+   "memorable": "Victims. Aren't we all.",
+   "non_memorable": "The Day of the Dead..."
+  },
+  {
+   "movie": "the fisher king",
+   "memorable": "Two kids tried to set me on fire.",
+   "non_memorable": "I think you're a very nice... very nice psychotic man."
+  },
+  {
+   "movie": "human nature",
+   "memorable": "Apes don't assassinate their presidents, gentlemen.",
+   "non_memorable": "I had never seen anything like it."
+  },
+  {
+   "movie": "sherlock holmes",
+   "memorable": "He was conceived during one of our rituals. His mother wasn't my wife, but she shared our beliefs. She was a powerful practitioner. Though not enough to survive giving birth to him.",
+   "non_memorable": "What family he had tended to... not survive."
+  },
+  {
+   "movie": "brick",
+   "memorable": "No. I gave you Jerr to see him eaten, not to see you fed.",
+   "non_memorable": "I'm 9 of 10 that Kara's got him, but who knows where."
+  },
+  {
+   "movie": "pi",
+   "memorable": "Who!? Those Wall Street bastards.",
+   "non_memorable": "He's okay, he got in his cab."
+  },
+  {
+   "movie": "the rock",
+   "memorable": "Careful. The second you don't respect this, it kills you.",
+   "non_memorable": "I've got some questions for you but they can wait."
+  },
+  {
+   "movie": "life",
+   "memorable": "You just committed suicide, boy.",
+   "non_memorable": "What do we have here?"
+  },
+  {
+   "movie": "american beauty",
+   "memorable": "Oh, no. I understand completely. In order to be successful, one must project an image of success. At all times.",
+   "non_memorable": "I think we deserve a little junk food, after the workout we had this morning."
+  },
+  {
+   "movie": "american beauty",
+   "memorable": "Welcome to America's Weirdest Home Videos.",
+   "non_memorable": "I go to school with your daughter."
+  },
+  {
+   "movie": "american beauty",
+   "memorable": "I know you think my dad's harmless, but you're wrong. He's doing massive psychological damage to me.",
+   "non_memorable": "Why, so I could see what freaks you and Dad really are?"
+  },
+  {
+   "movie": "fight club",
+   "memorable": "His name is Robert Paulson.",
+   "non_memorable": "A piece of corporate art..."
+  },
+  {
+   "movie": "fight club",
+   "memorable": "When you have insomnia, you're never really asleep and you're never really awake. I hadn't slept in four days...",
+   "non_memorable": "Between take-off and landing, we have our time together, but that's all we get."
+  },
+  {
+   "movie": "fight club",
+   "memorable": "Strangers with this kind of honesty make me go a big rubbery one.",
+   "non_memorable": "-- But, in here, in everyone, there's the squint of a five-day headache."
+  },
+  {
+   "movie": "fight club",
+   "memorable": "If I didn't say anything, people assumed the worst. They cried harder. I cried harder.",
+   "non_memorable": "Okay, in the Sylvia Plath philosophy way, we're all dying."
+  },
+  {
+   "movie": "fight club",
+   "memorable": "I am Jack's Cold Sweat.",
+   "non_memorable": "... and you come home to this."
+  },
+  {
+   "movie": "fight club",
+   "memorable": "The things you own, they end up owning you.",
+   "non_memorable": "We're on our third pitcher of beer."
+  },
+  {
+   "movie": "star wars: episode vi - return of the jedi",
+   "memorable": "I have a really bad feeling about this.",
+   "non_memorable": "Well, I suppose I could hotwire this thing."
+  },
+  {
+   "movie": "star wars: episode vi - return of the jedi",
+   "memorable": "What's that? I know that laugh.",
+   "non_memorable": "It's not my fault."
+  },
+  {
+   "movie": "xxx",
+   "memorable": "Nothing like fresh powder.",
+   "non_memorable": "Army of bad guys."
+  },
+  {
+   "movie": "the usual suspects",
+   "memorable": "How do I know that? How about it, pretzel-man? What's your story?",
+   "non_memorable": "She could erase Dillinger's record if she tried."
+  },
+  {
+   "movie": "the usual suspects",
+   "memorable": "You tell me, Agent Kujan. If I told you the Loch Ness Monster hired me to hit the harbor, what would you say?",
+   "non_memorable": "The quartet was in my file, along with every other thing I had done since high school, see?"
+  },
+  {
+   "movie": "heavenly creatures",
+   "memorable": "It's a three-act story with a tragic end.",
+   "non_memorable": "I have worked out a little more of our plan."
+  },
+  {
+   "movie": "x-men",
+   "memorable": "Welcome to the future... brother.",
+   "non_memorable": "You're among friends."
+  },
+  {
+   "movie": "shallow grave",
+   "memorable": "Love and happiness for ever.",
+   "non_memorable": "Now this is what we need."
+  },
+  {
+   "movie": "henry fool",
+   "memorable": "I learn so much from these magazines, Mr Deng. I refuse to discriminate between modes of knowing.",
+   "non_memorable": "No, but it's OK. Simon's gunna try to get me a job on the garbage truck."
+  },
+  {
+   "movie": "the shawshank redemption",
+   "memorable": "Every man's got a breaking point.",
+   "non_memorable": "Like to scare me to death, somethin' that big."
+  },
+  {
+   "movie": "the shawshank redemption",
+   "memorable": "I like to think the last thing that went through his head...other than that bullet...was to wonder how the hell Andy Dufresne ever got the best of him.",
+   "non_memorable": "...wound up sitting in a row at ten o'clock in the morning, drinking icy cold Black Label beer courtesy of the hardest screw that ever walked a turn at Shawshank State Prison."
+  },
+  {
+   "movie": "i still know what you did last summer",
+   "memorable": "Cancer in a box.",
+   "non_memorable": "Oh, God, get me out."
+  },
+  {
+   "movie": "the sixth sense",
+   "memorable": "I want to tell you my secret now.",
+   "non_memorable": "You have to add some twists and stuff."
+  },
+  {
+   "movie": "the sixth sense",
+   "memorable": "...De profundis clamo ad te domine.",
+   "non_memorable": "Grandma comes to visit me sometimes."
+  },
+  {
+   "movie": "the sixth sense",
+   "memorable": "I didn't know you were funny.",
+   "non_memorable": "You haven't told bedtime stories before?"
+  },
+  {
+   "movie": "bonfire of the vanities",
+   "memorable": "Maria, you are incorrigible.",
+   "non_memorable": "I'm upset, Maria."
+  },
+  {
+   "movie": "blade runner",
+   "memorable": "I'm an investigator for the Confidential Committee on Moral Abuses.",
+   "non_memorable": "It was something I didn't want to think about."
+  },
+  {
+   "movie": "terminator",
+   "memorable": "Come with me if you want to live.",
+   "non_memorable": "Don't make a sound unless I say."
+  },
+  {
+   "movie": "goodfellas",
+   "memorable": "As far back as I can remember, I always wanted to be a gangster.",
+   "non_memorable": "To me, being a gangster was better than being President of the United States."
+  },
+  {
+   "movie": "buffy the vampire slayer",
+   "memorable": "I got detention slips here, I'm not afraid to use them...",
+   "non_memorable": "Well, you know, there's more to most people than meets the eye."
+  },
+  {
+   "movie": "friday the 13th part iii",
+   "memorable": "Hey!  The van's on fire!",
+   "non_memorable": "I hate when you do that."
+  },
+  {
+   "movie": "coraline",
+   "memorable": "So sharp you won't feel a thing...",
+   "non_memorable": "Well, everything's right in this world, Kiddo."
+  },
+  {
+   "movie": "the queen",
+   "memorable": "Hurry up, dear. Getting cold.",
+   "non_memorable": "A lot of slamming doors."
+  },
+  {
+   "movie": "the rocky horror picture show",
+   "memorable": "I'm just a sweet Transvestite From Transexual Transylvania.",
+   "non_memorable": "I'm just a sweet transvestite From Transexual Transylvania."
+  },
+  {
+   "movie": "blade trinity",
+   "memorable": "Are you ready to die, Blade?",
+   "non_memorable": "Wouldn't you accept that gift?"
+  },
+  {
+   "movie": "reindeer games",
+   "memorable": "I had better sex in prison.",
+   "non_memorable": "She says a lot of things."
+  },
+  {
+   "movie": "star trek: the wrath of khan",
+   "memorable": "Are you out of your Vulcan mind? No human can tolerate the radiation loose in there!",
+   "non_memorable": "It's like the Garden of Eden..."
+  },
+  {
+   "movie": "star trek: the wrath of khan",
+   "memorable": "Who's been holding up the damn elevator?",
+   "non_memorable": "What about the rest of the inspection, Admiral?"
+  },
+  {
+   "movie": "the kingdom",
+   "memorable": "I don't like camels.",
+   "non_memorable": "How could they get more secure?"
+  },
+  {
+   "movie": "swordfish",
+   "memorable": "For someone the N.S.A. has listed as the most dangerous hacker in America, you sure don't look like much.",
+   "non_memorable": "How much would it cost to retain the best family lawyer in the country and regain custody of your daughter?"
+  },
+  {
+   "movie": "heathers",
+   "memorable": "Dear Diary, my teen angst bullshit has a body count.",
+   "non_memorable": "Suicide gave Heather depth, Kurt a soul, Ram a brain."
+  },
+  {
+   "movie": "heathers",
+   "memorable": "It's one thing to want somebody out of your life. It's another thing to serve them a wake-up cup of Drano.",
+   "non_memorable": "All we want is to be treated like human beings, not like guinea pigs to be experimented on and not like bunny rabbits to be patronized."
+  },
+  {
+   "movie": "american psycho",
+   "memorable": "I have to return some videotapes.",
+   "non_memorable": "Not in the mood, I guess."
+  },
+  {
+   "movie": "american psycho",
+   "memorable": "You're not confused, are you?",
+   "non_memorable": "So...it was hot out today, no?"
+  },
+  {
+   "movie": "orgy of the dead",
+   "memorable": "A pussycat is born to be whipped.",
+   "non_memorable": "The night things are all about me."
+  },
+  {
+   "movie": "the last of the mohicans",
+   "memorable": "Major! Some day I think you and I are gonna have a serious disagreement.",
+   "non_memorable": "While it is their women and children, not yours, alone in their farms!"
+  },
+  {
+   "movie": "gran torino",
+   "memorable": "Kill you to buy American.",
+   "non_memorable": "This used to be a nice neighborhood."
+  },
+  {
+   "movie": "as good as it gets",
+   "memorable": "Have you ever let a romantic moment make you do something you know is stupid?",
+   "non_memorable": "Hey... this is just a little throw- up -- it's nothing to be so embarrassed about."
+  },
+  {
+   "movie": "bad santa",
+   "memorable": "Sweet Jews for Jesus...",
+   "non_memorable": "This is pricks ficks."
+  },
+  {
+   "movie": "bad santa",
+   "memorable": "Daddy got a safe?",
+   "non_memorable": "...No aunts, no uncles, no cousins?"
+  },
+  {
+   "movie": "bad santa",
+   "memorable": "Should I fix you some sandwiches?",
+   "non_memorable": "You goin' to work today?"
+  },
+  {
+   "movie": "v for vendetta",
+   "memorable": "England prevails, Mr. Finch.",
+   "non_memorable": "He knows what he's doing, Finch."
+  },
+  {
+   "movie": "contact",
+   "memorable": "Good morning, Dr. Arroway.",
+   "non_memorable": "There may be an unforeseen mechanical failure."
+  },
+  {
+   "movie": "tombstone",
+   "memorable": "Forgive me if I don't shake hands.",
+   "non_memorable": "Oh sorry, Johnny, I forgot all About you."
+  },
+  {
+   "movie": "some like it hot",
+   "memorable": "How about the shape of that liquor cabinet?",
+   "non_memorable": "I just think us girls should stick together."
+  },
+  {
+   "movie": "the relic",
+   "memorable": "Somebody tell me! Where is it now?",
+   "non_memorable": "Why don't you just tell me how this space station works."
+  },
+  {
+   "movie": "the third man",
+   "memorable": "A person doesn't change because you find out more.",
+   "non_memorable": "If we have to see the Porter we'd better go."
+  },
+  {
+   "movie": "raising arizona",
+   "memorable": "Come on Hi. you're young, you got your health - what do you want with a job?",
+   "non_memorable": "Supposin' we get killed in there - it could be hours before he's discovered."
+  },
+  {
+   "movie": "the other boleyn girl",
+   "memorable": "hen was it that people stopped thinking of ambition as a sin, and started thinking of it as a virtue?",
+   "non_memorable": "I'm a mother with one child on his wedding day looking like he's been condemned to death."
+  },
+  {
+   "movie": "lost horizon",
+   "memorable": "Don't you ever want to see what's on the other side of the hill?",
+   "non_memorable": "Then when the enemy approaches we'll say, \"Come in, gentlemen - what can we do for you?"
+  },
+  {
+   "movie": "blow",
+   "memorable": "You failed because you had the wrong dream.",
+   "non_memorable": "Cut it a few times and retail, you're looking at two, three-hundred thousand."
+  },
+  {
+   "movie": "double indemnity",
+   "memorable": "Hello there, Mr. Neff.",
+   "non_memorable": "I say it's rheumatism."
+  },
+  {
+   "movie": "newsies",
+   "memorable": "You shouldn't be callin' people ugly little shrimps. Oscar. Unless you're referrin; to the family resemblance in your brother here.",
+   "non_memorable": "Prove what the big shots say is true -- we're street rats with no brains and no respect for nothin' -- includin' ourselves!"
+  },
+  {
+   "movie": "tall in the saddle",
+   "memorable": "Oh boy -- has somebody come to town!",
+   "non_memorable": "George Clews is in town."
+  },
+  {
+   "movie": "bad day at black rock",
+   "memorable": "Tim, you're a lost ball in the high weeds. I told you a long time ago, nothing happened for you to worry about.",
+   "non_memorable": "You don't know anything about Komako, now do you, Tim?"
+  },
+  {
+   "movie": "rushmore",
+   "memorable": "She's still in love with the dead guy, anyway.",
+   "non_memorable": "Because I haven't seen her in six weeks."
+  },
+  {
+   "movie": "rushmore",
+   "memorable": "Yeah? Well, kids don't like their parents to get divorced.",
+   "non_memorable": "Let's just hope it's got a happy ending."
+  },
+  {
+   "movie": "big",
+   "memorable": "Have a pleasant stay....Hey Angel! Get out of that bathroom now!",
+   "non_memorable": "It's the last door on the right."
+  },
+  {
+   "movie": "jerry maguire",
+   "memorable": "Go ahead. Jump right on into my nightmare. The water's warm.",
+   "non_memorable": "-- \"I'll be out there cheering for you."
+  },
+  {
+   "movie": "jerry maguire",
+   "memorable": "Sorry about this hand. You know that feeling -- you're not completely embarrassed yet, but you glimpe tomorrow's embarrassment?",
+   "non_memorable": "Tell me, because it's been a month, and she's about to take another job in San Diego."
+  },
+  {
+   "movie": "pineapple express",
+   "memorable": "Has anyone seen my bigger knife? Do you guys hear that?",
+   "non_memorable": "We should have this under control."
+  },
+  {
+   "movie": "the doors",
+   "memorable": "Actually, I don't really remember being born. It musta happened during one of my blackouts.",
+   "non_memorable": "Did you know Nietzsche said, \"all good consciousness, all evidence of truth comes only from the senses\"?"
+  },
+  {
+   "movie": "avatar",
+   "memorable": "I may not be much of a horse guy. But I was born to do this.",
+   "non_memorable": "It's hard to put in words the deep connection the People have to the forest."
+  },
+  {
+   "movie": "avatar",
+   "memorable": "Level out! Fly straight!",
+   "non_memorable": "The People call it Toruk."
+  },
+  {
+   "movie": "avatar",
+   "memorable": "I need to take some samples.",
+   "non_memorable": "Forget it, it doesn't matter."
+  },
+  {
+   "movie": "eastern promises",
+   "memorable": "Kirill, a vor doesn't kill little babies.",
+   "non_memorable": "Your dad has gone too far, Kirill."
+  },
+  {
+   "movie": "changeling",
+   "memorable": "It's raining cats, dogs and democrats out there, so this better be worth it.",
+   "non_memorable": "You can't just stay in the U.S. as long as you want, pal."
+  },
+  {
+   "movie": "o brother, where art thou?",
+   "memorable": "Do not seek the treasure! It's a bushwhack!",
+   "non_memorable": "I know we're kin!"
+  },
+  {
+   "movie": "election",
+   "memorable": "I sure was surprised the day Lisa Flanagan asked me for a ride home and ended up blowing me.",
+   "non_memorable": "First Lisa has a big fight with my sister, and the next thing you know she's my girlfriend."
+  },
+  {
+   "movie": "the hangover",
+   "memorable": "Well then...to a night we'll never forget.",
+   "non_memorable": "That said, let's not get too stupid tonight, okay?"
+  },
+  {
+   "movie": "revolutionary road",
+   "memorable": "It takes backbone to lead the life you want, Frank.",
+   "non_memorable": "And what do you think you're going to do?"
+  },
+  {
+   "movie": "dark star",
+   "memorable": "So don't give me any of that sentient life crap. Find me something I can blow up.",
+   "non_memorable": "I can remember running out on the beach early spring mornings with my board and a wet suit..."
+  },
+  {
+   "movie": "bones",
+   "memorable": "Nothing but a wide world o' pain locked in there.",
+   "non_memorable": "Cause I don't forgive you, I don't forgive you for dying."
+  },
+  {
+   "movie": "the elephant man",
+   "memorable": "People are often frightened by what they don't understand.",
+   "non_memorable": "They pray, grant thou, lest faith turn to despair."
+  },
+  {
+   "movie": "juno",
+   "memorable": "Yes, hello, I need to procure a hasty abortion?... What was that? I'm sorry, I'm on my hamburger phone and it's kind of awkward to talk on. It's really more of a novelty than a functional appliance.",
+   "non_memorable": "I'm kind of a deadbeat lab partner, huh?"
+  },
+  {
+   "movie": "juno",
+   "memorable": "I never realize how much I like being home unless I've been somewhere really different for a while.",
+   "non_memorable": "Listen, once I have the baby, Vanessa is going to finally be happy, and everything will be all right."
+  },
+  {
+   "movie": "superman iv: the quest for peace",
+   "memorable": "Oh, yeah, you never could hit a curve ball.",
+   "non_memorable": "Be careful in that big City, Clark."
+  },
+  {
+   "movie": "moon",
+   "memorable": "Sam, I can only account for what occurs on the base.",
+   "non_memorable": "Sam, I can only account for what occurs on the base."
+  },
+  {
+   "movie": "his girl friday",
+   "memorable": "Listen, you bumble-headed baboon --",
+   "non_memorable": "I'm not working for any other paper!"
+  },
+  {
+   "movie": "life as a house",
+   "memorable": "I'm not even listening.",
+   "non_memorable": "I was holding for someone."
+  },
+  {
+   "movie": "life as a house",
+   "memorable": "Why can't you all just die and leave me alone!",
+   "non_memorable": "Would you like to help us finish the house, Mr. Dokos?"
+  },
+  {
+   "movie": "grand theft parsons",
+   "memorable": "We'll be moving on, now that your sign no longer appears to be impeding our forward progress.",
+   "non_memorable": "Well, I think we should just make our delivery as soon as possible, don't you?"
+  },
+  {
+   "movie": "logan's run",
+   "memorable": "Fish and plankton, sea greens and protein from the sea. It's all here - ready - fresh as harvest day. Fish and plankton, sea greens and protein from the sea...And then it stopped coming and they came instead. So I store them here. I'm ready. And you're ready. It's my Job - protein, plankton, grass from the sea",
+   "non_memorable": "Regular storage procedure...the same as the other food..."
+  },
+  {
+   "movie": "broadcast news",
+   "memorable": "Because we have the kind of relationship where if I were the Devil, you'd be the only one I told.",
+   "non_memorable": "Five, six years from now I'll be in town to collect an award representing the surge in foreign coverage by local stations."
+  },
+  {
+   "movie": "a nightmare on elm street 4: the dream master",
+   "memorable": "How's this for a wet dream?",
+   "non_memorable": "Hari-kari to you and your balance, boy."
+  },
+  {
+   "movie": "godfather part ii",
+   "memorable": "Terrible. I'd give twice this amount to take a piss without it hurting.",
+   "non_memorable": "When I wake up, if it's still there, I'll know I have a partner."
+  },
+  {
+   "movie": "quills",
+   "memorable": "I love you, Madeleine, as a parishioner -- as a child of God --",
+   "non_memorable": "I've good news; I hope you'll agree."
+  },
+  {
+   "movie": "quills",
+   "memorable": "He's a writer, not a madman.",
+   "non_memorable": "No one's forcing you to listen."
+  },
+  {
+   "movie": "quills",
+   "memorable": "You've already stolen my heart, as well as another more prominent organ, south of the Equator...",
+   "non_memorable": "We held a mirror up to the Doctor, and -- apparently -- he didn't like what he saw."
+  },
+  {
+   "movie": "monty python and the holy grail",
+   "memorable": "What a strange person.",
+   "non_memorable": "Perhaps he was dictating."
+  },
+  {
+   "movie": "trainspotting",
+   "memorable": "We called him the mother superior on account of the length of his habit. He knew all about it. On it, off it, he knew it all. Of course I'd have another shot: after all, I had work to do.",
+   "non_memorable": "The debating society, the first eleven, the soft know of willow on leather --"
+  },
+  {
+   "movie": "kung fu panda",
+   "memorable": "Well done, students... if you were trying to disappoint me.",
+   "non_memorable": "It is as Oogway foretold -- You are the Dragon Warrior."
+  },
+  {
+   "movie": "kung fu panda",
+   "memorable": "The scroll has given him power.",
+   "non_memorable": "Tell me how proud you are, Shifu!"
+  },
+  {
+   "movie": "nixon",
+   "memorable": "I never thought Jack was ready for the presidency.  But I would never, never consider ...  His death was awful, an awful thing for this country.  Do you ever think of death, Mr. Helms?",
+   "non_memorable": "Did you see the look on Hoover's face?"
+  },
+  {
+   "movie": "nixon",
+   "memorable": "... if I'd been president, they never would have killed me.",
+   "non_memorable": "Don't worry -- I'll use the old Nixon charm on her."
+  },
+  {
+   "movie": "real genius",
+   "memorable": "Welcome to Pacific Tech's \"Smart People On Ice.\"",
+   "non_memorable": "You didn't straighten the place up, did you?"
+  },
+  {
+   "movie": "aliens",
+   "memorable": "Maybe we got 'em demoralized.",
+   "non_memorable": "With those things running around."
+  },
+  {
+   "movie": "bound",
+   "memorable": "We make our own choices, we pay our own prices.",
+   "non_memorable": "Thanks, Mickey, but I need to get out, you know?"
+  },
+  {
+   "movie": "bound",
+   "memorable": "Try not to steal anything on the way out.",
+   "non_memorable": "He saw me in a bar with another woman."
+  },
+  {
+   "movie": "vanilla sky",
+   "memorable": "I'm not blowing you off! I just want to be alone for a little bit. Trust me - I have a lot of things I gotta take care of. If we're friends, which we are, you'll understand.",
+   "non_memorable": "You're right on the money, Julie."
+  },
+  {
+   "movie": "vanilla sky",
+   "memorable": "I good you bid evening. Sofialooks at her watch, and the situation.",
+   "non_memorable": "I won't allow it!"
+  },
+  {
+   "movie": "inglourious basterds",
+   "memorable": "So I'm gonna give you a little somethin you can't take off.",
+   "non_memorable": "Just try puttin a bag over his head, and hear what kinda sounds he makes."
+  },
+  {
+   "movie": "the x files",
+   "memorable": "I don't believe the FBI currently has an investigation unit qualified to pursue the evidence in hand.",
+   "non_memorable": "These are fossilized bone fragments I've been able to study, gathered from the bomb site in Dallas..."
+  },
+  {
+   "movie": "star trek iv: the voyage home",
+   "memorable": "May fortune favor the foolish.  Mr. Sulu, Warp Speed!",
+   "non_memorable": "Mr. Chekov, engage cloaking device!"
+  },
+  {
+   "movie": "the brothers bloom",
+   "memorable": "That's my new favorite camel.",
+   "non_memorable": "I want to show you something."
+  },
+  {
+   "movie": "the brothers bloom",
+   "memorable": "You're the only audience I've ever needed.",
+   "non_memorable": "Let's get the hell out of Russia."
+  },
+  {
+   "movie": "philadelphia",
+   "memorable": "Forget everything you've seen on TV, and in the movies...",
+   "non_memorable": "You are presented with a simple fact: Andrew Beckett was fired."
+  },
+  {
+   "movie": "the thin man",
+   "memorable": "What's that man doing in my drawers?",
+   "non_memorable": "He's got more sense than you have."
+  },
+  {
+   "movie": "from dusk till dawn",
+   "memorable": "I swear to God, in Jesus Christ's name.",
+   "non_memorable": "If you don't tell the cops, I will."
+  },
+  {
+   "movie": "from dusk till dawn",
+   "memorable": "Fight now, cry later.",
+   "non_memorable": "Bash the door in!"
+  },
+  {
+   "movie": "bonnie and clyde",
+   "memorable": "I mean there's nothin' wrong with me, I don't like boys.",
+   "non_memorable": "We could drive all night and be on that golf course tomorrow morning!"
+  },
+  {
+   "movie": "thelma & louise",
+   "memorable": "Come on, Louise. Don't blow it. Let's go.",
+   "non_memorable": "No, Louise, you said the first part."
+  },
+  {
+   "movie": "gattaca",
+   "memorable": "Is that the only way you can succeed, Anton, to see me fail?",
+   "non_memorable": "God, even you want to tell me what I can't do."
+  },
+  {
+   "movie": "moonstruck",
+   "memorable": "Somebody tell a joke!",
+   "non_memorable": "I've said it."
+  },
+  {
+   "movie": "crank",
+   "memorable": "If you stop, you die.",
+   "non_memorable": "Well, that's a start."
+  },
+  {
+   "movie": "scream",
+   "memorable": "Billy and his penis don't deserve you.",
+   "non_memorable": "Grant Goodeve--the oldest brother on EIGHT IS ENOUGH."
+  },
+  {
+   "movie": "scream",
+   "memorable": "\"We all go a little mad sometimes.\"",
+   "non_memorable": "Yeah...and when I called no one answered."
+  },
+  {
+   "movie": "inventing the abbotts",
+   "memorable": "Doug, you do understand that you may be the only person at this party with artificial sideburns?",
+   "non_memorable": "Well, just the same, I'd prefer it if you'd smoke in the backyard."
+  },
+  {
+   "movie": "batman returns",
+   "memorable": "Maybe this is a bad time to mention it, but my license has expired. Of course, so have you.",
+   "non_memorable": "Actually it's not so bad down there, I miss the drip, drip, drip ..."
+  },
+  {
+   "movie": "batman returns",
+   "memorable": "Sorry.  I mistook me for somebody else.",
+   "non_memorable": "Not compared to that \"Cobblepot\" person you're promoting..."
+  },
+  {
+   "movie": "batman returns",
+   "memorable": "It's our secret.  Honest.  How can you be so mean to someone so meaningless?",
+   "non_memorable": "Intimidate me, bully me if it makes you feel big."
+  },
+  {
+   "movie": "big fish",
+   "memorable": "He's almost a stranger and I prefer him to you.",
+   "non_memorable": "I don't suppose one of us could stay with him."
+  },
+  {
+   "movie": "big fish",
+   "memorable": "Sandra Templeton! I love you! And I am going to marry you!",
+   "non_memorable": "Fate has a cruel way of circling around on you."
+  },
+  {
+   "movie": "big fish",
+   "memorable": "I don't think I'll ever dry out.",
+   "non_memorable": "Not everything your father says is a complete fabrication."
+  },
+  {
+   "movie": "the curious case of benjamin button",
+   "memorable": "I don't know... I'm always looking out of my own eyes...",
+   "non_memorable": "Will you still love me when I have pimples."
+  },
+  {
+   "movie": "lord of illusions",
+   "memorable": "Are you ready for my wisdom?",
+   "non_memorable": "Something terrible's going to happen."
+  },
+  {
+   "movie": "precious",
+   "memorable": "He looks just like you.",
+   "non_memorable": "Who's gonna read it?"
+  },
+  {
+   "movie": "midnight cowboy",
+   "memorable": "The two basic items necessary to sustain life are sunshine and coconut milk. That's a known fact. If I can find the goddam hole the milk squirts out.",
+   "non_memorable": "They lie out in their pagodas and pergolas waiting to grab the first jockstrap that passes."
+  },
+  {
+   "movie": "the ice storm",
+   "memorable": "I'll show you mine if you show me yours.",
+   "non_memorable": "They need the money for my band uniform at school."
+  },
+  {
+   "movie": "ninja assassin",
+   "memorable": "Weakness compels strength. Betrayal begets blood. This is the way of the Nine Clans. This is the way of the Ninja.",
+   "non_memorable": "You will suffer for seven days, one day for each year you defied me."
+  },
+  {
+   "movie": "donnie brasco",
+   "memorable": "Anything happens, make sure Louise gets the Cadillac.",
+   "non_memorable": "Ah, he's a stone degenerate, he's coked-up half the time."
+  },
+  {
+   "movie": "pet sematary",
+   "memorable": "Go on. Lie down. Play dead. Be dead.",
+   "non_memorable": "Come on, you guys--before you miss the boat."
+  },
+  {
+   "movie": "the producers",
+   "memorable": "\"SPRINGTIME FOR HITLER, A Gay Romp with Adolph and Eva in Berchtesgarten.\"  Fantastic!",
+   "non_memorable": "Max, as I was saying, maybe we should go easy on the spending."
+  },
+  {
+   "movie": "meet john doe",
+   "memorable": "Tear down all the fences. Why, if you tore one picket off of your neighbor's fence he'd sue you!",
+   "non_memorable": "You know we were headed for the Columbia River country before all this John Doe business came up."
+  },
+  {
+   "movie": "the limey",
+   "memorable": "If you could afford a house like this you would buy a house like this.",
+   "non_memorable": "I mean, sure, she would smoke a little grass, or something, have a few drinks."
+  },
+  {
+   "movie": "the avengers",
+   "memorable": "For you, Mrs. Peel.",
+   "non_memorable": "I can't wait to see afternoon."
+  },
+  {
+   "movie": "a nightmare on elm street",
+   "memorable": "Okay, Krueger, you bastard. We play in your court.",
+   "non_memorable": "You know he's dead though, right?"
+  },
+  {
+   "movie": "final destination 2",
+   "memorable": "But we're all going to die. We can't stop it. It's just a matter of time. I'm so scared.",
+   "non_memorable": "They're next on the list."
+  },
+  {
+   "movie": "you've got mail",
+   "memorable": "Don't you love New York in the fall?",
+   "non_memorable": "And you're late today -- I could have gotten another."
+  },
+  {
+   "movie": "edward scissorhands",
+   "memorable": "One chop to guy's neck. And it's all over. They're the sharpest things in the world. They can hack through anything. And...",
+   "non_memorable": "This kid brought in a box of baby possums, 10. maybe 12."
+  },
+  {
+   "movie": "the hudsucker proxy",
+   "memorable": "Aw, please, sir -- this job, it's all I got!",
+   "non_memorable": "...and it's been a pleasure serving you too, uh... buddy."
+  },
+  {
+   "movie": "the hudsucker proxy",
+   "memorable": "Ah guess ole Moses knows jes about ever'thing, leastways if it concerns Hudsuckuh.",
+   "non_memorable": "Yeah, he's a smart one, that Norville, heh-heh, he's a caution."
+  },
+  {
+   "movie": "elizabeth the golden age",
+   "memorable": "The puddle man is outside, majesty.",
+   "non_memorable": "I beg your majesty's forgiveness."
+  },
+  {
+   "movie": "smokin' aces",
+   "memorable": "Oh hell yeah. We's just in the wrong place at the wrong time. So don't feel so bad dude.",
+   "non_memorable": "and your car and me and my brothers were wanted by the law, I woulda killed you to get 'em too."
+  },
+  {
+   "movie": "serial mom",
+   "memorable": "Oh God! Now I'll never get a boyfriend!",
+   "non_memorable": "I don't know...maybe Mom's nuts!"
+  },
+  {
+   "movie": "serial mom",
+   "memorable": "Dr. Sutphin, is you wife mental?",
+   "non_memorable": "Contrusions...fractures... rupture of numerous vital organs..."
+  },
+  {
+   "movie": "charlie's angels",
+   "memorable": "Do you have any idea how difficult it is to find a quality man in Los Angeles?",
+   "non_memorable": "But Bosley, you HATE sports, why would you... You didn't buy them for yourself."
+  },
+  {
+   "movie": "backdraft",
+   "memorable": "These high-rise gigs give me the creeps.",
+   "non_memorable": "Whadda we gonna do about this?"
+  },
+  {
+   "movie": "rear window",
+   "memorable": "You haven't spent much time in cemeteries, have you? Mr. Thorwald could hardly put his wife into a plot of ground scarcely one foot square.",
+   "non_memorable": "Now just where do you suppose he cut her up?"
+  },
+  {
+   "movie": "mission impossible ii",
+   "memorable": "The satellite doesn't work as fast as I do.",
+   "non_memorable": "..then Cambridge..Harvard..entrepreneurial efforts..in efforts..in 1989, acquired Biocyte in hostile takeover.."
+  },
+  {
+   "movie": "death to smoochy",
+   "memorable": "Okey doke. I'm gonna go get drunk now.",
+   "non_memorable": "I love when you do the Jiggy Ziggy dance!"
+  },
+  {
+   "movie": "the world is not enough",
+   "memorable": "She's waiting for you.",
+   "non_memorable": "I love Christmas in Turkey."
+  },
+  {
+   "movie": "sex, lies and videotape",
+   "memorable": "Have you ever been on television?",
+   "non_memorable": "Oh, you mean to bring in!"
+  }
+ ]
+}

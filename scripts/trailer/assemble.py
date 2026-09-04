@@ -6,20 +6,45 @@ import json
 import sys
 from collections import Counter
 from pathlib import Path
+from typing import Callable
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 
 from studio.sfx import impact, sub_drop
 from studio.trailer_assemble import (card_fits, clip_seconds, concat, extract,
-                                     grade_to, luma_stats, mix, segment_start,
-                                     title_card_ass)
+                                     grade_to, line_windows, luma_stats,
+                                     mix_with_lines, segment_start, title_card_ass)
 from studio.trailer_cut import FINAL_HOLD, is_uniform
+from studio.trailer_stage_spec import VoiceLine
 
 ROOT = Path(__file__).resolve().parents[2]
 
 
+Resolver = Callable[[str, int, float, list[str]], str]
+"""(beat_id, shot order, shot seconds, takes on disk) -> the take the shot uses."""
+
+
+def neighbouring_take(beat_id: str, order: int, seconds: float, have: list[str]) -> str:
+    """The beat's own take, or a stand-in chosen deterministically."""
+    return beat_id if beat_id in have else have[order % len(have)]
+
+
+def spoken_lines(plan: dict, out: Path) -> list[tuple[float, Path]]:
+    """The voice step's lines at their planned windows; nothing when the step
+    has not run, so a trailer built before step 05 exists is the old mix."""
+    voice = out / "voice.json"
+    if not voice.exists():
+        return []
+    lines = [VoiceLine.model_validate(v) for v in json.loads(voice.read_text(encoding="utf-8"))]
+    return line_windows(plan, lines, out.parents[1])
+
+
 def build(book_glob: str, trailer_id: str = "main") -> Path:
     book = next(p for p in (ROOT / "library").iterdir() if p.name.startswith(book_glob))
+    return build_at(book, trailer_id)
+
+
+def build_at(book: Path, trailer_id: str = "main", resolve: Resolver = neighbouring_take) -> Path:
     out = book / "trailer" / trailer_id
     plan = json.loads((out / "plan.json").read_text(encoding="utf-8"))
     work = out / "work"
@@ -74,14 +99,10 @@ def build(book_glob: str, trailer_id: str = "main") -> Path:
         print(f"  WARNING: {len(beat_ids) - len(have)} beats have no clip; "
               f"their shots fall back to neighbouring takes")
 
-    def source_for(beat_id: str, order: int) -> str:
-        """The beat's own take, or a stand-in chosen deterministically."""
-        return beat_id if beat_id in have else have[order % len(have)]
-
     # Resolve every shot to the take it will actually use BEFORE counting, so
     # a take standing in for several beats still spreads its segments across
     # its whole length instead of reusing one moment.
-    resolved = {shot["index"]: source_for(shot["beat_id"], shot["index"])
+    resolved = {shot["index"]: resolve(shot["beat_id"], shot["index"], shot["seconds"], have)
                 for shot in plan["shots"]}
     uses = Counter(resolved.values())
 
@@ -143,9 +164,10 @@ def build(book_glob: str, trailer_id: str = "main") -> Path:
     cues = [(max(hit_at - 2.4, 0.0), sub_drop(work / "sub.wav")),
             (hit_at, impact(work / "hit.wav"))]
     final = out / f"TRAILER-{book.name.split('_', 1)[1]}.mp4"
-    mix(picture, music, cues, final, seconds=clip_seconds(picture))
-    print(f"{len(segments)} shots, card at {title_at:.1f}s holding "
-          f"{card_seconds:.1f}s, cue hit at {hit_at:.1f}s -> {final}")
+    lines = spoken_lines(plan, out)
+    mix_with_lines(picture, music, cues, lines, final, seconds=clip_seconds(picture))
+    print(f"{len(segments)} shots, {len(lines)} spoken line(s), card at {title_at:.1f}s "
+          f"holding {card_seconds:.1f}s, cue hit at {hit_at:.1f}s -> {final}")
     return final
 
 

@@ -1,0 +1,162 @@
+"""Step 07 -- clips: one take per beat, its face measured against its reference.
+
+The slow step: ~11 min per take on the local GPU, so the budget is read
+before every render.  A take whose face does not read as its reference
+sheet climbs seed x2 and then a whole-take close-up (the FORM changes, the
+beat does not).  The terminal rung never asks: it ships the BEST take of
+the beat capped at a short shot.  A beat is dropped only when no take
+exists at all -- no time for a first render, or the render itself failed.
+Every take is kept under clips/takes/; the chosen one is clips/<beat>.mp4,
+which is what the cut reads.
+"""
+from __future__ import annotations
+
+import json
+from pathlib import Path
+
+from scripts.trailer.build_clips import (SEED_BASE, bound_slots, is_complete, recipe_for,
+                                         render_take, take_values)
+from studio.clip_cache import is_current
+from studio.identity import SFACE, UNVERIFIABLE_BELOW
+from studio.identity_gate import (HEAD_LEAK_SECONDS, clip_identity, embed_file, ensure_models,
+                                  open_sessions)
+from studio.ladder import Ladder, Rung, climb
+from studio.learnings import Learning
+from studio.trailer_assemble import clip_seconds
+
+STEP_ID = "07"
+NAME = "clips"
+RENDER_SECONDS = 11 * 60
+SHORT_SHOT = 0.6
+"""A take whose face never bound may still carry a cut this short: too brief
+to read a wrong face, long enough to keep the beat's place in the metre."""
+BOUND_AT = SFACE.same_person_at
+LADDER = Ladder([Rung("reroll_seed", RENDER_SECONDS, tries=2),
+                 Rung("alternate_setup", RENDER_SECONDS, tries=1)], terminal="short_shot")
+DROPPED = "drop_beat"
+
+
+class TakeFailed(RuntimeError):
+    """The renderer produced no video; not a gate, a fact about the machine."""
+
+
+def seed_for(index: int, rung: Rung, i: int) -> int:
+    base = SEED_BASE + index * 7
+    return base + 5000 * (i + 1) if rung.name == "alternate_setup" else base + 1000 * i
+
+
+def need_seconds(beat_id: str, plan: dict) -> float:
+    """The longest shot the cut wants from this beat, past the reference leak."""
+    longest = max((s["seconds"] for s in plan["shots"] if s["beat_id"] == beat_id), default=0.0)
+    return longest + HEAD_LEAK_SECONDS
+
+
+def reference_of(sessions, book: Path, refs: dict, bound: list[str]):
+    """The sheet a take's face is measured against: its first bound character."""
+    char = next((r for r in bound if r.startswith("char-")), None)
+    if char is None:
+        return None, None
+    vector, _ = embed_file(sessions, book / refs[char]["rel_path"])
+    return char, vector
+
+
+def render_or_reuse(values: dict, bound: list[str], refs: dict, book: Path, dest: Path) -> Path:
+    """A finished take made from this exact recipe is reused; anything else renders."""
+    recipe = recipe_for(values, bound, refs, book)
+    if is_complete(dest) and is_current(dest, recipe):
+        return dest
+    if dest.exists():
+        dest.unlink()
+    try:
+        return render_take(values, bound, refs, book, dest)
+    except RuntimeError as exc:
+        raise TakeFailed(str(exc)) from exc
+
+
+def measure(sessions, video: Path, reference, work: Path) -> dict:
+    seconds = clip_seconds(video)
+    similarity, px = (None, 0) if reference is None else \
+        clip_identity(sessions, video, seconds, reference, work)
+    return {"path": video, "seconds": seconds, "similarity": similarity, "face_px": px}
+
+
+def best_of(tries: list[dict]) -> dict | None:
+    return max(tries, key=lambda t: -1.0 if t["similarity"] is None else t["similarity"],
+               default=None)
+
+
+def promote(take: Path, dest: Path) -> Path:
+    dest.parent.mkdir(parents=True, exist_ok=True)
+    dest.write_bytes(take.read_bytes())
+    return dest
+
+
+def clip_record(beat_id: str, chosen: dict, book: Path, dest: Path, reference: str | None,
+                capped: float | None, tries: list[dict]) -> dict:
+    return {"beat_id": beat_id, "rel_path": dest.relative_to(book).as_posix(),
+            "seconds": chosen["seconds"], "seed": chosen["seed"],
+            "similarity": chosen["similarity"], "face_px": chosen["face_px"],
+            "reference": reference, "capped": capped,
+            "takes": [{"seed": t["seed"], "similarity": t["similarity"]} for t in tries]}
+
+
+def bind_beat(ctx, index: int, beat: dict, plan: dict, refs: dict, style: str, sessions
+              ) -> dict | None:
+    """Climb the identity ladder for one beat; None means the beat is dropped."""
+    book, beat_id = ctx.book_dir, beat["beat_id"]
+    if not ctx.budget.can_afford(STEP_ID, RENDER_SECONDS):
+        ctx.learn(Learning(step=STEP_ID, gate="budget", measured=round(ctx.budget.remaining(STEP_ID)),
+                           threshold=RENDER_SECONDS, action=DROPPED, terminal=True))
+        return None
+    bound = bound_slots(beat, refs)
+    reference_id, reference = reference_of(sessions, book, refs, bound)
+    tries: list[dict] = []
+
+    def attempt(rung: Rung, i: int) -> dict:
+        seed = seed_for(index, rung, i)
+        values = take_values(beat, plan, refs, style, seed,
+                             tightest="close" if rung.name == "alternate_setup" else None)
+        take = render_or_reuse(values, bound, refs, book,
+                               ctx.out_dir / "clips/takes" / f"{beat_id}-{seed}.mp4")
+        result = dict(measure(sessions, take, reference, ctx.out_dir / "work/identity" / take.stem),
+                      seed=seed)
+        tries.append(result)
+        return result
+
+    def gate(result: dict):
+        if reference is None:
+            return True, None, BOUND_AT
+        if result["similarity"] is None or result["face_px"] < UNVERIFIABLE_BELOW:
+            ctx.learn(Learning(step=STEP_ID, gate="identity", measured=result["face_px"],
+                               threshold=UNVERIFIABLE_BELOW, action="accepted_unverifiable"))
+            return True, None, BOUND_AT
+        return result["similarity"] >= BOUND_AT, round(result["similarity"], 3), BOUND_AT
+
+    try:
+        outcome = climb(LADDER, STEP_ID, attempt, gate, ctx.budget, ctx.learn, gate_name="identity")
+        chosen, capped = (best_of(tries), SHORT_SHOT) if outcome.terminal else (outcome.result, None)
+    except TakeFailed as exc:
+        chosen, capped = best_of(tries), SHORT_SHOT
+        ctx.learn(Learning(step=STEP_ID, gate="render", measured=str(exc)[:80],
+                           action=DROPPED if chosen is None else "short_shot", terminal=True))
+    if chosen is None:
+        return None
+    dest = promote(chosen["path"], ctx.out_dir / "clips" / f"{beat_id}.mp4")
+    return clip_record(beat_id, chosen, book, dest, reference_id, capped, tries)
+
+
+def run(codex_id: str, ctx) -> None:
+    plan = json.loads((ctx.out_dir / "plan.json").read_text(encoding="utf-8"))
+    refs_doc = json.loads((ctx.book_dir / "refs/refs.json").read_text(encoding="utf-8"))
+    refs = {r["ref_id"]: r for r in refs_doc["refs"]}
+    sessions = open_sessions(ensure_models())
+    clips, dropped = [], []
+    for index, beat in enumerate(plan["beats"]):
+        ctx.tracker.log(f"{beat['beat_id']} [{index + 1}/{len(plan['beats'])}] "
+                        f"{round(ctx.budget.remaining(STEP_ID))}s left", step_id=STEP_ID)
+        record = bind_beat(ctx, index, beat, plan, refs, refs_doc["palette"], sessions)
+        (clips if record else dropped).append(record or beat["beat_id"])
+    (ctx.out_dir / "clips.json").write_text(json.dumps(
+        {"clips": clips, "dropped": dropped}, indent=2), encoding="utf-8")
+    print(f"[{STEP_ID}] {len(clips)} takes, {len(dropped)} dropped {dropped}, "
+          f"{sum(1 for c in clips if c['capped'])} capped short")

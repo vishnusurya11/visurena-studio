@@ -100,10 +100,13 @@ except the hold and the title. ladder: unbound → alternate setup in the same
 beat → location-only shot. fallback: drop the beat, re-walk.
 
 **07 clips** — in: `plan.json`, refs. out: `clips/<setup>.mp4`,
-`clips.json` (identity per clip, seconds). gate: identity ≥ threshold;
-duration ≥ shot length. ladder: seed ×2 → alternate setup same beat ×1 →
-shot ≤ 0.6 s → drop beat. Before each render: `budget.can_afford(11 min)`;
-if not, the remaining setups take the terminal rung.
+`clips.json` (identity per clip, seconds). gate: face similarity to
+the reference sheet ≥ 0.363 (SFace), unverifiable faces accepted and flagged.
+ladder: seed ×2 → whole-take close-up ×1; terminal: the BEST take capped at
+0.6 s (the cut sources longer shots of that beat from a neighbour). A beat
+is dropped only when no take exists: `budget.can_afford(11 min)` false
+before its first render, or the render failed. Every take is kept under
+`clips/takes/`.
 
 **08 assemble** — in: everything above. out: `TRAILER-*.mp4`. gate: none —
 deterministic; an exception is a bug and the run fails loudly here only.

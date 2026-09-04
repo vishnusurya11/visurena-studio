@@ -46,6 +46,8 @@ class StorySpec(BaseModel):
     narrator: str = Field(min_length=1, description="character id or 'omniscient'")
     register_: Register = Field(alias="register")
     thesis: str | None = None
+    setting: str = Field(default="", max_length=80,
+                         description="period and place in one line, e.g. '1881 London'")
     model_config = ConfigDict(populate_by_name=True, serialize_by_alias=True)
 
     @property
@@ -143,6 +145,8 @@ class LineSlate(BaseModel):
     lines: list[SlateLine] = Field(default_factory=list, max_length=MAX_LINES)
     iconicity: Literal["full", "thin", "none"]
     music_only: bool = False
+    pool: list[SlateLine] = Field(default_factory=list, description=(
+        "labelled candidates the slate did not use; step 05's next-line-same-function rung"))
 
     @model_validator(mode="after")
     def _a_slate_must_ask_and_threaten(self) -> "LineSlate":

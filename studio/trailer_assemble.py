@@ -14,6 +14,7 @@ from __future__ import annotations
 import math
 
 import json
+import re
 import subprocess
 from pathlib import Path
 
@@ -272,6 +273,105 @@ def mix(picture: Path, bed: Path, cues: list[tuple[float, Path]], output: Path,
          "-ar", "48000", "-shortest", str(output)],
         "mixing the trailer")
     return output
+
+
+DUCK_SPLIT = "acrossover=split=250 4000"
+"""The bed in three bands.  Only the middle one ducks: the low band is the
+pulse the cut was made to, the high band is the air; the line lives at
+250-4000 Hz and that is the room it needs (08-assemble)."""
+DUCK = "sidechaincompress=threshold=0.03:ratio=6:attack=160:release=1000:level_sc=1"
+"""Keyed by the line, not by a plan: a line that runs long ducks long."""
+
+
+def _key_chain(index: int, at: float) -> str:
+    """One line as a compressor key: conformed to the bed, delayed to its
+    window, then PADDED -- sidechaincompress ends its output when the key
+    ends, so an unpadded key cuts the bed off at the end of the line."""
+    ms = int(round(at * 1000))
+    return (f"[{index + 1}:a]aresample=48000,aformat=channel_layouts=stereo,"
+            f"adelay={ms}:all=1,apad[key{index}]")
+
+
+def duck_graph(starts: list[float]) -> str:
+    """Input 0 is the bed, inputs 1..n the lines; one compressor per line,
+    chained through the mid band, so each window ducks on its own key."""
+    parts = [f"[0:a]aresample=48000,aformat=channel_layouts=stereo,{DUCK_SPLIT}[lo][mid0][hi]"]
+    for index, at in enumerate(starts):
+        parts.append(_key_chain(index, at))
+        parts.append(f"[mid{index}][key{index}]{DUCK}[mid{index + 1}]")
+    parts.append(f"[lo][mid{len(starts)}][hi]amix=inputs=3:normalize=0:duration=first[out]")
+    return ";".join(parts)
+
+
+def duck_bed(bed: Path, keys: list[tuple[float, Path]], output: Path) -> Path:
+    """The bed with its mid band ducked under every spoken line.
+
+    With nothing spoken the bed is returned as it is: a card gives the
+    compressor no key, and a pass through the graph would not be a no-op.
+    """
+    if not keys:
+        return bed
+    inputs = ["-i", str(bed)]
+    for _, path in keys:
+        inputs += ["-i", str(path)]
+    _ffmpeg(["ffmpeg", "-y", "-v", "error", *inputs, "-filter_complex",
+             duck_graph([at for at, _ in keys]), "-map", "[out]",
+             "-t", f"{clip_seconds(bed):.3f}", "-c:a", "pcm_s16le", str(output)],
+            "ducking the bed under the lines")
+    return output
+
+
+def momentary(path: Path) -> list[tuple[float, float]]:
+    """(t, M) every 100 ms from ebur128: the momentary loudness QC reads."""
+    result = subprocess.run(["ffmpeg", "-v", "info", "-nostats", "-i", str(path),
+                             "-af", "ebur128", "-f", "null", "-"],
+                            capture_output=True, text=True, errors="replace")
+    readings = []
+    for line in result.stderr.splitlines():
+        hit = re.search(r"t:\s*([\d.]+)\s+TARGET.*?M:\s*(-?[\d.]+|-inf)", line)
+        if hit:
+            readings.append((float(hit.group(1)), float(hit.group(2))))
+    return readings
+
+
+def window_loudness(readings: list[tuple[float, float]], start: float, end: float) -> float:
+    """Mean momentary loudness over [start, end); refuses to average nothing."""
+    inside = [m for t, m in readings if start <= t < end]
+    if not inside:
+        raise ValueError(f"no loudness readings in {start:.2f}-{end:.2f}s")
+    return sum(inside) / len(inside)
+
+
+def line_windows(plan: dict, lines: list, book: Path) -> list[tuple[float, Path]]:
+    """Where each spoken line starts, from the plan.
+
+    `plan["lines"] = [{"index", "at"}]` names a window per voice line; a plan
+    without it (the shipped format) carries the text on the shot it plays
+    over, so the shot's start is the window.  A line the plan placed nowhere
+    was dropped by the plan and is not laid.  Cards have no file to lay.
+    """
+    by_index = {int(l["index"]): float(l["at"]) for l in plan.get("lines", [])}
+    by_text = {s["line"]: float(s["start"]) for s in plan.get("shots", []) if s.get("line")}
+    keys = []
+    for line in lines:
+        if line.card or not line.rel_path:
+            continue
+        at = by_index.get(line.index, by_text.get(line.text))
+        if at is not None:
+            keys.append((at, Path(book) / line.rel_path))
+    return keys
+
+
+def mix_with_lines(picture: Path, bed: Path, cues: list[tuple[float, Path]],
+                   lines: list[tuple[float, Path]], output: Path,
+                   seconds: float | None = None) -> Path:
+    """`mix` with the line layer: the bed ducks under each line and the line
+    rides as one more cue.  The ducked bed is kept beside the master so QC can
+    measure line-over-bed without un-mixing anything."""
+    if not lines:
+        return mix(picture, bed, cues, output, seconds)
+    ducked = duck_bed(bed, lines, Path(output).with_name(f"{Path(output).stem}.bed-ducked.wav"))
+    return mix(picture, ducked, cues + lines, output, seconds)
 
 
 def luma_stats(video: Path) -> tuple[float, float]:

@@ -364,9 +364,10 @@ stages:
       - id: "07"
         name: clips
         script: step_07_clips
-        desc: The slow step (~11 min per setup, local GPU). Identity gate per clip.
-          Reroll x2 -> alternate setup same beat -> shot <= 0.6 s -> drop beat. Reads
-          the remaining time budget before every render.
+        desc: The slow step (~11 min per take, local GPU). Identity gate per take.
+          Reroll x2 -> whole-take close-up -> best take capped at 0.6 s. A beat is
+          dropped only when no take exists (no time for a first render, or the
+          render failed). Reads the remaining time budget before every render.
       - id: "08"
         name: assemble
         script: step_08_assemble
