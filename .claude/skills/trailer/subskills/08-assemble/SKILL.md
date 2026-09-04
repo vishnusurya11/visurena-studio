@@ -177,3 +177,42 @@ the double-breath that reads as a mastering error.
 **If placement must be wrong, be wrong LATE.** ITU-R BT.1359 puts detection at
 ~45 ms for audio leading picture and ~125 ms lagging — the ear expects sound
 after light. At 24fps that is 1 frame early vs 3 frames late.
+
+## The line layer — a line is a shot with its own sound
+
+Spoken lines (`09-voice`) arrive as measured files, one per slot, each
+already at −20 LUFS-S. The bed is ducked **only inside the line's window**:
+
+```
+[bed]  acrossover=split=250 4000[lo][mid][hi];
+[mid][line] sidechaincompress=threshold=0.03:ratio=6:attack=160:release=1000:level_sc=1[midd];
+[lo][midd][hi] amix=inputs=3:normalize=0
+```
+
+- Target: bed at −26 LUFS-S under the line (6 LU below), untouched outside
+  it; attack 160 ms, release 0.8–1.2 s; one window per line, never a
+  trailer-long duck. Six holes destroy the dynamic range `trailer_fitness`
+  selected the cue for.
+- Only the mid band ducks. The low end keeps building under the voice — that
+  is why the split exists; a full-band duck makes every line a stopdown.
+- A card (over-black line) has no duck; the stopdown is already there.
+- Gate: `test_line_sits_six_lu_over_bed_in_its_window` on a synthetic bed +
+  tone through `ebur128`, PROPOSED. Until it passes the numbers above are a
+  paragraph, which is what the 12–15 dB rule was for three trailers.
+
+## QC reads the delivered file, never the plan
+
+Every gate above the cut runs on `plan.json`. A gate whose expectation comes
+from the plan is the plan grading itself — it passed a Scarlet plan with no
+Holmes in it. `scripts/trailer/qc.py` (to build) reads the **master**:
+
+1. extract the audio, track it with `beatmap.metre()`;
+2. scene-detect the picture, seeded from the manifest's cut list and
+   *verified* (threshold < 0.3 — 9 of 44 low-contrast cuts were missed at
+   0.3); report cuts the manifest lists that the picture does not show;
+3. report `cuts_on_beat`, `cuts_on_downbeat`, `cuts_on_L0`, `on_cap_fraction`,
+   `title_on_downbeat`, and per-line `line_over_bed_lu`.
+
+Targets (PROPOSED, numbers to beat, not to pass): ≥ 80% / ≥ 30% / 100% /
+≤ 10% / true / ≥ 5 LU. The shipped Scarlet master measures 12/35 on beat,
+4/35 on downbeat. Write the report next to the master; the manifest links it.

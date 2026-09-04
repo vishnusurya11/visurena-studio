@@ -39,6 +39,29 @@ TURN is not a plot reveal. For an adaptation it is **the moment the narration
 changes hands**, and the rule lands exactly on both books' structural breaks
 without knowing anything about them.
 
+**Generality caveats (found on the 30-book audit, not yet fixed):** TURN is
+undefined for a first-person book that never changes hands (*Call of the
+Wild*, *Eighty Days*) — fall back to the first scene of the longest
+lead-absent run *by location*. FIGURE returns the co-lead in a romance
+(*Pride and Prejudice* → Darcy), which is correct for the trailer and wrong
+for the word "antagonist"; the manifest calls it `figure`, never `villain`.
+
+## Three fields the later stages need and nothing records today
+
+The story stage is the only stage that has read the whole book, so it must
+emit these into `trailer/story.json`, or `03-music` and `09-voice` guess:
+
+| field | value | who consumes it |
+|---|---|---|
+| `narrator` | `<character_id>` or `omniscient` | `05-dialogue` (pool 4 exists only for a character narrator); `09-voice` (a first-person narrator is a designed voice; omniscient gets the card) |
+| `register` | one of `elegy / gothic / romance / coming-of-age / tragedy / procedural / detective / comedy / adventure` | `03-music`: only the first five are eligible for a vocal cue; the rest sell the *how* through spoken lines |
+| `thesis` | one sentence, present tense, ≤ 7 syllables, names nothing, not an event ("nobody is who they say") | `03-music` as the refrain of a vocal cue; `05-dialogue` as the title-echo target |
+
+`register` is an enumerated string, not prose — a free-text register cannot
+gate anything. `thesis` is judged by a Strands call with a FakeModel in tests;
+the test asserts only the contract (syllable count, no proper noun, present
+tense), never the sentence's taste.
+
 ## Spoilers are structural, not lexical
 
 Matching logline words against scene text **does not work** and we tried it: a

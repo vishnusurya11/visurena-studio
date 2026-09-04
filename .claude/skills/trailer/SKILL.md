@@ -40,9 +40,20 @@ Never put an audio reference in a shot where the face matters: identity
 similarity collapses 0.886 → 0.088, and no amount of steps or reference
 sizing recovers it.
 
-## Brick 2 — the music is the timeline, and the timeline is MEASURED
+## Brick 2 — the cut is a METRIC object; cut on the grid the music actually keeps
 
-Generate the cue first, then measure what it actually plays, then cut to that.
+Generate the cue first, then measure what it actually plays — its **metre**
+(beats, downbeats, bars) and its **events** (hits, stopdowns, slots) — select
+the seed on that structure, and cut in beats. Break the grid only where the
+music breaks it.
+
+**MEASURED 2026-09-03:** the delivered Scarlet cut had 35 of 44 cuts "on an
+onset" and, tracked against the music's own beat, **12 of 44 on a beat and 4
+of 44 on a downbeat** — about 2× chance for both. `onsets()` is a loudness
+grid; it has no bar. The full rule, the seed fitness with metric and slot
+terms, the beat walk that respects `MIN_SHOT` and the cap at 60–180 BPM, the
+instrumental and vocal sheets, and the instrumental-vs-vocal eligibility rule
+are in `subskills/03-music`. The history below is why measurement exists.
 
 The old assembler cut its title card at 75.21s when the cue's own +37 LU
 impact was at 80.5s — the braam landed two seconds *into* the button shot. It
@@ -61,6 +72,37 @@ build prints only a summary, and the parse returned `[]` — which callers
 reported as "0 impacts". `envelope()` now raises rather than returning
 nothing. **A measurement that cannot fail is not a measurement.**
 
+## Brick 3 — a trailer line needs no scene and takes a side
+
+The iconic *moment* is the same thing in pictures: an image that needs no
+scene and changes the story. Neither is a property of the text. Both are
+**what a culture kept**, so external evidence (Wikiquote, revid-keyed — 30 of
+30 analysed books resolve, median 18.5 quotes) outranks every text feature,
+and the text features are the floor for the book nobody kept — graded on a
+held-out corpus, never on themselves.
+
+**MEASURED:** the previous `line_value` scored 26 of 38 real trailer lines
+negative ("This is Sparta!" −7.6, every question −6.6) and put a Ferrier
+errand above all of them, because it penalised the two features that define
+the format — short, and a question a later line answers. And the screenplay is
+the wrong pool: 4 of Scarlet's 19 kept quotations survived adaptation; the
+title sentence lives only in `source/chapters/`. Finder, scorer, ordering and
+the moment features are in `subskills/05-dialogue`.
+
+## The coupling rule — a line is a shot
+
+A line is bound to its speaker's picture (Brick 1), occupies whole beats in a
+measured slot (Brick 2), and is chosen *for the slot it fits* — never
+compressed into one. `lines = min(slate, measured_slots)`, cap 4. Its voice is
+bound by a reference clip, never described per line (`subskills/09-voice`), and
+its duration is read from the rendered file, never predicted.
+
+The trailer is the fold of the timing rule over the cue's events plus slots,
+the slots filled from the oracle's ranked list in hook → answer → threat →
+title → button order. Every pipeline stage has a check that can fail on the
+DELIVERED file, not on the plan — a gate whose expectation is derived from the
+thing it checks cannot fail. Build order and status: `BUILD.md`.
+
 ## Subskills
 
 Read the one you need; each carries what was measured rather than assumed.
@@ -69,12 +111,13 @@ Read the one you need; each carries what was measured rather than assumed.
 |---|---|
 | `subskills/01-story` | lead, opposition, turn, what stays unanswered, element-level selection |
 | `subskills/02-refs` | reference sheets, identity binding, character collision |
-| `subskills/03-music` | generating the cue and MEASURING what it plays |
+| `subskills/03-music` | metre + events, seed fitness, the beat walk, instrumental and vocal sheets |
 | `subskills/04-shots` | H3 constants, framing, camera, coverage economics, costs |
-| `subskills/05-dialogue` | choosing lines that stand alone, placing them, whether to speak them |
+| `subskills/05-dialogue` | four pools, Wikiquote iconicity, the held-out scorer, ordering, slots, moments |
 | `subskills/06-style` | the house look and how to try others |
 | `subskills/07-cards` | title cards, typography, and two silent failures |
 | `subskills/08-assemble` | the cut, the grade, the mix, the gates, three ffmpeg traps |
+| `subskills/09-voice` | Qwen3-TTS: design once, clone every line, gate on similarity, measure seconds |
 
 ## Agents
 
@@ -186,11 +229,18 @@ default when the prompt says nothing about the camera, so always say something.
    book. They belong to `library/<book>/refs/`, shared by trailer, song and
    episode: a character who looks one way in the trailer and another in
    episode one is two characters to the audience.
-2. `build_music.py` — several seeds, chosen on measured fitness.
-3. `build_plan.py` — beats from the screenplay, cut to the measured grid.
-   **Refuses unbound shots.**
-4. `build_clips.py` — one long take per beat, reference-bound. ~17 min each.
-5. `assemble.py` — cut, title on the measured hit, synthesised sound, mix.
+2. `build_music.py` — several seeds, chosen on measured fitness: metre,
+   tempo, title-on-downbeat, lift, **slots**, late reach.
+3. `build_plan.py` — setups from the screenplay's authored shots; cuts from
+   the beat walk over the cue's metre and events; the line slate from the
+   four pools, ordered hook → answer → threat → title → button.
+   **Refuses unbound shots and a slate with no hook.**
+4. `build_voice.py` — design one reference per speaking character, clone
+   every line, gate on similarity, write measured seconds. Lines are then
+   chosen for their slots.
+5. `build_clips.py` — one take per setup, reference-bound. ~11 min each.
+6. `assemble.py` — cut, title on the measured hit, the line layer ducked
+   6 LU, synthesised sound, mix; QC on the delivered master.
 
 Cost: zero. Everything is local GPU; no paid API is involved at any step.
 
