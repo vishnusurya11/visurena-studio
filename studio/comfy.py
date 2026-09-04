@@ -75,6 +75,27 @@ def submit(workflow: dict) -> str:
             f"ComfyUI rejected the workflow: {failure.read().decode()[:900]}") from None
 
 
+def _post(path: str, body: dict | None = None) -> None:
+    """One fire-and-forget POST to the engine."""
+    data = json.dumps(body or {}).encode("utf-8")
+    request = urllib.request.Request(
+        f"{HOST}{path}", data=data, headers={"Content-Type": "application/json"})
+    with urllib.request.urlopen(request, timeout=60):
+        return None
+
+
+def free_models() -> None:
+    """Unload every staged model.  A VLM asked to load beside H3's DiT and
+    text encoder lands half on the CPU and answers in ten minutes, not one."""
+    _post("/free", {"unload_models": True, "free_memory": True})
+
+
+def interrupt() -> None:
+    """Stop the running job; a call that outlived its timeout must not hold
+    the queue against the next render."""
+    _post("/interrupt")
+
+
 def history(prompt_id: str) -> dict:
     """The engine's record of one job, or {} while it is still queued."""
     with urllib.request.urlopen(f"{HOST}/history/{prompt_id}", timeout=60) as response:

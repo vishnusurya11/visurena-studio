@@ -17,6 +17,16 @@ GREGSON = {**LESTRADE, "hair_colour": "fair", "complexion": "pale", "build": "st
            "headgear": "none", "description": "A tall flaxen-haired man."}
 
 
+def frames_in(folder: Path) -> list[Path]:
+    """Three 40x30 frames: red, green, blue."""
+    from PIL import Image
+    frames = []
+    for name, colour in (("0", (255, 0, 0)), ("1", (0, 255, 0)), ("2", (0, 0, 255))):
+        frames.append(folder / f"{name}.png")
+        Image.new("RGB", (40, 30), colour).save(frames[-1])
+    return frames
+
+
 def card(**changes) -> TraitCard:
     return TraitCard(**{**LESTRADE, **changes})
 
@@ -62,6 +72,11 @@ class TestParse:
         assert all(trait in prompt for trait in TRAITS)
         assert "unclear" in prompt and "bowler" in prompt and "description" in prompt
 
+    def test_the_frames_prompt_says_the_frames_are_one_shot(self):
+        prompt = describe.prompt_for(frames=3)
+        assert "3 frames" in prompt and "same person" in prompt
+        assert "one person in this image" not in prompt
+
 
 class TestDescribe:
     def test_describe_stages_the_image_and_runs_the_caption_workflow(self, tmp_path, monkeypatch):
@@ -78,10 +93,13 @@ class TestDescribe:
         assert seen["name"] == describe.IMAGE_WORKFLOW
         assert seen["values"]["image_1"] == "char-x.png" and seen["values"]["seed"] == 7
 
-    def test_describe_frames_sends_three_frames_to_the_video_workflow(self, tmp_path, monkeypatch):
-        frames = [tmp_path / f"{i}.png" for i in range(3)]
-        for f in frames:
-            f.write_bytes(b"png")
+    def test_describe_frames_sends_one_contact_sheet_to_the_image_workflow(self, tmp_path, monkeypatch):
+        """The Qwen3_VQA node reads image[0] of a batch, so the three-frame
+        video workflow only ever described frame 1 (Scarlet run 4: a take
+        whose first frame was hands holding a note came back 'face not
+        visible' although two frames showed it).  One image the model
+        provably sees whole: the frames side by side."""
+        frames = frames_in(tmp_path)
         monkeypatch.setattr(describe.comfy, "stage_image", lambda p: Path(p).name)
         seen = {}
 
@@ -89,8 +107,42 @@ class TestDescribe:
             seen.update(name=name, values=values)
             return json.dumps(GREGSON)
         assert describe.describe_frames(frames, seed=3, run=run) == TraitCard(**GREGSON)
-        assert seen["name"] == describe.VIDEO_WORKFLOW
-        assert [seen["values"][f"frame_{i}"] for i in (1, 2, 3)] == ["0.png", "1.png", "2.png"]
+        assert seen["name"] == describe.IMAGE_WORKFLOW
+        assert seen["values"]["image_1"] == f"{tmp_path.name}-contact.png"
+        assert "3 frames" in seen["values"]["prompt"]
+
+    def test_a_contact_sheet_lays_the_frames_side_by_side(self, tmp_path):
+        from PIL import Image
+        sheet = describe.contact_sheet(frames_in(tmp_path), tmp_path / "sheet.png")
+        with Image.open(sheet) as made:
+            assert made.size == (3 * 40, 30)
+            assert made.getpixel((20, 15)) == (255, 0, 0)
+            assert made.getpixel((100, 15)) == (0, 0, 255)
+
+    def test_a_contact_sheet_scales_every_frame_to_the_shortest(self, tmp_path):
+        from PIL import Image
+        Image.new("RGB", (80, 60), (0, 255, 0)).save(tmp_path / "tall.png")
+        frames = frames_in(tmp_path) + [tmp_path / "tall.png"]
+        with Image.open(describe.contact_sheet(frames, tmp_path / "sheet.png")) as made:
+            assert made.size == (3 * 40 + 40, 30)
+
+    def test_the_live_path_frees_the_engine_before_asking(self, tmp_path, monkeypatch):
+        """Scarlet run 4 died in step 07: with H3's DiT and text encoder still
+        staged, Qwen3-VL loaded offloaded to CPU -- 6:52 to load, 10:23 in all,
+        past the 600s gate timeout.  Resident, it answers in about a minute."""
+        image = tmp_path / "x.png"
+        image.write_bytes(b"png")
+        order = []
+        monkeypatch.setattr(describe.comfy, "stage_image", lambda p: Path(p).name)
+        monkeypatch.setattr(describe.comfy, "free_models", lambda: order.append("free"))
+        monkeypatch.setattr(describe.comfy, "run_text",
+                            lambda name, values, timeout: order.append("ask") or json.dumps(LESTRADE))
+        assert describe.describe(image) == card()
+        assert order == ["free", "ask"]
+
+    def test_unseen_is_a_card_that_vouches_for_nothing(self):
+        assert describe.known(describe.unseen()) == 0
+        assert not describe.verifiable(describe.unseen())
 
     def test_describe_retries_once_on_unparseable_text(self, tmp_path, monkeypatch):
         image = tmp_path / "x.png"
@@ -127,9 +179,20 @@ class TestCompare:
         assert describe.known(card()) == len(TRAITS)
         assert describe.known(card(age="unclear", build="unclear")) == len(TRAITS) - 2
 
-    def test_same_look_is_fewer_than_distinct_at_differences(self):
+    def test_a_one_notch_drift_on_an_ordered_trait_is_half_a_difference(self):
+        """Scarlet run 4, take B02: the contact sheet read Holmes as
+        middle-aged/grey/top hat against a reference of old/white/bowler --
+        three differences, two of them one notch along an ordered scale."""
+        assert describe.distance(card(), card(age="old")) == 0.5
+        assert describe.distance(card(), card(hair_colour="brown")) == 0.5
+        assert describe.distance(card(), card(hair_colour="fair")) == 1.0
+        assert describe.distance(card(), card(headgear="top hat")) == 1.0
+        assert describe.distance(card(), TraitCard(**GREGSON)) == 4.0
+
+    def test_same_look_is_a_distance_under_distinct_at(self):
         assert DISTINCT_AT == 3
         assert describe.same_look(card(), card(build="heavy", age="old"))
+        assert describe.same_look(card(), card(age="old", hair_colour="brown", headgear="top hat"))
         assert not describe.same_look(card(), TraitCard(**GREGSON))
 
     def test_closest_is_the_bound_card_with_fewest_differences(self):
@@ -137,3 +200,8 @@ class TestCompare:
         who, differing = describe.closest(card(), bound)
         assert who == "twin" and differing == ["build"]
         assert describe.closest(card(), {}) == (None, [])
+
+    def test_closest_measures_by_distance_not_by_count(self):
+        bound = {"three_notches": card(age="old", hair_colour="brown", build="average"),
+                 "one_clear": card(headgear="none")}
+        assert describe.closest(card(), bound)[0] == "one_clear"

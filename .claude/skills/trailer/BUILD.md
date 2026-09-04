@@ -26,7 +26,11 @@ Evidence: `docs/analysis/research/trailer-music-structure.md`,
   rung, rewriting exactly the matched card slots. The SFace cosine gate
   (`identity.py`, 0.363) it replaced said only THAT two sheets read alike,
   so its one rung was another seed: Lestrade collided five times in a row
-  (run 3, 2026-09-04).
+  (run 3, 2026-09-04). Under the trait card Lestrade bound on the second
+  sheet (run 4). A take's three frames go to the model as ONE contact sheet:
+  comfy_studio's `video_qwen3vl_caption` batches them, and `Qwen3_VQA`
+  reads `image[0]` only, so it described a take whose first frame was hands
+  holding a note as "face not visible" (run 4, B02).
 - measured but not yet re-cut through the new chain: the delivered Scarlet
   master under the new `qc.py` reads 30/45 cuts on beat (onset grid, the
   audio measured rubato), 0/45 on downbeat, 5 target flags, floor pass.

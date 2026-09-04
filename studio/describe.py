@@ -24,10 +24,15 @@ from pydantic import BaseModel, field_validator
 from studio import comfy
 
 IMAGE_WORKFLOW = "image_qwen3vl_caption"
-VIDEO_WORKFLOW = "video_qwen3vl_caption"
 TIMEOUT = 600.0
 DISTINCT_AT = 3
-"""Differ in this many seen traits and two faces are two people."""
+"""A distance of this many seen traits and two faces are two people."""
+NEAR = 0.5
+"""One notch along an ordered trait -- middle-aged/old, grey/white -- is what
+the same face reads as at two distances, so it counts half.  Scarlet run 4,
+take B02: a contact sheet read Holmes as middle-aged/grey/top hat against a
+reference read as old/white/bowler, and three whole differences would have
+rejected the take."""
 VERIFIABLE_FROM = 4
 """A card that sees fewer traits than this cannot vouch for anyone."""
 
@@ -40,6 +45,15 @@ TRAITS: dict[str, tuple[str, ...]] = {
     "complexion": ("pale", "fair", "sallow", "ruddy", "olive", "dark", "unclear"),
     "build": ("slight", "average", "stocky", "heavy", "unclear"),
 }
+ORDERED: dict[str, tuple[str, ...]] = {
+    "age": ("young", "middle-aged", "old"),
+    "hair_colour": ("black", "dark brown", "brown", "fair"),
+    "hair_length": ("bald", "short", "medium", "long"),
+    "build": ("slight", "average", "stocky", "heavy"),
+}
+"""Scales whose neighbours read alike at a distance; grey and white too."""
+NEIGHBOURS: set[frozenset[str]] = {frozenset(("grey", "white")), frozenset(("pale", "fair"))} | {
+    frozenset(scale[i:i + 2]) for scale in ORDERED.values() for i in range(len(scale) - 1)}
 SYNONYMS: dict[str, dict[str, tuple[str, ...]]] = {
     "age": {"old": ("elderly", "aged", "senior", "sixt", "sevent"),
             "young": ("youth", "twent", "teen", "boy", "girl"),
@@ -88,11 +102,15 @@ class TraitCard(BaseModel):
         return nearest(info.field_name, str(value))
 
 
-def prompt_for() -> str:
+def prompt_for(frames: int = 1) -> str:
     """Describe, in a closed vocabulary; never a yes/no."""
     allowed = "\n".join(f'  "{trait}": one of {list(pool)}' for trait, pool in TRAITS.items())
-    return ("Describe the one person in this image for a casting sheet.  Answer with a "
-            "single JSON object and nothing else, with exactly these keys:\n" + allowed +
+    subject = ("Describe the one person in this image for a casting sheet." if frames == 1 else
+               f"This image is {frames} frames of ONE shot laid side by side, all of the same "
+               "person.  Describe that person for a casting sheet from whichever frames show "
+               "them; a trait is unclear only if no frame shows it.")
+    return (subject + "  Answer with a single JSON object and nothing else, with exactly "
+            "these keys:\n" + allowed +
             '\n  "description": two sentences of plain prose about their face, hair and clothes.\n'
             'Use "unclear" for any trait the image does not show plainly.  Judge what is '
             "visible; do not guess from the period or the clothing.")
@@ -118,11 +136,31 @@ def parse_card(text: str) -> TraitCard:
     return TraitCard(**json.loads(found.group(0)))
 
 
-def _ask(name: str, images: dict[str, Path], seed: int, run: Callable) -> TraitCard:
+def contact_sheet(frames: list[Path], dest: Path) -> Path:
+    """The frames side by side in one image, each scaled to the shortest.
+
+    The Qwen3_VQA node reads image[0] of a batch, so a batched three-frame
+    call only ever described the first frame.  One image is seen whole."""
+    from PIL import Image
+    opened = [Image.open(f).convert("RGB") for f in frames]
+    height = min(im.height for im in opened)
+    scaled = [im.resize((round(im.width * height / im.height), height)) for im in opened]
+    sheet = Image.new("RGB", (sum(im.width for im in scaled), height))
+    left = 0
+    for im in scaled:
+        sheet.paste(im, (left, 0))
+        left += im.width
+    sheet.save(dest)
+    return dest
+
+
+def _ask(name: str, images: dict[str, Path], seed: int, run: Callable,
+         prompt: str | None = None) -> TraitCard:
     """One caption call, retried once with the next seed if the answer will not parse."""
     staged = {slot: comfy.stage_image(path) for slot, path in images.items()}
     for attempt in range(2):
-        values = {"prompt": prompt_for(), "temperature": 0.1, "seed": seed + attempt, **staged}
+        values = {"prompt": prompt or prompt_for(), "temperature": 0.1,
+                  "seed": seed + attempt, **staged}
         try:
             return parse_card(run(name, values, TIMEOUT))
         except ValueError as failure:
@@ -130,15 +168,31 @@ def _ask(name: str, images: dict[str, Path], seed: int, run: Callable) -> TraitC
     raise last
 
 
+def _live() -> Callable:
+    """The engine, with its models unloaded first: Qwen3-VL loaded beside H3's
+    staged DiT and text encoder lands half on the CPU (Scarlet run 4: 6:52 to
+    load, 10:23 to answer, past TIMEOUT); resident, it answers in a minute."""
+    comfy.free_models()
+    return comfy.run_text
+
+
+def unseen() -> TraitCard:
+    """The card of a face nobody managed to read: every trait unclear."""
+    return TraitCard(**{trait: "unclear" for trait in TRAITS})
+
+
 def describe(image: Path, seed: int = 42, run: Callable | None = None) -> TraitCard:
     """The trait card of the face in one still."""
-    return _ask(IMAGE_WORKFLOW, {"image_1": Path(image)}, seed, run or comfy.run_text)
+    return _ask(IMAGE_WORKFLOW, {"image_1": Path(image)}, seed, run or _live())
 
 
 def describe_frames(frames: list[Path], seed: int = 42, run: Callable | None = None) -> TraitCard:
-    """The trait card of the person seen across three sampled frames of a clip."""
-    images = {f"frame_{i + 1}": Path(f) for i, f in enumerate(frames[:3])}
-    return _ask(VIDEO_WORKFLOW, images, seed, run or comfy.run_text)
+    """The trait card of the person seen across the sampled frames of a clip."""
+    frames = [Path(f) for f in frames[:3]]
+    # Named after the take: stage_image keeps the bare filename in ComfyUI's input.
+    sheet = contact_sheet(frames, frames[0].parent / f"{frames[0].parent.name}-contact.png")
+    return _ask(IMAGE_WORKFLOW, {"image_1": sheet}, seed, run or _live(),
+                prompt=prompt_for(frames=len(frames)))
 
 
 def differences(a: TraitCard, b: TraitCard) -> list[str]:
@@ -165,13 +219,20 @@ def verifiable(card: TraitCard) -> bool:
     return known(card) >= VERIFIABLE_FROM
 
 
+def distance(a: TraitCard, b: TraitCard) -> float:
+    """How far apart two cards read: a whole difference per trait, NEAR for
+    one notch along an ordered scale."""
+    return sum(NEAR if frozenset((getattr(a, trait), getattr(b, trait))) in NEIGHBOURS else 1.0
+               for trait in differences(a, b))
+
+
 def same_look(a: TraitCard, b: TraitCard) -> bool:
-    return len(differences(a, b)) < DISTINCT_AT
+    return distance(a, b) < DISTINCT_AT
 
 
 def closest(card: TraitCard, bound: dict[str, TraitCard]) -> tuple[str | None, list[str]]:
     """The bound card this one is most like, and what still separates them."""
     if not bound:
         return None, []
-    who = min(bound, key=lambda name: len(differences(card, bound[name])))
+    who = min(bound, key=lambda name: distance(card, bound[name]))
     return who, differences(card, bound[who])

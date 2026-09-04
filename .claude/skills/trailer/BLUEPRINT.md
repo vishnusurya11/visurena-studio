@@ -111,8 +111,9 @@ beat → location-only shot. fallback: drop the beat, re-walk.
 
 **07 clips** — in: `plan.json`, refs. out: `clips/<setup>.mp4`,
 `clips.json` (trait card per take, `similarity`, `differs`, `known`,
-seconds). gate: three frames after the head leak, described by the VLM
-into one card, differ from the reference card in < `DISTINCT_AT` (3)
+seconds). gate: three frames after the head leak, laid side by side in ONE
+contact sheet (the VQA node reads only image[0] of a batch) and described by
+the VLM into one card, differ from the reference card in < `DISTINCT_AT` (3)
 traits; a card seeing < 4 traits is accepted `unverifiable` and flagged.
 ladder: seed ×2 → whole-take close-up ×1; terminal: the BEST take capped at
 0.6 s (the cut sources longer shots of that beat from a neighbour). A beat

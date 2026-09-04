@@ -34,3 +34,28 @@ def test_wait_record_returns_the_whole_record_on_completion(monkeypatch):
     monkeypatch.setattr(comfy, "history", lambda prompt_id: RECORD)
     assert comfy.wait_record("job-1", timeout=1.0) is RECORD
     assert comfy.wait("job-1", timeout=1.0) == comfy.outputs_of(RECORD)
+
+
+def test_free_models_posts_the_unload_request(monkeypatch):
+    sent = {}
+
+    def fake_urlopen(request, timeout=None):
+        sent.update(url=request.full_url, body=request.data)
+        import io
+        return io.BytesIO(b"")
+    monkeypatch.setattr(comfy.urllib.request, "urlopen", fake_urlopen)
+    comfy.free_models()
+    assert sent["url"].endswith("/free")
+    assert b'"unload_models": true' in sent["body"] and b'"free_memory": true' in sent["body"]
+
+
+def test_interrupt_posts_to_the_interrupt_endpoint(monkeypatch):
+    sent = {}
+
+    def fake_urlopen(request, timeout=None):
+        sent.update(url=request.full_url)
+        import io
+        return io.BytesIO(b"")
+    monkeypatch.setattr(comfy.urllib.request, "urlopen", fake_urlopen)
+    comfy.interrupt()
+    assert sent["url"].endswith("/interrupt")

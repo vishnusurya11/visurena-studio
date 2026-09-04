@@ -17,7 +17,7 @@ from PIL import Image
 from scripts.trailer import step_07_clips as step
 from scripts.trailer.build_clips import FRAMING
 from studio import db
-from studio.describe import DISTINCT_AT, TraitCard
+from studio.describe import DISTINCT_AT, TIMEOUT, TraitCard
 from studio.learnings import load
 from studio.run_budget import TRAILER_SHARES, Budget
 from studio.trailer_run import RunContext
@@ -29,6 +29,8 @@ NEAR = SHEET.model_copy(update={"headgear": "none"})                       # 1 a
 FAR = SHEET.model_copy(update={"hair_colour": "fair", "headgear": "none",
                                "facial_hair": "beard", "build": "stocky"})  # 4 apart: not him
 MID = SHEET.model_copy(update={"hair_colour": "grey", "headgear": "none", "build": "heavy"})  # 3
+NOTCHED = SHEET.model_copy(update={"age": "old", "hair_colour": "brown", "headgear": "none"})  # 2.0
+TILTED = FAR.model_copy(update={"age": "old"})                            # 4.5 apart
 BLIND = SHEET.model_copy(update={t: "unclear" for t in ("age", "hair_colour", "headgear", "build")})
 
 
@@ -125,6 +127,37 @@ class TestRun:
         assert rows[0].measured == 4 and rows[0].threshold == DISTINCT_AT
         seeds = [c["seed"] for c in rendered["calls"] if c["dest"].startswith("B00")]
         assert len(seeds) == 2 and len(set(seeds)) == 2
+
+    def test_one_notch_drifts_on_ordered_traits_still_bind(self, ctx, rendered):
+        """Scarlet run 4, B02: the sheet read old/white/bowler Holmes as
+        middle-aged/grey/top hat -- three traits, two of them one notch."""
+        rendered["cards"] = [NOTCHED]
+        step.run(ctx.codex_id, ctx)
+        clip = next(c for c in clips_doc(ctx)["clips"] if c["beat_id"] == "B00")
+        assert clip["differs"] == ["age", "hair_colour", "headgear"] and clip["capped"] is None
+        assert load(ctx.learnings_path) == []
+
+    def test_the_learning_records_the_distance_not_the_count(self, ctx, rendered):
+        rendered["cards"] = [TILTED, NEAR]
+        step.run(ctx.codex_id, ctx)
+        assert load(ctx.learnings_path)[0].measured == 4.5
+
+    def test_a_gate_timeout_ships_the_take_unverified_instead_of_killing_the_run(
+            self, ctx, rendered, monkeypatch):
+        """Scarlet run 4: one VLM call took 10:23 and the TimeoutError ended the
+        run with 19 beats unrendered.  The policy is retry, then degrade and
+        ship: the engine is interrupted, the take ships flagged, the run goes on."""
+        stopped = []
+        monkeypatch.setattr(step.comfy, "interrupt", lambda: stopped.append(True))
+
+        def slow(frames, seed):
+            raise TimeoutError("job-9 still running after 600.0s")
+        monkeypatch.setattr(step, "describe_frames", slow)
+        step.run(ctx.codex_id, ctx)
+        clip = next(c for c in clips_doc(ctx)["clips"] if c["beat_id"] == "B00")
+        assert clip["capped"] is None and stopped == [True]
+        rows = load(ctx.learnings_path)
+        assert rows[0].action == "accepted_on_timeout" and rows[0].threshold == f"{TIMEOUT}s"
 
     def test_a_face_that_never_binds_ships_its_best_take_short(self, ctx, rendered):
         rendered["cards"] = [FAR, MID, FAR]

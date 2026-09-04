@@ -15,12 +15,14 @@ from __future__ import annotations
 
 import json
 from pathlib import Path
+from typing import Callable
 
 from scripts.trailer.build_clips import (SEED_BASE, bound_slots, is_complete, recipe_for,
                                          render_take, take_values)
 from studio.clip_cache import is_current
-from studio.describe import (DISTINCT_AT, TraitCard, describe, describe_frames, differences,
-                             known, same_look, shared, verifiable)
+from studio import comfy
+from studio.describe import (DISTINCT_AT, TIMEOUT, TraitCard, describe, describe_frames,
+                             differences, distance, known, same_look, shared, unseen, verifiable)
 from studio.identity_gate import HEAD_LEAK_SECONDS, frame_at, frame_times
 from studio.ladder import Ladder, Rung, climb
 from studio.learnings import Learning
@@ -81,13 +83,29 @@ def frames_of(video: Path, seconds: float, work: Path) -> list[Path]:
     return [frame_at(video, when, work / f"{when:.2f}.png") for when in frame_times(seconds)]
 
 
-def measure(video: Path, reference: TraitCard | None, work: Path, seed: int) -> dict:
+def read_card(frames: list[Path], seed: int, learn: Callable) -> TraitCard:
+    """The take's card, or an unseen one when the model outlives TIMEOUT.
+
+    Scarlet run 4: one call took 10:23 and its TimeoutError ended the run with
+    19 beats unrendered.  Retry, then degrade and ship: the job is interrupted
+    so it cannot hold the queue, the take ships flagged, the run goes on."""
+    try:
+        return describe_frames(frames, seed=seed)
+    except TimeoutError as slow:
+        comfy.interrupt()
+        learn(Learning(step=STEP_ID, gate="identity", measured=str(slow)[:80],
+                       threshold=f"{TIMEOUT}s", action="accepted_on_timeout"))
+        return unseen()
+
+
+def measure(video: Path, reference: TraitCard | None, work: Path, seed: int,
+            learn: Callable = lambda row: None) -> dict:
     """What the vision model reads in the take, against the reference's card."""
     seconds = clip_seconds(video)
     if reference is None:
         return {"path": video, "seconds": seconds, "card": None, "similarity": None,
                 "differs": [], "known": 0}
-    card = describe_frames(frames_of(video, seconds, work), seed=seed)
+    card = read_card(frames_of(video, seconds, work), seed, learn)
     alike, apart = shared(card, reference), differences(card, reference)
     return {"path": video, "seconds": seconds, "card": card, "differs": apart, "known": known(card),
             "similarity": round(len(alike) / max(1, len(alike) + len(apart)), 3)}
@@ -130,8 +148,8 @@ def bind_beat(ctx, index: int, beat: dict, plan: dict, refs: dict, style: str) -
                              tightest="close" if rung.name == "alternate_setup" else None)
         take = render_or_reuse(values, bound, refs, book,
                                ctx.out_dir / "clips/takes" / f"{beat_id}-{seed}.mp4")
-        result = dict(measure(take, reference, ctx.out_dir / "work/identity" / take.stem, seed),
-                      seed=seed)
+        result = dict(measure(take, reference, ctx.out_dir / "work/identity" / take.stem, seed,
+                              learn=ctx.learn), seed=seed)
         tries.append(result)
         return result
 
@@ -142,7 +160,7 @@ def bind_beat(ctx, index: int, beat: dict, plan: dict, refs: dict, style: str) -
             ctx.learn(Learning(step=STEP_ID, gate="identity", measured=result["known"],
                                threshold="verifiable", action="accepted_unverifiable"))
             return True, None, DISTINCT_AT
-        return same_look(result["card"], reference), len(result["differs"]), DISTINCT_AT
+        return same_look(result["card"], reference), distance(result["card"], reference), DISTINCT_AT
 
     try:
         outcome = climb(LADDER, STEP_ID, attempt, gate, ctx.budget, ctx.learn, gate_name="identity")

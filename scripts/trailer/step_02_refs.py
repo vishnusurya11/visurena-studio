@@ -19,7 +19,8 @@ from pathlib import Path
 
 from scripts.trailer.build_refs import describe_location, generate, refs_needed
 from studio.cast_card import POOLS, cards_for, infer_gender, render_card
-from studio.describe import DISTINCT_AT, TraitCard, closest, describe, same_look, shared, verifiable
+from studio.describe import (DISTINCT_AT, TraitCard, closest, describe, distance, same_look,
+                             shared, verifiable)
 from studio.distinguish import distinguish
 from studio.ladder import Ladder, Rung, climb
 from studio.learnings import Learning
@@ -97,7 +98,7 @@ def bind_one(ctx, book: Path, index: int, char_id: str, card: dict, palette: str
             return True, None, DISTINCT_AT
         who = result["identity"]["closest"]
         if who is None or not same_look(result["card"], bound[who]):
-            return True, len(result["identity"]["differs"]), DISTINCT_AT
+            return True, distance(result["card"], bound[who]) if who else None, DISTINCT_AT
         state.update(other=bound[who], shared=shared(result["card"], bound[who]))
         return False, f"{who}: shares {', '.join(state['shared'])}", DISTINCT_AT
 
