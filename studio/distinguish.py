@@ -42,12 +42,47 @@ def expected(card: dict) -> TraitCard:
     return TraitCard(figure=figure, build=build, **seen)
 
 
+def owed(card: dict) -> list[str]:
+    """The reliable traits the render owes: those of the slots the book
+    asserted (`cast_card` records them); every one when the card predates
+    the field.  Scarlet run 7: Holmes's card said 'receding sandy hair' from
+    the rotation, the render put dark hair under his bowler four times, and
+    the lead went unbound over an invention."""
+    if "asserted" not in card:
+        return list(RELIABLE)
+    return [trait for slot in card["asserted"] for trait in SLOT_TRAITS.get(slot, ())
+            if trait in RELIABLE]
+
+
 def disobeyed(card: dict, reading: TraitCard) -> list[str]:
-    """The reliable traits the render ignored: seen, and more than a notch
+    """The owed traits the render ignored: seen, and more than a notch
     from what the card asked for."""
     asked = expected(card)
-    return [trait for trait in RELIABLE if trait in differences(asked, reading)
+    return [trait for trait in owed(card) if trait in differences(asked, reading)
             and frozenset((getattr(asked, trait), getattr(reading, trait))) not in NEIGHBOURS]
+
+
+def _drawn(slot: str, reading: TraitCard) -> str | None:
+    """The pool phrase closest to what the render drew in one slot: the most
+    traits matched, exact before partial; None when nothing was read."""
+    seen = {t: getattr(reading, t) for t in SLOT_TRAITS[slot] if getattr(reading, t) != "unclear"}
+    if not seen:
+        return None
+    score = lambda phrase: sum(coarse(slot, phrase, t) == v for t, v in seen.items())
+    best = max(cast_card.POOLS[slot], key=score)
+    return best if score(best) else None
+
+
+def adopt(card: dict, reading: TraitCard) -> dict:
+    """The card rewritten to what the render drew on the slots the book left
+    to invention, so the text and the sheet say the same thing downstream."""
+    new = dict(card)
+    for slot, traits in SLOT_TRAITS.items():
+        if slot in card.get("asserted", ()) or not any(t in RELIABLE for t in traits):
+            continue
+        if any(coarse(slot, card[slot], t) != getattr(reading, t) != "unclear" for t in traits):
+            new[slot] = _drawn(slot, reading) or card[slot]
+    return new
 
 
 def _move(slot: str, current: str, avoid: dict[str, str], taken: set[str]) -> str:

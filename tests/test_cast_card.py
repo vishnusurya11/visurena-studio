@@ -73,7 +73,8 @@ class TestRefuseCollision:
         readers called them near-identical -- what collided was age, hair,
         costume and light, which is what this measures."""
         cards = cards_for(CAST, {})
-        assert all(isinstance(v, str) for c in cards.values() for v in c.values())
+        assert all(isinstance(v, str) for c in cards.values()
+                   for k, v in c.items() if k != "asserted")
 
 
 class TestRenderCard:
@@ -266,3 +267,28 @@ class TestUnmarkedAdults:
         from studio.cast_card import card_for, render_card
         text = render_card(card_for("lucy", {}, "the young girl", gender="woman"))
         assert "clean-shaven" not in text
+
+
+class TestAsserted:
+    """Which slots the BOOK filled.  Scarlet run 7: Holmes's card said
+    'receding sandy hair' from the rotation, the render put dark hair under
+    his bowler four times, and the fidelity gate refused every sheet for
+    disobeying an invention.  The book is silent on Holmes's hair; a slot it
+    left to invention is the render's to decide."""
+
+    def test_a_book_matched_slot_is_asserted(self):
+        card = card_for("lestrade", {}, "A thin man with a heavy walrus moustache.")
+        assert card["asserted"] == ["facial_hair"]
+
+    def test_a_stated_slot_is_asserted(self):
+        card = card_for("gregson", {}, "a man of few words",
+                        stated={"hair": "fair hair parted in the middle"})
+        assert card["asserted"] == ["hair"]
+        assert card_for("gregson", {}, "a man in a coat")["asserted"] == ["garment"]
+
+    def test_an_invented_card_asserts_nothing(self):
+        assert card_for("holmes", {}, "")["asserted"] == []
+        assert card_for("holmes", {}, "limited physical description")["asserted"] == []
+
+    def test_a_womans_beardlessness_is_asserted(self):
+        assert card_for("lucy", {}, "the young girl", gender="woman")["asserted"] == ["facial_hair"]

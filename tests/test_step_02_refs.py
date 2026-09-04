@@ -196,6 +196,25 @@ class TestRun:
         first, second, third = sheet_prompts(rendered)[-3:]
         assert first == second == third
 
+    def test_an_invented_slot_the_render_reinterprets_binds_and_the_card_follows(
+            self, tmp_path, rendered):
+        """Scarlet run 7: the book is silent on Holmes's hair, the rotation
+        said 'receding sandy hair', the render put dark hair under his bowler
+        four times, and the lead went UNBOUND over an invention.  A render
+        owes the book; a slot the book left empty is the render's, and the
+        card is rewritten to what was drawn so the take prompts agree with
+        the sheet."""
+        ctx = make_ctx(tmp_path, {WATSON: DISTINCT[WATSON], HOLMES: ""})
+        holmes = step.cast_cards(ctx.book_dir, [WATSON, HOLMES])[HOLMES]
+        assert holmes["asserted"] == [] and expected(holmes).hair_colour == "dark brown"
+        rendered["drifts"] = [None, {"hair_colour": "fair", "hair_length": "short"}]
+        step.run(ctx.codex_id, ctx)
+        doc = refs_doc(ctx)
+        assert doc["unbound"] == [] and load(ctx.learnings_path) == []
+        record = next(r for r in doc["refs"] if r["entity_id"] == HOLMES)
+        assert "receding sandy hair" in record["physical"]
+        assert holmes["hair"] not in record["physical"]
+
     def test_a_persistent_collision_unbinds_the_character(self, close_ctx, rendered):
         watson = expected(step.cast_cards(close_ctx.book_dir, [WATSON])[WATSON])
         rendered["drifts"] = [None] + [dict(watson)] * 4
@@ -264,3 +283,15 @@ class TestAttemptShape:
     def test_every_try_gets_a_seed_no_earlier_try_used(self):
         seeds = [step.seed_for(0, rung, i) for rung in step.LADDER.rungs for i in range(rung.tries)]
         assert len(set(seeds)) == len(seeds)
+
+
+class TestFollowed:
+    def test_the_text_follows_the_render_on_invented_slots_only(self):
+        card = {"age": "about forty", "hair": "receding sandy hair", "facial_hair": "clean-shaven",
+                "headgear": "a brown bowler hat", "garment": "a frock coat", "neckwear": "a cravat",
+                "complexion": "a sallow complexion", "gender": "man", "asserted": ["facial_hair"]}
+        drawn = expected(card).model_copy(update={"hair_colour": "dark brown", "hair_length": "medium",
+                                                  "facial_hair": "beard"})
+        result = step.followed({"card": drawn, "path": None}, card)
+        assert "dark hair swept back" in result["physical"] and "clean-shaven" in result["physical"]
+        assert result["card"] is drawn

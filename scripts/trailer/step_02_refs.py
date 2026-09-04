@@ -25,7 +25,7 @@ from scripts.trailer.build_refs import describe_location, generate, refs_needed
 from studio.cast_card import POOLS, cards_for, infer_gender, render_card
 from studio.describe import (DISTINCT_AT, TIMEOUT, TraitCard, closest, describe, distance,
                              patiently, same_look, shared, verifiable)
-from studio.distinguish import disobeyed, distinguish
+from studio.distinguish import adopt, disobeyed, distinguish
 from studio.ladder import Ladder, Rung, climb
 from studio.learnings import Learning
 from studio.portrait import physical_text, portraits_for, stated
@@ -133,7 +133,14 @@ def bind_one(ctx, book: Path, index: int, char_id: str, card: dict, palette: str
     if outcome.terminal:
         return None
     bound[char_id] = outcome.result["card"]
-    return outcome.result
+    return followed(outcome.result, state["card"])
+
+
+def followed(result: dict, card: dict) -> dict:
+    """The bound result with its text rewritten to what the render drew on
+    the slots the book left to invention (`distinguish.adopt`), so every
+    later prompt agrees with the sheet it conditions on."""
+    return {**result, "physical": render_card(adopt(card, result["card"]))}
 
 
 def bind_cast(ctx, book: Path, characters: list[str], palette: str

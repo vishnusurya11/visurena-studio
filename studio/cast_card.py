@@ -215,7 +215,8 @@ def card_for(entity_id: str, taken: dict[str, set[str]],
     characters could and did land on the same features.
     """
     offset = sum(ord(ch) * (i + 1) for i, ch in enumerate(entity_id))
-    card: dict[str, str] = {}
+    card: dict = {}
+    asserted: list[str] = []
     for slot, pool in POOLS.items():
         spent = taken.get(slot, set())
         banded = BANDED.get(age_band(physical), {}).get(slot)
@@ -228,14 +229,21 @@ def card_for(entity_id: str, taken: dict[str, set[str]],
         options = [v for v in allowed if v not in spent] or allowed
         card[slot] = (for_role[0] if for_role
                       else from_book or options[offset % len(options)])
+        if from_book and not for_role:
+            asserted.append(slot)
     card.update(stated or {})
     card['gender'] = gender
     if gender == 'woman':
         # A beard is an OBJECT, and drawing one on a woman is not a small
         # error: Lucy came back indistinguishable from Gregson at 0.541.
         card['facial_hair'] = NO_BEARD
+        asserted.append('facial_hair')
     if physical.strip():
         card['book'] = physical.strip()
+    # The slots the book (or the person's sex) filled are the ones a render
+    # OWES; the rest were invented to tell the cast apart, and the render
+    # decides them (Scarlet run 7: Holmes unbound over invented sandy hair).
+    card['asserted'] = sorted(set(asserted) | set(stated or {}))
     return card
 
 

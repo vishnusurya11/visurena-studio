@@ -76,10 +76,15 @@ differs from every bound character in ≥ `DISTINCT_AT` (3) seen traits -
 the `refuse_collision` rule applied to pixels. A card seeing < 4 traits is
 accepted `unverifiable`. The VLM is asked to DESCRIBE in a closed
 vocabulary, never yes/no. A render is judged for FIDELITY first: a card
-whose reading disobeys its own words on a channel-reliable trait (hair
+whose reading disobeys the BOOK'S words on a channel-reliable trait (hair
 colour/length, facial hair, headgear - `distinguish.RELIABLE`; complexion,
 build and age are dead on this channel, run 4: 7/7 sheets read fair/average)
-fails `faithful`, not the collision gate. ladder: the first render, then
+fails `faithful`, not the collision gate. Only the slots the book filled
+(`card["asserted"]`, plus a woman's beardlessness) are owed; a slot the
+rotation invented to separate the cast is the render's to decide, and once
+bound the card's text is rewritten to what was drawn (`distinguish.adopt`)
+so take prompts agree with the sheet (run 7: Holmes unbound over invented
+sandy hair under a bowler). ladder: the first render, then
 `distinguish` ×3 - a collision rewrites exactly the traits that matched, to
 phrases no other character holds, and drops the book's sentence when it
 asserted the moved trait; a disobedient render goes again AS WRITTEN on a

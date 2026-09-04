@@ -90,6 +90,14 @@ title_on_downbeat`. Sent to Telegram by hand as a 39 MB copy (defect 4).
   render times out for the render's reason.
 - Holmes's hair and facial hair are still invented when the book is
   silent; the card should say "unspecified" and let the render decide, so
-  the fidelity gate does not enforce an invention.
+  the fidelity gate does not enforce an invention. CLOSED 2026-09-04, the
+  hard way: run 7's first launch spent 20 min refusing four Holmes sheets
+  for `hair_colour` (dark hair under a bowler; the card said "receding
+  sandy hair") and unbound the lead. The invention stays on the card (the
+  cast must still be told apart in the prompt) but only `asserted` slots
+  are owed, and the bound card's text follows the render
+  (`test_an_invented_slot_the_render_reinterprets_binds_and_the_card_follows`).
+  Measured on the way: a sheet render + read costs 286 s, not the 90 s the
+  rung is priced at (step 02's `RENDER_SECONDS`/`DESCRIBE_SECONDS`).
 - Retire the OpenCV identity parts (`identity.py`) now that the trait card
   gates steps 02 and 07; FP8 Qwen3-VL and moving it to NVMe are user-side.

@@ -34,7 +34,14 @@ Evidence: `docs/analysis/research/trailer-music-structure.md`,
   owned. A disobedient render now goes again as written; a moved slot the
   book itself asserted drops the book sentence from the prompt, which had
   been contradicting the card ("a full beard ... with a heavy walrus
-  moustache"). `cast_card.infer_gender` also tokenised on spaces after
+  moustache"). Run 7 (2026-09-04): the book is silent on Holmes's hair, the
+  rotation said "receding sandy hair", the render put dark hair under his
+  bowler four times, and the LEAD went unbound over an invention. A render
+  owes the BOOK: `cast_card` records the slots the book (or the person's
+  sex) filled as `asserted`, `disobeyed` counts only those, and a bound
+  sheet's text follows the render on the rest (`distinguish.adopt`), so
+  the take prompts agree with the sheet they condition on.
+  `cast_card.infer_gender` also tokenised on spaces after
   dropping only full stops, so "a thin man," was nobody. The SFace cosine gate
   (`identity.py`, 0.363) it replaced said only THAT two sheets read alike,
   so its one rung was another seed: Lestrade collided five times in a row

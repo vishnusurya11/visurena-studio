@@ -114,3 +114,38 @@ class TestRewrite:
     def test_the_rewrite_is_stable(self):
         once = distinguish.distinguish(CARD, ["hair_colour"], SEEN)
         assert once == distinguish.distinguish(CARD, ["hair_colour"], SEEN)
+
+
+class TestOwed:
+    """Scarlet run 7: Holmes's card said 'receding sandy hair' from the
+    rotation, the render put dark hair under his bowler four times, and the
+    gate refused every sheet -- the lead went unbound over an invention.
+    A render owes the book, not the rotation."""
+    INVENTED = {**CARD, "asserted": []}
+    ASSERTED = {**CARD, "asserted": ["hair", "facial_hair", "headgear"]}
+    DRAWN = SEEN.model_copy(update={"hair_colour": "dark brown", "hair_length": "short"})
+
+    def test_only_an_asserted_slot_can_be_disobeyed(self):
+        faithful = distinguish.expected(CARD)
+        drifted = faithful.model_copy(update={"hair_colour": "fair", "facial_hair": "moustache"})
+        assert distinguish.disobeyed(self.ASSERTED, drifted) == ["hair_colour", "facial_hair"]
+        assert distinguish.disobeyed({**CARD, "asserted": ["facial_hair"]}, drifted) == ["facial_hair"]
+        assert distinguish.disobeyed(self.INVENTED, drifted) == []
+
+    def test_a_card_without_the_field_owes_every_reliable_trait(self):
+        drifted = distinguish.expected(CARD).model_copy(update={"hair_colour": "fair"})
+        assert distinguish.disobeyed(CARD, drifted) == ["hair_colour"]
+
+    def test_adopt_moves_an_invented_slot_to_what_was_drawn(self):
+        card = {**CARD, "hair": "receding sandy hair", "asserted": ["facial_hair"]}
+        new = distinguish.adopt(card, self.DRAWN)
+        assert new["hair"] == "dark hair swept back"  # the pool's one dark-brown phrase
+        assert new["facial_hair"] == card["facial_hair"] and new["headgear"] == card["headgear"]
+        exact = self.DRAWN.model_copy(update={"hair_colour": "grey", "hair_length": "bald"})
+        assert distinguish.adopt(card, exact)["hair"] == "a bald crown with grey at the temples"
+
+    def test_adopt_leaves_an_asserted_slot_and_an_unread_one_alone(self):
+        card = {**CARD, "hair": "receding sandy hair", "asserted": ["hair"]}
+        assert distinguish.adopt(card, self.DRAWN) == card
+        blind = self.DRAWN.model_copy(update={"hair_colour": "unclear", "hair_length": "unclear"})
+        assert distinguish.adopt({**card, "asserted": []}, blind) == {**card, "asserted": []}
