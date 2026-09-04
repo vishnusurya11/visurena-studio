@@ -15,8 +15,9 @@ from __future__ import annotations
 
 import pytest
 
-from studio.cast_card import (TIER_ONE, card_for, cards_for, differences,
-                              refuse_collision, render_card)
+from studio.cast_card import (FACIAL_HAIR, GARMENT, HAIR, HEADGEAR, TIER_ONE, book_match,
+                              card_for, cards_for, differences, refuse_collision,
+                              render_card)
 
 CAST = ["sherlock_holmes", "john_watson", "g_lestrade", "jefferson_hope",
         "john_ferrier", "lucy_ferrier", "tobias_gregson", "stamford"]
@@ -284,7 +285,7 @@ class TestAsserted:
         card = card_for("gregson", {}, "a man of few words",
                         stated={"hair": "fair hair parted in the middle"})
         assert card["asserted"] == ["hair"]
-        assert card_for("gregson", {}, "a man in a coat")["asserted"] == ["garment"]
+        assert card_for("gregson", {}, "a man in a frock coat")["asserted"] == ["garment"]
 
     def test_an_invented_card_asserts_nothing(self):
         assert card_for("holmes", {}, "")["asserted"] == []
@@ -292,3 +293,63 @@ class TestAsserted:
 
     def test_a_womans_beardlessness_is_asserted(self):
         assert card_for("lucy", {}, "the young girl", gender="woman")["asserted"] == ["facial_hair"]
+
+
+class TestBookNamesTheObject:
+    """Scarlet run 7, cards rebuilt offline: Watson "as thin as a lath and as
+    brown as a nut" matched a brown bowler hat and a thin waxed moustache;
+    Hope's "long rifle" matched long black hair and a long untrimmed beard;
+    Lucy "felt long-forgotten thoughts" matched a wide-brimmed felt hat;
+    "tall" put Gregson and Hope both in a tall beaver hat -- every one of
+    them then ASSERTED, so the render owed an adjective the book had spent
+    on something else.  The book asserts an object when it names the object."""
+
+    def test_an_adjective_alone_asserts_nothing(self):
+        watson = "You are as thin as a lath and as brown as a nut."
+        assert book_match(watson, HEADGEAR, "headgear") == ""
+        assert book_match(watson, FACIAL_HAIR, "facial_hair") == ""
+        hope = "clad in the rough dress of a hunter, with a long rifle slung over his shoulders"
+        assert book_match(hope, HAIR, "hair") == ""
+        assert book_match(hope, FACIAL_HAIR, "facial_hair") == ""
+        assert book_match("felt long-forgotten thoughts revive", HEADGEAR, "headgear") == ""
+        assert book_match("a tall, white-faced, flaxen-haired man", HEADGEAR, "headgear") == ""
+
+    def test_the_object_named_with_an_attribute_matches(self):
+        assert "frock" in book_match("a tall man in a black frock coat", GARMENT, "garment")
+        assert book_match("a clean-shaven face", FACIAL_HAIR, "facial_hair") == "clean-shaven"
+        assert "bowler" in book_match("a brown bowler on his head", HEADGEAR, "headgear")
+        assert "walrus" in book_match("a heavy walrus moustache", FACIAL_HAIR, "facial_hair")
+
+    def test_the_bare_object_asserts_no_kind(self):
+        assert book_match("he wore a hat", HEADGEAR, "headgear") == ""
+        assert book_match("a man in a coat", GARMENT, "garment") == ""
+
+    def test_a_slot_with_no_object_word_matches_as_before(self):
+        assert book_match("as thin as a lath", ("a thin wiry frame",)) == "a thin wiry frame"
+
+    def test_a_womans_age_is_hers(self):
+        card = card_for("lucy_ferrier", {}, "", gender="woman",
+                        stated={"age": "in his late twenties"})
+        assert card["age"] == "in her late twenties"
+        young = card_for("lucy_ferrier", {}, "a young girl", gender="woman")
+        assert "his" not in young["age"].split()
+
+
+class TestStatedIsReservedFirst:
+    """Scarlet run 7: Gregson's flaxen hair is stated as "receding sandy
+    hair", but Holmes's card was built first and the rotation had already
+    handed him the same phrase -- the book's word arrived too late to be
+    avoided."""
+
+    def test_an_invented_slot_avoids_what_a_later_card_states(self):
+        stated = {"tobias_gregson": {"hair": "receding sandy hair"}}
+        cards = cards_for(["sherlock_holmes", "tobias_gregson"], {}, stated=stated)
+        assert cards["tobias_gregson"]["hair"] == "receding sandy hair"
+        assert cards["sherlock_holmes"]["hair"] != "receding sandy hair"
+
+    def test_a_woman_is_not_put_in_a_top_hat(self):
+        for taken in ({}, {"headgear": {"a wide-brimmed felt hat"}}):
+            card = card_for("lucy_ferrier", taken, "", gender="woman")
+            assert "bonnet" in card["headgear"]
+        assert card_for("john_watson", {}, "", gender="man")["headgear"] not in (
+            "a straw bonnet tied with ribbon", "a plain cotton sun bonnet")

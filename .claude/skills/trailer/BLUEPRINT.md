@@ -84,7 +84,10 @@ fails `faithful`, not the collision gate. Only the slots the book filled
 rotation invented to separate the cast is the render's to decide, and once
 bound the card's text is rewritten to what was drawn (`distinguish.adopt`)
 so take prompts agree with the sheet (run 7: Holmes unbound over invented
-sandy hair under a bowler). ladder: the first render, then
+sandy hair under a bowler). The book fills a slot when it NAMES the object
+and an attribute of it (`cast_card.OBJECT`/`BARE`: "a brown bowler" yes,
+"as brown as a nut" no, "a hat" no kind), and its words are reserved for
+the whole cast before any slot is invented. ladder: the first render, then
 `distinguish` ×3 - a collision rewrites exactly the traits that matched, to
 phrases no other character holds, and drops the book's sentence when it
 asserted the moved trait; a disobedient render goes again AS WRITTEN on a

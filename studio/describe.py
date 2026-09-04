@@ -76,7 +76,7 @@ SYNONYMS: dict[str, dict[str, tuple[str, ...]]] = {
     "facial_hair": {"beard": ("stubble", "unshaven"), "whiskers": ("sideburn", "muttonchop"),
                     "clean-shaven": ("none", "no facial hair", "clean shaven", "shaven")},
     "headgear": {"none": ("bare", "no hat", "hatless"), "cap": ("flat cap", "cloth cap"),
-                 "other hat": ("hat", "boater")},
+                 "other hat": ("hat", "boater", "bonnet")},
     "complexion": {"pale": ("ashen", "white"), "ruddy": ("florid", "sunburn", "red"),
                    "dark": ("tan", "brown"), "fair": ("freckl", "light")},
     "build": {"slight": ("thin", "lean", "wiry", "slender"), "heavy": ("stout", "fat", "portly"),

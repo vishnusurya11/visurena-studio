@@ -40,7 +40,15 @@ Evidence: `docs/analysis/research/trailer-music-structure.md`,
   owes the BOOK: `cast_card` records the slots the book (or the person's
   sex) filled as `asserted`, `disobeyed` counts only those, and a bound
   sheet's text follows the render on the rest (`distinguish.adopt`), so
-  the take prompts agree with the sheet they condition on.
+  the take prompts agree with the sheet they condition on. Rebuilding the
+  cards offline showed WHY so much was asserted: `book_match` scored
+  adjectives, so Watson "as brown as a nut" owned a brown bowler hat, Hope's
+  "long rifle" long black hair and a long untrimmed beard, Lucy "felt
+  long-forgotten thoughts" a felt hat, and "tall" put two men in a tall
+  beaver hat. The book asserts an object when it NAMES it (`OBJECT`) with an
+  attribute (`BARE`): "a hat" asserts no kind of hat. Stated values are
+  reserved before the rotation invents (Gregson's stated sandy hair had
+  already gone to Holmes), a woman's age is hers, and women get bonnets.
   `cast_card.infer_gender` also tokenised on spaces after
   dropping only full stops, so "a thin man," was nobody. The SFace cosine gate
   (`identity.py`, 0.363) it replaced said only THAT two sheets read alike,

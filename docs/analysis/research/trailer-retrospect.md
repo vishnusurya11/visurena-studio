@@ -98,6 +98,15 @@ title_on_downbeat`. Sent to Telegram by hand as a 39 MB copy (defect 4).
   are owed, and the bound card's text follows the render
   (`test_an_invented_slot_the_render_reinterprets_binds_and_the_card_follows`).
   Measured on the way: a sheet render + read costs 286 s, not the 90 s the
-  rung is priced at (step 02's `RENDER_SECONDS`/`DESCRIBE_SECONDS`).
+  rung is priced at (step 02's `RENDER_SECONDS`/`DESCRIBE_SECONDS`). And
+  rebuilding the five Scarlet cards offline found the generator of the
+  over-assertion: `book_match` matched adjectives ("brown as a nut" -> a
+  brown bowler hat; "long rifle" -> long black hair; "tall" -> a tall beaver
+  hat on two men; "felt long-forgotten" -> a felt hat), each then owed by
+  the render. It now needs the object named plus one attribute
+  (`TestBookNamesTheObject`); stated values are reserved cast-wide before
+  invention; a woman's age reads "in her"; women get bonnets, not top hats.
+  After the fix the five cards share nothing in Tier One and only
+  clean-shaven between Hope and Lucy.
 - Retire the OpenCV identity parts (`identity.py`) now that the trait card
   gates steps 02 and 07; FP8 Qwen3-VL and moving it to NVMe are user-side.

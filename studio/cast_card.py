@@ -24,7 +24,8 @@ import re
 HEADGEAR = ("a black silk top hat", "a brown bowler hat", "a tweed deerstalker",
             "a soft cloth cap", "a wide-brimmed felt hat", "a bare head",
             "a custodian helmet", "a straw boater", "a fur travelling cap",
-            "a flat tweed cap", "a tall beaver hat", "a knitted watch cap",)
+            "a flat tweed cap", "a tall beaver hat", "a knitted watch cap",
+            "a straw bonnet tied with ribbon", "a plain cotton sun bonnet",)
 FACIAL_HAIR = ("clean-shaven", "a full dark beard", "grey side-whiskers",
                "a heavy walrus moustache", "a short pointed beard",
                "a thin waxed moustache", "muttonchop whiskers",
@@ -54,7 +55,8 @@ ROLE_ITEMS = {
 distinguishing feature, it is a different character -- and the first run of
 this module put one on him."""
 
-FEMALE_ONLY = ("a slate-blue shawl and plain dress", "a lace collar")
+FEMALE_ONLY = ("a slate-blue shawl and plain dress", "a lace collar",
+               "a straw bonnet tied with ribbon", "a plain cotton sun bonnet")
 """Never assigned to a man, and never to an unknown: 'person' must not quietly
 mean 'put them in a gown'.  Watson's own description carries no pronoun, so
 inference returned 'person', and he was rendered in a dress at seventy."""
@@ -161,15 +163,52 @@ DECADES = ("twenties", "thirty", "thirties", "forty", "forties", "fifty",
            "fifties", "sixty", "sixties", "seventy", "seventies")
 
 
-def book_match(physical: str, pool: tuple[str, ...]) -> str:
+# The words that name a slot's OBJECT.  A pool phrase is an attribute on an
+# object ("a brown bowler hat"), and the book asserts the object only when it
+# names it: Watson "as brown as a nut" is not a hat, Hope's "long rifle" is
+# not long hair, "tall" is not a tall beaver hat (Scarlet run 7, every one of
+# them asserted, so the render owed an adjective spent on something else).
+OBJECT = {
+    "headgear": {"hat", "cap", "helmet", "bonnet", "hood", "bowler", "topper",
+                 "deerstalker", "boater", "bareheaded", "hatless"},
+    "facial_hair": {"moustache", "mustache", "beard", "bearded", "whiskers",
+                    "shaven", "unshaven", "stubble", "stubbled"},
+    "garment": {"coat", "overcoat", "jacket", "cloak", "ulster", "dress", "shawl",
+                "waistcoat", "uniform", "gown", "suit", "frock", "tweed", "robe"},
+    "neckwear": {"collar", "cravat", "tie", "necktie", "muffler", "scarf",
+                 "neckerchief", "stock"},
+    "hair": {"hair", "haired", "bald", "curls", "locks"},
+    "age": {"year", "years", "aged", "old", "young", "youth", "elderly"},
+    "complexion": {"complexion", "face", "faced", "cheek", "cheeks", "skin",
+                   "countenance"},
+}
+# Naming the object alone ("he wore a hat") asserts no KIND of it.
+BARE = {"hat", "cap", "coat", "jacket", "collar", "tie", "hair", "haired", "beard",
+        "moustache", "mustache", "face", "faced", "complexion", "year", "years",
+        "old", "young"}
+
+
+def names_object(physical: str, slot: str) -> bool:
+    """Whether the book's words name the thing this slot is about at all."""
+    if slot not in OBJECT:
+        return True
+    return bool(OBJECT[slot] & set(re.findall(r"[a-z]+", physical.lower())))
+
+
+def _overlap(physical: str, value: str) -> set[str]:
+    words = {w.strip('.,;:') for w in physical.lower().split()} - GENERIC
+    return ({w.strip('.,;:') for w in value.lower().split()} - GENERIC) & words
+
+
+def book_match(physical: str, pool: tuple[str, ...], slot: str = "") -> str:
     """The pool value the book's own description actually points at.
 
     Authority order is the book first, then dress convention, then invention.
     Invention is only for slots the book leaves empty -- a sheet that ignores
     Doyle saying "frock coat" to put Holmes in a riding coat is not a
-    reference to anything.
+    reference to anything.  A match needs the object named (`OBJECT`) and one
+    attribute of it in the book's words, not the bare noun.
     """
-    words = {w.strip('.,;:') for w in physical.lower().split()} - GENERIC
     # An age is a decade, and "thirty" must match "about thirty-five" -- the
     # book saying thirty and the card saying seventy is not a near miss.
     said = [d for d in DECADES if d in physical.lower()]
@@ -177,13 +216,13 @@ def book_match(physical: str, pool: tuple[str, ...]) -> str:
         for value in pool:
             if said[0].rstrip("ies").rstrip("y") in value.lower():
                 return value
+    if not names_object(physical, slot):
+        return ""
     best, score = '', 0
     for value in pool:
-        overlap = len({w.strip('.,;:') for w in value.lower().split()} - GENERIC
-                      & set()) if False else len(
-            ({w.strip('.,;:') for w in value.lower().split()} - GENERIC) & words)
-        if overlap > score:
-            best, score = value, overlap
+        overlap = _overlap(physical, value)
+        if len(overlap) > score and overlap - BARE:
+            best, score = value, len(overlap)
     return best
 
 
@@ -225,7 +264,7 @@ def card_for(entity_id: str, taken: dict[str, set[str]],
         # invention.  A policeman's helmet is not a distinguishing feature to
         # be handed out, it is what a policeman wears.
         for_role = [v for v in ROLE_ITEMS.get(slot, {}).get(role, ()) if v in allowed]
-        from_book = book_match(physical, tuple(allowed)) if physical.strip() else ""
+        from_book = book_match(physical, tuple(allowed), slot) if physical.strip() else ""
         options = [v for v in allowed if v not in spent] or allowed
         card[slot] = (for_role[0] if for_role
                       else from_book or options[offset % len(options)])
@@ -238,6 +277,7 @@ def card_for(entity_id: str, taken: dict[str, set[str]],
         # error: Lucy came back indistinguishable from Gregson at 0.541.
         card['facial_hair'] = NO_BEARD
         asserted.append('facial_hair')
+        card['age'] = card['age'].replace('in his ', 'in her ')
     if physical.strip():
         card['book'] = physical.strip()
     # The slots the book (or the person's sex) filled are the ones a render
@@ -252,7 +292,10 @@ def cards_for(cast: list[str], physical: dict[str, str],
               roles: dict[str, str] | None = None,
               stated: dict[str, dict[str, str]] | None = None) -> dict[str, dict]:
     """A card per character, each avoiding what the others have taken."""
-    taken: dict[str, set[str]] = {slot: set() for slot in POOLS}
+    # The book's words are reserved before anyone invents: Gregson's stated
+    # "receding sandy hair" arrived after the rotation had given it to Holmes.
+    taken: dict[str, set[str]] = {slot: {said[slot] for said in (stated or {}).values()
+                                         if slot in said} for slot in POOLS}
     cards: dict[str, dict] = {}
     for entity_id in cast:
         card = card_for(entity_id, taken, physical.get(entity_id, ""),
