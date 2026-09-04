@@ -49,7 +49,7 @@ class TestCandidates:
         hawk-nosed.  An alias by relation to the speaker is not a name."""
         watson = {"name": "John Watson", "aliases": ["my companion", "Dr. Watson", "his friend",
                                                      "the doctor"]}
-        assert portrait.names_of(watson) == ["John Watson", "the doctor", "Dr. Watson", "Watson"]
+        assert portrait.names_of(watson) == ["John Watson", "Dr. Watson", "the doctor", "Watson"]
 
     def test_the_surname_alone_is_a_name(self):
         """Stamford: 'Whatever have you been doing with yourself, Watson? You
@@ -75,6 +75,18 @@ class TestCandidates:
         named = "“No doubt you had drawn your own conclusions, Gregson,” my friend answered."
         found = portrait.candidates([chapter(3, PLAIN, met, named)], ["Gregson"], first_chapter=3)
         assert [p.n for p in found] == [2]
+
+    def test_the_first_chapter_is_read_from_its_start_up_to_the_first_naming(self):
+        """Ferrier: gaunt and haggard for fifty paragraphs of 'the traveller'
+        before a rescuer asks his name (Scarlet part II, ch 1).  Doyle
+        describes, then names; the description before the name is his.
+        A later chapter's unnamed paragraphs stay nobody's."""
+        seen = "The traveller was a gaunt man, his hair and beard grizzled with the dust."
+        named = "“My name is John Ferrier,” the wanderer explained."
+        later = "A stout, sandy-haired man came up the pathway."
+        found = portrait.candidates([chapter(8, PLAIN, seen, PLAIN, named), chapter(9, later, PLAIN)],
+                                    ["John Ferrier", "Ferrier"], first_chapter=8)
+        assert [(p.chapter, p.n) for p in found] == [(8, 2)]
 
     def test_a_paragraph_without_a_look_word_is_not(self):
         found = portrait.candidates(CHAPTERS, portrait.names_of(HOLMES), first_chapter=1)
@@ -161,6 +173,29 @@ class TestStated:
         got = portrait.stated(Portrait(sentences=["x"], hair="flaxen-haired", age="young"))
         assert got["hair"] in cast_card.POOLS["hair"] and coarse("hair", got["hair"]) == "fair"
         assert got["age"] in cast_card.POOLS["age"] and coarse("age", got["age"]) == "young"
+
+    def test_a_comma_inside_a_phrase_is_not_a_list(self):
+        """Ferrier: 'long, brown hair flecked and dashed with white' snapped to
+        'long black hair' because 'long' alone was read first.  Lists come
+        semicolon-separated from the model; a comma is the book's."""
+        got = portrait.stated(Portrait(sentences=["x"], hair="long, brown hair"))
+        assert got == {"hair": "long, brown hair"}
+
+    def test_a_long_phrase_snaps_onto_the_pool(self):
+        """'brown parchment-like skin drawn tightly over the projecting bones'
+        reads dark, and a card is a list of short attributes."""
+        got = portrait.stated(Portrait(sentences=["x"], complexion=
+                              "brown parchment-like skin drawn tightly over the projecting bones"))
+        assert got["complexion"] in cast_card.POOLS["complexion"]
+        assert coarse("complexion", got["complexion"]) == "dark"
+
+    def test_the_pool_holds_no_long_brown_hair_so_the_colour_decides(self):
+        """Ferrier's 'long, brown hair flecked and dashed with white' reads
+        brown and long; no pool phrase is both.  Colour is the slot's first
+        trait and the one the model obeys."""
+        got = portrait.stated(Portrait(sentences=["x"],
+                              hair="long, brown hair flecked and dashed with white"))
+        assert got["hair"] in cast_card.POOLS["hair"] and coarse("hair", got["hair"]) == "brown"
 
     def test_a_list_of_phrases_states_the_first_one_that_reads(self):
         """Lucy: 'fair face; cheek more ruddy; pale-faced' -- three readings in

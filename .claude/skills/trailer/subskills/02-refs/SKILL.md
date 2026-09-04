@@ -100,11 +100,17 @@ sentence not in the book, once with the violation quoted back, then the
 portrait is silent. Silence falls through to the dossier. Cached in
 `refs/portraits.json`.
 
-Two rules the extraction taught (Scarlet, 2026-09-04):
+In the chapter of first appearance everything before the first naming is a
+candidate too: Ferrier is "the traveller", gaunt and haggard, for fifty
+paragraphs before a rescuer asks his name. Doyle describes, then names.
+
+Three rules the extraction taught (Scarlet, 2026-09-04):
 
 - An alias BY RELATION ("my companion", "his daughter") names whoever the
   speaker is with, not the character: Watson's portrait came back as Holmes's
   six feet and hawk nose. `RELATIONAL` aliases are not names.
+- The analysis lists "Dr. Watson" and never "Watson"; Stamford says "Watson,
+  you are as thin as a lath". A capitalised surname is a name.
 - What the book states outranks the rotation (`portrait.stated` →
   `card_for(stated=)`): "flaxen-haired" in the quoted sentence beside "dark
   hair swept back" from the pool tells the model two things. A phrase the
@@ -113,8 +119,9 @@ Two rules the extraction taught (Scarlet, 2026-09-04):
   most words ("flaxen-haired" → "receding sandy hair", "about forty-three" →
   "about forty"); one it cannot read states nothing ("frightened face"),
   because the fidelity gate reads every slot. A list ("fair face; cheek more
-  ruddy; pale-faced") states its first readable phrase. Build has no reading
-  and is kept as written. `describe.nearest` matches at word starts only:
+  ruddy; pale-faced") states its first readable phrase; a comma is the
+  book's, not a list. A phrase over `WORDS` (6) snaps onto the pool: a card
+  is a list of short attributes. Build has no reading and is kept as written. `describe.nearest` matches at word starts only:
   "flaxen-haired" had read as RED.
 
 ## Filter the description before it reaches a shot

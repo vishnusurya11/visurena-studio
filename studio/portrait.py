@@ -71,8 +71,9 @@ def names_of(character: dict) -> list[str]:
     """The name and its aliases, longest first so 'Mr. Holmes' wins over 'Holmes'."""
     name = character.get("name", "")
     names = {name, surname(name), *character.get("aliases", [])}
+    # Longest first, ties alphabetical: a set's order is not a rule.
     return sorted((n for n in names if len(n) >= 3 and not n.lower().startswith(RELATIONAL)),
-                  key=len, reverse=True)
+                  key=lambda n: (-len(n), n))
 
 
 def surname(name: str) -> str:
@@ -98,16 +99,20 @@ def candidates(chapters: list[dict], names: list[str], first_chapter: int,
                span: int = SPAN, cap: int = CAP) -> list[Passage]:
     """Paragraphs about looks that name the person or sit next to one that does:
     Doyle's Holmes is 'he' the paragraph after his name, his Gregson is 'a
-    tall, white-faced, flaxen-haired man' the paragraph before."""
+    tall, white-faced, flaxen-haired man' the paragraph before.  In the
+    chapter of first appearance, everything before the first naming counts
+    too: Ferrier is 'the traveller', gaunt and haggard, for fifty paragraphs
+    before a rescuer asks his name."""
     found: list[Passage] = []
     for chapter in chapters:
         if not first_chapter <= chapter["n"] < first_chapter + span:
             continue
         paras = chapter["paragraphs"]
         named = [mentions(p["text"], names) for p in paras]
+        first_named = named.index(True) if chapter["n"] == first_chapter and any(named) else 0
         for i, para in enumerate(paras):
             around = named[max(i - 1, 0):i + 2]
-            if any(around) and looks(para["text"]):
+            if (any(around) or i < first_named) and looks(para["text"]):
                 found.append(Passage(chapter=chapter["n"], n=para["n"], text=para["text"]))
     return found[:cap]
 
@@ -192,7 +197,11 @@ def readings(slot: str, phrase: str) -> dict[str, str]:
     return {trait: value for trait, value in read.items() if value != "unclear"}
 
 
-def snap(slot: str, phrase: str) -> str:
+WORDS = 6
+"""A card is a list of short attributes: a longer phrase snaps onto the pool."""
+
+
+def snap(slot: str, parts: list[str]) -> str:
     """The book's words when the model reads them whole, else the pool phrase
     that reads the same, else nothing.
 
@@ -201,28 +210,32 @@ def snap(slot: str, phrase: str) -> str:
     obeys whichever it likes (run 6).  A phrase the vocabulary cannot read
     states nothing: the fidelity gate reads every card slot, and 'frightened
     face' is not a complexion.  Build has no reading and is kept as written;
-    an age is always the pool's, the card says 'A man {age}'."""
+    an age is always the pool's, the card says 'A man {age}'.  Of a list
+    ('fair face; cheek more ruddy; pale-faced') the first phrase read is the
+    card: three readings in one slot is no reading."""
     from studio import cast_card, distinguish
     traits = distinguish.SLOT_TRAITS.get(slot, ())
     if not traits:
-        return phrase
-    # Lucy: 'fair face, cheek more ruddy, pale-faced' -- three readings in one
-    # slot is no reading.  The first phrase the model reads is the card.
-    phrase, read = next(((part, readings(slot, part)) for part in
-                         (p.strip() for p in phrase.split(",")) if readings(slot, part)), ("", {}))
+        return ", ".join(parts)
+    phrase, read = next(((part, readings(slot, part)) for part in parts
+                         if readings(slot, part)), ("", {}))
     if not read:
         return ""
-    if len(read) == len(traits) and slot != "age":
+    if len(read) == len(traits) and slot != "age" and len(phrase.split()) <= WORDS:
         return phrase
     options = [option for option in cast_card.POOLS[slot]
                if all(distinguish.coarse(slot, option, t) == v for t, v in read.items())]
+    if not options and traits[0] in read:
+        # No pool phrase is long AND brown: the first trait is the one obeyed.
+        options = [option for option in cast_card.POOLS[slot]
+                   if distinguish.coarse(slot, option, traits[0]) == read[traits[0]]]
     words = set(re.findall(r"[a-z]+", phrase.lower()))
     return max(options, key=lambda o: len(words & set(re.findall(r"[a-z]+", o))), default="")
 
 
 def stated(found: Portrait) -> dict[str, str]:
     """The card slots the book itself fills."""
-    snapped = {slot: snap(slot, getattr(found, slot).replace(";", ","))
+    snapped = {slot: snap(slot, [p.strip() for p in getattr(found, slot).split(";") if p.strip()])
                for slot in SLOTS if getattr(found, slot)}
     return {slot: phrase for slot, phrase in snapped.items() if phrase}
 
