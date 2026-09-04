@@ -10,7 +10,7 @@ import pytest
 from studio import describe
 from studio.describe import DISTINCT_AT, TRAITS, TraitCard
 
-LESTRADE = {"age": "middle-aged", "hair_colour": "dark brown", "hair_length": "short",
+LESTRADE = {"figure": "man", "age": "middle-aged", "hair_colour": "dark brown", "hair_length": "short",
             "facial_hair": "clean-shaven", "headgear": "bowler", "complexion": "sallow",
             "build": "slight", "description": "A lean, ferret-like man in a bowler hat."}
 GREGSON = {**LESTRADE, "hair_colour": "fair", "complexion": "pale", "build": "stocky",
@@ -33,7 +33,7 @@ def card(**changes) -> TraitCard:
 
 class TestVocabulary:
     def test_every_trait_has_a_closed_vocabulary_plus_unclear(self):
-        assert set(TRAITS) == {"age", "hair_colour", "hair_length", "facial_hair",
+        assert set(TRAITS) == {"figure", "age", "hair_colour", "hair_length", "facial_hair",
                                "headgear", "complexion", "build"}
         assert all("unclear" in pool for pool in TRAITS.values())
 
@@ -50,6 +50,16 @@ class TestVocabulary:
     def test_the_card_normalises_on_construction(self):
         made = card(hair_colour="Greying", facial_hair="a moustache")
         assert made.hair_colour == "grey" and made.facial_hair == "moustache"
+
+
+    def test_a_card_without_a_figure_is_unclear_on_it(self):
+        """Scarlet's cast was read before the trait existed: Jefferson Hope and
+        Lucy Ferrier came out 2.0 apart -- a man and a woman -- because none of
+        the seven traits was the figure itself.  Old cards still load."""
+        assert TraitCard(**{k: v for k, v in LESTRADE.items() if k != "figure"}).figure == "unclear"
+        assert describe.distance(card(figure="man"), card(figure="woman")) == 1.0
+        assert describe.nearest("figure", "a young woman") == "woman"
+        assert describe.nearest("figure", "male") == "man"
 
 
 class TestParse:
@@ -168,9 +178,12 @@ class TestCompare:
 
     def test_shared_names_the_traits_both_see_alike(self):
         assert describe.shared(card(), card(hair_colour="unclear", build="heavy")) == [
-            "age", "hair_length", "facial_hair", "headgear", "complexion"]
+            "figure", "age", "hair_length", "facial_hair", "headgear", "complexion"]
 
     def test_a_card_is_verifiable_when_it_sees_enough_traits(self):
+        """Five of eight: the figure is readable on almost any distant back,
+        so it must not tip a turned-away figure into verifiable."""
+        assert describe.VERIFIABLE_FROM == 5
         assert describe.verifiable(card())
         assert not describe.verifiable(card(age="unclear", build="unclear", headgear="unclear",
                                             hair_colour="unclear"))

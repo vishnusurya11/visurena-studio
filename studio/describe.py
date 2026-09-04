@@ -33,10 +33,13 @@ the same face reads as at two distances, so it counts half.  Scarlet run 4,
 take B02: a contact sheet read Holmes as middle-aged/grey/top hat against a
 reference read as old/white/bowler, and three whole differences would have
 rejected the take."""
-VERIFIABLE_FROM = 4
-"""A card that sees fewer traits than this cannot vouch for anyone."""
+VERIFIABLE_FROM = 5
+"""A card that sees fewer traits than this cannot vouch for anyone.  Five of
+eight: the figure reads on almost any distant back, so it alone must not tip
+a turned-away figure into verifiable."""
 
 TRAITS: dict[str, tuple[str, ...]] = {
+    "figure": ("man", "woman", "child", "unclear"),
     "age": ("young", "middle-aged", "old", "unclear"),
     "hair_colour": ("black", "dark brown", "brown", "fair", "red", "grey", "white", "none", "unclear"),
     "hair_length": ("bald", "short", "medium", "long", "unclear"),
@@ -55,6 +58,8 @@ ORDERED: dict[str, tuple[str, ...]] = {
 NEIGHBOURS: set[frozenset[str]] = {frozenset(("grey", "white")), frozenset(("pale", "fair"))} | {
     frozenset(scale[i:i + 2]) for scale in ORDERED.values() for i in range(len(scale) - 1)}
 SYNONYMS: dict[str, dict[str, tuple[str, ...]]] = {
+    "figure": {"woman": ("female", "lady", "girl", "she"), "man": ("male", "gentleman", "boy", "he"),
+               "child": ("kid", "infant")},
     "age": {"old": ("elderly", "aged", "senior", "sixt", "sevent"),
             "young": ("youth", "twent", "teen", "boy", "girl"),
             "middle-aged": ("middle", "thirt", "fort", "fift")},
@@ -86,6 +91,9 @@ def nearest(trait: str, value: str) -> str:
 
 
 class TraitCard(BaseModel):
+    figure: str = "unclear"
+    """Man, woman or child -- the first thing read at any distance.  Optional
+    because Scarlet's cast was carded before the trait existed."""
     age: str
     hair_colour: str
     hair_length: str
