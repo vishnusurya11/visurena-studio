@@ -295,3 +295,12 @@ class TestFollowed:
         result = step.followed({"card": drawn, "path": None}, card)
         assert "dark hair swept back" in result["physical"] and "clean-shaven" in result["physical"]
         assert result["card"] is drawn
+
+
+class TestRungPrice:
+    def test_a_rung_is_priced_at_what_a_sheet_measured(self):
+        """Run 7 timed four sheet attempts at 286, 237, 212 and 371 s (691 with
+        the model load); the rung was priced at 90.  A budget that believes
+        90 lets the ladder start a climb it cannot finish."""
+        for rung in step.LADDER.rungs:
+            assert 250 <= rung.cost_seconds <= 400

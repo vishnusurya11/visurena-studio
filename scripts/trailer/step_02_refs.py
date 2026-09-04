@@ -36,8 +36,11 @@ from studio.trailer_stage_spec import StorySpec
 STEP_ID = "02"
 NAME = "refs"
 SEED_BASE = 40000
-RENDER_SECONDS = 30
-DESCRIBE_SECONDS = 60
+RENDER_SECONDS = 180
+DESCRIBE_SECONDS = 110
+"""Run 7 timed a sheet attempt at 286, 237, 212 and 371 s (691 s with the
+model load); the rung had been priced at 90, and the budget let the ladder
+start climbs it could not finish."""
 LADDER = Ladder([Rung("reroll_seed", RENDER_SECONDS + DESCRIBE_SECONDS, tries=1),
                  Rung("distinguish", RENDER_SECONDS + DESCRIBE_SECONDS, tries=3)],
                 terminal="unbound")
