@@ -121,15 +121,31 @@ def line_over_bed(out_dir: Path, momentary: Callable = trailer_assemble.momentar
     return out
 
 
+def on_music(found: Metre) -> list[float]:
+    """Every point a cut can land on: the beats and the L0 events, which the
+    walk cuts on and the tracker places between beats (run 10: 8 of 13
+    'off-beat' cuts sat on stopdowns and hits)."""
+    return sorted(set(found.beats) | set(level_zero(found)))
+
+
+def graded(cuts: list[float], found: Metre, tol: float = ON_GRID) -> list[float]:
+    """The cuts inside the span the grid covers: before the first beat and
+    after the last there is no pulse to be on or off."""
+    if not found.beats:
+        return []
+    return [c for c in cuts if found.beats[0] - tol <= c <= found.beats[-1] + tol]
+
+
 def report(plan: dict, found: Metre, seen: list[float], loud: tuple[float, float],
            lines_lu: list[float] = ()) -> QCReport:
     """The QCReport from the measured grid, the detected cuts, the loudness
     and each line's LU over the ducked bed (`line_over_bed`)."""
     lengths = [float(s["seconds"]) for s in plan["shots"]]
     title_at = planned_cuts(plan)[-1]
+    inside = graded(seen, found)
     return QCReport(
-        cuts=len(seen), cuts_on_beat=fraction_on(seen, found.beats),
-        cuts_on_downbeat=fraction_on(seen, found.downbeats),
+        cuts=len(seen), cuts_on_beat=fraction_on(inside, on_music(found)),
+        cuts_on_downbeat=fraction_on(inside, sorted(set(found.downbeats) | set(level_zero(found)))),
         cuts_on_L0=fraction_on(level_zero(found), seen),
         on_cap_fraction=on_cap_fraction(lengths, max_shot(found.bar)),
         title_on_downbeat=any(abs(title_at - d) <= ON_GRID for d in found.downbeats),

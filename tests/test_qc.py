@@ -40,6 +40,21 @@ class TestCutLists:
     def test_fraction_on_counts_cuts_within_forty_ms(self):
         assert qc.fraction_on([1.0, 2.03, 3.1], [1.0, 2.0, 3.0]) == pytest.approx(2 / 3)
 
+    def test_a_cut_on_a_stopdown_or_hit_is_on_the_music(self):
+        """Run 10: the walk cuts on every L0 event, the tracker puts them
+        between beats, and QC graded 8 of them off-beat."""
+        found = metre_at(120, 60.0).model_copy(update={"stopdowns": [10.25], "hits": [20.75]})
+        assert qc.on_music(found) == sorted(set(found.beats) | {10.25, 20.75})
+        assert qc.fraction_on([10.25, 20.75, 30.0], qc.on_music(found)) == 1.0
+
+    def test_cuts_where_the_grid_has_no_pulse_are_not_graded(self):
+        """Before the first beat and after the last there is nothing to be
+        on: an intro shot and the card over the tail are not off-beat."""
+        found = metre_at(120, 60.0)
+        found = found.model_copy(update={"beats": found.beats[10:]})  # the pulse starts at 5.0
+        assert qc.graded([0.3, 5.0, 59.5, 61.0, 70.0], found) == [5.0, 59.5]
+        assert qc.graded([1.0], found.model_copy(update={"beats": []})) == []
+
     def test_on_cap_fraction_counts_shots_at_the_ceiling(self):
         assert qc.on_cap_fraction([4.0, 3.99, 2.0, 1.0], 4.0) == 0.5
 
@@ -126,3 +141,15 @@ class TestReport:
         report = qc.report(plan, found, seen=[2.0, 4.0, 5.2], loud=(-14.0, -2.0))
         assert report.cuts == 3 and report.cuts_on_beat == pytest.approx(2 / 3)
         assert report.title_on_downbeat  # the card at 4.0 is a downbeat at 120 BPM
+
+    def test_the_report_grades_on_the_music_over_the_pulse_it_has(self):
+        """Run 10's shape in small: a cut in the intro before the pulse, one
+        on a stopdown between beats, one off, and the card over the tail."""
+        plan = {"shots": [{"start": 0.0, "seconds": 2.0, "cast": [], "char_refs": {}}]}
+        found = metre_at(120, 20.0).model_copy(update={"beats": [round(0.5 * i, 4) for i in range(6, 40)],
+                                                       "downbeats": [round(2.0 * i, 4) for i in range(2, 10)],
+                                                       "stopdowns": [10.25], "hits": []})
+        report = qc.report(plan, found, seen=[1.0, 4.0, 10.25, 12.3, 25.0], loud=(-14.0, -2.0))
+        assert report.cuts == 5
+        assert report.cuts_on_beat == pytest.approx(2 / 3)
+        assert report.cuts_on_downbeat == pytest.approx(2 / 3)

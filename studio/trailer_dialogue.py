@@ -260,6 +260,13 @@ def assign_lines(beats: list[dict], lines: list[dict], ceiling: int = 4,
 # ------------------------------------------------------------ ordering the slate
 
 CONTENT_WORD = re.compile(r"[a-z']{4,}")
+FUNCTION_WORDS = {"have", "has", "had", "been", "being", "will", "would", "shall", "should",
+                  "could", "must", "does", "did", "than", "then", "there", "them", "they",
+                  "what", "when", "which", "where", "your", "very", "some", "into", "upon",
+                  "also", "only", "more", "most", "such", "much", "here", "these", "those",
+                  "this", "with", "from", "were", "about", "shall"}
+"""Four-letter-plus words that carry no content: `shares_content_word` related
+two source quotes to 'You HAVE been in Afghanistan' on 'have' alone (run 10)."""
 ORDER = ("hook", "answer", "threat", "button")
 ROLE_KINDS = {"hook": ("hook",), "answer": ("stakes", "exposition"),
               "threat": ("threat", "stakes"), "button": ("button",)}
@@ -368,24 +375,27 @@ def line_seconds(line, measured: dict[str, float]) -> float:
 
 def shares_content_word(a: str, b: str) -> bool:
     from studio.trailer_story import STOPWORDS
-    wa = set(CONTENT_WORD.findall(a.lower())) - STOPWORDS
-    wb = set(CONTENT_WORD.findall(b.lower())) - STOPWORDS
+    wa = set(CONTENT_WORD.findall(a.lower())) - STOPWORDS - FUNCTION_WORDS
+    wb = set(CONTENT_WORD.findall(b.lower())) - STOPWORDS - FUNCTION_WORDS
     return bool(wa & wb)
 
 
 def role_candidates(role: str, pool: list, hook, figure: str) -> list:
-    """The lines that may play a role, best first.  The answer comes from
-    another voice and should relate to the hook (Lieu's accent); the threat
-    is the figure's own where the figure has one; a button is short."""
+    """The lines that may play a role, best first.  A spoken line outranks a
+    card (a line nobody speaks ships as text) at every role after the hook;
+    the answer comes from another voice and should relate to the hook
+    (Lieu's accent); the threat is the figure's own where the figure has
+    one; a button is short."""
     kinds = ROLE_KINDS[role]
     found = [l for l in pool if l.function in kinds]
     if role == "answer":
         found = [l for l in found if l.speaker != hook.speaker]
-        found.sort(key=lambda l: not shares_content_word(l.text, hook.text))
+        found.sort(key=lambda l: (l.speaker is None, not shares_content_word(l.text, hook.text)))
     elif role == "threat":
-        found.sort(key=lambda l: (l.function != "threat", l.speaker != figure))
+        found.sort(key=lambda l: (l.speaker is None, l.function != "threat", l.speaker != figure))
     elif role == "button":
         found = [l for l in found if l.words <= 6]
+        found.sort(key=lambda l: l.speaker is None)
     return found
 
 

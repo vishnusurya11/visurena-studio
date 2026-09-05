@@ -11,8 +11,8 @@ from __future__ import annotations
 import pytest
 
 from studio.trailer_dialogue import (DUCK_OVERRUN, LINE_ROOM, MAX_DUCKS, fits, holds, made_slots,
-                                     names_figure, order_lines, refusal, speech_seconds, targets,
-                                     windows_of)
+                                     names_figure, order_lines, refusal, role_candidates,
+                                     shares_content_word, speech_seconds, targets, windows_of)
 from studio.trailer_stage_spec import Metre, SlateLine, Slot
 
 BEAT = 0.5
@@ -31,6 +31,11 @@ NO_DATA = line("No data yet.", "button")
 FERRIER = line("I guess you are the daughter of John Ferrier.", "stakes", "jefferson_hope")
 NAMES = line("Jefferson Hope did this to us all.", "stakes", "john_watson")
 WATSON_KNOWS = line("I perceive nothing of what you perceive.", "stakes", "john_watson")
+USELESS_CARD = line("It is of the highest importance, therefore, not to have useless facts "
+                    "elbowing out the useful ones.", "exposition", None, score=5.0)
+WATSON_SPOKEN = line("I had no idea that such individuals did exist outside of stories.",
+                     "exposition", "john_watson", score=9.6)
+NATURE_CARD = line("Nor is Nature always in one mood throughout this grim district.", "threat", None)
 
 
 def slots(*seconds):
@@ -190,6 +195,26 @@ class TestOrder:
         slate = order_lines([AFGHAN, FERRIER, WATSON_KNOWS, DEATH], slots(6, 6, 6),
                             "jefferson_hope", beat=BEAT)
         assert slate.lines[1].text == WATSON_KNOWS.text
+
+    def test_an_auxiliary_is_not_a_content_word(self):
+        """Run 10: 'You HAVE been in Afghanistan' related to two source
+        quotes on 'have' alone, and both outranked Watson's spoken line."""
+        assert not shares_content_word(AFGHAN.text, USELESS_CARD.text)
+        assert shares_content_word(AFGHAN.text, WATSON_KNOWS.text)
+
+    def test_a_spoken_line_outranks_a_card_at_every_role(self):
+        """A line nobody speaks ships as a text card; it is the fallback for
+        a role no spoken line fits, never a peer.  Run 10 spoke 1 of 3."""
+        assert role_candidates("answer", [USELESS_CARD, WATSON_SPOKEN], AFGHAN, "x")[0] is WATSON_SPOKEN
+        assert role_candidates("threat", [NATURE_CARD, DEATH], AFGHAN, "x")[0] is DEATH
+        slate = order_lines([AFGHAN, USELESS_CARD, WATSON_SPOKEN, NATURE_CARD, DEATH],
+                            slots(6, 6, 6), "jefferson_hope", beat=BEAT)
+        assert [l.speaker for l in slate.lines] == ["sherlock_holmes", "john_watson", "sherlock_holmes"]
+
+    def test_a_card_is_placed_when_no_spoken_line_fits(self):
+        slate = order_lines([AFGHAN, USELESS_CARD, NATURE_CARD], slots(6, 10, 6),
+                            "jefferson_hope", beat=BEAT)
+        assert [l.speaker for l in slate.lines] == ["sherlock_holmes", None, None]
 
     def test_the_threat_prefers_the_figure(self):
         slate = order_lines([AFGHAN, DEATH, HOPE_THREAT], slots(6, 6), "jefferson_hope", beat=BEAT)

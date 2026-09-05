@@ -371,3 +371,66 @@ went to `accepted_as_written`); a bare shared surname credits every sharer
 (`addressing Ferrier` binds Lucy too — harmless while both are sheeted);
 two-subject binding stays an A/B; no run has yet cut through all four
 fixes.
+
+## Run 10 — A Study in Scarlet, 2026-09-05 12:18–17:35 UTC, delivered
+
+The first run through all four run-9 fixes (dialogue windows, tempo gate,
+line levelling, subject binding). Launched once as a tracked background
+process; step 10 delivered the master, `qc.json` and the caption to
+Telegram itself. Nothing was spent but GPU wall-clock: three LLM calls on
+`gpt-5.6-luna` (step 01 story 425/33 tokens, step 03 reauthor 338/68, step
+04 label 744/219) — $0.0007 by the ledger; MiniMax Music 3, MiniMax-H3 and
+Qwen3-TTS on the local ComfyUI.
+
+| step | what happened | rungs |
+|---|---|---|
+| 02 | five `accepted_as_written` pairs (Watson~Holmes, Lestrade~Holmes, Ferrier~Hope, Lucy~Lestrade, Gregson~Lestrade), all under the 3.0 threshold | — |
+| 03 | 115 BPM against 84 asked on the first two batches; `reauthor` held the register and the tempo; seed 3002 at 92.5 BPM (band 1) shipped, not `best_seed` | first_seeds → four_more_seeds → reauthor |
+| 04 | three lines placed in windows; not `music_only` for the first time since run 7 | one relabel |
+| 06 | 8 unbound, lead 43% → 0 unbound, lead ≥ 25%; Utah bound on Hope and Ferrier; 25 setups, 51 shots | select_setups |
+| 07 | 19 takes in ~4 h 56 min (12:36 → 17:32); B19–B24 dropped with 52 s of the 660 s budget left | drop_beat ×6 |
+| 08–10 | mixed, graded, titled, QC'd, delivered with 4 flags | — |
+
+**Heard vs measured.** I cannot listen; the numbers are the ear. The one
+spoken line rides 9.92 LU over the ducked bed under its window (target 5,
+so audible — the run-9 complaint "music too loud" cannot recur on that
+line). Integrated −14.16 LUFS, true peak −1.43. Whether 92.5 BPM at the
+reauthored caption reads as the register asked is the owner's call.
+
+**Cause 5 — one of three spoken.** Two of the three placed lines had no
+speaker and shipped as text cards. `role_candidates` ranked two speakerless
+source quotes over Watson's spoken line because `shares_content_word`
+related them to "You HAVE been in Afghanistan" on the auxiliary alone.
+Fixed: a spoken line outranks a card at every role after the hook, and
+`FUNCTION_WORDS` are not content. Replayed on run 10's own labels: hook
+Holmes and answer Watson both spoken; the threat is still a card because
+the 24-row sheet holds no spoken threat at all.
+
+**Cause 6 — QC graded the wrong grid.** The delivered `qc.json` read 75% on
+beat, 27% on downbeat. The walk cuts on every L0 event and the tracker puts
+hits and stopdowns between beats; 8 of the 13 "off" cuts sat on one, and
+the intro shot and the tail card had no pulse under them. Fixed: `on_music`
+and `graded`. Re-measured on the same master: 52 cuts, 0.90 on the music,
+0.43 on a downbeat or L0, `cuts_on_L0` 0.53, on-cap 0.02, floor pass.
+
+**Open.**
+- Spoken threat supply: the source pool's attribution (tag + sibling rules,
+  neither firing → card) is conservative by design and leaves most Holmes
+  lines speakerless. A labeller-guessed speaker was considered and rejected
+  — a guess from memory puts the wrong voice on a line. The honest fix is
+  more attribution rules in the pool, tested against the book.
+- `cuts_on_L0` 0.53: the stutter stopdowns at 11.5–13.9 s are 0.5 s apart
+  and `MIN_SHOT` cannot take them all; either the target admits a cluster
+  or the walk treats a stutter as one event.
+- `title_on_downbeat`: the card lands at the cue's end (102.08 s ≈ 101.95),
+  where no downbeat falls; the walk should place the title on the last
+  downbeat, not the last sample.
+- Step 07 at ~5 h for 19 takes, 6 dropped, is the whole budget. The
+  banner read "−199 min left" at step 08: it was printed before the step
+  opened, so 07's five hours were charged against 08's ten minutes. The
+  gates inside the steps read the right clock; only the banner lied. Fixed
+  in `run_step` (`test_the_banner_reads_the_budget_of_the_step_it_opens`).
+- Carried: independent "is this Sherlock?" read; cross-gender `same_look`;
+  step 02's 40-minute share; the Ferrier era blend; a frontier judge tier
+  needs an owner-confirmed rate; LoRA and two-subject A/Bs; bare shared
+  surname over-credit.

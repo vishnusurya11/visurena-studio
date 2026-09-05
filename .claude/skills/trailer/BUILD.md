@@ -118,7 +118,19 @@ Evidence: `docs/analysis/research/trailer-music-structure.md`,
   labelled hook", or "the shortest hook takes 3.3 s, the longest window
   holds 1.7 s; label shorter lines as hook" (`refusal`, `holds`) - because
   the labeller is the one who reads it, and every sheet it applied is kept
-  at `work/labels-N.json`.
+  at `work/labels-N.json`. Run 10 placed three lines and SPOKE one: a line
+  nobody speaks ships as a text card, and `role_candidates` ranked two
+  speakerless source quotes over Watson's spoken line because
+  `shares_content_word` related them to the hook on "have" alone. A spoken
+  line now outranks a card at every role after the hook (the card is the
+  fallback for a role no spoken line fits, never a peer), and
+  `FUNCTION_WORDS` (auxiliaries, determiners, prepositions of four letters
+  and more) are not content (`test_a_spoken_line_outranks_a_card_at_every_
+  role`, `test_an_auxiliary_is_not_a_content_word`). Replayed on run 10's
+  own sheet: hook Holmes, answer Watson, both spoken; the threat stays a
+  card because the sheet holds no spoken threat - the source pool's
+  attribution is conservative by design and leaves many Holmes lines
+  speakerless.
 - step 03 has ended on the terminal `onset_grid` rung every run. Measured
   over the 16 Scarlet seeds (2026-09-04): every metre-grid seed scores
   `title_term` 0.3 and `slot_term` 0.4 - the struck-pulse captions produce
@@ -183,6 +195,17 @@ Evidence: `docs/analysis/research/trailer-music-structure.md`,
   fills `line_over_bed_lu` from it: each line's integrated loudness less
   the ducked bed under its window (`qc.line_over_bed`, target 5 LU; a run
   9 style master with no lines measures nothing rather than passing).
+- QC graded every cut against the BEATS and read run 10 at 75% on beat: the
+  walk cuts on every L0 event (`test_walk_cuts_on_every_L0_event`), the
+  tracker places hits and stopdowns between beats, and 8 of the 13 "off"
+  cuts sat on one; the intro shot before the first beat and the card over
+  the tail had no pulse to be on. `qc.on_music` is the beats and the L0
+  events together, `qc.graded` keeps only the cuts inside the span the grid
+  covers, and `report` grades on those (`test_the_report_grades_on_the_
+  music_over_the_pulse_it_has`). Run 10 re-measured: 0.90 on the music,
+  0.43 on a downbeat or L0, two flags left - `cuts_on_L0` 0.53 (stutter
+  stopdowns 0.5 s apart cannot each take a cut under `MIN_SHOT`) and the
+  title at the cue's end where no downbeat falls.
 - step 06 bound a beat on the SCENE's cast: any face in the scene's ninety
   seconds without a sheet refused the setup. Every Utah scene holds a Mormon
   or a hunter nobody sheets, so run 9 plated all six Utah beats and shipped
@@ -221,6 +244,9 @@ Each item is one PR-sized change, test first. Order is by what unblocks what.
 | 15 | tempo gate: `tempo_error`, `on_tone`, `best_of` on the gate's order, tempo-holding `reauthor`, terminal `best_seed` | `scripts/trailer/step_03_music.py` | `test_verdict_needs_a_metric_grid_on_the_asked_tempo`, `test_best_of_ranks_on_what_the_gate_grades_before_fitness` | [x] |
 | 16 | line levelling before the duck: `integrated`, `bed_level`, `line_gain`, `level_lines`; `lines.level.json`; QC `line_over_bed` | `studio/trailer_assemble.py`, `scripts/trailer/qc.py` | `test_a_quiet_take_still_rides_over_the_ducked_bed` (real ffmpeg), `TestLineOverBed` | [x] |
 | 17 | subject binding: `subjects_of`, `TrailerBeat.subjects`, `unbound`/`alternates` on the frame not the scene | `studio/trailer_story.py`, `scripts/trailer/step_06_plan.py` | `test_a_shot_binds_on_who_it_names_not_on_who_is_in_the_scene`, `TestSubjectsOf` | [x] |
+| 18 | a spoken line outranks a card at every role; `FUNCTION_WORDS` are not content | `studio/trailer_dialogue.py` | `test_a_spoken_line_outranks_a_card_at_every_role`, `test_a_card_is_placed_when_no_spoken_line_fits` | [x] |
+| 19 | QC grades on the music: `on_music` (beats + L0), `graded` (inside the pulse only) | `scripts/trailer/qc.py` | `test_a_cut_on_a_stopdown_or_hit_is_on_the_music`, `test_cuts_where_the_grid_has_no_pulse_are_not_graded` | [x] |
+| 20 | the step banner is printed AFTER the step opens (run 10: `−199 min left` at 08 was 07's clock) | `trailer.py` | `test_the_banner_reads_the_budget_of_the_step_it_opens` | [x] |
 
 Prerequisite for 12 and 13: `01-story` emits `narrator`, `register`, `thesis`
 (`test_story_emits_register_from_enum`, `test_thesis_has_no_proper_noun`).

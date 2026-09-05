@@ -14,6 +14,7 @@ import pytest
 import trailer
 from studio import db
 from studio.learnings import Learning, load
+from studio.run_budget import TRAILER_SHARES, Budget
 from studio.trailer_run import RunContext
 
 
@@ -121,6 +122,18 @@ class TestRunStep:
         trailer.run_step(ctx, _step("07", lambda c, ctx: seen.update(
             step=ctx.budget.step, left=ctx.budget.remaining("07"))))
         assert seen["step"] == "07" and seen["left"] > 200 * 60
+
+    def test_the_banner_reads_the_budget_of_the_step_it_opens(self, conn, tmp_path, capsys):
+        """Run 10 printed '-199 min left' for step 08: the banner was read
+        while 07 was still the open step, so 07's five hours were charged
+        against 08's ten minutes.  The gate inside the step was right; the
+        number printed was not."""
+        ctx = _ctx(conn, tmp_path)
+        clock = [0.0]
+        ctx.budget = Budget(6 * 3600, TRAILER_SHARES, clock=lambda: clock[0])
+        trailer.run_step(ctx, _step("07", lambda c, ctx: clock.__setitem__(0, 200 * 60)))
+        trailer.run_step(ctx, _step("08", lambda c, ctx: None))
+        assert "--- step 08 (x) | 20 min left ---" in capsys.readouterr().out
 
     def test_degradations_are_summarised_on_the_completed_event(self, conn, tmp_path):
         ctx = _ctx(conn, tmp_path)

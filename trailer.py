@@ -51,6 +51,8 @@ def ready(conn) -> list[str]:
 def run_step(ctx: RunContext, step) -> None:
     """One step, bracketed by step-level events; its rungs summarised on completion."""
     ctx.open_step(step.STEP_ID)
+    print(f"--- step {step.STEP_ID} ({step.NAME}) | "
+          f"{ctx.budget.remaining(step.STEP_ID) / 60:.0f} min left ---")
     ctx.tracker.event(step.STEP_ID, "started")
     try:
         with llm.spend_context(ctx.conn, ctx.codex_id, STAGE, step.STEP_ID):
@@ -71,8 +73,6 @@ def process(conn, codex_id: str) -> None:
     db.mark_stage(conn, codex_id, STAGE, "running")
     try:
         for step in load_steps():
-            print(f"--- step {step.STEP_ID} ({step.NAME}) | "
-                  f"{ctx.budget.remaining(step.STEP_ID) / 60:.0f} min left ---")
             run_step(ctx, step)
     except Exception:
         db.mark_stage(conn, codex_id, STAGE, "failed")
