@@ -326,7 +326,7 @@ class TestTheTitleLandsOnTheHit:
     """The defect this whole pipeline was built to fix, in miniature."""
 
     @staticmethod
-    def card_seconds(shots_end: float, hit_at: float, hold: float = 3.0) -> float:
+    def card_seconds(shots_end: float, hit_at: float, hold: float = FINAL_HOLD) -> float:
         return max(hold, (hit_at - shots_end) + hold)
 
     def test_a_hit_after_the_shots_is_covered_by_the_card(self):
@@ -338,7 +338,7 @@ class TestTheTitleLandsOnTheHit:
         assert not 80.1 <= 83.95 <= 80.1 + 3.0
 
     def test_a_hit_during_the_shots_still_leaves_a_full_hold(self):
-        assert self.card_seconds(80.1, 60.0) == 3.0
+        assert self.card_seconds(80.1, 60.0) == FINAL_HOLD
 
     def test_the_card_never_shrinks_below_the_final_hold(self):
         from studio.trailer_cut import FINAL_HOLD
@@ -555,20 +555,202 @@ class TestBeatWalk:
         assert start in plan_cuts(m, [90.0], 90.0, 2.5)
 
     def test_a_cue_without_a_title_still_gets_one_hold(self):
-        from studio.trailer_edit import lengths_of, max_shot, plan_cuts
+        """Measured against `act_cap`, not `max_shot`: act 1 may hold two bars."""
+        from studio.trailer_edit import act_cap, lengths_of, plan_cuts
         m = self.metre(100)
         lengths = lengths_of(plan_cuts(m, [], 60.0, 2.5))
-        assert sum(1 for x in lengths if x > max_shot(m.bar) + 1e-6) == 1
+        assert sum(1 for x in lengths if x > act_cap(0.0, m.bar) + 1e-6) == 1
 
-    def test_shots_are_whole_beats_on_the_grid(self):
-        from studio.trailer_edit import plan_cuts
-        m = self.metre(120, title_hit=90.0, stopdown=86.5)
-        points = plan_cuts(m, [90.0], 90.0, 2.5)
-        half = [round(b + 0.25, 4) for b in m.beats]
-        on = sum(1 for p in points if any(abs(p - g) <= 0.021 for g in m.beats + half))
-        assert on == len(points)
 
     def test_the_cap_is_a_bar_and_a_quarter_at_slow_tempi(self):
         from studio.trailer_edit import MAX_SHOT, max_shot
         assert max_shot(2.0) == MAX_SHOT
         assert 5.0 <= max_shot(4.0) <= 5.05
+
+
+class TestTheShapeIsMeasurable:
+    """The four numbers the editor's critique of run 10 turned on, as pure
+    functions, so qc.py can read them off the DELIVERED picture too."""
+
+    def test_act_medians_shorten_across_the_acts(self):
+        from studio.trailer_edit import act_medians
+        points = [0.0, 3.0, 6.0, 9.0, 11.0, 13.0, 15.0, 16.0, 17.0, 18.0, 20.0, 25.0]
+        first, second, third = act_medians(points, 25.0)
+        assert first > second > third
+
+    def test_act_medians_leave_the_closing_hold_out(self):
+        """The hold is the button, not a cut length; counting it would make
+        the last act read SLOWER than the one before it."""
+        from studio.trailer_edit import act_medians
+        assert act_medians([0.0, 3.0, 6.0, 17.0, 18.0, 25.0], 25.0)[2] == 1.0
+
+    def test_an_act_with_no_shot_of_its_own_measures_zero(self):
+        from studio.trailer_edit import act_medians
+        assert act_medians([0.0, 25.0], 25.0)[1] == 0.0
+
+    def test_longest_equal_run_counts_shots_within_two_frames(self):
+        from studio.trailer_edit import longest_equal_run
+        assert longest_equal_run([0.0, 1.0, 2.0, 3.0, 4.0, 6.5]) == 4
+
+    def test_a_two_frame_drift_still_counts_as_equal(self):
+        """Run 10's 'varied' runs drifted by a frame; the eye reads them as one."""
+        from studio.trailer_edit import longest_equal_run
+        assert longest_equal_run([0.0, 1.0, 2.0, 3.0 + 2 / 24, 4.0 + 2 / 24]) == 4
+
+    def test_a_run_broken_by_one_long_shot_is_two_runs(self):
+        from studio.trailer_edit import longest_equal_run
+        assert longest_equal_run([0.0, 1.0, 2.0, 5.0, 6.0, 7.0]) == 2
+
+    def test_interval_variation_is_zero_for_a_metronome(self):
+        from studio.trailer_edit import interval_variation
+        assert interval_variation([i * 1.25 for i in range(30)]) == 0.0
+
+    def test_interval_variation_reads_the_WORST_window_not_the_whole_cut(self):
+        """Run 10 measured varied overall and still held ten cuts of
+        1.21-1.25 s between 83 s and 94 s."""
+        from studio.trailer_edit import interval_variation
+        varied = [0.0, 4.0, 5.0, 9.0, 10.0, 14.0, 15.0, 19.0]
+        flat = [varied[-1] + 1.25 * i for i in range(1, 13)]
+        assert interval_variation(varied + flat) < 0.35
+
+    def test_on_beat_fraction_reads_one_act_at_a_time(self):
+        from studio.trailer_edit import on_beat_fraction
+        points = [0.0, 2.1, 4.3, 70.0, 72.0, 100.0]
+        beats = [i * 2.0 for i in range(51)]
+        assert on_beat_fraction(points, beats, act=1, duration=100.0) == 0.0
+        assert on_beat_fraction(points, beats, act=3, duration=100.0) == 1.0
+
+    def test_on_beat_fraction_over_the_whole_cut_needs_no_act(self):
+        from studio.trailer_edit import on_beat_fraction
+        assert on_beat_fraction([0.0, 2.0, 3.1, 10.0], [0.0, 2.0, 4.0]) == 0.5
+
+
+class TestCutRhythm:
+    """Run 10 read as a song: 76% of cuts on the beat, 31 of 51 shots exactly
+    one of three musical lengths, runs of 8 and 9 equal shots, act medians
+    2.46 / 2.42 / 1.67 and the only hold at 15% of runtime.  "The viewer
+    starts counting within 4 shots and predicts cuts."  These are the numbers
+    that stop it, on the 100 s test cue and on the 25 s picture the no-reuse
+    rule actually affords.
+    """
+
+    EVENTS = [16.0, 40.0, 64.0, 85.5, 88.0]
+
+    @staticmethod
+    def metre(bpm: float = 120.0, seconds: float = 100.0, title_hit: float = 88.0):
+        from studio.trailer_stage_spec import Metre, Slot
+        beat = 60.0 / bpm
+        beats = [round(i * beat, 4) for i in range(int(seconds / beat))]
+        return Metre(seed=3, rel_path="cue.wav", seconds=seconds, bpm=bpm, bar=4 * beat,
+                     beats=beats, downbeats=beats[::4], bars_in_mode=0.97, grid="metre",
+                     fitness=20.0, hits=[16.0, 40.0, 64.0, title_hit],
+                     stopdowns=[title_hit - 2.5, title_hit - 2.0, title_hit - 1.5],
+                     phrase_starts=beats[::16], title_hit=title_hit,
+                     slots=[Slot(start=30.0, end=34.0), Slot(start=52.0, end=56.0)])
+
+    def walk(self, duration: float, bpm: float = 120.0):
+        from studio.trailer_edit import plan_cuts
+        found = self.metre(bpm)
+        return found, plan_cuts(found, self.EVENTS, duration, 2.5)
+
+    def test_the_acts_shorten_the_shots(self):
+        """Rule 5, expressed against the BAR so 120 BPM and 92 BPM both pass."""
+        from studio.trailer_edit import act_medians
+        for duration in (88.0, 25.0):
+            for bpm in (92.0, 120.0):
+                found, points = self.walk(duration, bpm)
+                first, second, third = act_medians(points, duration)
+                assert first > second > third, (duration, bpm, first, second, third)
+                assert first >= 1.25 * found.bar, (duration, bpm, first)
+                assert third <= 0.625 * found.bar, (duration, bpm, third)
+
+    def test_a_longer_stretch_keeps_the_acts_in_order(self):
+        from studio.trailer_edit import act_medians, plan_cuts
+        found = self.metre()
+        points = plan_cuts(found, self.EVENTS, 88.0, 2.5 * 1.5)
+        first, second, third = act_medians(points, 88.0)
+        assert first > second > third and first >= 1.25 * found.bar
+
+    def test_no_four_shots_in_a_row_are_the_same_length(self):
+        """Rule 6: run 10 had runs of 8 and 9 -- four is where counting starts."""
+        from studio.trailer_edit import longest_equal_run
+        for duration in (88.0, 25.0, 61.0):
+            for bpm in (92.0, 120.0, 140.0):
+                _, points = self.walk(duration, bpm)
+                assert longest_equal_run(points) < 4, (duration, bpm)
+
+    def test_the_cut_interval_varies_inside_every_twelve_seconds(self):
+        """Sound report rule G: std/mean >= 0.35 in EVERY 12 s window."""
+        from studio.trailer_edit import interval_variation
+        for duration in (88.0, 25.0):
+            for bpm in (92.0, 120.0):
+                _, points = self.walk(duration, bpm)
+                assert interval_variation(points) >= 0.35, (duration, bpm)
+
+    def test_acts_one_and_two_do_not_ride_the_beat(self):
+        """Rule 7 and G: <= 50% on beat in acts 1-2, so >= 30% of act-1 cuts
+        land off it and there is no grid to count."""
+        from studio.trailer_edit import on_beat_fraction
+        for duration in (88.0, 25.0):
+            found, points = self.walk(duration)
+            for act in (1, 2):
+                share = on_beat_fraction(points, found.beats, act, duration)
+                assert share <= 0.5, (duration, act, share)
+
+    def test_the_climax_rides_the_beat(self):
+        from studio.trailer_edit import on_beat_fraction
+        for duration in (88.0, 25.0):
+            found, points = self.walk(duration)
+            share = on_beat_fraction(points, found.beats, 3, duration)
+            assert share >= 0.8, (duration, share)
+
+    def test_the_hold_is_the_last_shot(self):
+        """Rule 8: run 10's only hold sat at 15% of runtime, where nothing
+        is being held FOR.  The hold ends the picture; the card follows."""
+        from studio.trailer_edit import lengths_of
+        for duration in (88.0, 25.0):
+            _, points = self.walk(duration)
+            lengths = lengths_of(points)
+            assert lengths[-1] >= 3.0, (duration, lengths[-1])
+            assert lengths[-1] == max(lengths[len(lengths) // 2:]), duration
+            assert points[-1] - points[-2] == lengths[-1]
+
+    def test_the_hold_ends_within_ten_seconds_of_the_picture(self):
+        for duration in (88.0, 25.0):
+            _, points = self.walk(duration)
+            assert duration - points[-1] <= 10.0
+
+    def test_the_picture_never_runs_past_its_duration(self):
+        """Rule 5: the picture is exactly as long as the takes allow."""
+        for duration in (88.0, 61.5, 25.0, 12.0):
+            _, points = self.walk(duration)
+            assert abs(points[-1] - duration) <= 1 / 24 + 1e-9, duration
+
+    def test_a_shorter_picture_never_asks_for_more_cuts(self):
+        """`fit_points` steps the duration down half a bar at a time until the
+        cut count fits the takes, so the walk must not get BUSIER as it
+        shortens.  It is monotone over two bars.  A single half-bar step can
+        still add up to two cuts, because the acts are FRACTIONS of the
+        duration while the shots are fixed lengths in BARS -- that costs
+        `fit_points` one more step, never its convergence."""
+        from studio.trailer_edit import plan_cuts
+        found = self.metre()
+        steps = int(88.0 / (found.bar / 2)) - 1
+        counts = [len(plan_cuts(found, self.EVENTS, 88.0 - i * found.bar / 2, 2.5)) - 1
+                  for i in range(steps)]
+        assert all(b <= a for a, b in zip(counts, counts[4:])), counts
+        assert all(b - a <= 2 for a, b in zip(counts, counts[1:])), counts
+
+    def test_every_shot_stays_inside_the_floor_and_its_act_ceiling(self):
+        from studio.trailer_edit import MIN_SHOT, act_cap, lengths_of
+        for bpm in range(60, 181, 4):
+            found, points = self.walk(88.0, bpm)
+            lengths = lengths_of(points)
+            assert min(lengths) >= MIN_SHOT - 1e-6, bpm
+            over = sum(1 for start, x in zip(points, lengths)
+                       if x > act_cap(start / 88.0, found.bar) + 1e-6)
+            assert over == 1, (bpm, over)
+
+    def test_the_figure_is_reproducible(self):
+        """Deterministic in the metre: no unseeded randomness anywhere."""
+        assert self.walk(88.0)[1] == self.walk(88.0)[1]
