@@ -75,6 +75,21 @@ Evidence: `docs/analysis/research/trailer-music-structure.md`,
   substrings ("flaxen-hai-RED"; "unshaven" read clean-shaven), and an alias
   by relation ("my companion") gave Watson Holmes's portrait. Costs one
   reasoning call per character with candidates (≈ $0.002).
+- the card's authority order is BOOK > KNOWN LOOK > ROLE > INVENTION.
+  Run 7 (2026-09-05) drew Holmes at forty with a walrus moustache under a
+  bowler, and the identity gate passed it: it compared the render to its
+  own card, and the card was the invention. Silence in the text is not
+  licence when the audience knows the face. `studio/canon.py` asks the
+  `canon` tier (luna at `reasoning_effort: high` - at `none` three asks
+  AGREED on a bearded, sandy, forty-five-year-old Watson) three times in
+  the card's closed vocabulary, keeps each slot by majority reading, caches
+  `refs/canon.json`, and `stated` fills the slots so the render OWES them.
+  On a known face the IDENTITY slots (`facial_hair`, `hair`) are never
+  invented, only `neutral` (clean-shaven, the plainest hair nobody has);
+  what is `taken` is what the reader would call the same (`cast_card.alike`:
+  two moustaches are one reading); `distinguish` never moves an asserted
+  slot, and a collision the book itself makes binds `accepted_as_written`.
+  ≈ $0.02 a character, once per book.
 - step 04 shipped `music_only` on runs 4, 5 and 6 ("no hook fits the first
   slot"): the delivered cue's troughs were 2.6 and 2.0 s and the best hook
   3.3 s. `rank` admits a line at twice the longest slot, `fits` refused it at

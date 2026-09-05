@@ -22,6 +22,7 @@ from PIL import Image
 from scripts.trailer import step_02_refs as step
 from studio import db
 from studio import describe, portrait
+from studio.canon import Canon
 from studio.describe import DISTINCT_AT
 from studio.distinguish import expected
 from studio.learnings import load
@@ -173,14 +174,28 @@ class TestRun:
 
     def test_a_faithful_collision_is_distinguished_in_the_prompt(self, close_ctx, rendered):
         """Two cards the words let through but the model reads as one face:
-        a new seed cannot help, the distinguish rung moves the shared traits."""
+        a new seed cannot help, the distinguish rung moves the shared traits
+        -- the invented ones.  Both moustaches are the book's, and stay."""
         step.run(close_ctx.codex_id, close_ctx)
         assert refs_doc(close_ctx)["unbound"] == []
         rows = load(close_ctx.learnings_path)
-        assert [r.action for r in rows] == ["reroll_seed"]  # the first render's rung
+        assert rows[0].action == "reroll_seed"  # the first render's rung
         assert rows[0].threshold == DISTINCT_AT and WATSON in str(rows[0].measured)
         before, after = sheet_prompts(rendered)[-2:]
-        assert "walrus moustache" in before and "walrus moustache" not in after
+        assert "walrus moustache" in before and "walrus moustache" in after
+        assert "fair hair" in before and "fair hair" in after
+        first, second = rendered["cards"][-2:]
+        moved = [slot for slot in ("headgear", "age", "complexion") if first[slot] != second[slot]]
+        assert moved and not set(moved) & set(second["asserted"])
+
+    def test_a_collision_the_book_itself_makes_binds_as_written(self, close_ctx, rendered):
+        """Once every shared trait sits on a slot the book asserted, there is
+        nothing left a rung may move: the book made them alike, and a faithful
+        sheet beats an unbound lead.  Flagged, not refused."""
+        step.run(close_ctx.codex_id, close_ctx)
+        rows = load(close_ctx.learnings_path)
+        assert rows[-1].action == "accepted_as_written" and HOLMES in str(rows[-1].measured)
+        assert refs_doc(close_ctx)["unbound"] == []
 
     def test_a_disobedient_render_is_asked_again_as_written(self, ctx, rendered):
         """Scarlet run 6, Lestrade rung 2: the card said walrus moustache, the
@@ -268,6 +283,31 @@ class TestPortraits:
         monkeypatch.setattr(portrait.llm, "structured", fake)
         step.run(ctx.codex_id, ctx)
         assert fake.prompts == [] and not (ctx.book_dir / "refs/portraits.json").exists()
+
+
+class TestKnownLook:
+    """Scarlet run 7: the book silent, the card gave Holmes a walrus moustache,
+    a bowler and forty years.  The known look fills what the book leaves
+    empty; the book's own words still outrank it."""
+    LOOK = Canon(known=True, source="the canon", age="in his late twenties",
+                 hair="dark hair swept back", facial_hair="clean-shaven")
+
+    def test_the_known_look_fills_the_slots_the_book_left_empty(self, ctx, monkeypatch):
+        monkeypatch.setattr(step, "portraits_for", lambda book, docs: {c: Portrait() for c in docs})
+        monkeypatch.setattr(step, "canons_for",
+                            lambda book, docs: {HOLMES: self.LOOK, WATSON: Canon()})
+        holmes = step.cast_cards(ctx.book_dir, [HOLMES, WATSON])[HOLMES]
+        assert holmes["facial_hair"] == "clean-shaven" and holmes["age"] == "in his late twenties"
+        assert {"facial_hair", "hair", "age"} <= set(holmes["asserted"])
+
+    def test_the_books_own_words_outrank_the_known_look(self, ctx, monkeypatch):
+        said = Portrait(sentences=["He wore a heavy moustache."], facial_hair="a heavy moustache")
+        monkeypatch.setattr(step, "portraits_for",
+                            lambda book, docs: {HOLMES: said, WATSON: Portrait()})
+        monkeypatch.setattr(step, "canons_for",
+                            lambda book, docs: {HOLMES: self.LOOK, WATSON: Canon()})
+        holmes = step.cast_cards(ctx.book_dir, [HOLMES, WATSON])[HOLMES]
+        assert "moustache" in holmes["facial_hair"] and holmes["hair"] == "dark hair swept back"
 
 
 class FakeLLM:

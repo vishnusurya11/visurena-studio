@@ -116,6 +116,29 @@ class TestRewrite:
         assert once == distinguish.distinguish(CARD, ["hair_colour"], SEEN)
 
 
+class TestAssertedStays:
+    """A collision rung moves the shared traits -- but not one the book or
+    the known look asserted: moving Holmes off clean-shaven to tell him from
+    Watson puts the beard back that the whole card exists to refuse."""
+
+    def test_an_asserted_slot_is_never_moved(self):
+        other = SEEN  # shares everything with CARD
+        card = {**CARD, "asserted": ["facial_hair", "hair"]}
+        moved = distinguish.distinguish(card, ["facial_hair", "hair_colour", "headgear"], other)
+        assert moved["facial_hair"] == CARD["facial_hair"] and moved["hair"] == CARD["hair"]
+        assert moved["headgear"] != CARD["headgear"]
+
+    def test_movable_is_what_a_rung_can_still_change(self):
+        card = {**CARD, "asserted": ["facial_hair", "hair"]}
+        assert distinguish.movable(["figure", "facial_hair", "hair_colour", "headgear", "build"],
+                                   card) == ["headgear", "build"]
+        assert distinguish.movable(["figure", "facial_hair"], card) == []
+
+    def test_an_invented_slot_still_moves(self):
+        moved = distinguish.distinguish({**CARD, "asserted": []}, ["facial_hair"], SEEN)
+        assert moved["facial_hair"] != CARD["facial_hair"]
+
+
 class TestOwed:
     """Scarlet run 7: Holmes's card said 'receding sandy hair' from the
     rotation, the render put dark hair under his bowler four times, and the

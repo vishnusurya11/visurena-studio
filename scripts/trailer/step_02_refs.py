@@ -22,10 +22,11 @@ from pathlib import Path
 from typing import Callable
 
 from scripts.trailer.build_refs import describe_location, generate, refs_needed
+from studio.canon import canons_for, known_look
 from studio.cast_card import POOLS, cards_for, infer_gender, render_card
 from studio.describe import (DISTINCT_AT, TIMEOUT, TraitCard, closest, describe, distance,
                              patiently, same_look, shared, verifiable)
-from studio.distinguish import adopt, disobeyed, distinguish
+from studio.distinguish import adopt, disobeyed, distinguish, movable
 from studio.ladder import Ladder, Rung, climb
 from studio.learnings import Learning
 from studio.portrait import physical_text, portraits_for, stated
@@ -54,15 +55,22 @@ def seed_for(index: int, rung: Rung, i: int) -> int:
 
 
 def cast_cards(book: Path, characters: list[str]) -> dict[str, dict]:
-    """One distinct card per character, from the analysis the book has."""
+    """One distinct card per character, from the analysis the book has.
+
+    Authority order: the book's own words, then the look the world already
+    knows the character by, then the card's own invention.  Scarlet run 7:
+    the book silent on Holmes's face, the rotation gave him a walrus
+    moustache, a bowler and forty years, and every clip followed."""
     docs = {c: load_json(book / "analysis/characters" / f"{c}.json") for c in characters}
     portraits = portraits_for(book, docs)
+    looks = canons_for(book, docs)
     physical = {c: physical_text(portraits[c], physical_of(d)) for c, d in docs.items()}
     genders = {c: infer_gender(d.get("name", c), d.get("aliases", []), physical[c])
                for c, d in docs.items()}
     roles = {c: (d.get("role") or "").lower() for c, d in docs.items()}
     return cards_for(characters, physical, genders, roles,
-                     {c: stated(p) for c, p in portraits.items()})
+                     {c: {**known_look(looks[c]), **stated(portraits[c])} for c in docs},
+                     known={c for c in docs if looks[c].known})
 
 
 def render_sheet(book: Path, char_id: str, card: dict, palette: str, seed: int,
@@ -129,6 +137,12 @@ def bind_one(ctx, book: Path, index: int, char_id: str, card: dict, palette: str
         if who is None or not same_look(result["card"], bound[who]):
             return True, distance(result["card"], bound[who]) if who else None, DISTINCT_AT
         state.update(other=bound[who], shared=shared(result["card"], bound[who]))
+        if not movable(state["shared"], state["card"]):
+            # Every shared trait is the book's own: nothing a rung may move.
+            ctx.learn(Learning(step=STEP_ID, gate="identity", threshold=DISTINCT_AT,
+                               measured=f"{char_id} ~ {who}: shares {', '.join(state['shared'])}",
+                               action="accepted_as_written"))
+            return True, distance(result["card"], bound[who]), DISTINCT_AT
         return False, f"{who}: shares {', '.join(state['shared'])}", DISTINCT_AT
 
     outcome = climb(LADDER, STEP_ID, attempt, gate, ctx.budget, ctx.learn, gate_name="identity",

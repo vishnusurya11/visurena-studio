@@ -31,6 +31,16 @@ tiers:
     model: gpt-5.6-luna
     params:
       reasoning_effort: none
+  canon:                  # the look the world knows a character by (studio/canon.py)
+    provider: openai
+    # Measured 2026-09-04 on Watson: at effort none, three asks AGREED on a short
+    # pointed beard, receding sandy hair and forty-five -- confidently wrong.  At
+    # high, three of three: late twenties, a moustache, sun-darkened.  Recall of
+    # a face needs the thinking; ~5k output tokens an ask, ~$0.02 a character,
+    # asked once per book and cached in refs/canon.json.
+    model: gpt-5.6-luna
+    params:
+      reasoning_effort: high
 
 providers:
   openai:

@@ -109,13 +109,25 @@ def unsaid(card: dict, new: dict) -> str:
     return book
 
 
+def movable(matched: list[str], card: dict) -> list[str]:
+    """The matched traits a rung may still move: those on a slot the book did
+    not assert, and build.  `figure` has no slot and never moves."""
+    slot_of = {trait: slot for slot, traits in SLOT_TRAITS.items() for trait in traits}
+    asserted = set(card.get("asserted", ()))
+    return [trait for trait in matched
+            if trait == "build" or (trait in slot_of and slot_of[trait] not in asserted)]
+
+
 def distinguish(card: dict, matched: list[str], other: TraitCard,
                 taken: dict[str, set[str]] | None = None) -> dict:
-    """The card with every matched trait moved off the other character's value."""
+    """The card with every matched trait moved off the other character's value
+    -- except on a slot the book or the known look asserted: moving Holmes
+    off clean-shaven to tell him from Watson puts back the beard the card
+    exists to refuse.  Two people the book makes alike stay alike."""
     new = dict(card)
     for slot, traits in SLOT_TRAITS.items():
         avoid = {t: getattr(other, t) for t in traits if t in matched}
-        if avoid:
+        if avoid and slot not in card.get("asserted", ()):
             new[slot] = _move(slot, card[slot], avoid, (taken or {}).get(slot, set()))
     if "build" in matched:
         new["build"] = next(phrase for value, phrase in BUILD.items() if value != other.build)

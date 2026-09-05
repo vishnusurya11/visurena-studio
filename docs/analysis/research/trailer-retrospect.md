@@ -160,3 +160,79 @@ title_on_downbeat`. Sent to Telegram by hand as a 39 MB copy (defect 4).
   tests and the `qc` group's OpenCV/onnxruntime pins; only `frame_times` /
   `frame_at` were still used (step 07) and now live in `studio/frames.py`.
   FP8 Qwen3-VL and moving it to NVMe are user-side.
+
+## Run 7 — A Study in Scarlet, 2026-09-05, stopped at step 07
+
+Stopped by hand once the character sheets were looked at: the Holmes sheet
+was a man of forty with a walrus moustache under a brown bowler; run 6's
+had been white hair worn long. The owner's question — "did you do any DQ?"
+— has a plain answer: no. The identity gate compared each render to its
+own card, and the card was the thing that was wrong. A gate that checks a
+render against an invention passes the invention.
+
+**What generated it.** `cast_card` is built on "a model draws OBJECTS;
+invent only where the book is silent", and the book is silent about
+Holmes's face because in 1887 nobody needed telling. The rotation filled
+the empty slots — hair, facial hair, headgear, age — from the pool, and
+each run's rotation landed on a different man. The portrait prompt
+forbids canon on purpose ("never infer from period or reputation"), which
+is right for a book's own words and wrong as the whole of the authority.
+Silence in the text is not licence when the audience knows the face.
+
+**What changed** (each with its test, `tests/test_canon.py`,
+`tests/test_cast_card.py`, `tests/test_step_02_refs.py`,
+`tests/test_distinguish.py`):
+
+- `studio/canon.py`: a known-look rung between the book's words and
+  invention. Asked in the card's closed vocabulary, at the time of this
+  book, with `known=false` permitted; cached in `refs/canon.json`. Its
+  slots are `asserted`, so the render OWES them — a bearded Holmes is
+  refused, not shipped. Authority order now: book's own words > known
+  look > role costume > rotation.
+- Agreement, not an answer: `ASKS = 3`, each slot kept by majority
+  READING, `known` by majority; a slot the asks disagree on is empty.
+  Measured first at luna `reasoning_effort: none`: Watson came back a
+  short pointed beard / nothing / a thin waxed moustache (guessing), and on
+  a second round the three asks AGREED on a pointed beard, receding sandy
+  hair and forty-five — confidently wrong. At `high`: late twenties, a
+  moustache, sun-darkened, three of three. Recall of a face needs the
+  thinking, so models.yaml has a `canon` tier (luna, `reasoning_effort:
+  high`; same priced model, ~5k output tokens an ask, ≈$0.02 a character,
+  ≈$0.13 a book, once). Not a frontier model: none has a confirmed rate
+  in models.yaml and nothing is priced from memory.
+- `cast_card.IDENTITY = ("facial_hair", "hair")`: on a known face these
+  are never invented, only `neutral` — clean-shaven, and the plainest hair
+  of the band nobody else has (BANDED hair reordered plainest-first; long
+  black hair on Watson is not nothing added). Not asserted: a proven
+  collision may still move them.
+- `cast_card.alike`: what is taken is what the reader would call the same.
+  A thin waxed moustache and a heavy walrus moustache are two phrases and
+  one reading ("moustache"); handing the second to the next character was
+  handing out a collision the sheet gate then had to catch on the GPU.
+- `distinguish` never moves an asserted slot ("two people the book makes
+  alike stay alike"); `movable` lists what a rung may still move, and when
+  nothing is movable the sheet binds `accepted_as_written` with a learning
+  — the book made them alike, and a faithful sheet beats an unbound lead.
+- FACIAL_HAIR pool reordered least-added first, so `_move` off clean-shaven
+  reaches a moustache before a full dark beard.
+
+**Measured after the fix** (Scarlet cards, canon tier): Holmes — late
+twenties, dark hair swept back, clean-shaven, pale, tall and lean,
+deerstalker; Watson — late twenties, moustache, brown as a nut (book),
+thin as a lath (book), sturdy neutral hair; Lestrade, Gregson — known only
+for build/complexion, the book's words carry the rest; Ferrier, Lucy —
+unknown, invented as before.
+
+**Still open.**
+- Jefferson Hope's card mixes two eras: the book's "tall, savage-looking
+  young fellow" (Utah, ~1860) sets his age to early twenties, while the
+  canon's long untrimmed beard and lined sunburnt face are the London
+  cabman of 1881. The portrait step should prefer the sentences of the
+  era the trailer's beats use; a character with two looks needs two cards
+  or a timeline, not one blend.
+- The known look is asked of the model that also wrote the analysis. A
+  frontier `judge` tier is the owner's stated preference and needs an
+  owner-confirmed rate before it exists.
+- No sheet is yet compared to anything but its card. The card is now
+  worth obeying; a second, independent read ("is this Sherlock Holmes?")
+  against the canon text would close the loop the owner asked about.

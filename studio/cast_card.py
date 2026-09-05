@@ -26,12 +26,14 @@ HEADGEAR = ("a black silk top hat", "a brown bowler hat", "a tweed deerstalker",
             "a custodian helmet", "a straw boater", "a fur travelling cap",
             "a flat tweed cap", "a tall beaver hat", "a knitted watch cap",
             "a straw bonnet tied with ribbon", "a plain cotton sun bonnet",)
-FACIAL_HAIR = ("clean-shaven", "a full dark beard", "grey side-whiskers",
-               "a heavy walrus moustache", "a short pointed beard",
-               "a thin waxed moustache", "muttonchop whiskers",
-               "a close-trimmed grey beard", "a long untrimmed beard",
-               "a drooping grey moustache", "a stubbled unshaven jaw",
-               "an imperial beard and moustache",)
+FACIAL_HAIR = ("clean-shaven", "a thin waxed moustache", "a heavy walrus moustache",
+               "a full dark beard", "grey side-whiskers", "a short pointed beard",
+               "muttonchop whiskers", "a close-trimmed grey beard",
+               "a long untrimmed beard", "a drooping grey moustache",
+               "a stubbled unshaven jaw", "an imperial beard and moustache",)
+"""Ordered from the least added to the most: `distinguish._move` walks the
+pool from the current phrase, and the first step off a known face's
+clean-shaven must be a moustache, not a full dark beard."""
 GARMENT = ("a charcoal frock coat", "a bottle-green velvet jacket",
            "a fawn tweed overcoat", "a black caped ulster",
            "a rust-brown corduroy coat", "a dove-grey morning coat",
@@ -81,6 +83,15 @@ COMPLEXION = ("a pale indoor complexion", "a florid weathered face",
 TIER_TWO = ("age", "hair", "complexion")
 """Properties with their own vocabulary.  Obeyed when Tier One agrees."""
 
+IDENTITY = ("facial_hair", "hair")
+"""The slots that make a face someone else when invented.  On a character
+the audience already knows (`canon`), where the book and the known look
+leave one of these empty, invention ADDS nothing: clean-shaven, and the
+plainest hair of that age.  Scarlet run 7 gave Watson a full dark beard and
+Holmes a walrus moustache; neither was a Watson or a Holmes nobody had
+described, each was a different man.  Not asserted: a proven collision may
+still move them."""
+
 POOLS = {"headgear": HEADGEAR, "facial_hair": FACIAL_HAIR, "garment": GARMENT,
          "neckwear": NECKWEAR, "age": AGE, "hair": HAIR,
          "complexion": COMPLEXION}
@@ -104,15 +115,15 @@ YOUNG_MARKS = ("young", "girl", "boy", "child", "youth", "youthful", "lad")
 BANDED = {
     "young": {"age": ("in his early twenties", "in his late twenties",
                       "about thirty"),
-              "hair": ("dark hair swept back", "long black hair",
-                       "wavy chestnut hair", "fair hair parted in the middle"),
+              "hair": ("dark hair swept back", "wavy chestnut hair",
+                       "fair hair parted in the middle", "long black hair"),
               "facial_hair": ("clean-shaven", "a thin waxed moustache",
                               "a stubbled unshaven jaw")},
     "middle": {"age": ("about thirty-five", "about forty", "about forty-five",
                        "about fifty"),
-               "hair": ("dark hair swept back", "receding sandy hair", "long black hair",
-                        "wavy chestnut hair", "thinning red hair",
-                        "fair hair parted in the middle")},
+               "hair": ("dark hair swept back", "receding sandy hair",
+                        "wavy chestnut hair", "fair hair parted in the middle",
+                        "thinning red hair", "long black hair")},
     "old": {"age": ("about sixty", "about seventy", "about fifty-five"),
             "hair": ("a bald crown with grey at the temples",
                      "close-cropped grey hair", "white hair worn long",
@@ -120,7 +131,9 @@ BANDED = {
             "facial_hair": ("a close-trimmed grey beard", "grey side-whiskers",
                             "a drooping grey moustache", "a long untrimmed beard")},
 }
-"""What is plausible at each end of life.
+"""What is plausible at each end of life, plainest first: `neutral` hands a
+known face the first of its band nobody has, and long black hair on Watson
+(Scarlet, 2026-09-04) is not nothing added.
 
 A bald crown with grey at the temples on a young woman, and late twenties on
 "the old farmer", are not near misses -- they are different people.  Nor is
@@ -240,13 +253,26 @@ def _allowed(slot: str, pool: tuple[str, ...], gender: str,
     return options
 
 
+def neutral(slot: str, physical: str, taken: dict[str, set[str]] | None = None) -> str:
+    """What invention may add to a known face: nothing -- clean-shaven, and
+    the plainest hair of the band that no other card already reads as."""
+    if slot == "facial_hair":
+        return NO_BEARD
+    options = BANDED[age_band(physical)]["hair"]
+    spent = (taken or {}).get("hair", set())
+    return next((h for h in options if h not in spent), options[0])
+
+
 def card_for(entity_id: str, taken: dict[str, set[str]],
              physical: str = "", gender: str = "man",
-             role: str = "", stated: dict[str, str] | None = None) -> dict[str, str]:
+             role: str = "", stated: dict[str, str] | None = None,
+             known: bool = False) -> dict[str, str]:
     """One character's eight slots, avoiding every value already spent.
 
-    `stated` is what the book says outright (`portrait.stated`): it outranks
-    the role, the book match and the rotation alike.
+    `stated` is what the book says outright (`portrait.stated`) or the look
+    the world knows (`canon.known_look`): it outranks the role, the book
+    match and the rotation alike.  `known` is a face the audience would
+    recognise: its IDENTITY slots are never invented, only left neutral.
 
     Walks the pools in a per-character rotation so the assignment is stable,
     and skips anything another character has taken.  The rotation is what
@@ -268,6 +294,8 @@ def card_for(entity_id: str, taken: dict[str, set[str]],
         options = [v for v in allowed if v not in spent] or allowed
         card[slot] = (for_role[0] if for_role
                       else from_book or options[offset % len(options)])
+        if known and slot in IDENTITY and not (for_role or from_book):
+            card[slot] = neutral(slot, physical, taken)
         if from_book and not for_role:
             asserted.append(slot)
     card.update(stated or {})
@@ -287,24 +315,40 @@ def card_for(entity_id: str, taken: dict[str, set[str]],
     return card
 
 
+def alike(slot: str, value: str) -> set[str]:
+    """Every pool phrase the sheet reader would call the same as this one.
+    A slot with no reading is alike only to itself."""
+    from studio.distinguish import SLOT_TRAITS, coarse
+    traits = SLOT_TRAITS.get(slot, ())
+    if not traits:
+        return {value}
+    seen = tuple(coarse(slot, value, t) for t in traits)
+    return {v for v in POOLS[slot] if tuple(coarse(slot, v, t) for t in traits) == seen} | {value}
+
+
 def cards_for(cast: list[str], physical: dict[str, str],
               genders: dict[str, str] | None = None,
               roles: dict[str, str] | None = None,
-              stated: dict[str, dict[str, str]] | None = None) -> dict[str, dict]:
+              stated: dict[str, dict[str, str]] | None = None,
+              known: set[str] | None = None) -> dict[str, dict]:
     """A card per character, each avoiding what the others have taken."""
     # The book's words are reserved before anyone invents: Gregson's stated
     # "receding sandy hair" arrived after the rotation had given it to Holmes.
-    taken: dict[str, set[str]] = {slot: {said[slot] for said in (stated or {}).values()
-                                         if slot in said} for slot in POOLS}
+    taken: dict[str, set[str]] = {slot: set() for slot in POOLS}
+    for said in (stated or {}).values():
+        for slot in POOLS:
+            if slot in said:
+                taken[slot] |= alike(slot, said[slot])
     cards: dict[str, dict] = {}
     for entity_id in cast:
         card = card_for(entity_id, taken, physical.get(entity_id, ""),
                         (genders or {}).get(entity_id, "man"),
                         (roles or {}).get(entity_id, ""),
-                        (stated or {}).get(entity_id))
+                        (stated or {}).get(entity_id),
+                        entity_id in (known or set()))
         cards[entity_id] = card
         for slot in POOLS:
-            taken[slot].add(card[slot])
+            taken[slot] |= alike(slot, card[slot])
     return cards
 
 

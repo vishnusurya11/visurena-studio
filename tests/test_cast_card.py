@@ -15,6 +15,7 @@ from __future__ import annotations
 
 import pytest
 
+from studio import cast_card
 from studio.cast_card import (FACIAL_HAIR, GARMENT, HAIR, HEADGEAR, TIER_ONE, book_match,
                               card_for, cards_for, differences, refuse_collision,
                               render_card)
@@ -353,3 +354,46 @@ class TestStatedIsReservedFirst:
             assert "bonnet" in card["headgear"]
         assert card_for("john_watson", {}, "", gender="man")["headgear"] not in (
             "a straw bonnet tied with ribbon", "a plain cotton sun bonnet")
+
+
+class TestTakenByReading:
+    """A thin waxed moustache and a heavy walrus moustache are two phrases and
+    one reading: the sheet gate reads both as 'moustache', so handing the
+    second to the next character is handing out a collision.  What is taken
+    is what the reader would call the same."""
+
+    def test_a_slot_another_character_took_is_not_reissued_under_another_name(self):
+        from studio.distinguish import coarse
+        cards = cast_card.cards_for(["a", "b", "c"], {"a": "", "b": "", "c": ""},
+                                    stated={"a": {"facial_hair": "a heavy walrus moustache"}})
+        for other in ("b", "c"):
+            assert coarse("facial_hair", cards[other]["facial_hair"]) != "moustache", other
+
+    def test_alike_is_every_pool_phrase_the_reader_cannot_tell_from_this_one(self):
+        alike = cast_card.alike("facial_hair", "a thin waxed moustache")
+        assert {"a thin waxed moustache", "a heavy walrus moustache"} <= alike
+        assert "clean-shaven" not in alike
+        assert cast_card.alike("garment", "a navy pea jacket") == {"a navy pea jacket"}
+
+
+class TestNeutralAvoidsTaken:
+    """Scarlet 2026-09-04: Holmes's canon hair is dark and swept back; Watson
+    and Lestrade, known faces with no agreed hair, were both handed the same
+    phrase as the band's plainest -- three dark swept-back heads.  Neutral
+    means nothing ADDED, not nothing avoided: the plainest hair nobody has."""
+
+    def test_neutral_hair_is_the_plainest_the_reader_has_not_seen(self):
+        taken = {slot: set() for slot in cast_card.POOLS}
+        first = cast_card.neutral("hair", "", taken)
+        taken["hair"] |= cast_card.alike("hair", first)
+        second = cast_card.neutral("hair", "", taken)
+        assert first != second and second in cast_card.BANDED[cast_card.age_band("")]["hair"]
+
+    def test_neutral_facial_hair_is_always_clean_shaven(self):
+        taken = {"facial_hair": {"clean-shaven"}}
+        assert cast_card.neutral("facial_hair", "", taken) == cast_card.NO_BEARD
+
+    def test_two_known_faces_with_no_agreed_hair_do_not_share_one(self):
+        from studio.distinguish import coarse
+        cards = cast_card.cards_for(["a", "b"], {"a": "", "b": ""}, known={"a", "b"})
+        assert coarse("hair", cards["a"]["hair"], "hair_colour") != coarse("hair", cards["b"]["hair"], "hair_colour")             or coarse("hair", cards["a"]["hair"], "hair_length") != coarse("hair", cards["b"]["hair"], "hair_length")
