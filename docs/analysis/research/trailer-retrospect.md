@@ -87,7 +87,9 @@ title_on_downbeat`. Sent to Telegram by hand as a 39 MB copy (defect 4).
   (best take, capped) and the beat is kept
   (`test_a_retry_never_spends_a_later_beats_first_render`).
 - `describe.TIMEOUT` includes ComfyUI queue wait, so a VLM read behind a
-  render times out for the render's reason.
+  render times out for the render's reason. CLOSED 2026-09-05:
+  `comfy.wait_record` polls `/queue` and starts the clock when the job
+  leaves `queue_pending` (`QUEUE_SECONDS` caps the wait in line).
 - Holmes's hair and facial hair are still invented when the book is
   silent; the card should say "unspecified" and let the render decide, so
   the fidelity gate does not enforce an invention. CLOSED 2026-09-04, the

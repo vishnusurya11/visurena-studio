@@ -59,3 +59,53 @@ def test_interrupt_posts_to_the_interrupt_endpoint(monkeypatch):
     monkeypatch.setattr(comfy.urllib.request, "urlopen", fake_urlopen)
     comfy.interrupt()
     assert sent["url"].endswith("/interrupt")
+
+
+class FakeClock:
+    def __init__(self):
+        self.now = 1000.0
+
+    def time(self):
+        return self.now
+
+    def sleep(self, seconds):
+        self.now += seconds
+
+
+def _clock(monkeypatch):
+    clock = FakeClock()
+    monkeypatch.setattr(comfy.time, "time", clock.time)
+    monkeypatch.setattr(comfy.time, "sleep", clock.sleep)
+    return clock
+
+
+def test_the_timeout_clock_starts_when_the_job_leaves_the_queue(monkeypatch):
+    """Run 6: a sheet queued behind an 11-minute take timed out before it had
+    run a second.  Waiting in line is not running."""
+    clock = _clock(monkeypatch)
+    pending = {"left": 3}
+    monkeypatch.setattr(comfy, "pending", lambda prompt_id: pending.__setitem__("left", pending["left"] - 1) or pending["left"] >= 0)
+    done = {"at": None}
+
+    def history(prompt_id):
+        done["at"] = done["at"] or clock.now + 6
+        return RECORD if clock.now >= done["at"] else {}
+    monkeypatch.setattr(comfy, "history", history)
+    assert comfy.wait_record("job-1", timeout=12.0, poll=5.0) is RECORD
+    assert clock.now >= 1000.0 + 15 + 6  # 15 s in line did not count
+
+
+def test_a_running_job_still_times_out(monkeypatch):
+    _clock(monkeypatch)
+    monkeypatch.setattr(comfy, "pending", lambda prompt_id: False)
+    monkeypatch.setattr(comfy, "history", lambda prompt_id: {})
+    import pytest
+    with pytest.raises(TimeoutError):
+        comfy.wait_record("job-1", timeout=10.0, poll=5.0)
+
+
+def test_pending_reads_the_engines_queue(monkeypatch):
+    queue = {"queue_running": [[0, "job-0", {}]], "queue_pending": [[1, "job-1", {}]]}
+    monkeypatch.setattr(comfy, "_get", lambda path: queue)
+    assert comfy.pending("job-1") is True
+    assert comfy.pending("job-0") is False

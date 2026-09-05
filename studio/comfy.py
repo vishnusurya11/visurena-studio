@@ -123,8 +123,26 @@ def texts_of(record: dict) -> list[str]:
     return found
 
 
+def _get(path: str) -> dict:
+    with urllib.request.urlopen(f"{HOST}{path}", timeout=60) as response:
+        return json.loads(response.read())
+
+
+def pending(prompt_id: str) -> bool:
+    """Whether the job is still waiting its turn behind another."""
+    return any(item[1] == prompt_id for item in _get("/queue").get("queue_pending", []))
+
+
+QUEUE_SECONDS = 7200.0
+
+
 def wait_record(prompt_id: str, timeout: float = 3600.0, poll: float = 5.0) -> dict:
-    """Block until a job finishes and return its record; raise on engine error or timeout."""
+    """Block until a job finishes and return its record; raise on engine error
+    or timeout.  The clock starts when the job leaves the queue: a sheet
+    queued behind an 11-minute take had timed out before it ran a second."""
+    queued_until = time.time() + QUEUE_SECONDS
+    while pending(prompt_id) and time.time() < queued_until:
+        time.sleep(poll)
     deadline = time.time() + timeout
     while time.time() < deadline:
         record = history(prompt_id)
