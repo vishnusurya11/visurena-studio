@@ -22,6 +22,12 @@ two rungs and nothing could move it).  Build has no slot; see BUILD."""
 BUILD = {"slight": "a slight wiry frame", "average": "an average frame",
          "stocky": "a broad stocky frame", "heavy": "a heavy stout frame"}
 RELIABLE = ("hair_colour", "hair_length", "facial_hair", "headgear")
+ADDED: dict[str, tuple[str, ...]] = {
+    "hair_colour": ("grey", "white"), "hair_length": ("bald", "long"),
+    "facial_hair": ("moustache", "beard", "whiskers")}
+"""What a render ADDS to a face the card left neutral (`cast_card.IDENTITY`):
+the readings that make a young man old, or a clean-shaven man someone else.
+Brown on fair is still the man; grey is not (Scarlet run 8, Watson)."""
 """The traits the render-and-read channel expresses.  Scarlet run 4's seven
 sheets: complexion read 'fair' on seven different card phrases, build
 'average' on all seven, age followed the hair colour; hair, facial hair and
@@ -54,12 +60,22 @@ def owed(card: dict) -> list[str]:
             if trait in RELIABLE]
 
 
+def added(card: dict, reading: TraitCard) -> list[str]:
+    """The neutral slots' traits the render added something to: a reading
+    in ADDED that the card's own phrase does not carry."""
+    asked = expected(card)
+    return [trait for slot in card.get("neutral", ()) for trait in SLOT_TRAITS.get(slot, ())
+            if trait in ADDED and getattr(reading, trait) in ADDED[trait]
+            and getattr(asked, trait) != getattr(reading, trait)]
+
+
 def disobeyed(card: dict, reading: TraitCard) -> list[str]:
     """The owed traits the render ignored: seen, and more than a notch
-    from what the card asked for."""
+    from what the card asked for; and the neutral ones it added to."""
     asked = expected(card)
-    return [trait for trait in owed(card) if trait in differences(asked, reading)
-            and frozenset((getattr(asked, trait), getattr(reading, trait))) not in NEIGHBOURS]
+    off = [trait for trait in owed(card) if trait in differences(asked, reading)
+           and frozenset((getattr(asked, trait), getattr(reading, trait))) not in NEIGHBOURS]
+    return off + [trait for trait in added(card, reading) if trait not in off]
 
 
 def _drawn(slot: str, reading: TraitCard) -> str | None:
@@ -111,15 +127,15 @@ def unsaid(card: dict, new: dict) -> str:
 
 def movable(matched: list[str], card: dict) -> list[str]:
     """The matched traits a rung may still move: the RELIABLE ones on a slot
-    the book did not assert.  Age, complexion and build are read off the
+    the book did not assert and invention did not leave neutral.  Age, complexion and build are read off the
     sheet but not expressed by it (age follows the hair colour, build read
     'average' seven of seven): a rung that moves them changes the person
     and not the reading -- Scarlet run 8 walked Lestrade from thirty-five
     to seventy that way.  `figure` has no slot and never moves."""
     slot_of = {trait: slot for slot, traits in SLOT_TRAITS.items() for trait in traits}
-    asserted = set(card.get("asserted", ()))
+    fixed = set(card.get("asserted", ())) | set(card.get("neutral", ()))
     return [trait for trait in matched
-            if trait in RELIABLE and trait in slot_of and slot_of[trait] not in asserted]
+            if trait in RELIABLE and trait in slot_of and slot_of[trait] not in fixed]
 
 
 def distinguish(card: dict, matched: list[str], other: TraitCard,

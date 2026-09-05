@@ -76,7 +76,7 @@ class TestRefuseCollision:
         costume and light, which is what this measures."""
         cards = cards_for(CAST, {})
         assert all(isinstance(v, str) for c in cards.values()
-                   for k, v in c.items() if k != "asserted")
+                   for k, v in c.items() if k not in ("asserted", "neutral"))
 
 
 class TestRenderCard:

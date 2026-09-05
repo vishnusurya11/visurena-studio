@@ -192,19 +192,25 @@ class TestOnTheCard:
         assert watson["hair"] == cast_card.BANDED["middle"]["hair"][0]
         assert gregson["facial_hair"] != "clean-shaven" or gregson["hair"] != watson["hair"]
 
-    def test_a_known_face_owns_its_identity_slots(self):
+    def test_a_known_face_names_its_neutral_slots(self):
         """Scarlet run 8: Lestrade's neutral clean-shaven and thinning red
         hair were 'movable if the pixels collide', the pixels collided with
-        Watson, and the rung made him seventy, white-haired and bearded.  On
-        a known face the neutral slots are the character's, as the book's
-        words would be: the render OWES them, no rung moves them, and a
-        sheet that draws grey on fair is refused rather than adopted."""
+        Watson, and the rung made him seventy, white-haired and bearded.
+        The card names the slots invention left neutral, so no rung moves
+        them and the render owes them as NOTHING ADDED (`distinguish`):
+        not asserted, since brown drawn on fair is still a Watson."""
         cards = cast_card.cards_for(["john_watson"], {"john_watson": ""},
                                     stated={"john_watson": {"age": "in his late twenties"}},
                                     known={"john_watson"})
-        assert {"facial_hair", "hair", "age"} <= set(cards["john_watson"]["asserted"])
+        watson = cards["john_watson"]
+        assert watson["neutral"] == ["facial_hair", "hair"]
+        assert not {"facial_hair", "hair"} & set(watson["asserted"])
+        stated = cast_card.cards_for(["sherlock_holmes"], {"sherlock_holmes": ""},
+                                     stated={"sherlock_holmes": canon.known_look(KNOWN)},
+                                     known={"sherlock_holmes"})["sherlock_holmes"]
+        assert stated["neutral"] == []  # the canon filled both
         stranger = cast_card.cards_for(["stamford"], {"stamford": ""})["stamford"]
-        assert "hair" not in stranger["asserted"]
+        assert stranger["neutral"] == [] and "hair" not in stranger["asserted"]
 
     def test_a_stranger_is_still_invented_from_the_rotation(self):
         card = cast_card.cards_for(["stamford"], {"stamford": ""})["stamford"]

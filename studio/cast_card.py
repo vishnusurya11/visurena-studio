@@ -83,17 +83,20 @@ COMPLEXION = ("a pale indoor complexion", "a florid weathered face",
 TIER_TWO = ("age", "hair", "complexion")
 """Properties with their own vocabulary.  Obeyed when Tier One agrees."""
 
-IDENTITY = ("facial_hair", "hair", "age")
+IDENTITY = ("facial_hair", "hair")
 """The slots that make a face someone else when invented.  On a character
 the audience already knows (`canon`), where the book and the known look
 leave one of these empty, invention ADDS nothing: clean-shaven, and the
 plainest hair of that age.  Scarlet run 7 gave Watson a full dark beard and
 Holmes a walrus moustache; neither was a Watson or a Holmes nobody had
-described, each was a different man.  Asserted, on a known face: run 8 left
-them movable for a proven collision, Lestrade's sheet collided with Watson's,
-and the rung made him seventy, white-haired and bearded.  The render OWES
-them and no rung moves them; a known face that reads like another known
-face is accepted as written, as two people the book makes alike are."""
+described, each was a different man.  The card lists them as `neutral`:
+run 8 left them movable for a proven collision, Lestrade's sheet collided
+with Watson's, and the rung made him seventy, white-haired and bearded; then
+asserted, the gate refused three brown-haired Watsons over an invented
+'fair'.  A neutral slot is owed as NOTHING ADDED (grey, white, bald, long,
+a beard), not as a phrase; no rung moves it; what the render drew within
+that is adopted.  A known face that reads like another known face is
+accepted as written, as two people the book makes alike are."""
 
 POOLS = {"headgear": HEADGEAR, "facial_hair": FACIAL_HAIR, "garment": GARMENT,
          "neckwear": NECKWEAR, "age": AGE, "hair": HAIR,
@@ -285,6 +288,7 @@ def card_for(entity_id: str, taken: dict[str, set[str]],
     offset = sum(ord(ch) * (i + 1) for i, ch in enumerate(entity_id))
     card: dict = {}
     asserted: list[str] = []
+    neutral_slots: list[str] = []
     for slot, pool in POOLS.items():
         spent = taken.get(slot, set())
         banded = BANDED.get(age_band(physical), {}).get(slot)
@@ -298,8 +302,9 @@ def card_for(entity_id: str, taken: dict[str, set[str]],
         card[slot] = (for_role[0] if for_role
                       else from_book or options[offset % len(options)])
         if known and slot in IDENTITY and not (for_role or from_book):
-            card[slot] = neutral(slot, physical, taken) if slot != "age" else card[slot]
-        if (from_book and not for_role) or (known and slot in IDENTITY):
+            card[slot] = neutral(slot, physical, taken)
+            neutral_slots.append(slot)
+        if from_book and not for_role:
             asserted.append(slot)
     card.update(stated or {})
     card['gender'] = gender
@@ -315,6 +320,7 @@ def card_for(entity_id: str, taken: dict[str, set[str]],
     # OWES; the rest were invented to tell the cast apart, and the render
     # decides them (Scarlet run 7: Holmes unbound over invented sandy hair).
     card['asserted'] = sorted(set(asserted) | set(stated or {}))
+    card['neutral'] = sorted(set(neutral_slots) - set(stated or {}))
     return card
 
 

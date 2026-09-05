@@ -84,14 +84,18 @@ Evidence: `docs/analysis/research/trailer-music-structure.md`,
   AGREED on a bearded, sandy, forty-five-year-old Watson) three times in
   the card's closed vocabulary, keeps each slot by majority reading, caches
   `refs/canon.json`, and `stated` fills the slots so the render OWES them.
-  On a known face the IDENTITY slots (`facial_hair`, `hair`, `age`) are
-  never invented, only `neutral` (clean-shaven, the plainest hair nobody
-  has), and they are ASSERTED: the render owes them, no rung moves them,
-  `adopt` does not rewrite them. Run 8 left them movable "if the pixels
-  collide", Lestrade collided with Watson, and the rung made him seventy,
-  white-haired and bearded; Watson's reroll drew grey on fair, bound
-  BECAUSE it differed from Holmes, and `adopt` wrote the grey into every
-  clip prompt. What is `taken` is what the reader would call the same
+  On a known face the IDENTITY slots (`facial_hair`, `hair`) are never
+  invented, only `neutral` (clean-shaven, the plainest hair nobody has),
+  and the card lists them as `neutral`: a third category beside asserted
+  and free. A neutral slot is owed as NOTHING ADDED (`distinguish.ADDED`:
+  grey, white, bald, long, any facial hair), never as its phrase; no rung
+  moves it; what the render drew within that is adopted. Run 8 left them
+  movable "if the pixels collide", Lestrade collided with Watson, and the
+  rung made him seventy, white-haired and bearded; Watson's reroll drew
+  grey on fair, bound BECAUSE it differed from Holmes, and `adopt` wrote
+  the grey into every clip prompt. Asserting them instead refused three
+  good brown-haired Watsons over the invented "fair" - a neutral phrase
+  is a placeholder, not a fact about the man. What is `taken` is what the reader would call the same
   (`cast_card.alike`: two moustaches are one reading); a rung moves only
   what the sheet can express (`RELIABLE`: hair colour and length, facial
   hair, headgear - never age, complexion or build); and a collision on

@@ -158,6 +158,35 @@ class TestOwed:
     ASSERTED = {**CARD, "asserted": ["hair", "facial_hair", "headgear"]}
     DRAWN = SEEN.model_copy(update={"hair_colour": "dark brown", "hair_length": "short"})
 
+    def test_a_neutral_slot_is_owed_as_nothing_added(self):
+        """Run 8, second pass: Watson's neutral hair was 'fair hair parted in
+        the middle', the model drew brown under his bowler three seeds
+        running, and the gate refused three good Watsons over a colour
+        nobody had asserted.  A neutral slot is not a fact about the man;
+        it is the promise that invention ADDS nothing.  Brown on fair keeps
+        that promise and is adopted; grey, white, bald, long, a beard on
+        clean-shaven break it and are refused."""
+        card = {**CARD, "hair": "fair hair parted in the middle",
+                "asserted": [], "neutral": ["facial_hair", "hair"]}
+        faithful = distinguish.expected(card)
+        assert distinguish.disobeyed(card, faithful.model_copy(update={"hair_colour": "brown"})) == []
+        assert distinguish.disobeyed(card, faithful.model_copy(update={"hair_colour": "grey"})) == ["hair_colour"]
+        assert distinguish.disobeyed(card, faithful.model_copy(update={"hair_length": "long"})) == ["hair_length"]
+        assert distinguish.disobeyed(card, faithful.model_copy(update={"facial_hair": "beard"})) == ["facial_hair"]
+        assert distinguish.disobeyed(card, faithful.model_copy(update={"hair_colour": "unclear"})) == []
+
+    def test_a_neutral_phrase_that_itself_adds_is_not_refused_for_it(self):
+        """Hope's neutral hair was 'long black hair' (the fourth of the young
+        band): a long reading is what the card asked for."""
+        card = {**CARD, "hair": "long black hair", "asserted": [], "neutral": ["hair"]}
+        assert distinguish.disobeyed(card, distinguish.expected(card)) == []
+
+    def test_a_neutral_slot_is_never_moved(self):
+        card = {**CARD, "asserted": [], "neutral": ["facial_hair", "hair"]}
+        assert distinguish.movable(["hair_colour", "facial_hair", "headgear"], card) == ["headgear"]
+        moved = distinguish.distinguish(card, ["hair_colour", "facial_hair"], SEEN)
+        assert moved["hair"] == card["hair"] and moved["facial_hair"] == card["facial_hair"]
+
     def test_only_an_asserted_slot_can_be_disobeyed(self):
         faithful = distinguish.expected(CARD)
         drifted = faithful.model_copy(update={"hair_colour": "fair", "facial_hair": "moustache"})

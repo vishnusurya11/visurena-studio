@@ -268,12 +268,28 @@ made them so.
   complexion and build are read off a sheet but not expressed by it
   (run 4: age followed the hair colour, build read 'average' 7/7); moving
   them changes the person and not the reading. Build no longer moves.
-- On a known face (`canon.known`) the IDENTITY slots — facial hair, hair,
-  and now age — are asserted even when neutral: the render OWES them, no
-  rung moves them, `adopt` does not rewrite them. A known face that reads
-  like another known face binds `accepted_as_written`, as two people the
-  book makes alike do. Grey drawn on fair is now `disobeyed hair_colour`
-  (fair–grey is not a neighbour) and rerolled, not adopted.
+- On a known face (`canon.known`) the IDENTITY slots — facial hair and
+  hair — are listed as `neutral` on the card, a third category beside
+  asserted and free. No rung moves them. A known face that reads like
+  another known face binds `accepted_as_written`, as two people the book
+  makes alike do.
+
+**Second pass (same day).** The first fix ASSERTED the neutral slots, and
+the rerun refused three good Watsons in a row: `disobeyed hair_colour`,
+brown drawn on "fair hair parted in the middle". The sheet at the third
+refusal was a correct Watson — about thirty, brown hair, moustache, brown
+bowler. Nobody had said fair; `neutral()` had, as the plainest hair
+nobody else had taken. A neutral phrase is a placeholder, and owing a
+placeholder as a fact refuses the man for the placeholder's sake.
+
+The rule that fits both failures: a neutral slot is owed as NOTHING
+ADDED. `distinguish.ADDED` names what a render adds to a young face —
+grey, white, bald, long, any facial hair on clean-shaven — and
+`disobeyed` refuses a neutral slot only for those; brown on fair is
+adopted (`adopt` still rewrites unasserted slots to what was drawn, so
+the clip prompts say brown). Lestrade's seventy-white-bearded and
+Watson's grey are still refused; Watson's brown is bound. The card
+carries `neutral` next to `asserted` so `movable` excludes both.
 
 **Also measured.** Step 02's 40-minute share is thin: 7 sheets at 290 s
 first-try is 34 min, one reroll is 5 min. Ferrier and Gregson went
