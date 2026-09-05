@@ -49,6 +49,35 @@ def arc_for(position: float) -> Register:
     return "aftermath"
 
 
+def movement_for(position: float) -> str:
+    """The movement a beat at this fractional position falls in.
+
+    Only for callers that have no story spine to ask -- the spine itself is
+    `trailer_story.movement_of`, which reads the SCENE.
+    """
+    if position < 0.25:
+        return "M1"
+    return "M2" if position < 0.70 else "M3"
+
+
+ARC_BY_MOVEMENT = {"M1": "quiet", "M2": "build", "M3": "hit"}
+"""World, problem, threat -- and the register each one is cut in."""
+
+
+def arc_of(movement: str, last: bool = False) -> Register:
+    """Where a beat sits in the rise, from the MOVEMENT it plays in.
+
+    `arc_for` reads the beat's position in the list, which run 10 filled by
+    score: B00-B05 were "quiet" because they ranked highest, and the gate
+    that refuses a trailer which never reaches a climax could not fail.
+    Deriving the arc from the movement makes it a fact about the story, so
+    a plan with no third movement now fails that gate honestly.
+    """
+    if last:
+        return "aftermath"
+    return ARC_BY_MOVEMENT.get(movement, "build")  # type: ignore[return-value]
+
+
 def scene_value(scene: dict, protagonist: str | None) -> int:
     """How much trailer a scene is worth.  Deliberately crude and readable."""
     value = 0

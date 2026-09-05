@@ -92,14 +92,44 @@ def to_spec(derived: dict, judged: Judgement) -> StorySpec:
                      thesis=judged.thesis, setting=judged.setting)
 
 
-def fallback(derived: dict, book_dir: Path) -> StorySpec:
+CLAUSE = re.compile(r"\s*(?:[,;:]|\band\b|\bbut\b|\bthat\b|\bwho\b|\bwhich\b"
+                    r"|\bwhere\b|\bwhen\b)\s*")
+"""Where a sentence can be cut and still mean something on a card."""
+
+
+def clauses(text: str) -> list[str]:
+    """The pieces a refrain can be cut back to, shortest first."""
+    parts = [p.strip(" ,;:.") for p in CLAUSE.split(text or "")]
+    return sorted({p for p in parts if p}, key=lambda p: (len(p.split()), p))
+
+
+def thesis_from(refused: str | None, derived: dict) -> str | None:
+    """A refused refrain cut back to the shortest clause the contract takes.
+
+    Run 10 shipped `thesis: null` because the model answered in eight
+    syllables and this function preferred silence to arithmetic -- and the
+    thesis is the one sentence the trailer can put on a card or read as
+    voice-over (R11).  The contract does the accepting, so the rules live in
+    one place: length is fixed by cutting, a name is not.
+    """
+    for clause in clauses(refused or ""):
+        try:
+            StorySpec(**derived, narrator="omniscient", register="procedural", thesis=clause)
+            return clause
+        except ValidationError:
+            continue
+    return None
+
+
+def fallback(derived: dict, book_dir: Path, refused: str | None = None) -> StorySpec:
     narrator = narrator_by_pronouns(source_text(book_dir), derived["lead"] or "omniscient")
-    return StorySpec(**derived, narrator=narrator, register="procedural", thesis=None)
+    return StorySpec(**derived, narrator=narrator, register="procedural",
+                     thesis=thesis_from(refused, derived))
 
 
 def judge(screenplay: dict, derived: dict, ctx) -> StorySpec:
     """Climb the judgement ladder: each refusal is quoted back to the model."""
-    violation: dict = {"text": None}
+    violation: dict = {"text": None, "thesis": None}
 
     def attempt(rung, i):
         return llm.structured(TIER, prompt_for(screenplay, derived, violation["text"]), Judgement)
@@ -110,10 +140,13 @@ def judge(screenplay: dict, derived: dict, ctx) -> StorySpec:
             return True, None, "StorySpec"
         except ValidationError as exc:
             violation["text"] = exc.errors()[0]["msg"]
+            violation["thesis"] = judged.thesis
             return False, violation["text"], "StorySpec"
 
     outcome = climb(LADDER, STEP_ID, attempt, gate, ctx.budget, ctx.learn, gate_name="judgement")
-    return fallback(derived, ctx.book_dir) if outcome.terminal else to_spec(derived, outcome.result)
+    if outcome.terminal:
+        return fallback(derived, ctx.book_dir, violation["thesis"])
+    return to_spec(derived, outcome.result)
 
 
 def run(codex_id: str, ctx) -> None:

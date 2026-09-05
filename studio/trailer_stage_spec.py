@@ -7,10 +7,13 @@ a model's judgment) live in the step and climb its ladder.
 """
 from __future__ import annotations
 
+import math
 import re
 from typing import ClassVar, Literal
 
 from pydantic import BaseModel, ConfigDict, Field, model_validator
+
+from studio.trailer_music import PINNED_DURATION
 
 Register = Literal["elegy", "gothic", "romance", "coming-of-age", "tragedy",
                    "procedural", "detective", "comedy", "adventure"]
@@ -20,7 +23,13 @@ through spoken lines and a voice would compete (03-music)."""
 
 Function = Literal["hook", "stakes", "threat", "promise", "button", "exposition"]
 MAX_THESIS_SYLLABLES = 7
-MAX_LINES = 4
+SPEECH_CEILING_PER_100S = 12
+"""The top of the dialogue-led trailer norm (8-12 lines per 100 s, see
+trailer-sound-chain.md).  `trailer_dialogue.SPOKEN_PER_100S` is the floor."""
+MAX_LINES = math.ceil(SPEECH_CEILING_PER_100S * PINNED_DURATION / 100)
+"""The most lines a slate may hold: the ceiling rate over the pinned cue.
+Run 10's constant 4 sat under the story spine's own floor, so no slate could
+ever satisfy it."""
 PAST = re.compile(r"\b(was|were|had|did|went|came|said|told|knew|saw|took|made)\b", re.I)
 
 

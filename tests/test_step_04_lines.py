@@ -10,6 +10,7 @@ from __future__ import annotations
 
 import json
 import re
+from pathlib import Path
 from urllib.error import URLError
 
 import pytest
@@ -18,7 +19,7 @@ from scripts.trailer import step_04_lines as step
 from studio import db, llm
 from studio.learnings import load
 from studio.trailer_run import RunContext
-from studio.trailer_stage_spec import LineSlate, SlateLine
+from studio.trailer_stage_spec import LineSlate, SlateLine, StorySpec
 
 HOLMES, WATSON, HOPE = "sherlock_holmes", "john_watson", "jefferson_hope"
 AFGHAN = "You have been in Afghanistan, I perceive."
@@ -129,7 +130,10 @@ class TestRun:
         assert slate.lines[0].text == AFGHAN
         assert "threat" in {l.function for l in slate.lines}
         assert slate.iconicity == "none" and not slate.music_only
-        assert len(fake.prompts) == 1
+        assert len(slate.spoken()) >= 3
+        # This pool holds no question and no threat short enough to be the
+        # button, so R8 is refused twice and the last rung drops it.
+        assert len(fake.prompts) == 3
         assert isinstance(raw["pool"], list) and str(ctx.book_dir) not in json.dumps(raw)
         spare = [SlateLine.model_validate(p) for p in raw["pool"]]
         assert spare and all(l.text not in {x.text for x in slate.lines} for l in spare)
@@ -163,11 +167,12 @@ class TestRun:
         step.run(ctx.codex_id, ctx)
         slate = LineSlate.model_validate(slate_of(ctx))
         assert slate.music_only and slate.lines == []
-        assert len(fake.prompts) == 2
+        assert len(fake.prompts) == 3
         assert "refused: no line is labelled hook" in fake.prompts[1]
         rows = load(ctx.learnings_path)
         assert rows[-1].terminal and rows[-1].action == "music_only"
         assert rows[0].action == "relabel_next_10" and rows[0].gate == "slate"
+        assert rows[-2].action == "drop_story_rules"
 
 
 class TestSheets:
@@ -178,7 +183,7 @@ class TestSheets:
         monkeypatch.setattr(llm, "structured", FakeLabeller(rules=[("death", "threat")]))
         step.run(ctx.codex_id, ctx)
         sheets = sorted((ctx.out_dir / "work").glob("labels-*.json"))
-        assert [p.name for p in sheets] == ["labels-0.json", "labels-1.json"]
+        assert [p.name for p in sheets] == ["labels-0.json", "labels-1.json", "labels-2.json"]
         first = json.loads(sheets[0].read_text(encoding="utf-8"))
         assert first and all(set(row) == {"text", "speaker", "function"} for row in first)
         assert "hook" not in {row["function"] for row in first}
@@ -209,6 +214,78 @@ class TestIconicity:
         assert slate_of(ctx)["iconicity"] == "thin"
 
 
+class TestSpeaksEnough:
+    """R1/R8.  `music_only` is a refusal to be quoted back, not an outcome:
+    run 10 spoke one line in a hundred seconds and shipped."""
+
+    def test_a_slate_that_speaks_too_little_is_refused_and_relabelled(self, ctx, monkeypatch):
+        """One spoken line and two cards is what run 10 delivered."""
+        fake = FakeLabeller(rules=[("Afghanistan", "hook"), ("death in one", "threat")])
+        monkeypatch.setattr(llm, "structured", fake)
+        step.run(ctx.codex_id, ctx)
+        assert "needs" in fake.prompts[1] or "speaks" in fake.prompts[1]
+
+    def test_the_prompt_names_how_many_lines_must_be_spoken(self, ctx, monkeypatch):
+        fake = FakeLabeller()
+        monkeypatch.setattr(llm, "structured", fake)
+        step.run(ctx.codex_id, ctx)
+        assert "must SPEAK at least" in fake.prompts[0]
+
+    def test_a_question_button_satisfies_the_last_word_rule(self, ctx, monkeypatch):
+        doc = screenplay()
+        doc["scenes"][2]["elements"].append(dialogue(HOPE, "Now, who am I?"))
+        write(ctx.book_dir / "screenplay/feature/screenplay.json", doc)
+        fake = FakeLabeller(rules=RULES + [("who am I", "button")])
+        monkeypatch.setattr(llm, "structured", fake)
+        step.run(ctx.codex_id, ctx)
+        slate = LineSlate.model_validate(slate_of(ctx))
+        assert slate.lines[-1].text.rstrip().endswith("?")
+        assert len(fake.prompts) == 1
+
+    def test_the_last_rung_ships_lines_rather_than_silence(self, ctx, monkeypatch):
+        """The story rules are dropped before the trailer goes silent."""
+        monkeypatch.setattr(llm, "structured", FakeLabeller())
+        step.run(ctx.codex_id, ctx)
+        slate = LineSlate.model_validate(slate_of(ctx))
+        assert not slate.music_only and slate.lines
+        rows = load(ctx.learnings_path)
+        assert [r.action for r in rows] == ["relabel_next_10", "relabel_next_10"]
+
+
+class TestNarratorMaySpeak:
+    def test_the_top_narration_lines_get_the_narrators_voice(self):
+        rows = [{"text": "There is a scarlet thread of murder.", "speaker": None,
+                 "pool": "narration", "scene": None},
+                {"text": "The fog hangs over the river.", "speaker": None,
+                 "pool": "narration", "scene": None},
+                {"text": "A word was written on the wall.", "speaker": None,
+                 "pool": "source", "scene": None}]
+        found = step.voiced(rows, WATSON, cap=1)
+        assert found[0]["speaker"] == WATSON
+        assert found[1]["speaker"] is None and found[2]["speaker"] is None
+
+    def test_an_omniscient_book_gets_no_voice_over(self):
+        rows = [{"text": "x", "speaker": None, "pool": "narration", "scene": None}]
+        assert step.voiced(rows, "omniscient") == rows
+
+
+class TestThesisReachesTheScreen:
+    def test_a_thesis_becomes_a_candidate(self):
+        spec = StorySpec(**{**story(), "thesis": "nobody is who they say"})
+        assert step.thesis_card(spec) == [{"text": "Nobody is who they say.", "speaker": None,
+                                          "pool": "thesis", "scene": None}]
+
+    def test_no_thesis_adds_nothing(self):
+        assert step.thesis_card(StorySpec(**story())) == []
+
+    def test_the_thesis_is_always_offered_to_the_labeller(self):
+        ranked = step.rank(step.thesis_card(StorySpec(**{**story(), "thesis": "nobody is who they say"}))
+                           + [{"text": t, "speaker": HOLMES, "pool": "screenplay", "scene": 1}
+                              for t in FILLER], [], (HOLMES,), longest_slot=9.0)
+        window = step.quota_fill(ranked, 2, HOPE, set())
+        assert "Nobody is who they say." in [l["text"] for l in window]
+
+
 class TestRanking:
     def test_kept_lines_rank_first(self):
         lines = [{"text": FILLER[0], "speaker": WATSON, "pool": "screenplay", "scene": 4},
@@ -228,3 +305,68 @@ class TestRanking:
         sheet = step.LabelSheet(labels=[{"index": 0, "function": "hook"}, {"index": 7, "function": "button"}])
         lines = step.labelled(ranked, sheet)
         assert len(lines) == 1 and lines[0].function == "hook" and lines[0].pool == "screenplay"
+
+
+class TestRun10Regression:
+    """R12, on run 10's own candidate pool (tests/fixtures/scarlet_line_pool.json,
+    228 rows drawn from the four pools) and its own Wikiquote page.
+
+    Offline in both directions: the pool is a file, the kept quotations are
+    the recorded API response test_iconicity already ships.
+    """
+
+    POOL = Path(__file__).parent / "fixtures" / "scarlet_line_pool.json"
+    PAGE = Path(__file__).parent / "fixtures" / "wikiquote_sherlock_holmes.json"
+    CLIMAX = {11, 18, 19}
+    LONGEST = 9.72
+
+    def pool(self):
+        return json.loads(self.POOL.read_text(encoding="utf-8"))
+
+    def kept(self):
+        from studio import iconicity
+        doc = json.loads(self.PAGE.read_text(encoding="utf-8"))["response"]
+        body = iconicity.section_for(doc["parse"]["wikitext"]["*"], "A Study in Scarlet")
+        return [{**q, "page": "Sherlock Holmes"} for q in iconicity.quotes_in(body)]
+
+    def window(self, where="character"):
+        ranked = step.rank(self.pool(), self.kept(), (HOLMES,), self.LONGEST, where)
+        return step.quota_fill(ranked, step.TOP_N, HOPE, self.CLIMAX)
+
+    def test_the_books_own_threat_reaches_the_labeller(self):
+        """Run 10 ranked these #663, #664 and #178 of 2336 and the labeller
+        saw the top 24."""
+        texts = [l["text"] for l in self.window()]
+        assert "Now, Enoch Drebber, who am I?" in texts
+        assert "Choose and eat." in texts
+        assert "You dog!" in texts
+        assert any("hunted you from Salt Lake City" in t for t in texts)
+
+    def test_the_hook_is_still_the_first_line_of_the_book(self):
+        assert any("Afghanistan" in l["text"] for l in self.window())
+
+    def test_the_aphorisms_no_longer_own_the_window(self):
+        """17 of run 10's 24 candidates came from outside the screenplay."""
+        window = self.window()
+        off_book = sum(l["pool"] not in ("screenplay", "thesis") for l in window)
+        assert off_book / len(window) < 0.5
+
+    def test_a_character_page_ranks_below_the_book(self):
+        """The same quotation, weighted for whose page it came from."""
+        rows = [{"text": "You have been in Afghanistan, I perceive.", "speaker": HOLMES,
+                 "pool": "screenplay", "scene": 1}]
+        as_book = step.rank(rows, self.kept(), (HOLMES,), self.LONGEST, "book")
+        as_character = step.rank(rows, self.kept(), (HOLMES,), self.LONGEST, "character")
+        assert as_book[0]["kept"] and as_character[0]["score"] < as_book[0]["score"]
+
+    def test_the_confrontation_arrives_in_the_order_it_is_spoken(self):
+        ranked = step.rank(self.pool(), self.kept(), (HOLMES,), self.LONGEST, "character")
+        spoken = step.confrontation(ranked, HOPE, self.CLIMAX)
+        assert [l["order"] for l in spoken] == sorted(l["order"] for l in spoken)
+        assert len(spoken) <= step.CONFRONTATION
+
+    def test_every_role_has_something_to_label(self):
+        ranked = step.rank(self.pool(), self.kept(), (HOLMES,), self.LONGEST, "character")
+        window = step.quota_fill(ranked, step.TOP_N, HOPE, self.CLIMAX)
+        for role, mark in step.ROLE_MARKS.items():
+            assert any(mark(l["text"]) for l in window), role

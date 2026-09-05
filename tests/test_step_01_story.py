@@ -119,3 +119,42 @@ class TestRun:
     def test_a_register_outside_the_enum_never_validates(self):
         with pytest.raises(ValidationError):
             judgement(register="moody")
+
+
+class TestThesisIsNeverDroppedForLength:
+    """R11.  Run 10 shipped `thesis: null` because the model answered with
+    eight syllables and `fallback` preferred silence to arithmetic.  The
+    thesis is the one sentence the trailer can put on a card or read as
+    voice-over, so a refrain that is too long is CUT BACK, never dropped."""
+
+    def test_clauses_are_the_pieces_a_refrain_cuts_back_to(self):
+        found = step.clauses("nobody is ever who they say they are")
+        assert "nobody is ever" in found
+        assert found == sorted(found, key=lambda c: (len(c.split()), c))
+
+    def test_a_refused_refrain_yields_its_shortest_accepted_clause(self):
+        derived = step.derive(screenplay()["scenes"])
+        assert step.thesis_from("nobody is ever who they say they are", derived) == "nobody is ever"
+
+    def test_a_refrain_that_names_somebody_still_yields_nothing(self):
+        """Length is arithmetic; a name is a different refusal and cutting
+        does not fix it."""
+        derived = step.derive(screenplay()["scenes"])
+        assert step.thesis_from("the truth about Holmes", derived) is None
+
+    def test_eight_syllables_then_six_is_taken_on_the_retry(self, ctx, monkeypatch):
+        fake = FakeLLM(judgement(thesis="every secret is a debt"),
+                        judgement(thesis="each secret is a debt"))
+        monkeypatch.setattr(llm, "structured", fake)
+        step.run(ctx.codex_id, ctx)
+        spec = StorySpec.model_validate_json((ctx.out_dir / "story.json").read_text())
+        assert spec.thesis == "each secret is a debt"
+        assert "syllables" in fake.prompts[1]
+
+    def test_three_over_long_answers_still_ship_a_refrain(self, ctx, monkeypatch):
+        long = judgement(thesis="nobody is ever who they say they are")
+        monkeypatch.setattr(llm, "structured", FakeLLM(long, long, long))
+        step.run(ctx.codex_id, ctx)
+        spec = StorySpec.model_validate_json((ctx.out_dir / "story.json").read_text())
+        assert spec.thesis == "nobody is ever"
+        assert spec.register == "procedural"

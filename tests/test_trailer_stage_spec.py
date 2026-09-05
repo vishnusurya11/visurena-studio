@@ -4,11 +4,14 @@ The pydantic model IS the spec: a step's output that does not validate is a
 failed step, and a gate the blueprint names is a validator here when it is a
 property of the artifact alone.
 """
+import math
+
 import pytest
 from pydantic import ValidationError
 
+from studio.trailer_music import PINNED_DURATION
 from studio.trailer_stage_spec import (
-    LineSlate, Metre, QCReport, SlateLine, Slot, StorySpec, syllables)
+    MAX_LINES, SPEECH_CEILING_PER_100S, LineSlate, Metre, QCReport, SlateLine, Slot, StorySpec, syllables)
 
 
 def story(**over):
@@ -104,9 +107,15 @@ class TestSlate:
         assert line(speaker=None).card
         assert not line().card
 
-    def test_at_most_four_lines(self):
+    def test_the_ceiling_is_a_dialogue_led_cue_at_the_pinned_length(self):
+        """12 lines per 100 s is the top of the dialogue-led norm; the cue is
+        pinned at 108 s.  Run 10's ceiling of 4 sat under the story spine's
+        own floor of 5 per 100 s, so the floor could never be met."""
+        assert MAX_LINES == math.ceil(SPEECH_CEILING_PER_100S * PINNED_DURATION / 100) == 13
+        full = [line()] * (MAX_LINES - 1) + [line(function="threat")]
+        LineSlate(lines=full, iconicity="full")
         with pytest.raises(ValidationError):
-            LineSlate(lines=[line()] * 4 + [line(function="threat")], iconicity="full")
+            LineSlate(lines=full + [line(function="threat")], iconicity="full")
 
     def test_the_pool_survives_a_round_trip_and_is_not_spoken(self):
         slate = LineSlate(lines=[line(), line(function="threat", text="There is death in one")],
@@ -126,10 +135,41 @@ class TestQC:
     def test_targets_missed_become_flags_not_failures(self):
         report = QCReport(cuts=35, cuts_on_beat=0.34, cuts_on_downbeat=0.11, cuts_on_L0=0.75,
                           on_cap_fraction=0.23, title_on_downbeat=False,
-                          integrated_lufs=-14.0, true_peak=-1.2, unbound_shots=0)
+                          integrated_lufs=-14.0, true_peak=-1.2, unbound_shots=0,
+                          music_only_fraction=0.92, peak_position=0.53,
+                          act3_over_act2_lu=-2.0)
         assert report.floor_pass
-        assert {"cuts_on_beat", "cuts_on_downbeat", "cuts_on_L0", "on_cap_fraction",
-                "title_on_downbeat"} <= set(report.flags)
+        assert {"cuts_on_downbeat", "cuts_on_L0", "on_cap_fraction", "title_on_downbeat",
+                "music_only_fraction", "peak_position", "act3_over_act2_lu"} <= set(report.flags)
+
+    def test_the_whole_trailer_beat_lock_is_not_a_target_any_more(self):
+        """0.80 on-beat across the whole trailer is what made a music video:
+        76% of run 10's cuts were on the beat and the viewer starts counting
+        within four shots.  The per-act pair replaces it, pulling opposite
+        ways -- loose in act 1, locked in act 3."""
+        report = QCReport(cuts=35, cuts_on_beat=0.34, cuts_on_downbeat=0.5, cuts_on_L0=1.0,
+                          on_cap_fraction=0.0, title_on_downbeat=True,
+                          integrated_lufs=-14.0, true_peak=-1.2, unbound_shots=0,
+                          cuts_on_beat_by_act=[0.2, 0.4, 0.9])
+        assert report.flags == []
+        loose = report.model_copy(update={"cuts_on_beat_by_act": [0.9, 0.4, 0.3]})
+        assert loose.flags == ["cuts_on_beat_act1", "cuts_on_beat_act3"]
+
+    def test_a_clipped_line_is_damage_and_fails_the_floor(self):
+        """Run 10 levelled its only line +11.8 dB with no ceiling anywhere in
+        the chain and every gate passed the result."""
+        report = QCReport(cuts=40, cuts_on_beat=0.9, cuts_on_downbeat=0.5, cuts_on_L0=1.0,
+                          on_cap_fraction=0.0, title_on_downbeat=True,
+                          integrated_lufs=-14.2, true_peak=-1.1, unbound_shots=0,
+                          line_tp=[0.0], line_flat_factor=[24.2])
+        assert not report.floor_pass and not report.lines_are_clean
+
+    def test_a_bed_that_faded_into_the_card_fails_the_floor(self):
+        report = QCReport(cuts=40, cuts_on_beat=0.9, cuts_on_downbeat=0.5, cuts_on_L0=1.0,
+                          on_cap_fraction=0.0, title_on_downbeat=True,
+                          integrated_lufs=-14.2, true_peak=-1.1, unbound_shots=0,
+                          hard_out=False)
+        assert not report.floor_pass
 
     def test_loudness_outside_the_floor_fails(self):
         report = QCReport(cuts=40, cuts_on_beat=0.9, cuts_on_downbeat=0.5, cuts_on_L0=1.0,

@@ -856,3 +856,336 @@ def line_pools(book_dir: Path, narrator: str | None = None) -> list[dict]:
     if narrator and narrator != "omniscient":
         pools += narration_pool(book)
     return dedupe_lines(pools)
+
+
+# ---------------------------------------------------------------- the spine
+
+MOVEMENTS = ("M1", "M2", "M3")
+"""World & hook, problem & turn, threat & climax.  The order IS the trailer:
+`trailer_order.one_each` plays the beats in the order it is handed them, so a
+list that is not ordered by movement is a playlist, which is what run 10
+shipped -- the killer's face at 8.75 s and the handcuffs at 17 s."""
+
+QUOTA_SHARES = {"M1": 0.25, "M2": 0.45, "M3": 0.30}
+"""How much of the picture each movement is worth.  Shares, not counts, so
+twelve shots and forty-one shots get the same shape."""
+
+LATE_SHARE = 0.75
+"""R4: the answer may not be photographed before three quarters of the cut."""
+
+PLACE_SHARE = 0.30
+"""R6: no location past this share of the shots.  Run 10 spent 39% of its
+seconds in 221B Baker Street and never photographed London at all."""
+
+PRINCIPAL_SHARE = 0.45
+"""R10: no one face owns the trailer.  Run 10 gave Holmes 26 of 51 shots and
+nine of his twelve setups were the same three-quarter deerstalker face with
+an orange lamp behind it -- the ensemble the ref sheets paid for never
+arrived, and Lucy, Drebber and Stangerson were never cast at all."""
+
+
+def late_floor(count: int) -> int:
+    """The first shot index an identity-revealing frame may occupy."""
+    return int(LATE_SHARE * count)
+
+
+def introduction_end(scenes: list[dict]) -> int:
+    """The last scene of the lead's introduction: the prefix that holds
+    nobody the first scene did not already have.
+
+    A trailer's first movement is the world before the story happens to it,
+    and the screenplay marks that boundary by who WALKS IN.  In Scarlet the
+    bar and the hospital are Watson, Holmes and Stamford; scene 3 brings
+    Lestrade, and Lestrade is the problem arriving.
+    """
+    if not scenes:
+        return 0
+    opening = people_in(scenes[0])
+    end = scenes[0]["number"]
+    for scene in scenes[1:]:
+        if not people_in(scene) <= opening:
+            break
+        end = scene["number"]
+    return end
+
+
+def movement_bounds(scenes: list[dict], lead: str | None) -> tuple[int, int]:
+    """(last scene of M1, last scene of M2), from the story's own two marks.
+
+    The second mark is `turn_of` -- where the narration changes hands.  The
+    first is the end of the lead's introduction.  Where the two would collide
+    they are pulled apart, because a movement with no scene in it cannot be
+    ordered and its quota would have nowhere to spend.
+    """
+    if not scenes:
+        return (0, 0)
+    first, last = scenes[0]["number"], scenes[-1]["number"]
+    turn = turn_of(scenes, lead)
+    m2_end = turn["number"] if turn else (first + last) // 2
+    m2_end = max(first + 1, min(m2_end, last - 1))
+    m1_end = max(first, min(introduction_end(scenes), m2_end - 1))
+    return (m1_end, m2_end)
+
+
+def movement_of(scene_number: int, bounds: tuple[int, int]) -> str:
+    """Which movement a scene plays in."""
+    if scene_number <= bounds[0]:
+        return "M1"
+    return "M2" if scene_number <= bounds[1] else "M3"
+
+
+def movement_quota(count: int) -> dict[str, int]:
+    """How many shots each movement gets, always summing to `count`."""
+    if count <= 0:
+        return {m: 0 for m in MOVEMENTS}
+    exact = {m: count * QUOTA_SHARES[m] for m in MOVEMENTS}
+    quota = {m: int(exact[m]) for m in MOVEMENTS}
+    if count >= len(MOVEMENTS):
+        quota = {m: max(1, n) for m, n in quota.items()}
+    return _settle(quota, exact, count)
+
+
+def _settle(quota: dict, exact: dict, count: int) -> dict:
+    """Hand the remainder to the movement the rounding shortchanged most."""
+    while sum(quota.values()) > count:
+        quota[max(MOVEMENTS, key=lambda m: quota[m] - exact[m])] -= 1
+    while sum(quota.values()) < count:
+        quota[max(MOVEMENTS, key=lambda m: exact[m] - quota[m])] += 1
+    return quota
+
+
+def identity_scenes(scenes: list[dict], lead: str | None,
+                    figure: str | None) -> set[int]:
+    """Scenes whose picture answers the question the trailer is selling.
+
+    Not a vocabulary match and not the story's tail: the answer to "who did
+    it" is the FIGURE standing where the LEAD stands -- the same room, or the
+    same company.  Both halves are already in the screenplay, so this needs
+    no model and no list of spoiler words.
+
+    In Scarlet it names the police-station chamber, 3 Lauriston Gardens by
+    night and Halliday's Hotel, and leaves Utah alone: Utah is the figure
+    before anyone is looking for him, and it is most of the second half.
+    """
+    if not lead or not figure:
+        return set()
+    places, people = set(), set()
+    for scene in scenes:
+        if lead in people_in(scene):
+            places.add(scene.get("slug", {}).get("location_id"))
+            people |= people_in(scene)
+    people -= {figure}
+    return {sc["number"] for sc in scenes if figure in people_in(sc)
+            and (sc.get("slug", {}).get("location_id") in places
+                 or bool(people_in(sc) & people))}
+
+
+def _ranked_pool(scenes: list[dict], refs: set[str], iconicity: dict,
+                 banned: set[int]) -> list[dict]:
+    """Every bindable, photographable setup outside the banned scenes, best
+    first -- the ranking `select_setups` uses, before the spine reorders it."""
+    pool = [c for c in authored_setups(scenes) if c["scene"] not in banned
+            and is_bindable(c, refs) and photographable_setup(c)]
+    first, last = appearance_scenes(scenes)
+    return sorted(pool, key=lambda c: (-setup_value(c, first, last, refs, iconicity),
+                                       c["scene"], c["index"]))
+
+
+def _fill(ranked: list[dict], want: int, max_share: float = 0.5) -> list[dict]:
+    """The best `want` of one movement, spread over its scenes and places."""
+    if want <= 0 or not ranked:
+        return []
+    return _take_spread(ranked, scene_quota(ranked, want), want, max_share)
+
+
+def _in_scene_order(chosen: list[dict]) -> list[dict]:
+    return sorted(chosen, key=lambda c: (c["scene"], c["index"]))
+
+
+def _third_movement(ranked: list[dict], reveal: set[int], want: int,
+                    room: int) -> list[dict]:
+    """The climax: what may be shown, then -- last of all -- the answer.
+
+    The reveal is the point of the third movement and the reason R4 exists,
+    so it is spent, but only into the slots after `late_floor`.
+    """
+    answers = [c for c in ranked if c["scene"] in reveal]
+    rest = [c for c in ranked if c["scene"] not in reveal]
+    late = _in_scene_order(_fill(answers, min(room, want)))
+    return _in_scene_order(_fill(rest, want - len(late))) + late
+
+
+def face_of(candidate: dict, refs: set[str], lead: str | None,
+            figure: str | None) -> str | None:
+    """The character a setup would be bound to, before it becomes a beat.
+
+    Exactly what `build_plan.beat_of` will decide: the setup's OWN subjects,
+    the scene cast only where the prose named nobody.  A quota that counted
+    faces differently from the thing that casts them counts the wrong faces.
+    """
+    return principal_of(sorted(candidate.get("subjects", candidate.get("cast") or [])),
+                        refs, lead, figure)
+
+
+def _swappable(candidate: dict, instead_of: dict, taken: set, bounds: tuple[int, int],
+               reveal: set[int]) -> bool:
+    """A setup that could stand in this slot: unused, the same movement, and
+    the same side of the reveal line -- so a quota can never reorder the
+    story or move the answer earlier."""
+    if (candidate["scene"], candidate["index"]) in taken:
+        return False
+    if movement_of(candidate["scene"], bounds) != movement_of(instead_of["scene"], bounds):
+        return False
+    return (candidate["scene"] in reveal) == (instead_of["scene"] in reveal)
+
+
+def _another_face(ranked: list[dict], instead_of: dict, taken: set, refs: set[str],
+                  lead: str | None, figure: str | None, bounds: tuple[int, int],
+                  reveal: set[int], seen, places, caps: tuple[int, int]) -> dict | None:
+    """The best unused setup of the same movement showing somebody else, in a
+    place the trailer has not already spent (R6)."""
+    faces_cap, place_cap = caps
+    for candidate in ranked:
+        if not _swappable(candidate, instead_of, taken, bounds, reveal):
+            continue
+        if places[candidate["location_id"]] >= place_cap:
+            continue
+        face = face_of(candidate, refs, lead, figure)
+        if face is not None and seen[face] < faces_cap:
+            return candidate
+    return None
+
+
+def _relief(ranked: list[dict], candidate: dict, books: dict, refs: set[str],
+            lead: str | None, figure: str | None, bounds: tuple[int, int],
+            reveal: set[int], caps: tuple[int, int]) -> dict | None:
+    """A setup to stand in for one whose face is over its share.
+
+    A face over its share is the louder fault -- run 10 was half Holmes, nine
+    of his twelve setups the same lamp-lit three-quarter face -- so where no
+    other face is free inside R6's place ceiling, the ceiling gives by one
+    rather than the trailer showing one man.
+    """
+    wider = (caps[0], caps[1] + 1)
+    return (_another_face(ranked, candidate, books["taken"], refs, lead, figure, bounds,
+                          reveal, books["seen"], books["places"], caps)
+            or _another_face(ranked, candidate, books["taken"], refs, lead, figure, bounds,
+                             reveal, books["seen"], books["places"], wider))
+
+
+def _book_swap(books: dict, out_face: str | None, out_place: str, swap: dict,
+               in_face: str | None) -> None:
+    """Move one setup's face, place and identity off the books and another on."""
+    books["seen"][out_face] -= 1
+    books["places"][out_place] -= 1
+    books["seen"][in_face] += 1
+    books["places"][swap["location_id"]] += 1
+    books["taken"].add((swap["scene"], swap["index"]))
+
+
+def _cap_faces(chosen: list[dict], ranked: list[dict], refs: set[str], lead: str | None,
+               figure: str | None, bounds: tuple[int, int], reveal: set[int]) -> list[dict]:
+    """R10: no principal past `PRINCIPAL_SHARE` of the shots.
+
+    The EARLIEST appearances of a face are kept -- they are the ones that
+    introduce him -- and the ones past the ceiling are swapped for a setup of
+    the same movement showing somebody else.  Where the book offers no other
+    face the setup stays: a quota may not invent an actor.
+
+    Faces count UP as the walk proceeds, so the earliest appearances survive;
+    places are counted for the WHOLE list from the start, because a swap must
+    not push a location past its share of a trailer it cannot see yet.
+    """
+    caps = (max(1, int(PRINCIPAL_SHARE * len(chosen))),
+            max(1, int(PLACE_SHARE * len(chosen))))
+    books = {"taken": {(c["scene"], c["index"]) for c in chosen}, "seen": Counter(),
+             "places": Counter(c["location_id"] for c in chosen)}
+    out: list[dict] = []
+    for candidate in chosen:
+        face = face_of(candidate, refs, lead, figure)
+        books["seen"][face] += 1
+        swap = (None if face is None or books["seen"][face] <= caps[0] else
+                _relief(ranked, candidate, books, refs, lead, figure, bounds, reveal, caps))
+        if swap is not None:
+            _book_swap(books, face, candidate["location_id"], swap,
+                       face_of(swap, refs, lead, figure))
+        out.append(swap if swap is not None else candidate)
+    return out
+
+
+def _regroup(chosen: list[dict], bounds: tuple[int, int], reveal: set[int]) -> list[dict]:
+    """Movement order, scene order inside it, the answer last of all."""
+    grouped: list[dict] = []
+    for movement in MOVEMENTS:
+        here = [c for c in chosen if movement_of(c["scene"], bounds) == movement]
+        answers = [c for c in here if c["scene"] in reveal]
+        grouped += _in_scene_order([c for c in here if c["scene"] not in reveal]) + answers
+    return grouped
+
+
+def select_by_movement(scenes: list[dict], refs: set[str], count: int,
+                       iconicity: dict | None = None, lead: str | None = None,
+                       figure: str | None = None, banned=()) -> list[dict]:
+    """`count` setups in TRAILER order: M1 -> M2 -> M3, scene order inside.
+
+    This is the change run 10 needed most.  Selection was a score ranking and
+    ordering was `best_scatter`, whose only objective is "do not bring an
+    image back soon" -- it has no notion of before and after, so the trailer
+    had none either.  Here the movement decides the slot, the scene decides
+    the place inside it, and the identity-revealing frames are held back to
+    the last quarter.
+    """
+    banned, reveal = set(banned), identity_scenes(scenes, lead, figure)
+    bounds = movement_bounds(scenes, lead)
+    quota, ranked = movement_quota(count), _ranked_pool(scenes, refs, iconicity or {}, banned)
+    room = count - late_floor(count)
+    chosen: list[dict] = []
+    for movement in MOVEMENTS:
+        here = [c for c in ranked if movement_of(c["scene"], bounds) == movement]
+        if movement == "M3":
+            chosen += _third_movement(here, reveal, quota[movement], room)
+        else:
+            chosen += _in_scene_order(_fill([c for c in here if c["scene"] not in reveal],
+                                            quota[movement]))
+    filled = _top_up(chosen, ranked, bounds, reveal, count)
+    return _regroup(_cap_faces(filled, ranked, refs, lead, figure, bounds, reveal),
+                    bounds, reveal)
+
+
+def _spare(ranked: list[dict], taken: set, reveal: set[int], places,
+           ceiling: int, want: int) -> list[dict]:
+    """The best unused setups that do not push a location past `ceiling`."""
+    found: list[dict] = []
+    for candidate in ranked:
+        if len(found) >= want:
+            break
+        if (candidate["scene"], candidate["index"]) in taken or candidate["scene"] in reveal:
+            continue
+        if places[candidate["location_id"]] >= ceiling:
+            continue
+        places[candidate["location_id"]] += 1
+        taken.add((candidate["scene"], candidate["index"]))
+        found.append(candidate)
+    return found
+
+
+def _top_up(chosen: list[dict], ranked: list[dict], bounds: tuple[int, int],
+            reveal: set[int], count: int) -> list[dict]:
+    """A quota a movement could not fill is spent in the OTHER movements,
+    each in its own place -- never by lengthening the trailer's answer.
+
+    Two passes.  The first holds R6's ceiling on how much of the trailer one
+    place may own; the second lets it slip by ONE rather than hand a rendered
+    take back, because run 10's other lesson is that an unspent take is a
+    shot the trailer does not have.
+    """
+    if len(chosen) >= count:
+        return chosen[:count]
+    taken = {(c["scene"], c["index"]) for c in chosen}
+    places = Counter(c["location_id"] for c in chosen)
+    ceiling = max(1, int(PLACE_SHARE * count))
+    spare = _spare(ranked, taken, reveal, places, ceiling, count - len(chosen))
+    if len(chosen) + len(spare) < count:
+        spare += _spare(ranked, taken, reveal, places, ceiling + 1,
+                        count - len(chosen) - len(spare))
+    return _regroup(chosen + spare, bounds, reveal)

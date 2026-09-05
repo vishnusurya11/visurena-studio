@@ -25,6 +25,11 @@ from studio.h3 import NATIVE_H, NATIVE_W, check_canvas
 Register = Literal["quiet", "build", "hit", "aftermath"]
 """Where a beat sits in the trailer's dynamic arc, not what it depicts."""
 
+Movement = Literal["M1", "M2", "M3"]
+"""Which of the trailer's three movements a beat belongs to: world & hook,
+problem & turn, threat & climax.  This is the SPINE -- shots play in movement
+order -- and `arc` is derived from it (`trailer_plan.arc_of`)."""
+
 
 class RefSheet(BaseModel):
     """One reference image belonging to the BOOK, not to any one trailer.
@@ -60,6 +65,9 @@ class TrailerBeat(BaseModel):
     beat_id: str = Field(min_length=1)
     scene_number: int = Field(ge=1)
     arc: Register
+    movement: Movement = "M2"
+    """The movement this beat plays in.  Shots are ordered by it, so a plan
+    whose beats are not in movement order is a playlist, not a trailer."""
     location_id: str = Field(min_length=1)
     cast: list[str] = Field(default_factory=list)
     subjects: list[str] = Field(default_factory=list)

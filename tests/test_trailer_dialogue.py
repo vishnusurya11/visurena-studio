@@ -10,16 +10,19 @@ from __future__ import annotations
 
 import pytest
 
-from studio.trailer_dialogue import (DUCK_OVERRUN, LINE_ROOM, MAX_DUCKS, fits, holds, made_slots,
-                                     names_figure, order_lines, refusal, role_candidates,
-                                     shares_content_word, speech_seconds, targets, windows_of)
+from studio.trailer_dialogue import (CARD_WORDS, DUCK_OVERRUN, LINE_ROOM, MAX_DUCKS,
+                                     button_refusal, closes_open, fits, holds, hook_refusal,
+                                     made_slots, names_figure, no_second_card, order_lines,
+                                     playable, refusal, role_candidates, roles_for, shares_content_word,
+                                     speech_refusal, speech_seconds, targets, wanted_speech,
+                                     windows_of)
 from studio.trailer_stage_spec import Metre, SlateLine, Slot
 
 BEAT = 0.5
 
 
-def line(text, function, speaker="sherlock_holmes", score=1.0, **kw):
-    return SlateLine(text=text, speaker=speaker, function=function, pool="screenplay",
+def line(text, function, speaker="sherlock_holmes", score=1.0, pool="screenplay", **kw):
+    return SlateLine(text=text, speaker=speaker, function=function, pool=pool,
                      score=score, **kw)
 
 
@@ -36,6 +39,10 @@ USELESS_CARD = line("It is of the highest importance, therefore, not to have use
 WATSON_SPOKEN = line("I had no idea that such individuals did exist outside of stories.",
                      "exposition", "john_watson", score=9.6)
 NATURE_CARD = line("Nor is Nature always in one mood throughout this grim district.", "threat", None)
+SHORT_CARD = line("Two strangers. One address.", "stakes", None)
+RACHE_CARD = line("A word in blood.", "threat", None)
+NARRATION = line("There is a scarlet thread of murder running through it.", "hook",
+                 "john_watson", pool="narration")
 
 
 def slots(*seconds):
@@ -68,6 +75,31 @@ def run_9():
                                           Slot(start=77.8, end=80.2), Slot(start=81.25, end=82.6)))
 
 
+class TestRoles:
+    def test_four_windows_are_the_classic_order(self):
+        assert roles_for(4) == ("hook", "answer", "threat", "button")
+
+    def test_two_windows_are_hook_and_threat(self):
+        """The contract needs a threat or stakes; exposition would spend
+        the only other window."""
+        assert roles_for(2) == ("hook", "threat")
+        assert roles_for(3) == ("hook", "answer", "threat")
+
+    def test_a_longer_cut_alternates_answer_and_threat_in_the_middle(self):
+        """A 100 s cut wants five or more lines (R1); the extra windows are
+        the middle of the spine, a line every 6-10 s, not a fifth role."""
+        assert roles_for(6) == ("hook", "answer", "threat", "answer", "threat", "button")
+        assert roles_for(7)[-1] == "button" and len(roles_for(13)) == 13
+
+    def test_the_lines_offered_bound_the_budget(self):
+        """Four lines over twenty windows aim at four even shares of the
+        span, not the first four of thirteen."""
+        found = windows_of(metre())
+        slate = order_lines([AFGHAN, EASIER, DEATH, NO_DATA], found, "x", beat=0.5)
+        starts = [l.window.start for l in slate.lines]
+        assert starts[-1] - starts[0] >= 0.5 * (found[-1].start - found[0].start)
+
+
 class TestWindows:
     """A line lives in a window: FOUND, a trough the cue has, or MADE, a
     phrase of the grid the mix ducks under it (08-assemble keys the bed's
@@ -83,7 +115,13 @@ class TestWindows:
         assert found and all(w.made for w in found)
         assert all(w.start in metre().phrase_starts for w in found)
         assert all(w.seconds >= LINE_ROOM + 2 * metre().beat for w in found)
-        assert all(0.2 * 100.0 <= w.start <= 0.8 * 100.0 for w in found)
+        assert all(0.0 <= w.start <= 0.8 * 100.0 for w in found)
+
+    def test_a_window_may_open_in_the_first_fifteen_seconds(self):
+        """R2: the hook opens inside twelve seconds.  The band used to start
+        at a fifth of the cue, so run 10's hundred-second bed could not hold
+        a line before twenty seconds and the hook landed at 38.9 s."""
+        assert min(w.start for w in made_slots(metre())) < 15.0
 
     def test_a_made_window_ends_before_the_next_hit(self):
         """The line ends before the impact, never across it: a hit inside the
@@ -212,9 +250,12 @@ class TestOrder:
         assert [l.speaker for l in slate.lines] == ["sherlock_holmes", "john_watson", "sherlock_holmes"]
 
     def test_a_card_is_placed_when_no_spoken_line_fits(self):
-        slate = order_lines([AFGHAN, USELESS_CARD, NATURE_CARD], slots(6, 10, 6),
+        """One card, and only one: the role after a card takes a voice or
+        takes nothing (R9)."""
+        slate = order_lines([AFGHAN, SHORT_CARD, RACHE_CARD], slots(6, 10, 6),
                             "jefferson_hope", beat=BEAT)
-        assert [l.speaker for l in slate.lines] == ["sherlock_holmes", None, None]
+        assert [l.speaker for l in slate.lines] == ["sherlock_holmes", None]
+        assert slate.lines[1].text == SHORT_CARD.text
 
     def test_the_threat_prefers_the_figure(self):
         slate = order_lines([AFGHAN, DEATH, HOPE_THREAT], slots(6, 6), "jefferson_hope", beat=BEAT)
@@ -304,3 +345,80 @@ class TestRefusals:
                                              r"3\.3 s, the longest window holds 1\.7 s; "
                                              r"label shorter lines as hook"):
             order_lines([AFGHAN, EASIER, DEATH], windows_of(m), "x", beat=m.beat)
+
+
+class TestCards:
+    """R9.  Run 10's two cards were eighteen and eleven words and played back
+    to back at 48.66 s and 68.3 s -- a page of prose in the middle of a
+    trailer."""
+
+    def test_a_card_longer_than_eight_words_never_plays(self):
+        assert CARD_WORDS == 8
+        assert not playable("answer", USELESS_CARD) and USELESS_CARD.words > CARD_WORDS
+        assert not playable("threat", NATURE_CARD)
+        assert playable("answer", SHORT_CARD) and playable("threat", RACHE_CARD)
+
+    def test_run_10s_two_cards_never_reach_a_slate(self):
+        slate = order_lines([AFGHAN, USELESS_CARD, NATURE_CARD, DEATH], slots(6, 10, 6),
+                            "jefferson_hope", beat=BEAT)
+        texts = [l.text for l in slate.lines]
+        assert USELESS_CARD.text not in texts and NATURE_CARD.text not in texts
+
+    def test_two_cards_never_play_back_to_back(self):
+        placed = [(SHORT_CARD, Slot(start=0.0, end=4.0))]
+        assert no_second_card([SHORT_CARD, DEATH], placed) == [DEATH]
+        assert no_second_card([SHORT_CARD, DEATH], []) == [SHORT_CARD, DEATH]
+        slate = order_lines([AFGHAN, SHORT_CARD, RACHE_CARD, DEATH], slots(6, 6, 6, 6),
+                            "jefferson_hope", beat=BEAT)
+        speakers = [l.speaker for l in slate.lines]
+        assert not any(a is None and b is None for a, b in zip(speakers, speakers[1:]))
+
+
+class TestNarratorVoice:
+    """The narrator may SPEAK -- two or three sentences of framing -- but the
+    hook and the last word belong to the people the story happens to."""
+
+    def test_narration_never_plays_the_hook_or_the_button(self):
+        assert not playable("hook", NARRATION) and not playable("button", NARRATION)
+
+    def test_narration_may_carry_the_stakes(self):
+        stakes = line("A word in blood on the wall.", "stakes", "john_watson", pool="narration")
+        assert playable("answer", stakes) and playable("threat", stakes)
+
+    def test_a_narrated_hook_is_passed_over_for_a_spoken_one(self):
+        slate = order_lines([NARRATION, AFGHAN, DEATH], slots(6, 6), "jefferson_hope", beat=BEAT)
+        assert slate.lines[0].text == AFGHAN.text
+
+
+class TestHowMuchIsSaid:
+    """R1/R2/R8, as refusals a LABELLER can act on: it can label another
+    line, and it cannot lengthen a window or shorten the trailer."""
+
+    def test_the_line_count_scales_with_the_trailer(self):
+        assert wanted_speech(25.0, 4) == 3
+        assert wanted_speech(100.0, 4) == 4
+        assert wanted_speech(100.0, 8) == 5
+
+    def test_run_10s_one_line_in_a_hundred_seconds_is_refused(self):
+        spoken = [AFGHAN, USELESS_CARD, NATURE_CARD]
+        said = speech_refusal(spoken, wanted_speech(100.0, 4))
+        assert said and "speaks 1 line" in said and "label more spoken lines" in said
+        assert speech_refusal([AFGHAN, DEATH, NO_DATA], 3) is None
+
+    def test_a_last_word_that_answers_the_trailer_is_refused(self):
+        assert closes_open(line("Who am I?", "button", "jefferson_hope"))
+        assert closes_open(DEATH)
+        assert not closes_open(NO_DATA)
+        assert button_refusal([AFGHAN, NO_DATA]) and "closes the trailer" in button_refusal([AFGHAN, NO_DATA])
+        assert button_refusal([AFGHAN, DEATH]) is None
+
+    def test_the_button_prefers_a_question_or_a_threat(self):
+        question = line("Who am I?", "button", "jefferson_hope")
+        assert role_candidates("button", [NO_DATA, question], AFGHAN, "x")[0] is question
+
+    def test_a_hook_that_opens_too_late_is_refused(self):
+        late = AFGHAN.model_copy(update={"window": Slot(start=38.94, end=48.66, made=True)})
+        early = AFGHAN.model_copy(update={"window": Slot(start=6.0, end=12.0, made=True)})
+        said = hook_refusal([late])
+        assert said and "38.9 s" in said
+        assert hook_refusal([early]) is None

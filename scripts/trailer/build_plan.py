@@ -19,16 +19,17 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 
-from studio.shot_grammar import (FRAMING, cause_of, choose_sizes,
-                                 destination_of, motivated_move)
+from studio.shot_grammar import (BOUND_FLOOR, FRAMING, MIN_SECONDS, cause_of,
+                                 choose_sizes, destination_of, motivated_move)
 from studio.trailer_dialogue import assign_lines, dialogue_candidates, pick_lines
 from studio.trailer_edit import cut_points, lengths_of
 from studio.trailer_order import one_each
-from studio.trailer_plan import arc_for
+from studio.trailer_plan import arc_of, movement_for
 from studio.trailer_spec import MusicBed, RefSheet, ShotSpec, TrailerBeat, TrailerPlan
 from studio.trailer_story import (action_text, figure_of, lead_of,
-                                  load_iconicity, people_in, principal_of,
-                                  resolution_scenes, select_setups, turn_of)
+                                  load_iconicity, movement_bounds, movement_of,
+                                  people_in, principal_of, resolution_scenes,
+                                  select_by_movement, turn_of)
 
 ROOT = Path(__file__).resolve().parents[2]
 SETUPS = 18
@@ -39,7 +40,8 @@ def load(path: Path) -> dict:
 
 
 def beat_of(element: dict, index: int, position: float, refs: dict,
-            lead: str | None, figure: str | None) -> TrailerBeat:
+            lead: str | None, figure: str | None, movement: str | None = None,
+            last: bool = False) -> TrailerBeat:
     """One beat from one action line, cast from WHO IS IN THAT FRAME.
 
     The subjects are the people the setup's own prose names; the scene cast
@@ -53,12 +55,14 @@ def beat_of(element: dict, index: int, position: float, refs: dict,
     """
     subjects = sorted(element.get("subjects", element["cast"]))
     principal = principal_of(subjects, set(refs), lead, figure)
+    movement = movement or movement_for(position)
     # The setup's OWN camera term drives the move.  Passing a constant "medium"
     # here made camera_for return "tracks in" for all nine beats, so every take
     # was the same push-in -- and a push-in sampled at four offsets is one image
     # at four focal lengths, which is why 23% of the cut was duplicate frames.
     return TrailerBeat(
-        beat_id=f"B{index:02d}", scene_number=element["scene"], arc=arc_for(position),
+        beat_id=f"B{index:02d}", scene_number=element["scene"],
+        arc=arc_of(movement, last), movement=movement,
         location_id=element["location_id"], cast=[principal] if principal else [],
         subjects=subjects, image_prompt=action_text(element),
         motion=move_for(element, position))
@@ -83,8 +87,22 @@ def move_for(setup: dict, position: float) -> str:
                           cause_of(text), destination)
 
 
+def hold_wide(sizes: list[str], order: list[str], lengths: list[float],
+              reveal) -> list[str]:
+    """R4: the answer is never a face filling the frame.
+
+    `choose_sizes` caps a shot carrying a reference at BOUND_FLOOR, so
+    "medium" is the WIDEST a bound shot may be -- the man in the room rather
+    than his eyes.  A cut too short to read a medium keeps the size the
+    grammar chose; an unreadable frame gives nothing away either.
+    """
+    reveal = set(reveal)
+    return [BOUND_FLOOR if beat in reveal and MIN_SECONDS[BOUND_FLOOR] <= length else size
+            for size, beat, length in zip(sizes, order, lengths)]
+
+
 def shots_for(beats: list[TrailerBeat], points: list[float], scenes: dict,
-              refs: dict, lines: list[dict]) -> list[ShotSpec]:
+              refs: dict, lines: list[dict], reveal=()) -> list[ShotSpec]:
     """One shot per beat, in the story's own order.
 
     Scattering was the reuse machine: it existed to spread FEWER beats over
@@ -102,7 +120,7 @@ def shots_for(beats: list[TrailerBeat], points: list[float], scenes: dict,
 
     bound = [bool(by_id[i].cast) for i in order]
     spots = [i / max(len(order) - 1, 1) for i in range(len(order))]
-    sizes = choose_sizes(lengths, bound, spots)
+    sizes = hold_wide(choose_sizes(lengths, bound, spots), order, lengths, reveal)
 
     # Dialogue is placed against the SHOTS, because only a shot knows how long
     # it lasts, and a line that outlasts its picture is cut off mid-word.
@@ -171,13 +189,17 @@ def main(book_glob: str, trailer_id: str = "main") -> None:
     # 2-3 seconds and never reuse one; the shipped cut asked 9 images to carry
     # 31 shots, which forced 23% of the picture to be frames already seen.
     wanted = len(cut_points(cue["title_stopdown"], cue["grid"])) - 1
-    elements = select_setups(scenes, set(refs), wanted, load_iconicity(book))
+    bounds = movement_bounds(scenes, lead)
+    elements = select_by_movement(scenes, set(refs), wanted, load_iconicity(book), lead,
+                                  figure, resolution_scenes(scenes, lead, figure))
     if len(elements) < wanted * 0.8:
         raise SystemExit(
             f"REFUSED: {wanted} cuts over {len(elements)} setups is "
             f"{wanted / max(len(elements), 1):.1f} uses per image; render more "
             f"location plates or cut shorter")
-    beats = [beat_of(e, i, i / max(len(elements) - 1, 1), refs, lead, figure)
+    beats = [beat_of(e, i, i / max(len(elements) - 1, 1), refs, lead, figure,
+                     movement=movement_of(e["scene"], bounds),
+                     last=(i == len(elements) - 1))
              for i, e in enumerate(elements)]
     refuse_unbindable(beats, scenes, refs)
 

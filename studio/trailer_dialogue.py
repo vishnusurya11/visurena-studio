@@ -269,7 +269,7 @@ FUNCTION_WORDS = {"have", "has", "had", "been", "being", "will", "would", "shall
 two source quotes to 'You HAVE been in Afghanistan' on 'have' alone (run 10)."""
 ORDER = ("hook", "answer", "threat", "button")
 ROLE_KINDS = {"hook": ("hook",), "answer": ("stakes", "exposition"),
-              "threat": ("threat", "stakes"), "button": ("button",)}
+              "threat": ("threat", "stakes"), "button": ("button", "threat")}
 """The threat role falls back to stakes because the contract (LineSlate) needs
 a threat OR stakes; a hook with only exposition after it is not a slate."""
 DUCK_OVERRUN = 1.0
@@ -285,9 +285,31 @@ MAX_DUCKS = 2
 (05-dialogue): the cue was chosen for its dynamic range, and six holes
 destroy it.  A line inside its trough is not a duck, and neither is a line
 in a MADE window: the phrase was chosen to be ducked, on the grid."""
-WINDOW_BAND = (0.2, 0.8)
-"""Where a window may open, as a share of the cue: `beatmap.slots` looks
-for troughs in the same band."""
+WINDOW_BAND = (0.0, 0.8)
+"""Where a window may open, as a share of the cue.
+
+The low edge used to be 0.2, which on run 10's hundred-second cue meant no
+line could be laid before twenty seconds -- so the hook landed at 38.9 s and
+the trailer opened with half a minute of instrumental.  R2 asks for the hook
+inside twelve seconds and the editor's rule asks for a line inside fifteen,
+and neither is reachable while the first fifth of the cue is off limits.
+The upper edge stays: a line laid over the title card is a caption."""
+
+CARD_WORDS = 8
+"""R9: a card is READ, and eight words is what a viewer reads in a shot.  Run
+10 shipped an eighteen-word card and an eleven-word card back to back."""
+
+HOOK_BY = 12.0
+"""R2: how late a trailer may leave asking its question."""
+
+MIN_SPOKEN = 3
+SPOKEN_PER_100S = 5
+"""R1: a trailer with one line in a hundred seconds is a music video with
+pictures.  `music_only` is a refusal to be quoted back, not an outcome."""
+
+VOICELESS_ROLES = ("hook", "button")
+"""The narrator frames and raises stakes; the hook and the last word belong
+to the people the story happens to."""
 LINE_ROOM = 5.4
 """Seconds the longest admissible line takes: `trailer_plan.MAX_LINE_WORDS`
 (14) at `speech_seconds`' 0.22 s a vowel group and the 1.6 groups a word
@@ -380,6 +402,24 @@ def shares_content_word(a: str, b: str) -> bool:
     return bool(wa & wb)
 
 
+def closes_open(line) -> bool:
+    """R8: a last word that leaves the question open -- a question, or a
+    threat.  A trailer that answers itself has nothing left to sell."""
+    return line.text.rstrip().endswith("?") or line.function == "threat"
+
+
+def playable(role: str, line) -> bool:
+    """Whether a line may play this role at all, before any preference.
+
+    Two rules, both from run 10's master: a card longer than `CARD_WORDS` is
+    a paragraph on screen (R9), and narration never asks the question or
+    speaks the last word (R1) -- the narrator frames, he does not confront.
+    """
+    if line.speaker is None and line.words > CARD_WORDS:
+        return False
+    return not (role in VOICELESS_ROLES and line.pool == "narration")
+
+
 def role_candidates(role: str, pool: list, hook, figure: str) -> list:
     """The lines that may play a role, best first.  A spoken line outranks a
     card (a line nobody speaks ships as text) at every role after the hook;
@@ -387,7 +427,7 @@ def role_candidates(role: str, pool: list, hook, figure: str) -> list:
     (Lieu's accent); the threat is the figure's own where the figure has
     one; a button is short."""
     kinds = ROLE_KINDS[role]
-    found = [l for l in pool if l.function in kinds]
+    found = [l for l in pool if l.function in kinds and playable(role, l)]
     if role == "answer":
         found = [l for l in found if l.speaker != hook.speaker]
         found.sort(key=lambda l: (l.speaker is None, not shares_content_word(l.text, hook.text)))
@@ -395,7 +435,7 @@ def role_candidates(role: str, pool: list, hook, figure: str) -> list:
         found.sort(key=lambda l: (l.speaker is None, l.function != "threat", l.speaker != figure))
     elif role == "button":
         found = [l for l in found if l.words <= 6]
-        found.sort(key=lambda l: l.speaker is None)
+        found.sort(key=lambda l: (l.speaker is None, not closes_open(l)))
     return found
 
 
@@ -436,28 +476,100 @@ def place(candidates: list, slots: list, target: float, after: float, beat: floa
     return None
 
 
+def roles_for(budget: int) -> tuple[str, ...]:
+    """The spine's roles for `budget` windows: hook first, button last, and
+    the middle alternating answer / threat.  Four windows are the classic
+    order; with two the second must be the threat, because the contract
+    needs a threat or stakes and exposition would spend the window.  A 100 s
+    cut wants five or more lines (R1): the extra windows are more middle,
+    not a fifth role."""
+    if budget <= 2:
+        return ORDER[:1] + ("threat",) * (budget - 1)
+    if budget <= 4:
+        return ORDER[:budget]
+    middle = tuple(ORDER[1:3][i % 2] for i in range(budget - 2))
+    return ORDER[:1] + middle + ORDER[3:]
+
+
 def fill_roles(placed: list, pool: list, slots: list, budget: int, figure: str,
                beat: float | None, measured: dict) -> list:
-    """Answer, threat, button after the hook, each aimed at its share of the
-    span and placed in a window after the last line.  With only two windows
-    the second must be the threat: the contract needs a threat or stakes,
-    and exposition would spend the window."""
+    """The roles after the hook (`roles_for`), each aimed at its share of
+    the span and placed in a window after the last line."""
     hook, aims = placed[0][0], targets(slots, budget)
-    for aim, role in enumerate(ORDER[1:budget] if budget > 2 else ("threat",), start=1):
-        found = place(role_candidates(role, pool, hook, figure), slots, aims[aim],
-                      placed[-1][1].end, beat, measured, allowance(placed, measured))
+    for aim, role in enumerate(roles_for(budget)[1:], start=1):
+        found = place(no_second_card(role_candidates(role, pool, hook, figure), placed),
+                      slots, aims[aim], placed[-1][1].end, beat, measured,
+                      allowance(placed, measured))
         if found is not None:
             placed.append(found)
             pool = [l for l in pool if l is not found[0]]
     return placed
 
 
+def no_second_card(candidates: list, placed: list) -> list:
+    """R9: never two cards in a row.  Two cards back to back is a page, and
+    run 10 put an eighteen-word one next to an eleven-word one."""
+    if placed and placed[-1][0].speaker is None:
+        return [l for l in candidates if l.speaker is not None]
+    return candidates
+
+
+def wanted_speech(runtime: float, ceiling: int) -> int:
+    """R1: how many lines this trailer must actually SAY.
+
+    Scaled by the picture's own length, never by a constant: a twenty-five
+    second cut and a hundred second cut are different films.  The contract
+    (`LineSlate.MAX_LINES`) is the ceiling.
+    """
+    want = math.ceil(SPOKEN_PER_100S * max(runtime, 0.0) / 100.0)
+    return min(max(MIN_SPOKEN, want), ceiling)
+
+
+def speech_refusal(lines: list, wanted: int) -> str | None:
+    """R1's refusal, said so the LABELLER can act on it."""
+    spoken = [l for l in lines if l.speaker]
+    if len(spoken) >= wanted:
+        return None
+    return (f"the slate speaks {len(spoken)} line(s) and this trailer needs {wanted}; "
+            f"label more spoken lines as hook, stakes, threat or button")
+
+
+def button_refusal(lines: list) -> str | None:
+    """R8's refusal: the last thing said leaves the question open."""
+    spoken = [l for l in lines if l.speaker]
+    if not spoken or closes_open(spoken[-1]):
+        return None
+    return (f"the last spoken line {spoken[-1].text!r} closes the trailer; "
+            f"label a question or a threat as the button")
+
+
+def hook_refusal(lines: list, by: float = HOOK_BY) -> str | None:
+    """R2's refusal: a trailer asks its question in the first twelve seconds."""
+    hook = next((l for l in lines if l.function == "hook" and l.window), None)
+    if hook is None or hook.window.start <= by:
+        return None
+    return (f"the hook opens at {hook.window.start:.1f} s and a trailer asks its "
+            f"question inside {by:.0f} s; label a shorter line as hook")
+
+
+def story_refusal(slate, runtime: float, ceiling: int) -> str | None:
+    """The first story rule this slate breaks, or None.  Separate from the
+    contract on purpose: the contract says what a slate IS, these say what a
+    trailer DOES, and only the second set is worth a second labelling."""
+    for refusal_ in (speech_refusal(slate.lines, wanted_speech(runtime, ceiling)),
+                     hook_refusal(slate.lines), button_refusal(slate.lines)):
+        if refusal_:
+            return refusal_
+    return None
+
+
 def order_lines(top: list, slots: list, figure: str, *, measured: dict | None = None,
                 beat: float | None = None, iconicity: str = "none"):
     """Hook -> answer -> threat -> (title) -> button, one line per window.
 
-    The number of lines is the number of windows, capped at four; the roles
-    aim at even shares of the span (`targets`) and each line is chosen for
+    The number of lines is the number of windows, bounded by the lines
+    offered and the contract's ceiling (`MAX_LINES`); the roles
+    (`roles_for`) aim at even shares of the span (`targets`) and each line is chosen for
     the window it will occupy, from its measured seconds where a voice file
     exists.  Every line carries its window out.  A line naming the figure is
     out before anything else: the trailer sells the question of who, and
@@ -466,8 +578,9 @@ def order_lines(top: list, slots: list, figure: str, *, measured: dict | None = 
     from studio.trailer_stage_spec import MAX_LINES, LineSlate
     if not slots:
         raise ValueError("no slots: nothing to put a hook in")
-    measured, budget = measured or {}, min(len(slots), MAX_LINES)
+    measured = measured or {}
     pool = [l for l in top if not names_figure(l.text, figure)]
+    budget = min(len(slots), len(pool), MAX_LINES)
     hooks = role_candidates("hook", pool, None, figure)
     first = place(hooks, slots, targets(slots, budget)[0], 0.0, beat, measured,
                   allowance([], measured))
