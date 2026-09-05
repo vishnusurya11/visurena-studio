@@ -416,6 +416,14 @@ def level_lines(bed: Path, lines: list[tuple[float, Path]], out_dir: Path) -> li
     return out
 
 
+def write_level_sheet(out_dir: Path, levelled: list[tuple[float, Path]]) -> Path:
+    """lines.level.json: where each levelled line was laid, for QC."""
+    sheet = out_dir / "lines.level.json"
+    sheet.write_text(json.dumps([{"at": at, "rel_path": path.name} for at, path in levelled],
+                                indent=2), encoding="utf-8")
+    return sheet
+
+
 def mix_with_lines(picture: Path, bed: Path, cues: list[tuple[float, Path]],
                    lines: list[tuple[float, Path]], output: Path,
                    seconds: float | None = None) -> Path:
@@ -426,6 +434,7 @@ def mix_with_lines(picture: Path, bed: Path, cues: list[tuple[float, Path]],
     if not lines:
         return mix(picture, bed, cues, output, seconds)
     levelled = level_lines(bed, lines, Path(output).parent)
+    write_level_sheet(Path(output).parent, levelled)
     ducked = duck_bed(bed, levelled, Path(output).with_name(f"{Path(output).stem}.bed-ducked.wav"))
     return mix(picture, ducked, cues + levelled, output, seconds)
 

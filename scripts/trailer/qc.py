@@ -21,7 +21,7 @@ from typing import Callable
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 
-from studio import beatmap
+from studio import beatmap, trailer_assemble
 from studio.paths import book_dir
 from studio.trailer_edit import max_shot
 from studio.trailer_stage_spec import Metre, QCReport
@@ -100,12 +100,31 @@ def level_zero(found: Metre) -> list[float]:
     return sorted(events)
 
 
-def report(plan: dict, found: Metre, seen: list[float], loud: tuple[float, float]) -> QCReport:
-    """The QCReport from the measured grid, the detected cuts and the loudness.
+def line_over_bed(out_dir: Path, momentary: Callable = trailer_assemble.momentary,
+                  integrated: Callable = trailer_assemble.integrated,
+                  seconds: Callable = trailer_assemble.clip_seconds) -> list[float]:
+    """LU each line rides over the ducked bed under its own window, from
+    what the mix left beside the master: `lines.level.json` (where each
+    levelled line was laid), `line-N.level.wav`, and `<master>.bed-ducked.wav`.
+    A master mixed without lines has no sheet and measures nothing."""
+    sheet = out_dir / "lines.level.json"
+    ducked = out_dir / f"{master_of(out_dir).stem}.bed-ducked.wav"
+    if not sheet.exists() or not ducked.exists():
+        return []
+    readings = momentary(ducked)
+    out = []
+    for row in json.loads(sheet.read_text(encoding="utf-8")):
+        line = out_dir / row["rel_path"]
+        at = float(row["at"])
+        bed = trailer_assemble.bed_level(readings, at, at + seconds(line))
+        out.append(round(integrated(line) - bed, 2))
+    return out
 
-    `line_over_bed_lu` stays empty: the delivered master has no stems to
-    separate a line from its bed, and Track C owns the line layer.
-    """
+
+def report(plan: dict, found: Metre, seen: list[float], loud: tuple[float, float],
+           lines_lu: list[float] = ()) -> QCReport:
+    """The QCReport from the measured grid, the detected cuts, the loudness
+    and each line's LU over the ducked bed (`line_over_bed`)."""
     lengths = [float(s["seconds"]) for s in plan["shots"]]
     title_at = planned_cuts(plan)[-1]
     return QCReport(
@@ -115,7 +134,7 @@ def report(plan: dict, found: Metre, seen: list[float], loud: tuple[float, float
         on_cap_fraction=on_cap_fraction(lengths, max_shot(found.bar)),
         title_on_downbeat=any(abs(title_at - d) <= ON_GRID for d in found.downbeats),
         integrated_lufs=loud[0], true_peak=loud[1], unbound_shots=len(plan_unbound(plan)),
-        grid=found.grid)
+        line_over_bed_lu=list(lines_lu), grid=found.grid)
 
 
 def master_of(out_dir: Path) -> Path:
@@ -124,7 +143,7 @@ def master_of(out_dir: Path) -> Path:
 
 def qc(out_dir: Path, detect: Callable = scene_cuts, track: beatmap.Tracker | None = None,
        measure: Callable = beatmap.metre, loud: Callable = loudness,
-       threshold: float = SCENE_THRESHOLD) -> QCReport:
+       threshold: float = SCENE_THRESHOLD, lines: Callable = line_over_bed) -> QCReport:
     """Measure the master in `out_dir`, write qc.json beside it, return the report.
 
     The master's own audio is what the tracker reads -- `beatmap.decode`
@@ -134,7 +153,7 @@ def qc(out_dir: Path, detect: Callable = scene_cuts, track: beatmap.Tracker | No
     plan = json.loads((out_dir / "plan.json").read_text(encoding="utf-8"))
     seen = detect(video, threshold=threshold)
     found = measure(video, seed=0, rel_path=video.name, track=track)
-    result = report(plan, found, seen, loud(video))
+    result = report(plan, found, seen, loud(video), lines(out_dir))
     sidecar = result.model_dump() | {"missing_cuts": missing_cuts(planned_cuts(plan), seen),
                                     "flags": result.flags, "floor_pass": result.floor_pass}
     (out_dir / "qc.json").write_text(json.dumps(sidecar, indent=2), encoding="utf-8")

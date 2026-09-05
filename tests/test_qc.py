@@ -44,6 +44,53 @@ class TestCutLists:
         assert qc.on_cap_fraction([4.0, 3.99, 2.0, 1.0], 4.0) == 0.5
 
 
+class TestLineOverBed:
+    """`line_over_bed_lu` was a target (5 LU) that no run ever filled: run 9
+    shipped with the field empty and was heard as 'music too loud'.  The mix
+    now leaves the ducked bed and the levelled lines beside the master with
+    a sheet of where each was laid, and QC reads them.  Measurers are
+    injected; nothing here shells out."""
+
+    def write_mix(self, out: Path, lines: list[tuple[float, str]]) -> None:
+        out.mkdir(parents=True, exist_ok=True)
+        (out / "TRAILER-test.mp4").write_bytes(b"")
+        (out / "TRAILER-test.bed-ducked.wav").write_bytes(b"")
+        for _, rel in lines:
+            (out / rel).write_bytes(b"")
+        (out / "lines.level.json").write_text(
+            json.dumps([{"at": at, "rel_path": rel} for at, rel in lines]), encoding="utf-8")
+
+    def test_each_line_is_measured_against_the_ducked_bed_under_its_window(self, tmp_path):
+        out = tmp_path / "main"
+        self.write_mix(out, [(3.0, "line-0.level.wav"), (10.0, "line-1.level.wav")])
+        bed = [(t / 10, -30.0 if 3.0 <= t / 10 < 5.0 else -14.0) for t in range(0, 150)]
+        levels = {"line-0.level.wav": -21.0, "line-1.level.wav": -12.0}
+        lu = qc.line_over_bed(out, momentary=lambda p: bed,
+                              integrated=lambda p: levels[p.name], seconds=lambda p: 2.0)
+        assert lu == [pytest.approx(9.0), pytest.approx(2.0)]
+
+    def test_a_master_without_lines_measures_nothing(self, tmp_path):
+        out = tmp_path / "main"
+        out.mkdir()
+        (out / "TRAILER-test.mp4").write_bytes(b"")
+        assert qc.line_over_bed(out, momentary=lambda p: [], integrated=lambda p: 0.0,
+                                seconds=lambda p: 0.0) == []
+
+    def test_the_report_carries_the_measurement_and_flags_a_buried_line(self, tmp_path):
+        fixture = load_fixture()
+        out = tmp_path / "main"
+        self.write_mix(out, [(3.0, "line-0.level.wav")])
+        (out / "plan.json").write_text(json.dumps(fixture["plan"]), encoding="utf-8")
+        report = qc.qc(out, detect=lambda video, threshold=0.1: fixture["scene_cuts"],
+                       measure=lambda video, **_: metre_at(120, 60.0),
+                       loud=lambda video: (-14.0, -1.5),
+                       lines=lambda out_dir: [2.0])
+        assert report.line_over_bed_lu == [2.0]
+        assert "line_over_bed_lu" in report.flags
+        written = json.loads((out / "qc.json").read_text(encoding="utf-8"))
+        assert written["line_over_bed_lu"] == [2.0]
+
+
 class TestReport:
     def test_qc_reports_manifest_cuts_missing_from_picture(self, tmp_path):
         fixture = load_fixture()

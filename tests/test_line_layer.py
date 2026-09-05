@@ -179,6 +179,14 @@ class TestMixWithLines:
         assert ducked.exists()
         assert loudness_between(bed, 0.8, 2.8) - loudness_between(ducked, 3.6, 5.0) >= 5.0
 
+    def test_the_mix_records_where_it_laid_each_levelled_line(self, tmp_path, bed, line, picture):
+        """QC measures line-over-bed from the files beside the master, and
+        the mix is the one that knows where each levelled line was laid."""
+        out = tmp_path / "master.mp4"
+        ta.mix_with_lines(picture, bed, [], [(LINE_AT, line)], out, seconds=SECONDS)
+        sheet = json.loads((tmp_path / "lines.level.json").read_text(encoding="utf-8"))
+        assert sheet == [{"at": LINE_AT, "rel_path": "line-0.level.wav"}]
+
     def test_a_quiet_take_still_rides_over_the_ducked_bed(self, tmp_path, bed, quiet_line, picture):
         """The quiet take, unlevelled, was 30 dB under the bed and no key to
         the compressor: levelled first, it ducks the bed and clears it."""

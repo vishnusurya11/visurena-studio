@@ -178,7 +178,11 @@ Evidence: `docs/analysis/research/trailer-music-structure.md`,
   loudness, and sets the take `LINE_OVER_BED` (8 LU) above the window before
   the duck (`line_gain`, bounded ±20 dB); the levelled takes are the duck's
   keys and are kept beside the master as `line-N.level.wav`
-  (`test_a_quiet_take_still_rides_over_the_ducked_bed`, real ffmpeg).
+  (`test_a_quiet_take_still_rides_over_the_ducked_bed`, real ffmpeg). The
+  mix writes `lines.level.json` (where each levelled line was laid) and QC
+  fills `line_over_bed_lu` from it: each line's integrated loudness less
+  the ducked bed under its window (`qc.line_over_bed`, target 5 LU; a run
+  9 style master with no lines measures nothing rather than passing).
 - step 06 bound a beat on the SCENE's cast: any face in the scene's ninety
   seconds without a sheet refused the setup. Every Utah scene holds a Mormon
   or a hunter nobody sheets, so run 9 plated all six Utah beats and shipped
@@ -215,7 +219,7 @@ Each item is one PR-sized change, test first. Order is by what unblocks what.
 | 13 | vocal path: eligibility (thesis + register + ≥ 2 stem gaps), Vocal Details sheet, demucs stem, refrain-on-downbeat | `scripts/trailer/build_music.py` | `test_vocal_path_refused_without_thesis`, `test_refrain_first_syllable_on_downbeat` (local) | [ ] |
 | 14 | windows: `made_slots`, `windows_of`, `targets`; actionable `refusal`; label sheets kept | `studio/trailer_dialogue.py`, `scripts/trailer/step_04_lines.py` | `test_the_run_9_slate_is_not_music_only`, `test_a_hook_that_fits_no_window_names_the_room` | [x] |
 | 15 | tempo gate: `tempo_error`, `on_tone`, `best_of` on the gate's order, tempo-holding `reauthor`, terminal `best_seed` | `scripts/trailer/step_03_music.py` | `test_verdict_needs_a_metric_grid_on_the_asked_tempo`, `test_best_of_ranks_on_what_the_gate_grades_before_fitness` | [x] |
-| 16 | line levelling before the duck: `integrated`, `bed_level`, `line_gain`, `level_lines` | `studio/trailer_assemble.py` | `test_a_quiet_take_still_rides_over_the_ducked_bed` (real ffmpeg) | [x] |
+| 16 | line levelling before the duck: `integrated`, `bed_level`, `line_gain`, `level_lines`; `lines.level.json`; QC `line_over_bed` | `studio/trailer_assemble.py`, `scripts/trailer/qc.py` | `test_a_quiet_take_still_rides_over_the_ducked_bed` (real ffmpeg), `TestLineOverBed` | [x] |
 | 17 | subject binding: `subjects_of`, `TrailerBeat.subjects`, `unbound`/`alternates` on the frame not the scene | `studio/trailer_story.py`, `scripts/trailer/step_06_plan.py` | `test_a_shot_binds_on_who_it_names_not_on_who_is_in_the_scene`, `TestSubjectsOf` | [x] |
 
 Prerequisite for 12 and 13: `01-story` emits `narrator`, `register`, `thesis`

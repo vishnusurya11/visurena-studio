@@ -359,12 +359,13 @@ the old rule, 6 under the new, all six substituted with sheeted spares,
 Utah bound on Hope and Ferrier, lead share 61%.
 
 **What the QC did not measure.** `line_over_bed_lu` has a target (5 LU)
-and has never been filled: `report()` leaves it empty. The ducked bed and
-the levelled takes now sit beside the master, so it can be. Tempo against
-the asked BPM was not a QC field either; it is now the step 03 gate.
+and had never been filled: `report()` left it empty. Fixed: the mix
+writes `lines.level.json` beside the master and `qc.line_over_bed` reads
+each levelled take against the ducked bed under its window; a master with
+no lines measures nothing rather than passing. Tempo against the asked BPM
+was not a QC field either; it is now the step 03 gate.
 
-**Open.** `line_over_bed_lu` in QC from `.bed-ducked.wav` and
-`line-N.level.wav`; an independent "is this Sherlock?" read on the sheets;
+**Open.** An independent "is this Sherlock?" read on the sheets;
 `same_look` across gender; step 02's 40-minute share (Ferrier and Gregson
 went to `accepted_as_written`); a bare shared surname credits every sharer
 (`addressing Ferrier` binds Lucy too — harmless while both are sheeted);
