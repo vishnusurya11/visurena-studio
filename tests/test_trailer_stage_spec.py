@@ -136,3 +136,18 @@ class TestQC:
                           on_cap_fraction=0.0, title_on_downbeat=True,
                           integrated_lufs=-18.0, true_peak=-1.1, unbound_shots=0)
         assert not report.floor_pass
+
+
+class TestWindows:
+    def test_a_slot_is_found_unless_made(self):
+        """A trough the cue has is found; a phrase the mix ducks is made."""
+        assert Slot(start=1.0, end=4.0).made is False
+        assert Slot(start=1.0, end=4.0, made=True).made is True
+
+    def test_a_slate_line_carries_the_window_it_was_chosen_for(self):
+        line = SlateLine(text="No data yet.", speaker="sherlock_holmes", function="button",
+                         pool="screenplay", score=1.0)
+        assert line.window is None
+        placed = line.model_copy(update={"window": Slot(start=30.0, end=38.0, made=True)})
+        assert placed.window.start == 30.0
+        assert SlateLine.model_validate_json(placed.model_dump_json()).window == placed.window

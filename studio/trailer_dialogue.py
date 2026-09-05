@@ -276,7 +276,53 @@ longest slot and `fits` refused it at the trough's edge."""
 MAX_DUCKS = 2
 """A line that overruns its trough ducks the loud bed: a hole.  Two at most
 (05-dialogue): the cue was chosen for its dynamic range, and six holes
-destroy it.  A line inside its trough is not a duck."""
+destroy it.  A line inside its trough is not a duck, and neither is a line
+in a MADE window: the phrase was chosen to be ducked, on the grid."""
+WINDOW_BAND = (0.2, 0.8)
+"""Where a window may open, as a share of the cue: `beatmap.slots` looks
+for troughs in the same band."""
+LINE_ROOM = 5.4
+"""Seconds the longest admissible line takes: `trailer_plan.MAX_LINE_WORDS`
+(14) at `speech_seconds`' 0.22 s a vowel group and the 1.6 groups a word
+measured on Scarlet run 9's pool (34 lines).  A made window leaves this
+much plus the two beats `fits` keeps at either end."""
+
+
+def made_slots(metre) -> list:
+    """One window per phrase start in the band: from the phrase start to the
+    first later phrase start that leaves LINE_ROOM plus two beats, capped at
+    the next hit so the line ends before the impact, never across it.
+
+    Scarlet shipped music_only four runs running, waiting for troughs the
+    music model does not reliably write; the grid always has phrases, and
+    08-assemble ducks the bed's mid band under whatever line is laid on
+    one.  A capped window shorter than a bar is not a window."""
+    from studio.trailer_stage_spec import Slot
+    room, hits = LINE_ROOM + 2 * metre.beat, metre.hits + [metre.title_hit or metre.seconds]
+    low, high = (share * metre.seconds for share in WINDOW_BAND)
+    out = []
+    for start in (p for p in metre.phrase_starts if low <= p <= high):
+        end = next((q for q in metre.phrase_starts if q >= start + room), None)
+        if end is None:
+            continue
+        end = min([end] + [h for h in hits if start < h < end])
+        if end - start >= metre.bar:
+            out.append(Slot(start=start, end=round(end, 3), made=True))
+    return out
+
+
+def windows_of(metre) -> list:
+    """Every window a line may take, in time order: the troughs the cue was
+    measured with and, on a metre grid, the phrases the mix can duck.  A
+    rubato cue has no phrases and keeps only its troughs."""
+    return sorted(list(metre.slots) + made_slots(metre), key=lambda s: s.start)
+
+
+def targets(slots: list, count: int) -> list[float]:
+    """Where `count` lines should open to span the windows: evenly from the
+    first window to the last, hook first and button last."""
+    first, last = slots[0].start, slots[-1].start
+    return [first + (last - first) * i / max(count - 1, 1) for i in range(count)]
 
 
 def names_figure(text: str, figure: str) -> bool:
@@ -295,6 +341,24 @@ def fits(seconds: float, slot, beat: float | None, overrun: float = 0.0) -> bool
         return seconds <= slot.seconds + overrun
     usable = math.floor(slot.seconds / beat + 1e-9) - 2
     return usable > 0 and math.ceil(seconds / beat - 1e-9) <= usable
+
+
+def holds(slot, beat: float | None) -> float:
+    """The seconds of speech a window holds under the fit rule."""
+    if beat is None or beat <= 0:
+        return slot.seconds
+    return max(math.floor(slot.seconds / beat + 1e-9) - 2, 0) * beat
+
+
+def refusal(role: str, candidates: list, slots: list, beat: float | None, measured: dict) -> str:
+    """Why a role went unplaced, said so the LABELLER can act on it: it can
+    label another line, or a shorter one; it cannot lengthen a window."""
+    if not candidates:
+        return f"no line is labelled {role}"
+    shortest = min(line_seconds(l, measured) for l in candidates)
+    longest = max(holds(s, beat) for s in slots)
+    return (f"no {role} fits a window: the shortest {role} takes {shortest:.1f} s, the longest "
+            f"window holds {longest:.1f} s; label shorter lines as {role}")
 
 
 def line_seconds(line, measured: dict[str, float]) -> float:
@@ -326,13 +390,14 @@ def role_candidates(role: str, pool: list, hook, figure: str) -> list:
 
 
 def overruns(line, slot, measured: dict) -> bool:
-    """True when the line ends after its trough: it will duck the bed."""
-    return line_seconds(line, measured) > slot.seconds
+    """True when the line ends after a trough it was laid in: it will duck
+    the bed.  A made window is ducked by design and spends nothing."""
+    return not slot.made and line_seconds(line, measured) > slot.seconds
 
 
-def allowance(chosen: list, slots: list, measured: dict) -> float:
+def allowance(placed: list, measured: dict) -> float:
     """How far the next line may overrun: one release while ducks remain."""
-    spent = sum(overruns(line, slot, measured) for line, slot in zip(chosen, slots))
+    spent = sum(overruns(line, slot, measured) for line, slot in placed)
     return DUCK_OVERRUN if spent < MAX_DUCKS else 0.0
 
 
@@ -345,43 +410,62 @@ def first_fit(candidates: list, slot, beat: float | None, measured: dict,
     return None
 
 
-def fill_roles(hook, pool: list, slots: list, budget: int, figure: str,
+def by_nearness(slots: list, target: float, after: float) -> list:
+    """The windows opening at or after `after`, nearest the target first."""
+    return sorted((s for s in slots if s.start >= after), key=lambda s: abs(s.start - target))
+
+
+def place(candidates: list, slots: list, target: float, after: float, beat: float | None,
+          measured: dict, overrun: float = 0.0) -> tuple | None:
+    """The best candidate in the window nearest its aim that holds one: a
+    window nothing fits is passed over for the next nearest."""
+    for slot in by_nearness(slots, target, after):
+        line = first_fit(candidates, slot, beat, measured, overrun)
+        if line is not None:
+            return line, slot
+    return None
+
+
+def fill_roles(placed: list, pool: list, slots: list, budget: int, figure: str,
                beat: float | None, measured: dict) -> list:
-    """Answer, threat, button after the hook, each against the slot it lands
-    in.  With only two slots the second must be the threat: the contract
-    needs a threat or stakes, and exposition would spend the slot."""
-    chosen = [hook]
-    for role in ORDER[1:] if budget > 2 else ("threat",):
-        if len(chosen) >= budget:
-            break
-        pick = first_fit(role_candidates(role, pool, hook, figure), slots[len(chosen)],
-                         beat, measured, allowance(chosen, slots, measured))
-        if pick is not None:
-            chosen.append(pick)
-            pool = [l for l in pool if l is not pick]
-    return chosen
+    """Answer, threat, button after the hook, each aimed at its share of the
+    span and placed in a window after the last line.  With only two windows
+    the second must be the threat: the contract needs a threat or stakes,
+    and exposition would spend the window."""
+    hook, aims = placed[0][0], targets(slots, budget)
+    for aim, role in enumerate(ORDER[1:budget] if budget > 2 else ("threat",), start=1):
+        found = place(role_candidates(role, pool, hook, figure), slots, aims[aim],
+                      placed[-1][1].end, beat, measured, allowance(placed, measured))
+        if found is not None:
+            placed.append(found)
+            pool = [l for l in pool if l is not found[0]]
+    return placed
 
 
 def order_lines(top: list, slots: list, figure: str, *, measured: dict | None = None,
                 beat: float | None = None, iconicity: str = "none"):
-    """Hook -> answer -> threat -> (title) -> button, one line per slot.
+    """Hook -> answer -> threat -> (title) -> button, one line per window.
 
-    The number of lines is the number of slots, capped at four; each line is
-    chosen for the slot it will occupy, from its measured seconds where a
-    voice file exists.  A line naming the figure is out before anything else:
-    the trailer sells the question of who, and the answer is not a line.
+    The number of lines is the number of windows, capped at four; the roles
+    aim at even shares of the span (`targets`) and each line is chosen for
+    the window it will occupy, from its measured seconds where a voice file
+    exists.  Every line carries its window out.  A line naming the figure is
+    out before anything else: the trailer sells the question of who, and
+    the answer is not a line.
     """
     from studio.trailer_stage_spec import MAX_LINES, LineSlate
     if not slots:
         raise ValueError("no slots: nothing to put a hook in")
     measured, budget = measured or {}, min(len(slots), MAX_LINES)
     pool = [l for l in top if not names_figure(l.text, figure)]
-    hook = first_fit(role_candidates("hook", pool, None, figure), slots[0], beat, measured,
-                     allowance([], slots, measured))
-    if hook is None:
-        raise ValueError("no hook fits the first slot")
-    chosen = fill_roles(hook, [l for l in pool if l is not hook], slots, budget, figure,
+    hooks = role_candidates("hook", pool, None, figure)
+    first = place(hooks, slots, targets(slots, budget)[0], 0.0, beat, measured,
+                  allowance([], measured))
+    if first is None:
+        raise ValueError(refusal("hook", hooks, slots, beat, measured))
+    placed = fill_roles([first], [l for l in pool if l is not first[0]], slots, budget, figure,
                         beat, measured)
-    if not {l.function for l in chosen} & {"threat", "stakes"}:
+    if not {l.function for l, _ in placed} & {"threat", "stakes"}:
         raise ValueError("a hook with no threat or stakes after it")
-    return LineSlate(lines=chosen, iconicity=iconicity)
+    return LineSlate(lines=[l.model_copy(update={"window": s}) for l, s in placed],
+                     iconicity=iconicity)

@@ -115,8 +115,9 @@ def ordered(slate: LineSlate, metre: Metre, figure: str, measured: dict,
     try:
         if order is None:
             from studio.trailer_dialogue import order_lines as order
+        from studio.trailer_dialogue import windows_of
         beat = metre.beat if metre.grid == "metre" else None
-        return order(slate.lines, metre.slots, figure, measured=measured, beat=beat,
+        return order(slate.lines, windows_of(metre), figure, measured=measured, beat=beat,
                      iconicity=slate.iconicity).lines
     except (ImportError, ValueError) as why:
         print(f"[{STEP_ID}] slate order kept: {why}")
@@ -124,12 +125,11 @@ def ordered(slate: LineSlate, metre: Metre, figure: str, measured: dict,
 
 
 def windows(lines: list[SlateLine], slate_lines: list[SlateLine], metre: Metre) -> list[dict]:
-    """One slot per spoken line, entering a beat after the trough opens."""
-    out: list[dict] = []
-    spoken = [l for l in lines if not l.card]
-    for line, slot in zip(spoken, metre.slots):
-        out.append({"index": slate_lines.index(line), "at": round(slot.start + metre.beat, 3)})
-    return out
+    """Each spoken line at the window the orderer chose it for, entering a
+    beat after it opens; a line placed nowhere is not laid."""
+    by_text = {l.text: i for i, l in enumerate(slate_lines)}
+    return [{"index": by_text[line.text], "at": round(line.window.start + metre.beat, 3)}
+            for line in lines if not line.card and line.window is not None]
 
 
 def lines_for(ctx, metre: Metre, story: StorySpec, scenes: list[dict]) -> tuple[list[dict], list[dict]]:

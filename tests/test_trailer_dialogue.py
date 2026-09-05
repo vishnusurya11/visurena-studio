@@ -10,8 +10,10 @@ from __future__ import annotations
 
 import pytest
 
-from studio.trailer_dialogue import DUCK_OVERRUN, MAX_DUCKS, fits, names_figure, order_lines, speech_seconds
-from studio.trailer_stage_spec import SlateLine, Slot
+from studio.trailer_dialogue import (DUCK_OVERRUN, LINE_ROOM, MAX_DUCKS, fits, holds, made_slots,
+                                     names_figure, order_lines, refusal, speech_seconds, targets,
+                                     windows_of)
+from studio.trailer_stage_spec import Metre, SlateLine, Slot
 
 BEAT = 0.5
 
@@ -37,6 +39,109 @@ def slots(*seconds):
         out.append(Slot(start=start, end=start + s))
         start += s + 4.0
     return out
+
+
+def metre(seconds=100.0, bpm=120.0, beats_per_bar=4, hits=(16.0, 40.0, 64.0), title_hit=88.0,
+          found=()):
+    beat = 60.0 / bpm
+    beats = [round(i * beat, 4) for i in range(int(seconds / beat))]
+    downbeats = beats[::beats_per_bar]
+    return Metre(seed=7, rel_path="trailer/main/music/cue-7.wav", seconds=seconds, bpm=bpm,
+                 bar=beats_per_bar * beat, beats_per_bar=beats_per_bar, beats=beats,
+                 downbeats=downbeats, bars_in_mode=0.97, grid="metre", fitness=12.0,
+                 hits=[*hits, title_hit], phrase_starts=downbeats[::4], title_hit=title_hit,
+                 slots=list(found))
+
+
+def run_9():
+    """Scarlet run 9's shipped seed, to the numbers in metre.json: 177.8 BPM in
+    three, a 1.02 s bar, four troughs of 1.25-2.4 s between 72 and 83 s,
+    the title hit at 108.95 of 132.1 s.  The slate was music_only: the
+    longest trough held five beats, 1.7 s, and the shortest hook ran 2.5."""
+    return metre(seconds=132.1, bpm=177.84, beats_per_bar=3, hits=(41.5, 82.6, 101.9),
+                 title_hit=108.95, found=(Slot(start=72.2, end=73.45), Slot(start=75.85, end=77.45),
+                                          Slot(start=77.8, end=80.2), Slot(start=81.25, end=82.6)))
+
+
+class TestWindows:
+    """A line lives in a window: FOUND, a trough the cue has, or MADE, a
+    phrase of the grid the mix ducks under it (08-assemble keys the bed's
+    mid band to the line).  Four runs of Scarlet shipped music_only waiting
+    for troughs the music model does not reliably write; the grid always
+    has phrases."""
+
+    def test_a_made_window_opens_on_a_phrase_and_holds_a_whole_line(self):
+        """From a phrase start to the first later phrase start that leaves
+        room for the longest line the pool admits, plus the two beats the
+        fit rule keeps."""
+        found = made_slots(metre())
+        assert found and all(w.made for w in found)
+        assert all(w.start in metre().phrase_starts for w in found)
+        assert all(w.seconds >= LINE_ROOM + 2 * metre().beat for w in found)
+        assert all(0.2 * 100.0 <= w.start <= 0.8 * 100.0 for w in found)
+
+    def test_a_made_window_ends_before_the_next_hit(self):
+        """The line ends before the impact, never across it: a hit inside the
+        phrase caps the window, and a capped window shorter than a bar is
+        not a window."""
+        m = metre(hits=(16.0, 40.0, 45.0, 64.0))
+        ends = {w.start: w.end for w in made_slots(m)}
+        assert ends[40.0] == 45.0
+        assert all(w.end <= 88.0 for w in made_slots(m))
+
+    def test_windows_are_found_and_made_in_time_order(self):
+        m = metre(found=(Slot(start=30.0, end=34.0),))
+        found = windows_of(m)
+        assert [w.start for w in found] == sorted(w.start for w in found)
+        assert any(not w.made and w.start == 30.0 for w in found)
+        assert any(w.made for w in found)
+
+    def test_a_rubato_cue_has_only_the_troughs_it_was_measured_with(self):
+        m = metre(found=(Slot(start=30.0, end=34.0),)).model_copy(
+            update={"grid": "onsets", "bars_in_mode": 0.4, "downbeats": [], "phrase_starts": []})
+        assert [w.made for w in windows_of(m)] == [False]
+
+    def test_lines_are_spread_across_the_windows(self):
+        """Four lines over twenty windows are not the first four phrases: each
+        role aims at an even share of the span, hook first, button last."""
+        found = windows_of(metre())
+        aims = targets(found, 4)
+        assert aims[0] == found[0].start and aims[-1] == found[-1].start
+        assert aims[1] - aims[0] == pytest.approx(aims[2] - aims[1]) == pytest.approx(aims[3] - aims[2])
+        assert targets(found, 1) == [found[0].start]
+        slate = order_lines([AFGHAN, EASIER, DEATH, NO_DATA], found, "x", beat=0.5)
+        starts = [l.window.start for l in slate.lines]
+        assert len(starts) == 4 and starts == sorted(starts)
+        assert starts[-1] - starts[0] >= 0.5 * (found[-1].start - found[0].start)
+
+    def test_chosen_windows_never_overlap(self):
+        """Made windows overlap one another (each phrase opens one); the
+        windows the lines take do not."""
+        slate = order_lines([AFGHAN, EASIER, DEATH, NO_DATA], windows_of(metre()), "x", beat=0.5)
+        for a, b in zip(slate.lines, slate.lines[1:]):
+            assert b.window.start >= a.window.end
+
+    def test_a_window_nothing_fits_is_passed_over_for_the_next_nearest(self):
+        """Run 9's troughs held 1.7 s at most: the hook passes them for the
+        made window nearest its aim, and the slate ships."""
+        m = run_9()
+        slate = order_lines([AFGHAN, EASIER, DEATH, NO_DATA], windows_of(m), "jefferson_hope",
+                            beat=m.beat)
+        assert [l.function for l in slate.lines][:1] == ["hook"]
+        assert {l.function for l in slate.lines} & {"threat", "stakes"}
+        assert all(l.window is not None for l in slate.lines)
+        assert all(fits(speech_seconds(l.text), l.window, m.beat) for l in slate.lines)
+
+    def test_the_run_9_slate_is_not_music_only(self):
+        """The regression: the pool that shipped music_only, on the cue it
+        shipped with."""
+        m = run_9()
+        pool = [AFGHAN, line("I am a consulting detective, if you can understand what that is.",
+                             "hook"), EASIER, DEATH,
+                line("I have a mule and two horses waiting in the Eagle Ravine.", "threat",
+                     "jefferson_hope")]
+        slate = order_lines(pool, windows_of(m), "jefferson_hope", beat=m.beat)
+        assert len(slate.lines) >= 2 and not slate.music_only
 
 
 class TestFit:
@@ -147,3 +252,30 @@ class TestFigure:
 
     def test_a_lower_case_common_word_is_not_a_name(self):
         assert not names_figure("I hope you are right.", "jefferson_hope")
+
+
+class TestRefusals:
+    """The refusal is quoted back to the labeller as the reason to relabel,
+    so it must name something a LABEL can change.  Run 9 quoted 'no hook
+    fits the first slot' twice; the failure was window duration, and the
+    labeller, which cannot lengthen a window, relabelled the same lines."""
+
+    def test_a_window_holds_whole_beats_less_the_two_the_fit_rule_keeps(self):
+        assert holds(Slot(start=10.0, end=14.0), 0.5) == pytest.approx(3.0)
+        assert holds(Slot(start=10.0, end=11.0), 0.5) == 0.0
+        assert holds(Slot(start=10.0, end=14.0), None) == 4.0
+
+    def test_a_pool_with_no_hook_says_so(self):
+        assert refusal("hook", [], slots(8.0), 0.5, {}) == "no line is labelled hook"
+        with pytest.raises(ValueError, match="no line is labelled hook"):
+            order_lines([EASIER, DEATH], slots(8.0, 8.0), "x", beat=0.5)
+
+    def test_a_hook_that_fits_no_window_names_the_room(self):
+        """Run 9's troughs and no phrases: the shortest hook takes 3.3 s, the
+        longest window holds 1.7 s, and the labeller is told to label
+        shorter lines."""
+        m = run_9().model_copy(update={"phrase_starts": []})
+        with pytest.raises(ValueError, match=r"no hook fits a window: the shortest hook takes "
+                                             r"3\.3 s, the longest window holds 1\.7 s; "
+                                             r"label shorter lines as hook"):
+            order_lines([AFGHAN, EASIER, DEATH], windows_of(m), "x", beat=m.beat)

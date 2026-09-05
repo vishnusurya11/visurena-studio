@@ -164,10 +164,25 @@ class TestRun:
         slate = LineSlate.model_validate(slate_of(ctx))
         assert slate.music_only and slate.lines == []
         assert len(fake.prompts) == 2
-        assert "relabel" in fake.prompts[1].lower() or fake.prompts[1] != fake.prompts[0]
+        assert "refused: no line is labelled hook" in fake.prompts[1]
         rows = load(ctx.learnings_path)
         assert rows[-1].terminal and rows[-1].action == "music_only"
         assert rows[0].action == "relabel_next_10" and rows[0].gate == "slate"
+
+
+class TestSheets:
+    def test_every_label_sheet_is_kept_for_the_retrospect(self, ctx, monkeypatch):
+        """Run 9 shipped music_only twice over and nothing on disk said what
+        the labeller had labelled: work/labels-N.json is each sheet as
+        applied, text and function, in the order they were asked for."""
+        monkeypatch.setattr(llm, "structured", FakeLabeller(rules=[("death", "threat")]))
+        step.run(ctx.codex_id, ctx)
+        sheets = sorted((ctx.out_dir / "work").glob("labels-*.json"))
+        assert [p.name for p in sheets] == ["labels-0.json", "labels-1.json"]
+        first = json.loads(sheets[0].read_text(encoding="utf-8"))
+        assert first and all(set(row) == {"text", "speaker", "function"} for row in first)
+        assert "hook" not in {row["function"] for row in first}
+        assert any(row["function"] == "threat" and "death" in row["text"].lower() for row in first)
 
 
 class TestIconicity:

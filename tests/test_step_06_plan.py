@@ -128,9 +128,14 @@ class TestPieces:
     def test_lead_share_counts_shots_not_beats(self):
         assert step.lead_share([[HOLMES], [HOPE], [], [HOLMES, WATSON]], HOLMES) == 0.5
 
-    def test_windows_start_a_beat_into_each_slot(self):
-        found = step.windows(slate().lines, slate().lines, metre())
+    def test_windows_start_a_beat_into_each_line_window(self):
+        placed = [l.model_copy(update={"window": w}) for l, w in
+                  zip(slate().lines, (Slot(start=30.0, end=34.0), Slot(start=52.0, end=60.0, made=True)))]
+        found = step.windows(placed, slate().lines, metre())
         assert found == [{"index": 0, "at": 30.5}, {"index": 1, "at": 52.5}]
+
+    def test_a_line_without_a_window_is_not_laid(self):
+        assert step.windows(slate().lines, slate().lines, metre()) == []
 
     def test_ordered_falls_back_to_slate_order(self):
         lines = slate().lines
@@ -172,7 +177,8 @@ class TestStep:
         step.run(ctx.codex_id, ctx)
         plan = plan_of(ctx)
         assert {w["index"] for w in plan["lines"]} == {0, 1}
-        assert all(30.0 <= w["at"] < 34.0 or 52.0 <= w["at"] < 56.0 for w in plan["lines"])
+        starts = [w["at"] for w in sorted(plan["lines"], key=lambda w: w["index"])]
+        assert starts == sorted(starts) and all(20.0 <= at <= 88.0 for at in starts)
         assert not any(s["line"] for s in plan["shots"])
 
     def test_a_scene_with_no_alternative_ships_a_plate_or_drops_it(self, ctx, monkeypatch):

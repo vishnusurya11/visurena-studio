@@ -18,7 +18,7 @@ from pydantic import BaseModel, Field
 from scripts.analysis.iconicity_coverage import book_identity
 from studio import iconicity, llm
 from studio.ladder import Ladder, Rung, climb
-from studio.trailer_dialogue import line_value, names_figure, order_lines, speech_seconds
+from studio.trailer_dialogue import line_value, names_figure, order_lines, speech_seconds, windows_of
 from studio.trailer_stage_spec import Function, LineSlate, Metre, SlateLine, StorySpec
 from studio.trailer_story import line_pools
 
@@ -117,6 +117,15 @@ def labelled(ranked: list[dict], sheet: LabelSheet) -> list[SlateLine]:
             for i, l in enumerate(ranked) if i in functions]
 
 
+def write_sheet(out_dir: Path, attempt: int, lines: list[SlateLine]) -> None:
+    """work/labels-N.json: the sheet as applied, for the retrospect."""
+    work = out_dir / "work"
+    work.mkdir(parents=True, exist_ok=True)
+    rows = [{"text": l.text, "speaker": l.speaker, "function": l.function} for l in lines]
+    (work / f"labels-{attempt}.json").write_text(json.dumps(rows, indent=2, ensure_ascii=False),
+                                                 encoding="utf-8")
+
+
 def try_order(lines: list[SlateLine], slots: list, figure: str, beat: float | None,
               level: str, violation: dict) -> tuple[bool, object, str]:
     """The ladder's gate: the ordered slate, or the refusal to quote back."""
@@ -140,10 +149,11 @@ def label(ranked: list[dict], story: StorySpec, metre: Metre, level: str,
         top = ranked[:TOP_N + i * RELABEL]
         sheet = llm.structured(TIER, prompt_for(top, story, violation["text"]), LabelSheet)
         seen[:] = labelled(top, sheet)
+        write_sheet(ctx.out_dir, i, seen)
         return seen
 
     def gate(lines):
-        return try_order(lines, metre.slots, story.figure, beat, level, violation)
+        return try_order(lines, windows_of(metre), story.figure, beat, level, violation)
 
     outcome = climb(LADDER, STEP_ID, attempt, gate, ctx.budget, ctx.learn, gate_name="slate")
     if outcome.terminal:

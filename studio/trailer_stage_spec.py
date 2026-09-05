@@ -71,10 +71,13 @@ class StorySpec(BaseModel):
 
 
 class Slot(BaseModel):
-    """A trough >= 6 dB under the median, held >= 1 bar: where a line lives."""
+    """Where a line lives.  FOUND: a trough >= 6 dB under the median, held
+    >= 1 bar, that the cue has.  MADE: a phrase of the grid the mix ducks
+    the bed under (`trailer_dialogue.made_slots`)."""
 
     start: float = Field(ge=0.0)
     end: float = Field(gt=0.0)
+    made: bool = False
 
     @property
     def seconds(self) -> float:
@@ -129,6 +132,8 @@ class SlateLine(BaseModel):
     bold: bool = False
     pool: str = Field(min_length=1)
     score: float
+    window: Slot | None = Field(default=None, description=(
+        "the window the orderer chose this line for; None on a pool line"))
 
     @property
     def card(self) -> bool:
