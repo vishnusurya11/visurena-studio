@@ -129,6 +129,18 @@ class TestSeeds:
         resung = build_music.render_cue(tmp_path, "caption B", 5, dest, "[Intro]\nAh...")
         assert first == again == moved == resung == dest / "cue-5.wav" and len(calls) == 3
 
+    def test_render_cue_asks_for_the_seconds_the_frames_afford(self, tmp_path, monkeypatch):
+        """The cue length is derived from the frame budget, never pinned: a
+        different length is a different cue, so the stamp covers it too."""
+        calls: list[dict] = []
+        monkeypatch.setattr(build_music, "run", fake_comfy(tmp_path, {}, calls))
+        dest = tmp_path / "music"
+        dest.mkdir()
+        build_music.render_cue(tmp_path, "caption A", 5, dest, "", duration=64)
+        build_music.render_cue(tmp_path, "caption A", 5, dest, "", duration=64)
+        build_music.render_cue(tmp_path, "caption A", 5, dest, "", duration=80)
+        assert [c["duration"] for c in calls] == [64, 80]
+
     def test_candidate_row_measures_the_rendered_file(self, tmp_path):
         row = build_music.candidate(write_wav(tmp_path / "cue-9.wav", cue(**KINDS["two"])), 9)
         assert row["seed"] == 9 and row["rel_path"] == "trailer/music/cue-9.wav"

@@ -254,6 +254,12 @@ class TestCueStaleness:
         assert caption_stamp(caption(tone), lyrics_plan(tone)) != \
             caption_stamp(caption(tone), lyrics_plan(vocal))
 
+    def test_a_longer_ask_gives_a_different_stamp(self):
+        """The length is part of the recipe: the frame budget asks for it,
+        and a 64 s render is not the 80 s one the next run needs."""
+        tone = scarlet()
+        assert caption_stamp(caption(tone), lyrics_plan(tone), 64) !=             caption_stamp(caption(tone), lyrics_plan(tone), 80)
+
     def test_a_cue_with_no_stamp_is_not_current(self, tmp_path):
         from studio.music_tone import cue_is_current
         assert not cue_is_current(tmp_path / "cue-1.flac", "abc")

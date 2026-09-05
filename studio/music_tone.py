@@ -364,8 +364,8 @@ def lyrics_plan(tone: Tone) -> str:
 
 # --- what was actually sent, recorded beside what came back ------------------
 
-def caption_stamp(text: str, lyrics: str = "") -> str:
-    """A short hash of the recipe that produced a cue.
+def caption_stamp(text: str, lyrics: str = "", duration: int = 0) -> str:
+    """A short hash of the recipe that produced a cue: caption, sheet, length.
 
     Caption and lyrics are ONE conditioning block in the node -- `build_prompt`
     puts both between `<|im_start|>` and `<|audio_start|>` and the
@@ -374,7 +374,7 @@ def caption_stamp(text: str, lyrics: str = "") -> str:
     the caption and re-running kept every cue the OLD recipe made and printed a
     success line.
     """
-    return hashlib.sha256(f"{text}\n{lyrics}".encode("utf-8")).hexdigest()[:16]
+    return hashlib.sha256(f"{text}\n{lyrics}\n{duration}".encode("utf-8")).hexdigest()[:16]
 
 
 def _stamp_path(cue: Path) -> Path:

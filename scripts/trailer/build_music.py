@@ -52,17 +52,18 @@ def duration_of(audio: Path) -> float:
 
 
 def render_cue(book: Path, text: str, seed: int, dest_dir: Path,
-               sheet: str = "") -> Path:
+               sheet: str = "", duration: int = PINNED_DURATION) -> Path:
     """One seed of one recipe, rendered once.
 
-    The stamp covers CAPTION AND SHEET, because the node guides both as one
-    conditioning block -- so a rewritten caption re-renders, a rewritten sheet
-    re-renders, and the same recipe does not.  The full text of both is
+    The stamp covers CAPTION, SHEET AND LENGTH, because the node guides the
+    first two as one conditioning block and the third is the frame budget's
+    ask -- so a rewritten caption re-renders, a rewritten sheet re-renders, a
+    longer ask re-renders, and the same recipe does not.  The full text of both is
     written beside the audio: cue-3002's stamp matches no committed caption
     times any committed tone.json, so what produced the shipped cue cannot be
     recovered from git.
     """
-    stamp = caption_stamp(text, sheet)
+    stamp = caption_stamp(text, sheet, duration)
     current = [c for c in dest_dir.glob(f"cue-{seed}.*") if cue_is_current(c, stamp)
                and c.suffix in (".flac", ".wav", ".mp3")]
     if current:
@@ -70,7 +71,7 @@ def render_cue(book: Path, text: str, seed: int, dest_dir: Path,
     print(f"  rendering cue seed={seed} ...")
     written = run("audio_minimax_music_3", {
         "caption": text, "lyrics": sheet,
-        "duration": PINNED_DURATION, "seed": seed, "steps": 30,
+        "duration": duration, "seed": seed, "steps": 30,
         "cfg_scale": 1.7, "top_k": 50, "format": "flac",
         "filename_prefix": f"CUE-{book.name[:8]}-{seed}"}, timeout=1800)
     dest = dest_dir / f"cue-{seed}{written[0].suffix or '.flac'}"
