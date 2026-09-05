@@ -131,6 +131,44 @@ class TestLineWindows:
         assert ta.line_windows({"lines": [{"index": 0, "at": 1.0}], "shots": []}, [spoken], tmp_path) == []
 
 
+@pytest.fixture()
+def quiet_line(tmp_path):
+    """A line rendered 30 dB under the bed: what a TTS take at its own level
+    can be, and what the duck's key cannot hear."""
+    return lavfi(tmp_path / "quiet.wav", "sine=frequency=440:sample_rate=24000",
+                 "volume=-18dB", LINE_SECONDS, 1)
+
+
+class TestLevel:
+    """A line is LEVELLED to its window before anything else: the bed's
+    loudness there plus LINE_OVER_BED, whatever the take came out at.  Run
+    9's master was heard as 'music too loud': the bed was normalised to
+    -14 LUFS and nothing set a line against it."""
+
+    def test_the_gain_lands_a_line_over_the_bed(self):
+        assert ta.line_gain(bed_lu=-30.0, line_lu=-20.0) == pytest.approx(-10.0 + ta.LINE_OVER_BED)
+        assert ta.line_gain(bed_lu=-30.0, line_lu=-60.0) == 20.0
+        assert ta.line_gain(bed_lu=-60.0, line_lu=-10.0) == -20.0
+
+    def test_a_quiet_take_is_lifted_over_its_window(self, tmp_path, bed, quiet_line):
+        (at, levelled), = ta.level_lines(bed, [(LINE_AT, quiet_line)], tmp_path / "out")
+        assert at == LINE_AT and levelled.name == "line-0.level.wav"
+        window = loudness_between(bed, LINE_AT, LINE_AT + LINE_SECONDS)
+        assert ta.integrated(levelled) - window == pytest.approx(ta.LINE_OVER_BED, abs=1.5)
+
+    def test_a_hot_take_is_brought_down_to_the_same_place(self, tmp_path, bed, line):
+        (_, levelled), = ta.level_lines(bed, [(LINE_AT, line)], tmp_path / "out")
+        window = loudness_between(bed, LINE_AT, LINE_AT + LINE_SECONDS)
+        assert ta.integrated(levelled) - window == pytest.approx(ta.LINE_OVER_BED, abs=1.5)
+        assert ta.integrated(levelled) < ta.integrated(line)
+
+    def test_a_silent_bed_window_does_not_pull_the_line_to_nothing(self):
+        """Momentary readings in a stop-down are -inf; they are not a level
+        to sit eight LU over."""
+        readings = [(3.0, float("-inf")), (3.1, -20.0), (3.2, -20.0), (3.3, float("-inf"))]
+        assert ta.bed_level(readings, 3.0, 3.4) == pytest.approx(-20.0)
+
+
 class TestMixWithLines:
     def test_a_master_carries_the_line_and_ducks_the_bed(self, tmp_path, bed, line, picture):
         out = tmp_path / "master.mp4"
@@ -140,6 +178,17 @@ class TestMixWithLines:
         ducked = out.with_name("master.bed-ducked.wav")
         assert ducked.exists()
         assert loudness_between(bed, 0.8, 2.8) - loudness_between(ducked, 3.6, 5.0) >= 5.0
+
+    def test_a_quiet_take_still_rides_over_the_ducked_bed(self, tmp_path, bed, quiet_line, picture):
+        """The quiet take, unlevelled, was 30 dB under the bed and no key to
+        the compressor: levelled first, it ducks the bed and clears it."""
+        out = tmp_path / "master.mp4"
+        ta.mix_with_lines(picture, bed, [], [(LINE_AT, quiet_line)], out, seconds=SECONDS)
+        ducked = out.with_name("master.bed-ducked.wav")
+        levelled = out.with_name("line-0.level.wav")
+        assert levelled.exists()
+        inside = loudness_between(ducked, LINE_AT + 0.6, LINE_AT + LINE_SECONDS)
+        assert ta.integrated(levelled) - inside >= ta.LINE_OVER_BED
 
     def test_without_lines_it_is_the_plain_mix(self, tmp_path, bed, picture, monkeypatch):
         seen = []

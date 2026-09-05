@@ -371,16 +371,63 @@ def line_windows(plan: dict, lines: list, book: Path) -> list[tuple[float, Path]
     return keys
 
 
+LINE_OVER_BED = 8.0
+"""LU a line rides over the bed in its window, set BEFORE the duck against
+the bed as rendered: QC targets 5 and the duck only widens the gap.  Run 9's
+master was heard as 'music too loud': the bed was normalised to -14 LUFS and
+nothing set a line against it -- a take at its own level was whatever the
+voice model gave, and a quiet one was no key to the compressor either."""
+GAIN_LIMIT = 20.0
+
+
+def integrated(path: Path) -> float:
+    """Integrated loudness of one file, LUFS, from ebur128 via loudnorm."""
+    report = _measure_loudness(["ffmpeg", "-v", "info", "-i", str(path), "-af",
+                                "loudnorm=print_format=json", "-f", "null", "-"])
+    return float(report["input_i"])
+
+
+def bed_level(readings: list[tuple[float, float]], start: float, end: float) -> float:
+    """The bed's momentary loudness over a window, silence left out: a
+    stop-down reads -inf and is not a level to sit over."""
+    return window_loudness([(t, m) for t, m in readings if m > -70.0], start, end)
+
+
+def line_gain(bed_lu: float, line_lu: float) -> float:
+    """The dB that lands a line LINE_OVER_BED above its window, bounded."""
+    return round(max(-GAIN_LIMIT, min(GAIN_LIMIT, bed_lu + LINE_OVER_BED - line_lu)), 2)
+
+
+def level_line(line: Path, gain_db: float, output: Path) -> Path:
+    output.parent.mkdir(parents=True, exist_ok=True)
+    _ffmpeg(["ffmpeg", "-y", "-v", "error", "-i", str(line), "-af", f"volume={gain_db:.2f}dB",
+             "-c:a", "pcm_s16le", str(output)], "levelling a line")
+    return output
+
+
+def level_lines(bed: Path, lines: list[tuple[float, Path]], out_dir: Path) -> list[tuple[float, Path]]:
+    """Each line at the gain that sits it over its own window of the bed."""
+    readings = momentary(bed)
+    out = []
+    for index, (at, path) in enumerate(lines):
+        window = bed_level(readings, at, at + clip_seconds(path))
+        gain = line_gain(window, integrated(path))
+        out.append((at, level_line(path, gain, out_dir / f"line-{index}.level.wav")))
+    return out
+
+
 def mix_with_lines(picture: Path, bed: Path, cues: list[tuple[float, Path]],
                    lines: list[tuple[float, Path]], output: Path,
                    seconds: float | None = None) -> Path:
-    """`mix` with the line layer: the bed ducks under each line and the line
-    rides as one more cue.  The ducked bed is kept beside the master so QC can
-    measure line-over-bed without un-mixing anything."""
+    """`mix` with the line layer: each line is levelled to its window, the
+    bed ducks under it, and the line rides as one more cue.  The ducked bed
+    and the levelled lines are kept beside the master so QC can measure
+    line-over-bed without un-mixing anything."""
     if not lines:
         return mix(picture, bed, cues, output, seconds)
-    ducked = duck_bed(bed, lines, Path(output).with_name(f"{Path(output).stem}.bed-ducked.wav"))
-    return mix(picture, ducked, cues + lines, output, seconds)
+    levelled = level_lines(bed, lines, Path(output).parent)
+    ducked = duck_bed(bed, levelled, Path(output).with_name(f"{Path(output).stem}.bed-ducked.wav"))
+    return mix(picture, ducked, cues + levelled, output, seconds)
 
 
 def luma_stats(video: Path) -> tuple[float, float]:
