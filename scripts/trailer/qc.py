@@ -21,7 +21,7 @@ from typing import Callable
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 
-from studio import beatmap, trailer_assemble
+from studio import beatmap, clip_cache, trailer_assemble
 from studio.paths import book_dir
 from studio.trailer_edit import max_shot
 from studio.trailer_stage_spec import Metre, QCReport
@@ -136,10 +136,39 @@ def graded(cuts: list[float], found: Metre, tol: float = ON_GRID) -> list[float]
     return [c for c in cuts if found.beats[0] - tol <= c <= found.beats[-1] + tol]
 
 
+def reused_shots(shots: list[dict]) -> int:
+    """Shots playing a take an earlier shot already played.
+
+    A shot with no beat_id cannot be shown to repeat anything, so it counts
+    as its own picture rather than as a nameless duplicate.
+    """
+    ids = [shot.get("beat_id", index) for index, shot in enumerate(shots)]
+    return len(ids) - len(set(ids))
+
+
+def stale_shots(shots: list[dict], fresh: list[str] | None) -> int:
+    """Shots cut from a clip that is not this plan's own render.  Without a
+    freshness reading nothing is claimed: the number is 0, not a guess."""
+    if fresh is None:
+        return 0
+    return sum(1 for shot in shots if shot.get("beat_id") not in set(fresh))
+
+
+def fresh_shots(out_dir: Path) -> list[str]:
+    """The beats whose clip on disk is the take step 07 promoted this run.
+    A trailer with no clips.json has none, so every shot reads as stale."""
+    path = out_dir / "clips.json"
+    if not path.exists():
+        return []
+    doc = json.loads(path.read_text(encoding="utf-8"))
+    return clip_cache.fresh(doc, out_dir.parents[1])
+
+
 def report(plan: dict, found: Metre, seen: list[float], loud: tuple[float, float],
-           lines_lu: list[float] = ()) -> QCReport:
-    """The QCReport from the measured grid, the detected cuts, the loudness
-    and each line's LU over the ducked bed (`line_over_bed`)."""
+           lines_lu: list[float] = (), fresh: list[str] | None = None) -> QCReport:
+    """The QCReport from the measured grid, the detected cuts, the loudness,
+    each line's LU over the ducked bed (`line_over_bed`), and whether any
+    picture in the cut is one the viewer has already seen."""
     lengths = [float(s["seconds"]) for s in plan["shots"]]
     title_at = planned_cuts(plan)[-1]
     inside = graded(seen, found)
@@ -150,6 +179,8 @@ def report(plan: dict, found: Metre, seen: list[float], loud: tuple[float, float
         on_cap_fraction=on_cap_fraction(lengths, max_shot(found.bar)),
         title_on_downbeat=any(abs(title_at - d) <= ON_GRID for d in found.downbeats),
         integrated_lufs=loud[0], true_peak=loud[1], unbound_shots=len(plan_unbound(plan)),
+        reused_shots=reused_shots(plan["shots"]),
+        stale_shots=stale_shots(plan["shots"], fresh),
         line_over_bed_lu=list(lines_lu), grid=found.grid)
 
 
@@ -159,7 +190,8 @@ def master_of(out_dir: Path) -> Path:
 
 def qc(out_dir: Path, detect: Callable = scene_cuts, track: beatmap.Tracker | None = None,
        measure: Callable = beatmap.metre, loud: Callable = loudness,
-       threshold: float = SCENE_THRESHOLD, lines: Callable = line_over_bed) -> QCReport:
+       threshold: float = SCENE_THRESHOLD, lines: Callable = line_over_bed,
+       fresh: Callable = fresh_shots) -> QCReport:
     """Measure the master in `out_dir`, write qc.json beside it, return the report.
 
     The master's own audio is what the tracker reads -- `beatmap.decode`
@@ -169,7 +201,7 @@ def qc(out_dir: Path, detect: Callable = scene_cuts, track: beatmap.Tracker | No
     plan = json.loads((out_dir / "plan.json").read_text(encoding="utf-8"))
     seen = detect(video, threshold=threshold)
     found = measure(video, seed=0, rel_path=video.name, track=track)
-    result = report(plan, found, seen, loud(video), lines(out_dir))
+    result = report(plan, found, seen, loud(video), lines(out_dir), fresh(out_dir))
     sidecar = result.model_dump() | {"missing_cuts": missing_cuts(planned_cuts(plan), seen),
                                     "flags": result.flags, "floor_pass": result.floor_pass}
     (out_dir / "qc.json").write_text(json.dumps(sidecar, indent=2), encoding="utf-8")

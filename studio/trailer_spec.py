@@ -199,5 +199,22 @@ class TrailerPlan(BaseModel):
         check_canvas(self.width, self.height)
         return self
 
+    @model_validator(mode="after")
+    def _one_take_per_shot(self) -> "TrailerPlan":
+        """A rendered take is never seen twice.
+
+        Run 10 shipped 51 shots off 25 takes -- every take twice, B00 three
+        times -- and 24% of the picture was a frame the viewer had already
+        watched.  The plan is where that becomes impossible: fewer beats than
+        cuts is not a spacing problem to be scattered, it is a plan that has
+        not been fitted to what was rendered.
+        """
+        seen: set[str] = set()
+        for shot in self.shots:
+            if shot.beat_id in seen:
+                raise ValueError(f"{shot.beat_id} plays twice: one take, one shot")
+            seen.add(shot.beat_id)
+        return self
+
     def unbound_shots(self) -> list[ShotSpec]:
         return [s for s in self.shots if not s.bound()]

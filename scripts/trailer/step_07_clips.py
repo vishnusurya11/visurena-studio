@@ -1,9 +1,10 @@
 """Step 07 -- clips: one take per beat, its person read against its reference.
 
-The slow step: ~11 min per take on the local GPU, so the budget is read
-before every render.  Three frames of every take are read by the vision
-model into a trait card (`studio.describe`) and compared with the reference
-sheet's card: DISTINCT_AT or more traits apart is not the same person.
+The slow step: ~16 min per take on the local GPU (run 10, measured), so the
+budget is read before every render.  Three frames of every take are read by
+the vision model into a trait card (`studio.describe`) and compared with
+the reference sheet's card: DISTINCT_AT or more traits apart is not the
+same person.
 Such a take climbs seed x2 and then a whole-take close-up (the FORM changes,
 the beat does not).  The terminal rung never asks: it ships the BEST take of
 the beat capped at a short shot.  A beat is dropped only when no take
@@ -19,7 +20,7 @@ from typing import Callable
 
 from scripts.trailer.build_clips import (SEED_BASE, bound_slots, is_complete, recipe_for,
                                          render_take, take_values)
-from studio.clip_cache import is_current
+from studio.clip_cache import is_current, sidecar_for, stored_fingerprint
 from studio.describe import (DISTINCT_AT, TIMEOUT, TraitCard, describe, describe_frames,
                              differences, distance, known, patiently, same_look, shared, verifiable)
 from studio.frames import frame_at, frame_times
@@ -29,7 +30,11 @@ from studio.trailer_assemble import clip_seconds
 
 STEP_ID = "07"
 NAME = "clips"
-RENDER_SECONDS = 11 * 60
+RENDER_SECONDS = 16 * 60
+"""MEASURED, not derived: run 10 rendered 19 takes between 12:36 and 17:32 --
+15.76 min each.  The old 660 s was the 243-frame arithmetic, and the plan it
+sized asked for 25 setups of which the budget rung dropped six.  The number
+the plan is built on is now the number the machine has actually done."""
 SHORT_SHOT = 0.6
 """A take whose face never bound may still carry a cut this short: too brief
 to read a wrong face, long enough to keep the beat's place in the metre."""
@@ -120,8 +125,16 @@ def best_of(tries: list[dict]) -> dict | None:
 
 
 def promote(take: Path, dest: Path) -> Path:
+    """The chosen take under its beat's name, RECIPE AND ALL.
+
+    The bytes alone made the promoted clip anonymous: run 10's assembler
+    could not tell this run's B04 from the B04 of the plan before it, and
+    cut 24% of the picture from stale files.  The sidecar is the identity.
+    """
     dest.parent.mkdir(parents=True, exist_ok=True)
     dest.write_bytes(take.read_bytes())
+    if sidecar_for(take).exists():
+        sidecar_for(dest).write_bytes(sidecar_for(take).read_bytes())
     return dest
 
 
@@ -131,6 +144,7 @@ def clip_record(beat_id: str, chosen: dict, book: Path, dest: Path, reference: s
             "seconds": chosen["seconds"], "seed": chosen["seed"],
             "similarity": chosen["similarity"], "differs": chosen["differs"],
             "known": chosen["known"], "reference": reference, "capped": capped,
+            "fingerprint": stored_fingerprint(dest),
             "takes": [{"seed": t["seed"], "similarity": t["similarity"]} for t in tries]}
 
 

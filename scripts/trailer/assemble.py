@@ -4,12 +4,11 @@ from __future__ import annotations
 
 import json
 import sys
-from collections import Counter
 from pathlib import Path
-from typing import Callable
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 
+from studio.clip_cache import fresh
 from studio.sfx import impact, sub_drop
 from studio.trailer_assemble import (card_fits, clip_seconds, concat, extract,
                                      grade_to, line_windows, luma_stats,
@@ -20,13 +19,31 @@ from studio.trailer_stage_spec import VoiceLine
 ROOT = Path(__file__).resolve().parents[2]
 
 
-Resolver = Callable[[str, int, float, list[str]], str]
-"""(beat_id, shot order, shot seconds, takes on disk) -> the take the shot uses."""
+def clips_doc(out: Path) -> dict:
+    """What step 07 promoted.  Without it the cut would be guessing, and
+    guessing is how run 10 cut a quarter of its picture from old renders."""
+    path = out / "clips.json"
+    if not path.exists():
+        raise SystemExit(f"REFUSED: no clips.json under {out}; nothing says "
+                         f"which takes this plan rendered")
+    return json.loads(path.read_text(encoding="utf-8"))
 
 
-def neighbouring_take(beat_id: str, order: int, seconds: float, have: list[str]) -> str:
-    """The beat's own take, or a stand-in chosen deterministically."""
-    return beat_id if beat_id in have else have[order % len(have)]
+def takes_for(plan: dict, clips: dict, book: Path) -> dict[str, Path]:
+    """The clip each shot reads: its own, and only if it is THIS run's.
+
+    A clip counts when step 07's record and the file's own sidecar agree
+    (`clip_cache.fresh`).  Anything else -- never rendered, dropped, or left
+    behind by an earlier plan -- refuses the cut, because the alternative
+    the assembler used to take was a neighbouring take played twice.
+    """
+    have = set(fresh(clips, book))
+    lack = sorted({s["beat_id"] for s in plan["shots"]} - have)
+    if lack:
+        raise SystemExit(f"REFUSED: no fresh clip for beats {lack}; re-plan "
+                         f"around the takes that exist rather than reusing one")
+    by_id = {c["beat_id"]: book / c["rel_path"] for c in clips["clips"]}
+    return {s["beat_id"]: by_id[s["beat_id"]] for s in plan["shots"]}
 
 
 def spoken_lines(plan: dict, out: Path) -> list[tuple[float, Path]]:
@@ -44,29 +61,24 @@ def build(book_glob: str, trailer_id: str = "main") -> Path:
     return build_at(book, trailer_id)
 
 
-def build_at(book: Path, trailer_id: str = "main", resolve: Resolver = neighbouring_take) -> Path:
+def build_at(book: Path, trailer_id: str = "main") -> Path:
     out = book / "trailer" / trailer_id
     plan = json.loads((out / "plan.json").read_text(encoding="utf-8"))
     work = out / "work"
     work.mkdir(parents=True, exist_ok=True)
 
     width, height, fps = plan["width"], plan["height"], plan["fps"]
+    # Which take each shot reads, decided BEFORE anything is measured.  The
+    # directory outlives the plan, so a rebuild that produces fewer beats
+    # leaves the extra renders behind; globbing them read last plan's
+    # pictures into the grade calibration and then offered them as
+    # substitutes -- 24% of run 10's delivered picture.
+    takes = takes_for(plan, clips_doc(out), book)
     # One hero look for the whole trailer.  The prompt cannot lock exposure --
     # a verbatim grade string in every prompt still gave clips spanning
     # 42.9-96.6 luma -- so it is matched here, against a real clip rather than
     # an invented target, with a floor so a uniformly dark set gets lifted.
-    # Only clips THIS plan asks for.  The directory outlives the plan: a
-    # rebuild that produces fewer beats leaves the extra renders behind, and
-    # they were being read into the grade calibration and offered as
-    # substitutes -- last plan's pictures colouring and filling this one's cut.
-    planned = {beat["beat_id"] for beat in plan["beats"]}
-    orphans = sorted(c.stem for c in (out / "clips").glob("*.mp4")
-                     if c.stem not in planned)
-    if orphans:
-        print(f"  ignoring {len(orphans)} clip(s) not in this plan: {', '.join(orphans)}")
-    stats = {clip.stem: luma_stats(clip)
-             for clip in sorted((out / "clips").glob("*.mp4"))
-             if clip.stem in planned}
+    stats = {beat_id: luma_stats(clip) for beat_id, clip in sorted(takes.items())}
     if not stats:
         raise SystemExit(f"REFUSED: no clips rendered under {out / 'clips'}")
     means = sorted(mean for mean, _ in stats.values())
@@ -81,47 +93,18 @@ def build_at(book: Path, trailer_id: str = "main", resolve: Resolver = neighbour
     print(f"  hero look: luma {hero_mean:.1f}/{hero_deviation:.1f} "
           f"from {len(stats)} clips spanning {means[0]:.1f}-{means[-1]:.1f}")
 
-    seen: Counter = Counter()
+    # One take, one shot: every segment is the middle of its OWN clip, and
+    # no clip is opened twice.  The old code spread a take's several uses
+    # across its length, which made a reused picture less obvious without
+    # making it any less a repeat.
     segments: list[Path] = []
-    missing: list[str] = []
-
-    # Substitute rather than refuse.  A beat whose clip never rendered used to
-    # abort the whole assembly, so one failure at 4am meant no trailer at all
-    # instead of a slightly less varied one.  Below a floor it still refuses,
-    # because a trailer cut from two takes is not a trailer.
-    have = sorted(clip.stem for clip in (out / "clips").glob("*.mp4")
-                  if clip.stem in planned)
-    beat_ids = [beat["beat_id"] for beat in plan["beats"]]
-    if len(have) < max(4, len(beat_ids) * 0.6):
-        raise SystemExit(f"REFUSED: only {len(have)} of {len(beat_ids)} beats "
-                         f"rendered; too few to cut from")
-    if len(have) < len(beat_ids):
-        print(f"  WARNING: {len(beat_ids) - len(have)} beats have no clip; "
-              f"their shots fall back to neighbouring takes")
-
-    # Resolve every shot to the take it will actually use BEFORE counting, so
-    # a take standing in for several beats still spreads its segments across
-    # its whole length instead of reusing one moment.
-    resolved = {shot["index"]: resolve(shot["beat_id"], shot["index"], shot["seconds"], have)
-                for shot in plan["shots"]}
-    uses = Counter(resolved.values())
-
     for shot in plan["shots"]:
-        actual = resolved[shot["index"]]
-        source = out / "clips" / f"{actual}.mp4"
-        if not source.exists():
-            missing.append(shot["beat_id"])
-            continue
-        usage = seen[actual]
-        seen[actual] += 1
-        start = segment_start(usage, uses[actual],
-                              shot["seconds"], clip_seconds(source))
-        mean, deviation = stats[actual]
+        source = takes[shot["beat_id"]]
+        start = segment_start(0, 1, shot["seconds"], clip_seconds(source))
+        mean, deviation = stats[shot["beat_id"]]
         segments.append(extract(source, start, shot["seconds"],
                                 work / f"s{shot['index']:03d}.mp4", width, height, fps,
                                 grade_to(mean, deviation, hero_mean, hero_deviation)))
-    if missing:
-        raise SystemExit(f"REFUSED: no clip for beats {sorted(set(missing))}")
 
     lengths = [s["seconds"] for s in plan["shots"]]
     if is_uniform(lengths):

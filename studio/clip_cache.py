@@ -50,17 +50,32 @@ def record(video: Path, recipe: dict) -> Path:
     return path
 
 
+def stored_fingerprint(video: Path) -> str | None:
+    """What the clip's sidecar says made it; None when there is no answer."""
+    try:
+        return json.loads(sidecar_for(video).read_text(encoding="utf-8")).get("fingerprint")
+    except (json.JSONDecodeError, OSError):
+        return None
+
+
 def is_current(video: Path, recipe: dict) -> bool:
     """True only when this clip was rendered from THIS recipe.
 
     A missing sidecar is not current.  Every clip rendered before this module
     existed re-renders once, which is correct: we cannot tell what made them.
     """
-    path = sidecar_for(video)
-    if not path.exists():
-        return False
-    try:
-        stored = json.loads(path.read_text(encoding="utf-8"))
-    except (json.JSONDecodeError, OSError):
-        return False
-    return stored.get("fingerprint") == fingerprint(recipe)
+    return stored_fingerprint(video) == fingerprint(recipe)
+
+
+def fresh(clips_doc: dict, book: Path) -> list[str]:
+    """The beats whose clip is on disk AND is the one step 07 promoted.
+
+    Run 10 cut 24% of its picture from clips of earlier plans: the assembler
+    globbed clips/*.mp4 and never asked whether a file was the take this run
+    rendered.  The sidecar answers it -- the record says which fingerprint
+    was promoted, the sidecar says which one is there.
+    """
+    return [clip["beat_id"] for clip in clips_doc.get("clips", [])
+            if clip.get("fingerprint")
+            and (book / clip["rel_path"]).exists()
+            and stored_fingerprint(book / clip["rel_path"]) == clip["fingerprint"]]

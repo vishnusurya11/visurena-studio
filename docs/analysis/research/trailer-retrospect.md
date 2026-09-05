@@ -434,3 +434,77 @@ and `graded`. Re-measured on the same master: 52 cuts, 0.90 on the music,
   step 02's 40-minute share; the Ferrier era blend; a frontier judge tier
   needs an owner-confirmed rate; LoRA and two-subject A/Bs; bare shared
   surname over-credit.
+
+### Run 10 — the no-reuse rule
+
+The owner watched the delivered master and gave one instruction: *"Don't even
+use a single shot .. create similar shots for rule of three or whatever
+artistic reason .. but don't reuse man I hate it doesn't look good at all."*
+
+Measured on what shipped: **51 shots from 25 takes** — every take played
+twice, B00 three times — and **24% of the picture came from clips left over
+from earlier plans**, files still sitting in `clips/` under the right beat
+names from a plan that no longer existed. Neither was a bug in one function.
+Both were the pipeline working as designed: `shots_for` called `best_scatter`,
+whose whole purpose is to spread FEWER beats over MORE cuts, and the
+assembler globbed `clips/*.mp4` without ever asking whether a file was the
+take this run rendered.
+
+**The brick.** The render is the only fixed thing; everything else bends to
+it. A take costs ~16 min on this GPU and no argument changes that, so it is
+the base case, and every other number is derived from it: takes = what step
+07's share affords → the story authors exactly that many distinct setups →
+the walk is shortened until its cut count fits the takes → one shot per take
+→ the assembler cuts only fresh clips of THIS plan → QC proves it. Run 10
+ran that recursion backwards — 44 cuts first, then whatever the budget could
+render — and the arithmetic had to close somewhere, so it closed on reuse.
+
+The chain, each link refusing rather than filling:
+
+- `trailer_order.one_each` replaces `best_scatter` in `shots_for`: beats in
+  story order, one shot each, `ValueError` on any mismatch. A count that does
+  not match is a plan that was never fitted to its takes, not a spacing
+  problem to be scattered.
+- `TrailerPlan._one_take_per_shot` makes a repeated beat unrepresentable. The
+  plan cannot be written that way, whatever writes it.
+- `RENDER_SECONDS` is now **16 min, measured** (19 takes, 12:36 → 17:32 =
+  15.76 min each). The old 660 s was the 243-frame arithmetic, and the plan
+  it sized asked for 25 setups of which the budget rung dropped six — the
+  last six, which are the climax.
+- `affordable_takes` → `fit_points` → `agree`: the walk gives up seconds,
+  half a bar at a time, until its cuts fit the takes, and hands back any
+  beats it could not use. On the test metre (120 BPM, title hit at 88 s) 12
+  affordable takes fit a **25.0 s** trailer of 12 shots. That is the honest
+  length of this pipeline today: the trailer is short because the render is
+  slow, and the only way to a 60 s cut is a faster cycle, not a second look
+  at a picture.
+- `music_of(metre, ends)`: the title lands on the cue's hit only when the
+  picture reaches it. A 25 s cut with a card timed to a hit at 88 s would
+  hold a static title for a minute. Line windows past the end are dropped
+  the same way (`inside`).
+- `clip_cache.fresh`: a clip counts only when step 07's record and the file's
+  own sidecar agree. `promote` now copies the recipe sidecar with the bytes,
+  so a promoted clip is identifiable; before this it was anonymous, which is
+  exactly why last plan's B04 could pass for this one's.
+- `assemble.takes_for` computes every shot's clip BEFORE `luma_stats` and
+  refuses if any is missing. The stale clips had also been poisoning the
+  grade calibration — the hero look was matched against pictures that were
+  not in the trailer.
+- `step_08.usable` + `step_06.refit`: a beat whose take never rendered, came
+  back capped shorter than its shot, or is stale, leaves the plan and the
+  walk is re-cut around what remains. `neighbouring_take` and `resolver_for`
+  are gone. A trailer that lost a take is a shorter trailer.
+- QC's floor gains `reused_shots` and `stale_shots`, both of which must be 0.
+  The rule is now measured on the delivered master, not only enforced
+  upstream — which is the standard every other gate here is held to.
+
+`best_scatter`, `scatter`, `interleave`, `allocate`, `is_cyclic`,
+`shortest_return`, `longest_repeat` and `refuse_repetitive` are now dead with
+respect to the pipeline: nothing but their own tests calls them. They are the
+measuring apparatus of a problem that no longer exists, kept until someone
+decides whether the song and episode paths still want them.
+
+**Open.** The trailer's length is now the render cycle's hostage: 16 min a
+take, ~12 takes in step 07's share, ~25 s of picture. Every second of trailer
+costs about half a take. The next real gain is not in the cut — it is fewer
+frames, fewer steps, or a second GPU.

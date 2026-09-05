@@ -111,3 +111,19 @@ class TestOneAspectRatio:
         p = TrailerPlan(trailer_id="t", book_id="b", title="T")
         assert p.width % 32 == 0 and p.height % 32 == 0
         assert (p.width, p.height) == (1344, 768)
+
+
+class TestOneTakeOneShot:
+    """Run 10 played every one of its 25 takes twice and B00 three times.
+    The owner's rule -- a rendered take is never seen twice -- is a property
+    of the plan alone, so the plan cannot be built that way."""
+
+    def test_a_beat_used_twice_is_refused(self):
+        with pytest.raises(ValidationError, match="one take, one shot"):
+            TrailerPlan(trailer_id="t", book_id="b", title="T",
+                        shots=[shot(index=0), shot(index=1, start=2.0)])
+
+    def test_a_shot_each_is_accepted(self):
+        p = TrailerPlan(trailer_id="t", book_id="b", title="T",
+                        shots=[shot(index=0), shot(index=1, beat_id="b2", start=2.0)])
+        assert len(p.shots) == 2

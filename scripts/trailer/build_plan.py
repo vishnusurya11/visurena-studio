@@ -23,7 +23,7 @@ from studio.shot_grammar import (FRAMING, cause_of, choose_sizes,
                                  destination_of, motivated_move)
 from studio.trailer_dialogue import assign_lines, dialogue_candidates, pick_lines
 from studio.trailer_edit import cut_points, lengths_of
-from studio.trailer_order import best_scatter, refuse_repetitive
+from studio.trailer_order import one_each
 from studio.trailer_plan import arc_for
 from studio.trailer_spec import MusicBed, RefSheet, ShotSpec, TrailerBeat, TrailerPlan
 from studio.trailer_story import (action_text, figure_of, lead_of,
@@ -85,16 +85,17 @@ def move_for(setup: dict, position: float) -> str:
 
 def shots_for(beats: list[TrailerBeat], points: list[float], scenes: dict,
               refs: dict, lines: list[dict]) -> list[ShotSpec]:
-    """Assign beats to cut points WITHOUT repeating the beat sequence.
+    """One shot per beat, in the story's own order.
 
-    The previous rule was `beats[index % len(beats)]`, which produced B00..B10
-    three times over -- not scattered reuse but the same sequence played three
-    times, each pass faster.  That is a loop, and no gate looked for one.
+    Scattering was the reuse machine: it existed to spread FEWER beats over
+    MORE cuts, and run 10 shipped 51 shots off 25 takes because of it.  The
+    owner's rule is that a rendered take is never seen twice, so the only
+    order left is the one the story wrote, and a count that does not match
+    is a plan that was never fitted to its takes (`step_06_plan.agree`).
     """
     lengths = lengths_of(points)
-    order = best_scatter([b.beat_id for b in beats], len(lengths))
     try:
-        refuse_repetitive(order, min_gap=3, max_repeat=3)
+        order = one_each([b.beat_id for b in beats], len(lengths))
     except ValueError as why:
         raise SystemExit(f"REFUSED: {why}") from why
     by_id = {b.beat_id: b for b in beats}

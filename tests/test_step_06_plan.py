@@ -103,6 +103,12 @@ def plan_of(ctx) -> dict:
     return json.loads((ctx.out_dir / "plan.json").read_text(encoding="utf-8"))
 
 
+def ends_at(plan: dict) -> float:
+    """Where the picture stops: the last shot's start plus its length."""
+    last = plan["shots"][-1]
+    return last["start"] + last["seconds"]
+
+
 class TestPieces:
     def test_stopdown_starts_keep_one_event_per_trough(self):
         assert step.stopdown_starts([20.05, 20.55, 21.05, 49.0, 49.5, 60.0]) == [20.05, 49.0, 60.0]
@@ -182,31 +188,56 @@ class TestStep:
         assert rows[0].gate == "binding" and "unbound" in str(rows[0].measured)
         assert all(b["scene_number"] != 4 or not b["cast"] for b in plan["beats"])
         assert all(s["char_refs"] or s["loc_ref"] for s in plan["shots"])
-        assert plan["music"]["title_impact"] == 88.0 and plan["stretch"] == LITERARY_STRETCH
+        assert plan["stretch"] == LITERARY_STRETCH
 
     def test_shots_follow_the_beat_walk(self, ctx):
+        """The walk is fitted to the takes, so the plan's own beat count is
+        the count it was cut for -- and cutting it again reproduces it."""
         step.run(ctx.codex_id, ctx)
         plan = plan_of(ctx)
-        points = plan_cuts(metre(), step.events_of(metre()), 88.0, LITERARY_STRETCH)
+        points = step.fit_points(metre(), step.events_of(metre()),
+                                 len(plan["beats"]), LITERARY_STRETCH)
         assert [s["start"] for s in plan["shots"]] == pytest.approx(points[:-1])
-        assert sum(s["seconds"] for s in plan["shots"]) == pytest.approx(88.0, abs=0.05)
+        assert sum(s["seconds"] for s in plan["shots"]) == pytest.approx(points[-1], abs=0.05)
+
+    def test_every_shot_has_its_own_setup(self, ctx):
+        """The owner's rule: a rendered take is never seen twice.  Run 10
+        played 25 takes over 51 shots and 24% of the picture was a repeat."""
+        step.run(ctx.codex_id, ctx)
+        plan = plan_of(ctx)
+        ids = [s["beat_id"] for s in plan["shots"]]
+        assert len(set(ids)) == len(ids) == len(plan["beats"])
+        assert ids == [b["beat_id"] for b in plan["beats"]]
 
     def test_replan_lengthens_the_shots(self, ctx):
+        """A longer stretch buys a longer TRAILER, not more shots: the takes
+        are fixed, so a stretched walk spends the same takes over more
+        seconds."""
         step.replan(ctx, 0)
-        first = len(plan_of(ctx)["shots"])
+        first = plan_of(ctx)
         step.replan(ctx, 2)
-        assert len(plan_of(ctx)["shots"]) < first and plan_of(ctx)["stretch"] == step.stretch_for(2)
+        later = plan_of(ctx)
+        assert ends_at(later) > ends_at(first)
+        assert len(later["shots"]) == len(later["beats"]) <= step.affordable_takes(ctx)
+        assert later["stretch"] == step.stretch_for(2)
 
     def test_lines_are_windowed_into_the_slots(self, ctx):
+        """A window past the end of the picture is a line nobody hears: the
+        walk stops where the takes run out, so the windows are filtered to
+        what the trailer actually reaches."""
+        early = metre().model_copy(update={
+            "slots": [Slot(start=4.0, end=8.0), Slot(start=16.0, end=20.0)],
+            "phrase_starts": [4.0, 16.0]})
+        (ctx.out_dir / "music/metre.json").write_text(early.model_dump_json(), encoding="utf-8")
         (ctx.out_dir / "lines.json").write_text(slate().model_dump_json(), encoding="utf-8")
         voice = [VoiceLine(index=i, text=l.text, speaker=l.speaker, rel_path=f"trailer/main/voice/{i}.wav",
                            seconds=1.4).model_dump() for i, l in enumerate(slate().lines)]
         (ctx.out_dir / "voice.json").write_text(json.dumps(voice), encoding="utf-8")
         step.run(ctx.codex_id, ctx)
         plan = plan_of(ctx)
-        assert {w["index"] for w in plan["lines"]} == {0, 1}
         starts = [w["at"] for w in sorted(plan["lines"], key=lambda w: w["index"])]
-        assert starts == sorted(starts) and all(20.0 <= at <= 88.0 for at in starts)
+        assert starts and starts == sorted(starts)
+        assert all(4.0 <= at < ends_at(plan) for at in starts)
         assert not any(s["line"] for s in plan["shots"])
 
     def test_a_scene_with_no_alternative_ships_a_plate_or_drops_it(self, ctx, monkeypatch):
@@ -218,13 +249,71 @@ class TestStep:
 
 
 class TestBudgetSizesThePlan:
-    """Step 07 renders ~11 min per setup; the plan must not ask for more takes
-    than its share affords, or the budget rung drops the climax beats."""
+    """Step 07 renders ~16 min per take (run 10, measured).  The render is the
+    only fixed thing: the takes are what the share affords, and the walk is
+    shortened until its cut count fits them."""
 
-    def test_setups_are_capped_by_what_step_07_can_afford(self, ctx):
+    def test_the_takes_are_what_step_07_can_afford(self, ctx):
         from scripts.trailer.step_07_clips import RENDER_SECONDS
         from studio.run_budget import TRAILER_SHARES, Budget
         ctx.budget = Budget(6 * 3600, TRAILER_SHARES, clock=lambda: 0.0)
         affordable = int(ctx.budget.remaining("07") // RENDER_SECONDS)
-        assert step.setup_count(60, ctx) == affordable - step.RETRY_RESERVE
-        assert step.setup_count(5, ctx) == 5
+        assert step.affordable_takes(ctx) == affordable - step.RETRY_RESERVE
+
+    def test_the_plan_never_asks_for_more_takes_than_it_can_render(self, ctx):
+        step.run(ctx.codex_id, ctx)
+        plan = plan_of(ctx)
+        assert len(plan["shots"]) == len(plan["beats"]) <= step.affordable_takes(ctx)
+
+
+class TestFitTheWalkToTheTakes:
+    """The render is the only fixed thing; the walk bends to it."""
+
+    def test_the_walk_is_shortened_until_its_cuts_fit_the_takes(self):
+        found = metre()
+        points = step.fit_points(found, step.events_of(found), 12, LITERARY_STRETCH)
+        assert len(points) - 1 <= 12 and points[-1] < 88.0
+
+    def test_takes_enough_for_the_whole_cue_keep_the_whole_walk(self):
+        found = metre()
+        whole = plan_cuts(found, step.events_of(found), 88.0, LITERARY_STRETCH)
+        assert step.fit_points(found, step.events_of(found), len(whole) - 1,
+                               LITERARY_STRETCH) == whole
+
+    def test_a_walk_that_fits_nothing_is_refused(self):
+        found = metre()
+        with pytest.raises(ValueError, match="no walk fits 0 takes"):
+            step.fit_points(found, step.events_of(found), 0, LITERARY_STRETCH)
+
+    def test_agree_trims_the_beats_to_the_cuts_it_fitted(self):
+        found = metre()
+        beats = step.setups_for(screenplay()["scenes"],
+                                {r["ref_id"] for r in refs()["refs"]}, 12, {}, HOLMES, HOPE)
+        kept, points = step.agree(found, step.events_of(found), beats, LITERARY_STRETCH)
+        assert len(kept) == len(points) - 1 <= len(beats)
+        assert [b.beat_id for b in kept] == [b.beat_id for b in beats[:len(kept)]]
+
+
+class TestTheTitleLandsOnlyWhereThePictureReaches:
+    def test_a_picture_that_reaches_the_hit_takes_it(self):
+        bed = step.music_of(metre(), 88.0)
+        assert bed.title_impact == 88.0 and bed.title_stopdown == 86.5
+
+    def test_a_picture_that_stops_short_has_no_title_moment(self):
+        """A 50 s cut with its card timed to a hit at 88 s would hold a static
+        title for 38 seconds; the card lands on the picture's own end."""
+        bed = step.music_of(metre(), 50.0)
+        assert bed.title_impact is None and bed.title_stopdown is None
+
+
+class TestRefit:
+    def test_refit_keeps_only_the_takes_that_exist_in_plan_order(self, ctx):
+        """Step 08's answer to a missing clip: a shorter trailer, never a
+        neighbouring take played a second time."""
+        step.run(ctx.codex_id, ctx)
+        rendered = [b["beat_id"] for b in plan_of(ctx)["beats"][:5]]
+        step.refit(ctx, 0, rendered=rendered)
+        plan = plan_of(ctx)
+        assert [b["beat_id"] for b in plan["beats"]] == rendered
+        assert [s["beat_id"] for s in plan["shots"]] == rendered
+        assert ends_at(plan) < 88.0

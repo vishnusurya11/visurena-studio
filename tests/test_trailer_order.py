@@ -4,8 +4,28 @@ from __future__ import annotations
 import pytest
 
 from studio.trailer_order import (allocate, interleave, is_cyclic,
-                                  longest_repeat, refuse_repetitive,
+                                  longest_repeat, one_each, refuse_repetitive,
                                   shortest_return)
+
+
+class TestOneEach:
+    """Run 10 shipped 51 shots from 25 takes: every take played twice, B00
+    three times.  The owner's rule is that a take plays ONCE, so the only
+    legal order is the story's own, and a mismatch is refused rather than
+    scattered."""
+
+    def test_every_beat_plays_once_in_story_order(self):
+        beats = [f"B{i:02d}" for i in range(6)]
+        assert one_each(beats, 6) == beats
+
+    def test_more_beats_than_cuts_is_refused(self):
+        with pytest.raises(ValueError, match="6 beats for 4 cuts"):
+            one_each([f"B{i:02d}" for i in range(6)], 4)
+
+    def test_fewer_beats_than_cuts_is_refused(self):
+        """Spreading 4 takes over 6 cuts is exactly the reuse machine."""
+        with pytest.raises(ValueError, match="4 beats for 6 cuts"):
+            one_each([f"B{i:02d}" for i in range(4)], 6)
 
 
 

@@ -195,13 +195,21 @@ class QCReport(BaseModel):
     integrated_lufs: float
     true_peak: float
     unbound_shots: int
+    reused_shots: int = 0
+    """Shots playing a take another shot already played.  Run 10 shipped 51
+    shots off 25 takes and every gate passed it; the owner watched it and
+    said don't reuse, ever."""
+    stale_shots: int = 0
+    """Shots cut from a clip that is not this plan's own render -- 24% of
+    run 10's delivered picture."""
     line_over_bed_lu: list[float] = Field(default_factory=list)
     grid: Literal["metre", "onsets"] = "metre"
 
     @property
     def floor_pass(self) -> bool:
         return (-15.5 <= self.integrated_lufs <= -12.5 and self.true_peak <= -1.0
-                and self.unbound_shots == 0)
+                and self.unbound_shots == 0 and self.reused_shots == 0
+                and self.stale_shots == 0)
 
     @property
     def flags(self) -> list[str]:
@@ -211,6 +219,7 @@ class QCReport(BaseModel):
             out.append("on_cap_fraction")
         if not self.title_on_downbeat:
             out.append("title_on_downbeat")
+        out += [k for k in ("reused_shots", "stale_shots") if getattr(self, k)]
         if any(lu < QC_TARGETS["line_over_bed_lu"] for lu in self.line_over_bed_lu):
             out.append("line_over_bed_lu")
         return out

@@ -18,6 +18,7 @@ from scripts.trailer import step_07_clips as step
 from scripts.trailer.build_clips import FRAMING
 from studio import db
 from studio import describe
+from studio.clip_cache import fingerprint, is_current, record, stored_fingerprint
 from studio.describe import DISTINCT_AT, TIMEOUT, TraitCard
 from studio.frames import HEAD_LEAK_SECONDS
 from studio.learnings import load
@@ -84,6 +85,9 @@ def rendered(monkeypatch):
         state["clock"][0] += step.RENDER_SECONDS
         dest.parent.mkdir(parents=True, exist_ok=True)
         dest.write_bytes(b"mp4" + str(values["seed"]).encode())
+        # The real renderer records the recipe beside the take; the fake must
+        # too, or every clip this run makes reads as stale to step 08.
+        record(dest, {"prompt": values["prompt"], "seed": values["seed"]})
         return dest
     state = {"calls": calls, "cards": [], "clock": [0.0]}
     monkeypatch.setattr(step, "render_take", render_take)
@@ -116,6 +120,7 @@ class TestRun:
         assert by_id["B00"]["reference"] == f"char-{HOLMES}" and by_id["B00"]["capped"] is None
         assert by_id["B01"]["similarity"] is None and by_id["B01"]["reference"] is None
         assert by_id["B00"]["rel_path"] == "trailer/main/clips/B00.mp4"
+        assert by_id["B00"]["fingerprint"] == stored_fingerprint(ctx.book_dir / by_id["B00"]["rel_path"])
         assert (ctx.book_dir / by_id["B00"]["rel_path"]).exists()
         assert len(rendered["calls"]) == 2 and load(ctx.learnings_path) == []
 
@@ -198,7 +203,7 @@ class TestRun:
 
 class TestBudget:
     def test_no_time_for_a_retry_ships_the_first_take_short(self, tmp_path, rendered):
-        ctx = make_ctx(tmp_path, rendered["clock"], ceiling=1500)
+        ctx = make_ctx(tmp_path, rendered["clock"], ceiling=2200)  # 07's share: 1283 s
         rendered["cards"] = [FAR]
         step.run(ctx.codex_id, ctx)
         doc = clips_doc(ctx)
@@ -212,7 +217,7 @@ class TestBudget:
         with 391 s left.  A retry is affordable only while every beat after
         this one can still be rendered once; otherwise the beat ships its
         best take short and the next beat gets its render."""
-        ctx = make_ctx(tmp_path, rendered["clock"], ceiling=2572)  # 07's share: 1500 s
+        ctx = make_ctx(tmp_path, rendered["clock"], ceiling=3772)  # 07's share: 2200 s
         rendered["cards"] = [FAR]
         step.run(ctx.codex_id, ctx)
         doc = clips_doc(ctx)
@@ -248,3 +253,46 @@ class TestMeasure:
         assert found["differs"] == ["hair_colour", "headgear", "build"] and found["known"] == 7
         assert found["similarity"] == pytest.approx(4 / 7, abs=0.001)
         assert step.measure(tmp_path / "take.mp4", None, tmp_path / "work", seed=1)["similarity"] is None
+
+
+class TestPromote:
+    """A clip without its recipe cannot be told from last plan's render, and
+    run 10 cut 24% of its picture from exactly that."""
+
+    RECIPE = {"prompt": "a man in fog", "seed": 51000}
+
+    def take(self, tmp_path, recipe=None):
+        take = tmp_path / "takes" / "B00-51000.mp4"
+        take.parent.mkdir(parents=True, exist_ok=True)
+        take.write_bytes(b"mp4")
+        if recipe is not None:
+            record(take, recipe)
+        return take
+
+    def test_the_recipe_travels_with_the_take(self, tmp_path):
+        dest = step.promote(self.take(tmp_path, self.RECIPE), tmp_path / "clips/B00.mp4")
+        assert dest.read_bytes() == b"mp4" and is_current(dest, self.RECIPE)
+
+    def test_a_take_with_no_recipe_still_promotes_its_video(self, tmp_path):
+        dest = step.promote(self.take(tmp_path), tmp_path / "clips/B00.mp4")
+        assert dest.exists() and stored_fingerprint(dest) is None
+
+
+class TestClipRecord:
+    def test_the_record_carries_the_promoted_clip_s_fingerprint(self, tmp_path):
+        book = tmp_path
+        dest = book / "trailer/main/clips/B00.mp4"
+        dest.parent.mkdir(parents=True)
+        dest.write_bytes(b"mp4")
+        record(dest, {"prompt": "p", "seed": 1})
+        found = step.clip_record("B00", {"seconds": 7.0, "seed": 1, "similarity": None,
+                                         "differs": [], "known": 0}, book, dest, None, None, [])
+        assert found["fingerprint"] == fingerprint({"prompt": "p", "seed": 1})
+
+    def test_a_clip_with_no_sidecar_records_no_fingerprint(self, tmp_path):
+        dest = tmp_path / "trailer/main/clips/B00.mp4"
+        dest.parent.mkdir(parents=True)
+        dest.write_bytes(b"mp4")
+        found = step.clip_record("B00", {"seconds": 7.0, "seed": 1, "similarity": None,
+                                         "differs": [], "known": 0}, tmp_path, dest, None, None, [])
+        assert found["fingerprint"] is None

@@ -21,6 +21,11 @@ def load_fixture() -> dict:
     return json.loads(FIXTURE.read_text(encoding="utf-8"))
 
 
+def fixture_beats(out_dir: Path) -> list[str]:
+    """The fixture plan's own beats, as if every clip were freshly rendered."""
+    return [shot["beat_id"] for shot in load_fixture()["plan"]["shots"]]
+
+
 def metre_at(bpm: float, seconds: float, title_hit: float | None = None) -> Metre:
     beat = 60.0 / bpm
     beats = [round(i * beat, 4) for i in range(int(seconds / beat))]
@@ -99,7 +104,7 @@ class TestLineOverBed:
         report = qc.qc(out, detect=lambda video, threshold=0.1: fixture["scene_cuts"],
                        measure=lambda video, **_: metre_at(120, 60.0),
                        loud=lambda video: (-14.0, -1.5),
-                       lines=lambda out_dir: [2.0])
+                       lines=lambda out_dir: [2.0], fresh=fixture_beats)
         assert report.line_over_bed_lu == [2.0]
         assert "line_over_bed_lu" in report.flags
         written = json.loads((out / "qc.json").read_text(encoding="utf-8"))
@@ -117,7 +122,7 @@ class TestReport:
         report = qc.qc(out, detect=lambda video, threshold=0.1: seen,
                        track=lambda samples, rate: ([], []),
                        measure=lambda video, **_: metre_at(120, 60.0, title_hit=48.0),
-                       loud=lambda video: (-14.0, -1.5))
+                       loud=lambda video: (-14.0, -1.5), fresh=fixture_beats)
         assert isinstance(report, QCReport) and report.cuts == len(seen)
         written = json.loads((out / "qc.json").read_text(encoding="utf-8"))
         assert written["missing_cuts"] == fixture["expected_missing"]
@@ -131,7 +136,7 @@ class TestReport:
         (out / "TRAILER-test.mp4").write_bytes(b"")
         report = qc.qc(out, detect=lambda video, threshold=0.1: fixture["scene_cuts"],
                        measure=lambda video, **_: metre_at(120, 60.0),
-                       loud=lambda video: (-9.0, 0.5))
+                       loud=lambda video: (-9.0, 0.5), fresh=fixture_beats)
         assert not report.floor_pass
 
     def test_cuts_on_beat_reads_the_delivered_picture(self):
@@ -153,3 +158,46 @@ class TestReport:
         assert report.cuts == 5
         assert report.cuts_on_beat == pytest.approx(2 / 3)
         assert report.cuts_on_downbeat == pytest.approx(2 / 3)
+
+
+class TestNoTakePlaysTwice:
+    """The owner's rule, measured on the master: a rendered take is never
+    seen twice, and no shot is cut from a clip of an earlier plan."""
+
+    def plan(self, beat_ids):
+        return {"shots": [{"beat_id": b, "start": 2.0 * i, "seconds": 2.0,
+                           "cast": [], "char_refs": {}}
+                          for i, b in enumerate(beat_ids)]}
+
+    def report_of(self, beat_ids, fresh=None):
+        return qc.report(self.plan(beat_ids), metre_at(120, 60.0), seen=[2.0],
+                         loud=(-14.0, -1.5), fresh=fresh)
+
+    def test_a_take_played_twice_is_counted(self):
+        assert self.report_of(["B0", "B1", "B0"]).reused_shots == 1
+        assert self.report_of(["B0", "B1", "B2"]).reused_shots == 0
+
+    def test_a_shot_cut_from_a_clip_no_longer_fresh_is_counted(self):
+        found = self.report_of(["B0", "B1", "B2"], fresh=["B0", "B2"])
+        assert found.stale_shots == 1
+
+    def test_without_a_freshness_reading_nothing_is_called_stale(self):
+        assert self.report_of(["B0", "B1"]).stale_shots == 0
+
+    def test_a_trailer_with_no_clips_json_has_no_fresh_clip_at_all(self, tmp_path):
+        assert qc.fresh_shots(tmp_path) == []
+
+    def test_fresh_shots_reads_the_run_s_own_record(self, tmp_path):
+        from studio.clip_cache import fingerprint, record
+        book = tmp_path / "book"
+        out = book / "trailer" / "main"
+        out.mkdir(parents=True)
+        video = out / "clips" / "B0.mp4"
+        video.parent.mkdir()
+        video.write_bytes(b"mp4")
+        recipe = {"prompt": "p", "seed": 1}
+        record(video, recipe)
+        (out / "clips.json").write_text(json.dumps({"clips": [
+            {"beat_id": "B0", "rel_path": video.relative_to(book).as_posix(),
+             "fingerprint": fingerprint(recipe)}]}), encoding="utf-8")
+        assert qc.fresh_shots(out) == ["B0"]

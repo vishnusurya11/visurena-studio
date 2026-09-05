@@ -137,6 +137,23 @@ class TestQC:
                           integrated_lufs=-18.0, true_peak=-1.1, unbound_shots=0)
         assert not report.floor_pass
 
+    def test_a_repeated_take_fails_the_floor(self):
+        """The owner's rule, measured on the delivered master: run 10 played
+        25 takes over 51 shots and no gate said a word."""
+        report = QCReport(cuts=40, cuts_on_beat=0.9, cuts_on_downbeat=0.5, cuts_on_L0=1.0,
+                          on_cap_fraction=0.0, title_on_downbeat=True,
+                          integrated_lufs=-14.2, true_peak=-1.1, unbound_shots=0,
+                          reused_shots=26)
+        assert not report.floor_pass and "reused_shots" in report.flags
+
+    def test_a_shot_cut_from_a_stale_clip_fails_the_floor(self):
+        """24% of run 10's picture came from clips of earlier plans."""
+        report = QCReport(cuts=40, cuts_on_beat=0.9, cuts_on_downbeat=0.5, cuts_on_L0=1.0,
+                          on_cap_fraction=0.0, title_on_downbeat=True,
+                          integrated_lufs=-14.2, true_peak=-1.1, unbound_shots=0,
+                          stale_shots=12)
+        assert not report.floor_pass and "stale_shots" in report.flags
+
 
 class TestWindows:
     def test_a_slot_is_found_unless_made(self):

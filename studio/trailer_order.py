@@ -222,3 +222,18 @@ def best_scatter(setups: list[str], count: int, hero: int = 3,
             f"{count} shots over {len(setups)} setups cannot avoid showing the "
             f"same image every other cut; render more setups or cut shorter")
     return best
+
+
+def one_each(beat_ids: list[str], count: int) -> list[str]:
+    """The shot order when a take may play once: the story's own, or nothing.
+
+    Run 10 shipped 51 shots from 25 takes -- every take twice, B00 three
+    times -- because `best_scatter` exists to spread FEWER beats over MORE
+    cuts.  Under the owner's rule there is no spreading to do: the walk is
+    fitted to the takes upstream, so a mismatch here is a planning bug and
+    the plan is refused rather than filled with a second look at a picture.
+    """
+    if count != len(beat_ids):
+        raise ValueError(f"{len(beat_ids)} beats for {count} cuts; a take plays "
+                         f"once, so the walk must be fitted to the takes first")
+    return list(beat_ids)

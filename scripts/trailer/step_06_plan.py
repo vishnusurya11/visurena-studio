@@ -1,12 +1,19 @@
-"""Step 06 -- plan: cut the beat walk over the MEASURED metre, then fill it.
+"""Step 06 -- plan: fit the beat walk to the TAKES, then fill every cut.
 
-The cue's metre (step 03) owns every cut: whole beats, every L0 event, one
-hold into the title.  Setups fill the cuts from the screenplay's own framings
-and the gate is the one the old plan could not fail: a setup whose scene holds
-a face with no reference sheet is refused, because the render would invent
-that face.  The ladder substitutes another setup for the same cut, then makes
-the shot an empty plate, and drops the beat as a last resort.  Lines, where
-steps 04 and 05 have run, are windowed into the cue's measured slots.
+The render is the only fixed thing.  Step 07 costs ~16 min a take, so the
+budget says how many takes exist, the walk gives up seconds until its cut
+count fits them (`fit_points`), and the story authors exactly one setup per
+cut.  One take, one shot: run 10 spread 25 takes over 51 shots and the owner
+threw it out.
+
+Inside that, the cue's metre (step 03) still owns every cut: whole beats,
+every L0 event, one hold into the title.  The binding gate is the one the
+old plan could not fail -- a setup whose frame holds a face with no reference
+sheet is refused, because the render would invent that face.  The ladder
+substitutes another setup for the same cut, then shoots the location alone,
+and drops the beat as a last resort.  Lines, where steps 04 and 05 have run,
+are windowed into the cue's measured slots, and a window past the end of the
+picture is dropped with it.
 """
 from __future__ import annotations
 
@@ -28,10 +35,15 @@ RETRY_RESERVE = 1
 """Takes left unplanned so one identity reroll anywhere costs no beat: the
 budget rung drops the LAST setups, and the last setups are the climax."""
 STRETCH = (1.0, 1.2, 1.5)
-"""Recut attempts lengthen the shots: fewer cuts need fewer clips, so fewer
-neighbouring takes stand in for missing ones.  First setting."""
-PLATE = "Empty plate, nobody in frame. "
+"""Recut attempts lengthen the shots.  With one take per shot the takes are
+fixed, so a longer stretch buys a longer TRAILER out of the same renders."""
+PLATE = "The room alone, the furniture and light holding the frame. "
+"""What IS in the shot.  The old wording was a negation ("nobody in frame"),
+and a negation is the one thing an image model cannot draw."""
 TROUGH_GAP = 1.0
+EPS = 0.05
+"""A frame either side: how near the picture's end must come to the cue's
+title hit before the card is allowed to be timed to it."""
 
 
 def stretch_for(attempt: int) -> float:
@@ -54,10 +66,49 @@ def events_of(metre: Metre) -> list[float]:
     return sorted(set(metre.hits) | set(stopdown_starts(metre.stopdowns)) | set(title))
 
 
-def setup_count(cuts: int, ctx) -> int:
-    """One setup per cut, capped by the takes step 07's share still affords."""
-    affordable = int(ctx.budget.remaining("07") // RENDER_SECONDS) - RETRY_RESERVE
-    return max(1, min(cuts, affordable))
+def affordable_takes(ctx) -> int:
+    """The takes step 07's remaining share can actually render.
+
+    The render is the only fixed thing in the trailer: every other number --
+    how many setups the story authors, how long the walk is, how long the
+    trailer runs -- is derived from this one.  Run 10 inverted that, planned
+    25 setups against a cycle it had guessed at 11 min, and the budget rung
+    dropped the last six beats, which are the climax.
+    """
+    return max(1, int(ctx.budget.remaining("07") // RENDER_SECONDS) - RETRY_RESERVE)
+
+
+def fit_points(metre: Metre, events: list[float], takes: int,
+               stretch: float = LITERARY_STRETCH) -> list[float]:
+    """The longest walk whose cut count fits `takes`, half a bar at a time.
+
+    A cut with no take of its own has to borrow one, and a borrowed take is
+    a picture the viewer has already seen.  So the walk gives up seconds,
+    never distinctness: the trailer is as long as the renders allow.
+    """
+    duration = metre.title_hit or metre.seconds
+    while duration >= metre.bar:
+        points = plan_cuts(metre, events, duration, stretch)
+        if len(points) - 1 <= takes:
+            return points
+        duration -= metre.bar / 2
+    raise ValueError(f"no walk fits {takes} takes")
+
+
+def agree(metre: Metre, events: list[float], beats: list[TrailerBeat],
+          stretch: float) -> tuple[list[TrailerBeat], list[float]]:
+    """Beats and cuts made to match: the walk fitted, then the beats trimmed.
+
+    Both directions are needed.  The walk shortens to the beats it has, and
+    a walk that could not use them all hands the spares back.
+    """
+    points = fit_points(metre, events, len(beats), stretch)
+    return beats[:len(points) - 1], points
+
+
+def inside(windows: list[dict], end: float) -> list[dict]:
+    """The line windows the picture actually reaches; the rest are unheard."""
+    return [w for w in windows if w["at"] < end]
 
 
 def setups_for(scenes: list[dict], refs, count: int, iconicity: dict,
@@ -154,11 +205,18 @@ def inputs(ctx) -> dict:
             "iconicity": load_iconicity(book)}
 
 
-def music_of(metre: Metre) -> MusicBed:
-    before = [s for s in metre.stopdowns if metre.title_hit and s < metre.title_hit]
+def music_of(metre: Metre, ends: float) -> MusicBed:
+    """The bed, and the title moment ONLY when the picture reaches it.
+
+    The card is held until the cue's hit.  A 25 s cut against a hit at 88 s
+    therefore holds a static title for a minute -- so a picture that stops
+    short takes its card on its own end instead.
+    """
+    hit = metre.title_hit if metre.title_hit and ends >= metre.title_hit - EPS else None
+    before = [s for s in metre.stopdowns if hit and s < hit]
     return MusicBed(rel_path=metre.rel_path, seconds=metre.seconds, sections=9,
                     cuts=[b for b in metre.beats if b <= metre.seconds],
-                    title_stopdown=before[-1] if before else None, title_impact=metre.title_hit)
+                    title_stopdown=before[-1] if before else None, title_impact=hit)
 
 
 def plan_for(found: dict, beats: list[TrailerBeat], points: list[float],
@@ -169,7 +227,7 @@ def plan_for(found: dict, beats: list[TrailerBeat], points: list[float],
         trailer_id=trailer_id, book_id=found["book_id"], title=screenplay["title"],
         refs=[RefSheet(ref_id=r["ref_id"], kind=r["kind"], name=r["name"],
                        prompt=r["prompt"], rel_path=r["rel_path"]) for r in found["refs_doc"]["refs"]],
-        beats=beats, shots=shots, music=music_of(found["metre"]))
+        beats=beats, shots=shots, music=music_of(found["metre"], points[-1]))
 
 
 def verdict(state: dict) -> tuple[bool, str, str]:
@@ -207,26 +265,52 @@ def rung_beats(rung: Rung, state: dict, found: dict) -> list[TrailerBeat]:
 
 
 def replan(ctx, attempt: int) -> None:
-    """The whole plan at the stretch for `attempt`; step 08's recut calls this."""
+    """The whole plan at the stretch for `attempt`; step 08's recut calls this.
+
+    The order is the rule: takes first, then a walk that fits them, then one
+    setup per cut.  Run 10 went the other way -- 44 cuts, then whatever the
+    budget could render -- and 25 takes carried 51 shots.
+    """
     found = inputs(ctx) | {"book_id": ctx.book_dir.name}
     story, metre, scenes = found["story"], found["metre"], found["screenplay"]["scenes"]
-    stretch = stretch_for(attempt)
-    points = plan_cuts(metre, events_of(metre), metre.title_hit or metre.seconds, stretch)
+    stretch, events = stretch_for(attempt), events_of(metre)
+    wanted = len(fit_points(metre, events, affordable_takes(ctx), stretch)) - 1
     line_windows, legacy = lines_for(ctx, metre, story, scenes)
-    state = {"beats": setups_for(scenes, found["refs"], setup_count(len(points) - 1, ctx),
-                                 found["iconicity"],
-                                 story.lead, story.figure), "bad": [], "lead": story.lead}
+    beats, points = agree(metre, events, setups_for(scenes, found["refs"], wanted,
+                                                    found["iconicity"], story.lead,
+                                                    story.figure), stretch)
+    state = {"beats": beats, "points": points, "bad": [], "lead": story.lead}
 
     def attempt_(rung, i):
         state["beats"] = rung_beats(rung, state, found)
         state["bad"] = unbound(state["beats"], found["refs"])
-        state["plan"] = plan_for(found, state["beats"], points, legacy, ctx.trailer_id)
+        state["plan"] = plan_for(found, state["beats"], state["points"], legacy, ctx.trailer_id)
         return state
 
     if climb(LADDER, STEP_ID, attempt_, verdict, ctx.budget, ctx.learn, gate_name="binding").terminal:
-        state["beats"] = [b for b in state["beats"] if b.beat_id not in state["bad"]]
-        state["plan"] = plan_for(found, state["beats"], points, legacy, ctx.trailer_id)
-    write_plan(ctx, state["plan"], line_windows, stretch)
+        kept = [b for b in state["beats"] if b.beat_id not in state["bad"]]
+        state["beats"], state["points"] = agree(metre, events, kept, stretch)
+        state["plan"] = plan_for(found, state["beats"], state["points"], legacy, ctx.trailer_id)
+    write_plan(ctx, state["plan"], inside(line_windows, state["points"][-1]), stretch)
+
+
+def refit(ctx, attempt: int, rendered: list[str]) -> None:
+    """Re-cut the plan around the takes that EXIST: fewer beats, shorter walk.
+
+    Step 08's old answer to a missing clip was a neighbouring take, which is
+    reuse wearing a different name -- 24% of run 10's picture.  A trailer
+    that lost a take is a shorter trailer, and this is where it gets shorter.
+    """
+    found = inputs(ctx) | {"book_id": ctx.book_dir.name}
+    plan = json.loads((ctx.out_dir / "plan.json").read_text(encoding="utf-8"))
+    metre, stretch = found["metre"], stretch_for(attempt)
+    have = set(rendered)
+    beats, points = agree(metre, events_of(metre),
+                          [TrailerBeat.model_validate(b) for b in plan["beats"]
+                           if b["beat_id"] in have], stretch)
+    line_windows, legacy = lines_for(ctx, metre, found["story"], found["screenplay"]["scenes"])
+    write_plan(ctx, plan_for(found, beats, points, legacy, ctx.trailer_id),
+               inside(line_windows, points[-1]), stretch)
 
 
 def run(codex_id: str, ctx) -> None:
