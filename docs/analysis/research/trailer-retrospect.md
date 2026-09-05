@@ -131,6 +131,19 @@ title_on_downbeat`. Sent to Telegram by hand as a 39 MB copy (defect 4).
   invention; a woman's age reads "in her"; women get bonnets, not top hats.
   After the fix the five cards share nothing in Tier One and only
   clean-shaven between Hope and Lucy.
+- One sheet per beat. `build_plan.beat_of` casts ONE principal, `h3_prompt`
+  declares <Subject 1> = that person and <Subject 2> = the place, and step 07
+  measures one face. The delivered run-6b trailer shows the cost: all 14
+  takes referenced the Holmes sheet, and the Watson who appears in B05/B09/
+  B11/B13 is prompt-only -- a different clean-shaven man each time. H3's
+  workflow takes two reference slots, so a two-person beat could bind
+  Holmes + Watson and carry the place by prompt (locations were measured
+  as `attribute_transfer` anyway). Needs the GPU: render B05 with
+  (a) Holmes + place and (b) Holmes + Watson over three seeds and read BOTH
+  faces -- `describe_frames` returns one card, so the read must name which
+  person it describes ("the man in the bowler" / "the man with the
+  moustache"). Do not build the two-subject path before that A/B says H3
+  keeps two faces apart rather than blending them.
 - CLOSED 2026-09-05: `identity.py` and `identity_gate.py` retired with their
   tests and the `qc` group's OpenCV/onnxruntime pins; only `frame_times` /
   `frame_at` were still used (step 07) and now live in `studio/frames.py`.
