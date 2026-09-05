@@ -17,6 +17,7 @@ from studio.learnings import load
 from studio.trailer_edit import LITERARY_STRETCH, plan_cuts
 from studio.trailer_run import RunContext
 from studio.trailer_stage_spec import LineSlate, Metre, SlateLine, Slot, StorySpec, VoiceLine
+from studio.trailer_story import authored_setups
 
 HOLMES, WATSON, HOPE, STRANGER = "holmes", "watson", "hope", "stangerson"
 PROSE = ["A hand on the door, candle light on the wall.",
@@ -24,10 +25,17 @@ PROSE = ["A hand on the door, candle light on the wall.",
          "Boots on the wet street under a gas lamp, a cab waiting."]
 
 
+def framed(cast, i):
+    return " and ".join(dict.fromkeys(c.title() for c in (cast[0], cast[i % len(cast)])))
+
+
 def scene(number, cast, location, term="locked-off", speaking=None):
+    """Three authored shots: singles of the first-billed, and a two-shot with
+    cast[i % len(cast)] where that is someone else."""
     elements = [{"kind": "action", "text": t} for t in PROSE]
-    shots = [{"index": i, "setup": f"Locked-off on the {w}.", "term": term,
-              "covers_start": i, "covers_end": i} for i, w in enumerate(("door", "floor", "street"))]
+    shots = [{"index": i, "setup": f"Locked-off on the {w}, {framed(cast, i)} in frame.",
+              "term": term, "covers_start": i, "covers_end": i}
+             for i, w in enumerate(("door", "floor", "street"))]
     return {"number": number, "cast": cast, "speaking": speaking or cast[:1],
             "slug": {"location_id": location, "location_name": location.title()},
             "duration_s": 90.0, "elements": elements, "shots": shots}
@@ -107,23 +115,43 @@ class TestPieces:
         assert step.stretch_for(0) == LITERARY_STRETCH < step.stretch_for(1) < step.stretch_for(2)
         assert step.stretch_for(9) == step.stretch_for(2)
 
-    def test_unbound_is_a_beat_whose_scene_has_an_unsheeted_face(self):
+    def test_unbound_is_a_beat_whose_shot_names_an_unsheeted_face(self):
         sheets = {r["ref_id"] for r in refs()["refs"]}
         beats = step.setups_for(screenplay()["scenes"], sheets, 6, {}, HOLMES, HOPE)
-        bad = step.unbound(beats, screenplay()["scenes"], sheets)
+        bad = step.unbound(beats, sheets)
         assert bad and all(b.scene_number == 4 for b in beats if b.beat_id in bad)
+
+    def test_a_shot_binds_on_who_it_names_not_on_who_is_in_the_scene(self):
+        """Run 9: every Utah shot was refused because the SCENE held a
+        Mormon nobody had sheeted.  A close-up of Hope is a shot of Hope."""
+        sheets = {r["ref_id"] for r in refs()["refs"]}
+        setups = list(authored_setups([scene(7, [HOPE, STRANGER], "plain")]))
+        beats = [step.beat_of(e, i, 0.5, sheets, HOLMES, HOPE) for i, e in enumerate(setups)]
+        by_subject = {tuple(b.subjects): b for b in beats}
+        assert set(by_subject) == {(HOPE,), (HOPE, STRANGER)}
+        assert by_subject[(HOPE,)].cast == [HOPE]
+        assert step.unbound(beats, sheets) == [by_subject[(HOPE, STRANGER)].beat_id]
 
     def test_rung_beats_substitutes_then_plates(self):
         sheets = {r["ref_id"] for r in refs()["refs"]}
         found = {"screenplay": screenplay(), "refs": sheets, "iconicity": {},
                  "story": StorySpec(**story())}
         beats = step.setups_for(screenplay()["scenes"], sheets, 6, {}, HOLMES, HOPE)
-        state = {"beats": beats, "bad": step.unbound(beats, screenplay()["scenes"], sheets)}
+        state = {"beats": beats, "bad": step.unbound(beats, sheets)}
         swapped = step.rung_beats(step.LADDER.rungs[1], state, found)
-        assert not step.unbound(swapped, screenplay()["scenes"], sheets)
+        assert not step.unbound(swapped, sheets)
         plates = step.rung_beats(step.LADDER.rungs[2], state, found)
-        assert all(b.image_prompt.startswith(step.PLATE) for b in plates if b.beat_id in state["bad"])
+        assert all(b.image_prompt.startswith(step.PLATE) and not b.subjects
+                   for b in plates if b.beat_id in state["bad"])
         assert step.rung_beats(step.LADDER.rungs[0], state, found) == beats
+
+    def test_alternates_are_shots_of_sheeted_faces_from_any_scene(self):
+        """A spare may come from a scene that holds a stranger, so long as
+        the spare's own frame does not."""
+        sheets = {r["ref_id"] for r in refs()["refs"]}
+        scenes = [scene(7, [HOPE, STRANGER], "plain")]
+        spare = step.alternates(scenes, sheets, set(), {}, 3)
+        assert spare and all(c["subjects"] == [HOPE] for c in spare)
 
     def test_lead_share_counts_shots_not_beats(self):
         assert step.lead_share([[HOLMES], [HOPE], [], [HOLMES, WATSON]], HOLMES) == 0.5

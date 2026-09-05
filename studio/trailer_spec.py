@@ -62,6 +62,8 @@ class TrailerBeat(BaseModel):
     arc: Register
     location_id: str = Field(min_length=1)
     cast: list[str] = Field(default_factory=list)
+    subjects: list[str] = Field(default_factory=list)
+    """Who the shot's own prose puts in frame; `cast` is who it is bound to."""
     image_prompt: str = Field(min_length=1)
     motion: str = Field(min_length=1)
     line: str | None = None

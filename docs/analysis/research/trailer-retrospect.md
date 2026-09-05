@@ -295,3 +295,78 @@ carries `neutral` next to `asserted` so `movable` excludes both.
 first-try is 34 min, one reroll is 5 min. Ferrier and Gregson went
 unbound on budget in run 8 after each one reroll. Not changed yet —
 the fixes above remove the rerolls the ladder was causing itself.
+
+## Run 9 — A Study in Scarlet, 2026-09-05, delivered and rejected
+
+**Outcome:** a master was delivered (132 s, 78 cuts, 87% on beat, 31% on
+downbeat, −14.3 LUFS, −1.19 dBTP, 0 unbound shots, floor pass, one flag)
+and the owner's read of it was the whole review: *"all I hear is music too
+loud, not at all matching tone, it is just some random music, no
+dialogues."* Every number above was true and none of them measured what
+was heard. Four causes, each fixed test-first, none needing a render to
+reproduce.
+
+**What the run did**
+
+| step | rungs | result |
+|---|---|---|
+| 02 refs | reroll/distinguish chains; five `accepted_as_written` pairs | 7 sheets |
+| 03 music | `first_seeds` (fitness 1.0, metre, 0 slots) → `four_more_seeds` (4.4, metre, 4 slots) → `reauthor_caption` ×2 → terminal `onset_grid` | seed 2003: 177.8 BPM in three against 84 asked, 132.1 s, four troughs of 1.25–2.4 s |
+| 04 lines | `relabel_next_10` ×2 ("no hook fits the first slot") → terminal `music_only` | no line, fourth run running |
+| 06 plan | 21 unbound → 6 unbound → plates | 25 beats: 19 Holmes, 6 empty plates (every Utah beat); scenes 4, 8, 21 carry 18 of 25 |
+| 07 clips | 7× `drop_beat` on budget | 18 takes |
+| 08–10 | — | master, QC, Telegram |
+
+**Cause 1 — no dialogue.** `fits` refused every hook at the trough's edge:
+the longest trough held five beats at 177.8 BPM, 1.7 s under the fit rule,
+and the shortest hook ran 2.5 s. The refusal quoted to the labeller was
+"no hook fits the first slot", which names nothing a label can change, so
+the labeller relabelled the same lines and the ladder ended `music_only`.
+Fixed: a line lives in a window, FOUND (a trough) or MADE (a phrase of the
+grid the mix ducks under it); roles aim at an even share of the span and
+take the nearest window that holds them; a refusal says "the shortest hook
+takes 3.3 s, the longest window holds 1.7 s; label shorter lines as hook";
+the sheets the labeller applied are kept at `work/labels-N.json`. Run 9's
+own pool on run 9's own cue now places two lines
+(`test_the_run_9_slate_is_not_music_only`). Commit `6d8ecb7`.
+
+**Cause 2 — random music.** Step 03 asked for 84 BPM and shipped 177.8:
+nothing compared the measured tempo to the asked one. `best_of` ranked
+metre, slots, fitness — and 2003 was the only seed with slots. Fixed: the
+gate is a metric grid within one tempo mark (15%) of the asked BPM;
+`best_of` ranks in the gate's order; `FITNESS_FLOOR` and the slot criterion
+are gone; `reauthor` keeps register AND tempo; the terminal rung ships the
+best seed and warns OFF TONE. Replayed on the 16 real seeds: 3004 at 100.9
+BPM is picked over 2003, no seed is within 15% of 84, and the ladder
+reauthors. Commit `f62c673`.
+
+**Cause 3 — too loud.** The bed was normalised to −14 LUFS and no line was
+set against it; a take rode at the voice model's level, and a quiet one did
+not even key the duck. Fixed: `level_lines` sets each take 8 LU over the
+bed under its own window before the duck, bounded ±20 dB; the levelled
+takes are the sidechain's keys. Verified on real ffmpeg with takes 30 dB
+under and 18 dB over the bed. Commit `f0f4745`.
+
+**Cause 4 — one man in one room.** `unbound` refused a beat if ANY face in
+the scene's cast lacked a sheet, and `alternates` drew only from scenes
+where everyone was sheeted. Every Utah scene holds `group_mormons` or an
+unnamed hunter, so Hope's close-ups were refused, plated, and shipped as
+empty desert while his sheet went unused; the plan was 19 Holmes beats
+and 6 plates. Fixed: a setup carries `subjects`, the people its own prose
+names from the scene cast (`subjects_of`); `beat_of`, `unbound` and
+`alternates` bind on the frame. Same 18 setups offline: 15 refused under
+the old rule, 6 under the new, all six substituted with sheeted spares,
+Utah bound on Hope and Ferrier, lead share 61%.
+
+**What the QC did not measure.** `line_over_bed_lu` has a target (5 LU)
+and has never been filled: `report()` leaves it empty. The ducked bed and
+the levelled takes now sit beside the master, so it can be. Tempo against
+the asked BPM was not a QC field either; it is now the step 03 gate.
+
+**Open.** `line_over_bed_lu` in QC from `.bed-ducked.wav` and
+`line-N.level.wav`; an independent "is this Sherlock?" read on the sheets;
+`same_look` across gender; step 02's 40-minute share (Ferrier and Gregson
+went to `accepted_as_written`); a bare shared surname credits every sharer
+(`addressing Ferrier` binds Lucy too — harmless while both are sheeted);
+two-subject binding stays an A/B; no run has yet cut through all four
+fixes.

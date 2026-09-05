@@ -12,6 +12,7 @@ from __future__ import annotations
 
 import json
 import re
+from collections import Counter
 from pathlib import Path
 
 CONNECTIVES = (" until ", " whose ", " before ", " only to ", " and discovers ",
@@ -27,6 +28,48 @@ STOPWORDS = {"the", "a", "an", "of", "and", "or", "to", "in", "on", "at", "by",
 def people_in(scene: dict) -> set[str]:
     """Everyone present or speaking in a scene."""
     return set(scene.get("cast") or []) | set(scene.get("speaking") or [])
+
+
+GENERIC_TOKENS = {"group", "unnamed", "the", "and", "two", "three", "four", "mr",
+                  "mrs", "miss", "sir", "man", "men", "woman", "women"}
+"""Parts of a cast id that name no one: a count, a title, a class."""
+
+
+def name_tokens(person: str) -> list[str]:
+    """The words of a cast id that could name them in prose, in order."""
+    return [t for t in re.split(r"[\s_]+", person.lower())
+            if len(t) >= 3 and t not in GENERIC_TOKENS]
+
+
+def consume_full_names(prose: str, cast: list[str], tokens: dict) -> tuple[str, set[str]]:
+    """Whole names credited and struck: 'Lucy Ferrier' is one person, and
+    her surname there is not also her father."""
+    named: set[str] = set()
+    for person in cast:
+        full = " ".join(tokens[person])
+        if full and f" {full} " in f" {prose} ":
+            named.add(person)
+            prose = f" {prose} ".replace(f" {full} ", "  ").strip()
+    return prose, named
+
+
+def subjects_of(text: str, cast) -> list[str]:
+    """Who a shot's own prose puts in frame, from the scene's cast.
+
+    A surname two people share is credited to whichever of them the prose
+    does not name by their own token -- 'Lucy looking up at Ferrier' is her
+    and her father -- and to all of them when it names neither.  The scene
+    cast is the universe: a name from elsewhere in the book binds nothing.
+    """
+    cast = sorted(cast)
+    tokens = {p: name_tokens(p) for p in cast}
+    prose, named = consume_full_names(" ".join(re.findall(r"[A-Za-z]+", text.lower())),
+                                      cast, tokens)
+    words = set(prose.split())
+    owners = Counter(t for ts in tokens.values() for t in ts)
+    named |= {p for p in cast if {t for t in tokens[p] if owners[t] == 1} & words}
+    shared = {p for p in cast if {t for t in tokens[p] if owners[t] > 1} & words}
+    return sorted(named | shared)
 
 
 def lead_of(scenes: list[dict]) -> str | None:
@@ -483,12 +526,13 @@ def authored_setups(scenes: list[dict]):
     """
     for scene in scenes:
         for shot in scene.get("shots") or []:
-            yield {"scene": scene["number"], "index": shot["index"],
-                   "setup": shot["setup"], "term": shot.get("term", "locked-off"),
-                   "location_id": scene["slug"]["location_id"],
-                   "duration_s": scene.get("duration_s", 0.0),
-                   "cast": people_in(scene),
-                   "covers": covered_elements(scene, shot)}
+            setup = {"scene": scene["number"], "index": shot["index"],
+                     "setup": shot["setup"], "term": shot.get("term", "locked-off"),
+                     "location_id": scene["slug"]["location_id"],
+                     "duration_s": scene.get("duration_s", 0.0),
+                     "cast": people_in(scene),
+                     "covers": covered_elements(scene, shot)}
+            yield setup | {"subjects": subjects_of(action_text(setup), setup["cast"])}
 
 
 def covered_elements(scene: dict, shot: dict) -> list[dict]:

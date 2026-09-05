@@ -74,6 +74,16 @@ class TestMusicOwnsTime:
         assert MusicBed(rel_path="m.flac", seconds=10.0, sections=2).cuts == []
 
 
+class TestBeatSubjects:
+    def test_a_beat_carries_who_its_shot_names_apart_from_who_it_is_bound_to(self):
+        beat = TrailerBeat(beat_id="b", scene_number=13, arc="hit", location_id="utah",
+                           cast=["john_ferrier"], subjects=["john_ferrier", "lucy_ferrier"],
+                           image_prompt="p", motion="m")
+        assert beat.subjects == ["john_ferrier", "lucy_ferrier"]
+        assert TrailerBeat(beat_id="b", scene_number=1, arc="hit", location_id="l",
+                           image_prompt="p", motion="m").subjects == []
+
+
 class TestBeatTraceability:
     def test_a_line_without_a_speaker_is_rejected(self):
         with pytest.raises(ValidationError, match="a line needs a speaker"):

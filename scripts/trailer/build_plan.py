@@ -40,13 +40,19 @@ def load(path: Path) -> dict:
 
 def beat_of(element: dict, index: int, position: float, refs: dict,
             lead: str | None, figure: str | None) -> TrailerBeat:
-    """One beat from one action line, cast from WHO IS IN THAT SCENE.
+    """One beat from one action line, cast from WHO IS IN THAT FRAME.
+
+    The subjects are the people the setup's own prose names; the scene cast
+    is the fallback for an element that carries none.  Binding on the scene
+    cast refused every Utah setup of run 9 for a Mormon somewhere in the
+    scene's ninety seconds, and dropped the opposition from the trailer.
 
     The camera sentence is derived from this beat's own action line, so a beat
     that names nothing photographable gets a locked-off frame rather than the
     twenty-third copy of the same slow push-in.
     """
-    principal = principal_of(element["cast"], set(refs), lead, figure)
+    subjects = sorted(element.get("subjects", element["cast"]))
+    principal = principal_of(subjects, set(refs), lead, figure)
     # The setup's OWN camera term drives the move.  Passing a constant "medium"
     # here made camera_for return "tracks in" for all nine beats, so every take
     # was the same push-in -- and a push-in sampled at four offsets is one image
@@ -54,7 +60,7 @@ def beat_of(element: dict, index: int, position: float, refs: dict,
     return TrailerBeat(
         beat_id=f"B{index:02d}", scene_number=element["scene"], arc=arc_for(position),
         location_id=element["location_id"], cast=[principal] if principal else [],
-        image_prompt=action_text(element),
+        subjects=subjects, image_prompt=action_text(element),
         motion=move_for(element, position))
 
 

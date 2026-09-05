@@ -46,6 +46,13 @@ class TestAuthoredSetups:
         assert first["scene"] == 5
         assert first["location_id"] == "number_3_lauriston_gardens"
 
+    def test_a_candidate_names_the_people_in_its_own_frame(self):
+        """Not the scene's cast: the shot's.  The Lestrade framing is Lestrade,
+        the grass insert is Holmes, the wall is nobody."""
+        found = list(authored_setups([SCENE]))
+        assert [c["subjects"] for c in found] == [["g_lestrade"], [], ["sherlock_holmes"]]
+        assert all(c["cast"] == {"sherlock_holmes", "g_lestrade"} for c in found)
+
     def test_a_scene_with_no_authored_shots_yields_nothing(self):
         assert list(authored_setups([{**SCENE, "shots": []}])) == []
 

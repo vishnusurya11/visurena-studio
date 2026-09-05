@@ -19,7 +19,7 @@ from studio.trailer_dialogue import dialogue_candidates, pick_lines
 from studio.trailer_edit import LITERARY_STRETCH, plan_cuts
 from studio.trailer_spec import MusicBed, RefSheet, TrailerBeat, TrailerPlan
 from studio.trailer_stage_spec import LineSlate, Metre, SlateLine, StorySpec, VoiceLine
-from studio.trailer_story import load_iconicity, people_in, select_setups
+from studio.trailer_story import load_iconicity, select_setups
 
 STEP_ID = "06"
 NAME = "plan"
@@ -67,16 +67,15 @@ def setups_for(scenes: list[dict], refs, count: int, iconicity: dict,
             for i, e in enumerate(elements)]
 
 
-def unbound(beats: list[TrailerBeat], scenes: list[dict], refs) -> list[str]:
-    """Beats whose scene holds a face with no sheet, unless shot as a plate."""
-    by_number = {s["number"]: s for s in scenes}
-    bad: list[str] = []
-    for beat in beats:
-        people = people_in(by_number.get(beat.scene_number, {}))
-        unsheeted = [p for p in people if f"char-{p}" not in refs]
-        if unsheeted and not beat.image_prompt.startswith(PLATE):
-            bad.append(beat.beat_id)
-    return bad
+def unbound(beats: list[TrailerBeat], refs) -> list[str]:
+    """Beats whose frame holds a face with no sheet, unless shot as a plate.
+
+    The frame, not the scene: a close-up of Hope in a scene that also holds
+    an unsheeted Mormon is a shot of Hope, and Hope has a sheet.
+    """
+    return [b.beat_id for b in beats
+            if any(f"char-{p}" not in refs for p in b.subjects)
+            and not b.image_prompt.startswith(PLATE)]
 
 
 def lead_share(casts: list[list[str]], lead: str | None) -> float:
@@ -86,10 +85,10 @@ def lead_share(casts: list[list[str]], lead: str | None) -> float:
 
 
 def alternates(scenes: list[dict], refs, used: set, iconicity: dict, count: int) -> list[dict]:
-    """Fully-sheeted setups not yet in the plan, best first."""
-    sheeted = [s for s in scenes if all(f"char-{p}" in refs for p in people_in(s))]
-    pool = select_setups(sheeted, set(refs), len(used) + count, iconicity)
-    return [c for c in pool if (c["scene"], c["index"]) not in used][:count]
+    """Setups whose every subject is sheeted, not yet in the plan, best first."""
+    pool = select_setups(scenes, set(refs), 2 * (len(used) + count), iconicity)
+    return [c for c in pool if (c["scene"], c["index"]) not in used
+            and all(f"char-{p}" in refs for p in c["subjects"])][:count]
 
 
 def substitute(beats: list[TrailerBeat], bad: list[str], spare: list[dict], refs,
@@ -104,7 +103,7 @@ def substitute(beats: list[TrailerBeat], bad: list[str], spare: list[dict], refs
 
 def plate(beats: list[TrailerBeat], bad: list[str]) -> list[TrailerBeat]:
     """The same place with nobody in it: the location sheet binds, faces do not."""
-    return [b.model_copy(update={"cast": [], "image_prompt": PLATE + b.image_prompt})
+    return [b.model_copy(update={"cast": [], "subjects": [], "image_prompt": PLATE + b.image_prompt})
             if b.beat_id in bad else b for b in beats]
 
 
@@ -220,7 +219,7 @@ def replan(ctx, attempt: int) -> None:
 
     def attempt_(rung, i):
         state["beats"] = rung_beats(rung, state, found)
-        state["bad"] = unbound(state["beats"], scenes, found["refs"])
+        state["bad"] = unbound(state["beats"], found["refs"])
         state["plan"] = plan_for(found, state["beats"], points, legacy, ctx.trailer_id)
         return state
 

@@ -108,6 +108,17 @@ Evidence: `docs/analysis/research/trailer-music-structure.md`,
   long as it runs. `order_lines` now grants an overrun of one ducker release
   (`DUCK_OVERRUN`) to at most `MAX_DUCKS` lines (`test_run_6_troughs_hold_a_
   hook_that_ducks_and_a_short_threat`). Run 7 is the first with a voice line.
+  Run 9 shipped `music_only` a fourth time on a cue whose troughs held 1.7 s
+  against a 2.5 s hook: the trough rule waits for silence the generator does
+  not reliably write. A line now lives in a WINDOW, found (a trough) or
+  made (a phrase of the grid the mix ducks under it, `made_slots`,
+  `windows_of`); roles aim at an even share of the span (`targets`) and
+  take the nearest window that holds them (`test_the_run_9_slate_is_not_
+  music_only`). A refusal names what a LABEL can change - "no line is
+  labelled hook", or "the shortest hook takes 3.3 s, the longest window
+  holds 1.7 s; label shorter lines as hook" (`refusal`, `holds`) - because
+  the labeller is the one who reads it, and every sheet it applied is kept
+  at `work/labels-N.json`.
 - step 03 has ended on the terminal `onset_grid` rung every run. Measured
   over the 16 Scarlet seeds (2026-09-04): every metre-grid seed scores
   `title_term` 0.3 and `slot_term` 0.4 - the struck-pulse captions produce
@@ -132,6 +143,18 @@ Evidence: `docs/analysis/research/trailer-music-structure.md`,
   grid and the QC read 0% of cuts on a downbeat. `best_of` now ranks a
   metric grid first, a slot second, fitness last - the order the gate
   grades - so an onset grid ships only when no seed counts.
+  And that order shipped run 9 on seed 2003 at 177.8 BPM against the 84
+  asked: metric, four slots, fitness 4.4, and heard as "random music, too
+  loud, not the tone". Nothing had compared the measured tempo to the asked
+  one. The gate is now `grid == metre AND |bpm - asked| / asked <= TEMPO_BAND`
+  (0.15, one tempo mark); `best_of` ranks metre, then tempo-error band, then
+  fitness; `FITNESS_FLOOR` and the slot criterion are gone (a window is made
+  from the grid now, see step 04); `reauthor` holds the register AND the
+  tempo ("hold 84 BPM from first bar to last, not double it"); the terminal
+  rung is `best_seed` and `ship` warns OFF TONE when it is. On run 9's own 16
+  seeds the rule picks 3004 (100.9 BPM, band 1) and, no seed being within
+  15% of 84, reauthors (`test_best_of_ranks_on_what_the_gate_grades_before_
+  fitness`).
 - run 6 (2026-09-04) reached step 08 and died there, twice: the concat list
   held repo-relative paths that ffmpeg resolves against the list file's
   directory (`listing_lines`), and every take was `CLIP_SECONDS` while the
@@ -146,8 +169,27 @@ Evidence: `docs/analysis/research/trailer-music-structure.md`,
   master under the new `qc.py` reads 30/45 cuts on beat (onset grid, the
   audio measured rubato), 0/45 on downbeat, 5 target flags, floor pass.
   Metre report over the 9 real seeds: 5 of 9 on a metric grid, fitness
-  0.3–2.5 — no seed cleared `FITNESS_FLOOR = 6.0`, which is therefore the
-  first number the retrospect will move.
+  0.3–2.5 — no seed cleared the then `FITNESS_FLOOR = 6.0`; the floor was
+  the first number the retrospect moved, and after run 9 it is gone.
+- the mix (08) normalised the bed to −14 LUFS and set nothing against it: a
+  line rode at whatever level the voice model gave, and a quiet take was no
+  key to the sidechain either. `level_lines` now measures the bed under each
+  line's window (`bed_level`, silence left out) and the take's integrated
+  loudness, and sets the take `LINE_OVER_BED` (8 LU) above the window before
+  the duck (`line_gain`, bounded ±20 dB); the levelled takes are the duck's
+  keys and are kept beside the master as `line-N.level.wav`
+  (`test_a_quiet_take_still_rides_over_the_ducked_bed`, real ffmpeg).
+- step 06 bound a beat on the SCENE's cast: any face in the scene's ninety
+  seconds without a sheet refused the setup. Every Utah scene holds a Mormon
+  or a hunter nobody sheets, so run 9 plated all six Utah beats and shipped
+  nineteen Holmes-in-Baker-Street beats out of nineteen bound. A setup now
+  carries `subjects` - who its own prose names, from the scene cast
+  (`subjects_of`: whole names first, a shared surname credited to the sharer
+  the prose does not name by their own token, all sharers when it names
+  neither) - and `unbound`, `alternates` and `beat_of` bind on those. On
+  the same 18 setups the old rule refused 15, the new one 6, all six
+  substitutable; Utah binds on Hope and Ferrier (`test_a_shot_binds_on_who_
+  it_names_not_on_who_is_in_the_scene`).
 
 Baseline before this build: 12/35 cuts on beat, 4/35 on downbeat (chance
 12% / 4%); 0 spoken lines; 1 slot in the chosen cue.
@@ -171,6 +213,10 @@ Each item is one PR-sized change, test first. Order is by what unblocks what.
 | 11 | line layer in `assemble.py`: crossover + mid-band sidechain, one window per line, cards without duck | `scripts/trailer/assemble.py` | `test_line_sits_six_lu_over_bed_in_its_window` (synthetic bed + tone, `ebur128`) | [x] |
 | 12 | `order_lines(top, slots, figure)` hook → answer → threat → title → button; `lines = min(slate, slots)` cap 4; whole-beat placement; never `atempo` | `studio/trailer_dialogue.py` | `test_order_refuses_slate_without_hook`, `test_line_chosen_for_slot_from_measured_seconds`, `test_line_naming_the_figure_is_refused` | [x] |
 | 13 | vocal path: eligibility (thesis + register + ≥ 2 stem gaps), Vocal Details sheet, demucs stem, refrain-on-downbeat | `scripts/trailer/build_music.py` | `test_vocal_path_refused_without_thesis`, `test_refrain_first_syllable_on_downbeat` (local) | [ ] |
+| 14 | windows: `made_slots`, `windows_of`, `targets`; actionable `refusal`; label sheets kept | `studio/trailer_dialogue.py`, `scripts/trailer/step_04_lines.py` | `test_the_run_9_slate_is_not_music_only`, `test_a_hook_that_fits_no_window_names_the_room` | [x] |
+| 15 | tempo gate: `tempo_error`, `on_tone`, `best_of` on the gate's order, tempo-holding `reauthor`, terminal `best_seed` | `scripts/trailer/step_03_music.py` | `test_verdict_needs_a_metric_grid_on_the_asked_tempo`, `test_best_of_ranks_on_what_the_gate_grades_before_fitness` | [x] |
+| 16 | line levelling before the duck: `integrated`, `bed_level`, `line_gain`, `level_lines` | `studio/trailer_assemble.py` | `test_a_quiet_take_still_rides_over_the_ducked_bed` (real ffmpeg) | [x] |
+| 17 | subject binding: `subjects_of`, `TrailerBeat.subjects`, `unbound`/`alternates` on the frame not the scene | `studio/trailer_story.py`, `scripts/trailer/step_06_plan.py` | `test_a_shot_binds_on_who_it_names_not_on_who_is_in_the_scene`, `TestSubjectsOf` | [x] |
 
 Prerequisite for 12 and 13: `01-story` emits `narrator`, `register`, `thesis`
 (`test_story_emits_register_from_enum`, `test_thesis_has_no_proper_noun`).
