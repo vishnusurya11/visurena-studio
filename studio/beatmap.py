@@ -130,7 +130,19 @@ def stopdowns(times: np.ndarray, db: np.ndarray, hold: float = 0.4,
     return found
 
 
-def title_moment(times: np.ndarray, db: np.ndarray) -> tuple[float, float] | None:
+TITLE_LOOK_BACK = 6.0
+"""How far before the hit its silence may start when no grid is known."""
+
+
+def look_back_of(metre: "Grid | Metre") -> float:
+    """Two bars of silence and the beat the hit lands on -- what the sheet asks
+    for before the title, so the search reaches exactly as far as the cue was
+    told to leave.  At 84 BPM that is 6.43 s; a flat 6.0 s missed it."""
+    return 2.0 * metre.bar + beat_length(metre)
+
+
+def title_moment(times: np.ndarray, db: np.ndarray,
+                 look_back: float = TITLE_LOOK_BACK) -> tuple[float, float] | None:
     """(stopdown, impact) for the title card: the late hit and its silence.
 
     The corpus puts the loudness peak at 80-90% and the quietest second-half
@@ -151,7 +163,7 @@ def title_moment(times: np.ndarray, db: np.ndarray) -> tuple[float, float] | Non
         window = int(impact / WINDOW)
         if float(db[window:window + 20].max()) < ceiling - 3.0:
             continue
-        before = [s for s in stopdowns(times, db) if impact - 6.0 <= s < impact]
+        before = [s for s in stopdowns(times, db) if impact - look_back <= s < impact]
         if before:
             return before[-1], impact
     return None
@@ -548,7 +560,7 @@ def metre(audio: Path, seed: int = 0, rel_path: str = "", track: Tracker | None 
 def metre_of(grid: Grid, times, db, seed: int, rel_path: str) -> Metre:
     """The Metre contract from a tracked grid and the cue's envelope."""
     metric = grid.bars_in_mode >= Metre.METRIC_FLOOR
-    moment = title_moment(times, db)
+    moment = title_moment(times, db, look_back_of(grid))
     grid_onsets = onsets(times, db)
     return Metre(
         seed=seed, rel_path=rel_path, seconds=round(float(times[-1]) + WINDOW, 3),

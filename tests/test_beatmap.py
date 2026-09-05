@@ -78,3 +78,42 @@ class TestStructuralFitness:
     def test_tempo_term_rewards_the_cuttable_band(self):
         from studio.beatmap import tempo_term
         assert tempo_term(100) == 1.0 > tempo_term(150) > tempo_term(200)
+
+
+class TestTitleLookBack:
+    """The sheet asks for a hard out, two bars of silence, then the hit.  At
+    84 BPM two bars and a beat is 6.43 s; the flat 6.0 s look-back the title
+    used missed exactly the silence the cue was told to leave.
+    """
+
+    @staticmethod
+    def envelope(silence_at, hit_at, seconds=100.0):
+        import numpy as np
+        from studio.beatmap import WINDOW
+        times = np.arange(int(seconds / WINDOW)) * WINDOW
+        db = np.full(len(times), -20.0)
+        at = lambda seconds: int(round(seconds / WINDOW))
+        db[at(silence_at):at(hit_at)] = -40.0
+        db[at(hit_at):at(hit_at + 3)] = -8.0
+        return times, db
+
+    def test_the_look_back_is_two_bars_and_a_beat(self):
+        from studio.beatmap import Grid, look_back_of
+        grid = Grid(beats=[], downbeats=[], bpm=84.0, bar=240.0 / 84.0,
+                    beats_per_bar=4, bars_in_mode=1.0)
+        assert abs(look_back_of(grid) - (2 * 240.0 / 84.0 + 60.0 / 84.0)) < 1e-6
+
+    def test_a_silence_two_bars_long_at_84_bpm_still_finds_the_title(self):
+        from studio.beatmap import title_moment
+        times, db = self.envelope(silence_at=83.6, hit_at=90.0)
+        assert title_moment(times, db) is None
+        stop, hit = title_moment(times, db, look_back=6.43)
+        assert abs(hit - 90.0) < 0.1 and stop <= hit
+
+    def test_metre_of_looks_back_by_its_own_grid(self):
+        from studio.beatmap import Grid, metre_of
+        times, db = self.envelope(silence_at=83.6, hit_at=90.0)
+        grid = Grid(beats=[i * 60 / 84 for i in range(140)],
+                    downbeats=[i * 240 / 84 for i in range(35)],
+                    bpm=84.0, bar=240.0 / 84.0, beats_per_bar=4, bars_in_mode=1.0)
+        assert abs(metre_of(grid, times, db, 1, "x.wav").title_hit - 90.0) < 0.1
