@@ -11,7 +11,7 @@ from pydantic import ValidationError
 
 from studio.trailer_music import PINNED_DURATION
 from studio.trailer_stage_spec import (
-    MAX_LINES, SPEECH_CEILING_PER_100S, LineSlate, Metre, QCReport, SlateLine, Slot, StorySpec, syllables)
+    MAX_LINES, CueCut, SPEECH_CEILING_PER_100S, LineSlate, Metre, QCReport, SlateLine, Slot, StorySpec, syllables)
 
 
 def story(**over):
@@ -129,7 +129,8 @@ class TestQC:
     def test_floor_is_derived_from_the_measurements(self):
         report = QCReport(cuts=40, cuts_on_beat=0.9, cuts_on_downbeat=0.5, cuts_on_L0=1.0,
                           on_cap_fraction=0.0, title_on_downbeat=True,
-                          integrated_lufs=-14.2, true_peak=-1.1, unbound_shots=0)
+                          integrated_lufs=-14.2, true_peak=-1.1, unbound_shots=0,
+                          cue_cut=cue_report().cue_cut)
         assert report.floor_pass and report.flags == []
 
     def test_targets_missed_become_flags_not_failures(self):
@@ -150,10 +151,40 @@ class TestQC:
         report = QCReport(cuts=35, cuts_on_beat=0.34, cuts_on_downbeat=0.5, cuts_on_L0=1.0,
                           on_cap_fraction=0.0, title_on_downbeat=True,
                           integrated_lufs=-14.0, true_peak=-1.2, unbound_shots=0,
-                          cuts_on_beat_by_act=[0.2, 0.4, 0.9])
+                          cuts_on_beat_by_act=[0.2, 0.4, 0.9], cue_cut=cue_report().cue_cut)
         assert report.flags == []
         loose = report.model_copy(update={"cuts_on_beat_by_act": [0.9, 0.4, 0.3]})
         assert loose.flags == ["cuts_on_beat_act1", "cuts_on_beat_act3"]
+
+    def test_an_unmeasured_cue_cut_is_flagged_and_never_passed(self):
+        """A master QC has not measured against its cue is not known to be
+        cut to it; the report says so instead of assuming a pass."""
+        report = QCReport(cuts=40, cuts_on_beat=0.9, cuts_on_downbeat=0.5, cuts_on_L0=1.0,
+                          on_cap_fraction=0.0, title_on_downbeat=True,
+                          integrated_lufs=-14.2, true_peak=-1.1, unbound_shots=0)
+        assert report.cue_cut is None and "cue_cut" in report.flags
+
+    def test_a_section_change_the_picture_missed_fails_the_floor(self):
+        """Run 10's section boundary at 43.0 s sat inside shot B17."""
+        report = cue_report(section_changes_cut=0.8)
+        assert not report.floor_pass and "section_changes_cut" in report.flags
+
+    def test_a_cut_inside_a_sustain_fails_the_floor(self):
+        report = cue_report(cuts_inside_sustain=1)
+        assert not report.floor_pass and "cuts_inside_sustain" in report.flags
+
+    def test_a_long_shot_off_a_sustain_and_a_line_out_of_its_trough_fail_the_floor(self):
+        assert not cue_report(long_shots_on_sustains=0.5).floor_pass
+        assert not cue_report(lines_in_troughs=0.0).floor_pass
+
+    def test_cuts_off_the_events_are_a_flag_not_a_failure(self):
+        report = cue_report(cuts_on_events=0.6)
+        assert report.floor_pass and report.flags == ["cuts_on_events"]
+
+    def test_a_cut_made_to_its_cue_passes_clean(self):
+        report = cue_report()
+        assert report.floor_pass and report.flags == []
+        assert report.cue_cut.frames_played_fraction == 0.5
 
     def test_a_clipped_line_is_damage_and_fails_the_floor(self):
         """Run 10 levelled its only line +11.8 dB with no ceiling anywhere in
@@ -208,3 +239,13 @@ class TestWindows:
         placed = line.model_copy(update={"window": Slot(start=30.0, end=38.0, made=True)})
         assert placed.window.start == 30.0
         assert SlateLine.model_validate_json(placed.model_dump_json()).window == placed.window
+
+def cue_report(**cue) -> QCReport:
+    """A report whose every other measurement passes, so one cue field decides."""
+    fields = dict(cuts_on_events=0.95, section_changes_cut=1.0, cuts_inside_sustain=0,
+                  long_shots_on_sustains=1.0, lines_in_troughs=1.0, accents_cut=0.9,
+                  movement_medians_s=[3.2, 1.9, 1.1], frames_rendered=2000, frames_played=1000)
+    fields.update(cue)
+    return QCReport(cuts=40, cuts_on_beat=0.9, cuts_on_downbeat=0.5, cuts_on_L0=1.0,
+                    on_cap_fraction=0.0, title_on_downbeat=True, integrated_lufs=-14.2,
+                    true_peak=-1.1, unbound_shots=0, cue_cut=CueCut(**fields))

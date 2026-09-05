@@ -112,6 +112,17 @@ class TestPlan:
         by = plan_of(three).by_movement()
         assert [(m, len(v)) for m, v in by.items()] == [("M1", 1), ("M2", 2), ("M3", 1)]
 
+    def test_a_line_window_is_a_trough_or_a_sustain(self):
+        """A line sits where the music leaves room: in a trough the cue has,
+        or under a sustain the mix can duck.  Phrases and accents are too
+        short to carry speech and sections carry the reveal."""
+        slots = plan_of(GOOD).line_windows()
+        assert [(s.start, s.made) for s in slots] == [(0.0, True), (12.5, False)]
+
+    def test_a_line_ends_a_beat_before_its_span_does(self):
+        slots = plan_of(GOOD).line_windows()
+        assert slots[0].end == 8.0 - BAR / 4 and slots[1].end == 16.0 - BAR / 4
+
     def test_the_plan_round_trips_through_json(self):
         plan = plan_of(GOOD)
         assert CuePlan.model_validate_json(plan.model_dump_json()) == plan

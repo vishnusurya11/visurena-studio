@@ -195,7 +195,8 @@ QC_TARGETS = {"cuts_on_downbeat": 0.30, "cuts_on_L0": 1.0,
               "act3_over_act2_lu": 2.0, "pre_title_silence_s": 1.5,
               "title_hit_lu": -25.0, "bed_under_line_lu": -24.0,
               "line_tp": -3.0, "line_crest_db": 10.0,
-              "cuts_on_beat_act1": 0.50, "cuts_on_beat_act3": 0.80}
+              "cuts_on_beat_act1": 0.50, "cuts_on_beat_act3": 0.80,
+              "cuts_on_events": 0.90}
 """What the delivered master is asked for.
 
 `cuts_on_beat >= 0.80` across the whole trailer used to be in here, and it is
@@ -204,6 +205,52 @@ beat, whole-bar lengths throughout, and a viewer starts counting within four
 shots.  It is replaced by two per-act targets pulling opposite ways -- act 1
 must be mostly OFF the grid, act 3 mostly on it -- because that difference is
 what an act break sounds like."""
+
+
+CUE_FLOORS = {"section_changes_cut": 1.0, "cuts_inside_sustain": 0,
+              "long_shots_on_sustains": 1.0, "lines_in_troughs": 1.0}
+"""What a cut made to its cue cannot miss.  Run 10's master cut inside every
+one of its cue's six hold spans and left the section change at 43.0 s inside
+a shot; these are floors because a viewer hears each one as a mistake."""
+
+
+class CueCut(BaseModel):
+    """How the delivered cut sits against the cue's own measured events.
+
+    The music-first brick: the cue's spans ARE the shot list, so the report
+    grades the picture against the CutMap, never against a bar count the
+    pipeline typed.  `None` on the parent report means this was never
+    measured, and an unmeasured cut is flagged, never passed.
+    """
+
+    cuts_on_events: float = Field(ge=0.0, le=1.0)
+    """Share of cuts on a rank >= 2 event within 0.1 s.  Run 10: 0.28, chance 0.11."""
+    section_changes_cut: float = Field(ge=0.0, le=1.0)
+    cuts_inside_sustain: int = Field(ge=0)
+    long_shots_on_sustains: float = Field(ge=0.0, le=1.0)
+    """Share of shots over LONG_SHOT that sit on a sustain span."""
+    lines_in_troughs: float = Field(ge=0.0, le=1.0)
+    accents_cut: float = Field(default=0.0, ge=0.0, le=1.0)
+    movement_medians_s: list[float] = Field(default_factory=list)
+    """Median shot length per movement: the arc as three numbers."""
+    frames_rendered: int = Field(default=0, ge=0)
+    frames_played: int = Field(default=0, ge=0)
+
+    @property
+    def frames_played_fraction(self) -> float:
+        """Picture that reached the master over picture that was rendered;
+        the head trim and handle are the tax, everything else is waste."""
+        return self.frames_played / self.frames_rendered if self.frames_rendered else 0.0
+
+    def floor_misses(self) -> list[str]:
+        out = [k for k in ("section_changes_cut", "long_shots_on_sustains", "lines_in_troughs")
+               if getattr(self, k) < CUE_FLOORS[k]]
+        if self.cuts_inside_sustain > CUE_FLOORS["cuts_inside_sustain"]:
+            out.append("cuts_inside_sustain")
+        return out
+
+    def target_misses(self) -> list[str]:
+        return ["cuts_on_events"] if self.cuts_on_events < QC_TARGETS["cuts_on_events"] else []
 
 
 class QCReport(BaseModel):
@@ -272,6 +319,8 @@ class QCReport(BaseModel):
     cuts_on_beat_by_act: list[float] = Field(default_factory=list)
     """On-beat share per act.  One number for the whole trailer cannot tell a
     loose first act from a locked third one, and the difference IS the arc."""
+    cue_cut: CueCut | None = None
+    """The cut against the cue's measured events; `None` is unmeasured."""
 
     @property
     def lines_are_clean(self) -> bool:
@@ -283,13 +332,20 @@ class QCReport(BaseModel):
     def floor_pass(self) -> bool:
         return (-15.5 <= self.integrated_lufs <= -12.5 and self.true_peak <= -1.0
                 and self.unbound_shots == 0 and self.reused_shots == 0
-                and self.stale_shots == 0 and self.lines_are_clean and self.hard_out)
+                and self.stale_shots == 0 and self.lines_are_clean and self.hard_out
+                and not (self.cue_cut and self.cue_cut.floor_misses()))
 
     @property
     def flags(self) -> list[str]:
         """Every target this master missed, by name."""
         return (self._grid_flags() + self._layer_flags() + self._shape_flags()
-                + self._line_flags() + self._act_flags())
+                + self._line_flags() + self._act_flags() + self._cue_flags())
+
+    def _cue_flags(self) -> list[str]:
+        """The cut against its cue: unmeasured is a flag, a missed floor is named."""
+        if self.cue_cut is None:
+            return ["cue_cut"]
+        return self.cue_cut.floor_misses() + self.cue_cut.target_misses()
 
     def _grid_flags(self) -> list[str]:
         out = [k for k in ("cuts_on_downbeat", "cuts_on_L0") if getattr(self, k) < QC_TARGETS[k]]

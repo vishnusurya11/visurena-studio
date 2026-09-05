@@ -17,6 +17,7 @@ from typing import Literal
 from pydantic import BaseModel, Field, model_validator
 
 from studio.trailer_edit import MIN_SHOT
+from studio.trailer_stage_spec import Slot
 from studio.trailer_spec import Movement
 from studio.trailer_story import MOVEMENTS, movement_quota
 
@@ -138,6 +139,14 @@ class CuePlan(BaseModel):
     def picture_spans(self) -> list[CueSpan]:
         """Every span the picture fills; the tail is the card's."""
         return [s for s in self.spans if s.kind != "tail"]
+
+    def line_windows(self) -> list[Slot]:
+        """Where a line may sit: a trough the cue has (found) or a sustain the
+        mix ducks under (made), ending a beat before the span does so the
+        cut lands on music, never on a word."""
+        beat = self.bar / 4.0
+        return [Slot(start=s.start, end=round(s.end - beat, 3), made=s.kind == "sustain")
+                for s in self.spans if s.kind in ("trough", "sustain")]
 
     def by_movement(self) -> dict[str, list[CueSpan]]:
         out: dict[str, list[CueSpan]] = {}
