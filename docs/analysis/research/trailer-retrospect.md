@@ -508,3 +508,68 @@ decides whether the song and episode paths still want them.
 take, ~12 takes in step 07's share, ~25 s of picture. Every second of trailer
 costs about half a take. The next real gain is not in the cut — it is fewer
 frames, fewer steps, or a second GPU.
+
+### Run 10 — phase B: the trailer is a shape, not an average
+
+The owner's second and third instructions on the same master: *"The song is
+really bad … lyrics are bland … don't use negative prompts .. not in images
+or videos or music .. strict rule"*, then *"Make all the changes .. use sub
+agents"*. Four critiques (editor, sound, story, pipeline) and five music
+reports were written against the run-10 master; every finding below is
+measured on that file, and every fix is in the build table as rows 29–42.
+
+**What the master measured.** 105 s; music with nothing over it 92 %; one
+spoken line (2.1 %), clipped (peak 0 dBFS, flat factor 24.2, crest 2.6 dB)
+and laid over the wrong face; loudest moment at 53 % of runtime, the last
+wave equal to the chorus, no lift; two declared cards not rendered; the
+killer's face at 8.75 s and the arrest at 17 s; 10 cuts at exactly two beats
+each in 83–94 s; the pipeline had asked for `[Verse][Chorus]` and
+"instruments STRUCK on every beat" and ranked the steadiest grid first. It
+was a music video because every stage ordered one.
+
+**The brick, again.** A trailer is three movements and a made ending, and
+everything measurable follows from the position in the picture: the story
+(M1 25 % / M2 45 % / M3 30 %), the cut (bars per shot 1.40 → 0.80 → 0.44,
+off the grid in acts 1–2, on it in act 3), the sound (peak in the last
+fifth, pulse gone under lines, a hard out, 2.2 s of room tone, the hit on
+the card), and the lines (hook ≤ 12 s, threat, button last; 5–12 per 100 s;
+every one on its speaker's face). QC now grades the SHAPE — where the peak
+is, how much of the picture speaks, per-act on-beat fractions, line true
+peak — not integrated loudness and one whole-trailer `cuts_on_beat`, which
+run 9's fixes had each satisfied while making the trailer worse.
+
+**Two consequences worth stating plainly.**
+
+- `title_on_downbeat` is now usually false and that is correct: the card is
+  struck 2.2 s after a hard out on a chosen downbeat, a made shape, not a
+  found one. The measurements that matter are `hard_out`,
+  `pre_title_silence_s` and `title_hit_lu`.
+- `MAX_LINES` was 4, under the story spine's own floor of 5 per 100 s, so
+  no long cut could ever satisfy R1; it is now derived (12 per 100 s over
+  the 108 s pinned cue = 13) and `roles_for` fills the extra windows with
+  more middle (answer / threat alternating), never a fifth role. On a 25 s
+  cut this changes nothing: `wanted_speech(25)` is 3.
+
+**Negatives.** `studio/affirm.py` lints every prompt string under `studio`
+and `scripts` for negation; the six trailer workflows in comfy_studio
+(`video_minimax_h3_r2v_turbo`, `image_krea2_turbo_t2i`,
+`image_qwen3vl_caption`, `audio_minimax_music_3`, `audio_qwen3tts_design`,
+`audio_qwen3tts_clone`) already feed `ConditioningZeroOut` and carry no
+negative text; only the unused LTX workflows do. Fixtures under `tests/`
+are data (movie lines) and are not scanned.
+
+**What run 11 must measure — none of these numbers is measured yet.**
+
+| expectation | where it comes from | what to read |
+|---|---|---|
+| ~7.45 min/take with H3 resident through a round (28 takes in the share) | pipeline critique: 8.3 of 15.76 min per take was model swap | gate=`cycle` learnings; `render_seconds(rows)` |
+| ~5.34 min/take with frames per shot (39 takes) | 124 frames average vs 175 | the same rows, second round onward |
+| reader session <= 240 s + 20 s/sheet | one Qwen3-VL session per round | gate=`read` learnings |
+| identity still holds at 124 frames with the head leak out of the sample | `frames_of` samples past `HEAD_TRIM` | step 07 bind verdicts, reroll count |
+| one 4-step insert vs its 8-step twin | `FAST_INSERTS` is off | a single paired take, by eye and by the reader |
+| `speech_occupancy` >= `speech_target` on a 25 s cut (3 lines) | story spine + `MAX_LINES` | `qc.json` |
+
+Until the first round writes a `cycle` learning, step 06 sizes the plan at
+the typed 16 min: **12 takes, ~25 s of picture**. The trailer gets longer
+only as the measured cycle gets shorter — the same recursion as the no-reuse
+rule, now with the cycle as the base case it was always supposed to be.
