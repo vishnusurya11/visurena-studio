@@ -23,7 +23,7 @@ from studio.trailer_run import RunContext
 from studio.trailer_stage_spec import Metre
 from test_metre import click_track, write_wav
 
-TONE = Tone(genre="Chamber noir", bpm=84, key="G", scale="minor",
+TONE = Tone(genre="Chamber noir", bpm=120, key="G", scale="minor",
             lead_instrument="a solo violin", percussion="a walking double bass and a pocket watch",
             sonics="dry and close", progression="curious, then a pursuit",
             imagery="a gaslit room", instruments="cello and double bass")
@@ -76,7 +76,7 @@ def fake_llm(calls: list[str]):
     def structured(tier, prompt, schema, **kw):
         calls.append(prompt)
         return schema(percussion="a taiko under a ticking hi-hat, struck on every beat",
-                      instruments="cello and a bass drum holding the grid", bpm=100)
+                      instruments="cello and a bass drum holding the grid")
     return structured
 
 
@@ -110,37 +110,59 @@ class TestSeeds:
         assert row["seed"] == 9 and row["rel_path"] == "trailer/music/cue-9.wav"
         assert row["seconds"] == pytest.approx(60.0, abs=0.1) and row["title_impact"] == 51.5
 
-    def test_verdict_needs_floor_grid_and_a_slot(self, tmp_path):
+    def test_a_seed_is_on_tone_within_a_tempo_mark_of_the_asked_bpm(self):
+        """The tone asks a bpm for a reason: it is the register's pace, and
+        the cut follows the MEASURED pulse at face value.  One tempo mark
+        (andante 76-108 is +-17% about 92) is the band; Scarlet run 9's
+        177.8 against 84 asked is seven bands out."""
+        assert step.tempo_error(84.0, 84) == 0.0
+        assert step.tempo_error(177.84, 84) == pytest.approx(1.117, abs=0.001)
+        assert step.on_tone(96.0, 84) and step.on_tone(72.0, 84)
+        assert not step.on_tone(100.9, 84) and not step.on_tone(177.84, 84)
+
+    def test_verdict_needs_a_metric_grid_on_the_asked_tempo(self, tmp_path):
+        """Fitness had a floor of 6.0 no real seed ever met (run 9's best was
+        4.4; earlier 0.3-2.5), and the slot the gate wanted is now MADE from
+        the grid by 04-lines.  What the gate grades is what the cut needs
+        and no seed can fake: a countable grid at the asked pace."""
         two = beatmap.metre(write_wav(tmp_path / "a.wav", cue(**KINDS["two"])), seed=1,
                             rel_path="a.wav", track=track_autocorrelation)
-        flat = beatmap.metre(write_wav(tmp_path / "b.wav", cue(**KINDS["flat"])), seed=2,
-                             rel_path="b.wav", track=track_autocorrelation)
-        assert step.verdict(two)[0] and not step.verdict(flat)[0]
-        assert not step.verdict(two.model_copy(update={"grid": "onsets"}))[0]
-        assert not step.verdict(two.model_copy(update={"slots": []}))[0]
-        assert not step.verdict(None)[0]
+        assert step.verdict(two, 120)[0]
+        assert step.verdict(two.model_copy(update={"slots": [], "fitness": 0.5}), 120)[0]
+        assert not step.verdict(two, 84)[0] and "against 84 asked" in step.verdict(two, 84)[1]
+        assert not step.verdict(two.model_copy(update={"grid": "onsets"}), 120)[0]
+        assert not step.verdict(None, 120)[0]
 
     def test_best_of_ranks_on_what_the_gate_grades_before_fitness(self, tmp_path):
         """Scarlet run 7: rubato seed 1002 scored 9.2 on dynamic range alone and
         shipped over nine metric seeds; the cut then landed 0% of cuts on a
-        downbeat.  A grid the cut can count and a slot for the line come first."""
+        downbeat.  Run 9: seed 1003 at 177.8 BPM in three won on its four
+        1.7 s troughs over 3004 at 100.9, and the trailer was 'random music,
+        too loud, not the tone'.  A grid the cut can count first, then the
+        nearest tempo band to the asked bpm, then fitness."""
         two = beatmap.metre(write_wav(tmp_path / "a.wav", cue(**KINDS["two"])), seed=1,
                             rel_path="a.wav", track=track_autocorrelation)
         rubato = two.model_copy(update={"seed": 2, "grid": "onsets", "fitness": 9.2})
-        metric_no_slot = two.model_copy(update={"seed": 3, "slots": [], "fitness": 7.0})
         metric = two.model_copy(update={"seed": 4, "fitness": 2.4})
-        better = two.model_copy(update={"seed": 5, "fitness": 3.0})
-        assert step.best_of([rubato, metric_no_slot, metric, better]).seed == 5
-        assert step.best_of([rubato, metric_no_slot]).seed == 3
-        assert step.best_of([rubato]).seed == 2
-        assert step.best_of([]) is None
+        better = two.model_copy(update={"seed": 5, "slots": [], "fitness": 3.0})
+        fast = two.model_copy(update={"seed": 1003, "bpm": 177.84, "fitness": 4.4})
+        near = two.model_copy(update={"seed": 3004, "bpm": 100.9, "slots": [], "fitness": 2.1})
+        assert step.best_of([rubato, metric, better, fast], 120).seed == 5
+        assert step.best_of([rubato, fast, near], 84).seed == 3004
+        assert step.best_of([rubato, fast], 84).seed == 1003
+        assert step.best_of([rubato], 120).seed == 2
+        assert step.best_of([], 120) is None
 
-    def test_reauthor_keeps_the_register_and_swaps_the_pulse(self, monkeypatch):
+    def test_reauthor_keeps_the_register_and_the_tempo_and_swaps_the_pulse(self, monkeypatch):
+        """The asked bpm is the tone's, not the reauthor's: a sheet that could
+        choose 80-140 would move the goal the gate measures against."""
         calls: list[str] = []
         monkeypatch.setattr(llm, "structured", fake_llm(calls))
         tone = step.reauthor(TONE, None)
         assert tone.genre == TONE.genre and tone.lead_instrument == TONE.lead_instrument
-        assert tone.percussion != TONE.percussion and "bars in mode" in calls[0]
+        assert tone.bpm == TONE.bpm and tone.percussion != TONE.percussion
+        assert "bars in mode" in calls[0] and "hold 120 BPM" in calls[0]
+        assert "bpm" not in step.CaptionSheet.model_fields
 
 
 class TestStep:
@@ -172,7 +194,7 @@ class TestStep:
         assert caption(TONE) not in [c["caption"] for c in comfy_calls[-8:]]
         rows = load(ctx.learnings_path)
         assert [r.action for r in rows] == ["first_seeds", "four_more_seeds", "reauthor_caption",
-                                            "reauthor_caption", "onset_grid"]
+                                            "reauthor_caption", "best_seed"]
         assert rows[-1].terminal and rows[-1].step == "03"
 
     def test_a_spent_budget_ships_what_was_measured(self, ctx, tmp_path, monkeypatch):
