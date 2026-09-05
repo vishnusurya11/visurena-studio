@@ -1,10 +1,12 @@
 #!/usr/bin/env python
 """Render one video clip per beat, every one bound to its reference sheets.
 
-Coverage, not shots: each clip is a long take the edit cuts several shots out
-of.  A second angle inside one H3 generation measured free (631s for a two-shot
-243-frame clip against 690s for a single-shot one), and a 243-frame unit is the
-cheapest per usable second, so long takes are both better craft and cheaper.
+ONE TAKE, ONE SHOT.  The take used to be long coverage the edit cut several
+shots out of, and that is precisely what produced four moments of one image
+instead of four images.  A take is now the length of its shot plus the head
+trim it has to skip, so the frames the machine samples are the frames the cut
+plays: run 10 rendered 175 frames a take and threw 65 of them away, about 50
+minutes of a five-hour run.
 """
 from __future__ import annotations
 
@@ -25,19 +27,34 @@ from studio.trailer_refs import visual_description
 from studio.trailer_shot import is_scene_safe
 
 ROOT = Path(__file__).resolve().parents[2]
-CLIP_SECONDS = 7.0
-"""One shot per take now, so a take needs to hold ONE shot, not four.
+HANDLE = 0.25
+"""Six frames of slack past the shot.
 
-At 10.1s a take was 243 frames of which 2.6s was reference leak and roughly 2.5s
-was used -- the rest existed so several shots could be cut from one render, and
-that is precisely what produced four moments of one image instead of four
-images.  7.0s aligns to 175 frames, leaving 4.69s after the head trim against a
-4.0s MAX_SHOT, and renders in appreciably less time."""
+`segment_start` snaps its seek UP onto the frame grid and needs the shot to
+still fit inside the take; a take cut exactly to length loses that fight by
+one frame.  This is the whole margin -- everything else the take renders, the
+cut uses."""
+READ_WINDOW = 0.75
+"""The shortest stretch of usable take the identity reader can sample.
+
+`frames_of` takes three stills PAST the head trim, so a take with nothing past
+it cannot be read at all and its gate becomes a picture of the reference sheet.
+Only a shot under this is lengthened, and MIN_SHOT is 0.5s."""
 STEPS = 8
 """Eight, not four.  At four steps the final Euler step drops sigma from ~0.72
 to zero -- one step doing three quarters of the denoising -- which is the
 arithmetic behind the mushy, smeared look.  Two independent published sources
 call four a draft mode."""
+FAST_STEPS = 4
+FAST_INSERTS = False
+"""OFF until one take measures it.  Four steps is a draft mode everywhere a
+viewer can read the frame -- but an insert held 0.8s is under twenty frames of
+an object filling the middle of the picture, and the published objection is
+about faces and motion.  The code path exists so run 11 can measure ONE take
+against its eight-step twin; the flag turns on from that measurement, never
+from this argument."""
+FAST_SIZES = ("insert", "extreme_close")
+FAST_SECONDS = 1.0
 
 
 def is_complete(video: Path) -> bool:
@@ -65,24 +82,44 @@ def bound_slots(beat: dict, refs: dict) -> list[str]:
     return (chars + ([loc] if loc in refs else []))[:2]
 
 
+def shot_seconds(beat_id: str, plan: dict) -> float:
+    """The longest shot the cut wants from this beat.  One take, one shot, so
+    this is normally THE shot; a plan that still doubles up gets the longer."""
+    return max((s["seconds"] for s in plan["shots"] if s["beat_id"] == beat_id), default=0.0)
+
+
 def take_seconds(beat_id: str, plan: dict) -> float:
-    """How long a beat's take must run: the longest shot the cut wants from
-    it, past the head trim, and never under the standard take.  The final
-    hold outruns MAX_SHOT by design; a take that cannot hold it starts the
-    cut inside the reference leak and comes up short (Scarlet run 6)."""
-    longest = max((s["seconds"] for s in plan["shots"] if s["beat_id"] == beat_id), default=0.0)
-    return max(CLIP_SECONDS, longest + HEAD_TRIM)
+    """Exactly what the cut takes from this beat, and the leak it must skip.
+
+    Run 10 rendered every take at a flat 7.29s and used 2.0s of it past a 2.6s
+    head trim: 65 frames a take, ~50 minutes of the run, sampled and thrown
+    away.  The 7.0s floor was there so ONE take could hold FOUR shots; it holds
+    one now.  The final hold outruns MAX_SHOT by design, and a take that cannot
+    hold its shot starts the cut inside the reference leak (Scarlet run 6).
+    """
+    return max(shot_seconds(beat_id, plan), READ_WINDOW) + HEAD_TRIM + HANDLE
+
+
+def steps_for(beat_id: str, plan: dict, fast: bool = None) -> int:
+    """Sampling steps for this beat's take: four only for an insert the cut
+    holds a second or less, where there is no face and no time to read a smear."""
+    fast = FAST_INSERTS if fast is None else fast
+    shots = [s for s in plan["shots"] if s["beat_id"] == beat_id]
+    if fast and shots and all(s["size"] in FAST_SIZES and s["seconds"] <= FAST_SECONDS
+                              for s in shots):
+        return FAST_STEPS
+    return STEPS
 
 
 def take_values(beat: dict, plan: dict, refs: dict, style: str, seed: int,
                 tightest: str | None = None) -> dict:
-    """What the model is asked for one beat's long take.
+    """What the model is asked for one beat's take.
 
-    A clip is a long take the edit cuts SEVERAL sizes out of, so the take has
-    to contain them: open on the widest size any of this beat's shots asks for
-    and arrive at the tightest.  `tightest` overrides that arrival -- the
-    identity ladder's alternate setup asks for a face the recogniser can read,
-    and holds that size for the whole take.
+    The take opens on the widest size this beat's shots ask for and arrives at
+    the tightest -- with one shot per beat those are the same size, and the
+    move is the shot's own.  `tightest` overrides the arrival: the identity
+    ladder's alternate setup asks for a face the recogniser can read, and
+    holds that size for the whole take.
 
     Two cast members bound are two subjects, never one person described twice:
     the second takes H3's second slot and the place goes by prompt.
@@ -107,7 +144,7 @@ def take_values(beat: dict, plan: dict, refs: dict, style: str, seed: int,
             close_framing=FRAMING[close], camera=beat["motion"], seconds=seconds,
             arc=beat["arc"]),
         "width": NATIVE_W, "height": NATIVE_H, "frames": frames_for(seconds),
-        "steps": STEPS, "seed": seed, "ref_image_size": "max",
+        "steps": steps_for(beat["beat_id"], plan), "seed": seed, "ref_image_size": "max",
         "filename_prefix": f"TR-{beat['beat_id']}"}
 
 

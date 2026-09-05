@@ -218,6 +218,26 @@ def _live(free: bool) -> Callable:
     return comfy.run_text
 
 
+def reader(free: bool = True) -> Callable:
+    """One reader for a WHOLE ROUND of takes: the engine is freed once, here.
+
+    `describe_frames` frees before every read, and freeing unloads H3's DiT,
+    text encoder and VAEs with it: run 10 paid 8.3 of every 15.76 minutes
+    re-streaming 16 GB off the spinning disk the models live on -- 53% of the
+    cycle was the model swap, not the compute.  Hand this one `run` to every
+    read of a round and the swap happens once for the round instead of once
+    per take.  The unload waits for the first question, so a round with no
+    face to read costs nothing.
+    """
+    held: list[Callable] = []
+
+    def ask(name: str, values: dict, timeout: float) -> str:
+        if not held:
+            held.append(_live(free))
+        return held[0](name, values, timeout)
+    return ask
+
+
 def unseen() -> TraitCard:
     """The card of a face nobody managed to read: every trait unclear."""
     return TraitCard(**{trait: "unclear" for trait in TRAITS})
@@ -245,7 +265,11 @@ def describe(image: Path, seed: int = 42, run: Callable | None = None) -> TraitC
 def describe_frames(frames: list[Path], seed: int = 42, run: Callable | None = None,
                     whom: str | None = None) -> TraitCard:
     """The trait card of the person seen across the sampled frames of a clip --
-    or, given `whom`, of the one person in a two-shot that note singles out."""
+    or, given `whom`, of the one person in a two-shot that note singles out.
+
+    On its own this frees the engine before asking, which is right for a single
+    read and ruinous for a run of them: hand a whole round of takes one
+    `reader()` instead and the unload happens once for the round."""
     frames = [Path(f) for f in frames[:3]]
     # Named after the take: stage_image keeps the bare filename in ComfyUI's input.
     sheet = contact_sheet(frames, frames[0].parent / f"{frames[0].parent.name}-contact.png")

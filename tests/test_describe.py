@@ -168,6 +168,31 @@ class TestDescribe:
         assert describe.describe_frames(frames) == card()
         assert order == ["free", "ask"]
 
+    def test_one_reader_frees_the_engine_once_for_a_whole_round_of_takes(self, tmp_path, monkeypatch):
+        """The swap, not the compute, was the cycle: freeing before EVERY read
+        unloaded H3's DiT, text encoder and VAEs after every take, and run 10
+        paid 8.3 of every 15.76 minutes re-streaming 16 GB off a spinning
+        disk.  A round of takes is read by ONE reader: unload once, answer
+        while resident."""
+        frames = frames_in(tmp_path)
+        order = []
+        monkeypatch.setattr(describe.comfy, "stage_image", lambda p: Path(p).name)
+        monkeypatch.setattr(describe.comfy, "free_models", lambda: order.append("free"))
+        monkeypatch.setattr(describe.comfy, "run_text",
+                            lambda name, values, timeout: order.append("ask") or json.dumps(LESTRADE))
+        reader = describe.reader()
+        for _ in range(3):
+            assert describe.describe_frames(frames, run=reader) == card()
+        assert order == ["free", "ask", "ask", "ask"]
+
+    def test_a_reader_nobody_asks_unloads_nothing(self, monkeypatch):
+        """A round with no face to read costs no swap: the unload waits for
+        the first question."""
+        order = []
+        monkeypatch.setattr(describe.comfy, "free_models", lambda: order.append("free"))
+        describe.reader()
+        assert order == []
+
     def test_the_still_path_leaves_the_engine_loaded(self, tmp_path, monkeypatch):
         """Scarlet run 5 died in step 02 the other way: freeing before every
         sheet read evicted Qwen3-VL too, and each read re-streamed 16 GB off
