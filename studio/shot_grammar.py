@@ -38,9 +38,10 @@ passes a shot where binding cannot possibly be observed."""
 FRAMING = {
     "extreme_wide": ("A single figure stands small and off-centre in the lower "
                      "third of the frame, the whole of the place visible around "
-                     "and above them; the figure reads as a dark shape, not a face."),
-    "wide": ("A wide shot of the whole place, no figure larger than a hand's "
-             "width in frame. The horizon crosses the frame at eye height."),
+                     "and above them; the figure reads as a dark shape the "
+                     "size of a fingernail against the landscape."),
+    "wide": ("A wide shot of the whole place, every figure at most a hand's "
+             "width tall in frame. The horizon crosses the frame at eye height."),
     "full": ("The full figure stands head to foot within the frame, a hand's "
              "width of air above the head and the feet near the bottom edge."),
     "medium": ("A medium shot cut at the waist; the head fills about a fifth of "
@@ -80,8 +81,8 @@ ANGLE = {
     "eye": "The lens is level with the eyes; the horizon crosses the frame at eye height.",
     "low": ("The camera sits below his eyeline looking up; the ceiling is visible "
             "behind his head and the horizon sits low in the frame."),
-    "high": ("The camera looks down from above; the ground fills the background "
-             "and no sky is visible."),
+    "high": ("The camera looks down from above; the frame is filled edge to "
+             "edge with ground and the tops of things."),
     "profile": "The figure is seen in strict profile, the nose breaking the vertical centre.",
     "overhead": ("The camera looks straight down from directly overhead; the "
                  "ground fills the entire frame."),
@@ -90,6 +91,9 @@ ANGLE = {
 background -- because a model trained on image captions has no grip vocabulary.
 "Low angle" alone is a term; "the ceiling is visible behind his head" is an
 observation, and observations are what these models render toward."""
+
+
+MODEL_TEXT = (FRAMING, ANGLE)
 
 
 def motivated_move(move: str, amplitude: str, speed: str, cause: str,

@@ -1,87 +1,205 @@
-"""Asking the music model for the book it is actually scoring.
+"""Asking the music model for the book it is scoring, in the form a trailer has.
 
-The caption was one 109-word paragraph, byte-identical for every title but for
-a pasted VISUAL palette -- "soot-black, gaslight amber and cold London grey" --
-sitting in the slot a MUSIC palette belonged.  The two variables were conflated
-because they share a word.  Genre, period, instrumentation and emotional arc
-were never inputs, so a Victorian procedural and a gothic horror were the same
-prompt separated by a seed, and the fitness metric that chose between takes had
-no term referring to the book at all.
+Two things were wrong at once, and each was measured.
 
-Measured consequences on the cue that shipped with A Study in Scarlet: the solo
-violin the caption asked for is not in the file (2-8 kHz sits 21 dB below the
-mids), the piece plays at ~105 BPM against a requested 92, and its loudness
-peaks at 60% where the cut wants its climax at 85-90%.
+THE MODEL SANG THE STAGE DIRECTIONS.  `lyrics_plan` sent nine `[Tag]` lines
+each followed by a parenthetical arrangement note, on the belief that a
+parenthetical stays descriptive.  Three delivered cues were separated with
+demucs and transcribed with whisper: each has a vocal stem 3-4 LU ABOVE the
+rest of the mix, singing "the lead states its figure plainly and alone,
+unhurried, no accompaniment" almost verbatim, in order.  In the training
+corpus a parenthetical is a SUNG backing line; the one documented exception is
+the single word `(instrumental)`.  So the sheet carries tags and sung words
+only, and the section prose lives in the caption's Arrangement timeline --
+which is what the vendor's own caption skill says to do.
+
+THE CUE WAS A SONG.  The shipped cue reached -15 LUFS at 8 s and held it to
+97 s, put its loudness peak at 52%, had every structural hit inside the first
+third, no pre-title stop, and ended in a fade.  A trailer cue is a STAIRCASE
+WITH HOLES: three plateaus, each louder, denser and higher than the last, a
+hole before every step, the deepest hole and the tallest step five seconds
+from the end.  The caption asks for that shape by name, section by section.
+
+Underneath both: one tonal centre, one pulse, and a sequence of one-way moves
+-- a new colour, a doubled subdivision, a lifted chord, a widened register --
+each audibly irreversible.  Mood is which mode the centre is heard in;
+excitement is how many of those clicks happen per minute.
+
+Every string here is AFFIRMATIVE (`studio/affirm.py`): a negated noun is still
+that noun in the prompt, and this pipeline measured it three times.
 """
 from __future__ import annotations
 
+import hashlib
 import json
-from dataclasses import dataclass
+from dataclasses import dataclass, fields
 from pathlib import Path
+
+from studio.affirm import negations
 
 EXECUTABLE_TAGS = ("Intro", "Verse", "Pre-Chorus", "Chorus", "Post-Chorus",
                    "Bridge", "Instrumental", "Solo", "Outro")
-"""The only section tags the model executes.
+"""The nine tags the open-weights README names.  The local node validates
+nothing, so `[Build]`, `[Final Build]` and `[Hit]` reached the model as unknown
+lowercase tokens and the length control went with them (78.5-139.75 s on one
+"nine section" sheet)."""
 
-`[Build]`, `[Final Build]` and `[Hit]` are not among them.  The model falls
-back to guessing from position, which is why "nine sections is about a hundred
-seconds" delivered 78.5s, 101.75s, 114.0s, 114.55s and 139.75s -- a 78% spread
-on what was documented as the one deterministic length control.
+SHEET_TAGS = ("Intro", "Verse", "Pre-Chorus", "Chorus", "Bridge",
+              "Pre-Chorus", "Chorus", "Post-Chorus", "Outro")
+"""The staircase, in the model's own vocabulary.
+
+`[Chorus]` twice because the model was trained on songs: one chorus at 44%
+became the peak and `[Post-Chorus]` at 78% an afterthought (MEASURED: loudest
+tenth 40-50%, 60-80% six dB quieter).  The second `[Chorus]` is the drop.
+`[Pre-Chorus]` twice because it is the only tag whose learned meaning is "rise
+into the next section".  `[Bridge]` is the half-time pull-back and the
+dialogue slot; `[Post-Chorus]` is the final wave; `[Outro]` is stop, title hit
+and tail.  `[Solo]` and `[Instrumental]` are left out: they mean thin and
+moderate, and act three must be neither -- the shipped cue's HF/mid ratio
+dipped 19 dB in its `[Solo]` tenth, exactly where the cut wants density.
 """
 
-ARC = [
-    ("Intro",
-     "one sustained low note under audible room tone, nothing else present"),
-    ("Verse",
-     "the lead states its figure plainly and alone, unhurried, no accompaniment"),
-    ("Pre-Chorus",
-     "a low pulse enters beneath it and will not let the figure go"),
-    ("Chorus",
-     "the first full statement, the ensemble committed, weight arriving underneath"),
-    ("Instrumental",
-     "the figure inverted, answered by a second instrument over shifting ground"),
-    ("Bridge",
-     "everything falls away to one instrument in a bare room, reverb gone"),
-    ("Solo",
-     "the lead alone and slower, exposed, every mechanical noise audible"),
-    ("Post-Chorus",
-     "everything returns at once, accelerating, the attacks crowding closer"),
-    ("Outro",
-     "a hard full stop, two full bars of total silence, one low impact, then a "
-     "decay of eight seconds or more with nothing new entering"),
-]
-"""Nine executable sections carrying quiet -> build -> hit -> aftermath.
+MODES = ("aeolian", "dorian", "phrygian", "harmonic_minor", "major",
+         "mixolydian", "lydian", "whole_tone", "octatonic", "open_fifth")
+MINOR_MODES = ("aeolian", "dorian", "phrygian", "harmonic_minor",
+               "octatonic", "whole_tone")
+CENTRES = ("C", "C#", "D", "Eb", "E", "F", "F#", "G", "Ab", "A", "Bb", "B")
+LYRICS_MODES = ("instrumental", "vocalise", "refrain", "whisper")
 
-The Outro asks for the shape the gate measures (`beatmap.title_term`): the
-pre-title trough must hold a bar, and the impact must land by 95% of the
-cue with room for the card.  Scarlet run 6 asked for "one beat of silence"
-and got it -- 1.5 s against a 3 s bar -- and one seed put the hit at 99%.
+STRONG_PULSE = ("pizzicato", "snare", "bass drum", "taiko", "clock", "watch",
+                "timpani", "piano", "bodhran", "handclap", "woodblock", "bell")
+"""Carriers the model can play in time.  A pulse made only of struck objects
+gave neither the model nor the beat tracker a metre to hold: 84 asked,
+89-189 delivered across eight seeds of one caption."""
+
+HOSTED_CHARS = 2000
+"""The HOSTED API's documented prompt cap, recorded because it is the number
+people quote.  It does NOT bind this studio: the submission path is the local
+ComfyUI node, whose only limit is 5000 tokens for caption and lyrics together
+(`nodes_minimax_music.py`, MEASURED) -- about 20 000 characters."""
+
+CAPTION_WORDS = (250, 560)
+CAPTION_CHARS = 3400
+"""What this caption is allowed to be.
+
+The vendor's caption-rewriter skill defaults to "approximately 250-450 English
+words".  That band was written for a SONG caption, which carries genre, mood
+and production and stops.  This one additionally carries a nine-section
+trailer form -- the thing whose absence made the last cue "not exciting at
+all" -- so it lands near 540 words and stays far inside the node's real cap.
+The ceiling exists so a caption cannot grow unnoticed; the exact count is
+asserted in `test_music_tone.py::test_the_caption_size_is_recorded_and_capped`.
 """
-
-SYLLABLES_PER_SECOND = 2.4
-"""Content fill the model expects.  Below ~0.8x it finishes the sheet early and
-noodles; the old plan ran 0.35x, which is the likely mechanism behind a cue
-that came back 78.5s when 100s was asked for."""
 
 
 @dataclass(frozen=True)
 class Tone:
     """What this book should sound like, and why.
 
-    Authored once per book, beside the reference sheets, for the same reason:
+    Authored once per book beside the reference sheets, for the same reason:
     it is a decision about the work that should not be re-made per render.
     """
 
     genre: str
+    tonal_centre: str
+    mode: str
+    mood: tuple[str, ...]
     bpm: int
-    key: str
-    scale: str
+    time_signature: str
+    tempo_plan: str
+    chord_plan: str
+    pulse_carriers: tuple[str, ...]
+    signature_sound: str
     lead_instrument: str
-    percussion: str
-    sonics: str
-    progression: str
+    supporting_instruments: str
+    register_arc: str
+    dynamics_arc: str
+    mix_space: str
+    era_reference: str
     imagery: str
-    instruments: str
+    hit: str
+    lyrics_mode: str = "instrumental"
+    refrain: str | None = None
+    vocalise: tuple[str, ...] = ()
+
+    def __post_init__(self) -> None:
+        _check_vocabulary(self)
+        _check_affirmative(self)
+        _check_pulse(self)
+        _check_voice(self)
+
+    @property
+    def key(self) -> str:
+        """What `Basic Attributes: key is ...` says: the centre, held all cue."""
+        return self.tonal_centre
+
+    @property
+    def scale(self) -> str:
+        """The mode, told to the model in the two words it was trained on."""
+        return "minor" if self.mode in MINOR_MODES else "major"
+
+    @property
+    def percussion_palette(self) -> str:
+        """The closed roster, read off the carriers so the two cannot drift.
+
+        A closed list occupies the slot a drum kit would fill: the shipped
+        caption said "no drum kit and no taiko at any point" and came back at
+        105 BPM with a heavy pulse.
+        """
+        return ", ".join(self.pulse_carriers)
+
+
+def texts_of(tone: Tone) -> list[tuple[str, str]]:
+    """(field name, string) for every string this tone will send to a model."""
+    found: list[tuple[str, str]] = []
+    for field in fields(tone):
+        value = getattr(tone, field.name)
+        if isinstance(value, str):
+            found.append((field.name, value))
+        elif isinstance(value, tuple):
+            found += [(field.name, item) for item in value]
+    return found
+
+
+def _check_affirmative(tone: Tone) -> None:
+    """Every field names what plays.  A negated noun is still that noun."""
+    for name, text in texts_of(tone):
+        found = negations(text)
+        if found:
+            raise ValueError(
+                f"{name} asks for an absence ({found[0]!r}): {text[:80]!r}. "
+                f"Name what occupies that place instead.")
+
+
+def _check_vocabulary(tone: Tone) -> None:
+    """One centre, one named mode, one lyric mode, three mood words."""
+    if tone.mode not in MODES:
+        raise ValueError(f"mode {tone.mode!r} is not one of {MODES}")
+    if tone.tonal_centre not in CENTRES:
+        raise ValueError(f"tonal_centre {tone.tonal_centre!r} is not one of {CENTRES}")
+    if tone.lyrics_mode not in LYRICS_MODES:
+        raise ValueError(f"lyrics_mode {tone.lyrics_mode!r} is not one of {LYRICS_MODES}")
+    if len(tone.mood) != 3:
+        raise ValueError(f"mood is three adjectives, not {len(tone.mood)}")
+
+
+def _check_pulse(tone: Tone) -> None:
+    """At least two carriers, one of them a thing the model plays in time."""
+    if len(tone.pulse_carriers) < 2:
+        raise ValueError("pulse_carriers needs at least two, in order of entry")
+    joined = " ".join(tone.pulse_carriers).lower()
+    if not any(word in joined for word in STRONG_PULSE):
+        raise ValueError(f"pulse_carriers needs one of {STRONG_PULSE}: a pulse the "
+                         f"model and the beat tracker can both hold")
+
+
+def _check_voice(tone: Tone) -> None:
+    """A refrain exists exactly when one is sung."""
+    sung = tone.lyrics_mode == "refrain"
+    if sung and not (tone.refrain or "").strip():
+        raise ValueError("lyrics_mode 'refrain' needs a refrain to sing")
+    if not sung and (tone.refrain or "").strip():
+        raise ValueError(f"a refrain with lyrics_mode {tone.lyrics_mode!r} is never sung")
 
 
 def load_tone(book: Path) -> Tone:
@@ -91,90 +209,203 @@ def load_tone(book: Path) -> Tone:
         raise FileNotFoundError(
             f"{path} does not exist; a cue cannot be tone-matched to a book "
             f"whose tone has never been written down")
-    return Tone(**json.loads(path.read_text(encoding="utf-8")))
+    return from_json(json.loads(path.read_text(encoding="utf-8")), path)
 
 
-def sections_for(count: int) -> list[tuple[str, str]]:
-    """`count` sections from the arc, all executable tags."""
-    if count >= len(ARC):
-        return list(ARC)
-    keep = [0] + sorted(range(1, len(ARC) - 1))[:count - 2] + [len(ARC) - 1]
-    return [ARC[i] for i in keep[:count]]
+def from_json(data: dict, path: Path | None = None) -> Tone:
+    """A Tone from a tone.json body, with v1 files told what they are."""
+    wanted = {field.name for field in fields(Tone)}
+    missing = sorted(wanted - set(data) - {"lyrics_mode", "refrain", "vocalise"})
+    if missing:
+        raise ValueError(
+            f"{path or 'tone.json'} is a v1 tone: it has no {', '.join(missing)}. "
+            f"Rewrite it in Tone v2 (see .claude/skills/trailer/subskills/03-music).")
+    listed = {k: tuple(v) if isinstance(v, list) else v for k, v in data.items()}
+    return Tone(**{k: v for k, v in listed.items() if k in wanted})
 
 
-def lyrics_plan(sections: list[tuple[str, str]],
-                intended_seconds: float = 100.0) -> str:
-    """The tag-and-parenthetical sheet.
+# --- the caption: three headings, and the staircase named section by section -
 
-    Parentheticals ARE submitted as lyric text, so they stay descriptive rather
-    than sung -- but they must be long enough.  A sheet at a third of the
-    expected fill leaves the model with nothing to do and it stops early.
+STAIRCASE = (
+    "Structure: three waves, each louder, denser and higher, silence before "
+    "every step. "
+    "Intro: {signature} alone over a held low note. "
+    "Verse: one low figure repeating to the last bar, a new colour every four "
+    "bars, every layer staying, its last two bars silent. "
+    "Pre-Chorus: a rising sweep into the downbeat. "
+    "Chorus: one hard impact there, the whole ensemble at once. "
+    "Bridge: one dry instrument two bars, then half-time, a heavy accent every "
+    "two beats. "
+    "Pre-Chorus: each bar higher, a longer sweep. "
+    "Chorus: the drop, heavier, a low accent on every second downbeat after a "
+    "short accent on the eighth before it, the lead calling a bar and the low "
+    "ensemble answering. "
+    "Post-Chorus: the densest bars of the piece, {register}, a hard stop on a "
+    "downbeat. "
+    "Outro: two full bars of total silence, {hit}, the loudest event of the "
+    "piece, one low note decaying alone for eight seconds."
+)
+"""Twelve excitement mechanics, one clause each.
+
+Ostinato, a layered entry every four bars, the hole at the end of the verse,
+riser into each impact, the half-time drop, rising register, the syncopated
+low accent, call-and-response, the density staircase, the pre-title stop, the
+title hit and the tail.  The shipped cue followed exactly one of them (rising
+register) because the old caption asked for nothing propulsive -- it asked for
+a chamber piece to get louder.
+"""
+
+VOCAL_DETAILS = {
+    "instrumental": "This piece is instrumental throughout. The lead melodic "
+                    "role belongs to {lead}.",
+    "vocalise": "A low choir, close and dry, holds open vowels through the "
+                "chorus, the bridge and the final wave, one syllable to the "
+                "pulse. Every other section belongs to {lead}.",
+    "refrain": "One low voice, close and dry, sings a single English line in "
+               "each chorus and twice in the final wave, the words few and "
+               "held long. Every other section belongs to {lead}.",
+    "whisper": "One voice speaks a single line in the bridge, unpitched and "
+               "close to the microphone. Every other section belongs to {lead}.",
+}
+"""What the voice does, said as what it does.
+
+Voices are excluded by describing an instrumental lead and saying nothing
+else about them -- the caption already said "This piece is instrumental" on
+the cues that came back singing, and it was the LYRICS field that sang.
+"""
+
+
+def lead_head(tone: Tone) -> str:
+    """The lead instrument in the fewest words that name it.
+
+    It is stated in full in the first sentence, where the model reads the
+    genre; Vocal Details only has to point back at it, and the shipped caption
+    spent 40 of its words saying the same clause twice.
     """
-    del intended_seconds  # ARC notes are authored at length
-    return "\n\n".join(f"[{tag}]\n({note})" for tag, note in sections)
+    return tone.lead_instrument.split(",")[0].strip()
 
 
-def _syllables(text: str) -> int:
-    return sum(len(word) // 3 + 1 for word in text.split())
+def head(tone: Tone) -> str:
+    """Global Metadata: genre, lead, tempo, key, metre, mood -- each once."""
+    return (
+        f"Basic Attributes: {tone.genre}, led throughout by {tone.lead_instrument}. "
+        f"tempo is around {tone.bpm} BPM, held from the first bar to the last. "
+        f"key is {tone.key}, and scale is {tone.scale}. "
+        f"time signature is {tone.time_signature}. mood is {', '.join(tone.mood)}.\n"
+        f"Global Emotional Progression: {tone.dynamics_arc}\n"
+        f"Application Scenarios & Imagery: {tone.imagery}.\n"
+        f"Sonics & Production Profile: {tone.mix_space}; {tone.era_reference}.")
+
+
+def arrangement(tone: Tone) -> str:
+    """Instruments, harmony, groove, then the section-by-section staircase."""
+    return (
+        f"Instrument Lifecycle. Supporting: {tone.supporting_instruments}. "
+        f"Percussion: the complete percussion section is {tone.percussion_palette}.\n"
+        f"Harmony: {tone.chord_plan}.\n"
+        f"Groove & Foundation Progression: {tone.tempo_plan}.\n"
+        + STAIRCASE.format(signature=tone.signature_sound,
+                           register=tone.register_arc, hit=tone.hit))
 
 
 def caption(tone: Tone) -> str:
     """MiniMax's three-heading caption grammar, written from this book's tone.
 
-    Routes on GENRE, groove and instrumentation.  "Cinematic", "dark" and
-    "epic" are modifiers, not genre families, and a caption that opens on them
-    is asking for the average of everything.
+    Routes on GENRE and on a named lead instrument in the first sentence:
+    "cinematic", "dark" and "epic" are modifiers, and a caption that opens on
+    them is asking for the average of everything -- which is what "just some
+    random music" sounds like.
     """
     return "\n\n".join([
-        "### Global Metadata",
-        f"Basic Attributes: bpm is {tone.bpm}. key is {tone.key}, and scale is "
-        f"{tone.scale}. {tone.genre}.",
-        f"Global Emotional Progression: {tone.progression}",
-        f"Application Scenarios & Imagery: {tone.imagery}.",
-        f"Sonics & Production Profile: {tone.sonics}.",
+        "### Global Metadata", head(tone),
         "### Vocal Details",
-        f"This piece is instrumental. The lead is {tone.lead_instrument}.",
-        "### Arrangement",
-        f"Instrument Lifecycle. Primary: {tone.lead_instrument}. "
-        f"Secondary: {tone.instruments}.",
-        f"Groove & Foundation Progression: {tone.percussion}. The tempo holds "
-        f"at {tone.bpm} BPM from first bar to last; the subdivision doubles once "
-        f"at the turn and again into the final wave (eighths, then sixteenths, "
-        f"over the same beat), then stops dead on a downbeat.",
-        "Embellishments, Textures & Spatial FX: a new colour introduced before "
-        "each restatement of the figure; two full bars of total silence before the "
-        "last impact; the piece ends on a single low note left to die in the "
-        "room for eight seconds or more. The density of events rises steadily through the final third so "
-        "that the last quarter carries the most attacks of the whole piece, "
-        "then stops.",
-    ])
+        VOCAL_DETAILS[tone.lyrics_mode].format(lead=lead_head(tone)),
+        "### Arrangement", arrangement(tone)])
 
 
-def caption_stamp(text: str) -> str:
-    """A short hash of the caption that produced a cue.
+# --- the lyric sheet: tags, and words that are meant to be sung --------------
 
-    Without it `build_music` skipped any seed whose file already existed, so
-    rewriting the caption and re-running kept every cue the OLD caption made
-    and printed a success line -- the same shape as the clip cache keyed on
-    beat id rather than on the recipe.
+VOICED = {"instrumental": (), "vocalise": ("Chorus", "Bridge", "Post-Chorus"),
+          "refrain": ("Chorus", "Post-Chorus"), "whisper": ("Bridge",)}
+"""Which sections carry a voice, by lyric mode.
+
+`[Intro]` and `[Verse]` stay voiceless in every mode because a spoken line
+never sits under a sung word, and those are the sections where `05-dialogue`
+puts its first window.  The `[Bridge]` carries a voice only where the voice IS
+the pull-back: one held vowel, or one whispered line over near-silence.
+"""
+
+
+def sung_lines(tone: Tone, tag: str) -> list[str]:
+    """The words sung under one tag, or nothing when the section is played."""
+    if tag not in VOICED[tone.lyrics_mode]:
+        return []
+    if tone.lyrics_mode == "refrain":
+        return [tone.refrain] * (2 if tag == "Post-Chorus" else 1)
+    words = list(tone.vocalise) or ["Ah..."]
+    if tone.lyrics_mode == "whisper":
+        return words[:1]
+    return words if tag != "Bridge" else ["Ah...", words[-1]]
+
+
+def lyrics_plan(tone: Tone) -> str:
+    """The lyric sheet: nine tags, and only words that are meant to be sung.
+
+    Every non-tag line is sung.  A section with nothing to sing carries the
+    one documented marker, `(instrumental)` -- the form the vendor's own
+    reference instrumental render uses.
     """
-    import hashlib
+    blocks = []
+    for tag in SHEET_TAGS:
+        lines = sung_lines(tone, tag) or ["(instrumental)"]
+        blocks.append("\n".join([f"[{tag}]"] + lines))
+    return "\n\n".join(blocks)
 
-    return hashlib.sha256(text.encode("utf-8")).hexdigest()[:16]
+
+# --- what was actually sent, recorded beside what came back ------------------
+
+def caption_stamp(text: str, lyrics: str = "") -> str:
+    """A short hash of the recipe that produced a cue.
+
+    Caption and lyrics are ONE conditioning block in the node -- `build_prompt`
+    puts both between `<|im_start|>` and `<|audio_start|>` and the
+    unconditioned branch replaces the lot -- so the stamp covers both.  Without
+    it `build_music` skipped any seed whose file already existed, so rewriting
+    the caption and re-running kept every cue the OLD recipe made and printed a
+    success line.
+    """
+    return hashlib.sha256(f"{text}\n{lyrics}".encode("utf-8")).hexdigest()[:16]
 
 
 def _stamp_path(cue: Path) -> Path:
     return cue.with_suffix(".caption.txt")
 
 
-def stamp_cue(cue: Path, stamp: str) -> None:
-    """Record which caption produced this audio, beside the audio."""
+def recipe_path(cue: Path) -> Path:
+    """Where the exact caption and sheet that made this audio are kept."""
+    return cue.with_suffix(".caption.json")
+
+
+def stamp_cue(cue: Path, stamp: str, text: str = "", lyrics: str = "") -> None:
+    """Record which recipe produced this audio, beside the audio.
+
+    cue-3002's stamp matches no committed caption times any committed
+    tone.json, so the text that produced the shipped cue cannot be recovered
+    from git.  The full recipe is written out now, not just its digest.
+    """
     _stamp_path(cue).write_text(stamp, encoding="utf-8")
+    recipe_path(cue).write_text(
+        json.dumps({"stamp": stamp, "caption": text, "lyrics": lyrics}, indent=1),
+        encoding="utf-8")
 
 
 def cue_is_current(cue: Path, stamp: str) -> bool:
-    """True only when this file was rendered from THIS caption."""
+    """True only when this file was rendered from THIS recipe."""
     path = _stamp_path(cue)
     if not cue.exists() or not path.exists():
         return False
     return path.read_text(encoding="utf-8").strip() == stamp
+
+
+MODEL_TEXT = (STAIRCASE, VOCAL_DETAILS)
+"""Every constant in this module that reaches the music model verbatim."""

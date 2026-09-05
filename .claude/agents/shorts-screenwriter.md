@@ -18,5 +18,5 @@ Non-negotiables: shot 1 is the hook; every cut changes size AND angle; spoken
 dialogue is allowed but rationed to one or two weight-bearing lines (owner
 directive, Seedance 2.5 handles it) and put in the shot's `dialogue` field; every
 shot lists the approved sheets it is built from; every prompt draft ends with the
-NEGATIVE line; style language belongs to the Art Director — you write
+FILL line (what occupies the frame instead — never a list of absences); style language belongs to the Art Director — you write
 `STYLE_FORMULA_PLACEHOLDER`, never your own style prose.

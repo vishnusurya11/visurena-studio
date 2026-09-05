@@ -131,24 +131,25 @@ def _subject(frames: int, whom: str | None) -> str:
                  f"this image, {frames} frames of ONE shot laid side by side")
         return (f"More than one person may be visible in {where}.  Describe for a "
                 f"casting sheet ONLY the person best matching this note, and ignore "
-                f"everyone else: {whom}.  Report what the frames show of that person, "
-                f"not what the note says.")
+                f"everyone else: {whom}.  Report what the frames show of that person; "
+                f"the note is there to pick them out, and the frames are the evidence.")
     if frames == 1:
         return "Describe the one person in this image for a casting sheet."
     return (f"This image is {frames} frames of ONE shot laid side by side, all of the same "
             "person.  Describe that person for a casting sheet from whichever frames show "
-            "them; a trait is unclear only if no frame shows it.")
+            "them; a trait is unclear when every frame leaves it in doubt.")
 
 
 def prompt_for(frames: int = 1, whom: str | None = None) -> str:
     """Describe, in a closed vocabulary; never a yes/no."""
     allowed = "\n".join(f'  "{trait}": one of {list(pool)}' for trait, pool in TRAITS.items())
     subject = _subject(frames, whom)
-    return (subject + "  Answer with a single JSON object and nothing else, with exactly "
-            "these keys:\n" + allowed +
+    return (subject + "  Answer with a single JSON object, and let it be the whole "
+            "reply, with exactly these keys:\n" + allowed +
             '\n  "description": two sentences of plain prose about their face, hair and clothes.\n'
-            'Use "unclear" for any trait the image does not show plainly.  Judge what is '
-            "visible; do not guess from the period or the clothing.")
+            'Use "unclear" for any trait the image leaves in doubt.  Report only what '
+            "these pixels show; the period and the clothing are evidence about the "
+            "picture, and the answer is about the face.")
 
 
 def unwrap(text: str) -> str:

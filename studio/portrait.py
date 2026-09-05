@@ -136,10 +136,12 @@ def prompt_for(name: str, passages: list[Passage], violation: str | None = None)
     slots = ", ".join(SLOTS)
     text = "\n\n".join(f"[ch {p.chapter} para {p.n}] {p.text}" for p in passages)
     head = (f"From the passages below, quote every sentence that describes how {name} "
-            f"LOOKS -- face, hair, build, age, dress -- verbatim, unchanged.  Only sentences "
-            f"about {name}; other people in the same paragraph are not {name}.  Then fill "
+            f"LOOKS -- face, hair, build, age, dress -- verbatim, unchanged.  Quote only "
+            f"sentences about {name} himself or herself; where a paragraph describes "
+            f"someone else, leave that sentence out.  Then fill "
             f"{slots} with a short phrase each, ONLY where a quoted sentence says so; leave "
-            f"a slot empty when the book is silent.  Never infer from period or reputation.")
+            f"a slot empty when the book is silent.  Every filled slot rests on a "
+            f"sentence you quoted; leave the rest empty.")
     if violation:
         head += f"\nYour last answer was refused: {violation}.  Quote exactly."
     return f"{head}\n\n{text}"

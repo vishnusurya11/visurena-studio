@@ -21,8 +21,7 @@ from studio.beatmap import (envelope, late_density, onsets, stopdowns,
                             structural_impacts, title_moment, trailer_fitness)
 from studio.comfy import run
 from studio.music_tone import (caption, caption_stamp, cue_is_current,
-                               load_tone, lyrics_plan, sections_for,
-                               stamp_cue)
+                               load_tone, lyrics_plan, stamp_cue)
 from studio.trailer_music import PINNED_DURATION
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -53,23 +52,30 @@ def duration_of(audio: Path) -> float:
 
 
 def render_cue(book: Path, text: str, seed: int, dest_dir: Path,
-               seconds: float = 100.0) -> Path:
-    """One seed of one caption, rendered once: the stamp keys the cache on the
-    RECIPE, so a rewritten caption re-renders and the same caption does not."""
-    stamp = caption_stamp(text)
+               sheet: str = "") -> Path:
+    """One seed of one recipe, rendered once.
+
+    The stamp covers CAPTION AND SHEET, because the node guides both as one
+    conditioning block -- so a rewritten caption re-renders, a rewritten sheet
+    re-renders, and the same recipe does not.  The full text of both is
+    written beside the audio: cue-3002's stamp matches no committed caption
+    times any committed tone.json, so what produced the shipped cue cannot be
+    recovered from git.
+    """
+    stamp = caption_stamp(text, sheet)
     current = [c for c in dest_dir.glob(f"cue-{seed}.*") if cue_is_current(c, stamp)
                and c.suffix in (".flac", ".wav", ".mp3")]
     if current:
         return current[0]
     print(f"  rendering cue seed={seed} ...")
     written = run("audio_minimax_music_3", {
-        "caption": text, "lyrics": lyrics_plan(sections_for(round(seconds / 11.1)), seconds),
+        "caption": text, "lyrics": sheet,
         "duration": PINNED_DURATION, "seed": seed, "steps": 30,
         "cfg_scale": 1.7, "top_k": 50, "format": "flac",
         "filename_prefix": f"CUE-{book.name[:8]}-{seed}"}, timeout=1800)
     dest = dest_dir / f"cue-{seed}{written[0].suffix or '.flac'}"
     dest.write_bytes(written[0].read_bytes())
-    stamp_cue(dest, stamp)
+    stamp_cue(dest, stamp, text, sheet)
     return dest
 
 
@@ -90,7 +96,7 @@ def candidate(dest: Path, seed: int) -> dict:
             "title_impact": round(moment[1], 2) if moment else None}
 
 
-def main(book_glob: str, seeds: list[int], seconds: float = 100.0) -> None:
+def main(book_glob: str, seeds: list[int]) -> None:
     """Render candidate cues FOR THIS BOOK and keep the one that measures best.
 
     `palette` used to be the second argument and it was the book's VISUAL grade
@@ -107,7 +113,8 @@ def main(book_glob: str, seeds: list[int], seconds: float = 100.0) -> None:
     print(f"  lead: {tone.lead_instrument}")
     candidates: list[dict] = []
     for seed in seeds:
-        entry = candidate(render_cue(book, caption(tone), seed, dest_dir, seconds), seed)
+        entry = candidate(render_cue(book, caption(tone), seed, dest_dir,
+                                     lyrics_plan(tone)), seed)
         print(f"  seed {seed}: {entry['seconds']}s  LRA {entry['lra']} LU  "
               f"fitness {entry['fitness']}  grid {len(entry['grid'])}  "
               f"title {entry['title_impact']}")
@@ -115,8 +122,9 @@ def main(book_glob: str, seeds: list[int], seconds: float = 100.0) -> None:
     best = max(candidates, key=lambda c: c["fitness"])
     (dest_dir / "cues.json").write_text(
         json.dumps({"chosen": best["seed"], "chosen_path": best["rel_path"],
-                    "caption": caption(tone), "tone": asdict(tone),
-                    "candidates": candidates}, indent=1), encoding="utf-8")
+                    "caption": caption(tone), "lyrics": lyrics_plan(tone),
+                    "tone": asdict(tone), "candidates": candidates}, indent=1),
+        encoding="utf-8")
     print(f"chosen: seed {best['seed']} (fitness {best['fitness']}, title at {best['title_impact']}s)")
 
 

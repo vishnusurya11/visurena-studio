@@ -19,12 +19,13 @@ from studio.trailer_spec import RefSheet
 
 STYLE = (
     "Cinematic live-action photograph, anamorphic widescreen, natural film grain, "
-    "photoreal, no stylisation, no illustration."
+    "photoreal: a physical 35 mm still of real skin, real fabric and real light "
+    "falling through real dust."
 )
 SHEET_FRAME = (
     "Head-and-shoulders portrait to mid-chest, the head filling the upper half "
     "of the frame, on a plain neutral mid-grey backdrop, even soft frontal "
-    "light with both eyes lit, no cast shadows, neutral expression with the "
+    "light with both eyes lit, shadowless, neutral expression with the "
     "mouth closed, sharp focus on the face."
 )
 """A bust, not a full figure.
@@ -36,10 +37,20 @@ encoder got the same handful.  A controlled A/B moved the face to 254-312px by
 changing the framing alone, roughly 25x the pixels for free.
 """
 PLATE_FRAME = (
-    "Establishing wide plate of an empty location, no people, no figures, "
-    "deep focus, even natural light."
+    "Establishing wide plate of an empty, unoccupied location: its furniture, "
+    "walls, weather and light are the only presences in the frame. Deep focus, "
+    "even natural light."
 )
-NO_TYPE = "No text, no lettering, no signage, no watermark, no subtitles."
+"""Naming the occupants is what empties the frame.
+
+"no people, no figures" returned a bar full of drinkers.  The model fills the
+subject slot with something; a plate prompt has to say what.
+"""
+PLAIN_SURFACES = (
+    "Every surface is plain and unlettered: shop boards are blank painted wood, "
+    "walls are bare plaster and brick, and paper is unmarked.")
+"""The image-side twin of `trailer_shot.PLAIN_SURFACES`, one register shorter
+because a reference sheet has fewer surfaces in it than a street."""
 
 
 def character_prompt(physical: str, palette: str) -> str:
@@ -51,13 +62,13 @@ def character_prompt(physical: str, palette: str) -> str:
     registered.  Naming who this is before saying how to photograph them is
     what separates them.
     """
-    return " ".join([physical.strip(), SHEET_FRAME, STYLE, palette, NO_TYPE])
+    return " ".join([physical.strip(), SHEET_FRAME, STYLE, palette, PLAIN_SURFACES])
 
 
 def location_prompt(described: str, palette: str) -> str:
     """A plate prompt.  Emptiness is stated because a plate with a figure in it
     binds that figure into every shot restaged from it."""
-    return " ".join([STYLE, palette, PLATE_FRAME, described.strip(), NO_TYPE])
+    return " ".join([STYLE, palette, PLATE_FRAME, described.strip(), PLAIN_SURFACES])
 
 
 def physical_of(character: dict) -> str:
@@ -336,6 +347,9 @@ PALETTES = {
 """One grade line per register, so the look is DERIVED from story.json and no
 run ever needs a hand-typed palette.  Every line stays inside the house look
 (06-style): desaturated, practical light, period-appropriate."""
+
+
+MODEL_TEXT = (STYLE, SHEET_FRAME, PLATE_FRAME, PLAIN_SURFACES, PALETTES)
 
 
 def palette_for(register: str, setting: str = "") -> str:

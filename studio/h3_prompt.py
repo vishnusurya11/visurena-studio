@@ -64,8 +64,8 @@ def retention_analysis(has_character: bool, has_second: bool = False) -> str:
         return ("<Subject 1>: fully_preserved. The face, build, hair and "
                 "clothing are carried into the new scene unchanged.\n"
                 "<Subject 2>: fully_preserved. The face, build, hair and "
-                "clothing are carried into the new scene unchanged; the two "
-                "people are never merged into one.")
+                "clothing are carried into the new scene unchanged; each of "
+                "the two keeps their own face and body throughout.")
     if has_character:
         return ("<Subject 1>: fully_preserved. The face, build, hair and "
                 "clothing are carried into the new scene unchanged; only the "
@@ -95,7 +95,8 @@ def summary(action: str, place: str, seconds: float, has_second: bool = False) -
             if has_second else "The identity of the person in <Subject 1> is")
     return (f"[Reference to Video] A single continuous {seconds:.0f}-second take. "
             f"{action.rstrip('.')}, in {place}. {kept} preserved exactly; the "
-            f"camera moves once, and the take does not cut.")
+            f"camera moves once, and the take runs unbroken from the "
+            f"first frame to the last.")
 
 
 def detailed_description(character: str, place: str, action: str,
@@ -110,14 +111,17 @@ def detailed_description(character: str, place: str, action: str,
     to the editor from one render.
     """
     who = (f"The person in <Subject 1>: {character} " if character
-           else "No people are visible in this shot. ")
+           else f"The shot holds an empty {place}: its furniture, walls, "
+                f"weather and light are the only occupants, and the only "
+                f"movement is the air and the light itself. ")
     if character and second:
         who += (f"The person in <Subject 2>: {second} They are two different "
                 f"people, each keeping their own face throughout. ")
     body = [
         f"{style}",
         f"The setting is {place}, established in the first moments of the take "
-        f"and held throughout; the geometry of the room does not change.",
+        f"and held throughout; the room keeps one fixed geometry, every "
+        f"wall and doorway staying where the first frame put it.",
         who,
         f"The take opens on this framing. {open_framing}",
         f"The action of the shot is as follows. {action}",
@@ -126,7 +130,7 @@ def detailed_description(character: str, place: str, action: str,
         f"{close_framing}",
         f"The light is motivated by a single dominant source within the scene, "
         f"falling across the subject from one side so that the shadowed side of "
-        f"the face retains detail rather than going to black. Dust and haze in "
+        f"the face keeps visible detail into its darkest corner. Dust and haze in "
         f"the air catch that light and make its direction visible. Surfaces "
         f"read as physical materials with weight and age: cloth with a nap, wood "
         f"with a grain, metal with tarnish, glass with reflections that move as "
@@ -134,35 +138,49 @@ def detailed_description(character: str, place: str, action: str,
         f"Parallax is visible throughout the move: objects nearest the lens "
         f"travel across the frame faster than the background behind them, and "
         f"the relationship between foreground and background changes as the "
-        f"camera travels. This is what makes the movement read as a camera in a "
-        f"real space rather than a still image being scaled.",
-        f"The performance is contained and specific rather than broad. Small "
-        f"movements of the head, the eyes and the hands carry the moment; there "
-        f"is no exaggerated gesture and no acting toward the lens. The subject "
-        f"does not look into the camera at any point.",
+        f"camera travels. True parallax is what makes the movement read as a "
+        f"camera carried through a real space.",
+        f"The performance is contained and specific. Every gesture is small "
+        f"and lived-in -- the head, the eyes and the hands carry the moment -- "
+        f"and the subject's attention stays inside the scene, on the person or "
+        f"the object the action concerns, for the whole take. The lens is an "
+        f"unnoticed observer.",
         f"Motion is continuous and physically plausible from the first frame to "
-        f"the last. Nothing in the frame teleports, duplicates, or changes "
-        f"identity partway through. Hands keep five fingers, objects keep their "
-        f"shape, and anything the subject is holding stays in their grip.",
-        f"The entire {seconds:.1f} seconds is one continuous take with no cuts, "
-        f"no dissolves, no speed changes and no camera stops.",
+        f"the last. Every object and every person keeps one continuous "
+        f"position, one body and one identity from beginning to end. Hands keep "
+        f"five fingers, objects keep their shape, and anything the subject is "
+        f"holding stays in their grip.",
+        f"The entire {seconds:.1f} seconds is one continuous take: a single "
+        f"unbroken shot at one constant speed, the camera in one uninterrupted "
+        f"motion from the first frame to the last.",
     ]
     return " ".join(part.strip() for part in body if part.strip())
 
 
 def soundscape(place: str) -> str:
     """Ambience and physical sound: what the microphone in the room hears."""
-    return (f"The ambience of {place}, recorded close and dry: the room tone of "
-            f"the space itself, the small physical sounds the action makes -- "
-            f"cloth, footfall, breath, the contact of objects with surfaces. No "
-            f"speech, no crowd, no music within the scene.")
+    return (f"The ambience of {place}, recorded close and dry. The audio of "
+            f"this scene is room tone and physical sound alone: the tone of the "
+            f"space itself, and the small sounds the action makes -- cloth, "
+            f"footfall, breath, the contact of objects with surfaces.")
 
 
 def music(arc: str) -> str:
-    """Score the characters cannot hear.  A trailer supplies its own; this
-    section exists to tell H3 NOT to invent one that fights it."""
-    return ("No non-diegetic music. The take is scored externally and any music "
-            "generated here would fight the trailer's own cue.")
+    """Score the characters cannot hear.
+
+    A trailer supplies its own cue, so this section says where the score comes
+    from rather than asking for its absence: naming what fills the slot is the
+    only form of exclusion these encoders act on.
+    """
+    del arc  # the arc belongs to the trailer's cue, which is laid on later
+    return ("This take carries its diegetic sound alone; the trailer's own cue "
+            "is laid over the finished picture afterwards.")
+
+
+MODEL_TEXT = (SECTIONS,)
+"""The prose in this module is built per shot; `tests/test_affirm.py` drives
+`build()` with a fixture, which is the only way to check a sentence that is
+assembled from six of them."""
 
 
 def build(style: str, character: str, place: str, action: str,

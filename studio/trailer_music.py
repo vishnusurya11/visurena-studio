@@ -1,70 +1,33 @@
-"""The cue, which is the timeline.
+"""How long a cue is allowed to run, and why that is the only knob here.
 
-Three measured facts about MiniMax Music 3 shape everything here:
+`max_duration` is a CAP, not a target and not a seed.  The node's own tooltip
+says "Maximum duration in seconds; the model can end the song earlier", the AR
+loop stops on `<|audio_end|>` or at the frame cap, and seven delivered cues
+under a 150 s cap ended of their own accord at 101.9, 118.8, 128.5, 132.4,
+132.4, 137.8 and 146.8 s.  The old docstring here called it "a seed, not a
+ceiling" and pinned 150; four of five measured cues then ran 128-150 s against
+a sheet documented as "about a hundred seconds", and the cut had to stretch to
+meet them.
 
-1.  SECTION COUNT sets length, not any duration field -- the text encoder is
-    an autoregressive model that decides the structure before diffusion runs,
-    and `build_prompt()` contains no duration token at all.  ~11.1s a section.
-2.  `duration` is a SECOND SEED.  Changing it re-rolls the whole composition
-    (waveform correlation between takes at 30/60/150 was -0.03).  So it is
-    pinned, and iteration happens on seed alone.
-3.  CAPTION PROSE sets dynamic shape.  One word decided it: a cue told
-    "relentless throughout" came back at 4.0 LU range with 3 stopdowns; the
-    same plan told "starts near-silent... hard full stop" came back at 9.7 LU
-    with 9.  A trailer needs the second one -- Lieu's rule is that the stops
-    are what make the fast parts feel fast.
+So it is pinned at the trailer's real need instead.  The staircase in
+`music_tone.STAIRCASE` is 38 bars plus a tail: at 92-100 BPM that is 101-104 s
+with the title hit at 95% of the runtime, which is exactly where
+`beatmap.title_moment` looks for it.
 
-Vocals are excluded by SAYING NOTHING ABOUT VOICES, never by negating them.
-Negation ("no vocals, no backing vocals") reliably produces humming.
+The section count is what actually decides length, and the old "~11.1 s per
+section" figure was measured while every section carried sung prose -- the
+per-section time was the time to SING the note.  With a `(instrumental)` sheet
+that number has to be re-measured, so nothing here depends on it any more.
 """
 from __future__ import annotations
 
-SECONDS_PER_SECTION = 11.1
-"""Measured mean across cues: 96.08s/9 and 99.87s/9."""
+PINNED_DURATION = 108
+"""The cap, pinned once and left alone.
 
-PINNED_DURATION = 150
-"""Never vary this.  It is a seed, not a ceiling."""
-
-SECTIONS: list[tuple[str, str]] = [
-    ("Intro", "a single sustained low note, room tone"),
-    ("Verse", "low strings ostinato enters, quiet"),
-    ("Build", "a solo violin rises over the ostinato"),
-    ("Pre-Chorus", "taiko hits land on the downbeats"),
-    ("Chorus", "full brass swell, strings high"),
-    ("Bridge", "drop away to near silence, one instrument"),
-    ("Final Build", "everything returns, accelerating"),
-    ("Hit", "one impact, then silence"),
-    ("Outro", "a single low note, fading"),
-]
-"""Nine sections ~= 100s.  The [Bridge] near-silence is where a line over
-black goes, and [Hit] is what the title card is cut to."""
-
-
-def section_count_for(seconds: float) -> int:
-    """How many sections to ask for to land near a target length."""
-    return max(1, round(seconds / SECONDS_PER_SECTION))
-
-
-def lyrics_plan(sections: list[tuple[str, str]] | None = None) -> str:
-    """The tag-only lyric plan.  Parentheticals ARE submitted as lyric text --
-    normalize_lyrics only lowercases the [tags] -- so they stay terse."""
-    return "\n\n".join(f"[{tag}]\n({note})" for tag, note in (sections or SECTIONS))
-
-
-def caption(palette: str, bpm: int = 92, key: str = "D minor") -> str:
-    """A caption in MiniMax's own label grammar, narrating the arc.
-
-    Note it says "entirely instrumental" and then stops -- it never lists the
-    voices it does not want.
-    """
-    return (
-        f"Global Metadata: Cinematic Orchestral, Epic Soundtrack, dark orchestral "
-        f"trailer cue. {bpm} BPM, {key}. {palette} "
-        "Arrangement: starts near-silent with a single sustained low note and room "
-        "tone. Low strings ostinato enters underneath. A solo violin rises over it. "
-        "Taiko hits land on the downbeats from the halfway point and brass swells "
-        "beneath them. The whole arrangement drops away to near silence for one "
-        "passage, then returns accelerating, rising to a hard full stop with one "
-        "beat of total silence, then a single low impact and a long decay. "
-        "Entirely instrumental."
-    )
+38 bars plus a five-second tail lands at 101-104 s across 84-120 BPM; 108
+gives the model a few seconds of headroom to finish its own decay and cuts a
+runaway off before the trailer has to stretch to it.  Iteration happens on
+seed, never on this number: waveform correlation between the same caption
+rendered at 30, 60 and 150 s was -0.03, so changing it re-rolls the whole
+composition.
+"""

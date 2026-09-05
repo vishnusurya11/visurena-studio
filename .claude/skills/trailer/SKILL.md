@@ -227,8 +227,16 @@ From `comfy_extras/nodes_minimax_h3.py`, encoded in `studio/h3.py`:
 - **8 steps, not 4.** At 4 steps the final Euler step drops sigma from ~0.72
   straight to zero — one step doing three quarters of the denoising. That is
   the arithmetic behind "mushy" and "motion smear".
-- **No CFG, no negative prompt.** `BasicGuider` has neither. Put negations in
-  the positive prompt; there is nowhere else.
+- **No CFG, no negative prompt.** `BasicGuider` has neither, so there is
+  nowhere to put an exclusion — and the fix is not to smuggle it into the
+  positive prompt. **FILL THE SLOT: name what occupies the frame where the
+  unwanted thing would be.** Empty room → "its furniture, walls, weather and
+  light are the only occupants". No text → "shop boards are blank painted
+  wood, paper is unmarked". No cuts → "one continuous unbroken take at one
+  constant speed". Measured twice, in this repo: "no signage, no lettering"
+  produced CRISTERION on a shop board (:275) and "no people, no figures"
+  produced a bar full of drinkers (:281). `uv run python -m studio.affirm
+  --scan studio scripts` is the gate; `tests/test_affirm.py` is the test.
 - i2v resizes the start frame with `crop="disabled"` — **a plain stretch**. A
   keyframe at the wrong aspect is distorted, then animated. Match exactly.
 

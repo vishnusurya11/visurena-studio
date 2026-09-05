@@ -18,15 +18,25 @@ from scripts.trailer import step_03_music as step
 from studio import beatmap, db, llm
 from studio.beatmap import RATE, track_autocorrelation
 from studio.learnings import load
-from studio.music_tone import Tone, caption
+from studio.affirm import negations
+from studio.music_tone import Tone, caption, lyrics_plan
 from studio.trailer_run import RunContext
 from studio.trailer_stage_spec import Metre
 from test_metre import click_track, write_wav
 
-TONE = Tone(genre="Chamber noir", bpm=120, key="G", scale="minor",
-            lead_instrument="a solo violin", percussion="a walking double bass and a pocket watch",
-            sonics="dry and close", progression="curious, then a pursuit",
-            imagery="a gaslit room", instruments="cello and double bass")
+TONE = Tone(
+    genre="Period chamber score", tonal_centre="G", mode="aeolian",
+    mood=("curious", "relentless", "grieving"), bpm=120, time_signature="4/4",
+    tempo_plan="quarter notes, then eighths, then sixteenths over the same beat",
+    chord_plan="one centre throughout, brightening to the fourth degree at the pursuit",
+    pulse_carriers=("a ticking pocket watch", "pizzicato cello and double bass"),
+    signature_sound="a detuned upright piano playing the figure",
+    lead_instrument="a solo violin, close-miked",
+    supporting_instruments="cello and double bass",
+    register_arc="violin above, piano bass octaves below",
+    dynamics_arc="curious, then a pursuit", mix_space="dry and close",
+    era_reference="one ribbon microphone, an 1890s parlour session",
+    imagery="a gaslit room", hit="one low bare open fifth in unison")
 
 
 def cue(troughs=((20.0, 24.0),), stop=(49.0, 51.5), seconds=60.0, seed=0) -> np.ndarray:
@@ -75,8 +85,20 @@ def fake_comfy(tmp_path, kinds: dict[int, str], calls: list[dict]):
 def fake_llm(calls: list[str]):
     def structured(tier, prompt, schema, **kw):
         calls.append(prompt)
-        return schema(percussion="a taiko under a ticking hi-hat, struck on every beat",
-                      instruments="cello and a bass drum holding the grid")
+        return schema(pulse_carriers=["a ticking pocket watch", "a field snare on two and four"],
+                      supporting_instruments="cello and a bass drum holding the grid")
+    return structured
+
+
+def refusing_llm(calls: list[str]):
+    """A model that first answers with an absence, then names what plays."""
+    def structured(tier, prompt, schema, **kw):
+        calls.append(prompt)
+        if len(calls) % 2:
+            return schema(pulse_carriers=["a knuckle on wood", "no drum kit at any point"],
+                          supporting_instruments="cello and a bass drum holding the grid")
+        return schema(pulse_carriers=["a ticking pocket watch", "a field snare on two and four"],
+                      supporting_instruments="cello and a bass drum holding the grid")
     return structured
 
 
@@ -100,10 +122,12 @@ class TestSeeds:
         monkeypatch.setattr(build_music, "run", fake_comfy(tmp_path, {}, calls))
         dest = tmp_path / "music"
         dest.mkdir()
-        first = build_music.render_cue(tmp_path, "caption A", 5, dest, 60.0)
-        again = build_music.render_cue(tmp_path, "caption A", 5, dest, 60.0)
-        moved = build_music.render_cue(tmp_path, "caption B", 5, dest, 60.0)
-        assert first == again == moved == dest / "cue-5.wav" and len(calls) == 2
+        sheet = "[Intro]\n(instrumental)"
+        first = build_music.render_cue(tmp_path, "caption A", 5, dest, sheet)
+        again = build_music.render_cue(tmp_path, "caption A", 5, dest, sheet)
+        moved = build_music.render_cue(tmp_path, "caption B", 5, dest, sheet)
+        resung = build_music.render_cue(tmp_path, "caption B", 5, dest, "[Intro]\nAh...")
+        assert first == again == moved == resung == dest / "cue-5.wav" and len(calls) == 3
 
     def test_candidate_row_measures_the_rendered_file(self, tmp_path):
         row = build_music.candidate(write_wav(tmp_path / "cue-9.wav", cue(**KINDS["two"])), 9)
@@ -153,6 +177,18 @@ class TestSeeds:
         assert step.best_of([rubato], 120).seed == 2
         assert step.best_of([], 120) is None
 
+    def test_form_outranks_a_steady_grid(self, tmp_path):
+        """Run 10's chosen seed had the steadiest grid of its family and was a
+        plateau from 8 s that ended in a fade.  A staircase on a wobblier grid
+        is the better trailer: the cut can follow onsets, and it cannot invent
+        a climax that is missing."""
+        two = beatmap.metre(write_wav(tmp_path / "a.wav", cue(**KINDS["two"])), seed=1,
+                            rel_path="a.wav", track=track_autocorrelation)
+        plateau = two.model_copy(update={"seed": 7, "fitness": 9.0})
+        staircase = two.model_copy(update={"seed": 8, "grid": "onsets", "fitness": 1.0})
+        assert step.best_of([plateau, staircase], 120, {7: 0, 8: 2}).seed == 8
+        assert step.best_of([plateau, staircase], 120).seed == 7
+
     def test_reauthor_keeps_the_register_and_the_tempo_and_swaps_the_pulse(self, monkeypatch):
         """The asked bpm is the tone's, not the reauthor's: a sheet that could
         choose 80-140 would move the goal the gate measures against."""
@@ -160,9 +196,85 @@ class TestSeeds:
         monkeypatch.setattr(llm, "structured", fake_llm(calls))
         tone = step.reauthor(TONE, None)
         assert tone.genre == TONE.genre and tone.lead_instrument == TONE.lead_instrument
-        assert tone.bpm == TONE.bpm and tone.percussion != TONE.percussion
-        assert "bars in mode" in calls[0] and "hold 120 BPM" in calls[0]
+        assert tone.bpm == TONE.bpm and tone.pulse_carriers != TONE.pulse_carriers
+        assert "bars in mode" in calls[0] and "around 120 BPM" in calls[0]
         assert "bpm" not in step.CaptionSheet.model_fields
+
+    def test_the_reauthor_brief_names_what_plays(self):
+        """Run 10 asked for "instruments STRUCK on every beat ... not double
+        it, not a triple subdivision".  A metronome satisfies every word of
+        that sentence, and a click track is what came back."""
+        assert negations(step.reauthor_prompt(TONE, None)) == []
+        assert "STRUCK on every beat" not in step.reauthor_prompt(TONE, None)
+
+    def test_a_rewrite_that_names_an_absence_is_refused_and_asked_again(self, monkeypatch):
+        """The reauthor writes text that becomes conditioning, so its answer
+        goes through the same gate the authored tone does."""
+        calls: list[str] = []
+        monkeypatch.setattr(llm, "structured", refusing_llm(calls))
+        tone = step.reauthor(TONE, None)
+        assert len(calls) == 2 and "refused" in calls[1]
+        assert "a field snare on two and four" in tone.pulse_carriers
+
+
+class TestForm:
+    """The two terms that tell a trailer cue from a song at the same tempo.
+
+    Both are read off the envelope the step already measures, so they cost
+    nothing extra, and both are stated as synthetic arrays here because the
+    shapes are the whole point: a staircase, and an ending that stops.
+    """
+
+    def envelope(self, tenths: list[float], seconds: float = 50.0):
+        """(times, dB) whose ten tenths hold the levels given."""
+        count = int(seconds / beatmap.WINDOW)
+        db = np.concatenate([np.full(count // 10, level) for level in tenths])
+        return np.arange(len(db)) * beatmap.WINDOW, db
+
+    def test_a_plateau_is_not_a_staircase(self):
+        """The shipped cue: tenths 8-9 sat 1.6 dB over tenths 2-3, and every
+        other term in the fitness formula passed it."""
+        times, db = self.envelope([-17.9, -19.2, -15.9, -15.4, -11.2,
+                                   -14.4, -17.7, -17.0, -14.6, -23.4])
+        assert not step.climbs(times, db)
+
+    def test_three_waves_each_louder_than_the_last_is(self):
+        times, db = self.envelope([-30, -22, -20, -18, -16, -14, -12, -10, -6, -12])
+        assert step.climbs(times, db)
+
+    def test_a_late_climb_whose_peak_comes_early_is_refused(self):
+        """Loud early and loud late is two peaks, not a staircase; the cut
+        wants its shortest shots where the loudest five seconds are."""
+        times, db = self.envelope([-30, -22, -20, -4, -16, -14, -12, -10, -12, -14])
+        assert not step.climbs(times, db)
+
+    def test_the_loudest_five_seconds_are_located(self):
+        times, db = self.envelope([-30, -22, -20, -18, -16, -14, -12, -10, -6, -12])
+        assert 0.75 <= step.loudest_start(times, db) <= 0.92
+
+    def test_every_tenth_is_measured(self):
+        times, db = self.envelope([-30, -22, -20, -18, -16, -14, -12, -10, -6, -12])
+        assert step.tenth_medians(db) == [-30, -22, -20, -18, -16, -14, -12, -10, -6, -12]
+
+    def test_silence_after_the_title_hit_is_a_stop(self):
+        times, db = self.envelope([-30, -20, -20, -20, -20, -20, -20, -20, -6, -40])
+        assert step.stops_dead(times, db, title_hit=40.5, bar=2.4)
+
+    def test_a_cue_that_keeps_going_after_the_hit_is_a_fade(self):
+        """cue-3002 fell monotonically over five seconds from 97.1 s; a fade
+        under the title card reads as a song ending."""
+        times, db = self.envelope([-30, -20, -20, -20, -20, -20, -6, -30, -6, -30])
+        assert not step.stops_dead(times, db, title_hit=30.0, bar=2.4)
+
+    def test_a_cue_with_no_title_hit_has_nothing_to_stop_after(self):
+        times, db = self.envelope([-20] * 10)
+        assert not step.stops_dead(times, db, title_hit=None, bar=2.4)
+
+    def test_form_of_scores_a_rendered_seed_out_of_two(self, tmp_path):
+        rendered = write_wav(tmp_path / "a.wav", cue(**KINDS["two"]))
+        found = beatmap.metre(rendered, seed=1, rel_path="a.wav",
+                              track=track_autocorrelation)
+        assert 0 <= step.form_of(rendered, found) <= 2
 
 
 class TestStep:

@@ -66,8 +66,11 @@ recognisable tell of generated video.
 - fps 24 is a module constant, not a parameter.
 - **8 steps, not 4** — at 4 the final Euler step drops sigma ~0.72 to zero, one
   step doing three quarters of the denoising.
-- No CFG, no negative prompt. `BasicGuider` has neither; negations go in the
-  positive prompt.
+- No CFG, no negative prompt. `BasicGuider` has neither — and an exclusion
+  moved into the positive prompt is still a request for the thing it names.
+  **Fill the slot instead**: name the occupant, the surface or the motion that
+  takes the place of what you are excluding (`studio/affirm.py`, and the two
+  measured failures in the parent SKILL).
 - i2v resizes the start frame with `crop="disabled"` — a plain stretch.
 
 ## LoRA

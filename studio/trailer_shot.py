@@ -10,13 +10,25 @@ Three things go in, and each is there because leaving it out has a known cost:
     nothing about the camera, and its vocabulary is a closed set written as
     prose with amplitude and speed, not bracket tags.  `[Push in]` is the
     HOSTED Hailuo dialect and does nothing here.
-*   The negatives, inside the positive prompt.  H3's guider has no negative
-    input at all -- there is literally nowhere else to put them.
+*   A sentence about the surfaces.  H3's guider has no negative input at
+    all, so exclusions have to be made by DESCRIBING WHAT IS THERE instead:
+    blank painted boards rather than "no signage", an empty room with its
+    furniture named rather than "no people".  The negative form was measured
+    to fail twice -- CRISTERION on a shop board, and a bar full of drinkers.
 """
 from __future__ import annotations
 
-NO_TYPE = ("All frames free of text: no signage, no lettering, no subtitles, "
-           "no watermarks, no captions, no on-screen writing.")
+PLAIN_SURFACES = (
+    "Every surface in frame is plain and unlettered: shop boards are blank "
+    "painted wood, walls are bare plaster and brick, windows are clear glass, "
+    "and paper on desks and tables is unmarked.")
+"""What occupies the slot lettering would occupy.
+
+`NO_TYPE` said "no signage, no lettering, no subtitles" and a Victorian street
+plate came back with the word CRISTERION painted on a shop board.  A text
+encoder embeds "signage" whether or not "no" precedes it; describing the blank
+board is what leaves it blank.
+"""
 
 CAMERA: dict[str, tuple[str, ...]] = {
     "quiet": (
@@ -105,19 +117,20 @@ def shot_prompt(style: str, physical: list[str], place: str, action: str,
         # contradict it rather than reinforce it.
         subject = "The person shown in <Picture 1> appears in this scene."
     else:
-        subject = "No people are visible."
+        subject = ("The place stands empty; its furniture, walls, weather "
+                   "and light are the only occupants.")
     return (
         f"{style} {subject} "
         f"The location is {place}. "
         f"{framing_for(arc) if physical else ''} "
         f"{action} {camera_for(arc, index)} "
-        f"The shot runs {seconds:.1f} seconds as one continuous take with no cuts. "
-        f"{NO_TYPE}"
+        f"The shot runs {seconds:.1f} seconds as one continuous unbroken take. "
+        f"{PLAIN_SURFACES}"
     )
 
 
 SHEET_WORDS = ("character reference", "mid-grey backdrop", "studio light",
-               "facing camera", "full figure", "no cast shadows", "turnaround")
+               "facing camera", "full figure", "shadowless", "turnaround")
 """Language that belongs on a reference SHEET and must never reach a shot.
 
 A reference sheet prompt and a shot prompt describe opposite things: one wants
@@ -126,6 +139,9 @@ Feeding the sheet prompt to the video model asks it to animate a character
 sheet.  That happened -- a fragile `split("sharp focus.")` silently failed to
 match and passed the entire sheet prompt through as the character description.
 """
+
+
+MODEL_TEXT = (PLAIN_SURFACES, CAMERA, FRAMING)
 
 
 def is_scene_safe(description: str) -> bool:

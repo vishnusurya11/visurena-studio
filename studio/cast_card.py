@@ -42,12 +42,15 @@ GARMENT = ("a charcoal frock coat", "a bottle-green velvet jacket",
             "a dark green hunting jacket", "a grey astrakhan coat",
             "a worn leather work coat",)
 NECKWEAR = ("a stiff wing collar and black stock", "a soft turned-down collar",
-            "a loosely knotted red neckerchief", "a bare throat, no collar",
+            "a loosely knotted red neckerchief", "a bare throat above a collarless shirt",
             "a white cravat pinned with a stud", "a clerical black tie",
             "a checked muffler", "a leather cord at the throat",
             "a lace collar",
             "a black silk scarf", "a high starched collar",
-            "an open shirt with no tie",)
+            "an open shirt with the collar unbuttoned",)
+
+MODEL_TEXT = (HEADGEAR, FACIAL_HAIR, GARMENT, NECKWEAR)
+
 
 ROLE_ITEMS = {
     "headgear": {"policeman": ("a custodian helmet",)},

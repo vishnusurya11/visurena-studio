@@ -38,8 +38,14 @@ Director; never write past it and hope S4 invents the missing piece.
   scene demands one unbroken move — justify it in the shot's `notes`.
 - Track continuity state that only moves one way (damage, blood, weather) and say
   its value in every shot, so S4 can't reset it.
-- Every video prompt you draft ends with a NEGATIVE line:
-  "No on-screen text, no watermark, no modern objects, no morphing limbs or hands."
+- Every video prompt you draft ends with a FILL line — what occupies the
+  frame where the unwanted thing would be, never a list of absences:
+  "Every surface is plain and unlettered, shop boards blank painted wood and
+  paper unmarked; every object in frame is period-made; hands keep five
+  fingers and every limb keeps one shape from the first frame to the last."
+  A text encoder embeds "watermark" whether or not "no" precedes it: this
+  studio measured "no signage, no lettering" producing the word CRISTERION on
+  a shop board, and "no people" producing a room full of drinkers.
 
 ## Output — `media\shorts\<yyyymmddhhmmss>_<name>\shots.json`
 
@@ -57,7 +63,7 @@ Director; never write past it and hope S4 invents the missing piece.
     "continuity_state": "one-way state at this shot, e.g. armour damage level, blood, dust",
     "characters": ["id from scene.json"], "location": "id", "props": ["id"],
     "asset_sheets": ["assets\\characters\\kaladin_sheet.png", "..."],
-    "video_prompt_draft": "STYLE_FORMULA_PLACEHOLDER + shot description + negative line",
+    "video_prompt_draft": "STYLE_FORMULA_PLACEHOLDER + shot description + fill line",
     "notes": ""
   }]
 }
