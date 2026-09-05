@@ -61,6 +61,13 @@ class TestTakeValues:
         assert clips.FRAMING["medium"] not in values["prompt"]
         assert values["prompt"].count(clips.FRAMING["close"]) == 2
 
+    def test_two_cast_members_become_two_subjects_not_one_person(self):
+        refs = dict(REFS, **{"char-watson": dict(REFS["char-holmes"], ref_id="char-watson",
+                                                  physical="A stocky man with a moustache.")})
+        prompt = clips.take_values(beat(cast=("holmes", "watson")), plan(), refs, "noir", seed=7)["prompt"]
+        assert "<Subject 2>: The second person" in prompt and "moustache" in prompt
+        assert "hawk nose" in prompt.split("<Subject 2>")[0]
+
     def test_reference_sheet_language_is_refused(self):
         refs = {k: dict(v) for k, v in REFS.items()}
         refs["char-holmes"]["physical"] = "A tall thin man with a hawk nose, full figure on a mid-grey backdrop."

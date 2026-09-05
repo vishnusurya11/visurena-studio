@@ -100,6 +100,12 @@ class TestParse:
         assert "3 frames" in prompt and "same person" in prompt
         assert "one person in this image" not in prompt
 
+    def test_the_prompt_can_single_out_one_of_two_people(self):
+        prompt = describe.prompt_for(frames=3, whom="the man with the moustache")
+        assert "the man with the moustache" in prompt and "ignore everyone else" in prompt
+        assert "3 frames" in prompt and "same person" not in prompt
+        assert all(trait in prompt for trait in TRAITS)
+
 
 class TestDescribe:
     def test_describe_stages_the_image_and_runs_the_caption_workflow(self, tmp_path, monkeypatch):

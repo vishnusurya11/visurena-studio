@@ -75,3 +75,28 @@ class TestDetailedDescription:
                                        ("character", "place", "action", "open_framing",
                                         "close_framing", "camera", "seconds", "style")})
         assert "no cuts" in body or "continuous" in body
+
+
+class TestTwoSubjects:
+    """A two-shot binds two faces: the second person takes the second slot and
+    the place goes by prompt.  Not the blind path yet -- the A/B decides."""
+    WATSON = "a stocky moustached man of thirty with a weathered face"
+
+    def test_the_second_person_takes_the_second_slot(self):
+        document = build(**TAKE, second=self.WATSON)
+        assert "<Subject 2>: The second person" in document
+        assert "weathered face" in document and "hawk-like nose" in document
+
+    def test_both_people_are_fully_preserved_and_the_place_is_not_a_subject(self):
+        from studio.h3_prompt import retention_analysis
+        text = retention_analysis(True, has_second=True)
+        assert text.count("fully_preserved") == 2 and "attribute_transfer" not in text
+        assert "221B" not in build(**TAKE, second=self.WATSON).split("summary:")[0]
+
+    def test_the_body_says_they_are_two_different_people(self):
+        document = build(**TAKE, second=self.WATSON)
+        assert "two different people" in document
+        assert "identities of the people in <Subject 1> and <Subject 2>" in document
+
+    def test_without_a_second_person_nothing_changes(self):
+        assert build(**TAKE, second="") == build(**TAKE)

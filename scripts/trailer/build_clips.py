@@ -83,6 +83,9 @@ def take_values(beat: dict, plan: dict, refs: dict, style: str, seed: int,
     and arrive at the tightest.  `tightest` overrides that arrival -- the
     identity ladder's alternate setup asks for a face the recogniser can read,
     and holds that size for the whole take.
+
+    Two cast members bound are two subjects, never one person described twice:
+    the second takes H3's second slot and the place goes by prompt.
     """
     char_ids = [r for r in bound_slots(beat, refs) if r.startswith("char-")]
     described = [visual_description(refs[c]["physical"]) for c in char_ids]
@@ -97,7 +100,8 @@ def take_values(beat: dict, plan: dict, refs: dict, style: str, seed: int,
     seconds = take_seconds(beat["beat_id"], plan)
     return {
         "prompt": h3_document(
-            style=style, character=" ".join(described),
+            style=style, character=described[0] if described else "",
+            second=described[1] if len(described) > 1 else "",
             place=refs[loc_id]["name"] if loc_id in refs else beat["location_id"],
             action=beat["image_prompt"], open_framing=FRAMING[open_size],
             close_framing=FRAMING[close], camera=beat["motion"], seconds=seconds,

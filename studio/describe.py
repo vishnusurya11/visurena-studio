@@ -123,13 +123,27 @@ class TraitCard(BaseModel):
         return nearest(info.field_name, str(value))
 
 
-def prompt_for(frames: int = 1) -> str:
+def _subject(frames: int, whom: str | None) -> str:
+    """Whom to describe: the only person, the one person across frames, or --
+    when a shot holds two people -- the one a note singles out."""
+    if whom:
+        where = ("this image" if frames == 1 else
+                 f"this image, {frames} frames of ONE shot laid side by side")
+        return (f"More than one person may be visible in {where}.  Describe for a "
+                f"casting sheet ONLY the person best matching this note, and ignore "
+                f"everyone else: {whom}.  Report what the frames show of that person, "
+                f"not what the note says.")
+    if frames == 1:
+        return "Describe the one person in this image for a casting sheet."
+    return (f"This image is {frames} frames of ONE shot laid side by side, all of the same "
+            "person.  Describe that person for a casting sheet from whichever frames show "
+            "them; a trait is unclear only if no frame shows it.")
+
+
+def prompt_for(frames: int = 1, whom: str | None = None) -> str:
     """Describe, in a closed vocabulary; never a yes/no."""
     allowed = "\n".join(f'  "{trait}": one of {list(pool)}' for trait, pool in TRAITS.items())
-    subject = ("Describe the one person in this image for a casting sheet." if frames == 1 else
-               f"This image is {frames} frames of ONE shot laid side by side, all of the same "
-               "person.  Describe that person for a casting sheet from whichever frames show "
-               "them; a trait is unclear only if no frame shows it.")
+    subject = _subject(frames, whom)
     return (subject + "  Answer with a single JSON object and nothing else, with exactly "
             "these keys:\n" + allowed +
             '\n  "description": two sentences of plain prose about their face, hair and clothes.\n'
@@ -227,13 +241,15 @@ def describe(image: Path, seed: int = 42, run: Callable | None = None) -> TraitC
     return _ask(IMAGE_WORKFLOW, {"image_1": Path(image)}, seed, run or _live(free=False))
 
 
-def describe_frames(frames: list[Path], seed: int = 42, run: Callable | None = None) -> TraitCard:
-    """The trait card of the person seen across the sampled frames of a clip."""
+def describe_frames(frames: list[Path], seed: int = 42, run: Callable | None = None,
+                    whom: str | None = None) -> TraitCard:
+    """The trait card of the person seen across the sampled frames of a clip --
+    or, given `whom`, of the one person in a two-shot that note singles out."""
     frames = [Path(f) for f in frames[:3]]
     # Named after the take: stage_image keeps the bare filename in ComfyUI's input.
     sheet = contact_sheet(frames, frames[0].parent / f"{frames[0].parent.name}-contact.png")
     return _ask(IMAGE_WORKFLOW, {"image_1": sheet}, seed, run or _live(free=True),
-                prompt=prompt_for(frames=len(frames)))
+                prompt=prompt_for(frames=len(frames), whom=whom))
 
 
 def differences(a: TraitCard, b: TraitCard) -> list[str]:

@@ -27,10 +27,20 @@ RETENTION = ("fully_preserved", "partially_preserved", "attribute_transfer",
              "weak_reference")
 
 
-def subject_definitions(character: str | None, place: str) -> str:
-    """Declare what each reference is, before anything refers to it."""
+def subject_definitions(character: str | None, place: str, second: str = "") -> str:
+    """Declare what each reference is, before anything refers to it.
+
+    Two people fill both slots and the place goes by prompt: H3 takes two
+    references, and a two-shot needs both faces more than it needs the room.
+    """
     lines = []
-    if character:
+    if character and second:
+        lines.append(f"<Subject 1>: The person whose identity, face, build and "
+                     f"dress the target video must keep. {character}")
+        lines.append(f"<Subject 2>: The second person, a different individual, "
+                     f"whose identity, face, build and dress the target video "
+                     f"must also keep. {second}")
+    elif character:
         lines.append(f"<Subject 1>: The person whose identity, face, build and "
                      f"dress the target video must keep. {character}")
         lines.append(f"<Subject 2>: {place} The location whose architecture, "
@@ -41,7 +51,7 @@ def subject_definitions(character: str | None, place: str) -> str:
     return "\n".join(lines)
 
 
-def retention_analysis(has_character: bool) -> str:
+def retention_analysis(has_character: bool, has_second: bool = False) -> str:
     """State how each reference survives into the shot.
 
     The character is fully_preserved -- that IS the binding.  The location is
@@ -50,6 +60,12 @@ def retention_analysis(has_character: bool) -> str:
     the bar's tables and gaslights.  Claiming fully_preserved for a place the
     model blends anyway would be asserting something the output contradicts.
     """
+    if has_character and has_second:
+        return ("<Subject 1>: fully_preserved. The face, build, hair and "
+                "clothing are carried into the new scene unchanged.\n"
+                "<Subject 2>: fully_preserved. The face, build, hair and "
+                "clothing are carried into the new scene unchanged; the two "
+                "people are never merged into one.")
     if has_character:
         return ("<Subject 1>: fully_preserved. The face, build, hair and "
                 "clothing are carried into the new scene unchanged; only the "
@@ -73,17 +89,18 @@ def word_count(text: str) -> int:
     return len(text.split())
 
 
-def summary(action: str, place: str, seconds: float) -> str:
+def summary(action: str, place: str, seconds: float, has_second: bool = False) -> str:
     """One paragraph, prefixed with the task type in brackets."""
+    kept = ("The identities of the people in <Subject 1> and <Subject 2> are"
+            if has_second else "The identity of the person in <Subject 1> is")
     return (f"[Reference to Video] A single continuous {seconds:.0f}-second take. "
-            f"{action.rstrip('.')}, in {place}. The identity of the person in "
-            f"<Subject 1> is preserved exactly; the camera moves once, and the "
-            f"take does not cut.")
+            f"{action.rstrip('.')}, in {place}. {kept} preserved exactly; the "
+            f"camera moves once, and the take does not cut.")
 
 
 def detailed_description(character: str, place: str, action: str,
                          open_framing: str, close_framing: str, camera: str,
-                         seconds: float, style: str) -> str:
+                         seconds: float, style: str, second: str = "") -> str:
     """The 350-500 word body, opening wide and ending tight.
 
     Written as one traversal rather than a list of shots, because the clip is a
@@ -94,6 +111,9 @@ def detailed_description(character: str, place: str, action: str,
     """
     who = (f"The person in <Subject 1>: {character} " if character
            else "No people are visible in this shot. ")
+    if character and second:
+        who += (f"The person in <Subject 2>: {second} They are two different "
+                f"people, each keeping their own face throughout. ")
     body = [
         f"{style}",
         f"The setting is {place}, established in the first moments of the take "
@@ -147,15 +167,16 @@ def music(arc: str) -> str:
 
 def build(style: str, character: str, place: str, action: str,
           open_framing: str, close_framing: str, camera: str,
-          seconds: float, arc: str = "build") -> str:
+          seconds: float, arc: str = "build", second: str = "") -> str:
     """The whole six-section document, in the order the spec names."""
+    two = bool(character and second)
     parts = {
-        "subject_definitions": subject_definitions(character or None, place),
-        "summary": summary(action, place, seconds),
-        "retention_analysis": retention_analysis(bool(character)),
+        "subject_definitions": subject_definitions(character or None, place, second),
+        "summary": summary(action, place, seconds, two),
+        "retention_analysis": retention_analysis(bool(character), two),
         "detailed_description": detailed_description(
             character, place, action, open_framing, close_framing, camera,
-            seconds, style),
+            seconds, style, second),
         "overall_soundscape": soundscape(place),
         "non_diegetic_music": music(arc),
     }
