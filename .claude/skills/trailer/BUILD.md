@@ -85,7 +85,15 @@ Evidence: `docs/analysis/research/trailer-music-structure.md`,
   gate `fitness >= 6 AND grid == metre AND slots` has never been jointly
   satisfiable by this generator; the pick (1002) is the right trade and the
   fix is upstream: a caption/section sheet the generator obeys, or a tracker
-  that reports beat regularity beside downbeat regularity. Retrospect item.
+  that reports beat regularity beside downbeat regularity. Both, measured
+  2026-09-05 on the same 16 seeds: `Grid.of` re-votes downbeats along a
+  steady beat (`beatmap.rebar`; four seeds the tracker had graded rubato by
+  alternating 2- and 4-beat bars are metric, 6 -> 9 of 16), and the caption
+  asks for the shape `title_term` grades - two full bars of silence, the
+  impact by 95%, an eight-second decay - and holds the tempo instead of
+  "the pulse doubles" (three metric seeds had read 175-201 BPM against 84).
+  The seven seeds that obeyed the old Outro gave 1.5 s of silence against a
+  3 s bar, which is what "one beat" asks for. Run 7 measures the new sheet.
 - run 6 (2026-09-04) reached step 08 and died there, twice: the concat list
   held repo-relative paths that ffmpeg resolves against the list file's
   directory (`listing_lines`), and every take was `CLIP_SECONDS` while the

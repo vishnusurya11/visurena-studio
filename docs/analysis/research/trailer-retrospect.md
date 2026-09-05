@@ -74,6 +74,25 @@ title_on_downbeat`. Sent to Telegram by hand as a 39 MB copy (defect 4).
   seed with both (1002, fitness 9.2) reads `bars_in_mode` 0.43. The fix is
   upstream — a caption/section sheet the generator obeys, or a tracker that
   reports beat regularity beside downbeat regularity — not a lower floor.
+  MEASURED 2026-09-05, all 16 seeds re-tracked on CPU: (1) the troughs are
+  not what breaks the metre — bars-in-mode outside the stopdowns/slots is
+  within 0.02 of the whole-cue figure on every seed; (2) four seeds held a
+  steady BEAT for 40–58 s (beats-in-mode 0.89–0.96) and were graded rubato
+  because the downbeat tracker alternated two- and four-beat bars
+  ({2: 29, 4: 31}) — `Grid.of` now re-votes the downbeats every modal bar
+  along the beat when the beat is steady (`beatmap.rebar`, `TestRebar`):
+  metre seeds 6 → 9 of 16, the shipped seed unchanged; (3) the generator
+  DOES obey the Outro — seven seeds put a stop before a late hit — but the
+  caption asked for "one beat of silence" and `title_term` grades a bar
+  (2001: 1.5 s against 3.0 s), and one seed landed the hit at 99%, past the
+  95% the title moment accepts; the sheet and caption now ask for two full
+  bars of silence, the impact, and an eight-second decay
+  (`test_the_closing_section_asks_for_what_the_gate_grades`); (4) three of
+  the five metric seeds read 175–201 BPM against 84 asked because the
+  caption said "the pulse doubles" — it now holds the tempo and doubles the
+  subdivision. Still open until run 7's step 03 measures the new caption:
+  the fitness floor of 6 is carried by dynamic range, so a rubato seed with
+  a title moment (1002, 9.2) outranks every metric seed (best 2.4).
 - The identity gate among men has five live traits (figure, complexion,
   build are shared on every "shares" list). Run 7 measures the unbound
   count under book-first cards before any threshold moves.

@@ -18,7 +18,8 @@ import numpy as np
 import pytest
 
 from studio import beatmap
-from studio.beatmap import RATE, Grid, bars_in_mode, metre, phrases, tempo_of, track_autocorrelation
+from studio.beatmap import (RATE, Grid, bars_in_mode, beats_in_mode, metre, phrases, tempo_of,
+                            track_autocorrelation)
 from studio.trailer_stage_spec import Metre
 
 TEMPOS = (60, 90, 120, 180)
@@ -123,6 +124,35 @@ class TestGrid:
         beats = [i * 0.5 for i in range(24)]
         grid = Grid.of(beats, beats[::3])
         assert grid.beats_per_bar == 3 and grid.bar == pytest.approx(1.5)
+
+
+class TestRebar:
+    """Scarlet run 6, re-tracked: seeds 2002, 2004, 3001 and 3003 held a
+    steady beat for 40-58 s (beats_in_mode 0.89-0.96) and were graded rubato
+    (bars_in_mode 0.45-0.65) because the downbeat tracker alternated bars of
+    two and four beats -- {2: 29, 4: 31}.  A steady beat determines its bar;
+    the downbeats are re-voted every modal count of beats along the beat."""
+    BEATS = [i * 0.5 for i in range(64)]
+
+    def test_beats_in_mode_is_the_share_of_intervals_within_five_percent(self):
+        assert beats_in_mode(self.BEATS) == 1.0
+        assert beats_in_mode([0.0, 0.5, 1.0, 1.8, 2.3]) == pytest.approx(3 / 4)
+        assert beats_in_mode([0.0]) == 0.0
+
+    def test_a_phase_flipping_tracker_is_rebarred_on_the_beat(self):
+        flipped = [self.BEATS[i] for i in (0, 4, 6, 10, 12, 16, 20, 22, 26, 28, 32, 36, 40, 44)]
+        grid = Grid.of(self.BEATS, flipped)
+        assert grid.bars_in_mode >= 0.95 and grid.beats_per_bar == 4
+        assert grid.downbeats == self.BEATS[::4][:len(grid.downbeats)]
+
+    def test_the_vote_keeps_the_phase_the_tracker_mostly_heard(self):
+        offbeat = [self.BEATS[i] for i in (1, 5, 9, 11, 13, 17, 21, 25, 29)]
+        assert Grid.of(self.BEATS, offbeat).downbeats[0] == self.BEATS[1]
+
+    def test_an_unsteady_beat_keeps_the_trackers_bars(self):
+        rubato = [0.0, 0.5, 1.0, 1.7, 2.1, 2.9, 3.3, 4.2, 4.6, 5.5, 5.9, 6.8]
+        grid = Grid.of(rubato, rubato[::4])
+        assert grid.downbeats == rubato[::4]
 
 
 @LOCAL

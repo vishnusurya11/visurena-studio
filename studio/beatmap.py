@@ -480,6 +480,30 @@ def snap_to(beats: list[float], downbeats: list[float]) -> list[float]:
     return sorted({min(beats, key=lambda b: abs(b - d)) for d in downbeats})
 
 
+def beats_in_mode(beats: list[float], tolerance: float = 0.05) -> float:
+    """The fraction of beat intervals within `tolerance` of the modal interval."""
+    gaps = np.diff(beats)
+    if len(gaps) < 1:
+        return 0.0
+    counts = [int(np.sum(np.abs(gaps - gap) <= tolerance * gap)) for gap in gaps]
+    return max(counts) / len(gaps)
+
+
+def rebar(beats: list[float], downbeats: list[float]) -> list[float]:
+    """Downbeats re-voted every modal bar of beats, in the phase most heard.
+
+    Scarlet run 6 re-tracked: four seeds held a steady beat for 40-58 s and
+    were graded rubato because the downbeat tracker alternated bars of two
+    and four beats.  A steady beat determines its bar; only the phase is the
+    tracker's to say, and it says it by majority.
+    """
+    per_bar = beats_per_bar(beats, downbeats)
+    index = {round(b, 3): i for i, b in enumerate(beats)}
+    votes = [index[round(d, 3)] % per_bar for d in downbeats if round(d, 3) in index]
+    phase = max(set(votes), key=votes.count) if votes else 0
+    return [b for i, b in enumerate(beats) if i % per_bar == phase]
+
+
 @dataclass(frozen=True)
 class Grid:
     """What a tracker measured, before the cue's envelope is read against it."""
@@ -494,6 +518,8 @@ class Grid:
     @classmethod
     def of(cls, beats: list[float], downbeats: list[float]) -> "Grid":
         downbeats = snap_to(beats, downbeats)
+        if beats_in_mode(beats) >= Metre.METRIC_FLOOR:
+            downbeats = rebar(beats, downbeats)
         per_bar = beats_per_bar(beats, downbeats)
         bpm = tempo_of(beats)
         if len(downbeats) > 1:

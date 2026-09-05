@@ -47,9 +47,16 @@ ARC = [
     ("Post-Chorus",
      "everything returns at once, accelerating, the attacks crowding closer"),
     ("Outro",
-     "a hard full stop, one beat of total silence, one low impact, long decay"),
+     "a hard full stop, two full bars of total silence, one low impact, then a "
+     "decay of eight seconds or more with nothing new entering"),
 ]
-"""Nine executable sections carrying quiet -> build -> hit -> aftermath."""
+"""Nine executable sections carrying quiet -> build -> hit -> aftermath.
+
+The Outro asks for the shape the gate measures (`beatmap.title_term`): the
+pre-title trough must hold a bar, and the impact must land by 95% of the
+cue with room for the card.  Scarlet run 6 asked for "one beat of silence"
+and got it -- 1.5 s against a 3 s bar -- and one seed put the hit at 99%.
+"""
 
 SYLLABLES_PER_SECOND = 2.4
 """Content fill the model expects.  Below ~0.8x it finishes the sheet early and
@@ -130,13 +137,14 @@ def caption(tone: Tone) -> str:
         "### Arrangement",
         f"Instrument Lifecycle. Primary: {tone.lead_instrument}. "
         f"Secondary: {tone.instruments}.",
-        f"Groove & Foundation Progression: {tone.percussion}. The pulse "
-        f"doubles once at the turn and again into the final wave, then stops "
-        f"dead on a downbeat.",
+        f"Groove & Foundation Progression: {tone.percussion}. The tempo holds "
+        f"at {tone.bpm} BPM from first bar to last; the subdivision doubles once "
+        f"at the turn and again into the final wave (eighths, then sixteenths, "
+        f"over the same beat), then stops dead on a downbeat.",
         "Embellishments, Textures & Spatial FX: a new colour introduced before "
-        "each restatement of the figure; one beat of total silence before the "
+        "each restatement of the figure; two full bars of total silence before the "
         "last impact; the piece ends on a single low note left to die in the "
-        "room. The density of events rises steadily through the final third so "
+        "room for eight seconds or more. The density of events rises steadily through the final third so "
         "that the last quarter carries the most attacks of the whole piece, "
         "then stops.",
     ])

@@ -162,6 +162,29 @@ class TestSectionNotesAreSelfSufficient:
         closing = dict(sections_for(9))["Outro"]
         assert "silence" in closing and "impact" in closing
 
+    def test_the_closing_section_asks_for_what_the_gate_grades(self):
+        """Scarlet run 6, 16 seeds: seven obeyed the Outro -- a stop, then a
+        late impact -- and the title term still read 0.3 on all but three,
+        because the caption asked for ONE BEAT of silence and `title_term`
+        needs a bar (2001: 1.5 s of silence against a 3.0 s bar).  Seed 4004
+        put the impact at 99%, past the 95% the title moment accepts, with
+        no decay to hold a card.  The sheet asks for the measured shape."""
+        closing = dict(sections_for(9))["Outro"]
+        assert "two full bars" in closing and "one beat" not in closing
+        assert "decay" in closing and "eight seconds" in closing
+
+    def test_the_caption_and_the_sheet_ask_for_the_same_silence(self):
+        text = caption(SCARLET)
+        assert "two full bars of total silence" in text and "one beat of total silence" not in text
+
+    def test_the_caption_never_asks_the_tempo_to_double(self):
+        """Three of the five Scarlet seeds that held a metre read 175-201 BPM
+        against 84 asked (`tempo_term` 0.5): the caption said "the pulse
+        doubles once at the turn and again into the final wave".  Density
+        may double; the tempo the tracker counts must hold the band."""
+        text = caption(SCARLET)
+        assert "pulse doubles" not in text and "tempo holds" in text
+
     def test_every_note_carries_the_fill_the_model_expects(self):
         plan = lyrics_plan(sections_for(9), intended_seconds=100.0)
         for block in plan.split("\n\n"):
