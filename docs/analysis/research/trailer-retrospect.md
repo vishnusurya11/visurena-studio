@@ -236,3 +236,46 @@ unknown, invented as before.
 - No sheet is yet compared to anything but its card. The card is now
   worth obeying; a second, independent read ("is this Sherlock Holmes?")
   against the canon text would close the loop the owner asked about.
+
+## Run 8 — A Study in Scarlet, 2026-09-05, step 02 only
+
+The fixed cards rendered; the FINAL sheets did not match them. Lestrade's
+sheet: about seventy, white hair worn long, a full dark beard, top hat.
+Watson's: fifty, grey hair. Holmes, Hope, Lucy: as carded.
+
+**Not a stale read.** The Qwen trait reads were re-checked against the
+final PNGs and are accurate. The sheets were wrong because the ladder
+made them so.
+
+**Generator.** Two rules, each right on its own, compounding:
+1. `distinguish._move` walks the pool to the NEXT phrase that reads
+   differently, with no notion of how far it has moved the person. Lestrade
+   read as Watson on hair colour and length, facial hair and build; the
+   rung took him from "thinning red hair" to "white hair worn long", from
+   clean-shaven past two moustaches to "a full dark beard", and (on the
+   next try, age now matched) from thirty-five to seventy.
+2. The gate rewards drift. Watson's first render drew dark hair on "fair
+   hair parted in the middle" and read as Holmes; the reroll drew GREY,
+   which read as three traits from Holmes, and bound. The `adopt` step
+   then rewrote his card to "close-cropped grey hair" so the clip prompts
+   would agree with the sheet: the pipeline rationalised the drift
+   instead of refusing it. Run 6's white-haired Holmes was the same
+   mechanism one character earlier.
+
+**Fixed (test-first).**
+- `distinguish.movable` and `distinguish` move only RELIABLE traits (hair
+  colour, hair length, facial hair, headgear) on unasserted slots. Age,
+  complexion and build are read off a sheet but not expressed by it
+  (run 4: age followed the hair colour, build read 'average' 7/7); moving
+  them changes the person and not the reading. Build no longer moves.
+- On a known face (`canon.known`) the IDENTITY slots — facial hair, hair,
+  and now age — are asserted even when neutral: the render OWES them, no
+  rung moves them, `adopt` does not rewrite them. A known face that reads
+  like another known face binds `accepted_as_written`, as two people the
+  book makes alike do. Grey drawn on fair is now `disobeyed hair_colour`
+  (fair–grey is not a neighbour) and rerolled, not adopted.
+
+**Also measured.** Step 02's 40-minute share is thin: 7 sheets at 290 s
+first-try is 34 min, one reroll is 5 min. Ferrier and Gregson went
+unbound on budget in run 8 after each one reroll. Not changed yet —
+the fixes above remove the rerolls the ladder was causing itself.

@@ -110,12 +110,16 @@ def unsaid(card: dict, new: dict) -> str:
 
 
 def movable(matched: list[str], card: dict) -> list[str]:
-    """The matched traits a rung may still move: those on a slot the book did
-    not assert, and build.  `figure` has no slot and never moves."""
+    """The matched traits a rung may still move: the RELIABLE ones on a slot
+    the book did not assert.  Age, complexion and build are read off the
+    sheet but not expressed by it (age follows the hair colour, build read
+    'average' seven of seven): a rung that moves them changes the person
+    and not the reading -- Scarlet run 8 walked Lestrade from thirty-five
+    to seventy that way.  `figure` has no slot and never moves."""
     slot_of = {trait: slot for slot, traits in SLOT_TRAITS.items() for trait in traits}
     asserted = set(card.get("asserted", ()))
     return [trait for trait in matched
-            if trait == "build" or (trait in slot_of and slot_of[trait] not in asserted)]
+            if trait in RELIABLE and trait in slot_of and slot_of[trait] not in asserted]
 
 
 def distinguish(card: dict, matched: list[str], other: TraitCard,
@@ -125,12 +129,11 @@ def distinguish(card: dict, matched: list[str], other: TraitCard,
     off clean-shaven to tell him from Watson puts back the beard the card
     exists to refuse.  Two people the book makes alike stay alike."""
     new = dict(card)
+    moving = set(movable(matched, card))
     for slot, traits in SLOT_TRAITS.items():
-        avoid = {t: getattr(other, t) for t in traits if t in matched}
-        if avoid and slot not in card.get("asserted", ()):
+        avoid = {t: getattr(other, t) for t in traits if t in moving}
+        if avoid:
             new[slot] = _move(slot, card[slot], avoid, (taken or {}).get(slot, set()))
-    if "build" in matched:
-        new["build"] = next(phrase for value, phrase in BUILD.items() if value != other.build)
     if "book" in card:
         new["book"] = unsaid(card, new)
     return new

@@ -83,14 +83,17 @@ COMPLEXION = ("a pale indoor complexion", "a florid weathered face",
 TIER_TWO = ("age", "hair", "complexion")
 """Properties with their own vocabulary.  Obeyed when Tier One agrees."""
 
-IDENTITY = ("facial_hair", "hair")
+IDENTITY = ("facial_hair", "hair", "age")
 """The slots that make a face someone else when invented.  On a character
 the audience already knows (`canon`), where the book and the known look
 leave one of these empty, invention ADDS nothing: clean-shaven, and the
 plainest hair of that age.  Scarlet run 7 gave Watson a full dark beard and
 Holmes a walrus moustache; neither was a Watson or a Holmes nobody had
-described, each was a different man.  Not asserted: a proven collision may
-still move them."""
+described, each was a different man.  Asserted, on a known face: run 8 left
+them movable for a proven collision, Lestrade's sheet collided with Watson's,
+and the rung made him seventy, white-haired and bearded.  The render OWES
+them and no rung moves them; a known face that reads like another known
+face is accepted as written, as two people the book makes alike are."""
 
 POOLS = {"headgear": HEADGEAR, "facial_hair": FACIAL_HAIR, "garment": GARMENT,
          "neckwear": NECKWEAR, "age": AGE, "hair": HAIR,
@@ -295,8 +298,8 @@ def card_for(entity_id: str, taken: dict[str, set[str]],
         card[slot] = (for_role[0] if for_role
                       else from_book or options[offset % len(options)])
         if known and slot in IDENTITY and not (for_role or from_book):
-            card[slot] = neutral(slot, physical, taken)
-        if from_book and not for_role:
+            card[slot] = neutral(slot, physical, taken) if slot != "age" else card[slot]
+        if (from_book and not for_role) or (known and slot in IDENTITY):
             asserted.append(slot)
     card.update(stated or {})
     card['gender'] = gender

@@ -84,12 +84,19 @@ Evidence: `docs/analysis/research/trailer-music-structure.md`,
   AGREED on a bearded, sandy, forty-five-year-old Watson) three times in
   the card's closed vocabulary, keeps each slot by majority reading, caches
   `refs/canon.json`, and `stated` fills the slots so the render OWES them.
-  On a known face the IDENTITY slots (`facial_hair`, `hair`) are never
-  invented, only `neutral` (clean-shaven, the plainest hair nobody has);
-  what is `taken` is what the reader would call the same (`cast_card.alike`:
-  two moustaches are one reading); `distinguish` never moves an asserted
-  slot, and a collision the book itself makes binds `accepted_as_written`.
-  ≈ $0.02 a character, once per book.
+  On a known face the IDENTITY slots (`facial_hair`, `hair`, `age`) are
+  never invented, only `neutral` (clean-shaven, the plainest hair nobody
+  has), and they are ASSERTED: the render owes them, no rung moves them,
+  `adopt` does not rewrite them. Run 8 left them movable "if the pixels
+  collide", Lestrade collided with Watson, and the rung made him seventy,
+  white-haired and bearded; Watson's reroll drew grey on fair, bound
+  BECAUSE it differed from Holmes, and `adopt` wrote the grey into every
+  clip prompt. What is `taken` is what the reader would call the same
+  (`cast_card.alike`: two moustaches are one reading); a rung moves only
+  what the sheet can express (`RELIABLE`: hair colour and length, facial
+  hair, headgear - never age, complexion or build); and a collision on
+  anything else binds `accepted_as_written`. ≈ $0.02 a character, once
+  per book.
 - step 04 shipped `music_only` on runs 4, 5 and 6 ("no hook fits the first
   slot"): the delivered cue's troughs were 2.6 and 2.0 s and the best hook
   3.3 s. `rank` admits a line at twice the longest slot, `fits` refused it at

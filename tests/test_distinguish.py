@@ -68,8 +68,18 @@ class TestRewrite:
         new = distinguish.distinguish(CARD, ["hair_colour", "headgear", "age"], SEEN)
         assert distinguish.coarse("hair", new["hair"]) != "dark brown"
         assert distinguish.coarse("headgear", new["headgear"]) != "bowler"
-        assert distinguish.coarse("age", new["age"]) != "middle-aged"
         assert new["facial_hair"] == CARD["facial_hair"] and new["garment"] == CARD["garment"]
+
+    def test_a_rung_moves_only_what_the_channel_expresses(self):
+        """Scarlet run 8: Lestrade shared age and build with Watson, and the
+        rung walked him from thirty-five to seventy and drew a full dark
+        beard on a man the book calls a ferret.  The reader's age follows
+        the hair colour and its build read 'average' on seven of seven
+        (RELIABLE): moving them changes the person and not the reading."""
+        card = {**CARD, "build": "a slight wiry frame"}
+        new = distinguish.distinguish(card, ["age", "build", "complexion"], SEEN)
+        assert new["age"] == card["age"] and new["build"] == card["build"]
+        assert new["complexion"] == card["complexion"]
 
     def test_a_phrase_another_character_holds_is_not_chosen(self):
         taken = {"hair": {"receding sandy hair", "close-cropped grey hair"}}
@@ -77,10 +87,9 @@ class TestRewrite:
         assert new["hair"] not in taken["hair"]
         assert distinguish.coarse("hair", new["hair"]) != "dark brown"
 
-    def test_build_becomes_a_phrase_the_sheet_prompt_carries(self):
-        new = distinguish.distinguish(CARD, ["build"], SEEN)
-        assert new["build"] and "slight" not in new["build"]
-        assert new["build"] in cast_card.render_card(new)
+    def test_build_is_left_as_the_card_had_it(self):
+        card = {**CARD, "build": "a slight wiry frame"}
+        assert distinguish.distinguish(card, ["build"], SEEN)["build"] == card["build"]
 
     def test_a_shared_hair_length_moves_the_hair_phrase(self):
         new = distinguish.distinguish(CARD, ["hair_length"], SEEN)
@@ -131,8 +140,9 @@ class TestAssertedStays:
     def test_movable_is_what_a_rung_can_still_change(self):
         card = {**CARD, "asserted": ["facial_hair", "hair"]}
         assert distinguish.movable(["figure", "facial_hair", "hair_colour", "headgear", "build"],
-                                   card) == ["headgear", "build"]
+                                   card) == ["headgear"]
         assert distinguish.movable(["figure", "facial_hair"], card) == []
+        assert distinguish.movable(["age", "build", "complexion"], {**CARD, "asserted": []}) == []
 
     def test_an_invented_slot_still_moves(self):
         moved = distinguish.distinguish({**CARD, "asserted": []}, ["facial_hair"], SEEN)

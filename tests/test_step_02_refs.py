@@ -174,19 +174,34 @@ class TestRun:
 
     def test_a_faithful_collision_is_distinguished_in_the_prompt(self, close_ctx, rendered):
         """Two cards the words let through but the model reads as one face:
-        a new seed cannot help, the distinguish rung moves the shared traits
-        -- the invented ones.  Both moustaches are the book's, and stay."""
+        a new seed cannot help, the distinguish rung moves the shared trait
+        the sheet can express -- the invented headgear.  Both moustaches are
+        the book's and stay; the age and complexion the reader also matched
+        are not the sheet's to change (Scarlet run 8 aged Lestrade to
+        seventy that way) and stay too."""
+        rendered["drifts"] = [None, {"headgear": "other hat"}, {"headgear": "other hat"}]
         step.run(close_ctx.codex_id, close_ctx)
         assert refs_doc(close_ctx)["unbound"] == []
         rows = load(close_ctx.learnings_path)
         assert rows[0].action == "reroll_seed"  # the first render's rung
         assert rows[0].threshold == DISTINCT_AT and WATSON in str(rows[0].measured)
+        assert rows[1].action == "distinguish"
         before, after = sheet_prompts(rendered)[-2:]
         assert "walrus moustache" in before and "walrus moustache" in after
         assert "fair hair" in before and "fair hair" in after
         first, second = rendered["cards"][-2:]
-        moved = [slot for slot in ("headgear", "age", "complexion") if first[slot] != second[slot]]
-        assert moved and not set(moved) & set(second["asserted"])
+        assert first["headgear"] != second["headgear"]
+        assert first["age"] == second["age"] and first["complexion"] == second["complexion"]
+
+    def test_a_collision_on_what_the_sheet_cannot_express_binds_as_written(self, close_ctx, rendered):
+        """The reader matches two faces on age, complexion and build alone:
+        no rung can change what it reads there, so the sheet is accepted
+        as written rather than the character aged and bearded to escape."""
+        step.run(close_ctx.codex_id, close_ctx)
+        rows = load(close_ctx.learnings_path)
+        assert [r.action for r in rows] == ["accepted_as_written"]
+        assert refs_doc(close_ctx)["unbound"] == []
+        assert len(rendered["cards"]) == 2  # one sheet each: no rung climbed
 
     def test_a_collision_the_book_itself_makes_binds_as_written(self, close_ctx, rendered):
         """Once every shared trait sits on a slot the book asserted, there is

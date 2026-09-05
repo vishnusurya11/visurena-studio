@@ -182,7 +182,7 @@ class TestOnTheCard:
         rotation would hand him a full dark beard and thinning red hair --
         that is not a Watson nobody described, it is a different man.  A
         face the audience knows gets nothing ADDED by invention: clean-shaven
-        and the plainest hair of his years, movable if the pixels collide."""
+        and the plainest hair of his years."""
         agreed = {"age": "about thirty-five"}
         cards = cast_card.cards_for(["john_watson", "tobias_gregson"],
                                     {"john_watson": "", "tobias_gregson": ""},
@@ -190,8 +190,21 @@ class TestOnTheCard:
         watson, gregson = cards["john_watson"], cards["tobias_gregson"]
         assert watson["facial_hair"] == "clean-shaven"
         assert watson["hair"] == cast_card.BANDED["middle"]["hair"][0]
-        assert "facial_hair" not in watson["asserted"] and "hair" not in watson["asserted"]
         assert gregson["facial_hair"] != "clean-shaven" or gregson["hair"] != watson["hair"]
+
+    def test_a_known_face_owns_its_identity_slots(self):
+        """Scarlet run 8: Lestrade's neutral clean-shaven and thinning red
+        hair were 'movable if the pixels collide', the pixels collided with
+        Watson, and the rung made him seventy, white-haired and bearded.  On
+        a known face the neutral slots are the character's, as the book's
+        words would be: the render OWES them, no rung moves them, and a
+        sheet that draws grey on fair is refused rather than adopted."""
+        cards = cast_card.cards_for(["john_watson"], {"john_watson": ""},
+                                    stated={"john_watson": {"age": "in his late twenties"}},
+                                    known={"john_watson"})
+        assert {"facial_hair", "hair", "age"} <= set(cards["john_watson"]["asserted"])
+        stranger = cast_card.cards_for(["stamford"], {"stamford": ""})["stamford"]
+        assert "hair" not in stranger["asserted"]
 
     def test_a_stranger_is_still_invented_from_the_rotation(self):
         card = cast_card.cards_for(["stamford"], {"stamford": ""})["stamford"]
