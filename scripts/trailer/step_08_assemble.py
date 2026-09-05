@@ -65,14 +65,33 @@ def master_of(ctx) -> Path:
 def recut(ctx, attempt: int) -> Path:
     """Re-plan around the takes that exist, at a longer stretch, then cut; free."""
     refit(ctx, attempt, rendered=usable(clips_of(ctx), plan_of(ctx), ctx.book_dir))
+    settle(ctx, attempt)
     return build_at(ctx.book_dir, ctx.trailer_id)
 
 
-def run(codex_id: str, ctx) -> None:
-    keep = usable(clips_of(ctx), plan_of(ctx), ctx.book_dir)
-    if keep != [shot["beat_id"] for shot in plan_of(ctx)["shots"]]:
+SETTLE_PASSES = 3
+"""Re-fits the walk may take before the cut is refused as unsettled."""
+
+
+def settle(ctx, attempt: int = 0, passes: int = SETTLE_PASSES) -> list[str]:
+    """Re-fit until every planned beat is usable at the length the walk gave it.
+
+    Fewer takes make each shot longer, so a capped take that held its shot
+    may outrun its cap after the re-fit; one pass is not a fixed point.
+    """
+    for _ in range(passes):
+        clips = clips_of(ctx)
+        keep = usable(clips, plan_of(ctx), ctx.book_dir)
+        if keep == [shot["beat_id"] for shot in plan_of(ctx)["shots"]]:
+            return keep
         print(f"[{STEP_ID}] {len(keep)} takes usable; re-fitting the walk to them")
-        refit(ctx, 0, rendered=keep)
+        refit(ctx, attempt, rendered=keep)
+    raise SystemExit(f"REFUSED: the walk did not settle on usable takes in "
+                     f"{passes} passes")
+
+
+def run(codex_id: str, ctx) -> None:
+    settle(ctx)
     master = build_at(ctx.book_dir, ctx.trailer_id)
     if not master.exists():
         raise RuntimeError(f"no master written at {master}")

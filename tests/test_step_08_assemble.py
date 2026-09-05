@@ -57,6 +57,15 @@ def ctx(tmp_path):
     return context
 
 
+def refitting(refits: list):
+    """A `refit` that does what step 06's does to the plan: writes it around
+    the takes it was given."""
+    def refit(ctx, attempt, rendered):
+        refits.append(rendered)
+        write(ctx, plan=plan_doc(rendered))
+    return refit
+
+
 def write(ctx, clips=None, plan=None):
     if clips is not None:
         (ctx.out_dir / "clips.json").write_text(json.dumps(clips), encoding="utf-8")
@@ -101,7 +110,7 @@ class TestRun:
         write(ctx, clips=clips_doc(ctx.book_dir, HAVE[:2], dropped=["B02"]))
         seen, refits = {}, []
         monkeypatch.setattr(step, "build_at", built(seen))
-        monkeypatch.setattr(step, "refit", lambda c, attempt, rendered: refits.append(rendered))
+        monkeypatch.setattr(step, "refit", refitting(refits))
         step.run(ctx.codex_id, ctx)
         assert refits == [["B00", "B01"]] and seen["book"] == ctx.book_dir
 
@@ -109,9 +118,38 @@ class TestRun:
         write(ctx, clips=clips_doc(ctx.book_dir, capped={"B01": 0.6}))
         seen, refits = {}, []
         monkeypatch.setattr(step, "build_at", built(seen))
-        monkeypatch.setattr(step, "refit", lambda c, attempt, rendered: refits.append(rendered))
+        monkeypatch.setattr(step, "refit", refitting(refits))
         step.run(ctx.codex_id, ctx)
         assert refits == [["B00", "B02"]]
+
+    def test_a_refit_that_lengthens_a_capped_shot_is_fitted_again(self, ctx, monkeypatch):
+        """The walk re-fitted to fewer takes gives each a longer shot; a take
+        capped at 2.5 s that held a 2.0 s shot may now hold a 3.0 s one and
+        must leave the plan too.  Run 10's step 08 computed `usable` once."""
+        write(ctx, clips=clips_doc(ctx.book_dir, HAVE[:2] + ["B02"], dropped=["B03"],
+                                   capped={"B01": 2.5}))
+        write(ctx, plan=plan_doc(HAVE + ["B03"]))
+        seen, refits = {}, []
+
+        def refit(c, attempt, rendered):
+            refits.append(rendered)
+            plan = plan_doc(rendered)
+            for shot in plan["shots"]:
+                shot["seconds"] = 8.0 / len(rendered)
+            write(c, plan=plan)
+
+        monkeypatch.setattr(step, "build_at", built(seen))
+        monkeypatch.setattr(step, "refit", refit)
+        step.run(ctx.codex_id, ctx)
+        assert refits == [["B00", "B01", "B02"], ["B00", "B02"]]
+
+    def test_a_walk_that_never_settles_is_refused(self, ctx, monkeypatch):
+        write(ctx, clips=clips_doc(ctx.book_dir, capped={"B01": 1.0}))
+        monkeypatch.setattr(step, "build_at", built({}))
+        monkeypatch.setattr(step, "refit", lambda c, attempt, rendered: write(
+            c, plan=plan_doc(["B00", "B01", "B02"])))
+        with pytest.raises(SystemExit, match="settle"):
+            step.run(ctx.codex_id, ctx)
 
     def test_without_step_07s_record_the_cut_is_refused(self, ctx, monkeypatch):
         (ctx.out_dir / "clips.json").unlink()
