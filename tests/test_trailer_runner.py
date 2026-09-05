@@ -75,6 +75,29 @@ class TestOlderDatabase:
         assert db.get_codex(connection, codex_id)["trailer_status"] == "completed"
 
 
+class TestPreflight:
+    def test_the_tools_every_step_shells_out_to_are_found_before_anything_is_spent(self, monkeypatch):
+        """Run 11's first launch inherited a PATH without ffmpeg: step 01 spent
+        its LLM call, step 03 died in `beatmap.decode`.  The runner asks first."""
+        monkeypatch.setattr(trailer.shutil, "which", lambda name: None)
+        with pytest.raises(SystemExit, match="ffmpeg"):
+            trailer.preflight()
+
+    def test_a_complete_path_passes(self, monkeypatch):
+        monkeypatch.setattr(trailer.shutil, "which", lambda name: f"/bin/{name}")
+        assert trailer.preflight() == [f"/bin/{name}" for name in trailer.TOOLS]
+
+    def test_main_refuses_before_opening_a_run(self, tmp_path, monkeypatch):
+        connection = db.get_connection(tmp_path / "t.db")
+        db.init_db(connection)
+        codex_id = _book(connection)
+        monkeypatch.setattr(trailer.shutil, "which", lambda name: None)
+        monkeypatch.setattr(trailer, "load_steps", lambda: pytest.fail("a step was loaded"))
+        with pytest.raises(SystemExit):
+            trailer.main([codex_id], connection)
+        assert db.get_codex(connection, codex_id)["trailer_status"] != "running"
+
+
 class TestRegistry:
     def test_ten_steps_in_order(self):
         ids = [s["id"] for s in trailer.load_registry()["steps"]]

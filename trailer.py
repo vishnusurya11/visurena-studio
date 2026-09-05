@@ -11,6 +11,7 @@ the `trailer` stage of stages.yaml — file order = execution order.
 from __future__ import annotations
 
 import importlib
+import shutil
 import sys
 from pathlib import Path
 
@@ -24,6 +25,11 @@ STAGE = "trailer"
 FINAL_STEP_ID = "10"
 REQUIRES_STAGE = "screenplay"
 REQUIRES_STEP_ID = "05"
+TOOLS = ("ffmpeg",)
+"""Executables the steps shell out to (beatmap.decode, sfx, assemble, qc,
+deliver).  Asked for BEFORE the run opens: run 11's first launch inherited a
+PATH without ffmpeg, spent step 01's LLM call, and died measuring the first
+cue in step 03."""
 
 
 def load_registry(stage: str = STAGE) -> dict:
@@ -46,6 +52,17 @@ def load_steps(stage: str = STAGE) -> list:
 def ready(conn) -> list[str]:
     return db.codex_ready_for_stage(conn, STAGE, FINAL_STEP_ID,
                                     REQUIRES_STAGE, REQUIRES_STEP_ID)
+
+
+def preflight(tools: tuple[str, ...] = TOOLS) -> list[str]:
+    """Every tool's resolved path, or a refusal naming the first one missing."""
+    found = []
+    for name in tools:
+        path = shutil.which(name)
+        if path is None:
+            raise SystemExit(f"REFUSED: {name} is not on PATH; nothing was started")
+        found.append(path)
+    return found
 
 
 def run_step(ctx: RunContext, step) -> None:
@@ -84,6 +101,7 @@ def process(conn, codex_id: str) -> None:
 def main(argv: list[str], conn=None) -> None:
     conn = conn or db.get_connection()
     db.init_db(conn)  # idempotent; adds the stage's columns to a library.db that predates it
+    preflight()
     books = argv or ready(conn)
     print(f"trailer: {len(books)} book(s): {books}")
     for codex_id in books:
