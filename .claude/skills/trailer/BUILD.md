@@ -51,7 +51,8 @@ Evidence: `docs/analysis/research/trailer-music-structure.md`,
   already gone to Holmes), a woman's age is hers, and women get bonnets.
   `cast_card.infer_gender` also tokenised on spaces after
   dropping only full stops, so "a thin man," was nobody. The SFace cosine gate
-  (`identity.py`, 0.363) it replaced said only THAT two sheets read alike,
+  (`identity.py`, 0.363; retired 2026-09-05 with its OpenCV/onnxruntime pins,
+  the frame sampler alone survives as `studio/frames.py`) it replaced said only THAT two sheets read alike,
   so its one rung was another seed: Lestrade collided five times in a row
   (run 3, 2026-09-04). Under the trait card Lestrade bound on the second
   sheet (run 4). A take's three frames go to the model as ONE contact sheet:

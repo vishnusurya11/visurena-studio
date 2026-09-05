@@ -22,7 +22,7 @@ from scripts.trailer.build_clips import (SEED_BASE, bound_slots, is_complete, re
 from studio.clip_cache import is_current
 from studio.describe import (DISTINCT_AT, TIMEOUT, TraitCard, describe, describe_frames,
                              differences, distance, known, patiently, same_look, shared, verifiable)
-from studio.identity_gate import frame_at, frame_times
+from studio.frames import frame_at, frame_times
 from studio.ladder import Ladder, Rung, climb
 from studio.learnings import Learning
 from studio.trailer_assemble import clip_seconds

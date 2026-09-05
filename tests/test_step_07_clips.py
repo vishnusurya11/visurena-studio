@@ -19,7 +19,7 @@ from scripts.trailer.build_clips import FRAMING
 from studio import db
 from studio import describe
 from studio.describe import DISTINCT_AT, TIMEOUT, TraitCard
-from studio.identity_gate import HEAD_LEAK_SECONDS
+from studio.frames import HEAD_LEAK_SECONDS
 from studio.learnings import load
 from studio.run_budget import TRAILER_SHARES, Budget
 from studio.trailer_run import RunContext

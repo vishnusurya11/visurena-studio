@@ -20,10 +20,7 @@ music = [
     "torch==2.14.0",
     "torchaudio==2.11.0",
 ]
-qc = [
-    "onnxruntime==1.24.1",
-    "opencv-python-headless==4.13.0.90",
-]
+qc = []
 voice = [
     "resemblyzer==0.1.4",
     "setuptools==80.9.0",

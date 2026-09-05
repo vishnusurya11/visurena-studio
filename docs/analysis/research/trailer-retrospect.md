@@ -112,5 +112,7 @@ title_on_downbeat`. Sent to Telegram by hand as a 39 MB copy (defect 4).
   invention; a woman's age reads "in her"; women get bonnets, not top hats.
   After the fix the five cards share nothing in Tier One and only
   clean-shaven between Hope and Lucy.
-- Retire the OpenCV identity parts (`identity.py`) now that the trait card
-  gates steps 02 and 07; FP8 Qwen3-VL and moving it to NVMe are user-side.
+- CLOSED 2026-09-05: `identity.py` and `identity_gate.py` retired with their
+  tests and the `qc` group's OpenCV/onnxruntime pins; only `frame_times` /
+  `frame_at` were still used (step 07) and now live in `studio/frames.py`.
+  FP8 Qwen3-VL and moving it to NVMe are user-side.
