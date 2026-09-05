@@ -22,18 +22,11 @@ from studio.comfy import run, stage_image
 from studio.h3 import NATIVE_H, NATIVE_W, frames_for
 from studio.h3_prompt import build as h3_document
 from studio.shot_grammar import FRAMING, LADDER
-from studio.trailer_assemble import HEAD_TRIM
+from studio.trailer_assemble import HANDLE, HEAD_TRIM
 from studio.trailer_refs import visual_description
 from studio.trailer_shot import is_scene_safe
 
 ROOT = Path(__file__).resolve().parents[2]
-HANDLE = 0.25
-"""Six frames of slack past the shot.
-
-`segment_start` snaps its seek UP onto the frame grid and needs the shot to
-still fit inside the take; a take cut exactly to length loses that fight by
-one frame.  This is the whole margin -- everything else the take renders, the
-cut uses."""
 READ_WINDOW = 0.75
 """The shortest stretch of usable take the identity reader can sample.
 

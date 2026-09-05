@@ -28,6 +28,8 @@ class Learning(BaseModel):
     seconds: float = 0.0
     terminal: bool = False
     note: str = ""
+    frames: int | None = None
+    """Mean frames per take on a gate="cycle" row; the budget's abscissa."""
 
 
 def record(path: Path, learning: Learning) -> None:

@@ -89,6 +89,13 @@ def limiter(ceiling_db: float) -> str:
     """An `alimiter` holding a true-peak ceiling, with its auto-level off."""
     return f"alimiter=limit={db_to_linear(ceiling_db - LIMITER_MARGIN)}:level=disabled"
 
+HANDLE = 0.25
+"""Six frames of slack past the shot.
+
+`segment_start` snaps its seek UP onto the frame grid and needs the shot to
+still fit inside the take; a take cut exactly to length loses that fight by
+up to one frame.  Part of the take tax the frame budget prices."""
+
 HEAD_TRIM = 2.6
 """Seconds discarded from the head of every take.
 
