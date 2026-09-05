@@ -85,7 +85,14 @@ def render_batch(ctx, text: str, seeds: list[int], state: dict) -> list[Metre]:
 
 
 def best_of(metres: list[Metre]) -> Metre | None:
-    return max(metres, key=lambda m: m.fitness) if metres else None
+    """The seed that satisfies most of what the gate grades, then the fittest.
+
+    Fitness alone shipped Scarlet run 7 on a rubato seed (9.2, all of it
+    dynamic range) over nine metric ones, and the cut put 0% of its cuts on
+    a downbeat.  The cut needs a countable grid first and a slot second;
+    fitness only orders seeds that agree on those."""
+    return max(metres, key=lambda m: (m.grid == "metre", bool(m.slots), m.fitness),
+               default=None)
 
 
 def verdict(best: Metre | None) -> tuple[bool, str, float]:

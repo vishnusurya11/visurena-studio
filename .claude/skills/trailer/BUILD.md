@@ -22,6 +22,13 @@ Evidence: `docs/analysis/research/trailer-music-structure.md`,
   `video_qwen3vl_caption`) to describe a face in a closed vocabulary of seven
   at-a-distance traits, and two faces are two people when ≥ `DISTINCT_AT`
   (3) seen traits differ - `cast_card.refuse_collision` applied to pixels.
+  Every beat binds ONE face by design (`build_plan.beat_of` casts one
+  principal; `h3_prompt` puts the place in the second slot), so a two-shot's
+  second person is prompt-only and drifts. `take_values` can now bind two
+  cast members as <Subject 1>/<Subject 2> and `describe.prompt_for(whom=)`
+  can read one face out of a two-shot; whether H3 keeps two faces apart is
+  measured by `scripts/trailer/two_subject_ab.py`, not assumed - the plan
+  keeps casting one principal until that A/B says otherwise.
   Steps 02 and 07 gate on it; `studio/distinguish.py` is step 02's second
   rung, rewriting exactly the matched card slots - and its FIDELITY gate:
   `expected(card)` is what a faithful render reads back as, `disobeyed`
@@ -94,6 +101,11 @@ Evidence: `docs/analysis/research/trailer-music-structure.md`,
   "the pulse doubles" (three metric seeds had read 175-201 BPM against 84).
   The seven seeds that obeyed the old Outro gave 1.5 s of silence against a
   3 s bar, which is what "one beat" asks for. Run 7 measures the new sheet.
+  And "the pick (1002) is the right trade" was wrong once nine seeds were
+  metric: `best_of` ranked on fitness alone, run 7 shipped 1002 on the onset
+  grid and the QC read 0% of cuts on a downbeat. `best_of` now ranks a
+  metric grid first, a slot second, fitness last - the order the gate
+  grades - so an onset grid ships only when no seed counts.
 - run 6 (2026-09-04) reached step 08 and died there, twice: the concat list
   held repo-relative paths that ffmpeg resolves against the list file's
   directory (`listing_lines`), and every take was `CLIP_SECONDS` while the

@@ -120,6 +120,21 @@ class TestSeeds:
         assert not step.verdict(two.model_copy(update={"slots": []}))[0]
         assert not step.verdict(None)[0]
 
+    def test_best_of_ranks_on_what_the_gate_grades_before_fitness(self, tmp_path):
+        """Scarlet run 7: rubato seed 1002 scored 9.2 on dynamic range alone and
+        shipped over nine metric seeds; the cut then landed 0% of cuts on a
+        downbeat.  A grid the cut can count and a slot for the line come first."""
+        two = beatmap.metre(write_wav(tmp_path / "a.wav", cue(**KINDS["two"])), seed=1,
+                            rel_path="a.wav", track=track_autocorrelation)
+        rubato = two.model_copy(update={"seed": 2, "grid": "onsets", "fitness": 9.2})
+        metric_no_slot = two.model_copy(update={"seed": 3, "slots": [], "fitness": 7.0})
+        metric = two.model_copy(update={"seed": 4, "fitness": 2.4})
+        better = two.model_copy(update={"seed": 5, "fitness": 3.0})
+        assert step.best_of([rubato, metric_no_slot, metric, better]).seed == 5
+        assert step.best_of([rubato, metric_no_slot]).seed == 3
+        assert step.best_of([rubato]).seed == 2
+        assert step.best_of([]) is None
+
     def test_reauthor_keeps_the_register_and_swaps_the_pulse(self, monkeypatch):
         calls: list[str] = []
         monkeypatch.setattr(llm, "structured", fake_llm(calls))

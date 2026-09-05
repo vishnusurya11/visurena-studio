@@ -90,9 +90,14 @@ title_on_downbeat`. Sent to Telegram by hand as a 39 MB copy (defect 4).
   (`test_the_closing_section_asks_for_what_the_gate_grades`); (4) three of
   the five metric seeds read 175–201 BPM against 84 asked because the
   caption said "the pulse doubles" — it now holds the tempo and doubles the
-  subdivision. Still open until run 7's step 03 measures the new caption:
-  the fitness floor of 6 is carried by dynamic range, so a rubato seed with
-  a title moment (1002, 9.2) outranks every metric seed (best 2.4).
+  subdivision. (5) FIXED 2026-09-05: the fitness floor of 6 is carried by
+  dynamic range, so the rubato seed with a title moment (1002, 9.2) outranked
+  every metric seed (best 2.4) and `best_of` SHIPPED it -- the delivered
+  run-7 trailer cut on the onset grid with 0% of cuts on a downbeat.
+  `best_of` now ranks on what the gate grades before fitness: a metric grid,
+  then a slot, then fitness (`test_best_of_ranks_on_what_the_gate_grades_
+  before_fitness`). Still open: whether the floor itself should weigh the
+  metric term more -- measure on run 7c's seeds under the new caption.
 - The identity gate among men has five live traits (figure, complexion,
   build are shared on every "shares" list). Run 7 measures the unbound
   count under book-first cards before any threshold moves.
@@ -144,6 +149,13 @@ title_on_downbeat`. Sent to Telegram by hand as a 39 MB copy (defect 4).
   person it describes ("the man in the bowler" / "the man with the
   moustache"). Do not build the two-subject path before that A/B says H3
   keeps two faces apart rather than blending them.
+  BUILT 2026-09-05 (unmeasured): `scripts/trailer/two_subject_ab.py` renders
+  a beat both ways over the same seeds and reads each expected face by its
+  own sheet's cue (`describe.prompt_for(whom=...)`).  `take_values` now turns
+  two bound cast members into <Subject 1> and <Subject 2> (`h3_prompt.build
+  (second=...)`); the blind path is unchanged because `beat_of` still casts
+  one principal.  Run after run 7: `uv run python -m scripts.trailer.
+  two_subject_ab 20260822113400 --beat B05 --second john_watson --seeds 3`.
 - CLOSED 2026-09-05: `identity.py` and `identity_gate.py` retired with their
   tests and the `qc` group's OpenCV/onnxruntime pins; only `frame_times` /
   `frame_at` were still used (step 07) and now live in `studio/frames.py`.
