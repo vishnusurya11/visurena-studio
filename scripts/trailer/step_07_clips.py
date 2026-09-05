@@ -27,6 +27,7 @@ from typing import Callable
 
 from scripts.trailer.build_clips import (SEED_BASE, bound_slots, is_complete, recipe_for,
                                          render_take, take_values)
+from studio import comfy
 from studio.clip_cache import is_current, sidecar_for, stored_fingerprint
 from studio.describe import (DISTINCT_AT, TIMEOUT, TraitCard, describe, describe_frames,
                              differences, distance, known, patiently, reader, same_look,
@@ -135,9 +136,20 @@ def render_or_reuse(values: dict, bound: list[str], refs: dict, book: Path,
     if dest.exists():
         dest.unlink()
     try:
-        return render_take(values, bound, refs, book, dest), True
+        return rendered_twice_if_lost(values, bound, refs, book, dest), True
     except RuntimeError as exc:
         raise TakeFailed(str(exc)) from exc
+
+
+def rendered_twice_if_lost(values: dict, bound: list[str], refs: dict, book: Path,
+                           dest: Path) -> Path:
+    """The take, submitted once more when the engine restarted under it (run
+    11): the engine is back, the recipe is unchanged, and the retry costs
+    only the render.  A second loss is the machine's answer."""
+    try:
+        return render_take(values, bound, refs, book, dest)
+    except comfy.EngineLost:
+        return render_take(values, bound, refs, book, dest)
 
 
 def frames_of(video: Path, seconds: float, work: Path) -> list[Path]:

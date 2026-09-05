@@ -9,6 +9,7 @@ tracker -- no test renders, calls a model, or loads Beat This.
 from __future__ import annotations
 
 import json
+import math
 
 import numpy as np
 import pytest
@@ -17,6 +18,9 @@ from scripts.trailer import build_music
 from scripts.trailer import step_03_music as step
 from studio import beatmap, db, llm
 from studio.beatmap import RATE, track_autocorrelation
+from studio import cue_ask, frame_budget
+from studio.cue_plan import MIN_FORM_BARS, CuePlan
+from studio.cue_spans import ShorterCue
 from studio.learnings import load
 from studio.affirm import negations
 from studio.music_tone import Tone, caption, lyrics_plan
@@ -156,17 +160,21 @@ class TestSeeds:
         assert step.on_tone(96.0, 84) and step.on_tone(72.0, 84)
         assert not step.on_tone(100.9, 84) and not step.on_tone(177.84, 84)
 
-    def test_verdict_needs_a_metric_grid_on_the_asked_tempo(self, tmp_path):
-        """Fitness had a floor of 6.0 no real seed ever met (run 9's best was
-        4.4; earlier 0.3-2.5), and the slot the gate wanted is now MADE from
-        the grid by 04-lines.  What the gate grades is what the cut needs
-        and no seed can fake: a countable grid at the asked pace."""
+    def test_verdict_needs_the_ask_delivered_on_a_metric_grid(self, tmp_path):
+        """Fitness had a floor of 6.0 no real seed ever met, then the gate
+        wanted the asked tempo; run 10 met both and the cut still landed 28%
+        of its cuts on an event.  What the cut needs and no seed can fake:
+        the events the ask pinned to bars, delivered, on a countable grid.
+        Tempo is reported, never gated: the picture cuts to measured events."""
         two = beatmap.metre(write_wav(tmp_path / "a.wav", cue(**KINDS["two"])), seed=1,
                             rel_path="a.wav", track=track_autocorrelation)
-        assert step.verdict(two, 120)[0]
-        assert step.verdict(two.model_copy(update={"slots": [], "fitness": 0.5}), 120)[0]
-        assert not step.verdict(two, 84)[0] and "against 84 asked" in step.verdict(two, 84)[1]
-        assert not step.verdict(two.model_copy(update={"grid": "onsets"}), 120)[0]
+        assert step.verdict(two, 120, {1: 0.9})[0]
+        assert step.verdict(two.model_copy(update={"slots": [], "fitness": 0.5}), 120, {1: 0.9})[0]
+        passed, measured, floor = step.verdict(two, 84, {1: 0.9})
+        assert passed and "against 84 asked" in measured and floor == cue_ask.VERDICT_FLOOR
+        assert not step.verdict(two, 120, {1: 0.5})[0] and "ask 0.50 delivered" in step.verdict(two, 120, {1: 0.5})[1]
+        assert not step.verdict(two, 120)[0]
+        assert not step.verdict(two.model_copy(update={"grid": "onsets"}), 120, {1: 0.9})[0]
         assert not step.verdict(None, 120)[0]
 
     def test_best_of_ranks_on_what_the_gate_grades_before_fitness(self, tmp_path):
@@ -289,13 +297,150 @@ class TestForm:
         assert 0 <= step.form_of(rendered, found) <= 2
 
 
+class TestAsk:
+    """The cue is as long as the frames afford, never a pinned number."""
+
+    def test_the_ask_is_sized_by_step_07s_share(self, ctx, monkeypatch):
+        """210 min less one reader session, at the typed curve, at the corpus
+        mix, is 76 s of picture: 38 bars of 2 s, plus the two the tail holds."""
+        monkeypatch.setattr(ctx.budget, "allowance", lambda step: 210 * 60.0)
+        assert step.bars_of(ctx, TONE) == 40
+        assert step.ask_of(ctx, TONE).seconds == 80.0
+
+    def test_a_budget_too_small_for_the_shortest_form_still_asks_for_it(self, ctx, monkeypatch):
+        """A trailer without music is worse than one cut to a short cue: the
+        shortest form is asked for and the fit rule trims the plan later."""
+        monkeypatch.setattr(ctx.budget, "allowance", lambda step: 600.0)
+        assert step.bars_of(ctx, TONE) == MIN_FORM_BARS + step.TAIL_BARS
+
+    def test_the_render_is_asked_for_the_ask_plus_headroom(self, ctx, tmp_path, monkeypatch):
+        comfy_calls: list[dict] = []
+        monkeypatch.setattr(build_music, "run", fake_comfy(tmp_path, {}, comfy_calls))
+        monkeypatch.setattr(ctx.budget, "allowance", lambda step: 210 * 60.0)
+        step.run(ctx.codex_id, ctx)
+        assert {c["duration"] for c in comfy_calls} == {80 + step.TAIL_HEADROOM}
+
+    def test_best_of_prefers_the_seed_that_delivered_its_ask(self):
+        a = Metre(seed=1, rel_path="m/a.wav", seconds=60.0, bpm=120.0, bar=2.0, beats_per_bar=4,
+                  beats=[0.5], downbeats=[0.5], bars_in_mode=0.9, grid="metre", fitness=9.0)
+        b = a.model_copy(update={"seed": 2, "fitness": 1.0})
+        assert step.best_of([a, b], 120, {1: 2, 2: 2}, {1: 0.5, 2: 0.9}) is b
+        assert step.best_of([a, b], 120, {1: 2, 2: 2}, {1: 0.9, 2: 0.9}) is a
+
+    def test_grade_records_metre_form_map_and_score_for_one_seed(self, ctx, tmp_path):
+        music = ctx.out_dir / "music"
+        music.mkdir(parents=True, exist_ok=True)
+        wav = write_wav(music / "cue-7.wav", cue(**KINDS["two"]))
+        state = {"ask": step.ask_of(ctx, TONE), "found": [], "form": {}, "maps": {}, "asks": {},
+                 "score": {}}
+        metre = step.grade(ctx.book_dir, wav, 7, state)
+        assert state["found"] == [metre] and metre.seed == 7
+        assert set(state["form"]) == set(state["maps"]) == set(state["score"]) == {7}
+        assert 0.0 <= state["score"][7] <= 1.0 and (music / "cutmap-7.json").exists()
+
+    def test_warn_short_names_every_shortfall_of_the_shipped_cue(self, ctx, tmp_path, monkeypatch):
+        logged = []
+        monkeypatch.setattr(ctx.tracker, "log", lambda msg, **kw: logged.append(msg))
+        two = beatmap.metre(write_wav(tmp_path / "a.wav", cue(**KINDS["two"])), seed=1,
+                            rel_path="a.wav", track=track_autocorrelation)
+        step.warn_short(ctx, two.model_copy(update={"grid": "onsets"}), 84, {1: 1}, 0.4)
+        assert [m.split(" shipped")[1][:14] for m in logged] == [
+            " delivering 0.", " with 1 of 2 f", " on the ONSET ", " OFF TONE: 115"]
+        logged.clear()
+        step.warn_short(ctx, two, 120, {1: 2}, 0.9)
+        assert logged == []
+
+    def test_a_shorter_ask_retires_the_seeds_rendered_at_the_longer_one(self, ctx):
+        """The fit rule judged the ASK too long for the frames: every cue cut
+        to it is out of the running once a shorter one has been rendered."""
+        first = step.ask_of(ctx, TONE)
+        shorter = step.shorter_ask(TONE, first, 4)
+        a = Metre(seed=1, rel_path="m/a.wav", seconds=60.0, bpm=120.0, bar=2.0, beats_per_bar=4,
+                  beats=[0.5], downbeats=[0.5], bars_in_mode=0.9, grid="metre", fitness=20.0)
+        b = a.model_copy(update={"seed": 2})
+        state = {"found": [a, b], "asks": {1: first, 2: shorter}, "ask": shorter}
+        assert step.in_the_running(state) == [b]
+        state["ask"] = step.shorter_ask(TONE, first, 8)
+        assert step.in_the_running(state) == [a, b]
+
+    def test_a_shorter_ask_loses_the_bars_the_fit_needed_and_keeps_the_form(self, ctx):
+        ask = step.ask_of(ctx, TONE)
+        assert step.shorter_ask(TONE, ask, 4).bars == ask.bars - 4
+        assert step.shorter_ask(TONE, ask, 10_000).bars == MIN_FORM_BARS + step.TAIL_BARS
+
+
 class TestStep:
-    def test_step_ranks_seeds_on_fitness(self, ctx, tmp_path, monkeypatch):
+    def test_a_cue_that_offers_too_many_spans_is_asked_for_shorter(self, ctx, tmp_path, monkeypatch):
+        """A seed that delivers its ask on more spans than the frames afford
+        fails the gate with the bars the fit needed; the next batch asks
+        for that many fewer, and the plan shipped is the trimmed one."""
+        seeds = step.seeds_for(0)
+        kinds = {s: "two" for b in range(2) for s in step.seeds_for(b)}
+        comfy_calls, fits = [], []
+        monkeypatch.setattr(build_music, "run", fake_comfy(tmp_path, kinds, comfy_calls))
+        monkeypatch.setattr(llm, "structured", fake_llm([]))
+        monkeypatch.setattr(step, "score_of", lambda ask, cut, found: 0.9)
+
+        def fitted(ctx_, plan):
+            fits.append(plan.asked.bars)
+            if len(fits) == 1:
+                raise ShorterCue(4)
+            return plan
+        monkeypatch.setattr(step, "fitted", fitted)
+        step.run(ctx.codex_id, ctx)
+        first = step.ask_of(ctx, TONE)
+        shorter = step.shorter_ask(TONE, first, 4)
+        assert [c["duration"] for c in comfy_calls] ==             [math.ceil(first.seconds) + step.TAIL_HEADROOM] * 4 +             [math.ceil(shorter.seconds) + step.TAIL_HEADROOM] * 4
+        assert fits == [first.bars, shorter.bars, shorter.bars]
+        rows = load(ctx.learnings_path)
+        assert rows[0].action == "first_seeds" and "4 fewer bars" in rows[0].measured
+        plan = CuePlan.model_validate_json((ctx.out_dir / "music/plan.json").read_text(encoding="utf-8"))
+        assert plan.asked.bars == shorter.bars and plan.seed in step.seeds_for(1)
+
+    def test_a_plan_no_fit_can_afford_ships_untrimmed_and_warns(self, ctx, tmp_path, monkeypatch):
+        seeds = step.seeds_for(0)
+        kinds = {seeds[0]: "two", seeds[1]: "two", seeds[2]: "two", seeds[3]: "two"}
+        monkeypatch.setattr(build_music, "run", fake_comfy(tmp_path, kinds, []))
+        monkeypatch.setattr(llm, "structured", fake_llm([]))
+        monkeypatch.setattr(ctx.budget, "can_afford", lambda s, secs: False)
+        monkeypatch.setattr(step, "score_of", lambda ask, cut, found: 0.9)
+
+        def never(ctx_, plan):
+            raise ShorterCue(3)
+        monkeypatch.setattr(step, "fitted", never)
+        logged = []
+        monkeypatch.setattr(ctx.tracker, "log", lambda msg, **kw: logged.append(msg))
+        step.run(ctx.codex_id, ctx)
+        assert (ctx.out_dir / "music/plan.json").exists()
+        assert any("3 fewer bars" in m for m in logged)
+
+    def test_step_writes_the_cue_plan_and_a_cut_map_per_seed(self, ctx, tmp_path, monkeypatch):
+        """Downstream steps read spans from `music/plan.json` and invent no cut;
+        every seed's cut map is kept beside its metre for the retrospect."""
+        seeds = step.seeds_for(0)
+        kinds = {seeds[0]: "flat", seeds[1]: "two", seeds[2]: "one", seeds[3]: "flat"}
+        monkeypatch.setattr(build_music, "run", fake_comfy(tmp_path, kinds, []))
+        monkeypatch.setattr(llm, "structured", fake_llm([]))
+        step.run(ctx.codex_id, ctx)
+        plan = CuePlan.model_validate_json((ctx.out_dir / "music/plan.json").read_text(encoding="utf-8"))
+        chosen = chosen_of(ctx)
+        assert plan.seed == chosen.seed and plan.rel_path == chosen.rel_path
+        assert plan.asked is not None and plan.asked.bars == step.bars_of(ctx, TONE)
+        assert plan.spans[-1].kind == "tail" and len(plan.picture_spans()) >= 2
+        rendered = sorted(p.stem.split("-")[1] for p in ctx.out_dir.glob("music/cue-*.wav"))
+        mapped = sorted(p.stem.split("-")[1] for p in ctx.out_dir.glob("music/cutmap-*.json"))
+        assert mapped == rendered and set(str(s) for s in seeds) <= set(mapped)
+
+    def test_step_stops_climbing_at_the_seed_that_delivers_its_ask(self, ctx, tmp_path, monkeypatch):
+        """A seed that delivered its ask on a metric grid ends the ladder on the
+        first batch: no second batch, no reauthor, nothing learned."""
         seeds = step.seeds_for(0)
         kinds = {seeds[0]: "flat", seeds[1]: "two", seeds[2]: "one", seeds[3]: "flat"}
         comfy_calls, llm_calls = [], []
         monkeypatch.setattr(build_music, "run", fake_comfy(tmp_path, kinds, comfy_calls))
         monkeypatch.setattr(llm, "structured", fake_llm(llm_calls))
+        monkeypatch.setattr(step, "score_of",
+                            lambda ask, cut, found: 0.9 if found.seed == seeds[1] else 0.2)
         step.run(ctx.codex_id, ctx)
         chosen = chosen_of(ctx)
         assert chosen.seed == seeds[1] and chosen.grid == "metre" and len(chosen.slots) == 2

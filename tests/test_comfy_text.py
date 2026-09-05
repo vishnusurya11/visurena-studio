@@ -85,6 +85,7 @@ def test_the_timeout_clock_starts_when_the_job_leaves_the_queue(monkeypatch):
     clock = _clock(monkeypatch)
     pending = {"left": 3}
     monkeypatch.setattr(comfy, "pending", lambda prompt_id: pending.__setitem__("left", pending["left"] - 1) or pending["left"] >= 0)
+    monkeypatch.setattr(comfy, "running", lambda prompt_id: True)
     done = {"at": None}
 
     def history(prompt_id):
@@ -98,10 +99,57 @@ def test_the_timeout_clock_starts_when_the_job_leaves_the_queue(monkeypatch):
 def test_a_running_job_still_times_out(monkeypatch):
     _clock(monkeypatch)
     monkeypatch.setattr(comfy, "pending", lambda prompt_id: False)
+    monkeypatch.setattr(comfy, "running", lambda prompt_id: True)
     monkeypatch.setattr(comfy, "history", lambda prompt_id: {})
     import pytest
     with pytest.raises(TimeoutError):
         comfy.wait_record("job-1", timeout=10.0, poll=5.0)
+
+
+def test_an_engine_that_cannot_be_reached_is_waited_for_not_crashed(monkeypatch):
+    """Run 11: ComfyUI was restarted under a take and `history` raised
+    TimeoutError straight through step 07.  The clock keeps running; the
+    poll keeps asking."""
+    _clock(monkeypatch)
+    monkeypatch.setattr(comfy, "pending", lambda prompt_id: False)
+    answers = [TimeoutError("timed out"), comfy.urllib.error.URLError("refused"), RECORD]
+
+    def history(prompt_id):
+        answer = answers.pop(0)
+        if isinstance(answer, Exception):
+            raise answer
+        return answer
+    monkeypatch.setattr(comfy, "history", history)
+    assert comfy.wait_record("job-1", timeout=60.0, poll=5.0) is RECORD
+
+
+def test_a_job_the_restarted_engine_has_forgotten_is_lost(monkeypatch):
+    """The engine answers again and knows nothing of the job: neither queued,
+    nor running, nor in history.  Waiting on it would run out the whole
+    timeout for nothing; the caller decides whether to render once more."""
+    _clock(monkeypatch)
+    monkeypatch.setattr(comfy, "pending", lambda prompt_id: False)
+    monkeypatch.setattr(comfy, "running", lambda prompt_id: False)
+    monkeypatch.setattr(comfy, "history", lambda prompt_id: {})
+    import pytest
+    with pytest.raises(comfy.EngineLost):
+        comfy.wait_record("job-1", timeout=60.0, poll=5.0)
+    assert issubclass(comfy.EngineLost, RuntimeError)
+
+
+def test_a_running_job_with_no_history_yet_is_not_lost(monkeypatch):
+    clock = _clock(monkeypatch)
+    monkeypatch.setattr(comfy, "pending", lambda prompt_id: False)
+    monkeypatch.setattr(comfy, "running", lambda prompt_id: True)
+    monkeypatch.setattr(comfy, "history", lambda prompt_id: RECORD if clock.now >= 1015 else {})
+    assert comfy.wait_record("job-1", timeout=60.0, poll=5.0) is RECORD
+
+
+def test_running_reads_the_engines_running_slot(monkeypatch):
+    queue = {"queue_running": [[0, "job-0", {}]], "queue_pending": [[1, "job-1", {}]]}
+    monkeypatch.setattr(comfy, "_get", lambda path: queue)
+    assert comfy.running("job-0") is True
+    assert comfy.running("job-1") is False
 
 
 def test_pending_reads_the_engines_queue(monkeypatch):

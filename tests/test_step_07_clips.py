@@ -18,7 +18,7 @@ from PIL import Image
 
 from scripts.trailer import step_07_clips as step
 from scripts.trailer.build_clips import FRAMING
-from studio import db
+from studio import comfy, db
 from studio import describe
 from studio.clip_cache import fingerprint, is_current, record, stored_fingerprint
 from studio.describe import DISTINCT_AT, TIMEOUT, TraitCard
@@ -225,6 +225,29 @@ class TestRun:
         clip = next(c for c in clips_doc(ctx)["clips"] if c["beat_id"] == "B00")
         assert clip["capped"] is None and clip["known"] == 3
         assert [r.action for r in rungs(ctx)] == ["accepted_unverifiable"]
+
+    def test_a_take_lost_to_an_engine_restart_is_rendered_once_more(self, ctx, rendered,
+                                                                    monkeypatch):
+        """The engine came back without the job: it is back, so the take is
+        submitted again -- once.  A second loss is the machine's answer."""
+        real, tries = step.render_take, []
+
+        def flaky(values, bound, refs, book, dest):
+            tries.append(values["seed"])
+            if len(tries) == 1:
+                raise comfy.EngineLost("job-1 vanished: the engine restarted")
+            return real(values, bound, refs, book, dest)
+        monkeypatch.setattr(step, "render_take", flaky)
+        rendered["cards"] = [NEAR]
+        step.run(ctx.codex_id, ctx)
+        assert clips_doc(ctx)["dropped"] == [] and tries[0] == tries[1]
+
+    def test_a_take_lost_twice_fails_like_any_other(self, ctx, rendered, monkeypatch):
+        def gone(values, bound, refs, book, dest):
+            raise comfy.EngineLost("job-1 vanished: the engine restarted")
+        monkeypatch.setattr(step, "render_take", gone)
+        step.run(ctx.codex_id, ctx)
+        assert clips_doc(ctx)["dropped"] == ["B00", "B01"]
 
     def test_a_take_that_fails_to_render_drops_the_beat(self, ctx, rendered, monkeypatch):
         def broken(values, bound, refs, book, dest):

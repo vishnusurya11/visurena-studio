@@ -102,6 +102,25 @@ def history(prompt_id: str) -> dict:
         return json.loads(response.read()).get(prompt_id, {})
 
 
+class EngineLost(RuntimeError):
+    """The engine answers again and knows nothing of the job: it restarted
+    while the job ran.  A RuntimeError, so every caller that already treats
+    a failed render as "the machine produced nothing" needs no new clause;
+    one that can afford a second submission catches this first."""
+
+
+UNREACHABLE = (urllib.error.URLError, TimeoutError, ConnectionError)
+"""What a poll raises while the engine is down or restarting."""
+
+
+def reachable(ask, *args):
+    """`ask`'s answer, or None while the engine cannot be reached."""
+    try:
+        return ask(*args)
+    except UNREACHABLE:
+        return None
+
+
 def outputs_of(record: dict) -> list[Path]:
     """Absolute paths of every file a finished job wrote."""
     found: list[Path] = []
@@ -133,6 +152,17 @@ def pending(prompt_id: str) -> bool:
     return any(item[1] == prompt_id for item in _get("/queue").get("queue_pending", []))
 
 
+def running(prompt_id: str) -> bool:
+    """Whether the job is the one the engine is executing now."""
+    return any(item[1] == prompt_id for item in _get("/queue").get("queue_running", []))
+
+
+def lost(prompt_id: str) -> bool:
+    """The engine knows nothing of the job -- neither queued, nor running,
+    nor finished.  Only a restart forgets a job."""
+    return not pending(prompt_id) and not running(prompt_id) and not history(prompt_id)
+
+
 QUEUE_SECONDS = 7200.0
 
 
@@ -141,18 +171,27 @@ def wait_record(prompt_id: str, timeout: float = 3600.0, poll: float = 5.0) -> d
     or timeout.  The clock starts when the job leaves the queue: a sheet
     queued behind an 11-minute take had timed out before it ran a second."""
     queued_until = time.time() + QUEUE_SECONDS
-    while pending(prompt_id) and time.time() < queued_until:
+    while reachable(pending, prompt_id) is not False and time.time() < queued_until:
         time.sleep(poll)
     deadline = time.time() + timeout
     while time.time() < deadline:
-        record = history(prompt_id)
-        status = record.get("status", {})
-        if status.get("status_str") == "error":
-            raise RuntimeError(f"{prompt_id} failed: {_first_error(record)}")
-        if status.get("completed"):
-            return record
+        record = reachable(history, prompt_id)
+        if record is not None:
+            settled(prompt_id, record)
+            if record.get("status", {}).get("completed"):
+                return record
         time.sleep(poll)
     raise TimeoutError(f"{prompt_id} still running after {timeout}s")
+
+
+def settled(prompt_id: str, record: dict) -> None:
+    """Raise on the two ways a job ends with nothing: the engine reported
+    an error, or it restarted and forgot the job.  An engine that is
+    unreachable for the check is simply waited for."""
+    if record.get("status", {}).get("status_str") == "error":
+        raise RuntimeError(f"{prompt_id} failed: {_first_error(record)}")
+    if not record and reachable(lost, prompt_id):
+        raise EngineLost(f"{prompt_id} vanished: the engine restarted")
 
 
 def wait(prompt_id: str, timeout: float = 3600.0, poll: float = 5.0) -> list[Path]:

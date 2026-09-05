@@ -13,6 +13,7 @@ music is worse than one cut to the wrong pace.
 """
 from __future__ import annotations
 
+import math
 import time
 from dataclasses import replace
 from pathlib import Path
@@ -21,9 +22,13 @@ import numpy as np
 from pydantic import BaseModel, Field
 
 from scripts.trailer import build_music
-from studio import beatmap, llm
+from scripts.trailer.step_07_clips import read_seconds
+from studio import beatmap, cue_ask, cue_spans, frame_budget, llm, music_events
+from studio.cue_plan import MIN_FORM_BARS, CueAsk, CuePlan
+from studio.cue_spans import ShorterCue
 from studio.ladder import Ladder, Rung, climb
-from studio.music_tone import Tone, caption, load_tone, lyrics_plan, recipe_path
+from studio.learnings import load
+from studio.music_tone import Tone, load_tone, lyrics_plan, recipe_path
 from studio.trailer_stage_spec import Metre
 
 STEP_ID = "03"
@@ -38,6 +43,12 @@ seeds within a band now and gates nothing.  A slot is no longer graded:
 BATCH = 4
 RENDER_ESTIMATE = 240.0
 """Seconds per render until the first batch has been timed."""
+TAIL_BARS = 2
+"""Bars past the picture that the card plays over; the ask's title bar sits
+where they begin.  FLAG: the register's `tail_seconds` may ask for more."""
+TAIL_HEADROOM = 4
+"""Seconds the model is given past the ask to finish its own decay; a
+runaway is cut at the hard out, never stretched to."""
 
 STAIRCASE_DB = 4.0
 """How far the last third must sit above the first for the cue to be climbing.
@@ -71,6 +82,74 @@ def rel_path(book: Path, path: Path) -> str:
     return path.relative_to(book).as_posix()
 
 
+def bar_of(tone: Tone) -> float:
+    return round(60.0 / tone.bpm * cue_ask.beats_per_bar(tone), 4)
+
+
+def picture_budget(ctx) -> float:
+    """Render seconds step 07 has for picture: its share net of one reader session."""
+    return max(0.0, ctx.budget.allowance("07") - read_seconds(len(frame_budget.CORPUS_MIX)))
+
+
+def cycle_of(ctx) -> frame_budget.Cycle:
+    """The render cycle the learnings measured, or the typed one until they have."""
+    return frame_budget.Cycle.from_rows(load(ctx.learnings_path))
+
+
+def bars_of(ctx, tone: Tone) -> int:
+    """Bars the frame budget affords: step 07's share, net of one reader
+    session, at the cycle the learnings measured, at the corpus mix of shot
+    lengths -- plus the bars the card holds.  The shortest form is asked for
+    when even that is out of reach: the fit rule trims the plan, a trailer
+    without music is not shipped."""
+    mix = list(frame_budget.CORPUS_MIX)
+    seconds = frame_budget.cue_seconds_for(picture_budget(ctx), cycle_of(ctx), mix)
+    try:
+        return frame_budget.bars_for(seconds, bar_of(tone)) + TAIL_BARS
+    except ValueError:
+        ctx.tracker.log(f"budget affords {seconds:.0f}s of picture; asking for the shortest "
+                        f"form anyway", level="WARNING", step_id=STEP_ID)
+        return MIN_FORM_BARS + TAIL_BARS
+
+
+def ask_of(ctx, tone: Tone) -> CueAsk:
+    """What this run asks the music model for, derived from the frames."""
+    return cue_ask.ask_for(tone, bars_of(ctx, tone))
+
+
+def shorter_ask(tone: Tone, ask: CueAsk, bars_needed: int) -> CueAsk:
+    """The ask with the bars the fit could not afford taken off, never under
+    the shortest form: the cue bends, the form does not."""
+    return cue_ask.ask_for(tone, max(MIN_FORM_BARS + TAIL_BARS, ask.bars - bars_needed))
+
+
+def in_the_running(state: dict) -> list[Metre]:
+    """The seeds rendered at the current ask, or every seed until one has
+    been: a shorter ask retires the longer cues, whose plans the frames did
+    not afford, and no batch is spent judging their siblings one by one."""
+    current = [m for m in state["found"] if state["asks"][m.seed] == state["ask"]]
+    return current or state["found"]
+
+
+def fitted(ctx, plan: CuePlan) -> CuePlan:
+    """The plan trimmed to the takes step 07's frames afford."""
+    return cue_spans.fit_to_budget(plan, picture_budget(ctx), cycle_of(ctx))
+
+
+def map_cue(book: Path, cue: Path, found: Metre) -> dict:
+    """One seed's cut map, written beside its metre for the retrospect."""
+    cut = music_events.CutMap.model_validate(
+        music_events.cut_map(beatmap.decode(cue), beatmap.RATE, found))
+    (cue.parent / f"cutmap-{found.seed}.json").write_text(
+        cut.model_dump_json(indent=2), encoding="utf-8")
+    return cut.model_dump()
+
+
+def score_of(ask: CueAsk, cut: dict, found: Metre) -> float:
+    """The weighted share of the ask's events the rendered cue delivered."""
+    return cue_ask.plan_score(cue_ask.verify(ask, cut, found))
+
+
 def measure(book: Path, cue: Path, seed: int) -> Metre:
     """One seed's Metre, written beside the cue for the retrospect."""
     found = beatmap.metre(cue, seed=seed, rel_path=rel_path(book, cue))
@@ -83,7 +162,8 @@ def render_batch(ctx, text: str, sheet: str, seeds: list[int], state: dict) -> l
     """Render and measure seeds until the batch or the budget is done.
 
     The first render of a run is never gated; after that each render must fit
-    in the time left, at the slowest render seen so far."""
+    in the time left, at the slowest render seen so far.  Every seed gets a
+    Metre, a cut map and a score against the ask."""
     music = ctx.out_dir / "music"
     music.mkdir(parents=True, exist_ok=True)
     found: list[Metre] = []
@@ -93,13 +173,23 @@ def render_batch(ctx, text: str, sheet: str, seeds: list[int], state: dict) -> l
                             level="WARNING", step_id=STEP_ID)
             break
         started = time.monotonic()
-        cue = build_music.render_cue(ctx.book_dir, text, seed, music, sheet)
+        cue = build_music.render_cue(ctx.book_dir, text, seed, music, sheet,
+                                     duration=math.ceil(state["ask"].seconds) + TAIL_HEADROOM)
         state["timed"].append(time.monotonic() - started)
         state["render"] = max(max(state["timed"]), 1.0)
-        found.append(measure(ctx.book_dir, cue, seed))
-        state["form"][seed] = form_of(cue, found[-1])
-        state["found"].append(found[-1])
+        found.append(grade(ctx.book_dir, cue, seed, state))
     return found
+
+
+def grade(book: Path, cue: Path, seed: int, state: dict) -> Metre:
+    """Measure one rendered seed: its Metre, form, cut map and ask score."""
+    metre = measure(book, cue, seed)
+    state["form"][seed] = form_of(cue, metre)
+    state["maps"][seed] = map_cue(book, cue, metre)
+    state["asks"][seed] = state["ask"]
+    state["score"][seed] = score_of(state["ask"], state["maps"][seed], metre)
+    state["found"].append(metre)
+    return metre
 
 
 def tenth_medians(db) -> list[float]:
@@ -155,10 +245,14 @@ def on_tone(bpm: float, asked: int) -> bool:
     return tempo_error(bpm, asked) <= TEMPO_BAND
 
 
-def best_of(metres: list[Metre], asked: int, form: dict[int, int] | None = None) -> Metre | None:
-    """The seed that satisfies most of what the gate grades, then the fittest.
+def best_of(metres: list[Metre], asked: int, form: dict[int, int] | None = None,
+            score: dict[int, float] | None = None) -> Metre | None:
+    """The seed that delivered most of its ask, then the most form, then the fittest.
 
-    FORM FIRST, ahead of grid steadiness.  Run 10's chosen seed had the
+    THE ASK FIRST: the cut is read off the events the ask pinned to bars, so
+    a seed whose stop and title hit landed where they were asked is the one
+    the picture can be cut to, whatever its grid.  Then FORM, ahead of grid
+    steadiness.  Run 10's chosen seed had the
     steadiest grid of its family and was a plateau from 8 s with a fade for an
     ending: every metric term passed a cue that is not a trailer cue.  A
     staircase on a wobblier grid is the better trailer, because `04-shots` can
@@ -167,19 +261,26 @@ def best_of(metres: list[Metre], asked: int, form: dict[int, int] | None = None)
     Then a countable grid, then the asked pace by the tempo band it falls in;
     fitness only orders seeds that agree on all three.
     """
-    scores = form or {}
-    return max(metres, key=lambda m: (scores.get(m.seed, 0), m.grid == "metre",
+    scores, delivered = form or {}, score or {}
+    return max(metres, key=lambda m: (delivered.get(m.seed, 0.0), scores.get(m.seed, 0),
+                                      m.grid == "metre",
                                       -int(tempo_error(m.bpm, asked) / TEMPO_BAND),
                                       m.fitness), default=None)
 
 
-def verdict(best: Metre | None, asked: int) -> tuple[bool, str, float]:
-    """(passed, what was measured, band): a metric grid on the asked tempo."""
+def verdict(best: Metre | None, asked: int, score: dict[int, float] | None = None
+            ) -> tuple[bool, str, float]:
+    """(passed, what was measured, floor): the ask delivered, on a metric grid.
+
+    Tempo is reported, not gated: the picture cuts to measured events now, so
+    a cue at 127 against 100 asked that landed its stop and title hit is a
+    trailer cue, and one at 100 that landed neither is not."""
     if best is None:
-        return False, "no seed rendered", TEMPO_BAND
-    measured = (f"{best.bpm:.1f} bpm against {asked} asked, {best.grid}, "
-                f"fitness {best.fitness:.1f}")
-    return best.grid == "metre" and on_tone(best.bpm, asked), measured, TEMPO_BAND
+        return False, "no seed rendered", cue_ask.VERDICT_FLOOR
+    delivered = (score or {}).get(best.seed, 0.0)
+    measured = (f"ask {delivered:.2f} delivered, {best.bpm:.1f} bpm against {asked} asked, "
+                f"{best.grid}, fitness {best.fitness:.1f}")
+    return best.grid == "metre" and cue_ask.verdict(delivered), measured, cue_ask.VERDICT_FLOOR
 
 
 def reauthor_prompt(tone: Tone, best: Metre | None, refused: str = "") -> str:
@@ -226,14 +327,46 @@ def reauthor(tone: Tone, best: Metre | None, tries: int = 2) -> Tone:
     return tone
 
 
-def ship(ctx, best: Metre | None, asked: int, form: dict[int, int]) -> None:
-    """Write the chosen Metre; an onset grid, an off-tone pace or a cue that
-    is not a staircase is shipped, but never silently."""
-    if best is None:
-        raise RuntimeError("step 03 rendered no cue; nothing to cut to")
-    (ctx.out_dir / "music/metre.json").write_text(
-        best.model_dump_json(indent=2, by_alias=True), encoding="utf-8")
-    recipe = recipe_path(ctx.out_dir / "music" / Path(best.rel_path).name)
+def plan_for(best: Metre, state: dict) -> CuePlan:
+    """The chosen cue's measured spans, carrying the ask they were graded against."""
+    cut = music_events.CutMap.model_validate(state["maps"][best.seed])
+    verified = cue_ask.verify(state["asks"][best.seed], state["maps"][best.seed], best)
+    plan = cue_spans.plan_of(cut, best, rel_path=best.rel_path, seed=best.seed)
+    return plan.model_copy(update={"asked": verified})
+
+
+def judge(ctx, best: Metre | None, asked: int, state: dict) -> tuple[bool, str, float]:
+    """The gate: the ask delivered on a metric grid, AND a plan the frames
+    afford.  A plan that does not fit fails with the bars it needs off; the
+    next attempt asks for that many fewer."""
+    passed, measured, floor = verdict(best, asked, state["score"])
+    if not passed:
+        return passed, measured, floor
+    try:
+        fitted(ctx, plan_for(best, state))
+    except ShorterCue as short:
+        state["short"] = short.bars_needed
+        return False, f"{measured}; the plan wants {short.bars_needed} fewer bars", floor
+    return True, measured, floor
+
+
+def shipped_plan(ctx, best: Metre, state: dict) -> CuePlan:
+    """The fitted plan, or the whole one with a warning when no fit afforded
+    it: step 08 settles what step 07 cannot render, never silently."""
+    plan = plan_for(best, state)
+    try:
+        return fitted(ctx, plan)
+    except ShorterCue as short:
+        ctx.tracker.log(f"seed {best.seed} shipped with a plan the frames do not afford: "
+                        f"{short.bars_needed} fewer bars wanted", level="WARNING", step_id=STEP_ID)
+        return plan
+
+
+def warn_short(ctx, best: Metre, asked: int, form: dict[int, int], delivered: float) -> None:
+    """What the shipped cue falls short of, on the tracker, never silently."""
+    if not cue_ask.verdict(delivered):
+        ctx.tracker.log(f"seed {best.seed} shipped delivering {delivered:.2f} of its ask "
+                        f"(floor {cue_ask.VERDICT_FLOOR})", level="WARNING", step_id=STEP_ID)
     if form.get(best.seed, 0) < 2:
         ctx.tracker.log(f"seed {best.seed} shipped with {form.get(best.seed, 0)} of 2 form "
                         f"terms (staircase, stop-not-fade)", level="WARNING", step_id=STEP_ID)
@@ -243,10 +376,24 @@ def ship(ctx, best: Metre | None, asked: int, form: dict[int, int]) -> None:
     if not on_tone(best.bpm, asked):
         ctx.tracker.log(f"seed {best.seed} shipped OFF TONE: {best.bpm:.1f} bpm against "
                         f"{asked} asked", level="WARNING", step_id=STEP_ID)
-    print(f"[{STEP_ID}] seed {best.seed}: {best.bpm:.1f} bpm against {asked} asked, "
-          f"{best.bars_in_mode:.0%} bars in mode, {best.grid}, {len(best.slots)} slots, "
-          f"form {form.get(best.seed, 0)}/2, fitness {best.fitness:.1f}, "
-          f"recipe {recipe.name}")
+
+
+def ship(ctx, best: Metre | None, asked: int, form: dict[int, int], state: dict) -> None:
+    """Write the chosen Metre and its CuePlan: downstream steps read spans from
+    the plan and invent no cut of their own."""
+    if best is None:
+        raise RuntimeError("step 03 rendered no cue; nothing to cut to")
+    (ctx.out_dir / "music/metre.json").write_text(
+        best.model_dump_json(indent=2, by_alias=True), encoding="utf-8")
+    plan = shipped_plan(ctx, best, state)
+    (ctx.out_dir / "music/plan.json").write_text(plan.model_dump_json(indent=2), encoding="utf-8")
+    recipe = recipe_path(ctx.out_dir / "music" / Path(best.rel_path).name)
+    delivered = state["score"].get(best.seed, 0.0)
+    warn_short(ctx, best, asked, form, delivered)
+    print(f"[{STEP_ID}] seed {best.seed}: ask {delivered:.2f} delivered, "
+          f"{len(plan.picture_spans())} spans over {plan.seconds:.1f}s, {best.bpm:.1f} bpm against "
+          f"{asked} asked, {best.bars_in_mode:.0%} bars in mode, {best.grid}, "
+          f"form {form.get(best.seed, 0)}/2, fitness {best.fitness:.1f}, recipe {recipe.name}")
 
 
 def ladder_for(render: float) -> Ladder:
@@ -255,22 +402,29 @@ def ladder_for(render: float) -> Ladder:
 
 
 def run(codex_id: str, ctx) -> None:
-    state = {"tone": load_tone(ctx.book_dir), "render": RENDER_ESTIMATE,
-             "timed": [], "found": [], "form": {}, "batches": 0}
+    tone = load_tone(ctx.book_dir)
+    state = {"tone": tone, "ask": ask_of(ctx, tone), "render": RENDER_ESTIMATE,
+             "timed": [], "found": [], "form": {}, "maps": {}, "asks": {}, "score": {},
+             "short": 0, "batches": 0}
     ladder = ladder_for(RENDER_ESTIMATE)
 
     asked = state["tone"].bpm
 
+    def best():
+        return best_of(in_the_running(state), asked, state["form"], state["score"])
+
     def attempt(rung, i):
         if rung.name == "reauthor_caption":
-            state["tone"] = reauthor(state["tone"], best_of(state["found"], asked, state["form"]))
-        render_batch(ctx, caption(state["tone"]), lyrics_plan(state["tone"]),
-                     seeds_for(state["batches"]), state)
+            state["tone"] = reauthor(state["tone"], best())
+        if state["short"]:
+            state["ask"], state["short"] = shorter_ask(state["tone"], state["ask"], state["short"]), 0
+        render_batch(ctx, cue_ask.caption_from(state["ask"], state["tone"]),
+                     lyrics_plan(state["tone"]), seeds_for(state["batches"]), state)
         state["batches"] += 1
         for later in ladder.rungs[1:]:
             later.cost_seconds = BATCH * state["render"]
-        return best_of(state["found"], asked, state["form"])
+        return best()
 
-    climb(ladder, STEP_ID, attempt, lambda best: verdict(best, asked), ctx.budget, ctx.learn,
-          gate_name="metre")
-    ship(ctx, best_of(state["found"], asked, state["form"]), asked, state["form"])
+    climb(ladder, STEP_ID, attempt, lambda b: judge(ctx, b, asked, state), ctx.budget, ctx.learn,
+          gate_name="ask")
+    ship(ctx, best(), asked, state["form"], state)
