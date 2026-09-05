@@ -2,28 +2,30 @@ from pathlib import Path
 
 
 
-class TestLimitingHeadroom:
-    """A more dynamic cue needs more limiting to reach the same average.
+class TestLimitingIsNotTheSound:
+    """LIMITING_DB was raised to 5.5 to reach an average, and 5.5 dB of gain
+    reduction is not a safety net -- it is the wall the owner heard.  The
+    average is found before the limiter instead: the bed is peak-limited to
+    -1 dBTP before the sum, and every levelled line to -3.
 
-    LIMITING_DB was tuned against a cue with LRA 7.0.  The tone-matched cue has
-    LRA 14.2 -- which is the improvement, not a fault -- and a higher crest
-    factor means the true-peak ceiling binds sooner, so the same allowance
-    landed the master at -17.0 LUFS against a -16.0 floor.
-
-    This raises the MASTERING allowance, not the acceptance gate: QC still
-    measures the finished file and still refuses it outside -16.0..-12.5 with
+    This is the MASTERING allowance, not the acceptance gate: QC still
+    measures the finished file and still refuses it outside -15.5..-12.5 with
     a true peak over -1.0 dBTP.
     """
 
-    def test_the_allowance_covers_a_high_crest_cue(self):
+    def test_the_limiter_only_catches_what_the_headroom_missed(self):
         from studio.trailer_assemble import LIMITING_DB
-        # measured: -17.0 delivered with 2.0 dB, floor is -16.0
-        assert LIMITING_DB >= 3.0
+        assert LIMITING_DB <= 2.0
 
-    def test_it_stays_within_what_a_trailer_master_would_do(self):
-        """Past about 6 dB the limiter is the sound, not the safety net."""
-        from studio.trailer_assemble import LIMITING_DB
-        assert LIMITING_DB <= 6.0
+    def test_the_headroom_it_replaces_is_made_at_the_source(self):
+        from studio.trailer_assemble import BED_TP, LINE_TP
+        assert BED_TP <= -1.0 and LINE_TP <= -3.0
+
+    def test_a_ceiling_is_asked_for_below_the_true_peak_it_has_to_hold(self):
+        """alimiter is a sample-peak limiter; intersample peaks run over it."""
+        from studio.trailer_assemble import LIMITER_MARGIN, db_to_linear, limiter
+        assert LIMITER_MARGIN > 0.0
+        assert limiter(-1.0) == f"alimiter=limit={db_to_linear(-1.5)}:level=disabled"
 
 
 class TestConcatListing:

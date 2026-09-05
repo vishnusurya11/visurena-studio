@@ -18,6 +18,7 @@ import os
 import re
 import subprocess
 from pathlib import Path
+from typing import NamedTuple
 
 def _ffmpeg(command: list[str], what: str) -> None:
     """Run ffmpeg and, on failure, say WHY.
@@ -38,15 +39,15 @@ TARGET_TP = -2.0
 """True-peak ceiling.  EBU R128 asks for -1.0; -2.0 leaves room for the
 intersample peaks the AAC encoder introduces after this measurement."""
 
-LIMITING_DB = 5.5
+LIMITING_DB = 2.0
 """How much peak limiting the master may do to bring the average up.
 
-Taking the strictly peak-safe gain left Jekyll at -16.2 LUFS, because a cue
-with a braam in it has a high crest factor and the peak constraint binds long
-before the loudness target.  Raised from 2.0 to 3.5 when the tone-matched cue
-arrived at LRA 14.2 against the old 7.0: a wider range is the improvement, and
-it costs exactly this much more limiting to reach the same average.  Allowing the limiter to do real gain reduction is
-what mastering IS; the alternative is a correct-but-quiet master.
+Was 5.5.  Five and a half decibels of gain reduction is not a safety net, it
+IS the sound -- it is what flattens a trailer into a wall, and run 10's master
+came out at crest 12.6 dB with its loudest moment at 53% of the runtime.  The
+allowance is back to 2.0 and the average is found EARLIER instead: the bed is
+peak-limited to -1 dBTP before the sum (F), which is where the headroom the
+old allowance was buying actually comes from.
 
 Bounded, and verified after the fact rather than trusted: the QC gate measures
 the finished file's true peak, so overreach here fails loudly."""
@@ -58,6 +59,35 @@ Note `level=disabled` wherever alimiter is used.  Its auto-level is ON by
 default: it limits and then re-levels the result back up, so LOWERING the
 limit made the mix LOUDER -- peaks went -0.55 -> +0.53 -> +0.95 dBTP across
 three attempts while I kept tightening a limiter that was undoing itself."""
+
+BED_TP = -1.0
+"""True-peak ceiling on the bed BEFORE anything is summed into it (F).
+
+Run 10 handed the mix a bed at +0.4 dBTP and a cue at +0.2, then asked the
+master limiter to find 5.5 dB of average out of what was left.  Headroom is
+made at the source or it is not made at all."""
+
+LINE_TP = -3.0
+"""True-peak ceiling on a levelled line (B).
+
+A line is the one element that gets GAIN applied to it, so it is the one
+element that can clip -- and run 10's did: 3,096 samples at full scale."""
+
+LIMITER_MARGIN = 0.5
+"""alimiter is a SAMPLE-peak limiter and every ceiling here is a TRUE-peak
+one.  Intersample peaks run about half a decibel over sample peaks on
+band-limited material, so the limiter is asked for that much less than the
+ceiling that has to survive the measurement."""
+
+
+def db_to_linear(db: float) -> float:
+    """A decibel level as the linear amplitude ffmpeg's limiters take."""
+    return round(10.0 ** (db / 20.0), 4)
+
+
+def limiter(ceiling_db: float) -> str:
+    """An `alimiter` holding a true-peak ceiling, with its auto-level off."""
+    return f"alimiter=limit={db_to_linear(ceiling_db - LIMITER_MARGIN)}:level=disabled"
 
 HEAD_TRIM = 2.6
 """Seconds discarded from the head of every take.
@@ -284,63 +314,172 @@ def mix(picture: Path, bed: Path, cues: list[tuple[float, Path]], output: Path,
     return output
 
 
-DUCK_SPLIT = "acrossover=split=250 4000"
-"""The bed in three bands.  Only the middle one ducks: the low band is the
-pulse the cut was made to, the high band is the air; the line lives at
-250-4000 Hz and that is the room it needs (08-assemble)."""
-DUCK = "sidechaincompress=threshold=0.03:ratio=6:attack=160:release=1000:level_sc=1"
-"""Keyed by the line, not by a plan: a line that runs long ducks long."""
+DUCK_DEPTH_DB = 10.0
+"""The least the bed loses under a line, full band (B: duck >= 10 LU).
+
+Run 10 ducked 250-4000 Hz only -- `acrossover` split the bed in three and
+compressed the middle -- so the pulse and the air kept hitting straight
+through the one spoken line, and the deepest the bed ever got was 6.2 LU.
+A band-split duck is what you do when the bed is the point.  Here the LINE is
+the point."""
+
+DUCK_ATTACK = 0.02
+"""Seconds for the duck to reach full depth.  Run 10 used 160 ms, so the
+first third of "You have been..." played over a -9 LUFS bed."""
+
+DUCK_RELEASE = 0.8
+"""Seconds for the bed to come back.  Inside the 600-900 ms norm: shorter
+pumps, longer eats the next line's room."""
+
+DUCK_PREDELAY = 0.15
+"""Seconds the duck opens BEFORE the line does.
+
+This is the lookahead, and it is free: the windows are known before a single
+sample is rendered, so the envelope can simply start early instead of a
+compressor guessing at it from a key it has not heard yet."""
+
+BED_UNDER_LINE = -24.0
+"""Momentary LUFS the bed may reach under a line (B), including the first
+200 ms.  With the line at -16 that is the 8 LU of separation the norm asks
+for; the depth per line is whatever gets THIS bed down to it.
+
+A CEILING, so the depth is sized against the loudest moment of the window
+and not its average.  Measured on run 10's bed: the mean momentary under its
+one line is -14.8 LUFS and the peak is -9.1, because the line was placed on a
+bar the cue puts a hit on.  A duck sized to the mean leaves that hit 5.7 LU
+above where the rule says the bed has to be, and the rule reads as met."""
+
+DUCK_DEPTH_MAX = 18.0
+"""The most the bed will duck for one line.
+
+Past about this the bed is not ducked, it is gone, and the hole is a worse
+artefact than the bed.  A line that would need more than this was placed on
+a hit -- which is a PLACEMENT fault, and QC's `bed_under_line_lu` names it
+instead of the mix hiding it under a gate."""
+
+LINE_TARGET_LUFS = -16.0
+"""Integrated loudness a line is levelled to (B: -20..-15).
+
+An absolute target, not a gap: run 9 set the line against the bed BEFORE the
+duck and run 10 measured the result at -8.2 LUFS -- the loudest point of the
+whole trailer was a piece of dialogue. The gap is made by the duck, which
+knows exactly how deep it has to go, not by shouting."""
+
+LINE_OVER_BED = 8.0
+"""LU a line rides over the DUCKED bed in its window (B: 8-12).
+
+Derived, not tuned: LINE_TARGET_LUFS - BED_UNDER_LINE.  Run 10's QC read
+9.92 here and passed -- measured after the line had already clipped, against
+a bed ducked in one band only."""
+
+HARD_OUT_GATE = 0.02
+"""Seconds the bed takes to stop.  Twenty milliseconds is a STOP -- below the
+~50 ms where the ear starts hearing a fade.  Run 10 faded out over 3 s, which
+is the cue ending, not the trailer stopping."""
+
+GAIN_LIMIT = 20.0
 
 
-def _key_chain(index: int, at: float) -> str:
-    """One line as a compressor key: conformed to the bed, delayed to its
-    window, then PADDED -- sidechaincompress ends its output when the key
-    ends, so an unpadded key cuts the bed off at the end of the line."""
-    ms = int(round(at * 1000))
-    return (f"[{index + 1}:a]aresample=48000,aformat=channel_layouts=stereo,"
-            f"adelay={ms}:all=1,apad[key{index}]")
+def _ramp(t: float, start: float, end: float, attack: float, release: float) -> float:
+    """0 before `start`, 1 across the hold, back to 0 `release` after `end`."""
+    return max(0.0, min(1.0, (t - start) / attack, (end + release - t) / release))
 
 
-def duck_graph(starts: list[float]) -> str:
-    """Input 0 is the bed, inputs 1..n the lines; one compressor per line,
-    chained through the mid band, so each window ducks on its own key."""
-    parts = [f"[0:a]aresample=48000,aformat=channel_layouts=stereo,{DUCK_SPLIT}[lo][mid0][hi]"]
-    for index, at in enumerate(starts):
-        parts.append(_key_chain(index, at))
-        parts.append(f"[mid{index}][key{index}]{DUCK}[mid{index + 1}]")
-    parts.append(f"[lo][mid{len(starts)}][hi]amix=inputs=3:normalize=0:duration=first[out]")
-    return ";".join(parts)
+def duck_db(t: float, windows: list[tuple[float, float, float]],
+            attack: float = DUCK_ATTACK, release: float = DUCK_RELEASE,
+            predelay: float = DUCK_PREDELAY) -> float:
+    """The gain reduction the bed carries at `t`, in dB, over every window.
 
-
-def duck_bed(bed: Path, keys: list[tuple[float, Path]], output: Path) -> Path:
-    """The bed with its mid band ducked under every spoken line.
-
-    With nothing spoken the bed is returned as it is: a card gives the
-    compressor no key, and a pass through the graph would not be a no-op.
+    `windows` are (line start, line end, depth); the deepest one wins, so
+    two lines close together do not stack into a hole.
     """
-    if not keys:
+    return -max((depth * _ramp(t, at - predelay, end, attack, release)
+                 for at, end, depth in windows), default=0.0)
+
+
+def _ramp_expr(start: float, end: float, attack: float, release: float) -> str:
+    """`_ramp` as an ffmpeg expression.  Commas are escaped because a comma
+    inside a filter argument otherwise ends the filter."""
+    return (rf"max(0\,min(1\,min((t-{start:.4f})/{attack:.4f}\,"
+            rf"({end + release:.4f}-t)/{release:.4f})))")
+
+
+def duck_expr(windows: list[tuple[float, float, float]], attack: float = DUCK_ATTACK,
+              release: float = DUCK_RELEASE, predelay: float = DUCK_PREDELAY) -> str:
+    """The duck as one `volume` expression: a product of per-line envelopes.
+
+    An expression, not `sidechaincompress`, because every number the rule
+    asks for -- depth, attack, lookahead, release -- is then EXACTLY what was
+    asked for.  A compressor's depth is a consequence of a threshold, a ratio
+    and how loud the key happened to be, and run 10's key was quiet.
+    """
+    return "*".join(
+        f"(1-{1 - db_to_linear(-depth):.6f}*{_ramp_expr(at - predelay, end, attack, release)})"
+        for at, end, depth in windows) or "1"
+
+
+def gate_expr(at: float, ramp: float = HARD_OUT_GATE) -> str:
+    """A fall to nothing at `at`, over `ramp` seconds: a stop, not a fade."""
+    return rf"max(0\,min(1\,({at:.4f}-t)/{ramp:.4f}))"
+
+
+def bed_expr(windows: list[tuple[float, float, float]], hard_out: float | None = None) -> str:
+    """The whole bed envelope: ducked under every line, stopped at the hard out."""
+    parts = [duck_expr(windows)] + ([gate_expr(hard_out)] if hard_out is not None else [])
+    return "*".join(part for part in parts if part != "1") or "1"
+
+
+def bed_gain(t: float, windows: list[tuple[float, float, float]],
+             hard_out: float | None = None) -> float:
+    """`bed_expr` evaluated in Python: the linear gain the bed carries at `t`."""
+    gate = 1.0 if hard_out is None else max(0.0, min(1.0, (hard_out - t) / HARD_OUT_GATE))
+    return db_to_linear(duck_db(t, windows)) * gate
+
+
+def shape_bed(bed: Path, windows: list[tuple[float, float, float]],
+              hard_out: float | None, output: Path) -> Path:
+    """The bed as the master will hear it: full-band duck under every line, a
+    hard out at the last cut, and peak-safe before anything is summed into it.
+
+    With nothing to duck and nothing to stop, the bed is returned as it is: a
+    pass through the graph would not be a no-op.
+    """
+    if not windows and hard_out is None:
         return bed
-    inputs = ["-i", str(bed)]
-    for _, path in keys:
-        inputs += ["-i", str(path)]
-    _ffmpeg(["ffmpeg", "-y", "-v", "error", *inputs, "-filter_complex",
-             duck_graph([at for at, _ in keys]), "-map", "[out]",
+    _ffmpeg(["ffmpeg", "-y", "-v", "error", "-i", str(bed), "-af",
+             (f"aresample=48000,aformat=channel_layouts=stereo,"
+              f"volume=volume='{bed_expr(windows, hard_out)}':eval=frame,{limiter(BED_TP)}"),
              "-t", f"{clip_seconds(bed):.3f}", "-c:a", "pcm_s16le", str(output)],
-            "ducking the bed under the lines")
+            "shaping the bed under the lines")
     return output
 
 
-def momentary(path: Path) -> list[tuple[float, float]]:
-    """(t, M) every 100 ms from ebur128: the momentary loudness QC reads."""
+READING = re.compile(r"t:\s*([\d.]+)\s+TARGET.*?M:\s*(-?[\d.]+|-inf)\s+S:\s*(-?[\d.]+|-inf)")
+
+
+def loudness_readings(path: Path) -> list[tuple[float, float, float]]:
+    """(t, momentary, short-term) every 100 ms from ebur128.
+
+    Both windows, from one pass: momentary is 400 ms and answers "is the bed
+    out of the way of this line"; short-term is 3 s and is the only one that
+    answers "where is the loudest part of the trailer".  Reading only M is
+    how run 10's QC could report a level and know nothing of its shape.
+    """
     result = subprocess.run(["ffmpeg", "-v", "info", "-nostats", "-i", str(path),
                              "-af", "ebur128", "-f", "null", "-"],
                             capture_output=True, text=True, errors="replace")
-    readings = []
-    for line in result.stderr.splitlines():
-        hit = re.search(r"t:\s*([\d.]+)\s+TARGET.*?M:\s*(-?[\d.]+|-inf)", line)
-        if hit:
-            readings.append((float(hit.group(1)), float(hit.group(2))))
-    return readings
+    return [(float(t), float(m), float(st)) for t, m, st in READING.findall(result.stderr)]
+
+
+def momentary(path: Path) -> list[tuple[float, float]]:
+    """(t, M) every 100 ms: the momentary loudness QC reads."""
+    return [(t, m) for t, m, _ in loudness_readings(path)]
+
+
+def short_term(path: Path) -> list[tuple[float, float]]:
+    """(t, S) every 100 ms.  S is undefined until its 3 s window fills, so
+    ebur128 reports about -120 there and the caller drops the head."""
+    return [(t, st) for t, _, st in loudness_readings(path)]
 
 
 def window_loudness(readings: list[tuple[float, float]], start: float, end: float) -> float:
@@ -349,6 +488,16 @@ def window_loudness(readings: list[tuple[float, float]], start: float, end: floa
     if not inside:
         raise ValueError(f"no loudness readings in {start:.2f}-{end:.2f}s")
     return sum(inside) / len(inside)
+
+
+def window_peak(readings: list[tuple[float, float]], start: float, end: float,
+                default: float = float("-inf")) -> float:
+    """The LOUDEST reading in a window.
+
+    A mean says the bed was mostly out of the way of a line; only the peak
+    says whether it ever was not.
+    """
+    return max((m for t, m in readings if start <= t < end), default=default)
 
 
 def line_windows(plan: dict, lines: list, book: Path) -> list[tuple[float, Path]]:
@@ -371,20 +520,47 @@ def line_windows(plan: dict, lines: list, book: Path) -> list[tuple[float, Path]
     return keys
 
 
-LINE_OVER_BED = 8.0
-"""LU a line rides over the bed in its window, set BEFORE the duck against
-the bed as rendered: QC targets 5 and the duck only widens the gap.  Run 9's
-master was heard as 'music too loud': the bed was normalised to -14 LUFS and
-nothing set a line against it -- a take at its own level was whatever the
-voice model gave, and a quiet one was no key to the compressor either."""
-GAIN_LIMIT = 20.0
-
-
 def integrated(path: Path) -> float:
     """Integrated loudness of one file, LUFS, from ebur128 via loudnorm."""
-    report = _measure_loudness(["ffmpeg", "-v", "info", "-i", str(path), "-af",
-                                "loudnorm=print_format=json", "-f", "null", "-"])
-    return float(report["input_i"])
+    return float(_loudnorm(path)["input_i"])
+
+
+def true_peak(path: Path) -> float:
+    """True peak of one file, dBTP, from the same analysis pass."""
+    return float(_loudnorm(path)["input_tp"])
+
+
+def _loudnorm(path: Path) -> dict:
+    """loudnorm's analysis of one whole file."""
+    return _measure_loudness(["ffmpeg", "-v", "info", "-i", str(path), "-af",
+                              "loudnorm=print_format=json", "-f", "null", "-"])
+
+
+def astats_of(path: Path) -> dict[str, float]:
+    """The overall time-domain statistics of one file, by the name astats prints."""
+    result = subprocess.run(["ffmpeg", "-v", "info", "-nostats", "-i", str(path), "-af",
+                             "astats=measure_perchannel=none", "-f", "null", "-"],
+                            capture_output=True, text=True, errors="replace")
+    stats: dict[str, float] = {}
+    for line in result.stderr.splitlines():
+        key, _, value = line.partition("] ")[2].rpartition(":")
+        try:
+            stats[key.strip()] = float(value)
+        except ValueError:
+            continue
+    return stats
+
+
+def line_shape(path: Path) -> tuple[float, float, float]:
+    """(true peak dBTP, flat factor, crest dB) of one levelled line.
+
+    Flat factor counts runs of identical consecutive samples -- what clipping
+    leaves behind, and what run 10's only line measured 24.2 of.  Crest is
+    peak over RMS: speech runs 12-18 dB, a square wave runs single digits.
+    """
+    stats = astats_of(path)
+    return (true_peak(path), stats["Flat factor"],
+            round(stats["Peak level dB"] - stats["RMS level dB"], 2))
 
 
 def bed_level(readings: list[tuple[float, float]], start: float, end: float) -> float:
@@ -393,50 +569,113 @@ def bed_level(readings: list[tuple[float, float]], start: float, end: float) -> 
     return window_loudness([(t, m) for t, m in readings if m > -70.0], start, end)
 
 
-def line_gain(bed_lu: float, line_lu: float) -> float:
-    """The dB that lands a line LINE_OVER_BED above its window, bounded."""
-    return round(max(-GAIN_LIMIT, min(GAIN_LIMIT, bed_lu + LINE_OVER_BED - line_lu)), 2)
+def line_gain(line_lu: float, target: float = LINE_TARGET_LUFS) -> float:
+    """The dB that lands a line at its absolute target, bounded.
+
+    Against a TARGET, not against the bed.  Setting it against the bed is what
+    put a -8.2 LUFS line into run 10: the window it was placed in happened to
+    be the loudest moment of the cue's first half, so the rule said shout.
+    """
+    return round(max(-GAIN_LIMIT, min(GAIN_LIMIT, target - line_lu)), 2)
 
 
-def level_line(line: Path, gain_db: float, output: Path) -> Path:
+def bed_peak(readings: list[tuple[float, float]], start: float, end: float) -> float:
+    """The LOUDEST the bed gets in a window, silence left out.
+
+    What the duck is sized against.  The mean says the bed was mostly quiet
+    there; the rule a line needs is a ceiling.
+    """
+    return window_peak([(t, m) for t, m in readings if m > -70.0], start, end,
+                       default=BED_UNDER_LINE)
+
+
+def duck_depth(bed_lu: float, floor: float = BED_UNDER_LINE,
+               minimum: float = DUCK_DEPTH_DB,
+               maximum: float = DUCK_DEPTH_MAX) -> float:
+    """How deep THIS bed has to duck to reach the floor a line needs under it."""
+    return round(min(maximum, max(minimum, bed_lu - floor)), 2)
+
+
+class Levelled(NamedTuple):
+    """One line as the mix laid it, and what the bed must do under it."""
+
+    at: float
+    seconds: float
+    path: Path
+    depth: float
+    bed_peak_lufs: float
+
+
+def level_line(line: Path, gain_db: float, output: Path,
+               ceiling_db: float = LINE_TP) -> Path:
+    """Level a line THROUGH a limiter -- never plain `volume=` into pcm.
+
+    Run 10 applied +11.8 dB with `volume=` alone and wrote the result to
+    pcm_s16le with no ceiling anywhere in the chain: 3,096 samples pinned at
+    full scale, flat factor 24.2, crest 8.2 dB.  The one line the trailer had
+    was a square wave, and QC measured its level after it had already clipped.
+    """
     output.parent.mkdir(parents=True, exist_ok=True)
-    _ffmpeg(["ffmpeg", "-y", "-v", "error", "-i", str(line), "-af", f"volume={gain_db:.2f}dB",
+    _ffmpeg(["ffmpeg", "-y", "-v", "error", "-i", str(line), "-af",
+             f"volume={gain_db:.2f}dB,{limiter(ceiling_db)}",
              "-c:a", "pcm_s16le", str(output)], "levelling a line")
     return output
 
 
-def level_lines(bed: Path, lines: list[tuple[float, Path]], out_dir: Path) -> list[tuple[float, Path]]:
-    """Each line at the gain that sits it over its own window of the bed."""
+def level_lines(bed: Path, lines: list[tuple[float, Path]], out_dir: Path) -> list[Levelled]:
+    """Each line at LINE_TARGET_LUFS, and the depth its window has to duck."""
     readings = momentary(bed)
     out = []
     for index, (at, path) in enumerate(lines):
-        window = bed_level(readings, at, at + clip_seconds(path))
-        gain = line_gain(window, integrated(path))
-        out.append((at, level_line(path, gain, out_dir / f"line-{index}.level.wav")))
+        seconds = clip_seconds(path)
+        peak = bed_peak(readings, at, at + seconds)
+        levelled = level_line(path, line_gain(integrated(path)),
+                              out_dir / f"line-{index}.level.wav")
+        out.append(Levelled(at, seconds, levelled, duck_depth(peak), peak))
     return out
 
 
-def write_level_sheet(out_dir: Path, levelled: list[tuple[float, Path]]) -> Path:
-    """lines.level.json: where each levelled line was laid, for QC."""
+def duck_windows(levelled: list[Levelled]) -> list[tuple[float, float, float]]:
+    """The (start, end, depth) triples the bed envelope is built from."""
+    return [(line.at, line.at + line.seconds, line.depth) for line in levelled]
+
+
+def write_level_sheet(out_dir: Path, levelled: list[Levelled],
+                      hard_out: float | None = None) -> Path:
+    """lines.level.json: what the mix DID, for QC to read back.
+
+    Not just where each line was laid -- the depth the bed ducked under it,
+    the level the bed had there, the floor those two imply, and the point the
+    bed was stopped at.  QC cannot ask whether the duck was deep enough or
+    whether the hard out landed unless the mix writes down what it chose.
+    """
     sheet = out_dir / "lines.level.json"
-    sheet.write_text(json.dumps([{"at": at, "rel_path": path.name} for at, path in levelled],
-                                indent=2), encoding="utf-8")
+    sheet.write_text(json.dumps({"hard_out": hard_out, "lines": [
+        {"at": round(line.at, 3), "seconds": round(line.seconds, 3),
+         "rel_path": line.path.name, "duck_db": round(-line.depth, 2),
+         "bed_peak_lufs": round(line.bed_peak_lufs, 2),
+         "bed_floor_lufs": round(line.bed_peak_lufs - line.depth, 2)} for line in levelled]},
+        indent=2), encoding="utf-8")
     return sheet
 
 
 def mix_with_lines(picture: Path, bed: Path, cues: list[tuple[float, Path]],
                    lines: list[tuple[float, Path]], output: Path,
-                   seconds: float | None = None) -> Path:
-    """`mix` with the line layer: each line is levelled to its window, the
-    bed ducks under it, and the line rides as one more cue.  The ducked bed
-    and the levelled lines are kept beside the master so QC can measure
-    line-over-bed without un-mixing anything."""
-    if not lines:
-        return mix(picture, bed, cues, output, seconds)
+                   seconds: float | None = None, hard_out: float | None = None) -> Path:
+    """`mix` with the line layer and the shaped bed.
+
+    Each line is levelled to an absolute target through a limiter, the bed
+    ducks full-band under it and stops dead at `hard_out`, and the line rides
+    as one more cue.  The shaped bed, the levelled lines and the sheet saying
+    what was done are kept beside the master, so QC can measure the mix
+    without un-mixing anything.
+    """
     levelled = level_lines(bed, lines, Path(output).parent)
-    write_level_sheet(Path(output).parent, levelled)
-    ducked = duck_bed(bed, levelled, Path(output).with_name(f"{Path(output).stem}.bed-ducked.wav"))
-    return mix(picture, ducked, cues + levelled, output, seconds)
+    write_level_sheet(Path(output).parent, levelled, hard_out)
+    shaped = shape_bed(bed, duck_windows(levelled), hard_out,
+                       Path(output).with_name(f"{Path(output).stem}.bed-ducked.wav"))
+    return mix(picture, shaped, cues + [(line.at, line.path) for line in levelled],
+               output, seconds)
 
 
 def luma_stats(video: Path) -> tuple[float, float]:

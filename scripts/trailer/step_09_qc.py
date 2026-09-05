@@ -1,9 +1,10 @@
 """Step 09 -- qc: measure the DELIVERED master, gate on the floor, recut or flag.
 
-The floor (loudness, true peak, every shot bound) fails the run; the targets
-(cuts on beats, on downbeats, on L0 events, under the cap, title on a
-downbeat) only flag it.  A floor fail buys two recuts at a longer walk
-stretch -- step 08 owns the cut, step 06 the walk, so this step only asks --
+The floor (loudness, true peak, every shot bound, no line clipped, the bed
+stopped before the card) fails the run; the targets -- how much of the
+runtime is music alone, where the loudest moment sits, whether act 3 lifts
+over act 2, the per-act beat lock -- only flag it.  A floor fail buys two
+recuts at a longer walk stretch -- step 08 owns the cut, step 06 the walk, so this step only asks --
 and after that the master ships flagged: qc.json says so, and the retrospect
 reads it, but nobody is asked a question.
 """
@@ -34,9 +35,15 @@ def recut(ctx, attempt: int) -> None:
 
 
 def verdict(report: QCReport) -> tuple[bool, str, str]:
+    """The floor is damage, not taste: a level outside delivery range, a shot
+    whose face never bound, a picture already seen, a line that CLIPPED, and a
+    bed that faded into the card instead of stopping before it."""
     measured = (f"{report.integrated_lufs:.1f} LUFS, TP {report.true_peak:.1f}, "
-                f"{report.unbound_shots} unbound")
-    return report.floor_pass, measured, "-15.5..-12.5 LUFS, TP <= -1.0, 0 unbound"
+                f"{report.unbound_shots} unbound, "
+                f"{'clean' if report.lines_are_clean else 'CLIPPED'} lines, "
+                f"{'hard out' if report.hard_out else 'NO hard out'}")
+    return report.floor_pass, measured, ("-15.5..-12.5 LUFS, TP <= -1.0, 0 unbound, "
+                                         "no clipped line, the bed stops before the card")
 
 
 def flag_shipped(ctx) -> None:
@@ -59,5 +66,8 @@ def run(codex_id: str, ctx) -> None:
         flag_shipped(ctx)
     report = QCReport.model_validate_json((ctx.out_dir / "qc.json").read_text(encoding="utf-8"))
     print(f"[{STEP_ID}] {'floor pass' if report.floor_pass else 'FLAGGED'}: "
-          f"{report.cuts} cuts, {report.cuts_on_beat:.0%} on beat, "
-          f"{report.integrated_lufs:.1f} LUFS; flags: {', '.join(report.flags) or 'none'}")
+          f"{report.cuts} cuts, {report.integrated_lufs:.1f} LUFS, "
+          f"{report.music_only_fraction:.0%} music-only, "
+          f"speech {report.speech_occupancy:.0%} of {report.speech_target:.0%}, "
+          f"peak at {report.peak_position:.0%}, act3 {report.act3_over_act2_lu:+.1f} LU; "
+          f"flags: {', '.join(report.flags) or 'none'}")

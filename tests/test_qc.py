@@ -63,6 +63,15 @@ class TestCutLists:
     def test_on_cap_fraction_counts_shots_at_the_ceiling(self):
         assert qc.on_cap_fraction([4.0, 3.99, 2.0, 1.0], 4.0) == 0.5
 
+    def test_an_act_one_shot_is_measured_against_its_own_act_s_cap(self):
+        """At 92 BPM act 1 may run two bars (5.2 s); `max_shot` says 4.0.  A
+        4.0 s act-1 shot is inside its ceiling, an act-3 one is on it."""
+        bar = 240.0 / 92.0
+        shots = [{"start": 0.0, "seconds": 4.0}, {"start": 4.0, "seconds": 2.0},
+                 {"start": 6.0, "seconds": 2.0}, {"start": 8.0, "seconds": 2.0},
+                 {"start": 10.0, "seconds": 4.0}]
+        assert qc.on_cap_fraction(qc.act_caps_of(shots, bar), bar) == 0.2
+
 
 class TestLineOverBed:
     """`line_over_bed_lu` was a target (5 LU) that no run ever filled: run 9
@@ -201,3 +210,211 @@ class TestNoTakePlaysTwice:
             {"beat_id": "B0", "rel_path": video.relative_to(book).as_posix(),
              "fingerprint": fingerprint(recipe)}]}), encoding="utf-8")
         assert qc.fresh_shots(out) == ["B0"]
+
+def flat(level: float, start: float, end: float, step: float = 0.1) -> list[tuple[float, float]]:
+    """Momentary readings holding one level across a span."""
+    return [(round(start + i * step, 2), level)
+            for i in range(int(round((end - start) / step)))]
+
+
+class TestLayers:
+    """A: how much of the runtime is music with nothing over it.  Run 10 was
+    92% music-only with two stretches of 27 and 40 seconds, and QC -- which
+    measured integrated loudness, true peak and a fraction of cuts -- had no
+    field that could say so."""
+
+    def readings(self):
+        return flat(-14.0, 0.0, 30.0)
+
+    def test_a_line_window_is_not_music_only(self):
+        runs = qc.music_only_runs(self.readings(), [(10.0, 14.0)], 30.0)
+        assert runs == [(0.0, 9.9), (14.0, 29.9)]
+
+    def test_silence_is_not_music_only_either(self):
+        quiet = flat(-14.0, 0.0, 10.0) + flat(-60.0, 10.0, 14.0) + flat(-14.0, 14.0, 20.0)
+        assert qc.music_only_runs(quiet, [], 20.0) == [(0.0, 9.9), (14.0, 19.9)]
+
+    def test_the_fraction_is_the_share_of_the_picture(self):
+        runs = qc.music_only_runs(self.readings(), [(10.0, 14.0)], 30.0)
+        assert qc.music_only_fraction(runs, 30.0) == pytest.approx(0.86, abs=0.02)
+
+    def test_the_final_montage_is_measured_apart_from_the_rest(self):
+        """The norm allows ONE long music-only stretch, at the end."""
+        runs = [(0.0, 6.0), (10.0, 30.0)]
+        assert qc.longest_music_only(runs) == 6.0
+        assert qc.final_music_only(runs) == 20.0
+
+    def test_a_single_stretch_is_the_final_montage(self):
+        assert qc.longest_music_only([(0.0, 20.0)]) == 0.0
+        assert qc.final_music_only([(0.0, 20.0)]) == 20.0
+
+    def test_nothing_measured_is_nothing_claimed(self):
+        assert qc.music_only_fraction([], 30.0) == 0.0
+        assert qc.final_music_only([]) == 0.0
+
+
+class TestSpeechOccupancy:
+    def test_it_is_the_share_of_the_picture_with_a_voice_on_it(self):
+        assert qc.speech_occupancy([(2.0, 4.0), (10.0, 13.0)], 25.0) == pytest.approx(0.2)
+
+    def test_a_line_running_past_the_card_only_counts_to_the_card(self):
+        assert qc.speech_occupancy([(20.0, 30.0)], 25.0) == pytest.approx(0.2)
+
+    def test_a_short_trailer_is_asked_for_three_real_lines_not_a_ratio(self):
+        """Three lines of the 1.5-4 s the norm gives them is 0.22 of 30 s and
+        cannot be the 0.30 a 90-150 s trailer is measured against."""
+        assert qc.speech_target(25.0) == 0.22
+        assert qc.speech_target(30.0) == 0.22
+
+    def test_the_full_norm_applies_once_the_trailer_is_long_enough(self):
+        assert qc.speech_target(60.0) == 0.30
+        assert qc.speech_target(105.0) == 0.30
+        assert 0.22 < qc.speech_target(45.0) < 0.30
+
+
+class TestShape:
+    """C and D: where the loudest moment sits and how the trailer ends."""
+
+    def test_the_peak_position_is_a_fraction_of_the_picture(self):
+        short = flat(-20.0, 0.0, 20.0) + flat(-10.0, 20.0, 22.0) + flat(-18.0, 22.0, 25.0)
+        assert qc.peak_position(short, 25.0) == pytest.approx(0.8)
+
+    def test_the_undefined_head_of_the_short_term_window_is_dropped(self):
+        """ebur128 reports about -120 until its 3 s window fills, and a
+        reading at t=0 louder than everything would otherwise win."""
+        short = [(0.0, 0.0), (1.0, 0.0)] + flat(-20.0, 3.0, 10.0) + flat(-10.0, 10.0, 12.0)
+        assert qc.peak_position(short, 12.0) >= 0.8
+
+    def test_the_acts_are_thirds_of_the_picture_not_of_the_file(self):
+        assert qc.act_bounds(30.0) == [(0.0, 10.0), (10.0, 20.0), (20.0, 30.0)]
+
+    def test_act_three_is_measured_against_act_two(self):
+        readings = flat(-20.0, 0.0, 10.0) + flat(-18.0, 10.0, 20.0) + flat(-13.0, 20.0, 30.0)
+        assert qc.act_over_act(readings, qc.act_bounds(30.0)) == pytest.approx(5.0)
+
+    def test_a_trailer_that_sinks_into_its_third_act_reads_negative(self):
+        """Run 10: act 3 was 1-3 LU QUIETER than act 2."""
+        readings = flat(-20.0, 0.0, 10.0) + flat(-12.0, 10.0, 20.0) + flat(-15.0, 20.0, 30.0)
+        assert qc.act_over_act(readings, qc.act_bounds(30.0)) == pytest.approx(-3.0)
+
+
+class TestTheButton:
+    def test_the_held_breath_is_the_longest_stretch_under_the_ceiling(self):
+        readings = flat(-14.0, 0.0, 20.0) + flat(-45.0, 20.0, 22.0) + flat(-10.0, 22.0, 26.0)
+        assert qc.longest_under(readings, 20.0, 22.0, -35.0) == pytest.approx(1.9, abs=0.05)
+
+    def test_a_fade_is_not_a_hard_out(self):
+        """Run 10 faded over 3 s.  The gate asks that the bed was PLAYING and
+        then was not, within one momentary window."""
+        fade = [(round(20.0 + i * 0.1, 2), -14.0 - i) for i in range(30)]
+        assert not qc.hard_out_ok(flat(-14.0, 19.0, 20.0) + fade, 20.0)
+
+    def test_a_stop_is(self):
+        readings = flat(-14.0, 19.0, 20.0) + flat(-45.0, 20.0, 22.0)
+        assert qc.hard_out_ok(readings, 20.0)
+
+    def test_a_bed_that_was_never_playing_did_not_stop(self):
+        assert not qc.hard_out_ok(flat(-50.0, 19.0, 22.0), 20.0)
+
+    def test_the_hit_is_read_where_the_card_is_struck(self):
+        readings = flat(-45.0, 20.0, 22.0) + flat(-9.0, 22.0, 25.0)
+        assert qc.title_hit_lu(readings, 22.0) == -9.0
+
+    def test_a_card_struck_over_nothing_reads_dead(self):
+        """Run 10's cue had faded to -46 LUFS by the time the card arrived."""
+        assert qc.title_hit_lu(flat(-46.0, 22.0, 25.0), 22.0) == -46.0
+
+
+class TestBedUnderLine:
+    def test_it_is_the_loudest_moment_of_the_window_not_the_average(self):
+        """A mean says the bed was mostly out of the way; run 10's bed was
+        mostly out of the way of a line it opened over at -9 LUFS."""
+        bed = flat(-30.0, 3.0, 4.0) + [(4.0, -9.0)] + flat(-30.0, 4.1, 5.0)
+        assert qc.bed_under_lines(bed, [(3.0, 5.0)]) == [-9.0]
+
+    def test_the_smeared_onset_is_not_read_as_the_bed_under_the_line(self):
+        """ebur128 integrates 400 ms, so the reading at a line's onset is
+        mostly the bed from BEFORE the duck opened."""
+        bed = [(3.0, -9.0), (3.1, -14.0), (3.2, -20.0)] + flat(-30.0, 3.4, 5.0)
+        assert qc.bed_under_lines(bed, [(3.0, 5.0)]) == [-30.0]
+
+    def test_a_window_the_bed_has_no_reading_in_measures_nothing_loud(self):
+        assert qc.bed_under_lines([], [(3.0, 5.0)]) == [-70.0]
+
+
+class TestPerActBeatLock:
+    """G: one on-beat number for the whole trailer forces a music video."""
+
+    def test_each_act_is_graded_on_its_own(self):
+        grid = [round(0.5 * i, 2) for i in range(60)]
+        cuts = [1.3, 2.7, 10.0, 10.5, 21.0, 21.5, 22.0]
+        assert qc.on_beat_by_act(cuts, grid, qc.act_bounds(30.0)) == [0.0, 1.0, 1.0]
+
+    def test_an_act_with_no_cuts_in_it_reads_zero(self):
+        assert qc.on_beat_by_act([], [0.0], qc.act_bounds(30.0)) == [0.0, 0.0, 0.0]
+
+
+class TestTheLevelSheet:
+    def test_the_mixs_own_sheet_carries_the_hard_out_and_every_duck(self, tmp_path):
+        (tmp_path / "lines.level.json").write_text(json.dumps({
+            "hard_out": 96.4, "lines": [{"at": 12.0, "seconds": 2.5,
+                                         "rel_path": "line-0.level.wav", "duck_db": -11.2,
+                                         "bed_peak_lufs": -12.8, "bed_floor_lufs": -24.0}]}),
+            encoding="utf-8")
+        sheet = qc.level_sheet(tmp_path)
+        assert sheet["hard_out"] == 96.4
+        assert qc.sheet_windows(sheet) == [(12.0, 14.5)]
+
+    def test_run_tens_bare_list_still_reads(self, tmp_path):
+        """The one master this pipeline can measure before and after."""
+        (tmp_path / "lines.level.json").write_text(
+            json.dumps([{"at": 29.755, "rel_path": "line-0.level.wav"}]), encoding="utf-8")
+        sheet = qc.level_sheet(tmp_path)
+        assert sheet["hard_out"] is None and len(sheet["lines"]) == 1
+        assert qc.sheet_windows(sheet, seconds=lambda p: 2.23) == [(29.755, 31.985)]
+
+    def test_a_mix_that_laid_no_lines_has_no_sheet_and_claims_nothing(self, tmp_path):
+        assert qc.level_sheet(tmp_path) == {"hard_out": None, "lines": []}
+
+
+class TestShapeReachesTheReport:
+    def plan(self):
+        return {"shots": [{"start": 0.0, "seconds": 2.0, "cast": [], "char_refs": {}}]}
+
+    def test_the_report_carries_a_measured_shape_and_flags_what_it_missed(self):
+        shape = {"music_only_fraction": 0.92, "longest_music_only_s": 40.0,
+                 "speech_occupancy": 0.021, "speech_target": 0.30,
+                 "peak_position": 0.53, "act3_over_act2_lu": -2.0,
+                 "pre_title_silence_s": 0.0, "hard_out": False, "title_hit_lu": -46.0,
+                 "cuts_on_beat_by_act": [0.9, 0.8, 0.5]}
+        report = qc.report(self.plan(), metre_at(120, 60.0), seen=[2.0],
+                           loud=(-14.0, -1.5), shape=shape)
+        assert set(report.flags) >= {"music_only_fraction", "longest_music_only_s",
+                                     "speech_occupancy", "peak_position",
+                                     "act3_over_act2_lu", "pre_title_silence_s",
+                                     "title_hit_lu", "cuts_on_beat_act1", "cuts_on_beat_act3"}
+        assert not report.floor_pass  # the bed never stopped
+
+    def test_a_report_with_no_shape_claims_nothing_and_still_passes(self):
+        report = qc.report(self.plan(), metre_at(120, 60.0), seen=[2.0], loud=(-14.0, -1.5))
+        assert report.floor_pass and "music_only_fraction" not in report.flags
+
+    def test_a_clipped_line_fails_the_floor_rather_than_flagging(self):
+        """B, as safety: run 10's only line had 3,096 samples at full scale
+        and flat factor 24.2, and every gate passed it."""
+        clipped = qc.report(self.plan(), metre_at(120, 60.0), seen=[2.0], loud=(-14.0, -1.5),
+                            shape={"line_tp": [0.0], "line_flat_factor": [24.2]})
+        assert not clipped.floor_pass and not clipped.lines_are_clean
+        clean = qc.report(self.plan(), metre_at(120, 60.0), seen=[2.0], loud=(-14.0, -1.5),
+                          shape={"line_tp": [-3.4], "line_flat_factor": [0.0]})
+        assert clean.floor_pass
+
+    def test_a_bed_left_on_a_line_is_flagged(self):
+        buried = qc.report(self.plan(), metre_at(120, 60.0), seen=[2.0], loud=(-14.0, -1.5),
+                           shape={"bed_under_line_lu": [-9.0], "line_crest_db": [2.58]})
+        assert "bed_under_line_lu" in buried.flags and "line_crest_db" in buried.flags
+
+    def test_the_whole_trailer_beat_lock_is_no_longer_a_target(self):
+        """It is the target that forced a music video."""
+        from studio.trailer_stage_spec import QC_TARGETS
+        assert "cuts_on_beat" not in QC_TARGETS

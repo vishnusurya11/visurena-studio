@@ -95,11 +95,11 @@ class TestRun:
         assert actions == ["reroll_seed"] + ["send"] * 3 + ["undelivered"]
 
     def test_a_flagged_master_names_its_misses_in_the_caption(self, ctx, sender):
-        (ctx.out_dir / "qc.json").write_text(json.dumps(dict(QC, cuts_on_beat=0.5)),
+        (ctx.out_dir / "qc.json").write_text(json.dumps(dict(QC, cuts_on_downbeat=0.1)),
                                              encoding="utf-8")
         step.run(ctx.codex_id, ctx)
-        assert manifest_of(ctx)["flags"] == ["cuts_on_beat"]
-        assert "cuts_on_beat" in sender["calls"][0]["caption"]
+        assert manifest_of(ctx)["flags"] == ["cuts_on_downbeat"]
+        assert "cuts_on_downbeat" in sender["calls"][0]["caption"]
 
     def test_without_qc_the_manifest_still_ships(self, ctx, sender):
         (ctx.out_dir / "qc.json").unlink()

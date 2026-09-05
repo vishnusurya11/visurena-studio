@@ -9,14 +9,45 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 
 from studio.clip_cache import fresh
-from studio.sfx import impact, sub_drop
+from studio.sfx import impact, riser, room_tone, sub_drop
 from studio.trailer_assemble import (card_fits, clip_seconds, concat, extract,
                                      grade_to, line_windows, luma_stats,
                                      mix_with_lines, segment_start, title_card_ass)
-from studio.trailer_cut import FINAL_HOLD, is_uniform
+from studio.trailer_cut import is_uniform, title_moment
 from studio.trailer_stage_spec import VoiceLine
 
 ROOT = Path(__file__).resolve().parents[2]
+
+RISER_SECONDS = 2.5
+"""How long the rise into the hard out runs (D: riser >= 2 s before the title).
+
+`sfx.riser` was written, tested by nobody, and never called once across
+eleven runs.  The stop it leads into is only a stop if something was building
+towards it."""
+
+SUB_SECONDS = 2.4
+"""The sub-drop, kept where it always was -- landing ON the stop rather than
+inside the silence after it, so the held breath measures as a held breath."""
+
+IMPACT_SECONDS = 3.0
+"""The hit on the card.  D asks for a tail >= 3 s, and a hit that has already
+decayed is the thing run 10 shipped: the card landed at -46 LUFS."""
+
+
+def designed_layer(work: Path, hard_out: float, hit: float,
+                   seconds: float) -> list[tuple[float, Path]]:
+    """The synthesised cues that make the button a button.
+
+    A riser and a sub-drop that both END on the hard out, room tone across
+    the silence the hard out opens, and the impact on the card.  The room
+    tone is the piece run 10 had no equivalent of: its pre-title gap was
+    digital silence, every sample zero, which reads as a dropped stream
+    rather than as a designed one (E).
+    """
+    return [(max(hard_out - RISER_SECONDS, 0.0), riser(work / "riser.wav", RISER_SECONDS)),
+            (max(hard_out - SUB_SECONDS, 0.0), sub_drop(work / "sub.wav", SUB_SECONDS)),
+            (hard_out, room_tone(work / "room.wav", max(seconds - hard_out, 0.1))),
+            (hit, impact(work / "hit.wav", IMPACT_SECONDS))]
 
 
 def clips_doc(out: Path) -> dict:
@@ -110,9 +141,6 @@ def build_at(book: Path, trailer_id: str = "main") -> Path:
     if is_uniform(lengths):
         raise SystemExit("REFUSED: every shot is the same length -- the amateur tell")
 
-    # The card must still be on screen when the cue's own hit arrives.  Cutting
-    # it to a fixed hold ended the trailer 0.85s BEFORE the impact -- the same
-    # defect as the previous trailer's 5.29s miss, just smaller.
     # MEASURE the picture; do not trust the plan's arithmetic.  ffmpeg's -t
     # cannot render a fraction of a frame -- it rounds each shot UP to the next
     # whole one -- and thirty-three of those roundings accumulated to 1.28s of
@@ -127,9 +155,15 @@ def build_at(book: Path, trailer_id: str = "main") -> Path:
           f"(drift {drift:+.3f}s)")
     if drift > 2.0 / fps:
         raise SystemExit(f"REFUSED: delivered picture drifts {drift:.3f}s from the "
-                         f"plan; the title would miss the cue's hit")
-    hit_at = plan["music"].get("title_impact") or title_at
-    card_seconds = max(FINAL_HOLD, (hit_at - title_at) + FINAL_HOLD)
+                         f"plan; the bed would stop somewhere the picture is not")
+    # The cue's own title hit is not what the card lands on any more.  With
+    # the no-reuse rule the picture usually ends BEFORE it (run 10 had
+    # title_impact None on every seed of every caption), and chasing a hit
+    # the cue may not have is how the card came to be held over a bed that
+    # had already faded to -46 LUFS.  So the shape is made, not found: the
+    # bed STOPS on the last cut, the card runs on room tone for a held
+    # breath, and the synthesised impact lands on it while it is still alive.
+    hard_out_at, hit_at, card_seconds = title_moment(title_at)
     card = title_card_ass(plan["title"], work / "title.mp4",
                           card_seconds, width, height, fps)
     # Measure the card rather than trusting it.  The Jekyll title shipped
@@ -141,16 +175,17 @@ def build_at(book: Path, trailer_id: str = "main") -> Path:
     print(f"  title card: {note}")
     segments.append(card)
     picture = concat(segments, work / "picture.mp4")
+    seconds = clip_seconds(picture)
 
     music = book / plan["music"]["rel_path"]
-    # The synthesised hit reinforces the cue's hit; it does not compete with it.
-    cues = [(max(hit_at - 2.4, 0.0), sub_drop(work / "sub.wav")),
-            (hit_at, impact(work / "hit.wav"))]
+    cues = designed_layer(work, hard_out_at, hit_at, seconds)
     final = out / f"TRAILER-{book.name.split('_', 1)[1]}.mp4"
     lines = spoken_lines(plan, out)
-    mix_with_lines(picture, music, cues, lines, final, seconds=clip_seconds(picture))
-    print(f"{len(segments)} shots, {len(lines)} spoken line(s), card at {title_at:.1f}s "
-          f"holding {card_seconds:.1f}s, cue hit at {hit_at:.1f}s -> {final}")
+    mix_with_lines(picture, music, cues, lines, final, seconds=seconds,
+                   hard_out=hard_out_at)
+    print(f"{len(segments)} shots, {len(lines)} spoken line(s), bed out at "
+          f"{hard_out_at:.1f}s, {hit_at - hard_out_at:.1f}s of room tone, hit at "
+          f"{hit_at:.1f}s, card holding {card_seconds:.1f}s -> {final}")
     return final
 
 

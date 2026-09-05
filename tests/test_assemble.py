@@ -15,6 +15,8 @@ import pytest
 
 from scripts.trailer import assemble as script
 from studio.clip_cache import fingerprint, record
+from studio.trailer_assemble import clip_seconds
+from studio.trailer_cut import title_moment
 
 RECIPE = {"prompt": "a man in fog", "seed": 51000}
 BEATS = ["B00", "B01", "B02"]
@@ -64,3 +66,47 @@ class TestClipsDoc:
         doc = {"clips": [], "dropped": []}
         (tmp_path / "clips.json").write_text(json.dumps(doc), encoding="utf-8")
         assert script.clips_doc(tmp_path) == doc
+
+
+class TestTheDesignedLayer:
+    """Run 10's whole designed layer was two cues, both AFTER the music had
+    already died: a sub-drop and an impact.  `sfx.riser` was in the tree and
+    never called, there was no atmos anywhere, and the pre-title gap was
+    digital silence."""
+
+    def layer(self, tmp_path, hard_out=20.0, hit=22.0, seconds=26.5):
+        return script.designed_layer(tmp_path, hard_out, hit, seconds)
+
+    def test_the_riser_ends_on_the_hard_out(self, tmp_path):
+        (at, path), *_ = self.layer(tmp_path)
+        assert at + script.RISER_SECONDS == pytest.approx(20.0)
+        assert path.name == "riser.wav" and script.RISER_SECONDS >= 2.0
+
+    def test_the_sub_drop_lands_on_the_stop_not_inside_the_silence(self, tmp_path):
+        _, (at, path), _, _ = self.layer(tmp_path)
+        assert at + script.SUB_SECONDS == pytest.approx(20.0) and path.name == "sub.wav"
+
+    def test_room_tone_covers_every_second_after_the_bed_stops(self, tmp_path):
+        _, _, (at, path), _ = self.layer(tmp_path)
+        assert at == pytest.approx(20.0) and path.name == "room.wav"
+        assert clip_seconds(path) == pytest.approx(6.5, abs=0.05)
+
+    def test_the_impact_lands_on_the_card_with_a_tail_to_spare(self, tmp_path):
+        *_, (at, path) = self.layer(tmp_path)
+        assert at == pytest.approx(22.0) and path.name == "hit.wav"
+        assert script.IMPACT_SECONDS >= 3.0
+
+    def test_nothing_is_asked_for_before_the_file_starts(self, tmp_path):
+        """A picture shorter than the riser would otherwise ask adelay for a
+        negative offset, which ffmpeg reads as zero and nobody notices."""
+        assert all(at >= 0.0 for at, _ in self.layer(tmp_path, hard_out=1.0, hit=3.0, seconds=7.5))
+
+
+class TestTheShapeOfTheTail:
+    def test_the_bed_stops_where_the_picture_does(self):
+        hard_out, hit, card = title_moment(96.4)
+        assert hard_out == 96.4 and hit > hard_out and card > hit - hard_out
+
+    def test_the_card_outlasts_the_hit_it_carries(self):
+        _, hit, card = title_moment(96.4)
+        assert 96.4 + card - hit >= script.IMPACT_SECONDS

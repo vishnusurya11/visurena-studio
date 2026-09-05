@@ -78,3 +78,32 @@ def impact(output: Path, seconds: float = 2.4) -> Path:
              "[crack][mid][low]amix=inputs=3:normalize=0,"
              "alimiter=limit=0.70:level=disabled[out]")
     return _render([body, sub, noise, graph], output, seconds)
+
+
+ROOM_TONE_LUFS = -45.0
+"""Where atmos sits under a deliberate silence (E: atmos >= -45 LUFS wherever
+the music is under -30).
+
+Run 10's pre-title gap was DIGITAL silence -- every sample zero -- and a
+dropped stream is what that sounds like: a fault, not a held breath.  A floor
+this far down is inaudible as content and unmistakable as presence."""
+
+ROOM_TONE_RAW_LUFS = -22.2
+"""Measured, twice, at 4s and 8s: `anoisesrc=c=brown:a=0.5` through
+40-2500 Hz lands at -22.23 and -22.22 LUFS.  Amplitude scaling is linear, so
+one measurement fixes the gain for every level this is asked for -- and a
+second ffmpeg pass to re-measure what is already known would only make the
+cue non-deterministic."""
+
+
+def room_tone(output: Path, seconds: float = 2.0,
+              level_lufs: float = ROOM_TONE_LUFS) -> Path:
+    """A filtered noise floor: the sound of a room with nothing happening in it.
+
+    Brown rather than pink, and rolled off above 2.5 kHz, because the top end
+    is what makes noise read AS noise; below that it reads as a space.
+    """
+    source = f"anoisesrc=d={seconds:.4f}:c=brown:r=48000:a=0.5:seed=11"
+    graph = (f"[0:a]aformat=channel_layouts=stereo,highpass=f=40,lowpass=f=2500,"
+             f"volume={level_lufs - ROOM_TONE_RAW_LUFS:.2f}dB[out]")
+    return _render([source, graph], output, seconds)

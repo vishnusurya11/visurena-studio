@@ -179,12 +179,35 @@ class VoiceLine(BaseModel):
     card: bool = False
 
 
-QC_TARGETS = {"cuts_on_beat": 0.80, "cuts_on_downbeat": 0.30, "cuts_on_L0": 1.0,
-              "on_cap_fraction": 0.10, "line_over_bed_lu": 5.0}
+QC_TARGETS = {"cuts_on_downbeat": 0.30, "cuts_on_L0": 1.0,
+              "on_cap_fraction": 0.10, "line_over_bed_lu": 5.0,
+              "music_only_fraction": 0.45, "longest_music_only_s": 15.0,
+              "final_music_only_s": 20.0, "peak_position": (0.78, 0.92),
+              "act3_over_act2_lu": 2.0, "pre_title_silence_s": 1.5,
+              "title_hit_lu": -25.0, "bed_under_line_lu": -24.0,
+              "line_tp": -3.0, "line_crest_db": 10.0,
+              "cuts_on_beat_act1": 0.50, "cuts_on_beat_act3": 0.80}
+"""What the delivered master is asked for.
+
+`cuts_on_beat >= 0.80` across the whole trailer used to be in here, and it is
+the single target that FORCED a music video: 76% of run 10's cuts were on the
+beat, whole-bar lengths throughout, and a viewer starts counting within four
+shots.  It is replaced by two per-act targets pulling opposite ways -- act 1
+must be mostly OFF the grid, act 3 mostly on it -- because that difference is
+what an act break sounds like."""
 
 
 class QCReport(BaseModel):
-    """Step 09's reading of the DELIVERED master.  Floor fails; targets flag."""
+    """Step 09's reading of the DELIVERED master.  Floor fails; targets flag.
+
+    Run 10 passed every gate here and the owner's verdict was "all I hear is
+    music too loud ... it is just some random music .. no dialogues".  Every
+    number the old report carried was an AVERAGE -- integrated loudness, true
+    peak, a fraction of cuts on a beat -- and a trailer is a SHAPE.  The
+    fields below are the shape: where the loudest moment sits, how much of
+    the runtime is music with nothing over it, whether act 3 is louder than
+    act 2, whether the bed stops before the card or fades into it.
+    """
 
     cuts: int
     cuts_on_beat: float
@@ -205,21 +228,98 @@ class QCReport(BaseModel):
     line_over_bed_lu: list[float] = Field(default_factory=list)
     grid: Literal["metre", "onsets"] = "metre"
 
+    music_only_fraction: float = 0.0
+    """Share of the picture that is music with nothing over it.  Run 10: 0.92."""
+    longest_music_only_s: float = 0.0
+    """The longest such stretch that is NOT the final montage.  Run 10: 40 s."""
+    final_music_only_s: float = 0.0
+    """The last stretch before the title -- the one the norm lets run to 20 s."""
+    speech_occupancy: float = 1.0
+    """Share of the picture with a voice on it.  Run 10: 0.021."""
+    speech_target: float = 0.0
+    """What `speech_occupancy` had to reach, scaled to this trailer's length."""
+    peak_position: float = 0.85
+    """Where the loudest short-term window sits, as a fraction of the picture.
+    Run 10: 0.53, and act 3 was quieter than act 2."""
+    act3_over_act2_lu: float = 2.0
+    """LU act 3 gains over act 2.  Run 10: -1 to -3."""
+    pre_title_silence_s: float = 1.5
+    """Seconds under -35 LUFS momentary between the hard out and the hit."""
+    hard_out: bool = True
+    """Whether the bed STOPPED before the card instead of fading into it."""
+    title_hit_lu: float = -20.0
+    """How loud the master is where the card is struck.  Run 10's CUE had
+    faded to -46 LUFS by then; the field reads the delivered file, which also
+    carries the synthesised impact, so what it catches is a hit that never
+    reached the master or landed past its end."""
+    line_tp: list[float] = Field(default_factory=list)
+    """True peak of each levelled line.  Run 10's only line: 0.00 dBFS."""
+    line_flat_factor: list[float] = Field(default_factory=list)
+    """Runs of identical samples per line -- what clipping leaves.  Run 10: 24.2."""
+    line_crest_db: list[float] = Field(default_factory=list)
+    """Peak over RMS per line.  Speech runs 12-18 dB; a square wave does not."""
+    bed_under_line_lu: list[float] = Field(default_factory=list)
+    """The LOUDEST the ducked bed gets under each line, momentary."""
+    cuts_on_beat_by_act: list[float] = Field(default_factory=list)
+    """On-beat share per act.  One number for the whole trailer cannot tell a
+    loose first act from a locked third one, and the difference IS the arc."""
+
+    @property
+    def lines_are_clean(self) -> bool:
+        """B as safety, not taste: a line that clipped is damage, not a miss."""
+        return (all(tp <= QC_TARGETS["line_tp"] for tp in self.line_tp)
+                and all(flat == 0.0 for flat in self.line_flat_factor))
+
     @property
     def floor_pass(self) -> bool:
         return (-15.5 <= self.integrated_lufs <= -12.5 and self.true_peak <= -1.0
                 and self.unbound_shots == 0 and self.reused_shots == 0
-                and self.stale_shots == 0)
+                and self.stale_shots == 0 and self.lines_are_clean and self.hard_out)
 
     @property
     def flags(self) -> list[str]:
-        out = [k for k in ("cuts_on_beat", "cuts_on_downbeat", "cuts_on_L0")
-               if getattr(self, k) < QC_TARGETS[k]]
+        """Every target this master missed, by name."""
+        return (self._grid_flags() + self._layer_flags() + self._shape_flags()
+                + self._line_flags() + self._act_flags())
+
+    def _grid_flags(self) -> list[str]:
+        out = [k for k in ("cuts_on_downbeat", "cuts_on_L0") if getattr(self, k) < QC_TARGETS[k]]
         if self.on_cap_fraction > QC_TARGETS["on_cap_fraction"]:
             out.append("on_cap_fraction")
         if not self.title_on_downbeat:
             out.append("title_on_downbeat")
-        out += [k for k in ("reused_shots", "stale_shots") if getattr(self, k)]
-        if any(lu < QC_TARGETS["line_over_bed_lu"] for lu in self.line_over_bed_lu):
-            out.append("line_over_bed_lu")
+        return out + [k for k in ("reused_shots", "stale_shots") if getattr(self, k)]
+
+    def _layer_flags(self) -> list[str]:
+        """A: is anybody speaking, and how long does the music run alone."""
+        out = [k for k in ("music_only_fraction", "longest_music_only_s",
+                           "final_music_only_s") if getattr(self, k) > QC_TARGETS[k]]
+        if self.speech_occupancy < self.speech_target:
+            out.append("speech_occupancy")
+        return out
+
+    def _shape_flags(self) -> list[str]:
+        """C and D: where the peak sits and how the trailer ends."""
+        low, high = QC_TARGETS["peak_position"]
+        out = [] if low <= self.peak_position <= high else ["peak_position"]
+        return out + [k for k in ("act3_over_act2_lu", "pre_title_silence_s",
+                                  "title_hit_lu") if getattr(self, k) < QC_TARGETS[k]]
+
+    def _line_flags(self) -> list[str]:
+        """B: how each line sits against the bed it ducked."""
+        out = ["line_over_bed_lu"] if any(
+            lu < QC_TARGETS["line_over_bed_lu"] for lu in self.line_over_bed_lu) else []
+        if any(lu > QC_TARGETS["bed_under_line_lu"] for lu in self.bed_under_line_lu):
+            out.append("bed_under_line_lu")
+        if any(crest < QC_TARGETS["line_crest_db"] for crest in self.line_crest_db):
+            out.append("line_crest_db")
+        return out
+
+    def _act_flags(self) -> list[str]:
+        """G: loose in act 1, locked in act 3 -- opposite targets, one field."""
+        if len(self.cuts_on_beat_by_act) < 3:
+            return []
+        out = ["cuts_on_beat_act1"] if self.cuts_on_beat_by_act[0] > QC_TARGETS["cuts_on_beat_act1"] else []
+        if self.cuts_on_beat_by_act[2] < QC_TARGETS["cuts_on_beat_act3"]:
+            out.append("cuts_on_beat_act3")
         return out

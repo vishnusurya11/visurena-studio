@@ -23,8 +23,38 @@ ARC: list[tuple[float, float]] = [
 ]
 """(fractional position, median shot length in seconds) -- the measured shape."""
 
-FINAL_HOLD = 3.0
-"""Median last shot across the corpus.  The title needs somewhere to sit."""
+FINAL_HOLD = 4.5
+"""How long the card holds after the hit lands on it.
+
+The corpus median last shot is 3.0s, and 3.0 is what run 10 held -- so the
+file ended while the impact was still decaying (momentary -49 LUFS at 104.7s
+of a 105.08s master) and the last thing the trailer did was cut itself off.
+A synthesised impact decays over about 3s; the hold has to outlast it, and
+the corpus median is a median of shots, not of buttons (D: title hold >= 4s).
+"""
+
+PRE_TITLE_SILENCE = 2.2
+"""The held breath between the hard out and the hit on the card.
+
+The norm is 1.5-2.5s.  It is not 1.5, because the rule that measures it --
+momentary loudness under -35 LUFS for >= 1.5s -- reads a 400ms trailing
+window, so the first 0.4s of any silence still carries the music that
+preceded it and a 1.5s gap can only ever measure 1.1s.  MEASURED on the
+synthetic rebuild of run 10: 2.0s of silence measures 1.5s, exactly on the
+rule with nothing to spare; 2.2 measures 1.7.
+"""
+
+
+def title_moment(title_at: float, hold: float = FINAL_HOLD,
+                 silence: float = PRE_TITLE_SILENCE) -> tuple[float, float, float]:
+    """(hard out, hit, card seconds) for a picture whose last cut is `title_at`.
+
+    The bed stops dead on the last cut, the card runs on room tone alone for
+    `silence`, the hit lands, and the card holds `hold` past it so the tail
+    has somewhere to decay.  Run 10 instead faded the cue over 3s into digital
+    silence and struck the card at -46 LUFS, where there was no cue left.
+    """
+    return title_at, title_at + silence, silence + hold
 
 
 def target_length(position: float) -> float:
