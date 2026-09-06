@@ -208,12 +208,13 @@ def render_batch(ctx, text: str, sheet: str, seeds: list[int], state: dict) -> l
     return found
 
 
-ARC_VERSION = 4
+ARC_VERSION = 5
 """Bumped when `cue_arc` or `cue_punct` change what they cut, so a kept
 raw render is arced again rather than trusted.  2: cut on the measured bar.
 3: the tracker's tempo octave merged or split back to the ask's bar.
 4: every bar cut to the cue's bar, black bars no material, and the arc's
-events written beside its bar lines for the cut map."""
+events written beside its bar lines for the cut map.  5: a long render
+loses its middle, not its climax (`cut_middle`)."""
 
 
 def arc_cue(book: Path, raw: Path, ask: CueAsk, seed: int) -> Path:

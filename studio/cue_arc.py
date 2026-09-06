@@ -123,8 +123,9 @@ def ascending(levels: np.ndarray, phrases: list[tuple[int, int]]) -> list[tuple[
 def bar_order(levels: np.ndarray, bars: int, phrase: int = PHRASE_BARS,
               usable: np.ndarray | None = None) -> list[int]:
     """Exactly `bars` source bars, quiet phrases first; when the render is
-    short the loudest phrase plays again, as a climax does.  A phrase with a
-    bar not `usable` (see `has_material`) is left out."""
+    short the loudest phrase plays again, as a climax does, and when it is
+    long the middle goes (`cut_middle`).  A phrase with a bar not `usable`
+    (see `has_material`) is left out."""
     phrases = [p for p in phrases_of(len(levels), phrase)
                if usable is None or usable[p[0]:p[1] + 1].all()]
     phrases = ascending(levels, phrases)
@@ -133,7 +134,17 @@ def bar_order(levels: np.ndarray, bars: int, phrase: int = PHRASE_BARS,
     order = [b for first, last in phrases for b in range(first, last + 1)]
     while len(order) < bars:
         order += list(range(phrases[-1][0], phrases[-1][1] + 1))
-    return order[:bars]
+    return cut_middle(order, bars)
+
+
+def cut_middle(order: list[int], bars: int) -> list[int]:
+    """`order` shortened to `bars` out of its middle, so the quiet opening
+    and the climax both stay.  MEASURED (raw-1001, v4): cut from the end,
+    34 of 36 bars lost the loudest phrase's -13 and -12 dB bars before the
+    stop; cut from the start, a 16-bar render loses its whole intro."""
+    excess = len(order) - bars
+    mid = (len(order) - excess) // 2
+    return order[:mid] + order[mid + excess:]
 
 
 def ranges_of(order: list[int]) -> list[tuple[int, int]]:

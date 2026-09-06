@@ -66,9 +66,15 @@ def test_ascending_orders_phrases_by_their_mean_level():
 
 
 def test_bar_order_fills_exactly_the_bars_asked_repeating_the_loudest():
+    """MEASURED (raw-1001, v4): 34 bars asked of nine 4-bar phrases, and the
+    two bars cut were the LAST two of the loudest phrase -- its -13 and -12
+    dB bars, the climax -- leaving -22 -20 before the stop.  What is cut
+    when the render has more than the ask is the MIDDLE: the quiet opening
+    and the climax are the two things the arc is for."""
     levels = np.array(SCRAMBLED)
     order = cue_arc.bar_order(levels, 10)
-    assert order == [12, 13, 14, 15, 0, 1, 2, 3, 8, 9]
+    assert order == [12, 13, 14, 15, 0, 11, 4, 5, 6, 7]
+    assert cue_arc.cut_middle(list(range(36)), 34) == list(range(17)) + list(range(19, 36))
     long = cue_arc.bar_order(levels, 20)
     assert len(long) == 20 and long[16:] == [4, 5, 6, 7]
 
