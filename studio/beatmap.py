@@ -554,16 +554,18 @@ def metre(audio: Path, seed: int = 0, rel_path: str = "", track: Tracker | None 
     if grid.bpm <= 0 or grid.bar <= 0:
         raise RuntimeError(f"no pulse found in {audio.name}")
     times, db = envelope_of(samples)
-    return metre_of(grid, times, db, seed, rel_path or audio.name)
+    return metre_of(grid, times, db, seed, rel_path or audio.name, seconds=len(samples) / RATE)
 
 
-def metre_of(grid: Grid, times, db, seed: int, rel_path: str) -> Metre:
-    """The Metre contract from a tracked grid and the cue's envelope."""
+def metre_of(grid: Grid, times, db, seed: int, rel_path: str, seconds: float | None = None) -> Metre:
+    """The Metre contract from a tracked grid and the cue's envelope; `seconds`
+    is the decoded length (the cut map's figure), the last window failing that."""
     metric = grid.bars_in_mode >= Metre.METRIC_FLOOR
     moment = title_moment(times, db, look_back_of(grid))
     grid_onsets = onsets(times, db)
     return Metre(
-        seed=seed, rel_path=rel_path, seconds=round(float(times[-1]) + WINDOW, 3),
+        seed=seed, rel_path=rel_path,
+        seconds=round(float(times[-1]) + WINDOW if seconds is None else seconds, 3),
         bpm=round(grid.bpm, 2), bar=round(grid.bar, 4), beats_per_bar=grid.beats_per_bar,
         beats=grid.beats if metric else grid_onsets, downbeats=grid.downbeats if metric else [],
         bars_in_mode=round(grid.bars_in_mode, 4), grid="metre" if metric else "onsets",

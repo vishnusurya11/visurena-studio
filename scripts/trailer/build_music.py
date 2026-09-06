@@ -52,8 +52,8 @@ def duration_of(audio: Path) -> float:
 
 
 def render_cue(book: Path, text: str, seed: int, dest_dir: Path,
-               sheet: str = "", duration: int = PINNED_DURATION) -> Path:
-    """One seed of one recipe, rendered once.
+               sheet: str = "", duration: int = PINNED_DURATION, prefix: str = "cue") -> Path:
+    """One seed of one recipe, rendered once, as `<prefix>-<seed>`.
 
     The stamp covers CAPTION, SHEET AND LENGTH, because the node guides the
     first two as one conditioning block and the third is the frame budget's
@@ -64,7 +64,7 @@ def render_cue(book: Path, text: str, seed: int, dest_dir: Path,
     recovered from git.
     """
     stamp = caption_stamp(text, sheet, duration)
-    current = [c for c in dest_dir.glob(f"cue-{seed}.*") if cue_is_current(c, stamp)
+    current = [c for c in dest_dir.glob(f"{prefix}-{seed}.*") if cue_is_current(c, stamp)
                and c.suffix in (".flac", ".wav", ".mp3")]
     if current:
         return current[0]
@@ -74,7 +74,7 @@ def render_cue(book: Path, text: str, seed: int, dest_dir: Path,
         "duration": duration, "seed": seed, "steps": 30,
         "cfg_scale": 1.7, "top_k": 50, "format": "flac",
         "filename_prefix": f"CUE-{book.name[:8]}-{seed}"}, timeout=1800)
-    dest = dest_dir / f"cue-{seed}{written[0].suffix or '.flac'}"
+    dest = dest_dir / f"{prefix}-{seed}{written[0].suffix or '.flac'}"
     dest.write_bytes(written[0].read_bytes())
     stamp_cue(dest, stamp, text, sheet)
     return dest

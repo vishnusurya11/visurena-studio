@@ -1,0 +1,191 @@
+"""The editor's arc: the ask's staircase CUT from one render, on its bar lines.
+
+MEASURED (BUILD row 60): five rounds of captions -- intensity adjectives,
+a "Dynamics" sentence, descriptive section tags, a late [Chorus] -- moved
+the song model's timbre (trailer > chamber on every seed) and never its
+ORDER: every seed reaches its plateau by 20-30 % and stays there (climb
+-0.6 dB over three seeds; the late-chorus sheet -4.4 and +3.5).  The
+vendor's rule holds -- mood words are weak, tags command structure -- and
+structure is not dynamics.  What the model reliably provides is MATERIAL
+in both registers: intro bars at -27 to -37 dBFS, loud bars at -10 to -16,
+same key, tempo and mastering.
+
+So the arc is an EDIT.  Phrases sorted by measured level, quiet to loud,
+fill the bars up to the stop; the ask's holes are gated on their bars, the
+stop is a hard out on its bar, and the bar carrying the render's biggest
+impact is landed on the title bar to decay alone.  The ask -- the spec the
+cut map is verified against -- is delivered by construction, not by hope.
+Measured on epic_cfg17-7005: climb -0.9 -> 11.0 dB, loudest 25 % -> 76 %.
+`cue_edit.conform` refuses a join whose level steps by more than 3 dB
+because a step reads as an edit; here the step on a downbeat IS the arc,
+so `step_join` allows it and the join is only ever a downbeat.
+"""
+from __future__ import annotations
+
+import numpy as np
+
+from studio import cue_edit
+from studio.cue_ask import HOLE_BARS
+from studio.beatmap import structural_impacts
+from studio.cue_plan import CueAsk
+from studio.trailer_stage_spec import Metre
+
+PHRASE_BARS = 4
+"""Bars a phrase keeps together when the cue is re-ordered: the unit the
+model composes in (a four-bar phrase is a musical sentence), so a join
+lands between sentences, never inside one."""
+
+STEP_FADE = 0.010
+"""Crossfade seconds at a downbeat join; the downbeat's transient masks it
+(the same figure as `cue_edit.HIT_FADE`, for the same reason)."""
+
+HOLE_FLOOR_DB = -70.0
+"""How far a hole gates down: digital black, the room a line is read over."""
+
+HOLE_RETURN = 0.01
+"""Seconds the music takes to return on the hole's downbeat: a switch, so
+the return reads as a hit and not a fade-in."""
+
+BAR_TOLERANCE = 0.1
+"""A measured bar longer or shorter than the cue's bar by this share is one
+the tracker stretched (a downbeat lost in a silence) -- cut into the arc it
+shifts every asked bar after it, so it is no phrase material."""
+
+
+def bar_levels(metre: Metre, times: np.ndarray, db: np.ndarray) -> np.ndarray:
+    """Median dBFS of every measured bar; a bar with no window reads as black."""
+    ends = list(metre.downbeats[1:]) + [metre.seconds]
+    out = []
+    for start, end in zip(metre.downbeats, ends):
+        inside = (times >= start) & (times < end)
+        out.append(float(np.median(db[inside])) if inside.any() else HOLE_FLOOR_DB)
+    return np.array(out)
+
+
+def regular_bars(metre: Metre, tolerance: float = BAR_TOLERANCE) -> np.ndarray:
+    """Which measured bars are within `tolerance` of the cue's bar length;
+    the last bar, ending where the cue ends, is judged like the rest."""
+    ends = list(metre.downbeats[1:]) + [metre.seconds]
+    lengths = np.array(ends) - np.array(metre.downbeats)
+    return np.abs(lengths - metre.bar) <= tolerance * metre.bar
+
+
+def phrases_of(count: int, phrase: int = PHRASE_BARS) -> list[tuple[int, int]]:
+    """Whole phrases of `phrase` bars over `count` bars; a trailing part is dropped."""
+    return [(i, i + phrase - 1) for i in range(0, count - phrase + 1, phrase)]
+
+
+def ascending(levels: np.ndarray, phrases: list[tuple[int, int]]) -> list[tuple[int, int]]:
+    """The phrases quiet to loud by mean level, ties in cue order."""
+    return sorted(phrases, key=lambda p: float(levels[p[0]:p[1] + 1].mean()))
+
+
+def bar_order(levels: np.ndarray, bars: int, phrase: int = PHRASE_BARS,
+              usable: np.ndarray | None = None) -> list[int]:
+    """Exactly `bars` source bars, quiet phrases first; when the render is
+    short the loudest phrase plays again, as a climax does.  A phrase with a
+    bar not `usable` (see `regular_bars`) is left out."""
+    phrases = [p for p in phrases_of(len(levels), phrase)
+               if usable is None or usable[p[0]:p[1] + 1].all()]
+    phrases = ascending(levels, phrases)
+    if not phrases:
+        raise ValueError(f"{len(levels)} bars is less than one {phrase}-bar phrase")
+    order = [b for first, last in phrases for b in range(first, last + 1)]
+    while len(order) < bars:
+        order += list(range(phrases[-1][0], phrases[-1][1] + 1))
+    return order[:bars]
+
+
+def ranges_of(order: list[int]) -> list[tuple[int, int]]:
+    """Consecutive source bars folded into one range, so a phrase is one slice."""
+    ranges = [[order[0], order[0]]]
+    for bar in order[1:]:
+        if bar == ranges[-1][1] + 1:
+            ranges[-1][1] = bar
+        else:
+            ranges.append([bar, bar])
+    return [(a, b) for a, b in ranges]
+
+
+def step_join(a: np.ndarray, b: np.ndarray, rate: int, fade_s: float = STEP_FADE) -> np.ndarray:
+    """`b` landed after `a` over an equal-power crossfade of `fade_s`; the
+    level may step, because the join is a downbeat and the step is the arc."""
+    n = min(int(rate * fade_s), len(a), len(b))
+    ramp = np.linspace(0.0, np.pi / 2, n)
+    mix = a[-n:] * cue_edit.per_sample(np.cos(ramp), a) + b[:n] * cue_edit.per_sample(np.sin(ramp), b)
+    return np.concatenate([a[:-n], mix, b[n:]])
+
+
+def assemble(samples: np.ndarray, rate: int, metre: Metre,
+             ranges: list[tuple[int, int]]) -> tuple[np.ndarray, list[float]]:
+    """The ranges in order, each landed on the next downbeat; the downbeats
+    of the result, one per bar, read off the slices' measured lengths."""
+    out, downbeats, at = None, [], 0.0
+    for first, last in ranges:
+        piece = cue_edit.slice_bars(samples, rate, metre, first, last)
+        bounds = [cue_edit.bar_bounds(metre, b, b) for b in range(first, last + 1)]
+        downbeats += [at + (s - bounds[0][0]) for s, _ in bounds]
+        out = piece if out is None else step_join(out, piece, rate)
+        at = len(out) / rate
+    return out, downbeats
+
+
+def hit_bar(metre: Metre, times: np.ndarray, db: np.ndarray) -> int:
+    """The bar holding the render's biggest impact; the first bar when it has none."""
+    hits = structural_impacts(times, db, count=1)
+    if not hits:
+        return 0
+    return max(0, int(np.searchsorted(metre.downbeats, hits[0], side="right") - 1))
+
+
+def event_bars(ask: CueAsk, kind: str) -> list[int]:
+    return [e.bar for e in ask.events if e.kind == kind]
+
+
+def gate_holes(out: np.ndarray, rate: int, downbeats: list[float], ask: CueAsk) -> np.ndarray:
+    """Every asked hole gated to black for HOLE_BARS, back on its downbeat."""
+    for bar in event_bars(ask, "hole"):
+        end = downbeats[bar + HOLE_BARS] if bar + HOLE_BARS < len(downbeats) else len(out) / rate
+        out = cue_edit.hole(out, rate, downbeats[bar], end - downbeats[bar], HOLE_FLOOR_DB, HOLE_RETURN)
+    return out
+
+
+def title_piece(samples: np.ndarray, rate: int, metre: Metre, bar: int, seconds: float) -> np.ndarray:
+    """The impact bar and what follows it, `seconds` long, fading to black at the end."""
+    last = min(len(metre.downbeats) - 1, bar + max(1, int(np.ceil(seconds / metre.bar))))
+    piece = cue_edit.slice_bars(samples, rate, metre, bar, last)[: int(seconds * rate)].copy()
+    fade = np.linspace(1.0, 0.0, min(len(piece), int(rate * min(1.5, seconds / 2))))
+    piece[-len(fade):] *= cue_edit.per_sample(fade, piece)
+    return piece
+
+
+def staircase(samples: np.ndarray, rate: int, metre: Metre, ask: CueAsk,
+              levels: np.ndarray) -> tuple[np.ndarray, list[float]]:
+    """The bars up to the stop, quiet phrases first, holes gated, hard out on
+    the stop bar with the asked silence after it; the downbeats so far."""
+    stop, title = event_bars(ask, "stop")[0], ask.title_bar
+    order = bar_order(levels, stop, usable=regular_bars(metre))
+    body, downbeats = assemble(samples, rate, metre, ranges_of(order))
+    body = gate_holes(body, rate, downbeats, ask)
+    body = cue_edit.stop_at(body, rate, len(body) / rate, (title - stop) * ask.bar)
+    downbeats += [downbeats[-1] + (i + 1) * ask.bar for i in range(title - stop)]
+    return body, downbeats
+
+
+def grid_of(downbeats: list[float], bar: float) -> tuple[list[float], list[float]]:
+    """The arc's grid as a tracker would report it: four beats laid on every
+    bar line, so `beatmap.metre` reads the cue on the lines it was cut on."""
+    beats = [round(d + i * bar / 4, 4) for d in downbeats for i in range(4)]
+    return beats, [float(d) for d in downbeats]
+
+
+def arc(samples: np.ndarray, rate: int, metre: Metre, ask: CueAsk,
+        times: np.ndarray, db: np.ndarray) -> tuple[np.ndarray, list[float]]:
+    """The ask cut from the render: (samples, downbeats of every asked bar).
+    `times`, `db` are the render's envelope, the instrument the levels and
+    the impact are read with."""
+    body, downbeats = staircase(samples, rate, metre, ask, bar_levels(metre, times, db))
+    after = ask.bars - ask.title_bar
+    tail = title_piece(samples, rate, metre, hit_bar(metre, times, db), after * ask.bar)
+    downbeats += [downbeats[-1] + (i + 1) * ask.bar for i in range(after)]
+    return np.concatenate([body, tail]).astype(samples.dtype), downbeats

@@ -13,7 +13,9 @@ music is worse than one cut to the wrong pace.
 """
 from __future__ import annotations
 
+import json
 import math
+import shutil
 import time
 from dataclasses import replace
 from pathlib import Path
@@ -23,13 +25,13 @@ from pydantic import BaseModel, Field
 
 from scripts.trailer import build_music
 from scripts.trailer.step_07_clips import read_seconds
-from studio import beatmap, cue_ask, cue_conform, cue_spans, frame_budget, llm, music_events
+from studio import beatmap, cue_arc, cue_ask, cue_conform, cue_punct, cue_spans, frame_budget, llm, music_events
 from studio.cue_plan import MIN_FORM_BARS, CueAsk, CuePlan
 from studio.cue_settle import Settled
 from studio.cue_spans import ShorterCue
 from studio.ladder import Ladder, Rung, climb
 from studio.learnings import Learning, load
-from studio.music_tone import Tone, load_tone, lyrics_plan, recipe_path
+from studio.music_tone import Tone, caption_stamp, cue_is_current, load_tone, lyrics_plan, recipe_path, stamp_cue
 from studio.trailer_stage_spec import Metre
 
 STEP_ID = "03"
@@ -153,9 +155,23 @@ def score_of(ask: CueAsk, cut: dict, found: Metre) -> float:
     return cue_ask.plan_score(cue_ask.verify(ask, cut, found))
 
 
+def grid_path(cue: Path) -> Path:
+    """Where an arced cue keeps the bar lines it was cut on."""
+    return cue.with_suffix(".grid.json")
+
+
+def known_grid(cue: Path) -> beatmap.Tracker | None:
+    """A tracker that reports the arc's own bar lines, when the cue has them;
+    a tracker loses the downbeats inside the arc's deliberate silences."""
+    if not grid_path(cue).exists():
+        return None
+    grid = json.loads(grid_path(cue).read_text(encoding="utf-8"))
+    return lambda samples, rate: (grid["beats"], grid["downbeats"])
+
+
 def measure(book: Path, cue: Path, seed: int) -> Metre:
     """One seed's Metre, written beside the cue for the retrospect."""
-    found = beatmap.metre(cue, seed=seed, rel_path=rel_path(book, cue))
+    found = beatmap.metre(cue, seed=seed, rel_path=rel_path(book, cue), track=known_grid(cue))
     (cue.parent / f"metre-{seed}.json").write_text(
         found.model_dump_json(indent=2, by_alias=True), encoding="utf-8")
     return found
@@ -176,12 +192,46 @@ def render_batch(ctx, text: str, sheet: str, seeds: list[int], state: dict) -> l
                             level="WARNING", step_id=STEP_ID)
             break
         started = time.monotonic()
-        cue = build_music.render_cue(ctx.book_dir, text, seed, music, sheet,
+        raw = build_music.render_cue(ctx.book_dir, text, seed, music, sheet, prefix="raw",
                                      duration=math.ceil(state["ask"].seconds) + TAIL_HEADROOM)
         state["timed"].append(time.monotonic() - started)
         state["render"] = max(max(state["timed"]), 1.0)
-        found.append(grade(ctx.book_dir, cue, seed, state))
+        found.append(grade(ctx.book_dir, arc_cue(ctx.book_dir, raw, state["ask"], seed), seed, state))
     return found
+
+
+ARC_VERSION = 1
+"""Bumped when `cue_arc` or `cue_punct` change what they cut, so a kept
+raw render is arced again rather than trusted."""
+
+
+def arc_cue(book: Path, raw: Path, ask: CueAsk, seed: int) -> Path:
+    """The raw render cut into the ask's arc (`cue_arc`) and punctuated
+    (`cue_punct`), written as cue-<seed> beside it with the render's recipe
+    carried over; the same render and ask are arced once."""
+    recipe = json.loads(recipe_path(raw).read_text(encoding="utf-8"))
+    dest = raw.with_name(f"cue-{seed}{raw.suffix}")
+    stamp = caption_stamp(f"{recipe['stamp']}|{ask.model_dump_json()}|arc{ARC_VERSION}")
+    if cue_is_current(dest, stamp):
+        return dest
+    metre = beatmap.metre(raw, seed=seed, rel_path=rel_path(book, raw))
+    if len(metre.downbeats) < cue_arc.PHRASE_BARS:
+        shutil.copyfile(raw, dest)          # rubato: nothing to re-order, ship the render
+        grid_path(dest).unlink(missing_ok=True)
+    else:
+        write_arc(raw, dest, metre, ask)
+    stamp_cue(dest, stamp, recipe["caption"], recipe["lyrics"])
+    return dest
+
+
+def write_arc(raw: Path, dest: Path, metre: Metre, ask: CueAsk) -> None:
+    """The render cut into the ask's arc and punctuated, the bar lines it was
+    cut on written beside it for `measure`."""
+    samples, rate = cue_conform.read_cue(raw)
+    body, downbeats = cue_arc.arc(samples, rate, metre, ask, *beatmap.envelope(raw))
+    cue_conform.write_cue(dest, cue_punct.punctuate(body, rate, downbeats, ask), rate)
+    beats, downbeats = cue_arc.grid_of(downbeats, ask.bar)
+    grid_path(dest).write_text(json.dumps({"beats": beats, "downbeats": downbeats}), encoding="utf-8")
 
 
 def grade(book: Path, cue: Path, seed: int, state: dict) -> Metre:

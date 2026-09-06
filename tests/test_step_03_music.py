@@ -16,7 +16,7 @@ import pytest
 
 from scripts.trailer import build_music
 from scripts.trailer import step_03_music as step
-from studio import beatmap, db, llm
+from studio import beatmap, cue_arc, db, llm
 from studio.beatmap import RATE, track_autocorrelation
 from studio import cue_ask, frame_budget
 from studio.cue_plan import MIN_FORM_BARS, CuePlan
@@ -25,7 +25,7 @@ from studio.cue_settle import Settled
 from studio.cue_spans import ShorterCue
 from studio.learnings import load
 from studio.affirm import negations
-from studio.music_tone import Tone, caption, lyrics_plan
+from studio.music_tone import Tone, caption, lyrics_plan, recipe_path, stamp_cue
 from studio.trailer_run import RunContext
 from studio.trailer_stage_spec import Metre
 from test_metre import click_track, write_wav
@@ -146,6 +146,15 @@ class TestSeeds:
         build_music.render_cue(tmp_path, "caption A", 5, dest, "", duration=64)
         build_music.render_cue(tmp_path, "caption A", 5, dest, "", duration=80)
         assert [c["duration"] for c in calls] == [64, 80]
+
+    def test_render_cue_names_the_file_by_its_prefix(self, tmp_path, monkeypatch):
+        """The raw render is `raw-<seed>`: the cue the pipeline grades and
+        ships is the ARC cut from it, and that one is `cue-<seed>`."""
+        monkeypatch.setattr(build_music, "run", fake_comfy(tmp_path, {}, []))
+        dest = tmp_path / "music"
+        dest.mkdir()
+        raw = build_music.render_cue(tmp_path, "caption A", 5, dest, "", prefix="raw")
+        assert raw == dest / "raw-5.wav" and build_music.render_cue(tmp_path, "caption A", 5, dest, "", prefix="raw") == raw
 
     def test_candidate_row_measures_the_rendered_file(self, tmp_path):
         row = build_music.candidate(write_wav(tmp_path / "cue-9.wav", cue(**KINDS["two"])), 9)
@@ -329,6 +338,59 @@ class TestAsk:
         assert step.best_of([a, b], 120, {1: 2, 2: 2}, {1: 0.5, 2: 0.9}) is b
         assert step.best_of([a, b], 120, {1: 2, 2: 2}, {1: 0.9, 2: 0.9}) is a
 
+    def test_arc_cue_cuts_the_ask_from_the_raw_render_and_reuses_it(self, ctx, monkeypatch):
+        """The raw render's bars, quiet phrases first, the stop and the title
+        hit where the ask puts them: a cue-<seed> beside raw-<seed>, its recipe
+        carried over, arced once per (render, ask)."""
+        from tests.test_cue_arc import SCRAMBLED, metre_of, planted, measured_bar_levels
+        music = ctx.out_dir / "music"
+        music.mkdir(parents=True, exist_ok=True)
+        raw = write_wav(music / "raw-7.wav", planted(SCRAMBLED))
+        stamp_cue(raw, "recipe-7", "caption A", "[Intro]")
+        monkeypatch.setattr(beatmap, "metre", lambda path, seed, rel_path: metre_of(16))
+        ask = cue_ask.CueAsk.for_bars(16, bar=2.0, bpm=120)
+        out = step.arc_cue(ctx.book_dir, raw, ask, 7)
+        assert out == music / "cue-7.wav" and recipe_path(out).exists()
+        grid = json.loads(step.grid_path(out).read_text(encoding="utf-8"))
+        assert len(grid["downbeats"]) == ask.bars and len(grid["beats"]) == 4 * ask.bars
+        samples = beatmap.decode(out)
+        assert abs(len(samples) / RATE - ask.seconds) < 2.0
+        levels = measured_bar_levels(samples, ask.bars)
+        assert levels[11] < levels[10] - 30 and levels[ask.title_bar] > levels[ask.title_bar - 1] + 20
+        assert np.mean(levels[8:11]) > np.mean(levels[0:4]) + 6
+        written = out.stat().st_mtime_ns
+        assert step.arc_cue(ctx.book_dir, raw, ask, 7) == out and out.stat().st_mtime_ns == written
+        longer = cue_ask.CueAsk.for_bars(20, bar=2.0, bpm=120)
+        assert step.arc_cue(ctx.book_dir, raw, longer, 7) == out and out.stat().st_mtime_ns != written
+
+    def test_measure_reads_the_grid_the_arc_was_cut_on(self, ctx, monkeypatch):
+        """An arced cue carries its bar lines beside it; the Metre is read on
+        them, because a tracker loses the downbeats inside the asked holes."""
+        from tests.test_cue_arc import SCRAMBLED, planted
+        music = ctx.out_dir / "music"
+        music.mkdir(parents=True, exist_ok=True)
+        wav = write_wav(music / "cue-9.wav", planted(SCRAMBLED))
+        downbeats = [i * 2.0 for i in range(16)]
+        step.grid_path(wav).write_text(json.dumps(
+            {"beats": cue_arc.grid_of(downbeats, 2.0)[0], "downbeats": downbeats}), encoding="utf-8")
+        monkeypatch.setattr(beatmap, "track_beats", lambda s, r: ([], []))
+        found = step.measure(ctx.book_dir, wav, 9)
+        assert found.grid == "metre" and np.allclose(found.downbeats, downbeats, atol=0.02)
+        assert step.known_grid(music / "cue-10.wav") is None
+
+    def test_arc_cue_ships_a_render_with_no_bar_lines_as_it_is(self, ctx, monkeypatch):
+        """Rubato has no bars to re-order: the raw render is the cue, and the
+        grade sees the same file the old path graded (degrade, then learn)."""
+        from tests.test_cue_arc import SCRAMBLED, metre_of, planted
+        music = ctx.out_dir / "music"
+        music.mkdir(parents=True, exist_ok=True)
+        raw = write_wav(music / "raw-8.wav", planted(SCRAMBLED[:6]))
+        stamp_cue(raw, "recipe-8", "caption A", "")
+        bare = metre_of(2).model_copy(update={"downbeats": [], "beats": [], "grid": "onsets"})
+        monkeypatch.setattr(beatmap, "metre", lambda path, seed, rel_path: bare)
+        out = step.arc_cue(ctx.book_dir, raw, cue_ask.CueAsk.for_bars(16, bar=2.0, bpm=120), 8)
+        assert out == music / "cue-8.wav" and out.read_bytes() == raw.read_bytes()
+
     def test_grade_records_metre_form_map_and_score_for_one_seed(self, ctx, tmp_path):
         music = ctx.out_dir / "music"
         music.mkdir(parents=True, exist_ok=True)
@@ -495,7 +557,8 @@ class TestStep:
 
     def test_step_stops_climbing_at_the_seed_that_delivers_its_ask(self, ctx, tmp_path, monkeypatch):
         """A seed that delivered its ask on a metric grid ends the ladder on the
-        first batch: no second batch, no reauthor, nothing learned."""
+        first batch: no second batch, no reauthor, nothing learned.  The shipped
+        cue is the ARC of the render, so its slots are where the ask put its holes."""
         seeds = step.seeds_for(0)
         kinds = {seeds[0]: "flat", seeds[1]: "two", seeds[2]: "one", seeds[3]: "flat"}
         comfy_calls, llm_calls = [], []
@@ -505,8 +568,12 @@ class TestStep:
                             lambda ask, cut, found: 0.9 if found.seed == seeds[1] else 0.2)
         step.run(ctx.codex_id, ctx)
         chosen = chosen_of(ctx)
-        assert chosen.seed == seeds[1] and chosen.grid == "metre" and len(chosen.slots) == 2
+        assert chosen.seed == seeds[1] and chosen.grid == "metre"
         assert chosen.rel_path == f"trailer/main/music/cue-{seeds[1]}.wav"
+        plan = CuePlan.model_validate_json((ctx.out_dir / "music/plan.json").read_text(encoding="utf-8"))
+        holes = [e.bar for e in plan.asked.events if e.kind == "hole"]
+        assert holes and all(any(abs(slot.start - chosen.downbeats[b]) < chosen.bar / 2
+                                 for slot in chosen.slots) for b in holes)
         assert sorted(p.name for p in ctx.out_dir.glob("music/metre-*.json")) == \
             sorted(f"metre-{s}.json" for s in seeds)
         assert [c["seed"] for c in comfy_calls] == seeds and llm_calls == []

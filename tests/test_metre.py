@@ -104,6 +104,14 @@ class TestMetreOfAFile:
         assert recall(downbeats, found.downbeats) >= 0.9
         assert found.phrase_starts == phrases(found.downbeats)
 
+    def test_seconds_is_the_decoded_length_not_the_last_window(self, tmp_path):
+        """The cut map reads len(samples)/RATE; the Metre must say the same,
+        or a cue 82.079 s long is graded as 82.1 and the plan disagrees with it."""
+        samples, _, _ = click_track(120, seconds=20.0)
+        wav = write_wav(tmp_path / "cue-3.wav", samples[: int(19.979 * RATE)])
+        found = metre(wav, seed=3, rel_path="cue-3.wav", track=track_autocorrelation)
+        assert found.seconds == pytest.approx(19.979, abs=1e-3)
+
     def test_a_tracker_that_finds_nothing_is_replaced_by_the_fallback(self, tmp_path):
         samples, beats, _ = click_track(90, seconds=20.0)
         wav = write_wav(tmp_path / "cue-1.wav", samples)
