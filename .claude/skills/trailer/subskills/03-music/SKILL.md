@@ -653,18 +653,19 @@ Targets (PROPOSED): ≥ 80 % / ≥ 30 % / 100 % / true.
    render **one seed at `max_duration` 20**, run `demucs` on the result and
    require the vocal stem to sit well below the rest of the mix with an empty
    whisper transcript. Then render the full cap.
-2. **Whether `[Chorus]` twice reads as a drop.** The A-B-A-B-A argument is
-   from library practice; what the model does with a second, later `[Chorus]`
-   in a chamber score is a guess until eight seeds are measured with `climbs`.
+2. ~~Whether `[Chorus]` twice reads as a drop.~~ MEASURED (§16): a second,
+   later `[Chorus]` moved the climb −4.4 and +3.5 dB on two seeds — no
+   drop by caption. The drop is cut by the arc now, not asked for.
 3. **Section length with empty bodies.** "≈ 11.1 s per section" was measured
    while every section carried sung prose — the per-section time was the time
    to *sing* the note. Re-measure, then decide whether nine tags still land
    near 100 s or the sheet needs more.
 4. **Whether the model parses "harmonic minor", "Neapolitan" or "sixteenth
    notes" at all.** Hence the sound-word translations in §6.
-5. **Whether 100 BPM holds better than 84.** The guess is yes (100 is inside
-   the vendor's own "groove" band and the pulse now sits on instruments with
-   strong priors), and the tempo gate grades it per seed.
+5. **Whether 100 BPM holds better than 84.** PARTLY MEASURED (§0): the
+   asked 100 held at 86–100 on the four epic-head seeds and was ignored
+   (63–190) on the four detective-head seeds — the tempo follows the
+   DRUMS the caption names, not the number. 84 is still unmeasured.
 6. **`title_moment`'s look-back is a constant 6.0 s** (`studio/beatmap.py`).
    Two bars at ≤ 80 BPM exceed it, so a correct cue would be rejected.
    PROPOSED: make it metre-aware, `2·bar + beat`. `beatmap.py` belongs to
