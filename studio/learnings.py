@@ -29,7 +29,8 @@ class Learning(BaseModel):
     terminal: bool = False
     note: str = ""
     frames: int | None = None
-    """Mean frames per take on a gate="cycle" row; the budget's abscissa."""
+    """The take's frames on a gate="cycle" row (one row per fresh take); the
+    budget's abscissa."""
 
 
 def record(path: Path, learning: Learning) -> None:

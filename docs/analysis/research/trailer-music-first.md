@@ -229,10 +229,10 @@ unbuilt: nothing downstream consumes one.
 - `CAPTION_WORDS` (250, 560) is typed against a measured 5000-token node
   limit; a reauthor adds pulse-carrier and supporting-section text to the
   caption, and whether a reauthored caption stays under 560 is unmeasured.
-- `Learning.frames` is "mean frames per take on a gate=cycle row" and
-  `frame_budget.cycle_points` pairs it with the row's `measured` seconds as
-  one point of the cycle fit; the point is on the line only if `measured` is
-  per take too. Unverified against the rows step 07 writes.
+- `Learning.frames`: verified, one gate=cycle row per fresh take (step 07
+  `learn_cycle`), `frames` the take's frames and `measured` its render
+  seconds, so `frame_budget.cycle_points` fits per-take points. The
+  docstring said "mean"; it now says the take's.
 
 ## 10. Build order (BUILD.md rows 43–62)
 
