@@ -18,7 +18,7 @@ from pydantic import BaseModel, Field, model_validator
 
 from studio.trailer_edit import MIN_SHOT
 from studio.trailer_stage_spec import Slot
-from studio.trailer_spec import Movement
+from studio.trailer_spec import CueSection, Movement
 from studio.trailer_story import MOVEMENTS, movement_quota
 
 SpanKind = Literal["section", "phrase", "accent", "sustain", "trough", "tail"]
@@ -36,17 +36,6 @@ MIN_FORM_BARS = 8
 EVENT_ORDER = ("pulse_in", "hit", "stop")
 """One landmark per section start, in the order the sections arrive; the
 title hit sits after the stop, on the bar the ask names."""
-
-
-class CueSection(BaseModel):
-    """A stretch of the cue at one level, one pulse, one movement."""
-
-    index: int = Field(ge=0)
-    start: float = Field(ge=0.0)
-    end: float = Field(gt=0.0)
-    movement: Movement
-    pulse: bool
-    level_db: float
 
 
 class CueSpan(BaseModel):

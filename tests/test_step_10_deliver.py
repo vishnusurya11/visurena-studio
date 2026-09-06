@@ -18,7 +18,7 @@ from studio.learnings import Learning, record
 from studio.trailer_run import RunContext
 
 QC = {"cuts": 30, "cuts_on_beat": 0.9, "cuts_on_downbeat": 0.4, "cuts_on_L0": 1.0,
-      "on_cap_fraction": 0.05, "title_on_downbeat": True, "integrated_lufs": -14.2,
+      "title_on_downbeat": True, "integrated_lufs": -14.2,
       "true_peak": -1.3, "unbound_shots": 0, "line_over_bed_lu": [6.1], "grid": "metre",
       "cue_cut": {"cuts_on_events": 0.95, "section_changes_cut": 1.0, "cuts_inside_sustain": 0,
                   "long_shots_on_sustains": 1.0, "lines_in_troughs": 1.0}}

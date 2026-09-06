@@ -229,11 +229,11 @@ def one_each(beat_ids: list[str], count: int) -> list[str]:
 
     Run 10 shipped 51 shots from 25 takes -- every take twice, B00 three
     times -- because `best_scatter` exists to spread FEWER beats over MORE
-    cuts.  Under the owner's rule there is no spreading to do: the walk is
-    fitted to the takes upstream, so a mismatch here is a planning bug and
+    cuts.  Under the owner's rule there is no spreading to do: the cue's
+    spans are fitted to the takes upstream, so a mismatch here is a planning bug and
     the plan is refused rather than filled with a second look at a picture.
     """
     if count != len(beat_ids):
         raise ValueError(f"{len(beat_ids)} beats for {count} cuts; a take plays "
-                         f"once, so the walk must be fitted to the takes first")
+                         f"once, so the spans must be fitted to the takes first")
     return list(beat_ids)

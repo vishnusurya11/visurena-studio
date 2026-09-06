@@ -4,8 +4,8 @@ The floor (loudness, true peak, every shot bound, no line clipped, the bed
 stopped before the card) fails the run; the targets -- how much of the
 runtime is music alone, where the loudest moment sits, whether act 3 lifts
 over act 2, the per-act beat lock -- only flag it.  A floor fail buys two
-recuts at a longer walk stretch -- step 08 owns the cut, step 06 the walk, so this step only asks --
-and after that the master ships flagged: qc.json says so, and the retrospect
+recuts -- step 08 settles the cue on the takes that exist and step 06 lays
+its spans, so this step only asks -- and after that the master ships flagged: qc.json says so, and the retrospect
 reads it, but nobody is asked a question.
 """
 from __future__ import annotations

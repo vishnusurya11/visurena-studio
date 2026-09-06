@@ -30,7 +30,6 @@ from __future__ import annotations
 import json
 from dataclasses import dataclass, field
 from pathlib import Path
-from statistics import median
 from typing import Callable
 
 from scripts.trailer.build_clips import (SEED_BASE, bound_slots, is_complete, recipe_for,
@@ -49,12 +48,6 @@ from studio.trailer_assemble import HEAD_TRIM, clip_seconds
 
 STEP_ID = "07"
 NAME = "clips"
-RENDER_SECONDS = 16 * 60
-"""The per-take constant step 06 still sizes its plan on (`render_seconds_for`),
-measured on run 10: 19 takes between 12:36 and 17:32, 15.76 min each, a 4.6
-min model reload in every one.  Step 07 itself prices nothing on it: a take
-costs its FRAMES on the cycle (`cycle_of`), and step 06 moves to frames with
-BUILD row 51."""
 LONG_TAKE = 243
 """Frames of the take round one renders long so the cycle's slope is measured.
 
@@ -136,21 +129,6 @@ def frames_of_beat(beat_id: str, plan: dict) -> int:
 def long_take_measured(rows: list) -> bool:
     """Whether a cycle row has already timed a take of LONG_TAKE frames or more."""
     return any(frames >= LONG_TAKE for frames, _ in frame_budget.cycle_points(rows))
-
-
-def render_seconds(rows: list[Learning]) -> float:
-    """LEGACY, for step 06: seconds per take as the median over every cycle
-    row -- the median so a single stalled take cannot resize the next plan.
-    Step 07 prices on `cycle_of`; step 06 sizes by frames from BUILD row 51."""
-    took = [float(row.measured) for row in rows
-            if row.step == STEP_ID and row.gate == CYCLE
-            and isinstance(row.measured, (int, float))]
-    return median(took) if took else float(RENDER_SECONDS)
-
-
-def render_seconds_for(ctx) -> float:
-    """This book's measured seconds per take, for step 06 to size its plan on."""
-    return render_seconds(load(ctx.learnings_path))
 
 
 def seed_for(index: int, rung: Rung, i: int) -> int:

@@ -533,7 +533,13 @@ grid). `phrases(metre)` groups downbeats in fours.
 - Timbral self-similarity does not recover authored sections (MEASURED,
   negative). Sections are envelope events snapped to downbeats.
 
-### The cut walk — in BEATS, not seconds
+### The cut walk — in BEATS, not seconds (HISTORY: removed in BUILD row 55)
+
+**Superseded.** Step 03 writes `music/plan.json` (`studio.cue_plan.CuePlan`)
+whose measured `spans` ARE the shot list; step 06 lays one shot per span and
+`plan_cuts`/`ACT_BARS`/`FIGURE`/`BEAT_LOCK` no longer exist in `trailer_edit`.
+`MusicBed.sections` carries the measured `CueSection`s and `MusicBed.cuts`
+the span starts. What follows is the walk as it was, kept for the record.
 
 ```
 L0  structural: title hit, structural_impacts, slot starts/ends, phrase starts
@@ -573,8 +579,9 @@ plan_cuts(metre, events, duration, stretch):
 QC reads the DELIVERED file, never the plan: `qc.py` extracts the master's
 audio, tracks it, scene-detects the picture (threshold below 0.3 — 9 of 44
 low-contrast cuts were missed at 0.3) and reports `cuts_on_beat`,
-`cuts_on_downbeat`, `cuts_on_L0`, `on_cap_fraction`, `title_on_downbeat`.
-Targets (PROPOSED): ≥ 80 % / ≥ 30 % / 100 % / ≤ 10 % / true.
+`cuts_on_downbeat`, `cuts_on_L0`, `title_on_downbeat` (`on_cap_fraction`
+graded the walk and left with it, row 55).
+Targets (PROPOSED): ≥ 80 % / ≥ 30 % / 100 % / true.
 
 ---
 

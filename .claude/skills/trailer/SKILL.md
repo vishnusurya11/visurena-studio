@@ -65,7 +65,7 @@ music breaks it.
 onset" and, tracked against the music's own beat, **12 of 44 on a beat and 4
 of 44 on a downbeat** — about 2× chance for both. `onsets()` is a loudness
 grid; it has no bar. The full rule, the seed fitness with metric and slot
-terms, the beat walk that respects `MIN_SHOT` and the cap at 60–180 BPM, the
+terms, the measured spans that ARE the shot list (the beat walk is gone, row 55), the cap at 60–180 BPM, the
 instrumental and vocal sheets, and the instrumental-vs-vocal eligibility rule
 are in `subskills/03-music`. The history below is why measurement exists.
 
@@ -125,7 +125,7 @@ Read the one you need; each carries what was measured rather than assumed.
 |---|---|
 | `subskills/01-story` | lead, opposition, turn, what stays unanswered, element-level selection |
 | `subskills/02-refs` | reference sheets, identity binding, character collision |
-| `subskills/03-music` | metre + events, seed fitness, the beat walk, instrumental and vocal sheets |
+| `subskills/03-music` | metre + events, seed fitness, the cue plan's spans (no walk), instrumental and vocal sheets |
 | `subskills/04-shots` | H3 constants, framing, camera, coverage economics, costs |
 | `subskills/05-dialogue` | four pools, Wikiquote iconicity, the held-out scorer, ordering, slots, moments |
 | `subskills/06-style` | the house look and how to try others |
@@ -253,8 +253,9 @@ default when the prompt says nothing about the camera, so always say something.
    episode one is two characters to the audience.
 2. `build_music.py` — several seeds, chosen on measured fitness: metre,
    tempo, title-on-downbeat, lift, **slots**, late reach.
-3. `build_plan.py` — setups from the screenplay's authored shots; cuts from
-   the beat walk over the cue's metre and events; the line slate from the
+3. `build_plan.py` — setups from the screenplay's authored shots (`beat_of`,
+   `hold_wide`, now read by step 06; its walk CLI is gone, row 55); the cuts
+   are the cue plan's span starts, never invented; the line slate from the
    four pools, ordered hook → answer → threat → title → button.
    **Refuses unbound shots and a slate with no hook.**
 4. `build_voice.py` — design one reference per speaking character, clone

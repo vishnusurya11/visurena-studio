@@ -10,26 +10,24 @@ exist and the trailer gets shorter, because the owner's rule is that a
 rendered take is never seen twice.  `recut` is the free re-cut step 09
 climbs when the delivered master misses its targets.
 
-With a cue plan on disk the step settles the way an editor does (row 53):
-the cue bends, the story does not.  A lost accent is absorbed by the shot
-before it; a lost phrase, sustain or trough is cut OUT of the music and
-everything after moves up; a lost button moves the hard out.  Only then
-does step 06's spans path lay the survivors, with nothing left to fold, so
-every take keeps the length it was rendered at.
+The step settles the way an editor does (row 53): the cue bends, the story
+does not.  A lost accent is absorbed by the shot before it; a lost phrase,
+sustain or trough is cut OUT of the music and everything after moves up; a
+lost button moves the hard out.  Only then does step 06 lay the survivors on
+the settled spans, with nothing left to fold, so every take keeps the length
+it was rendered at.  Step 03's cue plan is the one thing every re-fit reads;
+without it the step refuses (row 55), because nothing here may invent a cut.
 """
 from __future__ import annotations
 
 import json
 from pathlib import Path
 
-import numpy as np
-
 from scripts.trailer.assemble import build_at
-from studio import cue_edit, cue_settle
+from studio import cue_conform, cue_settle
 from studio.clip_cache import fresh
 from studio.cue_plan import CuePlan
 from studio.learnings import Learning
-from studio.trailer_stage_spec import Metre
 
 STEP_ID = "08"
 NAME = "assemble"
@@ -62,60 +60,25 @@ def plan_of(ctx) -> dict:
     return json.loads((ctx.out_dir / "plan.json").read_text(encoding="utf-8"))
 
 
-def refit(ctx, attempt: int, rendered: list[str]) -> None:
-    """Step 06 owns the walk; imported here so step 08 loads without it."""
+def refit(ctx, rendered: list[str]) -> None:
+    """Step 06 owns the plan; imported here so step 08 loads without it."""
     from scripts.trailer import step_06_plan
-    step_06_plan.refit(ctx, attempt, rendered=rendered)
+    step_06_plan.refit(ctx, rendered=rendered)
 
 
-def cue_plan_of(ctx) -> CuePlan | None:
-    """Step 03's measured spans when it wrote them; None is the walk."""
+def cue_plan_of(ctx) -> CuePlan:
+    """Step 03's measured spans; their absence is a refusal, not a fallback."""
     path = ctx.out_dir / "music/plan.json"
     if not path.exists():
-        return None
+        raise FileNotFoundError(f"[{STEP_ID}] music/plan.json is missing: the cut settles on "
+                                f"step 03's spans and has no other cut to make")
     return CuePlan.model_validate_json(path.read_text(encoding="utf-8"))
 
 
-def cut_map_name(rel_path: str) -> str:
-    """The cut map beside a cue: `cue-1003.flac` -> `cutmap-1003.json`, and
-    the settled cue's beside it, so qc grades against the cue that plays."""
-    return f"cutmap-{Path(rel_path).stem.removeprefix('cue-')}.json"
-
-
-def settled_rel(cue: CuePlan) -> str:
-    """The settled cue's path beside the original, one file however many
-    passes settle it."""
-    seed = Path(cue.rel_path).stem.removeprefix("cue-").removesuffix("-settled")
-    return (Path(cue.rel_path).parent / f"cue-{seed}-settled.flac").as_posix()
-
-
-def read_cue(path: Path) -> tuple[np.ndarray, int]:
-    import soundfile
-    samples, rate = soundfile.read(path, dtype="float32")
-    return samples, int(rate)
-
-
-def write_cue(path: Path, samples: np.ndarray, rate: int) -> None:
-    import soundfile
-    soundfile.write(path, samples, rate, subtype="PCM_16")
-
-
 def cut_cue(ctx, cue: CuePlan, removed: list[tuple[float, float]]) -> str:
-    """Every removed range spliced out of the cue in order, the metre and the
-    cut map moved with it; the settled cue's rel_path."""
-    music = ctx.out_dir / "music"
-    metre = Metre.model_validate_json((music / "metre.json").read_text(encoding="utf-8"))
-    cut_map = json.loads((music / cut_map_name(cue.rel_path)).read_text(encoding="utf-8"))
-    samples, rate = read_cue(ctx.book_dir / cue.rel_path)
-    for start, end in removed:
-        samples, recut = cue_edit.remove_range(samples, rate, metre, start, end)
-        metre, cut_map = recut.metre, cue_settle.shifted_cut_map(cut_map, start, end)
-    rel = settled_rel(cue)
-    write_cue(ctx.book_dir / rel, samples, rate)
-    (music / "metre.json").write_text(metre.model_copy(update={"rel_path": rel})
-                                      .model_dump_json(indent=2, by_alias=True), encoding="utf-8")
-    (music / cut_map_name(rel)).write_text(json.dumps(cut_map, indent=2), encoding="utf-8")
-    return rel
+    """Every removed range cut out of the cue in order, the metre and the cut
+    map moved with it (`cue_conform.cut_files`); the settled cue's rel_path."""
+    return cue_conform.cut_files(ctx.out_dir / "music", ctx.book_dir, cue, removed)
 
 
 def fold_instead(ctx, attempt: int, keep: list[str], exc: Exception) -> None:
@@ -123,15 +86,13 @@ def fold_instead(ctx, attempt: int, keep: list[str], exc: Exception) -> None:
     survivors, and the run learns why."""
     ctx.learn(Learning(step=STEP_ID, gate="settle", measured=str(exc)[:80], action="folded",
                        attempt=attempt + 1, note="the cue kept its length; spans folded"))
-    refit(ctx, attempt, rendered=keep)
+    refit(ctx, rendered=keep)
 
 
 def settled(ctx, attempt: int, keep: list[str]) -> None:
-    """Re-plan around the takes that exist.  With a cue plan the cue is
-    settled first and the survivors laid over it; without one, the walk."""
+    """Re-plan around the takes that exist: the cue is settled first and the
+    survivors laid over it."""
     cue = cue_plan_of(ctx)
-    if cue is None:
-        return refit(ctx, attempt, rendered=keep)
     out = cue_settle.settle(cue, [s["beat_id"] for s in plan_of(ctx)["shots"]], set(keep))
     try:
         rel = cut_cue(ctx, cue, out.removed) if out.removed else cue.rel_path
@@ -141,7 +102,7 @@ def settled(ctx, attempt: int, keep: list[str]) -> None:
     (ctx.out_dir / "music/plan.json").write_text(plan.model_dump_json(indent=2), encoding="utf-8")
     print(f"[{STEP_ID}] settled: {len(out.removed)} range(s) cut from the cue, "
           f"{plan.seconds:.1f}s left, {len(out.ids)} spans filled")
-    refit(ctx, attempt, rendered=out.ids)
+    refit(ctx, rendered=out.ids)
 
 
 def master_of(ctx) -> Path:
@@ -152,23 +113,23 @@ def master_of(ctx) -> Path:
 
 
 def recut(ctx, attempt: int) -> Path:
-    """Re-plan around the takes that exist, at a longer stretch, then cut; free."""
+    """Re-plan around the takes that exist, then cut; free.  `attempt` is
+    step 09's rung, recorded with what the settle learns."""
     settled(ctx, attempt, usable(clips_of(ctx), plan_of(ctx), ctx.book_dir))
     settle(ctx, attempt)
     return build_at(ctx.book_dir, ctx.trailer_id)
 
 
 SETTLE_PASSES = 3
-"""Re-fits the walk may take before the cut is refused as unsettled."""
+"""Re-fits the plan may take before the cut is refused as unsettled."""
 
 
 def settle(ctx, attempt: int = 0, passes: int = SETTLE_PASSES) -> list[str]:
     """Settle until every planned beat is usable at the length the plan gave it.
 
-    On the walk, fewer takes make each shot longer, so a capped take that
-    held its shot may outrun its cap after the re-fit; one pass is not a
-    fixed point.  On the spans path every take keeps its length and the
-    first pass is the last.
+    On the spans every take keeps its length, so the first pass is the last;
+    the loop is the guard that says so on disk if a re-fit ever changes a
+    length again.
     """
     for _ in range(passes):
         clips = clips_of(ctx)
@@ -177,7 +138,7 @@ def settle(ctx, attempt: int = 0, passes: int = SETTLE_PASSES) -> list[str]:
             return keep
         print(f"[{STEP_ID}] {len(keep)} takes usable; settling the plan on them")
         settled(ctx, attempt, keep)
-    raise SystemExit(f"REFUSED: the walk did not settle on usable takes in "
+    raise SystemExit(f"REFUSED: the plan did not settle on usable takes in "
                      f"{passes} passes")
 
 

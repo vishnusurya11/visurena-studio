@@ -19,7 +19,7 @@ from studio.trailer_stage_spec import QCReport
 
 def report(lufs: float = -14.0, unbound: int = 0) -> QCReport:
     return QCReport(cuts=40, cuts_on_beat=0.85, cuts_on_downbeat=0.35, cuts_on_L0=1.0,
-                    on_cap_fraction=0.05, title_on_downbeat=True, integrated_lufs=lufs,
+                    title_on_downbeat=True, integrated_lufs=lufs,
                     true_peak=-1.5, unbound_shots=unbound)
 
 

@@ -652,29 +652,3 @@ class TestMeasuredCycle:
         points on no line: the typed curve stands until a frames row exists."""
         ctx.learn(Learning(step="07", gate="cycle", action="round_1", measured=945.6))
         assert step.cycle_of(ctx) == TYPED
-
-
-class TestLegacyCycleForStep06:
-    """`render_seconds_for` is what step 06 still sizes its plan on, until it
-    sizes by frames (BUILD row 51).  Step 07 itself prices nothing on it."""
-
-    def test_with_nothing_measured_the_cycle_is_the_constant(self):
-        assert step.render_seconds([]) == step.RENDER_SECONDS
-
-    def test_the_cycle_is_the_median_of_the_takes_that_measured_one(self):
-        rows = [Learning(step="07", gate="cycle", action="round_1", measured=500.0),
-                Learning(step="07", gate="cycle", action="round_2", measured=400.0),
-                Learning(step="07", gate="cycle", action="round_3", measured=900.0)]
-        assert step.render_seconds(rows) == 500.0
-
-    def test_only_step_07_cycle_rows_are_a_take_s_cycle(self):
-        rows = [Learning(step="07", gate="read", action="session", measured=240.0),
-                Learning(step="02", gate="cycle", action="round_1", measured=90.0),
-                Learning(step="07", gate="identity", action="reroll_seed", measured=4.0)]
-        assert step.render_seconds(rows) == step.RENDER_SECONDS
-
-    def test_the_next_plan_reads_this_run_s_takes_off_the_book(self, ctx, rendered):
-        rendered["cards"] = [NEAR]
-        step.run(ctx.codex_id, ctx)
-        assert step.render_seconds_for(ctx) == pytest.approx(
-            (TYPED.cost_seconds(LONG) + TYPED.cost_seconds(B01_FRAMES)) / 2, abs=0.1)

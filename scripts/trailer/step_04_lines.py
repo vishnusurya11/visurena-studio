@@ -240,8 +240,8 @@ def thesis_card(story: StorySpec) -> list[dict]:
 def runtime_of(ctx, metre: Metre) -> float:
     """How long the picture will actually run.
 
-    Step 06 fits the walk to the takes the budget affords, so the cue's own
-    length is an upper bound and not the trailer.  A recut reads the plan's
+    Step 06 folds the cue's spans to the takes the budget affords, so the
+    cue's own length is an upper bound and not the trailer.  A recut reads the plan's
     end; the first pass has only the cue.
     """
     path = ctx.out_dir / "plan.json"

@@ -188,8 +188,7 @@ class VoiceLine(BaseModel):
     card: bool = False
 
 
-QC_TARGETS = {"cuts_on_downbeat": 0.30, "cuts_on_L0": 1.0,
-              "on_cap_fraction": 0.10, "line_over_bed_lu": 5.0,
+QC_TARGETS = {"cuts_on_downbeat": 0.30, "cuts_on_L0": 1.0, "line_over_bed_lu": 5.0,
               "music_only_fraction": 0.45, "longest_music_only_s": 15.0,
               "final_music_only_s": 20.0, "peak_position": (0.78, 0.92),
               "act3_over_act2_lu": 2.0, "pre_title_silence_s": 1.5,
@@ -202,8 +201,9 @@ QC_TARGETS = {"cuts_on_downbeat": 0.30, "cuts_on_L0": 1.0,
 the single target that FORCED a music video: 76% of run 10's cuts were on the
 beat, whole-bar lengths throughout, and a viewer starts counting within four
 shots.  It was replaced by two per-act targets pulling opposite ways.  Act 1's is
-gone with the walk it graded (`on_cap_fraction` likewise): the cue's spans
-now decide where act 1 cuts, and `cue_cut` grades that.  Act 3's stays --
+gone with the beat walk it graded, and so is `on_cap_fraction`, which
+measured shots against the walk's act ceilings: the cue's spans now decide
+where act 1 cuts, and `cue_cut` grades that.  Act 3's stays --
 the locked third act is what an act break sounds like."""
 
 
@@ -269,7 +269,6 @@ class QCReport(BaseModel):
     cuts_on_beat: float
     cuts_on_downbeat: float
     cuts_on_L0: float
-    on_cap_fraction: float
     title_on_downbeat: bool
     integrated_lufs: float
     true_peak: float

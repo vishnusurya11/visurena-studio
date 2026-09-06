@@ -6,6 +6,9 @@ capped shorter than its shot, or is a leftover from an earlier plan does not
 get a stand-in: the plan is re-fitted around the takes that exist and the
 trailer gets shorter.  Run 10 substituted instead, and 24% of the delivered
 picture was a frame already seen.  ffmpeg is never run here.
+
+Every re-fit reads step 03's cue plan; without one the step refuses rather
+than cutting a picture of its own.
 """
 from __future__ import annotations
 
@@ -14,7 +17,7 @@ import json
 import pytest
 
 from scripts.trailer import step_08_assemble as step
-from studio import db
+from studio import cue_conform, db
 from studio.clip_cache import fingerprint, record
 from studio.trailer_run import RunContext
 
@@ -60,7 +63,7 @@ def ctx(tmp_path):
 def refitting(refits: list):
     """A `refit` that does what step 06's does to the plan: writes it around
     the takes it was given."""
-    def refit(ctx, attempt, rendered):
+    def refit(ctx, rendered):
         refits.append(rendered)
         write(ctx, plan=plan_doc(rendered))
     return refit
@@ -97,57 +100,71 @@ class TestUsable:
         assert step.usable(doc, short, tmp_path) == HAVE
 
 
+IDS = [f"B{i:02d}" for i in range(10)]
+CUE = "trailer/main/music/cue-1.flac"
+CUT_MAP = {"events": [{"t": 8.0, "rank": 3, "kind": "hit", "evidence": ["x"]},
+                      {"t": 12.0, "rank": 2, "kind": "hit", "evidence": ["x"]}],
+           "spans": [{"start": 16.0, "end": 20.0, "kind": "dropout"}],
+           "hard_out": 24.0, "title_hit": 24.0, "seconds": 30.0}
+
+
+def stage(ctx, monkeypatch, lost: str | None = None, capped: dict | None = None):
+    """A run with step 03's cue plan on disk (tests.test_cue_qc.build_plan: ten
+    picture spans), ten planned takes, and one of them lost or capped."""
+    from tests.test_cue_edit import RATE, click
+    from tests.test_cue_qc import build_plan
+    music = ctx.out_dir / "music"
+    music.mkdir()
+    samples, metre = click(30.0)
+    metre = metre.model_copy(update={"rel_path": CUE})
+    (music / "plan.json").write_text(
+        build_plan().model_copy(update={"rel_path": CUE}).model_dump_json(), encoding="utf-8")
+    (music / "metre.json").write_text(metre.model_dump_json(), encoding="utf-8")
+    (music / "cutmap-1.json").write_text(json.dumps(CUT_MAP), encoding="utf-8")
+    have = [b for b in IDS if b != lost]
+    write(ctx, clips=clips_doc(ctx.book_dir, have, dropped=[lost] if lost else (), capped=capped),
+          plan=plan_doc(IDS))
+    seen, refits = {}, []
+    monkeypatch.setattr(cue_conform, "read_cue", lambda path: (samples, RATE))
+    monkeypatch.setattr(cue_conform, "write_cue",
+                        lambda path, out, rate: seen.update(path=path, samples=len(out), rate=rate))
+    monkeypatch.setattr(step, "refit", refitting(refits))
+    return seen, refits, have
+
+
 class TestRun:
     def test_a_complete_set_of_takes_is_cut_as_planned(self, ctx, monkeypatch):
         seen, refits = {}, []
         monkeypatch.setattr(step, "build_at", built(seen))
-        monkeypatch.setattr(step, "refit", lambda c, attempt, rendered: refits.append(rendered))
+        monkeypatch.setattr(step, "refit", lambda c, rendered: refits.append(rendered))
         step.run(ctx.codex_id, ctx)
         assert seen["book"] == ctx.book_dir and seen["trailer_id"] == "main"
         assert refits == [] and step.master_of(ctx).name == "TRAILER-scarlet.mp4"
 
     def test_a_missing_take_shortens_the_cut_instead_of_borrowing_one(self, ctx, monkeypatch):
-        write(ctx, clips=clips_doc(ctx.book_dir, HAVE[:2], dropped=["B02"]))
-        seen, refits = {}, []
+        seen, refits, have = stage(ctx, monkeypatch, lost="B02")
         monkeypatch.setattr(step, "build_at", built(seen))
-        monkeypatch.setattr(step, "refit", refitting(refits))
         step.run(ctx.codex_id, ctx)
-        assert refits == [["B00", "B01"]] and seen["book"] == ctx.book_dir
+        assert refits == [have] and seen["book"] == ctx.book_dir
 
     def test_a_capped_take_shortens_the_cut_too(self, ctx, monkeypatch):
-        write(ctx, clips=clips_doc(ctx.book_dir, capped={"B01": 0.6}))
-        seen, refits = {}, []
+        seen, refits, _ = stage(ctx, monkeypatch, capped={"B01": 0.6})
         monkeypatch.setattr(step, "build_at", built(seen))
-        monkeypatch.setattr(step, "refit", refitting(refits))
         step.run(ctx.codex_id, ctx)
-        assert refits == [["B00", "B02"]]
+        assert refits == [[b for b in IDS if b != "B01"]]
 
-    def test_a_refit_that_lengthens_a_capped_shot_is_fitted_again(self, ctx, monkeypatch):
-        """The walk re-fitted to fewer takes gives each a longer shot; a take
-        capped at 2.5 s that held a 2.0 s shot may now hold a 3.0 s one and
-        must leave the plan too.  Run 10's step 08 computed `usable` once."""
-        write(ctx, clips=clips_doc(ctx.book_dir, HAVE[:2] + ["B02"], dropped=["B03"],
-                                   capped={"B01": 2.5}))
-        write(ctx, plan=plan_doc(HAVE + ["B03"]))
-        seen, refits = {}, []
+    def test_a_missing_take_without_a_cue_plan_is_a_refusal_not_a_borrowed_take(self, ctx, monkeypatch):
+        """No cue plan, no re-fit: nothing downstream of step 03 may invent
+        a cut, so the step stops rather than walking a shorter picture."""
+        write(ctx, clips=clips_doc(ctx.book_dir, HAVE[:2], dropped=["B02"]))
+        monkeypatch.setattr(step, "build_at", built({}))
+        with pytest.raises(FileNotFoundError, match="music/plan.json"):
+            step.run(ctx.codex_id, ctx)
 
-        def refit(c, attempt, rendered):
-            refits.append(rendered)
-            plan = plan_doc(rendered)
-            for shot in plan["shots"]:
-                shot["seconds"] = 8.0 / len(rendered)
-            write(c, plan=plan)
-
-        monkeypatch.setattr(step, "build_at", built(seen))
-        monkeypatch.setattr(step, "refit", refit)
-        step.run(ctx.codex_id, ctx)
-        assert refits == [["B00", "B01", "B02"], ["B00", "B02"]]
-
-    def test_a_walk_that_never_settles_is_refused(self, ctx, monkeypatch):
+    def test_a_plan_that_never_settles_is_refused(self, ctx, monkeypatch):
         write(ctx, clips=clips_doc(ctx.book_dir, capped={"B01": 1.0}))
         monkeypatch.setattr(step, "build_at", built({}))
-        monkeypatch.setattr(step, "refit", lambda c, attempt, rendered: write(
-            c, plan=plan_doc(["B00", "B01", "B02"])))
+        monkeypatch.setattr(step, "settled", lambda c, attempt, keep: write(c, plan=plan_doc(HAVE)))
         with pytest.raises(SystemExit, match="settle"):
             step.run(ctx.codex_id, ctx)
 
@@ -164,13 +181,19 @@ class TestRun:
 
 
 class TestRecut:
-    def test_the_recut_refits_at_the_attempt_s_stretch_then_builds(self, ctx, monkeypatch):
-        seen, refits = {}, []
+    def test_the_recut_settles_on_the_usable_takes_then_builds(self, ctx, monkeypatch):
+        seen, settles = {}, []
         monkeypatch.setattr(step, "build_at", built(seen))
-        monkeypatch.setattr(step, "refit",
-                            lambda c, attempt, rendered: refits.append((attempt, rendered)))
+        monkeypatch.setattr(step, "settled",
+                            lambda c, attempt, keep: settles.append((attempt, keep)))
         step.recut(ctx, 2)
-        assert refits == [(2, HAVE)] and seen["trailer_id"] == "main"
+        assert settles == [(2, HAVE)] and seen["trailer_id"] == "main"
+
+    def test_the_recut_refits_on_the_cue_plan(self, ctx, monkeypatch):
+        seen, refits, have = stage(ctx, monkeypatch, lost="B05")
+        monkeypatch.setattr(step, "build_at", built(seen))
+        step.recut(ctx, 1)
+        assert refits == [have] and seen["trailer_id"] == "main"
 
 
 def built(seen: dict):
@@ -188,32 +211,10 @@ class TestSettledSpans:
     cue bends, the story does not -- and only then hands the survivors to
     step 06's spans path, which has nothing left to fold."""
 
-    IDS = [f"B{i:02d}" for i in range(10)]
-    CUE = "trailer/main/music/cue-1.flac"
-    CUT_MAP = {"events": [{"t": 8.0, "rank": 3, "kind": "hit", "evidence": ["x"]},
-                          {"t": 12.0, "rank": 2, "kind": "hit", "evidence": ["x"]}],
-               "spans": [{"start": 16.0, "end": 20.0, "kind": "dropout"}],
-               "hard_out": 24.0, "title_hit": 24.0, "seconds": 30.0}
+    CUE = CUE
 
     def stage(self, ctx, monkeypatch, lost: str):
-        from tests.test_cue_edit import RATE, click
-        from tests.test_cue_qc import build_plan
-        music = ctx.out_dir / "music"
-        music.mkdir()
-        samples, metre = click(30.0)
-        metre = metre.model_copy(update={"rel_path": self.CUE})
-        (music / "plan.json").write_text(
-            build_plan().model_copy(update={"rel_path": self.CUE}).model_dump_json(), encoding="utf-8")
-        (music / "metre.json").write_text(metre.model_dump_json(), encoding="utf-8")
-        (music / "cutmap-1.json").write_text(json.dumps(self.CUT_MAP), encoding="utf-8")
-        have = [b for b in self.IDS if b != lost]
-        write(ctx, clips=clips_doc(ctx.book_dir, have, dropped=[lost]), plan=plan_doc(self.IDS))
-        seen, refits = {}, []
-        monkeypatch.setattr(step, "read_cue", lambda path: (samples, RATE))
-        monkeypatch.setattr(step, "write_cue",
-                            lambda path, out, rate: seen.update(path=path, samples=len(out), rate=rate))
-        monkeypatch.setattr(step, "refit", refitting(refits))
-        return seen, refits, have
+        return stage(ctx, monkeypatch, lost=lost)
 
     def music(self, ctx, name):
         return json.loads((ctx.out_dir / "music" / name).read_text(encoding="utf-8"))
@@ -254,7 +255,3 @@ class TestSettledSpans:
         assert refits == [have] and self.music(ctx, "plan.json")["seconds"] == 30.0
         rows = [json.loads(l) for l in ctx.learnings_path.read_text(encoding="utf-8").splitlines()]
         assert [(r["step"], r["gate"], r["action"]) for r in rows] == [("08", "settle", "folded")]
-
-    def test_the_cut_map_is_named_after_the_cue_it_measures(self):
-        assert step.cut_map_name("trailer/main/music/cue-1003.flac") == "cutmap-1003.json"
-        assert step.cut_map_name("trailer/main/music/cue-1003-settled.flac") == "cutmap-1003-settled.json"

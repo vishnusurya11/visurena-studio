@@ -4,12 +4,18 @@ from __future__ import annotations
 import pytest
 from pydantic import ValidationError
 
-from studio.trailer_spec import MusicBed, RefSheet, ShotSpec, TrailerBeat, TrailerPlan
+from studio.trailer_spec import CueSection, MusicBed, RefSheet, ShotSpec, TrailerBeat, TrailerPlan
+from tests.test_cue_qc import build_plan
 
 
 def shot(**kw) -> ShotSpec:
     base = dict(beat_id="b1", index=0, start=0.0, seconds=2.0)
     return ShotSpec(**{**base, **kw})
+
+
+def section(**kw) -> CueSection:
+    base = dict(index=0, start=0.0, end=10.0, movement="M1", pulse=False, level_db=-20.0)
+    return CueSection(**{**base, **kw})
 
 
 class TestRefSheet:
@@ -64,14 +70,30 @@ class TestIdentityBinding:
 class TestMusicOwnsTime:
     def test_cuts_must_increase(self):
         with pytest.raises(ValidationError, match="strictly increase"):
-            MusicBed(rel_path="m.flac", seconds=60.0, sections=6, cuts=[1.0, 3.0, 2.0])
+            MusicBed(rel_path="m.flac", seconds=60.0, sections=[section()], cuts=[1.0, 3.0, 2.0])
 
     def test_cut_past_the_end_is_rejected(self):
         with pytest.raises(ValidationError, match="past bed end"):
-            MusicBed(rel_path="m.flac", seconds=10.0, sections=2, cuts=[4.0, 11.0])
+            MusicBed(rel_path="m.flac", seconds=10.0, sections=[section()], cuts=[4.0, 11.0])
 
     def test_a_bed_with_no_cuts_is_legal(self):
-        assert MusicBed(rel_path="m.flac", seconds=10.0, sections=2).cuts == []
+        assert MusicBed(rel_path="m.flac", seconds=10.0, sections=[section()]).cuts == []
+
+    def test_the_bed_carries_measured_sections(self):
+        plan = build_plan()
+        bed = MusicBed(rel_path=plan.rel_path, seconds=plan.seconds, sections=plan.sections,
+                       cuts=[s.start for s in plan.picture_spans()])
+        assert [s.movement for s in bed.sections] == ["M1", "M2", "M3"]
+        assert bed.sections[1].pulse and bed.sections[1].level_db == -18.0
+        assert bed.cuts == [0.0, 4.0, 6.0, 8.0, 10.0, 10.5, 14.5, 16.0, 20.0, 22.0]
+
+    def test_a_bed_needs_at_least_one_section(self):
+        with pytest.raises(ValidationError):
+            MusicBed(rel_path="m.flac", seconds=10.0, sections=[])
+
+    def test_a_section_count_is_no_longer_a_bed(self):
+        with pytest.raises(ValidationError):
+            MusicBed(rel_path="m.flac", seconds=10.0, sections=6)
 
 
 class TestBeatSubjects:

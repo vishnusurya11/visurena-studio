@@ -21,12 +21,11 @@ from typing import Callable
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 
-from scripts.trailer.step_08_assemble import cut_map_name
+from studio.cue_conform import cut_map_name
 from studio import beatmap, clip_cache, cue_qc, trailer_assemble
 from studio.cue_plan import CuePlan
 from studio.paths import book_dir
 from studio.trailer_cut import title_moment
-from studio.trailer_edit import act_cap
 from studio.trailer_stage_spec import CueCut, Metre, QCReport
 
 ON_GRID = 0.04
@@ -81,23 +80,6 @@ def fraction_on(cuts: list[float], grid: list[float], tol: float = ON_GRID) -> f
     if not cuts:
         return 0.0
     return sum(any(abs(c - g) <= tol for g in grid) for c in cuts) / len(cuts)
-
-
-def act_caps_of(shots: list[dict], bar: float) -> list[float]:
-    """Each shot's length as a share of ITS act's ceiling, so a two-bar act-1
-    shot at 92 BPM reads as inside its cap and a 4 s act-3 shot reads as on it."""
-    duration = sum(float(s["seconds"]) for s in shots)
-    if not duration:
-        return []
-    return [float(s["seconds"]) / act_cap(float(s["start"]) / duration, bar) * bar
-            for s in shots]
-
-
-def on_cap_fraction(lengths: list[float], cap: float, tol: float = ON_GRID) -> float:
-    """The share of shots sitting at the ceiling -- the tell of a starved grid."""
-    if not lengths:
-        return 0.0
-    return sum(1 for x in lengths if x >= cap - tol) / len(lengths)
 
 
 def plan_unbound(plan: dict) -> list:
@@ -396,7 +378,6 @@ def report(plan: dict, found: Metre, seen: list[float], loud: tuple[float, float
         cuts=len(seen), cuts_on_beat=fraction_on(inside, on_music(found)),
         cuts_on_downbeat=fraction_on(inside, sorted(set(found.downbeats) | set(level_zero(found)))),
         cuts_on_L0=fraction_on(level_zero(found), seen),
-        on_cap_fraction=on_cap_fraction(act_caps_of(plan["shots"], found.bar), found.bar),
         title_on_downbeat=any(abs(title_at - d) <= ON_GRID for d in found.downbeats),
         integrated_lufs=loud[0], true_peak=loud[1], unbound_shots=len(plan_unbound(plan)),
         reused_shots=reused_shots(plan["shots"]),

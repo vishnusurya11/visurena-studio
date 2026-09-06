@@ -128,19 +128,19 @@ class TestSlate:
 class TestQC:
     def test_floor_is_derived_from_the_measurements(self):
         report = QCReport(cuts=40, cuts_on_beat=0.9, cuts_on_downbeat=0.5, cuts_on_L0=1.0,
-                          on_cap_fraction=0.0, title_on_downbeat=True,
+                          title_on_downbeat=True,
                           integrated_lufs=-14.2, true_peak=-1.1, unbound_shots=0,
                           cue_cut=cue_report().cue_cut)
         assert report.floor_pass and report.flags == []
 
     def test_targets_missed_become_flags_not_failures(self):
         report = QCReport(cuts=35, cuts_on_beat=0.34, cuts_on_downbeat=0.11, cuts_on_L0=0.75,
-                          on_cap_fraction=0.23, title_on_downbeat=False,
+                          title_on_downbeat=False,
                           integrated_lufs=-14.0, true_peak=-1.2, unbound_shots=0,
                           music_only_fraction=0.92, peak_position=0.53,
                           act3_over_act2_lu=-2.0)
         assert report.floor_pass
-        assert "on_cap_fraction" not in report.flags  # the walk's grader, retired with it
+        assert "on_cap_fraction" not in QCReport.model_fields  # the walk's grader, gone with it
         assert {"cuts_on_downbeat", "cuts_on_L0", "title_on_downbeat",
                 "music_only_fraction", "peak_position", "act3_over_act2_lu"} <= set(report.flags)
 
@@ -150,7 +150,7 @@ class TestQC:
         within four shots.  The per-act pair replaces it, pulling opposite
         ways -- loose in act 1, locked in act 3."""
         report = QCReport(cuts=35, cuts_on_beat=0.34, cuts_on_downbeat=0.5, cuts_on_L0=1.0,
-                          on_cap_fraction=0.0, title_on_downbeat=True,
+                          title_on_downbeat=True,
                           integrated_lufs=-14.0, true_peak=-1.2, unbound_shots=0,
                           cuts_on_beat_by_act=[0.2, 0.4, 0.9], cue_cut=cue_report().cue_cut)
         assert report.flags == []
@@ -161,7 +161,7 @@ class TestQC:
         """A master QC has not measured against its cue is not known to be
         cut to it; the report says so instead of assuming a pass."""
         report = QCReport(cuts=40, cuts_on_beat=0.9, cuts_on_downbeat=0.5, cuts_on_L0=1.0,
-                          on_cap_fraction=0.0, title_on_downbeat=True,
+                          title_on_downbeat=True,
                           integrated_lufs=-14.2, true_peak=-1.1, unbound_shots=0)
         assert report.cue_cut is None and "cue_cut" in report.flags
 
@@ -191,21 +191,21 @@ class TestQC:
         """Run 10 levelled its only line +11.8 dB with no ceiling anywhere in
         the chain and every gate passed the result."""
         report = QCReport(cuts=40, cuts_on_beat=0.9, cuts_on_downbeat=0.5, cuts_on_L0=1.0,
-                          on_cap_fraction=0.0, title_on_downbeat=True,
+                          title_on_downbeat=True,
                           integrated_lufs=-14.2, true_peak=-1.1, unbound_shots=0,
                           line_tp=[0.0], line_flat_factor=[24.2])
         assert not report.floor_pass and not report.lines_are_clean
 
     def test_a_bed_that_faded_into_the_card_fails_the_floor(self):
         report = QCReport(cuts=40, cuts_on_beat=0.9, cuts_on_downbeat=0.5, cuts_on_L0=1.0,
-                          on_cap_fraction=0.0, title_on_downbeat=True,
+                          title_on_downbeat=True,
                           integrated_lufs=-14.2, true_peak=-1.1, unbound_shots=0,
                           hard_out=False)
         assert not report.floor_pass
 
     def test_loudness_outside_the_floor_fails(self):
         report = QCReport(cuts=40, cuts_on_beat=0.9, cuts_on_downbeat=0.5, cuts_on_L0=1.0,
-                          on_cap_fraction=0.0, title_on_downbeat=True,
+                          title_on_downbeat=True,
                           integrated_lufs=-18.0, true_peak=-1.1, unbound_shots=0)
         assert not report.floor_pass
 
@@ -213,7 +213,7 @@ class TestQC:
         """The owner's rule, measured on the delivered master: run 10 played
         25 takes over 51 shots and no gate said a word."""
         report = QCReport(cuts=40, cuts_on_beat=0.9, cuts_on_downbeat=0.5, cuts_on_L0=1.0,
-                          on_cap_fraction=0.0, title_on_downbeat=True,
+                          title_on_downbeat=True,
                           integrated_lufs=-14.2, true_peak=-1.1, unbound_shots=0,
                           reused_shots=26)
         assert not report.floor_pass and "reused_shots" in report.flags
@@ -221,7 +221,7 @@ class TestQC:
     def test_a_shot_cut_from_a_stale_clip_fails_the_floor(self):
         """24% of run 10's picture came from clips of earlier plans."""
         report = QCReport(cuts=40, cuts_on_beat=0.9, cuts_on_downbeat=0.5, cuts_on_L0=1.0,
-                          on_cap_fraction=0.0, title_on_downbeat=True,
+                          title_on_downbeat=True,
                           integrated_lufs=-14.2, true_peak=-1.1, unbound_shots=0,
                           stale_shots=12)
         assert not report.floor_pass and "stale_shots" in report.flags
@@ -248,5 +248,5 @@ def cue_report(**cue) -> QCReport:
                   movement_medians_s=[3.2, 1.9, 1.1], frames_rendered=2000, frames_played=1000)
     fields.update(cue)
     return QCReport(cuts=40, cuts_on_beat=0.9, cuts_on_downbeat=0.5, cuts_on_L0=1.0,
-                    on_cap_fraction=0.0, title_on_downbeat=True, integrated_lufs=-14.2,
+                    title_on_downbeat=True, integrated_lufs=-14.2,
                     true_peak=-1.1, unbound_shots=0, cue_cut=CueCut(**fields))

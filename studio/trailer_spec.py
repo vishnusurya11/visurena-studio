@@ -123,7 +123,7 @@ class ShotSpec(BaseModel):
     """How many shots the line runs across.  A line starts on the speaker and
     may carry over ONE cut; that is how a trailer speaks."""
     span_kind: SpanKind | None = None
-    """The cue span this shot fills; None on a plan cut by the beat walk."""
+    """The cue span this shot fills; None on a plan without a cue plan."""
     movement: Movement | None = None
     """The movement of the span, read off the cue's sections."""
     move: str | None = None
@@ -197,17 +197,30 @@ class ShotSpec(BaseModel):
         return slots
 
 
-class MusicBed(BaseModel):
-    """The bed, and the grid of moments the picture is allowed to cut on.
+class CueSection(BaseModel):
+    """A stretch of the cue at one level, one pulse, one movement -- measured
+    off the rendered music by step 03, never planned."""
 
-    MiniMax Music 3 sets duration by SECTION COUNT, not by any seconds field
-    (comfy_studio finding F11), so `sections` is the real length control and
-    `seconds` records what actually came back.
+    index: int = Field(ge=0)
+    start: float = Field(ge=0.0)
+    end: float = Field(gt=0.0)
+    movement: Movement
+    pulse: bool
+    level_db: float
+
+
+class MusicBed(BaseModel):
+    """The bed as the plan carries it: the measured sections of the rendered
+    cue and the moments the picture cuts on.
+
+    `sections` are the `CueSection`s step 03 measured (the cue plan's own);
+    `cuts` are the starts of the plan's picture spans.  Nothing here is a
+    request to the music model -- the plan records what came back.
     """
 
     rel_path: str = Field(min_length=1)
     seconds: float = Field(gt=0.0)
-    sections: int = Field(ge=1)
+    sections: list[CueSection] = Field(min_length=1)
     cuts: list[float] = Field(default_factory=list)
     title_stopdown: float | None = None
     title_impact: float | None = None

@@ -60,18 +60,6 @@ class TestCutLists:
         assert qc.graded([0.3, 5.0, 59.5, 61.0, 70.0], found) == [5.0, 59.5]
         assert qc.graded([1.0], found.model_copy(update={"beats": []})) == []
 
-    def test_on_cap_fraction_counts_shots_at_the_ceiling(self):
-        assert qc.on_cap_fraction([4.0, 3.99, 2.0, 1.0], 4.0) == 0.5
-
-    def test_an_act_one_shot_is_measured_against_its_own_act_s_cap(self):
-        """At 92 BPM act 1 may run two bars (5.2 s); `max_shot` says 4.0.  A
-        4.0 s act-1 shot is inside its ceiling, an act-3 one is on it."""
-        bar = 240.0 / 92.0
-        shots = [{"start": 0.0, "seconds": 4.0}, {"start": 4.0, "seconds": 2.0},
-                 {"start": 6.0, "seconds": 2.0}, {"start": 8.0, "seconds": 2.0},
-                 {"start": 10.0, "seconds": 4.0}]
-        assert qc.on_cap_fraction(qc.act_caps_of(shots, bar), bar) == 0.2
-
 
 class TestLineOverBed:
     """`line_over_bed_lu` was a target (5 LU) that no run ever filled: run 9

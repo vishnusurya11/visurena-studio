@@ -1,54 +1,50 @@
-"""Step 06 -- plan: fill the cue's spans, or fit the beat walk to the TAKES.
+"""Step 06 -- plan: fill the cue's spans with story.
 
-Two paths, one rule: nothing here invents a cut.  When step 03 has written
-music/plan.json the cue's MEASURED spans are the shot list -- one shot per
-picture span, in and out on the span's own bounds, each kind filled by its
-grammar (`studio.shot_grammar`: a section reveals on its downbeat, a sustain
-carries one move and three timed actions, a phrase states one fact, an accent
-is an insert with no face, a trough is a static answer).  The frames the
-budget affords fold that plan by step 03's own rule (`fit_to_frames`), never
-by inventing a shorter cut.  See docs/analysis/research/trailer-music-first.md.
+One path, one rule: nothing here invents a cut.  Step 03 wrote
+music/plan.json, and the cue's MEASURED spans are the shot list -- one shot
+per picture span, in and out on the span's own bounds, each kind filled by
+its grammar (`studio.shot_grammar`: a section reveals on its downbeat, a
+sustain carries one move and three timed actions, a phrase states one fact,
+an accent is an insert with no face, a trough is a static answer).  The
+frames the budget affords fold that plan by step 03's own rule
+(`fit_to_frames`), never by inventing a shorter cut.  Without plan.json the
+step refuses (`cue_plan_of`): there is no fallback that cuts a picture.
+See docs/analysis/research/trailer-music-first.md.
 
-Without plan.json the beat walk below is the FALLBACK, and the log says so.
-
-The render is the only fixed thing.  Step 07 costs ~16 min a take, so the
-budget says how many takes exist, the walk gives up seconds until its cut
-count fits them (`fit_points`), and the story authors exactly one setup per
-cut.  One take, one shot: run 10 spread 25 takes over 51 shots and the owner
-threw it out.
-
-Inside that, the cue's metre (step 03) still owns every cut: whole beats,
-every L0 event, one hold into the title.  The binding gate is the one the
-old plan could not fail -- a setup whose frame holds a face with no reference
-sheet is refused, because the render would invent that face.  The ladder
-substitutes another setup for the same cut, then shoots the location alone,
-and drops the beat as a last resort.  Lines, where steps 04 and 05 have run,
-are windowed into the cue's measured slots, and a window past the end of the
-picture is dropped with it.
+The story authors exactly one setup per span.  One take, one shot: run 10
+spread 25 takes over 51 shots and the owner threw it out.  The binding gate
+is the one the old plan could not fail -- a setup whose frame holds a face
+with no reference sheet is refused, because the render would invent that
+face.  The ladder substitutes another setup for the same span, then shoots
+the location alone, and drops the beat as a last resort.  Lines, where steps
+04 and 05 have run, are windowed into the cue's own line windows, and a
+window past the end of the picture is dropped with it.
 
 The ORDER of those setups is the trailer's story spine: M1 world and hook, M2
 problem and turn, M3 threat and climax, scene order inside each, and the
 frames that answer the question held back to the last quarter
-(`trailer_story.select_by_movement`).  `one_each` plays the beats in the order
-it is handed them, so this list IS the trailer.  Every spoken line then lands
-on the face that says it -- the picture moves inside its movement, never the
-line (`speak_on_face`).  See docs/analysis/research/trailer-story-spine.md.
+(`trailer_story.select_by_movement`).  The spans are filled in the order the
+beats are handed over, so this list IS the trailer.  Every spoken line then
+lands on the face that says it -- the picture moves inside its movement,
+never the line (`speak_on_face`).  See docs/analysis/research/trailer-story-spine.md.
+
+History: until BUILD row 55 this step carried "the beat walk" as a fallback,
+a synthesised cut list fitted to the takes step 07 could afford.  Run 12
+onward reads only the spans, so the walk is gone.
 """
 from __future__ import annotations
 
 import json
 from collections import Counter
 
-from scripts.trailer.build_plan import beat_of, hold_wide, shots_for
-from scripts.trailer.step_07_clips import read_seconds, render_seconds_for
+from scripts.trailer.build_plan import beat_of, hold_wide
+from scripts.trailer.step_07_clips import read_seconds
 from studio import frame_budget
 from studio.cue_plan import CuePlan, CueSpan
 from studio.cue_spans import ShorterCue, fit_to_budget, plan_fit
 from studio.ladder import Ladder, Rung, climb
 from studio.learnings import load
 from studio.shot_grammar import FRAMING, INSERT, grammar_for, insert_text
-from studio.trailer_dialogue import dialogue_candidates, pick_lines
-from studio.trailer_edit import LITERARY_STRETCH, plan_cuts
 from studio.trailer_plan import arc_of
 from studio.trailer_spec import MusicBed, RefSheet, ShotSpec, TrailerBeat, TrailerPlan
 from studio.trailer_stage_spec import LineSlate, Metre, SlateLine, StorySpec, VoiceLine
@@ -59,81 +55,12 @@ from studio.trailer_story import (MOVEMENTS, identity_scenes, load_iconicity, mo
 STEP_ID = "06"
 NAME = "plan"
 LEAD_SHARE_FLOOR = 0.25
-RETRY_RESERVE = 1
-"""Takes left unplanned so one identity reroll anywhere costs no beat: the
-budget rung drops the LAST setups, and the last setups are the climax."""
-STRETCH = (1.0, 1.2, 1.5)
-"""Recut attempts lengthen the shots.  With one take per shot the takes are
-fixed, so a longer stretch buys a longer TRAILER out of the same renders."""
 PLATE = "The room alone, the furniture and light holding the frame. "
 """What IS in the shot.  The old wording was a negation ("nobody in frame"),
 and a negation is the one thing an image model cannot draw."""
-TROUGH_GAP = 1.0
 EPS = 0.05
 """A frame either side: how near the picture's end must come to the cue's
 title hit before the card is allowed to be timed to it."""
-
-
-def stretch_for(attempt: int) -> float:
-    return LITERARY_STRETCH * STRETCH[min(attempt, len(STRETCH) - 1)]
-
-
-def stopdown_starts(stopdowns: list[float], gap: float = TROUGH_GAP) -> list[float]:
-    """One event per trough: `stopdowns` lists every quiet window in it."""
-    starts: list[float] = []
-    for when in sorted(stopdowns):
-        if not starts or when - last > gap:
-            starts.append(when)
-        last = when
-    return starts
-
-
-def events_of(metre: Metre) -> list[float]:
-    """The L0 events the walk must cut on: hits, trough starts, the title."""
-    title = [metre.title_hit] if metre.title_hit else []
-    return sorted(set(metre.hits) | set(stopdown_starts(metre.stopdowns)) | set(title))
-
-
-def affordable_takes(ctx) -> int:
-    """The takes step 07's remaining share can actually render.
-
-    The render is the only fixed thing in the trailer: every other number --
-    how many setups the story authors, how long the walk is, how long the
-    trailer runs -- is derived from this one.  Run 10 inverted that, planned
-    25 setups against a cycle it had guessed at 11 min, and the budget rung
-    dropped the last six beats, which are the climax.  The cycle is the one
-    this book's runs measured (`render_seconds_for`), the typed constant only
-    until a run has written one.
-    """
-    return max(1, int(ctx.budget.remaining("07") // render_seconds_for(ctx)) - RETRY_RESERVE)
-
-
-def fit_points(metre: Metre, events: list[float], takes: int,
-               stretch: float = LITERARY_STRETCH) -> list[float]:
-    """The longest walk whose cut count fits `takes`, half a bar at a time.
-
-    A cut with no take of its own has to borrow one, and a borrowed take is
-    a picture the viewer has already seen.  So the walk gives up seconds,
-    never distinctness: the trailer is as long as the renders allow.
-    """
-    duration = metre.title_hit or metre.seconds
-    while duration >= metre.bar:
-        points = plan_cuts(metre, events, duration, stretch)
-        if len(points) - 1 <= takes:
-            return points
-        duration -= metre.bar / 2
-    raise ValueError(f"no walk fits {takes} takes")
-
-
-def agree(metre: Metre, events: list[float], beats: list[TrailerBeat],
-          stretch: float) -> tuple[list[TrailerBeat], list[float]]:
-    """Beats and cuts made to match: the walk fitted, then the beats trimmed.
-
-    Both directions are needed.  The walk shortens to the beats it has, and
-    a walk that could not use them all hands the spares back.
-    """
-    points = fit_points(metre, events, len(beats), stretch)
-    return beats[:len(points) - 1], points
 
 
 def inside(windows: list[dict], end: float) -> list[dict]:
@@ -318,15 +245,13 @@ def windows(lines: list[SlateLine], slate_lines: list[SlateLine], metre: Metre) 
             for line in lines if not line.card and line.window is not None]
 
 
-def lines_for(ctx, metre: Metre, story: StorySpec, scenes: list[dict],
-              end: float | None = None, slots=None
-              ) -> tuple[list[dict], list[dict], dict[int, str | None]]:
-    """(windows, legacy lines, who speaks each window).
+def lines_for(ctx, metre: Metre, story: StorySpec, end: float | None = None,
+              slots=None) -> tuple[list[dict], dict[int, str | None]]:
+    """(windows, who speaks each window); nothing without a voiced slate.
 
-    Voiced lines get windows and the shots carry no text; without a voice
-    step the old on-shot dialogue placement stands.  The speakers travel with
-    the windows because a window that lands on the wrong face is not a
-    placement, it is a voice with no mouth (`speak_on_face`).
+    Voiced lines get windows and the shots carry no text.  The speakers
+    travel with the windows because a window that lands on the wrong face is
+    not a placement, it is a voice with no mouth (`speak_on_face`).
     """
     slate_path, voice_path = ctx.out_dir / "lines.json", ctx.out_dir / "voice.json"
     if slate_path.exists() and voice_path.exists():
@@ -335,9 +260,8 @@ def lines_for(ctx, metre: Metre, story: StorySpec, scenes: list[dict],
         measured = {v.text: v.seconds for v in voiced if v.seconds}
         laid = windows(ordered(slate, metre, story.figure, measured, end=end, slots=slots),
                        slate.lines, metre)
-        return laid, [], {i: l.speaker for i, l in enumerate(slate.lines)}
-    candidates = dialogue_candidates(scenes, set(story.restricted_scenes), (story.lead, story.figure))
-    return [], pick_lines(candidates, count=16, per_speaker=5), {}
+        return laid, {i: l.speaker for i, l in enumerate(slate.lines)}
+    return [], {}
 
 
 def inputs(ctx) -> dict:
@@ -350,18 +274,25 @@ def inputs(ctx) -> dict:
             "iconicity": load_iconicity(book)}
 
 
-def music_of(metre: Metre, ends: float) -> MusicBed:
-    """The bed, and the title moment ONLY when the picture reaches it.
+def title_of(cue: CuePlan, ends: float) -> tuple[float | None, float | None]:
+    """(the trough the card rides in on, the hit) -- ONLY when the picture
+    reaches the hit.
 
     The card is held until the cue's hit.  A 25 s cut against a hit at 88 s
-    therefore holds a static title for a minute -- so a picture that stops
-    short takes its card on its own end instead.
+    would hold a static title for a minute, so a picture that stops short
+    takes its card on its own end instead.
     """
-    hit = metre.title_hit if metre.title_hit and ends >= metre.title_hit - EPS else None
-    before = [s for s in metre.stopdowns if hit and s < hit]
-    return MusicBed(rel_path=metre.rel_path, seconds=metre.seconds, sections=9,
-                    cuts=[b for b in metre.beats if b <= metre.seconds],
-                    title_stopdown=before[-1] if before else None, title_impact=hit)
+    hit = cue.title_hit if cue.title_hit and ends >= cue.title_hit - EPS else None
+    troughs = [s.start for s in cue.spans if hit and s.kind == "trough" and s.start < hit]
+    return (troughs[-1] if troughs else None), hit
+
+
+def music_of(cue: CuePlan, spans: list[CueSpan]) -> MusicBed:
+    """The bed as the plan records it: the cue's measured sections, the cuts
+    on the starts of the spans the picture kept, the title where reached."""
+    stopdown, hit = title_of(cue, spans[-1].end)
+    return MusicBed(rel_path=cue.rel_path, seconds=cue.seconds, sections=cue.sections,
+                    cuts=[s.start for s in spans], title_stopdown=stopdown, title_impact=hit)
 
 
 def sheets_of(found: dict) -> list[RefSheet]:
@@ -376,16 +307,6 @@ def answers_in(found: dict, beats: list[TrailerBeat]) -> set[str]:
     return {b.beat_id for b in beats if b.scene_number in answers}
 
 
-def plan_for(found: dict, beats: list[TrailerBeat], points: list[float],
-             legacy: list[dict], trailer_id: str) -> TrailerPlan:
-    screenplay, refs = found["screenplay"], found["refs"]
-    shots = shots_for(beats, points, screenplay, refs, legacy, reveal=answers_in(found, beats))
-    return TrailerPlan(
-        trailer_id=trailer_id, book_id=found["book_id"], title=screenplay["title"],
-        refs=sheets_of(found), beats=beats, shots=shots,
-        music=music_of(found["metre"], points[-1]))
-
-
 def verdict(state: dict) -> tuple[bool, str, str]:
     """Every setup sheeted and the lead in a quarter of the shots."""
     plan, bad = state["plan"], state["bad"]
@@ -394,26 +315,24 @@ def verdict(state: dict) -> tuple[bool, str, str]:
     return ok, f"{len(bad)} unbound, lead in {share:.0%}", f"0 unbound, lead >= {LEAD_SHARE_FLOOR:.0%}"
 
 
-def write_plan(ctx, plan: TrailerPlan, windows: list[dict], stretch: float,
-               refused: list[dict] | None = None, spans: list[CueSpan] | None = None) -> None:
-    """plan.json with the voice windows, what was refused, the stretch, and
-    the path taken: the cue's `spans` when they were the shot list, an empty
-    list and "walk" when the beat walk cut the picture.
+def write_plan(ctx, plan: TrailerPlan, windows: list[dict], spans: list[CueSpan],
+               refused: list[dict] | None = None) -> None:
+    """plan.json with the voice windows, what was refused, and the cue's
+    `spans` the shots were laid on ("path": "spans" -- the only path).
 
     A line that could not be laid on its speaker's face is recorded rather
     than dropped in silence: run 10 shipped one line over the wrong man and
     nothing on disk said so.
     """
-    doc = plan.model_dump(mode="json") | {"lines": windows, "stretch": stretch,
-                                          "lines_refused": refused or [],
-                                          "path": "spans" if spans else "walk",
-                                          "spans": [s.model_dump(mode="json") for s in spans or []]}
+    doc = plan.model_dump(mode="json") | {"lines": windows, "lines_refused": refused or [],
+                                          "path": "spans",
+                                          "spans": [s.model_dump(mode="json") for s in spans]}
     ctx.out_dir.mkdir(parents=True, exist_ok=True)
     (ctx.out_dir / "plan.json").write_text(json.dumps(doc, indent=1), encoding="utf-8")
     counted = Counter(b.movement for b in plan.beats)
     print(f"[{STEP_ID}] {len(plan.beats)} setups "
           f"({'/'.join(f'{m} {counted[m]}' for m in MOVEMENTS)}), {len(plan.shots)} shots, "
-          f"{len(windows)} line windows, {len(refused or [])} refused, stretch {stretch}")
+          f"{len(windows)} line windows, {len(refused or [])} refused, {len(spans)} spans")
 
 
 LADDER = Ladder([Rung("select_setups", 0.0), Rung("alternate_setup_same_beat", 5.0),
@@ -435,109 +354,47 @@ def rung_beats(rung: Rung, state: dict, found: dict) -> list[TrailerBeat]:
     return beats
 
 
-def replan(ctx, attempt: int) -> None:
-    """The whole plan; step 08's recut calls this.
-
-    The cue's spans when step 03 measured them (`replan_spans`), the beat
-    walk at the stretch for `attempt` when it did not (`replan_walk`).
-    """
+def replan(ctx) -> None:
+    """The whole plan on the cue's spans; step 08's recut calls this."""
     found = inputs(ctx) | {"book_id": ctx.book_dir.name}
     plan = cue_plan_of(ctx)
-    if plan is None:
-        print(f"[{STEP_ID}] music/plan.json absent: the beat walk cuts the picture (fallback)")
-        return replan_walk(ctx, attempt, found)
     print(f"[{STEP_ID}] music/plan.json: {len(plan.picture_spans())} spans are the shot list")
     replan_spans(ctx, found, plan)
 
 
-def replan_walk(ctx, attempt: int, found: dict) -> None:
-    """The FALLBACK: the walk at the stretch for `attempt`, fitted to the takes.
-
-    The order is the rule: takes first, then a walk that fits them, then one
-    setup per cut.  Run 10 went the other way -- 44 cuts, then whatever the
-    budget could render -- and 25 takes carried 51 shots.
-    """
-    story, metre, scenes = found["story"], found["metre"], found["screenplay"]["scenes"]
-    stretch, events = stretch_for(attempt), events_of(metre)
-    walk = fit_points(metre, events, affordable_takes(ctx), stretch)
-    wanted = len(walk) - 1
-    line_windows, legacy, speakers = lines_for(ctx, metre, story, scenes, walk[-1])
-    beats, points = agree(metre, events, setups_for(scenes, found["refs"], wanted,
-                                                    found["iconicity"], story.lead,
-                                                    story.figure,
-                                                    banned=story.restricted_scenes), stretch)
-    state = {"beats": beats, "points": points, "bad": [], "lead": story.lead}
-
-    def attempt_(rung, i):
-        state["beats"] = rung_beats(rung, state, found)
-        state["bad"] = unbound(state["beats"], found["refs"])
-        state["plan"] = plan_for(found, state["beats"], state["points"], legacy, ctx.trailer_id)
-        return state
-
-    if climb(LADDER, STEP_ID, attempt_, verdict, ctx.budget, ctx.learn, gate_name="binding").terminal:
-        kept = [b for b in state["beats"] if b.beat_id not in state["bad"]]
-        state["beats"], state["points"] = agree(metre, events, kept, stretch)
-        state["plan"] = plan_for(found, state["beats"], state["points"], legacy, ctx.trailer_id)
-    laid, refused = lay(state, found, inside(line_windows, state["points"][-1]),
-                        speakers, legacy, ctx.trailer_id)
-    write_plan(ctx, state["plan"], laid, stretch, refused)
-
-
-def lay(state: dict, found: dict, line_windows: list[dict],
-        speakers: dict, legacy: list[dict], trailer_id: str) -> tuple[list[dict], list[dict]]:
-    """Put the lines on their speakers' faces, re-cutting the plan if the
-    picture had to be reordered to make room (R3)."""
-    beats, laid, refused = speak_on_face(state["beats"], state["points"],
-                                         line_windows, speakers)
-    if [b.beat_id for b in beats] != [b.beat_id for b in state["beats"]]:
-        state["beats"] = beats
-        state["plan"] = plan_for(found, beats, state["points"], legacy, trailer_id)
-    return laid, refused
-
-
-def refit(ctx, attempt: int, rendered: list[str]) -> None:
-    """Re-cut the plan around the takes that EXIST: fewer beats, shorter walk.
+def refit(ctx, rendered: list[str]) -> None:
+    """Re-cut the plan around the takes that EXIST: fewer beats, a folded cue.
 
     Step 08's old answer to a missing clip was a neighbouring take, which is
     reuse wearing a different name -- 24% of run 10's picture.  A trailer
     that lost a take is a shorter trailer, and this is where it gets shorter.
     """
     found = inputs(ctx) | {"book_id": ctx.book_dir.name}
+    cue = cue_plan_of(ctx)
     plan = json.loads((ctx.out_dir / "plan.json").read_text(encoding="utf-8"))
     have = set(rendered)
     kept = [TrailerBeat.model_validate(b) for b in plan["beats"] if b["beat_id"] in have]
-    cue = cue_plan_of(ctx)
-    if cue is not None:
-        return refit_spans(ctx, found, cue, kept)
-    metre, stretch = found["metre"], stretch_for(attempt)
-    beats, points = agree(metre, events_of(metre), kept, stretch)
-    line_windows, legacy, speakers = lines_for(ctx, metre, found["story"],
-                                               found["screenplay"]["scenes"], points[-1])
-    state = {"beats": beats, "points": points,
-             "plan": plan_for(found, beats, points, legacy, ctx.trailer_id)}
-    laid, refused = lay(state, found, inside(line_windows, points[-1]), speakers,
-                        legacy, ctx.trailer_id)
-    write_plan(ctx, state["plan"], laid, stretch, refused)
+    refit_spans(ctx, found, cue, kept)
 
 
 def run(codex_id: str, ctx) -> None:
-    replan(ctx, 0)
+    replan(ctx)
 
 
 # --- the cue's spans ARE the shot list -----------------------------------------
 #
-# Everything above this line cuts a picture by walking the metre.  Below it
-# nothing cuts: step 03 measured the cue into spans, each span is one shot
-# with the span's own in and out, and the only question left is how each
+# Nothing below cuts: step 03 measured the cue into spans, each span is one
+# shot with the span's own in and out, and the only question left is how each
 # KIND of span is filled -- which is the grammar's (`studio.shot_grammar`).
 
 
-def cue_plan_of(ctx) -> CuePlan | None:
-    """Step 03's measured spans when it wrote them; None sends step 06 down
-    the beat walk."""
+def cue_plan_of(ctx) -> CuePlan:
+    """Step 03's measured spans.  Their absence is a refusal, never a
+    fallback: no stage downstream may invent a cut."""
     path = ctx.out_dir / "music/plan.json"
     if not path.exists():
-        return None
+        raise FileNotFoundError(f"[{STEP_ID}] music/plan.json is missing: step 03 measures the "
+                                f"cue into spans and step 06 has nothing else to cut on")
     return CuePlan.model_validate_json(path.read_text(encoding="utf-8"))
 
 
@@ -556,7 +413,7 @@ def fit_to_frames(plan: CuePlan, remaining_s: float, cycle: frame_budget.Cycle) 
     """The plan folded a span at a time until its frames render inside the
     seconds left.  The fold is step 03's own (`plan_fit`: the latest accent
     first, then phrases merged; sections, sustains and troughs never move),
-    so the shot list shrinks by the cue's rule and never by a shorter walk."""
+    so the shot list shrinks by the cue's rule and never by a cut of its own."""
     fitted = fit_to_budget(plan, remaining_s, cycle)
     if fitted is not plan:
         print(f"[{STEP_ID}] the frames afford {len(fitted.picture_spans())} of "
@@ -694,7 +551,7 @@ def plan_from_spans(found: dict, beats: list[TrailerBeat], spans: list[CueSpan],
     return TrailerPlan(
         trailer_id=trailer_id, book_id=found["book_id"], title=found["screenplay"]["title"],
         refs=sheets_of(found), beats=beats, shots=shots,
-        music=music_of(found["metre"], spans[-1].end))
+        music=music_of(found["cue"], spans))
 
 
 def filled(beats: list[TrailerBeat], plan: CuePlan) -> tuple[list[TrailerBeat], list[CueSpan]]:
@@ -734,12 +591,12 @@ def opening_state(found: dict, cue: CuePlan) -> dict:
 
 
 def replan_spans(ctx, found: dict, cue: CuePlan) -> None:
-    """The spans path: the cue folded to the frames, one setup per span,
-    the binding ladder inside that, then the lines.  No walk, no stretch."""
-    story, metre, scenes = found["story"], found["metre"], found["screenplay"]["scenes"]
+    """The cue folded to the frames, one setup per span, the binding ladder
+    inside that, then the lines.  No cut is chosen here."""
     cue = fit_to_frames(cue, picture_seconds_left(ctx, cue), cycle_of(ctx))
-    line_windows, _, speakers = lines_for(ctx, metre, story, scenes, cue.hard_out,
-                                          slots=cue.line_windows())
+    found["cue"] = cue
+    line_windows, speakers = lines_for(ctx, found["metre"], found["story"], cue.hard_out,
+                                       slots=cue.line_windows())
     state = opening_state(found, cue)
 
     def attempt_(rung, i):
@@ -754,19 +611,19 @@ def replan_spans(ctx, found: dict, cue: CuePlan) -> None:
         state["beats"], state["spans"] = filled(kept, cue)
     laid, refused = lay_spans(state, found, inside(line_windows, state["spans"][-1].end),
                               speakers, ctx.trailer_id)
-    write_plan(ctx, state["plan"], laid, 1.0, refused, spans=state["spans"])
+    write_plan(ctx, state["plan"], laid, state["spans"], refused)
 
 
 def refit_spans(ctx, found: dict, cue: CuePlan, kept: list[TrailerBeat]) -> None:
     """The spans path around the takes that EXIST: the cue folds to the
     beats left, by its own rule.  A dropped take is a folded span; the
     settle of what the fold lengthens is step 08's."""
-    story, metre, scenes = found["story"], found["metre"], found["screenplay"]["scenes"]
+    found["cue"] = cue
     beats, spans = filled(kept, cue)
-    line_windows, _, speakers = lines_for(ctx, metre, story, scenes, spans[-1].end,
-                                          slots=cue.line_windows())
+    line_windows, speakers = lines_for(ctx, found["metre"], found["story"], spans[-1].end,
+                                       slots=cue.line_windows())
     state = {"beats": beats, "spans": spans}
     laid, refused = lay_spans(state, found, inside(line_windows, spans[-1].end), speakers,
                               ctx.trailer_id)
     print(f"[{STEP_ID}] refit: {len(kept)} takes exist, the cue folds to {len(spans)} spans")
-    write_plan(ctx, state["plan"], laid, 1.0, refused, spans=spans)
+    write_plan(ctx, state["plan"], laid, spans, refused)

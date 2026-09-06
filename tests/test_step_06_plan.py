@@ -1,9 +1,10 @@
-"""Step 06 of the trailer stage: the plan is cut on the MEASURED metre.
+"""Step 06 of the trailer stage: the cue's MEASURED spans are the shot list.
 
-The beat walk decides where the cuts fall; setups fill them from the
-screenplay's own framings; a setup whose scene holds a face with no sheet is
-refused and replaced, not rendered from imagination.  Lines, where step 04
-and 05 have run, are given windows in the cue's measured slots.
+Step 03's music/plan.json decides where every cut falls; setups fill the
+spans from the screenplay's own framings; a setup whose scene holds a face
+with no sheet is refused and replaced, not rendered from imagination.  Lines,
+where steps 04 and 05 have run, are given windows in the cue's own slots.
+Without a cue plan the step refuses: nothing here invents a cut.
 """
 from __future__ import annotations
 
@@ -14,7 +15,6 @@ import pytest
 from scripts.trailer import step_06_plan as step
 from studio import db
 from studio.learnings import load
-from studio.trailer_edit import LITERARY_STRETCH, plan_cuts
 from studio.trailer_run import RunContext
 from studio.trailer_plan import arc_of
 from studio.trailer_spec import TrailerBeat
@@ -98,8 +98,15 @@ def ctx(tmp_path):
     (context.out_dir / "music").mkdir(parents=True)
     (context.out_dir / "story.json").write_text(json.dumps(story()), encoding="utf-8")
     (context.out_dir / "music/metre.json").write_text(metre().model_dump_json(), encoding="utf-8")
+    (context.out_dir / "music/plan.json").write_text(cue_plan().model_dump_json(), encoding="utf-8")
     context.open_step("06")
     return context
+
+
+@pytest.fixture()
+def uncued(ctx):
+    (ctx.out_dir / "music/plan.json").unlink()
+    return ctx
 
 
 def plan_of(ctx) -> dict:
@@ -113,17 +120,6 @@ def ends_at(plan: dict) -> float:
 
 
 class TestPieces:
-    def test_stopdown_starts_keep_one_event_per_trough(self):
-        assert step.stopdown_starts([20.05, 20.55, 21.05, 49.0, 49.5, 60.0]) == [20.05, 49.0, 60.0]
-
-    def test_events_are_hits_stopdown_starts_and_the_title(self):
-        found = step.events_of(metre())
-        assert 88.0 in found and 85.5 in found and 86.0 not in found and 16.0 in found
-
-    def test_stretch_ladder_lengthens_shots_per_attempt(self):
-        assert step.stretch_for(0) == LITERARY_STRETCH < step.stretch_for(1) < step.stretch_for(2)
-        assert step.stretch_for(9) == step.stretch_for(2)
-
     def test_unbound_is_a_beat_whose_shot_names_an_unsheeted_face(self):
         sheets = {r["ref_id"] for r in refs()["refs"]}
         beats = step.setups_for(screenplay()["scenes"], sheets, 6, {}, HOLMES, HOPE)
@@ -191,17 +187,7 @@ class TestStep:
         assert rows[0].gate == "binding" and "unbound" in str(rows[0].measured)
         assert all(b["scene_number"] != 4 or not b["cast"] for b in plan["beats"])
         assert all(s["char_refs"] or s["loc_ref"] for s in plan["shots"])
-        assert plan["stretch"] == LITERARY_STRETCH
-
-    def test_shots_follow_the_beat_walk(self, ctx):
-        """The walk is fitted to the takes, so the plan's own beat count is
-        the count it was cut for -- and cutting it again reproduces it."""
-        step.run(ctx.codex_id, ctx)
-        plan = plan_of(ctx)
-        points = step.fit_points(metre(), step.events_of(metre()),
-                                 len(plan["beats"]), LITERARY_STRETCH)
-        assert [s["start"] for s in plan["shots"]] == pytest.approx(points[:-1])
-        assert sum(s["seconds"] for s in plan["shots"]) == pytest.approx(points[-1], abs=0.05)
+        assert plan["path"] == "spans" and "stretch" not in plan
 
     def test_every_shot_has_its_own_setup(self, ctx):
         """The owner's rule: a rendered take is never seen twice.  Run 10
@@ -212,22 +198,10 @@ class TestStep:
         assert len(set(ids)) == len(ids) == len(plan["beats"])
         assert ids == [b["beat_id"] for b in plan["beats"]]
 
-    def test_replan_lengthens_the_shots(self, ctx):
-        """A longer stretch buys a longer TRAILER, not more shots: the takes
-        are fixed, so a stretched walk spends the same takes over more
-        seconds."""
-        step.replan(ctx, 0)
-        first = plan_of(ctx)
-        step.replan(ctx, 2)
-        later = plan_of(ctx)
-        assert ends_at(later) > ends_at(first)
-        assert len(later["shots"]) == len(later["beats"]) <= step.affordable_takes(ctx)
-        assert later["stretch"] == step.stretch_for(2)
-
     def test_lines_are_windowed_into_the_slots(self, ctx):
         """A window past the end of the picture is a line nobody hears: the
-        walk stops where the takes run out, so the windows are filtered to
-        what the trailer actually reaches."""
+        picture stops where the cue's spans run out, so the windows are
+        filtered to what the trailer actually reaches."""
         early = metre().model_copy(update={
             "slots": [Slot(start=4.0, end=8.0), Slot(start=16.0, end=20.0)],
             "phrase_starts": [4.0, 16.0]})
@@ -240,7 +214,7 @@ class TestStep:
         plan = plan_of(ctx)
         starts = [w["at"] for w in sorted(plan["lines"], key=lambda w: w["index"])]
         assert starts and starts == sorted(starts)
-        assert all(4.0 <= at < ends_at(plan) for at in starts)
+        assert all(0.0 <= at < ends_at(plan) for at in starts)
         assert not any(s["line"] for s in plan["shots"])
 
     def test_a_scene_with_no_alternative_ships_a_plate_or_drops_it(self, ctx, monkeypatch):
@@ -251,87 +225,43 @@ class TestStep:
         assert all(s["char_refs"] or s["loc_ref"] for s in plan_of(ctx)["shots"])
 
 
-class TestBudgetSizesThePlan:
-    """Step 07 renders ~16 min per take (run 10, measured).  The render is the
-    only fixed thing: the takes are what the share affords, and the walk is
-    shortened until its cut count fits them."""
+class TestTheBedIsTheMeasuredCue:
+    def test_the_bed_carries_the_cues_sections_and_cuts_on_its_span_starts(self):
+        plan = cue_plan()
+        bed = step.music_of(plan, plan.picture_spans())
+        assert bed.rel_path == plan.rel_path and bed.seconds == plan.seconds
+        assert bed.sections == plan.sections
+        assert bed.cuts == [s.start for s in plan.picture_spans()]
 
-    def test_the_takes_are_what_step_07_can_afford(self, ctx):
-        from scripts.trailer.step_07_clips import RENDER_SECONDS
-        from studio.run_budget import TRAILER_SHARES, Budget
-        ctx.budget = Budget(6 * 3600, TRAILER_SHARES, clock=lambda: 0.0)
-        affordable = int(ctx.budget.remaining("07") // RENDER_SECONDS)
-        assert step.affordable_takes(ctx) == affordable - step.RETRY_RESERVE
+    def test_a_folded_cue_cuts_only_on_the_spans_it_kept(self):
+        plan = cue_plan()
+        kept = plan.picture_spans()[:5]
+        assert step.music_of(plan, kept).cuts == [s.start for s in kept]
 
-    def test_a_measured_cycle_resizes_the_plan(self, ctx):
-        """Once step 07 has written what a take cost, the plan is sized on
-        that, not on the number a person typed."""
-        from studio.learnings import Learning
-        from studio.run_budget import TRAILER_SHARES, Budget
-        ctx.budget = Budget(6 * 3600, TRAILER_SHARES, clock=lambda: 0.0)
-        typed = step.affordable_takes(ctx)
-        for took in (450.0, 440.0, 460.0):
-            ctx.learn(Learning(step="07", gate="cycle", measured=took, action="measured"))
-        measured = int(ctx.budget.remaining("07") // 450.0) - step.RETRY_RESERVE
-        assert step.affordable_takes(ctx) == measured > typed
-
-    def test_the_plan_never_asks_for_more_takes_than_it_can_render(self, ctx):
-        step.run(ctx.codex_id, ctx)
-        plan = plan_of(ctx)
-        assert len(plan["shots"]) == len(plan["beats"]) <= step.affordable_takes(ctx)
-
-
-class TestFitTheWalkToTheTakes:
-    """The render is the only fixed thing; the walk bends to it."""
-
-    def test_the_walk_is_shortened_until_its_cuts_fit_the_takes(self):
-        found = metre()
-        points = step.fit_points(found, step.events_of(found), 12, LITERARY_STRETCH)
-        assert len(points) - 1 <= 12 and points[-1] < 88.0
-
-    def test_takes_enough_for_the_whole_cue_keep_the_whole_walk(self):
-        found = metre()
-        whole = plan_cuts(found, step.events_of(found), 88.0, LITERARY_STRETCH)
-        assert step.fit_points(found, step.events_of(found), len(whole) - 1,
-                               LITERARY_STRETCH) == whole
-
-    def test_a_walk_that_fits_nothing_is_refused(self):
-        found = metre()
-        with pytest.raises(ValueError, match="no walk fits 0 takes"):
-            step.fit_points(found, step.events_of(found), 0, LITERARY_STRETCH)
-
-    def test_agree_trims_the_beats_to_the_cuts_it_fitted(self):
-        found = metre()
-        beats = step.setups_for(screenplay()["scenes"],
-                                {r["ref_id"] for r in refs()["refs"]}, 12, {}, HOLMES, HOPE)
-        kept, points = step.agree(found, step.events_of(found), beats, LITERARY_STRETCH)
-        assert len(kept) == len(points) - 1 <= len(beats)
-        assert [b.beat_id for b in kept] == [b.beat_id for b in beats[:len(kept)]]
-
-
-class TestTheTitleLandsOnlyWhereThePictureReaches:
     def test_a_picture_that_reaches_the_hit_takes_it(self):
-        bed = step.music_of(metre(), 88.0)
-        assert bed.title_impact == 88.0 and bed.title_stopdown == 86.5
+        plan = cue_plan().model_copy(update={"title_hit": 32.0})
+        bed = step.music_of(plan, plan.picture_spans())
+        assert bed.title_impact == 32.0 and bed.title_stopdown == 27.5
 
     def test_a_picture_that_stops_short_has_no_title_moment(self):
-        """A 50 s cut with its card timed to a hit at 88 s would hold a static
-        title for 38 seconds; the card lands on the picture's own end."""
-        bed = step.music_of(metre(), 50.0)
+        """A cut folded to end before the hit would hold a static title until
+        the hit came; the card lands on the picture's own end."""
+        plan = cue_plan().model_copy(update={"title_hit": 32.0})
+        bed = step.music_of(plan, plan.picture_spans()[:5])
         assert bed.title_impact is None and bed.title_stopdown is None
 
 
-class TestRefit:
-    def test_refit_keeps_only_the_takes_that_exist_in_plan_order(self, ctx):
-        """Step 08's answer to a missing clip: a shorter trailer, never a
-        neighbouring take played a second time."""
+class TestNoCuePlanNoPlan:
+    def test_run_refuses_when_step_03_wrote_no_cue_plan(self, uncued):
+        with pytest.raises(FileNotFoundError, match="music/plan.json"):
+            step.run(uncued.codex_id, uncued)
+        assert not (uncued.out_dir / "plan.json").exists()
+
+    def test_refit_refuses_without_a_cue_plan_too(self, ctx):
         step.run(ctx.codex_id, ctx)
-        rendered = [b["beat_id"] for b in plan_of(ctx)["beats"][:5]]
-        step.refit(ctx, 0, rendered=rendered)
-        plan = plan_of(ctx)
-        assert [b["beat_id"] for b in plan["beats"]] == rendered
-        assert [s["beat_id"] for s in plan["shots"]] == rendered
-        assert ends_at(plan) < 88.0
+        (ctx.out_dir / "music/plan.json").unlink()
+        with pytest.raises(FileNotFoundError, match="music/plan.json"):
+            step.refit(ctx, rendered=[])
 
 
 class TestTheSpine:
@@ -528,13 +458,14 @@ class TestTheDeliveredOrder:
 
 # --- the cue's spans ARE the shot list ------------------------------------------
 #
-# BUILD row 51.  When step 03 has written music/plan.json, step 06 fills its
-# picture spans with story and invents no cut: shot in/out are the span's own
-# bounds, and each span kind is filled by its grammar (studio/shot_grammar.py).
-# The beat walk above is the FALLBACK, taken only when plan.json is absent.
+# BUILD rows 51 and 55.  Step 03's music/plan.json is the shot list: step 06
+# fills its picture spans with story and invents no cut -- shot in/out are the
+# span's own bounds, and each span kind is filled by its grammar
+# (studio/shot_grammar.py).  There is no other path.
 
 from studio import frame_budget
-from studio.cue_plan import CuePlan, CueSection, CueSpan
+from studio.cue_plan import CuePlan, CueSpan
+from studio.trailer_spec import CueSection
 
 BAR = 2.0
 CUE = [(0.0, 8.0, "sustain", 0, "M1"), (8.0, 12.0, "phrase", 0, "M1"),
@@ -648,12 +579,10 @@ class TestTheCueIsTheShotList:
             speaker = slate().lines[window["index"]].speaker
             assert speaker in shot["cast"]
 
-    def test_the_walk_is_the_fallback_when_the_plan_is_absent(self, ctx, capsys):
-        step.run(ctx.codex_id, ctx)
-        plan = plan_of(ctx)
-        assert plan["path"] == "walk" and plan["spans"] == []
-        assert all(s["span_kind"] is None for s in plan["shots"])
-        assert "beat walk" in capsys.readouterr().out
+    def test_every_shot_names_the_kind_of_span_it_fills(self, cued):
+        step.run(cued.codex_id, cued)
+        plan = plan_of(cued)
+        assert plan["spans"] and all(s["span_kind"] for s in plan["shots"])
 
     def test_the_spans_path_says_so(self, cued, capsys):
         step.run(cued.codex_id, cued)
@@ -662,7 +591,7 @@ class TestTheCueIsTheShotList:
     def test_refit_keeps_the_rendered_takes_on_the_spans_path(self, cued):
         step.run(cued.codex_id, cued)
         rendered = [b["beat_id"] for b in plan_of(cued)["beats"][:5]]
-        step.refit(cued, 0, rendered=rendered)
+        step.refit(cued, rendered=rendered)
         plan = plan_of(cued)
         assert [b["beat_id"] for b in plan["beats"]] == rendered
         assert [s["beat_id"] for s in plan["shots"]] == rendered
@@ -758,7 +687,8 @@ class TestSpanPieces:
         want = ctx.budget.remaining("07") - read_seconds(len(plan.picture_spans()))
         assert step.picture_seconds_left(ctx, plan) == pytest.approx(want, abs=1.0)
 
-    def test_the_cue_plan_is_read_when_present(self, ctx, cued):
-        assert step.cue_plan_of(ctx) is not None
+    def test_the_cue_plan_is_read_when_present_and_refused_when_not(self, ctx):
+        assert step.cue_plan_of(ctx).seconds == 38.0
         (ctx.out_dir / "music/plan.json").unlink()
-        assert step.cue_plan_of(ctx) is None
+        with pytest.raises(FileNotFoundError, match="music/plan.json"):
+            step.cue_plan_of(ctx)

@@ -210,9 +210,10 @@ Holmes in it. `scripts/trailer/qc.py` (to build) reads the **master**:
 2. scene-detect the picture, seeded from the manifest's cut list and
    *verified* (threshold < 0.3 — 9 of 44 low-contrast cuts were missed at
    0.3); report cuts the manifest lists that the picture does not show;
-3. report `cuts_on_beat`, `cuts_on_downbeat`, `cuts_on_L0`, `on_cap_fraction`,
-   `title_on_downbeat`, and per-line `line_over_bed_lu`.
+3. report `cuts_on_beat`, `cuts_on_downbeat`, `cuts_on_L0`,
+   `title_on_downbeat`, and per-line `line_over_bed_lu` (`on_cap_fraction`
+   graded the walk and left with it, row 55).
 
 Targets (PROPOSED, numbers to beat, not to pass): ≥ 80% / ≥ 30% / 100% /
-≤ 10% / true / ≥ 5 LU. The shipped Scarlet master measures 12/35 on beat,
+true / ≥ 5 LU. The shipped Scarlet master measures 12/35 on beat,
 4/35 on downbeat. Write the report next to the master; the manifest links it.
