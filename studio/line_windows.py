@@ -1,8 +1,10 @@
 """Where a spoken line may sit, read from the cue plan when step 03 wrote one.
 
-Design (docs/analysis/research/trailer-music-first.md): a line sits in a
-trough the cue has or a sustain the mix ducks under, and ends at least a
-beat before the span does, so the cut lands on music and never on a word.
+Design (docs/analysis/research/trailer-music-first.md): a line sits over a
+RUN of the spans the music leaves room in -- troughs the cue has, sustains
+and phrases the mix ducks under, inside one section and never across an
+accent -- and ends at least a beat before the run does, so the cut lands on
+music and never on a word; the picture may cut under the line.
 `CuePlan.line_windows` is that rule; this module chooses between it and the
 metre's own windows (`trailer_dialogue.windows_of`), which stand for a
 production that predates the plan.
@@ -32,7 +34,7 @@ def load_plan(out_dir: Path) -> CuePlan | None:
 
 
 def windows_for(metre: Metre, plan: CuePlan | None) -> list[Slot]:
-    """The plan's troughs and sustains, a beat short of the span; the metre's
+    """The plan's runs of room, a beat short of the run; the metre's
     troughs and ducked phrases when there is no plan."""
     if plan is not None:
         return plan.line_windows()

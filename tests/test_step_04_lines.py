@@ -9,6 +9,7 @@ reached through the module's FETCH seam, which the tests point at an outage.
 from __future__ import annotations
 
 import json
+import os
 import re
 from pathlib import Path
 from urllib.error import URLError
@@ -17,6 +18,7 @@ import pytest
 
 from scripts.trailer import step_04_lines as step
 from studio import db, llm
+from studio.cue_plan import CuePlan
 from studio.learnings import load
 from studio.trailer_dialogue import speech_seconds, windows_of
 from studio.trailer_run import RunContext
@@ -387,42 +389,65 @@ class TestRun10Regression:
             assert any(mark(l["text"]) for l in window), role
 
 
-class TestPlanWindows:
-    """BUILD 50: with a cue plan, a line sits in a trough or a sustain and
-    ends at least a beat before the span does, so the cut lands on music
-    and never on a word.  The metre's slots (10-16, 22-28, ...) sit on
-    phrases of this plan and must not be used."""
+class TestRuntime:
+    """How long the picture will run decides how much must be SAID.  Run
+    12b read run 11.4's plan.json (26 s) under a 60 s cue plan: a step's
+    output is a later step's input only inside the run that made it."""
 
-    def spans_by_window(self, ctx, slate):
-        spans = plan()["spans"]
+    def test_a_plan_from_an_earlier_run_is_not_this_pictures_length(self, ctx):
+        write(ctx.book_dir / "trailer/main/music/plan.json", plan())
+        stale = ctx.out_dir / "plan.json"
+        write(stale, {"shots": [{"start": 20.0, "seconds": 6.0}]})
+        story_at = (ctx.out_dir / "story.json").stat().st_mtime
+        os.utime(stale, (story_at - 3600, story_at - 3600))
+        assert step.runtime_of(ctx, Metre.model_validate(metre(6, 6, 6, 6))) == 72.0
+
+    def test_this_runs_recut_plan_is_the_pictures_length(self, ctx):
+        write(ctx.book_dir / "trailer/main/music/plan.json", plan())
+        write(ctx.out_dir / "plan.json", {"shots": [{"start": 20.0, "seconds": 6.0}]})
+        assert step.runtime_of(ctx, Metre.model_validate(metre(6, 6, 6, 6))) == 26.0
+
+    def test_without_a_cue_plan_the_metre_is_the_length(self, ctx):
+        assert step.runtime_of(ctx, Metre.model_validate(metre(6, 6, 6, 6))) == 80.0
+
+
+class TestPlanWindows:
+    """BUILD 50: with a cue plan, a line sits over a run of the spans the
+    music leaves room in (troughs, sustains, phrases; never an accent, a
+    section start or the tail) and ends at least a beat before the run
+    does, so the cut lands on music and never on a word.  The metre's
+    slots (10-16, 22-28, ...) must not be used."""
+
+    def runs_by_window(self, ctx, slate):
+        runs = CuePlan.model_validate(plan()).line_runs()
         found = []
         for line in slate.lines:
-            span = next(s for s in spans if s["start"] <= line.window.start < s["end"])
-            found.append((line, span))
+            run = next(r for r in runs if r[0].start <= line.window.start < r[-1].end)
+            found.append((line, run))
         return found
 
-    def test_a_line_window_is_a_trough_or_a_sustain(self, ctx, monkeypatch):
+    def test_a_line_window_is_a_run_of_the_plans_room(self, ctx, monkeypatch):
         write(ctx.book_dir / "trailer/main/music/plan.json", plan())
         monkeypatch.setattr(llm, "structured", FakeLabeller())
         step.run(ctx.codex_id, ctx)
         slate = LineSlate.model_validate(slate_of(ctx))
         assert not slate.music_only and len(slate.lines) >= 3
-        for line, span in self.spans_by_window(ctx, slate):
-            assert span["kind"] in ("trough", "sustain"), (line.text, span)
-            assert line.window.start == span["start"]
-            assert line.window.made == (span["kind"] == "sustain")
+        for line, run in self.runs_by_window(ctx, slate):
+            assert all(s.kind in ("trough", "sustain", "phrase") for s in run), line.text
+            assert line.window.start == run[0].start
+            assert line.window.made == any(s.kind != "trough" for s in run)
         assert any("plan.json" in msg for msg in logged(ctx))
 
-    def test_a_line_ends_a_beat_before_the_span(self, ctx, monkeypatch):
+    def test_a_line_ends_a_beat_before_the_run(self, ctx, monkeypatch):
         write(ctx.book_dir / "trailer/main/music/plan.json", plan())
         monkeypatch.setattr(llm, "structured", FakeLabeller())
         step.run(ctx.codex_id, ctx)
         slate = LineSlate.model_validate(slate_of(ctx))
         beat = plan()["bar"] / 4.0
-        for line, span in self.spans_by_window(ctx, slate):
-            assert line.window.end <= span["end"] - beat + 1e-6
+        for line, run in self.runs_by_window(ctx, slate):
+            assert line.window.end <= run[-1].end - beat + 1e-6
             spoken_end = line.window.start + beat + speech_seconds(line.text)
-            assert spoken_end <= span["end"] - beat + 1e-6, (line.text, span)
+            assert spoken_end <= run[-1].end - beat + 1e-6, (line.text, run[-1])
 
     def test_without_a_plan_the_metre_windows_are_the_fallback(self, ctx, monkeypatch):
         monkeypatch.setattr(llm, "structured", FakeLabeller())

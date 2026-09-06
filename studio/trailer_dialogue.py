@@ -580,6 +580,8 @@ def order_lines(top: list, slots: list, figure: str, *, measured: dict | None = 
         raise ValueError("no slots: nothing to put a hook in")
     measured = measured or {}
     pool = [l for l in top if not names_figure(l.text, figure)]
+    if not pool:
+        raise ValueError("no lines to order: the slate is empty or names only the figure")
     budget = min(len(slots), len(pool), MAX_LINES)
     hooks = role_candidates("hook", pool, None, figure)
     first = place(hooks, slots, targets(slots, budget)[0], 0.0, beat, measured,

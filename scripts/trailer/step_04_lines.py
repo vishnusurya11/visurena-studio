@@ -237,18 +237,30 @@ def thesis_card(story: StorySpec) -> list[dict]:
              "speaker": None, "pool": "thesis", "scene": None}]
 
 
+def this_run(path: Path, ctx) -> bool:
+    """Whether `path` was written by THIS run: no older than its story.json.
+    A step's output is a later step's input only inside the run that made
+    it; run 12b read run 11.4's plan under a fresh cue."""
+    story = ctx.out_dir / "story.json"
+    return path.exists() and story.exists() and path.stat().st_mtime >= story.stat().st_mtime
+
+
 def runtime_of(ctx, metre: Metre) -> float:
     """How long the picture will actually run.
 
     Step 06 folds the cue's spans to the takes the budget affords, so the
-    cue's own length is an upper bound and not the trailer.  A recut reads the plan's
-    end; the first pass has only the cue.
+    cue's own length is an upper bound and not the trailer.  A recut reads
+    the plan's end; the first pass has the cue plan's hard out, and only
+    without a cue plan the metre.
     """
     path = ctx.out_dir / "plan.json"
-    if path.exists():
+    if this_run(path, ctx):
         shots = json.loads(path.read_text(encoding="utf-8")).get("shots") or []
         if shots:
             return shots[-1]["start"] + shots[-1]["seconds"]
+    cue = load_plan(ctx.out_dir)
+    if cue is not None:
+        return cue.hard_out
     return metre.title_hit or metre.seconds
 
 

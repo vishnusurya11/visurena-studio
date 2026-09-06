@@ -112,16 +112,41 @@ class TestPlan:
         by = plan_of(three).by_movement()
         assert [(m, len(v)) for m, v in by.items()] == [("M1", 1), ("M2", 2), ("M3", 1)]
 
-    def test_a_line_window_is_a_trough_or_a_sustain(self):
-        """A line sits where the music leaves room: in a trough the cue has,
-        or under a sustain the mix can duck.  Phrases and accents are too
-        short to carry speech and sections carry the reveal."""
+    def test_a_line_window_is_a_run_of_spans_the_music_leaves_room_in(self):
+        """A line sits where the music leaves room: a run of troughs the cue
+        has and sustains or phrases the mix can duck, however the picture
+        cuts inside it.  An accent is a hit no word may sit on and a section
+        carries the reveal, so both end a run; the tail is never a window."""
         slots = plan_of(GOOD).line_windows()
-        assert [(s.start, s.made) for s in slots] == [(0.0, True), (12.5, False)]
+        assert [(s.start, s.end, s.made) for s in slots] == [
+            (0.0, 12.0 - BAR / 4, True), (12.5, 16.0 - BAR / 4, False)]
 
-    def test_a_line_ends_a_beat_before_its_span_does(self):
+    def test_a_run_is_found_only_when_every_span_in_it_is_a_trough(self):
+        spans = spans_of((0.0, 4.0, "trough"), (4.0, 6.0, "phrase"), (6.0, 8.0, "section"),
+                         (8.0, 10.0, "trough"), (10.0, 12.0, "trough"), (12.0, 16.0, "tail"))
+        slots = plan_of(spans).line_windows()
+        assert [(s.start, s.end, s.made) for s in slots] == [
+            (0.0, 6.0 - BAR / 4, True), (8.0, 12.0 - BAR / 4, False)]
+
+    def test_a_run_never_crosses_a_section_start(self):
+        """The section's first span opens a movement, whatever its kind."""
+        spans = spans_of((0.0, 4.0, "trough", "M1"), (4.0, 8.0, "phrase", "M2"),
+                         (8.0, 12.0, "trough", "M2"), (12.0, 16.0, "tail", "M2"))
+        spans = [s.model_copy(update={"section": 0 if s.start < 4.0 else 1}) for s in spans]
+        sections = [CueSection(index=0, start=0.0, end=4.0, movement="M1", pulse=False, level_db=0.0),
+                    CueSection(index=1, start=4.0, end=16.0, movement="M2", pulse=False, level_db=0.0)]
+        slots = plan_of(spans, sections).line_windows()
+        assert [(s.start, s.end, s.made) for s in slots] == [
+            (0.0, 4.0 - BAR / 4, False), (4.0, 12.0 - BAR / 4, True)]
+
+    def test_a_line_ends_a_beat_before_the_run_does(self):
+        """The cut lands on music, never on a word: the window stops a beat
+        short of the run's last span, and a run under a beat is no window."""
         slots = plan_of(GOOD).line_windows()
-        assert slots[0].end == 8.0 - BAR / 4 and slots[1].end == 16.0 - BAR / 4
+        assert slots[-1].end == 16.0 - BAR / 4
+        short = spans_of((0.0, 8.0, "sustain"), (8.0, 8.5, "trough"), (8.5, 9.0, "accent"),
+                         (9.0, 16.0, "section"), (16.0, 22.0, "tail"))
+        assert [s.start for s in plan_of(short).line_windows()] == [0.0]
 
     def test_the_plan_round_trips_through_json(self):
         plan = plan_of(GOOD)

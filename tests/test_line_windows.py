@@ -61,12 +61,14 @@ class TestLoadPlan:
 
 
 class TestWindows:
-    def test_a_plan_gives_its_troughs_and_sustains_a_beat_short(self):
+    def test_a_plan_gives_its_runs_of_room_a_beat_short(self):
+        """Each run of troughs, sustains and phrases inside one section,
+        broken by the accents, ending a beat before the run does."""
         found = lw.windows_for(metre(), plan())
         assert found == plan().line_windows()
         assert [(s.start, s.end, s.made) for s in found] == [
-            (0.0, 7.5, True), (12.5, 19.5, False), (26.0, 33.5, True),
-            (40.0, 47.5, False), (60.0, 65.5, False)]
+            (0.0, 11.5, True), (12.5, 19.5, False), (20.0, 47.5, True),
+            (48.0, 51.5, True), (52.5, 71.5, True)]
 
     def test_without_a_plan_the_metre_windows_stand(self):
         assert lw.windows_for(metre(), None) == windows_of(metre())

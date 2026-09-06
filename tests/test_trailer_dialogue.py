@@ -227,6 +227,13 @@ class TestOrder:
         with pytest.raises(ValueError):
             order_lines([AFGHAN, NO_DATA], slots(6, 6), "jefferson_hope", beat=BEAT)
 
+    def test_an_empty_slate_is_refused_in_words(self):
+        """Run 12 died on `targets(...)[0]` with nothing to place: a slate
+        step 04 degraded to music-only reaches the orderer empty, and the
+        orderer says so instead of indexing into nothing."""
+        with pytest.raises(ValueError, match="no lines"):
+            order_lines([], slots(6, 6), "jefferson_hope", beat=BEAT)
+
     def test_the_answer_comes_from_another_speaker_and_relates(self):
         """Watson's line shares 'perceive' with Holmes's hook; Hope's does not,
         and Hope's ranks higher."""

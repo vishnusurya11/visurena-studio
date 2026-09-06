@@ -223,11 +223,18 @@ unbuilt: nothing downstream consumes one.
   measured against 0.25 s typed; `music_events` carries the note.
 - A line's room has two rulers: `CueSpan.line_room` is the measured
   dropout's length (`cue_spans.trough_room`) and the plan's `line_windows()`
-  (troughs and sustains, a beat short of the span) is what step 04 lays
-  lines in whenever `music/plan.json` exists (verified, `line_windows.windows_for`);
-  `trailer_dialogue.made_slots` (`LINE_ROOM` 5.4 s plus two beats, capped at
-  the next hit) is the no-plan fallback only. Whether a beat short of a
-  trough leaves the tail of a 14-word line clear of the return is unmeasured.
+  is what step 04 lays lines in whenever `music/plan.json` exists (verified,
+  `line_windows.windows_for`); `trailer_dialogue.made_slots` (`LINE_ROOM`
+  5.4 s plus two beats, capped at the next hit) is the no-plan fallback only.
+  A window is a RUN (`CuePlan.line_runs`): consecutive troughs, sustains and
+  phrases inside one section, broken by accents, a beat short of the run's
+  end, `made` when any part needs the duck. Run 12 measured why one span is
+  not a window: cue 1003's spans are 0.5-6.8 s at bar 1.88 s, and per-span
+  windows left two that held a line, so step 04 degraded to music-only; the
+  runs give four windows holding 7-17 s. A line may cross the picture cuts
+  inside its run -- `spoken_in` needs only that it OPEN on the speaker's
+  face. Whether a beat short of a trough leaves the tail of a 14-word line
+  clear of the return is unmeasured.
 - `CAPTION_WORDS` (250, 560) is typed against a measured 5000-token node
   limit; a reauthor adds pulse-carrier and supporting-section text to the
   caption, and whether a reauthored caption stays under 560 is unmeasured.

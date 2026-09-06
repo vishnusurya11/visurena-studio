@@ -74,6 +74,11 @@ class CueSpan(BaseModel):
         return self
 
 
+LINE_KINDS = ("trough", "sustain", "phrase")
+"""Span kinds a line may sit over: the trough the cue has and the sustain or
+phrase the mix ducks under.  Accents, sections and the tail end a run."""
+
+
 class CuePlan(BaseModel):
     """The rendered cue, measured, as the list of shots it affords."""
 
@@ -130,12 +135,31 @@ class CuePlan(BaseModel):
         return [s for s in self.spans if s.kind != "tail"]
 
     def line_windows(self) -> list[Slot]:
-        """Where a line may sit: a trough the cue has (found) or a sustain the
-        mix ducks under (made), ending a beat before the span does so the
-        cut lands on music, never on a word."""
+        """Where a line may sit: each run of spans the music leaves room in,
+        ending a beat before the run does so the cut lands on music, never
+        on a word.  A run is found when it is all troughs the cue has and
+        made when any part is a sustain or phrase the mix ducks under; a
+        line may cross the picture cuts inside it.  An accent is a hit no
+        word sits on, a section carries the reveal and the tail is never
+        heard, so each of those ends a run, and so does a section start; a
+        run under two beats holds no line and is no window."""
         beat = self.bar / 4.0
-        return [Slot(start=s.start, end=round(s.end - beat, 3), made=s.kind == "sustain")
-                for s in self.spans if s.kind in ("trough", "sustain")]
+        return [Slot(start=run[0].start, end=round(run[-1].end - beat, 3),
+                     made=any(s.kind != "trough" for s in run))
+                for run in self.line_runs() if run[-1].end - run[0].start >= 2 * beat]
+
+    def line_runs(self) -> list[list[CueSpan]]:
+        """Maximal runs of consecutive spans a line may sit over, within
+        one section."""
+        runs: list[list[CueSpan]] = []
+        for s in self.spans:
+            if s.kind not in LINE_KINDS:
+                runs.append([])
+            elif runs and runs[-1] and runs[-1][-1].section == s.section:
+                runs[-1].append(s)
+            else:
+                runs.append([s])
+        return [r for r in runs if r]
 
     def by_movement(self) -> dict[str, list[CueSpan]]:
         out: dict[str, list[CueSpan]] = {}

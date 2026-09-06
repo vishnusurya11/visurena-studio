@@ -72,8 +72,8 @@ class TestFloors:
         assert cue_qc.long_shots_on_holds(PLANNED, plan) == 1.0
 
     def test_a_line_outside_every_window_fails_the_floor(self, plan):
-        assert cue_qc.lines_in_troughs([(16.5, 19.0), (5.0, 7.0)], plan) == 0.5
-        assert cue_qc.lines_in_troughs([(0.5, 3.4), (11.0, 13.9)], plan) == 1.0
+        assert cue_qc.lines_in_troughs([(16.5, 19.0), (8.5, 9.5)], plan) == 0.5
+        assert cue_qc.lines_in_troughs([(0.5, 3.4), (11.0, 13.9), (5.0, 7.0)], plan) == 1.0
         assert cue_qc.lines_in_troughs([], plan) == 1.0
 
 
