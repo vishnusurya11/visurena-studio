@@ -42,9 +42,11 @@ from scripts.trailer.step_07_clips import read_seconds
 from studio import frame_budget
 from studio.cue_plan import CuePlan, CueSpan
 from studio.cue_spans import ShorterCue, fit_to_budget, plan_fit
+from studio.h3 import FPS
 from studio.ladder import Ladder, Rung, climb
 from studio.learnings import load
 from studio.shot_grammar import FRAMING, INSERT, grammar_for, insert_text
+from studio.trailer_edit import quantise
 from studio.trailer_plan import arc_of
 from studio.trailer_spec import MusicBed, RefSheet, ShotSpec, TrailerBeat, TrailerPlan
 from studio.trailer_stage_spec import LineSlate, Metre, SlateLine, StorySpec, VoiceLine
@@ -292,7 +294,7 @@ def music_of(cue: CuePlan, spans: list[CueSpan]) -> MusicBed:
     on the starts of the spans the picture kept, the title where reached."""
     stopdown, hit = title_of(cue, spans[-1].end)
     return MusicBed(rel_path=cue.rel_path, seconds=cue.seconds, sections=cue.sections,
-                    cuts=[s.start for s in spans], title_stopdown=stopdown, title_impact=hit)
+                    cuts=[quantise(s.start) for s in spans], title_stopdown=stopdown, title_impact=hit)
 
 
 def sheets_of(found: dict) -> list[RefSheet]:
@@ -517,14 +519,24 @@ def sizes_for(beats: list[TrailerBeat], spans: list[CueSpan], reveal) -> list[st
     return [g if s.kind == "accent" else h for g, h, s in zip(sizes, held, spans)]
 
 
+def framed_bounds(span: CueSpan, fps: int = FPS) -> tuple[float, float]:
+    """The span's in point and length on the render's ruler: both BOUNDS
+    quantised to frames, so the picture's length is the last bound's
+    quantised value and never a sum of per-shot roundings (run 11.4 died
+    in step 08 on 0.130s of exactly that drift)."""
+    start = quantise(span.start, fps)
+    return start, quantise(span.end, fps) - start
+
+
 def shot_from_span(index: int, beat: TrailerBeat, span: CueSpan, refs, size: str,
                    laid: list[dict], speakers: dict) -> ShotSpec:
-    """One shot filling one span: in and out are the span's, the fill is
-    its kind's grammar, the text stays on the voice track."""
+    """One shot filling one span: in and out are the span's on whole frames,
+    the fill is its kind's grammar, the text stays on the voice track."""
     spoken, speaker = spoken_in(span, laid, speakers)
     grammar = grammar_for(span, beat.motion, beat.image_prompt, beat.cast, spoken, speaker)
     char_refs, loc_ref = refs_of(beat, refs)
-    return ShotSpec(beat_id=beat.beat_id, index=index, start=span.start, seconds=span.seconds,
+    start, seconds = framed_bounds(span)
+    return ShotSpec(beat_id=beat.beat_id, index=index, start=start, seconds=seconds,
                     cast=beat.cast, char_refs=char_refs, loc_ref=loc_ref,
                     size=size, framing=FRAMING[size], span_kind=span.kind,
                     movement=span.movement, move=grammar.move, actions=grammar.actions,

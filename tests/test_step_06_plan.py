@@ -17,6 +17,7 @@ from studio import db
 from studio.learnings import load
 from studio.trailer_run import RunContext
 from studio.trailer_plan import arc_of
+from studio.trailer_edit import quantise
 from studio.trailer_spec import TrailerBeat
 from studio.trailer_stage_spec import LineSlate, Metre, SlateLine, Slot, StorySpec, VoiceLine
 from studio.trailer_story import (MOVEMENTS, authored_setups, identity_scenes, late_floor,
@@ -675,6 +676,30 @@ class TestSpanPieces:
         order, kept, refused = step.speak_on_face(beats, points, wants_pinned_face, {0: HOLMES},
                                                   pinned={1})
         assert order == beats and not kept and refused
+
+    def test_shots_land_on_whole_frames_so_the_picture_never_drifts_from_the_plan(self):
+        """Run 11.4 died in step 08: the walk's plan drifted 0.130s from the
+        delivered picture.  Span bounds are onset times, frames are the
+        render's ruler, so each shot's in and out are the span's bounds
+        quantised to frames and the picture's length is the last bound's
+        quantised value, never a sum of roundings."""
+        sheets = {r["ref_id"] for r in refs()["refs"]}
+        cue = cue_plan()
+        # every interior bound off the frame grid by a different fraction
+        bounds = [s.start for s in cue.spans] + [cue.seconds]
+        at = {b: b + (0.013 * i if 0 < i < len(bounds) - 1 else 0.0) for i, b in enumerate(bounds)}
+        moved = [s.model_copy(update={"start": at[s.start], "end": at[s.end]}) for s in cue.spans]
+        sections = [c.model_copy(update={"start": at[c.start], "end": at[c.end]}) for c in cue.sections]
+        cue = cue.model_copy(update={"spans": moved, "sections": sections, "hard_out": at[cue.hard_out]})
+        beats = step.setups_for(screenplay()["scenes"], sheets, len(cue.picture_spans()), {}, HOLMES, HOPE)
+        beats, spans = step.filled(beats, cue)
+        shots = step.shots_from_spans(beats, spans, refs()["refs"], [], {})
+        for shot, span in zip(shots, spans):
+            assert shot.start == quantise(span.start)
+            assert shot.seconds == pytest.approx(quantise(span.end) - quantise(span.start), abs=1e-9)
+            assert shot.seconds * 24 == pytest.approx(round(shot.seconds * 24), abs=1e-6)
+        assert sum(s.seconds for s in shots) == pytest.approx(quantise(spans[-1].end), abs=1e-6)
+        assert step.music_of(cue, spans).cuts == [quantise(s.start) for s in spans]
 
     def test_shots_from_spans_refuse_a_count_mismatch(self):
         spans = cue_plan().picture_spans()
