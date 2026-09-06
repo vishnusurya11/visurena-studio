@@ -160,3 +160,36 @@ def test_arc_refuses_a_cue_with_fewer_bars_than_one_phrase():
     ask = CueAsk.for_bars(8, bar=BAR, bpm=int(BPM))
     with pytest.raises(ValueError):
         cue_arc.arc(samples, RATE, metre, ask, *envelope_of(samples))
+
+
+def test_octave_steps_is_the_doubling_that_brings_the_bar_nearest_the_ask():
+    """MEASURED (run 13): the tracker read raw-1001 at 214 BPM (1.12 s bars)
+    against 100 asked and the arc cut 38 of them: a 43.7 s cue for a 91.2 s
+    ask.  A tempo octave is the tracker's ambiguity, not the render's."""
+    assert cue_arc.octave_steps(1.12, 2.4) == 1
+    assert cue_arc.octave_steps(0.56, 2.4) == 2
+    assert cue_arc.octave_steps(2.92, 2.4) == 0          # within the octave band: the render's bar
+    assert cue_arc.octave_steps(1.82, 2.4) == 0
+    assert cue_arc.octave_steps(4.8, 2.4) == -1
+
+
+def test_at_octave_merges_bars_in_pairs_and_keeps_the_grid_consistent():
+    metre = metre_of(16)
+    up = cue_arc.at_octave(metre, 2 * BAR)
+    assert up.bar == pytest.approx(2 * BAR) and up.bpm == pytest.approx(BPM / 2)
+    assert up.downbeats == [i * 2 * BAR for i in range(8)]
+    assert set(up.downbeats) <= set(up.beats) and up.seconds == metre.seconds
+    assert Metre.model_validate(up.model_dump())
+
+
+def test_at_octave_splits_bars_at_their_midpoints():
+    metre = metre_of(8)
+    down = cue_arc.at_octave(metre, BAR / 2)
+    assert down.bar == pytest.approx(BAR / 2) and down.bpm == pytest.approx(2 * BPM)
+    assert down.downbeats == pytest.approx([i * BAR / 2 for i in range(16)])
+    assert set(down.downbeats) <= set(down.beats)
+
+
+def test_at_octave_leaves_a_bar_inside_the_octave_band_alone():
+    metre = metre_of(8)
+    assert cue_arc.at_octave(metre, BAR * 1.3) is metre

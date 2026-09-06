@@ -383,6 +383,24 @@ class TestAsk:
         assert np.allclose(np.diff(grid["downbeats"]), measured.bar, atol=0.05)
         assert np.allclose(np.diff(grid["beats"]), measured.bar / 4, atol=0.05)
 
+    def test_arc_cue_merges_a_double_time_grid_back_to_the_asked_bar(self, ctx, monkeypatch):
+        """MEASURED (run 13): raw-1001 tracked at 214 BPM against 100 asked
+        and the arc cut 38 one-second bars: a 43.7 s cue for a 91.2 s ask,
+        and the judge shipped it.  A tempo octave is the tracker's, so the
+        bar lines are merged in pairs before the ask is fitted to them."""
+        from tests.test_cue_arc import SCRAMBLED, metre_of, planted
+        music = ctx.out_dir / "music"
+        music.mkdir(parents=True, exist_ok=True)
+        raw = write_wav(music / "raw-11.wav", planted(SCRAMBLED * 2))
+        stamp_cue(raw, "recipe-11", "caption A", "[Intro]")
+        double = cue_arc.at_octave(metre_of(32), 1.0)             # 240 BPM: 1.0 s bars
+        monkeypatch.setattr(beatmap, "metre", lambda path, seed, rel_path: double)
+        ask = cue_ask.CueAsk.for_bars(16, bar=2.4, bpm=100)
+        out = step.arc_cue(ctx.book_dir, raw, ask, 11)
+        assert abs(len(beatmap.decode(out)) / RATE - ask.bars * 2.0) < 2.0
+        grid = json.loads(step.grid_path(out).read_text(encoding="utf-8"))
+        assert np.allclose(np.diff(grid["downbeats"]), 2.0, atol=0.05)
+
     def test_measure_reads_the_grid_the_arc_was_cut_on(self, ctx, monkeypatch):
         """An arced cue carries its bar lines beside it; the Metre is read on
         them, because a tracker loses the downbeats inside the asked holes."""

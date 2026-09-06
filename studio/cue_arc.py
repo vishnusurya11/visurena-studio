@@ -52,6 +52,46 @@ the tracker stretched (a downbeat lost in a silence) -- cut into the arc it
 shifts every asked bar after it, so it is no phrase material."""
 
 
+OCTAVE_BAND = 2 ** 0.5
+"""A measured bar within this ratio of the asked bar is the render's own
+bar; further off it is the tracker's tempo octave -- beats read at double
+or half time -- and the bar lines are merged or split back to the ask.
+MEASURED (run 13): raw-1001 tracked at 214 BPM against 100 asked; cut on
+1.12 s bars the ask's 38 bars made a 43.7 s cue for a 91.2 s ask."""
+
+
+def octave_steps(bar: float, target: float, band: float = OCTAVE_BAND) -> int:
+    """Doublings (negative: halvings) that bring `bar` inside the band of `target`."""
+    steps = 0
+    while bar * 2 ** steps < target / band:
+        steps += 1
+    while bar * 2 ** steps > target * band:
+        steps -= 1
+    return steps
+
+
+def split_bars(downbeats: list[float], seconds: float) -> list[float]:
+    """Every bar cut at its midpoint, the last one ending at `seconds`."""
+    ends = list(downbeats[1:]) + [seconds]
+    return [t for start, end in zip(downbeats, ends) for t in (start, (start + end) / 2)]
+
+
+def at_octave(metre: Metre, target: float) -> Metre:
+    """The metre with its bar lines at the tempo octave nearest `target`;
+    the metre itself when it is already inside the band."""
+    steps = octave_steps(metre.bar, target)
+    if steps == 0:
+        return metre
+    downbeats = list(metre.downbeats)
+    for _ in range(steps):
+        downbeats = downbeats[::2]
+    for _ in range(-steps):
+        downbeats = split_bars(downbeats, metre.seconds)
+    beats = sorted(set(metre.beats) | set(downbeats))
+    return metre.model_copy(update={"bar": metre.bar * 2 ** steps, "bpm": metre.bpm / 2 ** steps,
+                                    "downbeats": downbeats, "beats": beats})
+
+
 def bar_levels(metre: Metre, times: np.ndarray, db: np.ndarray) -> np.ndarray:
     """Median dBFS of every measured bar; a bar with no window reads as black."""
     ends = list(metre.downbeats[1:]) + [metre.seconds]

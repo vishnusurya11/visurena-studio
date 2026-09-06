@@ -200,9 +200,10 @@ def render_batch(ctx, text: str, sheet: str, seeds: list[int], state: dict) -> l
     return found
 
 
-ARC_VERSION = 2
+ARC_VERSION = 3
 """Bumped when `cue_arc` or `cue_punct` change what they cut, so a kept
-raw render is arced again rather than trusted.  2: cut on the measured bar."""
+raw render is arced again rather than trusted.  2: cut on the measured bar.
+3: the tracker's tempo octave merged or split back to the ask's bar."""
 
 
 def arc_cue(book: Path, raw: Path, ask: CueAsk, seed: int) -> Path:
@@ -214,7 +215,7 @@ def arc_cue(book: Path, raw: Path, ask: CueAsk, seed: int) -> Path:
     stamp = caption_stamp(f"{recipe['stamp']}|{ask.model_dump_json()}|arc{ARC_VERSION}")
     if cue_is_current(dest, stamp):
         return dest
-    metre = beatmap.metre(raw, seed=seed, rel_path=rel_path(book, raw))
+    metre = cue_arc.at_octave(beatmap.metre(raw, seed=seed, rel_path=rel_path(book, raw)), ask.bar)
     if len(metre.downbeats) < cue_arc.PHRASE_BARS:
         shutil.copyfile(raw, dest)          # rubato: nothing to re-order, ship the render
         grid_path(dest).unlink(missing_ok=True)
@@ -228,7 +229,9 @@ def fitted(ask: CueAsk, metre: Metre) -> CueAsk:
     """The ask on the render's bar: the same COUNT of bars and events, at the
     length the render plays a bar.  MEASURED: raw-1001 came back at 2.69 s
     bars against 2.4 asked; cut on the ask's bar the arc ran 101.8 s for a
-    91.2 s ask with beats laid 2.4 s apart on 2.69 s bars (bars_in_mode 0.81)."""
+    91.2 s ask with beats laid 2.4 s apart on 2.69 s bars (bars_in_mode 0.81).
+    The metre is `cue_arc.at_octave` first: a bar off by a tempo octave
+    (run 13: 1.12 s at 214 BPM for 100 asked) is the tracker's, not the render's."""
     return ask.model_copy(update={"bar": metre.bar, "bpm": int(round(metre.bpm))})
 
 
