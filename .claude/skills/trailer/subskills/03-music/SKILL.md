@@ -14,7 +14,24 @@ Follow this file top to bottom. Every step is checkable without listening.
 
 ---
 
-## 0. The two bricks
+## 0. The two bricks, and the one under them
+
+> **SOUND:** a trailer cue's genre and its mix are the TRAILER'S, the same
+> for every book — `TRAILER_GENRE` and `TRAILER_MIX` in `studio/music_tone.py`,
+> written into the first sentence and the Sonics line by `head()`. The book
+> supplies COLOUR only: the family word, two or three instruments that name
+> it, the lead voice on top, key, mode, mood, the arc, the imagery, the hit.
+
+**MEASURED across runs 9–12:** sixteen cues, four batches, four ladder rungs,
+and every one opened on the book's `genre` — "Period orchestral chamber score
+with folk violin, a small acoustic ensemble of 1881 London" — with "one ribbon
+microphone … an 1890s parlour session" for Sonics. The ladder changed form and
+seed and never the sound, and the user rejected the sound twice ("random
+music", "shit music"). The model routes on the first sentence and on Sonics;
+whatever ensemble stands there is the ensemble that plays. §1's old table row
+told the author to write "a small acoustic ensemble of 1881 London" in place
+of the trailer orchestra — that row asked for the parlour piece by name.
+
 
 > **HARMONY:** a trailer cue is a *harmonic-rhythmic ratchet* — one tonal
 > centre, one pulse, and a sequence of one-way moves (a new colour, a doubled
@@ -54,7 +71,7 @@ signage, no lettering" produced the word CRISTERION painted on a shop board;
 | no drums / no kit | "the complete percussion section is a ticking pocket watch, pizzicato cello and double bass, a field snare on two and four" — a closed roster |
 | no reverb / dry | "close in one small dry room with a short tail; every note stops the instant the bow lifts" |
 | instrumental | "This piece is instrumental throughout. The lead melodic role belongs to a solo violin." — then say nothing more about voices |
-| not a hybrid trailer orchestra | "a small acoustic ensemble of 1881 London", "five players in one room" |
+| the period colour on top, the trailer orchestra beneath | `genre`: "a Victorian detective mystery, folk violin and a ticking pocket watch"; `mix_space`: "the pocket watch, violin and piano sit close and dry at the front of the wide mix" — the orchestra and the wide mix are `TRAILER_GENRE` / `TRAILER_MIX` and are never written in the tone |
 | sparse | "one line at a time; long rests between phrases" |
 | no tempo change | "the tempo holds from the first bar to the last; the felt speed doubles by subdivision over the same beat" |
 
@@ -431,7 +448,7 @@ progression / instruments) is refused by name.
 
 | field | rule |
 |---|---|
-| `genre` | a recognised genre noun + a period word + the ensemble. Modifiers ("cinematic", "dark", "epic") are demoted to third position or dropped |
+| `genre` | the BOOK'S COLOUR, ≤ 12 words: the family word (`cue_ask.KEYWORDS` routes on it) + the two or three instruments that name the book. The trailer's genre is `TRAILER_GENRE`, prepended by `head()`; a `genre` that names an ensemble ("a small acoustic ensemble of 1881 London") asks for that ensemble's music, and sixteen cues did |
 | `tonal_centre` | one of the twelve; one centre for the whole cue; prefer one whose tonic or fifth is an open string of the lead |
 | `mode` | one of ten (§6). `key` and `scale` are derived from these two |
 | `mood` | exactly three adjectives |
@@ -445,8 +462,8 @@ progression / instruments) is refused by name.
 | `supporting_instruments` | the bed and the colour per restatement |
 | `register_arc` | the top and bottom of the climax against the first statement |
 | `dynamics_arc` | the emotional arc as prose |
-| `mix_space` | room, distance, tail, low-end source |
-| `era_reference` | a recording practice, never a living artist or a brand |
+| `mix_space` | where the colour instruments sit IN the trailer mix (front, close, dry). The mix itself — width, sub, brass, risers, mastering — is `TRAILER_MIX` |
+| `era_reference` | "in the manner of a modern <family> trailer cue"; never a living artist or a brand |
 | `imagery` | what the cue is scoring |
 | `hit` | the final impact: a bare fifth or a unison, low |
 | `lyrics_mode` | one of four (§8) |

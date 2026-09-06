@@ -78,15 +78,34 @@ people quote.  It does NOT bind this studio: the submission path is the local
 ComfyUI node, whose only limit is 5000 tokens for caption and lyrics together
 (`nodes_minimax_music.py`, MEASURED) -- about 20 000 characters."""
 
-CAPTION_WORDS = (250, 560)
-CAPTION_CHARS = 3400
+TRAILER_GENRE = "Cinematic hybrid orchestral trailer music, a full trailer orchestra"
+TRAILER_MIX = ("a modern wide trailer mix, full symphonic strings and horns, low brass "
+               "braams, sub-bass under every impact, taiko and processed percussion, a "
+               "riser sweeping into each downbeat, wide stereo, a long hall tail, "
+               "mastered loud")
+"""What every book's cue IS, before the book colours it.
+
+The model routes on the first sentence and on the Sonics line.  Sixteen cues
+over runs 9-12 opened on the book's `genre` -- "Period orchestral chamber
+score with folk violin, a small acoustic ensemble of 1881 London" -- with
+"one ribbon microphone ... an 1890s parlour session" for Sonics, and every
+ladder rung changed form and seed but never the sound; the user rejected the
+SOUND twice ("random music", "shit music").  A trailer's genre and its mix
+are the same for A Study in Scarlet as for Dracula, so they live here, and
+`Tone.genre`, `mix_space` and `era_reference` are the colour laid on them.
+"""
+
+CAPTION_WORDS = (250, 640)
+CAPTION_CHARS = 3800
 """What this caption is allowed to be.
 
 The vendor's caption-rewriter skill defaults to "approximately 250-450 English
 words".  That band was written for a SONG caption, which carries genre, mood
 and production and stops.  This one additionally carries a nine-section
 trailer form -- the thing whose absence made the last cue "not exciting at
-all" -- so it lands near 540 words and stays far inside the node's real cap.
+all" -- and the trailer's own genre and mix (`TRAILER_GENRE`, `TRAILER_MIX`,
+about 50 words), so it lands near 600 words and stays far inside the node's
+real cap.
 The ceiling exists so a caption cannot grow unnoticed; the exact count is
 asserted in `test_music_tone.py::test_the_caption_size_is_recorded_and_capped`.
 """
@@ -286,15 +305,18 @@ def lead_head(tone: Tone) -> str:
 
 
 def head(tone: Tone) -> str:
-    """Global Metadata: genre, lead, tempo, key, metre, mood -- each once."""
+    """Global Metadata: the trailer's genre coloured by the book's, the lead,
+    tempo, key, metre, mood -- each once; the trailer's mix, then the book's."""
     return (
-        f"Basic Attributes: {tone.genre}, led throughout by {tone.lead_instrument}. "
+        f"Basic Attributes: {TRAILER_GENRE}, coloured by {tone.genre}; the lead "
+        f"voice riding above the orchestra is {tone.lead_instrument}. "
         f"tempo is around {tone.bpm} BPM, held from the first bar to the last. "
         f"key is {tone.key}, and scale is {tone.scale}. "
         f"time signature is {tone.time_signature}. mood is {', '.join(tone.mood)}.\n"
         f"Global Emotional Progression: {tone.dynamics_arc}\n"
-        f"Application Scenarios & Imagery: {tone.imagery}.\n"
-        f"Sonics & Production Profile: {tone.mix_space}; {tone.era_reference}.")
+        f"Application Scenarios & Imagery: a film trailer for {tone.imagery}.\n"
+        f"Sonics & Production Profile: {TRAILER_MIX}; {tone.mix_space}; "
+        f"{tone.era_reference}.")
 
 
 def arrangement(tone: Tone) -> str:
@@ -311,10 +333,11 @@ def arrangement(tone: Tone) -> str:
 def caption(tone: Tone) -> str:
     """MiniMax's three-heading caption grammar, written from this book's tone.
 
-    Routes on GENRE and on a named lead instrument in the first sentence:
-    "cinematic", "dark" and "epic" are modifiers, and a caption that opens on
-    them is asking for the average of everything -- which is what "just some
-    random music" sounds like.
+    Routes on GENRE and on a named lead instrument in the first sentence.
+    The genre is the TRAILER'S (`TRAILER_GENRE`, a noun the corpus tags
+    music with) and the book's `genre` colours it; a caption that opens on
+    the book's ensemble is asking for that ensemble's music, and sixteen
+    cues asked for an 1881 parlour.
     """
     return "\n\n".join([
         "### Global Metadata", head(tone),

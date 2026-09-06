@@ -24,8 +24,9 @@ import pytest
 
 from studio.affirm import negations
 from studio.music_tone import (CAPTION_CHARS, CAPTION_WORDS, EXECUTABLE_TAGS,
-                               HOSTED_CHARS, LYRICS_MODES, SHEET_TAGS, Tone,
-                               caption, caption_stamp, load_tone, lyrics_plan)
+                               HOSTED_CHARS, LYRICS_MODES, SHEET_TAGS,
+                               TRAILER_GENRE, TRAILER_MIX, Tone, caption,
+                               caption_stamp, head, load_tone, lyrics_plan)
 
 SCARLET_DIR = Path("library/20260822113400_a-study-in-scarlet")
 
@@ -88,6 +89,44 @@ class TestTone:
     def test_a_book_with_no_tone_file_says_so(self, tmp_path):
         with pytest.raises(FileNotFoundError):
             load_tone(tmp_path)
+
+
+class TestTrailerConstants:
+    """Sixteen cues over runs 9-12 all opened on the book's `genre` -- "Period
+    orchestral chamber score ... a small acoustic ensemble of 1881 London" --
+    and the user rejected the SOUND twice ("random music", "shit music").
+    The model routes on the first sentence and on Sonics; those two name
+    what a trailer is, for every book, and the book only colours them."""
+
+    def first_sentence(self, tone: Tone) -> str:
+        return head(tone).split("\n")[0]
+
+    def sonics(self, tone: Tone) -> str:
+        return next(l for l in head(tone).split("\n") if l.startswith("Sonics"))
+
+    def test_the_first_sentence_opens_on_the_trailers_genre_for_every_book(self):
+        other = replace(scarlet(), genre="Victorian gothic horror, church organ and solo violin",
+                        tonal_centre="E", mode="phrygian")
+        for tone in (scarlet(), other):
+            assert self.first_sentence(tone).startswith(f"Basic Attributes: {TRAILER_GENRE}")
+
+    def test_the_books_genre_follows_as_colour_in_the_same_sentence(self):
+        first = self.first_sentence(scarlet())
+        assert scarlet().genre in first
+        assert first.index(TRAILER_GENRE) < first.index(scarlet().genre)
+
+    def test_the_production_profile_opens_on_the_trailers_mix(self):
+        line = self.sonics(scarlet())
+        assert line.startswith(f"Sonics & Production Profile: {TRAILER_MIX}")
+        assert scarlet().mix_space in line and scarlet().era_reference in line
+
+    def test_the_constants_name_what_plays(self):
+        for text in (TRAILER_GENRE, TRAILER_MIX):
+            assert negations(text) == [], text
+        for word in ("trailer", "orchestra"):
+            assert word in TRAILER_GENRE
+        for word in ("sub", "brass", "riser", "wide"):
+            assert word in TRAILER_MIX, word
 
 
 class TestCaption:
@@ -156,7 +195,8 @@ class TestCaption:
     def test_the_caption_size_is_recorded_and_capped(self):
         """The number itself is the point of this test.
 
-        MEASURED on 2026-09-05: 3199 characters, 539 words.  The hosted API
+        MEASURED on 2026-09-05: 3538 characters, 597 words, of which the
+        trailer's constants are about 50.  The hosted API
         caps a prompt at 2000 characters and does not apply here; the local
         node caps caption plus lyrics at 5000 TOKENS
         (`comfy_extras/nodes_minimax_music.py`), roughly 20 000 characters;
@@ -164,7 +204,7 @@ class TestCaption:
         caption.  This one also carries the nine-section trailer form.
         """
         text = caption(scarlet())
-        assert (len(text), len(text.split())) == (3199, 539), (len(text), len(text.split()))
+        assert (len(text), len(text.split())) == (3538, 597), (len(text), len(text.split()))
         assert CAPTION_WORDS[0] <= len(text.split()) <= CAPTION_WORDS[1]
         assert len(text) <= CAPTION_CHARS
         assert HOSTED_CHARS == 2000
