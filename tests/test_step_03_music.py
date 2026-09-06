@@ -414,6 +414,23 @@ class TestAsk:
         longer = cue_ask.CueAsk.for_bars(20, bar=2.0, bpm=120)
         assert step.arc_cue(ctx.book_dir, raw, longer, 7) == out and out.stat().st_mtime_ns != written
 
+    def test_arc_cue_voices_the_render_before_it_cuts(self, ctx, monkeypatch):
+        """MEASURED: every raw render is voiced the same wrong way (sub hot,
+        body scooped, low mids boxy, top dark), which level cannot fix.  The
+        render is voiced (`cue_voicing.voice`) BEFORE the arc cuts and rides
+        it, so the ride reads the voiced bars."""
+        from tests.test_cue_arc import SCRAMBLED, metre_of, planted
+        music = ctx.out_dir / "music"
+        music.mkdir(parents=True, exist_ok=True)
+        raw = write_wav(music / "raw-9.wav", planted(SCRAMBLED))
+        stamp_cue(raw, "recipe-9", "caption A", "[Intro]")
+        monkeypatch.setattr(beatmap, "metre", lambda path, seed, rel_path: metre_of(16))
+        seen = []
+        monkeypatch.setattr(step.cue_voicing, "voice", lambda samples, rate: seen.append(len(samples)) or samples * 0.0)
+        out = step.arc_cue(ctx.book_dir, raw, cue_ask.CueAsk.for_bars(16, bar=2.0, bpm=120), 9)
+        assert seen == [len(planted(SCRAMBLED))]                # the raw, whole, once
+        assert np.abs(beatmap.decode(out)[: RATE * 4]).max() < 1e-3   # what was cut is what voice returned
+
     def test_arc_cue_cuts_on_the_measured_bar_when_the_render_came_back_slower(self, ctx, monkeypatch):
         """MEASURED: raw-1001 tracked at 2.69 s bars against 2.4 s asked; cut
         on the ask's bar the arc came out 101.8 s for a 91.2 s ask with beats

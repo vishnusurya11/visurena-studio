@@ -765,6 +765,15 @@ had cut from elsewhere and left −40 in the opening. And `climbs` measures
 the material up to the stop, not the silence the ask put after it. Every
 seed of run 16's raws then fits within 1.4 dB with form 2/2.
 
+Then the VOICING (ARC_VERSION 9, BUILD row 64). Level solved and the
+word still "not dramatic": so the spectrum. Measured against finished
+music's mean spectrum (Elowsson & Friberg 2017) the model voices every
+render alike -- sub hot, body scooped, low mids boxy, top 9-15 dB dark.
+`cue_voicing.voice` moves each octave band toward the reference shape,
+at most 6 dB, before the arc cuts; the ride then reads the voiced bars.
+Nothing the arc does to level can fix a spectrum, and nothing the
+prompt says fixes the model's vocoder.
+
 **Open:** the two holes are two bars each (5.4 s at 2.69 s bars) — the line
 slot the ask specifies, long on the ear; riser and impact gains are typed
 constants until a sound check names them; the epic renders (§0) track

@@ -25,7 +25,8 @@ from pydantic import BaseModel, Field
 
 from scripts.trailer import build_music
 from scripts.trailer.step_07_clips import read_seconds
-from studio import beatmap, cue_arc, cue_ask, cue_conform, cue_punct, cue_spans, frame_budget, llm, music_events
+from studio import (beatmap, cue_arc, cue_ask, cue_conform, cue_punct, cue_spans, cue_voicing,
+                    frame_budget, llm, music_events)
 from studio.cue_plan import MIN_FORM_BARS, CueAsk, CuePlan
 from studio.cue_settle import Settled
 from studio.cue_spans import ShorterCue
@@ -222,7 +223,7 @@ def render_batch(ctx, text: str, sheet: str, seeds: list[int], state: dict) -> l
     return found
 
 
-ARC_VERSION = 8
+ARC_VERSION = 9
 """Bumped when `cue_arc` or `cue_punct` change what they cut, so a kept
 raw render is arced again rather than trusted.  2: cut on the measured bar.
 3: the tracker's tempo octave merged or split back to the ask's bar.
@@ -231,7 +232,8 @@ events written beside its bar lines for the cut map.  5: a long render
 loses its middle, not its climax (`cut_middle`).  6: the title rings out to
 black (`ring_out`).  7: every bar ridden to the level the ask wrote
 (`cue_arc.ride`), the staircase the ask's height, not the render's.  8: the
-ride reads the bars it moves after they are cut (`body_levels`)."""
+ride reads the bars it moves after they are cut (`body_levels`).  9: the
+render's spectrum voiced to finished music's before the cut (`cue_voicing`)."""
 
 
 def arc_cue(book: Path, raw: Path, ask: CueAsk, seed: int) -> Path:
@@ -264,10 +266,11 @@ def fitted(ask: CueAsk, metre: Metre) -> CueAsk:
 
 
 def write_arc(raw: Path, dest: Path, metre: Metre, ask: CueAsk) -> None:
-    """The render cut into the ask's arc on its measured bar and punctuated,
-    the bar lines it was cut on written beside it for `measure`."""
+    """The render voiced, cut into the ask's arc on its measured bar and
+    punctuated, the bar lines it was cut on written beside it for `measure`."""
     fit = fitted(ask, metre)
     samples, rate = cue_conform.read_cue(raw)
+    samples = cue_voicing.voice(samples, rate)
     body, downbeats = cue_arc.arc(samples, rate, metre, fit, *beatmap.envelope(raw))
     cue_conform.write_cue(dest, cue_punct.punctuate(body, rate, downbeats, fit), rate)
     beats, downbeats = cue_arc.grid_of(downbeats, fit.bar)
