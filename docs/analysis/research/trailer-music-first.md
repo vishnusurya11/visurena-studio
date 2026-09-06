@@ -205,6 +205,35 @@ unbuilt: nothing downstream consumes one.
 | 25/45/30 | story spine | first music-first master |
 | HOOK_BY / PULSE_DENSITY | 12 s / 0.6 | first music-first master |
 
+**Found while building rows 48-56 (each is a FLAG until a run measures it):**
+
+- Real cues measure as `grid: onsets` with no downbeats (seed 1001) or as a
+  metre whose bar (1.86 s, seed 1003, bpm 81.5 against 100 asked) makes the
+  ask's bar count and the delivered bar count two different rulers. Every
+  bar-indexed edit in `cue_edit` (`remove_bars`, `conform_bars`,
+  `hole_bars`) has nothing to name on an onset grid; the seconds-based
+  `remove_range` is what rows 53 and 56 use.
+- `cue_edit`'s `Recut.metre` is a grid derived from the edit, not a
+  re-measurement of the edited audio. A run should re-measure one settled
+  cue and diff the two before the grid is trusted for a second edit.
+- `structural_impacts` marks the click track's clicks as hits: the
+  detector's floor is set against textures, and a click is all transient.
+  Fixtures use `metre_of(..., hits=)` explicitly for that reason.
+- The pooled frame (`frame_budget` and the research scripts) is 0.2554 s
+  measured against 0.25 s typed; `music_events` carries the note.
+- A line's room has two rulers: `CueSpan.line_room` is the measured
+  dropout's length (`cue_spans.trough_room`), while `trailer_dialogue.made_slots`
+  makes windows of `LINE_ROOM` 5.4 s plus two beats, capped at the next hit.
+  Which one step 04 lays lines against decides whether lines end before the
+  trough closes or two beats early; unreconciled.
+- `CAPTION_WORDS` (250, 560) is typed against a measured 5000-token node
+  limit; a reauthor adds pulse-carrier and supporting-section text to the
+  caption, and whether a reauthored caption stays under 560 is unmeasured.
+- `Learning.frames` is "mean frames per take on a gate=cycle row" and
+  `frame_budget.cycle_points` pairs it with the row's `measured` seconds as
+  one point of the cycle fit; the point is on the line only if `measured` is
+  per take too. Unverified against the rows step 07 writes.
+
 ## 10. Build order (BUILD.md rows 43–62)
 
 Contracts first, then the four disjoint modules in parallel, then step
