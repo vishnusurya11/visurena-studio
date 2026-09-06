@@ -20,6 +20,8 @@ from studio import beatmap, db, llm
 from studio.beatmap import RATE, track_autocorrelation
 from studio import cue_ask, frame_budget
 from studio.cue_plan import MIN_FORM_BARS, CuePlan
+from studio import cue_conform, cue_settle, frame_budget
+from studio.cue_settle import Settled
 from studio.cue_spans import ShorterCue
 from studio.learnings import load
 from studio.affirm import negations
@@ -372,8 +374,9 @@ class TestAsk:
 class TestStep:
     def test_a_cue_that_offers_too_many_spans_is_asked_for_shorter(self, ctx, tmp_path, monkeypatch):
         """A seed that delivers its ask on more spans than the frames afford
-        fails the gate with the bars the fit needed; the next batch asks
-        for that many fewer, and the plan shipped is the trimmed one."""
+        AND that no conform can cut down fails the gate with the bars the
+        fit needed; the next batch asks for that many fewer, and the plan
+        shipped is the conformed one."""
         seeds = step.seeds_for(0)
         kinds = {s: "two" for b in range(2) for s in step.seeds_for(b)}
         comfy_calls, fits = [], []
@@ -381,12 +384,12 @@ class TestStep:
         monkeypatch.setattr(llm, "structured", fake_llm([]))
         monkeypatch.setattr(step, "score_of", lambda ask, cut, found: 0.9)
 
-        def fitted(ctx_, plan):
+        def conformed(ctx_, plan):
             fits.append(plan.asked.bars)
             if len(fits) == 1:
                 raise ShorterCue(4)
-            return plan
-        monkeypatch.setattr(step, "fitted", fitted)
+            return Settled(plan=plan, ids=cue_conform.indices(plan), removed=[])
+        monkeypatch.setattr(step, "conformed", conformed)
         step.run(ctx.codex_id, ctx)
         first = step.ask_of(ctx, TONE)
         shorter = step.shorter_ask(TONE, first, 4)
@@ -407,12 +410,71 @@ class TestStep:
 
         def never(ctx_, plan):
             raise ShorterCue(3)
-        monkeypatch.setattr(step, "fitted", never)
+        monkeypatch.setattr(step, "conformed", never)
         logged = []
         monkeypatch.setattr(ctx.tracker, "log", lambda msg, **kw: logged.append(msg))
         step.run(ctx.codex_id, ctx)
         assert (ctx.out_dir / "music/plan.json").exists()
         assert any("3 fewer bars" in m for m in logged)
+
+    def test_a_cue_over_the_frames_is_conformed_from_the_one_render(self, ctx, tmp_path, monkeypatch):
+        """Row 56: a shorter cue is an edit of the verified one, not a second
+        render.  The gate passes on the conformed plan, the cue is cut, and
+        the plan shipped plays the settled file."""
+        seeds = step.seeds_for(0)
+        kinds = {s: "two" for s in seeds}
+        comfy_calls, cuts = [], []
+        monkeypatch.setattr(build_music, "run", fake_comfy(tmp_path, kinds, comfy_calls))
+        monkeypatch.setattr(llm, "structured", fake_llm([]))
+        monkeypatch.setattr(step, "score_of", lambda ask, cut, found: 0.9)
+
+        def conformed(ctx_, plan):
+            out = cue_settle.cut_settled(plan, cue_conform.indices(plan), 1)
+            return Settled(plan=out.plan, ids=out.ids, removed=out.removed)
+
+        def cut_files(music, book, cue, removed):
+            cuts.append((cue.seed, removed))
+            return cue_conform.settled_rel(cue)
+        monkeypatch.setattr(step, "conformed", conformed)
+        monkeypatch.setattr(cue_conform, "cut_files", cut_files)
+        step.run(ctx.codex_id, ctx)
+        plan = CuePlan.model_validate_json((ctx.out_dir / "music/plan.json").read_text(encoding="utf-8"))
+        assert len(comfy_calls) == 4 and len(cuts) == 1 and cuts[0][0] == plan.seed
+        assert plan.rel_path.endswith(f"cue-{plan.seed}-settled.wav")
+        gone = cuts[0][1][0]
+        assert plan.seconds == pytest.approx(chosen_of(ctx).seconds - (gone[1] - gone[0]), abs=1e-3)
+        rows = [r for r in load(ctx.learnings_path) if r.gate == "conform"]
+        assert len(rows) == 1 and rows[0].action == "conformed" and "1 range" in rows[0].measured
+
+    def test_conformed_is_the_budgets_cut_of_the_plan(self, ctx, monkeypatch):
+        from tests.test_cue_qc import build_plan
+        monkeypatch.setattr(step, "picture_budget", lambda ctx_: 10.0)
+        monkeypatch.setattr(step, "cycle_of", lambda ctx_: frame_budget.TYPED)
+        with pytest.raises(ShorterCue):
+            step.conformed(ctx, build_plan())
+        monkeypatch.setattr(step, "picture_budget", lambda ctx_: 10_000.0)
+        assert step.conformed(ctx, build_plan()).plan == build_plan()
+
+    def test_a_join_the_cue_refuses_ships_the_whole_cue_and_warns(self, ctx, tmp_path, monkeypatch):
+        seeds = step.seeds_for(0)
+        monkeypatch.setattr(build_music, "run", fake_comfy(tmp_path, {s: "two" for s in seeds}, []))
+        monkeypatch.setattr(llm, "structured", fake_llm([]))
+        monkeypatch.setattr(step, "score_of", lambda ask, cut, found: 0.9)
+
+        def conformed(ctx_, plan):
+            out = cue_settle.cut_settled(plan, cue_conform.indices(plan), 1)
+            return Settled(plan=out.plan, ids=out.ids, removed=out.removed)
+
+        def refuse(music, book, cue, removed):
+            raise ValueError("levels differ by 4.1 dB at the join")
+        monkeypatch.setattr(step, "conformed", conformed)
+        monkeypatch.setattr(cue_conform, "cut_files", refuse)
+        logged = []
+        monkeypatch.setattr(ctx.tracker, "log", lambda msg, **kw: logged.append(msg))
+        step.run(ctx.codex_id, ctx)
+        plan = CuePlan.model_validate_json((ctx.out_dir / "music/plan.json").read_text(encoding="utf-8"))
+        assert plan.rel_path == chosen_of(ctx).rel_path and plan.seconds == chosen_of(ctx).seconds
+        assert any("refused a join" in m for m in logged)
 
     def test_step_writes_the_cue_plan_and_a_cut_map_per_seed(self, ctx, tmp_path, monkeypatch):
         """Downstream steps read spans from `music/plan.json` and invent no cut;

@@ -177,6 +177,17 @@ hit), `repeat_bars`, `hole`, `stop_at`, `section_gains`, `compatible`,
 `conform` (a ladder rung between more seeds and reauthor). No stretching.
 The short is `slice_bars` of the verified long cue.
 
+**Built (row 56, `studio/cue_conform.py`):** the conform is not a rung but
+the gate's own arithmetic. `ShorterCue` used to buy a second render batch
+for a cue that had already passed the ask; now `conform_to_budget` folds
+what the fit rule can, then cuts the smallest interior span out of the cue
+(latest first among equals, never the opening image, never the button) and
+re-checks `frame_budget.fits` each time. Only when nothing interior is left
+does step 03 re-ask. The audio side is `cut_files` -- the cue, its metre
+and its cut map moved together -- shared with step 08's settle. A join the
+cue refuses ships the whole cue with a warning. The 25 s short is still
+unbuilt: nothing downstream consumes one.
+
 ## 9. What is unmeasured (FLAG table)
 
 | constant | typed | measured by |

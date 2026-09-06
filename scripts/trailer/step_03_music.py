@@ -23,11 +23,12 @@ from pydantic import BaseModel, Field
 
 from scripts.trailer import build_music
 from scripts.trailer.step_07_clips import read_seconds
-from studio import beatmap, cue_ask, cue_spans, frame_budget, llm, music_events
+from studio import beatmap, cue_ask, cue_conform, cue_spans, frame_budget, llm, music_events
 from studio.cue_plan import MIN_FORM_BARS, CueAsk, CuePlan
+from studio.cue_settle import Settled
 from studio.cue_spans import ShorterCue
 from studio.ladder import Ladder, Rung, climb
-from studio.learnings import load
+from studio.learnings import Learning, load
 from studio.music_tone import Tone, load_tone, lyrics_plan, recipe_path
 from studio.trailer_stage_spec import Metre
 
@@ -131,9 +132,11 @@ def in_the_running(state: dict) -> list[Metre]:
     return current or state["found"]
 
 
-def fitted(ctx, plan: CuePlan) -> CuePlan:
-    """The plan trimmed to the takes step 07's frames afford."""
-    return cue_spans.fit_to_budget(plan, picture_budget(ctx), cycle_of(ctx))
+def conformed(ctx, plan: CuePlan) -> Settled:
+    """The plan conformed to the takes step 07's frames afford: folds first,
+    then the smallest interior spans cut out of the cue (row 56).  ShorterCue
+    only when nothing interior is left to cut."""
+    return cue_conform.conform_to_budget(plan, picture_budget(ctx), cycle_of(ctx))
 
 
 def map_cue(book: Path, cue: Path, found: Metre) -> dict:
@@ -343,23 +346,43 @@ def judge(ctx, best: Metre | None, asked: int, state: dict) -> tuple[bool, str, 
     if not passed:
         return passed, measured, floor
     try:
-        fitted(ctx, plan_for(best, state))
+        conformed(ctx, plan_for(best, state))
     except ShorterCue as short:
         state["short"] = short.bars_needed
         return False, f"{measured}; the plan wants {short.bars_needed} fewer bars", floor
     return True, measured, floor
 
 
+def cut_cue(ctx, best: Metre, plan: CuePlan, out: Settled) -> CuePlan:
+    """The conformed plan over the cue cut to it, one render and two lengths;
+    the whole plan with a warning when the cue refuses a join."""
+    if not out.removed:
+        return out.plan
+    try:
+        rel = cue_conform.cut_files(ctx.out_dir / "music", ctx.book_dir, plan, out.removed)
+    except ValueError as exc:
+        ctx.tracker.log(f"seed {best.seed}: the cue refused a join ({exc}); shipped whole",
+                        level="WARNING", step_id=STEP_ID)
+        return plan
+    lost = sum(b - a for a, b in out.removed)
+    ctx.learn(Learning(step=STEP_ID, gate="conform", measured=f"{lost:.1f}s cut in {len(out.removed)} range(s)",
+                       threshold="frames afforded", action="conformed", attempt=1, terminal=True,
+                       note=f"{out.plan.seconds:.1f}s left, {len(out.ids)} spans"))
+    return out.plan.model_copy(update={"rel_path": rel})
+
+
 def shipped_plan(ctx, best: Metre, state: dict) -> CuePlan:
-    """The fitted plan, or the whole one with a warning when no fit afforded
-    it: step 08 settles what step 07 cannot render, never silently."""
+    """The conformed plan over the cut cue, or the whole one with a warning
+    when no conform affords it: step 08 settles what step 07 cannot render,
+    never silently."""
     plan = plan_for(best, state)
     try:
-        return fitted(ctx, plan)
+        out = conformed(ctx, plan)
     except ShorterCue as short:
         ctx.tracker.log(f"seed {best.seed} shipped with a plan the frames do not afford: "
                         f"{short.bars_needed} fewer bars wanted", level="WARNING", step_id=STEP_ID)
         return plan
+    return cut_cue(ctx, best, plan, out)
 
 
 def warn_short(ctx, best: Metre, asked: int, form: dict[int, int], delivered: float) -> None:
