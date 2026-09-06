@@ -222,10 +222,12 @@ unbuilt: nothing downstream consumes one.
 - The pooled frame (`frame_budget` and the research scripts) is 0.2554 s
   measured against 0.25 s typed; `music_events` carries the note.
 - A line's room has two rulers: `CueSpan.line_room` is the measured
-  dropout's length (`cue_spans.trough_room`), while `trailer_dialogue.made_slots`
-  makes windows of `LINE_ROOM` 5.4 s plus two beats, capped at the next hit.
-  Which one step 04 lays lines against decides whether lines end before the
-  trough closes or two beats early; unreconciled.
+  dropout's length (`cue_spans.trough_room`) and the plan's `line_windows()`
+  (troughs and sustains, a beat short of the span) is what step 04 lays
+  lines in whenever `music/plan.json` exists (verified, `line_windows.windows_for`);
+  `trailer_dialogue.made_slots` (`LINE_ROOM` 5.4 s plus two beats, capped at
+  the next hit) is the no-plan fallback only. Whether a beat short of a
+  trough leaves the tail of a 14-word line clear of the return is unmeasured.
 - `CAPTION_WORDS` (250, 560) is typed against a measured 5000-token node
   limit; a reauthor adds pulse-carrier and supporting-section text to the
   caption, and whether a reauthored caption stays under 560 is unmeasured.
