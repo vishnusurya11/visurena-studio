@@ -153,7 +153,8 @@ def test_arc_opens_on_a_quiet_intro_the_tracker_read_at_half_time():
     ask = CueAsk.for_bars(16, bar=BAR, bpm=int(BPM))
     out, _ = cue_arc.arc(samples, RATE, metre, ask, *envelope_of(samples))
     levels = measured_bar_levels(out, ask.bars)
-    assert np.mean(levels[0:4]) < -29 and all(levels[i] < levels[i + 4] + 6 for i in range(4))
+    low = cue_arc.RIDE_DB["low"][0]                             # the intro can be ridden there; a loud phrase cannot (RIDE_MAX)
+    assert all(abs(level - low) < 1.5 for level in levels[0:4]) and all(levels[i] < levels[i + 4] for i in range(4))
 
 
 def test_title_piece_rings_out_from_its_hit_bar_to_black():
@@ -349,3 +350,27 @@ def test_ride_moves_both_channels_of_a_stereo_cue():
     assert out.shape == (len(mono), 2)
     assert np.allclose(centre_levels(out[:, 0], 2), [-20.0, -26.0], atol=0.7)
     assert np.array_equal(out[:, 0], out[:, 1])
+
+
+def test_body_levels_reads_an_assembled_body_on_its_own_uniform_lines():
+    body = planted([-20.0, -30.0, -10.0])
+    levels = cue_arc.body_levels(body, RATE, [0.0, BAR, 2 * BAR], BAR)
+    assert np.allclose(levels, [-20.0, -30.0, -10.0], atol=1.5)
+    stereo = cue_arc.body_levels(np.stack([body, body], axis=1), RATE, [0.0, BAR, 2 * BAR], BAR)
+    assert np.allclose(stereo, levels, atol=0.01)
+
+
+def test_arc_rides_what_it_cut_not_what_the_tracker_measured_on_the_render():
+    """MEASURED (run 17, cue-1001): the ride's gains were read off the
+    tracker's bars of the RENDER -- lines 3.02 s apart over a 2.24 s bar --
+    while `assemble` cuts whole bars from each range's first line; the
+    body's bars 5-7 held -17 -15 -13 dB material the tracker had filed as
+    -27 -26 -22, so a -4 dB gain for a -26 target left one bar at -40 and
+    the ride fit read 2.6 dB against 1.9 offline.  What is ridden is
+    measured after it is cut."""
+    samples, metre = planted(TAME), half_time_intro(metre_of(16))
+    ask = CueAsk.for_bars(16, bar=BAR, bpm=int(BPM))
+    out, _ = cue_arc.arc(samples, RATE, metre, ask, *envelope_of(samples))
+    levels = centre_levels(out, 11)
+    targets = cue_arc.ride_targets(ask, ask.bars)[:11]
+    assert np.allclose(levels, targets, atol=1.5), (levels, list(targets))

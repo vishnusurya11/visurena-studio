@@ -279,6 +279,17 @@ class TestForm:
         times, db = self.envelope([-30, -22, -20, -4, -16, -14, -12, -10, -12, -14])
         assert not step.climbs(times, db)
 
+    def test_a_staircase_that_stops_dead_before_the_title_still_climbs(self):
+        """MEASURED (arc 8, all three seeds): tenths -29 -28 -29 -84 -20 -20
+        -17 -16 -120 -73 -- the asked stop's silence and the title's ring-out
+        fill the last two tenths of a 39-bar cue, so the "last third" the
+        term compared held -120 and every seed read as not climbing at a
+        loudest-five-seconds of 76%.  The climb is the material's, up to
+        the stop; what follows the stop is the stop term's."""
+        times, db = self.envelope([-29, -28, -29, -84, -20, -20, -17, -16, -120, -73])
+        assert not step.climbs(times, db)
+        assert step.climbs(times, db, until=40.0)
+
     def test_the_loudest_five_seconds_are_located(self):
         times, db = self.envelope([-30, -22, -20, -18, -16, -14, -12, -10, -6, -12])
         assert 0.75 <= step.loudest_start(times, db) <= 0.92

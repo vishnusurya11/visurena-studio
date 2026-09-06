@@ -26,7 +26,7 @@ import numpy as np
 
 from studio import cue_edit, music_events
 from studio.cue_ask import HOLE_BARS
-from studio.beatmap import structural_impacts
+from studio.beatmap import WINDOW, structural_impacts
 from studio.cue_plan import CueAsk
 from studio.trailer_stage_spec import Metre
 
@@ -271,6 +271,21 @@ def ride_gains(levels: np.ndarray, targets: np.ndarray, usable: np.ndarray,
     return np.where(usable, gains, 0.0)
 
 
+def body_levels(body: np.ndarray, rate: int, downbeats: list[float], bar: float) -> np.ndarray:
+    """Median dBFS of every bar of an assembled body, read on its own uniform
+    lines.  MEASURED (run 17, cue-1001): gains read off the tracker's bars of
+    the RENDER (lines 3.02 s apart over a 2.24 s bar) moved bars `assemble`
+    had cut from elsewhere -- -17 -15 -13 dB material filed as -27 -26 -22,
+    one bar left at -40 for a -26 target.  What is ridden is measured after
+    it is cut."""
+    mono = body if body.ndim == 1 else body.mean(axis=1)
+    width = int(rate * WINDOW)
+    count = len(mono) // width
+    rms = np.sqrt((mono[:count * width].reshape(count, width) ** 2).mean(axis=1))
+    times, db = np.arange(count) * WINDOW, 20 * np.log10(np.maximum(rms, 1e-6))
+    return np.array([float(np.median(db[(times >= d) & (times < d + bar)])) for d in downbeats])
+
+
 def ride(samples: np.ndarray, rate: int, downbeats: list[float], gains_db: np.ndarray) -> np.ndarray:
     """The gains applied as one envelope, whole at each bar's centre and
     sliding between centres, so no bar line carries a step."""
@@ -287,10 +302,10 @@ def staircase(samples: np.ndarray, rate: int, metre: Metre, ask: CueAsk,
     levels, holes gated, hard out on the stop bar with the asked silence
     after it; the downbeats so far."""
     stop, title = event_bars(ask, "stop")[0], ask.title_bar
-    usable = has_material(levels)
-    order = bar_order(levels, stop, usable=usable)
+    order = bar_order(levels, stop, usable=has_material(levels))
     body, downbeats = assemble(samples, rate, metre, ranges_of(order))
-    body = ride(body, rate, downbeats, ride_gains(levels[order], ride_targets(ask, ask.bars, stop)[:stop], usable[order]))
+    now = body_levels(body, rate, downbeats, metre.bar)
+    body = ride(body, rate, downbeats, ride_gains(now, ride_targets(ask, ask.bars, stop)[:stop], has_material(now)))
     body = gate_holes(body, rate, downbeats, ask)
     body = cue_edit.stop_at(body, rate, len(body) / rate, (title - stop) * ask.bar)
     downbeats += [downbeats[-1] + (i + 1) * ask.bar for i in range(title - stop)]

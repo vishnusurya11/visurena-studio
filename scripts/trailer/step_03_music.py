@@ -222,7 +222,7 @@ def render_batch(ctx, text: str, sheet: str, seeds: list[int], state: dict) -> l
     return found
 
 
-ARC_VERSION = 7
+ARC_VERSION = 8
 """Bumped when `cue_arc` or `cue_punct` change what they cut, so a kept
 raw render is arced again rather than trusted.  2: cut on the measured bar.
 3: the tracker's tempo octave merged or split back to the ask's bar.
@@ -230,7 +230,8 @@ raw render is arced again rather than trusted.  2: cut on the measured bar.
 events written beside its bar lines for the cut map.  5: a long render
 loses its middle, not its climax (`cut_middle`).  6: the title rings out to
 black (`ring_out`).  7: every bar ridden to the level the ask wrote
-(`cue_arc.ride`), the staircase the ask's height, not the render's."""
+(`cue_arc.ride`), the staircase the ask's height, not the render's.  8: the
+ride reads the bars it moves after they are cut (`body_levels`)."""
 
 
 def arc_cue(book: Path, raw: Path, ask: CueAsk, seed: int) -> Path:
@@ -298,14 +299,20 @@ def loudest_start(times, db, width: float = 5.0) -> float:
     return float(times[int(np.argmax(means))]) / float(times[-1])
 
 
-def climbs(times, db) -> bool:
+def climbs(times, db, until: float | None = None) -> bool:
     """C's staircase term: the last third is louder, and its peak is late.
 
     The one term that would have failed the shipped cue while nearly every
     existing term passed it -- bars_in_mode 0.94, P95-P5 26.1 dB, one slot --
     which is how a plateau reached at 8 s came to be the best of its four
-    seeds.
+    seeds.  `until` is where the material ends (an arc's stop): MEASURED
+    (arc 8, three seeds) the asked silence and the title's ring-out filled
+    the last two tenths of a 39-bar cue, and a 14 dB staircase read as flat
+    against them.
     """
+    if until is not None:
+        keep = np.asarray(times) < until
+        times, db = np.asarray(times)[keep], np.asarray(db)[keep]
     tenths = tenth_medians(db)
     rises = float(np.median(tenths[7:9])) >= float(np.median(tenths[1:3])) + STAIRCASE_DB
     return rises and LOUDEST_BAND[0] <= loudest_start(times, db) <= LOUDEST_BAND[1]
@@ -334,7 +341,8 @@ def level_at(times, db, t: float) -> float:
 def form_of(cue: Path, found: Metre) -> int:
     """How many of the two form terms this seed satisfies, out of two."""
     times, db = beatmap.envelope(cue)
-    return int(climbs(times, db)) + int(stops_dead(times, db, found.title_hit, found.bar))
+    until = music_events.known_hard_out(known_events(cue))
+    return int(climbs(times, db, until)) + int(stops_dead(times, db, found.title_hit, found.bar))
 
 
 def fit_of(cue: Path, found: Metre, ask: CueAsk) -> float:
