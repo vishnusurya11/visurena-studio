@@ -740,11 +740,34 @@ did not know what the arc had cut. The tracker's bar lines are where a bar
 STARTS; how long a bar IS is the cue's, and what the arc did is written
 down, not re-detected.
 
+Then the LEVEL (ARC_VERSION 5–7, BUILD row 62). Ordering bars by level
+can only build a staircase as tall as the render's range, and the render
+comes back mastered flat: run 16's cue-1001 had phrase means −24 −24 −17
+−23 −18 −18 −25 −23 −26, 9 dB end to end, where a trailer cue climbs
+15–20. A caption cannot ask a mastered model for dynamics it flattens, so
+the arc RIDES them: `cue_arc.ride` takes every material bar to the level
+the ask wrote (`RIDE_DB`: low −26 held, a step at the hit, mid −18 → −14,
+high −14 → −12 finishing on the bar before the stop), within `RIDE_MAX`
+12 dB, as one envelope whole at bar centres and sliding between them.
+Re-arced, the same render reads −28..−32 / −22..−16 / −17..−15 with the
+loudest five seconds at 79 %. Two smaller ones: a long render loses its
+MIDDLE, not its climax (`cut_middle`; v5 kept raw-1001's −13/−12 bars),
+and the title material holds a beat and rings out within a bar (`ring_out`,
+`RING_BARS`) — the decay under the card is the punctuation's own impact,
+and `stops_dead` reads rises more than `RING_FLOOR_DB` under the hit as
+the hit ringing. `best_of` then ranks seeds by `fit_of` — dB RMS from the
+ridden levels — because the range is now the ask's and only the fit is
+still the render's (raw-1004's bar 7 rose from −66 to −54 and fits 5.5;
+raw-1001 1.9).
+
 **Open:** the two holes are two bars each (5.4 s at 2.69 s bars) — the line
 slot the ask specifies, long on the ear; riser and impact gains are typed
 constants until a sound check names them; the epic renders (§0) track
 cleanly at the asked tempo, which is the other reason the caption carries
-the drums.
+the drums; `RIDE_DB` is the first sound check's number, not a measured
+one — the next lever after the ride is the material itself (a
+percussion-first preamble), since the ride can lift a bar's level but not
+put a drum in it.
 
 ---
 
