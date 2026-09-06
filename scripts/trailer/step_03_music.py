@@ -141,10 +141,18 @@ def conformed(ctx, plan: CuePlan) -> Settled:
     return cue_conform.conform_to_budget(plan, picture_budget(ctx), cycle_of(ctx))
 
 
+def known_events(cue: Path) -> list[dict]:
+    """The events an arc wrote beside its bar lines; none for a raw cue."""
+    if not grid_path(cue).exists():
+        return []
+    return json.loads(grid_path(cue).read_text(encoding="utf-8")).get("events", [])
+
+
 def map_cue(book: Path, cue: Path, found: Metre) -> dict:
-    """One seed's cut map, written beside its metre for the retrospect."""
+    """One seed's cut map, written beside its metre for the retrospect; an
+    arced cue's own events and stop are in it (output is input)."""
     cut = music_events.CutMap.model_validate(
-        music_events.cut_map(beatmap.decode(cue), beatmap.RATE, found))
+        music_events.cut_map(beatmap.decode(cue), beatmap.RATE, found, known_events(cue)))
     (cue.parent / f"cutmap-{found.seed}.json").write_text(
         cut.model_dump_json(indent=2), encoding="utf-8")
     return cut.model_dump()
@@ -200,10 +208,12 @@ def render_batch(ctx, text: str, sheet: str, seeds: list[int], state: dict) -> l
     return found
 
 
-ARC_VERSION = 3
+ARC_VERSION = 4
 """Bumped when `cue_arc` or `cue_punct` change what they cut, so a kept
 raw render is arced again rather than trusted.  2: cut on the measured bar.
-3: the tracker's tempo octave merged or split back to the ask's bar."""
+3: the tracker's tempo octave merged or split back to the ask's bar.
+4: every bar cut to the cue's bar, black bars no material, and the arc's
+events written beside its bar lines for the cut map."""
 
 
 def arc_cue(book: Path, raw: Path, ask: CueAsk, seed: int) -> Path:
@@ -243,7 +253,8 @@ def write_arc(raw: Path, dest: Path, metre: Metre, ask: CueAsk) -> None:
     body, downbeats = cue_arc.arc(samples, rate, metre, fit, *beatmap.envelope(raw))
     cue_conform.write_cue(dest, cue_punct.punctuate(body, rate, downbeats, fit), rate)
     beats, downbeats = cue_arc.grid_of(downbeats, fit.bar)
-    grid_path(dest).write_text(json.dumps({"beats": beats, "downbeats": downbeats}), encoding="utf-8")
+    grid_path(dest).write_text(json.dumps({"beats": beats, "downbeats": downbeats,
+                                           "events": cue_arc.events_of(fit, downbeats)}), encoding="utf-8")
 
 
 def grade(book: Path, cue: Path, seed: int, state: dict) -> Metre:

@@ -374,6 +374,30 @@ class TestHardOuts:
         assert me.hard_out_of([], title_hit=None, seconds=30.0, grid=grid) == 24.5
 
 
+class TestKnownEvents:
+    def test_a_known_event_keeps_its_time_and_kind_and_takes_the_detectors_as_witnesses(self):
+        """MEASURED (run 14, cutmap-1001): the arc's stop at 76.399 s merged
+        under a detected 'section' (equal rank, more structural), so the ask's
+        stop -- a dropout -- went unmeasured.  The arc's event wins: it is the
+        cut, the detector only saw it."""
+        known = [me.event(15.0, "dropout", "arc:stop", end=20.0)]
+        found = [me.event(15.1, "section", "novelty"), me.event(3.0, "hit", "onset")]
+        out = me.with_known(found, known)
+        assert [(e["t"], e["kind"]) for e in out] == [(3.0, "hit"), (15.0, "dropout")]
+        assert out[1]["evidence"] == ["arc:stop", "novelty"] and out[1]["end"] == 20.0
+        assert found[0]["evidence"] == ["novelty"] and known[0]["evidence"] == ["arc:stop"]
+
+    def test_the_known_stop_is_the_hard_out(self):
+        samples, beats, downbeats = click_track(120, 30.0)
+        known = [me.event(downbeats[9], "dropout", "arc:stop", end=downbeats[12]),
+                 me.event(downbeats[12], "hit", "arc:title_hit")]
+        raw = me.cut_map(samples, RATE, metre_of(beats, downbeats), known=known)
+        assert raw["hard_out"] == round(downbeats[9], 3)
+        stop = [e for e in raw["events"] if e["evidence"][0] == "arc:stop"]
+        assert len(stop) == 1 and stop[0]["kind"] == "dropout" and stop[0]["end"] == downbeats[12]
+        assert me.known_hard_out([]) is None
+
+
 # --- the map -----------------------------------------------------------------
 
 class TestCutMap:

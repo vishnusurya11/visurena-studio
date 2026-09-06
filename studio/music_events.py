@@ -434,6 +434,29 @@ def merge(events: list[dict], within: float = MERGE_WITHIN) -> list[dict]:
     return out
 
 
+def with_known(events: list[dict], known: list[dict], within: float = MERGE_WITHIN) -> list[dict]:
+    """The arc's own events laid over the detectors': a known event keeps its
+    time and kind, and a detector event inside `within` becomes its witness.
+
+    MEASURED (run 14, cutmap-1001): the arc's stop at 76.399 s merged under
+    a detected 'section' (equal rank, more structural), the bar-10 impact
+    was no detected hit at all -- delivered 0.62 for events the arc cut."""
+    out = [dict(k, evidence=list(k["evidence"])) for k in known]
+    for event in events:
+        near = [k for k in out if abs(k["t"] - event["t"]) <= within]
+        if near:
+            near[0]["evidence"] += [w for w in event["evidence"] if w not in near[0]["evidence"]]
+        else:
+            out.append(event)
+    return sorted(out, key=lambda e: e["t"])
+
+
+def known_hard_out(known: list[dict]) -> float | None:
+    """The arc's stop, when it wrote one: the hard out is where the cut stops."""
+    stops = [k["t"] for k in known if "arc:stop" in k["evidence"]]
+    return stops[0] if stops else None
+
+
 def affordances(events: list[dict], seconds: float) -> list[dict]:
     """Each event given `affords`: seconds to the next of rank >= its own."""
     out = []
@@ -541,8 +564,9 @@ def cue_spans(events: list[dict], times: np.ndarray, db: np.ndarray, seconds: fl
     return out
 
 
-def cut_map(samples: np.ndarray, rate: int, metre: Metre) -> dict:
-    """The CutMap of one rendered cue, as a JSON-able dict."""
+def cut_map(samples: np.ndarray, rate: int, metre: Metre, known: list[dict] | None = None) -> dict:
+    """The CutMap of one rendered cue, as a JSON-able dict; `known` are the
+    events an arc wrote beside its bar lines, laid over the detectors'."""
     if rate != RATE:
         import librosa
         samples, rate = librosa.resample(samples, orig_sr=rate, target_sr=RATE), RATE
@@ -553,9 +577,11 @@ def cut_map(samples: np.ndarray, rate: int, metre: Metre) -> dict:
     onset_times = [t for t, _ in onset_peaks(strength, hop_s)]
     raw = raw_events(structure_features(samples, rate), times, db, strength, seconds, hop_s, metre.beats)
     grid = grid_of(metre, [e["t"] for e in raw if e["kind"] == "accent"])
-    events = affordances(merge(snap(raw, grid)), seconds)
+    events = affordances(with_known(merge(snap(raw, grid)), known or []), seconds)
     for e in events:
         e.update(span_stats(e["t"], e["t"] + e["affords"], times, db, onset_times))
-    hard = hard_out_of(hard_outs(grid, times, db, strength, hop_s), metre.title_hit, seconds, grid)
+    hard = known_hard_out(known or [])
+    if hard is None:
+        hard = hard_out_of(hard_outs(grid, times, db, strength, hop_s), metre.title_hit, seconds, grid)
     return CutMap(events=events, spans=cue_spans(events, times, db, seconds, onset_times),
                   hard_out=hard, title_hit=metre.title_hit, seconds=seconds).model_dump()

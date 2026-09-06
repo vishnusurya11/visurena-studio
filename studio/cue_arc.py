@@ -24,7 +24,7 @@ from __future__ import annotations
 
 import numpy as np
 
-from studio import cue_edit
+from studio import cue_edit, music_events
 from studio.cue_ask import HOLE_BARS
 from studio.beatmap import structural_impacts
 from studio.cue_plan import CueAsk
@@ -46,10 +46,13 @@ HOLE_RETURN = 0.01
 """Seconds the music takes to return on the hole's downbeat: a switch, so
 the return reads as a hit and not a fade-in."""
 
-BAR_TOLERANCE = 0.1
-"""A measured bar longer or shorter than the cue's bar by this share is one
-the tracker stretched (a downbeat lost in a silence) -- cut into the arc it
-shifts every asked bar after it, so it is no phrase material."""
+BLACK_DB = -60.0
+"""A bar whose median level sits under this is black -- a stop's silence,
+a tail -- and no phrase material: sorted by level it would open the cue.
+The tracker's bar LINES are not the test any more: MEASURED (run 14),
+raw-1001's first six tracked bars were 4.44 s at a 2.24 s bar (half time
+over the drumless intro) and raw-1004 had 5 regular phrases of 11, so a
+length rule threw away exactly the quiet material the intro needs."""
 
 
 OCTAVE_BAND = 2 ** 0.5
@@ -102,12 +105,9 @@ def bar_levels(metre: Metre, times: np.ndarray, db: np.ndarray) -> np.ndarray:
     return np.array(out)
 
 
-def regular_bars(metre: Metre, tolerance: float = BAR_TOLERANCE) -> np.ndarray:
-    """Which measured bars are within `tolerance` of the cue's bar length;
-    the last bar, ending where the cue ends, is judged like the rest."""
-    ends = list(metre.downbeats[1:]) + [metre.seconds]
-    lengths = np.array(ends) - np.array(metre.downbeats)
-    return np.abs(lengths - metre.bar) <= tolerance * metre.bar
+def has_material(levels: np.ndarray, floor: float = BLACK_DB) -> np.ndarray:
+    """Which measured bars hold sound: the phrase material."""
+    return np.asarray(levels) > floor
 
 
 def phrases_of(count: int, phrase: int = PHRASE_BARS) -> list[tuple[int, int]]:
@@ -124,7 +124,7 @@ def bar_order(levels: np.ndarray, bars: int, phrase: int = PHRASE_BARS,
               usable: np.ndarray | None = None) -> list[int]:
     """Exactly `bars` source bars, quiet phrases first; when the render is
     short the loudest phrase plays again, as a climax does.  A phrase with a
-    bar not `usable` (see `regular_bars`) is left out."""
+    bar not `usable` (see `has_material`) is left out."""
     phrases = [p for p in phrases_of(len(levels), phrase)
                if usable is None or usable[p[0]:p[1] + 1].all()]
     phrases = ascending(levels, phrases)
@@ -158,13 +158,18 @@ def step_join(a: np.ndarray, b: np.ndarray, rate: int, fade_s: float = STEP_FADE
 
 def assemble(samples: np.ndarray, rate: int, metre: Metre,
              ranges: list[tuple[int, int]]) -> tuple[np.ndarray, list[float]]:
-    """The ranges in order, each landed on the next downbeat; the downbeats
-    of the result, one per bar, read off the slices' measured lengths."""
+    """The ranges in order, each cut from its first downbeat for its count
+    of bars at the cue's bar and landed on the next downbeat; the downbeats
+    of the result, uniform by construction.  The tracker's lines wander
+    (half time over a drumless intro, a downbeat lost in a breakdown); the
+    cue's bar does not, so the lines only say where a phrase starts."""
     out, downbeats, at = None, [], 0.0
     for first, last in ranges:
-        piece = cue_edit.slice_bars(samples, rate, metre, first, last)
-        bounds = [cue_edit.bar_bounds(metre, b, b) for b in range(first, last + 1)]
-        downbeats += [at + (s - bounds[0][0]) for s, _ in bounds]
+        bars = last - first + 1
+        start = float(metre.downbeats[first])
+        a, b = cue_edit.indices_between(samples, rate, start, start + bars * metre.bar)
+        piece = samples[a:b]
+        downbeats += [at + i * metre.bar for i in range(bars)]
         out = piece if out is None else step_join(out, piece, rate)
         at = len(out) / rate
     return out, downbeats
@@ -204,12 +209,33 @@ def staircase(samples: np.ndarray, rate: int, metre: Metre, ask: CueAsk,
     """The bars up to the stop, quiet phrases first, holes gated, hard out on
     the stop bar with the asked silence after it; the downbeats so far."""
     stop, title = event_bars(ask, "stop")[0], ask.title_bar
-    order = bar_order(levels, stop, usable=regular_bars(metre))
+    order = bar_order(levels, stop, usable=has_material(levels))
     body, downbeats = assemble(samples, rate, metre, ranges_of(order))
     body = gate_holes(body, rate, downbeats, ask)
     body = cue_edit.stop_at(body, rate, len(body) / rate, (title - stop) * ask.bar)
     downbeats += [downbeats[-1] + (i + 1) * ask.bar for i in range(title - stop)]
     return body, downbeats
+
+
+MAP_KINDS = {"pulse_in": "lift", "hit": "hit", "title_hit": "hit", "hole": "dropout", "stop": "dropout"}
+"""Each asked event as the cut map names it."""
+
+
+def event_end(ask: CueAsk, kind: str, bar: int, downbeats: list[float]) -> float | None:
+    """Where an asked dropout ends: a hole after HOLE_BARS, the stop at the title."""
+    if kind == "stop":
+        return float(downbeats[ask.title_bar])
+    if kind == "hole":
+        return float(downbeats[bar]) + HOLE_BARS * ask.bar
+    return None
+
+
+def events_of(ask: CueAsk, downbeats: list[float]) -> list[dict]:
+    """The ask's events on the arc's own bar lines, in the cut map's kinds,
+    witnessed by the arc: what was cut is what the map is verified against."""
+    return [music_events.event(downbeats[a.bar], MAP_KINDS[a.kind], f"arc:{a.kind}",
+                               end=event_end(ask, a.kind, a.bar, downbeats))
+            for a in ask.events]
 
 
 def grid_of(downbeats: list[float], bar: float) -> tuple[list[float], list[float]]:

@@ -11,7 +11,7 @@ from __future__ import annotations
 import numpy as np
 import pytest
 
-from studio import cue_arc
+from studio import cue_arc, music_events
 from studio.beatmap import RATE, envelope_of
 from studio.cue_ask import HOLE_BARS
 from studio.cue_plan import AskedEvent, CueAsk
@@ -73,23 +73,28 @@ def test_bar_order_fills_exactly_the_bars_asked_repeating_the_loudest():
     assert len(long) == 20 and long[16:] == [4, 5, 6, 7]
 
 
-def test_regular_bars_flags_a_bar_the_tracker_stretched():
-    """A stop's silence swallowed a downbeat in one render: the tracker
-    reported a 4 s "bar" at 120 BPM.  Cut into the arc it shifts every asked
-    bar after it by one, so an irregular bar is no phrase material."""
-    metre = metre_of(16)
-    downbeats = [d for i, d in enumerate(metre.downbeats) if i != 9]
-    stretched = metre.model_copy(update={"downbeats": downbeats})
-    regular = cue_arc.regular_bars(stretched)
-    assert regular.tolist() == [True] * 8 + [False] + [True] * 6
+def test_has_material_flags_a_black_bar():
+    """A stop's silence swallowed a downbeat in one render and the tracker
+    reported a 4 s "bar" of black; sorted by level it opened the cue.  A
+    bar is phrase material when it holds sound, whatever its tracked length."""
+    levels = np.array(SCRAMBLED[:8] + [cue_arc.HOLE_FLOOR_DB] + SCRAMBLED[9:])
+    assert cue_arc.has_material(levels).tolist() == [True] * 8 + [False] + [True] * 7
 
 
-def test_bar_order_leaves_out_a_phrase_holding_an_irregular_bar():
+def test_bar_order_leaves_out_a_phrase_holding_a_black_bar():
     levels = np.array(SCRAMBLED)
     usable = np.array([True] * 16)
     usable[13] = False
     order = cue_arc.bar_order(levels, 12, usable=usable)
     assert order == [0, 1, 2, 3, 8, 9, 10, 11, 4, 5, 6, 7]
+
+
+def half_time_intro(metre: Metre, bars: int = 4) -> Metre:
+    """The tracker at half time over the first `bars`: every other downbeat missing.
+    MEASURED (run 14, raw-1001): the first six tracked bars were 4.44 s at a
+    2.24 s bar, and raw-1004's were 2.8, 1.86, 1.96, 1.02, 7.46 s at 1.82."""
+    keep = [d for i, d in enumerate(metre.downbeats) if i >= bars or i % 2 == 0]
+    return metre.model_copy(update={"downbeats": keep})
 
 
 def test_grid_of_lays_four_beats_on_every_arc_bar():
@@ -120,6 +125,29 @@ def test_assemble_lands_each_range_on_the_next_downbeat():
     assert len(downbeats) == 6
     assert abs(len(out) / RATE - 6 * BAR) < 0.05
     assert np.allclose(downbeats, [i * BAR for i in range(6)], atol=0.02)
+
+
+def test_assemble_cuts_every_bar_to_the_cues_bar_whatever_the_tracker_said():
+    """The tracker's bar LINES wander (half time over a drumless intro, a
+    downbeat lost in a breakdown); the cue's BAR does not.  A range is cut
+    from its first downbeat for its count of bars, so the arc's grid is
+    uniform by construction and no phrase is thrown away for its lines."""
+    samples, metre = planted(SCRAMBLED), half_time_intro(metre_of(16))
+    out, downbeats = cue_arc.assemble(samples, RATE, metre, [(0, 1), (12, 13)])
+    assert abs(len(out) / RATE - 4 * BAR) < 0.05
+    assert np.allclose(downbeats, [i * BAR for i in range(4)], atol=0.02)
+    levels = measured_bar_levels(out, 4)
+    assert abs(levels[0] - SCRAMBLED[0]) < 1.5 and abs(levels[1] - SCRAMBLED[1]) < 1.5
+    assert abs(levels[2] - SCRAMBLED[14]) < 1.5                # tracked bar 12 starts real bar 14
+
+
+def test_arc_opens_on_a_quiet_intro_the_tracker_read_at_half_time():
+    quiet_first = [-36.0, -34.0, -32.0, -30.0] + SCRAMBLED[:12]
+    samples, metre = planted(quiet_first), half_time_intro(metre_of(16))
+    ask = CueAsk.for_bars(16, bar=BAR, bpm=int(BPM))
+    out, _ = cue_arc.arc(samples, RATE, metre, ask, *envelope_of(samples))
+    levels = measured_bar_levels(out, ask.bars)
+    assert np.mean(levels[0:4]) < -29 and all(levels[i] < levels[i + 4] + 6 for i in range(4))
 
 
 def test_arc_is_a_staircase_ending_in_stop_silence_and_the_title_hit():
@@ -193,3 +221,22 @@ def test_at_octave_splits_bars_at_their_midpoints():
 def test_at_octave_leaves_a_bar_inside_the_octave_band_alone():
     metre = metre_of(8)
     assert cue_arc.at_octave(metre, BAR * 1.3) is metre
+
+
+def test_events_of_writes_every_asked_event_on_the_arcs_own_bar_lines():
+    """MEASURED (run 14, cue-1001): the arc's bar-10 impact was no detected
+    hit, its stop at 76.4 s was merged under a 'section', and the hard out
+    was picked at 62.9 s -- delivered 0.62 for events the arc itself had
+    cut.  An arc's output is the map's input: the events are written down
+    beside the bar lines, in the cut map's kinds."""
+    ask = CueAsk.for_bars(16, bar=2.0, bpm=120)
+    ask = ask.model_copy(update={"events": ask.events + [AskedEvent(kind="hole", bar=6)]})
+    downbeats = [2.0 * i for i in range(16)]
+    events = cue_arc.events_of(ask, downbeats)
+    assert [e["evidence"] for e in events] == [[f"arc:{a.kind}"] for a in ask.events]
+    assert [e["t"] for e in events] == [downbeats[a.bar] for a in ask.events]
+    by = {a.kind: e for a, e in zip(ask.events, events)}
+    assert by["pulse_in"]["kind"] == "lift" and by["hit"]["kind"] == by["title_hit"]["kind"] == "hit"
+    assert by["stop"]["kind"] == "dropout" and by["stop"]["end"] == downbeats[ask.title_bar]
+    assert by["hole"]["kind"] == "dropout" and by["hole"]["end"] == 12.0 + HOLE_BARS * 2.0
+    assert all(e["rank"] == music_events.RANK[e["kind"]] for e in events)

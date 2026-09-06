@@ -401,6 +401,28 @@ class TestAsk:
         grid = json.loads(step.grid_path(out).read_text(encoding="utf-8"))
         assert np.allclose(np.diff(grid["downbeats"]), 2.0, atol=0.05)
 
+    def test_map_cue_carries_the_arcs_events_and_hard_out(self, ctx, monkeypatch):
+        """MEASURED (run 14, cue-1001): delivered 0.62 and hard_out 62.9 s for
+        an arc whose stop was cut at 76.4 s.  The arc writes its events beside
+        its bar lines; the cut map reads them, so what the arc cut is what the
+        ask is verified against, and the stop is the hard out."""
+        from tests.test_cue_arc import SCRAMBLED, metre_of, planted
+        music = ctx.out_dir / "music"
+        music.mkdir(parents=True, exist_ok=True)
+        raw = write_wav(music / "raw-12.wav", planted(SCRAMBLED))
+        stamp_cue(raw, "recipe-12", "caption A", "[Intro]")
+        sixteen = metre_of(16)
+        monkeypatch.setattr(beatmap, "track_beats", lambda s, r: (sixteen.beats, sixteen.downbeats))
+        ask = cue_ask.CueAsk.for_bars(16, bar=2.0, bpm=120)
+        out = step.arc_cue(ctx.book_dir, raw, ask, 12)
+        grid = json.loads(step.grid_path(out).read_text(encoding="utf-8"))
+        assert [e["evidence"] for e in grid["events"]] == [[f"arc:{a.kind}"] for a in ask.events]
+        found = step.measure(ctx.book_dir, out, 12)
+        cut = step.map_cue(ctx.book_dir, out, found)
+        stop = next(a.bar for a in ask.events if a.kind == "stop")
+        assert cut["hard_out"] == pytest.approx(found.downbeats[stop], abs=0.01)
+        assert step.score_of(ask, cut, found) == 1.0
+
     def test_measure_reads_the_grid_the_arc_was_cut_on(self, ctx, monkeypatch):
         """An arced cue carries its bar lines beside it; the Metre is read on
         them, because a tracker loses the downbeats inside the asked holes."""
