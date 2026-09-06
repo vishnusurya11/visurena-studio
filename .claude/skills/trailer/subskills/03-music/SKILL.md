@@ -14,13 +14,39 @@ Follow this file top to bottom. Every step is checkable without listening.
 
 ---
 
-## 0. The two bricks, and the one under them
+## 0. The three bricks, and the one under them
 
-> **SOUND:** a trailer cue's genre and its mix are the TRAILER'S, the same
-> for every book — `TRAILER_GENRE` and `TRAILER_MIX` in `studio/music_tone.py`,
-> written into the first sentence and the Sonics line by `head()`. The book
-> supplies COLOUR only: the family word, two or three instruments that name
-> it, the lead voice on top, key, mode, mood, the arc, the imagery, the hit.
+> **SOUND:** a trailer cue's genre, mood, progression and mix are the
+> TRAILER'S, the same for every book — `TRAILER_GENRE`, `TRAILER_MOOD`,
+> `TRAILER_ARC` and `TRAILER_MIX` in `studio/music_tone.py`, written into the
+> first sentence, the Progression line and the Sonics line by `head()`, and
+> they carry INTENSITY WORDS (massive, thunderous, huge, loud, maximum
+> intensity, enormous). The book supplies COLOUR only: the family word, two
+> or three instruments that name it, the lead voice on top, key, mode, three
+> more moods, its own arc after the trailer's, the imagery, the hit.
+
+**MEASURED 2026-09-06 (row 60), 4-bar phrase means, four seeds each:** the
+head "Cinematic hybrid orchestral trailer music … coloured by a Victorian
+detective mystery, folk violin and a ticking pocket watch" came back FLAT —
+quiet-to-loud spread 3.6, 1.5, 13.4, 13.8 dB — tracked at 80, 63, 190, 77 BPM
+against 100 asked, and the user heard it: "not dramatic enough for trailer".
+The head "Epic trailer music, massive hybrid orchestral, thunderous taiko …
+huge, loud, dramatic" with "a whisper that becomes a war" came back with BOTH
+registers — spread 13.2, 17.9, 7.9, 6.9 dB — at 86, 100, 96, 97 BPM. Same
+model, same cfg, same tempo asked. The model routes on intensity words as it
+routes on ensemble nouns, and a caption with neither extreme in it gets the
+middle. So the section levels in `cue_ask.LEVEL_TEXT` are "a whisper, quiet
+and close" / "huge and loud, the whole orchestra" / "at maximum intensity, the
+loudest bars of the piece" — never "at speaking level".
+
+> **EDIT:** the model gives MATERIAL, never ORDER. The ask's staircase is CUT
+> from one render on its measured bar lines (`studio/cue_arc.py`): phrases
+> sorted by measured level, quiet first, up to the stop bar; the holes gated
+> on their bars; a hard out on the stop bar; the render's biggest impact
+> landed on the title bar to decay alone; then `studio/cue_punct.py` lays a
+> synthesised sub impact on the hit, every hole's return and the title, and
+> a noise riser into every hole. The ask is delivered by construction — see
+> §16.
 
 **MEASURED across runs 9–12:** sixteen cues, four batches, four ladder rungs,
 and every one opened on the book's `genre` — "Period orchestral chamber score
@@ -646,6 +672,59 @@ Targets (PROPOSED): ≥ 80 % / ≥ 30 % / 100 % / true.
 7. **A hand-tapped 16-bar fixture** for the drumless seed. Until it exists,
    `bars_in_mode` is an opinion about a rubato cue and no seed may be
    *refused* on it — only ranked.
+
+---
+
+## 16. The editor's arc — the ask is cut, not hoped for (BUILD row 60)
+
+**MEASURED, five rounds of captions on the epic experiment set:** intensity
+adjectives, a "Dynamics" sentence, descriptive section tags, a late
+`[Chorus]` — each moved the timbre and never the ORDER. Every seed reached
+its plateau by 20–30 % of the runtime and stayed there (climb −0.6 dB over
+three seeds; the late-chorus sheet −4.4 and +3.5). The vendor's rule holds:
+mood words are weak, tags command structure — and structure is not dynamics.
+What the model reliably gives, when the caption asks for both extremes (§0),
+is material in both registers in ONE render: intro bars at −27 to −37 dBFS,
+loud bars at −10 to −16, same key, tempo and mastering.
+
+So step 03 renders `raw-<seed>` (ask seconds + `TAIL_HEADROOM`) and
+`arc_cue` writes `cue-<seed>` from it:
+
+1. `beatmap.metre(raw)` — the render's bar lines. Fewer than one 4-bar phrase
+   (rubato) → the raw render ships as the cue, nothing to re-order.
+2. `fitted(ask, metre)` — the ask's COUNT of bars on the render's MEASURED
+   bar. raw-1001 came back at 2.69 s bars against 2.4 asked; cut on the
+   ask's bar the arc ran 101.8 s for a 91.2 s ask with beats laid 2.4 s apart
+   on 2.69 s bars (bars_in_mode 0.81). Length follows the render; the
+   fit rule (row 56) trims the plan.
+3. `cue_arc.arc` — `bar_levels` (median dBFS per bar) → `regular_bars` (a bar
+   more than 10 % off the cue's bar is one the tracker stretched across a
+   silence: cut in, it shifts every asked bar after it by one) → `bar_order`
+   (whole 4-bar phrases, quiet to loud, the loudest repeated when short) →
+   `assemble` (10 ms equal-power `step_join` at downbeats — the level step
+   IS the arc, so `cue_edit.conform`'s 3 dB refusal does not apply) →
+   `gate_holes` → `stop_at` → `title_piece` on the render's biggest impact.
+   Measured on epic_cfg17-7005: climb −0.9 → 11.0 dB, loudest 25 % → 76 %.
+4. `cue_punct.punctuate` — sub impact (70→32 Hz sine, click on the front,
+   1.6 s) on the hit, every hole's return; a 2.5 s one at full gain on the
+   title; a noise riser over the two bars into every hole; bed −3 dB; tanh
+   knee at 0.85. Seed 7, so the same ask punctuates the same way every run.
+5. `cue-<seed>.grid.json` — the arc's own bar lines. `measure` reads the cue
+   on them (`known_grid`), because re-tracking a cue through its deliberate
+   holes loses two downbeats per hole and reports stretched bars.
+
+Three "an agent's output is its next input" bugs this surfaced, all fixed:
+`Metre.seconds` was the last envelope window, not the decoded length (plan
+82.079 ≠ 82.1); a stop's silence made the tracker report a 4 s bar the arc
+placed first, shifting every asked bar; the arc'd cue re-tracked lost the
+downbeats inside its holes. Each is a test now.
+
+**Open:** the two holes are two bars each (5.4 s at 2.69 s bars) — the line
+slot the ask specifies, long on the ear; riser and impact gains are typed
+constants until a sound check names them; the tracker's downbeats on the
+detective renders were jittery enough that only 3 of 8 phrases in raw-1001
+passed `regular_bars` — the epic renders (§0) track cleanly at the asked
+tempo, which is the other reason the caption carries the drums.
 
 ---
 
