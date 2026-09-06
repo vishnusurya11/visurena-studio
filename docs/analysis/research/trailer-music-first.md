@@ -252,6 +252,18 @@ integration in dependency order:
    `learn_cycle` with `frames` (58); step 08 settle moves (59); QC fields
    and floors (60); remove the walk (61); `MusicBed` measured sections (62).
 
+**Built (BUILD.md rows 43-56, all ticked, commits ed5b28b..b62dd5c).** The
+table numbered the work more tightly than this list: 43 contracts, 44 cut
+map, 45 `spans_of`/`plan_fit`, 46 frames-first budget, 47 the ask, 48
+`cue_edit`, 49 step 03, 50 step 04 windows, 51 step 06 spans, 52 step 07
+`learn_cycle` frames, 53 step 08 settle, 54 QC against the cue, 55 the walk
+removed with `MusicBed` measured sections (this list's 61 and 62 together),
+56 the conform rung (not in this list; found while building, section 8).
+Row 55 also removed `scripts/trailer/run_all.py`, the pre-`trailer.py`
+runner that drove the walk's CLI.  Step 06 and step 08 now refuse
+(`FileNotFoundError`) when `music/plan.json` is missing rather than falling
+back to the walk: the plan is the only path.
+
 ## 11. Publishable
 
 The cut-opportunity map — audio in, JSON out, librosa only, with the
