@@ -37,6 +37,12 @@ PROBES = {
 probe so a Learning row reads as English."""
 
 CLAP_MODEL = "laion/clap-htsat-unfused"
+CLAP_RATE = 48_000
+WINDOW_SECONDS = 10
+"""CLAP hears ten seconds.  Its processor takes a RANDOM ten seconds of a
+longer clip, so one call on a 112 s cue scored a different slice each time
+(measured 2026-09-06: the same file moved 0.51 -> 0.34 on one probe between
+two runs).  The cue is embedded window by window and the windows averaged."""
 BRIEF_WORDS = 40
 """CLAP's text tower truncates at 77 tokens; a brief stays well under it."""
 
@@ -99,6 +105,21 @@ def write_verdict(cue: Path, verdict: Verdict) -> Path:
     return path
 
 
+def windows(samples: np.ndarray, rate: int = CLAP_RATE,
+            seconds: int = WINDOW_SECONDS) -> list[np.ndarray]:
+    """Consecutive full windows of the cue; a short tail is dropped."""
+    step = rate * seconds
+    return [samples[i:i + step] for i in range(0, len(samples) - step + 1, step)] or [samples]
+
+
+def features_of(out) -> np.ndarray:
+    """The projected embedding, whichever way transformers hands it back:
+    a bare tensor before v5, an output object carrying it as
+    `pooler_output` from v5 (measured on 5.16.1)."""
+    tensor = getattr(out, "pooler_output", out)
+    return tensor.detach().float().cpu().numpy()
+
+
 class ClapEmbedder:
     """LAION CLAP through transformers; the checkpoint loads on first use."""
 
@@ -114,13 +135,13 @@ class ClapEmbedder:
         inputs = self.processor(text=sentences, return_tensors="pt", padding=True)
         with torch.no_grad():
             out = self.model.get_text_features(**{k: v.to(self.device) for k, v in inputs.items()})
-        return out.float().cpu().numpy()
+        return features_of(out)
 
     def audio(self, path: Path) -> np.ndarray:
         import librosa
         import torch
-        samples, _ = librosa.load(path, sr=48_000, mono=True)
-        inputs = self.processor(audio=samples, sampling_rate=48_000, return_tensors="pt")
+        samples, _ = librosa.load(path, sr=CLAP_RATE, mono=True)
+        inputs = self.processor(audio=windows(samples), sampling_rate=CLAP_RATE, return_tensors="pt")
         with torch.no_grad():
             out = self.model.get_audio_features(**{k: v.to(self.device) for k, v in inputs.items()})
-        return out[0].float().cpu().numpy()
+        return features_of(out).mean(axis=0)

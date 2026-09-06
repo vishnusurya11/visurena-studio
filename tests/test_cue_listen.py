@@ -92,6 +92,39 @@ class TestListen:
         assert Verdict.model_validate_json(path.read_text(encoding="utf-8")) == verdict
 
 
+class FakeTensor:
+    def __init__(self, rows): self.rows = rows
+    def detach(self): return self
+    def float(self): return self
+    def cpu(self): return self
+    def numpy(self): return np.asarray(self.rows, dtype=np.float32)
+
+
+class TestFeatures:
+    def test_a_bare_tensor_is_read_as_is(self):
+        """transformers < 5 returns the projected embedding itself."""
+        assert cue_listen.features_of(FakeTensor([[1.0, 2.0]])).tolist() == [[1.0, 2.0]]
+
+    def test_an_output_object_yields_its_pooler_output(self):
+        """transformers 5.16.1 returns BaseModelOutputWithPooling with the
+        projected, normalised embedding in `pooler_output`; the probe of
+        2026-09-06 died on `.float()` of that object."""
+        class Out:
+            pooler_output = FakeTensor([[3.0, 4.0]])
+        assert cue_listen.features_of(Out()).tolist() == [[3.0, 4.0]]
+
+
+class TestWindows:
+    def test_a_long_cue_is_cut_into_full_windows(self):
+        """One call on a long cue scores a random ten seconds; every window
+        is embedded and averaged instead."""
+        cut = cue_listen.windows(np.zeros(48_000 * 25), rate=48_000, seconds=10)
+        assert [len(w) for w in cut] == [480_000, 480_000]
+
+    def test_a_short_cue_is_one_window(self):
+        assert len(cue_listen.windows(np.zeros(48_000 * 4))) == 1
+
+
 class TestRealEmbedder:
     def test_the_real_embedder_is_imported_lazily(self):
         """The gate must be testable without the 600 MB checkpoint; the
