@@ -696,8 +696,12 @@ So step 03 renders `raw-<seed>` (ask seconds + `TAIL_HEADROOM`) and
 2. `fitted(ask, metre)` — the ask's COUNT of bars on the render's MEASURED
    bar. raw-1001 came back at 2.69 s bars against 2.4 asked; cut on the
    ask's bar the arc ran 101.8 s for a 91.2 s ask with beats laid 2.4 s apart
-   on 2.69 s bars (bars_in_mode 0.81). Length follows the render; the
-   fit rule (row 56) trims the plan.
+   on 2.69 s bars (bars_in_mode 0.81). Before that, `cue_arc.at_octave`:
+   a tracked bar more than sqrt(2) off the asked bar is the tracker's
+   tempo octave (run 13: 214 BPM for 100 asked, 38 one-second bars, a
+   43.7 s cue) and its bar lines are merged in pairs or split at their
+   midpoints first. Length follows the render's bar inside that band;
+   the fit rule (row 56) trims the plan.
 3. `cue_arc.arc` — `bar_levels` (median dBFS per bar) → `regular_bars` (a bar
    more than 10 % off the cue's bar is one the tracker stretched across a
    silence: cut in, it shifts every asked bar after it by one) → `bar_order`
