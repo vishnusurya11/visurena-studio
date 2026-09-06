@@ -354,6 +354,58 @@ class TestPerActBeatLock:
         assert qc.on_beat_by_act([], [0.0], qc.act_bounds(30.0)) == [0.0, 0.0, 0.0]
 
 
+class TestTheCueCut:
+    """The cut against the cue it was cut to: qc reads music/plan.json and
+    grades the detected cuts against the plan's spans."""
+
+    def plan_json(self) -> str:
+        from tests.test_cue_qc import build_plan
+        return build_plan().model_dump_json()
+
+    def write_cue(self, out: Path, takes: list[dict]) -> None:
+        (out / "music").mkdir(parents=True, exist_ok=True)
+        (out / "music/plan.json").write_text(self.plan_json(), encoding="utf-8")
+        (out / "clips.json").write_text(json.dumps({"takes": takes}), encoding="utf-8")
+        (out / "lines.level.json").write_text(json.dumps(
+            {"hard_out": 24.0, "lines": [{"at": 16.5, "seconds": 2.5, "rel_path": "l.wav"}]}),
+            encoding="utf-8")
+
+    def test_the_report_counts_frames_rendered_against_frames_played(self, tmp_path):
+        self.write_cue(tmp_path, [{"frames": 121}, {"frames": 243}])
+        cuts = [4.0, 6.0, 8.0, 10.0, 10.5, 14.5, 16.0, 20.0, 22.0]
+        cut = qc.measure_cue(tmp_path, cuts)
+        assert cut.frames_rendered == 364 and cut.frames_played == 576
+        assert cut.floor_misses() == [] and cut.lines_in_troughs == 1.0
+
+    def test_a_cut_inside_a_sustain_fails_the_floor(self, tmp_path):
+        self.write_cue(tmp_path, [])
+        cut = qc.measure_cue(tmp_path, [2.0, 4.0, 8.0, 20.0])
+        assert "cuts_inside_sustain" in cut.floor_misses()
+
+    def test_the_chosen_seeds_own_cut_map_supplies_the_events(self, tmp_path):
+        self.write_cue(tmp_path, [])
+        events = [{"t": 4.0, "rank": 3}, {"t": 12.0, "rank": 2}, {"t": 5.0, "rank": 1}]
+        (tmp_path / "music/cutmap-1.json").write_text(json.dumps({"events": events}), encoding="utf-8")
+        assert qc.measure_cue(tmp_path, [4.0, 12.0, 5.0]).cuts_on_events == pytest.approx(2 / 3)
+
+    def test_a_trailer_cut_before_the_plan_existed_is_unmeasured(self, tmp_path):
+        assert qc.measure_cue(tmp_path, [2.0]) is None
+
+    def test_qc_carries_the_cue_cut_into_the_report(self, tmp_path):
+        fixture = load_fixture()
+        out = tmp_path / "main"
+        out.mkdir()
+        (out / "TRAILER-x.mp4").write_bytes(b"")
+        (out / "plan.json").write_text(json.dumps(fixture["plan"]), encoding="utf-8")
+        self.write_cue(out, [{"frames": 100}])
+        report = qc.qc(out, detect=lambda video, threshold=0.1: [4.0, 8.0, 12.0, 20.0],
+                       measure=lambda video, **_: metre_at(120, 60.0),
+                       loud=lambda video: (-14.0, -1.5), lines=lambda out_dir: [],
+                       fresh=fixture_beats, shape=None)
+        assert report.cue_cut is not None and report.cue_cut.frames_rendered == 100
+        assert "cue_cut" not in report.flags and "cuts_inside_sustain" in report.flags
+
+
 class TestTheLevelSheet:
     def test_the_mixs_own_sheet_carries_the_hard_out_and_every_duck(self, tmp_path):
         (tmp_path / "lines.level.json").write_text(json.dumps({
@@ -392,7 +444,8 @@ class TestShapeReachesTheReport:
         assert set(report.flags) >= {"music_only_fraction", "longest_music_only_s",
                                      "speech_occupancy", "peak_position",
                                      "act3_over_act2_lu", "pre_title_silence_s",
-                                     "title_hit_lu", "cuts_on_beat_act1", "cuts_on_beat_act3"}
+                                     "title_hit_lu", "cuts_on_beat_act3"}
+        assert "cuts_on_beat_act1" not in report.flags  # it graded the walk; the walk is gone
         assert not report.floor_pass  # the bed never stopped
 
     def test_a_report_with_no_shape_claims_nothing_and_still_passes(self):

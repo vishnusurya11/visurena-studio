@@ -524,3 +524,241 @@ class TestTheDeliveredOrder:
         beats = plan_of(ctx)["beats"]
         key = [(MOVEMENTS.index(b["movement"]), b["scene_number"]) for b in beats]
         assert self.tau(key) >= 0.4
+
+
+# --- the cue's spans ARE the shot list ------------------------------------------
+#
+# BUILD row 51.  When step 03 has written music/plan.json, step 06 fills its
+# picture spans with story and invents no cut: shot in/out are the span's own
+# bounds, and each span kind is filled by its grammar (studio/shot_grammar.py).
+# The beat walk above is the FALLBACK, taken only when plan.json is absent.
+
+from studio import frame_budget
+from studio.cue_plan import CuePlan, CueSection, CueSpan
+
+BAR = 2.0
+CUE = [(0.0, 8.0, "sustain", 0, "M1"), (8.0, 12.0, "phrase", 0, "M1"),
+       (12.0, 14.0, "section", 1, "M2"), (14.0, 16.0, "phrase", 1, "M2"),
+       (16.0, 16.5, "accent", 1, "M2"), (16.5, 22.5, "sustain", 1, "M2"),
+       (22.5, 24.0, "phrase", 1, "M2"),
+       (24.0, 26.0, "section", 2, "M3"), (26.0, 27.0, "phrase", 2, "M3"),
+       (27.0, 27.5, "accent", 2, "M3"), (27.5, 32.0, "trough", 2, "M3"),
+       (32.0, 38.0, "tail", 2, "M3")]
+"""Eleven picture spans and a tail: as many as the fixture screenplay has
+sheeted setups, so the whole cue is filled and both accents survive."""
+
+
+def cue_span(index, start, end, kind, section, movement) -> CueSpan:
+    return CueSpan(index=index, start=start, end=end, kind=kind, section=section,
+                   movement=movement, bars=(end - start) / BAR)
+
+
+def cue_plan() -> CuePlan:
+    sections = [CueSection(index=0, start=0.0, end=12.0, movement="M1", pulse=False, level_db=-30.0),
+                CueSection(index=1, start=12.0, end=24.0, movement="M2", pulse=True, level_db=-20.0),
+                CueSection(index=2, start=24.0, end=38.0, movement="M3", pulse=True, level_db=-12.0)]
+    return CuePlan(rel_path="trailer/main/music/cue-7.wav", seed=7, seconds=38.0, bpm=120.0,
+                   bar=BAR, sections=sections, hard_out=32.0, title_hit=None,
+                   spans=[cue_span(i, *spec) for i, spec in enumerate(CUE)])
+
+
+@pytest.fixture()
+def cued(ctx):
+    (ctx.out_dir / "music/plan.json").write_text(cue_plan().model_dump_json(), encoding="utf-8")
+    return ctx
+
+
+def voiced(ctx) -> None:
+    (ctx.out_dir / "lines.json").write_text(slate().model_dump_json(), encoding="utf-8")
+    voice = [VoiceLine(index=i, text=l.text, speaker=l.speaker,
+                       rel_path=f"trailer/main/voice/{i}.wav", seconds=1.4).model_dump()
+             for i, l in enumerate(slate().lines)]
+    (ctx.out_dir / "voice.json").write_text(json.dumps(voice), encoding="utf-8")
+
+
+class TestTheCueIsTheShotList:
+    def test_every_shot_is_a_span_and_every_span_is_a_shot(self, cued):
+        step.run(cued.codex_id, cued)
+        plan = plan_of(cued)
+        shots = [(s["start"], s["seconds"]) for s in plan["shots"]]
+        spans = [(s["start"], round(s["end"] - s["start"], 3)) for s in plan["spans"]]
+        assert shots == spans and plan["path"] == "spans"
+        assert len({s["beat_id"] for s in plan["shots"]}) == len(spans) == len(plan["beats"])
+
+    def test_no_cut_is_invented(self, cued):
+        """Every shot opens and closes on a bound the cue measured."""
+        step.run(cued.codex_id, cued)
+        starts = {s.start for s in cue_plan().spans}
+        ends = {s.end for s in cue_plan().spans}
+        for shot in plan_of(cued)["shots"]:
+            assert shot["start"] in starts
+            assert round(shot["start"] + shot["seconds"], 3) in ends
+
+    def test_a_sustain_shot_carries_one_move_and_three_actions(self, cued):
+        step.run(cued.codex_id, cued)
+        sustains = [s for s in plan_of(cued)["shots"] if s["span_kind"] == "sustain"]
+        assert sustains
+        for shot in sustains:
+            assert shot["move"] and len(shot["actions"]) == 3
+            assert [a["phase"] for a in shot["actions"]] == ["open", "middle", "final"]
+            assert all(shot["start"] <= a["at"] < shot["start"] + shot["seconds"]
+                       for a in shot["actions"])
+
+    def test_an_accent_shot_carries_no_face(self, cued):
+        """Step 07 binds from the BEAT, so the beat under an accent is an
+        insert too: object alone, cast empty."""
+        step.run(cued.codex_id, cued)
+        plan = plan_of(cued)
+        by_id = {b["beat_id"]: b for b in plan["beats"]}
+        accents = [s for s in plan["shots"] if s["span_kind"] == "accent"]
+        assert accents
+        for shot in accents:
+            assert shot["char_refs"] == {} and shot["cast"] == [] and not shot["binds_face"]
+            assert shot["size"] == "insert" and by_id[shot["beat_id"]]["cast"] == []
+
+    def test_a_section_shot_reveals_on_its_downbeat(self, cued):
+        step.run(cued.codex_id, cued)
+        sections = [s for s in plan_of(cued)["shots"] if s["span_kind"] == "section"]
+        assert sections and all(s["reveal_at"] == s["start"] for s in sections)
+
+    def test_a_trough_shot_holds_still(self, cued):
+        step.run(cued.codex_id, cued)
+        troughs = [s for s in plan_of(cued)["shots"] if s["span_kind"] == "trough"]
+        assert troughs and all(s["move"] is None for s in troughs)
+
+    def test_the_beats_take_the_cues_movements(self, cued):
+        """The cue's sections are the movement doors: a beat plays in the
+        movement of the span it fills."""
+        step.run(cued.codex_id, cued)
+        plan = plan_of(cued)
+        by_id = {b["beat_id"]: b for b in plan["beats"]}
+        assert all(by_id[s["beat_id"]]["movement"] == s["movement"] for s in plan["shots"])
+        assert [b["movement"] for b in plan["beats"]] == sorted(b["movement"] for b in plan["beats"])
+
+    def test_lines_sit_in_the_spans_windows_and_name_a_speaker_mode(self, cued):
+        voiced(cued)
+        step.run(cued.codex_id, cued)
+        plan = plan_of(cued)
+        assert plan["lines"]
+        for window in plan["lines"]:
+            shot = next(s for s in plan["shots"]
+                        if s["start"] <= window["at"] < s["start"] + s["seconds"])
+            assert shot["span_kind"] in ("sustain", "trough")
+            assert shot["speaker_mode"] is not None
+            speaker = slate().lines[window["index"]].speaker
+            assert speaker in shot["cast"]
+
+    def test_the_walk_is_the_fallback_when_the_plan_is_absent(self, ctx, capsys):
+        step.run(ctx.codex_id, ctx)
+        plan = plan_of(ctx)
+        assert plan["path"] == "walk" and plan["spans"] == []
+        assert all(s["span_kind"] is None for s in plan["shots"])
+        assert "beat walk" in capsys.readouterr().out
+
+    def test_the_spans_path_says_so(self, cued, capsys):
+        step.run(cued.codex_id, cued)
+        assert "spans are the shot list" in capsys.readouterr().out
+
+    def test_refit_keeps_the_rendered_takes_on_the_spans_path(self, cued):
+        step.run(cued.codex_id, cued)
+        rendered = [b["beat_id"] for b in plan_of(cued)["beats"][:5]]
+        step.refit(cued, 0, rendered=rendered)
+        plan = plan_of(cued)
+        assert [b["beat_id"] for b in plan["beats"]] == rendered
+        assert [s["beat_id"] for s in plan["shots"]] == rendered
+        assert len(plan["spans"]) == 5
+
+
+class TestSpanPieces:
+    def test_counts_by_movement_reads_the_plan(self):
+        assert step.counts_by_movement(cue_plan()) == {"M1": 2, "M2": 5, "M3": 4}
+
+    def test_points_of_are_the_span_bounds(self):
+        spans = cue_plan().picture_spans()
+        assert step.points_of(spans) == [s.start for s in spans] + [32.0]
+
+    def test_fit_to_frames_folds_the_plan_until_the_frames_afford_it(self):
+        plan = cue_plan()
+        whole = step.fit_to_frames(plan, 1e9, frame_budget.TYPED)
+        assert whole is plan
+        tight = step.fit_to_frames(plan, 4000.0, frame_budget.TYPED)
+        assert len(tight.picture_spans()) < len(plan.picture_spans())
+        assert frame_budget.fits(tight, 4000.0, frame_budget.TYPED)
+
+    def test_agree_spans_folds_the_plan_to_the_beats_it_has(self):
+        sheets = {r["ref_id"] for r in refs()["refs"]}
+        beats = step.setups_for(screenplay()["scenes"], sheets, 9, {}, HOLMES, HOPE)[:9]
+        kept, plan = step.agree_spans(cue_plan(), beats)
+        assert len(kept) == len(plan.picture_spans()) == len(beats)
+        assert all(s.kind != "accent" for s in plan.spans) or len(beats) >= 11
+
+    def test_folded_to_ends_the_picture_early_when_the_fixed_spans_outnumber_the_takes(self, capsys):
+        plan = cue_plan()
+        five = step.folded_to(plan, 5)
+        picture = five.picture_spans()
+        assert len(picture) == 5 and [s.kind for s in picture] == [s.kind for s in plan.spans[:5]]
+        assert five.hard_out == plan.spans[5].start == five.spans[-1].start
+        assert five.spans[-1].kind == "tail" and five.spans[-1].end == plan.seconds
+        assert all(c.start < five.hard_out for c in five.sections)
+        assert "ends after 5 spans" in capsys.readouterr().out
+        assert step.folded_to(plan, 10) is not plan and len(step.folded_to(plan, 10).picture_spans()) == 10
+
+    def test_restamped_beats_take_their_spans_movement(self):
+        sheets = {r["ref_id"] for r in refs()["refs"]}
+        spans = cue_plan().picture_spans()
+        beats = step.setups_for(screenplay()["scenes"], sheets, len(spans), {}, HOLMES, HOPE)
+        beats, plan = step.agree_spans(cue_plan(), beats)
+        spans = plan.picture_spans()
+        stamped = step.restamped(beats, spans)
+        assert [b.movement for b in stamped] == [s.movement for s in spans]
+        assert stamped[-1].arc == "aftermath"
+        assert all(b.arc == arc_of(b.movement) for b in stamped[:-1])
+
+    def test_inserts_strip_the_face_from_the_beat_under_an_accent(self):
+        sheets = {r["ref_id"] for r in refs()["refs"]}
+        spans = cue_plan().picture_spans()
+        beats = step.setups_for(screenplay()["scenes"], sheets, len(spans), {}, HOLMES, HOPE)
+        beats, plan = step.agree_spans(cue_plan(), beats)
+        spans = plan.picture_spans()
+        made = step.inserts(beats, spans)
+        for beat, span in zip(made, spans):
+            if span.kind == "accent":
+                assert beat.cast == [] and beat.subjects == []
+                assert beat.image_prompt.startswith(step.INSERT)
+        assert step.inserts(made, spans) == made
+
+    def test_spoken_in_finds_the_line_that_opens_inside_the_span(self):
+        span = cue_plan().spans[5]
+        laid = [{"index": 0, "at": 17.0}, {"index": 1, "at": 29.5}]
+        assert step.spoken_in(span, laid, {0: HOLMES, 1: WATSON}) == (True, HOLMES)
+        assert step.spoken_in(cue_plan().spans[1], laid, {0: HOLMES}) == (False, None)
+
+    def test_accent_slots_are_never_swapped_by_a_line(self):
+        beats = [TrailerBeat(beat_id=f"B{i:02d}", scene_number=1, arc="build", movement="M2",
+                             location_id="room", cast=cast, subjects=cast,
+                             image_prompt="A hand on the door.", motion="the camera is static")
+                 for i, cast in enumerate(([WATSON], [HOLMES], [WATSON]))]
+        points = [0.0, 8.0, 8.5, 16.0]
+        on_accent = [{"index": 0, "at": 8.2}]
+        order, kept, refused = step.speak_on_face(beats, points, on_accent, {0: WATSON}, pinned={1})
+        assert order == beats and not kept and "accent" in refused[0]["why"]
+        wants_pinned_face = [{"index": 0, "at": 8.6}]
+        order, kept, refused = step.speak_on_face(beats, points, wants_pinned_face, {0: HOLMES},
+                                                  pinned={1})
+        assert order == beats and not kept and refused
+
+    def test_shots_from_spans_refuse_a_count_mismatch(self):
+        spans = cue_plan().picture_spans()
+        with pytest.raises(ValueError, match="span"):
+            step.shots_from_spans([], spans, {}, [], {})
+
+    def test_picture_seconds_left_is_step_07s_remaining_net_of_a_read(self, ctx):
+        from scripts.trailer.step_07_clips import read_seconds
+        plan = cue_plan()
+        want = ctx.budget.remaining("07") - read_seconds(len(plan.picture_spans()))
+        assert step.picture_seconds_left(ctx, plan) == pytest.approx(want, abs=1.0)
+
+    def test_the_cue_plan_is_read_when_present(self, ctx, cued):
+        assert step.cue_plan_of(ctx) is not None
+        (ctx.out_dir / "music/plan.json").unlink()
+        assert step.cue_plan_of(ctx) is None

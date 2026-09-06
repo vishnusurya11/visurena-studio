@@ -16,6 +16,14 @@ rung never asks: it ships the BEST take of the beat capped at a short shot.  A
 beat is dropped only when no take exists at all -- no time for a first render,
 or the render itself failed.  Every take is kept under clips/takes/; the chosen
 one is clips/<beat>.mp4, which is what the cut reads.
+
+THE TAKE IS PRICED IN FRAMES.  A render costs `a + b * frames` (the cycle,
+`studio.frame_budget`), so every take renders the frames its shot needs and
+every cycle row written here carries `frames` beside the seconds the render
+took: two columns, and `Cycle.from_rows` fits the line through them.  Round
+one renders its longest beat at LONG_TAKE frames when no row has timed a take
+that long, so the slope `b` is measured across two frame counts on this
+machine, never inferred from one.
 """
 from __future__ import annotations
 
@@ -26,13 +34,15 @@ from statistics import median
 from typing import Callable
 
 from scripts.trailer.build_clips import (SEED_BASE, bound_slots, is_complete, recipe_for,
-                                         render_take, take_values)
-from studio import comfy
+                                         render_take, take_seconds, take_values)
+from studio import comfy, frame_budget
 from studio.clip_cache import is_current, sidecar_for, stored_fingerprint
 from studio.describe import (DISTINCT_AT, TIMEOUT, TraitCard, describe, describe_frames,
                              differences, distance, known, patiently, reader, same_look,
                              shared, verifiable)
+from studio.frame_budget import Cycle
 from studio.frames import frame_at, frame_times
+from studio.h3 import frames_for
 from studio.ladder import Climb, Ladder, Rung
 from studio.learnings import Learning, load
 from studio.trailer_assemble import HEAD_TRIM, clip_seconds
@@ -40,11 +50,19 @@ from studio.trailer_assemble import HEAD_TRIM, clip_seconds
 STEP_ID = "07"
 NAME = "clips"
 RENDER_SECONDS = 16 * 60
-"""The FALLBACK cycle, measured on run 10: 19 takes between 12:36 and 17:32,
-15.76 min each.  It stays at the last measured truth until a run measures a
-new one -- `render_seconds` below reads what the rounds of the last run
-actually cost, and that is what the next plan is sized on.  Lowering this by
-argument is how run 10 planned 25 setups and dropped six of them."""
+"""The per-take constant step 06 still sizes its plan on (`render_seconds_for`),
+measured on run 10: 19 takes between 12:36 and 17:32, 15.76 min each, a 4.6
+min model reload in every one.  Step 07 itself prices nothing on it: a take
+costs its FRAMES on the cycle (`cycle_of`), and step 06 moves to frames with
+BUILD row 51."""
+LONG_TAKE = 243
+"""Frames of the take round one renders long so the cycle's slope is measured.
+
+The AICU figures for H3 (124 / 243 / 362 frames = 16.4 / 48.1 / 97.2 min at
+20 steps) say render time is superlinear in frames, so a slope read off one
+frame count is a guess about every other.  The middle rung of that range,
+rendered once, gives `Cycle.from_rows` its second point; a book that already
+carries a row this long pays it once."""
 SESSION_SECONDS = 4 * 60
 """One reader session: the unload, Qwen3-VL off the spinning disk, first sheet.
 
@@ -62,15 +80,7 @@ retrospect reads these to state the real cycle; they are not rungs."""
 SHORT_SHOT = 0.6
 """A take whose face never bound may still carry a cut this short: too brief
 to read a wrong face, long enough to keep the beat's place in the metre."""
-RETRY_COST = RENDER_SECONDS + SESSION_SECONDS
-"""What a reroll ROUND costs: one render and the reader session that must
-follow it.  Run 6's rule -- a retry may cost this beat, never a later one --
-is structural now: every beat's first take is rendered in round one, so a
-reroll can only ever spend another reroll."""
-LADDER = Ladder([Rung("reroll_seed", RETRY_COST, tries=1),
-                 Rung("alternate_setup", RETRY_COST, tries=1)], terminal="short_shot")
-"""One reroll: a seed moves the reading about half a trait (run 6, B12: 4.0
-then 3.5), so the second retry is a framing the reader can see the face in."""
+TERMINAL = "short_shot"
 DROPPED = "drop_beat"
 
 
@@ -86,19 +96,52 @@ def read_seconds(sheets: int) -> float:
     return SESSION_SECONDS + SHEET_SECONDS * (sheets - 1)
 
 
-def take_cost(staged: int) -> float:
-    """What adding one more take to a round costs: its render, and its share
-    of the one reader session the round ends with.  A take rendered with no
-    time left to read it ships ungated, which is worse than not rendering it."""
-    return RENDER_SECONDS + read_seconds(staged + 1) - read_seconds(staged)
+def take_cost(staged: int, frames: int, cycle: Cycle) -> float:
+    """What adding one more take to a round costs: its `frames` on the cycle,
+    and its share of the one reader session the round ends with.  A take
+    rendered with no time left to read it ships ungated, which is worse than
+    not rendering it."""
+    return cycle.cost_seconds(frames) + read_seconds(staged + 1) - read_seconds(staged)
+
+
+def retry_cost(frames: int, cycle: Cycle) -> float:
+    """What a reroll ROUND costs this beat: one render of its frames and the
+    reader session that must follow it.  Run 6's rule -- a retry may cost this
+    beat, never a later one -- is structural: every beat's first take is
+    rendered in round one, so a reroll can only ever spend another reroll."""
+    return cycle.cost_seconds(frames) + SESSION_SECONDS
+
+
+def ladder_for(frames: int, cycle: Cycle) -> Ladder:
+    """One reroll, then a framing the reader can see the face in: a seed moves
+    the reading about half a trait (run 6, B12: 4.0 then 3.5).  Priced for
+    THIS beat's frames on the cycle of the round."""
+    cost = retry_cost(frames, cycle)
+    return Ladder([Rung("reroll_seed", cost, tries=1), Rung("alternate_setup", cost, tries=1)],
+                  terminal=TERMINAL)
+
+
+def cycle_of(ctx) -> Cycle:
+    """The cycle this book's cycle rows fit, or the typed curve until they do."""
+    return Cycle.from_rows(load(ctx.learnings_path))
+
+
+def frames_of_beat(beat_id: str, plan: dict) -> int:
+    """The legal frame count that covers this beat's take: its shot plus the
+    head trim and the handle, snapped UP onto H3's ladder -- the same count
+    `take_values` asks the renderer for, so the price and the ask agree."""
+    return frames_for(take_seconds(beat_id, plan))
+
+
+def long_take_measured(rows: list) -> bool:
+    """Whether a cycle row has already timed a take of LONG_TAKE frames or more."""
+    return any(frames >= LONG_TAKE for frames, _ in frame_budget.cycle_points(rows))
 
 
 def render_seconds(rows: list[Learning]) -> float:
-    """The cycle a take actually cost, as the runs of this book measured it.
-
-    `RENDER_SECONDS` is a number a person typed; this is the machine's own
-    answer, the median over every round that measured one, and the median so
-    a single stalled round cannot resize the next plan."""
+    """LEGACY, for step 06: seconds per take as the median over every cycle
+    row -- the median so a single stalled take cannot resize the next plan.
+    Step 07 prices on `cycle_of`; step 06 sizes by frames from BUILD row 51."""
     took = [float(row.measured) for row in rows
             if row.step == STEP_ID and row.gate == CYCLE
             and isinstance(row.measured, (int, float))]
@@ -106,7 +149,7 @@ def render_seconds(rows: list[Learning]) -> float:
 
 
 def render_seconds_for(ctx) -> float:
-    """This book's measured cycle, for step 06 to size its plan on."""
+    """This book's measured seconds per take, for step 06 to size its plan on."""
     return render_seconds(load(ctx.learnings_path))
 
 
@@ -233,6 +276,8 @@ class Bind:
     reference_id: str | None
     reference: TraitCard | None
     climb: Climb
+    frames: int = 0
+    """The frames this beat's take renders: what the price and the ask agree on."""
     tries: list[dict] = field(default_factory=list)
     stopped: bool = False
 
@@ -246,20 +291,43 @@ class Bind:
         return not self.stopped and not self.climb.done
 
 
-def bind_for(ctx, index: int, beat: dict, refs: dict) -> Bind:
+def bind_for(ctx, index: int, beat: dict, refs: dict, plan: dict, cycle: Cycle) -> Bind:
     """One beat's place on the identity ladder, before any take exists."""
     bound = bound_slots(beat, refs)
     reference_id, reference = reference_of(ctx.book_dir, refs, bound)
+    frames = frames_of_beat(beat["beat_id"], plan)
     return Bind(index, beat, bound, reference_id, reference,
-                Climb(LADDER, STEP_ID, substep=beat["beat_id"], gate_name="identity"))
+                Climb(ladder_for(frames, cycle), STEP_ID, substep=beat["beat_id"],
+                      gate_name="identity"), frames=frames)
 
 
-def drop_beat(ctx, bind: Bind, staged: int) -> None:
+def reprice(binds: list[Bind], cycle: Cycle) -> None:
+    """Every beat's rungs at what a reroll costs on the cycle measured so far:
+    a climb keeps its place on the ladder and the ladder takes the new price."""
+    for bind in binds:
+        bind.climb.ladder = ladder_for(bind.frames, cycle)
+
+
+def long_take_bind(binds: list[Bind], rows: list) -> Bind | None:
+    """The beat round one renders at LONG_TAKE frames: the longest live one,
+    or none when a cycle row has already timed a take that long."""
+    if long_take_measured(rows):
+        return None
+    return max((b for b in binds if b.active), key=lambda b: b.frames, default=None)
+
+
+def frames_this_round(bind: Bind, long: Bind | None) -> int:
+    """The frames this beat renders this round: its own, or LONG_TAKE when it
+    is the beat that measures the slope and its own take is shorter."""
+    return max(bind.frames, LONG_TAKE) if bind is long else bind.frames
+
+
+def drop_beat(ctx, bind: Bind, cost: float) -> None:
     """No time for this beat's FIRST take: it has no clip and never will."""
     bind.stopped = True
     ctx.learn(Learning(step=STEP_ID, substep=bind.beat_id, gate="budget",
                        measured=round(ctx.budget.remaining(STEP_ID)),
-                       threshold=take_cost(staged), action=DROPPED, terminal=True))
+                       threshold=cost, action=DROPPED, terminal=True))
 
 
 def take_failed(ctx, bind: Bind, exc: Exception) -> None:
@@ -267,16 +335,17 @@ def take_failed(ctx, bind: Bind, exc: Exception) -> None:
     bind.stopped = True
     ctx.learn(Learning(step=STEP_ID, substep=bind.beat_id, gate="render",
                        measured=str(exc)[:80], terminal=True,
-                       action="short_shot" if bind.tries else DROPPED))
+                       action=TERMINAL if bind.tries else DROPPED))
 
 
 def render_attempt(ctx, bind: Bind, rung: Rung, i: int, plan: dict, refs: dict,
-                   style: str) -> dict | None:
-    """One take for one beat; None when the renderer produced no video."""
+                   style: str, frames: int) -> dict | None:
+    """One take of `frames` for one beat; None when the renderer produced no video."""
     seed = seed_for(bind.index, rung, i)
-    values = take_values(bind.beat, plan, refs, style, seed,
-                         tightest="close" if rung.name == "alternate_setup" else None)
-    ctx.tracker.log(f"{bind.beat_id} {rung.name} seed {seed}, {values['frames']} frames, "
+    values = dict(take_values(bind.beat, plan, refs, style, seed,
+                              tightest="close" if rung.name == "alternate_setup" else None),
+                  frames=frames)
+    ctx.tracker.log(f"{bind.beat_id} {rung.name} seed {seed}, {frames} frames, "
                     f"{round(ctx.budget.remaining(STEP_ID))}s left", step_id=STEP_ID)
     started = ctx.budget.clock()
     try:
@@ -286,23 +355,27 @@ def render_attempt(ctx, bind: Bind, rung: Rung, i: int, plan: dict, refs: dict,
         take_failed(ctx, bind, exc)
         return None
     return {"bind": bind, "rung": rung, "take": take, "seed": seed, "fresh": fresh,
-            "seconds": ctx.budget.clock() - started}
+            "frames": frames, "seconds": ctx.budget.clock() - started}
 
 
-def render_round(ctx, binds: list[Bind], plan: dict, refs: dict, style: str) -> list[dict]:
+def render_round(ctx, binds: list[Bind], plan: dict, refs: dict, style: str,
+                 cycle: Cycle, long: Bind | None = None) -> list[dict]:
     """Every live beat's next take, rendered BACK TO BACK with H3 resident.
 
     Nothing here frees the engine: the unload belongs to the read that follows,
-    once for the whole round."""
+    once for the whole round.  `long` is the beat this round renders at
+    LONG_TAKE frames, round one's measurement of the slope."""
     staged: list[dict] = []
     for bind in [b for b in binds if b.active]:
         wanted = bind.climb.ask(ctx.budget, ctx.learn)
         if wanted is None:
             continue
-        if bind.climb.attempts == 0 and not ctx.budget.can_afford(STEP_ID, take_cost(len(staged))):
-            drop_beat(ctx, bind, len(staged))
+        frames = frames_this_round(bind, long)
+        cost = take_cost(len(staged), frames, cycle)
+        if bind.climb.attempts == 0 and not ctx.budget.can_afford(STEP_ID, cost):
+            drop_beat(ctx, bind, cost)
             continue
-        pending = render_attempt(ctx, bind, *wanted, plan, refs, style)
+        pending = render_attempt(ctx, bind, *wanted, plan, refs, style, frames)
         if pending:
             staged.append(pending)
     return staged
@@ -354,14 +427,18 @@ def learn_read(ctx, sheets: int, seconds: float) -> None:
                            seconds=round(seconds, 1), note=f"{sheets} sheet(s)"))
 
 
-def learn_cycle(ctx, staged: list[dict], seconds: float, number: int) -> None:
-    """What a take cost this round, render and its share of the read: the
-    number the NEXT plan is sized on, measured instead of assumed."""
-    fresh = sum(1 for pending in staged if pending["fresh"])
-    if fresh:
-        ctx.learn(Learning(step=STEP_ID, gate=CYCLE, measured=round(seconds / fresh, 1),
-                           threshold=RENDER_SECONDS, action=f"round_{number}", attempt=number,
-                           seconds=round(seconds, 1), note=f"{fresh} take(s)"))
+def learn_cycle(ctx, staged: list[dict], cycle: Cycle, number: int) -> None:
+    """One row per take RENDERED this round: the frames it asked for and the
+    seconds its render took -- the two columns `Cycle.from_rows` fits -- against
+    what the cycle priced it.  The render alone: the reader session is its own
+    row (`learn_read`), or it would be fitted into `a` and paid twice.  A
+    reused take cost no render and is no measurement."""
+    for pending in [p for p in staged if p["fresh"]]:
+        seconds, frames = round(pending["seconds"], 1), pending["frames"]
+        ctx.learn(Learning(step=STEP_ID, substep=pending["bind"].beat_id, gate=CYCLE,
+                           measured=seconds, threshold=round(cycle.cost_seconds(frames), 1),
+                           action=f"round_{number}", attempt=number, seconds=seconds,
+                           frames=frames, note=f"{pending['rung'].name} seed {pending['seed']}"))
 
 
 def chosen_of(bind: Bind) -> tuple[dict | None, float | None]:
@@ -395,21 +472,34 @@ def write_clips(ctx, binds: list[Bind]) -> None:
           f"{sum(1 for c in clips if c['capped'])} capped short")
 
 
+def open_round(ctx, binds: list[Bind], number: int) -> Cycle:
+    """The cycle this round prices on -- fitted from every cycle row so far,
+    round one's included -- with every beat's rungs repriced to it."""
+    cycle = cycle_of(ctx)
+    reprice(binds, cycle)
+    ctx.tracker.log(f"round {number}: {sum(b.active for b in binds)} beat(s) climbing, "
+                    f"{round(ctx.budget.remaining(STEP_ID))}s left, cycle "
+                    f"{cycle.a:.0f} + {cycle.b:.2f}/frame", step_id=STEP_ID)
+    return cycle
+
+
 def run(codex_id: str, ctx) -> None:
     plan = json.loads((ctx.out_dir / "plan.json").read_text(encoding="utf-8"))
     refs_doc = json.loads((ctx.book_dir / "refs/refs.json").read_text(encoding="utf-8"))
     refs = {r["ref_id"]: r for r in refs_doc["refs"]}
-    binds = [bind_for(ctx, index, beat, refs) for index, beat in enumerate(plan["beats"])]
+    cycle = cycle_of(ctx)
+    binds = [bind_for(ctx, index, beat, refs, plan, cycle)
+             for index, beat in enumerate(plan["beats"])]
+    long = long_take_bind(binds, load(ctx.learnings_path))
     number = 0
     while any(bind.active for bind in binds):
         number += 1
-        started = ctx.budget.clock()
-        ctx.tracker.log(f"round {number}: {sum(b.active for b in binds)} beat(s) climbing, "
-                        f"{round(ctx.budget.remaining(STEP_ID))}s left", step_id=STEP_ID)
-        staged = render_round(ctx, binds, plan, refs, refs_doc["palette"])
+        cycle = open_round(ctx, binds, number)
+        staged = render_round(ctx, binds, plan, refs, refs_doc["palette"], cycle,
+                              long if number == 1 else None)
         if not staged:
             break
         read_round(ctx, staged)
         settle_round(ctx, staged)
-        learn_cycle(ctx, staged, ctx.budget.clock() - started, number)
+        learn_cycle(ctx, staged, cycle, number)
     write_clips(ctx, binds)

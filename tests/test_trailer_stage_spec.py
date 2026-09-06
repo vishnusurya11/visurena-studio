@@ -140,7 +140,8 @@ class TestQC:
                           music_only_fraction=0.92, peak_position=0.53,
                           act3_over_act2_lu=-2.0)
         assert report.floor_pass
-        assert {"cuts_on_downbeat", "cuts_on_L0", "on_cap_fraction", "title_on_downbeat",
+        assert "on_cap_fraction" not in report.flags  # the walk's grader, retired with it
+        assert {"cuts_on_downbeat", "cuts_on_L0", "title_on_downbeat",
                 "music_only_fraction", "peak_position", "act3_over_act2_lu"} <= set(report.flags)
 
     def test_the_whole_trailer_beat_lock_is_not_a_target_any_more(self):
@@ -154,7 +155,7 @@ class TestQC:
                           cuts_on_beat_by_act=[0.2, 0.4, 0.9], cue_cut=cue_report().cue_cut)
         assert report.flags == []
         loose = report.model_copy(update={"cuts_on_beat_by_act": [0.9, 0.4, 0.3]})
-        assert loose.flags == ["cuts_on_beat_act1", "cuts_on_beat_act3"]
+        assert loose.flags == ["cuts_on_beat_act3"]  # act 1 is the cue's to loosen now
 
     def test_an_unmeasured_cue_cut_is_flagged_and_never_passed(self):
         """A master QC has not measured against its cue is not known to be

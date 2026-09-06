@@ -13,7 +13,8 @@ import pytest
 from studio import cue_edit as ce
 from studio.beatmap import RATE, envelope_of, onsets
 from studio.trailer_assemble import HARD_OUT_GATE
-from studio.trailer_stage_spec import Metre
+from studio.cue_plan import CueSection
+from studio.trailer_stage_spec import Metre, Slot
 from tests.test_metre import click_track
 
 BPM = 120.0
@@ -107,9 +108,14 @@ class TestSlice:
 
 class TestSplice:
     def test_a_join_on_a_hit_is_ten_milliseconds(self):
-        _, metre = click(8.0)
+        _, beats, downbeats = click_track(BPM, 8.0)
+        metre = metre_of(beats, downbeats, 8.0, hits=[4.5])
         assert ce.fade_for(metre, on_hit=True) == ce.HIT_FADE == 0.010
         assert ce.fade_for(metre, on_hit=False) == pytest.approx(BEAT / 2)
+        assert ce.fade_at(metre, 4.5) == ce.HIT_FADE                 # a measured hit
+        assert ce.fade_at(metre, 4.5 + ce.ZERO_WINDOW) == ce.HIT_FADE   # the cut moved to a zero crossing
+        assert ce.fade_at(metre, 6.5) == pytest.approx(BEAT / 2)     # texture continues
+        assert ce.fade_at(metre, 6.5, marks=[6.5]) == ce.HIT_FADE    # a section start the plan names
 
     def test_a_splice_keeps_the_level_through_the_join(self):
         a, b = texture(2.0, seed=1), texture(2.0, seed=2)
@@ -272,3 +278,129 @@ class TestTempo:
         c = a.model_copy(update={"bpm": BPM * 1.03})
         assert ce.compatible_tempo(a, b)
         assert not ce.compatible_tempo(a, c)
+
+
+class TestGrid:
+    """The layer steps 03 and 08 call: a span read back to its bars, and the
+    grid the cue HAS after an edit, so the plan is re-derived from a metre that
+    agrees with the samples."""
+
+    def test_bars_covering_reads_a_span_back_to_its_bars(self):
+        _, metre = click(16.0)                       # downbeats 0.5, 2.5, ... 14.5; the cue ends at 16.0
+        assert ce.bars_covering(metre, 4.5, 8.5) == (2, 3)
+        assert ce.bars_covering(metre, 14.5, 16.0) == (7, 7)   # the last bar ends where the cue ends
+        assert ce.bars_covering(metre, 4.5 + ce.ZERO_WINDOW, 8.5) == (2, 3)
+        with pytest.raises(ValueError):
+            ce.bars_covering(metre, 5.0, 8.5)        # a span opening off the downbeat is not bars
+
+    def test_runs_collapse_bar_indices_to_ranges(self):
+        assert ce.runs([0, 1, 4, 5, 8]) == [(0, 1), (4, 5), (8, 8)]
+        assert ce.runs(range(3)) == [(0, 2)]
+        assert ce.runs([5, 4, 4]) == [(4, 5)]
+        assert ce.runs([]) == []
+
+    def test_keep_spans_lays_the_kept_seconds_out_contiguously(self):
+        _, beats, downbeats = click_track(BPM, 16.0)
+        metre = metre_of(beats, downbeats, 16.0, hits=[8.5, 6.5]).model_copy(
+            update={"title_hit": 10.5, "stopdowns": [7.0],
+                    "slots": [Slot(start=8.5, end=12.5), Slot(start=2.5, end=6.5)]})
+        kept = ce.keep_spans(metre, [(0.5, 4.5), (8.5, 12.5)])
+        assert kept.seconds == 8.0
+        assert kept.downbeats == [0.0, 2.0, 4.0, 6.0]
+        assert len(kept.beats) == 16 and set(kept.downbeats) <= set(kept.beats)
+        assert kept.hits == [4.0]                    # 6.5 fell in the dropped seconds
+        assert kept.title_hit == pytest.approx(6.0) and kept.stopdowns == []   # 7.0 was in the dropped bars
+        assert [(s.start, s.end) for s in kept.slots] == [(4.0, 8.0)]   # a slot cut by the edit is gone
+        assert (kept.bpm, kept.bar, kept.grid, kept.seed) == (metre.bpm, metre.bar, metre.grid, metre.seed)
+
+    def test_conform_bars_returns_the_audio_and_the_grid_it_now_has(self):
+        samples, metre = click(24.0)
+        out, recut = ce.conform_bars(samples, RATE, metre, [0, 1, 4, 5, 8])
+        assert np.array_equal(out, ce.conform(samples, RATE, metre, [(0, 1), (4, 5), (8, 8)]))
+        assert recut.metre.downbeats == [0.0, 2.0, 4.0, 6.0, 8.0]
+        assert recut.metre.seconds == 10.0
+        assert abs(len(out) / RATE - recut.metre.seconds) <= 2 * ce.ZERO_WINDOW
+        assert off_grid(click_times(out), recut.metre) == []
+        assert [(e.op, e.first_bar, e.last_bar, e.at) for e in recut.edits] == [
+            ("keep", 0, 1, 0.0), ("keep", 4, 5, 4.0), ("keep", 8, 8, 8.0)]
+        assert recut.edits[0].fade_s == 0.0 and recut.edits[1].fade_s == ce.HIT_FADE
+
+    def test_conform_bars_from_a_range_is_the_head_of_the_cue(self):
+        samples, metre = click(16.0)
+        out, recut = ce.conform_bars(samples, RATE, metre, range(0, 4))
+        assert np.array_equal(out, ce.slice_bars(samples, RATE, metre, 0, 3))
+        assert recut.metre.seconds == 8.0 and len(recut.edits) == 1
+
+    def test_remove_bars_is_splice_out_with_the_grid_shifted(self):
+        _, beats, downbeats = click_track(BPM, 16.0)
+        samples = click(16.0)[0]
+        metre = metre_of(beats, downbeats, 16.0, hits=[4.5, 8.5])
+        out, recut = ce.remove_bars(samples, RATE, metre, 2, 2)
+        assert np.array_equal(out, ce.splice_out(samples, RATE, metre, 2, 2))
+        assert recut.metre.seconds == 14.0
+        assert recut.metre.downbeats == [0.5, 2.5, 4.5, 6.5, 8.5, 10.5, 12.5]   # the pre-roll stays
+        assert recut.metre.hits == [6.5]              # the hit on the removed bar is gone, the later one moved
+        assert off_grid(click_times(out), recut.metre) == []
+        assert abs(len(out) / RATE - recut.metre.seconds) <= 2 * ce.ZERO_WINDOW
+        assert [(e.op, e.first_bar, e.last_bar, e.at, e.fade_s) for e in recut.edits] == [
+            ("remove", 2, 2, 4.5, ce.HIT_FADE)]
+
+    def test_a_span_between_events_is_removed_by_the_second(self):
+        """Run 11's cues measure as onsets, not bars: the plan's spans sit on
+        events, and a lost span is cut out between two of them."""
+        _, beats, downbeats = click_track(BPM, 16.0)
+        samples = click(16.0)[0]
+        metre = metre_of(beats, downbeats, 16.0, hits=[4.5, 8.5])
+        out, recut = ce.remove_range(samples, RATE, metre, 4.5, 6.5)
+        assert np.array_equal(out, ce.remove_bars(samples, RATE, metre, 2, 2)[0])
+        assert recut.metre.seconds == 14.0 and recut.metre.hits == [6.5]
+        assert [(e.op, e.start_s, e.end_s, e.at, e.fade_s) for e in recut.edits] == [
+            ("cut", 4.5, 6.5, 4.5, ce.HIT_FADE)]
+
+    def test_a_join_off_every_hit_fades_over_half_a_beat(self):
+        samples, metre = click(16.0)
+        _, recut = ce.remove_range(samples, RATE, metre, 4.5, 6.5)
+        assert recut.edits[0].fade_s == BEAT / 2
+
+    def test_a_stereo_cue_is_cut_as_one_where_its_mid_crosses_zero(self):
+        """The delivered cue is 44.1 kHz stereo; both channels are cut at the
+        same sample, chosen on the mid, or the image smears at the join."""
+        mono, metre = click(16.0)
+        stereo = np.stack([mono, mono], axis=1)
+        out, recut = ce.remove_bars(stereo, RATE, metre, 2, 2)
+        expect = ce.remove_bars(mono, RATE, metre, 2, 2)[0]
+        assert out.shape == (len(expect), 2)
+        assert np.array_equal(out[:, 0], expect) and np.array_equal(out[:, 1], expect)
+
+    def test_a_hole_a_stop_and_the_staircase_keep_both_channels(self):
+        mono = texture(8.0)
+        stereo = np.stack([mono, mono], axis=1)
+        assert ce.hole(stereo, RATE, 2.0, 2.0, -30.0, 0.25).shape == stereo.shape
+        stopped = ce.stop_at(stereo, RATE, 4.0, 1.0)
+        assert stopped.shape == (5 * RATE, 2) and np.array_equal(stopped[:, 0], stopped[:, 1])
+        stepped = ce.section_gains(stereo, RATE, [(0.0, 4.0), (4.0, 8.0)], [0.0, 3.0])
+        assert stepped.shape == stereo.shape
+
+    def test_hole_bars_is_a_hole_over_whole_bars_returning_on_the_downbeat(self):
+        samples, metre = click(8.0)
+        out = ce.hole_bars(samples, RATE, metre, 1, 1, depth_db=-30.0, return_s=0.25)
+        assert np.array_equal(out, ce.hole(samples, RATE, 2.5, 2.0, -30.0, 0.25))
+
+    def test_section_bounds_read_from_the_plan_sections(self):
+        sections = [CueSection(index=0, start=0.0, end=4.5, movement="M1", pulse=False, level_db=-24.0),
+                    CueSection(index=1, start=4.5, end=12.5, movement="M2", pulse=True, level_db=-18.0)]
+        assert ce.section_bounds(sections) == [(0.0, 4.5), (4.5, 12.5)]
+
+    def test_the_helpers_under_the_grid_layer(self):
+        _, metre = click(8.0)                        # downbeats 0.5, 2.5, 4.5, 6.5
+        assert ce.lands_on(4.505, [4.5]) and not ce.lands_on(4.6, [4.5])
+        assert ce.bar_at(metre, 2.5) == 1
+        with pytest.raises(ValueError):
+            ce.bar_at(metre, 3.0)
+        spans = [(0.5, 4.5), (6.5, 8.0)]
+        assert ce.offsets_of(spans) == [0.0, 4.0]
+        assert ce.shifted([0.5, 4.5, 6.5, 7.9], spans) == [0.0, 4.0, 5.4]   # 4.5 closes the first span
+        assert ce.kept_slots([Slot(start=6.5, end=8.0), Slot(start=4.0, end=6.5)], spans) == [
+            Slot(start=4.0, end=5.5)]
+        edits = ce.keep_edits([(0, 1), (3, 3)], spans, ce.HIT_FADE)
+        assert [(e.at, e.fade_s) for e in edits] == [(0.0, 0.0), (4.0, ce.HIT_FADE)]

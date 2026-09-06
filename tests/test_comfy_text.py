@@ -152,6 +152,55 @@ def test_running_reads_the_engines_running_slot(monkeypatch):
     assert comfy.running("job-1") is False
 
 
+def _answers(monkeypatch, answers: list):
+    """urlopen that pops one answer per call: an exception is raised, anything
+    else returned.  Returns the call log."""
+    calls = []
+
+    def fake_urlopen(request, timeout=None):
+        calls.append(request)
+        answer = answers.pop(0)
+        if isinstance(answer, Exception):
+            raise answer
+        return answer
+    monkeypatch.setattr(comfy.urllib.request, "urlopen", fake_urlopen)
+    return calls
+
+
+def test_a_call_to_a_restarting_engine_is_retried_until_it_answers(monkeypatch):
+    """Run 11, attempt 3: `submit` met a refused connection while the engine
+    restarted and the run died in step 02.  Every door to the engine waits
+    the restart out, not only the poll."""
+    clock = _clock(monkeypatch)
+    refused = comfy.urllib.error.URLError("[WinError 10061] actively refused")
+    calls = _answers(monkeypatch, [refused, TimeoutError("timed out"), "response"])
+    assert comfy._open("http://x/queue") == "response"
+    assert len(calls) == 3 and clock.now > 1000.0
+
+
+def test_an_engine_down_past_the_restart_window_raises(monkeypatch):
+    clock = _clock(monkeypatch)
+    _answers(monkeypatch, [comfy.urllib.error.URLError("refused")] * 10_000)
+    import pytest
+    with pytest.raises(comfy.urllib.error.URLError):
+        comfy._open("http://x/queue")
+    assert clock.now - 1000.0 >= comfy.RESTART_SECONDS
+
+
+def test_a_rejected_workflow_is_the_engines_answer_not_its_absence(monkeypatch):
+    """HTTPError is a URLError by inheritance and nothing else: the engine
+    answered, and a 400 retried for ten minutes is a 400."""
+    import io
+    _clock(monkeypatch)
+    rejected = comfy.urllib.error.HTTPError("http://x/prompt", 400, "Bad Request", {},
+                                            io.BytesIO(b'{"error": "bad node"}'))
+    calls = _answers(monkeypatch, [rejected, "never"])
+    import pytest
+    with pytest.raises(RuntimeError, match="bad node"):
+        comfy.submit({"1": {}})
+    assert len(calls) == 1
+
+
 def test_pending_reads_the_engines_queue(monkeypatch):
     queue = {"queue_running": [[0, "job-0", {}]], "queue_pending": [[1, "job-1", {}]]}
     monkeypatch.setattr(comfy, "_get", lambda path: queue)

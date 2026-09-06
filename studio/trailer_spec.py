@@ -30,6 +30,24 @@ Movement = Literal["M1", "M2", "M3"]
 problem & turn, threat & climax.  This is the SPINE -- shots play in movement
 order -- and `arc` is derived from it (`trailer_plan.arc_of`)."""
 
+SpanKind = Literal["section", "phrase", "accent", "sustain", "trough", "tail"]
+"""The class of the cue span a shot fills (`studio/cue_plan.py` names the same
+six).  Each kind fills its span in one way (`studio/shot_grammar.py`)."""
+
+SpeakerMode = Literal["listening", "look_up", "ots", "profile", "walking_away",
+                      "wide", "two_shot"]
+"""How the face in a sustain or trough carries the line that sits in it."""
+
+Phase = Literal["open", "middle", "final"]
+
+
+class TimedAction(BaseModel):
+    """One thing that happens inside a shot, at a time on the cue's clock."""
+
+    at: float = Field(ge=0.0)
+    phase: Phase
+    text: str = Field(min_length=1)
+
 
 class RefSheet(BaseModel):
     """One reference image belonging to the BOOK, not to any one trailer.
@@ -104,6 +122,31 @@ class ShotSpec(BaseModel):
     line_span: int = Field(default=1, ge=1, le=2)
     """How many shots the line runs across.  A line starts on the speaker and
     may carry over ONE cut; that is how a trailer speaks."""
+    span_kind: SpanKind | None = None
+    """The cue span this shot fills; None on a plan cut by the beat walk."""
+    movement: Movement | None = None
+    """The movement of the span, read off the cue's sections."""
+    move: str | None = None
+    """The ONE camera move, as a motivated sentence; None holds the frame still."""
+    actions: list[TimedAction] = Field(default_factory=list)
+    """What happens inside the shot, timed on the cue's clock (a sustain
+    carries three: open, middle, final-second look-up)."""
+    speaker_mode: SpeakerMode | None = None
+    """How the face carries the line that sits in this span; None when
+    the span holds no line."""
+    reveal_at: float | None = None
+    """A section's reveal lands here: the span's own start, the downbeat."""
+    binds_face: bool = False
+    """Whether the take binds a character sheet.  An accent never does."""
+
+    @model_validator(mode="after")
+    def _an_accent_is_an_insert_with_no_face(self) -> "ShotSpec":
+        """An accent is a beat long: a bound face has no time to be read,
+        so the sheet would be spent on a smear."""
+        if self.span_kind == "accent" and (self.binds_face or self.char_refs):
+            raise ValueError(f"{self.beat_id}: an accent carries an insert, and this "
+                             f"one binds a face")
+        return self
 
     @model_validator(mode="after")
     def _size_must_be_legible(self) -> "ShotSpec":

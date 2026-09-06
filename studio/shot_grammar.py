@@ -93,8 +93,6 @@ background -- because a model trained on image captions has no grip vocabulary.
 observation, and observations are what these models render toward."""
 
 
-MODEL_TEXT = (FRAMING, ANGLE)
-
 
 def motivated_move(move: str, amplitude: str, speed: str, cause: str,
                    destination: str, occluder: str = "") -> str:
@@ -239,3 +237,199 @@ def camera_for(text: str, size: str, position: float) -> str:
         move, amplitude = "tracks in", "moderate"
     speed = "quick" if late else "slow"
     return motivated_move(move, amplitude, speed, cause_of(text), destination)
+
+
+# --- the grammar per span kind -------------------------------------------------
+#
+# The cue's measured spans ARE the shot list (docs/analysis/research/
+# trailer-music-first.md section 5).  A shot's length is read off its span, so
+# what is left to decide is HOW each kind of span is filled: a section is the
+# widest frame with its reveal on the downbeat; a sustain is one move carrying
+# three timed actions; a phrase states one fact; an accent is an insert with
+# no face to bind; a trough is a static answer.  `ShotGrammar` is the contract
+# that refuses a fill breaking its kind's rule; the functions below produce
+# one that passes.
+
+from pydantic import BaseModel, Field, model_validator
+
+from studio.trailer_spec import SpanKind, SpeakerMode, TimedAction
+
+STATIC = motivated_move("static", "", "", "", "")
+"""The sentence a locked-off beat carries; a sustain reads it as 'give me a move'."""
+
+FINAL_SECOND = 1.0
+"""A sustain's last action lands this far before the cut: the look-up the
+next shot answers."""
+
+LOOK_UP = "In the final second the figure looks up, the gaze held to the cut."
+INSERT = "An insert: the object alone fills the frame. "
+"""Model-facing texts.  Affirmative: each names what the frame holds."""
+
+MODEL_TEXT = (FRAMING, ANGLE, LOOK_UP, INSERT)
+
+PHRASE_SIZE = "medium_close"
+"""One fact reads at mid-ladder: it stands apart from the wides around it."""
+
+
+class ShotGrammar(BaseModel):
+    """What a span's kind asks of the shot that fills it."""
+
+    kind: SpanKind
+    start: float = Field(ge=0.0)
+    end: float = Field(gt=0.0)
+    size: str = Field(min_length=1)
+    move: str | None = None
+    actions: list[TimedAction] = Field(default_factory=list)
+    speaker_mode: SpeakerMode | None = None
+    reveal_at: float | None = None
+    binds_face: bool = False
+
+    @model_validator(mode="after")
+    def _actions_sit_inside_the_span_in_order(self) -> "ShotGrammar":
+        times = [a.at for a in self.actions]
+        if any(not self.start <= t < self.end for t in times):
+            raise ValueError(f"{self.kind} at {self.start}s: every action sits inside the span")
+        if times != sorted(times):
+            raise ValueError(f"{self.kind} at {self.start}s: actions run in time order")
+        return self
+
+    @model_validator(mode="after")
+    def _a_sustain_carries_one_move_and_three_actions(self) -> "ShotGrammar":
+        if self.kind != "sustain":
+            return self
+        if self.move is None:
+            raise ValueError(f"sustain at {self.start}s: a sustain carries one move")
+        if len(self.actions) != 3:
+            raise ValueError(f"sustain at {self.start}s: three timed actions, "
+                             f"got {len(self.actions)}")
+        return self
+
+    @model_validator(mode="after")
+    def _a_section_reveals_on_its_downbeat(self) -> "ShotGrammar":
+        if self.kind == "section" and self.reveal_at != self.start:
+            raise ValueError(f"section at {self.start}s: the reveal lands on the "
+                             f"downbeat the span opens on, got {self.reveal_at}")
+        return self
+
+    @model_validator(mode="after")
+    def _a_phrase_states_one_fact(self) -> "ShotGrammar":
+        if self.kind == "phrase" and len(self.actions) != 1:
+            raise ValueError(f"phrase at {self.start}s: one fact, got {len(self.actions)}")
+        return self
+
+    @model_validator(mode="after")
+    def _an_accent_is_an_insert_with_no_face(self) -> "ShotGrammar":
+        if self.kind == "accent" and (self.binds_face or self.size != "insert"):
+            raise ValueError(f"accent at {self.start}s: an insert, and it binds a face "
+                             f"or is sized {self.size!r}")
+        return self
+
+    @model_validator(mode="after")
+    def _a_trough_holds_still(self) -> "ShotGrammar":
+        if self.kind == "trough" and self.move is not None:
+            raise ValueError(f"trough at {self.start}s: the answer holds still")
+        return self
+
+
+def widest(seconds: float, bound: bool) -> str:
+    """The largest size the span can read; a face caps it at BOUND_FLOOR."""
+    sizes = legible_sizes(seconds)
+    if bound:
+        floor = LADDER.index(BOUND_FLOOR)
+        sizes = [s for s in sizes if LADDER.index(s) <= floor]
+    return sizes[-1]
+
+
+def size_for(kind: str, seconds: float, bound: bool) -> str:
+    """The frame each kind takes: widest for a section, sustain or trough,
+    an insert for an accent, mid-ladder for a phrase when it has the time."""
+    if kind == "accent":
+        return "insert"
+    top = widest(seconds, bound)
+    if kind == "phrase" and LADDER.index(PHRASE_SIZE) <= LADDER.index(top):
+        return PHRASE_SIZE
+    return top
+
+
+def one_move(motion: str, text: str) -> str:
+    """The beat's own motivated move, or a slow push toward its destination
+    when the beat was locked off: a sustain holds a single move through."""
+    if motion != STATIC:
+        return motion
+    return motivated_move("pushes in", "small", "slow", cause_of(text),
+                          destination_of(text) or "the subject")
+
+
+def timed_actions(start: float, end: float, text: str) -> list[TimedAction]:
+    """Open, middle, final-second look-up: the three phases a sustain plays."""
+    arrives = destination_of(text) or "the subject"
+    return [TimedAction(at=start, phase="open", text=f"{cause_of(text)}."),
+            TimedAction(at=round((start + end) / 2.0, 3), phase="middle",
+                        text=f"The frame arrives on {arrives}."),
+            TimedAction(at=round(end - FINAL_SECOND, 3), phase="final", text=LOOK_UP)]
+
+
+def speaker_mode_for(cast: list[str], speaker: str | None, spoken: bool) -> SpeakerMode | None:
+    """How the face carries the line: two faces share it, the speaker looks
+    up on it, a voice with no face is listened to, an absent speaker is heard
+    over the shoulder of who is there."""
+    if not spoken:
+        return None
+    if speaker is None:
+        return "listening"
+    if speaker in cast:
+        return "two_shot" if len(cast) >= 2 else "look_up"
+    return "ots"
+
+
+def one_fact(start: float, text: str) -> list[TimedAction]:
+    """One visual statement, at the cut."""
+    return [TimedAction(at=start, phase="open", text=text)]
+
+
+def sustain_grammar(span, motion: str, text: str, cast: list[str], spoken: bool,
+                    speaker: str | None) -> ShotGrammar:
+    """One move, three timed actions, and how the face carries any line."""
+    return ShotGrammar(kind="sustain", start=span.start, end=span.end,
+                       size=size_for("sustain", span.seconds, bool(cast)), binds_face=bool(cast),
+                       move=one_move(motion, text), actions=timed_actions(span.start, span.end, text),
+                       speaker_mode=speaker_mode_for(cast, speaker, spoken))
+
+
+def insert_text(text: str) -> str:
+    """The action as an insert: its object alone in frame; a text already
+    written as one is kept as it is."""
+    if text.startswith(INSERT):
+        return text
+    return INSERT + (destination_of(text) or text)
+
+
+def accent_grammar(span, text: str) -> ShotGrammar:
+    """An insert on the hit: the action's object alone, no face to bind."""
+    return ShotGrammar(kind="accent", start=span.start, end=span.end, size="insert", move=None,
+                       actions=one_fact(span.start, insert_text(text)))
+
+
+def held_grammar(span, motion: str, text: str, cast: list[str], spoken: bool,
+                 speaker: str | None) -> ShotGrammar:
+    """A section, phrase or trough: one fact; the section's reveal on its
+    downbeat; the trough held still with the line it answers."""
+    kind = span.kind
+    move = None if kind == "trough" or motion == STATIC else motion
+    mode = speaker_mode_for(cast, speaker, spoken) if kind == "trough" else None
+    return ShotGrammar(kind=kind, start=span.start, end=span.end, move=move,
+                       size=size_for(kind, span.seconds, bool(cast)), binds_face=bool(cast),
+                       speaker_mode=mode, reveal_at=span.start if kind == "section" else None,
+                       actions=one_fact(span.start, text))
+
+
+def grammar_for(span, motion: str, text: str, cast: list[str], spoken: bool = False,
+                speaker: str | None = None) -> ShotGrammar:
+    """The fill a span's kind asks for, from the beat's own move and action."""
+    if span.kind == "tail":
+        raise ValueError("the tail is the card's; the picture fills every other span")
+    if span.kind == "sustain":
+        return sustain_grammar(span, motion, text, cast, spoken, speaker)
+    if span.kind == "accent":
+        return accent_grammar(span, text)
+    return held_grammar(span, motion, text, cast, spoken, speaker)

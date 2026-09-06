@@ -28,8 +28,9 @@ from pydantic import BaseModel, Field
 from scripts.analysis.iconicity_coverage import book_identity
 from studio import iconicity, llm
 from studio.ladder import Ladder, Rung, climb
+from studio.line_windows import beat_for, load_plan, windows_for
 from studio.trailer_dialogue import (line_value, names_figure, order_lines, speech_seconds,
-                                     story_refusal, wanted_speech, windows_of)
+                                     story_refusal, wanted_speech)
 from studio.trailer_stage_spec import (MAX_LINES, Function, LineSlate, Metre, SlateLine,
                                        StorySpec)
 from studio.trailer_story import identity_scenes, line_pools
@@ -316,13 +317,26 @@ def try_order(lines: list[SlateLine], slots: list, figure: str, beat: float | No
     return True, slate, "LineSlate"
 
 
-def label(ranked: list[dict], story: StorySpec, metre: Metre, level: str, ctx,
-          runtime: float = 0.0, climax: set | None = None) -> tuple[LineSlate, list[SlateLine]]:
+def line_windows(ctx, metre: Metre) -> tuple[list, float | None]:
+    """Where a line may sit, and the beat it is measured in.
+
+    BUILD 50: with step 03's plan the windows are its troughs and sustains,
+    each a beat short of the span, so a line ends before the cut and never
+    under it.  A production cut before the plan existed keeps the metre's
+    windows; which path was taken is on the log.
+    """
+    plan = load_plan(ctx.out_dir)
+    source = "music/plan.json (troughs and sustains)" if plan else "music/metre.json (slots and phrases)"
+    ctx.tracker.log(f"line windows from {source}", step_id=STEP_ID)
+    return windows_for(metre, plan), beat_for(metre, plan)
+
+
+def label(ranked: list[dict], story: StorySpec, windows: list, beat: float | None, level: str,
+          ctx, runtime: float = 0.0, climax: set | None = None) -> tuple[LineSlate, list[SlateLine]]:
     """Climb the labelling ladder: each refusal is quoted back, ten more
     candidates join the sheet, and the last rung drops the story rules.
     Returns the slate and every labelled line, so step 05 can fall back to a
     spare."""
-    beat = metre.beat if metre.grid == "metre" else None
     violation: dict = {"text": None}
     seen: list[SlateLine] = []
     state = {"n": 0, "strict": True}
@@ -338,7 +352,7 @@ def label(ranked: list[dict], story: StorySpec, metre: Metre, level: str, ctx,
         return seen
 
     def gate(lines):
-        return try_order(lines, windows_of(metre), story.figure, beat, level, violation,
+        return try_order(lines, windows, story.figure, beat, level, violation,
                          runtime if state["strict"] else None)
 
     outcome = climb(LADDER, STEP_ID, attempt, gate, ctx.budget, ctx.learn, gate_name="slate")
@@ -367,16 +381,17 @@ def run(codex_id: str, ctx) -> None:
     story, metre = load_inputs(ctx.out_dir)
     doc = kept_quotes(ctx)
     kept = doc.get("kept", [])
-    longest = max([s.seconds for s in windows_of(metre)] or [0.0])
+    windows, beat = line_windows(ctx, metre)
+    longest = max([s.seconds for s in windows] or [0.0])
     scenes = scenes_of(ctx.book_dir)
     pool = thesis_card(story) + candidates(ctx.book_dir, story)
     ranked = voiced(rank(pool, kept, (story.lead,), longest, doc.get("where")), story.narrator)
     level = iconicity_level(ranked, kept)
     runtime = runtime_of(ctx, metre)
-    slate, spare = label(ranked, story, metre, level, ctx, runtime,
+    slate, spare = label(ranked, story, windows, beat, level, ctx, runtime,
                          climax_scenes(scenes, story))
     write_slate(ctx.out_dir, slate, spare)
-    print(f"[{STEP_ID}] {len(ranked)} candidates, {len(metre.slots)} slots, "
+    print(f"[{STEP_ID}] {len(ranked)} candidates, {len(windows)} windows, "
           f"{runtime:.0f} s picture, needs {wanted_speech(runtime, MAX_LINES)} spoken, "
           f"iconicity {level}, " + ("music only" if slate.music_only else
                                     " -> ".join(f"{l.function}:{l.speaker or 'CARD'}"

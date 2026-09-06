@@ -18,8 +18,10 @@ import pytest
 from scripts.trailer import step_04_lines as step
 from studio import db, llm
 from studio.learnings import load
+from studio.trailer_dialogue import speech_seconds, windows_of
 from studio.trailer_run import RunContext
-from studio.trailer_stage_spec import LineSlate, SlateLine, StorySpec
+from studio.trailer_stage_spec import LineSlate, Metre, SlateLine, StorySpec
+from tests.test_line_windows import plan_doc
 
 HOLMES, WATSON, HOPE = "sherlock_holmes", "john_watson", "jefferson_hope"
 AFGHAN = "You have been in Afghanistan, I perceive."
@@ -64,9 +66,22 @@ def metre(*slot_seconds):
             "grid": "metre", "fitness": 0.8, "slots": slots}
 
 
+def plan():
+    """Step 03's cue plan over the 80 s fixture cue: two sustains, three
+    troughs, two accents and three section starts (tests/test_line_windows)."""
+    return plan_doc()
+
+
 def write(path, doc):
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(json.dumps(doc), encoding="utf-8")
+
+
+def logged(ctx) -> list[str]:
+    path = ctx.tracker.log_path
+    if not path.exists():
+        return []
+    return [json.loads(l)["msg"] for l in path.read_text(encoding="utf-8").splitlines()]
 
 
 @pytest.fixture()
@@ -370,3 +385,49 @@ class TestRun10Regression:
         window = step.quota_fill(ranked, step.TOP_N, HOPE, self.CLIMAX)
         for role, mark in step.ROLE_MARKS.items():
             assert any(mark(l["text"]) for l in window), role
+
+
+class TestPlanWindows:
+    """BUILD 50: with a cue plan, a line sits in a trough or a sustain and
+    ends at least a beat before the span does, so the cut lands on music
+    and never on a word.  The metre's slots (10-16, 22-28, ...) sit on
+    phrases of this plan and must not be used."""
+
+    def spans_by_window(self, ctx, slate):
+        spans = plan()["spans"]
+        found = []
+        for line in slate.lines:
+            span = next(s for s in spans if s["start"] <= line.window.start < s["end"])
+            found.append((line, span))
+        return found
+
+    def test_a_line_window_is_a_trough_or_a_sustain(self, ctx, monkeypatch):
+        write(ctx.book_dir / "trailer/main/music/plan.json", plan())
+        monkeypatch.setattr(llm, "structured", FakeLabeller())
+        step.run(ctx.codex_id, ctx)
+        slate = LineSlate.model_validate(slate_of(ctx))
+        assert not slate.music_only and len(slate.lines) >= 3
+        for line, span in self.spans_by_window(ctx, slate):
+            assert span["kind"] in ("trough", "sustain"), (line.text, span)
+            assert line.window.start == span["start"]
+            assert line.window.made == (span["kind"] == "sustain")
+        assert any("plan.json" in msg for msg in logged(ctx))
+
+    def test_a_line_ends_a_beat_before_the_span(self, ctx, monkeypatch):
+        write(ctx.book_dir / "trailer/main/music/plan.json", plan())
+        monkeypatch.setattr(llm, "structured", FakeLabeller())
+        step.run(ctx.codex_id, ctx)
+        slate = LineSlate.model_validate(slate_of(ctx))
+        beat = plan()["bar"] / 4.0
+        for line, span in self.spans_by_window(ctx, slate):
+            assert line.window.end <= span["end"] - beat + 1e-6
+            spoken_end = line.window.start + beat + speech_seconds(line.text)
+            assert spoken_end <= span["end"] - beat + 1e-6, (line.text, span)
+
+    def test_without_a_plan_the_metre_windows_are_the_fallback(self, ctx, monkeypatch):
+        monkeypatch.setattr(llm, "structured", FakeLabeller())
+        step.run(ctx.codex_id, ctx)
+        slate = LineSlate.model_validate(slate_of(ctx))
+        starts = {l.window.start for l in slate.lines}
+        assert starts <= {s.start for s in windows_of(Metre.model_validate(metre(6, 6, 6, 6)))}
+        assert any("metre.json" in msg for msg in logged(ctx))

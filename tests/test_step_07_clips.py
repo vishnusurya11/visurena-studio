@@ -17,17 +17,24 @@ import pytest
 from PIL import Image
 
 from scripts.trailer import step_07_clips as step
-from scripts.trailer.build_clips import FRAMING
+from scripts.trailer.build_clips import FRAMING, recipe_for
 from studio import comfy, db
 from studio import describe
+from studio import frame_budget
 from studio.clip_cache import fingerprint, is_current, record, stored_fingerprint
 from studio.describe import DISTINCT_AT, TIMEOUT, TraitCard
+from studio.frame_budget import TYPED, Cycle
 from studio.frames import HEAD_LEAK_SECONDS
 from studio.learnings import Learning, load
 from studio.run_budget import TRAILER_SHARES, Budget
 from studio.trailer_run import RunContext
 
 HOLMES = "sherlock_holmes"
+LONG = step.LONG_TAKE
+SHORT_FRAMES = frame_budget.take_frames(2.0)
+"""A 2 s shot's take: 124 frames, the frame count `one_beat_plan` renders."""
+B00_FRAMES, B01_FRAMES = frame_budget.take_frames(2.5), frame_budget.take_frames(1.5)
+"""The default plan's two takes: 141 and 107 frames."""
 SHEET = TraitCard(age="middle-aged", hair_colour="dark brown", hair_length="short",
                   facial_hair="clean-shaven", headgear="bowler", complexion="sallow", build="slight")
 NEAR = SHEET.model_copy(update={"headgear": "none"})                       # 1 apart: bound
@@ -37,6 +44,11 @@ MID = SHEET.model_copy(update={"hair_colour": "grey", "headgear": "none", "build
 NOTCHED = SHEET.model_copy(update={"age": "old", "hair_colour": "brown", "headgear": "none"})  # 2.0
 TILTED = FAR.model_copy(update={"age": "old"})                            # 4.5 apart
 BLIND = SHEET.model_copy(update={t: "unclear" for t in ("age", "hair_colour", "headgear", "build")})
+
+
+def ceiling_for(share: float) -> float:
+    """The run ceiling that hands step 07 exactly `share` seconds."""
+    return share / TRAILER_SHARES["07"]
 
 
 def beat(beat_id, cast, loc):
@@ -92,18 +104,20 @@ def rendered(monkeypatch):
     """Faked renders and readings.  `cards` is consumed per bound take in
     ROUND order, and every read of a round is handed that round's one reader:
     the reader is what unloads the video model, so counting readers counts
-    model swaps."""
+    model swaps.  The fake machine renders on `cycle`, a line in frames --
+    the typed curve unless a test sets another -- so what a take costs is a
+    function of the frames it asked for, as on the real one."""
     calls = []
 
     def render_take(values, bound, refs, book, dest):
         calls.append({"seed": values["seed"], "prompt": values["prompt"], "dest": dest.name,
                       "frames": values["frames"]})
-        state["clock"][0] += step.RENDER_SECONDS
+        state["clock"][0] += state["cycle"].cost_seconds(values["frames"])
         dest.parent.mkdir(parents=True, exist_ok=True)
         dest.write_bytes(b"mp4" + str(values["seed"]).encode())
         # The real renderer records the recipe beside the take; the fake must
         # too, or every clip this run makes reads as stale to step 08.
-        record(dest, {"prompt": values["prompt"], "seed": values["seed"]})
+        record(dest, recipe_for(values, bound, refs, book))
         return dest
 
     def reader(free=True):
@@ -116,7 +130,8 @@ def rendered(monkeypatch):
         state["open"].add(run)
         return state["cards"].pop(0)
 
-    state = {"calls": calls, "cards": [], "clock": [0.0], "sessions": [], "reads": [], "open": set()}
+    state = {"calls": calls, "cards": [], "clock": [0.0], "sessions": [], "reads": [], "open": set(),
+             "cycle": TYPED}
     monkeypatch.setattr(step, "render_take", render_take)
     monkeypatch.setattr(step, "reader", reader)
     monkeypatch.setattr(step, "is_complete", lambda p: p.exists())
@@ -263,7 +278,10 @@ class TestRun:
 
 class TestBudget:
     def test_no_time_for_a_retry_ships_the_first_take_short(self, tmp_path, rendered):
-        ctx = make_ctx(tmp_path, rendered["clock"], ceiling=2200)  # 07's share: 1283 s
+        # Room for B00's long take and its session; once B00 has rendered, 20 s
+        # short of what B01's take would add.
+        share = TYPED.cost_seconds(LONG) + step.take_cost(1, B01_FRAMES, TYPED) - 20
+        ctx = make_ctx(tmp_path, rendered["clock"], ceiling=ceiling_for(share))
         rendered["cards"] = [FAR]
         step.run(ctx.codex_id, ctx)
         doc = clips_doc(ctx)
@@ -280,8 +298,11 @@ class TestBudget:
         with 391 s left.  Rounds make that structural -- every beat's first
         take is rendered in round one, so a reroll can only ever cost another
         reroll -- and a reroll is priced at what a reroll ROUND costs: one
-        render and the reader session that has to follow it."""
-        ctx = make_ctx(tmp_path, rendered["clock"], ceiling=3772)  # 07's share: 2200 s
+        render of the beat's own frames and the reader session that has to
+        follow it."""
+        # Round one whole, with 50 s to spare: far short of a reroll round.
+        share = step.take_cost(0, LONG, TYPED) + step.take_cost(1, B01_FRAMES, TYPED) + 50
+        ctx = make_ctx(tmp_path, rendered["clock"], ceiling=ceiling_for(share))
         rendered["cards"] = [FAR]
         step.run(ctx.codex_id, ctx)
         doc = clips_doc(ctx)
@@ -290,7 +311,8 @@ class TestBudget:
         assert len(rendered["calls"]) == 2
         rows = rungs(ctx)
         assert [r.gate for r in rows] == ["identity", "budget"]
-        assert rows[1].threshold == step.RETRY_COST and rows[1].substep == "B00"
+        assert rows[1].threshold == pytest.approx(step.retry_cost(B00_FRAMES, TYPED), abs=0.1)
+        assert rows[1].substep == "B00"
 
     def test_no_time_for_a_first_render_drops_the_remaining_beats(self, tmp_path, rendered):
         ctx = make_ctx(tmp_path, rendered["clock"], ceiling=100)
@@ -419,12 +441,16 @@ class TestRounds:
         """A take rendered with no time left to read it ships unread, which is
         a take nobody gated.  The round reserves the session before it stages
         the first render."""
-        ctx = make_ctx(tmp_path, rendered["clock"], ceiling=1715, beats=2)  # 07's share: 1000 s
-        assert step.RENDER_SECONDS < ctx.budget.remaining("07") < step.take_cost(0)
+        share = step.take_cost(0, SHORT_FRAMES, TYPED) - 1
+        ctx = make_ctx(tmp_path, rendered["clock"], ceiling=ceiling_for(share), beats=2)
+        assert (TYPED.cost_seconds(SHORT_FRAMES) < ctx.budget.remaining("07")
+                < step.take_cost(0, SHORT_FRAMES, TYPED))
         step.run(ctx.codex_id, ctx)
         assert rendered["calls"] == [] and rendered["sessions"] == []
         assert clips_doc(ctx)["dropped"] == ["B00", "B01"]
-        assert rungs(ctx)[0].threshold == step.take_cost(0)
+        # B00 was to be round one's long take; B01 asked for its own frames.
+        assert [r.threshold for r in rungs(ctx)] == [step.take_cost(0, LONG, TYPED),
+                                                     step.take_cost(0, SHORT_FRAMES, TYPED)]
 
     def test_a_beat_that_binds_stops_asking_for_takes(self, tmp_path, rendered):
         """The round shrinks to the beats still climbing; a bound beat is not
@@ -437,7 +463,9 @@ class TestRounds:
 
 
 class TestRoundCost:
-    """What a round costs, so the budget can be asked before one starts."""
+    """What a round costs, so the budget can be asked before one starts.  A
+    take is priced on the CYCLE -- a line in its frames -- never on a
+    per-take constant."""
 
     def test_reading_nothing_costs_nothing(self):
         assert step.read_seconds(0) == 0.0
@@ -447,43 +475,193 @@ class TestRoundCost:
         assert step.read_seconds(3) == step.SESSION_SECONDS + 2 * step.SHEET_SECONDS
 
     def test_the_first_take_of_a_round_carries_the_whole_session(self):
-        assert step.take_cost(0) == step.RENDER_SECONDS + step.SESSION_SECONDS
+        cycle = Cycle(a=30.0, b=2.0)
+        assert step.take_cost(0, 124, cycle) == 30.0 + 2.0 * 124 + step.SESSION_SECONDS
 
     def test_every_further_take_of_a_round_carries_only_its_sheet(self):
-        assert step.take_cost(3) == step.RENDER_SECONDS + step.SHEET_SECONDS
+        cycle = Cycle(a=30.0, b=2.0)
+        assert step.take_cost(3, 243, cycle) == 30.0 + 2.0 * 243 + step.SHEET_SECONDS
+
+    def test_a_take_costs_its_own_frames(self):
+        assert step.take_cost(1, 243, TYPED) - step.take_cost(1, 124, TYPED) == pytest.approx(
+            TYPED.b * (243 - 124))
+
+    def test_a_reroll_round_is_one_render_and_one_session(self):
+        cycle = Cycle(a=30.0, b=2.0)
+        assert step.retry_cost(141, cycle) == 30.0 + 2.0 * 141 + step.SESSION_SECONDS
+
+    def test_the_ladder_is_priced_on_the_beat_s_frames(self):
+        ladder = step.ladder_for(141, TYPED)
+        assert [r.name for r in ladder.rungs] == ["reroll_seed", "alternate_setup"]
+        assert {r.cost_seconds for r in ladder.rungs} == {step.retry_cost(141, TYPED)}
+        assert ladder.terminal == "short_shot"
+
+
+def bind_of(index: int, frames: int) -> "step.Bind":
+    """A bind with no sheet, standing at the foot of its ladder."""
+    return step.Bind(index, {"beat_id": f"B{index:02}"}, [], None, None,
+                     step.Climb(step.ladder_for(frames, TYPED), "07"), frames=frames)
+
+
+class TestFrames:
+    """Every take renders the frames its shot needs, and round one renders
+    one of them LONG so the slope of the cycle is measured, never inferred."""
+
+    def test_a_beat_s_frames_are_its_take_snapped_onto_the_ladder(self):
+        plan = {"shots": [{"beat_id": "B00", "index": 0, "seconds": 2.5, "size": "medium"},
+                          {"beat_id": "B01", "index": 1, "seconds": 8.0, "size": "wide"}]}
+        assert step.frames_of_beat("B00", plan) == frame_budget.take_frames(2.5) == 141
+        assert step.frames_of_beat("B01", plan) == frame_budget.take_frames(8.0) == 277
+
+    def test_the_long_take_is_the_longest_beat_of_the_round(self):
+        binds = [bind_of(i, f) for i, f in enumerate((124, 158, 107))]
+        assert step.long_take_bind(binds, []) is binds[1]
+        assert step.frames_this_round(binds[1], binds[1]) == LONG
+        assert step.frames_this_round(binds[0], binds[1]) == 124
+
+    def test_a_beat_that_already_needs_a_long_take_is_the_measurement(self):
+        long = bind_of(0, 277)
+        assert step.frames_this_round(long, long) == 277
+
+    def test_a_long_take_already_timed_is_asked_for_once(self):
+        rows = [Learning(step="07", gate="cycle", action="round_1", measured=600.0, frames=LONG)]
+        binds = [bind_of(0, 124)]
+        assert step.long_take_bind(binds, rows) is None
+        short = [Learning(step="07", gate="cycle", action="round_1", measured=300.0, frames=124)]
+        assert step.long_take_bind(binds, short) is binds[0]
+
+    def test_a_long_take_is_measured_by_any_cycle_row_that_long(self):
+        rows = [Learning(step="07", gate="cycle", action="round_1", measured=300.0, frames=124),
+                Learning(step="07", gate="cycle", action="round_1", measured=900.0, frames=277)]
+        assert step.long_take_measured(rows) and not step.long_take_measured(rows[:1])
+        assert not step.long_take_measured(
+            [Learning(step="07", gate="cycle", action="round_1", measured=900.0)])
+
+    def test_the_ladders_are_repriced_on_the_cycle_of_the_round(self):
+        binds = [bind_of(0, 124), bind_of(1, 243)]
+        step.reprice(binds, Cycle(a=100.0, b=1.0))
+        assert [b.climb.ladder.rungs[0].cost_seconds for b in binds] == [
+            100.0 + 124 + step.SESSION_SECONDS, 100.0 + 243 + step.SESSION_SECONDS]
+
+    def test_opening_a_round_prices_it_on_the_rows_so_far(self, ctx):
+        binds = [bind_of(0, 124)]
+        assert step.open_round(ctx, binds, 1) == TYPED
+        for frames, seconds in ((124, 224.0), (243, 343.0)):
+            ctx.learn(Learning(step="07", gate="cycle", action="round_1", measured=seconds,
+                               frames=frames))
+        cycle = step.open_round(ctx, binds, 2)
+        assert cycle.a == pytest.approx(100.0) and cycle.b == pytest.approx(1.0)
+        assert binds[0].climb.ladder.rungs[0].cost_seconds == pytest.approx(
+            step.retry_cost(124, cycle))
+
+    def test_round_one_measures_a_long_take(self, tmp_path, rendered):
+        """Three 2 s shots would all render at 124 frames, one frame count, and
+        one frame count fits no slope.  Round one renders the first of them at
+        243 frames; the cut trims what it does not play."""
+        ctx = make_ctx(tmp_path, rendered["clock"], beats=3)
+        rendered["cards"] = [NEAR] * 3
+        step.run(ctx.codex_id, ctx)
+        assert [c["frames"] for c in rendered["calls"]] == [LONG, SHORT_FRAMES, SHORT_FRAMES]
+        rows = [r for r in load(ctx.learnings_path) if r.gate == "cycle"]
+        assert sorted({r.frames for r in rows}) == [SHORT_FRAMES, LONG]
+
+    def test_a_reroll_renders_the_beat_s_own_frames_again(self, tmp_path, rendered):
+        ctx = make_ctx(tmp_path, rendered["clock"], beats=2)
+        rendered["cards"] = [FAR, NEAR, NEAR]
+        step.run(ctx.codex_id, ctx)
+        assert [(c["dest"][:3], c["frames"]) for c in rendered["calls"]] == [
+            ("B00", LONG), ("B01", SHORT_FRAMES), ("B00", SHORT_FRAMES)]
+
+    def test_a_book_whose_long_take_is_timed_renders_every_beat_at_its_frames(
+            self, tmp_path, rendered):
+        ctx = make_ctx(tmp_path, rendered["clock"], beats=2)
+        ctx.learn(Learning(step="07", gate="cycle", action="round_1", measured=600.0, frames=LONG))
+        rendered["cards"] = [NEAR] * 2
+        step.run(ctx.codex_id, ctx)
+        assert [c["frames"] for c in rendered["calls"]] == [SHORT_FRAMES] * 2
 
 
 class TestMeasuredCycle:
     """The cycle stops being a constant a person typed.  Run 10 planned on 11
     min a take and rendered at 15.76, and the budget rung dropped the last six
-    beats -- which are the climax."""
+    beats -- which are the climax.  A cycle is a LINE in frames, `a + b *
+    frames`, and a line is fitted from rows that carry both columns."""
 
-    def test_every_round_learns_what_a_take_cost_it(self, ctx, rendered):
+    def test_every_cycle_row_carries_its_frames(self, ctx, rendered):
+        """One row per take rendered: the frames it asked for and the seconds
+        its render took, which is what `Cycle.from_rows` fits."""
         rendered["cards"] = [NEAR]
         step.run(ctx.codex_id, ctx)
-        cycle = [r for r in load(ctx.learnings_path) if r.gate == "cycle"]
-        assert len(cycle) == 1 and cycle[0].step == "07" and cycle[0].action == "round_1"
-        assert cycle[0].measured == pytest.approx(
-            (2 * step.RENDER_SECONDS + step.SESSION_SECONDS) / 2, abs=0.1)
-        assert cycle[0].threshold == step.RENDER_SECONDS
+        rows = [r for r in load(ctx.learnings_path) if r.gate == "cycle"]
+        assert [(r.substep, r.frames) for r in rows] == [("B00", LONG), ("B01", B01_FRAMES)]
+        for row in rows:
+            assert row.step == "07" and row.action == "round_1" and row.attempt == 1
+            assert row.measured == pytest.approx(TYPED.cost_seconds(row.frames), abs=0.1)
+            assert row.threshold == pytest.approx(TYPED.cost_seconds(row.frames), abs=0.1)
+        assert Cycle.from_rows(rows).b == pytest.approx(TYPED.b, abs=0.01)
 
-    def test_the_reader_session_is_measured_on_its_own(self, ctx, rendered):
+    def test_the_render_is_measured_apart_from_the_read(self, ctx, rendered):
+        """The reader session is its own row; a cycle row is the render alone,
+        or the session would be fitted into `a` and paid twice."""
         rendered["cards"] = [NEAR]
         step.run(ctx.codex_id, ctx)
-        read = [r for r in load(ctx.learnings_path) if r.gate == "read"]
+        rows = load(ctx.learnings_path)
+        assert sum(r.measured for r in rows if r.gate == "cycle") == pytest.approx(
+            TYPED.cost_seconds(LONG) + TYPED.cost_seconds(B01_FRAMES), abs=0.1)
+        read = [r for r in rows if r.gate == "read"]
         assert len(read) == 1 and read[0].action == "session"
         assert read[0].measured == pytest.approx(step.SESSION_SECONDS, abs=0.1)
         assert read[0].threshold == step.read_seconds(1)
+
+    def test_a_machine_off_the_typed_curve_is_measured_by_round_one(self, tmp_path, rendered):
+        """The fake machine is a different line; after round one the book's
+        cycle IS that line, and the next round is priced on it."""
+        rendered["cycle"] = Cycle(a=100.0, b=1.0)
+        ctx = make_ctx(tmp_path, rendered["clock"], beats=2)
+        rendered["cards"] = [FAR, NEAR, NEAR]
+        step.run(ctx.codex_id, ctx)
+        cycle = step.cycle_of(ctx)
+        assert cycle.a == pytest.approx(100.0, abs=0.5) and cycle.b == pytest.approx(1.0, abs=0.01)
+        second = [r for r in load(ctx.learnings_path) if r.gate == "cycle" and r.action == "round_2"]
+        assert second[0].threshold == pytest.approx(100.0 + SHORT_FRAMES, abs=0.5)
+
+    def test_a_reused_take_is_no_measurement(self, tmp_path, rendered):
+        """A take found finished from this exact recipe costs no render and
+        writes no cycle row: a reused take cannot resize the next plan."""
+        ctx = make_ctx(tmp_path, rendered["clock"], beats=2)
+        rendered["cards"] = [NEAR] * 2
+        step.run(ctx.codex_id, ctx)
+        assert len([r for r in load(ctx.learnings_path) if r.gate == "cycle"]) == 2
+        ctx.learnings_path.unlink()
+        ctx.open_step("07")
+        rendered["cards"] = [NEAR] * 2
+        step.run(ctx.codex_id, ctx)
+        assert len(rendered["calls"]) == 2
+        assert [r for r in load(ctx.learnings_path) if r.gate == "cycle"] == []
 
     def test_a_round_that_rendered_nothing_measures_no_cycle(self, tmp_path, rendered):
         ctx = make_ctx(tmp_path, rendered["clock"], ceiling=100)
         step.run(ctx.codex_id, ctx)
         assert [r for r in load(ctx.learnings_path) if r.gate in step.MEASURED] == []
 
+    def test_with_nothing_measured_the_cycle_is_the_typed_curve(self, ctx):
+        assert step.cycle_of(ctx) == TYPED
+
+    def test_rows_without_frames_price_nothing(self, ctx):
+        """The rows the last design wrote, one per round with no frames, are
+        points on no line: the typed curve stands until a frames row exists."""
+        ctx.learn(Learning(step="07", gate="cycle", action="round_1", measured=945.6))
+        assert step.cycle_of(ctx) == TYPED
+
+
+class TestLegacyCycleForStep06:
+    """`render_seconds_for` is what step 06 still sizes its plan on, until it
+    sizes by frames (BUILD row 51).  Step 07 itself prices nothing on it."""
+
     def test_with_nothing_measured_the_cycle_is_the_constant(self):
         assert step.render_seconds([]) == step.RENDER_SECONDS
 
-    def test_the_cycle_is_the_median_of_the_rounds_that_measured_one(self):
+    def test_the_cycle_is_the_median_of_the_takes_that_measured_one(self):
         rows = [Learning(step="07", gate="cycle", action="round_1", measured=500.0),
                 Learning(step="07", gate="cycle", action="round_2", measured=400.0),
                 Learning(step="07", gate="cycle", action="round_3", measured=900.0)]
@@ -495,10 +673,8 @@ class TestMeasuredCycle:
                 Learning(step="07", gate="identity", action="reroll_seed", measured=4.0)]
         assert step.render_seconds(rows) == step.RENDER_SECONDS
 
-    def test_the_next_plan_reads_this_run_s_cycle_off_the_book(self, ctx, rendered):
-        """What step 06 calls: the plan is sized by what the machine has
-        actually done on this book, not by the constant."""
+    def test_the_next_plan_reads_this_run_s_takes_off_the_book(self, ctx, rendered):
         rendered["cards"] = [NEAR]
         step.run(ctx.codex_id, ctx)
         assert step.render_seconds_for(ctx) == pytest.approx(
-            (2 * step.RENDER_SECONDS + step.SESSION_SECONDS) / 2, abs=0.1)
+            (TYPED.cost_seconds(LONG) + TYPED.cost_seconds(B01_FRAMES)) / 2, abs=0.1)

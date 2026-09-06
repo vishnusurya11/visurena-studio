@@ -195,16 +195,16 @@ QC_TARGETS = {"cuts_on_downbeat": 0.30, "cuts_on_L0": 1.0,
               "act3_over_act2_lu": 2.0, "pre_title_silence_s": 1.5,
               "title_hit_lu": -25.0, "bed_under_line_lu": -24.0,
               "line_tp": -3.0, "line_crest_db": 10.0,
-              "cuts_on_beat_act1": 0.50, "cuts_on_beat_act3": 0.80,
-              "cuts_on_events": 0.90}
+              "cuts_on_beat_act3": 0.80, "cuts_on_events": 0.90}
 """What the delivered master is asked for.
 
 `cuts_on_beat >= 0.80` across the whole trailer used to be in here, and it is
 the single target that FORCED a music video: 76% of run 10's cuts were on the
 beat, whole-bar lengths throughout, and a viewer starts counting within four
-shots.  It is replaced by two per-act targets pulling opposite ways -- act 1
-must be mostly OFF the grid, act 3 mostly on it -- because that difference is
-what an act break sounds like."""
+shots.  It was replaced by two per-act targets pulling opposite ways.  Act 1's is
+gone with the walk it graded (`on_cap_fraction` likewise): the cue's spans
+now decide where act 1 cuts, and `cue_cut` grades that.  Act 3's stays --
+the locked third act is what an act break sounds like."""
 
 
 CUE_FLOORS = {"section_changes_cut": 1.0, "cuts_inside_sustain": 0,
@@ -349,8 +349,6 @@ class QCReport(BaseModel):
 
     def _grid_flags(self) -> list[str]:
         out = [k for k in ("cuts_on_downbeat", "cuts_on_L0") if getattr(self, k) < QC_TARGETS[k]]
-        if self.on_cap_fraction > QC_TARGETS["on_cap_fraction"]:
-            out.append("on_cap_fraction")
         if not self.title_on_downbeat:
             out.append("title_on_downbeat")
         return out + [k for k in ("reused_shots", "stale_shots") if getattr(self, k)]
@@ -381,10 +379,7 @@ class QCReport(BaseModel):
         return out
 
     def _act_flags(self) -> list[str]:
-        """G: loose in act 1, locked in act 3 -- opposite targets, one field."""
+        """G: locked in act 3.  Act 1 is the cue's to loosen (`cue_cut`)."""
         if len(self.cuts_on_beat_by_act) < 3:
             return []
-        out = ["cuts_on_beat_act1"] if self.cuts_on_beat_by_act[0] > QC_TARGETS["cuts_on_beat_act1"] else []
-        if self.cuts_on_beat_by_act[2] < QC_TARGETS["cuts_on_beat_act3"]:
-            out.append("cuts_on_beat_act3")
-        return out
+        return ["cuts_on_beat_act3"] if self.cuts_on_beat_by_act[2] < QC_TARGETS["cuts_on_beat_act3"] else []

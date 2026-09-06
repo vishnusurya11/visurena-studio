@@ -21,11 +21,12 @@ from typing import Callable
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 
-from studio import beatmap, clip_cache, trailer_assemble
+from studio import beatmap, clip_cache, cue_qc, trailer_assemble
+from studio.cue_plan import CuePlan
 from studio.paths import book_dir
 from studio.trailer_cut import title_moment
 from studio.trailer_edit import act_cap
-from studio.trailer_stage_spec import Metre, QCReport
+from studio.trailer_stage_spec import CueCut, Metre, QCReport
 
 ON_GRID = 0.04
 """A cut within a frame of a beat is on it; beyond that it is near it."""
@@ -402,6 +403,23 @@ def report(plan: dict, found: Metre, seen: list[float], loud: tuple[float, float
         line_over_bed_lu=list(lines_lu), grid=found.grid, **(shape or {}))
 
 
+def read_json(path: Path) -> dict | None:
+    return json.loads(path.read_text(encoding="utf-8")) if path.exists() else None
+
+
+def measure_cue(out_dir: Path, cuts: list[float]) -> CueCut | None:
+    """The cut graded against the plan step 03 shipped, or None for a
+    trailer cut before the plan existed -- unmeasured, which the report
+    flags, never passes."""
+    shipped = read_json(out_dir / "music/plan.json")
+    if shipped is None:
+        return None
+    plan = CuePlan.model_validate(shipped)
+    lines = sheet_windows(level_sheet(out_dir), out_dir=out_dir)
+    return cue_qc.measure(cuts, plan, lines, read_json(out_dir / "clips.json"),
+                          read_json(out_dir / f"music/cutmap-{plan.seed}.json"))
+
+
 def master_of(out_dir: Path) -> Path:
     return next(out_dir.glob("TRAILER-*.mp4"))
 
@@ -459,6 +477,7 @@ def qc(out_dir: Path, detect: Callable = scene_cuts, track: beatmap.Tracker | No
     found = measure(video, seed=0, rel_path=video.name, track=track)
     measured = shape(out_dir, video, plan, seen, found) if shape else None
     result = report(plan, found, seen, loud(video), lines(out_dir), fresh(out_dir), measured)
+    result = result.model_copy(update={"cue_cut": measure_cue(out_dir, seen)})
     sidecar = result.model_dump() | {"missing_cuts": missing_cuts(planned_cuts(plan), seen),
                                     "flags": result.flags, "floor_pass": result.floor_pass}
     (out_dir / "qc.json").write_text(json.dumps(sidecar, indent=2), encoding="utf-8")

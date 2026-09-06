@@ -60,13 +60,44 @@ def stage_image(path: Path) -> str:
     return path.name
 
 
+UNREACHABLE = (urllib.error.URLError, TimeoutError, ConnectionError)
+"""What a call raises while the engine is down or restarting."""
+
+RESTART_SECONDS = 600.0
+"""How long a call waits for an engine that cannot be reached.  The GPU is
+shared: another session restarts ComfyUI under a run (run 11 died twice to
+it), and a model-laden engine is back within minutes.  One that is not is
+a failure the caller should see."""
+
+RESTART_POLL = 5.0
+
+
+def down(failure: BaseException) -> bool:
+    """Whether the failure is the engine's absence, not its answer: HTTPError
+    is a URLError by inheritance and a 400 retried for ten minutes is a 400."""
+    return isinstance(failure, UNREACHABLE) and not isinstance(failure, urllib.error.HTTPError)
+
+
+def _open(request, timeout: float = 60.0):
+    """The one door to the engine: urlopen, retried while the engine is
+    restarting, for RESTART_SECONDS at most."""
+    give_up = time.time() + RESTART_SECONDS
+    while True:
+        try:
+            return urllib.request.urlopen(request, timeout=timeout)
+        except UNREACHABLE as failure:
+            if not down(failure) or time.time() >= give_up:
+                raise
+            time.sleep(RESTART_POLL)
+
+
 def submit(workflow: dict) -> str:
     """Queue a filled-in workflow and return its prompt id."""
     body = json.dumps({"prompt": workflow}).encode("utf-8")
     request = urllib.request.Request(
         f"{HOST}/prompt", data=body, headers={"Content-Type": "application/json"})
     try:
-        with urllib.request.urlopen(request, timeout=60) as response:
+        with _open(request) as response:
             return json.loads(response.read())["prompt_id"]
     except urllib.error.HTTPError as failure:
         # The rejection body names the node and field; without it a 400 is
@@ -80,7 +111,7 @@ def _post(path: str, body: dict | None = None) -> None:
     data = json.dumps(body or {}).encode("utf-8")
     request = urllib.request.Request(
         f"{HOST}{path}", data=data, headers={"Content-Type": "application/json"})
-    with urllib.request.urlopen(request, timeout=60):
+    with _open(request):
         return None
 
 
@@ -98,7 +129,7 @@ def interrupt() -> None:
 
 def history(prompt_id: str) -> dict:
     """The engine's record of one job, or {} while it is still queued."""
-    with urllib.request.urlopen(f"{HOST}/history/{prompt_id}", timeout=60) as response:
+    with _open(f"{HOST}/history/{prompt_id}") as response:
         return json.loads(response.read()).get(prompt_id, {})
 
 
@@ -107,10 +138,6 @@ class EngineLost(RuntimeError):
     while the job ran.  A RuntimeError, so every caller that already treats
     a failed render as "the machine produced nothing" needs no new clause;
     one that can afford a second submission catches this first."""
-
-
-UNREACHABLE = (urllib.error.URLError, TimeoutError, ConnectionError)
-"""What a poll raises while the engine is down or restarting."""
 
 
 def reachable(ask, *args):
@@ -143,7 +170,7 @@ def texts_of(record: dict) -> list[str]:
 
 
 def _get(path: str) -> dict:
-    with urllib.request.urlopen(f"{HOST}{path}", timeout=60) as response:
+    with _open(f"{HOST}{path}") as response:
         return json.loads(response.read())
 
 
