@@ -195,20 +195,24 @@ FORM_TAGS = ("Intro", "Verse", "Pre-Chorus", "Chorus", "Bridge", "Post-Chorus", 
 """The seven sections the ask is told in, each one of `EXECUTABLE_TAGS`."""
 assert set(FORM_TAGS) <= set(EXECUTABLE_TAGS)
 
-LEVEL_TEXT = {"low": "quiet and close", "mid": "at speaking level", "high": "at full weight"}
+LEVEL_TEXT = {"low": "a whisper, quiet and close", "mid": "huge and loud, the whole orchestra",
+              "high": "at maximum intensity, the loudest bars of the piece"}
 PULSE_TEXT = {True: "the pulse on every beat"}
 DENSITY_TEXT = {"sparse": "one figure at a time", "building": "a new layer every four bars, each staying",
                 "dense": "the densest bars of the piece"}
 """A section's texture, read off `AskedSection.level`, `pulse`, `density`.
 A section whose pulse is still says so through its landmark (the intro's
 carrier once a beat, the verse's entry), so the pulse clause is spoken only
-where the pulse walks."""
+where the pulse walks.  The levels are the EXTREMES: the arc is an edit that
+sorts the render's phrases by measured level, so the caption's job is
+material at both ends -- "at speaking level" asked for the middle and four
+seeds came back 1.5-14 dB flat (`music_tone.TRAILER_GENRE`)."""
 
 EVENT_TEXT = {
     "pulse_in": "on the downbeat {carrier} takes up the figure and walks it",
     "hole": "everything falls silent on a downbeat, {lead} plays two bars alone, "
             "then the full ensemble returns on the downbeat",
-    "hit": "one hard impact on the downbeat, the whole ensemble at once",
+    "hit": "one enormous impact on the downbeat, the whole orchestra, drums and brass at once",
     "stop": "a full stop on one downbeat, the room silent",
     "title_hit": "two bars of total silence, then the loudest event of the piece decaying alone "
                  "into stillness: {hit}",

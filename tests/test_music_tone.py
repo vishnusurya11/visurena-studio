@@ -25,7 +25,8 @@ import pytest
 from studio.affirm import negations
 from studio.music_tone import (CAPTION_CHARS, CAPTION_WORDS, EXECUTABLE_TAGS,
                                HOSTED_CHARS, LYRICS_MODES, SHEET_TAGS,
-                               TRAILER_GENRE, TRAILER_MIX, Tone, caption,
+                               TRAILER_ARC, TRAILER_GENRE, TRAILER_MIX, TRAILER_MOOD,
+                               Tone, caption,
                                caption_stamp, head, load_tone, lyrics_plan)
 
 SCARLET_DIR = Path("library/20260822113400_a-study-in-scarlet")
@@ -121,12 +122,40 @@ class TestTrailerConstants:
         assert scarlet().mix_space in line and scarlet().era_reference in line
 
     def test_the_constants_name_what_plays(self):
-        for text in (TRAILER_GENRE, TRAILER_MIX):
+        for text in (TRAILER_GENRE, TRAILER_MIX, TRAILER_ARC) + TRAILER_MOOD:
             assert negations(text) == [], text
         for word in ("trailer", "orchestra"):
             assert word in TRAILER_GENRE
         for word in ("sub", "brass", "riser", "wide"):
             assert word in TRAILER_MIX, word
+
+    def test_the_constants_ask_for_the_extremes_in_intensity_words(self):
+        """MEASURED 2026-09-06, four seeds each, 4-bar phrase means: the
+        caption headed "Cinematic hybrid orchestral trailer music ... coloured
+        by a Victorian detective mystery, folk violin and a ticking pocket
+        watch" came back FLAT -- quiet-to-loud spread 3.6, 1.5, 13.4, 13.8 dB,
+        tracked at 80, 63, 190, 77 BPM against 100 asked.  The caption headed
+        "Epic trailer music, massive hybrid orchestral, thunderous taiko ...
+        huge, loud, dramatic" with "a whisper that becomes a war" came back
+        with both registers -- spread 13.2, 17.9, 7.9, 6.9 dB -- at 86, 100,
+        96, 97 BPM.  The user's word on the first kind: "not dramatic enough
+        for trailer".  The model routes on intensity words; the trailer's
+        constants carry them, for every book."""
+        for word in ("massive", "thunderous", "huge"):
+            assert word in TRAILER_GENRE, word
+        for word in ("huge", "loud", "dramatic"):
+            assert word in TRAILER_MIX, word
+        for word in ("whisper", "maximum intensity", "enormous"):
+            assert word in TRAILER_ARC, word
+        assert "epic" in TRAILER_MOOD and "massive" in TRAILER_MOOD
+
+    def test_the_mood_and_the_progression_open_on_the_trailers_before_the_books(self):
+        tone = scarlet()
+        first = self.first_sentence(tone)
+        assert f"mood is {', '.join(TRAILER_MOOD + tone.mood)}" in first
+        progression = next(l for l in head(tone).splitlines() if l.startswith("Global Emotional"))
+        assert progression.startswith(f"Global Emotional Progression: {TRAILER_ARC}")
+        assert tone.dynamics_arc in progression
 
 
 class TestCaption:
@@ -196,7 +225,10 @@ class TestCaption:
         """The number itself is the point of this test.
 
         MEASURED on 2026-09-05: 3538 characters, 597 words, of which the
-        trailer's constants are about 50.  The hosted API
+        trailer's constants were about 50; on 2026-09-06, with the trailer's
+        mood, progression and intensity words: 3853 characters, 648 words
+        (the ask-written caption, `cue_ask.caption_from`, 4004 and 675).
+        The hosted API
         caps a prompt at 2000 characters and does not apply here; the local
         node caps caption plus lyrics at 5000 TOKENS
         (`comfy_extras/nodes_minimax_music.py`), roughly 20 000 characters;
@@ -204,7 +236,7 @@ class TestCaption:
         caption.  This one also carries the nine-section trailer form.
         """
         text = caption(scarlet())
-        assert (len(text), len(text.split())) == (3538, 597), (len(text), len(text.split()))
+        assert (len(text), len(text.split())) == (3853, 648), (len(text), len(text.split()))
         assert CAPTION_WORDS[0] <= len(text.split()) <= CAPTION_WORDS[1]
         assert len(text) <= CAPTION_CHARS
         assert HOSTED_CHARS == 2000

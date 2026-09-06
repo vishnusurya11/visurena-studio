@@ -200,9 +200,9 @@ def render_batch(ctx, text: str, sheet: str, seeds: list[int], state: dict) -> l
     return found
 
 
-ARC_VERSION = 1
+ARC_VERSION = 2
 """Bumped when `cue_arc` or `cue_punct` change what they cut, so a kept
-raw render is arced again rather than trusted."""
+raw render is arced again rather than trusted.  2: cut on the measured bar."""
 
 
 def arc_cue(book: Path, raw: Path, ask: CueAsk, seed: int) -> Path:
@@ -224,13 +224,22 @@ def arc_cue(book: Path, raw: Path, ask: CueAsk, seed: int) -> Path:
     return dest
 
 
+def fitted(ask: CueAsk, metre: Metre) -> CueAsk:
+    """The ask on the render's bar: the same COUNT of bars and events, at the
+    length the render plays a bar.  MEASURED: raw-1001 came back at 2.69 s
+    bars against 2.4 asked; cut on the ask's bar the arc ran 101.8 s for a
+    91.2 s ask with beats laid 2.4 s apart on 2.69 s bars (bars_in_mode 0.81)."""
+    return ask.model_copy(update={"bar": metre.bar, "bpm": int(round(metre.bpm))})
+
+
 def write_arc(raw: Path, dest: Path, metre: Metre, ask: CueAsk) -> None:
-    """The render cut into the ask's arc and punctuated, the bar lines it was
-    cut on written beside it for `measure`."""
+    """The render cut into the ask's arc on its measured bar and punctuated,
+    the bar lines it was cut on written beside it for `measure`."""
+    fit = fitted(ask, metre)
     samples, rate = cue_conform.read_cue(raw)
-    body, downbeats = cue_arc.arc(samples, rate, metre, ask, *beatmap.envelope(raw))
-    cue_conform.write_cue(dest, cue_punct.punctuate(body, rate, downbeats, ask), rate)
-    beats, downbeats = cue_arc.grid_of(downbeats, ask.bar)
+    body, downbeats = cue_arc.arc(samples, rate, metre, fit, *beatmap.envelope(raw))
+    cue_conform.write_cue(dest, cue_punct.punctuate(body, rate, downbeats, fit), rate)
+    beats, downbeats = cue_arc.grid_of(downbeats, fit.bar)
     grid_path(dest).write_text(json.dumps({"beats": beats, "downbeats": downbeats}), encoding="utf-8")
 
 

@@ -78,11 +78,16 @@ people quote.  It does NOT bind this studio: the submission path is the local
 ComfyUI node, whose only limit is 5000 tokens for caption and lyrics together
 (`nodes_minimax_music.py`, MEASURED) -- about 20 000 characters."""
 
-TRAILER_GENRE = "Cinematic hybrid orchestral trailer music, a full trailer orchestra"
+TRAILER_GENRE = ("Epic trailer music, a massive hybrid orchestra, thunderous taiko drums, "
+                 "huge orchestral hits and low brass braams")
+TRAILER_MOOD = ("epic", "dramatic", "thunderous", "massive")
+TRAILER_ARC = ("a whisper that becomes a war: a quiet intro, drums arriving and doubling, "
+               "a silent hole, then the whole orchestra, brass and drums at maximum "
+               "intensity, bigger with every eight bars, to one enormous final hit")
 TRAILER_MIX = ("a modern wide trailer mix, full symphonic strings and horns, low brass "
                "braams, sub-bass under every impact, taiko and processed percussion, a "
                "riser sweeping into each downbeat, wide stereo, a long hall tail, "
-               "mastered loud")
+               "mastered loud, huge, loud, dramatic")
 """What every book's cue IS, before the book colours it.
 
 The model routes on the first sentence and on the Sonics line.  Sixteen cues
@@ -93,19 +98,33 @@ ladder rung changed form and seed but never the sound; the user rejected the
 SOUND twice ("random music", "shit music").  A trailer's genre and its mix
 are the same for A Study in Scarlet as for Dracula, so they live here, and
 `Tone.genre`, `mix_space` and `era_reference` are the colour laid on them.
+
+MEASURED 2026-09-06 (4-bar phrase means, four seeds each): the head
+"Cinematic hybrid orchestral trailer music ... coloured by a Victorian
+detective mystery" came back FLAT -- quiet-to-loud spread 3.6, 1.5, 13.4,
+13.8 dB, tracked at 80, 63, 190, 77 BPM against 100 asked -- and the user
+heard it: "not dramatic enough for trailer".  The head "Epic trailer music,
+massive hybrid orchestral, thunderous taiko ... huge, loud, dramatic" with
+the progression "a whisper that becomes a war" came back with BOTH registers
+-- spread 13.2, 17.9, 7.9, 6.9 dB -- at 86, 100, 96, 97 BPM.  The arc
+(`studio/cue_arc.py`) is an edit that sorts the render's phrases by level;
+what the caption must deliver is material at both extremes, and the model
+routes on intensity words.  So the mood opens on `TRAILER_MOOD`, the
+progression on `TRAILER_ARC`, and the book's words follow as colour.
 """
 
-CAPTION_WORDS = (250, 640)
-CAPTION_CHARS = 3800
+CAPTION_WORDS = (250, 700)
+CAPTION_CHARS = 4100
 """What this caption is allowed to be.
 
 The vendor's caption-rewriter skill defaults to "approximately 250-450 English
 words".  That band was written for a SONG caption, which carries genre, mood
 and production and stops.  This one additionally carries a nine-section
 trailer form -- the thing whose absence made the last cue "not exciting at
-all" -- and the trailer's own genre and mix (`TRAILER_GENRE`, `TRAILER_MIX`,
-about 50 words), so it lands near 600 words and stays far inside the node's
-real cap.
+all" -- and the trailer's own genre, mood, progression and mix
+(`TRAILER_GENRE`, `TRAILER_MOOD`, `TRAILER_ARC`, `TRAILER_MIX`, about 100
+words), so it lands near 650 words (the ask-written form, `cue_ask.caption_from`,
+near 675) and stays far inside the node's real cap.
 The ceiling exists so a caption cannot grow unnoticed; the exact count is
 asserted in `test_music_tone.py::test_the_caption_size_is_recorded_and_capped`.
 """
@@ -312,8 +331,9 @@ def head(tone: Tone) -> str:
         f"voice riding above the orchestra is {tone.lead_instrument}. "
         f"tempo is around {tone.bpm} BPM, held from the first bar to the last. "
         f"key is {tone.key}, and scale is {tone.scale}. "
-        f"time signature is {tone.time_signature}. mood is {', '.join(tone.mood)}.\n"
-        f"Global Emotional Progression: {tone.dynamics_arc}\n"
+        f"time signature is {tone.time_signature}. "
+        f"mood is {', '.join(TRAILER_MOOD + tone.mood)}.\n"
+        f"Global Emotional Progression: {TRAILER_ARC}. {tone.dynamics_arc}\n"
         f"Application Scenarios & Imagery: a film trailer for {tone.imagery}.\n"
         f"Sonics & Production Profile: {TRAILER_MIX}; {tone.mix_space}; "
         f"{tone.era_reference}.")

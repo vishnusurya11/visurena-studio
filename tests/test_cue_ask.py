@@ -149,6 +149,20 @@ class TestCaption:
         tone = tone_of()
         assert ca.caption_from(ask, tone).rstrip(". ").endswith(tone.hit)
 
+    def test_the_textures_ask_for_a_whisper_and_for_maximum_intensity(self, ask):
+        """The arc is an EDIT: it sorts the render's phrases by measured
+        level, so what the caption must deliver is MATERIAL at both extremes.
+        "At speaking level" asked for the middle and the renders were flat
+        (see `test_music_tone`); the epic caption's "huge and loud" and
+        "maximum intensity" came back 13-18 dB apart."""
+        text = ca.form_text(ask, tone_of())
+        verse = text[text.index("Verse:"):text.index("Pre-Chorus:")]
+        chorus = text[text.index("Chorus:"):text.index("Bridge:")]
+        post = text[text.index("Post-Chorus:"):text.index("Outro:")]
+        assert "whisper" in verse and "quiet" in verse
+        assert "enormous impact" in chorus and "huge and loud" in chorus
+        assert "maximum intensity" in post and "loudest" in post
+
     def test_the_caption_carries_every_asked_event_once(self, ask):
         text = ca.form_text(ask, tone_of())
         assert text.count(ca.EVENT_TEXT["hole"].split("{")[0]) == 1

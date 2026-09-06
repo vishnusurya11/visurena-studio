@@ -363,6 +363,26 @@ class TestAsk:
         longer = cue_ask.CueAsk.for_bars(20, bar=2.0, bpm=120)
         assert step.arc_cue(ctx.book_dir, raw, longer, 7) == out and out.stat().st_mtime_ns != written
 
+    def test_arc_cue_cuts_on_the_measured_bar_when_the_render_came_back_slower(self, ctx, monkeypatch):
+        """MEASURED: raw-1001 tracked at 2.69 s bars against 2.4 s asked; cut
+        on the ask's bar the arc came out 101.8 s for a 91.2 s ask with beats
+        laid 2.4 s apart on 2.69 s bars (bars_in_mode 0.81).  The bars are
+        the render's; the ask's COUNT of bars is what is cut, on the length
+        the render plays them at, and the grid says so."""
+        from tests.test_cue_arc import SCRAMBLED, metre_of, planted
+        music = ctx.out_dir / "music"
+        music.mkdir(parents=True, exist_ok=True)
+        raw = write_wav(music / "raw-8.wav", planted(SCRAMBLED))
+        stamp_cue(raw, "recipe-8", "caption A", "[Intro]")
+        measured = metre_of(16)                                   # 120 BPM: 2.0 s bars
+        monkeypatch.setattr(beatmap, "metre", lambda path, seed, rel_path: measured)
+        ask = cue_ask.CueAsk.for_bars(16, bar=1.5, bpm=160)      # asked faster than delivered
+        out = step.arc_cue(ctx.book_dir, raw, ask, 8)
+        assert abs(len(beatmap.decode(out)) / RATE - ask.bars * measured.bar) < 2.0
+        grid = json.loads(step.grid_path(out).read_text(encoding="utf-8"))
+        assert np.allclose(np.diff(grid["downbeats"]), measured.bar, atol=0.05)
+        assert np.allclose(np.diff(grid["beats"]), measured.bar / 4, atol=0.05)
+
     def test_measure_reads_the_grid_the_arc_was_cut_on(self, ctx, monkeypatch):
         """An arced cue carries its bar lines beside it; the Metre is read on
         them, because a tracker loses the downbeats inside the asked holes."""
