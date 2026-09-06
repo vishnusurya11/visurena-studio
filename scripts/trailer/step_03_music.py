@@ -37,6 +37,17 @@ from studio.trailer_stage_spec import Metre
 STEP_ID = "03"
 NAME = "music"
 TIER = "reasoning"
+RING_FLOOR_DB = 30.0
+"""How far under the title hit a rise may sit and still be the hit ringing
+out, not something new: a tail's own drum strokes are 4 dB rises to the grid
+detector at any level (MEASURED run 16, cue-1001: -17 -24 -25 -28 dB bars
+after the hit failed the stop term)."""
+
+SPREAD_BAND = 3.0
+"""dB between the quietest and loudest phrase that separates two seeds'
+drama; inside one band the tempo orders them.  MEASURED (run 13/14 raws):
+6.8 / 8.9 / 12.6 dB across three seeds that all delivered their ask."""
+
 TEMPO_BAND = 0.15
 """How far the measured pulse may sit from the asked bpm, as a share of it:
 one tempo mark (andante 76-108 is +-17% about 92).  Fitness had a floor of
@@ -208,13 +219,14 @@ def render_batch(ctx, text: str, sheet: str, seeds: list[int], state: dict) -> l
     return found
 
 
-ARC_VERSION = 5
+ARC_VERSION = 6
 """Bumped when `cue_arc` or `cue_punct` change what they cut, so a kept
 raw render is arced again rather than trusted.  2: cut on the measured bar.
 3: the tracker's tempo octave merged or split back to the ask's bar.
 4: every bar cut to the cue's bar, black bars no material, and the arc's
 events written beside its bar lines for the cut map.  5: a long render
-loses its middle, not its climax (`cut_middle`)."""
+loses its middle, not its climax (`cut_middle`).  6: the title rings out to
+black (`ring_out`)."""
 
 
 def arc_cue(book: Path, raw: Path, ask: CueAsk, seed: int) -> Path:
@@ -262,6 +274,7 @@ def grade(book: Path, cue: Path, seed: int, state: dict) -> Metre:
     """Measure one rendered seed: its Metre, form, cut map and ask score."""
     metre = measure(book, cue, seed)
     state["form"][seed] = form_of(cue, metre)
+    state["spread"][seed] = spread_of(cue, metre)
     state["maps"][seed] = map_cue(book, cue, metre)
     state["asks"][seed] = state["ask"]
     state["score"][seed] = score_of(state["ask"], state["maps"][seed], metre)
@@ -304,13 +317,31 @@ def stops_dead(times, db, title_hit: float | None, bar: float) -> bool:
     if title_hit is None:
         return False
     after = title_hit + bar
-    return not [t for t in beatmap.onsets(times, db) if t > after]
+    hit = float(np.asarray(db)[(times >= title_hit) & (times < after)].max(initial=-120.0))
+    rises = [t for t in beatmap.onsets(times, db) if t > after]
+    return not [t for t in rises if level_at(times, db, t) > hit - RING_FLOOR_DB]
+
+
+def level_at(times, db, t: float) -> float:
+    """The envelope's level at `t`."""
+    return float(np.asarray(db)[min(int(np.searchsorted(times, t)), len(db) - 1)])
 
 
 def form_of(cue: Path, found: Metre) -> int:
     """How many of the two form terms this seed satisfies, out of two."""
     times, db = beatmap.envelope(cue)
     return int(climbs(times, db)) + int(stops_dead(times, db, found.title_hit, found.bar))
+
+
+def spread_of(cue: Path, found: Metre) -> float:
+    """dB between the cue's quietest and loudest phrase of material: the
+    range its arc climbs.  Two phrases or fewer with material is no range."""
+    times, db = beatmap.envelope(cue)
+    levels = cue_arc.bar_levels(found, times, db)
+    usable = cue_arc.has_material(levels)
+    means = [float(levels[a:b + 1].mean()) for a, b in cue_arc.phrases_of(len(levels))
+             if usable[a:b + 1].all()]
+    return round(max(means) - min(means), 1) if len(means) > 1 else 0.0
 
 
 def tempo_error(bpm: float, asked: int) -> float:
@@ -323,8 +354,10 @@ def on_tone(bpm: float, asked: int) -> bool:
 
 
 def best_of(metres: list[Metre], asked: int, form: dict[int, int] | None = None,
-            score: dict[int, float] | None = None) -> Metre | None:
-    """The seed that delivered most of its ask, then the most form, then the fittest.
+            score: dict[int, float] | None = None, spread: dict[int, float] | None = None
+            ) -> Metre | None:
+    """The seed that delivered most of its ask, then the most form, then the
+    widest range, then the fittest.
 
     THE ASK FIRST: the cut is read off the events the ask pinned to bars, so
     a seed whose stop and title hit landed where they were asked is the one
@@ -335,12 +368,15 @@ def best_of(metres: list[Metre], asked: int, form: dict[int, int] | None = None,
     staircase on a wobblier grid is the better trailer, because `04-shots` can
     cut to onsets and cannot invent a climax that is missing.
 
-    Then a countable grid, then the asked pace by the tempo band it falls in;
-    fitness only orders seeds that agree on all three.
+    Then a countable grid, then the RANGE the cue climbs by `SPREAD_BAND`
+    (drama is dynamics: the nearest-tempo seed of run 13/14 had the
+    flattest material), then the asked pace by the tempo band it falls in;
+    fitness only orders seeds that agree on all of it.
     """
-    scores, delivered = form or {}, score or {}
+    scores, delivered, ranges = form or {}, score or {}, spread or {}
     return max(metres, key=lambda m: (delivered.get(m.seed, 0.0), scores.get(m.seed, 0),
                                       m.grid == "metre",
+                                      int(ranges.get(m.seed, 0.0) / SPREAD_BAND),
                                       -int(tempo_error(m.bpm, asked) / TEMPO_BAND),
                                       m.fitness), default=None)
 
@@ -490,7 +526,8 @@ def ship(ctx, best: Metre | None, asked: int, form: dict[int, int], state: dict)
     print(f"[{STEP_ID}] seed {best.seed}: ask {delivered:.2f} delivered, "
           f"{len(plan.picture_spans())} spans over {plan.seconds:.1f}s, {best.bpm:.1f} bpm against "
           f"{asked} asked, {best.bars_in_mode:.0%} bars in mode, {best.grid}, "
-          f"form {form.get(best.seed, 0)}/2, fitness {best.fitness:.1f}, recipe {recipe.name}")
+          f"form {form.get(best.seed, 0)}/2, range {state['spread'].get(best.seed, 0.0):.1f} dB, "
+          f"fitness {best.fitness:.1f}, recipe {recipe.name}")
 
 
 def ladder_for(render: float) -> Ladder:
@@ -501,14 +538,14 @@ def ladder_for(render: float) -> Ladder:
 def run(codex_id: str, ctx) -> None:
     tone = load_tone(ctx.book_dir)
     state = {"tone": tone, "ask": ask_of(ctx, tone), "render": RENDER_ESTIMATE,
-             "timed": [], "found": [], "form": {}, "maps": {}, "asks": {}, "score": {},
+             "timed": [], "found": [], "form": {}, "spread": {}, "maps": {}, "asks": {}, "score": {},
              "short": 0, "batches": 0}
     ladder = ladder_for(RENDER_ESTIMATE)
 
     asked = state["tone"].bpm
 
     def best():
-        return best_of(in_the_running(state), asked, state["form"], state["score"])
+        return best_of(in_the_running(state), asked, state["form"], state["score"], state["spread"])
 
     def attempt(rung, i):
         if rung.name == "reauthor_caption":

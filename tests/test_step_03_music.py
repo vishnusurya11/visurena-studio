@@ -297,6 +297,16 @@ class TestForm:
         times, db = self.envelope([-30, -20, -20, -20, -20, -20, -6, -30, -6, -30])
         assert not step.stops_dead(times, db, title_hit=30.0, bar=2.4)
 
+    def test_a_ring_out_with_a_transient_far_under_the_hit_still_stops_dead(self):
+        """MEASURED (run 16, cue-1001): the title tail's own drum strokes, 30
+        to 40 dB under the hit, are onsets to the grid detector (a 4 dB rise
+        is a rise at any level) and failed the stop term.  Under the card,
+        nothing new sounds when nothing rises within RING_FLOOR_DB of the hit."""
+        times, db = self.envelope([-30, -20, -20, -20, -20, -20, -20, -6, -50, -44])
+        assert step.stops_dead(times, db, title_hit=35.5, bar=2.4)
+        times, db = self.envelope([-30, -20, -20, -20, -20, -20, -20, -6, -30, -24])
+        assert not step.stops_dead(times, db, title_hit=35.5, bar=2.4)
+
     def test_a_cue_with_no_title_hit_has_nothing_to_stop_after(self):
         times, db = self.envelope([-20] * 10)
         assert not step.stops_dead(times, db, title_hit=None, bar=2.4)
@@ -330,6 +340,26 @@ class TestAsk:
         monkeypatch.setattr(ctx.budget, "allowance", lambda step: 210 * 60.0)
         step.run(ctx.codex_id, ctx)
         assert {c["duration"] for c in comfy_calls} == {80 + step.TAIL_HEADROOM}
+
+    def test_best_of_prefers_the_wider_dynamic_range_over_the_nearer_tempo(self):
+        """MEASURED (run 13/14 raws, arc v5): the three arced seeds all
+        deliver 1.0 with full form; raw-1002 sits in the nearest tempo band
+        (87.7 for 100 asked) with 6.8 dB between its quietest and loudest
+        phrase, raw-1004 (57.0) has 12.6 dB.  Range is what a trailer's
+        drama is made of; the tempo band only orders seeds within 3 dB."""
+        a = Metre(seed=1, rel_path="m/a.wav", seconds=60.0, bpm=88.0, bar=2.0, beats_per_bar=4,
+                  beats=[0.5], downbeats=[0.5], bars_in_mode=0.9, grid="metre", fitness=9.0)
+        b = a.model_copy(update={"seed": 2, "bpm": 57.0, "fitness": 1.0})
+        form, score = {1: 2, 2: 2}, {1: 1.0, 2: 1.0}
+        assert step.best_of([a, b], 100, form, score, {1: 6.8, 2: 12.6}) is b
+        assert step.best_of([a, b], 100, form, score, {1: 6.8, 2: 8.0}) is a
+        assert step.best_of([a, b], 100, form, score) is a
+
+    def test_spread_of_reads_the_range_between_the_quietest_and_loudest_phrase(self, tmp_path):
+        from tests.test_cue_arc import SCRAMBLED, metre_of, planted
+        wav = write_wav(tmp_path / "s.wav", planted(SCRAMBLED))
+        assert abs(step.spread_of(wav, metre_of(16)) - 14.0) < 1.5
+        assert step.spread_of(wav, metre_of(4)) == 0.0
 
     def test_best_of_prefers_the_seed_that_delivered_its_ask(self):
         a = Metre(seed=1, rel_path="m/a.wav", seconds=60.0, bpm=120.0, bar=2.0, beats_per_bar=4,
@@ -455,7 +485,7 @@ class TestAsk:
         music = ctx.out_dir / "music"
         music.mkdir(parents=True, exist_ok=True)
         wav = write_wav(music / "cue-7.wav", cue(**KINDS["two"]))
-        state = {"ask": step.ask_of(ctx, TONE), "found": [], "form": {}, "maps": {}, "asks": {},
+        state = {"ask": step.ask_of(ctx, TONE), "found": [], "form": {}, "spread": {}, "maps": {}, "asks": {},
                  "score": {}}
         metre = step.grade(ctx.book_dir, wav, 7, state)
         assert state["found"] == [metre] and metre.seed == 7

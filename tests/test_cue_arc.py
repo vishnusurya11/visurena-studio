@@ -156,6 +156,21 @@ def test_arc_opens_on_a_quiet_intro_the_tracker_read_at_half_time():
     assert np.mean(levels[0:4]) < -29 and all(levels[i] < levels[i + 4] + 6 for i in range(4))
 
 
+def test_title_piece_rings_out_from_its_hit_bar_to_black():
+    """MEASURED (run 16, cue-1001): the four bars after the title hit read
+    -17 -24 -25 -28 dB with a 1.5 s fade at the very end -- 7.5 s of the
+    render carrying on under the card, and `stops_dead` false on its
+    onsets.  The form is impact, decay, black: the hit's bar at level, then
+    a ring-out to RING_DB by the end of the piece."""
+    samples, metre = planted([-12.0] * 8), metre_of(8)
+    piece = cue_arc.title_piece(samples, RATE, metre, 2, 4 * BAR)
+    assert abs(len(piece) / RATE - 4 * BAR) < 0.05
+    levels = measured_bar_levels(piece, 4)
+    assert abs(levels[0] + 12.0) < 2.0
+    assert levels[1] < -12.0 - 5 and levels[2] < -12.0 - 20 and levels[3] < -12.0 - 35
+    assert all(b < a for a, b in zip(levels, levels[1:]))
+
+
 def test_arc_is_a_staircase_ending_in_stop_silence_and_the_title_hit():
     samples, metre = planted(SCRAMBLED), metre_of(16)
     ask = CueAsk.for_bars(16, bar=BAR, bpm=int(BPM))

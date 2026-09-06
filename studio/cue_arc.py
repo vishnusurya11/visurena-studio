@@ -206,13 +206,26 @@ def gate_holes(out: np.ndarray, rate: int, downbeats: list[float], ask: CueAsk) 
     return out
 
 
+RING_DB = -50.0
+"""Where the title's ring-out has reached by the end of the piece: black
+under the card.  MEASURED (run 16, cue-1001): with a 1.5 s fade at the very
+end, the four bars after the hit read -17 -24 -25 -28 dB -- the render
+carrying on under the card, and the stop term false on its drum strokes."""
+
+
+def ring_out(length: int, hold: int, floor_db: float = RING_DB) -> np.ndarray:
+    """Unity for `hold` samples, then a straight line in dB to `floor_db` at the end."""
+    hold = min(hold, length)
+    db = np.linspace(0.0, floor_db, max(length - hold, 1))
+    return np.concatenate([np.ones(hold), 10 ** (db / 20)])[:length]
+
+
 def title_piece(samples: np.ndarray, rate: int, metre: Metre, bar: int, seconds: float) -> np.ndarray:
-    """The impact bar and what follows it, `seconds` long, fading to black at the end."""
+    """The impact bar at level and what follows it ringing out: impact, decay, black."""
     last = min(len(metre.downbeats) - 1, bar + max(1, int(np.ceil(seconds / metre.bar))))
     piece = cue_edit.slice_bars(samples, rate, metre, bar, last)[: int(seconds * rate)].copy()
-    fade = np.linspace(1.0, 0.0, min(len(piece), int(rate * min(1.5, seconds / 2))))
-    piece[-len(fade):] *= cue_edit.per_sample(fade, piece)
-    return piece
+    gain = ring_out(len(piece), int(metre.bar * rate))
+    return (piece * cue_edit.per_sample(gain, piece)).astype(piece.dtype)
 
 
 def staircase(samples: np.ndarray, rate: int, metre: Metre, ask: CueAsk,
