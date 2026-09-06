@@ -702,21 +702,29 @@ So step 03 renders `raw-<seed>` (ask seconds + `TAIL_HEADROOM`) and
    43.7 s cue) and its bar lines are merged in pairs or split at their
    midpoints first. Length follows the render's bar inside that band;
    the fit rule (row 56) trims the plan.
-3. `cue_arc.arc` — `bar_levels` (median dBFS per bar) → `regular_bars` (a bar
-   more than 10 % off the cue's bar is one the tracker stretched across a
-   silence: cut in, it shifts every asked bar after it by one) → `bar_order`
-   (whole 4-bar phrases, quiet to loud, the loudest repeated when short) →
-   `assemble` (10 ms equal-power `step_join` at downbeats — the level step
-   IS the arc, so `cue_edit.conform`'s 3 dB refusal does not apply) →
+3. `cue_arc.arc` — `bar_levels` (median dBFS per bar) → `has_material` (the
+   only bar with nothing in it is a black one, < −60 dB; a phrase holding
+   one is left out) → `bar_order` (whole 4-bar phrases, quiet to loud, the
+   loudest repeated when short) → `assemble` (every bar cut to the CUE'S
+   bar from its downbeat, whatever length the tracker gave it; 10 ms
+   equal-power `step_join` — the level step IS the arc, so
+   `cue_edit.conform`'s 3 dB refusal does not apply) →
    `gate_holes` → `stop_at` → `title_piece` on the render's biggest impact.
    Measured on epic_cfg17-7005: climb −0.9 → 11.0 dB, loudest 25 % → 76 %.
 4. `cue_punct.punctuate` — sub impact (70→32 Hz sine, click on the front,
    1.6 s) on the hit, every hole's return; a 2.5 s one at full gain on the
    title; a noise riser over the two bars into every hole; bed −3 dB; tanh
    knee at 0.85. Seed 7, so the same ask punctuates the same way every run.
-5. `cue-<seed>.grid.json` — the arc's own bar lines. `measure` reads the cue
-   on them (`known_grid`), because re-tracking a cue through its deliberate
-   holes loses two downbeats per hole and reports stretched bars.
+5. `cue-<seed>.grid.json` — the arc's own bar lines AND its events
+   (`events_of`: the ask's events in the cut map's kinds, witnessed
+   `arc:<kind>`, the stop and holes with their `end`). `measure` reads the
+   cue on the lines (`known_grid`), because re-tracking a cue through its
+   deliberate holes loses two downbeats per hole; `map_cue` lays the
+   events over the detectors' (`music_events.with_known`) and takes the
+   stop as the hard out (`known_hard_out`), because a detector only SEES
+   what the arc cut — cutmap-1001 had the bar-10 impact as no hit, the
+   stop merged under a 'section', the hard out at 62.9 s for a stop at
+   76.4: delivered 0.62 for an arc that had delivered everything.
 
 Three "an agent's output is its next input" bugs this surfaced, all fixed:
 `Metre.seconds` was the last envelope window, not the decoded length (plan
@@ -724,12 +732,19 @@ Three "an agent's output is its next input" bugs this surfaced, all fixed:
 placed first, shifting every asked bar; the arc'd cue re-tracked lost the
 downbeats inside its holes. Each is a test now.
 
+Then three more (ARC_VERSION 4, BUILD row 61): the tracker read raw-1001's
+drumless intro at HALF TIME (six bars of 4.44 s on a 2.24 s bar) and
+`assemble` sliced on its lines; `regular_bars` threw those quiet phrases
+away as "stretched", so every run-13/14 arc opened loud; and the cut map
+did not know what the arc had cut. The tracker's bar lines are where a bar
+STARTS; how long a bar IS is the cue's, and what the arc did is written
+down, not re-detected.
+
 **Open:** the two holes are two bars each (5.4 s at 2.69 s bars) — the line
 slot the ask specifies, long on the ear; riser and impact gains are typed
-constants until a sound check names them; the tracker's downbeats on the
-detective renders were jittery enough that only 3 of 8 phrases in raw-1001
-passed `regular_bars` — the epic renders (§0) track cleanly at the asked
-tempo, which is the other reason the caption carries the drums.
+constants until a sound check names them; the epic renders (§0) track
+cleanly at the asked tempo, which is the other reason the caption carries
+the drums.
 
 ---
 
