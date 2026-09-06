@@ -757,8 +757,13 @@ and the title material holds a beat and rings out within a bar (`ring_out`,
 and `stops_dead` reads rises more than `RING_FLOOR_DB` under the hit as
 the hit ringing. `best_of` then ranks seeds by `fit_of` — dB RMS from the
 ridden levels — because the range is now the ask's and only the fit is
-still the render's (raw-1004's bar 7 rose from −66 to −54 and fits 5.5;
-raw-1001 1.9).
+still the render's. Its first run (17) taught the rule's own corollary
+(v8, BUILD row 63): the ride reads the level of what it MOVES, after the
+cut, on the body's uniform lines (`body_levels`) — read off the tracker's
+wandering lines on the render, a −4 dB gain landed on a bar `assemble`
+had cut from elsewhere and left −40 in the opening. And `climbs` measures
+the material up to the stop, not the silence the ask put after it. Every
+seed of run 16's raws then fits within 1.4 dB with form 2/2.
 
 **Open:** the two holes are two bars each (5.4 s at 2.69 s bars) — the line
 slot the ask specifies, long on the ear; riser and impact gains are typed
