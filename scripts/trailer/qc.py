@@ -21,6 +21,7 @@ from typing import Callable
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 
+from scripts.trailer.step_08_assemble import cut_map_name
 from studio import beatmap, clip_cache, cue_qc, trailer_assemble
 from studio.cue_plan import CuePlan
 from studio.paths import book_dir
@@ -417,7 +418,7 @@ def measure_cue(out_dir: Path, cuts: list[float]) -> CueCut | None:
     plan = CuePlan.model_validate(shipped)
     lines = sheet_windows(level_sheet(out_dir), out_dir=out_dir)
     return cue_qc.measure(cuts, plan, lines, read_json(out_dir / "clips.json"),
-                          read_json(out_dir / f"music/cutmap-{plan.seed}.json"))
+                          read_json(out_dir / "music" / cut_map_name(plan.rel_path)))
 
 
 def master_of(out_dir: Path) -> Path:

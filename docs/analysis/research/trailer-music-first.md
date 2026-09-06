@@ -144,6 +144,32 @@ frames). A lost phrase or sustain is `splice_out` of the cue on bar lines
 (10 ms crossfade), the cue is re-measured and the plan re-derived. A lost
 button moves `hard_out`. Every pass removes ≥ 1 span, so settle terminates.
 
+**Built (row 53, `studio/cue_settle.py`), and what changed on contact:**
+
+- Real cues measure as `grid: onsets` with `downbeats == []` (seed 1001) or
+  as a metre whose spans sit on events, not bar lines (seed 1003, bar 1.86,
+  a span 29.0–29.629). A bar-indexed `splice_out` has no bar to name, so
+  the settle cuts **between the two measured times** (`cue_edit.remove_range`,
+  seconds-based; the fade is 10 ms on a hit, half a beat otherwise) and the
+  plan is **shifted, not re-measured**: every later span, section, the hard
+  out and the title hit move up by the cut; the cut map moves with them
+  (`shifted_cut_map`). Re-measuring would re-decide the kinds of shots that
+  already have takes.
+- A lost **section door** is cut out too, not absorbed: absorbing it forward
+  would give the successor's take a shot longer than it was rendered.
+  Cutting the door's bars keeps every take its length and the successor
+  opens the section.
+- Two sustains the cut brings together lose the later one as well (and its
+  beat): the plan's own rule, kept by construction.
+- Losses settle **latest first**; `removed` is the list of ranges on the
+  progressively edited timeline, in the order `remove_range` applies them.
+- A join the cue refuses (levels differ by > `COMPAT_DB` at the join) falls
+  back to the fold with a `gate=settle action=folded` learning row.
+- Files: `cue-{seed}-settled.flac` beside the original (44.1 kHz stereo,
+  PCM 16), `music/metre.json` re-pointed, `cutmap-{seed}-settled.json`,
+  `music/plan.json` rewritten; qc grades against the cut map named after the
+  cue that plays (`cut_map_name`).
+
 ## 8. `studio/cue_edit.py`
 
 `zero_cross`, `slice_bars`, `splice` (equal-power; beat/2, or 10 ms on a

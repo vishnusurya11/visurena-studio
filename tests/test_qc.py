@@ -360,7 +360,7 @@ class TestTheCueCut:
 
     def plan_json(self) -> str:
         from tests.test_cue_qc import build_plan
-        return build_plan().model_dump_json()
+        return build_plan().model_copy(update={"rel_path": "m/cue-1.flac"}).model_dump_json()
 
     def write_cue(self, out: Path, takes: list[dict]) -> None:
         (out / "music").mkdir(parents=True, exist_ok=True)
@@ -383,6 +383,8 @@ class TestTheCueCut:
         assert "cuts_inside_sustain" in cut.floor_misses()
 
     def test_the_chosen_seeds_own_cut_map_supplies_the_events(self, tmp_path):
+        """Named after the cue that plays, so a settled cue (row 53) is graded
+        against its own moved map, never the unsettled seed's."""
         self.write_cue(tmp_path, [])
         events = [{"t": 4.0, "rank": 3}, {"t": 12.0, "rank": 2}, {"t": 5.0, "rank": 1}]
         (tmp_path / "music/cutmap-1.json").write_text(json.dumps({"events": events}), encoding="utf-8")

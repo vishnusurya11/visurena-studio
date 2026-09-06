@@ -181,3 +181,80 @@ def built(seen: dict):
         master.write_bytes(b"mp4")
         return master
     return build_at
+
+
+class TestSettledSpans:
+    """Row 53: with a cue plan on disk, step 08 settles like an editor -- the
+    cue bends, the story does not -- and only then hands the survivors to
+    step 06's spans path, which has nothing left to fold."""
+
+    IDS = [f"B{i:02d}" for i in range(10)]
+    CUE = "trailer/main/music/cue-1.flac"
+    CUT_MAP = {"events": [{"t": 8.0, "rank": 3, "kind": "hit", "evidence": ["x"]},
+                          {"t": 12.0, "rank": 2, "kind": "hit", "evidence": ["x"]}],
+               "spans": [{"start": 16.0, "end": 20.0, "kind": "dropout"}],
+               "hard_out": 24.0, "title_hit": 24.0, "seconds": 30.0}
+
+    def stage(self, ctx, monkeypatch, lost: str):
+        from tests.test_cue_edit import RATE, click
+        from tests.test_cue_qc import build_plan
+        music = ctx.out_dir / "music"
+        music.mkdir()
+        samples, metre = click(30.0)
+        metre = metre.model_copy(update={"rel_path": self.CUE})
+        (music / "plan.json").write_text(
+            build_plan().model_copy(update={"rel_path": self.CUE}).model_dump_json(), encoding="utf-8")
+        (music / "metre.json").write_text(metre.model_dump_json(), encoding="utf-8")
+        (music / "cutmap-1.json").write_text(json.dumps(self.CUT_MAP), encoding="utf-8")
+        have = [b for b in self.IDS if b != lost]
+        write(ctx, clips=clips_doc(ctx.book_dir, have, dropped=[lost]), plan=plan_doc(self.IDS))
+        seen, refits = {}, []
+        monkeypatch.setattr(step, "read_cue", lambda path: (samples, RATE))
+        monkeypatch.setattr(step, "write_cue",
+                            lambda path, out, rate: seen.update(path=path, samples=len(out), rate=rate))
+        monkeypatch.setattr(step, "refit", refitting(refits))
+        return seen, refits, have
+
+    def music(self, ctx, name):
+        return json.loads((ctx.out_dir / "music" / name).read_text(encoding="utf-8"))
+
+    def test_a_lost_sustain_cuts_the_cue_and_refits_to_the_survivors(self, ctx, monkeypatch):
+        from tests.test_cue_edit import RATE
+        seen, refits, have = self.stage(ctx, monkeypatch, lost="B05")
+        assert step.settle(ctx) == have
+        assert refits == [have] and seen["rate"] == RATE and seen["samples"] == 26 * RATE
+        assert seen["path"] == ctx.book_dir / "trailer/main/music/cue-1-settled.flac"
+        plan = self.music(ctx, "plan.json")
+        assert plan["rel_path"] == "trailer/main/music/cue-1-settled.flac"
+        assert plan["seconds"] == 26.0 and plan["hard_out"] == 20.0 and len(plan["spans"]) == 10
+        metre = self.music(ctx, "metre.json")
+        assert metre["rel_path"] == plan["rel_path"] and metre["seconds"] == 26.0
+        cut_map = self.music(ctx, "cutmap-1-settled.json")
+        assert cut_map["seconds"] == 26.0 and [e["t"] for e in cut_map["events"]] == [8.0]
+
+    def test_a_lost_accent_touches_no_audio(self, ctx, monkeypatch):
+        seen, refits, have = self.stage(ctx, monkeypatch, lost="B04")
+        assert step.settle(ctx) == have
+        assert seen == {} and refits == [have]
+        plan = self.music(ctx, "plan.json")
+        assert plan["rel_path"] == self.CUE and len(plan["spans"]) == 10
+        door = plan["spans"][3]
+        assert (door["start"], door["end"], door["kind"]) == (8.0, 10.5, "section")
+
+    def test_a_join_the_cue_refuses_falls_back_to_the_fold(self, ctx, monkeypatch):
+        """Two sides of a join too far apart in level: the music is left
+        whole, the spans fold to the survivors, and the run learns why."""
+        seen, refits, have = self.stage(ctx, monkeypatch, lost="B05")
+
+        def refuse(*_):
+            raise ValueError("levels differ by more than 6.0 dB at the join")
+
+        monkeypatch.setattr(step, "cut_cue", refuse)
+        assert step.settle(ctx) == have
+        assert refits == [have] and self.music(ctx, "plan.json")["seconds"] == 30.0
+        rows = [json.loads(l) for l in ctx.learnings_path.read_text(encoding="utf-8").splitlines()]
+        assert [(r["step"], r["gate"], r["action"]) for r in rows] == [("08", "settle", "folded")]
+
+    def test_the_cut_map_is_named_after_the_cue_it_measures(self):
+        assert step.cut_map_name("trailer/main/music/cue-1003.flac") == "cutmap-1003.json"
+        assert step.cut_map_name("trailer/main/music/cue-1003-settled.flac") == "cutmap-1003-settled.json"
