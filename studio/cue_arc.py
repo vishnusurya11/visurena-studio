@@ -207,34 +207,90 @@ def gate_holes(out: np.ndarray, rate: int, downbeats: list[float], ask: CueAsk) 
 
 
 RING_DB = -50.0
-"""Where the title's ring-out has reached by the end of the piece: black
-under the card.  MEASURED (run 16, cue-1001): with a 1.5 s fade at the very
-end, the four bars after the hit read -17 -24 -25 -28 dB -- the render
-carrying on under the card, and the stop term false on its drum strokes."""
+"""Where the title's ring-out has reached: black under the card.  MEASURED
+(run 16, cue-1001): with a 1.5 s fade at the very end, the four bars after
+the hit read -17 -24 -25 -28 dB -- the render carrying on under the card,
+and the stop term false on its drum strokes."""
+
+RING_BARS = 1.0
+"""How long the render's material takes to ring out after the title hit,
+in bars, held for one beat first.  MEASURED (arc 7, seeds 1001/1002/1004):
+held a whole bar and rung out over three, the material's strokes in the
+ring's first bar read -33 dB against a -17 dB hit and `stops_dead` was
+false on every seed.  The decay under the card is the title impact's own
+(`cue_punct`, 2.5 s); the render only has to get out of its way."""
 
 
-def ring_out(length: int, hold: int, floor_db: float = RING_DB) -> np.ndarray:
-    """Unity for `hold` samples, then a straight line in dB to `floor_db` at the end."""
-    hold = min(hold, length)
-    db = np.linspace(0.0, floor_db, max(length - hold, 1))
-    return np.concatenate([np.ones(hold), 10 ** (db / 20)])[:length]
+def ring_out(length: int, hold: int, ring: int, floor_db: float = RING_DB) -> np.ndarray:
+    """Unity for `hold` samples, a straight line in dB to `floor_db` over
+    `ring` samples, the floor after."""
+    hold, ring = min(hold, length), max(ring, 1)
+    db = np.concatenate([np.zeros(hold), np.linspace(0.0, floor_db, ring), np.full(length, floor_db)])
+    return 10 ** (db[:length] / 20)
 
 
 def title_piece(samples: np.ndarray, rate: int, metre: Metre, bar: int, seconds: float) -> np.ndarray:
-    """The impact bar at level and what follows it ringing out: impact, decay, black."""
+    """The impact beat at level and what follows it ringing out: impact, decay, black."""
     last = min(len(metre.downbeats) - 1, bar + max(1, int(np.ceil(seconds / metre.bar))))
     piece = cue_edit.slice_bars(samples, rate, metre, bar, last)[: int(seconds * rate)].copy()
-    gain = ring_out(len(piece), int(metre.bar * rate))
+    gain = ring_out(len(piece), int(metre.bar / 4 * rate), int(RING_BARS * metre.bar * rate))
     return (piece * cue_edit.per_sample(gain, piece)).astype(piece.dtype)
+
+
+RIDE_DB = {"low": (-26.0, -26.0), "mid": (-18.0, -14.0), "high": (-14.0, -12.0)}
+"""Where each section's bars are RIDDEN to, dBFS at the section's first and
+last bar: low held, a step up at the hit, a climb through mid, high held to
+the stop.  MEASURED (run 16, cue-1001): the render came back mastered flat
+-- phrase means -24 -24 -17 -23 -18 -18 -25 -23 -26, a 9 dB range end to
+end -- so the staircase the ORDER built was 9 dB tall where a trailer's is
+15-20.  The level is the ask's to write, not the render's to offer.  High
+still climbs its last decibel: held flat, the loudest five seconds sat at
+the section's first bar (70% of the cue, MEASURED arc 7 seed 1001) and the
+climb term wants them late, in LOUDEST_BAND."""
+
+RIDE_MAX = 12.0
+"""The most a bar is moved, either way: past this the noise floor of a quiet
+bar comes up with it, or a loud bar is left with no transient."""
+
+
+def ride_targets(ask: CueAsk, bars: int, stop: int | None = None) -> np.ndarray:
+    """The level asked of every bar, interpolated between each section's
+    ends; a section the stop falls in finishes its climb on the bar before it."""
+    xs, ys = [], []
+    for s in ask.sections:
+        end = s.bar + s.bars - 1
+        xs += [s.bar, min(end, stop - 1) if stop is not None and s.bar < stop else end]
+        ys += list(RIDE_DB[s.level])
+    return np.interp(np.arange(bars), xs, ys)
+
+
+def ride_gains(levels: np.ndarray, targets: np.ndarray, usable: np.ndarray,
+               limit: float = RIDE_MAX) -> np.ndarray:
+    """dB per bar that takes each usable bar to its target, within the limit."""
+    gains = np.clip(targets - levels, -limit, limit)
+    return np.where(usable, gains, 0.0)
+
+
+def ride(samples: np.ndarray, rate: int, downbeats: list[float], gains_db: np.ndarray) -> np.ndarray:
+    """The gains applied as one envelope, whole at each bar's centre and
+    sliding between centres, so no bar line carries a step."""
+    half = (downbeats[1] - downbeats[0]) / 2 if len(downbeats) > 1 else len(samples) / rate / 2
+    centres = np.asarray(downbeats[:len(gains_db)]) + half
+    gain = np.interp(np.arange(len(samples)) / rate, centres, gains_db)
+    gain = gain[:, None] if samples.ndim == 2 else gain
+    return (samples * 10 ** (gain / 20)).astype(samples.dtype)
 
 
 def staircase(samples: np.ndarray, rate: int, metre: Metre, ask: CueAsk,
               levels: np.ndarray) -> tuple[np.ndarray, list[float]]:
-    """The bars up to the stop, quiet phrases first, holes gated, hard out on
-    the stop bar with the asked silence after it; the downbeats so far."""
+    """The bars up to the stop, quiet phrases first, ridden to the asked
+    levels, holes gated, hard out on the stop bar with the asked silence
+    after it; the downbeats so far."""
     stop, title = event_bars(ask, "stop")[0], ask.title_bar
-    order = bar_order(levels, stop, usable=has_material(levels))
+    usable = has_material(levels)
+    order = bar_order(levels, stop, usable=usable)
     body, downbeats = assemble(samples, rate, metre, ranges_of(order))
+    body = ride(body, rate, downbeats, ride_gains(levels[order], ride_targets(ask, ask.bars, stop)[:stop], usable[order]))
     body = gate_holes(body, rate, downbeats, ask)
     body = cue_edit.stop_at(body, rate, len(body) / rate, (title - stop) * ask.bar)
     downbeats += [downbeats[-1] + (i + 1) * ask.bar for i in range(title - stop)]

@@ -160,15 +160,27 @@ def test_title_piece_rings_out_from_its_hit_bar_to_black():
     """MEASURED (run 16, cue-1001): the four bars after the title hit read
     -17 -24 -25 -28 dB with a 1.5 s fade at the very end -- 7.5 s of the
     render carrying on under the card, and `stops_dead` false on its
-    onsets.  The form is impact, decay, black: the hit's bar at level, then
-    a ring-out to RING_DB by the end of the piece."""
+    onsets.  The form is impact, decay, black: the hit's beat at level, a
+    ring-out to RING_DB within RING_BARS, black after.  MEASURED (arc 7,
+    all three seeds): with the material held a whole bar and rung out over
+    the rest of the piece, its drum strokes in the ring's first bar read
+    -33 dB against a -17 dB hit, and `stops_dead` was false on every seed;
+    the decay under the card is the title impact's own, not the render's."""
     samples, metre = planted([-12.0] * 8), metre_of(8)
     piece = cue_arc.title_piece(samples, RATE, metre, 2, 4 * BAR)
     assert abs(len(piece) / RATE - 4 * BAR) < 0.05
+    first_beat = piece[: int(BAR / 4 * RATE)]
+    assert abs(20 * np.log10(np.sqrt(np.mean(first_beat ** 2))) + 12.0) < 1.0
     levels = measured_bar_levels(piece, 4)
-    assert abs(levels[0] + 12.0) < 2.0
-    assert levels[1] < -12.0 - 5 and levels[2] < -12.0 - 20 and levels[3] < -12.0 - 35
-    assert all(b < a for a, b in zip(levels, levels[1:]))
+    assert levels[1] < -12.0 + cue_arc.RING_DB + 2 and levels[2] < -12.0 + cue_arc.RING_DB + 2
+    assert all(b <= a for a, b in zip(levels, levels[1:]))
+
+
+def test_ring_out_holds_then_falls_to_the_floor_within_the_ring_and_stays_there():
+    gain = cue_arc.ring_out(1000, hold=100, ring=200, floor_db=-40.0)
+    assert np.all(gain[:100] == 1.0)
+    assert abs(20 * np.log10(gain[200]) - -20.0) < 0.5
+    assert np.all(np.abs(20 * np.log10(gain[300:]) - -40.0) < 0.01)
 
 
 def test_arc_is_a_staircase_ending_in_stop_silence_and_the_title_hit():
@@ -261,3 +273,79 @@ def test_events_of_writes_every_asked_event_on_the_arcs_own_bar_lines():
     assert by["stop"]["kind"] == "dropout" and by["stop"]["end"] == downbeats[ask.title_bar]
     assert by["hole"]["kind"] == "dropout" and by["hole"]["end"] == 12.0 + HOLE_BARS * 2.0
     assert all(e["rank"] == music_events.RANK[e["kind"]] for e in events)
+
+
+TAME = [-20.0, -16.0, -22.0, -18.0, -15.0, -23.0, -16.0, -19.0,
+        -22.0, -17.0, -21.0, -16.0, -18.0, -22.0, -20.0, -23.0]
+"""Sixteen bars within RIDE_MAX of every ride target, so the ride lands
+exactly where it aims and the test reads the targets back."""
+
+
+def centre_levels(samples: np.ndarray, bars: int) -> list[float]:
+    """RMS dB at the middle fifth of every bar, where the ride's gain is whole."""
+    out = []
+    for i in range(bars):
+        a, b = int(((i + 0.4) * BAR) * RATE), int(((i + 0.6) * BAR) * RATE)
+        out.append(float(20 * np.log10(np.sqrt(np.mean(samples[a:b] ** 2)) + 1e-12)))
+    return out
+
+
+def test_ride_targets_hold_low_step_to_mid_climb_and_hold_high():
+    """MEASURED (run 16, cue-1001): phrase means -24 -24 -17 -23 -18 -18 -25
+    -23 -26 and a 9 dB range end to end -- the render is mastered flat, so
+    the staircase the arc orders is 9 dB tall where a trailer's is 15-20.
+    The ride is the level the ask WROTE: low held, a step up at the hit,
+    a climb through mid, high held to the stop."""
+    ask = CueAsk.for_bars(16, bar=BAR, bpm=int(BPM))         # low 0-3, mid 4-10, high 11-15
+    t = cue_arc.ride_targets(ask, ask.bars)
+    assert t[0] == t[3] == cue_arc.RIDE_DB["low"][0]
+    assert t[4] == cue_arc.RIDE_DB["mid"][0] and t[10] == cue_arc.RIDE_DB["mid"][1]
+    assert t[11] == cue_arc.RIDE_DB["high"][0] and t[15] == cue_arc.RIDE_DB["high"][1]
+    assert np.all(np.diff(t) >= 0) and t[10] - t[4] > 3
+
+
+def test_ride_targets_finish_their_climb_on_the_bar_before_the_stop():
+    """MEASURED (arc 7, seeds 1001/1002/1004): with high's climb laid over
+    the whole section -- the stop's silence and the title included -- the
+    bars before the stop read -15 -15 -16 -16 -15 -15 and the loudest five
+    seconds sat at 64-70% of the cue, under LOUDEST_BAND."""
+    ask = CueAsk.for_bars(40, bar=BAR, bpm=int(BPM))          # low 0-9, mid 10-27, high 28-39
+    stop = 34                                                  # the planner's stop: six bars of high before it
+    events = [e.model_copy(update={"bar": {"stop": stop, "title_hit": 36}.get(e.kind, e.bar)}) for e in ask.events]
+    ask = ask.model_copy(update={"events": events, "title_bar": 36})
+    t = cue_arc.ride_targets(ask, ask.bars, stop=stop)
+    assert t[28] == cue_arc.RIDE_DB["high"][0] and t[stop - 1] == cue_arc.RIDE_DB["high"][1]
+    assert t[stop - 1] - t[28] >= 2.0
+
+
+def test_ride_gains_reach_the_target_within_the_limit_and_leave_black_bars_alone():
+    levels = np.array([-30.0, -20.0, -10.0, -70.0])
+    targets = np.array([-26.0, -26.0, -26.0, -26.0])
+    gains = cue_arc.ride_gains(levels, targets, np.array([True, True, True, False]), limit=12.0)
+    assert list(gains) == [4.0, -6.0, -12.0, 0.0]
+
+
+def test_ride_moves_each_bar_by_its_gain_at_the_bars_centre():
+    samples = planted([-20.0] * 4)
+    downbeats = [i * BAR for i in range(4)]
+    out = cue_arc.ride(samples, RATE, downbeats, np.array([0.0, -6.0, 6.0, 0.0]))
+    levels = centre_levels(out, 4)
+    assert np.allclose(levels, [-20.0, -26.0, -14.0, -20.0], atol=0.7)
+
+
+def test_arc_rides_the_staircase_to_the_asks_levels_whatever_the_render_gave():
+    samples, metre = planted(TAME), metre_of(16)
+    ask = CueAsk.for_bars(16, bar=BAR, bpm=int(BPM))
+    out, _ = cue_arc.arc(samples, RATE, metre, ask, *envelope_of(samples))
+    levels = centre_levels(out, 11)                            # the bars before the stop
+    targets = cue_arc.ride_targets(ask, ask.bars)[:11]
+    assert np.allclose(levels, targets, atol=1.5), (levels, list(targets))
+
+
+def test_ride_moves_both_channels_of_a_stereo_cue():
+    """The renders are stereo: (samples, 2)."""
+    mono = planted([-20.0] * 2)
+    out = cue_arc.ride(np.stack([mono, mono], axis=1), RATE, [0.0, BAR], np.array([0.0, -6.0]))
+    assert out.shape == (len(mono), 2)
+    assert np.allclose(centre_levels(out[:, 0], 2), [-20.0, -26.0], atol=0.7)
+    assert np.array_equal(out[:, 0], out[:, 1])

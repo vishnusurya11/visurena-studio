@@ -16,7 +16,7 @@ import pytest
 
 from scripts.trailer import build_music
 from scripts.trailer import step_03_music as step
-from studio import beatmap, cue_arc, db, llm
+from studio import beatmap, cue_arc, cue_punct, db, llm
 from studio.beatmap import RATE, track_autocorrelation
 from studio import cue_ask, frame_budget
 from studio.cue_plan import MIN_FORM_BARS, CuePlan
@@ -341,25 +341,35 @@ class TestAsk:
         step.run(ctx.codex_id, ctx)
         assert {c["duration"] for c in comfy_calls} == {80 + step.TAIL_HEADROOM}
 
-    def test_best_of_prefers_the_wider_dynamic_range_over_the_nearer_tempo(self):
-        """MEASURED (run 13/14 raws, arc v5): the three arced seeds all
-        deliver 1.0 with full form; raw-1002 sits in the nearest tempo band
-        (87.7 for 100 asked) with 6.8 dB between its quietest and loudest
-        phrase, raw-1004 (57.0) has 12.6 dB.  Range is what a trailer's
-        drama is made of; the tempo band only orders seeds within 3 dB."""
+    def test_best_of_prefers_the_closer_ride_over_the_nearer_tempo(self):
+        """MEASURED (run 16 raws, arc 7): every seed is ridden to the ask's
+        levels, so the range no longer separates them -- what does is how
+        far the render could be taken: raw-1004's bar 7 sat at -66 and came
+        up only to -54 against a -26 target (RIDE_MAX) and fits 5.5 dB RMS,
+        raw-1001 fits 1.9, raw-1002 1.2.  Tempo orders seeds only within
+        one FIT_BAND of each other."""
         a = Metre(seed=1, rel_path="m/a.wav", seconds=60.0, bpm=88.0, bar=2.0, beats_per_bar=4,
                   beats=[0.5], downbeats=[0.5], bars_in_mode=0.9, grid="metre", fitness=9.0)
         b = a.model_copy(update={"seed": 2, "bpm": 57.0, "fitness": 1.0})
         form, score = {1: 2, 2: 2}, {1: 1.0, 2: 1.0}
-        assert step.best_of([a, b], 100, form, score, {1: 6.8, 2: 12.6}) is b
-        assert step.best_of([a, b], 100, form, score, {1: 6.8, 2: 8.0}) is a
+        assert step.best_of([a, b], 100, form, score, {1: 5.7, 2: 2.6}) is b
+        assert step.best_of([a, b], 100, form, score, {1: 3.1, 2: 2.6}) is a
         assert step.best_of([a, b], 100, form, score) is a
 
-    def test_spread_of_reads_the_range_between_the_quietest_and_loudest_phrase(self, tmp_path):
-        from tests.test_cue_arc import SCRAMBLED, metre_of, planted
-        wav = write_wav(tmp_path / "s.wav", planted(SCRAMBLED))
-        assert abs(step.spread_of(wav, metre_of(16)) - 14.0) < 1.5
-        assert step.spread_of(wav, metre_of(4)) == 0.0
+    def test_fit_of_reads_how_far_the_material_bars_sit_from_the_ridden_levels(self, tmp_path):
+        """A cue that sits exactly on its targets (less the bed trim) fits 0;
+        one bar 12 dB off over 16 bars reads 3 dB RMS; a hole is not counted."""
+        from tests.test_cue_arc import BAR, BPM, metre_of, planted
+        ask = cue_ask.CueAsk.for_bars(16, bar=BAR, bpm=int(BPM))
+        stop = cue_arc.event_bars(ask, "stop")[0]
+        targets = cue_arc.ride_targets(ask, 16, stop) - cue_punct.BED_TRIM_DB
+        wav = write_wav(tmp_path / "on.wav", planted(list(targets)))
+        assert step.fit_of(wav, metre_of(16), ask) < 1.0
+        off = list(targets)
+        off[3] -= 12.0
+        off[5] = -90.0
+        wav = write_wav(tmp_path / "off.wav", planted(off))
+        assert abs(step.fit_of(wav, metre_of(16), ask) - 12.0 / np.sqrt(stop - 1)) < 1.0
 
     def test_best_of_prefers_the_seed_that_delivered_its_ask(self):
         a = Metre(seed=1, rel_path="m/a.wav", seconds=60.0, bpm=120.0, bar=2.0, beats_per_bar=4,
@@ -485,7 +495,7 @@ class TestAsk:
         music = ctx.out_dir / "music"
         music.mkdir(parents=True, exist_ok=True)
         wav = write_wav(music / "cue-7.wav", cue(**KINDS["two"]))
-        state = {"ask": step.ask_of(ctx, TONE), "found": [], "form": {}, "spread": {}, "maps": {}, "asks": {},
+        state = {"ask": step.ask_of(ctx, TONE), "found": [], "form": {}, "fit": {}, "maps": {}, "asks": {},
                  "score": {}}
         metre = step.grade(ctx.book_dir, wav, 7, state)
         assert state["found"] == [metre] and metre.seed == 7
