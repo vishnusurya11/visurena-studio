@@ -86,6 +86,23 @@ trait card. Two questions, in this order:
 Vocabulary aliasing is not a difference: a deerstalker reads as "cap", a
 tall beaver hat as "top hat" (`describe.NEIGHBOURS`, half a difference).
 
+### A read that outlives its timeout, and an engine that ignores the interrupt
+
+A read past `describe.TIMEOUT` (600 s) is interrupted, logged
+`accepted_on_timeout`, and the sheet binds unseen (`patiently`). That was
+bounded for one read and unbounded for a round. Run 18: a Qwen3-VL read on
+a VRAM-full engine (H3 still staged from a killed run, the VLM offloaded to
+CPU) ignored the interrupt and stayed at the head of the queue; the NEXT read
+sat `comfy.QUEUE_SECONDS` (7200 s) in line behind it before its own 600 s -
+the learnings are 130 min apart, five times: 11 h in step 02, budget -590 min
+at step 03. The interrupt is now verified (`comfy.stuck`: still running
+`STUCK_SECONDS` 30 after it) and one `describe.Patience` per round remembers
+the verdict - stuck, every later read of the round returns unseen at once,
+logged `accepted_on_timeout` / "engine stuck: read skipped". Cost of a stuck
+engine: 630 s once per round (step 02's cast, each step 07 round), not
+130 min per read. The engine itself still needs a restart; the run does not
+attempt one.
+
 ## The book's own portrait comes first
 
 `analysis/profile.physical` says "limited physical description" for Holmes,

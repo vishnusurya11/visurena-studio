@@ -127,10 +127,37 @@ def interrupt() -> None:
     _post("/interrupt")
 
 
+STUCK_SECONDS = 30.0
+"""How long after an interrupt a job may still show as running before the
+engine is called stuck.  Run 18: a Qwen3-VL read on a VRAM-full engine
+ignored six interrupts over 11 h; a job that does take the interrupt is
+off the queue within a poll or two."""
+
+
+def stuck(prompt_id: str, patience: float = STUCK_SECONDS, poll: float = 5.0) -> bool:
+    """Whether the job is still running `patience` after its interrupt.  An
+    engine that cannot be reached is restarting, which is not stuck."""
+    deadline = time.time() + patience
+    while time.time() < deadline:
+        if not reachable(running, prompt_id):
+            return False
+        time.sleep(poll)
+    return bool(reachable(running, prompt_id))
+
+
 def history(prompt_id: str) -> dict:
     """The engine's record of one job, or {} while it is still queued."""
     with _open(f"{HOST}/history/{prompt_id}") as response:
         return json.loads(response.read()).get(prompt_id, {})
+
+
+class StillRunning(TimeoutError):
+    """A job that outlived its timeout, named so the caller can ask whether
+    the interrupt it sends takes."""
+
+    def __init__(self, prompt_id: str, timeout: float):
+        super().__init__(f"{prompt_id} still running after {timeout}s")
+        self.prompt_id = prompt_id
 
 
 class EngineLost(RuntimeError):
@@ -208,7 +235,7 @@ def wait_record(prompt_id: str, timeout: float = 3600.0, poll: float = 5.0) -> d
             if record.get("status", {}).get("completed"):
                 return record
         time.sleep(poll)
-    raise TimeoutError(f"{prompt_id} still running after {timeout}s")
+    raise StillRunning(prompt_id, timeout)
 
 
 def settled(prompt_id: str, record: dict) -> None:

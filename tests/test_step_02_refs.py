@@ -156,6 +156,27 @@ class TestRun:
         assert [r.action for r in load(ctx.learnings_path)] == [
             "accepted_on_timeout", "accepted_unverifiable"]
 
+    def test_a_stuck_engine_costs_one_timeout_and_the_rest_of_the_cast_is_bound_unread(
+            self, ctx, rendered, monkeypatch):
+        """Run 18: five reads, 130 min each, behind one hung job.  The first
+        timeout whose interrupt does not take is the last read the step
+        waits for; every later sheet binds unverified at once."""
+        stopped = []
+        monkeypatch.setattr(describe.comfy, "interrupt", lambda: stopped.append(True))
+        monkeypatch.setattr(describe.comfy, "stuck", lambda prompt_id: True)
+        asked = []
+
+        def read(path, seed):
+            asked.append(path)
+            raise describe.comfy.StillRunning("job-9", 600.0)
+        monkeypatch.setattr(step, "describe", read)
+        step.run(ctx.codex_id, ctx)
+        assert refs_doc(ctx)["unbound"] == [] and stopped == [True] and len(asked) == 1
+        assert [r.action for r in load(ctx.learnings_path)] == [
+            "accepted_on_timeout", "accepted_unverifiable",
+            "accepted_on_timeout", "accepted_unverifiable"]
+        assert load(ctx.learnings_path)[2].measured == "engine stuck: read skipped"
+
     def test_a_render_that_reads_as_another_character_is_asked_again(self, ctx, rendered):
         """Holmes' first render comes back looking like Watson: it disobeyed
         its card, so the same card on another seed reads as written and binds."""

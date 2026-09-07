@@ -96,14 +96,34 @@ def test_the_timeout_clock_starts_when_the_job_leaves_the_queue(monkeypatch):
     assert clock.now >= 1000.0 + 15 + 6  # 15 s in line did not count
 
 
-def test_a_running_job_still_times_out(monkeypatch):
+def test_a_running_job_still_times_out_naming_itself(monkeypatch):
+    """The timeout names the job so the caller can ask whether its interrupt took."""
     _clock(monkeypatch)
     monkeypatch.setattr(comfy, "pending", lambda prompt_id: False)
     monkeypatch.setattr(comfy, "running", lambda prompt_id: True)
     monkeypatch.setattr(comfy, "history", lambda prompt_id: {})
     import pytest
-    with pytest.raises(TimeoutError):
+    with pytest.raises(TimeoutError) as caught:
         comfy.wait_record("job-1", timeout=10.0, poll=5.0)
+    assert isinstance(caught.value, comfy.StillRunning) and caught.value.prompt_id == "job-1"
+    assert str(caught.value) == "job-1 still running after 10.0s"
+
+
+def test_stuck_is_a_job_that_outlives_its_interrupt(monkeypatch):
+    """Run 18: a Qwen3-VL read on a VRAM-full engine ignored the interrupt
+    and stayed at the head of the queue; the next five reads each sat
+    QUEUE_SECONDS in line behind it before their own 600 s -- 11 h in step
+    02.  An engine still running the job STUCK_SECONDS after the interrupt
+    is stuck; one that has dropped it, or cannot be reached (restarting),
+    is not."""
+    clock = _clock(monkeypatch)
+    monkeypatch.setattr(comfy, "running", lambda prompt_id: True)
+    assert comfy.stuck("job-1", patience=30.0, poll=5.0) is True
+    assert 30.0 <= clock.now - 1000.0 <= 35.0
+    monkeypatch.setattr(comfy, "running", lambda prompt_id: False)
+    assert comfy.stuck("job-1", patience=30.0, poll=5.0) is False
+    monkeypatch.setattr(comfy, "running", lambda prompt_id: (_ for _ in ()).throw(ConnectionError()))
+    assert comfy.stuck("job-1", patience=30.0, poll=5.0) is False
 
 
 def test_an_engine_that_cannot_be_reached_is_waited_for_not_crashed(monkeypatch):

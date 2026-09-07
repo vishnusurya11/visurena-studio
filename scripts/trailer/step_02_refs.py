@@ -24,7 +24,7 @@ from typing import Callable
 from scripts.trailer.build_refs import describe_location, generate, refs_needed
 from studio.canon import canons_for, known_look
 from studio.cast_card import POOLS, cards_for, infer_gender, render_card
-from studio.describe import (DISTINCT_AT, TIMEOUT, TraitCard, closest, describe, distance,
+from studio.describe import (DISTINCT_AT, TIMEOUT, Patience, TraitCard, closest, describe, distance,
                              patiently, same_look, shared, verifiable)
 from studio.distinguish import adopt, disobeyed, distinguish, movable
 from studio.ladder import Ladder, Rung, climb
@@ -103,7 +103,8 @@ def timed_out(learn) -> Callable[[str], None]:
 
 
 def bind_one(ctx, book: Path, index: int, char_id: str, card: dict, palette: str,
-             bound: dict[str, TraitCard], taken: dict[str, set[str]]) -> dict | None:
+             bound: dict[str, TraitCard], taken: dict[str, set[str]],
+             patience: Patience | None = None) -> dict | None:
     """Climb the ladder for one character; None means unbound.
 
     A render is judged twice.  Did it OBEY its card on the traits the channel
@@ -120,7 +121,7 @@ def bind_one(ctx, book: Path, index: int, char_id: str, card: dict, palette: str
             state["card"] = distinguish(state["card"], state["shared"], state["other"], taken)
         seed = seed_for(index, rung, i)
         path, physical = render_sheet(book, char_id, state["card"], palette, seed, fresh)
-        card = patiently(lambda: describe(path, seed=seed), timed_out(ctx.learn))
+        card = patiently(lambda: describe(path, seed=seed), timed_out(ctx.learn), patience)
         return {"path": path, "physical": physical, "card": card}
 
     def gate(result):
@@ -166,8 +167,10 @@ def bind_cast(ctx, book: Path, characters: list[str], palette: str
     taken = {slot: {c[slot] for c in cards.values()} for slot in POOLS}
     bound: dict[str, TraitCard] = {}
     records, unbound = [], []
+    patience = Patience()
     for index, char_id in enumerate(characters):
-        result = bind_one(ctx, book, index, char_id, cards[char_id], palette, bound, taken)
+        result = bind_one(ctx, book, index, char_id, cards[char_id], palette, bound, taken,
+                          patience)
         if result is None:
             unbound.append(char_id)
             continue

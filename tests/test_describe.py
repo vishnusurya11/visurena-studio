@@ -223,6 +223,37 @@ class TestDescribe:
         assert describe.patiently(slow, told.append) == describe.unseen()
         assert stopped == [True] and told == ["job-9 still running after 600.0s"]
 
+    def test_a_stuck_engine_is_asked_nothing_more_this_round(self, monkeypatch):
+        """Run 18: the interrupt did not take, the hung read stayed at the head
+        of the queue, and each of the next five reads waited 2 h in line
+        before its own 10 min -- 11 h in step 02.  An interrupt that does not
+        take marks the engine stuck for the round; every later read comes
+        back unseen at once, and the caller is told why."""
+        stopped, told, asked = [], [], []
+        monkeypatch.setattr(describe.comfy, "interrupt", lambda: stopped.append(True))
+        monkeypatch.setattr(describe.comfy, "stuck", lambda prompt_id: prompt_id == "job-9")
+        patience = describe.Patience()
+
+        def slow():
+            asked.append(True)
+            raise describe.comfy.StillRunning("job-9", 600.0)
+        assert describe.patiently(slow, told.append, patience) == describe.unseen()
+        assert patience.stuck
+        assert describe.patiently(card, told.append, patience) == describe.unseen()
+        assert stopped == [True] and len(asked) == 1
+        assert told == ["job-9 still running after 600.0s", "engine stuck: read skipped"]
+
+    def test_an_interrupt_that_takes_leaves_the_round_reading(self, monkeypatch):
+        monkeypatch.setattr(describe.comfy, "interrupt", lambda: None)
+        monkeypatch.setattr(describe.comfy, "stuck", lambda prompt_id: False)
+        patience = describe.Patience()
+
+        def slow():
+            raise describe.comfy.StillRunning("job-9", 600.0)
+        assert describe.patiently(slow, lambda what: None, patience) == describe.unseen()
+        assert not patience.stuck
+        assert describe.patiently(card, lambda what: None, patience) == card()
+
     def test_unseen_is_a_card_that_vouches_for_nothing(self):
         assert describe.known(describe.unseen()) == 0
         assert not describe.verifiable(describe.unseen())

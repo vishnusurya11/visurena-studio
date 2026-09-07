@@ -36,7 +36,7 @@ from scripts.trailer.build_clips import (SEED_BASE, bound_slots, is_complete, re
                                          render_take, take_seconds, take_values)
 from studio import comfy, frame_budget
 from studio.clip_cache import is_current, sidecar_for, stored_fingerprint
-from studio.describe import (DISTINCT_AT, TIMEOUT, TraitCard, describe, describe_frames,
+from studio.describe import (DISTINCT_AT, TIMEOUT, Patience, TraitCard, describe, describe_frames,
                              differences, distance, known, patiently, reader, same_look,
                              shared, verifiable)
 from studio.frame_budget import Cycle
@@ -190,25 +190,29 @@ def timed_out(learn: Callable) -> Callable[[str], None]:
                                        threshold=f"{TIMEOUT}s", action="accepted_on_timeout"))
 
 
-def read_card(frames: list[Path], seed: int, learn: Callable, run: Callable | None = None) -> TraitCard:
+def read_card(frames: list[Path], seed: int, learn: Callable, run: Callable | None = None,
+              patience: Patience | None = None) -> TraitCard:
     """The take's card, or an unseen one when the model outlives TIMEOUT.
 
-    `run` is the ROUND'S reader: freed once, then resident for every sheet.
+    `run` is the ROUND'S reader: freed once, then resident for every sheet;
+    `patience` is the round's memory of an interrupt that did not take.
 
     Scarlet run 4: one call took 10:23 and its TimeoutError ended the run with
     19 beats unrendered.  Retry, then degrade and ship: the job is interrupted
     so it cannot hold the queue, the take ships flagged, the run goes on."""
-    return patiently(lambda: describe_frames(frames, seed=seed, run=run), timed_out(learn))
+    return patiently(lambda: describe_frames(frames, seed=seed, run=run), timed_out(learn),
+                     patience)
 
 
 def measure(video: Path, reference: TraitCard | None, work: Path, seed: int,
-            learn: Callable = lambda row: None, run: Callable | None = None) -> dict:
+            learn: Callable = lambda row: None, run: Callable | None = None,
+            patience: Patience | None = None) -> dict:
     """What the vision model reads in the take, against the reference's card."""
     seconds = clip_seconds(video)
     if reference is None:
         return {"path": video, "seconds": seconds, "card": None, "similarity": None,
                 "differs": [], "known": 0}
-    card = read_card(frames_of(video, seconds, work), seed, learn, run)
+    card = read_card(frames_of(video, seconds, work), seed, learn, run, patience)
     alike, apart = shared(card, reference), differences(card, reference)
     return {"path": video, "seconds": seconds, "card": card, "differs": apart, "known": known(card),
             "similarity": round(len(alike) / max(1, len(alike) + len(apart)), 3)}
@@ -363,13 +367,14 @@ def read_round(ctx, staged: list[dict]) -> None:
     """Every take of the round read in ONE session: the image models are
     unloaded once, here, and the reader answers the rest while resident."""
     started = ctx.budget.clock()
-    session = reader(free=True)
+    session, patience = reader(free=True), Patience()
     for pending in staged:
         bind = pending["bind"]
         pending["result"] = dict(
             measure(pending["take"], bind.reference,
                     ctx.out_dir / "work/identity" / pending["take"].stem,
-                    pending["seed"], learn=ctx.learn, run=session), seed=pending["seed"])
+                    pending["seed"], learn=ctx.learn, run=session, patience=patience),
+            seed=pending["seed"])
         bind.tries.append(pending["result"])
     learn_read(ctx, sum(1 for p in staged if p["bind"].reference), ctx.budget.clock() - started)
 

@@ -243,18 +243,43 @@ def unseen() -> TraitCard:
     return TraitCard(**{trait: "unclear" for trait in TRAITS})
 
 
-def patiently(ask: Callable[[], TraitCard], on_timeout: Callable[[str], None]) -> TraitCard:
+class Patience:
+    """What a round of reads remembers of the engine: once an interrupt has
+    not taken, the hung job heads the queue and every later read would sit
+    QUEUE_SECONDS in line behind it before its own TIMEOUT.  Run 18: five
+    reads at 130 min each, 11 h in step 02.  Stuck, the round asks no more."""
+
+    def __init__(self) -> None:
+        self.stuck = False
+
+
+def patiently(ask: Callable[[], TraitCard], on_timeout: Callable[[str], None],
+              patience: Patience | None = None) -> TraitCard:
     """`ask()`, or an unseen card when the model outlives TIMEOUT.
 
     The policy is retry within the time frame, then degrade and ship: the
     job is interrupted so it cannot hold the queue, the caller is told what
-    happened, and the read comes back vouching for nothing."""
+    happened, and the read comes back vouching for nothing.  An interrupt
+    that does not take marks the round's `patience` stuck, and the reads
+    after it come back unseen without waiting."""
+    if patience is not None and patience.stuck:
+        on_timeout("engine stuck: read skipped")
+        return unseen()
     try:
         return ask()
     except TimeoutError as slow:
         comfy.interrupt()
         on_timeout(str(slow)[:80])
+        if patience is not None:
+            patience.stuck = held_up(slow)
         return unseen()
+
+
+def held_up(slow: TimeoutError) -> bool:
+    """Whether the job behind a timeout is still running after its interrupt;
+    a timeout that does not name its job cannot be checked and is not."""
+    prompt_id = getattr(slow, "prompt_id", None)
+    return prompt_id is not None and comfy.stuck(prompt_id)
 
 
 def describe(image: Path, seed: int = 42, run: Callable | None = None) -> TraitCard:

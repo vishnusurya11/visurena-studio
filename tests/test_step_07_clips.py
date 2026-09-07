@@ -217,6 +217,32 @@ class TestRun:
         rows = rungs(ctx)
         assert rows[0].action == "accepted_on_timeout" and rows[0].threshold == f"{TIMEOUT}s"
 
+    def test_a_stuck_engine_costs_one_timeout_and_the_rest_of_the_round_ships_unread(
+            self, ctx, monkeypatch, tmp_path):
+        """Run 18, step 02 shape: an interrupt the engine ignores leaves the
+        hung read heading the queue, and every later read of the round would
+        wait QUEUE_SECONDS in line before its own TIMEOUT.  The round asks
+        once, and the remaining takes ship unverified at once."""
+        asked, stopped = [], []
+        monkeypatch.setattr(describe.comfy, "interrupt", lambda: stopped.append(True))
+        monkeypatch.setattr(describe.comfy, "stuck", lambda prompt_id: True)
+        monkeypatch.setattr(step, "clip_seconds", lambda video: 3.0)
+        monkeypatch.setattr(step, "frames_of", lambda video, seconds, work: [tmp_path / "f.png"])
+
+        def slow(frames, seed, run=None):
+            asked.append(seed)
+            raise describe.comfy.StillRunning("job-9", 600.0)
+        monkeypatch.setattr(step, "describe_frames", slow)
+        binds = [step.Bind(i, {"beat_id": f"B{i:02}"}, ["char-x"], "char-x", SHEET,
+                           step.Climb(step.ladder_for(48, TYPED), "07"), frames=48) for i in range(3)]
+        staged = [{"bind": b, "take": tmp_path / f"take{b.index}.mp4", "seed": b.index} for b in binds]
+        step.read_round(ctx, staged)
+        assert asked == [0] and stopped == [True]
+        assert all(p["result"]["card"] == describe.unseen() for p in staged)
+        rows = [r for r in load(ctx.learnings_path) if r.action == "accepted_on_timeout"]
+        assert [r.measured for r in rows] == ["job-9 still running after 600.0s",
+                                              "engine stuck: read skipped", "engine stuck: read skipped"]
+
     def test_a_face_that_never_binds_ships_its_best_take_short(self, ctx, rendered):
         """Scarlet run 6: B12 read 4.0 then 3.5 on two seeds -- a seed moves
         the reading half a trait -- and the third seed cost the cut three
