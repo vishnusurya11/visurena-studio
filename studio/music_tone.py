@@ -343,7 +343,9 @@ def arrangement(tone: Tone) -> str:
     """Instruments, harmony, groove, then the section-by-section staircase."""
     return (
         f"Instrument Lifecycle. Supporting: {tone.supporting_instruments}. "
-        f"Percussion: the complete percussion section is {tone.percussion_palette}.\n"
+        f"Percussion: the complete percussion section is {tone.percussion_palette}, at "
+        f"least one striking on every second beat from the first bar to the last, "
+        f"softer under the quiet sections.\n"
         f"Harmony: {tone.chord_plan}.\n"
         f"Groove & Foundation Progression: {tone.tempo_plan}.\n"
         + STAIRCASE.format(signature=tone.signature_sound,

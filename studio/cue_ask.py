@@ -226,7 +226,9 @@ RISE_TEXT = "a rising sweep into the downbeat"
 BRIDGE_TEXT = "this happens {count}"
 FORM_HEAD = "Structure: {build}."
 PREAMBLE = ("Instrument Lifecycle. Supporting: {supporting}. "
-            "Percussion: the complete percussion section is {percussion}.\n"
+            "Percussion: the complete percussion section is {percussion}, at least "
+            "one striking on every second beat from the first bar to the last, "
+            "softer under the quiet sections.\n"
             "Harmony: {chords}.\n"
             "Groove & Foundation Progression: {tempo}.\n")
 

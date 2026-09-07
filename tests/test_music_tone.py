@@ -221,6 +221,18 @@ class TestCaption:
         for carrier in tone.pulse_carriers:
             assert carrier in caption(tone)
 
+    def test_the_caption_asks_for_a_stroke_rate_the_picture_can_cut_to(self):
+        """MEASURED, run 19: the caption named a percussion roster and never a
+        RATE, and the cue came back with 19 strokes over 113.8 s -- one every
+        4.4 s -- leaving a 14.6 s stretch with nothing to cut on and a 17.51 s
+        span in the plan.  A cut point must be an attack and no shot may run
+        past MAX_SHOT 4.0 s (`cue_supply`), so the roster is asked for a stroke
+        on every second beat, which is 2.4x the margin that gate needs."""
+        text = caption(scarlet())
+        assert "striking on every second beat" in text
+        assert "from the first bar to the last" in text
+        assert "softer under the quiet sections" in text
+
     def test_the_caption_size_is_recorded_and_capped(self):
         """The number itself is the point of this test.
 
@@ -228,6 +240,10 @@ class TestCaption:
         trailer's constants were about 50; on 2026-09-06, with the trailer's
         mood, progression and intensity words: 3853 characters, 648 words
         (the ask-written caption, `cue_ask.caption_from`, 4004 and 675).
+        On 2026-09-07, with the STROKE RATE the picture cuts to (BUILD row 66:
+        run 19's cue answered every word of the percussion brief with 19
+        strokes over 113.8 s): 3961 and 668, twenty words for the one clause
+        that decides whether the cut has anything to land on.
         The hosted API
         caps a prompt at 2000 characters and does not apply here; the local
         node caps caption plus lyrics at 5000 TOKENS
@@ -236,7 +252,7 @@ class TestCaption:
         caption.  This one also carries the nine-section trailer form.
         """
         text = caption(scarlet())
-        assert (len(text), len(text.split())) == (3853, 648), (len(text), len(text.split()))
+        assert (len(text), len(text.split())) == (3961, 668), (len(text), len(text.split()))
         assert CAPTION_WORDS[0] <= len(text.split()) <= CAPTION_WORDS[1]
         assert len(text) <= CAPTION_CHARS
         assert HOSTED_CHARS == 2000
