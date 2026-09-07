@@ -78,6 +78,39 @@ def test_voice_pulls_a_boxy_dark_render_toward_the_reference():
     assert distance(voiced) < distance(raw) * 0.5
 
 
+def test_voice_backs_off_before_it_buries_the_attacks():
+    """MEASURED: on a cue whose bed is tonal and whose strokes are broadband,
+    the full match boosts the bed's bands +6 and cuts the strokes' bands -6 --
+    a 12 dB swing against the transient.  A 120 BPM click over a 110 Hz bed
+    went from 30 cut points to 0, and its envelope spread from 7.3 dB to 2.3.
+    The picture is cut on those attacks (`cue_supply`), so the match is backed
+    off until they survive: a spectrum nobody can cut to is not an improvement."""
+    rate = 44100
+    t = np.arange(int(20 * rate)) / rate
+    bed = 0.1 * np.sin(2 * np.pi * 110 * t)
+    strokes = np.zeros_like(t)
+    rng = np.random.default_rng(4)
+    for beat in np.arange(0.5, 20.0, 0.5):
+        at = int(beat * rate)
+        n = int(0.02 * rate)
+        strokes[at:at + n] = rng.standard_normal(n) * np.exp(-np.arange(n) / (0.004 * rate))
+    cue = (bed + strokes).astype(np.float32)
+    before = cue_voicing.cut_points(cue, rate)
+    after = cue_voicing.cut_points(cue_voicing.voice(cue, rate), rate)
+    assert before > 20
+    assert after >= cue_voicing.KEEP_ATTACKS * before
+
+
+def test_voice_still_matches_when_the_attacks_survive_it():
+    """The back-off is a floor, not a retreat: material whose cut points the
+    match does not bury is still voiced the whole way."""
+    ref = cue_voicing.reference_db(CENTRES)
+    raw = shaped(list(ref + np.array([5.0, -4.0, -4.0, 5.0, 3.0, 0.0, -4.0, -10.0, -13.0])))
+    distance = lambda x: np.sqrt(np.mean((cue_voicing.voicing_gains(  # noqa: E731
+        cue_voicing.band_levels(*cue_voicing.spectrum(x, RATE)), CENTRES, limit=99.0)) ** 2))
+    assert distance(cue_voicing.voice(raw, RATE)) < distance(raw) * 0.5
+
+
 def test_voice_keeps_a_stereo_cue_stereo_and_a_flat_reference_alone():
     ref = cue_voicing.reference_db(CENTRES)
     left = shaped(list(ref), seed=5)

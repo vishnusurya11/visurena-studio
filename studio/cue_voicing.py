@@ -21,6 +21,8 @@ from __future__ import annotations
 import numpy as np
 from scipy.signal import fftconvolve
 
+from studio import beatmap, cue_supply
+
 SLOPES = {200.0: -2.350, 400.0: -3.668, 800.0: -4.985, 1600.0: -6.303, 3200.0: -7.621, 6400.0: -8.938}
 """dB per octave of the mean spectrum at each centre (Table 1); the slope
 is linear in log frequency, so the level is its integral."""
@@ -91,8 +93,9 @@ def voicing_filter(gains: np.ndarray, centres: np.ndarray, rate: int, taps: int 
     return np.roll(kernel, taps // 2) * np.hanning(taps)
 
 
-def voice(samples: np.ndarray, rate: int, limit: float = LIMIT_DB) -> np.ndarray:
-    """The cue with each octave band moved toward the reference shape."""
+def voiced_at(samples: np.ndarray, rate: int, limit: float) -> np.ndarray:
+    """The cue with each octave band moved toward the reference shape, by at
+    most `limit` dB a band."""
     edges = edges_within(rate)
     centres = centres_of(edges)
     gains = voicing_gains(band_levels(*spectrum(samples, rate), edges), centres, limit)
@@ -101,3 +104,51 @@ def voice(samples: np.ndarray, rate: int, limit: float = LIMIT_DB) -> np.ndarray
         return np.stack([fftconvolve(samples[:, c], kernel, mode="same") for c in range(samples.shape[1])],
                         axis=1).astype(np.float32)
     return fftconvolve(samples, kernel, mode="same").astype(np.float32)
+
+
+KEEP_ATTACKS = 0.9
+"""How much of the cue's cut points the match must leave standing."""
+
+BACK_OFF = (1.0, 0.5, 0.25, 0.0)
+"""The shares of LIMIT_DB tried, in order.  0.0 ships the render unvoiced:
+a spectrum nobody can cut to is not an improvement."""
+
+
+def at_beatmap_rate(mono: np.ndarray, rate: int) -> np.ndarray:
+    """`mono` at `beatmap.RATE`, averaged in blocks rather than sampled: the
+    envelope is windowed RMS, so dropping every other sample would alias a
+    cymbal into a cut point that is not there."""
+    factor = max(1, int(round(rate / beatmap.RATE)))
+    if factor == 1:
+        return np.asarray(mono, dtype=np.float32)
+    keep = len(mono) // factor * factor
+    return mono[:keep].reshape(-1, factor).mean(axis=1).astype(np.float32)
+
+
+def cut_points(samples: np.ndarray, rate: int) -> int:
+    """How many attacks the editor could cut this audio on, read with the
+    detector it cuts with (`beatmap.onsets` through `cue_supply`)."""
+    mono = samples.mean(axis=1) if samples.ndim == 2 else samples
+    return len(cue_supply.attacks(*beatmap.envelope_of(at_beatmap_rate(mono, rate))))
+
+
+def voice(samples: np.ndarray, rate: int, limit: float = LIMIT_DB) -> np.ndarray:
+    """The cue voiced toward the reference, backed off until its attacks survive.
+
+    THE TRANSIENT IS NOT NEGOTIABLE.  The reference is the long-term average
+    spectrum of FINISHED music, whose transients are already in it; our render's
+    are not, and they do not sit in the same bands as its bed.  MEASURED: a
+    120 BPM stroke over a 110 Hz bed is voiced +6 dB where the bed lives and
+    -6 dB where the strokes do -- a 12 dB swing against the attack -- and the
+    cue went from 30 cut points to 0, its envelope spread from 7.3 dB to 2.3.
+    On run 19's real renders the same match cost 5 of 54 and 5 of 33 attacks.
+    The picture is cut on those attacks and no later step can put one back, so
+    the match is halved until `KEEP_ATTACKS` of them are still there.
+    """
+    before = cut_points(samples, rate)
+    for share in BACK_OFF:
+        if share == 0.0:
+            return np.asarray(samples, dtype=np.float32)
+        out = voiced_at(samples, rate, limit * share)
+        if not before or cut_points(out, rate) >= KEEP_ATTACKS * before:
+            return out

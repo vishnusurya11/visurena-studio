@@ -1246,6 +1246,59 @@ new pin, since `plan_of` is one pass over a cut map already in
 
 ---
 
+## 21. WHAT THE CUE SUPPLIES THE EDITOR (BUILD row 66)
+
+The brick of this whole step, and the last thing anyone measured.
+
+**A cut point must be an attack** — `trailer_edit` picks every cut from
+`beatmap.onsets` — **and no shot may run past `MAX_SHOT` 4.0 s.** Both rules are
+already in the repo. Together they bind the MUSIC: a cue that leaves a wait
+longer than 4.0 s inside the material it is playing forces the editor to break
+one of them. Nothing downstream can undo it, because no later step can put an
+attack into a render that has none.
+
+MEASURED, run 19 (`cue_supply.supply` on the shipped files):
+
+| seed | attacks | per shot (floor 1.5) | longest wait (ceiling 4.0 s) | old gate |
+|---|---|---|---|---|
+| 1001 | 22 | 1.29 | 5.9 s | passed |
+| **1002 (shipped)** | **19** | **0.86** | **14.6 s** | **passed, form 2/2, fit 0.8 dB, ask 1.00** |
+| 1004 | 9 | 0.64 | 14.5 s | passed |
+
+`plan.json` shows what the shipped one bought: 23 spans, mean 5.07 s, **one held
+17.51 s** in a 106 s trailer. The 1.5 floor is not invented here either —
+`beatmap.GRID_DB` was set at 4.0 dB precisely because that threshold yields
+"roughly 1.5 candidates per shot: enough to choose from".
+
+So the step now measures supply per seed (`supply_of`), **ranks on it ahead of
+the ride fit** (the arc can move every level and every band of a render and
+cannot add one attack to it), **gates on it** (`verdict`), and when it refuses,
+the re-ask says so in the player's terms (`waited`): *something must be struck
+at least once every 4.0 s, from the first bar to the last, through the quiet
+sections too.* The caption had always asked for a pulse and never for a RATE.
+
+Three stretches are NOT waits, and each has a reason in the code:
+- an asked **dropout** — the arc cut that hole on purpose;
+- a bar the ask **rode LOW** — `cue_qc.long_shots_on_holds` already says a long
+  shot belongs over a trough;
+- the **run-out after the last attack** — the cut ends on the hard out and the
+  card holds to the stop, so that is the picture arriving, not a shot stranded.
+
+### The voicing was burying them (same row)
+
+ARC_VERSION 9 matched the render's spectrum to the long-term average spectrum of
+finished music. That reference is music whose transients are ALREADY in it; our
+render's bed and its strokes live in different bands, so the match lifts the bed
++6 dB exactly where the cut needs the stroke to stand out. MEASURED: a 120 BPM
+stroke over a 110 Hz bed went from **30 cut points to 0**, envelope spread 7.3 dB
+→ 2.3 dB. `cue_voicing.voice` now reads its own output and halves the match until
+`KEEP_ATTACKS` 0.9 of the cut points survive (raw-1002: 22 → 20).
+
+**The rule this leaves:** every dimension this step moves must be read back on
+its own output with the instrument the NEXT step uses. Level was read back by
+`fit_of` and passed. Spectrum was read back by `cue_voicing` and passed. Neither
+was read with the editor's detector, and the editor is who has to cut it.
+
 ## 20. Never reuse a shot applies to SOUND
 
 The arc can repeat material. `bar_order` fills a short render with

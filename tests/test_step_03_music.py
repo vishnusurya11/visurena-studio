@@ -26,6 +26,8 @@ from studio.cue_spans import ShorterCue
 from studio.learnings import load
 from studio.affirm import negations
 from studio.music_tone import Tone, caption, lyrics_plan, recipe_path, stamp_cue
+from studio import cue_supply
+from studio.trailer_edit import MAX_SHOT
 from studio.trailer_run import RunContext
 from studio.trailer_stage_spec import Metre
 from test_metre import click_track, write_wav
@@ -382,6 +384,74 @@ class TestAsk:
         wav = write_wav(tmp_path / "off.wav", planted(off))
         assert abs(step.fit_of(wav, metre_of(16), ask) - 12.0 / np.sqrt(stop - 1)) < 1.0
 
+    def test_supply_of_reads_the_cut_points_the_cue_offers_the_editor(self, tmp_path):
+        """MEASURED, run 19: cue-1002 gave 19 attacks inside its material --
+        0.86 per shot against the 1.5 `beatmap.GRID_DB` was tuned for -- and
+        left a 14.6 s wait with no cut point in it, four times MAX_SHOT.  Its
+        plan.json duly held a 17.51 s span.  The seeds it beat measured 1.29
+        and 0.64 per shot: every one starved, and no term read any of it."""
+        from tests.test_cue_arc import BAR, metre_of, planted
+        levels = [-20.0] * 16
+        wav = write_wav(tmp_path / "sparse.wav", planted(levels))
+        found = step.supply_of(wav, metre_of(16), until=16 * BAR)
+        assert found.longest_wait > MAX_SHOT and found.starves
+        assert "MAX_SHOT" in found.why
+
+    def test_the_reauthor_tells_the_model_how_long_the_picture_waited(self):
+        """The gate refuses a cue the editor cannot cut; the re-ask must then
+        say so in the model's own terms.  Run 19's best seed left one stretch
+        of 14.6 s with nothing to cut on -- the caption asked for a pulse and
+        never said how often a stroke has to land."""
+        best = Metre(seed=1, rel_path="m/a.wav", seconds=60.0, bpm=100.0, bar=2.0,
+                     beats_per_bar=4, beats=[0.5], downbeats=[0.5], bars_in_mode=1.0,
+                     grid="metre", fitness=1.0)
+        fed = cue_supply.Supply(count=19, per_bar=0.5, per_shot=0.86, longest_wait=14.6,
+                                seconds=113.8)
+        text = step.reauthor_prompt(TONE, best, fed=fed)
+        assert "14.6" in text and "4.0" in text
+        assert "every 4.0 s" in text or "every 4.0s" in text
+        assert "14.6" not in step.reauthor_prompt(TONE, best)
+
+    def test_the_title_cards_own_hold_is_not_the_editor_waiting(self, tmp_path):
+        """After the title hit the picture IS the card, held to the stop -- the
+        one long shot the cut is built around.  A fixture cue read 6.1 s of
+        "wait" there and failed a gate about shots that have run out of music."""
+        from tests.test_cue_arc import BAR, metre_of
+        metre = metre_of(16).model_copy(update={"title_hit": 24.0})
+        ask = cue_ask.CueAsk.for_bars(16, bar=BAR, bpm=120)
+        assert (24.0, 32.0) in step.rests_of(ask, metre, end=32.0)
+
+    def test_best_of_prefers_the_seed_that_feeds_the_editor_over_the_fitter_one(self):
+        """The ride is a per-bar gain and the voicing an FFT convolution: both
+        preserve attack COUNT exactly, so nothing the arc does can make a
+        sparse render cuttable.  Between two seeds that delivered the same ask
+        with the same form, the one that supplies the editor cut points wins,
+        ahead of the ride fit -- run 19 shipped the seed with 0.86 attacks per
+        shot over one with 1.29 because fit was all that separated them."""
+        a = Metre(seed=1, rel_path="m/a.wav", seconds=60.0, bpm=120.0, bar=2.0, beats_per_bar=4,
+                  beats=[0.5], downbeats=[0.5], bars_in_mode=0.9, grid="metre", fitness=9.0)
+        b = a.model_copy(update={"seed": 2, "fitness": 1.0})
+        form, score, fit = {1: 2, 2: 2}, {1: 1.0, 2: 1.0}, {1: 0.8, 2: 3.0}
+        feeds = {1: 0.9, 2: 2.0}
+        assert step.best_of([a, b], 120, form, score, fit, feeds) is b
+        assert step.best_of([a, b], 120, form, score, fit, {1: 2.0, 2: 2.0}) is a
+
+    def test_a_cue_that_starves_the_editor_fails_the_verdict(self):
+        """Level was solved three rows running (fit <= 1.4 dB, form 2/2, ask
+        1.00 delivered) and the owner's verdict never moved.  A cue the editor
+        cannot cut is not a trailer cue, whatever it scored: the gate says so,
+        and the ladder re-authors the caption instead of ranking sparser seeds."""
+        best = Metre(seed=1, rel_path="m/a.wav", seconds=60.0, bpm=100.0, bar=2.0,
+                     beats_per_bar=4, beats=[0.5], downbeats=[0.5], bars_in_mode=1.0,
+                     grid="metre", fitness=1.0)
+        starved = cue_supply.Supply(count=9, per_bar=0.3, per_shot=0.6,
+                                    longest_wait=16.6, seconds=60.0)
+        fed = starved.model_copy(update={"count": 40, "per_bar": 1.4, "per_shot": 2.0,
+                                         "longest_wait": 3.2})
+        passed, measured, _ = step.verdict(best, 100, {1: 1.0}, {1: starved})
+        assert not passed and "longest wait 16.6s" in measured
+        assert step.verdict(best, 100, {1: 1.0}, {1: fed})[0]
+
     def test_best_of_prefers_the_seed_that_delivered_its_ask(self):
         a = Metre(seed=1, rel_path="m/a.wav", seconds=60.0, bpm=120.0, bar=2.0, beats_per_bar=4,
                   beats=[0.5], downbeats=[0.5], bars_in_mode=0.9, grid="metre", fitness=9.0)
@@ -524,10 +594,11 @@ class TestAsk:
         music.mkdir(parents=True, exist_ok=True)
         wav = write_wav(music / "cue-7.wav", cue(**KINDS["two"]))
         state = {"ask": step.ask_of(ctx, TONE), "found": [], "form": {}, "fit": {}, "maps": {}, "asks": {},
-                 "score": {}}
+                 "score": {}, "feeds": {}}
         metre = step.grade(ctx.book_dir, wav, 7, state)
         assert state["found"] == [metre] and metre.seed == 7
         assert set(state["form"]) == set(state["maps"]) == set(state["score"]) == {7}
+        assert state["feeds"][7].count > 0          # what the seed offers the editor
         assert 0.0 <= state["score"][7] <= 1.0 and (music / "cutmap-7.json").exists()
 
     def test_warn_short_names_every_shortfall_of_the_shipped_cue(self, ctx, tmp_path, monkeypatch):

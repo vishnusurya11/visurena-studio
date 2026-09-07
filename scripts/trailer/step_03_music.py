@@ -25,13 +25,15 @@ from pydantic import BaseModel, Field
 
 from scripts.trailer import build_music
 from scripts.trailer.step_07_clips import read_seconds
-from studio import (beatmap, cue_arc, cue_ask, cue_conform, cue_punct, cue_spans, cue_voicing,
+from studio import (beatmap, cue_arc, cue_ask, cue_conform, cue_punct, cue_spans, cue_supply,
+                    cue_voicing,
                     frame_budget, llm, music_events)
 from studio.cue_plan import MIN_FORM_BARS, CueAsk, CuePlan
 from studio.cue_settle import Settled
 from studio.cue_spans import ShorterCue
 from studio.ladder import Ladder, Rung, climb
 from studio.learnings import Learning, load
+from studio.trailer_edit import MAX_SHOT
 from studio.music_tone import Tone, caption_stamp, cue_is_current, load_tone, lyrics_plan, recipe_path, stamp_cue
 from studio.trailer_stage_spec import Metre
 
@@ -283,6 +285,7 @@ def grade(book: Path, cue: Path, seed: int, state: dict) -> Metre:
     metre = measure(book, cue, seed)
     state["form"][seed] = form_of(cue, metre)
     state["fit"][seed] = fit_of(cue, metre, state["ask"])
+    state["feeds"][seed] = supply_of(cue, metre, state["ask"])
     state["maps"][seed] = map_cue(book, cue, metre)
     state["asks"][seed] = state["ask"]
     state["score"][seed] = score_of(state["ask"], state["maps"][seed], metre)
@@ -348,6 +351,54 @@ def form_of(cue: Path, found: Metre) -> int:
     return int(climbs(times, db, until)) + int(stops_dead(times, db, found.title_hit, found.bar))
 
 
+def dropouts_of(cue: Path) -> list[tuple[float, float]]:
+    """The silences the arc ASKED for, as spans; a hole is not the editor waiting."""
+    return [(float(e["t"]), float(e.get("end") or e["t"]))
+            for e in known_events(cue) if e.get("kind") == "dropout"]
+
+
+def title_of(cue: Path, found: Metre) -> float | None:
+    """When the title lands: the arc's own event if it wrote one, else what the
+    tracker heard.  The arc is the authority -- it PUT the hit there."""
+    written = [float(e["t"]) for e in known_events(cue)
+               if "arc:title_hit" in str(e.get("evidence", "")) + str(e.get("witness", ""))]
+    return written[0] if written else found.title_hit
+
+
+def rests_of(ask: CueAsk, found: Metre, end: float, title: float | None = None
+             ) -> list[tuple[float, float]]:
+    """Where the picture is MEANT to hold, so a wait there is not starvation:
+    the bars the ask rode LOW (a long shot belongs over a trough --
+    `cue_qc.long_shots_on_holds`), and everything from the title hit to the
+    stop, which is the card the whole cut is built around."""
+    low = cue_arc.RIDE_DB["low"][0]
+    targets = cue_arc.ride_targets(ask, ask.bars)
+    downs = found.downbeats
+    rests = [(downs[i], downs[i] + found.bar) for i, t in enumerate(targets)
+             if i < len(downs) and t <= low]
+    landed = title if title is not None else found.title_hit
+    if landed is not None and landed < end:
+        rests.append((landed, end))
+    return rests
+
+
+def supply_of(cue: Path, found: Metre, ask: CueAsk | None = None,
+              until: float | None = None) -> cue_supply.Supply:
+    """What this seed offers the editor: cut points, and the waits between them.
+
+    The one dimension the arc cannot move.  `cue_arc.ride` is a per-bar gain
+    and `cue_voicing.voice` is an FFT convolution, so both preserve attack
+    COUNT exactly -- rows 62, 63 and 64 could not have changed this number by
+    construction, which is why three trailers scored better and sounded the
+    same."""
+    times, db = beatmap.envelope(cue)
+    end = until if until is not None else (music_events.known_hard_out(known_events(cue))
+                                           or float(times[-1]))
+    holes = [(a, b) for a, b in dropouts_of(cue) if a < end]
+    return cue_supply.supply(times, db, found.bar, end, holes,
+                             rests_of(ask, found, end, title_of(cue, found)) if ask else None)
+
+
 def fit_of(cue: Path, found: Metre, ask: CueAsk) -> float:
     """dB RMS between the cue's material bars before the stop and the levels
     the ask rode them to (less the bed trim the punctuation applies)."""
@@ -368,9 +419,15 @@ def on_tone(bpm: float, asked: int) -> bool:
     return tempo_error(bpm, asked) <= TEMPO_BAND
 
 
+SUPPLY_BAND = 0.5
+"""Cut points per shot are banded like every other ranking term: two seeds
+within half a candidate per shot are equally cuttable and order on what
+follows."""
+
+
 def best_of(metres: list[Metre], asked: int, form: dict[int, int] | None = None,
-            score: dict[int, float] | None = None, fit: dict[int, float] | None = None
-            ) -> Metre | None:
+            score: dict[int, float] | None = None, fit: dict[int, float] | None = None,
+            feeds: dict[int, float] | None = None) -> Metre | None:
     """The seed that delivered most of its ask, then the most form, then the
     one closest to the ridden levels, then the fittest.
 
@@ -383,37 +440,72 @@ def best_of(metres: list[Metre], asked: int, form: dict[int, int] | None = None,
     staircase on a wobblier grid is the better trailer, because `04-shots` can
     cut to onsets and cannot invent a climax that is missing.
 
-    Then a countable grid, then how close the render came to the levels the
-    ask rode it to, by `FIT_BAND` (drama is dynamics: the arc writes them,
-    and a seed whose material could not be taken there is the one that
-    still sounds flat or holed), then the asked pace by the tempo band it
-    falls in; fitness only orders seeds that agree on all of it.
+    Then a countable grid, then WHAT THE SEED FEEDS THE EDITOR by `SUPPLY_BAND`
+    -- cut points per shot (`cue_supply`).  This ranks ahead of the ride fit
+    because the arc can move every level and every band of a render and cannot
+    add one attack to it: run 19 chose the seed offering 0.86 cut points per
+    shot over one offering 1.29, on a fit difference, and shipped a cut with a
+    17.5 s span in it.  Then how close the render came to the levels the ask
+    rode it to, by `FIT_BAND` (drama is dynamics: the arc writes them, and a
+    seed whose material could not be taken there is the one that still sounds
+    flat or holed), then the asked pace by the tempo band it falls in; fitness
+    only orders seeds that agree on all of it.
     """
     scores, delivered, fits = form or {}, score or {}, fit or {}
+    fed = feeds or {}
     return max(metres, key=lambda m: (delivered.get(m.seed, 0.0), scores.get(m.seed, 0),
                                       m.grid == "metre",
+                                      int(fed.get(m.seed, 0.0) / SUPPLY_BAND),
                                       -int(fits.get(m.seed, 0.0) / FIT_BAND),
                                       -int(tempo_error(m.bpm, asked) / TEMPO_BAND),
                                       m.fitness), default=None)
 
 
-def verdict(best: Metre | None, asked: int, score: dict[int, float] | None = None
-            ) -> tuple[bool, str, float]:
-    """(passed, what was measured, floor): the ask delivered, on a metric grid.
+def verdict(best: Metre | None, asked: int, score: dict[int, float] | None = None,
+            feeds: dict[int, cue_supply.Supply] | None = None) -> tuple[bool, str, float]:
+    """(passed, what was measured, floor): the ask delivered, on a metric grid,
+    by a cue the editor can actually cut.
 
     Tempo is reported, not gated: the picture cuts to measured events now, so
     a cue at 127 against 100 asked that landed its stop and title hit is a
-    trailer cue, and one at 100 that landed neither is not."""
+    trailer cue, and one at 100 that landed neither is not.
+
+    SUPPLY IS GATED.  A cut point must be an attack and no shot may run past
+    `MAX_SHOT`, so a cue that leaves a longer wait than that inside its own
+    material forces the editor to break one rule or the other -- which no
+    later step can undo.  Run 19's three graded seeds waited 5.9, 14.6 and
+    16.6 s and every one of them passed this gate on level alone."""
     if best is None:
         return False, "no seed rendered", cue_ask.VERDICT_FLOOR
     delivered = (score or {}).get(best.seed, 0.0)
+    fed = (feeds or {}).get(best.seed)
     measured = (f"ask {delivered:.2f} delivered, {best.bpm:.1f} bpm against {asked} asked, "
-                f"{best.grid}, fitness {best.fitness:.1f}")
-    return best.grid == "metre" and cue_ask.verdict(delivered), measured, cue_ask.VERDICT_FLOOR
+                f"{best.grid}, fitness {best.fitness:.1f}"
+                + (f", {fed.why}" if fed else ""))
+    passed = (best.grid == "metre" and cue_ask.verdict(delivered)
+              and not (fed is not None and fed.starves))
+    return passed, measured, cue_ask.VERDICT_FLOOR
 
 
-def reauthor_prompt(tone: Tone, best: Metre | None, refused: str = "") -> str:
-    """Ask for a pulse the tracker can count, in the words a player would read.
+def waited(fed: cue_supply.Supply | None) -> str:
+    """What the last cue left the editor to cut on, in the words a player reads.
+
+    The caption has always asked for a pulse and never for a RATE.  Run 19's
+    chosen seed answered with 19 strokes over 113.8 s and one stretch of 14.6 s
+    with nothing in it: every word of the brief was satisfied and the picture
+    had nothing to cut to."""
+    if fed is None or not fed.starves:
+        return ""
+    return (f"\nThe last cue left {fed.longest_wait:.1f} s of music with no stroke in it, "
+            f"and {fed.count} strokes in all. A shot cannot run longer than {MAX_SHOT:.1f} s, "
+            f"so SOMETHING must be struck at least once every {MAX_SHOT:.1f} s from the first "
+            f"bar to the last -- through the quiet sections too, softer but still struck.")
+
+
+def reauthor_prompt(tone: Tone, best: Metre | None, refused: str = "",
+                    fed: cue_supply.Supply | None = None) -> str:
+    """Ask for a pulse the tracker can count AND a stroke rate the picture can
+    cut to, in the words a player would read.
 
     Run 10 asked for "instruments STRUCK on every beat ... not double it, not
     a triple subdivision" and got a click track back: a metronome satisfies
@@ -434,6 +526,7 @@ def reauthor_prompt(tone: Tone, best: Metre | None, refused: str = "") -> str:
              f"each entering a later section than the one before and staying to the end; then "
              f"name the supporting instruments, one of them holding the grid through the final "
              f"third. Write every phrase as what plays.")
+    asked += waited(fed)
     return f"{asked}\nYour last answer was refused: {refused}. Name what plays." if refused else asked
 
 
@@ -468,7 +561,7 @@ def judge(ctx, best: Metre | None, asked: int, state: dict) -> tuple[bool, str, 
     """The gate: the ask delivered on a metric grid, AND a plan the frames
     afford.  A plan that does not fit fails with the bars it needs off; the
     next attempt asks for that many fewer."""
-    passed, measured, floor = verdict(best, asked, state["score"])
+    passed, measured, floor = verdict(best, asked, state["score"], state["feeds"])
     if not passed:
         return passed, measured, floor
     try:
@@ -555,13 +648,15 @@ def run(codex_id: str, ctx) -> None:
     tone = load_tone(ctx.book_dir)
     state = {"tone": tone, "ask": ask_of(ctx, tone), "render": RENDER_ESTIMATE,
              "timed": [], "found": [], "form": {}, "fit": {}, "maps": {}, "asks": {}, "score": {},
+             "feeds": {},
              "short": 0, "batches": 0}
     ladder = ladder_for(RENDER_ESTIMATE)
 
     asked = state["tone"].bpm
 
     def best():
-        return best_of(in_the_running(state), asked, state["form"], state["score"], state["fit"])
+        return best_of(in_the_running(state), asked, state["form"], state["score"], state["fit"],
+                       {seed: fed.per_shot for seed, fed in state["feeds"].items()})
 
     def attempt(rung, i):
         if rung.name == "reauthor_caption":
