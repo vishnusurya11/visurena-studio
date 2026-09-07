@@ -10,11 +10,28 @@ description: Cut a trailer for a book that has a screenplay - reference-bound sh
 ```
 uv run python trailer.py <codex_id>
 ```
-One command, one 6-hour ceiling, zero credits, no questions. Read
-`library/<book>/trailer/main/qc.json` and `learnings.jsonl` afterwards.
+One command, a 6-hour ceiling every step CONSULTS and none enforces (see
+BLUEPRINT's control law before you trust it), zero credits, no questions.
+`<codex_id>` is the 14-digit `codex.id`, NOT the folder name: the book at
+`library/20260822113400_a-study-in-scarlet/` runs as `20260822113400`
+(`paths.book_dir` globs `{codex_id}_*`).
+Read `library/<book>/trailer/main/qc.json` afterwards — it, and the manifest's
+`qc`/`flags`, are THIS run; `learnings.jsonl`, and the manifest's
+`learnings`/`rungs_by_step`, are EVERY run of this book (no run field), so read
+those by date range.
+It needs several things it can only READ and checks none of but ffmpeg:
+**BLUEPRINT, "What must exist before the command is run" — the one list, never
+copied here.** (This sentence used to enumerate them and would already be one
+item short.) Passing a `codex_id` skips the readiness query, so `preflight`
+asks for ffmpeg and nothing else. On 29 of the 30 books in the library the run
+ends with no master because one of those things is missing.
 The contract every step honours — input, output, gate, adapt ladder,
 fallback, time share — is `BLUEPRINT.md`; what is built vs proposed is
-`BUILD.md`; the registry is the `trailer` stage of `stages.yaml`. Everything
+`BUILD.md`. The `trailer` stage of `stages.yaml` is the registry for **file
+order, id and script name only** — its `desc` prose is stale and not a spec
+(it still describes step 06's beat walk, deleted in BUILD row 55, "11 min"
+takes against run 19's measured 9.6 min mean, and a step 07 "Reroll x2"
+against the code's one reroll). Everything
 below this line is for the agent that BUILDS or FIXES a step, not the one
 that runs it.
 
@@ -35,8 +52,9 @@ missing capability, only a missing wire.
 
 **The rule: a shot that shows a character carries that character's reference
 image, and a shot that cannot is a failing shot.** `ShotSpec.unbound_cast()`
-asks what the JOB will carry, never what the prompt says. `build_plan.py`
-refuses a plan with any unbound shot rather than rendering it and hoping.
+asks what the JOB will carry, never what the prompt says. Step 06's gate
+(`step_06_plan.py:unbound`) refuses a plan with any unbound setup rather than
+rendering it and hoping, and the QC floor requires `unbound_shots == 0`.
 
 Two corollaries, both measured:
 
@@ -107,7 +125,12 @@ the moment features are in `subskills/05-dialogue`.
 
 A line is bound to its speaker's picture (Brick 1), occupies whole beats in a
 measured slot (Brick 2), and is chosen *for the slot it fits* — never
-compressed into one. `lines = min(slate, measured_slots)`, cap 4. Its voice is
+compressed into one. `lines = min(slate, measured_slots)`, cap 4 — and `slate`
+can be ZERO: step 04's terminal rung `music_only` was taken on 8 of 10 measured
+climbs and delivered on 2 of the 4 runs that ever ran the whole chain, a
+trailer with no voice at all, which the QC floor PASSES (BLUEPRINT, the control
+law). That is the owner's first verdict, and no mix change reaches it.
+Its voice is
 bound by a reference clip, never described per line (`subskills/09-voice`), and
 its duration is read from the rendered file, never predicted.
 
@@ -139,7 +162,7 @@ Read the one you need; each carries what was measured rather than assumed.
 |---|---|
 | `trailer-story` | structure and selection, before any render, spends nothing |
 | `trailer-art` | reference sheets and visual register |
-| `trailer-cinematographer` | the clips, ~11 min per setup |
+| `trailer-cinematographer` | the clips, at `Cycle` seconds per take (sizing law) |
 | `trailer-editor` | cut, grade, mix, cards, QC — free, iterate here |
 
 
@@ -185,8 +208,13 @@ A short in-world action repeated as the rhythm bed is a named prestige device
 (Woollen's chalkboard in *A Serious Man*; Garrett calls diegetic percussion
 the defining technique of the past decade). It is also the cheapest thing this
 pipeline can render. **It converts the fixed-clip-length problem from a tell
-into an intention.** Reuse beats deliberately — but start each use at a
-different moment of its take, or repetition reads as a stutter.
+into an intention.** But **the motif is a repeated ACTION, never a repeated
+take.** Run 10 shipped 51 shots off 25 takes — every take twice, B00 three
+times, 24% of the picture a frame the viewer had already watched — so a motif
+is rendered as N distinct takes of the same action. `TrailerPlan._one_take_per_shot`
+refuses the plan and the QC floor requires `reused_shots == 0`. Its price is N
+takes' frames in the frame budget, which SHORTENS the cue by that much: under
+the one-take rule an artistic choice is a budget choice. Size it first.
 
 Straight cuts by default. "Dips to black create separation, cuts create
 connection" — a dissolve must mean something.
@@ -247,25 +275,21 @@ default when the prompt says nothing about the camera, so always say something.
 
 ## Order of work
 
-1. `build_refs.py` — reference sheets, from `analysis/` so they answer to the
-   book. They belong to `library/<book>/refs/`, shared by trailer, song and
-   episode: a character who looks one way in the trailer and another in
-   episode one is two characters to the audience.
-2. `build_music.py` — several seeds, chosen on measured fitness: metre,
-   tempo, title-on-downbeat, lift, **slots**, late reach.
-3. `build_plan.py` — setups from the screenplay's authored shots (`beat_of`,
-   `hold_wide`, now read by step 06; its walk CLI is gone, row 55); the cuts
-   are the cue plan's span starts, never invented; the line slate from the
-   four pools, ordered hook → answer → threat → title → button.
-   **Refuses unbound shots and a slate with no hook.**
-4. `build_voice.py` — design one reference per speaking character, clone
-   every line, gate on similarity, write measured seconds. Lines are then
-   chosen for their slots.
-5. `build_clips.py` — one take per setup, reference-bound. ~11 min each.
-6. `assemble.py` — cut, title on the measured hit, the line layer ducked
-   6 LU, synthesised sound, mix; QC on the delivered master.
+The ten steps in `stages.yaml` order, each with its input, output, gate,
+ladder and fallback: **BLUEPRINT.md, "The ten steps" — the one list, never
+copied here.** (This section used to be a second copy and rotted: it named
+`build_voice.py`, which does not exist, and credited `build_plan.py` with a
+refusal that lives in step 06.) Reference sheets belong to
+`library/<book>/refs/`, shared by trailer, song and episode: a character who
+looks one way in the trailer and another in episode one is two characters to
+the audience.
 
-Cost: zero. Everything is local GPU; no paid API is involved at any step.
+Cost: every PIXEL, note and voice is free — MiniMax Music 3, MiniMax-H3 and
+Qwen3-TTS all run on the local ComfyUI. **The TEXT is not.** Steps 01–04 call
+`llm.structured`, which `models.yaml` resolves to `api.openai.com` on every
+tier, so the run needs `OPENAI_API_KEY` and dies in step 01 without it. The
+budget of a run is TIME, not money — the measured spend and what a NEW book
+pays extra are BLUEPRINT, "What the model is allowed to decide".
 
 ## Observed on the first bound run — read before the next one
 
