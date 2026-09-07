@@ -687,14 +687,35 @@ def _line(text: str, speaker: str | None, pool: str, scene: int | None) -> dict:
     return {"text": text, "speaker": speaker, "pool": pool, "scene": scene}
 
 
-def screenplay_pool(scenes: list[dict]) -> list[dict]:
-    """Every spoken sentence of the screenplay, with its scene number."""
+def speaker_id(cue: str, index: dict | None) -> str | None:
+    """The cast id a screenplay's character cue names, or None for a cue nobody
+    in the cast answers to.
+
+    A cue is written for a READER -- "POLICE INSPECTOR", "Dr. Watson" -- while
+    the quote and source pools key on the analysis id, and step 05 can only
+    clone a voice from a cast card filed under that id.  MEASURED, run 19: the
+    slate's stakes line was spoken by "Police Inspector", which matches none of
+    the 23 ids on disk, so the line was carded and the trailer spoke 4 of 5 --
+    with four castable stakes spares unused in the same pool.  An unresolved
+    cue is a card, and the slate then knows it is choosing one."""
+    if not index:
+        return cue or None
+    if cue in index.values():
+        return cue
+    from studio.names import match_alias
+    return match_alias(cue, index)
+
+
+def screenplay_pool(scenes: list[dict], index: dict | None = None) -> list[dict]:
+    """Every spoken sentence of the screenplay, with its scene number, spoken
+    by the cast id its character cue names."""
     out: list[dict] = []
     for scene in scenes:
         for element in scene.get("elements", []):
             if element.get("kind") != "dialogue" or not element.get("character"):
                 continue
-            out += [_line(s, element["character"], "screenplay", scene["number"])
+            who = speaker_id(element["character"], index)
+            out += [_line(s, who, "screenplay", scene["number"])
                     for s in sentences(element.get("text") or "")]
     return out
 
@@ -721,12 +742,13 @@ def alias_index(characters: list[dict]) -> dict:
     return {**build_index(characters), **build_surname_index(characters)}
 
 
-def known_speech(scenes: list[dict], quotes: dict[str, list[str]]) -> list[tuple[set, str]]:
+def known_speech(scenes: list[dict], quotes: dict[str, list[str]],
+                 index: dict | None = None) -> list[tuple[set, str]]:
     """What we already know somebody said, as word sets: screenplay dialogue
     and the character quotes, each whole and sentence by sentence."""
     from studio.iconicity import tokens
     known: list[tuple[set, str]] = []
-    for line in screenplay_pool(scenes) + quote_pool(quotes):
+    for line in screenplay_pool(scenes, index) + quote_pool(quotes):
         known.append((tokens(line["text"]), line["speaker"]))
     for scene in scenes:
         for element in scene.get("elements", []):
@@ -850,9 +872,10 @@ def line_pools(book_dir: Path, narrator: str | None = None) -> list[dict]:
                             .read_text(encoding="utf-8"))
     registry = json.loads((book / "analysis/registry.json").read_text(encoding="utf-8"))
     quotes = character_quotes(book)
-    known = known_speech(screenplay["scenes"], quotes)
-    pools = screenplay_pool(screenplay["scenes"]) + quote_pool(quotes)
-    pools += source_pool(book, alias_index(registry["characters"]), known)
+    index = alias_index(registry["characters"])
+    known = known_speech(screenplay["scenes"], quotes, index)
+    pools = screenplay_pool(screenplay["scenes"], index) + quote_pool(quotes)
+    pools += source_pool(book, index, known)
     if narrator and narrator != "omniscient":
         pools += narration_pool(book)
     return dedupe_lines(pools)

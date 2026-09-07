@@ -76,6 +76,30 @@ def next_candidate(pool: list[SlateLine], function: str, used: set[str],
     return None
 
 
+def next_castable(pool: list[SlateLine], function: str, used: set[str],
+                  refs: dict[str, Path], ctx) -> SlateLine | None:
+    """The next unused line of this function whose speaker the book can CARD --
+    designed already, or with a cast card to design from.  Wider than
+    `next_candidate` on purpose: this runs when the slate's own speaker turned
+    out to be uncastable, so there is no designed voice for that function yet."""
+    for line in pool:
+        if line.function != function or line.text in used or not line.speaker:
+            continue
+        if line.speaker in refs or load_card(ctx.book_dir, line.speaker) is not None:
+            return line
+    return None
+
+
+def reference_for(speaker: str, refs: dict[str, Path], ctx) -> Path:
+    """The speaker's designed reference, designed now if this is the first line
+    of theirs the step has reached."""
+    if speaker not in refs:
+        refs[speaker] = voice.design_reference(load_card(ctx.book_dir, speaker),
+                                               ctx.out_dir / "voice" / "refs")
+        ctx.tracker.log(f"voice reference for {speaker}", step_id=STEP_ID)
+    return refs[speaker]
+
+
 def attempt_line(rung: Rung, i: int, line: SlateLine, index: int, refs: dict[str, Path],
                  out_dir: Path) -> VoiceLine:
     """Render one try, measure its similarity, and charge the rung what it took."""
@@ -118,9 +142,20 @@ def voice_line(line: SlateLine, index: int, refs: dict[str, Path], pool: list[Sl
     if line.card:
         return card_line(line, index)
     if line.speaker not in refs:
+        # MEASURED, run 19: the slate's stakes line was spoken by "Police
+        # Inspector", who has no cast card, and the trailer SPOKE 4 OF 5 while
+        # four castable stakes spares sat in the same pool.  A speaker nobody
+        # designed is the same problem as a take nobody can use: draw the next
+        # line of that function, the rung the ladder already knows.
+        spare = next_castable(pool, line.function, used | {line.text}, refs, ctx)
         ctx.learn(Learning(step=STEP_ID, gate="speaker_card", measured=line.speaker,
-                           threshold="cast card", action="card", terminal=True))
-        return card_line(line, index)
+                           threshold="cast card", terminal=spare is None,
+                           action="spare_drawn" if spare else "card",
+                           note=spare.speaker if spare else ""))
+        if spare is None:
+            return card_line(line, index)
+        reference_for(spare.speaker, refs, ctx)
+        line = spare
     outcome = climb_line(line, index, refs, pool, used, ctx)
     if outcome.terminal:
         return card_line(line, index)

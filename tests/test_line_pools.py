@@ -45,7 +45,12 @@ def screenplay():
             {"kind": "dialogue", "character": "sherlock_holmes",
              "text": "I shall have him, Doctor. I'll lay you two to one that I have him."},
             {"kind": "dialogue", "character": "sherlock_holmes",
-             "text": "I shall have him, Doctor. I'll lay you two to one that I have him."}]}]}
+             "text": "I shall have him, Doctor. I'll lay you two to one that I have him."}]},
+        {"number": 5, "elements": [
+            {"kind": "dialogue", "character": "Dr. Watson",
+             "text": "Do you consider that there is immediate danger?"},
+            {"kind": "dialogue", "character": "Police Inspector",
+             "text": "The case is closed, gentlemen."}]}]}
 
 
 @pytest.fixture()
@@ -92,6 +97,21 @@ class TestPools:
 
     def test_a_pronoun_tag_is_a_card(self, book):
         assert by_text(story.line_pools(book), "You are wrong, sir")[0]["speaker"] is None
+
+    def test_a_screenplay_cue_is_resolved_to_the_cast_id_it_names(self, book):
+        """A character cue is written for a READER -- "Dr. Watson" -- while every
+        other pool keys on the analysis id.  Step 05 can only clone a voice
+        from a cast card, which is filed under the id."""
+        assert by_text(story.line_pools(book), "immediate danger")[0]["speaker"] == "john_watson"
+
+    def test_a_cue_naming_nobody_in_the_cast_is_a_card(self, book):
+        """MEASURED, run 19: the slate's stakes line was spoken by "Police
+        Inspector", which matches none of the 23 ids on disk, so step 05 carded
+        it and the trailer spoke 4 of 5 lines -- while four castable stakes
+        spares sat unused in the same pool.  A line nobody in the cast can
+        speak enters as a card, and the slate then knows it is choosing one."""
+        line = by_text(story.line_pools(book), "The case is closed")[0]
+        assert line["speaker"] is None
 
     def test_every_pool_is_present_and_deduplicated(self, book):
         pool = story.line_pools(book)

@@ -8,6 +8,34 @@ description: Find the lines a culture kept, grade the finder on a held-out corpu
 `scripts/trailer/step_04_lines.py`, `studio/trailer_dialogue.py`, `studio/quotes.py`,
 `studio/iconicity.py`, `studio/line_windows.py`. Speaking the lines is `09-voice`.
 
+## The join between a slate and a voice is an ID, and nothing checked it
+
+MEASURED, run 19: the trailer spoke **4 of 5** lines. The fifth was the slate's
+`stakes` line, spoken by **"Police Inspector"** — a character cue written for a
+reader. The 23 cast cards on disk are filed under snake_case ids
+(`analysis/characters/<id>.json`), so nothing could clone that voice and step 05
+carded the line. In the same `lines.json`, four `stakes` spares sat unused, all
+of them `jefferson_hope`, all castable.
+
+Two pools, two conventions: `quote_pool` and `source_pool` key on the analysis
+id, while `screenplay_pool` took the screenplay's character cue verbatim. The
+join was never tested because the test fixture's screenplay used ids as cues.
+
+**Fixed at both ends** (BUILD row 67):
+1. `trailer_story.speaker_id` resolves a cue through the registry's alias index
+   (`Dr. Watson` → `john_watson`). A cue nobody in the cast answers to enters as
+   a **card** — speakerless, the way narration already does — so the slate knows
+   it is choosing one, and the speech floor is counted honestly.
+2. `step_05_voice` no longer cards a line for want of a voice: it draws the next
+   unused line of the same FUNCTION whose speaker the book can card
+   (`next_castable`), designs that reference on demand (`reference_for`), and
+   logs `spare_drawn` rather than a terminal refusal. Carding stays the last
+   resort, which is what the ladder does everywhere else.
+
+**The rule:** when one step's output is another step's input, the identifier
+that joins them is a contract — test it with a fixture that does NOT already
+speak the destination's dialect.
+
 ## The brick — a trailer line needs no scene and takes a side
 
 Length, syntax, position, what to speak and what to set in type all derive from

@@ -171,6 +171,36 @@ class TestLadder:
         assert engine.cloned == [] and engine.designed == []
         assert load(ctx.learnings_path)[0].gate == "speaker_card"
 
+    def test_a_speaker_with_no_cast_card_draws_a_spare_of_the_same_function(self, ctx, monkeypatch):
+        """MEASURED, run 19: the slate's `stakes` line was spoken by "Police
+        Inspector", who has no cast card, so the step carded it and the trailer
+        SPOKE 4 OF 5 -- while four castable `stakes` spares sat in the same
+        pool.  A speaker nobody designed is a reason to draw the next line of
+        that function, which is what the ladder already does for a bad take."""
+        engine = FakeEngine(monkeypatch, 0.9)
+        spare = spoken("There is death in one and life in the other.",
+                       speaker="john_watson", function="stakes")
+        (ctx.out_dir / "lines.json").write_text(json.dumps(slate(
+            spoken("What do you make of it?"),
+            spoken("Do you consider there is danger?", speaker="Police Inspector",
+                   function="stakes"),
+            card("Run."), pool=[spare])), encoding="utf-8")
+        step.run(CODEX, ctx)
+        lines = written(ctx)
+        assert not lines[1].card and lines[1].speaker == "john_watson"
+        assert lines[1].text == spare.text and engine.cloned
+        rows = load(ctx.learnings_path)
+        assert rows[0].gate == "speaker_card" and rows[0].action == "spare_drawn"
+        assert not rows[0].terminal
+
+    def test_a_speaker_with_no_cast_card_and_no_spare_is_still_a_card(self, ctx, monkeypatch):
+        engine = FakeEngine(monkeypatch, 0.9)
+        (ctx.out_dir / "lines.json").write_text(json.dumps(slate(
+            spoken("Who goes there?", speaker="ghost"), card("Run."))), encoding="utf-8")
+        step.run(CODEX, ctx)
+        assert written(ctx)[0].card and engine.cloned == []
+        assert load(ctx.learnings_path)[0].terminal and engine.designed == []
+
     def test_a_rung_costs_what_the_render_took(self, ctx, monkeypatch):
         """Rerolls are gated on MEASURED render time, not a guess."""
         FakeEngine(monkeypatch, 0.5)
