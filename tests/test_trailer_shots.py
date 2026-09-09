@@ -54,6 +54,15 @@ class TestTheBrief:
         assert "B00" in text and "the crime" in text
         assert "char-irene_adler" not in text
 
+    def test_it_says_only_two_faces_can_be_bound(self):
+        """H3 takes TWO reference images.  MEASURED on the first render: the
+        page wrote beats naming three and four people, so the shot bound two
+        and the model invented the rest -- and an invented face is a different
+        face in every shot.  Anyone past the second is out of frame, turned
+        away, or in silhouette."""
+        text = shots.brief(a_page(), REFS)
+        assert "two people" in text and "turned away" in text
+
     def test_it_asks_for_a_vertical_composition(self):
         """9:16 is the default frame, and the top and bottom of it are covered
         by platform interface -- so the subject has to sit in the centre band."""

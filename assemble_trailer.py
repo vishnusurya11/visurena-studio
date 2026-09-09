@@ -15,7 +15,7 @@ import sys
 from pathlib import Path
 
 from scripts.trailer.build_music import render_cue
-from studio import script_cue, script_cut, script_mix, voice
+from studio import script_cue, script_cut, script_mix, script_qc, voice
 from studio.trailer_script import TrailerScript
 
 LIBRARY = Path("library")
@@ -84,6 +84,16 @@ def build(book: Path) -> Path:
     master = out / f"TRAILER60-{book.name.split('_', 1)[-1]}.mp4"
     script_mix.mix(picture, bed, lines, script_cue.spoken_windows(page),
                    out / "work/script", master, page.seconds)
+
+    spoken = sum(b.seconds for b in page.beats
+                 if b.line and any(str(p).endswith(f"{b.id}.wav") for _, p in lines))
+    report = script_qc.measure(page, master, spoken)
+    (out / "script_qc.json").write_text(report.model_dump_json(indent=2), encoding="utf-8")
+    print(f"qc: {report.seconds}s promised {report.promised}s | acts "
+          f"{report.shares} | speech {report.speech:.0%} | {report.lufs} LUFS "
+          f"{report.peak} dBTP", flush=True)
+    print(f"qc: {'DELIVERED' if report.delivered else 'MISSED ' + ', '.join(report.misses)}",
+          flush=True)
     return master
 
 
