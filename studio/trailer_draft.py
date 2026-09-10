@@ -133,8 +133,14 @@ def brief(story: dict, scenes: list[dict], lines: list[dict], cast: dict[str, st
         f"new dialogue; a line that is not on this list cannot be spoken:\n"
         f"{line_menu(lines, cast)}\n\n"
         f"For every beat give: what we SEE, what we HEAR, the line and its speaker if "
-        f"it speaks, the card if it holds text, and WHY the beat is there. A beat "
-        f"without a reason to exist is decoration — cut it.")
+        f"it speaks, the EMOTION it is said with, the card if it holds text, and "
+        f"WHY the beat is there. A beat without a reason to exist is decoration "
+        f"— cut it.\n\n"
+        f"HOW A LINE IS SAID. Every spoken beat names one of: "
+        f"{', '.join(trailer_script.FEELINGS)}. Choose it for what the moment "
+        f"IS -- a deduction stated flat is cold, the lead on a scent is curious, "
+        f"the avenger naming his hour is threatening. A voice bank is rendered "
+        f"for each of these, so the word you choose is the read the trailer gets.")
 
 
 def check(page: TrailerScript, lines: list[dict], cast: dict[str, str]) -> TrailerScript:

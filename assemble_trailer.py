@@ -15,7 +15,9 @@ import sys
 from pathlib import Path
 
 from scripts.trailer.build_music import render_cue
-from studio import script_cue, script_cut, script_mix, script_qc, voice
+from studio import (comfy, script_cue, script_cut, script_mix, script_qc,
+                    voice, voice_bank, voice_say)
+from studio.music_tone import load_tone
 from studio.trailer_script import TrailerScript
 
 LIBRARY = Path("library")
@@ -37,16 +39,33 @@ def load_page(out: Path) -> TrailerScript:
 def cue_for(book: Path, page: TrailerScript, out: Path) -> Path:
     """The cue this page asked for, rendered once."""
     ask = script_cue.ask_for(page)
-    text = script_cue.brief(page)
+    # The six-section caption is what set the LENGTH on every cue that measured
+    # near its ask; the page's moments are added to it, not substituted for it.
+    tone = load_tone(book) if (book / "trailer/music/tone.json").exists() else None
+    text = script_cue.brief(page, tone)
     (out / "music/script_cue_brief.txt").parent.mkdir(parents=True, exist_ok=True)
     (out / "music/script_cue_brief.txt").write_text(text, encoding="utf-8")
     return render_cue(book, text, CUE_SEED, out / "music",
                       duration=int(ask.seconds) + 2, prefix="script-cue")
 
 
+def bank_render(text: str, instruct: str, out: Path) -> None:
+    """One VoiceDesign clip for the bank: the baseline passage, as directed."""
+    produced = comfy.run(voice.DESIGN_WORKFLOW, {
+        "text": text, "instruct": instruct,
+        "filename_prefix": f"bank_{out.stem}"}, timeout=voice.DESIGN_TIMEOUT)
+    voice._render(produced[0], out)
+
+
 def speak(book: Path, page: TrailerScript, out: Path) -> list[tuple[float, Path]]:
-    """Every written line, said in its speaker's designed voice."""
-    said = []
+    """Every written line, in its speaker's voice and its beat's FEELING.
+
+    Two references, not one: the character's `calm` clip carries the timbre and
+    the beat's emotion clip carries the delivery, which is what IndexTTS2 takes
+    them apart for.  The old path cloned from a single reference, so Holmes
+    stating a deduction and Hope naming the hour of his revenge read the same.
+    """
+    said, banks = [], {}
     for beat in page.beats:
         if not beat.line:
             continue
@@ -55,12 +74,17 @@ def speak(book: Path, page: TrailerScript, out: Path) -> list[tuple[float, Path]
             print(f"  {beat.id}: no cast card for {beat.speaker}; the line is cut", flush=True)
             continue
         who = json.loads(card.read_text(encoding="utf-8"))
-        reference = voice.design_reference(who, out / "voice/refs")
+        if beat.speaker not in banks:
+            banks[beat.speaker] = voice_bank.build(who, out / "voice/bank", bank_render)
+        bank = banks[beat.speaker]
+        feeling = voice_bank.emotion_for(beat.function, beat.why, beat.emotion)
         dest = out / "voice/script" / f"{beat.id}.wav"
         if not dest.exists():
-            print(f"  {beat.id}: {beat.speaker} says “{beat.line[:48]}…”", flush=True)
-            voice.clone_line(reference, beat.line, voice.seed_for(beat.speaker, 0), dest,
-                             speaker=beat.speaker)
+            print(f"  {beat.id}: {beat.speaker} [{feeling}] “{beat.line[:44]}…”",
+                  flush=True)
+            voice_say.say(beat.line, voice_bank.timbre_of(bank),
+                          bank.get(feeling, voice_bank.timbre_of(bank)),
+                          voice.seed_for(beat.speaker, 0), dest, speaker=beat.speaker)
         said.append((page.at(beat), dest))
     return said
 

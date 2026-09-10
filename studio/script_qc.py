@@ -73,15 +73,20 @@ class ScriptQC(BaseModel):
 
 def seconds_of(path: Path) -> float:
     """The master's own length, read off the file rather than assumed."""
+    # -v info, not error: the "Duration:" line IS ffmpeg's info output, and
+    # quieting it is what left this fallback with nothing to read.
     proc = subprocess.run(
-        ["ffmpeg", "-v", "error", "-i", str(path), "-f", "null", "-"],
+        ["ffmpeg", "-v", "info", "-i", str(path), "-f", "null", "-"],
         capture_output=True, text=True, encoding="utf-8", errors="replace")
-    found = subprocess.run(
-        ["ffprobe", "-v", "error", "-show_entries", "format=duration",
-         "-of", "json", str(path)], capture_output=True, text=True,
-        encoding="utf-8", errors="replace")
-    if found.returncode == 0 and found.stdout.strip():
-        return round(float(json.loads(found.stdout)["format"]["duration"]), 2)
+    try:
+        found = subprocess.run(
+            ["ffprobe", "-v", "error", "-show_entries", "format=duration",
+             "-of", "json", str(path)], capture_output=True, text=True,
+            encoding="utf-8", errors="replace")
+        if found.returncode == 0 and found.stdout.strip():
+            return round(float(json.loads(found.stdout)["format"]["duration"]), 2)
+    except (FileNotFoundError, OSError):
+        pass                      # no ffprobe on this box; ffmpeg reports it too
     return _from_stderr(proc.stderr)
 
 

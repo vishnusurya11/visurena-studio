@@ -97,6 +97,18 @@ class TestTheBrief:
         assert "a pocket watch, alone" in text and "the biggest hit, then silence" in text
         assert "three acts" in text and "BPM" in text
 
+    def test_the_brief_builds_on_the_caption_that_measured_its_length(self, monkeypatch):
+        """MEASURED: a 200-word prose brief asking for 58 s came back 25.03 s.
+        The caption that reliably produced 100-second cues is the full
+        `music_tone.caption` document (668 words, six sections), so the page's
+        moments are APPENDED to it rather than replacing it -- keep what set
+        the length, add what sets the drama."""
+        page = a_page()
+        monkeypatch.setattr(script_cue, "caption", lambda tone: "FULL SIX-SECTION CAPTION")
+        text = script_cue.brief(page, tone=object())
+        assert text.startswith("FULL SIX-SECTION CAPTION")
+        assert "a pocket watch, alone" in text          # and the page's own direction
+
     def test_the_windows_are_where_the_trailer_speaks(self):
         """Not for ducking -- for STOPPING.  Run 19 ducked a bed under four
         lines and the owner still heard no dialogue."""

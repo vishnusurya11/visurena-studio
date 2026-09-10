@@ -35,6 +35,7 @@ def a_page() -> TrailerScript:
 
 def a_shot(beat_id: str, **kw) -> shots.Shot:
     fields = {"place": "loc-221b_baker_street", "character": "char-sherlock_holmes",
+              "subject": "Holmes at the window, the street below",
               "action": "He crosses to the window and looks down into the street.",
               "open_framing": "A wide of the room, the window bright behind him.",
               "close_framing": "A tight profile, gaslight raking one cheek.",
@@ -62,6 +63,20 @@ class TestTheBrief:
         away, or in silhouette."""
         text = shots.brief(a_page(), REFS)
         assert "two people" in text and "turned away" in text
+
+    def test_it_asks_what_the_shot_is_OF(self):
+        """MEASURED: B08's 1009-word prompt said "pills" twice, because nothing
+        ever stated the SUBJECT -- the thing the shot exists to show.  The
+        model rendered the craft language instead and put candles on the table."""
+        text = shots.brief(a_page(), REFS)
+        assert "SUBJECT" in text and "one thing the shot is OF" in text
+
+    def test_it_refuses_a_beat_written_as_a_montage(self):
+        """B05 asked for "Rapid flashes: a newspaper, a bloodstained room, a
+        wedding ring, and a gloved hand" as ONE continuous take.  H3 cannot cut,
+        so it blended four subjects into one muddle."""
+        text = shots.brief(a_page(), REFS)
+        assert "montage" in text.lower() and "cannot cut" in text.lower()
 
     def test_it_asks_for_a_vertical_composition(self):
         """9:16 is the default frame, and the top and bottom of it are covered

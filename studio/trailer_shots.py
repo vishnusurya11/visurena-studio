@@ -19,7 +19,7 @@ from typing import Callable
 
 from pydantic import BaseModel, Field
 
-from studio import h3_prompt, llm
+from studio import llm, shot_document
 from studio.trailer_script import TrailerScript
 
 TIER = "reasoning"
@@ -40,10 +40,12 @@ class Shot(BaseModel):
     character: str | None = Field(default=None, description="ref_id of the person bound in frame")
     second: str | None = Field(default=None, description="ref_id of a second person, for a two-shot")
     place: str = Field(description="ref_id of the location the shot is set in")
-    action: str = Field(min_length=20, description="what happens, in one or two sentences")
-    open_framing: str = Field(min_length=20, description="the composition the take opens on")
-    close_framing: str = Field(min_length=20, description="the composition the move arrives at")
-    camera: str = Field(min_length=20, description="the single camera move between them")
+    subject: str = Field(min_length=8,
+                         description="the ONE thing this shot is of, in a few words")
+    action: str = Field(min_length=40, description="what happens, in two or three sentences")
+    open_framing: str = Field(min_length=30, description="the composition the take opens on")
+    close_framing: str = Field(min_length=30, description="the composition the move arrives at")
+    camera: str = Field(min_length=25, description="the single camera move between them")
     arc: str = Field(default="build", description="quiet, build or hit — what the score is doing")
 
 
@@ -91,6 +93,12 @@ def brief(page: TrailerScript, refs: dict) -> str:
         f"beat is ABOUT and keep the others out of frame, turned away, or in "
         f"silhouette -- a face nobody bound is invented, and an invented face is a "
         f"different person in every shot.\n\n"
+        f"EVERY SHOT IS OF ONE THING. Name it as the SUBJECT in a few words -- "
+        f"'two identical pills on a table', 'the word RACHE on the plaster'. It is "
+        f"the one thing the shot is OF, and the whole take arrives at it. A beat "
+        f"written as a montage -- rapid flashes, several cutaways, 'then' -- is not "
+        f"one shot: choose the single strongest image in it and shoot that, because "
+        f"the renderer makes one continuous take and cannot cut.\n\n"
         f"For every beat give: the person bound in frame (or none, for a shot of a "
         f"place or an object), the place, the ACTION, the framing the take OPENS on, "
         f"the framing the move ARRIVES at, and the single CAMERA move between them. "
@@ -118,10 +126,11 @@ def document(shot: Shot, beat, bound: dict[str, dict], palette: str) -> str:
     person = bound.get(shot.character or "", {}).get("physical", "")
     other = bound.get(shot.second or "", {}).get("physical", "")
     place = bound.get(shot.place, {}).get("physical") or shot.place
-    return h3_prompt.build(style=palette, character=person, place=place,
-                           action=shot.action, open_framing=shot.open_framing,
-                           close_framing=shot.close_framing, camera=shot.camera,
-                           seconds=beat.seconds, arc=shot.arc, second=other)
+    return shot_document.build(style=palette, character=person, place=place,
+                               subject=shot.subject, action=shot.action,
+                               open_framing=shot.open_framing,
+                               close_framing=shot.close_framing, camera=shot.camera,
+                               seconds=beat.seconds, second=other)
 
 
 def write(out_dir: Path, page: TrailerScript, refs: dict,

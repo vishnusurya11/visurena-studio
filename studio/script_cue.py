@@ -20,6 +20,7 @@ from __future__ import annotations
 import re
 
 from studio.cue_plan import AskedEvent, CueAsk
+from studio.music_tone import caption
 from studio.trailer_script import TrailerScript
 
 STOP_WORDS = ("stops", "stop", "silence", "silent", "cuts out", "drops out",
@@ -91,12 +92,18 @@ def heard_lines(page: TrailerScript) -> str:
     return "\n".join(f"{page.at(b):5.1f}s  {b.hear}" for b in page.beats if b.hear)
 
 
-def brief(page: TrailerScript) -> str:
+def brief(page: TrailerScript, tone=None) -> str:
     """The composer's brief: what the music does in each part of the trailer.
 
     Written to the page, not to a genre template -- this is the text a trailer
     house sends with its outline when it commissions a cue."""
     ask = ask_for(page)
+    if tone is not None:
+        # MEASURED: a 200-word prose brief asking for 58 s came back 25.03 s.
+        # The six-section caption is what set the length on every cue that
+        # measured near its ask, so the page's moments are added to it.
+        return (f"{caption(tone)}\n\nTHE MOMENTS THIS CUE IS WRITTEN FOR, in the "
+                f"order the picture plays them:\n{heard_lines(page)}")
     return (f"A {page.seconds:.0f}-second trailer cue for '{page.title}', "
             f"{page.genre}, at {ask.bpm} BPM in 4/4.\n"
             f"The trailer has three acts: it opens quiet for "

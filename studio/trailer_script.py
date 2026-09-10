@@ -46,6 +46,12 @@ shipped, and not the 130-148 s of theatrical practice (Redfern n=50, median
 142.5 s) -- this is a SOCIAL trailer whose job is to make someone watch the
 episode, and the YouTube Shorts feed plays only the first 60 s of any upload."""
 
+FEELINGS = ("calm", "curious", "cold", "urgent", "grieving", "threatening")
+"""How a line may be said.  The same vocabulary the voice bank renders a clip
+for (`voice_bank.EMOTIONS`), kept here as plain strings so the page contract
+does not depend on the audio stack."""
+
+
 SPEECH_CEILING = 0.50
 """The most of the runtime that may carry a spoken line.  Measured practice is
 41-45% for a dialogue-led cut; the ceiling sits just above it so a page is
@@ -90,6 +96,9 @@ class ScriptBeat(BaseModel):
     line: str | None = Field(default=None, description="what is spoken over it")
     speaker: str | None = Field(default=None, description="the cast id who speaks it")
     card: str | None = Field(default=None, description="text the picture holds on")
+    emotion: str | None = Field(
+        default=None,
+        description="how the line is said: calm, curious, cold, urgent, grieving, threatening")
     source_scene: int | None = None
     why: str = Field(min_length=4, description="what this beat is for; a beat without one is decoration")
 
@@ -98,6 +107,21 @@ class ScriptBeat(BaseModel):
         """Whether the picture holds here -- a card, not a shot -- so the
         editor's shot ceiling does not apply."""
         return self.card is not None
+
+    @model_validator(mode="after")
+    def _a_line_is_said_some_particular_way(self) -> "ScriptBeat":
+        """A spoken beat names its own feeling.
+
+        MEASURED on the first bank run: guessing the emotion from the beat's
+        function and reason gave Hope's revenge declaration -- "The hour has
+        come when you must answer for the life you took so long before" --
+        the GRIEVING read, and gave three of Holmes' deductions URGENT because
+        the word "escalation" contains "escalat".  Keyword matching on a
+        summary is a story about the beat, not a property of it; the page
+        knows what the line is for, so the page says it."""
+        if self.emotion and self.emotion not in FEELINGS:
+            raise ValueError(f"{self.id}: {self.emotion!r} is not one of {FEELINGS}")
+        return self
 
     @model_validator(mode="after")
     def _a_beat_shows_or_says_something(self) -> "ScriptBeat":

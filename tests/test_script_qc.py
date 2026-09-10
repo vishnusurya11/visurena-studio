@@ -15,6 +15,22 @@ def a_report(**kw) -> ScriptQC:
     return ScriptQC(**fields)
 
 
+def test_the_duration_falls_back_when_ffprobe_is_absent(monkeypatch, tmp_path):
+    """MEASURED: this box has no ffprobe, and subprocess.run raises
+    FileNotFoundError from CreateProcess before any return code can be read --
+    so the fallback has to catch the RAISE, not a non-zero exit."""
+    def no_ffprobe(cmd, **kw):
+        if "ffprobe" in cmd[0]:
+            raise FileNotFoundError(2, "The system cannot find the file specified")
+        class Result:
+            returncode = 0
+            stderr = "  Duration: 00:00:53.50, start: 0.000000, bitrate: 2323 kb/s\n"
+            stdout = ""
+        return Result()
+    monkeypatch.setattr(script_qc.subprocess, "run", no_ffprobe)
+    assert script_qc.seconds_of(tmp_path / "x.mp4") == 53.5
+
+
 def test_a_cut_that_kept_its_promises_passes():
     assert a_report().delivered and a_report().misses == []
 

@@ -5,7 +5,7 @@ import numpy as np
 import pytest
 
 from studio import script_mix
-from studio.trailer_assemble import DUCK_DEPTH_MAX, TARGET_LUFS, TARGET_TP
+from studio.trailer_assemble import BED_TP, DUCK_DEPTH_MAX, TARGET_LUFS, TARGET_TP
 
 
 def gain_at(t: float, windows, stop_db: float = script_mix.STOP_DB) -> float:
@@ -42,19 +42,64 @@ class TestTheBedStops:
         alone = gain_at(5.0, [(4.0, 7.0)])
         assert together == pytest.approx(alone, abs=1e-6)
 
+    def test_every_max_takes_exactly_two_arguments(self):
+        """MEASURED, the first real mix: nine spoken windows produced a nine-arg
+        max() and ffmpeg refused it -- "Missing ')' or too many args".  Python's
+        own max() is variadic, so the unit tests passed while the mix died.  The
+        expression folds pairwise instead."""
+        expr = script_mix.bed_expr([(1.0, 2.0), (5.0, 6.0), (9.0, 10.0),
+                                    (13.0, 14.0), (17.0, 18.0)])
+        depth, worst = 0, 0
+        for i, ch in enumerate(expr):
+            if expr[max(0, i - 4):i + 1].endswith("max("):
+                depth += 1
+            args = 0
+        # every max( ... ) in the string encloses exactly one top-level comma
+        for start in [i for i in range(len(expr)) if expr.startswith("max(", i)]:
+            level, commas = 0, 0
+            for j in range(start + 4, len(expr)):
+                if expr[j] == "(":
+                    level += 1
+                elif expr[j] == ")":
+                    if level == 0:
+                        break
+                    level -= 1
+                elif expr[j] == "," and level == 0 and expr[j - 1] == "\\":
+                    commas += 1
+            assert commas == 1, f"max() at {start} has {commas + 1} args"
+
     def test_no_windows_leaves_the_bed_alone(self):
         assert script_mix.bed_expr([]) == "1"
 
 
+class TestHeadroomIsMadeAtTheSource:
+    """MEASURED, the first real premix: bed and lines summed raw landed at
+    -19.39 LUFS with a true peak of +0.05 dBTP, so the ceiling bound the gain
+    and the master would have shipped 7 dB quiet.  The repo learned this in
+    run 10 -- "handed the mix a bed at +0.4 dBTP and a cue at +0.2, then asked
+    the limiter to fix it" -- and the answer is headroom BEFORE the sum."""
+
+    def test_the_bed_is_peak_limited_before_it_is_summed(self, tmp_path):
+        chain = script_mix.bed_chain([(4.0, 7.0)])
+        assert "alimiter" in chain and str(BED_TP) not in chain.split("alimiter")[0]
+
+    def test_every_line_is_peak_limited_before_it_is_summed(self, tmp_path):
+        chains = script_mix.line_filters([(3.5, tmp_path / "a.wav")])
+        assert "alimiter" in chains[0]
+
+
 class TestLanding:
-    def test_the_gain_lands_the_programme_without_pushing_the_peak_over(self):
-        """Whichever binds first: the loudness target or the ceiling."""
-        headroom = {"lufs": -24.0, "peak": -20.0}          # loudness binds
-        assert script_mix.gain_for(headroom) == pytest.approx(10.0)
-        hot = {"lufs": -24.0, "peak": -4.0}                # the ceiling binds
-        assert script_mix.gain_for(hot) == pytest.approx(2.0)
-        over = {"lufs": -10.0, "peak": -1.0}               # already loud: comes DOWN
-        assert script_mix.gain_for(over) < 0
+    def test_the_master_is_levelled_by_a_measured_two_pass_loudnorm(self):
+        """MEASURED, the first real premix: peak-limiting alone left the sum at
+        -19.2 LUFS with a -1.26 dBTP peak, so a single gain could only take it
+        DOWN and the master would have shipped 6 dB quiet.  Two-pass loudnorm
+        applies ONE measured gain toward the target -- single-pass runs in
+        dynamic mode and reshapes the dynamics the cue was chosen for."""
+        reading = {"lufs": -19.2, "peak": -1.26, "lra": 9.4, "thresh": -29.6}
+        chain = script_mix.level_chain(reading)
+        assert "loudnorm" in chain and "linear=true" in chain
+        assert "measured_I=-19.2" in chain and "measured_tp=-1.26" in chain.lower()
+        assert f"I={TARGET_LUFS}" in chain and f"TP={TARGET_TP}" in chain
 
     def test_a_line_is_laid_at_the_second_the_page_put_it(self, tmp_path):
         chains = script_mix.line_filters([(3.5, tmp_path / "a.wav"),
