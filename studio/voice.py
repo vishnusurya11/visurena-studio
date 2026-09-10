@@ -101,13 +101,17 @@ def seed_for(speaker_id: str, attempt: int) -> int:
     return base % (2**31 - 1024) + attempt
 
 
+STAGES = ("trailer", "episodes")
+"""The book-level folders a rendered line may live under."""
+
+
 def book_relative(path: Path) -> str:
     """The path as an artifact stores it: relative to the book dir, posix."""
     path = Path(path)
     for parent in path.parents:
-        if parent.name == "trailer":
+        if parent.name in STAGES:
             return path.relative_to(parent.parent).as_posix()
-    raise ValueError(f"{path} is not under a book's trailer/ dir")
+    raise ValueError(f"{path} is not under a book's {'/'.join(STAGES)} dir")
 
 
 def _render(src: Path, dst: Path, filters: str = "") -> Path:
@@ -198,13 +202,45 @@ def _encoder():
     return _ENCODER
 
 
+_EMBEDDED: dict[tuple[str, int, int], "object"] = {}
+
+
+def embedding(clip: Path):
+    """The GE2E speaker embedding of one file, computed once and kept.
+
+    Comparing a cast of N is N*(N-1)/2 pairs but only N voices, and embedding
+    inside `similarity` made it 2 per pair: 23 characters cost 506 embeddings
+    where 23 would do.  The dot product is microseconds; the embedding is the
+    whole cost.  Keyed on size and mtime so a re-rendered clip is re-read.
+    """
+    from resemblyzer import preprocess_wav
+
+    path = Path(clip)
+    stat = path.stat()
+    key = (str(path), stat.st_size, int(stat.st_mtime))
+    if key not in _EMBEDDED:
+        _EMBEDDED[key] = _encoder().embed_utterance(preprocess_wav(path))
+    return _EMBEDDED[key]
+
+
 def similarity(a: Path, b: Path) -> float:
     """Cosine between resemblyzer (GE2E, 256-d) speaker embeddings of two files.
 
     Chosen over MFCC cosine because MFCC measures the room and the words as
-    much as the speaker; GE2E was trained to ignore both.
+    much as the speaker; GE2E was trained to ignore both.  CPU on purpose --
+    the encoder is small, and it must never take VRAM off a render.
     """
     import numpy as np
-    from resemblyzer import preprocess_wav
-    ea, eb = (_encoder().embed_utterance(preprocess_wav(Path(p))) for p in (a, b))
+
+    ea, eb = embedding(a), embedding(b)
     return float(np.dot(ea, eb) / (np.linalg.norm(ea) * np.linalg.norm(eb) + 1e-9))
+
+
+def apart(clips: dict[str, Path]) -> dict[tuple[str, str], float]:
+    """Every pair of a cast, scored -- N embeddings, not 2 per pair."""
+    import itertools
+
+    for clip in clips.values():
+        embedding(clip)
+    return {(one, other): similarity(clips[one], clips[other])
+            for one, other in itertools.combinations(sorted(clips), 2)}

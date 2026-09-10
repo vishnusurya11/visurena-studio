@@ -193,6 +193,10 @@ class TestBookRelative:
         path = tmp_path / "lib" / "b" / "trailer" / "main" / "voice" / "lines" / "a.wav"
         assert voice.book_relative(path) == "trailer/main/voice/lines/a.wav"
 
+    def test_an_episode_line_is_relative_to_the_book_too(self, tmp_path):
+        path = tmp_path / "lib" / "b" / "episodes" / "ep01" / "lines" / "a.wav"
+        assert voice.book_relative(path) == "episodes/ep01/lines/a.wav"
+
     def test_a_path_outside_a_book_is_refused(self, tmp_path):
         with pytest.raises(ValueError):
             voice.book_relative(tmp_path / "elsewhere" / "a.wav")

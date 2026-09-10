@@ -48,3 +48,15 @@ class TestConcatListing:
         monkeypatch.chdir(tmp_path)
         lines = listing_lines([Path("clips/B00.mp4")], Path("main/work/shots.txt"))
         assert lines == ["file '../../clips/B00.mp4'"]
+
+
+class TestExtractFilter:
+    def test_a_pre_filter_runs_before_the_conform(self):
+        from studio.trailer_assemble import extract_filter
+        chain = extract_filter(768, 1344, 24, pre="crop=768:1294:0:0")
+        assert chain.startswith("crop=768:1294:0:0,scale=768:1344")
+        assert chain.endswith("format=yuv420p")
+
+    def test_no_pre_filter_leaves_the_chain_as_it_was(self):
+        from studio.trailer_assemble import extract_filter
+        assert extract_filter(768, 1344, 24).startswith("scale=768:1344")

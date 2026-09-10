@@ -183,8 +183,15 @@ def frames_arg(seconds: float, fps: int = 24) -> str:
     return f"{math.floor(frames / fps * 10_000) / 10_000:.4f}"
 
 
+def extract_filter(width: int, height: int, fps: int, grade: str = "", pre: str = "") -> str:
+    """`pre` runs on the source before it is conformed (the episode's gutter
+    guard crops there, so the crop is scaled back up to the full frame)."""
+    return (f"{pre + ',' if pre else ''}scale={width}:{height}:force_original_aspect_ratio=increase,"
+            f"crop={width}:{height},fps={fps},{grade + ',' if grade else ''}format=yuv420p")
+
+
 def extract(video: Path, start: float, seconds: float, output: Path,
-            width: int, height: int, fps: int, grade: str = "") -> Path:
+            width: int, height: int, fps: int, grade: str = "", pre: str = "") -> Path:
     """Cut one shot out of a take, conformed to the trailer's single format.
 
     Every shot is forced to the same size, rate and pixel format here.  The
@@ -195,9 +202,7 @@ def extract(video: Path, start: float, seconds: float, output: Path,
     _ffmpeg(
         ["ffmpeg", "-y", "-v", "error", "-ss", frames_arg(start, fps), "-i", str(video),
          "-t", frames_arg(seconds, fps), "-an",
-         "-vf", (f"scale={width}:{height}:force_original_aspect_ratio=increase,"
-                 f"crop={width}:{height},fps={fps},{grade + ',' if grade else ''}"
-                 f"format=yuv420p"),
+         "-vf", extract_filter(width, height, fps, grade, pre),
          "-c:v", "libx264", "-preset", "fast", "-crf", "17", str(output)],
         f"extracting {output.name}")
     return output
