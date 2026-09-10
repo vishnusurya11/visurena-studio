@@ -88,6 +88,26 @@ class TestHeadroomIsMadeAtTheSource:
         assert "alimiter" in chains[0]
 
 
+class TestTheWindowFollowsTheLine:
+    """MEASURED on the first emotional read: B02's beat is 3.0 s and the cold
+    delivery of its line runs 4.41 s -- slower on purpose, because the
+    direction asks for exact pauses.  A window sized to the BEAT lets the bed
+    come back while the character is still talking, which is the "cannot hear
+    the dialogue" failure wearing a different hat."""
+
+    def test_a_window_runs_as_long_as_the_line_actually_takes(self, tmp_path, monkeypatch):
+        monkeypatch.setattr(script_mix, "clip_seconds", lambda p: 4.41)
+        got = script_mix.windows_for([(6.0, tmp_path / "B02.wav")], {"B02": 3.0})
+        assert got == [(6.0, pytest.approx(10.41))]
+
+    def test_a_short_line_still_holds_its_beat_open(self, tmp_path, monkeypatch):
+        """The picture's beat is the floor: a two-word line in a 3 s beat must
+        not let the bed back in a second later."""
+        monkeypatch.setattr(script_mix, "clip_seconds", lambda p: 1.2)
+        got = script_mix.windows_for([(6.0, tmp_path / "B14.wav")], {"B14": 3.0})
+        assert got == [(6.0, pytest.approx(9.0))]
+
+
 class TestLanding:
     def test_the_master_is_levelled_by_a_measured_two_pass_loudnorm(self):
         """MEASURED, the first real premix: peak-limiting alone left the sum at

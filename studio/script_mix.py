@@ -20,6 +20,7 @@ from pathlib import Path
 
 from studio.trailer_assemble import (BED_TP, LIMITER_MARGIN, LINE_TP, TARGET_LUFS,
                                      TARGET_TP, _ffmpeg, db_to_linear, limiter)
+from studio.voice import clip_seconds
 
 STOP_DB = 40.0
 """How far the bed goes down where a line plays.  Not a duck: 40 dB is out.
@@ -66,6 +67,21 @@ def bed_expr(windows: list[tuple[float, float]], stop_db: float = STOP_DB) -> st
     deepest = fold_max([ramp_expr(a, b) for a, b in windows])
     floor = db_to_linear(-stop_db)
     return f"(1-(1-{floor:.6f})*{deepest})"
+
+
+def windows_for(lines: list[tuple[float, Path]],
+                beats: dict[str, float] | None = None) -> list[tuple[float, float]]:
+    """Where the bed must be out: for as long as the line actually TAKES.
+
+    MEASURED on the first emotional read: B02's beat is 3.0 s and its cold
+    delivery runs 4.41 s, because the direction asks for exact pauses.  A
+    window sized to the beat lets the bed back in while the character is still
+    talking.  The beat is the floor and the line is the ceiling."""
+    found = []
+    for at, path in lines:
+        held = (beats or {}).get(Path(path).stem, 0.0)
+        found.append((round(at, 3), round(at + max(held, clip_seconds(path)), 3)))
+    return found
 
 
 def line_inputs(lines: list[tuple[float, Path]]) -> list[str]:

@@ -106,7 +106,8 @@ def build(book: Path) -> Path:
     print(f"voice: {len(lines)} of {len(page.spoken())} lines", flush=True)
 
     master = out / f"TRAILER60-{book.name.split('_', 1)[-1]}.mp4"
-    script_mix.mix(picture, bed, lines, script_cue.spoken_windows(page),
+    held = {b.id: b.seconds for b in page.beats}
+    script_mix.mix(picture, bed, lines, script_mix.windows_for(lines, held),
                    out / "work/script", master, page.seconds)
 
     spoken = sum(b.seconds for b in page.beats
