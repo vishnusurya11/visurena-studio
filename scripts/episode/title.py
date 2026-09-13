@@ -18,12 +18,14 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 
-from studio import episode_home
+from studio import approval, canvas, episode_home, image_spend as spend
 from studio.comfy import run, stage_image
 from studio.h3 import frames_for
 from studio.llm import _load_dotenv
 
-W, H = 768, 1344
+W, H = canvas.size("9:16")
+ASPECT = "9:16"
+"""Both rebound from the plan in `main`; the plan declares the aspect."""
 SECONDS = 4.0
 MODEL = "gpt-image-2.5-sunburst"
 WORKFLOW = "video_minimax_h3_i2v_turbo"
@@ -31,54 +33,90 @@ SEED = 91000
 SERIES = "Sherlock Holmes"
 
 
-def still_prompt(series: str, title: str, number: int, palette: str) -> str:
-    return (f'A cinematic title card, vertical 9:16, photoreal 35 mm film still. Typography: the '
-            f'words "{series.upper()}" set very large in an elegant Victorian serif, letterpress-'
-            f'crisp, pale ivory, centred in the upper third; directly beneath, smaller, the words '
-            f'"{title.upper()}"; at the very bottom, small and widely letter-spaced, "EPISODE '
-            f'{number}". The picture: a black hansom cab racing straight toward the camera down a '
-            f'fog-choked gaslit Victorian London street at night in heavy rain, the horse mid-'
-            f'stride, wheels throwing spray, gas lamps blooming in the fog on both sides, wet '
-            f'cobbles mirroring the lamps, the driver a dark shape high on the box. {palette} Fine '
-            f'grain, deep shadow, cold blue-grey fog against warm lamplight. No faces readable, no '
-            f'other text, no logo, no border.')
+def still_prompt(series: str, title: str, number: int, palette: str,
+                 shape: str = "vertical 9:16") -> str:
+    """Holmes's own sentence made a picture: the scarlet thread running through
+    the colourless skein.  The book's title, in one object, with no blood in it."""
+    return (f'A cinematic title card poster, {shape}, photoreal 35 mm film still, 1881. '
+            f'THE PICTURE: a loose skein of undyed wool, pale grey and colourless, lies coiled on '
+            f'the dark leather top of a Victorian writing desk and fills the lower half of the '
+            f'frame, lit cold and low from a tall window behind it. Running through the whole '
+            f'length of that grey skein is ONE fine SCARLET THREAD, and its loose end is drawn up '
+            f'and out of the coil toward the lens, lying bright across the leather; the scarlet '
+            f'thread carries the only saturated colour in the picture. Beside the skein, in soft '
+            f'focus, a magnifying glass on its side, a folded newspaper, an inkwell with a steel '
+            f'pen, and a brass oil lamp with a low flame. Far behind the desk, out of focus and '
+            f'small, the tall lean dark silhouette of a man in a long coat stands at the window '
+            f'with the grey London fog pressing against the glass and rooftops beyond. The scarlet '
+            f'thread and the lamp flame hold all the colour here; every other surface is cold '
+            f'grey, soot-black, bone-white and worn leather brown. TYPOGRAPHY, the whole block '
+            f'centred inside the middle of the frame, clear of the top and bottom eighths, and '
+            f'with a wide clear margin inside the LEFT and RIGHT edges so that every letter stands '
+            f'complete: the words "{series.upper()}" on one line, set large in an elegant Victorian '
+            f'serif with fine hairlines, letterpress-crisp, pale ivory; directly beneath and half '
+            f'that size, in the same serif, the words "{title.upper()}", with the word SCARLET in '
+            f'the same deep scarlet as the thread; directly beneath that, at the same size as the '
+            f'subtitle and widely letter-spaced, "EPISODE {number}". {palette} Fine grain, deep '
+            f'shadow, a single cold key light from the window and the warm point of the lamp. The '
+            f'thread, the skein and the lettering are the only sharp things. Clean plain frame '
+            f'edges, lettering in these three lines only.')
 
 
 def take_prompt(series: str, title: str, number: int) -> str:
+    """One continuous action for four seconds: the thread draws out of the skein."""
     return ("For the target video, at 0.00 seconds into the target video, <Picture 1> (from "
-            "[Shot 1]) is fully referenced.
-
-"
-            "integrated_multimodal_description: [Shot 1] Photoreal cinematic title card, night, "
-            "rain, fog. Begin exactly from <Picture 1>. Through the whole shot the lettering "
+            "[Shot 1]) is fully referenced.\n\n"
+            "integrated_multimodal_description: [Shot 1] Photoreal cinematic title card, a cold "
+            "study, grey daylight. Begin exactly from <Picture 1>. The camera holds one steady "
+            "position for the whole shot. From 00:00 to 00:04 the single scarlet thread draws "
+            "steadily out of the grey skein toward the lens in one continuous pull, its loose end "
+            "travelling across the leather and the coil turning over once as it gives up the "
+            "thread; the low lamp flame wavers; the fog behind the window drifts steadily from the "
+            "left of frame to the right; the tall dark silhouette at the window keeps its place. "
+            "The lettering "
             f'"{series.upper()}", "{title.upper()}" and "EPISODE {number}" stays exactly as drawn, '
-            "perfectly still, sharp and legible. From 0 to 4 seconds the camera pushes in slowly; "
-            "the hansom cab gallops toward the camera, the horse's legs driving, the wheels "
-            "turning and throwing spray, rain falling in sheets through the lamplight, thick fog "
-            "rolling across the street from left to right, every gas lamp flickering. In the "
-            "final half second the cab fills the lower frame and the movement settles. No new "
-            "text, no captions, no cut.
-
-"
-            "overall_soundscape: Galloping hooves and iron wheels on wet cobbles, heavy rain, "
-            "wind, a distant church bell.
-
-"
+            "still, sharp and legible, for every frame.\n\n"
+            "overall_soundscape: A quiet room, a clock ticking somewhere, the small hiss of a lamp, "
+            "muffled street sound far beyond the window.\n\n"
             "non_diegetic_music: N/A")
 
 
-def draw(prompt: str, out: Path) -> Path:
+def previous_still(book: Path, number: int) -> Path | None:
+    """The nearest earlier episode's title still, if the book has one.
+
+    A series card is the same picture every week with one line changed, so the
+    later card is an EDIT of the earlier one rather than a fresh generation:
+    generated afresh it is a different skein, a different desk and a different
+    lamp, and the run stops looking like one series.  The canvas may still
+    differ -- episode 1 is 9:16 and episode 2 is 1:1 -- which is exactly why the
+    earlier still is a reference and not a copy."""
+    for earlier in range(number - 1, 0, -1):
+        was = book / "title" / f"ep{earlier:02d}.png"
+        if was.exists():
+            return was
+    return None
+
+
+def draw(prompt: str, out: Path, approved: bool = False, size: str = "1024x1536",
+         like: Path | None = None) -> Path:
     if out.exists():
         return out
+    approval.require("title", f"one {MODEL} still for {out.stem}", 0.20, approved)
     _load_dotenv()
     from openai import OpenAI
     from PIL import Image
 
     client = OpenAI(api_key=os.environ["OPENAI_API_KEY"])
-    result = client.images.generate(model=MODEL, prompt=prompt, size="1024x1536", quality="high", n=1)
+    if like and like.exists():
+        with open(like, "rb") as handle:
+            result = client.images.edit(model=MODEL, image=[handle], prompt=prompt,
+                                        size=size, quality="high", n=1)
+    else:
+        result = client.images.generate(model=MODEL, prompt=prompt, size=size, quality="high", n=1)
     out.parent.mkdir(parents=True, exist_ok=True)
     raw = out.with_name(out.stem + "_raw.png")
     raw.write_bytes(base64.b64decode(result.data[0].b64_json))
+    spend.record(out.resolve().parents[1], MODEL, size, "high", 1, f"title still {out.stem}")
     image = Image.open(raw).convert("RGB")
     scale = max(W / image.width, H / image.height)
     resized = image.resize((round(image.width * scale), round(image.height * scale)), Image.LANCZOS)
@@ -87,9 +125,10 @@ def draw(prompt: str, out: Path) -> Path:
     return out
 
 
-def animate(still: Path, prompt: str, out: Path, seed: int) -> Path:
+def animate(still: Path, prompt: str, out: Path, seed: int, approved: bool = False) -> Path:
     if out.exists():
         return out
+    approval.require("render", f"the title card's {SECONDS:.0f} s animation on ComfyUI", 0.0, approved)
     made = run(WORKFLOW, {"prompt": prompt, "width": W, "height": H,
                           "frames": frames_for(SECONDS + 0.25), "steps": 8, "seed": seed,
                           "start_image": stage_image(still), "filename_prefix": "ep_title"},
@@ -103,21 +142,42 @@ def card_path(book: Path, number: int) -> Path:
     return book / "title" / f"ep{number:02d}.mp4"
 
 
-def main(book_id: str, number: int) -> None:
+def main(book_id: str, number: int, approved: bool = False, rendering: bool = False) -> None:
+    """The still and the animation are two spends: one is money, one is the
+    owner's own GPU and queue.  Each is approved for itself, so an approval
+    typed for the picture never starts a ComfyUI job."""
     book = episode_home.book_dir(book_id)
+    global W, H, ASPECT
+    ASPECT = episode_home.load_plan(book, number).aspect
+    W, H = canvas.size(ASPECT)
     refs = episode_home.read_json(book / "refs" / "refs.json")
     play = episode_home.read_json(book / "screenplay" / "feature" / "screenplay.json")
     series, title = play.get("series", SERIES), play["title"]
     folder = book / "title"
-    still = draw(still_prompt(series, title, number, refs["palette"]), folder / f"ep{number:02d}.png")
+    shape = canvas.words(ASPECT)
+    like = previous_still(book, number)
+    said = still_prompt(series, title, number, refs["palette"], shape)
+    if like:
+        said = (f"THE SAME TITLE CARD AS THE ATTACHED PICTURE, reproduced on a {shape} canvas: the same "
+                f"skein of grey wool, the same single scarlet thread drawn out of it toward the lens, "
+                f"the same dark leather desk, the same magnifying glass, folded newspaper, inkwell and "
+                f"brass lamp, the same cold window light and the same tall dark silhouette at the "
+                f"window. Keep the lettering in the same Victorian serif at the same three sizes, and "
+                f"recompose it for the {shape} frame. THE ONLY CHANGE: the bottom line now reads "
+                f'"EPISODE {number}". {said}')
+    still = draw(said, folder / f"ep{number:02d}.png", approved, canvas.still_size(ASPECT), like)
     prompt = take_prompt(series, title, number)
     (folder / f"ep{number:02d}.prompt.txt").write_text(
-        still_prompt(series, title, number, refs["palette"]) + "
-
-" + prompt, encoding="utf-8")
-    take = animate(still, prompt, card_path(book, number), SEED + number)
+        still_prompt(series, title, number, refs["palette"]) + "\n\n" + prompt, encoding="utf-8")
+    take = animate(still, prompt, card_path(book, number), SEED + number, rendering)
     print(f"title card -> {take}", flush=True)
 
 
+def _cli(argv: list[str]) -> None:
+    args = [a for a in argv[1:] if not a.startswith("--")]
+    main(args[0], int(args[1]) if len(args) > 1 else 1,
+         approval.approved_for("title", argv), approval.approved_for("render", argv))
+
+
 if __name__ == "__main__":
-    main(sys.argv[1], int(sys.argv[2]) if len(sys.argv) > 2 else 1)
+    _cli(sys.argv)

@@ -1,225 +1,779 @@
 ---
 name: episode
-description: Turn one book chapter into a 90-120 s vertical (9:16) microdrama episode — one event, voice-over on cutaways, a gpt-image 3x3 storyboard as the video model's input, every panel animated on local MiniMax-H3, mixed and captioned for phones. Use when writing, building, fixing or reviewing an episode under library/<book>/episodes/.
+description: Turn one book chapter into a 2-3 minute vertical (9:16) or square (1:1) microdrama episode — first-person narration laid over pictures cut to the measured voice, the chapter's own locations, one storyboard sequence per setup drawn by gpt-image-2.5, every take rendered on local MiniMax-H3 ref2va from the storyboard's cells with dialogue lips driven by the line's own wav, DQ-gated, iterated with five reviewers. Use when writing, building, fixing or reviewing an episode under library/<book>/episodes/.
 ---
 
 # Episode
 
-One chapter -> `library/<book>/episodes/epNN/master.mp4`.
+An episode is ONE WHOLE CHAPTER (owner, 2026-09-10), 2 minutes as the
+target, 2-3 minutes when the chapter is big. Every iteration ends with the
+master's full path first, kept as `master_iterN.mp4` (never overwrite the
+only copy). Every paid image is logged in `library/<book>/spend.jsonl`
+(`studio/spend.py`, calibrated 2026-09-10: a 2048x3072 sheet ~$0.20, a
+2048x2048 sheet ~$0.13, a 1024x1536 still ~$0.08, a 1024x1024 still ~$0.05;
+the OpenAI usage page is the truth).
 
 ```
-uv run python scripts/episode/episode.py    <codex_id> <n> [--until=<step>]  # all, in order, resumable
-uv run python scripts/episode/say_lines.py  <codex_id> <n>   # 1. AUDIO FIRST: every line, IndexTTS2, measured
-uv run python scripts/episode/timeline.py   <codex_id> <n>   # 2. placed.json: shot times FROM the audio
-uv run python scripts/episode/frames.py     <codex_id> <n>   # 3. one empty 9:16 plate per setup + sheets
-uv run python scripts/episode/storyboard.py <codex_id> <n>   # 4. gpt-image 3x3 sheets -> SNN.png  (PAID)
-uv run python scripts/episode/shots.py      <codex_id> <n>   # 5. H3 round: silent i2v, SPEAKING i2v for dialogue
-uv run python scripts/episode/storyboard.py <codex_id> <n> --review   # review.png: panel | start | end
-uv run python scripts/episode/assemble.py   <codex_id> <n>   # 6. cut to placed.json, mix, title card, black
-uv run python scripts/episode/qc.py         <codex_id> <n>   # 7. measure the delivered file
-uv run python scripts/episode/title.py      <codex_id>       # once per book: the animated title card (PAID still)
-uv run python scripts/episode/runcards.py   <codex_id> <n>   # runcards.html: every shot's panel, audio, settings, prompt
+uv run python scripts/episode/say_lines.py   <codex_id> <n> [--redo=20,32]  # 1. AUDIO FIRST: every line, IndexTTS2, measured
+uv run python scripts/episode/respot.py      <codex_id> <n>   # 2. sub-shot cuts scaled to the measured lines
+uv run python scripts/episode/timeline.py    <codex_id> <n>   # 3. placed.json: shot times FROM the audio
+uv run python scripts/episode/frames.py      <codex_id> <n>   # 4. one empty plate per setup, at the PLAN's aspect (local, free)
+uv run python scripts/episode/cast_bust.py    <codex_id> <who>       # 4a. FREE, LOCAL: the identity BUST of a character nobody has drawn
+uv run python scripts/episode/cast_cards.py   <codex_id> --check     # 4b. FREE: gates every cast sheet (studio/cast_agree.py)
+uv run python scripts/episode/cast_cards.py   <codex_id> --prompts   # FREE: writes each picture's prompt for the owner to read
+uv run python scripts/episode/cast_cards.py   <codex_id> --draw <who> <bust|indoor|outdoor> --approved  # ESCALATE: $0.08 a picture
+uv run python scripts/episode/seq_boards.py  <codex_id> <n>   # 5. ONE storyboard sequence per setup (PAID ~$0.20 a sheet)
+uv run python scripts/episode/takes_r2v.py   <codex_id> <n>   # 6. every take on H3 ref2va from the board's cells
+uv run python scripts/episode/take_dq.py     <codex_id> <n> <take...>          # 7. DQ per take; --retake=1,6 re-renders
+uv run python scripts/episode/assemble.py    <codex_id> <n> --engine=r2v  # 8. cut, quiet bed, title card -> master_r2v.mp4
+uv run python scripts/episode/qc.py          <codex_id> <n> --engine=r2v  # 9. measure the delivered file
+uv run python scripts/episode/runcards.py    <codex_id> <n>   # every input of every shot, both engines, for the owner
+uv run python scripts/episode/title.py       <codex_id> <n>   # per episode: SHERLOCK HOLMES / book / EPISODE n card (PAID still)
 ```
-
-The plan is WRITTEN (by an agent or a person) to `episodes/epNN/plan.json`
-and validated by `studio/episode_spec.py` on every load. Every script skips
-what is on disk, so a rerun resumes and the paid step never spends twice.
-Rules come from `docs/analysis/research/episode-01..03-*.md`; the two reviews
-that cut this pipeline down are `episode-04-simplify-critic.md` and
-`episode-05-defender.md`.
 
 ## The brick
 
 ONE EVENT split by a title card: a TURN (the lead's choice, 50-75 % in) and a
 BUTTON (the world's answer, the last line, never the lead's). AUDIO FIRST:
-the plan carries no seconds; every line is rendered and measured, and each
-shot's length is derived from the lines it carries, so there is no hole in
-the voice that the plan did not name as a beat. A first-person NARRATOR (the
-book's narrator, in that character's cast voice) carries ~90 % of the words
-over cutaways; the few DIALOGUE lines are spoken ON CAMERA, the speaker's
-face at close or medium close-up, the lips driven by the line's own wav.
-Continuity is a STORYBOARD DRAWN AS ONE PICTURE, every panel the first frame
-the video model animates. No text on the picture. An episode is the WHOLE
-chapter: TWO MINUTES is the target, and the 2-3 minute room is only for a
-chapter that needs it (owner, 2026-09-10); closed by the book's animated
-title card.
+the plan carries no seconds; every line is rendered and measured; each
+shot's length is derived from the lines it carries; nothing is scheduled
+afterwards. THE PANEL IS FRAME ZERO: the storyboard cell is the instant
+before the motion, and the render begins on it. THE STORYBOARD IS ONE
+SEQUENCE PER SETUP: drawn first, in story order, with a route position in
+every cell, so no take can contradict its neighbours; takes are windows on
+it. NARRATION IS NEVER IN THE TAKE: only dialogue wavs go into a render (an
+anchored narration made the face on screen mouth it, 2026-09-11); narration
+is laid on the master.
 
 ## THE SYNC RULE (owner-approved, non-negotiable)
 
-The picture is cut to the voice, never the voice laid on the picture.
-Lines are rendered and MEASURED first. A shot is exactly: 0.25 s handle +
-its lines' measured seconds + 0.35 s breath between two lines + 0.25 s handle
-+ any beat the plan names, snapped UP to a whole frame. Every line is laid
-at its own shot's start + 0.25 s. A speaking take is driven by the SAME wav
-at frame 6, so mouth and sound are one recording. Nothing is scheduled,
-shifted or dropped afterwards; `timeline.py` refuses a placement that breaks
-this (`episode_timeline.misaligned`). Measured result on the first
-audio-first master: 33/33 lines heard, 25/25 cuts on frame, owner: "great job
-on the audio narration voice over sync with the video".
+`shot.seconds = 0.25 + sum(measured line seconds) + 0.50 x (lines - 1) +
+0.25 + beat_s + coda_s`, snapped UP to a whole frame at 24 fps. Every line
+is laid at its shot's start + 0.25 on the master. A dialogue line's wav is
+anchored in its take at that same offset, so mouth and sound are one
+recording; measured lag 0.000-0.010 s on every engine
+(`studio/av_sync.py`). `episode_timeline.misaligned()` refuses anything else.
 
-## 1. Write the plan (`plan.json`) — no seconds anywhere
+## 0. RESUMING: read `story.md` first, and say it back
 
-Order is the method: button first, then hook, then the lines in playback
-order, then a shot for every line. `Line{index, kind, speaker, text, shot}`;
-`Shot{index, section, setup, size, faces, frame, motion, take, beat_s, coda_s}`.
-A line NAMES the shot it plays on; a shot carries one or two lines; a shot
-with no line names a `beat_s` (<= 1.5) or the `coda_s` (<= 4, last shot). The
-shot before the button names a beat >= 1.0. The validator projects the
-runtime at the measured pace (3.8 words/s) and refuses outside 120-180 s.
+`episodes/epNN/story.md` is the one file that answers "what is this and where
+did it get to". Regenerate the facts with
+`uv run python scripts/episode/story.py <book> <ep>`; the judgement half is
+kept verbatim through every regeneration.
 
-- **Button** = last spoken line: not the protagonist; leaves the question open.
-- **Hook** = shot 0, ends by 0:05: the latest element that carries conflict and
-  reads on mute. Everything before it is cut or becomes a picture plant.
-- **Lines** have a `kind`: `narration` (written fresh, first person, the
-  narrator's cast voice) or `dialogue` (the 3-5 lines that turn the story,
-  5-20 % of the words: the dial). <= 18 words each. Spell honorifics and
-  numbers out ("Doctor", "Mister"). A DIALOGUE line's shot must show the
-  speaker in `faces` at `close` or `medium_close` — the lips are driven, so
-  the mouth must be readable (the old rule is inverted for dialogue).
-  Narration may sit over anyone's face with the mouth closed.
-- **Shots** tile the runtime, >= 1 s each, `setup` names a key of `setups`
-  (1-3 setups). `size` in insert/extreme_close/close/medium_close/medium/full/wide.
-  `faces` = whose face is frontal and readable; a speaker in `faces` at
-  close/medium_close/medium/extreme_close is refused (F1). A line never starts
-  within 0.25 s of a cut (T1) — lead or trail it.
-- **Under a line**, the shot shows: the listener with the mouth closed, the
-  speaker's back or strict profile, a wide where heads are small, an insert of
-  hands or the object. Never the speaker's readable face.
-- `frame`: the storyboard panel — shot type first, then who does what, then the
-  light ("Close on Watson's gloved hand on the stick; Stamford ahead, out of
-  focus, glancing back"). `motion`: two to four clauses separated by
-  semicolons, the camera idea first; the take prompt places them in order.
-- **Geography is continuous inside a setup, and every frame says WHERE.** The
-  first corridor sheet put the men at the side-door in shot 2 and walking
-  toward it in shot 3 (owner caught it, 2026-09-10): the sheet was faithful,
-  the plan was wrong. So each `frame` states the position relative to the
-  previous shot ("still mid-corridor; the door still far ahead", "now at the
-  doorway"), and a person who has reached a place in shot N is never on the
-  way to it in shot N+1.
-- **A beat may only move what the panel shows.** Measured on iteration 1
-  (2026-09-10): "his hand tightens on the stick" in a face close-up with no
-  stick in frame produced an invented hand holding an object; "his eyes go to
-  his own hand" raised a hand into a face close-up; "turns to the bench and
-  pricks his finger" swung the camera round to show it; "the drop falls and
-  blooms" turned the whole vessel red inside the shot that only needed one
-  drop. Name a body part, object or change only if it is IN the panel and
-  belongs to this shot's beat; leave the rest to the next panel.
-- `setups[name].described` is the empty room for the plate; `.cast` who appears.
+On picking up an episode: read "Where it got to", "Settled" and "Decisions",
+say the project back in three sentences (`story_bible.restate`), then carry on
+from that stage. DO NOT re-open a settled decision unless the owner overturns
+it. On stopping: make sure the facts are fresh and the last line says what
+happens next.
 
-Validate: `uv run python -c "from studio import episode_home as h; h.load_plan(h.book_dir('<codex>'), <n>)"`.
-Fix what it names; never weaken the validator.
+Every choice whose reason a stranger could not reconstruct goes in the decision
+log with its date and its WHY — `story.py --decide "<what>" --because "<why>"`.
+Without the why the next window reads a rule it cannot evaluate, and either
+obeys it superstitiously or quietly reverses it. Armstrong footnotes his
+scripts only where the reason for a change is not self-evident and notes that
+the distribution of the footnotes is itself information: the episodes that shot
+smoothly have none. Where our log is thick is where the pipeline is unsettled.
 
-## 2. Lines — `say_lines.py`, then `timeline.py`
+## The story layer: one question, and a value that turns
 
-IndexTTS2 from `cast/<who>/voice/design.wav` as both timbre and emotion
-reference (MEASURED: 0.80 speaker similarity to the designed voice vs 0.73
-for the Qwen3 clone, both word-perfect; ~4x slower). All renders first, then
-all listening: Whisper WER <= 0.20 AND ECAPA similarity >= 0.70 against the
-designed voice, one re-roll. `lines/lines.json` carries the measured seconds.
-`timeline.py` then writes `placed.json`: `shot.seconds = 0.25 + sum(lines) +
-0.35 x (lines-1) + 0.25 + beat_s + coda_s`, every line at its shot's start +
-0.25, the runtime the sum; refused outside 120-180 s. Every later stage reads
-placed.json; nothing is scheduled or dropped afterwards.
+Two rules, both optional on the contract and REPORTED rather than refused
+(`studio/story_layer.py`), because episode 1 was cut before either existed.
 
-## 3. Plates and sheets — `frames.py`
+**One question per episode, answered inside it.** `Episode.question`, in
+Armstrong's form: "Today, can X do Y?". "Today" is what makes it answerable in
+one episode; "can" is what makes the answer yes or no. An episode with no such
+question has no reason to stop where it stops.
 
-Krea 2 turbo, `9:16 (Portrait Widescreen)`, `location_prompt(described)`,
-conformed to 768x1344. A character sheet is made for any speaker the trailer
-never drew (Stamford's body is invented once, in `STAMFORD`). `refs.json` is
-never written here.
+**No shot without a turn.** `Shot.turn` is the value at stake and how it flips,
+written "before -> after" ("alone -> seen", "hope -> refused"). McKee: mark the
+value at the open and again at the close, and if they read the same the scene
+is there to explain something — and explanation belongs inside another shot's
+picture. THIS IS THE STORY-SIDE STATEMENT OF OUR OWN WORST RENDER FAULT. A shot
+whose value does not turn has nothing to photograph, and it comes back frozen.
+We spent three iterations treating the freeze as an engine problem, then as a
+pin problem, then as a prompt-vocabulary problem. It is all three, but upstream
+of all three it is a shot that was never about anything.
 
-## 4. Storyboard — `storyboard.py` (PAID: gpt-image-2.5-sunburst, owner's go 2026-09-10)
+**`Shot.why`** is the only shot string the drawer never reads: the new thing
+this shot tells, and the thing it shows about the protagonist (Hicks: a scene
+does both, or it is cut). It is reasoning for the people and agents writing the
+episode, so it is absent from `SHEET_TEXT` and free to explain an absence,
+which every drawn string is forbidden.
 
-Per setup, the shots spread evenly over 3x3 sheets at 2048x3072 (`chunks`:
-ten shots are two sheets of five). References attached in order: the plate,
-each character's sheet, the previous sheet of the same scene. The prompt
-(`episode_board.prompt`) states the grid and reading order, what every
-attached image is, `Panel k: <frame>` per shot, alternates for spare cells
-(never black), the still register. Each panel is cropped and conformed to
-`frames/SNN.png`; any edge of a cell that reads near-white is trimmed first
-(a sheet's gutters are not all the same width: three corridor panels kept a
-white bottom edge before this). The prompt and reference list are written
-beside a sheet ONLY when it is drawn. Look at the sheets before the round: same room, same
-person in the same clothes, listener's mouth closed. A bad sheet is deleted
-and redrawn with a corrected `frame`.
+## 1. The plan (`plan.json`) — no seconds anywhere
 
-Measured 2026-09-10: three sheets, sixteen panels, first try — Watson's tweed,
-bowler, moustache and stick identical across both setups. The image-edit
-compositor lane tried first swapped wardrobes between people; it is gone.
+`Line{index, kind: narration|dialogue, speaker, text, shot}` (<= 18 words,
+first person, the narrator's cast voice, fresh prose, no book quote over 8
+words). `Shot{index, section, setup, size, faces, frame, motion, take,
+beat_s <= 1.5, coda_s <= 4, path 0..1, cuts: [SubShot{at_s, size, faces,
+frame, motion, path}]}`. `Setup{described, cast, landmark, route}`.
+Validators: 120-180 s projected at 3.0 words/s; one hook, one turn (50-75
+%), one button (not the lead's, beat >= 1.0 before it); dialogue on a
+readable face (close / medium_close); 5-20 % dialogue words; <= 2 lines a
+shot; sub-shots >= 2.5 s apart on narration shots only; route positions
+never go backwards within a setup; up to SIX setups.
 
-## 5. Takes — `shots.py`, two lanes
+**`Episode.aspect` IS THE DELIVERY SHAPE, AND THE PLAN IS THE ONLY PLACE IT IS
+WRITTEN** (`studio/canvas.py`, added 2026-09-12 when the owner asked for 1:1).
+`"9:16"` renders 768x1344 and draws 2048x3072 sheets; `"1:1"` renders 768x768
+and draws 2048x2048 sheets, which are CHEAPER ($0.13 against $0.20) because a
+square cell wastes no pixels. Every stage derives its canvas from this one
+field -- the plate, the sheet grid AND ITS OWN WORDING ("equal square 1:1
+panels"), the take, the cut, the title card. It used to be a literal
+`W, H = 768, 1344` in seven files, which is six chances to disagree in silence:
+a square take cropped by a vertical assemble loses a third of every frame and
+nothing raises. H3 forces the short edge to 768 and rewrites any other canvas
+without saying so, so `canvas.size()` returns the fixed point of H3's own
+transform and the tests assert it by calling `h3.check_canvas`.
 
-Narration lane: `video_minimax_h3_i2v_turbo` from the panel, frames =
-`legal_frames(24 x (placed seconds + 0.25))`. DIALOGUE lane:
-`video_minimax_h3_i2v_turbo_speak` — the same base with the line's wav as an
-audio guide at frame 6 (`MiniMaxH3AddGuide`, 0.25 s silent head): the person
-in the panel speaks OUR line with moving lips. MEASURED 2026-09-10 (research
-06): words verbatim, voice 0.844 against the input wav, mouth motion 10x
-higher during the line than after, identity and framing the panel's. The
-master lays the original wav at the same 0.25 s, so mouth and sound are one
-recording. Takes run one lane at a time so weights load once. 768x1344,
-8 steps, H3 resident, queue empty (`episode.py` refuses otherwise). FLF
-between panels is a morph (measured) and is not used. `shots/prompts.json` is
-the one place every run card lives; `shots.json` repeats it per take with the
-render time.
+Rules the owner made after watching:
+- **Locations.** No setup holds more than ~25 s of picture (50 s of one
+  corridor was rejected). Take the chapter's own places (Criterion Bar, the
+  cab, the hospital gate, the corridor under 20 s, the laboratory, the
+  street) and add a setup whenever it buys variety: plates are free.
+- **A hold is not a shot.** An insert earns 3 seconds; a narration stretch
+  over 5 s becomes 2-3 sub-shots (a new angle, subject or reveal), each a
+  real frame zero, continuous with the takes on either side (still walking,
+  same place, the last sub-shot hands off to the next take's first frame).
+- **Variety.** No two consecutive shots of the same subject at the same
+  size; every third shot an insert or a new axis; a face that must read is
+  >= a fifth of the frame height.
+- **Wardrobe contract, one state, in every frame text**: Watson bare
+  sunburnt hands to the wrist on a black stick with a silver knob; Holmes
+  bare-headed, green velvet jacket, plaster on the right forefinger. The
+  contract is SPLIT in `refs.json`: `physical` is invariant, positive and
+  unconditional, and `wardrobe[state]` carries the hat, chosen by the
+  setup's own `state` (`Setup.outdoors` -> indoor / outdoor). Each
+  character has TWO pictures -- the bare-headed identity BUST
+  `char-<who>.png` and the wardrobe CARD `char-<who>_<state>.png` --
+  cited inside one `<Subject>`, as MiniMax's guide's own example does.
+  `cast_cards.py --check` refuses a sheet whose caption and picture are
+  not the same statement.
+- **Narration text**: ~22 lines / <= 260 words / ~90 s of speech for a
+  chapter; cut caption-lines (the picture shows it) and repeats.
 
-The take prompt (`studio/episode_take_prompt.py`) is the official H3 Start
-Frame skeleton — alignment line, `integrated_multimodal_description: [Shot 1]`,
-`overall_soundscape`, `non_diegetic_music: N/A`. A SPEAKING shot's body: a
-quarter-second silent head, `<Name> (S1) speaks to the person just off-screen,
-physically speaking with natural lip movement on every syllable: <d>[English]
-<the line>.</d>`, the beats, silence after the line, the LOCK. A silent
-shot's body is the shortest that measured as holding the frame: the panel's own `frame` text, the `motion`
-beats in playback order with prose positions (the format keeps timestamps for
-cuts), a framing LOCK, the rules. MEASURED on one panel and seed, four
-variants: every element the prompt names, the model shows — a room paragraph
-pulled the camera back to show the room, a bystander's description pulled his
-face in. Nothing else is named.
+## 2. Lines and the timeline
 
-## 6. Review — `storyboard.py --review`
+IndexTTS2 from `cast/<who>/voice/design.wav` (0.80 similarity vs 0.73 for
+the Qwen clone); Whisper WER <= 0.20 AND ECAPA >= 0.70; a line whose text
+changed is re-rendered; `--redo` gives a rejected line a fresh seed and
+KEEPS THE BEST TRY (a redo once went 0.69 -> 0.64); from the third try the
+reference is the speaker's own best passed line (>= 0.75), because a short
+line cloned from the design clip drifted toward the narrator's voice
+(Stamford's button measured 0.55 against Watson, 2026-09-11); a -3 dBFS
+limiter after the gain. BREATH between two lines in one shot is 0.70 s (the
+wavs carry no silence of their own). `respot.py` scales every `at_s` to
+measured/projected, floors the cap so the tail clears the validator under
+BOTH the projected and the measured length, and keeps the 2.5 s grid;
+`timeline.py` writes `placed.json` with absolute `cuts`.
 
-`review.png`: one row per shot, panel | take at 0.3 s | take at its last
-frame. Judge the END frame: every drift of iterations 1-2 was invisible at
-the start and plain at the end (a window appearing behind a profile, a hand
-raised into a close-up, a vessel gone red a shot early). The eye is the gate;
-nothing automatic compares panel to take yet (research 02 §5).
+## 3. The storyboard: one sequence per setup (`seq_boards.py`)
 
-## The iteration loop (three passes on chapter 1, 2026-09-10)
+Per setup, every shot and sub-shot is a PANEL, in STORY ORDER (owner
+2026-09-11): panel 1 is the first moment of the scene, each panel is later
+than the one before, and each END panel sits straight after the panel it
+closes. Story order is also order of distance travelled, because the plan
+already refuses a route that goes backwards. The sheet is the smallest grid
+that holds the panels (3x1 at 1536x1024, 3x2 at 2048x2048, 3x3 at
+2048x3072); a spare cell takes an END panel, walks and moving shots first.
 
-Render -> `review.png` -> three frames of the master at line times (captions)
--> `qc.json` -> write the defects in `episodes/epNN/iterations.md` -> fix the
-plan's `motion`, the assemble stage or this skill -> delete ONLY the takes
-whose motion changed and rerun `episode.py` (everything else is cached).
-Iteration 1: 17 takes, 93 min; 4 takes drifted, captions overlapped, -15.8 LUFS.
-Iteration 2: 5 takes re-rendered, 3 of 4 drifts gone, QC PASS at -15.3 LUFS.
-Iteration 3: 1 take. A background that is DESCRIBED gets embellished (a
-profile "against the plain wall" grew a window twice); describe only the
-person and the move, never the background of a tracking shot. And a rerun
-with the SAME seed drifts the same way — three S04 reruns did — so a retake
-is `Shot.take += 1` in the plan, which changes the seed; the motion text is
-only changed when the drift is something the words named.
+The prompt is built in labelled blocks: SHEET, DIFFERENT PICTURES, ORDER,
+REFERENCES, LOCATION, GEOMETRY, WARDROBE, BACKGROUND LIFE, PANELS, STYLE,
+CONSTRAINTS. GEOMETRY states every relation as a frame edge and an apparent
+size and fixes one side of the 180-degree line, because a relational
+preposition ("the horse's legs ahead of the wheel") drew a four-wheeler with
+the horse abreast of the axle. WARDROBE is its own block with the hat rule
+flattened to one state per sheet. BACKGROUND LIFE names counts and
+activities in public setups: the owner asked for ordinary people at their own
+work by name. EVERY STRING IS AFFIRMATIVE: a negated noun is still that noun,
+and our own board drew CRISTERION from a "no signage" clause.
 
-## 7. Assemble and QC — `assemble.py`, `qc.py`
+Each panel carries `frame` (the instant BEFORE its action, never the action
+finished), `motion`, `camera` (position and lens, no move words), `at_rest`
+(what is still), and where it earns one `end` plus `changed` (ONE sentence of
+12-17 words naming what moved, the frame edge it moved to, and its apparent
+size). The panel prose is written by one author per setup, then read by three
+reviewers together (story and continuity, physical and optical sense, the
+rules mechanically) and settled by a fixer, because each author sees only its
+own location and the faults live between them.
 
-Cut each take from its first frame to its PLACED seconds; ACE-Step bed at
-least the runtime long; lines laid at their placed `at` (a dialogue take's own
-track is discarded, the driving wav is laid instead); `trailer_assemble.mix_with_lines`
-(-16 LUFS lines, bed ducked to -24 under them, master -14 LUFS / -2 dBTP
-pre-encode, then one final gain toward -14 bounded by the -1.0 dBTP ceiling);
-then the book's animated title card (`title/title.mp4`, made once by
-`title.py`: a gpt-image still animated 3.5 s by H3), then 2 s of black. No
-captions or text on the picture (`studio/episode_captions.py` stays for a
-future subtitle FILE). QC on the delivered file: length, -15.5..-12.5 LUFS,
-TP <= -1.0, every planned cut seen within 0.12 s, every line heard ON THE
-MASTER (WER <= 0.20); reports `speech_s` and `longest_gap_s` (the dial the
-narration ratio is turned by). Not yet measured on a real master: captions, the cut
-detector on same-setup cuts.
+Cells are cut between the gutters FOUND on the sheet
+(`episode_board.cell_boxes(grey, cols, rows)`), soft edges above 170
+trimmed, and DQ'd: the right number of gutters per axis, no bright flat line
+inside a cell, the landmark growing along the route, and NO TWO PANELS ALIKE
+at `ALIKE = 0.70` over EVERY pair, a panel and its own END panel included
+(measured: the highest legitimate pair on a sheet is 0.584, the copies the
+owner caught were 0.82 to 0.95). A failing sheet is redrawn once with a
+STRICT opening naming the offending panels.
 
-## Open items
 
-- No automatic panel-vs-take identity gate.
-- Models load off the D: HDD; moving the H3 weights (~64 GB) to the C: NVMe is
-  user-side and the largest unmeasured speed-up.
-- Lip-sync is a future lane; every line is VO. `ComfyUI-MiniMaxH3-Director`
-  (timeline editor, retake-stitch of a range) is the interactive retake lane
-  to try when a take fails in one beat.
+### ONE SIMPLE CAMERA MOVE BETWEEN PANELS (owner, 2026-09-12)
+
+The difference between two consecutive panels — a panel and its own END panel
+included — is ONE SIMPLE CAMERA MOVE plus ONE SMALL LOCAL ACTION. Nothing
+else. The moves are: push in, pull back, pan left or right, tilt up or down, a
+small track along the subject. The local action is one limb, one object, one
+eyelid: a hand slides a baluster's width, a chin comes up, a page travels a
+thumb's width.
+
+The mechanism, and why this is a rule and not a taste: a ref2va segment is
+given two pictures and asked to get from one to the other. If the two differ by
+a REPOSITION of the subject — the same man standing somewhere else, the same
+room from a different corner, a prop that has crossed the frame — the model has
+no path between them and dissolves one into the other. THAT IS THE MORPHING.
+If the two differ by SCALE or by a shifted frame edge, the path is a camera
+move, which is exactly what the model is good at, and the segment comes back
+smooth.
+
+So `changed` names a change of apparent SIZE or of FRAME EDGE ("the chin has
+risen to the top third, a hand taller"), never a change of place. Write the
+move's name into the take prose (`motion`), and keep the panel's own `camera`
+a standing position with no move words, as it always was: the panel is where
+the camera IS, the move is how it gets to the next panel.
+
+This also cheapens the freeze problem from the other side. A big re-stage was
+our instinct for "give the segment something to do"; it is the one thing that
+guarantees the segment cannot do it.
+
+### THE END PANEL CANNOT BE ASKED FOR IN WORDS (measured 2026-09-12, ep02)
+
+An END panel is "the same shot one moment later". **This drawer cannot draw
+that**, and three attempts on the same 9 cells of episode 2 bound the problem
+from both sides:
+
+| What the prompt did | Result | Similarity to its own start cell |
+|---|---|---|
+| Sheet prose: "a DIFFERENT photograph … a viewer can say what happened in between" | **re-staged** to a new camera | 0.072 – 0.406 |
+| Attached the start cell as Image 1: "draw Image 1 again, with one thing changed" | **copy** | 0.984 – 0.997 |
+| Same, with the reference demoted in prose to "the angle and the SIDE" | **copy** | 0.981 |
+
+With a dominant reference image it copies; without one it re-stages. Both
+prompts asked for a RELATION to another picture ("be different", "be the
+same"), and a relation is not a thing that can be drawn.
+
+So: **judge, never argue.** `sq.reaches()` measures the drawn pair and only a
+cell inside `END_FLOOR..END_CEILING` (0.45–0.80) is a destination.
+
+- A **re-staged** END cell is dropped. Aiming a take at it is aiming it at a
+  cut, and `drift` then fails the take for the sheet's fault — that was all
+  seven of episode 2's hard drift failures.
+- A **copy** END cell is dropped too, and this one is counter-intuitive: it is
+  WORSE than no END cell, because it tells the take to end where it began,
+  which is the stillness the owner banned outright.
+- With **no** END cell the take follows the motion described in words and
+  `drift` has no aimed segment to fail. That is the good default.
+
+`seq_boards.py` already does the right thing: `duplicates()` judges END pairs
+in the band, one strict retry names the offender, then `drop_end_copies`
+deletes it. Cost is bounded at two draws per sheet. Episode 2's sheets predate
+that gate, which is why 9 bad cells reached the render.
+
+**Still open, and free**: derive the END cell mechanically by CROPPING its
+start cell. A crop IS a push-in — same axis, same angle, closer — and it lands
+in the band by construction (a 25 % crop measures 0.66). Only legitimate for a
+segment whose motion is a camera push; a segment whose motion is a subject
+action needs different content, which a crop cannot give.
+
+### Craft the storyboard inherits from screenwriting
+
+- **A cut between two setups needs a third element, shared or opposed**: a
+  gesture, an object, a line, the quality of the light, a sound, an idea
+  (greenhouse -> jungle; dawn shadows -> sunset). Our cut-landing gate measures
+  that a cut lands on its pin; it cannot tell you the cut MEANS anything. Name
+  the linking element in the second panel's `frame`.
+- **Action beats talk, and the camera magnifies small things.** The ring that
+  rolls under the table, the French toast made badly then well, wringing out a
+  stocking. For a 9:16 microdrama this is the best source of visible action
+  that is not a walk — and a walk is what we reach for when we have not thought.
+- **Concrete or it is invented for you.** Not "a small midwestern town" but
+  "Springfield, Ohio"; not "expensive clothes" but "a double-breasted
+  chocolate-brown Armani suit". Our prop-size rule is one case of this law;
+  apply it to light, ground, weather and crowd too.
+- **Don't show a detail off.** The test of a repeat is whether it advances the
+  story: a sack of rice appearing three times is necessary; the same flourish
+  seven times is nauseating. This is our twin-panel fault said in craft terms.
+- **Enter late, leave early — and leave before the conflict resolves.** The
+  unfinished feeling is the tension. Shorten shots approaching the turn to earn
+  the right to a pause on it.
+- **The last word of a line is the core word.** Put the word that opens the
+  next reaction at the END of the line, not the middle; it is also where our cut
+  lands.
+- **The greatest sin is boredom, and repeated beats are how it arrives** — the
+  same tactic in different words. Two panels that argue the same thing twice are
+  one panel.
+
+## 4. Takes (`takes_r2v.py`) — ENGINE r2v v6
+
+Base `video_minimax_h3_r2v_turbo_ref8`: ref2va fp8 + the DEDICATED lightx2v
+Ref2V 8-step 768p LoRA at 1.0, euler/beta 8 steps, sigma shift 12/3 (the
+LoRA's own release post; 6/3 is the FL2VA row, and an FL2VA-lineage LoRA on
+ref2va ran iteration 1 with camera-scale pumping: never again). A take is a
+run of consecutive shots <= 12 s in one setup; 12 s is a hard cap (a 15 s
+take cost 24 min a try and froze on both seeds).
+
+References: the cast sheets for EVERY face the take shows, sub-shot faces
+included (reading shot-level faces alone left 6 of 19 takes with a face on
+screen and no sheet staged), then the plate, then a strip of the take's own
+cells in time order with its END frames. Pins: EVERY CELL ONCE, at its first
+token start (H3 packs 17 frames into 5 tokens, so token starts are
+17k + {0,1,5,9,13}); the next cell's start pin closes the segment. NO END
+PINS of any kind: a pin is a soft conditioning row at its time, not a latent
+overwrite, so a second pin on a hold says "nothing changes" and the take
+freezes (measured over 71 segments: start + same cell 65 % frozen, start +
+drawn END cell 59 %, start only 30 %). END cells live in the strip and the
+prompt only. Audio: dialogue wavs at their offsets, silence elsewhere,
+anchored at frame 0; narration NEVER (an anchored narration made the face on
+screen mouth it).
+
+Prompt (`studio/episode_ref_official.py`), MiniMax's own ref2va grammar with
+the owner's rules on top, and a LINT that refuses the prompt rather than
+sending a bad one:
+- EVERY TIME IS A WHOLE SECOND and every shot is a RANGE, `From MM:SS to
+  MM:SS`, ranges touching, the first starting at 00:00 and the last ending at
+  the take's length, so the text accounts for every second of the video. A
+  point stamp gives a segment nothing to sustain, which is one source of the
+  freeze. (The guide's own form is an onset, `[Shot 1]` with no stamp and
+  later shots `At MM:SS.mmm`; the owner's range form is what ships, with the
+  guide's rule named in a comment so the A/B can flip it in one line.)
+- AN ACTION IN EVERY SEGMENT, including a one-second reference beat: "if we
+  need a ref shot, just showing the other character, put it for a second and
+  define an action, so it is not static."
+- AFFIRMATIVE ONLY. MiniMax reads no negation; the builder raises on any.
+  `calm()` converts the drawer's stillness vocabulary at the boundary, so the
+  panel prose stays right for gpt-image and reaches H3 as position.
+- The limp is a gait, never a speed: "limps along on his stick at a normal
+  walking pace" while Stamford walks at a normal pace. "Slow" applied to a
+  person renders as slow motion, and the turbo LoRA already pulls that way.
+- NAME THE CAMERA MOVE, ONE PER SEGMENT (owner, 2026-09-12). The segment's
+  action sentence carries the move the storyboard already implies between its
+  two cells — "the camera pushes in a hand's breadth", "the camera pans a
+  hand's breadth to follow him" — and nothing else moves the frame. A segment
+  with no named move and a repositioned subject is the morph; a segment with a
+  named move and one small local action is the smooth take. The move in the
+  prose must be the SAME move the cells differ by, or the model is being told
+  two stories about one second.
+- DESCRIPTIVE: 150-240 words a shot block, at least `min(350, 150 x shots)`
+  a take. Ours measured 114 a block before this and 179 after.
+- The plate is a DEFINITION, `partially_preserved`, never "appears in" a
+  shot: declared as a shot, the model showed the empty room as one.
+- One `<Picture N>` per pinned cell; the voice range is clipped to its own
+  segment (a span crossing a cut made the model wait for the span's end
+  instead of cutting on the pin); `(Sx)` counts dialogue voices only.
+`ref_image_size: match`. Takes render at ~3.3 s/frame.
+
+
+### DRY-BUILD EVERY TAKE PROMPT BEFORE YOU COMMIT THE GPU (2026-09-12)
+
+`takes_r2v.cards(book, episode, number)` builds every prompt and runs the LINT
+without touching ComfyUI. Call it FIRST, always:
+
+```python
+cards = t.cards(book, episode, number)      # raises on the first bad prompt
+print(f"{len(cards)} prompts, {sum(c['frames'] for c in cards)} frames")
+```
+
+The lint refuses the whole run on the FIRST bad prompt, so a render launched
+without this dies minutes in, and the next fault is only revealed after the next
+launch. Episode 2 hit FIVE in a row this way -- L16, L9 (twice, different
+causes), L2 and L14 -- and each discovery cost a fresh submit. One dry-build
+loop found all of them in minutes.
+
+What they were, because they are the classes that recur:
+
+- **L16 DIALOGUE TAIL.** `beat_sentences` reads `clauses_of(motion)[1][1:]` --
+  the camera sentence consumes the FIRST follow-on clause -- so a dialogue shot
+  needs **two clauses after the head** (`head; tail; tail.`) for one to reach
+  the stamped beat at the line's end. One clause emits no tail beat at all, and
+  6 of 8 dialogue segments froze at the second their line ended.
+- **L2 STILLNESS on the words you add.** `still, stays, remains, motionless,
+  frozen, pauses, waits, unchanged, unmoving, holds, held`. A tail clause is
+  exactly where "he holds the salute" wants to be written, and it is banned.
+  It also catches a CONTRACT: `refs.json` `physical` is repeated verbatim into
+  every prompt, so "shoulders held back" in a character's own description
+  refuses every take that character appears in.
+- **A MOUTH NOTE is silently dropped.** `clauses_of` filters a clause that only
+  says a mouth is closed, so "he waits with his lips closed" leaves you a clause
+  short and L16 fires anyway.
+- **L9 NO LIMP fires on somebody else's gait.** The lint asks only whether
+  Watson's tag and a gait word share a block; it cannot attribute the verb. A
+  hansom "at a trot", a woman who "walks the pavement", and the NOUN "steps"
+  (stair treads) each refused a take where nobody was walking. Reword the
+  background life -- the cabs roll, the woman carries her basket, the stair has
+  treads -- rather than loosening the lint or writing a limp into a man who is
+  standing at a window.
+- **L14 LENGTH, 150-240 words a block.** Every clause you add to fix the rules
+  above pushes toward the cap; budget for it.
+
+### THE PLATE IS NOT AN UNCONDITIONAL REFERENCE (measured 2026-09-12, ep02)
+
+Episode 2's top fault by count: **13 of its 14 foreign frames were the take's
+OWN attached plate**, matched at 0.988–0.998. T03 opens on Holmes's face and by
+1.5 s the frame IS `plate_sofa.png`, chairs and violin and all.
+
+Every one came from a close or insert segment with **no wider cell anywhere in
+the take** (Fisher exact p = 0.0072; 0 of 64 wider frame samples). The
+mechanism: a take of nothing but tight cells cannot place a room, so the plate
+stops being a definition and becomes the only whole picture the model can fall
+back on.
+
+So the plate is staged only when `sq.places_the_plate(sizes)` — the take shows
+at least one `medium`, `full` or `wide` cell. On episode 2 that dropped it from
+12 of 19 takes.
+
+**Dropping it from the reference LIST alone fails loudly, and this is the trap.**
+`picture_numbers` fixed the plate at slot `n_faces + 1` and every later picture
+counted from it, so the prompt cited a picture the graph never staged —
+`L11 PICTURES: 5 pictures defined against 4 staged references`. The numbering
+has to close the gap too, and `has_plate` threads through **all five**
+emitters: `picture_numbers`, `subjects`, `retention`, `summary` and
+`prompt_facts`. Miss `summary` and it cites `<Subject 3>` with no such subject;
+miss `prompt_facts` and the two plate lints fire on a plate that isn't there.
+
+### THE HALF AFTER `as` IS NOT A NEW SENTENCE (2026-09-12)
+
+`camera_sentence` joins the camera half to the motion half, and the motion half
+arrives from the plan as its own sentence, capital and all:
+`…pushes in a hand's breadth as The right forefinger lifts`. **21 of these
+across 19 take prompts.** A capital mid-sentence reads to the model as a second
+sentence — the same class of fault as the malformed camera clause.
+
+`lower_lead()` lowercases a closed list of words that can only ever open a
+subordinate clause (`the a an his her their its one both two three`). It does
+NOT touch names: lowercasing `Watson` would cost more than the fault it fixes.
+Careful — `"his".rstrip("'s")` is a CHARACTER SET and eats the `s`; use
+`removesuffix`.
+
+### ONE GPU, ONE STAGE AT A TIME (owner, 2026-09-12)
+
+Every take of a run is submitted to ComfyUI BEFORE any of them is collected, so
+they execute consecutively and the MiniMax weights load once. Then, and only
+then, the whole DQ. Then the whole retake batch. Then DQ again. Never a DQ
+while takes are in flight: the lip-sync gate reaches Whisper THROUGH ComfyUI,
+and every Whisper job evicts the video weights.
+
+A STAGE THAT LOSES WORK STOPS; IT DOES NOT FALL THROUGH. One interrupted take
+killed the collector, three more rendered with nobody waiting for them, and the
+chain walked on to DQ and then to assemble on an incomplete set. Collect every
+take you can, name the ones lost, exit non-zero. The same morning taught the
+smaller half of it: a displaced attempt's name is read off disk, never from a
+`tries` counter, because a re-run does not know what earlier retakes left there.
+
+MEASURED the morning this rule was written: back to back, takes ran 407, 502,
+583 s; with another production's jobs landing between them the same graph took
+742 and 998 s. Memory is the other half of it: with the weights of two
+productions and Whisper resident, the machine had 6.6 GB of 63.7 free and 1.6 GB
+of 24 VRAM, and was paging -- which reads as heavy disk, not as a slow GPU. A
+restart put it back to 46.8 and 20.8. Submitting one take and waiting for it leaves a gap after every
+take, and the gap is where another job gets in — 19 invitations per episode.
+Two of those interleavings were mine, from re-running the DQ to check a gate
+while the renders were running.
+
+## THE THIRD REFERENCE: OBJECTS (owner, 2026-09-12)
+
+A book binds its people and its places and used to bind nothing else.
+`Setup.props` only ever named ANOTHER SETUP whose plate got reused, so an object
+that is not also a location could be described and never shown.
+
+    character   refs/characters/char-<id>.png   build_refs.py / cast_bust.py   free, Krea2
+    location    refs/locations/loc-<id>.png     build_refs.py                  free, Krea2
+    PROP        refs/props/prop-<id>.png        prop_refs.py                   free, Krea2
+
+    uv run python scripts/episode/prop_refs.py <codex_id> --bind <records.json>  # FREE
+    uv run python scripts/episode/prop_refs.py <codex_id> --check                # FREE
+    uv run python scripts/episode/prop_refs.py <codex_id> --draw-all             # FREE, LOCAL
+
+MEASURED on episode 2, nine props drawn from WORDS ALONE over six independent
+sheets: violin 0.36x (a child's fiddle under a six-foot jaw -- and correct at
+63 cm in panel 1 of the SAME sheet), shawl 3.0x, a fingerprint asked "a
+thumbnail wide" drawn a palm across, stick shaft 1.95x, pencil 2.6x, coffee pot
+0.55x and drifting 1.5x inside one sheet, and in one panel the poker was drawn
+AS the walking stick. The controlled comparison is the blue envelope, the one
+prop with a picture -- and only by accident, because the commissionaire's bust
+happens to show it in his hand against his chest. It came back at 1.25x over
+ten panels and three sheets.
+
+THE BRICK: gpt-image copies APPEARANCE and never ABSOLUTE SIZE, and the only
+thing in a photograph that carries absolute size is A HUMAN BODY. So:
+
+- **The reference picture always has a hand in it.** Held in a hand where the
+  object has an owner, standing beside an open hand where it does not. An
+  object photographed alone on a table teaches appearance and nothing else.
+- **The contract states THREE measures** (`studio/prop_refs.Prop`): `overall`
+  against the body, `cross_section`, and one sized `detail`. The validator
+  REFUSES a measure in centimetres -- a model has no ruler -- and refuses a
+  negation or a pace word like every other drawn string.
+- **Extraction is judgement, the contract is code.** An agent reads the chapter
+  and authors the records, the way `analysis/characters/` is authored; `--bind`
+  validates them into `refs.json` as `kind: "prop"` rows and refuses a prop
+  missing a measure BEFORE anything is drawn.
+- **Slots are the constraint at take time.** `ro.MAX_PICTURES` is 9 and the ep02
+  takes already use 3-7, so a take attaches its HERO prop only. Sheets have
+  room for more.
+
+## What the five prompt auditors measured (2026-09-12)
+
+Read `library/<book>/episodes/epNN/report_final.html` for the full list. The
+findings that change how we write, not just what we fixed:
+
+- **OBEDIENCE, per instruction type, over 54 drawn cells.** people count 0.96;
+  the instant before 0.93; named face frontal 0.93; frame-edge assertion 0.83;
+  wordless surfaces 0.83; shot size 0.80; camera height 0.76; END differs by its
+  one named change 0.58; END keeps the same camera 0.33; **landmark size ladder
+  0.00**. The ladder is DEAD PROMPT -- zero for seven, failing both too big and
+  too small -- while the same fact stated as a frame edge lands. Write sizes as
+  frame edges.
+- **A stated head fraction is honoured only at or above A QUARTER** (delivered
+  vs stated: median 0.95 above that line, 0.00-0.45 below it). The old rule
+  said "a fifth", which is under the model's own threshold.
+- **Where the size word and the head fraction disagree, the model follows the
+  FRACTION.** Size misses run 10-to-1 WIDER, and every panel drawn wider than
+  its size word also invented furniture the prompt never named.
+- **The prompt is not too long.** OpenAI's cap is 32,000 characters and ours run
+  16-22 kB; the block order already matches their documented order. The waste is
+  inside it: 19 % of every prompt is an "instant BEFORE" clause re-describing
+  the picture the same block just described.
+- **`quality="high"` is the MIDDLE rung on gpt-image-2.5**, not the top: `xhigh`
+  and `max` sit above it. `input_fidelity` is a dead end -- the docs say omit
+  it, GPT Image 2 and later always process inputs at high fidelity.
+- **Keep the 3x3 sheet, raise its canvas.** One sheet is $0.0144 a cell against
+  $0.053 for singles, and the resolution argument for singles collapses: a
+  682 px cell upscales 1.13x to the 768 canvas while a 1024 px single would be
+  DOWNSCALED. 2880x2880 is the documented pixel cap and gives 960 px cells with
+  no upscale.
+- **Four setups of one room drawn four times are not one room.** The room-plan
+  clause is BYTE-IDENTICAL (419 characters) in all five sitting-room prompts and
+  still produced two different sofas and three door colours -- and the drift is
+  in the PLATES, each sheet having copied its own plate faithfully. Words cannot
+  substitute for a picture. No gate in `studio/` is cross-sheet.
+
+## 5. The gate ladder: nothing is spent before it is checked
+
+Each rung is free and guards the rung after it.
+
+**G1 PLAN**, before anything: an action in every segment, no negation, no
+stillness word, no "slow" on a person, the wardrobe contract named wherever a
+hand, hat or Holmes's jacket shows, props named in `motion` present in
+`frame`, sub-shot faces named, no location over ~25 s, no still segment over
+2.5 s after an internal cut, ranges covering the take. Guards the sheets and
+the whole render round.
+
+**G2 SHEET PROMPT**, before the paid draw: every panel a different picture,
+each the instant before its action, END panels naming a changed state,
+geometry as edges and sizes, crowd life in public setups, panel count
+matching the grid. Guards ~$0.20 a sheet.
+
+**G3 CELL**, after the draw and before any GPU: gutters, white lines, the
+landmark growing along the route, and `ALIKE = 0.70` over EVERY pair
+including a panel and its own END panel. A failing sheet is one STRICT
+redraw. Guards hours of render.
+
+**G4 TAKE** (`take_dq.py`, `studio/motion_gate.py`, `cut_landing.py`,
+`take_verdict.py`, `identity_gate.py`): frozen-at-start over 1.0 s is a hard
+fail (the owner's "some takes start with a static image"); frozen share per
+segment kind; no foreign picture; the cut landing within [-4,+6] frames of
+its pin with no ping-pong; drift; lip sync and words heard on dialogue takes
+only (a narration take carries silence by design); identity against the cast
+sheet. One score, `--attempts` keeps the best automatically, budget 2
+retakes, and a reseed is never the answer to a freeze.
+
+**G5 MASTER** (`studio/edit_gate.py`, `qc.py`): every segment of the master
+is its take frame for frame, no duplicated frame across a cut, cut positions
+within half a frame, no pts hole, then -15.5..-12.5 LUFS, TP <= -1.0, every
+line heard.
+
+`assemble.py`: one segment per take-run, gutter guard, bed 11 dB down with
+-40 LUFS room tone, duck at least 4 dB with 0.15 s attack / 0.25 s pre-delay
+/ 1.0 s release, a 2.76 s fade over bed AND tone at the placed end, lines at
+their placed `at`, title card at -20 LUFS with fades, 0.25 s of black after
+it, final gain + limiter.
+
+## 5b. THE MUSIC BED — every episode has one
+
+**This stage is easy to miss, and it was missed**: the owner asked "are we not
+doing background music?" on 2026-09-13, after two episodes had shipped with a
+bed under every second of them. It was documented in half a line inside a
+sentence about `assemble.py`, so it read as absent. It is not.
+
+**Where it lives.** NEVER in the take. The ref2v prompt ends
+`non_diegetic_music: N/A` on purpose — H3 generates the take's diegetic sound
+only, and music in a take cannot be ducked, cut or levelled afterwards. The bed
+is laid on the MASTER in `assemble.py`, exactly like narration.
+
+**What it is**, measured and tuned across three iterations:
+
+| knob | value | why |
+|---|---|---|
+| model | **YuE2 3B** (`audio_yue2_song`) — owner's choice 2026-09-13 | more expressive, and its `style` field takes descriptive prose instead of a tag list |
+| ask | `BED_STYLE` prose | states key, tempo and instrumentation, THEN states what must not happen: no melody that leads, no swell, no climax |
+| length | `max(100, runtime + 10)` s | one pass covers the episode; a bed shorter than the cut is silently re-made, never looped |
+| level | **measured to `BED_TARGET_LUFS = -25.6`** | the old fixed -11 dB was right for ACE-Step's -14.6 LUFS output ALONE; the level is the constant, the gain is measured per bed |
+| floor | room tone at -40 LUFS | under the bed, so a gap is never digital silence |
+| duck | >= 4 dB, 0.15 s attack, 0.25 s pre-delay, 1.0 s release | 10 dB in 20 ms pumped audibly on every line |
+| out | 2.76 s half-sine over bed AND tone | the bed's last hit at 135.0 s fell inside the old 1.5 s fade |
+
+Verify it landed rather than trusting the code: sample the master's quietest
+quarter. Episodes 1 and 2 measure -31.7 and -33.3 dBFS there against -16/-17
+loud, and 0-1.2% of either is below -60 dBFS. Silence would read as -inf.
+
+### Why YuE2, and what changing engine breaks
+
+OWNER 2026-09-13: *"ace step is shit .. use yue2 .. more expressive and great
+prompt control on style."* YuE2 3B is the default; `--bed=acestep` still works.
+
+**Changing the engine moves the LEVEL, and that is the thing to get right.**
+`BED_TRIM_DB = -11` was never a property of the bed — it was the distance from
+ACE-Step's own -14.6 LUFS output down to where the bed belonged. Carry that
+number to a model with different output loudness and the bed moves with it. So
+the target is the constant now (`BED_TARGET_LUFS = -25.6`, the level two shipped
+episodes were judged at) and `bed_gain_db()` measures each bed and computes the
+gain, capped at +6 dB because a bed far under target is a failed generation
+rather than something to crank. It falls back to the old fixed trim when the
+loudness cannot be read, so a missing loudnorm pass degrades instead of asking
+for infinite gain.
+
+**Write the style as PROSE, and say what must not happen.** ACE-Step wanted a
+comma-separated tag list; YuE2 wants description, which is the control the owner
+chose it for. `BED_STYLE` names the key, the tempo and the instruments, and then
+forbids the things that fight narration: a melody that leads, a swell, a climax.
+
+**Still unused: the ABC score.** `OlmYuE2Plan -> GenerateABC -> ApplyEditedScore
+-> Synthesize` exposes the score as editable ABC notation. That is how fourteen
+episodes could carry ONE motif instead of fourteen unrelated drones — a series
+theme stated in the trailer and answered in each chapter. Nothing depends on it
+yet.
+
+**THE INSTRUMENTAL MARKER IS A DIFFERENT WORD IN EACH MODEL, and getting it
+wrong does not fail — it SINGS.** ACE-Step takes `[inst]`. YuE2 takes
+`(instrumental)`, which `music_tone` established the expensive way on the
+trailer: in that corpus a parenthetical is a SUNG backing line, and three
+delivered cues came back with a vocal stem 3-4 LU above the mix singing their
+own stage directions in order. `(instrumental)` is the single documented
+exception. `bed_request()` holds both markers and is tested.
+
+## 6. Writing with agents: authors, reviewers, one fixer
+
+The panel prose and the take prose are judgement work, so agents write them;
+the checks are exact, so code runs them. Never the other way round.
+
+WHAT MAY BE SPLIT IS PANEL TEXT, NOTHING ELSE. The chapter, the episode's
+question, the shot list and the story stay in one head: they are one thing, and
+an agent given a piece of them returns something that contradicts the rest.
+Parallel work is for (a) panel prose inside ONE setup, (b) read-only review,
+each agent running one checklist over everything, and (c) bulk retrieval that
+brings back a conclusion rather than a pile of text.
+
+ONE AUTHOR PER SETUP, in parallel, each reading its peers' patches so the
+voice matches and writing only a patch for its own setup, which is merged
+centrally. Then THREE REVIEWERS reading all setups together, one for story
+and continuity, one for physical and optical sense, one for the rules
+mechanically. Then ONE FIXER. Then the lints again, and only then the draw.
+
+This is not ceremony. On the pass that built this section the authors caught
+the plaster on the wrong hand and a panel contradicting its own staging; the
+reviewers caught the time of day running backwards across four locations
+against a chapter set before lunch, a wardrobe block ordering Watson drawn
+bareheaded on every sheet, and a cab panel that is geometrically impossible
+(a 9:16 frame whose height holds a 9 ft 6 in hansom is 16 ft wide, the
+length of the rig, so it cannot stand at one edge and cross to the other).
+Where two reviewers disagree, the third supplies the mechanism.
+
+## 7. The iteration loop
+
+After each master: five reviewers in parallel (picture and continuity,
+prompts vs the official grammar, storyboards and character consistency,
+audio/sync/mix, story/edit/plan), each returning <= 8 ranked changes with
+evidence and a measurement; the owner's own notes outrank them. Apply,
+re-run the chain unattended, report the path, QC, DQ, wall time and ledger.
+Log in `episodes/epNN/iterations.log`, and keep every issue with its
+evidence and status in `episodes/epNN/findings.json`, which `runcards.py`
+renders at the top of `report_final.html`.
+
+NO AGENT TOUCHES THE GPU WHILE A RENDER RUNS: a vision model loaded during
+one turned an 8-minute take into 37.
+
+## The contract: every prop carries a size
+
+A wardrobe and props contract is the list of things the drawer is forbidden to
+invent, and anything it leaves out is invented panel by panel. So each prop
+states what it IS, how BIG it is against the body, and WHERE it sits: "a black
+walking stick that stands hip high and reaches a little over half his own
+height, its shaft as thick as one finger and its ferrule on the ground beside
+his boot". An adjective ("a walking stick") is not a size, and 23 panels each
+guessed a different one, which is how a cane came back the size of a lamp post
+(owner, 2026-09-11).
+
+Two traps in the code made that invisible and both are now shut, but check them
+in any new book:
+- `trailer_refs.visual_description` trims to 220 characters and trims SILENTLY.
+  A contract cannot be trimmed, so the episode reads `contract_description`,
+  which has no limit; `dropped_by_limit` says when the two disagree.
+- A sentence reaches the drawer only if it sounds photographable, and the word
+  list was faces and clothes alone. A sentence about a PROP failed it, so every
+  fact about the stick was discarded whatever the limit. Props are in the list
+  now.
+
+## Known open items
+
+
+- Word-level spotting from Whisper timestamps (`respot.py` scales by line,
+  not by phrase yet).
+- Wardrobe and face-count on a cell need a local vision model; identity has
+  one behind a flag (`facenet-pytorch`), wardrobe is still the eye.
+- There is no free pixel test for "is this cell in the right place": 17 of 40
+  cells measure closer to a foreign plate than their own, so a panel drawn in
+  the wrong location is caught only by reading the text.
+- Room tone per setup is one brown-noise floor; no footsteps.
+
+## Entry paths — where a session actually starts
+
+| What you have | Start at | Watch for |
+|---|---|---|
+| A chapter of a book already set up (cast voices, refs, plates) | Stage 1, lines | The normal path |
+| A book with no cast voices yet | Voice design first; the episode cannot begin | Audio first is not negotiable |
+| A chapter that brings a character with no sheet | Author his row in `refs.json`, then `cast_bust.py <who>` (free, local), then `cast_cards.py --draw <who> <state> --approved` | The BUST is free on your own GPU and only the wardrobe CARD costs $0.08. NEVER `build_refs.py` for this: it draws the whole cast and then REWRITES refs.json from what it drew, deleting every hand-authored wardrobe, sheet and cards block. `faces_of` stages the new sheet everywhere the words name him |
+| A chapter that brings a character who HAS a bust but no card | Author `wardrobe`, `sheet` and `cards` on his row, then `cast_cards.py --draw <who> indoor --approved` | **A BUST IS NOT A CARD.** Gregson and Lestrade each had a bust and nothing else, so `cast_sheet` fell through to it: a landscape head-and-shoulders wearing a hat, with no body. No body is no scale — the proportion fault of episode 2 — and the hat is baked into every indoor shot. The card is an `images.edit` OF the bust, so **the bust's face and SKIN TONE survive it**: Lestrade's contract says Doyle's "sallow" and his card came back fair, because the template says "the same skin tone". Fix the bust first, or accept and record the deviation |
+| A chapter in a location never drawn | One plate, then the sheet for that setup only | `--setup=<name>` keeps the other sheets' money in your pocket |
+| An episode half rendered | `takes_r2v.py` with no `--retake`: it renders only what has no record | Check no other run is alive FIRST, by command line, not by `ps -W` |
+| A cut that needs re-cutting, no new pictures | `assemble.py` then `qc.py` | Costs nothing; `master_iterN` never overwrites |
+| One bad cell in a good sheet | `redraw_panel.py <book> <ep> S14.1 --approved` | $0.08, leaves its neighbours alone |
+| A finished episode to review | `runcards.py`, then read `report_final.html` | Every input and output per take, with the issues |
+
+## When a failure sends you back
+
+A fault is almost never owned by the stage that reveals it.
+
+| What you see | Whose fault it is | Go back to |
+|---|---|---|
+| Take frozen, or still then moving | The panel, or the shot that turns no value | Stage 0 (the turn) and stage 3 (the cell) |
+| Subject dissolves or smears between two cells | Two panels that differ by a REPOSITION, not by a camera move | Stage 3, `changed`: make it a size or a frame edge |
+| Walk reads as slow motion | The motion text | Stage 1, the plan's words |
+| Vehicle moves but goes nowhere | The shot is locked off and the world is still | Stage 1 |
+| Face wrong, moustache missing | Whoever the scene's words name had no sheet staged | Stage 1's text, not the cast sheet |
+| Prop the wrong size | The contract did not size it | `refs.json`, before any drawing |
+| Two panels the same picture | An END whose change cannot read at that size | Stage 5, the sheet prompt |
+| A shot cuts to a picture nobody asked for | A reference the model could not place | Stage 7, the take's reference list |
+| A line lands late | Seconds written into the plan instead of measured | Stage 2, and never the plan |
+| Renders taking half again as long | Something else is on the GPU between takes | The staging rule above |
+
+## What earns its own skill, and how a new one is added
+
+A medium gets its own skill only if it makes us WRITE DIFFERENTLY — different
+structure, different format, different language rules. Subject matter (a
+detective chapter, a romance chapter), a book, or a visual style do not
+qualify; those are entries in a table inside an existing skill. By that rule
+`episode`, `trailer` and `shorts-*` are three skills because a trailer is cut
+to music, a short is a single scene, and an episode is cut to a measured voice;
+a second book is not a fourth.
+
+When a new medium does earn one: ONE new skill, ONE boundary table inside it
+saying what transfers from here and what does not, and ONE row in the entry
+table above. The existing skills are not edited. A medium that edits the
+general layer to fit itself has taken everything else hostage.
+
+## The owner's spec outranks everything in this file
+
+If the owner or the platform gives a length, an aspect, a format or a count,
+that is the spec; every convention here is a default for the blanks they left.
+Never ship something off-spec in order to fill in a field this skill asks for.
+Say which of our defaults you dropped, and why.

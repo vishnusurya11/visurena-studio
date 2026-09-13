@@ -146,7 +146,7 @@ def post_process(src: Path, dst: Path) -> Path:
     flat = dst.with_name(dst.stem + ".flat.wav")
     _render(src, flat, POST_CHAIN)
     gain = LINE_LUFS - integrated_lufs(flat)
-    _render(flat, dst, f"volume={gain:.2f}dB")
+    _render(flat, dst, f"volume={gain:.2f}dB,alimiter=limit=0.708:level=disabled")  # -3 dBFS ceiling
     flat.unlink()
     return dst
 

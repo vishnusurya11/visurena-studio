@@ -14,9 +14,13 @@ audio.  Only rules computable from the plan live here.
 """
 from __future__ import annotations
 
+import re
 from typing import Literal
 
 from pydantic import BaseModel, Field, model_validator
+
+from studio import canvas
+from studio.affirm import negations
 
 MIN_SECONDS, MAX_SECONDS = 120.0, 180.0
 """An episode is the WHOLE chapter, two to three minutes (owner, 2026-09-10)."""
@@ -33,8 +37,8 @@ DIALOGUE_SHARE = (0.05, 0.20)
 """Dialogue words as a share of all words: the 90/10 dial, adjustable."""
 MAX_LINES_PER_SHOT = 2
 MAX_SPEAKING = 3
-MAX_SETUPS = 3
-BREATH = 0.35
+MAX_SETUPS = 6
+BREATH = 0.70  # audio reviewer, iteration 3: 0.50 was the entire pause between two sentences (wavs carry <= 0.04 s of silence)
 HANDLE = 0.25
 TURN_BAND = (0.50, 0.75)
 
@@ -66,30 +70,244 @@ class Line(BaseModel):
         return self
 
 
-class Shot(BaseModel):
+MIN_SUB = 2.5
+BANNED_PROPS = ("glove",)
+"""Words no frame or motion may carry: the drawer draws what the text says,
+and the render copies the drawing (a tan glove on Watson, 2026-09-11)."""
+
+
+def banned_prop(text: str) -> str | None:
+    low = text.lower()
+    return next((w for w in BANNED_PROPS if w in low), None)
+
+
+PACE = re.compile(r"(?<![\w-])(slow|slowly|slower|slow-motion|slowmotion"
+                  r"|gradual|gradually|languid|languidly|leisurely|lingering|linger"
+                  r"|unhurried|dawdl\w*|crawl(?:s|ing)?)(?![\w-])", re.IGNORECASE)
+"""NO SLOW SHOTS (owner, strict, 2026-09-12).
+
+`episode_ref_official` refused 'slow' in the take PROMPT, which is one stage
+too late: the word is written in the plan, printed on the paid storyboard
+sheet, drawn into the cell, and only then refused.  gpt-image obeys a pace
+word by drawing the drag as POSTURE, and H3 inherits that posture as position
+-- so the slow shot survives the take lint that was supposed to stop it.
+
+The turbo LoRA already pulls toward slow motion on its own, which is why the
+rule is a refusal and never a repair: there is no amount of slowness this
+engine needs to be asked for.  A gait is a gait ("limps along on his stick at
+a normal walking pace"); an amount is an amount ("a thumb's width", "one whole
+tread").  Neither is a speed."""
+
+
+def slow_word(text: str) -> str | None:
+    """The pace word in `text`, or None.  A whole word: 'slowworm' is a lizard."""
+    found = PACE.search(text or "")
+    return found.group(1) if found else None
+"""A sub-shot must last at least this long (owner: an insert earns three
+seconds; a hold with nothing to watch fails on screen)."""
+
+
+SHEET_TEXT = ("frame", "motion", "camera", "at_rest", "end", "changed", "crowd")
+"""Every field of a segment that is written FOR a model.  All of them are
+affirmative: a negated noun is still that noun in the prompt, which is how
+"no gloves" in a character description reached six storyboard sheets."""
+
+
+class Framed(BaseModel):
+    """The picture half of a shot or a sub-shot: what the STORYBOARD draws.
+
+    Every field here is one sentence the drawer receives, and each exists
+    because the drawer got the previous form wrong (owner, 2026-09-11)."""
+    frame: str
+    motion: str
+    camera: str = ""
+    """Where the camera STANDS ("low on the cobbles at the near kerb, level
+    with the wheel hub").  An unplaced camera is how a cab insert ended up on
+    a different axis from its own wide."""
+    at_rest: str = ""
+    """Where the thing that is about to move IS, right now, as a noun in a
+    place ("Stamford's glass stands on the mahogany, his hand beside it").
+    "The instant before: <verb phrase>" was drawn as the finished action."""
+    end: str = ""
+    """The picture AFTER this segment's motion, written from scratch as nouns
+    in positions.  The END panel is drawn from this; told "identical to panel
+    1" instead, the drawer drew panel 1 again (four of five END cells)."""
+    changed: str = ""
+    """The one named change between the start picture and `end`, in five
+    words, so the gate and the human check the same sentence."""
+    crowd: str = ""
+    """This panel's own background life, with a count and an activity.  A
+    crowd named once for a location is averaged away over nine panels."""
+
+    @model_validator(mode="after")
+    def _the_drawer_reads_only_what_is(self) -> "Framed":
+        for name in SHEET_TEXT:
+            if bad := negations(getattr(self, name)):
+                raise ValueError(f"{name!r} asks for an absence the drawer cannot draw ({bad}); "
+                                 f"name what occupies that place instead")
+        if self.changed and not self.end:
+            raise ValueError("'changed' names the change INTO 'end'; write the end picture too")
+        return self
+
+    @model_validator(mode="after")
+    def _no_slow_shots(self) -> "Framed":
+        """The owner's strict rule: nothing in this pipeline is ever asked to be slow."""
+        for name in SHEET_TEXT:
+            if word := slow_word(getattr(self, name)):
+                raise ValueError(f"{name!r} asks for a slow shot ({word!r}); the owner's rule is that "
+                                 f"nothing is slow. Name the AMOUNT instead -- a thumb's width, one "
+                                 f"whole tread, a hand's breadth -- or the gait at a normal pace")
+        return self
+
+
+class SubShot(Framed):
+    """A CUT inside a shot's audio window (owner, 2026-09-11: an 11 s insert
+    of a hand on a stick is a carrier, not a cutaway).  Carries no line and
+    no seconds: the parent shot keeps its lines and its derived length; the
+    take renders `[Shot k] At MM:SS.mmm, the shot cuts to ...` at `at_s`."""
+    at_s: float = Field(gt=0)
+    size: Size
+    faces: list[str] = Field(default_factory=list)
+    path: float | None = Field(default=None, ge=0, le=1)
+    """Position along the setup's route (0 = its start, 1 = its far end)."""
+
+
+class Shot(Framed):
     index: int = Field(ge=0)
     section: Section
     setup: str
     size: Size
     faces: list[str] = Field(default_factory=list)
     """Whose face is frontal and readable in the panel."""
-    frame: str
-    motion: str
     take: int = Field(default=0, ge=0)
     beat_s: float = Field(default=0.0, ge=0, le=MAX_BEAT)
     """Named silence after this shot's lines, before the cut."""
     coda_s: float = Field(default=0.0, ge=0, le=MAX_CODA)
     """Picture with no voice at the very end (the world's answer)."""
+    cuts: list[SubShot] = Field(default_factory=list)
+    """Sub-shots, in time order, each at least MIN_SUB after the previous
+    (the parent's own frame is the implicit first sub-shot at 0)."""
+    path: float | None = Field(default=None, ge=0, le=1)
+    """Position along the setup's route at this shot's first frame; never
+    goes backwards through a setup's shots (the storyboard is one sequence)."""
+    turn: str = ""
+    """The value this shot puts at stake and how it flips, as "before -> after"
+    ("alone -> seen", "hope -> refused").
+
+    McKee: there is no scene without a turn; a scene whose value reads the same
+    at the close exists to explain something, and explanation belongs inside
+    another scene's picture.  We had already measured this as a RENDER fault --
+    a shot with nothing to photograph comes back frozen -- without knowing it
+    was a story fault first.  Reported by `studio.story_layer`, never refused,
+    because episode 1 was cut before the field existed."""
+    why: str = ""
+    """Why this shot is in the episode: the new thing it tells, and the thing it
+    shows about the protagonist (Hicks: a scene does both or it is cut).
+
+    The ONLY shot string the drawer never reads -- it is reasoning for the
+    people and the agents writing the episode, so it is absent from SHEET_TEXT
+    and free to explain an absence, which every drawn string is forbidden."""
+
+    @model_validator(mode="after")
+    def _no_banned_props(self) -> "Shot":
+        texts = [self.frame, self.motion] + [c.frame + " " + c.motion for c in self.cuts]
+        for text in texts:
+            if word := banned_prop(text):
+                raise ValueError(f"shot {self.index}: '{word}' in the frame text; the book gives bare hands")
+        return self
+
+    @model_validator(mode="after")
+    def _cuts_ascend(self) -> "Shot":
+        last = 0.0
+        for cut in self.cuts:
+            if cut.at_s - last < MIN_SUB:
+                raise ValueError(f"shot {self.index}: a sub-shot at {cut.at_s} s is less than "
+                                 f"{MIN_SUB} s after the previous ({last} s)")
+            last = cut.at_s
+        return self
 
 
 class Setup(BaseModel):
     described: str
     cast: list[str] = Field(default_factory=list)
+    landmark: str = ""
+    """One fixed object the storyboard drawer keeps at the same place in every
+    cell of a take sheet ("the barred window at the far end")."""
+    landmark_at: Literal["start", "far_end"] = "far_end"
+    """WHICH END of `route` the landmark stands at, and so which way its apparent
+    size runs: a corridor door grows as they walk to it, the bench's Bunsen flame
+    and the gateway's arch shrink as they walk away.  Told a walk always ENDS at
+    its landmark, the sheet put a one-inch flame twenty feet off at "fills the
+    frame" and the drawer drew the burner (cell Q19_1, 2026-09-11)."""
+    landmark_size: str = ""
+    """The biggest this landmark ever stands in this setup, in the size ladder's
+    own words ("is the height of a finger").  A door reaches the top rung at
+    closest approach; a flame never leaves the bottom one.  Empty means the
+    ladder runs to the top."""
+    route: str = ""
+    """The path the people travel in this setup, start to far end ("from the
+    corridor's near end to the dissecting-room doorway at its far end")."""
+    geometry: str = ""
+    """How the fixed things in this place stand relative to each other, each
+    relation restated as WHICH FRAME EDGE at WHAT APPARENT SIZE with what
+    between.  "The horse ahead of the wheel" drew a horse level with a wheel
+    three times; relational prepositions are the documented weak spot."""
+    crowd: str = ""
+    """The background life of this place, as a count and an activity ("eight
+    or nine men in top hats two deep at the counter, a barman drawing a
+    cork").  Reaches every panel that is not an insert."""
+    outdoors: bool = False
+    """True when this setup stands under the sky.  The hat rule for the whole
+    sheet is a function of it, stated flat instead of as a conditional."""
+    props: list[str] = Field(default_factory=list)
+    """Prop plates attached as references (`plate_<name>.png`): the one that
+    binds a vehicle across the setups that share it.  The cab was bound by
+    words on one sheet and by nothing on another, and three different vehicles
+    came back."""
+
+    @property
+    def state(self) -> str:
+        """Which WARDROBE STATE this setup is in, and so which cast card binds
+        it: the hat on the head, or the hat in the hand.
+
+        The contract has exactly two states and six setups map onto them
+        (criterion, corridor, lab and bench indoors; cab and gateway outdoors --
+        the cab is open to the street and counts as outdoor).  DERIVED from the
+        `outdoors` flag the plan already declares, never declared a second time:
+        two fields that can disagree about one fact is exactly the fault
+        `cast_agree` exists to catch (R1, one writer).
+
+        A setup cannot get the wrong hat state by accident now, because the
+        state is a declared field, it lints once, and it selects the file."""
+        return "outdoor" if self.outdoors else "indoor"
+
+    @model_validator(mode="after")
+    def _the_drawer_reads_only_what_is(self) -> "Setup":
+        for name in ("described", "geometry", "crowd"):
+            if bad := negations(getattr(self, name)):
+                raise ValueError(f"setup {name!r} asks for an absence ({bad}); name what is there instead")
+            if word := slow_word(getattr(self, name)):
+                raise ValueError(f"setup {name!r} asks for a slow shot ({word!r}); the owner's rule is "
+                                 f"that nothing is slow -- name the amount or the gait instead")
+        return self
 
 
 class Episode(BaseModel):
     number: int = Field(ge=1)
     title: str
+    question: str = ""
+    """The one question this episode answers, in Armstrong's form: "Today, can
+    X do Y?"  Answered before the episode ends, or the episode has no reason to
+    stop where it stops.  Reported by `studio.story_layer`, never refused."""
+    aspect: Literal["9:16", "1:1"] = canvas.DEFAULT
+    """The delivery shape, and the ONE place it is declared (`studio/canvas.py`).
+
+    Every stage -- the plate, the sheet grid and its own wording, the take, the
+    cut, the title card -- derives its canvas from this field, because the
+    aspect written down seven times is six chances to disagree silently: a
+    square take cropped by a vertical assemble loses a third of every frame and
+    nothing raises.  The default is what episode 1 shipped; episode 2 is 1:1 on
+    the owner's spec (2026-09-12), and the owner's spec outranks the default."""
     protagonist: str
     setups: dict[str, Setup]
     shots: list[Shot]
@@ -172,6 +390,33 @@ class Episode(BaseModel):
             raise ValueError("no line after the button; the coda is picture only")
         if button.shot > 0 and self.shot(button.shot - 1).beat_s < 1.0:
             raise ValueError("the shot before the button names a beat of >= 1.0 s of silence")
+        return self
+
+    @model_validator(mode="after")
+    def _route_never_goes_backwards(self) -> "Episode":
+        for name in self.setups:
+            last = -1.0
+            for shot in self.shots:
+                if shot.setup != name:
+                    continue
+                for p in [shot.path] + [c.path for c in shot.cuts]:
+                    if p is None:
+                        continue
+                    if p < last - 1e-9:
+                        raise ValueError(f"setup {name!r}: shot {shot.index} goes backwards along the route")
+                    last = p
+        return self
+
+    @model_validator(mode="after")
+    def _cuts_sit_on_narration_and_fit(self) -> "Episode":
+        for shot in self.shots:
+            if not shot.cuts:
+                continue
+            if any(l.kind == "dialogue" for l in self.lines_of(shot.index)):
+                raise ValueError(f"shot {shot.index}: a dialogue shot takes no sub-shots (the driven "
+                                 f"lips stay in one readable frame)")
+            if self.shot_seconds(shot) - shot.cuts[-1].at_s < MIN_SUB:
+                raise ValueError(f"shot {shot.index}: the last sub-shot projects shorter than {MIN_SUB} s")
         return self
 
     @model_validator(mode="after")

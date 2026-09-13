@@ -22,19 +22,27 @@ STYLE = (
     "photoreal: a physical 35 mm still of real skin, real fabric and real light "
     "falling through real dust."
 )
-SHEET_FRAME = (
-    "Head-and-shoulders portrait to mid-chest, the head filling the upper half "
-    "of the frame, on a plain neutral mid-grey backdrop, even soft frontal "
-    "light with both eyes lit, shadowless, neutral expression with the "
-    "mouth closed, sharp focus on the face."
+BUST_FRAME = (
+    "Head-and-shoulders portrait to mid-chest, the head upright and square to "
+    "the camera, filling the upper half of the frame, bare-headed with the "
+    "whole hairline visible from the parting to the ears, on a plain neutral "
+    "mid-grey backdrop, even soft frontal light with both eyes lit, "
+    "shadowless, neutral expression with the mouth closed, sharp focus on the "
+    "face."
 )
-"""A bust, not a full figure.
+"""A bust, not a full figure, and BARE-HEADED.
 
 MEASURED on the shipped sheets with RetinaFace: the face was 59x83px, 0.5% of
 a 1368x768 frame -- below ArcFace's own 112x112 input, so the recogniser was
 being asked to read a face from about five thousand pixels, and H3's reference
 encoder got the same handful.  A controlled A/B moved the face to 254-312px by
 changing the framing alone, roughly 25x the pixels for free.
+
+The bare head is the second measurement.  A hat on the identity picture put
+the deerstalker in every laboratory cell and the bowler in every indoor
+Watson: the sheets wore them, and a hat also occludes the hairline, which is
+the most discriminative region for both the face embedder and H3's reference
+encoder.  The hat is a STATE, and a state belongs on the state card.
 """
 PLATE_FRAME = (
     "Establishing wide plate of an empty, unoccupied location: its furniture, "
@@ -53,7 +61,7 @@ PLAIN_SURFACES = (
 because a reference sheet has fewer surfaces in it than a street."""
 
 
-def character_prompt(physical: str, palette: str) -> str:
+def character_prompt(physical: str, palette: str, frame: str = BUST_FRAME) -> str:
     """A reference sheet prompt, THE PERSON FIRST.
 
     Order matters more than content here.  With the style block leading, seven
@@ -62,7 +70,100 @@ def character_prompt(physical: str, palette: str) -> str:
     registered.  Naming who this is before saying how to photograph them is
     what separates them.
     """
-    return " ".join([physical.strip(), SHEET_FRAME, STYLE, palette, PLAIN_SURFACES])
+    return " ".join([physical.strip(), frame, STYLE, palette, PLAIN_SURFACES])
+
+
+# ---- the two cast pictures: an identity BUST and a wardrobe CARD -----------
+
+SAME_MAN = (
+    "The same man as in the reference image: the same face, the same bone "
+    "structure, the same eyes, the same hairline, the same skin tone and the "
+    "same age."
+)
+"""Both cast pictures are gpt-image EDITS of an existing sheet, never fresh
+generations: the edit is what preserves the canon face, and the face is the one
+thing that must not be re-rolled -- the whole book, the trailer, the designed
+voices and the identity gate's prototypes are bound to these three men."""
+
+PLAIN_STUDIO = (
+    "He stands against a plain, flat, unbroken mid-grey studio backdrop that "
+    "runs off all four edges of the frame, and the backdrop is the only thing "
+    "behind him. The frame holds this one man alone."
+)
+"""Crowd life belongs to the setup's `described` string and to the storyboard
+cell, and to nothing else.  A `<Subject>` is "reusable visible content" and the
+list of what that covers includes "Scenes, backgrounds, or environments", so
+whatever stands behind him is on offer in every shot he appears in -- and
+`retention_analysis` marks him `fully_preserved`, with no way to say "keep the
+man, drop the room" that is not a negation.  MEASURED: `char-stamford.png`'s
+side strips read std 28.6 against 13.0-15.0 on every other sheet, because the
+brick pillars and the studio flat's edges are inside the frame."""
+
+NEUTRAL = (
+    "Even soft frontal light with both eyes open and lit and the face "
+    "shadowless; the mouth is closed; the expression is neutral and at rest, "
+    "the face of a man waiting to be photographed."
+)
+
+FILM = (
+    "Photoreal 35 mm film still, natural film grain, real skin and real cloth. "
+    "Every surface in the frame is plain and unlettered, and the picture runs "
+    "clean to all four edges of the canvas."
+)
+"""The spec wrote this tail as "No text, no lettering, no border".  A negated
+noun is still that noun in the prompt (`studio/affirm.py`, three times
+measured), and MiniMax's own ref-mode rule forbids negation outright, so the
+same instruction is stated as what the surfaces ARE."""
+
+BUST = (
+    "{same_man} "
+    "Head-and-shoulders portrait to mid-chest, the head upright and square to "
+    "the camera, filling the upper half of the frame, with a hand's width of "
+    "backdrop above the top of the head and the chest reaching the bottom "
+    "edge. Sharp focus on the face. He is bare-headed and his whole hairline "
+    "is visible from the parting to the ears. {head} {plain} {neutral} {film}"
+)
+"""The identity picture: face, hair, head.  One per character,
+setup-independent, ALWAYS bare-headed -- a hat on the identity picture is what
+put the deerstalker in every laboratory cell."""
+
+CARD = (
+    "{same_man} The same hair, the same build. "
+    "A standing three-quarter-length figure, head to mid-thigh, square to the "
+    "camera, with a hand's width of backdrop above the head and a hand's width "
+    "of backdrop below the lowest hand, both arms and both hands entirely "
+    "inside the frame, and everything he carries entirely inside the frame and "
+    "turned toward the camera. Sharp focus on the face and on both hands. "
+    "{wardrobe} {hands} {props} {plain} {neutral} {film}"
+)
+"""The wardrobe-and-props picture: one per character per WARDROBE STATE
+(indoor / outdoor), which is two states across all six setups.  Every prop the
+contract names is held here, facing the camera, at a size a copyist can copy --
+Runware's guide, verbatim: "Show H3 the details you do not want it to
+invent." """
+
+
+def same_man(extra: str = "") -> str:
+    """Which man the edit must keep, plus anything else this face is known by."""
+    return f"{SAME_MAN.rstrip('.')}, {extra.strip()}." if extra.strip() else SAME_MAN
+
+
+def _tidy(text: str) -> str:
+    """One space between sentences, whichever slots came back empty."""
+    return re.sub(r"\s+", " ", text).strip()
+
+
+def bust_prompt(head: str = "", same: str = "") -> str:
+    """The identity picture's prompt: who this is, and his head."""
+    return _tidy(BUST.format(same_man=same_man(same), head=head.strip(),
+                             plain=PLAIN_STUDIO, neutral=NEUTRAL, film=FILM))
+
+
+def card_prompt(wardrobe: str, hands: str = "", props: str = "", same: str = "") -> str:
+    """One wardrobe state's prompt: what he wears, his hands, and his things."""
+    return _tidy(CARD.format(same_man=same_man(same), wardrobe=wardrobe.strip(),
+                             hands=hands.strip(), props=props.strip(),
+                             plain=PLAIN_STUDIO, neutral=NEUTRAL, film=FILM))
 
 
 def location_prompt(described: str, palette: str) -> str:
@@ -114,6 +215,15 @@ APPEARANCE = (
     "dressed", "dress", "clothes", "clothing", "coat", "hat", "worn", "wears",
     "wearing", "pale", "dark", "fair", "aged", "years old", "nose", "chin",
     "brow", "complexion", "posture", "bearing", "stoop",
+) + (
+    # What a person CARRIES or wears is as drawable as their face, and a prop with
+    # no stated size is invented panel by panel: Watson's walking stick had no
+    # length anywhere, so 23 panels each guessed one (owner, 2026-09-11).
+    "stick", "cane", "staff", "umbrella", "glove", "gloves", "boot", "boots", "shoe", "shoes",
+    "ring", "watch", "chain", "bag", "case", "pipe", "spectacles", "eyeglass", "monocle",
+    "knob", "ferrule", "shaft", "brim", "cuff", "collar", "cravat", "stud", "waistcoat",
+    "trousers", "sleeve", "scarf", "muffler", "apron", "plaster", "bandage", "cap", "bowler",
+    "jacket", "velvet", "tweed", "frock", "buttons", "pocket",
 )
 
 ABSENCE = ("no description", "no confirmed", "no precise", "gives no", "does not provide",
@@ -185,6 +295,24 @@ def visual_description(physical: str, limit: int = VISUAL_LIMIT) -> str:
         if len(". ".join(kept)) >= limit:
             break
     return (". ".join(kept) + ".") if kept else ""
+
+
+def contract_description(physical: str) -> str:
+    """The WHOLE photographable description, with no length limit.
+
+    `visual_description` trims to `VISUAL_LIMIT` so a trailer prompt stays short,
+    and it trims SILENTLY.  A wardrobe and props contract cannot be trimmed: what
+    falls off the end is a fact the drawer then invents.  Watson's description ran
+    607 characters, the limit kept the first sentence, and the walking stick's
+    length never reached a single sheet -- so 23 panels each guessed one and the
+    owner saw a cane the size of a lamp post (2026-09-11).
+    """
+    return visual_description(physical, limit=len(physical or "") + 1)
+
+
+def dropped_by_limit(physical: str) -> bool:
+    """True when the trimmed description loses something the whole one keeps."""
+    return contract_description(physical) != visual_description(physical)
 
 
 VOID_EPITHETS = ("the latter", "our friend", "our old friend", "the former",
@@ -349,7 +477,8 @@ run ever needs a hand-typed palette.  Every line stays inside the house look
 (06-style): desaturated, practical light, period-appropriate."""
 
 
-MODEL_TEXT = (STYLE, SHEET_FRAME, PLATE_FRAME, PLAIN_SURFACES, PALETTES)
+MODEL_TEXT = (STYLE, BUST_FRAME, PLATE_FRAME, PLAIN_SURFACES, PALETTES,
+              SAME_MAN, PLAIN_STUDIO, NEUTRAL, FILM, BUST, CARD)
 
 
 def palette_for(register: str, setting: str = "") -> str:

@@ -54,8 +54,17 @@ def shots_dir(book: Path, number: int) -> Path:
     return home(book, number) / "shots"
 
 
-def master_path(book: Path, number: int) -> Path:
-    return home(book, number) / "master.mp4"
+def master_path(book: Path, number: int, engine: str = "i2v") -> Path:
+    return home(book, number) / ("master.mp4" if engine == "i2v" else f"master_{engine}.mp4")
+
+
+def takes_dir(book: Path, number: int, engine: str = "i2v") -> Path:
+    """Where an engine's takes and shots.json live: `shots/` for i2v, `shots_<engine>/` else."""
+    return shots_dir(book, number) if engine == "i2v" else home(book, number) / f"shots_{engine}"
+
+
+def engine_arg(argv: list[str]) -> str:
+    return next((a.split("=", 1)[1] for a in argv if a.startswith("--engine=")), "i2v")
 
 
 def relative(book: Path, path: Path) -> str:

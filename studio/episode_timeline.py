@@ -42,7 +42,8 @@ def place(episode: Episode, measured: dict[int, float]) -> dict:
         seconds = on_frame(cursor + HANDLE + shot.beat_s + shot.coda_s - start)
         end = start + seconds
         shots.append({"index": shot.index, "t_start": round(start, 6), "t_end": round(end, 6),
-                      "seconds": round(seconds, 6), "lane": lane_of(episode, shot.index)})
+                      "seconds": round(seconds, 6), "lane": lane_of(episode, shot.index),
+                      "cuts": [round(start + c.at_s, 3) for c in shot.cuts]})
         t = end
     return {"duration_s": round(t, 6), "shots": shots, "lines": lines}
 
@@ -61,6 +62,11 @@ def holes(placed: dict, longer_than: float = 1.5) -> list[tuple[float, float]]:
             out.append((round(end, 2), round(line["at"], 2)))
         end = max(end or 0.0, line["at"] + line["seconds"])
     return out
+
+
+def short_subshots(placed: dict, minimum: float = 2.5) -> list[int]:
+    """Shots whose last sub-shot, measured, would run shorter than `minimum`."""
+    return [s["index"] for s in placed["shots"] if s.get("cuts") and s["t_end"] - s["cuts"][-1] < minimum]
 
 
 def misaligned(placed: dict) -> list[str]:

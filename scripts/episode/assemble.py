@@ -18,37 +18,218 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 
-from studio import episode_gutter, episode_home
+from studio import canvas, episode_gutter, episode_home
 from studio.comfy import run
 from studio.episode_spec import Episode
-from studio.trailer_assemble import concat, extract, integrated, mix_with_lines, true_peak
+from studio import trailer_assemble
+from studio.trailer_assemble import clip_seconds, concat, extract, integrated, mix_with_lines, true_peak
 
-W, H, FPS = 768, 1344, 24
+W, H, FPS = canvas.size("9:16") + (24,)
+"""W and H are rebound from the plan in `main`; the plan declares the aspect."""
+
+
+class TakePath(type(Path())):
+    """A take file that knows which shots it covers (take-based engines)."""
+
+    def __new__(cls, path, shots=None):
+        self = super().__new__(cls, path)
+        self.shots = shots
+        return self
+
+    def __init__(self, path, shots=None):
+        super().__init__(path)
+        self.shots = shots
 BED_WORKFLOW = "audio_acestep15_music"
 BED_TAGS = ("sparse dark ambient underscore, low sustained cello and double bass drone, "
             "distant piano notes, Victorian London, tension, cinematic, no drums, no vocals, "
             "slow, quiet, minimal")
+BED_STYLE = ("Solo violin in D minor at 60 BPM, unaccompanied, played slow and low on the G and D "
+             "strings, long bowed notes with a little rosin and bow noise near the bridge, the "
+             "phrases falling far apart with air between them, never hurried and never rising to a "
+             "finish. A cello holds one long drone far underneath. Recorded at night in a large "
+             "panelled room, gaslit Victorian London, grave, patient, unresolved, an underscore "
+             "that sits far beneath everything else and stays there.")
+"""OWNER 2026-09-13: a violin, because HOLMES PLAYS ONE -- the instrument is the
+character, and the episodes have already drawn him with it.
+
+YuE2 takes descriptive STYLE PROSE, not ACE-Step's comma-separated tag list, and
+the owner chose it for that control.  IT NAMES NO VOICE, NOT EVEN TO FORBID ONE:
+the vendor's own guidance is that a style carrying vocal descriptors makes the
+model add a voice, and MiniMax cannot read a negation at all.  A fence built out
+of the word you are avoiding is a summons."""
+
 BED_SECONDS = 100.0
-END_CHIP_SECONDS = 2.0
+END_CHIP_SECONDS = 0.25  # title-ends review 2026-09-11: 2 s of silent black before a loop is dead time
+BED_TRIM_DB = -11.0  # audio reviewer, iteration 3: the bed sat only 6-9 LU under the voice in the gaps
+"""MEASURED 2026-09-11 (reviewer 4): the raw bed was -14.6 LUFS, louder than
+the -16 LUFS lines, and the 1.7 s beat before the button was the loudest
+stretch of the episode.  Nine dB down puts it under the voice everywhere."""
+ROOM_TONE_LUFS = -40.0
+BED_FADE_S = 2.76  # a long half-sine fade over bed AND room tone; the bed's last hit at 135.0 s fell inside the old 1.5 s
+TITLE_LUFS = -20.0
+ENCODE_LAG_S = 0.030
+"""The volume+limiter re-encode of the master lands the voice ~30 ms late
+against the wavs (measured +0.04 s vs +0.01 s before trim); compensated."""
+
+
+def quiet_bed(bed: Path, seconds: float, out: Path) -> Path:
+    """The bed for an episode: BED_TRIM_DB down, a room-tone floor under it,
+    faded out over BED_FADE_S at the placed end, cut to `seconds`."""
+    from studio import sfx
+
+    tone = sfx.room_tone(out.with_name("room_tone.wav"), seconds + 1.0, ROOM_TONE_LUFS)
+    fade_at = max(seconds - BED_FADE_S, 0.0)
+    # MEASURED per bed, not a constant: the -11 dB trim was right for ACE-Step's
+    # -14.6 LUFS output alone, and the bed model is now the owner's to choose.
+    try:
+        gain = bed_gain_db(integrated(bed))
+    except Exception:                                   # no loudnorm pass available
+        gain = BED_TRIM_DB
+    print(f"  bed {Path(bed).name}: {gain:+.1f} dB to reach {BED_TARGET_LUFS} LUFS", flush=True)
+    import soundfile as sf
+    have = sf.info(str(bed)).frames / sf.info(str(bed)).samplerate
+    passes = loops_for(have, seconds)
+    if passes > 1:
+        print(f"  bed is {have:.1f}s for a {seconds:.1f}s cut: looping x{passes}", flush=True)
+    subprocess.run(["ffmpeg", "-y", "-v", "error",
+                    "-stream_loop", str(passes - 1), "-i", str(bed), "-i", str(tone),
+                    "-filter_complex",
+                    f"[0:a]volume={gain}dB,atrim=0:{seconds:.3f}[b];"
+                    f"[1:a]atrim=0:{seconds:.3f}[r];[b][r]amix=inputs=2:normalize=0,"
+                    f"afade=t=out:st={fade_at:.3f}:d={BED_FADE_S}:curve=ihsin[a]",
+                    "-map", "[a]", "-ar", "48000", str(out)], check=True)
+    return out
 """Black tail after the last frame.  No text anywhere on the picture: the
 owner removed captions, chip and end card (2026-09-10)."""
 
 
-def bed(out: Path, seed: int, runtime: float = BED_SECONDS) -> Path:
+BED_ENGINE_DEFAULT = "yue2"
+"""OWNER 2026-09-13: "ace step is shit .. use yue2 .. more expressive and great
+prompt control on style."  ACE-Step stays reachable as `--bed=acestep`."""
+
+BED_TARGET_LUFS = -25.6
+"""Where the bed SITS, replacing a fixed -11 dB trim.
+
+The trim was right for one model only: ACE-Step's raw bed measured -14.6 LUFS
+-- louder than the -16 LUFS lines -- and -11 dB put it at -25.6, which is the
+level two shipped episodes were judged at.  Carrying that -11 across to a model
+with a different output loudness would move the bed, not keep it.  So the LEVEL
+is the constant and the gain is measured per bed."""
+
+BED_MAX_LIFT_DB = 6.0
+"""A bed far under target is a failed generation, not something to crank:
+lifting 30 dB would raise its noise floor with it."""
+
+
+def loops_for(have: float | None, need: float) -> int:
+    """How many passes of a `have`-second bed cover `need` seconds.
+
+    `max_duration` IS A CAP, NOT A TARGET.  Asked YuE2 for 172 s against a 162 s
+    cut and it stopped at 157.8 s -- 4.2 s of episode with no bed (measured
+    2026-09-13); `trailer_music` saw the same on seven cues that ended by
+    themselves between 101.9 s and 146.8 s under a 150 s cap.  So the bed is
+    covered by looping, which is free, rather than by asking again, which costs
+    four minutes and can come back short a second time."""
+    import math
+
+    if not have or have <= 0:
+        return 1
+    return max(1, math.ceil(need / have))
+
+
+def bed_is_usable(have: float | None, need: float) -> bool:
+    """A SHORT bed is usable -- it loops.  Only a missing or empty one is not.
+
+    `bed()` used to delete anything shorter than the runtime and regenerate.
+    The file is the expensive part of this stage; covering the cut is free."""
+    return bool(have and have > 0)
+
+
+def bed_gain_db(loudness: float | None) -> float:
+    """The gain that puts THIS bed at `BED_TARGET_LUFS`.
+
+    Falls back to the old fixed trim when the bed cannot be measured, so a
+    missing ffmpeg loudnorm pass degrades to the previous behaviour instead of
+    asking for infinite gain on a silent file."""
+    if loudness is None or loudness == float("-inf") or loudness != loudness:
+        return BED_TRIM_DB
+    return min(round(BED_TARGET_LUFS - loudness, 2), BED_MAX_LIFT_DB)
+
+BED_INSTRUMENTAL = {"acestep": "[inst]", "yue2": ""}
+"""HOW EACH MODEL IS TOLD "NO SINGING", AND THEY DO NOT AGREE.
+
+ACE-Step has a token, `[inst]`, and it works: episodes 1 and 2 came back silent.
+
+YUE2 HAS NO TOKEN AT ALL.  Its lyrics field must be EMPTY -- not `[Instrumental]`,
+not `(instrumental)`, not a section tag without words.  Given any lyric-shaped
+string it writes a song to fit.
+
+This was got wrong once, expensively, and the error was a MIS-ATTRIBUTION rather
+than a guess: `(instrumental)` is MiniMax Music 3's exception, measured on the
+TRAILER (`music_tone`, `audio_minimax_music_3`), and it was written into this
+module as though it had been measured on YuE2.  It had not.  Episode 3's bed then
+sang invented English verse for 101 of its 157.8 seconds -- 64 % -- and shipped,
+because nothing between the generator and the mix ever listened to it.  Hence
+`bed_sings()` below: the marker is now VERIFIED per bed, not asserted here."""
+
+
+def bed_request(engine: str, seconds: float, seed: int) -> tuple[str, dict]:
+    """The workflow and the values for one bed, by engine.
+
+    Pure: no network, no GPU, so the ask is testable without spending a minute
+    of either.  YuE2 runs three seeded stages on one graph (ABC score, semantic,
+    sampler) and all three move together -- a retry that re-rolled only the
+    sampler would keep the tune and change the mix, which is not what a retry
+    means when the tune is what was wrong."""
+    if engine not in BED_INSTRUMENTAL:
+        raise ValueError(f"unknown bed engine {engine!r}; one of {sorted(BED_INSTRUMENTAL)}")
+    if engine == "yue2":
+        # THE OLMPACK PIPELINE, because it is the one that DOCUMENTS an
+        # instrumental: `OlmYuE2Request.lyrics` reads "Leave empty for
+        # instrumental music."  `audio_yue2_song` drives `YuE2GenerateMusic`,
+        # whose lyrics field promises nothing -- given `(instrumental)` it sang
+        # invented verse, and given "" it sang again.
+        return "audio_yue2_song_olmpack", {
+            "style": BED_STYLE, "lyrics": BED_INSTRUMENTAL[engine], "cot": "full",
+            "seed": seed, "abc": "", "filename_prefix": "ep_bed"}
+    return BED_WORKFLOW, {
+        "tags": BED_TAGS, "lyrics": BED_INSTRUMENTAL[engine], "seconds": seconds,
+        "duration": seconds, "bpm": 60, "keyscale": "D minor",
+        "seed": seed, "lm_seed": seed, "filename_prefix": "ep_bed"}
+
+
+def bed(out: Path, seed: int, runtime: float = BED_SECONDS,
+        engine: str = BED_ENGINE_DEFAULT) -> Path:
     """A quiet instrumental bed, made once, long enough for the placed runtime."""
     seconds = float(max(BED_SECONDS, int(runtime) + 10))
     if out.exists():
         import soundfile as sf
         info = sf.info(str(out))
-        if info.frames / info.samplerate >= runtime:
+        if bed_is_usable(info.frames / info.samplerate, runtime):
             return out
-        out.unlink()  # too short for this runtime: make a longer one
-    made = run(BED_WORKFLOW, {"tags": BED_TAGS, "lyrics": "[inst]", "seconds": seconds,
-                              "duration": seconds, "bpm": 60, "keyscale": "D minor",
-                              "seed": seed, "lm_seed": seed, "filename_prefix": "ep_bed"},
-              timeout=900)
+        out.unlink()  # empty or unreadable: the only reason to spend again
+    workflow, values = bed_request(engine, seconds, seed)
+    made = run(workflow, values, timeout=900)
     out.parent.mkdir(parents=True, exist_ok=True)
     out.write_bytes(made[0].read_bytes())
+    # SOMETHING LISTENS BEFORE IT SHIPS. Episode 3's bed sang invented verse under
+    # the narration for 64 % of its length and reached YouTube's queue, because the
+    # prompt said "no vocals" and nothing checked. A prompt is an intention.
+    from studio import bed_gate
+
+    why = bed_gate.refuse(out)
+    if why == bed_gate.UNVERIFIED:
+        # NOT silence. A gate that cannot measure must say so out loud, or it is
+        # indistinguishable from one that measured and approved -- which is how
+        # the first version of this gate passed a bed that was singing.
+        print(f"  WARNING: the {engine} bed is UNVERIFIED -- no transcriber was "
+              f"reachable. Listen to {out} before publishing.", flush=True)
+    elif why:
+        kept = bed_gate.refused_name(out)
+        out.rename(kept)
+        raise SystemExit(f"the {engine} bed was refused and kept as {kept.name}: {why}")
+    else:
+        print(f"  bed checked: no singing heard in {out.name}", flush=True)
     return out
 
 
@@ -66,47 +247,154 @@ def guard(take: Path, seconds: float, work: Path) -> str:
     return episode_gutter.crop_filter(episode_gutter.box(greys), W, H)
 
 
+def segments_of(placed: dict, takes: dict[int, Path]) -> list[tuple[int, float]]:
+    """(take index, seconds) in cut order.  A per-shot engine has a take per
+    shot; a take-based engine (r2v) has a take per RUN of shots, keyed by the
+    run's first shot, cut to the run's summed placed seconds."""
+    by = {s["index"]: s["seconds"] for s in placed["shots"]}
+    out, k = [], 0
+    order = sorted(by)
+    while k < len(order):
+        index = order[k]
+        run = getattr(takes[index], "shots", None) or [index]
+        out.append((index, round(sum(by[i] for i in run), 6)))
+        k += len(run)
+    return out
+
+
 def picture(placed: dict, takes: dict[int, Path], work: Path) -> Path:
     """Every take trimmed from its first frame to its PLACED seconds, guarded
     against the storyboard gutter, joined in order.  `work/gutter.json` says
     what was cropped where."""
     segments, guarded = [], {}
-    for shot in placed["shots"]:
-        crop = guard(takes[shot["index"]], shot["seconds"], work)
+    for index, seconds in segments_of(placed, takes):
+        crop = guard(takes[index], seconds, work)
         if crop:
-            guarded[shot["index"]] = crop
-        seg = extract(takes[shot["index"]], 0.0, shot["seconds"], work / f"seg{shot['index']:02d}.mp4",
-                      W, H, FPS, pre=crop)
+            guarded[index] = crop
+        seg = extract(takes[index], 0.0, seconds, work / f"seg{index:02d}.mp4", W, H, FPS, pre=crop)
         segments.append(seg)
     episode_home.write_json(work / "gutter.json", guarded)
     print(f"gutter guard cropped {len(guarded)} takes: {guarded}", flush=True)
     return concat(segments, work / "picture.mp4")
 
 
-def tail(master: Path, title: Path | None, out: Path, work: Path) -> Path:
-    """After the last frame: the book's animated title card if it exists (its
-    own sound kept), then black with silence.  No text is burned anywhere."""
-    black = work / "black.mp4"
+def video_frames(video: Path) -> int:
+    """How many frames the PICTURE has, which is not what the container says:
+    a card whose sound outlasts its last frame reports the sound's duration."""
+    seen = subprocess.run(["ffmpeg", "-v", "quiet", "-stats", "-i", str(video), "-map", "0:v",
+                           "-f", "null", "-"], capture_output=True, text=True, errors="replace")
+    return int(seen.stderr.rsplit("frame=", 1)[1].split()[0])
+
+
+CARD_RATIO_TOLERANCE = 0.01
+"""A card may be a pixel off its exact ratio (2048/3 = 682.67); it may not be a
+different SHAPE."""
+
+
+def card_fits(size: tuple[int, int] | None, width: int, height: int) -> bool:
+    """Is this title card the episode's own shape?
+
+    `conform_card` scales with `force_original_aspect_ratio=increase` and then
+    crops, so a card of the wrong shape is blown up and has its edges CUT OFF --
+    lettering included.  Episode 3 had no `ep03.mp4`, fell back to the book's
+    9:16 `title.mp4`, and shipped with the title cropped top and bottom while QC
+    reported `title_card: true` because a card was present."""
+    if not size or not all(size):
+        return False
+    return abs(size[0] / size[1] - width / height) <= CARD_RATIO_TOLERANCE
+
+
+def check_card(size, width: int, height: int, name: str, number: int) -> None:
+    """Refuse a wrong-shaped card, and NAME THE COMMAND that makes a right one."""
+    if card_fits(size, width, height):
+        return
+    raise SystemExit(
+        f"title card {name} is {size[0]}x{size[1]} but this episode is {width}x{height}: "
+        f"conforming it would crop the lettering off.\n"
+        f"  make this episode's own card:  uv run python scripts/episode/title.py "
+        f"<codex_id> {number} --approved")
+
+
+def card_size(card: Path) -> tuple[int, int] | None:
+    """The card's pixel size, read off ffmpeg rather than assumed."""
+    seen = subprocess.run(["ffmpeg", "-hide_banner", "-i", str(card)],
+                          capture_output=True, text=True)
+    import re
+
+    found = re.search(r", (\d{2,5})x(\d{2,5})[ ,]", seen.stderr)
+    return (int(found.group(1)), int(found.group(2))) if found else None
+
+
+def conform_card(card: Path, out: Path) -> Path:
+    """The title card in the episode's own format, every frame kept and the
+    sound ending with the picture.
+
+    MEASURED 2026-09-12: the `fps=` filter dropped the card's last frame (90 in,
+    89 out) and loudnorm left 3.80 s of sound over 3.71 s of picture, so the
+    concat held that last frame for 0.09 s before the black.  An output frame
+    rate conforms the same way and keeps the frame; a `-t` at the picture's own
+    length ends the sound where the picture ends."""
+    seconds = video_frames(card) / FPS
+    fade_at = max(seconds - 0.3, 0.0)
+    subprocess.run(["ffmpeg", "-y", "-v", "error", "-i", str(card),
+                    "-vf", f"scale={W}:{H}:force_original_aspect_ratio=increase,crop={W}:{H},format=yuv420p",
+                    "-fps_mode", "cfr", "-r", str(FPS),
+                    "-af", f"aresample=48000,loudnorm=I={TITLE_LUFS}:TP=-1.5:LRA=7,volume=-1.7dB,"
+                           f"afade=t=in:d=0.4,afade=t=out:st={fade_at:.3f}:d=0.3",
+                    "-t", trailer_assemble.frames_arg(seconds, FPS),
+                    "-c:v", "libx264", "-preset", "fast", "-crf", "17",
+                    "-c:a", "aac", "-ar", "48000", str(out)], check=True)
+    return out
+
+
+def black_chip(out: Path) -> Path:
+    """Black and silence, the same length every run.
+
+    `-shortest` across two lavfi inputs is a race: the same code gave 6 frames
+    on one master and 48 on the next.  A duration is not a race."""
     subprocess.run(["ffmpeg", "-y", "-v", "error", "-f", "lavfi",
-                    "-i", f"color=c=black:s={W}x{H}:r={FPS}:d={END_CHIP_SECONDS}",
-                    "-f", "lavfi", "-t", str(END_CHIP_SECONDS), "-i", "anullsrc=r=48000:cl=stereo",
+                    "-i", f"color=c=black:s={W}x{H}:r={FPS}",
+                    "-f", "lavfi", "-i", "anullsrc=r=48000:cl=stereo",
                     "-c:v", "libx264", "-preset", "fast", "-crf", "16", "-c:a", "aac", "-ar", "48000",
-                    "-shortest", str(black)], check=True)
+                    "-t", trailer_assemble.frames_arg(END_CHIP_SECONDS, FPS), str(out)], check=True)
+    return out
+
+
+def tail(master: Path, title: Path | None, out: Path, work: Path, number: int = 0) -> Path:
+    """After the last frame: the book's animated title card if it exists (its
+    own sound kept), then black with silence.  No text is burned anywhere.
+
+    The card must be the EPISODE'S shape: the book-wide fallback is drawn for
+    whatever aspect the book started in, and conforming it across shapes crops
+    the lettering (see `card_fits`)."""
     parts = [master]
     if title and title.exists():
-        card = work / "title_conformed.mp4"
-        subprocess.run(["ffmpeg", "-y", "-v", "error", "-i", str(title),
-                        "-vf", f"scale={W}:{H}:force_original_aspect_ratio=increase,crop={W}:{H},"
-                               f"fps={FPS},format=yuv420p",
-                        "-af", "aresample=48000", "-c:v", "libx264", "-preset", "fast", "-crf", "17",
-                        "-c:a", "aac", "-ar", "48000", str(card)], check=True)
-        parts.append(card)
-    parts.append(black)
+        check_card(card_size(title), W, H, title.name, number)
+        parts.append(conform_card(title, work / "title_conformed.mp4"))
+    parts.append(black_chip(work / "black.mp4"))
     listing = work / "final.txt"
     listing.write_text("".join("file '" + p.as_posix() + "'\n" for p in parts), encoding="utf-8")
+    # The concat demuxer carries the first part's own start offset into the join:
+    # MEASURED 2026-09-12, the mix's first frame sits at 0.000 and the joined
+    # master's at 0.041, so the whole picture arrived one frame late -- which is
+    # also why every cut in QC read one frame past the frame the plan named.
+    # setpts puts the join back on zero; the output rate keeps every frame the
+    # `fps=` filter would have dropped.
     subprocess.run(["ffmpeg", "-y", "-v", "error", "-f", "concat", "-safe", "0", "-i", str(listing),
+                    "-vf", "setpts=PTS-STARTPTS", "-af", "asetpts=PTS-STARTPTS",
+                    "-fps_mode", "cfr", "-r", str(FPS), "-muxdelay", "0", "-muxpreload", "0",
                     "-c:v", "libx264", "-preset", "fast", "-crf", "17", "-c:a", "aac", "-b:a", "256k",
                     "-ar", "48000", str(out)], check=True)
+    # The concat demuxer does not refuse a part whose picture does not match the
+    # first one: it drops it and reports success.  That is how a master four
+    # frames short shipped without anyone seeing it, so the join counts itself.
+    want = sum(video_frames(p) for p in parts)
+    got = video_frames(out)
+    if got != want:
+        raise RuntimeError(
+            f"the join lost picture: {got} frames out of {want} "
+            f"({', '.join(f'{p.name} {video_frames(p)}f' for p in parts)}). "
+            f"A part whose size, rate or pixel format differs is dropped silently.")
     return out
 
 
@@ -124,45 +412,71 @@ def final_gain(lufs: float, tp: float) -> float:
     return round(max(0.0, min(TARGET_LUFS - lufs, TP_CEILING - 0.1 - tp)), 2)
 
 
+LIMIT = 0.794
+"""A true-peak limiter at -2.0 dBFS after the final gain: the AAC encode
+overshoots by ~0.5 dB (the r2v master measured -0.49 dBTP after a gain
+computed to land at -1.1), so the delivered peak stays under -1.0 dBTP."""
+
+
 def trim(master: Path, work: Path) -> Path:
-    gain = final_gain(integrated(master), true_peak(master))
-    if gain <= 0:
+    lufs, tp = integrated(master), true_peak(master)
+    gain = final_gain(lufs, tp)
+    if gain <= 0 and tp <= TP_CEILING:
         return master
     louder = work / "trimmed.mp4"
     subprocess.run(["ffmpeg", "-y", "-v", "error", "-i", str(master), "-c:v", "copy",
-                    "-af", f"volume={gain}dB", "-c:a", "aac", "-b:a", "256k", str(louder)], check=True)
+                    "-af", f"atrim=start={ENCODE_LAG_S},asetpts=PTS-STARTPTS,"
+                           f"volume={max(gain, 0.0)}dB,alimiter=limit={LIMIT}:level=false",
+                    "-c:a", "aac", "-b:a", "256k", str(louder)], check=True)
     master.write_bytes(louder.read_bytes())
     return master
 
 
-def main(book_id: str, number: int) -> None:
+def main(book_id: str, number: int, engine: str = "i2v",
+         bed_engine: str = BED_ENGINE_DEFAULT) -> None:
+    """`engine` is the PICTURE engine (i2v/r2v); `bed_engine` is the music model.
+    Two different questions that both used to be called 'engine'."""
     book = episode_home.book_dir(book_id)
     episode = episode_home.load_plan(book, number)
+    global W, H
+    W, H = canvas.size(episode.aspect)   # the plan declares the canvas (studio/canvas.py)
     home = episode_home.home(book, number)
-    work = home / "work"
+    work = home / ("work" if engine == "i2v" else f"work_{engine}")
     work.mkdir(parents=True, exist_ok=True)
-    takes = {r["index"]: book / r["rel_path"]
-             for r in episode_home.read_json(episode_home.shots_dir(book, number) / "shots.json")}
+    takes = {}
+    for r in episode_home.read_json(episode_home.takes_dir(book, number, engine) / "shots.json"):
+        takes[r["index"]] = TakePath(book / r["rel_path"], r.get("shots"))
     placed = episode_home.read_json(home / "placed.json")
     wavs = {r["index"]: book / r["rel_path"]
             for r in episode_home.read_json(episode_home.lines_dir(book, number) / "lines.json")}
-    missing = [s.index for s in episode.shots if s.index not in takes]
+    covered = {i for p in takes.values() for i in (p.shots or [])} | set(takes)
+    missing = [s.index for s in episode.shots if s.index not in covered]
     if missing:
         raise SystemExit(f"no take for shots {missing}")
 
     cut = picture(placed, takes, work)
-    music = bed(home / "audio" / "bed.wav", 90000 + number, placed["duration_s"])
+    music = quiet_bed(bed(home / "audio" / "bed.wav", 90000 + number, placed["duration_s"],
+                          bed_engine),
+                      placed["duration_s"], work / "bed_quiet.wav")
+    # audio reviewer, iteration 3: 10 dB in 20 ms on every line pumped; the bed now sits lower
+    # (BED_TRIM_DB) and ducks gently: at least 4 dB, 0.15 s attack, 0.25 s pre-delay, 1.0 s release
+    trailer_assemble.DUCK_DEPTH_DB, trailer_assemble.DUCK_ATTACK = 4.0, 0.15
+    trailer_assemble.DUCK_PREDELAY, trailer_assemble.DUCK_RELEASE = 0.25, 1.0
     mixed = mix_with_lines(cut, music, [], [(line["at"], wavs[line["index"]])
                                             for line in placed["lines"]],
                            work / "mixed.mp4", seconds=placed["duration_s"])
     card = book / "title" / f"ep{number:02d}.mp4"
     out = tail(mixed, card if card.exists() else book / "title" / "title.mp4",
-               episode_home.master_path(book, number), work)
+               episode_home.master_path(book, number, engine), work, number)
     trim(out, work)
-    keep = next(n for n in range(1, 100) if not (home / f"master_iter{n}.mp4").exists())
+    taken = [int(f.stem.split("master_iter")[1]) for f in home.glob("master_iter*.mp4") if f.stem.split("master_iter")[1].isdigit()]
+    keep = max(taken, default=0) + 1  # always the next number, never a gap filled
     (home / f"master_iter{keep}.mp4").write_bytes(out.read_bytes())
     print(f"master -> {out}  (kept as master_iter{keep}.mp4)")
 
 
 if __name__ == "__main__":
-    main(sys.argv[1], int(sys.argv[2]) if len(sys.argv) > 2 else 1)
+    args = [a for a in sys.argv[1:] if not a.startswith("--")]
+    main(args[0], int(args[1]) if len(args) > 1 else 1, episode_home.engine_arg(sys.argv),
+         next((a.split("=", 1)[1] for a in sys.argv if a.startswith("--bed=")),
+              BED_ENGINE_DEFAULT))

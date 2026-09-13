@@ -49,3 +49,18 @@ class TestPaletteFor:
         from studio.trailer_refs import palette_for
         assert "1881 London" in palette_for("detective", "1881 London")
         assert palette_for("nonsense") == palette_for("procedural")
+
+
+def test_a_contract_is_never_silently_cut_short():
+    """MEASURED 2026-09-11: Watson's description ran 607 characters and the 220-char
+    limit kept its first sentence and dropped the rest WITHOUT SAYING SO, so the
+    walking stick's length never reached any drawer and 23 panels each invented one.
+    A contract is complete or it is a lie, so `contract_description` has no limit."""
+    from studio.trailer_refs import contract_description, dropped_by_limit
+    long = ("A man in his late twenties, as thin as a lath, dark hair swept back, a brown tweed "
+            "overcoat over a tweed waistcoat with a watch chain and a white cravat pinned with a "
+            "stud, both hands bare and sunburnt. The stick stands hip high and its shaft is as "
+            "thick as one finger. His boots are black and square-toed.")
+    whole = contract_description(long)
+    assert "hip high" in whole and "square-toed" in whole
+    assert dropped_by_limit(long) and not dropped_by_limit("A short man in a grey coat.")

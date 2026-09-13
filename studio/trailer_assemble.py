@@ -183,6 +183,21 @@ def frames_arg(seconds: float, fps: int = 24) -> str:
     return f"{math.floor(frames / fps * 10_000) / 10_000:.4f}"
 
 
+def output_bound(seconds: float | None) -> list[str]:
+    """How the mix's own output is made to end.
+
+    MEASURED on episode 1, 2026-09-12: `-t` and `-shortest` together cost four
+    frames of picture.  The cut went into the mix at 3601 frames and came out
+    at 3597, and the concat that follows then HELD the last picture frame for
+    the 0.17 s of sound that had nowhere to sit -- a pause before the title
+    card that nobody cut, and the one the owner saw.  `-t` alone renders every
+    frame the duration names, so `-shortest` is left to the unbounded case it
+    was written for: the bed is `apad`ed to an infinite stream, and with no
+    duration to render to nothing else ends the file.
+    """
+    return ["-t", frames_arg(seconds)] if seconds else ["-shortest"]
+
+
 def extract_filter(width: int, height: int, fps: int, grade: str = "", pre: str = "") -> str:
     """`pre` runs on the source before it is conformed (the episode's gutter
     guard crops there, so the crop is scaled back up to the full frame)."""
@@ -319,9 +334,8 @@ def mix(picture: Path, bed: Path, cues: list[tuple[float, Path]], output: Path,
     parts.append(f"{base},volume={gain:.2f}dB,alimiter=limit={TP_LINEAR}:level=disabled[out]")
     _ffmpeg(
         ["ffmpeg", "-y", "-v", "error", *inputs, "-filter_complex", ";".join(parts),
-         *bound,
          "-map", "0:v", "-map", "[out]", "-c:v", "copy", "-c:a", "aac", "-b:a", "256k",
-         "-ar", "48000", "-shortest", str(output)],
+         "-ar", "48000", *output_bound(seconds), str(output)],
         "mixing the trailer")
     return output
 
@@ -398,8 +412,11 @@ def _ramp(t: float, start: float, end: float, attack: float, release: float) -> 
 
 
 def duck_db(t: float, windows: list[tuple[float, float, float]],
-            attack: float = DUCK_ATTACK, release: float = DUCK_RELEASE,
-            predelay: float = DUCK_PREDELAY) -> float:
+            attack: float | None = None, release: float | None = None,
+            predelay: float | None = None) -> float:
+    attack = DUCK_ATTACK if attack is None else attack
+    release = DUCK_RELEASE if release is None else release
+    predelay = DUCK_PREDELAY if predelay is None else predelay
     """The gain reduction the bed carries at `t`, in dB, over every window.
 
     `windows` are (line start, line end, depth); the deepest one wins, so
@@ -416,8 +433,11 @@ def _ramp_expr(start: float, end: float, attack: float, release: float) -> str:
             rf"({end + release:.4f}-t)/{release:.4f})))")
 
 
-def duck_expr(windows: list[tuple[float, float, float]], attack: float = DUCK_ATTACK,
-              release: float = DUCK_RELEASE, predelay: float = DUCK_PREDELAY) -> str:
+def duck_expr(windows: list[tuple[float, float, float]], attack: float | None = None,
+              release: float | None = None, predelay: float | None = None) -> str:
+    attack = DUCK_ATTACK if attack is None else attack
+    release = DUCK_RELEASE if release is None else release
+    predelay = DUCK_PREDELAY if predelay is None else predelay
     """The duck as one `volume` expression: a product of per-line envelopes.
 
     An expression, not `sidechaincompress`, because every number the rule
@@ -602,8 +622,9 @@ def bed_peak(readings: list[tuple[float, float]], start: float, end: float) -> f
 
 
 def duck_depth(bed_lu: float, floor: float = BED_UNDER_LINE,
-               minimum: float = DUCK_DEPTH_DB,
+               minimum: float | None = None,
                maximum: float = DUCK_DEPTH_MAX) -> float:
+    minimum = DUCK_DEPTH_DB if minimum is None else minimum
     """How deep THIS bed has to duck to reach the floor a line needs under it."""
     return round(min(maximum, max(minimum, bed_lu - floor)), 2)
 

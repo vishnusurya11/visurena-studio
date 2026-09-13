@@ -30,5 +30,17 @@ def test_an_existing_sheet_is_reused_and_refs_json_untouched(tmp_path):
     sheet.write_bytes(b"png")
     refs = tmp_path / "refs" / "refs.json"
     refs.write_text("{}")
-    assert frames.sheet_for(tmp_path, "x", "pal", 1) == sheet
+    assert frames.sheet_for(tmp_path, "x") == sheet
     assert refs.read_text() == "{}"
+
+
+def test_a_character_the_book_never_bound_gets_no_invented_body(tmp_path):
+    """`frames.py` inventing a description is how "fair side-whiskers" entered
+    a clean-shaven man's record: only `step_02_refs.py` may create a body,
+    because it is the only thing that reads the render back."""
+    import pytest
+
+    (tmp_path / "refs" / "characters").mkdir(parents=True)
+    with pytest.raises(SystemExit):
+        frames.sheet_for(tmp_path, "stamford")
+    assert not hasattr(frames, "STAMFORD")

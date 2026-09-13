@@ -42,3 +42,15 @@ def test_panel_boxes_follow_reading_order_and_trim_gutters():
     assert fourth[0] == first[0] and fourth[1] > first[3]
     assert last[2] < board.CANVAS[0] and last[3] < board.CANVAS[1]
     assert all(b[2] - b[0] > 640 and b[3] - b[1] > 980 for b in (first, third, fourth, last))
+
+
+def test_a_single_panel_prompt_names_one_frame_and_no_grid():
+    from studio.episode_spec import Shot
+    from studio import episode_board as board
+    shot = Shot(index=19, section="payoff", setup="lab", size="insert", frame="Two hands clasp.",
+                motion="hold")
+    text = board.panel_prompt(shot, "A lab.", ["sherlock_holmes"], {"sherlock_holmes": "Lean."})
+    assert text.startswith("A single vertical 9:16 film frame")
+    assert "no grid" in text and "Two hands clasp." in text
+    assert "Image 3 is the previous storyboard sheet" in text
+    assert "Panel 1" not in text

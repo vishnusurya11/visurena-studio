@@ -24,3 +24,17 @@ def test_the_verdict_needs_every_gate():
 def test_the_longest_gap_is_measured_from_the_placed_windows():
     lines = [{"at": 0.0, "seconds": 3.0}, {"at": 3.5, "seconds": 2.0}, {"at": 12.0, "seconds": 1.0}]
     assert qc.longest_gap(lines, 20.0) == 7.0
+
+
+def test_a_soft_cut_inside_a_take_run_does_not_fail_the_verdict():
+    import importlib.util
+    from pathlib import Path
+    spec = importlib.util.spec_from_file_location("ep_qc", Path(__file__).resolve().parents[1] / "scripts" / "episode" / "qc.py")
+    qc = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(qc)
+    placed = {"shots": [{"index": 0, "t_start": 0.0}, {"index": 1, "t_start": 4.0}, {"index": 2, "t_start": 9.0}]}
+    assert qc.internal_cuts(placed, [{"index": 0, "shots": [0, 1]}, {"index": 2, "shots": [2]}]) == [4.0]
+    report = {"lufs_ok": True, "tp_ok": True, "missing_cuts": [4.0], "internal_cuts": [4.0], "lines": []}
+    assert qc.verdict(report) is True
+    report["missing_cuts"] = [4.0, 9.0]
+    assert qc.verdict(report) is False

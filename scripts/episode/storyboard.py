@@ -3,6 +3,7 @@
 
     uv run python scripts/episode/storyboard.py <codex_id> <episode>           # sheets + panels
     uv run python scripts/episode/storyboard.py <codex_id> <episode> --review  # contact sheet
+    uv run python scripts/episode/storyboard.py <codex_id> <episode> --panel=19  # redraw ONE panel (PAID)
 
 Per setup: the shots in cut order, spread evenly over 3x3 sheets; each sheet
 is drawn from the plate, the setup's character sheets and the previous sheet
@@ -23,16 +24,25 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 
 from studio import episode_board as board
-from studio import episode_home
+from studio import approval, canvas, episode_home, image_spend as spend
 from studio.episode_spec import Episode
 from studio.llm import _load_dotenv
-from studio.trailer_refs import visual_description
+from studio.trailer_refs import contract_description
 
-W, H = 768, 1344
+W, H = canvas.size("9:16")
+"""Rebound from the plan by `adopt()`: the plan declares the aspect."""
 PEEK = 0.3
 
 
-WHITE = 200
+def adopt(aspect: str) -> tuple[int, int]:
+    """Point `conform` at the plan's canvas.  One call, at the top of a run:
+    a cell cropped to the wrong shape is silent until the master is cut."""
+    global W, H
+    W, H = canvas.size(aspect)
+    return W, H
+
+
+WHITE = 170
 MAX_TRIM = 0.06
 """A gutter reads as a near-white edge; up to 6 % of a side is trimmed.
 Measured on the corridor sheet: three panels kept a white bottom edge with
@@ -71,15 +81,25 @@ def conform(src: Path, dst: Path, box=None) -> Path:
 
 
 def physicals(book: Path) -> dict[str, str]:
-    return {r["entity_id"]: visual_description(r.get("physical", ""))
+    return {r["entity_id"]: contract_description(r.get("physical", ""))
             for r in episode_home.read_json(book / "refs" / "refs.json")["refs"]
             if r.get("kind") == "character"}
 
 
-def draw(prompt: str, images: list[Path], out: Path) -> Path:
+def book_of(path: Path) -> Path:
+    """The book folder above `episodes/epNN/frames/<file>`."""
+    return Path(path).resolve().parents[3]
+
+
+def draw(prompt: str, images: list[Path], out: Path, size: tuple[int, int] = board.CANVAS,
+         approved: bool | None = None) -> Path:
     """One sheet from gpt-image, references attached in order.  Cached on disk."""
     if out.exists():
         return out
+    if approved is None:  # the caller did not decide, so the command line does
+        approved = approval.approved_for("sheets", sys.argv)
+    usd = {(2048, 3072): 0.20, (2048, 2048): 0.13, (1536, 1024): 0.08}.get(size, 0.20)
+    approval.require("sheets", f"one {board.MODEL} sheet {out.stem} at {size[0]}x{size[1]}", usd, approved)
     _load_dotenv()
     from openai import OpenAI
 
@@ -87,17 +107,30 @@ def draw(prompt: str, images: list[Path], out: Path) -> Path:
     handles = [open(p, "rb") for p in images]
     try:
         result = client.images.edit(model=board.MODEL, image=handles, prompt=prompt,
-                                    size=f"{board.CANVAS[0]}x{board.CANVAS[1]}",
+                                    size=f"{size[0]}x{size[1]}",
                                     quality="high", n=1)
     finally:
         for h in handles:
             h.close()
     out.parent.mkdir(parents=True, exist_ok=True)
     out.write_bytes(base64.b64decode(result.data[0].b64_json))
-    refs = "\n".join(str(p) for p in images)
+    spend.record(book_of(out), board.MODEL, f"{size[0]}x{size[1]}", "high", 1, f"storyboard {out.stem}")
+    refs = "\n".join(p.name for p in images)
     out.with_suffix(".prompt.txt").write_text(f"{prompt}\n\nreferences, in order:\n{refs}\n",
                                               encoding="utf-8")
     return out
+
+
+def cells(sheet: Path) -> list[tuple[int, int, int, int]]:
+    """The nine cell boxes as FOUND on the sheet (gutters detected), never thirds."""
+    import numpy as np
+    from PIL import Image
+
+    return board.cell_boxes(np.asarray(Image.open(sheet).convert("L"), dtype=float))
+
+
+def redrawn(frames_dir: Path, shot) -> Path:
+    return frames_dir / f"panel_S{shot.index:02d}_take{shot.take}.png"
 
 
 def sheets(book: Path, episode: Episode, frames_dir: Path) -> None:
@@ -110,10 +143,42 @@ def sheets(book: Path, episode: Episode, frames_dir: Path) -> None:
             text = board.prompt(group, setup.described, setup.cast, looks, previous is not None)
             sheet = draw(text, refs + ([previous] if previous else []),
                          frames_dir / f"board_{name}_{k}.png")
+            boxes = cells(sheet)
             for i, shot in enumerate(group):
-                conform(sheet, frames_dir / f"S{shot.index:02d}.png", board.panel_box(i))
+                if redrawn(frames_dir, shot).exists():
+                    continue  # a panel redrawn alone outranks its sheet cell
+                conform(sheet, frames_dir / f"S{shot.index:02d}.png", boxes[i])
             print(f"  sheet {name} {k}: shots {[s.index for s in group]} -> {sheet}", flush=True)
             previous = sheet
+
+
+PANEL_SIZE = (1024, 1536)
+
+
+def sheet_of(episode: Episode, shot) -> int:
+    """Which sheet of its setup the shot's panel was cut from."""
+    groups = board.chunks([s for s in episode.shots if s.setup == shot.setup])
+    return next(k for k, group in enumerate(groups) if shot in group)
+
+
+def repanel(book_id: str, number: int, index: int) -> None:
+    """Redraw ONE panel (PAID: one gpt-image call) from the plan's current
+    `frame`, referenced to the plate, the cast and the sheet it came from.
+    The old panel is kept beside it as `SNN.prev.png`; the take must be redone."""
+    book = episode_home.book_dir(book_id)
+    episode = episode_home.load_plan(book, number)
+    frames_dir = episode_home.frames_dir(book, number)
+    shot, setup = episode.shot(index), episode.setups[episode.shot(index).setup]
+    refs = [frames_dir / f"plate_{shot.setup}.png"]
+    refs += [book / "refs" / "characters" / f"char-{who}.png" for who in setup.cast]
+    refs.append(frames_dir / f"board_{shot.setup}_{sheet_of(episode, shot)}.png")
+    text = board.panel_prompt(shot, setup.described, setup.cast, physicals(book))
+    drawn = draw(text, refs, frames_dir / f"panel_S{index:02d}_take{shot.take}.png", PANEL_SIZE)
+    panel = frames_dir / f"S{index:02d}.png"
+    if panel.exists():
+        panel.replace(panel.with_suffix(".prev.png"))
+    conform(drawn, panel)
+    print(f"  panel S{index:02d} redrawn -> {panel}", flush=True)
 
 
 def grids(book_id: str, number: int) -> None:
@@ -167,5 +232,9 @@ def review(book_id: str, number: int) -> None:
 
 
 if __name__ == "__main__":
-    entry = review if "--review" in sys.argv else grids
-    entry(sys.argv[1], int(sys.argv[2]) if len(sys.argv) > 2 and sys.argv[2].isdigit() else 1)
+    panel = next((a.split("=", 1)[1] for a in sys.argv if a.startswith("--panel=")), "")
+    number = int(sys.argv[2]) if len(sys.argv) > 2 and sys.argv[2].isdigit() else 1
+    if panel:
+        repanel(sys.argv[1], number, int(panel))
+    else:
+        (review if "--review" in sys.argv else grids)(sys.argv[1], number)

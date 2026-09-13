@@ -66,34 +66,101 @@ def alternates(shots: list[Shot], size: int = PANELS) -> list[tuple[int, str]]:
     return out
 
 
-def describe_refs(cast: list[str], physical: dict[str, str], previous: bool) -> str:
+def _person_lines(k: int, who: str, physical: dict[str, str],
+                  wardrobe: dict[str, str] | None) -> list[str]:
+    """What this person's attached picture -- or pair of pictures -- is.
+
+    With cards drawn, the face and the clothes are two separate images, which
+    is what MiniMax's guide and the practical H3 guide both ask for: image one
+    is the face and hairstyle, image two is the wardrobe and silhouette.  The
+    state sentence rides on the SECOND line, so the hat is a fact about this
+    scene rather than a conditional inside the description."""
+    name = who.replace("_", " ").title()
+    if not wardrobe or not wardrobe.get(who):
+        return [f"Image {k} is {name}: {physical.get(who, '')} Keep exactly this face, "
+                f"hair, build and these clothes in every panel that shows {name}."]
+    return [f"Image {k} is {name}, his face and hair: {physical.get(who, '')} "
+            f"Keep exactly this face and hair in every panel that shows {name}.",
+            f"Image {k + 1} is {name}'s clothes, hands and things: in this scene he "
+            f"{wardrobe[who]}. Keep exactly these clothes and these things in every "
+            f"panel that shows {name}."]
+
+
+def describe_refs(cast: list[str], physical: dict[str, str], previous: bool,
+                  wardrobe: dict[str, str] | None = None) -> str:
     """What each attached image is, in the order it is attached: plate first."""
     lines = ["Image 1 is the empty location: every panel is set in this exact room, "
              "with its furniture, walls, windows and light."]
-    for k, who in enumerate(cast, start=2):
-        name = who.replace("_", " ").title()
-        lines.append(f"Image {k} is {name}: {physical.get(who, '')} Keep exactly this face, "
-                     f"hair, build and these clothes in every panel that shows {name}.")
+    k = 2
+    for who in cast:
+        said = _person_lines(k, who, physical, wardrobe)
+        lines += said
+        k += len(said)
     if previous:
-        lines.append(f"Image {len(cast) + 2} is the previous storyboard sheet of this same "
-                     f"scene: match its light, wardrobe and staging exactly.")
+        lines.append(f"Image {k} is the previous storyboard sheet of this same "
+                     f"scene: match its light and wardrobe; do NOT reuse its framings, each panel is "
+                     f"framed only by its own text.")
     return " ".join(lines)
 
 
 def prompt(shots: list[Shot], described: str, cast: list[str], physical: dict[str, str],
-           previous: bool) -> str:
+           previous: bool, wardrobe: dict[str, str] | None = None) -> str:
     frames = [shot.frame for shot in shots] + [text for _, text in alternates(shots)]
     panels = " ".join(f"Panel {k}: {frame}" for k, frame in enumerate(frames, start=1))
     return (f"A film storyboard sheet: a {COLS} by {ROWS} grid of {PANELS} equal vertical 9:16 "
             f"panels filling the whole canvas, thin white gutters between them. {ORDER} "
             f"Every panel is a frame from the same scene: {described} "
-            f"{describe_refs(cast, physical, previous)} {panels} {STILL}")
+            f"{describe_refs(cast, physical, previous, wardrobe)} {panels} {STILL}")
 
 
-def panel_box(index: int, canvas: tuple[int, int] = CANVAS) -> tuple[int, int, int, int]:
+def panel_prompt(shot: Shot, described: str, cast: list[str], physical: dict[str, str],
+                 wardrobe: dict[str, str] | None = None) -> str:
+    """ONE panel redrawn on its own (a bad cell on an otherwise good sheet):
+    the same scene, references and register, the previous sheet attached last
+    so the redraw matches its light and staging.  Measured need: S19 of
+    episode 1 drew three hands into a handshake (2026-09-10)."""
+    return (f"A single vertical 9:16 film frame filling the whole canvas, no grid, no border, "
+            f"no gutter. The scene: {described} {describe_refs(cast, physical, True, wardrobe)} "
+            f"The frame: {shot.frame} {STILL}")
+
+
+GUTTER_WHITE, GUTTER_FLAT = 190.0, 30.0
+"""A gutter line is bright AND flat across the whole sheet."""
+
+
+def bands(grey, axis: int) -> list[tuple[int, int]]:
+    """Runs of gutter lines along `axis` (0: rows, 1: columns) as [start, end)."""
+    lines = grey if axis == 0 else grey.T
+    white = (lines.mean(axis=1) > GUTTER_WHITE) & (lines.std(axis=1) < GUTTER_FLAT)
+    out, start = [], None
+    for i, flag in enumerate(list(white) + [False]):
+        if flag and start is None:
+            start = i
+        elif not flag and start is not None:
+            out.append((start, i))
+            start = None
+    return out
+
+
+def cell_boxes(grey, cols: int = COLS, rows: int = ROWS) -> list[tuple[int, int, int, int]]:
+    """The nine cells as the regions BETWEEN the drawn gutters, reading order.
+    MEASURED 2026-09-10: the corridor sheet's gutters were not at thirds, so
+    the flat split left a 14 px white line 34 px inside three panels (S03-S05),
+    which H3 then kept and grew.  Falls back to thirds without two per axis."""
+    h, w = grey.shape
+    row_bands, col_bands = bands(grey, 0), bands(grey, 1)
+    if len(row_bands) != rows - 1 or len(col_bands) != cols - 1:
+        return [panel_box(i, (w, h), cols, rows) for i in range(cols * rows)]
+    ys = [0] + [y for band in row_bands for y in band] + [h]
+    xs = [0] + [x for band in col_bands for x in band] + [w]
+    return [(xs[2 * c], ys[2 * r], xs[2 * c + 1], ys[2 * r + 1])
+            for r in range(rows) for c in range(cols)]
+
+
+def panel_box(index: int, canvas: tuple[int, int] = CANVAS, cols: int = COLS, rows: int = ROWS) -> tuple[int, int, int, int]:
     """Pixel box of panel `index` (0-based, reading order), gutters trimmed."""
-    col, row = index % COLS, index // COLS
-    width, height = canvas[0] / COLS, canvas[1] / ROWS
+    col, row = index % cols, index // cols
+    width, height = canvas[0] / cols, canvas[1] / rows
     trim_x, trim_y = round(width * 0.015), round(height * 0.015)
     return (round(col * width) + trim_x, round(row * height) + trim_y,
             round((col + 1) * width) - trim_x, round((row + 1) * height) - trim_y)

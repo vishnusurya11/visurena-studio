@@ -3,7 +3,7 @@ import pytest
 from pydantic import ValidationError
 
 from studio import episode_timeline as tl
-from studio.episode_spec import Episode, Line, Setup, Shot
+from studio.episode_spec import Episode, Line, Setup, Shot, SubShot
 
 SETUPS = {"lab": Setup(described="a lab", cast=["a", "b"])}
 NARR = ("Then we walked on together down the long corridor and neither of us spoke "
@@ -110,3 +110,50 @@ def test_the_sync_rule_holds_for_a_placed_timeline_and_catches_a_shifted_line():
     assert tl.misaligned(placed) == []
     placed["lines"][0]["at"] += 0.1
     assert any("does not start one handle" in f for f in tl.misaligned(placed))
+
+
+def test_a_frame_that_puts_a_glove_on_anyone_is_refused():
+    """Iteration 2 drew Watson's handshake in a tan leather glove because the
+    frame text asked for one; the book gives him a bare sunburnt hand."""
+    with pytest.raises(ValidationError, match="glove"):
+        Shot(index=1, section="friction", setup="lab", size="insert", frame="two hands, one in a tan glove",
+             motion="m")
+    with pytest.raises(ValidationError, match="glove"):
+        Shot(index=1, section="friction", setup="lab", size="insert", frame="f", motion="m",
+             cuts=[SubShot(at_s=3.0, size="close", frame="a gloved hand", motion="m")])
+
+
+class TestWhatTheStoryboardDraws:
+    """The fields the sheet prompt is compiled from (owner, 2026-09-11).  Each one
+    exists because the drawer got the previous form wrong, and each one says what
+    IS: a negated noun is still that noun in the prompt."""
+
+    def test_the_picture_fields_default_empty_so_a_plan_written_before_them_still_validates(self):
+        shot = Shot(index=0, section="hook", setup="lab", size="wide", frame="f", motion="m")
+        assert (shot.camera, shot.at_rest, shot.end, shot.changed, shot.crowd) == ("", "", "", "", "")
+        cut = SubShot(at_s=3.0, size="close", frame="f", motion="m")
+        assert (cut.camera, cut.at_rest, cut.end, cut.changed, cut.crowd) == ("", "", "", "", "")
+
+    def test_a_setup_carries_its_geometry_its_crowd_its_sky_and_its_prop_plates(self):
+        bare = Setup(described="a lab")
+        assert (bare.geometry, bare.crowd, bare.outdoors, bare.props) == ("", "", False, [])
+        street = Setup(described="a street", geometry="The wheel fills the LEFT third.",
+                       crowd="four pedestrians under umbrellas", outdoors=True, props=["cab"])
+        assert street.outdoors and street.props == ["cab"]
+
+    def test_a_picture_field_that_asks_for_an_absence_is_refused(self):
+        """"no gloves" in a character description reached six sheets and drew a
+        glove; the drawer can only put nouns in places."""
+        with pytest.raises(ValidationError, match="absence"):
+            Shot(index=0, section="hook", setup="lab", size="wide", frame="f", motion="m",
+                 at_rest="his hand is not yet on the glass")
+        with pytest.raises(ValidationError, match="absence"):
+            Setup(described="a lab with no windows")
+
+    def test_a_named_change_without_the_end_picture_it_changes_into_is_refused(self):
+        """"Changed since panel 1" is only checkable against a written end picture."""
+        with pytest.raises(ValidationError, match="write the end picture"):
+            Shot(index=0, section="hook", setup="lab", size="wide", frame="f", motion="m",
+                 changed="the glass reaches his mouth")
+        Shot(index=0, section="hook", setup="lab", size="wide", frame="f", motion="m",
+             end="The glass rests at his lips.", changed="the glass reaches his mouth")

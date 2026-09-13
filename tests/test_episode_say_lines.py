@@ -41,3 +41,28 @@ def test_seeds_differ_per_attempt():
     from studio.episode_spec import Line
     line = Line(index=3, kind="narration", speaker="a", text="x", shot=0)
     assert say.seed_for(1, line, 0) != say.seed_for(1, line, 1)
+
+
+def test_a_redo_that_scores_lower_than_the_try_before_is_thrown_away(tmp_path):
+    """l21 went 0.69 -> 0.64 -> 0.66 -> 0.64 on redo; the best try is the one kept."""
+    wav = tmp_path / "l21.wav"; wav.write_bytes(b"new")
+    kept = tmp_path / "l21.prev.wav"; kept.write_bytes(b"old")
+    previous = {"index": 21, "similarity": 0.69, "passed": False, "seconds": 2.9}
+    new = {"index": 21, "similarity": 0.64, "passed": False, "seconds": 2.6}
+    best = say.keep_best(new, previous, wav)
+    assert best["similarity"] == 0.69 and wav.read_bytes() == b"old" and not kept.exists()
+    wav.write_bytes(b"new"); kept.write_bytes(b"old")
+    best = say.keep_best({"index": 21, "similarity": 0.72, "passed": True}, previous, wav)
+    assert best["similarity"] == 0.72 and wav.read_bytes() == b"new" and not kept.exists()
+
+
+def test_a_stubborn_line_is_cloned_from_the_speakers_best_passed_line():
+    """Audio reviewer, iteration 3: l21 measured closer to Watson's design voice than
+    Stamford's after six seeds from the design clip; Stamford's own l00 (0.795) is the
+    better reference for his second line."""
+    records = {0: {"speaker": "stamford", "similarity": 0.795, "passed": True, "rel_path": "episodes/ep01/lines/l00.wav"},
+               21: {"speaker": "stamford", "similarity": 0.66, "passed": False, "rel_path": "episodes/ep01/lines/l21.wav"},
+               13: {"speaker": "sherlock_holmes", "similarity": 0.9, "passed": True, "rel_path": "x"}}
+    assert say.best_line_reference(records, "stamford", exclude=21) == 0
+    assert say.best_line_reference(records, "john_watson", exclude=None) is None
+    assert say.best_line_reference({0: dict(records[0], similarity=0.71)}, "stamford", exclude=None) is None  # below 0.75

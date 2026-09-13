@@ -4,6 +4,9 @@ version = "0.1.0"
 description = "Visurena Studio - AI content studio: books to audiobooks, shorts, songs, novels"
 requires-python = ">=3.12"
 dependencies = [
+    "google-api-python-client==2.149.0",
+    "google-auth-httplib2==0.2.0",
+    "google-auth-oauthlib==1.2.1",
     "imageio-ffmpeg==0.6.0",
     "matplotlib==3.10.7",
     "pyyaml==6.0.2",
