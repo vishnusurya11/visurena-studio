@@ -46,9 +46,23 @@ encoder.  The hat is a STATE, and a state belongs on the state card.
 """
 PLATE_FRAME = (
     "Establishing wide plate of an empty, unoccupied location: its furniture, "
-    "walls, weather and light are the only presences in the frame. Deep focus, "
-    "even natural light."
+    "walls, weather and light are the only presences in the frame. Deep focus."
 )
+"""IT ASSERTS NO LIGHT.  This used to end "Deep focus, even natural light" -- a
+camera instruction sitting in front of the location's own description, and "even
+natural light" is daylight whatever hour the scene happens at.
+
+Measured on episode 5 before a penny of sheet money was spent: four of its six
+setups are after dark and say so at length -- "after dark", "the curtains pulled
+across the two windows", "one gas bracket burning amber", "the gas turned down to
+a bead", "close upon midnight" -- and all four plates came back with bright grey
+daylight in the windows.  The plate is the room DEFINITION handed to the sheet
+drawer and then to the take as a <Subject>, so a plate that says noon binds noon
+into every picture restaged from it.  Episodes 1 to 4 are mostly morning scenes,
+so the default agreed with them by luck.
+
+`described` always names its own light, and the palette line already carries
+"gaslight amber" and "practical period light sources"."""
 """Naming the occupants is what empties the frame.
 
 "no people, no figures" returned a bar full of drinkers.  The model fills the
