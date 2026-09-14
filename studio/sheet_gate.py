@@ -149,10 +149,25 @@ def picture(seg: dict) -> str:
 
 
 def twins(segs: list[dict], floor: float = TWIN, watch: float = WATCH) -> list[Finding]:
-    """Every pair of panels on one sheet that describes the same picture."""
+    """Every pair of panels on one sheet that describes the same picture.
+
+    A PANEL AND ITS OWN END PANEL ARE EXEMPT.  `end_text` builds an END cell as
+    "the same place, the same camera and the same light as panel N" plus its one
+    change, so high overlap with panel N is the rule OBEYED.  MEASURED on
+    episode 3: 6 of the 9 hard findings over the whole episode were an END panel
+    flagged against the panel it closes (Q01_0E, Q06_0E, Q07_1E, Q19_0E), which
+    would have refused 5 of 6 setups.
+
+    The picture side judges that pair properly, and in a BAND -- `END_FLOOR` and
+    `END_CEILING`, 0.45-0.80 -- because an END cell that is too DIFFERENT is a
+    re-stage and one that is too SIMILAR is a copy.  A one-sided text ceiling
+    cannot say that, so it leaves the pair to the gate that can."""
     out = []
     for i in range(len(segs)):
         for j in range(i + 1, len(segs)):
+            if (segs[i]["shot"], segs[i]["sub"]) == (segs[j]["shot"], segs[j]["sub"]) \
+                    and bool(segs[i].get("end")) != bool(segs[j].get("end")):
+                continue
             score = overlap(picture(segs[i]), picture(segs[j]))
             if score > watch:
                 out.append(Finding("TWINS", panel_key(segs[j]), picture(segs[j]).strip(), score > floor,

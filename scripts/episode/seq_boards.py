@@ -29,7 +29,7 @@ sys.path.insert(0, str(ROOT))
 import numpy as np
 from PIL import Image
 
-from studio import actor_gate, episode_board as board, episode_home, episode_seq_board as sq, prop_refs, route_gate
+from studio import actor_gate, episode_board as board, episode_home, episode_seq_board as sq, prop_refs, route_gate, sheet_gate
 from studio.episode_spec import Episode, Setup
 from studio.trailer_refs import contract_description
 
@@ -46,12 +46,47 @@ def physicals(book: Path) -> dict[str, str]:
             for r in episode_home.read_json(book / "refs" / "refs.json")["refs"] if r.get("kind") == "character"}
 
 
+ACCEPT_DIRTY = False
+"""Draw a sheet whose TEXT the free gate refuses.  Set by `--accept-dirty`.
+
+The escape is deliberate and it prints what it waived.  `sheet_gate` is the last
+free moment before an irreversible spend, and on episode 3 it finds real faults
+-- the hall carries three near-identical medium-closes of Holmes (Q22_0 against
+Q12_0 at 0.886) -- so refusing is right.  But a gate with no sanctioned way past
+it is a gate somebody eventually comments out, and a waiver nobody can read
+afterwards is indistinguishable from a bug."""
+
+GUTTER_EDGE = 6
+"""How far into a cell a leaked gutter can reach, in pixels.  A residue is
+contiguous with the frame edge it came from; `strip_white_edges` already takes
+the first few, so what survives sits within a handful of pixels of the border."""
+
+GUTTER_FLAT = 12.0
+"""How uniform sheet paper is.  MEASURED on episode 3's cells: a real gutter
+residue reads std 2-5, while the lit architecture this gate used to reject reads
+26.9 (Q11_0.before col 83) and 30.0 (Q23_0 col 74) -- ten times the variance, and
+74 to 83 pixels inside the picture."""
+
+
 def white_lines(cells: list[Path]) -> list[str]:
+    """The cells carrying a leaked white gutter, by name.
+
+    THE TEST IS BRIGHT **AND** FLAT **AND** AT AN EDGE.  It used to be bright and
+    loosely flat at ANY position, which rejected a lit doorway jamb as sheet
+    paper -- and a rejection is not cheap: it made the hall sheet unclean, bought
+    a $0.13 strict redraw, overwrote all nine of its cells, introduced a
+    duplicate pair the first attempt did not have and got `Q11_0E` deleted.  Shot
+    11 rendered with no END pin for a fault that was never there.
+
+    `episode_board.bands` already uses bright-and-flat to FIND the gutters; this
+    is the same brick, applied to what leaked through."""
     bad = []
     for c in cells:
         a = np.asarray(Image.open(c).convert("L"), dtype=float)
-        if any(a[i].mean() > 190 and a[i].std() < 30 for i in range(a.shape[0])) or \
-           any(a[:, j].mean() > 190 and a[:, j].std() < 30 for j in range(a.shape[1])):
+        rows, cols = a.shape
+        edges = lambda n, size: n < GUTTER_EDGE or n >= size - GUTTER_EDGE
+        if any(edges(i, rows) and a[i].mean() > 190 and a[i].std() < GUTTER_FLAT for i in range(rows)) or \
+           any(edges(j, cols) and a[:, j].mean() > 190 and a[:, j].std() < GUTTER_FLAT for j in range(cols)):
             bad.append(c.name)
     return bad
 
@@ -95,7 +130,47 @@ def attempt(sb, text: str, refs: list[Path], out: Path, group: list[dict], route
 
 
 def clean(entry: dict) -> bool:
-    return not (entry["regressions"] or entry["white_lines_in"] or entry["duplicates"])
+    """Is this attempt good enough to keep without a strict retry?
+
+    `gutters_ok` belongs here.  It was computed on every attempt and only ever
+    reached `report["passed"]`, which nothing reads -- `takes_r2v` takes its
+    cells off disk.  MEASURED: `seq_corner_wall_0.png` returned FOUR column bands
+    instead of two, so `cell_boxes` fell back to cutting the sheet in thirds;
+    those cells are 663 px against a true 675-693 and every one then needed a
+    bottom trim -- gutter leaking into the panel.  A sheet with misaligned cells
+    is not a clean sheet, whatever its pictures say."""
+    return bool(entry.get("gutters_ok", True)) and not (
+        entry["regressions"] or entry["white_lines_in"] or entry["duplicates"])
+
+
+def refuse_on_text(group: list[dict], setup, prompt: str, grid: tuple, name: str) -> None:
+    """The FREE gate, at the last moment before the paid draw.
+
+    `sheet_gate` is 430 lines and nine checks, four of them HARD, and it has
+    never run on an episode: it is imported by `sheet_dq.py`, a separate manual
+    command, and by nothing on the path that spends the money.  Episode 3 -- the
+    one that shipped -- has no `sheet_dq.json` at all.  `sheet_dq.py`'s own
+    docstring stated the wiring as an aspiration; this is it, built.
+
+    HARD findings refuse for $0.  The rest print, because the advisory half is
+    most of why the gate was worth writing and a gate that blocks on advice is a
+    gate somebody turns off."""
+    found = sheet_gate.sheet_findings(group, setup, prompt, grid)
+    for fault in found:
+        if not fault.hard:
+            print(f"  WATCH {name}: {fault.check} panel {fault.panel} -- {fault.text}", flush=True)
+    if not (hard := [f for f in found if f.hard]):
+        return
+    said = "\n  ".join(f"{f.check} panel {f.panel} -- {f.text} ({f.note})" for f in hard)
+    if ACCEPT_DIRTY:
+        # A SANCTIONED, LOGGED escape, because a gate with no way past it is a
+        # gate somebody deletes.  It says what it waived, in the run's own output.
+        print(f"  ACCEPT-DIRTY {name}: drawing anyway past {len(hard)} hard finding(s):\n  {said}",
+              flush=True)
+        return
+    raise SystemExit(f"{name}: the sheet prompt fails the free gate, so nothing was drawn "
+                     f"and nothing was spent:\n  {said}\n"
+                     f"Fix the plan's panel prose, or pass --accept-dirty to draw regardless.")
 
 
 def drop_end_copies(frames_dir: Path, entry: dict) -> list[dict]:
@@ -121,6 +196,9 @@ def draw_sheet(sb, frames_dir: Path, name: str, k: int, group: list[dict], route
                          aspect=aspect, props=props)
         if strict:
             text = sq.strict_prefix(entry["duplicates"], entry["regressions"], setup) + "\n\n" + text
+        else:
+            # the free gate, before the first dollar of this sheet
+            refuse_on_text(group, setup, text, grid, name)
         out = frames_dir / (f"seq_{name}_{k}_strict.png" if strict else f"seq_{name}_{k}.png")
         entry = attempt(sb, text, refs, out, group, route, grid, frames_dir, strict, setup)
         report["sheets"].append(entry)
@@ -195,6 +273,7 @@ def main(book_id: str, number: int, only: str | None = None, sheet: int | None =
 
 
 if __name__ == "__main__":
+    ACCEPT_DIRTY = "--accept-dirty" in sys.argv
     only = next((a.split("=", 1)[1] for a in sys.argv if a.startswith("--setup=")), None)
     one = next((int(a.split("=", 1)[1]) for a in sys.argv if a.startswith("--sheet=")), None)
     main(sys.argv[1], int(sys.argv[2]) if len(sys.argv) > 2 and sys.argv[2].isdigit() else 1, only, one)
