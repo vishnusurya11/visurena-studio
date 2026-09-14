@@ -30,6 +30,10 @@ def a_book(tmp_path, row=ROW):
     chars = tmp_path / "refs" / "characters"
     chars.mkdir(parents=True)
     Image.new("RGB", (200, 300), (128, 128, 128)).save(chars / "char-x.png")
+    # ROW declares an indoor AND an outdoor wardrobe, and R5 wants a picture for
+    # each: a state promising clothes no card shows falls through to the bust.
+    for state in ("indoor", "outdoor"):
+        Image.new("RGB", (200, 300), (128, 128, 128)).save(chars / f"char-x_{state}.png")
     (tmp_path / "refs" / "refs.json").write_text(
         json.dumps({"book_id": "b", "palette": "p", "refs": [row]}), encoding="utf-8")
     return tmp_path
@@ -98,5 +102,7 @@ class TestTheOldPictureIsKept:
         assert kept.read_bytes() == old.read_bytes()
 
     def test_a_picture_that_does_not_exist_yet_supersedes_nothing(self, tmp_path):
+        """A name `a_book` does NOT draw: it writes the bust and both declared
+        wardrobe cards, because R5 wants a picture for every promise."""
         book = a_book(tmp_path)
-        assert cards.supersede(book / "refs" / "characters" / "char-x_indoor.png") is None
+        assert cards.supersede(book / "refs" / "characters" / "char-x_lab.png") is None

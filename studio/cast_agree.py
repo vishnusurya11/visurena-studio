@@ -348,12 +348,46 @@ def _face_complaints(path: Path, kind: str, detect) -> list[str]:
     return out
 
 
+def promise_complaints(book: Path, who: str) -> list[str]:
+    """R5 -- a wardrobe state that promises clothes must have a picture that shows
+    them, and a drawn card must have a line that describes it.
+
+    `check` measured each state's card `if card:`, so a state with a written
+    wardrobe line and no card on disk was skipped in SILENCE.  That silence is
+    where three parts of this book drifted apart: `Setup.state` calls the cab
+    outdoor, `wardrobe["outdoor"]` promises Watson a brown bowler, and no
+    `char-john_watson_outdoor.png` was ever drawn -- so `cast_sheet` falls
+    through to the bust, which is bare-headed by rule.
+
+    Nothing looked wrong only because the wardrobe line reaches neither the sheet
+    prompt nor the take prompt.  Connect any one of the three and the words
+    contradict the picture; that is the mechanism behind episode 3's `_bench`
+    muffler.  A promise nobody can keep should not be written down."""
+    row = cast_refs.row(book, who)
+    said = row.get("wardrobe") or {}
+    out = []
+    for state in cast_refs.STATES:
+        line, found = (said.get(state) or "").strip(), cast_refs.card(book, who, state)
+        # `cast_refs.card` returns a row-named path WITHOUT checking it exists, so
+        # that `picture_complaints` can say "the row names this picture and it is
+        # not on disk".  A promise is kept by a picture, not by a filename.
+        card = found if found and Path(found).exists() else None
+        if line and not card:
+            out.append(f"{who} wardrobe[{state}] promises {line[:40]!r} and no card shows it: "
+                       f"the bust is what gets passed, and the bust is bare-headed (R5)")
+        elif card and not line:
+            out.append(f"{who} has a {state} card and no wardrobe line: a picture no prompt "
+                       f"can describe (R5)")
+    return out
+
+
 def check(book: Path, who: str, detect=None) -> list[str]:
     """Every complaint about one character's text and pictures.
 
     An empty list means the caption and the picture are the same statement."""
     row = cast_refs.row(book, who)
     out = text_complaints(row)
+    out += promise_complaints(book, who)
     out += picture_complaints(cast_refs.bust(book, who), "bust", detect)
     for state in cast_refs.STATES:
         card = cast_refs.card(book, who, state)

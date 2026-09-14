@@ -163,6 +163,12 @@ def a_book(tmp_path, row, pictures=("char-x.png",)):
     return tmp_path
 
 
+def _card(book, name: str) -> None:
+    """A drawn wardrobe card, same shape as the bust `a_book` writes."""
+    from PIL import Image
+    Image.new("RGB", (200, 300), (128, 128, 128)).save(book / "refs" / "characters" / name)
+
+
 class TestTheWholeCheck:
     def test_a_sheet_that_never_passed_the_gate_says_so(self, tmp_path):
         book = a_book(tmp_path, {"ref_id": "char-x", "kind": "character", "entity_id": "x",
@@ -185,11 +191,14 @@ class TestTheWholeCheck:
         assert any("R1" in line for line in ca.check(book, "x"))
 
     def test_a_clean_row_with_a_clean_picture_has_nothing_to_say(self, tmp_path):
+        """The indoor card is drawn, because R5 counts a wardrobe line with no
+        picture as a promise nobody can keep."""
         book = a_book(tmp_path, {"ref_id": "char-x", "kind": "character", "entity_id": "x",
                                  "physical": WATSON_NEW,
                                  "wardrobe": {"indoor": "is bare-headed"},
                                  "identity": {"traits": {"headgear": "none",
                                                          "facial_hair": "moustache"}}})
+        _card(book, "char-x_indoor.png")
         assert ca.check(book, "x") == []
 
     def test_the_missing_card_of_a_declared_state_is_a_complaint(self, tmp_path):
