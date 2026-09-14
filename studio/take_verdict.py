@@ -185,9 +185,18 @@ def drift_gate(segments: list[SegmentReport]) -> Gate:
     # was losing up to 30 points for moving, and ep03's three 100/100 takes are
     # its three most nearly frozen.  A segment aimed at nothing cannot miss.
     penalty = 30.0 * max(0.0, DRIFT_ADVISORY - end_sim) / DRIFT_ADVISORY if aimed else 0.0
+    # THE ROW NAMES BOTH NUMBERS WHEN THEY DIFFER.  It reported `end_sim` and
+    # ruled `ok` on `every`, so a take could print "drift 0.95" and carry `adv`
+    # because an unaimed segment elsewhere read 0.29 -- and an unaimed segment
+    # legitimately reads 0.25-0.29 against its own start cell.  The number on the
+    # line then explained nothing.  Latent while a take holds one shot, as
+    # episodes 4 and 5 do; live again the moment one holds two.
+    # ... and ONLY when it is the reason: naming it on a clean row is noise.
+    blamed = every < DRIFT_ADVISORY <= end_sim
+    note = f"{end_sim:.2f} (worst hold {every:.2f})" if blamed else f"{end_sim:.2f}"
     return Gate("drift", round(end_sim, 3), every >= DRIFT_ADVISORY,
                 bool(aimed) and end_sim < DRIFT_HARD,
-                f"{end_sim:.2f}", penalty)
+                note, penalty)
 
 
 def word_error(audio: dict, line_text: str) -> float | None:
