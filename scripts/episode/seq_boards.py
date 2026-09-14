@@ -29,7 +29,7 @@ sys.path.insert(0, str(ROOT))
 import numpy as np
 from PIL import Image
 
-from studio import episode_board as board, episode_home, episode_seq_board as sq, prop_refs, route_gate
+from studio import actor_gate, episode_board as board, episode_home, episode_seq_board as sq, prop_refs, route_gate
 from studio.episode_spec import Episode, Setup
 from studio.trailer_refs import contract_description
 
@@ -179,6 +179,15 @@ def draw_setup(book: Path, episode: Episode, number: int, name: str, only_sheet:
 def main(book_id: str, number: int, only: str | None = None, sheet: int | None = None) -> None:
     book = episode_home.book_dir(book_id)
     episode = episode_home.load_plan(book, number)
+    # THE LAST FREE MOMENT.  A wrong actor drawn into a sheet is paid for twice --
+    # once to draw it and once to draw it again -- and episode 3 shipped a whole
+    # master with Holmes making Gregson's gesture because nothing read the plan
+    # before the draw.  `actor_gate` was written and then called by nothing, which
+    # is a comment, not a gate.
+    for note in actor_gate.advisory_episode(episode):
+        print(f"  ADVISORY {note}", flush=True)
+    if faults := actor_gate.hard_episode(episode):
+        raise SystemExit("the plan fails the actor gate:\n  " + "\n  ".join(faults))
     for name in episode.setups:
         if only and name != only:
             continue

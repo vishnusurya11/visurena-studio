@@ -18,7 +18,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 
-from studio import canvas, episode_gutter, episode_home
+from studio import canvas, edit_gate, episode_gutter, episode_home
 from studio.comfy import run
 from studio.episode_spec import Episode
 from studio import trailer_assemble
@@ -59,7 +59,11 @@ model add a voice, and MiniMax cannot read a negation at all.  A fence built out
 of the word you are avoiding is a summons."""
 
 BED_SECONDS = 100.0
-END_CHIP_SECONDS = 0.25  # title-ends review 2026-09-11: 2 s of silent black before a loop is dead time
+END_CHIP_SECONDS = edit_gate.END_CHIP_FRAMES / FPS
+"""Title-ends review 2026-09-11: 2 s of silent black before a loop is dead time.
+DERIVED, never restated -- `edit_gate` owns the frame count and checks the cut
+against it, and holding the number in both places is what left every episode
+failing its own tail check by exactly 42 frames."""
 BED_TRIM_DB = -11.0  # audio reviewer, iteration 3: the bed sat only 6-9 LU under the voice in the gaps
 """MEASURED 2026-09-11 (reviewer 4): the raw bed was -14.6 LUFS, louder than
 the -16 LUFS lines, and the 1.7 s beat before the button was the loudest

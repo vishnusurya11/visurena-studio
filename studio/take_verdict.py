@@ -145,9 +145,17 @@ def drift_gate(segments: list[SegmentReport]) -> Gate:
     # cannot have failed to reach one, and legitimately reads 0.25-0.29 against
     # its own start cell. The ADVISORY still watches every segment, because a
     # hold that has wandered is worth printing even when nothing was aimed at.
+    # THE PENALTY GETS THE SAME SCOPE AS THE HARD VERDICT.  It did not, and that
+    # one asymmetry made the whole 0-100 number a stillness meter: measured over
+    # ep03's 23 records, `drift` is the ONLY non-zero penalty among the 16 takes
+    # that passed, so score == 70 + 40*end_sim -- and for 33 of 37 segments
+    # `end_sim` compares the last frame to the segment's OWN FIRST FRAME.  A take
+    # was losing up to 30 points for moving, and ep03's three 100/100 takes are
+    # its three most nearly frozen.  A segment aimed at nothing cannot miss.
+    penalty = 30.0 * max(0.0, DRIFT_ADVISORY - end_sim) / DRIFT_ADVISORY if aimed else 0.0
     return Gate("drift", round(end_sim, 3), every >= DRIFT_ADVISORY,
                 bool(aimed) and end_sim < DRIFT_HARD,
-                f"{end_sim:.2f}", 30.0 * max(0.0, DRIFT_ADVISORY - end_sim) / DRIFT_ADVISORY)
+                f"{end_sim:.2f}", penalty)
 
 
 def word_error(audio: dict, line_text: str) -> float | None:

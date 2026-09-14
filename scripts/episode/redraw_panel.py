@@ -70,7 +70,13 @@ def main(book_id: str, number: int, key: str, approved: bool) -> None:
     refs = [frames / sq.cell_name(panel["shot"], panel["sub"])] if end else []
     refs += [frames / f"plate_{name}.png"]
     refs += [frames / f"plate_{p}.png" for p in setup.props if p != name]
-    refs += [sq.cast_sheet(book, who, name) for who in setup.cast]
+    # `setup.state` IS the wardrobe selector, and dropping it silently picks a
+    # DIFFERENT card than the sheet this panel is repairing: measured 2026-09-13,
+    # the hall sheet referenced `char-john_watson_indoor.png` while this $0.08
+    # redraw of one of its panels referenced `char-john_watson_bench.png` -- the
+    # same man with a bowler in his hand, in an episode whose prose says
+    # "bare-headed" throughout.  A repair that changes the wardrobe is not a repair.
+    refs += [sq.cast_sheet(book, who, name, setup.state) for who in setup.cast]
     out = frames / f"panel_{cell.stem}.png"
     out.unlink(missing_ok=True)
     sb.adopt(episode.aspect)   # the cell is cropped to the PLAN's canvas, not a module default

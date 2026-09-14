@@ -11,8 +11,16 @@ PLACED = [{"index": 0, "t_start": 0.0, "t_end": 3.0, "seconds": 3.0},
           {"index": 4, "t_start": 23.0, "t_end": 26.0, "seconds": 3.0}]
 
 
-def test_groups_fill_the_budget_with_consecutive_shots():
-    assert tk.groups(PLACED, budget=12.0) == [[0, 1, 2], [3], [4]]
+def test_groups_fill_the_budget_and_stop_at_the_segment_cap():
+    """This used to assert `[[0, 1, 2], [3], [4]]` -- three panels in one take,
+    per the owner's 2026-09-10 "give the model three".
+
+    SUPERSEDED BY MEASUREMENT, 2026-09-13, over all 22 takes of episode 3:
+    1-segment takes pass 7/9 (mean 76.7), 2-segment 7/11 (79.3), 3-segment
+    0/2 (23.5) -- and the two 3-segment takes are the two worst in the episode.
+    With the earlier 6-of-6 result that is 8 of 8. `SEGMENT_CAP` now closes a run
+    at two, so shots 0-2 no longer travel together. See `test_segment_cap.py`."""
+    assert tk.groups(PLACED, budget=12.0) == [[0, 1], [2], [3], [4]]
 
 
 def test_a_shot_longer_than_the_budget_still_gets_its_own_take():

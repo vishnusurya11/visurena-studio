@@ -597,7 +597,13 @@ def crowd_clause(seg: dict, setup: Setup) -> str:
     named once for a whole location is averaged away: the criterion two-shot and
     its END drew an empty bar although the location text says "two deep"."""
     crowd = seg.get("crowd") or setup.crowd
-    if not crowd or seg.get("size") == "insert":
+    # A CROWD IS PART OF THE PLACE, so it needs a panel wide enough to hold a
+    # place -- the same ladder `places_the_plate` uses, for the reason stated
+    # there: below it you are looking at a person, not at a place.  This used to
+    # exclude `insert` alone, so episode 3 drew a constable and four loafers into
+    # a MEDIUM_CLOSE on Watson's face, where people can only be smears at the
+    # frame edge (owner, 2026-09-13: "a blur human on the side").
+    if not crowd or seg.get("size") not in WIDE_ENOUGH:
         return ""
     return f" Behind them, {crowd}, out of focus."
 
@@ -760,7 +766,12 @@ def single(seg: dict, setup: Setup, physical: dict[str, str], aspect: str = "9:1
              "THE PICTURE", "STYLE", "CONSTRAINTS")
     bodies = (single_block(cv.words(aspect)), references_block(setup, physical),
               setup.described, geometry_block(setup),
-              wardrobe_block(setup, physical), crowd_block(setup), single_picture(seg, setup),
+              wardrobe_block(setup, physical),
+              # the crowd needs room here for the same reason `crowd_clause` does:
+              # a panel redrawn alone is still a panel, and a medium close on one
+              # man's head has no street in it to fill with people
+              crowd_block(setup) if seg.get("size") in WIDE_ENOUGH else "",
+              single_picture(seg, setup),
               STYLE, CONSTRAINTS)
     return "\n\n".join(f"{head}\n{body}" for head, body in zip(heads, bodies) if body)
 
@@ -825,6 +836,6 @@ def single_picture(seg: dict, setup: Setup) -> str:
         parts.append(f"The camera stands {seg['camera']}.")
     if seg.get("at_rest"):
         parts.append(seg["at_rest"])
-    if seg.get("crowd"):
+    if seg.get("crowd") and seg.get("size") in WIDE_ENOUGH:
         parts.append(seg["crowd"])
     return " ".join(p.rstrip() for p in parts)

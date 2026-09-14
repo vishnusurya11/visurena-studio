@@ -123,7 +123,22 @@ def timestamp_holes(times: list[float], fps: int = FPS, tol: float = PTS_TOL) ->
     return holes
 
 
-def tail_check(master: np.ndarray, picture_frames: int, card: np.ndarray | None, black: int = 48) -> dict:
+END_CHIP_FRAMES = 6
+"""The silent black chip after the title card, in frames: 0.25 s at 24 fps.
+
+THE CONTRACT LIVES HERE, and `assemble.END_CHIP_SECONDS` derives from it, because
+holding it twice is what broke every episode's QC.  The chip was shortened from
+2.0 s to 0.25 s on 2026-09-11 ("2 s of silent black before a loop is dead time")
+and this gate kept demanding 48.  Measured on every episode ever cut -- ep01,
+ep02 and ep03 -- expected minus master is 42 = 48 - 6, exactly, three times.
+
+`tail["ok"]` was therefore False forever, so `edit_integrity.ok` was False, so
+`qc.passed` was False on every episode, so `--override` became the normal way to
+publish.  A gate that can never pass is a gate nobody reads."""
+
+
+def tail_check(master: np.ndarray, picture_frames: int, card: np.ndarray | None,
+               black: int = END_CHIP_FRAMES) -> dict:
     """After the picture: the card frame for frame, then `black` black frames, nothing else."""
     card_n = len(card) if card is not None else 0
     out = {"expected_frames": picture_frames + card_n + black, "master_frames": len(master)}

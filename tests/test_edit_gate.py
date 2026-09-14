@@ -70,8 +70,14 @@ def test_a_timestamp_hole_and_a_late_first_frame_are_found():
 
 
 def test_the_tail_is_the_card_then_black_and_nothing_else():
+    """The chip count comes from `gate.END_CHIP_FRAMES`, never from a literal.
+
+    This test used to hard-code 48 and so PASSED against a gate that demanded a
+    tail the cutter has not produced since 2026-09-11 -- which is exactly why the
+    42-frame mismatch survived three episodes. A test that restates a constant
+    cannot notice the constant moving. See `test_tail_black_count.py`."""
     picture, card = moving(10), moving(6, seed=9)
-    black = np.zeros((48, gate.GREY_H, gate.GREY_W), dtype=np.uint8)
+    black = np.zeros((gate.END_CHIP_FRAMES, gate.GREY_H, gate.GREY_W), dtype=np.uint8)
     good = np.concatenate([picture, card, black])
     assert gate.tail_check(good, 10, card)["ok"]
     short = np.concatenate([picture[:-4], card, black])           # mix -shortest ate four picture frames

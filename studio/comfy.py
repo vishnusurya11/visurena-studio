@@ -8,6 +8,7 @@ gets "passed" to a workflow that never reads it.
 """
 from __future__ import annotations
 
+import hashlib
 import json
 import shutil
 import time
@@ -49,15 +50,35 @@ def apply_inject(template: dict, inject: dict, values: dict[str, Any]) -> dict:
 
 
 def stage_image(path: Path) -> str:
-    """Copy an image into ComfyUI's input dir and return the bare filename."""
+    """Copy a file into ComfyUI's input dir under a CONTENT-ADDRESSED name.
+
+    `ComfyUI/input/` is one flat global directory shared by every book and every
+    episode, and this used to copy in under the file's BARE NAME, skipping the
+    copy on an mtime comparison.  Two things followed, both measured on episode 3
+    (2026-09-13):
+
+      * A REDRAW MASQUERADED AS THE RENDER'S INPUT.  Fifteen ep03 cells on disk
+        no longer match the bytes staged when their take rendered.  T13 scores
+        100/100 only because its record predates a redraw -- re-run its DQ and it
+        hard-fails against a picture it was never shown.  The gate and the render
+        were reading different files and nothing said so.
+      * EPISODES COLLIDED SILENTLY.  Cell names carry no book and no episode, and
+        ep02 and ep03 share more than twenty (`Q00_0.png`, `Q02_1.png`, ...).
+        Stage one after the other and the next render quietly uses the wrong
+        picture -- no error, no log line.
+
+    The digest makes both impossible, and it makes the staged name itself the
+    record of which bytes rendered."""
     path = Path(path)
     if not path.exists():
         raise FileNotFoundError(f"cannot stage missing image: {path}")
-    dest = COMFY_ROOT / "input" / path.name
+    digest = hashlib.md5(path.read_bytes()).hexdigest()[:8]
+    dest = COMFY_ROOT / "input" / f"{path.stem}_{digest}{path.suffix}"
     dest.parent.mkdir(parents=True, exist_ok=True)
-    if not dest.exists() or dest.stat().st_mtime < path.stat().st_mtime:
+    # the name IS the content, so an existing file is already the right bytes
+    if not dest.exists():
         shutil.copy2(path, dest)
-    return path.name
+    return dest.name
 
 
 UNREACHABLE = (urllib.error.URLError, TimeoutError, ConnectionError)

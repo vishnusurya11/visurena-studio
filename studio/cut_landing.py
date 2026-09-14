@@ -23,7 +23,14 @@ from PIL import Image
 from studio import frame_match as fm
 
 FPS = 24
-PRE, POST = 24, 48
+PRE, POST = 48, 48
+"""How far either side of a pin `landing` looks, in frames.
+
+PRE WAS 24, WHICH IS A FLOOR WEARING A NUMBER'S CLOTHES.  The backward search
+stops there, so a cut that landed 40 frames early reports exactly -24 -- and
+BOTH of episode 3's catastrophic takes report exactly -24, which is the search
+limit and not a measurement.  Two seconds is wide enough for the reported delta
+to be a value you can act on."""
 LAND = 0.60
 """CALIBRATION: review8/transitions.md -- a frame that reproduces its pinned cell
 scores 0.95-1.00; the neighbour cell a missed cut opened on scored 0.31.  0.60 is
@@ -84,7 +91,12 @@ def foreign_names(frames_dir: Path, own: set[str]) -> list[str]:
     mine = own_family(own)
     cells = sorted(p.name for p in frames_dir.glob("Q??_?*.png"))
     plates = sorted(p.name for p in frames_dir.glob("plate_*.png"))
-    return [n for n in cells + plates if n not in mine]
+    # A `.before.png` is a cell AS IT WAS BEFORE A REDRAW -- a draft that was never
+    # rendered against, so no take can legitimately be drifting onto it.  MEASURED
+    # on episode 3: 10 of 18 foreign-flagged samples (56 %) were a `.before`
+    # sibling, and T12 hard-failed on three of them by 0.08 against a 0.05 margin
+    # -- a coin flip between two near-identical pictures of the same panel.
+    return [n for n in cells + plates if n not in mine and ".before." not in n]
 
 
 def classify(sig: np.ndarray, own: dict[str, np.ndarray], other: dict[str, np.ndarray]) -> list[dict]:
@@ -134,8 +146,17 @@ def landing(per_frame: list[dict], anchors: list) -> list[dict]:
         lo = max(pin - PRE, 0)
         landed = next((t for t in range(lo, nxt) if per_frame[t]["own"] == target and per_frame[t]["own_s"] >= LAND), None)
         window = per_frame[lo:min(pin + POST, n)]
+        # A PING-PONG NEEDS THE FRAME TO ACTUALLY BE THE EARLIER CELL.  `landed`
+        # above requires `own_s >= LAND`; this required nothing, so a frame that
+        # matched NOTHING was reported as a cut back.  MEASURED on T07: the camera
+        # walks off its cell (end_sim 0.087) and for 44 straight frames every
+        # own-score is 0.022-0.352, argmax lands on whichever cell is the better
+        # nearest-neighbour of noise, and the gate said "cut back to shot 0".
+        # Four identical re-rolls could never fix that, because the fault was in
+        # the reading, not the render.
         back = [t for t in range((landed if landed is not None else pin), nxt)
-                if not per_frame[t]["foreign"] and segment[per_frame[t]["own"].replace("E.png", ".png")] < k]
+                if not per_frame[t]["foreign"] and per_frame[t]["own_s"] >= LAND
+                and segment[per_frame[t]["own"].replace("E.png", ".png")] < k]
         rows.append({"cut": k, "target": target, "pin": pin, "landed": landed,
                      "delta": None if landed is None else landed - pin,
                      "foreign_run": longest_run([w["foreign"] for w in window]),
