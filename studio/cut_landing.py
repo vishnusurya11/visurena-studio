@@ -107,6 +107,18 @@ def foreign_names(cells: Path, plates: Path, own: set[str]) -> list[str]:
     return [n for n in seen if n not in mine and ".before." not in n]
 
 
+def foreign_pictures(cells: Path, plates: Path, own: set[str]) -> dict[str, Path]:
+    """Every foreign picture as a RESOLVED PATH, because a bare name has to be
+    joined to a room and both call sites joined every one of them to `cells`.
+
+    `foreign_names` returns cell names and plate names together; plates live in
+    `boards/plates/`, so `cells / "plate_cab.png"` never existed and the plate
+    signatures were silently skipped.  That set is the one that caught T01
+    drifting onto plate_criterion for 40 frames."""
+    return {n: (plates if n.startswith("plate_") else cells) / n
+            for n in foreign_names(cells, plates, own)}
+
+
 def classify(sig: np.ndarray, own: dict[str, np.ndarray], other: dict[str, np.ndarray]) -> list[dict]:
     """Per frame: closest own cell + score, closest other + score, foreign flag."""
     names, o_names = list(own), list(other)
@@ -214,8 +226,8 @@ def cut_landing(video: Path, anchors: list, cells: Path) -> dict:
     measured cut frames the assembler should use (`measured_cuts`)."""
     own_names = list(dict.fromkeys(n for n, _ in anchors))
     own = {n: fm.signature(fm.load(cells / n)).ravel() for n in own_names if (cells / n).exists()}
-    other = {n: fm.signature(fm.load(cells / n)).ravel()
-             for n in foreign_names(cells, cells.parent / "plates", set(own))}
+    other = {n: fm.signature(fm.load(p)).ravel()
+             for n, p in foreign_pictures(cells, cells.parent / "plates", set(own)).items()}
     per_frame = classify(signatures(grey_frames(video)), own, other)
     rows = landing(per_frame, anchors)
     out = verdict(rows)

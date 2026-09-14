@@ -1,6 +1,12 @@
 #!/usr/bin/env python
 """G4 THE TAKE GATE: one verdict, one score, per rendered r2v take attempt.
 
+`picture_dq` and a second `strip` used to live here and were called by nothing.
+`picture_dq` could not have run if they had been: it referenced `sq`, which this
+module never imported, so any call was a NameError.  Dead code that cannot run
+is worse than dead code that can -- it reads as a working gate.  Its one useful
+sentence, the FOREIGN_MARGIN calibration, already lives in `studio/cut_landing.py`.
+
     uv run python scripts/episode/take_dq.py <codex_id> <episode> <take...> [--attempts]
 
 Every attempt on disk is measured the same way and the ladder returns ONE
@@ -28,7 +34,7 @@ sys.path.insert(0, str(ROOT))
 
 from PIL import Image, ImageDraw
 
-from studio import av_sync, cut_landing as cl, episode_home, frame_match as fm, motion_gate, take_verdict as tv
+from studio import av_sync, cut_landing as cl, episode_home, episode_seq_board as sq, frame_match as fm, motion_gate, take_verdict as tv
 from studio.trailer_assemble import clip_seconds
 
 SAMPLES = 8
@@ -78,30 +84,6 @@ def own_family(anchors: list) -> set[str]:
     return cl.own_family({name for name, _ in anchors})
 
 
-def picture_dq(video: Path, index: int, boards: Path, work: Path, seconds: float,
-               anchors: list | None = None) -> dict:
-    """`anchors` = the take's [(cell name, frame)]: its own cells in time order."""
-    anchors = anchors or []
-    own = {k: fm.load(boards / name) for k, (name, _) in enumerate(anchors)}
-    own_names = own_family(anchors)
-    others = {p.name: fm.load(p) for p in list(boards.glob("Q??_?.png")) + list(sq.cells_in(boards).glob("Q??_?E.png"))
-              if p.name not in own_names}
-    order = segment_order(anchors)
-    rows, off, foreign = [], 0, 0
-    for k in range(SAMPLES):
-        at = min(seconds * k / (SAMPLES - 1), seconds - 0.05)
-        frame = frame_at(video, at, work / f"take_T{index:02d}_{k}.png")
-        best, score = fm.closest(frame, {str(c): im for c, im in own.items()})
-        want = expected_anchor(anchors, at) if anchors else 0
-        f_best, f_score = fm.closest(frame, others) if others else ("", 0.0)
-        is_off = abs(segment_of(anchors, int(best), order) - segment_of(anchors, want, order)) > 1 if anchors else False
-        is_foreign = f_score > score + 0.05
-        off += is_off
-        foreign += is_foreign
-        rows.append({"at": round(at, 2), "closest_own": int(best), "score": score, "expected": want,
-                     "off": is_off, "closest_foreign": f_best, "foreign_score": f_score, "foreign": is_foreign})
-    return {"frames": rows, "off_beat": off, "foreign": foreign, "picture_ok": off <= 2 and foreign == 0}
-
 
 def camera_dq(video: Path, seconds: float, cuts: list[float]) -> dict:
     """Scale change per second and scene events, away from declared cuts."""
@@ -149,22 +131,6 @@ def audio_dq(video: Path, composite: Path, dialogue: bool, work: Path, index: in
         out["heard"] = voice_qc.any_transcriber()(track)
     return out
 
-
-def strip(work: Path, index: int, rows: list[dict], boards: Path, anchors: list | None = None) -> Path:
-    tile = (220, 385)
-    page = Image.new("RGB", (SAMPLES * (tile[0] + 4), 2 * (tile[1] + 22)), "black")
-    d = ImageDraw.Draw(page)
-    for k, row in enumerate(rows):
-        page.paste(Image.open(work / f"take_T{index:02d}_{k}.png").resize(tile), (k * (tile[0] + 4), 20))
-        d.text((k * (tile[0] + 4) + 3, 3), f"{row['at']}s own K{row['closest_own']} ({row['score']:.2f}) want {row['expected']}"
-               + (" OFF" if row["off"] else "") + (" FOREIGN" if row["foreign"] else ""), fill="white")
-        name = anchors[row["expected"]][0] if anchors else ""
-        if name:
-            page.paste(Image.open(boards / name).resize(tile), (k * (tile[0] + 4), tile[1] + 42))
-        d.text((k * (tile[0] + 4) + 3, tile[1] + 25), f"expected cell {name}", fill="white")
-    out = work / f"take_T{index:02d}.png"
-    page.save(out)
-    return out
 
 
 def segment_kinds(episode, anchors: list) -> dict[str, str]:
@@ -232,13 +198,16 @@ def record(best, attempts: list) -> dict:
     return out
 
 
-def measure_attempt(video: Path, rec: dict, index: int, boards: Path, work: Path, take_dir: Path,
+def measure_attempt(video: Path, rec: dict, index: int, cells: Path, work: Path, take_dir: Path,
                     kinds: dict, line: str, attempt: int):
-    """One attempt: its audio, then the one verdict every gate feeds."""
+    """One attempt: its audio, then the one verdict every gate feeds.
+
+    `cells` is the CELLS room, `boards/cells/`, not `boards/`: `tv.measure`
+    resolves every anchor name against it."""
     seconds = min(clip_seconds(video), rec["placed_seconds"])
     composite = take_dir / (f"voice_{index:02d}.wav" if rec["audio"] != "silence" else f"silence_{index:02d}.wav")
     audio = audio_dq(video, composite, rec["lane"] == "dialogue", work, index)
-    v = tv.measure(video, rec, boards, seconds, attempt, audio, line, kinds)
+    v = tv.measure(video, rec, cells, seconds, attempt, audio, line, kinds)
     return v, audio
 
 
@@ -247,6 +216,7 @@ def main(book_id: str, number: int, indices: list[int], attempts: bool = False) 
     home = episode_home.home(book, number)
     episode = episode_home.load_plan(book, number)
     boards, take_dir = episode_home.boards_dir(book, number), episode_home.takes_dir(book, number, "r2v")
+    cells = sq.cells_in(boards)
     work = episode_home.work_dir(book, number, "r2v") / "dq"
     work.mkdir(parents=True, exist_ok=True)
     records = {r["index"]: r for r in episode_home.read_json(take_dir / "shots.json")}
@@ -254,7 +224,7 @@ def main(book_id: str, number: int, indices: list[int], attempts: bool = False) 
         rec = records[index]
         kinds, line = segment_kinds(episode, rec.get("anchors", [])), line_text(episode, rec)
         files = attempts_of(take_dir, index) if attempts else [book / rec["rel_path"]]
-        judged = {f: measure_attempt(f, rec, index, boards, work, take_dir, kinds, line, k)
+        judged = {f: measure_attempt(f, rec, index, cells, work, take_dir, kinds, line, k)
                   for k, f in enumerate(files)}
         verdicts = {f: v for f, (v, _) in judged.items()}
         best = settle(take_dir, index, verdicts) if attempts else files[0]
@@ -262,7 +232,7 @@ def main(book_id: str, number: int, indices: list[int], attempts: bool = False) 
         kept = take_dir / f"T{index:02d}.mp4" if attempts else best
         report = record(v, list(verdicts.values()))
         report["audio"], report["camera"] = audio, camera_dq(kept, v.seconds, [f / 24 for _, f in rec.get("anchors", [])][1:])
-        report["strip"] = str(tv.strip(v, kept, boards, work / f"take_T{index:02d}.png"))
+        report["strip"] = str(tv.strip(v, kept, cells, work / f"take_T{index:02d}.png"))
         episode_home.write_json(take_dir / f"T{index:02d}.dq.json", report)
         print(row(index, v, best.name if attempts else "", len(files)), flush=True)
 

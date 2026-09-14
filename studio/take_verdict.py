@@ -267,8 +267,23 @@ def segments_of(anchors: list, cells: Path, seconds: float,
 
 
 def cell_signatures(cells: Path, names) -> dict[str, np.ndarray]:
-    """A flat frame_match signature per named cell on disk."""
-    return {n: fm.signature(fm.load(cells / n)).ravel() for n in names if (cells / n).exists()}
+    """A flat frame_match signature per named cell.
+
+    A NAMED CELL THAT IS NOT THERE IS AN ERROR, not an omission.  This used to
+    skip it -- `if (cells / n).exists()` -- and `take_dq.main` was passing
+    `boards` where `cells` was wanted after cells moved to `boards/cells/`.  The
+    dict came back empty, `measure` turned that into `per_frame = []` by its own
+    `if own else []`, and every picture gate read an empty list as nothing
+    wrong.  Episode 4's whole DQ run produced verdicts off zero frames of
+    comparison and only surfaced because the report image, drawn last, raised on
+    the same bad path.
+
+    A gate may say a take is bad, and may say it could not read something.  It
+    may not say nothing and be taken for a pass."""
+    missing = [n for n in names if not (cells / n).exists()]
+    if missing:
+        raise FileNotFoundError(f"{len(missing)} named cells are not in {cells}: {', '.join(sorted(missing)[:4])}")
+    return {n: fm.signature(fm.load(cells / n)).ravel() for n in names}
 
 
 def opening_similarity(sigs: np.ndarray, cell: np.ndarray, first: int) -> float:
@@ -310,7 +325,8 @@ def measure(video: Path, record: dict, cells: Path, seconds: float, attempt: int
     sigs = cl.signatures(frames.astype(np.uint8))
     own = cell_signatures(cells, dict.fromkeys(n for n, _ in anchors))
     # cells/ and plates/ are siblings under the episode's boards/ by construction
-    other = cell_signatures(cells, cl.foreign_names(cells, cells.parent / "plates", set(own)))
+    other = {n: fm.signature(fm.load(p)).ravel()
+             for n, p in cl.foreign_pictures(cells, cells.parent / "plates", set(own)).items()}
     per_frame = cl.classify(sigs, own, other) if own else []
     rows = cl.landing(per_frame, anchors) if per_frame else []
     # The take's own reference list decides what it was AIMED at; the cells on
