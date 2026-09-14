@@ -107,16 +107,58 @@ def foreign_names(cells: Path, plates: Path, own: set[str]) -> list[str]:
     return [n for n in seen if n not in mine and ".before." not in n]
 
 
-def foreign_pictures(cells: Path, plates: Path, own: set[str]) -> dict[str, Path]:
-    """Every foreign picture as a RESOLVED PATH, because a bare name has to be
-    joined to a room and both call sites joined every one of them to `cells`.
+DISTINCT = 0.55
+"""How different a foreign picture must be from the take's own cells to be
+usable as evidence against it.
 
-    `foreign_names` returns cell names and plate names together; plates live in
-    `boards/plates/`, so `cells / "plate_cab.png"` never existed and the plate
-    signatures were silently skipped.  That set is the one that caught T01
-    drifting onto plate_criterion for 40 frames."""
-    return {n: (plates if n.startswith("plate_") else cells) / n
-            for n in foreign_names(cells, plates, own)}
+A plate the gate cannot tell apart from the cell is not a foreign picture, it is
+the same view: a frame near either is near both and the 0.05 FOREIGN_MARGIN is
+measuring noise.  Episode 4's shot 13 is a wide of an empty street and its own
+cell scores +0.623 against that street's plate; the gate called 85 of its 158
+frames foreign.
+
+MEASURED on episode 4, cell vs its own setup's plate:
+
+    Q13_0 +0.623   flagged 85 frames -- FALSE, the shot IS that street
+    Q05_0 +0.626   Audley Court wide, the same shape
+    Q00_0 +0.475   the cab two-shot, two men in it
+    Q17_0 +0.230
+    Q08_0 -0.057
+    Q21_0 -0.051   hit 0.999 on the plate while its own cell read -0.055
+                   -- TRUE, the room really did empty
+
+Cross-SHEET cells do the same thing one room further out: Q13_0 scores +0.585
+against Q11_0 and +0.553 against Q15_0E, both close-ups of Rance in a lit indoor
+parlour, because a 48x84 grey thumbnail reads a night exterior and a dark
+interior with one bright window as the same picture.  TWINS cannot catch those:
+it compares panels within ONE sheet and these are different setups.
+
+The split is between +0.475 and +0.623.  Six cells is thin evidence for a
+constant, and this is where that is admitted."""
+
+
+def foreign_pictures(cells: Path, plates: Path, own: set[str]) -> dict[str, Path]:
+    """Every foreign picture as a RESOLVED PATH, less any PLATE that is the
+    take's own view.
+
+    Two faults in one place.  A bare name has to be joined to a room and both
+    call sites joined every one of them to `cells` -- plates live in
+    `boards/plates/`, so no plate signature was ever loaded, silently.  And once
+    they were, a shot framed on an empty location was accused of drifting onto
+    the picture of that location.
+
+    The exemption covers plates AND cells.  It was plates only at first, on the
+    reasoning that two cells which look alike is a sheet fault TWINS owns -- but
+    TWINS compares panels within one SHEET, and the pairs that bit here are in
+    different setups, so it never saw them.  The law is about the matcher, not
+    the kind of picture."""
+    out = {n: (plates if n.startswith("plate_") else cells) / n
+           for n in foreign_names(cells, plates, own)}
+    mine = [fm.load(cells / n) for n in own if (cells / n).exists()]
+    if not mine:
+        return out
+    return {n: p for n, p in out.items()
+            if max(fm.similarity(c, fm.load(p)) for c in mine) < DISTINCT}
 
 
 def classify(sig: np.ndarray, own: dict[str, np.ndarray], other: dict[str, np.ndarray]) -> list[dict]:

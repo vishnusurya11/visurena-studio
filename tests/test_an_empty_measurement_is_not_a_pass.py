@@ -32,9 +32,14 @@ from PIL import Image
 from studio import take_verdict as tv
 
 
-def a_cell(where: Path, name: str) -> None:
+def a_cell(where: Path, name: str, seed: int | None = None) -> None:
+    """The seed defaults to the NAME, so two different cells are two different
+    pictures.  They all used RandomState(0) and so were byte-identical, which
+    made `foreign_pictures` exempt one as indistinguishable from the other --
+    correctly, and for a reason the fixture never meant to state."""
     where.mkdir(parents=True, exist_ok=True)
-    Image.fromarray(np.random.RandomState(0).randint(0, 255, (84, 48), dtype=np.uint8)).save(where / name)
+    seed = abs(hash(name)) % 9999 if seed is None else seed
+    Image.fromarray(np.random.RandomState(seed).randint(0, 255, (84, 48), dtype=np.uint8)).save(where / name)
 
 
 def test_named_cells_that_are_all_missing_raise(tmp_path):
