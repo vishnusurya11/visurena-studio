@@ -21,6 +21,14 @@ from pydantic import BaseModel, Field, model_validator
 
 from studio import canvas
 from studio.affirm import negations
+from studio.episode_takes import BUDGET as TAKE_BUDGET
+
+"""THE PACKER'S BUDGET IS THE PLAN'S BUDGET, and it is imported rather than
+copied.  `episode_takes.groups` caps a RUN of shots at BUDGET seconds; it cannot
+split a single shot, so a shot longer than the budget becomes a take longer than
+the budget and nothing downstream refuses it.  Measured on episode 4's first
+plan, five of nineteen takes ran 9.4-12.25 s and every one was a shot carrying
+two lines -- the band that passed 0 of 2 in episode 3 at a mean of 3.75."""
 
 MIN_SECONDS, MAX_SECONDS = 120.0, 180.0
 """An episode is the WHOLE chapter, two to three minutes (owner, 2026-09-10)."""
@@ -371,6 +379,12 @@ class Episode(BaseModel):
                 raise ValueError(f"shot {shot.index} carries more than {MAX_LINES_PER_SHOT} lines")
             if not self.lines_of(shot.index) and not (shot.beat_s or shot.coda_s):
                 raise ValueError(f"shot {shot.index} carries no line and names no beat: a hole")
+            seconds = self.shot_seconds(shot)
+            if seconds > TAKE_BUDGET:
+                raise ValueError(
+                    f"shot {shot.index} projects {seconds:.2f} s, longer than a take "
+                    f"({TAKE_BUDGET} s): split it into two shots with two lines. "
+                    f"A run of shots can be split by the packer; one shot cannot")
         return self
 
     @model_validator(mode="after")

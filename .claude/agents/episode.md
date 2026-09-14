@@ -9,9 +9,12 @@ first and follow its sections in order; everything you need is there.
 Rules:
 - Write `plan.json` per section 1: no seconds; lines name shots; dialogue on
   the speaker's readable face; up to six setups drawn from the chapter's own
-  places, none holding more than ~25 s of picture; no hold over 5 s without
-  sub-shots; the wardrobe contract in every frame text. Validate it
-  (`Episode(**plan)`) before anything renders.
+  places, none holding more than ~25 s of picture; ONE LINE PER SHOT, so a
+  stretch over the take budget is split into two shots and two lines rather
+  than into sub-shots inside one take (a sub-shot is a cut the model places
+  from a whole-second stamp, which bounds it to +-12 frames); the wardrobe
+  contract in every frame text. Validate it (`Episode(**plan)`) before
+  anything renders.
 - Audio first: `say_lines`, `respot`, `timeline` before any picture; the shot
   times come from `placed.json`, never from the plan.
 - The panel is frame zero: `motion` never asks for an action whose result

@@ -132,10 +132,19 @@ Rules the owner made after watching:
   corridor was rejected). Take the chapter's own places (Criterion Bar, the
   cab, the hospital gate, the corridor under 20 s, the laboratory, the
   street) and add a setup whenever it buys variety: plates are free.
-- **A hold is not a shot.** An insert earns 3 seconds; a narration stretch
-  over 5 s becomes 2-3 sub-shots (a new angle, subject or reveal), each a
-  real frame zero, continuous with the takes on either side (still walking,
-  same place, the last sub-shot hands off to the next take's first frame).
+- **A hold is not a shot, and a sub-shot is not the answer.** An insert
+  earns 3 seconds. A stretch longer than the take budget becomes TWO SHOTS
+  WITH TWO LINES, split while the lines are being written -- never 2-3
+  sub-shots inside one take. A sub-shot is a cut the MODEL has to place,
+  and it is placed from a stamp: `episode_ref_official.stamp` rounds to a
+  whole second (the engine's own grammar), so the model can be told the
+  time only to +-12 frames. Measured over all fifteen of episode 3's
+  internal pins, 7 of 15 could not land inside the old [-4, +6] window even
+  with perfect obedience. Episode 4 was written with one line per shot: 24
+  shots, 24 takes, zero internal cuts, every take 4.5-8.0 s, all inside the
+  band that passes 16 of 20 (`episode_takes.BUDGET`). Put the cut in the
+  EDIT, where it is frame-exact, and ask the latent for one continuous
+  picture.
 - **Variety.** No two consecutive shots of the same subject at the same
   size; every third shot an insert or a new axis; a face that must read is
   >= a fifth of the frame height.
@@ -149,7 +158,11 @@ Rules the owner made after watching:
   `char-<who>.png` and the wardrobe CARD `char-<who>_<state>.png` --
   cited inside one `<Subject>`, as MiniMax's guide's own example does.
   `cast_cards.py --check` refuses a sheet whose caption and picture are
-  not the same statement.
+  not the same statement -- including R5, a `wardrobe[state]` line with no
+  card drawn for it. That is not pedantry: `cast_sheet` falls through to
+  the BUST, which is bare-headed by rule, so an undrawn `_outdoor` card
+  means the words promise a hat and the picture passed shows none. Either
+  draw the card or delete the line.
 - **Narration text**: ~22 lines / <= 260 words / ~90 s of speech for a
   chapter; cut caption-lines (the picture shows it) and repeats.
 
