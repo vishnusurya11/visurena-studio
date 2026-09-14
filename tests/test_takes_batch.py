@@ -106,12 +106,21 @@ def test_a_retake_never_collides_with_an_attempt_already_on_disk(tmp_path):
     """The retake stage crashed at 07:37 with FileExistsError renaming T02.mp4 to
     T02_fail1.mp4, because T02_fail1.mp4 was already there from an earlier retake:
     the name came from a `tries` counter in the record, not from what is on disk.
-    take_dq has always chosen the next FREE name; the renderer did not."""
+
+    ONE COPY NOW, in `episode_home`.  The renderer and the judge each had their
+    own, both globbing the flat take dir while `migrate_layout` had moved the
+    displaced rolls into `attempts/` -- so the promise in the name held only by
+    the accident of the collision landing in another directory.  Both rooms are
+    counted and the new name goes in `attempts/`.
+    See tests/test_every_attempt_is_found_and_none_overwritten.py."""
+    from studio import episode_home
     for name in ("T02.mp4", "T02_fail1.mp4", "T02_fail2.mp4"):
         (tmp_path / name).write_bytes(b"")
-    assert takes.next_fail(tmp_path, 2).name == "T02_fail3.mp4"
+    got = episode_home.next_fail(tmp_path, 2)
+    assert got.name == "T02_fail3.mp4" and got.parent.name == "attempts"
 
 
 def test_the_first_failed_attempt_is_fail1(tmp_path):
+    from studio import episode_home
     (tmp_path / "T05.mp4").write_bytes(b"")
-    assert takes.next_fail(tmp_path, 5).name == "T05_fail1.mp4"
+    assert episode_home.next_fail(tmp_path, 5).name == "T05_fail1.mp4"

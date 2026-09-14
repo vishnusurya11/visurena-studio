@@ -121,6 +121,45 @@ def attempts_dir(book: Path, number: int, engine: str = "i2v") -> Path:
     return takes_dir(book, number, engine) / "attempts"
 
 
+def attempts_of(take_dir: Path, index: int) -> list[Path]:
+    """Every roll of one take: the kept file first, then every `T<NN>_*.mp4`.
+
+    IT READS BOTH ROOMS.  `migrate_layout` moved displaced rolls into
+    `take_dir/attempts/` and the renderer, written before the move, keeps putting
+    them flat -- so episode 3's losers are in `attempts/` and episode 4's are in
+    `takes/r2v/`.  Globbing one folder made `take_dq --attempts` report
+    "kept T07.mp4 of 1" while four rolls sat one directory down, and a reader of
+    that line concludes a best-of-5 was adjudicated."""
+    take_dir = Path(take_dir)
+    kept = take_dir / f"T{index:02d}.mp4"
+    others = sorted(take_dir.glob(f"T{index:02d}_*.mp4"))
+    others += sorted((take_dir / "attempts").glob(f"T{index:02d}_*.mp4"))
+    return ([kept] if kept.exists() else []) + others
+
+
+def next_fail(take_dir: Path, index: int) -> Path:
+    """The next free `T<NN>_failN.mp4`, in the attempts room, counting BOTH rooms.
+
+    ONE COPY.  `take_dq` and `takes_r2v` each had their own, and the renderer's
+    docstring says so: "the renderer had its own, worse, copy of the idea".  Both
+    globbed the flat take dir, so with the losers in `attempts/` this returned
+    `_fail1` while `attempts/T07_fail1.mp4` already existed -- and the promise in
+    its own name, that no displaced attempt is ever overwritten, held only by the
+    accident of the collision being in a different directory.
+
+    Read off what is on disk, never off a counter: the renderer once crashed with
+    FileExistsError because the name came from `tries` in a record, which a
+    re-run does not know about."""
+    take_dir = Path(take_dir)
+    used = [int(p.stem.rsplit("_fail", 1)[1])
+            for room in (take_dir, take_dir / "attempts")
+            for p in room.glob(f"T{index:02d}_fail*.mp4")
+            if p.stem.rsplit("_fail", 1)[1].isdigit()]
+    room = take_dir / "attempts"
+    room.mkdir(parents=True, exist_ok=True)
+    return room / f"T{index:02d}_fail{max(used, default=0) + 1}.mp4"
+
+
 def work_dir(book: Path, number: int, engine: str = "i2v") -> Path:
     """Scratch for a render: composited guide audio, reference strips."""
     return takes_root(book, number) / "work"

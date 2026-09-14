@@ -49,17 +49,24 @@ def test_the_line_text_of_a_dialogue_take_is_what_the_wer_is_scored_against():
 
 
 def test_attempts_of_lists_the_kept_file_first(tmp_path):
+    """`attempts_of` and `next_fail` moved to `episode_home`: the judge and the
+    renderer each had their own copy, both globbing only the flat take dir while
+    the displaced rolls had moved to `attempts/`.
+    See tests/test_every_attempt_is_found_and_none_overwritten.py."""
+    from studio import episode_home
     for name in ("T01.mp4", "T01_retake1.mp4", "T01_fail1.mp4", "T02.mp4"):
         (tmp_path / name).write_bytes(b"x")
-    assert [p.name for p in dq.attempts_of(tmp_path, 1)] == ["T01.mp4", "T01_fail1.mp4", "T01_retake1.mp4"]
-    assert [p.name for p in dq.attempts_of(tmp_path, 9)] == []
+    assert [p.name for p in episode_home.attempts_of(tmp_path, 1)] == [
+        "T01.mp4", "T01_fail1.mp4", "T01_retake1.mp4"]
+    assert [p.name for p in episode_home.attempts_of(tmp_path, 9)] == []
 
 
 def test_the_next_fail_name_does_not_overwrite_an_existing_one(tmp_path):
-    assert dq.next_fail(tmp_path, 1).name == "T01_fail1.mp4"
+    from studio import episode_home
+    assert episode_home.next_fail(tmp_path, 1).name == "T01_fail1.mp4"
     (tmp_path / "T01_fail1.mp4").write_bytes(b"x")
     (tmp_path / "T01_fail3.mp4").write_bytes(b"x")
-    assert dq.next_fail(tmp_path, 1).name == "T01_fail4.mp4"
+    assert episode_home.next_fail(tmp_path, 1).name == "T01_fail4.mp4"
 
 
 def test_settle_keeps_the_best_attempt_and_renames_the_one_it_displaces(tmp_path):
@@ -71,7 +78,9 @@ def test_settle_keeps_the_best_attempt_and_renames_the_one_it_displaces(tmp_path
     best = dq.settle(tmp_path, 1, {kept: make(False, 60.0), retake: make(True, 96.0)})
     assert best == retake
     assert kept.read_bytes() == b"better"
-    assert (tmp_path / "T01_fail1.mp4").read_bytes() == b"worse"
+    # the displaced roll goes to the ATTEMPTS room, which is where
+    # `migrate_layout` has been putting them and where `next_fail` now looks
+    assert (tmp_path / "attempts" / "T01_fail1.mp4").read_bytes() == b"worse"
     assert not retake.exists()
 
 

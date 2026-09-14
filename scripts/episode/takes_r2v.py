@@ -350,18 +350,6 @@ def graph_for(c: dict, book: Path, number: int, take_dir: Path, base: str = "") 
     return h3_anchors.anchored(graph, anchors, audio)
 
 
-def next_fail(take_dir: Path, index: int) -> Path:
-    """The next FREE `T<NN>_failN.mp4`, read off disk rather than from a counter.
-
-    The retake stage crashed with FileExistsError at 07:37 on 2026-09-12 renaming
-    T02.mp4 to T02_fail1.mp4, because T02_fail1.mp4 was already there from an
-    earlier retake: the name came from `tries` in the record, which a re-run does
-    not know about.  Disk knows.  `take_dq.next_fail` has always done it this way;
-    the renderer had its own, worse, copy of the idea."""
-    used = [int(p.stem.rsplit("_fail", 1)[1]) for p in take_dir.glob(f"T{index:02d}_fail*.mp4")
-            if p.stem.rsplit("_fail", 1)[1].isdigit()]
-    return take_dir / f"T{index:02d}_fail{max(used, default=0) + 1}.mp4"
-
 
 def ran_for(record: dict) -> float | None:
     """Seconds ComfyUI says this prompt executed, from its own timestamps.
@@ -492,7 +480,7 @@ def main(book_id: str, number: int, retake: list[int] | None = None, approved: b
         if retake and c["index"] in retake:
             tries = records.get(c["index"], {}).get("tries", 0) + 1
             if out.exists():
-                out.rename(next_fail(take_dir, c["index"]))
+                out.rename(episode_home.next_fail(take_dir, c["index"]))
             c["seed"] += 101 * tries
             c["tries"] = tries
         elif c["index"] in records and records[c["index"]].get("shots") == c["shots"] and out.exists():

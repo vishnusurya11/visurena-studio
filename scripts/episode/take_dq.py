@@ -153,18 +153,6 @@ def line_text(episode, rec: dict) -> str:
     return " ".join(line.text for line in episode.lines if line.kind == "dialogue" and line.shot in shots)
 
 
-def attempts_of(take_dir: Path, index: int) -> list[Path]:
-    """The kept file first, then every `T<NN>_*.mp4` (fail, retake) on disk."""
-    kept = take_dir / f"T{index:02d}.mp4"
-    others = sorted(take_dir.glob(f"T{index:02d}_*.mp4"))
-    return ([kept] if kept.exists() else []) + others
-
-
-def next_fail(take_dir: Path, index: int) -> Path:
-    """The next free `T<NN>_failN.mp4`, so no displaced attempt is ever overwritten."""
-    used = [int(p.stem.rsplit("_fail", 1)[1]) for p in take_dir.glob(f"T{index:02d}_fail*.mp4")
-            if p.stem.rsplit("_fail", 1)[1].isdigit()]
-    return take_dir / f"T{index:02d}_fail{max(used, default=0) + 1}.mp4"
 
 
 def settle(take_dir: Path, index: int, verdicts: dict) -> Path:
@@ -174,7 +162,7 @@ def settle(take_dir: Path, index: int, verdicts: dict) -> Path:
     best = max(verdicts, key=lambda p: tv.rank_key(verdicts[p]))
     if best != kept:
         if kept.exists():
-            kept.rename(next_fail(take_dir, index))
+            kept.rename(episode_home.next_fail(take_dir, index))
         best.rename(kept)
     return best
 
@@ -223,7 +211,7 @@ def main(book_id: str, number: int, indices: list[int], attempts: bool = False) 
     for index in indices:
         rec = records[index]
         kinds, line = segment_kinds(episode, rec.get("anchors", [])), line_text(episode, rec)
-        files = attempts_of(take_dir, index) if attempts else [book / rec["rel_path"]]
+        files = episode_home.attempts_of(take_dir, index) if attempts else [book / rec["rel_path"]]
         judged = {f: measure_attempt(f, rec, index, cells, work, take_dir, kinds, line, k)
                   for k, f in enumerate(files)}
         verdicts = {f: v for f, (v, _) in judged.items()}
