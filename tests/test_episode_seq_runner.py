@@ -69,19 +69,32 @@ def test_a_sheet_is_clean_only_when_every_gate_is_quiet():
     assert boards.clean(dict(passing, white_lines_in=["Q02_0.png"])) is False
 
 
-def test_an_end_cell_that_is_still_a_copy_after_the_retry_is_deleted(tmp_path):
-    """Owner 2026-09-11: a silently kept copy is worse than no END cell."""
+def test_an_end_cell_that_is_still_a_copy_after_the_retry_is_retired(tmp_path):
+    """Owner 2026-09-11: a silently kept copy is worse than no END cell.
+
+    THIS TEST USED TO WRITE THE CELLS IN THE BOARDS ROOT, which is where the
+    code looked before cells moved to `boards/cells/` -- so it kept passing
+    while the real tree stopped matching, and pinned the broken path in place.
+    Episode 4 had seven copied END cells and `dropped_ends` came back empty.
+    The cell is now MOVED to `boards/superseded/`, not unlinked: `sq.reaches`
+    already refuses a copy as a destination, so deleting a drawn picture bought
+    nothing.  See tests/test_drop_end_copies_finds_the_cells.py."""
+    (tmp_path / "cells").mkdir()
     for name in ("Q02_0.png", "Q02_0E.png"):
-        Image.new("L", (8, 8), 0).save(tmp_path / name)
+        Image.new("L", (8, 8), 0).save(tmp_path / "cells" / name)
     dropped = boards.drop_end_copies(tmp_path, {"duplicates": [("Q02_0", "Q02_0E")]})
     assert dropped == [{"dropped_end": "Q02_0E", "reason": "still a copy of Q02_0 after strict"}]
-    assert (tmp_path / "Q02_0.png").exists() and not (tmp_path / "Q02_0E.png").exists()
+    assert (tmp_path / "cells" / "Q02_0.png").exists()
+    assert not (tmp_path / "cells" / "Q02_0E.png").exists()
+    assert (tmp_path / "superseded" / "Q02_0E.png").exists()
 
 
 def test_two_start_cells_that_match_are_left_on_disk_for_the_human(tmp_path):
     """Only an END cell has a start panel to fall back on; two matching start cells
     are a redraw the owner looks at, never a file this script deletes."""
+    (tmp_path / "cells").mkdir()
     for name in ("Q11_1.png", "Q15_0.png"):
-        Image.new("L", (8, 8), 0).save(tmp_path / name)
+        Image.new("L", (8, 8), 0).save(tmp_path / "cells" / name)
     assert boards.drop_end_copies(tmp_path, {"duplicates": [("Q11_1", "Q15_0")]}) == []
-    assert (tmp_path / "Q11_1.png").exists() and (tmp_path / "Q15_0.png").exists()
+    assert (tmp_path / "cells" / "Q11_1.png").exists()
+    assert (tmp_path / "cells" / "Q15_0.png").exists()

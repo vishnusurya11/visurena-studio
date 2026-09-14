@@ -175,13 +175,25 @@ def refuse_on_text(group: list[dict], setup, prompt: str, grid: tuple, name: str
 
 def drop_end_copies(boards: Path, entry: dict) -> list[dict]:
     """An END cell that is still its own start panel after the strict retry is
-    DELETED.  A copy kept on disk becomes a take's pin and freezes the render on
-    the frame it repeats; the segment renders with no end pin instead."""
+    RETIRED to `boards/superseded/`: a copy is no destination for a take, and a
+    copy left where cells live is one a later reader can still pick up.
+
+    It used to build the path as `boards / f"{end}.png"` and cells moved to
+    `boards/cells/` in the layout change.  Because it asks `.exists()` first it
+    then skipped every cell in silence -- episode 4 had seven copied END cells,
+    every one of their sheets was refused by `clean`, the strict retry ran, this
+    was reached, and the report said `dropped_ends: []`, which read as good news.
+
+    It moves rather than unlinks.  `sq.reaches` already refuses a copy as a
+    destination, so deleting a picture that cost money to draw bought nothing."""
     dropped = []
     for a, b in entry["duplicates"]:
         end = next((n for n in (b, a) if n.endswith("E")), "")
-        if end and (boards / f"{end}.png").exists():
-            (boards / f"{end}.png").unlink()
+        cell = sq.cells_in(boards) / f"{end}.png"
+        if end and cell.exists():
+            old = boards / "superseded"
+            old.mkdir(parents=True, exist_ok=True)
+            cell.replace(old / cell.name)
             dropped.append({"dropped_end": end, "reason": f"still a copy of {a if end == b else b} after strict"})
     return dropped
 
