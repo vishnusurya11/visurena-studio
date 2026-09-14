@@ -48,9 +48,28 @@ def seen_cuts(video: Path, threshold: float = SCENE_THRESHOLD) -> list[float]:
     return [round(float(m), 3) for m in PTS.findall(result.stderr)]
 
 
-def missing_cuts(planned: list[float], seen: list[float], tol: float = CUT_TOLERANCE) -> list[float]:
-    """Planned cuts with no detected cut within the tolerance."""
-    return [cut for cut in planned if not any(abs(cut - s) <= tol for s in seen)]
+def missing_cuts(planned: list[float], seen: list[float], tol: float = CUT_TOLERANCE,
+                 proven: list[dict] | None = None, fps: int = 24) -> list[float]:
+    """Planned cuts that neither the scene metric saw nor the edit gate proved.
+
+    `seen` is ffmpeg's `select=gt(scene,0.1)`, a content-difference heuristic, and
+    two shots of the SAME ROOM at the same lens and the same light score under it
+    -- so a real cut reads as one that never happened, and `verdict` hard-fails
+    the delivered master for it.
+
+    `proven` is `edit_gate`'s own per-cut answer, which is not a heuristic: the
+    frame before the cut IS the previous take's last placed frame and the frame
+    at it IS the next take's first, within SAME_FRAME = 4.0 where encoder noise
+    measures 0.16-0.59 and another picture 32-63.  A cut it proved exact is
+    present whatever the scene metric saw.
+
+    Episode 5 is where this stops being theoretical: five of its six setups are
+    the 221B sitting room from five corners, most of them at the same gaslight
+    and the same fire."""
+    exact = [row["at"] / fps for row in (proven or []) if row.get("exact")]
+    return [cut for cut in planned
+            if not any(abs(cut - s) <= tol for s in seen)
+            and not any(abs(cut - s) <= tol for s in exact)]
 
 
 def window(master: Path, at: float, seconds: float, out: Path) -> Path:
@@ -204,7 +223,7 @@ def main(book_id: str, number: int, engine: str = "i2v") -> None:
         "lufs": lufs, "lufs_ok": LUFS_BAND[0] <= lufs <= LUFS_BAND[1],
         "true_peak": tp, "tp_ok": tp <= TP_CEILING,
         "planned_cuts": planned_cuts(placed), "seen_cuts": seen,
-        "missing_cuts": missing_cuts(planned_cuts(placed), seen),
+        "missing_cuts": [],          # filled below, once the edit gate has spoken
         "internal_cuts": internal_cuts(placed, records),
         "lines": heard_on_master(master, lines, work, voice_qc.any_transcriber()),
         # THE PICTURE'S END, not the last line's START.  With the start, the final
@@ -215,6 +234,11 @@ def main(book_id: str, number: int, engine: str = "i2v") -> None:
         "speech_s": round(sum(line["seconds"] for line in lines), 1),
     }
     report["edit"] = edit_report(master, placed, records, book, number, work)
+    # AFTER the edit gate, because a cut it PROVED frame-exact is present whatever
+    # ffmpeg's scene metric saw.  Episode 5 plays five of its six setups in one
+    # room, where a real cut between two corners can score under the threshold.
+    report["missing_cuts"] = missing_cuts(planned_cuts(placed), seen,
+                                          proven=report["edit"].get("cuts"))
     report["takes"] = takes_rollup(take_dir)
     report["sheets"] = sheets_rollup(episode_home.boards_dir(book, number), book)
     report["passed"] = verdict(report)
