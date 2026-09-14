@@ -429,9 +429,24 @@ def render(c: dict, graph: dict, out: Path, approved: bool = False) -> dict:
     return collect(c, prompt_id, out)
 
 
-def prompts(book_id: str, number: int) -> None:
+def opened(book_id: str, number: int):
+    """The ONE road into `cards`: the book, the plan, and the canvas the plan
+    declares.  Both entry points take it.
+
+    `main` used to rebind the canvas for itself and `prompts` did not, so the
+    free preview built every card at the module default -- episode 4's plan says
+    1:1, the preview cards said 768x1344, the graph that ran said 768x768.  A
+    preview that differs from the run by one line of setup is a different
+    program, and its whole job is to be the run."""
+    global W, H
     book = episode_home.book_dir(book_id)
     episode = episode_home.load_plan(book, number)
+    W, H = canvas.size(episode.aspect)
+    return book, episode
+
+
+def prompts(book_id: str, number: int) -> None:
+    book, episode = opened(book_id, number)
     out = episode_home.write_json(episode_home.takes_dir(book, number, "r2v") / "prompts.json",
                                   cards(book, episode, number))
     print(f"take cards -> {out}", flush=True)
@@ -440,10 +455,7 @@ def prompts(book_id: str, number: int) -> None:
 def main(book_id: str, number: int, retake: list[int] | None = None, approved: bool = False) -> None:
     """Render every take that has no record yet; `retake` re-renders those
     indices with a fresh seed (the failed file is kept as T<NN>_failN.mp4)."""
-    book = episode_home.book_dir(book_id)
-    episode = episode_home.load_plan(book, number)
-    global W, H
-    W, H = canvas.size(episode.aspect)   # the plan declares the canvas (studio/canvas.py)
+    book, episode = opened(book_id, number)
     take_dir = episode_home.takes_dir(book, number, "r2v")
     sheet = take_dir / "shots.json"
     records = {r["index"]: r for r in episode_home.read_json(sheet)} if sheet.exists() else {}
