@@ -379,13 +379,22 @@ class Episode(BaseModel):
                 raise ValueError(f"shot {shot.index} carries more than {MAX_LINES_PER_SHOT} lines")
             if not self.lines_of(shot.index) and not (shot.beat_s or shot.coda_s):
                 raise ValueError(f"shot {shot.index} carries no line and names no beat: a hole")
-            seconds = self.shot_seconds(shot)
-            if seconds > TAKE_BUDGET:
-                raise ValueError(
-                    f"shot {shot.index} projects {seconds:.2f} s, longer than a take "
-                    f"({TAKE_BUDGET} s): split it into two shots with two lines. "
-                    f"A run of shots can be split by the packer; one shot cannot")
         return self
+
+    def long_shots(self) -> list[tuple[int, float]]:
+        """Shots that project longer than a take, with their seconds.
+
+        A QUERY, NOT A VALIDATOR.  This was a validator and it refused episode
+        1's already-published plan, whose shot 17 projects 11.40 s -- so every
+        tool that merely READS an old plan broke, `story.py` included.  Reading
+        a historical plan is not endorsing it; the constraint belongs where a
+        plan is about to be DRAWN or RENDERED, before anything is spent, and
+        `seq_boards` and `takes_r2v` ask there.
+
+        Measured over the shipped plans: ep01 has one (shot 17, 11.40 s), ep02,
+        ep03 and ep04 have none."""
+        return [(s.index, round(self.shot_seconds(s), 2))
+                for s in self.shots if self.shot_seconds(s) > TAKE_BUDGET]
 
     @model_validator(mode="after")
     def _the_shape_is_present(self) -> "Episode":

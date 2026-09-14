@@ -499,10 +499,23 @@ def main(book_id: str, number: int, engine: str = "i2v",
     out = tail(mixed, card if card.exists() else book / "title" / "title.mp4",
                episode_home.master_path(book, number, engine), work, number)
     trim(out, work)
-    taken = [int(f.stem.split("master_iter")[1]) for f in home.glob("master_iter*.mp4") if f.stem.split("master_iter")[1].isdigit()]
-    keep = max(taken, default=0) + 1  # always the next number, never a gap filled
-    (home / f"master_iter{keep}.mp4").write_bytes(out.read_bytes())
+    keep = next_iteration(home)
+    (home / "cut" / f"master_iter{keep}.mp4").write_bytes(out.read_bytes())
     print(f"master -> {out}  (kept as master_iter{keep}.mp4)")
+
+
+def next_iteration(home: Path) -> int:
+    """The number the cut about to be written takes, read off the CUT ROOM.
+
+    Every iteration is kept under a numbered name so none overwrites the one
+    before it.  This globbed `home` and masters moved to `home/"cut"/`, so the
+    glob matched nothing, `max(default=0) + 1` was always 1, and every assemble
+    would have written master_iter1.mp4 over the last -- silently inverting the
+    rule the numbering exists to keep.
+
+    Always the NEXT number, never a gap filled: a name is a moment in time."""
+    seen = [f.stem.split("master_iter")[1] for f in (Path(home) / "cut").glob("master_iter*.mp4")]
+    return max((int(s) for s in seen if s.isdigit()), default=0) + 1
 
 
 if __name__ == "__main__":

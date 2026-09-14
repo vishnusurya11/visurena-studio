@@ -71,17 +71,25 @@ def test_two_sub_shots_no_longer_fit_in_a_take():
         plan([cut(3.0), cut(5.5, "medium", faces=["john_watson"])])
 
 
-def test_two_lines_and_two_sub_shots_is_refused_for_its_length():
-    """The old fixture's own shape: 9.2 s, two lines, two cuts."""
-    ep = plan([])
-    data = ep.model_dump()
+def test_two_lines_and_two_sub_shots_is_a_take_nobody_can_render():
+    """The old fixture's own shape: 9.2 s, two lines, two cuts.
+
+    It VALIDATES -- the cuts at 3.0 and 6.0 each leave more than MIN_SUB of a
+    9.2 s shot -- and that is the point.  Nothing in the contract refuses it;
+    `long_shots` reports it and the steps that spend refuse on that, so a plan
+    already on disk still loads (`test_a_shot_fits_in_a_take.py`)."""
+    data = plan([]).model_dump()
     data["lines"].insert(2, Line(index=2, kind="narration", speaker="john_watson",
                                  text=WORDS, shot=1).model_dump())
     for k, line in enumerate(data["lines"]):
         line["index"] = k
     data["shots"][1]["cuts"] = [cut(3.0).model_dump(), cut(6.0, "medium").model_dump()]
-    with pytest.raises(ValueError, match="longer than a take"):
-        Episode(**data)
+    ep = Episode(**data)
+    assert [i for i, _ in ep.long_shots()] == [1]
+
+    from scripts.episode.takes_r2v import refuse_long_shots
+    with pytest.raises(SystemExit, match="longer than a take"):
+        refuse_long_shots(ep)
 
 
 def test_a_dialogue_shot_takes_no_cuts():

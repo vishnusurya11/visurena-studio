@@ -19,6 +19,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 import importlib.util as _iu
 
 from studio import episode_home, episode_ref_official as ro
+from studio import episode_seq_board as sq
 
 SECTIONS = ("subject_definitions:", "summary:", "retention_analysis:", "detailed_description:",
             "overall_soundscape:", "non_diegetic_music:")
@@ -104,7 +105,7 @@ def verdict(record: dict) -> str:
 
 def take_card(book: Path, frames: Path, home: Path, episode, record: dict) -> str:
     shots = record.get("shots") or [record["index"]]
-    made = home / "shots_r2v" / f"T{record['index']:02d}.mp4"
+    made = episode_home.takes_under(home, "r2v") / f"T{record['index']:02d}.mp4"
     video = (f'<div class=row2><video src="{rc.rel(book, made)}" controls muted preload="none"></video>'
              f'<a href="{rc.rel(book, made)}">open beside the page</a></div>'
              if made.exists() else '<p class=todo>take not rendered yet</p>')

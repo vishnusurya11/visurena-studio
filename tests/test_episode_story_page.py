@@ -24,31 +24,31 @@ def home(tmp_path: Path, *made: str) -> Path:
         target = tmp_path / name
         target.parent.mkdir(parents=True, exist_ok=True)
         target.write_bytes(b"")
-    (tmp_path / "frames").mkdir(exist_ok=True)
+    (tmp_path / "boards").mkdir(exist_ok=True)
     return tmp_path
 
 
 def test_an_episode_with_takes_outstanding_is_at_the_take_stage(tmp_path):
     """Even with a master and a report from an earlier iteration on disk."""
-    where = home(tmp_path, "master_iter4.mp4", "report_final.html", "placed.json")
+    where = home(tmp_path, "cut/master_iter4.mp4", "reports/report_final.html", "placed.json")
     assert story.stage_of(where, takes=[1] * 15, plan_exists=True, total=19) == "8 takes"
 
 
 def test_an_episode_whose_takes_are_all_in_is_judged_by_what_else_is_on_disk(tmp_path):
-    where = home(tmp_path, "master_iter5.mp4", "report_final.html")
+    where = home(tmp_path, "cut/master_iter5.mp4", "reports/report_final.html")
     assert story.stage_of(where, takes=[1] * 19, plan_exists=True, total=19).startswith("10 pages")
 
 
 def test_a_master_with_no_report_is_the_cut_stage(tmp_path):
-    where = home(tmp_path, "master_iter5.mp4")
+    where = home(tmp_path, "cut/master_iter5.mp4")
     assert story.stage_of(where, takes=[1] * 19, plan_exists=True, total=19) == "9 cut and QC"
 
 
 def test_the_earlier_stages_are_read_off_what_exists(tmp_path):
     assert story.stage_of(home(tmp_path), takes=[], plan_exists=True, total=0) == "0 the plan"
     assert story.stage_of(home(tmp_path, "placed.json"), [], True, 0) == "2 timeline"
-    assert story.stage_of(home(tmp_path, "frames/plate_lab.png"), [], True, 0) == "3 plates"
-    assert story.stage_of(home(tmp_path, "frames/Q02_0.png"), [], True, 0) == "6 storyboards drawn"
+    assert story.stage_of(home(tmp_path, "boards/plates/plate_lab.png"), [], True, 0) == "3 plates"
+    assert story.stage_of(home(tmp_path, "boards/cells/Q02_0.png"), [], True, 0) == "6 storyboards drawn"
 
 
 def test_no_plan_says_so(tmp_path):

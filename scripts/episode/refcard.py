@@ -29,6 +29,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 
 from studio import episode_home
+from studio import episode_seq_board as sq
 
 CSS = """
 *{box-sizing:border-box}
@@ -154,11 +155,11 @@ def take_section(card: dict) -> str:
 def build(book: Path, number: int) -> Path:
     home, frames = episode_home.home(book, number), episode_home.boards_dir(book, number)
     episode = episode_home.load_plan(book, number)
-    cards = json.loads((home / "shots_r2v" / "prompts.json").read_text(encoding="utf-8"))
+    cards = json.loads((episode_home.takes_dir(book, number, "r2v") / "prompts.json").read_text(encoding="utf-8"))
     cards = cards["takes"] if isinstance(cards, dict) else cards
 
     by_setup: dict[str, list[str]] = {}
-    for p in sorted(frames.glob("Q*.png")):
+    for p in sorted(sq.cells_in(frames).glob("Q*.png")):
         if ".before" in p.name or ".cells" in p.name:
             continue
         shot = int(p.stem[1:3])

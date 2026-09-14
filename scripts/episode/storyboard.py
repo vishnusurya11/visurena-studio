@@ -25,6 +25,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 
 from studio import book_root
 from studio import episode_board as board
+from studio import episode_seq_board as sq
 from studio import approval, canvas, episode_home, image_spend as spend
 from studio.episode_spec import Episode
 from studio.llm import _load_dotenv
@@ -229,7 +230,7 @@ def review(book_id: str, number: int) -> None:
         if shot.index not in records:
             continue
         take = book / records[shot.index]["rel_path"]
-        rows.append((home / "frames" / f"S{shot.index:02d}.png",
+        rows.append((sq.panels_in(home / "boards") / f"S{shot.index:02d}.png",
                      still(take, PEEK, work / f"take{shot.index:02d}.png"),
                      still(take, max(records[shot.index]["placed_seconds"] - 0.1, 0.0),
                            work / f"end{shot.index:02d}.png")))

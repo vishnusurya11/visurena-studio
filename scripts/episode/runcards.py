@@ -549,7 +549,7 @@ STYLE = ("body{font:14px system-ui;background:#111;color:#ddd;margin:20px;max-wi
 
 def deliverables_section(book: Path, home: Path) -> str:
     """Every kept master with its size and time, newest first, and the QC of the current one."""
-    masters = sorted(home.glob("master_iter*.mp4"), key=lambda p: int(p.stem.split("iter")[1]), reverse=True)
+    masters = sorted((home / "cut").glob("master_iter*.mp4"), key=lambda p: int(p.stem.split("iter")[1]), reverse=True)
     rows = "".join(f'<tr><td><a href="{rel(book, p)}">{esc(p.name)}</a></td><td>{p.stat().st_size / 1e6:.1f} MB</td>'
                    f"<td>{__import__('datetime').datetime.fromtimestamp(p.stat().st_mtime):%Y-%m-%d %H:%M}</td></tr>" for p in masters)
     qc = home / "qc_r2v.json"
@@ -617,15 +617,15 @@ def main(book_id: str, number: int) -> None:
     # both engines and compared them; r2v is the engine now, and an episode that
     # only ran r2v was left with no report at all -- which is the one artefact the
     # owner reads to see what went wrong.
-    i2v_sheet = home / "shots" / "shots.json"
+    i2v_sheet = episode_home.takes_dir(book, number, "i2v") / "shots.json"
     records = ({r["index"]: r for r in episode_home.read_json(i2v_sheet)}
                if i2v_sheet.exists() else {})
-    r2v_sheet = home / "shots_r2v" / "shots.json"
+    r2v_sheet = episode_home.takes_dir(book, number, "r2v") / "shots.json"
     r2v = {}
     for r in (episode_home.read_json(r2v_sheet) if r2v_sheet.exists() else []):
         for i in r.get("shots") or [r["index"]]:
             r2v[i] = r  # a take-run's record answers for every shot in the run
-    r2v_cards = home / "shots_r2v" / "prompts.json"
+    r2v_cards = episode_home.takes_dir(book, number, "r2v") / "prompts.json"
     r2v_planned = {}
     for c in (episode_home.read_json(r2v_cards) if r2v_cards.exists() else []):
         for i in c.get("shots") or [c["index"]]:
@@ -663,10 +663,10 @@ def main(book_id: str, number: int) -> None:
             + "".join(f'<a href="#voice-{who}">voice: {who}</a>' for who in speakers)
             + "".join(f'<a href="#{stem}">{stem}</a>' for stem in by_sheet)
             + "".join(f'<a href="#shot{s.index:02d}">S{s.index:02d}</a>' for s in episode.shots))
-    (home / "report_final.html").write_text(
+    (episode_home.reports_dir(book, number) / "report_final.html").write_text(
         page(f"{episode.title} — EP {number} final report: issues, inputs, prompts, workflow per take", fnav, final),
         encoding="utf-8")
-    print(f"final report -> {home / 'report_final.html'}")
+    print(f"final report -> {episode_home.reports_dir(book, number) / 'report_final.html'}")
     print(f"{len(episode.shots)} shot cards, {len(by_sheet)} sheets -> {out}", flush=True)
 
 

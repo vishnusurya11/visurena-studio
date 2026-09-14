@@ -20,9 +20,8 @@ beat and coda.  Episode 4's rewritten plan projects a worst shot of 7.90 s and
 measured 7.71 s, so the projection is close enough to refuse on.
 """
 import pytest
-from pydantic import ValidationError
 
-from studio.episode_spec import Episode, Line
+from studio.episode_spec import Episode
 from studio.episode_takes import BUDGET
 from tests.test_episode_spec import NARR, episode
 
@@ -47,17 +46,34 @@ def two_lines_on_one_shot() -> dict:
     return data
 
 
-def test_a_shot_that_projects_past_the_budget_is_refused():
-    with pytest.raises(ValidationError, match="longer than a take"):
-        Episode(**two_lines_on_one_shot())
+def test_a_shot_that_projects_past_the_budget_is_found():
+    assert Episode(**two_lines_on_one_shot()).long_shots() == [(2, 11.87)]
 
 
-def test_the_complaint_names_the_shot_and_its_seconds():
-    with pytest.raises(ValidationError) as e:
-        Episode(**two_lines_on_one_shot())
+def test_the_step_that_spends_refuses_it():
+    """A QUERY on the plan, a REFUSAL at the step.  As a validator this refused
+    episode 1's already-published plan (shot 17, 11.40 s) and broke every tool
+    that merely READS an old plan, `story.py` included.  Reading a historical
+    plan is not endorsing it."""
+    from scripts.episode.takes_r2v import refuse_long_shots
+    with pytest.raises(SystemExit, match="longer than a take"):
+        refuse_long_shots(Episode(**two_lines_on_one_shot()))
+
+
+def test_the_refusal_names_the_shot_and_its_seconds():
+    from scripts.episode.takes_r2v import refuse_long_shots
+    with pytest.raises(SystemExit) as e:
+        refuse_long_shots(Episode(**two_lines_on_one_shot()))
     said = str(e.value)
     assert "shot 2 projects 11.87 s" in said and f"({BUDGET} s)" in said
-    assert "split it into two shots" in said
+    assert "Split each into two" in said
+
+
+def test_an_old_plan_with_a_long_shot_still_loads():
+    """Episode 1 ships one.  It must keep loading for every reader."""
+    from studio import episode_home
+    ep = episode_home.load_plan(episode_home.book_dir("20260822113400_a-study-in-scarlet"), 1)
+    assert ep.long_shots() == [(17, 11.4)]
 
 
 def test_one_line_a_shot_still_passes():
@@ -74,8 +90,7 @@ def test_a_hold_counts_against_the_budget_too():
     # speech + 0.50 of handles.  A full beat and a coda push it to 9.50.
     data["lines"][4]["text"] = " ".join(["word"] * 18)
     data["shots"][data["lines"][4]["shot"]].update(beat_s=1.5, coda_s=1.5)
-    with pytest.raises(ValidationError, match="longer than a take"):
-        Episode(**data)
+    assert Episode(**data).long_shots()
 
 
 def test_a_shot_exactly_at_the_budget_is_allowed():

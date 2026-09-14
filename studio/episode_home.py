@@ -101,6 +101,15 @@ def takes_root(book: Path, number: int) -> Path:
     return home(book, number) / "takes"
 
 
+def takes_under(home_dir: Path, engine: str = "i2v") -> Path:
+    """One engine's takes, addressed from the EPISODE HOME rather than from
+    (book, number).  Some readers -- a per-take HTML card, say -- are handed the
+    home and never see the number, and without this they spell the room out by
+    hand -- which is how a hand-written join to the pre-split takes folder
+    outlived the folder it named, in three separate report scripts."""
+    return Path(home_dir) / "takes" / engine
+
+
 def takes_dir(book: Path, number: int, engine: str = "i2v") -> Path:
     """One engine's takes. The engine is a FOLDER, not a filename suffix."""
     return takes_root(book, number) / engine

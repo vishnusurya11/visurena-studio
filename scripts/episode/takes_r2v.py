@@ -440,6 +440,19 @@ def render(c: dict, graph: dict, out: Path, approved: bool = False) -> dict:
     return collect(c, prompt_id, out)
 
 
+def refuse_long_shots(episode) -> None:
+    """A shot longer than a take is a take nobody can render: refuse BEFORE
+    spending.  `episode_takes.groups` caps a run of shots at BUDGET seconds and
+    cannot split a single shot, so nothing downstream would catch it -- episode
+    4's first plan put five takes at 9.4-12.25 s, the band that passed 0 of 2 in
+    episode 3 at a mean of 3.75, and it took reading the take cards by hand."""
+    long = episode.long_shots()
+    if long:
+        raise SystemExit("; ".join(f"shot {i} projects {s} s" for i, s in long)
+                         + f" -- longer than a take ({tk.BUDGET} s). Split each into two "
+                           "shots with two lines; a run can be split by the packer, one shot cannot")
+
+
 def opened(book_id: str, number: int):
     """The ONE road into `cards`: the book, the plan, and the canvas the plan
     declares.  Both entry points take it.
@@ -453,6 +466,7 @@ def opened(book_id: str, number: int):
     book = episode_home.book_dir(book_id)
     episode = episode_home.load_plan(book, number)
     W, H = canvas.size(episode.aspect)
+    refuse_long_shots(episode)
     return book, episode
 
 

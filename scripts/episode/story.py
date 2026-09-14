@@ -22,6 +22,7 @@ ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT))
 
 from studio import episode_home, story_bible as sb, story_layer
+from studio import episode_seq_board as sq
 
 
 def stage_of(home: Path, takes: list, plan_exists: bool, total: int = 0) -> str:
@@ -33,15 +34,15 @@ def stage_of(home: Path, takes: list, plan_exists: bool, total: int = 0) -> str:
     still unrendered.  A status line that flatters is worse than none."""
     if total and len(takes) < total:
         return "8 takes"
-    if (home / "report_final.html").exists() and any(home.glob("master_iter*.mp4")):
+    if (home / "reports" / "report_final.html").exists() and any((home / "cut").glob("master_iter*.mp4")):
         return "10 pages — delivered"
-    if any(home.glob("master_iter*.mp4")):
+    if any((home / "cut").glob("master_iter*.mp4")):
         return "9 cut and QC"
     if takes:
         return "8 takes"
-    if list((home / "frames").glob("Q??_?.png")):
+    if list(sq.cells_in(home / "boards").glob("Q??_?.png")):
         return "6 storyboards drawn"
-    if list((home / "frames").glob("plate_*.png")):
+    if list(sq.plates_in(home / "boards").glob("plate_*.png")):
         return "3 plates"
     if (home / "placed.json").exists():
         return "2 timeline"
@@ -74,7 +75,7 @@ def facts(book_id: str, number: int) -> dict:
     takes_sheet = episode_home.takes_dir(book, number, "r2v") / "shots.json"
     takes = episode_home.read_json(takes_sheet) if takes_sheet.exists() else []
     placed = episode_home.read_json(home / "placed.json") if (home / "placed.json").exists() else {}
-    masters = sorted(home.glob("master_iter*.mp4"))
+    masters = sorted((home / "cut").glob("master_iter*.mp4"))
     planned = planned_takes(book, episode, number, len(takes))
     return {
         "title": f"{episode.title} — episode {number}",
