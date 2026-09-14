@@ -212,14 +212,68 @@ minting a coin that reads "SOLVUNT EF . CENOWLEBH" around a figure who is not
 Victoria, while the correct face sat drawn and unused in Q10_0E.png."""
 
 
-def end_pair_verdict(score: float, size: str = "") -> str:
+BLOCK_GRID = (7, 4)
+BLOCK_FLOOR = 0.2
+"""Reading an END pair WHERE IT CHANGED, not over the whole frame.
+
+The ceiling asks "did anything move" and answers it globally, which works while
+the camera moves and fails on a locked-off one: most of the frame is SUPPOSED to
+be identical and the change sits in one part of it.  Episode 4's shot 21 -- the
+same room, the same table, the same man in the foreground, and in the END cell
+the two visitors have turned and are walking out of the door -- scores 0.856 and
+was called a copy.  The take got no destination and invented one, cutting to
+plate_rance_parlour.png at frame 128 and reproducing it at 0.999.
+
+Blocks of 7 x 4 over the thumbnail, counting those under 0.2, across all eleven
+of episode 4's END pairs:
+
+    Q08_0 0.982 global   0 blocks   a copy, and it looks like one
+    Q00_0 0.935          0          a copy
+    Q11_0 0.945          0          a head tilt; a copy
+    Q15_0 0.938          4          leans in and re-gestures -- NOT a copy
+    Q21_0 0.856          3          the two men walk out -- NOT a copy
+    Q20_0 0.856          3
+    Q09_0 0.807          3
+
+0 against 3 with nothing between, verified by eye on Q21 and Q15 (kept) and Q11
+and Q08 (still copies).  So ONE block of real change is enough; the count is not
+tuned to the eleven pairs that happened to be measured."""
+
+
+def changed_blocks(start, end, grid: tuple[int, int] = BLOCK_GRID,
+                   floor: float = BLOCK_FLOOR) -> int:
+    """How many blocks of the frame hold a real change between the two cells."""
+    import numpy as np
+
+    a, b = np.asarray(start, dtype=float), np.asarray(end, dtype=float)
+    if a.ndim == 3:
+        a, b = a.mean(2), b.mean(2)
+    ny, nx = grid
+    h, w = a.shape
+    n = 0
+    for j in range(ny):
+        for i in range(nx):
+            p = a[h * j // ny:h * (j + 1) // ny, w * i // nx:w * (i + 1) // nx].ravel()
+            q = b[h * j // ny:h * (j + 1) // ny, w * i // nx:w * (i + 1) // nx].ravel()
+            p, q = p - p.mean(), q - q.mean()
+            if float(p @ q / ((np.linalg.norm(p) * np.linalg.norm(q)) + 1e-9)) < floor:
+                n += 1
+    return n
+
+
+def end_pair_verdict(score: float, size: str = "", changed: int | None = None) -> str:
     """"ok", "restaged" (no camera move can travel it) or "copy" (nothing moved).
 
-    The floor is dropped for a size whose subject fills the frame; the ceiling
-    never is, because an END that ends where it began is stillness at any size."""
+    The floor is dropped for a size whose subject fills the frame.  The ceiling
+    stands only while NOTHING CHANGED ANYWHERE: given `changed`, one block of
+    real difference overturns it, because on a locked-off camera a high global
+    score is what an obeyed END cell looks like.  A caller that does not pass
+    `changed` gets the old ceiling, which refuses more."""
     if score < END_FLOOR and size not in SUBJECT_FILLS:
         return "restaged"
-    return "copy" if score > END_CEILING else "ok"
+    if score > END_CEILING and not (changed or 0):
+        return "copy"
+    return "ok"
 
 
 def reaches(start: "Path", end: "Path", size: str = "") -> bool:
@@ -249,7 +303,8 @@ def reaches(start: "Path", end: "Path", size: str = "") -> bool:
     start, end = Path(start), Path(end)
     if not (start.exists() and end.exists()):
         return False
-    return end_pair_verdict(fm.similarity(fm.load(start), fm.load(end)), size) == "ok"
+    a, b = fm.load(start), fm.load(end)
+    return end_pair_verdict(fm.similarity(a, b), size, changed_blocks(a, b)) == "ok"
 
 
 def is_end_pair(a: dict, b: dict) -> bool:
