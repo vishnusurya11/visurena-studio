@@ -208,7 +208,7 @@ def card(book: Path, episode: Episode, number: int, take: dict, measured: dict) 
         for k, cut in enumerate(s.cuts, start=1):
             anchors.append((sq.cell_name(s.index, k), on_grid(round((t0 + cut.at_s) * FPS))))
     for name, _ in anchors:
-        if not (boards / name).exists():
+        if not (sq.cells_in(boards) / name).exists():
             raise SystemExit(f"take {first.index:02d}: sequence cell {name} missing: run seq_boards.py first")
     # MEASURED 2026-09-11 (task force, 71 segments): any end pin, the start cell again or a drawn END
     # cell, is reached within ~1 s and then HELD (65 % / 59 % frozen vs 30 % start-only).  A pin is a
@@ -313,7 +313,7 @@ def graph_for(c: dict, book: Path, number: int, take_dir: Path, base: str = "") 
     values = {"prompt": c["prompt"], "width": W, "height": H, "frames": c["frames"], "steps": STEPS,
               "seed": c["seed"], "ref_image_size": c["ref_image_size"],
               "filename_prefix": f"ep_take_{c['index']:02d}"}
-    paths = [book / "refs" / "characters" / n if n.startswith("char-") else boards / n for n in c["refs"]]
+    paths = [sq.picture_path(boards, book, n) for n in c["refs"]]
     # (a setup variant is named char-<who>_<setup>.png and lives beside the plain sheet)
     # the strip must be the LAST picture slot: the prompt numbers it after the cast, the plate,
     # the pinned cells and the END cells (reference_list IS that order)
@@ -328,7 +328,7 @@ def graph_for(c: dict, book: Path, number: int, take_dir: Path, base: str = "") 
         graph[node] = {"class_type": "LoadImage", "inputs": {"image": stage_image(path), "upload": "image"},
                        "_meta": {"title": f"ref_image_{k + 1}"}}
         graph[base]["inputs"][f"ref_images.ref_image_{k}"] = [node, 0]
-    anchors = [(stage_image(boards / name), frame) for name, frame in c["anchors"]]
+    anchors = [(stage_image(sq.cells_in(boards) / name), frame) for name, frame in c["anchors"]]
     if c["audio"] == "silence":
         wav = composite([], c["seconds"], take_dir / f"silence_{c['index']:02d}.wav")
         audio = (stage_image(wav), 0)

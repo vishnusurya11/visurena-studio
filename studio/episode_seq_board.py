@@ -146,7 +146,26 @@ def segments(shots: list[Shot], setup: str) -> list[dict]:
 
 
 def chunks(segs: list[dict], size: int = CELLS) -> list[list[dict]]:
-    return [segs[i:i + size] for i in range(0, len(segs), size)]
+    """Split into the FEWEST sheets that hold them, as evenly as possible.
+
+    A greedy split leaves the remainder on its own: ten panels became nine and
+    ONE, the one picked up whatever END cells were going and landed at two in a
+    2x2 grid -- so the drawer was told "a 2 by 2 grid of 4 equal panels", drew
+    four, and the packer used two.  A full $0.13 for half a picture, and the
+    GRID gate refused the setup for it (episode 4's parlour, measured).
+
+    Evenly, the same ten are 5 and 5, and each half fills its 3x3 from the END
+    cells `end_choices` already ranks."""
+    if not segs:
+        return []
+    sheets = -(-len(segs) // size)                    # ceil
+    base, extra = divmod(len(segs), sheets)
+    out, at = [], 0
+    for k in range(sheets):
+        take = base + (1 if k < extra else 0)
+        out.append(segs[at:at + take])
+        at += take
+    return out
 
 
 ALIKE = 0.70
@@ -278,6 +297,25 @@ def plate_path(boards: Path, setup: str) -> Path:
 
 def sheet_path(boards: Path, setup: str, k: int, strict: bool = False) -> Path:
     return boards / "sheets" / sheet_name(setup, k, strict)
+
+
+def picture_path(boards: Path, book: Path, name: str) -> Path:
+    """Where a reference NAMED IN A RECORD actually lives, routed by its prefix.
+
+    A record stores bare names (`Q11_0.png`, `plate_hall.png`,
+    `char-john_rance_indoor.png`) and they no longer share one folder.  Routing
+    is done HERE, once, because the alternative is the same three-way `if` copied
+    into every reader -- and a reader that gets it wrong resolves to a file that
+    does not exist, or worse, to a different one that does."""
+    if name.startswith("char-"):
+        return Path(book) / "refs" / "characters" / name
+    if name.startswith("plate_"):
+        return plates_in(boards) / name
+    if name.startswith("panel_") or ".before." in name:
+        return panels_in(boards) / name
+    if name.startswith("seq_"):
+        return sheets_in(boards) / name
+    return cells_in(boards) / name
 
 
 def cells_in(boards: Path) -> Path:

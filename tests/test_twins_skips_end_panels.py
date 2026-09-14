@@ -56,11 +56,29 @@ def test_an_end_panel_is_still_measured_against_a_panel_it_does_not_close():
     assert not found or all(f.panel != "22.0E" or "19" not in (f.note or "") for f in found)
 
 
-def test_two_end_panels_of_different_shots_are_still_compared():
-    segs = [panel(19, 0, SAME, end=True), panel(22, 0, SAME, end=True)]
-    assert twins(segs)
-
-
 def test_the_start_panel_is_not_blamed_for_its_own_end_panel():
     segs = [panel(19, 0, SAME), panel(19, 0, SAME, end=True)]
     assert not [f for f in twins(segs) if f.panel.startswith("19.0") and f.hard]
+
+
+def test_two_end_panels_are_not_compared_to_each_other():
+    """Their text is a TEMPLATE -- `end_text` opens every END cell with "the same
+    place, the same camera and the same light as panel N" -- so comparing two of
+    them measures the boilerplate, not the pictures. Episode 4's parlour was
+    refused for Q10_0E against Q09_0E at 0.772, two different shots' arrivals.
+
+    It is also redundant. If the two START panels differ (this gate checks that)
+    and each END is within `END_FLOOR..END_CEILING` of its own start (the picture
+    gate checks that), the two ENDs cannot be one picture."""
+    segs = [panel(9, 0, "Medium on Holmes at the table."),
+            panel(9, 0, SAME, end=True),
+            panel(10, 0, "Close on Rance on the sofa."),
+            panel(10, 0, SAME, end=True)]
+    assert not [f for f in twins(segs) if f.panel.endswith("E") and f.hard]
+
+
+def test_two_start_panels_that_are_one_picture_are_still_refused_alongside():
+    """The exemption is for END-vs-END only; the starts are still judged."""
+    segs = [panel(9, 0, SAME), panel(9, 0, SAME, end=True),
+            panel(10, 0, SAME), panel(10, 0, SAME, end=True)]
+    assert [f for f in twins(segs) if f.hard]

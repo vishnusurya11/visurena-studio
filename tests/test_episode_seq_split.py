@@ -103,7 +103,9 @@ def test_end_frames_fill_the_spare_cells_walk_cells_first_and_are_named_apart():
 def test_a_setup_over_nine_cells_still_splits_by_axis():
     many = SEGS + [seg(9 + i, 0, "close", 0.9) for i in range(4)]
     sheets = sq.sheets(many)
-    assert [len(g) for g, _, _ in sheets] == [9, 3]  # nine to a sheet in story order, then the remainder
+    # AMENDED 2026-09-13: evenly, not greedily -- a remainder sheet is a grid
+    # the drawer fills and the packer discards. See `test_sheets_are_balanced.py`.
+    assert [len(g) for g, _, _ in sheets] == [6, 6]
     assert [(s["shot"], s["sub"]) for s in sheets[0][0]][:3] == [(0, 0), (1, 0), (1, 1)]
 
 

@@ -168,6 +168,16 @@ def twins(segs: list[dict], floor: float = TWIN, watch: float = WATCH) -> list[F
             if (segs[i]["shot"], segs[i]["sub"]) == (segs[j]["shot"], segs[j]["sub"]) \
                     and bool(segs[i].get("end")) != bool(segs[j].get("end")):
                 continue
+            # NOR ARE TWO END PANELS COMPARED TO EACH OTHER.  `end_text` opens
+            # every END cell with "the same place, the same camera and the same
+            # light as panel N", so the score measures that template: episode 4's
+            # parlour was refused for Q10_0E against Q09_0E at 0.772, the arrivals
+            # of two different shots.  It is redundant as well -- if the STARTS
+            # differ (this loop checks that) and each END sits inside
+            # END_FLOOR..END_CEILING of its own start (the picture gate checks
+            # that), then the two ENDs cannot be one picture.
+            if segs[i].get("end") and segs[j].get("end"):
+                continue
             score = overlap(picture(segs[i]), picture(segs[j]))
             if score > watch:
                 out.append(Finding("TWINS", panel_key(segs[j]), picture(segs[j]).strip(), score > floor,

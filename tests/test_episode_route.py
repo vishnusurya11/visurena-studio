@@ -44,5 +44,9 @@ def test_the_geography_prompt_names_the_walk_and_the_door_size_per_panel():
 def test_sheets_chunk_nine_cells_and_name_the_cell_files():
     segs = [{"shot": i, "sub": 0, "frame": "x", "motion": "y", "path": i / 12, "faces": []} for i in range(12)]
     chunks = sq.chunks(segs)
-    assert [len(c) for c in chunks] == [9, 3]
+    # AMENDED 2026-09-13: greedy 9+3 left a 3-panel sheet in a 4-cell grid, so
+    # the drawer was told to fill four and the packer used three. `chunks` now
+    # splits EVENLY into the fewest sheets that hold them. See
+    # `test_sheets_are_balanced.py`.
+    assert [len(c) for c in chunks] == [6, 6]
     assert sq.cell_name(3, 1) == "Q03_1.png" and sq.cell_name(12, 0) == "Q12_0.png"

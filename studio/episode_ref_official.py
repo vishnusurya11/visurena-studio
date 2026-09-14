@@ -602,9 +602,16 @@ def crowd_of(seg: dict) -> str:
 SLOW = re.compile(r"\bslow(ly)?\b", re.I)
 GAIT = re.compile(r"\b(walks?|walking(?!\s+(?:stick|sticks|height|pace|speed))|walked|limps?|limping|"
                   r"limped|climbs?|climbing|climbed|trots?|trotting|rides?|riding|steps|stepping|"
-                  r"stepped|strides|striding)\b", re.I)
+                  r"stepped|strides(?!\s+(?:from|behind|of|away))|striding)\b", re.I)
 """L8 and L9 read a gait VERB (spec §4).  The nouns `step`, `stride` and `pace` are
-out, and so is `walking` inside a compound: the camera's own position says `one step
+out -- INCLUDING THE PLURAL, which they were not.  `strides` sat in the verb
+alternation, so this repo's commonest camera idiom tripped it: "level with
+Holmes's chest and two long STRIDES from him" refused episode 4's take 15, a man
+standing still in a parlour, for "a walk with no pace named".  A gait verb is
+never followed by `from`, `behind`, `of` or `away`, so "he strides across the
+room" still reads as a gait while a measured distance no longer does.
+
+And `walking` inside a compound is out too: the camera's own position says `one step
 farther along the counter`, `a stride behind the two men`, `at walking height` and
 `down the length of the black walking stick`, and a blind injection there wrote `The
 camera is one step limping on his stick farther along the counter`."""
