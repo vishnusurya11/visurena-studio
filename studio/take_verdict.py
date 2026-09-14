@@ -104,7 +104,39 @@ class TakeVerdict:
 # ---- the gates ---------------------------------------------------------------
 
 def frozen_gates(v: TakeVerdict) -> list[Gate]:
-    """G4.1 frozen at a segment start (hard) and G4.2 the take's frozen share."""
+    """G4.1 frozen at a segment start and G4.2 the take's frozen share.
+
+    BOTH STAY HARD, AND I TRIED TO DEMOTE THEM AND WAS WRONG.
+
+    Measured over every judged attempt on disk -- 97 of them, episodes 1 to 5:
+
+        frozen-at-start   wall 1.00 s   max ever observed 0.750   fired 0 of 97
+        frozen-share      wall 0.40     max ever observed 0.340   fired 0 of 97
+
+    From which I concluded that a wall sitting above every observation protects
+    nothing, and made both advisory.  `test_a_frozen_take_fails_hard_and_a_moving_one_passes`
+    refused it immediately: iteration 4's T17 ran 14.75 of its 15.0 seconds
+    frozen -- a share of 0.98 -- and with the rungs advisory that take PASSES.
+
+    The inference was backwards.  A hard gate that has not fired lately is not
+    dead; it may be a floor nobody has hit since the things upstream of it got
+    better, and the case it exists for is in the regression suite precisely
+    because it happened.  "It never fires" and "it cannot fire" are different
+    claims, and only the second would justify moving it.
+
+    What IS true, and is the part worth keeping: both walls were read on an
+    instrument the repo has since replaced.  `motion_gate` now uses block-max
+    bins rather than the old 96x168 global-mean scan, and `share` here is
+    `sum(frozen_spans)/seconds` -- the fraction of runtime inside a >= 0.75 s
+    still run -- a strictly smaller quantity than the `still_share` the
+    "iteration 3 25 %, iteration 4 55 %" figures were taken from.  So the numbers
+    are not wrong, they are unverified on the current instrument, and verifying
+    them needs the one thing nobody recorded: which takes a human called frozen.
+
+    The SCORE PENALTY is what has actually moved takes -- episode 4's T12 lost
+    two rolls to it at 30/100 and 45/100 before its motion was rewritten -- and
+    `motion_gate.STILL` (13 813 frame steps over 63 takes) is the well-founded
+    constant underneath both."""
     lead = max((s.lead_in_s for s in v.segments), default=0.0)
     share = round(sum(b - a for a, b in v.frozen_spans) / v.seconds, 2) if v.seconds else 0.0
     start = Gate("frozen-at-start", lead, lead <= motion_gate.START_LIMIT_S, True, f"{lead}s",

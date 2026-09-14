@@ -71,3 +71,31 @@ def test_watson_measured_in_strides_is_not_walking():
     CAMERA stood two strides from a seated man."""
     said = "The camera is level with <Subject 1>'s eyes and two long strides from him."
     assert l9_limp(block(said), {"watson": "<Subject 1>"}) == []
+
+
+# ---- the same distance, more prepositions -----------------------------------
+
+def test_two_strides_inside_the_room_is_a_distance():
+    """Episode 5's camera stands "two strides inside the room", which the first
+    version of this fix did not cover: it listed `from`, `behind`, `of` and
+    `away` and a camera's distance takes any preposition of place."""
+    said = "The camera is on the carpet two strides inside the room, level with her eyes."
+    assert l8_pace(block(said), {}) == []
+
+
+def test_a_stride_into_the_doorway_is_a_distance():
+    assert l8_pace(block("The camera stands a stride into the doorway."), {}) == []
+
+
+def test_two_strides_along_the_pavement_is_a_distance():
+    assert l8_pace(block("The camera is two strides along the pavement from the gate."), {}) == []
+
+
+def test_a_stride_short_of_the_table_is_a_distance():
+    assert l8_pace(block("The camera stands a stride short of the table."), {}) == []
+
+
+def test_a_man_who_strides_into_the_room_is_still_a_gait():
+    """The exemption is for a MEASURED distance -- a number or an article and a
+    noun of length -- not for the preposition alone."""
+    assert l8_pace(block("Holmes strides into the room and turns."), {})

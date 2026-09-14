@@ -617,6 +617,26 @@ farther along the counter`, `a stride behind the two men`, `at walking height` a
 camera is one step limping on his stick farther along the counter`."""
 
 
+MEASURED_STRIDE = re.compile(
+    r"\b(?:a|one|two|three|four|five|six|seven|eight|nine|ten|several|a few|half)\s+"
+    r"(?:long|short|full|whole|good|easy)?\s*strides?\b", re.I)
+"""A STRIDE YOU COUNT IS A DISTANCE, whatever preposition follows it.
+
+The first version of this fix listed the prepositions -- `from`, `behind`, `of`,
+`away` -- and a camera's distance takes any preposition of place.  Episode 5's
+camera stands "two strides inside the room" and L8 refused a shot of an old
+woman standing still in a doorway.
+
+The discriminator is the MEASURE, not the preposition: "two long strides",
+"a stride", "three strides" are all lengths, and "Holmes strides into the room"
+has no measure and is still a gait.  `walked` is the same shape and needs no
+help, because nobody writes "two walked"."""
+
+
+def without_measures(text: str) -> str:
+    """The body with every measured stride removed, so a gait rule reads only gaits."""
+    return MEASURED_STRIDE.sub(" ", text or "")
+
 TROT = re.compile(r"\b(trot|trots|trotting|ride|rides|riding)\b", re.I)
 
 
@@ -1031,14 +1051,15 @@ def l7_pins(text, facts):
 def l8_pace(text, facts):
     return [f"L8 NO PACE [Shot {k}]: a walk, climb or ride with no pace named"
             for k, a, b, body in blocks(text)
-            if GAIT.search(body) and not any(p in body.lower() for p in PACE)]
+            if GAIT.search(without_measures(body)) and not any(p in body.lower() for p in PACE)]
 
 
 def l9_limp(text, facts):
     who = facts.get("watson")
     return [f"L9 NO LIMP [Shot {k}]: {who} walks or climbs with no limp"
             for k, a, b, body in blocks(text)
-            if who and who in body and GAIT.search(body) and "limp" not in body.lower()]
+            if who and who in body and GAIT.search(without_measures(body))
+            and "limp" not in body.lower()]
 
 
 def l10_life(text, facts):
