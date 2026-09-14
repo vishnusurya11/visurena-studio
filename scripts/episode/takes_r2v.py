@@ -140,9 +140,29 @@ def sheet_of(episode: Episode, shot) -> str:
     return next(f"board_{shot.setup}_{k}" for k, group in enumerate(groups) if shot in group)
 
 
+def measured_seconds(path: Path) -> float:
+    """How long this wav really is, or a value that forces a rebuild.
+
+    Being unable to measure is not a pass (`bed_gate`'s rule): an unreadable or
+    truncated guide must be rebuilt, never trusted."""
+    try:
+        return clip_seconds(path)
+    except Exception:
+        return -1.0
+
+
 def composite(lines: list[tuple[Path, float]], seconds: float, out: Path) -> Path:
-    """The take's audio: dialogue wavs at their offsets over silence, 24 kHz mono."""
-    if out.exists():
+    """The take's audio: dialogue wavs at their offsets over silence, 24 kHz mono.
+
+    THE CACHE IS KEYED ON THE LENGTH, not on the filename.  This audio is the
+    model's SHARED CLOCK -- H3 lays the audio latents on the same t-axis as the
+    target frames -- so its duration is a statement about when the picture ends.
+    MEASURED on episode 3: `silence_02.wav` and `silence_11.wav` were 12.25 s
+    files left over a pair of takes re-planned to 6.583 s, and the node crops
+    silently, so nothing errored.  Too long is harmless; too SHORT ends the
+    model's clock before the video, which is the early-arrival fault this
+    pipeline has been chasing."""
+    if out.exists() and abs(measured_seconds(out) - seconds) <= 1.0 / FPS:
         return out
     out.parent.mkdir(parents=True, exist_ok=True)
     # ffmpeg will not create the directory it is told to write into, and its

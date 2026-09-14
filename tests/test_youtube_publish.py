@@ -60,8 +60,12 @@ def test_an_unknown_privacy_is_refused():
 
 # ---- gates -----------------------------------------------------------------
 
-CLEAN = dict(qc={"passed": True}, dq_failed=[], privacy="private",
+CLEAN = dict(qc={"passed": True, "sha8": "abc12345"}, dq_failed=[], privacy="private",
              watched="abc12345", digest="abc12345", already=None)
+"""A clean episode's qc report names the very bytes being uploaded.
+
+`sha8` joined this fixture on 2026-09-13, after ep03 went public against a report
+written about the PREVIOUS cut. See `test_qc_measured_this_cut.py`."""
 
 
 def test_a_clean_episode_has_no_refusals():

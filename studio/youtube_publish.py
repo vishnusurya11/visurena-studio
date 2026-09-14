@@ -130,6 +130,15 @@ def refusals(qc: dict, dq_failed: list[str], *, privacy: str, watched: str,
     the best cut of what we rendered" and wrong when asking "is this fit for
     strangers".  The same measurement is advisory at G5 and hard here."""
     out = []
+    # DOES THE REPORT DESCRIBE THIS FILE?  Also a fact, also no override -- you
+    # cannot waive a measurement that was never taken.  MEASURED 2026-09-13:
+    # qc_r2v.json was written at 19:49 about sha8 f5ddd2a3, the master was re-cut
+    # at 20:02 as f8bf7814 after a take was swapped, and it went public at 20:04
+    # against a report that had never seen it.  Had that report said PASS, an
+    # unmeasured cut would have shipped with no override at all.
+    if (measured := qc.get("sha8")) != digest:
+        out.append(f"qc measured {measured or 'no recorded'} sha8, this cut is {digest}; "
+                   f"re-run qc on the file you are uploading")
     # `already` is NOT a judgement, it is a fact, so no override reaches it: waiving
     # it puts a second copy of the same cut on the channel.
     if already:

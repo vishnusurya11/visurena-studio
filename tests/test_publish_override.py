@@ -17,7 +17,7 @@ So the override is REAL but NARROW:
 """
 from studio import youtube_publish as yp
 
-DIRTY = dict(qc={"passed": False}, dq_failed=["T00", "T05", "T08"], privacy="public",
+DIRTY = dict(qc={"passed": False, "sha8": "abc12345"}, dq_failed=["T00", "T05", "T08"], privacy="public",
              watched="abc12345", digest="abc12345", already=None, audited=True)
 
 
@@ -52,7 +52,7 @@ def test_a_blank_override_is_no_override():
 
 
 def test_the_clean_path_is_unchanged():
-    clean = dict(qc={"passed": True}, dq_failed=[], privacy="private",
+    clean = dict(qc={"passed": True, "sha8": "abc12345"}, dq_failed=[], privacy="private",
                  watched="abc12345", digest="abc12345", already=None)
     assert yp.refusals(**clean) == []
 

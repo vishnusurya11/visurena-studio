@@ -25,7 +25,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 
-from studio import edit_gate, episode_home, voice_qc
+from studio import edit_gate, episode_home, voice_qc, youtube_publish as yp
 from studio.episode_spec import Episode
 from studio.trailer_assemble import clip_seconds, integrated, true_peak
 
@@ -185,6 +185,12 @@ def main(book_id: str, number: int, engine: str = "i2v") -> None:
     records = episode_home.read_json(take_dir / "shots.json")
     report = {
         "master": episode_home.relative(book, master),
+        # WHICH BYTES THIS REPORT MEASURED.  Without it a report can outlive the
+        # cut it describes: ep03's qc measured f5ddd2a3 at 19:49, the master was
+        # re-cut as f8bf7814 at 20:02, and the publish ladder read the stale
+        # report. `youtube_publish.refusals` compares this and cannot be
+        # overridden, because it is a fact and not a judgement.
+        "sha8": yp.sha8(master),
         "seconds": clip_seconds(master), "planned_seconds": placed["duration_s"],
         "title_card": (book / "title" / f"ep{number:02d}.mp4").exists() or (book / "title" / "title.mp4").exists(),
         "lufs": lufs, "lufs_ok": LUFS_BAND[0] <= lufs <= LUFS_BAND[1],
@@ -193,7 +199,11 @@ def main(book_id: str, number: int, engine: str = "i2v") -> None:
         "missing_cuts": missing_cuts(planned_cuts(placed), seen),
         "internal_cuts": internal_cuts(placed, records),
         "lines": heard_on_master(master, lines, work, voice_qc.any_transcriber()),
-        "longest_gap_s": longest_gap(lines, max(l["at"] for l in lines)),
+        # THE PICTURE'S END, not the last line's START.  With the start, the final
+        # `until - end` is negative and the tail is thrown away by `max()`:
+        # ep03 reported 2.03 s while a 3.26 s run-out sat at the end of the
+        # episode with the bed at -45.6 LUFS.
+        "longest_gap_s": longest_gap(lines, placed["duration_s"]),
         "speech_s": round(sum(line["seconds"] for line in lines), 1),
     }
     report["edit"] = edit_report(master, placed, records, book, number, work)

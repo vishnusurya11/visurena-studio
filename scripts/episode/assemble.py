@@ -86,10 +86,19 @@ def quiet_bed(bed: Path, seconds: float, out: Path) -> Path:
     # MEASURED per bed, not a constant: the -11 dB trim was right for ACE-Step's
     # -14.6 LUFS output alone, and the bed model is now the owner's to choose.
     try:
-        gain = bed_gain_db(integrated(bed))
+        loudness = integrated(bed)
+        gain, short = bed_gain_db(loudness), bed_shortfall_db(loudness)
     except Exception:                                   # no loudnorm pass available
-        gain = BED_TRIM_DB
-    print(f"  bed {Path(bed).name}: {gain:+.1f} dB to reach {BED_TARGET_LUFS} LUFS", flush=True)
+        gain, loudness, short = BED_TRIM_DB, None, 0.0
+    if short:
+        # The clamp has to speak. Saying "+6.0 dB to reach -25.6" when the bed
+        # lands at -27.8 is the sentence that let a failed generation ship.
+        print(f"  bed {Path(bed).name}: WARNING {loudness:.1f} LUFS needs "
+              f"{BED_TARGET_LUFS - loudness:+.1f} dB and the lift caps at "
+              f"{BED_MAX_LIFT_DB:+.1f}; it will sit at {loudness + gain:.1f} LUFS, "
+              f"{short:.1f} dB under target", flush=True)
+    else:
+        print(f"  bed {Path(bed).name}: {gain:+.1f} dB to reach {BED_TARGET_LUFS} LUFS", flush=True)
     import soundfile as sf
     have = sf.info(str(bed)).frames / sf.info(str(bed)).samplerate
     passes = loops_for(have, seconds)
@@ -158,6 +167,23 @@ def bed_gain_db(loudness: float | None) -> float:
     if loudness is None or loudness == float("-inf") or loudness != loudness:
         return BED_TRIM_DB
     return min(round(BED_TARGET_LUFS - loudness, 2), BED_MAX_LIFT_DB)
+
+
+def bed_shortfall_db(loudness: float | None) -> float:
+    """How far under `BED_TARGET_LUFS` this bed will still sit after the lift.
+
+    `bed_gain_db` clamps at `BED_MAX_LIFT_DB` and the caller prints the clamped
+    number as though it had reached the target -- which is false exactly when it
+    matters.  MEASURED on episode 3: `bed.wav` is -33.63 LUFS, wants +8.03 dB,
+    gets +6.00, and lands at -27.83.  In four of the episode's speech gaps the
+    bed then sits at or under the -40 LUFS room-tone floor, including the whole
+    3.26 s run-out at -45.6, so the listener hears room tone and not a violin.
+
+    The skill's own rule is that a bed far under target is a failed generation.
+    This one shipped because the only sentence a human reads said otherwise."""
+    if loudness is None or loudness == float("-inf") or loudness != loudness:
+        return 0.0
+    return round(max(0.0, round(BED_TARGET_LUFS - loudness, 2) - BED_MAX_LIFT_DB), 2)
 
 BED_INSTRUMENTAL = {"acestep": "[inst]", "yue2": ""}
 """HOW EACH MODEL IS TOLD "NO SINGING", AND THEY DO NOT AGREE.
