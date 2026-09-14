@@ -45,8 +45,22 @@ def cast_sheet(book, who: str, setup: str, state: str = ""):
 
     Tried in order: the STATE card (`char-<who>_indoor.png`, the contract's own
     naming, `cast_refs.STATES`), then episode 1's per-SETUP variant
-    (`char-<who>_lab.png`), then any other state card the character has, then the
-    identity bust.
+    (`char-<who>_lab.png`), then the identity bust.
+
+    THERE IS NO "ANY OTHER CARD" RUNG.  There was, and it was
+    `sorted(glob("char-<who>_*.png"))[0]` -- an ALPHABETICAL choice among
+    semantically incompatible wardrobes, and alphabetical order has no opinion
+    about clothes.  MEASURED on this book: no `char-*_outdoor.png` exists for
+    anyone (the prompts were written, the cards never drawn), so every outdoor
+    setup silently resolved to whatever sorted first -- Watson and Holmes to
+    `_bench`, an indoor card, Holmes's being the muffler one.  Episode 3's `cab`
+    and `garden_path` are both outdoors, so two paid sheets and four rendered
+    takes drew the wrong clothes while `hat_line` printed "the bowler hat is on
+    his head in every panel of this sheet".
+
+    The bust is the honest floor, and for an outdoor setup it is also the closer
+    picture: the bust is the one drawn with the hat on.  What it never does is
+    claim to be a wardrobe it is not.
 
     This used to try the per-setup name ALONE, which stopped existing when the
     contract moved to one card per wardrobe state -- so every episode 2 take fell
@@ -58,8 +72,7 @@ def cast_sheet(book, who: str, setup: str, state: str = ""):
     for name in (f"char-{who}_{state}.png" if state else "", f"char-{who}_{setup}.png"):
         if name and (chars / name).exists():
             return chars / name
-    other = sorted(chars.glob(f"char-{who}_*.png"))
-    return other[0] if other else chars / f"char-{who}.png"
+    return chars / f"char-{who}.png"
 
 
 WIDE_ENOUGH = {"medium", "full", "wide"}

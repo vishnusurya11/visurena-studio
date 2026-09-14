@@ -46,17 +46,20 @@ def test_dropping_the_state_is_what_picked_the_bench_card(tmp_path):
     with_state = cast_sheet(book, "john_watson", "hall", "indoor")
     without = cast_sheet(book, "john_watson", "hall")
     assert with_state.name == "char-john_watson_indoor.png"
-    assert without.name == "char-john_watson_bench.png"
+    # The alphabetical rung is gone, so a dropped state now lands on the BUST --
+    # still the wrong picture for an indoor sheet, still a divergence worth
+    # failing on, but no longer a silent claim to be a wardrobe it is not.
+    assert without.name == "char-john_watson.png"
     assert with_state != without
 
 
-def test_a_missing_state_card_falls_back_alphabetically_which_is_how_w2_happened(tmp_path):
-    """W2, pinned as behaviour so the substitution is at least NAMED somewhere.
-    `outdoor` is asked for, `outdoor` is absent, `bench` comes back."""
+def test_a_missing_state_card_no_longer_falls_back_alphabetically(tmp_path):
+    """W2, FIXED.  This used to pin the substitution as behaviour so that it was
+    at least NAMED somewhere.  The rung is now deleted: `outdoor` is asked for,
+    `outdoor` is absent, and the bust comes back rather than `bench`."""
     book = cards(tmp_path, "char-john_watson.png", "char-john_watson_bench.png",
                  "char-john_watson_indoor.png")
-    assert cast_sheet(book, "john_watson", "garden_path", "outdoor").name == \
-        "char-john_watson_bench.png"
+    assert cast_sheet(book, "john_watson", "garden_path", "outdoor").name == "char-john_watson.png"
 
 
 def test_the_bust_is_the_last_resort_only(tmp_path):

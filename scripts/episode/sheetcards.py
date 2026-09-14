@@ -54,7 +54,7 @@ def blocks_of(prompt: str) -> list[tuple[str, str]]:
 def references(book: Path, frames: Path, setup_name: str, setup) -> list[Path]:
     """The pictures the drawer is handed, in the order the prompt names them."""
     out = [frames / f"plate_{setup_name}.png"]
-    out += [sq.cast_sheet(book, who, setup_name) for who in setup.cast]
+    out += [sq.cast_sheet(book, who, setup_name, setup.state) for who in setup.cast]
     return [p for p in out if p.exists()]
 
 

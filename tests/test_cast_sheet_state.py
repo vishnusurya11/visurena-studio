@@ -45,11 +45,16 @@ def test_the_bust_is_the_floor_when_no_card_was_drawn(tmp_path):
     assert cast_sheet(book, "stamford", "criterion", "indoor").name == "char-stamford.png"
 
 
-def test_a_missing_state_falls_back_rather_than_raising(tmp_path):
-    """A character with an indoor card standing in an outdoor setup: the card he
-    has beats the bust, because the bust is the one with the hat on."""
+def test_a_missing_state_falls_back_to_the_bust_not_to_another_wardrobe(tmp_path):
+    """AMENDED 2026-09-13. This used to assert that an INDOOR card stands in for a
+    missing outdoor one, on the reasoning that the bust is the one with the hat
+    on. Measured, that reasoning is backwards: outdoors the hat IS on, so the
+    bust is the closer picture -- and the rung that delivered the indoor card was
+    `sorted(glob(...))[0]`, which chose by alphabet, not by clothes. It sent two
+    paid ep03 sheets and four takes out in a bench wardrobe. See
+    `test_no_wardrobe_substitution.py`."""
     book = a_book(tmp_path, "char-john_watson.png", "char-john_watson_indoor.png")
-    assert cast_sheet(book, "john_watson", "street", "outdoor").name == "char-john_watson_indoor.png"
+    assert cast_sheet(book, "john_watson", "street", "outdoor").name == "char-john_watson.png"
 
 
 def test_the_state_is_optional_so_old_callers_keep_working(tmp_path):
