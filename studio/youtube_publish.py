@@ -184,8 +184,12 @@ def deliverable(home, engine: str = "") -> tuple:
     from pathlib import Path as _P
 
     home = _P(home)
-    found = [(name, home / master, home / qc) for name, master, qc in MASTERS
-             if (home / master).exists()]
+    # THE CUT ROOM.  This built `home / master` and masters moved to `home/cut/`
+    # in the layout change, while the QC report stayed at the episode root -- so
+    # the pair came apart and a passing episode 4 was reported as "no master has
+    # a QC that passed", which reads as a bad cut.
+    found = [(name, home / "cut" / master, home / qc) for name, master, qc in MASTERS
+             if (home / "cut" / master).exists()]
     if engine:
         picked = [f for f in found if f[0] == engine]
         if not picked:
