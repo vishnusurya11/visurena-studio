@@ -81,7 +81,58 @@ def normalised(text: str) -> list[str]:
     bare = APOSTROPHE.sub("", text)
     flat = unicodedata.normalize("NFKD", bare).encode("ascii", "ignore").decode()
     words = FILLER.sub(" ", flat.lower()).split()
-    return [HONORIFICS.get(word, word) for word in words]
+    return [spelling(HONORIFICS.get(word, word)) for word in words]
+
+
+
+SPELLINGS = (
+    # -our- is regular, with its derived forms; the {3,} guard keeps `our`,
+    # `four`, `hour`, `your`, `pour`, `tour` and `sour` intact
+    (re.compile(r"^(.{3,}?)our(s|ed|ing|able|ful|less)?$"), r"\1or\2"),
+    (re.compile(r"^(.{2,}?)is(e|ed|es|ing|er|ers|ation|ations)$"), r"\1iz\2"),
+    (re.compile(r"^(.{3,}?)ll(ed|ing|er|ers)$"), r"\1l\2"),
+    (re.compile(r"^grey(s|er|est|ish|hound|hounds)?$"), r"gray\1"),
+)
+"""BRITISH AND AMERICAN ARE ONE SPELLING HERE, because the script is Victorian
+British prose and the transcriber writes American.
+
+Episode 4's QC failed a perfectly read line on "discoloured" against
+"discolored"; eleven chapters remain and every colour, neighbour, grey and
+realise in them would do it again.
+
+The fold does not have to be correct English -- it is applied to BOTH sides, so
+it only has to be CONSISTENT.  What it must not do is collapse two genuinely
+DIFFERENT words into one and hide a real mistake.  Hence the guards: `.{3,}?`
+before -our keeps `our`, `four`, `hour` and `pour` whole, and `pored`/`poured`
+and `floor`/`flour` stay two words apart.
+
+-RE IS A WORD LIST, NOT A RULE.  A `-re` -> `-er` regex eats `before`, `there`,
+`where` and `here`, which are not dialect spellings at all."""
+
+RE_STEMS = ("cent", "theat", "met", "lit", "fib", "sab", "calib",
+            "somb", "spect", "lust", "scept", "och", "manoeuv")
+"""The `-re`/`-er` pairs, by stem: centre/center, theatre/theater, ..."""
+
+BUT_NOT_ISE = {"wise", "rise", "promise", "premise", "surprise", "advise", "devise",
+               "revise", "arise", "noise", "raise", "praise", "poise", "cruise",
+               "guise", "louse", "mise", "demise", "paradise", "exercise", "franchise",
+               "chastise", "disguise", "supervise", "improvise", "merchandise"}
+"""Words ending -ise that are not the British spelling of -ize.  `wise` became
+`iz`, and `promise` and `rise` with it."""
+
+
+def spelling(word: str) -> str:
+    """One canonical spelling for a word two dialects write differently."""
+    for stem in RE_STEMS:
+        for tail, into in (("re", "er"), ("res", "ers"), ("red", "ered"), ("ring", "ering")):
+            if word == stem + tail:
+                return stem + into
+    if word in BUT_NOT_ISE:
+        return word
+    for pattern, into in SPELLINGS:
+        if pattern.match(word):
+            return pattern.sub(into, word)
+    return word
 
 
 HONORIFICS = {"dr": "doctor", "mr": "mister", "mrs": "missus", "st": "saint"}
@@ -90,14 +141,27 @@ was right and the gate called it 0.40 wrong.  Both spellings are one word."""
 
 
 def distance(said: list[str], meant: list[str]) -> int:
-    """Levenshtein distance over WORDS, not characters."""
+    """Levenshtein distance over WORDS, where JOINING OR SPLITTING A WORD COSTS 1.
+
+    A transcriber merges and splits compounds constantly, and plain Levenshtein
+    charges two errors for it: "under lines" heard as "underlines" is a deletion
+    plus a substitution.  Episode 4 lost a QC pass to exactly that, on a line
+    that was read correctly.  One sound written as one word or two is one
+    difference, so it costs one."""
+    prev2: list[int] | None = None
     row = list(range(len(meant) + 1))
     for i, word in enumerate(said, start=1):
         nxt = [i]
         for j, want in enumerate(meant, start=1):
-            nxt.append(min(row[j] + 1, nxt[j - 1] + 1,
-                           row[j - 1] + (word != want)))
-        row = nxt
+            best = min(row[j] + 1, nxt[j - 1] + 1, row[j - 1] + (word != want))
+            # said[i-1] is meant[j-2] + meant[j-1] run together
+            if j >= 2 and word == meant[j - 2] + want:
+                best = min(best, row[j - 2] + 1)
+            # said[i-2] + said[i-1] run together is meant[j-1]
+            if i >= 2 and prev2 is not None and said[i - 2] + word == want:
+                best = min(best, prev2[j - 1] + 1)
+            nxt.append(best)
+        prev2, row = row, nxt
     return row[-1]
 
 

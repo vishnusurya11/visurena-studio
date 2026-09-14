@@ -116,6 +116,16 @@ def quiet_bed(bed: Path, seconds: float, out: Path) -> Path:
 owner removed captions, chip and end card (2026-09-10)."""
 
 
+BED_TIMEOUT = 2400
+"""Seconds to wait for a bed, set from the SLOWEST engine and not the fastest.
+
+It was 900.  YuE2's olmpack graph runs three seeded stages and takes longer than
+that here: measured on episode 4, the waiter raised `StillRunning` at 900 s, the
+assemble died with no master, and ComfyUI's history reported the same prompt id
+as `status: success` with the audio on disk.  The bed was made and thrown away
+by the clock.  Waiting too long costs minutes; not waiting long enough costs the
+whole job."""
+
 BED_ENGINE_DEFAULT = "yue2"
 """OWNER 2026-09-13: "ace step is shit .. use yue2 .. more expressive and great
 prompt control on style."  ACE-Step stays reachable as `--bed=acestep`."""
@@ -228,6 +238,26 @@ def bed_request(engine: str, seconds: float, seed: int) -> tuple[str, dict]:
         "seed": seed, "lm_seed": seed, "filename_prefix": "ep_bed"}
 
 
+def bed_seed(out: Path, number: int, base: int = 90000) -> int:
+    """The seed for the NEXT bed, moved along by every refused one on disk.
+
+    A gate that can refuse must leave a way forward.  `bed_gate` refuses a bed
+    that sings -- rightly; episode 3's sang invented verse under the narration
+    for 64 % of its length and reached YouTube's queue -- and renames it
+    `bed.sings.wav`.  The seed was `base + number`, fixed, so re-running
+    regenerated the SAME bed, which sang again, and there was no flag to change
+    it.  Episode 4's assemble died after four minutes of GPU with no master and
+    every retry would have died identically.
+
+    `refused_name` in this same subsystem already wrote the rule: "a model that
+    sings once tends to sing again ... read the name off what is there, never
+    off a counter".  So does this -- a plain re-run re-rolls, and the seed stays
+    reproducible from the tree rather than remembered."""
+    out = Path(out)
+    refused = len(list(out.parent.glob(f"{out.stem}.sings*{out.suffix}")))
+    return base + number + 101 * refused
+
+
 def bed(out: Path, seed: int, runtime: float = BED_SECONDS,
         engine: str = BED_ENGINE_DEFAULT) -> Path:
     """A quiet instrumental bed, made once, long enough for the placed runtime."""
@@ -239,7 +269,7 @@ def bed(out: Path, seed: int, runtime: float = BED_SECONDS,
             return out
         out.unlink()  # empty or unreadable: the only reason to spend again
     workflow, values = bed_request(engine, seconds, seed)
-    made = run(workflow, values, timeout=900)
+    made = run(workflow, values, timeout=BED_TIMEOUT)
     out.parent.mkdir(parents=True, exist_ok=True)
     out.write_bytes(made[0].read_bytes())
     # SOMETHING LISTENS BEFORE IT SHIPS. Episode 3's bed sang invented verse under
@@ -484,8 +514,10 @@ def main(book_id: str, number: int, engine: str = "i2v",
     if missing:
         raise SystemExit(f"no take for shots {missing}")
 
+    episode_home.make_rooms(book, number)   # free; the bed and the mix in front of it are not
     cut = picture(placed, takes, work)
-    music = quiet_bed(bed(home / "audio" / "bed.wav", 90000 + number, placed["duration_s"],
+    music = quiet_bed(bed(home / "audio" / "bed.wav", bed_seed(home / "audio" / "bed.wav", number),
+                          placed["duration_s"],
                           bed_engine),
                       placed["duration_s"], work / "bed_quiet.wav")
     # audio reviewer, iteration 3: 10 dB in 20 ms on every line pumped; the bed now sits lower

@@ -131,6 +131,21 @@ def cut_dir(book: Path, number: int) -> Path:
     return home(book, number) / "cut"
 
 
+def make_rooms(book: Path, number: int) -> None:
+    """Make the episode's output rooms, before the work that fills them.
+
+    `master_path` returns `<home>/cut/...` and nothing created `cut/`.  Episodes
+    1 to 3 have one only because `migrate_layout.py` made it while moving their
+    masters in; a NEW episode never got one, so the first assemble reached
+    ffmpeg and died on "No such file or directory" AFTER the cut, the mix and
+    the bed had been paid for.  `reports_dir` had the same shape.
+
+    A room is free and the work in front of it is not, so they are made at the
+    start of the step, not at the moment of writing."""
+    for room in (cut_dir(book, number), reports_dir(book, number)):
+        room.mkdir(parents=True, exist_ok=True)
+
+
 def master_path(book: Path, number: int, engine: str = "i2v") -> Path:
     return cut_dir(book, number) / ("master.mp4" if engine == "i2v" else f"master_{engine}.mp4")
 
