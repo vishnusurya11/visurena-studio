@@ -17,8 +17,28 @@ from __future__ import annotations
 
 from studio.h3 import frames_for
 
-BUDGET = 12.0
-"""Seconds of picture per take; H3 is trained to ~15 s (362 frames)."""
+BUDGET = 8.0
+"""Seconds of picture per take.  H3 is trained to ~15 s (362 frames) and will
+RENDER far longer than it can HOLD.
+
+MEASURED over all 24 of episode 3's takes, by rendered frame count:
+
+    141 f (5.88 s)   2 takes   2 pass   mean 95.2
+    158 f (6.58 s)   5 takes   4 pass   mean 82.1
+    175 f (7.29 s)   7 takes   5 pass   mean 78.8
+    192 f (8.00 s)   5 takes   4 pass   mean 87.9
+    209 f (8.71 s)   1 take    1 pass   mean 73.2
+    294 f (12.25 s)  2 takes   0 pass   mean  3.75
+
+The 5.9-8.7 s band passes 16 of 20 at a mean of 82.9.  The two takes at 12.25 s
+pass NONE and are the two worst in the episode -- T02 at 3.7, which drew the
+owner's "blurred man at 17 seconds", and T22 at 3.8.
+
+This is a SEPARATE axis from `SEGMENT_CAP`: T22 carries two segments and still
+scores 3.8.  What the long takes share is how far the model must hold a
+composition unaided -- every passing 2-segment take cuts at 68-94 frames
+(2.8-3.9 s), while T22's cut sits at 175 (7.3 s).  8.0 s is just above the
+largest passing take, 7.67 s placed.  Was 12.0."""
 HANDLE = 0.25
 
 SEGMENT_CAP = 2
