@@ -157,21 +157,33 @@ class TestThePanels:
         text = sheet([seg(0, motion="Static shot; the glass goes up"), seg(1, motion="Tracking beside him; he walks")])
         assert "Static" not in text and "Tracking" not in text
 
-    def test_an_end_panel_is_a_complete_picture_with_its_changes_listed(self):
+    def test_an_end_panel_leads_with_where_the_change_arrived(self):
+        """The prompt used to say "same" EIGHT times and carry a six-noun
+        "Unchanged since panel J" list against one change stated LAST, while every
+        start panel on the same sheet said "same" zero times.  Sameness is now
+        SHOWN by the inherited inventory, not asserted; the words go on the one
+        thing that moved and where it moved to.
+        See tests/test_an_end_panel_inherits_a_picture.py."""
         start = seg(2, size="medium", end_frame="Stamford's glass is at his lips and his eyes are on Watson.",
                     changed="one glass has travelled to his mouth")
         text = sq.panels_block([start, sq.end_panel(start, 1)], [], BAR)
-        assert "Panel 2 - THE END OF PANEL 1." in text
+        assert "Panel 2 - PANEL 1 ONE ACTION LATER" in text
+        assert "one glass has travelled to his mouth" in text
         assert "In frame: Stamford's glass is at his lips" in text
-        assert "Changed since panel 1: one glass has travelled to his mouth." in text
-        assert "Unchanged since panel 1:" in text
+        assert text.index("travelled to his mouth") < text.index("In frame: Stamford")
+        assert "Unchanged since panel 1:" not in text
         assert "identical" not in text and "Static" not in text
 
-    def test_an_end_panel_without_a_written_picture_still_draws_a_fresh_one(self):
-        """The plan has yet to carry its 29 end pictures; until it does the END panel
-        says the same place one action later, and never the word identical."""
+    def test_an_end_panel_without_a_written_picture_inherits_the_start_panels_nouns(self):
+        """The plan still carries no `end` pictures, and until it does the END
+        panel CARRIES the start panel's own nouns rather than pointing at them.
+        It used to say "the same place, the same camera and the same light as
+        panel N, drawn afresh with <verb>" -- a delta with no base, whose only
+        base was the panel six inches away on the same canvas."""
         text = sq.panels_block([seg(3), sq.end_panel(seg(3), 1)], [], BAR)
-        assert "THE END OF PANEL 1" in text and "drawn afresh" in text
+        assert "PANEL 1 ONE ACTION LATER" in text
+        assert "the same place, the same camera" not in text
+        assert "Two men on the wet cobbles" in text
         assert negations(text) == []
 
     def test_the_size_ladder_fires_only_on_a_route_panel(self):

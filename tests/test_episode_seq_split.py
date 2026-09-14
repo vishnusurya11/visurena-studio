@@ -81,8 +81,10 @@ def test_a_setup_that_fits_one_sheet_draws_geography_then_close_ups_with_no_repe
     assert sq.DIFFERENT in text  # the law is stated affirmatively: a negated noun is still that noun
     assert "The panels are in story order: panel 1 happens first" in text
     assert "so the barred window is larger in each of them than in the one before" in text
-    assert "Panel 5 - THE END OF PANEL 4." in text and "Panel 7 - THE END OF PANEL 6." in text
-    assert "drawn afresh" in text and "identical" not in text and "alternate" not in text
+    assert "Panel 5 - PANEL 4 ONE ACTION LATER" in text
+    assert "Panel 7 - PANEL 6 ONE ACTION LATER" in text
+    # the END panel CARRIES the start panel's nouns instead of pointing at them
+    assert "drawn afresh" not in text and "identical" not in text and "alternate" not in text
     assert negations(text) == []
 
 
@@ -96,7 +98,14 @@ def test_end_frames_fill_the_spare_cells_walk_cells_first_and_are_named_apart():
     group = [s for s in SEGS[:5] if s["size"] in sq.GEO_SIZES] + [s for s in SEGS[:5] if s["size"] not in sq.GEO_SIZES]
     ends = sq.end_panels(group, 2)
     assert [(e["shot"], e["sub"]) for e in ends] == [(3, 0), (4, 0)]  # the walk panels first
-    assert ends[0]["end"] and "drawn afresh" in ends[0]["frame"] and "identical" not in ends[0]["frame"]
+    # THE END PANEL CARRIES THE START PANEL'S OWN NOUNS, rather than pointing at
+    # them with "the same place ... drawn afresh". And a motion of "Static" yields
+    # NO change clause at all -- static is the word for nothing moving, and it was
+    # being handed to the drawer as the thing that changed.
+    assert ends[0]["end"]
+    assert "the door far" in ends[0]["frame"] and "drawn afresh" not in ends[0]["frame"]
+    assert "identical" not in ends[0]["frame"] and "Static" not in ends[0]["frame"]
+    assert ends[0]["changed"] == ""
     assert sq.cell_name(4, 0, end=True) == "Q04_0E.png" and sq.cell_name(4, 0) == "Q04_0.png"
 
 

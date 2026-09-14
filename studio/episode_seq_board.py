@@ -437,18 +437,50 @@ def end_choices(segs: list[dict], spare: int, setup: Setup | None = None) -> lis
     return (told + walk + moving + rest)[:spare]
 
 
+STAYS = re.compile(r"\b(stay|stays|stayed|hold|holds|holding|held|remain|remains|steady|keeps?|kept|unmoved|motionless|static|still|unchanged)\b", re.I)
+"""Clauses that say something did NOT move.
+
+They were passed through as the END panel's change, so the drawer was told to
+draw a still in which "his hands stay folded on the head of his stick" -- and it
+drew the same hands.  Episode 4's three copied END cells are all of this shape or
+its cousin, a verb with no destination."""
+
+
+def moved_clause(motion: str) -> str:
+    """The first clause of a motion that names something ARRIVING SOMEWHERE.
+
+    An END panel is judged by whether a viewer can point at one thing and say
+    where it went, so the change has to have a destination.  Measured over all
+    eleven of episode 4's END pairs: every keeper names a body or object at a new
+    place -- "lifts one hand OFF HIS KNEE", "straightens OFF THE TABLE", "lays the
+    half-sovereign down ON THE CHECKED CLOTH" -- and every copy names a verb with
+    none."""
+    for clause in re.split(r"[;,] and |[;,]| and then ", still(motion or "")):
+        said = clause.strip().rstrip(". ")
+        if said and not STAYS.search(said):
+            return said
+    return ""
+
+
 def end_panel(seg: dict, number: int) -> dict:
-    """The END panel of `seg`: the same place after its action, drawn as its own
-    COMPLETE picture.  The plan's own `end` when it has one; the word 'identical'
-    is gone on purpose (owner 2026-09-11: told 'identical', the drawer drew the
-    identical panel -- four of five END cells were copies)."""
-    done = still(seg.get("motion", "")).rstrip(". ")
+    """The END panel of `seg`: its own COMPLETE picture, one action later.
+
+    IT INHERITS THE START PANEL'S OWN NOUNS rather than pointing at them.  It used
+    to read "the same place, the same camera and the same light as panel N, drawn
+    afresh with <verb>", which fired on 24 of 24 shots in episode 4 because the
+    plan's `end` is empty on every one -- so the start panel named nouns at frame
+    fractions and edges and the END panel named no framing noun at all.  A delta
+    with no base, whose only base was the panel six inches away on the same
+    canvas, which is what the drawer copied.
+
+    The word 'identical' went for the same reason one revision earlier (owner
+    2026-09-11: told 'identical', it drew the identical panel)."""
+    moved = seg.get("changed") or moved_clause(seg.get("motion", ""))
+    carried = keeps_camera(stop(seg.get("frame", "")).rstrip(". "))
     return dict(seg, end=True, of=number, motion="",
                 frame=seg.get("end_frame") or (
-                    f"the same place, the same camera and the same light as panel {number}, drawn afresh "
-                    f"with this carried through to its finish -- {done} -- and every person and object "
-                    f"standing where that leaves them"),
-                changed=seg.get("changed") or done.split(";")[0])
+                    f"{carried}, with {moved}" if moved else carried),
+                changed=moved)
 
 
 def end_panels(segs: list[dict], spare: int) -> list[dict]:
@@ -846,16 +878,21 @@ def keeps_camera(text: str) -> str:
 
 
 def end_text(k: int, seg: dict, crowd: str) -> str:
-    """An END panel: its own complete picture, then the one change and the
-    preservation list.  Given a verb phrase and the word "identical" the drawer
-    drew the identical picture (0.951 on Q02_0 / Q02_0E)."""
-    j = seg["of"]
-    return (f"Panel {k} - THE END OF PANEL {j}. The same place, the same camera position, the same lens, "
-            f"the same light and the same wardrobe as panel {j}, one action later. In frame: "
-            f"{stop(keeps_camera(seg['frame']))}{crowd} Changed since panel {j}: {seg['changed'].rstrip('. ')}. "
-            f"Unchanged since panel {j}: the place, the camera, the lens, the light, the wardrobe and "
-            f"every other object in frame. Panel {k} is a different photograph from panel {j}: a viewer "
-            f"seeing them side by side can say what happened in between.")
+    """An END panel: THE CHANGE FIRST, then its own complete picture.
+
+    This used to say "same" eight times and carry a six-noun "Unchanged since
+    panel J" list against one change clause stated last -- while every start
+    panel on the same sheet said "same" zero times.  Four of its six sentences
+    asserted sameness.  Sameness is now SHOWN, by the inherited inventory in
+    `frame`, instead of asserted; what the prompt spends its words on is the one
+    thing that moved and where it moved to."""
+    j, moved = seg["of"], (seg.get("changed") or "").rstrip(". ")
+    turn = (f"What a viewer sees at a different place than in panel {j}: {moved}. "
+            f"Draw that finished and at rest, at its new place in the frame. "
+            if moved else f"Panel {j} one action later. ")
+    return (f"Panel {k} - PANEL {j} ONE ACTION LATER, from the same camera. {turn}"
+            f"In frame: {stop(keeps_camera(seg['frame']))}{crowd} Panel {k} is its own photograph: "
+            f"laid beside panel {j}, a viewer points at one thing and says where it went.")
 
 
 def panel_text(k: int, seg: dict, route: list[int], setup: Setup) -> str:
