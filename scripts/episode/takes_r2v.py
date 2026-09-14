@@ -188,8 +188,8 @@ def card(book: Path, episode: Episode, number: int, take: dict, measured: dict) 
     faces = faces_of(shots, sorted(physicals(book)))
     sheet = reference_strip(boards, episode, shots)
     segs = [(s.index, k) for s in shots for k in range(0, len(s.cuts) + 1)]
-    ends = end_cells(sq.cells_in(boards), segs)
     sizes = [s.size for s in shots] + [c.size for s in shots for c in s.cuts]
+    ends = end_cells(sq.cells_in(boards), segs, seg_sizes(shots))
     refs = reference_list(book, boards, faces, first.setup, segs, ends, sheet,
                           episode.setups[first.setup].state, sizes)
     lines = [l for l in episode.lines if l.shot in take["shots"]]
@@ -247,7 +247,7 @@ def reference_strip(boards: Path, episode: Episode, shots: list) -> Path:
     # Own cells only is still right: each pinned cell needs its own <Picture N> at full resolution.
     window = segs
     panels = [Image.open(sq.cells_in(boards) / sq.cell_name(a, b)).convert("RGB") for a, b in window]
-    ends = end_cells(sq.cells_in(boards), segs)  # the take's own END frames, after its panels
+    ends = end_cells(sq.cells_in(boards), segs, seg_sizes(shots))  # the take's own END frames, after its panels
     panels += [Image.open(sq.cells_in(boards) / sq.cell_name(a, b, end=True)).convert("RGB") for a, b in ends]
     out = boards / f"ref_take_{shots[0].index:02d}.png"
     episode_strip_ref.compose(panels).save(out)
@@ -261,7 +261,17 @@ compare against the same episode rendered with them.  A flag, not a deletion, so
 the control stays reproducible and the change is one line to undo."""
 
 
-def end_cells(cells: Path, segs: list[tuple[int, int]]) -> list[tuple[int, int]]:
+def seg_sizes(shots: list) -> list[str]:
+    """Every segment's size, in SEGMENT order: each shot followed by its own cuts.
+
+    `card` also builds a flat `sizes` list -- every shot, then every cut -- for
+    `places_the_plate`, which only counts them.  The two orders agree while a
+    take holds one shot and disagree the moment one holds two, so anything that
+    needs a size FOR a segment asks here."""
+    return [size for s in shots for size in [s.size] + [c.size for c in s.cuts]]
+
+
+def end_cells(cells: Path, segs: list[tuple[int, int]], sizes: list[str] | None = None) -> list[tuple[int, int]]:
     """The (shot, sub) segments of a take with an END frame ONE CAMERA MOVE AWAY.
 
     An END frame on disk is not enough. MEASURED on episode 2: 9 of the 13 drawn
@@ -271,8 +281,9 @@ def end_cells(cells: Path, segs: list[tuple[int, int]]) -> list[tuple[int, int]]
     a re-staged END pair belongs; here it is simply not a destination."""
     if NO_ENDS:
         return []
-    return [(a, b) for a, b in segs
-            if sq.reaches(cells / sq.cell_name(a, b), cells / sq.cell_name(a, b, end=True))]
+    sizes = sizes or [""] * len(segs)
+    return [(a, b) for (a, b), size in zip(segs, sizes)
+            if sq.reaches(cells / sq.cell_name(a, b), cells / sq.cell_name(a, b, end=True), size)]
 
 
 def end_numbers(segs: list[tuple[int, int]], ends: list[tuple[int, int]]) -> list[int]:

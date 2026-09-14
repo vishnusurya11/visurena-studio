@@ -199,14 +199,30 @@ highest legitimate pair; the floor is 0.45, under every obeying pair and over
 every re-stage (the highest re-stage measured 0.44)."""
 
 
-def end_pair_verdict(score: float) -> str:
-    """"ok", "restaged" (no camera move can travel it) or "copy" (nothing moved)."""
-    if score < END_FLOOR:
+SUBJECT_FILLS = ("insert",)
+"""Sizes whose subject IS the frame, so a whole-frame score measures the SUBJECT.
+
+The END floor asks one question -- did the camera travel somewhere no simple
+move reaches -- and answers it by how different the two pictures look.  That
+works while the frame holds a room.  On an insert there is no room: episode 4's
+shot 10 is a half-sovereign between finger and thumb which turns over to show
+its face, the same lens and hand and distance, and it scores 0.166.  The gate
+called it re-staged, gave the take no END cell, and H3 invented the reveal --
+minting a coin that reads "SOLVUNT EF . CENOWLEBH" around a figure who is not
+Victoria, while the correct face sat drawn and unused in Q10_0E.png."""
+
+
+def end_pair_verdict(score: float, size: str = "") -> str:
+    """"ok", "restaged" (no camera move can travel it) or "copy" (nothing moved).
+
+    The floor is dropped for a size whose subject fills the frame; the ceiling
+    never is, because an END that ends where it began is stillness at any size."""
+    if score < END_FLOOR and size not in SUBJECT_FILLS:
         return "restaged"
     return "copy" if score > END_CEILING else "ok"
 
 
-def reaches(start: "Path", end: "Path") -> bool:
+def reaches(start: "Path", end: "Path", size: str = "") -> bool:
     """Can one simple camera move travel from this cell to its own END cell?
 
     MEASURED, episode 2: 9 of 13 drawn END cells score below `END_FLOOR` against
@@ -233,7 +249,7 @@ def reaches(start: "Path", end: "Path") -> bool:
     start, end = Path(start), Path(end)
     if not (start.exists() and end.exists()):
         return False
-    return end_pair_verdict(fm.similarity(fm.load(start), fm.load(end))) == "ok"
+    return end_pair_verdict(fm.similarity(fm.load(start), fm.load(end)), size) == "ok"
 
 
 def is_end_pair(a: dict, b: dict) -> bool:
