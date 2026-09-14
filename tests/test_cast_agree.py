@@ -98,10 +98,32 @@ class TestTheFaceIsBigEnoughToCopy:
         assert ca.face_ok(path, "card", detect=lambda p: [(0, 0, 50, 40)]) is False
 
 
+def wide_figure(path, bottom, size=(300, 400)):
+    """A figure whose ARMS reach the side thirds -- a hand at the bottom corner."""
+    image = Image.new("RGB", size, GREY)
+    draw = ImageDraw.Draw(image)
+    draw.rectangle([100, 40, 200, size[1] - 1 - bottom], fill=(30, 30, 30))
+    draw.rectangle([20, 200, 90, size[1] - 1 - bottom], fill=(30, 30, 30))
+    draw.rectangle([210, 200, 280, size[1] - 1 - bottom], fill=(30, 30, 30))
+    image.save(path)
+    return path
+
+
 class TestTheHandsAreInsideTheFrame:
-    def test_a_figure_running_off_the_bottom_edge_fails(self, tmp_path):
-        assert ca.hands_clear(figure(tmp_path / "cut.png", bottom=0)) is False
-        assert ca.hands_clear(figure(tmp_path / "air.png", bottom=60)) is True
+    def test_a_hand_running_off_the_bottom_CORNER_fails(self, tmp_path):
+        """AMENDED 2026-09-13. This used to fail a CENTRED figure reaching the
+        bottom edge -- which is what a correctly framed card looks like, because
+        the card is framed "head to mid-thigh" and the thighs are central.
+        Measured, the old test failed EVERY card on disk (0.291-0.683 of the foot
+        band) while the outer thirds told the two cases apart cleanly: five
+        well-framed cards at 0.112-0.320, the badly framed one at 0.640. Hands
+        hang outboard; legs run central."""
+        assert ca.hands_clear(wide_figure(tmp_path / "cut.png", bottom=0)) is False
+        assert ca.hands_clear(wide_figure(tmp_path / "air.png", bottom=60)) is True
+
+    def test_a_centred_figure_reaching_the_bottom_edge_is_the_framing(self, tmp_path):
+        """Head to mid-thigh: the thighs are supposed to reach the edge."""
+        assert ca.hands_clear(figure(tmp_path / "thighs.png", bottom=0)) is True
 
     def test_the_bottom_share_is_the_measurement_the_complaint_quotes(self, tmp_path):
         assert ca.bottom_share(figure(tmp_path / "cut.png", bottom=0)) == pytest.approx(1 / 3, abs=0.02)

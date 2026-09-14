@@ -15,6 +15,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 
+from studio import episode_seq_board as sq
 from studio import canvas, episode_home
 from studio.comfy import run
 from studio.episode_spec import Episode, Setup
@@ -68,7 +69,7 @@ def main(book_id: str, number: int) -> None:
     episode: Episode = episode_home.load_plan(book, number)
     global W, H, ASPECT
     ASPECT, (W, H) = episode.aspect, canvas.size(episode.aspect)
-    out_dir = episode_home.boards_dir(book, number)
+    out_dir = sq.plates_in(episode_home.boards_dir(book, number))
     out_dir.mkdir(parents=True, exist_ok=True)
     palette = episode_home.read_json(book / "refs" / "refs.json")["palette"]
     seed = SEED_BASE + number * 1000

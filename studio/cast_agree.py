@@ -87,17 +87,39 @@ def _pixels(path: Path):
     return np.asarray(Image.open(path).convert("RGB"), dtype=float)
 
 
-def side_strips(path: Path, frac: float = SIDE_STRIP):
-    """The two outer vertical strips of the frame, side by side.
+SHOULDER = 0.60
+"""How far down the frame the backdrop is still backdrop.
+
+A BUST FRAMES HEAD AND SHOULDERS, so the shoulders reach the side edges near the
+bottom by construction, and a broad man's reach them sooner.  Reading the whole
+strip therefore measures the MAN and calls him a second room.  MEASURED on
+`char-john_rance.png`, drawn against a plainly flat grey seamless:
+
+    top third    left std  7.3   right std  7.8
+    middle       left std  5.0   right std 12.7
+    bottom third left std 38.8   right std 39.1     <- his tunic
+    whole strip  left std 32.7   right std 39.2     -> refused at 20.0
+
+The same complaint stands against `char-unnamed_retired_marine_sergeant.png`
+(35.3, whose record says "broad, thick-set, heavy square shoulders") and
+`char-stamford.png` (28.6): the fault scales with how wide the character is,
+which is a property of the person and not of the plate."""
+
+
+def side_strips(path: Path, frac: float = SIDE_STRIP, down: float = SHOULDER):
+    """The two outer vertical strips of the frame ABOVE THE SHOULDER LINE.
 
     The backdrop is measured at the edges because that is where a sheet keeps
     what it should not have: the brick pillars behind Stamford stand at both
-    sides of frame, with the man himself down the middle."""
+    sides of frame, with the man himself down the middle.  It is measured only
+    in the upper part because below that the edges are the subject."""
     import numpy as np
 
     pixels = _pixels(path)
     width = max(int(pixels.shape[1] * frac), 1)
-    return np.concatenate([pixels[:, :width], pixels[:, -width:]], axis=1)
+    tall = max(int(pixels.shape[0] * down), 1)
+    top = pixels[:tall]
+    return np.concatenate([top[:, :width], top[:, -width:]], axis=1)
 
 
 def backdrop_std(path: Path, frac: float = SIDE_STRIP) -> float:
@@ -128,12 +150,43 @@ def bottom_share(path: Path, margin: int = FOOT, distance: float = SUBJECT) -> f
     return round(float((far > distance).mean()), 4)
 
 
-def hands_clear(path: Path, margin: int = FOOT) -> bool:
-    """True when there is clear air below the lowest hand.
+HAND_BAND = 0.45
+"""How much of the foot band's OUTER THIRDS may be subject before a hand is
+running off the frame.
+
+THE CENTRE OF THAT BAND IS THIGHS, BY DESIGN.  A card is framed "head to
+mid-thigh" -- the prompt says so -- so the body reaches the bottom edge down the
+middle of every correct card.  Reading the whole width therefore fails all of
+them.  Measured over every card on disk:
+
+    card                        whole   outer thirds   centre
+    g_lestrade_indoor           0.471          0.320    0.773
+    john_rance_indoor           0.330          0.155    0.678
+    john_watson_indoor          0.291          0.112    0.649
+    sherlock_holmes_indoor      0.339          0.151    0.712
+    tobias_gregson_indoor       0.338          0.140    0.732
+    marine_sergeant_indoor      0.683          0.640    0.767
+
+Five well-framed cards sit at 0.112-0.320 in the outer thirds; the one the cast
+gate has always complained about sits at 0.640.  Hands hang OUTBOARD and legs
+run CENTRAL, so the outer thirds are where the question actually lives."""
+
+
+def hands_clear(path: Path, margin: int = FOOT, limit: float = HAND_BAND) -> bool:
+    """True when the bottom corners are clear -- no hand running off the frame.
 
     "Both hands entirely inside the frame" is the card's whole job: a hand that
-    leaves the frame is a hand the model may draw any way it likes."""
-    return bottom_share(path, margin) <= CLEAR
+    leaves the frame is a hand the model may draw any way it likes.  It is asked
+    at the SIDES because that is where hands hang; the middle of the bottom edge
+    is the thighs the framing asks for."""
+    import numpy as np
+
+    pixels = _pixels(path)
+    foot = pixels[pixels.shape[0] - margin:]
+    far = np.sqrt(((foot - backdrop_tone(path)) ** 2).sum(axis=2)) > SUBJECT
+    third = max(pixels.shape[1] // 3, 1)
+    outer = np.concatenate([far[:, :third], far[:, -third:]], axis=1)
+    return float(outer.mean()) <= limit
 
 
 # ---- the picture, where a face model is installed -------------------------
