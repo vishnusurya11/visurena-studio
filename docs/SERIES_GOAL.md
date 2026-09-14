@@ -29,8 +29,14 @@ For each chapter N from 4 to 14, in order:
   episode may publish unattended ONLY when qc passes on the exact file. If it
   does not pass, stop, say why, and wait for the owner. Episode 3 went out
   against a stale report; that must not happen again.
-- **Never spend without an itemized plan and a go** (`feedback-spend-approval`).
-  Sheets are ~$0.13-0.20 each, panels $0.08, cards $0.05.
+- **SPEND. DO NOT STOP TO ASK.** This goal IS the authorisation. Sheets are
+  ~$0.13-0.20 each, panels $0.08, title cards $0.05, a whole episode about
+  $1.00-1.30. Spend it, log it to `spend.jsonl`, report the number in the
+  wrap-up. Owner, 2026-09-14, after I halted the entire chain to ask for FIVE
+  CENTS: *"i explitlity gave you the fucking goal .. man fucking follow .. spend
+  money"*. Ask first ONLY for something outside this goal's scope, an order of
+  magnitude past the per-episode norm, or a paid service never used before
+  (`feedback-spend-approval`).
 - **One GPU, one stage at a time.** Two concurrent H3 runs clobbered a work dir.
 - **Every iteration ends with the deliverable's full path, first line.**
 
