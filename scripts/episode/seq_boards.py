@@ -267,7 +267,12 @@ def draw_setup(book: Path, episode: Episode, number: int, name: str, only_sheet:
     # a one-sheet redraw reports on that sheet alone and leaves the setup's own
     # dq.json where it is, rather than overwriting it with a partial verdict
     stem = f"seq_{name}" if only_sheet is None else f"seq_{name}_{only_sheet}"
-    episode_home.write_json(boards / f"{stem}.dq.json", report)
+    # THE SHEETS ROOM, because `qc.sheets_rollup` globs it there.  This wrote to
+    # `boards/` and `migrate_layout.py` moved the existing reports into
+    # `boards/sheets/` without moving the writer, so every episode drawn after
+    # the migration filed its reports where QC does not look -- and an empty
+    # rollup renders as a clean one.
+    episode_home.write_json(sq.sheets_in(boards) / f"{stem}.dq.json", report)
     return report
 
 
