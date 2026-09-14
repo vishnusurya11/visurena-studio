@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 """Redraw ONE storyboard cell, under its own sheet's laws.
 
-    uv run python scripts/episode/redraw_panel.py <codex_id> <episode> S14.1 --approved
+    uv run python scripts/episode/redraw_panel.py <codex_id> <episode> Q14_1 --approved
 
 A sheet costs $0.20 and redraws every panel on it, including the ones that came
 back right; one panel costs $0.08 and touches only the picture that was wrong

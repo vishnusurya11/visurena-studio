@@ -989,10 +989,23 @@ def single(seg: dict, setup: Setup, physical: dict[str, str], aspect: str = "9:1
 
 
 def end_key(key: str) -> tuple[int, int, bool]:
-    """`S19.1E` -> (19, 1, True).  A trailing E names a segment's END cell."""
-    body = key.upper().lstrip("S")
+    """`Q19_1E`, `S19.1E`, `19.1E` or a filename -> (19, 1, True).
+
+    IT TAKES THE NAME ON DISK.  It used to strip a leading "S" and split on ".",
+    which was the i2v-era naming, while every cell written by `cell_name` is
+    `Q19_1E.png`.  `redraw_panel.py` -- the $0.08 repair for one wrong cell --
+    documents itself as `... S14.1 --approved`, so handing it the name a reader
+    can actually see raised `invalid literal for int(): 'Q13_0'`.  Measured when
+    episode 5's doorway wide needed a walking stick taken out of it.
+
+    A trailing E names a segment's END cell."""
+    body = key.upper().strip()
+    for tail in (".PNG", ".JPG", ".JPEG"):
+        if body.endswith(tail):
+            body = body[:-len(tail)]
+    body = body.lstrip("SQ")
     end = body.endswith("E")
-    head, _, sub = body.rstrip("E").partition(".")
+    head, _, sub = body.rstrip("E").replace("_", ".").partition(".")
     return int(head), int(sub) if sub else 0, end
 
 

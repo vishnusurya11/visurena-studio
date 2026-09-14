@@ -1,14 +1,35 @@
-"""G3 (cell side) and its take-side twin: is the setup's geography honest?
+"""G3 geography -- SUPERSEDED IN PART, UNWIRED IN THE REST. Read this before using it.
 
-Cell side, run on the drawn sheet before a frame of GPU is spent: an END cell
-must show a DIFFERENT instant from its own start cell, the far landmark must
-grow as the route advances and never shrink, and the walking direction may not
-flip without a turn in the text.
+NOTHING IMPORTS THIS MODULE except its own test. That is not an invitation to
+wire it up: one half of it is a worse-founded duplicate of a rule that now lives
+elsewhere, and wiring it would re-introduce a fault this repo has already paid
+to remove.
 
-Take side, run on the rendered file: the hard cuts the take actually made
-against the cell changes the plan asked for, and how fast the floor slides
-under a tracking walk.
+`end_moved` / `frozen_end_cells` (END_MOVED = 0.75) -- SUPERSEDED by
+`episode_seq_board.end_pair_verdict`. `_sig` here is byte-for-byte
+`frame_match.signature`, so `end_moved` IS `fm.similarity(start, end) < 0.75`:
+the same measurement as END_CEILING = 0.80, compared to a different number. The
+replacement is better founded on every axis -- 12 episode-2 pairs plus all 11 of
+episode 4's against four samples here, plus the `SUBJECT_FILLS` exemption for an
+insert and the 7x4 `changed_blocks` override for a locked-off camera. And this
+version's stated "moved" range of 0.34-0.62 is FALSIFIED by episode 4: Q09 at
+0.807, Q20 and Q21 at 0.856 and Q15 at 0.938 all moved, verified by eye, and
+every one is above 0.75. `frozen_end_cells` would call 7 of episode 4's 11 END
+pairs frozen -- the identical false refusal that commit e30f5e4 removed.
+
+The rest -- `cuts_from_energy`, `unplanned_cuts`, `landmark_track`,
+`direction_breaks`, `floor_slide` -- is UNWIRED rather than superseded. It was
+written against the i2v-era chain and nothing in the r2v chain calls it. The
+take-side cut detection overlaps `cut_landing`, which is live and calibrated on
+more data; the landmark and direction rules overlap `route_gate` and the size
+ladder in `episode_seq_board`.
+
+IT IS KEPT, NOT DELETED, ON PURPOSE. `studio/identity.py` was deleted in 1c04e40
+because "nothing was importing it yet", and it turned out to be 173 lines of
+measured, licence-audited work that the next person needed and had to recover
+out of git history. A banner costs nothing and a deletion costs that.
 """
+
 from __future__ import annotations
 
 import re
