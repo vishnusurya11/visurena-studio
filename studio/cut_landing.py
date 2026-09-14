@@ -43,8 +43,16 @@ FOREIGN_MIN = 0.60
 mid-crossing: own 0.39, other 0.45 -- without the floor that reads FOREIGN, but a
 frame matching nothing is off its own composition, which is drift's business."""
 MAX_EARLY, MAX_LATE = 4, 6
-"""CALIBRATION: frames.  Every honoured cut of iteration 4 landed in [-3, +1];
-the failures measured +34, +51, +37, +54 and -5..-24 (review8/transitions.md)."""
+"""CALIBRATION: frames, measured from `stated_frame(pin)` -- the whole second the
+model was asked for -- and NOT from the pin.  Every honoured cut of iteration 4
+landed in [-3, +1]; the failures measured +34, +51, +37, +54 and -5..-24
+(review8/transitions.md).
+
+The origin matters more than the width.  Measured from the pin, 7 of episode 3's
+15 internal cuts could not pass even with perfect obedience, because a
+whole-second stamp bounds the model to +-12 frames before it does anything
+(tests/test_cut_landing_judges_the_ask.py).  A gate may only demand a precision
+the instruction can express."""
 MAX_FOREIGN_RUN = 12
 """CALIBRATION: frames (0.5 s).  Honoured cuts carried <= 7 frames of matcher
 flicker; the real intrusions ran 25-57 frames (T01's plate_criterion, 40/51)."""
@@ -135,6 +143,28 @@ def longest_run(flags: list[bool]) -> int:
     return best
 
 
+def stated_frame(pin: int, fps: int = FPS) -> int:
+    """The frame the model was actually ASKED for.
+
+    It never sees `pin`.  `episode_ref_official.stamp` rounds every time to a
+    whole second -- the engine's own grammar -- so a pin at frame 137 is asked
+    for as "00:06", which is frame 144.  Obedience is measured against this;
+    the pin stays what the PICTURE is matched against."""
+    return round(pin / fps) * fps
+
+
+def off_span(landed: int, pin: int, asked: int) -> int:
+    """How far a landing is OUTSIDE the span the instruction could mean; 0 inside.
+
+    The plan wants `pin`; the words say `asked`.  Both are obedient landings and
+    so is anything between them, so the tolerance is applied to the distance from
+    that span and not from either end.  Judging against `asked` alone refuses a
+    cut that lands exactly on the pin; judging against `pin` alone refuses one
+    that lands exactly on the second it was asked for."""
+    lo, hi = min(pin, asked), max(pin, asked)
+    return 0 if lo <= landed <= hi else (landed - hi if landed > hi else landed - lo)
+
+
 def landing(per_frame: list[dict], anchors: list) -> list[dict]:
     """One row per internal cut: pin, landed, delta, foreign run, ping-pong frames."""
     starts = start_pins(anchors)
@@ -157,8 +187,9 @@ def landing(per_frame: list[dict], anchors: list) -> list[dict]:
         back = [t for t in range((landed if landed is not None else pin), nxt)
                 if not per_frame[t]["foreign"] and per_frame[t]["own_s"] >= LAND
                 and segment[per_frame[t]["own"].replace("E.png", ".png")] < k]
-        rows.append({"cut": k, "target": target, "pin": pin, "landed": landed,
-                     "delta": None if landed is None else landed - pin,
+        asked = stated_frame(pin)
+        rows.append({"cut": k, "target": target, "pin": pin, "asked": asked, "landed": landed,
+                     "delta": None if landed is None else off_span(landed, pin, asked),
                      "foreign_run": longest_run([w["foreign"] for w in window]),
                      "foreign_cell": next((w["other"] for w in window if w["foreign"]), ""),
                      "pingpong": len(back), "pingpong_to": per_frame[back[0]]["own"] if back else ""})
@@ -172,7 +203,7 @@ def verdict(rows: list[dict]) -> dict:
         if r["foreign_run"] > MAX_FOREIGN_RUN:
             return {"passed": False, "reason": f"cut {r['cut']}: {r['foreign_run']} frames of {r['foreign_cell']} at the cut"}
         if r["delta"] is None or r["delta"] < -MAX_EARLY or r["delta"] > MAX_LATE:
-            return {"passed": False, "reason": f"cut {r['cut']} to {r['target']}: landed {r['delta']} frames from the pin"}
+            return {"passed": False, "reason": f"cut {r['cut']} to {r['target']}: landed {r['delta']} frames from the {r.get('asked', r['pin'])/FPS:.0f}s it was asked for"}
         if r["pingpong"] > MAX_PINGPONG:
             return {"passed": False, "reason": f"cut {r['cut']}: {r['pingpong']} frames back on {r['pingpong_to']} after landing"}
     return {"passed": True, "reason": ""}

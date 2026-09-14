@@ -79,16 +79,28 @@ def test_cut_on_the_pin_passes():
 
 
 def test_cut_three_frames_early_passes_and_late_fails():
+    """`delta` counts from the SPAN between the pin (77) and the whole second the
+    model was asked for (72), not from the pin -- see
+    tests/test_cut_landing_judges_the_ask.py.  Frame 74 lies inside that span, so
+    it now reads 0 rather than -3; it passed before and passes now."""
     early = cl.landing(take([(A, 74), (B, 101)]), ANCHORS)
-    assert early[0]["delta"] == -3 and cl.verdict(early)["passed"]
+    assert early[0]["delta"] == 0 and cl.verdict(early)["passed"]
     late = cl.landing(take([(A, 111), (B, 64)]), ANCHORS)          # T09: pin ignored, cut at 111
     assert late[0]["delta"] == 34 and not cl.verdict(late)["passed"]
     assert "landed 34" in cl.verdict(late)["reason"]
 
 
+def test_three_frames_early_of_the_whole_span_still_passes():
+    """Genuinely three frames early: 72 - 3, outside the span at its near end."""
+    rows = cl.landing(take([(A, 69), (B, 106)]), ANCHORS)
+    assert rows[0]["delta"] == -3 and cl.verdict(rows)["passed"]
+
+
 def test_cut_a_second_early_fails():
-    rows = cl.landing(take([(A, 66), (B, 109)]), ANCHORS)          # iteration-3 T01: -11
-    assert rows[0]["delta"] == -11 and not cl.verdict(rows)["passed"]
+    """Iteration-3 T01 cut a whole second early.  From the pin that was -11; from
+    the span's near end it is -6.  Either way it is past MAX_EARLY and refused."""
+    rows = cl.landing(take([(A, 66), (B, 109)]), ANCHORS)
+    assert rows[0]["delta"] == -6 and not cl.verdict(rows)["passed"]
 
 
 def test_plate_at_the_cut_fails_and_names_it():

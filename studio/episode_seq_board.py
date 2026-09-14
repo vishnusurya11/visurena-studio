@@ -32,6 +32,7 @@ prompt (`studio/affirm.py`), so the sheet carries no negation at all -- the
 from __future__ import annotations
 
 import re
+from pathlib import Path
 
 from studio import canvas as cv, prop_refs
 from studio.episode_spec import Setup, Shot
