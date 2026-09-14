@@ -56,17 +56,32 @@ def distinct_words(text: str) -> int:
     return len(set(words(text)))
 
 
-def sings_text(text: str | None) -> bool:
-    """Is somebody singing words in this bed?"""
+DISTINCT_PER_MINUTE = 5.0
+"""Distinct words a minute at or above which a transcript is a lyric.
+
+MEASURED: clean beds run about 2 a minute (whisper filler on an instrumental),
+the singing ones 9-12.  The RATE is what separates them at any length -- a flat
+count of 12 passed a 40 s clip singing "Oh, my God ... we for life and grief",
+because forty seconds cannot hold twelve distinct words however hard it sings."""
+
+
+def sings_text(text: str | None, seconds: float | None = None) -> bool:
+    """Is somebody singing words in this bed?
+
+    `seconds` is the clip's length; without it the flat count is used, which is
+    right for a full-length bed and too loose for a short one."""
     heard = words(text)
-    return len(heard) >= MIN_WORDS and distinct_words(text) >= DISTINCT_WORDS
+    if len(heard) < MIN_WORDS:
+        return False
+    need = DISTINCT_WORDS if not seconds else max(4.0, DISTINCT_PER_MINUTE * seconds / 60.0)
+    return distinct_words(text) >= need
 
 
-def refuse_text(text: str | None) -> str:
+def refuse_text(text: str | None, seconds: float | None = None) -> str:
     """The reason not to use this bed: "" to go ahead, `UNVERIFIED` when unheard."""
     if text is None:
         return UNVERIFIED
-    if sings_text(text):
+    if sings_text(text, seconds):
         return (f"the bed sings: {' '.join(words(text)[:24])}...\n"
                 f"  a music model given any lyric-shaped string writes a song to fit. "
                 f"YuE2's instrumental is an EMPTY lyrics field; ACE-Step's is `[inst]`.")
@@ -90,9 +105,19 @@ def listen(bed: Path, transcribe=None) -> str | None:
     return heard if isinstance(heard, str) else None
 
 
+def seconds_of(bed: Path) -> float | None:
+    try:
+        import soundfile as sf
+
+        i = sf.info(str(bed))
+        return i.frames / i.samplerate
+    except Exception:                     # noqa: BLE001
+        return None
+
+
 def refuse(bed: Path, transcribe=None) -> str:
     """The reason not to use this bed, or "" to go ahead."""
-    return refuse_text(listen(bed, transcribe))
+    return refuse_text(listen(bed, transcribe), seconds_of(bed))
 
 
 def refused_name(bed: Path) -> Path:

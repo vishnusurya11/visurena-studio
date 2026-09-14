@@ -33,7 +33,7 @@ from __future__ import annotations
 
 import re
 
-from studio import canvas as cv
+from studio import canvas as cv, prop_refs
 from studio.episode_spec import Setup, Shot
 
 COLS, ROWS = 3, 3
@@ -423,6 +423,40 @@ CONSTRAINTS = ("The whole canvas is photograph and thin white gutter, edge to ed
                "one a viewer tells from every other panel at a glance.\nEvery hand in every panel is bare skin.")
 
 
+WORDLESS = ("Every surface in every panel stays wordless: signs, labels, "
+            "glass and paper carry plain tone and grain alone.")
+"""The one line of CONSTRAINTS that `wordless_law` opens up, quoted here so the
+carve-out and the law can never drift apart by a comma."""
+
+
+def wordless_law(props: list[dict] | None = None) -> str:
+    """CONSTRAINTS, with the wordless line opened up for props that HAVE a picture
+    of their words.
+
+    The blanket law is right about the thing it was written for.  gpt-image
+    INVENTS lettering: our own board drew CRISTERION off a "no signage" clause,
+    and one seed with one blank card gave us both "Number 3 Lauriston Gardens."
+    and "Vinisitien of 3 Lauriston Gardens".
+
+    But what is a coin-flip is GENERATION.  PROPAGATION from an attached picture
+    measured near-lossless, 6 of 6, including a word at 14 % of frame width,
+    defocused, under a moving camera.  So the law's real content is NO INVENTED
+    WORDS, and a word with a reference picture is not invented -- it is copied.
+
+    Said affirmatively, and pointing at the picture rather than at the spelling,
+    because a negated noun is still that noun and because a model asked to spell
+    RACHE out of its own memory hands back RAHE."""
+    rows = prop_refs.lettered(props or [])
+    if not rows:
+        return CONSTRAINTS
+    said = "; ".join(f'{r["name"]} carries the words "{r["words"]}"' for r in rows)
+    return CONSTRAINTS.replace(
+        WORDLESS,
+        f"Exactly these surfaces carry writing, and they carry it copied letter for letter from "
+        f"their own reference photograph: {said}. Every other surface in every panel stays "
+        f"wordless: signs, labels, glass and paper carry plain tone and grain alone.")
+
+
 END_CONSTRAINTS = "\n".join(l for l in CONSTRAINTS.split("\n") if "every other panel" not in l)
 """The sheet's laws MINUS "one a viewer tells from every other panel at a glance".
 
@@ -502,9 +536,15 @@ def references_block(setup: Setup, physical: dict[str, str], props: list[dict] |
         lines.append(f"Image {len(lines) + 1} is {name}: {steady(physical.get(who, ''))} Keep exactly this "
                      f"face, hair, build and these clothes in every panel that shows {name}.")
     for row in (props or []):
+        # picture, INDEX and measure in ONE sentence: the single episode 2 prop that
+        # held its size (the envelope, 1.25x against 0.36-3.0x for the rest) was the
+        # one that had all three.  A lettered prop needs the same three for its WORDS.
+        copy = (f' Its writing reads "{row["words"]}" and is copied from that photograph letter for '
+                f'letter, at that size and on that surface, rather than spelled afresh.'
+                ) if row.get("words") else ""
         lines.append(f"Image {len(lines) + 1} is {row['name']}, photographed beside a hand so that its "
                      f"size reads against the fingers: {row['physical']} Draw it at exactly that size "
-                     f"against the body it touches, in every panel that shows it.")
+                     f"against the body it touches, in every panel that shows it.{copy}")
     return "\n".join(lines)
 
 
@@ -696,7 +736,7 @@ def prompt(segs: list[dict], setup: Setup, physical: dict[str, str], previous: b
               references_block(setup, physical, props or []), setup.described, geometry_block(setup),
               wardrobe_block(setup, physical), props_block(props or []),
               crowd_block(setup), panels_block(segs, route, setup),
-              STYLE, CONSTRAINTS)
+              STYLE, wordless_law(props or []))
     return "\n\n".join(f"{head}\n{body}" for head, body in zip(BLOCKS, bodies) if body)
 
 

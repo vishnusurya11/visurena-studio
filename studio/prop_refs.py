@@ -52,7 +52,7 @@ episode 2 numbers show what happens: nine props measured in words landed between
 0.36x and 3.0x.  Every measure here names a part of a person, or compares
 against one."""
 
-FIELDS = ("overall", "cross_section", "detail", "material", "sits")
+FIELDS = ("overall", "cross_section", "detail", "material", "sits", "words")
 
 
 class Prop(BaseModel):
@@ -77,6 +77,18 @@ class Prop(BaseModel):
     """Where it rests when nobody is using it, as a noun in a place."""
     held_by: str = ""
     """The character whose hand it belongs in, when it has one."""
+    words: str = ""
+    """The EXACT letters this object carries, verbatim, or "" for the silent
+    majority.  The board's standing law is that every surface stays wordless,
+    and it earned that law: gpt-image GENERATES lettering as a coin-flip -- one
+    seed and one blank card gave us both "Number 3 Lauriston Gardens." and
+    "Vinisitien of 3 Lauriston Gardens".
+
+    What the same measurement shows is that PROPAGATION from an attached picture
+    is near-lossless, 6 of 6.  So an object may carry words on exactly the terms
+    every other prop carries its size: there is a picture of it, the picture is
+    indexed, and the words are stated beside the index.  Filling this in without
+    drawing `rel_path` is the one way to get CRISTERION back."""
 
     @model_validator(mode="after")
     def _the_three_measures_are_present(self) -> "Prop":
@@ -119,7 +131,10 @@ def contract_sentence(prop: Prop) -> str:
     instance, the words pin the category, and dropping either one lets it
     drift."""
     parts = [prop.material, prop.overall, prop.cross_section, prop.detail, prop.sits]
-    return f"{prop.name}: " + "; ".join(p.rstrip(". ") for p in parts if p and p.strip()) + "."
+    said = f"{prop.name}: " + "; ".join(p.rstrip(". ") for p in parts if p and p.strip()) + "."
+    # the letters ride in `physical`, the ONE sentence both the sheet and the take
+    # repeat -- anywhere else and they reach the board and not the render
+    return said + f' It carries the words "{prop.words}", spelled exactly so.' if prop.words else said
 
 
 PLAIN = ("A plain even grey studio backdrop fills the frame behind them, one flat wall, "
@@ -149,6 +164,7 @@ def refs_row(prop: Prop) -> dict:
             "rel_path": f"refs/props/prop-{prop.id}.png",
             "overall": prop.overall, "cross_section": prop.cross_section, "detail": prop.detail,
             "material": prop.material, "sits": prop.sits, "held_by": prop.held_by,
+            "words": prop.words,
             "aliases": list(prop.aliases), "first_chapter": prop.first_chapter}
 
 
@@ -177,3 +193,12 @@ def props_in(text: str, rows: list[dict]) -> list[dict]:
                for n in names):
             out.append(row)
     return out
+
+
+def lettered(rows: list[dict]) -> list[dict]:
+    """The rows that carry words, in row order.
+
+    Kept apart from `props_in` because the two questions are different: that one
+    asks WHICH objects this sheet shows, this one asks which of them the wordless
+    law has to step aside for."""
+    return [r for r in rows if (r.get("words") or "").strip()]

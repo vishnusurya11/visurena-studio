@@ -81,3 +81,35 @@ def test_the_refused_name_is_free_on_disk(tmp_path):
     assert refused_name(bed).name == "bed.sings2.wav"
     (tmp_path / "bed.sings2.wav").write_bytes(b"")
     assert refused_name(bed).name == "bed.sings3.wav"
+
+
+# ---- the threshold must scale with LENGTH -----------------------------------
+
+def test_a_short_clip_is_judged_by_RATE_not_by_a_flat_count():
+    """MEASURED 2026-09-13: a 40 s violin clip transcribed to "Oh, my God. we
+    for life and grief" -- 8 distinct words -- and PASSED, because the flat
+    threshold of 12 was calibrated on 158-second beds. A 40 s clip cannot fit
+    12 distinct words even while singing the whole way through.
+
+    Clean beds run about 2 distinct words a minute (whisper's filler); the
+    singing ones 9-12. The rate separates them at any length."""
+    from studio.bed_gate import sings_text
+
+    short_sung = "Oh my God we for life and grief"          # 8 words over 40 s
+    assert sings_text(short_sung, seconds=40)
+    # the same handful of words spread over a three-minute bed is filler
+    assert not sings_text(short_sung, seconds=180)
+
+
+def test_the_long_bed_verdicts_are_unchanged():
+    from studio.bed_gate import sings_text
+
+    assert sings_text(EP03_SUNG, seconds=158)
+    assert not sings_text(EP01_CLEAN, seconds=177)
+    assert not sings_text(EP02_LOOP, seconds=166)
+
+
+def test_an_unknown_length_falls_back_to_the_flat_count():
+    from studio.bed_gate import sings_text
+
+    assert sings_text(EP03_SUNG) and not sings_text(EP01_CLEAN)
