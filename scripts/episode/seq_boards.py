@@ -217,6 +217,11 @@ def draw_setup(book: Path, episode: Episode, number: int, name: str, only_sheet:
     aspect = episode.aspect
     sb.adopt(aspect)          # the cells are cropped to the PLAN's canvas, never to a module default
     boards = episode_home.boards_dir(book, number)
+    # the rooms are made before anything is written into them: PIL will not
+    # create a parent, and a sheet that drew and then could not be cut has spent
+    # the money for nothing
+    for room in (sq.cells_in(boards), sq.sheets_in(boards), sq.plates_in(boards), sq.panels_in(boards)):
+        room.mkdir(parents=True, exist_ok=True)
     setup = episode.setups[name]
     physical = physicals(book)
     segs = sq.segments(episode.shots, name)

@@ -23,6 +23,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 
+from studio import book_root
 from studio import episode_board as board
 from studio import approval, canvas, episode_home, image_spend as spend
 from studio.episode_spec import Episode
@@ -87,8 +88,13 @@ def physicals(book: Path) -> dict[str, str]:
 
 
 def book_of(path: Path) -> Path:
-    """The book folder above `episodes/epNN/frames/<file>`."""
-    return Path(path).resolve().parents[3]
+    """The book folder this drawing belongs to, FOUND and never counted to.
+
+    This was `parents[3]` -- a hard-coded depth, correct for exactly one layout.
+    The hour the sheets moved into `boards/sheets/` it silently sent $0.91 of
+    real spend to `episodes/spend.jsonl` instead of the book's own ledger, with
+    nothing raised and nothing printed."""
+    return book_root.of(path)
 
 
 def draw(prompt: str, images: list[Path], out: Path, size: tuple[int, int] = board.CANVAS,
