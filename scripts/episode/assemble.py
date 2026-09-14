@@ -126,9 +126,48 @@ as `status: success` with the audio on disk.  The bed was made and thrown away
 by the clock.  Waiting too long costs minutes; not waiting long enough costs the
 whole job."""
 
-BED_ENGINE_DEFAULT = "yue2"
-"""OWNER 2026-09-13: "ace step is shit .. use yue2 .. more expressive and great
-prompt control on style."  ACE-Step stays reachable as `--bed=acestep`."""
+YUE2_TOKENS_PER_S, YUE2_MAX_TOKENS = 25, 9000
+"""YuE2's semantic stage emits 25 codec tokens a second, capped at 9000 (360 s).
+
+`bed_request` takes `seconds` and the yue2 branch DISCARDED it, so the bed's
+length had no relation to the runtime asked for.  `semantic_max_tokens` is the
+duration control, it is injectable, and nobody was setting it."""
+
+BED_ENGINE_DEFAULT = "acestep"
+"""ACE-STEP, BECAUSE IT IS THE ONE THAT CAN BE TOLD NOT TO SING.
+
+The owner asked for YuE2 -- "ace step is shit .. use yue2 .. more expressive and
+great prompt control on style" (2026-09-13) -- and he is right about the style
+control.  YuE2 simply has no instrumental control of any kind, and this is a
+mechanism, not a bad run.  Read out of the node source 2026-09-14 after YuE2
+sang on three separate beds:
+
+  * its token vocabulary has NO vocal/instrumental token at all
+    (`_vendor/yue2/tokenization_yue2.py:16-18`), and `encode_ordinary` means an
+    `[inst]`-style string is encoded as literal TEXT, never as a control;
+  * `SongRequest.text()` interpolates lyrics unconditionally, so an empty field
+    yields a `[Lyrics]` header over a blank line -- an UNFILLED SLOT, not an
+    instruction;
+  * with `cot="full"` the plan stage writes a chord-annotated ABC score whose
+    melody line IS the vocal line, and the semantic stage improvises syllables
+    over it.  That is why both refused beds were phoneme scat, one
+    pseudo-English and one pseudo-Japanese, rather than actual verse;
+  * `guidance` returns exactly 1.0 for `cot="full"`, so the negative branch is
+    never built and CFG has been OFF on every bed ever generated.
+
+The word "instrumental" occurs ONCE in the whole node pack: a tooltip on the
+lyrics input.  This module chose that pipeline because of that tooltip.  A
+tooltip is not a mechanism.
+
+ACE-Step has both halves -- `[inst]` is a trained control string in its lyric
+encoder, its tags field says instrumental too, and it runs real CFG at 2.0
+against a zeroed negative.  So `[inst]` is a lever and `""` is the absence of
+one.  Episodes 1, 2 and 4 shipped silent beds on ACE-Step.
+
+`--bed=yue2` stays reachable.  The one experiment worth its twenty minutes if
+the owner wants YuE2 back is `cot="off"`: it plans no ABC score at all, drops
+the word "transcription" from the instruction, and turns CFG on for the first
+time.  If that sings too, the levers are exhausted."""
 
 BED_TARGET_LUFS = -25.6
 """Where the bed SITS, replacing a fixed -11 dB trim.
@@ -231,7 +270,9 @@ def bed_request(engine: str, seconds: float, seed: int) -> tuple[str, dict]:
         # invented verse, and given "" it sang again.
         return "audio_yue2_song_olmpack", {
             "style": BED_STYLE, "lyrics": BED_INSTRUMENTAL[engine], "cot": "full",
-            "seed": seed, "abc": "", "filename_prefix": "ep_bed"}
+            "seed": seed, "abc": "", "filename_prefix": "ep_bed",
+            # the duration control, at 25 tokens a second; it was never set
+            "semantic_max_tokens": min(int(seconds * YUE2_TOKENS_PER_S), YUE2_MAX_TOKENS)}
     return BED_WORKFLOW, {
         "tags": BED_TAGS, "lyrics": BED_INSTRUMENTAL[engine], "seconds": seconds,
         "duration": seconds, "bpm": 60, "keyscale": "D minor",

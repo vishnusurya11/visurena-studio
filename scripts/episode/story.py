@@ -46,7 +46,7 @@ def stage_of(home: Path, takes: list, plan_exists: bool, total: int = 0) -> str:
         return "3 plates"
     if (home / "placed.json").exists():
         return "2 timeline"
-    if (home / "lines").exists():
+    if (home / "audio" / "lines").exists():
         return "1 lines"
     return "0 the plan" if plan_exists else "0 no plan yet"
 

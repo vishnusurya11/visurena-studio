@@ -27,8 +27,18 @@ sys.modules["ep_assemble"] = asm
 spec.loader.exec_module(asm)
 
 
-def test_the_default_engine_is_the_owners_choice():
-    assert asm.BED_ENGINE_DEFAULT == "yue2"
+def test_the_default_engine_is_the_one_that_can_be_told_not_to_sing():
+    """The owner asked for YuE2 and he is right about its style control.  It has
+    no instrumental control of any kind, and that is a mechanism, not a bad run:
+    no vocal token exists in its vocabulary, `encode_ordinary` makes any
+    `[inst]`-style string literal text, an empty `lyrics` yields an UNFILLED SLOT
+    rather than an instruction, and `guidance` returns exactly 1.0 for
+    `cot="full"` so CFG has been off on every bed ever generated.  Three YuE2
+    beds have sung.  ACE-Step has a trained control string AND real CFG against a
+    zeroed negative; episodes 1, 2 and 4 shipped silent on it.  `--bed=yue2`
+    stays reachable."""
+    assert asm.BED_ENGINE_DEFAULT == "acestep"
+    assert "yue2" in asm.BED_INSTRUMENTAL
 
 
 def test_acestep_asks_with_its_own_instrumental_marker():
@@ -48,11 +58,28 @@ def test_yue2_uses_the_workflow_THAT_DOCUMENTS_AN_INSTRUMENTAL():
     and given "" it sang again -- "winter silence i am hating ... ah ah ah".
     Both were caught, the second by the gate.
 
-    `OlmYuE2Request.lyrics` carries the contract in its own tooltip: "Leave empty
-    for instrumental music." That is the `audio_yue2_song_olmpack` pipeline, and
-    it also exposes `cot` (full/melody/off) -- the score plan, which the vendor
-    guidance says to leave at `full` so the model has an arrangement to build
-    without words to sing."""
+    `OlmYuE2Request.lyrics` carries a TOOLTIP reading "Leave empty for
+    instrumental music", and this module chose the `audio_yue2_song_olmpack`
+    pipeline because of it.  A tooltip is not a mechanism: the word
+    "instrumental" appears exactly once in the whole node pack, in that string,
+    and is implemented nowhere.
+
+    THE JUSTIFICATION THIS DOCSTRING USED TO GIVE FOR `cot="full"` -- "the vendor
+    guidance says to leave it at full so the model has an arrangement to build
+    without words to sing" -- CITES A SOURCE THAT DOES NOT EXIST.  Nothing in the
+    pack, its README, its four example workflows or the vendored upstream
+    recommends a `cot` setting for an instrumental.  And the reasoning is
+    inverted: `cot="full"` is what makes the plan stage write a chord-annotated
+    TRANSCRIPTION whose melody line is baked into the semantic prefix, so the
+    semantic stage improvises syllables over a prescribed lead.  "An arrangement
+    to build without words to sing" is a precise description of how you get scat
+    singing, which is what both refused beds were.
+
+    This is the same fault `BED_INSTRUMENTAL` warns about one layer up -- a
+    plausible sentence credited to a source never consulted -- repeated in the
+    test that was supposed to catch it.  The value is left at `full` because
+    changing it is a twenty-minute GPU experiment nobody has run, not because
+    anyone recommends it."""
     name, values = asm.bed_request("yue2", 171.0, 90003)
     assert name == "audio_yue2_song_olmpack"
     assert values["lyrics"] == ""

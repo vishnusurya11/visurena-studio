@@ -91,7 +91,12 @@ def numbered(refs: list[str]) -> list[tuple[int, str]]:
 
 def href(name: str) -> str:
     """Where a staged reference lives, relative to the episode folder."""
-    return f"../../refs/characters/{name}" if name.startswith("char-") else f"frames/{name}"
+    if name.startswith("char-"):
+        return f"../../../refs/characters/{name}"
+    room = ("plates" if name.startswith("plate_") else
+            "sheets" if name.startswith("seq_") else
+            "panels" if name.startswith("panel_") or ".before." in name else "cells")
+    return f"../boards/{room}/{name}"
 
 
 def anchor_rows(anchors: list, fps: int = 24) -> list[tuple[str, int, float]]:
@@ -108,9 +113,9 @@ def read(path: Path) -> str:
 def storyboard_section(frames: Path, setup: str, cells: list[str]) -> str:
     sheet = sheet_used(frames, setup)
     prompt = read(frames / f"{sheet.stem}.prompt.txt") if sheet else ""
-    pic = (f'<div class="sheet"><img src="frames/{esc(sheet.name)}" alt="{esc(setup)}"></div>'
+    pic = (f'<div class="sheet"><img src="../boards/sheets/{esc(sheet.name)}" alt="{esc(setup)}"></div>'
            if sheet else '<p class="miss">no sheet on disk</p>')
-    grid = "".join(f'<div class="cell"><img src="frames/{esc(n)}"><div class="n">{esc(n)}</div></div>'
+    grid = "".join(f'<div class="cell"><img src="../boards/cells/{esc(n)}"><div class="n">{esc(n)}</div></div>'
                    for n in cells)
     body = (f'<pre>{esc(prompt)}</pre>' if prompt
             else '<p class="miss">no prompt.txt beside this sheet</p>')

@@ -334,7 +334,8 @@ def shot_card(book: Path, episode: Episode, shot, where: tuple[str, int] | None,
         origin = "no sheet"
     return (f'<section id="shot{shot.index:02d}"><h2>Shot {shot.index:02d} · {esc(shot.section)} · '
             f"{esc(shot.setup)} · {esc(shot.size)} · take {shot.take}</h2>"
-            f'<div class=row><figure><a href="frames/{panel.name}"><img src="frames/{panel.name}"></a>'
+            f'<div class=row><figure><a href="../boards/panels/{panel.name}">'
+            f'<img src="../boards/panels/{panel.name}"></a>'
             f"<figcaption>{panel.name} (H3 start frame) · {origin}</figcaption></figure><div class=meta>"
             f"<h4>plan</h4><p><b>frame:</b> {esc(shot.frame)}</p><p><b>motion:</b> {esc(shot.motion)}</p>"
             f"<p><b>faces:</b> {esc(', '.join(shot.faces) or '—')} · <b>beat</b> {shot.beat_s} s · "
@@ -630,7 +631,8 @@ def main(book_id: str, number: int) -> None:
     for c in (episode_home.read_json(r2v_cards) if r2v_cards.exists() else []):
         for i in c.get("shots") or [c["index"]]:
             r2v_planned[i] = c["prompt"]
-    measured = {r["index"]: r for r in episode_home.read_json(home / "lines" / "lines.json")}
+    measured = {r["index"]: r for r in episode_home.read_json(
+        episode_home.lines_dir(book, number) / "lines.json")}
     where = locate(episode, episode_home.boards_dir(book, number))
     by_sheet: dict[str, list[int]] = {}
     for index, (stem, _) in where.items():

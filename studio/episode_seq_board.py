@@ -330,7 +330,17 @@ def duplicates(cells: list, segs: list[dict], floor: float = ALIKE) -> list[tupl
             pair = (cell_name(a["shot"], a["sub"], a.get("end", False))[:-4],
                     cell_name(b["shot"], b["sub"], b.get("end", False))[:-4])
             if is_end_pair(a, b):
-                if end_pair_verdict(score) != "ok":
+                # BOTH RULES, at the site that SPENDS.  The insert exemption and
+                # the changed-block override reached `reaches()` -- which decides
+                # whether a TAKE may aim at an END cell -- and never reached here,
+                # the site that costs a STRICT redraw and retires the cell.
+                # Measured on episode 4's own sheet report: 8 END pairs refused,
+                # 2 STRICT redraws, and 5 of the 8 are not copies under the rule
+                # this module already states -- Q09 (0.807, 3 changed blocks),
+                # Q15 (0.938, 4), Q20 (0.856, 3), Q21 (0.856, 3), and Q10, the
+                # half-sovereign insert at 0.166 the exemption exists for.
+                if end_pair_verdict(score, a.get("size", ""),
+                                    changed_blocks(images[i], images[j])) != "ok":
                     out.append(pair)
             elif score > floor:
                 out.append(pair)

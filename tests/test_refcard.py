@@ -40,9 +40,17 @@ def test_a_reference_is_numbered_in_staging_order():
 
 
 def test_a_cast_sheet_resolves_to_the_book_and_a_cell_to_the_episode():
-    assert rc.href("char-john_watson.png") == "../../refs/characters/char-john_watson.png"
-    assert rc.href("Q00_0.png") == "frames/Q00_0.png"
-    assert rc.href("plate_hall.png") == "frames/plate_hall.png"
+    """The page is written into `reports/` and the pictures are in `boards/<room>/`,
+    so every href climbs one and comes back down the right room.  It used to emit
+    `src="frames/<name>"` -- a room retired in the layout change -- so EVERY image
+    on refcard.html was a dead link, silently, and inside an f-string where the
+    retired-room guard could not see it."""
+    assert rc.href("char-john_watson.png") == "../../../refs/characters/char-john_watson.png"
+    assert rc.href("Q00_0.png") == "../boards/cells/Q00_0.png"
+    assert rc.href("Q00_0E.png") == "../boards/cells/Q00_0E.png"
+    assert rc.href("plate_hall.png") == "../boards/plates/plate_hall.png"
+    assert rc.href("seq_hall_0.png") == "../boards/sheets/seq_hall_0.png"
+    assert rc.href("panel_Q00_0.png") == "../boards/panels/panel_Q00_0.png"
 
 
 def test_an_anchor_carries_its_frame_and_its_second():

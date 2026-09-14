@@ -57,7 +57,12 @@ def metadata(home: Path) -> dict:
 def failed_takes(home: Path, engine: str = "r2v") -> list[str]:
     """Which takes the DQ refused, read from their own reports, for THIS engine."""
     out = []
-    folder = home / ("shots_r2v" if engine == "r2v" else "shots")
+    # THE TAKES ROOM.  This globbed `shots_r2v/`, a room retired in the layout
+    # change, so the glob returned nothing and `dq_failed` was ALWAYS empty --
+    # the DQ gate on the one irreversible step in the pipeline could not fire,
+    # and `yp.waived` recorded `dq_failed: []` in the override ledger as well,
+    # so the audit trail said the same false thing.
+    folder = episode_home.takes_under(home, engine)
     for report in sorted(folder.glob("T*.dq.json")):
         if not json.loads(report.read_text(encoding="utf-8")).get("passed"):
             out.append(report.stem.split(".")[0])

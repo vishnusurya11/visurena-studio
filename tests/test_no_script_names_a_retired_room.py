@@ -31,22 +31,48 @@ from pathlib import Path
 import pytest
 
 ROOT = Path(__file__).resolve().parents[1]
-RETIRED = ("frames", "shots_r2v", "shots_i2v")
+RETIRED = ("frames", "shots_r2v", "shots_i2v", "shots", "work_r2v", "work_i2v")
+HOME_ONLY = ("lines",)
+"""Names that are retired AT THE EPISODE HOME and legitimate deeper down.
+
+`audio/lines/` is where the wavs live now and `cast/<who>/voice/lines/` is a
+different subsystem entirely, so `lines` cannot be blanket-retired -- only
+`home / "lines"` can."""
 EXEMPT = {"migrate_layout.py"}
 
-FILES = sorted(p for p in list((ROOT / "scripts" / "episode").glob("*.py")) + list((ROOT / "studio").glob("*.py"))
-               if p.name not in EXEMPT)
+# EVERY script, not two directories.  The first version globbed
+# `scripts/episode/*.py` and `studio/*.py`, and the worst instance of this whole
+# class was sitting in `scripts/publish/` the entire time: the DQ gate on
+# PUBLISHING globbed a retired room, so `dq_failed` was always empty and the one
+# irreversible step in the pipeline was carried by a gate that could not fire.
+FILES = sorted(p for p in list((ROOT / "scripts").rglob("*.py")) + list((ROOT / "studio").rglob("*.py"))
+               if p.name not in EXEMPT and "__pycache__" not in p.parts)
 
 
 def joins(text: str) -> list[str]:
-    """Every `... / "<name>"` path join in the file, by the name joined."""
-    return re.findall(r'/\s*"([A-Za-z_0-9]+)"', text)
+    """Every `... / "<name>"` path join in the file, by the name joined, and every
+    room named inside an f-string URL -- which is how `refcard.py` emitted
+    `src="frames/<name>"` past the first version of this guard."""
+    return (re.findall(r'/\s*"([A-Za-z_0-9]+)"', text)
+            + re.findall(r'"([A-Za-z_0-9]+)/\{', text)
+            # `home / ("shots_r2v" if engine == "r2v" else "shots")` -- the room
+            # hidden in a conditional expression, which is where the dead publish
+            # gate was sitting
+            + re.findall(r'/\s*\(\s*"([A-Za-z_0-9]+)"', text)
+            + re.findall(r'if\s+\w+\s*==\s*"\w+"\s+else\s+"([A-Za-z_0-9]+)"\)', text))
 
 
 @pytest.mark.parametrize("path", FILES, ids=lambda p: p.name)
 def test_no_path_join_names_a_retired_room(path):
     named = [n for n in joins(path.read_text(encoding="utf-8")) if n in RETIRED]
     assert not named, f"{path.name} joins a retired room: {sorted(set(named))}"
+
+
+@pytest.mark.parametrize("path", FILES, ids=lambda p: p.name)
+def test_no_script_hangs_a_moved_room_off_the_episode_home(path):
+    said = path.read_text(encoding="utf-8")
+    for name in HOME_ONLY:
+        assert f'home / "{name}"' not in said, f"{path.name}: home / {name!r} moved"
 
 
 def test_the_guard_would_have_caught_the_ones_that_shipped():

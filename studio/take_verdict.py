@@ -233,7 +233,7 @@ def to_json(v: TakeVerdict) -> dict:
 # ---- measurement -------------------------------------------------------------
 
 def segments_of(anchors: list, cells: Path, seconds: float,
-                staged: list[str] | None = None) -> list[tuple]:
+                staged: list[str] | None = None, sizes: dict[str, str] | None = None) -> list[tuple]:
     """(start cell, target cell, start_s, end_s, start frame) per segment, END pins folded in."""
     starts = sorted(((f, n) for n, f in anchors if not n.endswith("E.png")), key=lambda x: x[0])
     seen, segs = set(), []
@@ -261,7 +261,12 @@ def segments_of(anchors: list, cells: Path, seconds: float,
         if staged is not None:
             target = end_name if end_name in staged else n
         else:
-            target = end_name if sq.reaches(cells / n, cells / end_name) else n
+            # WITH THE SIZE: `reaches` drops the END floor for a size whose
+            # subject fills the frame, and without it an insert's END cell is
+            # refused here for being different -- which is what an insert's END
+            # cell is.  `sizes` is keyed by start-cell name.
+            target = (end_name if sq.reaches(cells / n, cells / end_name,
+                                             (sizes or {}).get(n, "")) else n)
         out.append((n, target, round(f / FPS, 3), round(min(end_f, int(seconds * FPS)) / FPS, 3), f))
     return out
 
