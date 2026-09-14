@@ -15,7 +15,12 @@ qc = importlib.util.module_from_spec(spec)
 sys.modules["ep_qc_rollup"] = qc
 spec.loader.exec_module(qc)
 
-GOOD = {"lufs_ok": True, "tp_ok": True, "missing_cuts": [], "lines": [{"passed": True}]}
+GOOD = {"lufs_ok": True, "tp_ok": True, "missing_cuts": [], "lines": [{"passed": True}],
+        "edit": {"ok": True, "measured": True}}
+"""The edit block carries `measured` now.  An ABSENT or UNMEASURED block is no
+longer a pass: `.get("edit", {}).get("ok", True)` made a missing measurement
+clean twice over, and G5.6 provenance was returning `measured: False` on every
+episode ever cut because nothing wrote its input."""
 
 
 def write(path: Path, data) -> None:
@@ -25,9 +30,11 @@ def write(path: Path, data) -> None:
 def test_the_verdict_fails_when_the_edit_is_not_the_takes():
     """master_iter11: T22's frames 133-136 were another picture (the card started 4
     frames early), and the picture began 0.041 s late."""
-    assert qc.verdict({**GOOD, "edit": {"ok": True}})
-    assert not qc.verdict({**GOOD, "edit": {"ok": False}})
-    assert qc.verdict(GOOD)                                  # no edit gate run: nothing to fail on
+    assert qc.verdict(GOOD)
+    assert not qc.verdict({**GOOD, "edit": {"ok": False, "measured": True}})
+    # AND AN EDIT GATE THAT DID NOT RUN IS NOT A PASS
+    assert not qc.verdict({k: v for k, v in GOOD.items() if k != "edit"})
+    assert not qc.verdict({**GOOD, "edit": {"ok": True, "measured": False}})
 
 
 def test_a_spent_retake_budget_is_printed_red_and_does_not_fail_the_master():

@@ -15,10 +15,17 @@ def test_a_cut_within_tolerance_is_found():
 
 
 def test_the_verdict_needs_every_gate():
-    good = {"lufs_ok": True, "tp_ok": True, "missing_cuts": [], "lines": [{"passed": True}]}
+    """INCLUDING THE EDIT GATE HAVING RUN.  An absent or unmeasured edit block
+    used to pass -- `.get("edit", {}).get("ok", True)` -- while G5.6 provenance
+    returned `measured: False` on every episode ever cut, because nothing wrote
+    the manifest it needs."""
+    good = {"lufs_ok": True, "tp_ok": True, "missing_cuts": [], "lines": [{"passed": True}],
+            "edit": {"ok": True, "measured": True}}
     assert qc.verdict(good)
     assert not qc.verdict({**good, "lines": [{"passed": False}]})
     assert not qc.verdict({**good, "missing_cuts": [5.0]})
+    assert not qc.verdict({**good, "edit": {"ok": True, "measured": False}})
+    assert not qc.verdict({k: v for k, v in good.items() if k != "edit"})
 
 
 def test_the_longest_gap_is_measured_from_the_placed_windows():
@@ -34,7 +41,8 @@ def test_a_soft_cut_inside_a_take_run_does_not_fail_the_verdict():
     spec.loader.exec_module(qc)
     placed = {"shots": [{"index": 0, "t_start": 0.0}, {"index": 1, "t_start": 4.0}, {"index": 2, "t_start": 9.0}]}
     assert qc.internal_cuts(placed, [{"index": 0, "shots": [0, 1]}, {"index": 2, "shots": [2]}]) == [4.0]
-    report = {"lufs_ok": True, "tp_ok": True, "missing_cuts": [4.0], "internal_cuts": [4.0], "lines": []}
+    report = {"lufs_ok": True, "tp_ok": True, "missing_cuts": [4.0], "internal_cuts": [4.0],
+              "lines": [], "edit": {"ok": True, "measured": True}}
     assert qc.verdict(report) is True
     report["missing_cuts"] = [4.0, 9.0]
     assert qc.verdict(report) is False

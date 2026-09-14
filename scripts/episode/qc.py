@@ -158,7 +158,12 @@ def edit_report(master: Path, placed: dict, records: list[dict], book: Path, num
     """G5.1-5.6 -- the edit gate, or an honest 'not measured' when a take is gone."""
     missing = [r["rel_path"] for r in records if not (book / r["rel_path"]).exists()]
     if missing:
-        return {"ok": True, "measured": False, "note": f"not measured: {len(missing)} take files missing"}
+        # NOT ok.  This returned `ok: True` and `verdict` read it as a pass --
+        # `migrate_layout.repoint`'s own docstring names the fault and then fixed
+        # only the records, not the reader.  A gate that could not read the takes
+        # has not approved the master.
+        return {"ok": False, "measured": False,
+                "note": f"not measured: {len(missing)} take files missing"}
     out = edit_gate.edit_integrity(master, placed, records, book, card_path(book, number), cut_json(work))
     return out | {"measured": True}
 
@@ -169,7 +174,10 @@ def verdict(report: dict) -> bool:
     hard = [c for c in report["missing_cuts"] if c not in report.get("internal_cuts", [])]
     return (report["lufs_ok"] and report["tp_ok"] and not hard
             and all(row["passed"] for row in report["lines"])
-            and report.get("edit", {}).get("ok", True))
+            # AN ABSENT EDIT BLOCK IS NOT A PASS.  `.get("edit", {}).get("ok", True)`
+            # made a missing measurement clean twice over.
+            and bool(report.get("edit", {}).get("ok", False))
+            and bool(report.get("edit", {}).get("measured", False)))
 
 
 def main(book_id: str, number: int, engine: str = "i2v") -> None:

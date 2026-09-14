@@ -556,6 +556,7 @@ def main(book_id: str, number: int, engine: str = "i2v",
         raise SystemExit(f"no take for shots {missing}")
 
     episode_home.make_rooms(book, number)   # free; the bed and the mix in front of it are not
+    write_cut_manifest(work, list(episode_home.read_json(sheet)), book)
     cut = picture(placed, takes, work)
     music = quiet_bed(bed(home / "audio" / "bed.wav", bed_seed(home / "audio" / "bed.wav", number),
                           placed["duration_s"],
@@ -575,6 +576,24 @@ def main(book_id: str, number: int, engine: str = "i2v",
     keep = next_iteration(home)
     (home / "cut" / f"master_iter{keep}.mp4").write_bytes(out.read_bytes())
     print(f"master -> {out}  (kept as master_iter{keep}.mp4)")
+
+
+def write_cut_manifest(work: Path, records: list[dict], book: Path) -> Path:
+    """G5.6's input: what each take file WAS, recorded at cut time.
+
+    `edit_gate.provenance` asks whether the takes on disk are still the ones the
+    master was cut from, and can only answer it against a manifest written when
+    the cut was made -- "a manifest read off the same files it is compared to can
+    never be stale".  `edit_gate` says this module writes it.  It did not, on any
+    episode: `find library -name cut.json` came back empty for ep01 to ep05.
+
+    So provenance returned `{"measured": False, "stale_takes": []}`, the empty
+    list read as clean, and every report has claimed a master provably made of
+    the files on disk without the claim ever being checked."""
+    rows = {Path(r["rel_path"]).stem: {"rel_path": r["rel_path"],
+                                       "bytes": (Path(book) / r["rel_path"]).stat().st_size}
+            for r in records if (Path(book) / r["rel_path"]).exists()}
+    return episode_home.write_json(Path(work) / "cut.json", rows)
 
 
 def next_iteration(home: Path) -> int:
