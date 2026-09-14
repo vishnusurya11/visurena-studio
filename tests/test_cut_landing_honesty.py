@@ -39,7 +39,7 @@ def sig(seed: int) -> np.ndarray:
 def test_a_before_sibling_is_not_a_foreign_cell(tmp_path):
     for name in ("Q11_0.png", "Q11_0.before.png", "Q11_1.png", "Q23_0.png", "plate_hall.png"):
         (tmp_path / name).write_bytes(b"")
-    got = cl.foreign_names(tmp_path, {"Q11_0.png"})
+    got = cl.foreign_names(tmp_path, tmp_path, {"Q11_0.png"})
     assert "Q11_0.before.png" not in got
 
 
@@ -48,13 +48,13 @@ def test_another_shots_before_sibling_is_not_foreign_either(tmp_path):
     take can legitimately be drifting onto it."""
     for name in ("Q11_0.png", "Q23_0.png", "Q23_0.before.png"):
         (tmp_path / name).write_bytes(b"")
-    assert not [n for n in cl.foreign_names(tmp_path, {"Q11_0.png"}) if ".before." in n]
+    assert not [n for n in cl.foreign_names(tmp_path, tmp_path, {"Q11_0.png"}) if ".before." in n]
 
 
 def test_a_real_other_cell_and_a_plate_are_still_foreign(tmp_path):
     for name in ("Q11_0.png", "Q23_0.png", "plate_hall.png"):
         (tmp_path / name).write_bytes(b"")
-    got = cl.foreign_names(tmp_path, {"Q11_0.png"})
+    got = cl.foreign_names(tmp_path, tmp_path, {"Q11_0.png"})
     assert set(got) == {"Q23_0.png", "plate_hall.png"}
 
 

@@ -234,7 +234,7 @@ def dq_row(book: Path, record: dict) -> str:
             verdict += (f'<br><a href="{rel(book, strip)}"><img src="{rel(book, strip)}" style="width:100%;max-width:900px">'
                         f"</a><br><small>top: sampled frames with the closest own cell and its score; bottom: the cell expected at that time</small>")
         cells.append(f"<tr><th>DQ</th><td>{verdict}</td></tr>")
-    motion = take.parent.parent / "work_r2v" / "motion.json"
+    motion = take.parent.parent.parent / "work" / "motion.json"
     if motion.exists():
         m = episode_home.read_json(motion).get(take.stem)
         if m:
@@ -311,7 +311,7 @@ def final_block(book: Path, home: Path, shot_placed: dict | None) -> str:
     if not shot_placed:
         return ""
     master = home / "master_r2v.mp4"
-    made = final_clip(book, home, master, shot_placed, home / "work_r2v" / "final")
+    made = final_clip(book, home, master, shot_placed, home / "takes" / "work" / "final")
     if not made:
         return ""
     clip, strip = made
@@ -324,7 +324,7 @@ def final_block(book: Path, home: Path, shot_placed: dict | None) -> str:
 def shot_card(book: Path, episode: Episode, shot, where: tuple[str, int] | None,
               record: dict | None, measured: dict[int, dict], r2v: dict | None = None,
               r2v_planned: str = "", with_i2v: bool = True, placed_shot: dict | None = None) -> str:
-    panel = episode_home.frames_dir(book, episode.number) / f"S{shot.index:02d}.png"
+    panel = episode_home.boards_dir(book, episode.number) / f"S{shot.index:02d}.png"
     if where:
         stem, cell = where
         origin = (f'cut from <a href="#{stem}">{stem}.png</a>, cell {cell + 1}'
@@ -343,7 +343,7 @@ def shot_card(book: Path, episode: Episode, shot, where: tuple[str, int] | None,
             + (f"<h4>i2v take (Start Frame)</h4>{take_block(book, record, take_prompt.build(episode, shot))}" if with_i2v else "")
             + final_block(book, episode_home.home(book, episode.number), placed_shot)
             + f"<h4>r2v take: references, pinned cells, workflow as run, audio, prompt, DQ, motion, attempts</h4>"
-            f"{take_block(book, r2v, r2v_planned, episode_home.frames_dir(book, episode.number))}"
+            f"{take_block(book, r2v, r2v_planned, episode_home.boards_dir(book, episode.number))}"
             f"</div></div></section>")
 
 
@@ -456,7 +456,7 @@ def outputs_block(book: Path, home: Path, record: dict, placed_shot: dict | None
 
 def r2v_card(book: Path, episode: Episode, shot, where, record: dict | None, measured: dict, placed_shot: dict | None,
              planned: str = "") -> str:
-    home, frames = episode_home.home(book, episode.number), episode_home.frames_dir(book, episode.number)
+    home, frames = episode_home.home(book, episode.number), episode_home.boards_dir(book, episode.number)
     cell = frames / f"Q{shot.index:02d}_0.png"
     origin = f'cut from <a href="#{where[0]}">{where[0]}.png</a>, cell {where[1] + 1}' if where else "no sheet"
     head = (f'<section id="shot{shot.index:02d}" class=card><h2>Shot {shot.index:02d} · {esc(shot.section)} · '
@@ -612,7 +612,7 @@ def page(title: str, nav: str, sections: list[str]) -> str:
 def main(book_id: str, number: int) -> None:
     book = episode_home.book_dir(book_id)
     episode = episode_home.load_plan(book, number)
-    home, frames = episode_home.home(book, number), episode_home.frames_dir(book, number)
+    home, frames = episode_home.home(book, number), episode_home.boards_dir(book, number)
     # The i2v sheet is OPTIONAL. runcards was written when every episode rendered
     # both engines and compared them; r2v is the engine now, and an episode that
     # only ran r2v was left with no report at all -- which is the one artefact the
@@ -631,7 +631,7 @@ def main(book_id: str, number: int) -> None:
         for i in c.get("shots") or [c["index"]]:
             r2v_planned[i] = c["prompt"]
     measured = {r["index"]: r for r in episode_home.read_json(home / "lines" / "lines.json")}
-    where = locate(episode, episode_home.frames_dir(book, number))
+    where = locate(episode, episode_home.boards_dir(book, number))
     by_sheet: dict[str, list[int]] = {}
     for index, (stem, _) in where.items():
         by_sheet.setdefault(stem, []).append(index)

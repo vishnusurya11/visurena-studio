@@ -25,7 +25,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 
-from studio import edit_gate, episode_home, voice_qc, youtube_publish as yp
+from studio import edit_gate, episode_home, episode_seq_board as sq, voice_qc, youtube_publish as yp
 from studio.episode_spec import Episode
 from studio.trailer_assemble import clip_seconds, integrated, true_peak
 
@@ -124,12 +124,12 @@ def sheet_spend(book: Path) -> dict[str, float]:
     return out
 
 
-def sheets_rollup(frames_dir: Path, book: Path) -> list[dict]:
+def sheets_rollup(boards: Path, book: Path) -> list[dict]:
     """G5.8 -- per setup: did the cell gate pass, how many STRICT redraws it took,
     which pairs were alike, and what the setup cost."""
     spend = sheet_spend(book)
     rows = []
-    for path in sorted(Path(frames_dir).glob("seq_*.dq.json")):
+    for path in sorted(Path(sq.sheets_in(boards)).glob("seq_*.dq.json")):
         d = json.loads(path.read_text(encoding="utf-8"))
         sheets = d.get("sheets", [])
         rows.append({"setup": d.get("setup", path.stem.split(".")[0][4:]), "passed": d.get("passed"),
@@ -176,7 +176,7 @@ def main(book_id: str, number: int, engine: str = "i2v") -> None:
     book = episode_home.book_dir(book_id)
     episode = episode_home.load_plan(book, number)
     master = episode_home.master_path(book, number, engine)
-    work = episode_home.home(book, number) / ("work" if engine == "i2v" else f"work_{engine}")
+    work = episode_home.work_dir(book, number, engine)
     placed = episode_home.read_json(episode_home.home(book, number) / "placed.json")
     lines = placed["lines"]
     lufs, tp = integrated(master), true_peak(master)
@@ -208,7 +208,7 @@ def main(book_id: str, number: int, engine: str = "i2v") -> None:
     }
     report["edit"] = edit_report(master, placed, records, book, number, work)
     report["takes"] = takes_rollup(take_dir)
-    report["sheets"] = sheets_rollup(episode_home.frames_dir(book, number), book)
+    report["sheets"] = sheets_rollup(episode_home.boards_dir(book, number), book)
     report["passed"] = verdict(report)
     report_path = episode_home.home(book, number) / ("qc.json" if engine == "i2v" else f"qc_{engine}.json")
     episode_home.write_json(report_path, report)

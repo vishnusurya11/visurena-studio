@@ -123,7 +123,7 @@ def take_card(book: Path, frames: Path, home: Path, episode, record: dict) -> st
 def main(book_id: str, number: int) -> None:
     book = episode_home.book_dir(book_id)
     episode = episode_home.load_plan(book, number)
-    home, frames = episode_home.home(book, number), episode_home.frames_dir(book, number)
+    home, frames = episode_home.home(book, number), episode_home.boards_dir(book, number)
     records = takes.cards(book, episode, number)
     faults = sum(len(ro.lint(r["prompt"])) for r in records)
     words = [len(r["prompt"].split()) for r in records]

@@ -232,7 +232,7 @@ def to_json(v: TakeVerdict) -> dict:
 
 # ---- measurement -------------------------------------------------------------
 
-def segments_of(anchors: list, frames_dir: Path, seconds: float,
+def segments_of(anchors: list, cells: Path, seconds: float,
                 staged: list[str] | None = None) -> list[tuple]:
     """(start cell, target cell, start_s, end_s, start frame) per segment, END pins folded in."""
     starts = sorted(((f, n) for n, f in anchors if not n.endswith("E.png")), key=lambda x: x[0])
@@ -261,14 +261,14 @@ def segments_of(anchors: list, frames_dir: Path, seconds: float,
         if staged is not None:
             target = end_name if end_name in staged else n
         else:
-            target = end_name if sq.reaches(frames_dir / n, frames_dir / end_name) else n
+            target = end_name if sq.reaches(cells / n, cells / end_name) else n
         out.append((n, target, round(f / FPS, 3), round(min(end_f, int(seconds * FPS)) / FPS, 3), f))
     return out
 
 
-def cell_signatures(frames_dir: Path, names) -> dict[str, np.ndarray]:
+def cell_signatures(cells: Path, names) -> dict[str, np.ndarray]:
     """A flat frame_match signature per named cell on disk."""
-    return {n: fm.signature(fm.load(frames_dir / n)).ravel() for n in names if (frames_dir / n).exists()}
+    return {n: fm.signature(fm.load(cells / n)).ravel() for n in names if (cells / n).exists()}
 
 
 def opening_similarity(sigs: np.ndarray, cell: np.ndarray, first: int) -> float:
@@ -277,15 +277,15 @@ def opening_similarity(sigs: np.ndarray, cell: np.ndarray, first: int) -> float:
     return round(max((float(sigs[i] @ cell) for i in window), default=0.0), 3)
 
 
-def segment_rows(anchors: list, frames_dir: Path, seconds: float, sigs: np.ndarray,
+def segment_rows(anchors: list, cells: Path, seconds: float, sigs: np.ndarray,
                  motion: dict, rows: list[dict], kinds: dict,
                  staged: list[str] | None = None) -> list[SegmentReport]:
     """One SegmentReport per segment: its freeze, its opening, its end, its cut.
 
     `staged` is the take's OWN reference list, so the judge aims only at pictures
     the render was actually given (see `segments_of`)."""
-    segs = segments_of(anchors, frames_dir, seconds, staged)
-    cells = cell_signatures(frames_dir, {n for seg in segs for n in seg[:2]})
+    segs = segments_of(anchors, cells, seconds, staged)
+    cells = cell_signatures(cells, {n for seg in segs for n in seg[:2]})
     landed = {r["target"]: (r["delta"] is not None and -cl.MAX_EARLY <= r["delta"] <= cl.MAX_LATE) for r in rows}
     offsets = {r["target"]: (r["delta"] or 0) for r in rows}
     out = []
@@ -301,22 +301,23 @@ def segment_rows(anchors: list, frames_dir: Path, seconds: float, sigs: np.ndarr
     return out
 
 
-def measure(video: Path, record: dict, frames_dir: Path, seconds: float, attempt: int = 0,
+def measure(video: Path, record: dict, cells: Path, seconds: float, attempt: int = 0,
             audio: dict | None = None, line_text: str = "", kinds: dict | None = None) -> TakeVerdict:
     """Decode the take once and read every gate off it."""
     frames = motion_gate.frames(video, seconds)
     anchors = record.get("anchors") or []
     motion = motion_gate.report(motion_gate.block_max(frames), anchors, kinds or {})
     sigs = cl.signatures(frames.astype(np.uint8))
-    own = cell_signatures(frames_dir, dict.fromkeys(n for n, _ in anchors))
-    other = cell_signatures(frames_dir, cl.foreign_names(frames_dir, set(own)))
+    own = cell_signatures(cells, dict.fromkeys(n for n, _ in anchors))
+    # cells/ and plates/ are siblings under the episode's boards/ by construction
+    other = cell_signatures(cells, cl.foreign_names(cells, cells.parent / "plates", set(own)))
     per_frame = cl.classify(sigs, own, other) if own else []
     rows = cl.landing(per_frame, anchors) if per_frame else []
     # The take's own reference list decides what it was AIMED at; the cells on
     # disk only say what was drawn. `--no-ends` withholds every END picture and
     # the cells stay on disk, so reading disk failed T08 on drift for missing a
     # picture it was never given.
-    segs = segment_rows(anchors, frames_dir, seconds, sigs, motion, rows, kinds or {},
+    segs = segment_rows(anchors, cells, seconds, sigs, motion, rows, kinds or {},
                         record.get("refs"))
     v = TakeVerdict(record["index"], attempt, video.name, round(seconds, 2), record.get("lane", "narration"),
                     [], segs, motion["frozen_spans"], [round(float(x), 1) for x in motion["bins"]],
@@ -371,12 +372,12 @@ def sample_frame(video: Path, at: float) -> Image.Image | None:
 
 
 def strip_row(page: Image.Image, d: ImageDraw.ImageDraw, s: SegmentReport, video: Path,
-              frames_dir: Path, v: TakeVerdict, y: int) -> int:
+              cells: Path, v: TakeVerdict, y: int) -> int:
     """One segment's row: its START cell, its END cell, then SAMPLES frames of the take."""
-    page.paste(Image.open(frames_dir / s.cell).convert("RGB").resize(TILE), (4, y))
+    page.paste(Image.open(cells / s.cell).convert("RGB").resize(TILE), (4, y))
     d.text((6, y + 2), "START cell", fill="#ff0")
-    if s.target != s.cell and (frames_dir / s.target).exists():
-        page.paste(Image.open(frames_dir / s.target).convert("RGB").resize(TILE), (4 + TILE[0] + PAD, y))
+    if s.target != s.cell and (cells / s.target).exists():
+        page.paste(Image.open(cells / s.target).convert("RGB").resize(TILE), (4 + TILE[0] + PAD, y))
         d.text((6 + TILE[0] + PAD, y + 2), "END cell", fill="#ff0")
     else:
         d.rectangle((4 + TILE[0] + PAD, y, 4 + 2 * TILE[0] + PAD, y + TILE[1]), outline="#555")
@@ -392,7 +393,7 @@ def strip_row(page: Image.Image, d: ImageDraw.ImageDraw, s: SegmentReport, video
     return y + TILE[1] + 24
 
 
-def strip(v: TakeVerdict, video: Path, frames_dir: Path, out: Path) -> Path:
+def strip(v: TakeVerdict, video: Path, cells: Path, out: Path) -> Path:
     """The one page that says what this attempt is: cells, frames, energy, verdict."""
     cols = 2 + SAMPLES
     page = Image.new("RGB", (cols * (TILE[0] + PAD) + 8, len(v.segments) * (TILE[1] + 40) + 120), "black")
@@ -402,7 +403,7 @@ def strip(v: TakeVerdict, video: Path, frames_dir: Path, out: Path) -> Path:
         d.text((8, y), f"segment {s.cell} -> {s.target}  {s.start_s:.2f}-{s.end_s:.2f}s  lead-in {s.lead_in_s}s"
                f"  start {s.start_sim:.2f}  end {s.end_sim:.2f}  cut {'landed' if s.landed else 'MISSED'}"
                f" ({s.offset:+d}f)", fill="#fff")
-        y = strip_row(page, d, s, video, frames_dir, v, y + 16)
+        y = strip_row(page, d, s, video, cells, v, y + 16)
     sparkline(d, 8, y, page.width - 16, 40, v.energy_q, v.frozen_spans, v.seconds)
     d.text((10, y + 42), f"motion energy per 1/4 s (line = STILL {motion_gate.STILL}); red = frozen spans", fill="#aaa")
     d.text((8, y + 62), v.line(), fill="#5f5" if v.passed else "#f55")

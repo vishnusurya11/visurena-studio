@@ -60,16 +60,17 @@ def test_every_declared_face_is_staged_up_to_the_reference_ceiling():
 def test_the_reference_list_is_the_picture_numbering_the_prompt_states(tmp_path):
     book, frames = tmp_path / "book", tmp_path / "frames"
     (book / "refs" / "characters").mkdir(parents=True)
-    frames.mkdir()
+    (frames / "plates").mkdir(parents=True)
+    (frames / "cells").mkdir(parents=True)
     (book / "refs" / "characters" / "char-john_watson.png").write_bytes(b"")
     for name in ("plate_lab.png", "Q00_0.png", "Q00_1.png", "Q01_0.png"):
-        (frames / name).write_bytes(b"")
+        ((frames / "plates" if name.startswith("plate_") else frames / "cells") / name).write_bytes(b"")
     # Q00_1E has to be a REAL picture: `end_cells` now measures whether one camera
     # move reaches it from Q00_1, so both of that pair are drawn one push apart.
-    _reachable_pair(frames / "Q00_1.png", frames / "Q00_1E.png")
+    _reachable_pair(frames / "cells" / "Q00_1.png", frames / "cells" / "Q00_1E.png")
     segs = [(0, 0), (0, 1), (1, 0)]
     refs = tr.reference_list(book, frames, ["john_watson"], "lab", segs,
-                             tr.end_cells(frames, segs), frames / "ref_take_00.png",
+                             tr.end_cells(frames / "cells", segs), frames / "ref_take_00.png",
                              sizes=["medium", "close", "close"])
     assert [p.name for p in refs] == ["char-john_watson.png", "plate_lab.png", "Q00_0.png", "Q00_1.png",
                                       "Q01_0.png", "Q00_1E.png"]
@@ -82,10 +83,11 @@ def test_a_take_of_nothing_but_tight_cells_stages_no_plate(tmp_path):
     becomes the only whole picture the model can fall back on."""
     book, frames = tmp_path / "book", tmp_path / "frames"
     (book / "refs" / "characters").mkdir(parents=True)
-    frames.mkdir()
+    (frames / "plates").mkdir(parents=True)
+    (frames / "cells").mkdir(parents=True)
     (book / "refs" / "characters" / "char-john_watson.png").write_bytes(b"")
     for name in ("plate_lab.png", "Q00_0.png", "Q00_1.png"):
-        (frames / name).write_bytes(b"")
+        ((frames / "plates" if name.startswith("plate_") else frames / "cells") / name).write_bytes(b"")
     segs = [(0, 0), (0, 1)]
     refs = tr.reference_list(book, frames, ["john_watson"], "lab", segs, [],
                              frames / "ref_take_00.png", sizes=["close", "insert"])
@@ -95,7 +97,8 @@ def test_a_take_of_nothing_but_tight_cells_stages_no_plate(tmp_path):
 def test_the_reference_list_never_passes_the_nine_slot_wall(tmp_path):
     book, frames = tmp_path / "book", tmp_path / "frames"
     (book / "refs" / "characters").mkdir(parents=True)
-    frames.mkdir()
+    (frames / "plates").mkdir(parents=True)
+    (frames / "cells").mkdir(parents=True)
     segs = [(0, k) for k in range(9)]
     with pytest.raises(SystemExit, match=str(ro.MAX_PICTURES)):
         tr.reference_list(book, frames, ["john_watson", "stamford"], "lab", segs, [],

@@ -63,11 +63,13 @@ def test_sheet_spend_is_read_from_the_books_own_ledger(tmp_path):
 
 def test_the_sheet_rollup_names_the_setup_its_strict_draws_and_what_it_cost(tmp_path):
     frames = tmp_path / "frames"
-    frames.mkdir()
-    write(frames / "seq_gateway.dq.json", {"setup": "gateway", "passed": False, "sheets": [
+    (frames / "plates").mkdir(parents=True)
+    (frames / "cells").mkdir(parents=True)
+    (frames / "sheets").mkdir(parents=True)
+    write(frames / "sheets" / "seq_gateway.dq.json", {"setup": "gateway", "passed": False, "sheets": [
         {"sheet": "seq_gateway_0.png", "strict": False, "duplicates": [["Q07_0", "Q07_0E"]]},
         {"sheet": "seq_gateway_0.png", "strict": True, "duplicates": []}]})
-    write(frames / "seq_lab.dq.json", {"setup": "lab", "passed": True, "sheets": [
+    write(frames / "sheets" / "seq_lab.dq.json", {"setup": "lab", "passed": True, "sheets": [
         {"sheet": "seq_lab_0.png", "strict": False, "duplicates": []}]})
     (tmp_path / "spend.jsonl").write_text(json.dumps(
         {"purpose": "storyboard seq_gateway_0", "usd_estimate": 0.2}), encoding="utf-8")

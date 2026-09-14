@@ -68,7 +68,7 @@ def main(book_id: str, number: int) -> None:
     episode: Episode = episode_home.load_plan(book, number)
     global W, H, ASPECT
     ASPECT, (W, H) = episode.aspect, canvas.size(episode.aspect)
-    out_dir = episode_home.frames_dir(book, number)
+    out_dir = episode_home.boards_dir(book, number)
     out_dir.mkdir(parents=True, exist_ok=True)
     palette = episode_home.read_json(book / "refs" / "refs.json")["palette"]
     seed = SEED_BASE + number * 1000

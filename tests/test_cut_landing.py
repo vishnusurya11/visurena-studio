@@ -130,7 +130,7 @@ def test_the_foreign_set_carries_the_location_plates(tmp_path):
     plate_criterion were logged as 'Q21_0 0.444' instead of a foreign picture."""
     for name in ("Q01_0.png", "Q01_1.png", "Q05_0.png", "Q05_0E.png", "plate_criterion.png", "ref_take_01.png"):
         (tmp_path / name).write_bytes(b"")
-    assert cl.foreign_names(tmp_path, {"Q01_0.png", "Q01_1.png"}) == \
+    assert cl.foreign_names(tmp_path, tmp_path, {"Q01_0.png", "Q01_1.png"}) == \
         ["Q05_0.png", "Q05_0E.png", "plate_criterion.png"]
 
 
@@ -142,4 +142,4 @@ def test_a_cells_own_end_picture_is_not_foreign_to_that_cell(tmp_path):
     Q03_0E at 0.978, and both were failed and queued for a retake for it."""
     for name in ("Q02_0.png", "Q02_0E.png", "Q02_1.png", "Q10_1.png", "Q10_1E.png"):
         (tmp_path / name).write_bytes(b"")
-    assert cl.foreign_names(tmp_path, {"Q02_0.png", "Q02_1.png"}) == ["Q10_1.png", "Q10_1E.png"]
+    assert cl.foreign_names(tmp_path, tmp_path, {"Q02_0.png", "Q02_1.png"}) == ["Q10_1.png", "Q10_1E.png"]

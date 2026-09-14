@@ -124,7 +124,7 @@ def sheet_card(book: Path, frames: Path, name: str, setup, panels: list[dict], r
 def main(book_id: str, number: int) -> None:
     book = episode_home.book_dir(book_id)
     episode: Episode = episode_home.load_plan(book, number)
-    frames = episode_home.frames_dir(book, number)
+    frames = episode_home.boards_dir(book, number)
     cards, total = [], 0.0
     for name, setup in episode.setups.items():
         for panels, route, grid in sq.sheets(sq.segments(episode.shots, name), aspect=episode.aspect):

@@ -86,15 +86,15 @@ def end_moved(start: Image.Image, end: Image.Image, floor: float = END_MOVED) ->
     return float((_sig(start) * _sig(end)).sum()) < floor
 
 
-def frozen_end_cells(frames_dir: Path, cells: list[str], floor: float = END_MOVED) -> list[str]:
+def frozen_end_cells(cells_dir: Path, names: list[str], floor: float = END_MOVED) -> list[str]:
     """Every END cell on the sheet that copied its own start cell.  G3: this is the
     fault that produced three frozen takes in iteration 4 (T02, T07, T08)."""
     out = []
-    for name in cells:
+    for name in names:
         if not name.endswith("E.png"):
             continue
-        start = frames_dir / name.replace("E.png", ".png")
-        if start.exists() and not end_moved(Image.open(start), Image.open(frames_dir / name), floor):
+        start = cells_dir / name.replace("E.png", ".png")
+        if start.exists() and not end_moved(Image.open(start), Image.open(cells_dir / name), floor):
             out.append(name)
     return out
 

@@ -471,7 +471,7 @@ def main(book_id: str, number: int, engine: str = "i2v",
     global W, H
     W, H = canvas.size(episode.aspect)   # the plan declares the canvas (studio/canvas.py)
     home = episode_home.home(book, number)
-    work = home / ("work" if engine == "i2v" else f"work_{engine}")
+    work = episode_home.work_dir(book, number, engine)
     work.mkdir(parents=True, exist_ok=True)
     takes = {}
     for r in episode_home.read_json(episode_home.takes_dir(book, number, engine) / "shots.json"):

@@ -254,6 +254,48 @@ def cell_name(shot: int, sub: int, end: bool = False) -> str:
     return f"Q{shot:02d}_{sub}{'E' if end else ''}.png"
 
 
+def plate_name(setup: str) -> str:
+    return f"plate_{setup}.png"
+
+
+def sheet_name(setup: str, k: int, strict: bool = False) -> str:
+    return f"seq_{setup}_{k}{'_strict' if strict else ''}.png"
+
+
+# ---- where each kind of picture lives under `boards/` ----------------------
+# One room per kind (owner, 2026-09-13). `frames/` held plates, sheets, prompts,
+# dq reports, cells, END cells, superseded drafts and redraw working files under
+# one name; at fourteen episodes that stops you re-rolling one stage and leaving
+# the rest alone. The NAMES are unchanged so nothing else has to be re-learned.
+
+def cell_path(boards: Path, shot: int, sub: int, end: bool = False) -> Path:
+    return boards / "cells" / cell_name(shot, sub, end)
+
+
+def plate_path(boards: Path, setup: str) -> Path:
+    return boards / "plates" / plate_name(setup)
+
+
+def sheet_path(boards: Path, setup: str, k: int, strict: bool = False) -> Path:
+    return boards / "sheets" / sheet_name(setup, k, strict)
+
+
+def cells_in(boards: Path) -> Path:
+    return boards / "cells"
+
+
+def plates_in(boards: Path) -> Path:
+    return boards / "plates"
+
+
+def sheets_in(boards: Path) -> Path:
+    return boards / "sheets"
+
+
+def panels_in(boards: Path) -> Path:
+    return boards / "panels"
+
+
 def grid(n: int, aspect: str = "9:16") -> tuple[int, int, tuple[int, int]]:
     """The smallest sheet that holds n cells, at the plan's delivery aspect.
 

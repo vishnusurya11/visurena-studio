@@ -93,7 +93,7 @@ def main(book_id: str, number: int, only: str | None = None) -> dict:
         print(f"  CONTRACT {f['panel']:<14} {f['detail'][:90]}")
     for finding in [f for s in whole["setups"] for f in s["findings"] if f["hard"]]:
         print(f"  FAIL {finding['check']:<14} {finding['panel']:<8} {finding['text'][:80]}")
-    out = episode_home.write_json(episode_home.frames_dir(book, number) / "sheet_dq.json", whole)
+    out = episode_home.write_json(episode_home.boards_dir(book, number) / "sheet_dq.json", whole)
     print(f"{'PASS' if whole['passed'] else 'FAIL'}  hard {whole['hard']} watch {whole['watch']} -> {out}")
     return whole
 

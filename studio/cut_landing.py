@@ -84,19 +84,19 @@ def own_family(own: set[str]) -> set[str]:
     return set(own) | {f"{Path(n).stem}E.png" for n in own if not Path(n).stem.endswith("E")}
 
 
-def foreign_names(frames_dir: Path, own: set[str]) -> list[str]:
+def foreign_names(cells: Path, plates: Path, own: set[str]) -> list[str]:
     """Every cell and location plate of the episode that is NOT this take's own.
     The plates belong here: a take that drifts onto its empty location is the
     fault (T01, 40 frames of plate_criterion) the cell-only set could not see."""
     mine = own_family(own)
-    cells = sorted(p.name for p in frames_dir.glob("Q??_?*.png"))
-    plates = sorted(p.name for p in frames_dir.glob("plate_*.png"))
+    seen = sorted(p.name for p in cells.glob("Q??_?*.png"))
+    seen += sorted(p.name for p in plates.glob("plate_*.png"))
     # A `.before.png` is a cell AS IT WAS BEFORE A REDRAW -- a draft that was never
     # rendered against, so no take can legitimately be drifting onto it.  MEASURED
     # on episode 3: 10 of 18 foreign-flagged samples (56 %) were a `.before`
     # sibling, and T12 hard-failed on three of them by 0.08 against a 0.05 margin
     # -- a coin flip between two near-identical pictures of the same panel.
-    return [n for n in cells + plates if n not in mine and ".before." not in n]
+    return [n for n in seen if n not in mine and ".before." not in n]
 
 
 def classify(sig: np.ndarray, own: dict[str, np.ndarray], other: dict[str, np.ndarray]) -> list[dict]:
@@ -178,12 +178,13 @@ def verdict(rows: list[dict]) -> dict:
     return {"passed": True, "reason": ""}
 
 
-def cut_landing(video: Path, anchors: list, frames_dir: Path) -> dict:
+def cut_landing(video: Path, anchors: list, cells: Path) -> dict:
     """The take's cut-landing report: rows per internal cut, the verdict, and the
     measured cut frames the assembler should use (`measured_cuts`)."""
     own_names = list(dict.fromkeys(n for n, _ in anchors))
-    own = {n: fm.signature(fm.load(frames_dir / n)).ravel() for n in own_names if (frames_dir / n).exists()}
-    other = {n: fm.signature(fm.load(frames_dir / n)).ravel() for n in foreign_names(frames_dir, set(own))}
+    own = {n: fm.signature(fm.load(cells / n)).ravel() for n in own_names if (cells / n).exists()}
+    other = {n: fm.signature(fm.load(cells / n)).ravel()
+             for n in foreign_names(cells, cells.parent / "plates", set(own))}
     per_frame = classify(signatures(grey_frames(video)), own, other)
     rows = landing(per_frame, anchors)
     out = verdict(rows)

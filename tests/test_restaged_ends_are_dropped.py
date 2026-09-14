@@ -65,7 +65,8 @@ def test_the_take_keeps_only_the_end_cells_it_can_travel_to(tmp_path):
     import takes_r2v as tr
 
     frames = tmp_path / "frames"
-    frames.mkdir()
+    (frames / "plates").mkdir(parents=True)
+    (frames / "cells").mkdir(parents=True)
     reachable = draw(frames / "Q00_0.png", 1)
     push(reachable, frames / "Q00_0E.png")
     draw(frames / "Q01_0.png", 1)

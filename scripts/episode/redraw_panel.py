@@ -57,19 +57,19 @@ def main(book_id: str, number: int, key: str, approved: bool) -> None:
     boards = _sibling("seq_boards")
     book = episode_home.book_dir(book_id)
     episode = episode_home.load_plan(book, number)
-    frames = episode_home.frames_dir(book, number)
+    root = episode_home.boards_dir(book, number)
     name, panel = find(episode, key)
     setup = episode.setups[name]
-    cell = frames / sq.cell_name(panel["shot"], panel["sub"], panel.get("end", False))
+    cell = sq.cell_path(root, panel["shot"], panel["sub"], panel.get("end", False))
     end = bool(panel.get("end"))
     text = (sq.end_single if end else sq.single)(panel, setup, boards.physicals(book), episode.aspect)
     approval.require("panel", f"one gpt-image still to replace {cell.name} ({key}, {name})", USD, approved)
     # An END cell is drawn FROM ITS OWN START CELL: measured, 9 of episode 2's 13
     # END cells were re-staged to a different camera when asked for in prose alone.
     # It goes in FIRST because `end_single` numbers it Image 1 and shifts the rest.
-    refs = [frames / sq.cell_name(panel["shot"], panel["sub"])] if end else []
-    refs += [frames / f"plate_{name}.png"]
-    refs += [frames / f"plate_{p}.png" for p in setup.props if p != name]
+    refs = [sq.cell_path(root, panel["shot"], panel["sub"])] if end else []
+    refs += [sq.plate_path(root, name)]
+    refs += [sq.plate_path(root, p) for p in setup.props if p != name]
     # `setup.state` IS the wardrobe selector, and dropping it silently picks a
     # DIFFERENT card than the sheet this panel is repairing: measured 2026-09-13,
     # the hall sheet referenced `char-john_watson_indoor.png` while this $0.08
@@ -77,14 +77,19 @@ def main(book_id: str, number: int, key: str, approved: bool) -> None:
     # same man with a bowler in his hand, in an episode whose prose says
     # "bare-headed" throughout.  A repair that changes the wardrobe is not a repair.
     refs += [sq.cast_sheet(book, who, name, setup.state) for who in setup.cast]
-    out = frames / f"panel_{cell.stem}.png"
+    panels = sq.panels_in(root)
+    panels.mkdir(parents=True, exist_ok=True)
+    out = panels / f"panel_{cell.stem}.png"
     out.unlink(missing_ok=True)
     sb.adopt(episode.aspect)   # the cell is cropped to the PLAN's canvas, not a module default
     drawn = sb.draw(text, [r for r in refs if r.exists()], out,
                     panel_size(episode.aspect), approved=True)
-    cell.replace(cell.with_suffix(".before.png"))
+    # the draft goes to `panels/`, not beside the cells: a superseded `.before.png`
+    # sitting in `cells/` was read as another shot's picture and cost episode 3
+    # ten of its eighteen foreign-frame flags.
+    cell.replace(panels / f"{cell.stem}.before.png")
     sb.conform(drawn, cell)
-    (frames / f"{cell.stem}.prompt.txt").write_text(text, encoding="utf-8")
+    (panels / f"{cell.stem}.prompt.txt").write_text(text, encoding="utf-8")
     print(f"{key} redrawn -> {cell} (the old one kept as {cell.stem}.before.png)")
 
 

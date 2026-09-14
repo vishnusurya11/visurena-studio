@@ -113,13 +113,13 @@ def ladder_check(cells: list[Path], group: list[dict], route: list[int],
 
 
 def attempt(sb, text: str, refs: list[Path], out: Path, group: list[dict], route: list[int],
-            grid: tuple, frames_dir: Path, strict: bool, setup: Setup | None = None) -> dict:
+            grid: tuple, boards: Path, strict: bool, setup: Setup | None = None) -> dict:
     """One paid draw, cut into its cells and gated.  PAID: one gpt-image call."""
     cols, rows, canvas = grid
     sheet = sb.draw(text, refs, out, canvas)
     grey = np.asarray(Image.open(sheet).convert("L"), dtype=float)
     boxes = board.cell_boxes(grey, cols, rows)
-    cells = [sb.conform(sheet, frames_dir / sq.cell_name(s["shot"], s["sub"], s.get("end", False)), boxes[i])
+    cells = [sb.conform(sheet, sq.cells_in(boards) / sq.cell_name(s["shot"], s["sub"], s.get("end", False)), boxes[i])
              for i, s in enumerate(group)]
     heights, regress = ladder_check(cells, group, route, setup)
     row_bands, col_bands = board.bands(grey, 0), board.bands(grey, 1)
@@ -173,20 +173,20 @@ def refuse_on_text(group: list[dict], setup, prompt: str, grid: tuple, name: str
                      f"Fix the plan's panel prose, or pass --accept-dirty to draw regardless.")
 
 
-def drop_end_copies(frames_dir: Path, entry: dict) -> list[dict]:
+def drop_end_copies(boards: Path, entry: dict) -> list[dict]:
     """An END cell that is still its own start panel after the strict retry is
     DELETED.  A copy kept on disk becomes a take's pin and freezes the render on
     the frame it repeats; the segment renders with no end pin instead."""
     dropped = []
     for a, b in entry["duplicates"]:
         end = next((n for n in (b, a) if n.endswith("E")), "")
-        if end and (frames_dir / f"{end}.png").exists():
-            (frames_dir / f"{end}.png").unlink()
+        if end and (boards / f"{end}.png").exists():
+            (boards / f"{end}.png").unlink()
             dropped.append({"dropped_end": end, "reason": f"still a copy of {a if end == b else b} after strict"})
     return dropped
 
 
-def draw_sheet(sb, frames_dir: Path, name: str, k: int, group: list[dict], route: list[int], grid: tuple,
+def draw_sheet(sb, boards: Path, name: str, k: int, group: list[dict], route: list[int], grid: tuple,
                setup: Setup, physical: dict[str, str], refs: list[Path], report: dict,
                aspect: str = "9:16", props: list[dict] | None = None) -> dict:
     """One sheet: the draw, and one strict retry that names its own offender."""
@@ -199,8 +199,8 @@ def draw_sheet(sb, frames_dir: Path, name: str, k: int, group: list[dict], route
         else:
             # the free gate, before the first dollar of this sheet
             refuse_on_text(group, setup, text, grid, name)
-        out = frames_dir / (f"seq_{name}_{k}_strict.png" if strict else f"seq_{name}_{k}.png")
-        entry = attempt(sb, text, refs, out, group, route, grid, frames_dir, strict, setup)
+        out = sq.sheets_in(boards) / (f"seq_{name}_{k}_strict.png" if strict else f"seq_{name}_{k}.png")
+        entry = attempt(sb, text, refs, out, group, route, grid, boards, strict, setup)
         report["sheets"].append(entry)
         print(f"  {name} sheet {k}{' STRICT' if strict else ''}: {[sq.label(s) for s in group]} -> "
               f"{entry['sheet']} gutters {entry['gutters_ok']} white {entry['white_lines_in']} "
@@ -208,7 +208,7 @@ def draw_sheet(sb, frames_dir: Path, name: str, k: int, group: list[dict], route
               flush=True)
         if clean(entry):
             return entry
-    report["dropped_ends"] += drop_end_copies(frames_dir, entry)
+    report["dropped_ends"] += drop_end_copies(boards, entry)
     return entry
 
 
@@ -216,13 +216,13 @@ def draw_setup(book: Path, episode: Episode, number: int, name: str, only_sheet:
     sb = storyboard()
     aspect = episode.aspect
     sb.adopt(aspect)          # the cells are cropped to the PLAN's canvas, never to a module default
-    frames_dir = episode_home.frames_dir(book, number)
+    boards = episode_home.boards_dir(book, number)
     setup = episode.setups[name]
     physical = physicals(book)
     segs = sq.segments(episode.shots, name)
-    refs = [frames_dir / f"plate_{name}.png"]
+    refs = [sq.plates_in(boards) / f"plate_{name}.png"]
     # the same cab in every setup that shows one; the cab setup's own plate IS that plate
-    refs += [frames_dir / f"plate_{p}.png" for p in setup.props if p != name]
+    refs += [sq.plates_in(boards) / f"plate_{p}.png" for p in setup.props if p != name]
     # The WARDROBE CARD, not the identity bust: the bust is the picture with the
     # hat on. All six episode 2 sheets were drawn against Holmes in a deerstalker
     # and Watson in his bowler while every panel's prose said 'bare-headed'.
@@ -239,7 +239,7 @@ def draw_setup(book: Path, episode: Episode, number: int, name: str, only_sheet:
     for k, (group, route, grid) in enumerate(groups):
         if only_sheet is not None and k != only_sheet:
             continue
-        entry = draw_sheet(sb, frames_dir, name, k, group, route, grid, setup, physical, refs,
+        entry = draw_sheet(sb, boards, name, k, group, route, grid, setup, physical, refs,
                            report, aspect, shown)
         finals.append(entry)
         report["white_lines_in"] += entry["white_lines_in"]
@@ -250,7 +250,7 @@ def draw_setup(book: Path, episode: Episode, number: int, name: str, only_sheet:
     # a one-sheet redraw reports on that sheet alone and leaves the setup's own
     # dq.json where it is, rather than overwriting it with a partial verdict
     stem = f"seq_{name}" if only_sheet is None else f"seq_{name}_{only_sheet}"
-    episode_home.write_json(frames_dir / f"{stem}.dq.json", report)
+    episode_home.write_json(boards / f"{stem}.dq.json", report)
     return report
 
 

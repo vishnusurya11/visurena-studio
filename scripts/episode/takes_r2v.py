@@ -106,7 +106,7 @@ def faces_of(shots: list, cast: list[str] | None = None) -> list[str]:
     return seen[:MAX_FACES]
 
 
-def reference_list(book: Path, frames_dir: Path, faces: list[str], setup: str,
+def reference_list(book: Path, boards: Path, faces: list[str], setup: str,
                    segs: list[tuple[int, int]], ends: list[tuple[int, int]], strip: Path,
                    state: str = "", sizes: list[str] | None = None) -> list[Path]:
     """The take's picture slots, in the order `graph_for` stages them and therefore in
@@ -123,9 +123,9 @@ def reference_list(book: Path, frames_dir: Path, faces: list[str], setup: str,
     # Dropping it here is only half the fix: `picture_numbers` closes the slot
     # too, or the prompt cites a picture the graph never staged (L11).
     if sq.places_the_plate(sizes or []):
-        refs += [frames_dir / f"plate_{setup}.png"]
-    refs += [frames_dir / sq.cell_name(a, b) for a, b in segs]
-    refs += [frames_dir / sq.cell_name(a, b, end=True) for a, b in ends]
+        refs += [sq.plates_in(boards) / f"plate_{setup}.png"]
+    refs += [sq.cells_in(boards) / sq.cell_name(a, b) for a, b in segs]
+    refs += [sq.cells_in(boards) / sq.cell_name(a, b, end=True) for a, b in ends]
     # OWNER 2026-09-11: no strip.  On a one-segment take it was the cell again, pixel for
     # pixel; on a multi-shot take its trailing panels were read as later shots and the take
     # cut back to them.  Every cell is staged whole and named, which is all the strip said.
@@ -184,13 +184,13 @@ def composite(lines: list[tuple[Path, float]], seconds: float, out: Path) -> Pat
 def card(book: Path, episode: Episode, number: int, take: dict, measured: dict) -> dict:
     shots = [episode.shot(i) for i in take["shots"]]
     first = shots[0]
-    frames_dir = episode_home.frames_dir(book, number)
+    boards = episode_home.boards_dir(book, number)
     faces = faces_of(shots, sorted(physicals(book)))
-    sheet = reference_strip(frames_dir, episode, shots)
+    sheet = reference_strip(boards, episode, shots)
     segs = [(s.index, k) for s in shots for k in range(0, len(s.cuts) + 1)]
-    ends = end_cells(frames_dir, segs)
+    ends = end_cells(sq.cells_in(boards), segs)
     sizes = [s.size for s in shots] + [c.size for s in shots for c in s.cuts]
-    refs = reference_list(book, frames_dir, faces, first.setup, segs, ends, sheet,
+    refs = reference_list(book, boards, faces, first.setup, segs, ends, sheet,
                           episode.setups[first.setup].state, sizes)
     lines = [l for l in episode.lines if l.shot in take["shots"]]
     at = {l.index: (measured[l.index]["at"], measured[l.index]["seconds"]) for l in lines}
@@ -208,7 +208,7 @@ def card(book: Path, episode: Episode, number: int, take: dict, measured: dict) 
         for k, cut in enumerate(s.cuts, start=1):
             anchors.append((sq.cell_name(s.index, k), on_grid(round((t0 + cut.at_s) * FPS))))
     for name, _ in anchors:
-        if not (frames_dir / name).exists():
+        if not (boards / name).exists():
             raise SystemExit(f"take {first.index:02d}: sequence cell {name} missing: run seq_boards.py first")
     # MEASURED 2026-09-11 (task force, 71 segments): any end pin, the start cell again or a drawn END
     # cell, is reached within ~1 s and then HELD (65 % / 59 % frozen vs 30 % start-only).  A pin is a
@@ -234,7 +234,7 @@ def card(book: Path, episode: Episode, number: int, take: dict, measured: dict) 
             "seed": SEED_BASE + number * 1000 + first.index + 7919 * first.take, "prompt": prompt}
 
 
-def reference_strip(frames_dir: Path, episode: Episode, shots: list) -> Path:
+def reference_strip(boards: Path, episode: Episode, shots: list) -> Path:
     """The take's own storyboard: its cells from the sequence board side by
     side, then its END frames.  No neighbour cells.  Free (no drawing)."""
     from studio import episode_strip_ref
@@ -246,10 +246,10 @@ def reference_strip(frames_dir: Path, episode: Episode, shots: list) -> Path:
     # prompt declares the room "appears in [Shot 2]" and the narration lips sentence spans the cut.
     # Own cells only is still right: each pinned cell needs its own <Picture N> at full resolution.
     window = segs
-    panels = [Image.open(frames_dir / sq.cell_name(a, b)).convert("RGB") for a, b in window]
-    ends = end_cells(frames_dir, segs)  # the take's own END frames, after its panels
-    panels += [Image.open(frames_dir / sq.cell_name(a, b, end=True)).convert("RGB") for a, b in ends]
-    out = frames_dir / f"ref_take_{shots[0].index:02d}.png"
+    panels = [Image.open(sq.cells_in(boards) / sq.cell_name(a, b)).convert("RGB") for a, b in window]
+    ends = end_cells(sq.cells_in(boards), segs)  # the take's own END frames, after its panels
+    panels += [Image.open(sq.cells_in(boards) / sq.cell_name(a, b, end=True)).convert("RGB") for a, b in ends]
+    out = boards / f"ref_take_{shots[0].index:02d}.png"
     episode_strip_ref.compose(panels).save(out)
     return out
 
@@ -261,7 +261,7 @@ compare against the same episode rendered with them.  A flag, not a deletion, so
 the control stays reproducible and the change is one line to undo."""
 
 
-def end_cells(frames_dir: Path, segs: list[tuple[int, int]]) -> list[tuple[int, int]]:
+def end_cells(cells: Path, segs: list[tuple[int, int]]) -> list[tuple[int, int]]:
     """The (shot, sub) segments of a take with an END frame ONE CAMERA MOVE AWAY.
 
     An END frame on disk is not enough. MEASURED on episode 2: 9 of the 13 drawn
@@ -272,7 +272,7 @@ def end_cells(frames_dir: Path, segs: list[tuple[int, int]]) -> list[tuple[int, 
     if NO_ENDS:
         return []
     return [(a, b) for a, b in segs
-            if sq.reaches(frames_dir / sq.cell_name(a, b), frames_dir / sq.cell_name(a, b, end=True))]
+            if sq.reaches(cells / sq.cell_name(a, b), cells / sq.cell_name(a, b, end=True))]
 
 
 def end_numbers(segs: list[tuple[int, int]], ends: list[tuple[int, int]]) -> list[int]:
@@ -308,12 +308,12 @@ def drop_second_slot(graph: dict, base: str) -> dict:
 
 
 def graph_for(c: dict, book: Path, number: int, take_dir: Path, base: str = "") -> dict:
-    frames_dir = episode_home.frames_dir(book, number)
+    boards = episode_home.boards_dir(book, number)
     template, inject = load_workflow(base or BASE)
     values = {"prompt": c["prompt"], "width": W, "height": H, "frames": c["frames"], "steps": STEPS,
               "seed": c["seed"], "ref_image_size": c["ref_image_size"],
               "filename_prefix": f"ep_take_{c['index']:02d}"}
-    paths = [book / "refs" / "characters" / n if n.startswith("char-") else frames_dir / n for n in c["refs"]]
+    paths = [book / "refs" / "characters" / n if n.startswith("char-") else boards / n for n in c["refs"]]
     # (a setup variant is named char-<who>_<setup>.png and lives beside the plain sheet)
     # the strip must be the LAST picture slot: the prompt numbers it after the cast, the plate,
     # the pinned cells and the END cells (reference_list IS that order)
@@ -328,7 +328,7 @@ def graph_for(c: dict, book: Path, number: int, take_dir: Path, base: str = "") 
         graph[node] = {"class_type": "LoadImage", "inputs": {"image": stage_image(path), "upload": "image"},
                        "_meta": {"title": f"ref_image_{k + 1}"}}
         graph[base]["inputs"][f"ref_images.ref_image_{k}"] = [node, 0]
-    anchors = [(stage_image(frames_dir / name), frame) for name, frame in c["anchors"]]
+    anchors = [(stage_image(boards / name), frame) for name, frame in c["anchors"]]
     if c["audio"] == "silence":
         wav = composite([], c["seconds"], take_dir / f"silence_{c['index']:02d}.wav")
         audio = (stage_image(wav), 0)

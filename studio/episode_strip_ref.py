@@ -32,7 +32,7 @@ def compose(panels: list[Image.Image], height: int = 1024) -> Image.Image:
     return out
 
 
-def strip_for(frames_dir: Path, run: list[int], first: int, last: int, out: Path) -> Path:
-    panels = [Image.open(frames_dir / f"S{i:02d}.png").convert("RGB") for i in neighbours(run, first, last)]
+def strip_for(cells: Path, run: list[int], first: int, last: int, out: Path) -> Path:
+    panels = [Image.open(cells / f"S{i:02d}.png").convert("RGB") for i in neighbours(run, first, last)]
     compose(panels).save(out)
     return out

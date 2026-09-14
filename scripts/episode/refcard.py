@@ -152,7 +152,7 @@ def take_section(card: dict) -> str:
 
 
 def build(book: Path, number: int) -> Path:
-    home, frames = episode_home.home(book, number), episode_home.frames_dir(book, number)
+    home, frames = episode_home.home(book, number), episode_home.boards_dir(book, number)
     episode = episode_home.load_plan(book, number)
     cards = json.loads((home / "shots_r2v" / "prompts.json").read_text(encoding="utf-8"))
     cards = cards["takes"] if isinstance(cards, dict) else cards

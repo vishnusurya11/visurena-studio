@@ -129,25 +129,25 @@ def cells(sheet: Path) -> list[tuple[int, int, int, int]]:
     return board.cell_boxes(np.asarray(Image.open(sheet).convert("L"), dtype=float))
 
 
-def redrawn(frames_dir: Path, shot) -> Path:
-    return frames_dir / f"panel_S{shot.index:02d}_take{shot.take}.png"
+def redrawn(boards: Path, shot) -> Path:
+    return sq.panels_in(boards) / f"panel_S{shot.index:02d}_take{shot.take}.png"
 
 
-def sheets(book: Path, episode: Episode, frames_dir: Path) -> None:
+def sheets(book: Path, episode: Episode, boards: Path) -> None:
     looks = physicals(book)
     for name, setup in episode.setups.items():
-        refs = [frames_dir / f"plate_{name}.png"]
+        refs = [sq.plates_in(boards) / f"plate_{name}.png"]
         refs += [book / "refs" / "characters" / f"char-{who}.png" for who in setup.cast]
         previous: Path | None = None
         for k, group in enumerate(board.chunks([s for s in episode.shots if s.setup == name])):
             text = board.prompt(group, setup.described, setup.cast, looks, previous is not None)
             sheet = draw(text, refs + ([previous] if previous else []),
-                         frames_dir / f"board_{name}_{k}.png")
+                         boards / f"board_{name}_{k}.png")
             boxes = cells(sheet)
             for i, shot in enumerate(group):
-                if redrawn(frames_dir, shot).exists():
+                if redrawn(boards, shot).exists():
                     continue  # a panel redrawn alone outranks its sheet cell
-                conform(sheet, frames_dir / f"S{shot.index:02d}.png", boxes[i])
+                conform(sheet, boards / f"S{shot.index:02d}.png", boxes[i])
             print(f"  sheet {name} {k}: shots {[s.index for s in group]} -> {sheet}", flush=True)
             previous = sheet
 
@@ -167,14 +167,14 @@ def repanel(book_id: str, number: int, index: int) -> None:
     The old panel is kept beside it as `SNN.prev.png`; the take must be redone."""
     book = episode_home.book_dir(book_id)
     episode = episode_home.load_plan(book, number)
-    frames_dir = episode_home.frames_dir(book, number)
+    boards = episode_home.boards_dir(book, number)
     shot, setup = episode.shot(index), episode.setups[episode.shot(index).setup]
-    refs = [frames_dir / f"plate_{shot.setup}.png"]
+    refs = [sq.plates_in(boards) / f"plate_{shot.setup}.png"]
     refs += [book / "refs" / "characters" / f"char-{who}.png" for who in setup.cast]
-    refs.append(frames_dir / f"board_{shot.setup}_{sheet_of(episode, shot)}.png")
+    refs.append(boards / f"board_{shot.setup}_{sheet_of(episode, shot)}.png")
     text = board.panel_prompt(shot, setup.described, setup.cast, physicals(book))
-    drawn = draw(text, refs, frames_dir / f"panel_S{index:02d}_take{shot.take}.png", PANEL_SIZE)
-    panel = frames_dir / f"S{index:02d}.png"
+    drawn = draw(text, refs, sq.panels_in(boards) / f"panel_S{index:02d}_take{shot.take}.png", PANEL_SIZE)
+    panel = boards / f"S{index:02d}.png"
     if panel.exists():
         panel.replace(panel.with_suffix(".prev.png"))
     conform(drawn, panel)
@@ -183,7 +183,7 @@ def repanel(book_id: str, number: int, index: int) -> None:
 
 def grids(book_id: str, number: int) -> None:
     book = episode_home.book_dir(book_id)
-    sheets(book, episode_home.load_plan(book, number), episode_home.frames_dir(book, number))
+    sheets(book, episode_home.load_plan(book, number), episode_home.boards_dir(book, number))
 
 
 # ---- the review contact sheet, after the round -----------------------------
@@ -217,7 +217,7 @@ def review(book_id: str, number: int) -> None:
     work = home / "work"
     work.mkdir(exist_ok=True)
     records = {r["index"]: r for r in
-               episode_home.read_json(episode_home.shots_dir(book, number) / "shots.json")}
+               episode_home.read_json(episode_home.takes_dir(book, number) / "shots.json")}
     rows = []
     for shot in episode.shots:
         if shot.index not in records:
