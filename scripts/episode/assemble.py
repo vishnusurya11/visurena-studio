@@ -18,7 +18,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 
-from studio import canvas, edit_gate, episode_gutter, episode_home
+from studio import canvas, edit_gate, episode_bed, episode_gutter, episode_home
 from studio.comfy import run
 from studio.episode_spec import Episode
 from studio import trailer_assemble
@@ -76,7 +76,7 @@ ENCODE_LAG_S = 0.030
 against the wavs (measured +0.04 s vs +0.01 s before trim); compensated."""
 
 
-def quiet_bed(bed: Path, seconds: float, out: Path) -> Path:
+def quiet_bed(bed: Path, seconds: float, out: Path, normalise: bool = True) -> Path:
     """The bed for an episode: BED_TRIM_DB down, a room-tone floor under it,
     faded out over BED_FADE_S at the placed end, cut to `seconds`."""
     from studio import sfx
@@ -85,11 +85,18 @@ def quiet_bed(bed: Path, seconds: float, out: Path) -> Path:
     fade_at = max(seconds - BED_FADE_S, 0.0)
     # MEASURED per bed, not a constant: the -11 dB trim was right for ACE-Step's
     # -14.6 LUFS output alone, and the bed model is now the owner's to choose.
-    try:
-        loudness = integrated(bed)
-        gain, short = bed_gain_db(loudness), bed_shortfall_db(loudness)
-    except Exception:                                   # no loudnorm pass available
-        gain, loudness, short = BED_TRIM_DB, None, 0.0
+    if not normalise:
+        # A COMPOSITE IS ALREADY AT LEVEL, span by span.  Measuring the whole
+        # thing and lifting it to one target would average five deliberate
+        # levels back into one -- the sameness the tones exist to break.
+        gain, loudness, short = 0.0, None, 0.0
+        print(f"  bed {Path(bed).name}: composed per span, already at level", flush=True)
+    else:
+        try:
+            loudness = integrated(bed)
+            gain, short = bed_gain_db(loudness), bed_shortfall_db(loudness)
+        except Exception:                               # no loudnorm pass available
+            gain, loudness, short = BED_TRIM_DB, None, 0.0
     if short:
         # The clamp has to speak. Saying "+6.0 dB to reach -25.6" when the bed
         # lands at -27.8 is the sentence that let a failed generation ship.
@@ -97,7 +104,7 @@ def quiet_bed(bed: Path, seconds: float, out: Path) -> Path:
               f"{BED_TARGET_LUFS - loudness:+.1f} dB and the lift caps at "
               f"{BED_MAX_LIFT_DB:+.1f}; it will sit at {loudness + gain:.1f} LUFS, "
               f"{short:.1f} dB under target", flush=True)
-    else:
+    elif normalise:
         print(f"  bed {Path(bed).name}: {gain:+.1f} dB to reach {BED_TARGET_LUFS} LUFS", flush=True)
     import soundfile as sf
     have = sf.info(str(bed)).frames / sf.info(str(bed)).samplerate
@@ -252,7 +259,8 @@ because nothing between the generator and the mix ever listened to it.  Hence
 `bed_sings()` below: the marker is now VERIFIED per bed, not asserted here."""
 
 
-def bed_request(engine: str, seconds: float, seed: int) -> tuple[str, dict]:
+def bed_request(engine: str, seconds: float, seed: int,
+                tone: str = "") -> tuple[str, dict]:
     """The workflow and the values for one bed, by engine.
 
     Pure: no network, no GPU, so the ask is testable without spending a minute
@@ -269,14 +277,82 @@ def bed_request(engine: str, seconds: float, seed: int) -> tuple[str, dict]:
         # whose lyrics field promises nothing -- given `(instrumental)` it sang
         # invented verse, and given "" it sang again.
         return "audio_yue2_song_olmpack", {
-            "style": BED_STYLE, "lyrics": BED_INSTRUMENTAL[engine], "cot": "full",
+            "style": episode_bed.tone_style(tone) if tone else BED_STYLE,
+            "lyrics": BED_INSTRUMENTAL[engine], "cot": "full",
             "seed": seed, "abc": "", "filename_prefix": "ep_bed",
             # the duration control, at 25 tokens a second; it was never set
             "semantic_max_tokens": min(int(seconds * YUE2_TOKENS_PER_S), YUE2_MAX_TOKENS)}
+    # THE TONE DECIDES THE TAGS, THE TEMPO AND THE KEY.  bpm and keyscale are
+    # separate values on this request, so a tone that changed only its tags
+    # would arrive at 60 BPM in D minor like every other -- which is the
+    # sameness the owner heard.
+    voice = episode_bed.TONES.get(tone)
     return BED_WORKFLOW, {
-        "tags": BED_TAGS, "lyrics": BED_INSTRUMENTAL[engine], "seconds": seconds,
-        "duration": seconds, "bpm": 60, "keyscale": "D minor",
+        "tags": voice.tags if voice else BED_TAGS,
+        "lyrics": BED_INSTRUMENTAL[engine], "seconds": seconds,
+        "duration": seconds,
+        "bpm": voice.bpm if voice else 60,
+        "keyscale": voice.key if voice else "D minor",
         "seed": seed, "lm_seed": seed, "filename_prefix": "ep_bed"}
+
+
+def toned_bed(home: Path, number: int, beds: list[dict], placed: dict,
+              engine: str = BED_ENGINE_DEFAULT) -> Path:
+    """One bed per distinct tone, each at its own level, laid into `audio/bed.wav`.
+
+    OWNER 2026-09-14: "make sure audio is not too loud the BG ... different types
+    based on the context of background thrilling .. normal".
+
+    MEASURED on the shipped episode 5 master before any of this: speech -13.2
+    LUFS, the bed in an un-ducked gap -28.0, the bed inside the voice band -34.9.
+    It was never objectively loud.  What made it READ as loud is that one solo
+    violin in D minor played for 160 seconds under a breakfast, a joke, a
+    flashback and a murder, and a constant is a thing the ear gives up filtering.
+
+    An episode with no `beds` block gets one `plain` span end to end, so episodes
+    1 to 5 would rebuild exactly as they shipped, only quieter."""
+    at = {s["index"]: s["t_start"] for s in placed["shots"]}
+    plan = episode_bed.bed_plan(beds, at, placed["duration_s"])
+    room = home / "audio"
+    room.mkdir(parents=True, exist_ok=True)
+    print(f"  bed: {len(plan.spans)} span(s), {len(plan.needed)} tone(s) to make", flush=True)
+
+    made: dict[str, Path] = {}
+    for tone in plan.needed:
+        out = room / f"bed_{tone}.wav"
+        want = plan.seconds[tone]
+        if not out.exists():
+            workflow, values = bed_request(engine, want, bed_seed(out, number), tone)
+            got = run(workflow, values, timeout=BED_TIMEOUT)
+            out.write_bytes(got[0].read_bytes())
+        level(out, episode_bed.tone_lufs(tone))
+        print(f"    {tone:10s} {want:6.1f}s at {episode_bed.tone_lufs(tone):6.1f} LUFS "
+              f"-> {out.name}", flush=True)
+        made[tone] = out
+    return episode_bed.compose(plan.spans, made, room / "bed.wav")
+
+
+def level(path: Path, target: float) -> Path:
+    """Put one file AT `target` LUFS, in place.
+
+    Each tone is levelled BEFORE composing, never after: normalising the
+    composite would average five deliberate levels back into one, which is the
+    thing the tones exist to stop."""
+    try:
+        loudness = integrated(path)
+    except Exception:
+        print(f"    WARNING: {path.name} could not be measured; left as generated", flush=True)
+        return path
+    gain = min(round(target - loudness, 2), BED_MAX_LIFT_DB)
+    if round(target - loudness, 2) > BED_MAX_LIFT_DB:
+        print(f"    WARNING {path.name}: {loudness:.1f} LUFS needs {target - loudness:+.1f} dB "
+              f"and the lift caps at {BED_MAX_LIFT_DB:+.1f}; it will sit "
+              f"{round(target - loudness, 2) - BED_MAX_LIFT_DB:.1f} dB under target", flush=True)
+    tmp = path.with_suffix(".lev.wav")
+    subprocess.run(["ffmpeg", "-y", "-v", "error", "-i", str(path),
+                    "-af", f"volume={gain}dB", str(tmp)], check=True)
+    tmp.replace(path)
+    return path
 
 
 def bed_seed(out: Path, number: int, base: int = 90000) -> int:
@@ -559,10 +635,8 @@ def main(book_id: str, number: int, engine: str = "i2v",
     write_cut_manifest(work, episode_home.read_json(
         episode_home.takes_dir(book, number, engine) / "shots.json"), book)
     cut = picture(placed, takes, work)
-    music = quiet_bed(bed(home / "audio" / "bed.wav", bed_seed(home / "audio" / "bed.wav", number),
-                          placed["duration_s"],
-                          bed_engine),
-                      placed["duration_s"], work / "bed_quiet.wav")
+    music = quiet_bed(toned_bed(home, number, episode.beds, placed, bed_engine),
+                      placed["duration_s"], work / "bed_quiet.wav", normalise=False)
     # audio reviewer, iteration 3: 10 dB in 20 ms on every line pumped; the bed now sits lower
     # (BED_TRIM_DB) and ducks gently: at least 4 dB, 0.15 s attack, 0.25 s pre-delay, 1.0 s release
     trailer_assemble.DUCK_DEPTH_DB, trailer_assemble.DUCK_ATTACK = 4.0, 0.15

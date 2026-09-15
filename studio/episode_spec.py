@@ -320,6 +320,18 @@ class Episode(BaseModel):
     setups: dict[str, Setup]
     shots: list[Shot]
     lines: list[Line]
+    beds: list[dict] = Field(default_factory=list)
+    """The music bed's tone spans: `[{"from_shot": 0, "tone": "plain"}, ...]`.
+
+    OWNER 2026-09-14: "different types based on the context of background
+    thrilling .. normal".  One drone under a breakfast, a joke, a flashback and
+    a murder is why episode 5's bed read as loud at 15 LU under the voice.
+
+    AUTHORED, NOT DERIVED FROM `section`.  "friction" covers both a comic
+    invasion of six street boys and a man's hand closing on a woman's wrist, so
+    a tone taken from the label would be confidently wrong about one of them.
+    Empty means one `plain` span end to end, which is what episodes 1-5 shipped.
+    `studio/episode_bed.py` owns the tones and cuts the spans."""
 
     # ---- lookups -----------------------------------------------------------
     def shot(self, index: int) -> Shot:
