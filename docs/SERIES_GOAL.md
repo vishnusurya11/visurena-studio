@@ -53,7 +53,7 @@ truth for where the loop is, and it is updated after every step, not at the end.
 | 4 | What John Rance Had to Tell | published `WN2ktyq8tr0` |
 | 5 | Our Advertisement Brings a Visitor | published `g-U-P0ZOoq8` |
 | 6 | Tobias Gregson Shows What He Can Do | published `AIX83NAcTGc` |
-| 7 | Light in the Darkness | IN PROGRESS -- takes re-rendered, DQ pending |
+| 7 | Light in the Darkness | published `xksX2qouWEo` |
 | 8 | On the Great Alkali Plain | |
 | 9 | The Flower of Utah | |
 | 10 | John Ferrier Talks with the Prophet | |
