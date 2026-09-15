@@ -645,3 +645,136 @@ An un-automatable safety gate is one somebody eventually comments out, and a
 gate that refuses 34 correct motions is the same thing by a slower route.  The
 advisories still print, because they are how a motion gets from passing to
 good."""
+
+
+# ---- a man may only carry his own marks -------------------------------------
+
+def marks_of(refs: list[dict]) -> dict[str, str]:
+    """`{mark: entity_id}` from the bible's own `marks` lists.
+
+    A MARK IS A THING ONLY ONE CHARACTER HAS.  It is authored, not derived from
+    `physical`: "both hands bare" and "a white collar" are in nearly every
+    description and belong to nobody, so a derived list is mostly noise."""
+    out: dict[str, str] = {}
+    for row in refs:
+        if row.get("kind") != "character":
+            continue
+        for mark in row.get("marks") or []:
+            low = mark.lower()
+            if low in out and out[low] != row["entity_id"]:
+                raise ValueError(f"{mark!r} is claimed by both {out[low]} and "
+                                 f"{row['entity_id']}; a mark two men share is not a mark")
+            out[low] = row["entity_id"]
+    return out
+
+
+def named_in(text: str, names: dict[str, str]) -> list[str]:
+    """Which characters this text names, in the order they first appear."""
+    low = (text or "").lower()
+    at = sorted((m.start(), who) for word, who in names.items()
+                for m in re.finditer(rf"\b{re.escape(word)}\b", low))
+    out: list[str] = []
+    for _, who in at:
+        if who not in out:
+            out.append(who)
+    return out
+
+
+def name_map(refs: list[dict]) -> dict[str, str]:
+    """`{token: entity_id}` for every token that names exactly ONE character.
+
+    A TOKEN CLAIMED BY TWO PEOPLE IDENTIFIES NEITHER, so it is dropped -- the
+    same rule `marks_of` applies to marks.  Madame, Alice and Arthur Charpentier
+    all answer to "charpentier", and a map built from surnames alone gave the
+    key to whichever row was written last: episode 6's mother was then reported
+    as her son wearing her own black bombazine.
+
+    `aka` carries the phrases a PLAN actually uses for someone it does not name.
+    Episode 5's shot 20 is "the old woman going small and bent in her brown
+    shawl ... and Holmes ... following": Holmes is the only name in it, so
+    without the alias her shawl is attributed to him and a correct shot is
+    refused."""
+    claims: dict[str, set] = {}
+    for row in refs:
+        if row.get("kind") != "character":
+            continue
+        who, name = row["entity_id"], row.get("name", "").lower()
+        tokens = {name, name.split()[-1].strip(".,") if name else ""}
+        tokens |= {w.strip(".,") for w in name.split() if len(w) > 4}
+        tokens |= {a.lower().strip() for a in row.get("aka") or []}
+        for token in tokens:
+            if len(token) > 3:
+                claims.setdefault(token, set()).add(who)
+    return {token: next(iter(who)) for token, who in claims.items() if len(who) == 1}
+
+
+def crossed_mark(text: str, owners: dict[str, str],
+                 names: dict[str, str]) -> tuple[str, str, str] | None:
+    """The first (wearer, mark, true owner) in `text` where they disagree.
+
+    IT ANSWERS ONLY WHEN THE PROSE NAMES EXACTLY ONE MAN, because that is the
+    only case where the wearer is not a guess.  Clause attribution was tried and
+    measured over the six plans on disk: it produced 17 hits and almost all were
+    two-handers describing both men in one sentence, where the mark's own clause
+    names nobody.  Episode 3 has the opposite shape -- "Medium on WATSON ...
+    where HOLMES has knelt ... his hand on the silver ball knob" -- so nearest
+    preceding name is wrong there and first name is wrong in the other.  No
+    ordering rule settles both, and a lint that cries wolf on every two-hander
+    is one somebody turns off.
+
+    THE FAULT THAT SHIPPED IS EXACTLY THIS SHAPE.  Episode 4's take 2 is an
+    insert of nothing but a hand, naming HOLMES alone, carrying Watson's black
+    walking stick beside Holmes's own sticking plaster -- both men's identity
+    marks in one full-frame picture.
+
+    A segment naming two or more men is NOT MEASURED; `unmeasured_marks` is how
+    a caller reports that rather than treating it as a pass."""
+    here = named_in(text, names)
+    if len(here) != 1:
+        return None
+    wearer = here[0]
+    for mark, owner in owners.items():
+        if owner != wearer and mark.lower() in (text or "").lower():
+            return wearer, mark, owner
+    return None
+
+
+def unmeasured_marks(text: str, owners: dict[str, str], names: dict[str, str]) -> list[str]:
+    """The men named in a segment the mark lint had to stand down on.
+
+    Empty when the segment was measurable.  An unmeasured check that reads as a
+    pass is this repo's most-found fault, so the two-hander case is reported
+    rather than silently skipped."""
+    here = named_in(text, names)
+    if len(here) < 2:
+        return []
+    return here if any(m.lower() in (text or "").lower() for m in owners) else []
+
+
+MARK_FIELDS = ("frame", "motion", "camera", "at_rest", "end")
+
+
+def plan_marks(episode, refs: list[dict]) -> tuple[list[str], list[str]]:
+    """(crossed, unmeasured) for a whole plan, against the bible's own marks.
+
+    MEASURED over the six plans on disk, 140 shots: ONE crossed mark, and it is
+    exactly the take the identity audit found by eye -- episode 4's shot 2,
+    "Insert on Holmes's raised hand ... off the head of the black stick", which
+    rendered Watson's stick and Holmes's sticking plaster on one hand in one
+    full-frame insert.  No false positives.
+
+    37 segments are NOT MEASURED because they name two men, and those are
+    returned separately rather than counted as clean."""
+    owners, names = marks_of(refs), name_map(refs)
+    crossed, vague = [], []
+    for shot in episode.shots:
+        for seg in [shot] + list(shot.cuts or []):
+            for field in MARK_FIELDS:
+                said = getattr(seg, field, "") or ""
+                if got := crossed_mark(said, owners, names):
+                    wearer, mark, owner = got
+                    crossed.append(f"shot {shot.index} {field}: {wearer} carries {mark!r}, "
+                                   f"which refs.json gives to {owner} alone")
+                elif who := unmeasured_marks(said, owners, names):
+                    vague.append(f"shot {shot.index} {field}: {' and '.join(who)} both named")
+    return crossed, vague

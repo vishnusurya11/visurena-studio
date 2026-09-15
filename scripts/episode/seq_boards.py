@@ -300,6 +300,16 @@ def main(book_id: str, number: int, only: str | None = None, sheet: int | None =
     if hard := [f for f in still if f[1] in ep_spec.HARD_MOTION]:
         raise SystemExit("the plan fails the motion gate:\n  "
                          + "\n  ".join(f"shot {i} {c}: {w}" for i, c, w in hard))
+    # AND WHO IS CARRYING WHAT.  Episode 4's shot 2 put Watson's black stick and
+    # Holmes's sticking plaster on ONE hand in a full-frame insert -- authored in
+    # the plan, drawn into the paid cell Q02_0.png, then rendered.  Measured over
+    # the 140 shots on disk: one crossed mark, and it is that one.
+    refs = episode_home.read_json(book / "refs" / "refs.json")["refs"]
+    crossed, vague = ep_spec.plan_marks(episode, refs)
+    for note in vague:
+        print(f"  ADVISORY marks not measured -- {note}", flush=True)
+    if crossed:
+        raise SystemExit("the plan fails the mark gate:\n  " + "\n  ".join(crossed))
     for name in episode.setups:
         if only and name != only:
             continue
