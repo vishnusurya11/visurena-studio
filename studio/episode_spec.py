@@ -565,8 +565,11 @@ last clause, so a terminal one produces a sentence that contradicts itself and
 the model obeys the terminal half.  Measured: fires on 7 of episodes 4-5's 49
 shots, whose mean frozen penalty is 8.13 against 2.60 for the other 42."""
 
-FEATURES = re.compile(r"\b(eyes?|brows?|eyelids?|lids?|lashes|pupils?|iris|jaw|"
+FEATURES = re.compile(r"\b(eyes?|brows?|eyelids?|lashes|pupils?|iris|jaw|"
                       r"lips?|nostrils?|line of (?:his|her|their) mouth)\b", re.I)
+"""`lids?` on its own used to be in here and it matched a CIGAR BOX LID on
+episode 6's shot 14 -- an object rocking a thumb's width, which is exactly the
+kind of tail the rule exists to permit.  An eyelid is `eyelid`."""
 """Face parts too small for the instrument that judges the take.
 
 `motion_gate` bins a 24x24 block of a 192x336 grey frame -- about a MOUTH's size

@@ -183,3 +183,20 @@ def test_each_fault_says_what_to_do():
 
 def test_an_empty_motion_is_not_judged():
     assert motion_faults("") == []
+
+
+# ---- what M6 must NOT catch -------------------------------------------------
+
+def test_a_box_lid_is_not_an_eyelid():
+    """Found on episode 6's shot 14, where `lids?` matched a cigar box. The
+    rule is about face parts a 24x24 block cannot resolve; a box lid rocking a
+    thumb's width is an object, and objects are what the tail is FOR."""
+    said = ("The camera pushes in across the whole shot; the hand closes round the tumbler; "
+            "the cigar box lid rocks a thumb's width where his cuff catches it.")
+    assert "M6" not in faults(said)
+
+
+def test_an_eyelid_is_still_caught():
+    said = ("The camera pushes in across the whole shot; his arm comes out; his eyelids "
+            "come down once.")
+    assert "M6" in faults(said)

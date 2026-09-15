@@ -319,7 +319,38 @@ def text_complaints(row: dict) -> list[str]:
     return out + agrees(row.get("physical", ""), {}, traits)
 
 
-def picture_complaints(path: Path, kind: str, detect=None) -> list[str]:
+FLOOR_LENGTH = re.compile(
+    r"\b(?:skirt|dress|gown|nightgown|cassock|robe|petticoat|greatcoat|cloak|habit)\b"
+    r"[^.;]{0,60}?\bto the (?:floor|ground|boot|boots|ankle|ankles|instep|hem)\b"
+    r"|\bfloor[- ]length\b|\bfull[- ]length (?:skirt|dress|gown|habit)\b"
+    r"|\b(?:bombazine|crinoline|bustle) (?:dress|gown|skirt)\b", re.I)
+"""A contract that says the garment reaches the floor.
+
+Anchored to a GARMENT word and a HEM word together, so "the key light spills to
+the floor" is lighting and not a hem."""
+
+
+def floor_length(row: dict | None) -> bool:
+    """Does this character's own contract say the garment reaches the floor?
+
+    `hands_clear` reads the bottom OUTER THIRDS, and its calibration table is
+    six cards that are all men in jackets and trousers (0.112-0.320, against the
+    0.640 it was built to catch).  A floor-length dress is WIDE AT THE HEM and
+    fills those corners because that is what the garment does -- measured at
+    0.736 on Madame Charpentier and 0.812-0.843 on Mrs Sawyer, all three with
+    both hands plainly inside the frame and nothing cut off.
+
+    So the instrument says where it does not apply, rather than being softened
+    for everyone.  A man whose hand runs off the frame still fails at exactly
+    the threshold he always did."""
+    if not row:
+        return False
+    said = " ".join([*(row.get("sheet") or {}).values(),
+                     *(row.get("wardrobe") or {}).values()])
+    return bool(FLOOR_LENGTH.search(said))
+
+
+def picture_complaints(path: Path, kind: str, detect=None, row: dict | None = None) -> list[str]:
     """Everything wrong with one picture, measured."""
     if not Path(path).exists():
         return [f"{Path(path).name}: the row names this picture and it is not on disk"]
@@ -328,8 +359,15 @@ def picture_complaints(path: Path, kind: str, detect=None) -> list[str]:
         out.append(f"{path.name}: backdrop std {backdrop_std(path)} over {BACKDROP_LIMIT}; "
                    f"the frame holds more than one flat wall")
     if kind == "card" and not hands_clear(path):
-        out.append(f"{path.name}: the bottom {FOOT} rows are {bottom_share(path):.1%} "
-                   f"subject; a hand or a hat runs off the frame")
+        if floor_length(row):
+            # NOT SILENCE.  An unmeasured check that reads as a pass is this
+            # repo's most-found fault; the row says which rule stood down.
+            out.append(f"{path.name}: bottom corners {bottom_share(path):.1%} subject, "
+                       f"NOT MEASURED -- the contract says the garment reaches the floor, "
+                       f"so the outer thirds cannot answer for the hands")
+        else:
+            out.append(f"{path.name}: the bottom {FOOT} rows are {bottom_share(path):.1%} "
+                       f"subject; a hand or a hat runs off the frame")
     read = detect or detector()
     if read:                                              # pragma: no cover - needs a model
         out += _face_complaints(path, kind, read)
@@ -388,9 +426,9 @@ def check(book: Path, who: str, detect=None) -> list[str]:
     row = cast_refs.row(book, who)
     out = text_complaints(row)
     out += promise_complaints(book, who)
-    out += picture_complaints(cast_refs.bust(book, who), "bust", detect)
+    out += picture_complaints(cast_refs.bust(book, who), "bust", detect, row)
     for state in cast_refs.STATES:
         card = cast_refs.card(book, who, state)
         if card:
-            out += picture_complaints(card, "card", detect)
+            out += picture_complaints(card, "card", detect, row)
     return out
