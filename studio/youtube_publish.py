@@ -206,3 +206,41 @@ def deliverable(home, engine: str = "") -> tuple:
                          f"({', '.join(n for n, _m, _q in found) or 'none found'}); "
                          f"fix the cut, or name one with --engine=<r2v|i2v>")
     raise SystemExit(f"{len(passed)} masters passed QC in {home}; name one with --engine=")
+
+
+# ---- the title -------------------------------------------------------------
+
+SERIES = "Sherlock Holmes"
+"""The character, not the author or the channel.
+
+It leads because it is the search term. A viewer looking for this work types
+"Sherlock Holmes" long before they type "A Study in Scarlet", and never types
+the chapter title -- which is what the first five uploads led with."""
+
+ELLIPSIS = "…"
+
+
+def elided(text: str, room: int) -> str:
+    """`text` cut to `room` characters at a word boundary, ending in an ellipsis.
+
+    Cutting inside a word ("Reminiscen…") reads as a bug rather than as an
+    abbreviation, so the cut lands on the last space or comma that fits."""
+    if len(text) <= room:
+        return text
+    kept = text[:max(0, room - len(ELLIPSIS))]
+    kept = kept[:max(0, kept.rstrip().rfind(" "))].rstrip(" ,")
+    return kept + ELLIPSIS
+
+
+def series_title(book: str, episode: int, total: int, chapter: str) -> str:
+    """`Sherlock Holmes: A Study in Scarlet — Ep 04/14 — "What John Rance..."`.
+
+    The serial and the position come first because that is what a truncated
+    search result shows; the chapter is what gives when the 100-character wall
+    is reached, never the other way round."""
+    if not chapter.strip():
+        raise ValueError("a title needs its chapter name")
+    if not 1 <= episode <= total:
+        raise ValueError(f"episode {episode} of {total} is not in the series")
+    lead = f"{SERIES}: {book} — Ep {episode:02d}/{total:02d} — "
+    return f'{lead}"{elided(chapter.strip(), TITLE_MAX - len(lead) - 2)}"'

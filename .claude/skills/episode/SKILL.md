@@ -29,7 +29,35 @@ uv run python scripts/episode/assemble.py    <codex_id> <n> --engine=r2v  # 8. c
 uv run python scripts/episode/qc.py          <codex_id> <n> --engine=r2v  # 9. measure the delivered file
 uv run python scripts/episode/runcards.py    <codex_id> <n>   # every input of every shot, both engines, for the owner
 uv run python scripts/episode/title.py       <codex_id> <n>   # per episode: SHERLOCK HOLMES / book / EPISODE n card (PAID still)
+uv run python scripts/publish/youtube_upload.py  <codex_id> <n> --dry-run   # 10. every gate's verdict, no network
+uv run python scripts/publish/youtube_retitle.py <codex_id> --dry-run       # carry the title format back over what is already live
 ```
+
+## The YouTube title
+
+**The serial and the position come FIRST; the chapter is what gets cut.**
+`studio/youtube_publish.series_title` builds it -- never type one into
+`episodes/epNN/youtube.json` by hand:
+
+```
+Sherlock Holmes: A Study in Scarlet — Ep 04/14 — "What John Rance Had to Tell"
+```
+
+A search result, a sidebar and a phone show 40-70 characters. The first five
+episodes led with the chapter title, so a viewer saw the one thing that cannot
+tell them what this is or where it sits, and the series and the number were the
+part truncated away. `04/14` and not `Ep.4` because a viewer deciding whether to
+start a serial wants to know how long it is.
+
+YouTube's wall is 100 characters. Thirteen of this book's fourteen chapter names
+fit whole; chapter 13 ("A Continuation of the Reminiscences of John Watson,
+M.D.") is elided at a word boundary. The series and the number are never what is
+cut.
+
+`youtube_retitle.py` carries a format change back over published videos. It
+reads each video's LIVE snippet first, because `videos.update` with
+`part=snippet` REPLACES the snippet -- sending a title alone returns 200 and
+leaves the video with no description, no tags and no category.
 
 ## The brick
 
@@ -358,14 +386,55 @@ sending a bad one:
 - The limp is a gait, never a speed: "limps along on his stick at a normal
   walking pace" while Stamford walks at a normal pace. "Slow" applied to a
   person renders as slow motion, and the turbo LoRA already pulls that way.
-- NAME THE CAMERA MOVE, ONE PER SEGMENT (owner, 2026-09-12). The segment's
-  action sentence carries the move the storyboard already implies between its
-  two cells — "the camera pushes in a hand's breadth", "the camera pans a
-  hand's breadth to follow him" — and nothing else moves the frame. A segment
-  with no named move and a repositioned subject is the morph; a segment with a
-  named move and one small local action is the smooth take. The move in the
-  prose must be the SAME move the cells differ by, or the model is being told
-  two stories about one second.
+- **THE CAMERA MOVE GOES IN THE HEAD CLAUSE, BEFORE THE FIRST SEMICOLON.**
+  Owner's rule since 2026-09-12; nothing enforced it, and episodes 4 and 5
+  dropped it on 32 of 49 shots. `M2` in `episode_spec.motion_faults` now
+  refuses it, in `seq_boards` and `takes_r2v`, before a cent is spent.
+
+  MEASURED over the 92 judged takes of episodes 2–5:
+
+  | episode | head names a camera move | stillness points lost |
+  |---------|--------------------------|-----------------------|
+  | ep02    | 25/25 (100 %)            | 12.2 over 19 takes    |
+  | ep03    | 25/25 (100 %)            | 10.8 over 24 takes    |
+  | ep04    | 12/24  (50 %)            | 59.1                  |
+  | ep05    |  7/25  (28 %)            | 106.8                 |
+
+  All ten of the stillest takes in episodes 4–5 have a head with no camera
+  move; not one of the nineteen takes whose head names one was ever penalised
+  (Fisher one-sided, p = 0.0041). Episodes 2 and 3 scored *badly* — means of
+  59.6 and 76.6 — but lost it to landing, drift and lip-sync. Their stillness
+  loss is ~zero. The convention broke, and all the loss moved to stillness.
+
+  **Why the camera and not the subject.** The camera move is the only element
+  of the prompt that is not a property of the reference picture. The pose, the
+  wardrobe, the room — H3 can satisfy all of them by rendering the pinned cell
+  and holding. A move is the one instruction it cannot satisfy by standing
+  still.
+
+  Write it with a measured amount and the span:
+
+      The camera pushes in on the sofa across the whole shot, travelling two
+      long strides; <action>; <action>
+
+  A move written AFTER a semicolon is deleted by the builder and never reaches
+  the model (ep04 T21). The move in the prose must be the SAME move the cells
+  differ by.
+
+- **EVERY MOVING THING HAS A MOVER, AND THE CAMERA IS THE PREFERRED ONE**
+  (owner, 2026-09-14: "remove unnatural movement like paper turning on its own
+  on table ... and violin getting a red light ... keep the movement simple").
+  `M9` refuses a clause whose subject is a thing at rest on a surface — paper,
+  ring, coin, a patch of light — with no hand, no finger and no camera in it.
+
+  This is the same fault as the missing camera move, seen from the other end:
+  with nothing else moving, the motion got handed to the props. Episode 5's
+  shot 6 (the paper sliding itself across the cloth) and shot 24 (a red light
+  crossing the violin) are the two the owner picked out by eye, and they are
+  the only two the gate finds in that episode.
+
+  Fog, flame, coal, smoke, washing in a draught and a turning cab wheel are
+  NOT this fault — the place supplies their cause, and those shots scored 100.
 - DESCRIPTIVE: 150-240 words a shot block, at least `min(350, 150 x shots)`
   a take. Ours measured 114 a block before this and 179 after.
 - The plate is a DEFINITION, `partially_preserved`, never "appears in" a

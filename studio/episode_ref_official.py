@@ -294,11 +294,20 @@ def arrival_clause(seg: dict) -> str:
         # Two gates shaped this sentence and both were right: `holds` is on the L2
         # stillness list (a stillness verb in a block measured 0.77 frozen against
         # 0.47), and "goes no further" is a NEGATION, which MiniMax cannot read.
-        # `stands` is the word `calm()` itself rewrites `waits` INTO.
-        return (f"By {stamp(seg['end'])} the camera has finished {move} and stands at that "
-                f"distance, with the action of that shot completed.")
-    return (f"By {stamp(seg['end'])} the camera is where it began, "
-            f"with the action of that shot completed.")
+        #
+        # IT USED TO END `with the action of that shot completed`, and that is the
+        # LAST thing the block says about motion -- on 18 of episode 5's 25 takes.
+        # `frozen-share` is measured over exactly the tail it describes, and it is
+        # 67.2 of that episode's 92.2 lost points.  Nothing above argued for
+        # `completed`; it arrived with the no-`end` fallback and was never the
+        # point.  The two constraints stand, and they also rule out the obvious
+        # repair -- "is still pushing in" puts `still` in an L2-linted sentence.
+        # `continues ... through the last frame` is what the timed beats already
+        # say, so the block now ends in the register it spent its middle in.
+        return (f"By {stamp(seg['end'])} the camera is {move} through the last frame of "
+                f"the shot, and the action continues with it.")
+    return (f"By {stamp(seg['end'])} the action of that shot continues "
+            f"through the last frame.")
 
 
 def audio_line(spoken) -> str:

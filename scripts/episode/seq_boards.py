@@ -30,6 +30,7 @@ import numpy as np
 from PIL import Image
 
 from studio import actor_gate, episode_board as board, episode_home, episode_seq_board as sq, prop_refs, route_gate, sheet_gate
+from studio import episode_spec as ep_spec
 from studio.episode_spec import Episode, Setup
 from studio.trailer_refs import contract_description
 
@@ -288,6 +289,17 @@ def main(book_id: str, number: int, only: str | None = None, sheet: int | None =
         print(f"  ADVISORY {note}", flush=True)
     if faults := actor_gate.hard_episode(episode):
         raise SystemExit("the plan fails the actor gate:\n  " + "\n  ".join(faults))
+    # AND THE MOTION, for the same reason and at the same price.  A head with no
+    # camera move renders a photograph -- every one of the 10 stillest takes in
+    # episodes 4-5 is one, and not one of the 19 takes whose head names a move
+    # was ever penalised (p = 0.0041).  Drawing its sheet costs $0.20 before the
+    # GPU learns that.
+    still = episode.still_motions()
+    for index, code, why in (f for f in still if f[1] not in ep_spec.HARD_MOTION):
+        print(f"  ADVISORY shot {index} {code}: {why}", flush=True)
+    if hard := [f for f in still if f[1] in ep_spec.HARD_MOTION]:
+        raise SystemExit("the plan fails the motion gate:\n  "
+                         + "\n  ".join(f"shot {i} {c}: {w}" for i, c, w in hard))
     for name in episode.setups:
         if only and name != only:
             continue

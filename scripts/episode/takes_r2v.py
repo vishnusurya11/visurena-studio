@@ -28,6 +28,7 @@ from studio import episode_seq_board as sq
 from studio import episode_takes as tk
 from studio import h3_anchors
 from studio.comfy import apply_inject, load_workflow, stage_image, submit, wait_record, outputs_of
+from studio import episode_spec as spec
 from studio.episode_spec import Episode
 from studio.trailer_assemble import clip_seconds
 from studio.trailer_refs import contract_description
@@ -441,6 +442,34 @@ def refuse_long_shots(episode) -> None:
                            "shots with two lines; a run can be split by the packer, one shot cannot")
 
 
+def refuse_still_motions(episode) -> None:
+    """A motion whose head names no camera move renders a photograph.
+
+    MEASURED over 92 judged takes: every one of the 10 stillest takes in
+    episodes 4-5 has a head with no camera move, and not one of the 19 takes
+    whose head names one was ever penalised (Fisher one-sided p = 0.0041).  The
+    camera move is the only instruction in the prompt that H3 cannot satisfy by
+    rendering the pinned cell and holding.
+
+    M9 is the owner's own note, 2026-09-14: "remove unnatural movement like
+    paper turning on its own on table ... keep the movement simple".  It is the
+    same fault seen from the other end -- with no camera move, the motion got
+    handed to the props.
+
+    Refused here and in `seq_boards`, so it costs nothing: before the $0.20
+    sheets and before the GPU."""
+    faults = [f for f in episode.still_motions() if f[1] in spec.HARD_MOTION]
+    advice = [f for f in episode.still_motions() if f[1] not in spec.HARD_MOTION]
+    for index, code, why in advice:
+        print(f"  advisory shot {index:2d} {code}: {why}", flush=True)
+    if faults:
+        raise SystemExit("\n".join(f"shot {i} {c}: {w}" for i, c, w in faults)
+                         + f"\n\n{len(faults)} motion(s) refused. Open every head with a "
+                           "camera move -- `The camera pushes in ... across the whole shot, "
+                           "travelling a forearm; <action>; <action>` -- and give every "
+                           "moving object a hand.")
+
+
 def opened(book_id: str, number: int):
     """The ONE road into `cards`: the book, the plan, and the canvas the plan
     declares.  Both entry points take it.
@@ -455,6 +484,7 @@ def opened(book_id: str, number: int):
     episode = episode_home.load_plan(book, number)
     W, H = canvas.size(episode.aspect)
     refuse_long_shots(episode)
+    refuse_still_motions(episode)
     return book, episode
 
 

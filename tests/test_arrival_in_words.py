@@ -34,7 +34,11 @@ def test_a_segment_with_a_written_end_says_where_it_arrives():
 
 
 def test_a_segment_with_no_written_end_falls_back_to_the_action():
-    assert "with the action of that shot completed" in arrival_clause(SEG)
+    """It used to fall back to `with the action of that shot completed`, which
+    is the LAST thing the block says about motion on 18 of episode 5's 25 takes
+    -- over exactly the tail `frozen-share` measures.  See
+    tests/test_a_block_does_not_end_by_saying_it_is_over.py."""
+    assert "the action continues with it" in arrival_clause(SEG)
 
 
 def test_the_clause_never_cites_a_picture():
@@ -83,7 +87,7 @@ def test_a_locked_off_shot_still_says_something_true():
     seg = dict(SEG, end_frame="", motion="Holmes turns his head toward the camera.")
     said = arrival_clause(seg)
     assert said.startswith("By 00:04")
-    assert "camera" in said.lower()
+    assert "continues through the last frame" in said
 
 
 def test_a_written_end_still_wins_over_the_camera():

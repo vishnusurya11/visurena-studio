@@ -396,6 +396,26 @@ class Episode(BaseModel):
         return [(s.index, round(self.shot_seconds(s), 2))
                 for s in self.shots if self.shot_seconds(s) > TAKE_BUDGET]
 
+    def still_motions(self) -> list[tuple[int, str, str]]:
+        """Every segment whose motion will render still, as (shot, code, why).
+
+        A QUERY for the same reason `long_shots` is one: episodes 1, 4 and 5 are
+        published with 46 shots that fail M2, and reading a historical plan is
+        not endorsing it.  `seq_boards` and `takes_r2v` refuse on it, before the
+        $0.20 sheets and before the GPU.
+
+        Measured 2026-09-14 -- shots whose head names no camera move: ep01 19/23,
+        ep02 2/25, ep03 0/25, ep04 13/24, ep05 19/25.  Episodes 2 and 3 lost
+        almost nothing to stillness; 4 and 5 lost 98 % of their score to it."""
+        out = []
+        for shot in self.shots:
+            for seg in [shot] + list(shot.cuts or []):
+                out += [(shot.index, code, why) for code, why in motion_faults(seg.motion)]
+                out += [(shot.index, "M9", f"{thing!r} moves with nothing to move it; "
+                                           f"give the camera the move, or name the hand")
+                        for thing in uncaused_motion(seg.motion)]
+        return out
+
     @model_validator(mode="after")
     def _the_shape_is_present(self) -> "Episode":
         sections = [shot.section for shot in self.shots]
@@ -472,3 +492,153 @@ class Episode(BaseModel):
         if not TURN_BAND[0] <= share <= TURN_BAND[1]:
             raise ValueError(f"the turn projects to {share:.0%} of the runtime; wanted 50-75 %")
         return self
+
+
+# ---- a thing moves because something moves it -------------------------------
+
+MOVABLE = (r"paper|sheet|note|letter|envelope|card|newspaper|book|page|ring|band|coin|"
+           r"cup|saucer|plate|knife|spoon|bottle|box|pipe|hat|key|watch|chain|lamp|"
+           r"chair|stool|drawer|lid|violin|bow|pen|light|beam|shaft|patch|shadow|"
+           r"jar|tray|glass|boot|glove|purse")
+"""Things that are at rest on a surface until somebody touches them.
+
+Deliberately NOT here: fog, flame, smoke, coal, washing, a cab wheel, water.
+Those move for reasons the place supplies, and shots built on them are fine --
+episode 4's fog and episode 5's firelight are among the takes that scored 100."""
+
+SELF_MOVERS = (r"fog|mist|smoke|steam|flame|fire|coal|ember|embers|rain|snow|sleet|"
+               r"wind|draught|draft|breeze|cloud|dust|water|wheel|washing|curtain|"
+               r"horse|traffic|crowd|snowflake")
+"""The standing natural agents: a clause that names one has its cause in it."""
+
+AGENTS = (r"camera|hand|hands|finger|fingers|thumb|arm|arms|fist|wrist|elbow|knee|"
+          r"foot|shoulder|he|she|they|him|her|his|their|holmes|watson|lestrade|"
+          r"gregson|rance|man|woman|boy|girl")
+"""What can make a thing move: a person, a part of one, or the camera."""
+
+MOVES_ITSELF = re.compile(
+    r"\b(" + MOVABLE + r")\b(?:\s+\w+){0,2}\s+"
+    r"\b(slides?|moves?|turns?|travels?|drifts?|crosses?|rolls?|falls?|fell|lifts?|"
+    r"rises?|rose|tips?|swings?|glides?|creeps?|crept|sweeps?|swept|floats?|shifts?|"
+    r"slips?|tilts?|swivels?|spins?|opens?|closes?)\b", re.IGNORECASE)
+
+HAS_CAUSE = re.compile(r"\b(" + AGENTS + r"|" + SELF_MOVERS + r")\b", re.IGNORECASE)
+
+SPLIT_CLAUSE = re.compile(r";|\band\b|(?<!\bM)\.(?:\s|$)", re.IGNORECASE)
+
+
+def uncaused_motion(motion: str) -> list[str]:
+    """Every thing in `motion` that moves with nothing to move it.
+
+    OWNER, 2026-09-14, on episode 5: "remove unnatural movement like paper
+    turning on its own on table ... and violin getting a red light ... keep the
+    movement simple".
+
+    Both were real.  Both are what I wrote when a shot needed to not be still
+    and its head clause named no camera move -- so the motion had to come from
+    somewhere and I gave it to the props.  That is the wrong mover: the research
+    census (2026-09-14, 92 takes) puts every one of the 10 stillest takes in the
+    set of shots whose head names no camera move, and all 19 whose head names
+    one at exactly 100.  The camera is what should have been moving.
+
+    Judged per clause, because "The coal settles in the grate and a red light
+    moves across the strings" has its cause in the first half and not the
+    second."""
+    out: list[str] = []
+    for clause in SPLIT_CLAUSE.split(motion or ""):
+        if not clause or HAS_CAUSE.search(clause):
+            continue
+        found = MOVES_ITSELF.search(clause)
+        if found and (word := found.group(1).lower()) not in out:
+            out.append(word)
+    return out
+
+
+# ---- the head clause names a camera move ------------------------------------
+
+TERMINAL = re.compile(r"\b(settles?|comes? to rest|at rest|drops? into|closes? on|"
+                      r"stops?|lands?|sinks? to|lies (?:flat|still)|rests?)\b", re.I)
+"""Last-clause endings that state an END STATE.
+
+The builder bolts `and <noun> continues to the last frame of the shot` onto the
+last clause, so a terminal one produces a sentence that contradicts itself and
+the model obeys the terminal half.  Measured: fires on 7 of episodes 4-5's 49
+shots, whose mean frozen penalty is 8.13 against 2.60 for the other 42."""
+
+FEATURES = re.compile(r"\b(eyes?|brows?|eyelids?|lids?|lashes|pupils?|iris|jaw|"
+                      r"lips?|nostrils?|line of (?:his|her|their) mouth)\b", re.I)
+"""Face parts too small for the instrument that judges the take.
+
+`motion_gate` bins a 24x24 block of a 192x336 grey frame -- about a MOUTH's size
+at 768x1344.  A mouth speaking reads 3-15 against `STILL = 1.2` and registers
+fine; an eye moving inside that block does not shift its mean.  So a last clause
+whose subject is one of these leaves the tail measurably frozen however
+faithfully H3 renders it (ep04 T11, ep05 T15).
+
+KNOWN GAP: ep05 T04's `his fingers spread once on the cloth` is the same fault
+with a hand-sized subject, and this does not catch it -- `his thumb runs along
+the barrel` is a shipped 100 and no subject-noun rule separates the two.  The
+difference is `once` against `runs along`, and one instance is not enough to
+write a rule on."""
+
+
+def motion_faults(motion: str) -> list[tuple[str, str]]:
+    """Every reason this motion will render still, as (code, what to do).
+
+    A QUERY, NOT A VALIDATOR -- `long_shots` records what happened the last time
+    a rule like this was a `model_validator`: it refused a published plan and
+    broke every tool that merely READS one.  Episodes 4 and 5 are published with
+    30 shots that fail M2.  The refusal belongs at the steps that SPEND."""
+    from studio.episode_ref_official import CAMERA, MOVES, STILL, camera_clause, clauses_of
+
+    if not (motion or "").strip():
+        return []
+    parts = [c.strip() for c in motion.split(";") if c.strip()]
+    head, _ = clauses_of(motion)
+    cam, _ = camera_clause(head)
+    first = (cam.split() or [""])[0].lower().rstrip(",.;")
+    last = parts[-1]
+    out = []
+    if len(parts) < 3:
+        out.append(("M1", f"{len(parts)} clause(s): the builder reads beats from the THIRD "
+                          f"onward, so this yields no timed beat and no 'continues to the "
+                          f"last frame' sentence. Write `camera; action; action`."))
+    if not (first in CAMERA or any(first.startswith(w) for w in MOVES)):
+        out.append(("M2", "the head names no camera move. Open with one, before the first "
+                          "semicolon, with a measured amount and `across the whole shot` -- "
+                          "a move written after a semicolon is deleted by the builder."))
+    if STILL.search(last):
+        out.append(("M4", f"the LAST clause says the picture is still ({last!r}); `calm()` "
+                          f"rewrites that into a positive static assertion the take lint "
+                          f"cannot see. A stillness clause is fine anywhere but last."))
+    if TERMINAL.search(last):
+        out.append(("M5", f"the LAST clause states an end state ({last!r}), and the builder "
+                          f"appends `continues to the last frame` to it. End on something "
+                          f"still going: `runs along`, `comes down`, `lifts`."))
+    if FEATURES.search(last):
+        out.append(("M6", f"the LAST clause moves a face part too small to measure "
+                          f"({last!r}). The tail needs a limb, a head, a torso or a "
+                          f"travelling object."))
+    return out
+
+
+HARD_MOTION = ("M2", "M9")
+"""Which motion faults REFUSE a plan, as against merely printing.
+
+Only the two the evidence actually carries.  Measured over the four scored
+episodes, the fault codes fire like this:
+
+    ep02  M1 34  M2  3  M4 1  M5 5  M6 10  M9 1     stillness loss ~0
+    ep03  M1 21  M2  1  M4 2  M5 1  M6 10  M9 3     stillness loss ~0
+    ep04  M1 10  M2 13  M4 8  M5 2  M6  7           59.1 points
+    ep05  M1 16  M2 19  M4 1  M5 5  M6  3  M9 2    106.8 points
+
+M1 and M6 fire hardest on the two episodes that lost nothing to stillness, so
+as refusals they would be mostly noise -- the pooled effect of clause count is
+1.6x against 13-21x for the camera move.  M2 tracks the damage exactly.  M9 is
+what the owner saw on screen.
+
+An un-automatable safety gate is one somebody eventually comments out, and a
+gate that refuses 34 correct motions is the same thing by a slower route.  The
+advisories still print, because they are how a motion gets from passing to
+good."""

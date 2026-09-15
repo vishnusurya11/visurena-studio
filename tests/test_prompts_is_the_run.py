@@ -49,7 +49,8 @@ def test_a_preview_card_carries_the_plans_own_canvas(tmp_path, aspect, size, mon
     monkeypatch.setattr(tr, "cards", fake_cards)
     monkeypatch.setattr(tr.episode_home, "book_dir", lambda _id: tmp_path)
     monkeypatch.setattr(tr.episode_home, "load_plan",
-                        lambda b, n: type("E", (), {"aspect": aspect, "long_shots": lambda self: []})())
+                        lambda b, n: type("E", (), {"aspect": aspect, "long_shots": lambda self: [],
+                                                    "still_motions": lambda self: []})())
     monkeypatch.setattr(tr.episode_home, "takes_dir", lambda b, n, e: tmp_path)
     tr.prompts("book", 4)
     assert seen["wh"] == size == canvas.size(aspect)
