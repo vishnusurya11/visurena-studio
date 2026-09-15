@@ -261,22 +261,48 @@ def changed_blocks(start, end, grid: tuple[int, int] = BLOCK_GRID,
     return n
 
 
-def end_pair_verdict(score: float, size: str = "", changed: int | None = None) -> str:
+def end_pair_verdict(score: float, size: str = "", changed: int | None = None,
+                     motion: str = "") -> str:
     """"ok", "restaged" (no camera move can travel it) or "copy" (nothing moved).
 
-    The floor is dropped for a size whose subject fills the frame.  The ceiling
-    stands only while NOTHING CHANGED ANYWHERE: given `changed`, one block of
-    real difference overturns it, because on a locked-off camera a high global
-    score is what an obeyed END cell looks like.  A caller that does not pass
-    `changed` gets the old ceiling, which refuses more."""
-    if score < END_FLOOR and size not in SUBJECT_FILLS:
+    THE FLOOR IS A QUESTION ABOUT A CAMERA THAT WAS TOLD TO STAY.  It was fair
+    while `end_text` said "from the same camera", and it caught a real fault:
+    episode 2's 9 of 13 END cells answered "the shot ends here" by moving to a
+    different setup.  Episode 7's END panels are told where the camera FINISHED,
+    and the floor immediately threw away four correct ones -- all seven drawn
+    that day were looked at, one by one:
+
+        Q10_0E  0.757  kept     the lane, camera tracked along, boy further off
+        Q21_0E  0.489  kept     Holmes's head up off his chest
+        Q22_0E  0.855  kept     the doorway, barely moved
+        Q23_0E  0.380  DROPPED  Holmes and the cabman both bent over the strap
+        Q24_0E  0.410  DROPPED  Lestrade nearer, the cuffs held out to camera
+        Q11_0E  0.340  DROPPED  the same ladder and window, curtain blown out
+        Q14_0E  0.240  DROPPED  camera pulled back two strides, Watson walked in
+
+    Every one of the four is right.  Their similarity is low because the framing
+    changed, and the framing changed because the plan said to change it.  The
+    measurement asks how far the camera moved; a camera TOLD to move cannot be
+    judged by how far it moved.
+
+    THE CEILING GETS SHARPER, not weaker.  On a locked camera a high score is
+    what an obeyed END cell looks like, which is why `changed` overturns it.  On
+    a travelling camera a high score means the travel was ignored, and nothing
+    overturns that -- Q22_0E at 0.855 is that panel, and it is the one of the
+    seven a person would also call barely moved.
+
+    A caller that names no motion cannot know the camera travelled, so it gets
+    the stricter rule.  Nothing loosens in silence."""
+    travels = bool(camera_end(motion))
+    excused = bool(changed) and not travels
+    if score < END_FLOOR and size not in SUBJECT_FILLS and not travels:
         return "restaged"
-    if score > END_CEILING and not (changed or 0):
+    if score > END_CEILING and not excused:
         return "copy"
     return "ok"
 
 
-def reaches(start: "Path", end: "Path", size: str = "") -> bool:
+def reaches(start: "Path", end: "Path", size: str = "", motion: str = "") -> bool:
     """Can one simple camera move travel from this cell to its own END cell?
 
     MEASURED, episode 2: 9 of 13 drawn END cells score below `END_FLOOR` against
@@ -304,7 +330,7 @@ def reaches(start: "Path", end: "Path", size: str = "") -> bool:
     if not (start.exists() and end.exists()):
         return False
     a, b = fm.load(start), fm.load(end)
-    return end_pair_verdict(fm.similarity(a, b), size, changed_blocks(a, b)) == "ok"
+    return end_pair_verdict(fm.similarity(a, b), size, changed_blocks(a, b), motion) == "ok"
 
 
 def is_end_pair(a: dict, b: dict) -> bool:
@@ -339,8 +365,12 @@ def duplicates(cells: list, segs: list[dict], floor: float = ALIKE) -> list[tupl
                 # this module already states -- Q09 (0.807, 3 changed blocks),
                 # Q15 (0.938, 4), Q20 (0.856, 3), Q21 (0.856, 3), and Q10, the
                 # half-sovereign insert at 0.166 the exemption exists for.
+                # The START seg carries the shot's motion; the END seg has it
+                # blanked by `end_panel`, which is why the motion is taken from
+                # whichever of the pair is not the END.
+                said = (b if a.get("end") else a).get("motion", "")
                 if end_pair_verdict(score, a.get("size", ""),
-                                    changed_blocks(images[i], images[j])) != "ok":
+                                    changed_blocks(images[i], images[j]), said) != "ok":
                     out.append(pair)
             elif score > floor:
                 out.append(pair)
@@ -1218,7 +1248,7 @@ def single_picture(seg: dict, setup: Setup) -> str:
     return " ".join(p.rstrip() for p in parts)
 
 
-def drop_reason(end: str, start: str, sim: float) -> str:
+def drop_reason(end: str, start: str, sim: float, motion: str = "") -> str:
     """Why this END cell was retired, in the words of what was MEASURED.
 
     It used to be the hardcoded string "still a copy of {start} after strict",
@@ -1233,6 +1263,10 @@ def drop_reason(end: str, start: str, sim: float) -> str:
     before anyone measured the cells."""
     if sim > END_CEILING:
         return f"a copy of {start} at {sim:.2f}, over the {END_CEILING} ceiling"
-    if sim < END_FLOOR:
+    # A PANEL IS NEVER TOLD IT BROKE A RULE THAT DID NOT JUDGE IT.  The floor
+    # does not apply to a shot whose camera was told to travel, so naming it
+    # here would quote a number that never ran -- which is how episode 6's seven
+    # re-stagings came to be recorded as copies.
+    if sim < END_FLOOR and not (motion and camera_end(motion)):
         return f"re-staged from {start} at {sim:.2f}, under the {END_FLOOR} floor"
     return f"in band against {start} at {sim:.2f} -- dropped for another pair's sake"

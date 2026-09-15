@@ -175,7 +175,7 @@ def refuse_on_text(group: list[dict], setup, prompt: str, grid: tuple, name: str
                      f"Fix the plan's panel prose, or pass --accept-dirty to draw regardless.")
 
 
-def drop_end_copies(boards: Path, entry: dict) -> list[dict]:
+def drop_end_copies(boards: Path, entry: dict, group: list[dict] | None = None) -> list[dict]:
     """An END cell that is still its own start panel after the strict retry is
     RETIRED to `boards/superseded/`: a copy is no destination for a take, and a
     copy left where cells live is one a later reader can still pick up.
@@ -198,6 +198,10 @@ def drop_end_copies(boards: Path, entry: dict) -> list[dict]:
             cell.replace(old / cell.name)
             other = a if end == b else b
             start = sq.cells_in(boards) / f"{other}.png"
+            # the START seg's motion: `end_panel` blanks it on the END seg
+            said = next((s.get("motion", "") for s in (group or [])
+                         if not s.get("end")
+                         and sq.cell_name(s["shot"], s["sub"], False)[:-4] == other), "")
             # THE MEASURED VERDICT, not one hardcoded word for two opposite
             # faults. All seven of episode 6's retired ENDs were re-stagings
             # (0.330 down to -0.007) and every one was logged as "a copy".
@@ -206,7 +210,7 @@ def drop_end_copies(boards: Path, entry: dict) -> list[dict]:
                 sim = frame_match.similarity(frame_match.load(start),
                                              frame_match.load(old / cell.name))
             dropped.append({"dropped_end": end, "similarity": round(float(sim), 3),
-                            "reason": sq.drop_reason(end, other, sim)})
+                            "reason": sq.drop_reason(end, other, sim, said)})
     return dropped
 
 
@@ -232,7 +236,7 @@ def draw_sheet(sb, boards: Path, name: str, k: int, group: list[dict], route: li
               flush=True)
         if clean(entry):
             return entry
-    report["dropped_ends"] += drop_end_copies(boards, entry)
+    report["dropped_ends"] += drop_end_copies(boards, entry, group)
     return entry
 
 

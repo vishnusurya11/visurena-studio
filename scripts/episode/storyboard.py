@@ -98,10 +98,50 @@ def book_of(path: Path) -> Path:
     return book_root.of(path)
 
 
+def asked(prompt: str, images: list[Path]) -> str:
+    """The whole question: the words, and the pictures they were said over.
+
+    The references are half the instruction -- the same prompt over a different
+    wardrobe card draws a different sheet -- and their ORDER is the other half,
+    because `shift_indices` numbers the panels against it."""
+    refs = "\n".join(p.name for p in images)
+    return f"{prompt}\n\nreferences, in order:\n{refs}\n"
+
+
+def remember(out: Path, prompt: str, images: list[Path]) -> Path:
+    """Write the question beside the answer.  `draw` has always done this; now
+    the cache reads it."""
+    record = out.with_suffix(".prompt.txt")
+    record.write_text(asked(prompt, images), encoding="utf-8")
+    return record
+
+
+def cached(out: Path, prompt: str, images: list[Path]) -> bool:
+    """May this sheet be reused?
+
+    IT USED TO BE `out.exists()`, which is not a cache key: a path names WHERE
+    the answer was put, never WHAT was asked.  So `seq_boards --setup=
+    landing_arrest` returned in seconds against a changed END-panel prompt, the
+    sheet kept its two-hour-old timestamp, and every cell cut from it came back
+    byte-identical -- indistinguishable, from outside, from a fix that was
+    genuinely a no-op.  Both happened, in that order, to the same fix.
+
+    A sheet drawn before the record existed is KEPT.  Six published episodes
+    have sheets with no prompt file beside them, and re-spending on all of them
+    to learn nothing is not a cache miss worth having."""
+    if not out.exists():
+        return False
+    record = out.with_suffix(".prompt.txt")
+    if not record.exists():
+        return True
+    return record.read_text(encoding="utf-8") == asked(prompt, images)
+
+
 def draw(prompt: str, images: list[Path], out: Path, size: tuple[int, int] = board.CANVAS,
          approved: bool | None = None) -> Path:
-    """One sheet from gpt-image, references attached in order.  Cached on disk."""
-    if out.exists():
+    """One sheet from gpt-image, references attached in order.  Cached on its
+    PROMPT -- see `cached`."""
+    if cached(out, prompt, images):
         return out
     if approved is None:  # the caller did not decide, so the command line does
         approved = approval.approved_for("sheets", sys.argv)
@@ -122,9 +162,7 @@ def draw(prompt: str, images: list[Path], out: Path, size: tuple[int, int] = boa
     out.parent.mkdir(parents=True, exist_ok=True)
     out.write_bytes(base64.b64decode(result.data[0].b64_json))
     spend.record(book_of(out), board.MODEL, f"{size[0]}x{size[1]}", "high", 1, f"storyboard {out.stem}")
-    refs = "\n".join(p.name for p in images)
-    out.with_suffix(".prompt.txt").write_text(f"{prompt}\n\nreferences, in order:\n{refs}\n",
-                                              encoding="utf-8")
+    remember(out, prompt, images)
     return out
 
 
