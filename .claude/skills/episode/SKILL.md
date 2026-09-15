@@ -75,8 +75,11 @@ is laid on the master.
 
 ## THE SYNC RULE (owner-approved, non-negotiable)
 
-`shot.seconds = 0.25 + sum(measured line seconds) + 0.50 x (lines - 1) +
-0.25 + beat_s + coda_s`, snapped UP to a whole frame at 24 fps. Every line
+`shot.seconds = HANDLE + sum(measured line seconds) + BREATH x (lines - 1) +
+HANDLE + beat_s + coda_s`, snapped UP to a whole frame at 24 fps.
+`studio/episode_spec.py` owns both numbers -- HANDLE = 0.25, BREATH = 0.70 --
+and they are named rather than copied here, because this line said 0.50 for
+three episodes while section 2 below said 0.70 and the code meant 0.70. Every line
 is laid at its shot's start + 0.25 on the master. A dialogue line's wav is
 anchored in its take at that same offset, so mouth and sound are one
 recording; measured lag 0.000-0.010 s on every engine
@@ -175,7 +178,12 @@ Rules the owner made after watching:
   picture.
 - **Variety.** No two consecutive shots of the same subject at the same
   size; every third shot an insert or a new axis; a face that must read is
-  >= a fifth of the frame height.
+  >= A QUARTER of the frame height. A stated head fraction is honoured at a
+  median 0.95 at or above a quarter and at 0.00-0.45 below it (54 drawn cells,
+  2026-09-12). The old rule said a fifth, which is under the model's own
+  threshold. NOTHING ENFORCES THIS -- `identity_gate.READABLE` is a
+  post-render floor on a disabled gate, and `cast_agree.CARD_FACE` judges the
+  cast card, not a panel.
 - **Wardrobe contract, one state, in every frame text**: Watson bare
   sunburnt hands to the wrist on a black stick with a silver knob; Holmes
   bare-headed, green velvet jacket, plaster on the right forefinger. The
@@ -350,8 +358,12 @@ Base `video_minimax_h3_r2v_turbo_ref8`: ref2va fp8 + the DEDICATED lightx2v
 Ref2V 8-step 768p LoRA at 1.0, euler/beta 8 steps, sigma shift 12/3 (the
 LoRA's own release post; 6/3 is the FL2VA row, and an FL2VA-lineage LoRA on
 ref2va ran iteration 1 with camera-scale pumping: never again). A take is a
-run of consecutive shots <= 12 s in one setup; 12 s is a hard cap (a 15 s
-take cost 24 min a try and froze on both seeds).
+run of consecutive shots totalling <= `episode_takes.BUDGET` (**8.0 s**, was
+12.0) and holding at most `SEGMENT_CAP` (**2**) segments. Measured on episode
+3's 24 takes: the 5.9-8.7 s band passes 16 of 20 at a mean of 82.9, both 12.25 s
+takes pass 0 of 2 at a mean of 3.75, and 3-segment takes pass 0 of 2 at 23.5.
+`takes_r2v.refuse_long_shots` refuses the whole run before the GPU -- so a plan
+written to the old 12 s is refused AFTER its sheets are paid for.
 
 References: the cast sheets for EVERY face the take shows, sub-shot faces
 included (reading shot-level faces alone left 6 of 19 takes with a face on
@@ -686,52 +698,39 @@ is laid on the MASTER in `assemble.py`, exactly like narration.
 
 | knob | value | why |
 |---|---|---|
-| model | **YuE2 3B** (`audio_yue2_song`) — owner's choice 2026-09-13 | more expressive, and its `style` field takes descriptive prose instead of a tag list |
-| ask | `BED_STYLE` prose | states key, tempo and instrumentation, THEN states what must not happen: no melody that leads, no swell, no climax |
-| length | `max(100, runtime + 10)` s | one pass covers the episode; a bed shorter than the cut is silently re-made, never looped |
-| level | **measured to `BED_TARGET_LUFS = -25.6`** | the old fixed -11 dB was right for ACE-Step's -14.6 LUFS output ALONE; the level is the constant, the gain is measured per bed |
+| model | **ACE-Step 1.5** (`audio_acestep15_music`), `BED_ENGINE_DEFAULT = "acestep"` | it is the only engine with a real instrumental control. `--bed=yue2` stays reachable |
+| ask | **five per-span tones**, `studio/episode_bed.py` | `plain / light / uneasy / grave / thrilling`, each with its own `tags` (acestep), `style` prose (yue2), `bpm`, `key` and `lufs` |
+| spans | `Episode.beds`, authored | `[{"from_shot": 0, "tone": "plain"}, ...]`; empty means one `plain` span end to end, which is what episodes 1-5 shipped |
+| length | per tone, its longest span + `CROSSFADE_S` | ONE generation per DISTINCT tone, not per span: two rolls of one tone are two different performances |
+| level | **per tone**, -31.0 to -27.5 LUFS | set BEFORE composing; `quiet_bed(..., normalise=False)` on that path, because normalising the composite averages five deliberate levels back into one |
+| dead | `DEAD_UNDER = 12.0` dB under target, `BED_ROLLS = 3` | episode 6's `grave` came back at -58.0 against -29.0. A warning is not a fix: it re-rolls, keeps each dead roll as `bed_<tone>.emptyN.wav`, and refuses after three |
+| sings | `studio/bed_gate.py` | a bed is transcribed and REFUSED if it sings |
 | floor | room tone at -40 LUFS | under the bed, so a gap is never digital silence |
 | duck | >= 4 dB, 0.15 s attack, 0.25 s pre-delay, 1.0 s release | 10 dB in 20 ms pumped audibly on every line |
+| seams | 2.0 s equal-power crossfade | equal-power, not linear: two uncorrelated beds summed with linear fades dip ~3 dB in the middle of the join |
 | out | 2.76 s half-sine over bed AND tone | the bed's last hit at 135.0 s fell inside the old 1.5 s fade |
 
-Verify it landed rather than trusting the code: sample the master's quietest
-quarter. Episodes 1 and 2 measure -31.7 and -33.3 dBFS there against -16/-17
-loud, and 0-1.2% of either is below -60 dBFS. Silence would read as -inf.
+**WHY PER-SPAN.** OWNER 2026-09-14, after episode 5: *"make sure audio is not
+too loud the BG ... different types based on the context of background thrilling
+.. normal"*. Measured on the shipped ep05 master: speech -13.2 LUFS, the bed in
+an un-ducked gap -28.0, the bed inside the voice band -34.9. It was never
+objectively loud. What made it READ as loud is that one solo violin in D minor
+played for 160 seconds under a breakfast, a joke, a flashback and a murder, and
+a constant is a thing the ear gives up filtering. Episode 6's quiet floor
+measures -45.0 dB against episode 5's -35.1, with the loud level unchanged.
 
-### Why YuE2, and what changing engine breaks
-
-OWNER 2026-09-13: *"ace step is shit .. use yue2 .. more expressive and great
-prompt control on style."* YuE2 3B is the default; `--bed=acestep` still works.
-
-**Changing the engine moves the LEVEL, and that is the thing to get right.**
-`BED_TRIM_DB = -11` was never a property of the bed — it was the distance from
-ACE-Step's own -14.6 LUFS output down to where the bed belonged. Carry that
-number to a model with different output loudness and the bed moves with it. So
-the target is the constant now (`BED_TARGET_LUFS = -25.6`, the level two shipped
-episodes were judged at) and `bed_gain_db()` measures each bed and computes the
-gain, capped at +6 dB because a bed far under target is a failed generation
-rather than something to crank. It falls back to the old fixed trim when the
-loudness cannot be read, so a missing loudnorm pass degrades instead of asking
-for infinite gain.
-
-**Write the style as PROSE, and say what must not happen.** ACE-Step wanted a
-comma-separated tag list; YuE2 wants description, which is the control the owner
-chose it for. `BED_STYLE` names the key, the tempo and the instruments, and then
-forbids the things that fight narration: a melody that leads, a swell, a climax.
-
-**Still unused: the ABC score.** `OlmYuE2Plan -> GenerateABC -> ApplyEditedScore
--> Synthesize` exposes the score as editable ABC notation. That is how fourteen
-episodes could carry ONE motif instead of fourteen unrelated drones — a series
-theme stated in the trailer and answered in each chapter. Nothing depends on it
-yet.
+The tone is AUTHORED, never derived from `section`: "friction" covers both a
+comic invasion of six street boys and a man's hand closing on a woman's wrist.
 
 **THE INSTRUMENTAL MARKER IS A DIFFERENT WORD IN EACH MODEL, and getting it
-wrong does not fail — it SINGS.** ACE-Step takes `[inst]`. YuE2 takes
-`(instrumental)`, which `music_tone` established the expensive way on the
-trailer: in that corpus a parenthetical is a SUNG backing line, and three
-delivered cues came back with a vocal stem 3-4 LU above the mix singing their
-own stage directions in order. `(instrumental)` is the single documented
-exception. `bed_request()` holds both markers and is tested.
+wrong does not fail — it SINGS.** ACE-Step takes **`[inst]`**, a trained control
+string in its lyric encoder. **YuE2 takes the EMPTY STRING** — it has no
+instrumental token in its vocabulary at all, `encode_ordinary` makes any marker
+literal text, and CFG is off, so there is nothing to steer with. `(instrumental)`
+belongs to MiniMax Music 3 and to the TRAILER; it was written into this pipeline
+as though it had been measured on YuE2, it had not, and episode 3's bed then
+sang invented English verse for 101 of its 157.8 seconds (64 %) and reached
+YouTube's queue. `BED_INSTRUMENTAL` holds both markers and is tested.
 
 ## 6. Writing with agents: authors, reviewers, one fixer
 

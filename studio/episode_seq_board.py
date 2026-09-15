@@ -1064,3 +1064,23 @@ def single_picture(seg: dict, setup: Setup) -> str:
     if seg.get("crowd") and seg.get("size") in WIDE_ENOUGH:
         parts.append(seg["crowd"])
     return " ".join(p.rstrip() for p in parts)
+
+
+def drop_reason(end: str, start: str, sim: float) -> str:
+    """Why this END cell was retired, in the words of what was MEASURED.
+
+    It used to be the hardcoded string "still a copy of {start} after strict",
+    written for BOTH outcomes -- and `duplicates()` flags a pair when
+    `end_pair_verdict() != "ok"`, which is a copy OR a re-staging, two opposite
+    faults.  All seven of episode 6's retired END cells scored 0.330, 0.253,
+    0.321, 0.315, 0.407, 0.176 and -0.007 against their own start: every one a
+    RE-STAGING, every one recorded as a copy.
+
+    The string was not the cost.  The false fact was quoted into the skill's
+    stated mechanism, into a reviewer's brief and into a report to the owner
+    before anyone measured the cells."""
+    if sim > END_CEILING:
+        return f"a copy of {start} at {sim:.2f}, over the {END_CEILING} ceiling"
+    if sim < END_FLOOR:
+        return f"re-staged from {start} at {sim:.2f}, under the {END_FLOOR} floor"
+    return f"in band against {start} at {sim:.2f} -- dropped for another pair's sake"

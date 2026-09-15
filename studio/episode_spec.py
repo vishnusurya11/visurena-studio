@@ -790,3 +790,124 @@ def plan_marks(episode, refs: list[dict]) -> tuple[list[str], list[str]]:
                 elif who := unmeasured_marks(said, owners, names):
                     vague.append(f"shot {shot.index} {field}: {' and '.join(who)} both named")
     return crossed, vague
+
+
+# ---- the narration is written, not copied -----------------------------------
+
+QUOTE_WALL = 8
+"""The longest run of the book's own consecutive words a line may carry.
+
+In the spec since episode 1 and enforced by nothing until 2026-09-15.  MEASURED
+over all six published plans: ep01 1 line over, ep02 0, ep03 0, ep04 5, ep05 6,
+ep06 4.  Episodes 2 and 3 quote nothing and are the two a writing review rated
+highest; the drift after episode 4 is from adaptation toward
+audiobook-with-pictures."""
+
+
+def _tokens(text: str) -> list[str]:
+    low = (text or "").replace("\u2019", "'").replace("\u2014", " ").replace("\u2013", " ")
+    return re.findall(r"[a-z']+", low.lower())
+
+
+def lifted_run(line: str, source: str) -> int:
+    """The longest run of consecutive words in `line` that appears in `source`.
+
+    Longest-first per start, so the first hit IS the longest and the scan stops.
+    The obvious shortest-first version with a `break` on the first miss returns
+    zero for everything -- I wrote it that way, and it told me six plans were
+    clean while episode 5 carried a fourteen-word lift."""
+    words, found = _tokens(line), _tokens(source)
+    if not words or not found:
+        return 0
+    seen = {" ".join(found[i:i + n]) for n in range(QUOTE_WALL + 1, 21)
+            for i in range(len(found) - n + 1)}
+    best = 0
+    for start in range(len(words)):
+        for end in range(len(words), start + best, -1):
+            if " ".join(words[start:end]) in seen:
+                best = end - start
+                break
+    return best
+
+
+def quoted_lines(lines: list[dict], source: str) -> tuple[list[dict], list[dict]]:
+    """(refuse, advise) -- narration over the wall is hard, dialogue is advisory.
+
+    THE SPLIT IS THE WHOLE JUDGEMENT.  Narration is Watson's voice-over and
+    exists to carry what the picture cannot; a transcribed sentence spends that
+    channel on what Doyle already wrote.  Dialogue is a character speaking, and
+    Doyle's dialogue is better than anything written to replace it -- episode
+    2's button is the marine's line almost verbatim, and its craft is in the
+    TRIM, cutting Doyle's trailing "No answer? Right, sir." to land at the wall
+    instead of over it."""
+    hard, soft = [], []
+    for line in lines:
+        got = lifted_run(line.get("text", ""), source)
+        if got <= QUOTE_WALL:
+            continue
+        (hard if line.get("kind") == "narration" else soft).append(dict(line, lifted=got))
+    return hard, soft
+
+
+# ---- an episode has a rhythm -------------------------------------------------
+
+RHYTHM_IQR = 3.0
+"""The narrowest interquartile range of LINE WORD COUNTS that still cuts as an
+edit rather than a metronome, for a plan with no internal cuts.
+
+MEASURED over the six published plans -- line words, then what a viewer sees:
+
+    ep  n   median  IQR   on-screen cuts   internal cuts
+    01  23    13    4.0        53               17
+    02  25    14    6.0        44               17
+    03  25    13    2.0        38               12
+    04  24    12    2.0        25                0
+    05  24    15    1.0        26                0
+    06  26    16    2.0        27                0
+
+Episode 5's twenty-four lines are ALL between 14 and 17 words.  The wall sits
+between episode 1's 4.0 and the 2.0 of the plans that cut like a metronome."""
+
+RHYTHM_MIN_LINES = 6
+CUTS_ARE_RHYTHM = 4
+"""Internal cuts a plan needs before its rhythm comes from somewhere other than
+its line lengths.  Episodes 1-3 carry 12-17 and a viewer sees 38-53 cuts."""
+
+
+def line_rhythm(lines: list[dict], cuts: int) -> dict:
+    """Does this plan's writing vary enough to cut like an edit?
+
+    SHOT LENGTH IS LINE LENGTH.  The sync rule derives a shot's seconds from the
+    audio it carries, and since episode 4 every shot carries exactly one line
+    and no internal cut -- so a plan whose lines all run 14 to 17 words delivers
+    a shot every six seconds from beginning to end, however good its pictures.
+
+    ONE LINE PER SHOT IS STAYING.  Seven of episode 3's fifteen internal cuts
+    could not land even with perfect obedience, because a whole-second stamp
+    bounds the model to +-12 frames.  That fix was right; what nobody measured
+    is that those cuts were the pipeline's ONLY other source of rhythm.
+
+    ADVISORY.  The distribution is not in doubt, but nothing measures what the
+    sameness COSTS -- that is one reviewer's judgement -- so this prints and
+    refuses nothing."""
+    import statistics
+
+    counts = sorted(len(l.get("text", "").split()) for l in lines)
+    out = {"lines": len(counts), "iqr": 0.0, "shortest": 0, "longest": 0,
+           "flat": False, "note": ""}
+    if len(counts) < RHYTHM_MIN_LINES:
+        out["note"] = f"{len(counts)} lines is too few to judge a rhythm"
+        return out
+    quarters = statistics.quantiles(counts, n=4)
+    out.update(iqr=round(quarters[2] - quarters[0], 2),
+               shortest=counts[0], longest=counts[-1])
+    if cuts >= CUTS_ARE_RHYTHM:
+        out["note"] = f"{cuts} internal cuts carry the rhythm; the lines need not"
+        return out
+    out["flat"] = out["iqr"] < RHYTHM_IQR
+    if out["flat"]:
+        out["note"] = (f"every line runs {counts[0]}-{counts[-1]} words (IQR {out['iqr']}) "
+                       f"and no shot holds an internal cut, so every shot will be the "
+                       f"same length. Write some SHORT lines, and give a shot or two no "
+                       f"line at all")
+    return out

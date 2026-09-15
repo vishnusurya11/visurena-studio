@@ -113,6 +113,36 @@ CROSSFADE_S = 2.0
 edit the viewer hears; two seconds is under a phrase and over a click."""
 
 
+DEAD_DBFS = -60.0
+"""A 1-second window under this carries no music; a listener hears a dropout.
+
+MEASURED on episode 6's five delivered tones: plain is dead at 24-25 s, light at
+35-40, uneasy at 0-4 AND 18-21, grave at 26-30, thrilling at 18.  Laid from
+sample 0, that put 24 of the episode's 159.6 seconds under -60 dBFS -- and
+`uneasy`, which opens with five seconds of nothing, is used TWICE."""
+
+
+def trim_to_music(path, floor: float = DEAD_DBFS):
+    """(samples, rate) with the silent head and tail cut off, channels kept.
+
+    `is_dead` cannot find this: it measures the WHOLE generation against its
+    target, and a file with a six-second silent tail still integrates on target.
+    A per-file loudness check is blind to a hole inside the file."""
+    import numpy as np
+    import soundfile as sf
+
+    audio, rate = sf.read(str(path), dtype="float32", always_2d=True)
+    mono = audio.mean(axis=1)
+    step = max(rate // 20, 1)                       # 50 ms
+    blocks = len(mono) // step
+    live = [i for i in range(blocks)
+            if 20 * np.log10(max(1e-9, float(np.sqrt(
+                (mono[i * step:(i + 1) * step] ** 2).mean())))) > floor]
+    if not live:
+        return audio, rate
+    return audio[live[0] * step:(live[-1] + 1) * step], rate
+
+
 @dataclass(frozen=True)
 class Span:
     start: float
@@ -215,19 +245,30 @@ def compose(cut: list[Span], files: dict[str, "Path"], out: "Path", rate: int = 
     if missing:
         raise ValueError(f"no bed file for {', '.join(missing)}")
 
-    fade = int(CROSSFADE_S * rate)
-    total = int(round(cut[-1].end * rate))
-    track = np.zeros(total + fade, dtype=np.float32)
-
+    # TRIMMED TO ITS MUSIC, AND STILL IN STEREO.  This used to read the file
+    # whole and `mean(axis=1)` it: episode 6 shipped 24 of 159.6 seconds with no
+    # bed at all (uneasy opens on five seconds of nothing and is used twice),
+    # and mono-summing cost each tone 3.3-5.1 dB of the level it had just been
+    # verified at -- unequally, by L/R correlation, so the designed 3.5 LU arc
+    # became 5.5 LU and episode 6 is the only one of six with a mono bed.
     loaded: dict[str, np.ndarray] = {}
+    width = 1
     for tone, path in files.items():
-        audio, got = sf.read(str(path), dtype="float32", always_2d=False)
-        if audio.ndim > 1:
-            audio = audio.mean(axis=1)
+        audio, got = trim_to_music(path)
         if got != rate:
             index = np.linspace(0, len(audio) - 1, int(len(audio) * rate / got))
-            audio = np.interp(index, np.arange(len(audio)), audio).astype(np.float32)
+            audio = np.stack([np.interp(index, np.arange(len(audio)), audio[:, c])
+                              for c in range(audio.shape[1])], axis=1).astype(np.float32)
         loaded[tone] = audio
+        width = max(width, audio.shape[1])
+    for tone, audio in loaded.items():
+        if audio.shape[1] < width:
+            loaded[tone] = np.repeat(audio, width, axis=1)
+
+    fade = int(CROSSFADE_S * rate)
+    total = int(round(cut[-1].end * rate))
+    track = np.zeros((total + fade, width), dtype=np.float32)
+
 
     for n, span in enumerate(cut):
         start = int(round(span.start * rate))
@@ -237,18 +278,18 @@ def compose(cut: list[Span], files: dict[str, "Path"], out: "Path", rate: int = 
         want = int(round(span.end * rate)) - start + head
         audio = loaded[span.tone]
         if len(audio) < want:
-            audio = np.tile(audio, int(np.ceil(want / max(len(audio), 1))))
+            audio = np.tile(audio, (int(np.ceil(want / max(len(audio), 1))), 1))
         piece = np.array(audio[:want], dtype=np.float32)
         if head:
             ramp = np.sqrt(np.linspace(0.0, 1.0, head, dtype=np.float32))
-            piece[:head] *= ramp
+            piece[:head] *= ramp[:, None]
         if n + 1 < len(cut):
             ramp = np.sqrt(np.linspace(1.0, 0.0, fade, dtype=np.float32))
-            piece[-fade:] *= ramp
+            piece[-fade:] *= ramp[:, None]
         at = start - head
         track[at:at + len(piece)] += piece
 
-    sf.write(str(out), track[:total], rate)
+    sf.write(str(out), track[:total] if width > 1 else track[:total, 0], rate)
     return out
 
 

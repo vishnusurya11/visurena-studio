@@ -31,6 +31,7 @@ from PIL import Image
 
 from studio import actor_gate, episode_board as board, episode_home, episode_seq_board as sq, prop_refs, route_gate, sheet_gate
 from studio import episode_spec as ep_spec
+from studio import frame_match
 from studio.episode_spec import Episode, Setup
 from studio.trailer_refs import contract_description
 
@@ -195,7 +196,17 @@ def drop_end_copies(boards: Path, entry: dict) -> list[dict]:
             old = boards / "superseded"
             old.mkdir(parents=True, exist_ok=True)
             cell.replace(old / cell.name)
-            dropped.append({"dropped_end": end, "reason": f"still a copy of {a if end == b else b} after strict"})
+            other = a if end == b else b
+            start = sq.cells_in(boards) / f"{other}.png"
+            # THE MEASURED VERDICT, not one hardcoded word for two opposite
+            # faults. All seven of episode 6's retired ENDs were re-stagings
+            # (0.330 down to -0.007) and every one was logged as "a copy".
+            sim = float("nan")
+            if start.exists():
+                sim = frame_match.similarity(frame_match.load(start),
+                                             frame_match.load(old / cell.name))
+            dropped.append({"dropped_end": end, "similarity": round(float(sim), 3),
+                            "reason": sq.drop_reason(end, other, sim)})
     return dropped
 
 
@@ -277,6 +288,19 @@ def draw_setup(book: Path, episode: Episode, number: int, name: str, only_sheet:
     return report
 
 
+
+def book_words(book: Path) -> str:
+    """Every chapter of the source, as one string, for the quote gate.
+
+    THE WHOLE BOOK AND NOT THIS CHAPTER: a recap line quotes an EARLIER chapter,
+    and episode 5's longest lift is Doyle's chapter III describing the corpse,
+    carried forward into episode 5's second line."""
+    out = []
+    for path in sorted((Path(book) / "source" / "chapters").glob("ch_*.json")):
+        doc = episode_home.read_json(path)
+        out.append(" ".join(p["text"] for p in doc.get("paragraphs", [])))
+    return " ".join(out)
+
 def main(book_id: str, number: int, only: str | None = None, sheet: int | None = None) -> None:
     book = episode_home.book_dir(book_id)
     episode = episode_home.load_plan(book, number)
@@ -310,6 +334,21 @@ def main(book_id: str, number: int, only: str | None = None, sheet: int | None =
         print(f"  ADVISORY marks not measured -- {note}", flush=True)
     if crossed:
         raise SystemExit("the plan fails the mark gate:\n  " + "\n  ".join(crossed))
+    # AND THE NARRATION IS WRITTEN, NOT COPIED.  The 8-word ceiling has been in
+    # the spec since episode 1 and gated nothing: lines over it run 1, 0, 0, 5,
+    # 6, 4 across the six published plans, and episodes 2 and 3 -- the two that
+    # quote nothing -- are the two a writing review rated highest.
+    said = book_words(book)
+    lifted, borrowed = ep_spec.quoted_lines(
+        [l.model_dump() for l in episode.lines], said)
+    for line in borrowed:
+        print(f"  ADVISORY line {line['index']} speaks {line['lifted']} of Doyle's own "
+              f"words; dialogue may, and the craft is in the TRIM", flush=True)
+    if lifted:
+        raise SystemExit(
+            "the plan fails the quote gate -- narration is Watson's own prose:\n  "
+            + "\n  ".join(f"line {l['index']} lifts {l['lifted']} consecutive words: "
+                           f"{l['text']!r}" for l in lifted))
     for name in episode.setups:
         if only and name != only:
             continue
