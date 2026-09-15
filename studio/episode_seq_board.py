@@ -476,8 +476,18 @@ def end_panel(seg: dict, number: int) -> dict:
     The word 'identical' went for the same reason one revision earlier (owner
     2026-09-11: told 'identical', it drew the identical panel)."""
     moved = seg.get("changed") or moved_clause(seg.get("motion", ""))
-    carried = keeps_camera(stop(seg.get("frame", "")).rstrip(". "))
-    return dict(seg, end=True, of=number, motion="",
+    # WHERE THE CAMERA FINISHED rides on its own key, because `motion` is blanked
+    # here on purpose -- the END panel draws a state, not a movement, and the
+    # motion prose printed into it makes the drawer draw the movement.  Blanking
+    # it also took away the one fact `end_text` needs, and every END cell in
+    # episode 7 was drawn "from the same camera" while eight green tests said
+    # otherwise.
+    went = camera_end(seg.get("motion", ""), number)
+    # A TRAVELLING CAMERA'S REFRAMING IS THE PANEL.  `keeps_camera` deletes it,
+    # which is right when the camera held and wrong when it did not.
+    said = stop(seg.get("frame", "")).rstrip(". ")
+    carried = said if went else keeps_camera(said)
+    return dict(seg, end=True, of=number, motion="", moved_from=went,
                 frame=seg.get("end_frame") or (
                     f"{carried}, with {moved}" if moved else carried),
                 changed=moved)
@@ -1029,7 +1039,7 @@ def end_text(k: int, seg: dict, crowd: str) -> str:
     # never arrive at.  `keeps_camera` is right for a locked-off shot and wrong
     # for a travelling one for the same reason: it deletes the reframing, and
     # when the camera really did reframe, the reframing IS the panel.
-    went = camera_end(seg.get("motion", ""), j)
+    went = seg.get("moved_from") or camera_end(seg.get("motion", ""), j)
     where = f"from {went}" if went else "from the same camera"
     picture = seg["frame"] if went else keeps_camera(seg["frame"])
     return (f"Panel {k} - PANEL {j} ONE ACTION LATER, {where}. {turn}"

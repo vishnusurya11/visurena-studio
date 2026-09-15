@@ -50,11 +50,26 @@ STILL = ("The camera is static across the whole shot; Holmes raises the glass to
 
 
 def end(motion, changed="the boy's hand is down at his side"):
-    """Lower-cased: the panel SHOUTS the direction on purpose, so the model
-    cannot read past it, and the test asserts the word, not the shouting."""
-    seg = {"of": 3, "changed": changed, "frame": "A ragged boy round the door jamb.",
-           "motion": motion, "end": True}
-    return sq.end_text(4, seg, "").lower()
+    """The panel text as the PIPELINE builds it, through `end_panel`.
+
+    This used to hand `end_text` a dict written here, carrying a `motion` key.
+    `end_panel` sets `motion=""` on every END seg it makes -- deliberately, so
+    the END panel does not print the shot's motion prose -- so the real END seg
+    never had one, `camera_end` read "" for every shot on disk, and the whole
+    fix was a no-op that eight green tests reported as working. It was caught by
+    a redrawn Q10_0E coming back byte-identical to the cell it replaced.
+
+    A test that builds its own input tests the code it was written beside. This
+    one goes through `cell` and `end_panel`, which is the only path a real panel
+    takes.
+
+    Lower-cased: the panel SHOUTS the direction on purpose, so the model cannot
+    read past it, and the test asserts the word, not the shouting."""
+    start = {"shot": 3, "sub": 0, "frame": "A ragged boy round the door jamb.",
+             "motion": motion, "path": 0.5, "faces": [], "size": "full",
+             "camera": "at the hearth rug, a 35mm lens", "at_rest": "",
+             "end_frame": "", "changed": changed, "crowd": ""}
+    return sq.end_text(4, sq.end_panel(start, 3), "").lower()
 
 
 def test_a_push_ends_nearer_than_it_began():
@@ -93,11 +108,15 @@ def test_a_moving_end_may_say_how_it_is_framed():
     """`keeps_camera` exists to stop an END panel RE-SPECIFYING a camera it was
     told to keep.  When the camera did not keep, the reframing IS the panel."""
     frame = "A ragged boy round the door jamb, from two long strides nearer."
-    seg = {"of": 3, "changed": "his hand is down", "frame": frame, "motion": PUSH, "end": True}
-    assert "nearer" in sq.end_text(4, seg, "")
+    start = {"shot": 3, "sub": 0, "frame": frame, "motion": PUSH, "path": 0.5, "faces": [],
+             "size": "full", "camera": "", "at_rest": "", "end_frame": "",
+             "changed": "his hand is down", "crowd": ""}
+    assert "nearer" in sq.end_text(4, sq.end_panel(start, 3), "")
 
 
 def test_a_still_end_still_may_not():
     frame = "A ragged boy round the door jamb, from a tighter framing."
-    seg = {"of": 3, "changed": "his hand is down", "frame": frame, "motion": STILL, "end": True}
-    assert "tighter framing" not in sq.end_text(4, seg, "")
+    start = {"shot": 3, "sub": 0, "frame": frame, "motion": STILL, "path": 0.5, "faces": [],
+             "size": "full", "camera": "", "at_rest": "", "end_frame": "",
+             "changed": "his hand is down", "crowd": ""}
+    assert "tighter framing" not in sq.end_text(4, sq.end_panel(start, 3), "")
