@@ -199,6 +199,23 @@ def measure_attempt(video: Path, rec: dict, index: int, cells: Path, work: Path,
     return v, audio
 
 
+def wanted(records: dict, indices: list[int]) -> list[int]:
+    """Which takes to measure: the ones asked for, or every one that exists.
+
+    MEASURED on episode 7: 26 shots became 25 takes because `episode_takes.
+    groups` packed two shots into one, so take 5 is not on disk.  Called with
+    `seq 0 25` -- the shot count -- the run died at `records[index]` after 5 of
+    25 reports, and the five it had written were the only evidence of how far
+    it got.  The caller cannot know the packing; `shots.json` already does."""
+    if not indices:
+        return sorted(records)
+    missing = sorted(set(indices) - set(records))
+    if missing:
+        have = f"{min(records)}-{max(records)}" if records else "none"
+        raise SystemExit(f"no take rendered for {missing}; takes on disk: {have}")
+    return sorted(set(indices))
+
+
 def main(book_id: str, number: int, indices: list[int], attempts: bool = False) -> None:
     book = episode_home.book_dir(book_id)
     home = episode_home.home(book, number)
@@ -208,7 +225,7 @@ def main(book_id: str, number: int, indices: list[int], attempts: bool = False) 
     work = episode_home.work_dir(book, number, "r2v") / "dq"
     work.mkdir(parents=True, exist_ok=True)
     records = {r["index"]: r for r in episode_home.read_json(take_dir / "shots.json")}
-    for index in indices:
+    for index in wanted(records, indices):
         rec = records[index]
         kinds, line = segment_kinds(episode, rec.get("anchors", [])), line_text(episode, rec)
         files = episode_home.attempts_of(take_dir, index) if attempts else [book / rec["rel_path"]]

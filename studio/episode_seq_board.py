@@ -921,6 +921,69 @@ def keeps_camera(text: str) -> str:
     return out.strip().lstrip(",;: ").strip()
 
 
+TRAVEL = re.compile(r"\btravell?(?:ing|s|ed)?\s+(?:about\s+|roughly\s+)?([^;,.]+)", re.I)
+"""How far the camera goes, in the plan's own body-scale words.
+
+Every motion line the plan writes carries one: "travelling two long strides",
+"travelling a hand's breadth", "travelling a forearm".  `episode_spec` already
+requires it -- a move with no distance is a move the renderer sizes itself."""
+
+HOLDS = re.compile(r"\b(?:static|locked|lock(?:ed)?[- ]off)\b", re.I)
+
+# Where the camera ENDS, per move word.  The tilt/crane pair splits on its own
+# direction word; everything that travels across the scene rather than toward
+# or away from it ends "along its own travel", which is the only thing that can
+# be said without knowing the geography.
+NEARER = r"push\w*|dolly[- ]?in|dollies in|zoom\w*\s+in|creep\w*\s+in"
+FURTHER = r"pull\w*|dolly[- ]?out|dollies out|zoom\w*\s+out|withdraw\w*"
+VERTICAL = r"tilt\w*|cran\w*|pedestal\w*|boom\w*|ris\w*"
+
+
+def camera_clause(motion: str) -> str:
+    """The part of a motion line that belongs to the CAMERA, in either shape.
+
+    The plan writes the camera first ("The camera pushes in ...; his hand comes
+    down") or last ("his hand comes down as the camera pushes in"), and both
+    shapes are in episode 7."""
+    for part in re.split(r"[;.]", motion or ""):
+        if re.search(r"\bthe\s+camera\b", part, re.I):
+            return part.strip()
+    return ""
+
+
+def camera_end(motion: str, j: int = 0) -> str:
+    """Where the camera stands in the shot's LAST frame; "" if it never left.
+
+    MEASURED, episode 7 take 22: the plan pushes the camera in two long strides
+    across the whole shot, the take does it cleanly, and the drawn END cell sits
+    at the START camera because `end_text` told it to -- so `drift_gate` scored
+    the last frame at 0.397 against a picture taken from a place the camera had
+    left, and HARD-failed a good take.
+
+    "From the same camera" was true of episodes 2 to 5, which mostly hold still.
+    Episode 6 cured the stillness by moving the camera across the whole of every
+    shot, and the sentence became false for every END panel in the episode."""
+    said = camera_clause(motion)
+    if not said or HOLDS.search(said):
+        return ""
+    far = TRAVEL.search(said)
+    if not far:
+        return ""
+    how, at = far.group(1).strip(), f"panel {j}" if j else "the start panel"
+    # EACH DIRECTION TAKES ITS OWN PREPOSITION.  A push is comparative and takes
+    # "than"; a rise is positional and takes "above".  A prompt the model has to
+    # repair is a prompt it may repair the wrong way.
+    if re.search(NEARER, said, re.I):
+        return f"{how} NEARER than in {at}"
+    if re.search(FURTHER, said, re.I):
+        return f"{how} FURTHER BACK than in {at}"
+    if re.search(VERTICAL, said, re.I):
+        fallen = re.search(r"\b(?:down|downward\w*)\b", said, re.I)
+        side = "DROPPED" if fallen else "RISEN"
+        return f"a camera {side} {how} {'below' if fallen else 'above'} {at}"
+    return f"a camera {how} ALONG its own travel from {at}"
+
+
 def end_text(k: int, seg: dict, crowd: str) -> str:
     """An END panel: THE CHANGE FIRST, then its own complete picture.
 
@@ -934,8 +997,16 @@ def end_text(k: int, seg: dict, crowd: str) -> str:
     turn = (f"What a viewer sees at a different place than in panel {j}: {moved}. "
             f"Draw that finished and at rest, at its new place in the frame. "
             if moved else f"Panel {j} one action later. ")
-    return (f"Panel {k} - PANEL {j} ONE ACTION LATER, from the same camera. {turn}"
-            f"In frame: {stop(keeps_camera(seg['frame']))}{crowd} Panel {k} is its own photograph: "
+    # WHERE THE CAMERA STANDS NOW.  A shot whose camera travels ends somewhere
+    # else, and the panel that says "the same camera" is a picture the take can
+    # never arrive at.  `keeps_camera` is right for a locked-off shot and wrong
+    # for a travelling one for the same reason: it deletes the reframing, and
+    # when the camera really did reframe, the reframing IS the panel.
+    went = camera_end(seg.get("motion", ""), j)
+    where = f"from {went}" if went else "from the same camera"
+    picture = seg["frame"] if went else keeps_camera(seg["frame"])
+    return (f"Panel {k} - PANEL {j} ONE ACTION LATER, {where}. {turn}"
+            f"In frame: {stop(picture)}{crowd} Panel {k} is its own photograph: "
             f"laid beside panel {j}, a viewer points at one thing and says where it went.")
 
 
