@@ -426,6 +426,8 @@ class Episode(BaseModel):
                 out += [(shot.index, "M9", f"{thing!r} moves with nothing to move it; "
                                            f"give the camera the move, or name the hand")
                         for thing in uncaused_motion(seg.motion)]
+                out += [(shot.index, "M10", why)
+                        for why in already_in_frame(seg.at_rest, seg.motion)]
         return out
 
     @model_validator(mode="after")
@@ -637,7 +639,79 @@ def motion_faults(motion: str) -> list[tuple[str, str]]:
     return out
 
 
-HARD_MOTION = ("M2", "M9")
+HARD_MOTION = ("M2", "M9", "M10")
+
+ARRIVES = r"comes?|come|moves?|swings?|drops?|rises?|slides?|steps?|lifts?"
+ENTERS = re.compile(
+    r"([^;,.]+?)\s+(?:"
+    rf"(?:{ARRIVES})\s+(?:\w+\s+){{0,2}}?in(?:to)?\s+(?:the\s+)?(?:frame|view|shot)"
+    r"|(?:enters?|appears?)\s+(?:in\s+)?(?:the\s+)?(?:frame|view|shot)"
+    rf"|(?:{ARRIVES})\s+on\s+camera"
+    r")\b",
+    re.I)
+r"""A thing arriving in the picture, however the plan phrases the arrival.
+
+`(?:\w+\s+){0,2}?` is lazy and capped at two words so "comes DOWN INTO frame"
+and "swings UP INTO frame" are caught while "comes down the ladder and takes a
+rung in the frame" is not."""
+
+LEAVES = re.compile(r"\b(?:out of|off|from)\s+(?:the\s+)?(?:frame|shot|view)\b", re.I)
+"""A thing that IS in frame is exactly the thing that can leave it, so an exit
+is never this fault -- and "goes out of frame" contains "of frame"."""
+
+NOISE = frozenset(
+    "the a an his her its their our this that these those and or but with at in on of to "
+    "from into over under beside behind before after one two both same other new old open "
+    "closed first second left right top bottom centre center frame view shot camera".split())
+
+
+def head_noun(phrase: str) -> str:
+    """The last content word of a noun phrase -- "the open sash window" -> "window".
+
+    Crude on purpose. A looser match would fire on the setup furniture that every
+    `at_rest` names, and a gate that fires on good plans gets switched off."""
+    words = [w.strip("'\u2019") for w in re.findall(r"[A-Za-z']+", phrase.lower())]
+    content = [w for w in words if w not in NOISE]
+    return content[-1] if content else ""
+
+
+def named_at_rest(noun: str, at_rest: str) -> bool:
+    """Is that noun already standing in the first frame? Singular and plural both."""
+    if not noun:
+        return False
+    stem = noun[:-1] if noun.endswith("s") and len(noun) > 3 else noun
+    return bool(re.search(rf"\b{re.escape(stem)}(?:s|es)?\b", at_rest, re.I))
+
+
+def already_in_frame(at_rest: str, motion: str) -> list[str]:
+    """M10 -- every thing the motion brings IN that `at_rest` already has in frame.
+
+    MEASURED, episode 7 shot 11.  `at_rest` put an open sash window at the TOP
+    CENTRE; `motion` said "the open window comes down into frame as the camera
+    rises".  `at_rest` IS the first frame, so the window cannot enter it, and the
+    only way to obey both sentences is to start the camera somewhere the window
+    is not -- that is, to throw away the staging.  The take did: it left the
+    ladder at 3.3 s, re-established the whole mews lane, and finished on a wide
+    alley.  It scored 0.976 against the location plate and 0.176 against its own
+    start cell, and 40/100.
+
+    The `foreign` gate caught the wreck.  Nothing caught the sentence, and the
+    sentence is two plan fields disagreeing -- free to read, before the $0.20
+    sheet and before the GPU."""
+    if not at_rest or not motion:
+        return []
+    out = []
+    for clause in re.split(r"[;.]", motion):
+        if LEAVES.search(clause):
+            continue
+        for hit in ENTERS.finditer(clause):
+            noun = head_noun(hit.group(1))
+            if named_at_rest(noun, at_rest):
+                out.append(f"{noun!r} already stands in the frame at rest, so it cannot "
+                           f"come into it: {hit.group(0).strip()!r}")
+    return out
+
+
 """Which motion faults REFUSE a plan, as against merely printing.
 
 Only the two the evidence actually carries.  Measured over the four scored

@@ -928,7 +928,26 @@ Every motion line the plan writes carries one: "travelling two long strides",
 "travelling a hand's breadth", "travelling a forearm".  `episode_spec` already
 requires it -- a move with no distance is a move the renderer sizes itself."""
 
-HOLDS = re.compile(r"\b(?:static|locked|lock(?:ed)?[- ]off)\b", re.I)
+HOLD_WORD = (r"static|locked|lock(?:ed)?[- ]off|holds?|held|holding|stays?|"
+             r"remains?|does not move|never moves")
+HOLDS = re.compile(rf"\b(?:{HOLD_WORD})\b", re.I)
+"""A camera that does not travel, however the plan says so.
+
+This knew "static" and "locked" only, so ep05 shot 21 -- "the camera holds level
+with its hub" -- read as a move whose distance could not be found."""
+
+BODY = (r"(?:an?|one|two|three|four|half a)\s+(?:whole\s+|long\s+|short\s+)?"
+        r"(?:hand's breadth|hand's width|thumb's width|finger's breadth|arm's length|"
+        r"head's height|forearm|strides?|paces?|steps?|treads?)")
+GAIT = (r"at an? (?:normal|walking|trotting|running|strolling|steady|brisk)"
+        r"(?: walking| running)? pace")
+DISTANCE = re.compile(rf"\b({BODY}|{GAIT})", re.I)
+"""How far, in the owner's body-scale words -- the standing rule for every
+amount in this pipeline: no percentages, no metres, no "slowly".
+
+Only DIMENSIONAL forms are listed. A bare "a hand" is a hand, not a distance,
+and ep04 shot 2's "the camera pushes straight in on the hand" would otherwise
+have been read as travelling one hand."""
 
 # Where the camera ENDS, per move word.  The tilt/crane pair splits on its own
 # direction word; everything that travels across the scene rather than toward
@@ -945,8 +964,13 @@ def camera_clause(motion: str) -> str:
     The plan writes the camera first ("The camera pushes in ...; his hand comes
     down") or last ("his hand comes down as the camera pushes in"), and both
     shapes are in episode 7."""
+    # THE CAMERA HAS TO BE THE ONE DOING SOMETHING.  "her eyes fix on the
+    # camera" and "the paper turns toward the camera" both name the camera and
+    # neither moves it; reading them as camera moves made ep05 shots 16 and 17
+    # into moves with no distance.
+    doing = re.compile(rf"\bthe\s+camera\s+(?:{MOVE_WORD}|{HOLD_WORD}|is|are|was)\b", re.I)
     for part in re.split(r"[;.]", motion or ""):
-        if re.search(r"\bthe\s+camera\b", part, re.I):
+        if doing.search(part):
             return part.strip()
     return ""
 
@@ -966,7 +990,10 @@ def camera_end(motion: str, j: int = 0) -> str:
     said = camera_clause(motion)
     if not said or HOLDS.search(said):
         return ""
-    far = TRAVEL.search(said)
+    # "travelling <how far>" if the plan wrote it that way, else the body-scale
+    # amount wherever in the clause it stands.  Eleven shots across episodes 6
+    # and 7 use the second shape.
+    far = TRAVEL.search(said) or DISTANCE.search(said)
     if not far:
         return ""
     how, at = far.group(1).strip(), f"panel {j}" if j else "the start panel"
