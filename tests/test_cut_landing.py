@@ -30,7 +30,13 @@ def test_the_thresholds_are_the_measured_gap():
     were 25-57 frames against a 7-frame matcher flicker; ping-pongs 36 and 92."""
     assert (cl.MAX_EARLY, cl.MAX_LATE) == (4, 6)
     assert cl.MAX_FOREIGN_RUN == 12 and cl.MAX_PINGPONG == 12
-    assert cl.LAND == 0.60 and cl.FOREIGN_MARGIN == 0.05 and cl.FOREIGN_MIN == 0.60
+    assert cl.LAND == 0.60 and cl.FOREIGN_MARGIN == 0.05
+    # FOREIGN_MIN was 0.60 -- 0.015 above the matcher's own noise -- and survived
+    # four episodes only because the camera HELD. Episode 6 names a camera move in
+    # 26 of 26 shot heads, own-similarity decays legitimately, and three takes
+    # failed HARD on unrelated cells at 0.61-0.66. See
+    # tests/test_a_foreign_frame_is_the_other_picture.py.
+    assert cl.FOREIGN_MIN == 0.90
 
 
 def test_a_frame_that_matches_nothing_is_not_a_foreign_picture():
@@ -47,7 +53,10 @@ def test_a_frame_that_matches_nothing_is_not_a_foreign_picture():
     weak = cl.classify(frame(0.39, 0.45)[None], {"Q01_0.png": mine}, {"Q05_0.png": theirs})[0]
     assert round(weak["own_s"], 2) == 0.39 and round(weak["other_s"], 2) == 0.45
     assert weak["other_s"] > weak["own_s"] + cl.FOREIGN_MARGIN and not weak["foreign"]
-    real = cl.classify(frame(0.30, 0.72)[None], {"Q01_0.png": mine}, {"plate_x.png": theirs})[0]
+    # 0.72 used to stand for a real intrusion and is now known to be the ARTIFACT
+    # band (ep03 T12 0.721, ep06 0.610-0.659). A real one is the plate taking the
+    # frame: ep03 T08 reaches 0.965, episode 2's thirteen measured 0.988-0.998.
+    real = cl.classify(frame(0.30, 0.96)[None], {"Q01_0.png": mine}, {"plate_x.png": theirs})[0]
     assert real["foreign"] and real["other"] == "plate_x.png"
 
 

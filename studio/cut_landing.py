@@ -38,10 +38,42 @@ the floor for 'this frame IS the target picture'."""
 FOREIGN_MARGIN = 0.05
 """CALIBRATION: inherited from take_dq.picture_dq -- a frame is another picture
 only when it beats its own cell by this margin."""
-FOREIGN_MIN = 0.60
+FOREIGN_MIN = 0.90
 """CALIBRATION: and it must MATCH that other picture.  Iteration 4 T03, the cab
 mid-crossing: own 0.39, other 0.45 -- without the floor that reads FOREIGN, but a
-frame matching nothing is off its own composition, which is drift's business."""
+frame matching nothing is off its own composition, which is drift's business.
+
+RAISED FROM 0.60 ON 2026-09-14, and the reason is the camera.
+
+0.60 sat 0.015 above `frame_match`'s own noise between two unrelated pictures
+(~0.585).  It survived four episodes because the camera HELD: own-similarity
+stayed near 0.9 all take, so `other > own + FOREIGN_MARGIN` could almost never
+fire, and the floor was never load-bearing.
+
+Episode 6 is the first plan where every shot head names a camera move (26 of
+26, against episode 5's 7 of 25).  Stillness went to exactly zero -- frozen-share
+0.0 and frozen-at-start 0.0 over 26 takes -- and three takes then failed HARD on
+`foreign` for 90 points, which is almost precisely the stillness loss it
+replaced.  All three are false positives, confirmed by eye: T20's last frame is
+plainly Gregson pushed in, and the cell that beat it is two women in another
+room.  A moving camera makes a take stop resembling its own STATIC start cell --
+T20 decays 0.999 -> 0.603 across 4.3 s, exactly as instructed -- so the margin
+test stopped being a discriminator the moment the pictures started moving.
+
+The two populations separate cleanly, and not by the margin:
+
+    REAL      the other picture is the take's own PLATE, a whole empty room,
+              and the score climbs toward 1.0
+              ep03 T08  plate_garden_path  0.763 -> 0.965
+              ep02      13 of 14 foreign frames were the plate, 0.988-0.998
+
+    ARTIFACT  an unrelated CELL, flat near the noise floor
+              ep03 T12 0.721 · ep03 T22 0.629 · ep06 0.610-0.659
+
+`LAND` is the precedent for where a floor belongs: "a frame that reproduces its
+pinned cell scores 0.95-1.00".  0.60 is the floor for a MISS.  At 0.90 every
+documented real intrusion still fires with room to spare, and no artifact
+does."""
 MAX_EARLY, MAX_LATE = 4, 6
 """CALIBRATION: frames, measured from `stated_frame(pin)` -- the whole second the
 model was asked for -- and NOT from the pin.  Every honoured cut of iteration 4
