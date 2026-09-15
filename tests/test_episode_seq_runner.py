@@ -80,10 +80,23 @@ def test_an_end_cell_that_is_still_a_copy_after_the_retry_is_retired(tmp_path):
     already refuses a copy as a destination, so deleting a drawn picture bought
     nothing.  See tests/test_drop_end_copies_finds_the_cells.py."""
     (tmp_path / "cells").mkdir()
+    # A PICTURE, not a flat field. Two solid-black cells measure 0.00 against
+    # each other, not 1.00, because `frame_match` mean-centres and a constant
+    # image has no variance -- so the old fixture could never have produced the
+    # "copy" verdict it was named for, and only passed while the reason string
+    # was hardcoded.
+    same = Image.effect_noise((48, 84), 40).convert("L")
     for name in ("Q02_0.png", "Q02_0E.png"):
-        Image.new("L", (8, 8), 0).save(tmp_path / "cells" / name)
+        same.save(tmp_path / "cells" / name)
     dropped = boards.drop_end_copies(tmp_path, {"duplicates": [("Q02_0", "Q02_0E")]})
-    assert dropped == [{"dropped_end": "Q02_0E", "reason": "still a copy of Q02_0 after strict"}]
+    # THE REASON IS MEASURED NOW, not one hardcoded word for two opposite faults.
+    # `duplicates` flags a pair that is a COPY or a RE-STAGING, and the old string
+    # said "still a copy" for both: all seven of episode 6's retired ENDs were
+    # re-stagings (0.330 down to -0.007) and every one was logged as a copy.
+    # These two cells are identical, so this one really is a copy.
+    assert len(dropped) == 1 and dropped[0]["dropped_end"] == "Q02_0E"
+    assert "copy" in dropped[0]["reason"] and "Q02_0" in dropped[0]["reason"]
+    assert dropped[0]["similarity"] >= 0.8
     assert (tmp_path / "cells" / "Q02_0.png").exists()
     assert not (tmp_path / "cells" / "Q02_0E.png").exists()
     assert (tmp_path / "superseded" / "Q02_0E.png").exists()
