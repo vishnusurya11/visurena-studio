@@ -50,10 +50,10 @@ truth for where the loop is, and it is updated after every step, not at the end.
 | 1 | A Mr. Sherlock Holmes | published `-K2ucdt_mCg` |
 | 2 | The Science of Deduction | published `P8i7niWhEWo` |
 | 3 | The Lauriston Garden Mystery | published `Pkr4HudmQPo` |
-| 4 | What John Rance Had to Tell | NEXT |
-| 5 | Our Advertisement Brings a Visitor | |
-| 6 | Tobias Gregson Shows What He Can Do | |
-| 7 | Light in the Darkness | |
+| 4 | What John Rance Had to Tell | published `WN2ktyq8tr0` |
+| 5 | Our Advertisement Brings a Visitor | published `g-U-P0ZOoq8` |
+| 6 | Tobias Gregson Shows What He Can Do | published `AIX83NAcTGc` |
+| 7 | Light in the Darkness | IN PROGRESS -- takes re-rendered, DQ pending |
 | 8 | On the Great Alkali Plain | |
 | 9 | The Flower of Utah | |
 | 10 | John Ferrier Talks with the Prophet | |
