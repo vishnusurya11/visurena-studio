@@ -556,7 +556,8 @@ def main(book_id: str, number: int, engine: str = "i2v",
         raise SystemExit(f"no take for shots {missing}")
 
     episode_home.make_rooms(book, number)   # free; the bed and the mix in front of it are not
-    write_cut_manifest(work, list(episode_home.read_json(sheet)), book)
+    write_cut_manifest(work, episode_home.read_json(
+        episode_home.takes_dir(book, number, engine) / "shots.json"), book)
     cut = picture(placed, takes, work)
     music = quiet_bed(bed(home / "audio" / "bed.wav", bed_seed(home / "audio" / "bed.wav", number),
                           placed["duration_s"],

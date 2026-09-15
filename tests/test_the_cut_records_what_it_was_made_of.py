@@ -63,9 +63,30 @@ def test_the_manifest_records_each_takes_size_in_bytes(tmp_path):
     assert got["T00"]["bytes"] == 11 and got["T00"]["rel_path"] == "takes/r2v/T00.mp4"
 
 
-def test_assemble_writes_it_before_it_finishes():
+def test_assemble_calls_it_with_names_that_exist():
+    """AN INSPECTION ASSERTION IS NOT A BEHAVIOURAL ONE.  The first version of
+    this test only checked that the string "write_cut_manifest" appeared in
+    `main`, and the call I had written passed it `sheet` -- a name that does not
+    exist in that scope.  The test passed; the assemble died with NameError after
+    25 takes were rendered and the room had been made.
+
+    Compiling the function is the cheapest check that every name it reads is
+    bound, and it costs no GPU."""
+    import ast
+    import builtins
     import inspect
-    assert "write_cut_manifest" in inspect.getsource(assemble.main)
+    import textwrap
+
+    src = textwrap.dedent(inspect.getsource(assemble.main))
+    assert "write_cut_manifest" in src
+    tree = ast.parse(src)
+    fn = tree.body[0]
+    loaded = {n.id for n in ast.walk(tree) if isinstance(n, ast.Name) and isinstance(n.ctx, ast.Load)}
+    stored = {n.id for n in ast.walk(tree) if isinstance(n, ast.Name) and isinstance(n.ctx, ast.Store)}
+    args = {a.arg for a in fn.args.args + fn.args.kwonlyargs}
+    known = stored | args | set(vars(assemble)) | set(dir(builtins))
+    unbound = loaded - known
+    assert not unbound, f"main reads names nothing binds: {sorted(unbound)}"
 
 
 # ---- and provenance can then actually answer -------------------------------
