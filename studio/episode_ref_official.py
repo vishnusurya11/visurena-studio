@@ -817,9 +817,40 @@ more shots and never because one shot is padded.  A block is filled to the floor
 plus a margin and no further (ref-en §5.2 asks 350-500 words a take)."""
 
 
+SCRUB_RATIO = 0.70
+"""What fraction of a raw block survives `words()`.
+
+MEASURED on episode 7's shot 0: the built block runs 209 raw words and `words()`
+-- which strips `<Picture N>`, `<Subject N>` and the timestamps before counting
+-- calls it 146.  146/209 = 0.70.  The same ratio holds across episode 6's
+blocks, because every block carries the same furniture of tags and stamps."""
+
+
 def budget(core: int, low: int = LOW_BLOCK, high: int = HIGH_BLOCK) -> int:
-    """How many words of the panel's own detail this block may still spend."""
-    return max(0, min(low + MARGIN, high) - core)
+    """How many RAW words of the panel's own detail this block may still spend.
+
+    `core` arrives counted by `words()`, which SCRUBS, and `detail`'s `trim`
+    spends the allowance in RAW words -- so an allowance of `165 - core` is
+    spent in raw words and then judged in scrubbed ones, and the block lands
+    about 30 % short of what it was filled for.
+
+    MEASURED, and this is why the correction is here rather than in the gate:
+    episode 7's shot 0 was given a longer frame, a longer camera, a longer
+    at_rest and two more motion clauses -- fifty words of authored prose -- and
+    the measured block stayed at exactly 146 through every one of them, because
+    each word added to `core` takes one out of `want` and each word added to a
+    detail field is trimmed back to `want`.  The block was pinned below its own
+    floor and nothing written could move it.
+
+    Episodes 4 to 6 never hit it: their blocks carry dialogue and more beats, so
+    `core` alone clears 150 and the fill never binds.  A LEAN block -- a silent
+    insert, one short line -- is the case that cannot pass, and those are
+    exactly the shots the rhythm work asks for.
+
+    The ceiling is unchanged: OWNER 5.17's rule that a take is long because it
+    has more shots, never because one shot is padded, is what `high` is for."""
+    want = max(0, min(low + MARGIN, high) - core)
+    return min(int(round(want / SCRUB_RATIO)), max(0, high - core))
 
 
 def detail(seg: dict, want: int) -> list[str]:

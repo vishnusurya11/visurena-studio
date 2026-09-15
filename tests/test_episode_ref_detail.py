@@ -45,10 +45,21 @@ def test_a_field_is_cut_at_a_clause_boundary_never_mid_phrase():
 
 def test_a_block_asks_for_only_the_detail_it_is_short_of():
     """The gate is per block (OWNER 5.17), so a heavy block takes no padding at
-    all and a light one takes just enough to clear the floor."""
-    assert ro.budget(120) == 45          # 165 is the floor plus a margin
+    all and a light one takes just enough to clear the floor.
+
+    THE ALLOWANCE IS NOW IN RAW WORDS AND THE FLOOR IS IN SCRUBBED ONES. `core`
+    arrives counted by `words()`, which strips `<Picture N>`, `<Subject N>` and
+    the timestamps; `detail`'s `trim` spends the allowance in raw words. Asking
+    for 165 - core RAW bought about 0.70 of that after the scrub, so a lean
+    block landed ~30 % short of the floor it was filled for and NOTHING written
+    into the plan could move it -- measured at a stuck 146 on episode 7's shot 0
+    across fifty added words. See tests/test_a_block_can_reach_its_own_floor.py.
+
+    The ceiling is unchanged: the fill may never push a block past HIGH_BLOCK."""
+    assert ro.budget(120) == round(45 / ro.SCRUB_RATIO)
     assert ro.budget(165) == 0 and ro.budget(231) == 0
-    assert ro.budget(0) == 165
+    assert ro.budget(0) == round(165 / ro.SCRUB_RATIO)
+    assert 0 + ro.budget(0) <= ro.HIGH_BLOCK
 
 
 def test_the_detail_spends_the_camera_first_and_then_what_is_at_rest():
