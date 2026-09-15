@@ -106,37 +106,41 @@ class TakeVerdict:
 def frozen_gates(v: TakeVerdict) -> list[Gate]:
     """G4.1 frozen at a segment start and G4.2 the take's frozen share.
 
-    BOTH STAY HARD, AND I TRIED TO DEMOTE THEM AND WAS WRONG.
+    BOTH HARD, AND EPISODE 5 SETTLED THE ARGUMENT.
 
-    Measured over every judged attempt on disk -- 97 of them, episodes 1 to 5:
+    Over every judged attempt to the end of episode 4 -- 97 of them -- neither
+    rung had ever fired:
 
-        frozen-at-start   wall 1.00 s   max ever observed 0.750   fired 0 of 97
-        frozen-share      wall 0.40     max ever observed 0.340   fired 0 of 97
+        frozen-at-start   wall 1.00 s   max observed 0.750   fired 0 of 97
+        frozen-share      wall 0.40     max observed 0.340   fired 0 of 97
 
-    From which I concluded that a wall sitting above every observation protects
-    nothing, and made both advisory.  `test_a_frozen_take_fails_hard_and_a_moving_one_passes`
-    refused it immediately: iteration 4's T17 ran 14.75 of its 15.0 seconds
+    I read that as walls protecting nothing and made both advisory.  The suite
+    refused it in the same run: iteration 4's T17 ran 14.75 of its 15.0 seconds
     frozen -- a share of 0.98 -- and with the rungs advisory that take PASSES.
+    Reverted.  Then episode 5's first DQ pass, ON THIS INSTRUMENT:
 
-    The inference was backwards.  A hard gate that has not fired lately is not
-    dead; it may be a floor nobody has hit since the things upstream of it got
-    better, and the case it exists for is in the regression suite precisely
-    because it happened.  "It never fires" and "it cannot fire" are different
-    claims, and only the second would justify moving it.
+        T21  start 2.75 s  share 0.84      the bootprint filling with water
+        T00  start 2.00 s  share 0.68      Watson lying awake on the sofa
+        T02  start 2.25 s  share 0.29      the hand hanging off the cushion
+        T19  start 1.25 s  share 0.21
+        T22  start 1.25 s  share 0.19
 
-    What IS true, and is the part worth keeping: both walls were read on an
-    instrument the repo has since replaced.  `motion_gate` now uses block-max
-    bins rather than the old 96x168 global-mean scan, and `share` here is
-    `sum(frozen_spans)/seconds` -- the fraction of runtime inside a >= 0.75 s
-    still run -- a strictly smaller quantity than the `still_share` the
-    "iteration 3 25 %, iteration 4 55 %" figures were taken from.  So the numbers
-    are not wrong, they are unverified on the current instrument, and verifying
-    them needs the one thing nobody recorded: which takes a human called frozen.
+    FIVE of 25 takes over a wall that had not been touched in 97.  Chapter V is a
+    quiet chapter and the shots were written as still pictures; had the demotion
+    stood, all five would have passed and shipped.
 
-    The SCORE PENALTY is what has actually moved takes -- episode 4's T12 lost
-    two rolls to it at 30/100 and 45/100 before its motion was rewritten -- and
-    `motion_gate.STILL` (13 813 frame steps over 63 takes) is the well-founded
-    constant underneath both."""
+    "It never fires" and "it cannot fire" are different claims, and only the
+    second would justify moving a wall.  A hard gate that has not fired lately
+    may be a floor nobody has hit since the things upstream of it improved -- and
+    the moment the writing got quieter, the floor was there.
+
+    The old worry, that both walls were read on an instrument the repo has since
+    replaced, is answered: they separate cleanly on the CURRENT one, with the
+    passing takes at 0.00-0.75 s and the failures at 1.25-2.75 s.
+
+    The SCORE PENALTY is what moves a take before the wall does -- episode 4's
+    T12 lost two rolls to it at 30/100 and 45/100 -- and `motion_gate.STILL`
+    (13 813 frame steps over 63 takes) is the constant underneath both."""
     lead = max((s.lead_in_s for s in v.segments), default=0.0)
     share = round(sum(b - a for a, b in v.frozen_spans) / v.seconds, 2) if v.seconds else 0.0
     start = Gate("frozen-at-start", lead, lead <= motion_gate.START_LIMIT_S, True, f"{lead}s",

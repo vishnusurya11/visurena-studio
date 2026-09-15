@@ -96,6 +96,12 @@ def test_the_walls_are_unchanged():
 
 
 def test_the_refutation_is_written_down_beside_the_distribution():
+    """The 97 that never fired, the 98 % regression case that refuted the
+    demotion, AND episode 5's five firings on the current instrument -- all in
+    the function, so the next reader cannot re-derive the demotion from half
+    the evidence."""
     import inspect
     said = inspect.getsource(tv.frozen_gates)
-    assert "0 of 97" in said and "backwards" in said
+    assert "0 of 97" in said
+    assert "0.98" in said or "14.75" in said
+    assert "2.75" in said and "0.84" in said
