@@ -6,7 +6,7 @@ cited INSIDE its subject line; the location plate is a subject and a DEFINITION,
 never a framing; every pinned cell is its own `<Picture N>` first frame; the
 take's storyboard strip is a `weak_reference` that carries shot order alone.
 
-Spec: `scratchpad/review9/ref2v_prompt_spec.md`, approved 2026-09-11.
+Spec: `docs/calibration/ref2v_prompt_spec.md`, approved 2026-09-11.
 
 Where the guide and the owner disagree the OWNER's form is kept and the guide's
 rule is named in a comment beside it, so the A/B can flip one line:

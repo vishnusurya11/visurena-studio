@@ -25,7 +25,7 @@ SIZE = (192, 336)
 BLOCK = 24
 BIN_S = 0.25
 STILL = 1.2
-"""CALIBRATION: review8/motion_gate.md, 13 813 frame steps over 63 H3 takes
+"""CALIBRATION: docs/calibration/motion_gate.md, 13 813 frame steps over 63 H3 takes
 (iterations 2-4, retakes and fails, 2026-09-11).  A pinned still reads 0.2-0.7,
 a slow drift the eye still reads as a still 0.8-1.1, a living hold at rest
 (breathing, a head sway, ink in water) 1.8-3.0, a speaking mouth 3-15, a walk
@@ -40,7 +40,7 @@ the first bin, then the still -- iteration-4 T17 segment 0).  A still run that
 begins inside GRACE_S still counts as 'at the start'."""
 SHARE_CEILING = {"dialogue": 0.20, "hold": 0.35, "insert": 0.50, "track": 0.10}
 """CALIBRATION: per-kind frozen-share distributions over 136 segments
-(review8/motion_gate/calib.json).  Advisory only: a share is a taste call, a
+(docs/calibration/motion_gate_calib.json).  Advisory only: a share is a taste call, a
 frozen start is not."""
 
 

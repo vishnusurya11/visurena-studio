@@ -12,7 +12,7 @@ picture has one state and a take has one state, so the repair is structural:
     rel_path    the identity BUST, bare-headed, setup-independent
     cards       {"indoor": ..., "outdoor": ...}, the wardrobe-and-props CARDS
 
-Six setups, two states (`review8/wardrobe/eye_labels.json`: criterion,
+Six setups, two states (`docs/calibration/wardrobe_eye_labels.json`: criterion,
 corridor, lab and bench indoors; cab and gateway outdoors), so the whole book
 is three busts and five cards -- eight pictures, reused by the trailer, the
 song and every future episode, instead of six setups x three people.

@@ -30,7 +30,7 @@ not called out by the owner, iteration 4 (55 %) was; 0.40 separates every take h
 named from every take he did not."""
 DRIFT_HARD, DRIFT_ADVISORY = 0.50, 0.75
 """CALIBRATION: similarity of a segment's last frame to its target cell.
-review7/holds11 -- held segments measured 0.93-1.00, the ones the reviewer marked
+docs/calibration/holds11.txt -- held segments measured 0.93-1.00, the ones the reviewer marked
 DRIFT 0.28-0.60.  Hard only where an END cell was drawn (there is a target); a
 hold without one is advisory, because a static camera the cab crosses
 legitimately ends at 0.25-0.29 against its start cell."""

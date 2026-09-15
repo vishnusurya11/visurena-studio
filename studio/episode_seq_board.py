@@ -7,7 +7,7 @@ on the setup's route the people are, in chained sheets.  Takes are windows on
 this board: their pins are its cells, their reference is a strip of its
 cells.  No take has a sheet of its own.
 
-THE PROMPT (rewritten 2026-09-11 from `scratchpad/review9/storyboard_prompt_spec.md`).
+THE PROMPT (rewritten 2026-09-11 from `docs/calibration/storyboard_prompt_spec.md`).
 A 5 kB paragraph became short LABELLED BLOCKS, because that is the shape both
 OpenAI guides ask for on a complex request.  Every rule on the sheet is the
 conversion of something gpt-image obeys badly into something it obeys well:

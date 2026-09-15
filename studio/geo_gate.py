@@ -39,7 +39,7 @@ import numpy as np
 from PIL import Image
 
 CUT, CUT_RATIO, PIN_TOL_S = 20.0, 4.0, 0.3
-"""CALIBRATION: review8/geography.md, iterations 3 and 4.  A pinned cut is a
+"""CALIBRATION: docs/calibration/geography.md, iterations 3 and 4.  A pinned cut is a
 frame-to-frame mean |diff| of 20-60 on 96x168 grey at 24 fps; a moving wide (T03,
 the cab) peaks at 14 and a spring-up in a wide (T12) at 8.  The 4x-the-local-
 median rule stops a busy shot faking a cut.  PIN_TOL_S: a pin lands on a video

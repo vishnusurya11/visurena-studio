@@ -32,7 +32,7 @@ BOTH of episode 3's catastrophic takes report exactly -24, which is the search
 limit and not a measurement.  Two seconds is wide enough for the reported delta
 to be a value you can act on."""
 LAND = 0.60
-"""CALIBRATION: review8/transitions.md -- a frame that reproduces its pinned cell
+"""CALIBRATION: docs/calibration/transitions.md -- a frame that reproduces its pinned cell
 scores 0.95-1.00; the neighbour cell a missed cut opened on scored 0.31.  0.60 is
 the floor for 'this frame IS the target picture'."""
 FOREIGN_MARGIN = 0.05
@@ -78,7 +78,7 @@ MAX_EARLY, MAX_LATE = 4, 6
 """CALIBRATION: frames, measured from `stated_frame(pin)` -- the whole second the
 model was asked for -- and NOT from the pin.  Every honoured cut of iteration 4
 landed in [-3, +1]; the failures measured +34, +51, +37, +54 and -5..-24
-(review8/transitions.md).
+(docs/calibration/transitions.md).
 
 The origin matters more than the width.  Measured from the pin, 7 of episode 3's
 15 internal cuts could not pass even with perfect obedience, because a

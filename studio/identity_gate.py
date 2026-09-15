@@ -23,7 +23,7 @@ SWITCH = "VISURENA_IDENTITY_GATE"
 """Set to `off` to silence a working backend; anything else leaves it to the import."""
 
 READABLE = 0.12
-"""CALIBRATION: face box height / frame height.  review8/identity.md -- faces at
+"""CALIBRATION: face box height / frame height.  docs/calibration/identity.md -- faces at
 8-10 % of frame height score 0.46-0.72 against their own sheet and are not
 judgeable; at 12 % and above the score separates the right man from a stranger."""
 FRONTAL = 0.50
