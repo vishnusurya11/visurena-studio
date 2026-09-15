@@ -250,3 +250,27 @@ def compose(cut: list[Span], files: dict[str, "Path"], out: "Path", rate: int = 
 
     sf.write(str(out), track[:total], rate)
     return out
+
+
+DEAD_UNDER = 12.0
+"""How far under its target a bed must sit to be a failed generation, in dB.
+
+MEASURED on episode 6's first assemble, five tones in one pass: plain -30.8,
+light -30.5, uneasy -28.8, thrilling -27.3 -- all within 0.2 dB of target -- and
+grave -58.0 against a -29.0 target.  Four good rolls and one empty one from the
+same prose in the same minute: a silent return is a dice roll, not a bad ask.
+
+TWELVE, because `BED_MAX_LIFT_DB` is 6.0: anything the level pass can actually
+recover is not dead, and twice that is clear of any bed worth keeping.  The real
+failure was 29 dB under."""
+
+
+def is_dead(loudness: float | None, target: float) -> bool:
+    """Is this generation empty rather than merely quiet?
+
+    `None` is NOT dead.  No loudnorm pass means "not measured", which is a
+    different thing from "measured and empty", and treating one as the other is
+    the fault this repo has found thirteen times."""
+    if loudness is None:
+        return False
+    return loudness < target - DEAD_UNDER

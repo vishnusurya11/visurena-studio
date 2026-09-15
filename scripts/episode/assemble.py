@@ -319,17 +319,54 @@ def toned_bed(home: Path, number: int, beds: list[dict], placed: dict,
 
     made: dict[str, Path] = {}
     for tone in plan.needed:
-        out = room / f"bed_{tone}.wav"
-        want = plan.seconds[tone]
+        made[tone] = one_tone(room, number, tone, plan.seconds[tone], engine)
+    return episode_bed.compose(plan.spans, made, room / "bed.wav")
+
+
+BED_ROLLS = 3
+"""How many times a tone may come back empty before the assemble stops.
+
+Bounded on purpose: an unbounded retry on a model that has started returning
+silence spends the GPU all night and delivers nothing."""
+
+
+def one_tone(room: Path, number: int, tone: str, want: float, engine: str) -> Path:
+    """One tone, generated, levelled, and RE-ROLLED if it comes back empty.
+
+    MEASURED on episode 6's first assemble: five tones in one pass, four within
+    0.2 dB of target and `grave` at -58.0 against -29.0.  `level` printed the
+    clamp warning and the assemble used the file anyway, which put 29 seconds of
+    nothing under the Camberwell flashback.
+
+    A warning is not a fix.  `BED_MAX_LIFT_DB`'s own docstring already said what
+    this means -- "a bed far under target is a failed generation, not something
+    to crank" -- and nothing acted on it.
+
+    RE-ROLL RATHER THAN RE-ASK: four good beds came from the same prose in the
+    same minute, so there is nothing in the request to repair."""
+    out = room / f"bed_{tone}.wav"
+    target = episode_bed.tone_lufs(tone)
+    for roll in range(BED_ROLLS):
         if not out.exists():
-            workflow, values = bed_request(engine, want, bed_seed(out, number), tone)
+            seed = bed_seed(out, number) + 977 * roll
+            workflow, values = bed_request(engine, want, seed, tone)
             got = run(workflow, values, timeout=BED_TIMEOUT)
             out.write_bytes(got[0].read_bytes())
-        level(out, episode_bed.tone_lufs(tone))
-        print(f"    {tone:10s} {want:6.1f}s at {episode_bed.tone_lufs(tone):6.1f} LUFS "
-              f"-> {out.name}", flush=True)
-        made[tone] = out
-    return episode_bed.compose(plan.spans, made, room / "bed.wav")
+        try:
+            loudness = integrated(out)
+        except Exception:
+            loudness = None
+        if not episode_bed.is_dead(loudness, target):
+            level(out, target)
+            print(f"    {tone:10s} {want:6.1f}s at {target:6.1f} LUFS -> {out.name}", flush=True)
+            return out
+        dead = out.with_name(f"{out.stem}.empty{roll + 1}{out.suffix}")
+        out.rename(dead)
+        print(f"    {tone}: came back at {loudness:.1f} LUFS against {target:.1f} -- empty. "
+              f"Kept as {dead.name}; re-rolling ({roll + 1}/{BED_ROLLS}).", flush=True)
+    raise SystemExit(f"the {tone} bed came back empty {BED_ROLLS} times. The same prose "
+                     f"made the other tones in the same pass, so this is the model and not "
+                     f"the ask: check ComfyUI, then re-run assemble.")
 
 
 def level(path: Path, target: float) -> Path:
