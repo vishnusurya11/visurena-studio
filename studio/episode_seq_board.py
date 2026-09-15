@@ -556,15 +556,59 @@ def where(seg: dict) -> str:
 
 # ---- the sentences a drawer obeys -----------------------------------------
 
-CAMERA_MOVE = re.compile(r"^(static|tracking|track|push|pull|tilt|pan|handheld|locked|dolly|crane)\b[^;]*;\s*", re.I)
+MOVE_WORD = (r"static|locked|handheld|track\w*|push\w*|pull\w*|tilt\w*|pan\w*|"
+             r"doll\w*|cran\w*|zoom\w*|orbit\w*|swing\w*|truck\w*|pedestal\w*|arc\w*")
+CAMERA_MOVE = re.compile(rf"^(?:the\s+camera\s+)?(?:{MOVE_WORD})\b[^;]*;\s*", re.I)
 """The camera instruction at the head of a motion line.  It is written FOR
 MiniMax; on a still prompt it is noise that gets drawn (reviewer 3: "Static
-shot; ... the Bunsen flame" put a blue flame on Watson's cravat stud)."""
+shot; ... the Bunsen flame" put a blue flame on Watson's cravat stud).
+
+IT MATCHED NOTHING FROM EPISODE 2 TO EPISODE 6.  The old pattern was
+`^(static|tracking|track|push|...)` -- a BARE, UNINFLECTED verb at the start of
+the line.  Episode 1 wrote "Static shot; ..." and it matched 23 of 23.  Every
+plan since writes "The camera pushes in on his face across the whole shot; ...",
+which begins with "The" and inflects the verb, and matched 0 of 25, 0 of 24,
+0 of 26.
+
+So `still()` stripped nothing and `moved_clause()` handed the CAMERA CLAUSE to
+the drawer as the END panel's one named change.  The paid prompt on disk,
+`ep06/boards/sheets/seq_window_street_0.prompt.txt`:
+
+    "PANEL 3 ONE ACTION LATER, FROM THE SAME CAMERA.  What a viewer sees at a
+     different place than in panel 3: The camera pushes in on his face across
+     the whole shot."
+
+One sentence, two contradictory instructions.  The drawer moved the camera, and
+all seven of episode 6's END panels came back re-staged (0.330 down to -0.007
+against their own start cells, every one under the 0.45 floor), leaving ONE END
+cell in the episode.
+
+AND THE CAMERA-MOVE RULE IS WHAT SET IT OFF.  Earlier plans led with the camera
+on 7 to 13 motions; episode 6 leads with it on 26 of 26, so every END panel got
+a camera instruction where it used to get a subject action.  The regex had been
+wrong since episode 2 and cost nothing until the prose changed shape."""
 
 
 def still(motion: str) -> str:
-    """A motion line with its camera move removed: the sheet draws a STILL."""
-    return stop(CAMERA_MOVE.sub("", (motion or "").strip()))
+    """A motion line with its camera move removed: the sheet draws a STILL.
+
+    The camera clause is not always first -- 41 of episode 2's 42 motions put
+    the subject first with the camera trailing ("his hand comes up as the camera
+    pushes in") -- so the trailing form is cut out of the head clause too."""
+    said = CAMERA_MOVE.sub("", (motion or "").strip())
+    head, semi, rest = said.partition(";")
+    trimmed = CAMERA_LEAD.split(head, maxsplit=1)[0].strip(" ,.")
+    if semi and trimmed and trimmed != head.strip(" ,."):
+        said = f"{trimmed}{semi}{rest}"
+    elif not semi and trimmed:
+        said = trimmed
+    return stop(said)
+
+
+CAMERA_LEAD = re.compile(r"\b(?:as|while|and)\s+(?=the\s+camera\b)", re.I)
+"""Where a motion hands over from the subject's action to the camera's move.
+Mirrors `episode_ref_official.CAMERA_LEAD`, which the take builder uses to find
+the same clause."""
 
 
 def stop(text: str) -> str:
