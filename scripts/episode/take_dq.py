@@ -44,7 +44,19 @@ CELLS = 6
 SCALE_PER_SECOND = 0.15
 """Engine designer, 2026-09-10: the ±10 % wobble over ~2 s after a snap is
 0.10/s; a snap was 0.6-1.8/s; i2v drift is 0.013/s.  Measured at 4 fps in a
-1 s window, outside ±0.25 s of a declared cut."""
+1 s window, outside ±0.25 s of a declared cut.
+
+DRIFT AND SNAP ARE THE TWO REGIMES OF A CAMERA HOLDING STILL, and 0.15 is the
+line between them.  It was never a question about a camera that MOVES, and every
+shot from episode 6 on has one -- so `camera_ok` below is a stillness meter, not
+a quality signal.  Measured over all 25 of episode 7's first-pass records:
+TRUE on 2 takes (mean 92.95), FALSE on 23 (mean 94.48), and FALSE on all
+nineteen that score 100.00.  The two it calls good are the two least-moving
+takes in the episode and one of them is a hard failure.
+
+So `camera_ok` stays unread, on purpose.  That is not unfinished wiring, and
+`tests/test_camera_ok_is_a_stillness_meter.py` holds the measurement and fails
+if the picture ever changes."""
 SCENE_EVENT = 0.15
 
 
