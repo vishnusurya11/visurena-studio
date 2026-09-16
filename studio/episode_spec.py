@@ -1026,7 +1026,8 @@ def first_person_share(lines: list[dict]) -> float:
     return sum(len(FIRST_PERSON.findall(t)) for t in said) / words if words else 0.0
 
 
-def silent_narrator(lines: list[dict]) -> list[str]:
+def silent_narrator(lines: list[dict], cast: set[str] | None = None,
+                    narrator: str = "") -> list[str]:
     """Is this an episode of Watson's memoirs in which Watson never appears?
 
     MEASURED over the seven delivered plans, counting narration lines in which
@@ -1048,6 +1049,23 @@ def silent_narrator(lines: list[dict]) -> list[str]:
     if not any(l.get("kind") == "narration" for l in lines):
         return []
     if narrator_acts(lines):
+        return []
+    # PART TWO HAS NO WATSON.  Chapters 8 to 13 leave London entirely -- the
+    # alkali plain in 1847, John Ferrier and Lucy and Brigham Young's caravan --
+    # and Doyle tells them in the third person.  A rule that says "the narrator
+    # must act" would refuse all six BY CONSTRUCTION: a gate calibrated on
+    # episodes 1 to 7 and applied to a world that changes at episode 8, which is
+    # the fault this pipeline produces more than any other.
+    #
+    # The discriminator is MEASURED, not assumed: in all seven delivered plans
+    # the narration's speaker is `john_watson` and `john_watson` is in the
+    # setups' cast.  A narrator who stands in his own scenes is a witness and
+    # must act in them; one who appears in none of them is telling somebody
+    # else's story, and asking him to act is asking for a different story.
+    #
+    # A caller that names no cast cannot know which it has, and gets the rule
+    # that refuses.  Nothing loosens by omission.
+    if cast is not None and narrator and narrator not in cast:
         return []
     return ["the narrator never acts in his own episode: no narration line has him as "
             "the subject of a verb. Delivered episodes run 1 to 5 such lines; only "

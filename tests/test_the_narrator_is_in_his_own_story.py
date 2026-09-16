@@ -113,3 +113,52 @@ def test_only_episode_7_fails_the_floor():
               if es.silent_narrator([l.model_dump()
                                      for l in episode_home.load_plan(BOOK, n).lines])]
     assert failed == [7], failed
+
+
+# ---- Part Two has no Watson -------------------------------------------------
+#
+# Chapters 8 to 13 of A Study in Scarlet leave London entirely: the alkali
+# plain, 1847, John Ferrier and Lucy and Brigham Young's caravan. Watson is not
+# in them and Doyle tells them in the third person. A rule that says "the
+# narrator must act" would refuse every one of those six episodes BY
+# CONSTRUCTION -- a gate calibrated on episodes 1 to 7 and applied to a world
+# that changes at episode 8.
+#
+# The discriminator is measured, not assumed: in all seven delivered plans the
+# narration's speaker is `john_watson` AND `john_watson` is in the setups' cast.
+# A narrator who stands in his own scenes is a witness and must act in them. A
+# narrator who appears in none of them is telling somebody else's story, and
+# asking him to act is asking for a different story.
+
+
+def test_a_narrator_who_is_in_the_cast_must_act():
+    said = [line("The window stood wide open.")]
+    assert es.silent_narrator(said, cast={"john_watson"}, narrator="john_watson")
+
+
+def test_a_narrator_who_is_in_none_of_the_scenes_need_not():
+    """Episode 8's shape: the plain, Ferrier, Lucy, and nobody telling it from
+    inside."""
+    said = [line("The great salt plain stretched before his eyes, and there was no gleam of hope.")]
+    assert es.silent_narrator(said, cast={"john_ferrier", "lucy_ferrier"},
+                              narrator="chronicler") == []
+
+
+def test_the_default_is_still_the_strict_one():
+    """A caller that names no cast cannot know whether the narrator is in it, and
+    gets the rule that refuses. Nothing loosens by omission."""
+    assert es.silent_narrator([line("The window stood wide open.")])
+
+
+def test_part_one_still_measures_as_recorded():
+    if not (BOOK / "episodes/ep07/plan.json").exists():
+        pytest.skip("the book is not on this disk")
+    failed = []
+    for n in range(1, 8):
+        episode = episode_home.load_plan(BOOK, n)
+        cast = {who for s in episode.setups.values() for who in s.cast}
+        narrator = next((l.speaker for l in episode.lines if l.kind == "narration"), "")
+        if es.silent_narrator([l.model_dump() for l in episode.lines],
+                              cast=cast, narrator=narrator):
+            failed.append(n)
+    assert failed == [7], failed

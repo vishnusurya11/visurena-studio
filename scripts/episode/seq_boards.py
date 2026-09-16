@@ -377,7 +377,9 @@ def main(book_id: str, number: int, only: str | None = None, sheet: int | None =
     # in a single line where he is the object of somebody else's request, in the
     # chapter where a doctor hands an animal over to settle a question.
     said = [l.model_dump() for l in episode.lines]
-    if quiet := ep_spec.silent_narrator(said):
+    in_shot = {who for s in episode.setups.values() for who in s.cast}
+    telling = next((l["speaker"] for l in said if l["kind"] == "narration"), "")
+    if quiet := ep_spec.silent_narrator(said, cast=in_shot, narrator=telling):
         raise SystemExit("the plan fails the witness gate:\n  " + "\n  ".join(quiet))
     print(f"  first person {ep_spec.first_person_share(said) * 100:.1f}% of narration "
           f"(delivered 0.7-6.3; the two best-rated episodes are 5.7 and 4.4), "
