@@ -3,26 +3,24 @@ r"""Episode 10 — "John Ferrier Talks with the Prophet", Part Two chapter 3.
 THE BRICK. One event split by the title card.
 
   QUESTION  Today, can John Ferrier say no to the Prophet?
-  TURN      shot 15, 53 % in: Young turns in the doorway -- better that you and
-            she lay skeletons on the Sierra Blanco than defy the Holy Four.
+  TURN      shot 16, ~50 % in: Young turns on the threshold -- better that you
+            and she lay skeletons on the Sierra Blanco than defy the Holy Four.
             prosperous and let alone -> marked.
-  BUTTON    shot 26, Lucy, the world's answer and the last line: "But they won't
+  BUTTON    shot 30, Lucy, the world's answer and the last line: "But they won't
             let us leave." Then three silent shots: the bar across the door, the
             rusty shotgun cleaned and loaded by one candle.
 
 Written against docs/analysis/ep08_ep09_why_worse.md and the gates built from
-it (studio/plan_gates.py, house_style.py, take_coherence.py):
-  - `where` + `light`, sixteen words on the style line, a black in every setup
-  - every `at_rest` is a PICTURE: >= 40 words, >= 3 frame-edge placements
-  - five inserts; no face closed on more than six times; a medium_close is a
-    single head, never written "two-shot"
-  - moves sized to the shot: a hand's breadth or a forearm on a close, at most
-    two long strides on a medium, a hold on the one many-figure wide
-  - first dialogue at shot 7 (~24 %); a silent shot at 18 and three at the end
-  - no written `end`: the arrival is the camera, said by the builder
-  - dialogue capped at 20 % of words, so eight lines carry the scene and the
-    narration carries the rest -- Young's demand, Ferrier's answer, the threat,
-    Lucy's fear, and her last line
+it, then read by a director before a cent was spent. What the reader sent back,
+all applied here: the turn shot was written with the camera behind the man's
+head; the sun was mirrored on every shot facing away from the house; Ferrier
+was bare-headed on two outdoor sheets whose WARDROBE block puts his hat on; he
+never said no in his own voice; the threat landed on nobody for three shots;
+two pairs of closes were the same picture; Lucy's three heads all ended with a
+hand at her collar; a push on four horses would clone them; a bar drawn in
+mid-air would pass through its brackets. Twenty-four gate refusals before that,
+none of which found any of it. Gates prove only the absence of their own fault.
+
 Chapter 10 is the first with three characters in dialogue; MAX_SPEAKING is 4.
 """
 import json
@@ -91,13 +89,13 @@ SETUPS = {
                   "across the TOP third, and the rag rug lies in the BOTTOM third on the boards."),
         crowd="", outdoors=False, props=[]),
     "farm_doorway": dict(
-        described=("The open front door of John Ferrier's log villa seen from the shingly path on a June "
-                   "morning, 1860: the deep porch on its two posts, the plank door standing open on the "
-                   "dark room behind it, the sitting-room window to its right, the long log wall running "
-                   "off either side, cut stubble either side of the path down to the gate; the low sun "
-                   "comes from the right and lights the porch posts, the door frame and the right-hand "
-                   "log wall hard, throws the posts' shadows long to the left across the boards, and "
-                   "leaves the room behind the open door black"),
+        described=("The open front door of John Ferrier's log villa on a June morning, 1860: the deep "
+                   "porch on its two posts, the plank door standing open between its dark jambs, the "
+                   "sitting-room window to its right, the long log wall running off either side, cut "
+                   "stubble either side of the shingly path down to the gate; the low sun comes from the "
+                   "right and lights the porch posts, the door frame and the right-hand log wall hard, "
+                   "throws the posts' shadows long to the left across the boards, and leaves the room "
+                   "behind the open door black"),
         cast=["john_ferrier", "brigham_young"], landmark="the open front door", landmark_at="start",
         landmark_size="fills the frame",
         route="from the porch step down the shingly path to the gate",
@@ -131,17 +129,17 @@ SETUPS = {
                    "one candle burning on a stool beside the narrow bed is the only light and it comes "
                    "from the candle alone, low and yellow, throwing a man's shadow huge up the log wall; "
                    "a rusty old single-barrelled shotgun hangs on two wooden pegs on the log wall above "
-                   "the bed, a heavy plank door in the near wall with a wooden bar leaning beside it and "
-                   "two iron brackets to take it, a small tin of oil and a rag on the stool, the corners "
-                   "of the room in darkness"),
+                   "the bed, a heavy plank door in the near wall with a wooden bar seated in its two iron "
+                   "brackets, a small tin of oil and a rag on the stool, the corners of the room in "
+                   "darkness"),
         cast=["john_ferrier"], landmark="the shotgun on its two pegs", landmark_at="far_end",
         landmark_size="is half the height of the frame",
         route="from the plank door across the boards to the bed under the shotgun",
-        geometry=("The plank door stands along the LEFT edge of the frame with its bar leaning beside it "
-                  "and the two iron brackets at the height of a man's chest. The candle on the stool burns "
-                  "in the BOTTOM RIGHT corner and is the only light. The narrow bed lies along the RIGHT "
-                  "third. The shotgun hangs on its two pegs across the TOP third of the far log wall above "
-                  "the bed, and the man's shadow climbs the LEFT wall beside the door."),
+        geometry=("The plank door stands along the LEFT edge of the frame with its bar across it in the "
+                  "two iron brackets at the height of a man's chest. The candle on the stool burns in the "
+                  "BOTTOM RIGHT corner and is the only light. The narrow bed lies along the RIGHT third. "
+                  "The shotgun hangs on its two pegs across the TOP third of the far log wall above the "
+                  "bed, and the man's shadow climbs the LEFT wall beside the door."),
         crowd="", outdoors=False, props=[]),
 }
 
@@ -153,8 +151,8 @@ S = [
      "on the bare rock shoulder, rifles across their saddles, the low moon behind the ridge at the "
      "right throwing their long black shadows across the trail toward the camera, the valley a "
      "black gulf at the left.",
-     "The camera pushes in on the four riders across the whole shot, travelling one short stride; the "
-     "nearest horse shifts one hoof on the rock; a rider turns his masked head toward the valley.",
+     "The camera pushes in on the four riders across the whole shot, travelling a hand's breadth; "
+     "the nearest horse shifts one hoof on the rock; a rider turns his masked head toward the valley.",
      "on the trail at the height of a mounted man's eye, four long strides below the riders, a "
      "35mm lens. The low moon stands behind the ridge at the right and throws every shadow toward "
      "the camera",
@@ -169,9 +167,8 @@ S = [
      "Medium of two masked riders side by side on the trail, dark cloth masks under low hat "
      "brims, long rifles across the saddle bows, the moon behind the ridge rimming the horses' "
      "backs and leaving the men's faces black.",
-     "The camera pushes in on the two riders across the whole shot, travelling one long stride; "
-     "the near rider lifts his rifle a hand's breadth off the saddle bow; his horse tosses its "
-     "head against the bit.",
+     "The camera pushes in on the two riders across the whole shot, travelling a forearm; the near "
+     "rider lifts his rifle a hand's breadth off the saddle bow; the near horse's ear turns back.",
      "on the trail level with the riders' chests, two long strides from the near horse, a 50mm "
      "lens. The moon rims the men from behind and the right",
      "The two riders fill the CENTRE of the frame from the bottom edge to the TOP third, the near "
@@ -191,7 +188,7 @@ S = [
      "The bare hand fills the CENTRE of the frame closed on the dark stock. The rifle barrel runs "
      "from the hand to the RIGHT edge as one white line of moonlight on steel. The horse's dark "
      "shoulder fills the BOTTOM third and the black of the night fills the TOP third.",
-     "setup", 0.4, 0.0),
+     "setup", 0.4, 1.0),
 
     # ---- the Prophet at the gate ----------------------------------------------
     ("farm_path_morning", "wide", [], 0.0,
@@ -199,9 +196,9 @@ S = [
      "gate in the near ground standing open, the low sun from the right raking the stubble and "
      "throwing the porch's black shadow half across the path, the sitting-room window a dark "
      "square beside the door.",
-     "The camera pushes in on the porch across the whole shot, travelling two long strides; the "
-     "open gate swings a hand's breadth on its hinge; a curtain moves in the dark sitting-room "
-     "window.",
+     "The camera pushes in on the porch across the whole shot, travelling two long strides; John "
+     "Ferrier's bearded face comes up pale behind the dark glass of the sitting-room window; a "
+     "curtain moves beside it.",
      "on the path just inside the gate at a standing man's eye, a 35mm lens. The low morning sun "
      "comes from the right and throws the porch's shadow toward the left",
      "The porch and the open door stand in the TOP CENTRE of the frame the height of a hand. The "
@@ -213,47 +210,47 @@ S = [
     ("farm_path_morning", "medium", ["brigham_young"], 0.4,
      "Medium of Brigham Young coming up the shingly path toward the porch, a stout sandy-haired "
      "man in a plain black homespun frock coat buttoned high over a black stock, bare-headed, a "
-     "brown-backed volume under one arm, the low sun from the right hard on the side of his face.",
-     "The camera pulls back off Brigham Young across the whole shot, travelling two long strides "
-     "as he walks up the path at a normal walking pace; he shifts the brown-backed volume from one "
-     "arm to the other; the shingle turns under his boots.",
+     "brown-backed volume under one arm, the low sun from the left hard on the side of his face.",
+     "The camera pushes in on Brigham Young across the whole shot, travelling a forearm, as he "
+     "walks up the path toward it at a normal walking pace; he shifts the brown-backed volume from "
+     "one arm to the other; the shingle turns under his boots.",
      "on the path ahead of him at the height of his chest, three long strides up the path from "
-     "him, a 50mm lens. The low sun comes from the right and leaves the left side of his face in "
+     "him, a 50mm lens. The low sun comes from the left and leaves the right side of his face in "
      "shadow",
      "Brigham Young fills the CENTRE of the frame from the bottom edge to the TOP third, his sandy "
      "head at the TOP CENTRE, the black frock coat filling the middle of the frame, the "
-     "brown-backed volume under his LEFT arm at the left of the frame. The sunlit stubble fills "
-     "the RIGHT edge and the porch's black shadow the LEFT edge behind him.",
+     "brown-backed volume under his left arm at the RIGHT of the frame. The sunlit stubble fills "
+     "the LEFT edge and the open gate and the pale valley the TOP edge behind him.",
      "setup", 0.0, 0.0),
 
     ("farm_path_morning", "close", ["brigham_young"], 0.6,
      "Close on Brigham Young's face coming up the path, the full florid clean-shaven face and "
      "heavy jaw, the pale blue eyes under light sandy lashes turned up toward the porch, the sandy "
-     "hair going grey combed back, the low sun from the right on one cheek and the other in "
+     "hair going grey combed back, the low sun from the left on one cheek and the other in "
      "shadow.",
      "The camera pushes in on Brigham Young's face across the whole shot, travelling a hand's "
      "breadth; his pale eyes come up from the path to the door ahead; he lifts his head a finger's "
      "breadth toward the door.",
      "on the path at Brigham Young's own eye, an arm's length ahead of him, a 90mm lens. The low "
-     "sun comes from the right and splits his face into a lit half and a dark half",
+     "sun comes from the left and splits his face into a lit half and a dark half",
      "Brigham Young's face fills the CENTRE of the frame from the chin at the BOTTOM edge to the "
-     "sandy hair at the TOP edge, the RIGHT half of the face in hard sun and the LEFT half in "
+     "sandy hair at the TOP edge, the LEFT half of the face in hard sun and the RIGHT half in "
      "shadow, the pale eyes on the line of the upper third. The black stock and the top of the "
-     "frock coat cross the BOTTOM edge and the sunlit stubble is a blur along the RIGHT edge.",
+     "frock coat cross the BOTTOM edge and the sunlit stubble is a blur along the LEFT edge.",
      "setup", 0.0, 0.0),
 
     ("farm_path_morning", "medium", ["john_ferrier", "brigham_young"], 0.9,
-     "Medium at the porch step: John Ferrier in the open doorway bare-headed in his dark "
-     "waistcoat and rolled shirt sleeves with his brown felt hat in one bare hand and the other "
-     "hand held out, Brigham Young arriving at the step with his back three-quarter to the "
-     "camera, the black room behind Ferrier.",
+     "Medium at the porch step: John Ferrier in the open doorway in his wide-brimmed brown felt "
+     "hat and the fawn homespun coat open over his dark waistcoat, one bare hand held out, Brigham "
+     "Young arriving at the step with his back three-quarter to the camera, the black room behind "
+     "Ferrier.",
      "The camera pushes in on the two men across the whole shot, travelling one long stride; "
      "Brigham Young walks past Ferrier's held-out hand and into the dark doorway at a normal "
      "walking pace; Ferrier lowers the hand to his side and turns after him into the door.",
      "on the path below the porch, level with Ferrier's chest, two long strides from the step, "
-     "a 50mm lens. The low sun comes from the right and lights the porch post and Ferrier's face",
+     "a 50mm lens. The low sun comes from the right and lights the porch post and Ferrier's coat",
      "John Ferrier stands in the open doorway in the CENTRE of the frame from the porch step at the "
-     "BOTTOM edge to the door lintel at the TOP edge, the brown felt hat in his LEFT hand and his "
+     "BOTTOM edge to the door lintel at the TOP edge, the hat brim's black across his eyes and his "
      "RIGHT hand held out into the light. Brigham Young's broad black-coated back fills the RIGHT "
      "third of the frame at the step. The room behind Ferrier is black across the middle of the "
      "frame.",
@@ -280,7 +277,8 @@ S = [
     ("farm_parlour", "close", ["john_ferrier"], 0.3,
      "Close on John Ferrier standing by the table, the long sun-darkened face and iron-grey beard "
      "lit hard from the window at the left and the right side of the face in shadow, his eyes down "
-     "on the seated man, the log wall dark behind him.",
+     "toward the chair below the frame, the top of the pushed-back chair's rail bright in the "
+     "bottom left corner, the log wall dark behind him.",
      "The camera pushes in on John Ferrier's face across the whole shot, travelling a hand's "
      "breadth; he draws a breath that lifts the rolled shirt sleeve at the bottom of frame; "
      "he brings his chin down a finger's breadth.",
@@ -288,9 +286,9 @@ S = [
      "light comes from the left and leaves the right of his face dark",
      "John Ferrier's face fills the CENTRE of the frame from the beard at the BOTTOM edge to the "
      "iron-grey hair at the TOP edge, the LEFT half of the face carved in window light and the "
-     "RIGHT half in shadow, the deep-set eyes on the line of the upper third looking down. The dark "
-     "log wall fills both edges behind him and the top of the rolled shirt sleeve crosses the "
-     "BOTTOM edge.",
+     "RIGHT half in shadow, the deep-set eyes on the line of the upper third looking down. The "
+     "chair's top rail is a bright bar in the BOTTOM LEFT corner and the dark log wall fills the "
+     "RIGHT edge behind him.",
      "friction", 0.0, 0.0),
 
     ("farm_parlour", "medium_close", ["brigham_young"], 0.4,
@@ -324,114 +322,117 @@ S = [
      "friction", 0.0, 0.0),
 
     ("farm_parlour", "medium_close", ["brigham_young"], 0.6,
-     "Medium close on Brigham Young, head and shoulders, leaning a little forward in the chair "
-     "with both heavy hands flat on the pine table in the window light, the pale eyes steady on "
-     "Ferrier at the right of frame, the sandy hair going grey combed back.",
+     "Medium close on Brigham Young from above, head and shoulders, leaning a little forward in "
+     "the chair with both heavy hands flat on the pine table in the window light, the pale eyes "
+     "turned up into the lens, the sandy hair going grey combed back.",
      "The camera pushes in on Brigham Young across the whole shot, travelling a hand's breadth; "
-     "he brings both flat hands forward a hand's breadth along the table toward the right of "
-     "frame; his shoulders come forward with them.",
-     "at the table end level with Brigham Young's eye, an arm's length from him, a 50mm lens. The "
-     "window sun comes from the left across the table and his hands",
+     "he brings both flat hands forward a hand's breadth along the table toward the lens; his "
+     "shoulders come forward with them.",
+     "at the table end at a standing man's eye looking down at him, an arm's length from him, a "
+     "50mm lens. The window sun comes from the left across the table and his hands",
      "Brigham Young's head and shoulders fill the CENTRE of the frame from the TOP edge to the "
      "black coat at the BOTTOM third, the LEFT cheek sunlit, the pale eyes on the upper third "
-     "fixed to the right. His two heavy hands lie flat on the sunlit table across the BOTTOM edge "
-     "of the frame. The far corner is deep shadow behind his RIGHT shoulder.",
+     "fixed up into the lens. His two heavy hands lie flat on the sunlit table across the BOTTOM "
+     "edge of the frame. The far corner is deep shadow behind his RIGHT shoulder.",
      "friction", 0.0, 0.0),
 
     ("farm_parlour", "close", ["john_ferrier"], 0.7,
-     "Close on John Ferrier's face with the brows knitted, the deep-set eyes narrowed under the "
-     "heavy brows, the iron-grey beard lit from the window at the left, the right of the face in "
-     "shadow, his mouth set in the beard.",
+     "Close on John Ferrier's face with the brows knitted, the riding whip's stock held up under "
+     "his chin in his bare knuckles, the deep-set eyes narrowed under the heavy brows, the "
+     "iron-grey beard lit from the window at the left, the right of the face in shadow.",
      "The camera pushes in on John Ferrier's face across the whole shot, travelling a hand's "
      "breadth; his brows draw down a finger's breadth over the eyes; he lifts his bearded chin a "
-     "finger's breadth to answer.",
+     "finger's breadth off the whip stock to answer.",
      "in the room at John Ferrier's own eye, an arm's length from him, a 90mm lens. The window "
      "light comes hard from the left",
-     "John Ferrier's face fills the CENTRE of the frame from the beard at the BOTTOM edge to the "
+     "John Ferrier's face fills the CENTRE of the frame from the beard at the BOTTOM third to the "
      "hairline at the TOP edge, the LEFT half of the face in window light and the RIGHT half in "
-     "shadow, the knitted brows on the line of the upper third. The dark log wall fills both edges "
-     "behind his head.",
-     "friction", 1.0, 0.0),
+     "shadow, the knitted brows on the line of the upper third. The whip stock crosses the BOTTOM "
+     "edge under his beard in his bare knuckles and the dark log wall fills both edges behind his "
+     "head.",
+     "friction", 1.0, 1.5),
 
     ("farm_parlour", "medium", ["brigham_young", "john_ferrier"], 0.9,
      "Medium of Brigham Young on his feet beside the pushed-back ladder-back chair, the "
      "brown-backed volume tucked under his arm, the slab of window light cutting across his black "
      "waistcoat at the chest, his sandy head above the light in shadow, the chair's rungs bright "
      "beside his knee, John Ferrier's dark shoulder at the right edge.",
-     "The camera pulls back off Brigham Young across the whole shot, travelling one long stride; "
+     "The camera pushes in on Brigham Young across the whole shot, travelling a forearm; "
      "he pushes the chair back a hand's breadth with his knee; he tucks the volume tighter under "
      "his arm and turns toward the door.",
-     "at the hearth end of the room level with a standing man's chest, three long strides from the "
-     "table, a 35mm lens. The window at the left throws its slab of sun across the table between "
-     "the two men",
+     "at the window end of the room level with a standing man's chest, three long strides from the "
+     "table, a 35mm lens. The window beside the camera at the left throws its slab of sun across "
+     "the table between the two men",
      "Brigham Young stands on his feet at the LEFT third of the frame from the bottom edge to the "
      "TOP edge, the slab of window light cutting across his chest at the CENTRE line and his head "
      "in shadow above it. The pushed-back chair's bright rungs stand at the BOTTOM LEFT. John "
      "Ferrier's dark shoulder cuts the RIGHT edge and the black hearth arch sits in the TOP RIGHT.",
      "friction", 1.5, 0.0),
 
-    # ---- turn: the threat in the doorway ----------------------------------------
+    # ---- turn: the threat on the threshold ---------------------------------------
     ("farm_doorway", "medium_close", ["brigham_young"], 0.0,
-     "Medium close of Brigham Young turned back in the open front door, head and shoulders, one "
-     "hand up on the door frame, the flushed heavy face and flashing pale eyes turned into the dark room, "
-     "the low sun from the right hard on the porch post and the black frock coat, the room black "
-     "behind him.",
+     "Medium close of Brigham Young turned back on the threshold and facing into the room, head "
+     "and shoulders, the flushed heavy face and flashing pale eyes full to the lens, one hand up "
+     "on the door frame, the brown-backed volume clamped under his other arm, the sunlit path and "
+     "the pale valley bright behind him between the black door jambs.",
      "The camera pushes in on Brigham Young across the whole shot, travelling a forearm; "
-     "he throws one heavy hand up and out in a threat toward the dark room; his boot comes down "
-     "hard on the porch step.",
-     "on the shingly path below the porch, level with a standing man's chest, four long strides "
-     "from the step, a 35mm lens. The low sun comes from the right and lights the porch posts and "
-     "the black coat hard",
+     "he throws one heavy hand up and out in a threat toward the lens; his boot comes down "
+     "hard on the threshold.",
+     "inside the doorway at Brigham Young's own eye, an arm's length from him with the black door "
+     "jamb at each edge of the lens, a 50mm lens. The low sun comes from the right along the house "
+     "front and lights the path behind him and his right cheek hard",
      "Brigham Young's head and shoulders fill the CENTRE of the frame from the black stock at the "
      "BOTTOM edge to the sandy hair at the TOP edge, the RIGHT half of the flushed face in hard sun "
-     "and the LEFT half in shadow, the pale eyes on the upper third flashing into the room. His "
-     "raised hand grips the sunlit door frame at the RIGHT edge and the black of the room fills the "
-     "frame behind his head.",
+     "and the LEFT half in shadow, the pale eyes on the upper third full to the lens. The black "
+     "door jambs stand at the LEFT and RIGHT edges and the sunlit path and pale valley fill the "
+     "frame bright between them behind his head.",
      "turn", 0.0, 0.0),
 
     ("farm_doorway", "insert", [], 0.1,
-     "Insert on Brigham Young's heavy raised hand against the black of the open door, the fingers "
+     "Insert on Brigham Young's heavy raised hand against the black of the door jamb, the fingers "
      "spread in a threat, the sunlight from the right hard on the knuckles and the black coat "
      "cuff, the white shirt cuff below it.",
      "The camera pushes in on the raised hand across the whole shot, travelling a hand's breadth; "
      "the spread fingers close into a fist; the fist drops out of the bottom of the frame.",
-     "at the porch step at the height of a standing man's head, an arm's length from the hand, a "
+     "at the threshold at the height of a standing man's head, an arm's length from the hand, a "
      "90mm lens. The low sun comes from the right onto the knuckles",
      "The raised hand fills the CENTRE of the frame with the fingers spread across the upper third, "
      "lit hard from the RIGHT, the black coat cuff and the white shirt cuff at the BOTTOM CENTRE. "
-     "The black of the open door fills the whole frame behind the hand and the sunlit door frame "
+     "The black of the door jamb fills the whole frame behind the hand and the sunlit door frame "
      "is a bar of light along the RIGHT edge.",
      "spike", 0.0, 0.0),
 
+    ("farm_doorway", "medium_close", ["john_ferrier"], None,
+     "Medium close on John Ferrier inside the doorway, head and shoulders, in the brown felt hat "
+     "with the brim's black across his eyes and the fawn coat open, the long sun-darkened face and "
+     "iron-grey beard, the low sun from the right on one side of the face, the riding whip in his "
+     "hand at the bottom of frame, the black room behind him.",
+     "The camera pushes in on John Ferrier across the whole shot, travelling a hand's breadth; "
+     "his head turns a hand's breadth to follow the man out of the door; his hand tightens on the "
+     "riding whip and draws it up against his chest.",
+     "on the threshold level with John Ferrier's eye, an arm's length from him, a 50mm lens. The "
+     "low sun comes from the right onto his near cheek under the hat brim",
+     "John Ferrier's head and shoulders fill the CENTRE of the frame from the TOP edge to the fawn "
+     "coat at the BOTTOM third, the hat brim's black across his eyes and the RIGHT cheek in hard "
+     "sun under it, the LEFT cheek in shadow. The riding whip crosses the BOTTOM edge in his hand "
+     "and the black of the room fills the frame behind his head.",
+     "reaction", 1.5, 1.5),
+
     ("farm_doorway", "medium", ["brigham_young"], 0.6,
      "Medium of Brigham Young's broad black-coated back going away down the shingly path from "
-     "the porch, the brown-backed volume under one arm, the low sun from the right on his sandy "
-     "head, the open gate at the far end of the path.",
-     "The camera pushes in on Brigham Young's back across the whole shot, travelling one long stride as he walks away down the path at a normal "
-     "walking pace; the shingle turns under his heavy boots; his black coat skirts swing at the "
-     "knee.",
-     "on the porch step at the height of a standing man's chest, three long strides behind him, a "
-     "50mm lens. The low sun comes from the right and lights his head and shoulder",
-     "Brigham Young's black back fills the CENTRE of the frame from the bottom edge to the TOP "
-     "third, his sandy head at the TOP CENTRE lit from the RIGHT. The shingly path runs from the "
-     "BOTTOM edge past him to the open gate at the CENTRE of the upper third. The sunlit stubble "
-     "fills the RIGHT edge and the porch's black shadow the LEFT edge.",
+     "the porch, seen low from the porch boards, the brown-backed volume under one arm, his boots "
+     "and the swinging coat skirts big in the frame, the low sun from the left on his sandy head, "
+     "the open gate small at the far end of the path.",
+     "The camera pushes in on Brigham Young's back across the whole shot, travelling one long "
+     "stride as he walks away down the path at a normal walking pace; the shingle turns under his "
+     "heavy boots; his black coat skirts swing at the knee.",
+     "on the porch boards at the height of a man's knee, three long strides behind him, a 35mm "
+     "lens. The low sun comes from the left and lights his head and shoulder",
+     "Brigham Young's black back fills the CENTRE of the frame from the boots at the bottom edge to "
+     "the sandy head at the TOP third, lit from the LEFT. The shingly path runs from the BOTTOM "
+     "edge past his boots to the open gate small at the CENTRE of the upper third. The sunlit "
+     "stubble fills the LEFT edge and the porch's black shadow the RIGHT edge.",
      "spike", 0.0, 0.0),
-
-    ("farm_doorway", "medium_close", ["john_ferrier"], None,
-     "Medium close on John Ferrier in the open doorway watching the path, head and shoulders, the "
-     "long sun-darkened face and iron-grey beard, the low sun from the right on one side of the "
-     "face, the riding whip in his hand at the bottom of frame, the black room behind him.",
-     "The camera pushes in on John Ferrier across the whole shot, travelling a hand's breadth; "
-     "his head turns a hand's breadth to follow the path down to the gate; his hand tightens on the "
-     "riding whip and draws it up against his chest.",
-     "on the porch step level with John Ferrier's eye, an arm's length from him, a 50mm lens. The "
-     "low sun comes from the right onto his near cheek",
-     "John Ferrier's head and shoulders fill the CENTRE of the frame from the TOP edge to the dark "
-     "waistcoat at the BOTTOM third, the RIGHT cheek in hard sun and the LEFT cheek in shadow, the "
-     "deep-set eyes on the upper third turned toward the RIGHT edge. The riding whip crosses the "
-     "BOTTOM edge in his hand and the black of the room fills the frame behind his head.",
-     "reaction", 1.5, 1.5),
 
     # ---- payoff: the lamp -------------------------------------------------------
     ("parlour_evening", "medium", ["john_ferrier", "lucy_ferrier"], 0.1,
@@ -456,7 +457,8 @@ S = [
      "back, the clear hazel eyes wide and wet, her lips parted, the lamp warm on one side of her "
      "face and the other side dark.",
      "The camera pushes in on Lucy's face across the whole shot, travelling a hand's breadth; her "
-     "lips part on the question; she brings one bare hand up to her collar.",
+     "lips part on the question; she bows her head a finger's breadth toward her father below the "
+     "frame.",
      "in the room at Lucy's own eye, an arm's length from her, a 90mm lens. The lamp lights her "
      "from the left and low",
      "Lucy's face fills the CENTRE of the frame from the narrow white collar at the BOTTOM edge to "
@@ -495,18 +497,19 @@ S = [
      "payoff", 0.0, 0.0),
 
     ("parlour_evening", "close", ["john_ferrier"], 0.5,
-     "Close on John Ferrier's face turned up to Lucy, the iron-grey beard and the deep-set eyes in "
-     "lamplight, a hard set to the mouth in the beard, the lamp warm on the right of the face and "
-     "the left in shadow.",
+     "Close on John Ferrier's face in three-quarter profile turned up to Lucy, the lamp behind "
+     "him at the left rim-lighting the iron-grey beard and the cheekbone, the near side of the "
+     "face black, a hard set to the mouth in the beard, Lucy's grey-blue sleeve at the right edge.",
      "The camera pushes in on John Ferrier's face across the whole shot, travelling a hand's "
      "breadth; he sets his jaw and brings his chin up a finger's breadth; he lifts one hand into "
      "the bottom of frame to count off a finger.",
-     "in the room at John Ferrier's own eye, an arm's length from him, a 90mm lens. The lamp "
-     "lights him from the right",
-     "John Ferrier's face fills the CENTRE of the frame from the beard at the BOTTOM edge to the "
-     "iron-grey hair at the TOP edge, the RIGHT half warm in lamplight and the LEFT half in "
-     "shadow, the deep-set eyes on the upper third turned up. The black log wall fills both edges "
-     "behind his head and one hand comes into the BOTTOM RIGHT corner.",
+     "in the room at John Ferrier's own eye, an arm's length from him, a 90mm lens. The lamp is "
+     "behind him at the left and rims him; the near side of his face is black",
+     "John Ferrier's face in three-quarter profile fills the CENTRE of the frame from the beard at "
+     "the BOTTOM edge to the iron-grey hair at the TOP edge, the lamp's rim a line of warm light "
+     "along the LEFT edge of the beard and the cheekbone, the near face BLACK across the CENTRE. "
+     "Lucy's grey-blue sleeve stands at the RIGHT edge and one hand comes into the BOTTOM RIGHT "
+     "corner.",
      "payoff", 0.0, 0.0),
 
     ("parlour_evening", "medium_close", ["lucy_ferrier"], 0.6,
@@ -544,8 +547,8 @@ S = [
      "eyes steady on her father at the left of frame, the chestnut hair gathered back, the lamp on "
      "one cheek, the blue-black window behind her shoulder.",
      "The camera pushes in on Lucy across the whole shot, travelling a hand's breadth; she puts "
-     "her chin up a finger's breadth toward her father; she draws her hands together at her "
-     "collar.",
+     "her chin up a finger's breadth toward her father; she turns her head a hand's breadth to the "
+     "blue-black window behind her shoulder.",
      "at the table side level with Lucy's eye, an arm's length from her, a 50mm lens. The lamp "
      "lights her from the left",
      "Lucy's head and shoulders fill the CENTRE of the frame from the TOP edge to the narrow white "
@@ -556,20 +559,21 @@ S = [
 
     # ---- the answer, in pictures: the bar, the gun, the candle ------------------
     ("bedroom_night", "medium", ["john_ferrier"], 0.0,
-     "Medium of John Ferrier by one candle dropping the heavy wooden bar into its brackets across "
-     "the plank door of the log bedroom, bare-headed, in his dark waistcoat and rolled sleeves, the "
-     "candle on the stool behind him throwing his shadow huge across the door.",
+     "Medium of John Ferrier by one candle with both hands flat on the heavy wooden bar seated in "
+     "its two iron brackets across the plank door of the log bedroom, bare-headed, in his dark "
+     "waistcoat and rolled sleeves, the candle on the stool behind him throwing his shadow huge "
+     "across the door.",
      "The camera pushes in on John Ferrier across the whole shot, travelling one long stride; he "
-     "lowers the heavy bar into its two brackets across the door; he sets both hands flat on the "
-     "bar and leans his weight on it.",
+     "leans his weight onto the bar with both hands; his head bows between his arms.",
      "at the bed end of the small room level with a standing man's chest, three long strides from "
      "the door, a 35mm lens. The one candle on the stool at the right lights him from behind and "
      "below and throws his shadow on the door",
      "John Ferrier stands at the plank door along the LEFT third of the frame from the bottom edge "
-     "to the TOP edge with the heavy bar in both hands across the middle of the frame, his huge "
-     "shadow thrown up the door beside him. The candle burns on the stool in the BOTTOM RIGHT "
-     "corner as the only light. The log wall and the shotgun's pegs are dark across the TOP RIGHT.",
-     "answer", 1.0, 1.0),
+     "to the TOP edge with both hands flat on the heavy bar lying in its two brackets across the "
+     "middle of the frame, his huge shadow thrown up the door beside him. The candle burns on the "
+     "stool in the BOTTOM RIGHT corner as the only light. The log wall and the shotgun's pegs are "
+     "dark across the TOP RIGHT.",
+     "answer", 1.0, 2.0),
 
     ("bedroom_night", "insert", [], 0.6,
      "Insert on John Ferrier's two bare heavy-knuckled hands drawing an oily rag down the rusty "
@@ -584,7 +588,7 @@ S = [
      "RIGHT edge, the rag dark in the near hand, the rust brown on the steel lit warm from the LEFT. "
      "The dark cloth of his knees fills the BOTTOM third and the open oil tin and the candle flame "
      "sit at the LEFT edge. The room is black across the TOP third.",
-     "answer", 1.0, 1.0),
+     "answer", 1.0, 1.5),
 
     ("bedroom_night", "medium", ["john_ferrier"], 0.8,
      "Medium of John Ferrier seated on the edge of the narrow bed with the shotgun across his knees "
@@ -594,8 +598,8 @@ S = [
      "The camera pushes in on John Ferrier across the whole shot, travelling one long stride; "
      "his hands close the breech of the gun with a snap; he turns "
      "his head toward the barred door.",
-     "at the door end of the room level with a seated man's eye, three long strides from the bed, a "
-     "35mm lens. The candle on the stool lights him from the right and below",
+     "in the near corner beside the plank door, level with a seated man's eye, three long strides "
+     "from the bed, a 35mm lens. The candle on the stool lights him from the right and below",
      "John Ferrier sits on the bed's edge in the CENTRE of the frame from the boards at the BOTTOM "
      "edge to the TOP third, bent over the shotgun across his knees, the RIGHT side of him warm from "
      "the candle on the stool in the BOTTOM RIGHT corner and the LEFT side black. His shadow climbs "
@@ -635,52 +639,52 @@ EXTRA = {
          "table crosses the BOTTOM third in the sun and the cold hearth is a dark arch behind his "
          "shoulder at the RIGHT edge.",
          "friction", 0.0, 0.0),
-    16: ("farm_doorway", "wide", [], 0.9,
+    17: ("farm_doorway", "wide", [], 0.9,
          "Wide down the shingly path from the porch step to the open gate, Brigham Young's small "
          "black figure at the gate with the brown-backed volume under his arm, his long shadow "
-         "thrown across the stubble by the low sun from the right, the valley pale beyond the gate.",
-         "The camera pushes in on the gate across the whole shot, travelling one short stride as Brigham Young goes out through it at a normal "
-         "walking pace; the gate swings a hand's breadth behind him; the long shadow slides off the "
-         "stubble with him.",
-         "on the porch step at a standing man's eye, a 35mm lens. The low sun comes from the right "
-         "and throws every shadow to the left",
+         "thrown across the stubble by the low sun from the left, the valley pale beyond the gate.",
+         "The camera pushes in on the gate across the whole shot, travelling one short stride as "
+         "Brigham Young goes out through it at a normal walking pace; the gate swings a hand's "
+         "breadth behind him; the long shadow slides off the stubble with him.",
+         "on the porch step at a standing man's eye, a 35mm lens. The low sun comes from the left "
+         "and throws every shadow to the right",
          "The shingly path runs from the BOTTOM edge of the frame up to the open gate at the CENTRE "
          "of the upper third. Brigham Young's black figure stands at the gate the height of a "
-         "finger with his long shadow lying across the LEFT half of the stubble. The sunlit stubble "
-         "fills the RIGHT half and the pale valley and the ridge fill the TOP third.",
+         "finger with his long shadow lying across the RIGHT half of the stubble. The sunlit stubble "
+         "fills the LEFT half and the pale valley and the ridge fill the TOP third.",
          "spike", 0.0, 0.0),
     22: ("parlour_evening", "insert", [], 0.55,
          "Insert on the oil lamp's flame in its glass chimney on the pine table, the brass burner "
-         "bright, Lucy Ferrier's face soft and unfocused behind it in the warm light, the black of "
-         "the room around the flame.",
-         "The camera pushes in on the lamp across the whole shot, travelling a hand's breadth; the "
-         "flame leans once in its chimney; Lucy's soft face behind it turns toward the left of frame.",
+         "bright, the dark table top around it, the black of the room beyond the flame.",
+         "The camera pushes in on the lamp across the whole shot, travelling a hand's breadth; John "
+         "Ferrier's fingers turn the brass wick key a quarter turn at the bottom edge; the flame "
+         "rises in the chimney.",
          "over the table at the height of the lamp chimney, an arm's length from the flame, a 90mm "
          "lens. The flame is the light",
          "The lamp's flame burns in its glass chimney at the CENTRE of the frame from the brass "
-         "burner at the BOTTOM third to the top of the chimney at the TOP third. Lucy's face is a "
-         "soft warm shape behind it filling the RIGHT half of the frame. The black of the room fills "
-         "the LEFT third and the TOP edge.",
+         "burner at the BOTTOM third to the top of the chimney at the TOP third. The dark table top "
+         "fills the BOTTOM edge and the black of the room fills the LEFT third, the RIGHT third and "
+         "the TOP edge.",
          "payoff", 0.0, 0.0),
     24: ("parlour_evening", "insert", [], 0.75,
-         "Insert on John Ferrier's broad rough hand closed on the riding whip on the pine table "
-         "beside the lamp, the knuckles lit warm from the left, the blue-black window a faint "
-         "square beyond the table's edge.",
-         "The camera pushes in on the hand across the whole shot, travelling a hand's breadth; the "
-         "hand tightens on the whip stock until the knuckles stand up; the thumb runs once along "
-         "the leather.",
-         "over the table at the height of a seated man's chin, an arm's length from the hand, a 90mm "
-         "lens. The lamp lights the hand from the left",
-         "The hand fills the CENTRE of the frame closed on the whip stock on the pine boards, the "
-         "knuckles warm from the LEFT and the lamp's brass foot at the LEFT edge. The leather thong "
-         "of the whip lies across the BOTTOM third. The blue-black window is a faint square in the "
-         "TOP RIGHT and the rest of the frame is black.",
+         "Insert on the deep window's blue-black glass beside the table: the lamp's flame reflected "
+         "small and sharp in one pane, the dark log frame around it, and beyond the glass the faint "
+         "pale line of the path running down to the gate under a sky a shade lighter than the hills.",
+         "The camera pushes in on the reflected flame across the whole shot, travelling a hand's "
+         "breadth; the reflected flame leans once in the pane; John Ferrier's dark shoulder comes in "
+         "across the left of the glass as he turns to the window.",
+         "at the table's window end, level with the lamp chimney, an arm's length from the glass, a "
+         "90mm lens. The lamp behind the camera is the light and the glass gives back one small flame",
+         "The window's dark log frame crosses the frame as two thick bars, one along the TOP edge "
+         "and one down the RIGHT third. The blue-black glass fills the CENTRE with the lamp's "
+         "reflected flame a small sharp point on the line of the upper third. Below it the faint "
+         "pale path runs from the BOTTOM LEFT corner to the black hills across the middle, and the "
+         "rest of the frame is black.",
          "runout", 1.2, 0.0),
 }
-"""Five narration shots the first count had no room for: 103 s projected against a
-120 s floor, and dialogue at 24 % against the 20 % cap. Each is a picture the
-chapter gives -- the volume under the Prophet's hand, Ferrier's open hand, the
-small black figure at the gate, the lamp, the whip -- and each takes one line."""
+"""Five shots inserted AFTER the named BASE index. The parlour volume and open hand
+carry narration the first count had no room for; the wide at the gate follows
+the back; the lamp and the window are the evening's two objects."""
 
 
 def with_extra(base: list, extra: dict) -> list:
@@ -707,23 +711,23 @@ LINES = [
     ("narration", "john_watson", "It was of the daughter that the Prophet had come to speak.", 10),
     ("narration", "john_watson", "There were stories, he said, that she was promised to a Gentile.", 11),
     ("narration", "john_watson", "And the thirteenth rule of Joseph Smith let no maiden of the faith wed outside it.", 12),
-    ("dialogue", "brigham_young", "Stangerson has a son, and Drebber has a son. Let her choose between them.", 13),
+    ("dialogue", "brigham_young", "Stangerson has a son, and Drebber has a son. Let her choose.", 13),
     ("dialogue", "john_ferrier", "You will give us time. My daughter is very young.", 14),
     ("narration", "john_watson", "She should have a month, he said, and at the end of it her answer.", 15),
     ("dialogue", "brigham_young", "It were better you and she lay bleached skeletons on the Sierra Blanco than defy the Holy Four.", 16),
-    ("narration", "john_watson", "He turned from the door with a threat of his hand.", 17),
-    ("narration", "john_watson", "Ferrier heard his heavy step going away down the shingle.", 18),
-    ("narration", "john_watson", "The Council of Four had decided it, and the girl had a month.", 19),
-    # shot 20: silent
-    ("narration", "john_watson", "He was still sitting with his elbows on his knees when a soft hand was laid on his.", 21),
+    ("narration", "john_watson", "His voice rang through the house, and his daughter heard every word of it.", 17),
+    # shot 18: silent -- the threat lands on Ferrier's face
+    ("narration", "john_watson", "Ferrier heard his heavy step going away down the shingle.", 19),
+    ("narration", "john_watson", "The Council of Four had decided it, and the girl had a month.", 20),
+    ("narration", "john_watson", "He sat on till the lamp was lit, and then a soft hand was laid on his.", 21),
     ("dialogue", "lucy_ferrier", "Oh, father, what shall we do?", 22),
     ("dialogue", "john_ferrier", "Don't you scare yourself. We'll fix it up somehow.", 23),
     ("narration", "john_watson", "A sob and a squeeze of his hand was her only answer.", 24),
     ("narration", "john_watson", "There was a party leaving for Nevada in the morning. He would send Hope word.", 25),
     ("narration", "john_watson", "If he knew the young man, he would be back at a speed to whip the telegraph.", 26),
     ("narration", "john_watson", "She laughed through her tears, and one heard such stories about those who opposed the Prophet.", 27),
-    ("narration", "john_watson", "They had a clear month, he said. At the end of it they would leave Utah.", 28),
-    ("narration", "john_watson", "He was a free-born American, he said, and too old to knuckle under to any man.", 29),
+    ("dialogue", "john_ferrier", "I'm a free-born American, and too old to knuckle under.", 28),
+    ("narration", "john_watson", "They had a clear month, he said. At the end of it they would leave Utah.", 29),
     ("dialogue", "lucy_ferrier", "But they won't let us leave.", 30),
     # shots 31, 32, 33: silent -- the answer is a picture
 ]
@@ -732,16 +736,12 @@ BEDS = [
     {"from_shot": 0, "tone": "uneasy"},
     {"from_shot": 3, "tone": "plain"},
     {"from_shot": 7, "tone": "grave"},
-    {"from_shot": 14, "tone": "thrilling"},
-    {"from_shot": 18, "tone": "light"},
-    {"from_shot": 25, "tone": "uneasy"},
+    {"from_shot": 16, "tone": "thrilling"},
+    {"from_shot": 23, "tone": "light"},
+    {"from_shot": 28, "tone": "uneasy"},
 ]
 
 TURNS = {16: "prosperous and let alone -> marked", 30: "a plan to run -> the door already shut"}
-
-# Exactly one hook, one turn, one button (`Episode._the_shape_is_present`); the
-# turn at 14 of 29 is 48 %... the band is 50-75 % of RUNTIME and the long
-# dialogue shots sit after it, so it is measured by the validator, not counted.
 
 
 def build() -> dict:
