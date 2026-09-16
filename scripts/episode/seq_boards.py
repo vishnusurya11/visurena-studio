@@ -30,7 +30,7 @@ sys.path.insert(0, str(ROOT))
 import numpy as np
 from PIL import Image
 
-from studio import actor_gate, episode_board as board, episode_home, episode_seq_board as sq, prop_refs, route_gate, sheet_gate
+from studio import actor_gate, episode_board as board, episode_gutter, episode_home, episode_seq_board as sq, prop_refs, route_gate, sheet_gate
 from studio import episode_spec as ep_spec
 from studio import frame_match
 from studio.episode_spec import Episode, Setup
@@ -81,15 +81,26 @@ def white_lines(cells: list[Path]) -> list[str]:
     duplicate pair the first attempt did not have and got `Q11_0E` deleted.  Shot
     11 rendered with no END pin for a fault that was never there.
 
-    `episode_board.bands` already uses bright-and-flat to FIND the gutters; this
-    is the same brick, applied to what leaked through."""
+    AND IT LOOKS AS FAR IN AS THE TAKE GUARD DOES, by asking it.  This used to
+    stop at `GUTTER_EDGE` = 6 pixels while `episode_gutter.band` -- which crops
+    the same leak out of a rendered take -- looks `MAX_FRAC` = 8 % of the side,
+    61 pixels of a 768 cell.  A residue between the two passed here and was
+    cropped there, and the crop changes the picture's geometry, so the assembled
+    frames stop matching the take they were cut from and the EDIT gate fails the
+    whole episode.
+
+    MEASURED, episode 8: Q17_0 and Q18_0 carry a paper-white band at rows 8 to 19
+    from the bottom, eight pixels past where this stopped looking.  Both shipped,
+    the take guard cropped 22 and 21 pixels off T17 and T18, and qc reported
+    "edit: FAIL | segments off 2/28" on an episode whose pictures were fine.
+
+    `episode_gutter`'s window is the calibrated one -- measured on episode 1,
+    where four takes ended with a paper-white band the owner saw as a white bar
+    at 28 s and 37 s -- so it owns the number and this asks for it."""
     bad = []
     for c in cells:
         a = np.asarray(Image.open(c).convert("L"), dtype=float)
-        rows, cols = a.shape
-        edges = lambda n, size: n < GUTTER_EDGE or n >= size - GUTTER_EDGE
-        if any(edges(i, rows) and a[i].mean() > 190 and a[i].std() < GUTTER_FLAT for i in range(rows)) or \
-           any(edges(j, cols) and a[:, j].mean() > 190 and a[:, j].std() < GUTTER_FLAT for j in range(cols)):
+        if any(episode_gutter.band(a, edge) > 0 for edge in episode_gutter.EDGES):
             bad.append(c.name)
     return bad
 

@@ -30,6 +30,20 @@ def band(grey: np.ndarray, edge: str) -> int:
     for i in range(limit):
         if lines[i].mean() > WHITE and lines[i].std() < FLAT:
             found = i + 1
+    # A BRIGHT FLAT REGION THAT FILLS THE WHOLE WINDOW IS THE PICTURE.  Leaked
+    # paper is a BAND: it starts at the edge and STOPS, with the picture under
+    # it.  A pale sky does not stop -- it runs past the window and on into the
+    # frame.  MEASURED on episode 8, whose palette is "bleached high-key ... bone
+    # white ... under a white sun": Q13_0E is a wide of the plateau and its top
+    # 67 rows are sky at mean 198, std 2.5, so this returned its own limit and
+    # called a correct picture a gutter.  The three real residues in the same
+    # episode run 11 to 12 rows and stop well inside it.
+    #
+    # Without this the guard would crop 61 pixels off the top of every wide
+    # desert shot in Part Two and scale the rest up, which is a defect in the
+    # delivered picture rather than a repair.
+    if found >= limit:
+        return 0
     return min(found + MARGIN, limit) if found else 0
 
 
