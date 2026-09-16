@@ -256,11 +256,31 @@ def reference_strip(boards: Path, episode: Episode, shots: list) -> Path:
     return out
 
 
-NO_ENDS = False
-"""THE EXPERIMENT, owner 2026-09-13: render every take with NO END picture and
-the arrival said in words instead (`episode_ref_official.arrival_clause`), then
-compare against the same episode rendered with them.  A flag, not a deletion, so
-the control stays reproducible and the change is one line to undo."""
+NO_ENDS = True
+"""THE OWNER'S RULE, 2026-09-16: the ref2v workflow pins NO last frame. A take is
+given its first frame and the arrival is said in WORDS
+(`episode_ref_official.arrival_clause`), never as a second picture.
+
+WHY, and what a last-frame pin actually does (`docs/calibration/end_frames.md`
+section 2, and measured again on episode 8 as delivered):
+
+    the model moves to the END picture as fast as the distance allows,
+    then holds it until the pin.
+
+So the pin has no good setting. A near-copy END (sim ~ 0.9) freezes the segment;
+a far END glides -- and the glide is WHATEVER separates the two pictures, so when
+what separates them is the background, the background dissolves. That is the
+warping the owner saw, and it is not a bug to be gated: it is what the pin does.
+
+Episode 8 is the measurement that settled it. All 15 END-pinned takes were on a
+travelling camera; 7 of the 15 had START/END pictures FARTHER apart than the 0.45
+re-staging floor (Q15_0 at 0.041 -- the two pictures share nothing), admitted only
+because `sq.reaches` drops that floor for a camera told to move. 7 of the 15 then
+froze 0.8-2.1 s before their pin, against 3 of the 13 unpinned takes.
+
+This was `False` for eight episodes because the experiment that would have set it
+was ordered on 2026-09-13 and never run. `--ends` puts the pins back for a
+comparison; nothing in the pipeline asks for them."""
 
 
 def seg_sizes(shots: list) -> list[str]:
@@ -576,8 +596,11 @@ def main(book_id: str, number: int, retake: list[int] | None = None, approved: b
 
 
 def _set_no_ends(argv: list[str]) -> None:
+    """`--ends` is the only way back to last-frame pinning, and it is a control,
+    not an option: see `NO_ENDS`. `--no-ends` still parses so an older command
+    line means what it always meant."""
     global NO_ENDS
-    NO_ENDS = "--no-ends" in argv
+    NO_ENDS = "--ends" not in argv
 
 
 if __name__ == "__main__":

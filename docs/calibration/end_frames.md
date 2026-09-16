@@ -238,3 +238,62 @@ START Q03_0 redrawn with the cab ENTERING at the left edge (the current cell has
 travel across a fixed street, which is the shot. The motion text: "the cab crosses the whole frame from the left edge
 to the right edge at a trot, the shopfronts stay where they are, the wheels throw water" — no "static shot" clause,
 which the prompt member is removing anyway.
+
+---
+
+# THE DECISION, 2026-09-16: the ref2v workflow pins no last frame
+
+Everything above is a proposal for making END pins work. It was never adopted: gate A
+(`end_cell_distinct`) and gate B (`render_reaches_end`) do not exist in the codebase, and
+the owner's experiment of 2026-09-13 (`takes_r2v.NO_ENDS`, "render every take with NO END
+picture and the arrival said in words, then compare") was never run. `NO_ENDS` stayed
+`False` through eight episodes by default, not by decision.
+
+The owner's standing rule, stated again on 2026-09-16: **no first-frame/last-frame pinning
+in the ref2v workflow, because it warps.** Section 2 above is the mechanism, in this
+document's own words:
+
+> the model moves to the END picture as fast as the distance allows, then holds it until
+> the pin. A near-copy END = a freeze for the whole segment. A far END = a glide over the
+> whole segment -- but the glide is whatever separates the two pictures.
+
+So the pin has no good setting. Near freezes; far dissolves the background. Gate B does not
+fix that; it only detects it after the render is paid for.
+
+## What episode 8 shipped
+
+Episode 8 carried **15 END pins against 3 in episode 7 and 1 in episode 6** -- not because
+anything was decided, but because `sq.reaches` was fixed on 2026-09-15 to drop its 0.45
+re-staging floor for a camera told to travel (`The END cell now reaches the take that paid
+for it`, 1a31d69). Every one of episode 8's shots travels.
+
+| | ep06 | ep07 | ep08 |
+|---|---|---|---|
+| takes given an END pin | 1 | 3 | **15** |
+
+Measured on the delivered files (`shots.json` + `T??.mp4`):
+
+- All 15 pins sit on a travelling camera.
+- **7 of the 15 have START/END pictures farther apart than the 0.45 floor** -- admitted only
+  because the floor was dropped. `Q15_0` scores **0.041**: the two pictures share nothing,
+  which is precisely the Q03_0E case (the street dissolving into the gate) that section 2
+  named the treadmill.
+- 7 of the 15 freeze 0.8-2.1 s before their pin (worst `T04`, 2.08 s), against 3 of the 13
+  unpinned takes. The pin roughly doubles the rate; it is not the only cause of a freeze.
+
+## What is enforced now
+
+`scripts/episode/takes_r2v.py`: `NO_ENDS = True`, and `end_cells` returns `[]` whatever is
+drawn on disk. `--ends` is the control, kept so the comparison stays reproducible; nothing
+in the pipeline asks for it. The destination is carried by
+`episode_ref_official.arrival_clause`, verified against the rebuilt artefact rather than the
+function: 28 of 28 episode-8 take prompts, 0 staged END pictures, 0 occurrences of
+"last frame of [Shot".
+
+Tests: `tests/test_dq_targets_what_was_staged.py::test_the_ref2v_workflow_pins_no_last_frame`
+(a drawn, perfectly reachable END cell is still refused) and
+`::test_the_arrival_is_said_in_words_when_no_end_is_staged`.
+
+The END panels are still DRAWN on the sequence sheets. They cost nothing extra (they fill
+spare cells that would otherwise be alternates) and they remain a useful contact-sheet
+check that the plan's motion has a destination at all. They are simply never pinned.

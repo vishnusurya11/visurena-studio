@@ -57,7 +57,11 @@ def test_every_declared_face_is_staged_up_to_the_reference_ceiling():
     assert len(tr.faces_of(take)) <= tr.MAX_FACES
 
 
-def test_the_reference_list_is_the_picture_numbering_the_prompt_states(tmp_path):
+def test_the_reference_list_is_the_picture_numbering_the_prompt_states(tmp_path, monkeypatch):
+    # This is about the PICTURE NUMBERING when an END cell is staged, so it is
+    # stated with the pin turned back ON. The live default withholds every END
+    # picture -- `takes_r2v.NO_ENDS`, the owner's rule of 2026-09-16.
+    monkeypatch.setattr(tr, "NO_ENDS", False)
     book, frames = tmp_path / "book", tmp_path / "frames"
     (book / "refs" / "characters").mkdir(parents=True)
     (frames / "plates").mkdir(parents=True)

@@ -59,10 +59,14 @@ def test_a_missing_start_cell_is_not_reachable(tmp_path):
     assert not sq.reaches(tmp_path / "Q05_0.png", b)
 
 
-def test_the_take_keeps_only_the_end_cells_it_can_travel_to(tmp_path):
+def test_the_take_keeps_only_the_end_cells_it_can_travel_to(tmp_path, monkeypatch):
     import sys
     sys.path.insert(0, "scripts/episode")
     import takes_r2v as tr
+    # This is about which END cell `reaches` can travel to, so it is stated with
+    # the pin turned back ON. The live default withholds every END picture --
+    # `takes_r2v.NO_ENDS`, the owner's rule of 2026-09-16.
+    monkeypatch.setattr(tr, "NO_ENDS", False)
 
     frames = tmp_path / "frames"
     (frames / "plates").mkdir(parents=True)

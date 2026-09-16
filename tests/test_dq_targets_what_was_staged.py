@@ -64,11 +64,17 @@ def test_no_end_cell_at_all_still_aims_at_itself(tmp_path):
     assert segments_of(ANCHORS, tmp_path, 4.0)[0][1] == "Q00_0.png"
 
 
-def test_the_judge_and_the_builder_agree(tmp_path):
-    """The one invariant: whatever `end_cells` stages, `segments_of` aims at."""
+def test_the_judge_and_the_builder_agree(tmp_path, monkeypatch):
+    """The one invariant: whatever `end_cells` stages, `segments_of` aims at.
+
+    Stated under `NO_ENDS = False`, because the invariant is about the two
+    functions agreeing and there is nothing to disagree about when nothing is
+    staged.  The live default is the other way (`takes_r2v.NO_ENDS`); the test
+    below is the one that holds there."""
     import sys
     sys.path.insert(0, "scripts/episode")
     import takes_r2v as tr
+    monkeypatch.setattr(tr, "NO_ENDS", False)
 
     push(draw(tmp_path / "Q00_0.png"), tmp_path / "Q00_0E.png")   # reachable
     draw(tmp_path / "Q00_1.png", 2)
@@ -76,6 +82,32 @@ def test_the_judge_and_the_builder_agree(tmp_path):
     staged = {sq.cell_name(a, b, end=True) for a, b in tr.end_cells(tmp_path, [(0, 0), (0, 1)])}
     aimed = {t for _c, t, *_ in segments_of(ANCHORS, tmp_path, 4.0) if t.endswith("E.png")}
     assert staged == aimed == {"Q00_0E.png"}
+
+
+def test_the_ref2v_workflow_pins_no_last_frame(tmp_path):
+    """THE OWNER'S RULE, 2026-09-16, and this is where it is enforced.
+
+    A last-frame pin makes the model race to the END picture and hold it: a near
+    copy freezes the segment, a far one dissolves whatever separates the two
+    pictures -- the warping.  Episode 8 shipped 15 of them because `NO_ENDS`
+    defaulted `False` for eight episodes.  A drawn, perfectly reachable END cell
+    sitting on disk is NOT a reason to pin it."""
+    import sys
+    sys.path.insert(0, "scripts/episode")
+    import takes_r2v as tr
+
+    assert tr.NO_ENDS is True, "the default is no last-frame pin"
+    push(draw(tmp_path / "Q00_0.png"), tmp_path / "Q00_0E.png")   # reachable, and still refused
+    assert tr.end_cells(tmp_path, [(0, 0)]) == []
+
+
+def test_the_arrival_is_said_in_words_when_no_end_is_staged():
+    """And the destination does not simply vanish with the picture: with no END
+    staged, the take's own prompt block says where the shot gets to."""
+    from studio import episode_ref_official as ro
+    seg = {"t": 0.0, "end": 4.0, "size": "wide", "motion": "The camera pushes in on the man.",
+           "frame": "A man on the plain.", "speaks": [], "shot": 0, "sub": 0}
+    assert ro.arrival_clause(seg).strip()
 
 
 # ---- the record is the truth, not the disk ---------------------------------
