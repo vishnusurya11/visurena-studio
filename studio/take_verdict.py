@@ -6,9 +6,12 @@ that segment against the cell it was pinned to.  Everything here is free:
 ffmpeg, numpy, PIL, studio.frame_match.
 
 The measures live in their own modules and are called once each:
-  studio.motion_gate   frozen at a segment start, frozen share  (G4.1-4.2)
-  studio.cut_landing   where the cut landed, foreign pictures    (G4.3-4.4)
-  studio.identity_gate who is on screen                          (G4.7, flagged)
+  studio.motion_gate     frozen at a segment start, frozen share  (G4.1-4.2)
+  studio.cut_landing     where the cut landed, foreign pictures    (G4.3-4.4)
+  studio.identity_gate   who is on screen                          (G4.7, flagged)
+  studio.take_coherence  stays on its own board MID-take: off-board
+                         share, last frame vs cell, unprompted cut (HARD),
+                         churn after pan removal (advisory)        (G-COHERENCE)
 This module adds drift to the END cell, lip sync (lag AND word error rate),
 turns them into one score, ranks attempts, and owns the retake budget.
 """
@@ -21,7 +24,7 @@ from pathlib import Path
 import numpy as np
 from PIL import Image, ImageDraw
 
-from studio import cut_landing as cl, frame_match as fm, identity_gate, motion_gate
+from studio import cut_landing as cl, frame_match as fm, identity_gate, motion_gate, take_coherence as tc
 
 FPS = 24
 SHARE_HARD, SHARE_ADVISORY = 0.40, 0.20
@@ -87,6 +90,7 @@ class TakeVerdict:
     frozen_spans: list = field(default_factory=list)
     energy_q: list[float] = field(default_factory=list)
     foreign: list[dict] = field(default_factory=list)
+    coherence: dict = field(default_factory=dict)
     score: float = 0.0
     passed: bool = False
 
@@ -241,6 +245,10 @@ def gates(v: TakeVerdict, audio: dict | None, line_text: str, unplanned: list[fl
     out.append(foreign_gate(v))
     out.append(landing_gate(v.segments, unplanned))
     out.append(drift_gate(v.segments))
+    # G-COHERENCE: the take is judged over EVERY frame against its own board,
+    # not the END frame only.  ep09 scored 28/28 at 100 with 62 % of its
+    # frames off-board; the rows and their calibration live in take_coherence.
+    out.extend(tc.rows(v.coherence))
     out.append(lip_gate(v.lane, audio, line_text))
     out.append(identity_gate_row(identity))
     out.append(Gate("wardrobe", None, True, False, "not measured"))
@@ -387,11 +395,21 @@ def measure(video: Path, record: dict, cells: Path, seconds: float, attempt: int
                         record.get("refs"))
     v = TakeVerdict(record["index"], attempt, video.name, round(seconds, 2), record.get("lane", "narration"),
                     [], segs, motion["frozen_spans"], [round(float(x), 1) for x in motion["bins"]],
-                    sampled_foreign(per_frame))
+                    sampled_foreign(per_frame), coherence(video, record, cells, seconds))
     identity = identity_gate.identity_dq(video, segs, record.get("faces", []), record.get("refs", []))
     v.gates = gates(v, audio, line_text, unplanned_from(rows), identity)
     v.score, v.passed = score(v.gates)
     return v
+
+
+def coherence(video: Path, record: dict, cells: Path, seconds: float) -> dict:
+    """G-COHERENCE off a second, native-size grey decode: the 192x336 frames the
+    motion gate reads squash a square take and average its grain away, and the
+    coherence constants were calibrated on the take's own pixels."""
+    names = tc.pinned_names(record)
+    if not names:
+        return {}
+    return tc.measure(tc.frames(video, seconds), tc.load_cells(cells, names), record.get("anchors") or [])
 
 
 def sampled_foreign(per_frame: list[dict], samples: int = 8) -> list[dict]:

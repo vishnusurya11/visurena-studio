@@ -563,8 +563,13 @@ def door_size(path: float, landmark_at: str = FAR_END, largest: str = "") -> str
 
 def on_route(seg: dict, setup: Setup | None = None) -> bool:
     """A panel that shows the walk: a wide framing with a place on a route the
-    setup actually names."""
-    if setup is not None and not setup.route:
+    setup actually names.
+
+    AN ALTERNATE IS NEVER ON THE WALK.  It inherits its base panel's `path` so
+    the take builder can find it, and episode 9's sheets listed 14 of them as
+    route panels that had to be farther along than the panel before -- while
+    each was another angle of a panel already passed."""
+    if seg.get("alt") or (setup is not None and not setup.route):
         return False
     return seg["size"] in GEO_SIZES and seg.get("path") is not None
 
@@ -586,53 +591,124 @@ def sheets(segs: list[dict], setup: Setup | None = None,
 
 
 ALTERNATES = (
-    ("Reverse angle on {who}, the camera round on the other side of the same moment as "
-     "panel {k}: their faces where their backs were, the far side of the place behind them.",
-     "The camera stands opposite its position in panel {k}, at the same height, a 35mm lens."),
-    ("A wide establishing view of the same moment as panel {k}, {who} small in the middle "
-     "distance with the whole place open around them, floor to roof in frame.",
-     "The camera stands well back from panel {k}, at a standing eye, a 24mm lens."),
-    ("A tight insert from the moment of panel {k}: hands, cuffs and one held object filling "
-     "the frame from edge to edge, the collar and the chest below it the top of frame.",
-     "The camera stands an arm's length from the hands, looking down, a 90mm lens."),
-    ("A low angle on {who} at the same moment as panel {k}, the camera near the ground "
-     "looking up past them to the roof or the sky.",
-     "The camera stands at knee height below panel {k}, its lens aimed up past them at the "
-     "roof or the sky, a 28mm lens."),
+    # (frame, camera, size, at_rest) -- a size of "" keeps the base panel's.
+    # `{who}` and `{thing}` are always two nouns joined by "and", so every
+    # sentence is plural whether the base panel holds two people or none.
+    ("Reverse angle on {who} and {thing}, the camera round on the far side of panel {k}: "
+     "their near sides where their far sides were, the far side of the place behind them.",
+     "opposite its position in panel {k}, at the same height, a 35mm lens",
+     "",
+     "{who} and {thing} stand exactly as panel {k} left them, seen from this side."),
+    ("A wide establishing view of {who} and {thing}, both small in the middle distance "
+     "with the whole place open around them, floor to roof in frame.",
+     "well back from panel {k}, at a standing eye, a 24mm lens",
+     "wide",
+     "{who} and {thing} sit still at the middle distance with the whole place open around them."),
+    ("A tight insert on {thing} from panel {k}, {thing} filling the frame from edge to edge, "
+     "{hands}.",
+     "an arm's length from {thing}, looking down, a 90mm lens",
+     "insert",
+     "{thing} fills the middle of the frame with everything on it still."),
+    ("A low angle on {who} and {thing}, the camera near the ground looking up past them to the "
+     "roof or the sky.",
+     "at knee height below panel {k}, its lens aimed up past them, a 28mm lens",
+     "",
+     "{who} and {thing} stand over the camera, and the roof or the sky fills the top of frame."),
 )
-"""Four alternates, each its OWN picture in its own words.
+"""Four alternates, each its OWN picture in its own words: its own SIZE, its
+own camera, its own at-rest line, and the base panel's people AND hero object.
 
 The first draft inherited the base panel's whole `frame` and appended one
 sentence, which the TWINS gate measured at 0.836 against its base and refused --
-correctly. Two panels asking for one picture cannot both be the different
-picture the sheet demands. So an alternate states a camera and a framing the
-base panel does not have, and borrows only the people."""
+correctly.  The second draft borrowed only the people and said "the same moment
+as panel k" -- and MEASURED on episode 9's 14 alternates: every one inherited
+its base's `size`, `at_rest` and ladder clause (a "FULL SHOT ... a tight insert
+of hands"), was listed as a route panel that had to advance, carried "camera
+The camera stands", and named no object, so the drawer drew the same wide three
+times per 3x3 sheet (nearest-neighbour similarity 0.22 -> 0.32).  Two panels
+asking for one picture cannot both be the different picture the sheet demands.
+
+The camera strings are written the way every plan writes `camera` -- the
+phrase after the word "camera" -- because `start_text` prints ", camera <this>"
+and a string that opened "The camera stands" printed "camera The camera stands"
+fourteen times."""
 
 
 def _who(seg: dict) -> str:
-    """Who the alternate is of, in three words, so it shares no prose with its base."""
+    """Who the alternate is of, in three words, so it shares no prose with its
+    base; a panel with no face in it is "of" its first concrete noun."""
     faces = [f.replace("_", " ").title() for f in seg.get("faces") or []]
-    return " and ".join(faces[:2]) if faces else "the place"
-"""What a spare cell becomes. The four are the angles an editor asks for first.
+    return " and ".join(faces[:2]) if faces else hero(seg.get("frame", ""))
 
-The grid table is coarse -- 3, 6 or 9 cells at 9:16 -- so a setup almost never
-fills its sheet exactly, and a sheet with black cells is a sheet the owner sent
-back. Spares used to be END panels; they are alternates now, because an
-alternate is a picture of a moment the episode really has, and nothing
-downstream can mistake it for a destination the way an END cell was."""
+
+def _thing(seg: dict) -> str:
+    """The hero OBJECT the alternate must also show: the base frame's first
+    concrete noun -- its second, when the first is already standing in for
+    the people."""
+    things = nouns(seg.get("frame", ""))
+    if seg.get("faces"):
+        return things[0] if things else "the nearest thing in frame"
+    return things[1] if len(things) > 1 else "the ground under it"
+
+
+SKIP_NOUNS = frozenset("""light lamplight sunlight daylight firelight dusk dawn dark shadow glare distance
+moment instant frame edge foreground background middle centre center left right top bottom whole same far
+near height width air way side rest action face faces head eyes eye beard hair hand hands shoulder shoulders
+back profile figure mouth chin brow cheek cheekbones jaw""".split())
+"""Nouns that name no OBJECT: a picture of "the lamplight" or "the middle
+distance" cannot be drawn as the thing an insert closes on, and a face or a
+hand is a person's, already named by `_who`."""
+
+NOUN_PHRASE = re.compile(
+    r"\b(the|a|an)\s+((?:[\w'-]+\s+){0,2}?[\w'-]+)"
+    r"(?=\s+(?:of|in|on|at|by|with|under|over|across|along|behind|beside|from|to|and|through|into|"
+    r"against|between|off|for|beyond|before|after|round|around|past|up|down|above|below|toward|towards|"
+    r"onto|upon|about|near|inside|outside|within|"
+    r"stands?|sits?|lies?|hangs?|leans?|runs?|fills?|holds?|rests?|burns?|opens?|falls?|rises?|comes?|"
+    r"goes?|walks?|rides?|turns?|looks?|catches|crosses|settles?|is|are|has|have)\b|[,.;:]|$)", re.I)
+"""An article, the FEWEST modifiers that reach a noun, and the noun -- closed
+by a preposition, a verb, punctuation or the end.  The modifier count is lazy
+on purpose: greedy, "the lamp above." read "lamp" as a modifier of "above"."""
+
+
+def nouns(frame: str) -> list[str]:
+    """Every concrete noun phrase of a frame, article and all, in order, each
+    once: ["the pine table", "the hanging lamp", ...]."""
+    out = []
+    for found in NOUN_PHRASE.finditer(frame or ""):
+        phrase = f"{found.group(1).lower()} {found.group(2).strip()}"
+        if phrase.split()[-1].lower() not in SKIP_NOUNS and phrase.lower() not in [p.lower() for p in out]:
+            out.append(phrase)
+    return out
+
+
+def hero(frame: str) -> str:
+    """The first concrete noun of a frame, article and all: "the pine table".
+
+    The thing the alternate must ALSO show, so that a reverse, a wide, an insert
+    and a low angle of one panel are four pictures of one object and not four
+    template sentences.  Nine of episode 9's thirty shots were the same close of
+    Lucy with the same hat-hair-skirt list; episode 7's closes each had a
+    different object in hand, and that is the difference this noun buys."""
+    found = nouns(frame)
+    return found[0] if found else "the nearest thing in frame"
 
 
 def alt_panel(seg: dict, number: int) -> dict:
-    """An ALTERNATE angle of panel `number`: the same instant, another camera.
+    """An ALTERNATE angle of panel `number`: another camera on the same people
+    and the same object, written as its own complete picture.
 
-    It carries the start panel's own nouns, like `end_panel`, so the drawer has a
-    base to vary rather than a relation to satisfy -- the lesson of the three END
-    panel attempts on episode 2, which is about the drawer and outlives the END
-    panel itself."""
-    frame, camera = ALTERNATES[(number - 1) % len(ALTERNATES)]
-    who = _who(seg)
+    It keeps the base panel's `path`, `faces` and `crowd` -- the facts a take
+    builder and the crowd clause need -- and NOTHING that describes the base's
+    own picture: size, camera, at-rest and ladder are its own."""
+    frame, camera, size, at_rest = ALTERNATES[(number - 1) % len(ALTERNATES)]
+    who, thing = _who(seg), _thing(seg)
+    hands = (f"the bare hands and cuffs of {who} at the edge of frame" if seg.get("faces")
+             else "its own surface sharp from edge to edge")
+    words = {"k": number, "who": who, "thing": thing, "hands": hands}
     return dict(seg, alt=True, end=False, of=number, end_frame="", changed="",
-                frame=frame.format(k=number, who=who), camera=camera.format(k=number),
+                size=size or seg.get("size", ""), frame=frame.format(**words),
+                camera=camera.format(**words), at_rest=at_rest.format(**words),
                 motion="The camera holds a static shot; a hand shifts a finger's breadth.")
 
 
@@ -880,12 +956,21 @@ def grows(setup: Setup) -> str:
     return "larger" if setup.landmark_at == FAR_END else "smaller"
 
 
-def order_block(n: int, ladder: list[int], setup: Setup) -> str:
+def order_block(n: int, ladder: list[int], setup: Setup, alts: list[int] = ()) -> str:
     """ONE ordering law (story order), plus the distance ladder as explicit panel
     numbers.  The geography-first sort made panel 1 of the criterion sheet shot 2,
-    and the sheet then carried two contradictory ordering sentences."""
-    text = (f"The panels are in story order: panel 1 happens first, panel {n} happens last, and each panel "
+    and the sheet then carried two contradictory ordering sentences.
+
+    The ALTERNATES are named here as sitting OUTSIDE the sequence: a sheet that
+    says every panel is later than the last and then draws another angle of
+    panel 1 in cell 6 carries the same contradiction in a new place."""
+    last = max([k for k in range(1, n + 1) if k not in set(alts)] or [n])
+    text = (f"The panels are in story order: panel 1 happens first, panel {last} happens last, and each panel "
             f"is a later moment than the one before it.")
+    if alts:
+        text += (f" {span(list(alts))} {'are alternates' if len(alts) > 1 else 'is an alternate'}: "
+                 f"each is another angle of the panel it names, at that panel's own moment, and sits "
+                 f"outside the sequence.")
     if setup.route and ladder:
         far = setup.landmark or "the far door"
         text += f" The people travel {setup.route}."
@@ -897,7 +982,7 @@ def order_block(n: int, ladder: list[int], setup: Setup) -> str:
     return text
 
 
-def references_block(setup: Setup, physical: dict[str, str], props: list[dict] | None = None) -> str:
+def references_block(setup: Setup, physical: dict, props: list[dict] | None = None) -> str:
     """What each attached image is, by index and role, in the order it is attached:
     the plate, the prop plates, the cast, then the OBJECT cards.
 
@@ -915,8 +1000,8 @@ def references_block(setup: Setup, physical: dict[str, str], props: list[dict] |
                      f"is the same {prop} all afternoon.")
     for who in setup.cast:
         name = who.replace("_", " ").title()
-        lines.append(f"Image {len(lines) + 1} is {name}: {steady(physical.get(who, ''))} Keep exactly this "
-                     f"face, hair, build and these clothes in every panel that shows {name}.")
+        lines.append(f"Image {len(lines) + 1} is {name}: {described(who, physical.get(who, ''), setup)} Keep "
+                     f"exactly this face, hair, build and these clothes in every panel that shows {name}.")
     for row in (props or []):
         # picture, INDEX and measure in ONE sentence: the single episode 2 prop that
         # held its size (the envelope, 1.25x against 0.36-3.0x for the rest) was the
@@ -952,22 +1037,75 @@ def geometry_block(setup: Setup) -> str:
     return "\n".join(parts)
 
 
-def wardrobe_block(setup: Setup, physical: dict[str, str]) -> str:
+def look(row) -> dict:
+    """A cast row in ONE shape, whichever the caller stored:
+    `{"physical": <the invariant description>, "wardrobe": {<state>: <garments>}}`.
+
+    `seq_boards.physicals()` hands the wardrobe states beside the physical; the
+    London-era callers and every test fixture hand a bare string, which is a
+    physical with no states.  Both are read here, once, so no block has an
+    `isinstance` of its own."""
+    if isinstance(row, str):
+        return {"physical": row, "wardrobe": {}}
+    return {"physical": (row or {}).get("physical", ""), "wardrobe": dict((row or {}).get("wardrobe") or {})}
+
+
+def garments(row, state: str) -> str:
+    """The garment line for this sheet's state, as a verb phrase after the name
+    ("wears a broad brown felt sombrero ..."), or "" when the row has none."""
+    return (look(row)["wardrobe"].get(state) or "").strip().rstrip(". ")
+
+
+def described(who: str, row, setup: Setup) -> str:
+    """What this character looks like ON THIS SHEET: the invariant physical, then
+    the garments of this setup's state as one flat sentence.
+
+    MEASURED on episode 9: the block read `physical` alone, the Utah rows keep
+    their clothes in `wardrobe[state]`, and the WARDROBE block -- "these stay
+    the same in every panel" -- named no garment for anyone in Part Two."""
+    name, worn = who.replace("_", " ").title(), garments(row, setup.state)
+    base = steady(look(row)["physical"])
+    return f"{base} {name} {worn}." if worn else base
+
+
+def wardrobe_block(setup: Setup, physical: dict) -> str:
     """The preservation list, standalone and repeated on every sheet, with every
     conditional flattened to one fact.  Buried inside "Image 2 is John Watson: ..."
-    it read as a description of the reference, not as a law over the sheet."""
+    it read as a description of the reference, not as a law over the sheet.
+
+    The hat line is derived from the physical's conditional clauses ONLY where
+    the row has no state line: a state line already says where the hat is, and
+    "her straw hat is on his head" over it is the drift the block exists to end."""
     lines = ["These stay the same in every panel of this sheet."]
     for who in setup.cast:
-        name = who.replace("_", " ").title()
-        lines.append(f"{name.upper()}: {steady(physical.get(who, ''))}"
-                     f"{hat_line(name, physical.get(who, ''), setup.outdoors)}")
+        name, row = who.replace("_", " ").title(), physical.get(who, "")
+        hat = "" if garments(row, setup.state) else hat_line(name, look(row)["physical"], setup.outdoors)
+        lines.append(f"{name.upper()}: {described(who, row, setup)}{hat}")
     lines.append("Every hand in every panel is bare skin.")
     return "\n".join(lines)
 
 
+PEOPLE = re.compile(
+    r"\b(?:men|women|man|woman|people|folk|crowd|boys?|girls?|children|drivers?|herdsmen|immigrants?|"
+    r"clerks?|porters?|farm hands?|riders?|horsemen|soldiers?|students?|waiters?|drinkers?|pedestrians?|"
+    r"passers-by|walkers?|nurses?|loafers?|constables?|figures?|indians|labourers?|workmen|cabmen|cabman|"
+    r"urchins?|barmen|barman|maids?|servants?|guards?|elders?|pilgrims?|settlers?|travellers?|traders?|"
+    r"onlookers?|bystanders?|villagers?|townsfolk|congregation|worshippers?)\b", re.I)
+"""The nouns that make a crowd a crowd: a closed list, so that a horse at a
+rail and moths at a lamp glass are what they are.  Episode 9's six setups all
+carried a `crowd`, two of them of animals, and all six sheets were told "this
+is a public place in a working city and people fill it in every panel"."""
+
+
+def people(crowd: str) -> bool:
+    """Does this background life name PEOPLE?"""
+    return bool(PEOPLE.search(crowd or ""))
+
+
 def crowd_block(setup: Setup) -> str:
-    """The sheet-level half of the owner's "background folks having regular work"."""
-    if not setup.crowd:
+    """The sheet-level half of the owner's "background folks having regular work"
+    -- stated only where the setup's crowd is people."""
+    if not people(setup.crowd):
         return ""
     return ("This is a public place in a working city and people fill it in every panel. The people behind "
             "the action are different people in different postures in every panel, a fresh group drawn for "
@@ -977,8 +1115,12 @@ def crowd_block(setup: Setup) -> str:
 def crowd_clause(seg: dict, setup: Setup) -> str:
     """This panel's own background life, with a count and an activity.  A crowd
     named once for a whole location is averaged away: the criterion two-shot and
-    its END drew an empty bar although the location text says "two deep"."""
-    crowd = seg.get("crowd") or setup.crowd
+    its END drew an empty bar although the location text says "two deep".
+
+    ONCE, and closed once: the crowd's own full stop is stripped so the clause
+    cannot print ".," (32 times across episode 9), and a frame that already
+    carries the crowd sentence is not told it a second time."""
+    crowd = (seg.get("crowd") or setup.crowd or "").strip().rstrip(". ")
     # A CROWD IS PART OF THE PLACE, so it needs a panel wide enough to hold a
     # place -- the same ladder `places_the_plate` uses, for the reason stated
     # there: below it you are looking at a person, not at a place.  This used to
@@ -987,7 +1129,9 @@ def crowd_clause(seg: dict, setup: Setup) -> str:
     # frame edge (owner, 2026-09-13: "a blur human on the side").
     if not crowd or seg.get("size") not in WIDE_ENOUGH:
         return ""
-    return f" Behind them, {crowd}, out of focus."
+    if crowd.lower() in (seg.get("frame") or "").lower():
+        return ""
+    return f" Behind them, {crowd[0].lower()}{crowd[1:]}, out of focus."
 
 
 def ladder_clause(seg: dict, setup: Setup) -> str:
@@ -1011,6 +1155,8 @@ def start_text(k: int, seg: dict, ladder: str, crowd: str) -> str:
     """A start panel: size, where the CAMERA stands, the nouns in frame, the
     landmark ladder, this panel's crowd, and what is still at rest."""
     head = f"Panel {k} - {size_word(seg)}"
+    if seg.get("alt"):
+        head += f", ALTERNATE ANGLE OF PANEL {seg['of']}"
     head += f", camera {seg['camera'].rstrip('. ')}." if seg.get("camera") else "."
     return f"{head} In frame: {stop(seg['frame'])}{ladder}{crowd} {before_clause(seg)}".strip()
 
@@ -1220,10 +1366,12 @@ def prompt(segs: list[dict], setup: Setup, physical: dict[str, str], previous: b
     sit on the walk (True = all).  `previous` and `first` are kept for the caller's
     signature: the previous sheet is no longer attached (reviewer 3 item 7, it
     copied framings), so nothing on the sheet depends on them."""
-    route = route_numbers(geography, len(segs))
+    alts = [k for k, s in enumerate(segs, start=1) if s.get("alt")]
+    route = [k for k in route_numbers(geography, len(segs)) if k not in alts]
     ladder = [k for k in route if not segs[k - 1].get("end")]
     cols, rows, _ = grid(len(segs), aspect)
-    bodies = (sheet_block(cols, rows, cv.words(aspect)), different_pictures(), order_block(len(segs), ladder, setup),
+    bodies = (sheet_block(cols, rows, cv.words(aspect)), different_pictures(),
+              order_block(len(segs), ladder, setup, alts),
               references_block(setup, physical, props or []), setup.described, geometry_block(setup),
               wardrobe_block(setup, physical), props_block(props or []),
               crowd_block(setup), panels_block(segs, route, setup),

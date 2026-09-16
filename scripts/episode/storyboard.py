@@ -48,29 +48,26 @@ def adopt(aspect: str) -> tuple[int, int]:
     return W, H
 
 
-WHITE = 170
-MAX_TRIM = 0.06
-"""A gutter reads as a near-white edge; up to 6 % of a side is trimmed.
-Measured on the corridor sheet: three panels kept a white bottom edge with
-the flat 1.5 % trim, because that sheet's gutter under row one was wider."""
+def strip_white_edges(image):
+    """Cut the leaked sheet paper off every edge, as `episode_gutter.band` finds it.
 
+    THIS OWNED ITS OWN IDEA OF PAPER -- WHITE=170, mean only, no flatness, no
+    drop, a 6 % cap -- and it was the third such idea in the pipeline.  The
+    other two were recalibrated for Part Two's pale skies on 2026-09-16 and
+    this one was missed, so it went on trimming picture off any first frame
+    whose edge is sky or sand: first frames that lost 30 px or more on an edge,
+    ep04-07 0 / 0 / 0 / 1, ep08 11 of 30, ep09 10 of 30, every one to the cap,
+    then re-squared by centre crop (-7 % on both axes, upscale 1.21-1.28x
+    instead of 1.13x).  Q00_0 lost its snow peaks.
 
-def strip_white_edges(image, white: int = WHITE, max_trim: float = MAX_TRIM):
-    """Cut every edge row or column whose mean luminance says gutter."""
+    Paper is bright AND flat AND has picture under it, and the guard already
+    knows all three; one fact about paper, one function."""
     import numpy as np
 
+    from studio import episode_gutter as gutter
+
     grey = np.asarray(image.convert("L"), dtype=float)
-    h, w = grey.shape
-    top, bottom, left, right = 0, h, 0, w
-    while top < h * max_trim and grey[top].mean() > white:
-        top += 1
-    while bottom > h * (1 - max_trim) and grey[bottom - 1].mean() > white:
-        bottom -= 1
-    while left < w * max_trim and grey[:, left].mean() > white:
-        left += 1
-    while right > w * (1 - max_trim) and grey[:, right - 1].mean() > white:
-        right -= 1
-    return image.crop((left, top, right, bottom))
+    return image.crop(gutter.box([grey]))
 
 
 def conform(src: Path, dst: Path, box=None) -> Path:

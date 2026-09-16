@@ -62,14 +62,24 @@ def test_a_block_asks_for_only_the_detail_it_is_short_of():
     assert 0 + ro.budget(0) <= ro.HIGH_BLOCK
 
 
-def test_the_detail_spends_the_camera_first_and_then_what_is_at_rest():
+def test_the_detail_is_required_and_the_allowance_only_widens_what_is_at_rest():
+    """MEASURED on episode 9 (docs/analysis/ep08_ep09_why_worse.md §5): a 36-word
+    crowd caption was counted as core before the budget, and the camera position
+    fell 22 -> 15 words, the at-rest geometry 32 -> 4 words a block.  Where the
+    camera STANDS and what is at rest in the first frame are the two sentences
+    the drawer and H3 share, so they are REQUIRED: a zero allowance still
+    carries the camera whole (to `CAMERA_CAP`) and the at-rest to `REST_FLOOR`,
+    and the allowance only widens the at-rest beyond that floor."""
     seg = {"camera": "on the drinkers' side of the counter, at standing eye height",
-           "at_rest": "the brown bowler rests flat against his chest, his head level"}
-    assert ro.detail(seg, 0) == []
-    assert ro.detail(seg, 10) == ["The camera is on the drinkers' side of the counter."]
-    assert ro.detail(seg, 40) == ["The camera is on the drinkers' side of the counter, at standing eye height.",
-                                  "At the first frame the brown bowler rests flat against his chest, "
-                                  "his head level."]
+           "at_rest": "the brown bowler rests flat against his chest, his head level, the glass on the "
+                      "mahogany at his elbow, the mirror behind the shelf, the door at the far end"}
+    both = ro.detail(seg, 0)
+    assert both[0] == "The camera is on the drinkers' side of the counter, at standing eye height."
+    assert both[1].startswith("At the first frame the brown bowler rests flat against his chest")
+    assert len(both[1].split()) <= ro.REST_FLOOR + 4
+    assert ro.detail(seg, 80)[1] == ("At the first frame the brown bowler rests flat against his chest, his "
+                                     "head level, the glass on the mahogany at his elbow, the mirror behind "
+                                     "the shelf, the door at the far end.")
 
 
 def test_the_detail_is_calm_before_it_is_spent():

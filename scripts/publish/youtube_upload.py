@@ -22,6 +22,13 @@ compliance audit.  Until that audit, `videos.insert` from an unverified project
 is forced private whatever you send -- the call still returns 200 with a video
 id -- so `public` before then would only record a falsehood.
 
+`--watched` IS A CLAIM, AND THE EYE REVIEW IS ITS EVIDENCE (2026-09-16).  Episode
+9 passed 28/28 takes at 100.0 and looked worse than 4-7; the flag was satisfied
+by an agent that had looked at six frames.  So the flag is accepted only when
+`episodes/epNN/review/eye_<sha8>.json` (`scripts/episode/eye_review.py`) exists
+for THIS cut with every rubric field answered, and no `n` without a
+`waived_because` -- and the waivers are recorded in the ledger beside the video.
+
 That split is deliberate.  Demanding a human for every network call would make
 the pipeline un-automatable, and an un-automatable safety gate is one somebody
 eventually comments out.
@@ -39,7 +46,23 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 
+from scripts.episode import eye_review
 from studio import approval, episode_home, youtube, youtube_publish as yp
+
+
+def eye_stops(home: Path, watched: str, digest: str) -> tuple[list[str], dict]:
+    """Why `--watched` is not accepted, and what the ledger records when it is.
+
+    No flag, no claim, nothing to check: a private upload never needed a human.
+    With the flag, the rubric file for that sha must exist, describe THIS cut,
+    answer every field, and carry a reason beside every `n`."""
+    if not watched:
+        return [], {}
+    stops, rubric = eye_review.verdict(home, watched, digest)
+    if stops:
+        return stops, {}
+    return [], {"sha8": rubric.get("sha8"), "reviewed_by": rubric.get("reviewed_by", ""),
+                "waived": eye_review.waivers(rubric)}
 
 
 def metadata(home: Path) -> dict:
@@ -114,6 +137,8 @@ def main(argv: list[str], send=send) -> None:
                         watched=watched, digest=digest, already=yp.uploaded(book, key),
                         audited="--audited" in argv, override=override)
     waived = yp.waived(qc, dq_failed, override=override)
+    seen, eye = eye_stops(home, watched, digest)
+    stops += seen
 
     print(f"file      {master}")
     print(f"size      {master.stat().st_size / 1e6:.1f} MB   sha8 {digest}")
@@ -131,6 +156,9 @@ def main(argv: list[str], send=send) -> None:
         print(f"  waived qc.passed={waived['qc_passed']} and "
               f"{len(waived['dq_failed'])} failed take(s): {', '.join(waived['dq_failed']) or 'none'}")
         print("  recorded in the ledger beside this upload.")
+    if eye:
+        print(f"EYE       reviewed by {eye['reviewed_by'] or '(unsigned)'}; "
+              f"waived: {', '.join(f'{k}: {v}' for k, v in eye['waived'].items()) or 'nothing'}")
 
     if stops:
         print("REFUSED:")
@@ -149,7 +177,7 @@ def main(argv: list[str], send=send) -> None:
     got = send(master, body, youtube.credentials())
     video_id = got.get("id")
     yp.record(book, {"key": key, "episode": number, "video_id": video_id, "waived": waived,
-                     "privacy": got.get("status", {}).get("privacyStatus"),
+                     "eye": eye, "privacy": got.get("status", {}).get("privacyStatus"),
                      "title": body["snippet"]["title"], "sha8": digest,
                      "at": dt.datetime.now().isoformat(timespec="seconds")})
     print(f"\nuploaded: https://youtu.be/{video_id}")

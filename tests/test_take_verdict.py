@@ -173,9 +173,38 @@ def test_segments_fold_end_pins_and_pick_the_end_cell_as_target(tmp_path):
 
 def test_the_verdict_line_names_every_gate_in_order():
     v = verdict([seg()])
-    assert [g.name for g in v.gates] == ["frozen-at-start", "frozen-share", "foreign", "cut-landing",
-                                         "drift", "lip-sync", "identity", "wardrobe"]
+    assert [g.name for g in v.gates] == ["frozen-at-start", "frozen-share", "foreign", "cut-landing", "drift",
+                                         "coherence off-board", "last-vs-cell", "cut", "churn",
+                                         "lip-sync", "identity", "wardrobe"]
     assert v.line().startswith("T01 a0 PASS 100/100")
+
+
+def test_an_unmeasured_coherence_prints_so_and_fails_nothing():
+    """A gate may say it could not read something; it may not be silent."""
+    v = verdict([seg()])
+    assert "coherence off-board not measured" in v.line() and v.passed
+
+
+def test_ep09_t02_fails_hard_on_coherence_and_the_row_names_the_rung():
+    """ep09 T02, the wagon train that multiplies up a hill: every existing gate
+    clean, 100/100.  Its coherence numbers measured 2026-09-16."""
+    v = tv.TakeVerdict(2, 0, "T02.mp4", 5.33, "narration", [], [seg("Q02_0.png")],
+                       coherence={"offboard_share": 0.60, "last_vs_cell": 0.08, "hard_cut": 14.9, "nonrigid": 10.7})
+    v.gates = tv.gates(v, None, "", [])
+    v.score, v.passed = tv.score(v.gates)
+    assert not v.passed
+    assert "coherence off-board 0.60 HARD | last-vs-cell 0.08 HARD | cut 14.9 | churn 10.7 adv" in v.line()
+    assert tv.to_json(v)["coherence"]["offboard_share"] == 0.60
+
+
+def test_a_coherent_moving_take_still_scores_a_hundred():
+    """The gate must not become a second stillness meter (test_score_is_honest):
+    a dolly on the board with a low churn carries no penalty."""
+    v = tv.TakeVerdict(3, 0, "T03.mp4", 6.0, "narration", [], [seg("Q03_0.png", end=0.3)],
+                       coherence={"offboard_share": 0.05, "last_vs_cell": 0.55, "hard_cut": 9.0, "nonrigid": 4.5})
+    v.gates = tv.gates(v, None, "", [])
+    v.score, v.passed = tv.score(v.gates)
+    assert v.passed and v.score == 100.0
 
 
 def test_the_record_is_json_shaped():

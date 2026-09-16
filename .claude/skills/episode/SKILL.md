@@ -28,9 +28,10 @@ uv run python scripts/episode/no_last_frame.py <codex_id> <n>  # 6b. FREE: no la
 uv run python scripts/episode/take_dq.py     <codex_id> <n> [take...]          # 7. DQ EVERY take on disk; name indices only to narrow it
 uv run python scripts/episode/assemble.py    <codex_id> <n> --engine=r2v  # 8. cut, quiet bed, title card -> master_r2v.mp4
 uv run python scripts/episode/qc.py          <codex_id> <n> --engine=r2v  # 9. measure the delivered file
+uv run python scripts/episode/eye_review.py  <codex_id> <n>   # 9b. G-EYE: contact sheet + rubric a PERSON fills (review/eye_<sha8>.json)
 uv run python scripts/episode/runcards.py    <codex_id> <n>   # every input of every shot, both engines, for the owner
 uv run python scripts/episode/title.py       <codex_id> <n>   # per episode: SHERLOCK HOLMES / book / EPISODE n card (PAID still)
-uv run python scripts/publish/youtube_upload.py  <codex_id> <n> --dry-run   # 10. every gate's verdict, no network
+uv run python scripts/publish/youtube_upload.py  <codex_id> <n> --dry-run   # 10. every gate's verdict, no network; --watched=<sha8> needs the filled rubric
 uv run python scripts/publish/youtube_retitle.py <codex_id> --dry-run       # carry the title format back over what is already live
 ```
 
@@ -203,6 +204,34 @@ Rules the owner made after watching:
 - **Narration text**: ~22 lines / <= 260 words / ~90 s of speech for a
   chapter; cut caption-lines (the picture shows it) and repeats.
 
+### PLAN AUTHORING FLOORS (`studio/plan_gates.py`, 2026-09-16)
+
+Measured on the plan that read as an illustrated synopsis. Episode 9's
+`at_rest` fell to **14.7 words** a shot (ep04-08: 57-77) with 0.8 frame-edge
+placements (3-4) -- and this is the sentence both the drawer and H3 get for the
+first frame. Inserts went 6-7 -> **0**. Nine of thirty shots were the same close
+of Lucy with the same hat-hair-skirt list; ep07's closes each had a different
+object in hand. Three `medium_close` shots were written "Medium two-shot" and
+drawn so (face 0.15-0.23 of frame vs 0.33). First dialogue at **87.6 s** (ep07:
+6.6 s), after 17 narration lines in a row. 30 shots x exactly one line, zero
+silent shots, shot-length stdev 0.85 s, the fastest read in the series. The
+rescue -- *"a sinewy brown hand caught the frightened horse by the curb"* -- is
+not in the episode; it cuts from the danger to "You're not hurt, I hope, miss."
+First-person narration 0 % in ep08 and ep09 (ep05 55 %, ep06 36 %). Nothing in
+the spec asked for any of this, so the spec now refuses it:
+
+| floor | number |
+|---|---|
+| `at_rest` per shot | >= 40 words, with >= 3 frame-edge placements |
+| inserts | >= 1 per 6 shots |
+| closes of one face | <= 3 |
+| `medium_close` prose | may not open "two-shot" -- a two-shot is a `medium` |
+| first dialogue | by 25 % of runtime |
+| silent shots | >= 1 (a shot with no line is where the picture speaks) |
+| shot-length stdev | >= 1.0 s (a metronome is what a synopsis sounds like) |
+| the turn | its VERB (the hand catching the curb) is a shot's `motion`, not a narration line |
+| the witness | in Part Two, where Watson is not there, the plan gives the camera a witness: a POV or a reaction shot -- a camera that belongs to nobody is 0 % first person |
+
 ## 2. Lines and the timeline
 
 IndexTTS2 from `cast/<who>/voice/design.wav` (0.80 similarity vs 0.73 for
@@ -256,6 +285,63 @@ at `ALIKE = 0.70` over EVERY pair, a panel and its own END panel included
 (measured: the highest legitimate pair on a sheet is 0.584, the copies the
 owner caught were 0.82 to 0.95). A failing sheet is redrawn once with a
 STRICT opening naming the offending panels.
+
+### THE STYLE LINE: `where` + `light`, sixteen words or fewer (2026-09-16)
+
+`studio/house_style.py` builds it from two fields and refuses anything else:
+`where` (place, date, <= 6 words) and `light` (a DIRECTION that throws shadow
+into frame, and a NAMED BLACK). Sixteen words in all. The clause that made
+episodes 4-7 look like film is the model:
+
+    1881 London; deep shadow; practical period light sources
+
+Never a colour inventory, never objects. What happened when it was: episode 9
+replaced that clause with "sunlight only" and a list of colours, and the
+drawer, which obeys light-DIRECTION words and nothing else, lifted the whole
+histogram off the floor -- 5th-percentile luma 4-7 (ep05-07) -> **16.5**,
+near-black share .29-.45 -> .14, mid-tones .25-.34 -> .56; 68 % of pixels
+colourful (vs 29-45 %) and **94 % of those one orange, 0 % green**; "hard blue
+shadow" never arrived. The palette's OBJECTS stamped a gold wheat foreground
+into five of six plates, including the bare rock shoulder. Episode 8 kept
+"1881 London, gaslight-amber" on 13/13 sheets over a noon desert and the drawer
+resolved the contradiction into the flattest, greyest sheets in the series
+(saturation 0.21, 8 % dark pixels). The lamplit parlour cells of ep09 sit at
+luma 40 with a true black: the pipeline can still do it; the sunlit setups lost
+the shadow because nobody named one. So `light` for a Utah noon is "low sun
+from frame left; hard shadow across the ground; black under the brim", not
+"golden". The style line went to H3 as a 48-word paragraph in ep09 (13 in
+ep05-08); at sixteen words it cannot.
+
+### CROWD, WARDROBE, PROPS, CAST: where each may come from (2026-09-16)
+
+Four sheet-side faults of episode 9, none of them a drawing fault:
+
+- **Crowd** only in PUBLIC setups, and per panel. BACKGROUND LIFE told a
+  private parlour it was "a public place in a working city that people fill in
+  every panel" (its crowd is moths), and the same 36-word setup crowd caption
+  was injected verbatim into 30/30 take blocks (ep07: 2/26), byte-identical up
+  to 8x, with "Behind him" in twelve shots with no him -- and counted as core
+  before the budget, it displaced the shot's own camera, light and at-rest
+  geometry (32 -> 4 words a block). `episode_seq_board` writes it only where
+  the crowd names people; it is never counted as take core and never repeated
+  per block.
+- **Wardrobe** lives in `wardrobe[state]` and the sheet reads it THERE
+  (`sheet_gate`). The garments were moved out of `physical` into `wardrobe`
+  and the sheet went on reading `physical`, so the WARDROBE block was EMPTY
+  for every Part Two character and the law "these stay the same in every
+  panel" held nothing.
+- **Props** attach only through `Setup.props` (`prop_refs`), never by alias.
+  Watson's brown bowler card from the 221B hat stand reached a Utah parlour and
+  the cattle drove by the alias "his hat"; the 221B grey shawl reached three
+  ep08 crag sheets the same way.
+- **Cast**: every cast member the chapter brings needs a `sheet` block on the
+  row, a card for the state the setup uses, and a PASSED `cast_cards.py
+  --check` BEFORE any sheet is drawn -- `seq_boards` refuses until
+  `cast_refs.bound` says so. The Utah cast had no `sheet` block, so six cards
+  were drawn from the wardrobe sentence alone with no "the same black beard"
+  clause, and the gate never ran between the cards and the sheets. The card
+  template is GENDER-AWARE: Lucy's card was drawn as "The same man ... the face
+  of a man waiting to be photographed".
 
 
 ### ONE SIMPLE CAMERA MOVE BETWEEN PANELS (owner, 2026-09-12)
@@ -332,7 +418,7 @@ GPU, so a pin can never reach a render again.
 
 | artefact | what stops it |
 |---|---|
-| sheet | `episode_seq_board.DRAW_ENDS = False` — no END panel is drawn, so no END cell exists to pin. Spare cells take ALTERNATES (another angle of a real moment) so no sheet has a black cell |
+| sheet | `episode_seq_board.DRAW_ENDS = False` — no END panel is drawn, so no END cell exists to pin. Spare cells take ALTERNATES so no sheet has a black cell — with DISTINCT prose, no inherited size word, ladder or at-rest line, out of ORDER and the route, never "the same moment as panel k" (14 of 44 ep09 panels said exactly that and the same wide was drawn three times a sheet; nearest-neighbour similarity 0.22 -> 0.32) |
 | take | `takes_r2v.NO_ENDS = True` — `end_cells()` returns `[]` whatever is on disk |
 | prompt | `L11` refuses any `<Picture N> is the last frame` or `<Picture N> ([Shot k] last frame)`. It leaves the spec's own prose clause, "and the lean continues to the last frame of the shot", alone |
 
@@ -504,10 +590,9 @@ sending a bad one:
   and holding. A move is the one instruction it cannot satisfy by standing
   still.
 
-  Write it with a measured amount and the span:
+  Write it with a measured amount, inside the ceiling in the table below:
 
-      The camera pushes in on the sofa across the whole shot, travelling two
-      long strides; <action>; <action>
+      The camera pushes in on the sofa a hand's breadth; <action>; <action>
 
   A move written AFTER a semicolon is deleted by the builder and never reaches
   the model (ep04 T21). The move in the prose must be the SAME move the cells
@@ -522,6 +607,30 @@ sending a bad one:
   the parser cannot size is drawn as a camera that never left, and the 0.45
   floor then re-applies to it. `HOLDS` knows static, locked, locked-off, holds,
   held, holding, stays, remains, does not move, never moves.
+
+  **THE AMOUNT HAS A CEILING, SET BY THE SHOT SIZE AND THE SHOT LENGTH
+  (2026-09-16).** "Every shot moves" stays. "Every shot travels across the
+  whole shot" goes: the rule was never the fault, its AMPLITUDE was. Episodes
+  6 and 7 obeyed it 26/26 at "a hand's breadth" and were fine. Episode 9 asked
+  "a head's height" nine times on 4.9 s shots of 90 mm faces and "three/four
+  long strides" five times, into boards a camera cannot dolly through, and H3
+  morphed: mean frame-to-frame diff 1.47 / 2.83 / 4.58 / 5.51 / **6.67** (ep05
+  -> ep09), takes over 6: 1 / 6 / 4 / 13 / **17** of 28, last frame vs its own
+  cell **0.075** (ep05-08: 0.20-0.59), 62 % of frames off-board. Pan removal
+  explains none of it -- the motion is non-rigid. T02's wagon train multiplied
+  into an endless duplicated line; T10's town swapped to bare hills; T20's
+  laughing close whipped into four riders at a gate. `studio/plan_gates.py`
+  caps the amount:
+
+  | shot size | ceiling on the move |
+  |---|---|
+  | close, insert | a finger's breadth |
+  | medium, medium_close | a forearm |
+  | wide / full with >= 6 figures | HOLD, or one short stride |
+  | any travel | capped by the shot's length: a long move needs a long shot |
+
+  A wide with a crowd is the worst case twice over -- the most figures to
+  clone and the least room to move through -- so it holds.
 
 - **EVERY MOVING THING HAS A MOVER, AND THE CAMERA IS THE PREFERRED ONE**
   (owner, 2026-09-14: "remove unnatural movement like paper turning on its own
@@ -576,6 +685,30 @@ sending a bad one:
   instead of cutting on the pin); `(Sx)` counts dialogue voices only.
 `ref_image_size: match`. Takes render at ~3.3 s/frame.
 
+### NOT FROZEN IS NOT GOOD: the coherence gate (2026-09-16)
+
+"0 of 28 frozen" is a true measurement and it is NOT evidence of quality. It
+is the absence of one fault. Episode 5 looked "better" because 14 of 25 takes
+were told to hold and 9 were effectively still; episode 9 removed every pin
+and every hold and 17 of 28 takes churned. **The pendulum went from frozen to
+churning**, and the churning side had no gate: DQ's drift scores the END frame
+only, and "foreign" only knows other takes' cells, so a take that abandons its
+board mid-way and comes back for the last frame scores 100. Episode 9 did:
+28/28 at 100.0.
+
+So `take_dq` has a COHERENCE gate (`studio/take_coherence.py`): the share of
+frames that resemble no cell of the take (off-board share) and any hard cut
+the prompt did not ask for. Churning now fails the way freezing does. The
+no-last-frame rule above stays exactly as written -- a pin is not the answer
+to churn; a smaller move is (the amplitude table).
+
+The same day also found that the three paper tests -- the gutter guard, the
+cell soft-edge trim and `strip_white_edges` -- were three calibrations of one
+question, and the third was never recalibrated: mean-only at 170, no
+flatness, no drop, it trimmed >= 30 px off 10/30 first frames of ep09 and
+11/30 of ep08 (ep04-07: 0/0/0/1), each to the 6 % cap, then re-squared by a
+centre crop that cost 7 % on both axes (Q00_0 lost its snow peaks). They are
+one test now: `storyboard.strip_white_edges` asks `episode_gutter.band`.
 
 ### DRY-BUILD EVERY TAKE PROMPT BEFORE YOU COMMIT THE GPU (2026-09-12)
 
@@ -765,6 +898,34 @@ findings that change how we write, not just what we fixed:
 
 Each rung is free and guards the rung after it.
 
+**A PASSING GATE PROVES ONLY THE ABSENCE OF THE FAULT IT WAS BUILT FOR.** (Ten
+reviewers, 2026-09-16, `docs/analysis/ep08_ep09_why_worse.md`.) Episode 9
+scored **28/28 takes at 100.0**, the best DQ in the series, and looks worse
+than episodes 4-7: **62 % of its frames are off their storyboard cell** (last
+frame vs own cell 0.075, against 0.20-0.59), its **5th-percentile luma is 16.5**
+where episodes 5-7 sit at 4-7 (the black floor is gone), and its **first
+dialogue comes at 87.6 s** (ep07: 6.6 s). DQ measures freeze, landing, lip-sync
+and end-frame drift; all four were fine, and none of them is palette, shadow,
+panel size, face size, mid-take coherence, repetition or whether the story
+lands. Every one of ep09's faults passed every gate, and most were introduced
+the same day in the name of fixing ep08: the no-last-frame fix was right and
+"not frozen" was read as "good"; the palette fix reached the artefact and
+pasted a colour inventory where a light direction belonged; the alternates fix
+satisfied the GRID gate and broke the DIFFERENT-PICTURES one. The owner's eye
+found in minutes what 4,600 tests did not. So this ladder has a rung the code
+cannot run: **G-EYE**, a contact sheet and a rubric answered by a person and
+recorded on disk BEFORE publish. `youtube_upload.py --watched=<sha8>` is a
+claim; the rubric file is its evidence, and the upload refuses without it.
+
+The rungs in order, each named by the module that runs it:
+`studio/plan_gates.py` (G1, and the authoring floors and move ceilings of
+sections 1 and 4) -> `studio/house_style.py` (the `where` + `light` line) ->
+`cast_refs.bound` (every cast member has a `sheet` block, a card for the state
+and a passed `--check`) -> sheets (`episode_seq_board`, `sheet_gate`,
+`prop_refs`) -> `studio/look_gate.py` on the cells (black floor, one hue,
+paper) -> takes (`episode_ref_official` L19-L23) -> `studio/take_coherence.py`
+(off-board share, unprompted cut) -> **G-EYE** (`eye_review.py`) -> publish.
+
 **G1 PLAN**, before anything: an action in every segment, no negation, no
 stillness word, no "slow" on a person, the wardrobe contract named wherever a
 hand, hat or Holmes's jacket shows, props named in `motion` present in
@@ -795,6 +956,23 @@ retakes, and a reseed is never the answer to a freeze.
 is its take frame for frame, no duplicated frame across a cut, cut positions
 within half a frame, no pts hole, then -15.5..-12.5 LUFS, TP <= -1.0, every
 line heard.
+
+**G-EYE** (`scripts/episode/eye_review.py`), after G5 and before publish, run
+by a PERSON. `eye_review.py <codex_id> <n>` writes
+`episodes/epNN/review/contact_<sha8>.png` -- the whole master on a 5x6 grid,
+one frame every 5 s, 256 px cells, each stamped with its time -- and
+`review/eye_<sha8>.json`, a rubric of five questions, each one of ep09's
+faults, answered `y` or `n` by name, plus free text that may not be empty:
+**shadow** (a true black in most frames?), **faces** (readable at a quarter of
+the frame in the closes?), **board** (does each frame still resemble its cell?),
+**repeats** (is every picture drawn once?), **story** (does the turn land as an
+action on screen?). `y` is always the good answer; an `n` passes only with a
+`waived_because` the owner would sign, and the waiver goes into `uploads.jsonl`
+beside the video id. `youtube_upload.py --watched=<sha8>` REFUSES without this
+file for THIS sha, with any field unanswered, or with an `n` and no reason --
+and an `--override` cannot waive it, because it IS the human. The builder never
+pre-fills a rubric and never blanks a filled one. The contact sheet is not the
+review -- watch the file -- it is the artefact that proves WHICH file.
 
 `assemble.py`: one segment per take-run, gutter guard, bed 11 dB down with
 -40 LUFS room tone, duck at least 4 dB with 0.15 s attack / 0.25 s pre-delay
@@ -939,6 +1117,7 @@ in any new book:
 | A cut that needs re-cutting, no new pictures | `assemble.py` then `qc.py` | Costs nothing; `master_iterN` never overwrites |
 | One bad cell in a good sheet | `redraw_panel.py <book> <ep> S14.1 --approved` | $0.08, leaves its neighbours alone |
 | A finished episode to review | `runcards.py`, then read `report_final.html` | Every input and output per take, with the issues |
+| A master to publish | `eye_review.py`, look at the contact sheet AND watch the master, fill `review/eye_<sha8>.json`, then `youtube_upload.py --watched=<sha8>` | `--watched` is a claim and the rubric is its evidence. Six frames glanced at is not a watch, and the flag was once satisfied by exactly that (ep09, 28/28 at 100.0) |
 
 ## When a failure sends you back
 
@@ -956,6 +1135,9 @@ A fault is almost never owned by the stage that reveals it.
 | A shot cuts to a picture nobody asked for | A reference the model could not place | Stage 7, the take's reference list |
 | A line lands late | Seconds written into the plan instead of measured | Stage 2, and never the plan |
 | Renders taking half again as long | Something else is on the GPU between takes | The staging rule above |
+| Takes churn, figures clone, the background swaps mid-take | The plan asked a wide crowd to travel, or any shot to travel farther than its length allows (ep09: "a head's height" x9 on 4.9 s shots) | Stage 1: the move's amplitude (the ceiling table in section 4) and the wide crowd's hold |
+| The pictures look like a print: no black, one hue | The style line is a colour inventory or a list of objects, not a light | `light` in `house_style`: a direction that throws shadow into frame, and a named black |
+| The same picture drawn three times on one sheet | Template ALTERNATES that say "the same moment as panel k" | `episode_seq_board`: distinct prose, out of ORDER and the route, never the same moment |
 
 ## What earns its own skill, and how a new one is added
 

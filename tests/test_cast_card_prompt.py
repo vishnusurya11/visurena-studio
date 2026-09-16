@@ -8,7 +8,7 @@ from studio import cast_refs, trailer_refs as tr
 from studio.affirm import negations
 
 ROW = {"ref_id": "char-john_watson", "entity_id": "john_watson", "kind": "character",
-       "name": "Dr. John Watson",
+       "name": "Dr. John Watson", "pronouns": "he",
        "physical": "A man in his late twenties, as thin as a lath.",
        "wardrobe": {"outdoor": "wears the brown bowler hat squarely on his head",
                     "indoor": "is bare-headed and carries the brown bowler by the brim "
@@ -58,7 +58,7 @@ class TestTheWardrobeCard:
 
     def test_the_card_shares_the_busts_backdrop_light_and_stock(self):
         card, bust = tr.card_prompt("He wears a coat."), tr.bust_prompt("")
-        for tail in (tr.PLAIN_STUDIO, tr.NEUTRAL, tr.FILM):
+        for tail in (tr.plain_studio(), tr.neutral(), tr.FILM):
             assert tail in card and tail in bust
 
     def test_every_sentence_the_card_sends_names_something_present(self):

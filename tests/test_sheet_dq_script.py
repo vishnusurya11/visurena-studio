@@ -17,7 +17,11 @@ spec = importlib.util.spec_from_file_location("ep_sheet_dq", ROOT / "scripts" / 
 dq = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(dq)
 
-PHYSICAL = {"john_watson": "A man in his late twenties, as brown as a nut, a brown bowler hat."}
+# AMENDED 2026-09-16: the description names a GARMENT.  It used to be "a brown
+# bowler hat" alone and the setup counted as clean -- which is the episode 9
+# fault verbatim (a WARDROBE line with no clothes on it), now a HARD finding
+# (`sheet_gate.garments_named`).
+PHYSICAL = {"john_watson": "A man in his late twenties, as brown as a nut, a brown tweed overcoat, a brown bowler hat."}
 CORRIDOR = Setup(described="A whitewashed hospital corridor, 1881.", cast=["john_watson"],
                  landmark="the pale barred window", route="from the near end to the far door",
                  crowd="two porters halted at the left-hand wall with a covered trolley between them")

@@ -16,13 +16,17 @@ sys.modules["ep_cast_cards"] = cards
 _spec.loader.exec_module(cards)
 
 ROW = {"ref_id": "char-x", "kind": "character", "entity_id": "x", "name": "Mr X",
+       "pronouns": "he",
        "physical": "A man in his late twenties, as thin as a lath.",
        "wardrobe": {"indoor": "is bare-headed and carries the brown bowler in his left hand",
                     "outdoor": "wears the brown bowler hat squarely on his head"},
        "rel_path": "refs/characters/char-x.png",
-       "sheet": {"head": "His dark hair is swept back.",
+       # every SHEET_KEY: a row that has not said enough is refused, not drawn thin
+       "sheet": {"same": "the same thin waxed moustache",
+                 "head": "His dark hair is swept back.",
                  "garments": "He wears a fawn tweed overcoat.",
-                 "hands": "Both his hands are bare to the wrist."},
+                 "hands": "Both his hands are bare to the wrist.",
+                 "props": "His hands hang open at his sides."},
        "identity": {"traits": {"headgear": "none"}}}
 
 

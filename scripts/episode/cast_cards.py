@@ -63,8 +63,12 @@ def write_prompts(book: Path, cast: list[str]) -> list[Path]:
     made = []
     for who in cast:
         row = cast_refs.row(book, who)
-        if not row.get("sheet"):
-            continue          # the owner has not authored this character's pictures yet
+        if missing := cast_refs.sheet_missing(row):
+            # NOT SILENCE.  This was `continue`, and the three Utah leads went
+            # to the drawer with no prompt on disk and nobody told.
+            print(f"  {who}: no prompt written -- the row is missing {', '.join(missing)}",
+                  flush=True)
+            continue
         for stem, said in cast_refs.sheet_prompts(row).items():
             path = prompt_file(book, stem)
             path.write_text(_record(stem, said, cast_refs.bust(book, who).name),
@@ -103,10 +107,27 @@ def draw(book: Path, who: str, kind: str, approved: bool = False) -> Path:
                          f"pass --approved once the owner has approved the prompt")
     row = cast_refs.row(book, who)
     stem = row["ref_id"] if kind == "bust" else f"{row['ref_id']}_{kind}"
-    said = cast_refs.sheet_prompts(row)[stem]
+    try:
+        said = cast_refs.sheet_prompts(row)[stem]
+    except ValueError as thin:
+        raise SystemExit(f"cast_cards --draw refuses before spending: {thin}")
     out = cast_refs.characters(book) / f"{stem}.png"
     supersede(out)
-    return _edit(cast_refs.bust(book, who), out, said, book, stem)
+    source = cast_refs.bust(book, who)
+    drawn = _edit(source, out, said, book, stem)
+    remember(book, stem, said, source)
+    return drawn
+
+
+def remember(book: Path, stem: str, said: str, source: Path) -> Path:
+    """The prompt beside the card, EVERY time it is drawn.
+
+    Episode 9's six Utah cards had no prompt on disk: `--prompts` skipped rows
+    without `sheet`, and `--draw` never wrote one.  A picture with no record of
+    what asked for it cannot be checked against anything."""
+    record = prompt_file(book, stem)
+    record.write_text(_record(stem, said, source.name), encoding="utf-8")
+    return record
 
 
 def _edit(source: Path, out: Path, said: str, book: Path, stem: str) -> Path:

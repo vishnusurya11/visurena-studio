@@ -178,20 +178,89 @@ def prop_from_row(row: dict) -> Prop:
     return Prop(**fields)
 
 
-def props_in(text: str, rows: list[dict]) -> list[dict]:
-    """The bound props this text names, by name or alias, each once, in row order.
+GENERIC = re.compile(r"^(?:the|a|an|his|her|its|their|my|your|our)\s+([a-z-]+)$", re.I)
+"""An alias of one article-or-pronoun and one common noun names a CATEGORY.
 
-    Read from the PROSE rather than from a declared list: `Setup.props` was `[]`
-    on all six setups of episode 2 while its panels named nine objects between
-    them, and a field that can disagree with the prose is exactly the fault the
-    cast gate exists to catch."""
+MEASURED on episodes 8 and 9: "his hat" -- Jefferson Hope's, in a Utah parlour
+-- attached Watson's brown bowler card off the 221B hat stand to two Utah
+sheets, and "the shawl" attached the grey shawl from the same hat stand to
+three alkali-plain crag sheets.  A hat any man could wear is not this hat."""
+
+PLACES = ("sitting-room", "sitting room", "hat stand", "221b")
+"""Places a prop's own description can keep it in.  A prop described as
+hanging "on the mahogany hat stand beside the sitting-room door" belongs to no
+sheet whose setup lacks that door."""
+
+
+def distinctive(alias: str, row: dict) -> bool:
+    """Does this alias name THE object rather than its category?
+
+    Article + one noun is a category -- unless the noun is the object's own id
+    ("the fingerprint", "the violin"): a book with one fingerprint has no
+    category to confuse it with."""
+    found = GENERIC.match((alias or "").strip())
+    return not found or found.group(1).lower() == (row.get("entity_id") or "").lower()
+
+
+def named_by(text: str, row: dict) -> str:
+    """The name or alias of this row that the text uses, "" if none; the row's
+    own name first, then its aliases in order."""
     low = (text or "").lower()
+    for n in [row.get("name", "")] + list(row.get("aliases") or []):
+        if n and re.search(r"(?<![a-z])" + re.escape(n.lower()) + r"(?![a-z])", low):
+            return n
+    return ""
+
+
+def kept_elsewhere(row: dict, text: str, setup=None) -> str:
+    """The place the row's description keeps this prop in, when neither the
+    setup's description nor this text names it; "" when the place is here."""
+    said = f"{row.get('sits', '')} {row.get('physical', '')}".lower()
+    here = f"{getattr(setup, 'described', '') or ''} {text or ''}".lower()
+    kept = [p for p in PLACES if p in said]
+    return ", ".join(kept) if kept and not any(p in here for p in kept) else ""
+
+
+def declared(row: dict, setup=None) -> bool:
+    """Does the setup declare this prop by id or name?"""
+    props = list(getattr(setup, "props", None) or [])
+    return row.get("entity_id") in props or row.get("name") in props
+
+
+def refusal(text: str, row: dict, setup=None) -> str:
+    """Why this text does NOT attach this row, or "" when it does.
+
+    The setup that declares the prop attaches it by any name.  Otherwise the
+    name used has to be the object's own, and the object's own place has to be
+    this place."""
+    used = named_by(text, row)
+    if not used or declared(row, setup):
+        return ""
+    if not distinctive(used, row):
+        return (f"named only by {used!r}, a category and not this object; say a distinctive name "
+                f"or declare {row.get('entity_id')} in Setup.props")
+    if place := kept_elsewhere(row, text, setup):
+        return f"its own description keeps it at the {place}, which this setup lacks"
+    return ""
+
+
+def props_in(text: str, rows: list[dict], setup=None) -> list[dict]:
+    """The bound props this text names by a DISTINCTIVE name or alias, each once,
+    in row order -- or by any name, when `setup.props` declares the prop.
+
+    Read from the PROSE rather than from a declared list alone: `Setup.props`
+    was `[]` on all six setups of episode 2 while its panels named nine objects
+    between them, and a field that can disagree with the prose is exactly the
+    fault the cast gate exists to catch.  `refusals` says what was left out."""
+    return [row for row in rows if named_by(text, row) and not refusal(text, row, setup)]
+
+
+def refusals(text: str, rows: list[dict], setup=None) -> list[tuple[dict, str]]:
+    """Every row the text names and `props_in` leaves out, with the reason."""
     out = []
     for row in rows:
-        names = [row.get("name", "")] + list(row.get("aliases") or [])
-        if any(n and re.search(r"(?<![a-z])" + re.escape(n.lower()) + r"(?![a-z])", low)
-               for n in names):
-            out.append(row)
+        if named_by(text, row) and (why := refusal(text, row, setup)):
+            out.append((row, why))
     return out
 
 

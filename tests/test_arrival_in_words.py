@@ -18,6 +18,8 @@ both fully_preserved, and the END cell was never anchored in the graph -- an
 unpinned whole-frame composition the model is free to cut to. Episode 2's T15
 and T19 did exactly that and finished their takes there.
 """
+import re
+
 from studio.episode_ref_official import arrival_clause, gerund
 
 SEG = {"t": 0.0, "end": 4, "t_to": 4.0, "size": "close", "crowd": "",
@@ -27,10 +29,14 @@ SEG = {"t": 0.0, "end": 4, "t_to": 4.0, "size": "close", "crowd": "",
 
 
 def test_a_segment_with_a_written_end_says_where_it_arrives():
+    """A written `end` is a LAYOUT for the drawer ("the brow holding the TOP
+    edge"), so the arrival is still the camera's, carrying one noun from the
+    layout as what is now in frame."""
     seg = dict(SEG, end_frame="Close on the open eyes alone, the brow holding the TOP edge.")
     said = arrival_clause(seg)
-    assert said.startswith("By 00:04")
-    assert "the open eyes alone" in said
+    assert said.startswith("By 00:04 the camera is pushing in")
+    assert "with the open eyes alone now in frame" in said
+    assert "TOP edge" not in said
 
 
 def test_a_segment_with_no_written_end_falls_back_to_the_action():
@@ -52,9 +58,15 @@ def test_the_clause_lands_on_the_segments_own_end_second():
 
 
 def test_the_clause_reads_as_one_sentence():
-    """`By 00:04, Close on the open eyes` -- the mid-sentence capital again."""
-    seg = dict(SEG, end_frame="The open eyes alone hold the frame.")
-    assert "By 00:04, the open eyes alone" in arrival_clause(seg)
+    """`By 00:04, Close on the open eyes` -- the mid-sentence capital again; and
+    episode 9's "By 00:07, ferrier's head" -- the name lowercased.  A proper name
+    keeps its capital and nothing else has one."""
+    seg = dict(SEG, end_frame="The open eyes alone stand in the frame.")
+    said = arrival_clause(seg)
+    assert said.startswith("By 00:04 the camera is pushing in") and ", the open eyes alone" not in said
+    named = dict(SEG, end_frame="Holmes has turned to the window.")
+    assert ", and Holmes has turned to the window." in arrival_clause(named, ("Holmes",))
+    assert not re.search(r"[a-z], [A-Z]", arrival_clause(named, ("Holmes",)))
 
 
 # ---- when the plan wrote no END frame, the CAMERA says where it arrived -----
@@ -90,8 +102,13 @@ def test_a_locked_off_shot_still_says_something_true():
     assert "continues through the last frame" in said
 
 
-def test_a_written_end_still_wins_over_the_camera():
+def test_a_written_end_never_replaces_the_camera():
+    """It used to: the drawer's `end` layout became the block's closing motion
+    sentence -- "By 00:05, the log house stands twice its size..." -- a still
+    composition as the destination, on 29 of episode 9's 30 blocks, where ep06
+    and ep07 ended "the camera is pushing in ... through the last frame".  The
+    camera arrives; the layout lends at most one noun."""
     seg = dict(SEG, end_frame="Close on the open eyes alone, the brow holding the TOP edge.")
     said = arrival_clause(seg)
     assert "the open eyes alone" in said
-    assert "pushing" not in said
+    assert "pushing in a hand's breadth through the last frame of the shot" in said

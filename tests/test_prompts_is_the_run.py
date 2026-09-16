@@ -48,8 +48,14 @@ def test_a_preview_card_carries_the_plans_own_canvas(tmp_path, aspect, size, mon
 
     monkeypatch.setattr(tr, "cards", fake_cards)
     monkeypatch.setattr(tr.episode_home, "book_dir", lambda _id: tmp_path)
+    # The road into `cards` now also declares the light and runs the plan gates
+    # (2026-09-16); this test is about the CANVAS, so those read a stub that is
+    # in HOUSE light and passes, rather than being skipped on one entry point.
+    monkeypatch.setattr(tr.house_style, "faults", lambda episode: [])
+    monkeypatch.setattr(tr.plan_gates, "faults", lambda episode: [])
     monkeypatch.setattr(tr.episode_home, "load_plan",
-                        lambda b, n: type("E", (), {"aspect": aspect, "long_shots": lambda self: [],
+                        lambda b, n: type("E", (), {"aspect": aspect, "where": "", "light": "",
+                                                    "long_shots": lambda self: [],
                                                     "still_motions": lambda self: []})())
     monkeypatch.setattr(tr.episode_home, "takes_dir", lambda b, n, e: tmp_path)
     tr.prompts("book", 4)

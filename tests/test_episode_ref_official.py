@@ -205,16 +205,21 @@ def test_a_dialogue_line_is_introduced_then_driven_and_never_paced():
 
 def test_a_public_setup_puts_people_to_work_behind_the_shot():
     """Owner verbatim: 'i liked you added some background folks in public shots'.  The
-    clause is the contract's own `Framed.crowd`, falling back to `Setup.crowd`."""
-    assert ro.life_sentence("the drinkers lift their glasses", 0, 3, them=False) == \
-        "Behind him the drinkers lift their glasses, from 00:00 to 00:03."
-    assert ro.life_sentence("the drinkers lift their glasses", 0, 3, them=True).startswith("Behind them ")
-    assert ro.life_sentence("", 0, 3, them=False) == ""
+    clause is the contract's own `Framed.crowd`, falling back to `Setup.crowd`.
+
+    Who the crowd is BEHIND is the block's staged faces: `them` for two or more,
+    the one face's own label, and `Beyond the foreground` when nobody's face is
+    staged -- episode 9 said "Behind him" over twelve shots with no him."""
+    assert ro.life_sentence("the drinkers lift their glasses", 0, 3, "<Subject 1>") == \
+        "Behind <Subject 1> the drinkers lift their glasses, from 00:00 to 00:03."
+    assert ro.life_sentence("the drinkers lift their glasses", 0, 3, "them").startswith("Behind them ")
+    assert ro.life_sentence("the drinkers lift their glasses", 0, 3, "").startswith("Beyond the foreground ")
+    assert ro.life_sentence("", 0, 3, "them") == ""
 
 
 def test_an_insert_takes_no_background_life_and_a_segment_inherits_its_setups():
     """`Setup.crowd`: it 'reaches every panel that is not an insert'."""
-    setup = Setup(described="The Criterion Bar.", crowd="the drinkers lift their glasses")
+    setup = Setup(described="The Criterion Bar.", crowd="The drinkers lift their glasses.")
     assert ro.crowd_of({"size": "close", "crowd": "", "setup": setup}) == "the drinkers lift their glasses"
     assert ro.crowd_of({"size": "close", "crowd": "a barman draws a cork", "setup": setup}) == \
         "a barman draws a cork"

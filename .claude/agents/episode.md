@@ -31,9 +31,20 @@ Rules:
   covering the take, an action in every segment, affirmative text only) ->
   `take_dq.py` (motion, cut landing, foreign, drift, lip sync, identity; one
   score; best of N automatically) -> `assemble.py --engine=r2v` ->
-  `qc.py --engine=r2v` (edit integrity too) -> `runcards.py`.
+  `qc.py --engine=r2v` (edit integrity too) -> `eye_review.py` (the contact
+  sheet and the rubric a person fills before any `--watched`) -> `runcards.py`.
 - The gate ladder runs in order and nothing is spent before its gate passes:
-  PLAN, SHEET PROMPT, CELL, TAKE, MASTER. Section 5 of the skill.
+  `studio/plan_gates.py` (plan: authoring floors, move ceilings) ->
+  `studio/house_style.py` (the `where` + `light` style line) ->
+  `cast_refs.bound` (every cast member sheeted, carded and `--check`ed) ->
+  sheets (`episode_seq_board`, `sheet_gate`, `prop_refs`) ->
+  `studio/look_gate.py` on the cells -> takes (`episode_ref_official`
+  L19-L23) -> `studio/take_coherence.py` -> `eye_review.py` (G-EYE, filled by
+  a person) -> publish. Section 5 of the skill. A gate that passes proves
+  only the absence of its own fault: episode 9 passed 28/28 at 100.0 and
+  looked worse than 4-7, so never report a passing ladder as quality, and
+  never pass `--watched=<sha8>` without the filled `review/eye_<sha8>.json`
+  behind it.
 - Panel and take prose is written by one author per setup in parallel, read by
   three reviewers together (story, physical sense, rules), settled by one
   fixer, then linted again. Section 6 of the skill.

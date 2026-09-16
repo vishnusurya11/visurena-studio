@@ -18,6 +18,12 @@ the fault it prevents.
                              (`studio/affirm.py`, three measured draws)
     TWINS          HARD      two panels asking for one picture cannot both be
                              the DIFFERENT PICTURE the sheet demands
+    ALTERNATE      HARD      an alternate that says "the same moment as panel
+                             k", sits on the route, or shares half its words
+                             with another panel is the template repeating a
+                             panel (14 of episode 9's 44 panels)
+    WARDROBE       HARD      a named cast member whose WARDROBE line names no
+                             garment: the block held nothing for Part Two
     INSTANT BEFORE HARD      the panel's OWN motion found finished in the
                              picture it draws, or an outright "has just" /
                              "at full height": a panel drawn at its end state
@@ -183,6 +189,75 @@ def twins(segs: list[dict], floor: float = TWIN, watch: float = WATCH) -> list[F
                 out.append(Finding("TWINS", panel_key(segs[j]), picture(segs[j]).strip(), score > floor,
                                    f"overlap {score:.3f} with {panel_key(segs[i])}"))
     return out
+
+
+# ---- ALTERNATE ------------------------------------------------------------
+
+ALT_ALIKE = 0.5
+"""An alternate against ANY other panel on its sheet (frame + camera, the
+same cosine as TWINS).  Lower than `TWIN` on purpose: an alternate exists to
+be another picture of a moment already drawn, so the ordinary p90 of 0.561
+between two real shots is not its measure -- an alternate that shares half
+its content words with a panel is the template repeating that panel.
+Episode 9's 14 alternates measured 0.22 -> 0.32 nearest-neighbour on the
+drawn cells; the text that produced them is what this refuses."""
+
+SAME_MOMENT = re.compile(r"\b(?:the same moment as|from the moment of) panel (\d+)", re.I)
+"""The sentence that contradicts the ORDER block on the same sheet."""
+
+PANEL_HEAD = re.compile(r"^Panel (\d+) - ", re.M)
+ALT_HEAD = re.compile(r"^Panel (\d+) - [A-Z -]+, ALTERNATE ANGLE OF PANEL (\d+)", re.M)
+ROUTE_LINE = re.compile(r"Panels? ((?:\d+(?:, | and )?)+) looks? along that path")
+
+
+def panel_texts(prompt: str) -> dict[int, str]:
+    """Each panel's own text, by its number on the sheet."""
+    heads = list(PANEL_HEAD.finditer(prompt or ""))
+    return {int(m.group(1)): (prompt[m.start():heads[i + 1].start()] if i + 1 < len(heads) else prompt[m.start():])
+            for i, m in enumerate(heads)}
+
+
+def route_said(prompt: str) -> list[int]:
+    """The panel numbers the ORDER block says look along the route."""
+    found = ROUTE_LINE.search(prompt or "")
+    return [int(n) for n in re.findall(r"\d+", found.group(1))] if found else []
+
+
+def same_moment(prompt: str) -> list[Finding]:
+    """Every panel whose text says it is the same moment as another."""
+    return [Finding("ALTERNATE", f"panel {k}", SAME_MOMENT.search(text).group(0), True,
+                    "the ORDER block says every panel is later than the last; an alternate is another "
+                    "angle of a named panel and sits outside the sequence")
+            for k, text in panel_texts(prompt).items() if SAME_MOMENT.search(text)]
+
+
+def alternates_on_route(prompt: str) -> list[Finding]:
+    """An alternate the ORDER block counts as a route panel that must advance."""
+    alts = {int(m.group(1)) for m in ALT_HEAD.finditer(prompt or "")}
+    return [Finding("ALTERNATE", f"panel {k}", f"panel {k}", True,
+                    "an alternate is listed as a route panel; it sits outside the walk")
+            for k in route_said(prompt) if k in alts]
+
+
+def alternate_twins(segs: list[dict], floor: float = ALT_ALIKE) -> list[Finding]:
+    """An alternate whose text is half the text of another panel on its sheet."""
+    out = []
+    for alt in [s for s in segs if s.get("alt")]:
+        for other in segs:
+            if other is alt:
+                continue
+            score = overlap(picture(alt), picture(other))
+            if score >= floor:
+                out.append(Finding("ALTERNATE", panel_key(alt), picture(alt).strip(), True,
+                                   f"overlap {score:.3f} with {panel_key(other)}; an alternate is its own picture"))
+                break
+    return out
+
+
+def alternates(segs: list[dict], prompt: str) -> list[Finding]:
+    """An alternate is a real picture or nothing: never "the same moment", never
+    on the route, never half the words of another panel."""
+    return same_moment(prompt) + alternates_on_route(prompt) + alternate_twins(segs)
 
 
 # ---- INSTANT BEFORE -------------------------------------------------------
@@ -368,6 +443,37 @@ CONTRACTS = {
 }
 
 
+GARMENT = re.compile(
+    r"\b(?:coat|overcoat|frock[- ]coat|waistcoat|jacket|shirt|shirtsleeves|blouse|dress|gown|skirt|"
+    r"trousers|breeches|boots|shoes|cloak|cape|shawl|apron|comforter|muffler|scarf|sombrero|buckskin|"
+    r"homespun|tunic|vest|robe|pinafore|bonnet|uniform|sleeves|cravat|collarless|corduroy|tweed|velvet|"
+    r"nightdress|nightshirt|nightgown|bodice|petticoat|kerchief|mantle|smock|jersey|pyjamas)\b",
+    re.I)
+"""A garment, by a closed list of garment nouns and cloths.  "collar" is
+left out on purpose: three Utah descriptions cut hair "to the collar"; so is
+"hat", because a man in a bowler and nothing else is not dressed."""
+
+CAST_LINE = re.compile(r"^([A-Z][A-Z .'-]+): (.*)$", re.M)
+"""One cast member's line of the WARDROBE block: the name in capitals."""
+
+
+def wardrobe_lines(prompt: str) -> list[tuple[str, str]]:
+    """The (name, line) pairs of the built prompt's WARDROBE block."""
+    block = re.search(r"(?:^|\n)WARDROBE\n(.*?)(?:\n\n|$)", prompt or "", re.S)
+    return CAST_LINE.findall(block.group(1)) if block else []
+
+
+def garments_named(prompt: str) -> list[Finding]:
+    """A named cast member whose WARDROBE line names no garment is a HARD fault.
+
+    MEASURED on episode 9: the block read `physical` while the Utah rows keep
+    their clothes in `wardrobe[state]`, so "these stay the same in every panel"
+    held a face and a hairstyle and no clothes, for every Part Two character on
+    every sheet."""
+    return [Finding("WARDROBE", "sheet", name, True, f"WARDROBE names no garment for {name}")
+            for name, said in wardrobe_lines(prompt) if not GARMENT.search(said)]
+
+
 def wardrobe(seg: dict) -> list[Finding]:
     """A panel that shows a hand, a hat or Holmes's jacket names the contract.
     The sheet's WARDROBE block states it once; a panel that says "his hand"
@@ -425,7 +531,8 @@ def grid_findings(segs: list[dict], prompt: str, grid: tuple) -> list[Finding]:
 
 def sheet_findings(segs: list[dict], setup: Setup, prompt: str, grid: tuple) -> list[Finding]:
     """Every check, over every panel of one sheet, in the order they are read."""
-    found = affirmative(prompt, segs) + twins(segs) + grid_findings(segs, prompt, grid)
+    found = (affirmative(prompt, segs) + twins(segs) + grid_findings(segs, prompt, grid)
+             + alternates(segs, prompt) + garments_named(prompt))
     for seg in segs:
         found += (instant_before(seg) + end_findings(seg) + camera_still(seg) + geometry(seg)
                   + crowd_findings(seg, setup) + wardrobe(seg) + props(seg))
@@ -439,15 +546,18 @@ def verdict(findings: list[Finding]) -> dict:
             "checks": dict(Counter(f.check for f in findings))}
 
 
-def contract_faults(physicals: dict[str, str]) -> list[dict]:
+def contract_faults(physicals: dict) -> list[dict]:
     """A character contract that the 220-character trim would cut short.
 
     The episode reads the WHOLE description, but a book whose refs were written
     against the trimmed reader can still carry facts nothing ever sees, and that
-    silence is what cost 23 panels their stick (owner, 2026-09-11)."""
+    silence is what cost 23 panels their stick (owner, 2026-09-11).
+
+    A row may be a bare string or `{"physical", "wardrobe"}` (`sq.look`); the
+    trim is a fact about the physical alone."""
     from studio.trailer_refs import contract_description, dropped_by_limit, visual_description
     out = []
-    for who, physical in sorted(physicals.items()):
+    for who, physical in sorted((who, sq.look(row)["physical"]) for who, row in physicals.items()):
         if dropped_by_limit(physical):
             lost = contract_description(physical)[len(visual_description(physical)):].strip()
             out.append({"check": "CONTRACT", "panel": who,

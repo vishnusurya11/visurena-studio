@@ -13,9 +13,15 @@ Every attempt on disk is measured the same way and the ladder returns ONE
 number.  HARD: no segment sits frozen more than 1.0 s at its start
 (studio.motion_gate), every internal cut lands on its pin and no frame is
 another take's cell or a location plate (studio.cut_landing), a drawn END cell
-is actually reached, and a dialogue take's lips sit within a frame of the wav
-AND say the line (WER).  ADVISORY: the frozen share, the camera numbers, the
-identity gate while the face model is absent (studio.identity_gate).
+is actually reached, the take stays on its OWN board mid-take -- off-board
+share, last frame vs its last pinned cell, no unprompted hard cut
+(studio.take_coherence; ep09 scored 28/28 at 100 with 62 % of its frames
+off-board) -- and a dialogue take's lips sit within a frame of the wav AND say
+the line (WER).  ADVISORY: the frozen share, the churn after pan removal, the
+camera numbers, the identity gate while the face model is absent
+(studio.identity_gate).  The per-take line prints the coherence rows like the
+others: `coherence off-board 0.62 HARD | last-vs-cell 0.08 HARD | cut 32.7 HARD
+| churn 10.7 adv`.
 
 With `--attempts` every `T<NN>*.mp4` on disk is judged, the best by
 (passed, score) is kept as `T<NN>.mp4` and the file it displaces becomes the

@@ -23,10 +23,13 @@ def test_contact_lays_out_three_tiles_per_row(tmp_path):
 
 def test_a_white_gutter_on_an_edge_is_trimmed_before_conforming(tmp_path):
     from PIL import Image
+
+    from studio import episode_gutter as gutter
     panel = Image.new("RGB", (600, 1000), (40, 40, 40))
     panel.paste((255, 255, 255), (0, 970, 600, 1000))       # a white gutter at the bottom
     trimmed = sb.strip_white_edges(panel)
-    assert trimmed.size == (600, 970)
+    # the guard's own cut: the 30 rows of paper plus its MARGIN
+    assert trimmed.size == (600, 1000 - 30 - gutter.MARGIN)
     panel.save(tmp_path / "p.png")
     out = sb.conform(tmp_path / "p.png", tmp_path / "o.png", box=(0, 0, 600, 1000))
     import numpy as np

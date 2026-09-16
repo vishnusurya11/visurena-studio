@@ -19,7 +19,7 @@ from typing import Literal
 
 from pydantic import BaseModel, Field, model_validator
 
-from studio import canvas
+from studio import canvas, house_style
 from studio.affirm import negations
 from studio.episode_takes import BUDGET as TAKE_BUDGET
 
@@ -307,8 +307,28 @@ class Episode(BaseModel):
     """The one question this episode answers, in Armstrong's form: "Today, can
     X do Y?"  Answered before the episode ends, or the episode has no reason to
     stop where it stops.  Reported by `studio.story_layer`, never refused."""
+    where: str = ""
+    """The place and the date, six words or fewer ("Utah valley, June 1860").
+
+    Empty with `light` empty means the book's own: 1881 London.  One of the
+    two without the other is refused; a plan with a `palette` and neither is
+    a published Part Two plan, which loads and fails G-LIGHT at the build."""
+    light: str = ""
+    """A light DIRECTION that throws shadow into frame, and a named BLACK
+    ("low left sun, hard black shadows"; "gaslight from one side, deep shadow").
+
+    MEASURED, episode 9 (docs/analysis/ep08_ep09_why_worse.md, cause 2): the
+    `palette` paragraph replaced the London clause that made ep04-07 look like
+    film -- "deep shadow; practical period light sources" -- with a colour
+    inventory and "sunlight only".  5th-percentile luma went 4-7 -> 16.5, 94 %
+    of the colour sat in one orange band, and the palette's OBJECTS were drawn
+    as a gold wheat foreground in five of six plates.  The vocabulary lives in
+    `studio.house_style`, which also caps the rendered style line at the
+    length that worked."""
     palette: str = ""
-    """The light and the place, for this episode's plates, overriding the book's.
+    """SUPERSEDED by `where` + `light`; kept so ep08 and ep09's published
+    plan.json still load.  A new plan that carries only a palette is refused
+    by `house_style.faults` before anything is drawn.
 
     MEASURED, episode 8. `refs.json` carries ONE palette for the whole book and
     it ends "1881 London"; `trailer_refs.location_prompt` puts it in front of
@@ -379,6 +399,21 @@ class Episode(BaseModel):
         return sum(line.words() for line in self.dialogue()) / words
 
     # ---- the rules ---------------------------------------------------------
+    @model_validator(mode="after")
+    def _the_light_has_a_direction_and_a_black(self) -> "Episode":
+        """A plan written in the new form is held to the vocabulary at load.
+
+        A plan that declares neither field passes here: it is London, or a
+        published palette plan that G-LIGHT refuses at the build (reading a
+        historical plan is not endorsing it -- `long_shots`)."""
+        if not (self.where or self.light):
+            return self
+        bad = (house_style.where_faults(self.where) + house_style.light_faults(self.light)
+               + house_style.style_faults(self.where, self.light))
+        if bad:
+            raise ValueError("; ".join(bad))
+        return self
+
     @model_validator(mode="after")
     def _shots_are_in_order_and_named(self) -> "Episode":
         if [s.index for s in self.shots] != list(range(len(self.shots))):

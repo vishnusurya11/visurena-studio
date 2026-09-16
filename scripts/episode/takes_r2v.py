@@ -25,6 +25,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 
 from studio import approval, canvas, episode_board as board, episode_home, episode_ref_official as ro, episode_ref_prompt as rp
 from studio import house_style
+from studio import plan_gates
 from studio import episode_seq_board as sq
 from studio import episode_takes as tk
 from studio import h3_anchors
@@ -532,7 +533,14 @@ def opened(book_id: str, number: int):
     # AND THE PLACE, on the same road and for the same reason the canvas is
     # here.  Episode 8 was drawn and rendered saying "1881 London" over an
     # 1847 Utah desert: `Episode.palette` reached the location plate alone.
-    house_style.adopt(getattr(episode, "palette", ""))
+    house_style.adopt(episode.where, episode.light)
+    # And the plan's light and authoring floors, before any GPU second: a take
+    # prompt is built from the plan, and episode 9's were built from one whose
+    # first-frame prose was a quarter of ep04-08's under a colour-list style line.
+    if unlit := house_style.faults(episode):
+        raise SystemExit("G-LIGHT refuses the plan:\n  " + "\n  ".join(unlit))
+    if thin := plan_gates.faults(episode):
+        raise SystemExit("the plan fails the authoring gates:\n  " + "\n  ".join(thin))
     refuse_long_shots(episode)
     refuse_still_motions(episode)
     return book, episode

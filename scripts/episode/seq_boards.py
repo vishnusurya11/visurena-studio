@@ -32,6 +32,7 @@ import numpy as np
 from PIL import Image
 
 from studio import actor_gate, episode_board as board, episode_gutter, episode_home, episode_seq_board as sq, prop_refs, route_gate, sheet_gate
+from studio import cast_refs, look_gate, plan_gates
 from studio import house_style
 from studio import episode_spec as ep_spec
 from studio import frame_match
@@ -46,8 +47,16 @@ def storyboard():
     return mod
 
 
-def physicals(book: Path) -> dict[str, str]:
-    return {r["entity_id"]: contract_description(r.get("physical", ""))
+def physicals(book: Path) -> dict[str, dict]:
+    """Every character as `{"physical": <invariant>, "wardrobe": {<state>: <garments>}}`.
+
+    MEASURED on episode 9: this returned the physical ALONE, the Part Two rows
+    keep their garments in `wardrobe[state]`, and the sheet's WARDROBE block --
+    "these stay the same in every panel" -- named no garment for Lucy, Hope or
+    Ferrier on any sheet.  `sq.look` reads either shape, so the London callers
+    that hand a bare string are unchanged."""
+    return {r["entity_id"]: {"physical": contract_description(r.get("physical", "")),
+                             "wardrobe": dict(r.get("wardrobe") or {})}
             for r in episode_home.read_json(book / "refs" / "refs.json")["refs"] if r.get("kind") == "character"}
 
 
@@ -138,11 +147,12 @@ def attempt(sb, text: str, refs: list[Path], out: Path, group: list[dict], route
     cells = [sb.conform(sheet, sq.cells_in(boards) / sq.named(s), boxes[i])
              for i, s in enumerate(group)]
     heights, regress = ladder_check(cells, group, route, setup)
+    looked = look_of(cells, out.stem)
     row_bands, col_bands = board.bands(grey, 0), board.bands(grey, 1)
     return {"sheet": sheet.name, "route": route, "cells": [c.name for c in cells],
             "gutters_ok": len(row_bands) == rows - 1 and len(col_bands) == cols - 1,
             "white_lines_in": white_lines(cells), "door_heights": heights, "regressions": regress,
-            "duplicates": sq.duplicates(cells, group), "strict": strict}
+            "duplicates": sq.duplicates(cells, group), "strict": strict, "look": looked}
 
 
 def clean(entry: dict) -> bool:
@@ -332,7 +342,7 @@ def draw_setup(book: Path, episode: Episode, number: int, name: str, only_sheet:
     refs += [sq.cast_sheet(book, who, name, setup.state) for who in setup.cast]
     shown = prop_refs.props_in(" ".join(str(v) for c in segs for v in c.values()),
                                [r for r in episode_home.read_json(book / 'refs' / 'refs.json')['refs']
-                                if r.get('kind') == 'prop'])
+                                if r.get('kind') == 'prop'], setup=setup)
     # AND IT SAYS WHAT IT DROPPED.  This filter was silent, so episode 7's
     # terrier -- the one prop whose bible note says its identity has to hold
     # across three shots -- was dropped from the references of three paid
@@ -391,6 +401,33 @@ def book_words(book: Path) -> str:
         out.append(" ".join(p["text"] for p in doc.get("paragraphs", [])))
     return ep_spec.quote_corpus(" ".join(out))
 
+def unbound_cast(book: Path, episode: Episode) -> list[str]:
+    """Every reason a cast member of this episode is not ready for a paid sheet.
+
+    Episode 9's three leads had no `sheet` block, so their cards were built from
+    the wardrobe sentence alone; Lucy's was drawn by a male-only template; and
+    the cast gate never ran between the cards and the sheets. `cast_refs.bound`
+    knows the reasons; this asks for each person in the state their setup puts
+    them in, once."""
+    out, seen = [], set()
+    for setup in episode.setups.values():
+        for who in setup.cast:
+            if (who, setup.state) in seen:
+                continue
+            seen.add((who, setup.state))
+            out += [f"{who} ({setup.state}): {why}" for why in cast_refs.bound(book, who, setup.state)]
+    return out
+
+
+def look_of(cells: list[Path], name: str) -> list[str]:
+    """The look gate on one sheet's cells: printed per picture, and the
+    episode-level verdict is left to `main` after every sheet is in."""
+    said = look_gate.faults(cells)
+    for line in said:
+        print(f"  WATCH {name}: LOOK {line}", flush=True)
+    return said
+
+
 def main(book_id: str, number: int, only: str | None = None, sheet: int | None = None) -> None:
     book = episode_home.book_dir(book_id)
     episode = episode_home.load_plan(book, number)
@@ -402,7 +439,20 @@ def main(book_id: str, number: int, only: str | None = None, sheet: int | None =
     # THE RUN DECLARES ITS PLACE before it makes anything. Episode 8 was drawn
     # and rendered saying "1881 London" over an 1847 Utah desert because the
     # palette reached the location plate alone.
-    house_style.adopt(episode.palette)
+    house_style.adopt(episode.where, episode.light)
+    # THE LIGHT, THE PLAN AND THE CAST, before a cent (docs/analysis/ep08_ep09_why_worse.md).
+    # Episode 9 passed every gate below and looked worse than 4-7: no black floor
+    # because its palette was a colour list, a first-frame prose a quarter of ep04-08's,
+    # nine identical closes, a rescue that never happens, and a cast that was never
+    # bound. Each of these is free to read and refuses here, in this order.
+    if unlit := house_style.faults(episode):
+        raise SystemExit("G-LIGHT refuses the plan:\n  " + "\n  ".join(unlit))
+    for note in plan_gates.advisories(episode):
+        print(f"  ADVISORY {note}", flush=True)
+    if thin := plan_gates.faults(episode):
+        raise SystemExit("the plan fails the authoring gates:\n  " + "\n  ".join(thin))
+    if loose := unbound_cast(book, episode):
+        raise SystemExit("the cast is not bound (cast_refs.bound):\n  " + "\n  ".join(loose))
     for note in actor_gate.advisory_episode(episode):
         print(f"  ADVISORY {note}", flush=True)
     if faults := actor_gate.hard_episode(episode):
@@ -469,6 +519,15 @@ def main(book_id: str, number: int, only: str | None = None, sheet: int | None =
         if only and name != only:
             continue
         draw_setup(book, episode, number, name, sheet)
+    # THE LOOK OF THE WHOLE EPISODE, once every sheet is in. A single pale cell is
+    # a picture of a pale place; an episode whose MEDIAN cell has no black floor,
+    # or is one hue, is what the owner called "a print, not a projection". Reported
+    # per sheet above as it was cut; refused here on the roll-up, before the GPU.
+    cells = sorted(p for p in sq.cells_in(episode_home.boards_dir(book, number)).glob("Q*.png")
+                   if not p.stem.endswith(("E", "A")))
+    if flat := [f for f in look_gate.faults(cells) if f.startswith("episode:")]:
+        raise SystemExit("the drawn episode fails the look gate (studio/look_gate.py):\n  "
+                         + "\n  ".join(flat) + "\n  Rewrite `light` and the setups' light, then redraw.")
 
 
 if __name__ == "__main__":

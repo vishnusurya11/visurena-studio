@@ -1,5 +1,5 @@
-"""The 18-rule prompt lint (spec §4): what makes a take prompt FAIL before it is
-sent.  Every input below is real -- it is either the text on disk today, the
+"""The 23-rule prompt lint (spec §4, plus L19-L23 from the episode 8/9 analysis):
+what makes a take prompt FAIL before it is sent.  Every input below is real -- it is either the text on disk today, the
 plan's own words, or one of the two worked prompts of spec §2, which are kept
 verbatim in `tests/fixtures/ref2v_spec_t01.txt` and `..._t20.txt`.
 
@@ -205,6 +205,48 @@ def test_t18b_a_block_over_240_words_is_padded_and_also_fails():
 def test_a_banned_prop_never_reaches_the_prompt():
     """Already BANNED_PROPS in episode_spec; the lint repeats it at prompt level."""
     assert "L18" in ids("his gloved hand on the silver knob")
+
+
+# ---- L19-L23  take prompt hygiene (docs/analysis/ep08_ep09_why_worse.md §5) --
+
+def test_l19_the_crowd_caption_may_not_repeat_nor_carry_a_dot_comma():
+    """Episode 9's setup crowd went into 30 of 30 blocks verbatim, ending `.,`."""
+    assert "L19" in ids(block("He walks on. Behind him forty immigrants kneel along the rock shoulder., "
+                              "from 00:00 to 00:04."))
+    crowd = " ".join(["the drinkers two deep at the near end talk and lift their glasses"] * 2)
+    twice = (f"detailed_description:\n[Shot 1] From 00:00 to 00:04. He walks on. Behind him {crowd}, from "
+             f"00:00 to 00:04.\n[Shot 2] From 00:04 to 00:08. He walks on. Behind him {crowd}, from 00:04 to 00:08.")
+    assert "L19" in ids(twice)
+
+
+def test_l20_the_style_line_is_sixteen_words_at_most_and_carries_no_stray_capital():
+    ep09 = ("Photoreal cinematic live-action, Warm high-summer palette of gold ripe wheat, red road dust and "
+            "deep green pine, hard blue shadow under a clear bleached sky; the Utah valley and Salt Lake City, "
+            "June 1860; American frontier, sunlight and lamplight only., 35 mm film grain, natural weight and pace.")
+    assert "L20" in ids(f"detailed_description:\n{ep09}\n[Shot 1] From 00:00 to 00:04. He walks on.")
+    ep07 = "Photoreal cinematic live-action, 1881 London, 35 mm film grain, natural weight and pace."
+    assert "L20" not in ids(f"detailed_description:\n{ep07}\n[Shot 1] From 00:00 to 00:04. He walks on.")
+
+
+def test_l21_a_block_may_not_end_on_a_layout():
+    assert "L21" in ids(block("He walks on at a normal walking pace. By 00:04, the temple stands twice its "
+                              "height over the roofs with the near adobe walls carried out past both edges."))
+    assert "L21" not in ids(block("He walks on at a normal walking pace. By 00:04 the camera is pushing in on "
+                                  "the temple through the last frame of the shot, and the action continues with it."))
+
+
+def test_l22_no_absent_man_is_told_to_keep_his_mouth_shut():
+    assert "L22" in ids(block("He walks on at a normal walking pace. John Ferrier's mouth is closed from 00:00 "
+                              "to 00:04 while the wheat runs in a long wave."))
+    assert "L22" not in ids(block("<Subject 1>'s mouth is closed from 00:00 to 00:04 while he walks on at a "
+                                  "normal walking pace."))
+
+
+def test_l23_a_pace_belongs_to_a_person_or_an_animal():
+    assert "L23" in ids(block("The camera pulls back, travelling three long strides as the low sun lifts along "
+                              "the far peaks at a normal walking pace, from 00:00 to 00:02."))
+    assert "L23" not in ids(block("The camera tracks beside them as <Subject 1> walks on at a normal walking "
+                                  "pace, from 00:00 to 00:02."))
 
 
 # ---- T20-T22  the two worked prompts pass every rule ------------------------

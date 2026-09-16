@@ -38,53 +38,58 @@ sys.path.insert(0, str(ROOT))
 from studio import house_style
 
 BOOK = ROOT / "library/20260822113400_a-study-in-scarlet"
-DESERT = ("Bleached high-key palette of bone white and alkali grey; the alkali flats of "
-          "Utah Territory, 1847; American frontier, sunlight only.")
+# 2026-09-16: `adopt` took ONE palette paragraph here ("Bleached high-key
+# palette of bone white and alkali grey; ... sunlight only.") and pasted it
+# whole into the line -- the 46/48-word style lines the ten reviewers measured
+# on ep08/09 (docs/analysis/ep08_ep09_why_worse.md).  The place is two clauses
+# now: WHERE (six words) and LIGHT (a direction and a black); see
+# tests/test_house_style.py for the vocabulary.
+DESERT = ("Utah Territory, May 1847", "hard sun from behind, black shadows")
 
 
 @pytest.fixture(autouse=True)
 def _restore():
     yield
-    house_style.adopt("")
+    house_style.adopt("", "")
 
 
 def test_the_house_default_is_the_book_it_was_written_for():
-    house_style.adopt("")
+    house_style.adopt("", "")
     assert "1881 London" in house_style.stills()
     assert "1881 London" in house_style.live()
 
 
-def test_an_adopted_palette_replaces_it():
-    house_style.adopt(DESERT)
+def test_an_adopted_place_replaces_it():
+    house_style.adopt(*DESERT)
     for said in (house_style.stills(), house_style.live()):
         assert "1881 London" not in said
         assert "Utah Territory" in said
 
 
 def test_the_photographic_half_survives():
-    """The palette says the place; the style still says how it is photographed."""
-    house_style.adopt(DESERT)
+    """The plan says the place and the light; the style still says how it is photographed."""
+    house_style.adopt(*DESERT)
     assert "35 mm" in house_style.stills()
     assert "film grain" in house_style.stills()
     assert "live-action" in house_style.live()
 
 
 def test_adopting_nothing_puts_the_book_back():
-    house_style.adopt(DESERT)
-    house_style.adopt("")
+    house_style.adopt(*DESERT)
+    house_style.adopt("", "")
     assert "1881 London" in house_style.stills()
 
 
 def test_the_sheet_builder_reads_it_rather_than_a_constant():
     from studio import episode_seq_board as sq
-    house_style.adopt(DESERT)
+    house_style.adopt(*DESERT)
     assert "1881 London" not in sq.style_line()
     assert "Utah Territory" in sq.style_line()
 
 
 def test_the_take_builder_reads_it_too():
     from studio import episode_ref_official as ro
-    house_style.adopt(DESERT)
+    house_style.adopt(*DESERT)
     assert "1881 London" not in ro.style_line()
     assert "Utah Territory" in ro.style_line()
 

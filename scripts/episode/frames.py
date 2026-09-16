@@ -56,32 +56,52 @@ def sheet_for(book: Path, who: str) -> Path:
     return dest
 
 
-def plate(name: str, setup: Setup, palette: str, out: Path, seed: int) -> Path:
+def plate_prompt(setup: Setup, where: str, light: str) -> str:
+    """The plate's prompt: the place, the light, and the setup's own words.
+
+    NEVER THE PALETTE.  ep09's palette objects -- "gold ripe wheat, red road
+    dust and deep green pine" -- were drawn as a gold wheat foreground into
+    five of six plates, including the bare rock shoulder (report, cause 8).
+    The plate's light comes from the SETUP, which names its own source with a
+    direction (G-LIGHT holds it to that); the plan's `light` is the default
+    for a setup that has none."""
+    own = not house_style.setup_faults(setup.described, setup.outdoors)
+    return location_prompt(setup.described, where if own else f"{where}, {light}")
+
+
+def plate(name: str, setup: Setup, where: str, light: str, out: Path, seed: int) -> Path:
     if out.exists():
         return out
-    made = run(PLATE_WORKFLOW, {"prompt": location_prompt(setup.described, palette),
+    made = run(PLATE_WORKFLOW, {"prompt": plate_prompt(setup, where, light),
                                 "aspect_ratio": canvas.comfy_ratio(ASPECT), "megapixels": 1.0,
                                 "seed": seed, "steps": 8, "filename_prefix": f"ep_plate_{name}"})
     return conform(made[0], out)
+
+
+def refuse_unlit(episode: Episode) -> None:
+    """G-LIGHT, before the first plate: a plan whose light is missing,
+    directionless, shadowless or an inventory draws nothing."""
+    if bad := house_style.faults(episode):
+        raise SystemExit("G-LIGHT refuses the plan:\n  " + "\n  ".join(bad))
 
 
 def main(book_id: str, number: int) -> None:
     book = episode_home.book_dir(book_id)
     episode: Episode = episode_home.load_plan(book, number)
     global W, H, ASPECT
-    # THE RUN DECLARES ITS PLACE before it makes anything. Episode 8 was drawn
-    # and rendered saying "1881 London" over an 1847 Utah desert because the
-    # palette reached the location plate alone.
-    house_style.adopt(episode.palette)
+    # THE RUN DECLARES ITS PLACE AND ITS LIGHT before it makes anything.
+    # Episode 8 was drawn and rendered saying "1881 London" over an 1847 Utah
+    # desert because the palette reached the location plate alone; episode 9
+    # was drawn under a colour inventory with no direction and no black.
+    house_style.adopt(episode.where, episode.light)
+    refuse_unlit(episode)
     ASPECT, (W, H) = episode.aspect, canvas.size(episode.aspect)
     out_dir = sq.plates_in(episode_home.boards_dir(book, number))
     out_dir.mkdir(parents=True, exist_ok=True)
-    # THE EPISODE'S OWN PALETTE WINS. The book's ends "1881 London", which is
-    # right for Part One and wrong for every chapter from the eighth on.
-    palette = episode.palette or episode_home.read_json(book / "refs" / "refs.json")["palette"]
     seed = SEED_BASE + number * 1000
     for i, (name, setup) in enumerate(episode.setups.items()):
-        made = plate(name, setup, palette, out_dir / f"plate_{name}.png", seed + i)
+        made = plate(name, setup, house_style.where(), house_style.light(),
+                     out_dir / f"plate_{name}.png", seed + i)
         print(f"  plate {name}: {made}", flush=True)
         for who in setup.cast:
             sheet_for(book, who)

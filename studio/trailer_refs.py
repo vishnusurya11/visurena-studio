@@ -89,20 +89,35 @@ def character_prompt(physical: str, palette: str, frame: str = BUST_FRAME) -> st
 
 # ---- the two cast pictures: an identity BUST and a wardrobe CARD -----------
 
+PERSONS = {
+    "he": {"noun": "man", "Subject": "He", "subject": "he", "object": "him",
+           "possessive": "his"},
+    "she": {"noun": "woman", "Subject": "She", "subject": "she", "object": "her",
+            "possessive": "her"},
+}
+"""The words the card template says about the person in it.
+
+THE TEMPLATE WAS MALE-ONLY.  MEASURED on episode 9's cards: Lucy Ferrier's
+prompt read "The same man as in the reference image ... He wears a broad-brimmed
+cream straw hat hanging back off her shoulders ... the face of a man waiting to
+be photographed", because every sentence below had "man", "he" and "him"
+written into it.  A row's `pronouns` field ("he" / "she") chooses the row here;
+`cast_refs.pronouns` reads it."""
+
 SAME_MAN = (
-    "The same man as in the reference image: the same face, the same bone "
+    "The same {noun} as in the reference image: the same face, the same bone "
     "structure, the same eyes, the same hairline, the same skin tone and the "
     "same age."
 )
 """Both cast pictures are gpt-image EDITS of an existing sheet, never fresh
 generations: the edit is what preserves the canon face, and the face is the one
 thing that must not be re-rolled -- the whole book, the trailer, the designed
-voices and the identity gate's prototypes are bound to these three men."""
+voices and the identity gate's prototypes are bound to these faces."""
 
 PLAIN_STUDIO = (
-    "He stands against a plain, flat, unbroken mid-grey studio backdrop that "
-    "runs off all four edges of the frame, and the backdrop is the only thing "
-    "behind him. The frame holds this one man alone."
+    "{Subject} stands against a plain, flat, unbroken mid-grey studio backdrop "
+    "that runs off all four edges of the frame, and the backdrop is the only "
+    "thing behind {object}. The frame holds this one {noun} alone."
 )
 """Crowd life belongs to the setup's `described` string and to the storyboard
 cell, and to nothing else.  A `<Subject>` is "reusable visible content" and the
@@ -116,7 +131,7 @@ brick pillars and the studio flat's edges are inside the frame."""
 NEUTRAL = (
     "Even soft frontal light with both eyes open and lit and the face "
     "shadowless; the mouth is closed; the expression is neutral and at rest, "
-    "the face of a man waiting to be photographed."
+    "the face of a {noun} waiting to be photographed."
 )
 
 FILM = (
@@ -134,8 +149,9 @@ BUST = (
     "Head-and-shoulders portrait to mid-chest, the head upright and square to "
     "the camera, filling the upper half of the frame, with a hand's width of "
     "backdrop above the top of the head and the chest reaching the bottom "
-    "edge. Sharp focus on the face. He is bare-headed and his whole hairline "
-    "is visible from the parting to the ears. {head} {plain} {neutral} {film}"
+    "edge. Sharp focus on the face. {Subject} is bare-headed and {possessive} "
+    "whole hairline is visible from the parting to the ears. {head} {plain} "
+    "{neutral} {film}"
 )
 """The identity picture: face, hair, head.  One per character,
 setup-independent, ALWAYS bare-headed -- a hat on the identity picture is what
@@ -146,9 +162,9 @@ CARD = (
     "A standing three-quarter-length figure, head to mid-thigh, square to the "
     "camera, with a hand's width of backdrop above the head and a hand's width "
     "of backdrop below the lowest hand, both arms and both hands entirely "
-    "inside the frame, and everything he carries entirely inside the frame and "
-    "turned toward the camera. Sharp focus on the face and on both hands. "
-    "{wardrobe} {hands} {props} {plain} {neutral} {film}"
+    "inside the frame, and everything {subject} carries entirely inside the "
+    "frame and turned toward the camera. Sharp focus on the face and on both "
+    "hands. {wardrobe} {hands} {props} {plain} {neutral} {film}"
 )
 """The wardrobe-and-props picture: one per character per WARDROBE STATE
 (indoor / outdoor), which is two states across all six setups.  Every prop the
@@ -157,9 +173,26 @@ Runware's guide, verbatim: "Show H3 the details you do not want it to
 invent." """
 
 
-def same_man(extra: str = "") -> str:
-    """Which man the edit must keep, plus anything else this face is known by."""
-    return f"{SAME_MAN.rstrip('.')}, {extra.strip()}." if extra.strip() else SAME_MAN
+def person(pronouns: str = "he") -> dict[str, str]:
+    """The words for one row's person; an unknown pronoun is refused, never
+    guessed, because a guess here is a man in a dress at seventy."""
+    if pronouns not in PERSONS:
+        raise ValueError(f"pronouns must be one of {sorted(PERSONS)}, not {pronouns!r}")
+    return PERSONS[pronouns]
+
+
+def same_man(extra: str = "", pronouns: str = "he") -> str:
+    """Which person the edit must keep, plus anything else this face is known by."""
+    said = SAME_MAN.format(**person(pronouns))
+    return f"{said.rstrip('.')}, {extra.strip()}." if extra.strip() else said
+
+
+def plain_studio(pronouns: str = "he") -> str:
+    return PLAIN_STUDIO.format(**person(pronouns))
+
+
+def neutral(pronouns: str = "he") -> str:
+    return NEUTRAL.format(**person(pronouns))
 
 
 def _tidy(text: str) -> str:
@@ -167,17 +200,20 @@ def _tidy(text: str) -> str:
     return re.sub(r"\s+", " ", text).strip()
 
 
-def bust_prompt(head: str = "", same: str = "") -> str:
-    """The identity picture's prompt: who this is, and his head."""
-    return _tidy(BUST.format(same_man=same_man(same), head=head.strip(),
-                             plain=PLAIN_STUDIO, neutral=NEUTRAL, film=FILM))
+def bust_prompt(head: str = "", same: str = "", pronouns: str = "he") -> str:
+    """The identity picture's prompt: who this is, and their head."""
+    return _tidy(BUST.format(**person(pronouns), same_man=same_man(same, pronouns),
+                             head=head.strip(), plain=plain_studio(pronouns),
+                             neutral=neutral(pronouns), film=FILM))
 
 
-def card_prompt(wardrobe: str, hands: str = "", props: str = "", same: str = "") -> str:
-    """One wardrobe state's prompt: what he wears, his hands, and his things."""
-    return _tidy(CARD.format(same_man=same_man(same), wardrobe=wardrobe.strip(),
-                             hands=hands.strip(), props=props.strip(),
-                             plain=PLAIN_STUDIO, neutral=NEUTRAL, film=FILM))
+def card_prompt(wardrobe: str, hands: str = "", props: str = "", same: str = "",
+                pronouns: str = "he") -> str:
+    """One wardrobe state's prompt: what they wear, their hands, their things."""
+    return _tidy(CARD.format(**person(pronouns), same_man=same_man(same, pronouns),
+                             wardrobe=wardrobe.strip(), hands=hands.strip(),
+                             props=props.strip(), plain=plain_studio(pronouns),
+                             neutral=neutral(pronouns), film=FILM))
 
 
 def location_prompt(described: str, palette: str) -> str:

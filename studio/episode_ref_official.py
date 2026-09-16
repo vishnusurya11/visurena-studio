@@ -168,14 +168,29 @@ OPENERS = (("Close on ", "a close shot of "), ("Close ", "a close shot "),
            ("Insert ", "an insert "), ("Wide ", "a wide "))
 
 
-def noun_phrase(frame: str) -> str:
+def names_of(cast) -> tuple[str, ...]:
+    """Every word of every cast name: `lucy_ferrier` -> Lucy, Ferrier.  The plan
+    names people by first name as often as by surname."""
+    return tuple(sorted({w for who in cast for w in name_of(who).split()}))
+
+
+def is_name(word: str, names) -> bool:
+    return word.strip(",.;:").removesuffix("'s") in names
+
+
+def noun_phrase(frame: str, names=()) -> str:
     """The plan writes a frame as a shot-size heading; ref-en §5.3 reads `the shot
-    begins from <Picture 1>: ...`, which needs a noun phrase after the colon."""
+    begins from <Picture 1>: ...`, which needs a noun phrase after the colon.
+
+    A proper name keeps its capital: episode 9 closed 12 of 29 blocks on
+    "By 00:07, ferrier's head..." because the first character was lowered blind."""
     text = calm(frame).rstrip(".")
     for head, phrase in OPENERS:
         if text.startswith(head):
             return phrase + text[len(head):]
-    return text[0].lower() + text[1:] if text else text
+    if not text or is_name(text.split()[0], names):
+        return text
+    return text[0].lower() + text[1:]
 
 
 def split_frame(phrase: str) -> tuple[str, str]:
@@ -205,8 +220,14 @@ INDOORS = ("room", "bar", "laboratory", "corridor", "chamber", "cab", "interior"
 INDOOR_WORDS = re.compile(r"\b(" + "|".join(INDOORS) + r")\b", re.I)
 
 
-def place_word(described: str) -> str:
-    """Whole words only: `bar` matched inside `Bartholomew` and called a street a room."""
+def place_word(described: str, outdoors: bool = False) -> str:
+    """Whole words only: `bar` matched inside `Bartholomew` and called a street a room.
+
+    A setup that stands under the sky (`Setup.outdoors`) is a PLACE whatever nouns
+    its description carries: episode 9's farm was "this room" because its log house
+    had "grown room by room"."""
+    if outdoors:
+        return "place"
     return "room" if INDOOR_WORDS.search(described) else "place"
 
 
@@ -217,13 +238,16 @@ def short_place(described: str) -> str:
 
 
 def subject_of(who: str, faces: list[str]) -> str:
-    return f"<Subject {faces.index(who) + 1}>" if who in faces else name_of(who)
+    """The `<Subject k>` label of a staged face, and NOTHING for anyone else.  It
+    used to fall back to the bare name, which is how episode 9 wrote "John
+    Ferrier's mouth is closed" into four blocks whose `faces` were empty."""
+    return f"<Subject {faces.index(who) + 1}>" if who in faces else ""
 
 
 def lead_tag(faces: list[str]) -> str:
     """How the limp rule (L9) and the block guarantee both name the lead: his
     `<Subject k>` where his sheet is staged, his own name where it is not."""
-    return subject_of("john_watson", faces)
+    return subject_of("john_watson", faces) or name_of("john_watson")
 
 
 # ---- 1.1  subject_definitions ----------------------------------------------
@@ -278,8 +302,64 @@ def gerund(verb_phrase: str) -> str:
     return f"{stem} {rest}".strip()
 
 
-def arrival_clause(seg: dict) -> str:
-    """Where the shot ARRIVES, said in words instead of shown as a picture.
+LAYOUT = re.compile(r"\b(edges?|corners?|twice|taller|smaller|larger|half again|left half|right half|"
+                    r"reduced|inside the frame|in the frame|fills? the|filling the|from edge to edge)\b", re.I)
+"""What marks a sentence as a FRAME LAYOUT -- nouns at edges and sizes -- rather
+than a movement.  `Framed.end` is written for the drawer as exactly that ("the
+log house stands twice its size along the left edge"), and episode 9 closed 29
+of 30 blocks on one: a still composition as the shot's destination, where ep06
+and ep07 ended with the camera moving through the last frame."""
+
+LEFT_FRAME = re.compile(r"\b(?:ha(?:s|ve) left|leaves?|gone|out of frame|carried out)\b", re.I)
+NP_END = re.compile(r"\b(stands?|fills?|filling|has|have|is|are|sits?|lies?|rests?|holds?|at|in|on|along|"
+                    r"with|over|under|from|to|by|inside)\b", re.I)
+CLAUSE = re.compile(r",|\band (?=(?:the|a|an|both|his|her|their|its|two|three|four|five|six)\b|[A-Z])")
+"""Where a layout's clauses part: a comma, or an `and` that opens a new subject --
+"head and shoulders" is one subject, "and the wheat reduced" is the next."""
+
+
+def is_layout(end: str) -> bool:
+    return bool(LAYOUT.search(end))
+
+
+def end_noun(end: str, names=()) -> str:
+    """The one noun a layout lends the arrival: the subject of its first clause
+    that has COME INTO frame (a clause that says something has left lends nothing),
+    its size opener off, cut before its first verb or preposition and, past five
+    words, at its first `of`."""
+    text = end.rstrip(".")
+    text = next((text[len(h):] for h, _ in OPENERS if text.startswith(h)), text)
+    for clause in CLAUSE.split(text):
+        if not clause.strip() or LEFT_FRAME.search(clause):
+            continue
+        head = NP_END.split(clause.strip(), maxsplit=1)[0].strip()
+        if len(head.split()) > 5 and " of " in head:
+            head = head.split(" of ")[0]
+        return noun_phrase(head, names) if head else ""
+    return ""
+
+
+def arrival_end(end: str, names=()) -> tuple[str, str]:
+    """What a written `end` lends the arrival: a layout lends one noun now in
+    frame; anything else trails the camera as its own clause."""
+    if not end:
+        return "", ""
+    if is_layout(end):
+        noun = end_noun(end, names)
+        return (f", with {noun} now in frame" if noun else ""), ""
+    return "", f", and {lower_lead(noun_phrase(end, names))}"
+
+
+def arrival_clause(seg: dict, names=()) -> str:
+    """Where the shot ARRIVES, said in words instead of shown as a picture: the
+    CAMERA arriving, never a static layout.
+
+    A written `end` is the drawer's last-frame LAYOUT, and episode 9 pasted it in
+    as the block's closing motion sentence -- "By 00:05, the log house stands
+    twice its size along the left edge" -- a still composition as the destination,
+    on 29 of 30 blocks (L21).  Now the camera's own move is the arrival in every
+    case; a layout lends one noun as what is now in frame, and a written end that
+    is not a layout ("the door stands open") trails the camera as its own clause.
 
     `last_frame_text` says the same thing, but it lives in `subject_definitions`
     bolted to a `<Picture N>`.  MEASURED on episodes 2 and 3: that picture is
@@ -296,8 +376,7 @@ def arrival_clause(seg: dict) -> str:
     of that shot completed" -- would have been the arrival for every one of them,
     and it names nothing a model can aim at.  The motion's own camera half does:
     the shot arrives where the move ends."""
-    if seg.get("end_frame"):
-        return f"By {stamp(seg['end'])}, {lower_lead(noun_phrase(seg['end_frame']))}."
+    held, tail = arrival_end(seg.get("end_frame") or "", names)
     cam, _subject = camera_clause(clauses_of(seg.get("motion", ""))[0])
     move = gerund(camera_verb(cam)) if cam else ""
     if move:
@@ -310,14 +389,13 @@ def arrival_clause(seg: dict) -> str:
         # `frozen-share` is measured over exactly the tail it describes, and it is
         # 67.2 of that episode's 92.2 lost points.  Nothing above argued for
         # `completed`; it arrived with the no-`end` fallback and was never the
-        # point.  The two constraints stand, and they also rule out the obvious
-        # repair -- "is still pushing in" puts `still` in an L2-linted sentence.
-        # `continues ... through the last frame` is what the timed beats already
-        # say, so the block now ends in the register it spent its middle in.
+        # point.  The two constraints stand and rule out the obvious repair -- "is
+        # still pushing in" puts `still` in an L2-linted sentence.  `continues ...
+        # through the last frame` is what the timed beats already say.
         return (f"By {stamp(seg['end'])} the camera is {move} through the last frame of "
-                f"the shot, and the action continues with it.")
+                f"the shot{held}, and the action continues with it{tail}.")
     return (f"By {stamp(seg['end'])} the action of that shot continues "
-            f"through the last frame.")
+            f"through the last frame{held}{tail}.")
 
 
 def audio_line(spoken) -> str:
@@ -333,10 +411,10 @@ def audio_line(spoken) -> str:
 
 def subjects(faces: list[str], physical: dict[str, str], described: str, segs: list[dict],
              ends: list[int] | None = None, spoken=None,
-             has_plate: bool = True) -> tuple[str, dict[int, int], int]:
+             has_plate: bool = True, outdoors: bool = False) -> tuple[str, dict[int, int], int]:
     """subject_definitions; returns the text, `{segment -> its first-frame picture}`
     and the strip's picture number."""
-    ends = ends or []
+    ends, names = ends or [], names_of(list(physical) or faces)
     plate, cells, last, strip = picture_numbers(len(faces), len(segs), ends, has_plate)
     # A CAST SHEET DEFINES A MAN; IT IS NOT A FRAMING.  Measured on episode 3 T02:
     # the take held a full-length studio portrait AND the storyboard cell of the
@@ -350,11 +428,11 @@ def subjects(faces: list[str], physical: dict[str, str], described: str, segs: l
            for k, who in enumerate(faces, start=1)]
     if plate is not None:
         out.append(f"<Subject {plate}> is the location in <Picture {plate}>: {described} <Picture {plate}> "
-                   f"defines this {place_word(described)} alone; each shot keeps the framing of its own "
-                   f"first-frame picture.")
+                   f"defines this {place_word(described, outdoors)} alone; each shot keeps the framing of "
+                   f"its own first-frame picture.")
     for i, seg in enumerate(segs):
         out.append(f"<Picture {cells[i]}> is the first frame of [Shot {i + 1}], "
-                   f"{split_frame(tagged(noun_phrase(seg['frame']), faces))[0]}.")
+                   f"{split_frame(tagged(noun_phrase(seg['frame'], names), faces))[0]}.")
     out += [f"<Picture {last[k]}> is the last frame of [Shot {k}], {last_frame_text(segs[k - 1])}."
             for k in ends]
     # OWNER 2026-09-11: the strip is gone.  Its only unique content was shot order,
@@ -366,7 +444,7 @@ def subjects(faces: list[str], physical: dict[str, str], described: str, segs: l
 # ---- 1.3  retention_analysis -----------------------------------------------
 
 def retention(faces: list[str], segs: list[dict], cells: dict, strip: int, ends: list[int],
-              described: str, has_plate: bool = True) -> str:
+              described: str, has_plate: bool = True, outdoors: bool = False) -> str:
     """R1-R7.  The plate is `partially_preserved` and never `appears in` a shot
     (OWNER 5.16).  Every pinned cell is `fully_preserved` as its shot's first frame;
     there is no strip to mark `weak_reference` any more."""
@@ -382,8 +460,9 @@ def retention(faces: list[str], segs: list[dict], cells: dict, strip: int, ends:
     if plate is not None:
         out.append(f"<Subject {plate}> (the location behind {shot_list(every)}): partially_preserved - the "
                    f"materials, furniture and light of <Picture {plate}> carry into every shot behind the "
-                   f"people; <Picture {plate}> serves as a definition of the {place_word(described)} and "
-                   f"each shot keeps the framing of its own first-frame picture.")
+                   f"people; <Picture {plate}> serves as a definition of the "
+                   f"{place_word(described, outdoors)} and each shot keeps the framing of its own "
+                   f"first-frame picture.")
     # NOT `viewpoint`: 22 of 22 prompts asked for a preserved viewpoint in a block
     # whose own camera sentence pushes the camera THROUGH it.  Told to hold the
     # viewpoint and to change it, the render held -- episode 3 T02's Holmes sits at
@@ -419,8 +498,9 @@ def voice_of(physical: str) -> str:
 
 def speaker_intro(who: str, sid: str, physical: str, seen, faces: list[str]) -> str:
     """D8.  The identity comes once, at the speaker's first vocal event (ref-en §5.3
-    forbids re-describing him afterwards)."""
-    tag = subject_of(who, faces)
+    forbids re-describing him afterwards).  A speaker with no sheet staged keeps
+    his name: a voice needs a body to be attributed to."""
+    tag = subject_of(who, faces) or name_of(who)
     if who in seen:
         return f"{tag} ({sid}) says:"
     return f"{tag} ({sid}), on screen, {voice_of(physical)}, says:"
@@ -603,24 +683,95 @@ def beat_sentences(motion: str, t0: int, t1: int, line_end: int | None = None) -
 
 # ---- 1.4  the owner's two content rules ------------------------------------
 
-def life_sentence(crowd: str, t0: int, t1: int, them: bool) -> str:
+def life_sentence(crowd: str, t0: int, t1: int, behind: str = "") -> str:
     """D6, owner verbatim: 'i liked you added some background folks in public shots,
     that is having people regular work sells that thing'.  The clause is the segment's
     own `Framed.crowd`, falling back to its `Setup.crowd`; a private setup names none
-    and an insert takes none (Setup.crowd: 'reaches every panel that is not an insert')."""
-    return f"Behind {'them' if them else 'him'} {crowd}, {during(t0, t1)}." if crowd else ""
+    and an insert takes none (Setup.crowd: 'reaches every panel that is not an insert').
+
+    `behind` is who the crowd is behind -- `them`, one face's own label, or nobody:
+    episode 9 said "Behind him" over twelve shots whose `faces` were empty."""
+    if not crowd:
+        return ""
+    lead = f"Behind {behind}" if behind else "Beyond the foreground"
+    return f"{lead} {crowd}, {during(t0, t1)}."
 
 
-def crowd_of(seg: dict) -> str:
-    """This segment's background life: its own crowd, else the setup's."""
+def staged(seg: dict, faces: list[str]) -> list[str]:
+    """Whose face this BLOCK shows among the take's staged sheets: the shot's own
+    `faces` (readable in the panel) that have a `<Subject k>`.  A take's sheets
+    are staged once for all its shots; a man on the second shot's sheet is not
+    in the first shot's picture."""
+    return [w for w in seg.get("faces", faces) if w in faces]
+
+
+def behind(shown: list[str], faces: list[str] | None = None) -> str:
+    """The subject the life sentence agrees with: the faces the block shows,
+    labelled against the take's staged list."""
+    faces = shown if faces is None else faces
+    if len(shown) > 1:
+        return "them"
+    return subject_of(shown[0], faces) if shown else ""
+
+
+def normal_crowd(text: str, names=()) -> str:
+    """`Setup.crowd` is a drawer's caption -- a capital and a full stop -- and
+    wrapped untouched it gave every episode 9 block "Behind him Forty immigrants
+    ... in the yoke., from 00:00 to 00:05".  Trailing stop off; a leading capital
+    lowered unless it is a name (or opens one: "Salt Lake")."""
+    text = " ".join(text.split()).rstrip(".; ")
+    words = text.split()
+    if not words or is_name(words[0], names) or (len(words) > 1 and words[1][:1].isupper()):
+        return text
+    return text[0].lower() + text[1:]
+
+
+def crowd_of(seg: dict, names=()) -> str:
+    """This segment's background life: its own crowd, else the setup's, normalised."""
     if seg["size"] == "insert":
         return ""
-    return calm(seg.get("crowd") or getattr(seg.get("setup"), "crowd", "") or "")
+    return normal_crowd(calm(seg.get("crowd") or getattr(seg.get("setup"), "crowd", "") or ""), names)
+
+
+WIDE_ENOUGH = ("wide", "full", "medium")
+"""The sizes in which background life is a picture rather than a rumour: a close
+or an insert has no room behind the subject for thirty pack mules."""
+
+
+def crowd_block(segs: list[dict]) -> int | None:
+    """Which segment carries the take's ONE life sentence: the first wide enough
+    to show it, else the first that is not an insert -- a take of closes in a
+    public bar still has the drinkers behind the man, which is the episode 4-7
+    shape the owner praised.  Episode 9 put the same 36-word caption into 30 of
+    30 blocks."""
+    wide = next((i for i, seg in enumerate(segs) if seg["size"] in WIDE_ENOUGH and crowd_of(seg)), None)
+    return wide if wide is not None else next((i for i, seg in enumerate(segs) if crowd_of(seg)), None)
+
+
+LIFE_WRAP = 5
+"""What `life_sentence` adds around the crowd, in scrubbed words."""
+
+
+def life_for(k: int, seg: dict, ctx: dict, used: int) -> str:
+    """The life sentence for block `k`, if this is the take's crowd block and the
+    crowd fits under the ceiling with everything else already said -- cut to its
+    first clauses to fit, and gone when its first clause does not: the crowd is
+    what a full block does without.  What was said is recorded in `ctx['life']`
+    so L10 asks for it exactly where it is."""
+    if ctx.get("crowd_at") != k - 1:
+        return ""
+    crowd = trim(crowd_of(seg, ctx["names"]), max(0, HIGH_BLOCK - used - LIFE_WRAP))
+    said = life_sentence(crowd, int(round(seg["t"])), seg["end"], behind(staged(seg, ctx["faces"]), ctx["faces"]))
+    if not said or used + words(said) > HIGH_BLOCK:
+        return ""
+    ctx["life"][k] = crowd
+    return said
 
 
 SLOW = re.compile(r"\bslow(ly)?\b", re.I)
 GAIT = re.compile(r"\b(walks?|walking(?!\s+(?:stick|sticks|height|pace|speed))|walked|limps?|limping|"
-                  r"limped|climbs?|climbing|climbed|trots?|trotting|rides?|riding|steps|stepping|"
+                  r"limped|climbs?|climbing|climbed|trots?|trotting|rides?|riding|"
+                  r"(?<!porch )(?<!stone )(?<!front )(?<!\bthe )steps|stepping|"
                   r"stepped|strides(?!\s+(?:from|behind|of|away))|striding)\b", re.I)
 """L8 and L9 read a gait VERB (spec §4).  The nouns `step`, `stride` and `pace` are
 out -- INCLUDING THE PLURAL, which they were not.  `strides` sat in the verb
@@ -656,6 +807,51 @@ def without_measures(text: str) -> str:
     """The body with every measured stride removed, so a gait rule reads only gaits."""
     return MEASURED_STRIDE.sub(" ", text or "")
 
+
+def blank_measures(text: str) -> str:
+    """The same, blanked IN PLACE, so a match's position still indexes the original
+    text: `paced` and `limp` write at the position they matched."""
+    return MEASURED_STRIDE.sub(lambda m: " " * len(m.group(0)), text or "")
+
+
+BOUNDARY = re.compile(r"[,;:]|\b(?:as|while|where)\b", re.I)
+PERSON = re.compile(r"<Subject \d+>|\b(he|she|they|him|her|them|his|their|man|men|woman|women|boy|boys|"
+                    r"girl|girls|child|children|people|folk|figures?|riders?|drivers?|herdsm[ae]n|"
+                    r"porters?|clerks?|barman|farmers?|immigrants?|guards?|soldiers?|both|horses?|"
+                    r"mules?|pony|ponies|mustang|ox|oxen|dog|cat|cattle|herd|drove)\b", re.I)
+STOP_CAPS = {"The", "A", "An", "At", "By", "From", "Behind", "Beyond", "In", "On", "With", "Across", "Over",
+             "Under", "Then", "And", "As", "While", "Close", "Medium", "Wide", "Full", "Insert", "Extreme",
+             "Static", "Camera", "Shot", "Picture", "Subject", "Audio", "English", "One", "Two", "Three",
+             "Four", "Five", "Six", "Seven", "Eight", "Nine", "Ten", "Twelve", "Twenty", "Thirty", "Forty",
+             "Fifty", "Several"}
+"""Who can WALK: a pronoun, a label, a closed list of people and animals, or a
+capitalised name that is not a sentence opener or a number.  The sun, the wheat
+and a curtain are none of these (L23)."""
+
+
+def clause_head(text: str, at: int) -> str:
+    """The clause position `at` sits in, from its last boundary: a comma, a
+    semicolon or a subordinator.  `and` is not one -- "he walks to the door and
+    opens it" is still his clause."""
+    starts = [m.end() for m in BOUNDARY.finditer(text, 0, at)]
+    return text[starts[-1] if starts else 0:at]
+
+
+def is_person(head: str) -> bool:
+    """Does this clause belong to somebody who can walk?"""
+    if PERSON.search(head):
+        return True
+    return any(w[0].isupper() and not w.isupper() and not is_name(w, STOP_CAPS)
+               for w in head.split() if w[:1].isalpha())
+
+
+def gaits(text: str) -> list[re.Match]:
+    """Every gait verb in `text` whose clause is a person's or an animal's, read
+    with the measured strides blanked -- "three long strides as the low sun
+    lifts" is a distance, and the sun has no gait (L8, L9, L23)."""
+    body = blank_measures(text)
+    return [m for m in GAIT.finditer(body) if is_person(clause_head(body, m.start()))]
+
 TROT = re.compile(r"\b(trot|trots|trotting|ride|rides|riding)\b", re.I)
 
 
@@ -663,8 +859,9 @@ def limp(text: str) -> str:
     """D12's clause at the gait word it belongs to.  The stick is named ONCE: the plan
     usually says `on his stick` itself, and `a full step limping on his stick back from
     the doorway on his stick` is what the blind injection wrote into T10."""
-    if not (m := GAIT.search(text)):
+    if not (found := gaits(text)):
         return text
+    m = found[0]
     tail = "limping" if "stick" in text.lower() else "limping on his stick"
     return f"{text[:m.end()]} {tail}{text[m.end():]}"
 
@@ -681,9 +878,12 @@ def limp_clause(text: str, who: str = LEAD) -> str:
 def paced(text: str) -> str:
     """D11, owner: the motion runs at normal speed and the pace is NAMED.  It lands at
     the end of the clause carrying the gait, where it reads as speed rather than as a
-    label stacked on the verb (base-en §4.3)."""
-    if not (m := GAIT.search(text)) or any(p in text.lower() for p in PACE):
+    label stacked on the verb (base-en §4.3).  The clause must be a PERSON's:
+    episode 9 wrote "the low sun lifts along the far peaks at a normal walking
+    pace", episode 7 the same onto a curtain and a gas flame."""
+    if not (found := gaits(text)) or any(p in text.lower() for p in PACE):
         return text
+    m = found[0]
     rate = "at a normal trot" if TROT.match(m.group(0)) else "at a normal walking pace"
     end = next((i for i in range(m.end(), len(text)) if text[i] in ",;."), len(text))
     return f"{text[:end].rstrip()} {rate}{text[end:]}"
@@ -695,7 +895,7 @@ def guarantee(parts: list[tuple[str, bool]], who: str) -> list[str]:
     limp land on the first WRITABLE clause that carries the gait, so the spoken line
     and the setup's own life sentence are never written into."""
     body, out = " ".join(t for t, _ in parts), [t for t, _ in parts]
-    spots = [i for i, (text, writable) in enumerate(parts) if writable and GAIT.search(text)]
+    spots = [i for i, (text, writable) in enumerate(parts) if writable and gaits(text)]
     if not spots:
         return out
     if who and who in body and "limp" not in body.lower():
@@ -797,19 +997,22 @@ def lines_under(lines: list[Line], at: dict, offset: float, t0: float, t1: float
 
 
 def mouth_of(seg: dict, faces: list[str], cast) -> str:
-    """Whose closed mouth D7 speaks about: the staged subject the frame shows, else the
-    first person it names.  An insert shows nobody, so it says nothing (D7')."""
-    if seg["size"] == "insert":
+    """Whose closed mouth D7 speaks about: the staged face the frame names, else
+    the one staged face.  An insert shows nobody, so it says nothing (D7'), and
+    so does a shot with no face staged: "Ferrier's farm" in a `frame` named a
+    man, and four episode 9 blocks told an absent man to keep his mouth shut."""
+    shown = staged(seg, faces)
+    if seg["size"] == "insert" or not shown:
         return ""
     named = people_in(seg["frame"], cast)
-    who = next((w for w in faces if w in named), named[0] if named else None)
+    who = next((w for w in shown if w in named), shown[0] if len(shown) == 1 else None)
     return subject_of(who, faces) if who else ""
 
 
-def framing(k: int, seg: dict, pic: int, faces: list[str]) -> str:
+def framing(k: int, seg: dict, pic: int, faces: list[str], names=()) -> str:
     """D2a / D2b: the first shot BEGINS FROM its picture (ref-en §5.3) and every later
     shot says at what second it cuts (base-en §4.2's `the shot cuts to`)."""
-    phrase = tagged(noun_phrase(seg["frame"]), faces)
+    phrase = tagged(noun_phrase(seg["frame"], names), faces)
     if k == 1:
         text = f"The shot begins from <Picture {pic}>: {phrase}."
     else:
@@ -863,26 +1066,36 @@ def budget(core: int, low: int = LOW_BLOCK, high: int = HIGH_BLOCK) -> int:
     return min(int(round(want / SCRUB_RATIO)), max(0, high - core))
 
 
+REST_FLOOR = 24
+"""The fewest raw words of at-rest geometry a block carries whatever its budget.
+Episode 7's blocks carried 30 on average; episode 9's carried 4, because the
+crowd caption was counted as core first and the geometry was what gave way."""
+
+
 def detail(seg: dict, want: int) -> list[str]:
-    """D2c / D2d: where the camera STANDS and what is at rest in the first frame,
-    both authored per panel by the setup's own author.  An unplaced camera is how a
-    cab insert ended up on a different axis from its own wide; the at-rest clause is
-    what keeps the drawer's still things still while the action runs."""
+    """D2c / D2d, REQUIRED: where the camera STANDS and what is at rest in the first
+    frame, both authored per panel by the setup's own author.  An unplaced camera is
+    how a cab insert ended up on a different axis from its own wide; the at-rest
+    clause is what keeps the drawer's still things still while the action runs.
+
+    Neither is displaced by the budget: the camera is whole (to `CAMERA_CAP`), the
+    at-rest runs to `REST_FLOOR` at least, and `want` only widens the at-rest.  When
+    a block overflows, the crowd goes first (`life_for`), then at-rest clauses."""
     out = []
-    if want > 0 and (where := trim(calm(seg.get("camera", "")), min(want, CAMERA_CAP))):
+    if where := trim(calm(seg.get("camera", "")), CAMERA_CAP):
         out.append(f"The camera is {where}.")
         want -= len(where.split())
-    if (rest := trim(calm(seg.get("at_rest", "")), want)) and len(rest.split()) <= want:
-        out.append(f"At the first frame {rest}.")
+    if rest := trim(calm(seg.get("at_rest", "")), max(REST_FLOOR, want)):
+        out.append(f"At the first frame {lower_lead(rest)}.")
     return out
 
 
 def block_parts(k: int, seg: dict, pic: int, ctx: dict) -> list[tuple[str, bool]]:
-    """One `[Shot k]` block in the order §2.B emits it: the framing, the camera bound
-    to its first action, the spoken line, the beats, the life of the place, then the
-    closed mouth.  Each part says whether the block's guarantees may WRITE into it:
-    the spoken line is verbatim by grammar, and the life clause is the setup's own
-    sentence, which L10 then looks for byte for byte."""
+    """One `[Shot k]` block's CORE in the order §2.B emits it: the framing, the camera
+    bound to its first action, the spoken line, the beats, then the closed mouth.
+    Each part says whether the block's guarantees may WRITE into it: the spoken
+    line is verbatim by grammar.  The life of the place is not core any more --
+    counted here, it displaced the required detail (`life_for`)."""
     t0, t1, faces = int(round(seg["t"])), seg["end"], ctx["faces"]
     here = lines_under(ctx["lines"], ctx["at"], ctx["offset"], seg["t"], seg["t_to"])
     spoken = [l for l in here if l.kind == "dialogue"]
@@ -891,44 +1104,60 @@ def block_parts(k: int, seg: dict, pic: int, ctx: dict) -> list[tuple[str, bool]
     mouth = mouth_of(seg, faces, ctx["cast"])
     voice = lambda ls: voice_events(ls, ctx["at"], ctx["offset"], ctx["ids"], faces, ctx["physical"],
                                     mouth, mouth_action(motion, mouth), t0, t1, ctx["seen"])
-    out = [(framing(k, seg, pic, faces), True), (camera_sentence(motion, t0, t1, end), True),
-           (voice(spoken), False)]
+    out = [(framing(k, seg, pic, faces, ctx.get("names", ())), True),
+           (camera_sentence(motion, t0, t1, end), True), (voice(spoken), False)]
     out += [(s, True) for s in beat_sentences(motion, t0, t1, end)]
-    out += [(life_sentence(crowd_of(seg), t0, t1, len(people_in(seg["frame"], ctx["cast"])) > 1), False),
-            (voice([l for l in here if l.kind == "narration"]), False)]
+    out += [(voice([l for l in here if l.kind == "narration"]), False)]
     return [(text, writable) for text, writable in out if text]
 
 
+def joined(parts: list[tuple[str, bool]]) -> int:
+    """The scrubbed word count of a block's parts so far."""
+    return words(" ".join(t for t, _ in parts))
+
+
 def segment_text(k: int, seg: dict, pic: int, ctx: dict) -> str:
-    """The block, filled to the band from the panel's own prose and then made to keep
-    its two block promises: a named pace and Watson's limp (L8, L9)."""
+    """The block: the core, the REQUIRED detail, the take's one life sentence where
+    it fits, the arrival; then made to keep its two block promises, a named pace
+    and Watson's limp (L8, L9)."""
     parts = block_parts(k, seg, pic, ctx)
     # the detail says where the camera STANDS and what is at rest; the gait is never
     # its business, so the block's guarantees leave it alone
-    parts[1:1] = [(s, False) for s in detail(seg, budget(words(" ".join(t for t, _ in parts))))]
+    parts[1:1] = [(s, False) for s in detail(seg, budget(joined(parts)))]
     # With no END PICTURE staged, the shot's destination is said in words instead --
     # otherwise nothing anywhere states where the shot gets to. It is appended AFTER
     # the budget is spent, like the head: a required statement is not detail, and
     # charging it to the detail allowance made blocks SHORTER than the 150 floor.
-    if ctx.get("no_ends"):
-        parts.append((arrival_clause(seg), False))
+    tail = [(tagged(arrival_clause(seg, ctx.get("names", ())), ctx["faces"]), False)] \
+        if ctx.get("no_ends") else []
+    if life := life_for(k, seg, ctx, joined(parts + tail)):
+        at = next((i for i, (t, _) in enumerate(parts) if "mouth is closed" in t), len(parts))
+        parts.insert(at, (life, False))
     head = f"[Shot {k}] {span(int(round(seg['t'])), seg['end'])}."
-    return " ".join([head] + guarantee(parts, ctx["watson"]))
+    return " ".join([head] + guarantee(parts + tail, ctx["watson"]))
 
 
-def description(shots: list[Shot], placed: list[dict], lines: list[Line], at: dict, faces: list[str],
-                physical: dict[str, str], narrator: str, frames: int, cells: dict,
-                setup: Setup | None = None, fps: int = 24, no_ends: bool = False) -> str:
-    """detailed_description.  Line 0 is the style opening ref-en §5.2 asks for before
-    `[Shot 1]`; every segment then gets its own block."""
+def describe(shots: list[Shot], placed: list[dict], lines: list[Line], at: dict, faces: list[str],
+             physical: dict[str, str], narrator: str, frames: int, cells: dict,
+             setup: Setup | None = None, fps: int = 24, no_ends: bool = False) -> tuple[str, dict]:
+    """detailed_description and `{block -> the crowd clause it carries}`.  Line 0 is
+    the style opening ref-en §5.2 asks for before `[Shot 1]`; every segment then
+    gets its own block, and exactly one of them the take's life sentence."""
     by = {s["index"]: s for s in placed}
     offset = by[shots[0].index]["t_start"]
     segs = segments(shots, placed, offset, frames, setup, fps)
+    cast = list(physical) or faces
     ctx = {"faces": faces, "physical": physical, "lines": lines, "at": at, "offset": offset,
-           "ids": voice_id(lines, narrator), "seen": set(), "cast": list(physical) or faces,
-           "watson": lead_tag(faces), "no_ends": no_ends}
-    return "\n".join([style_line()] + [segment_text(k, seg, cells[k - 1], ctx)
-                                for k, seg in enumerate(segs, start=1)])
+           "ids": voice_id(lines, narrator), "seen": set(), "cast": cast, "names": names_of(cast),
+           "watson": lead_tag(faces), "no_ends": no_ends, "crowd_at": crowd_block(segs), "life": {}}
+    text = "\n".join([style_line()] + [segment_text(k, seg, cells[k - 1], ctx)
+                                       for k, seg in enumerate(segs, start=1)])
+    return text, ctx["life"]
+
+
+def description(*args, **kw) -> str:
+    """The text half of `describe`."""
+    return describe(*args, **kw)[0]
 
 
 # ---- 1.2 / 1.5 / 1.6 -------------------------------------------------------
@@ -955,11 +1184,11 @@ def summary(frames: int, segs: list[dict], cells: dict, described: str, faces: l
             f"{runs}. The take carries {who} through {shot_list(range(1, n + 1))} in that order. {audio}")
 
 
-def soundscape(described: str, crowd: str = "") -> str:
+def soundscape(described: str, crowd: str = "", outdoors: bool = False) -> str:
     """1.5, base-en §4.6: ambience, physical action and non-verbal human sound, in one
     paragraph.  Dialogue 'already belongs in the multimodal description'."""
     body = (f"The ambience of {short_place(described)} runs under the whole take: its own air, the "
-            f"surfaces underfoot and the fabric of the {place_word(described)} around it.")
+            f"surfaces underfoot and the fabric of the {place_word(described, outdoors)} around it.")
     if crowd:
         return (f"{body} Cloth, boots, wood and glass carry the physical action, and the movement and "
                 f"low murmur of the people at work nearby carry under it throughout.")
@@ -1101,15 +1330,14 @@ def l7_pins(text, facts):
 def l8_pace(text, facts):
     return [f"L8 NO PACE [Shot {k}]: a walk, climb or ride with no pace named"
             for k, a, b, body in blocks(text)
-            if GAIT.search(without_measures(body)) and not any(p in body.lower() for p in PACE)]
+            if gaits(body) and not any(p in body.lower() for p in PACE)]
 
 
 def l9_limp(text, facts):
     who = facts.get("watson")
     return [f"L9 NO LIMP [Shot {k}]: {who} walks or climbs with no limp"
             for k, a, b, body in blocks(text)
-            if who and who in body and GAIT.search(without_measures(body))
-            and "limp" not in body.lower()]
+            if who and who in body and gaits(body) and "limp" not in body.lower()]
 
 
 def l10_life(text, facts):
@@ -1252,9 +1480,117 @@ def l18_banned_prop(text, facts):
     return [f"L18 BANNED PROP: {w!r} (the book gives bare hands)" for w in BANNED_PROPS if w in text.lower()]
 
 
+# ---- L19-L23  take prompt hygiene (docs/analysis/ep08_ep09_why_worse.md §5) --
+
+SENTENCE = re.compile(r"(?<=[.!?])\s+(?=[A-Z<])")
+LONG_SENTENCE = 20
+
+
+def sentences(body: str) -> list[str]:
+    return [s.strip() for s in SENTENCE.split(body.strip()) if s.strip()]
+
+
+def l19_crowd(text, facts):
+    """Episode 9's setup crowd caption went into 30 of 30 blocks verbatim, up to
+    eight times over, ending `.,`.  One long sentence lives in one block."""
+    seen: dict[str, list[int]] = {}
+    out = [f"L19 CROWD [Shot {k}]: the block carries '.,'" for k, a, b, body in blocks(text) if ".," in body]
+    for k, a, b, body in blocks(text):
+        for said in {re.sub(r"\d\d:\d\d", "", s) for s in sentences(body)}:
+            if len(said.split()) >= LONG_SENTENCE:
+                seen.setdefault(said, []).append(k)
+    out += [f"L19 CROWD: one {len(s.split())}-word sentence sits in {shot_list(ks)}: {s[:48]!r}..."
+            for s, ks in seen.items() if len(ks) > 1]
+    return out
+
+
+STYLE_CAP = 16
+STYLE_WORDS = ("warm", "cool", "hard", "soft", "deep", "bright", "dark", "pale", "muted", "natural", "golden",
+               "gold", "cold", "hot", "dusty", "sunlit", "lamplit", "high", "low", "late", "early", "clear",
+               "bleached", "bone", "alkali", "grey", "gray", "black", "white", "red", "green", "blue", "amber",
+               "soot", "photoreal", "cinematic", "palette", "light", "shadow", "sunlight", "sun", "summer")
+"""A style line's own vocabulary: none of these is a name, so capitalised
+mid-sentence any of them is a pasted sentence head ("..., Warm high-summer")."""
+
+
+def stray_capitals(line: str, text: str) -> list[str]:
+    """Capitalised words after the first that are not names: in the style
+    vocabulary, or used in lower case elsewhere in the prompt."""
+    out = []
+    for w in line.split()[1:]:
+        word = w.strip(",.;:")
+        if word[:1].isupper() and not word.isupper() and \
+                (word.lower() in STYLE_WORDS or re.search(rf"\b{re.escape(word.lower())}\b", text)):
+            out.append(word)
+    return out
+
+
+def l20_style(text, facts):
+    """The style line is the first line of detailed_description: 13 words in
+    episodes 5-8, 48 in episode 9 ("only., 35 mm")."""
+    dd = sections(text).get("detailed_description")
+    line = (dd or "").split("\n")[0].strip()
+    if not line or line.startswith("[Shot"):
+        return []
+    out = [f"L20 STYLE: the style line is {n} words; the cap is {STYLE_CAP}"] \
+        if (n := len(line.split())) > STYLE_CAP else []
+    out += ["L20 STYLE: the style line carries '.,'"] if ".," in line else []
+    if caps := stray_capitals(line, text):
+        out.append(f"L20 STYLE: mid-sentence capital outside a name: {caps}")
+    return out
+
+
+MOVER = re.compile(r"\bthe camera\b|\bcontinues?\b|\b(?:is|are) \w+ing\b|"
+                   r"\b(?:comes?|goes?|moves?|runs?|settles?|falls?|rises?)\b", re.I)
+"""What a closing sentence may name as moving besides an `ACTION` verb: the camera,
+a continuation, a progressive, or the plain verbs of a body in motion ("his head
+comes further down over the buckle")."""
+
+
+def l21_arrival(text, facts):
+    """The last sentence of a block is the last thing the model hears about
+    motion.  It names the camera or a moving body, never a layout: episode 9
+    closed 29 of 30 blocks on "the log house stands twice its size along the
+    left edge"."""
+    out = []
+    for k, a, b, body in blocks(text):
+        last = (sentences(body) or [""])[-1]
+        if m := LAYOUT.search(last):
+            out.append(f"L21 ARRIVAL [Shot {k}]: the block ends on a layout, not a movement: {m.group(0)!r}")
+        elif not (MOVER.search(last) or ACTION.search(last) or GAIT.search(last)):
+            out.append(f"L21 ARRIVAL [Shot {k}]: the block's last sentence names nothing that moves")
+    return out
+
+
+ABSENT_MOUTH = re.compile(r"(?<![>\w])([A-Z][a-z]+(?: [A-Z][a-z]+)*)'s mouth is closed")
+
+
+def l22_absent_mouth(text, facts):
+    """A closed mouth belongs to a staged face, which the builder always writes as
+    its `<Subject k>`; a bare name here is a man who is not in the shot."""
+    return [f"L22 ABSENT MOUTH [Shot {k}]: {who}'s mouth is closed, and {who} is not a staged face"
+            for k, a, b, body in blocks(text) for who in ABSENT_MOUTH.findall(body)]
+
+
+PACE_MARK = re.compile(r"\bat (?:a normal (?:walking pace|pace|trot)|walking pace|normal speed|a trot|"
+                       r"the horse's trot)\b")
+
+
+def l23_pace_on_a_thing(text, facts):
+    """A pace belongs to a clause whose subject can walk.  Episode 9 gave one to
+    the sun and the wheat, episode 7 to a curtain and a gas flame."""
+    out = []
+    for k, a, b, body in blocks(text):
+        for m in PACE_MARK.finditer(body):
+            if not is_person(head := clause_head(body, m.start())):
+                out.append(f"L23 PACE ON A THING [Shot {k}]: {head.strip()[:70]!r} moves at a walking pace")
+    return out
+
+
 RULES = (l1_negation, l2_stillness, l3_slow, l4_action, l5_coverage, l6_stamps, l7_pins, l8_pace,
          l9_limp, l10_life, l11_pictures, l12_speakers, l13_task_type, l14_length,
-         l15_summary_length, l16_dialogue_tail, l17_cross_cut, l18_banned_prop)
+         l15_summary_length, l16_dialogue_tail, l17_cross_cut, l18_banned_prop,
+         l19_crowd, l20_style, l21_arrival, l22_absent_mouth, l23_pace_on_a_thing)
 
 
 def lint(text: str, facts: dict | None = None) -> list[str]:
@@ -1273,8 +1609,13 @@ def check(text: str, facts: dict | None = None) -> None:
 # ---- 3.16  the whole prompt ------------------------------------------------
 
 def prompt_facts(frames, segs, faces, spoken, at, offset, setup, strip, refs, fps=24,
-                 has_plate=True) -> dict:
-    """What the lint needs beyond the text itself."""
+                 has_plate=True, life: dict | None = None) -> dict:
+    """What the lint needs beyond the text itself.  `life` is what `describe`
+    actually put in (one block, or none when it did not fit); without it the
+    take's crowd block is assumed to carry the crowd."""
+    at_block = crowd_block(segs)
+    if life is None:
+        life = {at_block + 1: crowd_of(segs[at_block])} if at_block is not None else {}
     lines = [{"block": 1 + next(i for i, s in enumerate(segs) if s["t"] - 1e-6 <= a < s["t_to"] - 1e-6),
               "text": l.text, "end": a + at[l.index][1],
               "crosses": a + at[l.index][1] > next(s["t_to"] for s in segs if s["t"] - 1e-6 <= a < s["t_to"] - 1e-6)}
@@ -1282,8 +1623,14 @@ def prompt_facts(frames, segs, faces, spoken, at, offset, setup, strip, refs, fp
     return {"frames": frames, "fps": fps, "refs": refs,
             "plate": len(faces) + 1 if has_plate else None, "strip": strip,
             "pins": [(i + 1, s["t"]) for i, s in enumerate(segs)], "lines": lines,
-            "life": {i + 1: crowd_of(s) for i, s in enumerate(segs) if crowd_of(s)},
-            "watson": subject_of("john_watson", faces)}
+            "life": life, "watson": lead_tag(faces)}
+
+
+def six_sections(subs: str, summ: str, ret: str, dd: str, sound: str) -> str:
+    """The six sections in ref-en's order, blank-line separated."""
+    return "\n\n".join([f"subject_definitions:\n{subs}", f"summary:\n{summ}",
+                        f"retention_analysis:\n{ret}", f"detailed_description:\n{dd}",
+                        f"overall_soundscape: {sound}", "non_diegetic_music: N/A"])
 
 
 def build(shots: list[Shot], placed: list[dict], lines: list[Line], at: dict, frames: int,
@@ -1294,21 +1641,19 @@ def build(shots: list[Shot], placed: list[dict], lines: list[Line], at: dict, fr
     for the effective duration, and the placed length is 0.5 s short of it (5.6)."""
     offset = {s["index"]: s for s in placed}[shots[0].index]["t_start"]
     described = calm(described)     # the setup sheet is written for the drawer too (L2)
+    outdoors = bool(getattr(setup, "outdoors", False))
     segs = segments(shots, placed, offset, frames, setup, fps)
     spoken = [(l, at[l.index][0] - offset) for l in sorted(lines, key=lambda l: l.index)
               if l.kind == "dialogue"]
-    subs, cells, strip = subjects(faces, physical, described, segs, ends or [], spoken, has_plate)
-    text = "\n\n".join([
-        f"subject_definitions:\n{subs}",
-        f"summary:\n{summary(frames, segs, cells, described, faces, spoken, fps, has_plate)}",
-        f"retention_analysis:\n{retention(faces, segs, cells, strip, ends or [], described, has_plate)}",
-        f"detailed_description:\n"
-        f"{description(shots, placed, lines, at, faces, physical, narrator, frames, cells, setup, fps, not (ends or []))}",
-        f"overall_soundscape: {soundscape(described, getattr(setup, 'crowd', ''))}",
-        "non_diegetic_music: N/A"])
+    subs, cells, strip = subjects(faces, physical, described, segs, ends or [], spoken, has_plate, outdoors)
+    dd, life = describe(shots, placed, lines, at, faces, physical, narrator, frames, cells, setup, fps,
+                        not (ends or []))
+    text = six_sections(subs, summary(frames, segs, cells, described, faces, spoken, fps, has_plate),
+                        retention(faces, segs, cells, strip, ends or [], described, has_plate, outdoors),
+                        dd, soundscape(described, getattr(setup, "crowd", ""), outdoors))
     if bad := negations(text):
         raise ValueError(f"the prompt carries negation MiniMax cannot read: {bad}")
     if check_lint:
         check(text, prompt_facts(frames, segs, faces, spoken, at, offset, setup, strip, refs, fps,
-                                 has_plate))
+                                 has_plate, life))
     return text

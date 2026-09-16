@@ -82,8 +82,18 @@ def test_the_fingerprint_is_still_found_when_the_prose_means_it(rows):
     assert "fingerprint" in found(rows, "the fingerprint stands on the glass of the window pane")
 
 
-def test_the_pencilled_list_is_still_found_when_the_prose_means_it(rows):
-    assert "pencilled_list" in found(rows, "the list lies open on the breakfast table")
+def test_the_pencilled_list_is_found_by_its_own_name_and_refused_by_its_category(rows):
+    """AMENDED 2026-09-16.  This asserted that `the list` finds the pencilled
+    list -- article + one common noun, the exact shape that attached Watson's
+    bowler to a Utah parlour by "his hat" (`docs/analysis/ep08_ep09_why_worse.md`).
+    A category attaches nothing now unless the setup declares the prop; the
+    object's own name still does."""
+    from studio.episode_spec import Setup
+    assert "pencilled_list" not in found(rows, "the list lies open on the breakfast table")
+    assert "pencilled_list" in found(rows, "Watson's pencilled list lies open on the breakfast table")
+    declared = Setup(described="The sitting-room.", cast=[], props=["pencilled_list"])
+    assert "pencilled_list" in {r["entity_id"] for r in prop_refs.props_in(
+        "the list lies open on the breakfast table", rows, declared)}
 
 
 def test_the_lettered_props_still_match_where_they_should(prose, rows):
