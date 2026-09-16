@@ -594,10 +594,24 @@ def tail(master: Path, title: Path | None, out: Path, work: Path, number: int = 
     # also why every cut in QC read one frame past the frame the plan named.
     # setpts puts the join back on zero; the output rate keeps every frame the
     # `fps=` filter would have dropped.
+    # THE ONE ENCODE THAT IS UPLOADED, so it is the one that scales.  Everything
+    # upstream -- cells, takes, the joined parts -- stays at H3's 768 fixed
+    # point; only this last pass goes to `canvas.deliver`.  768x768 is 0.59 MP,
+    # under every tier YouTube treats as high definition, and the transcode
+    # spends that tier's bitrate whatever the master cost.  It adds no detail;
+    # it stops the detail already there from being thrown away.  See
+    # `studio/canvas.DELIVER` for the measurement that found it.
+    #
+    # `slow` and CRF 14 here rather than `fast` and 17: this runs once per
+    # episode and the file it makes is the deliverable.
+    up_w, up_h = W * canvas.DELIVER, H * canvas.DELIVER
     subprocess.run(["ffmpeg", "-y", "-v", "error", "-f", "concat", "-safe", "0", "-i", str(listing),
-                    "-vf", "setpts=PTS-STARTPTS", "-af", "asetpts=PTS-STARTPTS",
+                    "-vf", f"setpts=PTS-STARTPTS,scale={up_w}:{up_h}:flags=lanczos,format=yuv420p",
+                    "-af", "asetpts=PTS-STARTPTS",
                     "-fps_mode", "cfr", "-r", str(FPS), "-muxdelay", "0", "-muxpreload", "0",
-                    "-c:v", "libx264", "-preset", "fast", "-crf", "17", "-c:a", "aac", "-b:a", "256k",
+                    "-c:v", "libx264", "-preset", "slow", "-crf", "14",
+                    "-pix_fmt", "yuv420p", "-movflags", "+faststart",
+                    "-c:a", "aac", "-b:a", "256k",
                     "-ar", "48000", str(out)], check=True)
     # The concat demuxer does not refuse a part whose picture does not match the
     # first one: it drops it and reports success.  That is how a master four

@@ -166,7 +166,7 @@ def test_the_take_floor_is_the_sum_of_its_blocks_when_350_cannot_be_reached():
     without breaking the owner's 240-word block ceiling, so the floor is the
     blocks' own floor until the take has the shots to carry the guide's."""
     assert ro.take_floor(1) == 150 and ro.take_floor(2) == 300 and ro.take_floor(3) == 350
-    one = "detailed_description:\n" + ro.STYLE + "\n[Shot 1] From 00:00 to 00:08. " + "word " * 200
+    one = "detailed_description:\n" + ro.style_line() + "\n[Shot 1] From 00:00 to 00:08. " + "word " * 200
     assert [f for f in ro.l14_length(one, {}) if "detailed_description is" in f] == []
 
 

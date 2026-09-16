@@ -9,7 +9,7 @@ the setup and the take's approved panels attached, so the family holds.
 """
 from __future__ import annotations
 
-from studio.episode_board import STILL
+from studio.episode_board import still_line
 from studio.episode_spec import Shot
 
 COLS, ROWS = 3, 2
@@ -154,7 +154,7 @@ def prompt(beats_: list[dict], described: str, cast: list[str], physical: dict[s
                if strict else "") + opening
     return (f"{opening} A {COLS} by {ROWS} grid of {CELLS} equal vertical 9:16 panels filling the whole "
             f"canvas, thin white gutters, read left to right, top to bottom, in time order. Every panel "
-            f"is set in: {described} {refs_text(cast, physical, own_panels)} {panels} {STILL}")
+            f"is set in: {described} {refs_text(cast, physical, own_panels)} {panels} {still_line()}")
 
 
 def names_push(motion: str) -> bool:

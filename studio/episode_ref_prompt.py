@@ -8,7 +8,7 @@ every frame between them.
 from __future__ import annotations
 
 from studio.episode_spec import Shot
-from studio.episode_take_prompt import STYLE
+from studio.episode_take_prompt import style_line
 
 HEAD = 0.25
 
@@ -46,13 +46,13 @@ def bands(shot: Shot, seconds: float) -> str:
 
 
 def silent_body(shot: Shot, seconds: float) -> str:
-    return (f"[Shot 1] {STYLE} At 0.00 seconds the shot begins exactly on the anchored first "
+    return (f"[Shot 1] {style_line()} At 0.00 seconds the shot begins exactly on the anchored first "
             f"frame: {shot.frame} {bands(shot, seconds)} Nobody speaks and no lips move. {lock()}")
 
 
 def speaking_body(shot: Shot, speaker: str, text: str, line_s: float, seconds: float) -> str:
     who, end = name_of(speaker), min(HEAD + line_s, seconds)
-    return (f"[Shot 1] {STYLE} At 0.00 seconds the shot begins exactly on the anchored first "
+    return (f"[Shot 1] {style_line()} At 0.00 seconds the shot begins exactly on the anchored first "
             f"frame: {shot.frame} From 0.00 to {HEAD:.2f} seconds {who} is silent and still, "
             f"mouth closed. From {HEAD:.2f} to {end:.2f} seconds {who} (S1) speaks to the person "
             f"just off-screen, physically speaking with natural lip movement on every syllable, "
@@ -87,7 +87,7 @@ def timeline_body(shots: list[Shot], placed: list[dict], lines: list, at: dict, 
     the frames each shot begins on, the voice laid at its measured time."""
     by = {s["index"]: s for s in placed}
     offset = by[shots[0].index]["t_start"]
-    parts = [f"[Shot 1] {STYLE} At 0.00 seconds the take begins exactly on the first anchored "
+    parts = [f"[Shot 1] {style_line()} At 0.00 seconds the take begins exactly on the first anchored "
              f"frame; each later shot begins exactly on its own anchored frame, and the picture "
              f"moves continuously from one anchored frame to the next -- no cut, no fade."]
     for k, shot in enumerate(shots, start=1):

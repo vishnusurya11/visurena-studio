@@ -24,6 +24,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 
 from studio import approval, canvas, episode_board as board, episode_home, episode_ref_official as ro, episode_ref_prompt as rp
+from studio import house_style
 from studio import episode_seq_board as sq
 from studio import episode_takes as tk
 from studio import h3_anchors
@@ -505,6 +506,10 @@ def opened(book_id: str, number: int):
     book = episode_home.book_dir(book_id)
     episode = episode_home.load_plan(book, number)
     W, H = canvas.size(episode.aspect)
+    # AND THE PLACE, on the same road and for the same reason the canvas is
+    # here.  Episode 8 was drawn and rendered saying "1881 London" over an
+    # 1847 Utah desert: `Episode.palette` reached the location plate alone.
+    house_style.adopt(getattr(episode, "palette", ""))
     refuse_long_shots(episode)
     refuse_still_motions(episode)
     return book, episode

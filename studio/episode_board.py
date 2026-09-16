@@ -15,6 +15,7 @@ call and the files are in scripts/episode/storyboard.py.
 """
 from __future__ import annotations
 
+from studio import house_style
 from studio.episode_spec import Shot
 
 COLS, ROWS = 3, 3
@@ -22,9 +23,20 @@ PANELS = COLS * ROWS
 CANVAS = (2048, 3072)
 MODEL = "gpt-image-2.5-sunburst"
 """Owner's choice, 2026-09-10, with explicit permission to spend on it."""
-STILL = ("Photoreal cinematic 35 mm film stills, 1881 London, natural film grain, muted "
-         "soot-black and gaslight-amber palette. No text, no numbers, no captions, no labels, "
-         "no watermark; thin white gutters are the only borders.")
+BARE = ("No text, no numbers, no captions, no labels, no watermark; thin white gutters are "
+        "the only borders.")
+
+
+def still_line() -> str:
+    """The style line for this run, from `studio.house_style`, plus the sheet's
+    own bareness rule.
+
+    This was a constant reading "1881 London". Episode 8 was drawn and rendered
+    under it over an 1847 Utah desert, because `Episode.palette` was wired into
+    the location plate alone and the fix was called done -- 13 of 13 sheet
+    prompts and 28 of 28 take prompts carried the wrong place. The place is
+    declared once per run now, in one module."""
+    return f"{house_style.stills()} {BARE}"
 ORDER = ("Panels read left to right, top to bottom: panel 1 is top-left, panel 3 top-right, "
          "panel 9 bottom-right.")
 
@@ -110,7 +122,7 @@ def prompt(shots: list[Shot], described: str, cast: list[str], physical: dict[st
     return (f"A film storyboard sheet: a {COLS} by {ROWS} grid of {PANELS} equal vertical 9:16 "
             f"panels filling the whole canvas, thin white gutters between them. {ORDER} "
             f"Every panel is a frame from the same scene: {described} "
-            f"{describe_refs(cast, physical, previous, wardrobe)} {panels} {STILL}")
+            f"{describe_refs(cast, physical, previous, wardrobe)} {panels} {still_line()}")
 
 
 def panel_prompt(shot: Shot, described: str, cast: list[str], physical: dict[str, str],
@@ -121,7 +133,7 @@ def panel_prompt(shot: Shot, described: str, cast: list[str], physical: dict[str
     episode 1 drew three hands into a handshake (2026-09-10)."""
     return (f"A single vertical 9:16 film frame filling the whole canvas, no grid, no border, "
             f"no gutter. The scene: {described} {describe_refs(cast, physical, True, wardrobe)} "
-            f"The frame: {shot.frame} {STILL}")
+            f"The frame: {shot.frame} {still_line()}")
 
 
 GUTTER_WHITE, GUTTER_FLAT = 190.0, 30.0

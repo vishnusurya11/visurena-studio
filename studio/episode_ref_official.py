@@ -37,11 +37,21 @@ short of the owner's 150-240 word band (`budget`).
 from __future__ import annotations
 
 import math
+from studio import house_style
 import re
 
 from studio.episode_spec import BANNED_PROPS, Line, Setup, Shot
 
-STYLE = "Photoreal cinematic live-action, 1881 London, 35 mm film grain, natural weight and pace."
+def style_line() -> str:
+    """The style line for this run, from `studio.house_style`.
+
+    This was a constant reading "1881 London". Episode 8 was drawn and
+    rendered under it over an 1847 Utah desert, because `Episode.palette`
+    was wired into the location plate alone and the fix was called done --
+    13 of 13 sheet prompts and 28 of 28 take prompts carried the wrong
+    place. The place is declared once per run now, in one module.
+    """
+    return house_style.live()
 LEAD = "Watson"
 """The one character the limp rule watches (owner: Watson limps on his stick)."""
 MAX_PICTURES = 9
@@ -917,7 +927,7 @@ def description(shots: list[Shot], placed: list[dict], lines: list[Line], at: di
     ctx = {"faces": faces, "physical": physical, "lines": lines, "at": at, "offset": offset,
            "ids": voice_id(lines, narrator), "seen": set(), "cast": list(physical) or faces,
            "watson": lead_tag(faces), "no_ends": no_ends}
-    return "\n".join([STYLE] + [segment_text(k, seg, cells[k - 1], ctx)
+    return "\n".join([style_line()] + [segment_text(k, seg, cells[k - 1], ctx)
                                 for k, seg in enumerate(segs, start=1)])
 
 

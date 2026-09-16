@@ -79,6 +79,43 @@ def size(aspect: str) -> tuple[int, int]:
     return h3.adapt_canvas(*RATIOS[aspect])
 
 
+DELIVER = 2
+"""How much bigger the UPLOAD is than the render, as a whole number.
+
+Every episode so far was rendered, cut and uploaded at H3's native 768x768 --
+0.59 megapixels, below every tier YouTube treats as high definition. The upload
+is then transcoded at that tier's bitrate and the detail is thrown away between
+the master and the viewer. The master itself is not the problem: it is CRF 17
+and episode 8's is the highest-bitrate one in the series.
+
+EPISODE 8 IS WHERE IT SHOWED. Measured across the delivered masters -- detail is
+the mean absolute Laplacian, the high-frequency energy a codec must spend bits
+on:
+
+    ep06 interiors   detail 5.03   mean luma  69.0
+    ep07 interiors   detail 5.60   mean luma  55.5
+    ep08 desert      detail 6.93   mean luma 100.9
+
+38 % more fine detail than episode 6 and 46 % brighter. Both punish a thin
+transcode: fine rock smears, and the banding that hides in a dark parlour is
+plain in a pale sky. The first episode that is mostly wide exteriors is the
+first where the upload size hurts.
+
+A WHOLE NUMBER, because 768 to 1080 is a factor of 1.406 and rings on every
+hard edge; 2x resamples cleanly. This adds NO detail -- Lanczos cannot invent
+any. It stops the detail that IS there from being discarded by a tier chosen on
+pixel count, which is a different and more modest claim than "better quality".
+
+The render pipeline does not move: cells, takes and cuts stay at H3's fixed
+point. Only the last encode scales."""
+
+
+def deliver(aspect: str) -> tuple[int, int]:
+    """The canvas the finished master is ENCODED at, for upload."""
+    w, h = size(aspect)
+    return w * DELIVER, h * DELIVER
+
+
 def comfy_ratio(aspect: str) -> str:
     """The label the ResolutionSelector node expects for a local plate."""
     return COMFY[aspect]

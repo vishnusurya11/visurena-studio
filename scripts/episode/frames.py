@@ -16,6 +16,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 
 from studio import episode_seq_board as sq
+from studio import house_style
 from studio import canvas, episode_home
 from studio.comfy import run
 from studio.episode_spec import Episode, Setup
@@ -68,6 +69,10 @@ def main(book_id: str, number: int) -> None:
     book = episode_home.book_dir(book_id)
     episode: Episode = episode_home.load_plan(book, number)
     global W, H, ASPECT
+    # THE RUN DECLARES ITS PLACE before it makes anything. Episode 8 was drawn
+    # and rendered saying "1881 London" over an 1847 Utah desert because the
+    # palette reached the location plate alone.
+    house_style.adopt(episode.palette)
     ASPECT, (W, H) = episode.aspect, canvas.size(episode.aspect)
     out_dir = sq.plates_in(episode_home.boards_dir(book, number))
     out_dir.mkdir(parents=True, exist_ok=True)

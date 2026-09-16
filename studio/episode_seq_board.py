@@ -35,6 +35,7 @@ import re
 from pathlib import Path
 
 from studio import canvas as cv, prop_refs
+from studio import house_style
 from studio.episode_spec import Setup, Shot
 
 COLS, ROWS = 3, 3
@@ -706,8 +707,16 @@ def size_word(seg: dict) -> str:
 # The law is stated affirmatively on purpose: a negated noun is still that noun, and our own
 # board drew CRISTERION from a "no signage" clause.  The duplicate gate (ALIKE) enforces it.
 DIFFERENT = "Every panel on this sheet is a DIFFERENT photograph."
-STYLE = ("Photoreal cinematic 35 mm film stills, 1881 London, natural film grain, muted soot-black and "
-         "gaslight-amber palette.")
+def style_line() -> str:
+    """The style line for this run, from `studio.house_style`.
+
+    This was a constant reading "1881 London". Episode 8 was drawn and
+    rendered under it over an 1847 Utah desert, because `Episode.palette`
+    was wired into the location plate alone and the fix was called done --
+    13 of 13 sheet prompts and 28 of 28 take prompts carried the wrong
+    place. The place is declared once per run now, in one module.
+    """
+    return house_style.stills()
 CONSTRAINTS = ("The whole canvas is photograph and thin white gutter, edge to edge, and those thin white "
                "gutters are its only borders.\nEvery surface in every panel stays wordless: signs, labels, "
                "glass and paper carry plain tone and grain alone.\nEach panel stands as its own photograph, "
@@ -1136,7 +1145,7 @@ def prompt(segs: list[dict], setup: Setup, physical: dict[str, str], previous: b
               references_block(setup, physical, props or []), setup.described, geometry_block(setup),
               wardrobe_block(setup, physical), props_block(props or []),
               crowd_block(setup), panels_block(segs, route, setup),
-              STYLE, wordless_law(props or []))
+              style_line(), wordless_law(props or []))
     return "\n\n".join(f"{head}\n{body}" for head, body in zip(BLOCKS, bodies) if body)
 
 
@@ -1166,7 +1175,7 @@ def single(seg: dict, setup: Setup, physical: dict[str, str], aspect: str = "9:1
               # man's head has no street in it to fill with people
               crowd_block(setup) if seg.get("size") in WIDE_ENOUGH else "",
               single_picture(seg, setup),
-              STYLE, CONSTRAINTS)
+              style_line(), CONSTRAINTS)
     return "\n\n".join(f"{head}\n{body}" for head, body in zip(heads, bodies) if body)
 
 
@@ -1223,7 +1232,7 @@ def end_single(seg: dict, setup: Setup, physical: dict[str, str], aspect: str = 
              "THE PICTURE", "STYLE", "CONSTRAINTS")
     bodies = (single_block(cv.words(aspect)), f"{start}\n{later}", setup.described,
               geometry_block(setup), wardrobe_block(setup, physical), crowd_block(setup),
-              f"The same frame as Image 1, one action later: {changed}.", STYLE, END_CONSTRAINTS)
+              f"The same frame as Image 1, one action later: {changed}.", style_line(), END_CONSTRAINTS)
     return "\n\n".join(f"{head}\n{body}" for head, body in zip(heads, bodies) if body)
 
 

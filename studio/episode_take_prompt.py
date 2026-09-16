@@ -15,9 +15,19 @@ timestamps for cuts), a framing LOCK, and the rules.  Nothing else.
 """
 from __future__ import annotations
 
+from studio import house_style
 from studio.episode_spec import Episode, Shot
 
-STYLE = "Photoreal cinematic live-action, 1881 London, 35 mm film grain, natural weight and pace."
+def style_line() -> str:
+    """The style line for this run, from `studio.house_style`.
+
+    This was a constant reading "1881 London". Episode 8 was drawn and
+    rendered under it over an 1847 Utah desert, because `Episode.palette`
+    was wired into the location plate alone and the fix was called done --
+    13 of 13 sheet prompts and 28 of 28 take prompts carried the wrong
+    place. The place is declared once per run now, in one module.
+    """
+    return house_style.live()
 LOCK = ("The camera keeps the distance, height and lens of <Picture 1> for the whole shot: "
         "nothing outside the panel's frame is revealed, no pull-back, no widening, no "
         "re-framing. Everyone and everything stays exactly as drawn in <Picture 1>.")
@@ -52,7 +62,7 @@ def timeline(shot: Shot) -> str:
 
 
 def description(shot: Shot) -> str:
-    return (f"[Shot 1] {STYLE} Begin exactly from <Picture 1>: {shot.frame} {timeline(shot)} "
+    return (f"[Shot 1] {style_line()} Begin exactly from <Picture 1>: {shot.frame} {timeline(shot)} "
             f"In the final second every moving element comes to rest and the frame holds to "
             f"the cut. {LOCK} {RULES}")
 
@@ -65,7 +75,7 @@ def speaking(shot: Shot, speaker: str, text: str) -> str:
     """The Start Frame body for a shot whose person speaks the line's own wav
     (measured: docs/analysis/research/episode-06-lipsync-h3.md §4)."""
     name = speaker.replace("_", " ").title()
-    return (f"[Shot 1] {STYLE} Begin exactly from <Picture 1>: {shot.frame} At the start of the "
+    return (f"[Shot 1] {style_line()} Begin exactly from <Picture 1>: {shot.frame} At the start of the "
             f"shot {name} is silent for a quarter of a second, mouth closed. Then {name} (S1) "
             f"speaks to the person just off-screen, physically speaking with natural lip movement "
             f"on every syllable: <d>[English] {text}</d> {timeline(shot)} After the line "

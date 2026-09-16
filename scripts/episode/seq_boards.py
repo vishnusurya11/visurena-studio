@@ -31,6 +31,7 @@ import numpy as np
 from PIL import Image
 
 from studio import actor_gate, episode_board as board, episode_gutter, episode_home, episode_seq_board as sq, prop_refs, route_gate, sheet_gate
+from studio import house_style
 from studio import episode_spec as ep_spec
 from studio import frame_match
 from studio.episode_spec import Episode, Setup
@@ -341,6 +342,10 @@ def main(book_id: str, number: int, only: str | None = None, sheet: int | None =
     # master with Holmes making Gregson's gesture because nothing read the plan
     # before the draw.  `actor_gate` was written and then called by nothing, which
     # is a comment, not a gate.
+    # THE RUN DECLARES ITS PLACE before it makes anything. Episode 8 was drawn
+    # and rendered saying "1881 London" over an 1847 Utah desert because the
+    # palette reached the location plate alone.
+    house_style.adopt(episode.palette)
     for note in actor_gate.advisory_episode(episode):
         print(f"  ADVISORY {note}", flush=True)
     if faults := actor_gate.hard_episode(episode):
