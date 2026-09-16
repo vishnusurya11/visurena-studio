@@ -622,7 +622,7 @@ EXTRA = {
         "from the LEFT. The volume lies in the BOTTOM half of the frame on the sunlit boards with "
         "the table's far edge running along the TOP third into shadow. The black coat cuff comes "
         "in from the RIGHT edge.",
-        "friction", 0.0, 0.0),
+        "friction", 0.5, 0.0),
     10: ("farm_parlour", "medium", ["john_ferrier"], 0.55,
          "Medium of John Ferrier standing beside the pine table with the riding whip in one bare "
          "hand and the other hand thrown out open in expostulation, the window light hard on the "
@@ -638,7 +638,7 @@ EXTRA = {
          "at the LEFT third. The riding whip hangs in his RIGHT hand along the RIGHT third. The pine "
          "table crosses the BOTTOM third in the sun and the cold hearth is a dark arch behind his "
          "shoulder at the RIGHT edge.",
-         "friction", 0.0, 0.0),
+         "friction", 1.0, 0.0),
     17: ("farm_doorway", "wide", [], 0.9,
          "Wide down the shingly path from the porch step to the open gate, Brigham Young's small "
          "black figure at the gate with the brown-backed volume under his arm, his long shadow "
@@ -711,8 +711,8 @@ LINES = [
     ("narration", "john_watson", "It was of the daughter that the Prophet had come to speak.", 10),
     ("narration", "john_watson", "There were stories, he said, that she was promised to a Gentile.", 11),
     ("narration", "john_watson", "And the thirteenth rule of Joseph Smith let no maiden of the faith wed outside it.", 12),
-    ("dialogue", "brigham_young", "Stangerson has a son, and Drebber has a son. Let her choose.", 13),
-    ("dialogue", "john_ferrier", "You will give us time. My daughter is very young.", 14),
+    ("dialogue", "brigham_young", "Stangerson has a son. Drebber has a son. Let her choose.", 13),
+    ("dialogue", "john_ferrier", "Give us time. My daughter is very young.", 14),
     ("narration", "john_watson", "She should have a month, he said, and at the end of it her answer.", 15),
     ("dialogue", "brigham_young", "It were better you and she lay bleached skeletons on the Sierra Blanco than defy the Holy Four.", 16),
     ("narration", "john_watson", "His voice rang through the house, and his daughter heard every word of it.", 17),
@@ -722,11 +722,11 @@ LINES = [
     ("narration", "john_watson", "He sat on till the lamp was lit, and then a soft hand was laid on his.", 21),
     ("dialogue", "lucy_ferrier", "Oh, father, what shall we do?", 22),
     ("dialogue", "john_ferrier", "Don't you scare yourself. We'll fix it up somehow.", 23),
-    ("narration", "john_watson", "A sob and a squeeze of his hand was her only answer.", 24),
+    ("narration", "john_watson", "She answered him with a sob, and with her hand tightening on his.", 24),
     ("narration", "john_watson", "There was a party leaving for Nevada in the morning. He would send Hope word.", 25),
     ("narration", "john_watson", "If he knew the young man, he would be back at a speed to whip the telegraph.", 26),
     ("narration", "john_watson", "She laughed through her tears, and one heard such stories about those who opposed the Prophet.", 27),
-    ("dialogue", "john_ferrier", "I'm a free-born American, and too old to knuckle under.", 28),
+    ("dialogue", "john_ferrier", "I am a free-born American, and too old to knuckle under to any man.", 28),
     ("narration", "john_watson", "They had a clear month, he said. At the end of it they would leave Utah.", 29),
     ("dialogue", "lucy_ferrier", "But they won't let us leave.", 30),
     # shots 31, 32, 33: silent -- the answer is a picture

@@ -108,10 +108,26 @@ def dominant_hue(h: np.ndarray, s: np.ndarray, v: np.ndarray) -> tuple[int, floa
     return top * SECTOR, round(float(hist[top] / h.size), 4)
 
 
-def one_hue(share: float, entropy: float) -> bool:
-    """A grey picture (share 0) has no hue to be one of; its entropy is 0 by
-    construction and says nothing."""
-    return share > 0 and (share > ONE_HUE_SHARE or entropy < HUE_ENTROPY_FLOOR)
+def one_hue(share: float, entropy: float, p5: float | None = None,
+            near_black: float | None = None) -> bool:
+    """One hue is the SHARE wall, or low variety in a picture that has also lost
+    its floor. A grey picture (share 0) has no hue to be one of.
+
+    MEASURED building episode 10: every cell kept its floor (median p5 4.1, half
+    of each frame near black -- deeper than London's 8.4 / 0.27) and the episode
+    was refused as one hue on entropy alone, 0.81 against 1.10. Hue entropy is
+    measured over saturated pixels, so a room lit by one lamp with half the frame
+    black has nothing saturated that is not lamp-coloured; a candlelit bedroom
+    scores like a bleached noon. What separated ep09 from ep07 was the dominant
+    share (0.69 against 0.26) TOGETHER with a lifted floor. Reviewer 8's words:
+    the loss was "no direction and no floor", not "one hue". So low entropy
+    counts only where the floor is gone; ep10 at share 0.39 passes."""
+    if share <= 0:
+        return False
+    if share > ONE_HUE_SHARE:
+        return True
+    lifted = p5 is not None and near_black is not None and no_black_floor(p5, near_black)
+    return entropy < HUE_ENTROPY_FLOOR and lifted
 
 
 def judge(path: Path) -> dict:
@@ -124,7 +140,7 @@ def judge(path: Path) -> dict:
     if no_black_floor(p5, near_black):
         faults_.append(f"no black floor (p5 {p5:.1f} over {P5_FLOOR:.0f}, "
                        f"near-black {near_black:.2f} under {BLACK_SHARE:.2f})")
-    if one_hue(share, entropy):
+    if one_hue(share, entropy, p5, near_black):
         faults_.append(f"one hue (sector {sector} holds {share:.2f} of the frame, "
                        f"hue entropy {entropy:.2f})")
     return {"p5": p5, "near_black": near_black, "hue_entropy": entropy,
@@ -141,7 +157,7 @@ def roll_up(judged: list[dict]) -> list[str]:
     if no_black_floor(med["p5"], med["near_black"]):
         out.append(f"episode: no black floor (median p5 {med['p5']:.1f} over {P5_FLOOR:.0f}, "
                    f"median near-black {med['near_black']:.2f} under {BLACK_SHARE:.2f})")
-    if one_hue(med["dominant_share"], med["hue_entropy"]):
+    if one_hue(med["dominant_share"], med["hue_entropy"], med["p5"], med["near_black"]):
         out.append(f"episode: one hue (median dominant-hue share {med['dominant_share']:.2f} "
                    f"against {ONE_HUE_SHARE:.2f}, median hue entropy {med['hue_entropy']:.2f} "
                    f"against {HUE_ENTROPY_FLOOR:.2f})")
