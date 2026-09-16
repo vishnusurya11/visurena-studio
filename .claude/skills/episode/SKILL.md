@@ -285,6 +285,40 @@ This also cheapens the freeze problem from the other side. A big re-stage was
 our instinct for "give the segment something to do"; it is the one thing that
 guarantees the segment cannot do it.
 
+### 🛑 NO END CELL REACHES A TAKE. EVER. (owner's rule, restated 2026-09-16)
+
+**A take is given its FIRST frame and nothing else. No last frame, no END
+picture, no `<Picture N>` declared "the last frame of [Shot k]".** The arrival
+is said in WORDS — `episode_ref_official.arrival_clause`. Enforced at
+`takes_r2v.NO_ENDS = True`, where `end_cells()` returns `[]` whatever is drawn
+on disk. `--ends` exists only as a reproducible control; nothing asks for it.
+
+Why, measured in `docs/calibration/end_frames.md`: **the model moves to the END
+picture as fast as the distance allows, then holds it until the pin.** A
+near-copy END freezes the whole segment. A far END glides — and the glide is
+whatever separates the two pictures, so when that is the background, *the
+background dissolves*. That is the warping. **The pin has no good setting**, so
+there is no threshold to tune and no gate that saves it; a gate only detects it
+after the render is paid for.
+
+**How this rule was broken while still written down here.** This page already
+said "NO END PINS of any kind" and the code honoured it — *in the anchor list*.
+It then re-introduced the pin through a different artefact: the END cell was
+staged as a reference and the prompt declared `<Picture 3> is the last frame of
+[Shot 1]`. Model-side that IS the pin. Episode 8 shipped 15 of them (ep07: 3,
+ep06: 1) because `reaches` was "fixed" to drop its floor for a travelling
+camera and every ep08 shot travels; 7 of the 15 were farther apart than the
+floor that used to reject them (Q15_0 at **0.041** — two pictures sharing
+nothing) and 7 froze 0.8–2.1 s before their pin.
+
+So the rule is stated on the ARTEFACT, not on a code path: **a rebuilt take
+prompt must contain zero occurrences of `last frame of [Shot` and stage zero
+`*E.png` references.** Check that, not the flag.
+
+Everything below about judging END pairs governs the **sequence sheet only** —
+whether the plan's motion has a drawable destination at all, which is a useful
+contact-sheet check. None of it decides what a take is given.
+
 ### THE END PANEL CANNOT BE ASKED FOR IN WORDS (measured 2026-09-12, ep02)
 
 An END panel is "the same shot one moment later". **This drawer cannot draw
@@ -315,10 +349,11 @@ band it is judged in depends on whether the camera MOVED.
   shot, because there a high score means the travel was ignored.
 - Pass the motion: `end_pair_verdict(score, size, changed, motion)` and
   `reaches(start, end, size, motion)`. A caller that names no motion gets the
-  stricter locked-off rule, so nothing loosens by accident — and BOTH the
-  drawing side and the spending side need it. The spending side was missed
-  once, and three paid, correct END cells were withheld from their own takes
-  in silence.
+  stricter locked-off rule, so nothing loosens by accident.
+- **There is no "spending side" any more.** `reaches` judges the SHEET. It was
+  once also asked whether a take should be GIVEN its END cell, and widening it
+  there is what put 15 pins into episode 8. A take is given no END cell under
+  any verdict.
 
 - A **re-staged** END cell is dropped **when its camera was told to stay**.
   Aiming a take at it is aiming it at a cut, and `drift` then fails the take
@@ -328,7 +363,9 @@ band it is judged in depends on whether the camera MOVED.
   WORSE than no END cell, because it tells the take to end where it began,
   which is the stillness the owner banned outright.
 - With **no** END cell the take follows the motion described in words and
-  `drift` has no aimed segment to fail. That is the good default.
+  `drift` has no aimed segment to fail. **That is not a default, it is the
+  rule** — see the 🛑 block above. These three bullets only decide whether a
+  drawn END cell is kept on the sheet as a contact-sheet check.
 
 `seq_boards.py` already does the right thing: `duplicates()` judges END pairs
 in the band, one strict retry names the offender, then `drop_end_copies`
@@ -385,14 +422,19 @@ written to the old 12 s is refused AFTER its sheets are paid for.
 References: the cast sheets for EVERY face the take shows, sub-shot faces
 included (reading shot-level faces alone left 6 of 19 takes with a face on
 screen and no sheet staged), then the plate, then a strip of the take's own
-cells in time order with its END frames. Pins: EVERY CELL ONCE, at its first
+start cells in time order. Pins: EVERY CELL ONCE, at its first
 token start (H3 packs 17 frames into 5 tokens, so token starts are
-17k + {0,1,5,9,13}); the next cell's start pin closes the segment. NO END
-PINS of any kind: a pin is a soft conditioning row at its time, not a latent
+17k + {0,1,5,9,13}); the next cell's start pin closes the segment. **NO END
+PINS of any kind, and NO END CELL STAGED AS A REFERENCE EITHER** — declaring
+one in the prompt as "the last frame of [Shot k]" is the same pin by another
+route, and that is how 15 of them reached episode 8 while this line already
+said no. A pin is a soft conditioning row at its time, not a latent
 overwrite, so a second pin on a hold says "nothing changes" and the take
 freezes (measured over 71 segments: start + same cell 65 % frozen, start +
-drawn END cell 59 %, start only 30 %). END cells live in the strip and the
-prompt only. Audio: dialogue wavs at their offsets, silence elsewhere,
+drawn END cell 59 %, start only 30 %); and a far one dissolves the background
+instead (`docs/calibration/end_frames.md`). The arrival is carried by
+`arrival_clause` in the shot's own block — words, not a picture.
+Audio: dialogue wavs at their offsets, silence elsewhere,
 anchored at frame 0; narration NEVER (an anchored narration made the face on
 screen mouth it).
 

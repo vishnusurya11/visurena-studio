@@ -124,6 +124,43 @@ def test_t13_one_picture_may_not_be_the_first_frame_of_every_shot():
     assert "L11" in ids(text, {"strip": 3})
 
 
+def test_no_picture_may_be_declared_a_shot_s_LAST_FRAME():
+    """THE OWNER'S RULE, and the lint is where it has to live.
+
+    `takes_r2v.NO_ENDS` stops END cells being STAGED; this stops the prompt
+    DECLARING one, which is the same pin by another route and is exactly how 15
+    of them reached episode 8 while the skill already said "no end pins". The
+    model races to the last-frame picture and then holds it: near, the segment
+    freezes; far, the background dissolves into the other picture.
+
+    The gate is on the ARTEFACT -- the built prompt -- because a flag can be
+    honoured on one code path and bypassed on another, and was."""
+    text = ("subject_definitions:\n<Picture 2> is the first frame of [Shot 1], a wide.\n"
+            "<Picture 3> is the last frame of [Shot 1], with the action of that shot completed.")
+    assert "L11" in ids(text)
+    assert any("last frame" in fault for fault in ro.lint(text))
+
+
+def test_the_retention_line_may_not_retain_one_either():
+    text = ("retention_analysis:\n<Picture 3> ([Shot 1] last frame): fully_preserved - viewpoint.")
+    assert any("last frame" in fault for fault in ro.lint(text))
+
+
+def test_a_prompt_that_only_names_its_first_frames_passes_that_rule():
+    text = "subject_definitions:\n<Picture 2> is the first frame of [Shot 1], a wide."
+    assert not [f for f in ro.lint(text) if "last frame" in f]
+
+
+def test_the_PROSE_clause_the_spec_requires_is_not_a_pin():
+    """"...and the lean continues to the last frame of the shot" is the spec's own
+    continuation clause and appears in both worked prompts. It binds no picture to
+    anything; a rule that cannot tell it from a declaration would refuse every take."""
+    text = ("detailed_description:\n[Shot 1] From 00:00 to 00:03. The shot begins from "
+            "<Picture 3>: a close shot. At 00:02 he leans his weight onto the stick, "
+            "and the lean continues to the last frame of the shot.")
+    assert not [f for f in ro.lint(text) if "last frame" in f]
+
+
 def test_t14_the_location_may_not_appear_in_a_shot_nor_be_fully_preserved():
     text = ("retention_analysis:\n<Subject 2> (appears in [Shot 1], [Shot 2]): fully_preserved - "
             "the room, its furniture, walls, windows and light.")

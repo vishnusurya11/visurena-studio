@@ -24,7 +24,10 @@ Rules:
   no two panels alike at 0.70, END panels only where a state changes) ->
   `takes_r2v.py` (Ref2V LoRA, shift 12/3, cast sheets for EVERY face shown
   including sub-shot faces, plate, own strip, ONE pin per cell at its token
-  start and NO end pins, DIALOGUE-ONLY audio, whole-second touching ranges
+  start, NO end pins AND NO END CELL STAGED AT ALL — a take gets its first
+  frame and the arrival in words; a `<Picture N>` called "the last frame of
+  [Shot k]" is the same pin by another route and it warps (ep08 shipped 15),
+  DIALOGUE-ONLY audio, whole-second touching ranges
   covering the take, an action in every segment, affirmative text only) ->
   `take_dq.py` (motion, cut landing, foreign, drift, lip sync, identity; one
   score; best of N automatically) -> `assemble.py --engine=r2v` ->

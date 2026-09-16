@@ -1131,6 +1131,20 @@ def l11_pictures(text, facts):
         out.append(f"L11 PICTURES: {len(defined)} pictures defined against {refs} staged references")
     out += [f"L11 PICTURES: <Picture {n}> is the first frame of more than one shot"
             for n, body in re.findall(r"<Picture (\d+)> \(([^)]*)\)", text) if body.count("first frame") > 1]
+    # THE OWNER'S RULE, 2026-09-16: no picture is a shot's LAST frame. `takes_r2v.NO_ENDS`
+    # stops one being STAGED; this stops one being DECLARED, which is the same pin by
+    # another route -- the model races to it and holds, so a near one freezes the segment
+    # and a far one dissolves the background into it (docs/calibration/end_frames.md).
+    # Episode 8 shipped 15 while the skill already said "no end pins", because the flag
+    # was honoured in the anchor list and bypassed in the prompt text. The gate belongs
+    # on the built artefact, which is what a lint reads.
+    # Only a DECLARATION, never prose: "the lean continues to the last frame of the shot"
+    # is the required continuation clause and must stay legal, so the pattern is the two
+    # forms that bind a picture TO a shot's end -- the definition and the retention line.
+    out += [f"L11 PICTURES: <Picture {n}> is declared the last frame of a shot"
+            for n in re.findall(r"<Picture (\d+)> is the last frame", text)]
+    out += [f"L11 PICTURES: <Picture {n}> is retained as a shot's last frame"
+            for n, body in re.findall(r"<Picture (\d+)> \(([^)]*)\)", text) if "last frame" in body]
     if (plate := facts.get("plate")) and re.search(rf"<Picture {plate}>[^\n]*(first|last) frame", text):
         out.append(f"L11 PICTURES: the plate <Picture {plate}> is declared a frame")
     if (strip := facts.get("strip")) and (m := re.search(rf"<Picture {strip}> \([^)]*\): (\w+)", text)) \
