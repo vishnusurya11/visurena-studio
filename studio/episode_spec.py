@@ -307,6 +307,21 @@ class Episode(BaseModel):
     """The one question this episode answers, in Armstrong's form: "Today, can
     X do Y?"  Answered before the episode ends, or the episode has no reason to
     stop where it stops.  Reported by `studio.story_layer`, never refused."""
+    palette: str = ""
+    """The light and the place, for this episode's plates, overriding the book's.
+
+    MEASURED, episode 8. `refs.json` carries ONE palette for the whole book and
+    it ends "1881 London"; `trailer_refs.location_prompt` puts it in front of
+    every plate. That was true for seven episodes and false from the eighth --
+    chapter VIII opens on the Great Alkali Plain on 4 May 1847 and Part Two
+    never comes back. Drawn against the book palette, three of episode 8's six
+    plates came back as GEORGIAN TERRACED STREETS with covered waggons driving
+    down them, and a fourth framed its desert boulder through a ruined brick
+    doorway. Every setup said "the alkali plain, 1847"; the sentence in front of
+    it said London, and London won.
+
+    Empty by default, so an episode that says nothing keeps the book's palette
+    and the seven already built are untouched."""
     aspect: Literal["9:16", "1:1"] = canvas.DEFAULT
     """The delivery shape, and the ONE place it is declared (`studio/canvas.py`).
 

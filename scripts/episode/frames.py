@@ -71,7 +71,9 @@ def main(book_id: str, number: int) -> None:
     ASPECT, (W, H) = episode.aspect, canvas.size(episode.aspect)
     out_dir = sq.plates_in(episode_home.boards_dir(book, number))
     out_dir.mkdir(parents=True, exist_ok=True)
-    palette = episode_home.read_json(book / "refs" / "refs.json")["palette"]
+    # THE EPISODE'S OWN PALETTE WINS. The book's ends "1881 London", which is
+    # right for Part One and wrong for every chapter from the eighth on.
+    palette = episode.palette or episode_home.read_json(book / "refs" / "refs.json")["palette"]
     seed = SEED_BASE + number * 1000
     for i, (name, setup) in enumerate(episode.setups.items()):
         made = plate(name, setup, palette, out_dir / f"plate_{name}.png", seed + i)
