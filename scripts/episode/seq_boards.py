@@ -13,8 +13,9 @@ every setup that shows it), the setup's cast.  The PREVIOUS sheet is no longer
 attached: it copied its framings into the new cells (reviewer 3, item 7).
 
 `--sheet=<k>` redraws one sheet of a setup for $0.13 instead of the whole
-setup; `draw()` returns early when the output file exists, so a re-run costs
-nothing for sheets already on disk.  Owner's design, 2026-09-11: takes are
+setup; `draw()` returns early only when the sheet's `.prompt.txt` still matches
+the prompt it would send, so a re-run costs nothing for UNCHANGED sheets and
+redraws the ones whose prose you edited.  Owner's design, 2026-09-11: takes are
 windows on this board.
 """
 from __future__ import annotations

@@ -11,7 +11,11 @@ of the same scene; each panel is cropped and conformed to 768x1344 as
 `frames/SNN.png`.  Spare cells are drawn as alternate angles so no cell is
 black; they are not cropped out.  The prompt is written beside a sheet ONLY
 when the sheet is drawn, so the record is the prompt that made it.  PAID
-step (owner's go, 2026-09-10); sheets on disk are never redrawn.
+step (owner's go, 2026-09-10).  A sheet is reused only while the prompt that
+made it is unchanged: `cached()` compares `asked(prompt, images)` against the
+`<sheet>.prompt.txt` written beside it.  A path is not a cache key -- it names
+WHERE the answer was put, never WHAT was asked -- and keying on it meant a
+corrected prompt redrew nothing while every cell came back byte-identical.
 """
 from __future__ import annotations
 

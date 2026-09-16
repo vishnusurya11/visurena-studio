@@ -38,7 +38,10 @@ Rules:
 - Look at the sequence sheets before the H3 round, and at the take strips
   before the cut. Report what you saw, not what you hoped.
 - The sheets cost money: they run only with the owner's go on record; sheets
-  on disk are never redrawn; every call is logged in `spend.jsonl`.
+  on disk are redrawn ONLY when their prompt changed (`cached()` compares
+  `<sheet>.prompt.txt` byte for byte; a sheet drawn before that record existed
+  is kept), so editing panel prose re-spends ~$0.20 a sheet on the next run --
+  budget for it; every call is logged in `spend.jsonl`.
 - Deliver only with `qc.json` saying `passed: true`; a failing gate is reported
   by name and number.
 - Every path you report is absolute and copy-pasteable, on its own line; the

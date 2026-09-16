@@ -146,7 +146,7 @@ Per break, in the order a viewer meets them.
 
 **Pins (`studio/episode_takes.py`).** No code change to `end_pins`; the END pin is right when the END cell is right. The one pin rule to add: a hold whose END is its own start cell (`has_end=False`) may only be pinned that way if its motion is a face beat (size close/medium_close/insert); a geography cell without a drawn END gets NO end pin (the iteration-3 behaviour, 25 % frozen) rather than a same-cell pin (55 % frozen). That single rule would have left T20's two-shot and T17's bodkin free to move.
 
-**DQ.** Promote `picture_ok` and `camera_ok` from advisory to verdict, replacing `scene_events` with `cuts_from_energy` + `unplanned_cuts` + `extra_pictures` (calibrated above: zero false positives against both human reviews).
+**DQ.** `camera_ok` is NOT promotable -- measured 2026-09-15 it is a stillness meter, FALSE on all nineteen ep07 takes that scored 100 (see `tests/test_camera_ok_is_a_stillness_meter.py`). Promote `picture_ok` alone from advisory to verdict, replacing `scene_events` with `cuts_from_energy` + `unplanned_cuts` + `extra_pictures` (calibrated above: zero false positives against both human reviews).
 
 ## Not a geography problem, noted for the others
 

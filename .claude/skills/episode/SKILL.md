@@ -24,7 +24,7 @@ uv run python scripts/episode/cast_cards.py   <codex_id> --prompts   # FREE: wri
 uv run python scripts/episode/cast_cards.py   <codex_id> --draw <who> <bust|indoor|outdoor> --approved  # ESCALATE: $0.08 a picture
 uv run python scripts/episode/seq_boards.py  <codex_id> <n>   # 5. ONE storyboard sequence per setup (PAID ~$0.20 a sheet)
 uv run python scripts/episode/takes_r2v.py   <codex_id> <n>   # 6. every take on H3 ref2va from the board's cells
-uv run python scripts/episode/take_dq.py     <codex_id> <n> <take...>          # 7. DQ per take; --retake=1,6 re-renders
+uv run python scripts/episode/take_dq.py     <codex_id> <n> [take...]          # 7. DQ EVERY take on disk; name indices only to narrow it
 uv run python scripts/episode/assemble.py    <codex_id> <n> --engine=r2v  # 8. cut, quiet bed, title card -> master_r2v.mp4
 uv run python scripts/episode/qc.py          <codex_id> <n> --engine=r2v  # 9. measure the delivered file
 uv run python scripts/episode/runcards.py    <codex_id> <n>   # every input of every shot, both engines, for the owner
@@ -301,12 +301,29 @@ With a dominant reference image it copies; without one it re-stages. Both
 prompts asked for a RELATION to another picture ("be different", "be the
 same"), and a relation is not a thing that can be drawn.
 
-So: **judge, never argue.** `sq.reaches()` measures the drawn pair and only a
-cell inside `END_FLOOR..END_CEILING` (0.45–0.80) is a destination.
+So: **judge, never argue.** `sq.reaches()` measures the drawn pair — and the
+band it is judged in depends on whether the camera MOVED.
 
-- A **re-staged** END cell is dropped. Aiming a take at it is aiming it at a
-  cut, and `drift` then fails the take for the sheet's fault — that was all
-  seven of episode 2's hard drift failures.
+- A shot whose camera **holds** is judged inside `END_FLOOR..END_CEILING`
+  (0.45–0.80).
+- A shot whose camera **travels has NO FLOOR.** Its framing changed because the
+  plan said to change it, and a camera told to move cannot be judged by how far
+  it moved. Episode 7's floor threw away four correct panels before this was
+  scoped — Q23_0E 0.380, Q24_0E 0.410, Q11_0E 0.340, Q14_0E 0.240, every one
+  right, every one low because the plan moved the camera.
+- Its **ceiling is absolute**: `changed` cannot overturn 0.80 for a travelling
+  shot, because there a high score means the travel was ignored.
+- Pass the motion: `end_pair_verdict(score, size, changed, motion)` and
+  `reaches(start, end, size, motion)`. A caller that names no motion gets the
+  stricter locked-off rule, so nothing loosens by accident — and BOTH the
+  drawing side and the spending side need it. The spending side was missed
+  once, and three paid, correct END cells were withheld from their own takes
+  in silence.
+
+- A **re-staged** END cell is dropped **when its camera was told to stay**.
+  Aiming a take at it is aiming it at a cut, and `drift` then fails the take
+  for the sheet's fault — that was all seven of episode 2's hard drift
+  failures.
 - A **copy** END cell is dropped too, and this one is counter-intuitive: it is
   WORSE than no END cell, because it tells the take to end where it began,
   which is the stillness the owner banned outright.
@@ -433,6 +450,16 @@ sending a bad one:
   the model (ep04 T21). The move in the prose must be the SAME move the cells
   differ by.
 
+  **THE AMOUNT MUST BE IN THE BODY-SCALE VOCABULARY, or the END panel loses its
+  camera.** `episode_seq_board.DISTANCE` is a closed list: a hand's breadth, a
+  hand's width, a thumb's width, a finger's breadth, an arm's length, a head's
+  height, a forearm, or one/two/three/four (long|short) strides / paces /
+  steps / treads; or a gait, "at a normal walking pace". No metres, no
+  percentages, no "slowly". A bare "a hand" is a hand, not a distance. A move
+  the parser cannot size is drawn as a camera that never left, and the 0.45
+  floor then re-applies to it. `HOLDS` knows static, locked, locked-off, holds,
+  held, holding, stays, remains, does not move, never moves.
+
 - **EVERY MOVING THING HAS A MOVER, AND THE CAMERA IS THE PREFERRED ONE**
   (owner, 2026-09-14: "remove unnatural movement like paper turning on its own
   on table ... and violin getting a red light ... keep the movement simple").
@@ -447,6 +474,36 @@ sending a bad one:
 
   Fog, flame, coal, smoke, washing in a draught and a turning cab wheel are
   NOT this fault — the place supplies their cause, and those shots scored 100.
+
+- **A THING CANNOT ENTER A FRAME IT IS ALREADY IN.** `M10`
+  (`episode_spec.already_in_frame`) refuses a `motion` clause that brings into
+  frame something `at_rest` already has standing in it. Episode 7 shot 11:
+  `at_rest` put an open sash window at the TOP CENTRE, `motion` said "the open
+  window comes down into frame as the camera rises". `at_rest` IS the first
+  frame, so the only way to obey both is to throw the staging away — and the
+  take did, left the ladder at 3.3 s and re-established the whole mews lane,
+  0.976 against the location plate and 0.176 against its own start cell,
+  40/100. An EXIT is never this fault, and neither is a body used as a RULER
+  ("at the height of a standing woman's shoulder") nor a thing `at_rest` puts
+  outside the frame ("toward Watson below the bottom of frame"). Free to read,
+  before the $0.20 sheet and before the GPU.
+
+- **WATSON HAS TO DO SOMETHING IN HIS OWN EPISODE.** `silent_narrator` refuses
+  a plan with no narration line in which the narrator is the acting subject of
+  a verb. Measured across the seven delivered plans: ep01 4, ep02 5, ep03 2,
+  ep04 1, ep05 1, ep06 3, **ep07 0** — and episode 7 is the one that reads as a
+  police report. Its whole first person in 270 words is one `me` and one `our`,
+  in a line where he is the object of somebody else's request, in the chapter
+  where a doctor hands an animal over to settle a question. The floor is ONE.
+  First-person density is printed beside it as an advisory; the delivered band
+  is 0.7–6.3 %, and the two episodes a writing review rated highest are 5.7 and
+  4.4.
+
+- **A REFERENCE THE BIBLE DECLARES MUST BE ON DISK.** `prop_refs.undrawn`
+  refuses before the first sheet. Episode 7 added a `terrier` row whose own
+  note said its identity had to hold across three shots, never drew
+  `prop-terrier.png`, and `draw_setup` filtered it out of three paid sheets in
+  silence. Declaring a reference and not drawing it is never intentional.
 - DESCRIPTIVE: 150-240 words a shot block, at least `min(350, 150 x shots)`
   a take. Ours measured 114 a block before this and 179 after.
 - The plate is a DEFINITION, `partially_preserved`, never "appears in" a
