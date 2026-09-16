@@ -642,10 +642,14 @@ def motion_faults(motion: str) -> list[tuple[str, str]]:
 HARD_MOTION = ("M2", "M9", "M10")
 
 ARRIVES = r"comes?|come|moves?|swings?|drops?|rises?|slides?|steps?|lifts?"
+EDGE = r"(?:\w+\s+){0,3}?(?:frame|view|shot)"
+"""The frame, however the plan points at a part of it: "into frame", "into the
+bottom of frame", "at the left edge of frame".  Lazy and capped at three words,
+so it reaches across "the bottom of" and not across a whole clause."""
 ENTERS = re.compile(
     r"([^;,.]+?)\s+(?:"
-    rf"(?:{ARRIVES})\s+(?:\w+\s+){{0,2}}?in(?:to)?\s+(?:the\s+)?(?:frame|view|shot)"
-    r"|(?:enters?|appears?)\s+(?:in\s+)?(?:the\s+)?(?:frame|view|shot)"
+    rf"(?:{ARRIVES})\s+(?:\w+\s+){{0,2}}?in(?:to)?\s+(?:the\s+)?{EDGE}"
+    rf"|(?:enters?|appears?)\s+(?:in|at|on)?\s*(?:the\s+)?{EDGE}"
     rf"|(?:{ARRIVES})\s+on\s+camera"
     r")\b",
     re.I)
@@ -675,12 +679,49 @@ def head_noun(phrase: str) -> str:
     return content[-1] if content else ""
 
 
+OUTSIDE = re.compile(
+    r"\b(?:below|beyond|outside|behind|past|off)\s+(?:the\s+)?"
+    r"(?:bottom|top|left|right|near|far)?\s*(?:edge\s+)?(?:of\s+)?(?:the\s+)?"
+    r"(?:frame|shot|picture)\b"
+    r"|\b(?:out of|clear of)\s+(?:the\s+)?(?:frame|shot|picture)\b", re.I)
+"""A clause that puts something OUTSIDE the picture.
+
+A thing the staging places outside the frame is EXACTLY the thing that may
+enter it, so the clause saying so is dropped before the noun search. ep01 shot
+8 cut 1 states it outright -- "toward Watson below the bottom of frame" -- and
+then correctly has Watson's shoulder rise into the bottom of frame; without
+this, M10 accused the one plan that had said where everybody was."""
+
+
+MEASURING = re.compile(
+    r"\bat\s+(?:the\s+|a\s+|half\s+the\s+)?"
+    r"(?:height|width|length|depth|breadth|size)\s+of\s+[^,;.]*"
+    r"|\blevel\s+with\s+[^,;.]*", re.I)
+"""A body used as a RULER, not as a thing standing in the picture.
+
+These plans size everything against a body -- "at the height of a standing
+woman's shoulder", "at a third of the frame height" -- which is the owner's
+standing rule.  Without this, widening `ENTERS` turns every such phrase into a
+false contradiction the moment a shot brings that body part into frame, and a
+HARD gate that fires on good plans is one somebody switches off."""
+
+
 def named_at_rest(noun: str, at_rest: str) -> bool:
-    """Is that noun already standing in the first frame? Singular and plural both."""
+    """Is that noun already standing in the first frame? Singular and plural both.
+
+    The measuring phrases come out first: a shoulder named only as the height of
+    something else is a ruler, and a ruler is not in the frame."""
     if not noun:
         return False
+    # MEASURING RUNS PER CLAUSE, BEFORE THE JOIN.  Its `[^,;.]*` tail uses the
+    # commas as its boundary, and joining the surviving clauses on a space takes
+    # those commas away -- so applied afterwards, one "at the height of a thumb"
+    # swallowed the rest of the sentence and with it the hand that was the whole
+    # question.  Measured on ep06 shot 0, which went silent in exactly that way.
+    standing = " , ".join(MEASURING.sub(" ", part) for part in re.split(r"[,;]", at_rest)
+                          if not OUTSIDE.search(part))
     stem = noun[:-1] if noun.endswith("s") and len(noun) > 3 else noun
-    return bool(re.search(rf"\b{re.escape(stem)}(?:s|es)?\b", at_rest, re.I))
+    return bool(re.search(rf"\b{re.escape(stem)}(?:s|es)?\b", standing, re.I))
 
 
 def already_in_frame(at_rest: str, motion: str) -> list[str]:
