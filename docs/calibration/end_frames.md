@@ -297,3 +297,32 @@ Tests: `tests/test_dq_targets_what_was_staged.py::test_the_ref2v_workflow_pins_n
 The END panels are still DRAWN on the sequence sheets. They cost nothing extra (they fill
 spare cells that would otherwise be alternates) and they remain a useful contact-sheet
 check that the plan's motion has a destination at all. They are simply never pinned.
+
+## THE CONTROLLED COMPARISON, 2026-09-16: episode 8 against episode 9
+
+The experiment ordered on 2026-09-13 and never run. Episode 9 is the same book, the same
+engine (MiniMax-H3 ref2va + the Ref2V 8-step LoRA, shift 12/3, 8 steps), the same 1:1
+canvas, the same 8.0 s take budget and the same 2-segment cap. It carries no last-frame
+pin anywhere. Measured with gate B's own meter on the delivered `T??.mp4` -- the run of
+frames before the end of a segment whose step energy sits under 1.5:
+
+| | episode 8 | episode 9 |
+|---|---|---|
+| takes | 28 | 28 |
+| takes given a last-frame pin | **15** | **0** |
+| trailing freeze, mean | 0.63 s | **0.05 s** |
+| trailing freeze, worst | 4.42 s | **0.71 s** |
+| takes frozen over 0.75 s | **10 of 28** (36 %) | **0 of 28** |
+| mean step energy | 3.81 | **5.19** (+36 %) |
+
+Not one take in episode 9 crosses the threshold, and the pictures move a third more. The
+owner's rule is not a trade: removing the pin cost nothing and the freeze went with it.
+
+The arrival is carried by `episode_ref_official.arrival_clause` -- words in the shot's own
+block -- on 28 of 28 take prompts. `scripts/episode/no_last_frame.py` reads clean on all
+three artefacts: 0 sheet prompts asking for an END panel, 0 END cells on disk, 0 take
+prompts declaring or staging one.
+
+**This closes the question.** A last-frame pin has no good setting, it is not needed to
+give a segment a destination, and the record now has the control it lacked for eight
+episodes.
