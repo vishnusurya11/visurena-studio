@@ -306,12 +306,20 @@ def book_words(book: Path) -> str:
 
     THE WHOLE BOOK AND NOT THIS CHAPTER: a recap line quotes an EARLIER chapter,
     and episode 5's longest lift is Doyle's chapter III describing the corpse,
-    carried forward into episode 5's second line."""
+    carried forward into episode 5's second line.
+
+    AND THE BOOK WITH ITS ATTRIBUTIONS SPLICED OUT.  Doyle writes the tag inside
+    the speech -- `," remarked Lestrade, "` -- and there are 222 of them, each
+    one splitting a quotation into two shorter runs.  Episode 7's closing line is
+    such a speech with the tag deleted, every word Doyle's, and it scored 11
+    against the raw source because no run there is longer than the half the tag
+    left.  It is 17, the longest lift in the series, and it is the last thing the
+    episode says."""
     out = []
     for path in sorted((Path(book) / "source" / "chapters").glob("ch_*.json")):
         doc = episode_home.read_json(path)
         out.append(" ".join(p["text"] for p in doc.get("paragraphs", [])))
-    return " ".join(out)
+    return ep_spec.quote_corpus(" ".join(out))
 
 def main(book_id: str, number: int, only: str | None = None, sheet: int | None = None) -> None:
     book = episode_home.book_dir(book_id)

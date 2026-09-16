@@ -909,6 +909,38 @@ def plan_marks(episode, refs: list[dict]) -> tuple[list[str], list[str]]:
 
 # ---- the narration is written, not copied -----------------------------------
 
+SPEECH_VERB = (r"said|says|cried|cries|remarked|remarks|answered|answers|asked|asks|"
+               r"returned|returns|observed|observes|continued|continues|replied|replies|"
+               r"exclaimed|exclaims|put in|broke in|added|adds|murmured|muttered|"
+               r"gasped|shouted|whispered|repeated|insisted|retorted|rejoined")
+ATTRIBUTION = re.compile(
+    rf"[,.!?]\s*[\u201d\"]\s*(?:[A-Za-z]+\s+)?(?:{SPEECH_VERB})\b[^.\u201c\"]*[.,]\s*[\u201c\"]",
+    re.I)
+"""Doyle's attribution INSIDE a speech: `," remarked Lestrade, "`.
+
+MEASURED: the book carries 222 of them, and each one splits a quotation into two
+shorter runs. Episode 7's closing line is one such speech with the tag deleted --
+"The old pattern is good enough, if we can only find the man to put them on" --
+every word Doyle's, and `lifted_run` scored it 11 against the raw source because
+no run in the source is longer than the half the tag left. It is 17."""
+
+
+def without_attribution(text: str) -> str:
+    """The same prose with the speech tags taken out, so a quotation reads whole."""
+    return ATTRIBUTION.sub(" ", text or "")
+
+
+def quote_corpus(text: str) -> str:
+    """What a lift is measured against: the book, AND the book with its
+    attributions spliced out.
+
+    BOTH, never the spliced copy alone -- a lift that does not straddle a tag
+    has to keep being found, and the raw text is where it lives. A run that does
+    straddle one is present verbatim in the second copy, so `lifted_run` finds
+    it without knowing anything about attributions."""
+    return f"{text} {without_attribution(text)}"
+
+
 QUOTE_WALL = 8
 """The longest run of the book's own consecutive words a line may carry.
 
