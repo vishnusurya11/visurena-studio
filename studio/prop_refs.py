@@ -202,3 +202,31 @@ def lettered(rows: list[dict]) -> list[dict]:
     asks WHICH objects this sheet shows, this one asks which of them the wordless
     law has to step aside for."""
     return [r for r in rows if (r.get("words") or "").strip()]
+
+
+def undrawn(refs: list[dict], book) -> list[str]:
+    """Every bible row whose picture is not on disk, said plainly.
+
+    MEASURED, episode 7.  A `terrier` prop row was written into refs.json, and
+    the note written beside it says why: "it appears alive, drinking and dead
+    across three shots, so its identity has to hold like a character's."
+    `refs/props/prop-terrier.png` was never drawn, and `seq_boards.draw_setup`
+    filters the reference list by `.exists()` -- so the one prop whose identity
+    was declared to need binding is the one prop that was dropped, on three
+    paid sheets, without a word.
+
+    The rule is narrow.  It does not ask that every prop have a reference; most
+    do not need one.  It asks that a row SOMEBODY WROTE point at a file that is
+    there.  Declaring a reference and not drawing it is never intentional."""
+    from pathlib import Path
+
+    book = Path(book)
+    out = []
+    for row in refs:
+        rel = row.get("rel_path")
+        if not rel:
+            out.append(f"{row.get('entity_id', '?')} ({row.get('kind', '?')}) names no picture at all")
+        elif not (book / rel).exists():
+            out.append(f"{row.get('entity_id', '?')} ({row.get('kind', '?')}) declares {rel}, "
+                       f"which is not on disk")
+    return out

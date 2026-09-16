@@ -190,7 +190,7 @@ def card(book: Path, episode: Episode, number: int, take: dict, measured: dict) 
     sheet = reference_strip(boards, episode, shots)
     segs = [(s.index, k) for s in shots for k in range(0, len(s.cuts) + 1)]
     sizes = [s.size for s in shots] + [c.size for s in shots for c in s.cuts]
-    ends = end_cells(sq.cells_in(boards), segs, seg_sizes(shots))
+    ends = end_cells(sq.cells_in(boards), segs, seg_sizes(shots), seg_motions(shots))
     refs = reference_list(book, boards, faces, first.setup, segs, ends, sheet,
                           episode.setups[first.setup].state, sizes)
     lines = [l for l in episode.lines if l.shot in take["shots"]]
@@ -248,7 +248,7 @@ def reference_strip(boards: Path, episode: Episode, shots: list) -> Path:
     # Own cells only is still right: each pinned cell needs its own <Picture N> at full resolution.
     window = segs
     panels = [Image.open(sq.cells_in(boards) / sq.cell_name(a, b)).convert("RGB") for a, b in window]
-    ends = end_cells(sq.cells_in(boards), segs, seg_sizes(shots))  # the take's own END frames, after its panels
+    ends = end_cells(sq.cells_in(boards), segs, seg_sizes(shots), seg_motions(shots))  # the take's own END frames, after its panels
     panels += [Image.open(sq.cells_in(boards) / sq.cell_name(a, b, end=True)).convert("RGB") for a, b in ends]
     out = boards / f"ref_take_{shots[0].index:02d}.png"
     episode_strip_ref.compose(panels).save(out)
@@ -272,19 +272,41 @@ def seg_sizes(shots: list) -> list[str]:
     return [size for s in shots for size in [s.size] + [c.size for c in s.cuts]]
 
 
-def end_cells(cells: Path, segs: list[tuple[int, int]], sizes: list[str] | None = None) -> list[tuple[int, int]]:
+def seg_motions(shots: list[Shot]) -> list[str]:
+    """Every segment's own motion, in the same flat order as `seg_sizes`.
+
+    `reaches` needs it to know whether the camera TRAVELS, and the two lists are
+    walked together, so they are built the same way for the reason `seg_sizes`
+    gives: the orders agree while a take holds one shot and disagree the moment
+    one holds two."""
+    return [said for s in shots for said in [s.motion] + [c.motion for c in s.cuts]]
+
+
+def end_cells(cells: Path, segs: list[tuple[int, int]], sizes: list[str] | None = None,
+              motions: list[str] | None = None) -> list[tuple[int, int]]:
     """The (shot, sub) segments of a take with an END frame ONE CAMERA MOVE AWAY.
 
     An END frame on disk is not enough. MEASURED on episode 2: 9 of the 13 drawn
     END cells are re-staged to a different camera setup (`sq.reaches`), and the
     take is then sent toward a picture no simple move can travel to -- which is
     every one of the episode's seven hard drift failures. The sheet gate is where
-    a re-staged END pair belongs; here it is simply not a destination."""
+    a re-staged END pair belongs; here it is simply not a destination.
+
+    AND WITH THE MOTION. `reaches` drops the 0.45 re-staging floor for a shot
+    whose camera TRAVELS -- a camera told to move cannot be judged by how far it
+    moved -- and this call omitted it, so the floor came back at the one place
+    that decides whether a take is GIVEN its END cell. The drawing side of that
+    fix landed and the spending side did not. MEASURED on episode 7: Q11_0E,
+    Q14_0E and Q24_0E were drawn on paid sheets, passed the sheet gate, were
+    looked at by eye and found correct, and were withheld here in silence.
+    Three of six."""
     if NO_ENDS:
         return []
     sizes = sizes or [""] * len(segs)
-    return [(a, b) for (a, b), size in zip(segs, sizes)
-            if sq.reaches(cells / sq.cell_name(a, b), cells / sq.cell_name(a, b, end=True), size)]
+    saids = motions or [""] * len(segs)
+    return [(a, b) for (a, b), size, said in zip(segs, sizes, saids)
+            if sq.reaches(cells / sq.cell_name(a, b), cells / sq.cell_name(a, b, end=True),
+                          size, said)]
 
 
 def end_numbers(segs: list[tuple[int, int]], ends: list[tuple[int, int]]) -> list[int]:

@@ -114,7 +114,16 @@ def test_the_gate_is_off_without_the_face_model(monkeypatch):
 
 
 def test_an_explicit_off_switch_disables_a_working_backend(monkeypatch):
+    """A WORKING backend means one that can also MEASURE.
+
+    This used to supply only `_backend` and assert that "on" armed the gate --
+    which was true, and was the fault: `observe` raises NotImplementedError, so
+    arming it crashed the DQ of every take. `enabled()` now requires a measurer
+    too, so this test supplies one; it is testing the SWITCH, and the switch
+    still wins over a gate that could otherwise run.
+    See tests/test_the_identity_switch_cannot_arm_a_gate_that_raises.py."""
     monkeypatch.setattr(g, "_backend", lambda: object())
+    monkeypatch.setattr(g, "observe", lambda video, segments, sheets, samples=8: [])
     monkeypatch.setenv(g.SWITCH, "off")
     assert not g.enabled()
     monkeypatch.setenv(g.SWITCH, "on")

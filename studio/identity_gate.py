@@ -151,9 +151,37 @@ def _backend():
     return (MTCNN, InceptionResnetV1)
 
 
+def _measurer_exists() -> bool:
+    """Is there anything to run, or is `observe` still the placeholder?
+
+    Asked by calling it, not by reading a flag somebody has to remember to
+    change: when `observe` is written, this answers True by itself."""
+    try:
+        observe(None, [], {})
+    except NotImplementedError:
+        return False
+    except Exception:
+        pass
+    return True
+
+
 def enabled() -> bool:
-    """True only when the face model imports AND the switch is not `off`."""
-    return os.environ.get(SWITCH, "").lower() != "off" and _backend() is not None
+    """True only when the face model imports, the switch is not `off`, AND there
+    is a measurer to run.
+
+    THE THIRD CLAUSE IS NOT DECORATION.  `observe` raises NotImplementedError,
+    and `enabled` used to go True the moment `facenet_pytorch` imported -- so
+    the documented install, on its own, turned every `take_dq` run from a quiet
+    "identity: not measured" into a crash, on every take of every episode.
+    Nothing would have caught it first: `tests/test_identity_gate.py` monkeypatches
+    `observe` away, so all sixteen of its tests stay green over a gate that
+    cannot run.
+
+    It is self-retiring.  Write `observe` and this clause stops holding the gate
+    shut, with no edit here."""
+    return (os.environ.get(SWITCH, "").lower() != "off"
+            and _backend() is not None
+            and _measurer_exists())
 
 
 def observe(video, segments: list, sheets: dict, samples: int = 8) -> list[Face]:

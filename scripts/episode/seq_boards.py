@@ -263,6 +263,14 @@ def draw_setup(book: Path, episode: Episode, number: int, name: str, only_sheet:
     shown = prop_refs.props_in(" ".join(str(v) for c in segs for v in c.values()),
                                [r for r in episode_home.read_json(book / 'refs' / 'refs.json')['refs']
                                 if r.get('kind') == 'prop'])
+    # AND IT SAYS WHAT IT DROPPED.  This filter was silent, so episode 7's
+    # terrier -- the one prop whose bible note says its identity has to hold
+    # across three shots -- was dropped from the references of three paid
+    # sheets without a word.  The plan gate in `main` now refuses before the
+    # money; this stays as the last word in case a row is written afterwards.
+    for gone in [r for r in shown if not (book / r['rel_path']).exists()]:
+        print(f"  WATCH {name}: {gone['entity_id']} is named in this setup and its "
+              f"reference {gone['rel_path']} is not on disk -- drawn unbound", flush=True)
     shown = [r for r in shown if (book / r['rel_path']).exists()]
     refs += [book / r['rel_path'] for r in shown]
     groups = sq.sheets(segs, setup, aspect)
@@ -353,6 +361,14 @@ def main(book_id: str, number: int, only: str | None = None, sheet: int | None =
             "the plan fails the quote gate -- narration is Watson's own prose:\n  "
             + "\n  ".join(f"line {l['index']} lifts {l['lifted']} consecutive words: "
                            f"{l['text']!r}" for l in lifted))
+    # AND EVERY REFERENCE THE BIBLE DECLARES IS ACTUALLY ON DISK.  A row that
+    # names a picture nobody drew is dropped by `draw_setup`'s existence filter,
+    # which was silent: episode 7's terrier was unbound across three $0.13
+    # sheets and three rendered shots, and its own bible note says its identity
+    # had to hold.  Free to check, here, before the first sheet.
+    if blank := prop_refs.undrawn(refs, book):
+        raise SystemExit("the bible declares references that are not on disk:\n  "
+                         + "\n  ".join(blank))
     for name in episode.setups:
         if only and name != only:
             continue
