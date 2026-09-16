@@ -28,7 +28,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 
-from studio import cast_agree, cast_refs, episode_home, image_spend as spend
+from studio import cast_agree, cast_refs, describe, episode_home, image_spend as spend
 from studio.llm import _load_dotenv
 
 MODEL, SIZE, QUALITY = cast_refs.MODEL, cast_refs.SIZE, cast_refs.QUALITY
@@ -160,9 +160,40 @@ def named(argv: list[str], book: Path) -> list[str]:
     return asked or cast_of(book)
 
 
+def read_back(book: Path, who: str) -> dict:
+    """Read the bust with the vision model and store its traits on the row.
+
+    `cast_refs.bound` refuses a character with no `identity.traits`, and until
+    now nothing in the EPISODE pipeline wrote one: the only writer was the
+    trailer's `step_02_refs`, `--check` only read it, and `cast_bust --redraw`
+    clears it. Every redrawn or episode-authored character was therefore
+    unbound with no command that could bind it. This is that command.
+
+    Vision runs through ComfyUI: never call it while a take is rendering (a
+    vision model loaded during one turned an 8-minute take into 37)."""
+    bust = cast_refs.bust(book, who)
+    if not bust or not Path(bust).exists():
+        raise SystemExit(f"cast_cards --read {who}: no bust on disk to read")
+    card = describe.describe(Path(bust))
+    path = book / "refs" / "refs.json"
+    doc = episode_home.read_json(path)
+    for row in doc["refs"]:
+        if row.get("entity_id") == who:
+            row["identity"] = {"traits": card.model_dump(), "read_at": time.strftime("%Y-%m-%dT%H:%M:%S"),
+                               "read_of": Path(bust).name}
+    episode_home.write_json(path, doc)
+    return card.model_dump()
+
+
 def main(argv: list[str]) -> None:
     book = episode_home.book_dir(argv[1])
     cast = named(argv, book)
+    if "--read" in argv:
+        at = argv.index("--read")
+        for who in argv[at + 1:]:
+            if who.startswith("--"):
+                break
+            print(f"  read {who}: {read_back(book, who)}", flush=True)
     if "--prompts" in argv:
         for path in write_prompts(book, cast):
             print(f"  {path}", flush=True)

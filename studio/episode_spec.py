@@ -44,7 +44,17 @@ MAX_CODA = 4.0
 DIALOGUE_SHARE = (0.05, 0.20)
 """Dialogue words as a share of all words: the 90/10 dial, adjustable."""
 MAX_LINES_PER_SHOT = 2
-MAX_SPEAKING = 3
+MAX_SPEAKING = 4
+"""Voices in one episode, the narrator counted.
+
+It was 3, and every chapter through 9 fitted it: a narrator and at most two
+people in dialogue (ep06 Watson + Gregson + Lestrade, ep09 Watson + Lucy +
+Hope). Chapter 10 -- "John Ferrier Talks with the Prophet" -- is the first in
+which THREE characters speak, and all three must: Young makes the demand,
+Ferrier answers it, and Lucy's "But they won't let us leave" is the button,
+which may not be the protagonist's. Narrating any one of them away loses the
+scene. The real ceiling is the cast voices, and all four exist
+(`cast/<who>/voice/design.wav`). A fifth voice is still refused."""
 MAX_SETUPS = 6
 BREATH = 0.70  # audio reviewer, iteration 3: 0.50 was the entire pause between two sentences (wavs carry <= 0.04 s of silence)
 HANDLE = 0.25

@@ -186,8 +186,18 @@ def copy_of_the_book(tmp_path) -> Path:
 
 @pytest.mark.skipif(not BOOK.exists(), reason="the library is not on this machine")
 class TestTheBookAsItIs:
-    def test_lucy_ferrier_is_unbound_for_three_reasons(self, tmp_path):
-        said = cast_refs.bound(copy_of_the_book(tmp_path), "lucy_ferrier", "outdoor")
+    def test_a_row_as_lucy_ferrier_s_was_this_morning_is_unbound_for_three_reasons(self, tmp_path):
+        """The book moves on -- Lucy was given a sheet block and her cards were
+        recorded the same afternoon -- so the three-reason shape is asserted on
+        a copy with those stripped back off, not on whatever the row is today."""
+        book = copy_of_the_book(tmp_path)
+        path = book / "refs" / "refs.json"
+        doc = json.loads(path.read_text(encoding="utf-8"))
+        for row in doc["refs"]:
+            if row.get("entity_id") == "lucy_ferrier":
+                row.pop("sheet", None); row["cards"] = {}; row.pop("identity", None)
+        path.write_text(json.dumps(doc), encoding="utf-8")
+        said = cast_refs.bound(book, "lucy_ferrier", "outdoor")
         assert len(said) == 3, said
         assert any("sheet" in s for s in said)
         assert any("cards[outdoor]" in s for s in said)
