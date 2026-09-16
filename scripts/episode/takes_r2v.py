@@ -521,6 +521,17 @@ def main(book_id: str, number: int, retake: list[int] | None = None, approved: b
     """Render every take that has no record yet; `retake` re-renders those
     indices with a fresh seed (the failed file is kept as T<NN>_failN.mp4)."""
     book, episode = opened(book_id, number)
+    # NO CELL FROM AN OLDER NUMBERING.  A cell is named by shot index, so a plan
+    # that gains or loses a shot re-points every name after it at a different
+    # picture.  Episode 8 gained five and three takes were then aimed at other
+    # shots' END panels -- which reads, in the DQ, exactly like a renderer that
+    # could not reach its mark.  Free to check, and it has to be here: the cost
+    # of being wrong is a whole episode of takes.
+    if left := sq.stale_cells(episode_home.boards_dir(book, number)):
+        raise SystemExit(
+            "these cells belong to an older numbering of the plan; no sheet drawn for "
+            "the current one claims them:\n  " + "\n  ".join(left)
+            + "\nRedraw the boards, or move them out of boards/cells/ first.")
     take_dir = episode_home.takes_dir(book, number, "r2v")
     sheet = take_dir / "shots.json"
     records = {r["index"]: r for r in episode_home.read_json(sheet)} if sheet.exists() else {}

@@ -1270,3 +1270,42 @@ def drop_reason(end: str, start: str, sim: float, motion: str = "") -> str:
     if sim < END_FLOOR and not (motion and camera_end(motion)):
         return f"re-staged from {start} at {sim:.2f}, under the {END_FLOOR} floor"
     return f"in band against {start} at {sim:.2f} -- dropped for another pair's sake"
+
+
+def stale_cells(boards) -> list[str]:
+    """Cells on disk that no sheet in this episode's reports claims to have cut.
+
+    A cell is named by SHOT INDEX -- `Q19_0E.png` is shot 19's END panel -- and a
+    plan may be renumbered.  Episode 8 was: five shots were spliced in so every
+    shot carried one line, and everything from the fifth onward moved up.  The
+    sheets were redrawn and wrote the new cells beside the old ones, and nothing
+    removed the old ones.
+
+    MEASURED: four survived -- Q09_0E, Q16_0E, Q19_0E, Q23_0E -- as pictures of
+    shots that no longer carry those numbers.  Old shot 19 was the scouts
+    climbing the bluff; new shot 19 is Ferrier and the child asleep against the
+    boulder.  `takes_r2v` attached the old picture as the new shot's
+    destination, and `drift` failed three takes for not arriving at a photograph
+    of some horsemen -- three of the episode's five failures, every one looking
+    exactly like a renderer that could not reach its mark.
+
+    THE SHEET REPORT IS THE TRUTH: `seq_<setup>.dq.json` lists the cells each
+    attempt actually cut.  An episode whose boards are not drawn yet has no
+    reports, and then nothing is judged -- there is no truth to check against,
+    and calling every cell stale would be worse than saying nothing."""
+    import json
+
+    room = cells_in(boards)
+    if not room.exists():
+        return []
+    claimed: set[str] = set()
+    for report in sheets_in(boards).glob("seq_*.dq.json"):
+        try:
+            doc = json.loads(report.read_text(encoding="utf-8"))
+        except (OSError, ValueError):
+            continue
+        for sheet in doc.get("sheets", []):
+            claimed |= set(sheet.get("cells", []))
+    if not claimed:
+        return []
+    return sorted(p.name for p in room.glob("*.png") if p.name not in claimed)
