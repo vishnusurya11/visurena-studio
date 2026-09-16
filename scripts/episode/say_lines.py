@@ -11,6 +11,7 @@ refused).  Brigham Young's hallucinated line is why the second one exists.
 """
 from __future__ import annotations
 
+import json
 import sys
 from pathlib import Path
 
@@ -55,15 +56,44 @@ def best_line_reference(records: dict, speaker: str, exclude: int | None) -> int
     return max(good)[1] if good else None
 
 
+def other_episode_records(book: Path) -> list[dict]:
+    """Every line record in every OTHER episode's lines.json on disk."""
+    out = []
+    for path in sorted(book.glob("episodes/ep*/audio/lines/lines.json")):
+        doc = json.loads(path.read_text(encoding="utf-8"))
+        rows = doc["lines"] if isinstance(doc, dict) and "lines" in doc else doc
+        out += [r for r in rows if isinstance(r, dict)]
+    return out
+
+
+def book_best_reference(book: Path, records: dict, speaker: str, exclude: int | None) -> Path | None:
+    """The speaker's best PASSED line anywhere in the BOOK, at or over the floor,
+    with its text written beside it for the clone. None if nothing qualifies.
+
+    MEASURED building episode 10: John Ferrier's line 27 rendered at 0.63-0.69
+    against the 0.70 floor eight times, under four wordings and three redo seeds.
+    The third-try rule wanted his own best line (>= 0.75) and this episode had
+    none -- his two passing lines sit at 0.71 and 0.74 -- so every third try
+    went back to the design clip and came back the same. Episode 8 has him at
+    0.815. A cast voice is a book-level asset, so the rule sees the book."""
+    here = [(r.get("similarity", 0.0), r["rel_path"], r["text"]) for i, r in records.items()
+            if r.get("speaker") == speaker and r.get("passed") and i != exclude]
+    there = [(r.get("similarity", 0.0), r["rel_path"], r["text"]) for r in other_episode_records(book)
+             if r.get("speaker") == speaker and r.get("passed") and (book / r["rel_path"]).exists()]
+    good = [g for g in here + there if g[0] >= BEST_REFERENCE_FLOOR]
+    if not good:
+        return None
+    _, rel, text = max(good)
+    clip = book / rel
+    clip.with_suffix(".txt").write_text(text, encoding="utf-8")
+    return clip
+
+
 def line_reference(book: Path, records: dict, line: Line, attempt: int) -> Path:
     """The design clip for the first two tries; from the third, the speaker's own
-    best line (its text written beside it for the clone), when one exists."""
-    best = best_line_reference(records, line.speaker, line.index) if attempt >= 2 else None
-    if best is None:
-        return reference_for(book, line.speaker)
-    clip = book / records[best]["rel_path"]
-    clip.with_suffix(".txt").write_text(records[best]["text"], encoding="utf-8")
-    return clip
+    best line anywhere in the book (its text written beside it for the clone)."""
+    best = book_best_reference(book, records, line.speaker, line.index) if attempt >= 2 else None
+    return best if best is not None else reference_for(book, line.speaker)
 
 
 def seed_for(episode: int, line: Line, attempt: int) -> int:
