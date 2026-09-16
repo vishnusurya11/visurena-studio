@@ -86,6 +86,26 @@ def supersede(path: Path) -> Path | None:
     return kept
 
 
+def forget_read_back(book: Path, who: str) -> None:
+    """Drop `identity` from a row whose picture is about to be replaced.
+
+    A read-back describes A PICTURE. MEASURED building episode 9: John Ferrier's
+    bust carried a black fur hat and Lucy Ferrier's a bonnet, both against the
+    bare-headed rule; both were redrawn bare-headed, and `cast_cards --check`
+    went on reporting "headgear: the text says none, the picture says other hat"
+    -- because it was reading a stored description of the photograph that had
+    just been thrown away. An empty `identity` is honest: the new picture has
+    not been read yet, and the gate says so instead of accusing it."""
+    import json
+
+    path = book / "refs" / "refs.json"
+    doc = json.loads(path.read_text(encoding="utf-8"))
+    for row in doc["refs"]:
+        if row.get("entity_id") == who and row.pop("identity", None) is not None:
+            path.write_text(json.dumps(doc, indent=1, ensure_ascii=False), encoding="utf-8")
+            return
+
+
 def draw(book: Path, who: str, render=render, redraw: bool = False, tries: int = 1) -> Path:
     """The bust, drawn once.  A bust on disk is never redrawn unless asked: it
     is the identity every later picture of this person is bound to.
@@ -99,6 +119,7 @@ def draw(book: Path, who: str, render=render, redraw: bool = False, tries: int =
         if not redraw:
             return out
         supersede(out)
+        forget_read_back(book, who)
     said = prompt_for(book, who)
     out.parent.mkdir(parents=True, exist_ok=True)
     return render(said, f"REF-{cast_refs.row(book, who)['ref_id']}",
