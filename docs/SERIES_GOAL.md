@@ -54,7 +54,7 @@ truth for where the loop is, and it is updated after every step, not at the end.
 | 5 | Our Advertisement Brings a Visitor | published `g-U-P0ZOoq8` |
 | 6 | Tobias Gregson Shows What He Can Do | published `AIX83NAcTGc` |
 | 7 | Light in the Darkness | published `xksX2qouWEo` |
-| 8 | On the Great Alkali Plain | |
+| 8 | On the Great Alkali Plain | published `V5sFXhGemRk` |
 | 9 | The Flower of Utah | |
 | 10 | John Ferrier Talks with the Prophet | |
 | 11 | A Flight for Life | |
