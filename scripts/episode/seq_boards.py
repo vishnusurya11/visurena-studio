@@ -21,6 +21,7 @@ windows on this board.
 from __future__ import annotations
 
 import importlib.util
+import json
 import sys
 from pathlib import Path
 
@@ -156,6 +157,62 @@ def clean(entry: dict) -> bool:
     is not a clean sheet, whatever its pictures say."""
     return bool(entry.get("gutters_ok", True)) and not (
         entry["regressions"] or entry["white_lines_in"] or entry["duplicates"])
+
+
+def grid_of(cells: int, a_cell: Path) -> tuple[int, int]:
+    """The (cols, rows) a sheet of this many cells was laid out on.
+
+    The aspect comes from the CELL ON DISK, not from a module default. A cell
+    is cut to the plan's delivery shape, so a square cell means a square sheet
+    table -- and reading it off the artefact is the only way a tool that did
+    not load the plan can be right about it. (Measured the hard way minutes
+    earlier: `storyboard.conform` reads module globals, and an ad-hoc re-cut
+    that did not call `adopt` wrote four 768x1344 cells into a 1:1 episode.)"""
+    w, h = Image.open(a_cell).size
+    cols, rows, _canvas = sq.grid(cells, "1:1" if w == h else "9:16")
+    return cols, rows
+
+
+def remeasure(boards: Path) -> list[str]:
+    """Re-take every sheet report's cell verdict from the cells on disk. FREE.
+
+    A gate that is recalibrated has to be re-runnable on work already paid for.
+    MEASURED, episode 9: `episode_gutter.FLAT` was moved off a London number onto
+    one calibrated for the desert, every cell went clean, the master passed and
+    edit integrity passed -- and `qc` still failed the episode, because it reads
+    `seq_<setup>.dq.json` and that file records what was measured AT DRAW TIME.
+    Redrawing to refresh a verdict costs $0.13 a sheet and throws away pictures
+    that were never wrong.
+
+    It is NOT forgiving: it reads the cells again and reports whatever it finds.
+    A report whose cells are missing is left alone -- an empty measurement that
+    reads as a pass is this repo's most-found fault."""
+    changed = []
+    for path in sorted((boards / "sheets").glob("seq_*.dq.json")):
+        report = json.loads(path.read_text(encoding="utf-8"))
+        cells_room, sheets_room, took = sq.cells_in(boards), boards / "sheets", False
+        for entry in report.get("sheets", []):
+            on_disk = [cells_room / n for n in entry.get("cells", [])]
+            if not all(c.exists() for c in on_disk):
+                continue
+            entry["white_lines_in"] = white_lines(on_disk)
+            # `gutters_ok` is derived from the SHEET, and the sheet is on disk too,
+            # so it is retaken the same way rather than left at its draw-time value.
+            drawn = sheets_room / entry["sheet"]
+            if drawn.exists():
+                grey = np.asarray(Image.open(drawn).convert("L"), dtype=float)
+                cols, rows = grid_of(len(entry["cells"]), on_disk[0])
+                entry["gutters_ok"] = (len(board.bands(grey, 0)) == rows - 1
+                                       and len(board.bands(grey, 1)) == cols - 1)
+            took = True
+        if not took:
+            continue
+        finals = report["sheets"]
+        report["white_lines_in"] = [n for e in finals for n in e["white_lines_in"]]
+        report["passed"] = all(clean(e) and e["gutters_ok"] for e in finals)
+        path.write_text(json.dumps(report, indent=1), encoding="utf-8")
+        changed.append(report.get("setup") or path.stem)
+    return changed
 
 
 def refuse_on_text(group: list[dict], setup, prompt: str, grid: tuple, name: str) -> None:
@@ -415,6 +472,14 @@ def main(book_id: str, number: int, only: str | None = None, sheet: int | None =
 
 
 if __name__ == "__main__":
+    if "--remeasure" in sys.argv:
+        # FREE: retake every sheet verdict from the cells on disk, for when a
+        # gate has been recalibrated since the draw. Never redraws.
+        number = int(sys.argv[2]) if len(sys.argv) > 2 and sys.argv[2].isdigit() else 1
+        boards = episode_home.boards_dir(episode_home.book_dir(sys.argv[1]), number)
+        took = remeasure(boards)
+        print(f"re-measured {len(took)} sheet report(s): {', '.join(took) or 'none'}")
+        raise SystemExit(0)
     ACCEPT_DIRTY = "--accept-dirty" in sys.argv
     only = next((a.split("=", 1)[1] for a in sys.argv if a.startswith("--setup=")), None)
     one = next((int(a.split("=", 1)[1]) for a in sys.argv if a.startswith("--sheet=")), None)

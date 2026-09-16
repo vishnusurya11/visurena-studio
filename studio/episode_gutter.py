@@ -11,10 +11,46 @@ from __future__ import annotations
 
 import numpy as np
 
-WHITE, FLAT = 190.0, 30.0
-"""A gutter row is bright AND flat; a lit wall is bright and textured."""
+WHITE, FLAT = 190.0, 8.0
+"""A gutter row is bright AND flat; a lit wall is bright and textured.
+
+FLAT WAS 30.0 AND THAT WAS A NUMBER FROM A DARKER BOOK. Episodes 1 to 7 are
+soot-black gaslit London, where nothing bright is ever also smooth, so a loose
+floor cost nothing. Part Two is a bleached desert under a white sun, and 30.0
+then admits the sky.
+
+MEASURED, episode 9: `Q00_0` and `Q01_0` are wides of the valley of Utah at
+sunrise. Their top 50 and 16 rows read mean 203 and 200 at **std 16.9 and 13.5**
+-- bright, and smooth enough for 30.0. Both were called leaked paper, and the
+cost of that one false positive ran the whole length of the pipeline: the sheet
+DQ failed a setup whose four pictures were correct, a $0.13 STRICT redraw was
+bought and read the same, the take guard cropped 52 and 51 px of real picture off
+T00 and T01, and the EDIT gate then failed the master because a cropped segment
+no longer matches the take it was cut from.
+
+Calibrated against every band this function finds across every cell of every
+episode on disk -- there are exactly two, and they are those two skies:
+
+    real leaked paper       std 2-5      (episode 3's residues)
+    episode 9's pale sky    std 13.5, 16.9
+
+The two populations do not overlap and the gap is empty, so the floor sits in the
+middle of it. `found >= limit` below covers the OTHER sky -- the one that fills
+the window and runs on (episode 8's Q13_0E, 67 rows at std 2.5). This one STOPS,
+where the mountains begin, so by shape it is a band; only flatness tells them
+apart."""
 MAX_FRAC = 0.08
 MARGIN = 2
+DROP = 25.0
+"""How much darker the picture under a leaked gutter is than the gutter itself.
+
+Paper is the brightest thing in the frame; the scene beneath it is the scene. A
+run that ends at something no darker than itself is sky ending in more sky. The
+two cases on disk are 100+ grey levels apart, so this is nowhere near either:
+
+    episode 1's white bar    paper ~250 over a night street
+    episode 9's T06 / T09    run at ~196, and what follows is 214 and 206
+"""
 
 EDGES = {"top": (0, 1), "bottom": (0, -1), "left": (1, 1), "right": (1, -1)}
 
@@ -26,6 +62,12 @@ def band(grey: np.ndarray, edge: str) -> int:
     lines = grey if axis == 0 else grey.T
     lines = lines[::-1] if direction < 0 else lines
     limit = round(lines.shape[0] * MAX_FRAC)
+    # THE OUTERMOST qualifying line is the depth, not a contiguous run from the
+    # edge. A LEAK IS LAYERED and it need not touch the edge: episode 1's is
+    # "a paper-white band along the bottom AND THE GREY TOP OF A NEXT CELL
+    # BENEATH IT", so paper, then cell, then paper again; and episode 8's Q17_0
+    # and Q18_0 carry theirs at rows 8 to 19 FROM the bottom with picture
+    # outside them. A contiguous-run rule was tried here and broke both.
     found = 0
     for i in range(limit):
         if lines[i].mean() > WHITE and lines[i].std() < FLAT:
@@ -44,7 +86,18 @@ def band(grey: np.ndarray, edge: str) -> int:
     # delivered picture rather than a repair.
     if found >= limit:
         return 0
-    return min(found + MARGIN, limit) if found else 0
+    if not found:
+        return 0
+    # AND PAPER HAS PICTURE UNDER IT. Contiguity is not enough either: episode
+    # 9's T06 and T09 carry a SOLID bright flat run of 46 and 60 rows, inside
+    # the window and unbroken, so they are a band by depth and by shape. What
+    # gives them away is where the run STOPS -- row 46 reads mean 214 and row 60
+    # reads mean 206. It ends at BRIGHTER sky. Leaked paper is the brightest
+    # thing in the frame and the scene beneath it is darker by a wide margin,
+    # so a run that ends at something no darker than itself was never paper.
+    if lines[found].mean() > lines[:found].mean() - DROP:
+        return 0
+    return min(found + MARGIN, limit)
 
 
 def box(frames: list[np.ndarray]) -> tuple[int, int, int, int]:

@@ -15,6 +15,7 @@ call and the files are in scripts/episode/storyboard.py.
 """
 from __future__ import annotations
 
+from studio import episode_gutter
 from studio import house_style
 from studio.episode_spec import Shot
 
@@ -136,8 +137,30 @@ def panel_prompt(shot: Shot, described: str, cast: list[str], physical: dict[str
             f"The frame: {shot.frame} {still_line()}")
 
 
-GUTTER_WHITE, GUTTER_FLAT = 190.0, 30.0
-"""A gutter line is bright AND flat across the whole sheet."""
+GUTTER_WHITE, GUTTER_FLAT = episode_gutter.WHITE, episode_gutter.FLAT
+"""What sheet paper looks like -- ASKED, never written out again.
+
+Two places decide whether a bright flat run is paper: this, finding the gutters
+ON a sheet so cells can be cut between them, and `episode_gutter.band`, finding
+leaked paper IN a cell or a take so it can be cropped off. They carried the same
+pair of numbers written twice, and when the guard's floor was recalibrated for
+Part Two's bleached desert this kept the London one.
+
+MEASURED, episode 9's `seq_valley_rim_0_strict.png`, a 2x2 of the valley of Utah
+at sunrise. A 2x2 needs exactly one band per axis; at 30.0 this found three rows:
+
+    rows   16-17     depth   1   mean 190.1   std 13.87   sky
+    rows   18-118    depth 100   mean 196.6   std 16.40   sky, a hundred rows deep
+    rows 1015-1026   depth  11   mean 247.7   std  2.12   the gutter
+    cols 1018-1030   depth  12   mean 251.7   std  2.49   the gutter
+
+So `cell_boxes` fell back to flat halves, `gutters_ok` went False, and `qc`
+failed an episode whose 28 takes all scored 100/100 and whose master matched its
+takes frame for frame.
+
+`white_lines` in `seq_boards` already reaches for the guard's window for exactly
+this reason -- "it owns the number and this asks for it". The floor is the same
+fact about paper, so it is the same number."""
 
 
 def bands(grey, axis: int) -> list[tuple[int, int]]:
