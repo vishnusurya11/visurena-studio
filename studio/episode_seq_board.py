@@ -354,8 +354,7 @@ def duplicates(cells: list, segs: list[dict], floor: float = ALIKE) -> list[tupl
         for j in range(i + 1, len(cells)):
             score = fm.similarity(images[i], images[j])
             a, b = segs[i], segs[j]
-            pair = (cell_name(a["shot"], a["sub"], a.get("end", False))[:-4],
-                    cell_name(b["shot"], b["sub"], b.get("end", False))[:-4])
+            pair = (named(a)[:-4], named(b)[:-4])
             if is_end_pair(a, b):
                 # BOTH RULES, at the site that SPENDS.  The insert exemption and
                 # the changed-block override reached `reaches()` -- which decides
@@ -382,8 +381,15 @@ def label(seg: dict) -> str:
     return f"{seg['shot']}.{seg['sub']}{'E' if seg.get('end') else ''}" if seg["sub"] or seg.get("end") else str(seg["shot"])
 
 
-def cell_name(shot: int, sub: int, end: bool = False) -> str:
-    return f"Q{shot:02d}_{sub}{'E' if end else ''}.png"
+def cell_name(shot: int, sub: int, end: bool = False, alt: bool = False) -> str:
+    """`Q03_0.png` the panel, `Q03_0E.png` its END panel, `Q03_0A.png` an ALTERNATE
+    angle of it. Only the bare name is ever staged in a take."""
+    return f"Q{shot:02d}_{sub}{'E' if end else 'A' if alt else ''}.png"
+
+
+def named(seg: dict) -> str:
+    """The cell name a panel dict is cut to, whichever kind it is."""
+    return cell_name(seg["shot"], seg["sub"], bool(seg.get("end")), bool(seg.get("alt")))
 
 
 def plate_name(setup: str) -> str:
@@ -579,9 +585,84 @@ def sheets(segs: list[dict], setup: Setup | None = None,
     return out
 
 
+ALTERNATES = (
+    ("Reverse angle on {who}, the camera round on the other side of the same moment as "
+     "panel {k}: their faces where their backs were, the far side of the place behind them.",
+     "The camera stands opposite its position in panel {k}, at the same height, a 35mm lens."),
+    ("A wide establishing view of the same moment as panel {k}, {who} small in the middle "
+     "distance with the whole place open around them, floor to roof in frame.",
+     "The camera stands well back from panel {k}, at a standing eye, a 24mm lens."),
+    ("A tight insert from the moment of panel {k}: hands, cuffs and one held object filling "
+     "the frame, no face above the collar.",
+     "The camera stands an arm's length from the hands, looking down, a 90mm lens."),
+    ("A low angle on {who} at the same moment as panel {k}, the camera near the ground "
+     "looking up past them to the roof or the sky.",
+     "The camera stands at knee height below panel {k}, tilted up, a 28mm lens."),
+)
+"""Four alternates, each its OWN picture in its own words.
+
+The first draft inherited the base panel's whole `frame` and appended one
+sentence, which the TWINS gate measured at 0.836 against its base and refused --
+correctly. Two panels asking for one picture cannot both be the different
+picture the sheet demands. So an alternate states a camera and a framing the
+base panel does not have, and borrows only the people."""
+
+
+def _who(seg: dict) -> str:
+    """Who the alternate is of, in three words, so it shares no prose with its base."""
+    faces = [f.replace("_", " ").title() for f in seg.get("faces") or []]
+    return " and ".join(faces[:2]) if faces else "the place"
+"""What a spare cell becomes. The four are the angles an editor asks for first.
+
+The grid table is coarse -- 3, 6 or 9 cells at 9:16 -- so a setup almost never
+fills its sheet exactly, and a sheet with black cells is a sheet the owner sent
+back. Spares used to be END panels; they are alternates now, because an
+alternate is a picture of a moment the episode really has, and nothing
+downstream can mistake it for a destination the way an END cell was."""
+
+
+def alt_panel(seg: dict, number: int) -> dict:
+    """An ALTERNATE angle of panel `number`: the same instant, another camera.
+
+    It carries the start panel's own nouns, like `end_panel`, so the drawer has a
+    base to vary rather than a relation to satisfy -- the lesson of the three END
+    panel attempts on episode 2, which is about the drawer and outlives the END
+    panel itself."""
+    frame, camera = ALTERNATES[(number - 1) % len(ALTERNATES)]
+    who = _who(seg)
+    return dict(seg, alt=True, end=False, of=number, end_frame="", changed="",
+                frame=frame.format(k=number, who=who), camera=camera.format(k=number),
+                motion="The camera holds a static shot; a hand shifts a finger's breadth.")
+
+
+def alt_panels(segs: list[dict], spare: int) -> list[dict]:
+    """One alternate per spare cell, spread over the sheet's own panels."""
+    return [alt_panel(segs[k % len(segs)], k % len(segs) + 1) for k in range(max(spare, 0))]
+
+
+DRAW_ENDS = False
+"""THE OWNER'S RULE, 2026-09-16: no sheet draws an END panel.
+
+A take is given its first frame and the arrival in words (`takes_r2v.NO_ENDS`),
+so nothing downstream consumes an END cell. Drawing them anyway is waste -- and
+worse, it leaves a drawn, apparently-usable last frame sitting beside every
+start cell, which is exactly what got pinned again in episode 8 after the rule
+was already written down. The cell cannot be pinned if the cell does not exist.
+
+Kept as a switch, like `NO_ENDS`, so the comparison in
+`docs/calibration/end_frames.md` stays reproducible. Nothing asks for it.
+
+The spare cells are simply left to the grid, which chooses a smaller one."""
+
+
 def with_ends(segs: list[dict], spare: int, setup: Setup | None = None) -> list[dict]:
     """The panels with an END panel inserted straight after each start panel that
-    earns one, walks and moving shots first, up to `spare` of them."""
+    earns one, walks and moving shots first, up to `spare` of them.
+
+    Under the owner's rule no END panel is inserted: the spare cells take
+    ALTERNATES instead. See `DRAW_ENDS` and `ALTERNATES`."""
+    if not DRAW_ENDS:
+        return list(segs) + alt_panels(segs, spare)
     chosen = end_choices(segs, spare, setup)
     out = []
     for s in segs:

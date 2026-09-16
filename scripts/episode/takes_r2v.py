@@ -34,6 +34,9 @@ from studio.episode_spec import Episode
 from studio.trailer_assemble import clip_seconds
 from studio.trailer_refs import contract_description
 
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+import no_last_frame  # noqa: E402  the owner's rule, checked on the built prompt
+
 W, H, FPS, STEPS = canvas.size("9:16") + (24, 8)
 """W and H are rebound from the plan in `main`; the plan declares the aspect."""
 BASE = "video_minimax_h3_r2v_turbo_ref8"
@@ -560,10 +563,20 @@ def main(book_id: str, number: int, retake: list[int] | None = None, approved: b
     take_dir = episode_home.takes_dir(book, number, "r2v")
     sheet = take_dir / "shots.json"
     records = {r["index"]: r for r in episode_home.read_json(sheet)} if sheet.exists() else {}
+    # NO LAST FRAME, CHECKED ON THE BUILT PROMPT (owner, 2026-09-16). `NO_ENDS` and
+    # the L11 lint both already say this; so did the skill, twice, while 15 pins
+    # shipped in episode 8 through an artefact nobody was reading. A rule broken
+    # that way is checked on the thing that goes to the GPU, not on the flag.
+    built = cards(book, episode, number)
+    if pinned := no_last_frame.take_faults(built):
+        raise SystemExit(
+            "a last frame reached the take prompts, which warps the render "
+            "(docs/calibration/end_frames.md):\n  "
+            + "\n  ".join(f"T{i:02d}: {'; '.join(said)}" for i, said in sorted(pinned.items())))
     # Every graph is built first and the whole run is queued in one go, so the
     # takes execute consecutively and the weights load once (owner, 2026-09-12).
     jobs, wheres = [], {}
-    for c in cards(book, episode, number):
+    for c in built:
         out = take_dir / f"T{c['index']:02d}.mp4"
         if retake and c["index"] in retake:
             tries = records.get(c["index"], {}).get("tries", 0) + 1

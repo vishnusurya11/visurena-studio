@@ -134,7 +134,7 @@ def attempt(sb, text: str, refs: list[Path], out: Path, group: list[dict], route
     sheet = sb.draw(text, refs, out, canvas)
     grey = np.asarray(Image.open(sheet).convert("L"), dtype=float)
     boxes = board.cell_boxes(grey, cols, rows)
-    cells = [sb.conform(sheet, sq.cells_in(boards) / sq.cell_name(s["shot"], s["sub"], s.get("end", False)), boxes[i])
+    cells = [sb.conform(sheet, sq.cells_in(boards) / sq.named(s), boxes[i])
              for i, s in enumerate(group)]
     heights, regress = ladder_check(cells, group, route, setup)
     row_bands, col_bands = board.bands(grey, 0), board.bands(grey, 1)

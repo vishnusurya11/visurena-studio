@@ -80,7 +80,7 @@ class Finding:
 
 def panel_key(seg: dict) -> str:
     """The cell the owner reads on the contact sheet: `Q09_1`, `Q02_0E`."""
-    return sq.cell_name(seg["shot"], seg["sub"], bool(seg.get("end")))[:-4]
+    return sq.named(seg)[:-4]
 
 
 def drawn_text(seg: dict) -> str:

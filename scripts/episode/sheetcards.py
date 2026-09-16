@@ -62,7 +62,7 @@ def panel_rows(book: Path, frames: Path, panels: list[dict]) -> str:
     """Every panel: its cell when drawn, its key, and the four texts that made it."""
     rows = []
     for k, seg in enumerate(panels, start=1):
-        name = sq.cell_name(seg["shot"], seg["sub"], seg.get("end", False))
+        name = sq.named(seg)
         cell = frames / name
         shot = f"S{seg['shot']:02d}" + (f".{seg['sub']}" if seg["sub"] else "") + ("E" if seg.get("end") else "")
         picture = (f'<a href="{rc.rel(book, cell)}"><img src="{rc.rel(book, cell)}" style="width:150px"></a>'

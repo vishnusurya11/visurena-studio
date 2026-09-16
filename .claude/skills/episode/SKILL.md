@@ -24,6 +24,7 @@ uv run python scripts/episode/cast_cards.py   <codex_id> --prompts   # FREE: wri
 uv run python scripts/episode/cast_cards.py   <codex_id> --draw <who> <bust|indoor|outdoor> --approved  # ESCALATE: $0.08 a picture
 uv run python scripts/episode/seq_boards.py  <codex_id> <n>   # 5. ONE storyboard sequence per setup (PAID ~$0.20 a sheet)
 uv run python scripts/episode/takes_r2v.py   <codex_id> <n>   # 6. every take on H3 ref2va from the board's cells
+uv run python scripts/episode/no_last_frame.py <codex_id> <n>  # 6b. FREE: no last frame in any sheet prompt, cell or take prompt
 uv run python scripts/episode/take_dq.py     <codex_id> <n> [take...]          # 7. DQ EVERY take on disk; name indices only to narrow it
 uv run python scripts/episode/assemble.py    <codex_id> <n> --engine=r2v  # 8. cut, quiet bed, title card -> master_r2v.mp4
 uv run python scripts/episode/qc.py          <codex_id> <n> --engine=r2v  # 9. measure the delivered file
@@ -313,7 +314,27 @@ nothing) and 7 froze 0.8–2.1 s before their pin.
 
 So the rule is stated on the ARTEFACT, not on a code path: **a rebuilt take
 prompt must contain zero occurrences of `last frame of [Shot` and stage zero
-`*E.png` references.** Check that, not the flag.
+`*E.png` references.** Check that, not the flag — and there is a command for it,
+which the owner asked to be run AFTER the prompts and the sheets exist:
+
+```
+uv run python scripts/episode/no_last_frame.py <codex_id> <n>
+```
+
+It reads three artefacts and exits non-zero naming every offender: the SHEET
+PROMPTS on disk (no END panel asked for), the CELLS (no `Q??_?E.png` drawn), and
+the TAKE PROMPTS from `shots.json` or `prompts.json` (no picture declared or
+retained as a last frame, no `*E.png` staged). Run it on episode 8 and it
+refuses 31 places. `takes_r2v.main` runs the take half of it itself, before the
+GPU, so a pin can never reach a render again.
+
+**Three places now make it impossible, not just forbidden:**
+
+| artefact | what stops it |
+|---|---|
+| sheet | `episode_seq_board.DRAW_ENDS = False` — no END panel is drawn, so no END cell exists to pin. Spare cells take ALTERNATES (another angle of a real moment) so no sheet has a black cell |
+| take | `takes_r2v.NO_ENDS = True` — `end_cells()` returns `[]` whatever is on disk |
+| prompt | `L11` refuses any `<Picture N> is the last frame` or `<Picture N> ([Shot k] last frame)`. It leaves the spec's own prose clause, "and the lean continues to the last frame of the shot", alone |
 
 Everything below about judging END pairs governs the **sequence sheet only** —
 whether the plan's motion has a drawable destination at all, which is a useful

@@ -44,9 +44,14 @@ def test_the_door_ladder_maps_route_position_to_a_size_word():
     assert sq.door_size(0.95) == "fills the frame"
 
 
-def test_panels_are_in_story_order_and_an_end_panel_follows_its_own_start():
+def test_panels_are_in_story_order_and_an_end_panel_follows_its_own_start(monkeypatch):
     """Owner 2026-09-11: the sheet reads in story order.  Sorting the wides first
     made panel 1 of the criterion sheet shot 2 and panel 2 shot 0."""
+    # END panels are the reproducible CONTROL now, not the default: the owner's
+    # rule of 2026-09-16 fills spare cells with ALTERNATES instead
+    # (`episode_seq_board.DRAW_ENDS`). These three state how the packer PLACES an
+    # END panel when one is asked for, so they ask for one.
+    monkeypatch.setattr(sq, "DRAW_ENDS", True)
     sheets = sq.sheets(SEGS)
     group, route, _grid = sheets[0]
     assert [(s["shot"], s["sub"], bool(s.get("end"))) for s in group] == [
@@ -68,9 +73,14 @@ def test_the_far_landmark_line_only_fires_on_a_route_panel():
     assert "height of" in sq.panel_text(1, walk, [1], setup)
 
 
-def test_a_setup_that_fits_one_sheet_draws_geography_then_close_ups_with_no_repeats():
+def test_a_setup_that_fits_one_sheet_draws_geography_then_close_ups_with_no_repeats(monkeypatch):
     """Owner 2026-09-11: 'most 3x3 storyboards have all 3 rows the same' — a
     two-cell strip was padded with seven alternates.  Seven cells fit one sheet."""
+    # END panels are the reproducible CONTROL now, not the default: the owner's
+    # rule of 2026-09-16 fills spare cells with ALTERNATES instead
+    # (`episode_seq_board.DRAW_ENDS`). These three state how the packer PLACES an
+    # END panel when one is asked for, so they ask for one.
+    monkeypatch.setattr(sq, "DRAW_ENDS", True)
     sheets = sq.sheets(SEGS)
     assert len(sheets) == 1
     group, route, grid = sheets[0]
@@ -118,9 +128,14 @@ def test_a_setup_over_nine_cells_still_splits_by_axis():
     assert [(s["shot"], s["sub"]) for s in sheets[0][0]][:3] == [(0, 0), (1, 0), (1, 1)]
 
 
-def test_an_end_panel_names_the_panel_number_it_closes_on_this_sheet():
+def test_an_end_panel_names_the_panel_number_it_closes_on_this_sheet(monkeypatch):
     """The END panel used to be numbered by its place in the SEGMENT list, so once
     one END cell was inserted every later END named the panel before its own start."""
+    # END panels are the reproducible CONTROL now, not the default: the owner's
+    # rule of 2026-09-16 fills spare cells with ALTERNATES instead
+    # (`episode_seq_board.DRAW_ENDS`). These three state how the packer PLACES an
+    # END panel when one is asked for, so they ask for one.
+    monkeypatch.setattr(sq, "DRAW_ENDS", True)
     panels = sq.with_ends(SEGS[:5], spare=2)
     ends = [(k, s["of"]) for k, s in enumerate(panels, start=1) if s.get("end")]
     assert ends == [(5, 4), (7, 6)]
