@@ -841,8 +841,21 @@ def name_map(refs: list[dict]) -> dict[str, str]:
         if row.get("kind") != "character":
             continue
         who, name = row["entity_id"], row.get("name", "").lower()
-        tokens = {name, name.split()[-1].strip(".,") if name else ""}
-        tokens |= {w.strip(".,") for w in name.split() if len(w) > 4}
+        # A COMMA SEPARATES THE NAME FROM AN EPITHET, and an epithet is not what
+        # anybody calls somebody.  MEASURED, episode 8: the row named "Lucy
+        # Ferrier, aged five" gave its last token to the map, so "five" became a
+        # name -- and shot 21's "a girl of five in a pink frock" beside "a gaunt
+        # bearded man in a dark velveteen tunic" then named exactly one
+        # character, which is the one case `crossed_mark` answers in.  It
+        # reported Lucy wearing John Ferrier's tunic and refused a correct plan.
+        # Ferrier is not NAMED in that sentence at all; the one token the
+        # matcher found decided the verdict.
+        #
+        # This is a rule about punctuation, not a stoplist: a stoplist would
+        # have to know that "five" is a number and "Wiggins" is not.
+        plain = name.split(",")[0].strip()
+        tokens = {name, plain.split()[-1].strip(".") if plain else ""}
+        tokens |= {w.strip(".,") for w in plain.split() if len(w) > 4}
         tokens |= {a.lower().strip() for a in row.get("aka") or []}
         for token in tokens:
             if len(token) > 3:
