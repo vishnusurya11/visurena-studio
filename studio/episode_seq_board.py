@@ -593,11 +593,12 @@ ALTERNATES = (
      "distance with the whole place open around them, floor to roof in frame.",
      "The camera stands well back from panel {k}, at a standing eye, a 24mm lens."),
     ("A tight insert from the moment of panel {k}: hands, cuffs and one held object filling "
-     "the frame, no face above the collar.",
+     "the frame from edge to edge, the collar and the chest below it the top of frame.",
      "The camera stands an arm's length from the hands, looking down, a 90mm lens."),
     ("A low angle on {who} at the same moment as panel {k}, the camera near the ground "
      "looking up past them to the roof or the sky.",
-     "The camera stands at knee height below panel {k}, tilted up, a 28mm lens."),
+     "The camera stands at knee height below panel {k}, its lens aimed up past them at the "
+     "roof or the sky, a 28mm lens."),
 )
 """Four alternates, each its OWN picture in its own words.
 

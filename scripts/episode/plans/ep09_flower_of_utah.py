@@ -2,7 +2,7 @@ r"""Episode 9 — "The Flower of Utah", Part Two chapter 2.
 
 THE BRICK. One event split by the title card.
 
-  QUESTION  Today, can Lucy Ferrier ride into the city and come back her own?
+  QUESTION  Today, can Lucy John Ferrier ride into the city and come back her own?
   TURN      shot 17, 57% in: a stranger's brown hand closes on her bridle.
             alone and sufficient -> seen, and no longer her own.
   BUTTON    shot 29, Jefferson Hope, the world's answer and the last line:
@@ -69,7 +69,7 @@ SETUPS = {
                   "rutted road runs from the bottom centre away to it. The adobe walls and "
                   "cottonwoods stand along both edges."),
         crowd=("Thirty heavily-laden pack mules file west along the left of the road with six "
-               "drivers walking at their heads, a train of eight immigrant waggons rolls the "
+               "drivers walking at their heads at a normal walking pace, a train of eight immigrant waggons rolls the "
                "other way, and four Indians lead ponies loaded with pelts along the right wall."),
         outdoors=True, props=[]),
     "the_drove": dict(
@@ -84,14 +84,22 @@ SETUPS = {
                   "from edge to edge. The red dust hangs across the middle band. The adobe wall "
                   "and the rail corral stand along the RIGHT edge and the TOP third is bleached "
                   "sky."),
-        crowd=("Six wild-looking herdsmen on ponies ride the flanks of the drove swinging coiled "
-               "ropes, and two more sit their horses at the corral rail watching the road."),
+        crowd=("Six wild-looking herdsmen on ponies ride the flanks of the drove at a normal walking pace swinging coiled ropes, and two more sit their horses at the corral rail watching the road."),
         outdoors=True, props=[]),
     "farm_parlour": dict(
-        described=("The parlour of John Ferrier's log villa on a summer evening, 1860: squared "
-                   "log walls chinked white, a stone hearth with a low fire, a scrubbed pine "
-                   "table under a hanging oil lamp, ladder-back chairs, a rag rug on boards, a "
-                   "deep window open on the blue dusk, warm lamplight"),
+        # INSIDE THE ROOM, said in the first six words. The first draft opened "The
+        # parlour of John Ferrier's log villa on a summer evening" and listed the
+        # furniture, and the plate came back as a CUTAWAY seen from OUTSIDE: a cabin
+        # standing in a wheatfield with one wall torn off and open sky above it. Every
+        # other setup in this episode is outdoors and the drawer followed them out.
+        # An interior has to say that it is one.
+        described=("Interior, inside the parlour of John Ferrier's log villa on a summer "
+                   "evening, 1860, the camera standing within the room with squared "
+                   "white-chinked log walls closed on all four sides and a low plank ceiling "
+                   "overhead: a stone hearth with a low fire burning in it, a scrubbed pine "
+                   "table under a hanging oil lamp, ladder-back chairs, a rag rug on the board "
+                   "floor, one deep window in the far wall open on the blue dusk outside; the "
+                   "hanging oil lamp is the light in the room and the window a pale rectangle"),
         cast=["john_ferrier", "lucy_ferrier", "jefferson_hope"],
         landmark="the stone hearth with its low fire", landmark_at="start",
         landmark_size="is half the height of the frame",
@@ -126,7 +134,7 @@ S = [
      "silver inland sea along its far side under a chain of snow-flecked peaks, kneeling "
      "immigrants in dust-grey homespun ranked along the bare rock shoulder in the near ground.",
      "The camera pulls back off the valley across the whole shot, travelling three long strides; "
-     "the low sun lifts along the far peaks and the shadow slides down the valley wall; the "
+     "the low sun lifts along the far peaks; the "
      "kneeling men bow their heads together in the near ground.",
      "on the crest of the pass at a standing man's eye, two long strides behind the kneeling "
      "rank, a 35mm lens. The low sun stands behind the near ridge and rakes across the valley",
@@ -169,7 +177,7 @@ S = [
      "The camera pushes in on the log house across the whole shot, travelling two long strides; "
      "the wheat runs in a long wave where the wind crosses it; a farm hand pitches a forkful up "
      "onto the waggon at the fence.",
-     "on the beaten track in front of the farm at a standing man's eye, four long strides out "
+     "on the beaten cart road in front of the farm at a standing man's eye, four long strides out "
      "from the rail fence, a 35mm lens. The hard morning sun stands high behind the camera",
      "The log house stands along the LEFT edge and the gold wheat fills the middle band.",
      "The log house stands twice its size along the left edge with the porch posts at the bottom "
@@ -181,9 +189,9 @@ S = [
      "Medium of John Ferrier at the rail fence, the wide-brimmed brown felt hat level over his "
      "brows, the fawn homespun coat open on his dark waistcoat, one bare heavy-knuckled hand "
      "closed on the top rail, the gold wheat standing to his shoulder behind him.",
-     "The camera pushes in on Ferrier across the whole shot, travelling one long stride; he runs "
+     "The camera pushes in on John Ferrier across the whole shot, travelling one long stride; he runs "
      "his bare hand along the top rail toward the post; he turns his beard toward the wheat.",
-     "on the track side of the rail fence, level with Ferrier's eye, two long strides from him, "
+     "on the road side of the rail fence, level with Ferrier's eye, two long strides from him, "
      "a 50mm lens. The high sun comes over his right shoulder",
      "Ferrier stands in the LEFT half with his hand on the top rail and the wheat behind him.",
      "Ferrier's head and shoulders fill the left half of the frame with the fence rail cut off "
@@ -191,7 +199,7 @@ S = [
      "Ferrier has grown by half in frame", "rise", 0.0, 0.0),
 
     ("ferrier_land", "full", ["lucy_ferrier"], 0.6,
-     "Full of Lucy Ferrier walking a path through the standing wheat, the cream straw hat hanging "
+     "Full of Lucy John Ferrier walking a path through the standing wheat, the cream straw hat hanging "
      "back off her shoulders on its ribbon, chestnut hair loose, the white blouse and the "
      "slate-blue riding skirt bright against the gold, the pine hills behind.",
      "The camera tracks beside Lucy across the whole shot, travelling four long strides; she "
@@ -219,14 +227,14 @@ S = [
 
     ("ferrier_land", "medium_close", ["lucy_ferrier", "john_ferrier"], 0.85,
      "Medium two-shot on the porch steps: Lucy on the lower step with the straw hat back on her "
-     "shoulders, Ferrier above her in the brown felt hat with a folded paper held out in his "
+     "shoulders, John Ferrier above her in the brown felt hat with a folded paper held out in his "
      "bare hand, the open house door dark behind them.",
      "The camera pushes in on the two of them across the whole shot, travelling one long stride; "
      "Ferrier puts the folded paper down into Lucy's bare hand; she closes her fingers on it and "
      "turns her face up to him.",
      "on the beaten path below the porch, level with Lucy's eye, two long strides from the steps, "
      "a 50mm lens. The high sun comes over the roof and leaves the doorway dark",
-     "Lucy stands on the LEFT of the steps and Ferrier on the RIGHT above her.",
+     "Lucy stands on the LEFT of the steps and John Ferrier on the RIGHT above her.",
      "Both stand half again as large with the porch posts carried out past both edges and the "
      "paper in Lucy's closed hand.",
      "the two have grown by half", "rise", 0.0, 0.0),
@@ -279,7 +287,7 @@ S = [
      "Close on Lucy's face in the gallop, the cream straw hat flat behind her head on its ribbon, "
      "her chestnut hair blown straight back, her cheek flushed, her eyes ahead down the road.",
      "The camera pushes in on Lucy's face across the whole shot, travelling a head's height; her "
-     "hair lifts and streams back off her temple; she narrows her eyes against the hanging dust.",
+     "hair lifts and streams back off her temple; she puts one bare hand up to the hat ribbon at her throat.",
      "beside the road at Lucy's own eye, an arm's length from her, a 90mm lens. The low sun comes "
      "across her face from the right",
      "Lucy's face fills the middle of the frame with the road behind her.",
@@ -291,8 +299,8 @@ S = [
      "city, bundles of pelts roped over the ponies' backs, their faces turned up the road after "
      "something passing.",
      "The camera pans right off the road onto the pony train across the whole shot, travelling "
-     "two long strides; the leading man turns his head to follow the road; a pony swings its "
-     "roped pelts against the adobe.",
+     "two long strides; the laden ponies come on along the wall at a normal walking pace; the "
+     "nearest pony swings its roped pelts against the adobe.",
      "at the right roadside at a standing man's eye, two long strides from the wall, a 50mm lens. "
      "The low sun comes over the wall from behind them",
      "The pony train stands along the RIGHT half against the adobe wall.",
@@ -375,7 +383,7 @@ S = [
      "the close black beard, his eyes up at Lucy, the rifle strap across his buckskin shoulder, "
      "dust hanging behind him.",
      "The camera pushes in on Hope's face across the whole shot, travelling a head's height; he "
-     "puts his chin up a finger's breadth toward her; his jaw works once under the beard.",
+     "puts his chin up a finger's breadth toward her; he turns his rifle shoulder a hand's breadth round toward her.",
      "on the road at Hope's own eye, an arm's length from him, a 90mm lens. The overhead sun "
      "comes past his hat brim onto his beard",
      "Hope's face fills the middle of the frame with the dust behind him.",
@@ -399,8 +407,7 @@ S = [
     ("the_drove", "close", ["lucy_ferrier"], 1.0,
      "Close on Lucy's face turned down to Hope at the frame edge, her hair off her cheek, her "
      "mouth open on a laugh, the bright road behind her.",
-     "The camera holds a static shot as Lucy laughs down at him; she tips her head over toward "
-     "her shoulder; she draws one bare hand down the mustang's neck.",
+     "The camera pushes in on Lucy across the whole shot, travelling a head's height; she laughs down at him and tips her head over toward her shoulder; she draws one bare hand down the mustang's neck.",
      "at the edge of the drove at Lucy's own eye, an arm's length from her, a 90mm lens. The "
      "overhead sun comes across her cheek",
      "Lucy's face fills the middle of the frame.",
@@ -422,14 +429,14 @@ S = [
 
     ("farm_parlour", "medium", ["jefferson_hope", "john_ferrier"], 0.3,
      "Medium two-shot across the pine table: Jefferson Hope leaning in on his forearms with his "
-     "hat off and the black hair flat, Ferrier opposite him bare-headed in his dark waistcoat "
+     "hat off and the black hair flat, John Ferrier opposite him bare-headed in his dark waistcoat "
      "with the iron-grey hair combed back, the lamp hanging between them.",
      "The camera pushes in on the two men across the whole shot, travelling one long stride; Hope "
-     "opens one brown hand flat on the boards toward Ferrier; Ferrier puts his chin down and "
+     "opens one brown hand flat on the boards toward John Ferrier; John Ferrier puts his chin down and "
      "draws his beard through his fingers.",
      "at the table end level with a seated man's eye, two long strides from the near chair, a "
      "50mm lens. The hanging lamp is over the table between them",
-     "Hope sits in the LEFT half and Ferrier in the RIGHT half across the table.",
+     "Hope sits in the LEFT half and John Ferrier in the RIGHT half across the table.",
      "Both men stand half again as large with the lamp carried out above the top edge.",
      "the lamp rim has risen to the top edge", "reaction", 0.0, 0.0),
 
@@ -450,8 +457,7 @@ S = [
      "across the table, the buckskin shoulder catching the lamp, the white-chinked logs behind "
      "him.",
      "The camera pushes in on Hope across the whole shot, travelling one long stride; he turns "
-     "his head from the table toward the window; his eyes come up and hold on Lucy at the frame "
-     "edge.",
+     "his head from the table toward the window; he lifts his open brown hand off the boards toward the frame edge.",
      "at the table side level with Hope's eye, two long strides from him, a 50mm lens. The "
      "hanging lamp comes down on his shoulder from the left",
      "Hope fills the LEFT half of the frame with the log wall behind him.",
@@ -477,8 +483,7 @@ S = [
      "running to the porch of the log house on the left, gold stubble either side, the pine hills "
      "black against a burning orange west.",
      "The camera pushes in on the gate across the whole shot, travelling two long strides; the "
-     "roan at the fence swings its head at the flies; the long light slides up the stubble as the "
-     "sun drops behind the hills.",
+     "roan at the fence swings its head at the flies; it lifts one forehoof clear of the beaten path and sets it down again.",
      "on the path below the gate at a standing man's eye, four long strides out, a 35mm lens. The "
      "low sun burns orange behind the pine hills",
      "The five-bar gate stands in the near RIGHT and the porch in the LEFT third.",
@@ -513,8 +518,7 @@ S = [
      "Close on Hope's face against the burning west, the sombrero pushed back, the dark fierce "
      "eyes down on Lucy at the frame edge, the black beard close along his jaw.",
      "The camera pushes in on Hope's face across the whole shot, travelling a head's height; he "
-     "brings his head down toward her a finger's breadth; his eyes hold and his jaw sets under "
-     "the beard.",
+     "brings his head down toward her a finger's breadth; he draws his brown hand up off hers to the brim of the sombrero.",
      "beside the gate at Hope's own eye, an arm's length from him, a 90mm lens. The low orange "
      "sun burns behind his shoulder",
      "Hope's face fills the middle of the frame against the burning sky.",
@@ -535,7 +539,7 @@ LINES = [
 
     ("narration", "john_watson", "It was a warm June morning, and the whole valley was at work.", 8),
     ("narration", "john_watson", "The gold fever had broken out west, and the road to it ran through the city.", 9),
-    ("narration", "john_watson", "Through the middle of it all Lucy Ferrier came galloping in on her father's errand.", 10),
+    ("narration", "john_watson", "Through the middle of it all Lucy John Ferrier came galloping in on her father's errand.", 10),
     ("narration", "john_watson", "She was nineteen, and she had ridden that road a hundred times alone.", 11),
     ("narration", "john_watson", "Strangers turned in the dust to watch her go by.", 12),
 
@@ -605,7 +609,7 @@ def build() -> dict:
              for k, (kind, who, text, shot) in enumerate(LINES)]
     return dict(
         number=9, title="The Flower of Utah",
-        question="Today, can Lucy Ferrier ride into the city and come back her own?",
+        question="Today, can Lucy John Ferrier ride into the city and come back her own?",
         aspect="1:1", palette=PALETTE, protagonist="lucy_ferrier",
         narrator="john_watson", beds=BEDS, setups=SETUPS, shots=shots, lines=lines)
 
