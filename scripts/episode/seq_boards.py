@@ -361,6 +361,18 @@ def main(book_id: str, number: int, only: str | None = None, sheet: int | None =
             "the plan fails the quote gate -- narration is Watson's own prose:\n  "
             + "\n  ".join(f"line {l['index']} lifts {l['lifted']} consecutive words: "
                            f"{l['text']!r}" for l in lifted))
+    # AND WATSON IS IN HIS OWN EPISODE.  Measured over the seven delivered plans,
+    # narration lines in which the narrator is the acting subject: ep01 4, ep02 5,
+    # ep03 2, ep04 1, ep05 1, ep06 3, ep07 0 -- and episode 7 is the one that
+    # reads as a police report. Its whole first person is one `me` and one `our`,
+    # in a single line where he is the object of somebody else's request, in the
+    # chapter where a doctor hands an animal over to settle a question.
+    said = [l.model_dump() for l in episode.lines]
+    if quiet := ep_spec.silent_narrator(said):
+        raise SystemExit("the plan fails the witness gate:\n  " + "\n  ".join(quiet))
+    print(f"  first person {ep_spec.first_person_share(said) * 100:.1f}% of narration "
+          f"(delivered 0.7-6.3; the two best-rated episodes are 5.7 and 4.4), "
+          f"{len(ep_spec.narrator_acts(said))} line(s) where Watson acts", flush=True)
     # AND EVERY REFERENCE THE BIBLE DECLARES IS ACTUALLY ON DISK.  A row that
     # names a picture nobody drew is dropped by `draw_setup`'s existence filter,
     # which was silent: episode 7's terrier was unbound across three $0.13

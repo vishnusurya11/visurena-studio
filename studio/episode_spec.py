@@ -966,6 +966,62 @@ def quoted_lines(lines: list[dict], source: str) -> tuple[list[dict], list[dict]
 
 # ---- an episode has a rhythm -------------------------------------------------
 
+ACTS = re.compile(
+    r"(?:^|[\"\u201c(]|[,;:]\s*|\s(?:and|but|so|then|when|while|as|for|because|though)\s+)"
+    r"I\b(?![A-Z])")
+"""The narrator as the acting SUBJECT of a verb -- "I carried", "Holmes and I
+read" -- as against the narrator as somebody else's object, "he asked me".
+
+`(?![A-Z])` keeps it off an acronym: "The INSPECTOR said" is not Watson."""
+
+FIRST_PERSON = re.compile(r"\b(?:I|me|my|mine|we|us|our)\b")
+"""Every first-person token, for the density advisory."""
+
+
+def narrator_acts(lines: list[dict]) -> list[int]:
+    """The indices of NARRATION lines in which the narrator does something.
+
+    Dialogue is excluded because every speaker says "I"; the question is whether
+    the man telling the story is in it."""
+    return [k for k, line in enumerate(lines)
+            if line.get("kind") == "narration" and ACTS.search(line.get("text", ""))]
+
+
+def first_person_share(lines: list[dict]) -> float:
+    """First-person tokens as a share of the narration's words."""
+    said = [l.get("text", "") for l in lines if l.get("kind") == "narration"]
+    words = sum(len(t.split()) for t in said)
+    return sum(len(FIRST_PERSON.findall(t)) for t in said) / words if words else 0.0
+
+
+def silent_narrator(lines: list[dict]) -> list[str]:
+    """Is this an episode of Watson's memoirs in which Watson never appears?
+
+    MEASURED over the seven delivered plans, counting narration lines in which
+    the narrator is the acting subject:
+
+        ep01 4, ep02 5, ep03 2, ep04 1, ep05 1, ep06 3, ep07 0
+
+    and first-person density: 6.3, 5.7, 4.4, 3.0, 6.0, 2.5, 0.7 per cent -- the
+    two episodes a writing review rated highest being ep02 and ep03.
+
+    Episode 7 is the only one where he never acts.  Its whole first person is one
+    `me` and one `our`, in a single line where he is the object of somebody
+    else's request -- and the chapter it reports is the one where a doctor hands
+    an animal over to settle a question, and the doctor never touches it.
+
+    THE FLOOR IS ONE, which is why this is a gate and not a taste.  It is not a
+    threshold fitted to seven points; it is the line between a witness and a
+    police report, and every episode that has shipped clears it but that one."""
+    if not any(l.get("kind") == "narration" for l in lines):
+        return []
+    if narrator_acts(lines):
+        return []
+    return ["the narrator never acts in his own episode: no narration line has him as "
+            "the subject of a verb. Delivered episodes run 1 to 5 such lines; only "
+            "episode 7 has none, and it is the one that reads as a report"]
+
+
 RHYTHM_IQR = 3.0
 """The narrowest interquartile range of LINE WORD COUNTS that still cuts as an
 edit rather than a metronome, for a plan with no internal cuts.
