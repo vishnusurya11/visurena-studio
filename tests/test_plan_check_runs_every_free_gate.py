@@ -16,7 +16,7 @@ def test_the_check_names_every_gate_it_runs():
 
     src = inspect.getsource(plan_check)
     for gate in ("house_style.faults", "plan_gates.faults", "plan_gates.advisories", "series_rate",
-                 "still_motions", "plan_marks", "cast_refs.bound", "sheet_dq", "refuse_long_shots"):
+                 "still_motions", "plan_marks", "unbound_cast", "sheet_dq", "refuse_long_shots"):
         assert gate in src, gate
 
 
