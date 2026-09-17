@@ -889,9 +889,16 @@ wall is `OVER_PUSH = 1.55` for a hand's or finger's breadth, 2.0 for a forearm,
 in 1.51-1.62 gives the same verdicts.
 
 What to write instead, in the plan:
-- **A CLOSE takes a pull-back or a pan, never a push.** A pull-back of a
-  hand's breadth cannot end tighter than it began (ep10 shot 5). **An INSERT
-  takes a pan or a tilt, not a pull-back**: the hand-on-the-rifle insert
+- **A CLOSE takes a PAN, never a push and never a pull-back either.** A
+  pull-back cannot end tighter than it began (ep10 shot 5) -- but it has no
+  brake going out: ep11's three pull-backs on closes ran 0.71x, 0.43x and
+  0.58x and left their panels (off-board 0.43-0.67), and a pan of a finger's
+  breadth with a sharp edge object kept fixed all three. The zoom word
+  overruns in BOTH directions; the only move a face can be given is the one
+  with no scale in it. Off-board reads a pan as leaving the board by design
+  (T08: 0.06 as a push, 0.48 as a pan of the same shot), so a panning shot
+  gets `OFFBOARD_HARD_PAN` 0.60 while pushes and holds keep 0.40. **An
+  INSERT takes a pan or a tilt, not a pull-back**: the hand-on-the-rifle insert
   pulled back to 0.54x and left its panel (off-board 0.65 HARD) -- there is
   nothing to hold the scale to when the subject fills the frame. Its first
   render, a 1.72x push with the zoom advisory, was the take that shipped,
