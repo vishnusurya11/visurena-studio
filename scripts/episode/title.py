@@ -1,6 +1,9 @@
 #!/usr/bin/env python
 """The episode's title card: one still from gpt-image, animated 4 s by H3.
 
+`--local` draws the still on the owner's own model instead (free, no API):
+the fallback for a day the paid API has no credits (ep13, 2026-09-17).
+
     uv run python scripts/episode/title.py <codex_id> <episode>
 
 The series name is the main title ("SHERLOCK HOLMES"), the book the subtitle,
@@ -125,6 +128,53 @@ def draw(prompt: str, out: Path, approved: bool = False, size: str = "1024x1536"
     return out
 
 
+LOCAL_WORKFLOW = "image_krea2_turbo_t2i"
+LOCAL_SEED = 4400
+"""MEASURED ep13 (2026-09-17): seeds 4100-4500 all set the three lines legibly;
+4400 keeps the lamp warm and the word SCARLET red."""
+
+
+def local_prompt(said: str) -> str:
+    """The card's prompt with the red asked for twice: the local drawer draws the
+    lettering well and drops the scarlet thread unless it is named as the only red."""
+    return (said + " THE ONE THREAD RUNNING THROUGH THE GREY SKEIN IS BRIGHT PILLAR-BOX RED, vivid "
+            "and saturated, and it trails off the desk toward the lens; it is the only red in the "
+            "picture. In the subtitle line the single word SCARLET is lettered in that same bright "
+            "red while the words A STUDY IN stay pale ivory.")
+
+
+def render_local(prompt: str, prefix: str, seed: int) -> Path:
+    """The one ComfyUI call. Injected in tests so no test touches the GPU."""
+    written = run(LOCAL_WORKFLOW, {"prompt": prompt, "aspect_ratio": canvas.comfy_ratio(ASPECT),
+                                   "megapixels": 1.0, "seed": seed, "steps": 8,
+                                   "filename_prefix": f"ep_title_local_{seed}"})
+    if not written:
+        raise RuntimeError(f"{prefix} produced no image")
+    return written[0]
+
+
+def draw_local(prompt: str, out: Path, seed: int = LOCAL_SEED, render=render_local) -> Path:
+    """The still from the LOCAL model, conformed to the episode's canvas.
+
+    FREE, and no approval: it spends the owner's own GPU, like every other
+    ComfyUI stage. The paid `draw` stays the default; this is what ships the
+    episode when the API has no credits (ep13). The card is legible and on
+    style; the scarlet thread is the one thing the local drawer will not draw."""
+    if out.exists():
+        return out
+    from PIL import Image
+
+    out.parent.mkdir(parents=True, exist_ok=True)
+    raw = out.with_name(out.stem + "_raw.png")
+    raw.write_bytes(Path(render(local_prompt(prompt), out.stem, seed)).read_bytes())
+    image = Image.open(raw).convert("RGB")
+    scale = max(W / image.width, H / image.height)
+    resized = image.resize((round(image.width * scale), round(image.height * scale)), Image.LANCZOS)
+    left, top = (resized.width - W) // 2, (resized.height - H) // 2
+    resized.crop((left, top, left + W, top + H)).save(out)
+    return out
+
+
 def animate(still: Path, prompt: str, out: Path, seed: int, approved: bool = False) -> Path:
     if out.exists():
         return out
@@ -142,7 +192,8 @@ def card_path(book: Path, number: int) -> Path:
     return book / "title" / f"ep{number:02d}.mp4"
 
 
-def main(book_id: str, number: int, approved: bool = False, rendering: bool = False) -> None:
+def main(book_id: str, number: int, approved: bool = False, rendering: bool = False,
+         local: bool = False) -> None:
     """The still and the animation are two spends: one is money, one is the
     owner's own GPU and queue.  Each is approved for itself, so an approval
     typed for the picture never starts a ComfyUI job."""
@@ -165,7 +216,9 @@ def main(book_id: str, number: int, approved: bool = False, rendering: bool = Fa
                 f"window. Keep the lettering in the same Victorian serif at the same three sizes, and "
                 f"recompose it for the {shape} frame. THE ONLY CHANGE: the bottom line now reads "
                 f'"EPISODE {number}". {said}')
-    still = draw(said, folder / f"ep{number:02d}.png", approved, canvas.still_size(ASPECT), like)
+    card = folder / f"ep{number:02d}.png"
+    still = (draw_local(said, card) if local
+             else draw(said, card, approved, canvas.still_size(ASPECT), like))
     prompt = take_prompt(series, title, number)
     (folder / f"ep{number:02d}.prompt.txt").write_text(
         still_prompt(series, title, number, refs["palette"]) + "\n\n" + prompt, encoding="utf-8")
@@ -176,7 +229,8 @@ def main(book_id: str, number: int, approved: bool = False, rendering: bool = Fa
 def _cli(argv: list[str]) -> None:
     args = [a for a in argv[1:] if not a.startswith("--")]
     main(args[0], int(args[1]) if len(args) > 1 else 1,
-         approval.approved_for("title", argv), approval.approved_for("render", argv))
+         approval.approved_for("title", argv), approval.approved_for("render", argv),
+         "--local" in argv)
 
 
 if __name__ == "__main__":
