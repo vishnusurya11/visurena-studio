@@ -42,16 +42,22 @@ import re
 
 from studio.episode_spec import BANNED_PROPS, Line, Setup, Shot
 
-def style_line() -> str:
-    """The style line for this run, from `studio.house_style`.
+def style_line(setup=None) -> str:
+    """The style line for this run, from `studio.house_style`, under the
+    SETUP's own light when one is given.
 
     This was a constant reading "1881 London". Episode 8 was drawn and
     rendered under it over an 1847 Utah desert, because `Episode.palette`
     was wired into the location plate alone and the fix was called done --
     13 of 13 sheet prompts and 28 of 28 take prompts carried the wrong
     place. The place is declared once per run now, in one module.
+
+    MEASURED, episode 10: the one episode light ("low side sun, deep black
+    shadow") reached 30/30 take blocks including the moon, lamp and candle
+    setups (dq10/J.md §4).  `house_style.light_for` reads the setup's own
+    source clause; the episode light is its fallback.
     """
-    return house_style.live()
+    return house_style.live(setup)
 LEAD = "Watson"
 """The one character the limp rule watches (owner: Watson limps on his stick)."""
 MAX_PICTURES = 9
@@ -378,7 +384,7 @@ def arrival_clause(seg: dict, names=()) -> str:
     the shot arrives where the move ends."""
     held, tail = arrival_end(seg.get("end_frame") or "", names)
     cam, _subject = camera_clause(clauses_of(seg.get("motion", ""))[0])
-    move = gerund(camera_verb(cam)) if cam else ""
+    move = move_verb(cam) if cam else ""
     if move:
         # Two gates shaped this sentence and both were right: `holds` is on the L2
         # stillness list (a stillness verb in a block measured 0.77 frozen against
@@ -392,10 +398,36 @@ def arrival_clause(seg: dict, names=()) -> str:
         # point.  The two constraints stand and rule out the obvious repair -- "is
         # still pushing in" puts `still` in an L2-linted sentence.  `continues ...
         # through the last frame` is what the timed beats already say.
-        return (f"By {stamp(seg['end'])} the camera is {move} through the last frame of "
-                f"the shot{held}, and the action continues with it{tail}.")
+        #
+        # AND THE MOVE IS NAMED ONCE.  MEASURED, episode 10 (dq10/J.md §5-6): the
+        # arrival repeated the whole camera head -- "pushing in on <Subject 1>'s
+        # face across the whole shot, travelling a hand's breadth" -- 11.6 words a
+        # block verbatim, "across the whole shot" twice in 34/34 blocks, and the
+        # amount word a second time where the model scales by it 0/16.  The 16
+        # blocks that overran the ceiling overran on this duplicate, not content.
+        # So the arrival carries the verb and its particle and nothing else of
+        # the head; the timed beats and the camera sentence already say the rest.
+        return (f"By {stamp(seg['end'])} the camera is {move} through the last frame{held}, "
+                f"and the action continues with it{tail}.")
     return (f"By {stamp(seg['end'])} the action of that shot continues "
             f"through the last frame{held}{tail}.")
+
+
+PARTICLES = ("in", "out", "back", "up", "down", "left", "right", "off", "away", "forward", "handheld")
+"""What may follow the verb into the arrival: the particle that says which
+way.  `on <Subject 1>'s face`, `a hand's breadth`, `along the counter` stay
+with the camera sentence."""
+
+
+def move_verb(cam: str) -> str:
+    """`pushes in on his face across the whole shot, travelling a hand's breadth`
+    -> `pushing in`: the verb and its particle, the ONE thing the arrival may
+    repeat of the camera head."""
+    words = camera_verb(cam).split()
+    if not words:
+        return ""
+    keep = words[:2] if len(words) > 1 and words[1].lower().strip(",.;") in PARTICLES else words[:1]
+    return gerund(" ".join(keep))
 
 
 def audio_line(spoken) -> str:
@@ -1072,19 +1104,74 @@ Episode 7's blocks carried 30 on average; episode 9's carried 4, because the
 crowd caption was counted as core first and the geometry was what gave way."""
 
 
-def detail(seg: dict, want: int) -> list[str]:
-    """D2c / D2d, REQUIRED: where the camera STANDS and what is at rest in the first
-    frame, both authored per panel by the setup's own author.  An unplaced camera is
-    how a cab insert ended up on a different axis from its own wide; the at-rest
-    clause is what keeps the drawer's still things still while the action runs.
+LIGHT_CAP = 10
+"""Words of the light sentence: a direction and a black.
 
-    Neither is displaced by the budget: the camera is whole (to `CAMERA_CAP`), the
-    at-rest runs to `REST_FLOOR` at least, and `want` only widens the at-rest.  When
-    a block overflows, the crowd goes first (`life_for`), then at-rest clauses."""
+MEASURED (dq10/J.md §1, §4): ep05/07 carried a light sentence of 5.3/5.5
+words in about half their blocks and looked right; ep10 carried 14.0 words in
+33/34 blocks, and the second half of it ("... and leaves the right side of his
+face in shadow") is inert in the take -- the light is honest in 30/30 because
+the CELL carries it.  The first clause always lands whole: a direction cut in
+half is no direction."""
+
+
+def camera_parts(camera: str) -> tuple[str, str]:
+    """The plan's `camera` is two sentences -- where the camera stands, then
+    the light: "..., a 35mm lens. The low sun comes from the left ...".  Parted
+    at the first full stop, so each is spent by its own cap."""
+    where, _, light = " ".join((camera or "").split()).partition(". ")
+    return where.strip(), light.strip()
+
+
+LIGHT_TAIL = re.compile(r"\s+(?=(?:along|across|onto|over|into|toward|behind|between)\b)")
+"""Where a first clause that overflows the cap may part: the phrase after the
+direction ("... from the right | along the house front")."""
+
+
+def under_cap(parts: list[str], cap: int) -> list[str]:
+    """The leading parts that fit in `cap` words; the first always lands."""
+    out: list[str] = []
+    for part in parts:
+        if out and len(" ".join(out + [part]).split()) > cap:
+            break
+        out.append(part)
+    return out
+
+
+def light_sentence(light: str) -> str:
+    """The light in `LIGHT_CAP` words: the first clause, then clauses while
+    they fit; a first clause over the cap parts at its trailing phrase.  T16's
+    light was the one of 34 that never reached H3 -- cut off the end of a
+    45-word camera field by `CAMERA_CAP` -- so the light is its own sentence
+    now and never trimmed with the position."""
+    text = calm(light).rstrip(".")
+    if not text:
+        return ""
+    clauses = re.split(r"(?<=[;,])\s+|\s+(?=and\b)", text)
+    if len(clauses[0].split()) > LIGHT_CAP:
+        clauses[:1] = LIGHT_TAIL.split(clauses[0])
+    return " ".join(under_cap(clauses, LIGHT_CAP)).strip(" ,;") + "."
+
+
+def detail(seg: dict, want: int) -> list[str]:
+    """D2c / D2d, REQUIRED: where the camera STANDS, the LIGHT, and what is at
+    rest in the first frame, all authored per panel by the setup's own author.
+    An unplaced camera is how a cab insert ended up on a different axis from
+    its own wide; the at-rest clause is what keeps the drawer's still things
+    still while the action runs.
+
+    None of it is displaced by the budget: the camera position is whole (to
+    `CAMERA_CAP`), the light is whole (to `LIGHT_CAP`), the at-rest runs to
+    `REST_FLOOR` at least, and `want` only widens the at-rest.  When a block
+    overflows, the crowd goes first (`life_for`), then at-rest clauses."""
     out = []
-    if where := trim(calm(seg.get("camera", "")), CAMERA_CAP):
+    position, light = camera_parts(seg.get("camera", ""))
+    if where := trim(calm(position), CAMERA_CAP):
         out.append(f"The camera is {where}.")
         want -= len(where.split())
+    if lit := light_sentence(light):
+        out.append(lit)
+        want -= len(lit.split())
     if rest := trim(calm(seg.get("at_rest", "")), max(REST_FLOOR, want)):
         out.append(f"At the first frame {lower_lead(rest)}.")
     return out
@@ -1150,8 +1237,8 @@ def describe(shots: list[Shot], placed: list[dict], lines: list[Line], at: dict,
     ctx = {"faces": faces, "physical": physical, "lines": lines, "at": at, "offset": offset,
            "ids": voice_id(lines, narrator), "seen": set(), "cast": cast, "names": names_of(cast),
            "watson": lead_tag(faces), "no_ends": no_ends, "crowd_at": crowd_block(segs), "life": {}}
-    text = "\n".join([style_line()] + [segment_text(k, seg, cells[k - 1], ctx)
-                                       for k, seg in enumerate(segs, start=1)])
+    text = "\n".join([style_line(setup)] + [segment_text(k, seg, cells[k - 1], ctx)
+                                            for k, seg in enumerate(segs, start=1)])
     return text, ctx["life"]
 
 
@@ -1604,6 +1691,85 @@ def check(text: str, facts: dict | None = None) -> None:
     """Called by `build`, so a prompt that fails a rule can never reach the GPU."""
     if bad := lint(text, facts):
         raise ValueError(f"the prompt fails the lint ({len(bad)} faults): " + "; ".join(bad))
+
+
+# ---- L24-L27  the wording H3 measurably ignores (ADVISORY, dq10/B.md §4, J.md §3-4) --
+#
+# Episode 10 measured four sentence shapes against the render: a kept-clause
+# held 1 of 4 (the one a sharp static edge object under a small move); "turns
+# his head toward the door" walked the man past the lens on 3/3 renders; a walk
+# toward the lens or by a 50-px figure in a wide was ignored 2/2 while a walk
+# away to a named thing in frame was obeyed 2/2.  None is a fault the render
+# cannot survive, so these print and never refuse: `advise`, not `check`.
+
+CAMERA_TRAVEL = re.compile(r"\bThe camera (?:pushes|pulls|tracks|pans|tilts|dollies|cranes|orbits|zooms|moves)\b")
+KEPT_EDGE = re.compile(r"(?:[\w']+ ){1,3}keeps? the frame edges?\b", re.I)
+HEAD_TARGET = re.compile(r"\bhead\b[^;.]*?\btoward the (?:[\w-]+ )?(?:doors?|windows?|gates?)\b", re.I)
+KEPT_SCOPE = re.compile(r"\b(?:keeps?|kept)\b[^;.,]*?\b(?:inside the frame|whole face|sharp)\b|"
+                        r"\bkeeps? sharp\b|\b(?:alone|only)\b[^;.]*?\bcomes? in\b|\bcomes? in\b[^;.]*?\b(?:alone|only)\b", re.I)
+WALK_AT_LENS = re.compile(r"\b(?:walk|step|strid|climb)\w*\b[^;.]*?\btoward (?:the camera|the lens|it)\b", re.I)
+WIDE_FRAMING = re.compile(r"^[^.]*\b(?:a wide|Wide )")
+
+
+def kept_edge(body: str, travels: bool) -> str:
+    """A kept frame edge under a camera travel: a 1.12x push removed the porch
+    post (T20); a pull-back moved the gate posts inward (T03)."""
+    hit = KEPT_EDGE.search(body)
+    return hit.group(0).strip() if hit and travels else ""
+
+
+def head_reposition(body: str) -> str:
+    """A target noun in a head clause: obeyed as a reposition every time (T15
+    x3, T28, T29 s2).  Name what the face keeps, never the thing looked at."""
+    hit = HEAD_TARGET.search(body)
+    return hit.group(0) if hit else ""
+
+
+def kept_scope(body: str) -> str:
+    """A kept-clause naming a scale, a blur or an absence: 0/3 obeyed (T05
+    "whole face keeps inside", T15 "keeps sharp", T29 "the shoulder alone")."""
+    hit = KEPT_SCOPE.search(body)
+    return hit.group(0) if hit else ""
+
+
+def walk_advice(body: str, wide: bool) -> str:
+    """A walk at the lens (T04, 0/2) or by a figure in a wide (T20, 0/2)."""
+    if hit := WALK_AT_LENS.search(body):
+        return f"{hit.group(0)!r} walks at the lens; give the travel to the camera or walk away to a named thing"
+    if wide and gaits(body):
+        return "a walk by a figure in a wide is ignored (T20's 50-px figure never left the gate)"
+    return ""
+
+
+def l24_kept_edge(text, facts):
+    return [f"ADVISORY L24 KEPT EDGE [Shot {k}]: {hit!r} under a camera travel -- a push removes the "
+            f"edge, a pull-back moves it inward; keep a thing in the MIDDLE of the frame, or hold"
+            for k, a, b, body in blocks(text) if (hit := kept_edge(body, bool(CAMERA_TRAVEL.search(body))))]
+
+
+def l25_reposition(text, facts):
+    return [f"ADVISORY L25 REPOSITION [Shot {k}]: {hit!r} names the thing looked at; obeyed as a "
+            f"whole-body turn 3/3 -- say what the face keeps ('his eyes stay on the lens')"
+            for k, a, b, body in blocks(text) if (hit := head_reposition(body))]
+
+
+def l26_kept_scope(text, facts):
+    return [f"ADVISORY L26 KEPT SCOPE [Shot {k}]: {hit!r} -- a kept-clause holds a sharp static edge "
+            f"object, not a scale, a blur or an absence"
+            for k, a, b, body in blocks(text) if (hit := kept_scope(body))]
+
+
+def l27_walk(text, facts):
+    return [f"ADVISORY L27 WALK [Shot {k}]: {why}"
+            for k, a, b, body in blocks(text) if (why := walk_advice(body, bool(WIDE_FRAMING.match(body))))]
+
+
+ADVISORIES = (l24_kept_edge, l25_reposition, l26_kept_scope, l27_walk)
+
+
+def advise(text: str, facts: dict | None = None) -> list[str]:
+    """Every advisory of L24-L27: printed beside the card, never a refusal."""
+    return [note for rule in ADVISORIES for note in rule(text, facts or {})]
 
 
 # ---- 3.16  the whole prompt ------------------------------------------------

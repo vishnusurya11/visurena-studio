@@ -57,7 +57,7 @@ DIRECTIONS = re.compile(
     r"north|south|windows?|doorway)\b"
     r"|\b(?:low|level|raking|slanting|sidelong|side-?lit)\b"
     r"|\b(?:behind|ahead)\b|\bdown the \w+\b"
-    r"|\bthrough (?:the |a )?(?:\w+ )?(?:windows?|doorway|shutters?|blinds?|glass)\b", re.I)
+    r"|\bthrough (?:the |a )?(?:\w+ ){0,2}(?:windows?|doorway|shutters?|blinds?|glass)\b", re.I)
 """A direction that throws shadow INTO the frame.  "The drawer obeys
 light-direction words" (report, cause 2): a low or side source, or light
 coming from a named edge, is what puts a black in the picture."""
@@ -134,14 +134,174 @@ def light() -> str:
     return _light
 
 
-def stills() -> str:
-    """The style line for a DRAWN sheet or board."""
-    return STILLS.format(where=_where, light=_light)
+def stills(setup=None) -> str:
+    """The style line for a DRAWN sheet or board; with a setup, under ITS light."""
+    return STILLS.format(where=_where, light=light_for(setup))
 
 
-def live() -> str:
-    """The style line for a RENDERED take."""
-    return LIVE.format(where=_where, light=_light)
+def live(setup=None) -> str:
+    """The style line for a RENDERED take; with a setup, under ITS light."""
+    return LIVE.format(where=_where, light=light_for(setup))
+
+
+# ---- the setup's own light ----------------------------------------------------------
+#
+# MEASURED, episode 10 (dq10/C.md §5, J.md §6): the episode `light` -- "low side
+# sun, deep black shadow" -- reached 8/8 sheets and 30/30 take blocks INCLUDING
+# the moon, lamp and candle setups.  It cost nothing there because every
+# `described` names its own source and the drawer weighted it; it is the exact
+# configuration that failed on ep08 ("1881 London, gaslight-amber" over a noon
+# desert, cause #1) when the setup was weaker.  So the line takes the setup's
+# own source when the setup names one, in the words the style wall leaves.
+
+SOURCES = re.compile(
+    r"\b(?:lamps?|lamplight|gaslight|gas|candles?|candlelight|fire|firelight|hearth|coals?|embers?|"
+    r"grate|lanterns?|torch(?:es)?|stove|forge|windows?|skylight|sun|sunlight|moon|moonlight|"
+    r"daylight|flame)\b", re.I)
+"""The noun the light line is built on: a practical or a sky source.  `light`
+is not one -- "the light comes from the left window" is the window's clause."""
+
+COMPOUNDS = ("bracket", "jet", "lamp", "flame", "light", "slab", "fire")
+"""A source noun's own second word: "gas bracket", "window light", "coal fire"."""
+
+SKIP_WORDS = ("a", "an", "the", "one", "two", "its", "his", "her", "of", "and", "in", "on", "at",
+              "left", "right", "near", "far", "only", "same")
+"""Never the source's adjective: a determiner, a side (the side is the
+direction's business) or a filler."""
+
+SIDE = re.compile(r"\b(?:from|at|to|on|along)\s+(?:the\s+|one\s+|(?:behind|above|below) and the\s+)?"
+                  r"(left|right)\b", re.I)
+"""A FRAME side the source stands at: "from the right", "behind the ridge to the
+right", "from above and the left".  `his right cheek` never matches: the side
+here follows a preposition of place, not a possessive."""
+
+LIGHT_ADJECTIVES = ("low", "level", "raking", "slanting", "sidelong")
+"""The DIRECTIONS words that are adjectives: they prefix a sky source ("low sun")."""
+
+FIXED_STYLE_WORDS = 6
+"""What `STILLS` / `LIVE` add around the place and the light."""
+
+
+def clauses(text: str) -> list[str]:
+    return [c for c in re.split(r"[,;:.]", text or "") if c.strip()]
+
+
+def is_lit(clause: str) -> bool:
+    """The rule `setup_faults` reads: a practical that is burning, or a sky
+    source with a direction."""
+    return bool((PRACTICALS.search(clause) and LIT.search(clause))
+                or (SKY.search(clause) and DIRECTIONS.search(clause)))
+
+
+def lit_clause(described: str) -> str:
+    """The first clause of a setup's `described` that names its light."""
+    return next((c for c in clauses(described) if is_lit(c)), "")
+
+
+def source_of(clause: str) -> str:
+    """The source noun with one qualifying word: "oil lamp", "low moon",
+    "gas bracket", "candle"."""
+    hit = SOURCES.search(clause)
+    if not hit:
+        return ""
+    before = clause[:hit.start()].split()
+    after = clause[hit.end():].split()
+    noun = hit.group(0).lower()
+    if after and after[0].lower() in COMPOUNDS:
+        noun = f"{noun} {after[0].lower()}"
+    if before and before[-1].isalpha() and before[-1].lower() not in SKIP_WORDS:
+        return f"{before[-1].lower()} {noun}"
+    return noun
+
+
+def side_of(text: str) -> str:
+    hit = SIDE.search(text or "")
+    return hit.group(1).lower() if hit else ""
+
+
+def direction_of(clause: str, source: str = "") -> str:
+    """How the source's direction is said: a frame side first, else the
+    bearing or the opening the clause names, else -- for a SKY source only --
+    its adjective (`low sun`).  A practical has a place of its own, and "a low
+    fire burning in the hearth" is the fire's word, not the hearth's."""
+    if side := side_of(clause):
+        return f"from the {side}"
+    found = [m.group(0).lower() for m in DIRECTIONS.finditer(clause)]
+    for word in found:
+        if word in ("behind", "ahead"):
+            return f"from {word}"
+        if word not in LIGHT_ADJECTIVES:
+            return word
+    if found and SKY.search(source or ""):
+        return found[0]
+    return ""
+
+
+def black_of(text: str) -> str:
+    """The named black in `text`, two words where the text gives them ("black
+    shadows", "deep shadow"), else the first black word, else nothing."""
+    found = []
+    for hit in BLACKS.finditer(text or ""):
+        before, after = text[:hit.start()].split(), text[hit.end():].split()
+        word = hit.group(0).lower()
+        if after and BLACKS.fullmatch(after[0].strip(",.;")):
+            return f"{word} {after[0].strip(',.;').lower()}"
+        if before and before[-1].lower() in ("deep", "hard", "true", "soot"):
+            return f"{before[-1].lower()} {word}"
+        found.append(word)
+    return found[0] if found else ""
+
+
+def compose(source: str, direction: str, black: str) -> str:
+    """`<direction> <source>` for an adjective, `<source> <direction>` for a
+    bearing, then the black -- a direction and a black, the house rule.  A
+    source that is the direction's own noun ("windows" / "through the two
+    windows") is said once: the light through it."""
+    noun = source.split()[-1] if source else ""
+    if direction in LIGHT_ADJECTIVES:
+        head = source if source.startswith(direction) else f"{direction} {source}"
+    elif direction and re.search(rf"\b{re.escape(noun)}\b", direction):
+        head = f"light {direction}"
+    else:
+        head = f"{source} {direction}".strip()
+    return f"{head}, {black}" if black else head
+
+
+def shorter(phrase: str) -> str:
+    """The phrase without its adjective: "morning sun" -> "sun", "deep shadow"
+    -> "shadow".  A compound noun ("gas bracket") keeps both words."""
+    words = phrase.split()
+    if len(words) == 2 and words[1] not in COMPOUNDS:
+        return words[1]
+    return phrase
+
+
+def fit(source: str, direction: str, black: str, where: str) -> str:
+    """The phrase in the words the style wall leaves after the place: the
+    source's adjective goes first, then the black's; past that, nothing."""
+    budget = MAX_STYLE_WORDS - FIXED_STYLE_WORDS - len(where.split())
+    for src, blk in ((source, black), (shorter(source), black), (shorter(source), shorter(black))):
+        said = compose(src, direction, blk)
+        if len(said.split()) <= budget:
+            return said
+    return ""
+
+
+def light_for(setup) -> str:
+    """The setup's own light phrase -- its source, its direction and a black --
+    with the episode `light` as the fallback for a setup that names no source,
+    or whose phrase would fail the vocabulary or the style wall."""
+    described = getattr(setup, "described", "") or ""
+    clause = lit_clause(described)
+    source = source_of(clause)
+    if not source:
+        return _light
+    region = described[described.find(clause):]
+    black = black_of(region)
+    if len(black.split()) < 2:
+        black = black_of(_light) or black
+    phrase = fit(source, direction_of(clause, source), black, _where)
+    return phrase if phrase and not light_faults(phrase) else _light
 
 
 # ---- the validators -------------------------------------------------------------

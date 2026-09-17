@@ -89,7 +89,10 @@ def test_with_no_written_end_the_arrival_is_the_camera_move_completed():
     seg = dict(SEG, end_frame="")
     said = arrival_clause(seg)
     assert "By 00:04" in said
-    assert "pushing in a hand's breadth" in said
+    # the verb and its particle, and no more of the head: episode 10 carried the
+    # whole camera clause twice a block (dq10/J.md §5)
+    assert "the camera is pushing in through the last frame" in said
+    assert "hand's breadth" not in said
     # the empty phrase may TRAIL a real statement; it may not be the whole of it
     assert not said.startswith("By 00:04, with the action")
 
@@ -111,4 +114,4 @@ def test_a_written_end_never_replaces_the_camera():
     seg = dict(SEG, end_frame="Close on the open eyes alone, the brow holding the TOP edge.")
     said = arrival_clause(seg)
     assert "the open eyes alone" in said
-    assert "pushing in a hand's breadth through the last frame of the shot" in said
+    assert "the camera is pushing in through the last frame" in said

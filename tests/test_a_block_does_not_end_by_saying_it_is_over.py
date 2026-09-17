@@ -50,7 +50,9 @@ def test_the_arrival_says_the_action_reaches_the_last_frame():
 
 
 def test_the_camera_move_is_named_as_still_running():
-    assert "pushing in a hand's breadth" in arrival_clause(MOVING)
+    # the verb and its particle: the amount stays with the camera sentence
+    # (episode 10 said it twice a block, dq10/J.md §5)
+    assert "the camera is pushing in through the last frame" in arrival_clause(MOVING)
 
 
 def test_the_arrival_carries_no_stillness_word():

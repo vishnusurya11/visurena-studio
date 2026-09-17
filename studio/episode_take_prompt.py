@@ -18,8 +18,10 @@ from __future__ import annotations
 from studio import house_style
 from studio.episode_spec import Episode, Shot
 
-def style_line() -> str:
-    """The style line for this run, from `studio.house_style`.
+def style_line(setup=None) -> str:
+    """The style line for this run, from `studio.house_style`, under the
+    SETUP's own light when one is given (dq10/J.md §6 item 6: 16 of 34 ep10
+    blocks said "low side sun" over a moon, a lamp and a candle).
 
     This was a constant reading "1881 London". Episode 8 was drawn and
     rendered under it over an 1847 Utah desert, because `Episode.palette`
@@ -27,7 +29,7 @@ def style_line() -> str:
     13 of 13 sheet prompts and 28 of 28 take prompts carried the wrong
     place. The place is declared once per run now, in one module.
     """
-    return house_style.live()
+    return house_style.live(setup)
 LOCK = ("The camera keeps the distance, height and lens of <Picture 1> for the whole shot: "
         "nothing outside the panel's frame is revealed, no pull-back, no widening, no "
         "re-framing. Everyone and everything stays exactly as drawn in <Picture 1>.")
@@ -61,8 +63,8 @@ def timeline(shot: Shot) -> str:
     return " ".join(f"{position(i, len(rows))}, {clause}." for i, clause in enumerate(rows))
 
 
-def description(shot: Shot) -> str:
-    return (f"[Shot 1] {style_line()} Begin exactly from <Picture 1>: {shot.frame} {timeline(shot)} "
+def description(shot: Shot, setup=None) -> str:
+    return (f"[Shot 1] {style_line(setup)} Begin exactly from <Picture 1>: {shot.frame} {timeline(shot)} "
             f"In the final second every moving element comes to rest and the frame holds to "
             f"the cut. {LOCK} {RULES}")
 
@@ -71,11 +73,11 @@ SPEAK_RULES = ("One continuous shot, one camera idea, no cut, no morph. Realisti
                "hands. No captions, overlays or text.")
 
 
-def speaking(shot: Shot, speaker: str, text: str) -> str:
+def speaking(shot: Shot, speaker: str, text: str, setup=None) -> str:
     """The Start Frame body for a shot whose person speaks the line's own wav
     (measured: docs/analysis/research/episode-06-lipsync-h3.md §4)."""
     name = speaker.replace("_", " ").title()
-    return (f"[Shot 1] {style_line()} Begin exactly from <Picture 1>: {shot.frame} At the start of the "
+    return (f"[Shot 1] {style_line(setup)} Begin exactly from <Picture 1>: {shot.frame} At the start of the "
             f"shot {name} is silent for a quarter of a second, mouth closed. Then {name} (S1) "
             f"speaks to the person just off-screen, physically speaking with natural lip movement "
             f"on every syllable: <d>[English] {text}</d> {timeline(shot)} After the line "
@@ -83,17 +85,24 @@ def speaking(shot: Shot, speaker: str, text: str) -> str:
             f"{SPEAK_RULES}")
 
 
+def setup_of(episode, shot: Shot):
+    """The shot's own setup, when the episode carries one: its light is the
+    style line's light."""
+    return (getattr(episode, "setups", None) or {}).get(shot.setup) if episode else None
+
+
 def build(episode: Episode, shot: Shot) -> str:
     spoken = [l for l in (episode.lines_of(shot.index) if episode else []) if l.kind == "dialogue"]
+    setup = setup_of(episode, shot)
     if spoken:
         line = spoken[0]
         name = line.speaker.replace("_", " ").title()
         return (f"{ALIGNMENT}\n\n"
-                f"integrated_multimodal_description: {speaking(shot, line.speaker, line.text)}\n\n"
+                f"integrated_multimodal_description: {speaking(shot, line.speaker, line.text, setup)}\n\n"
                 f"overall_soundscape: {name}'s voice, close and dry, and the room's own tone; "
                 f"no other voice.\n\n"
                 f"non_diegetic_music: N/A")
     return (f"{ALIGNMENT}\n\n"
-            f"integrated_multimodal_description: {description(shot)}\n\n"
+            f"integrated_multimodal_description: {description(shot, setup)}\n\n"
             f"overall_soundscape: Room tone only; no spoken dialogue, no voice.\n\n"
             f"non_diegetic_music: N/A")

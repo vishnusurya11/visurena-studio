@@ -194,9 +194,11 @@ SEG = {"t": 0.0, "end": 5, "t_to": 5.0, "size": "wide", "crowd": "", "faces": []
 
 def test_a_layout_end_becomes_the_camera_arriving_with_one_noun_in_frame():
     said = ro.arrival_clause(SEG)
-    assert said == ("By 00:05 the camera is pushing in on the log house across the whole shot, travelling "
-                    "two long strides through the last frame of the shot, with the log house now in frame, "
-                    "and the action continues with it.")
+    # the move once, as its verb and particle (dq10/J.md §6 item 1): the head's
+    # "on the log house across the whole shot, travelling two long strides" is
+    # said by the camera sentence and not again here
+    assert said == ("By 00:05 the camera is pushing in through the last frame, with the log house now "
+                    "in frame, and the action continues with it.")
     assert "stands" not in said and "twice" not in said and ".," not in said
     assert ro.l21_arrival(f"detailed_description:\n[Shot 1] From 00:00 to 00:05. He walks on. {said}", {}) == []
 
@@ -426,8 +428,10 @@ def test_the_lint_facts_ask_for_the_crowd_only_where_the_builder_put_it():
     text = rebuilt([T03, T04], [{"index": 3, "t_start": 10.0, "seconds": 5.88},
                                 {"index": 4, "t_start": 15.88, "seconds": 7.29}],
                    {3: (10.2, 5.0), 4: (16.0, 6.5)}, 316, ["john_ferrier"])
-    # the wide's block is full (a 45-word frame), so the crowd went in as its first clause
+    # the crowd went into the wide's block (whole, now that the arrival no longer
+    # repeats the camera head); L10 asks for it there, not in the close, and not
+    # for a clause the builder never wrote
     life = {1: "two farm hands in shirtsleeves pitch cut wheat onto a waggon at the fence line"}
     assert ro.l10_life(text, {"life": life}) == []
     assert ro.l10_life(text, {"life": {2: life[1]}})
-    assert ro.l10_life(text, {"life": {1: life[1] + ", and a yoke of oxen stands in the shafts"}})
+    assert ro.l10_life(text, {"life": {1: life[1] + ", and a dog barks at the gate"}})
