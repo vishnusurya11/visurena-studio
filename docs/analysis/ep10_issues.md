@@ -120,7 +120,15 @@ His ep10 lines pass at 0.71–0.74 against a 0.70 floor; l27 needed the
 book-wide best reference (ep08, 0.815) after eight tries. A redesign of his
 cast voice from the ep08 line would lift the whole book.
 
-### 11. Small
+### 11. A pull-back on an insert overshoots
+Shot 2 (hand on the rifle stock) re-rendered as a pull-back read 0.54× and
+left its panel (off-board 0.65 HARD). A close of a face gives the model a
+scale to hold; an insert that fills the frame gives it none. `--attempts`
+kept the first render (a 1.72× push, PASS with the zoom advisory) — the
+best-of-N mechanism did its job.
+- Done: skill says an INSERT takes a pan or a tilt, not a pull-back.
+
+### 12. Small
 - A 220 MiB master cannot be sent to the owner's phone (30 MiB limit); a
   900 kbps `preview_iterN.mp4` was made by hand — `assemble` could write it.
 - The sheet reviewer's Q20 wide has no black floor (accepted, sunlit wide).

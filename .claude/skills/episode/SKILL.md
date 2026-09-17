@@ -729,7 +729,12 @@ in 1.51-1.62 gives the same verdicts.
 
 What to write instead, in the plan:
 - **A CLOSE takes a pull-back or a pan, never a push.** A pull-back of a
-  hand's breadth cannot end tighter than it began (ep10 shot 5).
+  hand's breadth cannot end tighter than it began (ep10 shot 5). **An INSERT
+  takes a pan or a tilt, not a pull-back**: the hand-on-the-rifle insert
+  pulled back to 0.54x and left its panel (off-board 0.65 HARD) -- there is
+  nothing to hold the scale to when the subject fills the frame. Its first
+  render, a 1.72x push with the zoom advisory, was the take that shipped,
+  by `--attempts` keeping the best of the two.
 - **Name what is KEPT, affirmatively, in a middle clause**: "both gate posts
   keep the frame edges and the log villa keeps its one chimney" held a house
   that had grown a second chimney on the first render. A reposition word
