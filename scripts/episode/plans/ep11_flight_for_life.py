@@ -482,7 +482,7 @@ LINES = [
     ("narration", "john_watson", "In his sitting-room sat two young men with their boots up: the sons of Elders Drebber and Stangerson.", 2),
     ("narration", "john_watson", "Stangerson had four wives, and Drebber seven, and each thought that settled it.", 3),
     ("dialogue", "john_ferrier", "This room has two ways out. The door, or the window.", 4),
-    ("narration", "john_watson", "They went with their hats in their hands, and the door banged behind them.", 6),
+    ("narration", "john_watson", "They went, and the door banged behind them.", 6),
     ("narration", "john_watson", "Next morning there was a paper pinned to his coverlet, printed in bold straggling letters.", 7),
     ("narration", "john_watson", "Twenty-nine days are given you for amendment, it said, and then a dash.", 8),
     ("narration", "john_watson", "At breakfast his daughter pointed at the ceiling: scrawled there with a burnt stick, twenty-eight.", 9),
