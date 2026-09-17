@@ -113,5 +113,16 @@ how the next plan is written; the rest are gates, tools or the clock.
 ### G. The skill (`.claude/skills/episode/SKILL.md`)
 Each owner above writes its paragraph. The plan-writing rules for ep11 in one place: a close takes a pull-back or a pan; an insert a pan or a tilt; head fraction is the size; no sun split on a face — name the shadow-caster; the lead speaks his own decision on his own face; the turn shot holds the protagonist; the last line lands within 6 s of the end; a name's first hearing carries its role; one batched retake round with a written reason.
 
+## Landed (2026-09-16, seven implementers, all test-first)
+- F: queue guard, retake `--why`/`--last`, per-condition norms, grid cuts, gap wall — `f412009`.
+- E: design-time voice gates, Ferrier recast (self 0.498 → 0.671, vs Young 0.847 → 0.701), length-scaled floors, episode-voice check on alternates, abrupt-end/rushed checks, crossfaded bed loops, short-tone refusal, Whisper on CPU, `mux_lag_s` — `4a…` series, `5b23361`.
+- B: G-STORY reported speech, turn holds the protagonist, `Episode.answer`, wordless tail ≤ 6 s, G-NAMES, caption ranking — `83f55d7`.
+- D: redraw adopts the house style, instant-before participle, ladder only in frame, strict retry needs an offender, alternate twins reported — `3af2774`.
+- C: `picture_gates` (G-SIZE hard; sunsplit / light-side / motion advisories), `light_for(setup)`, ten-word light sentence, arrival names the move once, L24–L27 — `2b358a2`; wired into `plan_gates` and the sheet line — `728fdaa`.
+- A1: drift scoped to aimed, wide churn wall 6.0, zoom per segment with exit cap, stride 1.6, live-row count, retake ledger — `663615c`.
+- A2: face-at-end (HARD), look (HARD / advisory), post-cut and pulse, identity recalibrated, `one_hue` floor — `ec6ed93`.
+- The skill carries every rule, per section — `1c5571c` … `15477ad`.
+- Open: `identity_gate.observe` (needs an embedding backend; YuNet gives boxes only); the wardrobe measurer (A′2); the scene-scoped wardrobe state (A′3); the parallel plan (F4); a Ferrier re-roll to clear Stangerson if the two ever share a scene.
+
 ## Cost of the day, for the record
 $1.45 of images (8 sheets, 4 panels, 1 title still, 2 cast cards); 5.0 h of stages of which ~1.5 h was retakes and their re-cuts and ~0.9 h authoring gaps between stages.
