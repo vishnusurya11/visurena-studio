@@ -229,7 +229,7 @@ S = [
     # 6
     ("farm_parlour_day", "medium", [], 0.5,
      "Medium of the open door from inside the room with the two young men going out through it, their backs to the camera, hats in their hands, the tall pale one ducking under the lintel and the bull-necked one a step behind, the black of the hall beyond them.",
-     "The camera pans right across the whole shot, travelling a finger's breadth; the door jambs keep the frame's centre and the sunlit log wall keeps the left edge; the two men go out one behind the other into the black hall; the pale one's hat comes off in his hand.",
+     "The camera pans right across the whole shot, travelling a finger's breadth; the door jambs keep the frame's centre and the sunlit log wall keeps the left edge; the pale one's hat comes off in his hand; the door leaf swings a hand's breadth toward the jamb behind them.",
      "at the window end of the room level with a standing man's chest, three long strides from the "
      "door, a 35mm lens. The window sun comes from the LEFT across the table and leaves the doorway "
      "black",
@@ -489,7 +489,7 @@ LINES = [
     ("narration", "john_watson", "Day by day the count came down, on his door and his gate, and no rider was Hope.", 10),
     ("narration", "john_watson", "The night the figure two went up, with every door bolted, he sank his head on the table.", 11),
     ("narration", "john_watson", "Then, in the silence, a scratching at a panel of the door; assassin, or the last day's number.", 12),
-    ("narration", "john_watson", "He drew the bolt and threw the door wide. Stars, the fence, the road. Then he looked down.", 13),
+    ("narration", "john_watson", "He drew the bolt and threw the door wide on nothing. Then he looked down.", 13),
     ("narration", "john_watson", "It writhed over the sill like a snake, sprang up, shut the door, and was Hope the hunter.", 14),
     ("dialogue", "jefferson_hope", "Food first. Nothing for two days.", 15),
     ("narration", "john_watson", "He ate like a starving man, and two thousand dollars in gold went into a bag.", 16),
@@ -510,7 +510,7 @@ BEDS = [
     {"from_shot": 2, "tone": "plain"},
     {"from_shot": 7, "tone": "grave"},
     {"from_shot": 12, "tone": "thrilling"},
-    {"from_shot": 16, "tone": "light"},
+    {"from_shot": 16, "tone": "plain"},
     {"from_shot": 20, "tone": "thrilling"},
     {"from_shot": 25, "tone": "uneasy"},
 ]
