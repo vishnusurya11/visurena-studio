@@ -1521,6 +1521,48 @@ refusals it found, so the next plan is written without them:
 - **The title card is animated on H3**: `run.py <book> <n> title -- --approved`
   needs the GPU; draw it after the takes, not while they render.
 
+## A WIDE GIVEN A PUSH OVERRUNS TOO (ep13, 2026-09-17)
+
+Closes and MCUs take pans by rule since ep11. Episode 13 measured the same
+fault on the other end of the ladder: T08, the wide of the cab in the rain,
+asked to "push in on the cab across the whole shot, travelling a hand's
+breadth", came back at **1.94x** and 0.46 off-board -- the one hard failure in
+28 takes. Rewritten as "pans right ... the gas lamp keeps the right third" it
+returned **100/100**. Episode 12's T21 and T23 (pushes at 1.74x and 1.60x) say
+the same more quietly.
+
+**So: a push is for an insert on a still object. Everything else pans**, and
+the pan clause names what keeps an edge. 27 of 28 ep13 takes passed first time
+-- the best first pass in the series -- because every close, MCU and medium was
+written as a pan from the start.
+
+## THE SHORT LINE THAT WILL NOT CLONE (ep13)
+
+Hope's turn line "Now, Enoch Drebber. Who am I?" (6 words) measured 0.46 then
+0.55 against his own voice, and two `--redo` rounds returned 0.55 again: a
+re-roll does not fix a line the speaker embedding cannot hear. His long lines
+in the same episode measured 0.82-0.86. **Lengthen the line** ("Now then, Enoch
+Drebber. Look at my face, and tell me who I am.") -- it passed at once. Watch
+the dialogue share when you do: the extra words pushed ep13 to 20.2 % and
+another line had to give two back, which then packed two shots into one take.
+
+## WHEN THE IMAGE API HAS NO CREDITS
+
+Measured 2026-09-17, mid-episode: `credit_balance_exhausted`. What still runs:
+lines, respot, timeline, plates, takes, take_dq, assemble, qc, publish (all
+local or free) and **`title.py --local`**, which draws the card on the owner's
+own model. What does not: the storyboard sheets (~$0.13 each) and the paid
+title still. An episode can be carried to "plan, cast, lines, plates done" and
+stopped there; say so in the ledger with the exact money it needs to finish.
+
+## The dry build is the cheapest reviewer
+
+`takes_r2v.py <book> <n> --prompts` builds every take prompt and now names the
+take and lists EVERY refusal at once. Two ep13 faults it caught before a second
+of GPU: a setup's CROWD line goes into every take of that setup and needs its
+own pace word, and "his head draws back" is not a body-scale verb to L4
+("pulls back" is; the list is `episode_ref_official.ACTS`).
+
 ## Known open items
 
 
