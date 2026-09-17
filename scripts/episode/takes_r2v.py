@@ -8,6 +8,8 @@ otherwise silence.
 
     uv run python scripts/episode/takes_r2v.py <codex_id> <episode>            # render
     uv run python scripts/episode/takes_r2v.py <codex_id> <episode> --prompts  # cards only
+    uv run python scripts/episode/takes_r2v.py <codex_id> <episode> --from-refs
+                          # no storyboard cell: the plate + the cast cards only (see FROM_REFS)
 
 Takes -> `shots_r2v/T<first>.mp4`; records in `shots_r2v/shots.json` carry
 `shots` (the run) so the cut and the run cards know the grouping.
@@ -141,6 +143,67 @@ def reference_list(book: Path, boards: Path, faces: list[str], setup: str,
     return refs
 
 
+FROM_REFS = False
+"""RENDER FROM THE REFERENCES ALONE: the plate and the cast cards, no cell.
+Turned on by `--from-refs`; OFF is the normal path and the default.
+
+WHY IT EXISTS.  On 2026-09-17 the paid image API that draws the storyboard
+sheets had no credits, so no episode can have its cells drawn.  Everything
+upstream of the sheets is free and already on disk: the plan, the location
+plates, the cast cards, the measured voice.  The experiment this switch runs is
+whether those alone carry a take -- the model shown WHO is in it and WHERE it
+is, and told the shot in words.
+
+WHAT IT CHANGES, and nothing else: the reference list is the cast sheets and the
+plate; no cell is staged, none is pinned, no END cell is drawn on, and the strip
+is not composed (it opens every cell, and there are none).  Audio, frames,
+seconds, the seed and every other record field are built exactly as they are on
+the normal path.
+
+AND THE PLATE IS ALWAYS STAGED here -- see `refs_from_cards`."""
+
+
+def refs_from_cards(book: Path, boards: Path, faces: list[str], setup: str,
+                    state: str = "") -> list[Path]:
+    """FROM_REFS: this take's cast sheets, then its plate.  ALWAYS its plate.
+
+    `places_the_plate` is not consulted, and that is deliberate.  Its rule -- a
+    take of nothing but tight cells does not get the plate -- answers a fault
+    that NEEDS cells to happen: the plate leaked into episode 2's closes because
+    it was the only WHOLE picture beside a close-up cell (13 of 14 foreign
+    frames).  With no cell staged at all there is no such competition, and
+    obeying the rule here would leave a close-only take with faces alone and an
+    insert take that declares no readable face with ZERO references -- which
+    `graph_for` cannot stage, since it reads `paths[0]` before it counts."""
+    refs = [sq.cast_sheet(book, who, setup, state) for who in faces]
+    return refs + [sq.plates_in(boards) / f"plate_{setup}.png"]
+
+
+def staged_facts(sizes: list[str], from_refs: bool) -> dict:
+    """What `episode_ref_official.build` is told about the pictures it may cite.
+
+    FROM_REFS states both: the plate IS staged, and no cell is.  The normal path
+    states only the plate and leaves `cells_staged` at the builder's own default,
+    so every episode already built is told exactly what it was told before."""
+    if from_refs:
+        return {"has_plate": True, "cells_staged": False}
+    return {"has_plate": sq.places_the_plate(sizes)}
+
+
+def mode_said(from_refs: bool) -> str:
+    """The card's own account of what was staged.  A record that claims a cell it
+    never staged is the artefact a later reader measures the render against."""
+    if from_refs:
+        return ("reference-to-video from the references alone (--from-refs): a cast sheet for every "
+                "face the take shows + the location plate, always; no storyboard cell, nothing "
+                "pinned; the dialogue wavs at their offsets anchored at frame 0")
+    return ("reference-to-video: a cast sheet for every face the take shows + the plate as a "
+            "DEFINITION when the take has a wide cell to place it against + one <Picture N> per "
+            "pinned cell + the END cells + the take's own storyboard strip as a weak_reference; "
+            "each cell pinned once at its start frame; the dialogue wavs at their offsets "
+            "anchored at frame 0")
+
+
 def sheet_of(episode: Episode, shot) -> str:
     groups = board.chunks([s for s in episode.shots if s.setup == shot.setup])
     return next(f"board_{shot.setup}_{k}" for k, group in enumerate(groups) if shot in group)
@@ -187,17 +250,53 @@ def composite(lines: list[tuple[Path, float]], seconds: float, out: Path) -> Pat
     return out
 
 
+def cell_anchors(shots: list, take: dict) -> list[tuple[str, int]]:
+    """Every segment's cell, pinned ONCE at its own start frame within the take."""
+    by = {s["index"]: s for s in take["placed"]}
+    anchors = []
+    for s in shots:
+        t0 = by[s.index]["t_start"] - take["t_start"]
+        anchors.append((sq.cell_name(s.index, 0), on_grid(round(t0 * FPS))))
+        for k, cut in enumerate(s.cuts, start=1):
+            anchors.append((sq.cell_name(s.index, k), on_grid(round((t0 + cut.at_s) * FPS))))
+    return anchors
+
+
+def refuse_missing_cells(cells: Path, anchors: list[tuple[str, int]], index: int) -> None:
+    """A pin needs its picture: refuse before the GPU, naming the step that draws it."""
+    for name, _ in anchors:
+        if not (Path(cells) / name).exists():
+            raise SystemExit(f"take {index:02d}: sequence cell {name} missing: run seq_boards.py first")
+
+
+def refuse_double_pins(anchors: list[tuple[str, int]], index: int) -> None:
+    """MEASURED 2026-09-11 (task force, 71 segments): any end pin -- the start cell
+    again or a drawn END cell -- is reached within ~1 s and then HELD (65 % / 59 %
+    frozen vs 30 % start-only).  A pin is a soft conditioning row at its time, so
+    two pins on one cell say "nothing changes".  Every cell is pinned ONCE, at its
+    start; the next start pin closes the segment."""
+    if len({n for n, _ in anchors}) != len(anchors):
+        raise SystemExit(f"take {index:02d}: a cell is pinned twice: {anchors}")
+
+
 def card(book: Path, episode: Episode, number: int, take: dict, measured: dict) -> dict:
     shots = [episode.shot(i) for i in take["shots"]]
     first = shots[0]
     boards = episode_home.boards_dir(book, number)
     faces = faces_of(shots, sorted(physicals(book)))
-    sheet = reference_strip(boards, episode, shots)
     segs = [(s.index, k) for s in shots for k in range(0, len(s.cuts) + 1)]
     sizes = [s.size for s in shots] + [c.size for s in shots for c in s.cuts]
-    ends = end_cells(sq.cells_in(boards), segs, seg_sizes(shots), seg_motions(shots))
-    refs = reference_list(book, boards, faces, first.setup, segs, ends, sheet,
-                          episode.setups[first.setup].state, sizes)
+    state = episode.setups[first.setup].state
+    if FROM_REFS:
+        ends, anchors = [], []
+        refs = refs_from_cards(book, boards, faces, first.setup, state)
+    else:
+        sheet = reference_strip(boards, episode, shots)
+        ends = end_cells(sq.cells_in(boards), segs, seg_sizes(shots), seg_motions(shots))
+        refs = reference_list(book, boards, faces, first.setup, segs, ends, sheet, state, sizes)
+        anchors = cell_anchors(shots, take)
+        refuse_missing_cells(sq.cells_in(boards), anchors, first.index)
+        refuse_double_pins(anchors, first.index)
     lines = [l for l in episode.lines if l.shot in take["shots"]]
     at = {l.index: (measured[l.index]["at"], measured[l.index]["seconds"]) for l in lines}
     spoken = [l for l in lines if l.kind == "dialogue"]
@@ -206,33 +305,13 @@ def card(book: Path, episode: Episode, number: int, take: dict, measured: dict) 
     # "lips remain closed" sentence; narration is laid on the master, never in the take.
     voice = [(book / measured[l.index]["rel_path"], round(measured[l.index]["at"] - take["t_start"], 3))
              for l in spoken]
-    by = {s["index"]: s for s in take["placed"]}
-    anchors = []
-    for s in shots:
-        t0 = by[s.index]["t_start"] - take["t_start"]
-        anchors.append((sq.cell_name(s.index, 0), on_grid(round(t0 * FPS))))
-        for k, cut in enumerate(s.cuts, start=1):
-            anchors.append((sq.cell_name(s.index, k), on_grid(round((t0 + cut.at_s) * FPS))))
-    for name, _ in anchors:
-        if not (sq.cells_in(boards) / name).exists():
-            raise SystemExit(f"take {first.index:02d}: sequence cell {name} missing: run seq_boards.py first")
-    # MEASURED 2026-09-11 (task force, 71 segments): any end pin, the start cell again or a drawn END
-    # cell, is reached within ~1 s and then HELD (65 % / 59 % frozen vs 30 % start-only).  A pin is a
-    # soft conditioning row at its time, so two pins say "nothing changes".  Every cell is pinned ONCE,
-    # at its start; the next start pin closes the segment; END cells stay in the strip and the prompt.
-    if len({n for n, _ in anchors}) != len(anchors):
-        raise SystemExit(f"take {first.index:02d}: a cell is pinned twice: {anchors}")
     setup = episode.setups[first.setup]
     prompt = ro.build(shots, take["placed"], lines, at, take["frames"], faces, physicals(book),
                       setup.described, NARRATOR, ends=end_numbers(segs, ends), setup=setup,
-                      refs=len(refs), fps=FPS, has_plate=sq.places_the_plate(sizes))
+                      refs=len(refs), fps=FPS, **staged_facts(sizes, FROM_REFS))
     return {"index": first.index, "shots": take["shots"], "section": first.section, "setup": first.setup,
             "lane": "dialogue" if spoken else "narration", "workflow": BASE + " + anchors",
-            "model": "MiniMax-H3 ref2va + Ref2V 8-step LoRA", "mode": "reference-to-video: a cast sheet for "
-            "every face the take shows + the plate as a DEFINITION when the take has a wide cell to place it "
-            "against + one <Picture N> per pinned cell + the "
-            "END cells + the take's own storyboard strip as a weak_reference; each cell pinned once at its "
-            "start frame; the dialogue wavs at their offsets anchored at frame 0",
+            "model": "MiniMax-H3 ref2va + Ref2V 8-step LoRA", "mode": mode_said(FROM_REFS),
             "refs": [p.name for p in refs], "faces": faces, "ref_image_size": REF_IMAGE_SIZE,
             "anchors": anchors, "audio": [(p.name, a) for p, a in voice] or "silence",
             "width": W, "height": H, "fps": FPS, "placed_seconds": take["seconds"], "frames": take["frames"],
@@ -608,23 +687,32 @@ def mark_retake(c: dict, tries: int, why: str) -> None:
     c["retake_why"] = why
 
 
+def refuse_stale_cells(boards: Path) -> None:
+    """NO CELL FROM AN OLDER NUMBERING.  A cell is named by shot index, so a plan
+    that gains or loses a shot re-points every name after it at a different
+    picture.  Episode 8 gained five and three takes were then aimed at other
+    shots' END panels -- which reads, in the DQ, exactly like a renderer that
+    could not reach its mark.  Free to check, and it runs before the first GPU
+    second: the cost of being wrong is a whole episode of takes.
+
+    FROM_REFS stages no cell at all, so no cell on disk -- current or stale --
+    can reach the render, and an old one is not a reason to refuse the run."""
+    if FROM_REFS:
+        return
+    if left := sq.stale_cells(boards):
+        raise SystemExit(
+            "these cells belong to an older numbering of the plan; no sheet drawn for "
+            "the current one claims them:\n  " + "\n  ".join(left)
+            + "\nRedraw the boards, or move them out of boards/cells/ first.")
+
+
 def main(book_id: str, number: int, retake: list[int] | None = None, approved: bool = False,
          why: str = "") -> None:
     """Render every take that has no record yet; `retake` re-renders those
     indices with a fresh seed (the failed file is kept as T<NN>_failN.mp4)
     and `why` -- the reason the round was ordered -- goes into each record."""
     book, episode = opened(book_id, number)
-    # NO CELL FROM AN OLDER NUMBERING.  A cell is named by shot index, so a plan
-    # that gains or loses a shot re-points every name after it at a different
-    # picture.  Episode 8 gained five and three takes were then aimed at other
-    # shots' END panels -- which reads, in the DQ, exactly like a renderer that
-    # could not reach its mark.  Free to check, and it has to be here: the cost
-    # of being wrong is a whole episode of takes.
-    if left := sq.stale_cells(episode_home.boards_dir(book, number)):
-        raise SystemExit(
-            "these cells belong to an older numbering of the plan; no sheet drawn for "
-            "the current one claims them:\n  " + "\n  ".join(left)
-            + "\nRedraw the boards, or move them out of boards/cells/ first.")
+    refuse_stale_cells(episode_home.boards_dir(book, number))
     take_dir = episode_home.takes_dir(book, number, "r2v")
     sheet = take_dir / "shots.json"
     records = {r["index"]: r for r in episode_home.read_json(sheet)} if sheet.exists() else {}
@@ -679,8 +767,15 @@ def _set_no_ends(argv: list[str]) -> None:
     NO_ENDS = "--ends" not in argv
 
 
+def _set_from_refs(argv: list[str]) -> None:
+    """`--from-refs` is the only way into the no-cell mode: see `FROM_REFS`."""
+    global FROM_REFS
+    FROM_REFS = "--from-refs" in argv
+
+
 if __name__ == "__main__":
     _set_no_ends(sys.argv)
+    _set_from_refs(sys.argv)
     number = int(sys.argv[2]) if len(sys.argv) > 2 and sys.argv[2].isdigit() else 1
     retake, why = retake_list(sys.argv), retake_why(sys.argv)
     if refused := retake_refusal(retake, why, "--last" in sys.argv):

@@ -23,6 +23,14 @@ camera numbers, the identity gate while the face model is absent
 others: `coherence off-board 0.62 HARD | last-vs-cell 0.08 HARD | cut 32.7 HARD
 | churn 10.7 adv`.
 
+A TAKE WITH NO STORYBOARD CELL (`takes_r2v --from-refs`: the location plate and
+the cast cards only) is judged on everything that reads the frames -- the
+freeze, the churn, the unprompted cut, the camera, the picture rows, the lips --
+and the five rows that are a comparison to a cell print `not measured (no cell)`
+and fail nothing.  The printed row's "(N of 16 rows live)" is what says how much
+of the ladder the score speaks for -- five rows fewer on a cell-less take, and a
+100/100 there is a statement about the frames alone.
+
 With `--attempts` every `T<NN>*.mp4` on disk is judged, the best by
 (passed, score) is kept as `T<NN>.mp4` and the file it displaces becomes the
 next `T<NN>_failN.mp4` -- which retires the hand-renaming that left
@@ -283,7 +291,10 @@ def record(best, attempts: list, prior: dict | None = None) -> dict:
     out = tv.to_json(best) | {"attempts": every, "budget_spent": len(every) > tv.RETAKE_BUDGET and not best.passed}
     out["foreign_samples"] = out.pop("foreign", [])
     out["foreign"] = sum(bool(f.get("foreign")) for f in out["foreign_samples"])
-    out["off_beat"] = sum(1 for s in out["segments"] if not s["landed"])
+    # `landed is False`, not `not landed`: a segment of a take with no cell was
+    # never read against a pin and carries None, and `not None` is True -- the
+    # run card would have called every segment of episode 14 off-beat.
+    out["off_beat"] = sum(1 for s in out["segments"] if s["landed"] is False)
     return out
 
 
