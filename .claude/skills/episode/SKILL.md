@@ -981,6 +981,19 @@ What they were, because they are the classes that recur:
 - **L14 LENGTH, 150-240 words a block.** Every clause you add to fix the rules
   above pushes toward the cap; budget for it.
 
+### A PLATE FILLS ITS FRAME (measured 2026-09-16, ep11)
+
+The local plate drawer pads a wide picture into the square canvas with flat
+white bars top and bottom -- ep11's parlour at night, on two seeds running --
+and `frames.py` accepted both; the bars would have been the sheet's
+reference. `studio/plate_gate.letterboxed` reads flat bands at both edges
+(each >= 4 % of the height), `frames.plate_rolled` draws again on the next
+seed up to three times and keeps the rejected rolls in `plates/rejected/`,
+and the third seed filled the frame. Look at the plates before the sheets
+anyway: the same run mirrored the canyon (the crag on the right where the
+geometry says LEFT), which no gate reads -- a plate that contradicts the
+GEOMETRY block is set aside by hand and redrawn.
+
 ### THE PLATE IS NOT AN UNCONDITIONAL REFERENCE (measured 2026-09-12, ep02)
 
 Episode 2's top fault by count: **13 of its 14 foreign frames were the take's
