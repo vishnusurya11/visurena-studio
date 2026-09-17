@@ -176,6 +176,18 @@ readable face (close / medium_close); 5-20 % dialogue words; <= 2 lines a
 shot; sub-shots >= 2.5 s apart on narration shots only; route positions
 never go backwards within a setup; up to SIX setups.
 
+Two free gates learned on episode 11 (2026-09-16), both faults the GPU used
+to find first: **G-SYNC** -- a dialogue line is the FIRST line on its shot,
+because every line is laid at the shot's start + HANDLE and the dialogue wav
+is anchored in its take at that offset, so a narration line ahead of it made
+`timeline.py` refuse after a 23-minute lines run; and **G-RATE** (advisory,
+`plan_gates.advisories(..., rate=series_rate(book, n))`) -- the contract
+projects at 3.0 words a second and this narrator measures 2.68, so a plan
+that projects 168 s places at 185; the advisory re-projects at the book's own
+measured rate and says "cut lines now" before anything renders. Cut AFTER
+the turn when you cut for time: words before it are what keep the turn past
+50 %.
+
 **`Episode.aspect` IS THE DELIVERY SHAPE, AND THE PLAN IS THE ONLY PLACE IT IS
 WRITTEN** (`studio/canvas.py`, added 2026-09-12 when the owner asked for 1:1).
 `"9:16"` renders 768x1344 and draws 2048x3072 sheets; `"1:1"` renders 768x768

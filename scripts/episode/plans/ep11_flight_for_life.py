@@ -510,7 +510,7 @@ LINES = [
     ("narration", "john_watson", "On the morning after the Prophet's visit, John Ferrier rode into the city with a letter for Nevada.", 0),
     ("narration", "john_watson", "He came home to find two strange horses hitched to his own gate posts.", 1),
     ("narration", "john_watson", "In his sitting-room sat two young men with their boots up: the sons of Elders Drebber and Stangerson.", 2),
-    ("narration", "john_watson", "Stangerson had four wives, and Drebber seven, and each thought that settled it.", 4),
+    ("narration", "john_watson", "Stangerson had four wives, and Drebber seven, and each thought that settled it.", 3),
     ("dialogue", "john_ferrier", "This room has two ways out. The door, or the window.", 4),
     ("dialogue", "john_ferrier", "Come back when my daughter sends for you.", 5),
     ("narration", "john_watson", "They went with their hats in their hands, and the door banged behind them.", 6),
@@ -522,20 +522,19 @@ LINES = [
     ("narration", "john_watson", "His doors and windows were secured every night, and his servants slept in the outhouse.", 11),
     ("narration", "john_watson", "Then, in the silence, a scratching at a panel of the door; assassin, or the last day's number.", 12),
     ("narration", "john_watson", "He drew the bolt and threw the door wide. Stars, the fence, the road. Then he looked down.", 13),
-    ("narration", "john_watson", "A man lay flat on his face across the threshold, and for a breath Ferrier thought him dead.", 14),
-    ("narration", "john_watson", "It writhed over the sill like a snake, sprang up, shut the door, and was Hope the hunter.", 15),
+    ("narration", "john_watson", "For a breath Ferrier thought the man at his feet was dead.", 14),
+    ("narration", "john_watson", "It writhed over the sill like a snake, sprang up, shut the door, and was Hope the hunter.", 14),
     ("dialogue", "jefferson_hope", "Food first. Nothing for two days.", 15),
     ("narration", "john_watson", "He ate like a starving man, and two thousand dollars in gold went into a bag.", 16),
-    ("dialogue", "jefferson_hope", "The house is watched on every side. So I came in on my belly.", 17),
-    ("dialogue", "jefferson_hope", "Tomorrow is your last day. We ride tonight, or you are lost.", 18),
+    ("dialogue", "jefferson_hope", "The house is watched. So I came in on my belly.", 17),
+    ("dialogue", "jefferson_hope", "Tomorrow is your last day. We ride tonight.", 18),
     ("dialogue", "john_ferrier", "Then we ride tonight. Every acre of it can stay.", 19),
-    ("narration", "john_watson", "The lights went out, and one by one they passed through the side window into the garden.", 20),
     ("narration", "john_watson", "At the gap in the hedge, Hope dragged them down. An owl hooted, a few yards off.", 21),
     ("narration", "john_watson", "Nine to seven, said a voice. Seven to five, said another; and two shadows went their ways.", 21),
     ("narration", "john_watson", "The horses waited in the Eagle Canyon; high in the pass, a voice rang out above them.", 22),
     ("dialogue", "unnamed_sentinel", "Who goes there? Nine from seven.", 23),
     ("dialogue", "jefferson_hope", "Travellers for Nevada. Seven from five.", 24),
-    ("dialogue", "unnamed_sentinel", "Pass, and the Lord go with you.", 25),
+    ("dialogue", "unnamed_sentinel", "Pass on, then, and the Lord go with you.", 25),
     # shot 26: silent -- the trot, the watcher small behind them
 ]
 
@@ -568,7 +567,7 @@ def build() -> dict:
              for k, (kind, who, text, shot) in enumerate(LINES)]
     return dict(number=11, title="A Flight for Life",
                 question="Tonight, can John Ferrier get his daughter out of Utah?",
-                aspect="1:1", where=WHERE, light=LIGHT, protagonist="john_ferrier", answer="line 28",
+                aspect="1:1", where=WHERE, light=LIGHT, protagonist="john_ferrier", answer="line 27",
                 beds=BEDS, setups=SETUPS, shots=shots, lines=lines)
 
 
