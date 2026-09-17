@@ -120,3 +120,11 @@ def test_a_reversal_on_a_near_still_take_is_noise_not_an_advisory():
     assert tz.row({"ratio": 1.05, "measured": True, "monotonic": False}, HAND).ok
     g = tz.row({"ratio": 1.45, "measured": True, "monotonic": False}, HAND)
     assert not g.ok and not g.hard
+
+
+
+def test_a_pan_or_a_tilt_is_read_off_the_motion_head():
+    assert tz.is_pan("The camera pans right across the whole shot, travelling a finger's breadth; his hand lifts.")
+    assert tz.is_pan("The camera tilts down across the whole shot, travelling a finger's breadth; the boot comes down.")
+    assert not tz.is_pan("The camera pushes in on the gate across the whole shot, travelling a hand's breadth; the horse tosses its head.")
+    assert not tz.is_pan("")

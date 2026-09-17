@@ -516,3 +516,12 @@ def row(z: dict, planned: str | list[str]):
     plans = (plans or [""]) + [(plans or [""])[-1]] * len(segs)
     rows = [segment_row(s, p, k, len(segs)) for k, (s, p) in enumerate(zip(segs, plans))]
     return max(rows, key=lambda g: (g.penalty, not g.ok))
+
+
+
+def is_pan(motion) -> bool:
+    """True when the motion's head clause is a pan or a tilt (the camera reveals
+    picture beyond the cell by design, so off-board gets its wider wall)."""
+    head = (motion[0] if isinstance(motion, (list, tuple)) and motion else motion) or ""
+    head = str(head).split(";")[0].lower()
+    return bool(re.search(r"\bcamera (?:pans|tilts)\b", head))

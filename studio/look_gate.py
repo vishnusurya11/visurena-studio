@@ -21,8 +21,12 @@ from pathlib import Path
 
 import numpy as np
 
-P5_FLOOR = 15.0
-BLACK_SHARE = 0.10
+P5_FLOOR = 20.0
+BLACK_SHARE = 0.08
+"""MEASURED on episode 11 (2026-09-17): the sunlit gate wide T00 read p5 19 / near-black
+0.09-0.10 on two seeds with its post shadows black in the picture, against ep10's one
+print T20 at 43 / 0.01 and the ep10 keep T03 at 16.6 / 0.12.  20 and 0.08 keep the
+print and pass the shadowed day wide; the margin is a stop either side."""
 NEAR_BLACK = 25.0
 """A picture has NO BLACK FLOOR when its 5th-percentile Rec.709 luma is above
 P5_FLOOR and fewer than BLACK_SHARE of its pixels are under NEAR_BLACK.  Both,

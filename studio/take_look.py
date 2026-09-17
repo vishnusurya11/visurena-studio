@@ -104,9 +104,14 @@ def lost_black(m: dict) -> str:
     return ", ".join(out)
 
 
+LEVEL_P5 = 15.0
+"""The level advisory's own lift: ep09's class sits at p5 17.8 / mean 95, under the
+20 that fails a day wide for having no floor at all (look_gate.P5_FLOOR)."""
+
+
 def level(m: dict) -> str:
     """The advisory's words when the take sits a stop up with a lifted p5, else ''."""
-    if m["mean"] > LEVEL_MEAN and m["p5"] > lg.P5_FLOOR:
+    if m["mean"] > LEVEL_MEAN and m["p5"] > LEVEL_P5:
         return f"level mean {m['mean']:.0f} p5 {m['p5']:.0f}"
     return ""
 

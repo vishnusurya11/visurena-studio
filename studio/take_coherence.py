@@ -90,6 +90,13 @@ ON_BOARD = 0.50
 """frame_match cosine at or above which a frame IS a re-framing of the cell
 (the report's definition: 'off-board' = under 0.5 to any pinned cell)."""
 OFFBOARD_HARD, OFFBOARD_ADVISORY = 0.40, 0.20
+OFFBOARD_HARD_PAN = 0.60
+"""0.40 separates ep07 from ep09 (the calibration test below) for pushes and
+holds.  A PAN or TILT reveals picture beyond the cell by design and reads
+off-board at 0.43-0.52 on takes the reviewer kept (ep11 T03, T08, T20; T08 read
+0.06 as a push and 0.48 as a pan of the same shot), while the true re-stagings
+sat at 0.64-0.70 (ep11 T13, T06) and 0.65 (ep10 T02, a pull-back off its
+panel): a panning shot gets OFFBOARD_HARD_PAN.  Margin 0.04 below, 0.08 above."""
 LAST_HARD, LAST_ADVISORY = 0.20, 0.40
 CUT_HARD, CUT_ADVISORY = 30.0, 20.0
 PIN_TOL = 6
@@ -289,7 +296,7 @@ def last_row(last: float, exit: bool):
                 20.0 * max(0.0, LAST_ADVISORY - last) / LAST_ADVISORY)
 
 
-def rows(m: dict, size: str = "", exit: bool = False) -> list:
+def rows(m: dict, size: str = "", exit: bool = False, panned: bool = False) -> list:
     """The four verdict rows: off-board and cut are HARD, last-vs-cell HARD
     unless the plan sent the subject out of frame, churn HARD on a wide and
     advisory elsewhere.  `size` is the plan's size for the take's first shot."""
@@ -299,7 +306,7 @@ def rows(m: dict, size: str = "", exit: bool = False) -> list:
     share, cut = m["offboard_share"], m["hard_cut"]
     # Every penalty starts where its advisory band starts: a dolly on the board
     # reads 0.00-0.10 off-board and must cost nothing (test_score_is_honest).
-    return [Gate("coherence off-board", share, share <= OFFBOARD_ADVISORY, share > OFFBOARD_HARD, f"{share:.2f}",
+    return [Gate("coherence off-board", share, share <= OFFBOARD_ADVISORY, share > (OFFBOARD_HARD_PAN if panned else OFFBOARD_HARD), f"{share:.2f}",
                  50.0 * max(0.0, share - OFFBOARD_ADVISORY) / (1.0 - OFFBOARD_ADVISORY)),
             last_row(m["last_vs_cell"], exit),
             Gate("cut", cut, cut <= CUT_ADVISORY, cut > CUT_HARD, f"{cut:.1f}",

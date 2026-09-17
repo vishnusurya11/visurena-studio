@@ -150,7 +150,7 @@ def test_a_missing_pinned_cell_is_an_error_not_a_pass(tmp_path):
 # ---- the rows in the verdict --------------------------------------------------
 
 def test_the_constants_are_the_calibrated_ones():
-    assert (tc.OFFBOARD_HARD, tc.OFFBOARD_ADVISORY) == (0.40, 0.20)
+    assert (tc.OFFBOARD_HARD, tc.OFFBOARD_ADVISORY) == (0.40, 0.20)   # pushes and holds; a pan gets OFFBOARD_HARD_PAN 0.60
     assert (tc.LAST_HARD, tc.LAST_ADVISORY) == (0.20, 0.40)
     assert (tc.CUT_HARD, tc.CUT_ADVISORY, tc.PIN_TOL) == (30.0, 20.0, 6)
     assert tc.NONRIGID_ADVISORY == 7.0 and tc.NONRIGID_WIDE == 6.0 and tc.ON_BOARD == 0.50
@@ -256,3 +256,19 @@ def test_ep07_mostly_passes_and_ep09_mostly_fails():
         flagged[ep] = sum(map(churns, ms)) / len(ms)
     assert hard["ep07"] <= 0.30 and hard["ep09"] >= 2 * hard["ep07"]
     assert flagged["ep07"] <= 0.20 and flagged["ep09"] >= 2 * flagged["ep07"]
+
+
+
+def test_a_pan_gets_the_wider_off_board_wall():
+    """MEASURED on episode 11 (2026-09-17): T08 read off-board 0.06 as a push and
+    0.48 as a PAN of the same shot; the reviewer's kept pans T03 0.52 / T20 0.43
+    sat over the 0.40 wall while the re-stagings sat at 0.64-0.70 (T13) and 0.66
+    (T06).  A pan reveals picture beyond the cell by design."""
+    m = {"offboard_share": 0.50, "last_vs_cell": 0.50, "hard_cut": 3.0, "nonrigid": 2.0}
+    plain = {g.name: g for g in tc.rows(m)}
+    panned = {g.name: g for g in tc.rows(m, panned=True)}
+    assert plain["coherence off-board"].hard and not plain["coherence off-board"].ok
+    assert not panned["coherence off-board"].hard and not panned["coherence off-board"].ok
+    far = {g.name: g for g in tc.rows(dict(m, offboard_share=0.66), panned=True)}
+    assert far["coherence off-board"].hard
+    assert (tc.OFFBOARD_HARD, tc.OFFBOARD_HARD_PAN) == (0.40, 0.60)

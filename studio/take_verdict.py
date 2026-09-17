@@ -308,7 +308,8 @@ def gates(v: TakeVerdict, audio: dict | None, line_text: str, unplanned: list[fl
     # frames off-board; the rows and their calibration live in take_coherence.
     # A last segment whose subject was told to leave the frame has no last
     # frame to compare (ep10 T17).
-    out.extend(tc.rows(v.coherence, size, exit=tz.has_exit(motions[-1] if motions else "")))
+    out.extend(tc.rows(v.coherence, size, exit=tz.has_exit(motions[-1] if motions else ""),
+                       panned=tz.is_pan(motions[0] if motions else "")))
     # G-ZOOM: how far the picture actually travelled against the plan's reach
     # word.  ep10: seven of thirty takes ended a size tighter than planned and
     # every row above passed them; the wall and its calibration live in take_zoom.
