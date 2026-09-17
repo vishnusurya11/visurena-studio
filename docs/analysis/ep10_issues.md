@@ -35,12 +35,19 @@ sizes tighter than the plan; T05 twice ran "a hand's breadth" to an
 eyes-and-nose frame. Every gate passed them: coherence off-board, last-vs-cell
 and drift all judge resemblance, none judges scale. Words did not hold it
 ("comes to rest with the whole face inside the frame" — still nostrils).
-- Done: shot 5 is a pull-back (cannot end tighter than it began); a CPU
-  measurer `studio/take_zoom.py` (feature-match scale first→last frame) is
-  being built and calibrated on today's takes and their superseded renders.
-- Open: wire `take_zoom` into `take_dq` as a hard wall for "a hand's breadth /
-  a finger's breadth" pushes; write into the episode skill that a CLOSE takes
-  a pull-back or a pan, never a push.
+- Done: shot 5 is a pull-back (cannot end tighter than it began). A CPU
+  measurer `studio/take_zoom.py` (phase-correlated window lattice → RANSAC
+  similarity → subject-region scale first→last frame; `docs/calibration/
+  take_zoom.md`) separates the reviewer's groups: over-pushed ≥ 1.63, fine
+  ≤ 1.50, wall `OVER_PUSH = 1.55` (hand/finger), 2.0 (forearm), 2.5 (any).
+  Wired into `take_dq` as the `zoom` row after the coherence rows
+  (`tests/test_take_zoom_gate.py`); the episode skill now says a CLOSE takes a
+  pull-back or a pan, never a push, and how to order the clauses.
+- Open: the whole-frame read does NOT separate the groups (the room zooms
+  1.3× while the man is walked at the lens), so the wall is a fit to 14
+  labelled takes — recalibrate on ep11. Stride pushes T12 (1.98) and T33
+  (1.52) sit under their 2.0 wall; `REACH_WALLS["stride"]` is the one line
+  if a stride is to be held to a hand.
 
 ### 2. The coherence gate is blind to a background that re-draws itself
 T03's house grew a second chimney, a second window and a wider porch between

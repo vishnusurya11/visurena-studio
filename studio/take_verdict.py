@@ -24,7 +24,7 @@ from pathlib import Path
 import numpy as np
 from PIL import Image, ImageDraw
 
-from studio import cut_landing as cl, frame_match as fm, identity_gate, motion_gate, take_coherence as tc
+from studio import cut_landing as cl, frame_match as fm, identity_gate, motion_gate, take_coherence as tc, take_zoom as tz
 
 FPS = 24
 SHARE_HARD, SHARE_ADVISORY = 0.40, 0.20
@@ -91,6 +91,7 @@ class TakeVerdict:
     energy_q: list[float] = field(default_factory=list)
     foreign: list[dict] = field(default_factory=list)
     coherence: dict = field(default_factory=dict)
+    zoom: dict = field(default_factory=dict)
     score: float = 0.0
     passed: bool = False
 
@@ -239,7 +240,7 @@ def identity_gate_row(report: dict | None) -> Gate:
 
 
 def gates(v: TakeVerdict, audio: dict | None, line_text: str, unplanned: list[float],
-          identity: dict | None = None) -> list[Gate]:
+          identity: dict | None = None, motion: str = "") -> list[Gate]:
     """Every gate of the take, in the order the verdict line prints them."""
     out = frozen_gates(v)
     out.append(foreign_gate(v))
@@ -249,6 +250,10 @@ def gates(v: TakeVerdict, audio: dict | None, line_text: str, unplanned: list[fl
     # not the END frame only.  ep09 scored 28/28 at 100 with 62 % of its
     # frames off-board; the rows and their calibration live in take_coherence.
     out.extend(tc.rows(v.coherence))
+    # G-ZOOM: how far the picture actually travelled against the plan's reach
+    # word.  ep10: seven of thirty takes ended a size tighter than planned and
+    # every row above passed them; the wall and its calibration live in take_zoom.
+    out.append(tz.row(v.zoom, motion))
     out.append(lip_gate(v.lane, audio, line_text))
     out.append(identity_gate_row(identity))
     out.append(Gate("wardrobe", None, True, False, "not measured"))
@@ -397,7 +402,8 @@ def measure(video: Path, record: dict, cells: Path, seconds: float, attempt: int
                     [], segs, motion["frozen_spans"], [round(float(x), 1) for x in motion["bins"]],
                     sampled_foreign(per_frame), coherence(video, record, cells, seconds))
     identity = identity_gate.identity_dq(video, segs, record.get("faces", []), record.get("refs", []))
-    v.gates = gates(v, audio, line_text, unplanned_from(rows), identity)
+    v.zoom = tz.zoom(video, end_frame=tz.head_frame(anchors))
+    v.gates = gates(v, audio, line_text, unplanned_from(rows), identity, record.get("motion", ""))
     v.score, v.passed = score(v.gates)
     return v
 

@@ -174,7 +174,7 @@ def test_segments_fold_end_pins_and_pick_the_end_cell_as_target(tmp_path):
 def test_the_verdict_line_names_every_gate_in_order():
     v = verdict([seg()])
     assert [g.name for g in v.gates] == ["frozen-at-start", "frozen-share", "foreign", "cut-landing", "drift",
-                                         "coherence off-board", "last-vs-cell", "cut", "churn",
+                                         "coherence off-board", "last-vs-cell", "cut", "churn", "zoom",
                                          "lip-sync", "identity", "wardrobe"]
     assert v.line().startswith("T01 a0 PASS 100/100")
 

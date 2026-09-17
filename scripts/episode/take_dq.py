@@ -163,6 +163,15 @@ def segment_kinds(episode, anchors: list) -> dict[str, str]:
     return kinds
 
 
+def planned_motion(episode, rec: dict) -> str:
+    """The plan's motion for the take's first shot: the zoom row's reach word."""
+    first = (rec.get("shots") or [rec.get("index")])[0]
+    try:
+        return episode.shot(first).motion
+    except (StopIteration, KeyError, ValueError, IndexError):
+        return ""
+
+
 def line_text(episode, rec: dict) -> str:
     """The dialogue the take is supposed to say, for the word-error rate (G4.6)."""
     if rec.get("lane") != "dialogue":
@@ -246,6 +255,7 @@ def main(book_id: str, number: int, indices: list[int], attempts: bool = False) 
     for index in wanted(records, indices):
         rec = records[index]
         kinds, line = segment_kinds(episode, rec.get("anchors", [])), line_text(episode, rec)
+        rec["motion"] = planned_motion(episode, rec)
         files = episode_home.attempts_of(take_dir, index) if attempts else [book / rec["rel_path"]]
         judged = {f: measure_attempt(f, rec, index, cells, work, take_dir, kinds, line, k)
                   for k, f in enumerate(files)}

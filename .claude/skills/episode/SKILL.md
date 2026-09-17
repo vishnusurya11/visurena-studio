@@ -710,6 +710,40 @@ flatness, no drop, it trimmed >= 30 px off 10/30 first frames of ep09 and
 centre crop that cost 7 % on both axes (Q00_0 lost its snow peaks). They are
 one test now: `storyboard.strip_white_edges` asks `episode_gutter.band`.
 
+### THE PUSH HAS NO BRAKE: the zoom gate (measured 2026-09-16, ep10)
+
+Coherent is not the same as the planned size either. Episode 10 rendered
+seven of thirty takes a size or two tighter than the plan -- "a hand's
+breadth" on a close ran to an eyes-and-nose frame, twice -- and every row
+above passed them, because off-board, last-vs-cell and drift judge
+RESEMBLANCE and none judges SCALE. Words do not brake it: "comes to rest with
+the whole face, hairline to collar, inside the frame" still ended on nostrils.
+
+So `take_dq` has a ZOOM row (`studio/take_zoom.py`, calibration in
+`docs/calibration/take_zoom.md`): the subject-region scale from the first
+frame to the last, read on the head of a two-shot take, judged against the
+plan's own reach word. Over-pushed takes read >= 1.63, fine ones <= 1.50; the
+wall is `OVER_PUSH = 1.55` for a hand's or finger's breadth, 2.0 for a forearm,
+2.5 whatever was planned. A fit to fourteen labelled takes, not a law: any wall
+in 1.51-1.62 gives the same verdicts.
+
+What to write instead, in the plan:
+- **A CLOSE takes a pull-back or a pan, never a push.** A pull-back of a
+  hand's breadth cannot end tighter than it began (ep10 shot 5).
+- **Name what is KEPT, affirmatively, in a middle clause**: "both gate posts
+  keep the frame edges and the log villa keeps its one chimney" held a house
+  that had grown a second chimney on the first render. A reposition word
+  ("turns toward the door", "goes out through it") is obeyed literally -- the
+  man walked past the lens, the camera left the porch -- so a turn is "turns
+  his head, his shoulders following a hand's breadth", and a walk names what
+  slides past ("the fence posts behind him sliding to the right").
+- **Clause order the lints require**: the camera move FIRST (M2), the
+  kept-clauses in the MIDDLE, a MOVEMENT last (the "ends on a layout" lint
+  reads the final clause), and beats from the third clause on (M1). Three
+  rounds were spent learning that on ep10; spend none.
+- A blurred foreground body in a cell dissolves in the take (T15, twice):
+  a foreground figure is sharp and whole, or absent.
+
 ### DRY-BUILD EVERY TAKE PROMPT BEFORE YOU COMMIT THE GPU (2026-09-12)
 
 `takes_r2v.cards(book, episode, number)` builds every prompt and runs the LINT
@@ -944,12 +978,15 @@ including a panel and its own END panel. A failing sheet is one STRICT
 redraw. Guards hours of render.
 
 **G4 TAKE** (`take_dq.py`, `studio/motion_gate.py`, `cut_landing.py`,
-`take_verdict.py`, `identity_gate.py`): frozen-at-start over 1.0 s is a hard
-fail (the owner's "some takes start with a static image"); frozen share per
-segment kind; no foreign picture; the cut landing within [-4,+6] frames of
-its pin with no ping-pong; drift; lip sync and words heard on dialogue takes
-only (a narration take carries silence by design); identity against the cast
-sheet. One score, `--attempts` keeps the best automatically, budget 2
+`take_verdict.py`, `take_coherence.py`, `take_zoom.py`, `identity_gate.py`):
+frozen-at-start over 1.0 s is a hard fail (the owner's "some takes start with
+a static image"); frozen share per segment kind; no foreign picture; the cut
+landing within [-4,+6] frames of its pin with no ping-pong; drift; coherence
+over every frame (off-board share, last-vs-cell, unplanned cut, churn); zoom
+-- the subject's scale first frame to last against the plan's reach word;
+lip sync and words heard on dialogue takes only (a narration take carries
+silence by design); identity against the cast sheet -- NOT MEASURED on any
+episode yet: `identity_gate.observe` is unimplemented, the row is quiet. One score, `--attempts` keeps the best automatically, budget 2
 retakes, and a reseed is never the answer to a freeze.
 
 **G5 MASTER** (`studio/edit_gate.py`, `qc.py`): every segment of the master

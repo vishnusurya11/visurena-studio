@@ -180,7 +180,7 @@ S = [
     ("mountain_track_night", "insert", [], 0.6,
      "Insert on a bare brown hand closed on the stock of a long rifle across a saddle bow, the moon "
      "lying as one white line along the barrel, the horse's dark shoulder below.",
-     "The camera pushes in on the hand across the whole shot, travelling a hand's breadth; the "
+     "The camera pulls back from the hand across the whole shot, travelling a hand's breadth; the "
      "bare fingers close tighter on the stock; the horse's shoulder rises under the rifle as it "
      "breathes.",
      "beside the horse at the height of the saddle bow, an arm's length from the hand, a 90mm "
@@ -193,7 +193,7 @@ S = [
     # ---- the Prophet at the gate ----------------------------------------------
     ("farm_path_morning", "wide", [], 0.0,
      "Wide up the shingly path to the porch of the log villa on a June morning, the open gate in the near ground, the porch's black shadow half across the path, the sitting-room window a dark square beside the door.",
-"The camera pushes in on the porch across the whole shot, travelling a hand's breadth; both gate posts keep the frame edges and the log villa keeps its one chimney and one window; John Ferrier's bearded face comes up pale behind the dark glass of the sitting-room window; a curtain moves beside it.",
+"The camera pulls back from the porch across the whole shot, travelling a hand's breadth; both gate posts keep the frame edges and the log villa keeps its one chimney and one window; John Ferrier's bearded face comes up pale behind the dark glass of the sitting-room window; a curtain moves beside it.",
 "on the path just inside the gate at a standing man's eye, a 35mm lens. The low morning sun "
      "comes from the right and throws the porch's shadow toward the left",
      "The porch and the open door stand in the TOP CENTRE the height of a hand. The path runs from the bottom LEFT corner up to the porch step. The porch's black shadow lies across the LEFT half of the path, sunlit stubble fills the RIGHT half, and the gate's top bar crosses the BOTTOM edge.",
