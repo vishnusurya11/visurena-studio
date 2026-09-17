@@ -925,6 +925,9 @@ def name_map(refs: list[dict]) -> dict[str, str]:
         tokens = {name, plain.split()[-1].strip(".") if plain else ""}
         tokens |= {w.strip(".,") for w in plain.split() if len(w) > 4}
         tokens |= {a.lower().strip() for a in row.get("aka") or []}
+        # A POSSESSIVE IS THE BARE NAME.  MEASURED ep13: "a wife of Drebber's"
+        # claimed "drebber's" alone, so "Enoch Drebber's face" named HER.
+        tokens = {t.removesuffix("'s").removesuffix("’s") for t in tokens}
         for token in tokens:
             if len(token) > 3:
                 claims.setdefault(token, set()).add(who)
