@@ -67,6 +67,9 @@ SILENT = 18
 def shot(i: int, size: str) -> dict:
     faces = [DIALOGUE_AT[i]] if i in DIALOGUE_AT else (["sherlock_holmes"] if size in pg.CLOSE_SIZES else [])
     section = "hook" if i == 0 else "turn" if i == 12 else "button" if i == 19 else "setup"
+    if i == 12:
+        faces = ["sherlock_holmes"]  # the protagonist is in the frame of his own turn (ep10, B2)
+    turn = "alone -> seen" if i == 12 else ""
     motion = HEAD[size] + "; his hand comes up to his chin; his head turns toward the window."
     if i == 12:
         motion = HEAD[size] + "; Holmes catches Watson by the wrist; Watson's hand opens."
@@ -74,7 +77,7 @@ def shot(i: int, size: str) -> dict:
             "frame": f"{size.replace('_', ' ').title()} on Holmes at the mantel, the bottle-green "
                      f"velvet jacket open over his white shirt.",
             "motion": motion, "camera": "at the height of a seated man's eye, two strides inside the door",
-            "at_rest": AT_REST, "beat_s": 1.5 if i == SILENT else 0.0}
+            "at_rest": AT_REST, "beat_s": 1.5 if i == SILENT else 0.0, "turn": turn}
 
 
 def synthetic(**over) -> dict:
@@ -327,8 +330,12 @@ def test_no_silent_shot_fails():
 
 
 def test_story_regression_on_the_fixtures():
-    for ep in ("05", "07", "08"):
+    """ep08 is no longer G-STORY-clean: its line 27 ("They could come as believers, he said")
+    plays over Brigham Young's own face (shot 28), the ep10 fault two episodes early."""
+    for ep in ("05", "07"):
         assert of(pg.faults(load(ep)), "G-STORY") == [], ep
+    assert [f for f in of(pg.faults(load("08")), "G-STORY") if "make it dialogue" not in f] == []
+    assert any("line 27" in f and "brigham_young" in f for f in of(pg.faults(load("08")), "G-STORY"))
     ep09 = of(pg.faults(load("09")), "G-STORY")
     assert any("first dialogue" in f and "measured 0.6 against 0.25" in f for f in ep09)
     assert any("narration-only run" in f and "measured 92.2 against 75.0" in f for f in ep09)
@@ -367,3 +374,116 @@ def test_every_fault_names_its_gate_and_its_numbers():
     for f in pg.faults(load("09")):
         assert f.split(" ")[0] in ("G-FIRSTFRAME", "G-VARIETY", "G-MOVE", "G-STORY"), f
         assert ", measured " in f and " against " in f, f
+
+
+# ---- G-STORY after episode 10 (docs/analysis/ep10_dq_synthesis.md, section B) ----------
+
+def narrate(plan: dict, shot: int, text: str, faces: list[str] | None = None) -> Episode:
+    """The synthetic plan with one narration line rewritten, and its shot's faces set."""
+    for line in plan["lines"]:
+        if line["shot"] == shot:
+            line.update(kind="narration", speaker="john_watson", text=text)
+    if faces is not None:
+        plan["shots"][shot]["faces"] = faces
+    return Episode(**plan)
+
+
+def test_reported_speech_over_the_speakers_own_face_is_refused():
+    ep = narrate(synthetic(), 8, "The man would be desperate, he said, and it was as well to be ready.",
+                 faces=["sherlock_holmes"])
+    got = of(pg.faults(ep), "G-STORY")
+    assert any("line 8" in f and "sherlock_holmes's speech over his own face: make it dialogue" in f for f in got)
+
+
+def test_reported_speech_off_the_speakers_face_is_an_advisory():
+    ep = narrate(synthetic(), 8, "The man would be desperate, he said, and it was as well to be ready.", faces=[])
+    assert not any("make it dialogue" in f for f in pg.faults(ep))
+    assert any("line 8" in a and "reports he's speech" in a for a in pg.advisories(ep))
+
+
+def test_reported_speech_on_ep10():
+    """Lines 15 and 24 play over the speaker's face (15 over both men, either of whom is "he");
+    9, 11, 25 and 28 sit on face-less inserts and are advisories.  ep05's three "he said" lines
+    (8, 10, 21) are all on face-less shots: advisories, never faults."""
+    ep10 = load("10")
+    hard = sorted(int(f.split("line ")[1].split(":")[0]) for f in pg.faults(ep10) if "make it dialogue" in f)
+    assert hard == [15, 24]
+    assert any("line 15" in f and "brigham_young or john_ferrier's speech" in f for f in pg.faults(ep10))
+    soft = sorted(int(a.split("line ")[1].split(":")[0]) for a in pg.advisories(ep10) if "reports " in a)
+    assert soft == [9, 11, 25, 28]
+    assert not any("make it dialogue" in f for f in pg.faults(load("05")))
+    assert sorted(int(a.split("line ")[1].split(":")[0]) for a in pg.advisories(load("05")) if "reports " in a) == [8, 10, 21]
+
+
+def test_the_turn_shot_holds_the_protagonist_from_episode_ten():
+    """ep05's turn is Madame Sawyer's curtsey and ep07's a face-less knife on a pill, both judged
+    right, so the rule is an advisory below episode 10 and a refusal from the episode it was
+    measured on: a gate that does not refuse its own calibration positive is not the gate."""
+    ep10 = load("10")
+    assert any("turn shot 16: the protagonist john_ferrier is not in the frame of his own turn" in f
+               for f in pg.faults(ep10))
+    plan = synthetic(number=11)
+    plan["shots"][12]["faces"] = []
+    assert any("turn shot 12" in f and "not in the frame" in f for f in pg.faults(Episode(**plan)))
+    plan["number"] = 9
+    assert not any("not in the frame" in f for f in pg.faults(Episode(**plan)))
+    assert any("not in the frame" in a for a in pg.advisories(Episode(**plan)))
+    for ep in ("05", "07"):
+        assert not any("not in the frame" in f for f in pg.faults(load(ep))), ep
+        assert any("not in the frame" in a for a in pg.advisories(load(ep))), ep
+    assert pg.TURN_FACE_HARD_FROM == 10
+
+
+def test_a_turn_shot_with_no_turn_string_is_refused():
+    plan = synthetic()
+    plan["shots"][12]["turn"] = ""
+    plan["shots"][12]["faces"] = ["sherlock_holmes"]
+    assert any("turn shot 12" in f and "names no value" in f for f in pg.faults(Episode(**plan)))
+    plan["shots"][12]["turn"] = "alone -> seen"
+    assert not any("names no value" in f for f in pg.faults(Episode(**plan)))
+
+
+def test_a_first_hearing_in_the_series_with_no_role_is_a_names_advisory():
+    earlier = [line.text for ep in ("08", "09") for line in load(ep).lines]
+    got = [a for a in pg.name_advisories(load("10"), earlier) if a.startswith("G-NAMES ")]
+    assert any("line 3" in a and "'Jefferson Hope'" in a and "carries no role" in a for a in got)
+    assert not any("'Brigham Young'" in a or "'Young'" in a for a in got)
+    assert pg.name_advisories(load("10"), earlier + ["Jefferson Hope, the hunter."]) == [
+        a for a in got if "'Jefferson Hope'" not in a]
+
+
+def test_advisories_carry_names_only_when_given_the_earlier_lines():
+    assert not any(a.startswith("G-NAMES") for a in pg.advisories(load("10")))
+    assert any(a.startswith("G-NAMES") for a in pg.advisories(load("10"), earlier_lines=[]))
+
+
+def test_series_lines_reads_every_earlier_episodes_lines_json(tmp_path):
+    for n, text in ((8, "the plain"), (9, "the valley"), (10, "the prophet")):
+        d = tmp_path / "episodes" / f"ep{n:02d}" / "audio" / "lines"
+        d.mkdir(parents=True)
+        (d / "lines.json").write_text(json.dumps([{"text": text}]), encoding="utf-8")
+    assert pg.series_lines(tmp_path, 10) == ["the plain", "the valley"]
+
+
+def test_caption_lines_are_ranked_and_the_wall_is_ep07s_top():
+    """The overlap ratio does NOT separate ep07 from ep10 -- ep07's milk-boy and nightdress lines
+    score 0.8 -- so the wall is ep07's maximum and the gate's use is the ranking inside one plan."""
+    top = pg.caption_ratios(load("10"))[:3]
+    assert [(line, shot) for _, line, shot in top] == [(4, 4), (18, 19), (23, 24)]
+    assert round(max(r for r, _, _ in pg.caption_ratios(load("07"))), 2) == pg.CAPTION_WALL == 0.8
+    said = [a for a in pg.advisories(load("10")) if "caption-line" in a]
+    assert len(said) == 3 and any("line 18" in a and "0.57" in a for a in said)
+    assert not any("over the wall" in a for a in pg.advisories(load("07")))
+
+
+def test_the_wordless_tail_after_the_last_line():
+    """ep10: the button shot's 0.5 s remainder and three silent answer shots of 3.5, 3.0 and 4.5 s."""
+    assert {ep: round(pg.wordless_tail(load(ep)), 2) for ep in ("05", "07", "10")} == {"05": 4.6, "07": 4.7, "10": 11.5}
+    assert any("wordless tail" in f and "measured 11.5 against 6.0" in f for f in of(pg.faults(load("10")), "G-STORY"))
+    for ep in ("05", "07"):
+        assert not any("wordless tail" in f for f in pg.faults(load(ep))), ep
+
+
+def test_the_button_shot_rests_before_the_cut():
+    assert any("button shot 30" in a and "beat_s + coda_s" in a for a in pg.advisories(load("10")))
+    assert not any("beat_s + coda_s" in a for a in pg.advisories(load("05")))

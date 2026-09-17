@@ -1,9 +1,15 @@
 """Lag between two tracks, from the cross-correlation of their envelopes.
 
-Used as the sync gate on an anchored H3 take: the take's own soundtrack is
-the model's regeneration of the anchored wav, so its envelope should sit on
-the input's envelope with zero lag.  A lag of one frame (0.042 s) is the
-tolerance; anything more means the mouth is not on the wav we play.
+WHAT THIS MEASURES IS THE MUX, NOT THE MOUTH.  The take's own soundtrack IS
+the wav that drove it, re-encoded: MEASURED on episode 10's seven dialogue
+takes, sample-level normalised correlation 0.86-0.95 at exactly HANDLE on
+every one, and every lag read +0.000 or -0.010.  The number says whether the
+sound was laid where we put it.  It cannot say whether the lips are on the
+words -- by eye all seven were, and this gate would have read the same if
+they were not.  Hence `mux_lag_s` everywhere the number is written or printed,
+until a measurement of the mouth exists.
+
+A lag of one frame (0.042 s) is the tolerance for the mux.
 """
 from __future__ import annotations
 
@@ -40,4 +46,10 @@ def load_mono(path: Path, sr: int = 24000) -> np.ndarray:
 
 
 def take_lag(take: Path, wav: Path, sr: int = 24000) -> float:
+    """The MUX lag of a take against the wav that drove it: where the sound was
+    laid, not where the mouth is.  Written as `mux_lag_s`."""
     return lag_seconds(load_mono(take, sr), load_mono(wav, sr), sr)
+
+
+mux_lag = take_lag
+"""The honest name; `take_lag` stays for the callers that have it."""

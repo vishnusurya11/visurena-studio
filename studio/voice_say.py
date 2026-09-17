@@ -25,6 +25,25 @@ ALPHA = 0.8
 neutral and the bank was wasted; at 1.0 the timbre starts to follow the
 emotion clip instead of the speaker's."""
 
+ROOM_S = 0.12
+"""Silence appended after the last sample, so the last consonant has somewhere
+to release.  MEASURED on episode 10: the median trailing room across thirty
+lines was 0.05 s, fourteen had less, and l14 ("young.") and l05 ended with
+0.00 s at -25 / -30 dB in their last 50 ms -- cut off on the edit.  120 ms is
+under the 0.70 s BREATH the timeline already leaves between lines, so nothing
+downstream moves; the timeline reads the seconds off the file either way."""
+
+
+def pad_room(out: Path, seconds: float = ROOM_S) -> Path:
+    """`seconds` of digital silence appended to `out`, in place."""
+    import numpy as np
+    import soundfile as sf
+
+    audio, rate = sf.read(str(out), dtype="float32", always_2d=True)
+    tail = np.zeros((int(round(seconds * rate)), audio.shape[1]), dtype=np.float32)
+    sf.write(str(out), np.concatenate([audio, tail]), rate, subtype="PCM_16")
+    return out
+
 
 def values_for(text: str, timbre: Path, emotion: Path, seed: int,
                alpha: float = ALPHA) -> dict:
@@ -44,5 +63,6 @@ def say(text: str, timbre: Path, emotion: Path, seed: int, out: Path,
     produced = (run or comfy.run)(WORKFLOW, values_for(text, timbre, emotion, seed, alpha),
                                   timeout=TIMEOUT)
     post_process(produced[0], out)
+    pad_room(out)
     return VoiceLine(index=index, text=text, speaker=speaker, rel_path=out.name,
                      seconds=clip_seconds(out), seed=seed)

@@ -59,6 +59,8 @@ MAX_SETUPS = 6
 BREATH = 0.70  # audio reviewer, iteration 3: 0.50 was the entire pause between two sentences (wavs carry <= 0.04 s of silence)
 HANDLE = 0.25
 TURN_BAND = (0.50, 0.75)
+ANSWER = re.compile(r"^(shot|line) (\d+)$")
+"""The shape of `Episode.answer`: a shot (a picture) or a line (a sentence)."""
 
 Section = Literal["hook", "setup", "friction", "payoff", "transition", "turn",
                   "spike", "reaction", "runout", "button", "answer"]
@@ -361,6 +363,14 @@ class Episode(BaseModel):
     square take cropped by a vertical assemble loses a third of every frame and
     nothing raises.  The default is what episode 1 shipped; episode 2 is 1:1 on
     the owner's spec (2026-09-12), and the owner's spec outranks the default."""
+    answer: str = ""
+    """Where the question is answered: "shot N" (a picture), "line N" (a spoken
+    sentence) or "" (nowhere).  `studio.story_layer.report` prints it, never
+    refuses it.  ep10 (docs/analysis/ep10_dq_synthesis.md, B3): Doyle's own
+    answering sentence, "But we haven't opposed him yet", was cut from the plan,
+    so the viewer held l27 "I won't knuckle under" (a yes) against the barred
+    door of shot 31 (a no).  When the chapter contains the sentence that
+    answers the question, it is a line, spoken by whoever says it in the book."""
     protagonist: str
     setups: dict[str, Setup]
     shots: list[Shot]
@@ -422,6 +432,19 @@ class Episode(BaseModel):
                + house_style.style_faults(self.where, self.light))
         if bad:
             raise ValueError("; ".join(bad))
+        return self
+
+    @model_validator(mode="after")
+    def _the_answer_is_in_the_plan(self) -> "Episode":
+        """An empty answer is reported; a written one must name a shot or a line the plan has."""
+        if not self.answer:
+            return self
+        hit = ANSWER.match(self.answer)
+        if not hit:
+            raise ValueError(f"answer {self.answer!r} is not 'shot N' or 'line N'")
+        kind, n = hit.group(1), int(hit.group(2))
+        if n >= len(self.shots if kind == "shot" else self.lines):
+            raise ValueError(f"answer {self.answer!r} names a {kind} the plan does not have")
         return self
 
     @model_validator(mode="after")

@@ -103,14 +103,24 @@ def encoder(device: str = "") -> object:
     return _MODEL[device]
 
 
+def embed_samples(samples, device: str = ""):
+    """The 192-d ECAPA embedding of samples already in memory, uncached."""
+    import numpy as np
+    import torch
+
+    device = device or best_device()
+    batch = torch.tensor(np.asarray(samples, dtype="float32")).unsqueeze(0).to(device)
+    with torch.no_grad():
+        got = encoder(device).encode_batch(batch)
+    return got.squeeze().detach().cpu().numpy()
+
+
 def embedding(clip: Path, device: str = ""):
     """The 192-d ECAPA embedding of one file, computed once and kept.
 
     Cached on size and mtime, so a re-rendered clip is re-read: comparing a
     cast of N is N*(N-1)/2 pairs but only N voices."""
-    import numpy as np
     import soundfile as sf
-    import torch
 
     device = device or best_device()
     path = Path(clip)
@@ -118,11 +128,28 @@ def embedding(clip: Path, device: str = ""):
     key = (str(path), stat.st_size, int(stat.st_mtime))
     if key not in _HEARD:
         wave, _ = sf.read(str(path))
-        batch = torch.tensor(np.asarray(wave, dtype="float32")).unsqueeze(0).to(device)
-        with torch.no_grad():
-            got = encoder(device).encode_batch(batch)
-        _HEARD[key] = got.squeeze().detach().cpu().numpy()
+        _HEARD[key] = embed_samples(wave, device)
     return _HEARD[key]
+
+
+def self_similarity(clip: Path, device: str = "") -> float:
+    """One clip's first half against its second: does a voice agree with ITSELF?
+
+    MEASURED on the cast of A Study in Scarlet (ep10 DQ, CPU ECAPA): Watson
+    0.762, Drebber 0.770, Lucy 0.721, Young 0.706, Holmes 0.704, Hope 0.695,
+    Stangerson 0.559, Ferrier 0.498.  A design clip that changes voice halfway
+    has a whole-clip embedding that is an AVERAGE of two people, and no line
+    rendered from it can score well against an average -- Ferrier's best line
+    in the book is 0.815 and his median 0.726 against Watson's 0.855.  The
+    fault is visible at cast time, from one file, before a line is said."""
+    import numpy as np
+    import soundfile as sf
+
+    wave, _ = sf.read(str(clip), dtype="float32", always_2d=True)
+    mono = wave.mean(axis=1)
+    half = len(mono) // 2
+    a, b = embed_samples(mono[:half], device), embed_samples(mono[half:], device)
+    return float(np.dot(a, b) / (np.linalg.norm(a) * np.linalg.norm(b) + 1e-9))
 
 
 def similarity(a: Path, b: Path, device: str = "") -> float:

@@ -227,7 +227,7 @@ def dq_row(book: Path, record: dict) -> str:
         r = episode_home.read_json(dq)
         a = r.get("audio", {})
         verdict = (f"{'PASS' if r.get('passed') else 'FAIL'} · foreign {r.get('foreign')} · off-beat {r.get('off_beat')} "
-                   f"(advisory) · lag {a.get('lag_s', 0):+.3f} s{' (silent take, lag ungated)' if not a.get('lag_measured', True) else ''}"
+                   f"(advisory) · mux lag {a.get('mux_lag_s', a.get('lag_s', 0)):+.3f} s{' (silent take, lag ungated)' if not a.get('lag_measured', True) else ''}"
                    f" · heard: {esc(a.get('heard', ''))[:80]}")
         strip = Path(r.get("strip", ""))
         if strip.exists():

@@ -28,8 +28,63 @@ cosine): IndexTTS2 0.799, Qwen3-TTS clone 0.728; both word-perfect.  IndexTTS2
 is ~4x slower (111 s vs 26 s cold) and the more accurate voice, which is
 what the owner asked for."""
 SIMILAR = 0.70
-"""ECAPA cosine a line must reach against the designed voice.  Between the
-two engines' measured scores; a line under it is not that character."""
+"""ECAPA cosine a line of four seconds or more must reach against the designed
+voice.  Between the two engines' measured scores; a line under it is not that
+character.  Shorter lines get `similar_floor`."""
+
+FLOORS = ((4.0, SIMILAR), (2.0, 0.65), (0.0, 0.60))
+"""(at least this many seconds, this floor).
+
+MEASURED on episode 10 by truncating a GENUINE line and scoring the truncation
+against its own design -- same voice, less audio:
+
+    Ferrier ep08/l25  5.27 s 0.815 | 1.5 s 0.690 | 2.5 s 0.771 | 4.0 s 0.819
+    Watson  ep10/l26  5.84 s 0.824 | 1.5 s 0.640 | 2.5 s 0.709 | 4.0 s 0.796
+    Young   ep10/l16  5.42 s 0.853 | 1.5 s 0.677 | 2.5 s 0.708 | 4.0 s 0.826
+
+A correct voice loses ~0.05 at 2.5 s and 0.12-0.18 at 1.5 s.  Lucy's four lines
+run 1.5-2.6 s and three sit under 0.75 with a design that reads 0.864 on a
+2.6 s line.  A flat 0.70 refuses the TRUE voice under two seconds; a line that
+short cannot be judged harder than the encoder can hear it."""
+
+EPISODE_VOICE = 0.75
+"""Line-vs-line ECAPA cosine an ALTERNATE-reference render must reach against
+the speaker's other passed lines in the same episode.
+
+MEASURED on episode 10: Ferrier's l27, cloned from ep08/l25 on its fourth try,
+passed the design floor at 0.701 -- by 0.001 -- and measured 0.585 / 0.589 /
+0.588 against the two lines he speaks 25 s earlier in the same room, while
+those two sit at 0.839 against each other and his lines across two episodes
+at 0.79-0.90.  The listener never hears the design clip; the listener hears
+this line after the last one.  0.75 is under every genuine pair and over the
+one that was a different man."""
+
+
+def similar_floor(seconds: float) -> float:
+    """The similarity a line of `seconds` must reach: the measured truncation loss."""
+    return next(floor for at, floor in FLOORS if seconds >= at)
+
+
+def episode_voice(book: Path, records: dict, record: dict, similarity=None) -> float | None:
+    """Mean line-vs-line similarity of an alternate-reference render against the
+    speaker's other PASSED lines in this episode.  None for a design-clip render
+    (nothing to judge) and when there is no other passed line (nothing to
+    compare it to)."""
+    if record.get("reference", "design.wav") == "design.wav":
+        return None
+    score = similarity or voice_ear.similarity
+    mine = book / record["rel_path"]
+    others = [book / r["rel_path"] for i, r in records.items()
+              if r.get("speaker") == record["speaker"] and r.get("passed")
+              and i != record["index"] and (book / r["rel_path"]).exists()]
+    if not others:
+        return None
+    return round(sum(float(score(mine, other)) for other in others) / len(others), 3)
+
+
+def alternate_ok(score: float | None) -> bool:
+    """An alternate-reference render is the man in the room, or it is not kept."""
+    return score is None or score >= EPISODE_VOICE
 
 
 def reference_for(book: Path, speaker: str) -> Path:
@@ -116,20 +171,24 @@ def render(book: Path, episode: Episode, line: Line, out_dir: Path, attempt: int
             "seed": said.seed, "tries": attempt + 1, "reference": reference.name}
 
 
-def listen_all(records: list[dict], book: Path, listen) -> list[int]:
+def listen_all(records: list[dict], book: Path, listen, among: dict | None = None) -> list[int]:
     """Read every clip back; return the indices that did not say their line.
 
     All the renders first, then all the listening: every swap between the
     TTS and the Whisper model costs minutes off the HDD, so thirteen lines
-    pay two swaps here instead of twenty-six."""
+    pay two swaps here instead of twenty-six.  `among` is the whole episode's
+    records, which an alternate-reference render is judged against."""
+    among = among if among is not None else {r["index"]: r for r in records}
     failed = []
     for record in records:
         clip = book / record["rel_path"]
         verdict = voice_qc.check(clip, record["text"], transcribe=listen)
         similarity = voice_ear.similarity(reference_for(book, record["speaker"]), clip)
-        passed = verdict.passed and similarity >= SIMILAR
-        record.update(heard=verdict.heard, error_rate=verdict.error_rate,
-                      similarity=round(float(similarity), 3), passed=passed)
+        floor, room = similar_floor(verdict.seconds), episode_voice(book, among, record)
+        passed = verdict.passed and similarity >= floor and alternate_ok(room)
+        record.update(heard=verdict.heard, error_rate=verdict.error_rate, why=verdict.why,
+                      similarity=round(float(similarity), 3), floor=floor,
+                      episode_voice=room, passed=passed)
         if not passed:
             failed.append(record["index"])
     return failed
@@ -137,11 +196,14 @@ def listen_all(records: list[dict], book: Path, listen) -> list[int]:
 
 def keep_best(new: dict, previous: dict | None, wav: Path) -> dict:
     """A redo never makes a line worse: the try with the higher similarity
-    stays on disk as l{NN}.wav, the other is deleted."""
+    stays on disk as l{NN}.wav, the other is deleted.  An alternate-reference
+    render that is not the man in the room never wins, whatever it scored
+    against the design clip."""
     prev_wav = wav.with_suffix(".prev.wav")
     if previous is None or not prev_wav.exists():
         return new
-    if new.get("similarity", 0.0) >= previous.get("similarity", 0.0):
+    if alternate_ok(new.get("episode_voice")) and \
+            new.get("similarity", 0.0) >= previous.get("similarity", 0.0):
         prev_wav.unlink()
         return new
     wav.unlink(missing_ok=True)
@@ -181,7 +243,8 @@ def main(book_id: str, number: int, redo: list[int] | None = None) -> None:
             print(f"  said l{line.index:02d} {line.speaker:16} {records[line.index]['seconds']:.2f}s",
                   flush=True)
             episode_home.write_json(sheet, [records[k] for k in sorted(records)])
-        failed = listen_all([records[line.index] for line in todo], book, voice_qc.any_transcriber())
+        failed = listen_all([records[line.index] for line in todo], book, voice_qc.any_transcriber(),
+                            among=records)
         for line in todo:  # a redo keeps whichever try scored higher, across every attempt
             if line.index in previous:
                 wav = out_dir / f"l{line.index:02d}.wav"
@@ -192,8 +255,10 @@ def main(book_id: str, number: int, redo: list[int] | None = None) -> None:
         episode_home.write_json(sheet, [records[k] for k in sorted(records)])
         for line in todo:
             r = records[line.index]
+            room = f" room {r['episode_voice']:.2f}" if r.get("episode_voice") is not None else ""
             print(f"  {'ok ' if r['passed'] else 'BAD'} l{line.index:02d} wer {r['error_rate']:.2f} "
-                  f"sim {r['similarity']:.2f}  heard: {r['heard'][:60]}", flush=True)
+                  f"sim {r['similarity']:.2f}/{r['floor']:.2f}{room}  {r['why']}  heard: {r['heard'][:50]}",
+                  flush=True)
         todo = [line for line in todo if line.index in failed]
         if not todo:
             break

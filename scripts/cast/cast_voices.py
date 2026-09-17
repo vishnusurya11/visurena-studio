@@ -6,9 +6,12 @@ See `.claude/skills/cast-voices/SKILL.md` for why each step is here.
 from __future__ import annotations
 
 import argparse
+import dataclasses
 import json
+import re
 import sys
 import time
+from dataclasses import dataclass
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
@@ -40,6 +43,36 @@ problem was only ever that we accepted the first draw out of it.
 
 Two, not more, until the gain is measured: each candidate is a ~45 s render,
 so this multiplies the cast's wall clock directly."""
+
+SELF_FLOOR = 0.65
+"""Half-vs-half ECAPA cosine a design clip must reach against ITSELF.
+
+MEASURED on the cast of A Study in Scarlet after episode 10: Watson 0.762,
+Drebber 0.770, Lucy 0.721, Young 0.706, Holmes 0.704, Hope 0.695, Stangerson
+0.559, Ferrier 0.498.  Ferrier's clip is two voices; every line cloned from it
+is cloned from an average, and his median line similarity across the book is
+0.726 against Watson's 0.855.  0.65 sits under every voice that works and over
+the two that do not."""
+
+NEAREST_CEIL = 0.80
+"""ECAPA cosine above which a design is its nearest neighbour's twin.
+
+MEASURED: Ferrier vs Young 0.847, the highest pair in the cast -- and three of
+Ferrier's five lines score HIGHER against Young's design than against his own.
+These two men share every dialogue scene of episode 10.  Next pairs: Drebber-
+Watson 0.841, Hope-Watson 0.831; both under this line by the ear, and the
+line is set above the working cast's median (0.73) with room."""
+
+REROLLS = 3
+"""How many rolls a character gets before the least bad design is kept and
+named.  Each roll is `CANDIDATES` renders of ~45 s; three rolls is under five
+minutes, and a design that fails three times with its register moved twice is
+a cast collision to solve by hand, not by rolling all night."""
+
+NUDGE_HZ = 8
+"""How far the register moves per failed roll -- AWAY from the rival.  Under
+`voice_register.APART`, so a nudged voice cannot land on a third character's
+slot; two nudges (16 Hz) is what separated Ferrier from Young on paper."""
 
 SHE = ("lucy", "madame", "mrs", "miss", "sawyer", "servant", "anna")
 
@@ -149,48 +182,179 @@ def collisions(book: Path, cast: list[str]) -> list[tuple[str, str, float]]:
                    if score >= APART), key=lambda row: -row[2])
 
 
-def audition(book: Path, who: str, instruct: str, cast: dict[str, Path]) -> Path:
-    """Render `CANDIDATES` voices and keep the one least like anyone cast."""
-    dest = cast_home.clip(book, who)
-    if dest.exists():
-        return dest
-    dest.parent.mkdir(parents=True, exist_ok=True)
-    tried = []
+@dataclass(frozen=True)
+class Pick:
+    """One rendered candidate and what the ear made of it."""
+    clip: Path
+    self_similarity: float
+    rival: str
+    nearest: float
+    fault: str
+    hertz: int
+
+
+def design_fault(self_sim: float, nearest: float) -> str:
+    """Why a design fails at cast time, or "" when it passes both gates."""
+    why = []
+    if self_sim < SELF_FLOOR:
+        why.append(f"does not agree with itself ({self_sim:.3f} < {SELF_FLOOR})")
+    if nearest > NEAREST_CEIL:
+        why.append(f"is its nearest neighbour's twin ({nearest:.3f} > {NEAREST_CEIL})")
+    return "; ".join(why)
+
+
+def nudge_step(who: str, rival: str) -> int:
+    """Which way the register moves: AWAY from the rival, up when there is none.
+
+    Young holds 76 and Ferrier 93 -- Ferrier goes up.  A rival placed higher
+    pushes the voice down.  Direction comes from the assigned registers, not
+    the rendered ones, because the rendered ones are what went wrong."""
+    mine, theirs = PREFER.get(who, 0), PREFER.get(rival, 0)
+    return -NUDGE_HZ if theirs > mine else NUDGE_HZ
+
+
+def nudge(instruct: str, hertz: int, step: int) -> str:
+    """The same instruction with every `<hertz> Hz` moved by `step`."""
+    return re.sub(rf"\b{hertz}\s*Hz\b", f"{hertz + step} Hz", instruct)
+
+
+def retire(dest: Path) -> Path | None:
+    """The clip being recast becomes design_vN.wav (its sheet voice_vN.json),
+    N the first free number, so a recast never destroys what it replaces."""
+    dest = Path(dest)
+    if not dest.exists():
+        return None
+    n = 1
+    while dest.with_name(f"{dest.stem}_v{n}{dest.suffix}").exists():
+        n += 1
+    old = dest.with_name(f"{dest.stem}_v{n}{dest.suffix}")
+    dest.replace(old)
+    sheet = dest.with_name("voice.json")
+    if sheet.exists():
+        sheet.replace(sheet.with_name(f"voice_v{n}.json"))
+    return old
+
+
+def render_design(instruct: str, dest: Path) -> Path:
+    """One VoiceDesign render of PASSAGE under `instruct`, conformed to `dest`."""
+    made = voice.comfy.run(voice.DESIGN_WORKFLOW,
+                           {"text": PASSAGE, "instruct": instruct,
+                            "filename_prefix": f"cast_{dest.parent.parent.name}"},
+                           timeout=voice.DESIGN_TIMEOUT)
+    return voice._render(made[0], dest)
+
+
+def judge(clip: Path, cast: dict[str, Path]) -> tuple[float, str, float, str]:
+    """(self-similarity, rival, nearest, fault) for one rendered candidate."""
+    self_sim = voice_ear.self_similarity(clip)
+    rival, near = voice_ear.nearest(clip, cast)
+    return self_sim, rival, near, design_fault(self_sim, near)
+
+
+def one_roll(dest: Path, roll: int, instruct: str, cast: dict[str, Path],
+             hertz: int, render) -> list[Pick]:
+    """`CANDIDATES` renders of one instruction, each scored by the ear."""
+    picks = []
     for take in range(CANDIDATES):
-        spare = dest.with_name(f".take{take}.wav")
-        made = voice.comfy.run(voice.DESIGN_WORKFLOW,
-                               {"text": PASSAGE, "instruct": instruct,
-                                "filename_prefix": f"cast_{who}_{take}"},
-                               timeout=voice.DESIGN_TIMEOUT)
-        voice._render(made[0], spare)
-        rival, score = voice_ear.nearest(spare, cast)
-        tried.append((score, take, spare, rival))
-        print(f"      take {take + 1}/{CANDIDATES}: nearest {rival or 'nobody'} "
-              f"{score:.2f}", flush=True)
-    tried.sort(key=lambda row: row[0])
-    best = tried[0]
-    best[2].replace(dest)
-    for _, _, spare, _ in tried[1:]:
-        spare.unlink(missing_ok=True)
-    return dest
+        spare = dest.with_name(f".take{roll}_{take}.wav")
+        render(instruct, spare)
+        self_sim, rival, near, fault = judge(spare, cast)
+        picks.append(Pick(spare, self_sim, rival, near, fault, hertz))
+        print(f"      roll {roll + 1} take {take + 1}/{CANDIDATES} at {hertz} Hz: self {self_sim:.2f}, "
+              f"nearest {rival or 'nobody'} {near:.2f}{'  ' + fault if fault else ''}", flush=True)
+    return picks
+
+
+def best_of(picks: list[Pick]) -> Pick:
+    """Passing first; then the lowest collision; then the most self-agreeing."""
+    return min(picks, key=lambda p: (bool(p.fault), p.nearest, -p.self_similarity))
+
+
+def settle(tried: list[Pick], dest: Path) -> Pick:
+    """The winner becomes design.wav; every other take is deleted."""
+    best = best_of(tried)
+    best.clip.replace(dest)
+    for pick in tried:
+        pick.clip.unlink(missing_ok=True)
+    if best.fault:
+        print(f"      WARNING: no roll passed; kept the least bad, which {best.fault}", flush=True)
+    return dataclasses.replace(best, clip=dest)
+
+
+def audition(book: Path, who: str, instruct: str, cast: dict[str, Path],
+             hertz: int = 0, render=None) -> Pick:
+    """Render, gate, and re-roll with the register nudged until a design passes.
+
+    A roll that fails both gates is not re-asked with the same words: the
+    register moves `NUDGE_HZ` away from the rival it collided with, because a
+    VoiceDesign has no seed and the only lever the writer holds is the sheet."""
+    dest = cast_home.clip(book, who)
+    dest.parent.mkdir(parents=True, exist_ok=True)
+    render = render or render_design
+    rival, tried = "", []
+    for roll in range(REROLLS):
+        if roll:
+            step = nudge_step(who, rival)
+            instruct, hertz = nudge(instruct, hertz, step), hertz + step
+        picks = one_roll(dest, roll, instruct, cast, hertz, render)
+        tried += picks
+        rival = best_of(picks).rival
+        if any(not pick.fault for pick in picks):
+            break
+    return settle(tried, dest)
+
+
+def cast_clips(book: Path, exclude: str) -> dict[str, Path]:
+    """Every OTHER character's design clip on disk: what a candidate is scored against."""
+    return {who: cast_home.clip(book, who) for who in cast_home.cast_of(book)
+            if who != exclude and cast_home.clip(book, who).exists()}
+
+
+def sheet_of(who: str, got: voice_persona.VoiceInstruction, pick: Pick) -> dict:
+    """What is recorded beside the audio: the ask, and what the ear measured."""
+    return {"character": who, "register_hz": got.hertz(), "register_rendered_hz": pick.hertz,
+            "instruction": got.model_dump(), "persona": got.persona(), "sheet": got.sheet(),
+            "passage": PASSAGE, "clip": pick.clip.name,
+            "gates": {"self_similarity": round(pick.self_similarity, 3),
+                      "nearest": pick.rival, "nearest_similarity": round(pick.nearest, 3),
+                      "fault": pick.fault}}
+
+
+def recorded_instruction(book: Path, who: str) -> voice_persona.VoiceInstruction | None:
+    """The instruction already on file for this character -- the latest retired
+    sheet first, then the live one -- or None when nothing was ever written.
+
+    A recast re-renders; it does not re-write.  The words that made Ferrier's
+    clip were never the fault (a VoiceDesign has no seed; the RENDER was), and
+    writing them again is a paid reasoning call to arrive at the same sheet."""
+    room = cast_home.voice_dir(book, who)
+    sheets = sorted(room.glob("voice_v*.json"), key=lambda p: int(p.stem.split("_v")[1]))
+    live = room / "voice.json"
+    for path in [*reversed(sheets), *([live] if live.exists() else [])]:
+        body = json.loads(path.read_text(encoding="utf-8")).get("instruction")
+        if body:
+            return voice_persona.VoiceInstruction.model_validate(body)
+    return None
 
 
 def cast_one(book: Path, card: dict, setting: str, era: str, hertz: int,
              taken: dict[str, int], texture: str = "",
              cast: dict[str, Path] | None = None) -> voice_persona.VoiceInstruction:
-    """Write one instruction, render it, and record both beside the audio."""
+    """Write one instruction (or read the one on file), render it, and record
+    both beside the audio."""
     who = card["id"]
-    cast = cast if cast is not None else {}
-    got = voice_persona.write(card, setting, era, hertz, taken, texture=texture)
+    cast = cast if cast is not None else cast_clips(book, who)
+    dest = cast_home.clip(book, who)
+    got = recorded_instruction(book, who) or \
+        voice_persona.write(card, setting, era, hertz, taken, texture=texture)
     started = time.time()
-    clip = audition(book, who, got.instruct(SHAPE), cast)
-    cast_home.write_sheet(book, who, {
-        "character": who, "register_hz": got.hertz(),
-        "instruction": got.model_dump(),
-        "persona": got.persona(), "sheet": got.sheet(),
-        "passage": PASSAGE, "clip": clip.name,
-    })
-    print(f"  {who:32} {got.hertz():4} Hz  {time.time() - started:4.0f}s", flush=True)
+    if dest.exists():
+        print(f"  {who:32} {got.hertz():4} Hz  already cast; --recast to redesign", flush=True)
+        return got
+    pick = audition(book, who, got.instruct(SHAPE), cast, hertz=got.hertz())
+    cast_home.write_sheet(book, who, sheet_of(who, got, pick))
+    print(f"  {who:32} {pick.hertz:4} Hz  self {pick.self_similarity:.2f}  nearest "
+          f"{pick.rival or 'nobody'} {pick.nearest:.2f}  {time.time() - started:4.0f}s", flush=True)
     return got
 
 
@@ -199,7 +363,7 @@ def main() -> None:
     ap.add_argument("codex_id")
     ap.add_argument("--only", default="", help="comma-separated character ids")
     ap.add_argument("--recast", action="store_true",
-                    help="only re-cast characters whose voices collide")
+                    help="redesign the --only characters: the old clip is kept as design_vN.wav")
     args = ap.parse_args()
 
     book = book_dir(args.codex_id)
@@ -208,6 +372,12 @@ def main() -> None:
     cards = cards_of(book, only)
     if not cards:
         raise SystemExit("nobody to cast; run cast_home.gather first")
+    if args.recast:
+        if not only:
+            raise SystemExit("--recast needs --only: a whole-cast redesign is a decision, not a flag")
+        for card in cards:
+            old = retire(cast_home.clip(book, card["id"]))
+            print(f"  {card['id']}: old design kept as {old.name if old else 'nothing (no clip yet)'}")
 
     print(f"book: {book}")
     print(f"cast: {len(cards)} characters\n")

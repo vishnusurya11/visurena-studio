@@ -17,13 +17,16 @@ constant with no world attached is the fault this repo produces most.
 """
 from __future__ import annotations
 
+import json
 import math
 import re
 import statistics
+from pathlib import Path
 
+from studio import story_layer
 from studio.episode_ref_official import camera_clause
 from studio.episode_seq_board import HOLDS, TRAVEL
-from studio.episode_spec import Episode, Setup, Shot
+from studio.episode_spec import Episode, Line, Setup, Shot
 
 
 def fault(gate: str, where: str, why: str, got, wall) -> str:
@@ -405,7 +408,185 @@ def story_faults(episode: Episode) -> list[str]:
     if len(silent_shots(episode)) < MIN_SILENT_SHOTS:
         out.append(fault("G-STORY", "plan", "shots carrying no line (silent shots)",
                          len(silent_shots(episode)), MIN_SILENT_SHOTS))
+    return out + speech_faults(episode) + turn_faults(episode) + tail_faults(episode)
+
+
+# ---- G-STORY after episode 10: the lead speaks his own words ---------------------
+# docs/analysis/ep10_dq_synthesis.md, section B.  Calibrated on the ep10 fixture
+# (the faults present) against ep05 and ep07 (clean, or the advisories named).
+# The text rules live in `studio.story_layer`; the walls and the wiring live here.
+
+TURN_FACE_HARD_FROM = 10
+"""From which episode number the turn shot must hold the protagonist's face.
+
+ep10 shot 16 (`faces=['brigham_young']`, protagonist john_ferrier): the turn
+is Young's threat on the threshold, acted superbly, and it is done TO the
+lead; Ferrier's own choice reached the picture at 94-100 %, after the button.
+ep05's turn is Madame Sawyer's curtsey (faces=['madame_sawyer']) and ep07's
+a face-less knife splitting a pill -- both judged right by eye -- so below
+this number the rule is an advisory.  It is hard FROM the episode it was
+measured on: a gate that does not refuse its own calibration positive is not
+the gate.  Never lowered to an advisory for a later plan: write the lead
+into the frame of his own turn."""
+
+WORDLESS_TAIL_S = 6.0
+"""Projected seconds of picture after the last word: the button shot less its
+speech, plus every shot after it.  MEASURED: ep05 4.6, ep07 4.7, ep10 11.5
+(measured on the cut 11.25: three silent answer shots of 3.5, 3.0 and 4.5 s,
+the bed dead at 166 s and the tile seam at 167.8 s inside that stretch)."""
+
+BUTTON_REST_S = 0.6
+"""ADVISORY.  `beat_s + coda_s` on the button shot, so the last line lands on
+a held frame and not on a cut.  ep05 1.0, ep07 1.2, ep10 0.0."""
+
+CAPTION_WALL = 0.80
+"""ADVISORY.  The share of a narration line's content words already in its
+shot's frame+motion (`story_layer.overlap`).  MEASURED, top three per plan:
+ep07 0.80 / 0.80 / 0.75 (the milk boy at the ladder, the nightdress under the
+sill, the open watch), ep05 0.50 / 0.38 / 0.38, ep10 0.71 / 0.57 / 0.50.  The
+wall is ep07's maximum and it does NOT separate ep07 from ep10: on this
+measure the episode that read as film captions harder.  What the measure does
+give is the ranking INSIDE a plan -- ep10's #2, #3 and #4 (l18 "heavy step
+going away down the shingle", l23 "her hand tightening on his", l26 "laughed
+through her tears") are the three lines the analyst's ear called captions --
+so the top three are printed every time and the wall only marks a line."""
+
+CAPTION_TOP = 3
+
+
+def episode_cast(episode: Episode) -> list[str]:
+    return sorted({who for setup in episode.setups.values() for who in setup.cast})
+
+
+def reported_lines(episode: Episode) -> list[tuple[Line, str, list[str]]]:
+    """(line, speaker token, faces on the line's shot that token resolves to)
+    for every narration line reporting speech.  A token that is neither a
+    pronoun nor a cast name token ("Nobody said a word") reports nobody."""
+    names, who = cast_tokens(episode_cast(episode)), story_layer.pronouns(episode.shots)
+    out = []
+    for line in episode.lines:
+        token = story_layer.reported_speech(line.text) if line.kind == "narration" else ""
+        if token in ("he", "she") or token in names:
+            out.append((line, token, story_layer.speakers_on(token, episode.shot(line.shot).faces, who, names)))
     return out
+
+
+def own_face(faces: list[str], who: dict[str, str]) -> str:
+    """"brigham_young or john_ferrier's speech over his own face"."""
+    pronoun = "her" if who.get(faces[0]) == "she" else "his"
+    return f"{' or '.join(faces)}'s speech over {pronoun} own face"
+
+
+def speech_faults(episode: Episode) -> list[str]:
+    """HARD: the speaker's face is on the shot and his words are in the narrator's mouth.
+    ep10 lines 15 (over both men) and 24 (over Ferrier); ep08 line 27; ep09 line 23."""
+    who = story_layer.pronouns(episode.shots)
+    return [fault("G-STORY", f"line {line.index}", f"reports {own_face(faces, who)}: make it dialogue",
+                  "narration", "dialogue")
+            for line, _, faces in reported_lines(episode) if faces]
+
+
+def speech_advisories(episode: Episode) -> list[str]:
+    """The same pattern on a shot without the speaker: ep10 lines 9, 11, 25, 28 on inserts;
+    ep05 lines 8, 10, 21 (Holmes reported over face-less shots, and ep05 looked right)."""
+    return [f"G-STORY line {line.index}: reports {token}'s speech on shot {line.shot}, whose faces are "
+            f"{episode.shot(line.shot).faces} (advisory: the speaker is off the shot; give the line to "
+            f"his face, or keep it narration)"
+            for line, token, faces in reported_lines(episode) if not faces]
+
+
+def turn_face_fault(episode: Episode) -> str:
+    """The sentence, or "" when the protagonist is in the frame of the turn."""
+    turn, who = episode.turn(), story_layer.pronouns(episode.shots)
+    if episode.protagonist in turn.faces:
+        return ""
+    own = "her" if who.get(episode.protagonist) == "she" else "his"
+    return fault("G-STORY", f"turn shot {turn.index}", f"the protagonist {episode.protagonist} is not in "
+                 f"the frame of {own} own turn", turn.faces, episode.protagonist)
+
+
+def turn_faults(episode: Episode) -> list[str]:
+    """The turn names a value that flips (always), and holds the lead's face (from TURN_FACE_HARD_FROM)."""
+    turn, out = episode.turn(), []
+    if not story_layer.turns(turn.turn):
+        out.append(fault("G-STORY", f"turn shot {turn.index}", "the turn names no value that flips",
+                         repr(turn.turn), "'before -> after'"))
+    if episode.number >= TURN_FACE_HARD_FROM and (bad := turn_face_fault(episode)):
+        out.append(bad)
+    return out
+
+
+def turn_face_advisories(episode: Episode) -> list[str]:
+    bad = turn_face_fault(episode)
+    if bad and episode.number < TURN_FACE_HARD_FROM:
+        return [f"{bad} (advisory below episode {TURN_FACE_HARD_FROM}: ep05 and ep07 were judged right without it)"]
+    return []
+
+
+def wordless_tail(episode: Episode) -> float:
+    """Projected seconds of picture after the last word (see WORDLESS_TAIL_S)."""
+    button = episode.button()
+    spoken = sum(line.projected_seconds() for line in episode.lines_of(button.shot))
+    after = [shot for shot in episode.shots if shot.index >= button.shot]
+    return sum(episode.shot_seconds(shot) for shot in after) - spoken
+
+
+def tail_faults(episode: Episode) -> list[str]:
+    got = round(wordless_tail(episode), 2)
+    if got <= WORDLESS_TAIL_S:
+        return []
+    return [fault("G-STORY", f"shots {episode.button().shot}-{episode.shots[-1].index}",
+                  "wordless tail after the last line in projected seconds", got, WORDLESS_TAIL_S)]
+
+
+def button_rest_advisories(episode: Episode) -> list[str]:
+    shot = episode.shot(episode.button().shot)
+    got = round(shot.beat_s + shot.coda_s, 2)
+    if got >= BUTTON_REST_S:
+        return []
+    return [f"G-STORY button shot {shot.index}: beat_s + coda_s is {got} s, under {BUTTON_REST_S} "
+            f"(advisory: the last line lands on a held frame, not on a cut)"]
+
+
+def caption_ratios(episode: Episode) -> list[tuple[float, int, int]]:
+    """(ratio, line, shot) for every narration line, most caption-like first."""
+    out = []
+    for line in episode.lines:
+        if line.kind == "narration":
+            shot = episode.shot(line.shot)
+            out.append((round(story_layer.overlap(line.text, shot.frame + " " + shot.motion), 2),
+                        line.index, line.shot))
+    return sorted(out, reverse=True)
+
+
+def caption_advisories(episode: Episode) -> list[str]:
+    out = []
+    for ratio, line, shot in caption_ratios(episode)[:CAPTION_TOP]:
+        over = " -- over the wall" if ratio > CAPTION_WALL else ""
+        out.append(f"G-STORY line {line} (shot {shot}): caption-line, {ratio} of its content words are in "
+                   f"the shot's frame+motion{over} (advisory: the wall {CAPTION_WALL} is ep07's top line; "
+                   f"a line on a picture adds what the picture cannot show)")
+    return out
+
+
+def series_lines(book: Path, number: int) -> list[str]:
+    """Every earlier episode's spoken line texts, from audio/lines/lines.json --
+    the `earlier_lines` argument of `advisories` / `name_advisories`."""
+    out = []
+    for n in range(1, number):
+        path = Path(book) / "episodes" / f"ep{n:02d}" / "audio" / "lines" / "lines.json"
+        if path.exists():
+            out += [line["text"] for line in json.loads(path.read_text(encoding="utf-8"))]
+    return out
+
+
+def name_advisories(episode: Episode, earlier_lines: list[str]) -> list[str]:
+    """G-NAMES: a name first heard in the series whose first line carries no role noun.
+    ep10 line 3 "Jefferson Hope" (0 hits in ep01-09; ep09 calls him "a stranger")."""
+    texts = [line.text for line in episode.lines]
+    return [f"G-NAMES line {k}: first hearing of {name!r} in the series carries no role (advisory: say "
+            f"once who it is -- {', '.join(story_layer.ROLE_NOUNS[:5])}, ...)"
+            for k, name in story_layer.naked_names(texts, earlier_lines)]
 
 
 # ---- the verdict ---------------------------------------------------------------
@@ -416,12 +597,17 @@ def faults(episode: Episode) -> list[str]:
             + move_faults(episode) + rate_faults(episode) + story_faults(episode))
 
 
-def advisories(episode: Episode) -> list[str]:
-    """The two story measures the fixtures proved cannot be refusals: printed,
+def advisories(episode: Episode, earlier_lines: list[str] | None = None) -> list[str]:
+    """The story measures the fixtures proved cannot be refusals: printed,
     never counted.  ep05/07/08's turns are a curtsey, a knife on a pill and a
     dust column -- none acts on another cast member -- and ep05 is the flattest
     plan by projected stdev.  A gate that refuses the good episodes is one
-    somebody switches off."""
+    somebody switches off.
+
+    After ep10: reported speech off the speaker's face, the turn shot's faces
+    below `TURN_FACE_HARD_FROM`, the three most caption-like lines, the button
+    shot's rest, and -- only when `earlier_lines` (see `series_lines`) is given
+    -- G-NAMES, a name's first hearing in the series with no role beside it."""
     out = []
     got = round(shot_length_stdev(episode), 2)
     if got < STDEV_FLOOR:
@@ -430,4 +616,8 @@ def advisories(episode: Episode) -> list[str]:
     if not turn_acts_on(episode):
         out.append(f"G-STORY turn shot {episode.turn().index}: no clause has one cast member acting on "
                    f"another (advisory: true of every delivered plan, ep05-ep09)")
+    out += (speech_advisories(episode) + turn_face_advisories(episode)
+            + caption_advisories(episode) + button_rest_advisories(episode))
+    if earlier_lines is not None:
+        out += name_advisories(episode, earlier_lines)
     return out

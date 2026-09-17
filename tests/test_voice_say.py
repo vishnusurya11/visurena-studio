@@ -33,7 +33,11 @@ def test_a_line_is_said_through_the_indextts_workflow(tmp_path, monkeypatch):
         src.write_bytes(b"RIFF0000WAVE")
         return [src]
 
-    monkeypatch.setattr(voice_say, "post_process", lambda src, dst: dst.write_bytes(b"x"))
+    import numpy as np
+    import soundfile as sf
+
+    monkeypatch.setattr(voice_say, "post_process",
+                        lambda src, dst: sf.write(str(dst), np.zeros(2400, dtype="float32"), 24000))
     monkeypatch.setattr(voice_say, "clip_seconds", lambda p: 2.4)
     timbre, emotion = tmp_path / "t.wav", tmp_path / "e.wav"
     for p in (timbre, emotion):

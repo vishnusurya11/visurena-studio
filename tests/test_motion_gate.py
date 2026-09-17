@@ -103,11 +103,11 @@ def test_report_from_energy_is_the_verdict_without_a_decoder():
 
 
 def test_best_attempt_prefers_a_pass_then_the_shorter_start_freeze():
-    a = {"foreign": 0, "audio": {"lag_ok": True, "lag_s": 0.0},
+    a = {"foreign": 0, "audio": {"lag_ok": True, "mux_lag_s": 0.0},
          "motion": {"motion_ok": False, "worst_leading_still_s": 5.0, "still_share": 0.9}}
-    b = {"foreign": 0, "audio": {"lag_ok": True, "lag_s": 0.01},
+    b = {"foreign": 0, "audio": {"lag_ok": True, "mux_lag_s": 0.01},
          "motion": {"motion_ok": True, "worst_leading_still_s": 0.5, "still_share": 0.3}}
-    c = {"foreign": 1, "audio": {"lag_ok": True, "lag_s": 0.0},
+    c = {"foreign": 1, "audio": {"lag_ok": True, "mux_lag_s": 0.0},
          "motion": {"motion_ok": True, "worst_leading_still_s": 0.0, "still_share": 0.1}}
     assert mg.best_attempt({"T17.mp4": a, "T17_fail1.mp4": b, "x": c}) == "T17_fail1.mp4"
     assert mg.attempt_score(c)[0] == 1                            # a foreign frame fails the hard gates

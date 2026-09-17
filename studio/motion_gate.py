@@ -170,7 +170,7 @@ def attempt_score(report_: dict) -> tuple:
     audio = report_.get("audio", {})
     passed = motion.get("motion_ok", True) and report_.get("foreign", 0) == 0 and audio.get("lag_ok", True)
     return (0 if passed else 1, motion.get("worst_leading_still_s", 0.0), motion.get("still_share", 0.0),
-            report_.get("foreign", 0), abs(audio.get("lag_s", 0.0)))
+            report_.get("foreign", 0), abs(audio.get("mux_lag_s", audio.get("lag_s", 0.0))))
 
 
 def best_attempt(reports: dict[str, dict]) -> str:

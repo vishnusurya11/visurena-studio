@@ -122,25 +122,81 @@ sample 0, that put 24 of the episode's 159.6 seconds under -60 dBFS -- and
 `uneasy`, which opens with five seconds of nothing, is used TWICE."""
 
 
+def live_blocks(mono, rate: int, floor: float = DEAD_DBFS) -> tuple[list[int], int]:
+    """The 50 ms blocks of `mono` that carry music, and the block size."""
+    import numpy as np
+
+    step = max(rate // 20, 1)                       # 50 ms
+    blocks = len(mono) // step
+    live = [i for i in range(blocks)
+            if 20 * np.log10(max(1e-9, float(np.sqrt(
+                (mono[i * step:(i + 1) * step] ** 2).mean())))) > floor]
+    return live, step
+
+
 def trim_to_music(path, floor: float = DEAD_DBFS):
     """(samples, rate) with the silent head and tail cut off, channels kept.
 
     `is_dead` cannot find this: it measures the WHOLE generation against its
     target, and a file with a six-second silent tail still integrates on target.
     A per-file loudness check is blind to a hole inside the file."""
-    import numpy as np
     import soundfile as sf
 
     audio, rate = sf.read(str(path), dtype="float32", always_2d=True)
-    mono = audio.mean(axis=1)
-    step = max(rate // 20, 1)                       # 50 ms
-    blocks = len(mono) // step
-    live = [i for i in range(blocks)
-            if 20 * np.log10(max(1e-9, float(np.sqrt(
-                (mono[i * step:(i + 1) * step] ** 2).mean())))) > floor]
+    live, step = live_blocks(audio.mean(axis=1), rate, floor)
     if not live:
         return audio, rate
     return audio[live[0] * step:(live[-1] + 1) * step], rate
+
+
+def live_seconds(path, floor: float = DEAD_DBFS) -> float:
+    """How many seconds of MUSIC a generation holds, first live block to last.
+
+    MEASURED on episode 10: `light` came back as a 27.7 s file with 10.4 s of
+    music in it, -76 dBFS from 11 s on, and integrated -30.5 LUFS against a
+    -30.5 target -- on target by the whole-file number and 38 % music by this
+    one.  It was laid three times over shots 23-27."""
+    import soundfile as sf
+
+    audio, rate = sf.read(str(path), dtype="float32", always_2d=True)
+    live, step = live_blocks(audio.mean(axis=1), rate, floor)
+    if not live:
+        return 0.0
+    return round((live[-1] + 1 - live[0]) * step / rate, 3)
+
+
+def looped(audio, want: int, fade: int):
+    """`audio` carried to `want` samples by looping, every tile boundary an
+    equal-power crossfade of `fade` samples.
+
+    `np.tile` is a butt joint.  MEASURED on episode 10's master: `uneasy`'s
+    trimmed end is its eight-second decrescendo and the tile restarted it at
+    its opening bar, at 167.83 s, in the only eleven seconds with nobody
+    speaking -- -36.1 to -27.1 LUFS across the joint, spectral flux eleven
+    times the local median.  Four of six spans looped; five seams hid under
+    speech and the sixth did not.
+
+    Sine/cosine and not sqrt: both are equal-power, but sqrt's slope is
+    infinite at zero, and on two tiles of ONE tone -- which are correlated --
+    that puts a step at the very start of the fade."""
+    import numpy as np
+
+    if len(audio) >= want:
+        return audio[:want]
+    n = len(audio)
+    fade = max(1, min(fade, n // 2))
+    up = np.sin(np.linspace(0.0, np.pi / 2, fade, dtype=np.float32))[:, None]
+    out = np.zeros((want + n, audio.shape[1]), dtype=np.float32)
+    at = 0
+    while at < want:
+        piece = np.array(audio, dtype=np.float32)
+        if at:
+            piece[:fade] *= up
+        if at + n - fade < want:                    # another tile follows
+            piece[-fade:] *= up[::-1]
+        out[at:at + n] += piece
+        at += n - fade
+    return out[:want]
 
 
 @dataclass(frozen=True)
@@ -235,7 +291,9 @@ def compose(cut: list[Span], files: dict[str, "Path"], out: "Path", rate: int = 
     of music arriving for no reason.
 
     A file shorter than its span is looped rather than left to run out: a hole of
-    digital silence in the middle of an episode is worse than a repeat."""
+    digital silence in the middle of an episode is worse than a repeat.  And the
+    loop's own seams get the same crossfade (`looped`): episode 10's tail seam
+    at 167.83 s was a butt joint between a decrescendo and an opening bar."""
     import numpy as np
     import soundfile as sf
 
@@ -276,10 +334,7 @@ def compose(cut: list[Span], files: dict[str, "Path"], out: "Path", rate: int = 
         # beds overlap across the seam instead of meeting at a point.
         head = fade if n else 0
         want = int(round(span.end * rate)) - start + head
-        audio = loaded[span.tone]
-        if len(audio) < want:
-            audio = np.tile(audio, (int(np.ceil(want / max(len(audio), 1))), 1))
-        piece = np.array(audio[:want], dtype=np.float32)
+        piece = np.array(looped(loaded[span.tone], want, fade), dtype=np.float32)
         if head:
             ramp = np.sqrt(np.linspace(0.0, 1.0, head, dtype=np.float32))
             piece[:head] *= ramp[:, None]

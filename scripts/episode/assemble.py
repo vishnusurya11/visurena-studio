@@ -330,13 +330,61 @@ Bounded on purpose: an unbounded retry on a model that has started returning
 silence spends the GPU all night and delivers nothing."""
 
 
+LIVE_SHARE = 0.75
+"""How much of the seconds asked for must come back as MUSIC, or the tone is a
+failed generation like an empty one.
+
+MEASURED on episode 10: `light` came back as a 27.7 s file with 10.4 s of music
+(38 %), -76 dBFS from 11 s on, integrated -30.5 LUFS against a -30.5 target.
+`is_dead` measures the whole file and passed it; `compose` then looped it three
+times over shots 23-27.  The other five tones delivered 79-93 % of their ask
+(ACE-Step always stops a little early and pads), so 0.75 is under every
+generation that worked and twice what the one that did not delivered."""
+
+
+def is_short(live: float, want: float) -> bool:
+    """Is this generation mostly silence rather than merely padded at the end?"""
+    return live < LIVE_SHARE * want
+
+
+def tone_fault(out: Path, loudness: float | None, target: float, want: float) -> str:
+    """Why this generation cannot be used: "empty", "short", or "" when it can."""
+    if episode_bed.is_dead(loudness, target):
+        return "empty"
+    if is_short(episode_bed.live_seconds(out), want):
+        return "short"
+    return ""
+
+
+def generate(out: Path, number: int, roll: int, tone: str, want: float, engine: str) -> Path:
+    """One roll of one tone onto disk, its seed moved along by the roll number."""
+    seed = bed_seed(out, number) + 977 * roll
+    workflow, values = bed_request(engine, want, seed, tone)
+    got = run(workflow, values, timeout=BED_TIMEOUT)
+    out.write_bytes(got[0].read_bytes())
+    return out
+
+
+def refuse(out: Path, roll: int, fault: str, loudness: float | None, target: float,
+           want: float) -> Path:
+    """Keep the refused roll on disk, named for why, and say so."""
+    kept = out.with_name(f"{out.stem}.{fault}{roll + 1}{out.suffix}")
+    out.rename(kept)
+    heard = (f"{loudness:.1f} LUFS against {target:.1f}" if fault == "empty" and loudness is not None
+             else f"{episode_bed.live_seconds(kept):.1f} s of music in a {want:.1f} s ask")
+    print(f"    {out.stem[4:]}: came back {fault} ({heard}). Kept as {kept.name}; "
+          f"re-rolling ({roll + 1}/{BED_ROLLS}).", flush=True)
+    return kept
+
+
 def one_tone(room: Path, number: int, tone: str, want: float, engine: str) -> Path:
-    """One tone, generated, levelled, and RE-ROLLED if it comes back empty.
+    """One tone, generated, levelled, and RE-ROLLED if it comes back empty or short.
 
     MEASURED on episode 6's first assemble: five tones in one pass, four within
     0.2 dB of target and `grave` at -58.0 against -29.0.  `level` printed the
     clamp warning and the assemble used the file anyway, which put 29 seconds of
-    nothing under the Camberwell flashback.
+    nothing under the Camberwell flashback.  And on episode 10: `light` on
+    target by the whole-file number and 38 % music by `live_seconds`.
 
     A warning is not a fix.  `BED_MAX_LIFT_DB`'s own docstring already said what
     this means -- "a bed far under target is a failed generation, not something
@@ -348,25 +396,20 @@ def one_tone(room: Path, number: int, tone: str, want: float, engine: str) -> Pa
     target = episode_bed.tone_lufs(tone)
     for roll in range(BED_ROLLS):
         if not out.exists():
-            seed = bed_seed(out, number) + 977 * roll
-            workflow, values = bed_request(engine, want, seed, tone)
-            got = run(workflow, values, timeout=BED_TIMEOUT)
-            out.write_bytes(got[0].read_bytes())
+            generate(out, number, roll, tone, want, engine)
         try:
             loudness = integrated(out)
         except Exception:
             loudness = None
-        if not episode_bed.is_dead(loudness, target):
+        fault = tone_fault(out, loudness, target, want)
+        if not fault:
             level(out, target)
             print(f"    {tone:10s} {want:6.1f}s at {target:6.1f} LUFS -> {out.name}", flush=True)
             return out
-        dead = out.with_name(f"{out.stem}.empty{roll + 1}{out.suffix}")
-        out.rename(dead)
-        print(f"    {tone}: came back at {loudness:.1f} LUFS against {target:.1f} -- empty. "
-              f"Kept as {dead.name}; re-rolling ({roll + 1}/{BED_ROLLS}).", flush=True)
-    raise SystemExit(f"the {tone} bed came back empty {BED_ROLLS} times. The same prose "
-                     f"made the other tones in the same pass, so this is the model and not "
-                     f"the ask: check ComfyUI, then re-run assemble.")
+        refuse(out, roll, fault, loudness, target, want)
+    raise SystemExit(f"the {tone} bed came back empty or short {BED_ROLLS} times. The same "
+                     f"prose made the other tones in the same pass, so this is the model and "
+                     f"not the ask: check ComfyUI, then re-run assemble.")
 
 
 def level(path: Path, target: float) -> Path:

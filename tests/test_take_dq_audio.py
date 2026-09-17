@@ -1,4 +1,9 @@
-"""Only a dialogue take is gated on audio lag: a narration take carries silence."""
+"""Only a dialogue take is gated on audio lag: a narration take carries silence.
+
+The lag is the MUX lag -- the take's own soundtrack against the wav that drove
+it -- and the key says so.  It measures whether the sound was laid where we put
+it, not whether the mouth is on the words (analyst F, ep10: r 0.86-0.95 at
+exactly HANDLE on all seven takes; it cannot fail)."""
 import importlib.util
 from pathlib import Path
 
@@ -8,7 +13,7 @@ spec.loader.exec_module(dq)
 
 
 def test_a_silent_narration_take_is_not_gated_on_lag():
-    assert dq.lag_verdict(None, dialogue=False) == {"lag_s": 0.0, "lag_ok": True, "lag_measured": False}
+    assert dq.lag_verdict(None, dialogue=False) == {"mux_lag_s": 0.0, "lag_ok": True, "lag_measured": False}
 
 
 def test_a_dialogue_take_is_gated_on_lag():

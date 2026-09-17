@@ -44,6 +44,23 @@ runaway.  An emotion edit legitimately changes pace -- a grieving read is
 slower than a calm one -- so this is deliberately loose; it exists to catch
 9.36 s against 4.38 s, not to police delivery."""
 
+WPS_MAX = 3.8
+"""Words per second of SPEECH (trailing room excluded) over which a line is rushed.
+
+MEASURED on episode 10's thirty lines: mean 3.02 (episode 9: 3.17), and the
+ones the ear flagged as rushed -- l01 4.20, l10 4.11, l29 4.00 (Lucy's six-word
+button in 1.50 s, also the loudest line), l25 3.79, l28 3.74.  3.8 keeps the
+three that were heard as rushed out and the two that were not in."""
+
+TRAIL_S = 0.05
+"""Trailing room under which a line has nowhere to release.  MEASURED: the
+episode's median trail is 0.05 s; fourteen of thirty lines had less."""
+
+RELEASE_DB = 30.0
+"""How far under its peak the last 50 ms must sit for the line to have
+ended.  l14 ("young.") and l05 were at -25 and -30 dB with 0.00 s of room:
+the last consonant is cut off, and a listener hears the edit."""
+
 APOSTROPHE = re.compile(r"['‘’ʼ]")
 FILLER = re.compile(r"[^\w\s]")
 
@@ -63,6 +80,8 @@ class Verdict:
     stretch: float
     passed: bool
     why: str
+    wps: float = 0.0
+    abrupt: bool = False
 
     def line(self) -> str:
         """One row for a log or a report."""
@@ -181,51 +200,122 @@ def seconds_of(clip: Path) -> float:
     return float(info.frames) / float(info.samplerate)
 
 
-def judge(rate: float, stretch: float) -> tuple[bool, str]:
+def _mono(clip: Path):
+    """(samples as one channel, rate) of a clip."""
+    import soundfile as sf
+
+    audio, rate = sf.read(str(clip), dtype="float32", always_2d=True)
+    return audio.mean(axis=1), rate
+
+
+ROOM_FLOOR_DB = -50.0
+"""Under this, relative to the clip's peak, a sample is room and not voice.
+MEASURED on ep10: at -60 dB the PCM dither at the end of l29 (0.09 s of
+audible room) counts as sound and the trail reads 0.000 s; at -50 it reads
+0.056 s.  l14's trail is 0.000 s at every floor."""
+
+
+def tail_room(clip: Path) -> float:
+    """Seconds of room (ROOM_FLOOR_DB under the clip's peak) after the last sound."""
+    import numpy as np
+
+    mono, rate = _mono(Path(clip))
+    peak = float(np.abs(mono).max()) if len(mono) else 0.0
+    if peak < 1e-4:
+        return len(mono) / rate
+    loud = np.flatnonzero(np.abs(mono) >= peak * 10 ** (ROOM_FLOOR_DB / 20))
+    return round((len(mono) - 1 - int(loud[-1])) / rate, 4)
+
+
+def ends_abruptly(clip: Path) -> bool:
+    """Is the last consonant cut off?  The last 50 ms still peak within
+    RELEASE_DB of the clip's peak AND under TRAIL_S of room after them.  The
+    window's PEAK and not its RMS: that is the number the ear measured (l14
+    -25 dB, l05 -30 dB), and a consonant is a peak.  A silent clip is not
+    abrupt: there is nothing in it to cut."""
+    import numpy as np
+
+    mono, rate = _mono(Path(clip))
+    peak = float(np.abs(mono).max()) if len(mono) else 0.0
+    if peak < 1e-4 or tail_room(clip) >= TRAIL_S:
+        return False
+    last = mono[-max(int(rate * 0.05), 1):]
+    level = 20 * np.log10(max(1e-9, float(np.abs(last).max())) / peak)
+    return level > -RELEASE_DB
+
+
+def words_per_second(text: str, seconds: float) -> float:
+    """The pace of the line, from the words it was given and the seconds measured."""
+    if seconds <= 0:
+        return 0.0
+    return len(normalised(text)) / seconds
+
+
+def judge(rate: float, stretch: float, wps: float = 0.0, abrupt: bool = False) -> tuple[bool, str]:
     """The verdict in words: what went wrong, or that nothing did."""
     if rate > MAX_ERROR_RATE:
         return False, f"said something else (wer {rate:.2f} > {MAX_ERROR_RATE})"
     if stretch > MAX_STRETCH:
         return False, f"ran away ({stretch:.2f}x its source > {MAX_STRETCH})"
+    if abrupt:
+        return False, f"cut off (last 50 ms within {RELEASE_DB:.0f} dB of peak, under {TRAIL_S} s of room)"
+    if wps > WPS_MAX:
+        return False, f"rushed ({wps:.2f} words/s > {WPS_MAX})"
     return True, "said the line"
 
 
 def check(clip: Path, intended: str, transcribe: Callable[[Path], str] | None = None,
           source: Path | None = None) -> Verdict:
     """Listen to one clip and rule on it against the line it was asked to say."""
+    clip = Path(clip)
     listen = transcribe or transcriber()
-    heard = listen(Path(clip))
+    heard = listen(clip)
     rate = error_rate(heard, intended)
-    seconds = seconds_of(Path(clip))
+    seconds = seconds_of(clip)
     stretch = seconds / seconds_of(source) if source else 1.0
-    passed, why = judge(rate, stretch)
-    return Verdict(str(clip), intended, heard, rate, seconds, stretch, passed, why)
+    wps = words_per_second(intended, seconds - tail_room(clip))
+    abrupt = ends_abruptly(clip)
+    passed, why = judge(rate, stretch, wps, abrupt)
+    return Verdict(str(clip), intended, heard, rate, seconds, stretch, passed, why,
+                   round(wps, 2), abrupt)
 
 
 WHISPER_ROOT = ("D:/Projects/KingdomOfViSuReNa/alpha/ComfyUI_windows_portable/ComfyUI"
                 "/models/whisper")
 MODEL = "large-v3-turbo"
+DEVICE = "cpu"
+"""Where the ear runs.  The CPU, on purpose: the repo venv's torch is CPU-only,
+and a listen on the CPU never enters ComfyUI's single queue, so a DQ can run
+while a take renders instead of behind it.  MEASURED (ep10 DQ, F3): every
+take_dq and qc listen used to go through `comfy_transcriber` and wait on the
+render in front of it."""
 _HEARD = {}
 
 
-def transcriber(model: str = MODEL) -> Callable[[Path], str]:
-    """The real ear: local Whisper, loaded once and kept.
+def whisper_options(device: str) -> dict:
+    """What `transcribe` is called with: half precision only where it exists."""
+    return {"language": "en", "fp16": device != "cpu"}
+
+
+def transcriber(model: str = MODEL, device: str = DEVICE) -> Callable[[Path], str]:
+    """The real ear: local Whisper in THIS process, loaded once and kept.
 
     Import is deferred and the model cached module-side, because the gate is
     called once per clip and a 30-clip run must not load the weights 30 times.
     """
-    if model not in _HEARD:
+    key = (model, device)
+    if key not in _HEARD:
         try:
             import whisper
         except ImportError as why:  # pragma: no cover - environment, not logic
             raise NoTranscriber(
-                "openai-whisper is not importable here; run the gate under "
-                "ComfyUI's python, or pass transcribe=") from why
-        _HEARD[model] = whisper.load_model(model, download_root=WHISPER_ROOT)
-    engine = _HEARD[model]
+                "openai-whisper is not importable here; `uv sync --all-groups`, "
+                "run the gate under ComfyUI's python, or pass transcribe=") from why
+        _HEARD[key] = whisper.load_model(model, device=device, download_root=WHISPER_ROOT)
+    engine = _HEARD[key]
 
     def listen(clip: Path) -> str:
-        return engine.transcribe(str(clip), language="en", fp16=True)["text"].strip()
+        return engine.transcribe(str(clip), **whisper_options(device))["text"].strip()
 
     return listen
 
