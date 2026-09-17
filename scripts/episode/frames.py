@@ -69,13 +69,40 @@ def plate_prompt(setup: Setup, where: str, light: str) -> str:
     return location_prompt(setup.described, where if own else f"{where}, {light}")
 
 
+PLATE_ROLLS = 3
+"""Letterboxed rolls before the run stops: ep11's parlour at night came back
+padded with white bars on two seeds running, and nothing refused it."""
+ROLL_STEP = 100
+
+
+def plate_rolled(draw, out: Path, seed: int) -> Path:
+    """Draw with `draw(seed)` until the picture fills its frame; a letterboxed
+    roll is kept beside the plate as `rejected/<name>.bars<k>.png`."""
+    from PIL import Image
+
+    from studio import plate_gate
+
+    for k in range(PLATE_ROLLS):
+        made = conform(draw(seed + k * ROLL_STEP), out)
+        if not plate_gate.letterboxed(Image.open(made)):
+            return made
+        aside = out.parent / "rejected" / f"{out.stem}.bars{k + 1}{out.suffix}"
+        aside.parent.mkdir(parents=True, exist_ok=True)
+        made.replace(aside)
+    raise SystemExit(f"{out.name}: letterboxed on {PLATE_ROLLS} seeds; the prompt draws a wide picture -- "
+                     f"say the room closes on four sides and the camera stands inside it")
+
+
 def plate(name: str, setup: Setup, where: str, light: str, out: Path, seed: int) -> Path:
     if out.exists():
         return out
-    made = run(PLATE_WORKFLOW, {"prompt": plate_prompt(setup, where, light),
-                                "aspect_ratio": canvas.comfy_ratio(ASPECT), "megapixels": 1.0,
-                                "seed": seed, "steps": 8, "filename_prefix": f"ep_plate_{name}"})
-    return conform(made[0], out)
+
+    def draw(s: int) -> Path:
+        return run(PLATE_WORKFLOW, {"prompt": plate_prompt(setup, where, light),
+                                    "aspect_ratio": canvas.comfy_ratio(ASPECT), "megapixels": 1.0,
+                                    "seed": s, "steps": 8, "filename_prefix": f"ep_plate_{name}"})[0]
+
+    return plate_rolled(draw, out, seed)
 
 
 def refuse_unlit(episode: Episode) -> None:
