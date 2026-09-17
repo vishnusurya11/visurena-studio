@@ -530,7 +530,7 @@ LINES = [
     ("dialogue", "jefferson_hope", "Tomorrow is your last day. We ride tonight, or you are lost.", 18),
     ("dialogue", "john_ferrier", "Then we ride tonight. Every acre of it can stay.", 19),
     ("narration", "john_watson", "The lights went out, and one by one they passed through the side window into the garden.", 20),
-    ("narration", "john_watson", "At the gap in the hedge Hope dragged them down, and an owl hooted a few yards off.", 21),
+    ("narration", "john_watson", "At the gap in the hedge, Hope dragged them down. An owl hooted, a few yards off.", 21),
     ("narration", "john_watson", "Nine to seven, said a voice. Seven to five, said another; and two shadows went their ways.", 21),
     ("narration", "john_watson", "The horses waited in the Eagle Canyon; high in the pass, a voice rang out above them.", 22),
     ("dialogue", "unnamed_sentinel", "Who goes there? Nine from seven.", 23),
