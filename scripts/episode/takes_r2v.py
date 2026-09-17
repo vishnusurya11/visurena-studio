@@ -553,9 +553,52 @@ def prompts(book_id: str, number: int) -> None:
     print(f"take cards -> {out}", flush=True)
 
 
-def main(book_id: str, number: int, retake: list[int] | None = None, approved: bool = False) -> None:
+def retake_list(argv: list[str]) -> list[int]:
+    """The take indices `--retake=3,4,15` names; none without the flag."""
+    return [int(v) for a in argv if a.startswith("--retake=") for v in a.split("=", 1)[1].split(",") if v]
+
+
+def retake_why(argv: list[str]) -> str:
+    """The reason `--why=<text>` carries -- the gate row or the finding the round
+    answers.  The shell hands it over as one argument, spaces and all."""
+    return next((a.split("=", 1)[1].strip() for a in argv if a.startswith("--why=")), "")
+
+
+def retake_refusal(retake: list[int], why: str, last: bool) -> str | None:
+    """ONE BATCHED RETAKE ROUND PER MASTER, WITH A WRITTEN REASON (ep10 synthesis F1).
+
+    Episode 10 ordered ten renders in four waves as the reviews arrived; nine
+    were reviewer-driven, three waves were one or two takes, each wave paid a
+    ~300 s cold load and a re-cut + qc + eye cycle, and 30.8 min of GPU never
+    reached the picture.  A round of ONE take as its own wave cost 14.4 min of
+    wall for a 6.6 s take.  So: a retake names its reason, which run.py stamps
+    into the clock note, and a round of one take is refused unless the caller
+    declares it the last (`--last`) -- after the take review AND the owner's
+    read are both in, the retakes are ordered once."""
+    if not retake:
+        return None
+    if not why:
+        return "a retake names its reason: --why=<the gate row or finding it answers>"
+    if len(retake) == 1 and not last:
+        return (f"a round of one take (T{retake[0]:02d}) is refused: batch every retake the "
+                "review and the owner's read call for into one round, or pass --last to "
+                "declare this the last round for this master")
+    return None
+
+
+def mark_retake(c: dict, tries: int, why: str) -> None:
+    """A retaken card: a fresh seed, its try count, and the reason that ordered
+    it -- `retake_why` rides into the take's record beside the render numbers."""
+    c["seed"] += 101 * tries
+    c["tries"] = tries
+    c["retake_why"] = why
+
+
+def main(book_id: str, number: int, retake: list[int] | None = None, approved: bool = False,
+         why: str = "") -> None:
     """Render every take that has no record yet; `retake` re-renders those
-    indices with a fresh seed (the failed file is kept as T<NN>_failN.mp4)."""
+    indices with a fresh seed (the failed file is kept as T<NN>_failN.mp4)
+    and `why` -- the reason the round was ordered -- goes into each record."""
     book, episode = opened(book_id, number)
     # NO CELL FROM AN OLDER NUMBERING.  A cell is named by shot index, so a plan
     # that gains or loses a shot re-points every name after it at a different
@@ -587,11 +630,9 @@ def main(book_id: str, number: int, retake: list[int] | None = None, approved: b
     for c in built:
         out = take_dir / f"T{c['index']:02d}.mp4"
         if retake and c["index"] in retake:
-            tries = records.get(c["index"], {}).get("tries", 0) + 1
             if out.exists():
                 out.rename(episode_home.next_fail(take_dir, c["index"]))
-            c["seed"] += 101 * tries
-            c["tries"] = tries
+            mark_retake(c, records.get(c["index"], {}).get("tries", 0) + 1, why)
         elif c["index"] in records and records[c["index"]].get("shots") == c["shots"] and out.exists():
             continue
         graph = graph_for(c, book, number, take_dir)
@@ -627,8 +668,10 @@ def _set_no_ends(argv: list[str]) -> None:
 if __name__ == "__main__":
     _set_no_ends(sys.argv)
     number = int(sys.argv[2]) if len(sys.argv) > 2 and sys.argv[2].isdigit() else 1
-    retake = [int(v) for a in sys.argv if a.startswith("--retake=") for v in a.split("=", 1)[1].split(",") if v]
+    retake, why = retake_list(sys.argv), retake_why(sys.argv)
+    if refused := retake_refusal(retake, why, "--last" in sys.argv):
+        raise SystemExit(refused)
     if "--prompts" in sys.argv:
         prompts(sys.argv[1], number)
     else:
-        main(sys.argv[1], number, retake, approval.approved_for("render", sys.argv))
+        main(sys.argv[1], number, retake, approval.approved_for("render", sys.argv), why)

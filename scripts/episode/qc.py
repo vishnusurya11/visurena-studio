@@ -26,12 +26,21 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 
 from studio import edit_gate, episode_home, episode_seq_board as sq, voice_qc, youtube_publish as yp
+from studio import episode_takes as tk
 from studio.episode_spec import Episode
 from studio.trailer_assemble import clip_seconds, integrated, true_peak
 
 LUFS_BAND = (-15.5, -12.5)
 TP_CEILING = -1.0
 CUT_TOLERANCE = 0.12
+"""How far an EDIT-MADE cut may sit from its plan. A cut the model makes inside
+a take-run is judged at its grid frame instead (`grid_cut`)."""
+MAX_GAP_S = 6.0
+"""The longest hole in speech a delivered master may carry (ep10 synthesis
+B6/F6): ep05 4.4 s, ep07 4.5 s, ep09 3.25 s pass; ep10's 11.25 s wordless tail
+after the button -- the bed dying at 166 s into the only voiceless stretch --
+fails. The plan gate's twin, read off the file."""
+FPS = 24
 SCENE_THRESHOLD = 0.1
 MAX_ERROR_RATE = voice_qc.MAX_ERROR_RATE
 PTS = re.compile(r"pts_time:\s*([0-9.]+)")
@@ -102,13 +111,56 @@ def longest_gap(lines: list[dict], until: float) -> float:
     return round(max(gaps), 2) if gaps else until
 
 
-def internal_cuts(placed: dict, records: list[dict]) -> list[float]:
-    """Cuts that fall INSIDE a take-run (engine r2v): the model makes them,
-    the edit does not, so a soft one is reported, never failed."""
+def internal_pairs(placed: dict, records: list[dict]) -> list[tuple[float, float]]:
+    """(cut, start of its take) for every cut INSIDE a take-run (engine r2v):
+    the shot boundaries after the run's first, and each shot's own sub-cuts."""
     by = {s["index"]: s for s in placed["shots"]}
-    soft = [by[i]["t_start"] for r in records for i in (r.get("shots") or [])[1:]]
-    soft += [c for r in records for i in (r.get("shots") or []) for c in by[i].get("cuts", [])]
-    return soft
+    pairs = []
+    for r in records:
+        shots = r.get("shots") or []
+        start = by[shots[0]]["t_start"] if shots else 0.0
+        pairs += [(by[i]["t_start"], start) for i in shots[1:]]
+        pairs += [(c, start) for i in shots for c in by[i].get("cuts", [])]
+    return pairs
+
+
+def internal_cuts(placed: dict, records: list[dict]) -> list[float]:
+    """Cuts that fall INSIDE a take-run: the model makes them, the edit does
+    not, so one the picture lacks is reported, never failed."""
+    return [cut for cut, _ in internal_pairs(placed, records)]
+
+
+def grid_cut(planned: float, take_frame: int, seen: list[float], fps: int = FPS,
+             tol: float = CUT_TOLERANCE) -> dict:
+    """One cut inside a take-run, judged where the model CAN land it.
+
+    The pin is snapped forward to the token grid (`episode_takes.grid_frame`,
+    17k + {0,1,5,9,13}) by `takes_r2v.on_grid`, and the model obeys the snapped
+    frame.  Episode 10's four internal cuts landed at take frames 85, 77, 145,
+    85 against planned 84, 74, 144, 84 -- each exactly its grid frame -- and the
+    3-frame snap is 0.125 s, 5 ms past CUT_TOLERANCE, so cut 22 was "missing".
+    It is late by three frames and on the grid, which is what this says."""
+    grid = tk.grid_frame(take_frame)
+    expect = planned + (grid - take_frame) / fps
+    near = min(seen, key=lambda s: abs(s - expect), default=None)
+    found = near is not None and abs(near - expect) <= tol
+    return {"at": planned, "take_frame": take_frame, "grid_frame": grid,
+            "seen": near if found else None,
+            "late_frames": round((near - planned) * fps) if found else None,
+            "on_grid": found, "missing": not found}
+
+
+def internal_cut_rows(placed: dict, records: list[dict], seen: list[float], fps: int = FPS) -> list[dict]:
+    """`grid_cut` for every cut inside a take-run; the take frame is the cut's
+    distance from the run's first shot, since take frame 0 IS that shot's start."""
+    return [grid_cut(cut, round((cut - start) * fps), seen, fps)
+            for cut, start in internal_pairs(placed, records)]
+
+
+def drop_on_grid(missing: list[float], rows: list[dict]) -> list[float]:
+    """A cut found at its grid frame is present; it leaves the missing list."""
+    present = {row["at"] for row in rows if row.get("on_grid")}
+    return [cut for cut in missing if cut not in present]
 
 
 def takes_rollup(take_dir: Path) -> dict:
@@ -192,6 +244,7 @@ def verdict(report: dict) -> bool:
     The take and sheet roll-ups are printed, never failed on."""
     hard = [c for c in report["missing_cuts"] if c not in report.get("internal_cuts", [])]
     return (report["lufs_ok"] and report["tp_ok"] and not hard
+            and report.get("longest_gap_s", 0.0) <= MAX_GAP_S
             and all(row["passed"] for row in report["lines"])
             # AN ABSENT EDIT BLOCK IS NOT A PASS.  `.get("edit", {}).get("ok", True)`
             # made a missing measurement clean twice over.
@@ -237,19 +290,23 @@ def main(book_id: str, number: int, engine: str = "i2v") -> None:
     # AFTER the edit gate, because a cut it PROVED frame-exact is present whatever
     # ffmpeg's scene metric saw.  Episode 5 plays five of its six setups in one
     # room, where a real cut between two corners can score under the threshold.
-    report["missing_cuts"] = missing_cuts(planned_cuts(placed), seen,
-                                          proven=report["edit"].get("cuts"))
+    report["internal_cut_rows"] = internal_cut_rows(placed, records, seen)
+    report["missing_cuts"] = drop_on_grid(
+        missing_cuts(planned_cuts(placed), seen, proven=report["edit"].get("cuts")),
+        report["internal_cut_rows"])
     report["takes"] = takes_rollup(take_dir)
     report["sheets"] = sheets_rollup(episode_home.boards_dir(book, number), book)
     report["passed"] = verdict(report)
     report_path = episode_home.home(book, number) / ("qc.json" if engine == "i2v" else f"qc_{engine}.json")
     episode_home.write_json(report_path, report)
     said = sum(row["passed"] for row in report["lines"])
+    grid = report["internal_cut_rows"]
+    late = [r["late_frames"] for r in grid if r["on_grid"]]
     print(f"{report['seconds']:.2f}s | {lufs:.1f} LUFS {tp:.1f} dBTP | "
           f"cuts missing {len(report['missing_cuts'])}/{len(report['planned_cuts'])} "
-          f"(soft inside take-runs: {len([c for c in report['missing_cuts'] if c in report['internal_cuts']])}) | "
+          f"(inside take-runs: {len(late)}/{len(grid)} on grid, late up to {max(late, default=0)} f) | "
           f"lines heard {said}/{len(report['lines'])} | speech {report['speech_s']}s, "
-          f"longest gap {report['longest_gap_s']}s | {'PASS' if report['passed'] else 'FAIL'}")
+          f"longest gap {report['longest_gap_s']}s (wall {MAX_GAP_S}) | {'PASS' if report['passed'] else 'FAIL'}")
     edit = report["edit"]
     print(f"edit: {'OK' if edit['ok'] else 'FAIL'}"
           + (f" ({edit.get('note')})" if not edit.get("measured") else

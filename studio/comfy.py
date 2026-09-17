@@ -232,6 +232,37 @@ def running(prompt_id: str) -> bool:
     return any(item[1] == prompt_id for item in _get("/queue").get("queue_running", []))
 
 
+def _get_once(path: str, timeout: float = 5.0) -> dict:
+    """One GET with no restart wait: a question about the queue is answered
+    now or not at all."""
+    with urllib.request.urlopen(f"{HOST}{path}", timeout=timeout) as response:
+        return json.loads(response.read())
+
+
+def queue_counts(fetch=None) -> tuple[int, int]:
+    """(running, pending) off /queue.  An engine that cannot be reached holds
+    no queue -- a restart empties it -- and the stage itself will meet the
+    restart; an engine that ANSWERS with an error is not absent, and raises."""
+    try:
+        queue = (fetch or _get_once)("/queue")
+    except UNREACHABLE as failure:
+        if not down(failure):
+            raise
+        return 0, 0
+    return len(queue.get("queue_running", [])), len(queue.get("queue_pending", []))
+
+
+def busy(fetch=None) -> bool:
+    """Whether the engine has work: running + pending > 0.
+
+    Episode 10, 20:20: a take_dq's seven Whisper jobs were queued when the r4
+    takes were submitted; T02 rendered at 598 s (warm 266) and the DQ ran five
+    times its uncontended time and was then re-run.  `run.py` asks this before
+    any stage that touches the engine."""
+    running, pending = queue_counts(fetch)
+    return running + pending > 0
+
+
 def lost(prompt_id: str) -> bool:
     """The engine knows nothing of the job -- neither queued, nor running,
     nor finished.  Only a restart forgets a job."""
