@@ -79,3 +79,6 @@ models/
 
 # downloaded OAuth client (never commit)
 client_secret*.json
+# the face detector the take gate reads with (OpenCV zoo, 232 KB)
+!studio/models/
+!studio/models/yunet.onnx

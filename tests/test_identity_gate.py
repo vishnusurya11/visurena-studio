@@ -22,11 +22,27 @@ def face(k, h, watson, holmes, stamford, v=None, yaw=0.0, seg=0):
 
 def test_the_thresholds_are_the_measured_populations():
     """review8/identity.md: the right man scores 0.61-0.94, strangers 0.43/0.21/
-    0.03/-0.04, profiles 0.51-0.69 (excluded); readable = 12 % of frame height
-    (faces at 8-10 % score 0.46-0.72 and are not judgeable); in-segment drift is
-    >= 0.81 on every real pair against 0.72 for the one true slip (iteration 3 T09)."""
-    assert (g.READABLE, g.FRONTAL) == (0.12, 0.50)
+    0.03/-0.04 (MATCH 0.60, STRANGER 0.45); in-segment drift is >= 0.81 on every
+    real ep01 pair against 0.72 for the one true slip (iteration 3 T09).
+
+    RECALIBRATED on episode 10 (docs/calibration/identity.md, dq10/A): READABLE
+    0.12 -> 0.15, because T06's 0.12-0.13 faces are the only frontal faces that
+    score under 0.60 for the right man; FRONTAL 0.50 -> 0.35, because T29 f5
+    (yaw 0.44) and T33 f4 (yaw 0.43) are full profiles by eye and the old wall
+    let them into the drift pair."""
+    assert (g.READABLE, g.FRONTAL) == (0.15, 0.35)
     assert (g.MATCH, g.STRANGER, g.DRIFT) == (0.60, 0.45, 0.75)
+
+
+def test_a_face_at_the_old_readable_floor_is_no_longer_judged():
+    """ep10 T06: Ferrier at 0.12-0.13 of frame scored 0.56-0.60 while frontal."""
+    assert g.readable([face(1, 0.13, 0.1, 0.1, 0.58)]) == []
+
+
+def test_a_three_quarter_turn_is_a_profile_now():
+    """ep10 T29 f5 at yaw 0.44 and T33 f4 at 0.43 are profiles by eye."""
+    assert g.readable([face(5, 0.3, 0.1, 0.1, 0.47, yaw=0.44)]) == []
+    assert g.readable([face(0, 0.3, 0.1, 0.1, 0.79, yaw=0.30)]) != []
 
 
 def test_small_faces_are_not_judged():
@@ -101,6 +117,49 @@ def test_drift_needs_two_frames():
     assert g.drift([face(0, 0.4, 0.70, 0.3, 0.1, vec(4))]) == {}
 
 
+def swing(seed: int, amount: float) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
+    """One man in three poses: the base vector pushed one way, then the other,
+    by `amount` along a direction orthogonal to it."""
+    b, u = vec(seed), vec(seed + 100)
+    u = u - (u @ b) * b
+    u /= np.linalg.norm(u)
+    first, last = b + amount * u, b - amount * u
+    return first / np.linalg.norm(first), b, last / np.linalg.norm(last)
+
+
+def test_a_pose_swing_over_three_frames_is_not_drift():
+    """ep10: same-person first-vs-last pairs measured 0.60-0.69 whenever the
+    head was pitched or turned, while every frame against the segment's MEDIAN
+    embedding measured 0.82-0.98.  With three or more readable frames the
+    drift is the minimum cosine to the median, not the first-last pair."""
+    first, mid, last = swing(7, 0.6)
+    assert float(first @ last) < g.DRIFT                      # the pair alone would have failed it
+    faces = [face(0, 0.4, 0.70, 0.3, 0.1, first), face(2, 0.4, 0.72, 0.3, 0.1, mid),
+             face(4, 0.4, 0.71, 0.3, 0.1, last)]
+    assert g.drift(faces)["john_watson"] >= g.DRIFT
+    assert g.judge(faces, ["john_watson"], ["char-john_watson.png"]).ok
+
+
+def test_a_real_slip_in_a_run_of_three_is_still_drift():
+    """Two frames of one man and a third of another: the third against the
+    median of the run reads as a stranger's cosine."""
+    a, c = vec(1), vec(2)
+    faces = [face(0, 0.4, 0.70, 0.3, 0.1, a), face(2, 0.4, 0.70, 0.3, 0.1, a), face(4, 0.4, 0.62, 0.3, 0.1, c)]
+    assert g.drift(faces)["john_watson"] < g.DRIFT
+
+
+def test_two_frames_still_compare_first_with_last():
+    """ep01's one true slip (iteration 3 T09) had two readable frames at 0.72."""
+    first, _, last = swing(8, 0.45)
+    faces = [face(0, 0.4, 0.70, 0.3, 0.1, first), face(4, 0.4, 0.66, 0.3, 0.1, last)]
+    assert g.drift(faces)["john_watson"] == round(float(first @ last), 3)
+
+
+def test_the_median_embedding_is_a_unit_vector():
+    first, mid, last = swing(9, 0.6)
+    assert abs(float(np.linalg.norm(g.median_embedding([first, mid, last]))) - 1.0) < 1e-6
+
+
 # the feature flag -------------------------------------------------------------
 
 def test_the_gate_is_off_without_the_face_model(monkeypatch):
@@ -130,10 +189,33 @@ def test_an_explicit_off_switch_disables_a_working_backend(monkeypatch):
     assert g.enabled()
 
 
-def test_a_measured_verdict_carries_the_flags(monkeypatch):
+def test_a_measured_verdict_carries_the_flags_and_stays_advisory(monkeypatch):
+    """ARMED is False for one episode: on ep10 every hard flag the calibrated
+    gate raised was pose (four same-person takes), and its only true positives
+    are two ep01 takes.  The finding is kept, in `flags`, and fails nothing."""
     faces = [face(2, 0.3, 0.40, 0.43, 0.28)]
     monkeypatch.setattr(g, "_backend", lambda: object())
     monkeypatch.setattr(g, "observe", lambda *args, **kw: faces)
     report = g.identity_dq("T09.mp4", [], ["john_watson"], ["char-john_watson.png"])
-    assert report["measured"] and not report["ok"]
-    assert report["hard"] == ["STRANGER frame 2: best sherlock_holmes 0.43 < 0.45"]
+    assert report["measured"] and report["ok"]
+    assert report["hard"] == [] and not g.ARMED
+    assert report["flags"] == ["STRANGER frame 2: best sherlock_holmes 0.43 < 0.45"]
+    assert "advisory" in report["note"]
+
+
+def test_arming_the_gate_makes_the_same_finding_hard(monkeypatch):
+    faces = [face(2, 0.3, 0.40, 0.43, 0.28)]
+    monkeypatch.setattr(g, "_backend", lambda: object())
+    monkeypatch.setattr(g, "observe", lambda *args, **kw: faces)
+    monkeypatch.setattr(g, "ARMED", True)
+    report = g.identity_dq("T09.mp4", [], ["john_watson"], ["char-john_watson.png"])
+    assert not report["ok"] and report["hard"] == ["STRANGER frame 2: best sherlock_holmes 0.43 < 0.45"]
+
+
+def test_observe_is_still_the_placeholder_without_facenet():
+    """The venv has OpenCV's YuNet (boxes and landmarks; studio/face_end.py)
+    and not facenet-pytorch (embeddings), so the measurer stays unwritten and
+    the gate stays honestly 'not measured'."""
+    import pytest
+    with pytest.raises(NotImplementedError):
+        g.observe(None, [], {})

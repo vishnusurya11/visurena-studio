@@ -2,14 +2,23 @@
 the same person from a segment's first frame to its last?
 
 Two halves.  The JUDGE (everything above `observe`) is pure arithmetic over face
-observations and is always available.  The MEASURER needs a face model
+observations and is always available.  The MEASURER needs a face EMBEDDER
 (facenet-pytorch: MTCNN boxes + a VGGFace2 embedding), which is NOT in this
 venv, so it sits behind a feature flag: `enabled()` is False, `identity_dq`
 returns "not measured", and no take fails on an identity the gate never read.
+(The venv does carry OpenCV's YuNet -- boxes and five landmarks, no embedding
+-- for studio/face_end.py; a detector cannot say WHO, so `observe` waits.)
 
 To turn it on:  uv add torchvision==0.29.0
-                uv pip install --no-deps facenet-pytorch==2.6.0
+                uv pip install --no-deps facenet-pytorch==2.6.0  (needs tqdm too)
                 uv sync --all-groups      (uv add strips the music/voice groups)
+                then write `observe` from dq10/A/scan.py (embed, yaw, bank_of).
+
+RECALIBRATED on episode 10 (docs/calibration/identity.md, dq10/A): the gate
+as first calibrated on ep01 would have hard-failed four GOOD ep10 takes on
+drift (T06 0.60, T21 0.69, T29 0.43, T33 0.67 -- all the same person, all
+pose) and caught no swap, because there was none.  READABLE, FRONTAL and the
+drift statistic moved; the row stays ADVISORY (`ARMED`) for one episode.
 """
 from __future__ import annotations
 
@@ -22,13 +31,23 @@ import numpy as np
 SWITCH = "VISURENA_IDENTITY_GATE"
 """Set to `off` to silence a working backend; anything else leaves it to the import."""
 
-READABLE = 0.12
+ARMED = False
+"""False: a STRANGER or DRIFT finding is reported in `flags` and fails nothing.
+ep10's only hard flags were four same-person takes read in a bad pose; the
+gate's only true positives are two ep01 takes.  One clean episode on the
+recalibrated numbers, then True."""
+
+READABLE = 0.15
 """CALIBRATION: face box height / frame height.  docs/calibration/identity.md -- faces at
 8-10 % of frame height score 0.46-0.72 against their own sheet and are not
-judgeable; at 12 % and above the score separates the right man from a stranger."""
-FRONTAL = 0.50
+judgeable.  Was 0.12; ep10 T06's faces at 0.12-0.13 are the only frontal
+faces that score under MATCH (0.56-0.60) for the right man, so the floor
+moved to 0.15."""
+FRONTAL = 0.35
 """CALIBRATION: nose offset from the eye midpoint in eye-distances.  Profiles
-score 0.51-0.69 against their own sheet (iteration 3 T09 frame 3 at yaw 0.92)."""
+score 0.51-0.69 against their own sheet (iteration 3 T09 frame 3 at yaw 0.92).
+Was 0.50; ep10 T29 f5 (yaw 0.44) and T33 f4 (0.43) are full profiles by eye
+and dragged the first-vs-last pair to 0.43 and 0.67 for the same man."""
 MATCH = 0.60
 """CALIBRATION: cosine to the character's cast sheet.  The right man measured
 0.61-0.94 (0.72-0.94 when his sheet was among the take's refs)."""
@@ -36,9 +55,14 @@ STRANGER = 0.45
 """CALIBRATION: best cosine below this is nobody from the cast -- the four real
 strangers on disk measured 0.43, 0.21, 0.03 and -0.04."""
 DRIFT = 0.75
-"""CALIBRATION: cosine between the first and last readable frame of one character
-WITHIN one pinned segment.  Real pairs measured >= 0.81; the one true identity
-slip (iteration 3 T09) measured 0.72."""
+"""CALIBRATION: the cosine that says one character stayed one man WITHIN one
+pinned segment.  With three or more readable frames it is the minimum cosine
+of each frame to the run's MEDIAN embedding: ep10 same-person minimum 0.82-0.98
+in every take (T06 0.84, T21 Lucy 0.88, T33 0.82).  With two frames it is the
+pair itself: ep01 real pairs measured >= 0.81 and the one true slip (iteration
+3 T09, two frames) 0.72.  The pair is the statistic most sensitive to pose --
+ep10's same-person pairs read 0.60-0.69 whenever the head was pitched or
+turned -- which is why it is used only when there is nothing else."""
 
 
 @dataclass
@@ -105,15 +129,33 @@ def uncast(faces: list[Face], expected: list[str]) -> list[str]:
     return sorted(seen - set(expected))
 
 
+def median_embedding(vecs: list[np.ndarray]) -> np.ndarray:
+    """The coordinate-wise median of unit vectors, renormalised: the run's centre,
+    which one bad pose cannot drag."""
+    m = np.median(np.stack(vecs), axis=0)
+    return m / (np.linalg.norm(m) or 1.0)
+
+
+def run_drift(run: list[Face]) -> float | None:
+    """One character's readable run in one segment: the minimum cosine to the
+    run's median (n >= 3), the pair itself (n = 2), nothing (n < 2)."""
+    if len(run) >= 3:
+        m = median_embedding([f.vec for f in run])
+        return round(min(float(f.vec @ m) for f in run), 3)
+    if len(run) == 2 and run[0].k != run[-1].k:
+        return round(float(run[0].vec @ run[-1].vec), 3)
+    return None
+
+
 def drift(faces: list[Face]) -> dict[str, float]:
-    """Per character: the lowest cosine between the first and last frame he is
-    readable in within one segment (across a cut the framing changes by design)."""
+    """Per character: the lowest run_drift over the segments he is readable in
+    (across a cut the framing changes by design)."""
     out: dict[str, float] = {}
     for who in {identify(f) for f in readable(faces)} - {None}:
         for seg in sorted({f.seg for f in faces}):
             run = [f for f in readable(faces) if identify(f) == who and f.seg == seg and f.vec is not None]
-            if len(run) >= 2 and run[0].k != run[-1].k:
-                c = round(float(run[0].vec @ run[-1].vec), 3)
+            c = run_drift(run)
+            if c is not None:
                 out[who] = min(out.get(who, 1.0), c)
     return out
 
@@ -195,11 +237,15 @@ NOT_MEASURED = {"measured": False, "ok": True, "note": "not measured: face model
 
 def identity_dq(video, segments: list, expected: list[str], refs: list[str],
                 sheets: dict | None = None) -> dict:
-    """The take's identity report, or the honest 'not measured' when the flag is off."""
+    """The take's identity report, or the honest 'not measured' when the flag is
+    off.  Until `ARMED`, a hard finding is carried in `flags` and `note` and
+    fails nothing: the row prints, the take passes."""
     if not enabled():
         return dict(NOT_MEASURED)
     v = judge(observe(video, segments, sheets or {}), expected, refs)
-    return {"measured": True, "ok": v.ok, "note": "", "flags": v.flags, "hard": v.hard, "present": v.present}
+    hard = v.hard if ARMED else []
+    note = "" if ARMED or not v.hard else "advisory for one episode: " + "; ".join(v.hard)
+    return {"measured": True, "ok": not hard, "note": note, "flags": v.flags, "hard": hard, "present": v.present}
 
 
 def sheet_paths(book: Path, cast: list[str]) -> dict[str, Path]:

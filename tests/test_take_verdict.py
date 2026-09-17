@@ -210,8 +210,10 @@ def test_the_picture_rows_are_not_measured_while_their_modules_are_absent(monkey
     measured` row -- a gate may say it could not read something; it may not
     be silent and be taken for a pass."""
     import sys
+    import studio
     for name in ("studio.face_end", "studio.take_look", "studio.take_edit"):
         monkeypatch.setitem(sys.modules, name, None)          # `from studio import x` raises ImportError
+        monkeypatch.delattr(studio, name.split(".")[-1], raising=False)   # and the package attribute cache
     rows = {g.name: g for g in tv.picture_rows(Path("T01.mp4"), {"placed_seconds": 5.0}, 5.0)}
     assert list(rows) == ["face-at-end", "look", "post-cut", "pulse"]
     assert all(g.value is None and g.ok and not g.hard and g.note == "not measured" for g in rows.values())
@@ -230,6 +232,7 @@ def test_the_picture_rows_are_wired_by_interface_when_the_modules_exist(monkeypa
         tv.Gate("post-cut", 8.6, False, False, "8.6", 5.0), tv.Gate("pulse", 0.1, True, False, "0.1")]
     for name, mod in (("studio.face_end", face_end), ("studio.take_look", take_look), ("studio.take_edit", take_edit)):
         monkeypatch.setitem(sys.modules, name, mod)
+        monkeypatch.setattr(__import__("studio"), name.split(".")[-1], mod, raising=False)
     record = {"placed_seconds": 5.0, "seconds": 5.3}
     rows = tv.picture_rows(Path("T01.mp4"), record, 5.0)
     assert [g.name for g in rows] == ["face-at-end", "look", "post-cut", "pulse"]

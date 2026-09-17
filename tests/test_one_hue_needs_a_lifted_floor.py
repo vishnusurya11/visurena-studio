@@ -39,9 +39,26 @@ def test_low_variety_with_no_floor_is_one_hue_even_under_the_share_wall():
     assert lg.one_hue(0.40, 0.70, p5=25.0, near_black=0.02)
 
 
-def test_the_share_wall_alone_is_enough_whatever_the_floor():
-    """One hue filling two thirds of the frame is one hue, black or not."""
-    assert lg.one_hue(0.70, 1.30, p5=3.0, near_black=0.50)
+def test_a_share_wall_over_a_black_floor_is_a_lamp_not_a_print():
+    """ep09's Q28_0A, the lamp insert the module docstring calls the proof the
+    drawer can do it: share 0.85, entropy 0.39, p5 ~ 0, near-black ~ 0.6.  The
+    share wall alone fired on it at sheet time, and on Q09_0 (0.60), Q18_0A
+    (0.64), 45/225 ep05 take frames and 31/225 ep07 frames -- the GOOD
+    episodes.  The floor separates everything the wall was meant to; the wall
+    separates nothing on its own (dq10/C).  One hue needs the lifted floor on
+    BOTH branches."""
+    assert not lg.one_hue(0.85, 0.39, p5=0.4, near_black=0.60)
+    assert not lg.one_hue(0.70, 1.30, p5=3.0, near_black=0.50)
+
+
+def test_the_share_wall_still_fires_over_a_lifted_floor():
+    """ep09's sunlit orange: two thirds of the frame one hue and nothing black."""
+    assert lg.one_hue(0.70, 1.30, p5=22.0, near_black=0.05)
+
+
+def test_no_floor_numbers_is_no_one_hue_verdict():
+    """A caller that passes no floor has not shown a lifted one."""
+    assert not lg.one_hue(0.85, 0.39)
 
 
 def test_gaslit_london_passes():

@@ -110,7 +110,7 @@ def dominant_hue(h: np.ndarray, s: np.ndarray, v: np.ndarray) -> tuple[int, floa
 
 def one_hue(share: float, entropy: float, p5: float | None = None,
             near_black: float | None = None) -> bool:
-    """One hue is the SHARE wall, or low variety in a picture that has also lost
+    """One hue is the SHARE wall or low variety, in a picture that has ALSO lost
     its floor. A grey picture (share 0) has no hue to be one of.
 
     MEASURED building episode 10: every cell kept its floor (median p5 4.1, half
@@ -121,13 +121,22 @@ def one_hue(share: float, entropy: float, p5: float | None = None,
     scores like a bleached noon. What separated ep09 from ep07 was the dominant
     share (0.69 against 0.26) TOGETHER with a lifted floor. Reviewer 8's words:
     the loss was "no direction and no floor", not "one hue". So low entropy
-    counts only where the floor is gone; ep10 at share 0.39 passes."""
+    counts only where the floor is gone; ep10 at share 0.39 passes.
+
+    THE SHARE WALL NEEDS THE FLOOR TOO (dq10/C, 2026-09-16). Left unconditional
+    it fired at sheet time on Q09_0 (0.60), Q18_0A (0.64) and Q28_0A -- share
+    0.85 over p5 ~ 0, the lamp insert this module's docstring calls the proof
+    the drawer can do it -- and on 45/225 ep05 and 31/225 ep07 take frames, the
+    GOOD episodes, every one a warm insert or lamp close over near-black
+    0.40-0.58. In ep09, of the 19 takes over the wall, the 10 that kept their
+    floor were its praised lamplit closes. A share wall over a black floor is a
+    lamp, not a print; the floor separates everything the wall was meant to.
+    The roll-up is unchanged in effect: ep09's median share 0.67 sits over a
+    median p5 of 17.8 and near-black 0.09, so it still fails both ways."""
     if share <= 0:
         return False
-    if share > ONE_HUE_SHARE:
-        return True
     lifted = p5 is not None and near_black is not None and no_black_floor(p5, near_black)
-    return entropy < HUE_ENTROPY_FLOOR and lifted
+    return lifted and (share > ONE_HUE_SHARE or entropy < HUE_ENTROPY_FLOOR)
 
 
 def judge(path: Path) -> dict:

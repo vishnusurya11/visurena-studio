@@ -40,9 +40,18 @@ def lifted_grey(side=256):
 
 
 def orange_field(side=256):
-    """Every pixel orange, with a black band so only the hue is at fault."""
+    """Every pixel orange and nothing black: a lifted one-hue print.  It used
+    to carry a black band 'so only the hue is at fault' -- but a hue over a
+    black floor is a lamp, not a fault (tests/test_one_hue_needs_a_lifted_floor.py),
+    so the fixture lost its band when the wall gained its floor."""
     rgb = np.zeros((side, side, 3))
     rgb[..., 0], rgb[..., 1], rgb[..., 2] = 210.0, 120.0, 30.0
+    return rgb
+
+
+def orange_over_black(side=256):
+    """The same orange with a black band along the bottom: a lamp over a floor."""
+    rgb = orange_field(side)
     rgb[-int(side * 0.2):] = 0.0
     return rgb
 
@@ -86,6 +95,11 @@ class TestOneHue:
         assert got["dominant_share"] > lg.ONE_HUE_SHARE
         assert got["hue_entropy"] < lg.HUE_ENTROPY_FLOOR
         assert any(f.startswith("one hue") for f in got["faults"])
+
+    def test_an_orange_field_over_a_black_floor_is_not_one_hue(self, tmp_path):
+        got = lg.judge(picture(tmp_path, "c2.png", orange_over_black()))
+        assert got["dominant_share"] > lg.ONE_HUE_SHARE
+        assert not any(f.startswith("one hue") for f in got["faults"])
 
     def test_six_hues_are_not_one(self, tmp_path):
         got = lg.judge(picture(tmp_path, "d.png", many_hues()))

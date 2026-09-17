@@ -324,3 +324,63 @@ tail is where both of iteration 3's slips lived (T09 tail 63.2–65.2 s, T21_fai
 - `cells_unreferenced.png` — the storyboard cells behind the unreferenced faces
 - `evidence_eye.png`, `drift_pairs.png` — the flagged/suspect faces beside their cast sheets at full resolution
 - `durations.json`, `smoke.py`, `conv.py`, `scan.log` — support
+
+
+---
+
+# Episode 10 populations and the recalibration (2026-09-16)
+
+Source: dq10 analyst A (`scratchpad\dq10\A.md`, `scan.log`, `scan2.log`, `identity_scan_ep10.json`):
+the 30 kept ep10 takes at 6 frames each, facenet-pytorch (MTCNN + InceptionResnetV1/VGGFace2) on
+CPU in a scratch venv, scored against the nine cast pictures `char-{brigham_young,john_ferrier,
+lucy_ferrier}{,_indoor,_outdoor}.png`.  Cast x cast: Young x Ferrier -0.01, Young x Lucy -0.01,
+Ferrier x Lucy 0.15 -- and Ferrier x Stangerson 0.62-0.66, which is the next episode's problem.
+
+## The populations, readable frames against the character's best sheet
+
+| character | takes | cosine | notes |
+|---|---|---|---|
+| Brigham Young | 11 (T04, T05, T07, T10, T13, T15, T16 + hands) | 0.67-0.89 | never below MATCH; T04 at h 0.19 is the low end |
+| John Ferrier | 15 | 0.56-0.85 | 0.56-0.60 only at h 0.12-0.13 (T06); T12 f3 WEAK 0.59 at h 0.15 |
+| Lucy Ferrier | 5 (T21, T22, T27, T29, T31) | 0.58-0.79 | 0.49 with a hand over the eye (T27 f1); 0.47 in profile (T29 f5) |
+| strangers | none | -- | no STRANGER, no UNCAST but the S29 insert intrusion |
+
+## What the ep01 constants did on ep10
+
+| verdict | takes | by eye |
+|---|---|---|
+| STRANGER (hard) | none | correct |
+| DRIFT (hard), first-vs-last | T06 Ferrier 0.60; T21 Lucy 0.69; T29 Lucy 0.43; T33 Ferrier 0.67 | all four the same person: T29 f5 a full profile passed by yaw 0.44 < 0.50; T33 f4 at yaw 0.43 (frontal-only pair 0.91); T21 head bowed (pitch); T06 faces at the 0.12 floor with the coat changing |
+| WEAK (advisory) | T06 f1/f3, T12 f3, T21 f0, T27 f1, T29 f5 | small, occluded or turned |
+
+Four good takes (~11 min of 4090 each) refused, no swap caught, because there was none.  The
+ep01 sentence "real pairs >= 0.81" does not survive a pitched or turned head: same-person
+first-vs-last pairs measure 0.60-0.71 whenever the face is <= 0.14 of frame, bowed, or past
+yaw 0.4.
+
+## The recalibration (studio/identity_gate.py)
+
+| constant | was | now | why |
+|---|---|---|---|
+| `READABLE` | 0.12 | 0.15 | T06's 0.12-0.13 faces are the only frontal faces under 0.60 for the right man |
+| `FRONTAL` | 0.50 | 0.35 | T29 f5 (0.44) and T33 f4 (0.43) are profiles by eye; removes T29 (n < 2) and lifts T33 0.67 -> 0.91, T27 0.55 -> 0.87 |
+| `drift()` | first vs last | min cosine of each readable frame to the run's MEDIAN embedding when n >= 3; the pair when n = 2 | same-person minimum-to-median 0.82-0.98 in every take (T06 0.84, T21 Lucy 0.88, T33 0.82); the pair is the statistic most sensitive to pose.  n = 2 keeps ep01's one true slip (T09, two frames, 0.72) |
+| `ARMED` | -- | False | the row stays ADVISORY for one episode: findings go to `flags` and `note`, `hard` is empty |
+
+With the three changes the gate flags nothing on ep10 and still flags ep01's T09 (two frames,
+0.72 < 0.75) and T21_fail1 (stranger, 0.43 < 0.45).
+
+## What is and is not in the venv
+
+`opencv-python-headless==5.0.0.93` is in the lock with YuNet (`studio/models/yunet.onnx`) for the
+face-at-end row (`studio/face_end.py`): boxes and five landmarks, no embedding.  facenet-pytorch
+is not, so `identity_gate.observe` is still the placeholder and the row still says "not
+measured"; the measurer, when written, is the forty lines of `dq10\A\scan.py` (`embed`, `yaw`,
+`bank_of`, per-segment sampling) on the recipe in the module docstring.
+
+## Seen and not measured
+
+Grooming is where ep10 actually drifts -- T31's beard short and black, T33's trimmed and grey by
+3.9 s, T21's hair sandy at 4.9 s, T06's coat check -> plain -- and the embedder scores them 0.79 /
+0.67 / 0.76 / 0.60 because it is built to ignore hair and beard.  That is a WARDROBE-row problem
+(analyst A's first improvement), not an identity-row problem.
