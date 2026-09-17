@@ -184,12 +184,32 @@ def provenance(plan: list[dict], book: Path, manifest: dict | None) -> dict:
     return {"measured": True, "stale_takes": stale_takes(manifest, book)}
 
 
+def heads_in(home: Path) -> dict[int, float]:
+    """Seconds the cut skipped at the head of a take, from `<episode>/heads.json`
+    (ep12 T13: an invented jump at frame 15).  The ONE reader: assemble cuts from
+    it and this gate compares from it, so the two can never disagree."""
+    import json
+
+    path = Path(home) / "heads.json"
+    if not path.exists():
+        return {}
+    return {int(k): float(v) for k, v in json.loads(path.read_text(encoding="utf-8")).items()}
+
+
+def headed(frames: np.ndarray, head_s: float, fps: int = FPS) -> np.ndarray:
+    """The take's frames from the one the cut started on."""
+    return frames[int(round(head_s * fps)):]
+
+
 def edit_integrity(master_path: Path, placed: dict, records: list[dict], book: Path,
-                   card: Path | None, manifest: dict | None = None) -> dict:
+                   card: Path | None, manifest: dict | None = None,
+                   heads: dict[int, float] | None = None) -> dict:
     """The whole gate: every segment, every cut, every timestamp, the tail, provenance."""
     master = grey_frames(master_path)
     plan = segment_plan(placed, records)
-    takes = {row["take"]: grey_frames(book / row["rel_path"]) for row in plan}
+    heads = heads or {}
+    takes = {row["take"]: headed(grey_frames(book / row["rel_path"]), heads.get(row["take"], 0.0))
+             for row in plan}
     segments = [{**row, **segment_match(master, takes[row["take"]], row["start"], row["n"])} for row in plan]
     cuts = [{"at": nxt["start"],
              "exact": cut_exact(master, nxt["start"], takes[prev["take"]][prev["n"] - 1], takes[nxt["take"]][0])}

@@ -235,7 +235,8 @@ def edit_report(master: Path, placed: dict, records: list[dict], book: Path, num
         # has not approved the master.
         return {"ok": False, "measured": False,
                 "note": f"not measured: {len(missing)} take files missing"}
-    out = edit_gate.edit_integrity(master, placed, records, book, card_path(book, number), cut_json(work))
+    out = edit_gate.edit_integrity(master, placed, records, book, card_path(book, number), cut_json(work),
+                                   heads=edit_gate.heads_in(episode_home.home(book, number)))
     return out | {"measured": True}
 
 

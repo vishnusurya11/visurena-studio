@@ -403,10 +403,8 @@ S = [
      "torn brown driving coat, the black beard ragged, the candles' light from the bier on his face "
      "from the front, the grey morning behind him in the doorway, a woman's black shoulder at the left "
      "edge.",
-     "The camera pushes in on the doorway across the whole shot, travelling a hand's breadth; the door "
-     "leaf swings the last hand's breadth back against the wall; Hope's boot comes down over the "
-     "threshold; his hat comes off in his hand.",
-     "at the bier's foot at a standing man's eye, three long strides from the door, a 35mm lens. The "
+     "The camera pans left across the whole shot, travelling a finger's breadth; the door frame keeps the frame's centre and the black wall keeps the right third; the door leaf swings the last hand's breadth back against the wall; his hat comes off in his hand.",
+     "by the near wall at a standing man's eye, three long strides from the door, a 35mm lens. The "
      "candles behind the camera are the light, from the FRONT, and leave the walls black",
      "The plank door stands open at the CENTRE of the frame from the BOTTOM edge to the TOP edge with "
      "Jefferson Hope in it from the BOTTOM edge to the TOP third, his face a quarter of the frame "
@@ -504,7 +502,7 @@ TURNS = {13: "a guide with two lives in his hands -> a man with one thing left",
 
 # (beat_s, coda_s) by shot; every other shot is 0.5 / 0.0
 BEATS = {0: (0.6, 0.4), 3: (1.0, 0.0), 6: (0.5, 0.3), 9: (0.7, 0.3), 10: (1.2, 0.5), 13: (0.8, 0.0),
-         14: (1.0, 0.3), 15: (0.5, 0.3), 16: (0.6, 0.3), 21: (1.2, 0.0), 22: (1.0, 0.3), 25: (1.0, 0.0),
+         14: (1.0, 0.3), 15: (0.5, 0.3), 16: (0.6, 0.3), 21: (1.2, 1.0), 22: (1.0, 0.3), 25: (1.0, 0.0),
          26: (0.6, 0.0), 27: (0.8, 1.5)}
 
 

@@ -548,18 +548,40 @@ def refuse_short(short: list[tuple[int, float, float]]) -> None:
                          f"(the lines changed after they were made) or shorten their lines")
 
 
-def picture(placed: dict, takes: dict[int, Path], work: Path) -> Path:
-    """Every take trimmed from its first frame to its PLACED seconds, guarded
-    against the storyboard gutter, joined in order.  `work/gutter.json` says
-    what was cropped where."""
-    segments, guarded = [], {}
+def heads_of(home: Path) -> dict[int, float]:
+    """Seconds to skip at the head of a take, from `<episode>/heads.json`.
+
+    MEASURED ep12 T13: the take opens on its cell and jumps at frame 15 to a
+    wider picture of the same moment; the render is long enough to start after
+    the jump.  Written by hand, with the frame it answers, never by a gate."""
+    from studio import edit_gate
+
+    return edit_gate.heads_in(home)
+
+
+def refuse_dialogue_heads(heads: dict[int, float], placed: dict) -> None:
+    """A dialogue shot's wav is anchored 0.25 s into its take: a later picture
+    start puts the mouth ahead of the sound."""
+    spoken = {l["shot"] for l in placed["lines"] if l.get("kind") == "dialogue"}
+    if bad := sorted(i for i, head in heads.items() if head > 0 and i in spoken):
+        raise SystemExit("a head trim on a dialogue shot breaks lip-sync: "
+                         + ", ".join(f"T{i:02d}" for i in bad))
+
+
+def picture(placed: dict, takes: dict[int, Path], work: Path, heads: dict[int, float] | None = None) -> Path:
+    """Every take trimmed from its first frame (or its written head) to its
+    PLACED seconds, guarded against the storyboard gutter, joined in order.
+    `work/gutter.json` says what was cropped where."""
+    segments, guarded, heads = [], {}, heads or {}
     order = segments_of(placed, takes)
-    refuse_short(short_takes(order, lambda i: clip_seconds(takes[i])))
+    refuse_dialogue_heads(heads, placed)
+    refuse_short(short_takes(order, lambda i: clip_seconds(takes[i]) - heads.get(i, 0.0)))
     for index, seconds in order:
         crop = guard(takes[index], seconds, work)
         if crop:
             guarded[index] = crop
-        seg = extract(takes[index], 0.0, seconds, work / f"seg{index:02d}.mp4", W, H, FPS, pre=crop)
+        seg = extract(takes[index], heads.get(index, 0.0), seconds, work / f"seg{index:02d}.mp4",
+                      W, H, FPS, pre=crop)
         segments.append(seg)
     episode_home.write_json(work / "gutter.json", guarded)
     print(f"gutter guard cropped {len(guarded)} takes: {guarded}", flush=True)
@@ -759,7 +781,7 @@ def main(book_id: str, number: int, engine: str = "i2v",
     episode_home.make_rooms(book, number)   # free; the bed and the mix in front of it are not
     write_cut_manifest(work, episode_home.read_json(
         episode_home.takes_dir(book, number, engine) / "shots.json"), book)
-    cut = picture(placed, takes, work)
+    cut = picture(placed, takes, work, heads_of(home))
     music = quiet_bed(toned_bed(home, number, episode.beds, placed, bed_engine),
                       placed["duration_s"], work / "bed_quiet.wav", normalise=False)
     # audio reviewer, iteration 3: 10 dB in 20 ms on every line pumped; the bed now sits lower

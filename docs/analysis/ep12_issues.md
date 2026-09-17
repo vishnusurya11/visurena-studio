@@ -42,4 +42,45 @@ line); day cells on the canyon have no black floor (p5 23-31, black 0.02-0.06)
 
 ## Takes
 
-(filled after take_dq)
+27 takes queued, 4-9 min each (2.4 h). Shot 21 (a 1.7 s silent reaction) had
+packed into T20; lengthened to 2.7 s and rendered as its own take, T20
+re-rendered at its own length -- 28 takes, one shot each.
+
+First DQ: 21/28. The seven, read by eye on 4-frame strips:
+
+| take | row | what the picture did |
+|---|---|---|
+| T01 | off-board 0.89 | a pan on Hope walking the horse; the two riders pass behind the horse |
+| T09 | off-board 0.75, last-vs-cell 0.19 | the cupped-hands halloo holds; the background shifts from cliffs to forest in the last third |
+| T13 (turn) | invented cut 32.6 | opens on its MCU cell, jumps at frame 15 to shot 12's kneeling picture |
+| T16 | no floor p5 22 | a correct sunlit wide with haze |
+| T24 | off-board 0.76 | asked to PUSH in on the doorway; cut to shot 23's bier wide instead |
+| T27 | churn wide 6.8, no floor p5 30 | a correct sunlit runout, walking figure |
+
+One batched round of six (`--why=` written). T24's push rewritten as a pan:
+it now holds the doorway -- the ep11 rule (a medium on a doorway takes a pan
+too). T13's retake jumped again at frame 15; cut from 0.67 s in instead.
+T01, T09, T27 retakes scored LOWER than the originals and `--attempts` kept
+the originals. Final 24/28.
+
+## What was built
+
+- **A head trim** (`heads.json`, assemble + edit gate through one reader,
+  refused on dialogue shots): a take whose first frames are the invented jump
+  is cut after it, when the render is long enough. The edit gate compared from
+  frame 0 and reported all 191 frames off until it read the same file.
+- **Two plan_check gates** (ONE PER TAKE, L8 pace) and the quote gate moved in.
+- **alt_panels** kind follows the cell; **name_map** possessive fix.
+
+## What the gates got wrong
+
+The look gate's black floor (p5 <= 20, black >= 0.08) refuses sunlit wides on
+every day setup: ep11 T00 at 19 moved the constant, ep12 T16/T27 at 22/30 need
+it again. A day setup is not a night setup; the floor wants to be read per
+setup light (sun vs lamp), not per episode -- open item.
+
+## Publish
+
+QC PASS sha8 3834c9c5, 169.70 s, -14.3 LUFS. Published with a recorded
+override for the four accepted takes, on the owner's standing instruction:
+https://youtu.be/s7_uJ-VSDHk. Spend $1.07. Clock 3.6 h of stages, takes 70 %.
