@@ -147,7 +147,7 @@ SETUPS = {
 S = [
     # 0 HOOK -- two strange horses at his own gate
     ("farm_gate_day", "wide", [], 0.0,
-     "Wide of the gate of Ferrier's farm on a warm afternoon, a five-bar gate of split timber rails hung between two square posts, two saddled horses hitched one to each post, the shingly path beyond running up to the log house, the posts' shadows black across "
+     "Wide of the gate of Ferrier's farm on a warm afternoon, a farm gate of five rough grey split-rail timbers, weathered wood pegged to two square timber posts, two saddled horses hitched one to each post, the shingly path beyond running up to the log house, the posts' shadows black across "
      "the road.",
      "The camera pushes in on the gate across the whole shot, travelling a hand's breadth; the near horse "
      "tosses its head; the reins swing against the post; its tail switches once.",
@@ -279,8 +279,7 @@ S = [
      "Insert on a small square placard nailed to the top rail of the gate in the low sun, its face blank "
      "to the lens, John Ferrier's bare hand flat on the rail beside it, a rider's dust drifting on the "
      "road beyond.",
-     "The camera pans right across the whole shot, travelling a hand's breadth; the hand on the rail "
-     "closes on the placard's corner; a rider's dust drifts across the road behind the gate from left to "
+     "The camera pans right across the whole shot, travelling a hand's breadth; the bare hand pulls along the rail a hand's breadth and closes on the placard's corner; a rider's dust drifts across the road behind the gate from left to "
      "right; the placard's corner tears a finger's breadth.",
      "at the gate at the height of the top rail, an arm's length from the placard, a 90mm lens. The low "
      "sun comes from the LEFT onto the placard and leaves the post's near face black",

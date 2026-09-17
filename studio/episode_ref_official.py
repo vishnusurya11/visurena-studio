@@ -702,6 +702,8 @@ def beat_sentences(motion: str, t0: int, t1: int, line_end: int | None = None) -
     if not rest:
         return []
     marks = ([line_end] + beats(line_end, t1, len(rest) - 1)) if line_end is not None else beats(t0, t1, len(rest))
+    if not marks:   # a segment too short for a first beat: every clause rides the tail (ep11 shot 5, 1.5 s)
+        return [f"Then {', then '.join(rest)}, and {motion_noun(rest[-1])} continues to the last frame of the shot."]
     out: list[str] = []
     for k, clause in enumerate(rest):
         if k >= len(marks):                                   # the seconds ran out (3.4)
@@ -1414,10 +1416,21 @@ def l7_pins(text, facts):
             for k, t in facts.get("pins", []) if k > 1 and k in at and abs(t - at[k]) > 0.5]
 
 
+def unquoted(text: str, spoken=()) -> str:
+    """The block with its spoken lines removed: a gait the character SAYS is
+    not a walk the picture makes (ep11: "We ride tonight" read as a ride with
+    no pace).  The lines stand in the block bare, so they are cut by their text."""
+    out = re.sub(r'"[^"]*"', "", text)
+    for line in spoken or ():
+        out = out.replace(str(line), "")
+    return out
+
+
 def l8_pace(text, facts):
+    said = [s if isinstance(s, str) else s.get("text", "") for s in (facts.get("lines") or [])]
     return [f"L8 NO PACE [Shot {k}]: a walk, climb or ride with no pace named"
             for k, a, b, body in blocks(text)
-            if gaits(body) and not any(p in body.lower() for p in PACE)]
+            if gaits(unquoted(body, said)) and not any(p in body.lower() for p in PACE)]
 
 
 def l9_limp(text, facts):
