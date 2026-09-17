@@ -147,13 +147,11 @@ SETUPS = {
 S = [
     # 0 HOOK -- two strange horses at his own gate
     ("farm_gate_day", "wide", [], 0.0,
-     "Wide of the gate of Ferrier's farm on a warm afternoon, two saddled horses hitched one to each "
-     "square post, the shingly path beyond running up to the log house, the posts' shadows black across "
+     "Wide of the gate of Ferrier's farm on a warm afternoon, a five-bar gate of split timber rails hung between two square posts, two saddled horses hitched one to each post, the shingly path beyond running up to the log house, the posts' shadows black across "
      "the road.",
      "The camera pushes in on the gate across the whole shot, travelling a hand's breadth; the near horse "
      "tosses its head; the reins swing against the post; its tail switches once.",
-     "on the road at a standing man's eye, three long strides from the gate, a 35mm lens. The low "
-     "afternoon sun comes from the LEFT and throws the posts' shadows black to the right",
+     "on the road at a standing man's eye, three long strides from the gate, a 35mm lens. The low afternoon sun comes from the LEFT, lays the posts' shadows BLACK across the road and leaves each post's near face black",
      "The two square gate posts stand in the CENTRE of the frame the height of half the frame with a "
      "saddled horse hitched to each. The road crosses the BOTTOM third. The posts' black shadows lie "
      "across the RIGHT half of the road and the sunlit stubble fills the LEFT third. The log house is "
@@ -197,11 +195,9 @@ S = [
      "The camera pulls back from the youth's face across the whole shot, travelling a hand's breadth; "
      "the smirk widens; his chin comes round a finger's breadth to the glass; his hand smooths the sandy "
      "curls.",
-     "at the wall beside the looking-glass level with his eyes, an arm's length from him, a 90mm lens. "
-     "The window sun comes from the LEFT onto his near cheek and leaves the far side of his face black",
+     "at the wall beside the looking-glass level with his eyes, an arm's length from him, a 90mm lens. The window sun comes from the RIGHT, past the looking-glass, onto his near cheek and leaves the far side of his face black",
      "The youth's florid face fills the CENTRE of the frame, half the frame height, from the loose black "
-     "tie at the BOTTOM edge to the sandy curls at the TOP edge, the LEFT cheek in hard sun and the RIGHT "
-     "cheek black. The small looking-glass is a bright square at the RIGHT edge with the edge of his "
+     "tie at the BOTTOM edge to the sandy curls at the TOP edge, the RIGHT cheek in hard sun and the LEFT cheek black. The small looking-glass is a bright square at the RIGHT edge with the edge of his "
      "reflection in it.",
      "setup", 0.5, 0.0),
     # 4
@@ -234,7 +230,7 @@ S = [
      "both edges.",
      "friction", 1.0, 0.0),
     # 6
-    ("farm_parlour_day", "medium", ["joseph_stangerson_young", "enoch_drebber_young"], 0.5,
+    ("farm_parlour_day", "medium", [], 0.5,
      "Medium of the open door from inside the room with the two young men going out through it, their backs to the camera, hats in their hands, the tall pale one ducking under the lintel and the bull-necked one a step behind, the black of the hall beyond them.",
      "The camera pans right across the whole shot, travelling a hand's breadth; the two men go out "
      "through the open door at the RIGHT edge one behind the other; the rocking-chair rocks empty behind "
@@ -252,9 +248,7 @@ S = [
      "paper a hand's breadth; the thumb presses its corner flat; the pin glints once.",
      "over the table at the height of a seated man's chest, an arm's length from the paper, a 90mm "
      "lens. The window sun comes from the LEFT onto the paper and leaves the table's far edge black",
-     "The square of paper fills the CENTRE of the frame the height of a hand with the bare fingers "
-     "holding its LEFT edge. The sunlit pine table fills the BOTTOM half and the black of the room "
-     "fills the TOP third.",
+     "The square of paper fills the CENTRE of the frame the height of a hand with the bare fingers holding its LEFT edge, the window's light on it from the LEFT edge and the paper's shadow lying to the RIGHT on the table. The sunlit pine table fills the BOTTOM half and the black of the room fills the TOP third.",
      "friction", 0.6, 0.0),
     # 9
     ("farm_parlour_day", "medium_close", ["john_ferrier"], 0.65,
@@ -308,7 +302,7 @@ S = [
      "the RIGHT. The lamp stands at the LEFT edge and the room is black across the TOP third.",
      "spike", 1.0, 0.5),
     # 14
-    ("farm_door_night", "medium", ["john_ferrier"], 0.1,
+    ("farm_door_night", "medium", [], 0.1,
      "Medium of John Ferrier standing in the narrow hall facing the heavy plank door with its iron bolt, "
      "his back to the camera, the candle behind the camera on his shoulders and on the door, his shadow "
      "huge and black up the planks.",
@@ -325,29 +319,25 @@ S = [
     # 17 TURN -- his own hand opened it; now he looks down
     ("farm_door_night", "medium_close", ["john_ferrier"], 0.55,
      "Medium close of John Ferrier in the thrown-open doorway, bare-headed, the candle from behind the "
-     "camera hard on his face, his iron-grey beard, his eyes going from the empty night down toward "
-     "his own feet, the starry black behind him.",
+     "camera hard on his face, his iron-grey beard, his eyes level on the empty night beyond the fence, the starry black behind him.",
      "The camera tilts down across the whole shot, travelling a finger's breadth; his eyes drop to the "
      "threshold; his bare hand goes to his throat; his mouth opens a finger's breadth.",
      "in the hall level with his eyes, two long strides from him, a 50mm lens. The candle behind the "
      "camera is the light, from the FRONT, and the night behind him is blue-black under stars",
-     "John Ferrier's head and shoulders fill the CENTRE of the frame from the TOP third to the collar at the BOTTOM edge, his head a third of the frame's height, lit from the front, with the starry "
-     "night black behind him and the black jambs at the LEFT and RIGHT edges.",
+     "John Ferrier's head sits at the CENTRE of the frame a third of the frame's height, his collar at the BOTTOM third, lit from the front, with the starry night black behind him and the black jambs at the LEFT and RIGHT edges.",
      "turn", 1.0, 0.0),
     # 18 -> insert: the prone man's hand on the sill
     ("farm_door_night", "insert", [], 0.6,
-     "Insert looking down at a man's bare brown hand flat on the threshold boards beside a sprawled "
-     "buckskin sleeve, the candle from the hall hard on the knuckles, the starlit garden path pale beyond "
+     "Insert looking down at a man's bare brown hand flat on the threshold boards beside the sprawled sleeve of a brown driving coat, the candle from the hall hard on the knuckles, the starlit garden path pale beyond "
      "the fingers.",
      "The camera tilts down across the whole shot, travelling a finger's breadth; the fingers spread and "
-     "grip the board's edge; the buckskin sleeve drags forward a hand's breadth over the sill; the "
+     "grip the board's edge; the coat sleeve drags forward a hand's breadth over the sill; the "
      "knuckles whiten.",
      "in the hall at the height of a standing man's knee looking down, an arm's length from the "
      "threshold, a 90mm lens. The candle behind the camera is the light, from the FRONT, and the garden "
      "beyond is blue-black",
      "The bare hand fills the CENTRE of the frame the width of a third of the frame with the fingers "
-     "toward the BOTTOM edge. The threshold board crosses the frame at the CENTRE line. The buckskin "
-     "sleeve comes in from the RIGHT edge and the pale path fills the TOP third.",
+     "toward the BOTTOM edge. The threshold board crosses the frame at the CENTRE line. The brown coat sleeve comes in from the RIGHT edge and the pale path fills the TOP third.",
      "reaction", 1.0, 0.0),
     # 19
     ("farm_door_night", "close", ["jefferson_hope"], 0.8,
@@ -355,7 +345,7 @@ S = [
      "door, the black beard cut close, the deep-set dark eyes on Ferrier, the hair damp and flat, the "
      "planks of the door black behind his head.",
      "The camera pulls back from Jefferson Hope's face across the whole shot, travelling a hand's "
-     "breadth; his eyes come up into the lens; his jaw sets; his hand comes up to wipe his mouth.",
+     "breadth; his jaw sets; his hand comes up to wipe his mouth; his chin lifts a finger's breadth.",
      "in the hall level with his eyes, an arm's length from him, a 90mm lens. The candle behind the "
      "camera is the light, from the FRONT, and leaves the door planks behind him black",
      "Jefferson Hope's face fills the CENTRE of the frame, half the frame height, from the black beard "
@@ -365,11 +355,9 @@ S = [
     # 20 -> insert: Hope's hands at the bread
     ("parlour_night", "insert", [], 0.3,
      "Insert on Jefferson Hope's two brown hands tearing a loaf over a plate of cold meat on the pine "
-     "table beside the low lamp, the buckskin cuffs, the lamp's light hard on the knuckles and the "
+     "table beside the low lamp, the brown wool cuffs of his driving coat, the lamp's light hard on the knuckles and the "
      "table's far edge black.",
-     "The camera tilts down across the whole shot, travelling a finger's breadth; the hands tear the "
-     "loaf in two; one hand carries a piece up out of the TOP edge; the other hand drags the plate a "
-     "hand's breadth nearer.",
+     "The camera tilts down across the whole shot, travelling a finger's breadth; one hand carries the torn half up out of the TOP edge; the other hand drags the plate a hand's breadth nearer; a crumb falls to the table.",
      "over the table at the height of the lamp chimney, an arm's length from the plate, a 90mm lens. "
      "The lamp is the light, from the LEFT, and leaves the far edge of the table black",
      "The two hands and the loaf fill the CENTRE of the frame the height of the middle third over the "
@@ -378,11 +366,10 @@ S = [
      "payoff", 0.5, 0.0),
     # 21
     ("parlour_night", "close", ["jefferson_hope"], 0.4,
-     "Close on Jefferson Hope's face over the plate, the black beard, the dark eyes up on Ferrier at the "
-     "right of frame, the lamp warm on the near side of the face and the far side black, a crust in "
+     "Close on Jefferson Hope's face over the plate, the black beard, the dark eyes off to the left of the lens, the lamp warm on the near side of the face and the far side black, a crust in "
      "his fist.",
      "The camera pulls back from Jefferson Hope's face across the whole shot, travelling a hand's "
-     "breadth; his eyes hold the lens; his chin comes up a finger's breadth on the words; the crust lifts to his mouth.",
+     "breadth; his eyes come round into the lens on the words; his chin comes up a finger's breadth; the crust lifts to his mouth.",
      "across the table level with his eyes, an arm's length from him, a 90mm lens. The lamp is the "
      "light, from the LEFT, and leaves the right side of his face black",
      "Jefferson Hope's face fills the CENTRE of the frame, half the frame height, from the beard at the "
@@ -391,8 +378,7 @@ S = [
      "payoff", 1.0, 0.0),
     # 23
     ("parlour_night", "medium_close", ["jefferson_hope"], 0.7,
-     "Medium close of Jefferson Hope on his feet by the table, the buckskin shirt, the revolver butt at "
-     "the front of his belt, his fierce face turned to Ferrier at the right of frame, the lamp warm on "
+     "Medium close of Jefferson Hope on his feet by the table, the brown driving coat open over the revolver butt at the front of his belt, his fierce face turned to Ferrier at the right of frame, the lamp warm on "
      "one side and the room black.",
      "The camera pans right across the whole shot, travelling a hand's breadth; his eyes hold the lens; his hand slaps the revolver butt once; his head comes forward a finger's breadth on the words.",
      "at the window end of the room level with his eyes, two long strides from him, a 50mm lens. The "
@@ -417,11 +403,8 @@ S = [
      "payoff", 1.2, 0.0),
     # 25 -> insert: boots down from the sill
     ("garden_hedge_night", "insert", [], 0.1,
-     "Insert by starlight on the side window's sill with a woman's small boot coming down over it onto "
-     "the dug earth, Jefferson Hope's two bare hands under the boot, the hem of a cloak, the house wall "
-     "black.",
-     "The camera tilts down across the whole shot, travelling a finger's breadth; the boot comes down "
-     "the last hand's breadth onto the earth; the hands let go; the cloak's hem falls over the boot.",
+     "Insert by starlight on the side window's sill with a woman's small boot coming down over it onto the dug earth, Jefferson Hope's two bare hands under the boot, the hem of her skirt, the house wall black.",
+     "The camera tilts down across the whole shot, travelling a finger's breadth; the boot comes down the last hand's breadth onto the earth; the hands let go; the skirt's hem falls over the boot.",
      "in the garden at the height of the sill, an arm's length from it, a 90mm lens. The starlight comes "
      "from ABOVE and behind the camera, cold and faint, and leaves the house wall black",
      "The sill crosses the frame at the TOP third with the boot and the two hands at the CENTRE of the "
@@ -431,17 +414,15 @@ S = [
     # 26
     ("garden_hedge_night", "medium_close", ["jefferson_hope"], 0.5,
      "Medium close of Jefferson Hope flat against the black side of the hedge, the sombrero's brim over "
-     "his eyes, one bare hand pressing Lucy's hooded head down beside him, his face turned to the gap "
+     "his eyes, one bare hand pressing Lucy's bowed head down beside him, her loose chestnut hair over her collar, his face turned to the gap "
      "in the hedge at the right of frame where two shadowy figures stand against the pale field.",
      "The camera pans right across the whole shot, travelling a hand's breadth; the two shadowy figures "
-     "at the gap part and go their ways left and right; Hope's hand stays flat on the hood; his chin "
-     "lifts a finger's breadth.",
+     "at the gap part and go their ways left and right; Hope's hand stays flat on her hair; his chin lifts a finger's breadth.",
      "at the foot of the hedge at the height of a crouching man's eye, two long strides from him, a "
      "50mm lens. The starlight from ABOVE is the light and leaves his face black under the brim against "
      "the pale field",
      "Jefferson Hope's hat and shoulders fill the LEFT third of the frame from the BOTTOM edge to the "
-     "CENTRE line, his head a third of the frame's height, black under the brim with the hood beside "
-     "him at the BOTTOM CENTRE. The hedge's black side runs from the BOTTOM LEFT to the gap at the "
+     "CENTRE line, his head a third of the frame's height, black under the brim with her bowed head beside him at the BOTTOM CENTRE. The hedge's black side runs from the BOTTOM LEFT to the gap at the "
      "RIGHT third where the two shadowy figures stand against the pale field.",
      "spike", 1.0, 0.5),
     # 29
@@ -456,7 +437,7 @@ S = [
      "boulders",
      "The sentinel stands on his rock at the CENTRE of the upper third against the strip of stars, "
      "the height of a finger, the rifle upright beside him. The black crag fills the LEFT third to the "
-     "TOP edge. The file is small at the BOTTOM CENTRE on the pale dust between black boulders.",
+     "TOP edge. The three riders' backs fill the BOTTOM half of the frame on the pale dust between black boulders.",
      "friction", 0.8, 0.0),
     # 30
     ("eagle_canyon_night", "medium_close", ["unnamed_sentinel"], 0.7,
@@ -479,7 +460,7 @@ S = [
      "his bare hand on the rifle at his saddle at the bottom of the frame, the moon from behind and the "
      "left rimming the brim and the cheekbone and leaving the face black but for the eyes.",
      "The camera pulls back from Jefferson Hope's face across the whole shot, travelling a hand's "
-     "breadth; his eyes stay up on the rock; his hand closes on the rifle's stock; his chin lifts a finger's breadth on the words.",
+     "breadth; his eyes stay up on the rock; his hand slides a hand's breadth up the rifle's stock; his chin lifts a finger's breadth on the words.",
      "beside the horse level with his eyes, an arm's length from him, a 90mm lens. The moon comes from "
      "behind and the LEFT and rims the brim and the cheekbone, leaving the face black but for the eyes",
      "Jefferson Hope's face fills the CENTRE of the frame, half the frame height, from the beard at the "
@@ -500,8 +481,8 @@ S = [
     ("eagle_canyon_night", "wide", [], 1.0,
      "Wide from the sentinel's rock looking down into the canyon: the three riders going away from the camera at a trot down the pale dust between the black boulders, small and black, the rifle's muzzle and the sentinel's coat sleeve in the near left corner, the moon rimming the far crag.",
      "The camera tilts down across the whole shot, travelling a hand's breadth; the three riders go away down the trail at a trot growing smaller; the coat sleeve in the near corner lifts a hand's breadth; dust drifts off the trail to the right.",
-     "on the sentinel's rock at a standing man's eye looking down into the canyon, a 35mm lens. The moon comes from behind and the LEFT and rims every rider in silver, leaving the trail black between the boulders",
-     "The three riders are small at the CENTRE of the lower third going away down the pale trail. The rifle's muzzle and the coat sleeve fill the BOTTOM LEFT corner. The black crag fills the RIGHT third to the TOP edge and the trail runs from the BOTTOM CENTRE up to the far bend at the CENTRE of the upper third.",
+     "on the sentinel's rock HIGH ABOVE the trail, looking steeply DOWN so the riders' hat crowns and the horses' backs are seen from above, a 35mm lens. The moon comes from behind and the LEFT and rims every rider in silver, leaving the trail black between the boulders",
+     "The three riders are small at the CENTRE of the lower third going away down the pale trail, seen from above. The rock's edge crosses the BOTTOM LEFT corner under the rifle's muzzle and the coat sleeve, and the trail falls away below it. The black crag fills the RIGHT third to the TOP edge and the trail runs from the BOTTOM CENTRE up to the far bend at the CENTRE of the upper third.",
      "runout", 1.0, 3.0),
 ]
 
@@ -512,25 +493,22 @@ LINES = [
     ("narration", "john_watson", "In his sitting-room sat two young men with their boots up: the sons of Elders Drebber and Stangerson.", 2),
     ("narration", "john_watson", "Stangerson had four wives, and Drebber seven, and each thought that settled it.", 3),
     ("dialogue", "john_ferrier", "This room has two ways out. The door, or the window.", 4),
-    ("dialogue", "john_ferrier", "Come back when my daughter sends for you.", 5),
     ("narration", "john_watson", "They went with their hats in their hands, and the door banged behind them.", 6),
     ("narration", "john_watson", "Next morning there was a paper pinned to his coverlet, printed in bold straggling letters.", 7),
     ("narration", "john_watson", "Twenty-nine days are given you for amendment, it said, and then a dash.", 8),
     ("narration", "john_watson", "At breakfast his daughter pointed at the ceiling: scrawled there with a burnt stick, twenty-eight.", 9),
     ("narration", "john_watson", "Day by day the count came down, on his door and his gate, and no rider was Hope.", 10),
-    ("narration", "john_watson", "On the evening the figure two went up on his wall, he sank his head on the table.", 11),
-    ("narration", "john_watson", "His doors and windows were secured every night, and his servants slept in the outhouse.", 11),
+    ("narration", "john_watson", "The night the figure two went up, with every door bolted, he sank his head on the table.", 11),
     ("narration", "john_watson", "Then, in the silence, a scratching at a panel of the door; assassin, or the last day's number.", 12),
     ("narration", "john_watson", "He drew the bolt and threw the door wide. Stars, the fence, the road. Then he looked down.", 13),
-    ("narration", "john_watson", "For a breath Ferrier thought the man at his feet was dead.", 14),
     ("narration", "john_watson", "It writhed over the sill like a snake, sprang up, shut the door, and was Hope the hunter.", 14),
     ("dialogue", "jefferson_hope", "Food first. Nothing for two days.", 15),
     ("narration", "john_watson", "He ate like a starving man, and two thousand dollars in gold went into a bag.", 16),
     ("dialogue", "jefferson_hope", "The house is watched. So I came in on my belly.", 17),
     ("dialogue", "jefferson_hope", "Tomorrow is your last day. We ride tonight.", 18),
     ("dialogue", "john_ferrier", "Then we ride tonight. Every acre of it can stay.", 19),
-    ("narration", "john_watson", "At the gap in the hedge, Hope dragged them down. An owl hooted, a few yards off.", 21),
-    ("narration", "john_watson", "Nine to seven, said a voice. Seven to five, said another; and two shadows went their ways.", 21),
+    ("narration", "john_watson", "Through the side window, one by one, into the garden.", 20),
+    ("narration", "john_watson", "At the gap Hope dragged them down; nine to seven, said a voice, and seven to five, another.", 21),
     ("narration", "john_watson", "The horses waited in the Eagle Canyon; high in the pass, a voice rang out above them.", 22),
     ("dialogue", "unnamed_sentinel", "Who goes there? Nine from seven.", 23),
     ("dialogue", "jefferson_hope", "Travellers for Nevada. Seven from five.", 24),
@@ -567,7 +545,7 @@ def build() -> dict:
              for k, (kind, who, text, shot) in enumerate(LINES)]
     return dict(number=11, title="A Flight for Life",
                 question="Tonight, can John Ferrier get his daughter out of Utah?",
-                aspect="1:1", where=WHERE, light=LIGHT, protagonist="john_ferrier", answer="line 27",
+                aspect="1:1", where=WHERE, light=LIGHT, protagonist="john_ferrier", answer="line 24",
                 beds=BEDS, setups=SETUPS, shots=shots, lines=lines)
 
 
