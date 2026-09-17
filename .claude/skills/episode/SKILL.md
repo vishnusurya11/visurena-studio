@@ -1476,6 +1476,51 @@ refusals it found, so the next plan is written without them:
 - **The quote gate** (nine consecutive words of Doyle in narration) is in
   `plan_check` now; it used to fire first in the sheet stage.
 
+## Cutting past an invented jump; daylight; a second wardrobe row (2026-09-17)
+
+- **A HEAD TRIM, NOT A RETAKE, for a jump in the first second.** ep12 T13 (the
+  turn) opened on its MCU cell and jumped at frame 15 to the previous shot's
+  kneeling picture -- on BOTH renders. Find the frame with a frame-diff scan
+  (one diff ~28 against a field under 5), then write
+  `episodes/epNN/heads.json` `{"13": 0.67}`. `assemble` cuts the take from
+  there and the edit gate compares from there, through one reader
+  (`edit_gate.heads_in`). It refuses a dialogue shot: the wav is anchored
+  0.25 s into the take. It needs a render at least head + placed seconds long;
+  `short_takes` counts the head.
+- **Read a failing take's strip before retaking it.** Tile frames 0/40/80/120
+  (`ffmpeg ... select=eq(n\,0)+... ,tile=4x1`) and look. A 90-frame take tiled
+  at 96 and 140 shows black; that is the file ending, not a fault.
+- **`--attempts` keeps the better render**, and a retake often scores LOWER
+  (ep12: T01, T09, T27 all kept their first render). One batched round; then
+  accept on sight with the reason written, or change the WORDS (T24's push that
+  cut into the neighbouring wide held the doorway as a pan).
+- **The black floor is an advisory under daylight** (`take_look.is_daylight`:
+  an outdoor setup with a sun or overcast word and no lamp, fire, candle or moon
+  named as "the only light"). ep11 T00 and ep12 T16/T27 were correct sunlit
+  haze at p5 19-30. Night, lamp and interior setups keep the wall.
+- **The publish ladder refuses take-DQ failures without `--override="..."`.**
+  QC does not fail on them; the ladder does. Under the owner's standing
+  "publish unwatched" instruction, the override names each accepted take and
+  why; it is recorded beside the upload.
+- **A character whose outdoor state is wrong for this place gets a SECOND ROW**
+  (`jefferson_hope_cabman`): same `physical`, the bust copied, `identity`
+  copied, its own `wardrobe` and `marks`, and one card drawn. Hope's `outdoor`
+  is the Utah sombrero; the London cab box needed the cabman's cap. The frames
+  must not name the new row's marks on the old row's shots (MARKS gate).
+- **Marks and names are read as text.** A row named "a wife of Drebber's"
+  claimed "drebber's" and every "Drebber's coat" was hers (fixed: a possessive
+  is the bare name). "silk top hat" is Lestrade's mark, "sandy hair" Brigham
+  Young's: say "tall black hat", "curly hair" on anyone else.
+- **Match rooms to the episode that drew them first**: grep the earlier plans'
+  `setups` for the room and copy which wall holds what (ep13's Lauriston room
+  had its mantelpiece on the wrong wall against ep03).
+- **NEVER type `\b` (or any backslash) through a Bash heredoc.** It reaches
+  disk as the byte 0x08 and the regex matches nothing, silently. Three files
+  carried it (one for months); `tests/test_no_backspace_byte_in_source.py` now
+  refuses the byte. Patch scripts go through the Write tool.
+- **The title card is animated on H3**: `run.py <book> <n> title -- --approved`
+  needs the GPU; draw it after the takes, not while they render.
+
 ## Known open items
 
 
