@@ -345,11 +345,25 @@ def cards(book: Path, episode: Episode, number: int) -> list[dict]:
     measured = {l["index"]: l for l in placed["lines"]}
     for l in episode_home.read_json(episode_home.lines_dir(book, number) / "lines.json"):
         measured[l["index"]]["rel_path"] = l["rel_path"]
-    out = []
+    out, refused = [], []
     for take in tk.takes(shots):
         take["placed"] = shots
-        out.append(card(book, episode, number, take, measured))
+        try:
+            out.append(named_card(lambda: card(book, episode, number, take, measured), take))
+        except SystemExit as e:
+            refused.append(str(e))
+    if refused:  # every refusal at once: one dry build, not one per fault (ep13 took three)
+        raise SystemExit("take prompts refused:\n  " + "\n  ".join(refused))
     return out
+
+
+def named_card(build, take: dict) -> dict:
+    """The card, or the lint's refusal led by the take it belongs to: every
+    single-shot take's own shot is [Shot 1], so the lint alone names none (ep13)."""
+    try:
+        return build()
+    except ValueError as e:
+        raise SystemExit(f"T{take['shots'][0]:02d} (shots {take['shots']}): {e}") from e
 
 
 def drop_second_slot(graph: dict, base: str) -> dict:

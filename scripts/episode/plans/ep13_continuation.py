@@ -67,13 +67,13 @@ SETUPS = {
         geometry=("The line of dark carriages runs along the LEFT edge of the frame into the distance. The "
                   "iron columns stand in a row down the RIGHT third with the gas lamps on them. The porter's "
                   "barrow stands at the BOTTOM RIGHT and the platform runs from the BOTTOM CENTRE to the black far end at the CENTRE of the frame. The glass roof is black across the TOP edge above the steam."),
-        crowd=("Travellers in dark coats walk along the platform in twos and threes, a porter in a peaked "
+        crowd=("Travellers in dark coats walk along the platform at a walking pace in twos and threes, a porter in a peaked "
                "cap pushes a barrow of trunks, and steam drifts between the iron columns."),
         outdoors=False, props=[]),
     "cab_night_rain": dict(
         described=("A wet London street of dark brick houses at one in the morning in March 1881, blowing "
                    "hard and raining in torrents: a four-wheeled cab with a dark bay horse standing at the "
-                   "kerb, the cabman hunched on the box, the cobbles running with water, a single gas lamp on "
+                   "kerb, the cabman hunched on the box, the cobbles running with water under a black night sky, a single gas lamp on "
                    "an iron post at the kerb; the gas lamp is the only light and it comes from the right, "
                    "low and yellow, on the wet cobbles, the slanting rain, the horse's streaming flank and "
                    "the cab's wet panels, and leaves the house fronts and the far street black"),
@@ -90,7 +90,7 @@ SETUPS = {
                    "the morning, March 1881, the camera within the room with walls closed on all four sides: "
                    "bare floorboards thick with dust, walls of cheap flaring yellow paper peeling in strips "
                    "and blotched with mildew, a mantelpiece of imitation white marble on the left wall, a "
-                   "single tall curtainless window in the far wall streaming with rain, a panelled door in the right wall; "
+                   "single tall curtainless window in the far wall black with night and streaming with rain, a panelled door in the right wall; "
                    "a single wax candle in a man's hand is the only light and it comes from the candle "
                    "alone, low and yellow, on the faces and hands nearest it and on the peeling paper beside "
                    "it, and leaves the window, the corners and the ceiling black"),
@@ -340,7 +340,7 @@ S = [
      "Close on Enoch Drebber's coarse florid face in the candlelight, the small bleared eyes wide with "
      "horror, sweat standing on the low forehead, the jowls slack, the curly hair damp.",
      "The camera pans left across the whole shot, travelling a finger's breadth; the black window keeps "
-     "the frame behind him; sweat runs down his brow; his head draws back a hand's breadth.",
+     "the frame behind him; sweat runs down his brow; his head pulls back a hand's breadth.",
      "facing him level with his eyes, an arm's length from him, a 90mm lens. The candle is the light, from "
      "the LEFT, and leaves the window behind him black",
      "Enoch Drebber's face fills the CENTRE of the frame, half the frame height, from the stubbly beard at the BOTTOM third to the curly hair at the TOP edge, lit from the LEFT. The window is black "
@@ -493,7 +493,7 @@ S = [
 # (kind, speaker, text, shot)
 LINES = [
     ("narration", "john_watson", "We drove him to the station in his own cab, and he came as quiet as a lamb.", 0),
-    ("dialogue", "police_inspector", "Have you anything to say? I warn you, it will be taken down.", 1),
+    ("dialogue", "police_inspector", "Have you anything to say? It will be taken down.", 1),
     ("dialogue", "jefferson_hope", "I may never be tried.", 2),
     ("narration", "john_watson", "I put my hand on his chest. Inside, something throbbed like an engine in a shed.", 3),
     ("dialogue", "john_watson", "You have an aortic aneurism!", 4),
@@ -507,7 +507,7 @@ LINES = [
     ("narration", "john_watson", "At Brixton Road he woke his passenger, and walked him up the garden to the empty house.", 12),
     ("narration", "john_watson", "It was black inside. Hope struck a match, and lit a wax candle he had brought.", 13),
     ("narration", "john_watson", "Drebber stamped about the dust, grumbling at the dark, and waiting to be shown his room.", 14),
-    ("dialogue", "jefferson_hope", "Now, Enoch Drebber. Who am I?", 15),
+    ("dialogue", "jefferson_hope", "Now then, Enoch Drebber. Look at my face, and tell me who I am.", 15),
     ("narration", "john_watson", "The drink went out of his eyes, and the horror came into them. He knew.", 16),
     ("dialogue", "enoch_j_drebber", "Would you murder me?", 17),
     ("narration", "john_watson", "Hope held out the box. Drebber was to choose, and Hope would swallow the pill that was left.", 18),
@@ -534,7 +534,7 @@ TURNS = {15: "a cabman in the dark -> Jefferson Hope, lit and known",
          26: "a whole confession -> the law's Thursday"}
 
 # (beat_s, coda_s) by shot; every other shot is 0.5 / 0.0
-BEATS = {0: (0.6, 0.3), 2: (1.0, 0.0), 4: (1.0, 0.3), 5: (0.6, 0.3), 10: (0.6, 0.2), 11: (1.2, 0.3),
+BEATS = {0: (0.6, 0.3), 1: (0.8, 0.4), 2: (1.0, 0.0), 4: (1.0, 0.3), 5: (0.6, 0.3), 10: (0.6, 0.2), 11: (1.2, 0.3),
          14: (1.0, 0.3), 15: (1.0, 0.0), 16: (0.8, 0.0), 17: (0.6, 0.0), 19: (0.8, 0.0), 20: (0.6, 0.0),
          21: (0.8, 0.5), 23: (0.6, 0.0), 25: (1.0, 0.0), 26: (0.6, 0.0), 27: (0.8, 1.5)}
 
