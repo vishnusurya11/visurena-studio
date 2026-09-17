@@ -91,7 +91,7 @@ def half_silent(path: Path, seconds: float = 27.7, live: float = 6.0):   # under
 
 
 def test_live_seconds_is_the_music_not_the_file(tmp_path):
-    assert 10.0 < episode_bed.live_seconds(half_silent(tmp_path / "light.wav")) < 10.8
+    assert 10.0 < episode_bed.live_seconds(half_silent(tmp_path / "light.wav", live=10.4)) < 10.8
 
 
 def test_the_measured_light_tone_is_short():
