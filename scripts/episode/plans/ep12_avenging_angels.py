@@ -129,7 +129,7 @@ S = [
      "hook", 0.6, 0.4),
     # 1
     ("mountain_defile_dawn", "medium", ["jefferson_hope"], 0.2,
-     "Medium of Jefferson Hope on foot leading a horse up the trail in the sombrero and buckskin, the "
+     "Medium of Jefferson Hope on foot leading a horse up the trail at a walking pace in the sombrero and buckskin, the "
      "rifle across his back, the mule and the second horse with two riders small behind him, the sun rimming his hat from the left and the brim's shadow black over his face.",
      "The camera pans left across the whole shot, travelling a hand's breadth; the horse's head comes "
      "up; Hope's hand tightens on the lead; his hat brim turns a finger's breadth toward the peaks.",
@@ -207,7 +207,7 @@ S = [
      "the sombrero off beside him, the black beard along the stock, the sunlit pinnacle high above at "
      "the right, the rock's shadow black beneath him.",
      "The camera pans right across the whole shot, travelling a finger's breadth; the pinnacle keeps the "
-     "top right corner and the black rock keeps the bottom edge; his finger comes to the trigger; his cheek comes down along the stock.",
+     "top right corner and the black rock keeps the bottom edge; his hand slides along the stock; his cheek comes down along the stock.",
      "beside the rock level with his shoulders, two long strides from him, a 50mm lens. The sun comes "
      "from the RIGHT along the rifle and leaves the rock's underside black",
      "Jefferson Hope lies across the CENTRE of the frame from the LEFT third to the RIGHT third with the "
@@ -216,13 +216,13 @@ S = [
      "friction", 0.6, 0.0),
     # 8
     ("mountain_defile_dawn", "insert", [], 0.8,
-     "Insert on a bloody haunch of big-horn slung over Jefferson Hope's buckskin shoulder at dusk, the "
-     "fringe of the shirt, the rifle's strap, the grey rocks of a gorge behind dim in the dusk.",
+     "Insert on a haunch of big-horn meat wrapped in its own hide slung over Jefferson Hope's buckskin "
+     "shoulder at dusk, the fringe of the shirt, the rifle's strap, the grey rocks of a gorge behind dim in the dusk.",
      "The camera tilts down across the whole shot, travelling a finger's breadth; the haunch swings a "
-     "hand's breadth with his stride; the fringe swings with it; a drop falls from it to the rock.",
+     "hand's breadth with his stride; the fringe swings with it; the hide's edge flaps against the fringe.",
      "beside him at the height of his shoulder, an arm's length from the haunch, a 90mm lens. The last "
      "light comes from the RIGHT along the fringe and leaves the gorge behind black",
-     "The haunch fills the CENTRE of the frame the height of the middle third over the buckskin "
+     "The hide-wrapped haunch fills the CENTRE of the frame the height of the middle third over the buckskin "
      "shoulder at the LEFT third. The rifle's strap crosses the BOTTOM LEFT corner. The dim grey rocks "
      "fill the RIGHT third and the TOP edge is black.",
      "friction", 0.5, 0.0),
@@ -447,7 +447,7 @@ S = [
      "shoulder, the boulders' shadows black to the right in the sun from the left, the pale valley and "
      "the city small far below.",
      "The camera pushes in on the trail across the whole shot, travelling a hand's breadth; the black "
-     "shadows keep the right half of the trail; Hope walks down the trail toward the valley "
+     "shadows keep the right half of the trail; Hope walks down the trail toward the valley at a walking pace "
      "growing smaller; dust drifts off his boots.",
      "at the shelf's edge at a standing man's eye with the trail below the lens, a 35mm lens. The sun comes "
      "from the LEFT, hard, and throws the boulders' shadows black to the right across the trail",
