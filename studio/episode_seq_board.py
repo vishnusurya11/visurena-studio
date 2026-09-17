@@ -759,14 +759,15 @@ def hero(frame: str) -> str:
     return found[0] if found else "the nearest thing in frame"
 
 
-def alt_panel(seg: dict, number: int) -> dict:
+def alt_panel(seg: dict, number: int, variant: int | None = None) -> dict:
     """An ALTERNATE angle of panel `number`: another camera on the same people
     and the same object, written as its own complete picture.
 
     It keeps the base panel's `path`, `faces` and `crowd` -- the facts a take
     builder and the crowd clause need -- and NOTHING that describes the base's
     own picture: size, camera, at-rest and ladder are its own."""
-    frame, camera, size, at_rest = ALTERNATES[(number - 1) % len(ALTERNATES)]
+    variant = (number - 1) if variant is None else variant
+    frame, camera, size, at_rest = ALTERNATES[variant % len(ALTERNATES)]
     who, thing = _who(seg), _thing(seg)
     hands = (f"the bare hands and cuffs of {who} at the edge of frame" if seg.get("faces")
              else "its own surface sharp from edge to edge")
@@ -778,8 +779,15 @@ def alt_panel(seg: dict, number: int) -> dict:
 
 
 def alt_panels(segs: list[dict], spare: int) -> list[dict]:
-    """One alternate per spare cell, spread over the sheet's own panels."""
-    return [alt_panel(segs[k % len(segs)], k % len(segs) + 1) for k in range(max(spare, 0))]
+    """One alternate per spare cell, spread over the sheet's own panels, and the
+    ALTERNATE KIND chosen by the cell, not by the base panel.
+
+    MEASURED ep12 (2026-09-17): a one-shot setup with three spare cells got
+    "Reverse angle on panel 1" three times -- the kind was indexed by the base
+    panel's number, and every alternate was of panel 1.  Overlap 1.000 with
+    itself, six hard TWINS/ALTERNATE findings before a sheet was drawn.  The
+    grid gate needs every cell filled, so the cells stay; each is its own kind."""
+    return [alt_panel(segs[k % len(segs)], k % len(segs) + 1, variant=k) for k in range(max(spare, 0))]
 
 
 DRAW_ENDS = False

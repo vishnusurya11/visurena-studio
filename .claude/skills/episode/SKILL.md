@@ -1403,6 +1403,50 @@ in any new book:
   fact about the stick was discarded whatever the limit. Props are in the list
   now.
 
+## What the plan loop cost on ep12, and what each refusal was (2026-09-17)
+
+`plan_check` went clean in SIX passes and no line rendered before it did. The
+refusals it found, so the next plan is written without them:
+
+- **Absences in prose**: "gone", "nobody", "the animals gone" -- the contract
+  refuses them in `described` and `frame`. Say what occupies the place ("the
+  dead larch bare where the animals stood").
+- **The 18-word wall** catches a line the ear thinks is short; count.
+- **A cap in `physical` draws a capped bust.** The bust is read against the
+  invariant caption alone, so a hat, cap or bonnet named there fails
+  `headgear` AND `hair_colour` (the colour extractor takes "white" out of
+  "under a plain white cap"). The cap belongs in `wardrobe[state]`; the
+  physical says the hair and stops.
+- **A one-shot setup**: `alt_panels` used to fill three spare cells with one
+  alternate three times (overlap 1.000 with itself, six hard findings). Capped
+  at one alternate per panel; but a setup holding ONE shot is still a sheet
+  drawn for one cell, so fold the shot into a neighbouring setup when the
+  place allows it (ep12's gorge runout became the canyon's last shot).
+- **G-VARIETY counts closes per face**: eight Hope closes against a wall of
+  six. Two became mediums with a quarter-height head; the dialogue stayed on
+  closes.
+- **G-SUNSPLIT**: "the LEFT cheek in sun and the RIGHT side black" on seven
+  panels. The drawer never split a face (0/6 on ep10). Name the caster: "the
+  brim's shadow black across his eyes", "the hat's shadow black on the turned
+  cheek".
+- **G-LIGHT-SIDE reads words, not geometry**: "looking down" in `camera` and
+  "going away" in `frame` mean FACING AWAY to the gate, even when the camera
+  looks down at a face or the figure walks away from the lens toward the
+  landmark. Write "a head above his eyes", "his back on the trail below,
+  walking down toward the valley".
+- **"tilted" is a camera move word** even as an adjective in `camera`.
+- **Twin panels** are found on TEXT before a sheet is paid for: three Cowper
+  MCUs on one horse read as one picture. Each got its own camera position
+  (below the stirrup looking up; behind the horse's flank), its own frame
+  furniture (the bay's ears; Hope's sombrero crown; the horse's rump) and its
+  own action.
+- **A voice that fails its own gates is caught at casting, not at the line.**
+  Cowper's 125 Hz design did not agree with itself (0.64) and was Drebber's
+  twin (0.82); the nudge only walks DOWN toward the rivals. Edit the
+  instruction's pitch to a free register (the male cast holds 76-171 Hz in
+  8-10 Hz steps; 185 was free), change the texture words away from the
+  neighbours, then `cast_voices --only <who> --recast`.
+
 ## Known open items
 
 
