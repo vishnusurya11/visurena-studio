@@ -191,7 +191,7 @@ S = [
      "Close on the bull-necked youth's broad florid face smirking at his own reflection in the small "
      "looking-glass on the wall beside the window, the window sun hard on the near cheek, the far cheek "
      "in the black of the log wall.",
-     "The camera pans right across the whole shot, travelling a finger's breadth; the looking-glass keeps the right edge and the log wall keeps the left edge; the smirk widens; his hand smooths the sandy curls.",
+     "The camera pans right across the whole shot, travelling a finger's breadth; the looking-glass keeps the right edge and the log wall keeps the left edge; the smirk widens; his hand lifts to smooth the sandy curls.",
      "at the wall beside the looking-glass level with his eyes, an arm's length from him, a 90mm lens. The window sun comes from the RIGHT, past the looking-glass, onto his near cheek and leaves the far side of his face black",
      "The youth's florid face fills the CENTRE of the frame, half the frame height, from the loose black "
      "tie at the BOTTOM edge to the sandy curls at the TOP edge, the RIGHT cheek in hard sun and the LEFT cheek black. The small looking-glass is a bright square at the RIGHT edge with the edge of his "
@@ -383,7 +383,7 @@ S = [
      "Close on John Ferrier's face at the blue-black window glass, bare-headed, the iron-grey beard, "
      "his eyes on the dark fields beyond the glass, the lamp's low light from the left on one cheek and "
      "the near side of the face black against the glass.",
-     "The camera pans left across the whole shot, travelling a finger's breadth; the blue-black glass keeps the right third and the sill keeps the bottom edge; his eyes come round from the glass to the lens; his jaw sets on the words; his hand flat on the sill closes.",
+     "The camera pans left across the whole shot, travelling a finger's breadth; the blue-black glass keeps the right third and the sill keeps the bottom edge; his eyes come round from the glass to the lens; his jaw sets on the words; his hand lifts off the sill and closes.",
      "at the window level with his eyes, an arm's length from him, a 90mm lens. The lamp is the light, "
      "from the LEFT, and leaves the right side of his face black against the blue-black glass",
      "John Ferrier's face fills the CENTRE of the frame, half the frame height, from the beard at the "
