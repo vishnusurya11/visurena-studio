@@ -151,3 +151,14 @@ def test_the_room_is_the_documented_amount(tmp_path):
     assert voice_say.ROOM_S == 0.12
     got = voice_say.pad_room(spoken(tmp_path / "a.wav", seconds=1.0))
     assert abs(voice_qc.seconds_of(got) - 1.12) < 0.001
+
+
+def test_a_record_the_plan_no_longer_has_is_dropped():
+    """ep11 went from 29 lines to 25 while lines.json kept indices 25-28; the
+    take builder read them against placed.json and died on KeyError 25."""
+    import sys
+    sys.path.insert(0, "scripts/episode")
+    import say_lines
+
+    records = {0: {"index": 0}, 1: {"index": 1}, 25: {"index": 25}, 28: {"index": 28}}
+    assert sorted(say_lines.prune_stale(records, 2)) == [0, 1]

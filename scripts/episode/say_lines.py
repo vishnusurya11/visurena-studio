@@ -211,12 +211,20 @@ def keep_best(new: dict, previous: dict | None, wav: Path) -> dict:
     return dict(previous, tries=new.get("tries", previous.get("tries", 0)))
 
 
+def prune_stale(records: dict, count: int) -> dict:
+    """Records for line indices the plan no longer has are dropped (their wavs
+    stay on disk).  ep11 went from 29 lines to 25 and the take builder died on
+    a record for line 25 that placed.json could not place."""
+    return {k: v for k, v in records.items() if 0 <= int(k) < count}
+
+
 def main(book_id: str, number: int, redo: list[int] | None = None) -> None:
     book = episode_home.book_dir(book_id)
     episode = episode_home.load_plan(book, number)
     out_dir = episode_home.lines_dir(book, number)
     sheet = out_dir / "lines.json"
     records = {r["index"]: r for r in episode_home.read_json(sheet)} if sheet.exists() else {}
+    records = prune_stale(records, len(episode.lines))
     for line in episode.lines:  # a line whose TEXT changed is a new line (reviewer 5's re-cut)
         have = records.get(line.index)
         if have and have.get("text") != line.text:
