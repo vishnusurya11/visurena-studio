@@ -55,12 +55,12 @@ truth for where the loop is, and it is updated after every step, not at the end.
 | 6 | Tobias Gregson Shows What He Can Do | published `AIX83NAcTGc` |
 | 7 | Light in the Darkness | published `xksX2qouWEo` |
 | 8 | On the Great Alkali Plain | published `V5sFXhGemRk` |
-| 9 | The Flower of Utah | |
-| 10 | John Ferrier Talks with the Prophet | |
-| 11 | A Flight for Life | |
-| 12 | The Avenging Angels | |
-| 13 | A Continuation of the Reminiscences of John Watson, M.D. | |
-| 14 | The Conclusion | |
+| 9 | The Flower of Utah | published `Me9h8oQwx6E` |
+| 10 | John Ferrier Talks with the Prophet | published `nftf6bbjQMs` |
+| 11 | A Flight for Life | published `ZC7AWsoTrlo` |
+| 12 | The Avenging Angels | published `s7_uJ-VSDHk` |
+| 13 | A Continuation of the Reminiscences of John Watson, M.D. | published `OoTLbV3KurU` |
+| 14 | The Conclusion | plan, cast, lines, plates done; BLOCKED: image API has no credits (5 sheets ~$0.65) |
 
 Chapters 8-12 are the Utah flashback: a different cast, a different place, and
 no Holmes or Watson. Expect the cast and location work to be as large as an
