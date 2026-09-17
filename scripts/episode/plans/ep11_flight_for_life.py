@@ -482,7 +482,7 @@ LINES = [
     ("narration", "john_watson", "In his sitting-room sat two young men with their boots up: the sons of Elders Drebber and Stangerson.", 2),
     ("narration", "john_watson", "Stangerson had four wives, and Drebber seven, and each thought that settled it.", 3),
     ("dialogue", "john_ferrier", "This room has two ways out. The door, or the window.", 4),
-    ("narration", "john_watson", "They went, and the door banged behind them.", 6),
+    ("narration", "john_watson", "They went, and the door banged.", 6),
     ("narration", "john_watson", "Next morning there was a paper pinned to his coverlet, printed in bold straggling letters.", 7),
     ("narration", "john_watson", "Twenty-nine days are given you for amendment, it said, and then a dash.", 8),
     ("narration", "john_watson", "At breakfast his daughter pointed at the ceiling: scrawled there with a burnt stick, twenty-eight.", 9),
@@ -520,7 +520,7 @@ TURNS = {13: "hunted behind a bolt -> the door thrown open by his own hand",
          25: "the last post of the chosen people -> the road to Nevada open"}
 
 # (beat_s, coda_s) by FINAL shot number; every other shot is 0.5 / 0.0
-BEATS = {0: (0.6, 0.4), 6: (0.5, 0.0), 7: (0.6, 0.0), 8: (0.6, 0.0), 9: (0.6, 0.0), 10: (0.6, 0.0), 11: (1.0, 0.0), 12: (0.8, 0.0), 13: (1.0, 0.0),
+BEATS = {0: (0.6, 0.4), 6: (0.0, 0.0), 7: (0.6, 0.0), 8: (0.6, 0.0), 9: (0.6, 0.0), 10: (0.6, 0.0), 11: (1.0, 0.0), 12: (0.8, 0.0), 13: (1.0, 0.0),
          15: (0.5, 0.0), 19: (0.8, 0.0), 21: (0.5, 0.0), 24: (1.0, 0.0), 25: (0.6, 0.0), 26: (0.8, 1.0)}
 
 

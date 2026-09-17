@@ -524,12 +524,38 @@ def segments_of(placed: dict, takes: dict[int, Path]) -> list[tuple[int, float]]
     return out
 
 
+SHORT_TOLERANCE_S = 0.05
+"""A frame of slack: the take's frame count is quantised to 17n+5."""
+
+
+def short_takes(segments: list[tuple[int, float]], seconds_of) -> list[tuple[int, float, float]]:
+    """(take, take seconds, placed seconds) for every take shorter than its shot.
+    ep11: two lines were edited after the render and shots 15 / 19 placed at
+    8.25 / 7.08 s over 5.16 / 6.58 s takes; the picture came out 88 frames short
+    of the audio and only the join's frame count noticed."""
+    out = []
+    for index, placed in segments:
+        have = seconds_of(index)
+        if have + SHORT_TOLERANCE_S < placed:
+            out.append((index, round(have, 2), round(placed, 2)))
+    return out
+
+
+def refuse_short(short: list[tuple[int, float, float]]) -> None:
+    if short:
+        rows = "; ".join(f"T{i:02d} is {have} s, its shot places {placed} s" for i, have, placed in short)
+        raise SystemExit(f"a take is shorter than its shot: {rows} -- re-render those takes "
+                         f"(the lines changed after they were made) or shorten their lines")
+
+
 def picture(placed: dict, takes: dict[int, Path], work: Path) -> Path:
     """Every take trimmed from its first frame to its PLACED seconds, guarded
     against the storyboard gutter, joined in order.  `work/gutter.json` says
     what was cropped where."""
     segments, guarded = [], {}
-    for index, seconds in segments_of(placed, takes):
+    order = segments_of(placed, takes)
+    refuse_short(short_takes(order, lambda i: clip_seconds(takes[i])))
+    for index, seconds in order:
         crop = guard(takes[index], seconds, work)
         if crop:
             guarded[index] = crop
