@@ -1367,6 +1367,20 @@ and 30.8 min of GPU never reached the picture. One take as its own wave cost
 same take is ~4 min. Read the reviews, read the owner, write the list, write
 the why, order it once.
 
+A LINE EDITED AFTER THE RENDER CHANGES THE SHOT'S LENGTH, NOT THE TAKE'S
+(ep11, 2026-09-17). Two lines were reworded after the takes were made; their
+shots placed at 8.25 s and 7.08 s over 5.16 s and 6.58 s takes, the picture
+came out 88 frames short of the audio, the constant-rate join filled the hole
+with duplicates and only the frame count at the very end noticed.
+`assemble` now refuses a take shorter than its shot by name and by seconds.
+The rule upstream of the gate: after ANY line change, re-run `timeline` and
+compare each shot's placed seconds with its take's length before touching the
+cut -- a longer line means a re-render of that take (a length round, said so
+in `--why=`), a shorter line is free. And the reverse trick is legitimate: a
+take that fails in its tail (an unplanned cut at 3.3 s) is fixed in the cut
+by placing its shot ahead of the fault -- a shorter line, no beat -- because
+DQ judges only the placed seconds (ep11 T06, three renders, one fix).
+
 ## The contract: every prop carries a size
 
 A wardrobe and props contract is the list of things the drawer is forbidden to
