@@ -48,4 +48,28 @@ body-scale verb to L4 ("pulls back" is).
 
 ## Takes
 
-(filled after take_dq)
+28 takes, 27 passed first time -- the best first-pass DQ of the series. The one
+hard failure was T08, the wide of the cab in the rain: asked to PUSH in, it
+overran to 1.94x and read 0.46 off-board. Rewritten as a pan it came back
+100/100. Three advisories were accepted on sight: T07 (Drebber walking the
+platform, background shifts behind him), T21 (the wide of the fallen body, a
+push again at 1.74x) and T26 (the Inspector at the bell, a pan that drifts).
+
+The lesson is the ep11 one, again and in a new place: **a wide given a push
+overruns**. Closes and MCUs already pan by rule; wides on a moving subject want
+a pan too, or a push named at a hand's breadth with something that keeps an
+edge.
+
+## The title card, and the credits running out
+
+The paid image API answered `credit_balance_exhausted` with the episode
+finished but for its card -- and a 1:1 episode cannot fall back on the generic
+9:16 card. `title.py --local` now draws the still on the owner's own model:
+same desk, skein, lamp and silhouette, the three lines legible, the word
+SCARLET red. The one thing the local drawer will not draw is the scarlet
+thread, so the paid card stays the default.
+
+## Publish
+
+QC PASS sha8 f69b1444, 170.04 s, -14.3 LUFS, 28/28 takes, no override needed:
+https://youtu.be/OoTLbV3KurU. Spend $0.73.
