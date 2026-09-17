@@ -828,6 +828,35 @@ What to write instead, in the plan:
 - A blurred foreground body in a cell dissolves in the take (T15, twice):
   a foreground figure is sharp and whole, or absent.
 
+**Motion wording, measured (ep10 synthesis, `episode_ref_official` L24-L27 and
+`picture_gates` G-MOTION).** A kept-clause may hold a sharp, static, frame-edge
+object under a small move and nothing else: it cannot brake a scale ("the
+whole face keeps inside the frame", 0/1), hold a soft mass ("keeps sharp",
+0/1) or exclude a thing ("the shoulder alone", 0/1) -- and a kept frame edge
+contradicts any travel (a push removes the edge, a pull-back moves it inward;
+T20, T03). Never name the thing a head turns toward: "toward the door/window"
+is obeyed as a whole-body turn (3/3); say what the face keeps -- "his chin
+comes round a finger's breadth, his eyes on the lens". A walk is obeyed when
+it goes away or across to a named thing in frame (T06, T18) and ignored toward
+the lens or by a small figure in a wide (T04, T20, each twice): give the
+travel to the camera instead. Amount words on head beats governed 0/16; drop
+them from action clauses.
+
+**Light, measured (`house_style.light_for`, `picture_gates` G-SUNSPLIT and
+G-LIGHT-SIDE).** Every setup names its own source in `described` and the style
+line takes it -- a lamp room says the lamp, the path says the sun, the episode
+`light` is only the fallback (ep10 had "low side sun" over sixteen night
+blocks). Each shot's `camera` light sentence is a direction and a black in ten
+words ("The low sun comes from the left."); the "...and leaves the right of
+his face in shadow" half is inert in the take and is cut. Name the FRAME side,
+not the body side ("his right cheek" is frame-left when he faces the lens),
+and flip it when the camera stands on the landmark's ground facing away -- the
+ep10 doorway sun is on the right facing the porch and on the left from the
+threshold (16/17/18 were wrong). Under a sun, never split a face into a lit
+half and a shadow half (drawn 0/6): name the caster's black at a frame edge --
+"the hat brim's black across his eyes", "the porch post's shadow across the
+BOTTOM third" (obeyed). Under a lamp or a window slab the split works (3/4).
+
 ### DRY-BUILD EVERY TAKE PROMPT BEFORE YOU COMMIT THE GPU (2026-09-12)
 
 `takes_r2v.cards(book, episode, number)` builds every prompt and runs the LINT
