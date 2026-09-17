@@ -481,7 +481,7 @@ def main(book_id: str, number: int, only: str | None = None, sheet: int | None =
     # bound. Each of these is free to read and refuses here, in this order.
     if unlit := house_style.faults(episode):
         raise SystemExit("G-LIGHT refuses the plan:\n  " + "\n  ".join(unlit))
-    for note in plan_gates.advisories(episode):
+    for note in plan_gates.advisories(episode, plan_gates.series_lines(book, number), rate=plan_gates.series_rate(book, number)):
         print(f"  ADVISORY {note}", flush=True)
     if thin := plan_gates.faults(episode):
         raise SystemExit("the plan fails the authoring gates:\n  " + "\n  ".join(thin))

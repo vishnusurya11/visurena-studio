@@ -38,3 +38,17 @@ def test_plan_gates_carry_the_picture_gates():
 
     assert "picture_gates.faults" in inspect.getsource(plan_gates.faults)
     assert "picture_gates.advisories" in inspect.getsource(plan_gates.advisories)
+
+
+def test_the_sheet_run_prints_g_names_and_g_rate():
+    """G-NAMES needs the earlier episodes' lines and G-RATE the narrator's
+    measured rate; both are computed for free and the sheet run -- the last
+    free step before the paid draw -- is where they are printed."""
+    import inspect
+    import sys
+
+    sys.path.insert(0, "scripts/episode")
+    import seq_boards
+
+    src = inspect.getsource(seq_boards)
+    assert "plan_gates.series_lines(book, number)" in src and "plan_gates.series_rate(book, number)" in src
