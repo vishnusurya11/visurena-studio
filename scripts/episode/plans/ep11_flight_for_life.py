@@ -492,6 +492,7 @@ LINES = [
     ("narration", "john_watson", "He drew the bolt and threw the door wide on nothing. Then he looked down.", 13),
     ("narration", "john_watson", "It writhed over the sill like a snake, sprang up, shut the door, and was Hope the hunter.", 14),
     ("dialogue", "jefferson_hope", "Food first. Nothing for two days.", 15),
+    ("narration", "john_watson", "It was Hope, come the last mile on his belly.", 15),
     ("narration", "john_watson", "He ate like a starving man, and two thousand dollars in gold went into a bag.", 16),
     ("dialogue", "jefferson_hope", "The house is watched. So I came in on my belly.", 17),
     ("dialogue", "jefferson_hope", "Tomorrow is your last day. We ride tonight.", 18),
