@@ -22,7 +22,8 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
-from studio import actor_gate, episode_home, episode_spec as spec, house_style, plan_gates
+from studio import actor_gate, episode_home, episode_ref_official as ro, episode_spec as spec, house_style, plan_gates
+from studio import episode_takes as tk
 from studio.episode_takes import BUDGET
 
 HANDLE, BREATH = 0.25, 0.70
@@ -55,6 +56,47 @@ def long_shots(episode, rate: float, budget: float = BUDGET) -> list[tuple[int, 
         if seconds > budget + 1e-6:
             out.append((s.index, round(seconds, 2)))
     return out
+
+
+def projected(episode, rate: float) -> list[dict]:
+    """Each shot as the timeline would place it, at the narrator's measured rate."""
+    out = []
+    for s in episode.shots:
+        words = [len(l.text.split()) for l in episode.lines if l.shot == s.index]
+        seconds = 2 * HANDLE + sum(words) / rate + BREATH * max(0, len(words) - 1) + s.beat_s + s.coda_s
+        out.append({"index": s.index, "seconds": seconds, "setup": s.setup, "cuts": list(getattr(s, "cuts", []))})
+    return out
+
+
+def packed_shots(episode, rate: float) -> list[tuple[int, ...]]:
+    """Runs of shots the take packer would put into ONE take (ep12 shot 21: a
+    1.7 s reaction packed after a 5.5 s dialogue shot, an internal cut the
+    model had to place).  One shot per take is the rule since episode 4."""
+    return [tuple(run) for run in tk.groups(projected(episode, rate)) if len(run) > 1]
+
+
+def unpaced_shots(episode) -> list[tuple[int, str]]:
+    """(shot, gait word) where the frame, motion or at-rest has a person's gait
+    and no pace word -- the dry build's L8, read on the plan before a sheet is
+    paid for.  ADVISORY: the lint proper reads the BUILT prompt, where a
+    wardrobe clause ("riding skirt") has been rewritten from the cast row."""
+    out = []
+    for s in episode.shots:
+        body = " ".join([s.frame, s.motion, getattr(s, "at_rest", "") or ""])
+        hits = ro.gaits(body)
+        if hits and not any(p in body.lower() for p in ro.PACE):
+            out.append((s.index, hits[0].group(0)))
+    return out
+
+
+def measured_or_projected(book: Path, number: int, episode, rate: float) -> list[dict]:
+    """The timeline's own shots when it has been written, else the projection."""
+    placed = episode_home.home(book, number) / "placed.json"
+    if placed.exists():
+        by = {s.index: s for s in episode.shots}
+        return [dict(s, setup=by[s["index"]].setup, cuts=list(by[s["index"]].cuts))
+                for s in episode_home.read_json(placed)["shots"] if s["index"] in by]
+    return projected(episode, rate)
 
 
 def sheet_text(book_id: str, number: int) -> int:
@@ -99,6 +141,10 @@ def main(book_id: str, number: int) -> int:
     print("CAST BOUND   :", unbound or "all bound"); hard += len(unbound)
     lifted, _ = spec.quoted_lines([l.model_dump() for l in ep.lines], seq_boards.book_words(book))
     print("QUOTE        :", [(l["index"], l["lifted"]) for l in lifted] or "clean"); hard += len(lifted)
+    packed = [tuple(run) for run in tk.groups(measured_or_projected(book, number, ep, rate)) if len(run) > 1]
+    print("ONE PER TAKE :", packed or "every shot its own take"); hard += len(packed)
+    for i, word in unpaced_shots(ep):
+        print(f"  advisory: L8 shot {i}: {word!r} with no pace word (the built prompt may differ)")
     long = long_shots(ep, rate)
     print(f"TAKE LENGTH  : {long or 'every shot inside a take'} (at {rate:.2f} words/s, budget {BUDGET} s)")
     hard += len(long)
