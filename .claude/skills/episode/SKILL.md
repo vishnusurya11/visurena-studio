@@ -812,6 +812,45 @@ RETAKE, a face turned away that no row read until face-at-end. Retakes keep
 their ledger: a re-rendered take's `.dq.json` carries the superseded renders
 first, marked, so a reviewer's label always has a row to land on.
 
+**face-at-end (`studio/face_end.py`, HARD).** After the take is decoded, the
+DQ reads one frame -- the last frame of the take's first segment (the frame
+before the second pin, else the last frame) -- with OpenCV's YuNet
+(`studio/models/yunet.onnx`, CPU, free) and measures the largest face: its box
+height against the frame and whether the box touches an edge. On a `close` or
+`medium_close` with a planned face the row is HARD at height >= 0.75, or
+clipped at an edge from 0.70 up (penalty 30); a planned face that is not
+found is an advisory (the face turned away); an insert or wide with no
+planned face never fails (a hand can read as a face). Calibrated on ep10:
+faults T05_fail2 0.85C / T05_fail1 0.85 / T16 0.81C / T25 0.77 / T28 0.74C,
+keeps <= 0.73, T14 (0.83C, a whole close with hair on the edge) the one
+accepted false alarm; T22 at 0.68C is the cell's own headroom-less framing and
+passes. A push that ends over the wall is a plan fault before it is a render
+fault -- the `close` cells are drawn without headroom and any push carries
+the crown out: pull back, or pan. `docs/calibration/face_end.md`.
+
+**look (`studio/take_look.py`, HARD / scored advisory).** Eight frames spread
+over the take are read with look_gate's numbers. HARD when the take's median
+has no black floor (p5 luma > 15 and under 10 % of pixels near black) --
+ep10's T20, the sunlit wide that shipped as the one print in the cut, 43 /
+0.01; the cleanest take T31 reads 2 / 0.63. Scored advisory (15) when the
+black leaves over the length: near-black share drops >= 0.20 first->last or
+the dominant-hue share rises >= 0.25 -- T16 (.45->.18, hue .31->.75) and T28
+(.66->.28, .39->.79), both pushes ending on a face that fills the frame;
+takes that darken on the push (T07/T13/T15) are clean. A level advisory (5)
+names a take a stop up (median mean > 100 with p5 > 15). A two-shot take
+whose planned cut crosses a light change (T18) fires the advisory by design;
+read the note before retaking. Per picture, `look_gate.one_hue` needs a
+lifted floor on both branches: one warm hue over black is a lamp, not a print.
+`docs/calibration/take_look.md`.
+
+**post-cut / pulse (`studio/take_edit.py`, advisories, scored 5).** The frames
+the edit trims are read too: when their mean step is over twice the last ten
+placed steps' mean AND peaks over 8, the take collapsed inside its cut (ep10
+T28 4.07->8.48, T29 1.44->5.06; ep05/ep07 none). A period of 12-36 frames in
+the frame-difference series holding over three cycles at r > 0.5, with a
+residual at least half the median step, is a breath (T05, 23 f) or a stutter
+(T04, 4 f). Both rank best-of-N. `docs/calibration/take_edit.md`.
+
 The same day also found that the three paper tests -- the gutter guard, the
 cell soft-edge trim and `strip_white_edges` -- were three calibrations of one
 question, and the third was never recalibrated: mean-only at 170, no
