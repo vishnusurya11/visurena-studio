@@ -287,18 +287,19 @@ def audition(book: Path, who: str, instruct: str, cast: dict[str, Path],
 
     A roll that fails both gates is not re-asked with the same words: the
     register moves `NUDGE_HZ` away from the rival it collided with, because a
-    VoiceDesign has no seed and the only lever the writer holds is the sheet."""
+    VoiceDesign has no seed and the only lever the writer holds is the sheet.
+    The direction is fixed by the FIRST rival: MEASURED on the Ferrier recast,
+    roll 2's rival changed and the register walked back to where roll 1 was."""
     dest = cast_home.clip(book, who)
     dest.parent.mkdir(parents=True, exist_ok=True)
     render = render or render_design
-    rival, tried = "", []
+    step, tried = 0, []
     for roll in range(REROLLS):
         if roll:
-            step = nudge_step(who, rival)
             instruct, hertz = nudge(instruct, hertz, step), hertz + step
         picks = one_roll(dest, roll, instruct, cast, hertz, render)
         tried += picks
-        rival = best_of(picks).rival
+        step = step or nudge_step(who, best_of(picks).rival)
         if any(not pick.fault for pick in picks):
             break
     return settle(tried, dest)
