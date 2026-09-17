@@ -317,6 +317,14 @@ def wanted(records: dict, indices: list[int]) -> list[int]:
     return sorted(set(indices))
 
 
+def daylit(episode, rec: dict) -> bool:
+    """Is this take's setup an exterior lit by the sky (the look floor is advisory there)?"""
+    from studio import take_look
+
+    setup = episode.setups.get(rec.get("setup", ""))
+    return bool(setup) and take_look.is_daylight(setup.described, setup.outdoors)
+
+
 def main(book_id: str, number: int, indices: list[int], attempts: bool = False) -> None:
     book = episode_home.book_dir(book_id)
     home = episode_home.home(book, number)
@@ -332,6 +340,7 @@ def main(book_id: str, number: int, indices: list[int], attempts: bool = False) 
         rec["motion"], rec["motions"] = planned_motion(episode, rec), planned_motions(episode, rec)
         rec["size"] = planned_size(episode, rec)
         rec["placed_seconds"] = current_placed(episode_home.read_json(home / "placed.json"), rec)
+        rec["daylight"] = daylit(episode, rec)
         files = episode_home.attempts_of(take_dir, index) if attempts else [book / rec["rel_path"]]
         judged = {f: measure_attempt(f, rec, index, cells, work, take_dir, kinds, line, k)
                   for k, f in enumerate(files)}

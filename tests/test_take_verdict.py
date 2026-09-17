@@ -220,14 +220,14 @@ def test_the_picture_rows_are_not_measured_while_their_modules_are_absent(monkey
 
 
 def test_the_picture_rows_are_wired_by_interface_when_the_modules_exist(monkeypatch):
-    """The interface: face_end.row(video, record), take_look.row(video, seconds),
+    """The interface: face_end.row(video, record), take_look.row(video, seconds, daylight),
     take_edit.rows(video, seconds, placed_seconds) -> the named Gates."""
     import sys
     from types import ModuleType
     seen = {}
     face_end, take_look, take_edit = ModuleType("studio.face_end"), ModuleType("studio.take_look"), ModuleType("studio.take_edit")
     face_end.row = lambda video, record: seen.setdefault("face", (video, record)) and tv.Gate("face-at-end", 0.86, False, True, "0.86 clipped")
-    take_look.row = lambda video, seconds: seen.setdefault("look", seconds) and tv.Gate("look", 0.02, True, True, "floor 0.02")
+    take_look.row = lambda video, seconds, daylight=False: seen.setdefault("look", seconds) and tv.Gate("look", 0.02, True, True, "floor 0.02")
     take_edit.rows = lambda video, seconds, placed: seen.setdefault("edit", (seconds, placed)) and [
         tv.Gate("post-cut", 8.6, False, False, "8.6", 5.0), tv.Gate("pulse", 0.1, True, False, "0.1")]
     for name, mod in (("studio.face_end", face_end), ("studio.take_look", take_look), ("studio.take_edit", take_edit)):

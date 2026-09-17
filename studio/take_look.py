@@ -28,6 +28,7 @@ from __future__ import annotations
 
 import io
 import subprocess
+import re
 from pathlib import Path
 
 import numpy as np
@@ -116,14 +117,28 @@ def level(m: dict) -> str:
     return ""
 
 
-def verdict(m: dict):
-    """HARD with no floor on the median; scored ADVISORY when the black is lost
-    over the length or the level is a stop up; quiet with fewer than two frames."""
+DAY_WORDS = re.compile(r"\b(?:sun|sunlit|sunlight|daylight|overcast|grey sky|low grey sky)\b", re.I)
+LAMP_LIT = re.compile(r"\b(?:lamp|fire|candle|candles|brand|lantern|moon|match)\b[^;.]{0,40}\bthe only light\b", re.I)
+
+
+def is_daylight(described: str, outdoors: bool) -> bool:
+    """An outdoor setup lit by the sky: a sun or overcast word, and no lamp,
+    fire, candle or moon named as the only light.  MEASURED ep11 T00, ep12 T16
+    and T27: correct sunlit haze at p5 19-30 with no black to find."""
+    return bool(outdoors and DAY_WORDS.search(described or "") and not LAMP_LIT.search(described or ""))
+
+
+def verdict(m: dict, daylight: bool = False):
+    """HARD with no floor on the median -- a scored ADVISORY under daylight;
+    scored ADVISORY when the black is lost over the length or the level is a
+    stop up; quiet with fewer than two frames."""
     from studio.take_verdict import Gate
     if m.get("n", 0) < 2:
         return Gate("look", None, True, False, "not measured")
     said = f"p5 {m['p5']:.0f} black {m['near_black']:.2f} hue {m['share']:.2f}"
     if lg.no_black_floor(m["p5"], m["near_black"]):
+        if daylight:
+            return Gate("look", m["p5"], False, False, "no floor, daylight adv " + said, PENALTY_LEVEL)
         return Gate("look", m["p5"], False, True, "no floor " + said, PENALTY_NO_FLOOR)
     lost, up = lost_black(m), level(m)
     penalty = (PENALTY_LOST if lost else 0.0) + (PENALTY_LEVEL if up else 0.0)
@@ -131,6 +146,6 @@ def verdict(m: dict):
     return Gate("look", m["p5"], not (lost or up), False, note, penalty)
 
 
-def row(video: Path, seconds: float):
+def row(video: Path, seconds: float, daylight: bool = False):
     """The look row for one take."""
-    return verdict(measure(video, seconds))
+    return verdict(measure(video, seconds), daylight)

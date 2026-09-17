@@ -262,13 +262,14 @@ def face_end_row(video: Path, record: dict) -> list[Gate]:
     return [face_end.row(video, record)]
 
 
-def look_row(video: Path, seconds: float) -> list[Gate]:
-    """G-LOOK, by interface: the black floor of the picture (studio.take_look)."""
+def look_row(video: Path, seconds: float, daylight: bool = False) -> list[Gate]:
+    """G-LOOK, by interface: the black floor of the picture (studio.take_look);
+    advisory for a daylight setup (the record's `daylight`, set by take_dq)."""
     try:
         from studio import take_look
     except ImportError:
         return unmeasured("look")
-    return [take_look.row(video, seconds)]
+    return [take_look.row(video, seconds, daylight)]
 
 
 def edit_rows(video: Path, seconds: float, placed_seconds: float) -> list[Gate]:
@@ -288,7 +289,8 @@ def picture_rows(video: Path, record: dict, seconds: float) -> list[Gate]:
     instead of a silent pass (test_the_picture_rows_are_not_measured...)."""
     placed = float(record.get("placed_seconds", seconds))
     clip = float(record.get("measured_seconds") or record.get("seconds") or seconds)
-    return face_end_row(video, record) + look_row(video, seconds) + edit_rows(video, clip, placed)
+    return (face_end_row(video, record) + look_row(video, seconds, bool(record.get("daylight")))
+            + edit_rows(video, clip, placed))
 
 
 def gates(v: TakeVerdict, audio: dict | None, line_text: str, unplanned: list[float],

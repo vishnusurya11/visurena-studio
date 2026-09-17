@@ -200,7 +200,7 @@ def test_the_style_never_names_a_voice_even_to_forbid_one():
     # WORD boundaries: "single piano notes" contains "sing", and that is the
     # style doing its job, not naming a voice.
     for word in ("vocal", "vocals", "voice", "choir", "sings", "singer", "singing", "lyric"):
-        assert not re.search(rf"{word}", asm.BED_STYLE, re.I), word
+        assert not re.search(rf"\b{word}\b", asm.BED_STYLE, re.I), word
 
 
 def test_the_style_still_says_what_the_bed_IS():
@@ -217,4 +217,4 @@ def test_the_bed_is_a_violin_because_holmes_plays_one():
 def test_the_violin_style_still_names_no_voice():
     import re
     for word in ("vocal", "vocals", "voice", "choir", "sings", "singer", "singing", "lyric"):
-        assert not re.search(rf"{word}", asm.BED_STYLE, re.I), word
+        assert not re.search(rf"\b{word}\b", asm.BED_STYLE, re.I), word

@@ -248,7 +248,7 @@ dossier identifies Watson as an army surgeon" -- at best it is ignored, at
 worst the model renders a document.  A shot prompt needs what is visible."""
 
 
-SENTENCE_END = re.compile(r"(?<![A-Z])(?<!Dr)(?<!Mr)(?<!Mrs)(?<!St)\.\s+")
+SENTENCE_END = re.compile(r"(?<![A-Z])(?<!\bDr)(?<!\bMr)(?<!\bMrs)(?<!\bSt)\.\s+")
 """Sentence boundaries that survive titles.  A naive split on ". " turns
 "Dr. Watson" into two sentences and leaves "Watson." as a fragment -- the same
 abbreviation bug that once ended a sentence at "Mrs."."""
