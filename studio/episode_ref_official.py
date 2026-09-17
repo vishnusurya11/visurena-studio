@@ -259,7 +259,8 @@ def lead_tag(faces: list[str]) -> str:
 # ---- 1.1  subject_definitions ----------------------------------------------
 
 def picture_numbers(n_faces: int, n_segs: int, ends: list[int],
-                    has_plate: bool = True) -> tuple[int | None, dict, dict, int]:
+                    has_plate: bool = True,
+                    has_cells: bool = True) -> tuple[int | None, dict, dict, int]:
     """Every reference's picture slot, in `graph_for`'s staging order: cast sheets,
     plate, pinned cells in first-pin order, END cells (1.1).  The fourth value is
     the slot AFTER the last picture, kept so callers that took a strip number still
@@ -273,6 +274,14 @@ def picture_numbers(n_faces: int, n_segs: int, ends: list[int],
     staged, which is what L11 refuses."""
     plate = n_faces + 1 if has_plate else None
     first = (plate + 1) if has_plate else n_faces + 1
+    # `has_cells=False` is the ep14 experiment (2026-09-17): the storyboard drawer
+    # had no credits, so a take stages the cast cards and the plate and NOTHING
+    # else.  Each segment's picture is None and every sentence that would cite one
+    # says it in words instead -- a cited picture the graph never staged is what
+    # L11 refuses, and a picture called a first frame when none is pinned is a lie
+    # the model would try to obey.
+    if not has_cells:
+        return plate, {i: None for i in range(n_segs)}, {}, first - 1
     cells = {i: first + i for i in range(n_segs)}
     last = {k: first + n_segs + j for j, k in enumerate(ends)}
     return plate, cells, last, first + n_segs + len(ends)
@@ -443,11 +452,14 @@ def audio_line(spoken) -> str:
 
 def subjects(faces: list[str], physical: dict[str, str], described: str, segs: list[dict],
              ends: list[int] | None = None, spoken=None,
-             has_plate: bool = True, outdoors: bool = False) -> tuple[str, dict[int, int], int]:
+             has_plate: bool = True, outdoors: bool = False,
+             has_cells: bool = True) -> tuple[str, dict[int, int], int]:
     """subject_definitions; returns the text, `{segment -> its first-frame picture}`
     and the strip's picture number."""
     ends, names = ends or [], names_of(list(physical) or faces)
-    plate, cells, last, strip = picture_numbers(len(faces), len(segs), ends, has_plate)
+    plate, cells, last, strip = picture_numbers(len(faces), len(segs), ends, has_plate, has_cells)
+    framing_tail = ("each shot keeps the framing of its own first-frame picture." if has_cells
+                    else "each shot keeps the framing its own words describe.")
     # A CAST SHEET DEFINES A MAN; IT IS NOT A FRAMING.  Measured on episode 3 T02:
     # the take held a full-length studio portrait AND the storyboard cell of the
     # same man, both `fully_preserved`, and at 4.0 s the render put a full-length
@@ -455,14 +467,14 @@ def subjects(faces: list[str], physical: dict[str, str], described: str, segs: l
     # and framing, re-rendered into the room (matching no reference pixel-wise,
     # best 0.118).  This is OWNER 5.16's plate fix, owed to people all along.
     out = [f"<Subject {k}> is {name_of(who)} in <Picture {k}>: {physical.get(who, '')} "
-           f"<Picture {k}> defines this man alone; each shot keeps the framing of its own "
-           f"first-frame picture.".rstrip()
+           f"<Picture {k}> defines this man alone; {framing_tail}".rstrip()
            for k, who in enumerate(faces, start=1)]
     if plate is not None:
         out.append(f"<Subject {plate}> is the location in <Picture {plate}>: {described} <Picture {plate}> "
-                   f"defines this {place_word(described, outdoors)} alone; each shot keeps the framing of "
-                   f"its own first-frame picture.")
+                   f"defines this {place_word(described, outdoors)} alone; {framing_tail}")
     for i, seg in enumerate(segs):
+        if cells[i] is None:
+            continue
         out.append(f"<Picture {cells[i]}> is the first frame of [Shot {i + 1}], "
                    f"{split_frame(tagged(noun_phrase(seg['frame'], names), faces))[0]}.")
     out += [f"<Picture {last[k]}> is the last frame of [Shot {k}], {last_frame_text(segs[k - 1])}."
@@ -476,32 +488,33 @@ def subjects(faces: list[str], physical: dict[str, str], described: str, segs: l
 # ---- 1.3  retention_analysis -----------------------------------------------
 
 def retention(faces: list[str], segs: list[dict], cells: dict, strip: int, ends: list[int],
-              described: str, has_plate: bool = True, outdoors: bool = False) -> str:
+              described: str, has_plate: bool = True, outdoors: bool = False,
+              has_cells: bool = True) -> str:
     """R1-R7.  The plate is `partially_preserved` and never `appears in` a shot
     (OWNER 5.16).  Every pinned cell is `fully_preserved` as its shot's first frame;
     there is no strip to mark `weak_reference` any more."""
-    plate, cells, last, strip = picture_numbers(len(faces), len(segs), ends, has_plate)
+    plate, cells, last, strip = picture_numbers(len(faces), len(segs), ends, has_plate, has_cells)
+    framing_tail = ("each shot keeps the framing of its own first-frame picture." if has_cells
+                    else "each shot keeps the framing its own words describe.")
     every = list(range(1, len(segs) + 1))
     out = []
     for k, who in enumerate(faces, start=1):
         seen = [i for i, seg in enumerate(segs, start=1) if people_in(seg["frame"], [who])] or [1]
         out.append(f"<Subject {k}> (the man in {shot_list(seen)}): partially_preserved - the face, hair, "
                    f"build and clothes of <Picture {k}> carry into every shot that shows him; "
-                   f"<Picture {k}> serves as a definition of the man and each shot keeps the framing "
-                   f"of its own first-frame picture.")
+                   f"<Picture {k}> serves as a definition of the man and {framing_tail}")
     if plate is not None:
         out.append(f"<Subject {plate}> (the location behind {shot_list(every)}): partially_preserved - the "
                    f"materials, furniture and light of <Picture {plate}> carry into every shot behind the "
                    f"people; <Picture {plate}> serves as a definition of the "
-                   f"{place_word(described, outdoors)} and each shot keeps the framing of its own "
-                   f"first-frame picture.")
+                   f"{place_word(described, outdoors)} and {framing_tail}")
     # NOT `viewpoint`: 22 of 22 prompts asked for a preserved viewpoint in a block
     # whose own camera sentence pushes the camera THROUGH it.  Told to hold the
     # viewpoint and to change it, the render held -- episode 3 T02's Holmes sits at
     # similarity 1.000 to his cell with 0.12 frame-to-frame change, the still
     # reproduced and frozen.  The camera sentence owns the viewpoint now.
     out += [f"<Picture {cells[i]}> ([Shot {i + 1}] first frame): fully_preserved - subject "
-            f"placement, wardrobe and light." for i in range(len(segs))]
+            f"placement, wardrobe and light." for i in range(len(segs)) if cells[i] is not None]
     out += [f"<Picture {last[k]}> ([Shot {k}] last frame): fully_preserved - the same viewpoint with the "
             f"action completed." for k in ends]
     # OWNER 2026-09-11: no strip line either.  Citing a picture the graph no longer stages
@@ -1047,6 +1060,16 @@ def framing(k: int, seg: dict, pic: int, faces: list[str], names=()) -> str:
     """D2a / D2b: the first shot BEGINS FROM its picture (ref-en §5.3) and every later
     shot says at what second it cuts (base-en §4.2's `the shot cuts to`)."""
     phrase = tagged(noun_phrase(seg["frame"], names), faces)
+    if pic is None:  # no cell staged: the words carry the framing (ep14 experiment)
+        if k == 1:
+            text = f"The shot opens on {phrase}."
+        else:
+            head, rest = split_frame(phrase)
+            text = (f"At {stamp(seg['t'])} the shot cuts to {head}"
+                    f"{': ' + rest if rest else ''}.")
+        if seg["size"] == "insert":
+            return text[:-1] + "; only that object and what touches it is in frame."
+        return text
     if k == 1:
         text = f"The shot begins from <Picture {pic}>: {phrase}."
     else:
@@ -1261,11 +1284,13 @@ def summary(frames: int, segs: list[dict], cells: dict, described: str, faces: l
     reference is exactly what L11 refuses."""
     n = len(segs)
     plate = len(faces) + 1 if has_plate else None
-    runs = "; ".join(f"[Shot {i + 1}] begins from <Picture {cells[i]}> and runs "
-                     f"{during(int(round(s['t'])), s['end'])}" for i, s in enumerate(segs))
+    runs = "; ".join((f"[Shot {i + 1}] begins from <Picture {cells[i]}> and runs "
+                      f"{during(int(round(s['t'])), s['end'])}") if cells.get(i) is not None else
+                     (f"[Shot {i + 1}] runs {during(int(round(s['t'])), s['end'])}")
+                     for i, s in enumerate(segs))
     where = f"<Subject {plate}>, {short_place(described)}" if plate else short_place(described)
     who = ", ".join(f"<Subject {k}>" for k in range(1, len(faces) + 1)) \
-        or (f"<Subject {plate}>" if plate else f"<Picture {cells[0]}>")
+        or (f"<Subject {plate}>" if plate else f"<Picture {cells[0]}>" if cells.get(0) else "the place")
     audio = ("<Audio 1> carries that spoken line and is the complete audio track." if spoken
              else "<Audio 1> is the complete audio track.")
     return (f"[reference generation + keyframe completion + audio reuse] One {frames / fps:.2f}-second "
@@ -1815,7 +1840,8 @@ def six_sections(subs: str, summ: str, ret: str, dd: str, sound: str) -> str:
 def build(shots: list[Shot], placed: list[dict], lines: list[Line], at: dict, frames: int,
           faces: list[str], physical: dict[str, str], described: str, narrator: str,
           ends: list[int] | None = None, setup: Setup | None = None, refs: int | None = None,
-          fps: int = 24, check_lint: bool = True, has_plate: bool = True) -> str:
+          fps: int = 24, check_lint: bool = True, has_plate: bool = True,
+          cells_staged: bool = True) -> str:
     """The six sections, in order.  `frames` is the LATENT length: base-en §2.1 asks
     for the effective duration, and the placed length is 0.5 s short of it (5.6)."""
     offset = {s["index"]: s for s in placed}[shots[0].index]["t_start"]
@@ -1824,11 +1850,13 @@ def build(shots: list[Shot], placed: list[dict], lines: list[Line], at: dict, fr
     segs = segments(shots, placed, offset, frames, setup, fps)
     spoken = [(l, at[l.index][0] - offset) for l in sorted(lines, key=lambda l: l.index)
               if l.kind == "dialogue"]
-    subs, cells, strip = subjects(faces, physical, described, segs, ends or [], spoken, has_plate, outdoors)
+    subs, cells, strip = subjects(faces, physical, described, segs, ends or [], spoken, has_plate,
+                                  outdoors, cells_staged)
     dd, life = describe(shots, placed, lines, at, faces, physical, narrator, frames, cells, setup, fps,
                         not (ends or []))
     text = six_sections(subs, summary(frames, segs, cells, described, faces, spoken, fps, has_plate),
-                        retention(faces, segs, cells, strip, ends or [], described, has_plate, outdoors),
+                        retention(faces, segs, cells, strip, ends or [], described, has_plate, outdoors,
+                                  cells_staged),
                         dd, soundscape(described, getattr(setup, "crowd", ""), outdoors))
     if bad := negations(text):
         raise ValueError(f"the prompt carries negation MiniMax cannot read: {bad}")
