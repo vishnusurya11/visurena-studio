@@ -194,3 +194,28 @@ def test_a_takes_own_end_picture_is_not_a_foreign_picture():
 def test_another_shots_picture_is_still_foreign():
     family = dq.own_family([("Q02_0.png", 0)])
     assert "Q10_1.png" not in family and "Q10_1E.png" not in family
+
+
+def test_the_placed_seconds_are_read_from_the_current_timeline_not_the_render_record():
+    """ep11: shot 6's line was shortened AFTER the render so its shot would end
+    before the take's hard cut at 3.3 s; the record still said 5.42 s and the
+    DQ judged the cut inside the window three times over."""
+    from scripts.episode import take_dq
+
+    placed = {"shots": [{"index": 5, "seconds": 2.0}, {"index": 6, "seconds": 2.8}, {"index": 7, "seconds": 4.0}]}
+    assert take_dq.current_placed(placed, {"index": 6, "shots": [6], "placed_seconds": 5.42}) == 2.8
+    assert take_dq.current_placed(placed, {"index": 5, "shots": [5, 6], "placed_seconds": 9.0}) == 4.8
+    assert take_dq.current_placed({"shots": []}, {"index": 9, "placed_seconds": 3.0}) == 3.0
+
+
+def test_best_of_n_ignores_an_attempt_shorter_than_the_shot():
+    """ep11 T15: the line grew after the render; the 8.25 s re-render lost the
+    settle to the old 5.16 s file, which scored 100 and could not fill the shot."""
+    from scripts.episode import take_dq
+
+    short, long = object(), object()
+    seconds = {short: 5.16, long: 8.25}
+    keep = take_dq.fitting({short: "v", long: "v"}, placed=8.25, seconds_of=lambda p: seconds[p])
+    assert list(keep) == [long]
+    both = take_dq.fitting({short: "v", long: "v"}, placed=5.0, seconds_of=lambda p: seconds[p])
+    assert set(both) == {short, long}

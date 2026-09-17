@@ -203,6 +203,25 @@ def line_text(episode, rec: dict) -> str:
 
 
 
+def current_placed(placed: dict, rec: dict) -> float:
+    """The take's placed seconds from the CURRENT timeline (the sum over its
+    run of shots), not the render record: a line shortened after the render
+    moves the shot's end, and the DQ judges the window the edit will use."""
+    by = {s["index"]: float(s["seconds"]) for s in placed.get("shots", [])}
+    run = rec.get("shots") or [rec.get("index")]
+    if all(i in by for i in run):
+        return round(sum(by[i] for i in run), 6)
+    return float(rec.get("placed_seconds", 0.0))
+
+
+def fitting(verdicts: dict, placed: float, seconds_of) -> dict:
+    """The attempts long enough to fill the shot (a frame of slack); every
+    attempt when none is -- ep11 T15's 5.16 s file scored 100 and beat the
+    8.25 s re-render that could fill its shot."""
+    long = {p: v for p, v in verdicts.items() if seconds_of(p) + 0.05 >= placed}
+    return long or verdicts
+
+
 def settle(take_dir: Path, index: int, verdicts: dict) -> Path:
     """Keep the best attempt by (passed, score) as `T<NN>.mp4`; the file it displaces
     becomes the next `T<NN>_failN.mp4`.  Returns the winner's path before the rename."""
@@ -312,11 +331,13 @@ def main(book_id: str, number: int, indices: list[int], attempts: bool = False) 
         kinds, line = segment_kinds(episode, rec.get("anchors", [])), line_text(episode, rec)
         rec["motion"], rec["motions"] = planned_motion(episode, rec), planned_motions(episode, rec)
         rec["size"] = planned_size(episode, rec)
+        rec["placed_seconds"] = current_placed(episode_home.read_json(home / "placed.json"), rec)
         files = episode_home.attempts_of(take_dir, index) if attempts else [book / rec["rel_path"]]
         judged = {f: measure_attempt(f, rec, index, cells, work, take_dir, kinds, line, k)
                   for k, f in enumerate(files)}
         verdicts = {f: v for f, (v, _) in judged.items()}
-        best = settle(take_dir, index, verdicts) if attempts else files[0]
+        best = (settle(take_dir, index, fitting(verdicts, rec["placed_seconds"], clip_seconds))
+                if attempts else files[0])
         v, audio = judged[best]
         kept = take_dir / f"T{index:02d}.mp4" if attempts else best
         report = record(v, list(verdicts.values()), prior_record(take_dir, index))
