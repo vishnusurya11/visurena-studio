@@ -398,6 +398,31 @@ Four sheet-side faults of episode 9, none of them a drawing fault:
   of a man waiting to be photographed".
 
 
+### THE HEAD FRACTION IS THE SIZE, AND THE PANEL IS THE INSTANT BEFORE (ep10 synthesis, 2026-09-16)
+
+The head fraction is the size, not the span: a `close` at_rest says the head
+is half the frame's height, a `medium_close` a third, a `medium` a quarter --
+an MCU written "from the TOP edge to the collar at the BOTTOM third" is a
+close and will be drawn as one (ep10: 3 of 8 MCUs came back closes, 2 as
+mediums; ep07, which wrote the fraction in 20 of 26 at_rests, kept MCU and
+close apart). Every start panel is the instant BEFORE its own motion: the
+at_rest may not hold the motion's end state on the motion's own object --
+"lifts one hand" cannot sit beside "his raised hand", "throws the hand out"
+beside "hand out", "brings the hand up" beside "hand up"; `sheet_gate` refuses
+it for $0 (ep10 Q10/Q12/Q27 drew the gesture finished and the takes had
+nothing to do). The ladder sentence and the ORDER block name the landmark only
+in panels whose frame can see it, and the at_rest may not give the same noun a
+different rung. Redraw rule: a panel redraw (`redraw_panel.py`, $0.05-0.08)
+for at most 2 bad cells on a sheet; 3 or more is a sheet redraw ($0.13-0.20),
+because a single is drawn alone and drifts a size class even with the sheet's
+blocks copied over (ep10 Q13 0.25 -> 0.20, Q25 0.66 -> 0.36 face height, the
+episode's two worst takes). `redraw_panel.py` adopts the episode's place and
+light first -- the four ep10 panels were drawn under "1881 London, gaslight".
+A strict retry is only bought when `strict_prefix` can name a duplicate or a
+ladder regression; a white-line or gutter fault alone is a panel redraw, never
+a $0.13 re-roll of the identical prompt. Alternates feed no take: a twin
+between an alternate and its base is reported, not retried.
+
 ### ONE SIMPLE CAMERA MOVE BETWEEN PANELS (owner, 2026-09-12)
 
 The difference between two consecutive panels — a panel and its own END panel
