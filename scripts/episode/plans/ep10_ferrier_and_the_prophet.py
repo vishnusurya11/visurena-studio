@@ -317,7 +317,7 @@ S = [
      "beside his knee, John Ferrier's dark shoulder at the right edge.",
      "The camera pushes in on Brigham Young across the whole shot, travelling a forearm; "
      "he pushes the chair back a hand's breadth with his knee; he tucks the volume tighter under "
-     "his arm and turns toward the door.",
+     "his arm and turns his head toward the door, his shoulders following it a hand's breadth.",
      "at the window end of the room level with a standing man's chest, three long strides from the "
      "table, a 35mm lens. The window beside the camera at the left throws its slab of sun across "
      "the table between the two men",
