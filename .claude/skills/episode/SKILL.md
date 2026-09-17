@@ -14,6 +14,7 @@ only copy). Every paid image is logged in `library/<book>/spend.jsonl`
 the OpenAI usage page is the truth).
 
 ```
+uv run python scripts/episode/plan_check.py  <codex_id> <n>   # 0. EVERY FREE GATE AT ONCE: contract, G-LIGHT, plan gates (+G-NAMES, G-RATE), motion, marks, actor, cast bound, per-shot take length at the measured rate, the take builder's refusals, the sheet text. Loop here until clean; ep11 paid 13 line runs to find these one at a time.
 uv run python scripts/episode/say_lines.py   <codex_id> <n> [--redo=20,32]  # 1. AUDIO FIRST: every line, IndexTTS2, measured
 uv run python scripts/episode/respot.py      <codex_id> <n>   # 2. sub-shot cuts scaled to the measured lines
 uv run python scripts/episode/timeline.py    <codex_id> <n>   # 3. placed.json: shot times FROM the audio
