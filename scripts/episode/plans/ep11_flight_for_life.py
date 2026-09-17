@@ -114,7 +114,7 @@ SETUPS = {
                    "the earth, and it leaves the side of the house, the underside of the hedge and every "
                    "crouching figure black against the pale fields"),
         cast=["john_ferrier", "jefferson_hope", "lucy_ferrier"], landmark="the gap in the hedge",
-        landmark_at="far_end", landmark_size="is a quarter of the height of the frame",
+        landmark_at="far_end", landmark_size="is the height of a hand",
         route="from the side window along the hedge to the gap into the cornfields",
         geometry=("The side window of the house is a dark square at the LEFT edge of the frame with the "
                   "black wall below it. The hedge runs from the BOTTOM LEFT corner away to the gap at the "
@@ -123,23 +123,23 @@ SETUPS = {
                   "lies black across the BOTTOM third."),
         crowd="", outdoors=True, props=[]),
     "eagle_canyon_night": dict(
-        described=("The Eagle Canyon in the Utah mountains by night, 1860: a narrow rock track along the "
+        described=("The Eagle Canyon in the Utah mountains by night, 1860: a narrow rock trail along the "
                    "bed of a dried watercourse between great boulders, a black crag towering up on the "
                    "left with long basalt ribs down its face, a chaos of boulders and scree on the right, "
                    "the sky a strip of stars above; a low moon behind the crag to the left is the only "
                    "light and it comes from behind and the left, rimming the boulders and the crag's ribs "
-                   "in cold silver, throwing every shadow across the track toward the right, and leaving "
-                   "the faces of the riders black under their hat brims and the track itself pale dust "
+                   "in cold silver, throwing every shadow across the trail toward the right, and leaving "
+                   "the faces of the riders black under their hat brims and the trail itself pale dust "
                    "between black rocks"),
         cast=["john_ferrier", "jefferson_hope", "lucy_ferrier", "unnamed_sentinel"],
         landmark="the black crag with its basalt ribs", landmark_at="far_end",
-        landmark_size="is the full height of the frame",
-        route="from the picketed horses along the watercourse track to the sentinel's rock and beyond",
+        landmark_size="fills the frame",
+        route="from the picketed horses along the watercourse trail to the sentinel's rock and beyond",
         geometry=("The black crag fills the LEFT third of the frame from the BOTTOM edge to the TOP edge "
-                  "with its basalt ribs rimmed in moonlight. The track of pale dust runs from the BOTTOM "
+                  "with its basalt ribs rimmed in moonlight. The trail of pale dust runs from the BOTTOM "
                   "CENTRE up between the boulders to the CENTRE of the upper third. The scree and boulders "
                   "fill the RIGHT third. The strip of stars crosses the TOP edge and every shadow lies from "
-                  "the upper left toward the lower right across the track."),
+                  "the upper left toward the lower right across the trail."),
         crowd="", outdoors=True, props=[]),
 }
 
@@ -236,18 +236,14 @@ S = [
      "friction", 1.0, 0.0),
     # 6
     ("farm_parlour_day", "medium", ["joseph_stangerson_young", "enoch_drebber_young"], 0.5,
-     "Medium of the two young men on their feet with their hats snatched up, the pale one out of the "
-     "rocking-chair and the bull-necked one from the window, both making for the open door at the "
-     "right of the frame, the window sun across the table between them.",
+     "Medium of the open door from inside the room with the two young men going out through it, their backs to the camera, hats in their hands, the tall pale one ducking under the lintel and the bull-necked one a step behind, the black of the hall beyond them.",
      "The camera pans right across the whole shot, travelling a hand's breadth; the two men go out "
      "through the open door at the RIGHT edge one behind the other; the rocking-chair rocks empty behind "
      "them.",
      "at the window end of the room level with a standing man's chest, three long strides from the "
      "door, a 35mm lens. The window sun comes from the LEFT across the table and leaves the doorway "
      "black",
-     "The two young men stand in the CENTRE of the frame the height of the frame's middle third, hats "
-     "in their hands, the open door a black rectangle at the RIGHT edge. The empty rocking-chair stands "
-     "at the LEFT third by the stove and the sunlit table crosses the BOTTOM third.",
+     "The open door fills the CENTRE of the frame from the BOTTOM edge to the TOP edge with the two men's backs in it, the pale one ahead at the CENTRE and the bull-necked one at the RIGHT third. The black hall fills the doorway behind them and the sunlit log wall stands at the LEFT edge.",
      "reaction", 0.5, 0.0),
     # 8
     ("farm_parlour_day", "insert", [], 0.6,
@@ -453,13 +449,13 @@ S = [
      "spike", 1.0, 0.5),
     # 29
     ("eagle_canyon_night", "wide", [], 0.6,
-     "Wide up the canyon track: the file small on the pale dust below, and above them on a rock that "
-     "overhangs the track a solitary sentinel standing dark and plain against the strip of stars, a "
+     "Wide up the canyon trail: the file small on the pale dust below, and above them on a rock that "
+     "overhangs the trail a solitary sentinel standing dark and plain against the strip of stars, a "
      "rifle upright in his hands, the moon behind the crag rimming the rock's edge.",
      "The camera tilts up across the whole shot, travelling a hand's breadth; the sentinel on the rock "
      "raises the rifle a hand's breadth; the file below halts; a horse's head comes up.",
-     "on the track behind the file at a standing man's eye, a 35mm lens. The moon comes from behind "
-     "and the LEFT and rims the sentinel's rock in silver, leaving the track below black between the "
+     "on the trail behind the file at a standing man's eye, a 35mm lens. The moon comes from behind "
+     "and the LEFT and rims the sentinel's rock in silver, leaving the trail below black between the "
      "boulders",
      "The sentinel stands on his rock at the CENTRE of the upper third against the strip of stars, "
      "the height of a finger, the rifle upright beside him. The black crag fills the LEFT third to the "
@@ -471,9 +467,9 @@ S = [
      "black slouch hat and a long dark coat, the rifle upright in both bare hands, the moon behind the "
      "crag rimming his hat and shoulders and leaving his face black but for the eyes.",
      "The camera pans left across the whole shot, travelling a hand's breadth; the rifle's muzzle comes "
-     "down a hand's breadth toward the track; his head bends a finger's breadth to peer down; his mouth "
+     "down a hand's breadth toward the trail; his head bends a finger's breadth to peer down; his mouth "
      "opens on the words.",
-     "on the track below the rock at the height of a mounted man's eye looking up, three long strides "
+     "on the trail below the rock at the height of a mounted man's eye looking up, three long strides "
      "from him, a 50mm lens. The moon comes from behind and the LEFT and rims his hat and shoulders, "
      "leaving his face black but for the eyes",
      "The sentinel's hat and shoulders fill the CENTRE of the frame from the BOTTOM third to the TOP "
@@ -494,34 +490,21 @@ S = [
      "the rifle's stock crosses the BOTTOM edge and the black crag fills the RIGHT edge.",
      "friction", 0.6, 0.0),
     # 34 BUTTON -- the world lets them by
-    ("eagle_canyon_night", "medium_close", ["unnamed_sentinel"], 0.9,
-     "Medium close of the sentinel on his rock from below, leaning on his rifle with both bare hands on "
-     "its muzzle, the slouch hat, the long dark coat, his bearded face black under the brim with the "
-     "moon's silver rim along the hat and shoulders, the stars behind him.",
+    ("eagle_canyon_night", "close", ["unnamed_sentinel"], 0.9,
+     "Close on the sentinel's bearded face under the slouch hat's brim from below, his chin on his two bare hands folded over the rifle's muzzle, the moon's silver rim along the brim and the cheekbone from behind and the left, the rest of the face black, the stars behind.",
      "The camera pulls back from the sentinel across the whole shot, travelling a hand's breadth; his "
-     "hand lifts off the muzzle and waves once down the track, a hand's breadth; his head nods once; the coat skirt stirs.",
-     "on the track below the rock at the height of a mounted man's eye looking up, three long strides "
+     "hand lifts off the muzzle and waves once down the trail, a hand's breadth; his head nods once; the coat skirt stirs.",
+     "on the trail below the rock at the height of a mounted man's eye looking up, three long strides "
      "from him, a 50mm lens. The moon comes from behind and the LEFT and rims his hat and shoulders, "
      "leaving his face black under the brim",
-     "The sentinel's hat and shoulders fill the CENTRE of the frame from the BOTTOM third to the TOP "
-     "edge, his head a third of the frame's height, black under the brim with the silver rim along the "
-     "LEFT side. The rifle's muzzle is under his hands at the BOTTOM CENTRE and the strip of stars fills "
-     "the TOP edge.",
+     "The sentinel's face fills the CENTRE of the frame, half the frame height, from the folded hands at the BOTTOM third to the brim at the TOP edge, black with the silver rim along the LEFT side. The rifle's muzzle stands up into the BOTTOM CENTRE under his hands and the stars fill the TOP edge.",
      "button", 0.6, 0.0),
     # 35 -- silent runout: the trot, the watcher small behind
     ("eagle_canyon_night", "wide", [], 1.0,
-     "Wide back down the canyon track from ahead of the file: the three riders coming on at a trot on "
-     "the pale dust, black under their brims, and far behind and above them the sentinel small on his "
-     "rock leaning on his rifle against the strip of stars, the moon rimming the crag.",
-     "The camera pulls back from the file across the whole shot, travelling a hand's breadth; the three "
-     "riders come on at a trot toward the boulder at the bottom of the frame growing larger; the "
-     "sentinel on his rock leans on his rifle; dust drifts off the track to the right.",
-     "on the track ahead of the file at the height of a mounted man's chest, a 35mm lens. The moon "
-     "comes from behind and the LEFT and rims every rider in silver, leaving the track black between "
-     "the boulders",
-     "The three riders come on at the CENTRE of the frame the height of the middle third, black under "
-     "their brims. The sentinel is small on his rock at the CENTRE of the upper third against the stars. "
-     "The black crag fills the LEFT third to the TOP edge and a boulder crosses the BOTTOM edge.",
+     "Wide from the sentinel's rock looking down into the canyon: the three riders going away from the camera at a trot down the pale dust between the black boulders, small and black, the rifle's muzzle and the sentinel's coat sleeve in the near left corner, the moon rimming the far crag.",
+     "The camera tilts down across the whole shot, travelling a hand's breadth; the three riders go away down the trail at a trot growing smaller; the coat sleeve in the near corner lifts a hand's breadth; dust drifts off the trail to the right.",
+     "on the sentinel's rock at a standing man's eye looking down into the canyon, a 35mm lens. The moon comes from behind and the LEFT and rims every rider in silver, leaving the trail black between the boulders",
+     "The three riders are small at the CENTRE of the lower third going away down the pale trail. The rifle's muzzle and the coat sleeve fill the BOTTOM LEFT corner. The black crag fills the RIGHT third to the TOP edge and the trail runs from the BOTTOM CENTRE up to the far bend at the CENTRE of the upper third.",
      "runout", 1.0, 3.0),
 ]
 
