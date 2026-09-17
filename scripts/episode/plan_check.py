@@ -97,6 +97,8 @@ def main(book_id: str, number: int) -> int:
     import seq_boards  # noqa: E402
     unbound = seq_boards.unbound_cast(book, ep)
     print("CAST BOUND   :", unbound or "all bound"); hard += len(unbound)
+    lifted, _ = spec.quoted_lines([l.model_dump() for l in ep.lines], seq_boards.book_words(book))
+    print("QUOTE        :", [(l["index"], l["lifted"]) for l in lifted] or "clean"); hard += len(lifted)
     long = long_shots(ep, rate)
     print(f"TAKE LENGTH  : {long or 'every shot inside a take'} (at {rate:.2f} words/s, budget {BUDGET} s)")
     hard += len(long)

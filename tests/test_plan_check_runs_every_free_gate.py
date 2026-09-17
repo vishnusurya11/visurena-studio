@@ -4,6 +4,9 @@ MEASURED on episode 11 (2026-09-17): thirteen line runs, because each edit
 (the dialogue dial, the turn ratio, the projection, the sync rule, a shot
 longer than a take) was found by the NEXT gate on the road, after a GPU stage.
 One command that says everything at once turns that loop into two passes.
+
+ep12 (2026-09-17): the QUOTE gate lived only in seq_boards, so a nine-word lift
+was found after the lines, respot, timeline and plates had run.  It is here now.
 """
 import inspect
 import sys
@@ -16,7 +19,8 @@ def test_the_check_names_every_gate_it_runs():
 
     src = inspect.getsource(plan_check)
     for gate in ("house_style.faults", "plan_gates.faults", "plan_gates.advisories", "series_rate",
-                 "still_motions", "plan_marks", "unbound_cast", "sheet_dq", "refuse_long_shots"):
+                 "still_motions", "plan_marks", "unbound_cast", "sheet_dq", "refuse_long_shots",
+                 "quoted_lines", "book_words"):
         assert gate in src, gate
 
 

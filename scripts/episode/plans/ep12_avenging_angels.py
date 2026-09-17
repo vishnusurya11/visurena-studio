@@ -69,7 +69,7 @@ SETUPS = {
                    "glowing pile of wood ashes on the bare ground, the ground all round it stamped and "
                    "churned by the hooves of many horses, a low heap of reddish soil newly dug a little to "
                    "one side with a forked stick planted in it and a blank square of paper in the cleft, "
-                   "the boulders black on all sides; a brand blown to a flame in a man's hand is the only "
+                   "the boulders black on all sides under a black sky full of stars; a brand blown to a flame in a man's hand is the only "
                    "light and it comes from the brand alone, low and red, on the ashes, the stamped ground, "
                    "the heap and the stick, and leaves the boulders and the sky black"),
         cast=["jefferson_hope"], landmark="the low heap of reddish soil with its forked stick",
@@ -466,7 +466,7 @@ LINES = [
     ("dialogue", "jefferson_hope", "They will be upon our track by now. Everything depends on speed.", 3),
     ("narration", "john_watson", "On the second day the food ran out, so Hope made a fire in a sheltered nook.", 4),
     ("narration", "john_watson", "He shouldered his rifle, and went off after whatever the mountains might give him.", 5),
-    ("narration", "john_watson", "Looking back, he saw the old man and the girl crouched over the blaze, the animals behind them.", 6),
+    ("narration", "john_watson", "He looked back once: the old man and the girl bent to the fire, the animals behind them.", 6),
     ("narration", "john_watson", "Three hours brought him a big-horn on a pinnacle, and one long steady shot brought it down.", 7),
     ("narration", "john_watson", "With a haunch over his shoulder he turned back, and lost his way among the gorges till dark.", 8),
     ("narration", "john_watson", "At the mouth of the defile he put his hands to his mouth and hallooed. Nothing came back.", 9),
@@ -478,7 +478,7 @@ LINES = [
     ("narration", "john_watson", "He cooked what would last him, and walked back through the mountains on the track of the Angels.", 15),
     ("narration", "john_watson", "On the sixth day he stood above the city again, and there were flags in the streets.", 16),
     ("narration", "john_watson", "A rider came up the canyon, a Mormon named Cowper, who owed him a kindness or two.", 17),
-    ("dialogue", "cowper", "You are mad to come here. There is a warrant against you from the Holy Four.", 18),
+    ("dialogue", "cowper", "You are mad to come here. There is a warrant out against you, from the Holy Four.", 18),
     ("dialogue", "jefferson_hope", "What has become of Lucy Ferrier?", 19),
     ("dialogue", "cowper", "Married yesterday, to young Drebber. Hold up, man, hold up.", 20),
     # shot 21: silent -- white to the lips
@@ -503,7 +503,7 @@ TURNS = {13: "a guide with two lives in his hands -> a man with one thing left",
          26: "a bride in the ground -> her ring in his fist and the years ahead"}
 
 # (beat_s, coda_s) by shot; every other shot is 0.5 / 0.0
-BEATS = {0: (0.6, 0.4), 3: (1.0, 0.0), 6: (0.5, 0.3), 9: (0.7, 0.3), 10: (1.2, 0.5), 13: (1.0, 0.0),
+BEATS = {0: (0.6, 0.4), 3: (1.0, 0.0), 6: (0.5, 0.3), 9: (0.7, 0.3), 10: (1.2, 0.5), 13: (0.8, 0.0),
          14: (1.0, 0.3), 15: (0.5, 0.3), 16: (0.6, 0.3), 21: (1.2, 0.0), 22: (1.0, 0.3), 25: (1.0, 0.0),
          26: (0.6, 0.0), 27: (0.8, 1.5)}
 
