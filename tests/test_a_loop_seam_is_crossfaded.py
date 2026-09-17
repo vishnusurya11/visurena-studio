@@ -82,7 +82,7 @@ def test_the_loop_is_at_full_level_across_the_joint():
 
 # ---- a mostly-silent tone is a failed generation ------------------------------
 
-def half_silent(path: Path, seconds: float = 27.7, live: float = 10.4):
+def half_silent(path: Path, seconds: float = 27.7, live: float = 6.0):   # under LIVE_SHARE: an empty, not a short loop
     t = np.arange(int(seconds * RATE)) / RATE
     one = (0.2 * np.sin(2 * np.pi * 220 * t)).astype(np.float32)
     one[int(live * RATE):] = 0.0
@@ -103,7 +103,7 @@ def test_the_measured_light_tone_is_short():
     assert assemble.is_short(6.0, want=27.7)
     assert not assemble.is_short(23.4, want=26.7), "uneasy delivered 88 % and is fine"
     assert assemble.LIVE_SHARE == 0.30
-    assert not assemble.is_short(0.75 * 20.0, want=20.0) and assemble.is_short(0.75 * 20.0 - 0.01, want=20.0)
+    assert not assemble.is_short(assemble.LIVE_SHARE * 20.0, want=20.0) and assemble.is_short(assemble.LIVE_SHARE * 20.0 - 0.01, want=20.0)
 
 
 def test_a_short_tone_is_re_rolled_under_the_same_bound(tmp_path, monkeypatch):
