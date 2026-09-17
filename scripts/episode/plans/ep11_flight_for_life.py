@@ -149,8 +149,7 @@ S = [
     ("farm_gate_day", "wide", [], 0.0,
      "Wide of the gate of Ferrier's farm on a warm afternoon, a farm gate of five rough grey split-rail timbers, weathered wood pegged to two square timber posts, two saddled horses hitched one to each post, the shingly path beyond running up to the log house, the posts' shadows black across "
      "the road.",
-     "The camera pushes in on the gate across the whole shot, travelling a hand's breadth; the near horse "
-     "tosses its head; the reins swing against the post; its tail switches once.",
+     "The camera pans right across the whole shot, travelling a finger's breadth; the posts' black shadows keep the road's right half and the gate keeps the frame's centre; the near horse tosses its head; the reins swing against the post.",
      "on the road at a standing man's eye, three long strides from the gate, a 35mm lens. The low afternoon sun comes from the LEFT, lays the posts' shadows BLACK across the road and leaves each post's near face black",
      "The two square gate posts stand in the CENTRE of the frame the height of half the frame with a "
      "saddled horse hitched to each. The road crosses the BOTTOM third. The posts' black shadows lie "
@@ -192,9 +191,7 @@ S = [
      "Close on the bull-necked youth's broad florid face smirking at his own reflection in the small "
      "looking-glass on the wall beside the window, the window sun hard on the near cheek, the far cheek "
      "in the black of the log wall.",
-     "The camera pulls back from the youth's face across the whole shot, travelling a hand's breadth; "
-     "the smirk widens; his chin comes round a finger's breadth to the glass; his hand smooths the sandy "
-     "curls.",
+     "The camera pans right across the whole shot, travelling a finger's breadth; the looking-glass keeps the right edge and the log wall keeps the left edge; the smirk widens; his hand smooths the sandy curls.",
      "at the wall beside the looking-glass level with his eyes, an arm's length from him, a 90mm lens. The window sun comes from the RIGHT, past the looking-glass, onto his near cheek and leaves the far side of his face black",
      "The youth's florid face fills the CENTRE of the frame, half the frame height, from the loose black "
      "tie at the BOTTOM edge to the sandy curls at the TOP edge, the RIGHT cheek in hard sun and the LEFT cheek black. The small looking-glass is a bright square at the RIGHT edge with the edge of his "
@@ -232,9 +229,7 @@ S = [
     # 6
     ("farm_parlour_day", "medium", [], 0.5,
      "Medium of the open door from inside the room with the two young men going out through it, their backs to the camera, hats in their hands, the tall pale one ducking under the lintel and the bull-necked one a step behind, the black of the hall beyond them.",
-     "The camera pans right across the whole shot, travelling a hand's breadth; the two men go out "
-     "through the open door at the RIGHT edge one behind the other; the rocking-chair rocks empty behind "
-     "them.",
+     "The camera pans right across the whole shot, travelling a finger's breadth; the door jambs keep the frame's centre and the sunlit log wall keeps the left edge; the two men go out one behind the other into the black hall; the pale one's hat comes off in his hand.",
      "at the window end of the room level with a standing man's chest, three long strides from the "
      "door, a 35mm lens. The window sun comes from the LEFT across the table and leaves the doorway "
      "black",
@@ -254,8 +249,7 @@ S = [
     ("farm_parlour_day", "medium_close", ["john_ferrier"], 0.65,
      "Medium close of John Ferrier at the pine table reading the small square of paper, bare-headed, "
      "his brows drawn together, the window sun from the left on the paper and on one side of his face.",
-     "The camera pushes in on John Ferrier across the whole shot, travelling a hand's breadth; his eyes "
-     "go down the paper; his fist closes on it; his head bows a finger's breadth.",
+     "The camera pans left across the whole shot, travelling a hand's breadth; the window keeps the left edge and the paper keeps his two hands at the bottom centre; his eyes go down the paper; his fist closes on it; his head bows a finger's breadth.",
      "at the table's far end level with his eyes, two long strides from him, a 50mm lens. The window "
      "sun comes from the LEFT onto the left side of his face and leaves the right side and the wall "
      "behind him black",
@@ -267,7 +261,7 @@ S = [
      "Close on Lucy Ferrier at breakfast in the grey-blue house dress, her chestnut hair gathered back, "
      "her face turned up to the ceiling and her bare hand coming up to point, the window sun on one "
      "cheek and the other in shadow.",
-     "The camera pulls back from Lucy's face across the whole shot, travelling a hand's breadth; her eyes widen; her lips part; her pointing finger rises a hand's breadth.",
+     "The camera pans right across the whole shot, travelling a finger's breadth; the log wall keeps the frame behind her and the table's edge keeps the bottom edge; her eyes widen; her lips part; her pointing finger rises a hand's breadth.",
      "across the table level with her eyes, an arm's length from her, a 90mm lens. The window sun comes "
      "from the LEFT onto her left cheek and leaves the right cheek and the wall behind black",
      "Lucy's face fills the CENTRE of the frame, half the frame height, from the white collar at the "
@@ -279,8 +273,7 @@ S = [
      "Insert on a small square placard nailed to the top rail of the gate in the low sun, its face blank "
      "to the lens, John Ferrier's bare hand flat on the rail beside it, a rider's dust drifting on the "
      "road beyond.",
-     "The camera pans right across the whole shot, travelling a hand's breadth; the bare hand pulls along the rail a hand's breadth and closes on the placard's corner; a rider's dust drifts across the road behind the gate from left to "
-     "right; the placard's corner tears a finger's breadth.",
+     "The camera pans right across the whole shot, travelling a finger's breadth; the placard keeps its nails in the top rail at the frame's centre and the post keeps the right edge; dust drifts across the empty road behind the gate; the bare hand pulls along the rail a hand's breadth and closes on the placard's corner; the corner tears a finger's breadth.",
      "at the gate at the height of the top rail, an arm's length from the placard, a 90mm lens. The low "
      "sun comes from the LEFT onto the placard and leaves the post's near face black",
      "The placard is a pale square in the CENTRE of the frame the height of a hand on the gate's top rail, "
@@ -319,8 +312,7 @@ S = [
     ("farm_door_night", "medium_close", ["john_ferrier"], 0.55,
      "Medium close of John Ferrier in the thrown-open doorway, bare-headed, the candle from behind the "
      "camera hard on his face, his iron-grey beard, his eyes level on the empty night beyond the fence, the starry black behind him.",
-     "The camera tilts down across the whole shot, travelling a finger's breadth; his eyes drop to the "
-     "threshold; his bare hand goes to his throat; his mouth opens a finger's breadth.",
+     "The camera tilts down across the whole shot, travelling a finger's breadth; both black jambs keep the frame edges and the starry blue-black keeps the frame behind his head; his eyes drop to the threshold; his bare hand goes to his throat; his mouth opens a finger's breadth.",
      "in the hall level with his eyes, two long strides from him, a 50mm lens. The candle behind the "
      "camera is the light, from the FRONT, and the night behind him is blue-black under stars",
      "John Ferrier's head sits at the CENTRE of the frame a third of the frame's height, his collar at the BOTTOM third, lit from the front, with the starry night black behind him and the black jambs at the LEFT and RIGHT edges.",
@@ -356,7 +348,7 @@ S = [
      "Insert on Jefferson Hope's two brown hands tearing a loaf over a plate of cold meat on the pine "
      "table beside the low lamp, the brown wool cuffs of his driving coat, the lamp's light hard on the knuckles and the "
      "table's far edge black.",
-     "The camera tilts down across the whole shot, travelling a finger's breadth; one hand carries the torn half up out of the TOP edge; the other hand drags the plate a hand's breadth nearer; a crumb falls to the table.",
+     "The camera pans right across the whole shot, travelling a finger's breadth; the plate keeps the bottom centre and the lamp's foot keeps the left edge; one hand carries the torn half up out of the TOP edge; the other hand holds the plate; a crumb falls to the table.",
      "over the table at the height of the lamp chimney, an arm's length from the plate, a 90mm lens. "
      "The lamp is the light, from the LEFT, and leaves the far edge of the table black",
      "The two hands and the loaf fill the CENTRE of the frame the height of the middle third over the "
@@ -391,9 +383,7 @@ S = [
      "Close on John Ferrier's face at the blue-black window glass, bare-headed, the iron-grey beard, "
      "his eyes on the dark fields beyond the glass, the lamp's low light from the left on one cheek and "
      "the near side of the face black against the glass.",
-     "The camera pulls back from John Ferrier's face across the whole shot, travelling a hand's "
-     "breadth; his eyes come round from the glass to the lens; his jaw sets on the words; his hand flat "
-     "on the sill closes.",
+     "The camera pans left across the whole shot, travelling a finger's breadth; the blue-black glass keeps the right third and the sill keeps the bottom edge; his eyes come round from the glass to the lens; his jaw sets on the words; his hand flat on the sill closes.",
      "at the window level with his eyes, an arm's length from him, a 90mm lens. The lamp is the light, "
      "from the LEFT, and leaves the right side of his face black against the blue-black glass",
      "John Ferrier's face fills the CENTRE of the frame, half the frame height, from the beard at the "
@@ -403,7 +393,7 @@ S = [
     # 25 -> insert: boots down from the sill
     ("garden_hedge_night", "insert", [], 0.1,
      "Insert by starlight on the side window's sill with a woman's small boot coming down over it onto the dug earth, Jefferson Hope's two bare hands under the boot, the hem of her skirt, the house wall black.",
-     "The camera tilts down across the whole shot, travelling a finger's breadth; the boot comes down the last hand's breadth onto the earth; the hands let go; the skirt's hem falls over the boot.",
+     "The camera pans left across the whole shot, travelling a finger's breadth; the sill keeps the top third and the black house wall keeps the right edge; the boot comes down the last hand's breadth onto the earth; the hands let go; the skirt's hem falls over the boot.",
      "in the garden at the height of the sill, an arm's length from it, a 90mm lens. The starlight comes "
      "from ABOVE and behind the camera, cold and faint, and leaves the house wall black",
      "The sill crosses the frame at the TOP third with the boot and the two hands at the CENTRE of the "
