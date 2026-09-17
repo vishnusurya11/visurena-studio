@@ -588,7 +588,7 @@ def build() -> dict:
              for k, (kind, who, text, shot) in enumerate(LINES)]
     return dict(number=11, title="A Flight for Life",
                 question="Tonight, can John Ferrier get his daughter out of Utah?",
-                aspect="1:1", where=WHERE, light=LIGHT, protagonist="john_ferrier",
+                aspect="1:1", where=WHERE, light=LIGHT, protagonist="john_ferrier", answer="line 28",
                 beds=BEDS, setups=SETUPS, shots=shots, lines=lines)
 
 

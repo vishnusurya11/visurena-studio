@@ -86,7 +86,7 @@ def facts(book_id: str, number: int) -> dict:
         "takes_done": len(takes), "takes_total": max(planned, len(takes)),
         "master": str(masters[-1]) if masters else "",
         "pages": [p.name for p in sorted(home.glob("*.html"))],
-        "story": story_layer.report(episode.question, episode.shots)["says"],
+        "story": story_layer.report(episode.question, episode.shots, getattr(episode, "answer", ""))["says"],
     }
 
 
