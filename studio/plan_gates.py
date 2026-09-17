@@ -614,7 +614,40 @@ def faults(episode: Episode) -> list[str]:
             + picture_gates.faults(episode) + sync_faults(episode))
 
 
-def advisories(episode: Episode, earlier_lines: list[str] | None = None) -> list[str]:
+def measured_rate(rows: list[dict]) -> float:
+    """Words a second the book's narrator actually speaks, from lines.json rows
+    (text + measured seconds); 3.0 -- the contract's projection -- when there
+    are none.  ep11: 2.68, and the placed cut ran 185 s on a 168 s projection."""
+    words = sum(len(str(r.get("text", "")).split()) for r in rows if r.get("seconds"))
+    seconds = sum(float(r["seconds"]) for r in rows if r.get("seconds"))
+    return words / seconds if words and seconds else 3.0
+
+
+def series_rate(book, number: int) -> float:
+    """The measured rate over every earlier episode's lines.json."""
+    import json
+    from pathlib import Path
+    rows = []
+    for path in sorted(Path(book).glob("episodes/ep*/audio/lines/lines.json")):
+        if int(path.parts[-4][2:]) < number:
+            doc = json.loads(path.read_text(encoding="utf-8"))
+            rows += doc["lines"] if isinstance(doc, dict) and "lines" in doc else doc
+    return measured_rate([r for r in rows if isinstance(r, dict)])
+
+
+def rate_advisory(episode: Episode, rate: float) -> list[str]:
+    """G-RATE: the runtime re-projected at the measured rate, printed when it
+    leaves the 120-180 s band the contract checks at 3.0 words a second."""
+    words = sum(len(l.text.split()) for l in episode.lines)
+    rest = sum(s.beat_s + s.coda_s + 0.5 for s in episode.shots)
+    projected = words / rate + rest
+    if projected > 180:
+        return [f"G-RATE plan: at the narrator's measured {rate:.2f} words/s the cut projects to "
+                f"{projected:.0f} s, over 180 -- cut lines now, before the GPU measures it (advisory)"]
+    return []
+
+
+def advisories(episode: Episode, earlier_lines: list[str] | None = None, rate: float | None = None) -> list[str]:
     """The story measures the fixtures proved cannot be refusals: printed,
     never counted.  ep05/07/08's turns are a curtsey, a knife on a pill and a
     dust column -- none acts on another cast member -- and ep05 is the flattest
@@ -639,4 +672,6 @@ def advisories(episode: Episode, earlier_lines: list[str] | None = None) -> list
         out += name_advisories(episode, earlier_lines)
     from studio import picture_gates
     out += picture_gates.advisories(episode)
+    if rate is not None:
+        out += rate_advisory(episode, rate)
     return out

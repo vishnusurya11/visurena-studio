@@ -500,3 +500,18 @@ def test_a_dialogue_line_is_the_first_line_on_its_shot():
     doc["lines"][12]["shot"] = 13          # a narration line moved ahead of Young's line 13 on shot 13
     faults = [f for f in pg.faults(Episode(**doc)) if f.startswith("G-SYNC")]
     assert faults and "line 13" in faults[0] and "first line on its shot" in faults[0]
+
+
+def test_the_plan_is_reprojected_at_the_narrators_measured_rate():
+    """The contract projects at 3.0 words a second; ep11's narrator measured
+    2.68 (151 s for 405 words) and the placed runtime came out 185 s after the
+    GPU lines run. The book's own lines.json rows know the rate; the plan can
+    be re-projected for free and the overrun printed before anything renders."""
+    rows = [{"text": "one two three four five six", "seconds": 2.0, "kind": "narration"},
+            {"text": "seven eight nine ten", "seconds": 1.5, "kind": "narration"}]
+    assert abs(pg.measured_rate(rows) - 10 / 3.5) < 1e-9
+    assert pg.measured_rate([]) == 3.0
+    doc = json.loads((Path("tests/fixtures/episodes/ep10_plan.json")).read_text(encoding="utf-8"))
+    slow = [a for a in pg.advisories(Episode(**doc), rate=1.5) if a.startswith("G-RATE")]
+    assert slow and "over 180" in slow[0]
+    assert not [a for a in pg.advisories(Episode(**doc), rate=3.0) if a.startswith("G-RATE")]
