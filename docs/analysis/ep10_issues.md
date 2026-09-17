@@ -41,8 +41,13 @@ and drift all judge resemblance, none judges scale. Words did not hold it
   take_zoom.md`) separates the reviewer's groups: over-pushed ≥ 1.63, fine
   ≤ 1.50, wall `OVER_PUSH = 1.55` (hand/finger), 2.0 (forearm), 2.5 (any).
   Wired into `take_dq` as the `zoom` row after the coherence rows
-  (`tests/test_take_zoom_gate.py`); the episode skill now says a CLOSE takes a
-  pull-back or a pan, never a push, and how to order the clauses.
+  (`tests/test_take_zoom_gate.py`) — a SCORED ADVISORY, not a FAIL: the wall
+  at 1.55 failed six takes in the cut on the re-read and four were the
+  reviewer's KEEPs (T13 2.16, T16 2.40, T17 1.73, T25 2.12: a size tighter,
+  face whole). T05's nostrils at 1.93 read the same as T13's whole face at
+  2.16 — scale separates pushed from not pushed, not usable from not. The
+  episode skill now says a CLOSE takes a pull-back or a pan, never a push,
+  and how to order the clauses.
 - Open: the whole-frame read does NOT separate the groups (the room zooms
   1.3× while the man is walked at the lens), so the wall is a fit to 14
   labelled takes — recalibrate on ep11. Stride pushes T12 (1.98) and T33
