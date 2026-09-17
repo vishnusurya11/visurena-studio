@@ -85,11 +85,13 @@ def size_faults(episode: Episode) -> list[str]:
             out.append(note("G-SIZE", f"shot {s.index}",
                             f"a {s.size} whose at_rest names no head fraction; the size is "
                             f"'{HEAD_FRACTION[s.size][0]} the frame's height', not the span "
-                            f"(ep07 20/26 at_rests, ep10 0/34)"))
+                            f"(ep07 20/26 at_rests, ep10 0/34), measured none against "
+                            f"'{HEAD_FRACTION[s.size][0]}'"))
         if s.size == "medium_close" and drawn_as_close(s.at_rest):
             out.append(note("G-SIZE", f"shot {s.index}",
                             "a medium_close whose head runs from the TOP edge to the BOTTOM third: "
-                            "that sentence is a close (ep10 shots 18, 27, 30 drew at face 0.51-0.59)"))
+                            "that sentence is a close (ep10 shots 18, 27, 30 drew at face 0.51-0.59), "
+                            "measured 'TOP edge to BOTTOM third' against 'a third'"))
     return out
 
 
