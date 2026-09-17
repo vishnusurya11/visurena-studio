@@ -23,7 +23,7 @@ def _title():
 def test_a_named_title_approval_buys_the_still_and_not_the_render(monkeypatch):
     title = _title()
     asked = {}
-    monkeypatch.setattr(title, "main", lambda book, number, approved=False, rendering=False:
+    monkeypatch.setattr(title, "main", lambda book, number, approved=False, rendering=False, local=False:
                         asked.update(approved=approved, rendering=rendering))
     title._cli(["title.py", "20260822113400", "1", "--approved=title"])
     assert asked == {"approved": True, "rendering": False}
@@ -32,7 +32,7 @@ def test_a_named_title_approval_buys_the_still_and_not_the_render(monkeypatch):
 def test_a_bare_approval_buys_both(monkeypatch):
     title = _title()
     asked = {}
-    monkeypatch.setattr(title, "main", lambda book, number, approved=False, rendering=False:
+    monkeypatch.setattr(title, "main", lambda book, number, approved=False, rendering=False, local=False:
                         asked.update(approved=approved, rendering=rendering))
     title._cli(["title.py", "20260822113400", "1", "--approved"])
     assert asked == {"approved": True, "rendering": True}
@@ -41,7 +41,7 @@ def test_a_bare_approval_buys_both(monkeypatch):
 def test_no_flag_buys_nothing(monkeypatch):
     title = _title()
     asked = {}
-    monkeypatch.setattr(title, "main", lambda book, number, approved=False, rendering=False:
+    monkeypatch.setattr(title, "main", lambda book, number, approved=False, rendering=False, local=False:
                         asked.update(approved=approved, rendering=rendering))
     title._cli(["title.py", "20260822113400", "1"])
     assert asked == {"approved": False, "rendering": False}

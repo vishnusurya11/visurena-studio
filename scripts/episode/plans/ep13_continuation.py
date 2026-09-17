@@ -232,7 +232,7 @@ S = [
      "Wide of the wet street at night in driving rain: the four-wheeled cab and its dark bay horse standing "
      "at the kerb under the gas lamp, Jefferson Hope in the low black cap hunched on the box with "
      "the reins, the brick house fronts black, the cobbles running with water.",
-     "The camera pushes in on the cab across the whole shot, travelling a hand's breadth; the rain slants "
+     "The camera pans right across the whole shot, travelling a hand's breadth; the gas lamp keeps the right third; the rain slants "
      "through the lamplight; water runs off the cab's roof; the horse's head comes down a hand's breadth.",
      "across the street at a standing man's eye, five long strides from the cab, a 35mm lens. The gas lamp "
      "comes from the RIGHT onto the wet cobbles and leaves the house fronts black",
