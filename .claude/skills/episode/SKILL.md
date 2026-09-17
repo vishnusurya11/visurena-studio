@@ -134,6 +134,35 @@ does both, or it is cut). It is reasoning for the people and agents writing the
 episode, so it is absent from `SHEET_TEXT` and free to explain an absence,
 which every drawn string is forbidden.
 
+**G-STORY after episode 10 (2026-09-16, `studio/plan_gates.py` + `story_layer.py`).**
+The lead speaks his own words. A narration line that reports a present
+character's speech -- `, he said`, `Young said so`, or the modal report `He
+would send word` -- is a dialogue line given to the narrator; on a shot whose
+`faces` holds the speaker it is a G-STORY refusal (ep10 l15 over both men, l24
+over Ferrier), off the speaker's face it is an advisory (ep10 l9/l11/l25/l28,
+ep05 l8/l10/l21). The gate reads each face's pronoun off the plan's own
+single-face shots, so two men in frame and a bare "he said" refuse: whoever
+said it is on screen with his mouth shut. The turn shot holds the
+protagonist's face and names a value that flips (`turn: "before -> after"`);
+hard from episode 10 (`TURN_FACE_HARD_FROM`), advisory before it because
+ep05's curtsey and ep07's knife were judged right without it. The plan says
+where its question is answered -- `answer: "shot 33"` or `"line 27"` -- and
+`story_layer.report` prints "answered at: ..." or "answered: nowhere"; when
+the chapter contains the sentence that answers the question (ep10: "But we
+haven't opposed him yet"), it is a line, spoken by whoever says it in the
+book. The last line lands within 6 s of the end: `wordless_tail_s <= 6.0`
+projected after the last word (ep05 4.6, ep07 4.7, ep10 11.5 refused), and
+the button shot carries `beat_s + coda_s >= 0.6` so the line lands on a held
+frame, not a cut. A name's first hearing in the series carries its role:
+G-NAMES (advisory, computed against every earlier `audio/lines/lines.json`)
+lists each new capitalised name whose first line has no role noun --
+"Jefferson Hope, the young man who rode for Nevada", once, early.
+Caption-lines: the three narration lines with the highest content-word overlap
+against their own shot's frame+motion are printed with the ratio; the wall
+(0.80) is ep07's top line and does not separate good from bad -- use the
+ranking, and make a line on a picture add what the picture cannot show (time,
+hearing, motive: ep10 l17 and l20 are the working examples).
+
 ## 1. The plan (`plan.json`) — no seconds anywhere
 
 `Line{index, kind: narration|dialogue, speaker, text, shot}` (<= 18 words,
@@ -246,6 +275,31 @@ wavs carry no silence of their own). `respot.py` scales every `at_s` to
 measured/projected, floors the cap so the tail clears the validator under
 BOTH the projected and the measured length, and keeps the 2.5 s grid;
 `timeline.py` writes `placed.json` with absolute `cuts`.
+
+**A voice is gated when it is DESIGNED, not when it is first heard (ep10
+synthesis, 2026-09-16).** `cast_voices` scores every candidate half-against-half
+(`SELF_FLOOR` 0.65 -- Ferrier's old clip read 0.498 and was two men) and
+against every other design on disk (`NEAREST_CEIL` 0.80 -- Ferrier-Young read
+0.847), and re-rolls a failing design with its register nudged 8 Hz away from
+the rival; a recast (`--only X --recast`) keeps the old clip as `design_vN.wav`
+and re-renders the recorded instruction rather than paying to rewrite it.
+Ferrier's recast: self 0.671, vs Young 0.701, vs Hope 0.656 (kept; nearest is
+now Stangerson at 0.861, who shares no scene with him). A line's similarity
+floor scales with its length (`similar_floor`: 0.70 at >= 4 s, 0.65 at 2-4 s,
+0.60 under 2 s), because a genuine voice truncated to 1.5 s measures
+0.64-0.69 and a flat 0.70 refuses the true voice on short lines. From the
+third try a line may be cloned from the speaker's best passed line anywhere in
+the book, but that render is kept only if it measures >= 0.75
+(`EPISODE_VOICE`) against the speaker's other passed lines in THIS episode --
+ep10's l27 passed the design floor by 0.001 and was a different man from the
+two lines 25 s earlier. `voice_qc.check` also fails a line that is cut off
+(`ends_abruptly`: last 50 ms peak within 30 dB, under 0.05 s of room) or
+rushed (`WPS_MAX` 3.8 words/s of speech), and `voice_say` leaves 120 ms of
+room after the last sample. The lip-sync number in `T*.dq.json` is
+`mux_lag_s`: it measures whether the sound was laid where we put it, never
+whether the mouth is on the words. Whisper runs in-process on the CPU
+(`voice_qc.DEVICE`), so a DQ or QC listen never queues behind a render;
+`comfy_transcriber` is the fallback.
 
 ## 3. The storyboard: one sequence per setup (`seq_boards.py`)
 
@@ -1086,6 +1140,19 @@ belongs to MiniMax Music 3 and to the TRAILER; it was written into this pipeline
 as though it had been measured on YuE2, it had not, and episode 3's bed then
 sang invented English verse for 101 of its 157.8 seconds (64 %) and reached
 YouTube's queue. `BED_INSTRUMENTAL` holds both markers and is tested.
+
+**A tone is refused for two reasons, both measured per file before it is laid
+(ep10 synthesis, 2026-09-16):** empty (integrated loudness `DEAD_UNDER` 12 dB
+below the tone's target) or short (live music under `LIVE_SHARE` 0.75 of the
+seconds asked -- ep10's `light` was a 27.7 s file with 10.4 s of music, on
+target by the whole-file number). Refused rolls stay on disk as
+`bed_<tone>.empty<N>.wav` / `.short<N>.wav` and the seed moves; three refusals
+stop the assemble. A tone shorter than its span loops, and every loop seam is
+the same equal-power crossfade the span seams get (`episode_bed.looped`,
+sin/cos law) -- ep10's audible fault was a butt-jointed loop restarting
+`uneasy`'s opening bar at 167.83 s over eleven seconds with nobody speaking.
+Check the span table `qc` prints: any span whose file loops more than twice is
+a short generation the gate should have caught.
 
 ## 6. Writing with agents: authors, reviewers, one fixer
 
