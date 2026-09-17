@@ -89,8 +89,8 @@ SETUPS = {
         described=("Interior, inside the empty front room of a shut-up house in the Brixton Road at one in "
                    "the morning, March 1881, the camera within the room with walls closed on all four sides: "
                    "bare floorboards thick with dust, walls of cheap flaring yellow paper peeling in strips "
-                   "and blotched with mildew, a mantelpiece of imitation white marble on the right wall, a "
-                   "single tall window in the far wall streaming with rain, a panelled door in the left wall; "
+                   "and blotched with mildew, a mantelpiece of imitation white marble on the left wall, a "
+                   "single tall curtainless window in the far wall streaming with rain, a panelled door in the right wall; "
                    "a single wax candle in a man's hand is the only light and it comes from the candle "
                    "alone, low and yellow, on the faces and hands nearest it and on the peeling paper beside "
                    "it, and leaves the window, the corners and the ceiling black"),
@@ -98,7 +98,7 @@ SETUPS = {
         landmark_at="far_end", landmark_size="is half the height of the frame",
         route="from the panelled door across the bare boards to the tall window",
         geometry=("The tall rain-streaked window stands in the far wall at the CENTRE of the upper third, "
-                  "grey. The white marble mantelpiece stands along the RIGHT wall at the RIGHT third. The panelled door is at the LEFT edge and the bare dusty boards fill the BOTTOM third. The candle's light reaches the middle of the frame and the ceiling is black across the TOP edge."),
+                  "grey. The white marble mantelpiece stands along the LEFT wall at the LEFT third. The panelled door is at the RIGHT edge and the bare dusty boards fill the BOTTOM third. The candle's light reaches the middle of the frame and the ceiling is black across the TOP edge."),
         crowd="", outdoors=False, props=[]),
     "station_bench": dict(
         described=("Interior, inside the small bare charge room of the police station on the same March "
