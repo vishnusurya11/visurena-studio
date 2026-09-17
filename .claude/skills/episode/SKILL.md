@@ -781,6 +781,37 @@ the prompt did not ask for. Churning now fails the way freezing does. The
 no-last-frame rule above stays exactly as written -- a pin is not the answer
 to churn; a smaller move is (the amplitude table).
 
+**What each row can fire on (ep10 synthesis, 2026-09-16).** The take line
+says `PASS 100/100 (10 of 16 rows live)` and the count is the claim: only a
+row with a value can fire. `frozen-at-start` / `frozen-share`: a start held
+over 1.0 s, a share over 0.40 -- live at the attempt level, 0 fires on 162
+finals since ep05. `coherence off-board`: over 0.40 of the frames match no
+re-framing of the take's own cells -- a morph, a swap of location. `cut`: an
+unplanned hard cut over 30. `last-vs-cell`: last frame under 0.20 to its cell
+-- `n/a planned exit` when the motion sends the subject out of frame, because
+then bare boards are obedience. `churn`: mean non-rigid change after pan
+removal, advisory over 7.0 and HARD over 6.0 on a **wide**, where a second
+chimney or vanished gate posts read as churn and nothing else. `drift`: only
+when an END cell was staged -- ep10 staged none, so the row printed a number
+and could not fire; an unaimed segment's number is how far it moved, not a
+fault. `zoom`: subject scale per anchor segment against the reach word
+(hand/finger 1.55, stride 1.6, forearm 2.0, any 2.5), scored 15 points and
+NEVER a FAIL, because 1.93x nostrils and 2.16x a whole leaning face read the
+same; 5 points for a planned move that did not happen, a camera that followed
+the subject 0.3x past it, the wrong direction, a reversal; a planned exit is
+read only to where the subject field breaks up. `face-at-end`, `look`,
+`post-cut`, `pulse`: the face too big or clipped at the last frame is the
+FAIL the zoom row waits for; a take with no black floor, or one that loses
+its black over its length; a blow-up in the frames the edit trims; a periodic
+pulse. Dead rows, kept because they are free: `foreign` and `cut-landing` (0
+fires on 172 renders across six episodes), `lip-sync` (the MUX lag -- the wav
+laid where we put it, r 0.86-0.95 -- not the mouth; cannot fail), `identity`
+(advisory, recalibrated, one episode on probation). A green ladder proves
+only the absence of its own faults: ep10 T29 at 100/100 was the reviewer's
+RETAKE, a face turned away that no row read until face-at-end. Retakes keep
+their ledger: a re-rendered take's `.dq.json` carries the superseded renders
+first, marked, so a reviewer's label always has a row to land on.
+
 The same day also found that the three paper tests -- the gutter guard, the
 cell soft-edge trim and `strip_white_edges` -- were three calibrations of one
 question, and the third was never recalibrated: mean-only at 170, no
