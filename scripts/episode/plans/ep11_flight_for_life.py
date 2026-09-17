@@ -214,8 +214,7 @@ S = [
      "at the table end of the room level with a standing man's eye, two long strides from the door, a "
      "50mm lens. The window sun comes from the LEFT onto the left side of his face and leaves the "
      "doorway black behind him",
-     "John Ferrier's head and shoulders fill the CENTRE of the frame from the TOP edge to the rolled "
-     "sleeves at the BOTTOM third, his head a third of the frame's height, the LEFT side of his face lit "
+     "John Ferrier's head and shoulders fill the CENTRE of the frame from the TOP third to the rolled sleeves at the BOTTOM edge, his head a third of the frame's height, the LEFT side of his face lit "
      "and the RIGHT side dark. The whip stands up along the RIGHT third and the black of the doorway "
      "fills the frame behind him.",
      "friction", 1.0, 0.0),
@@ -266,8 +265,7 @@ S = [
      "at the table's far end level with his eyes, two long strides from him, a 50mm lens. The window "
      "sun comes from the LEFT onto the left side of his face and leaves the right side and the wall "
      "behind him black",
-     "John Ferrier's head and shoulders fill the CENTRE of the frame from the TOP edge to the sunlit "
-     "table at the BOTTOM third, his head a third of the frame's height, the LEFT side of his face lit "
+     "John Ferrier's head and shoulders fill the CENTRE of the frame from the TOP third to the sunlit table at the BOTTOM edge, his head a third of the frame's height, the LEFT side of his face lit "
      "and the RIGHT side dark. The square of paper is a bright point in his hands at the BOTTOM CENTRE.",
      "friction", 0.8, 0.0),
     # 10
@@ -333,8 +331,7 @@ S = [
      "threshold; his bare hand goes to his throat; his mouth opens a finger's breadth.",
      "in the hall level with his eyes, two long strides from him, a 50mm lens. The candle behind the "
      "camera is the light, from the FRONT, and the night behind him is blue-black under stars",
-     "John Ferrier's head and shoulders fill the CENTRE of the frame from the TOP edge to the collar at "
-     "the BOTTOM third, his head a third of the frame's height, lit from the front, with the starry "
+     "John Ferrier's head and shoulders fill the CENTRE of the frame from the TOP third to the collar at the BOTTOM edge, his head a third of the frame's height, lit from the front, with the starry "
      "night black behind him and the black jambs at the LEFT and RIGHT edges.",
      "turn", 1.0, 0.0),
     # 18 -> insert: the prone man's hand on the sill

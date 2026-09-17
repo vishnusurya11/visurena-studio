@@ -372,7 +372,7 @@ def test_turn_acting_on_a_cast_member_is_true_of_no_delivered_plan():
 
 def test_every_fault_names_its_gate_and_its_numbers():
     for f in pg.faults(load("09")):
-        assert f.split(" ")[0] in ("G-FIRSTFRAME", "G-VARIETY", "G-MOVE", "G-STORY"), f
+        assert f.split(" ")[0] in ("G-FIRSTFRAME", "G-VARIETY", "G-MOVE", "G-STORY", "G-SIZE"), f
         assert ", measured " in f and " against " in f, f
 
 

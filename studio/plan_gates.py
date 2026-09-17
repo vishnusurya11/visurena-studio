@@ -593,8 +593,10 @@ def name_advisories(episode: Episode, earlier_lines: list[str]) -> list[str]:
 
 def faults(episode: Episode) -> list[str]:
     """Every reason this plan should not be drawn, free to compute."""
+    from studio import picture_gates  # G-SIZE and the picture advisories (ep10 synthesis C)
     return (firstframe_faults(episode) + variety_faults(episode)
-            + move_faults(episode) + rate_faults(episode) + story_faults(episode))
+            + move_faults(episode) + rate_faults(episode) + story_faults(episode)
+            + picture_gates.faults(episode))
 
 
 def advisories(episode: Episode, earlier_lines: list[str] | None = None) -> list[str]:
@@ -620,4 +622,6 @@ def advisories(episode: Episode, earlier_lines: list[str] | None = None) -> list
             + caption_advisories(episode) + button_rest_advisories(episode))
     if earlier_lines is not None:
         out += name_advisories(episode, earlier_lines)
+    from studio import picture_gates
+    out += picture_gates.advisories(episode)
     return out
