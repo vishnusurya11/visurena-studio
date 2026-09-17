@@ -107,3 +107,13 @@ class TestTheComfyEar:
 def test_an_abbreviated_honorific_is_the_spoken_word():
     assert voice_qc.error_rate("Dr. Watson, Mr. Sherlock Holmes.",
                                "Doctor Watson, Mister Sherlock Holmes.") == 0.0
+
+
+def test_a_numeral_heard_for_a_number_word_is_the_same_word():
+    """ep11's countersign: Whisper heard "9. From Seven" and "7 from 5" for
+    "Nine from seven" / "Seven from five" and the ear scored 0.17 and 0.33."""
+    from studio import voice_qc
+
+    assert voice_qc.normalised("9. From Seven") == voice_qc.normalised("Nine from seven")
+    assert voice_qc.error_rate("Travelers for Nevada, 7 from 5.", "Travellers for Nevada. Seven from five.") == 0.0
+    assert voice_qc.normalised("twenty-nine days") == voice_qc.normalised("29 days")

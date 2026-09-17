@@ -100,7 +100,28 @@ def normalised(text: str) -> list[str]:
     bare = APOSTROPHE.sub("", text)
     flat = unicodedata.normalize("NFKD", bare).encode("ascii", "ignore").decode()
     words = FILLER.sub(" ", flat.lower()).split()
-    return [spelling(HONORIFICS.get(word, word)) for word in words]
+    return [spelling(HONORIFICS.get(word, word)) for word in number_words(words)]
+
+
+UNITS = ("zero", "one", "two", "three", "four", "five", "six", "seven", "eight", "nine", "ten",
+         "eleven", "twelve", "thirteen", "fourteen", "fifteen", "sixteen", "seventeen", "eighteen",
+         "nineteen")
+TENS = {20: "twenty", 30: "thirty", 40: "forty", 50: "fifty", 60: "sixty", 70: "seventy", 80: "eighty",
+        90: "ninety"}
+
+
+def number_words(words: list[str]) -> list[str]:
+    """A numeral Whisper wrote for a number word is that word (ep11: "9. From
+    Seven" for "Nine from seven" scored 0.17; "7 from 5" for "Seven from five"
+    0.33).  Digits 0-99 become their words; a hyphenated "twenty-nine" is two."""
+    out = []
+    for word in words:
+        if word.isdigit() and int(word) < 100:
+            n = int(word)
+            out += [UNITS[n]] if n < 20 else [TENS[n - n % 10]] + ([UNITS[n % 10]] if n % 10 else [])
+        else:
+            out += word.split("-") if "-" in word and word.replace("-", "").isalpha() else [word]
+    return out
 
 
 
