@@ -213,7 +213,7 @@ S = [
      "heavy jaw, the pale blue eyes turned up toward the porch, the sandy "
      "hair going grey combed back, the low sun from the left on one cheek and the other in "
      "shadow.",
-     "The camera pushes in on Brigham Young's face across the whole shot, travelling a hand's breadth; the whole face keeps inside the frame; his pale eyes come up from the path to the door ahead; he lifts his head a finger's breadth toward the door.",
+     "The camera pulls back from Brigham Young's face across the whole shot, travelling a hand's breadth; the whole face keeps inside the frame; his pale eyes come up from the path to the door ahead; he lifts his head a finger's breadth toward the door.",
 "on the path at Brigham Young's own eye, an arm's length ahead of him, a 90mm lens. The low "
      "sun comes from the left and splits his face into a lit half and a dark half",
      "Brigham Young's face fills the CENTRE of the frame from the chin at the BOTTOM edge to the "
