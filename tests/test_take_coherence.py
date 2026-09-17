@@ -153,7 +153,46 @@ def test_the_constants_are_the_calibrated_ones():
     assert (tc.OFFBOARD_HARD, tc.OFFBOARD_ADVISORY) == (0.40, 0.20)
     assert (tc.LAST_HARD, tc.LAST_ADVISORY) == (0.20, 0.40)
     assert (tc.CUT_HARD, tc.CUT_ADVISORY, tc.PIN_TOL) == (30.0, 20.0, 6)
-    assert tc.NONRIGID_ADVISORY == 7.0 and tc.ON_BOARD == 0.50
+    assert tc.NONRIGID_ADVISORY == 7.0 and tc.NONRIGID_WIDE == 6.0 and tc.ON_BOARD == 0.50
+
+
+def test_the_churn_wall_is_size_aware_and_hard_on_a_wide():
+    """MEASURED ep10 (analyst H): the wides the reviewer kept churned 3.12 /
+    3.60 / 3.63; the three wide faults -- a second chimney, a second window,
+    gate posts gone -- churned 6.43 (T20_fail1), 9.03 (T03_fail2), 10.82
+    (T03_fail1) with off-board 0.00 and last-vs-cell 0.58-0.69: the cosine
+    forgives a wide that changes everywhere a little.  ep05-07 wides max 5.73.
+    Margin +0.43 above / -0.27 below on 20 wides; elsewhere 7.0 stays advisory
+    (5.5 would buy T04/T20 at the price of T06, a KEEP at 6.56)."""
+    m = {"offboard_share": 0.0, "last_vs_cell": 0.69, "hard_cut": 12.6, "nonrigid": 6.4}
+    wide = {g.name: g for g in tc.rows(m, size="wide")}["churn"]
+    assert not wide.ok and wide.hard and wide.penalty > 0 and wide.note == "6.4 wide"
+    medium = {g.name: g for g in tc.rows(m, size="medium")}["churn"]
+    assert medium.ok and not medium.hard and medium.penalty == 0.0
+    adv = {g.name: g for g in tc.rows(m | {"nonrigid": 7.5}, size="medium")}["churn"]
+    assert not adv.ok and not adv.hard and adv.penalty > 0
+    kept = {g.name: g for g in tc.rows(m | {"nonrigid": 3.6}, size="wide")}["churn"]
+    assert kept.ok and kept.penalty == 0.0 and kept.note == "3.6 wide"
+
+
+def test_a_planned_exit_turns_the_last_frame_row_off():
+    """ep10 T17: told to drop the fist out of the bottom of the frame, it ended
+    on bare boards and last-vs-cell 0.20 cost it ten points for obeying."""
+    m = {"offboard_share": 0.10, "last_vs_cell": 0.20, "hard_cut": 5.8, "nonrigid": 3.4}
+    row = {g.name: g for g in tc.rows(m, exit=True)}["last-vs-cell"]
+    assert row.value is None and row.ok and not row.hard and row.penalty == 0.0 and "exit" in row.note
+    assert not {g.name: g for g in tc.rows(m)}["last-vs-cell"].ok
+
+
+def test_measure_reports_the_last_on_board_frame_of_every_segment():
+    """The zoom row caps an exit segment's read at its last on-board sample;
+    the number comes from here, one per anchor span."""
+    a, b, c = picture(15), picture(16), picture(17)
+    frames = np.concatenate([hold(a, 20), hold(c, 10), hold(b, 20)])
+    one = tc.measure(frames, cells(a))
+    assert one["onboard_last"] == [19]
+    two = tc.measure(frames, cells(a, b), anchors=[["Q00_0.png", 0], ["Q01_0.png", 30]])
+    assert two["onboard_last"] == [19, 49]
 
 
 def test_ep09_t02_shaped_numbers_fail_hard_on_off_board_and_last_frame():

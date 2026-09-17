@@ -19,7 +19,15 @@ there is exactly one segment and the two quantities coincide. It bit on the
 multi-segment takes of episodes 1 to 3, and it will bite again the moment a take
 holds two shots.
 
-So the row now names the second number when it differs.
+So the row named the second number when it differed.
+
+2026-09-16 (analyst H, ep05-10): the wider advisory scope fired on 125 of 137
+takes with no END target and on 0 of 25 with one -- 19 false alarms on ep10,
+Spearman -0.03 against the reviewer.  A push-in's last frame against its own
+START cell is how far it pushed, not how far it drifted.  The advisory now has
+the scope the HARD verdict and the penalty always had -- the aimed segments --
+and there is no second number to name: the row's one number is the one it
+ruled on.
 """
 from studio.take_verdict import DRIFT_ADVISORY, DRIFT_HARD, SegmentReport, drift_gate
 
@@ -33,19 +41,20 @@ def test_one_aimed_segment_reports_its_own_number():
     assert row.value == 0.91 and row.note == "0.91"
 
 
-def test_an_unaimed_hold_that_wandered_is_still_printed():
-    """The advisory's wider scope is the point; it is not silently dropped."""
+def test_an_unaimed_hold_that_wandered_is_printed_and_flags_nothing():
+    """The number is printed -- the row is not silent -- and it is not an
+    advisory: 0.25-0.29 against its own start cell is what a moving unaimed
+    segment legitimately reads (125 of 137 such takes fired, ep05-10)."""
     row = drift_gate([seg("Q00_0.png", "Q00_0.png", 0.29)])
-    assert row.ok is False
+    assert row.ok is True and row.note == "0.29" and row.penalty == 0.0
 
 
-def test_the_row_names_the_worst_hold_when_it_is_not_the_judged_number():
+def test_the_row_rules_on_the_number_it_prints():
     rows = [seg("Q00_0.png", "Q00_0E.png", 0.95),      # aimed, arrived
-            seg("Q01_0.png", "Q01_0.png", 0.29)]       # unaimed, wandered
+            seg("Q01_0.png", "Q01_0.png", 0.29)]       # unaimed, moved
     row = drift_gate(rows)
-    assert row.value == 0.95
-    assert "0.95" in row.note and "0.29" in row.note
-    assert row.ok is False
+    assert row.value == 0.95 and row.note == "0.95"
+    assert row.ok is True
 
 
 def test_the_hard_verdict_still_belongs_to_the_aimed_segment():

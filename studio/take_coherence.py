@@ -73,6 +73,7 @@ import numpy as np
 from PIL import Image
 
 from studio import frame_match as fm
+from studio.take_zoom import spans
 
 FPS = 24
 DOWN = 2
@@ -100,6 +101,18 @@ under 8 px/frame is actually removed. At 6.0 -- the DOWN=8 number -- it flagged 
 fifth of episode 7, which the owner judged fine, and the union with the hard rungs
 reached 48 %. At 7.0 the gap in the data is clean: ep05 0/25, ep07 3/25 (7.2, 7.4,
 8.1 -- T14 among them, the borderline morph seen by eye), ep09 8/28. Advisory."""
+NONRIGID_WIDE = 6.0
+"""The churn wall for a shot whose plan size is WIDE, and HARD there.  MEASURED
+ep10 (analyst H): the wides the reviewer kept churned 3.12 / 3.60 / 3.63; the
+three wide faults -- T03_fail1 10.82 and T03_fail2 9.03 (a second chimney, a
+second window, the gate posts gone), T20_fail1 6.43 (the camera left the
+porch) -- read off-board 0.00 and last-vs-cell 0.58-0.69, because a cosine
+forgives a wide that changes everywhere a little.  ep05-07 wides max 5.73
+(0 false alarms); ep08 2 and ep09 3 wides over it (ep09 T03 11.43 with
+last-vs-cell 0.43).  Margin +0.43 above / -0.27 below on 20 wides: thin, and
+said so.  Every other size keeps the 7.0 advisory -- at 5.5 it would buy
+T04_fail1 / T20_fail1 at the price of T06 (a KEEP, 6.56) and 7 + 5 fires on
+ep06 / ep07, both episodes the owner judged fine."""
 
 
 # ---- decoding ----------------------------------------------------------------
@@ -229,6 +242,16 @@ def hard_cut(raw: np.ndarray, anchors: list | None, tol: int = PIN_TOL) -> tuple
 
 # ---- the measurement ---------------------------------------------------------
 
+def onboard_last(best: np.ndarray, anchors: list | None) -> list[int]:
+    """Per anchor segment, the last frame whose best match is on board (the
+    segment's start - 1 when none is): the cap for a planned exit's zoom read."""
+    out = []
+    for a, b in spans(anchors or [], len(best)):
+        on = np.flatnonzero(best[a:b] >= ON_BOARD)
+        out.append(int(a + on.max()) if len(on) else a - 1)
+    return out
+
+
 def measure(fr: np.ndarray, cells: dict[str, Image.Image], anchors: list | None = None) -> dict:
     """The four coherence numbers of one take, off its grey frames and the images
     of its own pinned cells; `anchors` are `[[cell, frame], ...]` from the record."""
@@ -240,25 +263,45 @@ def measure(fr: np.ndarray, cells: dict[str, Image.Image], anchors: list | None 
     raw, rigid = step_diffs(fr)
     cut, at = hard_cut(raw, anchors)
     return {"frames": int(len(fr)), "offboard_share": round(float((best < ON_BOARD).mean()), 3) if len(best) else 0.0,
-            "last_vs_cell": round(last_sim, 3), "last_cell": last,
+            "last_vs_cell": round(last_sim, 3), "last_cell": last, "onboard_last": onboard_last(best, anchors),
             "raw_diff": round(float(raw.mean()), 2) if len(raw) else 0.0,
             "nonrigid": round(float(rigid.mean()), 2) if len(rigid) else 0.0,
             "hard_cut": round(cut, 1), "hard_cut_at": at}
 
 
-def rows(m: dict) -> list:
-    """The four verdict rows: off-board, last-vs-cell and cut are HARD, churn advisory."""
+def churn_row(churn: float, size: str):
+    """The churn wall by plan size: 6.0 and HARD on a wide, 7.0 advisory elsewhere."""
+    from studio.take_verdict import Gate
+    if size == "wide":
+        return Gate("churn", churn, churn <= NONRIGID_WIDE, churn > NONRIGID_WIDE, f"{churn:.1f} wide",
+                    min(30.0, 10.0 * max(0.0, churn - NONRIGID_WIDE)))
+    return Gate("churn", churn, churn <= NONRIGID_ADVISORY, False, f"{churn:.1f}",
+                min(30.0, 10.0 * max(0.0, churn - NONRIGID_ADVISORY)))
+
+
+def last_row(last: float, exit: bool):
+    """The last frame against the last pinned cell -- n/a when that frame's
+    subject was TOLD to leave (ep10 T17 ended on bare boards by instruction)."""
+    from studio.take_verdict import Gate
+    if exit:
+        return Gate("last-vs-cell", None, True, False, "n/a planned exit")
+    return Gate("last-vs-cell", last, last >= LAST_ADVISORY, last < LAST_HARD, f"{last:.2f}",
+                20.0 * max(0.0, LAST_ADVISORY - last) / LAST_ADVISORY)
+
+
+def rows(m: dict, size: str = "", exit: bool = False) -> list:
+    """The four verdict rows: off-board and cut are HARD, last-vs-cell HARD
+    unless the plan sent the subject out of frame, churn HARD on a wide and
+    advisory elsewhere.  `size` is the plan's size for the take's first shot."""
     from studio.take_verdict import Gate
     if not m:
         return [Gate(n, None, True, False, "not measured") for n in ("coherence off-board", "last-vs-cell", "cut", "churn")]
-    share, last, cut, churn = m["offboard_share"], m["last_vs_cell"], m["hard_cut"], m["nonrigid"]
+    share, cut = m["offboard_share"], m["hard_cut"]
     # Every penalty starts where its advisory band starts: a dolly on the board
     # reads 0.00-0.10 off-board and must cost nothing (test_score_is_honest).
     return [Gate("coherence off-board", share, share <= OFFBOARD_ADVISORY, share > OFFBOARD_HARD, f"{share:.2f}",
                  50.0 * max(0.0, share - OFFBOARD_ADVISORY) / (1.0 - OFFBOARD_ADVISORY)),
-            Gate("last-vs-cell", last, last >= LAST_ADVISORY, last < LAST_HARD, f"{last:.2f}",
-                 20.0 * max(0.0, LAST_ADVISORY - last) / LAST_ADVISORY),
+            last_row(m["last_vs_cell"], exit),
             Gate("cut", cut, cut <= CUT_ADVISORY, cut > CUT_HARD, f"{cut:.1f}",
                  min(40.0, 4.0 * max(0.0, cut - CUT_ADVISORY))),
-            Gate("churn", churn, churn <= NONRIGID_ADVISORY, False, f"{churn:.1f}",
-                 min(30.0, 10.0 * max(0.0, churn - NONRIGID_ADVISORY)))]
+            churn_row(m["nonrigid"], size)]

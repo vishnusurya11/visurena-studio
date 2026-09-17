@@ -132,10 +132,14 @@ def camera_dq(video: Path, seconds: float, cuts: list[float]) -> dict:
 
 def lag_verdict(lag: float | None, dialogue: bool) -> dict:
     """A narration take's audio is silence by design (owner 2026-09-11 06:00), so
-    its envelope lag is noise: only a dialogue take is gated on lag."""
+    its envelope lag is noise: only a dialogue take is gated on lag.
+
+    `mux_lag_s`, not `lag_s`: the number is the take's own soundtrack against
+    the wav that drove it -- the MUX, which cannot fail (ep10: all seven takes
+    at +0.000/-0.010) -- and not the mouth against the words."""
     if not dialogue:
-        return {"lag_s": 0.0, "lag_ok": True, "lag_measured": False}
-    return {"lag_s": round(lag, 3), "lag_ok": abs(lag) <= LAG_TOLERANCE, "lag_measured": True}
+        return {"mux_lag_s": 0.0, "lag_ok": True, "lag_measured": False}
+    return {"mux_lag_s": round(lag, 3), "lag_ok": abs(lag) <= LAG_TOLERANCE, "lag_measured": True}
 
 
 def audio_dq(video: Path, composite: Path, dialogue: bool, work: Path, index: int) -> dict:
@@ -172,6 +176,23 @@ def planned_motion(episode, rec: dict) -> str:
         return ""
 
 
+def planned_motions(episode, rec: dict) -> list[str]:
+    """The plan's motion for EVERY shot of the take, one per anchor segment: the
+    zoom row judges each segment against its own shot, and an exit clause
+    belongs to the segment that planned it."""
+    return [planned_motion(episode, {"index": i}) for i in (rec.get("shots") or [rec.get("index")])]
+
+
+def planned_size(episode, rec: dict) -> str:
+    """The plan's size for the take's first shot: the churn row's wall (a wide
+    is walled at take_coherence.NONRIGID_WIDE, hard)."""
+    first = (rec.get("shots") or [rec.get("index")])[0]
+    try:
+        return str(episode.shot(first).size)
+    except (StopIteration, KeyError, ValueError, IndexError):
+        return ""
+
+
 def line_text(episode, rec: dict) -> str:
     """The dialogue the take is supposed to say, for the word-error rate (G4.6)."""
     if rec.get("lane") != "dialogue":
@@ -194,19 +215,53 @@ def settle(take_dir: Path, index: int, verdicts: dict) -> Path:
     return best
 
 
+def live_rows(gates: list) -> tuple[int, int]:
+    """(rows that CAN fire, rows printed).  A row with no value -- not measured,
+    n/a for the lane -- cannot fire, and "30/30 pass" must say how many rows
+    it speaks for: over ep05-10 foreign, cut-landing and lip-sync fired 0 times
+    on 172 renders and identity never measured (analyst H, change 6)."""
+    return sum(g.value is not None for g in gates), len(gates)
+
+
 def row(index: int, v, kept: str = "", attempts: int = 0) -> str:
     """The one line the run prints per take."""
-    head = f"T{index:02d} {'PASS' if v.passed else 'FAIL'} {v.score:g}/100"
+    live, total = live_rows(v.gates)
+    head = f"T{index:02d} {'PASS' if v.passed else 'FAIL'} {v.score:g}/100 ({live} of {total} rows live)"
     gates = " | ".join(f"{g.name} {g.note or g.value}" + ("" if g.ok else (" HARD" if g.hard else " adv"))
                        for g in v.gates)
     return head + (f" | {gates}" if gates else "") + (f" | kept {kept} of {attempts}" if kept else "")
 
 
-def record(best, attempts: list) -> dict:
-    """The T<NN>.dq.json record: the kept verdict, every attempt, and the budget flag.
-    `foreign` and `off_beat` stay scalars so the run cards keep rendering."""
-    out = tv.to_json(best) | {"attempts": [tv.to_json(v) for v in attempts],
-                              "budget_spent": len(attempts) > tv.RETAKE_BUDGET and not best.passed}
+def same_render(a: dict, b: dict) -> bool:
+    """One render judged twice: the same file and, when both know it, the same bytes."""
+    return a.get("file") == b.get("file") and (a.get("bytes") is None or b.get("bytes") is None
+                                               or a.get("bytes") == b.get("bytes"))
+
+
+def superseded(prior: dict | None, now: list[dict]) -> list[dict]:
+    """The prior record's attempts that are not among the renders judged now,
+    each marked so.  A re-judged render keeps ONE entry -- the new verdict."""
+    return [a | {"superseded": True} for a in (prior or {}).get("attempts", [])
+            if not any(same_render(a, n) for n in now)]
+
+
+def prior_record(take_dir: Path, index: int) -> dict | None:
+    """The T<NN>.dq.json about to be overwritten, if any."""
+    path = take_dir / f"T{index:02d}.dq.json"
+    return episode_home.read_json(path) if path.exists() else None
+
+
+def record(best, attempts: list, prior: dict | None = None) -> dict:
+    """The T<NN>.dq.json record: the kept verdict, every attempt -- the prior
+    record's superseded renders first -- and the budget flag over all of them.
+    `foreign` and `off_beat` stay scalars so the run cards keep rendering.
+
+    MEASURED ep10 (analyst H): six of the seven retaken takes held
+    `attempts == [self]`; the renders the reviewer graded survived only in
+    scratch logs, and the next calibration was a log dig."""
+    now = [tv.to_json(v) for v in attempts]
+    every = superseded(prior, now) + now
+    out = tv.to_json(best) | {"attempts": every, "budget_spent": len(every) > tv.RETAKE_BUDGET and not best.passed}
     out["foreign_samples"] = out.pop("foreign", [])
     out["foreign"] = sum(bool(f.get("foreign")) for f in out["foreign_samples"])
     out["off_beat"] = sum(1 for s in out["segments"] if not s["landed"])
@@ -255,7 +310,8 @@ def main(book_id: str, number: int, indices: list[int], attempts: bool = False) 
     for index in wanted(records, indices):
         rec = records[index]
         kinds, line = segment_kinds(episode, rec.get("anchors", [])), line_text(episode, rec)
-        rec["motion"] = planned_motion(episode, rec)
+        rec["motion"], rec["motions"] = planned_motion(episode, rec), planned_motions(episode, rec)
+        rec["size"] = planned_size(episode, rec)
         files = episode_home.attempts_of(take_dir, index) if attempts else [book / rec["rel_path"]]
         judged = {f: measure_attempt(f, rec, index, cells, work, take_dir, kinds, line, k)
                   for k, f in enumerate(files)}
@@ -263,7 +319,7 @@ def main(book_id: str, number: int, indices: list[int], attempts: bool = False) 
         best = settle(take_dir, index, verdicts) if attempts else files[0]
         v, audio = judged[best]
         kept = take_dir / f"T{index:02d}.mp4" if attempts else best
-        report = record(v, list(verdicts.values()))
+        report = record(v, list(verdicts.values()), prior_record(take_dir, index))
         report["audio"], report["camera"] = audio, camera_dq(kept, v.seconds, [f / 24 for _, f in rec.get("anchors", [])][1:])
         report["strip"] = str(tv.strip(v, kept, cells, work / f"take_T{index:02d}.png"))
         episode_home.write_json(take_dir / f"T{index:02d}.dq.json", report)

@@ -65,11 +65,14 @@ def test_the_worst_aimed_segment_sets_the_penalty_not_the_worst_of_all():
     assert gate.penalty == 0.0
 
 
-def test_the_advisory_still_watches_every_segment():
-    """A hold that has wandered is worth PRINTING even when nothing was aimed --
-    the reporting half of the gate is unchanged, only the arithmetic."""
+def test_the_advisory_has_the_same_scope_as_the_penalty():
+    """It used to watch every segment -- "a hold that has wandered is worth
+    printing" -- and MEASURED over ep05-10 (analyst H) that printed on 125 of
+    137 takes with no END target, 0 of 25 with one: 19 false alarms on ep10,
+    Spearman -0.03.  An unaimed segment's end_sim is how far it moved, not how
+    far it drifted; it is printed as a number and flags nothing."""
     gate = drift_gate([seg("Q12_0.png", "Q12_0.png", 0.17)])
-    assert not gate.ok and gate.penalty == 0.0
+    assert gate.ok and gate.penalty == 0.0 and gate.note == "0.17"
 
 
 def test_an_unaimed_take_that_holds_still_is_not_rewarded_either():

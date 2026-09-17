@@ -11,9 +11,17 @@ The measures live in their own modules and are called once each:
   studio.identity_gate   who is on screen                          (G4.7, flagged)
   studio.take_coherence  stays on its own board MID-take: off-board
                          share, last frame vs cell, unprompted cut (HARD),
-                         churn after pan removal (advisory)        (G-COHERENCE)
-This module adds drift to the END cell, lip sync (lag AND word error rate),
-turns them into one score, ranks attempts, and owns the retake budget.
+                         churn after pan removal (advisory; HARD on
+                         a wide at 6.0)                            (G-COHERENCE)
+  studio.take_zoom       how far the push travelled, per anchor segment,
+                         against the plan's reach word (scored advisory)
+  studio.face_end        the last frame's face: height and edge contact
+  studio.take_look       the picture's black floor            } by interface,
+  studio.take_edit       the tail past the cut, the pulse     } lazily imported
+This module adds drift to the END cell, the mux lag AND word error rate of a
+dialogue take, turns them into one score, ranks attempts, and owns the retake
+budget.  A row whose module is absent prints `not measured` and fails nothing;
+a row with no value cannot fire, and `take_dq.row` counts those.
 """
 from __future__ import annotations
 
@@ -94,6 +102,9 @@ class TakeVerdict:
     zoom: dict = field(default_factory=dict)
     score: float = 0.0
     passed: bool = False
+    bytes: int = 0
+    """The judged file's size on disk: two renders of one take never share it,
+    so a record can tell a re-judged render from a superseded one (take_dq.record)."""
 
     def line(self) -> str:
         parts = [f"T{self.take:02d} a{self.attempt} {'PASS' if self.passed else 'FAIL'} {self.score:.0f}/100"]
@@ -182,30 +193,22 @@ def drift_gate(segments: list[SegmentReport]) -> Gate:
     aimed = [s for s in segments if s.target != s.cell]
     every = min((s.end_sim for s in segments), default=1.0)
     end_sim = min((s.end_sim for s in aimed), default=every)
-    # HARD belongs to the segments that HAVE a target -- a segment with none
-    # cannot have failed to reach one, and legitimately reads 0.25-0.29 against
-    # its own start cell. The ADVISORY still watches every segment, because a
-    # hold that has wandered is worth printing even when nothing was aimed at.
-    # THE PENALTY GETS THE SAME SCOPE AS THE HARD VERDICT.  It did not, and that
-    # one asymmetry made the whole 0-100 number a stillness meter: measured over
-    # ep03's 23 records, `drift` is the ONLY non-zero penalty among the 16 takes
-    # that passed, so score == 70 + 40*end_sim -- and for 33 of 37 segments
-    # `end_sim` compares the last frame to the segment's OWN FIRST FRAME.  A take
-    # was losing up to 30 points for moving, and ep03's three 100/100 takes are
-    # its three most nearly frozen.  A segment aimed at nothing cannot miss.
+    # HARD, ADVISORY AND PENALTY ALL BELONG TO THE SEGMENTS THAT HAVE A TARGET.
+    # A segment with none cannot have failed to reach one, and legitimately
+    # reads 0.25-0.29 against its own start cell.  The penalty got this scope
+    # first: without it the 0-100 number was a stillness meter -- over ep03's
+    # 23 records `drift` was the ONLY non-zero penalty among the 16 passing
+    # takes, so score == 70 + 40*end_sim against the segment's OWN FIRST FRAME.
+    # The advisory kept watching every segment "because a hold that has
+    # wandered is worth printing", and MEASURED over ep05-10 (analyst H) that
+    # printed on 125 of 137 takes with no END target and on 0 of 25 with one:
+    # ep06 25/25, ep09 28/28, ep10 27/30, 19 false alarms against the ep10
+    # reviewer, Spearman -0.03.  A push-in's last frame against its start cell
+    # is how far it pushed, not how far it drifted.  A segment aimed at nothing
+    # cannot miss, on any rung.
     penalty = 30.0 * max(0.0, DRIFT_ADVISORY - end_sim) / DRIFT_ADVISORY if aimed else 0.0
-    # THE ROW NAMES BOTH NUMBERS WHEN THEY DIFFER.  It reported `end_sim` and
-    # ruled `ok` on `every`, so a take could print "drift 0.95" and carry `adv`
-    # because an unaimed segment elsewhere read 0.29 -- and an unaimed segment
-    # legitimately reads 0.25-0.29 against its own start cell.  The number on the
-    # line then explained nothing.  Latent while a take holds one shot, as
-    # episodes 4 and 5 do; live again the moment one holds two.
-    # ... and ONLY when it is the reason: naming it on a clean row is noise.
-    blamed = every < DRIFT_ADVISORY <= end_sim
-    note = f"{end_sim:.2f} (worst hold {every:.2f})" if blamed else f"{end_sim:.2f}"
-    return Gate("drift", round(end_sim, 3), every >= DRIFT_ADVISORY,
-                bool(aimed) and end_sim < DRIFT_HARD,
-                note, penalty)
+    return Gate("drift", round(end_sim, 3), not aimed or end_sim >= DRIFT_ADVISORY,
+                bool(aimed) and end_sim < DRIFT_HARD, f"{end_sim:.2f}", penalty)
 
 
 def word_error(audio: dict, line_text: str) -> float | None:
@@ -217,16 +220,21 @@ def word_error(audio: dict, line_text: str) -> float | None:
 
 
 def lip_gate(lane: str, audio: dict | None, line_text: str) -> Gate:
-    """G4.6 -- a dialogue take's lips are on the wav AND the words are the line's."""
+    """G4.6 -- a dialogue take's soundtrack is where the wav was laid (the MUX
+    lag) AND the words are the line's.  Neither reads the mouth: analyst F
+    measured the mux lag at +0.000/-0.010 on all seven of ep10's dialogue
+    takes -- it cannot fail while the driver lays its own wav.  A narration
+    take has no value here to fire on (take_dq.live_rows)."""
     if lane != "dialogue":
-        return Gate("lip-sync", 0.0, True, True, "n/a narration")
+        return Gate("lip-sync", None, True, True, "n/a narration")
     if not audio or not audio.get("lag_measured", True):
         return Gate("lip-sync", None, True, True, "not measured")
-    lag, wer = float(audio.get("lag_s", 0.0)), word_error(audio, line_text)
+    lag = float(audio.get("mux_lag_s", audio.get("lag_s", 0.0)))   # old sidecars carry lag_s
+    wer = word_error(audio, line_text)
     ok = abs(lag) <= LAG_TOL and (wer is None or wer <= WER_CEIL)
     pen = min(40.0, 20.0 * max(0.0, abs(lag) - LAG_TOL) / LAG_TOL)
     pen += 50.0 * max(0.0, wer - WER_CEIL) if wer is not None else 0.0
-    return Gate("lip-sync", lag, ok, True, f"lag {lag:+.3f}s" + (f" wer {wer:.2f}" if wer is not None else ""), pen)
+    return Gate("lip-sync", lag, ok, True, f"mux lag {lag:+.3f}s" + (f" wer {wer:.2f}" if wer is not None else ""), pen)
 
 
 def identity_gate_row(report: dict | None) -> Gate:
@@ -239,9 +247,58 @@ def identity_gate_row(report: dict | None) -> Gate:
     return Gate("identity", len(hard), not hard, bool(hard), note, 0.0)
 
 
+def unmeasured(*names: str) -> list[Gate]:
+    """A row per name that says it could not read anything and fails nothing."""
+    return [Gate(n, None, True, False, "not measured") for n in names]
+
+
+def face_end_row(video: Path, record: dict) -> list[Gate]:
+    """G-FACE, by interface: the last frame's face height and edge contact
+    (studio.face_end, built alongside); absent, the row is not measured."""
+    try:
+        from studio import face_end
+    except ImportError:
+        return unmeasured("face-at-end")
+    return [face_end.row(video, record)]
+
+
+def look_row(video: Path, seconds: float) -> list[Gate]:
+    """G-LOOK, by interface: the black floor of the picture (studio.take_look)."""
+    try:
+        from studio import take_look
+    except ImportError:
+        return unmeasured("look")
+    return [take_look.row(video, seconds)]
+
+
+def edit_rows(video: Path, seconds: float, placed_seconds: float) -> list[Gate]:
+    """G-EDIT, by interface: the trimmed tail past the cut and the pulse
+    inside the take (studio.take_edit) -- `seconds` is the whole rendered
+    clip, `placed_seconds` where the edit cuts it."""
+    try:
+        from studio import take_edit
+    except ImportError:
+        return unmeasured("post-cut", "pulse")
+    return list(take_edit.rows(video, seconds, placed_seconds))
+
+
+def picture_rows(video: Path, record: dict, seconds: float) -> list[Gate]:
+    """face-at-end, look, post-cut, pulse -- the rows another implementer
+    measures, each imported lazily so an absent module prints `not measured`
+    instead of a silent pass (test_the_picture_rows_are_not_measured...)."""
+    placed = float(record.get("placed_seconds", seconds))
+    clip = float(record.get("measured_seconds") or record.get("seconds") or seconds)
+    return face_end_row(video, record) + look_row(video, seconds) + edit_rows(video, clip, placed)
+
+
 def gates(v: TakeVerdict, audio: dict | None, line_text: str, unplanned: list[float],
-          identity: dict | None = None, motion: str = "") -> list[Gate]:
-    """Every gate of the take, in the order the verdict line prints them."""
+          identity: dict | None = None, motion: str | list[str] = "", size: str = "",
+          picture: list[Gate] | None = None) -> list[Gate]:
+    """Every gate of the take, in the order the verdict line prints them.
+    `motion` is the plan's motion for the take's first shot, or one per
+    anchor segment; `size` the plan's size for the first shot; `picture` the
+    four rows of `picture_rows` (not measured when not given)."""
+    motions = list(motion) if isinstance(motion, list) else [motion]
     out = frozen_gates(v)
     out.append(foreign_gate(v))
     out.append(landing_gate(v.segments, unplanned))
@@ -249,14 +306,16 @@ def gates(v: TakeVerdict, audio: dict | None, line_text: str, unplanned: list[fl
     # G-COHERENCE: the take is judged over EVERY frame against its own board,
     # not the END frame only.  ep09 scored 28/28 at 100 with 62 % of its
     # frames off-board; the rows and their calibration live in take_coherence.
-    out.extend(tc.rows(v.coherence))
+    # A last segment whose subject was told to leave the frame has no last
+    # frame to compare (ep10 T17).
+    out.extend(tc.rows(v.coherence, size, exit=tz.has_exit(motions[-1] if motions else "")))
     # G-ZOOM: how far the picture actually travelled against the plan's reach
     # word.  ep10: seven of thirty takes ended a size tighter than planned and
     # every row above passed them; the wall and its calibration live in take_zoom.
     out.append(tz.row(v.zoom, motion))
+    out.extend(picture if picture is not None else unmeasured("face-at-end", "look", "post-cut", "pulse"))
     out.append(lip_gate(v.lane, audio, line_text))
     out.append(identity_gate_row(identity))
-    out.append(Gate("wardrobe", None, True, False, "not measured"))
     return out
 
 
@@ -400,12 +459,27 @@ def measure(video: Path, record: dict, cells: Path, seconds: float, attempt: int
                         record.get("refs"))
     v = TakeVerdict(record["index"], attempt, video.name, round(seconds, 2), record.get("lane", "narration"),
                     [], segs, motion["frozen_spans"], [round(float(x), 1) for x in motion["bins"]],
-                    sampled_foreign(per_frame), coherence(video, record, cells, seconds))
+                    sampled_foreign(per_frame), coherence(video, record, cells, seconds),
+                    bytes=video.stat().st_size if video.is_file() else 0)
     identity = identity_gate.identity_dq(video, segs, record.get("faces", []), record.get("refs", []))
-    v.zoom = tz.zoom(video, end_frame=tz.head_frame(anchors))
-    v.gates = gates(v, audio, line_text, unplanned_from(rows), identity, record.get("motion", ""))
+    v.zoom = zoom_of(video, record, v.coherence)
+    v.gates = gates(v, audio, line_text, unplanned_from(rows), identity, plan_motions(record),
+                    record.get("size", ""), picture_rows(video, record, seconds))
     v.score, v.passed = score(v.gates)
     return v
+
+
+def plan_motions(record: dict) -> list[str]:
+    """The plan's motion per shot of the take (`motions`), else the first shot's."""
+    return list(record.get("motions") or [record.get("motion", "")])
+
+
+def zoom_of(video: Path, record: dict, coherence_: dict) -> dict:
+    """G-ZOOM per anchor segment; a segment whose motion sends its subject out
+    of the frame is read to its last on-board sample (take_zoom.exit_cap)."""
+    onboard = coherence_.get("onboard_last") or []
+    caps = [last if tz.has_exit(m) else None for m, last in zip(plan_motions(record), onboard)]
+    return tz.zoom_take(video, record.get("anchors") or [], onboard_last=caps)
 
 
 def coherence(video: Path, record: dict, cells: Path, seconds: float) -> dict:

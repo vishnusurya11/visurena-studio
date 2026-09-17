@@ -65,6 +65,55 @@ def test_the_zoom_reads_only_the_head_of_a_two_shot_take():
     assert tz.head_frame([]) is None
 
 
+STRIDE = "The camera pushes in on the two men across the whole shot, travelling one long stride."
+PULL = "The camera pulls back from Brigham Young's face across the whole shot, travelling a hand's breadth."
+T17 = ("The camera pushes in on the raised hand across the whole shot, travelling a hand's breadth; "
+       "the spread fingers close into a fist; the fist drops out of the bottom of the frame.")
+
+
+def test_a_stride_that_ran_two_sizes_costs_points_and_a_stride_that_did_not_is_quiet():
+    """ep10 T12 1.98x (WATCH) sat 0.02 under the old 2.0 stride wall; T33 1.52x (KEEP)."""
+    far = tz.row({"ratio": 1.98, "measured": True, "monotonic": True}, STRIDE)
+    assert not far.ok and not far.hard and far.penalty == tz.ZOOM_PENALTY
+    assert tz.row({"ratio": 1.52, "measured": True, "monotonic": True}, STRIDE).ok
+
+
+def test_a_pull_back_that_did_not_move_costs_the_advisory_points():
+    """ep10 T05, current render: planned pull-back, read 0.99x, scored 100."""
+    g = tz.row({"ratio": 0.99, "measured": True, "monotonic": True}, PULL)
+    assert not g.ok and not g.hard and g.penalty == tz.ZOOM_ADVISORY_PENALTY and "pull-back" in g.note
+
+
+def test_a_camera_that_followed_costs_the_advisory_points():
+    """ep10 T06: subject 1.14x, whole frame 1.57x -- the camera walked into the doorway."""
+    g = tz.row({"ratio": 1.14, "camera": 1.57, "measured": True, "monotonic": True}, STRIDE)
+    assert not g.ok and not g.hard and g.penalty == tz.ZOOM_ADVISORY_PENALTY
+
+
+def test_the_row_judges_the_worst_segment_and_names_it():
+    z = {"ratio": 1.2, "measured": True, "monotonic": True,
+         "segments": [{"ratio": 1.2, "measured": True, "monotonic": True, "start": 0, "end": 85},
+                      {"ratio": 1.93, "measured": True, "monotonic": True, "start": 85, "end": 140}]}
+    g = tz.row(z, HAND)
+    assert not g.ok and g.penalty == tz.ZOOM_PENALTY and g.note.startswith("s2 1.93x") and g.value == 1.93
+    per_shot = tz.row(z, [HAND, STRIDE])                           # each segment against its own shot's plan
+    assert not per_shot.ok and per_shot.penalty == tz.ZOOM_PENALTY and "s2" in per_shot.note
+    quiet = tz.row({"ratio": 1.2, "measured": True, "monotonic": True, "segments": [z["segments"][0]]}, HAND)
+    assert quiet.ok and quiet.note == "1.20x hand"
+
+
+def test_an_exit_segment_read_to_its_break_loses_nothing_for_the_exit():
+    """ep10 T17: 1.73x on the full read (15 points), 1.47x to the break where
+    the fist left the boards.  The near-wall band is not applied to an exit
+    segment: the approach that precedes a planned exit is the planned action,
+    and the read inside it is the subject's, not the camera's."""
+    z = {"ratio": 1.467, "full_ratio": 1.727, "exit_at": 89, "measured": True, "monotonic": True}
+    g = tz.row(z, T17)
+    assert g.ok and g.penalty == 0.0 and "exit" in g.note and "1.47x" in g.note
+    over = tz.row(z | {"ratio": 1.60}, T17)
+    assert not over.ok and over.penalty == tz.ZOOM_PENALTY           # the wall itself still stands
+
+
 def test_a_reversal_on_a_near_still_take_is_noise_not_an_advisory():
     # ep10 re-read: T04 1.11x, T05 0.99x, T06 1.14x each lost ten points for
     # "reversed mid-take" -- a sign flip inside the measurer's own noise band.

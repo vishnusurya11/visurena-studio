@@ -7,6 +7,8 @@ clean scores 94-100.
 """
 from __future__ import annotations
 
+from pathlib import Path
+
 from PIL import Image
 
 from studio import take_verdict as tv
@@ -77,12 +79,29 @@ def test_drift_is_hard_only_when_an_end_cell_was_drawn():
 
 def test_a_drift_in_the_advisory_band_is_flagged_but_does_not_fail():
     """review7/holds11: a held segment reads 0.93-1.00 and a drifted one 0.28-0.60.
-    Below 0.50 with an END cell drawn is hard; 0.50-0.75 is advisory either way."""
+    Below 0.50 with an END cell drawn is hard; 0.50-0.75 is advisory.  A hold
+    with no END cell is aimed at nothing and reads 0.25-0.29 against its own
+    start cell by right: it is not flagged (analyst H, ep10)."""
     v = verdict([seg(target="Q03_0E.png", end=0.62)])
     g = {x.name: x for x in v.gates}["drift"]
     assert not g.ok and not g.hard and v.passed and v.score < 100
     hold = {x.name: x for x in verdict([seg(end=0.62)]).gates}["drift"]
-    assert not hold.ok and not hold.hard
+    assert hold.ok and not hold.hard
+
+
+def test_the_drift_advisory_is_scoped_to_aimed_segments_like_the_hard_half():
+    """MEASURED ep05-10 (analyst H): the advisory fired on 125 of 137 takes with
+    no END target and on 0 of 25 with one -- 19 false alarms on ep10 alone,
+    Spearman against the reviewer -0.03.  A push-in's last frame compared to
+    its own START cell is a stillness meter, not a drift."""
+    unaimed = {x.name: x for x in verdict([seg(end=0.29)]).gates}["drift"]
+    assert unaimed.ok and not unaimed.hard and unaimed.penalty == 0.0 and unaimed.note == "0.29"
+    adv = {x.name: x for x in verdict([seg(target="Q03_0E.png", end=0.60)]).gates}["drift"]
+    assert not adv.ok and not adv.hard
+    hard = {x.name: x for x in verdict([seg(target="Q03_0E.png", end=0.40)]).gates}["drift"]
+    assert not hard.ok and hard.hard
+    mixed = {x.name: x for x in verdict([seg(target="Q03_0E.png", end=0.95), seg("Q03_1.png", end=0.29)]).gates}["drift"]
+    assert mixed.ok and mixed.note == "0.95"                  # no "worst hold" blame on a clean row
 
 
 def test_foreign_frames_are_hard_and_capped():
@@ -101,16 +120,16 @@ def test_the_frozen_share_is_advisory_below_the_hard_ceiling():
 
 def test_lip_gate_reads_lag_and_wer_on_dialogue_only():
     assert tv.lip_gate("narration", None, "").ok
-    assert tv.lip_gate("dialogue", {"lag_s": 0.01, "lag_measured": True, "heard": "the room suits you"},
+    assert tv.lip_gate("dialogue", {"mux_lag_s": 0.01, "lag_measured": True, "heard": "the room suits you"},
                        "the room suits you").ok
-    assert not tv.lip_gate("dialogue", {"lag_s": -0.5, "lag_measured": True}, "").ok
-    assert tv.lip_gate("dialogue", {"lag_s": 0.0, "lag_measured": False}, "").note == "not measured"
+    assert not tv.lip_gate("dialogue", {"mux_lag_s": -0.5, "lag_measured": True}, "").ok
+    assert tv.lip_gate("dialogue", {"mux_lag_s": 0.0, "lag_measured": False}, "").note == "not measured"
 
 
 def test_the_word_error_rate_is_actually_scored():
     """Iteration 2's T11/T18/T21 measured WER 1.00-1.06 and were recorded passed:true:
     the docstring promised the check, the code never ran it."""
-    heard = {"lag_s": 0.0, "lag_measured": True, "heard": "nothing at all like the line"}
+    heard = {"mux_lag_s": 0.0, "lag_measured": True, "heard": "nothing at all like the line"}
     g = tv.lip_gate("dialogue", heard, "the room suits you very well indeed")
     assert not g.ok and "wer" in g.note and g.penalty > 0
 
@@ -171,12 +190,87 @@ def test_segments_fold_end_pins_and_pick_the_end_cell_as_target(tmp_path):
     assert segs[0][3] == round(97 / 24, 3) and segs[1][3] == round(int(8.25 * 24) / 24, 3)
 
 
+ROW_ORDER = ["frozen-at-start", "frozen-share", "foreign", "cut-landing", "drift",
+             "coherence off-board", "last-vs-cell", "cut", "churn", "zoom",
+             "face-at-end", "look", "post-cut", "pulse", "lip-sync", "identity"]
+
+
 def test_the_verdict_line_names_every_gate_in_order():
+    """The `wardrobe` placeholder is gone (analyst H, change 6): a row that has
+    never measured anything is not a wall, and printing it as one made
+    "30/30 pass" a statement about rows that cannot fire."""
     v = verdict([seg()])
-    assert [g.name for g in v.gates] == ["frozen-at-start", "frozen-share", "foreign", "cut-landing", "drift",
-                                         "coherence off-board", "last-vs-cell", "cut", "churn", "zoom",
-                                         "lip-sync", "identity", "wardrobe"]
+    assert [g.name for g in v.gates] == ROW_ORDER
     assert v.line().startswith("T01 a0 PASS 100/100")
+
+
+def test_the_picture_rows_are_not_measured_while_their_modules_are_absent(monkeypatch):
+    """face-at-end, look, post-cut and pulse are wired by interface to modules
+    another implementer builds.  Absent at import time, each is a `not
+    measured` row -- a gate may say it could not read something; it may not
+    be silent and be taken for a pass."""
+    import sys
+    for name in ("studio.face_end", "studio.take_look", "studio.take_edit"):
+        monkeypatch.setitem(sys.modules, name, None)          # `from studio import x` raises ImportError
+    rows = {g.name: g for g in tv.picture_rows(Path("T01.mp4"), {"placed_seconds": 5.0}, 5.0)}
+    assert list(rows) == ["face-at-end", "look", "post-cut", "pulse"]
+    assert all(g.value is None and g.ok and not g.hard and g.note == "not measured" for g in rows.values())
+
+
+def test_the_picture_rows_are_wired_by_interface_when_the_modules_exist(monkeypatch):
+    """The interface: face_end.row(video, record), take_look.row(video, seconds),
+    take_edit.rows(video, seconds, placed_seconds) -> the named Gates."""
+    import sys
+    from types import ModuleType
+    seen = {}
+    face_end, take_look, take_edit = ModuleType("studio.face_end"), ModuleType("studio.take_look"), ModuleType("studio.take_edit")
+    face_end.row = lambda video, record: seen.setdefault("face", (video, record)) and tv.Gate("face-at-end", 0.86, False, True, "0.86 clipped")
+    take_look.row = lambda video, seconds: seen.setdefault("look", seconds) and tv.Gate("look", 0.02, True, True, "floor 0.02")
+    take_edit.rows = lambda video, seconds, placed: seen.setdefault("edit", (seconds, placed)) and [
+        tv.Gate("post-cut", 8.6, False, False, "8.6", 5.0), tv.Gate("pulse", 0.1, True, False, "0.1")]
+    for name, mod in (("studio.face_end", face_end), ("studio.take_look", take_look), ("studio.take_edit", take_edit)):
+        monkeypatch.setitem(sys.modules, name, mod)
+    record = {"placed_seconds": 5.0, "seconds": 5.3}
+    rows = tv.picture_rows(Path("T01.mp4"), record, 5.0)
+    assert [g.name for g in rows] == ["face-at-end", "look", "post-cut", "pulse"]
+    assert rows[0].hard and not rows[0].ok and rows[2].penalty == 5.0
+    assert seen == {"face": (Path("T01.mp4"), record), "look": 5.0, "edit": (5.3, 5.0)}
+    v = tv.TakeVerdict(1, 0, "T01.mp4", 5.0, "narration", [], [seg()])
+    v.gates = tv.gates(v, None, "", [], picture=rows)
+    assert [g.name for g in v.gates] == ROW_ORDER and not tv.score(v.gates)[1]
+
+
+def test_the_plan_size_reaches_the_churn_row():
+    """A wide's churn wall is 6.0 and HARD (take_coherence.NONRIGID_WIDE); the
+    size travels through `gates` the way `motion` reaches the zoom row."""
+    coh = {"offboard_share": 0.0, "last_vs_cell": 0.7, "hard_cut": 12.6, "nonrigid": 6.4}
+    v = tv.TakeVerdict(3, 0, "T03.mp4", 6.3, "narration", [], [seg("Q03_0.png")], coherence=coh)
+    wide = {g.name: g for g in tv.gates(v, None, "", [], size="wide")}["churn"]
+    assert not wide.ok and wide.hard and "wide" in wide.note
+    medium = {g.name: g for g in tv.gates(v, None, "", [], size="medium")}["churn"]
+    assert medium.ok and not medium.hard
+
+
+T17 = ("The camera pushes in on the raised hand across the whole shot, travelling a hand's breadth; "
+       "the spread fingers close into a fist; the fist drops out of the bottom of the frame.")
+
+
+def test_a_planned_exit_silences_last_vs_cell():
+    """ep10 T17 (analyst B): the last frame is bare boards because the fist was
+    TOLD to drop out of the bottom of the frame; last-vs-cell 0.20 cost it ten
+    points for obeying.  With an exit clause in the segment's motion the row
+    reads n/a and cannot fire."""
+    coh = {"offboard_share": 0.10, "last_vs_cell": 0.20, "hard_cut": 5.8, "nonrigid": 3.4}
+    v = tv.TakeVerdict(17, 0, "T17.mp4", 5.58, "narration", [], [seg("Q17_0.png")], coherence=coh)
+    rows = {g.name: g for g in tv.gates(v, None, "", [], motion=T17)}
+    assert rows["last-vs-cell"].value is None and rows["last-vs-cell"].ok and "exit" in rows["last-vs-cell"].note
+    plain = {g.name: g for g in tv.gates(v, None, "", [], motion=T17.split(";")[0])}
+    assert not plain["last-vs-cell"].ok and plain["last-vs-cell"].penalty > 0
+
+
+def test_a_narration_take_has_no_lip_value_to_fire_on():
+    """`value is None` is the one signal `take_dq.row` counts as "cannot fire"."""
+    assert tv.lip_gate("narration", None, "").value is None
 
 
 def test_an_unmeasured_coherence_prints_so_and_fails_nothing():

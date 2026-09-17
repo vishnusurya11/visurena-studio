@@ -111,6 +111,63 @@ def test_the_record_carries_every_attempt_and_the_budget_flag():
     assert three["budget_spent"] is True
 
 
+def test_a_retakes_record_carries_the_superseded_attempts():
+    """Six of ep10's seven retaken takes have `attempts == [self]` (analyst H):
+    the reviewer's labels applied to renders whose rows survived only in
+    scratch logs.  Judged again after a re-render, the record prepends the
+    prior record's attempts -- the earlier render first."""
+    old = make(False, 64.7, take=3, name="T03.mp4")
+    old.bytes = 1_000
+    prior = dq.record(old, [old])
+    new = make(True, 100.0, take=3, name="T03.mp4")
+    new.bytes = 2_000
+    rec = dq.record(new, [new], prior)
+    assert [a["score"] for a in rec["attempts"]] == [64.7, 100.0]
+    assert rec["attempts"][0]["superseded"] is True and "superseded" not in rec["attempts"][1]
+    assert rec["score"] == 100.0 and rec["passed"] is True
+    twice = dq.record(new, [new], rec)                            # the ledger keeps growing, never doubling
+    assert [a["score"] for a in twice["attempts"]] == [64.7, 100.0]
+
+
+def test_rejudging_the_same_render_replaces_its_entry_instead_of_doubling_it():
+    """The same file, the same bytes, a new verdict (the gate changed): one entry."""
+    v = make(True, 95.0, take=3, name="T03.mp4")
+    v.bytes = 1_000
+    prior = dq.record(v, [v])
+    again = make(True, 100.0, take=3, name="T03.mp4")
+    again.bytes = 1_000
+    rec = dq.record(again, [again], prior)
+    assert [a["score"] for a in rec["attempts"]] == [100.0]
+    legacy = dq.record(again, [again], {"attempts": [{"file": "T03.mp4", "score": 90.0}]})   # ep10's records carry no bytes
+    assert [a["score"] for a in legacy["attempts"]] == [100.0]
+
+
+def test_the_prior_record_is_read_before_it_is_overwritten(tmp_path):
+    assert dq.prior_record(tmp_path, 3) is None
+    (tmp_path / "T03.dq.json").write_text('{"attempts": [{"file": "T03.mp4"}]}')
+    assert dq.prior_record(tmp_path, 3) == {"attempts": [{"file": "T03.mp4"}]}
+
+
+def test_the_printed_row_says_how_many_rows_can_fire():
+    """"30/30 pass" is a statement about the rows with a value.  ep05-10:
+    foreign, cut-landing and lip-sync fired 0 times on 172 renders; identity
+    never measured (analyst H, change 6)."""
+    v = make(True, 100.0, take=3)
+    v.gates = [tv.Gate("churn", 3.6, True, False, "3.6 wide"), tv.Gate("identity", None, True, False, "not measured"),
+               tv.Gate("lip-sync", None, True, True, "n/a narration")]
+    row = dq.row(3, v)
+    assert row.startswith("T03 PASS 100/100 (1 of 3 rows live)")
+    assert dq.live_rows(v.gates) == (1, 3)
+
+
+def test_the_plan_size_and_every_shots_motion_reach_the_record():
+    ep = FakeEpisode()
+    assert dq.planned_size(ep, {"shots": [0, 1], "index": 0}) == "medium_close"
+    assert dq.planned_size(ep, {"index": 40}) == ""
+    assert dq.planned_motions(ep, {"shots": [0, 1], "index": 0}) == ["Static shot; he speaks", "Tracking behind at walking pace"]
+    assert dq.planned_motions(ep, {"index": 40}) == [""]
+
+
 def test_the_record_keeps_foreign_and_off_beat_scalar_for_the_run_cards():
     """runcards.dq_row prints `foreign` and `off_beat` as numbers; the sampled rows
     move to `foreign_samples` so the card keeps rendering after the ladder lands."""

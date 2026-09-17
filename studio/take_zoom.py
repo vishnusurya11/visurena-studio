@@ -80,10 +80,36 @@ from PIL import Image
 
 # ---- the walls (see docs/calibration/take_zoom.md) ----------------------------
 OVER_PUSH = 1.55           # a hand's / a finger's breadth, measured this tight: hard
-OVER_PUSH_LONG = 2.0       # a forearm or a long stride allows up to here
+OVER_PUSH_STRIDE = 1.6
+"""A stride's wall.  Was OVER_PUSH_LONG (2.0): ep10 T12 planned a stride and
+pushed 1.98x -- a medium to a close, the reviewer's WATCH -- and sat 0.02
+under it, while T33 1.52 / T21 1.47 / T31 1.43 / T06 1.14 (KEEPs) all read
+under 1.6.  Margin +0.38 above, -0.08 below (analyst H, ep10)."""
+OVER_PUSH_LONG = 2.0       # a forearm allows up to here
 OVER_PUSH_ANY = 2.5        # over this it is hard whatever was planned
 ADVISORY_PUSH = 1.4        # a hand's breadth that read this far: worth a look
 WRONG_WAY = 1.15           # moved the other way by this much: advisory
+NO_MOVE = 0.05
+"""|ratio - 1| under this with a push or a pull-back planned: the move did not
+happen.  ep10 T05's current render planned a pull-back and read 0.99x at
+100/100 -- `judge` knew the wrong way and not the no way (analyst B)."""
+CAMERA_FOLLOW = 0.3
+"""camera - ratio at or over this: the frame travelled further than the subject
+grew, i.e. the camera FOLLOWED the subject.  ep10 T06: the whole frame read
+1.57x while the subject fit read 1.14x because the men's backs fill the
+centre; the plan asked one stride and the frame ended inside the doorway.
+T29 s1 (1.59 vs 1.31, 0.28) sits just under the line."""
+EXIT_FIELD = 0.75
+"""A planned exit (`has_exit`) is read only to the step where the subject
+field breaks up: the first step whose agreeing windows fall under this
+fraction of the segment's opening step.  MEASURED on ep10 T17 (the only exit
+clause in the episode): the steps agreed on 48 47 47 49 47 49 42, then 21 and
+13 as the fist left the boards behind it.  Margin: 42 above the 36 floor, 21
+below.  The on-board cosine cap the analyst proposed does NOT do this on its
+own -- the boards behind the fist ARE the cell, so the frame stays on-board
+until frame 119 and the read to there is 1.71x; to the field break it is
+1.47x, the reviewer's "push ~1.3x by frame 4".  Both caps apply; the earlier
+governs (`exit_cap`).  n = 1; ep11 confirms or moves it."""
 
 # ---- the measure ---------------------------------------------------------------
 GRID = 9                   # window centres per axis; windows are 2 strides wide
@@ -98,7 +124,7 @@ SAMPLES = 12               # 6 reads T12 at 1.59 on 8 inliers; 12 reads 1.98 on 
 FRAME_EXT = (".png", ".jpg", ".jpeg")
 
 REACH_WALLS = {"finger": OVER_PUSH, "hand": OVER_PUSH, "forearm": OVER_PUSH_LONG,
-               "stride": OVER_PUSH_LONG, None: OVER_PUSH_ANY}
+               "stride": OVER_PUSH_STRIDE, None: OVER_PUSH_ANY}
 
 
 # ---- decoding ------------------------------------------------------------------
@@ -300,6 +326,59 @@ def zoom(video: Path, samples: int = SAMPLES, end_frame: int | None = None) -> d
     return zoom_frames(load_frames(video, end_frame), samples)
 
 
+# ---- per segment, and the planned exit ------------------------------------------
+
+def spans(anchors: list, n: int) -> list[tuple[int, int]]:
+    """(start, end) frames of every anchor segment of an n-frame take: the START
+    pins in order, END pins folded into their segment, the last span to n."""
+    starts = sorted({int(f) for name, f in anchors if not str(name).endswith("E.png")} | {0})
+    starts = [f for f in starts if f < n]
+    return list(zip(starts, starts[1:] + [n]))
+
+
+def field_break(inliers: list[int]) -> int:
+    """The first step whose agreeing windows fall under EXIT_FIELD of the opening
+    step's -- where the subject stops moving as one picture -- else len(inliers)."""
+    if not inliers:
+        return 0
+    floor = EXIT_FIELD * inliers[0]
+    return next((k for k, n in enumerate(inliers) if n < floor), len(inliers))
+
+
+def exit_cap(z: dict, onboard_last: int | None) -> dict:
+    """A segment whose subject was TOLD to leave the frame, read only up to the
+    earlier of the field break and the last on-board sample; the full read is
+    kept as `full_ratio`, the cap frame as `exit_at`.  See EXIT_FIELD."""
+    k = field_break(z["inliers"])
+    if onboard_last is not None:
+        k = min(k, sum(f <= onboard_last for f in z["frames"]) - 1)
+    k = max(k, 0)
+    kept = list(zip(z["per_step"][:k], z["inliers"][:k]))
+    ratio, measured = compound(kept)
+    cam, _ = compound(list(zip(z["camera_steps"][:k], z["inliers"][:k])))
+    return z | {"ratio": ratio, "camera": cam, "measured": measured, "monotonic": is_monotonic([s for s, _ in kept]),
+                "exit_at": z["frames"][k], "full_ratio": z["ratio"]}
+
+
+def zoom_take(video: Path, anchors: list, samples: int = SAMPLES,
+              onboard_last: list[int | None] | None = None) -> dict:
+    """The zoom of every anchor segment of a take, the head's read at the top
+    level (the record's readers expect it there) and all of them under
+    `segments`.  `onboard_last[k]`, when given, caps segment k as a planned
+    exit (`exit_cap`).  The head-only read judged a two-shot take's second
+    shot by nothing (ep10 T29 s2's full turn-away, analyst B)."""
+    frames = load_frames(video)
+    caps = list(onboard_last or [])
+    segs = []
+    for k, (a, b) in enumerate(spans(anchors, len(frames))):
+        z = zoom_frames(frames[a:b], samples)
+        z["frames"] = [f + a for f in z["frames"]]
+        if k < len(caps) and caps[k] is not None:
+            z = exit_cap(z, caps[k])
+        segs.append(z | {"start": a, "end": b})
+    return dict(segs[0]) | {"segments": segs}
+
+
 # ---- the verdict ---------------------------------------------------------------
 
 REACH_WORDS = ("finger", "hand", "forearm", "stride")
@@ -322,24 +401,69 @@ def planned_direction(motion: str) -> int:
     return -1 if re.search(r"pulls? (?:back|out|away)|dolly out|dollies out", motion.lower()) else 1
 
 
-def judge(ratio: float, planned: str, measured: bool = True, monotonic: bool = True) -> dict:
-    """Hard when the measured travel in the planned direction is over the wall for
-    the planned reach, or over OVER_PUSH_ANY whatever was planned."""
+def planned_move(motion: str) -> bool:
+    """Did the plan ask for a scale change at all -- a push in or a pull back?"""
+    return bool(re.search(r"push\w* in|pull\w* (?:back|out|away)|doll(?:y|ies)\b", motion.lower()))
+
+
+def has_exit(motion: str) -> bool:
+    """Does a clause of the motion send its subject OUT of the frame?  Then the
+    last frame is not the cell's picture by instruction (ep10 T17: "the fist
+    drops out of the bottom of the frame" -- bare boards, 25 points lost)."""
+    return bool(re.search(r"drops? out of the (?:frame|bottom|top)|out of the (?:bottom|top) of the frame"
+                          r"|leaves the frame|goes out of the frame", motion.lower()))
+
+
+def planned_phrase(reach: str | None, direction: int) -> str:
+    """'planned pull-back of a hand', 'planned push' -- the subject of every sentence."""
+    verb = "push" if direction > 0 else "pull-back"
+    return f"planned {verb} of a {reach}" if reach else f"planned {verb}"
+
+
+def reach_verdict(ratio: float, travel: float, reach: str | None, direction: int, exit: bool) -> tuple[list, list]:
+    """The wall for the planned reach: hard over it; near it, advisory -- except
+    on an exit segment, where the approach that precedes the exit is the
+    planned action and the near-wall band sits inside the subject's own move."""
+    wall, what = REACH_WALLS[reach], planned_phrase(reach, direction)
+    size, seen = max(ratio, 1.0 / max(ratio, 1e-6)), "pushed in" if ratio > 1 else "pulled back"
+    if size >= wall and travel >= 1.0:
+        return [f"{what} travelled {travel:.2f}x, over the {wall:.2f}x wall"], []
+    if size >= wall:
+        return [f"{what} but the picture {seen} {size:.2f}x, over the {wall:.2f}x wall"], []
+    if reach in ("finger", "hand") and travel >= ADVISORY_PUSH and not exit:
+        return [], [f"{what} travelled {travel:.2f}x, near the {wall:.2f}x wall"]
+    return [], []
+
+
+def move_advisories(ratio: float, travel: float, planned: str, direction: int,
+                    camera: float | None, monotonic: bool) -> list[str]:
+    """The wrong way, the no way, the camera that followed, the reversal."""
+    what, size = planned_phrase(planned_reach(planned), direction), max(ratio, 1.0 / max(ratio, 1e-6))
+    out = []
+    if travel < 1.0 / WRONG_WAY:
+        out.append(f"{what} travelled {travel:.2f}x its own way: the picture "
+                   f"{'pushed in' if ratio > 1 else 'pulled back'} {size:.2f}x")
+    if planned_move(planned) and abs(ratio - 1.0) < NO_MOVE:
+        out.append(f"{what} but the picture did not move ({ratio:.2f}x)")
+    if camera is not None and camera - ratio >= CAMERA_FOLLOW:
+        out.append(f"the camera followed the subject: the frame travelled {camera:.2f}x while the subject read {ratio:.2f}x")
+    if not monotonic and size >= ADVISORY_PUSH:   # a flip inside the noise band is not a reversal
+        out.append("the zoom reversed mid-take")
+    return out
+
+
+def judge(ratio: float, planned: str, measured: bool = True, monotonic: bool = True,
+          camera: float | None = None, exit: bool = False) -> dict:
+    """Hard when the measured travel is over the wall for the planned reach, or
+    over OVER_PUSH_ANY whatever was planned; every sentence reports travel in
+    the PLANNED direction (a pull-back to 0.54x is 1.85x of travel)."""
     reach, direction = planned_reach(planned), planned_direction(planned)
-    wall = REACH_WALLS[reach]
     travel = ratio if direction > 0 else 1.0 / max(ratio, 1e-6)   # in the planned direction
-    size = max(ratio, 1.0 / max(ratio, 1e-6))                     # either direction
-    hard, advisory = [], []
     if not measured:
-        advisory.append("zoom not measured: too few windows agreed on one camera move")
-    elif size >= wall:
-        hard.append(f"planned {reach or 'push'} travelled {ratio:.2f}x, over the {wall:.2f}x wall")
-    elif reach in ("finger", "hand") and travel >= ADVISORY_PUSH:
-        advisory.append(f"planned {reach} travelled {ratio:.2f}x, near the {wall:.2f}x wall")
-    if measured and travel < 1.0 / WRONG_WAY:
-        advisory.append(f"planned {'push' if direction > 0 else 'pull-back'} but the picture read {ratio:.2f}x")
-    if measured and not monotonic and size >= ADVISORY_PUSH:   # a flip inside the noise band is not a reversal
-        advisory.append("the zoom reversed mid-take")
+        hard, advisory = [], ["zoom not measured: too few windows agreed on one camera move"]
+    else:
+        hard, advisory = reach_verdict(ratio, travel, reach, direction, exit)
+        advisory += move_advisories(ratio, travel, planned, direction, camera, monotonic)
     return {"ok": not hard, "hard": hard, "advisory": advisory, "ratio": ratio, "planned": reach}
 
 
@@ -350,14 +474,32 @@ ZOOM_ADVISORY_PENALTY = 5.0    # near the wall, or the picture went the other wa
 
 
 def head_frame(anchors: list) -> int | None:
-    """The frame of a take's second anchor: the zoom reads the first shot only,
-    because the internal cut is a planned scale change, not a push."""
+    """The frame of a take's second anchor -- where the head segment ends.  The
+    gate now reads every segment (`zoom_take`); this stays for callers that
+    want the head alone, because the internal cut is a planned scale change,
+    not a push, and must never be read as one."""
     return int(anchors[1][1]) if len(anchors) > 1 else None
 
 
-def row(z: dict, planned: str):
+def segment_row(z: dict, planned: str, k: int, n: int):
+    """One segment's verdict as a Gate: its own plan, its own camera read, its
+    own exit clause; the note names the segment when the take has several."""
+    from studio.take_verdict import Gate
+    exit = has_exit(planned)
+    v = judge(z["ratio"], planned, z.get("measured", True), z.get("monotonic", True), z.get("camera"), exit)
+    hard, advisory = bool(v["hard"]), bool(v["advisory"])
+    note = (f"s{k + 1} " if n > 1 else "") + f"{z['ratio']:.2f}x {v['planned'] or 'push'}"
+    note += " pull-back" if planned_direction(planned) < 0 else ""
+    note += f" to exit f{z['exit_at']}" if "exit_at" in z else ""
+    penalty = ZOOM_PENALTY if hard else (ZOOM_ADVISORY_PENALTY if advisory and z.get("measured", True) else 0.0)
+    return Gate("zoom", z["ratio"], not hard and not advisory, False, note, penalty)
+
+
+def row(z: dict, planned: str | list[str]):
     """The verdict row: a SCORED ADVISORY over the wall for the planned reach,
-    quiet when unmeasured, like the identity row.
+    quiet when unmeasured, like the identity row.  Every anchor segment is
+    judged against its own shot's motion (`planned` may be one string for the
+    whole take or one per segment) and the WORST segment is the row.
 
     Never hard, MEASURED on the ep10 re-read: the wall at 1.55 failed six takes
     in the cut, and four of them (T13 2.16, T16 2.40, T17 1.73, T25 2.12) were
@@ -365,12 +507,12 @@ def row(z: dict, planned: str):
     T05's nostrils at 1.93 read the same as T13's whole face at 2.16: scale
     separates pushed from not pushed, not usable from not. The points rank the
     attempts (best-of-N prefers the take that held its size); the FAIL waits
-    for a face-in-frame read."""
+    for the face-at-end row."""
     from studio.take_verdict import Gate
     if not z:
         return Gate("zoom", None, True, False, "not measured")
-    v = judge(z["ratio"], planned, z.get("measured", True), z.get("monotonic", True))
-    hard, advisory = bool(v["hard"]), bool(v["advisory"])
-    note = f"{z['ratio']:.2f}x {v['planned'] or 'push'}"
-    penalty = ZOOM_PENALTY if hard else (ZOOM_ADVISORY_PENALTY if advisory and z.get("measured", True) else 0.0)
-    return Gate("zoom", z["ratio"], not hard and not advisory, False, note, penalty)
+    segs = z.get("segments") or [z]
+    plans = list(planned) if isinstance(planned, list) else [planned]
+    plans = (plans or [""]) + [(plans or [""])[-1]] * len(segs)
+    rows = [segment_row(s, p, k, len(segs)) for k, (s, p) in enumerate(zip(segs, plans))]
+    return max(rows, key=lambda g: (g.penalty, not g.ok))

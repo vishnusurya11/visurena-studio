@@ -206,15 +206,132 @@ def test_a_hand_or_finger_push_is_hard_at_the_wall(planned):
     assert v["ok"] is False and len(v["hard"]) == 1 and tz.planned_reach(planned) in v["hard"][0]
 
 
-@pytest.mark.parametrize("planned", [FOREARM, STRIDE])
-def test_a_forearm_or_stride_push_has_the_higher_wall(planned):
-    assert tz.judge(tz.OVER_PUSH + 0.05, planned)["hard"] == []
-    assert tz.judge(tz.OVER_PUSH_LONG - 0.05, planned)["hard"] == []
-    assert tz.judge(tz.OVER_PUSH_LONG + 0.05, planned)["ok"] is False
+def test_a_forearm_push_has_the_higher_wall():
+    assert tz.judge(tz.OVER_PUSH + 0.05, FOREARM)["hard"] == []
+    assert tz.judge(tz.OVER_PUSH_LONG - 0.05, FOREARM)["hard"] == []
+    assert tz.judge(tz.OVER_PUSH_LONG + 0.05, FOREARM)["ok"] is False
+
+
+def test_a_stride_has_its_own_wall_at_1_6():
+    """MEASURED ep10 (analyst H): T12 planned a stride and pushed 1.98x -- a
+    medium to a close, the reviewer's WATCH -- and sat 0.02 under the 2.0
+    stride wall; T33 1.52, T21 1.47, T31 1.43, T06 1.14 (KEEPs) stay under 1.6.
+    Margin +0.38 above, -0.08 below."""
+    assert tz.REACH_WALLS["stride"] == tz.OVER_PUSH_STRIDE == 1.6
+    assert tz.judge(1.98, STRIDE)["ok"] is False and tz.judge(1.98, STRIDE)["hard"]
+    assert tz.judge(1.52, STRIDE)["hard"] == [] and tz.judge(1.52, STRIDE)["advisory"] == []
 
 
 def test_the_walls_are_ordered():
-    assert 1.0 < tz.ADVISORY_PUSH < tz.OVER_PUSH < tz.OVER_PUSH_LONG <= tz.OVER_PUSH_ANY
+    assert 1.0 < tz.ADVISORY_PUSH < tz.OVER_PUSH < tz.OVER_PUSH_STRIDE < tz.OVER_PUSH_LONG <= tz.OVER_PUSH_ANY
+
+
+HOLD = "Static shot on the two men at the table; he speaks."
+
+
+def test_a_planned_move_that_did_not_happen_is_advisory():
+    """ep10 T05 (current render): planned as a pull-back, read 0.99x, 100/100.
+    `judge` had WRONG_WAY (moved the other way) and no NO_MOVE (did not move)."""
+    assert tz.NO_MOVE == 0.05
+    v = tz.judge(0.99, PULL)
+    assert v["hard"] == [] and len(v["advisory"]) == 1 and "did not move" in v["advisory"][0]
+    assert "did not move" in tz.judge(1.02, HAND)["advisory"][0]
+    assert tz.judge(0.99, HOLD)["advisory"] == []                 # nothing was planned, nothing missed
+    assert tz.judge(1.06, HAND)["advisory"] == []
+    assert tz.planned_move(HAND) and tz.planned_move(PULL) and not tz.planned_move(HOLD)
+
+
+def test_a_camera_that_followed_the_subject_is_advisory():
+    """ep10 T06: the camera FOLLOWED both men into the doorway -- the whole
+    frame read 1.57x while the subject fit read 1.14x because their backs
+    fill the centre.  The plan asked one stride; the frame ends inside the
+    door.  100/100."""
+    assert tz.CAMERA_FOLLOW == 0.3
+    v = tz.judge(1.14, STRIDE, camera=1.57)
+    assert v["hard"] == [] and any("followed" in a and "1.57x" in a for a in v["advisory"])
+    assert tz.judge(1.31, STRIDE, camera=1.59)["advisory"] == []   # 0.28 under the line
+    assert tz.judge(1.14, STRIDE)["advisory"] == []                 # no camera read, nothing said
+
+
+def test_the_sentences_report_travel_in_the_planned_direction():
+    """T02_fail2: planned a pull-back of a hand, pulled back to 0.54x -- that is
+    1.85x of travel, over the wall, and the row must say 1.85x, not 0.54x."""
+    v = tz.judge(0.54, PULL)
+    assert v["ok"] is False and "pull-back" in v["hard"][0] and "1.85x" in v["hard"][0] and "0.54x" not in v["hard"][0]
+    wrong = tz.judge(1.72, PULL)                                   # the current T02: a pull-back that pushed
+    assert wrong["hard"] and "0.58x" in wrong["advisory"][0] and "pushed in 1.72x" in wrong["advisory"][0]
+    assert "push" in tz.judge(tz.OVER_PUSH + 0.05, HAND)["hard"][0]
+
+
+# ---- planned exits and per-segment reads --------------------------------------
+
+EXIT = ("The camera pushes in on the raised hand across the whole shot, travelling a hand's breadth; "
+        "the spread fingers close into a fist; the fist drops out of the bottom of the frame.")
+
+
+def test_an_exit_clause_is_read_from_the_motion():
+    assert tz.has_exit(EXIT)
+    assert tz.has_exit("He turns and leaves the frame to the left.")
+    assert tz.has_exit("the hand drops out of the frame")
+    assert tz.has_exit("the lamp goes out of the top of the frame")
+    assert not tz.has_exit(HAND) and not tz.has_exit("the lamp goes out; darkness")
+
+
+def test_spans_are_the_anchor_start_frames_with_end_pins_folded_in():
+    assert tz.spans([["Q18_0.png", 0], ["Q19_0.png", 85], ["Q18_0E.png", 80]], 140) == [(0, 85), (85, 140)]
+    assert tz.spans([["Q03_0.png", 0]], 151) == [(0, 151)]
+    assert tz.spans([], 100) == [(0, 100)]
+
+
+def test_the_subject_field_breaks_where_its_windows_stop_agreeing():
+    """ep10 T17's steps agreed on 48, 47, 47, 49, 47, 49, 42 windows, then 21
+    and 13 as the fist left the boards behind it: the break is the first
+    step under EXIT_FIELD of the opening field."""
+    assert tz.EXIT_FIELD == 0.75
+    assert tz.field_break([48, 47, 47, 49, 47, 49, 42, 21, 13, 26, 38]) == 7
+    assert tz.field_break([48, 48, 48]) == 3
+    assert tz.field_break([]) == 0
+
+
+def test_an_exit_segment_is_read_to_the_earlier_of_the_break_and_the_last_on_board_sample():
+    """MEASURED on T17 (2026-09-16): the cosine to the cell's re-framings stays
+    over ON_BOARD until frame 119 because the boards behind the fist ARE the
+    cell, so the on-board cap alone reads 1.71x; the field breaks at sample
+    89 and the read to there is 1.47x, the reviewer's "push ~1.3x by frame 4".
+    The earlier cap governs; both are recorded."""
+    z = {"ratio": 1.727, "camera": 1.717, "measured": True, "monotonic": True,
+         "per_step": [1.03, 1.04, 1.05, 1.06, 1.07, 1.06, 1.08, 1.09, 1.04, 1.03, 1.01],
+         "camera_steps": [1.03, 1.04, 1.05, 1.06, 1.07, 1.06, 1.07, 1.09, 1.05, 1.03, 1.01],
+         "inliers": [48, 47, 47, 49, 47, 49, 42, 21, 13, 26, 38],
+         "frames": [0, 13, 25, 38, 51, 64, 76, 89, 102, 115, 127, 140]}
+    capped = tz.exit_cap(z, onboard_last=119)
+    assert capped["exit_at"] == 89 and abs(capped["ratio"] - 1.467) < 0.01 and capped["full_ratio"] == 1.727
+    assert capped["measured"] is True and capped["camera"] < capped["full_ratio"]
+    early = tz.exit_cap(z, onboard_last=70)
+    assert early["exit_at"] == 64 and abs(early["ratio"] - 1.03 * 1.04 * 1.05 * 1.06 * 1.07) < 0.01
+    gone = tz.exit_cap(z, onboard_last=5)
+    assert gone["exit_at"] == 0 and gone["ratio"] == 1.0 and gone["measured"] is False
+
+
+def test_the_zoom_is_read_per_anchor_segment(tmp_path):
+    """A two-shot take: the first shot pushes 1.5x, the second holds.  The
+    head-only read judged the second shot by nothing (ep10 T29 s2's full
+    turn-away, analyst B)."""
+    first = dolly(picture(18), 20, 1.5)
+    clip = write_frames(np.concatenate([first, hold(picture(19), 20)]), tmp_path / "two")
+    z = tz.zoom_take(clip, [["Q18_0.png", 0], ["Q19_0.png", 20]], samples=6)
+    assert [(s["start"], s["end"]) for s in z["segments"]] == [(0, 20), (20, 40)]
+    assert abs(z["segments"][0]["ratio"] - 1.5) / 1.5 < 0.15
+    assert abs(z["segments"][1]["ratio"] - 1.0) < 0.05
+    assert z["ratio"] == z["segments"][0]["ratio"]                # the head's read stays at the top level
+    one = tz.zoom_take(clip, [["Q18_0.png", 0]], samples=6)
+    assert len(one["segments"]) == 1 and one["segments"][0]["end"] == 40
+
+
+def test_an_exit_cap_is_applied_to_its_own_segment_only(tmp_path):
+    clip = write_frames(np.concatenate([dolly(picture(20), 20, 1.5), hold(picture(21), 20)]), tmp_path / "two")
+    z = tz.zoom_take(clip, [["Q20_0.png", 0], ["Q21_0.png", 20]], samples=6, onboard_last=[None, 30])
+    assert "exit_at" not in z["segments"][0] and z["segments"][1]["exit_at"] <= 30
 
 
 UNREAD = "The camera pushes in on the lamp across the whole shot; the flame rises."
