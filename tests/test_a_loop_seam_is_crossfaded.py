@@ -97,9 +97,12 @@ def test_live_seconds_is_the_music_not_the_file(tmp_path):
 def test_the_measured_light_tone_is_short():
     from scripts.episode import assemble
 
-    assert assemble.is_short(10.4, want=27.7)
+    # ep11: ACE-Step gave 8.6-11.2 s for a 26 s ask on six seeds; with crossfaded
+    # loops a tone a third as long as its span is laid, an emptier one is refused
+    assert not assemble.is_short(10.4, want=27.7)
+    assert assemble.is_short(6.0, want=27.7)
     assert not assemble.is_short(23.4, want=26.7), "uneasy delivered 88 % and is fine"
-    assert assemble.LIVE_SHARE == 0.75
+    assert assemble.LIVE_SHARE == 0.30
     assert not assemble.is_short(0.75 * 20.0, want=20.0) and assemble.is_short(0.75 * 20.0 - 0.01, want=20.0)
 
 

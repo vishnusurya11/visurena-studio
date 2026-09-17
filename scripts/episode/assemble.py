@@ -330,7 +330,12 @@ Bounded on purpose: an unbounded retry on a model that has started returning
 silence spends the GPU all night and delivers nothing."""
 
 
-LIVE_SHARE = 0.75
+LIVE_SHARE = 0.30
+"""MEASURED building episode 11 (2026-09-17): ACE-Step returned 8.6-11.2 s of music
+for a 26 s ask on three seeds of `uneasy` and three of `light`, and the 0.75
+floor stopped the assemble twice.  Loop seams are crossfaded now (episode_bed
+.looped), so a tone a third as long as its span loops cleanly; only a tone
+under a third of the ask -- an empty -- is refused."""
 """How much of the seconds asked for must come back as MUSIC, or the tone is a
 failed generation like an empty one.
 
