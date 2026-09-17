@@ -1447,6 +1447,35 @@ refusals it found, so the next plan is written without them:
   8-10 Hz steps; 185 was free), change the texture words away from the
   neighbours, then `cast_voices --only <who> --recast`.
 
+## The sheet and take stages on ep12: what stopped the road (2026-09-17)
+
+- **`run.py` stage names** are `lines, respot, timeline, frames, sheets, takes,
+  take_dq, assemble, qc, title, eye_review, publish`. A paid or GPU stage needs
+  the standing approval passed through: `run.py <book> <n> sheets -- --approved`,
+  `run.py <book> <n> takes -- --approved`. Without it the stage refuses after
+  the plan gates have run, which costs a minute, not money.
+- **The image model's safety filter judges the OUTPUT.** The dawn sheet was
+  blocked for "violence" with a rifle aimed and "a bloody haunch" in the
+  panels. "A haunch of big-horn meat wrapped in its own hide" and "his hand
+  slides along the stock" drew. Keep blood, wounds and a finger on a trigger
+  out of panel prose; the story can say them in the narration.
+- **A short silent shot packs into its neighbour's take.** `episode_takes.groups`
+  fills a take to 8 s across consecutive shots of one setup, so a 1.7 s
+  reaction (shot 21) rode inside T20 as an internal cut the model had to
+  place. `plan_check` now names every packed run (ONE PER TAKE) from the
+  measured timeline. A hold that must stand alone needs beat + coda that push
+  its neighbour over the budget, or 3 s of its own.
+- **L8 NO PACE reads the built prompt.** "walks at the CENTRE" in `at_rest`
+  is a gait; "at a walking pace" satisfies it. `plan_check` prints the gait
+  word as an advisory; the dry build (`takes_r2v.py <book> <n> --prompts`) is
+  the verdict, and it runs before any render, so run it right after the sheets.
+- **Two sheet-gate false positives to recognise**: an image-hash "duplicate"
+  between a dawn wide and a prone rifleman under the same lit peaks (both
+  drawings, ALIKE 0.70), and a "white line" that is a sunlit rock crack. Look
+  at the cells; the takes stage does not read `passed`.
+- **The quote gate** (nine consecutive words of Doyle in narration) is in
+  `plan_check` now; it used to fire first in the sheet stage.
+
 ## Known open items
 
 
