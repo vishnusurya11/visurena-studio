@@ -855,6 +855,21 @@ take, and the gap is where another job gets in — 19 invitations per episode.
 Two of those interleavings were mine, from re-running the DQ to check a gate
 while the renders were running.
 
+THE QUEUE IS ASKED BEFORE ANY STAGE JOINS IT (ep10 synthesis, 2026-09-16).
+`run.py` reads `/queue` through `studio.comfy.busy()` and refuses every stage
+that puts a job on ComfyUI -- `lines`, `frames`, `takes`, `title`, `take_dq`,
+`qc`, `assemble` -- while anything is running or pending. The refusal is a row
+in `timing.jsonl` (`ok=false, note="refused: queue busy"`, zero seconds) so the
+ledger shows the collision that did NOT happen; `--after` waits instead, asking
+every 20 s for up to two hours, then refuses. Episode 10, 20:20: a take_dq was
+started by hand while two retakes were queued; T02 rendered at 598 s against a
+warm 266, the DQ ran five times its time and was then re-run -- 10 min of wall
+and 43 min of double-counted ledger. The rule was already written here; nothing
+enforced it. Now the road every stage takes does, and `--report` marks any two
+runs whose intervals overlap CONTENDED, with each run's norm scaled to what it
+actually covered (a retake of two takes is not a run of thirty; a DQ of one take
+is 38 s, not 1200).
+
 ## THE THIRD REFERENCE: OBJECTS (owner, 2026-09-12)
 
 A book binds its people and its places and used to bind nothing else.
@@ -1112,6 +1127,22 @@ renders at the top of `report_final.html`.
 
 NO AGENT TOUCHES THE GPU WHILE A RENDER RUNS: a vision model loaded during
 one turned an 8-minute take into 37.
+
+ONE BATCHED RETAKE ROUND PER MASTER, WITH A WRITTEN REASON (ep10 synthesis,
+2026-09-16). Retakes are ordered ONCE, after the take review AND the owner's
+read are both in, and every take in the round names the gate row or finding
+it answers: `takes_r2v.py … --retake=3,15,29 --why="T03 zoom 1.93 face 0.69
+HARD; T15 coherence 0.45; T29 second shot turned away"`. `--retake` without
+`--why=` is refused before anything is built; the reason is stamped into the
+clock note by `run.py` and into each record as `retake_why`, so the ledger says
+why the GPU was spent. A round of ONE take is refused unless `--last` declares
+it the last round for this master. Episode 10 is the measurement: ten renders
+in four waves as the reviews arrived, nine reviewer-driven, three waves of one
+or two takes; each wave paid a ~300 s cold load and a re-cut + qc + eye cycle,
+and 30.8 min of GPU never reached the picture. One take as its own wave cost
+14.4 min of wall for 6.6 s of picture -- 3.5x its warm render. Batched, the
+same take is ~4 min. Read the reviews, read the owner, write the list, write
+the why, order it once.
 
 ## The contract: every prop carries a size
 
