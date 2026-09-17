@@ -591,12 +591,27 @@ def name_advisories(episode: Episode, earlier_lines: list[str]) -> list[str]:
 
 # ---- the verdict ---------------------------------------------------------------
 
+def sync_faults(episode: Episode) -> list[str]:
+    """G-SYNC: a dialogue line is the FIRST line on its shot.  Every line is
+    laid at its shot's start + HANDLE and a dialogue wav is anchored in its
+    take at that offset, so a narration line ahead of it on the same shot is
+    refused by `timeline.py` -- after a GPU lines run (ep11 paid it twice)."""
+    first = {}
+    out = []
+    for line in episode.lines:
+        if line.kind == "dialogue" and line.shot in first:
+            out.append(f"G-SYNC line {line.index}: a dialogue line must be the first line on its shot "
+                       f"(shot {line.shot} already carries line {first[line.shot]}), measured second against first")
+        first.setdefault(line.shot, line.index)
+    return out
+
+
 def faults(episode: Episode) -> list[str]:
     """Every reason this plan should not be drawn, free to compute."""
     from studio import picture_gates  # G-SIZE and the picture advisories (ep10 synthesis C)
     return (firstframe_faults(episode) + variety_faults(episode)
             + move_faults(episode) + rate_faults(episode) + story_faults(episode)
-            + picture_gates.faults(episode))
+            + picture_gates.faults(episode) + sync_faults(episode))
 
 
 def advisories(episode: Episode, earlier_lines: list[str] | None = None) -> list[str]:

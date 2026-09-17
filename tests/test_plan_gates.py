@@ -487,3 +487,16 @@ def test_the_wordless_tail_after_the_last_line():
 def test_the_button_shot_rests_before_the_cut():
     assert any("button shot 30" in a and "beat_s + coda_s" in a for a in pg.advisories(load("10")))
     assert not any("beat_s + coda_s" in a for a in pg.advisories(load("05")))
+
+
+def test_a_dialogue_line_is_the_first_line_on_its_shot():
+    """THE SYNC RULE lays every line at its shot's start + HANDLE, and a
+    dialogue line's wav is anchored in its take at that same offset; a
+    narration line ahead of it on the same shot pushes it later and
+    `timeline.py` refuses -- after a GPU lines run. ep11 paid that twice
+    (lines 4 and 17). The plan can say it for free."""
+    doc = json.loads((Path("tests/fixtures/episodes/ep10_plan.json")).read_text(encoding="utf-8"))
+    assert not [f for f in pg.faults(Episode(**doc)) if f.startswith("G-SYNC")]
+    doc["lines"][12]["shot"] = 13          # a narration line moved ahead of Young's line 13 on shot 13
+    faults = [f for f in pg.faults(Episode(**doc)) if f.startswith("G-SYNC")]
+    assert faults and "line 13" in faults[0] and "first line on its shot" in faults[0]
