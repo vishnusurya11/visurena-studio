@@ -25,9 +25,12 @@ the fault it prevents.
     WARDROBE       HARD      a named cast member whose WARDROBE line names no
                              garment: the block held nothing for Part Two
     INSTANT BEFORE HARD      the panel's OWN motion found finished in the
-                             picture it draws, or an outright "has just" /
-                             "at full height": a panel drawn at its end state
-                             leaves the render nothing to do (T02, T07, T12,
+                             picture it draws -- a perfect tense, or the
+                             motion's participle / up / out state on its own
+                             object ("raised hand" for "lifts ... hand") -- or
+                             an outright "has just" / "at full height": a panel
+                             drawn at its end state leaves the render nothing
+                             to do (T02, T07, T12,
                              T17 froze on exactly these)
       (watch)      advisory  "already", "about to", "the last word", and a
                              perfect tense the motion never names -- "a porter
@@ -41,6 +44,9 @@ the fault it prevents.
                              fault yet and may not stop a draw
     CAMERA         HARD      a panel is a still; a move word in `camera` is a
                              video instruction leaking into a still prompt
+    LADDER         HARD      the ladder clause and the panel's own at_rest name
+                             two sizes for one landmark: the drawer picks one
+                             (ep10 Q03, a thumbnail porch against a hand)
     GEOMETRY       HARD      a relational preposition governing a vehicle part
                              with no frame edge anywhere in the panel: the
                              documented weak spot, and the owner's fault #2
@@ -280,10 +286,95 @@ decides."""
 
 def end_state(motion: str, text: str) -> str | None:
     """The panel's OWN motion, found finished in the picture it draws: `motion`
-    says "climbs the last three steps" and `frame` says "has climbed"."""
+    says "climbs the last three steps" and `frame` says "has climbed"; or
+    `motion` says "lifts one hand" and `at_rest` says "his raised hand"."""
     stems = set(re.findall(r"\b(\w{3,})(?:s|es)\b", (motion or "").lower()))
-    return next((m.group(0) for m in DONE.finditer(text)
-                 if m.group(1).lower().rstrip("e") in {s.rstrip("e") for s in stems}), None)
+    perfect = next((m.group(0) for m in DONE.finditer(text)
+                    if m.group(1).lower().rstrip("e") in {s.rstrip("e") for s in stems}), None)
+    return perfect or held_state(motion, text)
+
+
+MOVES = re.compile(r"\b(lifts|raises|throws|brings|holds|thrusts|puts|draws|pulls|pushes|opens|closes|turns|"
+                   r"spreads|stretches|extends|takes|sets|lays|folds|drops|lowers|swings|flings|tips|bends|"
+                   r"leans|rests)\b([^;,.]*)", re.I)
+"""A verb that leaves its object in a STATE, and the clause it governs up to
+the next stop.  The -s form only: the plan writes "he lifts", and the base
+form is an adjective as often as a verb -- "the spread fingers close into a
+fist" (ep10 Q17) is a closing, not a spreading."""
+
+PREP = (r"off|on|to|toward|towards|into|over|under|out|up|down|from|at|with|in|across|along|between|"
+        r"against|by|for|behind|and|as|onto|upon")
+OBJECT_END = re.compile(rf"\s+(?:{PREP})\b", re.I)
+"""Where the verb's own object ends: "lifts his bearded chin| a finger's breadth
+off the whip stock" -- the stock is where the chin comes from, not what lifts.
+"of" is left in so "the back of one bare hand" keeps its hand."""
+
+BRIDGE = (r"(?:(?!(?:of|in|on|at|to|by|under|over|from|into|the|a|an|his|her|its|their|and|with)\b)"
+          r"[\w'-]+\s+){0,2}?")
+"""Up to two words between a state and its noun, none of them a preposition
+or a determiner: "raised bare hand" is one phrase, "up under his chin" is not."""
+
+IRREGULAR = {"throw": "thrown", "bring": "brought", "hold": "held", "draw": "drawn", "take": "taken",
+             "put": "put", "set": "set", "lay": "laid", "spread": "spread", "thrust": "thrust",
+             "bend": "bent", "lean": "leant", "swing": "swung", "fling": "flung"}
+UP = ("up", "raised", "lifted")
+OUT = ("out", "outstretched", "extended", "thrown")
+"""The end states a verb or its particle names: "brings ... up" and "lifts"
+both leave the object UP; "throws ... out" leaves it OUT."""
+
+TAIL = frozenset("up out off down away back palm length breadth finger forearm arm hand's whole shot "
+                 "second seconds moment open bare heavy broad rough thick thin long short near far own "
+                 "both one two right left small".split())
+"""Words in an object phrase that are not its noun: particles, measures, and
+the adjectives a hand is written with ("the open hand out" is a hand)."""
+
+
+def stem(verb: str) -> str:
+    """`lifts` -> lift, `pushes` -> push, `raises` -> raise."""
+    return re.sub(r"(?:(?<=sh|ch|ss)es|s)$", "", verb.lower())
+
+
+def participle(verb: str) -> str:
+    """`lifts` -> lifted, `raises` -> raised, `throws` -> thrown, `pushes` -> pushed."""
+    root = stem(verb)
+    return IRREGULAR.get(root, root + ("d" if root.endswith("e") else "ed"))
+
+
+def states_of(verb: str, clause: str) -> tuple[str, ...]:
+    """Every word that says this verb's object is already where the verb puts it."""
+    said = [participle(verb)]
+    if stem(verb) in ("lift", "raise") or re.search(r"\bup\b", clause):
+        said += UP
+    if re.search(r"\bout\b", clause) or stem(verb) in ("extend", "stretch"):
+        said += OUT
+    return tuple(dict.fromkeys(said))
+
+
+def object_nouns(clause: str) -> list[str]:
+    """The nouns of the verb's own object: the phrase before the first
+    preposition, less its adjectives and measures."""
+    phrase = OBJECT_END.split(clause, maxsplit=1)[0]
+    return [w for w in re.findall(r"[a-z]+", phrase.lower()) if len(w) > 2 and w not in STOP | TAIL]
+
+
+def held_state(motion: str, text: str) -> str | None:
+    """The motion's own object, found in `text` already in the state the motion
+    puts it in: "raised hand" for "lifts ... hand", "hand out" for "throws the
+    open hand out", "hand up" for "brings ... hand up".
+
+    MEASURED on episode 10: Q10, Q12 and Q27 each drew the gesture finished
+    because the at_rest said so, and the takes had nothing to do (T12 drift
+    0.05).  Only the motion's OWN object counts: a raised glass on the table
+    while a hand lifts is set dressing."""
+    for verb, clause in MOVES.findall(motion or ""):
+        states = "|".join(states_of(verb, clause))
+        for noun in object_nouns(clause):
+            before = re.search(rf"\b(?:{states})\s+{BRIDGE}{noun}\b", text, re.I)
+            after = re.search(rf"\b{noun}\b(?:\s+(?!(?:of|in|on|at|to|by|under|over|from|into|the|a|an|his|"
+                              rf"her|its|their|and|with)\b)[\w'-]+){{0,2}}?\s+(?:{states})\b", text, re.I)
+            if found := before or after:
+                return found.group(0)
+    return None
 
 
 def instant_before(seg: dict) -> list[Finding]:
@@ -299,6 +390,36 @@ def instant_before(seg: dict) -> list[Finding]:
     if found := WATCHING.search(text) or DONE.search(text):
         return [Finding("INSTANT BEFORE", panel_key(seg), found.group(0), False,
                         "check this is a state at rest and not the action finished")]
+    return []
+
+
+# ---- LADDER ---------------------------------------------------------------
+
+RUNG_WORDS = ("thumbnail", "finger", "hand", "half the height", "fills the frame")
+RUNG = re.compile(r"\b(?:the height of an? (?:thumbnail|finger|hand)|half the height of the frame|"
+                  r"fills? the frame)\b", re.I)
+"""The size ladder's own words, as `sq.LADDER` prints them."""
+
+
+def rung_of(text: str) -> int | None:
+    """Which rung of the ladder this size phrase is, lowest first."""
+    return next((k for k, word in enumerate(RUNG_WORDS) if word in (text or "").lower()), None)
+
+
+def ladder_findings(seg: dict, setup: Setup) -> list[Finding]:
+    """The ladder clause and the panel's own at_rest may not name two sizes for
+    one landmark.  MEASURED on episode 10, Q03: the ladder printed "the porch
+    of the log house is the height of a thumbnail" and the at_rest, two lines
+    later, "the porch ... the height of a hand"; the drawer drew the hand."""
+    if seg.get("end") or not sq.on_route(seg, setup):
+        return []
+    head = sq.landmark_head(setup.landmark or "the far door")
+    ladder = sq.door_size(seg.get("path") or 0.0, setup.landmark_at, setup.landmark_size)
+    for sentence in re.split(r"(?<=[.;])\s+", seg.get("at_rest") or ""):
+        said = RUNG.search(sentence)
+        if said and re.search(rf"\b{head}s?\b", sentence, re.I) and rung_of(said.group(0)) != rung_of(ladder):
+            return [Finding("LADDER", panel_key(seg), said.group(0), True,
+                            f"the ladder says the {head} {ladder}; one panel, one size for one noun")]
     return []
 
 
@@ -534,8 +655,8 @@ def sheet_findings(segs: list[dict], setup: Setup, prompt: str, grid: tuple) -> 
     found = (affirmative(prompt, segs) + twins(segs) + grid_findings(segs, prompt, grid)
              + alternates(segs, prompt) + garments_named(prompt))
     for seg in segs:
-        found += (instant_before(seg) + end_findings(seg) + camera_still(seg) + geometry(seg)
-                  + crowd_findings(seg, setup) + wardrobe(seg) + props(seg))
+        found += (instant_before(seg) + ladder_findings(seg, setup) + end_findings(seg) + camera_still(seg)
+                  + geometry(seg) + crowd_findings(seg, setup) + wardrobe(seg) + props(seg))
     return found
 
 

@@ -149,10 +149,16 @@ def attempt(sb, text: str, refs: list[Path], out: Path, group: list[dict], route
     heights, regress = ladder_check(cells, group, route, setup)
     looked = look_of(cells, out.stem)
     row_bands, col_bands = board.bands(grey, 0), board.bands(grey, 1)
+    # ALTERNATE pairs are a row in the report and nothing more: an alternate
+    # feeds no take, so a twin there (ep10 Q26_0 / Q26_0A, 0.718) buys no retry.
+    alike = sq.alt_duplicates(cells, group)
+    for a, b in alike:
+        print(f"  WATCH {out.stem}: ALTERNATE {b} reads as {a} (over ALIKE {sq.ALIKE})", flush=True)
     return {"sheet": sheet.name, "route": route, "cells": [c.name for c in cells],
             "gutters_ok": len(row_bands) == rows - 1 and len(col_bands) == cols - 1,
             "white_lines_in": white_lines(cells), "door_heights": heights, "regressions": regress,
-            "duplicates": sq.duplicates(cells, group), "strict": strict, "look": looked}
+            "duplicates": sq.duplicates(cells, group), "alternate_duplicates": alike,
+            "strict": strict, "look": looked}
 
 
 def clean(entry: dict) -> bool:
@@ -294,16 +300,44 @@ def drop_end_copies(boards: Path, entry: dict, group: list[dict] | None = None) 
     return dropped
 
 
+def reroll_reason(entry: dict) -> str:
+    """Why a strict retry of this attempt would be the same prompt drawn again.
+
+    MEASURED on episode 10: the mountain sheet was refused by `white_lines()`
+    alone (Q02_0's prompted moonlit rifle barrel), `strict_prefix` had no
+    duplicate and no regression to name, and the retry drew the byte-identical
+    prompt for $0.13 -- the two sheets differ by two blank lines."""
+    faults = [f"white_lines_in {entry['white_lines_in']}" for _ in [0] if entry.get("white_lines_in")]
+    if not entry.get("gutters_ok", True):
+        faults.append("gutters_ok False")
+    return (f"the sheet failed on {' and '.join(faults) or 'nothing the prefix names'}, which the STRICT "
+            f"prefix cannot address (it names duplicates and ladder regressions only), so the retry "
+            f"would be a re-roll of the same prompt; redraw the cell alone (redraw_panel.py) or accept it")
+
+
+def strict_text(entry: dict, setup: Setup, text: str, name: str, k: int) -> str:
+    """The strict retry's prompt, or "" when the retry has no offender to name
+    and would be a re-roll: the refusal is written into the entry and printed."""
+    prefix = sq.strict_prefix(entry["duplicates"], entry["regressions"], setup)
+    if not prefix:
+        entry["strict_refused"] = reroll_reason(entry)
+        print(f"  {name} sheet {k}: strict retry refused -- {entry['strict_refused']}", flush=True)
+        return ""
+    return prefix + "\n\n" + text
+
+
 def draw_sheet(sb, boards: Path, name: str, k: int, group: list[dict], route: list[int], grid: tuple,
                setup: Setup, physical: dict[str, str], refs: list[Path], report: dict,
                aspect: str = "9:16", props: list[dict] | None = None) -> dict:
-    """One sheet: the draw, and one strict retry that names its own offender."""
+    """One sheet: the draw, and one strict retry that names its own offender --
+    and no retry at all when it has no offender to name (`strict_text`)."""
     entry = {"duplicates": [], "regressions": []}
     for strict in (False, True):
         text = sq.prompt(group, setup, physical, previous=False, first=(k == 0), geography=route,
                          aspect=aspect, props=props)
         if strict:
-            text = sq.strict_prefix(entry["duplicates"], entry["regressions"], setup) + "\n\n" + text
+            if not (text := strict_text(entry, setup, text, name, k)):
+                break
         else:
             # the free gate, before the first dollar of this sheet
             refuse_on_text(group, setup, text, grid, name)

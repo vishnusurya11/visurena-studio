@@ -191,7 +191,7 @@ class TestThePanels:
         fire on the substring 'behind' anywhere in a panel's text."""
         close = seg(2, size="close", path=None, frame="Close on Stamford, the gilt mirror behind them.")
         assert "height of" not in sq.panels_block([close], [], BAR)
-        walk = seg(3, size="medium", path=0.3, frame="Over Watson's shoulder, the door far off.")
+        walk = seg(3, size="medium", path=0.3, frame="Over Watson's shoulder, the stone arch far off.")
         assert "The stone arch is the height of a finger." in sq.panels_block([walk], [1], STREET)
 
 

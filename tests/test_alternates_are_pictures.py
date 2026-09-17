@@ -42,7 +42,7 @@ UTAH = {
 
 
 def seg(shot, size="full", path=0.3, faces=("lucy_ferrier", "jefferson_hope"),
-        frame="Full shot across the pine table: Lucy at the open window, the lamp between them.",
+        frame="Full shot across the pine table: Lucy at the open window, the lamp between them, the hearth behind.",
         camera="at the table end level with a seated man's eye, a 50mm lens",
         at_rest="Lucy stands in the RIGHT third with the pale window behind her."):
     return {"shot": shot, "sub": 0, "size": size, "path": path, "faces": list(faces), "frame": frame,

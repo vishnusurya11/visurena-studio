@@ -19,7 +19,7 @@ from studio import episode_seq_board as sq
 from studio.episode_spec import Setup
 
 
-def seg(shot, sub, size, path, frame="x"):
+def seg(shot, sub, size, path, frame="the flame, the arch and the passage in frame"):  # the landmark is in frame
     return {"shot": shot, "sub": sub, "size": size, "path": path, "frame": frame,
             "motion": "Static shot.", "faces": []}
 

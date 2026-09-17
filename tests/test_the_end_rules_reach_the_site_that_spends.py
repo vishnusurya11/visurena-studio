@@ -78,8 +78,11 @@ def test_two_ordinary_panels_that_are_one_picture_are_still_refused(tmp_path):
 
 def test_the_verdict_is_given_both_rules_at_this_site():
     import inspect
-    src = inspect.getsource(sq.duplicates)
+    # `duplicates` (the take-feeding pairs) and `alt_duplicates` (advisory) both read `alike_pairs`,
+    # which is where the two END rules must live for the site that spends to see them.
+    src = inspect.getsource(sq.alike_pairs)
     assert "changed_blocks" in src and "size" in src
+    assert "alike_pairs" in inspect.getsource(sq.duplicates)
 
 
 def test_the_dq_disk_fallback_asks_with_the_size_too():

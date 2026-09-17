@@ -30,14 +30,14 @@ def test_segments_of_a_setup_list_shots_and_sub_shots_in_order_with_their_positi
 def test_the_geography_prompt_names_the_walk_and_the_door_size_per_panel():
     setup = Setup(described="A corridor.", cast=["john_watson"], landmark="the barred window",
                   route="from the corridor's near end to the dissecting-room doorway at its far end")
-    segs = [{"shot": 0, "sub": 0, "size": "full", "frame": "Two men walk away from behind.", "motion": "Static", "path": 0.1, "faces": []},
-            {"shot": 1, "sub": 0, "size": "medium", "frame": "Side view of the two men.", "motion": "Static", "path": 0.3, "faces": []}]
+    segs = [{"shot": 0, "sub": 0, "size": "full", "frame": "Two men walk away from behind toward the barred window.", "motion": "Static", "path": 0.1, "faces": []},
+            {"shot": 1, "sub": 0, "size": "medium", "frame": "Side view of the two men, the barred window ahead.", "motion": "Static", "path": 0.3, "faces": []}]
     text = sq.prompt(segs, setup, {"john_watson": "Thin."}, previous=False, first=True, geography=True)
     assert text.startswith("SHEET\nA film storyboard sheet")
     assert "farther along it than the one before" in text and "from the corridor's near end" in text
-    assert ("Panel 1 - FULL SHOT. In frame: Two men walk away from behind. The barred window is the height "
+    assert ("Panel 1 - FULL SHOT. In frame: Two men walk away from behind toward the barred window. The barred window is the height "
             "of a thumbnail.") in text
-    assert ("Panel 2 - MEDIUM. In frame: Side view of the two men. The barred window is the height of a "
+    assert ("Panel 2 - MEDIUM. In frame: Side view of the two men, the barred window ahead. The barred window is the height of a "
             "finger.") in text
 
 

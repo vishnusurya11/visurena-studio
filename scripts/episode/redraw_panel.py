@@ -18,8 +18,8 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 
 import importlib.util as _iu
 
-from studio import approval, canvas, episode_home, episode_seq_board as sq
-from studio.episode_spec import Episode
+from studio import approval, canvas, episode_home, episode_seq_board as sq, house_style
+from studio.episode_spec import Episode, Setup
 
 SIZE = (1024, 1536)
 """The 9:16 default. A square plan draws a square cell instead: `panel_size()`."""
@@ -52,6 +52,19 @@ def find(episode: Episode, key: str) -> tuple[str, dict]:
     return shot.setup, (sq.end_panel(panel, segs.index(panel) + 1) if end else panel)
 
 
+def prompt_for(episode: Episode, panel: dict, setup: Setup, physical: dict) -> str:
+    """The one panel's prompt, under ITS EPISODE'S place and light.
+
+    MEASURED on episode 10: all four `boards/panels/*.prompt.txt` say "1881
+    London, gaslight from one side" over Ferrier's Utah farm in 1860.
+    `seq_boards.main` adopts the plan's place before it builds a sheet; this
+    script never did, so `sq.single()` printed the book's default -- the ep08
+    bug in a third module.  A repair drawn under another sky is not a repair."""
+    house_style.adopt(episode.where, episode.light)
+    end = bool(panel.get("end"))
+    return (sq.end_single if end else sq.single)(panel, setup, physical, episode.aspect)
+
+
 def main(book_id: str, number: int, key: str, approved: bool) -> None:
     sb = _sibling("storyboard")
     boards = _sibling("seq_boards")
@@ -62,7 +75,7 @@ def main(book_id: str, number: int, key: str, approved: bool) -> None:
     setup = episode.setups[name]
     cell = sq.cell_path(root, panel["shot"], panel["sub"], panel.get("end", False))
     end = bool(panel.get("end"))
-    text = (sq.end_single if end else sq.single)(panel, setup, boards.physicals(book), episode.aspect)
+    text = prompt_for(episode, panel, setup, boards.physicals(book))
     approval.require("panel", f"one gpt-image still to replace {cell.name} ({key}, {name})", USD, approved)
     # An END cell is drawn FROM ITS OWN START CELL: measured, 9 of episode 2's 13
     # END cells were re-staged to a different camera when asked for in prose alone.

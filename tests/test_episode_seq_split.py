@@ -5,14 +5,14 @@ from studio.affirm import negations
 from studio.episode_spec import Setup
 
 
-def seg(shot, sub, size, path, frame="x", faces=()):
+def seg(shot, sub, size, path, frame="the barred window far off", faces=()):  # the landmark is in frame
     return {"shot": shot, "sub": sub, "size": size, "path": path, "frame": frame, "motion": "Static", "faces": list(faces)}
 
 
 SEGS = [seg(0, 0, "medium_close", 0.05, faces=["stamford"]), seg(1, 0, "close", 0.15, faces=["stamford"]),
-        seg(1, 1, "insert", 0.18), seg(3, 0, "medium", 0.40, "Over Watson's shoulder from behind, the door far"),
-        seg(4, 0, "full", 0.55, "Full shot from behind, the two men walking away"), seg(4, 2, "medium", 0.66, "Side view"),
-        seg(7, 2, "medium", 1.0, "From behind: Stamford through the side-door")]
+        seg(1, 1, "insert", 0.18), seg(3, 0, "medium", 0.40, "Over Watson's shoulder from behind, the barred window far"),
+        seg(4, 0, "full", 0.55, "Full shot from behind, the two men walking away to the barred window"), seg(4, 2, "medium", 0.66, "Side view, the barred window ahead"),
+        seg(7, 2, "medium", 1.0, "From behind: Stamford through the side-door under the barred window")]
 
 
 def test_a_walk_panel_is_a_wide_framing_with_a_place_on_the_route():
@@ -113,7 +113,7 @@ def test_end_frames_fill_the_spare_cells_walk_cells_first_and_are_named_apart():
     # NO change clause at all -- static is the word for nothing moving, and it was
     # being handed to the drawer as the thing that changed.
     assert ends[0]["end"]
-    assert "the door far" in ends[0]["frame"] and "drawn afresh" not in ends[0]["frame"]
+    assert "the barred window far" in ends[0]["frame"] and "drawn afresh" not in ends[0]["frame"]
     assert "identical" not in ends[0]["frame"] and "Static" not in ends[0]["frame"]
     assert ends[0]["changed"] == ""
     assert sq.cell_name(4, 0, end=True) == "Q04_0E.png" and sq.cell_name(4, 0) == "Q04_0.png"

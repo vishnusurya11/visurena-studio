@@ -340,13 +340,29 @@ def is_end_pair(a: dict, b: dict) -> bool:
 
 
 def duplicates(cells: list, segs: list[dict], floor: float = ALIKE) -> list[tuple[str, str]]:
-    """Every pair of panels on a sheet that is the same picture. Owner's rule,
-    2026-09-11: no two panels of a storyboard may ever be the same.
+    """Every pair of TAKE-FEEDING panels on a sheet that is the same picture.
+    Owner's rule, 2026-09-11: no two panels of a storyboard may ever be the same.
 
     A panel and its OWN END panel are judged in a BAND instead (`END_FLOOR`,
     `END_CEILING`): they are one picture after one camera move, so being alike is
     what they are FOR. Under the ceiling alone this pair was rewarded for being a
-    different picture, which is the re-stage the render cannot travel."""
+    different picture, which is the re-stage the render cannot travel.
+
+    A pair with an ALTERNATE in it is `alt_duplicates`' to report: an alternate
+    feeds no take (`T*.graph.json` loads base cells only), so a twin there is
+    worth a line in the report and not the $0.13 strict re-roll this list buys."""
+    return [pair for pair, a, b in alike_pairs(cells, segs, floor) if not (a.get("alt") or b.get("alt"))]
+
+
+def alt_duplicates(cells: list, segs: list[dict], floor: float = ALIKE) -> list[tuple[str, str]]:
+    """Every alike pair with an ALTERNATE in it -- advisory.  MEASURED on episode
+    10: Q26_0 and Q26_0A read 0.718 over ALIKE 0.70 (the same lamp from the other
+    side) and the report on disk said `duplicates: []`."""
+    return [pair for pair, a, b in alike_pairs(cells, segs, floor) if a.get("alt") or b.get("alt")]
+
+
+def alike_pairs(cells: list, segs: list[dict], floor: float = ALIKE) -> list[tuple[tuple[str, str], dict, dict]]:
+    """Every pair on the sheet that reads as one picture, with its two panels."""
     from studio import frame_match as fm
     images = [fm.load(p) for p in cells]
     out = []
@@ -371,9 +387,9 @@ def duplicates(cells: list, segs: list[dict], floor: float = ALIKE) -> list[tupl
                 said = (b if a.get("end") else a).get("motion", "")
                 if end_pair_verdict(score, a.get("size", ""),
                                     changed_blocks(images[i], images[j]), said) != "ok":
-                    out.append(pair)
+                    out.append((pair, a, b))
             elif score > floor:
-                out.append(pair)
+                out.append((pair, a, b))
     return out
 
 
@@ -561,15 +577,48 @@ def door_size(path: float, landmark_at: str = FAR_END, largest: str = "") -> str
     return RUNGS[min(rung, RUNGS.index(largest) if largest else len(RUNGS) - 1)]
 
 
+HEAD_STOP = re.compile(r"\s+(?:of|in|on|at|against|under|over|by|with|to|from|across|behind|beside|"
+                       r"between|along|near|above|below|beyond|through|into|round|around|before|after)\b", re.I)
+"""Where a landmark's own noun phrase ends: "the porch| of the log house"."""
+
+
+def landmark_head(landmark: str) -> str:
+    """The head noun of a landmark: "porch" of "the porch of the log house",
+    "flame" of "the Bunsen lamp's blue flame on the bench"."""
+    words = HEAD_STOP.split((landmark or "").strip().rstrip("."), maxsplit=1)[0].split()
+    return words[-1].lower() if words else ""
+
+
+def landmark_in(frame: str, landmark: str) -> bool:
+    """Is the landmark in this panel's picture?  Its head noun, or the noun
+    before it in a compound ("ridge" of "the ridge line"), singular or plural.
+
+    MEASURED on episode 10: the ladder clause was obeyed 4 of 12 times, and the
+    misses named a landmark the camera was not looking at -- "the open front
+    door the height of a thumbnail" on two panels facing away from the door,
+    down the path to the gate (Q19, Q20)."""
+    head = HEAD_STOP.split((landmark or "").strip(), maxsplit=1)[0].split()
+    nouns = [w.lower().rstrip("'s") for w in head[-2:] if w.lower() not in {"the", "a", "an"} | ADJECTIVE_TAIL]
+    return any(re.search(rf"\b{re.escape(w)}(?:s|es)?\b", frame or "", re.I) for w in nouns)
+
+
 def on_route(seg: dict, setup: Setup | None = None) -> bool:
     """A panel that shows the walk: a wide framing with a place on a route the
-    setup actually names.
+    setup actually names, LOOKING AT THE LANDMARK.
 
     AN ALTERNATE IS NEVER ON THE WALK.  It inherits its base panel's `path` so
     the take builder can find it, and episode 9's sheets listed 14 of them as
     route panels that had to be farther along than the panel before -- while
-    each was another angle of a panel already passed."""
+    each was another angle of a panel already passed.
+
+    NOR IS A PANEL WHOSE FRAME HOLDS NO LANDMARK.  The ORDER block says of every
+    route panel that the landmark is smaller (or larger) in it than in the one
+    before, and the ladder clause names its size; said of a panel that faces the
+    other way, both ask the drawer to put the landmark in (episode 10, Q19/Q20:
+    the front door in two shots looking down the path to the gate)."""
     if seg.get("alt") or (setup is not None and not setup.route):
+        return False
+    if setup is not None and not landmark_in(seg.get("frame", ""), setup.landmark or "the far door"):
         return False
     return seg["size"] in GEO_SIZES and seg.get("path") is not None
 
@@ -654,10 +703,25 @@ def _thing(seg: dict) -> str:
 SKIP_NOUNS = frozenset("""light lamplight sunlight daylight firelight dusk dawn dark shadow glare distance
 moment instant frame edge foreground background middle centre center left right top bottom whole same far
 near height width air way side rest action face faces head eyes eye beard hair hand hands shoulder shoulders
-back profile figure mouth chin brow cheek cheekbones jaw""".split())
+back profile figure mouth chin brow brows cheek cheekbones jaw laugh threat line lines camera lens""".split())
 """Nouns that name no OBJECT: a picture of "the lamplight" or "the middle
 distance" cannot be drawn as the thing an insert closes on, and a face or a
-hand is a person's, already named by `_who`."""
+hand is a person's, already named by `_who`.  "a line" is a formation ("riders
+in a line") and "the faint pale line" a streak of light: episode 10 drew an
+insert on each and both were junk (Q00_0A, Q29_0A)."""
+
+ADJECTIVE_TAIL = frozenset("""black white grey gray red brown blue green gold golden yellow silver pale dark
+warm cold hot hard soft faint narrow wide small large big tall low high thin thick open shut closed bare wet
+dry dim bright long short old young flat plain rough sharp still deep heavy empty full bent broken lit unlit
+sunlit moonlit lamplit deep-set florid sandy iron-grey chestnut knitted facing spread running fallen turned
+raised lifted bowed bent parted gathered held folded tucked pushed thrown seated standing lying kneeling bared
+clenched set steady""".split())
+"""A phrase whose last word is one of these is an adjective or a participle with
+its noun cut off by the closer, not a noun phrase: `NOUN_PHRASE` closes at a
+comma or an "and", so "the lamp warm," and "the black and the door jamb" read
+"warm" and "black" as nouns, and "the brows knitted," reads "knitted" as one.  MEASURED on episode 10: 6 of 14 alternates named one --
+"the black", "the lamp warm", "the deep-set eyes hard" -- and the pictures they
+bought were an empty room, a worm's-eye dress and a macro of an eyebrow."""
 
 NOUN_PHRASE = re.compile(
     r"\b(the|a|an)\s+((?:[\w'-]+\s+){0,2}?[\w'-]+)"
@@ -677,7 +741,8 @@ def nouns(frame: str) -> list[str]:
     out = []
     for found in NOUN_PHRASE.finditer(frame or ""):
         phrase = f"{found.group(1).lower()} {found.group(2).strip()}"
-        if phrase.split()[-1].lower() not in SKIP_NOUNS and phrase.lower() not in [p.lower() for p in out]:
+        last = phrase.split()[-1].lower()
+        if last not in SKIP_NOUNS | ADJECTIVE_TAIL and phrase.lower() not in [p.lower() for p in out]:
             out.append(phrase)
     return out
 
@@ -1136,8 +1201,11 @@ def crowd_clause(seg: dict, setup: Setup) -> str:
 
 def ladder_clause(seg: dict, setup: Setup) -> str:
     """How big the far landmark is from HERE (research: camera-anchored size words,
-    never percentages)."""
+    never percentages) -- and nothing when the landmark is not in this frame:
+    a size for a thing the camera cannot see is an instruction to draw it in."""
     far = setup.landmark or "the far door"
+    if not landmark_in(seg.get("frame", ""), far):
+        return ""
     size = door_size(seg.get("path") or 0.0, setup.landmark_at, setup.landmark_size)
     return f" {far[0].upper() + far[1:]} {size}."
 
@@ -1147,18 +1215,27 @@ def before_clause(seg: dict) -> str:
     finished action -- Q02_0 came back with the glass already raised."""
     if seg.get("at_rest"):
         return f"This is the instant BEFORE the action: {seg['at_rest']}"
+    if not seg.get("motion"):
+        return ""   # a bare single-panel redraw with nothing at rest and no motion to hold still
     return (f"This is the instant BEFORE the action. What follows this panel: {still(seg['motion'])} Draw "
             f"the moment just before that begins, with everything that moves still at rest.")
 
 
-def start_text(k: int, seg: dict, ladder: str, crowd: str) -> str:
-    """A start panel: size, where the CAMERA stands, the nouns in frame, the
-    landmark ladder, this panel's crowd, and what is still at rest."""
-    head = f"Panel {k} - {size_word(seg)}"
+def panel_body(seg: dict, ladder: str = "", crowd: str = "") -> str:
+    """What a start panel says, before its number: size, where the CAMERA
+    stands, the nouns in frame, the landmark ladder, this panel's crowd, and
+    what is still at rest.  The sheet and the single-panel redraw print the
+    same body, so a redrawn cell carries "CLOSE" the way its sheet panel did."""
+    head = size_word(seg)
     if seg.get("alt"):
         head += f", ALTERNATE ANGLE OF PANEL {seg['of']}"
     head += f", camera {seg['camera'].rstrip('. ')}." if seg.get("camera") else "."
     return f"{head} In frame: {stop(seg['frame'])}{ladder}{crowd} {before_clause(seg)}".strip()
+
+
+def start_text(k: int, seg: dict, ladder: str, crowd: str) -> str:
+    """A start panel on a sheet: its number, then `panel_body`."""
+    return f"Panel {k} - {panel_body(seg, ladder, crowd)}"
 
 
 REFRAMING = re.compile(
@@ -1476,15 +1553,14 @@ def shift_indices(block: str) -> str:
 
 
 def single_picture(seg: dict, setup: Setup) -> str:
-    """The one panel's own text, with its panel number taken off."""
-    parts = [seg["frame"]]
-    if seg.get("camera"):
-        parts.append(f"The camera stands {seg['camera']}.")
-    if seg.get("at_rest"):
-        parts.append(seg["at_rest"])
-    if seg.get("crowd") and seg.get("size") in WIDE_ENOUGH:
-        parts.append(seg["crowd"])
-    return " ".join(p.rstrip() for p in parts)
+    """The one panel's own text: its sheet panel's body, with the number off.
+
+    MEASURED on episode 10: the four cells redrawn alone opened with the bare
+    frame, and the size word the sheet panel had carried in its head was gone.
+    Q13 went 0.25 -> 0.20 face height (an MCU drawn as a medium) and Q25 0.66 ->
+    0.36 (a close drawn as an MCU); their takes are the episode's two worst."""
+    ladder = ladder_clause(seg, setup) if on_route(seg, setup) else ""
+    return panel_body(seg, ladder, crowd_clause(seg, setup))
 
 
 def drop_reason(end: str, start: str, sim: float, motion: str = "") -> str:
