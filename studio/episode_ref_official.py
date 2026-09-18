@@ -237,9 +237,19 @@ def place_word(described: str, outdoors: bool = False) -> str:
     return "room" if INDOOR_WORDS.search(described) else "place"
 
 
+LABEL = ("interior", "exterior")
+"""A stage direction the drawer needs, and not what the place is called.
+MEASURED on ep13's and ep14's prompts (2026-09-17): every interior setup opens
+"Interior, inside ...", so the model was told the take happens "in <Subject 2>,
+Interior" and that "the ambience of Interior runs under the whole take"."""
+
+
 def short_place(described: str) -> str:
-    """The location's own name: the described text up to its first comma."""
-    head = described.split(",")[0].strip().rstrip(".")
+    """The location's own name: the described text up to its first comma, past
+    any Interior/Exterior label."""
+    parts = [p.strip() for p in (described or "").split(",")]
+    head = next((p for p in parts if p and p.lower() not in LABEL), parts[0] if parts else "")
+    head = head.rstrip(".")
     return re.sub(r"^(The|A|An)\b", lambda m: m.group(0).lower(), head)
 
 
