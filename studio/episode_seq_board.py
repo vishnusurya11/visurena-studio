@@ -446,6 +446,9 @@ def picture_path(boards: Path, book: Path, name: str) -> Path:
         return Path(book) / "refs" / "characters" / name
     if name.startswith("plate_"):
         return plates_in(boards) / name
+    if name.startswith("loc-"):
+        # The BOOK's own location picture, drawn once for the series (ep14).
+        return Path(book) / "refs" / "locations" / name
     if name.startswith("panel_") or ".before." in name:
         return panels_in(boards) / name
     if name.startswith("seq_"):

@@ -158,6 +158,14 @@ class Framed(BaseModel):
     crowd: str = ""
     """This panel's own background life, with a count and an activity.  A
     crowd named once for a location is averaged away over nine panels."""
+    still: bool = False
+    """THE BODY IN THIS SHOT DOES NOT MOVE -- a sleeper, a corpse, a man in a
+    faint.  MEASURED ep14 (2026-09-17): the dead man's hand flexed and spread
+    across a 6 s insert, because every block must carry a body-scale action and
+    the words that hold a body still are banned everywhere else.  They are
+    banned because they freeze a segment (0.77 frozen share against 0.47), and
+    a freeze is exactly what a body at rest wants.  Set it, and the motion
+    belongs to the light and the camera."""
 
     @model_validator(mode="after")
     def _the_drawer_reads_only_what_is(self) -> "Framed":
@@ -272,6 +280,15 @@ class Setup(BaseModel):
     relation restated as WHICH FRAME EDGE at WHAT APPARENT SIZE with what
     between.  "The horse ahead of the wheel" drew a horse level with a wheel
     three times; relational prepositions are the documented weak spot."""
+    location: str = ""
+    """The BOOK's own location picture for this place, by entity id
+    (`221b_baker_street` -> `refs/locations/loc-221b_baker_street.png`).
+
+    OWNER 2026-09-17: the thirteen locations were drawn once for the whole
+    series; the per-episode plate is a fresh drawing of the same room, and
+    episode 14's rooms drifted take to take because each take was given one of
+    those instead of the book's. Empty means this place has no canonical
+    picture and the episode's plate stands in."""
     crowd: str = ""
     """The background life of this place, as a count and an activity ("eight
     or nine men in top hats two deep at the counter, a barman drawing a

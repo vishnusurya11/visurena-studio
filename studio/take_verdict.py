@@ -22,6 +22,15 @@ This module adds drift to the END cell, the mux lag AND word error rate of a
 dialogue take, turns them into one score, ranks attempts, and owns the retake
 budget.  A row whose module is absent prints `not measured` and fails nothing;
 a row with no value cannot fire, and `take_dq.row` counts those.
+
+AND A ROW WITH NO PICTURE TO READ IS THE SAME KIND OF ABSENCE.  A take rendered
+from the location plate and the cast cards alone -- no storyboard cell, episode
+14, because the sheets' paid API has no credits -- has nothing for `cut-landing`,
+`drift`, `coherence off-board`, `last-vs-cell` or `foreign` to be measured
+against, and each of those reads clean when it is read against nothing (0 missed
+cuts, end_sim 1.0, 0 foreign frames).  They print `not measured (no cell)`
+instead (`no_cell`, `board_absent`); every other row needs only the frames and
+is unchanged.
 """
 from __future__ import annotations
 
@@ -80,10 +89,14 @@ class SegmentReport:
     lead_in_s: float
     still_share: float
     kind: str
-    start_sim: float
-    end_sim: float
-    landed: bool
+    start_sim: float | None
+    end_sim: float | None
+    landed: bool | None
     offset: int
+    """The three cell-measured fields are None when the take has no cell to be
+    measured against (`cellless_segments`).  NOT 0.0 and NOT True: a number in
+    that slot is read by a gate as a measurement, and the gate then reports a
+    verdict about a picture nobody compared."""
 
 
 @dataclass
@@ -166,15 +179,29 @@ def frozen_gates(v: TakeVerdict) -> list[Gate]:
 
 
 def foreign_gate(v: TakeVerdict) -> Gate:
-    """G4.4 -- any sampled frame that is another take's cell or a location plate."""
+    """G4.4 -- any sampled frame that is another take's cell or a location plate.
+
+    THE SAMPLES ARE THE EVIDENCE.  `cut_landing.classify` needs the take's OWN
+    cells in the bank to say a frame belongs to somebody else, so a take with
+    no cell is never classified and the sample list comes back empty -- which
+    this row used to read as "0 foreign frames", a pass off zero frames of
+    comparison (episode 14 renders from the plate alone, with no cell at all)."""
+    if not v.foreign:
+        return no_cell("foreign")[0]
     n = sum(bool(f.get("foreign")) for f in v.foreign)
     return Gate("foreign", n, n == 0, True, str(n), min(60.0, 30.0 * n))
 
 
 def landing_gate(segments: list[SegmentReport], unplanned: list[float]) -> Gate:
-    """G4.3 -- every segment opens on its own pin, and the take made no cut of its own."""
-    missed = [s for s in segments if not s.landed]
-    note = f"{len(segments) - len(missed)}/{len(segments)} on pin"
+    """G4.3 -- every segment opens on its own pin, and the take made no cut of its own.
+
+    A segment whose `landed` is None was never read against a pin (there was no
+    cell): "0/0 on pin" is not a clean landing, it is no landing measured."""
+    read = [s for s in segments if s.landed is not None]
+    if not read:
+        return no_cell("cut-landing")[0]
+    missed = [s for s in read if not s.landed]
+    note = f"{len(read) - len(missed)}/{len(read)} on pin"
     note += f" +{len(unplanned)} unplanned" if unplanned else ""
     return Gate("cut-landing", len(missed), not missed and not unplanned, True, note,
                 25.0 * len(missed) + min(30.0, 15.0 * len(unplanned)))
@@ -190,8 +217,13 @@ def drift_gate(segments: list[SegmentReport]) -> Gate:
     against its own start cell, as the calibration above says.  Episode 2 lost
     T00, T05 and T19 to segments that had no target at all.
     """
-    aimed = [s for s in segments if s.target != s.cell]
-    every = min((s.end_sim for s in segments), default=1.0)
+    # A SEGMENT WITH NO CELL HAS NO end_sim AT ALL, and `min` over nothing used
+    # to default to 1.0 -- a perfect arrival at a picture that was never drawn.
+    read = [s for s in segments if s.end_sim is not None]
+    if not read:
+        return no_cell("drift")[0]
+    aimed = [s for s in read if s.target != s.cell]
+    every = min((s.end_sim for s in read), default=1.0)
     end_sim = min((s.end_sim for s in aimed), default=every)
     # HARD, ADVISORY AND PENALTY ALL BELONG TO THE SEGMENTS THAT HAVE A TARGET.
     # A segment with none cannot have failed to reach one, and legitimately
@@ -252,6 +284,64 @@ def unmeasured(*names: str) -> list[Gate]:
     return [Gate(n, None, True, False, "not measured") for n in names]
 
 
+NO_CELL = "not measured (no cell)"
+"""AN ABSENT MEASUREMENT IS NOT A PASS, and this is the second way to be absent:
+not a missing module but a missing PICTURE.  Episode 14 is rendered from the
+location plate and the cast cards with no storyboard cell at all (the sheets'
+paid API has no credits), and every row that is a cosine to a cell then reads
+the number that means clean -- 0 missed cuts, end_sim 1.0, 0 foreign frames.
+The rows say this instead, carry no value (`take_dq.live_rows` stops counting
+them) and score nothing either way."""
+
+
+def no_cell(*names: str) -> list[Gate]:
+    """`unmeasured`, saying WHY: this take had no cell to be measured against."""
+    return [Gate(n, None, True, False, NO_CELL) for n in names]
+
+
+def board_absent(cells: Path, names) -> bool:
+    """True when NOT ONE of the take's pinned pictures can be read: no pins at
+    all, or no named cell on disk.
+
+    A take with SOME of its cells is NOT this case -- that is a board with a
+    hole in it, an inconsistency, and `cell_signatures` still raises on it."""
+    names = list(dict.fromkeys(names))
+    return not names or not any((cells / n).is_file() for n in names)
+
+
+def staged_cells(record: dict) -> list[str]:
+    """The cell pictures the RENDER was given, from its own reference list."""
+    return [r for r in record.get("refs") or [] if r.startswith("Q") and r.endswith(".png")]
+
+
+def check_cellless(record: dict, cells: Path) -> None:
+    """A take whose REFERENCE LIST names cells, with not one of them on disk, is
+    the episode-4 fault -- the wrong room, or a board that moved -- and stays
+    loud (tests/test_an_empty_measurement_is_not_a_pass.py).
+
+    A take that was never given a cell at all is a different thing and not a
+    fault: episode 14 renders from the location plate and the cast cards
+    because the sheets' API has no credits.  The record says which is which."""
+    named = staged_cells(record)
+    if named:
+        raise FileNotFoundError(
+            f"take {record.get('index')} was staged with {len(named)} cells "
+            f"({', '.join(sorted(named)[:4])}) and not one of them is in {cells}")
+
+
+def cellless_segments(anchors: list, motion: dict, kinds: dict) -> list[SegmentReport]:
+    """One SegmentReport per MOTION segment for a take with no cell: the freeze
+    numbers are read off the frames as always, and every field that would be
+    measured against a cell is None.  With no pins there is one segment over the
+    whole take and it is not given a cell name it does not have."""
+    out = []
+    for m in motion["segments"]:
+        cell = m["cell"] if anchors else ""
+        out.append(SegmentReport(cell, cell, m["start_s"], m["end_s"], m["leading_still_s"],
+                                 m["still_share"], kinds.get(cell, "hold"), None, None, None, 0))
+    return out
+
+
 def face_end_row(video: Path, record: dict) -> list[Gate]:
     """G-FACE, by interface: the last frame's face height and edge contact
     (studio.face_end, built alongside); absent, the row is not measured."""
@@ -310,8 +400,8 @@ def gates(v: TakeVerdict, audio: dict | None, line_text: str, unplanned: list[fl
     # frames off-board; the rows and their calibration live in take_coherence.
     # A last segment whose subject was told to leave the frame has no last
     # frame to compare (ep10 T17).
-    out.extend(tc.rows(v.coherence, size, exit=tz.has_exit(motions[-1] if motions else ""),
-                       panned=tz.is_pan(motions[0] if motions else "")))
+    out.extend(coherence_rows(v.coherence, size, exit=tz.has_exit(motions[-1] if motions else ""),
+                              panned=tz.is_pan(motions[0] if motions else "")))
     # G-ZOOM: how far the picture actually travelled against the plan's reach
     # word.  ep10: seven of thirty takes ended a size tighter than planned and
     # every row above passed them; the wall and its calibration live in take_zoom.
@@ -448,18 +538,25 @@ def measure(video: Path, record: dict, cells: Path, seconds: float, attempt: int
     anchors = record.get("anchors") or []
     motion = motion_gate.report(motion_gate.block_max(frames), anchors, kinds or {})
     sigs = cl.signatures(frames.astype(np.uint8))
-    own = cell_signatures(cells, dict.fromkeys(n for n, _ in anchors))
+    # NO CELL ON DISK IS A DIFFERENT CASE FROM A CELL THAT SHOULD BE THERE.
+    # Episode 14 renders from the location plate and the cast cards alone, so
+    # there is no board to resolve names against; every row that reads one goes
+    # `not measured (no cell)` and the rest are read off the frames as always.
+    board = not board_absent(cells, [n for n, _ in anchors])
+    if not board:
+        check_cellless(record, cells)
+    own = cell_signatures(cells, dict.fromkeys(n for n, _ in anchors)) if board else {}
     # cells/ and plates/ are siblings under the episode's boards/ by construction
     other = {n: fm.signature(fm.load(p)).ravel()
-             for n, p in cl.foreign_pictures(cells, cells.parent / "plates", set(own)).items()}
+             for n, p in cl.foreign_pictures(cells, cells.parent / "plates", set(own)).items()} if own else {}
     per_frame = cl.classify(sigs, own, other) if own else []
     rows = cl.landing(per_frame, anchors) if per_frame else []
     # The take's own reference list decides what it was AIMED at; the cells on
     # disk only say what was drawn. `--no-ends` withholds every END picture and
     # the cells stay on disk, so reading disk failed T08 on drift for missing a
     # picture it was never given.
-    segs = segment_rows(anchors, cells, seconds, sigs, motion, rows, kinds or {},
-                        record.get("refs"))
+    segs = (segment_rows(anchors, cells, seconds, sigs, motion, rows, kinds or {}, record.get("refs"))
+            if board else cellless_segments(anchors, motion, kinds or {}))
     v = TakeVerdict(record["index"], attempt, video.name, round(seconds, 2), record.get("lane", "narration"),
                     [], segs, motion["frozen_spans"], [round(float(x), 1) for x in motion["bins"]],
                     sampled_foreign(per_frame), coherence(video, record, cells, seconds),
@@ -490,9 +587,40 @@ def coherence(video: Path, record: dict, cells: Path, seconds: float) -> dict:
     motion gate reads squash a square take and average its grain away, and the
     coherence constants were calibrated on the take's own pixels."""
     names = tc.pinned_names(record)
-    if not names:
-        return {}
+    if board_absent(cells, names):
+        return churn_only(video, record, seconds)
     return tc.measure(tc.frames(video, seconds), tc.load_cells(cells, names), record.get("anchors") or [])
+
+
+def churn_only(video: Path, record: dict, seconds: float) -> dict:
+    """The two coherence numbers that need NO cell -- the churn after pan removal
+    and the largest unprompted step -- off the same native decode.  The two that
+    are cosines to a cell are simply absent from the dict, and `cells: False`
+    says so out loud (it reaches the record, so T<NN>.dq.json states it too)."""
+    fr = tc.frames(video, seconds)
+    raw, rigid = tc.step_diffs(fr)
+    cut, at = tc.hard_cut(raw, record.get("anchors") or [])
+    return {"frames": int(len(fr)), "cells": False,
+            "raw_diff": round(float(raw.mean()), 2) if len(raw) else 0.0,
+            "nonrigid": round(float(rigid.mean()), 2) if len(rigid) else 0.0,
+            "hard_cut": round(cut, 1), "hard_cut_at": at}
+
+
+BOARD_ROWS = ("coherence off-board", "last-vs-cell")
+"""The two coherence rows that ARE a cosine to the cell; `cut` and `churn` are
+read off the frame steps alone and keep firing with no cell on disk."""
+
+
+def coherence_rows(m: dict, size: str = "", exit: bool = False, panned: bool = False) -> list[Gate]:
+    """`take_coherence.rows`, with the two board rows blanked when there was no
+    board to read.  The zeros below exist ONLY to reach the two rows that do not
+    use them, and are replaced before anyone sees them: a zero must never leave
+    this function as a value."""
+    if m.get("cells", True):
+        return tc.rows(m, size, exit=exit, panned=panned)
+    blank = {g.name: g for g in no_cell(*BOARD_ROWS)}
+    return [blank.get(g.name, g)
+            for g in tc.rows(m | {"offboard_share": 0.0, "last_vs_cell": 0.0}, size, exit=exit, panned=panned)]
 
 
 def sampled_foreign(per_frame: list[dict], samples: int = 8) -> list[dict]:
@@ -538,11 +666,29 @@ def sample_frame(video: Path, at: float) -> Image.Image | None:
     return Image.frombytes("RGB", TILE, raw) if len(raw) == TILE[0] * TILE[1] * 3 else None
 
 
+def sim_text(x: float | None) -> str:
+    """A similarity for the strip: `n/m` when there was no cell to measure it against."""
+    return "n/m" if x is None else f"{x:.2f}"
+
+
+def cut_text(landed: bool | None) -> str:
+    """Whether the cut landed on its pin -- or that nobody could read it."""
+    return "not measured" if landed is None else ("landed" if landed else "MISSED")
+
+
 def strip_row(page: Image.Image, d: ImageDraw.ImageDraw, s: SegmentReport, video: Path,
               cells: Path, v: TakeVerdict, y: int) -> int:
-    """One segment's row: its START cell, its END cell, then SAMPLES frames of the take."""
-    page.paste(Image.open(cells / s.cell).convert("RGB").resize(TILE), (4, y))
-    d.text((6, y + 2), "START cell", fill="#ff0")
+    """One segment's row: its START cell, its END cell, then SAMPLES frames of the take.
+
+    The START cell is drawn only if it is there: a take rendered from the plate
+    alone has none, and the whole DQ run used to die here, on the report image,
+    AFTER every verdict had been measured (episode 4's bad-path run)."""
+    if (cells / s.cell).is_file():
+        page.paste(Image.open(cells / s.cell).convert("RGB").resize(TILE), (4, y))
+        d.text((6, y + 2), "START cell", fill="#ff0")
+    else:
+        d.rectangle((4, y, 4 + TILE[0], y + TILE[1]), outline="#555")
+        d.text((10, y + 2), "no cell", fill="#aaa")
     if s.target != s.cell and (cells / s.target).exists():
         page.paste(Image.open(cells / s.target).convert("RGB").resize(TILE), (4 + TILE[0] + PAD, y))
         d.text((6 + TILE[0] + PAD, y + 2), "END cell", fill="#ff0")
@@ -567,9 +713,9 @@ def strip(v: TakeVerdict, video: Path, cells: Path, out: Path) -> Path:
     d = ImageDraw.Draw(page)
     y = 6
     for s in v.segments:
-        d.text((8, y), f"segment {s.cell} -> {s.target}  {s.start_s:.2f}-{s.end_s:.2f}s  lead-in {s.lead_in_s}s"
-               f"  start {s.start_sim:.2f}  end {s.end_sim:.2f}  cut {'landed' if s.landed else 'MISSED'}"
-               f" ({s.offset:+d}f)", fill="#fff")
+        d.text((8, y), f"segment {s.cell or 'no cell'} -> {s.target or 'no cell'}  {s.start_s:.2f}-{s.end_s:.2f}s"
+               f"  lead-in {s.lead_in_s}s  start {sim_text(s.start_sim)}  end {sim_text(s.end_sim)}"
+               f"  cut {cut_text(s.landed)} ({s.offset:+d}f)", fill="#fff")
         y = strip_row(page, d, s, video, cells, v, y + 16)
     sparkline(d, 8, y, page.width - 16, 40, v.energy_q, v.frozen_spans, v.seconds)
     d.text((10, y + 42), f"motion energy per 1/4 s (line = STILL {motion_gate.STILL}); red = frozen spans", fill="#aaa")
