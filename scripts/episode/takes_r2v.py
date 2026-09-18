@@ -136,6 +136,17 @@ def people_staged(shots: list, cast: list[str]) -> list[str]:
     return seen[:MAX_FACES]
 
 
+def ref_name(book: Path, path: Path) -> str:
+    """How a record names a reference: the bare file name, as it always was, or
+    the book-relative path for a picture in the pack's per-entity folders
+    (`refs/characters/<id>/sheet.png`), where the bare name says nothing."""
+    path, refs = Path(path), Path(book) / "refs"
+    kinds = ("characters", "locations", "props")
+    if path.parent.parent.name in kinds and path.parent.parent.parent == refs:
+        return path.relative_to(book).as_posix()
+    return path.name
+
+
 def narrator_of(lines) -> str:
     """Whoever speaks the narration; the old constant when there is none.  It was
     `john_watson` for every book."""
@@ -390,7 +401,7 @@ def card(book: Path, episode: Episode, number: int, take: dict, measured: dict) 
     return {"index": first.index, "shots": take["shots"], "section": first.section, "setup": first.setup,
             "lane": "dialogue" if spoken else "narration", "workflow": BASE + " + anchors",
             "model": "MiniMax-H3 ref2va + Ref2V 8-step LoRA", "mode": mode_said(FROM_REFS),
-            "refs": [p.name for p in refs], "faces": faces, "ref_image_size": REF_IMAGE_SIZE,
+            "refs": [ref_name(book, p) for p in refs], "faces": faces, "ref_image_size": REF_IMAGE_SIZE,
             "anchors": anchors, "audio": [(p.name, a) for p, a in voice] or "silence",
             "width": W, "height": H, "fps": FPS, "placed_seconds": take["seconds"], "frames": take["frames"],
             "seconds": round(take["frames"] / FPS, 2), "steps": STEPS,

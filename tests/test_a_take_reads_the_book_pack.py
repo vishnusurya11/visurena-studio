@@ -108,3 +108,20 @@ def test_the_look_replaces_photoreal_in_the_take_line():
 def test_the_plan_carries_a_view_and_a_look():
     assert "view" in Shot.model_fields and Shot.model_fields["view"].default == ""
     assert "look" in Episode.model_fields and Episode.model_fields["look"].default == ""
+
+
+def test_a_pack_picture_is_recorded_by_its_book_path(tmp_path):
+    """Every sheet in the pack is called `sheet.png`: a bare name cannot say whose."""
+    book = _book(tmp_path)
+    sheet = book / "refs" / "characters" / "ogilvy" / "sheet.png"
+    assert takes_r2v.ref_name(book, sheet) == "refs/characters/ogilvy/sheet.png"
+
+
+def test_a_flat_picture_keeps_its_bare_name(tmp_path):
+    assert takes_r2v.ref_name(tmp_path, tmp_path / "refs" / "characters" / "char-x.png") == "char-x.png"
+    assert takes_r2v.ref_name(tmp_path, tmp_path / "boards" / "plates" / "plate_a.png") == "plate_a.png"
+
+
+def test_a_book_path_routes_back_to_the_book(tmp_path):
+    got = sq.picture_path(tmp_path / "boards", tmp_path, "refs/locations/ottershaw/reverse.png")
+    assert got == tmp_path / "refs" / "locations" / "ottershaw" / "reverse.png"

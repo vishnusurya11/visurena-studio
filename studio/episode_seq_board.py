@@ -445,6 +445,10 @@ def picture_path(boards: Path, book: Path, name: str) -> Path:
     is done HERE, once, because the alternative is the same three-way `if` copied
     into every reader -- and a reader that gets it wrong resolves to a file that
     does not exist, or worse, to a different one that does."""
+    if name.startswith("refs/"):
+        # THE BOOK'S PACK (2026-09-18): one folder per entity, so a record keeps
+        # the book-relative path -- every character's sheet is `sheet.png`.
+        return Path(book) / name
     if name.startswith("char-"):
         return Path(book) / "refs" / "characters" / name
     if name.startswith("plate_"):
