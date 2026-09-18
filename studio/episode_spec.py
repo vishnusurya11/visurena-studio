@@ -158,6 +158,14 @@ class Framed(BaseModel):
     crowd: str = ""
     """This panel's own background life, with a count and an activity.  A
     crowd named once for a location is averaged away over nine panels."""
+    still: bool = False
+    """THE BODY IN THIS SHOT DOES NOT MOVE -- a sleeper, a corpse, a man in a
+    faint.  MEASURED ep14 (2026-09-17): the dead man's hand flexed and spread
+    across a 6 s insert, because every block must carry a body-scale action and
+    the words that hold a body still are banned everywhere else.  They are
+    banned because they freeze a segment (0.77 frozen share against 0.47), and
+    a freeze is exactly what a body at rest wants.  Set it, and the motion
+    belongs to the light and the camera."""
 
     @model_validator(mode="after")
     def _the_drawer_reads_only_what_is(self) -> "Framed":

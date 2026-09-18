@@ -114,6 +114,28 @@ def faces_of(shots: list, cast: list[str] | None = None) -> list[str]:
     return seen[:MAX_FACES]
 
 
+def people_staged(shots: list, cast: list[str]) -> list[str]:
+    """Everyone a references-only take must stage: whoever has to READ, plus
+    whoever the shot's own words NAME, in first-appearance order.
+
+    OWNER 2026-09-17: a wide of Jefferson Hope's body staged no Hope, and a wide
+    of Holmes and Watson at the hearth staged neither, because `faces` means
+    "whose face must read" and a wide names nobody.  With a drawn cell that was
+    harmless -- the cell carried the men.  With references alone the men are only
+    in the take if their cards are."""
+    seen: list[str] = []
+    for shot in shots:
+        # WHO IS SHOWN, not who is mentioned: `named_in` reads the camera and the
+        # motion too, and "from Holmes's chair across the hearth" is where the
+        # camera STANDS -- staging his card there would put him in a shot the
+        # plan gives to Watson alone (ep14 T05).
+        shown = ro.people_in(" ".join([shot.frame or "", getattr(shot, "at_rest", "") or ""]), cast)
+        for who in list(getattr(shot, "faces", [])) + shown:
+            if who not in seen:
+                seen.append(who)
+    return seen[:MAX_FACES]
+
+
 def reference_list(book: Path, boards: Path, faces: list[str], setup: str,
                    segs: list[tuple[int, int]], ends: list[tuple[int, int]], strip: Path,
                    state: str = "", sizes: list[str] | None = None) -> list[Path]:
@@ -194,10 +216,15 @@ def refs_from_cards(book: Path, boards: Path, faces: list[str], setup: str,
     The exception is not a preference: a take with no cast sheet has nothing else
     to stage, and `graph_for` reads `paths[0]` before it counts."""
     refs = [sq.cast_sheet(book, who, setup, state) for who in faces]
-    where = place or sq.plates_in(boards) / f"plate_{setup}.png"
-    if refs and not sq.places_the_plate(sizes or []):
-        return refs
-    return refs + [where]
+    # THE PLACE IS ALWAYS STAGED HERE.  `places_the_plate` withholds the room from
+    # a take of nothing but tight cells, because beside a close-up CELL the room
+    # becomes the only whole picture the model can fall back on (ep02, 13 of 14
+    # foreign frames).  There is no cell here to be the tighter picture, and a
+    # close that stages no room was measured inventing one -- ep14's T04, T05,
+    # T06 and T22 put Holmes and Watson in a Gothic panelled hall.  OWNER
+    # 2026-09-17: "this needs location image too ... so you define the position
+    # relative to things in location".
+    return refs + [place or sq.plates_in(boards) / f"plate_{setup}.png"]
 
 
 def staged_facts(sizes: list[str], from_refs: bool, faces: list[str] | None = None) -> dict:
@@ -210,7 +237,7 @@ def staged_facts(sizes: list[str], from_refs: bool, faces: list[str] | None = No
     at the builder's own default, so every episode already built is told exactly
     what it was told before."""
     if from_refs:
-        return {"has_plate": sq.places_the_plate(sizes) or not faces, "cells_staged": False}
+        return {"has_plate": True, "cells_staged": False}
     return {"has_plate": sq.places_the_plate(sizes)}
 
 
@@ -314,6 +341,7 @@ def card(book: Path, episode: Episode, number: int, take: dict, measured: dict) 
     if FROM_REFS:
         ends, anchors = [], []
         where = location_picture(book, boards, episode.setups[first.setup], first.setup)
+        faces = people_staged(shots, sorted(physicals(book)))
         refs = refs_from_cards(book, boards, faces, first.setup, state, sizes, where)
     else:
         sheet = reference_strip(boards, episode, shots)

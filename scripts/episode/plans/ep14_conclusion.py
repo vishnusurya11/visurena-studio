@@ -64,7 +64,8 @@ SETUPS = {
                    "the far windows; the coal fire and the oil lamp are the only light and they come from the "
                    "left, low and warm, on the two faces, the chair backs and the carpet at the hearth, and "
                    "leave the far windows, the writing desk and the corners black"),
-        cast=["sherlock_holmes", "john_watson"], landmark="the white marble mantelpiece over the grate",
+        cast=["sherlock_holmes", "john_watson"], location="221b_baker_street",
+        landmark="the white marble mantelpiece over the grate",
         landmark_at="start", landmark_size="is half the height of the frame",
         route="from the hearth across the Turkey carpet to the writing desk under the windows",
         geometry=("The white marble mantelpiece and its burning grate hold the LEFT edge of the frame from "
@@ -96,7 +97,8 @@ SETUPS = {
                    "window in the centre of the far wall; the grey daylight through the tall window is the "
                    "only light and it comes from the far wall, low and cold, along the dusty boards, and "
                    "leaves the near corners, the ceiling and the wall beside the door black"),
-        cast=["sherlock_holmes"], landmark="the tall curtainless window in the far wall", landmark_at="far_end",
+        cast=["sherlock_holmes"], location="number_3_lauriston_gardens",
+        landmark="the tall curtainless window in the far wall", landmark_at="far_end",
         landmark_size="is half the height of the frame",
         route="from the doorway across the dusty boards to the tall window",
         geometry=("The tall curtainless window stands in the CENTRE of the far wall across the upper half of "
@@ -124,46 +126,41 @@ SETUPS = {
         outdoors=True, props=[]),
 }
 
-# (setup, size, faces, path, frame, motion, camera, at_rest, section)
+# (setup, size, faces, path, frame, motion, camera, at_rest, section[, still])
 S = [
     # 0 HOOK -- the cell at dawn
     ("cell_dawn", "wide", [], 0.2,
-     "Wide of the bare stone cell at dawn: Jefferson Hope in the long brownish driving coat lying stretched "
+     "Wide of the bare stone cell at dawn: the dead body of Jefferson Hope in the long brownish driving coat lying stretched "
      "on his back on the grey stone flags beside the plank bed, his hands open at his sides, the grey dawn "
      "falling from the small barred window high in the far wall in a pale square across him.",
-     "The camera pushes in on the flags across the whole shot, travelling a hand's breadth; the grey square "
-     "of dawn widens across the stones; dust turns in the window's light; the light climbs the edge of the "
-     "plank bed a hand's breadth.",
+     "The camera pushes in on the flags across the whole shot, travelling a hand's breadth; the body lies still and heavy on the stones with its weight settled into them; the grey square of dawn widens across the flags; dust turns in the window's light.",
      "at the iron-bound door at a standing man's eye, four long strides from him, a 35mm lens. The dawn "
      "comes from the TOP LEFT through the barred window and leaves the corners and the lower walls black",
      "Jefferson Hope lies across the CENTRE of the lower half of the frame on the flags, the height of a "
      "hand, in the pale square of dawn. The barred window stands at the TOP LEFT, the plank bed runs along "
      "the RIGHT edge and the corners are black.",
-     "hook"),
+     "hook", True),
     # 1 -- the placid smile
     ("cell_dawn", "close", ["jefferson_hope"], 0.5,
      "Close on Jefferson Hope's face lying on the grey stone flags, the eyes closed, the full black beard, a "
-     "placid smile on the lips, the grey dawn from the top left across the brow.",
-     "The camera tilts down across the whole shot, travelling a finger's breadth; the grey flags keep the "
-     "frame behind his head; the dawn light slides a finger's breadth down his brow; a strand of black hair "
-     "stirs on the stone.",
+     "slack jaw of a dead man, the grey dawn from the top left across the brow.",
+     "The camera tilts down across the whole shot, travelling a finger's breadth; the face lies still on the stone with the jaw slack and the eyes closed; the grey flags keep the frame behind his head; the dawn light slides a finger's breadth down his brow.",
      "over him at the height of a kneeling man's eye, an arm's length from his face, a 90mm lens. The dawn "
      "comes from the TOP LEFT onto his brow and leaves the flags beyond his head black",
      "Jefferson Hope's face fills the CENTRE of the frame, half the frame height, from the beard at the "
      "BOTTOM third to the black hair at the TOP edge, lit from the TOP LEFT. The grey flags lie behind his "
      "head and are black at the RIGHT edge.",
-     "setup"),
+     "setup", True),
     # 2 -- the open hand
     ("cell_dawn", "insert", [], 0.8,
-     "Insert on Jefferson Hope's bare brown hand lying open on the grey stone flags, the cuff of the brownish "
+     "Insert on the dead hand of Jefferson Hope, bare and brown, lying open and slack on the grey stone flags, the cuff of the brownish "
      "driving coat, the square of grey dawn light falling across the fingers.",
-     "The camera pans right across the whole shot, travelling a finger's breadth; the open hand keeps the "
-     "frame's centre; dust settles on the stone; the dawn light spreads a finger's breadth across the fingers.",
+     "The camera pans right across the whole shot, travelling a finger's breadth; the hand lies still and heavy on the stone with every finger keeping its place; dust settles on the flags; the dawn light spreads a finger's breadth across the knuckles.",
      "beside the plank bed at the height of the flags, an arm's length from the hand, a 90mm lens. The dawn "
      "comes from the TOP LEFT onto the fingers and leaves the flags beyond black",
      "The open hand lies at the CENTRE of the frame on the flags, the height of a hand, in the square of "
      "light. The coat's cuff comes in from the LEFT edge and the flags are black across the TOP third.",
-     "setup"),
+     "setup", True),
     # 3 -- the sitting-room
     ("sitting_room_evening", "wide", [], 0.1,
      "Wide of the sitting-room at 221B Baker Street in the evening: Sherlock Holmes in the bottle-green "
@@ -473,11 +470,14 @@ BEATS = {0: (0.6, 0.3), 2: (0.8, 0.3), 3: (0.6, 0.0), 5: (0.8, 0.0), 6: (0.8, 0.
 
 def build() -> dict:
     shots = []
-    for i, (setup, size, faces, path, frame, motion, camera, at_rest, section) in enumerate(S):
+    for i, row in enumerate(S):
+        setup, size, faces, path, frame, motion, camera, at_rest, section = row[:9]
+        still = bool(row[9]) if len(row) > 9 else False
         beat, coda = BEATS.get(i, (0.5, 0.0))
         shots.append(dict(index=i, section=section, setup=setup, size=size, faces=list(faces),
                           path=path, frame=frame, motion=motion, camera=camera, at_rest=at_rest,
-                          end="", changed="", beat_s=beat, coda_s=coda, turn=TURNS.get(i, ""), cuts=[]))
+                          end="", changed="", beat_s=beat, coda_s=coda, turn=TURNS.get(i, ""),
+                          still=still, cuts=[]))
     lines = [dict(index=k, kind=kind, speaker=who, text=text, shot=shot)
              for k, (kind, who, text, shot) in enumerate(LINES)]
     return dict(number=14, title="The Conclusion",
