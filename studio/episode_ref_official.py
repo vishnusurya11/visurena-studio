@@ -64,12 +64,35 @@ MAX_PICTURES = 9
 """`MiniMaxH3ReferenceToVideo.ref_images` is an Autogrow with min=0, max=9."""
 
 
+DISPLAY: dict[str, str] = {}
+"""A book's declared display names (refs.json `display`), set per run.  A second
+book's ids are not names -- `unnamed_first_person_narrator` title-cased into the
+prompt as "Unnamed First Person Narrator".  Empty is the old behaviour."""
+WOMEN: set[str] = set()
+"""Who the builder calls a woman (refs.json `gender`), set per run.  Every
+subject used to be "this man" and every speaker "His mouth"."""
+
+
 def name_of(who: str) -> str:
-    return who.replace("_", " ").title()
+    return DISPLAY.get(who) or who.replace("_", " ").title()
 
 
 def surname(who: str) -> str:
+    if who in DISPLAY:
+        return DISPLAY[who].split()[-1]
     return who.split("_")[-1].title()
+
+
+def noun(who: str) -> str:
+    return "woman" if who in WOMEN else "man"
+
+
+def possessive(who: str) -> str:
+    return "Her" if who in WOMEN else "His"
+
+
+def objective(who: str) -> str:
+    return "her" if who in WOMEN else "him"
 
 
 def stamp(seconds: float) -> str:
@@ -477,7 +500,7 @@ def subjects(faces: list[str], physical: dict[str, str], described: str, segs: l
     # and framing, re-rendered into the room (matching no reference pixel-wise,
     # best 0.118).  This is OWNER 5.16's plate fix, owed to people all along.
     out = [f"<Subject {k}> is {name_of(who)} in <Picture {k}>: {physical.get(who, '')} "
-           f"<Picture {k}> defines this man alone; {framing_tail}".rstrip()
+           f"<Picture {k}> defines this {noun(who)} alone; {framing_tail}".rstrip()
            for k, who in enumerate(faces, start=1)]
     if plate is not None:
         out.append(f"<Subject {plate}> is the location in <Picture {plate}>: {described} <Picture {plate}> "
@@ -510,9 +533,9 @@ def retention(faces: list[str], segs: list[dict], cells: dict, strip: int, ends:
     out = []
     for k, who in enumerate(faces, start=1):
         seen = [i for i, seg in enumerate(segs, start=1) if people_in(seg["frame"], [who])] or [1]
-        out.append(f"<Subject {k}> (the man in {shot_list(seen)}): partially_preserved - the face, hair, "
-                   f"build and clothes of <Picture {k}> carry into every shot that shows him; "
-                   f"<Picture {k}> serves as a definition of the man and {framing_tail}")
+        out.append(f"<Subject {k}> (the {noun(who)} in {shot_list(seen)}): partially_preserved - the face, "
+                   f"hair, build and clothes of <Picture {k}> carry into every shot that shows {objective(who)}; "
+                   f"<Picture {k}> serves as a definition of the {noun(who)} and {framing_tail}")
     if plate is not None:
         out.append(f"<Subject {plate}> (the location behind {shot_list(every)}): partially_preserved - the "
                    f"materials, furniture and light of <Picture {plate}> carry into every shot behind the "
@@ -576,7 +599,7 @@ def voice_events(shot_lines: list[Line], at: dict, offset: float, ids: dict, fac
                            f"while {action}.")
             continue
         out.append(f"{speaker_intro(line.speaker, ids[line.speaker], physical.get(line.speaker, ''), seen, faces)} "
-                   f"<d>[English] {line.text}</d> His mouth shapes every syllable as the line is heard "
+                   f"<d>[English] {line.text}</d> {possessive(line.speaker)} mouth shapes every syllable as the line is heard "
                    f"and closes on the last word.")
         seen.add(line.speaker)
     return " ".join(out)

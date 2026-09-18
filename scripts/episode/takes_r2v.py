@@ -26,7 +26,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 
 from studio import approval, canvas, episode_board as board, episode_home, episode_ref_official as ro, episode_ref_prompt as rp
-from studio import house_style
+from studio import house_style, pack_refs
 from studio import plan_gates
 from studio import episode_seq_board as sq
 from studio import episode_takes as tk
@@ -136,6 +136,26 @@ def people_staged(shots: list, cast: list[str]) -> list[str]:
     return seen[:MAX_FACES]
 
 
+def narrator_of(lines) -> str:
+    """Whoever speaks the narration; the old constant when there is none.  It was
+    `john_watson` for every book."""
+    return next((l.speaker for l in lines if l.kind == "narration"), NARRATOR)
+
+
+def adopt_names(rows: list[dict]) -> None:
+    """The book's declared display names and women, for the prompt builder.  A
+    row with no `display` keeps its title-cased id; no rows restores the default."""
+    ro.DISPLAY.clear()
+    ro.WOMEN.clear()
+    for r in rows:
+        if r.get("kind") != "character":
+            continue
+        if r.get("display"):
+            ro.DISPLAY[r["entity_id"]] = r["display"]
+        if r.get("gender") == "female":
+            ro.WOMEN.add(r["entity_id"])
+
+
 def reference_list(book: Path, boards: Path, faces: list[str], setup: str,
                    segs: list[tuple[int, int]], ends: list[tuple[int, int]], strip: Path,
                    state: str = "", sizes: list[str] | None = None) -> list[Path]:
@@ -185,7 +205,7 @@ the normal path.
 AND THE PLATE IS ALWAYS STAGED here -- see `refs_from_cards`."""
 
 
-def location_picture(book: Path, boards: Path, setup, name: str) -> Path:
+def location_picture(book: Path, boards: Path, setup, name: str, shot=None) -> Path:
     """The picture that says WHERE: the book's own location when the setup names
     one, else this episode's plate of the same place.
 
@@ -194,6 +214,11 @@ def location_picture(book: Path, boards: Path, setup, name: str) -> Path:
     named = getattr(setup, "location", "") or ""
     if not named:
         return sq.plates_in(boards) / f"plate_{name}.png"
+    # THE PACK LAYOUT (2026-09-18): a folder of views per location, and the view
+    # is chosen by the shot's size, because the take opens at its framing.
+    if (Path(book) / "refs" / "locations" / named).is_dir():
+        return pack_refs.location_view(book, named, getattr(shot, "size", "wide"),
+                                       getattr(shot, "view", "") or "")
     path = Path(book) / "refs" / "locations" / f"loc-{named}.png"
     if not path.exists():
         raise SystemExit(f"setup {name!r} names location {named!r}; {path.name} is not on disk")
@@ -340,7 +365,7 @@ def card(book: Path, episode: Episode, number: int, take: dict, measured: dict) 
     state = episode.setups[first.setup].state
     if FROM_REFS:
         ends, anchors = [], []
-        where = location_picture(book, boards, episode.setups[first.setup], first.setup)
+        where = location_picture(book, boards, episode.setups[first.setup], first.setup, first)
         faces = people_staged(shots, sorted(physicals(book)))
         refs = refs_from_cards(book, boards, faces, first.setup, state, sizes, where)
     else:
@@ -360,7 +385,7 @@ def card(book: Path, episode: Episode, number: int, take: dict, measured: dict) 
              for l in spoken]
     setup = episode.setups[first.setup]
     prompt = ro.build(shots, take["placed"], lines, at, take["frames"], faces, physicals(book),
-                      setup.described, NARRATOR, ends=end_numbers(segs, ends), setup=setup,
+                      setup.described, narrator_of(episode.lines), ends=end_numbers(segs, ends), setup=setup,
                       refs=len(refs), fps=FPS, **staged_facts(sizes, FROM_REFS, faces))
     return {"index": first.index, "shots": take["shots"], "section": first.section, "setup": first.setup,
             "lane": "dialogue" if spoken else "narration", "workflow": BASE + " + anchors",
@@ -680,6 +705,9 @@ def opened(book_id: str, number: int):
     # here.  Episode 8 was drawn and rendered saying "1881 London" over an
     # 1847 Utah desert: `Episode.palette` reached the location plate alone.
     house_style.adopt(episode.where, episode.light)
+    house_style.adopt_look(getattr(episode, "look", ""))
+    adopt_names(episode_home.read_json(book / "refs" / "refs.json").get("refs", [])
+                if (book / "refs" / "refs.json").exists() else [])
     # And the plan's light and authoring floors, before any GPU second: a take
     # prompt is built from the plan, and episode 9's were built from one whose
     # first-frame prose was a quarter of ep04-08's under a colour-list style line.

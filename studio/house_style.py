@@ -99,6 +99,11 @@ INVENTORY_ITEMS = 3
 a colour inventory, whatever the nouns."""
 
 _where, _light = HOUSE_WHERE, HOUSE_LIGHT
+_look = ""
+"""The book's own look for a RENDERED take, when it is not photoreal.  The War
+of the Worlds pack is drawn in an angular stylised 3D look (Krea2 + the
+cinematic artstyle LoRA); a take told "Photoreal live-action" over those
+references is told to be something its pictures are not.  Empty keeps LIVE."""
 
 
 # ---- the run declares its world ------------------------------------------------
@@ -139,8 +144,16 @@ def stills(setup=None) -> str:
     return STILLS.format(where=_where, light=light_for(setup))
 
 
+def adopt_look(look: str) -> None:
+    """Declare the book's look for rendered takes; empty puts `LIVE` back."""
+    global _look
+    _look = _clause(look)
+
+
 def live(setup=None) -> str:
     """The style line for a RENDERED take; with a setup, under ITS light."""
+    if _look:
+        return f"{_look}, {_where}, {light_for(setup)}."
     return LIVE.format(where=_where, light=light_for(setup))
 
 

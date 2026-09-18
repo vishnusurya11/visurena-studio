@@ -74,7 +74,10 @@ def cast_sheet(book, who: str, setup: str, state: str = ""):
     for name in (f"char-{who}_{state}.png" if state else "", f"char-{who}_{setup}.png"):
         if name and (chars / name).exists():
             return chars / name
-    return chars / f"char-{who}.png"
+    # THE BOOK'S PACK (2026-09-18): one sheet per character under its own folder,
+    # wardrobe states said in words.  Only when no card and no bust is drawn.
+    bust, sheet = chars / f"char-{who}.png", chars / who / "sheet.png"
+    return sheet if sheet.exists() and not bust.exists() else bust
 
 
 WIDE_ENOUGH = {"medium", "full", "wide"}

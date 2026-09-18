@@ -158,6 +158,11 @@ class Framed(BaseModel):
     crowd: str = ""
     """This panel's own background life, with a count and an activity.  A
     crowd named once for a location is averaged away over nine panels."""
+    view: str = ""
+    """The location VIEW this shot opens on (`refs/locations/<id>/<view>.png`),
+    for a book drawn with the reference pack.  Empty lets the shot's size choose
+    (`studio.pack_refs.view_for`).  A references-only take opens at its location
+    picture's framing, so the view is the shot's first framing."""
     still: bool = False
     """THE BODY IN THIS SHOT DOES NOT MOVE -- a sleeper, a corpse, a man in a
     faint.  MEASURED ep14 (2026-09-17): the dead man's hand flexed and spread
@@ -371,6 +376,8 @@ class Episode(BaseModel):
 
     Empty by default, so an episode that says nothing keeps the book's palette
     and the seven already built are untouched."""
+    look: str = ""
+    """The book's own rendered look, when it is not photoreal (`house_style.adopt_look`)."""
     aspect: Literal["9:16", "1:1"] = canvas.DEFAULT
     """The delivery shape, and the ONE place it is declared (`studio/canvas.py`).
 
