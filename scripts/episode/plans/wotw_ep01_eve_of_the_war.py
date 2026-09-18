@@ -27,7 +27,7 @@ OUT = Path(r"D:\Projects\KingdomOfViSuReNa\alpha\visurena_studio"
 
 WHERE = "Surrey, 1894"
 LIGHT = "low lantern light, deep black shadow"
-LOOK = "Angular stylised 3D animation, painterly brush-stroke texture, cinematic"
+LOOK = "Angular stylised 3D animation, brush-stroke texture"
 
 NARR = "the Narrator in the grey herringbone tweed suit and straw boater"
 OGIL = "Ogilvy in the ochre tweed Inverness cape, black velvet smoking cap and steel spectacles"
@@ -443,27 +443,27 @@ S = [
 N, O, W = "unnamed_first_person_narrator", "ogilvy", "narrators_wife"
 LINES = [
     ("narration", N, "No one would have believed it, in those last years of the century. Our world was being watched.", 0),
-    ("narration", N, "Across the gulf of space, minds vast and cool looked on our green Earth with envy, and planned.", 1),
-    ("narration", N, "Then, one summer night, Lavelle of Java wired the news of a huge flame bursting out of Mars.", 2),
-    ("narration", N, "Men went about their little affairs, serene and sure. I was busy writing essays on moral progress.", 3),
+    ("narration", N, "Across the gulf of space, minds vast and cool watched our green Earth with envy.", 1),
+    ("narration", N, "Then Lavelle of Java wired news of a huge flame bursting out of Mars.", 2),
+    ("narration", N, "Men went about their little affairs. I was busy writing essays on moral progress.", 3),
     ("narration", N, "I might never have heard of it, but for Ogilvy, the astronomer at Ottershaw. He was wild.", 4),
     ("dialogue", O, "Come and look. It came out of Mars like a shot from a gun.", 5),
-    ("narration", N, "I still remember that vigil: the black dome, the lantern low in the corner, the clockwork ticking.", 6),
+    ("narration", N, "I remember that vigil: the black dome, the lantern low, the clockwork ticking.", 6),
     ("narration", N, "Through the glass: deep blue, and in the middle of it the little planet, swimming.", 7),
-    ("narration", N, "It seemed so small, so bright and silvery. Forty million miles of darkness lay between us.", 8),
-    ("narration", N, "Ogilvy moved about in the dark behind me, unseen but heard, as the chronometer ran toward midnight.", 9),
+    ("narration", N, "So small, so bright. Forty million miles of darkness lay between us.", 8),
+    ("narration", N, "Ogilvy moved about in the dark behind me, as the chronometer ran toward midnight.", 9),
     # shot 10: silent -- the flash
     ("dialogue", N, "Ogilvy! A red flash, just now, at the edge of it!", 11),
     ("narration", N, "He took the eyepiece at once, and cried out at the plume of gas.", 12),
     ("narration", N, "I felt my way to the siphon, green and crimson swimming before my eyes.", 13),
-    ("narration", N, "I never dreamed of it then. That night, a second missile left Mars, flying straight for us.", 14),
+    ("narration", N, "I never dreamed of it. That night a second missile left Mars, flying for us.", 14),
     ("narration", N, "At one o'clock he gave up the watch, and we lit the lantern.", 15),
     ("dialogue", O, "The chances against anything manlike on Mars are a million to one.", 16),
     ("narration", N, "We walked down to his house. Below us, Ottershaw and Chertsey slept in peace.", 17),
     ("narration", N, "For ten nights the flames came, and the papers joked about volcanoes on Mars.", 18),
     ("narration", N, "One warm night, I took my wife out walking under the stars.", 19),
-    ("narration", N, "I showed her the Zodiac, and Mars, a bright dot creeping overhead.", 20),
-    ("narration", N, "Lights burned in upper windows. Far off, the shunting trains rang, softened into music.", 21),
+    ("narration", N, "I showed her the Zodiac, and Mars creeping overhead.", 20),
+    ("narration", N, "Lights burned in upper windows. Far off, trains rang, soft as music.", 21),
     ("dialogue", W, "Look, dear, the signal lights. Red and green and yellow. So bright.", 22),
     # shot 23: silent -- the lights over the valley
 ]
@@ -481,8 +481,8 @@ TURNS = {11: "a quiet vigil -> the first sign seen",
          22: "danger in the sky -> safe and tranquil at home"}
 
 # (beat_s, coda_s) by shot; every other shot is 0.5 / 0.0
-BEATS = {0: (0.8, 0.3), 1: (0.8, 0.0), 2: (0.8, 0.0), 4: (0.8, 0.0), 6: (0.8, 0.3), 7: (0.8, 0.0), 8: (0.6, 0.0), 10: (1.5, 3.0), 11: (1.0, 0.0), 14: (0.8, 0.3),
-         16: (1.0, 0.0), 21: (1.0, 0.0), 22: (1.0, 0.6), 23: (1.0, 2.0)}
+BEATS = {0: (0.8, 0.3), 1: (0.5, 0.0), 2: (0.5, 0.0), 3: (0.8, 0.0), 4: (0.8, 0.0), 5: (1.0, 0.0), 6: (0.8, 0.0), 7: (1.2, 0.0), 8: (0.5, 0.0), 9: (0.8, 0.0), 10: (1.5, 4.0), 11: (1.0, 0.0), 14: (0.5, 0.3),
+         16: (1.0, 0.0), 21: (1.0, 0.0), 22: (1.0, 0.0), 23: (1.0, 1.2)}
 
 
 def build() -> dict:
