@@ -272,6 +272,15 @@ class Setup(BaseModel):
     relation restated as WHICH FRAME EDGE at WHAT APPARENT SIZE with what
     between.  "The horse ahead of the wheel" drew a horse level with a wheel
     three times; relational prepositions are the documented weak spot."""
+    location: str = ""
+    """The BOOK's own location picture for this place, by entity id
+    (`221b_baker_street` -> `refs/locations/loc-221b_baker_street.png`).
+
+    OWNER 2026-09-17: the thirteen locations were drawn once for the whole
+    series; the per-episode plate is a fresh drawing of the same room, and
+    episode 14's rooms drifted take to take because each take was given one of
+    those instead of the book's. Empty means this place has no canonical
+    picture and the episode's plate stands in."""
     crowd: str = ""
     """The background life of this place, as a count and an activity ("eight
     or nine men in top hats two deep at the counter, a barman drawing a

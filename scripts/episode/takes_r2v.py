@@ -163,8 +163,24 @@ the normal path.
 AND THE PLATE IS ALWAYS STAGED here -- see `refs_from_cards`."""
 
 
+def location_picture(book: Path, boards: Path, setup, name: str) -> Path:
+    """The picture that says WHERE: the book's own location when the setup names
+    one, else this episode's plate of the same place.
+
+    OWNER 2026-09-17: "use the same location references refs/locations". They are
+    drawn once for the series, so the room is the same room in every episode."""
+    named = getattr(setup, "location", "") or ""
+    if not named:
+        return sq.plates_in(boards) / f"plate_{name}.png"
+    path = Path(book) / "refs" / "locations" / f"loc-{named}.png"
+    if not path.exists():
+        raise SystemExit(f"setup {name!r} names location {named!r}; {path.name} is not on disk")
+    return path
+
+
 def refs_from_cards(book: Path, boards: Path, faces: list[str], setup: str,
-                    state: str = "", sizes: list[str] | None = None) -> list[Path]:
+                    state: str = "", sizes: list[str] | None = None,
+                    place: Path | None = None) -> list[Path]:
     """FROM_REFS: this take's cast sheets, and its plate where the take is wide
     enough to place one -- or where it has nothing else to stage.
 
@@ -178,9 +194,10 @@ def refs_from_cards(book: Path, boards: Path, faces: list[str], setup: str,
     The exception is not a preference: a take with no cast sheet has nothing else
     to stage, and `graph_for` reads `paths[0]` before it counts."""
     refs = [sq.cast_sheet(book, who, setup, state) for who in faces]
+    where = place or sq.plates_in(boards) / f"plate_{setup}.png"
     if refs and not sq.places_the_plate(sizes or []):
         return refs
-    return refs + [sq.plates_in(boards) / f"plate_{setup}.png"]
+    return refs + [where]
 
 
 def staged_facts(sizes: list[str], from_refs: bool, faces: list[str] | None = None) -> dict:
@@ -296,7 +313,8 @@ def card(book: Path, episode: Episode, number: int, take: dict, measured: dict) 
     state = episode.setups[first.setup].state
     if FROM_REFS:
         ends, anchors = [], []
-        refs = refs_from_cards(book, boards, faces, first.setup, state, sizes)
+        where = location_picture(book, boards, episode.setups[first.setup], first.setup)
+        refs = refs_from_cards(book, boards, faces, first.setup, state, sizes, where)
     else:
         sheet = reference_strip(boards, episode, shots)
         ends = end_cells(sq.cells_in(boards), segs, seg_sizes(shots), seg_motions(shots))
