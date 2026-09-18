@@ -131,9 +131,14 @@ S = [
      "Wide of the bare stone cell at dawn: Jefferson Hope in the long brownish driving coat lying stretched "
      "on his back on the grey stone flags beside the plank bed, his hands open at his sides, the grey dawn "
      "falling from the small barred window high in the far wall in a pale square across him.",
-     "The camera pushes in on the flags across the whole shot, travelling a hand's breadth; the grey square "
-     "of dawn widens across the stones; dust turns in the window's light; the light climbs the edge of the "
-     "plank bed a hand's breadth.",
+     # A PUSH IS THE ONE MOVE THAT CHANGES THE SHOT'S SIZE, and the size is what
+     # the cut is built from.  Measured on this reel: the push ran until an
+     # eight-second WIDE of the whole cell ended as a close-up of the dead face,
+     # which is shot 1's framing, so shot 0 cut into shot 1 on the same picture.
+     # A pan holds the wide for its whole length.
+     "The camera pans right across the cell over the whole shot, travelling a hand's breadth; the grey "
+     "square of dawn widens across the stones; dust turns in the window's light; the light climbs the edge "
+     "of the plank bed a hand's breadth.",
      "at the iron-bound door at a standing man's eye, four long strides from him, a 35mm lens. The dawn "
      "comes from the TOP LEFT through the barred window and leaves the corners and the lower walls black",
      "Jefferson Hope lies across the CENTRE of the lower half of the frame on the flags, the height of a "
@@ -224,8 +229,16 @@ S = [
     ("garden_path_morning", "insert", [], 0.1,
      "Insert on two narrow wheel ruts pressed deep in the mud of the roadway at the kerb, grey water "
      "standing in them, the edge of the brick kerbstone at the top of frame.",
-     "The camera tilts up across the whole shot, travelling a finger's breadth; the two ruts keep the "
-     "frame's centre; a drop falls into the water in one rut; the ripple spreads a finger's breadth.",
+     # A PAN, BECAUSE THE DIRECTION IS THE ONLY PART OF A MOVE THAT IS OBEYED.
+     # This read "tilts up ... travelling a finger's breadth", and the take
+     # travelled until it was looking at the skyline -- where the cell holds
+     # nothing, so the model invented a house, and the house it invented was a
+     # tidy occupied terrace that contradicts shot 9's boarded-up one in the
+     # same setup.  A camera pointed down at the roadway can overrun as far as
+     # it likes and still only find more roadway.
+     "The camera pans right along the kerb across the whole shot, travelling a finger's breadth; the two "
+     "ruts keep the frame's centre; a drop falls into the water in one rut; the ripple spreads a finger's "
+     "breadth.",
      "over the roadway at the height of a stooping man's eye, an arm's length from the ruts, a 90mm lens. "
      "The grey light comes from the LEFT along the ruts and leaves their far walls black",
      "The two narrow ruts run from the BOTTOM edge up the CENTRE of the frame a hand's width apart with grey "
@@ -236,9 +249,20 @@ S = [
      "Insert on the yellow clay path with two lines of bootprints side by side: large deep prints set a "
      "long stride apart, and beside them small narrow prints of a well-made pointed boot, puddles in the "
      "clay.",
-     "The camera tilts up the path across the whole shot, travelling a finger's breadth; the two lines of "
-     "prints keep the frame's centre; water seeps into the deepest print; a drop falls into a puddle.",
-     "over the path at the height of a stooping man's eye, an arm's length from the prints, a 90mm lens. "
+     # The same fault and the same fix as shot 7: tilting UP off a ground-level
+     # insert aims the overrun at the skyline.  Panning across the prints keeps
+     # the clay filling the frame however far the move runs, and the house is
+     # shot 9's to reveal.
+     "The camera pans left across the line of prints over the whole shot, travelling a finger's breadth; "
+     "the two lines of prints keep the frame's centre; water seeps into the deepest print; a drop falls "
+     "into a puddle.",
+     # STRAIGHT DOWN, because the pan alone did not save this one.  At a
+     # stooping man's eye the lens still looks ALONG the path, so a sideways
+     # overrun swept across the grass and arrived at the house anyway -- and
+     # invented the wrong house, an occupied terrace against shot 9's boarded-up
+     # one.  Pointed at the ground, every direction of overrun finds more clay.
+     "directly above the path looking straight down at the clay, an arm's length from the prints, a 90mm "
+     "lens. "
      "The grey light comes from the LEFT across the prints and leaves their heels black",
      "The two lines of prints run from the BOTTOM edge up the CENTRE of the frame, the large ones at the "
      "LEFT third a stride apart and the small ones at the RIGHT third, each print the height of a finger. "
@@ -402,8 +426,12 @@ S = [
      # `crumples` and `tightens` are finger work, which ACTS excludes by name.
      # The whole fist leaving the chair arm is the same beat at body scale, and
      # `lifts` is in ACTS.
-     "The camera tilts up across the whole shot, travelling a finger's breadth; the fist keeps the frame's "
-     "centre; the paper's edge crumples in the fingers; the fist lifts off the chair arm a hand's breadth.",
+     # THE ACTION LEADS, because this take came back frozen for its first 1.75 s
+     # (DQ frozen-at-start HARD).  The lift was the last clause of four, so the
+     # model had three clauses' worth of nothing to do before it began.
+     "The camera tilts up across the whole shot, travelling a finger's breadth, and the fist lifts off the "
+     "chair arm a hand's breadth from the first frame; the paper's edge crumples in the fingers; the fist "
+     "keeps the frame's centre.",
      "beside the chair arm at the height of his chest, an arm's length from the fist, a 90mm lens. The fire "
      "comes from the LEFT onto the knuckles and leaves the chair's far side black",
      "The fist and the crumpled paper fill the CENTRE of the frame, the height of the middle third, on the "
