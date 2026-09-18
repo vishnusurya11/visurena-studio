@@ -104,25 +104,29 @@ class TestTheSwitch:
 class TestTheReferences:
     def test_they_are_the_cast_sheets_then_the_plate(self, tmp_path):
         book, boards = world(tmp_path)
-        refs = tr.refs_from_cards(book, boards, ["a"], "lab", "indoor")
+        refs = tr.refs_from_cards(book, boards, ["a"], "lab", "indoor", ["medium"])
         assert [p.name for p in refs] == ["char-a.png", "plate_lab.png"]
 
-    def test_the_plate_is_staged_for_a_take_of_nothing_but_closes(self, tmp_path):
-        """`places_the_plate` is not consulted: there is no cell for it to judge,
-        and a close-only take would otherwise stage faces alone."""
+    def test_a_take_of_nothing_but_closes_stages_its_face_alone(self, tmp_path):
+        """MEASURED on ep14's first references-only run: staging the plate on a
+        tight take put the room at frame 0 -- T20 (medium close) opened on it at
+        cosine 0.999 and dissolved into an invented library, T21 (insert) opened
+        on it and hard-cut into the shot at frame 14. That is episode 2's fault
+        with no cell in it, and `places_the_plate` is the rule that answers it."""
         book, boards = world(tmp_path)
-        refs = tr.refs_from_cards(book, boards, ["a"], "lab")
-        assert (boards / "plates" / "plate_lab.png") in refs
+        refs = tr.refs_from_cards(book, boards, ["a"], "lab", "", ["close", "insert"])
+        assert [p.name for p in refs] == ["char-a.png"]
 
     def test_a_take_with_no_readable_face_still_stages_one_picture(self, tmp_path):
         """An insert take declares no face.  Zero references is an IndexError in
         `graph_for`, which reads `paths[0]` before it counts anything."""
         book, boards = world(tmp_path)
-        assert [p.name for p in tr.refs_from_cards(book, boards, [], "lab")] == ["plate_lab.png"]
+        assert [p.name for p in tr.refs_from_cards(book, boards, [], "lab", "", ["insert"])] == \
+            ["plate_lab.png"]
 
     def test_the_faces_come_before_the_plate_in_first_appearance_order(self, tmp_path):
         book, boards = world(tmp_path)
-        refs = tr.refs_from_cards(book, boards, ["b", "a"], "lab")
+        refs = tr.refs_from_cards(book, boards, ["b", "a"], "lab", "", ["wide"])
         assert [p.name for p in refs] == ["char-b.png", "char-a.png", "plate_lab.png"]
 
 
@@ -134,7 +138,8 @@ class TestTheCard:
                             lambda *a: pytest.fail("the strip opens every cell; there are none"))
         card = tr.card(book, plan_episode(), 1, take_of_shot_zero(), MEASURED)
         assert card["anchors"] == []
-        assert card["refs"] == ["char-a.png", "plate_lab.png"]
+        # the fixture shot is a CLOSE, so its plate is dropped (see refs_from_cards)
+        assert card["refs"] == ["char-a.png"]
 
     def test_it_does_not_refuse_the_cells_that_were_never_drawn(self, tmp_path, monkeypatch, built):
         """The missing-cell refusal is the gate this mode exists to walk past."""
@@ -171,8 +176,17 @@ class TestTheCard:
 
 class TestWhatThePromptIsTold:
     def test_the_plate_is_staged_and_the_cells_are_not(self):
-        assert tr.staged_facts(["close", "insert"], from_refs=True) == {"has_plate": True,
-                                                                       "cells_staged": False}
+        assert tr.staged_facts(["medium"], from_refs=True, faces=["a"]) == {"has_plate": True,
+                                                                           "cells_staged": False}
+
+    def test_a_tight_take_with_a_face_is_told_its_plate_is_not_staged(self):
+        assert tr.staged_facts(["close"], from_refs=True, faces=["a"]) == {"has_plate": False,
+                                                                          "cells_staged": False}
+
+    def test_a_faceless_take_is_told_its_plate_is_staged(self):
+        """It is: `refs_from_cards` keeps it, because nothing else would be."""
+        assert tr.staged_facts(["insert"], from_refs=True, faces=[]) == {"has_plate": True,
+                                                                        "cells_staged": False}
 
     def test_the_normal_path_still_asks_whether_a_cell_places_the_plate(self):
         """And says nothing about cells: `build`'s own default is the staged one,
@@ -184,8 +198,8 @@ class TestWhatThePromptIsTold:
         book, _ = world(tmp_path)
         monkeypatch.setattr(tr, "FROM_REFS", True)
         tr.card(book, plan_episode(), 1, take_of_shot_zero(), MEASURED)
-        assert built["has_plate"] is True and built["cells_staged"] is False
-        assert built["refs"] == 2
+        assert built["has_plate"] is False and built["cells_staged"] is False
+        assert built["refs"] == 1
 
 
 class TestThePins:

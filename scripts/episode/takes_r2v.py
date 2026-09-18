@@ -164,29 +164,36 @@ AND THE PLATE IS ALWAYS STAGED here -- see `refs_from_cards`."""
 
 
 def refs_from_cards(book: Path, boards: Path, faces: list[str], setup: str,
-                    state: str = "") -> list[Path]:
-    """FROM_REFS: this take's cast sheets, then its plate.  ALWAYS its plate.
+                    state: str = "", sizes: list[str] | None = None) -> list[Path]:
+    """FROM_REFS: this take's cast sheets, and its plate where the take is wide
+    enough to place one -- or where it has nothing else to stage.
 
-    `places_the_plate` is not consulted, and that is deliberate.  Its rule -- a
-    take of nothing but tight cells does not get the plate -- answers a fault
-    that NEEDS cells to happen: the plate leaked into episode 2's closes because
-    it was the only WHOLE picture beside a close-up cell (13 of 14 foreign
-    frames).  With no cell staged at all there is no such competition, and
-    obeying the rule here would leave a close-only take with faces alone and an
-    insert take that declares no readable face with ZERO references -- which
-    `graph_for` cannot stage, since it reads `paths[0]` before it counts."""
+    MEASURED on ep14's first references-only run: staging the plate on every take
+    put the room at frame 0 of a medium close (T20, cosine 0.999, then a dissolve
+    into an invented library) and of an insert (T21, 0.999, hard cut at frame 14).
+    That is episode 2's fault without a cell in it: the plate stops being a
+    definition and becomes the only whole picture the model can fall back on.
+    `places_the_plate` answers exactly this, so it is consulted here too.
+
+    The exception is not a preference: a take with no cast sheet has nothing else
+    to stage, and `graph_for` reads `paths[0]` before it counts."""
     refs = [sq.cast_sheet(book, who, setup, state) for who in faces]
+    if refs and not sq.places_the_plate(sizes or []):
+        return refs
     return refs + [sq.plates_in(boards) / f"plate_{setup}.png"]
 
 
-def staged_facts(sizes: list[str], from_refs: bool) -> dict:
+def staged_facts(sizes: list[str], from_refs: bool, faces: list[str] | None = None) -> dict:
     """What `episode_ref_official.build` is told about the pictures it may cite.
 
-    FROM_REFS states both: the plate IS staged, and no cell is.  The normal path
-    states only the plate and leaves `cells_staged` at the builder's own default,
-    so every episode already built is told exactly what it was told before."""
+    FROM_REFS says no cell is staged; whether the plate is staged follows the same
+    rule as the normal path (`places_the_plate`), with the one exception
+    `refs_from_cards` makes: a take with no cast sheet keeps its plate because it
+    would otherwise stage nothing at all.  The normal path leaves `cells_staged`
+    at the builder's own default, so every episode already built is told exactly
+    what it was told before."""
     if from_refs:
-        return {"has_plate": True, "cells_staged": False}
+        return {"has_plate": sq.places_the_plate(sizes) or not faces, "cells_staged": False}
     return {"has_plate": sq.places_the_plate(sizes)}
 
 
@@ -289,7 +296,7 @@ def card(book: Path, episode: Episode, number: int, take: dict, measured: dict) 
     state = episode.setups[first.setup].state
     if FROM_REFS:
         ends, anchors = [], []
-        refs = refs_from_cards(book, boards, faces, first.setup, state)
+        refs = refs_from_cards(book, boards, faces, first.setup, state, sizes)
     else:
         sheet = reference_strip(boards, episode, shots)
         ends = end_cells(sq.cells_in(boards), segs, seg_sizes(shots), seg_motions(shots))
@@ -308,7 +315,7 @@ def card(book: Path, episode: Episode, number: int, take: dict, measured: dict) 
     setup = episode.setups[first.setup]
     prompt = ro.build(shots, take["placed"], lines, at, take["frames"], faces, physicals(book),
                       setup.described, NARRATOR, ends=end_numbers(segs, ends), setup=setup,
-                      refs=len(refs), fps=FPS, **staged_facts(sizes, FROM_REFS))
+                      refs=len(refs), fps=FPS, **staged_facts(sizes, FROM_REFS, faces))
     return {"index": first.index, "shots": take["shots"], "section": first.section, "setup": first.setup,
             "lane": "dialogue" if spoken else "narration", "workflow": BASE + " + anchors",
             "model": "MiniMax-H3 ref2va + Ref2V 8-step LoRA", "mode": mode_said(FROM_REFS),
