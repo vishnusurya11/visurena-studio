@@ -144,9 +144,13 @@ S = [
     ("cell_dawn", "close", ["jefferson_hope"], 0.5,
      "Close on Jefferson Hope's face lying on the grey stone flags, the eyes closed, the full black beard, a "
      "placid smile on the lips, the grey dawn from the top left across the brow.",
+     # NOTHING ON THE DEAD MAN MOVES.  This clause was "a strand of black hair
+     # stirs on the stone", which the owner caught in the reference reel as the
+     # corpse moving, and which L4 refuses anyway because `stir` is not a
+     # body-scale act.  The light is the only mover a dead face can have, and
+     # `crosses` is in ACTS, so the block carries an action without animating him.
      "The camera tilts down across the whole shot, travelling a finger's breadth; the grey flags keep the "
-     "frame behind his head; the dawn light slides a finger's breadth down his brow; a strand of black hair "
-     "stirs on the stone.",
+     "frame behind his head; the dawn light crosses his brow from the top left and lowers down his cheek.",
      "over him at the height of a kneeling man's eye, an arm's length from his face, a 90mm lens. The dawn "
      "comes from the TOP LEFT onto his brow and leaves the flags beyond his head black",
      "Jefferson Hope's face fills the CENTRE of the frame, half the frame height, from the beard at the "
@@ -344,7 +348,11 @@ S = [
     # 17 TURN -- Watson decides
     ("sitting_room_evening", "close", ["john_watson"], 0.6,
      "Close on John Watson on his feet by the armchair in profile facing the right edge of frame, the sunburnt face set and eager, the thin waxed moustache, the curtained window black beyond him, the firelight from the left on the back of his head and his ear.",
-     "The camera pans left across the whole shot, travelling a finger's breadth; the black window keeps the frame beyond him; his jaw sets on the words; his head comes forward a finger's breadth toward the right edge.",
+     # `his jaw sets` and `his head comes forward` are both under L4's floor --
+     # a jaw is named in ACTS' docstring as not counting, and `comes forward` is
+     # not `come up`.  Watson is on his feet and indignant, so the shoulders are
+     # the honest scale for it.
+     "The camera pans left across the whole shot, travelling a finger's breadth; the black window keeps the frame beyond him; his shoulders turn toward the right edge and his chin lifts a finger's breadth.",
      "across the hearth level with his eyes, an arm's length from him, a 90mm lens. The fire comes from the "
      "LEFT onto his face and leaves the bookshelves behind him black",
      "John Watson's face fills the CENTRE of the frame, half the frame height, from the moustache at the "
@@ -391,8 +399,11 @@ S = [
     ("sitting_room_evening", "insert", [], 0.8,
      "Insert on John Watson's bare sunburnt fist crumpling the edge of the folded newspaper on the arm of "
      "the worn chair, the firelight from the left on the knuckles.",
+     # `crumples` and `tightens` are finger work, which ACTS excludes by name.
+     # The whole fist leaving the chair arm is the same beat at body scale, and
+     # `lifts` is in ACTS.
      "The camera tilts up across the whole shot, travelling a finger's breadth; the fist keeps the frame's "
-     "centre; the paper's edge crumples in the fingers; the fist tightens a finger's breadth.",
+     "centre; the paper's edge crumples in the fingers; the fist lifts off the chair arm a hand's breadth.",
      "beside the chair arm at the height of his chest, an arm's length from the fist, a 90mm lens. The fire "
      "comes from the LEFT onto the knuckles and leaves the chair's far side black",
      "The fist and the crumpled paper fill the CENTRE of the frame, the height of the middle third, on the "
