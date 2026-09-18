@@ -60,7 +60,12 @@ truth for where the loop is, and it is updated after every step, not at the end.
 | 11 | A Flight for Life | published `ZC7AWsoTrlo` |
 | 12 | The Avenging Angels | published `s7_uJ-VSDHk` |
 | 13 | A Continuation of the Reminiscences of John Watson, M.D. | published `OoTLbV3KurU` |
-| 14 | The Conclusion | plan, cast, lines, plates done; BLOCKED: image API has no credits (5 sheets ~$0.65) |
+| 14 | The Conclusion | published `FSVrTMyOxxs` |
+
+**THE SERIES IS COMPLETE: 14 of 14, finished 2026-09-18.** The standing goal set
+on 2026-09-13 is discharged. Do not start another chapter of this book; the
+owner's next words on it were "we need to work on lot of things", and the open
+faults below are that work.
 
 Chapters 8-12 are the Utah flashback: a different cast, a different place, and
 no Holmes or Watson. Expect the cast and location work to be as large as an
@@ -101,3 +106,45 @@ These were measured on episode 3 and are NOT fixed. Each one will bite again.
 - **`SKILL.md:136` says a narration stretch becomes "2-3 sub-shots"**, which is a
   3-4 segment SHOT, which `groups()` can never split -- the rule manufactures the
   take `SEGMENT_CAP` forbids.
+
+## Carried out of episode 14, for the work after the series
+
+- **A camera move's DIRECTION is obeyed and its DISTANCE is not, so the direction
+  must point somewhere the storyboard cell already covers.** Episode 14's T07 and
+  T08 are inserts on the ground written "the camera tilts up ... travelling a
+  finger's breadth". Both travelled until they were looking at the skyline, where
+  their cell holds nothing, and each INVENTED what it arrived at -- a tidy
+  occupied terrace, against T09's boarded-up empty house, in the same setup and
+  cut from the same sheet. Panning T07 along the kerb fixed it because everything
+  sideways of the ruts is more roadway. The same pan did NOT fix T08, whose lens
+  sits at a stooping man's eye and so looks ALONG the path; only pointing it
+  straight down at the clay fixed it. This is the same failure as a references-
+  only take inventing a Gothic hall, reached from the other side: not "no
+  reference" but "travelled past the reference".
+- **A push is the only move that changes a shot's SIZE, and size is what the cut
+  is built from.** T00's push turned an 8 s WIDE into a close on the dead face,
+  which is shot 1's framing, so shot 0 cut into shot 1 on the same picture. Pans,
+  tilts and tracks preserve size; a push on a wide should be treated as a plan
+  smell, not a style choice.
+- **THE SERIES HAS NO SINGLE BAKER STREET.** The owner stopped a render over this.
+  `refs/locations/loc-221b_baker_street.png` and episode 14's own
+  `plate_sitting_room_evening.png` are two completely different rooms -- the book
+  picture has a chemistry bench, a violin and two windows flanking the fireplace;
+  the plate has none of them and a different wall layout. 221b appears in only
+  three of the fourteen episodes (3, 5, 14) and was never pinned to one
+  reference. Every recurring location needs one picture that every episode
+  stages, and nothing currently enforces that.
+- **The DQ's off-board row cannot forgive a large honest move.** Its own
+  calibration says so, and episode 6 -- which the owner judged fine -- is the
+  worst episode ever measured on it (10 HARD of 26). Episode 14 failed 8 of 24
+  while measuring 0.05 median off-board against episode 9's 0.62. A take that
+  fails this row needs an eye, not a retake; what an eye CAN catch, and this row
+  cannot, is a take that invented content contradicting its neighbours.
+- **The look floor is calibrated on night interiors.** A daylit interior has no
+  true black, so it fails; ep14's T11, Holmes's plastered finger reaching for the
+  wedding ring, is one of the best shots in the reel and failed on it.
+- **A stillness flag would still be useful, and was reverted with the experiment.**
+  L4 refuses a shot with no body-scale action, which a corpse cannot have. Episode
+  14 answered it by moving the LIGHT across the dead face -- `crosses` is in ACTS
+  and nothing on the body moves. That is a better answer than an exemption, and
+  worth keeping as the pattern.
