@@ -10,8 +10,10 @@ from __future__ import annotations
 import json
 import re
 
-PLATE_BOXES = ([60, 140, 940, 260], [300, 290, 700, 340], [120, 360, 880, 450])
-"""Series, episode, chapter -- stacked in the card's upper sky (0-1000 grid)."""
+PLATE_BOXES = ([140, 60, 260, 940], [290, 300, 340, 700], [360, 120, 450, 880])
+"""Series, episode, chapter -- stacked in the card's upper sky, 0-1000 grid, in
+Ideogram's [y1, x1, y2, x2] order.  MEASURED 2026-09-19: written x-first, each
+box was a tall thin column and the whole card was lettered sideways."""
 PLATE_SIZES = ("large", "small, widely letter-spaced", "medium")
 
 
@@ -41,6 +43,14 @@ def screen_over(art, plate):
     from PIL import Image, ImageChops
     return ImageChops.screen(art.convert("RGB"),
                              plate.convert("RGB").resize(art.size, Image.LANCZOS))
+
+
+def horizontal(plate) -> bool:
+    """Does the lettering run across the frame?  The bright pixels' extent is
+    wider than tall.  The OCR gate cannot see this: Qwen3-VL reads sideways
+    text perfectly well, so a card lettered down the frame passed it."""
+    box = plate.convert("L").point(lambda v: 255 if v > 128 else 0).getbbox()
+    return bool(box) and (box[2] - box[0]) > (box[3] - box[1])
 
 
 def chapter_name(raw: str) -> str:

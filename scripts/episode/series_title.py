@@ -25,7 +25,8 @@ from studio import canvas, episode_home
 from studio.comfy import run, run_text, stage_image
 from studio.h3 import frames_for
 from studio.refs_pack import styled
-from studio.series_title import card_lines, missing_lines, plate_caption, screen_over
+from studio.series_title import (card_lines, horizontal, missing_lines, plate_caption,
+                                 screen_over)
 
 TRIES = 6
 SECONDS = 4.0
@@ -43,14 +44,17 @@ def base_art(folder: Path) -> Path:
     return out
 
 
-def letter(base: Path, lines: list[str], seed: int) -> Path:
-    """Ideogram draws the words alone on black; they are screened over the art."""
+def letter(base: Path, lines: list[str], seed: int) -> Path | None:
+    """Ideogram draws the words alone on black; they are screened over the art.
+    None when the plate is lettered down the frame instead of across it."""
     from PIL import Image
-    plate = run("image_ideogram4_t2i", {"prompt": plate_caption(lines), "seed": seed,
-                "aspect_ratio": "1:1 (Square)", "megapixels": 1,
-                "filename_prefix": "series_title/plate"})[0]
+    plate = Image.open(run("image_ideogram4_t2i", {
+        "prompt": plate_caption(lines), "seed": seed, "aspect_ratio": "1:1 (Square)",
+        "megapixels": 1, "filename_prefix": "series_title/plate"})[0])
+    if not horizontal(plate):
+        return None
     out = base.with_name(f"lettered_{seed}.png")
-    screen_over(Image.open(base), Image.open(plate)).save(out)
+    screen_over(Image.open(base), plate).save(out)
     return out
 
 
@@ -61,7 +65,7 @@ def reads(card: Path) -> str:
 def lettered_card(base: Path, lines: list[str], out: Path) -> Path:
     for attempt in range(TRIES):
         card = letter(base, lines, 5200 + attempt)
-        wrong = missing_lines(lines, reads(card))
+        wrong = ["lettered down the frame"] if card is None else missing_lines(lines, reads(card))
         print(f"  lettering try {attempt + 1}: {'OK' if not wrong else f'misread {wrong}'}", flush=True)
         if not wrong:
             shutil.copyfile(card, out)

@@ -60,3 +60,21 @@ def test_the_plate_is_screened_over_the_art_so_black_leaves_it_untouched():
     assert screen_over(art, Image.new("RGB", (4, 4))).size == art.size
     assert out.getpixel((7, 7)) == (40, 60, 90)
     assert out.getpixel((0, 0)) == (255, 255, 255)
+
+
+def test_every_plate_box_is_wider_than_tall_in_ideograms_y_x_order():
+    import json
+    from studio.series_title import plate_caption
+    caption = json.loads(plate_caption(["A", "B", "C"]))
+    for element in caption["compositional_deconstruction"]["elements"]:
+        y1, x1, y2, x2 = element["bbox"]
+        assert (x2 - x1) > 3 * (y2 - y1)
+
+
+def test_a_plate_whose_lettering_runs_down_the_frame_is_refused():
+    from PIL import Image, ImageDraw
+    from studio.series_title import horizontal
+    wide, tall = Image.new("L", (100, 100)), Image.new("L", (100, 100))
+    ImageDraw.Draw(wide).rectangle([10, 40, 90, 60], fill=255)
+    ImageDraw.Draw(tall).rectangle([40, 10, 60, 90], fill=255)
+    assert horizontal(wide) and not horizontal(tall)
