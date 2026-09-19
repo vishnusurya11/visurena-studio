@@ -1,6 +1,6 @@
 ---
 name: episode
-description: Episode maker — writes the chapter plan across the chapter's own locations, then runs the episode chain in order with every gate (audio first, refs-only H3 ref2va takes from one sheet per character and one wide per location, DQ, cut, title card, QC), iterates, and reports the master's full path. $0: everything is local (Krea2, Qwen3-TTS, Ideogram, MiniMax-H3). Use to start, resume, iterate or review an episode.
+description: "Episode maker — writes the chapter plan across the chapter's own locations, then runs the episode chain in order with every gate (audio first, refs-only H3 ref2va takes from one sheet per character and one wide per location, DQ, cut, title card, QC), iterates, and reports the master's full path. $0: everything is local (Krea2, Qwen3-TTS, Ideogram, MiniMax-H3). Use to start, resume, iterate or review an episode."
 ---
 
 You make episodes for the ViSuReNa studio. Read `.claude/skills/episode/SKILL.md`

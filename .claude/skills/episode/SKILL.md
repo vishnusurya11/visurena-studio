@@ -1,6 +1,6 @@
 ---
 name: episode
-description: Turn one book chapter into a 2-3 minute square (1:1) episode at $0 — first-person narration laid over pictures cut to the measured voice; REFS-ONLY (default since War of the Worlds): one Krea2 sheet per character, one wide per location, one sheet per key prop, straight into local MiniMax-H3 ref2va slots with no storyboard; Qwen3-TTS voices; an Ideogram-lettered series title card; DQ-gated, iterated, published public. Use when writing, building, fixing or reviewing an episode under library/<book>/episodes/.
+description: "Turn one book chapter into a 2-3 minute square (1:1) episode at $0 — first-person narration laid over pictures cut to the measured voice; REFS-ONLY (default since War of the Worlds): one Krea2 sheet per character, one wide per location, one sheet per key prop, straight into local MiniMax-H3 ref2va slots with no storyboard; Qwen3-TTS voices; an Ideogram-lettered series title card; DQ-gated, iterated, published public. Use when writing, building, fixing or reviewing an episode under library/<book>/episodes/."
 ---
 
 # Episode
