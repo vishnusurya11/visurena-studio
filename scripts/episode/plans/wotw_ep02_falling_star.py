@@ -53,15 +53,17 @@ CYL = "the huge crusted cylinder"
 PIT_DESCRIBED = (
     "A great raw crater on Horsell Common at sunrise in 1894: sloping walls of loose yellow sand and grey "
     "gravel, a charred rim ringed with flung heaps of spoil, splintered fir wood on the gravel floor, and "
-    "lying half-buried across the pit a colossal cylinder thirty yards across, its huge circular end tilted "
-    "up out of the sand, its whole skin caked in a scaly dun-grey crust of clinker; pines and purple heather "
-    "stand on the far rim under a pale sky; the low sun comes from the LEFT over the far rim, hard and "
+    "lying half-buried across the pit a colossal cylinder thirty yards across, one long continuous hull "
+    "running back deep into the sand, its huge circular end tilted up out of it and ringed by a thin bright "
+    "seam, its whole skin caked in a scaly dun-grey crust of clinker; pines and purple heather stand on the "
+    "far rim under a pale gold dawn sky with thin blue smoke rising; the low sun comes from the LEFT over the far rim, hard and "
     "yellow on the crust, and leaves the pit's near wall and the underside of the cylinder black")
 PIT_GEOMETRY = (
-    "The circular end of the cylinder fills the CENTRE of the frame, its crusted face turned toward the "
-    "camera, the height of half the frame. The yellow sand walls slope down from the LEFT edge and the "
-    "RIGHT edge to the grey gravel floor at the BOTTOM. Splintered fir wood lies on the gravel at the "
-    "BOTTOM LEFT. Purple heather and dark pines line the far rim across the TOP third under a pale sky.")
+    "The circular end of the cylinder stands at the CENTRE and the RIGHT third of the frame, its crusted "
+    "face turned toward the camera, the height of half the frame, and its long hull runs back from it to "
+    "the LEFT third deep into the sand. The yellow sand walls slope down from the LEFT edge and the RIGHT "
+    "edge to the grey gravel floor at the BOTTOM, where splintered fir wood lies at the BOTTOM LEFT. Purple "
+    "heather, dark pines and the low sun line the far rim across the TOP third under a pale gold sky.")
 
 SETUPS = {
     "study": dict(
@@ -249,8 +251,9 @@ S = [
      "RIGHT half and the grey gravel lies across the BOTTOM edge.",
      "setup", "He goes toward it: curiosity is still bigger than fear."),
     ("floor", "insert", [], 0.1, "locked",
-     "Insert on the edge of the cylinder's crusted circular lid with a black scorch mark the size of a hand "
-     "on its rim, the thin seam between the lid and the body cutting across the crust.",
+     "Insert on the upper edge of the cylinder's crusted circular end, which stands tilted up out of the "
+     "sand like a wall facing the camera, a black scorch mark the size of a hand on its rim and the thin "
+     "bright seam between the lid and the body curving across it.",
      "The camera holds a locked-off frame; dust trickles off the rim as the whole crusted lid turns on its "
      "body, carrying the black mark along the rim from the right toward the left; dust spurts from the seam "
      "as the lid jerks and the black mark jumps forward.",
@@ -284,12 +287,12 @@ S = [
      "a quarter of the frame's height, his hands reaching toward the crust. The crusted circular end rises "
      "behind him across the frame from the LEFT edge to the RIGHT edge, heat haze over it.",
      "reaction", "His goodness nearly burns him: he would help the thing that has come to kill him."),
-    ("heath", "medium", ["ogilvy"], 0.8, "pan_to",
+    ("heath", "medium", ["ogilvy"], 0.8, "follow",
      f"Medium of {OGIL} already running hatless through the knee-deep heather toward the pale sandy road, "
      f"both arms flung up, and behind him on the road {WAGG} on the seat of a horse-drawn cart, the church "
      "tower of Woking on the horizon.",
-     "The camera pans from the smoking sand heaps across to Ogilvy running onto the pale sandy road; he "
-     "waves both arms at the cart; the horse pulls the cart on along the road.",
+     "The camera tracks beside Ogilvy as he runs through the heather toward the pale sandy road; he waves "
+     "both arms at the cart; the horse pulls the cart on along the road.",
      "on the heath at his shoulder height, three long strides from him, a 35mm lens. The low sun comes "
      "from BEHIND the far pines onto his hair and shoulders and leaves the near heather black",
      "Ogilvy runs through the heather at the CENTRE of the frame from the BOTTOM edge to the TOP third, his "

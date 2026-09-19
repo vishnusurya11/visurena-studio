@@ -41,21 +41,21 @@ Status starts at `untested`. Each trial records the take, the measured result
 
 | id | H3 phrasing (affirmative, direction only) | use for | risk from history | status |
 |---|---|---|---|---|
-| locked | "The camera holds a locked-off frame; <actor verb>." | dialogue, a reaction, a still moment where the actor moves | a frozen start if the actor has no verb | untested |
-| push_slow | "The camera pushes in slowly toward <subject>." | realisation, a close on a face or insert | overrun on wides (ep13 T08 1.94x): mediums and inserts only | untested |
-| pull_reveal | "The camera pulls back from <detail>, widening to show <the room / what surrounds it>." | reveal, aftermath, scale | invents what lies past the frame: reveal only what the wide contains | untested |
-| pan_to | "The camera pans from <A> across to <B>." | carry the eye between two things in the room | turns into an orbit if A or B is told to keep its place | untested |
-| tilt_up | "The camera tilts up from <ground detail> to <what stands above it>." | scale, a figure rising, sky, a dome | overran to the skyline and invented a terrace (Scarlet ep14): stop at something in the wide | untested |
-| tilt_down | "The camera tilts down from <sky / face> to <hands / ground>." | from the sky to the earth, from a face to what it holds | — | untested |
-| track_lateral | "The camera tracks sideways to the <left/right>, past <foreground object>, with <subject> behind it." | depth, parallax, a sense of place | may read as an orbit if a subject is centred and named as held | untested |
-| follow | "The camera tracks behind / beside <figure> as <he/she> walks toward <place>." | walks, arrivals, the porch | a small figure in a wide never left the gate (G-MOTION ep01 advisory) | untested |
-| crane_up | "The camera rises slowly above <subject>, looking down over <the place>." | endings, the heath, scale | invents the roofscape: point it at what the wide shows | untested |
-| crane_down | "The camera descends from <sky / treetops> to <figure at ground level>." | openings, arrivals | — | untested |
-| low_angle | camera line: "a low angle from knee height looking up at <subject>" + one move | authority, menace, the machines | angle words were ignored at Scarlet ("amounts, angles"): trial it | untested |
-| high_angle | camera line: "a high angle looking down on <subject>" + one move | smallness, the pit, the crowd | as above | untested |
-| over_shoulder | "Over <A>'s shoulder toward <B>; the camera holds; <B> speaks." | two-hander dialogue | the face ends up on the wrong subject; bind the faces clearly | untested |
+| locked | "The camera holds a locked-off frame; <actor verb>." | dialogue, a reaction, a still moment where the actor moves | a frozen start if the actor has no verb | works (ep02: 8/8 held; a low-angle 'locked' close still crept 1.4-1.9x) |
+| push_slow | "The camera pushes in slowly toward <subject>." | realisation, a close on a face or insert | overrun on wides (ep13 T08 1.94x): mediums and inserts only | mixed (ep02: works on a medium close; overran 3.5x on an insert and 1.9-3.3x on closes, twice into invention) |
+| pull_reveal | "The camera pulls back from <detail>, widening to show <the room / what surrounds it>." | reveal, aftermath, scale | invents what lies past the frame: reveal only what the wide contains | works (ep02 T10 three renders out of three) |
+| pan_to | "The camera pans from <A> across to <B>." | carry the eye between two things in the room | turns into an orbit if A or B is told to keep its place | mixed (ep02: works on the study and villa wides; letterboxed once, arced once, a walker walked into the lens once) |
+| tilt_up | "The camera tilts up from <ground detail> to <what stands above it>." | scale, a figure rising, sky, a dome | overran to the skyline and invented a terrace (Scarlet ep14): stop at something in the wide | works (ep02 T15) |
+| tilt_down | "The camera tilts down from <sky / face> to <hands / ground>." | from the sky to the earth, from a face to what it holds | — | fails (ep02: read as a pull-back on a close; opened on the plate on an insert) |
+| track_lateral | "The camera tracks sideways to the <left/right>, past <foreground object>, with <subject> behind it." | depth, parallax, a sense of place | may read as an orbit if a subject is centred and named as held | works (ep02: palings, gate top, and the rim insert; parallax on a foreground post) |
+| follow | "The camera tracks behind / beside <figure> as <he/she> walks toward <place>." | walks, arrivals, the porch | a small figure in a wide never left the gate (G-MOTION ep01 advisory) | works (ep02: 5/5 incl. T11 once its first 0.5 s is trimmed) |
+| crane_up | "The camera rises slowly above <subject>, looking down over <the place>." | endings, the heath, scale | invents the roofscape: point it at what the wide shows | works (ep02 T19 twice: seam to the whole hull) |
+| crane_down | "The camera descends from <sky / treetops> to <figure at ground level>." | openings, arrivals | — | fails (ep02 T02: no descent; became a lateral follow) |
+| low_angle | camera line: "a low angle from knee height looking up at <subject>" + one move | authority, menace, the machines | angle words were ignored at Scarlet ("amounts, angles"): trial it | mixed (ep02: held on T17 and T09; T07 twice came back at eye level) |
+| high_angle | camera line: "a high angle looking down on <subject>" + one move | smallness, the pit, the crowd | as above | works (ep02 T04 three renders) |
+| over_shoulder | "Over <A>'s shoulder toward <B>; the camera holds; <B> speaks." | two-hander dialogue | the face ends up on the wrong subject; bind the faces clearly | works (ep02 T12) |
 | handheld | "The camera is handheld, drifting gently with <figure>." | panic, the flight chapters | may churn; keep it for the panic chapters | untested |
-| rack_focus | "Focus shifts from <foreground object> to <figure behind it>." | two planes of meaning | may be ignored entirely | untested |
+| rack_focus | "Focus shifts from <foreground object> to <figure behind it>." | two planes of meaning | may be ignored entirely | fails (ep02 T17: no focus change; a locked medium-wide) |
 | orbit | "The camera circles slowly around <subject>, keeping <subject> in the centre." | a rare hero beat only: at most one per episode | THIS is what ep01 did 18 times by accident | works (ep01, involuntarily) |
 
 ## Trial log
@@ -102,3 +102,32 @@ One row per trial take: `episode | take | move id | size | result | eye verdict 
 | ep02 iter2 | T20 (2) | pan_to | wide | DQ 85 PASS | works | with the Narrator far off in the doorway the pan landed on the house as asked |
 | ep02 iter2 | T21 | track_lateral | insert | churn 7.3, DQ 76.6 | works | the paper folded edge-on: no masthead |
 | ep02 iter2 | T22 | locked | medium_close | zoom 1.04x, churn 2.6, face 0.24 | works | the boy points and speaks, face readable to the end |
+| ep02 iter3 | T04 | high_angle | wide | zoom 1.01x, churn 3.9, DQ 90 | works | on the redrawn pit (one long hull): the high angle and the tilt down to the end both read; the figure crouched at the rim, in the sheet's cape |
+| ep02 iter3 | T06 | track_lateral | insert | zoom 1.00x, churn 2.7, DQ 100 | works | on the new pit picture it no longer opened on the plate: the rim cracks and the clinker drifts down (the head trim was dropped) |
+| ep02 iter3 | T07 | low_angle | medium | zoom 0.99x, churn 1.9, DQ 100 | drifts | eye level again: a follow of him walking to the hull and laying a hand on it |
+| ep02 iter3 | T08 | locked | insert | zoom 1.02x, churn 1.5, DQ 100 | works | the camera held and a black mark appeared on the rim; the lid was drawn as a flat disc lying on the sand, unlike its neighbours |
+| ep02 iter3 | T09 | low_angle | medium_close | zoom 1.44x, churn 3.7, DQ 95 | mixed | crouched, looked up into the lens, spoke; "locked" still crept in 1.4x |
+| ep02 iter3 | T10 | pull_reveal | medium | zoom 0.11x, churn 5.9, DQ 80 | works | the third time: from his hands on the seam out to the whole hull, the best reveal in the episode |
+| ep02 iter3 | T18 | follow | medium | zoom 1.16x, churn 3.6, DQ 95 | works | again |
+| ep02 iter3 | T19 | crane_up | insert | zoom 0.48x, churn 2.1, DQ 90 | works | again: from the stick on the seam up to the length of the hull |
+| ep02 iter4 | T08 | locked | insert | DQ 100 | invents | the lid again a flat disc, now with a black drip down its edge; iter3's render kept |
+| ep02 iter4 | T11 | follow | medium | zoom 1.42x, churn 8.2, DQ 82.6 (was 36) | works | opened for 0.3 s on the sheet's front-on face, then followed him from behind waving at the cart; the cut enters at 0.5 s (heads.json) |
+
+## What ep02 taught (32 renders of 23 shots)
+
+- **Variety is achievable and it reads.** 14 move ids over 23 shots, none on more than
+  five, no orbit on purpose; the coordinator's contact-sheet review called the variety
+  a clear success. The one accidental orbit (T11 iter2) came from a pan whose subject
+  was a running man in the middle of the frame.
+- **The location picture outranks the words on size and shape.** "The hull towers many
+  times his height" changed nothing while the pit picture drew a coin two men tall;
+  redrawing that one picture changed every pit take at once.
+- **A take can open on a reference picture and cut away from it** (0.3-0.6 s): the plate
+  on an insert with no person in it (T06, three renders on the old pit picture) and the
+  sheet's front-on face on a figure seen from behind (T11 iter4). On a shot with no
+  dialogue, `heads.json` enters the take after it; with dialogue it would break lip-sync,
+  so re-render instead.
+- **A push has no brake on a close.** Asking for a push from a medium close is safer
+  than from a close; a "locked" low-angle close still crept 1.4-1.9x.
+- **Moves H3 ignores:** crane_down (became a follow), rack_focus (nothing), tilt_down
+  (became a pull-back). Use crane_up, pull_reveal and track_lateral instead.
