@@ -85,6 +85,19 @@ the picture monotonous. So:
 - Lock the camera and give the actor the verb when the actor carries the beat.
 - Log every take's move in the catalog's trial log (works / drifts / frozen
   / invents) so the catalog learns what H3 does.
+- **Smooth, not blurry, not warping** (owner, 2026-09-19). After the takes,
+  run `scripts/episode/motion_quality.py <book> <n>`: it flags `BLUR` (a
+  take that softens mid-move) and `REFRAME` (a take that jumps to a new
+  framing in its last second). Both are prompt faults, measured on ep02:
+  - NO push-in: every trial overran 1.9-3.5x, went soft and stretched the
+    face. A close is a locked close; scale is a pull-back reveal.
+  - The final clause of `motion` stays inside the opening frame: a gesture,
+    a look, a hand settling. Never an exit, "away", or "on along": H3 follows
+    the departing subject and reframes on it.
+  - Over-the-shoulder: the foreground is a shoulder and the back of a head,
+    never a sliver of face (it warps).
+  - Spoken lines go on locked-off shots: sharpest, most stable, best lips.
+  - A flagged take is retaken with the clause fixed, not with a new seed.
 
 **Title card** (`scripts/episode/series_title.py <book> <n>`): the art is drawn
 ONCE per book (`title/series_base.png` from `title/motif.txt`). Per episode,

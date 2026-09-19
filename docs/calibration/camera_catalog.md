@@ -58,6 +58,34 @@ Status starts at `untested`. Each trial records the take, the measured result
 | rack_focus | "Focus shifts from <foreground object> to <figure behind it>." | two planes of meaning | may be ignored entirely | fails (ep02 T17: no focus change; a locked medium-wide) |
 | orbit | "The camera circles slowly around <subject>, keeping <subject> in the centre." | a rare hero beat only: at most one per episode | THIS is what ep01 did 18 times by accident | works (ep01, involuntarily) |
 
+## Smoothness: blur and warp, measured (ep02, 2026-09-19)
+
+`scripts/episode/motion_quality.py <book> <n>` measures every take on grey
+frames at 6 fps: sharpness (Laplacian variance) per frame, and the optical-flow
+incoherence between consecutive frames. Flags, calibrated on ep02 and checked
+against the strips: `BLUR` = 3+ frames under half the take's own sharpness, or
+a minimum under 0.5; `REFRAME` = flow incoherence max >= 1.4, which is a take
+that jumps to a NEW FRAMING (not a melt). The mean incoherence on a locked
+shot is the actor's own motion and means nothing; read the max.
+
+What ep02's 23 takes showed:
+- **Zoom-type moves soften.** The one visibly soft take was the push-in (T16:
+  6 blur dips, min 0.45, and the face distorted as it filled the frame). The
+  pull-back (T10, min 0.65) and the wide pan that became a push (T20, 0.56)
+  softened next. Lateral moves, tilts and locked shots stayed sharp (min 0.8-0.98).
+  Reason: a magnified region of a 768 px render has less detail to upscale.
+- **Late reframes come from the last clause.** T12 ("...the horse pulls the cart
+  on along the road") jumped in its final second to the waggoner up on the cart;
+  T21 ("...fingers point away down the road") jumped to the brick wall. H3 follows
+  a departing subject to wherever the words send it. RULE: the final clause of
+  `motion` stays inside the opening frame -- a gesture, a look, a hand settling --
+  never an exit, an "away", or an "on along".
+- **Over-the-shoulder: the foreground face slice warps.** T12's foreground
+  Ogilvy was a distorted ear-and-cheek. Put the SHOULDER and the back of the
+  head in the foreground, never a sliver of face.
+- **Locked-off shots are the sharpest and the most stable** (no dips, no
+  reframes) and carry dialogue best: prefer them for every spoken line.
+
 ## Trial log
 
 One row per trial take: `episode | take | move id | size | result | eye verdict | note`.
