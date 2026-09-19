@@ -5,6 +5,12 @@ description: Write a Qwen3-TTS VoiceDesign instruction for every character in a 
 
 # Cast the voices
 
+**Cast just in time (owner, 2026-09-18).** Cast only the speakers the episode
+being built needs, and reuse every voice already filed under `cast/`. Don't
+cast the whole book up front. Voices are still FILED at book level, as below,
+so episode 5 reuses episode 1's narrator. WotW ep01 cast three (narrator,
+Ogilvy, wife); ep02 added only Henderson and the newspaper boy.
+
 Casting is a BOOK-level stage, run once after the screenplay and before any
 production. `library/<book>/` holds `trailer/`, `video/`, `audiobook/` and
 `publish/` as siblings, and all four need the same Holmes. A voice cast inside

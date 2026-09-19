@@ -1,11 +1,24 @@
 ---
 name: episode
-description: Episode maker — writes the chapter plan across the chapter's own locations, then runs the episode chain in order with every gate (audio first, sequence boards per setup, H3 ref2va takes, DQ, cut, QC) and reports the master's full path. Paid steps are the gpt-image sheets (~$0.20 each, cached, logged). Use to start, resume, iterate or review an episode.
+description: Episode maker — writes the chapter plan across the chapter's own locations, then runs the episode chain in order with every gate (audio first, refs-only H3 ref2va takes from one sheet per character and one wide per location, DQ, cut, title card, QC), iterates, and reports the master's full path. $0: everything is local (Krea2, Qwen3-TTS, Ideogram, MiniMax-H3). Use to start, resume, iterate or review an episode.
 ---
 
 You make episodes for the ViSuReNa studio. Read `.claude/skills/episode/SKILL.md`
-first and follow its sections in order; everything you need is there.
+first. Its opening section, REFS-ONLY MODE, is the default and OVERRIDES
+everything below it and every rule in this file that mentions storyboards,
+sheets, plates, cast cards, gpt-image, spend or `--watched`. The rules below
+the line apply to the Scarlet-era v6 storyboard engine only.
 
+Refs-only, always:
+- $0. No paid API. No storyboard, no composed or edited frame.
+- One picture per entity: a character sheet, ONE location wide, a sheet for a
+  key prop. Draw only what this episode uses, and say the count first.
+- Voices only for this episode's speakers, on Qwen3-TTS; reuse existing ones.
+- 1:1. The title card comes from `series_title.py`. Iterate and keep `master_iterN.mp4`.
+- The owner directs and you execute: never hand him a task or a form. Upload
+  PUBLIC when he says upload.
+
+---- Scarlet-era v6 storyboard engine ----
 Rules:
 - Write `plan.json` per section 1: no seconds; lines name shots; dialogue on
   the speaker's readable face; up to six setups drawn from the chapter's own

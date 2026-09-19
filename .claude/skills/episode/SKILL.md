@@ -1,9 +1,100 @@
 ---
 name: episode
-description: Turn one book chapter into a 2-3 minute vertical (9:16) or square (1:1) microdrama episode — first-person narration laid over pictures cut to the measured voice, the chapter's own locations, one storyboard sequence per setup drawn by gpt-image-2.5, every take rendered on local MiniMax-H3 ref2va from the storyboard's cells with dialogue lips driven by the line's own wav, DQ-gated, iterated with five reviewers. Use when writing, building, fixing or reviewing an episode under library/<book>/episodes/.
+description: Turn one book chapter into a 2-3 minute square (1:1) episode at $0 — first-person narration laid over pictures cut to the measured voice; REFS-ONLY (default since War of the Worlds): one Krea2 sheet per character, one wide per location, one sheet per key prop, straight into local MiniMax-H3 ref2va slots with no storyboard; Qwen3-TTS voices; an Ideogram-lettered series title card; DQ-gated, iterated, published public. Use when writing, building, fixing or reviewing an episode under library/<book>/episodes/.
 ---
 
 # Episode
+
+## REFS-ONLY MODE — the default from The War of the Worlds on (owner, 2026-09-18/19)
+
+This section OVERRIDES the storyboard, sheet, cast-card and publish sections
+below wherever they disagree. Those sections describe the Scarlet-era v6
+engine (gpt-image storyboards, ~$1 an episode). WotW ep01 was made this way
+at $0 and published: `library/20260827135508_the-war-of-the-worlds/episodes/ep01/`,
+best cut `cut/master_iter6.mp4`, 23/23 takes, QC pass. Read its `plan.json`
+and `story.md` as the worked example.
+
+**$0, local only.** No gpt-image, OpenAI, OpenRouter or Higgsfield call of any
+kind. Every picture comes from ComfyUI on the 4090, every voice from Qwen3-TTS, and
+every take from MiniMax-H3. If a step would spend money, stop and say so.
+
+**No storyboard and no composed frame.** The take's ref2v slots get the
+reference pictures THEMSELVES; everything else is said in words. Never
+generate a "frame zero", never composite a character into a room, never
+derive a location view with Qwen-Image-Edit or any edit model.
+
+**One picture per entity** (`studio/refs_pack.py`, `scripts/refs/build_pack.py`):
+
+| entity | the one picture | the rest is |
+|---|---|---|
+| character | `refs/characters/<id>/sheet.png`: canonical look, turnaround + face | wardrobe/injury state said in the take from `profile.wardrobe[wardrobe_by_chapter[n]]` |
+| location | `refs/locations/<id>/wide_establishing.png`: ONE wide | the camera verb finds mediums and inserts INSIDE that one room |
+| prop | `refs/props/<id>/sheet.png`: only for invented, recurring things words cannot pin (WotW: cylinder, fighting/handling/flying machine, heat-ray, red weed, black-smoke canister, Thunder Child, dog-cart, pony chaise) | every ordinary object is words |
+
+Why one: ep01's observatory drawn as four separate views was four rooms (a
+slim refractor in the wide, a pier telescope in the reverse) and the cut
+jumped between them. With one wide per place the room held in every take.
+
+**Look:** Krea2 Turbo + `Krea2_Cinematic_Artstyle` (the owner's pick),
+`image_krea2_cinematic_2x` (8 steps, then UltimateSDUpscale x2). Lead every
+prompt with `refs_pack.STYLE_LEAD`. A busy prompt drops its key object: put
+the story object first. Big flat metal breaks into a tile patchwork (the
+cylinder took three draws): look at every machine sheet.
+
+**Draw only what THIS episode uses.** The owner stopped a 304-picture
+book-wide run. Say the count before drawing more than ~5 pictures.
+`build_pack.py <book> --kind locations --only <id> ... [--dry]`.
+
+**Every character looks unique**: silhouette, dominant colours, dress,
+hair and headwear differ across the WHOLE cast, walk-ons included
+(`analysis/_design/cast_claims_*.json`).
+
+**Voices:** only the speakers this episode needs, on Qwen3-TTS VoiceDesign
+(the `cast-voices` skill); reuse any voice already under `cast/`. Gates: WER
+<= 0.20 and self-similarity >= 0.70; recast anything under.
+
+**Takes:** `takes_r2v.py <book> <n> --from-refs --no-ends --prompts`, then
+`--approved=render`. What ep01 taught:
+- A figure opens in its SHEET pose (standing, front-on) unless the frame
+  places it mid-action in the room. Describe it placed and acting.
+- A small object on a flat field freezes (the eyepiece dot froze 7.0 s, then
+  6.0 s). Give H3 something big to move and a direction of travel; the cure
+  was the planet itself, near and turning.
+- Only a move's direction is obeyed, not its distance; point it at what the
+  wide already contains. No negations and no stillness words.
+- Across neighbouring shots, keep the same props, light direction, time of
+  day and wardrobe. Say the hat is off indoors, or it stays on.
+- A take whose record exists is skipped even when its prompt changed:
+  `--retake=i,j --why=...` (a single take needs `--last`), or move `takes/r2v` aside.
+- `plan_check.py`'s CAST BOUND refusal is the Scarlet cast-card check. It
+  does not apply here; ep01 rendered past it.
+- DQ measures only 8-10 of 16 rows with no cell, and identity is not
+  measured. Your own look at every take strip and every cut pair is the real check.
+
+**Title card** (`scripts/episode/series_title.py <book> <n>`): the art is drawn
+ONCE per book (`title/series_base.png` from `title/motif.txt`). Per episode,
+Ideogram 4 letters `SERIES / EPISODE N / chapter` alone on black, a screen
+blend lays it on the art, Qwen3-VL reads it back, and a horizontal check
+refuses sideways plates. Ideogram bboxes are `[y1, x1, y2, x2]`; written
+x-first, the card was lettered down the frame and the OCR still passed it.
+Qwen-Image-Edit could not spell "THE WAR OF THE WORLDS". `assemble.py`
+appends `title/epNN.mp4` after the last frame.
+
+**Aspect:** 1:1 square (plan `"aspect": "1:1"`, delivered 1536x1536).
+
+**Iterate:** after the first master, run improving iterations. Keep every
+`master_iterN.mp4`, log what changed and why in `story.md`, and look at a
+contact sheet each time.
+
+**Publish PUBLIC when the owner says upload.** Write `episodes/epNN/youtube.json`
+(title `H. G. Wells: The War of the Worlds — Ep NN/27 — "<chapter>"`, the AI
+disclosure, `synthetic: true`, `privacy: public`). The owner's instruction
+is the go: he does not fill forms or click buttons for the pipeline.
+`youtube_upload.py` needs `.env`, which lives in the main tree, not the
+`visurena_studio_wotw` worktree. To change an uploaded video's privacy, read
+its live `status` first and then `videos.update part=status`.
+
+---
 
 An episode is ONE WHOLE CHAPTER (owner, 2026-09-10), 2 minutes as the
 target, 2-3 minutes when the chapter is big. Every iteration ends with the
