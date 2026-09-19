@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 """Draw a book's reference pack locally: characters, locations, props.
 
-    uv run python scripts/refs/build_pack.py <book_id> [--kind characters] [--only narrator] [--view wide_establishing] [--limit N] [--dry]
+    uv run python scripts/refs/build_pack.py <book_id> [--kind characters] [--only narrator] [--limit N] [--dry]
 
 Reads each entity's `profile.design` from analysis/<kind>/<id>.json and writes
 library/<book>/refs/<kind>/<id>/<name>.png, skipping pictures already on disk.
@@ -21,7 +21,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 
 from studio.comfy import run
-from studio.refs_pack import jobs_for, only_views, pending, relpath, values_for
+from studio.refs_pack import jobs_for, pending, relpath, values_for
 
 LIBRARY = Path(__file__).resolve().parents[2] / "library"
 KINDS = ("characters", "props", "locations")
@@ -65,12 +65,11 @@ def main() -> None:
     ap.add_argument("book_id")
     ap.add_argument("--kind", choices=KINDS, action="append")
     ap.add_argument("--only", action="append")
-    ap.add_argument("--view", action="append", help="draw only these location views")
     ap.add_argument("--limit", type=int)
     ap.add_argument("--dry", action="store_true")
     a = ap.parse_args()
     book = book_dir(a.book_id)
-    jobs = only_views(all_jobs(book, a.kind or KINDS, a.only), set(a.view or []))
+    jobs = all_jobs(book, a.kind or KINDS, a.only)
     todo = pending(jobs, lambda rel: (book / rel).exists())
     todo = todo[: a.limit] if a.limit else todo
     print(f"{len(todo)} pictures to draw", flush=True)

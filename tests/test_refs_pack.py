@@ -1,5 +1,5 @@
 """The reference pack: every character, location and prop design becomes jobs."""
-from studio.refs_pack import (STYLE_LEAD, Job, character_jobs, jobs_for,
+from studio.refs_pack import (STYLE_LEAD, T2I, Job, character_jobs, jobs_for,
                               location_jobs, pending, prop_jobs, relpath,
                               seed_for, styled, values_for)
 
@@ -41,10 +41,9 @@ def test_character_marked_not_drawn_yields_nothing():
     assert character_jobs("god", unseen) == []
 
 
-def test_location_gets_one_job_per_view():
+def test_a_location_picture_lives_under_its_place():
     jobs = location_jobs("horsell_pit", LOCATION)
-    assert [j.name for j in jobs] == ["wide_establishing", "insert_sand"]
-    assert relpath(jobs[1]) == "refs/locations/horsell_pit/insert_sand.png"
+    assert relpath(jobs[0]) == "refs/locations/horsell_pit/wide_establishing.png"
 
 
 def test_a_prop_is_exactly_one_sheet_whatever_its_views():
@@ -58,9 +57,9 @@ def test_jobs_for_dispatches_on_kind():
 
 
 def test_pending_skips_pictures_already_on_disk():
-    jobs = location_jobs("horsell_pit", LOCATION)
+    jobs = location_jobs("horsell_pit", LOCATION) + character_jobs("narrator", CHARACTER)
     done = {"refs/locations/horsell_pit/wide_establishing.png"}
-    assert [j.name for j in pending(jobs, done.__contains__)] == ["insert_sand"]
+    assert [j.name for j in pending(jobs, done.__contains__)] == ["sheet"]
 
 
 def test_values_for_fill_the_manifest_names():
@@ -70,14 +69,17 @@ def test_values_for_fill_the_manifest_names():
     assert values["prompt"].startswith(STYLE_LEAD)
 
 
-def test_only_views_keeps_the_named_views_and_every_non_view_job():
-    from studio.refs_pack import only_views
-    jobs = location_jobs("horsell_pit", LOCATION) + character_jobs("narrator", CHARACTER)
-    kept = only_views(jobs, {"insert_sand"})
-    assert [(j.kind, j.name) for j in kept] == [("locations", "insert_sand"), ("characters", "sheet")]
+ROOM = {"design": {"views": [
+    {"id": "reverse", "prompt": "The door wall."},
+    {"id": "wide_establishing", "prompt": "The whole round room."},
+    {"id": "medium_table", "prompt": "The little table."}]}}
 
 
-def test_only_views_with_no_filter_keeps_everything():
-    from studio.refs_pack import only_views
-    jobs = location_jobs("horsell_pit", LOCATION)
-    assert only_views(jobs, None) == jobs
+def test_a_location_is_exactly_one_picture_its_establishing_wide():
+    jobs = location_jobs("observatory", ROOM)
+    assert [(j.name, j.workflow) for j in jobs] == [("wide_establishing", T2I)]
+
+
+def test_a_location_without_a_named_wide_uses_its_first_view():
+    first_only = {"design": {"views": [{"id": "medium_bar", "prompt": "The bar."}]}}
+    assert [j.name for j in location_jobs("inn", first_only)] == ["medium_bar"]

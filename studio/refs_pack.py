@@ -3,7 +3,7 @@
 The designs live under library/<book>/analysis/{characters,locations,props}/
 as `profile.design`.  Each job is one picture: ONE sheet per character (its
 wardrobe states -- soaked, scalded, grey -- are said in the ref2v take prompt,
-never drawn as extra sheets), a location's views, ONE sheet per prop.  Only the
+never drawn as extra sheets), ONE wide per location, ONE sheet per prop.  Only the
 props words cannot pin (the Martian machines, the red weed…) are drawn at all;
 the runner is given that short list with --only.
 Paths are relative to the book folder -- never absolute.
@@ -18,6 +18,13 @@ STYLE_LEAD = ("A 3d, clean ultra hd, AAA game quality graphics, computer generat
               "realistic lighting. A heavily angular 3d art style with brush stroke colour "
               "texture. Cinematic film still of ")
 T2I = "image_krea2_cinematic_2x"
+# ONE picture per location: its establishing wide.  Views drawn each from
+# words came out as different rooms (ep01's observatory: a slim brass refractor
+# on a tripod in the wide, a massive telescope on a pier in the reverse), and
+# the cut jumped between them.  OWNER 2026-09-18: "just have a wide image ..
+# ref2v can close up based on camera" -- the take's camera finds the medium or
+# the insert inside the one room; no derived or edited views.
+ANCHOR = "wide_establishing"
 
 
 @dataclass(frozen=True)
@@ -53,12 +60,18 @@ def character_jobs(cid: str, profile: dict) -> list[Job]:
     return [Job("characters", cid, "sheet", T2I, sheet, 1536, 1024)]
 
 
-def view_jobs(kind: str, eid: str, views: list[dict]) -> list[Job]:
-    return [Job(kind, eid, v["id"], T2I, v["prompt"], 1536, 1024) for v in views]
+def anchor_view(views: list[dict]) -> dict:
+    """The one view drawn from words: the establishing wide, else the first."""
+    return next((v for v in views if v["id"] == ANCHOR), views[0])
 
 
 def location_jobs(lid: str, profile: dict) -> list[Job]:
-    return view_jobs("locations", lid, (profile.get("design") or {}).get("views") or [])
+    """Exactly one picture per location: the establishing wide."""
+    views = (profile.get("design") or {}).get("views") or []
+    if not views:
+        return []
+    anchor = anchor_view(views)
+    return [Job("locations", lid, anchor["id"], T2I, anchor["prompt"], 1536, 1024)]
 
 
 def prop_jobs(pid: str, profile: dict) -> list[Job]:
@@ -82,13 +95,3 @@ def values_for(job: Job) -> dict:
     return {"prompt": styled(job.prompt), "width": job.width, "height": job.height,
             "seed": seed_for(relpath(job)),
             "filename_prefix": f"wotw_refs/{job.kind}_{job.entity}_{job.name}"}
-
-
-def only_views(jobs: list[Job], views: set[str] | None) -> list[Job]:
-    """Keep only the named location views; characters and props pass through.
-
-    OWNER 2026-09-18: draw only what a chapter uses.  A location has 3-6 views
-    and an episode may use two of them, so the filter is by view, not by place."""
-    if not views:
-        return jobs
-    return [j for j in jobs if j.kind != "locations" or j.name in views]
