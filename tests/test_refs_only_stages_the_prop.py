@@ -87,3 +87,15 @@ def test_only_drawn_props_of_the_setup_are_staged(tmp_path):
     sheet.write_bytes(b"png")
     staged = pack_refs.props_for(tmp_path, ["martian_cylinder", "red_weed"])
     assert staged == [(sheet, ("the martian_cylinder", "A thing. Big."))]
+
+
+def test_a_name_that_carries_its_article_is_not_doubled_and_the_scale_is_its_first_clause(tmp_path):
+    (tmp_path / "analysis" / "props").mkdir(parents=True)
+    (tmp_path / "analysis" / "props" / "martian_cylinder.json").write_text(json.dumps({
+        "name": "the Martian cylinder",
+        "profile": {"physical": "A hollow cylinder.",
+                    "scale": "End about thirty yards across (Wells); the screw-thread that emerges is two feet long."}}),
+        encoding="utf-8")
+    name, text = pack_refs.prop_row(tmp_path, "martian_cylinder")
+    assert name == "the Martian cylinder"
+    assert text == "A hollow cylinder. End about thirty yards across."

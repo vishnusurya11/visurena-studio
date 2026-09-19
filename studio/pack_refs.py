@@ -15,6 +15,7 @@ hall).  Wardrobe states are not drawn: the chapter's state is said in words.
 from __future__ import annotations
 
 import json
+import re
 from pathlib import Path
 
 PREFER = {
@@ -99,8 +100,12 @@ def prop_row(book: Path, pid: str) -> tuple[str, str]:
     prof = card.get("profile") or {}
     body = [s.strip() for s in (prof.get("physical") or "").split(". ") if s.strip()]
     body = [s if s.endswith(".") else s + "." for s in body if not s.startswith("Once ")]
-    text = " ".join(body + [(prof.get("scale") or "").strip()]).strip()
-    return f"the {card.get('name', pid.replace('_', ' '))}", text
+    # The scale's FIRST clause is the size; what follows a semicolon is a later
+    # state ("the screw-thread that emerges"), and the take would draw it now.
+    scale = re.sub(r"\s*\([^)]*\)", "", (prof.get("scale") or "").split(";")[0]).strip().rstrip(".")
+    text = " ".join(body + ([scale + "."] if scale else [])).strip()
+    name = card.get("name") or pid.replace("_", " ")
+    return (name if name.lower().startswith("the ") else f"the {name}"), text
 
 
 def wardrobe_state(by_chapter: dict, chapter: int) -> str:
