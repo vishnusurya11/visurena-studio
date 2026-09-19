@@ -1256,9 +1256,19 @@ staged.  Enough to place the shot; short enough that the shot's own detail still
 owns the block (ep09's 36-word crowd caption in 30 of 30 blocks is the warning)."""
 
 
+def whole_clauses(words: list[str], words_allowed: int) -> str:
+    """The first `words_allowed` words, cut back to the last clause break when
+    the cap falls mid-clause, so a place never ends on "it comes from the"."""
+    kept = words[:words_allowed]
+    if len(words) > words_allowed:
+        breaks = [i for i, w in enumerate(kept) if w[-1:] in ",;."]
+        kept = kept[:breaks[-1] + 1] if breaks else kept
+    return " ".join(kept).rstrip(",;:. ")
+
+
 def place_clause(described: str, words_allowed: int = PLACE_WORDS) -> str:
     """The room, said inside the block, when no picture says it."""
-    said = " ".join((described or "").split()[:words_allowed]).rstrip(",;: ")
+    said = whole_clauses((described or "").split(), words_allowed)
     return f"The shot is inside this place: {said}." if said else ""
 
 

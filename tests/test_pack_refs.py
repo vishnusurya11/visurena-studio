@@ -72,10 +72,35 @@ def _book(tmp_path):
     return tmp_path
 
 
-def test_location_view_path_is_the_views_picture(tmp_path):
+def test_every_size_opens_on_the_one_establishing_wide(tmp_path):
     book = _book(tmp_path)
     got = pack_refs.location_view(book, "observatory", "insert")
-    assert got == book / "refs" / "locations" / "observatory" / "insert_eyepiece_field.png"
+    assert got == book / "refs" / "locations" / "observatory" / "wide_establishing.png"
+
+
+def test_a_named_view_is_ignored_for_the_one_wide(tmp_path):
+    book = _book(tmp_path)
+    got = pack_refs.location_view(book, "observatory", "wide", "insert_eyepiece_field")
+    assert got.name == "wide_establishing.png"
+
+
+def test_a_location_without_an_establishing_wide_takes_its_first_view(tmp_path):
+    loc = tmp_path / "analysis" / "locations"
+    loc.mkdir(parents=True)
+    views = [{"id": "wide_space", "shot_size": "wide"}, {"id": "wide_pit", "shot_size": "wide"}]
+    (loc / "space.json").write_text(json.dumps({"profile": {"design": {"views": views}}}))
+    drawn = tmp_path / "refs" / "locations" / "space"
+    drawn.mkdir(parents=True)
+    for name in ("wide_space", "wide_pit"):
+        (drawn / f"{name}.png").write_bytes(b"png")
+    assert pack_refs.location_view(tmp_path, "space", "insert").name == "wide_space.png"
+
+
+def test_an_undrawn_anchor_is_refused(tmp_path):
+    book = _book(tmp_path)
+    (book / "refs/locations/observatory/wide_establishing.png").unlink()
+    with pytest.raises(SystemExit):
+        pack_refs.location_view(book, "observatory", "wide")
 
 
 def test_location_view_of_a_medium_falls_to_what_is_drawn(tmp_path):

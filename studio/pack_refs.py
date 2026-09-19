@@ -63,11 +63,20 @@ def views_of(book: Path, location: str) -> list[dict]:
     return (row.get("profile") or {}).get("design", {}).get("views") or []
 
 
-def location_view(book: Path, location: str, size: str, named: str = "") -> Path:
-    """The picture that says WHERE, at the framing this shot opens on."""
-    folder = Path(book) / "refs" / "locations" / location
-    drawn = {p.stem for p in folder.glob("*.png")} if folder.exists() else set()
-    return folder / f"{view_for(size, views_of(book, location), drawn, named)}.png"
+ANCHOR = "wide_establishing"
+
+
+def location_view(book: Path, location: str, size: str = "", named: str = "") -> Path:
+    """The ONE picture that says WHERE: the establishing wide, else the design's
+    first view, whatever the shot's size (owner, 2026-09-18: two views of one
+    observatory were two rooms -- a slim refractor and a pier telescope -- and the
+    cut jumped between them).  The take's camera finds the closer framing."""
+    views = views_of(book, location)
+    anchor = next((v["id"] for v in views if v["id"] == ANCHOR), views[0]["id"] if views else ANCHOR)
+    path = Path(book) / "refs" / "locations" / location / f"{anchor}.png"
+    if not path.exists():
+        raise SystemExit(f"location {location!r}: its one picture {anchor}.png is not drawn")
+    return path
 
 
 def character_sheet(book: Path, who: str) -> Path | None:

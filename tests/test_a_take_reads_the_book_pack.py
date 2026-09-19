@@ -2,7 +2,7 @@
 
 OWNER 2026-09-18 (The War of the Worlds, episode 1): no storyboard and no
 composed first frame.  Each take is handed the reference pictures themselves --
-the location VIEW chosen by the shot's size, and the one sheet of every person
+the location's ONE picture, its establishing wide (owner, 2026-09-18), and the one sheet of every person
 in the shot -- and everything else is said in words.  The pack's look is not
 photoreal (Krea2 + the cinematic artstyle LoRA), so the take's style line says
 the book's own look instead of "Photoreal live-action".
@@ -40,12 +40,12 @@ def _book(tmp_path):
     return tmp_path
 
 
-def test_a_pack_book_takes_the_view_of_the_shots_size(tmp_path):
+def test_a_pack_book_opens_every_size_on_the_one_wide(tmp_path):
     book = _book(tmp_path)
     setup = SimpleNamespace(location="ottershaw_observatory")
     shot = SimpleNamespace(size="insert", view="")
     got = takes_r2v.location_picture(book, tmp_path / "boards", setup, "observatory", shot)
-    assert got == book / "refs/locations/ottershaw_observatory/insert_eyepiece_field.png"
+    assert got == book / "refs/locations/ottershaw_observatory/wide_establishing.png"
 
 
 def test_a_shot_may_name_its_view(tmp_path):
