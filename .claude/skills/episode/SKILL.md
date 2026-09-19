@@ -71,6 +71,21 @@ hair and headwear differ across the WHOLE cast, walk-ons included
 - DQ measures only 8-10 of 16 rows with no cell, and identity is not
   measured. Your own look at every take strip and every cut pair is the real check.
 
+**Camera: vary it from the catalog** (`docs/calibration/camera_catalog.md`).
+The owner, on ep01: "almost every other shot is a circle around the object
+or an arc… not good visually". 18 of ep01's 23 shots were pans, and each one
+named a subject that "keeps the left third". A rotating camera with a fixed
+subject IS an orbit. That came from "A WIDE GIVEN A PUSH OVERRUNS TOO"
+below, which is RETIRED for refs-only: it was tuned to pass DQ and it made
+the picture monotonous. So:
+- Use at least 8 different move ids in an episode.
+- No move on more than ~25% of shots; never the same move twice in a row;
+  at most one orbit.
+- A pan names where it ARRIVES; never write "keeps the …" on a pan or a track.
+- Lock the camera and give the actor the verb when the actor carries the beat.
+- Log every take's move in the catalog's trial log (works / drifts / frozen
+  / invents) so the catalog learns what H3 does.
+
 **Title card** (`scripts/episode/series_title.py <book> <n>`): the art is drawn
 ONCE per book (`title/series_base.png` from `title/motif.txt`). Per episode,
 Ideogram 4 letters `SERIES / EPISODE N / chapter` alone on black, a screen
