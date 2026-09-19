@@ -64,3 +64,26 @@ One row per trial take: `episode | take | move id | size | result | eye verdict 
 
 | ep | take | move | size | measured | eye | note |
 |---|---|---|---|---|---|---|
+| ep02 iter1 | T00 | pan_to | wide | zoom 0.98x, churn 2.9 | works | panned lamp to windows; the streak crossed the glass right to left |
+| ep02 iter1 | T01 | locked | medium_close | zoom 1.02x, churn 1.2 | works | pen writes, a green wash crosses the window behind him |
+| ep02 iter1 | T02 | crane_down | wide | zoom 0.92x, churn 2.0 | drifts | no descent at all: it became a lateral track following the walking figure (a good shot, the wrong move) |
+| ep02 iter1 | T03 | follow | medium | zoom 1.12x, churn 9.6 | works | tracked beside him through the heather to the smoke |
+| ep02 iter1 | T04 | high_angle | wide | zoom 0.99x, churn 2.9 | works | the high angle held; the tilt-down read as a slight push; the figure crouched at the rim |
+| ep02 iter1 | T05 | locked | medium_close | zoom 0.96x, churn 3.3, lip mux 0.000 | works | spoke on the locked frame |
+| ep02 iter1 | T06 | push_slow | insert | zoom 3.52x, churn 6.7 | invents | overran 3.5x into the rim and split the lid open on a black cavity (asked: a slab of crust falls) |
+| ep02 iter1 | T07 | low_angle | medium | zoom 0.96x, churn 6.3 | mixed | the low angle held; "slides on his heels" became a man lounging in the sand, in the sheet's cape |
+| ep02 iter1 | T08 | locked | insert | zoom 1.00x, churn 0.9 | works | the lid rim held and the mark crept left; the turn is faint |
+| ep02 iter1 | T09 | push_slow | close | zoom 1.91x, cut 40.6 HARD, DQ 19.7 FAIL | invents | overran from a close into a face-filling extreme close, then a hard cut to a POV of the lid with a hand ("his hand rises toward the lid") |
+| ep02 iter1 | T10 | pull_reveal | medium | zoom 0.27x, churn 7.0 | works | pulled back from his hands on the lid to the whole end of the cylinder |
+| ep02 iter1 | T11 | pan_to | wide | zoom 1.00x, churn 1.9, black share 0.54 | invents | letterboxed a 3:2 picture inside the square with black bars; the running figure lost in the heather |
+| ep02 iter1 | T12 | over_shoulder | medium_close | zoom 1.00x, churn 2.6 | works | Ogilvy's shoulder foreground, the waggoner facing him, then up on his cart |
+| ep02 iter1 | T13 | track_lateral | medium | zoom 1.02x, churn 10.4 | works | tracked along the palings; the gas lamp passed in front (parallax) |
+| ep02 iter1 | T14 | locked | medium_close | zoom 1.03x, churn 1.6, lip mux -0.010 | works | camera obeyed; staging put him inside the garden with the house behind him |
+| ep02 iter1 | T15 | tilt_up | medium_close | zoom 0.99x, churn 3.9 | works | tilted up the spade to his face as he straightened |
+| ep02 iter1 | T16 | push_slow | medium_close | zoom 1.86x, churn 6.2 | works | a medium close pushed to a close; no overrun into invention |
+| ep02 iter1 | T17 | rack_focus | medium_close | zoom 1.00x, churn 0.7, face 0.05 | drifts | no focus change at all; a locked medium-wide with his face a twentieth of the frame for a spoken line |
+| ep02 iter1 | T18 | follow | medium | zoom 1.61x, churn 6.0 | works | tracked behind the two men down to the cylinder |
+| ep02 iter1 | T19 | crane_up | insert | zoom 0.58x, churn 5.3 | works | rose from the seam to a top-down view of the whole lid |
+| ep02 iter1 | T20 | pan_to | wide | zoom 1.75x, churn 7.8 HARD, DQ 82.5 FAIL | mixed | panned to the house as asked but turned into a 1.75x push while two figures moved (boy running, man walking) |
+| ep02 iter1 | T21 | track_lateral | insert | zoom 0.85x, churn 9.3 | works | the move worked; the prop failed: a legible gibberish masthead ("Daily Chrciples") |
+| ep02 iter1 | T22 | tilt_down | medium_close | zoom 0.71x, churn 6.0 | drifts | read as a pull-back from his face to a full figure at the gate |

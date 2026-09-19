@@ -47,7 +47,7 @@ HEND = ("Henderson in white shirtsleeves rolled to the elbow and the black-and-g
 WAGG = ("the waggoner in the wide-brimmed black felt hat and the oatmeal linen smock frock, the long "
         "whip over his shoulder")
 BOY = ("the newspaper boy in the grey flat cap and the ginger corduroy jacket with patched elbows, the "
-       "canvas bag of folded papers across his chest")
+       "canvas bag on its strap across his chest")
 CYL = "the huge crusted cylinder"
 
 PIT_DESCRIBED = (
@@ -200,7 +200,8 @@ S = [
     ("pit", "wide", [], 0.2, "high_angle",
      f"High wide looking down into the raw pit at sunrise: {CYL} lying half-buried across it, its huge "
      "circular end tilted up out of the sand, splintered fir wood on the gravel, and at the charred rim "
-     f"at the bottom left the small figure of {OGIL} standing and staring.",
+     f"at the bottom left the small figure of {OGIL} standing and staring, the curved crusted hull towering "
+     "many times his height and running out of the frame at both sides.",
      "The camera tilts down from the pines on the far rim to the crusted circular end of the cylinder; "
      "a thin haze of heat shimmers off the crust; Ogilvy leans forward over the rim.",
      "high on the rim of the pit looking down into it, a 35mm lens, a high angle. The low sun comes from "
@@ -208,7 +209,8 @@ S = [
      "The crusted circular end of the cylinder fills the CENTRE of the frame, half the frame's height, "
      "tilted up out of the sand. The yellow sand walls slope in from the LEFT edge and the RIGHT edge, "
      "splintered fir lies on the gravel at the BOTTOM, and Ogilvy stands small on the rim at the BOTTOM "
-     "LEFT, the height of a finger. The heather and pines line the TOP edge.",
+     "LEFT, the height of a finger, the crusted hull many times his height. The heather and pines line the "
+     "TOP edge.",
      "setup", "The size of it: a man is a finger beside a thing thirty yards across."),
     ("pit", "medium_close", ["ogilvy"], 0.4, "locked",
      f"Medium close of {OGIL} at the edge of the pit, sweat on his broad ruddy face, the full auburn beard, "
@@ -221,11 +223,11 @@ S = [
      "to the mustard-ochre tweed at the BOTTOM edge, his head a third of the frame's height, lit from the "
      "LEFT. The crusted grey curve of the cylinder fills the frame behind him to the RIGHT edge.",
      "setup", "He sees design before he can name it: the shape, not the size, is what troubles him."),
-    ("pit", "insert", [], 0.7, "push_slow",
+    ("pit", "insert", [], 0.7, "tilt_down",
      "Insert on the crusted rim of the cylinder's circular end in the low sun: the thick dun-grey clinker "
      "already cracking and flaking off the curved edge, grey flakes dropping onto the yellow sand below.",
-     "The camera pushes in toward the crusted rim of the circular end; grey clinker flakes rain "
-     "down onto the sand; a large slab of crust breaks away and falls into the sand with a puff of dust.",
+     "The camera tilts down from the crusted rim of the circular end to the yellow sand below; grey "
+     "clinker flakes rain off the rim in a steady shower; the flakes pile into a grey drift on the sand.",
      "at the foot of the circular end looking up at its rim, an arm's length from the crust, a 90mm lens. "
      "The low sun comes from the LEFT along the rim and leaves the crust's underside black",
      "The curved crusted rim of the circular end crosses the frame from the LEFT edge to the RIGHT edge "
@@ -233,15 +235,15 @@ S = [
      "CENTRE and the yellow sand lies across the BOTTOM third with fallen flakes on it.",
      "setup", "The picture speaks: the Thing is shedding its skin, and he is alone with it."),
     ("pit", "medium", ["ogilvy"], 0.9, "low_angle",
-     f"Low medium from the pit floor of {OGIL} already half-way down the sand wall, sliding on his heels "
-     "toward the camera with one hand trailing in the sand, the crusted curve of the cylinder rising at "
+     f"Low medium from the pit floor of {OGIL} already half-way down the sand wall, upright on his feet "
+     "and stepping down it sideways, one arm out for balance, the crusted curve of the cylinder rising at "
      "the right.",
-     "The camera tilts up from the grey gravel of the pit floor to Ogilvy on the sand wall; he slides down "
-     "the last stretch of sand on his heels; a shower of sand runs down beside him.",
+     "The camera tilts up from the grey gravel of the pit floor to Ogilvy on the sand wall; he steps down "
+     "the sand sideways at a normal walking pace; a shower of sand runs down beside his boots.",
      "on the gravel floor of the pit at knee height looking up the sand wall, three long strides from him, "
      "a 35mm lens, a low angle. The low sun comes from the LEFT onto his back and the sand and leaves the "
      "cylinder's flank black",
-     "Ogilvy slides down the yellow sand wall at the LEFT third of the frame, his head a quarter of the "
+     "Ogilvy stands upright on the yellow sand wall at the LEFT third of the frame, his head a quarter of the "
      "frame's height, the pale sky above the rim at the TOP. The crusted curve of the cylinder rises at the "
      "RIGHT half and the grey gravel lies across the BOTTOM edge.",
      "setup", "He goes toward it: curiosity is still bigger than fear."),
@@ -257,20 +259,21 @@ S = [
      "the thin dark seam running under it. The black scorch mark sits at the RIGHT third of the rim, the "
      "size of a hand, and grey clinker lies on the sand at the BOTTOM edge.",
      "setup", "The shape becomes a mechanism: the lid is turning, so something turns it."),
-    ("floor", "close", ["ogilvy"], 0.3, "push_slow",
-     f"Close of {OGIL} at the foot of the cylinder, the broad ruddy face streaming with sweat and the small "
+    ("floor", "medium_close", ["ogilvy"], 0.3, "push_slow",
+     f"Medium close of {OGIL} at the foot of the cylinder, the broad ruddy face streaming with sweat and the small "
      "hazel eyes wide behind the steel spectacles, the crusted metal filling the frame behind him.",
      "The camera pushes in toward Ogilvy's face; his eyes go wide; his mouth opens on the words and "
-     "his hand rises toward the lid.",
+     "his hand rises to his spectacles.",
      "at the foot of the cylinder level with his eyes, an arm's length from him, a 50mm lens. The low sun "
      "comes from the LEFT onto his face and leaves the metal behind him in shadow",
-     "Ogilvy's face fills the CENTRE of the frame from his wild auburn hair at the TOP edge to his beard at "
-     "the BOTTOM third, his head half the frame's height, lit from the LEFT. The grey crust of the cylinder "
-     "fills the frame behind him from the LEFT edge to the RIGHT edge.",
+     "Ogilvy's head and shoulders fill the CENTRE of the frame from his wild auburn hair at the TOP third to "
+     "the mustard-ochre tweed at the BOTTOM edge, his head a third of the frame's height, lit from the LEFT. "
+     "The grey crust of the cylinder fills the frame behind him from the LEFT edge to the RIGHT edge.",
      "reaction", "The thought arrives whole and wrong: men, trapped, dying."),
     ("floor", "medium", ["ogilvy"], 0.5, "pull_reveal",
      f"Medium of {OGIL} at the foot of the huge crusted lid, both hands already reaching out toward the "
-     "glowing metal, heat haze rising off it around his fingers.",
+     "glowing metal, heat haze rising off it around his fingers, the curved crusted hull towering many "
+     "times his height and running out of the frame at both sides.",
      "The camera pulls back from Ogilvy's outstretched hands, widening to show the whole crusted end of "
      "the cylinder above him; he snatches his hands back from the heat and shakes them; he turns and "
      "scrambles up the sand wall.",
@@ -280,17 +283,18 @@ S = [
      "a quarter of the frame's height, his hands reaching toward the crust. The crusted circular end rises "
      "behind him across the frame from the LEFT edge to the RIGHT edge, heat haze over it.",
      "reaction", "His goodness nearly burns him: he would help the thing that has come to kill him."),
-    ("heath", "wide", [], 0.8, "pan_to",
-     f"Wide of Horsell Common in the early sun: {OGIL} running hatless through the heather toward the "
-     f"pale sandy road, and on the road {WAGG} on the seat of a horse-drawn cart already passing, the church "
+    ("heath", "medium", ["ogilvy"], 0.8, "pan_to",
+     f"Medium of {OGIL} already running hatless through the knee-deep heather toward the pale sandy road, "
+     f"both arms flung up, and behind him on the road {WAGG} on the seat of a horse-drawn cart, the church "
      "tower of Woking on the horizon.",
-     "The camera pans from the smoking sand heaps across to the pale sandy road and the church tower; "
-     "Ogilvy runs through the heather onto the road waving both arms; the cart rolls on along the road.",
-     "on the heath at a standing man's eye, far from the road, a 35mm lens. The low sun comes from BEHIND "
-     "the far pines onto the road and leaves the near heather black",
-     "The pale sandy road crosses the frame from the LEFT edge toward the CENTRE, the horse-drawn cart on it "
-     "at the LEFT third. Ogilvy runs through the heather at the CENTRE, the height of a finger. The church "
-     "tower rises small on the horizon at the CENTRE and the lemon sky fills the TOP half.",
+     "The camera pans from the smoking sand heaps across to Ogilvy running onto the pale sandy road; he "
+     "waves both arms at the cart; the horse pulls the cart on along the road.",
+     "on the heath at his shoulder height, three long strides from him, a 35mm lens. The low sun comes "
+     "from BEHIND the far pines onto his hair and shoulders and leaves the near heather black",
+     "Ogilvy runs through the heather at the CENTRE of the frame from the BOTTOM edge to the TOP third, his "
+     "head a quarter of the frame's height, both arms up. The pale sandy road crosses behind him from the "
+     "LEFT edge to the RIGHT third with the horse-drawn cart on it at the LEFT third, and the lemon sky "
+     "fills the TOP edge.",
      "friction", "The first person he meets does not stop: the news is too wild to be heard."),
     ("heath", "medium_close", ["unnamed_waggoner"], 0.9, "over_shoulder",
      f"Medium close over Ogilvy's shoulder toward {WAGG} on the seat of his cart, the weathered brick-red "
@@ -317,15 +321,17 @@ S = [
      "height. The gabled porch and green door stand at the LEFT third and the villa's brick fills the TOP.",
      "friction", "The one listener, and he is deaf in one ear and busy with his peas."),
     ("garden", "medium_close", ["ogilvy"], 0.3, "locked",
-     f"Medium close of {OGIL} at the white palings, both hands gripping the pointed tops, leaning over "
-     "them, breathless, sand on his tweed and in his beard, the rows of peas behind him.",
+     f"Medium close of {OGIL} on the pavement outside the white palings, turned three-quarters toward the "
+     "camera, both hands gripping the pointed tops, leaning over them into the garden, breathless, sand on "
+     "his tweed and in his beard.",
      "The camera holds a locked-off frame; he leans over the palings and calls out; his hand shakes the "
      "pointed tops.",
-     "inside the garden among the peas level with his eyes, an arm's length from him, a 50mm lens. The "
-     "low sun comes from the RIGHT onto his face and leaves the street behind him in shade",
-     "Ogilvy's head and shoulders fill the CENTRE of the frame from his wild auburn hair at the TOP third "
+     "on the pavement beside him level with his eyes, an arm's length from him, looking along the palings, "
+     "a 50mm lens. The low sun comes from the RIGHT onto his face and leaves the porch across the garden black",
+     "Ogilvy's head and shoulders fill the LEFT half of the frame from his wild auburn hair at the TOP third "
      "to his gripping hands on the palings at the BOTTOM edge, his head a third of the frame's height, lit "
-     "from the RIGHT. The white palings cross the BOTTOM edge and the gas lamp stands at the RIGHT edge.",
+     "from the RIGHT. The white palings run away from him along the BOTTOM edge, and the rows of peas and "
+     "the gabled porch of the villa stand across the garden at the RIGHT half.",
      "friction", "He has learned: this time he starts with what the other man saw."),
     ("garden", "medium_close", ["henderson"], 0.5, "tilt_up",
      f"Medium close of {HEND} straightening up among the peas, the narrow sharp face with its pointed nose "
@@ -339,30 +345,32 @@ S = [
      "the RIGHT. The spade handle rises at the LEFT third and the green porch door is dark at the TOP LEFT.",
      "friction", "He hears the word he wanted: a story. He has not heard the rest."),
     ("garden", "medium_close", ["ogilvy"], 0.7, "push_slow",
-     f"Medium close of {OGIL} leaning hard over the white palings, one hand chopping the air, his eyes "
-     "fixed across the palings, the low sun full on his broad ruddy face.",
+     f"Medium close of {OGIL} on the pavement leaning hard over the white palings into the garden, turned "
+     "three-quarters toward the camera, one hand chopping the air, the low sun full on his broad ruddy face.",
      "The camera pushes in toward Ogilvy's face; he slaps the palings with his open hand; he leans "
      "in over the palings and jabs his arm back toward the common.",
-     "inside the garden among the peas level with his eyes, an arm's length from him, a 50mm lens. The "
-     "low sun comes from the RIGHT onto his face and leaves the street behind him in shade",
-     "Ogilvy's head and shoulders fill the CENTRE of the frame from his wild auburn hair at the TOP third "
+     "on the pavement beside him level with his eyes, an arm's length from him, looking along the palings, "
+     "a 50mm lens. The low sun comes from the RIGHT onto his face and leaves the porch across the garden black",
+     "Ogilvy's head and shoulders fill the LEFT half of the frame from his wild auburn hair at the TOP third "
      "to his hand on the palings at the BOTTOM edge, his head a third of the frame's height, lit from the "
-     "RIGHT. The white palings cross the BOTTOM edge and the street is soft behind him at the LEFT edge.",
+     "RIGHT. The white palings run away from him along the BOTTOM edge, and the peas and the gabled porch "
+     "stand across the garden at the RIGHT half.",
      "turn", "The turn is his own act: he says the true word, artificial, and makes it land."),
-    ("garden", "medium_close", ["henderson"], 0.9, "rack_focus",
-     f"Medium close of {HEND} behind the white palings in the foreground, one hand cupped behind his ear, "
-     "his face turned toward the street.",
-     "The camera racks focus from the white palings in the foreground to Henderson behind them; he cups "
-     "his hand to his ear and leans in; he lets the spade fall into the peas.",
-     "on the pavement close behind the palings level with his eyes, an arm's length from him, a 50mm lens. "
+    ("garden", "medium_close", ["henderson"], 0.9, "low_angle",
+     f"Low medium close of {HEND} among the peas, one hand already cupped behind his ear, his narrow face "
+     "turned toward the palings, the spade loose in his other hand.",
+     "The camera holds a locked-off frame; he cups his hand to his ear and leans in over the peas; he lets "
+     "the spade fall into the peas.",
+     "among the peas at knee height looking up at him, an arm's length from him, a 50mm lens, a low angle. "
      "The low sun comes from the RIGHT onto his face and leaves the porch behind him black",
-     "The white pointed palings cross the BOTTOM third of the frame from the LEFT edge to the RIGHT edge in "
-     "the foreground. Henderson's head and shoulders stand behind them at the CENTRE, his head a third of "
-     "the frame's height, his hand cupped at his ear. The gabled porch is dark at the TOP LEFT.",
+     "Henderson's head and shoulders fill the CENTRE of the frame from his oiled brown hair at the TOP "
+     "third to the striped waistcoat at the BOTTOM edge, his head a third of the frame's height, his hand "
+     "cupped at his ear. The gabled porch is dark at the TOP LEFT and the blue sky fills the TOP RIGHT.",
      "reaction", "The deaf ear: one more obstacle, comic, before belief."),
     ("floor", "medium", [], 0.8, "follow",
      f"Medium of {OGIL} and Henderson, now in his black-and-white shepherd's-check jacket, hurrying down "
-     "the sand wall side by side toward the crusted cylinder, Henderson with a walking stick in his hand.",
+     "the sand wall side by side toward the crusted cylinder, Henderson with a walking stick in his hand, "
+     "the curved crusted hull towering many times their height and running out of the frame at both sides.",
      "The camera tracks behind Ogilvy and Henderson as they walk down the sand at a normal walking pace toward the cylinder; "
      "Henderson raps the crust with his stick; both men lean their heads toward the metal to listen.",
      "behind them on the sand wall at a standing man's eye, three long strides from them, a 35mm lens. "
@@ -385,10 +393,10 @@ S = [
      "answer", "The seam is the future: the lid is coming off, and nobody is there to see it."),
     ("home", "wide", ["unnamed_newspaper_boy", "unnamed_first_person_narrator"], 0.3, "pan_to",
      f"Wide of the narrator's red-brick villa at a quarter to nine in bright morning sun: {BOY} already "
-     "running up the gravel road toward the iron gate, and in the black doorway under the porch "
-     f"{NARR_OUT} stepping out onto the path.",
-     "The camera pans from the tall beeches at the left across to the black front door; the newspaper boy "
-     "runs up the gravel to the iron gate; the Narrator walks down the path at a normal walking pace toward him.",
+     "running up the gravel road toward the iron gate, and at the open gate "
+     f"{NARR_OUT} waiting with one hand on the gatepost.",
+     "The camera pans from the tall beeches at the left across to the iron gate; the newspaper boy runs up "
+     "the gravel to the iron gate; the Narrator at the gate raises his hand to him.",
      "on the gravel road at a standing man's eye, far down the hill, a 35mm lens. The morning sun comes "
      "from the LEFT onto the brick and leaves the laurels and the porch black",
      "The red-brick villa fills the CENTRE of the frame with the black front door under its red-tiled porch. "
@@ -397,20 +405,21 @@ S = [
      "runout", "The news has become a spectacle: the town goes to look before it goes to fear."),
     ("home", "insert", [], 0.6, "track_lateral",
      "Insert across the top of the black wrought-iron gate: the newspaper boy's inky fingers passing a "
-     "folded Daily Chronicle over the gate into the Narrator's hand in its grey tweed cuff.",
+     "newspaper folded tight in quarters, its plain grey folded edge toward the camera, over the gate into "
+     "the Narrator's hand in its grey tweed cuff.",
      "The camera tracks sideways to the left along the top of the iron gate, past the passing newspaper; "
-     "a grey tweed cuff reaches in, takes the paper and unfolds it; inky fingers point away down the road.",
+     "a grey tweed cuff reaches in and takes the folded paper; inky fingers point away down the road.",
      "beside the gate at the height of the gate top, an arm's length from the paper, a 90mm lens. The "
      "morning sun comes from the LEFT onto the paper and leaves the laurels behind black",
      "The black iron gate top crosses the BOTTOM third of the frame from the LEFT edge to the RIGHT edge. "
-     "The folded newspaper passes over it at the CENTRE, the boy's hand at the LEFT third and the Narrator's "
+     "The tight-folded newspaper passes over it edge-on at the CENTRE, the boy's hand at the LEFT third and the Narrator's "
      "grey tweed cuff at the RIGHT third. The dark laurels fill the TOP half behind.",
      "runout", "The lead's own entrance into the story: the news is handed to him over his own gate."),
-    ("home", "medium_close", ["unnamed_newspaper_boy"], 0.8, "tilt_down",
+    ("home", "medium_close", ["unnamed_newspaper_boy"], 0.8, "locked",
      f"Medium close of {BOY} at the black iron gate in the morning sun, the narrow freckled face flushed "
      "from running, gap-toothed and grinning, one hand pointing away down the road toward the common.",
-     "The camera tilts down from the tall beeches to the boy's face at the gate; he points down the road "
-     "toward the common; he bounces on his toes as he tells it.",
+     "The camera holds a locked-off frame; he points down the road toward the common; he bounces on his "
+     "toes as he tells it.",
      "on the garden path level with his eyes, an arm's length from him, a 50mm lens. The morning sun comes "
      "from the LEFT onto his face and leaves the laurels behind him black",
      "The newspaper boy's head and shoulders fill the CENTRE of the frame from his grey flat cap at the TOP "
