@@ -223,11 +223,12 @@ S = [
      "to the mustard-ochre tweed at the BOTTOM edge, his head a third of the frame's height, lit from the "
      "LEFT. The crusted grey curve of the cylinder fills the frame behind him to the RIGHT edge.",
      "setup", "He sees design before he can name it: the shape, not the size, is what troubles him."),
-    ("pit", "insert", [], 0.7, "tilt_down",
+    ("pit", "insert", [], 0.7, "track_lateral",
      "Insert on the crusted rim of the cylinder's circular end in the low sun: the thick dun-grey clinker "
      "already cracking and flaking off the curved edge, grey flakes dropping onto the yellow sand below.",
-     "The camera tilts down from the crusted rim of the circular end to the yellow sand below; grey "
-     "clinker flakes rain off the rim in a steady shower; the flakes pile into a grey drift on the sand.",
+     "The camera tracks sideways to the left along the crusted rim of the circular end, past the falling "
+     "flakes; grey clinker flakes rain off the rim in a steady shower; the flakes pile into a grey drift on "
+     "the sand.",
      "at the foot of the circular end looking up at its rim, an arm's length from the crust, a 90mm lens. "
      "The low sun comes from the LEFT along the rim and leaves the crust's underside black",
      "The curved crusted rim of the circular end crosses the frame from the LEFT edge to the RIGHT edge "
@@ -259,12 +260,12 @@ S = [
      "the thin dark seam running under it. The black scorch mark sits at the RIGHT third of the rim, the "
      "size of a hand, and grey clinker lies on the sand at the BOTTOM edge.",
      "setup", "The shape becomes a mechanism: the lid is turning, so something turns it."),
-    ("floor", "medium_close", ["ogilvy"], 0.3, "push_slow",
-     f"Medium close of {OGIL} at the foot of the cylinder, the broad ruddy face streaming with sweat and the small "
+    ("floor", "medium_close", ["ogilvy"], 0.3, "low_angle",
+     f"Low medium close of {OGIL} already crouched at the foot of the cylinder, the broad ruddy face streaming with sweat and the small "
      "hazel eyes wide behind the steel spectacles, the crusted metal filling the frame behind him.",
-     "The camera pushes in toward Ogilvy's face; his eyes go wide; his mouth opens on the words and "
-     "his hand rises to his spectacles.",
-     "at the foot of the cylinder level with his eyes, an arm's length from him, a 50mm lens. The low sun "
+     "The camera holds a locked-off frame; his eyes go wide; his mouth opens on the words and his hand "
+     "rises to his spectacles.",
+     "on the gravel below him looking up at his face, an arm's length from him, a 50mm lens, a low angle. The low sun "
      "comes from the LEFT onto his face and leaves the metal behind him in shadow",
      "Ogilvy's head and shoulders fill the CENTRE of the frame from his wild auburn hair at the TOP third to "
      "the mustard-ochre tweed at the BOTTOM edge, his head a third of the frame's height, lit from the LEFT. "
@@ -393,10 +394,10 @@ S = [
      "answer", "The seam is the future: the lid is coming off, and nobody is there to see it."),
     ("home", "wide", ["unnamed_newspaper_boy", "unnamed_first_person_narrator"], 0.3, "pan_to",
      f"Wide of the narrator's red-brick villa at a quarter to nine in bright morning sun: {BOY} already "
-     "running up the gravel road toward the iron gate, and at the open gate "
-     f"{NARR_OUT} waiting with one hand on the gatepost.",
+     "running up the gravel road toward the iron gate, and far off in the black doorway under the porch "
+     f"{NARR_OUT} standing with one hand on the door.",
      "The camera pans from the tall beeches at the left across to the iron gate; the newspaper boy runs up "
-     "the gravel to the iron gate; the Narrator at the gate raises his hand to him.",
+     "the gravel to the iron gate; far off in the doorway the Narrator lifts his hand.",
      "on the gravel road at a standing man's eye, far down the hill, a 35mm lens. The morning sun comes "
      "from the LEFT onto the brick and leaves the laurels and the porch black",
      "The red-brick villa fills the CENTRE of the frame with the black front door under its red-tiled porch. "

@@ -87,3 +87,18 @@ One row per trial take: `episode | take | move id | size | result | eye verdict 
 | ep02 iter1 | T20 | pan_to | wide | zoom 1.75x, churn 7.8 HARD, DQ 82.5 FAIL | mixed | panned to the house as asked but turned into a 1.75x push while two figures moved (boy running, man walking) |
 | ep02 iter1 | T21 | track_lateral | insert | zoom 0.85x, churn 9.3 | works | the move worked; the prop failed: a legible gibberish masthead ("Daily Chrciples") |
 | ep02 iter1 | T22 | tilt_down | medium_close | zoom 0.71x, churn 6.0 | drifts | read as a pull-back from his face to a full figure at the gate |
+| ep02 iter2 | T04 | high_angle | wide | zoom 0.99x, churn 4.3 | works | same as iter1; "the hull towers many times his height" did not enlarge the drum: the pit picture sets its size |
+| ep02 iter2 | T06 | tilt_down | insert | cut 60.5 HARD, DQ 60 FAIL (twice) | invents | opened on the pit's own wide for half a second, then cut to the rim insert; the clinker shower and the grey drift that followed were right |
+| ep02 iter2 | T07 | low_angle | medium | zoom 1.00x, churn 4.5 | drifts | no low angle: an eye-level follow of him walking past the drum, upright, in his suit |
+| ep02 iter2 | T09 | push_slow | medium_close | zoom 1.97x, churn 7.0, DQ 64.9 | invents | began on a full-length front-on sheet pose, then pushed to a face-filling close: the overrun again, from further out |
+| ep02 iter2 | T09 (2) | low_angle | medium_close | zoom ~1.9x, DQ 85 | mixed | crouched at the drum, spoke with good lips; the "locked-off" camera still pushed in from medium to close |
+| ep02 iter2 | T10 | pull_reveal | medium | zoom 0.32x, churn 6.6 | works | again; with "towering" in the words the drum now reads three times his height |
+| ep02 iter2 | T11 | pan_to | medium | zoom 0.68x, churn 10.9, DQ 36 | drifts | no letterbox this time; the pan became an arc around him to the cart (an orbit by the back door), and the sheet's cape came back |
+| ep02 iter2 | T14 | locked | medium_close | zoom 1.07x, churn 2.0 | works | the camera held; "on the pavement" did not move him out of the garden: the location picture has the house behind the palings, so he stands in front of it |
+| ep02 iter2 | T16 | push_slow | medium_close | zoom 3.29x, churn 8.4, DQ 71 | mixed | began medium-wide and pushed to a close (3.3x); readable and emotional, but the overrun is real |
+| ep02 iter2 | T17 | low_angle | medium_close | zoom 0.98x, churn 1.5, face 0.18 | works | the low angle held: he cups his ear looking down at the lens, face readable for the line |
+| ep02 iter2 | T18 | follow | medium | zoom 1.21x, churn 4.8 | works | again |
+| ep02 iter2 | T20 | pan_to | wide | churn 6.5 HARD, DQ 95.5 FAIL | invents | the Narrator waiting at the gate walked into the lens and filled the frame |
+| ep02 iter2 | T20 (2) | pan_to | wide | DQ 85 PASS | works | with the Narrator far off in the doorway the pan landed on the house as asked |
+| ep02 iter2 | T21 | track_lateral | insert | churn 7.3, DQ 76.6 | works | the paper folded edge-on: no masthead |
+| ep02 iter2 | T22 | locked | medium_close | zoom 1.04x, churn 2.6, face 0.24 | works | the boy points and speaks, face readable to the end |
