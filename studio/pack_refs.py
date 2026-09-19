@@ -85,6 +85,24 @@ def character_sheet(book: Path, who: str) -> Path | None:
     return path if path.exists() else None
 
 
+def prop_sheet(book: Path, pid: str) -> Path | None:
+    """The prop's one sheet, or None when the pack has not drawn it."""
+    path = Path(book) / "refs" / "props" / pid / "sheet.png"
+    return path if path.exists() else None
+
+
+def prop_row(book: Path, pid: str) -> tuple[str, str]:
+    """How a take names and defines a prop: its body and its scale.  A state
+    sentence ("Once open, ...") belongs to a later chapter; the shot's own words
+    say what the prop is doing now (ep02: the lid is still shut)."""
+    card = json.loads((Path(book) / "analysis" / "props" / f"{pid}.json").read_text(encoding="utf-8"))
+    prof = card.get("profile") or {}
+    body = [s.strip() for s in (prof.get("physical") or "").split(". ") if s.strip()]
+    body = [s if s.endswith(".") else s + "." for s in body if not s.startswith("Once ")]
+    text = " ".join(body + [(prof.get("scale") or "").strip()]).strip()
+    return f"the {card.get('name', pid.replace('_', ' '))}", text
+
+
 def wardrobe_state(by_chapter: dict, chapter: int) -> str:
     """The chapter's wardrobe state; a chapter with no entry keeps the last one before it."""
     earlier = [int(c) for c in by_chapter if str(c).isdigit() and int(c) <= chapter]
@@ -103,3 +121,23 @@ def character_row(book: Path, who: str, chapter: int) -> dict:
             "name": card.get("name", who), "physical": physical,
             "wardrobe": {"indoor": worn.strip(), "outdoor": worn.strip()},
             "rel_path": f"refs/characters/{who}/sheet.png"}
+
+
+def props_for(book: Path, pids: list[str]) -> list[tuple[Path, tuple[str, str]]]:
+    """The setup's props that have a drawn sheet, each with its definition."""
+    return [(sheet, prop_row(book, pid)) for pid in pids if (sheet := prop_sheet(book, pid))]
+
+
+def rows_for(book: Path, chapter: int, cast: list[str], old: list[dict],
+             named: dict[str, tuple[str, str]] | None = None) -> list[dict]:
+    """refs.json's character rows for one chapter: the cast rebuilt from the
+    dossier in that chapter's clothes, each keeping its display name and gender
+    (or taking the ones `named` gives), and every other row kept as it was."""
+    before = {r.get("entity_id"): r for r in old}
+    rows = []
+    for who in cast:
+        row = character_row(book, who, chapter)
+        display, gender = (named or {}).get(who, (before.get(who, {}).get("display"),
+                                                   before.get(who, {}).get("gender")))
+        rows.append({**row, **({"display": display} if display else {}), **({"gender": gender} if gender else {})})
+    return rows + [r for r in old if r.get("entity_id") not in cast]

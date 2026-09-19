@@ -379,7 +379,12 @@ def card(book: Path, episode: Episode, number: int, take: dict, measured: dict) 
         where = location_picture(book, boards, episode.setups[first.setup], first.setup, first)
         faces = people_staged(shots, sorted(physicals(book)))
         refs = refs_from_cards(book, boards, faces, first.setup, state, sizes, where)
+        # THE SETUP'S PROP SHEETS, after the place (ep02: the cylinder).
+        staged_props = pack_refs.props_for(book, list(getattr(episode.setups[first.setup], "props", []) or []))
+        refs += [path for path, _ in staged_props]
+        props = [row for _, row in staged_props]
     else:
+        props = []
         sheet = reference_strip(boards, episode, shots)
         ends = end_cells(sq.cells_in(boards), segs, seg_sizes(shots), seg_motions(shots))
         refs = reference_list(book, boards, faces, first.setup, segs, ends, sheet, state, sizes)
@@ -397,7 +402,7 @@ def card(book: Path, episode: Episode, number: int, take: dict, measured: dict) 
     setup = episode.setups[first.setup]
     prompt = ro.build(shots, take["placed"], lines, at, take["frames"], faces, physicals(book),
                       setup.described, narrator_of(episode.lines), ends=end_numbers(segs, ends), setup=setup,
-                      refs=len(refs), fps=FPS, **staged_facts(sizes, FROM_REFS, faces))
+                      refs=len(refs), fps=FPS, props=props, **staged_facts(sizes, FROM_REFS, faces))
     return {"index": first.index, "shots": take["shots"], "section": first.section, "setup": first.setup,
             "lane": "dialogue" if spoken else "narration", "workflow": BASE + " + anchors",
             "model": "MiniMax-H3 ref2va + Ref2V 8-step LoRA", "mode": mode_said(FROM_REFS),

@@ -486,7 +486,7 @@ def audio_line(spoken) -> str:
 def subjects(faces: list[str], physical: dict[str, str], described: str, segs: list[dict],
              ends: list[int] | None = None, spoken=None,
              has_plate: bool = True, outdoors: bool = False,
-             has_cells: bool = True) -> tuple[str, dict[int, int], int]:
+             has_cells: bool = True, props=None) -> tuple[str, dict[int, int], int]:
     """subject_definitions; returns the text, `{segment -> its first-frame picture}`
     and the strip's picture number."""
     ends, names = ends or [], names_of(list(physical) or faces)
@@ -505,6 +505,7 @@ def subjects(faces: list[str], physical: dict[str, str], described: str, segs: l
     if plate is not None:
         out.append(f"<Subject {plate}> is the location in <Picture {plate}>: {described} <Picture {plate}> "
                    f"defines this {place_word(described, outdoors)} alone; {framing_tail}")
+    out += prop_definitions(props or [], prop_first(len(faces), plate))
     for i, seg in enumerate(segs):
         if cells[i] is None:
             continue
@@ -518,11 +519,31 @@ def subjects(faces: list[str], physical: dict[str, str], described: str, segs: l
     return "\n".join(out), cells, strip
 
 
+def prop_first(n_faces: int, plate: int | None) -> int:
+    """The first prop's picture slot: straight after the plate (or the cast)."""
+    return (plate or n_faces) + 1
+
+
+def prop_definitions(props, first: int) -> list[str]:
+    """A prop sheet DEFINES an object, like a cast sheet defines a man (ep02's
+    cylinder: the pit's own picture draws it as a tile patchwork)."""
+    return [f"<Subject {k}> is {name} in <Picture {k}>: {text} <Picture {k}> defines this object alone; "
+            f"each shot keeps the framing its own words describe."
+            for k, (name, text) in enumerate(props, start=first)]
+
+
+def prop_retention(props, first: int, n_segs: int) -> list[str]:
+    return [f"<Subject {k}> ({name} in {shot_list(range(1, n_segs + 1))}): partially_preserved - the shape, "
+            f"surface and scale of <Picture {k}> carry into every shot that shows it; <Picture {k}> serves "
+            f"as a definition of the object and each shot keeps the framing its own words describe."
+            for k, (name, text) in enumerate(props, start=first)]
+
+
 # ---- 1.3  retention_analysis -----------------------------------------------
 
 def retention(faces: list[str], segs: list[dict], cells: dict, strip: int, ends: list[int],
               described: str, has_plate: bool = True, outdoors: bool = False,
-              has_cells: bool = True) -> str:
+              has_cells: bool = True, props=None) -> str:
     """R1-R7.  The plate is `partially_preserved` and never `appears in` a shot
     (OWNER 5.16).  Every pinned cell is `fully_preserved` as its shot's first frame;
     there is no strip to mark `weak_reference` any more."""
@@ -541,6 +562,7 @@ def retention(faces: list[str], segs: list[dict], cells: dict, strip: int, ends:
                    f"materials, furniture and light of <Picture {plate}> carry into every shot behind the "
                    f"people; <Picture {plate}> serves as a definition of the "
                    f"{place_word(described, outdoors)} and {framing_tail}")
+    out += prop_retention(props or [], prop_first(len(faces), plate), len(segs))
     # NOT `viewpoint`: 22 of 22 prompts asked for a preserved viewpoint in a block
     # whose own camera sentence pushes the camera THROUGH it.  Told to hold the
     # viewpoint and to change it, the render held -- episode 3 T02's Holmes sits at
@@ -607,7 +629,10 @@ def voice_events(shot_lines: list[Line], at: dict, offset: float, ids: dict, fac
 
 # ---- 1.4  the camera and the beats -----------------------------------------
 
-MOVES = ("push", "dolly", "pull", "zoom", "track", "handheld", "pan", "tilt", "crane", "orbit")
+MOVES = ("push", "dolly", "pull", "zoom", "track", "handheld", "pan", "tilt", "crane", "orbit",
+         # the camera catalog (docs/calibration/camera_catalog.md, owner 2026-09-19): a locked-off
+         # frame (`calm` says "holds" as "keeps"), a crane that descends or rises, a rack of focus
+         "hold", "keep", "descend", "rise", "rack")
 CAMERA = {"tracking": "tracks", "track": "tracks", "push": "pushes", "pushing": "pushes",
           "pull": "pulls", "pulling": "pulls", "dolly": "dollies", "dollying": "dollies",
           "zoom": "zooms", "zooming": "zooms", "pan": "pans", "panning": "pans",
@@ -1964,9 +1989,12 @@ def build(shots: list[Shot], placed: list[dict], lines: list[Line], at: dict, fr
           faces: list[str], physical: dict[str, str], described: str, narrator: str,
           ends: list[int] | None = None, setup: Setup | None = None, refs: int | None = None,
           fps: int = 24, check_lint: bool = True, has_plate: bool = True,
-          cells_staged: bool = True) -> str:
+          cells_staged: bool = True, props=None) -> str:
     """The six sections, in order.  `frames` is the LATENT length: base-en §2.1 asks
     for the effective duration, and the placed length is 0.5 s short of it (5.6)."""
+    if props and cells_staged:
+        raise ValueError("a prop sheet is staged only on a references-only take: its slot sits "
+                         "where the first storyboard cell would be numbered")
     offset = {s["index"]: s for s in placed}[shots[0].index]["t_start"]
     described = calm(described)     # the setup sheet is written for the drawer too (L2)
     outdoors = bool(getattr(setup, "outdoors", False))
@@ -1974,13 +2002,13 @@ def build(shots: list[Shot], placed: list[dict], lines: list[Line], at: dict, fr
     spoken = [(l, at[l.index][0] - offset) for l in sorted(lines, key=lambda l: l.index)
               if l.kind == "dialogue"]
     subs, cells, strip = subjects(faces, physical, described, segs, ends or [], spoken, has_plate,
-                                  outdoors, cells_staged)
+                                  outdoors, cells_staged, props)
     dd, life = describe(shots, placed, lines, at, faces, physical, narrator, frames, cells, setup, fps,
                         not (ends or []), cells_staged)
     text = six_sections(subs, summary(frames, segs, cells, described, faces, spoken, fps, has_plate,
                                       cells_staged),
                         retention(faces, segs, cells, strip, ends or [], described, has_plate, outdoors,
-                                  cells_staged),
+                                  cells_staged, props),
                         dd, soundscape(described, getattr(setup, "crowd", ""), outdoors))
     if bad := negations(text):
         raise ValueError(f"the prompt carries negation MiniMax cannot read: {bad}")
