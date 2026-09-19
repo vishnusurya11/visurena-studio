@@ -1,6 +1,6 @@
 """A series title card: one picture for the book, lettered per episode."""
-from studio.series_title import (card_lines, chapter_name, letter_prompt,
-                                 lines_read, missing_lines)
+from studio.series_title import (card_lines, chapter_name, lines_read,
+                                 missing_lines)
 
 
 def test_chapter_name_drops_the_roman_numeral_and_full_stop():
@@ -11,12 +11,6 @@ def test_chapter_name_drops_the_roman_numeral_and_full_stop():
 def test_card_lines_are_series_episode_then_chapter():
     assert card_lines("The War of the Worlds", 1, "I. THE EVE OF THE WAR.") == [
         "THE WAR OF THE WORLDS", "EPISODE 1", "THE EVE OF THE WAR"]
-
-
-def test_letter_prompt_quotes_every_line_exactly():
-    lines = ["THE WAR OF THE WORLDS", "EPISODE 12", "THE AVENGING ANGELS"]
-    text = letter_prompt(lines)
-    assert all(f'"{line}"' in text for line in lines)
 
 
 def test_lines_read_is_forgiving_of_case_space_and_punctuation():
@@ -43,3 +37,26 @@ def test_a_doubled_word_in_the_series_line_is_caught():
 
 def test_a_wrong_episode_number_is_caught():
     assert not lines_read(["EPISODE 1"], "EPISODE 11")
+
+
+def test_the_ideogram_plate_quotes_each_line_on_plain_black():
+    import json
+    from studio.series_title import plate_caption
+    lines = ["THE WAR OF THE WORLDS", "EPISODE 1", "THE EVE OF THE WAR"]
+    caption = json.loads(plate_caption(lines))
+    texts = [e["desc"] for e in caption["compositional_deconstruction"]["elements"]]
+    assert all(any(f'"{line}"' in t for t in texts) for line in lines)
+    assert "black" in caption["compositional_deconstruction"]["background"].lower()
+
+
+def test_the_plate_is_screened_over_the_art_so_black_leaves_it_untouched():
+    from PIL import Image
+    from studio.series_title import screen_over
+    art = Image.new("RGB", (8, 8), (40, 60, 90))
+    plate = Image.new("RGB", (8, 8), (0, 0, 0))
+    plate.putpixel((0, 0), (255, 255, 255))
+    out = screen_over(art, plate)
+    assert out.size == art.size
+    assert screen_over(art, Image.new("RGB", (4, 4))).size == art.size
+    assert out.getpixel((7, 7)) == (40, 60, 90)
+    assert out.getpixel((0, 0)) == (255, 255, 255)

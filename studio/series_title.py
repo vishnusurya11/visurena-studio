@@ -1,24 +1,46 @@
 """A series title card: ONE picture for the whole book, re-lettered per episode.
 
-The art is drawn once, with no text (a text-to-image model spells badly and
-would redraw the scene each time).  Each episode's words are then EDITED onto
-that picture by Qwen-Image-Edit, and read back by Qwen3-VL: a card is only used
-when every line reads exactly, so a misspelt title never ships.
+The art is drawn once, with no text (Krea2 spells badly and would redraw the
+scene each time).  Each episode's words are drawn by Ideogram 4 alone on black
+and screened over that picture, then read back by Qwen3-VL: a card is only
+used when every line reads exactly, so a misspelt title never ships.
 """
 from __future__ import annotations
 
 import json
 import re
 
-# MEASURED 2026-09-18: "an elegant Victorian serif" drew the series name as
-# ornamental flourishes that read as gibberish ("TEWNITS"); plain Roman
-# capitals spell.  The episode and chapter lines read at the first try.
-LETTER_STYLE = ("Keep the picture exactly as it is. Add clean title lettering centred in the "
-                "clear dark sky, in plain bold classical Roman serif capitals like carved "
-                "stone lettering, simple letterforms with even spacing, pale ivory with a "
-                "faint warm glow, every letter complete and clearly legible, with wide margins "
-                "inside the frame edges. Letter exactly these three lines and these words "
-                "only, top to bottom: ")
+PLATE_BOXES = ([60, 140, 940, 260], [300, 290, 700, 340], [120, 360, 880, 450])
+"""Series, episode, chapter -- stacked in the card's upper sky (0-1000 grid)."""
+PLATE_SIZES = ("large", "small, widely letter-spaced", "medium")
+
+
+def plate_caption(lines: list[str]) -> str:
+    """Ideogram 4's structured caption for the LETTERING ALONE on pure black.
+
+    MEASURED 2026-09-18: Qwen-Image-Edit, asked to letter the art, drew the
+    series name as "THE WAR OF / WHE THE WORLDS" on every seed.  Ideogram is
+    the typography model; its plate is screened over the art, black vanishing."""
+    elements = [{"type": "text", "bbox": box,
+                 "desc": f'the words "{line}" (exact, no typos), {size}, centred, all caps, '
+                         "plain classical Roman serif capitals, pale ivory with a faint warm glow"}
+                for line, box, size in zip(lines, PLATE_BOXES, PLATE_SIZES)]
+    return json.dumps({
+        "aspect_ratio": "1:1", "scene": "A title lettering plate",
+        "high_level_description": "Three centred lines of title lettering on a pure black ground.",
+        "text_rules": "Render only the quoted words, exactly as written, horizontal.",
+        "style_description": {"aesthetics": "classical title card lettering", "lighting": "flat",
+                              "medium": "typography only", "color_palette": ["#000000", "#F1E6CC"]},
+        "compositional_deconstruction": {"background": "Pure flat black, empty, no texture.",
+                                         "elements": elements}}, ensure_ascii=False)
+
+
+def screen_over(art, plate):
+    """Lay the lettering plate on the art with a screen blend: black leaves the
+    art untouched, ivory lights it.  No picture element is composited."""
+    from PIL import Image, ImageChops
+    return ImageChops.screen(art.convert("RGB"),
+                             plate.convert("RGB").resize(art.size, Image.LANCZOS))
 
 
 def chapter_name(raw: str) -> str:
@@ -29,13 +51,6 @@ def chapter_name(raw: str) -> str:
 
 def card_lines(series: str, number: int, chapter_title: str) -> list[str]:
     return [series.upper(), f"EPISODE {number}", chapter_name(chapter_title)]
-
-
-def letter_prompt(lines: list[str]) -> str:
-    # MEASURED: left to wrap, the series name came back "THE WAR OF / WHE THE WORLDS".
-    sizes = ("large, all on ONE single line", "small and widely letter-spaced", "medium")
-    said = "; ".join(f'"{line}" ({size})' for line, size in zip(lines, sizes))
-    return LETTER_STYLE + said + "."
 
 
 def transcription(raw: str) -> str:

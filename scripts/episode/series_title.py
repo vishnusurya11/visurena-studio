@@ -5,9 +5,10 @@
 
 1. title/series_base.png -- the art, ONCE per book, no text (Krea2 house style),
    from the words in title/motif.txt.
-2. title/epNN.png -- Qwen-Image-Edit letters the series, "EPISODE N" and the
-   chapter's own name onto that same picture; Qwen3-VL reads it back and the
-   card is kept only when every line reads exactly (up to TRIES seeds).
+2. title/epNN.png -- Ideogram 4 letters the series, "EPISODE N" and the
+   chapter's own name on black, screened over that same picture; Qwen3-VL reads
+   it back and the card is kept only when every line reads exactly (up to
+   TRIES seeds).
 3. title/epNN.mp4 -- 4 s on H3 i2v; assemble appends it after the last frame.
 Free: local GPU only.
 """
@@ -24,7 +25,7 @@ from studio import canvas, episode_home
 from studio.comfy import run, run_text, stage_image
 from studio.h3 import frames_for
 from studio.refs_pack import styled
-from studio.series_title import card_lines, letter_prompt, missing_lines
+from studio.series_title import card_lines, missing_lines, plate_caption, screen_over
 
 TRIES = 6
 SECONDS = 4.0
@@ -43,9 +44,14 @@ def base_art(folder: Path) -> Path:
 
 
 def letter(base: Path, lines: list[str], seed: int) -> Path:
-    return run("image_qwen_image_edit_2511_single_image",
-               {"prompt": letter_prompt(lines), "image_1": stage_image(base), "seed": seed,
-                "lightning": False, "filename_prefix": "series_title/lettered"})[0]
+    """Ideogram draws the words alone on black; they are screened over the art."""
+    from PIL import Image
+    plate = run("image_ideogram4_t2i", {"prompt": plate_caption(lines), "seed": seed,
+                "aspect_ratio": "1:1 (Square)", "megapixels": 1,
+                "filename_prefix": "series_title/plate"})[0]
+    out = base.with_name(f"lettered_{seed}.png")
+    screen_over(Image.open(base), Image.open(plate)).save(out)
+    return out
 
 
 def reads(card: Path) -> str:
