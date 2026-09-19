@@ -26,7 +26,7 @@ from studio.h3 import frames_for
 from studio.refs_pack import styled
 from studio.series_title import card_lines, letter_prompt, missing_lines
 
-TRIES = 4
+TRIES = 6
 SECONDS = 4.0
 OCR_ASK = ("Transcribe every word of lettering in this image exactly as it is spelled, "
            "line by line, top to bottom. Output only the transcription.")

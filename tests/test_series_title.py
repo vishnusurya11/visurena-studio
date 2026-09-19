@@ -30,5 +30,16 @@ def test_a_misspelt_line_is_named():
         "THE WAR OF THE WORLDS"]
 
 
+def test_the_vlm_json_list_with_escaped_newlines_is_read_as_lines():
+    raw = '[\n    "THE WAR OF\\nTHE WORLDS\\nEPISODE 1\\nTHE EVE OF THE WAR"\n]'
+    assert lines_read(["THE WAR OF THE WORLDS", "EPISODE 1", "THE EVE OF THE WAR"], raw)
+
+
+def test_a_doubled_word_in_the_series_line_is_caught():
+    raw = '["THE WAR OF\\nWHE THE WORLDS\\nEPISODE 1\\nTHE EVE OF THE WAR"]'
+    assert missing_lines(["THE WAR OF THE WORLDS", "EPISODE 1", "THE EVE OF THE WAR"], raw) == [
+        "THE WAR OF THE WORLDS"]
+
+
 def test_a_wrong_episode_number_is_caught():
     assert not lines_read(["EPISODE 1"], "EPISODE 11")

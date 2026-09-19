@@ -7,6 +7,7 @@ when every line reads exactly, so a misspelt title never ships.
 """
 from __future__ import annotations
 
+import json
 import re
 
 # MEASURED 2026-09-18: "an elegant Victorian serif" drew the series name as
@@ -31,13 +32,25 @@ def card_lines(series: str, number: int, chapter_title: str) -> list[str]:
 
 
 def letter_prompt(lines: list[str]) -> str:
-    sizes = ("large", "small and widely letter-spaced", "medium")
+    # MEASURED: left to wrap, the series name came back "THE WAR OF / WHE THE WORLDS".
+    sizes = ("large, all on ONE single line", "small and widely letter-spaced", "medium")
     said = "; ".join(f'"{line}" ({size})' for line, size in zip(lines, sizes))
     return LETTER_STYLE + said + "."
 
 
+def transcription(raw: str) -> str:
+    """Qwen3-VL answers as a JSON list of strings with escaped newlines
+    ('["THE WAR OF\\nTHE WORLDS"]'); read as plain text, the 'n' of each '\\n'
+    glued itself to the next word and every line failed."""
+    try:
+        said = json.loads(raw)
+    except ValueError:
+        return raw.replace("\\n", "\n")
+    return "\n".join(said) if isinstance(said, list) else str(said)
+
+
 def _norm(text: str) -> str:
-    return re.sub(r"[^A-Z0-9]+", " ", text.upper()).strip()
+    return re.sub(r"[^A-Z0-9]+", " ", transcription(text).upper()).strip()
 
 
 def missing_lines(lines: list[str], ocr: str) -> list[str]:
