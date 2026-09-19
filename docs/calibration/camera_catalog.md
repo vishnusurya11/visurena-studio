@@ -113,7 +113,7 @@ One row per trial take: `episode | take | move id | size | result | eye verdict 
 | ep02 iter4 | T08 | locked | insert | DQ 100 | invents | the lid again a flat disc, now with a black drip down its edge; iter3's render kept |
 | ep02 iter4 | T11 | follow | medium | zoom 1.42x, churn 8.2, DQ 82.6 (was 36) | works | opened for 0.3 s on the sheet's front-on face, then followed him from behind waving at the cart; the cut enters at 0.5 s (heads.json) |
 
-## What ep02 taught (32 renders of 23 shots)
+## What ep02 taught (49 renders of 23 shots)
 
 - **Variety is achievable and it reads.** 14 move ids over 23 shots, none on more than
   five, no orbit on purpose; the coordinator's contact-sheet review called the variety
