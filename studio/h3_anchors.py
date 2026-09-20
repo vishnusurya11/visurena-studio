@@ -19,8 +19,17 @@ def _find(graph: dict, class_type: str, title_hint: str = "") -> str:
     return hits[0]
 
 
-def _next_id(graph: dict) -> str:
-    return str(max(int(k) for k in graph) + 1)
+def next_id(graph: dict) -> str:
+    """One past the highest NUMERIC node id.
+
+    A workflow's node keys are not all numbers: the Singularity take workflow
+    (2026-09-19) names its second stacked turbo LoRA `lora_second`, and
+    `int(k)` over every key raised on the first take of WotW ep04, after the
+    whole run had been queued.  Non-numeric keys are skipped, and the digit
+    test is `isdigit` rather than a try/except so a key like `12a` is skipped
+    too instead of being silently counted as 12."""
+    numbered = [int(k) for k in graph if str(k).isdigit()]
+    return str(max(numbered, default=0) + 1)
 
 
 def anchored(graph: dict, anchors: list[tuple[str, int]], audio: tuple[str, int] | None) -> dict:
@@ -31,10 +40,10 @@ def anchored(graph: dict, anchors: list[tuple[str, int]], audio: tuple[str, int]
     video_vae, audio_vae = vaes[0], vaes[-1]
     head = [base, 0]
     for image, frame in anchors:
-        loader = _next_id(graph)
+        loader = next_id(graph)
         graph[loader] = {"class_type": "LoadImage", "inputs": {"image": image, "upload": "image"},
                          "_meta": {"title": f"anchor {image} @ {frame}"}}
-        guide = _next_id(graph)
+        guide = next_id(graph)
         graph[guide] = {"class_type": "MiniMaxH3AddGuide",
                         "inputs": {"positive": head, "latent": [base, 1], "vae": [video_vae, 0],
                                    "image": [loader, 0], "frame_idx": frame},
@@ -42,9 +51,9 @@ def anchored(graph: dict, anchors: list[tuple[str, int]], audio: tuple[str, int]
         head = [guide, 0]
     if audio:
         wav, frame = audio
-        loader = _next_id(graph)
+        loader = next_id(graph)
         graph[loader] = {"class_type": "LoadAudio", "inputs": {"audio": wav}, "_meta": {"title": "anchored audio"}}
-        guide = _next_id(graph)
+        guide = next_id(graph)
         graph[guide] = {"class_type": "MiniMaxH3AddGuide",
                         "inputs": {"positive": head, "latent": [base, 1], "audio_vae": [audio_vae, 0],
                                    "audio": [loader, 0], "frame_idx": frame},

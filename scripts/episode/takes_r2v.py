@@ -573,7 +573,7 @@ def graph_for(c: dict, book: Path, number: int, take_dir: Path, base: str = "") 
     if len(paths) == 1:
         drop_second_slot(graph, base)
     for k, path in enumerate(paths[2:], start=2):
-        node = str(max(int(x) for x in graph) + 1)
+        node = h3_anchors.next_id(graph)  # a node id is not always a number: `lora_second`
         graph[node] = {"class_type": "LoadImage", "inputs": {"image": stage_image(path), "upload": "image"},
                        "_meta": {"title": f"ref_image_{k + 1}"}}
         graph[base]["inputs"][f"ref_images.ref_image_{k}"] = [node, 0]
