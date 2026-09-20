@@ -338,8 +338,8 @@ S = [
      "the sand heaps, the burning sky behind him.",
      "The camera tracks sideways to the left, a truck with small amplitude past a black furze bush "
      "in the foreground until the neighbour stands clear of it, travelling one short stride; he "
-     "leans his weight forward onto the stick and drives its ferrule down into the sand of the "
-     "track; his blazer swings open at the hem and he shakes his head twice.",
+     "leans his weight down onto the stick with both fists on its head and drives the ferrule into "
+     "the sand at his own boot; his blazer swings open at the hem and he shakes his head twice.",
      "on the heather at a standing man's eye, two long strides from him, a 50mm lens. The low sun "
      "comes from the LEFT onto his shoulder; his straw panama reads bright and the furze at his "
      "feet is black",
@@ -355,10 +355,10 @@ S = [
      "behind him.",
      "The camera holds a static shot on the neighbour, keeping his face in the centre of frame; he "
      "hauls a breath in, throws his chin up at the sand heaps with his goatee working, and speaks "
-     "at the camera; one fist comes up off the stick and turns over in the air.",
+     "at the camera; one fist lifts a hand's breadth off the head of the stick.",
      "on the heather level with his eyes, two paces from him, a 50mm lens. He has turned back "
-     "toward the sun in the west and the low light comes from the RIGHT onto his cheek; his cheek "
-     "reads bright and the heather behind him is black",
+     "toward the sun in the west and the low light comes from the RIGHT onto his cheek; the "
+     "burning lemon-yellow sky stands behind him and the heather at his shoulder is black",
      "The neighbour's head and shoulders fill the CENTRE of the frame from his cream straw panama "
      "at the TOP third to the striped flannel at the BOTTOM edge, his head a third of the frame's "
      "height, lit from the RIGHT. The head of his ash stick shows at the BOTTOM LEFT, dark heather "
@@ -384,21 +384,24 @@ S = [
      "friction", "He asks the only question that matters to him, and gets nothing back."),
 
     ("knoll", "medium", NAR + NEI, 0.8, "low_angle",
-     f"Low medium from the heather looking up at the pair on the little knoll: {NARR} and the "
-     "neighbour standing side by side a yard apart, both faces turned out at the sand heaps, the "
-     "burning sky filling the frame behind their heads.",
-     "The camera keeps low under the pair on the knoll, a static shot from the height of the "
-     "heather with both of them against the sky; the neighbour shifts his stick across to his "
-     "other fist and settles his weight on it, and the Narrator takes half a step sideways and "
-     "squares his shoulders beside him; the heather closes round both their knees and their two "
-     "heads turn together toward the sand.",
-     "in the heather below the knoll looking up at them, three long strides from them, a 35mm lens, "
-     "a low angle. The low sun comes from the LEFT onto their faces; their collars read bright and "
-     "the heather and the pines are black",
-     "The two figures stand at the CENTRE and the RIGHT third of the frame from their hats at the "
-     "TOP third to the heather at the BOTTOM edge, each head a quarter of the height of the frame. "
-     "Knee-deep heather fills the BOTTOM half from the LEFT edge to the RIGHT edge, a young Scots "
-     "pine stands black at the LEFT edge, and the burning lemon-yellow sky fills the TOP half.",
+     f"Low medium from the heather looking up at the little heathery knoll: nearest the camera at "
+     f"the left {NEIGH}, the blue and white stripes of his flannel blazer bright against the "
+     f"burning sky and his ash stick planted in the sand at his boot; further off at the right and "
+     f"much smaller, {NARR}, his face turned out at the sand heaps.",
+     "The camera keeps low under the knoll, a static shot from the height of the heather with the "
+     "striped blazer nearest at the left; the neighbour brings his stick across to his other fist "
+     "and leans his weight down onto it, the striped sleeve swinging at his hip; further off the "
+     "Narrator turns his grey tweed shoulders a hand's breadth toward the sand heaps.",
+     "in the heather below the knoll looking up, two long strides from the neighbour and five from "
+     "the Narrator, a 35mm lens, a low angle. The low sun comes from the LEFT; the striped blazer "
+     "reads bright and the heather and the pines are black",
+     "The neighbour stands nearest at the LEFT third of the frame from his cream straw panama at "
+     "the TOP third to the heather at the BOTTOM edge, his head a third of the height of the "
+     "frame, the blue and white stripes of his blazer running down him and his ash stick planted "
+     "at the BOTTOM LEFT. The Narrator stands further off at the RIGHT third in grey herringbone "
+     "tweed, his head a sixth of the height of the frame. Knee-deep heather fills the BOTTOM half "
+     "from the LEFT edge to the RIGHT edge, a young Scots pine stands black at the LEFT edge, and "
+     "the burning lemon-yellow sky fills the TOP half.",
      "reaction", "Two strangers standing together is the whole of what anybody can offer."),
 
     # ---- dusk: the courage of the crowd comes back ---------------------------------
@@ -408,7 +411,7 @@ S = [
      "the thin mast standing above it, a long black band of people grown along the skyline beyond, "
      "and a pale straw panama showing small among the heather between.",
      "The camera rises above the heather with large amplitude until the black pine tops at the "
-     "left and the ring of sand both stand inside the picture, travelling two long strides; the "
+     "left and the ring of sand both stand inside the picture, travelling one long stride; the "
      "band on the skyline thickens as more figures come up onto it from the Woking side; the "
      "heather runs grey-blue under the lens and the pale panama travels on across the ground "
      "toward the band.",
@@ -552,7 +555,7 @@ S = [
      "white fleck of linen carried above them as wide as one of their heads, and a broken ring "
      "of other dark figures spread wide across the heather behind.",
      "The camera pans right with large amplitude from the black pine tops at the left across the "
-     "heather to the wedge of figures under the white fleck, travelling three long strides; the "
+     "heather to the wedge of figures under the white fleck, travelling two long strides; the "
      "wedge comes on toward the sand at a walking pace, the fleck swaying over it at each stride; "
      "the heather closes behind them and the broken ring of figures behind draws in after them.",
      "on the heather at a standing man's eye, out across the heather to the wedge, a 35mm lens. "
@@ -721,7 +724,7 @@ S = [
      "The camera keeps low under the Narrator, a static shot from the height of the heather with "
      "his face in the centre of frame; his head comes round off the sand ring and his whole body "
      "follows it, his shoulders driving forward as he throws his weight off his back foot; the "
-     "heather tears past his thighs and both his arms come up in front of him.",
+     "heather tears past his thighs and his near shoulder drives forward past the lens.",
      "in the heather below him looking up at his face, two paces from him, a 50mm lens, a low "
      "angle. A low fire of burning furze stands at the LEFT; his cheek reads warm and bright and "
      "the heather is black",
@@ -733,17 +736,17 @@ S = [
 
     ("dark", "medium_close", NEI, 0.8, "locked",
      f"Medium close of {NEIGH} on the pale sandy road in the dark, his head bare and his grey hair "
-     "wild, one shoulder of his blazer torn open, the firelight full on his hollow face, a burning "
+     "wild and his striped blazer buttoned askew, the firelight full on his hollow face, a burning "
      "furze bush at the left of the picture behind him.",
      "The camera holds a static shot on the neighbour, keeping his face in the centre of frame; he "
      "comes up out of the heather onto the road with his chest heaving and says it at the lens "
-     "with his stride still going; his torn shoulder comes round past the camera and the ash stick "
+     "with his stride still going; his striped shoulder comes round past the camera and the stick "
      "swings forward and goes down into the sand of the road.",
      "on the road level with his eyes, two paces from him, a 50mm lens. A low fire of burning "
      "furze stands at the LEFT behind him; his hollow cheek reads warm and bright and the road and "
      "the heather are black",
      "The neighbour's head and shoulders fill the CENTRE of the frame from his wild grey hair at "
-     "the TOP third to the torn striped flannel at the BOTTOM edge, his head a third of the "
+     "the TOP third to the striped flannel at the BOTTOM edge, his head a third of the "
      "frame's height, lit from the LEFT. The burning furze glows at the LEFT third behind him, the "
      "pale sandy road crosses the BOTTOM edge, and the black heather and the greenish afterglow "
      "fill the TOP RIGHT.",
