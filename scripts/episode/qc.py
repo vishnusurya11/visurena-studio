@@ -37,9 +37,39 @@ CUT_TOLERANCE = 0.12
 a take-run is judged at its grid frame instead (`grid_cut`)."""
 MAX_GAP_S = 6.0
 """The longest hole in speech a delivered master may carry (ep10 synthesis
-B6/F6): ep05 4.4 s, ep07 4.5 s, ep09 3.25 s pass; ep10's 11.25 s wordless tail
-after the button -- the bed dying at 166 s into the only voiceless stretch --
-fails. The plan gate's twin, read off the file."""
+B6/F6): Scarlet ep05 4.4 s, ep07 4.5 s, ep09 3.25 s pass; ep10's 11.25 s
+wordless tail after the button fails. The plan gate's twin, read off the file.
+
+THE STATED REASON WAS WRONG, and it nearly cost a rewrite.  This docstring
+said ep10 failed because of "the bed dying at 166 s into the only voiceless
+stretch", which reads as a rule -- a hole is a fault when there is nothing to
+HEAR in it -- and invites replacing the wall with a loudness floor.  MEASURED
+2026-09-20 on the delivered masters, integrated over each episode's own
+longest hole:
+
+    Scarlet ep10  11.25 s  -26.1 LUFS   FAILS
+    Scarlet ep07   4.46 s  -28.0 LUFS   ships
+    WotW    ep01   5.83 s  -28.5 LUFS   ships
+    WotW    ep02   5.50 s  -35.9 LUFS   ships
+    WotW    ep03   5.52 s  -31.9 LUFS   ships
+    WotW    ep04   5.26 s  -27.4 LUFS   ships
+    WotW    ep05   7.05 s  -26.8 LUFS   fails this wall
+
+The failing hole is the LOUDEST of them, and two shipped holes are 5 and 9 dB
+quieter than it.  The -45.6 LUFS in the old note was the BED FILE, not the
+master, so loudness does not separate the fault from the holds at all.  Any
+gate built on that reading would pass ep10 and fail ep02.
+
+What the table does separate is WHERE the hole sits.  Every hole that ships is
+between two lines, with picture running through it; ep10's is a run-out after
+the last word, at 159.8 s of a 171 s episode.  A held beat and a dead tail are
+different objects and this one number folds them together -- `longest_gap`
+appends `until - end` and takes the max.  That is a hypothesis with one failing
+case behind it, NOT a calibration, so nothing here acts on it yet.
+
+WotW ep05 sits 1.2 s past the longest hold the owner has ever shipped: 7.05 s
+of the mast rising out of the pit, on "Something down there put up an eye".
+It is reported, not excused.  The wall is not moved to fit a cut of mine."""
 FPS = 24
 SCENE_THRESHOLD = 0.1
 MAX_ERROR_RATE = voice_qc.MAX_ERROR_RATE
