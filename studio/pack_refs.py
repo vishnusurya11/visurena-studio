@@ -129,8 +129,62 @@ def character_row(book: Path, who: str, chapter: int) -> dict:
 
 
 def props_for(book: Path, pids: list[str]) -> list[tuple[Path, tuple[str, str]]]:
-    """The setup's props that have a drawn sheet, each with its definition."""
+    """The setup's props that have a drawn sheet, each with its definition.
+
+    UNFILTERED, and the caller almost never wants it: see `props_named`."""
     return [(sheet, prop_row(book, pid)) for pid in pids if (sheet := prop_sheet(book, pid))]
+
+
+GENERIC = {"shape", "thing", "object", "machine", "case", "box", "appliance", "apparatus"}
+"""Alias head-nouns too common to identify anything.  `pit_mast_mirror`'s own
+aliases include "humped shape", and a take that says "the shape of the heather"
+is not naming a Martian machine."""
+
+
+def prop_terms(book: Path, pid: str) -> list[str]:
+    """The nouns a shot uses when it means this prop: the HEAD NOUN of each
+    alias the dossier lists, less the generic ones.
+
+    Head nouns rather than whole aliases, because the aliases are the book's
+    phrasing and the plan's is its own: the card says "thin mast" and the plan
+    says "the thin jointed mast with its wobbling mirror", so an exact-phrase
+    test matches nothing and a head-noun test matches exactly the shots that
+    mean it."""
+    card = json.loads((Path(book) / "analysis" / "props" / f"{pid}.json").read_text(encoding="utf-8"))
+    heads = {a.strip().lower().split()[-1].strip(".,") for a in (card.get("aliases") or []) if a.strip()}
+    return sorted(h for h in heads if h and h not in GENERIC and len(h) > 2)
+
+
+def names_prop(text: str, terms: list[str]) -> bool:
+    low = (text or "").lower()
+    return any(re.search(rf"\b{re.escape(t)}s?\b", low) for t in terms)
+
+
+def props_named(book: Path, pids: list[str], text: str) -> list[tuple[Path, tuple[str, str]]]:
+    """The setup's drawn props THIS take's own prose names.
+
+    MEASURED on ep05 (2026-09-20).  `Setup.props` is a SETUP-level field and
+    `props_for` staged every prop it names -- sheet AND definition sentence --
+    on every take of that setup.  Chapter 5's one prop is the Martian mast, and
+    the humped dome that rises at the killing is part of the same card, so the
+    dome sat at the mast's foot from SHOT ZERO: T00, T01, T04, T07, T09, T11,
+    T17 and T25 all drew a chapter-5 machine twenty shots before it comes up,
+    and every one of them scored PASS.  The prose is the only thing that knows
+    when a thing has arrived, so the prose is what decides.
+
+    This is `prop_refs.props_in`'s rule -- "read from the PROSE rather than from
+    a declared list alone" -- applied to the take builder, which never had it.
+    The list still gates: a prop the setup does not declare is never staged, so
+    the filter can only ever remove."""
+    terms = {pid: prop_terms(book, pid) for pid in pids}
+    return [(sheet, prop_row(book, pid)) for pid in pids
+            if (sheet := prop_sheet(book, pid)) and names_prop(text, terms[pid])]
+
+
+def shot_prose(shots) -> str:
+    """Everything a take's shots say about what is in the picture."""
+    return " ".join(f"{getattr(s, 'frame', '')} {getattr(s, 'motion', '')} "
+                    f"{getattr(s, 'at_rest', '') or ''}" for s in shots)
 
 
 def rows_for(book: Path, chapter: int, cast: list[str], old: list[dict],

@@ -382,8 +382,14 @@ def card(book: Path, episode: Episode, number: int, take: dict, measured: dict) 
         where = location_picture(book, boards, episode.setups[first.setup], first.setup, first)
         faces = people_staged(shots, sorted(physicals(book)))
         refs = refs_from_cards(book, boards, faces, first.setup, state, sizes, where)
-        # THE SETUP'S PROP SHEETS, after the place (ep02: the cylinder).
-        staged_props = pack_refs.props_for(book, list(getattr(episode.setups[first.setup], "props", []) or []))
+        # THE SETUP'S PROP SHEETS, after the place (ep02: the cylinder) -- but
+        # only the ones THIS TAKE'S OWN PROSE NAMES.  `Setup.props` is a
+        # setup-level field, and staging all of it on every take of the setup
+        # put chapter 5's humped dome at the mast's foot from shot zero, twenty
+        # shots before it rises (`pack_refs.props_named`).
+        staged_props = pack_refs.props_named(
+            book, list(getattr(episode.setups[first.setup], "props", []) or []),
+            pack_refs.shot_prose(shots))
         refs += [path for path, _ in staged_props]
         props = [row for _, row in staged_props]
     else:

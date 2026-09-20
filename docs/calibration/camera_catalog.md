@@ -210,3 +210,55 @@ One row per trial take: `episode | take | move id | size | result | eye verdict 
   than from a close; a "locked" low-angle close still crept 1.4-1.9x.
 - **Moves H3 ignores:** crane_down (became a follow), rack_focus (nothing), tilt_down
   (became a pull-back). Use crane_up, pull_reveal and track_lateral instead.
+
+## Two named men in one frame: the identity merge (ep05, 2026-09-20)
+
+**The one fault the Singularity fine-tune has NOT solved for us.** The A/B above
+records that Singularity stopped H3 drawing the narrator twice at his own gate
+and stopped the rim crowd repeating one figure. It does not stop the reverse:
+handed two DIFFERENT cast sheets in one take, it can render both men as the
+same man.
+
+WotW ep05 T08. Staged: `unnamed_first_person_narrator/sheet.png` and
+`unnamed_neighbour/sheet.png`, both in the take's reference list, the shot's
+`faces` naming both. The two sheets could hardly be further apart -- the
+narrator is grey herringbone tweed, a straw boater with a BLACK band, a dark
+moustache and no beard; the neighbour is a blue-and-white striped flannel
+blazer, white flannel trousers, a straw hat with a NAVY band, a pointed grey
+goatee and an ash walking stick.
+
+What came back: two men in matching grey suits and matching straw boaters,
+standing at the same distance at the same size, differing only in the set of a
+face. The neighbour's blazer, his trousers and his stick are all absent. **The
+take scored DQ PASS 100/100**, because no row asks whether the man in the frame
+is the man on the sheet (`identity` is "not measured" on every refs-only take).
+
+Why it has not bitten before: until this episode two NAMED men rarely shared a
+frame in a refs-only take. ep02's two-hander is an over-the-shoulder, where one
+man is a foreground shoulder; ep03 and ep04 put the narrator beside people who
+are described in the prose but carry no sheet.
+
+The prose that produced it, and what is wrong with it:
+
+    frame:   "... the Narrator <full wardrobe sentence> and the neighbour
+              standing side by side a yard apart, both faces turned out at the
+              sand heaps"
+    at_rest: "The two figures stand at the CENTRE and the RIGHT third of the
+              frame ... each head a quarter of the height of the frame."
+
+Three things invite the merge. The second man is named with NO garments of his
+own (`NEIGH`'s wardrobe sentence is spent on the first man and the second is
+"the neighbour"). The two are given the SAME apparent size and the SAME
+distance, so nothing in the geometry separates them. And "side by side" plus
+"both ... turned out at" describes them as a PAIR, which is the group-described-
+once fault (R3) wearing two names.
+
+**The retake wording to try, and MEASURE rather than trust** (this row is
+updated with the result):
+1. Each man's garments in the same clause as his name, the second man's named
+   with something the first cannot borrow -- for the neighbour, the blue-and-
+   white STRIPES said twice and the ash stick planted in the sand.
+2. Different distances and different apparent sizes: one nearer and larger, the
+   other further and smaller, stated as two different head fractions.
+3. No clause that treats them as one unit: no "side by side", no "both", no
+   "the two figures" -- each man gets his own sentence with his own verb.

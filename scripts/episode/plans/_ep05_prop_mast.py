@@ -36,8 +36,21 @@ CARD = (ROOT / "library" / "20260827135508_the-war-of-the-worlds"
 PHYSICAL = (
     "A thin jointed metal rod rising joint by joint out of the sand-pit, bearing at its apex a "
     "circular disk the size of a cartwheel that turns with a wobbling motion and catches the light "
-    "like a mirror. Below it the humped black back of a Martian appliance lifts over the rim of "
-    "the pit, a smooth dark dome with a shallow funnel mouth set in its front.")
+    "like a mirror.")
+"""v3, and the edit is a SPOILER FIX found by looking at the first four takes.
+
+v2's second sentence -- "Below it the humped black back of a Martian appliance
+lifts over the rim of the pit, a smooth dark dome with a shallow funnel mouth
+set in its front" -- is pasted by `pack_refs.prop_row` into every take block of
+every setup that declares the prop, which is five of this episode's six. So the
+dome was in the words at SUNSET: T00 and T01 both drew it sitting at the foot of
+the mast beyond the heather, twenty shots before it rises. In chapter 5 the dome
+comes up once, at the killing, and afterwards Wells is explicit that "the
+Martians and their appliances were altogether invisible, save for that thin mast
+upon which their restless mirror wobbled".
+
+The dome is still on the SHEET, which is what binds its look; it is now named
+only in the `ray` shots' own frame and at_rest prose, where it belongs."""
 
 SHEET = (
     "Prop reference sheet for the Martian mast, mirror and humped appliance at the Horsell "

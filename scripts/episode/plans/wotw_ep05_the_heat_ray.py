@@ -275,20 +275,22 @@ S = [
 
     ("heather", "insert", [], 0.35, "pan_to",
      "Insert on the burning sunset sky above the raw sand heaps: the black top of a young Scots "
-     "pine at the left of the picture, and out beyond it a leash of thin black whips, like the "
-     "arms of an octopus, standing up out of the sand against the lemon-yellow light in flat "
-     "silhouette, the dark line of the heaps running across the bottom.",
+     "pine at the left of the picture, and out beyond it a bunch of black tentacles rooted "
+     "together at one point in the sand, each one a different length and each one curling over on "
+     "itself at a different height, like the arms of an octopus held up against the lemon-yellow "
+     "light in flat silhouette, the dark line of the heaps running across the bottom.",
      "The camera pans right with small amplitude from the black top of the young Scots pine across "
-     "to the whips above the sand, travelling a finger's breadth; the leash of whips flicks out "
-     "across the sky, each one bending from its own root; the light runs along their backs and the "
-     "whole leash draws down a thumb's width toward the sand.",
+     "to the tentacles above the sand, travelling a finger's breadth; the bunch of tentacles "
+     "uncurls out across the sky, each one whipping out from the same root at its own speed and to "
+     "its own height; the light runs along their backs and the whole bunch draws down a thumb's "
+     "width toward the sand.",
      "on the heather looking out over the heaps at the sky, a 135mm lens. The low sun stands beyond "
      "the sand at the LEFT; the sky reads bright and the whips, the pine and the heaps are black",
      "The burning lemon-yellow sky fills the TOP two thirds of the frame from the LEFT edge to the "
      "RIGHT edge. The black top of a young Scots pine stands at the LEFT edge and the dark line of "
-     "the sand heaps runs across the BOTTOM third. The leash of thin black whips stands up at the "
-     "CENTRE RIGHT against the sky, a fifth of the height of the frame, their tips curled over "
-     "toward the LEFT.",
+     "the sand heaps runs across the BOTTOM third. The bunch of black tentacles stands up from one "
+     "root at the CENTRE RIGHT against the sky, a fifth of the height of the frame, the longest "
+     "reaching twice the height of the shortest and every tip curled over at its own height.",
      "spike", "The first limb of the thing, and it is not a limb like ours."),
 
     ("heather", "medium", [], 0.5, "tilt_up",
