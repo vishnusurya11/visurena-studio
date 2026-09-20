@@ -42,20 +42,46 @@ PHYSICAL = (
 SHEET = (
     "Prop reference sheet for the Martian mast, mirror and humped appliance at the Horsell "
     "sand-pit from The War of the Worlds, 1898, on a plain neutral grey backdrop in even soft "
-    "light. The mast is a thin jointed rod of dark bronze in telescoping segments standing "
-    "upright, crowned at its apex by a polished silver disk the size of a cartwheel tilted over on "
-    "a short yoke. The appliance is a smooth humped dome of black metal the size of a haystack, "
-    "with a shallow funnel mouth set in its front and a faint shimmer of heat standing over the "
-    "mouth. Three views side by side: the whole mast from the side, the disk and its yoke from "
-    "below, and the dome in three-quarter view with the mast rising behind it. A standing "
-    "Victorian gentleman in a frock coat, drawn small and dark in flat silhouette, stands beside "
-    "the dome for scale. Matte metal surfaces, a muted palette of dark bronze, tarnished silver "
+    "light. The mirror is a solid round polished disk of tarnished silver, smooth and unbroken "
+    "like a round tray, four feet across, tilted over on a short yoke at the apex of a thin "
+    "jointed rod of dark bronze in telescoping segments. The appliance below is a vast smooth "
+    "humped dome of black metal as big as a haystack, three times the height of a man, with a "
+    "shallow flared funnel mouth set in its front. Three views side by side: the whole mast "
+    "standing tall from the side, the solid mirror disk and its yoke seen from below, and the "
+    "great dome in three-quarter view. A standing Victorian gentleman in a frock coat and top "
+    "hat, drawn small and dark in flat silhouette, stands beside the dome for scale and reaches a "
+    "third of its height. Matte metal surfaces, a muted palette of dark bronze, tarnished silver "
     "and black.")
+"""v2, after looking at v1 (`sheet_v1.png`).  v1 drew the mirror as a SPOKED
+CARTWHEEL -- "the size of a cartwheel" was a scale phrase and the drawer took it
+as a shape -- and Wells's word is `mirror`: "that thin mast upon which their
+restless mirror wobbled".  It also drew the dome at a man's height against its
+own scale silhouette, where the dossier says a haystack.  So the scale phrase is
+now a measure ("four feet across") and the shape is stated positively as solid
+and unbroken, and the man is told what fraction of the dome he reaches."""
+
+
+SCALE = ("The mast stands about three times a man's height above the pit rim; the mirror disk is "
+         "about four feet across; the humped dome is about the size of a haystack.")
+"""v2 of the scale line, and it is a RETREAT from the dossier's "about as tall as
+a church spire above the pit rim".  `pack_refs.prop_row` sends the first clause
+of this to every take block, and the SHEET draws the rod about two men above the
+dome's crown.  ep02 measured which of the two wins: "the hull towers many times
+his height" changed nothing while the pit picture drew a coin two men tall -- the
+picture outranks the words on size.  So the words are moved to the picture rather
+than left to contradict it, and every shot's own `at_rest` fraction is sized
+against the sheet: a 135 mm frame at a hundred yards is about 16 m tall, so a
+6 m mast really is a third of it (shot 3) and a tenth of a 35 mm frame (shot 25).
+A spire would need a redrawn sheet, and the chapter does not need one: Wells's
+mast is "thin", and what matters is that the mirror is up there wobbling."""
 
 
 def main() -> int:
     card = json.loads(CARD.read_text(encoding="utf-8"))
     design = card["profile"]["design"]
+    if "scale_v1" not in design:
+        design["scale_v1"] = card["profile"]["scale"]
+    card["profile"]["scale"] = SCALE
     if "physical_v1" not in design:
         design["physical_v1"] = card["profile"]["physical"]
     if "sheet_prompt_v1" not in design:
