@@ -28,6 +28,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 from studio import approval, canvas, episode_board as board, episode_home, episode_ref_official as ro, episode_ref_prompt as rp
 from studio import house_style, pack_refs
 from studio import take_currency
+from studio import take_refs
 from studio import plan_gates
 from studio import episode_seq_board as sq
 from studio import episode_takes as tk
@@ -370,6 +371,16 @@ def refuse_double_pins(anchors: list[tuple[str, int]], index: int) -> None:
         raise SystemExit(f"take {index:02d}: a cell is pinned twice: {anchors}")
 
 
+def storyboard_panel(book: Path, number: int, index: int) -> Path | None:
+    """This take's own storyboard panel, at H3's native size, or None.
+
+    Drawn by the Qwen-Image-2.1 pass and cut one-per-take with its gutter shed
+    (`studio.storyboard_grid.panel_box`). Absent means the episode was never
+    storyboarded, and the take builds exactly as it did before."""
+    path = (episode_home.home(book, number) / "storyboard" / "h3" / f"shot_{index:02d}.png")
+    return path if path.exists() else None
+
+
 def card(book: Path, episode: Episode, number: int, take: dict, measured: dict) -> dict:
     shots = [episode.shot(i) for i in take["shots"]]
     first = shots[0]
@@ -404,6 +415,13 @@ def card(book: Path, episode: Episode, number: int, take: dict, measured: dict) 
     lines = [l for l in episode.lines if l.shot in take["shots"]]
     at = {l.index: (measured[l.index]["at"], measured[l.index]["seconds"]) for l in lines}
     spoken = [l for l in lines if l.kind == "dialogue"]
+    # THE STORYBOARD PANEL, where one has been drawn for this take's first shot.
+    # It leads on a silent take and follows on a speaking one: ref2va drives
+    # lips off the voice wav and wants a clean face to drive, and a panel's face
+    # is small and half turned on an over-the-shoulder (see studio/take_refs).
+    panel = storyboard_panel(book, number, first.index)
+    if panel is not None:
+        refs = take_refs.with_panel(refs, panel, speaking=bool(spoken))
     # OWNER 2026-09-11 06:00: only DIALOGUE goes into a take's audio.  Anchored narration made the
     # face on screen mouth the narrator's words (Stamford at the introduction) despite the
     # "lips remain closed" sentence; narration is laid on the master, never in the take.

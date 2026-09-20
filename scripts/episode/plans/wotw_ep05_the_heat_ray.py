@@ -503,8 +503,14 @@ S = [
     # move it: the plan's own opening clause leads, and it said head. So the whole
     # animal is in the plan's first sentence and the head is what the light and the
     # lens attend to.
-    ("dusk", "medium", [], 0.9, "track_lateral",
-     "Medium down on the gravel floor of the sand-pits at twilight, the raw yellow sand wall of "
+    # Back to `insert` after the G-VARIETY gate counted 4 where 28 shots want 5.
+    # The size was only moved to `medium` because `insert` had been carried
+    # through as "the panel holds the object alone", which crops a horse to a
+    # head. That wording is gone -- an insert now "comes in close on one
+    # subject, which fills most of the frame" -- and a whole horse filling the
+    # frame is exactly that.
+    ("dusk", "insert", [], 0.9, "track_lateral",
+     "Insert down on the gravel floor of the sand-pits at twilight, the raw yellow sand wall of "
      "the pit standing up close behind: ONE BLACK CAB HORSE, entire and unbroken inside the "
      "frame. A heavy-shouldered gelding about fifteen hands, black all over, with a deep chest "
      "and a rounded barrel, a short upright black mane, a long black tail hanging to the hocks, "
@@ -643,8 +649,9 @@ S = [
 
     # ---- ray: the humped shape, and the invisible sword --------------------------
     ("ray", "medium", [], 0.2, "tilt_up",
-     "Medium on the raw ring of sand at nightfall: the crown of a smooth humped black dome just "
-     "showing over the rim out of the pit, the thin jointed mast standing beside it against the "
+     "Medium on the raw ring of sand at nightfall: the top of a smooth humped black dome, like "
+     "the curved back of a great whale, just rising over the rim out of the pit, the thin "
+     "jointed mast standing beside it against the "
      "last greenish light, the heather black across the bottom of the picture.",
      "The camera tilts up with small amplitude from the black heather to the rim of the sand, "
      "travelling a hand's breadth; the dome rides up over the rim until its shallow funnel mouth "
