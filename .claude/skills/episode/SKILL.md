@@ -110,6 +110,22 @@ appends `title/epNN.mp4` after the last frame.
 
 **Aspect:** 1:1 square (plan `"aspect": "1:1"`, delivered 1536x1536).
 
+**NO GROUP IS DESCRIBED ONCE** (owner, ep03: "some characters duplicates").
+One description covering several people gives H3 ONE template figure and it
+stamps out copies: "three workmen in collarless shirts and moleskin trousers"
+came back as three identical men, and "a dense crowd pressing forward" as rows
+of the same woman in white.
+- Every figure the frame shows at a readable size gets its OWN dress and its
+  OWN posture: "a bare-armed workman in braces drives a spade, a stout man in a
+  red waistcoat swings a pickaxe, a thin grey-haired man in a flat cap stoops".
+- A crowd is texture, not people: heads and shoulders above an edge, distant
+  figures on a slope, each named few turned a different way. Never a countable
+  group of identical roles in the foreground.
+- After the takes, run `scripts/episode/people_check.py <book> <n>`: it counts
+  faces bigger than 0.12 of frame height against the people the shot planned
+  and flags CLONE. It catches a duplicated LEAD; a cloned crowd is small in
+  frame, so the wording rule above is what prevents it.
+
 **The card fades, it never hard-cuts** (owner, ep03: "it ended abruptly").
 `assemble.conform_card` dips the picture up from black over 0.5 s and down
 over 0.8 s, with the sound matching (`studio/card_fade.py`); `edit_gate`

@@ -101,6 +101,20 @@ wide, not of the sheet. Two ways out, neither tried yet:
 2. write the insert as a medium (blocked on its own: G-VARIETY wants 4 inserts).
 A pull-back that ENDS wide is sharp where it lands; only its first second is soft.
 
+## Clones: one description, many copies (ep03, 2026-09-19)
+
+The owner saw duplicated characters. Measured on ep03's takes: the LEADS never
+cloned (`people_check.py`: 0 clone frames in 23 takes of ep01, ep02 and ep03),
+the CROWDS did.
+- T19 "three workmen in collarless shirts and moleskin trousers digging" -> three
+  identical men, same face, same pose, side by side.
+- T12 "a stream of people in straw hats and light summer dresses" and T14's
+  "crowded rim" -> rows of the same woman in white and the same boater.
+A group described once is a single figure to the model, repeated. Every figure
+at a readable size needs its own dress and posture; a crowd is heads and
+shoulders above an edge, or small distant figures, never a countable group of
+identical roles.
+
 ## Trial log
 
 One row per trial take: `episode | take | move id | size | result | eye verdict | note`.
