@@ -112,19 +112,50 @@ def _open(request, timeout: float = 60.0):
             time.sleep(RESTART_POLL)
 
 
-def submit(workflow: dict) -> str:
-    """Queue a filled-in workflow and return its prompt id."""
+def save_prefix(graph: dict) -> str | None:
+    """The `filename_prefix` a graph writes under: its identity in the queue."""
+    for node in graph.values():
+        if node.get("class_type", "").startswith("Save"):
+            got = node.get("inputs", {}).get("filename_prefix")
+            if got:
+                return got
+    return None
+
+
+def already_queued(queue: dict, prefix: str) -> str | None:
+    """The prompt id of a running or pending job writing `prefix`, if any."""
+    for key in ("queue_running", "queue_pending"):
+        for item in queue.get(key, []):
+            if len(item) > 2 and save_prefix(item[2]) == prefix:
+                return item[1]
+    return None
+
+
+def submit(workflow: dict, timeout: float = 180.0) -> str:
+    """Queue a filled-in workflow and return its prompt id.
+
+    POSTING A TAKE IS NOT IDEMPOTENT.  `_open` retries anything that looks like
+    an unreachable engine, and a socket timeout looks exactly like one -- but a
+    busy ComfyUI answers slowly while having ALREADY queued the job.  MEASURED
+    on WotW ep04 (2026-09-19): take 11 was queued SEVEN times and take 01 twice
+    behind a 694 s take, ~45 min of GPU spent rendering the same seed.  So a
+    timeout here asks the queue whether the job landed instead of re-POSTing."""
     body = json.dumps({"prompt": workflow}).encode("utf-8")
     request = urllib.request.Request(
         f"{HOST}/prompt", data=body, headers={"Content-Type": "application/json"})
+    prefix = save_prefix(workflow)
     try:
-        with _open(request) as response:
+        with urllib.request.urlopen(request, timeout=timeout) as response:
             return json.loads(response.read())["prompt_id"]
-    except urllib.error.HTTPError as failure:
-        # The rejection body names the node and field; without it a 400 is
-        # unactionable noise.
-        raise RuntimeError(
-            f"ComfyUI rejected the workflow: {failure.read().decode()[:900]}") from None
+    except UNREACHABLE as failure:
+        if isinstance(failure, urllib.error.HTTPError):
+            raise RuntimeError(
+                f"ComfyUI rejected the workflow: {failure.read().decode()[:900]}") from None
+        landed = already_queued(reachable(_get, "/queue") or {}, prefix) if prefix else None
+        if landed:
+            return landed
+        with _open(request) as response:                 # engine really was down
+            return json.loads(response.read())["prompt_id"]
 
 
 def _post(path: str, body: dict | None = None) -> None:
