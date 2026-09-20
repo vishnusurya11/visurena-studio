@@ -191,3 +191,54 @@ def test_the_cast_says_a_person_keeps_to_his_own_panels():
     from studio.storyboard_grid import cast_clause
     said = cast_clause([NEIGHBOUR, NARRATOR])
     assert "only in the panels that name" in said.lower()
+
+
+def test_shots_with_nobody_in_them_form_their_own_grid():
+    """MEASURED 2026-09-20 on ep05 `dusk`, the finding of this POC.
+
+    A STAGED CHARACTER REFERENCE IS CAST INTO ANY PANEL WHOSE PROSE CALLS FOR
+    UNNAMED PEOPLE, however plainly the panel says he is not in it.  Three
+    escalating wordings failed: binding him to a slot, naming who stands in
+    each panel, and forbidding him by name panel by panel.  He stood in four
+    of six.
+
+    Dropping his sheet from the staging -- changing nothing in the words --
+    emptied him out of all of them, and the crowd came back individuated: an
+    old bearded man, a woman in a shawl, a younger man, no two alike.  With
+    this model the references are stronger than the prose, so presence is
+    decided by WHAT IS PASSED, not by what is written.
+    """
+    from studio.storyboard_grid import grid_groups
+    shots = [{"index": 9, "faces": []}, {"index": 10, "faces": []},
+             {"index": 11, "faces": []}, {"index": 12, "faces": []},
+             {"index": 13, "faces": ["boy"]}, {"index": 14, "faces": []}]
+    groups = grid_groups(shots)
+    empty = [g for g in groups if not g["faces"]]
+    assert len(empty) == 1
+    assert [s["index"] for s in empty[0]["shots"]] == [9, 10, 11, 12, 14]
+    assert [g["faces"] for g in groups if g["faces"]] == [("boy",)]
+
+
+def test_one_cast_one_grid():
+    from studio.storyboard_grid import grid_groups
+    shots = [{"index": 0, "faces": ["a"]}, {"index": 1, "faces": ["a", "b"]},
+             {"index": 2, "faces": ["a"]}]
+    groups = grid_groups(shots)
+    assert {g["faces"] for g in groups} == {("a",), ("a", "b")}
+
+
+def test_a_grid_shape_is_as_square_as_the_count_allows():
+    from studio.storyboard_grid import grid_shape
+    assert grid_shape(4) == (2, 2)
+    assert grid_shape(6) == (2, 3)
+    assert grid_shape(2) == (2, 1)
+    assert grid_shape(1) == (1, 1)
+    assert grid_shape(9) == (3, 3)
+
+
+def test_an_odd_count_never_leaves_a_hole():
+    """A blank cell is a cell the drawer fills with its own invention."""
+    from studio.storyboard_grid import grid_shape
+    for n in range(1, 13):
+        cols, rows = grid_shape(n)
+        assert cols * rows == n, f"{n} -> {cols}x{rows} leaves a hole"

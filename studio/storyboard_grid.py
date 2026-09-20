@@ -130,3 +130,50 @@ def grid_prompt(shots: list[dict], cols: int, rows: int, place: tuple[list[int],
     if cast:
         parts.append(cast_clause(cast))
     return "\n\n".join(parts + blocks)
+
+
+def grid_shape(n: int) -> tuple[int, int]:
+    """(cols, rows) for n panels, as square as n allows and never with a hole.
+
+    A blank cell is a cell the drawer fills with its own invention, so the
+    product must be exactly n -- a prime count gets a single strip."""
+    best = (n, 1)
+    for cols in range(1, n + 1):
+        if n % cols:
+            continue
+        rows = n // cols
+        if abs(cols - rows) < abs(best[0] - best[1]):
+            best = (cols, rows)
+    return best
+
+
+def grid_groups(shots: list[dict]) -> list[dict]:
+    """Split shots into grids by WHO IS IN THEM, keeping plan order.
+
+    MEASURED 2026-09-20, ep05 `dusk`, and the finding this module was written
+    for: A STAGED CHARACTER REFERENCE IS CAST INTO ANY PANEL WHOSE PROSE CALLS
+    FOR UNNAMED PEOPLE -- a crowd, a band of figures on a skyline, a
+    washerwoman -- however plainly that panel says he is not in it.
+
+    Three wordings failed in a row: binding him to a slot, naming who stands in
+    each panel, then forbidding him by name in every panel he was absent from.
+    He stood in four panels of six, and only one shot named him.
+
+    Dropping his sheet from the staging, with the words left exactly as they
+    were, emptied him out of every one of them -- and the crowd came back
+    individuated, an old bearded man, a woman in a shawl, a younger man, no two
+    alike, which is the clone fault that has dogged every H3 crowd shot.
+
+    With this model the references are stronger than the prose. Presence is
+    decided by WHAT IS PASSED, not by what is written. So shots that name
+    nobody are drawn in a grid with no character sheet staged at all, and shots
+    are otherwise grouped by the exact cast they share.
+    """
+    order, groups = [], {}
+    for shot in shots:
+        key = tuple(shot.get("faces") or ())
+        if key not in groups:
+            groups[key] = []
+            order.append(key)
+        groups[key].append(shot)
+    return [{"faces": key, "shots": groups[key]} for key in order]
