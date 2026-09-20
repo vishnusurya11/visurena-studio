@@ -49,11 +49,12 @@ def summarise(sharp: list[float], warp: list[float]) -> dict:
 
 BLUR_DIPS = 3
 BLUR_FLOOR = 0.5
-REFRAME_WARP = 1.4
-"""CALIBRATED on WotW ep02 (2026-09-19): T16's push-in (6 dips, min 0.45) was
-the one visibly soft take; T12 (warp max 1.58) and T21 jumped to a new framing
-in their last second; every locked shot sat at warp max 1.2-1.4 with the
-actor's own motion and looked fine."""
+REFRAME_WARP = 1.55
+"""CALIBRATED on WotW ep02, RE-calibrated on ep03 (2026-09-19). Blur: ep02's
+push-in (6 dips, min 0.45) was the one visibly soft take. Reframe: ep02 T12
+(1.58) really did jump to a new framing; but ep03 T15 (1.46) and T22 (1.42) are
+locked closes where Ogilvy raises an arm across the frame, and they look right.
+A big foreground gesture reaches 1.5, so the wall sits above it."""
 
 
 def flags(row: dict) -> list[str]:

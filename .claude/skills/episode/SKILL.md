@@ -110,6 +110,19 @@ appends `title/epNN.mp4` after the last frame.
 
 **Aspect:** 1:1 square (plan `"aspect": "1:1"`, delivered 1536x1536).
 
+**The card fades, it never hard-cuts** (owner, ep03: "it ended abruptly").
+`assemble.conform_card` dips the picture up from black over 0.5 s and down
+over 0.8 s, with the sound matching (`studio/card_fade.py`); `edit_gate`
+knows those frames are fades and still checks the card's middle frame for
+frame, so a cropped card fails as before.
+
+**An extreme insert has no picture of its own.** With ONE wide per location,
+H3 makes a close-up by magnifying that wide, and a magnified crop is soft:
+ep03's insert on the cylinder's crust measured sharpness 0.19 of its own
+median. Write inserts against a place whose wide carries that scale, give
+the object its own prop sheet, or accept the softness. `plan_check`'s
+G-VARIETY wants 4 inserts in ~23 shots, so they cannot simply be dropped.
+
 **Iterate:** after the first master, run improving iterations. Keep every
 `master_iterN.mp4`, log what changed and why in `story.md`, and look at a
 contact sheet each time.

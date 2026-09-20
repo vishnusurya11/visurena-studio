@@ -86,6 +86,21 @@ What ep02's 23 takes showed:
 - **Locked-off shots are the sharpest and the most stable** (no dips, no
   reframes) and carry dialogue best: prefer them for every spoken line.
 
+## Where the remaining blur comes from (ep03, 2026-09-19)
+
+Three takes still flag BLUR after two iterations, and the cause is the same in
+all three: **an extreme magnification of the one location wide**.
+- T03, an insert on the cylinder's crust: sharpness min 0.19 of its own median.
+- T10, a pull-back that STARTS on a hand against the crust: min 0.35, 20 dips.
+- T11, a wide pan that became a 1.4x push: min 0.48.
+The prop sheet IS staged on these takes, but the location wide is Picture 1 and
+a take opens at its first picture's framing, so the insert is a crop of the
+wide, not of the sheet. Two ways out, neither tried yet:
+1. stage the PROP sheet first on a prop insert with no faces (needs the picture
+   numbering in `episode_ref_official.subjects` to move with it); or
+2. write the insert as a medium (blocked on its own: G-VARIETY wants 4 inserts).
+A pull-back that ENDS wide is sharp where it lands; only its first second is soft.
+
 ## Trial log
 
 One row per trial take: `episode | take | move id | size | result | eye verdict | note`.

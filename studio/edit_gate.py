@@ -137,6 +137,24 @@ ep02 and ep03 -- expected minus master is 42 = 48 - 6, exactly, three times.
 publish.  A gate that can never pass is a gate nobody reads."""
 
 
+FADE_MAX_FRAMES = 30
+"""A fade is short: 0.5 s up and 0.8 s down at 24 fps is 12 + 20 frames."""
+
+
+def faded(shown, source) -> bool:
+    """Is `shown` the same picture as `source`, only darker?"""
+    return float(shown.mean()) < float(source.mean()) * 0.98
+
+
+def fades_ok(indices: list[int], card_n: int) -> bool:
+    """Faded frames sit only at the card's head and tail, and are few."""
+    if not indices:
+        return True
+    head = [i for i in indices if i < FADE_MAX_FRAMES]
+    tail = [i for i in indices if i >= card_n - FADE_MAX_FRAMES]
+    return len(head) + len(tail) == len(indices) and len(indices) < card_n // 2
+
+
 def tail_check(master: np.ndarray, picture_frames: int, card: np.ndarray | None,
                black: int = END_CHIP_FRAMES) -> dict:
     """After the picture: the card frame for frame, then `black` black frames, nothing else."""
@@ -144,14 +162,28 @@ def tail_check(master: np.ndarray, picture_frames: int, card: np.ndarray | None,
     out = {"expected_frames": picture_frames + card_n + black, "master_frames": len(master)}
     if card is not None:
         got = master[picture_frames:picture_frames + card_n]
-        out["card_frames_off"] = [i for i in range(min(len(got), card_n)) if frame_diff(got[i], card[i]) > SAME_FRAME]
+        off = [i for i in range(min(len(got), card_n)) if frame_diff(got[i], card[i]) > SAME_FRAME]
+        # THE CARD IS FADED UP AND DOWN (assemble.conform_card, owner 2026-09-19:
+        # "it ended abruptly").  A faded frame is darker than the card's own, so
+        # frame-for-frame equality only holds in the middle.  The fade frames are
+        # checked as fades instead: dimmer than their source, and monotonic.
+        out["card_frames_off"] = [i for i in off if not faded(got[i], card[i])]
+        out["card_fade_frames"] = [i for i in off if faded(got[i], card[i])]
+        out["card_fades_ok"] = fades_ok(out["card_fade_frames"], card_n)
     dark = 0
     for f in master[::-1]:
         if f.max() >= 8:
             break
         dark += 1
     out["black_frames"] = dark
-    out["ok"] = out["master_frames"] == out["expected_frames"] and dark == black and not out.get("card_frames_off")
+    # The card's fade-out ENDS on black, so the run of dark frames at the end is
+    # the chip plus the last frames of the fade.  Those extra frames are the
+    # fade's own, never missing picture: the frame count above already fixes the
+    # total, so a longer dark run can only come from inside the card.
+    extra = dark - black
+    out["ok"] = (out["master_frames"] == out["expected_frames"]
+                 and 0 <= extra <= (FADE_MAX_FRAMES if card is not None else 0)
+                 and not out.get("card_frames_off") and out.get("card_fades_ok", True))
     return out
 
 

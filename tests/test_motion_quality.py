@@ -43,3 +43,9 @@ def test_flags_name_blur_and_a_late_reframe_and_nothing_else():
     assert flags({"blur_dips": 6, "sharp_min_ratio": 0.45, "warp_max": 1.0}) == ["BLUR"]
     assert flags({"blur_dips": 0, "sharp_min_ratio": 0.9, "warp_max": 1.58}) == ["REFRAME"]
     assert flags({"blur_dips": 0, "sharp_min_ratio": 0.9, "warp_max": 1.2}) == []
+
+
+def test_a_raised_arm_in_a_close_is_not_a_reframe():
+    """ep03 T15 (1.46) and T22 (1.42): locked closes, an arm across frame, both right."""
+    from studio.motion_quality import flags
+    assert flags({"blur_dips": 0, "sharp_min_ratio": 0.96, "warp_max": 1.46}) == []

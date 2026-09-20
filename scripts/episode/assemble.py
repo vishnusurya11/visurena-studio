@@ -18,7 +18,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 
-from studio import canvas, edit_gate, episode_bed, episode_gutter, episode_home
+from studio import card_fade, canvas, edit_gate, episode_bed, episode_gutter, episode_home
 from studio.comfy import run
 from studio.episode_spec import Episode
 from studio import trailer_assemble
@@ -645,12 +645,12 @@ def conform_card(card: Path, out: Path) -> Path:
     rate conforms the same way and keeps the frame; a `-t` at the picture's own
     length ends the sound where the picture ends."""
     seconds = video_frames(card) / FPS
-    fade_at = max(seconds - 0.3, 0.0)
+    fades = card_fade.card_fades(seconds)
     subprocess.run(["ffmpeg", "-y", "-v", "error", "-i", str(card),
-                    "-vf", f"scale={W}:{H}:force_original_aspect_ratio=increase,crop={W}:{H},format=yuv420p",
+                    "-vf", f"scale={W}:{H}:force_original_aspect_ratio=increase,crop={W}:{H},format=yuv420p,{fades['video']}",
                     "-fps_mode", "cfr", "-r", str(FPS),
                     "-af", f"aresample=48000,loudnorm=I={TITLE_LUFS}:TP=-1.5:LRA=7,volume=-1.7dB,"
-                           f"afade=t=in:d=0.4,afade=t=out:st={fade_at:.3f}:d=0.3",
+                           f"{fades['audio']}",
                     "-t", trailer_assemble.frames_arg(seconds, FPS),
                     "-c:v", "libx264", "-preset", "fast", "-crf", "17",
                     "-c:a", "aac", "-ar", "48000", str(out)], check=True)
