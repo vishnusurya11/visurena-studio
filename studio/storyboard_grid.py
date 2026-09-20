@@ -177,3 +177,28 @@ def grid_groups(shots: list[dict]) -> list[dict]:
             order.append(key)
         groups[key].append(shot)
     return [{"faces": key, "shots": groups[key]} for key in order]
+
+
+def style_clause(anchors, described: str) -> str:
+    """The look, POINTED AT a reference slot rather than described in words.
+
+    MEASURED 2026-09-20, and the owner saw it before any gate did: the panels
+    were not in the book's style. The Krea2 house anchor had been passed as
+    <image1> from the first render, and Qwen took the HEATH out of it -- the
+    pines, the sand ring, the purple-brown heather -- while rendering all of it
+    in its own default look: photographic depth of field, soft cinematic light,
+    photoreal skin and cloth.
+
+    A reference is used for CONTENT unless the prompt says to use it for STYLE.
+    Four renders of description bought nothing; naming the slot flipped it on
+    the first try at the same seed and the same 60 s.
+
+    It matters past the storyboard: H3 ref2va conditions on its references and
+    takes their look, which is why the delivered episodes are in the Krea2
+    style at all. A panel drawn in the wrong style drags the video with it."""
+    slots = [anchors] if isinstance(anchors, int) else list(anchors)
+    cited = " and ".join(f"<image{n}>" for n in slots)
+    return (f"DRAWN IN EXACTLY THE ART STYLE OF {cited}, copied from it and not invented: "
+            f"{described}. Match its palette, its brush texture and its level of stylisation "
+            f"exactly. NO photographic depth of field, no camera blur, no photoreal skin or "
+            f"cloth, no film grain.")

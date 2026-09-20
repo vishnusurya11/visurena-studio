@@ -242,3 +242,34 @@ def test_an_odd_count_never_leaves_a_hole():
     for n in range(1, 13):
         cols, rows = grid_shape(n)
         assert cols * rows == n, f"{n} -> {cols}x{rows} leaves a hole"
+
+
+def test_the_style_points_at_a_reference_rather_than_describing_itself():
+    """MEASURED 2026-09-20. The owner saw it first: the panels were not in the
+    book's style at all.
+
+    The Krea2 house anchor was passed as <image1> the whole time, and Qwen took
+    the HEATH from it -- the pines, the sand ring, the purple-brown heather --
+    and rendered all of it in its own default look: photographic depth of
+    field, soft cinematic light, photoreal skin and cloth. A reference is used
+    for CONTENT unless the prompt says to use it for STYLE.
+
+    Describing the look in words ("a heavily angular 3d art style with brush
+    stroke colour texture") bought nothing across four renders. Naming the slot
+    -- DRAWN IN EXACTLY THE ART STYLE OF <image1> -- flipped it on the first
+    try, same seed, same 60 s: flat painted shapes, visible brush texture, no
+    photographic blur.
+
+    This matters beyond the storyboard. H3 ref2va conditions on its references
+    and takes style from them, which is why the delivered episodes look like
+    Krea2. A panel in the wrong style drags the video with it."""
+    from studio.storyboard_grid import style_clause
+    said = style_clause(1, "flat angular shapes, brush-stroke colour texture")
+    assert "<image1>" in said
+    assert "no photographic depth of field" in said.lower()
+
+
+def test_the_style_clause_can_cite_several_anchors():
+    from studio.storyboard_grid import style_clause
+    said = style_clause([1, 2], "flat angular shapes")
+    assert "<image1>" in said and "<image2>" in said
