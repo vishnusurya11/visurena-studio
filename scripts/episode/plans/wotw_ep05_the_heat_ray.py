@@ -496,21 +496,41 @@ S = [
      "across the TOP edge.",
      "friction", "Courage arrives, and the first use anybody makes of it is to take a barrow."),
 
-    ("dusk", "insert", [], 0.9, "track_lateral",
-     "Insert on the gravel floor of the sand-pits at twilight: the black shape of a cab horse's "
-     "head down in a nosebag against the pale gravel, its ears standing up, the line of its "
-     "bridle and a hank of mane over the strap, the black shaft of the hansom crossing behind it.",
-     "The camera tracks sideways to the left, a truck with small amplitude along the horse's head "
-     "until the black shaft crosses behind it, travelling a finger's breadth; the horse works its "
-     "jaw in the nosebag, throws its head up against the strap and drives its nose back down into "
-     "the bag; the mane swings over the strap and both ears come round toward the heather.",
-     "on the gravel at the height of the horse's head, two paces from its head, a 50mm lens. The "
-     "last daylight comes low from the LEFT behind it; the gravel reads pale and the horse, the "
-     "bridle and the shaft are black",
-     "The horse's head fills the CENTRE and the RIGHT half of the frame from its ears at the TOP "
-     "third to the nosebag at the BOTTOM edge, black against the ground. The line of the bridle "
-     "runs down the CENTRE with a hank of mane over it, the black shaft of the hansom crosses the "
-     "TOP LEFT, and the pale gravel of the pit floor fills the BOTTOM LEFT.",
+    # OWNER 2026-09-20: "just horse head can't exist, it should be whole horse, we
+    # need to focus on the horse head." This was written as a head in a nosebag and
+    # drew exactly that -- a head with no body over the gravel, three renders
+    # running. Appending "the panel contains the horse whole" to the prompt did not
+    # move it: the plan's own opening clause leads, and it said head. So the whole
+    # animal is in the plan's first sentence and the head is what the light and the
+    # lens attend to.
+    ("dusk", "medium", [], 0.9, "track_lateral",
+     "Medium down on the gravel floor of the sand-pits at twilight, the raw yellow sand wall of "
+     "the pit standing up close behind: ONE BLACK CAB HORSE, entire and unbroken inside the "
+     "frame. A heavy-shouldered gelding about fifteen hands, black all over, with a deep chest "
+     "and a rounded barrel, a short upright black mane, a long black tail hanging to the hocks, "
+     "and one narrow white blaze down the front of its face. A padded leather collar sits on its "
+     "shoulders, a breeching strap runs along its flank, blinkers stand out at the cheekpieces "
+     "of its bridle and a hank of mane lies over the strap. All four legs are down on the "
+     "gravel, the near foreleg a half pace forward, the hooves plain on the stones, and the two "
+     "long black shafts of a hansom run back from its shoulders to the dark bulk of the cab. Its "
+     "head is lowered into a pale canvas nosebag.",
+     "The camera tracks sideways to the left, a truck with small amplitude past the standing "
+     "horse until the cab behind it comes into the picture, travelling a finger's breadth; the "
+     "horse works its jaw in the nosebag, throws its head up against the strap and drives its "
+     "nose back down into the bag; the mane swings over the strap and both ears come round "
+     "toward the heather.",
+     "on the gravel three paces from the horse, low at the height of its chest, a 50mm lens. The "
+     "last daylight comes low from the LEFT; the pale canvas nosebag and the white blaze catch "
+     "it, the raw sand wall of the pit behind reads pale grey-blue, and the horse, the harness "
+     "and the hansom are black",
+     "THE FOCUS OF THE PICTURE IS THE HORSE'S LOWERED HEAD AND THE PALE NOSEBAG: they sit at the "
+     "CENTRE of the frame, they are where the last daylight falls, they are the brightest and "
+     "the sharpest thing in it, and the eye goes there first. The rest of the horse reads "
+     "clearly around that: its ears at the TOP third, its black neck and shoulder running back "
+     "to the RIGHT, its barrel and its four legs down to the hooves on the gravel at the BOTTOM "
+     "edge, the shafts and the dark hansom at the RIGHT edge. The raw yellow sand wall of the "
+     "pit rises close behind the horse and fills the whole TOP and the LEFT of the frame, "
+     "closing the picture off above its ears.",
      "friction", "The one witness in the chapter that will never get a warning."),
 
     # ---- flag: he goes in with them, and the Deputation goes out ------------------

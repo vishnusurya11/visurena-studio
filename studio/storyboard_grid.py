@@ -202,3 +202,24 @@ def style_clause(anchors, described: str) -> str:
             f"{described}. Match its palette, its brush texture and its level of stylisation "
             f"exactly. NO photographic depth of field, no camera blur, no photoreal skin or "
             f"cloth, no film grain.")
+
+
+def whole_subject(subject: str, focus: str) -> str:
+    """An insert on PART of a living thing still contains the whole thing.
+
+    OWNER 2026-09-20, on ep05 shot 14: "just horse head can't exist, it should
+    be whole horse, we need to focus on the horse head."
+
+    The plan asks for "the black shape of a cab horse's head down in a nosebag",
+    and `insert` was carried through as "the panel holds the object alone, close
+    and filling the frame". A nosebag is an object; a horse is not. The panel
+    came back a head with no body over the gravel, the hansom's shafts barely
+    reading behind it.
+
+    The part is what the framing ATTENDS to. The creature is what the panel
+    CONTAINS. They are two different statements and only one of them was made."""
+    return (f"The panel contains {subject} WHOLE and unbroken -- the entire body inside the "
+            f"frame, standing on visible ground, never a cropped part on its own and never a "
+            f"detail floating with no body attached. The framing attends to {focus}: that is "
+            f"where the light falls, that is what is sharpest and nearest the centre, and the "
+            f"rest of {subject} reads clearly around it.")

@@ -273,3 +273,29 @@ def test_the_style_clause_can_cite_several_anchors():
     from studio.storyboard_grid import style_clause
     said = style_clause([1, 2], "flat angular shapes")
     assert "<image1>" in said and "<image2>" in said
+
+
+def test_an_insert_on_part_of_a_creature_keeps_the_creature_whole():
+    """OWNER 2026-09-20: "just horse head can't exist, it should be whole horse,
+    we need to focus on the horse head".
+
+    ep05 shot 14 asks for "the black shape of a cab horse's head down in a
+    nosebag", and INSERT was carried straight through as "the panel holds the
+    object alone, close and filling the frame". A nosebag is an object and a
+    horse is not: the panel came back a head with no body, floating over the
+    gravel with the hansom shafts barely reading behind it.
+
+    A living thing is never cropped to a part. The part is what the framing
+    ATTENDS to; the creature is what the panel CONTAINS."""
+    from studio.storyboard_grid import whole_subject
+    said = whole_subject("the cab horse in the shafts of its hansom", "its head down in the nosebag")
+    assert "whole" in said.lower()
+    assert "its head down in the nosebag" in said
+    assert "never" in said.lower()
+
+
+def test_the_attention_is_the_part_and_the_frame_is_the_creature():
+    from studio.storyboard_grid import whole_subject
+    said = whole_subject("the cab horse", "its head")
+    assert said.index("the cab horse") < said.index("its head"), (
+        "the creature is stated as what the panel holds before the part it attends to")
