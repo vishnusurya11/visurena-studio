@@ -35,13 +35,24 @@ def cell_names(cols: int, rows: int) -> list[str]:
     return out
 
 
-def geometry(cols: int, rows: int, style: str) -> str:
+def geometry(cols: int, rows: int, style: str, numbered: bool = False) -> str:
+    """`numbered` letters a label into each corner, and defaults OFF.
+
+    MEASURED 2026-09-20: asked for "the panel number drawn small in the
+    top-left corner", Qwen drew the SHOT SIZE there instead -- WIDE, MEDIUM,
+    INSERT lettered into the picture. On a page a person reads, that is a help.
+    These panels go on to be H3 ref2va references, and lettering in a reference
+    is lettering in the video -- so the default forbids it in the POSITIVE
+    prompt rather than hoping the negative catches it, which it did not."""
     n = cols * rows
-    return (f"A storyboard drawn as a strict grid of {cols} columns and {rows} rows, "
+    said = (f"A storyboard drawn as a strict grid of {cols} columns and {rows} rows, "
             f"{COUNTS.get(n, n)} panels in all, every panel exactly the same size and shape, "
-            f"thin white gutters between the panels and a thin black border around each one, "
-            f"and the panel number drawn small in the top-left corner of its own panel. "
-            f"Every panel is {style}.")
+            f"thin white gutters between the panels and a thin black border around each one. ")
+    said += ("The panel number is drawn small in the top-left corner of its own panel. "
+             if numbered else
+             "There is NO TEXT, NO LETTERING, no numbers, no words, no labels and no captions "
+             "anywhere in the image or in any panel. ")
+    return said + f"Every panel is {style}."
 
 
 def place_clause(slots: list[int], described: str) -> str:
@@ -79,7 +90,7 @@ def panel_block(number: int, where: str, size: str, body: str, cut: str) -> str:
 
 
 def grid_prompt(shots: list[dict], cols: int, rows: int, place: tuple[list[int], str],
-                cast: list[dict], style: str) -> str:
+                cast: list[dict], style: str, numbered: bool = False) -> str:
     """The whole prompt. Refuses a shot list that leaves a cell empty."""
     cells = cell_names(cols, rows)
     if len(shots) != len(cells):
@@ -87,5 +98,7 @@ def grid_prompt(shots: list[dict], cols: int, rows: int, place: tuple[list[int],
                          f"the drawer fills with its own invention")
     blocks = [panel_block(i, where, s["size"], s["body"], s["cut"])
               for i, (where, s) in enumerate(zip(cells, shots), start=1)]
-    return "\n\n".join([geometry(cols, rows, style), place_clause(*place),
-                        cast_clause(cast), *blocks])
+    parts = [geometry(cols, rows, style, numbered), place_clause(*place)]
+    if cast:
+        parts.append(cast_clause(cast))
+    return "\n\n".join(parts + blocks)

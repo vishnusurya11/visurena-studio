@@ -112,3 +112,29 @@ def test_the_prompt_refuses_a_shot_count_that_does_not_fill_the_grid():
     shots = [{"size": "MEDIUM", "body": "one", "cut": "at the waist"}]
     with pytest.raises(ValueError, match="4 cells"):
         grid_prompt(shots, 2, 2, place=place_clause_args(), cast=[NEIGHBOUR], style="s")
+
+
+def test_an_unnumbered_grid_forbids_lettering_outright():
+    """MEASURED 2026-09-20: asked for 'the panel number small in the corner',
+    Qwen drew the SHOT SIZE there instead -- WIDE, MEDIUM, INSERT burned into
+    the picture.  Harmless on a review page, and not harmless at all here: a
+    panel is going on to be an H3 ref2va reference, and lettering in a
+    reference is lettering in the video."""
+    from studio.storyboard_grid import geometry
+    said = geometry(2, 2, "a painted style", numbered=False)
+    assert "top-left corner" not in said, "it must not ASK for a corner label"
+    assert "no text" in said.lower() and "no lettering" in said.lower()
+    assert "no numbers" in said.lower()
+
+
+def test_a_numbered_grid_still_asks_for_the_number():
+    from studio.storyboard_grid import geometry
+    assert "number" in geometry(2, 2, "a painted style", numbered=True).lower()
+
+
+def test_the_prompt_is_unnumbered_by_default():
+    """The default use is an H3 reference, not a page for a person."""
+    from studio.storyboard_grid import grid_prompt
+    shots = [{"size": "MEDIUM", "body": f"shot {i}", "cut": "at the waist"} for i in range(4)]
+    said = grid_prompt(shots, 2, 2, place=([1], "a heath"), cast=[], style="s")
+    assert "no lettering" in said.lower()
