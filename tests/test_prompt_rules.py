@@ -80,3 +80,13 @@ def test_a_group_noun_needs_its_own_word_boundary():
     assert not group_once("the pole swings over and the linen runs out flat")
     assert not group_once("he crosses the lines of the ledger")
     assert group_once("the line of people pressing forward")
+
+
+def test_a_rope_knot_is_not_a_crowd():
+    """ep05: 'the cord snaps taut at the knot' and 'the linen runs out flat'
+    were flagged as crowds. A weak crowd word needs 'of <people>'."""
+    assert not group_once("the cord snaps taut at the knot")
+    assert not group_once("the linen runs out flat on the grass")
+    assert not group_once("a line of pines along the rim")
+    assert group_once("a line of onlookers along the rim")
+    assert group_once("the crowd surges back from the pit")

@@ -6,13 +6,13 @@ from __future__ import annotations
 
 import re
 
+PEOPLE = r"(?:people|men|women|workmen|figures|onlookers|soldiers|boys|girls|diggers|"\
+         r"labourers|spectators|mourners|refugees)"
 NUMBERED = re.compile(
-    r"\b(?:(?:two|three|four|five|six|several)\s+[a-z\- ]{0,30}?"
-    r"(?:people|men|women|workmen|figures|onlookers|soldiers|boys|girls|diggers|labourers|"
-    r"spectators)\b"
-    r"|(?:a|the)\s+(?:dense\s+|small\s+|great\s+|thin\s+)?"
-    r"(?:crowd|throng|mob|stream|line|row|knot|party)\b"
-    r"(?:\s+of\s+[a-z\- ]{0,30}?(?:people|men|women|figures|onlookers)\b)?)", re.I)
+    r"\b(?:(?:two|three|four|five|six|several)\s+[a-z\- ]{0,30}?" + PEOPLE + r"\b"
+    r"|(?:a|the)\s+(?:dense\s+|small\s+|great\s+|thin\s+)?(?:crowd|throng|mob)\b"
+    r"|(?:a|the)\s+(?:long\s+|thin\s+)?(?:stream|line|row|knot|party)\s+of\s+"
+    r"[a-z\- ]{0,30}?" + PEOPLE + r"\b)", re.I)
 """ep03 T19: 'three workmen in collarless shirts and moleskin trousers' came back
 as three identical men; T12/T14's 'dense crowd' and 'stream of people' as rows of
 the same figure.  One description covering several people IS one figure to H3.
