@@ -291,3 +291,88 @@ def no_duplicates(names: list[str]) -> str:
     return (f"{said}. Each of these people appears EXACTLY ONCE in a panel, never twice, never "
             f"as a pair and never as a reflection; and no other figure copies their face or "
             f"their clothes.")
+
+
+BEAT_CELLS = ("top-left", "top-right", "bottom-left", "bottom-right")
+
+
+def take_board(size: str, at_rest: str, beats: list[str], cut: str, panels: int = 4,
+               strict: bool = True, pose: bool = False) -> str:
+    """ONE take, broken into beats: the storyboard a ref2v call is given.
+
+    OWNER 2026-09-20: "i need a storyboard of each shot .. or take .. every
+    ref2v call to have a storyboard to generate direction."
+
+    The first board built was one PANEL PER SHOT across a whole setup -- a page
+    to read, which he said looks right for an episode and is not what a take
+    needs. A take needs its OWN shot in time order, first frame to last, so the
+    grid carries the camera move and the action into the render. That is what
+    direction is.
+
+    Every panel is the same shot: same camera position, same lens, same place,
+    same people, same light. Only the action advances. Four different framings
+    would be four shots.
+
+    MEASURED 2026-09-20, AND IT DOES NOT WORK. Four ways of asking, on ep05
+    shot 5, one variable at a time: strict with the motion's own verbs; loose,
+    with "EACH PANEL IS VISIBLY DIFFERENT FROM THE ONE BEFORE IT"; the beats
+    rewritten as the pose the body is in at the END of each action; and loose
+    and pose together. All four returned the same man standing the same way
+    four times -- no lean onto the stick, no ferrule driven into the sand, no
+    blazer swinging open, no head shaken, in any of them.
+
+    The vendor's own sentence says why, and I read past it first: the model
+    "turns a three-view character reference into a complete storyboard",
+    composing DIFFERENT SCENES. Panels differ when the panels are different
+    shots -- another size, another subject -- which is exactly why the
+    multi-shot grid works. "The same shot one second later" gives it nothing to
+    vary.
+
+    KEPT, NOT DELETED, so the next person does not spend the GPU finding this
+    out again. The owner chose the other route: one panel per take out of a
+    multi-shot grid, with the direction left in the ref2v prompt.
+    """
+    hold = ("the SAME CAMERA POSITION, the SAME LENS, the same place, the same people and the "
+            "same light in all four panels. Nothing moves between the panels except what each "
+            "beat below says moves."
+            if strict else
+            "the same place, the same people and the same light in all four panels, and one "
+            "continuous action running through them. EACH PANEL IS VISIBLY DIFFERENT FROM THE "
+            "ONE BEFORE IT: the body has moved, the pose has changed, the camera has travelled. "
+            "Four panels that look alike are four copies, not a shot.")
+    said = [f"FOUR PANELS OF ONE CONTINUOUS SHOT, in time order, left to right and top to "
+            f"bottom: panel 1 is the FIRST FRAME of the shot and panel 4 is its LAST FRAME. "
+            f"It is one {size} shot throughout -- {hold} The framing {cut}."]
+    ordered = list(beats)[:panels - 1]
+    while len(ordered) < panels - 1:                # a blank cell invites invention
+        ordered.append("the action of the beat before it continues, a little further on")
+    said.append(f"BEAT 1, {BEAT_CELLS[0]} -- the shot at rest, before anything moves: {at_rest}")
+    for i, beat in enumerate(ordered, start=2):
+        # A drawer draws a POSE, not a verb: "he leans his weight onto the stick
+        # and drives the ferrule into the sand" is a second of motion, and what
+        # a panel can hold is the body at the END of it.
+        body = (f"the exact moment this has just finished happening, drawn as the pose the body "
+                f"is in at the END of it: {beat}" if pose else beat)
+        said.append(f"BEAT {i}, {BEAT_CELLS[i - 1]} -- {body}")
+    return "\n\n".join(said)
+
+
+def beats_of(motion: str) -> list[str]:
+    """The actions in a shot's motion line, in the order they happen.
+
+    The plan writes a take's motion as clauses joined by semicolons -- the
+    camera's travel, then what the subject does, then what settles -- which is
+    already a beat list; it has only never been read as one."""
+    return [b.strip().rstrip(".") for b in (motion or "").split(";") if b.strip()]
+
+
+def panel_box(n: int, cols: int, rows: int, size: int, trim: int = 16) -> tuple:
+    """The crop box for panel `n` (0-based, reading order) out of a square grid.
+
+    `trim` sheds the gutter and border the geometry clause asks for. They are a
+    help on a page and a fault in a reference: H3 renders what it is given, and
+    a white seam down one edge is a picture element."""
+    cell_w, cell_h = size // cols, size // rows
+    r, c = divmod(n, cols)
+    return (c * cell_w + trim, r * cell_h + trim,
+            (c + 1) * cell_w - trim, (r + 1) * cell_h - trim)

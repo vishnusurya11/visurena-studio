@@ -372,3 +372,63 @@ def test_a_group_with_nothing_before_it_cannot_be_padded():
     from studio.storyboard_grid import cover
     with pytest.raises(ValueError, match="fewer than 4"):
         cover([0, 1], before=[])
+
+
+def test_a_take_board_is_one_shot_in_time_order():
+    """OWNER 2026-09-20: "i need a storyboard of each shot .. or take .. every
+    ref2v call to have a storyboard to generate direction."
+
+    The board built first was one PANEL per shot across a setup: a page to read,
+    not direction for a take. What a ref2v call needs is its own shot broken
+    into beats -- first frame to last -- so the grid carries the camera move and
+    the action, which is what direction is.
+
+    Every panel is the SAME shot: same camera, same lens, same place, same
+    people. Only the action advances."""
+    from studio.storyboard_grid import take_board
+    said = take_board("MEDIUM", "he stands among the furze",
+                      ["he leans on the stick", "his blazer swings open", "he shakes his head"],
+                      cut="cuts him at mid-thigh")
+    assert "ONE CONTINUOUS SHOT" in said
+    assert "BEAT 1" in said and "BEAT 4" in said
+    assert "first frame" in said.lower() and "last frame" in said.lower()
+
+
+def test_the_first_beat_is_the_shot_at_rest():
+    from studio.storyboard_grid import take_board
+    said = take_board("WIDE", "the common at dusk", ["a boy runs"], cut="full figure")
+    assert said.index("the common at dusk") < said.index("BEAT 2")
+
+
+def test_a_take_board_holds_the_camera_still_between_beats():
+    """Four different framings would be four shots, not one."""
+    from studio.storyboard_grid import take_board
+    said = take_board("MEDIUM", "x", ["a", "b", "c"], cut="y")
+    assert "same camera position" in said.lower()
+    assert "same lens" in said.lower()
+
+
+def test_fewer_beats_than_panels_still_fills_four():
+    """A blank cell is a cell the drawer fills with its own invention."""
+    from studio.storyboard_grid import take_board
+    said = take_board("MEDIUM", "x", ["only one thing happens"], cut="y")
+    for n in (1, 2, 3, 4):
+        assert f"BEAT {n}" in said
+
+
+def test_a_panel_is_cut_without_its_gutter():
+    """The grid draws thin white gutters and a black border; a naive quarter
+    carries that seam into the reference, and a seam is a picture element H3
+    would render."""
+    from studio.storyboard_grid import panel_box
+    assert panel_box(0, cols=2, rows=2, size=2048, trim=16) == (16, 16, 1008, 1008)
+    assert panel_box(3, cols=2, rows=2, size=2048, trim=16) == (1040, 1040, 2032, 2032)
+
+
+def test_panels_are_cut_in_reading_order():
+    from studio.storyboard_grid import panel_box
+    tl = panel_box(0, 2, 2, 2048, 0)
+    tr = panel_box(1, 2, 2, 2048, 0)
+    bl = panel_box(2, 2, 2, 2048, 0)
+    assert tr[0] > tl[0] and tr[1] == tl[1], "panel 2 is to the RIGHT of panel 1"
+    assert bl[1] > tl[1] and bl[0] == tl[0], "panel 3 is BELOW panel 1"
