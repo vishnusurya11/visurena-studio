@@ -19,6 +19,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 
 from studio import card_fade, canvas, edit_gate, episode_bed, episode_gutter, episode_home
+from studio import finished_file
 from studio.comfy import run
 from studio.episode_spec import Episode
 from studio import trailer_assemble
@@ -752,8 +753,7 @@ def trim(master: Path, work: Path) -> Path:
                     "-af", f"atrim=start={ENCODE_LAG_S},asetpts=PTS-STARTPTS,"
                            f"volume={max(gain, 0.0)}dB,alimiter=limit={LIMIT}:level=false",
                     "-c:a", "aac", "-b:a", "256k", str(louder)], check=True)
-    master.write_bytes(louder.read_bytes())
-    return master
+    return louder      # the caller publishes it; nothing is written in place
 
 
 def main(book_id: str, number: int, engine: str = "i2v",
@@ -792,12 +792,18 @@ def main(book_id: str, number: int, engine: str = "i2v",
                                             for line in placed["lines"]],
                            work / "mixed.mp4", seconds=placed["duration_s"])
     card = book / "title" / f"ep{number:02d}.mp4"
+    # The master's NAME goes on a finished file, never on a growing one: the
+    # join is `-preset slow -crf 14` over three minutes of picture, and while it
+    # ran the deliverable's own path pointed at a headerless stump.  ep05's
+    # master was found truncated at 133 MB that way.  See studio/finished_file.
+    master = episode_home.master_path(book, number, engine)
     out = tail(mixed, card if card.exists() else book / "title" / "title.mp4",
-               episode_home.master_path(book, number, engine), work, number)
-    trim(out, work)
+               finished_file.scratch_for(master, work), work, number)
+    out = trim(out, work)
+    finished_file.publish(out, master)
     keep = next_iteration(home)
-    (home / "cut" / f"master_iter{keep}.mp4").write_bytes(out.read_bytes())
-    print(f"master -> {out}  (kept as master_iter{keep}.mp4)")
+    (home / "cut" / f"master_iter{keep}.mp4").write_bytes(master.read_bytes())
+    print(f"master -> {master}  (kept as master_iter{keep}.mp4)")
 
 
 def write_cut_manifest(work: Path, records: list[dict], book: Path) -> Path:
