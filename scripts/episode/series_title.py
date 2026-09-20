@@ -26,7 +26,7 @@ from studio.comfy import run, run_text, stage_image
 from studio.h3 import frames_for
 from studio.refs_pack import styled
 from studio.series_title import (card_lines, horizontal, missing_lines, plate_caption,
-                                 screen_over)
+                                 screen_over, stray_glyphs)
 
 TRIES = 6
 SECONDS = 4.0
@@ -65,7 +65,12 @@ def reads(card: Path) -> str:
 def lettered_card(base: Path, lines: list[str], out: Path) -> Path:
     for attempt in range(TRIES):
         card = letter(base, lines, 5200 + attempt)
-        wrong = ["lettered down the frame"] if card is None else missing_lines(lines, reads(card))
+        if card is None:
+            wrong = ["lettered down the frame"]
+        else:
+            said = reads(card)
+            wrong = (missing_lines(lines, said)
+                     + [f"stray glyph {g!r}" for g in stray_glyphs(lines, said)])
         print(f"  lettering try {attempt + 1}: {'OK' if not wrong else f'misread {wrong}'}", flush=True)
         if not wrong:
             shutil.copyfile(card, out)

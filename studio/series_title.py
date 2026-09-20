@@ -86,3 +86,21 @@ def missing_lines(lines: list[str], ocr: str) -> list[str]:
 
 def lines_read(lines: list[str], ocr: str) -> bool:
     return not missing_lines(lines, ocr)
+
+
+STRAY = re.compile(r"[\"“”‘’`]")
+"""Quotation marks the drawer copied out of its own instructions.
+
+MEASURED on WotW ep05 (2026-09-20).  `plate_caption` asks for `the words
+"<line>" (exact, no typos)` -- the quotes are the PROMPT's, not the card's --
+and Ideogram lettered the third line as `The Heat-ray"`, with the closing curly
+quote set in the same ivory serif as the words.  ep01-ep04 are clean, so it is
+a seed, not a certainty, which is exactly why it needs a gate rather than a
+rewrite: `missing_lines` normalises every non-alphanumeric away before it
+compares, so a stray glyph can never fail it and the card read back "OK"."""
+
+
+def stray_glyphs(lines: list[str], ocr: str) -> list[str]:
+    """Quote glyphs the transcription carries that the asked-for lines do not."""
+    asked = "".join(lines)
+    return sorted({g for g in STRAY.findall(transcription(ocr)) if g not in asked})
