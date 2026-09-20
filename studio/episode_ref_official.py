@@ -71,6 +71,13 @@ prompt as "Unnamed First Person Narrator".  Empty is the old behaviour."""
 WOMEN: set[str] = set()
 """Who the builder calls a woman (refs.json `gender`), set per run.  Every
 subject used to be "this man" and every speaker "His mouth"."""
+CREATURES: set[str] = set()
+"""Who is not a person at all (refs.json `gender: "creature"`), set per run.
+WotW ep04: the Martian is a bear-sized bulk that is WHOLLY HEAD, with no arms,
+no legs and no torso, and the whole reveal is that absence -- and the builder
+called it "this man" in the one take the episode is built on.  A humanoid noun
+beside a sheet of a limbless bulk is exactly the contradiction ep02 measured
+the sheet winning; here the words would have been pulling the other way."""
 
 
 def name_of(who: str) -> str:
@@ -84,14 +91,20 @@ def surname(who: str) -> str:
 
 
 def noun(who: str) -> str:
+    if who in CREATURES:
+        return "creature"
     return "woman" if who in WOMEN else "man"
 
 
 def possessive(who: str) -> str:
+    if who in CREATURES:
+        return "Its"
     return "Her" if who in WOMEN else "His"
 
 
 def objective(who: str) -> str:
+    if who in CREATURES:
+        return "it"
     return "her" if who in WOMEN else "him"
 
 

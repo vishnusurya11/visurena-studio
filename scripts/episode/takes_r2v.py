@@ -158,6 +158,7 @@ def adopt_names(rows: list[dict]) -> None:
     row with no `display` keeps its title-cased id; no rows restores the default."""
     ro.DISPLAY.clear()
     ro.WOMEN.clear()
+    ro.CREATURES.clear()
     for r in rows:
         if r.get("kind") != "character":
             continue
@@ -165,6 +166,8 @@ def adopt_names(rows: list[dict]) -> None:
             ro.DISPLAY[r["entity_id"]] = r["display"]
         if r.get("gender") == "female":
             ro.WOMEN.add(r["entity_id"])
+        if r.get("gender") == "creature":
+            ro.CREATURES.add(r["entity_id"])
 
 
 def reference_list(book: Path, boards: Path, faces: list[str], setup: str,

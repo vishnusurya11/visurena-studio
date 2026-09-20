@@ -274,6 +274,15 @@ APPEARANCE = (
     "knob", "ferrule", "shaft", "brim", "cuff", "collar", "cravat", "stud", "waistcoat",
     "trousers", "sleeve", "scarf", "muffler", "apron", "plaster", "bandage", "cap", "bowler",
     "jacket", "velvet", "tweed", "frock", "buttons", "pocket",
+) + (
+    # A BOOK WHOSE CAST IS NOT ALL HUMAN (WotW, 2026-09-19).  The whole list was
+    # faces and clothes, so the Martian's two load-bearing sentences -- the body
+    # plan ("a rounded bulk the size of a bear, four feet across, whose whole body
+    # is one huge head") and the tentacles -- carried no appearance word and were
+    # dropped silently from every take prompt of the episode built on them.  The
+    # take then described skin, a face and an ear disc and no SHAPE.  Concrete
+    # creature nouns only: "head" and "body" are too common in narration.
+    "bulk", "hide", "tentacle", "tentacles", "beak", "carapace",
 )
 
 ABSENCE = ("no description", "no confirmed", "no precise", "gives no", "does not provide",
