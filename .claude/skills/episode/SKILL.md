@@ -110,6 +110,36 @@ appends `title/epNN.mp4` after the last frame.
 
 **Aspect:** 1:1 square (plan `"aspect": "1:1"`, delivered 1536x1536).
 
+**PROMPT THE MODEL THE WAY IT WAS TRAINED** — `docs/calibration/singularity_prompting.md`
+(researched 2026-09-19, a source per claim; §4 is the 13 rules, §5 two worked rewrites):
+- The fine-tune's author keeps the official six fields and adds three things: an
+  ACTION CHAIN, a FACIAL-EXPRESSION clause, a CAMERA clause.
+- An action is a chain, never a bare verb: initial state -> trigger -> primary
+  action -> displacement -> contact -> final state. ONE chain per take; the
+  model's own spec names "too many simultaneous actions in one shot" as a failure.
+- Camera terms are a CLOSED token list: Pan Left/Right, Tilt Up/Down, Truck,
+  Pedestal, Push In/Pull Out, Arc Shot, Tracking Shot, Static Shot, Roll, with
+  small/large amplitude, at slow/fast speed. Lead the camera clause with the
+  official token (locked = Static Shot, follow = Tracking Shot, track_lateral =
+  Truck, crane = Pedestal, pull_reveal = Pull Out). Push In stays banned by our
+  own measurement.
+- The desaturation is DELIBERATE (author's words). Never prompt colour back;
+  write light as source + direction + exposure + material response and grade in
+  the edit.
+- One expression clause per named face (gaze, brow, jaw, breath) and one
+  physical-feedback clause (dust, cloth, hair, heat shimmer) tied to the action.
+- Never write "slow" against a person; write the gait.
+- MEASURED AND REJECTED: the doc reports a 17k+5 frame grid; across all 46
+  ep02-ep03 takes it does not predict the in-take-cut artifact (on-grid mean
+  10.7, off-grid 9.6). Take lengths stay derived from the measured audio.
+- MEASURED AND REJECTED: "separate reference images per element". The official
+  guide sanctions one sheet per subject; our one-picture-per-entity rule stands.
+
+**Lint the plan before any GPU time**: `studio/prompt_rules.py` flags
+`group_once`, `push_in`, `exit_clause`, `kept_anchor`, and `move_variety`
+reports distinct moves, back-to-back repeats and the most-used share. ep03's
+plan flags 4 shots and scores 8 distinct / 2 back-to-back / 0.39 — beat it.
+
 **THE MODEL IS THE SINGULARITY FINE-TUNE** (A/B measured on ep03, 2026-09-19).
 `video_minimax_h3_r2v_turbo_ref8` now loads
 `Minimax-h3_Singularity_ref2va_Pruned_v1.3_int8.safetensors` with the 8-step
