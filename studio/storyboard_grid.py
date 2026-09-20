@@ -45,6 +45,18 @@ def geometry(cols: int, rows: int, style: str, numbered: bool = False) -> str:
     is lettering in the video -- so the default forbids it in the POSITIVE
     prompt rather than hoping the negative catches it, which it did not."""
     n = cols * rows
+    if n == 1:
+        # A GRID OF ONE IS NOT A GRID. MEASURED 2026-09-20 on the full ep05
+        # board: six groups held a single shot -- 8, 13, 14, 25, 26, 27 -- and
+        # this said "a strict grid of 1 columns and 1 rows, one panels in all".
+        # All six came back MOSAICS, three-by-three sheets of the same picture
+        # repeated small with borders and gutters. The arithmetic was ignored
+        # and the words "storyboard" and "grid" were obeyed.
+        return ("ONE SINGLE PICTURE that fills the whole image edge to edge. It is not a "
+                "storyboard, not a grid, not a sheet and not a collage: there are no panels, "
+                "NO BORDERS, NO GUTTERS, no dividing lines and no repeated or tiled copies of "
+                "anything. NO TEXT, NO LETTERING, no numbers, no words, no labels and no "
+                f"captions anywhere in it. The picture is {style}.")
     said = (f"A storyboard drawn as a strict grid of {cols} columns and {rows} rows, "
             f"{COUNTS.get(n, n)} panels in all, every panel exactly the same size and shape, "
             f"thin white gutters between the panels and a thin black border around each one. ")
@@ -123,9 +135,16 @@ def grid_prompt(shots: list[dict], cols: int, rows: int, place: tuple[list[int],
         raise ValueError(f"{len(shots)} shots for {len(cells)} cells: a blank cell is a cell "
                          f"the drawer fills with its own invention")
     everyone = [p["name"] for p in cast]
-    blocks = [panel_block(i, where, s["size"], s["body"], s["cut"],
-                          who=s.get("who"), absent=everyone)
-              for i, (where, s) in enumerate(zip(cells, shots), start=1)]
+    if len(shots) == 1:
+        # One shot is one picture: "PANEL 1, row 1 column 1" invites the sheet
+        # straight back in, so the block loses its heading and its cell.
+        s = shots[0]
+        blocks = [f"{s['size']}. {s['body']} The framing: {s['cut']}. "
+                  f"This picture is a {s['size']}."]
+    else:
+        blocks = [panel_block(i, where, s["size"], s["body"], s["cut"],
+                              who=s.get("who"), absent=everyone)
+                  for i, (where, s) in enumerate(zip(cells, shots), start=1)]
     parts = [geometry(cols, rows, style, numbered), place_clause(*place)]
     if cast:
         parts.append(cast_clause(cast))
@@ -223,3 +242,52 @@ def whole_subject(subject: str, focus: str) -> str:
             f"detail floating with no body attached. The framing attends to {focus}: that is "
             f"where the light falls, that is what is sharpest and nearest the centre, and the "
             f"rest of {subject} reads clearly around it.")
+
+
+def cover(group: list[int], before: list[int] | None = None, size: int = 4) -> list[list[int]]:
+    """Cover `group` with windows of EXACTLY `size`, overlapping where it must.
+
+    OWNER 2026-09-20: "i donno why you did 1*1 it is useless. we do only
+    storyboards .. 2*2 min."
+
+    Right twice over. A single picture is not a storyboard, and asking for one
+    as a 1x1 grid produced six mosaics on the ep05 board -- tiled sheets of the
+    same picture repeated small -- because the words "storyboard" and "grid"
+    beat the arithmetic of "1 columns and 1 rows".
+
+    A group that does not divide by `size` gets an OVERLAPPING last window
+    rather than a short one, and a group shorter than `size` reaches back into
+    `before` for its remainder. The overlap is not waste: a shot drawn twice is
+    a second take of it, for nothing.
+    """
+    before = list(before or [])
+    if len(group) < size:
+        short = size - len(group)
+        if len(before) < short:
+            raise ValueError(f"{len(group)} shots and only {len(before)} before them: "
+                             f"fewer than {size} to draw, and a short grid is not a grid")
+        return [before[-short:] + list(group)]
+    out, start = [], 0
+    while start + size <= len(group):
+        out.append(list(group[start:start + size]))
+        start += size
+    if start < len(group):                       # a tail: slide the last window back
+        out.append(list(group[-size:]))
+    return out
+
+
+def no_duplicates(names: list[str]) -> str:
+    """Say the duplication out loud, which the vendor guidance asks for.
+
+    MEASURED 2026-09-20 and RESEARCHED the same day: reference images duplicate
+    their subject, and the published method for multi-reference work says to
+    state it -- "no duplicated product, no duplicated helmet" -- rather than
+    hope. ep05 put two identical neighbours side by side in one panel and three
+    men in shot 8 where the plan names two."""
+    if not names:
+        return ("Every person in the picture is a different person: no two figures share a face, "
+                "a build or an outfit, and no figure is repeated or mirrored anywhere.")
+    said = ", ".join(f"no duplicated {n}" for n in names)
+    return (f"{said}. Each of these people appears EXACTLY ONCE in a panel, never twice, never "
+            f"as a pair and never as a reflection; and no other figure copies their face or "
+            f"their clothes.")

@@ -299,3 +299,76 @@ def test_the_attention_is_the_part_and_the_frame_is_the_creature():
     said = whole_subject("the cab horse", "its head")
     assert said.index("the cab horse") < said.index("its head"), (
         "the creature is stated as what the panel holds before the part it attends to")
+
+
+def test_a_grid_of_one_is_not_a_grid():
+    """MEASURED 2026-09-20 on the full ep05 board: six groups had a single shot
+    in them -- shot 8 (the only shot with both men), 13, 14, 25, 26, 27 -- and
+    `geometry(1, 1, ...)` said "a strict grid of 1 columns and 1 rows, one
+    panels in all".
+
+    All six came back as MOSAICS: three-by-three sheets of the same picture
+    repeated small, borders and gutters and all. The nonsense arithmetic was
+    ignored and the words "storyboard" and "grid" were obeyed.
+
+    One shot is one picture, and the prompt has to stop calling it a grid."""
+    from studio.storyboard_grid import geometry
+    said = geometry(1, 1, "a painted style").lower()
+    assert "a strict grid of" not in said, "it must not declare itself a grid"
+    assert "not a grid" in said and "not a storyboard" in said
+    assert "single" in said
+    assert "no borders" in said and "no gutters" in said
+    assert "tiled" in said, "the fault was a tiled sheet, so name it"
+
+
+def test_a_single_picture_still_forbids_lettering():
+    from studio.storyboard_grid import geometry
+    assert "no lettering" in geometry(1, 1, "a painted style").lower()
+
+
+def test_a_single_picture_prompt_has_no_panel_heading():
+    """"PANEL 1, row 1 column 1" invites the sheet back in."""
+    from studio.storyboard_grid import grid_prompt
+    said = grid_prompt([{"size": "MEDIUM", "body": "a horse", "cut": "at the knee"}],
+                       1, 1, place=([1], "a pit"), cast=[], style="s")
+    assert "PANEL" not in said
+    assert "MEDIUM" in said and "a horse" in said
+
+
+def test_every_window_is_a_full_four():
+    """OWNER 2026-09-20: "i donno why you did 1*1 it is useless. we do only
+    storyboards .. 2*2 min."
+
+    He is right twice. A single picture is not a storyboard, and asking for one
+    as a 1x1 grid produced six mosaics -- tiled sheets of the same picture --
+    because the words "storyboard" and "grid" beat the arithmetic.
+
+    So a group is covered by windows of exactly four, and a group that does not
+    divide by four gets an OVERLAPPING last window rather than a short one. The
+    overlap is not waste: a shot drawn twice is a second take of it, free."""
+    from studio.storyboard_grid import cover
+    assert cover([0, 1, 2, 3]) == [[0, 1, 2, 3]]
+    assert cover([4, 5, 6, 7, 8]) == [[4, 5, 6, 7], [5, 6, 7, 8]]
+    assert cover([9, 10, 11, 12, 13, 14]) == [[9, 10, 11, 12], [11, 12, 13, 14]]
+
+
+def test_a_short_group_reaches_back_for_its_fourth():
+    """ep05's `dark` is three shots. It cannot be a grid of three."""
+    from studio.storyboard_grid import cover
+    assert cover([25, 26, 27], before=[21, 22, 23, 24]) == [[24, 25, 26, 27]]
+
+
+def test_every_shot_is_covered_at_least_once():
+    from studio.storyboard_grid import cover
+    for group in ([0], [0, 1], [0, 1, 2], list(range(7)), list(range(9))):
+        got = cover(group, before=list(range(-4, 0)))
+        seen = {i for w in got for i in w}
+        assert set(group) <= seen, f"{group} -> {got} drops a shot"
+        assert all(len(w) == 4 for w in got), f"{group} -> {got} has a short window"
+
+
+def test_a_group_with_nothing_before_it_cannot_be_padded():
+    """Refuse rather than draw a grid of two: a caller must group differently."""
+    from studio.storyboard_grid import cover
+    with pytest.raises(ValueError, match="fewer than 4"):
+        cover([0, 1], before=[])
