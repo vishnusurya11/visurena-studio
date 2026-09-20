@@ -138,3 +138,23 @@ def test_the_prompt_is_unnumbered_by_default():
     shots = [{"size": "MEDIUM", "body": f"shot {i}", "cut": "at the waist"} for i in range(4)]
     said = grid_prompt(shots, 2, 2, place=([1], "a heath"), cast=[], style="s")
     assert "no lettering" in said.lower()
+
+
+def test_a_person_with_no_sheet_is_still_described():
+    """MEASURED 2026-09-20, ep05 `dusk` as 2x3: shot 13 names the newspaper boy,
+    a hand-written cast dict had no entry for him, the binding dropped him
+    silently -- and the panel came back a grinning man selling apples.  A person
+    the panels name must reach the prompt whether or not a sheet was drawn."""
+    from studio.storyboard_grid import cast_clause
+    said = cast_clause([{"ref": None, "name": "THE NEWSPAPER BOY",
+                         "wear": "a boy of thirteen in a cloth cap",
+                         "against": "he is no one else"}])
+    assert "THE NEWSPAPER BOY" in said
+    assert "<image" not in said, "no slot was staged for him, so none may be cited"
+
+
+def test_an_unstaged_person_is_not_promised_a_reference():
+    from studio.storyboard_grid import cast_clause
+    said = cast_clause([{"ref": 3, "name": "A", "wear": "w", "against": "x"},
+                        {"ref": None, "name": "B", "wear": "w", "against": "x"}])
+    assert "<image3>" in said and "<imageNone>" not in said

@@ -71,7 +71,14 @@ def cast_clause(people: list[dict]) -> str:
     a shape is a hat the drawer replaces with the commonest one in the scene."""
     said = []
     for p in people:
-        said.append(f"{p['name']} is the person in <image{p['ref']}>: {p['wear']} -- "
+        # A person with no sheet is described in WORDS and cited to no slot.
+        # MEASURED 2026-09-20 on ep05 `dusk`: shot 13 names the newspaper boy,
+        # the hand-written cast dict had no entry, the binding dropped him
+        # without a word, and the panel came back a man selling apples. A
+        # person the panels name reaches the prompt drawn or not.
+        where = (f"the person in <image{p['ref']}>" if p.get("ref") is not None
+                 else "a person with no reference picture, drawn from these words alone")
+        said.append(f"{p['name']} is {where}: {p['wear']} -- "
                     f"{p['against']}. Every panel {p['name']} appears in gives him exactly this "
                     f"face and exactly these clothes.")
     if len(people) > 1:
