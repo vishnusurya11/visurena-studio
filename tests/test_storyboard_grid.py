@@ -158,3 +158,36 @@ def test_an_unstaged_person_is_not_promised_a_reference():
     said = cast_clause([{"ref": 3, "name": "A", "wear": "w", "against": "x"},
                         {"ref": None, "name": "B", "wear": "w", "against": "x"}])
     assert "<image3>" in said and "<imageNone>" not in said
+
+
+def test_a_panel_names_who_stands_in_it():
+    """MEASURED 2026-09-20, ep05 `dusk` 2x3 iteration 2: the binding was right
+    at last -- one boy, one face, one corduroy jacket across the grid -- and he
+    turned up in FOUR panels when only shot 13 names him.  The clause said
+    "every panel THE NEWSPAPER BOY appears in gives him this face" and nothing
+    anywhere said WHICH panels those were, so he appeared in all of them.
+
+    Binding a person to a slot says who he is. It does not say where he is."""
+    from studio.storyboard_grid import panel_block
+    said = panel_block(2, "top-right", "MEDIUM", "the heather", cut="at the waist",
+                       who=["THE NEWSPAPER BOY"])
+    assert "In this panel: THE NEWSPAPER BOY" in said
+
+
+def test_a_panel_with_nobody_in_it_says_so():
+    """Shot 9 is a wide of empty common; leaving it silent let the boy walk in."""
+    from studio.storyboard_grid import panel_block
+    said = panel_block(1, "top-left", "WIDE", "the common", cut="full figure", who=[])
+    assert "no named character" in said.lower()
+
+
+def test_a_panel_forbids_the_others_by_name():
+    from studio.storyboard_grid import panel_block
+    said = panel_block(1, "top-left", "WIDE", "x", cut="y", who=["A"], absent=["B", "C"])
+    assert "B" in said and "C" in said and "does not appear" in said.lower()
+
+
+def test_the_cast_says_a_person_keeps_to_his_own_panels():
+    from studio.storyboard_grid import cast_clause
+    said = cast_clause([NEIGHBOUR, NARRATOR])
+    assert "only in the panels that name" in said.lower()

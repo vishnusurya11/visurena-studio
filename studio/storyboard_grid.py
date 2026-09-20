@@ -85,15 +85,34 @@ def cast_clause(people: list[dict]) -> str:
         names = " and ".join(p["name"] for p in people)
         said.append(f"{names} are never dressed alike and never wear the same hat, in any panel, "
                     f"without exception.")
+    if people:
+        said.append("Each of these people stands ONLY IN THE PANELS THAT NAME THEM below, and in "
+                    "no other panel. A panel that names nobody has nobody in it.")
     return "\n".join(said)
 
 
-def panel_block(number: int, where: str, size: str, body: str, cut: str) -> str:
-    """One panel: its cell, its size, its own words, and where the frame cuts.
+def panel_block(number: int, where: str, size: str, body: str, cut: str,
+                who: list[str] | None = None, absent: list[str] | None = None) -> str:
+    """One panel: its cell, its size, its own words, where the frame cuts, and
+    WHO STANDS IN IT.
 
     The size is said twice because said once it lost to the prose -- panel 1
-    asked MEDIUM and came back a full-length wide."""
-    return f"PANEL {number}, {where} -- {size}. {body} The framing: {cut}. This panel is a {size}."
+    asked MEDIUM and came back a full-length wide.
+
+    `who` exists because binding a person to a slot says WHO HE IS and says
+    nothing about WHERE HE IS. MEASURED 2026-09-20 on ep05 `dusk`: with the
+    binding finally correct, one boy with one face and one corduroy jacket
+    stood in four of six panels, when only shot 13 names him. The cast clause
+    promised "every panel he appears in" and no line anywhere said which those
+    were, so he appeared in all of them."""
+    said = f"PANEL {number}, {where} -- {size}. {body} The framing: {cut}."
+    if who is not None:
+        said += (f" In this panel: {', '.join(who)}; no other named person is in it."
+                 if who else " NO NAMED CHARACTER appears in this panel at all.")
+        for name in (absent or []):
+            if name not in (who or []):
+                said += f" {name} does not appear in this panel."
+    return said + f" This panel is a {size}."
 
 
 def grid_prompt(shots: list[dict], cols: int, rows: int, place: tuple[list[int], str],
@@ -103,7 +122,9 @@ def grid_prompt(shots: list[dict], cols: int, rows: int, place: tuple[list[int],
     if len(shots) != len(cells):
         raise ValueError(f"{len(shots)} shots for {len(cells)} cells: a blank cell is a cell "
                          f"the drawer fills with its own invention")
-    blocks = [panel_block(i, where, s["size"], s["body"], s["cut"])
+    everyone = [p["name"] for p in cast]
+    blocks = [panel_block(i, where, s["size"], s["body"], s["cut"],
+                          who=s.get("who"), absent=everyone)
               for i, (where, s) in enumerate(zip(cells, shots), start=1)]
     parts = [geometry(cols, rows, style, numbered), place_clause(*place)]
     if cast:
