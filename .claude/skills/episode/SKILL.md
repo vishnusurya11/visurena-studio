@@ -110,6 +110,19 @@ appends `title/epNN.mp4` after the last frame.
 
 **Aspect:** 1:1 square (plan `"aspect": "1:1"`, delivered 1536x1536).
 
+**ONE SPEAKER, ONE VOICE** (measured ep05, 2026-09-20). `say_lines` scores each
+render against the character's DESIGN clip and nothing scores a character's
+lines against EACH OTHER, so a part can pass twice and be two men: the
+neighbour's two lines passed their floors and measured 0.58 against each other.
+- Run `scripts/episode/speaker_check.py <book> <n>` after the lines; floor 0.70,
+  calibrated on the published episodes (ep01 0.76, ep02 0.76, ep03 0.72).
+- The cause is the voice SHEET, not the register: "an audible wet breath between
+  phrases", "a thick swallow", "the final consonant dropped entirely" are NOISE,
+  not timbre, and on an eight-word line the noise is most of what the ear scores.
+  Name register and colour only; the same pair then rendered 0.922.
+- Nearest-other-voice cannot be pushed below ~0.72 on this engine: the delivered
+  cast's own pairs run 0.71-0.86. Ask self > nearest, not an absolute ceiling.
+
 **PROMPT THE MODEL THE WAY IT WAS TRAINED** — `docs/calibration/singularity_prompting.md`
 (researched 2026-09-19, a source per claim; §4 is the 13 rules, §5 two worked rewrites):
 - The fine-tune's author keeps the official six fields and adds three things: an
