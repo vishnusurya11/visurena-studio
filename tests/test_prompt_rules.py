@@ -55,3 +55,28 @@ def test_men_inside_a_word_is_not_a_group():
     phrase with no group in it."""
     assert not group_once("two immense glossy black eyes above a lipless mouth")
     assert group_once("three workmen in collarless shirts digging")
+
+
+def test_the_gerund_keep_clause_is_the_same_orbit_request():
+    """ep04: the Singularity spec's 'keeping X in frame' dodged the lint and
+    brought ep01's orbit back as churn, blur and late reframes."""
+    assert kept_anchor("The camera tracks alongside the Narrator at a running pace, "
+                       "keeping him in the centre of frame with the pines at the right")
+    assert kept_anchor("The camera pans right with small amplitude from a pine branch across "
+                       "to the shopman, keeping his head in the centre of frame")
+    assert kept_anchor("The camera pulls out from the screw, keeping the bright seam in the "
+                       "upper centre of frame")
+
+
+def test_a_static_shot_may_say_what_it_frames():
+    assert not kept_anchor("The camera holds a static shot on the Narrator; he drags a breath")
+    assert not kept_anchor("The camera pans from the lamp across to the window")
+
+
+def test_a_group_noun_needs_its_own_word_boundary():
+    """ep05: "the linen cracks over" flagged `group_once`, because the second
+    branch of NUMBERED ended on `line` with no \b -- the same fault ep04 fixed
+    on the leading side of the alternation ("two immen" -> "men")."""
+    assert not group_once("the pole swings over and the linen runs out flat")
+    assert not group_once("he crosses the lines of the ledger")
+    assert group_once("the line of people pressing forward")

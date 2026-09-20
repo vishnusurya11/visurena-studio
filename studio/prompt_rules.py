@@ -11,11 +11,17 @@ NUMBERED = re.compile(
     r"(?:people|men|women|workmen|figures|onlookers|soldiers|boys|girls|diggers|labourers|"
     r"spectators)\b"
     r"|(?:a|the)\s+(?:dense\s+|small\s+|great\s+|thin\s+)?"
-    r"(?:crowd|throng|mob|stream|line|row|knot|party)"
-    r"(?:\s+of\s+[a-z\- ]{0,30}?(?:people|men|women|figures|onlookers))?)", re.I)
+    r"(?:crowd|throng|mob|stream|line|row|knot|party)\b"
+    r"(?:\s+of\s+[a-z\- ]{0,30}?(?:people|men|women|figures|onlookers)\b)?)", re.I)
 """ep03 T19: 'three workmen in collarless shirts and moleskin trousers' came back
 as three identical men; T12/T14's 'dense crowd' and 'stream of people' as rows of
-the same figure.  One description covering several people IS one figure to H3."""
+the same figure.  One description covering several people IS one figure to H3.
+
+Both ends of the alternation need their own word boundary, and both were learned
+the same way: ep04's "two immense glossy black eyes" matched `two immen` + `men`
+and flagged the Martian shots, and ep05's "the linen runs out flat" matched
+`the line` and flagged the white flag.  A lint that accuses correct prose is a
+lint the next author switches off."""
 
 INDIVIDUAL = re.compile(r"each turned|each in|one [a-z]+,|, a [a-z\- ]+ (?:man|woman|boy|girl)\b",
                         re.I)
@@ -27,7 +33,10 @@ EXIT = re.compile(r"\b(away|on along|off down|out of (?:the )?frame|into the dis
 """ep02 T12/T21: a last clause that sends someone out of frame makes H3 follow
 them and reframe in the final second."""
 
-KEPT = re.compile(r"\b(pans?|tracks?)\b[^.]*\bkeeps the\b", re.I)
+KEPT = re.compile(
+    r"\b(?:pans?|panning|tracks?|tracking|trucks?|trucking|pulls?|pulling|pushes|pushing|"
+    r"rises|rising|descends|descending|tilts?|tilting|circles|arcs?)\b"
+    r"[^.]*?\bkeep(?:s|ing)\b[^.]*?\b(?:centre|center|frame|third|edge)\b", re.I)
 """ep01: 18 of 23 shots were 'pan ... X keeps the left third' -- a rotating camera
 with a fixed subject is an orbit, which is what the owner saw."""
 
