@@ -262,3 +262,47 @@ updated with the result):
    other further and smaller, stated as two different head fractions.
 3. No clause that treats them as one unit: no "side by side", no "both", no
    "the two figures" -- each man gets his own sentence with his own verb.
+
+## The wide churn wall cannot tell a sprint from a second chimney
+
+MEASURED 2026-09-20, blocking ep04's upload.
+
+`take_coherence.NONRIGID_WIDE = 6.0` is HARD on any shot whose *plan size* is
+WIDE. ep04 T18 churns 8.67 and so fails DQ, and `youtube_publish.refusals`
+carries that failure all the way to the upload, where it is the only thing
+standing between a finished episode and the channel.
+
+T18 is the narrator sprinting across the common at sunset, tripping to his
+knees and running on. Frame by frame it is clean -- no warping, no doubled
+limbs, the grey suit and straw boater consistent end to end. The churn is a
+man running.
+
+The wall was calibrated on **Scarlet storyboard wides**, where the faults it
+caught were *a second chimney, a second window, the gate posts gone* -- content
+appearing and disappearing in a near-static frame. Nonrigid motion after pan
+removal is a good proxy for that. It is not a proxy for a tracking shot of a
+running figure: the camera follows the man, so pan removal cancels the heath
+and leaves his legs.
+
+The delivered episodes settle it. Churn across all 121 ep01-ep05 takes that
+carry the number, worst first:
+
+    ep02 T13  10.39   PUBLIC on the channel
+    ep02 T03   9.63   PUBLIC
+    ep01 T22   8.94   PUBLIC
+    ep04 T18   8.67   BLOCKED (wide -> hard wall)
+    ep02 T16   8.40   PUBLIC
+    ep02 T11   8.24   PUBLIC
+    ep04 T23   7.42   advisory only
+    ep02 T21   7.34   PUBLIC
+    ep01 T18   7.13   PUBLIC
+
+Five takes churnier than T18 are already public and the owner accepted the
+episodes. T18 is blocked by its SIZE LABEL, not by its picture: at any other
+plan size the same number is advisory and ships.
+
+So the gate here measures the right quantity against the wrong question, the
+same shape of fault as `qc.MAX_GAP_S` folding a held beat into a dead run-out.
+Both need the thing they are really asking about -- "did content change in a
+frame that was supposed to hold still" -- and neither has it. RECORDED, NOT
+ACTED ON: the wall is not moved to clear an upload of mine.
