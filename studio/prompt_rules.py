@@ -9,7 +9,7 @@ import re
 NUMBERED = re.compile(
     r"\b(?:(?:two|three|four|five|six|several)\s+[a-z\- ]{0,30}?"
     r"(?:people|men|women|workmen|figures|onlookers|soldiers|boys|girls|diggers|labourers|"
-    r"spectators)"
+    r"spectators)\b"
     r"|(?:a|the)\s+(?:dense\s+|small\s+|great\s+|thin\s+)?"
     r"(?:crowd|throng|mob|stream|line|row|knot|party)"
     r"(?:\s+of\s+[a-z\- ]{0,30}?(?:people|men|women|figures|onlookers))?)", re.I)

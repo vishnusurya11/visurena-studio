@@ -8,6 +8,26 @@ This is the **delta** on top of `docs/calibration/h3_ref_guide.md` (the official
 guide, verbatim) and `docs/calibration/ref2v_prompt_spec.md` (our per-sentence builder spec).
 Everything in those two still holds; the fine-tune did not replace the format.
 
+### 0. Settled by our own A/B since this was researched
+
+`docs/calibration/camera_catalog.md` §"The model: Singularity beats stock H3 (A/B, ep03,
+2026-09-19)" replayed three ep03 take graphs with the same prompt, references and seed, plus a
+control render that separates the model from the wording fix. Verdicts that override the web
+evidence below:
+
+- **C1 is false on our stack.** Stacked LoRA did *not* damage referencing. Stock drew the narrator
+  **twice** at his own gate and a rim crowd of repeated figures; Singularity drew one man and
+  individual onlookers. Both single- and stacked-LoRA fixed the duplicate; the stack was sharper
+  on the moving wide (T11 villa 1222 vs 1079), so the stack is the default. **E1 is answered.**
+- **V5's blur/face claim is confirmed in-house.** T11 villa went 615 sharpness with a blur flag →
+  **1222 with none**. **E3 is answered in the direction the README claimed.**
+- **The 17k+5 grid (V8) is rejected as a planning input.** Across all 46 ep02–ep03 takes it does
+  not predict the in-take-cut artifact (on-grid mean 10.7, off-grid 9.6). Take lengths stay
+  derived from the measured audio; do not round durations to the grid.
+- **C5 is rejected, as §2 predicted.** One picture per entity stands.
+
+Read §1–§2 as the source record; read this block as the current answer where they disagree.
+
 ---
 
 ## 1. Verified, with sources
@@ -72,9 +92,28 @@ connected"*; *"Assign each reference a job: State which reference drives which p
 (identity, style, motion, camera, voice). Explicit assignments tend to work much better."*
 From https://docs.comfy.org/tutorials/video/minimax/minimax-h3-prompt-guide : *"H3's native canvas
 is a 768px short edge… resolutions are rounded to a multiple of 32"*; *"The duration input snaps
-to the model's 17-frame-per-block (17k+5) grid at 24fps"* — so our 4–8 s window lands only on 90
-(3.75 s), 107, 124, 141, 158, 175, **192 (8.00 s exactly)**; on-screen text goes in English double
+to the model's 17-frame-per-block (17k+5) grid at 24fps"* — our 4–8 s window lands only on 90
+(3.75 s), 107, 124, 141, 158, 175, **192 (8.00 s exactly)**, but see §0: rounding take lengths to
+this grid was measured and rejected, so lengths stay audio-derived; on-screen text goes in double
 quotes, one string at a time, and `<d>` is only for speech.
+
+**V8b — The node source is the better primary source, and it says our short takes are off the
+trained range.** `ComfyUI/comfy_extras/nodes_minimax_h3.py`, `MiniMaxH3ReferenceToVideo`
+(local install, `D:\Projects\KingdomOfViSuReNa\alpha\ComfyUI_windows_portable\`):
+- `length` default **124**, `step=17`, tooltip *"Frame count at 24 fps, (124 = ~5s, trained range
+  is ~124-362)"*. The I2V/T2V nodes spell it out further: *"snapped up to the model's 17k+5 grid
+  … longer is untested."* **124 frames is 5.17 s, so a take under ~5.2 s sits below the model's
+  trained range.** §0 rejected rounding lengths *to the grid*; this is a different point, about
+  the **floor**. Measured against `placed.json` just now: **ep02 has 1 of 23 takes under 124
+  frames, ep03 has 2 of 23** (shortest 106 frames / 4.42 s; longest 217 / 9.04 s, comfortably
+  inside the range). Small exposure — worth knowing, not worth re-planning for.
+- `ref_images` is an Autogrow with `min=0, max=9`; `ref_videos` `max=3`. Confirms V8's limits from
+  the code rather than the docs. Each ref image is *"downscaled to 2048 short edge if larger,
+  never upscaled."*
+- `ref_image_size` tooltip gives the mechanism behind the cost: *"Reference tokens ride through
+  every sampling step, so 'max' can be several times slower."*
+- Node description: *"Use the same tags when prompting"* — `<Picture i>` / `<Video k>` /
+  `<Audio j>` numbering follows socket order, from the code.
 
 **V9 — Step count.** The official R2V template runs **20 steps** by default; *"raise the step count
 (for example to 25) for better motion quality"*; the 4-step turbo LoRA gives *"slightly lower
@@ -92,8 +131,8 @@ justify a shorter description."* No documented hard token limit was found.
 **C1 — Stacked turbo LoRAs wreck reference adherence. Contested, 2 reports, opposite signs.**
 `g2t2`: *"You are using 2 Turbo LoRA. In my testing experience, Turbo LoRAs terribly damage the
 referencing for me."* `EllipsesMark`, on the same 2-LoRA screenshot: *"I tried it… and it severely
-improved the output."* → discussions/18. This lands directly on our stack (1.0 + 0.7). **Untested
-by us. Experiment E1.**
+improved the output."* → discussions/18. This lands directly on our stack (1.0 + 0.7).
+**SETTLED — see §0: measured false on our stack; the stack is the default.**
 
 **C2 — 4 steps is too few; 8–10 is the sweet spot. 1 report.** Esha Sharma reports 4-step output
 was poor and improved at *"8–10 steps"*, and recommends testing on your own rig.
@@ -125,11 +164,11 @@ Our one-sheet-per-entity rule stands, and the 9-slot budget is not the constrain
 
 ## 3. Untested here
 
-Whether the second turbo LoRA at 0.7 costs identity (C1) · whether lighting/HDR/material words
-move this checkpoint more than base H3 (V5 claims yes) · whether "distant face restoration" buys
-us wider framing · whether an action chain beats a single verb on a 4–8 s **single-shot** take
-(V4's examples are all multi-beat combat) · whether 250–350 words underperforms the official
-350–500 band (V10) · whether `ref_image_size: max` recovers detail lost to pruning + int8.
+(The LoRA stack and the distant-face claim have since been answered — see §0.) Still open: whether
+lighting/HDR/material words move this checkpoint more than base H3 · whether an action chain beats
+a single verb on a 4–8 s **single-shot** take (V4's examples are all multi-beat combat) · whether
+250–350 words underperforms the official 350–500 band (V10) · whether `ref_image_size: max`
+recovers detail lost to pruning + int8.
 
 ---
 
@@ -274,10 +313,11 @@ way. *In-house handbook, measured.*
 
 | # | Renders | Measure |
 |---|---|---|
-| **E1** | Shot 5.2, 3 seeds each, at LoRA 1.0-only vs 1.0+0.7 | ArcFace/embedding similarity of the take's faces against the character sheet; per-frame blur; whether the pan completes. Settles C1 on our own stack. |
+| ~~E1~~ | **DONE** — see §0. Stock vs Singularity vs Singularity+2 LoRA, ep03 T11/T19 | Stack kept identity and was sharpest (1222); C1 false here. |
 | **E2** | Shot 5.1, 3 seeds, steps 8 vs 12 vs 20, LoRA held fixed | Same identity + blur metrics plus wall-clock. Settles C2/C3/V9 against our 8-step default. |
-| **E3** | Shot 5.2 wide, 3 seeds, Singularity vs the previous base checkpoint | Face-region sharpness and landmark stability on the one distant face. Tests V5's "distant face restoration" and tells us if we may frame wider. |
+| ~~E3~~ | **DONE** — see §0. Shot 5.2 (T11 villa), Singularity vs stock | 615 + blur flag → 1222 + none; the duplicate narrator vanished. V5 confirmed; we may frame wider. |
 | **E4** | Shot 5.1 at ~114 words (house average), ~300 words (Rule 11), ~450 words (official band), 3 seeds each | Count the prompted beats that actually appear; count invented content. Settles V10/Rule 11. |
 | **E5** | Shot 5.1 crowd clause written three ways: "a dense crowd" / 3 named + band / 6 named | Count distinct silhouettes at the rim; count exact-duplicate faces. Settles R3's threshold. |
-| **E6** | Shot 5.2 at `ref_image_size: match` vs `max`, 3 seeds | Identity similarity and wardrobe-detail recall vs render time. Settles the last item in §3. |
+| **E6** | Shot 5.2 at `ref_image_size: match` vs `max`, 3 seeds | Identity similarity and wardrobe-detail recall vs render time. Node source warns `max` is "several times slower" because ref tokens ride every step — so measure the cost, not just the gain. |
+| **E8** | The 2 ep03 takes under 124 frames, rendered at their audio-derived length vs padded to 124 | Sharpness, blur dips, whether the motion completes. Tests the V8b trained-range floor: is sub-5.2 s actually degraded, or is the tooltip conservative? Cheapest of the eight — 3 takes total. |
 | **E7** | Shot 5.1 with and without the Rule 9 lighting clause, 3 seeds | Mean saturation and luminance histogram of the output. Quantifies V2's desaturation and whether lighting words move it at all. |

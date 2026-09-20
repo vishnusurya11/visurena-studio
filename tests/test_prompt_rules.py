@@ -47,3 +47,11 @@ def test_check_shot_reports_every_fault_by_name():
                       "frame": "three workmen in collarless shirts digging",
                       "motion": "The camera pushes in on them; they walk away down the road."})
     assert set(bad) == {"group_once", "push_in", "exit_clause"}
+
+
+def test_men_inside_a_word_is_not_a_group():
+    """`two immense eyes` matched `two immen`+`men` before the noun list was
+    word-bounded: WotW ep04's two Martian shots flagged `group_once` for a
+    phrase with no group in it."""
+    assert not group_once("two immense glossy black eyes above a lipless mouth")
+    assert group_once("three workmen in collarless shirts digging")
