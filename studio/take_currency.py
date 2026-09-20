@@ -1,0 +1,54 @@
+"""Is the take on disk the take the plan would render now?
+
+MEASURED 2026-09-20 (WotW ep05): a reviewer pass rewrote seven shots and the
+prop filter stopped staging a setup's whole prop list on every take of it, so
+all 28 take prompts changed -- and `takes_r2v` would have re-rendered none of
+them, because its skip asked only whether the SHOT GROUPING matched and the file
+existed.  The run prints nothing, DQ repeats the old numbers, and the fix that
+changed the prompt never reaches a picture.
+
+The answer is already on disk: every run writes `T<NN>.graph.json` beside its
+take, "the exact graph this take ran with".  Currency is that comparison, not a
+record field somebody has to remember to keep up to date.
+"""
+from __future__ import annotations
+
+import json
+from pathlib import Path
+
+RENDER_NODE = "MiniMaxH3ReferenceToVideo"
+
+
+def prompt_of(graph: dict) -> str | None:
+    """The prompt the render node was given, or None if the graph has no
+    render node (a partial or a differently-built workflow)."""
+    for node in graph.values():
+        if node.get("class_type") == RENDER_NODE:
+            said = node.get("inputs", {}).get("prompt")
+            if isinstance(said, str):
+                return said
+    return None
+
+
+def recorded_prompt(take: Path) -> str | None:
+    """What this take was actually rendered from, read off its own graph."""
+    beside = Path(take).with_suffix(".graph.json")
+    if not beside.exists():
+        return None
+    try:
+        return prompt_of(json.loads(beside.read_text(encoding="utf-8")))
+    except (ValueError, OSError):
+        return None
+
+
+def is_current(built: str, take: Path) -> bool:
+    """True only when this take exists AND was rendered from this prompt.
+
+    Unprovable is not current: an episode from before the graph file was
+    written cannot show what it ran with, and re-rendering is the safe answer.
+    Whitespace is not a picture, so a re-wrap does not spend 200 s of GPU."""
+    take = Path(take)
+    if not take.exists():
+        return False
+    said = recorded_prompt(take)
+    return said is not None and said.strip() == (built or "").strip()

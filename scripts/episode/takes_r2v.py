@@ -27,6 +27,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 
 from studio import approval, canvas, episode_board as board, episode_home, episode_ref_official as ro, episode_ref_prompt as rp
 from studio import house_style, pack_refs
+from studio import take_currency
 from studio import plan_gates
 from studio import episode_seq_board as sq
 from studio import episode_takes as tk
@@ -841,7 +842,12 @@ def main(book_id: str, number: int, retake: list[int] | None = None, approved: b
             if out.exists():
                 out.rename(episode_home.next_fail(take_dir, c["index"]))
             mark_retake(c, records.get(c["index"], {}).get("tries", 0) + 1, why)
-        elif c["index"] in records and records[c["index"]].get("shots") == c["shots"] and out.exists():
+        # NOT the shot grouping alone.  MEASURED 2026-09-20 on ep05: a reviewer pass
+        # rewrote seven shots and the prop filter dropped a dome from the rest, so all
+        # 28 prompts changed while the grouping did not -- every take would have been
+        # kept, the fix reaching no picture while DQ repeated the old numbers.
+        elif (c["index"] in records and records[c["index"]].get("shots") == c["shots"]
+              and take_currency.is_current(c.get("prompt") or "", out)):
             continue
         graph = graph_for(c, book, number, take_dir)
         episode_home.write_json(out.with_suffix(".graph.json"), graph)  # the exact graph this take ran with
