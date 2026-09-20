@@ -115,6 +115,28 @@ at a readable size needs its own dress and posture; a crowd is heads and
 shoulders above an edge, or small distant figures, never a countable group of
 identical roles.
 
+## The model: Singularity beats stock H3 (A/B, ep03, 2026-09-19)
+
+Three ep03 take graphs were replayed with everything identical except the model.
+A control render (stock model, NEW wording) separates the model from the prompt
+fix, because the graphs had already been rebuilt with the de-cloned wording.
+
+| take | variant | sharpness | min | blur dips | warp max |
+|---|---|---|---|---|---|
+| T19 pit | stock, old wording | 420 | 0.71 | 0 | 0.47 |
+| T19 pit | stock, new wording | 506 | 0.87 | 0 | 0.78 |
+| T19 pit | Singularity | 539 | 0.71 | 0 | 0.99 |
+| T19 pit | Singularity + 2 LoRA | 539 | 0.68 | 0 | 1.06 |
+| T11 villa | stock, old wording | 615 | 0.48 | 2 (BLUR) | 0.98 |
+| T11 villa | stock, new wording | 612 | 0.55 | 0 | 1.17 |
+| T11 villa | Singularity | 1079 | 0.93 | 0 | 1.10 |
+| T11 villa | Singularity + 2 LoRA | **1222** | 0.92 | 0 | 0.63 |
+
+By eye, at the SAME wording: the stock model rendered the narrator twice at his
+gate and a rim crowd of repeated figures; Singularity rendered one narrator and
+individual onlookers. Both stacked-LoRA and single-LoRA fixed the duplicate;
+the stack was sharper on the moving wide, so it is the default.
+
 ## Trial log
 
 One row per trial take: `episode | take | move id | size | result | eye verdict | note`.

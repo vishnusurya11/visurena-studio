@@ -110,6 +110,19 @@ appends `title/epNN.mp4` after the last frame.
 
 **Aspect:** 1:1 square (plan `"aspect": "1:1"`, delivered 1536x1536).
 
+**THE MODEL IS THE SINGULARITY FINE-TUNE** (A/B measured on ep03, 2026-09-19).
+`video_minimax_h3_r2v_turbo_ref8` now loads
+`Minimax-h3_Singularity_ref2va_Pruned_v1.3_int8.safetensors` with the 8-step
+Ref2V turbo LoRA stacked TWICE (1.0 then 0.7), the workflow author's setting.
+Replayed take graphs -- same prompt, same references, same seed -- showed:
+- the stock ref2va drew the NARRATOR TWICE walking to his own gate; Singularity
+  drew one man. This is the duplicate the owner reported.
+- the stock model painted a rim crowd of repeated figures even after the
+  wording fix; Singularity drew individuals.
+- a moving wide's sharpness went 615 -> 1222 and its BLUR flag went away.
+Render time is unchanged (4-7 min a take). The wording rules below still hold:
+the model reduces clones, it does not licence a group described once.
+
 **NO GROUP IS DESCRIBED ONCE** (owner, ep03: "some characters duplicates").
 One description covering several people gives H3 ONE template figure and it
 stamps out copies: "three workmen in collarless shirts and moleskin trousers"
