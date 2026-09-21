@@ -603,10 +603,12 @@ S = [
      "coats all round; the crowd surges forward against itself and the packed coats swing together "
      "and back; one arm comes up out of the press and stays up.",
      "down in the road among them, low at a child's height, a 35mm lens, a low angle. The red sky "
-     "between the bank tops is the only light; the people around the camera are black and their "
-     "edges are dull red",
+     "between the bank tops is the only light, and it falls on the raw sand of the bank, which "
+     "stands out pale and clear against everything else; the people around the camera are black "
+     "and their edges are dull red",
      "Packed black coats and skirts fill the LEFT edge, the RIGHT edge and the BOTTOM half of the "
-     "frame. The raw sandy bank rises at the RIGHT third from the BOTTOM to the TOP third, a "
+     "frame. The raw sandy bank rises at the RIGHT third from the BOTTOM to the TOP third, its "
+     "bare sand pale and clearly lit where the red sky falls on it, a "
      "narrow strip of red sky shows between the bank tops at the TOP CENTRE, and one raised arm "
      "stands black at the CENTRE.",
      "answer", "A desperate struggle, at the bottom of a sandpit of their own."),
