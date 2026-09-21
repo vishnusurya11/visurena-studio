@@ -214,7 +214,18 @@ def style_clause(anchors, described: str) -> str:
 
     It matters past the storyboard: H3 ref2va conditions on its references and
     takes their look, which is why the delivered episodes are in the Krea2
-    style at all. A panel drawn in the wrong style drags the video with it."""
+    style at all. A panel drawn in the wrong style drags the video with it.
+
+    ANCHOR IT ON A CAST SHEET, NOT ON THE LOCATION. Owner, 2026-09-20: "the
+    style of the ref images is not getting transferred into the storyboard
+    pieces." Naming a slot had got most of the way and not all of it, and the
+    slot named was the location wide -- itself a fairly flat painted landscape,
+    so flat painted landscape is what came back. The CAST SHEETS carry the
+    house look unmistakably: modelled three-dimensional figures with brush
+    texture over solid surfaces. Anchored there, at the same seed and the same
+    25 steps, the figures come back modelled the way the sheet models them and
+    the poster flatness goes. Raising the encoder to 1536 and the sampler to 40
+    steps on top of that bought very little for the extra time."""
     slots = [anchors] if isinstance(anchors, int) else list(anchors)
     cited = " and ".join(f"<image{n}>" for n in slots)
     return (f"DRAWN IN EXACTLY THE ART STYLE OF {cited}, copied from it and not invented: "
