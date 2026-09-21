@@ -84,20 +84,25 @@ PIT_NIGHT = (
 ROAD_GLOAMING = (
     "the road out of Woking onto Horsell Common at dusk in 1894: a pale dry road running away "
     "between cut hedges, tall beech trees standing along its left side, brick cottages with lit "
-    "windows at the near end and the open common beyond the far end, the sky deep green-blue and "
+    "windows at the near end, a low brick bridge carrying the road over the canal partway along "
+    "and a white wooden finger-post standing where the common begins, the open common beyond "
+    "the far end, the sky deep green-blue and "
     "the ground already under its own shadow; the road reads pale, the hedges and the beeches read "
     "black, and the lit windows are the only warm light")
 ROAD_FIRE = (
     "the road out of Woking onto Horsell Common at night in 1894: a pale dry road between cut "
     "hedges with tall beech trees along its left side, the tops of the beeches alight and burning "
     "orange, sparks going up, a brick house at the corner with its window frames on fire and one "
-    "gable fallen into the road, and the common black beyond; the light is firelight from the LEFT, "
+    "gable fallen into the road with its loose brick and broken slate lying where it came down, "
+    "and the common black beyond; the light is firelight from the LEFT, "
     "the road reads orange-pale and everything away from the fire is black")
 BANKS = (
     "the narrow stretch of the Chobham road at night in 1894, where it runs down between high "
     "sandy banks: the road pinched to a cart's width, raw sandy banks rising steeply on both sides "
-    "above head height with heather and gorse roots along their tops, the way ahead black, and a "
-    "red glow in the sky behind; the only light is that glow, the banks read dull red at their "
+    "above head height with heather and gorse roots along their tops, cart ruts worn deep down "
+    "the middle of it, the way ahead black, and a "
+    "red glow in the sky behind; the only light is that glow from behind, low and raking, the "
+    "banks read dull red at their "
     "tops and the road between them is nearly black")
 
 GEO_PIT = (
@@ -216,21 +221,21 @@ S = [
      "horizon, and a deep blue-black sky fills the TOP third.",
      "setup", "Whatever is combustible flashes into flame at its touch."),
 
-    ("ray", "wide", [], 0.8, "track_lateral",
-     "Wide of the common at night from high on the heather: the open ground running from Horsell "
-     "away to Maybury with fires burning in patches all across it, a dozen low red glows in the "
-     "black, the red ring of the pit at the centre with its mast above it, and smoke lying flat "
-     "and lit along the ground between them.",
-     "The camera tracks sideways to the right, a truck with large amplitude across the heather "
-     "until the furthest fires toward Maybury are inside the picture, travelling two long strides; "
-     "the flat smoke drifts left to right across the fires; two of the far glows brighten and "
+    ("ray", "medium", [], 0.8, "track_lateral",
+     "Medium on a stretch of the burning common at night from high on the heather: three low "
+     "patches of furze burning in the black ground a little way apart, their red light lying on "
+     "the heather between them, the red ring of the pit small beyond them with its mast above it, "
+     "and smoke lying flat and lit along the ground.",
+     "The camera tracks sideways to the right, a truck with small amplitude across the heather "
+     "until the furthest of the three fires is inside the picture, travelling one short stride; "
+     "the flat smoke drifts left to right across the fires; two of the glows brighten and "
      "steady.",
      "high on the heather looking out across the common, a 35mm lens. Every light in the frame is "
      "a fire on the ground; the sky is black and the smoke is lit from below",
-     "Burning patches run across the CENTRE of the frame from the LEFT edge to the RIGHT edge, a "
-     "dozen low red glows in black ground. The red ring of the pit sits at the CENTRE with its "
-     "mast above it, flat lit smoke lies along the CENTRE between the fires, black heather fills "
-     "the BOTTOM third and a black sky fills the TOP third.",
+     "Three burning patches fill the CENTRE band of the frame from the LEFT edge to the RIGHT "
+     "edge, low red glows in black ground. The red ring of the pit sits small at the CENTRE with "
+     "its thin mast above it, flat lit smoke lies along the CENTRE between the fires, black "
+     "heather fills the BOTTOM third and a black sky fills the TOP third.",
      "setup", "Forty people under the starlight, and nobody yet who knows it."),
 
     # ---- road: the town walks out after work ------------------------------------
@@ -249,28 +254,30 @@ S = [
      "in the frame; the road reads pale and the hedges and beeches are black",
      GEO_ROAD, "setup", "A novelty, and the excuse it gives for walking together."),
 
-    ("road", "medium", [], 0.6, "track_lateral",
-     "Medium alongside two young shop people walking out on the road at dusk: a girl of twenty in "
-     "a pale cotton blouse and a dark skirt with her hat pushed back, and a young man beside her "
-     "in a cheap dark suit and a bowler, both of them brushed up after the day's work, walking at "
-     "an easy pace with the black hedge running past behind them.",
+    ("road", "medium_close", ["unnamed_neighbours_wife"], 0.6, "track_lateral",
+     "Medium close alongside the neighbour's wife walking out on the road at dusk, a woman of "
+     "thirty in a dark cotton dress and a straw bonnet tied under her chin, out with the rest of "
+     "the town after the day's work and talking as she walks, with a young man in a cheap dark "
+     "suit at her shoulder and the black hedge running past behind them.",
      "The camera tracks sideways to the left alongside them at their own pace until the hedge "
-     "behind them gives way to the open common, travelling one long stride; the girl turns her "
-     "face to him and laughs; he shifts his hat back off his forehead with one thumb.",
+     "behind them gives way to the open common, travelling a hand's breadth; she says it to the "
+     "young man beside her and laughs; he shifts his hat back off his forehead with one thumb.",
      "at the roadside level with their shoulders, three paces from them, a 50mm lens. The last "
      "green light is behind them; their faces read pale and the hedge behind them is black",
-     "The girl and the young man fill the CENTRE of the frame side by side, the panel cutting them "
-     "at mid-thigh, their heads at the TOP third. The black hedge runs across the whole frame "
+     "The wife fills the CENTRE of the frame, the panel cutting her at the middle of the chest, "
+     "her head a third the frame's height at the TOP third, the young man at her shoulder at the "
+     "RIGHT third. The black hedge runs across the whole frame "
      "behind them at the CENTRE, the pale road shows at the BOTTOM edge, and a deep green-blue sky "
      "fills the TOP third.",
      "setup", "The hum of voices along the road in the gloaming."),
 
-    ("road", "wide", [], 0.4, "crane_up",
-     "Wide of the Horsell bridge at dusk from the Woking side: the low brick parapet crossing the "
-     "frame, the pale road going over it and away toward the common beyond, a straggling line of "
-     "people crossing it in ones and twos, and the black water of the canal below the near side.",
-     "The camera rises from the road with small amplitude until the whole span of the bridge and "
-     "the common beyond it stand inside the picture, travelling one short stride; the line of "
+    ("road", "medium", [], 0.4, "crane_up",
+     "Medium on the parapet of the Horsell bridge at dusk from the Woking side: the low brick "
+     "parapet crossing the frame close to, the pale road going over it toward the common beyond, "
+     "a straggling line of people crossing it in ones and twos, and the black water of the canal "
+     "below the near side.",
+     "The camera rises from the road with small amplitude until the parapet and the people "
+     "crossing it stand inside the picture, travelling one short stride; the line of "
      "people goes on across the bridge in one unbroken file; two of them stop at the parapet and look "
      "over toward the common.",
      "on the road at the near end of the bridge, low, a 35mm lens. The sky over the common is "
@@ -345,7 +352,8 @@ S = [
      "glow of the pit comes from the LEFT and lights one side of each face; the other side is "
      "black",
      "The three of them fill the CENTRE of the frame from the LEFT third to the RIGHT third, the "
-     "panel cutting them at the middle of the chest, their heads across the TOP third. Black heads "
+     "panel cutting them at the middle of the chest, each head a third the frame's height, their "
+     "heads across the TOP third. Black heads "
      "and shoulders of the crowd in front of them cross the BOTTOM edge, the red glow shows at the "
      "LEFT edge, and a blue-black sky fills the TOP third.",
      "friction", "A crowd is always an occasion for noise and horse-play."),
@@ -364,9 +372,33 @@ S = [
      "shoulder in the near left is black",
      "Ogilvy's shoulder and hat brim fill the LEFT third of the frame from the TOP edge to the "
      "BOTTOM edge, black and out of focus. Stent stands at the RIGHT third, the panel cutting him "
-     "at the middle of the chest, his head at the TOP third with the red glow along his jaw. The "
+     "at the middle of the chest, his head a third the frame's height at the TOP third with the "
+     "red glow along his jaw. The "
      "red ring of sand shows small between them at the CENTRE and a blue-black sky fills the TOP.",
      "friction", "Two men who have already sent for soldiers, going out themselves first."),
+
+    # THE REVERSE, and it exists because a dialogue line drives LIPS: the
+    # contract refuses Ogilvy's answer laid over a shot that does not show
+    # Ogilvy's face, and G-SYNC refuses two dialogue lines on one shot. One
+    # exchange, two shots, which is how the exchange should have been cut.
+    ("knots", "medium_close", ["ogilvy", "stent"], 0.6, "over_shoulder",
+     f"Medium close over the shoulder of {STENT} back toward {OGILVY}, the two of them still "
+     "halted at the front of the crowd at night: Stent's black frock-coat shoulder and the brim "
+     "of his tall silk hat dark and near at the RIGHT, Ogilvy square in the left of the picture "
+     "in his brown Norfolk jacket and soft brown felt hat, his short sandy beard and one cheek "
+     "picked out by the red glow.",
+     "The camera holds a static shot over Stent's shoulder, keeping Ogilvy's face in the left of "
+     "frame; Ogilvy answers him and turns his head toward the open sand; Stent's near shoulder "
+     "settles a hand's breadth back.",
+     "at the front of the crowd level with their eyes, two paces behind Stent, a 50mm lens. The "
+     "red glow of the pit comes from the LEFT and lights Ogilvy's beard and cheek; Stent's "
+     "shoulder in the near right is black",
+     "Stent's shoulder and hat brim fill the RIGHT third of the frame from the TOP edge to the "
+     "BOTTOM edge, black and out of focus. Ogilvy stands at the LEFT third, the panel cutting him "
+     "at the middle of the chest, his head a third the frame's height at the TOP third with the "
+     "red glow along his beard. The red ring of sand shows small between them at the CENTRE and a "
+     "blue-black sky fills the TOP.",
+     "friction", "The answer that takes them both out on to the sand."),
 
     ("knots", "wide", [], 0.8, "track_lateral",
      "Wide of the open sand at night from the front of the crowd: a small party of dark figures "
@@ -374,7 +406,7 @@ S = [
      "a white sheet on a pole that hangs slack, the ring of sand low beyond them with the mast "
      "above it, and the black heads and shoulders of the crowd across the bottom of the frame.",
      "The camera tracks sideways to the right, a truck with small amplitude behind the crowd's "
-     "heads until the whole walking party is clear of them, travelling one long stride; the party "
+     "heads until the whole walking party is clear of them, travelling a hand's breadth; the party "
      "walks on across the sand away from the camera and the gap between them and the crowd opens; "
      "the night wind lifts the slack white sheet once and drops it.",
      "at the front of the crowd looking out over their heads, a 35mm lens. The red glow comes from "
@@ -482,20 +514,21 @@ S = [
      "rakes them from the LEFT.",
      "turn", "It splits the bricks, smashes the windows, fires the frames."),
 
-    ("beam", "wide", [], 0.8, "crane_up",
-     "Wide of the brick house at the corner of the road at night: its upper gable broken open and "
-     "coming down in loose brick, a heap of rubble spreading into the pale road below it, the "
-     "burning beech crowns standing over the road at the left, and the black common beyond.",
-     "The camera rises from the road with large amplitude until the broken gable and the burning "
-     "crowns above it both stand inside the picture, travelling one long stride; the gable sheds "
+    ("beam", "medium", [], 0.8, "crane_up",
+     "Medium on the upper gable of the brick house at the corner of the road at night: the gable "
+     "broken open and coming down in loose brick, a heap of rubble spreading into the pale road "
+     "below it, and the burning beech crowns standing over it at the left.",
+     "The camera rises from the road with small amplitude until the broken gable and the burning "
+     "crowns above it both stand inside the picture, travelling one short stride; the gable sheds "
      "another course of brick into the road; dust goes up through the firelight and drifts left.",
      "in the road forty paces from the house, a 35mm lens. The burning crowns at the LEFT are the "
      "light; the house reads orange on its left face and black on its right",
      GEO_FIRE, "turn", "A portion of the gable of the house nearest the corner."),
 
     # ---- panic: the crowd turns --------------------------------------------------
-    ("panic", "medium", [], 0.6, "pan_to",
-     "Medium on the pale road under the burning beeches at night: sparks and burning twigs coming "
+    ("panic", "insert", [], 0.6, "pan_to",
+     "Insert on the pale road surface under the burning beeches at night: sparks and burning "
+     "twigs coming "
      "down into the road, single leaves falling still alight like drifting flakes of flame, the road "
      "surface lit orange and pitted with small bright fires where they have landed.",
      "The camera pans to the left across the road until the foot of the nearest beech is inside "
@@ -520,7 +553,8 @@ S = [
      "in the crowd level with her face, two paces from her, a 50mm lens. The burning trees light "
      "her from ABOVE and from the LEFT; the crowd around her is black",
      "The woman's head and shoulders fill the CENTRE of the frame, the panel cutting her at the "
-     "middle of the chest, her face at the CENTRE lit orange from above. Black heads and shoulders "
+     "middle of the chest, her head a third the frame's height, her face at the CENTRE lit orange "
+     "from above. Black heads and shoulders "
      "of the crowd press in from the LEFT edge and the RIGHT edge, and the burning crowns show "
      "orange at the TOP third.",
      "friction", "Hats and dresses caught fire."),
@@ -560,39 +594,19 @@ S = [
      "friction", "They must have bolted as blindly as a flock of sheep."),
 
     # ---- banks: the road that is too narrow --------------------------------------
-    ("banks", "wide", [], 0.8, "track_lateral",
-     "Wide of the Chobham road at night where it runs down between high sandy banks: the road "
-     "pinched to a cart's width, raw banks rising steeply above head height on both sides, the way "
-     "between them nearly black, and the crowd jammed into that gap shoulder to shoulder with a "
-     "red glow in the sky behind them.",
+    ("banks", "medium", [], 0.8, "track_lateral",
+     "Medium looking down into the Chobham road at night where it runs between high sandy banks: "
+     "the road pinched to a cart's width, the raw bank rising steeply above head height at the "
+     "near side, the way between nearly black, and the crowd jammed into that gap shoulder to "
+     "shoulder with a red glow in the sky behind them.",
      "The camera tracks sideways to the right, a truck with small amplitude along the top of the "
-     "bank until the full length of the pinched road is inside the picture, travelling one long "
+     "bank until the pinch of the road is inside the picture, travelling one short "
      "stride; the crowd in the gap presses forward and stops and presses again; the gap holds them "
      "exactly where they stand.",
      "on the top of the bank looking down into the road, a 35mm lens. The only light is the red "
      "glow behind them in the sky; the tops of the banks read dull red and the road between them "
      "is nearly black",
      GEO_BANKS, "answer", "Where the road grows narrow and black between the high banks."),
-
-    # THE BUTTON SHOT, and it has to carry a face: a dialogue line drives lips,
-    # so the plan gate refuses one laid over an insert. The shriek was written
-    # over the trampled boot and had to come back to a mouth.
-    ("banks", "medium_close", ["unnamed_neighbours_wife"], 0.6, "low_angle",
-     "Medium close on a woman jammed in the road between the banks at night, a woman of thirty in "
-     "a dark shawl over a pale blouse with her hair coming down, her head turned back over her "
-     "shoulder toward the red glow behind, her mouth wide open, packed black coats pressing "
-     "against her on both sides.",
-     "The camera keeps low in the road, a static shot at the height of her face with the packed "
-     "coats all round; she looks back over her shoulder at the red sky and shouts; her free hand "
-     "comes up against the coat of the person in front of her and pushes.",
-     "down in the road among them, level with her face, two paces from her, a 50mm lens, a low "
-     "angle. The red glow behind her is the only light; her face reads dull red down one side and "
-     "the crowd around her is black",
-     "The woman's head and shoulders fill the CENTRE of the frame, the panel cutting her at the "
-     "middle of the chest, her face at the CENTRE turned back over her right shoulder. Packed "
-     "black coats fill the LEFT edge and the RIGHT edge, the raw sandy bank rises black at the "
-     "RIGHT third, and a strip of red sky shows at the TOP CENTRE.",
-     "button", "The only thing said aloud in the chapter, and it is not true."),
 
     ("banks", "medium", [], 0.6, "track_lateral",
      "Low medium in the road between the banks at night, in among the crowd: dark coats and skirts "
@@ -627,22 +641,43 @@ S = [
      "CENTRE RIGHT. Boot marks run across the ground from the LEFT edge to the RIGHT edge and a "
      "dull red light falls across all of it from the TOP.",
      "answer", "Three persons at least, and Wells gives them no names."),
+    # THE BUTTON SHOT, and it has to carry a face: a dialogue line drives lips,
+    # so the plan gate refuses one laid over an insert. The shriek was written
+    # over the trampled boot and had to come back to a mouth.
+    ("banks", "medium_close", ["unnamed_neighbours_wife"], 0.6, "low_angle",
+     "Medium close on a woman jammed in the road between the banks at night, a woman of thirty in "
+     "a dark shawl over a pale blouse with her hair coming down, her head turned back over her "
+     "shoulder toward the red glow behind, her mouth wide open, packed black coats pressing "
+     "against her on both sides.",
+     "The camera keeps low in the road, a static shot at the height of her face with the packed "
+     "coats all round; she looks back over her shoulder at the red sky and shouts; her free hand "
+     "comes up against the coat of the person in front of her and pushes.",
+     "down in the road among them, level with her face, two paces from her, a 50mm lens, a low "
+     "angle. The red glow behind her is the only light; her face reads dull red down one side and "
+     "the crowd around her is black",
+     "The woman's head and shoulders fill the CENTRE of the frame, the panel cutting her at the "
+     "middle of the chest, her head a third the frame's height, her face at the CENTRE turned "
+     "back over her right shoulder. Packed "
+     "black coats fill the LEFT edge and the RIGHT edge, the raw sandy bank rises black at the "
+     "RIGHT third, and a strip of red sky shows at the TOP CENTRE.",
+     "button", "The only thing said aloud in the chapter, and it is not true."),
+
 ]
 
 BEATS = {0: (1.0, 0.4), 1: (0.8, 0.0), 3: (1.0, 0.6), 4: (1.2, 0.6), 7: (0.8, 0.4),
-         11: (0.6, 0.0), 12: (1.0, 0.4), 14: (1.2, 1.4), 15: (1.0, 0.4),
+         11: (0.6, 0.0), 12: (0.6, 0.0), 13: (1.0, 0.4), 15: (1.2, 1.4), 16: (1.0, 0.4),
          # THE SILENT SHOTS CARRY THEIR OWN TIME. A shot with no line is only
          # its beat and its coda, and at 1.6 s two of them pack into one take --
          # which is what `groups` does with anything under the 8 s budget, and
          # what ONE PER TAKE refuses. A picture worth cutting to is worth four
          # seconds.
-         19: (1.5, 3.0), 21: (1.5, 3.0), 22: (1.5, 3.2), 26: (1.5, 4.0), 27: (1.5, 3.5),
-         18: (0.8, 0.4), 20: (0.8, 0.8), 23: (1.2, 0.8), 24: (1.2, 0.6), 25: (1.2, 0.8)}
+         20: (1.5, 3.0), 22: (1.5, 3.0), 23: (1.5, 3.2), 26: (1.5, 4.0), 27: (1.5, 3.5),
+         19: (0.8, 0.4), 21: (0.8, 0.8), 24: (1.2, 0.8), 25: (1.2, 0.6), 28: (1.2, 0.8)}
 
-TURNS = {14: "a deputation going out to be answered -> a common that has answered",
-         15: "a crowd that is being spared -> a crowd that does not know it",
-         19: "a road people walked out along -> a road coming down on them",
-         24: "a crowd running from the ray -> a crowd that is its own disaster"}
+TURNS = {15: "a deputation going out to be answered -> a common that has answered",
+         16: "a crowd that is being spared -> a crowd that does not know it",
+         20: "a road people walked out along -> a road coming down on them",
+         25: "a crowd running from the ray -> a crowd that is its own disaster"}
 
 LINES = [
     # ONE LINE A SHOT, and short. The take budget is 8 s and the builder
@@ -658,8 +693,18 @@ LINES = [
      "That night forty people lay about the pit, and the common burned till morning.", 3),
     ("narration", "unnamed_first_person_narrator",
      "In Woking the shops had shut when it happened.", 4),
-    ("narration", "unnamed_first_person_narrator",
-     "So the shop people walked out to see it, brushed up after the day.", 5),
+    # THE FIRST VOICE, and it belongs to a walk-on: ep04 opens on the newspaper
+    # boy and ep05 on the neighbour, both at a medium_close, both in the first
+    # fifth. ep06 had nobody speaking until Stent at 57.6 s of 154. It is the
+    # WIFE because the contract caps an episode at four voices, and because
+    # the woman who walks out cheerfully is the one who screams at the end.
+    # It goes ABOVE the narration because G-SYNC wants the dialogue first on
+    # its shot: lips are driven from the line that opens the shot.
+    # The narration that stood here -- "So the shop people walked out to see
+    # it, brushed up after the day" -- said what her line now DOES, and the
+    # two together projected 9.47 s on a shot with an 8 s take budget. One
+    # line a shot, and the line that dramatises beats the line that reports.
+    ("dialogue", "unnamed_neighbours_wife", "Half Woking's out on the common already. Come on.", 5),
     ("narration", "unnamed_first_person_narrator",
      "Few of them even knew the cylinder had opened.", 6),
     ("narration", "unnamed_first_person_narrator",
@@ -675,37 +720,42 @@ LINES = [
     # the deputation says what the chapter says it did, on the one shot close
     # enough to drive a mouth.
     ("dialogue", "stent", "Nine is two hours. They are out there now.", 11),
-    ("dialogue", "ogilvy", "Then we go out to them ourselves.", 11),
+    ("dialogue", "ogilvy", "Then we go out to them ourselves.", 12),
     ("narration", "unnamed_first_person_narrator",
-     "They had wired the barracks. Soldiers by nine, and it was half past eight.", 12),
+     "They had wired the barracks. Soldiers by nine, and it was half past eight.", 13),
     ("narration", "unnamed_first_person_narrator",
-     "Then they went back to lead the advance themselves.", 13),
+     "Then they went back to lead the advance themselves.", 14),
     ("narration", "unnamed_first_person_narrator",
-     "Three puffs of green smoke. A humming note. The flashes of flame.", 14),
+     "Three puffs of green smoke. A humming note. The flashes of flame.", 15),
     ("narration", "unnamed_first_person_narrator",
-     "That crowd had a far narrower escape than mine.", 15),
+     "That crowd had a far narrower escape than mine.", 16),
     ("narration", "unnamed_first_person_narrator",
-     "A hummock of heathery sand took the lower part of the ray.", 16),
+     "A hummock of heathery sand took the lower part of the ray.", 17),
     ("narration", "unnamed_first_person_narrator",
-     "A few yards higher, and none of them could have lived to tell it.", 17),
+     "A few yards higher, and none of them could have lived to tell it.", 18),
     ("narration", "unnamed_first_person_narrator",
-     "The beam swung over their heads and lit the tops of the beeches.", 18),
+     "The beam swung over their heads and lit the tops of the beeches.", 19),
     ("narration", "unnamed_first_person_narrator",
-     "It split the bricks, brought down a gable, and the road began to burn.", 20),
+     "It split the bricks, brought down a gable, and the road began to burn.", 21),
+    # SHE BREAKS THE RUN, on the shot she was already standing in: 85.8 s of
+    # narration ran from Ogilvy at 12 to the shriek at 28, and Stent and
+    # Ogilvy are dead at 15.
+    ("dialogue", "unnamed_neighbours_wife", "The trees have caught. The whole road's alight.", 22),
     ("narration", "unnamed_first_person_narrator",
-     "Where the road grows narrow between the banks, the crowd jammed.", 23),
+     "Where the road grows narrow between the banks, the crowd jammed.", 24),
     ("narration", "unnamed_first_person_narrator",
-     "Three at least did not get out. Two women, and a little boy.", 24),
-    # THE BUTTON IS NEVER THE PROTAGONIST'S (rule 5), and it is the only thing
-    # said aloud in the chapter -- and the only thing in it that is untrue.
+     "Three at least did not get out. Two women, and a little boy.", 25),
+    # THE BUTTON IS NEVER THE PROTAGONIST'S (rule 5). She says three things in
+    # the chapter and this is the only one that is untrue -- she walks out
+    # cheerfully at 5, names the fire at 22, and invents the Martians here.
     # Nothing was coming down that road. The words killed three people; the ray
     # killed none of them.
-    ("dialogue", "unnamed_neighbours_wife", "They're coming!", 25),
+    ("dialogue", "unnamed_neighbours_wife", "They're coming!", 28),
 ]
 
 BEDS = [{"from_shot": 0, "tone": "grave"}, {"from_shot": 4, "tone": "plain"},
-        {"from_shot": 8, "tone": "uneasy"}, {"from_shot": 12, "tone": "thrilling"},
-        {"from_shot": 20, "tone": "thrilling"}, {"from_shot": 25, "tone": "grave"}]
+        {"from_shot": 8, "tone": "uneasy"}, {"from_shot": 13, "tone": "thrilling"},
+        {"from_shot": 21, "tone": "thrilling"}, {"from_shot": 26, "tone": "grave"}]
 
 # The dramatic spine, one shot at a time. Exactly one hook, one turn, one
 # answer and one button -- the plan gate counts them, and it counted the
@@ -718,10 +768,10 @@ PATHS = {
     0: 0.1, 1: 0.3, 2: 0.5, 3: 0.8,                            # ray
     4: 0.2, 5: 0.5, 6: 0.9,                                    # road
     7: 0.1, 8: 0.2, 9: 0.3, 10: 0.4,                           # knots
-    11: 0.5, 12: 0.6, 13: 0.8, 14: 0.9,                        # knots, the deputation
-    15: 0.1, 16: 0.3, 17: 0.5, 18: 0.7, 19: 0.9,               # beam
-    20: 0.2, 21: 0.4, 22: 0.6, 23: 0.9,                        # panic
-    24: 0.2, 25: 0.5, 26: 0.7, 27: 0.9,                        # banks
+    11: 0.5, 12: 0.55, 13: 0.6, 14: 0.8, 15: 0.9,                        # knots, the deputation
+    16: 0.1, 17: 0.3, 18: 0.5, 19: 0.7, 20: 0.9,               # beam
+    21: 0.2, 22: 0.4, 23: 0.6, 24: 0.9,                        # panic
+    25: 0.2, 26: 0.5, 27: 0.7, 28: 0.9,                        # banks
 }
 
 SECTIONS = {
@@ -729,16 +779,16 @@ SECTIONS = {
     1: "setup", 2: "setup", 3: "setup",
     4: "transition", 5: "setup", 6: "transition", 7: "setup",
     8: "friction", 9: "friction", 10: "friction", 11: "friction",
-    12: "friction", 13: "friction",
-    14: "spike",
-    15: "turn",
-    16: "spike", 17: "spike", 18: "spike", 19: "spike", 20: "spike",
-    21: "reaction",
-    22: "spike",
-    23: "reaction",
-    24: "answer",
-    25: "button",
+    12: "friction", 13: "friction", 14: "friction",
+    15: "spike",
+    16: "turn",
+    17: "spike", 18: "spike", 19: "spike", 20: "spike", 21: "spike",
+    22: "reaction",
+    23: "spike",
+    24: "reaction",
+    25: "answer",
     26: "runout", 27: "runout",
+    28: "button",
 }
 
 MOVES = {i: s[4] for i, s in enumerate(S)}
@@ -757,7 +807,7 @@ def build() -> dict:
     return dict(number=6, title="The Heat-Ray in the Chobham Road",
                 question="Tonight, does the crowd that came to watch get home?",
                 aspect="1:1", where=WHERE, light=LIGHT, look=LOOK,
-                protagonist="unnamed_first_person_narrator", answer="shot 24",
+                protagonist="unnamed_first_person_narrator", answer="shot 25",
                 beds=BEDS, setups=SETUPS, shots=shots, lines=lines)
 
 
