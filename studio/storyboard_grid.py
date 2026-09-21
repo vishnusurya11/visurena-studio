@@ -103,6 +103,18 @@ def cast_clause(people: list[dict]) -> str:
     return "\n".join(said)
 
 
+def peopling_clause(who: list[str]) -> str:
+    """Who stands in the panel -- or, for an empty panel, what it is instead.
+
+    MEASURED 2026-09-20 on ep06 `beam`: "NO NAMED CHARACTER appears in this
+    panel at all" put `character` in the sentence and took nothing out of the
+    picture. An empty panel is described by what it holds.
+    """
+    if not who:
+        return "This panel is a picture of the place alone: ground, growth, sky and built things."
+    return f"In this panel: {', '.join(who)}; no other named person is in it."
+
+
 def panel_block(number: int, where: str, size: str, body: str, cut: str,
                 who: list[str] | None = None, absent: list[str] | None = None) -> str:
     """One panel: its cell, its size, its own words, where the frame cuts, and
@@ -119,8 +131,7 @@ def panel_block(number: int, where: str, size: str, body: str, cut: str,
     were, so he appeared in all of them."""
     said = f"PANEL {number}, {where} -- {size}. {body} The framing: {cut}."
     if who is not None:
-        said += (f" In this panel: {', '.join(who)}; no other named person is in it."
-                 if who else " NO NAMED CHARACTER appears in this panel at all.")
+        said += " " + peopling_clause(who)
         for name in (absent or []):
             if name not in (who or []):
                 said += f" {name} does not appear in this panel."
@@ -296,8 +307,14 @@ def no_duplicates(names: list[str]) -> str:
     hope. ep05 put two identical neighbours side by side in one panel and three
     men in shot 8 where the plan names two."""
     if not names:
-        return ("Every person in the picture is a different person: no two figures share a face, "
-                "a build or an outfit, and no figure is repeated or mirrored anywhere.")
+        # A GRID WITH NO CAST SAYS NOTHING ABOUT PEOPLE. This used to emit
+        # "every person in the picture is a different person ... no figure is
+        # repeated", which names a person, a face, a build, an outfit and a
+        # figure into a picture that has none -- and MiniMax reads no negation,
+        # so what arrives is person, figure, outfit. ep05 shot 21 and ep06
+        # shots 2, 15, 16 and 17 all came back with the same pink cartoon doll,
+        # and all five are grids with no cast.
+        return ""
     said = ", ".join(f"no duplicated {n}" for n in names)
     return (f"{said}. Each of these people appears EXACTLY ONCE in a panel, never twice, never "
             f"as a pair and never as a reflection; and no other figure copies their face or "
@@ -387,3 +404,40 @@ def panel_box(n: int, cols: int, rows: int, size: int, trim: int = 16) -> tuple:
     r, c = divmod(n, cols)
     return (c * cell_w + trim, r * cell_h + trim,
             (c + 1) * cell_w - trim, (r + 1) * cell_h - trim)
+
+
+# A size word carries a body with it. MEASURED 2026-09-20 on ep06 `beam`: a
+# grid with an EMPTY cast came back with a man standing in exactly the three
+# panels whose framing named a figure, a head, feet or hands -- and clean in
+# the one that named a subject instead. Saying "no character appears here"
+# under that does not cancel it.
+BODY_WORDS = ("figure", "head", "hands", "feet", "shoulders", "face", "mid-thigh", "chest")
+
+PEOPLED_CUT = {
+    "wide": "the whole figure stands well inside the panel with open ground below the feet and "
+            "sky above the head; the horizon is visible across the panel",
+    "medium": "the panel cuts the figure at mid-thigh; the head sits in the upper third and the "
+              "hands are visible",
+    "medium_close": "the panel cuts the figure at the middle of the chest; head and shoulders "
+                    "fill the centre and the background is far behind",
+    "close": "the panel cuts at the shoulders; the face fills the panel",
+    "insert": "the panel comes in close on one subject, which fills most of the frame",
+}
+
+EMPTY_CUT = {
+    "wide": "the camera stands far back across open ground, the horizon running the width of the "
+            "panel and a wide sky above it",
+    "medium": "the camera stands a few paces off, the main thing of the panel filling the middle "
+              "band of the frame with ground below it and sky behind",
+    "medium_close": "the camera stands close in, the main thing of the panel filling the centre "
+                    "and the distance falling away far behind it",
+    "close": "the camera is right up against the main thing of the panel, which fills the frame "
+             "corner to corner",
+    "insert": "the panel comes in close on one subject, which fills most of the frame",
+}
+
+
+def cut_clause(size: str, peopled: bool) -> str:
+    """How the panel is framed, said against what the panel actually holds."""
+    table = PEOPLED_CUT if peopled else EMPTY_CUT
+    return table[size]

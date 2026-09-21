@@ -175,10 +175,17 @@ def test_a_panel_names_who_stands_in_it():
 
 
 def test_a_panel_with_nobody_in_it_says_so():
-    """Shot 9 is a wide of empty common; leaving it silent let the boy walk in."""
+    """Shot 9 is a wide of empty common; leaving it silent let the boy walk in.
+
+    It says so POSITIVELY. Until 2026-09-20 this asserted the exact words "NO
+    NAMED CHARACTER appears in this panel at all", which named a character into
+    a panel that had none -- and ep06 `beam` drew one, in three panels out of
+    four, with an empty cast.
+    """
     from studio.storyboard_grid import panel_block
     said = panel_block(1, "top-left", "WIDE", "the common", cut="full figure", who=[])
-    assert "no named character" in said.lower()
+    assert "place alone" in said.lower()
+    assert "character" not in said.lower()
 
 
 def test_a_panel_forbids_the_others_by_name():
@@ -432,3 +439,30 @@ def test_panels_are_cut_in_reading_order():
     bl = panel_box(2, 2, 2, 2048, 0)
     assert tr[0] > tl[0] and tr[1] == tl[1], "panel 2 is to the RIGHT of panel 1"
     assert bl[1] > tl[1] and bl[0] == tl[0], "panel 3 is BELOW panel 1"
+
+
+def test_an_empty_grid_says_nothing_about_people():
+    """MEASURED 2026-09-20 across two episodes: A PINK CARTOON DOLL.
+
+    ep05 shot 21 drew one on the pit rim -- three renders, two seeds, and the
+    word 'crown' removed -- and ep06 drew the same doll in shots 2, 15, 16 and
+    17. Every one of those panels is in a grid with NO CAST, and this clause
+    still went out: "Every person in the picture is a different person: no two
+    figures share a face, a build or an outfit, and no figure is repeated."
+
+    It names a person, a face, a build, an outfit and a figure into a picture
+    that has none of them, and MiniMax reads no negation: what reaches it is
+    person, figure, outfit. An undescribed person with no sheet staged comes
+    back as a generic doll. It is the same law as everything else this week --
+    a picture is made of what you PUT IN, and this put a person in.
+
+    A grid with no cast says nothing about people at all."""
+    from studio.storyboard_grid import no_duplicates
+    assert no_duplicates([]) == ""
+
+
+def test_a_cast_grid_still_forbids_duplication():
+    from studio.storyboard_grid import no_duplicates
+    said = no_duplicates(["THE NARRATOR"])
+    assert "no duplicated THE NARRATOR" in said
+    assert "EXACTLY ONCE" in said
