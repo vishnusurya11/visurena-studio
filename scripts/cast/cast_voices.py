@@ -74,7 +74,15 @@ NUDGE_HZ = 8
 `voice_register.APART`, so a nudged voice cannot land on a third character's
 slot; two nudges (16 Hz) is what separated Ferrier from Young on paper."""
 
-SHE = ("lucy", "madame", "mrs", "miss", "sawyer", "servant", "anna")
+SHE = ("lucy", "madame", "mrs", "miss", "sawyer", "servant", "anna",
+       # ADDED 2026-09-20: WotW's neighbour's wife was cast at 125 Hz as a man.
+       # The list above is Scarlet's women -- Lucy, Madame, Mrs, Miss, a servant
+       # -- and it had never met a character whose id says "wife". A word list
+       # is right for the book it was written against and silent about the next
+       # one, which is the same fault as a threshold calibrated on one episode.
+       "wife", "widow", "mother", "sister", "aunt", "niece", "lady",
+       "landlady", "barmaid", "nurse", "governess", "washerwoman",
+       "schoolmistress", "maid", "housekeeper", "queen", "duchess")
 
 SHAPE = "both"
 """Which official instruction shape is sent.
