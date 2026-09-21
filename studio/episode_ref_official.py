@@ -2002,7 +2002,8 @@ def build(shots: list[Shot], placed: list[dict], lines: list[Line], at: dict, fr
           faces: list[str], physical: dict[str, str], described: str, narrator: str,
           ends: list[int] | None = None, setup: Setup | None = None, refs: int | None = None,
           fps: int = 24, check_lint: bool = True, has_plate: bool = True,
-          cells_staged: bool = True, props=None, panel: bool = False) -> str:
+          cells_staged: bool = True, props=None, panel: bool = False,
+          pin: bool = True) -> str:
     """The six sections, in order.  `frames` is the LATENT length: base-en §2.1 asks
     for the effective duration, and the placed length is 0.5 s short of it (5.6)."""
     if props and cells_staged:
@@ -2018,8 +2019,9 @@ def build(shots: list[Shot], placed: list[dict], lines: list[Line], at: dict, fr
                                   outdoors, cells_staged, props)
     # THE STORYBOARD PANEL, staged last in the graph and so numbered last here.
     # Every staged reference must be defined or L11 refuses the take; and it is
-    # defined as partially_preserved, never as a first frame, because a composed
-    # still staged as fully_preserved froze ep03 T02 (see studio/take_refs).
+    # PINNED as the first frame by default (owner, 2026-09-20, option 2). The
+    # freeze in ep03 T02 came from a preserved VIEWPOINT, not from the pin, and
+    # panel_pin preserves placement, wardrobe and light and never viewpoint.
     # It goes in the STRIP SLOT, which `picture_numbers` has always reserved --
     # "the slot AFTER the last picture ... nothing is staged there now" -- and
     # which this module's own header already assigns a meaning: "the take's
@@ -2036,7 +2038,7 @@ def build(shots: list[Shot], placed: list[dict], lines: list[Line], at: dict, fr
                                       cells_staged),
                         retention(faces, segs, cells, strip, ends or [], described, has_plate, outdoors,
                                   cells_staged, props)
-                        + ((chr(10) + take_refs.panel_retention(panel_slot)) if panel_slot else ""),
+                        + ((chr(10) + take_refs.panel_relation(panel_slot, 1, pin)) if panel_slot else ""),
                         dd, soundscape(described, getattr(setup, "crowd", ""), outdoors))
     if bad := negations(text):
         raise ValueError(f"the prompt carries negation MiniMax cannot read: {bad}")

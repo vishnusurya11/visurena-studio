@@ -109,3 +109,13 @@ def panel_anchor(name: str, t_start: float, take_start: float, fps: int = 24) ->
     from studio.episode_takes import grid_frame
 
     return name, grid_frame(round((t_start - take_start) * fps))
+
+
+def panel_relation(slot: int, shot: int = 1, pin: bool = True) -> str:
+    """How the staged panel relates to the take: pinned, or merely consulted.
+
+    OWNER 2026-09-20 chose the pin for episode 6, because a weak_reference has
+    no authority over framing and ep05 shipped with T14's horse cropped to a
+    head while its panel showed the whole animal.
+    """
+    return panel_pin(slot, shot) if pin else panel_retention(slot)
