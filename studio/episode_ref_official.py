@@ -2002,7 +2002,7 @@ def build(shots: list[Shot], placed: list[dict], lines: list[Line], at: dict, fr
           faces: list[str], physical: dict[str, str], described: str, narrator: str,
           ends: list[int] | None = None, setup: Setup | None = None, refs: int | None = None,
           fps: int = 24, check_lint: bool = True, has_plate: bool = True,
-          cells_staged: bool = True, props=None) -> str:
+          cells_staged: bool = True, props=None, panel: bool = False) -> str:
     """The six sections, in order.  `frames` is the LATENT length: base-en §2.1 asks
     for the effective duration, and the placed length is 0.5 s short of it (5.6)."""
     if props and cells_staged:
@@ -2016,12 +2016,27 @@ def build(shots: list[Shot], placed: list[dict], lines: list[Line], at: dict, fr
               if l.kind == "dialogue"]
     subs, cells, strip = subjects(faces, physical, described, segs, ends or [], spoken, has_plate,
                                   outdoors, cells_staged, props)
+    # THE STORYBOARD PANEL, staged last in the graph and so numbered last here.
+    # Every staged reference must be defined or L11 refuses the take; and it is
+    # defined as partially_preserved, never as a first frame, because a composed
+    # still staged as fully_preserved froze ep03 T02 (see studio/take_refs).
+    # It goes in the STRIP SLOT, which `picture_numbers` has always reserved --
+    # "the slot AFTER the last picture ... nothing is staged there now" -- and
+    # which this module's own header already assigns a meaning: "the take's
+    # storyboard strip is a weak_reference that carries shot order alone". The
+    # panel IS that strip, one picture instead of a row of cells, so it reuses
+    # the slot and the relation rather than inventing either.
+    panel_slot = refs if panel and refs else None   # staged last, so numbered last
+    if panel_slot:
+        from studio import take_refs
+        subs = subs + chr(10) + take_refs.panel_definition(panel_slot)
     dd, life = describe(shots, placed, lines, at, faces, physical, narrator, frames, cells, setup, fps,
                         not (ends or []), cells_staged)
     text = six_sections(subs, summary(frames, segs, cells, described, faces, spoken, fps, has_plate,
                                       cells_staged),
                         retention(faces, segs, cells, strip, ends or [], described, has_plate, outdoors,
-                                  cells_staged, props),
+                                  cells_staged, props)
+                        + ((chr(10) + take_refs.panel_retention(panel_slot)) if panel_slot else ""),
                         dd, soundscape(described, getattr(setup, "crowd", ""), outdoors))
     if bad := negations(text):
         raise ValueError(f"the prompt carries negation MiniMax cannot read: {bad}")

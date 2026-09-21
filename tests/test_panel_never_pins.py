@@ -19,14 +19,23 @@ def test_the_panel_is_never_fully_preserved():
     from studio.take_refs import panel_retention
     said = panel_retention(4)
     assert "fully_preserved" not in said
-    assert "partially_preserved" in said
+    assert "weak_reference" in said, (
+        "this pipeline's own word for a picture that informs without pinning")
+
+
+def test_the_retention_line_carries_no_negation():
+    """MiniMax cannot read one, and the prompt builder refuses the take over it:
+    "a fence built out of the word you are avoiding is a summons"."""
+    from studio.take_refs import panel_retention
+    from studio.episode_ref_official import negations
+    assert not negations(panel_retention(4))
 
 
 def test_the_panel_hands_the_framing_back_to_the_words():
     from studio.take_refs import panel_retention
     said = panel_retention(4).lower()
     assert "framing" in said and "camera" in said
-    assert "not" in said
+    assert "come from the camera sentence" in said
 
 
 def test_the_panel_keeps_who_and_where():

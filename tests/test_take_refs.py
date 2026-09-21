@@ -15,11 +15,15 @@ a clean sheet.
 import pytest
 
 
-def test_a_silent_take_leads_with_the_panel():
+def test_the_panel_is_always_last():
+    """It led on silent takes for one draft. That renumbers every other
+    picture: `picture_numbers` assigns <Picture N> in the graph's staging
+    order, so a panel in front makes the prompt cite every sheet by the wrong
+    slot, which is what L11 refuses."""
     from studio.take_refs import with_panel
-    got = with_panel(["place.png", "narrator.png"], "panel.png", speaking=False)
-    assert got[0] == "panel.png"
-    assert got == ["panel.png", "place.png", "narrator.png"]
+    for speaking in (True, False):
+        got = with_panel(["place.png", "narrator.png"], "panel.png", speaking=speaking)
+        assert got == ["place.png", "narrator.png", "panel.png"]
 
 
 def test_a_speaking_take_keeps_the_sheet_in_front():
@@ -47,7 +51,7 @@ def test_the_order_is_otherwise_untouched():
     from studio.take_refs import with_panel
     refs = ["a", "b", "c", "d"]
     assert with_panel(refs, "p", speaking=True)[:-1] == refs
-    assert with_panel(refs, "p", speaking=False)[1:] == refs
+    assert with_panel(refs, "p", speaking=False)[:-1] == refs
 
 
 def test_speaking_is_read_off_the_card_audio():

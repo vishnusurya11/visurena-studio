@@ -449,6 +449,11 @@ def picture_path(boards: Path, book: Path, name: str) -> Path:
         # THE BOOK'S PACK (2026-09-18): one folder per entity, so a record keeps
         # the book-relative path -- every character's sheet is `sheet.png`.
         return Path(book) / name
+    if name.startswith("episodes/"):
+        # A STORYBOARD PANEL (2026-09-20): episodes/epNN/storyboard/h3/shot_NN.png.
+        # Every episode has a shot_05.png, so the bare name says nothing here
+        # either and the record keeps the book-relative path.
+        return Path(book) / name
     if name.startswith("char-"):
         return Path(book) / "refs" / "characters" / name
     if name.startswith("plate_"):

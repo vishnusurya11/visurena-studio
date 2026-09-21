@@ -146,6 +146,11 @@ def ref_name(book: Path, path: Path) -> str:
     kinds = ("characters", "locations", "props")
     if path.parent.parent.name in kinds and path.parent.parent.parent == refs:
         return path.relative_to(book).as_posix()
+    # A storyboard panel lives under episodes/epNN/storyboard/h3/ and its bare
+    # name says nothing either: `graph_for` resolves a bare name against the
+    # boards' cell folder, and looked for shot_00.png among the cells.
+    if path.parent.name == "h3" and path.parent.parent.name == "storyboard":
+        return path.relative_to(book).as_posix()
     return path.name
 
 
@@ -430,7 +435,8 @@ def card(book: Path, episode: Episode, number: int, take: dict, measured: dict) 
     setup = episode.setups[first.setup]
     prompt = ro.build(shots, take["placed"], lines, at, take["frames"], faces, physicals(book),
                       setup.described, narrator_of(episode.lines), ends=end_numbers(segs, ends), setup=setup,
-                      refs=len(refs), fps=FPS, props=props, **staged_facts(sizes, FROM_REFS, faces))
+                      refs=len(refs), fps=FPS, props=props, panel=panel is not None,
+                      **staged_facts(sizes, FROM_REFS, faces))
     return {"index": first.index, "shots": take["shots"], "section": first.section, "setup": first.setup,
             "lane": "dialogue" if spoken else "narration", "workflow": BASE + " + anchors",
             "model": "MiniMax-H3 ref2va + Ref2V 8-step LoRA", "mode": mode_said(FROM_REFS),

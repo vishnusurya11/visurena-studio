@@ -512,14 +512,11 @@ S = [
     ("dusk", "insert", [], 0.9, "track_lateral",
      "Insert down on the gravel floor of the sand-pits at twilight, the raw yellow sand wall of "
      "the pit standing up close behind: ONE BLACK CAB HORSE, entire and unbroken inside the "
-     "frame. A heavy-shouldered gelding about fifteen hands, black all over, with a deep chest "
-     "and a rounded barrel, a short upright black mane, a long black tail hanging to the hocks, "
-     "and one narrow white blaze down the front of its face. A padded leather collar sits on its "
-     "shoulders, a breeching strap runs along its flank, blinkers stand out at the cheekpieces "
-     "of its bridle and a hank of mane lies over the strap. All four legs are down on the "
-     "gravel, the near foreleg a half pace forward, the hooves plain on the stones, and the two "
-     "long black shafts of a hansom run back from its shoulders to the dark bulk of the cab. Its "
-     "head is lowered into a pale canvas nosebag.",
+     "frame. A heavy-shouldered gelding about fifteen hands, black all over, deep in the chest, "
+     "with a short upright mane, a long tail to the hocks and one narrow white blaze down its "
+     "face. A padded collar sits on its shoulders and blinkers stand at its bridle. All four "
+     "legs are down on the gravel and the two long shafts of a hansom run back from its "
+     "shoulders to the dark cab. Its head is lowered into a pale canvas nosebag.",
      "The camera tracks sideways to the left, a truck with small amplitude past the standing "
      "horse until the cab behind it comes into the picture, travelling a finger's breadth; the "
      "horse works its jaw in the nosebag, throws its head up against the strap and drives its "
