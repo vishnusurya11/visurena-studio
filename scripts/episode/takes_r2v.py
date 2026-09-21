@@ -207,6 +207,14 @@ def reference_list(book: Path, boards: Path, faces: list[str], setup: str,
 
 
 FROM_REFS = False
+
+PIN_PANEL = True
+"""Whether the staged storyboard panel is the take's FIRST FRAME.
+
+Owner 2026-09-20 chose the pin (option 2) because a weak_reference has no
+authority over framing and ep05 shipped with T14's horse cropped to a head.
+`--no-pin` puts it back to a weak_reference, which is what ep01-05 rendered
+with, so the two can be measured against each other on the same shots."""
 """RENDER FROM THE REFERENCES ALONE: the plate and the cast cards, no cell.
 Turned on by `--from-refs`; OFF is the normal path and the default.
 
@@ -248,7 +256,7 @@ def location_picture(book: Path, boards: Path, setup, name: str, shot=None) -> P
 
 def refs_from_cards(book: Path, boards: Path, faces: list[str], setup: str,
                     state: str = "", sizes: list[str] | None = None,
-                    place: Path | None = None) -> list[Path]:
+                    place: Path | None = None, panel: bool = False) -> list[Path]:
     """FROM_REFS: this take's cast sheets, and its plate where the take is wide
     enough to place one -- or where it has nothing else to stage.
 
@@ -270,10 +278,19 @@ def refs_from_cards(book: Path, boards: Path, faces: list[str], setup: str,
     # T06 and T22 put Holmes and Watson in a Gothic panelled hall.  OWNER
     # 2026-09-17: "this needs location image too ... so you define the position
     # relative to things in location".
+    # UNLESS A STORYBOARD PANEL IS STAGED. MEASURED 2026-09-21, ep06 T17 and
+    # T21: both opened on this plate and hard-cut into the shot at frame 8 --
+    # ep14's fault again, at almost the same frame. The reason the plate is
+    # staged anyway is that a take with only a face invents the wrong room, and
+    # a panel cannot: it IS this shot's room, at this hour, in this style.
+    # Beside the panel the plate is a second whole picture to open on.
+    if panel:
+        return refs
     return refs + [place or sq.plates_in(boards) / f"plate_{setup}.png"]
 
 
-def staged_facts(sizes: list[str], from_refs: bool, faces: list[str] | None = None) -> dict:
+def staged_facts(sizes: list[str], from_refs: bool, faces: list[str] | None = None,
+                 panel: bool = False) -> dict:
     """What `episode_ref_official.build` is told about the pictures it may cite.
 
     FROM_REFS says no cell is staged; whether the plate is staged follows the same
@@ -283,7 +300,14 @@ def staged_facts(sizes: list[str], from_refs: bool, faces: list[str] | None = No
     at the builder's own default, so every episode already built is told exactly
     what it was told before."""
     if from_refs:
-        return {"has_plate": True, "cells_staged": False}
+        # A STAGED PANEL IS THE ROOM. MEASURED 2026-09-21 on ep06 T17 and T21:
+        # both opened on the plate and hard-cut into the shot at frame 8, the
+        # same fault ep14's T21 had at frame 14. The plate was staged anyway
+        # because a take with only a FACE invented the wrong room -- and a
+        # storyboard panel cannot invent it, because it IS this shot's room at
+        # this hour in this style. Staged beside the panel the plate is only a
+        # second whole picture for the model to open on.
+        return {"has_plate": not panel, "cells_staged": False}
     return {"has_plate": sq.places_the_plate(sizes)}
 
 
@@ -398,7 +422,8 @@ def card(book: Path, episode: Episode, number: int, take: dict, measured: dict) 
         ends, anchors = [], []
         where = location_picture(book, boards, episode.setups[first.setup], first.setup, first)
         faces = people_staged(shots, sorted(physicals(book)))
-        refs = refs_from_cards(book, boards, faces, first.setup, state, sizes, where)
+        refs = refs_from_cards(book, boards, faces, first.setup, state, sizes, where,
+                               panel=storyboard_panel(book, number, first.index) is not None)
         # THE SETUP'S PROP SHEETS, after the place (ep02: the cylinder) -- but
         # only the ones THIS TAKE'S OWN PROSE NAMES.  `Setup.props` is a
         # setup-level field, and staging all of it on every take of the setup
@@ -435,8 +460,8 @@ def card(book: Path, episode: Episode, number: int, take: dict, measured: dict) 
     setup = episode.setups[first.setup]
     prompt = ro.build(shots, take["placed"], lines, at, take["frames"], faces, physicals(book),
                       setup.described, narrator_of(episode.lines), ends=end_numbers(segs, ends), setup=setup,
-                      refs=len(refs), fps=FPS, props=props, panel=panel is not None,
-                      **staged_facts(sizes, FROM_REFS, faces))
+                      refs=len(refs), fps=FPS, props=props, panel=panel is not None, pin=PIN_PANEL,
+                      **staged_facts(sizes, FROM_REFS, faces, panel=panel is not None))
     return {"index": first.index, "shots": take["shots"], "section": first.section, "setup": first.setup,
             "lane": "dialogue" if spoken else "narration", "workflow": BASE + " + anchors",
             "model": "MiniMax-H3 ref2va + Ref2V 8-step LoRA", "mode": mode_said(FROM_REFS),
@@ -903,6 +928,12 @@ def _set_no_ends(argv: list[str]) -> None:
     NO_ENDS = "--ends" not in argv
 
 
+def _set_pin_panel(argv: list[str]) -> None:
+    """`--no-pin` stages the panel as a weak_reference instead of a first frame."""
+    global PIN_PANEL
+    PIN_PANEL = "--no-pin" not in argv
+
+
 def _set_from_refs(argv: list[str]) -> None:
     """`--from-refs` is the only way into the no-cell mode: see `FROM_REFS`."""
     global FROM_REFS
@@ -912,6 +943,7 @@ def _set_from_refs(argv: list[str]) -> None:
 if __name__ == "__main__":
     _set_no_ends(sys.argv)
     _set_from_refs(sys.argv)
+    _set_pin_panel(sys.argv)
     number = int(sys.argv[2]) if len(sys.argv) > 2 and sys.argv[2].isdigit() else 1
     retake, why = retake_list(sys.argv), retake_why(sys.argv)
     if refused := retake_refusal(retake, why, "--last" in sys.argv):

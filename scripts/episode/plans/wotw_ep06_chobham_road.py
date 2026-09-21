@@ -457,9 +457,10 @@ S = [
      "Low medium on a hummock of heathery sand out on the common at night, a long low swell of "
      "ground with heather growing over its top, standing between the camera and the red glow "
      "beyond, its whole crest lit hard along one edge and the ground behind it dark.",
-     "The camera keeps low against the hummock, a static shot from the height of the heather with "
-     "the crest across the frame; a hard line of light runs along the crest from the left to the "
-     "right and goes out; the heather along the top takes fire in a thin line and burns low.",
+     "The camera pushes in low toward the crest, a dolly with small amplitude until the lit "
+     "heather along the crest fills the middle of the picture, travelling one short stride; a hard "
+     "line of light runs along the crest from the left to the right; the heather stems along the "
+     "top catch one after another and go on burning low as it passes.",
      "on the ground below the hummock looking up along it, three paces from its foot, a 50mm lens, "
      "a low angle. The light that runs along the crest comes from the LEFT and is the brightest "
      "thing in the frame; the ground behind the hummock is black",
@@ -474,10 +475,10 @@ S = [
      "each one taking fire in turn along the line as though a hand were touching them one after "
      "another, the fires small and separate and bright, and the dark line of beech trees along the "
      "road standing at the far end.",
-     "The camera tracks sideways to the left, a truck with large amplitude along the line of "
-     "bushes until the beech trees at the road are inside the picture, travelling two long "
-     "strides; the bushes take fire one after another along the line away from the camera; the "
-     "light reaches the foot of the beeches.",
+     "The camera tracks sideways to the left, a truck with small amplitude along the line of "
+     "bushes until the furthest bush already in the picture is at the centre, travelling one short "
+     "stride; the bushes take fire one after another along the line away from the camera; the "
+     "light runs on down the line toward the beeches.",
      "out on the common level with the bushes, a 35mm lens. Each bush lights itself as it takes "
      "fire and lights the ground around it; the sky and the far trees are black",
      "The line of burning bushes runs from the BOTTOM LEFT away to the CENTRE RIGHT, each fire a "
@@ -533,9 +534,9 @@ S = [
      "twigs coming "
      "down into the road, single leaves falling still alight like drifting flakes of flame, the road "
      "surface lit orange and pitted with small bright fires where they have landed.",
-     "The camera pans to the left across the road until the foot of the nearest beech is inside "
-     "the picture, travelling a hand's breadth; sparks and burning twigs come down through the "
-     "frame; two lit leaves land in the road and go on burning where they lie.",
+     "The camera pans to the left across the road until the brightest of the small fires already "
+     "in the picture is at the centre, travelling a hand's breadth; sparks and burning twigs come "
+     "down through the frame; the lit leaves that land in the road go on burning where they lie.",
      "in the road looking down at it, a 50mm lens. The light comes from ABOVE out of the burning "
      "crowns; the road reads orange and the hedges at the edges are black",
      "The pale road fills the BOTTOM two thirds of the frame from the LEFT edge to the RIGHT edge, "
