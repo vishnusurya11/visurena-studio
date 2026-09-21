@@ -62,7 +62,10 @@ sys.path.insert(0, str(ROOT))
 BOOK = ROOT / "library" / "20260827135508_the-war-of-the-worlds"
 OUT = BOOK / "episodes" / "ep06" / "plan.json"
 
-WHERE = "The Chobham road, Surrey, 1894"
+# NO LEADING ARTICLE: `where` is spliced into the STYLE LINE, and L20 reads a
+# capital there as a name it does not know. ep01-05 all say "Surrey, 1894"
+# or "Horsell, Surrey, 1894".
+WHERE = "Horsell, Surrey, 1894"
 LIGHT = "firelight and black shadows"
 LOOK = "Angular stylised 3D animation, brush-stroke texture"
 
