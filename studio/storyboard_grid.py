@@ -14,6 +14,8 @@ item by its SHAPE AND AGAINST THE OTHER MAN'S.
 """
 from __future__ import annotations
 
+import re
+
 ROWS = ("top", "bottom")
 COLS = ("left", "right")
 COUNTS = {1: "one", 2: "two", 3: "three", 4: "four", 6: "six", 8: "eight",
@@ -441,3 +443,28 @@ def cut_clause(size: str, peopled: bool) -> str:
     """How the panel is framed, said against what the panel actually holds."""
     table = PEOPLED_CUT if peopled else EMPTY_CUT
     return table[size]
+
+
+COUNTED = re.compile(
+    r"\b(two|three|four|five|six|seven|eight|nine|ten)\s+"
+    r"((?:\w+\s+){0,2}?)"
+    r"(men|women|boys|girls|lads|people|figures|policemen|constables|soldiers|"
+    r"labourers|shopmen|of them)\b", re.I)
+
+
+def varied_group(body: str) -> str:
+    """Tell a counted group of walk-ons that its members differ from each other.
+
+    MEASURED 2026-09-20 on ep06 shot 10: "three young men ... in cheap dark
+    suits and bowlers" is three men and ONE wardrobe, and came back as one man
+    drawn three times. `no_duplicates` binds the NAMED cast; a walk-on has no
+    name to bind, so the count is the hook.
+    """
+    found = COUNTED.search(body or "")
+    if not found:
+        return ""
+    count, _, noun = found.groups()
+    who = f"{count} {noun}".lower()
+    return (f"The {who} are {count} different individuals: each one has his or her own face, "
+            f"own build, own hair and own hat, each wears the clothes a little differently, "
+            f"and each stands and gestures in a way of their own.")
