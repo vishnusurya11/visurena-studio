@@ -257,16 +257,15 @@ S = [
     ("road", "medium_close", ["unnamed_neighbours_wife"], 0.6, "track_lateral",
      "Medium close alongside the neighbour's wife walking out on the road at dusk, a woman of "
      "thirty in a dark cotton dress and a straw bonnet tied under her chin, out with the rest of "
-     "the town after the day's work and talking as she walks, with a young man in a cheap dark "
-     "suit at her shoulder and the black hedge running past behind them.",
+     "the town after the day's work and talking as she walks, with the black hedge running past "
+     "behind her and the backs of other walkers small and dark further down the road.",
      "The camera tracks sideways to the left alongside them at their own pace until the hedge "
-     "behind them gives way to the open common, travelling a hand's breadth; she says it to the "
-     "young man beside her and laughs; he shifts his hat back off his forehead with one thumb.",
+     "behind her gives way to the open common, travelling a hand's breadth; she says it over her "
+     "shoulder and laughs; her bonnet strings swing loose as she walks.",
      "at the roadside level with their shoulders, three paces from them, a 50mm lens. The last "
      "green light is behind them; their faces read pale and the hedge behind them is black",
-     "The wife fills the CENTRE of the frame, the panel cutting her at the middle of the chest, "
-     "her head a third the frame's height at the TOP third, the young man at her shoulder at the "
-     "RIGHT third. The black hedge runs across the whole frame "
+     "The wife fills the CENTRE of the frame alone, the panel cutting her at the middle of the "
+     "chest, her head a third the frame's height at the TOP third. The black hedge runs across the whole frame "
      "behind them at the CENTRE, the pale road shows at the BOTTOM edge, and a deep green-blue sky "
      "fills the TOP third.",
      "setup", "The hum of voices along the road in the gloaming."),
