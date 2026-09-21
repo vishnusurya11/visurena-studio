@@ -291,14 +291,15 @@ S = [
      "setup", "Nobody on this bridge knows the cylinder has opened."),
 
     # ---- knots: three hundred people, and three policemen -----------------------
-    ("knots", "wide", [], 0.4, "pan_to",
+    ("knots", "wide", [], 0.4, "crane_up",
      "Wide of the open common at night from the end of the road: loose knots of people standing "
      "out across the black heather in twos and fives and tens, every one of them turned the same "
      "way toward the red ring of sand a hundred yards off, with the thin mast and its turning "
      "mirror standing above it.",
-     "The camera pans to the left across the standing knots until the red ring of sand and the "
-     "mast above it are inside the picture, travelling a hand's breadth; the nearest knot shifts "
-     "and closes up; arms go up along the near knot and point toward the pit.",
+     "The camera rises from the end of the road with small amplitude until the whole spread of "
+     "standing knots lies below it with the red ring of sand beyond them, travelling one short "
+     "stride; the knots stir and shift against each other the whole time; arms go up along the "
+     "near knot and point toward the pit.",
      "at the end of the road looking out over the heather, a 35mm lens. The red glow out of the "
      "pit comes from the CENTRE; the standing people read black against it and the heather is "
      "black",
@@ -675,7 +676,7 @@ BEATS = {0: (1.0, 0.4), 1: (0.8, 0.0), 3: (1.0, 0.6), 4: (1.2, 0.6), 7: (0.8, 0.
          # what ONE PER TAKE refuses. A picture worth cutting to is worth four
          # seconds.
          20: (1.5, 3.0), 22: (1.5, 3.0), 23: (1.5, 3.2), 26: (1.5, 4.0), 27: (1.5, 3.5),
-         19: (0.8, 0.4), 21: (0.8, 0.8), 24: (1.2, 0.8), 25: (1.2, 0.6), 28: (1.2, 0.8)}
+         19: (0.8, 0.4), 21: (0.8, 0.8), 24: (1.2, 0.8), 25: (1.2, 0.6), 28: (0.6, 0.8)}
 
 TURNS = {15: "a deputation going out to be answered -> a common that has answered",
          16: "a crowd that is being spared -> a crowd that does not know it",
