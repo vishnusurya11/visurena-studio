@@ -75,3 +75,37 @@ def panel_retention(slot: int) -> str:
     return (f"<Picture {slot}> (the storyboard frame): weak_reference - it shows the location, "
             f"the people and the clothes they wear. The framing, the camera position and the "
             f"movement come from the camera sentence below, which owns the viewpoint.")
+
+
+def panel_pin(slot: int, shot: int = 1) -> str:
+    """The panel as the shot's FIRST FRAME -- Scarlet's relation, word for word.
+
+    OWNER 2026-09-20, for episode 6, after ep05 shipped with T14's horse cropped
+    to a head while its panel showed the whole animal in its cab. A
+    weak_reference informs and has no authority over framing, which is exactly
+    what we told it; a first-frame pin has that authority.
+
+    I had thought the pin was what froze ep03 T02. It was not, and the code
+    says so beside it: 22 of 22 prompts asked for a preserved VIEWPOINT in a
+    block whose own camera sentence pushes the camera through it, and told to
+    hold the viewpoint and to change it, the render held at similarity 1.000
+    with 0.12 frame-to-frame change. Dropping `viewpoint` was the fix. The pin
+    stayed, and Scarlet pinned every cell this way for fourteen episodes.
+
+    So: placement, wardrobe and light. Never viewpoint, never framing -- the
+    camera sentence owns those. And never a LAST frame: `NO_ENDS` stands,
+    because the model races to an end picture and then holds it there."""
+    return (f"<Picture {slot}> ([Shot {shot}] first frame): fully_preserved - subject "
+            f"placement, wardrobe and light.")
+
+
+def panel_anchor(name: str, t_start: float, take_start: float, fps: int = 24) -> tuple:
+    """(picture, frame) for `MiniMaxH3AddGuide`: the panel pinned ONCE, at its
+    own shot's start within the take.
+
+    The frame snaps FORWARD to a token start -- 17 frames per 5 tokens -- because
+    a pin inside a token smears across its four frames. The rule lives in
+    `episode_takes.grid_frame` and is delegated to, never re-derived."""
+    from studio.episode_takes import grid_frame
+
+    return name, grid_frame(round((t_start - take_start) * fps))
