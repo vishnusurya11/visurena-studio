@@ -25,7 +25,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 
-from studio import edit_gate, episode_home, episode_seq_board as sq, voice_qc, youtube_publish as yp
+from studio import edit_gate, episode_home, gap_owner, episode_seq_board as sq, voice_qc, youtube_publish as yp
 from studio import episode_takes as tk
 from studio.episode_spec import Episode
 from studio.trailer_assemble import clip_seconds, integrated, true_peak
@@ -338,6 +338,14 @@ def main(book_id: str, number: int, engine: str = "i2v") -> None:
           f"(inside take-runs: {len(late)}/{len(grid)} on grid, late up to {max(late, default=0)} f) | "
           f"lines heard {said}/{len(report['lines'])} | speech {report['speech_s']}s, "
           f"longest gap {report['longest_gap_s']}s (wall {MAX_GAP_S}) | {'PASS' if report['passed'] else 'FAIL'}")
+    # A gap is not a number, it is a SHOT. ep08 reported 6.81 s and nothing
+    # else, so the cure aimed at the neighbours' codas and froze one of them
+    # twice; the gap belonged to the silent shot lying inside it.
+    if report["longest_gap_s"] > MAX_GAP_S:
+        begins, ends = gap_owner.longest_span(lines, placed["duration_s"])
+        silent = [s["index"] for s in placed["shots"]
+                  if not any(l["shot"] == s["index"] for l in lines)]
+        print(f"  gap: {gap_owner.owner(placed['shots'], begins, ends, silent).said}")
     edit = report["edit"]
     print(f"edit: {'OK' if edit['ok'] else 'FAIL'}"
           + (f" ({edit.get('note')})" if not edit.get("measured") else

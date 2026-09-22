@@ -169,6 +169,11 @@ GEO_LAWN = (
     "RIGHT. The paling and the white gate run across the CENTRE RIGHT with the gravel drive going out "
     "to them, the burning treetops about the Oriental College stand in red flame across the CENTRE "
     "LEFT below the level of the lawn, and black smoke fills the TOP third.")
+GEO_BRIDGE_PARAPET = (
+    "The brick parapet runs across the BOTTOM third of the frame from the LEFT edge to the RIGHT "
+    "edge. The soot-blackened brick of the arch fills the CENTRE and the RIGHT third behind it "
+    "from the BOTTOM to the TOP, and the bright opening of the arch shows at the LEFT third with "
+    "hard white daylight standing in it.")
 GEO_INN = (
     "The scrubbed counter runs across the BOTTOM of the frame from the LEFT edge to the CENTRE RIGHT "
     "with the brass beer-engine handles standing up from it at the CENTRE. Shelves of bottles and "
@@ -292,10 +297,10 @@ S = [
      "The camera pushes in toward his face with small amplitude until his head fills the middle of "
      "the picture, travelling a forearm; he goes on speaking and opens one hand flat as he does; he "
      "goes on knocking the back of that hand twice against his own knee.",
-     "in the shade level with his eyes, three paces from him, an 85mm lens. The daylight comes from "
-     "the CENTRE beyond the arch and rakes across him; his red jacket reads dull brick and the brick "
-     "behind him reads dark",
-     GEO_BRIDGE + " His head is a third of the frame's height.",
+     "in the shade level with his eyes, three paces from him, an 85mm lens. The daylight comes out "
+     "of the bright arch opening at the LEFT and rakes across him; his red jacket reads dull brick "
+     "and the brick behind him reads dark",
+     GEO_BRIDGE_PARAPET + " His head is a third of the frame's height.",
      "friction", "Snippy, who wanted a trench, and had thought about it."),
 
     ("bridge", "medium", [], 0.5, "pan_to",
@@ -327,9 +332,10 @@ S = [
      "The camera pushes in on his face with small amplitude until it fills the middle of the "
      "picture, travelling a forearm; he goes on speaking with his chin up; his head "
      "goes on nodding once toward the common as he says it.",
-     "in the shade level with his eyes, two paces from him, an 85mm lens. The daylight from the "
-     "CENTRE beyond the arch rakes one side of his face and leaves the other dark",
-     GEO_BRIDGE + " His head is half the frame's height.", "reaction", "Octopuses, said he; fighters of fish it is this time."),
+     "in the shade level with his eyes, two paces from him, an 85mm lens. The daylight out of the "
+     "bright arch opening at the LEFT falls on his face, and the brick edge of the arch at the "
+     "CENTRE throws its own shadow across the right of it",
+     GEO_BRIDGE_PARAPET + " His head is half the frame's height.", "reaction", "Octopuses, said he; fighters of fish it is this time."),
 
     # ---- pit: the enemy declines to be looked at ----------------------------
     ("pit", "wide", [], 0.15, "crane_up",
@@ -416,16 +422,19 @@ S = [
      "LEFT; the broken brick reads hot red and the turned earth reads dark",
      GEO_LAWN, "spike", "A piece of our chimney came down on the flower bed."),
 
-    ("lawn", "close", ["unnamed_first_person_narrator"], 0.6, "push_in",
-     "Close on " + NARRATOR + " on his own lawn in the red evening light with his hand closed hard "
-     "round his wife's upper arm at the edge of the picture, his jaw set and his eyes going off to "
-     "the side toward the fire, the smoke black behind his head.",
-     "The camera pushes in on his face with small amplitude until it fills the middle of the "
-     "picture, travelling a forearm; he goes on speaking and his grip on the arm goes on "
-     "tightening; he goes on turning his head back toward the fire as he says it.",
-     "on the lawn level with his eyes, two paces from him, an 85mm lens. The red firelight comes "
-     "from the CENTRE LEFT and rakes one side of his face; the smoke behind him reads black",
-     GEO_LAWN + " His head is half the frame's height.", "turn", "I gripped my wife's arm and ran her out into the road."),
+    ("lawn", "medium_close", ["unnamed_first_person_narrator", "narrators_wife"], 0.6, "push_in",
+     "Medium close on " + NARRATOR + " and " + WIFE + " together on their own lawn in the red "
+     "evening light, his hand closed hard round her upper arm and her shoulder already turning "
+     "under it, both their faces in the picture and the smoke black behind their heads.",
+     "The camera pushes in toward the two of them with small amplitude until both faces fill the "
+     "middle of the picture, travelling a forearm; the narrator takes his wife by the arm and "
+     "draws her round toward the road as he speaks; she goes on turning her shoulder under his "
+     "hand and brings her foot round after it.",
+     "on the lawn level with their eyes, three paces from them, an 85mm lens. The red firelight "
+     "comes from the CENTRE LEFT and rakes across both their faces; the smoke behind them reads "
+     "black",
+     GEO_LAWN + " Their heads are a third of the frame's height.",
+     "turn", "I gripped my wife's arm and ran her out into the road."),
 
     ("lawn", "medium_close", ["narrators_wife"], 0.7, "push_in",
      "Medium close on " + WIFE + " standing on the gravel drive in the red evening light with her "
@@ -556,7 +565,7 @@ LINES = [
     ("dialogue", "narrators_wife",
      "But where are we to go?", 17),
     ("narration", "unnamed_first_person_narrator",
-     "Leatherhead, I shouted, above the noise. Her cousins were at Leatherhead.", 18),
+     "Leatherhead, I shouted: her cousins' town, twelve miles off and out of this.", 18),
     ("narration", "unnamed_first_person_narrator",
      "The landlord wanted a pound for his horse and cart.", 19),
     ("narration", "unnamed_first_person_narrator",
