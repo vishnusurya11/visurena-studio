@@ -385,7 +385,7 @@ S = [
      "friction", "What news from the common?"),
 
     ("gate", "medium_close", ["unnamed_neighbour"], 0.7, "over_shoulder",
-     f"Medium close over the shoulder of {NARRATOR} toward {NEIGHBOUR} at the gate at night: the "
+     f"Medium close over the shoulder of the narrator toward {NEIGHBOUR} at the gate at night: the "
      "back of the narrator's head and his dark shoulder near and black at the LEFT, turned away so only his hair shows, the neighbour square in the right of "
      "the picture in his shirtsleeves and waistcoat, turning with the pipe still in his hand.",
      "The camera holds a static shot over the narrator's shoulder, keeping the neighbour's face "
@@ -503,7 +503,7 @@ S = [
 
 
     ("table", "medium_close", ["unnamed_first_person_narrator"], 0.9, "over_shoulder",
-     f"Medium close over the shoulder of {WIFE} toward {NARRATOR} at the table at night: the back "
+     f"Medium close over the shoulder of the wife toward {NARRATOR} at the table at night: the back "
      "of her head and her pale shoulder near and soft at the LEFT, turned away so only her hair "
      "shows, the narrator square in the right of the picture with "
      "the decanter at his elbow, explaining something reasonable to her across the cloth.",
@@ -560,7 +560,7 @@ BEATS = {0: (1.0, 0.6), 2: (1.2, 1.5), 3: (1.0, 0.4), 5: (1.2, 0.8),
          18: (0.8, 1.0),
          # The collar insert held 2.2 s and packed into the doorway shot with
          # it; a silent shot has to be long enough to be its own take.
-         20: (1.5, 3.0), 21: (1.0, 0.6), 23: (1.2, 1.2),
+         20: (1.0, 1.0), 21: (1.0, 0.6), 23: (1.2, 1.2),
          24: (0.8, 0.6), 25: (1.0, 0.8), 26: (0.6, 0.8)}
 
 TURNS = {17: "a man carrying the news -> a man carrying a story",
@@ -612,6 +612,11 @@ LINES = [
      "I felt foolish, and went on home.", 18),
     ("narration", "unnamed_first_person_narrator",
      "My wife opened the door. She stepped back from the look of me.", 19),
+    # THE 8.26 s HOLE. Shot 20, the collar, held four and a half seconds of
+    # silence between the doorway and the table. ep06 taught that trimming a
+    # silent shot far enough lets the packer swallow it, so it gets a line.
+    ("narration", "unnamed_first_person_narrator",
+     "The collar had gone at the stud. I never felt it go.", 20),
     ("narration", "unnamed_first_person_narrator",
      "I went in, sat down, drank some wine, and told her what I had seen.", 22),
     ("narration", "unnamed_first_person_narrator",

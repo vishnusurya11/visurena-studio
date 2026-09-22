@@ -15,7 +15,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 
-from studio import episode_home, episode_timeline
+from studio import episode_home, timeline_fresh, episode_timeline
 from studio.episode_spec import MAX_SECONDS, MIN_SECONDS
 
 
@@ -28,6 +28,7 @@ def main(book_id: str, number: int) -> None:
     if missing:
         raise SystemExit(f"lines not rendered yet: {missing}")
     placed = episode_timeline.place(episode, measured)
+    placed["plan"] = timeline_fresh.fingerprint(episode)
     faults = episode_timeline.misaligned(placed)
     if faults:
         raise SystemExit("the sync rule is broken:\n  " + "\n  ".join(faults))

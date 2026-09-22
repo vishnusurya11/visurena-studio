@@ -68,3 +68,26 @@ Because the hypothesis is a good one and it will be proposed again. It has the
 right shape — the fault class this pipeline keeps producing is exactly "two
 numbers, each fine, whose relationship nobody measures" — and that shape is why
 it deserved measuring rather than believing.
+
+## The one case where a re-roll is the wrong cure (ep08 T16, 2026-09-22)
+
+Everything above is about a take that has never rendered clean. A take that
+rendered clean and froze *after its own length was changed* is a different
+animal, and the ladder makes it worse:
+
+| ep | take | coda | result |
+|----|------|------|--------|
+| 8 | 16 | 1.3 s | **100.0** |
+| 8 | 16 | 0.4 s | 26.9, frozen-share 51 % |
+| 8 | 16 | 0.4 s, fresh seed | 37.5, frozen-share **75 %** |
+| 8 | 16 | 1.3 s restored | see the ep08 record |
+
+Two samples at the short length, both frozen, one worse than the other: that
+is not the 8 % variance the table above measures. The shot's motion was
+written to travel one short stride and the coda was the room it had to finish
+in; cutting the room to 0.4 s left H3 a move it could not make, and it held
+the frame instead. A fresh seed re-rolls the picture, never the room.
+
+**Ask before re-rolling: did this take ever pass, and has its length changed
+since?** If yes, put the length back. The ladder is for takes that were never
+right, not for takes that were made wrong.

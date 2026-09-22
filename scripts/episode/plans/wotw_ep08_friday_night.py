@@ -431,10 +431,10 @@ MOVES = {i: s[4] for i, s in enumerate(S)}
 # Shots 0-4 hold a little less so the boy's first cry lands inside the first
 # quarter: it was 35.3 s of 137.5, and the wall is a quarter.
 BEATS = {0: (0.6, 0.6), 1: (0.4, 0.4), 2: (1.0, 1.2), 3: (0.4, 0.4),
-         4: (0.6, 0.6), 5: (1.5, 2.0), 6: (1.5, 2.0), 7: (1.0, 1.3),
+         4: (0.6, 0.6), 5: (0.6, 0.6), 6: (1.5, 2.0), 7: (1.0, 1.3),
          8: (0.9, 1.0), 9: (0.7, 0.8), 10: (1.5, 2.0), 11: (0.7, 0.8),
          12: (0.9, 1.0), 13: (1.0, 1.3), 14: (0.7, 0.8), 15: (0.9, 1.0),
-         16: (1.0, 1.3), 17: (1.5, 2.0), 18: (1.4, 1.7), 19: (1.5, 2.0)}
+         16: (1.0, 1.3), 17: (1.0, 1.0), 18: (1.0, 1.7), 19: (1.5, 2.0)}
 
 TURNS = {12: "a town that has not seen it -> a town that has seen it and called it a heath fire",
          18: "the news as news -> the news as a thing a child sells"}
@@ -446,8 +446,6 @@ LINES = [
      "Draw a circle five miles wide round the pit, and inside it people dug their gardens.", 1),
     ("narration", "unnamed_first_person_narrator",
      "Children went up to bed. Students sat over their books.", 2),
-    ("narration", "unnamed_first_person_narrator",
-     "In the public houses it was a new thing to talk about, and that was all.", 3),
     ("narration", "unnamed_first_person_narrator",
      "At the junction the trains came in and went out as they always had.", 4),
     # THE FIRST VOICE, early, and it belongs to a child: ep04 opened on this
@@ -477,6 +475,8 @@ LINES = [
     ("narration", "unnamed_first_person_narrator",
      "The common itself lay quiet all night, and the dead lay on it.", 16),
     ("narration", "unnamed_first_person_narrator",
+     "Whatever the ray had touched was lying where it fell.", 17),
+    ("narration", "unnamed_first_person_narrator",
      "Somewhere under the sand a hammering went on, and went on.", 18),
     # THE BUTTON IS NEVER THE PROTAGONIST'S (rule 5). The one true sentence
     # anybody says in the chapter, shouted by a child to sell a newspaper that
@@ -486,7 +486,10 @@ LINES = [
 
 BEDS = [{"from_shot": 0, "tone": "plain"}, {"from_shot": 5, "tone": "uneasy"},
         {"from_shot": 10, "tone": "plain"}, {"from_shot": 13, "tone": "uneasy"},
-        {"from_shot": 16, "tone": "grave"}, {"from_shot": 20, "tone": "grave"}]
+        {"from_shot": 16, "tone": "grave"},
+        # The button's own shot, which is 19: the bed named 20 and this
+        # episode ends at 19, the same off-by-one the line map had.
+        {"from_shot": 19, "tone": "grave"}]
 
 PATHS = {
     0: 0.1, 1: 0.3, 2: 0.5, 3: 0.8,                     # street

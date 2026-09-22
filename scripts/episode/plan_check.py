@@ -22,7 +22,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
-from studio import actor_gate, episode_home, episode_ref_official as ro, episode_spec as spec, house_style, plan_gates
+from studio import actor_gate, episode_home, episode_ref_official as ro, episode_spec as spec, house_style, plan_gates, timeline_fresh
 from studio import episode_takes as tk
 from studio.episode_takes import BUDGET
 
@@ -93,6 +93,8 @@ def measured_or_projected(book: Path, number: int, episode, rate: float) -> list
     """The timeline's own shots when it has been written, else the projection."""
     placed = episode_home.home(book, number) / "placed.json"
     if placed.exists():
+        if why := timeline_fresh.stale(episode, episode_home.read_json(placed)):
+            raise SystemExit(f"TIMELINE     : {why[0]}")
         by = {s.index: s for s in episode.shots}
         return [dict(s, setup=by[s["index"]].setup, cuts=list(by[s["index"]].cuts))
                 for s in episode_home.read_json(placed)["shots"] if s["index"] in by]
