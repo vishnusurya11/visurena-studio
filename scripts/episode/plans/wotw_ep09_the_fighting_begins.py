@@ -128,14 +128,13 @@ PIT_DAY = (
     "pines, and a shallow ditch with spoil thrown up along the near side; the light is a hard high "
     "sun from the right, so the sand ring reads raw pale yellow, the heather reads dusty olive and "
     "every shadow lies short to the LEFT of the thing that throws it")
-LAWN_EVENING = (
-    "the lawn and gate of a brick villa on the crest of Maybury Hill at six in the evening in 1894, "
-    "with the place on fire below it: a wooden summerhouse at the near end of the lawn, a flower bed "
-    "under the study window, a gravel drive running out to a white gate on the road, and below and "
-    "beyond the paling the tops of the trees about the Oriental College standing in smoky red flame "
-    "with the college roof line broken behind them; the light is low red firelight from below and "
-    "beyond, cut by a sun going down through smoke, so the lawn reads scorched gold, the brick reads "
-    "hot red and the smoke reads black")
+CREST_BURNING = (
+    "the same walled lawn on the crest of Maybury Hill with the valley below it on fire: the broken "
+    "roof line of the Oriental College and a half-fallen church tower burning above the garden "
+    "wall, thick black smoke driving up off them across the whole sky, a wooden summerhouse and a "
+    "white gate on the near lawn, and broken red chimney brick scattered fresh on the grass; the "
+    "light is the fire itself, low and raking from beyond the wall, so the lawn reads scorched "
+    "orange, the summerhouse and the gate read hot red on their fire side and black on the other")
 INN_BAR = (
     "the bar of a small country public house on a summer evening in 1894: a scrubbed wooden counter "
     "along one side with beer engines and their brass handles standing on it, shelves of bottles and "
@@ -146,17 +145,18 @@ INN_BAR = (
 
 # ---- the geometry of each place: WHERE things are, in cells -----------------
 GEO_GARDEN = (
-    "The bleached lawn fills the BOTTOM half of the frame from the LEFT edge to the RIGHT edge with "
-    "the gravel path running along it from the BOTTOM LEFT to the CENTRE RIGHT. The low paling fence "
-    "runs across the CENTRE with the side gate in it at the CENTRE RIGHT, the dark cedar stands at "
-    "the LEFT third, and the open heath and its pines lie flat behind the fence with a pale hazy sky "
-    "in the TOP third.")
+    "The gravel path runs from the BOTTOM CENTRE away to the white paling gate at the CENTRE LEFT, "
+    "with mown lawn and flower borders on both sides of it in the BOTTOM half. The brick wall of "
+    "the house fills the RIGHT third from the BOTTOM to the TOP with its sash windows in it, and a "
+    "tall dark cedar stands against it at the CENTRE RIGHT. The low white paling runs across the "
+    "CENTRE from the LEFT edge to the CENTRE RIGHT, the open heather of the common lies flat beyond "
+    "it, and a line of pines and a pale hazy sky fill the TOP third at the LEFT.")
 GEO_BRIDGE = (
-    "The dark brick arch of the bridge frames the CENTRE of the picture from the TOP third down to "
-    "the BOTTOM third, its soot-blackened underside across the TOP CENTRE and its piers at the LEFT "
-    "third and the RIGHT third. The pale dusty road runs from the BOTTOM edge through the arch and "
-    "away bright into the CENTRE, the green canal water shows at the BOTTOM LEFT below the towpath, "
-    "and hard white daylight stands in the opening at the CENTRE.")
+    "The dark brick of the bridge fills the LEFT half and the TOP third of the frame, its arch "
+    "springing from a pier at the LEFT third and coming down again at the RIGHT edge. The bright "
+    "opening of the arch shows at the CENTRE RIGHT with hard white daylight, hedges and elms in it, "
+    "and the green canal water lying flat beyond. The pale dusty road runs from the BOTTOM edge up "
+    "through the opening, and grass and weeds edge it at the BOTTOM LEFT and the BOTTOM RIGHT.")
 GEO_PIT = (
     "Dusty olive heather fills the BOTTOM third of the frame from the LEFT edge to the RIGHT edge, "
     "with the shallow ditch and its thrown-up spoil running across the BOTTOM LEFT. The raw ring of "
@@ -164,16 +164,17 @@ GEO_PIT = (
     "grey streamer of smoke stands straight up out of it at the CENTRE into the TOP third. Low pines "
     "close the horizon behind the ring and a pale hot sky fills the TOP third.")
 GEO_LAWN = (
-    "The scorched lawn fills the BOTTOM third of the frame from the LEFT edge to the RIGHT edge, the "
-    "summerhouse standing at the BOTTOM LEFT and the flower bed under the study window at the BOTTOM "
-    "RIGHT. The paling and the white gate run across the CENTRE RIGHT with the gravel drive going out "
-    "to them, the burning treetops about the Oriental College stand in red flame across the CENTRE "
-    "LEFT below the level of the lawn, and black smoke fills the TOP third.")
+    "The scorched lawn fills the BOTTOM half of the frame from the LEFT edge to the RIGHT edge with "
+    "broken red chimney brick scattered on it at the BOTTOM CENTRE and the BOTTOM RIGHT. The "
+    "summerhouse stands at the LEFT third, the low brick garden wall runs across the CENTRE from "
+    "the LEFT edge to the RIGHT edge with the white gate in it at the CENTRE RIGHT, the broken "
+    "roof line and the burning church tower stand above the wall at the CENTRE, and thick black "
+    "smoke fills the TOP third from the CENTRE to the RIGHT edge.")
 GEO_BRIDGE_PARAPET = (
     "The brick parapet runs across the BOTTOM third of the frame from the LEFT edge to the RIGHT "
-    "edge. The soot-blackened brick of the arch fills the CENTRE and the RIGHT third behind it "
-    "from the BOTTOM to the TOP, and the bright opening of the arch shows at the LEFT third with "
-    "hard white daylight standing in it.")
+    "edge. The soot-blackened brick of the arch fills the LEFT half from the BOTTOM to the TOP "
+    "behind it, and the bright opening of the arch shows at the CENTRE RIGHT with hard white "
+    "daylight and green hedges standing in it.")
 GEO_INN = (
     "The scrubbed counter runs across the BOTTOM of the frame from the LEFT edge to the CENTRE RIGHT "
     "with the brass beer-engine handles standing up from it at the CENTRE. Shelves of bottles and "
@@ -208,12 +209,12 @@ SETUPS = {
         crowd="",
         outdoors=True, props=[], location="horsell_common"),
     "lawn": dict(
-        described=LAWN_EVENING,
+        described=CREST_BURNING,
         cast=["unnamed_first_person_narrator", "narrators_wife", "unnamed_hussar"],
-        landmark="the burning treetops about the Oriental College below the lawn",
+        landmark="the burning church tower standing above the garden wall",
         landmark_at="far_end",
         landmark_size="is a quarter of the height of the frame",
-        route="from the summerhouse across the lawn to the paling and the white gate",
+        route="from the summerhouse across the scorched lawn to the white gate in the wall",
         geometry=GEO_LAWN,
         crowd="",
         outdoors=True, props=[], location="maybury_hill"),
@@ -374,19 +375,18 @@ S = [
      GEO_PIT, "reaction", "My imagination became belligerent and defeated them a dozen ways."),
 
     # ---- lawn: ninety seconds -----------------------------------------------
-    ("lawn", "medium", ["unnamed_first_person_narrator", "narrators_wife"], 0.1, "track_lateral",
-     "Medium on " + NARRATOR + " and " + WIFE + " sitting facing each other at a small table in a "
-     "wooden summerhouse at six in the evening with a tea tray between them, both of them leaning "
-     "in and talking, and the quiet lawn and the paling visible past the open side of the "
-     "summerhouse.",
-     "The camera tracks sideways to the left along the open side of the summerhouse, a truck with "
-     "small amplitude, until both of them are in the middle of the picture, travelling one short "
-     "stride; he goes on talking with one hand turned up on the table; she goes on holding her cup "
-     "in both hands and nods once.",
-     "just outside the summerhouse level with their shoulders, four paces from them, a 50mm lens. "
-     "The low evening light comes from the LEFT across the lawn; the tea things read white and the "
-     "inside of the summerhouse reads warm brown",
-     GEO_LAWN, "setup", "We sat at tea in the summerhouse talking about the battle."),
+    ("garden", "medium", ["unnamed_first_person_narrator", "narrators_wife"], 0.9, "track_lateral",
+     "Medium on " + NARRATOR + " and " + WIFE + " sitting facing each other at a small table set "
+     "out on their own lawn at six in the evening with a tea tray between them, both of them "
+     "leaning in and talking, and the flower borders and the white paling gate behind them.",
+     "The camera tracks sideways to the left along the lawn, a truck with small amplitude, until "
+     "both of them are in the middle of the picture, travelling one short stride; he goes on "
+     "talking with one hand turned up on the table; she goes on holding her cup in both hands "
+     "and nods once.",
+     "on the lawn level with their shoulders, four paces from them, a 50mm lens. The low evening "
+     "sun comes from the LEFT across the lawn; the tea things read white and the borders behind "
+     "them read dark",
+     GEO_GARDEN, "setup", "We sat at tea in the summerhouse talking about the battle."),
 
     ("lawn", "wide", [], 0.35, "crane_up",
      "Wide from the lawn across the paling at the tops of the trees about the Oriental College below "
@@ -555,7 +555,7 @@ LINES = [
     ("narration", "unnamed_first_person_narrator",
      "All that armament excited me. They seemed very helpless down there.", 11),
     ("narration", "unnamed_first_person_narrator",
-     "At six we sat at tea in the summerhouse, talking about the battle coming.", 12),
+     "At six we sat at tea on the lawn, talking about the battle coming.", 12),
     ("narration", "unnamed_first_person_narrator",
      "A muffled detonation, a gust of firing, and a crash that shook the ground.", 13),
     ("narration", "unnamed_first_person_narrator",
@@ -585,11 +585,12 @@ PATHS = {
     0: 0.1, 1: 0.4, 2: 0.6, 3: 0.8,                       # garden
     4: 0.1, 5: 0.35, 6: 0.5, 7: 0.7, 8: 0.85,             # bridge
     9: 0.15, 10: 0.4, 11: 0.65,                           # pit
-    12: 0.1, 13: 0.35, 14: 0.45, 15: 0.55, 16: 0.6,       # lawn
+    12: 0.9, 13: 0.35, 14: 0.45, 15: 0.55, 16: 0.6,       # lawn
     17: 0.7, 18: 0.8,
     19: 0.3, 20: 0.5,                                     # inn
     21: 0.9, 22: 0.95,                                    # lawn again
 }
+
 
 SECTIONS = {
     0: "hook",
