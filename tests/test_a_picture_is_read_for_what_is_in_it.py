@@ -100,7 +100,7 @@ def test_every_fault_is_named_in_the_verdict():
     got = faults(seen(landform="mountains", people=2, lookalikes=2, text=True,
                       hour="day", subjects=["a doll"]),
                  frame="empty heather at night", planned=0, crowd=True,
-                 flat=True, night=True)
+                 flat=True, night=True, banned=("doll",))
     assert len(got) >= 4
     assert any("landform" in f for f in got)
     assert any("doll" in f for f in got)
@@ -112,3 +112,105 @@ def test_burned_in_lettering_is_a_fault():
     assert any("text" in f or "lettering" in f
                for f in faults(seen(text=True), frame="heather", planned=0,
                                crowd=False, flat=True, night=True))
+
+
+# ---- the reader's own answer, which arrives wrapped ------------------------
+def test_the_answer_is_read_out_of_a_json_array_of_a_string():
+    """What the caption workflow actually returns: a JSON array whose one
+    element is a STRING of JSON.
+
+    The first version regexed for a brace and handed json.loads a string full
+    of escaped quotes. It raised, the reader returned its defaults, and every
+    panel of ep07 came back 'flat, 0 people, night' -- a DQ that silently
+    passes everything, which is worse than no DQ.
+
+    The fixture is BUILT, never typed: writing the escapes by hand is how the
+    first version of this test failed against correct code.
+    """
+    import json
+
+    from studio.panel_content import parse
+    inner = json.dumps({"landform": "flat", "people": 1, "lookalikes": 0,
+                        "text": False, "hour": "night",
+                        "subjects": ["man", "mustache"]}, indent=2)
+    got = parse(json.dumps([inner], indent=4))
+    assert got.people == 1
+    assert got.subjects == ["man", "mustache"]
+    assert got.hour == "night"
+
+
+def test_a_bare_json_object_is_read_too():
+    from studio.panel_content import parse
+    got = parse('{"landform": "hills", "people": 2, "lookalikes": 1, '
+                '"text": true, "hour": "day", "subjects": ["a doll"]}')
+    assert got.landform == "hills" and got.people == 2 and got.text is True
+
+
+def test_an_answer_that_cannot_be_read_raises_rather_than_passing():
+    """A read that fails must not look like a clean panel."""
+    from studio.panel_content import Unreadable, parse
+    import pytest as _pytest
+    with _pytest.raises(Unreadable):
+        parse("the picture shows a man standing in heather")
+
+
+# ---- what the first design got wrong --------------------------------------
+def test_an_unlisted_detail_is_not_a_fault():
+    """MEASURED: the first `faults` flagged every panel of ep07, 27 of 27.
+
+    Shot prose describes a COMPOSITION, not an inventory, so "tie", "trees",
+    "wallpaper" and "tablecloth" are all legitimately in frame and none of
+    them is named. A gate that fails everything says nothing."""
+    from studio.panel_content import faults
+    got = faults(seen(subjects=["heather", "a tie", "wallpaper", "trees"]),
+                 frame="black heather at night", planned=0, crowd=False,
+                 flat=True, night=True)
+    assert got == []
+
+
+def test_a_banned_subject_is_still_a_fault():
+    """The doll, and anything else an episode says must never appear."""
+    from studio.panel_content import faults
+    got = faults(seen(subjects=["heather", "a child's doll"]),
+                 frame="black heather at night", planned=0, crowd=False,
+                 flat=True, night=True, banned=("doll", "mountain"))
+    assert any("doll" in f for f in got)
+
+
+def test_facial_hair_the_cast_row_forbids_is_a_fault():
+    """The narrator is clean-shaven and the reader saw a moustache on him in
+    six panels. Nothing in this pipeline was comparing the two."""
+    from studio.panel_content import contradictions
+    assert contradictions(seen(subjects=["man", "mustache", "suit"]),
+                          "a lean clean-shaven man of thirty-five")
+
+
+def test_a_beard_the_cast_row_asks_for_is_not():
+    from studio.panel_content import contradictions
+    assert not contradictions(seen(subjects=["man", "short sandy beard"]),
+                              "a spare quick man with a short sandy beard")
+
+
+def test_a_hill_where_the_location_is_a_hill_is_not_a_fault():
+    """Maybury HILL is a hill. Flatness is a property of the LOCATION, not of
+    the book."""
+    from studio.panel_content import forbidden_landform
+    assert not forbidden_landform(seen(landform="hills"), flat=False)
+
+
+# ---- three false positives the first real run produced --------------------
+def test_a_banned_word_matches_a_whole_word_only():
+    """MEASURED: the reader said "carafe" on three panels of a dining room and
+    the gate reported a CAR, because "car" is a substring of it."""
+    from studio.panel_content import banned_subject
+    assert banned_subject(seen(subjects=["a carafe of wine"]), ("car",)) == []
+    assert banned_subject(seen(subjects=["a car in the road"]), ("car",)) == ["car"]
+
+
+def test_an_indoor_picture_is_not_judged_on_the_hour():
+    """A lamplit dining room read as 'day' and was called a night fault. The
+    hour of an interior is the lamp's, and the reader cannot see the sky."""
+    from studio.panel_content import faults
+    got = faults(seen(landform="indoors", hour="day"), frame="the dining room at night",
+                 planned=0, crowd=False, flat=False, night=True)
+    assert not any("hour" in f for f in got)

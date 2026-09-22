@@ -66,14 +66,26 @@ WHERE = "Horsell, Surrey, 1894"
 LIGHT = "gaslight and black shadows"
 LOOK = "Angular stylised 3D animation, brush-stroke texture"
 
-NARRATOR = ("the narrator, a lean clean-shaven man of thirty-five in a dark grey sack suit and a "
-            "soft collar, his hair disordered and his collar burst open at the stud")
-WIFE = ("the narrator's wife, a slight woman of thirty in a pale high-necked house dress with her "
-        "hair pinned up, a plain gold ring on her hand")
-NEIGHBOUR = ("the neighbour, a heavy man of forty-five in shirtsleeves and a waistcoat with a "
-             "clay pipe, his sleeves rolled to the elbow")
-NEIGHBOURS_WIFE = ("the neighbour's wife, a woman of thirty in a dark cotton dress and a straw "
-                   "bonnet tied under her chin")
+# THE CAST IS DESCRIBED FROM ITS BOUND ROWS (`refs.json`), never from memory.
+# The content gate read a moustache on a narrator this plan had called
+# clean-shaven, and the row is what the take prompt and the sheet both carry.
+NARRATOR = ("the narrator, a slender narrow-shouldered man of thirty-four with a long oval face, "
+            "grey eyes and dark brown hair parted on the left, a neat close-trimmed dark brown "
+            "moustache and shaven cheeks, in a mid-grey herringbone tweed suit with the jacket "
+            "torn at the left elbow, his starched collar sprung from its stud and his green tie "
+            "pulled sideways, bareheaded")
+WIFE = ("the narrator's wife, a slim straight-backed woman of twenty-nine with an oval face, wide "
+        "hazel eyes and light freckles across the nose, her thick chestnut-auburn hair swept up "
+        "into a soft pompadour, in a lilac-grey cotton house dress with a high collar and a white "
+        "bibbed apron tied at the waist, a plain gold band on her hand")
+NEIGHBOUR = ("the neighbour, a tall spare man of forty-eight with a slight stoop, hollow cheeks, "
+             "grey-brown hair receding at the temples and a short pointed grey goatee with shaved "
+             "cheeks and lip, in a sky-blue-and-white striped flannel blazer and white flannel "
+             "trousers, a flat-crowned cream straw panama in his hand")
+NEIGHBOURS_WIFE = ("the neighbour's wife, a slender straight-backed woman of forty-five with a "
+                   "fine-boned oval face, thin lips and grey-green eyes, her iron-grey hair "
+                   "centre-parted and drawn into a low smooth chignon, in a dark high-necked "
+                   "dress")
 
 # ---- the four places, each naming its own light and the direction it comes from --
 COMMON_DARK = (
@@ -202,12 +214,13 @@ S = [
      "behind lights one side of him; his face and the heather ahead of him are black",
      GEO_COMMON, "setup", "The stress of blundering against trees and stumbling through heather."),
 
-    ("flight", "insert", [], 0.7, "locked",
+    ("flight", "insert", [], 0.7, "tilt_up",
      "Insert on the broken ground at night: knee-deep black heather stems and bare sandy earth "
      "between them, a boot print pressed into the sand and filling in at its edge, and the dull "
      "red of the glow behind catching the tops of the stems.",
-     "The camera holds a static shot low over the heather; the stems that were pushed aside come "
-     "back upright one after another; sand runs back into the print a grain at a time as they do.",
+     "The camera tilts up from the print along the bent track, travelling a hand's breadth, until "
+     "the heather that was pushed aside is in the middle of the picture; the stems come back "
+     "upright one after another; sand runs back into the print a grain at a time as they do.",
      "on the ground among the heather stems, a 50mm lens, a low angle. The red glow comes from "
      "behind and lights the tops of the stems; the sand reads dull red and the roots are black",
      GEO_COMMON, "setup", "The only record that he came this way at all."),
@@ -225,13 +238,14 @@ S = [
      GEO_CANAL, "setup", "At last he could go no further, and fell by the wayside."),
 
     # ---- canal: the terror falls off him like a garment --------------------------
-    ("canal", "medium", ["unnamed_first_person_narrator"], 0.2, "locked",
+    ("canal", "medium", ["unnamed_first_person_narrator"], 0.2, "crane_up",
      f"Medium on {NARRATOR} lying still on the grass verge at night by the canal bridge, on his "
      "side with one arm under his head, his eyes open and fixed on the road past the camera, the "
      "stone parapet of "
      "the bridge behind him and the hard white lamps of the gasworks beyond.",
-     "The camera holds a static shot level with the grass; his open eyes go on staring past the "
-     "camera and stay there; his breathing slows and goes on slowing where he lies.",
+     "The camera rises off the grass with small amplitude until his whole length and the parapet "
+     "behind him are in the picture, travelling one short stride; his open eyes go on staring "
+     "past the camera; his breathing goes on lifting his shoulder where he lies.",
      "on the verge level with his face, three paces from him, a 50mm lens. The lamp light comes "
      "from the RIGHT and lights one side of his face; the grass and the road are black",
      GEO_CANAL, "setup", "I fell and lay still. I must have remained there some time."),
@@ -426,13 +440,13 @@ S = [
      "reaction", "I tried and found I could not tell them what I had seen."),
 
     # ---- door: he brings it home -------------------------------------------------
-    ("door", "medium", ["narrators_wife"], 0.3, "locked",
+    ("door", "medium", ["narrators_wife"], 0.3, "crane_up",
      f"Medium on {WIFE} standing in her own lit doorway at night with the door held open against "
      "her shoulder, the warm hall light behind her, looking out at something on the step that has "
      "stopped her where she stands.",
-     "The camera holds a static shot level with her face from the step; her hand tightens on the "
-     "edge of the door and stays tight; the hall light behind her goes on falling out across the "
-     "step.",
+     "The camera rises from the step with small amplitude until her face and the lit hall behind "
+     "her are both in the picture, travelling one short stride; her hand goes on tightening on "
+     "the edge of the door; the hall light goes on falling out across the step past her.",
      "on the doorstep level with her face, three paces from her, a 50mm lens. The hall light "
      "comes from behind her and rims her hair and shoulder; her face reads dim and the garden "
      "behind the camera is black",
@@ -515,19 +529,22 @@ S = [
      "on the table close to the lamp, a 50mm lens. The lamp is the light and it comes from the "
      "CENTRE; the cloth reads warm white and everything a hand's breadth beyond it is black",
      GEO_DINING, "runout", "The last light in the house, and how far it reaches."),
-    ("table", "medium_close", ["narrators_wife"], 0.8, "locked",
+    ("table", "medium_close", ["narrators_wife"], 0.8, "tilt_up",
      f"Medium close on {WIFE} at the table at night, her face deadly white in the lamplight, her "
      "brows knitted and her hand laid flat on the cloth halfway across it toward him, listening "
      "with her plate still square in front of her.",
-     "The camera holds a static shot level with her face; her hand goes further across the cloth "
-     "toward his and stays there; her eyes stay on him and go on staying.",
+     "The camera tilts up from the cloth to her face, travelling a hand's breadth, until her eyes "
+     "are in the middle of the picture; her hand goes on further across the cloth toward his; "
+     "the lamplight goes on moving on her face as the flame works.",
      "across the table level with her face, three paces from her, a 50mm lens. The oil lamp "
      "lights her from below and from the LEFT; her face reads warm white and the room behind her "
      "is black",
      "The wife's head and shoulders fill the CENTRE of the frame, the panel cutting her at the "
      "middle of the chest, her head a third the frame's height at the TOP third. The white cloth "
-     "fills the BOTTOM third with her hand laid flat on it, and the black room fills the frame "
-     "behind her.",
+     "fills the BOTTOM third with her hand laid flat on it. The papered wall of the dining room "
+     "stands behind her with its framed engraving at the RIGHT third and the curtained sash "
+     "window at the LEFT third, both dim in the lamplight, so the room she is sitting in is "
+     "visible all round her.",
      "button", "They may come here. She says it again and again, and she is right."),
 ]
 
@@ -540,7 +557,7 @@ BEATS = {0: (1.0, 0.6), 2: (1.2, 1.5), 3: (1.0, 0.4), 5: (1.2, 0.8),
          # which puts two mouths under one lip-sync gate.
          14: (1.2, 1.2), 15: (1.2, 1.2),
          17: (0.8, 0.8),
-         18: (0.8, 1.6),
+         18: (0.8, 1.0),
          # The collar insert held 2.2 s and packed into the doorway shot with
          # it; a silent shot has to be long enough to be its own take.
          20: (1.5, 3.0), 21: (1.0, 0.6), 23: (1.2, 1.2),
@@ -592,7 +609,7 @@ LINES = [
     # dialogue line opens its own shot.
     ("dialogue", "unnamed_first_person_narrator", "You'll hear more yet.", 18),
     ("narration", "unnamed_first_person_narrator",
-     "I felt foolish and angry, and went on home.", 18),
+     "I felt foolish, and went on home.", 18),
     ("narration", "unnamed_first_person_narrator",
      "My wife opened the door. She stepped back from the look of me.", 19),
     ("narration", "unnamed_first_person_narrator",

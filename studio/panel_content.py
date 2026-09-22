@@ -100,20 +100,113 @@ def people_fault(seen: Seen, planned: int, crowd: bool) -> bool:
         return True
     return not crowd and seen.people > planned
 
+BEARDS = ("beard", "moustache", "mustache", "whiskers", "goatee", "stubble")
+"""Facial hair a reader may name. A cast row that says clean-shaven and a
+picture that shows a moustache are two different men, and the take that
+follows the picture carries the wrong face into the cut."""
+
+CLEAN = re.compile(r"\bclean[- ]shaven\b", re.I)
+
+
+def contradictions(seen: Seen, physical: str) -> list[str]:
+    """What the picture shows that the cast row rules out.
+
+    MEASURED on ep07: the reader named a moustache on the narrator in six
+    panels and his row reads "a lean clean-shaven man of thirty-five".
+    Nothing in this pipeline compared the two.
+    """
+    out = []
+    said = " ".join(seen.subjects).lower()
+    if CLEAN.search(physical or "") and (hair := [b for b in BEARDS if b in said]):
+        out.append(f"{hair[0]} on a clean-shaven character")
+    return out
+
+
+def banned_subject(seen: Seen, banned) -> list[str]:
+    """Subjects an episode has said must never appear -- the doll's list.
+
+    A WHOLE WORD. MEASURED: the reader said "carafe" on three panels of a
+    dining room and a substring test reported a CAR in each of them.
+    """
+    said = " ".join(seen.subjects).lower()
+    words = set(WORD.findall(said))
+    return [b for b in (banned or ())
+            if set(WORD.findall(b.lower())) <= words and set(WORD.findall(b.lower()))]
+
 
 def faults(seen: Seen, frame: str, planned: int, crowd: bool,
-           flat: bool, night: bool) -> list[str]:
-    """Every way this picture disagrees with the shot that asked for it."""
+           flat: bool, night: bool, banned=(), physical: str = "") -> list[str]:
+    """Every way this picture disagrees with the shot that asked for it.
+
+    `frame` is kept for the caller's own reporting; it is NOT used to decide
+    whether a detail belongs, because shot prose is a composition and not an
+    inventory, and judging against it failed 27 of 27.
+    """
     out = []
     if forbidden_landform(seen, flat):
-        out.append(f"landform {seen.landform!r}: this country is flat")
-    if strangers := unasked_subject(seen, frame):
-        out.append(f"the shot never asked for {', '.join(strangers)}")
+        out.append(f"landform {seen.landform!r}: this place is flat")
+    if strangers := banned_subject(seen, banned):
+        out.append(f"banned from this book: {', '.join(strangers)}")
+    out += contradictions(seen, physical)
     if people_fault(seen, planned, crowd):
         out.append(f"{seen.people} figure(s) for {planned} cast, "
                    f"{seen.lookalikes} of them copies of another")
     if seen.text:
         out.append("text or lettering in the picture")
-    if night and not reads_as_night(seen):
+    # AN INTERIOR HAS NO HOUR TO READ. A lamplit dining room came back 'day'
+    # and was called a night fault; the reader cannot see the sky from inside.
+    if night and seen.landform != "indoors" and not reads_as_night(seen):
         out.append(f"the hour reads {seen.hour!r} and the shot is at night")
     return out
+
+
+class Unreadable(ValueError):
+    """The reader said something this vocabulary cannot hold.
+
+    IT RAISES, IT DOES NOT DEFAULT. The first version returned an empty `Seen`
+    when the parse failed, and every panel of ep07 came back 'flat, 0 people,
+    night' -- a gate that silently passes everything.
+    """
+
+
+def parse(said: str) -> Seen:
+    """The reader's answer, however the workflow wrapped it.
+
+    `image_qwen3vl_caption` returns a JSON ARRAY whose one element is a STRING
+    of JSON, so the object has to be unwrapped once before it will load.
+    """
+    import json
+
+    got = _loads(said)
+    if isinstance(got, list) and got:
+        got = _loads(got[0]) if isinstance(got[0], str) else got[0]
+    if not isinstance(got, dict):
+        raise Unreadable(f"no object in {said[:80]!r}")
+    try:
+        return Seen(
+            landform=str(got.get("landform", "flat")).lower().strip(),
+            people=int(got.get("people", 0) or 0),
+            lookalikes=int(got.get("lookalikes", 0) or 0),
+            text=bool(got.get("text", False)),
+            hour=str(got.get("hour", "night")).lower().strip(),
+            subjects=[str(s).strip() for s in (got.get("subjects") or [])],
+        )
+    except (TypeError, ValueError) as bad:
+        raise Unreadable(str(bad)) from bad
+
+
+def _loads(text: str):
+    import json
+    import re as _re
+
+    try:
+        return json.loads(text)
+    except json.JSONDecodeError:
+        pass
+    found = _re.search(r"\{.*\}", text, _re.S)
+    if not found:
+        raise Unreadable(f"no JSON in {text[:80]!r}")
+    try:
+        return json.loads(found.group(0))
+    except json.JSONDecodeError as bad:
+        raise Unreadable(str(bad)) from bad
