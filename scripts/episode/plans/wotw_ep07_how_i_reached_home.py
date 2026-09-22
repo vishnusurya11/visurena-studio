@@ -79,8 +79,10 @@ NEIGHBOURS_WIFE = ("the neighbour's wife, a woman of thirty in a dark cotton dre
 COMMON_DARK = (
     "the open heather of Horsell Common at night in 1894, away from the pit: knee-deep purple-brown "
     "heather and dark furze standing black in every direction, young Scots pines in loose stands "
-    "with bare trunks, the ground broken and uneven underfoot, and a low red glow in the sky behind "
-    "on the horizon where the pit lies; the only light is that glow from behind, low and raking, so "
+    "with bare trunks, bare sand tracks worn pale through the heather, the ground broken and "
+    "uneven underfoot, a horizon that runs dead flat and level, closed by a line of low pines, "
+    "and a low red glow "
+    "in the sky behind on that horizon where the pit lies; the only light is that glow from behind, low and raking, so "
     "the heather reads black and the pine trunks catch a dull red down one side")
 CANAL_NIGHT = (
     "the bridge that carries the road over the canal by the Woking gasworks at night in 1894: a "
@@ -105,9 +107,12 @@ DINING_LAMP = (
 
 GEO_COMMON = (
     "Black heather fills the BOTTOM two thirds of the frame from the LEFT edge to the RIGHT edge. "
-    "Bare pine trunks stand at the LEFT third and the RIGHT third from the BOTTOM to the TOP third, "
-    "a dull red down one side of each. A low red glow lies along the CENTRE at the horizon and a "
-    "black sky fills the TOP third.")
+    "The nearest pine trunk stands at the LEFT third from the BOTTOM to the TOP third, its bark "
+    "clearly lit red down the side that faces the glow and rough enough to read. A bare sand "
+    "track runs from the BOTTOM CENTRE away into the CENTRE, pale and clearly lit against the "
+    "black heather on both sides of it. Further trunks stand at the RIGHT third, a flat line of "
+    "low pines closes the horizon across the CENTRE, and a low red glow lies along it under a "
+    "black sky that fills the TOP third.")
 GEO_CANAL = (
     "The pale road runs from the BOTTOM edge up over the hump of the bridge at the CENTRE and away. "
     "The stone parapet runs across the CENTRE from the LEFT edge to the RIGHT edge. Black canal "
@@ -410,8 +415,9 @@ S = [
      f"Medium close on {NARRATOR} at the gate at night with the laughter going on in front of "
      "him, his mouth half open on a sentence he has given up, his hand coming down off the "
      "railings.",
-     "The camera holds a static shot level with his face; his mouth closes and stays closed; his "
-     "hand comes down off the railings and goes on down to his side.",
+     "The camera holds a static shot level with his face; his mouth closes after the words; his "
+     "hand comes down off the railings and goes on down to his side; he turns his shoulder "
+     "away from the gate and goes on turning until the light leaves his face.",
      "on the pavement level with his face, two paces from him, a 50mm lens. The window light "
      "comes from the LEFT and lights one side of his face; the road behind him is black",
      "The narrator's head and shoulders fill the CENTRE of the frame, the panel cutting him at "
@@ -483,16 +489,18 @@ S = [
 
 
     ("table", "medium_close", ["unnamed_first_person_narrator"], 0.9, "over_shoulder",
-     f"Medium close over the shoulder of {WIFE} toward {NARRATOR} at the table at night: her pale "
-     "shoulder near and soft at the LEFT, the narrator square in the right of the picture with "
+     f"Medium close over the shoulder of {WIFE} toward {NARRATOR} at the table at night: the back "
+     "of her head and her pale shoulder near and soft at the LEFT, turned away so only her hair "
+     "shows, the narrator square in the right of the picture with "
      "the decanter at his elbow, explaining something reasonable to her across the cloth.",
      "The camera holds a static shot over her shoulder, keeping his face in the right of frame; "
      "he lifts the decanter and goes on pouring for her; his other hand goes on turning over as "
      "he explains.",
      "across the table level with their eyes, two paces behind her, a 50mm lens. The oil lamp "
      "lights his face from below at the LEFT; her shoulder in the near left is soft and dim",
-     "The wife's shoulder fills the LEFT third of the frame from the TOP edge to the BOTTOM edge, "
-     "soft and out of focus. The narrator sits at the RIGHT third, the panel cutting him at the "
+     "The BACK of the wife's head and her shoulder fill the LEFT third of the frame from the TOP "
+     "edge to the BOTTOM edge, turned fully away from the camera, soft and out of focus. The "
+     "narrator sits at the RIGHT third, the panel cutting him at the "
      "middle of the chest, his head a third the frame's height at the TOP third. The white cloth "
      "crosses the BOTTOM third between them.",
      "runout", "I pressed her to take wine, and tried to reassure her."),
@@ -532,7 +540,10 @@ BEATS = {0: (1.0, 0.6), 2: (1.2, 1.5), 3: (1.0, 0.4), 5: (1.2, 0.8),
          # which puts two mouths under one lip-sync gate.
          14: (1.2, 1.2), 15: (1.2, 1.2),
          17: (0.8, 0.8),
-         18: (0.8, 0.8), 20: (1.0, 1.2), 21: (1.0, 0.6), 23: (1.2, 1.2),
+         18: (0.8, 1.6),
+         # The collar insert held 2.2 s and packed into the doorway shot with
+         # it; a silent shot has to be long enough to be its own take.
+         20: (1.5, 3.0), 21: (1.0, 0.6), 23: (1.2, 1.2),
          24: (0.8, 0.6), 25: (1.0, 0.8), 26: (0.6, 0.8)}
 
 TURNS = {17: "a man carrying the news -> a man carrying a story",
@@ -583,7 +594,7 @@ LINES = [
     ("narration", "unnamed_first_person_narrator",
      "I felt foolish and angry, and went on home.", 18),
     ("narration", "unnamed_first_person_narrator",
-     "My wife opened the door and took a step back from the look of me.", 19),
+     "My wife opened the door. She stepped back from the look of me.", 19),
     ("narration", "unnamed_first_person_narrator",
      "I went in, sat down, drank some wine, and told her what I had seen.", 22),
     ("narration", "unnamed_first_person_narrator",

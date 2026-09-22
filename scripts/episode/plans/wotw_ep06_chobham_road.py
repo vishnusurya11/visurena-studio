@@ -675,7 +675,7 @@ BEATS = {0: (1.0, 0.4), 1: (0.8, 0.0), 3: (1.0, 0.6), 4: (1.2, 0.6), 7: (0.8, 0.
          # which is what `groups` does with anything under the 8 s budget, and
          # what ONE PER TAKE refuses. A picture worth cutting to is worth four
          # seconds.
-         20: (1.5, 3.0), 22: (1.5, 3.0), 23: (1.5, 3.2), 26: (1.5, 4.0), 27: (1.5, 3.5),
+         20: (1.0, 1.5), 22: (1.5, 1.2), 23: (0.8, 1.2), 26: (0.8, 1.2), 27: (1.0, 1.5),
          19: (0.8, 0.4), 21: (0.8, 0.8), 24: (1.2, 0.8), 25: (1.2, 0.6), 28: (0.6, 0.8)}
 
 TURNS = {15: "a deputation going out to be answered -> a common that has answered",
@@ -746,14 +746,24 @@ LINES = [
     # Ogilvy are dead at 15.
     ("dialogue", "unnamed_neighbours_wife", "The trees have caught. The whole road's alight.", 22),
     ("narration", "unnamed_first_person_narrator",
+     "The mounted man could do nothing but turn and go with them.", 23),
+    ("narration", "unnamed_first_person_narrator",
      "Where the road grows narrow between the banks, the crowd jammed.", 24),
     ("narration", "unnamed_first_person_narrator",
      "Three at least did not get out. Two women, and a little boy.", 25),
+    # THE GAP BEFORE THE SHRIEK. QC measured 13.83 s of picture with no voice
+    # between this line and the button, against a 6.0 s wall -- the crush and
+    # the boot, both silent, both held long. Trimming them cannot give back
+    # eight seconds, and the chapter has the words for it.
+    ("narration", "unnamed_first_person_narrator",
+     "Crushed and trampled in the dark, between banks too steep to climb.", 26),
     # THE BUTTON IS NEVER THE PROTAGONIST'S (rule 5). She says three things in
     # the chapter and this is the only one that is untrue -- she walks out
     # cheerfully at 5, names the fire at 22, and invents the Martians here.
     # Nothing was coming down that road. The words killed three people; the ray
     # killed none of them.
+    ("narration", "unnamed_first_person_narrator",
+     "A boot went under, and a hat, and neither came up again.", 27),
     ("dialogue", "unnamed_neighbours_wife", "They're coming!", 28),
 ]
 
