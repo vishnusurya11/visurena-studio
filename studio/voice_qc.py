@@ -180,6 +180,39 @@ HONORIFICS = {"dr": "doctor", "mr": "mister", "mrs": "missus", "st": "saint"}
 was right and the gate called it 0.40 wrong.  Both spellings are one word."""
 
 
+SEAM_SLACK = 1
+"""Characters of slack allowed at a join, and only at a join."""
+
+SEAM_FLOOR = 6
+"""The shorter form must be this long before a letter of slack is small enough
+to mean a seam: "a" + "to" is one letter from "at", and is not a split word."""
+
+
+def letters_apart(said: str, want: str) -> int:
+    """Levenshtein distance over CHARACTERS of two single words."""
+    row = list(range(len(want) + 1))
+    for i, ch in enumerate(said, start=1):
+        nxt = [i]
+        for j, wanted in enumerate(want, start=1):
+            nxt.append(min(row[j] + 1, nxt[j - 1] + 1, row[j - 1] + (ch != wanted)))
+        row = nxt
+    return row[-1]
+
+
+def one_sound(joined: str, want: str) -> bool:
+    """Is `joined` the same sound as `want`, written across a seam?
+
+    Exactly, or within one character when both are long enough for one
+    character to be a seam rather than the word: the transcriber writes
+    "carriage is" for "carriages", and the `s` it moved is the whole
+    difference (ep08 line 9, measured).
+    """
+    if joined == want:
+        return True
+    return (min(len(joined), len(want)) >= SEAM_FLOOR
+            and letters_apart(joined, want) <= SEAM_SLACK)
+
+
 def distance(said: list[str], meant: list[str]) -> int:
     """Levenshtein distance over WORDS, where JOINING OR SPLITTING A WORD COSTS 1.
 
@@ -195,10 +228,10 @@ def distance(said: list[str], meant: list[str]) -> int:
         for j, want in enumerate(meant, start=1):
             best = min(row[j] + 1, nxt[j - 1] + 1, row[j - 1] + (word != want))
             # said[i-1] is meant[j-2] + meant[j-1] run together
-            if j >= 2 and word == meant[j - 2] + want:
+            if j >= 2 and one_sound(word, meant[j - 2] + want):
                 best = min(best, row[j - 2] + 1)
             # said[i-2] + said[i-1] run together is meant[j-1]
-            if i >= 2 and prev2 is not None and said[i - 2] + word == want:
+            if i >= 2 and prev2 is not None and one_sound(said[i - 2] + word, want):
                 best = min(best, prev2[j - 1] + 1)
             nxt.append(best)
         prev2, row = row, nxt
