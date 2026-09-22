@@ -67,8 +67,8 @@ MILKMAN = ("the milkman, a stocky short-legged man of forty-four with strong sho
            "the thigh and a long white apron to the shin")
 SAPPER = ("Snippy the sapper, a wiry narrow-shouldered man of twenty-six with quick hands, a long "
           "narrow face, a sharp pointed nose, thin lips and a prominent Adam's apple, fair freckled "
-          "skin sunburnt at the neck, sandy mouse-brown hair cropped short, a clipped sandy "
-          "moustache, pale grey eyes set close together and a small white scar through his right "
+          "skin sunburnt at the neck, sandy mouse-brown hair cropped short, clean-shaven, "
+          "pale grey eyes set close together and a small white scar through his right "
           "eyebrow, in a small round dark-blue pillbox cap with a narrow yellow band on a chin "
           "strap and a dirty brick-red serge jacket with garter-blue collar and cuffs hanging "
           "unbuttoned over a blue-grey flannel shirt")
