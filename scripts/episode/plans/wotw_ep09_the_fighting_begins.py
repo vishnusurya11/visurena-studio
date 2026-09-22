@@ -60,24 +60,31 @@ LIGHT = "low raking sun and black shadows"
 LOOK = "Angular stylised 3D animation, brush-stroke texture"
 
 # ---- the four new people, each a silhouette the other six do not have -------
-MILKMAN = ("the milkman, a squat barrel-chested man of forty with a short thick neck, a round "
-           "freckled face, a blunt nose and coarse sandy-red hair under a flat brown cloth cap, "
-           "thick ginger side-whiskers down both cheeks and a shaven chin, in a brown canvas coat "
-           "with a short leather shoulder cape and heavy hobnailed boots")
-SAPPER = ("the little dark sapper, a small compact man of thirty-two, a head shorter than the "
-          "others, with a square sallow face, heavy black brows, deep-set dark eyes and black hair "
-          "cropped close, clean-shaven with a blue-black shadow on his jaw, in a small round "
-          "forage cap, a dirty brick-red jacket unbuttoned over a blue collarless shirt, dark "
-          "trousers and boots to the calf, a short clay pipe in his teeth")
-LANDLORD = ("the landlord of the Spotted Dog, a heavy loose-built man of fifty-two with a thick "
-            "waist, bald on the crown with a fringe of black hair round the back and over the "
-            "ears, a broad red-veined face and a wide black walrus moustache hanging over his "
-            "mouth, in shirtsleeves rolled to the elbow, a bottle-green waistcoat and a long white "
-            "apron tied at the waist")
-HUSSAR = ("the young hussar, a wiry upright man of twenty-two with a narrow face, a small chin, "
-          "pale blue eyes and fair hair cropped close under a low dark-blue pillbox cap, a thin "
-          "fair moustache, in a dark-blue shell jacket crossed with rows of yellow braid, tight "
-          "dark-blue overalls with a yellow stripe, and soot smeared across one cheek")
+MILKMAN = ("the milkman, a stocky short-legged man of forty-four with strong shoulders, a round "
+           "ruddy face, a snub nose, cheerful creases at the eyes, bright blue eyes and short "
+           "chestnut curly hair, a thick chestnut walrus moustache covering his upper lip, in a "
+           "brown felt pork-pie hat with a narrow brim, a buff holland linen dairyman's coat to "
+           "the thigh and a long white apron to the shin")
+SAPPER = ("Snippy the sapper, a wiry narrow-shouldered man of twenty-six with quick hands, a long "
+          "narrow face, a sharp pointed nose, thin lips and a prominent Adam's apple, fair freckled "
+          "skin sunburnt at the neck, sandy mouse-brown hair cropped short, a clipped sandy "
+          "moustache, pale grey eyes set close together and a small white scar through his right "
+          "eyebrow, in a small round dark-blue pillbox cap with a narrow yellow band on a chin "
+          "strap and a dirty brick-red serge jacket with garter-blue collar and cuffs hanging "
+          "unbuttoned over a blue-grey flannel shirt")
+LANDLORD = ("the landlord of the Spotted Dog, a sturdy barrel-chested man of fifty-two with a thick "
+            "neck and heavy forearms, a broad red face, a fleshy nose and small shrewd blue eyes, "
+            "brown hair flecked with grey and thinning on the crown and brushed flat, heavy "
+            "grey-brown mutton-chop whiskers joined to a full moustache with a clean-shaven chin, "
+            "bare-headed, in a white cotton shirt with the sleeves rolled to the elbow and black "
+            "sleeve garters, a black broadcloth waistcoat with a brass watch chain and a long tan "
+            "leather cellarman's apron from chest to shin")
+HUSSAR = ("the dismounted hussar, a lean horseman of twenty-two with long thighs and narrow hips, "
+          "an oval olive-tanned face, a straight nose, dark brown eyes, brown curly hair cropped "
+          "close to the skull, a clean-shaven boyish jaw and a thin pale scar across his left "
+          "eyebrow, in a dark green pillbox forage cap with a yellow band on a chin strap and a "
+          "dark rifle-green serge hussar jacket with yellow cord frogging and a yellow-edged "
+          "collar, its right sleeve torn and blackened with soot")
 
 # ---- the three bound people, quoted from their rows in refs.json ------------
 NARRATOR = ("the narrator, a slender narrow-shouldered man of thirty-four with long limbs, a long "
@@ -88,14 +95,16 @@ NARRATOR = ("the narrator, a slender narrow-shouldered man of thirty-four with l
             "turn-down collar and a dark green knitted tie")
 WIFE = ("the narrator's wife, a slim straight-carried woman of twenty-nine with an oval face, wide "
         "hazel eyes, softly arched chestnut brows and light freckles across the nose, her thick "
-        "chestnut-auburn hair waved and swept up into a soft pompadour knotted at the crown, "
-        "bareheaded, in a lilac-grey cotton house dress with a high collar and a white bibbed "
-        "apron tied at the waist")
+        "chestnut-auburn hair waved and swept up into a soft pompadour, in a sage-green linen "
+        "walking costume with a short fitted jacket over a cream high-collared blouse and a long "
+        "sage-green skirt, a small sage-green felt toque with a cream ostrich tip pinned to her "
+        "hair")
 NEIGHBOUR = ("the neighbour, a tall spare stooping man of forty-eight with long arms, a long "
              "hollow-cheeked face with prominent cheekbones, mild hazel eyes, grey-brown hair "
              "receding at the temples and a short pointed grey goatee with shaved cheeks and lip, "
-             "in a flat-crowned cream straw panama, a sky-blue-and-white striped flannel blazer, "
-             "white flannel trousers and brown boots")
+             "in a wide-brimmed straw gardening hat, a collarless white shirt with the sleeves "
+             "rolled and sky-blue sleeve garters, a tan canvas gardening apron and white "
+             "flannel trousers")
 
 # ---- the five places, each naming its own light and where it comes from -----
 GARDEN_MORNING = (
@@ -103,21 +112,21 @@ GARDEN_MORNING = (
     "lawn with a gravel path along it, a low paling fence at the far side with a side gate in it, "
     "standard roses and a bed of stocks against the brick, a dark cedar at one corner and the open "
     "heath rising beyond the fence to a flat horizon of pines; the light is high flat hazy sunlight "
-    "the morning sun standing over the pines at the LEFT, so the lawn reads bleached green, the brick reads pale warm red and the shadows "
+    "the morning sun from the left over the pines, so the lawn reads bleached green, the brick reads pale warm red and the shadows "
     "under the cedar are short and soft")
 BRIDGE_DAY = (
     "the road under a brick railway bridge on the Maybury road at midday in 1894: a low round brick "
     "arch with a soot-blackened underside carrying the railway embankment over the road, the pale "
     "dusty road running through it, the canal running flat and green alongside below a towpath, "
     "hedges and elms on the far bank and the open common beyond; the light is hard white midday sun "
-    "coming from the CENTRE through the far opening of the arch, so the road reads bleached and chalky, the brick "
+    "sun from the far end of the arch, so the road reads bleached and chalky, the brick "
     "reads dark red and the water reads flat green")
 PIT_DAY = (
     "the sand-pits on Horsell Common on a hot bright afternoon in 1894: the raw ring of flung yellow "
     "sand round the crater, a single continuous streamer of grey smoke standing straight up out of "
     "it in the still air, knee-deep heather and dark furze running away flat to a horizon of low "
     "pines, and a shallow ditch with spoil thrown up along the near side; the light is a hard high "
-    "sun standing at the RIGHT, so the sand ring reads raw pale yellow, the heather reads dusty olive and "
+    "sun from the right, so the sand ring reads raw pale yellow, the heather reads dusty olive and "
     "every shadow lies short to the LEFT of the thing that throws it")
 LAWN_EVENING = (
     "the lawn and gate of a brick villa on the crest of Maybury Hill at six in the evening in 1894, "
@@ -176,7 +185,7 @@ SETUPS = {
         crowd="",
         outdoors=True, props=[], location="narrators_garden"),
     "bridge": dict(
-        described=BRIDGE_DAY, cast=["unnamed_sapper"],
+        described=BRIDGE_DAY, cast=["snippy"],
         landmark="the bright opening of the arch with the road going away through it",
         landmark_at="far_end",
         landmark_size="is a third of the height of the frame",
@@ -276,18 +285,18 @@ S = [
      "dark red",
      GEO_BRIDGE, "setup", "Under the railway bridge I found a group of sappers."),
 
-    ("bridge", "medium_close", ["unnamed_sapper"], 0.35, "push_in",
+    ("bridge", "medium_close", ["snippy"], 0.35, "push_in",
      "Medium close on " + SAPPER + " sitting on the parapet in the shade of the arch with his "
-     "forearms on his knees, the short clay pipe taken out of his teeth and held in one hand, the "
-     "dark brick of the arch close behind him.",
+     "forearms on his knees and his short entrenching spade leaning against the brick beside "
+     "him, the dark brick of the arch close behind him.",
      "The camera pushes in toward his face with small amplitude until his head fills the middle of "
-     "the picture, travelling a forearm; he goes on speaking and turns the pipe over once in his "
-     "fingers as he does; he goes on tapping the pipe stem twice against his own knee.",
+     "the picture, travelling a forearm; he goes on speaking and opens one hand flat as he does; he "
+     "goes on knocking the back of that hand twice against his own knee.",
      "in the shade level with his eyes, three paces from him, an 85mm lens. The daylight comes from "
      "the CENTRE beyond the arch and rakes across him; his red jacket reads dull brick and the brick "
      "behind him reads dark",
      GEO_BRIDGE + " His head is a third of the frame's height.",
-     "friction", "A little, contemplative, dark man, smoking a pipe."),
+     "friction", "Snippy, who wanted a trench, and had thought about it."),
 
     ("bridge", "medium", [], 0.5, "pan_to",
      "Medium along the pale dusty road beyond the arch at a single soldier standing sentinel in the "
@@ -312,15 +321,15 @@ S = [
      "beyond the arch; the dust reads pale and the scratched lines read dark",
      GEO_BRIDGE, "friction", "You always want trenches; you ought to have been born a rabbit."),
 
-    ("bridge", "close", ["unnamed_sapper"], 0.85, "push_in",
-     "Close on the face of " + SAPPER + " in the shade of the arch, the clay pipe back at the corner "
-     "of his mouth, the dark brick soft and out of focus behind him.",
+    ("bridge", "close", ["snippy"], 0.85, "push_in",
+     "Close on the face of " + SAPPER + " in the shade of the arch, his chin lifted and his cap "
+     "pushed back off his forehead, the dark brick soft and out of focus behind him.",
      "The camera pushes in on his face with small amplitude until it fills the middle of the "
-     "picture, travelling a forearm; he goes on speaking round the stem of the pipe; his "
-     "heavy brows go on drawing together as he says it.",
+     "picture, travelling a forearm; he goes on speaking with his chin up; his head "
+     "goes on nodding once toward the common as he says it.",
      "in the shade level with his eyes, two paces from him, an 85mm lens. The daylight from the "
      "CENTRE beyond the arch rakes one side of his face and leaves the other dark",
-     GEO_BRIDGE, "reaction", "Octopuses, said he; fighters of fish it is this time."),
+     GEO_BRIDGE + " His head is half the frame's height.", "reaction", "Octopuses, said he; fighters of fish it is this time."),
 
     # ---- pit: the enemy declines to be looked at ----------------------------
     ("pit", "wide", [], 0.15, "crane_up",
@@ -503,8 +512,8 @@ MOVES = {i: s[4] for i, s in enumerate(S)}
 BEATS = {0: (0.9, 1.0), 1: (0.8, 0.9), 2: (0.8, 0.9), 3: (0.9, 1.0),
          4: (0.9, 1.0), 5: (0.9, 1.0), 6: (0.8, 0.9), 7: (0.9, 1.0),
          8: (0.9, 1.0), 9: (0.9, 1.0), 10: (0.8, 0.9), 11: (0.9, 1.0),
-         12: (0.8, 0.9), 13: (0.9, 1.0), 14: (0.9, 1.0), 15: (1.2, 1.5),
-         16: (0.8, 0.9), 17: (0.9, 1.0), 18: (0.9, 1.0), 19: (0.8, 0.9),
+         12: (0.8, 0.9), 13: (0.9, 1.0), 14: (0.9, 1.0), 15: (0.8, 0.9),
+         16: (1.5, 2.0), 17: (0.9, 1.0), 18: (0.9, 1.0), 19: (0.8, 0.9),
          20: (0.8, 0.9), 21: (1.2, 1.2), 22: (1.0, 1.5)}
 
 TURNS = {16: "a man who has been winning the war in his head -> a man getting his wife "
@@ -513,35 +522,35 @@ TURNS = {16: "a man who has been winning the war in his head -> a man getting hi
 
 LINES = [
     ("narration", "unnamed_first_person_narrator",
-     "Saturday I remember as a day of suspense, hot and close, and nothing stirring but a lark.", 0),
+     "Saturday I remember as a day of suspense, hot and close and still.", 0),
     ("narration", "unnamed_first_person_narrator",
      "The milkman said they were surrounded in the night, and that guns were coming up.", 1),
     ("narration", "unnamed_first_person_narrator",
-     "A pity they are so unapproachable, said my neighbour; we might learn a thing or two.", 2),
+     "A pity they are so unapproachable, said my neighbour; we might learn something.", 2),
     ("narration", "unnamed_first_person_narrator",
-     "A second one had come down by the golf links, and the pine woods were still burning.", 3),
+     "A second had come down by the golf links, and the woods still burned.", 3),
     ("narration", "unnamed_first_person_narrator",
-     "After breakfast I walked down to the common, and got no further than the bridge.", 4),
-    ("dialogue", "unnamed_sapper",
-     "Ain't they got any necks, then?", 5),
+     "After breakfast I walked down, and got no further than the bridge.", 4),
+    ("dialogue", "snippy",
+     "What's cover against this heat? Sticks to cook yer!", 5),
     ("narration", "unnamed_first_person_narrator",
      "Nobody was allowed over the canal. None of these men had seen a Martian.", 6),
     ("narration", "unnamed_first_person_narrator",
-     "I described the heat-ray to them, and they began to argue among themselves.", 7),
-    ("dialogue", "unnamed_sapper",
+     "I told them what I had seen, and they fell to arguing.", 7),
+    ("dialogue", "snippy",
      "Octopuses. Talk about fishers of men. Fighters of fish it is this time.", 8),
     ("narration", "unnamed_first_person_narrator",
-     "All afternoon they showed not an inch of themselves. They were busy in their pit.", 9),
+     "All afternoon they showed not an inch of themselves.", 9),
     ("narration", "unnamed_first_person_narrator",
-     "We signalled with a flag on a pole. They took as much notice as a cow would.", 10),
+     "We signalled with a flag on a pole. They took no notice.", 10),
     ("narration", "unnamed_first_person_narrator",
-     "All that armament excited me. They seemed very helpless, down in that pit of theirs.", 11),
+     "All that armament excited me. They seemed very helpless down there.", 11),
     ("narration", "unnamed_first_person_narrator",
      "At six we sat at tea in the summerhouse, talking about the battle coming.", 12),
     ("narration", "unnamed_first_person_narrator",
      "A muffled detonation, a gust of firing, and a crash that shook the ground.", 13),
     ("narration", "unnamed_first_person_narrator",
-     "The college was cleared out of the way. Our own crest was in range now.", 14),
+     "The college was down. Our own crest was in range now.", 14),
     ("dialogue", "unnamed_first_person_narrator",
      "We can't possibly stay here.", 16),
     ("dialogue", "narrators_wife",
@@ -549,11 +558,11 @@ LINES = [
     ("narration", "unnamed_first_person_narrator",
      "Leatherhead, I shouted, above the noise. Her cousins were at Leatherhead.", 18),
     ("narration", "unnamed_first_person_narrator",
-     "The landlord wanted a pound for his horse and cart, and no one to drive it.", 19),
+     "The landlord wanted a pound for his horse and cart.", 19),
     ("narration", "unnamed_first_person_narrator",
      "I gave him two, and promised to bring it back by midnight.", 20),
     ("narration", "unnamed_first_person_narrator",
-     "I packed what plate we had in a tablecloth. The palings up the road glowed red.", 21),
+     "I packed our plate in a tablecloth. The palings glowed red.", 21),
     ("dialogue", "unnamed_hussar",
      "Crawling out in a thing like a dish cover!", 22),
 ]
