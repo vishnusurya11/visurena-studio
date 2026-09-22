@@ -148,7 +148,7 @@ def faults(seen: Seen, frame: str, planned: int, crowd: bool,
     if strangers := banned_subject(seen, banned):
         out.append(f"banned from this book: {', '.join(strangers)}")
     out += contradictions(seen, physical)
-    if people_fault(seen, planned, crowd):
+    if people_fault(seen, planned, crowd or (not planned and worn_by_someone(frame))):
         out.append(f"{seen.people} figure(s) for {planned} cast, "
                    f"{seen.lookalikes} of them copies of another")
     if seen.text:
@@ -210,3 +210,17 @@ def _loads(text: str):
         return json.loads(found.group(0))
     except json.JSONDecodeError as bad:
         raise Unreadable(str(bad)) from bad
+
+WORN = re.compile(
+    "throat|collar|lapel|cuff|sleeve|shoulder|"
+    "hand|hands|wrist|finger|face|cheek|jaw|mouth|eyes|hair|boot|foot|feet",
+    re.I)
+"""Parts of a person, and the things worn on them. An INSERT naming one of
+these holds a figure by necessity: ep07's shot 20 is a burst collar stud at a
+man's throat and it is cast for nobody. The other direction of the same rule
+is `storyboard_grid.whole_subject`: a horse's head cannot exist on its own."""
+
+
+def worn_by_someone(frame: str) -> bool:
+    """Does this shot's prose put the subject ON a person?"""
+    return bool(WORN.search(frame or ""))

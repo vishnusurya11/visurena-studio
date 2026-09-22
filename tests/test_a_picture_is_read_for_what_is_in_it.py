@@ -214,3 +214,14 @@ def test_an_indoor_picture_is_not_judged_on_the_hour():
     got = faults(seen(landform="indoors", hour="day"), frame="the dining room at night",
                  planned=0, crowd=False, flat=False, night=True)
     assert not any("hour" in f for f in got)
+
+
+def test_an_insert_on_a_body_part_may_hold_a_figure():
+    """ep07's shot 20 is an INSERT on a burst collar stud at a man's throat,
+    cast for nobody, and the reader counted one figure -- correctly. A collar
+    is worn. It is the same rule `whole_subject` states for the other
+    direction: a horse's head cannot exist on its own."""
+    from studio.panel_content import worn_by_someone
+    assert worn_by_someone("Insert on a burst collar stud at his throat")
+    assert worn_by_someone("Insert on the hand resting on the gate")
+    assert not worn_by_someone("Insert on the cold joint and the loaf on the cloth")

@@ -112,7 +112,7 @@ MAYBURY_NIGHT = (
     "the gables read warm brick and the arch and the embankment are black")
 DINING_LAMP = (
     "the narrator's dining room at night in 1894: a small square room with a papered wall and a "
-    "framed engraving, a mahogany table laid with a white cloth, a cold joint and bread and a "
+    "framed landscape print, a mahogany table laid with a white cloth, a cold joint and bread and a "
     "decanter of wine set out on it, two chairs drawn up, a sideboard against the wall and a "
     "curtained sash window; the light is one oil lamp standing on the table, warm and from below, "
     "so the cloth and the faces read warm and the corners of the room are black")
@@ -140,7 +140,7 @@ GEO_DINING = (
     "The laid table fills the BOTTOM half of the frame from the LEFT edge to the RIGHT edge, its "
     "white cloth the brightest thing in the picture. The oil lamp stands at the CENTRE on the "
     "table, the cold joint and the decanter at the CENTRE RIGHT, and the papered wall with its "
-    "framed engraving fills the TOP third behind, going black at the LEFT edge and the RIGHT edge.")
+    "framed landscape print fills the TOP third behind, going black at the LEFT edge and the RIGHT edge.")
 
 SETUPS = {
     "flight": dict(
@@ -386,7 +386,7 @@ S = [
 
     ("gate", "medium_close", ["unnamed_neighbour"], 0.7, "over_shoulder",
      f"Medium close over the shoulder of {NARRATOR} toward {NEIGHBOUR} at the gate at night: the "
-     "narrator's dark shoulder near and black at the LEFT, the neighbour square in the right of "
+     "back of the narrator's head and his dark shoulder near and black at the LEFT, turned away so only his hair shows, the neighbour square in the right of "
      "the picture in his shirtsleeves and waistcoat, turning with the pipe still in his hand.",
      "The camera holds a static shot over the narrator's shoulder, keeping the neighbour's face "
      "in the right of frame; the neighbour turns his head to answer and keeps turning it; the "
@@ -394,8 +394,8 @@ S = [
      "on the pavement level with their eyes, two paces behind the narrator, a 50mm lens. The "
      "window light comes from the RIGHT and lights the neighbour's face and forearm; the "
      "narrator's shoulder in the near left is black",
-     "The narrator's shoulder fills the LEFT third of the frame from the TOP edge to the BOTTOM "
-     "edge, black and out of focus. The neighbour stands at the RIGHT third, the panel cutting "
+     "The BACK of the narrator's head and his shoulder fill the LEFT third of the frame from the "
+     "TOP edge to the BOTTOM edge, turned fully away from the camera, black and out of focus. The neighbour stands at the RIGHT third, the panel cutting "
      "him at the middle of the chest, his head a third the frame's height at the TOP third. The "
      "lit window shows warm behind him at the RIGHT edge.",
      "friction", "Ain't yer just been there?"),
@@ -542,7 +542,7 @@ S = [
      "The wife's head and shoulders fill the CENTRE of the frame, the panel cutting her at the "
      "middle of the chest, her head a third the frame's height at the TOP third. The white cloth "
      "fills the BOTTOM third with her hand laid flat on it. The papered wall of the dining room "
-     "stands behind her with its framed engraving at the RIGHT third and the curtained sash "
+     "stands behind her with its framed landscape print at the RIGHT third and the curtained sash "
      "window at the LEFT third, both dim in the lamplight, so the room she is sitting in is "
      "visible all round her.",
      "button", "They may come here. She says it again and again, and she is right."),
