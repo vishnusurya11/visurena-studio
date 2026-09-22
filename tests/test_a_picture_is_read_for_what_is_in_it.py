@@ -225,3 +225,15 @@ def test_an_insert_on_a_body_part_may_hold_a_figure():
     assert worn_by_someone("Insert on a burst collar stud at his throat")
     assert worn_by_someone("Insert on the hand resting on the gate")
     assert not worn_by_someone("Insert on the cold joint and the loaf on the cloth")
+
+
+def test_printed_matter_may_carry_print():
+    """ep08 shot 6 is an INSERT ON A NEWSPAPER and the gate called its type a
+    fault. A shot whose subject is printed carries print by definition."""
+    from studio.panel_content import faults, prints_words
+    assert prints_words("Insert on the front page of an evening paper")
+    assert prints_words("the shuttered bookstall with its board")
+    assert not prints_words("Insert on the cold joint and the loaf")
+    got = faults(seen(text=True), frame="Insert on the front page of an evening paper",
+                 planned=0, crowd=False, flat=True, night=True)
+    assert not any("text" in f or "lettering" in f for f in got)

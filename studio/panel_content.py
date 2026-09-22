@@ -151,7 +151,7 @@ def faults(seen: Seen, frame: str, planned: int, crowd: bool,
     if people_fault(seen, planned, crowd or (not planned and worn_by_someone(frame))):
         out.append(f"{seen.people} figure(s) for {planned} cast, "
                    f"{seen.lookalikes} of them copies of another")
-    if seen.text:
+    if seen.text and not prints_words(frame):
         out.append("text or lettering in the picture")
     # AN INTERIOR HAS NO HOUR TO READ. A lamplit dining room came back 'day'
     # and was called a night fault; the reader cannot see the sky from inside.
@@ -224,3 +224,15 @@ is `storyboard_grid.whole_subject`: a horse's head cannot exist on its own."""
 def worn_by_someone(frame: str) -> bool:
     """Does this shot's prose put the subject ON a person?"""
     return bool(WORN.search(frame or ""))
+
+PRINTED = re.compile(
+    "newspaper|paper|page|print|placard|poster|board|sign|timetable|bookstall|"
+    "letter|telegram|book|label|ticket",
+    re.I)
+"""Things that carry words because that is what they are. ep08's shot 6 is an
+insert on the front page of an evening paper and the lettering check called
+it a fault; a page without type is not a page."""
+
+
+def prints_words(frame: str) -> bool:
+    return bool(PRINTED.search(frame or ""))
