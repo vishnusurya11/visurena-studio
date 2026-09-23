@@ -508,9 +508,9 @@ S = [
      GEO_HER + " Her head is a third of the frame's height.", "reaction", "But where are we to go? said my wife in terror."),
 
     ("lawn", "wide", [], 0.8, "push_in",
-     "Wide down the hill from the gate at a bevy of hussars in dark blue riding under the brick "
-     "railway bridge below and out along the road, two of them already dismounted and running from "
-     "house to house, and the sun standing blood red in the smoke above the trees.",
+     "Wide from the lawn at a bevy of hussars in dark blue passing along the road beyond the garden "
+     "wall, six of them riding and two already dismounted and running from house to house, and "
+     "the sun standing blood red in the smoke above the trees.",
      "The camera pushes in toward the riders passing along beyond the garden wall, travelling one "
      "short stride; the riders go on cantering along beyond the wall; the two on foot go on "
      "running beside them.",
@@ -658,7 +658,9 @@ PATHS = {
 # shot 21, three identical women walking where two sit in the cart.
 EXTRAS = {6: 1,    # the sentinel in the road
           10: 1,   # the man in the ditch with the flag
-          18: 6,   # a bevy of hussars under the bridge, two of them on foot
+          18: 8,   # a bevy of hussars: six riding, two on foot. Was 6, a guess the book
+                   # never makes ("a bevy"); the take drew six riders and the two on foot
+                   # and the content gate held it to the guess (2026-09-23)
           20: 1,   # the stranger the narrator speaks past
           21: 2}   # the wife and the servant, up in the cart
 
