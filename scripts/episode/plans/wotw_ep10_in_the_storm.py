@@ -157,7 +157,8 @@ GEO_REINS = (
 GEO_FAR_TRIPOD = (
     "The black silhouette of a tripod stands far off on the slope at the CENTRE RIGHT, its three "
     "thin legs a tenth of the height of the frame, higher than the pines around it. The dark field "
-    "fills the BOTTOM half, the hedge crosses the BOTTOM edge, and storm clouds fill the TOP third.")
+    "fills the BOTTOM half, the hedge crosses the BOTTOM edge, and storm clouds fill the TOP third. "
+    "The red glow stands low along the horizon at the LEFT third behind the far pines.")
 GEO_HEELING = (
     "A tripod heels over across the CENTRE, one leg lifted high to the LEFT and two planted at the "
     "RIGHT, a fifth of the height of the frame, over the dark heather that fills the BOTTOM third. "
@@ -165,11 +166,13 @@ GEO_HEELING = (
 GEO_RUSH = (
     "A tripod bursts out of the dark pines at the CENTRE, its brass dome at the TOP third and its "
     "three legs reaching down to the BOTTOM edge, snapped pine trunks falling away at the LEFT third "
-    "and the RIGHT third, and the pale road running into the BOTTOM CENTRE toward it.")
+    "and the RIGHT third, and the pale road running into the BOTTOM CENTRE toward it. Black hedges "
+    "line the road along the LEFT edge and the RIGHT edge.")
 GEO_WHEEL = (
     "The yellow-spoked wheel of the overturned dog cart stands at the CENTRE, turning, the black "
     "bulk of the cart behind it filling the RIGHT half and the black pool across the BOTTOM third, "
-    "dimpled with hail, with the dark furze at the LEFT edge.")
+    "dimpled with hail, with the dark furze at the LEFT edge. A broken shaft juts up from the "
+    "cart at the TOP RIGHT against the storm clouds.")
 GEO_CROUCH = (
     "The narrator crouches under the clump of furze at the CENTRE LEFT, his feet in the black water "
     "at the BOTTOM LEFT, soaked and shivering, the pool across the BOTTOM half and the gravel verge "
@@ -198,7 +201,7 @@ GEO_BLUNDER = (
 GEO_BOOTS = (
     "A heap of black broadcloth and a pair of black boots lie at the CENTRE at the foot of the grey "
     "palings, which run across the TOP half, with rain standing on the sand of the lane across the "
-    "BOTTOM third.")
+    "BOTTOM third. A rivulet of storm water runs past the boots from the LEFT edge to the RIGHT edge.")
 GEO_TURNS = (
     "The narrator stoops at the CENTRE RIGHT over the landlord, who lies against the foot of the "
     "grey palings at the CENTRE LEFT, one of the narrator's hands on his shoulder. The palings fill "
