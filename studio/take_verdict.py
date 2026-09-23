@@ -565,6 +565,15 @@ def measure(video: Path, record: dict, cells: Path, seconds: float, attempt: int
     v.zoom = zoom_of(video, record, v.coherence)
     v.gates = gates(v, audio, line_text, unplanned_from(rows), identity, plan_motions(record),
                     record.get("size", ""), picture_rows(video, record, seconds))
+    # A CUT IS A CHANGE OF PICTURE: `cut` reads brightness, and ep09 T15's second
+    # attempt switched pictures at 26.5 and passed (take-gate audit, 2026-09-23).
+    from studio import take_jump, take_lock
+    v.gates.append(take_jump.row(take_jump.min_step(sigs)))
+    # A PERSON HELD WHILE THE SET SLIDES THROUGH THEM: ep09 T02, the owner's
+    # "he walked with the fence"; every row above judged the frame, none asked
+    # whether what is fixed in the world stayed fixed (take_lock).
+    v.gates.append(take_lock.row(take_lock.lock(take_lock.frames(video, seconds)),
+                                 (plan_motions(record) or [""])[0]))
     v.score, v.passed = score(v.gates)
     return v
 
