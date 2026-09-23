@@ -181,6 +181,35 @@ GEO_INN = (
     "pewter fill the LEFT third behind it from the BOTTOM to the TOP, the hanging oil lamp burns at "
     "the TOP CENTRE, and the small sash window with the evening in it shows at the RIGHT third.")
 
+GEO_HAZE = (
+    "A pale hazy sky fills the TOP two thirds of the frame from the LEFT edge to the RIGHT edge, "
+    "with the flat grey haze of smoke lying across the CENTRE above a dark line of pines. Bleached "
+    "heather runs across the BOTTOM third.")
+GEO_DUST = (
+    "The pale dust of the road fills the whole frame from the LEFT edge to the RIGHT edge. The two "
+    "scratched lines run across the CENTRE, the point of the stick is at the CENTRE RIGHT, and "
+    "boots and puttees stand round the edge at the TOP LEFT and the TOP RIGHT.")
+GEO_TOWER = (
+    "The burning church tower stands up the whole height of the frame at the CENTRE, its masonry "
+    "going out of line at the CENTRE LEFT. Red flame fills the LEFT third and the RIGHT third "
+    "behind it and dust lifts across the BOTTOM third.")
+GEO_BRICK = (
+    "Turned earth and crushed stocks fill the whole frame from the LEFT edge to the RIGHT edge. The "
+    "heap of broken red chimney brick lies at the CENTRE, more pieces at the BOTTOM RIGHT, and the "
+    "sill of the study window closes the TOP third.")
+GEO_TWO = (
+    "The two heads fill the CENTRE of the frame side by side, his at the CENTRE LEFT and hers at "
+    "the CENTRE RIGHT, their shoulders across the BOTTOM third. Black smoke fills the TOP third and "
+    "the RIGHT edge behind them, with red firelight standing along the LEFT edge.")
+GEO_HER = (
+    "Her head and shoulders fill the CENTRE of the frame. The white gate shows behind her at the "
+    "RIGHT third, the scorched lawn runs across the BOTTOM third, and black smoke fills the TOP "
+    "third from the CENTRE to the RIGHT edge.")
+GEO_HIM = (
+    "His head fills the CENTRE of the frame from the TOP third to the BOTTOM third, turned back "
+    "over his shoulder at the CENTRE LEFT. A whirl of black smoke fills the RIGHT third and the "
+    "TOP edge behind him, and red firelight stands along the LEFT edge.")
+
 SETUPS = {
     "garden": dict(
         described=GARDEN_MORNING, cast=["unnamed_milkman", "unnamed_neighbour"],
@@ -275,7 +304,7 @@ S = [
      "drifting sideways above the pines by a thumb’s width; the heather goes on stirring in the hot air.",
      "at the fence looking out across the heath, an 85mm lens. The hazy sun comes from the TOP; the "
      "smoke reads pale grey and the pines read dusty dark green",
-     GEO_GARDEN, "setup", "Another of those blessed things had fallen by the Byfleet golf links."),
+     GEO_HAZE, "setup", "Another of those blessed things had fallen by the Byfleet golf links."),
 
     # ---- bridge: the army, arguing about a fight it has not seen ------------
     ("bridge", "medium", [], 0.1, "push_in",
@@ -325,7 +354,7 @@ S = [
      "stick goes on drawing the second line; the dust goes on lifting where it drags.",
      "over his shoulder looking down at the road, a 50mm lens. The daylight comes from the CENTRE "
      "beyond the arch; the dust reads pale and the scratched lines read dark",
-     GEO_BRIDGE, "friction", "You always want trenches; you ought to have been born a rabbit."),
+     GEO_DUST, "friction", "You always want trenches; you ought to have been born a rabbit."),
 
     ("bridge", "close", ["snippy"], 0.85, "push_in",
      "Close on the face of " + SAPPER + " in the shade of the arch, his chin lifted and his cap "
@@ -409,7 +438,7 @@ S = [
      "sliding down into itself; the dust goes on lifting up out of it.",
      "on the lawn looking over the paling, an 85mm lens. The light is red firelight from behind the "
      "tower at the CENTRE, so the tower reads black against it and the dust reads hot red",
-     GEO_LAWN, "spike", "The tower of the little church beside it slid down into ruin."),
+     GEO_TOWER, "spike", "The tower of the little church beside it slid down into ruin."),
 
     ("lawn", "insert", [], 0.55, "tilt_down",
      "Insert down at a flower bed under a study window with a heap of broken red chimney fragments "
@@ -420,7 +449,7 @@ S = [
      "sifting down off the brickwork onto the earth; a last fragment goes on rocking where it fell.",
      "at the flower bed looking down, a 50mm lens. The light is low red firelight from the CENTRE "
      "LEFT; the broken brick reads hot red and the turned earth reads dark",
-     GEO_LAWN, "spike", "A piece of our chimney came down on the flower bed."),
+     GEO_BRICK, "spike", "A piece of our chimney came down on the flower bed."),
 
     ("lawn", "medium_close", ["unnamed_first_person_narrator", "narrators_wife"], 0.6, "push_in",
      "Medium close on " + NARRATOR + " and " + WIFE + " together on their own lawn in the red "
@@ -433,7 +462,7 @@ S = [
      "on the lawn level with their eyes, three paces from them, an 85mm lens. The red firelight "
      "comes from the CENTRE LEFT and rakes across both their faces; the smoke behind them reads "
      "black",
-     GEO_LAWN + " Their heads are a third of the frame's height.",
+     GEO_TWO + " Their heads are a third of the frame's height.",
      "turn", "I gripped my wife's arm and ran her out into the road."),
 
     ("lawn", "medium_close", ["narrators_wife"], 0.7, "push_in",
@@ -445,7 +474,7 @@ S = [
      "go on gripping each other; she goes on turning her head further downhill as she speaks.",
      "on the drive level with her eyes, three paces from her, an 85mm lens. The red firelight comes "
      "from the CENTRE LEFT; her lilac-grey dress reads warm and the gate behind her reads pale",
-     GEO_LAWN + " Her head is a third of the frame's height.", "reaction", "But where are we to go? said my wife in terror."),
+     GEO_HER + " Her head is a third of the frame's height.", "reaction", "But where are we to go? said my wife in terror."),
 
     ("lawn", "wide", [], 0.8, "pan_to",
      "Wide down the hill from the gate at a bevy of hussars in dark blue riding under the brick "
@@ -507,7 +536,7 @@ S = [
      "off; the whirl of black smoke goes on driving across behind him and takes him into it.",
      "in the road level with his eyes, three paces from him, an 85mm lens. The red firelight comes "
      "from the CENTRE LEFT and stands on one side of his face; the smoke behind him reads black",
-     GEO_LAWN + " His head is half the frame's height.", "button", "He bawled something about a thing like a dish cover, and ran on."),
+     GEO_HIM + " His head is half the frame's height.", "button", "He bawled something about a thing like a dish cover, and ran on."),
 ]
 
 MOVES = {i: s[4] for i, s in enumerate(S)}
@@ -541,7 +570,7 @@ LINES = [
     ("narration", "unnamed_first_person_narrator",
      "After breakfast I walked down, and got no further than the bridge.", 4),
     ("dialogue", "snippy",
-     "What's cover against this heat? Sticks to cook yer!", 5),
+     "What's cover against this heat? The sticks would cook you.", 5),
     ("narration", "unnamed_first_person_narrator",
      "Nobody was allowed over the canal. None of these men had seen a Martian.", 6),
     ("narration", "unnamed_first_person_narrator",

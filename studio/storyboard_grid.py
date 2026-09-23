@@ -396,13 +396,58 @@ def beats_of(motion: str) -> list[str]:
     return [b.strip().rstrip(".") for b in (motion or "").split(";") if b.strip()]
 
 
-def panel_box(n: int, cols: int, rows: int, size: int, trim: int = 16) -> tuple:
-    """The crop box for panel `n` (0-based, reading order) out of a square grid.
+SEAM_PALE, SEAM_FLAT, SEAM_MOST = 235.0, 8.0, 0.25
+"""A seam row is paler than `SEAM_PALE`, varies by less than `SEAM_FLAT` along
+its length, and no more than `SEAM_MOST` of a side may be shaved: a picture
+that is genuinely pale all over is a picture, not a gutter."""
+
+
+def seam_box(frame) -> tuple:
+    """(left, top, right, bottom) with the panel's pale gutter measured off.
+
+    `panel_box` sheds a FIXED number of pixels, which was enough for every grid
+    drawn before ep09 and was not enough for its own: shot 18 kept a pale seam
+    along its top and right edges and the ink gate caught it, correctly -- a
+    white seam is a picture element as far as H3 is concerned, and it renders
+    what it is given.
+
+    A fixed trim is a guess about a number the picture already knows. The seam
+    is however many edge rows and columns are pale AND flat along their length,
+    so that is what comes off, and never more than a quarter of a side.
+    """
+    import numpy as np
+    grey = np.asarray(frame).mean(axis=2) if np.asarray(frame).ndim == 3 else np.asarray(frame)
+    height, width = grey.shape
+    top = _seam_depth(grey, int(height * SEAM_MOST))
+    bottom = _seam_depth(grey[::-1], int(height * SEAM_MOST))
+    left = _seam_depth(grey.T, int(width * SEAM_MOST))
+    right = _seam_depth(grey.T[::-1], int(width * SEAM_MOST))
+    return (left, top, width - right, height - bottom)
+
+
+def _seam_depth(grey, most: int) -> int:
+    """How many leading rows of `grey` are pale and flat, capped at `most`."""
+    depth = 0
+    while depth < most and grey[depth].mean() > SEAM_PALE and grey[depth].std() < SEAM_FLAT:
+        depth += 1
+    return depth
+
+
+def panel_box(n: int, cols: int, rows: int, size, trim: int = 16) -> tuple:
+    """The crop box for panel `n` (0-based, reading order) out of a grid.
+
+    `size` is the grid's (width, height), or one number when it is square.
+    Every grid before ep09 was N x N and this took one number and divided it by
+    cols for the width and by rows for the height, which is only the same thing
+    on a square. ep09's setups hold 2, 3, 5 and 8 shots and its grids are 2x1,
+    3x1 and 4x2: on a 2048x1024 grid the old arithmetic asked for a cell 1024
+    wide and 2048 tall, half of it below the bottom of the picture.
 
     `trim` sheds the gutter and border the geometry clause asks for. They are a
     help on a page and a fault in a reference: H3 renders what it is given, and
     a white seam down one edge is a picture element."""
-    cell_w, cell_h = size // cols, size // rows
+    width, height = size if isinstance(size, (tuple, list)) else (size, size)
+    cell_w, cell_h = width // cols, height // rows
     r, c = divmod(n, cols)
     return (c * cell_w + trim, r * cell_h + trim,
             (c + 1) * cell_w - trim, (r + 1) * cell_h - trim)

@@ -30,7 +30,13 @@ absolute floor either, for the same reason: sharpness has no absolute scale,
 only a scale against comparable pictures. So a panel is soft when it is under
 half the median of the episode's own panels.""" 
 
-INK = 0.02
+INK = 0.007
+"""MEASURED 2026-09-22 over all 127 panels of ep05-ep09: the inkiest clean
+panel in the series reads 0.00417, and a caption band struck across one of
+them reads 0.01009. The wall sits between, 68% above the worst clean panel
+and 31% below real lettering. The old 0.02 was set when `inkiness` was the
+share of bright pixels, which only worked because every episode until ep09
+was night."""
 """How much of a panel may be hard-edged near-white on near-black before it is
 lettering. MEASURED on the ep05 grids that drew WIDE / MEDIUM / INSERT into
 their corners."""
@@ -56,15 +62,60 @@ def tiledness(frame: np.ndarray) -> float:
                same(frame[:, :w // 2], frame[:, w // 2:w // 2 * 2]))
 
 
+BRIGHT, BLOCK, RELIEF = 225.0, 32, 40.0
+"""A mark is brighter than `BRIGHT`, and stands `RELIEF` above the mean of the
+`BLOCK`-sized patch it sits in. The patch is what makes it LOCAL, and it is
+wide enough that a stroke of type cannot pull up its own mean: at BLOCK 8 a
+four-pixel stroke filled half its patch and vanished into it."""
+
+
 def inkiness(frame: np.ndarray) -> float:
-    """The share of the picture that is hard, bright, small-scale marks -- what
-    lettering looks like to a histogram and a gradient."""
+    """The share of the picture that is small, bright marks standing clear of
+    their own surroundings -- which is what lettering is.
+
+    This used to be the share of pixels over 225 times the picture's mean
+    gradient. That works while every episode is gaslight and night, where
+    nothing is that bright except letters. ep09 is the first DAYLIGHT episode
+    and eleven of its twenty-three panels failed with no text on them: a hazy
+    white sky and a pale gravel path are bright pixels, and a garden full of
+    leaves supplies the gradient. The same arithmetic also MISSED white
+    lettering on a dark picture, because the bright share there is tiny.
+
+    What separates a letter from a sky is locality. A sky is a large bright
+    region with nothing inside it; a letter stands well above the patch of
+    picture it is struck onto. So the relief is measured against a local mean
+    and the marks are counted, rather than the brightness being weighed.
+    """
     grey = frame.mean(axis=2)
-    bright = grey > 225
-    if not bright.any():
-        return 0.0
-    edge = np.abs(np.diff(grey, axis=0)).mean() + np.abs(np.diff(grey, axis=1)).mean()
-    return float(bright.mean() * min(1.0, edge / 12.0))
+    local = _block_mean(grey, BLOCK)
+    marks = (grey > BRIGHT) & (grey - local > RELIEF)
+    return float(_rim(marks).mean())
+
+
+def _rim(marks: np.ndarray) -> np.ndarray:
+    """The marks' outer skin: every true pixel with a false pixel beside it.
+
+    A stroke of type is nearly all rim; a bright opening in a dark wall -- an
+    arch, a lit window -- is nearly all middle. ep09 shot 4's archway read
+    0.01836 against synthetic lettering at 0.01880 before this, a two per cent
+    margin that is a coincidence rather than a measurement.
+    """
+    inner = marks.copy()
+    inner[1:, :] &= marks[:-1, :]
+    inner[:-1, :] &= marks[1:, :]
+    inner[:, 1:] &= marks[:, :-1]
+    inner[:, :-1] &= marks[:, 1:]
+    return marks & ~inner
+
+
+def _block_mean(grey: np.ndarray, block: int) -> np.ndarray:
+    """The mean of each `block` x `block` patch, spread back over the picture."""
+    h, w = grey.shape
+    ph, pw = -h % block, -w % block
+    padded = np.pad(grey, ((0, ph), (0, pw)), mode="edge")
+    tiles = padded.reshape(padded.shape[0] // block, block,
+                           padded.shape[1] // block, block).mean(axis=(1, 3))
+    return np.repeat(np.repeat(tiles, block, axis=0), block, axis=1)[:h, :w]
 
 
 def cast_faces(faces: list[float], floor: float = CAST_FACE) -> list[float]:
@@ -103,8 +154,13 @@ def by_setup(sharps: dict) -> dict:
             for key, (setup, value) in sharps.items()}
 
 
+FACE_IS_THE_PICTURE = ("close", "extreme_close", "medium_close")
+"""The sizes at which a missing face is a fault. At a wide or a medium a face
+can be too small for a detector to find and the panel still be right."""
+
+
 def verdict(faces: list[float], planned: int, sharp: float, ink: float,
-            tiled: float, crowd: bool = False) -> dict:
+            tiled: float, crowd: bool = False, size: str = "") -> dict:
     """Every fault this panel carries, named. An empty list is a clean panel."""
     from studio import people_count
 
@@ -119,6 +175,11 @@ def verdict(faces: list[float], planned: int, sharp: float, ink: float,
         flags.append("people")
     if not crowd and planned >= 0 and people_count.clones(near, planned):
         flags.append("clone")
+    # AND GOING UNDER, which nobody ever asked it about. ep09's button was a
+    # big close-up of the hussar shouting; it came back an empty garden and
+    # this printed `faces 0/1` and passed.
+    if planned > 0 and not near and size in FACE_IS_THE_PICTURE:
+        flags.append("missing")
     if sharp < SHARP_FLOOR:   # `sharp` is the panel OVER the set median
         flags.append("blur")
     if ink > INK:
