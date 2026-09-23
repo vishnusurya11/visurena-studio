@@ -244,18 +244,41 @@ def split_frame(phrase: str) -> tuple[str, str]:
     return phrase, ""
 
 
+def called(who: str) -> re.Pattern:
+    """How a frame names this person. A proper name binds bare. A common noun
+    ("the hussar", "the newspaper boy") binds only inside a DEFINITE phrase --
+    "the dismounted hussar" -- keeping the article and its words: bare, it bound
+    "serge hussar jacket" (ep09 T22) and "a boy of sixteen" (ep06 T08, which
+    staged the 13-year-old's sheet for a stranger)."""
+    word = re.escape(surname(who))
+    if re.match(r"(?i)(the|a|an)\s", DISPLAY.get(who, "")):
+        # (?!'s): "the narrator's wife" is the wife; binding the narrator there
+        # staged his sheet into her solo take (ep09 T17, caught before render)
+        return re.compile(rf"(?i)\b(the(?:\s+[\w'-]+){{0,2}}\s+){word}\b(?!'s)")
+    return re.compile(rf"()\b{word}\b")
+
+
+def _label(m: re.Match, k: int) -> str:
+    """The label, keeping a describing word ("the dismounted <Subject 1>") but
+    not a bare article or another person's possessive."""
+    lead = m.group(1)
+    bare = not lead or lead.strip().lower() == "the" or "'s" in lead
+    return f"<Subject {k}>" if bare else f"{lead}<Subject {k}>"
+
+
 def tagged(text: str, faces: list[str]) -> str:
     """People become their `<Subject k>` labels; a person with no sheet staged keeps
     his name -- ref-en §2 lets only a DEFINED label be cited."""
     for k, who in enumerate(faces, start=1):
-        for word in (name_of(who), surname(who)):
-            text = re.sub(rf"\b{re.escape(word)}\b", f"<Subject {k}>", text)
+        if not re.match(r"(?i)(the|a|an)\s", DISPLAY.get(who, "")):
+            text = re.sub(rf"\b{re.escape(name_of(who))}\b", f"<Subject {k}>", text)
+        text = called(who).sub(lambda m, k=k: _label(m, k), text)
     return text
 
 
 def people_in(text: str, cast) -> list[str]:
     """Whoever a frame text names, in the order the cast gives."""
-    return [w for w in cast if re.search(rf"\b{re.escape(surname(w))}\b", text)]
+    return [w for w in cast if called(w).search(text)]
 
 
 INDOORS = ("room", "bar", "laboratory", "corridor", "chamber", "cab", "interior", "hall", "ward")
