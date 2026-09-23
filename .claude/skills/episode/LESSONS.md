@@ -21,6 +21,21 @@ SKILL.md.
   the real files: a shot keyed `at` where real placed shots use
   `t_start`/`t_end`, and a Setup built without its required fields.
 
+- **Look at every contact sheet and every take strip; the gates do not see
+  everything.** ep09's panel contact sheet showed a white gutter 97 px inside
+  shot 14's edge, the narrator in his boater AND holding a hat (shots 11, 20),
+  and an insert that was the place picture handed back; both panel gates
+  passed all three. The take strips showed T02's fence sliding through the
+  neighbour, which take_dq passed at 92.6 (2026-09-23).
+- **A plan script writes plan.json only through `episode_home.write_plan`.**
+  All 16 wrote unchecked; "nods slowly" replaced a good plan on disk and
+  grids.py was the first to fail (2026-09-23).
+- **Ten read-only audit agents found what a day of building had not**: the
+  grid dressed every ep09 character from chapter 6 (a hard-coded chapter the
+  lead had read past), a common-noun name that staged a 13-year-old's sheet
+  for a stranger, and a "make public" step that checked nothing. Audit with
+  fresh eyes after a heavy build (2026-09-23).
+
 ## Cast
 
 - **Describe the cast from its rows, never from memory.** ep07 shipped four
@@ -39,6 +54,17 @@ SKILL.md.
   newspaper boy" for any boy, in six published takes.
 - **One chapter's clothes at a time.** `refs.json` is rewritten per episode.
   Rows stamped for another chapter are refused.
+
+- **Declared extras are the plan's claim; take the number from the book.**
+  ep09 declared 6 for "a bevy of hussars ... two of them dismounted"; the
+  take drew six riders and the two on foot, and the content gate failed it
+  at 7 for 6. Declared 8 (2026-09-23).
+- **A person with a hat in his hand must be called "bareheaded".** Tagged
+  with the boater and holding it, the narrator was drawn with two (ep09 11,
+  20). G-HAT refuses the clash in the plan now.
+- **A common-noun name binds only in a definite phrase.** "the dismounted
+  hussar" binds; "serge hussar jacket" and "a boy of sixteen" do not; "the
+  narrator's wife" is the wife, not the narrator (2026-09-23).
 
 ## Places
 
@@ -70,6 +96,19 @@ SKILL.md.
   unconditional branch, so every "no beard, no duplicates" there did nothing.
 - **A fixed crop trim leaves gutters.** Measure the seam off (`seam_box`).
 
+- **The grid prompt is v2: subject first, garments bound whole.** Same seeds on
+  ep09: v1 cloned both leads at tea and drew the lawn's insert as a copy of its
+  wide; v2 did neither. The clothing half of that A/B was judged against the
+  wrong chapter (see docs/calibration/grid_prompt_ab.md, correction).
+- **Lay grids out by shot size; hold head counts in a 1x1.** A mixed 2x2 drew
+  a medium close as a full figure; eight seeds of a 2x2 drew 7-14 hussars
+  where every 1x1 drew the declared count.
+- **A grid is stale when what it would be drawn from changes** -- the prompt
+  text and every staged picture's bytes -- not only its plan fields. The
+  chapter-6 wardrobe could never have read as stale under the old check.
+- **Crop a shaved panel square.** Resizing a 895x992 crop to a square
+  stretched shot 14 11% into H3.
+
 ## Takes
 
 - **H3 obeys direction, not amount.** 0 of 16 amounts were obeyed. Point every
@@ -83,6 +122,18 @@ SKILL.md.
 - **No last-frame pin.** It freezes or dissolves the segment.
 - **No composed frame zero from sheets.** A panel cut from a multi-shot grid is
   allowed.
+
+- **Aim every move at what the cell already holds (G-AIM).** In ep09's retake
+  round 1, shots 14, 15 and 18 repeated their faults on fresh seeds: a tilt
+  past the cell invented a lawn, a tilt from tiles the cell lacks opened
+  elsewhere, a pan to an undrawn bridge invented a street.
+- **A fault that repeats on a fresh seed is the plan's, not the seed's.**
+- **Never truck sideways across a person anchored to the set (G-ANCHOR).** H3
+  keeps the person where the cell put them and slides the scenery through
+  them: ep09 T02, the neighbour leaning on the fence (owner: "ai slop, dq
+  missed it"); also T10, ep07 T13, ep08 T14. Push in, crane or hold.
+- **The take prompt says the place once too often.** T15, a 3-second rubble
+  insert, opened 0.5 s on the burning lawn its prompt named three times.
 
 ## DQ
 
@@ -99,3 +150,11 @@ SKILL.md.
 - **Look at what went public.** Four identical shopmen and a "NEWSPAPER BOY"
   headline passed every gate in ep08. The content gate now catches the first;
   OCR is needed for the second.
+- **`cut` reads brightness; a switch of picture is `jump`.** T15's second
+  attempt changed pictures at cut 26.5 and passed at 74; the signature jump
+  reads 0.16 against 0.83+ on every accepted take.
+- **Judge a take by what is fixed in the world, not only by the frame.**
+  `held` compares the face's travel with the scenery's: T02 1.01 over 1055 px
+  of fence. Whether a held subject is a fault is the plan's call.
+- **Calibrate before you wall.** A darkness wall would have failed 39 of 127
+  accepted takes, and layout correlation 19 accepted pairs; neither was built.

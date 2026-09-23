@@ -13,7 +13,9 @@ history only.
 
 Always:
 - **$0.** No paid API, and no test that spends.
-- **Rule one.** `plan_check` must end "VERDICT: clean", and `takes_r2v --from-refs --prompts` must refuse nothing, BEFORE any line is voiced or any picture drawn. Exit 1 is a stop.
+- **Rule one.** Bind this chapter's rows with `cast_rows.py` before running the plan script. `plan_check` must end "VERDICT: clean" (its CELL GATES refuse a truck across a person anchored to the set, a move aimed at what the cell lacks, a hat worn and held, a landmark the place lacks). `takes_r2v --from-refs --prompts` must refuse nothing once lines, timeline and places exist, and BEFORE any grid. Exit 1 is a stop.
+- **Eye-review every panel contact sheet and every take strip.** The gates passed double hats, a white gutter, a copied reference, and a man the fence slid through (ep09 T02, the owner's "ai slop").
+- **A fault that repeats on a fresh seed is the plan's.** Re-aim the move at what the cell holds; do not re-roll again.
 - **Never patch `plan.json`.** Change the plan `.py` and run it.
 - **Cast from its rows.** Use `cast_refs.tag` with verbatim fragments of the bound row. Bind this chapter's rows with `cast_rows.py` first.
 - **Places from the plan.** A setup names its `view`, drawn at this episode's hour by `scripts/refs/places.py`. Never rewrite the book's location rows.

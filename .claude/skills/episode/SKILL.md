@@ -28,18 +28,39 @@ master as `cut/master_iterN.mp4`, and never overwrite the only copy.
 
 ## RULE ONE — gate the plan before anything is made
 
-Nothing is rendered, voiced or drawn until the plan passes both batteries:
+Nothing is rendered until the plan passes both batteries. Each battery needs
+inputs, so the order is fixed:
 
 ```
-uv run python scripts/episode/plans/<book>_epNN_<slug>.py        # writes plan.json
-uv run python scripts/episode/plan_check.py <book> <n>            # must end "VERDICT: clean"
-uv run python scripts/episode/takes_r2v.py <book> <n> --from-refs --prompts   # must refuse nothing
+uv run python scripts/refs/cast_rows.py <book> <n> <who[=Display:gender]> ...  # FIRST: tag() checks against whatever refs.json holds
+uv run python scripts/episode/plans/wotw_epNN_<slug>.py           # plan.json, only through episode_home.write_plan
+uv run python scripts/episode/plan_check.py <book> <n>             # "VERDICT: clean"; CAST BOUND needs every sheet on disk
+#   then sheets, places, lines, respot, timeline (steps 3-7)
+uv run python scripts/episode/takes_r2v.py <book> <n> --from-refs --prompts   # needs placed.json, lines.json and every view; BEFORE any grid
 ```
+
+A plan script run before `cast_rows` checks its fragments against the
+previous chapter's clothes, and nothing warns. Name the plan `wotw_epNN_*.py`:
+the regenerate guard globs that pattern.
 
 `--prompts` builds every take prompt and runs the take lint over it for $0,
 with no GPU. ep06 paid for three picture stages by skipping it. ep09 skipped
 it too: seven take prompts were over length and four carried a banned prop,
 and nobody knew until the takes stage (2026-09-22).
+
+**The CELL GATES in `plan_check` read each shot against what its panel will
+hold (2026-09-23), and each cost ep09 renders before it existed:**
+- **G-ANCHOR:** no sideways truck on a medium-or-closer person who leans on,
+  sits on, or stands at the set. H3 keeps the person and slides the scenery
+  through them. The owner's "he walked with the fence ... ai slop" (ep09 T02).
+  Push in, crane, or hold.
+- **G-AIM:** every noun a move starts on or aims at must be in `at_rest`. A
+  move toward what is not drawn invents it (ep09 shots 14, 15, 18: three
+  retake rounds).
+- **G-HAT:** a hat worn and held in one picture draws two hats. Tag the
+  person without it and say "bareheaded".
+- **G-PLACE:** a landmark the setup's words and picture lack is dropped or
+  invented (ep09 shot 18's bridge on the lawn).
 
 `plan_check` exits 1 whenever it refuses anything. **An exit of 1 is a stop.**
 It used to fail every WotW plan for another book's reasons, and people read
@@ -55,22 +76,22 @@ and none of them defaults to 1.
 
 | # | step | command | its gate |
 |---|---|---|---|
-| 1 | Plan | write `scripts/episode/plans/<book>_epNN_<slug>.py`, run it | RULE ONE above |
-| 2 | Bind this chapter's cast | `uv run python scripts/refs/cast_rows.py <book> <n> <who[=Display:gender]> ...` | stamps `refs.json` with the chapter; the take, grid and content steps refuse rows stamped for another chapter |
-| 3 | Sheets | `uv run python scripts/refs/build_pack.py <book> --kind characters --only <who> ...` | look at every sheet beside its row; words must match the picture (LESSONS: cast) |
-| 4 | Places at this episode's hour | `uv run python scripts/refs/places.py <book> <n> [--draw]` | every setup's `location`+`view` resolves to a drawn picture (guard test); look at each one |
-| 5 | Voices (new speakers only) | `uv run python scripts/cast/cast_voices.py <codex> --only <who>` | pairwise similarity under the wall; at most 4 voices an episode |
-| 6 | Lines | `uv run python scripts/episode/say_lines.py <book> <n>` | every line heard as written (listen gate) |
+| 1 | Bind this chapter's cast | `uv run python scripts/refs/cast_rows.py <book> <n> <who[=Display:gender]> ...` | stamps `refs.json` with the chapter; must precede the plan; the take, grid and content steps all read this one row |
+| 2 | Plan | write `scripts/episode/plans/wotw_epNN_<slug>.py`, run it | RULE ONE above |
+| 3 | Sheets and prop sheets | `uv run python scripts/refs/build_pack.py <book> --kind characters --only <a> --only <b>` (repeat the flag; `--kind props` for a key prop) | look at every sheet beside its row; words must match the picture (LESSONS: cast) |
+| 4 | Places at this episode's hour | `uv run python scripts/refs/places.py <book> <n> [--draw] [--new=<loc>="Its name"]` | every setup's `location`+`view` resolves to a drawn picture (guard test); look at each one |
+| 5 | Voices (new speakers only) | `uv run python scripts/cast/cast_voices.py <codex> --only <a>,<b> [--recast]` | pairwise similarity under the wall; at most 4 voices an episode |
+| 6 | Lines | `uv run python scripts/episode/say_lines.py <book> <n> [--redo=i,j]` | every line heard as written (listen gate) |
 | 7 | Timeline | `uv run python scripts/episode/respot.py <book> <n>` then `uv run python scripts/episode/timeline.py <book> <n>` | fingerprinted to the plan AND the measured voice; every reader refuses a stale one |
-| 8 | Grids | `uv run python scripts/episode/grids.py <book> <n> <setup> <cols> <rows> [tag] [--shots=..]` | filed under `storyboard/grids/` with a manifest, the plan's hash and the prompt version (v2 default; `--prompt=v1` reproduces old grids, see docs/calibration/grid_prompt_ab.md) |
-| 9 | Panels | `uv run python scripts/episode/panels.py <book> <n>` | every shot from exactly one grid, drawn from THIS plan |
-| 10 | Panel gates | `uv run python scripts/episode/panel_check.py <book> <n>` and `uv run python scripts/episode/panel_content_check.py <book> <n>` | both must exit 0; `takes_r2v` refuses without both verdicts |
+| 8 | Grids | `uv run python scripts/episode/grids.py <book> <n> <setup> <cols> <rows> [tag] [--shots=..]` | shot count = cols x rows; the manifest records `inputs` (the exact prompt and every staged picture's bytes) and the prompt version (v2 default) |
+| 9 | Panels | `uv run python scripts/episode/panels.py <book> <n>` | a grid is stale when its prompt or a staged picture would now differ (a rebound row, a redrawn sheet or place, a builder fix); every shot from exactly one grid; a panel is cropped square and written only if its pixels changed, so re-running is safe |
+| 10 | Panel gates + EYE | `uv run python scripts/episode/panel_check.py <book> <n>` and `uv run python scripts/episode/panel_content_check.py <book> <n>`, then a contact sheet of all panels, looked at | both must exit 0; `takes_r2v` refuses without both verdicts. The gates passed double hats, a white gutter and a copied reference on ep09 |
 | 11 | Takes | `uv run python scripts/episode/takes_r2v.py <book> <n> --from-refs --approved=render` | the take lint; a take is current only to its words AND its pictures |
-| 12 | Take gates | `uv run python scripts/episode/take_dq.py <book> <n>` and `uv run python scripts/episode/take_content_check.py <book> <n>` | QC and the upload refuse an unjudged take |
-| 13 | Title card | `uv run python scripts/episode/series_title.py <book> <n>` | |
+| 12 | Take gates + EYE | `uv run python scripts/episode/take_dq.py <book> <n> [idx...] [--attempts]` and `uv run python scripts/episode/take_content_check.py <book> <n>`, then a 5-frame strip of every take, looked at | QC and the upload refuse an unjudged take. `held` fails a person pinned while the set slides; `jump` fails a switch of picture |
+| 13 | Title card | `uv run python scripts/episode/series_title.py <book> <n>` | QC fails a master without one |
 | 14 | Cut | `uv run python scripts/episode/assemble.py <book> <n> --engine=r2v` | kept as `cut/master_iterN.mp4` |
 | 15 | QC | `uv run python scripts/episode/qc.py <book> <n> --engine=r2v` | must say PASS; a silent gap names the shot it is made of |
-| 16 | Publish | write `episodes/epNN/youtube.json`; `uv run python scripts/publish/youtube_upload.py <book> <n> --engine=r2v --approved`; then `uv run python scripts/publish/youtube_privacy.py <book> <n> public --approved` | the upload refuses failed or unjudged takes; the title is the book's own series |
+| 16 | Publish | write `episodes/epNN/youtube.json`; `youtube_upload.py <book> <n> --engine=r2v --dry-run`, then `--approved`; then `uv run python scripts/publish/youtube_privacy.py <book> <n> public --approved` | the upload refuses failed or unjudged takes; the flip to public re-checks QC (about the uploaded sha8) and every take, as they stand then |
 
 Step 16 inserts the video private, because an unverified API project forces
 that on `videos.insert`, and then flips it public. **When the owner says
@@ -155,11 +176,32 @@ match the picture.
 - an unused LoadImage slot feeds the encoder ComfyUI's example doll, so
   `stage_only` removes it.
 
-The owner's rule is a 2x2 minimum; a setup of 2, 3 or 5 shots needs his word
-before a 1x1 or 2x1 is drawn.
+The 2x2 minimum is an OPEN owner decision (audit Tier 0, D3). ep09 drew
+1x1, 2x1 and 3x1 grids because its setups hold 5, 3 and 2 shots; the owner
+has not ruled. Say which layout you use in the report.
 
-**Panels.** `panels.py` cuts each shot from its grid and sheds the gutter it
-measures. It writes `storyboard/h3/shot_NN.png` at 768 for the take.
+**Lay a grid out by shot size**: wides with wides, faces with faces. A mixed
+2x2 drew a medium close as a full figure; head counts are a lottery across
+cells, and a 1x1 holds its count where a 2x2 does not (ep09 shot 18: 8-14
+riders in every 2x2 seed, the declared count in every 1x1).
+
+**Declare `extras` from the book's own count, never a guess.** ep09's "a bevy
+of hussars ... two of them dismounted" was declared 6; the take drew six
+riders and the two on foot, and the content gate held it to the guess.
+
+**A person with a hat in his hand is "bareheaded"** in that panel's words;
+that word is what drops headwear from the binding (G-HAT refuses the clash).
+
+**Panels.** `panels.py` cuts each shot from its grid, sheds the gutter it
+measures (at the edge up to 48 px, or a thin run within 120 px when the model
+drew the panel narrower than its cell), crops square, and writes
+`storyboard/h3/shot_NN.png` at 768 for the take. To redraw a grid, move the
+old grid's png/json/txt to `storyboard/superseded/` first: a shot in two
+grids is refused, and `--seed-bump` without a tag writes over the only copy.
+
+**Look at a contact sheet of every panel before any take.** On ep09 both
+gates passed a white gutter, two hats on one man, and an insert that was the
+place picture handed back.
 
 ---
 
@@ -170,8 +212,17 @@ MiniMax-H3 ref2va runs the Singularity fine-tune with the turbo LoRA x2
 camera verb; amounts, angles and negations are ignored.
 
 **Camera.**
-- Point every move at something the cell already holds.
+- Point every move at something the cell already holds (G-AIM).
+- Never truck sideways across a person anchored to the set (G-ANCHOR). A
+  walker the camera tracks WITH is fine: say "with him" / "keeping him".
+- The take prompt carries the camera's direction only; the builder drops the
+  travel amount. The plan keeps amounts because G-MOVE measures them.
 - Use at least 8 moves an episode, drawn from `docs/calibration/camera_catalog.md`.
+
+**Look at a 5-frame strip of every take before the cut.** Watch for a person
+or prop sliding against the set, a picture that changes into another, and a
+first second that is not the panel. The gates passed ep09 T02 at 92.6 before
+`held` existed.
 
 **When a take fails, match the cure to the cause:**
 
@@ -181,10 +232,17 @@ camera verb; amounts, angles and negations are ignored.
 | a still take froze | change the move TYPE, not its amount |
 | a take froze after its OWN length changed | put the length back; a fresh seed is not the cure (ep08 T16: 51%, then 75%, then 10% frozen once restored) |
 | lip-sync lags | shorten the take |
-| a hard cut appears early | the take opened on another staged picture |
+| a hard cut appears early | the take opened on another staged picture, or on the place its prompt names three times |
+| the same fault on a fresh seed | the PLAN: re-aim the move at what the cell holds (ep09 shots 14, 15, 18 repeated on new seeds) |
+| a person pinned while the set slides | the plan: push in or crane instead of the truck (G-ANCHOR) |
 
-Retakes run in one batched round: `--retake=a,b --why="..."`. The failed take
-is kept as `T<NN>_failN.mp4`.
+Retakes run in ONE batched round, after the take review AND the eye strips:
+`takes_r2v.py <book> <n> --from-refs --approved=render --retake=a,b --why="<gate row or finding>"`.
+`--why` is required; a round of one take is refused unless `--last` declares
+it the last round for this master. The failed take is kept as
+`attempts/T<NN>_failN.mp4`. Judge with `take_dq.py <book> <n> a b --attempts`
+so the better attempt is kept. After `panels.py` rewrites a panel, re-run both
+panel gates: the takes refuse a verdict older than its panel.
 
 **Never pin a last frame.** ref2v gives a take its first frame only.
 
@@ -220,7 +278,8 @@ Stop a run by killing its process tree by command line, never `uv.exe` alone
 | a plan gate or take-lint refusal | the plan `.py` (never `plan.json`) |
 | a person in the wrong clothes, or the wrong person | `cast_rows.py` for this chapter; the plan's `tag`s |
 | a picture missing its subject, or drawing the place instead | G-SCALE cells; the subject first in the prompt |
-| a panel gate failure | redraw that grid (`--shots=`, `--seed-bump=`); never patch the panel |
+| a panel gate failure, or a fault found by eye | redraw that grid (`--shots=` plus a tag, or `--seed-bump=`) after moving the old one to `storyboard/superseded/`; never patch the panel |
+| a person's count or clothes wrong in the grid | `extras` from the book; the chapter row (`cast_rows.py`); the grid goes stale by itself |
 | a take that is "current" but wrong | its pictures changed; currency now sees that |
 | QC's silent gap | the silent shot inside it (docs/calibration/silent_gaps.md) |
 

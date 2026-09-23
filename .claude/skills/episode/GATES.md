@@ -16,14 +16,38 @@ missing input, or an unread picture.
 | G-LIGHT | every setup names a light source with a direction; no overhead sun outdoors | HARD |
 | G-SIZE | a close or medium close names its head fraction | HARD |
 | G-SCALE | a shot that is not a wide never carries its setup's wide geometry | HARD |
-| G-VARIETY / G-MOVE / G-STORY | size mix, travel amounts per size, first dialogue within the first quarter | HARD |
+| G-FIRSTFRAME | median `at_rest` at least 40 words with at least 3 frame-edge words a shot; median setup `described` at least 90 words, `geometry` at least 60 | HARD |
+| G-SYNC | a dialogue line is the first line on its shot | HARD |
+| G-VARIETY / G-MOVE / G-STORY | size mix (an insert every 6 shots), travel per second of the shot, first dialogue within the first quarter | HARD |
+| CELL GATES (`studio/cell_gates.py`) | G-ANCHOR: no sideways truck on a medium-or-closer person leaning on / sitting on / standing at the set. G-AIM: every noun a move starts on or aims at is in `at_rest`. G-HAT: one hat worn and held in one picture. G-PLACE: a frame landmark the setup's words and drawn picture (`refs/pack.jsonl`) lack | HARD. Calibrated over ep01-09: G-ANCHOR fires on 7 shots of ep05-09, 5 visible faults (ep09 T02 the owner's, T10, T20; ep07 T13; ep08 T14), silent on the walker ep08 T05 |
+| TAKE BUILDER | `takes_r2v.refuse_long_shots` / `refuse_still_motions`, run on the plan | HARD |
+| WRITE | a plan script writes `plan.json` only through `episode_home.write_plan`, which refuses a plan the contract refuses and leaves the old file (guard test) | HARD |
 | MOTION, MARKS, ACTOR | motion wording; the last clause moves a limb or head; staging marks | HARD |
 | CAST BOUND | a book cast from sheets: every cast member has a row and a sheet on disk | HARD |
 | QUOTE | at most 8 consecutive book words in a line | HARD |
 | ONE PER TAKE / TAKE LENGTH | every shot is its own take, inside the 8 s budget | HARD |
 | TIMELINE | `placed.json` is of this plan AND this voice (`episode_home.load_placed`) | HARD |
 | SHEET TEXT | the Scarlet book's paid-sheet check; skipped for sheet books, and a crash is printed, never counted silently | HARD where it applies |
-| G-STORY advisories, G-NAMES, G-SUNSPLIT, G-LIGHT-SIDE | caption-like lines, first hearing of a name, a face split under a sun, the light side of a face | advisory |
+| G-STORY advisories, G-NAMES, G-RATE, G-MOTION, L8 pace, G-SUNSPLIT, G-LIGHT-SIDE, G-HAT with "bareheaded" | caption-like lines, first hearing of a name, speaking rate, motion wording, a face split under a sun, the light side of a face, a hat clash the picture already resolves | advisory |
+
+## Timeline — `timeline.py` (HARD)
+
+The measured runtime must sit in 120-180 s, and every line at its shot's start
+plus the handle (`misaligned`). The fingerprint covers only timing inputs, so a
+reworded frame does not stale it.
+
+## Grids and the panel cut — `grids.py`, `panels.py` (HARD)
+
+- **grids:** the chapter stamp; the shot count equals cols x rows; at most 3
+  slots. The cast is dressed from the same chapter row as the take
+  (`cast_refs.row`); a guard refuses a chapter given as a number.
+- **panels:** a grid is stale when the prompt it would be given now, or any
+  picture it would stage, differs from its manifest's `inputs`. Older
+  manifests fall back to `drawn_from` (plan fields), then to the plan hash. A
+  shot in two grids or none is refused. The seam shave takes an edge gutter up
+  to 48 px or a thin pale run within 120 px, with darker picture on both
+  sides; the panel is then cropped square, never stretched, and written only
+  when its pixels changed.
 
 ## Take prompts — `takes_r2v.py <book> <n> --from-refs --prompts` ($0, no GPU)
 
@@ -61,7 +85,7 @@ shot, or is older than a redrawn panel. **HARD.**
 
 | script | writes | measures | kind |
 |---|---|---|---|
-| `take_dq.py` | `T<NN>.dq.json` | frozen start and share, cut landing, churn, zoom, face at end, look, pulse, lip-sync lag and WER | HARD rows as marked in the report |
+| `take_dq.py` | `T<NN>.dq.json` | frozen start and share, cut landing, churn, zoom, face at end, look, pulse, lip-sync lag and WER; **held** (a person pinned while the set slides: lock = 1 - face travel / scenery travel, hard at 0.75 over 100 px, only when the plan keeps the subject in place); **jump** (lowest similarity between consecutive frame signatures, hard below 0.50: a switch of picture, whatever the brightness) | HARD rows as marked in the report. held: ep09 T02 1.01 over 1055 px and T10 1.05 fail; eligible passes top out at -0.42 (n=2 fires against 3 passes: thin). jump: T15's two faults 0.08 and 0.16, every accepted ep08/09 take 0.83 or more |
 | `take_content_check.py` | `T<NN>.content.json` | the panel content rules on 3 frames past the head leak, each read alone | HARD |
 
 Take currency: a take is kept only when it was rendered from the same prompt
@@ -77,29 +101,43 @@ QC fails on any of these:
 - a line not heard;
 - a silent gap over 6.0 s (it names the silent shot the gap is made of);
 - an unmeasured edit;
-- **any take without a current dq AND content verdict.**
+- **any take without a current dq AND content verdict;**
+- **no title card** (`title_card` false).
 
 A take that failed and spent its retake budget does not fail the master. That
 is the owner's call, and it was measured.
 
 ## Publish — `youtube_upload.py`
 
-It refuses on failed takes, content failures and unjudged takes, unless
-`--override` names each fault. The title comes from the book's own
-`series`/`display_title`/`episodes` in `source/book.json`, never from a
-default.
+It refuses on failed takes, content failures and unjudged takes. One
+`--override="<reason>"` waives the QC pass and the take roll-up and is
+recorded in the ledger; nothing waives "already uploaded". The title comes
+from the book's own `series`/`display_title`/`episodes` in
+`source/book.json`, never from a default.
+
+`youtube_privacy.py ... public` (the flip every episode takes, because the
+insert is forced private) refuses when QC is not about the uploaded sha8, QC
+failed, or any take failed or was never judged, as they stand at the flip.
+The human sign-off is waived by the owner's standing instruction; these are
+not. Dry-run on 2026-09-23: ep09 passes; ep05-ep08, public before the
+content gate existed, would be refused for unjudged or lettered takes.
 
 ## Known gaps — not measured yet
 
-The audit's Tier 4 checks that are still to be built:
-
-- face-embedding identity against the sheet, and clone detection that does not
-  depend on the reader noticing;
-- OCR (the "NEWSPAPER BOY" headline passed, because an insert on a paper is
-  allowed lettering);
-- a detector for two pictures stacked in one frame (ep07 S14 scores 1.00,
-  every other shot 0.31 or less);
-- a darkness wall (the black share is computed and never enforced);
-- layout correlation between shots of one setup (one camera position per
-  place);
-- reading every reference picture back against its prompt.
+- **framing:** a medium close drawn as a full figure passes (face 0.112
+  against published 0.101-0.3). It needs a closed-vocabulary FRAMING answer
+  from the content reader, judged against the planned size.
+- **a take against its own panel:** every panel-comparison row reads "not
+  measured (no cell)" on refs-only takes. Wired to the panel, off-board > 0.80
+  and last < 0.30 would catch T14's transformed lawn (take-gate audit).
+- **copies in a crowd:** the reader's lookalike count missed nine identical
+  sappers and two identical hussars; pairwise face embeddings are the fix
+  (YuNet + SFace ONNX via the OpenCV already installed).
+- **OCR:** no library installed; EasyOCR's weights are cached locally. ep08's
+  "NEWSPAPER BOY" is already in the PANEL, so OCR belongs at the panel stage.
+- **two pictures stacked in one frame:** the line score reads 1.00 on ep07
+  S12-S14 and at most 0.748 on 124 clean panels; wall 0.90 is ready to build.
+- **not to build:** a darkness wall (it would fail 39 of 127 accepted takes;
+  the known dark fault is only the second darkest) and same-setup layout
+  correlation (19 accepted pairs above 0.75; one camera position per place is
+  owner decision D4).
