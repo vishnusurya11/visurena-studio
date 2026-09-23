@@ -85,7 +85,7 @@ ROAD_NIGHT = (
     "toward Maybury Hill, under a thunderstorm: the pale sandy road running from the near edge up "
     "and away over the rise, a dark field beyond the hedge on the left, and far ahead along the "
     "western horizon a blood-red glow with masses of black and red smoke creeping up into the "
-    "driving storm clouds; the light is the red glow on the horizon AHEAD at the CENTRE and small "
+    "driving storm clouds; the light is the red glow on the horizon ahead at the LEFT and small "
     "far bolts of violet lightning in the clouds, so the road reads pale grey, the hedges read "
     "black and the sky reads red low down and black above")
 POOL_NIGHT = (
@@ -120,10 +120,11 @@ GEO_DOORWAY = (
     "in rows, the gas lantern stands at the LEFT edge, dark shrubs fill the LEFT and RIGHT edges, "
     "and driving clouds fill the TOP edge.")
 GEO_ROAD = (
-    "The pale road runs from the BOTTOM CENTRE up and away over the rise at the CENTRE, black hedges "
-    "and dark pines line it along the LEFT and the RIGHT edges, the dark field lies beyond the hedge "
-    "at the LEFT third, and the blood-red glow with its black smoke stands low along the horizon at "
-    "the CENTRE with storm clouds filling the TOP third.")
+    "The pale road runs from the BOTTOM CENTRE straight up and away over the rise at the CENTRE, a "
+    "black hedge lines it along the LEFT third with the dark field beyond, a tall hedge and dark "
+    "pines line it along the RIGHT third, the blood-red glow with its black smoke stands low along "
+    "the horizon at the CENTRE LEFT, a far violet bolt stands in the clouds at the TOP LEFT, and "
+    "black storm clouds fill the TOP third.")
 GEO_POOL = (
     "The shallow black pool lies across the BOTTOM half from the LEFT third to the CENTRE RIGHT, "
     "dimpled with hail. The dark clump of furze rises behind it at the CENTRE LEFT to the TOP third, "
