@@ -119,6 +119,22 @@ def faces_of(shots: list, cast: list[str] | None = None) -> list[str]:
     return seen[:MAX_FACES]
 
 
+def staging_candidates(episode: Episode, shots: list) -> list[str]:
+    """Who a take may stage: the SETUP's declared cast, then any face a shot
+    names that the setup forgot -- never every character row in the book.
+
+    MEASURED 2026-09-22 on ep09 T16, the turn: candidates were every row in
+    refs.json, including rows left from other chapters, matched by the last
+    word of a display name, so "the narrator's wife" staged "the neighbour's
+    wife" and the prompt said the narrator takes HER by the arm."""
+    out: list[str] = []
+    for shot in shots:
+        for who in list(episode.setups[shot.setup].cast or []) + list(shot.faces or []):
+            if who not in out:
+                out.append(who)
+    return out
+
+
 def people_staged(shots: list, cast: list[str]) -> list[str]:
     """Everyone a references-only take must stage: whoever has to READ, plus
     whoever the shot's own words NAME, in first-appearance order.
@@ -417,14 +433,14 @@ def card(book: Path, episode: Episode, number: int, take: dict, measured: dict) 
     shots = [episode.shot(i) for i in take["shots"]]
     first = shots[0]
     boards = episode_home.boards_dir(book, number)
-    faces = faces_of(shots, sorted(physicals(book)))
+    faces = faces_of(shots, staging_candidates(episode, shots))
     segs = [(s.index, k) for s in shots for k in range(0, len(s.cuts) + 1)]
     sizes = [s.size for s in shots] + [c.size for s in shots for c in s.cuts]
     state = episode.setups[first.setup].state
     if FROM_REFS:
         ends, anchors = [], []
         where = location_picture(book, boards, episode.setups[first.setup], first.setup, first)
-        faces = people_staged(shots, sorted(physicals(book)))
+        faces = people_staged(shots, staging_candidates(episode, shots))
         refs = refs_from_cards(book, boards, faces, first.setup, state, sizes, where,
                                panel=storyboard_panel(book, number, first.index) is not None)
         # THE SETUP'S PROP SHEETS, after the place (ep02: the cylinder) -- but
