@@ -1804,6 +1804,8 @@ def stray_capitals(line: str, text: str) -> list[str]:
     out = []
     for w in line.split()[1:]:
         word = w.strip(",.;:")
+        if word.lower() in house_style.place_words():
+            continue              # "Horsell Common" is a name, though "the common" is not
         if word[:1].isupper() and not word.isupper() and \
                 (word.lower() in STYLE_WORDS or re.search(rf"\b{re.escape(word.lower())}\b", text)):
             out.append(word)

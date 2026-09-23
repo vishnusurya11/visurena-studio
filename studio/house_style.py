@@ -100,6 +100,28 @@ a colour inventory, whatever the nouns."""
 
 _where, _light = HOUSE_WHERE, HOUSE_LIGHT
 _look = ""
+_places: dict[str, str] = {}
+"""{location id: its name}, from the book's location rows, set per run: the
+style line names the SETUP's place. It said "Horsell, Surrey" at Woking
+junction and in a railway carriage while the place was the episode's."""
+
+
+def adopt_places(places: dict[str, str]) -> None:
+    """Declare the names of this book's places for the run."""
+    global _places
+    _places = dict(places)
+
+
+def where_for(setup=None) -> str:
+    """The setup's own place with the episode's year -- "Woking junction, 1894"
+    -- or the episode's place when the setup has none, or when its name will
+    not fit the style line's place wall."""
+    name = _places.get(getattr(setup, "location", "") or "", "")
+    year = re.search(r"\b(1[5-9]\d\d|20\d\d)\b", _where or "")
+    if not name or not year:
+        return _where
+    said = f"{name}, {year.group(1)}"
+    return _where if where_faults(said) else said
 """The book's own look for a RENDERED take, when it is not photoreal.  The War
 of the Worlds pack is drawn in an angular stylised 3D look (Krea2 + the
 cinematic artstyle LoRA); a take told "Photoreal live-action" over those
@@ -152,9 +174,22 @@ def adopt_look(look: str) -> None:
 
 def live(setup=None) -> str:
     """The style line for a RENDERED take; with a setup, under ITS light."""
+    line = _live_line(where_for(setup), setup)
+    # A place name that pushes the line past its wall gives way to the
+    # episode's place: the wall held on ep05-08 and a long name broke it.
+    return line if len(line.split()) <= MAX_STYLE_WORDS else _live_line(_where, setup)
+
+
+def _live_line(where: str, setup=None) -> str:
     if _look:
-        return f"{_look}, {_where}, {light_for(setup)}."
-    return LIVE.format(where=_where, light=light_for(setup))
+        return f"{_look}, {where}, {light_for(setup)}."
+    return LIVE.format(where=where, light=light_for(setup))
+
+
+def place_words() -> set[str]:
+    """Every word of this run's declared place names: they are names, so a
+    capital on one of them is not a stray (the take lint's L20)."""
+    return {w.lower().strip(",.") for name in _places.values() for w in name.split()}
 
 
 # ---- the setup's own light ----------------------------------------------------------
@@ -178,7 +213,11 @@ COMPOUNDS = ("bracket", "jet", "lamp", "flame", "light", "slab", "fire")
 """A source noun's own second word: "gas bracket", "window light", "coal fire"."""
 
 SKIP_WORDS = ("a", "an", "the", "one", "two", "its", "his", "her", "of", "and", "in", "on", "at",
-              "left", "right", "near", "far", "only", "same")
+              "left", "right", "near", "far", "only", "same",
+              # verbs and pointers: every ep08 take read "1894, is gaslight" and
+              # "that lamp" before these were here (audit 2026-09-22, item 17)
+              "is", "was", "are", "were", "be", "that", "this", "these", "those", "which",
+              "by", "with", "from", "under", "through")
 """Never the source's adjective: a determiner, a side (the side is the
 direction's business) or a filler."""
 
@@ -211,10 +250,19 @@ def lit_clause(described: str) -> str:
     return next((c for c in clauses(described) if is_lit(c)), "")
 
 
+WINDOWS = re.compile(r"^windows?$", re.I)
+
+
 def source_of(clause: str) -> str:
     """The source noun with one qualifying word: "oil lamp", "low moon",
-    "gas bracket", "candle"."""
-    hit = SOURCES.search(clause)
+    "gas bracket", "candle".
+
+    A WINDOW is the source only when nothing else in the clause lights the
+    place: "lit sash windows and a gas lamp at the kerb" is lit by the lamp,
+    and every ep08 street take said "sash windows" (audit item 17)."""
+    hits = list(SOURCES.finditer(clause))
+    lamps = [h for h in hits if not WINDOWS.match(h.group(0))]
+    hit = (lamps or hits or [None])[0]
     if not hit:
         return ""
     before = clause[:hit.start()].split()

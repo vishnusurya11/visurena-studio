@@ -801,6 +801,7 @@ def opened(book_id: str, number: int):
     # 1847 Utah desert: `Episode.palette` reached the location plate alone.
     house_style.adopt(episode.where, episode.light)
     house_style.adopt_look(getattr(episode, "look", ""))
+    house_style.adopt_places(place_names(book))
     adopt_names(episode_home.read_json(book / "refs" / "refs.json").get("refs", [])
                 if (book / "refs" / "refs.json").exists() else [])
     # And the plan's light and authoring floors, before any GPU second: a take
@@ -880,6 +881,18 @@ def refuse_stale_cells(boards: Path) -> None:
             "these cells belong to an older numbering of the plan; no sheet drawn for "
             "the current one claims them:\n  " + "\n  ".join(left)
             + "\nRedraw the boards, or move them out of boards/cells/ first.")
+
+
+def place_names(book: Path) -> dict[str, str]:
+    """{location id: name} from the book's own location rows, so the style
+    line names the place a take is in (audit item 17)."""
+    folder = Path(book) / "analysis" / "locations"
+    out = {}
+    for row in sorted(folder.glob("*.json")):
+        name = (episode_home.read_json(row).get("name") or "").strip()
+        if name:
+            out[row.stem] = name
+    return out
 
 
 def refuse_failed_panels(book: Path, number: int, episode: Episode) -> None:
