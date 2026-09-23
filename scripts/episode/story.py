@@ -85,7 +85,7 @@ def facts(book_id: str, number: int) -> dict:
         "seconds": float(placed.get("duration_s", 0.0)),
         "stage": stage_of(home, takes, plan_exists=True, total=planned),
         "takes_done": len(takes), "takes_total": max(planned, len(takes)),
-        "master": str(masters[-1]) if masters else "",
+        "master": episode_home.relative(book, masters[-1]) if masters else "",   # never a drive letter
         "pages": [p.name for p in sorted(home.glob("*.html"))],
         "story": story_layer.report(episode.question, episode.shots, getattr(episode, "answer", ""))["says"],
     }
