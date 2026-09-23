@@ -306,7 +306,9 @@ Interior" and that "the ambience of Interior runs under the whole take"."""
 def short_place(described: str) -> str:
     """The location's own name: the described text up to its first comma, past
     any Interior/Exterior label."""
-    parts = [p.strip() for p in (described or "").split(",")]
+    # A COLON ENDS THE NAME TOO: "X in 1894: a clipped lawn with ..." leaked 20-30
+    # words of layout into the summary and soundscape (prompt audit, 2026-09-23).
+    parts = [p.strip() for p in re.split(r"[,:;]", described or "")]
     head = next((p for p in parts if p and p.lower() not in LABEL), parts[0] if parts else "")
     head = head.rstrip(".")
     return re.sub(r"^(The|A|An)\b", lambda m: m.group(0).lower(), head)
@@ -1344,6 +1346,22 @@ def whole_clauses(words: list[str], words_allowed: int) -> str:
     return " ".join(kept).rstrip(",;:. ")
 
 
+def says_place(ctx: dict) -> bool:
+    """Does the block say the room in words? Only when no picture does: a staged
+    storyboard panel IS the room, and ep09 T15 opened 0.5 s on the lawn its
+    prompt named three times before cutting to its own rubble insert."""
+    return not ctx.get("cells_staged", True) and not ctx.get("panel", False)
+
+
+def band_for(ctx: dict) -> tuple[int, int]:
+    """A staged panel is a picture of the room: the floor falls to the picture
+    band's, and the ceiling stays the references band's, which is against padding
+    (ep09 T22, a dialogue close, has 243 words of core alone)."""
+    if ctx.get("panel") and not ctx.get("cells_staged", True):
+        return LOW_BLOCK, HIGH_BLOCK_REFS
+    return block_band(ctx.get("cells_staged", True))
+
+
 def place_clause(described: str, words_allowed: int = PLACE_WORDS) -> str:
     """The room, said inside the block, when no picture says it."""
     said = whole_clauses((described or "").split(), words_allowed)
@@ -1365,7 +1383,7 @@ def block_parts(k: int, seg: dict, pic: int, ctx: dict) -> list[tuple[str, bool]
     voice = lambda ls: voice_events(ls, ctx["at"], ctx["offset"], ctx["ids"], faces, ctx["physical"],
                                     mouth, mouth_action(motion, mouth), t0, t1, ctx["seen"])
     out = [(framing(k, seg, pic, faces, ctx.get("names", ())), True)]
-    if not ctx.get("cells_staged", True) and (place := place_clause(ctx.get("place", ""))):
+    if says_place(ctx) and (place := place_clause(ctx.get("place", ""))):
         out.append((place, False))
     out += [(camera_sentence(motion, t0, t1, end), True), (voice(spoken), False)]
     beats = beat_sentences(motion, t0, t1, end)
@@ -1393,7 +1411,7 @@ def segment_text(k: int, seg: dict, pic: int, ctx: dict) -> str:
     parts = block_parts(k, seg, pic, ctx)
     # the detail says where the camera STANDS and what is at rest; the gait is never
     # its business, so the block's guarantees leave it alone
-    low, high = block_band(ctx.get("cells_staged", True))
+    low, high = band_for(ctx)
     parts[1:1] = [(s, False) for s in detail(seg, budget(joined(parts), low, high))]
     # With no END PICTURE staged, the shot's destination is said in words instead --
     # otherwise nothing anywhere states where the shot gets to. It is appended AFTER
@@ -1411,7 +1429,7 @@ def segment_text(k: int, seg: dict, pic: int, ctx: dict) -> str:
 def describe(shots: list[Shot], placed: list[dict], lines: list[Line], at: dict, faces: list[str],
              physical: dict[str, str], narrator: str, frames: int, cells: dict,
              setup: Setup | None = None, fps: int = 24, no_ends: bool = False,
-             cells_staged: bool = True) -> tuple[str, dict]:
+             cells_staged: bool = True, panel: bool = False) -> tuple[str, dict]:
     """detailed_description and `{block -> the crowd clause it carries}`.  Line 0 is
     the style opening ref-en §5.2 asks for before `[Shot 1]`; every segment then
     gets its own block, and exactly one of them the take's life sentence."""
@@ -1419,7 +1437,7 @@ def describe(shots: list[Shot], placed: list[dict], lines: list[Line], at: dict,
     offset = by[shots[0].index]["t_start"]
     segs = segments(shots, placed, offset, frames, setup, fps)
     cast = list(physical) or faces
-    ctx = {"cells_staged": cells_staged, "place": calm(getattr(setup, "described", "") or ""),
+    ctx = {"cells_staged": cells_staged, "panel": panel, "place": calm(getattr(setup, "described", "") or ""),
            "faces": faces, "physical": physical, "lines": lines,
            "at": at, "offset": offset,
            "ids": voice_id(lines, narrator), "seen": set(), "cast": cast, "names": names_of(cast),
@@ -1460,16 +1478,16 @@ def summary(frames: int, segs: list[dict], cells: dict, described: str, faces: l
             f"{runs}. The take carries {who} through {shot_list(range(1, n + 1))} in that order. {audio}")
 
 
-def soundscape(described: str, crowd: str = "", outdoors: bool = False) -> str:
-    """1.5, base-en §4.6: ambience, physical action and non-verbal human sound, in one
-    paragraph.  Dialogue 'already belongs in the multimodal description'."""
-    body = (f"The ambience of {short_place(described)} runs under the whole take: its own air, the "
-            f"surfaces underfoot and the fabric of the {place_word(described, outdoors)} around it.")
-    if crowd:
-        return (f"{body} Cloth, boots, wood and glass carry the physical action, and the movement and "
-                f"low murmur of the people at work nearby carry under it throughout.")
-    return (f"{body} Cloth, boots and the small sounds of hands on wood, glass and iron carry the "
-            f"physical action throughout.")
+def soundscape(described: str, crowd: str = "", outdoors: bool = False, life: bool = False) -> str:
+    """1.5, base-en §4.6: ambience and physical action, in ONE short line that names
+    no place. The audio is reused whole, so this line only ever steers the picture:
+    it was ~67 words naming the place a third time, and its "murmur of the people
+    at work nearby" sat in 49 of 99 prompts while 0 carried a life sentence --
+    people invited by the sound alone (prompt audit, 2026-09-23)."""
+    air = "Open air" if outdoors else "Indoor air"
+    if crowd and life:
+        return f"{air} under the action; cloth, footsteps and the people nearby."
+    return f"{air} under the action; cloth, footsteps and hands at work."
 
 
 # ---- 3.17  negation --------------------------------------------------------
@@ -1766,8 +1784,8 @@ def l14_length(text, facts):
     if dd is None:
         return []
     staged = bool((facts or {}).get("cells_staged", True))
-    low, high = block_band(staged)
-    want = take_floor(len(blocks(text)), staged)
+    low, high = band_for(facts or {})
+    want = min(350, low * len(blocks(text)))          # the band the take was given (band_for)
     out = [f"L14 LENGTH: detailed_description is {n} words; the floor is {want}"] \
         if (n := words(dd)) < want else []
     return out + [f"L14 LENGTH [Shot {k}]: {n} words; the gate is {low}-{high} a block"
@@ -2075,16 +2093,17 @@ def build(shots: list[Shot], placed: list[dict], lines: list[Line], at: dict, fr
         from studio import take_refs
         subs = subs + chr(10) + take_refs.panel_definition(panel_slot)
     dd, life = describe(shots, placed, lines, at, faces, physical, narrator, frames, cells, setup, fps,
-                        not (ends or []), cells_staged)
+                        not (ends or []), cells_staged, bool(panel_slot))
     text = six_sections(subs, summary(frames, segs, cells, described, faces, spoken, fps, has_plate,
                                       cells_staged),
                         retention(faces, segs, cells, strip, ends or [], described, has_plate, outdoors,
                                   cells_staged, props)
                         + ((chr(10) + take_refs.panel_relation(panel_slot, 1, pin)) if panel_slot else ""),
-                        dd, soundscape(described, getattr(setup, "crowd", ""), outdoors))
+                        dd, soundscape(described, getattr(setup, "crowd", ""), outdoors, bool(life)))
     if bad := negations(text):
         raise ValueError(f"the prompt carries negation MiniMax cannot read: {bad}")
     if check_lint:
-        check(text, prompt_facts(frames, segs, faces, spoken, at, offset, setup, strip, refs, fps,
-                                 has_plate, life, cells_staged))
+        facts = prompt_facts(frames, segs, faces, spoken, at, offset, setup, strip, refs, fps,
+                             has_plate, life, cells_staged)
+        check(text, {**facts, "panel": bool(panel_slot)})
     return text
