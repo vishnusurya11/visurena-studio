@@ -26,6 +26,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 
 from studio.episode_home import episode_arg
+from studio import panel_dq
 from studio import approval, canvas, episode_board as board, episode_home, episode_ref_official as ro, episode_ref_prompt as rp
 from studio import house_style, pack_refs
 from studio import take_currency
@@ -863,6 +864,23 @@ def refuse_stale_cells(boards: Path) -> None:
             + "\nRedraw the boards, or move them out of boards/cells/ first.")
 
 
+def refuse_failed_panels(book: Path, number: int, episode: Episode) -> None:
+    """No take is rendered from a panel the panel gate failed, never judged, or
+    judged before it was redrawn (audit 2026-09-22, item 5: this runner never
+    read panel_dq.json, so a failed panel went straight to the GPU).
+
+    An episode with no storyboard panels at all is refs-only, and has none to
+    judge."""
+    home = episode_home.home(book, number) / "storyboard"
+    panels = sorted(home.glob("shot_*.png"))
+    if not panels and not (home / "h3").is_dir():
+        return
+    why = panel_dq.panel_refusal(home / "panel_dq.json", panels, [s.index for s in episode.shots])
+    if why:
+        raise SystemExit(f"takes refused: {why}\n  run: uv run python scripts/episode/panel_check.py "
+                         f"<book> {number}")
+
+
 def main(book_id: str, number: int, retake: list[int] | None = None, approved: bool = False,
          why: str = "") -> None:
     """Render every take that has no record yet; `retake` re-renders those
@@ -870,6 +888,7 @@ def main(book_id: str, number: int, retake: list[int] | None = None, approved: b
     and `why` -- the reason the round was ordered -- goes into each record."""
     book, episode = opened(book_id, number)
     refuse_stale_cells(episode_home.boards_dir(book, number))
+    refuse_failed_panels(book, number, episode)
     take_dir = episode_home.takes_dir(book, number, "r2v")
     sheet = take_dir / "shots.json"
     records = {r["index"]: r for r in episode_home.read_json(sheet)} if sheet.exists() else {}

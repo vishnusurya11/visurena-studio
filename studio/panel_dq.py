@@ -120,6 +120,17 @@ def _block_mean(grey: np.ndarray, block: int) -> np.ndarray:
     return np.repeat(np.repeat(tiles, block, axis=0), block, axis=1)[:h, :w]
 
 
+FACE_SCORE = 0.8
+"""The detector confidence a face needs to count. MEASURED on the 60 cast-sized
+detections in ep06-09's panels: real frontal faces all scored 0.86 or more;
+smoke, steam round a gas lamp and back-of-head shapes scored 0.51-0.78."""
+
+
+def confident_faces(found) -> list[float]:
+    """Heights of the faces the detector is sure of, smallest first."""
+    return sorted(float(f["h"]) for f in (found or []) if f.get("score", 0.0) >= FACE_SCORE)
+
+
 def cast_faces(faces: list[float], floor: float = CAST_FACE) -> list[float]:
     """The faces big enough to be somebody, rather than a head in a crowd."""
     return [f for f in faces if f >= floor]
@@ -227,3 +238,43 @@ def edge_strength(frame) -> float:
     grey = np.asarray(frame).mean(axis=2)
     lap = np.abs(cv2.Laplacian(grey, cv2.CV_64F))
     return float(np.percentile(lap, 99))
+
+
+# ---- the hour of a panel, and the verdict the takes must have ----------------
+
+NIGHT_WORDS = re.compile(
+    r"\b(?:night|nightfall|dusk|twilight|after dark|full dark|darkness|"
+    r"moonlight|gaslight|lamplight)\b", re.I)
+
+
+def at_night(described: str) -> bool:
+    """Is this SETUP at night, by its own words?
+
+    The panel runner used to pick the night control from any "dark" in the
+    SHOT's prose, so 15 of ep09's 23 daylight panels -- "a dark cedar",
+    "dark brows", "the brick reads dark red" -- were judged against the night
+    picture. The hour belongs to the setup and is said in its `described`."""
+    return bool(NIGHT_WORDS.search(described or ""))
+
+
+def panel_refusal(verdict_path, panels: list, wanted: list[int]) -> str | None:
+    """Why takes may NOT be rendered from these panels, or None when they may.
+
+    takes_r2v never read panel_dq.json, so a failed panel went to the GPU; and
+    a verdict could say nothing about a shot it skipped. The verdict must
+    exist, cover every shot, pass every shot, and be newer than every panel."""
+    from pathlib import Path
+    import json
+    path = Path(verdict_path)
+    if not path.exists():
+        return f"no panel verdict at {path.name}: run scripts/episode/panel_check.py first"
+    rows = json.loads(path.read_text(encoding="utf-8"))
+    judged = {r.get("shot"): r for r in rows}
+    if unjudged := [i for i in wanted if i not in judged]:
+        return f"the panel verdict never judged shots {unjudged}"
+    if failed := [i for i in wanted if not judged[i].get("passed")]:
+        return f"panels failed the panel gate: shots {failed}"
+    stamp = path.stat().st_mtime
+    if newer := [Path(q).name for q in panels if Path(q).stat().st_mtime > stamp]:
+        return f"panels redrawn since the verdict, so it is about other pictures: newer {newer}"
+    return None
