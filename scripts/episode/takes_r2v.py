@@ -614,13 +614,27 @@ def drop_second_slot(graph: dict, base: str) -> dict:
     return graph
 
 
+def ref_paths(c: dict, book: Path, number: int) -> list[Path]:
+    """The reference pictures this card stages, in slot order."""
+    boards = episode_home.boards_dir(book, number)
+    return [sq.picture_path(boards, book, n) for n in c["refs"]]
+
+
+def card_pictures(c: dict, book: Path, number: int) -> list[Path]:
+    """EVERY picture this card stages: its references and its anchor cells. The
+    renderer and the currency check both read this, so a take is current only
+    to the bytes it would be rendered from (audit 2026-09-22, item 10)."""
+    boards = episode_home.boards_dir(book, number)
+    return ref_paths(c, book, number) + [sq.cells_in(boards) / name for name, _ in c["anchors"]]
+
+
 def graph_for(c: dict, book: Path, number: int, take_dir: Path, base: str = "") -> dict:
     boards = episode_home.boards_dir(book, number)
     template, inject = load_workflow(base or BASE)
     values = {"prompt": c["prompt"], "width": W, "height": H, "frames": c["frames"], "steps": STEPS,
               "seed": c["seed"], "ref_image_size": c["ref_image_size"],
               "filename_prefix": f"ep_take_{c['index']:02d}"}
-    paths = [sq.picture_path(boards, book, n) for n in c["refs"]]
+    paths = ref_paths(c, book, number)
     # (a setup variant is named char-<who>_<setup>.png and lives beside the plain sheet)
     # the strip must be the LAST picture slot: the prompt numbers it after the cast, the plate,
     # the pinned cells and the END cells (reference_list IS that order)
@@ -920,7 +934,8 @@ def main(book_id: str, number: int, retake: list[int] | None = None, approved: b
         # 28 prompts changed while the grouping did not -- every take would have been
         # kept, the fix reaching no picture while DQ repeated the old numbers.
         elif (c["index"] in records and records[c["index"]].get("shots") == c["shots"]
-              and take_currency.is_current(c.get("prompt") or "", out)):
+              and take_currency.is_current(c.get("prompt") or "", out,
+                                           pictures=card_pictures(c, book, number))):
             continue
         graph = graph_for(c, book, number, take_dir)
         episode_home.write_json(out.with_suffix(".graph.json"), graph)  # the exact graph this take ran with

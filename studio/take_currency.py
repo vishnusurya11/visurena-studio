@@ -41,8 +41,27 @@ def recorded_prompt(take: Path) -> str | None:
         return None
 
 
-def is_current(built: str, take: Path) -> bool:
-    """True only when this take exists AND was rendered from this prompt.
+def staged_images(take: Path) -> set[str]:
+    """The picture files this take's graph loaded -- content-addressed names,
+    so they are the record of which bytes it rendered from."""
+    beside = Path(take).with_suffix(".graph.json")
+    if not beside.exists():
+        return set()
+    try:
+        graph = json.loads(beside.read_text(encoding="utf-8"))
+    except (ValueError, OSError):
+        return set()
+    return {n["inputs"]["image"] for n in graph.values()
+            if n.get("class_type") == "LoadImage" and isinstance(n.get("inputs", {}).get("image"), str)}
+
+
+def is_current(built: str, take: Path, pictures: list | None = None) -> bool:
+    """True only when this take exists AND was rendered from this prompt -- and,
+    when `pictures` is given, from exactly these pictures' bytes.
+
+    MEASURED 2026-09-22 (audit item 10): with the words alone, 16 ep05 takes
+    whose sheet was redrawn and 6 ep07 takes whose panel was redrawn all read
+    as current, so a retake round would skip them.
 
     Unprovable is not current: an episode from before the graph file was
     written cannot show what it ran with, and re-rendering is the safe answer.
@@ -51,4 +70,9 @@ def is_current(built: str, take: Path) -> bool:
     if not take.exists():
         return False
     said = recorded_prompt(take)
-    return said is not None and said.strip() == (built or "").strip()
+    if said is None or said.strip() != (built or "").strip():
+        return False
+    if pictures is None:
+        return True
+    from studio.comfy import staged_name
+    return {staged_name(p) for p in pictures} <= staged_images(take)

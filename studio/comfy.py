@@ -49,6 +49,14 @@ def apply_inject(template: dict, inject: dict, values: dict[str, Any]) -> dict:
     return out
 
 
+def staged_name(path: Path) -> str:
+    """The content-addressed name `stage_image` gives a file, without copying
+    it -- so currency can ask what a build WOULD stage."""
+    path = Path(path)
+    digest = hashlib.md5(path.read_bytes()).hexdigest()[:8]
+    return f"{path.stem}_{digest}{path.suffix}"
+
+
 def stage_image(path: Path) -> str:
     """Copy a file into ComfyUI's input dir under a CONTENT-ADDRESSED name.
 
@@ -72,8 +80,7 @@ def stage_image(path: Path) -> str:
     path = Path(path)
     if not path.exists():
         raise FileNotFoundError(f"cannot stage missing image: {path}")
-    digest = hashlib.md5(path.read_bytes()).hexdigest()[:8]
-    dest = COMFY_ROOT / "input" / f"{path.stem}_{digest}{path.suffix}"
+    dest = COMFY_ROOT / "input" / staged_name(path)
     dest.parent.mkdir(parents=True, exist_ok=True)
     # the name IS the content, so an existing file is already the right bytes
     if not dest.exists():
