@@ -184,7 +184,8 @@ def grid_shots(ep, setup: str, cols: int, rows: int, only: list[int] | None) -> 
     return shots
 
 
-def _v1(blocks: list, cols: int, rows: int, place: tuple, cast: list, style_slot: int) -> str:
+def _v1(blocks: list, cols: int, rows: int, place: tuple, cast: list, style_slot: int,
+        props: list | None = None) -> str:
     cast = [{**p, "wear": p["wear"][:600]} for p in cast]      # v1's own cut, kept byte for byte
     text = grid_prompt(blocks, cols, rows, place=place, cast=cast, style=STYLE.format(scene=style_slot))
     return text + "\n\n" + no_duplicates([p["name"] for p in cast])
@@ -198,10 +199,29 @@ lawn's insert as a copy of its wide. v1 stays callable to reproduce old grids.""
 
 
 def compose(version: str, blocks: list, cols: int, rows: int, place: tuple, cast: list,
-            style_slot: int) -> str:
+            style_slot: int, props: list | None = None) -> str:
     if version not in PROMPTS:
         raise SystemExit(f"--prompt={version}: known versions are {sorted(PROMPTS)}")
-    return PROMPTS[version](blocks, cols, rows, place, cast, style_slot)
+    return PROMPTS[version](blocks, cols, rows, place, cast, style_slot, props)
+
+
+def props_of(book: Path, pids: list[str], shots: list) -> list[dict]:
+    """The setup's drawn props this grid's own shots NAME -- the take's rule
+    (`pack_refs.props_named`), so panel and take stage the same machine."""
+    named = pack_refs.props_named(book, list(pids or []), pack_refs.shot_prose(shots))
+    return [{"name": name, "sheet": sheet} for sheet, (name, _text) in named]
+
+
+def stage_props(props: list[dict], used: int) -> tuple[list[dict], dict]:
+    """Props into the slots the cast left, the place keeping the last one."""
+    out, slots = [], {}
+    for p in props:
+        if used >= MAX_SLOTS - 1:
+            break
+        used += 1
+        out.append({**p, "ref": used})
+        slots[str(100 + used)] = p["sheet"]
+    return out, slots
 
 
 def prompt_version(argv: list[str]) -> str:
@@ -214,15 +234,16 @@ def prompt_for(book: Path, ep, setup: str, shots: list, cols: int, rows: int,
     OWNS put people in the slots; a borrowed shot's cast drew line-ups."""
     owned = [s for s in shots if s.setup == setup] or shots
     cast, char_slots = cast_of(book, owned)
-    place_slot = len(char_slots) + 1
-    slots = {**char_slots, str(100 + place_slot): wide_for(book, ep.setups[shots[0].setup])}
+    props, prop_slots = stage_props(props_of(book, ep.setups[setup].props, owned), len(char_slots))
+    place_slot = len(char_slots) + len(prop_slots) + 1
+    slots = {**char_slots, **prop_slots, str(100 + place_slot): wide_for(book, ep.setups[shots[0].setup])}
     said_as = {p["entity"]: p["name"] for p in cast}
     blocks = [{"size": SAID[s.size], "body": body_of(s),
                "cut": cut_clause(s.size, peopled=bool(s.faces)),
                "who": [said_as[f] for f in (s.faces or []) if f in said_as],
                "extras": getattr(s, "extras", 0)} for s in shots]
     place = ([place_slot], ep.setups[shots[0].setup].described)
-    return compose(version, blocks, cols, rows, place, cast, place_slot), slots
+    return compose(version, blocks, cols, rows, place, cast, place_slot, props), slots
 
 
 def graph_for(text: str, slots: dict, cols: int, rows: int, seed: int, name: str) -> dict:

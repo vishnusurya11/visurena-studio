@@ -107,3 +107,12 @@ def test_a_person_with_a_hat_on_keeps_it():
     cast = [{"ref": 1, "name": "NARRATOR", "entity": "n", "wear": NARR, "against": "a"}]
     text = grid_prompt_v2([panel("in the heather", ["NARRATOR"])], 1, 1, PLACE, cast, 3)
     assert "Straw boater with a black band" in text
+
+
+def test_a_staged_prop_is_bound_as_an_object_not_a_person():
+    """ep10's tripod: without its sheet in the grid, every panel draws the
+    machine from words and no two agree (ep10 prep audit, 2026-09-23)."""
+    text = grid_prompt_v2([panel("a tripod striding over the pines")], 1, 1, PLACE, [], 3,
+                          props=[{"ref": 1, "name": "the Martian fighting-machine"}])
+    assert "the Martian fighting-machine is the object in <image1>" in text
+    assert "is the person in <image1>" not in text

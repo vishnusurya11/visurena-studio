@@ -223,7 +223,7 @@ def _block_v2(label: str, s: dict) -> str:
 
 
 def grid_prompt_v2(shots: list[dict], cols: int, rows: int, place: tuple[list[int], str],
-                   cast: list[dict], style_slot: int) -> str:
+                   cast: list[dict], style_slot: int, props: list[dict] | None = None) -> str:
     """Layout (one line), the panels SUBJECT FIRST, one binding line per person,
     the place, the style. No description is truncated -- the sheet in the slot
     carries the face and the panel prose carries the tag -- and a single
@@ -241,6 +241,10 @@ def grid_prompt_v2(shots: list[dict], cols: int, rows: int, place: tuple[list[in
         blocks = [_block_v2(f"PANEL {i} ({where}), ", s)
                   for i, (where, s) in enumerate(zip(cells, shots), start=1)]
     binding = [_binding(p, bareheaded(p["name"], shots)) for p in cast if p.get("ref")]
+    # A PROP IS AN OBJECT, bound to its sheet: ep10's tripod drawn from words
+    # alone would differ in every panel (ep10 prep audit, 2026-09-23).
+    binding += [f"{p['name']} is the object in <image{p['ref']}>, exactly as drawn there."
+                for p in props or [] if p.get("ref")]
     if len(binding) > 1:
         binding.append(f"{' and '.join(p['name'] for p in cast if p.get('ref'))} are never dressed alike.")
     refs = " and ".join(f"<image{n}>" for n in place[0])

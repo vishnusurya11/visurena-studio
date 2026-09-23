@@ -197,3 +197,31 @@ def test_a_shaved_panel_is_cropped_square_never_stretched():
     grid[:, 200 + 30:200 + 36] = 250                  # a gutter inside the middle cell
     panel = panels.cut(Image.fromarray(grid), {"cols": 3, "rows": 1}, 1)
     assert panel.size[0] == panel.size[1]
+
+
+# ---- a grid stages the prop sheets its own shots name (2026-09-23) -----------
+
+def prop_book(tmp_path):
+    (tmp_path / "analysis" / "props").mkdir(parents=True)
+    (tmp_path / "analysis" / "props" / "fighting_machine.json").write_text(json.dumps(
+        {"name": "the Martian fighting-machine", "aliases": ["tripod", "Titan"],
+         "profile": {"physical": "A walking engine.", "scale": "About a hundred feet high."}}))
+    (tmp_path / "refs" / "props" / "fighting_machine").mkdir(parents=True)
+    (tmp_path / "refs" / "props" / "fighting_machine" / "sheet.png").write_bytes(b"png")
+    return tmp_path
+
+
+class _Prose:
+    def __init__(self, frame):
+        self.frame, self.motion, self.at_rest = frame, "", ""
+
+
+def test_a_grid_stages_a_prop_its_shots_name(tmp_path):
+    book = prop_book(tmp_path)
+    got = grids.props_of(book, ["fighting_machine"], [_Prose("a tripod striding over the pines")])
+    assert [p["name"] for p in got] == ["the Martian fighting-machine"]
+
+
+def test_a_prop_no_shot_names_is_not_staged(tmp_path):
+    book = prop_book(tmp_path)
+    assert grids.props_of(book, ["fighting_machine"], [_Prose("the narrator at the reins")]) == []
