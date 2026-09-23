@@ -29,7 +29,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 import numpy as np
 from PIL import Image
 
-from grids import grids_dir, plan_sha, shots_sha
+from grids import drawn_inputs, grids_dir, plan_sha, shots_sha
 from studio import episode_home
 from studio.episode_home import episode_arg
 from studio.storyboard_grid import panel_box, seam_box
@@ -55,10 +55,14 @@ def owner_of(rows: list[dict], wanted: list[int]) -> dict[int, tuple[dict, int]]
     return {s: v[0] for s, v in seen.items() if s in wanted}
 
 
-def stale_grids(rows: list[dict], current: str, ep=None) -> list[str]:
-    """Grids whose own shots changed since they were drawn. A manifest with no
-    `drawn_from` (before 2026-09-23) falls back to the whole plan's hash."""
+def stale_grids(rows: list[dict], current: str, ep=None, book=None) -> list[str]:
+    """Grids that would now be drawn from something else: the prompt they would
+    be given or a picture they would stage (`inputs`). Older manifests fall back
+    to their own plan fields (`drawn_from`), then to the whole plan's hash."""
     def stale(r: dict) -> bool:
+        if ep is not None and book is not None and "inputs" in r:
+            return r["inputs"] != drawn_inputs(book, ep, r["setup"], r["shots"], r["cols"],
+                                               r["rows"], r.get("prompt", "v1"))
         if ep is not None and "drawn_from" in r:
             return r["drawn_from"] != shots_sha(ep, r["shots"])
         return r.get("plan") != current
@@ -87,7 +91,7 @@ def main(book_id: str, number: int) -> None:
     book = episode_home.book_dir(book_id)
     ep = episode_home.load_plan(book, number)
     rows = manifests(book, number)
-    if old := stale_grids(rows, plan_sha(book, number), ep):
+    if old := stale_grids(rows, plan_sha(book, number), ep, book):
         raise SystemExit(f"grids drawn from an older plan -- redraw them: {old}")
     owner = owner_of(rows, [s.index for s in ep.shots])
     out = episode_home.home(book, number) / "storyboard"

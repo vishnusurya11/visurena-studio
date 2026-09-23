@@ -101,6 +101,21 @@ def shots_sha(ep, indices: list[int]) -> str:
     return hashlib.sha256(json.dumps(body, sort_keys=True).encode()).hexdigest()[:16]
 
 
+def drawn_inputs(book: Path, ep, setup: str, indices: list[int], cols: int, rows: int,
+                 version: str) -> str:
+    """Everything a grid is drawn from: the prompt it would be given now and the
+    bytes of every picture it would stage. Plan fields alone missed a rebound
+    row, a redrawn sheet or place, and a prompt-builder fix -- so the chapter-6
+    wardrobe on every ep09 grid could never have read as stale (2026-09-23)."""
+    shots = [s for s in ep.shots if s.index in indices]
+    return inputs_sha(*prompt_for(book, ep, setup, shots, cols, rows, version))
+
+
+def inputs_sha(text: str, slots: dict) -> str:
+    pictures = sorted(hashlib.sha256(Path(p).read_bytes()).hexdigest() for p in slots.values())
+    return hashlib.sha256(json.dumps([text, pictures]).encode()).hexdigest()[:16]
+
+
 def wide_for(book: Path, setup) -> Path:
     """This setup's own place picture: the SETUP's view, through the same door
     the take uses, so the panel and the take can never open on different
@@ -255,7 +270,7 @@ def main(book_id: str, number: int, setup: str, cols: int, rows: int, tag: str =
         "name": name, "episode": number, "setup": setup, "cols": cols, "rows": rows,
         "shots": [s.index for s in shots], "seed": seed, "plan": plan_sha(book, number),
         "drawn_from": shots_sha(ep, [s.index for s in shots]),
-        "prompt": version})
+        "inputs": inputs_sha(text, slots), "prompt": version})
     print(f"{name} in {time.time() - began:.0f}s -> {episode_home.relative(book, grid)}", flush=True)
 
 

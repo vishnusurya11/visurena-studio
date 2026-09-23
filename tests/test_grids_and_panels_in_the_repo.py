@@ -160,3 +160,30 @@ def test_no_grid_code_names_a_chapter_by_number():
     import re
     source = (Path(grids.__file__)).read_text(encoding="utf-8")
     assert not re.search(r"character_row\([^)]*,\s*\d+\)", source)
+
+
+# ---- a grid is stale when what it would be drawn from changes (2026-09-23) --
+# drawn_from hashed plan fields only: a rebound cast row, a redrawn sheet or
+# place picture, or a prompt-builder fix left every grid "current" -- which is
+# how the chapter-6 wardrobe could never have been caught by a staleness check.
+
+
+def test_the_inputs_change_when_a_cast_row_changes(monkeypatch):
+    book = episode_home.book_dir(WOTW)
+    ep = episode_home.load_plan(book, 9)
+    before = grids.drawn_inputs(book, ep, "garden", [12], 1, 1, "v2")
+    assert grids.drawn_inputs(book, ep, "garden", [12], 1, 1, "v2") == before
+    real = cast_refs.row
+    monkeypatch.setattr(cast_refs, "row", lambda b, who: {**real(b, who), "physical": "Wearing: A red coat."})
+    assert grids.drawn_inputs(book, ep, "garden", [12], 1, 1, "v2") != before
+
+
+def test_a_manifest_whose_inputs_changed_is_stale(monkeypatch):
+    book = episode_home.book_dir(WOTW)
+    ep = episode_home.load_plan(book, 9)
+    row = {**grid("g", [12], "p"), "setup": "garden", "cols": 1, "rows": 1, "prompt": "v2",
+           "inputs": grids.drawn_inputs(book, ep, "garden", [12], 1, 1, "v2")}
+    assert panels.stale_grids([row], "p", ep, book) == []
+    real = cast_refs.row
+    monkeypatch.setattr(cast_refs, "row", lambda b, who: {**real(b, who), "physical": "Wearing: A red coat."})
+    assert panels.stale_grids([row], "p", ep, book) == ["g"]
