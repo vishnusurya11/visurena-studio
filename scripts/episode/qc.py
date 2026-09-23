@@ -26,6 +26,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 
 from studio.episode_home import episode_arg
+from studio import judged
 from studio import edit_gate, episode_home, gap_owner, episode_seq_board as sq, voice_qc, youtube_publish as yp
 from studio import episode_takes as tk
 from studio.episode_spec import Episode
@@ -198,7 +199,10 @@ def takes_rollup(take_dir: Path) -> dict:
     """G5.7 -- what the take gate said, over every take that has been judged.  A take
     whose retake budget is spent is named and printed red; it does not fail the
     master, because the cut still needs a picture (owner's call)."""
-    out = {"pass": 0, "of": 0, "fail": [], "budget_spent": [], "worst": None}
+    # THE UNIVERSE IS THE TAKES THE RENDER RECORDED, not the reports on disk:
+    # a take nobody judged was simply not counted (audit 2026-09-22, item 6).
+    out = {"pass": 0, "of": 0, "fail": [], "budget_spent": [], "worst": None,
+           "unjudged": judged.unjudged_takes(take_dir)}
     for path in sorted(take_dir.glob("T??.dq.json")):
         row, take = json.loads(path.read_text(encoding="utf-8")), path.name.split(".")[0]
         out["of"] += 1
@@ -281,7 +285,11 @@ def verdict(report: dict) -> bool:
             # AN ABSENT EDIT BLOCK IS NOT A PASS.  `.get("edit", {}).get("ok", True)`
             # made a missing measurement clean twice over.
             and bool(report.get("edit", {}).get("ok", False))
-            and bool(report.get("edit", {}).get("measured", False)))
+            and bool(report.get("edit", {}).get("measured", False))
+            # A TAKE NOBODY JUDGED IS NOT A PASS -- the same rule as the edit
+            # block above. A take that FAILED and spent its retake budget still
+            # does not fail the master (owner's call): that one was measured.
+            and not report.get("takes", {}).get("unjudged"))
 
 
 def main(book_id: str, number: int, engine: str = "i2v") -> None:

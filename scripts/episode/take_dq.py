@@ -345,6 +345,10 @@ def main(book_id: str, number: int, indices: list[int], attempts: bool = False) 
     work = episode_home.work_dir(book, number, "r2v") / "dq"
     work.mkdir(parents=True, exist_ok=True)
     records = {r["index"]: r for r in episode_home.read_json(take_dir / "shots.json")}
+    if not records or not wanted(records, indices):
+        # a take gate that measured nothing has passed nothing (audit item 6)
+        raise SystemExit(f"episode {number}: no takes to judge under "
+                         f"{episode_home.relative(book, take_dir)}")
     for index in wanted(records, indices):
         rec = records[index]
         kinds, line = segment_kinds(episode, rec.get("anchors", [])), line_text(episode, rec)
@@ -362,7 +366,9 @@ def main(book_id: str, number: int, indices: list[int], attempts: bool = False) 
         kept = take_dir / f"T{index:02d}.mp4" if attempts else best
         report = record(v, list(verdicts.values()), prior_record(take_dir, index))
         report["audio"], report["camera"] = audio, camera_dq(kept, v.seconds, [f / 24 for _, f in rec.get("anchors", [])][1:])
-        report["strip"] = str(tv.strip(v, kept, cells, work / f"take_T{index:02d}.png"))
+        # RELATIVE, never a drive letter (CLAUDE.md; audit item 15): this line
+        # had put the worktree's absolute path into ~200 take reports.
+        report["strip"] = episode_home.relative(book, tv.strip(v, kept, cells, work / f"take_T{index:02d}.png"))
         episode_home.write_json(take_dir / f"T{index:02d}.dq.json", report)
         print(row(index, v, best.name if attempts else "", len(files)), flush=True)
 

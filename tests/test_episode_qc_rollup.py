@@ -45,6 +45,7 @@ def test_a_spent_retake_budget_is_printed_red_and_does_not_fail_the_master():
 
 
 def test_the_takes_rollup_counts_passes_and_names_the_failures(tmp_path):
+    write(tmp_path / "shots.json", [{"index": 0}, {"index": 1}, {"index": 2}])
     write(tmp_path / "T00.dq.json", {"passed": True, "score": 100.0})
     write(tmp_path / "T01.dq.json", {"passed": False, "score": 47.5, "budget_spent": True})
     write(tmp_path / "T02.dq.json", {"passed": False, "score": 70.0, "budget_spent": False})
@@ -54,8 +55,11 @@ def test_the_takes_rollup_counts_passes_and_names_the_failures(tmp_path):
     assert roll["worst"] == ("T01", 47.5)
 
 
-def test_the_takes_rollup_is_empty_when_no_take_has_been_judged(tmp_path):
-    assert qc.takes_rollup(tmp_path) == {"pass": 0, "of": 0, "fail": [], "budget_spent": [], "worst": None}
+def test_the_takes_rollup_names_what_it_could_not_judge(tmp_path):
+    # An empty rollup used to read as clean. With no record of which takes
+    # exist, it now says so, and the QC verdict fails on it (audit item 6).
+    roll = qc.takes_rollup(tmp_path)
+    assert roll["of"] == 0 and roll["unjudged"]
 
 
 def test_sheet_spend_is_read_from_the_books_own_ledger(tmp_path):

@@ -47,6 +47,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 
 from scripts.episode import eye_review
+from studio import judged
 from studio import approval, episode_home, youtube, youtube_publish as yp
 
 
@@ -89,6 +90,10 @@ def failed_takes(home: Path, engine: str = "r2v") -> list[str]:
     for report in sorted(folder.glob("T*.dq.json")):
         if not json.loads(report.read_text(encoding="utf-8")).get("passed"):
             out.append(report.stem.split(".")[0])
+    # AND EVERY TAKE NOBODY JUDGED: counting only the reports that exist let a
+    # take rendered and never measured reach the one irreversible step
+    # (audit 2026-09-22, item 6).
+    out += [f"{name} (never judged)" for name in judged.unjudged_takes(folder)]
     return out
 
 

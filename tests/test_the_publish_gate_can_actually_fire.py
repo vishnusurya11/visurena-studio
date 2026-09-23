@@ -24,7 +24,12 @@ from scripts.publish.youtube_upload import failed_takes
 def episode(tmp_path: Path, **verdicts) -> Path:
     room = tmp_path / "takes" / "r2v"
     room.mkdir(parents=True)
+    # A REAL TAKES ROOM: the render records its takes in shots.json, and
+    # failed_takes now reads that as the universe (audit 2026-09-22, item 6).
+    (room / "shots.json").write_text(json.dumps([{"index": int(n[1:])} for n in verdicts]),
+                                     encoding="utf-8")
     for name, passed in verdicts.items():
+        (room / f"{name}.mp4").write_bytes(b"mp4")
         (room / f"{name}.dq.json").write_text(json.dumps({"passed": passed}), encoding="utf-8")
     return tmp_path
 
@@ -55,6 +60,8 @@ def test_a_missing_takes_room_is_not_silently_clean(tmp_path):
     An episode with no takes at all has not passed its DQ -- it has not had one."""
     with_nothing = tmp_path / "empty"
     with_nothing.mkdir()
-    assert failed_takes(with_nothing) == []          # the arithmetic is honest
-    # and the caller must not treat that as evidence: there are no reports to read
+    # It used to return [] here and leave the caller to know better, which is
+    # the flaw this file is about. Now the refusal is inside: no record of which
+    # takes exist is itself a reason not to publish.
+    assert failed_takes(with_nothing) != []
     assert not (with_nothing / "takes" / "r2v").exists()
