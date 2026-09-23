@@ -202,7 +202,8 @@ def takes_rollup(take_dir: Path) -> dict:
     # THE UNIVERSE IS THE TAKES THE RENDER RECORDED, not the reports on disk:
     # a take nobody judged was simply not counted (audit 2026-09-22, item 6).
     out = {"pass": 0, "of": 0, "fail": [], "budget_spent": [], "worst": None,
-           "unjudged": judged.unjudged_takes(take_dir)}
+           # both verdicts: the take gate AND what is in the picture
+           "unjudged": judged.unjudged_takes(take_dir, kinds=("dq", "content"))}
     for path in sorted(take_dir.glob("T??.dq.json")):
         row, take = json.loads(path.read_text(encoding="utf-8")), path.name.split(".")[0]
         out["of"] += 1
@@ -297,7 +298,7 @@ def main(book_id: str, number: int, engine: str = "i2v") -> None:
     episode = episode_home.load_plan(book, number)
     master = episode_home.master_path(book, number, engine)
     work = episode_home.work_dir(book, number, engine)
-    placed = episode_home.read_json(episode_home.home(book, number) / "placed.json")
+    placed = episode_home.load_placed(book, number, episode)   # refused when stale
     lines = placed["lines"]
     lufs, tp = integrated(master), true_peak(master)
     seen = seen_cuts(master)

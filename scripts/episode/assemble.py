@@ -771,7 +771,7 @@ def main(book_id: str, number: int, engine: str = "i2v",
     takes = {}
     for r in episode_home.read_json(episode_home.takes_dir(book, number, engine) / "shots.json"):
         takes[r["index"]] = TakePath(book / r["rel_path"], r.get("shots"))
-    placed = episode_home.read_json(home / "placed.json")
+    placed = episode_home.load_placed(book, number, episode)   # refused when stale
     wavs = {r["index"]: book / r["rel_path"]
             for r in episode_home.read_json(episode_home.lines_dir(book, number) / "lines.json")}
     covered = {i for p in takes.values() for i in (p.shots or [])} | set(takes)

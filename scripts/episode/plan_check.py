@@ -93,8 +93,10 @@ def measured_or_projected(book: Path, number: int, episode, rate: float) -> list
     """The timeline's own shots when it has been written, else the projection."""
     placed = episode_home.home(book, number) / "placed.json"
     if placed.exists():
-        if why := timeline_fresh.stale(episode, episode_home.read_json(placed)):
-            raise SystemExit(f"TIMELINE     : {why[0]}")
+        try:
+            episode_home.load_placed(book, number, episode)
+        except SystemExit as why:
+            raise SystemExit(f"TIMELINE     : {why}")
         by = {s.index: s for s in episode.shots}
         return [dict(s, setup=by[s["index"]].setup, cuts=list(by[s["index"]].cuts))
                 for s in episode_home.read_json(placed)["shots"] if s["index"] in by]

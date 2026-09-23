@@ -25,14 +25,19 @@ def _inputs(episode) -> list:
     return [shots, lines]
 
 
-def fingerprint(episode) -> str:
-    """A hash of the plan's timing inputs; the same plan always hashes the same."""
-    body = json.dumps(_inputs(episode), ensure_ascii=False, sort_keys=True)
+def fingerprint(episode, lines: list[dict] | None = None) -> str:
+    """A hash of the timing inputs: the plan's words and holds, and -- given the
+    rows of lines.json -- the MEASURED length of every line. Re-voicing a line
+    changes the timeline without touching the plan, so the plan alone could
+    call a stale timeline fresh (audit 2026-09-22, item 11)."""
+    measured = sorted((r["index"], round(float(r["seconds"]), 3)) for r in (lines or []))
+    body = json.dumps(_inputs(episode) + [measured], ensure_ascii=False, sort_keys=True)
     return hashlib.sha256(body.encode("utf-8")).hexdigest()[:16]
 
 
-def stale(episode, placed: dict | None) -> list[str]:
-    """The complaint, if the timeline on disk was not built from this plan."""
-    if not placed or placed.get("plan") != fingerprint(episode):
+def stale(episode, placed: dict | None, lines: list[dict] | None = None) -> list[str]:
+    """The complaint, if the timeline on disk was not built from this plan and
+    this voice."""
+    if not placed or placed.get("plan") != fingerprint(episode, lines):
         return [REBUILD]
     return []

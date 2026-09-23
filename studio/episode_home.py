@@ -65,6 +65,26 @@ def audio_dir(book: Path, number: int) -> Path:
     return home(book, number) / "audio"
 
 
+def load_placed(book: Path, number: int, episode) -> dict:
+    """THE door to placed.json: the timeline, refused when it is not the
+    timeline of this plan and this voice.
+
+    The freshness check used to be called by plan_check alone, while takes_r2v,
+    assemble, qc and take_dq read the file directly -- so a timeline left over
+    from an edited plan or a re-voiced line reached the GPU and the cut
+    (audit 2026-09-22, item 11)."""
+    from studio import timeline_fresh
+    path = home(book, number) / "placed.json"
+    if not path.exists():
+        raise SystemExit(f"episode {number}: no timeline yet -- run scripts/episode/timeline.py")
+    lines_file = lines_dir(book, number) / "lines.json"
+    lines = read_json(lines_file) if lines_file.exists() else None
+    placed = read_json(path)
+    if why := timeline_fresh.stale(episode, placed, lines):
+        raise SystemExit(f"episode {number}: {why[0]}")
+    return placed
+
+
 def lines_dir(book: Path, number: int) -> Path:
     return audio_dir(book, number) / "lines"
 

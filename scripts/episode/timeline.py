@@ -23,13 +23,13 @@ from studio.episode_spec import MAX_SECONDS, MIN_SECONDS
 def main(book_id: str, number: int) -> None:
     book = episode_home.book_dir(book_id)
     episode = episode_home.load_plan(book, number)
-    measured = {r["index"]: r["seconds"]
-                for r in episode_home.read_json(episode_home.lines_dir(book, number) / "lines.json")}
+    rows = episode_home.read_json(episode_home.lines_dir(book, number) / "lines.json")
+    measured = {r["index"]: r["seconds"] for r in rows}
     missing = [line.index for line in episode.lines if line.index not in measured]
     if missing:
         raise SystemExit(f"lines not rendered yet: {missing}")
     placed = episode_timeline.place(episode, measured)
-    placed["plan"] = timeline_fresh.fingerprint(episode)
+    placed["plan"] = timeline_fresh.fingerprint(episode, rows)   # the plan AND the voice
     faults = episode_timeline.misaligned(placed)
     if faults:
         raise SystemExit("the sync rule is broken:\n  " + "\n  ".join(faults))
