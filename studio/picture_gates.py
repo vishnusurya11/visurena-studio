@@ -236,9 +236,29 @@ def motion_advisories(episode: Episode) -> list[str]:
 
 # ---- the verdict ----------------------------------------------------------------------
 
+def scale_faults(episode: Episode) -> list[str]:
+    """G-SCALE: a shot that is not a wide carries its setup's WIDE geometry.
+
+    A setup's geometry lays out the whole place for its establishing wide, and
+    the drawer obeys cells: pasted into a tighter shot it draws the place. ep09's
+    close-up of the hussar came back an empty garden, its medium at tea an
+    empty lawn, ep08's newspaper insert the wide platform with a paper in the
+    corner. 35 non-wide shots in ep06-ep09 carried it (audit 2026-09-22, item 20).
+    A tight shot's cells name where ITS subject sits and one or two things
+    behind it."""
+    out = []
+    for s in episode.shots:
+        geo = (getattr(episode.setups[s.setup], "geometry", "") or "").strip()
+        if s.size != "wide" and geo and geo in (getattr(s, "at_rest", "") or ""):
+            out.append(note("G-SCALE", f"shot {s.index}",
+                            f"a {s.size} carries its setup's wide geometry; say where its "
+                            f"own subject sits instead"))
+    return out
+
+
 def faults(episode: Episode) -> list[str]:
-    """Every picture reason this plan should not be drawn: G-SIZE."""
-    return size_faults(episode)
+    """Every picture reason this plan should not be drawn: G-SIZE, G-SCALE."""
+    return size_faults(episode) + scale_faults(episode)
 
 
 def advisories(episode: Episode) -> list[str]:

@@ -198,6 +198,46 @@ GEO_HIM = (
 # EACH SETUP NAMES THE PICTURE OF ITS PLACE THAT THIS EPISODE USES (`view`).
 # ep09 first did this by rewriting the BOOK-WIDE location rows, which moved
 # every earlier episode's Horsell Common to a hot daylight afternoon.
+# ---- the mediums' own cells (G-SCALE) -----------------------------------------
+# A medium names where ITS subject sits and one or two things behind it. The
+# setup's geometry lays out the whole place for its wide, and pasted into a
+# medium it drew an empty lawn where two people sat at tea (audit item 20).
+GEO_MILKMAN = (
+    "The milkman stands at the CENTRE LEFT with the white paling gate held half open against his "
+    "hip at the LEFT edge. The flat heather of the common and a line of pines lie behind him across "
+    "the TOP third under a pale hazy sky. His head is a quarter of the frame's height.")
+GEO_OVER_FENCE = (
+    "The neighbour leans over the white paling at the CENTRE, the rail running across the frame at "
+    "his waist from the LEFT edge to the RIGHT edge. The flat heather and the pines lie behind him "
+    "across the TOP third. His head is a quarter of the frame's height.")
+GEO_SAPPERS = (
+    "The sappers sit along the brick parapet across the CENTRE and stand in the shade of the arch "
+    "at the LEFT third. The bright opening of the arch shows at the CENTRE RIGHT with the pale road "
+    "going away through it.")
+GEO_SENTINEL = (
+    "The sentinel stands in the middle of the pale road at the CENTRE, small against the hedges and "
+    "elms that close both sides of it. The road runs away behind him into the TOP third.")
+GEO_FLAG = (
+    "The soldier lies along the ditch across the BOTTOM third from the LEFT third to the CENTRE, the "
+    "pole rising from his hands to the white flag at the CENTRE RIGHT. The raw sand ring of the pit "
+    "stands far off in the TOP third at the CENTRE.")
+GEO_HEATHER = (
+    "The narrator stands at the CENTRE LEFT in the heather with his boater in his hand. The raw ring "
+    "of sand and its streamer of smoke stand far off behind him at the CENTRE RIGHT, and a pale hot "
+    "sky fills the TOP third. His head is a quarter of the frame's height.")
+GEO_TEA = (
+    "The narrator sits at the LEFT third and his wife at the RIGHT third, facing each other across a "
+    "small table set at the CENTRE with a tea tray on it. The flower borders and the white paling "
+    "gate lie behind them across the TOP third. Their heads are a quarter of the frame's height.")
+GEO_LANDLORD = (
+    "The landlord stands behind the counter at the CENTRE with both hands flat on the wood, the "
+    "brass beer-engine handles at the LEFT third beside him. Shelves of bottles and pewter fill the "
+    "wall behind him. His head is a quarter of the frame's height.")
+GEO_COUNTER = (
+    "The narrator stands at the CENTRE RIGHT beside the counter, the other man's shoulder dark and "
+    "near at the LEFT third. The bottles on the shelves fill the wall behind them. His head is a "
+    "quarter of the frame's height.")
+
 SETUPS = {
     "garden": dict(
         described=GARDEN_MORNING, cast=["unnamed_milkman", "unnamed_neighbour"],
@@ -269,7 +309,7 @@ S = [
      "can a little as he does; the gate goes on resting against his hip.",
      "at the fence level with his chest, four paces from him, a 50mm lens. The hazy sun comes from "
      "the TOP and slightly BEHIND him; his canvas coat reads dull brown and the heath reads pale",
-     GEO_GARDEN, "setup", "The milkman came as usual, and had the night's news at the gate."),
+     GEO_MILKMAN, "setup", "The milkman came as usual, and had the night's news at the gate."),
 
     ("garden", "medium", ["unnamed_neighbour"], 0.6, "track_lateral",
      "Medium on " + NEIGHBOUR + " leaning over the low paling fence with a handful of strawberries "
@@ -281,7 +321,7 @@ S = [
      "resting on the top of the paling.",
      "at the fence level with his chest, four paces from him, a 50mm lens. The hazy sun comes from "
      "the TOP; his striped blazer reads pale blue and white and the heath behind reads bleached",
-     GEO_GARDEN, "setup", "My neighbour was of opinion the troops would destroy them during the day."),
+     GEO_OVER_FENCE, "setup", "My neighbour was of opinion the troops would destroy them during the day."),
 
     ("garden", "insert", [], 0.8, "tilt_up",
      "Insert past the paling fence at a flat haze of grey smoke standing over a line of pine woods "
@@ -306,7 +346,7 @@ S = [
      "in the road at a standing man's eye, a 35mm lens. Hard white daylight stands in the opening "
      "at the CENTRE and the shade under the arch is cool; the road reads chalky and the brick reads "
      "dark red",
-     GEO_BRIDGE, "setup", "Under the railway bridge I found a group of sappers."),
+     GEO_SAPPERS, "setup", "Under the railway bridge I found a group of sappers."),
 
     ("bridge", "medium_close", ["snippy"], 0.35, "push_in",
      "Medium close on " + SAPPER + " sitting on the parapet in the shade of the arch with his "
@@ -331,7 +371,7 @@ S = [
      "in the road level with his chest, eight paces from him, an 85mm lens. Hard white sun comes "
      "from the CENTRE beyond the arch; the road reads bleached and his shadow lies short and black "
      "under him",
-     GEO_BRIDGE, "friction", "No one was allowed over the canal, and a sentinel stood in the road."),
+     GEO_SENTINEL, "friction", "No one was allowed over the canal, and a sentinel stood in the road."),
 
     ("bridge", "insert", [], 0.7, "tilt_down",
      "Medium down at a soldier squatting on his heels in the dust of the road in the shade of the "
@@ -378,7 +418,7 @@ S = [
      "on itself as it swings.",
      "at the lip of the ditch level with the spoil, five paces from him, a 50mm lens. A hard high sun stands at the "
      "RIGHT; the flag reads bright white and the heather reads dusty olive",
-     GEO_PIT, "friction", "It was done by a man in a ditch with a flag on a long pole."),
+     GEO_FLAG, "friction", "It was done by a man in a ditch with a flag on a long pole."),
 
     ("pit", "medium", ["unnamed_first_person_narrator"], 0.65, "push_in",
      "Medium on " + NARRATOR + " standing in the heather in the hard afternoon sun with his straw "
@@ -389,7 +429,7 @@ S = [
      "and turns the boater once right over in his hand; his shoulders go on standing square.",
      "in the heather level with his chest, four paces from him, a 50mm lens. A hard high sun stands at the "
      "RIGHT; his grey tweed reads pale and bleached and the heather behind him reads olive",
-     GEO_PIT, "reaction", "My imagination became belligerent and defeated them a dozen ways."),
+     GEO_HEATHER, "reaction", "My imagination became belligerent and defeated them a dozen ways."),
 
     # ---- lawn: ninety seconds -----------------------------------------------
     ("garden", "medium", ["unnamed_first_person_narrator", "narrators_wife"], 0.9, "track_lateral",
@@ -403,7 +443,7 @@ S = [
      "on the lawn level with their shoulders, four paces from them, a 50mm lens. The low evening "
      "sun comes from the LEFT across the lawn; the tea things read white and the borders behind "
      "them read dark",
-     GEO_GARDEN, "setup", "We sat at tea in the summerhouse talking about the battle."),
+     GEO_TEA, "setup", "We sat at tea in the summerhouse talking about the battle."),
 
     ("lawn", "wide", [], 0.35, "crane_up",
      "Wide from the lawn across the paling at the tops of the trees about the Oriental College below "
@@ -487,7 +527,7 @@ S = [
      "at the counter level with his chest, four paces from him, a 50mm lens. The oil lamp hangs at "
      "the TOP CENTRE and lights the counter and his face from above; the corners of the room read "
      "brown and dark",
-     GEO_INN, "setup", "I must have a pound, said the landlord, and I've no one to drive it."),
+     GEO_LANDLORD, "setup", "I must have a pound, said the landlord, and I've no one to drive it."),
 
     ("inn", "medium", ["unnamed_first_person_narrator"], 0.5, "track_lateral",
      "Medium on " + NARRATOR + " standing at the counter in the lamplight speaking past the shoulder "
@@ -499,7 +539,7 @@ S = [
      "against his chest.",
      "at the counter level with his chest, four paces from him, a 50mm lens. The oil lamp hangs at "
      "the TOP CENTRE; his grey tweed reads warm under it and the man in front of him reads dark",
-     GEO_INN, "friction", "I'll give you two, said I, over the stranger's shoulder."),
+     GEO_COUNTER, "friction", "I'll give you two, said I, over the stranger's shoulder."),
 
     # ---- lawn again: what a fight with them looks like ----------------------
     ("lawn", "wide", [], 0.9, "crane_up",
