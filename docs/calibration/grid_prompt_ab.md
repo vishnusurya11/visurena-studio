@@ -44,3 +44,15 @@ either pass 0.112 or accuse published work, so none is added. The instrument
 this needs is a FRAMING answer from the panel content VLM, from a closed
 vocabulary (head and shoulders / to the waist / full figure) judged against
 the planned size in code. It is queued with the Tier 4 checks.
+
+## Correction (2026-09-23): the A/B dressed the cast from chapter 6
+
+`grids.py` read `character_row(book, name, 6)`: every ep09 grid, A/B
+included, was bound to the chapter-6 wardrobe. The "clothes right" verdict on
+v2c (shawl, cream blouse, sage skirt) was judged against the wrong chapter;
+chapter 9 dresses the wife in a sage walking costume and a dust coat, and the
+milkman, Snippy, the hussar and the landlord got no garments at all. The
+structural result stands -- v1 cloned both leads and copied the insert, v2
+did neither, at the same seeds -- but the garment-binding result is unproven
+until re-measured on the right rows. The grid now reads the same chapter-
+stamped refs.json row as the take. Found by the grid-stage audit agent.

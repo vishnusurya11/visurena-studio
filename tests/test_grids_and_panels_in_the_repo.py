@@ -135,3 +135,28 @@ def test_a_changed_panel_is_rewritten(tmp_path):
     out = tmp_path / "shot_00.png"
     panels.save_if_changed(Image.new("RGB", (8, 8), (10, 20, 30)), out)
     assert panels.save_if_changed(Image.new("RGB", (8, 8), (99, 20, 30)), out) is True
+
+
+# ---- the grid dresses people from the SAME bound row as the take (2026-09-23)
+# grids.py read character_row(book, name, 6): every ep09 grid was dressed from
+# chapter 6 -- the wife's rust shawl, the neighbour's striped blazer, and no
+# garments at all for the milkman, Snippy, the hussar and the landlord.
+
+from studio import cast_refs  # noqa: E402
+
+
+class _Shot:
+    def __init__(self, faces):
+        self.faces = faces
+
+
+def test_the_grid_binds_the_chapter_row_the_take_uses():
+    book = episode_home.book_dir(WOTW)
+    people, _ = grids.cast_of(book, [_Shot(["narrators_wife"])])
+    assert people[0]["wear"] == " ".join(cast_refs.row(book, "narrators_wife")["physical"].split())
+
+
+def test_no_grid_code_names_a_chapter_by_number():
+    import re
+    source = (Path(grids.__file__)).read_text(encoding="utf-8")
+    assert not re.search(r"character_row\([^)]*,\s*\d+\)", source)

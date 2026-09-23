@@ -38,7 +38,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 
-from studio import episode_home, pack_refs
+from studio import cast_refs, episode_home, pack_refs
 from studio.comfy import load_workflow, stage_image, submit, wait
 from studio.episode_home import episode_arg
 from studio.ref_slots import stage_only
@@ -121,7 +121,11 @@ def cast_of(book: Path, shots: list) -> tuple[list[dict], dict]:
     who = list(dict.fromkeys(who))                      # first-appearance order
     people, slots, n = [], {}, 0
     for name in who:
-        row = pack_refs.character_row(book, name, 6)
+        # THE ROW THE TAKE READS: refs.json, stamped with this episode's chapter
+        # (chapter_refusal checks it). This used to read the dossier with the
+        # chapter hard-coded as six, and dressed every ep09 grid from chapter 6
+        # (2026-09-23).
+        row = cast_refs.row(book, name)
         sheet, ref = sheet_of(book, name), None
         if sheet is not None and n < MAX_SLOTS - 1:     # one slot is always the place
             n += 1
