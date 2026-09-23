@@ -135,7 +135,8 @@ def banned_subject(seen: Seen, banned) -> list[str]:
 
 
 def faults(seen: Seen, frame: str, planned: int, crowd: bool,
-           flat: bool, night: bool, banned=(), physical: str = "") -> list[str]:
+           flat: bool, night: bool, banned=(), physical: str = "",
+           size: str = "", extras: int = 0) -> list[str]:
     """Every way this picture disagrees with the shot that asked for it.
 
     `frame` is kept for the caller's own reporting; it is NOT used to decide
@@ -148,10 +149,14 @@ def faults(seen: Seen, frame: str, planned: int, crowd: bool,
     if strangers := banned_subject(seen, banned):
         out.append(f"banned from this book: {', '.join(strangers)}")
     out += contradictions(seen, physical)
-    if people_fault(seen, planned, crowd or (not planned and worn_by_someone(frame))):
+    # who may be here is DECLARED: faces + extras, or the setup's crowd. The
+    # one prose exemption left is an INSERT on something worn -- a collar stud
+    # at a throat holds a person by necessity -- and it reads whole words now.
+    worn = not planned and size == "insert" and worn_by_someone(frame)
+    if people_fault(seen, planned + extras, crowd or worn):
         out.append(f"{seen.people} figure(s) for {planned} cast, "
                    f"{seen.lookalikes} of them copies of another")
-    if seen.text and not prints_words(frame):
+    if seen.text and not lettering_expected(frame, size):
         out.append("text or lettering in the picture")
     # AN INTERIOR HAS NO HOUR TO READ. A lamplit dining room came back 'day'
     # and was called a night fault; the reader cannot see the sky from inside.
@@ -169,6 +174,9 @@ class Unreadable(ValueError):
     """
 
 
+REQUIRED = ("landform", "people", "lookalikes", "text", "hour")
+
+
 def parse(said: str) -> Seen:
     """The reader's answer, however the workflow wrapped it.
 
@@ -182,13 +190,18 @@ def parse(said: str) -> Seen:
         got = _loads(got[0]) if isinstance(got[0], str) else got[0]
     if not isinstance(got, dict):
         raise Unreadable(f"no object in {said[:80]!r}")
+    # A MISSING FIELD IS AN UNREADABLE ANSWER, never a default: no "people"
+    # read as 0 people, no "hour" as night, no "text" as clean -- a malformed
+    # answer passed as a clean picture (audit 2026-09-22).
+    if absent := [k for k in REQUIRED if k not in got]:
+        raise Unreadable(f"the reader's answer has no {', '.join(absent)}")
     try:
         return Seen(
-            landform=str(got.get("landform", "flat")).lower().strip(),
-            people=int(got.get("people", 0) or 0),
-            lookalikes=int(got.get("lookalikes", 0) or 0),
-            text=bool(got.get("text", False)),
-            hour=str(got.get("hour", "night")).lower().strip(),
+            landform=str(got["landform"]).lower().strip(),
+            people=int(got["people"] or 0),
+            lookalikes=int(got["lookalikes"] or 0),
+            text=bool(got["text"]),
+            hour=str(got["hour"]).lower().strip(),
             subjects=[str(s).strip() for s in (got.get("subjects") or [])],
         )
     except (TypeError, ValueError) as bad:
@@ -212,9 +225,12 @@ def _loads(text: str):
         raise Unreadable(str(bad)) from bad
 
 WORN = re.compile(
-    "throat|collar|lapel|cuff|sleeve|shoulder|"
-    "hand|hands|wrist|finger|face|cheek|jaw|mouth|eyes|hair|boot|foot|feet",
+    r"\b(?:throat|collar|lapel|cuffs?|sleeves?|shoulders?|"
+    r"hands?|wrists?|fingers?|face|cheeks?|jaw|mouth|eyes|hair|boots?|foot|feet)\b",
     re.I)
+"""WHOLE WORDS (audit 2026-09-22): without boundaries "surface" was a face,
+"chair" was hair and "footpath" a foot, and a match stood the people check
+down."""
 """Parts of a person, and the things worn on them. An INSERT naming one of
 these holds a figure by necessity: ep07's shot 20 is a burst collar stud at a
 man's throat and it is cast for nobody. The other direction of the same rule
@@ -226,9 +242,24 @@ def worn_by_someone(frame: str) -> bool:
     return bool(WORN.search(frame or ""))
 
 PRINTED = re.compile(
-    "newspaper|paper|page|print|placard|poster|board|sign|timetable|bookstall|"
-    "letter|telegram|book|label|ticket",
+    r"\b(?:newspapers?|papers?|pages?|placards?|posters?|signboards?|signs?|timetables?|"
+    r"letters?|telegrams?|books?|labels?|tickets?|headlines?)\b",
     re.I)
+"""WHOLE WORDS, and "print" and "board" are gone: "boot print" is not a page and
+"cupboard" is not a signboard. Without boundaries "papered wall" was paper."""
+
+LETTERING_SIZES = ("insert", "close", "extreme_close", "medium_close")
+
+
+def lettering_expected(frame: str, size: str) -> bool:
+    """Is type EXPECTED in this picture -- because the printed thing is its
+    subject, seen close enough to read?
+
+    A printed noun anywhere in the prose used to excuse lettering anywhere in
+    the picture: five ep07 dining-room wides say "papered wall" and the gate
+    never looked at them, in the room that had a lettered engraving. A poster
+    on the far wall of a wide is set dressing, not a page to read."""
+    return size in LETTERING_SIZES and bool(PRINTED.search(frame or ""))
 """Things that carry words because that is what they are. ep08's shot 6 is an
 insert on the front page of an evening paper and the lettering check called
 it a fault; a page without type is not a page."""
@@ -236,3 +267,30 @@ it a fault; a page without type is not a page."""
 
 def prints_words(frame: str) -> bool:
     return bool(PRINTED.search(frame or ""))
+
+
+# ---- the rules live with the book, not in the runners -----------------------
+
+def flat_place(book, location: str) -> bool:
+    """Does this place's own row say it is flat? A row that does not say is
+    not assumed flat: a hill called flat fails every panel of the hill."""
+    from pathlib import Path
+    import json
+    if not location:
+        return False
+    path = Path(book) / "analysis" / "locations" / f"{location}.json"
+    if not path.exists():
+        return False
+    return json.loads(path.read_text(encoding="utf-8")).get("landform") == "flat"
+
+
+def banned_subjects(book) -> tuple:
+    """Subjects this book never shows, from analysis/dq_rules.json. The two
+    runners each kept their own list and they drifted: the take checker still
+    banned "car", so a railway carriage failed (audit 2026-09-22, item 7)."""
+    from pathlib import Path
+    import json
+    path = Path(book) / "analysis" / "dq_rules.json"
+    if not path.exists():
+        return ()
+    return tuple(json.loads(path.read_text(encoding="utf-8")).get("banned_subjects", ()))

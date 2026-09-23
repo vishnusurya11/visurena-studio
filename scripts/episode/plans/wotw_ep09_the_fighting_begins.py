@@ -624,6 +624,17 @@ PATHS = {
 }
 
 
+# UNNAMED PEOPLE ARE DECLARED, never read out of the prose (audit 2026-09-22,
+# items 1-2). A setup declares a crowd; everyone else is counted here. The
+# content gate read ep09's panels against this and every one of its four
+# failures was real: an undeclared soldier, hussars and two women -- and, in
+# shot 21, three identical women walking where two sit in the cart.
+EXTRAS = {6: 1,    # the sentinel in the road
+          10: 1,   # the man in the ditch with the flag
+          18: 6,   # a bevy of hussars under the bridge, two of them on foot
+          20: 1,   # the stranger the narrator speaks past
+          21: 2}   # the wife and the servant, up in the cart
+
 SECTIONS = {
     0: "hook",
     1: "setup", 2: "setup", 3: "setup",
@@ -642,7 +653,7 @@ def build() -> dict:
     for i, (setup, size, faces, path, move, frame, motion, camera, at_rest, section, why) in enumerate(S):
         beat, coda = BEATS.get(i, (0.8, 0.9))
         shots.append(dict(index=i, section=SECTIONS.get(i, section), setup=setup, size=size,
-                          faces=list(faces), view="",
+                          faces=list(faces), extras=EXTRAS.get(i, 0), view="",
                           path=PATHS.get(i, path), frame=frame, motion=motion, camera=camera,
                           at_rest=at_rest, end="", changed="", beat_s=beat, coda_s=coda,
                           turn=TURNS.get(i, ""), why=why, cuts=[]))

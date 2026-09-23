@@ -875,10 +875,14 @@ def refuse_failed_panels(book: Path, number: int, episode: Episode) -> None:
     panels = sorted(home.glob("shot_*.png"))
     if not panels and not (home / "h3").is_dir():
         return
-    why = panel_dq.panel_refusal(home / "panel_dq.json", panels, [s.index for s in episode.shots])
-    if why:
-        raise SystemExit(f"takes refused: {why}\n  run: uv run python scripts/episode/panel_check.py "
-                         f"<book> {number}")
+    wanted = [s.index for s in episode.shots]
+    # BOTH panel gates: the statistics (panel_check) and what is actually IN
+    # the picture (panel_content_check). Same row shape, same refusal.
+    for verdict, runner in (("panel_dq.json", "panel_check.py"),
+                            ("panel_content.json", "panel_content_check.py")):
+        if why := panel_dq.panel_refusal(home / verdict, panels, wanted):
+            raise SystemExit(f"takes refused ({verdict}): {why}\n  run: uv run python "
+                             f"scripts/episode/{runner} <book> {number}")
 
 
 def main(book_id: str, number: int, retake: list[int] | None = None, approved: bool = False,

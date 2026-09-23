@@ -38,7 +38,14 @@ John Watson, M.D.", 56 characters, which overruns by seven.
 """
 import pytest
 
-from studio.youtube_publish import TITLE_MAX, series_title
+from studio.youtube_publish import TITLE_MAX
+from studio.youtube_publish import series_title as _series_title
+
+
+def series_title(*args, **kw):
+    """These are the Scarlet book's titles, so they name its series. The series
+    used to be a hardcoded default; it is the caller's now (audit item 13)."""
+    return _series_title(*args, series="Sherlock Holmes", **kw)
 
 
 def test_the_series_comes_first():

@@ -86,14 +86,24 @@ def push(api, video_id: str, snippet: dict) -> dict:
                                body={"id": video_id, "snippet": snippet}).execute()
 
 
+def series_of(book) -> tuple[str, str, int]:
+    """(series, display title, episodes in the series), from the book's own
+    source/book.json. No default: the defaults were the other book's -- "Sherlock
+    Holmes" and 14 -- and would have retitled WotW's published videos with them."""
+    said = json.loads((Path(book) / "source" / "book.json").read_text(encoding="utf-8"))
+    if missing := [k for k in ("series", "display_title", "episodes") if not said.get(k)]:
+        raise SystemExit(f"source/book.json does not say its {', '.join(missing)}; "
+                         f"a title will not be guessed")
+    return said["series"], said["display_title"], int(said["episodes"])
+
+
 def main(argv: list[str]) -> None:
     args = [a for a in argv[1:] if not a.startswith("--")]
     book_id = args[0]
-    total = int(next((a.split("=", 1)[1] for a in argv if a.startswith("--total=")), 14))
     dry = "--dry-run" in argv
 
     book = episode_home.book_dir(book_id)
-    name = json.loads((book / "source" / "book.json").read_text(encoding="utf-8"))["title"]
+    series, name, total = series_of(book)
     rows = episodes(book)
     print(f"book      {name}")
     print(f"episodes  {len(rows)} published, series of {total}\n")
@@ -106,7 +116,7 @@ def main(argv: list[str]) -> None:
                          0.0, approval.approved_for("publish", argv))
 
     for row in rows:
-        want = yp.series_title(name, row["episode"], total, chapter_of(row["title"]))
+        want = yp.series_title(name, row["episode"], total, chapter_of(row["title"]), series=series)
         print(f"ep{row['episode']:02d}  {row['video_id']}")
         print(f"  was  {row['title']}")
         print(f"  now  {want}   ({len(want)} chars)")

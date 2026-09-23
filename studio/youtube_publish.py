@@ -210,12 +210,6 @@ def deliverable(home, engine: str = "") -> tuple:
 
 # ---- the title -------------------------------------------------------------
 
-SERIES = "Sherlock Holmes"
-"""The character, not the author or the channel.
-
-It leads because it is the search term. A viewer looking for this work types
-"Sherlock Holmes" long before they type "A Study in Scarlet", and never types
-the chapter title -- which is what the first five uploads led with."""
 
 ELLIPSIS = "…"
 
@@ -232,15 +226,24 @@ def elided(text: str, room: int) -> str:
     return kept + ELLIPSIS
 
 
-def series_title(book: str, episode: int, total: int, chapter: str) -> str:
+def series_title(book: str, episode: int, total: int, chapter: str, *, series: str) -> str:
     """`Sherlock Holmes: A Study in Scarlet — Ep 04/14 — "What John Rance..."`.
+
+    `series` LEADS because it is the search term -- the character or author a
+    viewer types before the title, and never the chapter, which is what the
+    first five uploads led with. It is the BOOK's, passed in: this used to be a
+    module constant, "Sherlock Holmes", and run over The War of the Worlds the
+    retitle script would have renamed its published videos after Holmes
+    (audit 2026-09-22, item 13).
 
     The serial and the position come first because that is what a truncated
     search result shows; the chapter is what gives when the 100-character wall
     is reached, never the other way round."""
     if not chapter.strip():
         raise ValueError("a title needs its chapter name")
+    if not series.strip():
+        raise ValueError("a title needs its series name, from the book")
     if not 1 <= episode <= total:
         raise ValueError(f"episode {episode} of {total} is not in the series")
-    lead = f"{SERIES}: {book} — Ep {episode:02d}/{total:02d} — "
+    lead = f"{series.strip()}: {book} — Ep {episode:02d}/{total:02d} — "
     return f'{lead}"{elided(chapter.strip(), TITLE_MAX - len(lead) - 2)}"'
