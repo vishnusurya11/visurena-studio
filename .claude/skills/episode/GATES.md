@@ -53,7 +53,9 @@ reworded frame does not stale it.
 
 The take lint (`episode_ref_official.check`) runs on every built prompt:
 
-- the length per block (240-360 words);
+- the length per block: 240-360 words with references only, 150-360 when the
+  storyboard panel is staged (the panel is the room: the place is named once,
+  in the summary, and the soundscape is one line naming no place);
 - the style line: 16 words at most, no stray capitals (place names count as names);
 - banned props (for example gloves, where the book gives bare hands);
 - a last frame reaching the prompt;
@@ -76,10 +78,18 @@ content checks refuse rows stamped for another chapter. **HARD.**
 | script | writes | measures | calibration |
 |---|---|---|---|
 | `panel_check.py` | `storyboard/panel_dq.json` | people against `faces`+`extras` (faces need detector confidence 0.8 or more); missing face at medium or tighter (a back view the plan asks for is exempt); sharpness against the house control for the setup's hour; ink (small bright marks by their rim); tiling | ep06 29/29, ep08 20/20; the only failures are real (ep07 13 stacked, ep09 12 empty). Ink: worst clean panel 0.00417, caption band 0.01009, wall 0.007 |
+| `panel_check.py` stacked | (same file) | the strongest full row or column gutter line at 512 | HARD above 0.90: ep07 S12-S14 read 1.000, every other published panel at most 0.748 (ep09 S07, a chalk cross) |
 | `panel_content_check.py` | `storyboard/panel_content.json` | a vision model LISTS people, copies, lettering, hour, landform and subjects; code judges the list against the plan, the place's `landform` and the book's `dq_rules.json` | ep09 19/23, all four failures real (see `docs/calibration/content_gate.md`) |
 
 `takes_r2v` refuses when either verdict is missing, fails a shot, skipped a
 shot, or is older than a redrawn panel. **HARD.**
+
+The content reader is read STRICTLY (2026-09-23): a reply cut off inside
+`subjects` is salvaged (the judged fields come first) and one cut before
+them still refuses; `"false"` is false; a subjects string is split into
+words; fewer people than the shot NAMES fails (inserts and back views the
+plan asks for excepted); banned words match by stem. Re-judging ep09's 23
+stored readings raised no new failure.
 
 ## Takes
 

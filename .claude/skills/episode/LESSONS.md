@@ -150,6 +150,15 @@ SKILL.md.
 - **Look at what went public.** Four identical shopmen and a "NEWSPAPER BOY"
   headline passed every gate in ep08. The content gate now catches the first;
   OCR is needed for the second.
+- **Say the place once.** ep09's 23 take prompts carried "The shot is inside
+  this place" 23 times beside a staged panel; the median prompt fell from 558
+  to 405 words when it went, and every prompt still passed the lint.
+- **Read the reader strictly.** A cut-off answer, a "false" string and a
+  subjects string each blinded a check silently; a missing named person never
+  failed at all.
+- **A guard can depend on state that moves.** The regenerate guard checked
+  ep09's tags against refs.json, which holds only the chapter being made;
+  binding chapter 10 broke ep09 until tags carried their own chapter.
 - **`cut` reads brightness; a switch of picture is `jump`.** T15's second
   attempt changed pictures at cut 26.5 and passed at 74; the signature jump
   reads 0.16 against 0.83+ on every accepted take.

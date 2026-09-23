@@ -112,7 +112,10 @@ lead's). The turn is people acting on each other, so name both of them in one
 motion clause.
 
 **The cast.**
-- Name people with `cast_refs.tag(BOOK, who, "the narrator", [fragments])`.
+- Name people with `cast_refs.tag(BOOK, who, "the narrator", [fragments], chapter=N)`.
+  Pass the plan's own chapter: refs.json holds ONE chapter, so without it an
+  earlier plan cannot regenerate once the next chapter is bound. The tag is
+  closed in parentheses, so the plan's next verb cannot run on.
   The fragments are verbatim words from the bound row, face first and then
   silhouette.
 - It refuses any fragment the row does not say, so a plan can no longer
