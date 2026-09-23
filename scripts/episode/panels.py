@@ -65,6 +65,18 @@ def stale_grids(rows: list[dict], current: str, ep=None) -> list[str]:
     return [r["name"] for r in rows if stale(r)]
 
 
+def save_if_changed(img: Image.Image, out: Path) -> bool:
+    """Write the panel only when its pixels differ from the file on disk. A
+    re-cut of unchanged grids rewrote all 23 ep09 panels, and the takes then
+    refused every verdict as older than its picture."""
+    if out.exists():
+        with Image.open(out) as old:
+            if old.size == img.size and np.array_equal(np.asarray(old.convert("RGB")), np.asarray(img)):
+                return False
+    img.save(out)
+    return True
+
+
 def cut(grid: Image.Image, row: dict, slot: int) -> Image.Image:
     """One panel out of its grid, less the gutter the fixed trim left behind."""
     panel = grid.crop(panel_box(slot, row["cols"], row["rows"], grid.size))
@@ -83,8 +95,8 @@ def main(book_id: str, number: int) -> None:
     for shot in ep.shots:
         row, slot = owner[shot.index]
         panel = cut(Image.open(grids_dir(book, number) / f"{row['name']}.png").convert("RGB"), row, slot)
-        panel.resize((1024, 1024), Image.LANCZOS).save(out / f"shot_{shot.index:02d}.png")
-        panel.resize((NATIVE, NATIVE), Image.LANCZOS).save(out / "h3" / f"shot_{shot.index:02d}.png")
+        save_if_changed(panel.resize((1024, 1024), Image.LANCZOS), out / f"shot_{shot.index:02d}.png")
+        save_if_changed(panel.resize((NATIVE, NATIVE), Image.LANCZOS), out / "h3" / f"shot_{shot.index:02d}.png")
         print(f"  shot {shot.index:02d}  <- {row['name']} slot {slot}", flush=True)
     print(f"{len(ep.shots)} panels -> {episode_home.relative(book, out)}")
 

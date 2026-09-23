@@ -113,3 +113,25 @@ def test_a_camera_move_is_not_what_a_grid_is_drawn_from(ep09):
         s.model_copy(update={"motion": "The camera pushes in on it; it goes on burning."})
         if s.index == 14 else s for s in ep09.shots]})
     assert grids.shots_sha(moved, [13, 14, 21]) == grids.shots_sha(ep09, [13, 14, 21])
+
+
+# ---- re-cutting an unchanged panel leaves its file alone (2026-09-23) --------
+# Re-running panels.py after a plan edit rewrote all 23 ep09 panels with the
+# same pixels; the takes then refused every verdict as older than its picture.
+
+from PIL import Image  # noqa: E402
+
+
+def test_an_unchanged_panel_is_not_rewritten(tmp_path):
+    img = Image.new("RGB", (8, 8), (10, 20, 30))
+    out = tmp_path / "shot_00.png"
+    assert panels.save_if_changed(img, out) is True
+    stamp = out.stat().st_mtime_ns
+    assert panels.save_if_changed(img, out) is False
+    assert out.stat().st_mtime_ns == stamp
+
+
+def test_a_changed_panel_is_rewritten(tmp_path):
+    out = tmp_path / "shot_00.png"
+    panels.save_if_changed(Image.new("RGB", (8, 8), (10, 20, 30)), out)
+    assert panels.save_if_changed(Image.new("RGB", (8, 8), (99, 20, 30)), out) is True
