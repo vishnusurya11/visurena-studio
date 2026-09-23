@@ -87,3 +87,23 @@ def test_a_colon_introduces_parts_of_one_item_not_new_items():
             "White shirt, dark green tie. Straw boater.")
     assert worn_items(wear) == ["Mid-grey tweed lounge suit", "White shirt", "dark green tie",
                                 "Straw boater"]
+
+
+NARR = ("Man of 34. Wearing: Mid-grey tweed lounge suit. White shirt. Straw boater with a black "
+        "band.")
+
+
+def test_a_bareheaded_person_is_not_bound_to_wear_a_hat():
+    """ep09 shot 11: the plan put the boater in his hand, the binding line put
+    it on his head, and the panel drew both."""
+    cast = [{"ref": 1, "name": "NARRATOR", "entity": "n", "wear": NARR, "against": "a"}]
+    text = grid_prompt_v2([panel("bareheaded in the heather, his boater in one hand", ["NARRATOR"])],
+                          1, 1, PLACE, cast, 3)
+    line = next(x for x in text.split("\n\n") if x.startswith("NARRATOR is"))
+    assert "boater" not in line and "Mid-grey tweed lounge suit" in line
+
+
+def test_a_person_with_a_hat_on_keeps_it():
+    cast = [{"ref": 1, "name": "NARRATOR", "entity": "n", "wear": NARR, "against": "a"}]
+    text = grid_prompt_v2([panel("in the heather", ["NARRATOR"])], 1, 1, PLACE, cast, 3)
+    assert "Straw boater with a black band" in text

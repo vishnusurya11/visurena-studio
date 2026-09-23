@@ -201,8 +201,18 @@ def worn_items(wear: str, most: int = 5) -> list[str]:
     return [i for i in items if i][:most]
 
 
-def _binding(p: dict) -> str:
-    items = worn_items(p.get("wear", ""))
+HEADWEAR = re.compile(r"\b(?:hat|boater|cap|bonnet|toque|helmet|bowler|busby)\b", re.I)
+BAREHEADED = re.compile(r"\bbare-?headed\b", re.I)
+
+
+def bareheaded(name: str, shots: list[dict]) -> bool:
+    """Does a panel this person is in say they are bareheaded? ep09 shot 11
+    put the boater in his hand while the binding put it on his head: both drawn."""
+    return any(BAREHEADED.search(s["body"]) for s in shots if name in (s.get("who") or []))
+
+
+def _binding(p: dict, bare: bool = False) -> str:
+    items = [i for i in worn_items(p.get("wear", "")) if not (bare and HEADWEAR.search(i))]
     worn = f", wearing: {'; '.join(items)}" if items else ""
     return f"{p['name']} is the person in <image{p['ref']}>{worn}."
 
@@ -230,7 +240,7 @@ def grid_prompt_v2(shots: list[dict], cols: int, rows: int, place: tuple[list[in
                   f"same size, thin white gutters between them, no lettering anywhere.")
         blocks = [_block_v2(f"PANEL {i} ({where}), ", s)
                   for i, (where, s) in enumerate(zip(cells, shots), start=1)]
-    binding = [_binding(p) for p in cast if p.get("ref")]
+    binding = [_binding(p, bareheaded(p["name"], shots)) for p in cast if p.get("ref")]
     if len(binding) > 1:
         binding.append(f"{' and '.join(p['name'] for p in cast if p.get('ref'))} are never dressed alike.")
     refs = " and ".join(f"<image{n}>" for n in place[0])
@@ -502,12 +512,38 @@ def seam_box(frame) -> tuple:
     return (left, top, width - right, height - bottom)
 
 
+SEAM_THIN = 24
+"""The widest gutter found INSIDE the edge band. ep09's measured 7 columns; a
+broader pale band is a wall or a sky, and a picture keeps it."""
+
+
+def _is_seam(line) -> bool:
+    return line.mean() > SEAM_PALE and line.std() < SEAM_FLAT
+
+
 def _seam_depth(grey, most: int) -> int:
-    """How many leading rows of `grey` are pale and flat, capped at `most`."""
+    """How many leading rows of `grey` are gutter, capped at `most`: the pale,
+    flat run at the edge, or -- when the model drew the panel narrower than its
+    cell -- a thin pale run inside the band, with the neighbour's spill outside
+    it (ep09 shot 14: 93 columns of spill, then a 7-column gutter)."""
+    seam = [_is_seam(grey[i]) for i in range(most)]
     depth = 0
-    while depth < most and grey[depth].mean() > SEAM_PALE and grey[depth].std() < SEAM_FLAT:
+    while depth < most and seam[depth]:
         depth += 1
+    for i in range(depth, most):
+        if seam[i] and (i == 0 or not seam[i - 1]):
+            end = next((j for j in range(i, most) if not seam[j]), most)
+            if end - i <= SEAM_THIN and end < most and _between_picture(grey, i, end):
+                depth = end
     return depth
+
+
+def _between_picture(grey, start: int, end: int) -> bool:
+    """A gutter has darker picture on BOTH sides. A sky grading across the pale
+    line makes thin 'seam' runs too, with sky on either side (ep09 shots 1-3
+    lost 98-166 rows of morning sky to the rule without this)."""
+    darker = SEAM_PALE - 35
+    return start > 0 and grey[start - 1].mean() < darker and grey[end].mean() < darker
 
 
 def panel_box(n: int, cols: int, rows: int, size, trim: int = 16) -> tuple:

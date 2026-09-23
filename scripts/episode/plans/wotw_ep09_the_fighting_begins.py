@@ -72,6 +72,10 @@ from studio import cast_refs  # noqa: E402
 NARRATOR = cast_refs.tag(BOOK, "unnamed_first_person_narrator", "the narrator", [
     "Neat close-trimmed dark brown moustache", "Mid-grey herringbone tweed lounge suit",
     "Straw boater with a black band"])
+NARRATOR_BAREHEADED = cast_refs.tag(BOOK, "unnamed_first_person_narrator", "the narrator", [
+    "Neat close-trimmed dark brown moustache", "Mid-grey herringbone tweed lounge suit"])
+"""Shot 11 holds the boater in his hand. Tagged with it too, the panel drew a
+boater on his head AND one in his hand (2026-09-23)."""
 WIFE = cast_refs.tag(BOOK, "narrators_wife", "the narrator's wife", [
     "Thick chestnut-auburn hair", "Sage-green linen walking costume",
     "Small sage-green felt toque with a cream ostrich tip"])
@@ -421,8 +425,8 @@ S = [
      GEO_FLAG, "friction", "It was done by a man in a ditch with a flag on a long pole."),
 
     ("pit", "medium", ["unnamed_first_person_narrator"], 0.65, "push_in",
-     "Medium on " + NARRATOR + " standing in the heather in the hard afternoon sun with his straw "
-     "boater in one hand and his hair flat with heat, looking out across the heath toward the raw "
+     "Medium on " + NARRATOR_BAREHEADED + " standing bareheaded in the heather in the hard "
+     "afternoon sun with his straw boater held down in one hand and his hair flat with heat, looking out across the heath toward the raw "
      "ring of sand with his chin up, the flat common running away behind him.",
      "The camera pushes in toward him with small amplitude until his head and shoulders fill the "
      "middle of the picture, travelling one short stride; he goes on looking out across the heath "
@@ -531,12 +535,13 @@ S = [
 
     ("inn", "medium", ["unnamed_first_person_narrator"], 0.5, "track_lateral",
      "Medium on " + NARRATOR + " standing at the counter in the lamplight speaking past the shoulder "
-     "of another man who stands with his back to the camera, his hat off and held against his chest "
-     "and his face wet with the heat, the bottles on the shelves behind them.",
+     "of another man who stands with his back to the camera holding his own brown bowler off "
+     "against his chest, the bottles on the shelves behind them. The narrator's hands are empty "
+     "and rest on the counter.",
      "The camera tracks sideways to the right along the counter, a truck with small amplitude, until "
      "the brass handles already in the picture are at the centre, travelling one short stride; he "
-     "goes on speaking across the other man's shoulder; his hat goes on being turned round and round "
-     "against his chest.",
+     "goes on speaking across the other man's shoulder; the other man goes on turning his bowler "
+     "round against his chest.",
      "at the counter level with his chest, four paces from him, a 50mm lens. The oil lamp hangs at "
      "the TOP CENTRE; his grey tweed reads warm under it and the man in front of him reads dark",
      GEO_COUNTER, "friction", "I'll give you two, said I, over the stranger's shoulder."),

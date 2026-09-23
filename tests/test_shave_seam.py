@@ -60,3 +60,30 @@ def test_a_seam_is_never_allowed_to_eat_the_picture():
     all_white = np.full((128, 128, 3), 252, dtype=np.uint8)
     left, top, right, bottom = seam_box(all_white)
     assert right - left > 0 and bottom - top > 0
+
+
+def test_a_gutter_inside_the_edge_takes_the_neighbours_spill_with_it():
+    """ep09 lawn 3x1: the model drew its middle panel narrower than its cell,
+    so shot 14 came out with 93 columns of the left panel, a 7-column white
+    gutter, and then its own picture. The gutter is thin and has picture on
+    both sides; everything outside it is the neighbour's."""
+    frame = picture(200)
+    frame[:, 30:36] = 250
+    assert seam_box(frame)[0] == 36
+
+
+def test_a_broad_pale_band_inside_the_picture_is_not_a_gutter():
+    frame = picture(200)
+    frame[:, 20:48] = 250           # a white wall, 28 columns: wider than any gutter
+    assert seam_box(frame)[0] == 0
+
+
+def test_a_pale_graded_sky_is_never_taken_for_a_gutter():
+    """The first cut of the inner-gutter rule shaved 98-166 rows of morning sky
+    off ep09 shots 1-3: rows of a sky that grades across the pale threshold
+    make thin 'seam' runs with sky on both sides. A gutter has darker picture
+    on both sides of it."""
+    frame = picture(200, value=60)
+    for r in range(60):
+        frame[r, :] = 228 + (r % 3) * 5          # 228 / 233 / 238: sky flickering across the line
+    assert seam_box(frame)[1] == 0

@@ -66,3 +66,40 @@ def test_manifests_are_read_from_the_episode(tmp_path):
     folder.mkdir(parents=True)
     (folder / "ep09_grid_pit_2x1.json").write_text(json.dumps(grid("ep09_grid_pit_2x1", [9, 10])))
     assert [r["name"] for r in panels.manifests(tmp_path, 9)] == ["ep09_grid_pit_2x1"]
+
+
+# ---- a grid is stale only when ITS shots change (2026-09-23) ----------------
+# ep09: a hat worded twice in shot 11's plan text could not be fixed without
+# redrawing all 23 panels, because every grid carried one hash of the whole
+# plan. A grid is drawn from its own shots and their setups, and that is what
+# it is fingerprinted by.
+
+from studio import episode_home  # noqa: E402
+
+WOTW = "20260827135508_the-war-of-the-worlds"
+
+
+@pytest.fixture(scope="module")
+def ep09():
+    return episode_home.load_plan(episode_home.book_dir(WOTW), 9)
+
+
+def edited(ep, index, frame):
+    shots = [s.model_copy(update={"frame": frame}) if s.index == index else s for s in ep.shots]
+    return ep.model_copy(update={"shots": shots})
+
+
+def test_a_grid_is_fingerprinted_by_its_own_shots(ep09):
+    before = grids.shots_sha(ep09, [9, 10, 11])
+    assert grids.shots_sha(edited(ep09, 3, "a different haze"), [9, 10, 11]) == before
+    assert grids.shots_sha(edited(ep09, 10, "a different flag"), [9, 10, 11]) != before
+
+
+def test_only_the_grid_whose_shot_changed_is_stale(ep09):
+    rows = [{**grid("pit", [9, 10, 11], "old"), "drawn_from": grids.shots_sha(ep09, [9, 10, 11])},
+            {**grid("haze", [3], "old"), "drawn_from": grids.shots_sha(ep09, [3])}]
+    assert panels.stale_grids(rows, "new", edited(ep09, 3, "a different haze")) == ["haze"]
+
+
+def test_a_manifest_without_a_fingerprint_falls_back_to_the_plan_hash(ep09):
+    assert panels.stale_grids([grid("a", [0], "p0")], "p1", ep09) == ["a"]
