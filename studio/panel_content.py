@@ -129,9 +129,11 @@ def banned_subject(seen: Seen, banned) -> list[str]:
     dining room and a substring test reported a CAR in each of them.
     """
     said = " ".join(seen.subjects).lower()
-    words = set(WORD.findall(said))
+    # BY STEM: "mountains", "cliffs" and "dolls" passed a list that bans the
+    # singulars (VLM-gate audit, 2026-09-23).
+    words = {stem(w) for w in WORD.findall(said)}
     return [b for b in (banned or ())
-            if set(WORD.findall(b.lower())) <= words and set(WORD.findall(b.lower()))]
+            if (want := {stem(w) for w in WORD.findall(b.lower())}) and want <= words]
 
 
 def faults(seen: Seen, frame: str, planned: int, crowd: bool,
@@ -154,8 +156,10 @@ def faults(seen: Seen, frame: str, planned: int, crowd: bool,
     # at a throat holds a person by necessity -- and it reads whole words now.
     worn = not planned and size == "insert" and worn_by_someone(frame)
     if people_fault(seen, planned + extras, crowd or worn):
-        out.append(f"{seen.people} figure(s) for {planned} cast, "
-                   f"{seen.lookalikes} of them copies of another")
+        out.append(f"{seen.people} figure(s) for {planned + extras} declared ({planned} cast + "
+                   f"{extras} extras), {seen.lookalikes} of them copies of another")
+    if missing_cast(seen, planned, size, frame):
+        out.append(f"{seen.people} figure(s) for {planned} named: someone the shot casts is missing")
     if seen.text and not lettering_expected(frame, size):
         out.append("text or lettering in the picture")
     # AN INTERIOR HAS NO HOUR TO READ. A lamplit dining room came back 'day'
@@ -163,6 +167,46 @@ def faults(seen: Seen, frame: str, planned: int, crowd: bool,
     if night and seen.landform != "indoors" and not reads_as_night(seen):
         out.append(f"the hour reads {seen.hour!r} and the shot is at night")
     return out
+
+
+def missing_cast(seen: "Seen", planned: int, size: str, frame: str) -> bool:
+    """Fewer people than the shot NAMES. Only too many used to fail: ep09's
+    two-person tea panel read 0 and passed. An insert or a back view the plan
+    asks for may hold fewer faces."""
+    from studio.panel_dq import back_view
+    return seen.people < planned and size != "insert" and not back_view(frame)
+
+
+def truthy(value) -> bool:
+    """bool("false") is True: the reader's "false" as a string read as lettering."""
+    if isinstance(value, str):
+        return value.strip().lower() in ("true", "yes", "1")
+    return bool(value)
+
+
+def subject_list(value) -> list[str]:
+    """A subjects STRING was iterated into single letters, which silently blinded
+    the beard, banned and hair checks."""
+    if isinstance(value, str):
+        return [s.strip() for s in value.split(",") if s.strip()]
+    return [str(s).strip() for s in (value or [])]
+
+
+def salvage(text: str):
+    """A reply cut off inside `subjects`, the LAST key: the five judged fields are
+    already complete, so the list is closed at its last whole item. ep09 T21 read
+    'unread: no JSON' at seed 6 and failed on that alone (VLM-gate audit)."""
+    import json
+    start, key = text.find("{"), text.find('"subjects"')
+    if start < 0 or key < 0:
+        return None
+    body = text[start:]
+    cut = body.rfind('",')
+    head = body[:cut + 1] if cut > body.find('"subjects"') else body[:body.find("[", body.find('"subjects"')) + 1]
+    try:
+        return json.loads(head + "]}")
+    except json.JSONDecodeError:
+        return None
 
 
 class Unreadable(ValueError):
@@ -200,9 +244,9 @@ def parse(said: str) -> Seen:
             landform=str(got["landform"]).lower().strip(),
             people=int(got["people"] or 0),
             lookalikes=int(got["lookalikes"] or 0),
-            text=bool(got["text"]),
+            text=truthy(got["text"]),
             hour=str(got["hour"]).lower().strip(),
-            subjects=[str(s).strip() for s in (got.get("subjects") or [])],
+            subjects=subject_list(got.get("subjects")),
         )
     except (TypeError, ValueError) as bad:
         raise Unreadable(str(bad)) from bad
@@ -218,6 +262,8 @@ def _loads(text: str):
         pass
     found = _re.search(r"\{.*\}", text, _re.S)
     if not found:
+        if (saved := salvage(text)) is not None:
+            return saved
         raise Unreadable(f"no JSON in {text[:80]!r}")
     try:
         return json.loads(found.group(0))
