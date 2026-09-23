@@ -164,6 +164,66 @@ def grid_prompt(shots: list[dict], cols: int, rows: int, place: tuple[list[int],
     return "\n\n".join(parts + blocks)
 
 
+# ---- v2: the subject first (audit 2026-09-22, Tier 3 item 19) ------------------
+
+STYLE_V2 = ("Drawn in the art style of <image{n}>: angular stylised 3D shapes, visible "
+            "brush-stroke colour texture, flat high-chroma colour.")
+"""18 words where v1 spent 70, mostly negations. v1's own docstring measured
+that pointing at the slot works and describing the style in words bought
+nothing."""
+
+PANEL_WORD = re.compile(r"\bpanels?\b", re.I)
+
+
+def _one_picture(text: str) -> str:
+    """A single picture never hears "panel": the model obeys the word over the
+    arithmetic (measured on ep05's six 1x1 groups, which came back mosaics)."""
+    return PANEL_WORD.sub("picture", text)
+
+
+def _who_v2(who: list[str], extras: int) -> str:
+    """Who is in it: the named, else the declared unnamed, else the place alone."""
+    if who:
+        return f"In it: {', '.join(who)}."
+    if extras:
+        return f"In it: {extras} unnamed {'person' if extras == 1 else 'people'}, none of them a named person."
+    return "It is a picture of the place alone: ground, growth, sky and built things."
+
+
+def _block_v2(label: str, s: dict) -> str:
+    return (f"{label}{s['size']}: {s['body']} Framing: {s['cut']}. "
+            f"{_who_v2(s.get('who') or [], s.get('extras', 0))}")
+
+
+def grid_prompt_v2(shots: list[dict], cols: int, rows: int, place: tuple[list[int], str],
+                   cast: list[dict], style_slot: int) -> str:
+    """Layout (one line), the panels SUBJECT FIRST, one binding line per person,
+    the place, the style. No description is truncated -- the sheet in the slot
+    carries the face and the panel prose carries the tag -- and a single
+    picture never says storyboard, grid or panel."""
+    cells = cell_names(cols, rows)
+    if len(shots) != len(cells):
+        raise ValueError(f"{len(shots)} shots for {len(cells)} cells")
+    single = len(shots) == 1
+    if single:
+        layout = "One full-frame illustration, edge to edge, with no lettering anywhere."
+        blocks = [_one_picture(_block_v2("", shots[0]))]
+    else:
+        layout = (f"A storyboard of {len(shots)} panels in {cols} columns and {rows} rows, all the "
+                  f"same size, thin white gutters between them, no lettering anywhere.")
+        blocks = [_block_v2(f"PANEL {i} ({where}), ", s)
+                  for i, (where, s) in enumerate(zip(cells, shots), start=1)]
+    binding = [f"{p['name']} is the person in <image{p['ref']}>." for p in cast if p.get("ref")]
+    if len(binding) > 1:
+        binding.append(f"{' and '.join(p['name'] for p in cast if p.get('ref'))} are never dressed alike.")
+    refs = " and ".join(f"<image{n}>" for n in place[0])
+    where = (f"The picture is set at {refs}: {place[1]}." if single else
+             f"Every panel is set at {refs}, at the same hour: {place[1]}.")
+    parts = [layout] + blocks + ([" ".join(binding)] if binding else []) + [where,
+                                                                            STYLE_V2.format(n=style_slot)]
+    return "\n\n".join(_one_picture(x) if single else x for x in parts)
+
+
 def grid_shape(n: int) -> tuple[int, int]:
     """(cols, rows) for n panels, as square as n allows and never with a hole.
 

@@ -42,7 +42,8 @@ from studio import episode_home, pack_refs
 from studio.comfy import load_workflow, stage_image, submit, wait
 from studio.episode_home import episode_arg
 from studio.ref_slots import stage_only
-from studio.storyboard_grid import cut_clause, grid_prompt, no_duplicates, varied_group, whole_subject
+from studio.storyboard_grid import (cut_clause, grid_prompt, grid_prompt_v2, no_duplicates,
+                                    varied_group, whole_subject)
 
 CLIP = "qwen3vl_8b_fp8_scaled.safetensors"
 MAX_SLOTS = 3
@@ -145,7 +146,29 @@ def grid_shots(ep, setup: str, cols: int, rows: int, only: list[int] | None) -> 
     return shots
 
 
-def prompt_for(book: Path, ep, setup: str, shots: list, cols: int, rows: int) -> tuple[str, dict]:
+def _v1(blocks: list, cols: int, rows: int, place: tuple, cast: list, style_slot: int) -> str:
+    text = grid_prompt(blocks, cols, rows, place=place, cast=cast, style=STYLE.format(scene=style_slot))
+    return text + "\n\n" + no_duplicates([p["name"] for p in cast])
+
+
+PROMPTS = {"v1": _v1, "v2": grid_prompt_v2}
+"""v2 (subject first, no truncated identity block, no "panel" in a single
+picture) stays beside v1 until a same-seed A/B on ep09 decides."""
+
+
+def compose(version: str, blocks: list, cols: int, rows: int, place: tuple, cast: list,
+            style_slot: int) -> str:
+    if version not in PROMPTS:
+        raise SystemExit(f"--prompt={version}: known versions are {sorted(PROMPTS)}")
+    return PROMPTS[version](blocks, cols, rows, place, cast, style_slot)
+
+
+def prompt_version(argv: list[str]) -> str:
+    return next((a.split("=", 1)[1] for a in argv if a.startswith("--prompt=")), "v1")
+
+
+def prompt_for(book: Path, ep, setup: str, shots: list, cols: int, rows: int,
+               version: str = "v1") -> tuple[str, dict]:
     """(the grid prompt, {LoadImage node: picture}). Only the shots this grid
     OWNS put people in the slots; a borrowed shot's cast drew line-ups."""
     owned = [s for s in shots if s.setup == setup] or shots
@@ -155,10 +178,10 @@ def prompt_for(book: Path, ep, setup: str, shots: list, cols: int, rows: int) ->
     said_as = {p["entity"]: p["name"] for p in cast}
     blocks = [{"size": SAID[s.size], "body": body_of(s),
                "cut": cut_clause(s.size, peopled=bool(s.faces)),
-               "who": [said_as[f] for f in (s.faces or []) if f in said_as]} for s in shots]
-    text = grid_prompt(blocks, cols, rows, place=([place_slot], ep.setups[shots[0].setup].described),
-                       cast=cast, style=STYLE.format(scene=place_slot))
-    return text + "\n\n" + no_duplicates([p["name"] for p in cast]), slots
+               "who": [said_as[f] for f in (s.faces or []) if f in said_as],
+               "extras": getattr(s, "extras", 0)} for s in shots]
+    place = ([place_slot], ep.setups[shots[0].setup].described)
+    return compose(version, blocks, cols, rows, place, cast, place_slot), slots
 
 
 def graph_for(text: str, slots: dict, cols: int, rows: int, seed: int, name: str) -> dict:
@@ -188,14 +211,14 @@ def file_grid(book: Path, number: int, name: str, made: list, text: str, manifes
 
 
 def main(book_id: str, number: int, setup: str, cols: int, rows: int, tag: str = "",
-         only: list[int] | None = None, seed_bump: int = 0) -> None:
+         only: list[int] | None = None, seed_bump: int = 0, version: str = "v1") -> None:
     book = episode_home.book_dir(book_id)
     ep = episode_home.load_plan(book, number)
     from studio import cast_refs
     if why := cast_refs.chapter_refusal(book, number):   # this chapter's clothes (audit item 9)
         raise SystemExit(why)
     shots = grid_shots(ep, setup, cols, rows, only)
-    text, slots = prompt_for(book, ep, setup, shots, cols, rows)
+    text, slots = prompt_for(book, ep, setup, shots, cols, rows, version)
     name = grid_name(number, setup, cols, rows, tag)
     seed = 40500 + sum(s.index for s in shots) + seed_bump
     print(f"{name}: shots {[s.index for s in shots]} | slots {sorted(slots)} | prompt {len(text)} chars",
@@ -204,7 +227,8 @@ def main(book_id: str, number: int, setup: str, cols: int, rows: int, tag: str =
     made = wait(submit(graph_for(text, slots, cols, rows, seed, name)), timeout=3600)
     grid = file_grid(book, number, name, made, text, {
         "name": name, "episode": number, "setup": setup, "cols": cols, "rows": rows,
-        "shots": [s.index for s in shots], "seed": seed, "plan": plan_sha(book, number)})
+        "shots": [s.index for s in shots], "seed": seed, "plan": plan_sha(book, number),
+        "prompt": version})
     print(f"{name} in {time.time() - began:.0f}s -> {episode_home.relative(book, grid)}", flush=True)
 
 
@@ -213,4 +237,4 @@ if __name__ == "__main__":
     only = [int(v) for a in sys.argv if a.startswith("--shots=") for v in a.split("=", 1)[1].split(",") if v]
     bump = int(next((a.split("=", 1)[1] for a in sys.argv if a.startswith("--seed-bump=")), "0"))
     main(plain[0], episode_arg(sys.argv), plain[2], int(plain[3]), int(plain[4]),
-         plain[5] if len(plain) > 5 else "", only or None, bump)
+         plain[5] if len(plain) > 5 else "", only or None, bump, prompt_version(sys.argv))
