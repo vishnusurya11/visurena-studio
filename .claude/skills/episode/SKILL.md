@@ -32,15 +32,15 @@ Nothing is rendered until the plan passes both batteries. Each battery needs
 inputs, so the order is fixed:
 
 ```
-uv run python scripts/refs/cast_rows.py <book> <n> <who[=Display:gender]> ...  # FIRST: tag() checks against whatever refs.json holds
+uv run python scripts/refs/cast_rows.py <book> <n> <who[=Display:gender]> ...  # FIRST: takes, grids and content checks read this one bound row
 uv run python scripts/episode/plans/wotw_epNN_<slug>.py           # plan.json, only through episode_home.write_plan
 uv run python scripts/episode/plan_check.py <book> <n>             # "VERDICT: clean"; CAST BOUND needs every sheet on disk
 #   then sheets, places, lines, respot, timeline (steps 3-7)
 uv run python scripts/episode/takes_r2v.py <book> <n> --from-refs --prompts   # needs placed.json, lines.json and every view; BEFORE any grid
 ```
 
-A plan script run before `cast_rows` checks its fragments against the
-previous chapter's clothes, and nothing warns. Name the plan `wotw_epNN_*.py`:
+Tag with `chapter=N` so the plan checks its fragments against its own
+chapter's dossier row whatever is bound (without it, `tag()` reads refs.json). Name the plan `wotw_epNN_*.py`:
 the regenerate guard globs that pattern.
 
 `--prompts` builds every take prompt and runs the take lint over it for $0,
