@@ -55,6 +55,18 @@ def plan_path(book: Path, number: int) -> Path:
     return home(book, number) / "plan.json"
 
 
+def write_plan(out: Path, doc: dict) -> Path:
+    """Write a plan only if the contract accepts it. ep09's plan script wrote a
+    refused plan over the good one, and grids.py was the first to notice."""
+    from pydantic import ValidationError
+    try:
+        Episode.model_validate(doc)
+    except ValidationError as err:
+        raise SystemExit(f"the plan was refused and {out.name} left as it was:\n{err}") from None
+    out.write_text(json.dumps(doc, indent=1, ensure_ascii=False), encoding="utf-8")
+    return out
+
+
 def load_plan(book: Path, number: int) -> Episode:
     """The plan, validated on the way in: a plan that fails here never renders."""
     return Episode.model_validate_json(plan_path(book, number).read_text(encoding="utf-8"))

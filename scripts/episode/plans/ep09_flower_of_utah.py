@@ -614,10 +614,13 @@ def build() -> dict:
         narrator="john_watson", beds=BEDS, setups=SETUPS, shots=shots, lines=lines)
 
 
+from studio import episode_home  # noqa: E402
+
+
 if __name__ == "__main__":
     doc = build()
     OUT.parent.mkdir(parents=True, exist_ok=True)
-    OUT.write_text(json.dumps(doc, indent=1, ensure_ascii=False), encoding="utf-8")
+    episode_home.write_plan(OUT, doc)
     words = sum(len(l["text"].split()) for l in doc["lines"])
     said = sum(len(l["text"].split()) for l in doc["lines"] if l["kind"] == "dialogue")
     print(f"{len(doc['shots'])} shots, {len(doc['lines'])} lines, {words} words "

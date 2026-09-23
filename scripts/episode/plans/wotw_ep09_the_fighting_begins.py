@@ -535,13 +535,11 @@ S = [
 
     ("inn", "medium", ["unnamed_first_person_narrator"], 0.5, "track_lateral",
      "Medium on " + NARRATOR + " standing at the counter in the lamplight speaking past the shoulder "
-     "of another man who stands with his back to the camera holding his own brown bowler off "
-     "against his chest, the bottles on the shelves behind them. The narrator's hands are empty "
-     "and rest on the counter.",
+     "of another man who stands with his back to the camera, the bottles on the shelves behind "
+     "them, the narrator's two empty hands resting flat on the counter.",
      "The camera tracks sideways to the right along the counter, a truck with small amplitude, until "
      "the brass handles already in the picture are at the centre, travelling one short stride; he "
-     "goes on speaking across the other man's shoulder; the other man goes on turning his bowler "
-     "round against his chest.",
+     "goes on speaking across the other man's shoulder; the other man nods once as he listens.",
      "at the counter level with his chest, four paces from him, a 50mm lens. The oil lamp hangs at "
      "the TOP CENTRE; his grey tweed reads warm under it and the man in front of him reads dark",
      GEO_COUNTER, "friction", "I'll give you two, said I, over the stranger's shoulder."),
@@ -696,10 +694,13 @@ def build() -> dict:
                 beds=BEDS, setups=SETUPS, shots=shots, lines=lines)
 
 
+from studio import episode_home  # noqa: E402
+
+
 if __name__ == "__main__":
     doc = build()
     OUT.parent.mkdir(parents=True, exist_ok=True)
-    OUT.write_text(json.dumps(doc, indent=1, ensure_ascii=False), encoding="utf-8")
+    episode_home.write_plan(OUT, doc)
     (OUT.parent / "moves.json").write_text(json.dumps(MOVES, indent=1), encoding="utf-8")
     words = sum(len(l["text"].split()) for l in doc["lines"])
     said = sum(len(l["text"].split()) for l in doc["lines"] if l["kind"] == "dialogue")
