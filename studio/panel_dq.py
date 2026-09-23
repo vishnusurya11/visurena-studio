@@ -17,6 +17,8 @@ secretly a tiled sheet of one image.
 """
 from __future__ import annotations
 
+import re
+
 import numpy as np
 
 SHARP_FLOOR = 0.5
@@ -154,13 +156,26 @@ def by_setup(sharps: dict) -> dict:
             for key, (setup, value) in sharps.items()}
 
 
-FACE_IS_THE_PICTURE = ("close", "extreme_close", "medium_close")
-"""The sizes at which a missing face is a fault. At a wide or a medium a face
-can be too small for a detector to find and the panel still be right."""
+FACE_IS_THE_PICTURE = ("close", "extreme_close", "medium_close", "medium")
+"""The sizes at which a missing face is a fault. At a wide a face can be too
+small for a detector to find and the panel still be right. MEASURED on the
+16 medium panels of ep06-09 that plan a face: the detector missed 3 -- an
+empty garden, a stacked two-picture panel, and a back view the plan asked
+for, which `back_view` exempts. So mediums are held to it too."""
+
+BACK_VIEW = re.compile(
+    r"\b(?:past the (?:near )?shoulder|over the shoulder|from behind|"
+    r"(?:his|her|their) backs? (?:to|turned))\b", re.I)
+
+
+def back_view(prose: str) -> bool:
+    """Does the plan put the camera behind the person, so no face shows?"""
+    return bool(BACK_VIEW.search(prose or ""))
 
 
 def verdict(faces: list[float], planned: int, sharp: float, ink: float,
-            tiled: float, crowd: bool = False, size: str = "") -> dict:
+            tiled: float, crowd: bool = False, size: str = "", extras: int = 0,
+            prose: str = "") -> dict:
     """Every fault this panel carries, named. An empty list is a clean panel."""
     from studio import people_count
 
@@ -171,14 +186,16 @@ def verdict(faces: list[float], planned: int, sharp: float, ink: float,
     # the thin governess, the deputation -- so counting detected faces against
     # NAMED characters calls every crowd shot a fault. Where the shot's own
     # prose asks for unnamed people, only the clone check applies.
-    if not crowd and len(near) > max(planned, 0):
+    # who may be here is DECLARED: the shot's faces, its extras, or a crowd
+    # the setup names -- never a people-word found in the prose (audit 1).
+    if not crowd and len(near) > max(planned, 0) + extras:
         flags.append("people")
     if not crowd and planned >= 0 and people_count.clones(near, planned):
         flags.append("clone")
     # AND GOING UNDER, which nobody ever asked it about. ep09's button was a
     # big close-up of the hussar shouting; it came back an empty garden and
     # this printed `faces 0/1` and passed.
-    if planned > 0 and not near and size in FACE_IS_THE_PICTURE:
+    if planned > 0 and not near and size in FACE_IS_THE_PICTURE and not back_view(prose):
         flags.append("missing")
     if sharp < SHARP_FLOOR:   # `sharp` is the panel OVER the set median
         flags.append("blur")

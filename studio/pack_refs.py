@@ -67,11 +67,25 @@ def views_of(book: Path, location: str) -> list[dict]:
 ANCHOR = "wide_establishing"
 
 
-def location_view(book: Path, location: str, size: str = "", named: str = "") -> Path:
+def location_view(book: Path, location: str, size: str = "", named: str = "",
+                  view: str = "") -> Path:
     """The ONE picture that says WHERE: the establishing wide, else the design's
     first view, whatever the shot's size (owner, 2026-09-18: two views of one
     observatory were two rooms -- a slim refractor and a pier telescope -- and the
-    cut jumped between them).  The take's camera finds the closer framing."""
+    cut jumped between them).  The take's camera finds the closer framing.
+
+    `view` is the EPISODE's choice (its SETUP's `view`): a named picture of this
+    place, used instead of the book's anchor. It never rewrites the book row --
+    doing that for ep09 moved every earlier episode's place to ep09's hour.
+    `named` -- a single SHOT's view -- is still ignored, so every shot of a
+    setup opens on the same picture of its place."""
+    chosen = view
+    if chosen:
+        path = Path(book) / "refs" / "locations" / location / f"{chosen}.png"
+        if not path.exists():
+            raise SystemExit(f"location {location!r}: the view {chosen}.png this episode "
+                             f"names is not drawn")
+        return path
     views = views_of(book, location)
     anchor = next((v["id"] for v in views if v["id"] == ANCHOR), views[0]["id"] if views else ANCHOR)
     path = Path(book) / "refs" / "locations" / location / f"{anchor}.png"

@@ -210,6 +210,9 @@ GEO_HIM = (
     "over his shoulder at the CENTRE LEFT. A whirl of black smoke fills the RIGHT third and the "
     "TOP edge behind him, and red firelight stands along the LEFT edge.")
 
+# EACH SETUP NAMES THE PICTURE OF ITS PLACE THAT THIS EPISODE USES (`view`).
+# ep09 first did this by rewriting the BOOK-WIDE location rows, which moved
+# every earlier episode's Horsell Common to a hot daylight afternoon.
 SETUPS = {
     "garden": dict(
         described=GARDEN_MORNING, cast=["unnamed_milkman", "unnamed_neighbour"],
@@ -218,7 +221,7 @@ SETUPS = {
         route="from the gravel path across the lawn toward the side gate in the fence",
         geometry=GEO_GARDEN,
         crowd="",
-        outdoors=True, props=[], location="narrators_garden"),
+        outdoors=True, props=[], location="narrators_garden", view="wide_morning"),
     "bridge": dict(
         described=BRIDGE_DAY, cast=["snippy"],
         landmark="the bright opening of the arch with the road going away through it",
@@ -228,7 +231,7 @@ SETUPS = {
         geometry=GEO_BRIDGE,
         crowd="sappers in small round caps and dirty brick-red jackets unbuttoned over blue shirts, "
               "sitting on the parapet, standing in the shade of the arch, one squatting over the dust",
-        outdoors=True, props=[], location="maybury_canal_bridge"),
+        outdoors=True, props=[], location="maybury_canal_bridge", view="wide_arch_day"),
     "pit": dict(
         described=PIT_DAY, cast=["unnamed_first_person_narrator"],
         landmark="the raw ring of flung yellow sand round the crater", landmark_at="far_end",
@@ -236,7 +239,7 @@ SETUPS = {
         route="from the heather along the shallow ditch out toward the ring of the pit",
         geometry=GEO_PIT,
         crowd="",
-        outdoors=True, props=[], location="horsell_common"),
+        outdoors=True, props=[], location="horsell_common", view="wide_pit_day"),
     "lawn": dict(
         described=CREST_BURNING,
         cast=["unnamed_first_person_narrator", "narrators_wife", "unnamed_hussar"],
@@ -246,7 +249,7 @@ SETUPS = {
         route="from the summerhouse across the scorched lawn to the white gate in the wall",
         geometry=GEO_LAWN,
         crowd="",
-        outdoors=True, props=[], location="maybury_hill"),
+        outdoors=True, props=[], location="maybury_hill", view="wide_lawn_burning"),
     "inn": dict(
         described=INN_BAR, cast=["unnamed_landlord", "unnamed_first_person_narrator"],
         landmark="the brass beer-engine handles standing on the counter", landmark_at="far_end",
@@ -254,7 +257,7 @@ SETUPS = {
         route="from the door along the bare boards to the counter and its brass handles",
         geometry=GEO_INN,
         crowd="",
-        outdoors=False, props=[], location="spotted_dog"),
+        outdoors=False, props=[], location="spotted_dog", view="wide_bar"),
 }
 
 #  setup   size   faces  path  move   frame / motion / camera / geometry / section / why

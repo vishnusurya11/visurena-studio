@@ -248,7 +248,7 @@ def location_picture(book: Path, boards: Path, setup, name: str, shot=None) -> P
     # is chosen by the shot's size, because the take opens at its framing.
     if (Path(book) / "refs" / "locations" / named).is_dir():
         return pack_refs.location_view(book, named, getattr(shot, "size", "wide"),
-                                       getattr(shot, "view", "") or "")
+                                       view=getattr(setup, "view", "") or "")
     path = Path(book) / "refs" / "locations" / f"loc-{named}.png"
     if not path.exists():
         raise SystemExit(f"setup {name!r} names location {named!r}; {path.name} is not on disk")

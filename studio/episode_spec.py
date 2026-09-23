@@ -211,6 +211,10 @@ class Shot(Framed):
     setup: str
     size: Size
     faces: list[str] = Field(default_factory=list)
+    extras: int = Field(default=0, ge=0)
+    """Unnamed people this shot puts in the picture beyond its `faces`: a
+    sentry, a man at a counter. A CROWD is the setup's to declare; this is
+    the count for everyone else, so no gate has to guess it from prose."""
     """Whose face is frontal and readable in the panel."""
     take: int = Field(default=0, ge=0)
     beat_s: float = Field(default=0.0, ge=0, le=MAX_BEAT)
@@ -286,6 +290,10 @@ class Setup(BaseModel):
     between.  "The horse ahead of the wheel" drew a horse level with a wheel
     three times; relational prepositions are the documented weak spot."""
     location: str = ""
+    view: str = ""
+    """Which drawn picture of `location` THIS episode uses, e.g. wide_pit_day.
+    Empty means the book's anchor. The choice is the episode's: rewriting the
+    book-wide row to pick it changed every earlier episode's place too."""
     """The BOOK's own location picture for this place, by entity id
     (`221b_baker_street` -> `refs/locations/loc-221b_baker_street.png`).
 

@@ -38,8 +38,11 @@ def test_a_wide_that_plans_a_face_and_shows_none_is_not_a_fault():
     assert "missing" not in clean(faces=[], planned=1, size="wide")["flags"]
 
 
-def test_a_medium_is_not_held_to_it_either():
-    assert "missing" not in clean(faces=[], planned=1, size="medium")["flags"]
+def test_a_medium_is_held_to_it_too():
+    # Superseded by measurement (tests/test_panel_people_from_the_plan.py): on
+    # ep06-09 the detector found faces on 13 of 16 planned mediums, and two of
+    # the three misses were real faults. Only a back view is exempt.
+    assert "missing" in clean(faces=[], planned=1, size="medium")["flags"]
 
 
 def test_an_insert_plans_nobody_and_is_clean():
