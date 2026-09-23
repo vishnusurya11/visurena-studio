@@ -82,14 +82,22 @@ def plan_sha(book: Path, number: int) -> str:
     return hashlib.sha256(episode_home.plan_path(book, number).read_bytes()).hexdigest()[:16]
 
 
+SHOT_FIELDS = ("index", "setup", "size", "frame", "at_rest", "faces", "extras")
+SETUP_FIELDS = ("location", "view", "described")
+"""Exactly what `prompt_for` reads. A shot's `motion` is the take's, not the
+grid's: ep09's retakes changed three camera moves, and hashing the whole shot
+would have redrawn three good grids for words they never saw."""
+
+
 def shots_sha(ep, indices: list[int]) -> str:
-    """What a grid is drawn from: its own shots and their setups, and nothing
-    else of the plan. One hash of the whole plan made a word changed in shot 11
-    stale every grid in ep09."""
+    """What a grid is drawn from: the fields of its own shots and their setups
+    that its prompt reads, and nothing else of the plan. One hash of the whole
+    plan made a word changed in shot 11 stale every grid in ep09."""
     shots = [s for s in ep.shots if s.index in indices]
     setups = sorted({s.setup for s in shots})
-    body = {"shots": [s.model_dump(mode="json") for s in shots],
-            "setups": {k: ep.setups[k].model_dump(mode="json") for k in setups}}
+    body = {"shots": [s.model_dump(mode="json", include=set(SHOT_FIELDS)) for s in shots],
+            "setups": {k: ep.setups[k].model_dump(mode="json", include=set(SETUP_FIELDS))
+                       for k in setups}}
     return hashlib.sha256(json.dumps(body, sort_keys=True).encode()).hexdigest()[:16]
 
 

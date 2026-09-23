@@ -461,24 +461,23 @@ S = [
      "black",
      GEO_LAWN, "spike", "The tops of the trees about the Oriental College burst into flame."),
 
-    ("lawn", "insert", [], 0.45, "tilt_down",
+    ("lawn", "insert", [], 0.45, "push_in",
      "Medium across the paling at the tower of a little church beside the burning college, its "
      "masonry going out of line and sliding down into its own ruin, red flame standing up behind it "
      "and a column of dust lifting where it falls.",
-     "The camera tilts down from the top of the tower to the ruin already in the picture until the "
-     "falling masonry is in the middle of the frame, travelling a forearm; the tower goes on "
-     "sliding down into itself; the dust goes on lifting up out of it.",
+     "The camera pushes in on the falling masonry at the centre of the picture, travelling a "
+     "forearm; the tower goes on sliding down into itself; the dust goes on lifting up out of it.",
      "on the lawn looking over the paling, an 85mm lens. The light is red firelight from behind the "
      "tower at the CENTRE, so the tower reads black against it and the dust reads hot red",
      GEO_TOWER, "spike", "The tower of the little church beside it slid down into ruin."),
 
-    ("lawn", "insert", [], 0.55, "tilt_down",
+    ("lawn", "insert", [], 0.55, "push_in",
      "Insert down at a flower bed under a study window with a heap of broken red chimney fragments "
      "lying fresh on the turned earth among the crushed stocks, more pieces still lying along the "
      "roof tiles above, and red firelight coming across all of it from below the lawn.",
-     "The camera tilts down from the broken tiles to the flower bed already in the picture until the "
-     "heap of red fragments is in the middle of the frame, travelling a forearm; dust goes on "
-     "sifting down off the brickwork onto the earth; a last fragment goes on rocking where it fell.",
+     "The camera pushes in on the heap of red fragments at the centre of the picture, travelling a "
+     "forearm; dust goes on sifting down onto the earth; a last fragment goes on rocking where it "
+     "fell.",
      "at the flower bed looking down, a 50mm lens. The light is low red firelight from the CENTRE "
      "LEFT; the broken brick reads hot red and the turned earth reads dark",
      GEO_BRICK, "spike", "A piece of our chimney came down on the flower bed."),
@@ -508,13 +507,13 @@ S = [
      "from the CENTRE LEFT; her lilac-grey dress reads warm and the gate behind her reads pale",
      GEO_HER + " Her head is a third of the frame's height.", "reaction", "But where are we to go? said my wife in terror."),
 
-    ("lawn", "wide", [], 0.8, "pan_to",
+    ("lawn", "wide", [], 0.8, "push_in",
      "Wide down the hill from the gate at a bevy of hussars in dark blue riding under the brick "
      "railway bridge below and out along the road, two of them already dismounted and running from "
      "house to house, and the sun standing blood red in the smoke above the trees.",
-     "The camera pans to the left along the road until the railway bridge already in the picture is "
-     "at the centre, travelling one short stride; the riders go on coming through under the arch at "
-     "a canter; the two on foot go on running up to the doors.",
+     "The camera pushes in toward the riders passing along beyond the garden wall, travelling one "
+     "short stride; the riders go on cantering along beyond the wall; the two on foot go on "
+     "running beside them.",
      "at the gate looking downhill, a 35mm lens. The sun stands blood red in the smoke at the TOP "
      "CENTRE and throws a lurid light on everything; the road reads red-brown and the smoke reads "
      "black",

@@ -103,3 +103,13 @@ def test_only_the_grid_whose_shot_changed_is_stale(ep09):
 
 def test_a_manifest_without_a_fingerprint_falls_back_to_the_plan_hash(ep09):
     assert panels.stale_grids([grid("a", [0], "p0")], "p1", ep09) == ["a"]
+
+
+def test_a_camera_move_is_not_what_a_grid_is_drawn_from(ep09):
+    """The grid prompt never reads `motion`. ep09's take retakes needed three
+    camera moves changed; with motion in the hash, three good grids would have
+    been redrawn for words they never saw."""
+    moved = ep09.model_copy(update={"shots": [
+        s.model_copy(update={"motion": "The camera pushes in on it; it goes on burning."})
+        if s.index == 14 else s for s in ep09.shots]})
+    assert grids.shots_sha(moved, [13, 14, 21]) == grids.shots_sha(ep09, [13, 14, 21])
