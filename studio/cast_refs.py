@@ -178,14 +178,40 @@ def sheet_prompts(row: dict) -> dict[str, str]:
     return out
 
 
+def casts_from_sheets(book: Path) -> bool:
+    """Does this book cast from ONE SHEET per character (refs/characters/<who>/
+    sheet.png) rather than a bust plus a wardrobe card per state?"""
+    return any(characters(book).glob("*/sheet.png"))
+
+
+def sheet_unbound(book: Path, who: str) -> list[str]:
+    """Why a one-sheet character is not ready to be staged; [] when bound:
+    it has a row in refs.json, and its sheet is on disk."""
+    try:
+        row(book, who)
+    except KeyError as missing:
+        return [str(missing).strip('"')]
+    if not (characters(book) / who / "sheet.png").exists():
+        return [f"{who}: no sheet on disk at refs/characters/{who}/sheet.png"]
+    return []
+
+
 def bound(book: Path, who: str, state: str) -> list[str]:
-    """Why this character is NOT ready for a paid sheet in this state; [] when bound.
+    """Why this character is NOT ready in this state; [] when bound.
+
+    A book that casts from ONE SHEET per character is bound by its sheets
+    (`sheet_unbound`). The rest of this rule is the bust-and-card casting of
+    the Scarlet book, and applied to WotW it failed every plan -- 7, 18, 6 and
+    24 hard faults on ep06-09 -- so plan_check exited 1 on every episode and
+    the exit code stopped meaning anything (audit 2026-09-22, item 3).
 
     Three facts, each one a fault measured on episode 9: the row has said what
     the cards must show (`sheet`), the row RECORDS a card for this state that is
     on disk (a file the row does not name is a picture nobody wrote a prompt
     for), and the bust has a read-back -- `cast_cards --check` passed it, and it
     has not been redrawn since (`cast_bust --redraw` clears the read-back)."""
+    if casts_from_sheets(book):
+        return sheet_unbound(book, who)
     try:
         r = row(book, who)
     except KeyError as missing:

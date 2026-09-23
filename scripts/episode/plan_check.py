@@ -22,7 +22,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
-from studio import actor_gate, episode_home, episode_ref_official as ro, episode_spec as spec, house_style, plan_gates, timeline_fresh
+from studio import actor_gate, cast_refs, episode_home, episode_ref_official as ro, episode_spec as spec, house_style, plan_gates, timeline_fresh
 from studio import episode_takes as tk
 from studio.episode_takes import BUDGET
 
@@ -102,14 +102,27 @@ def measured_or_projected(book: Path, number: int, episode, rate: float) -> list
 
 
 def sheet_text(book_id: str, number: int) -> int:
-    """The sheet gate's text-only read, as `sheet_dq.py` prints it; hard count."""
+    """The sheet gate's text-only read, as `sheet_dq.py` prints it; hard count.
+
+    It checks the prompts of the PAID seq_boards sheets, which only a book cast
+    by bust and card draws. A book cast from one sheet per character draws
+    storyboard grids instead, and on WotW this gate crashed on its size words --
+    and the crash was counted as one hard fault with nothing printed, so every
+    WotW plan was REFUSED for a reason nobody could see (audit 2026-09-22)."""
+    if cast_refs.casts_from_sheets(episode_home.book_dir(book_id)):
+        print("    not applicable: this book draws storyboard grids, not seq_boards sheets")
+        return 0
     run = subprocess.run([sys.executable, str(Path(__file__).with_name("sheet_dq.py")), book_id, str(number)],
                          capture_output=True, text=True, errors="replace")
     tail = [l for l in run.stdout.splitlines() if l.strip()][-8:]
     for line in tail:
         print("   ", line[:150])
     m = re.search(r"(PASS|FAIL)\s+hard (\d+)", run.stdout)
-    return int(m.group(2)) if m else 1
+    if m:
+        return int(m.group(2))
+    said = [l for l in (run.stderr or "").splitlines() if l.strip()][-3:]
+    print("    the sheet gate did not report -- it CRASHED:", *(f"\n      {l[:150]}" for l in said))
+    return 1
 
 
 def main(book_id: str, number: int) -> int:
