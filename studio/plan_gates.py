@@ -24,7 +24,7 @@ import statistics
 from pathlib import Path
 
 from studio import story_layer
-from studio.episode_ref_official import camera_clause
+from studio.episode_ref_official import AMOUNT, camera_clause
 from studio.episode_seq_board import HOLDS, TRAVEL
 from studio.episode_spec import Episode, Line, Setup, Shot
 
@@ -184,11 +184,6 @@ either side of the close cap.  If a later episode shows a forearm close
 morphing, the cap moves to 1.0, not the ladder."""
 
 COUNT = {"a": 1.0, "an": 1.0, "one": 1.0, "two": 2.0, "three": 3.0, "four": 4.0, "half a": 0.5}
-AMOUNT = re.compile(
-    r"\b(a|an|one|two|three|four|half a)\s+(whole|long|short)?\s*"
-    r"(hand's breadth|hand's width|thumb's width|finger's breadth|arm's length|"
-    r"head's height|forearm|strides?|paces?|steps?|treads?)\b", re.I)
-
 CAP = {"insert": 2.5, "extreme_close": 2.5, "close": 2.5, "medium_close": 2.5,
        "medium": 20.0, "full": 40.0, "wide": 40.0}
 """The largest travel per size, on the ladder.  MEASURED, the largest each good

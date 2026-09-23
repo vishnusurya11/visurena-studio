@@ -44,7 +44,8 @@ def test_the_owners_own_example_is_no_longer_mangled():
     head = ("The commissionaire's broad reddened right hand comes up flat to his brow in a salute "
             "as he speaks the line, and the camera pushes in a hand's breadth")
     said = camera_sentence(f"{head}; the salute arrives flat at his brow", 0, 8)
-    assert said.startswith("The camera pushes in a hand's breadth")
+    # the distance is the plan's, not the model's (audit 2026-09-22, item 22)
+    assert said.startswith("The camera pushes in as the commissionaire's")
     assert "The camera the commissionaire" not in said
 
 
@@ -65,7 +66,7 @@ def test_a_camera_that_moves_is_never_called_static():
     camera rises one tread; 'rise' was simply absent from MOVES."""
     said = camera_sentence("The hand slides up the rail as the camera rises one tread", 0, 8)
     assert "static" not in said
-    assert "rises one tread" in said
+    assert said.startswith("The camera rises as")     # the move, without its distance
 
 
 def test_a_genuinely_locked_camera_is_still_called_static():

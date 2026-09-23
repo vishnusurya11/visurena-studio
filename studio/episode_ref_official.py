@@ -676,10 +676,27 @@ def clauses_of(motion: str) -> tuple[str, list[str]]:
     return (parts[0] if parts else ""), parts[1:]
 
 
+AMOUNT = re.compile(
+    r"\b(a|an|one|two|three|four|half a)\s+(whole|long|short)?\s*"
+    r"(hand's breadth|hand's width|thumb's width|finger's breadth|arm's length|"
+    r"head's height|forearm|strides?|paces?|steps?|treads?)\b", re.I)
+"""A camera amount in the words the plans write. plan_gates measures it on the
+ladder; the take prompt drops it (audit 2026-09-22, item 22)."""
+
+SAID_AMOUNT = re.compile(r",?\s*travelling\s+" + AMOUNT.pattern + r"|\s+" + AMOUNT.pattern, re.I)
+
+
+def without_amount(cam: str) -> str:
+    """The camera head without its distance. MEASURED: H3 obeys the direction
+    and the verb, and 0 of 16 amounts ("a head's height" on seven ep09 closes
+    morphed the face instead of travelling less); "with small amplitude" stays."""
+    return " ".join(SAID_AMOUNT.sub("", cam).split()).strip(" ,")
+
+
 def camera_verb(head: str) -> str:
     """base-en §4.3: the move is a natural English action inside the shot, never a
     stacked label, and medium amplitude and normal speed are left unsaid."""
-    words = head.split()
+    words = without_amount(head).split()
     return " ".join([CAMERA.get(words[0].lower(), words[0].lower())] + words[1:]) if words else ""
 
 
