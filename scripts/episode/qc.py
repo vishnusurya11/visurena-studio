@@ -290,7 +290,11 @@ def verdict(report: dict) -> bool:
             # A TAKE NOBODY JUDGED IS NOT A PASS -- the same rule as the edit
             # block above. A take that FAILED and spent its retake budget still
             # does not fail the master (owner's call): that one was measured.
-            and not report.get("takes", {}).get("unjudged"))
+            and not report.get("takes", {}).get("unjudged")
+            # A CUT WITH NO TITLE CARD IS NOT A PASS: assemble.tail appends only
+            # the black chip when no card exists, and title_card:false was
+            # written but never judged (publish audit, 2026-09-23).
+            and report.get("title_card") is True)
 
 
 def main(book_id: str, number: int, engine: str = "i2v") -> None:

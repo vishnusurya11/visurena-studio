@@ -31,7 +31,7 @@ qc = importlib.util.module_from_spec(_spec)
 sys.modules["ep_qc_proven"] = qc
 _spec.loader.exec_module(qc)
 
-GOOD = {"lufs_ok": True, "tp_ok": True, "lines": [{"passed": True}],
+GOOD = {"title_card": True, "lufs_ok": True, "tp_ok": True, "lines": [{"passed": True}],
         "edit": {"ok": True, "measured": True}}
 
 
@@ -71,3 +71,9 @@ def test_no_proof_leaves_the_heuristic_in_charge():
 def test_the_verdict_passes_a_master_whose_cuts_were_all_proved():
     report = dict(GOOD, missing_cuts=[], internal_cuts=[])
     assert qc.verdict(report) is True
+
+
+def test_a_master_with_no_title_card_does_not_pass():
+    """assemble.tail appends only the black chip when no card exists, and
+    title_card:false was written but never judged (publish audit, 2026-09-23)."""
+    assert qc.verdict(dict(GOOD, missing_cuts=[], internal_cuts=[], title_card=False)) is False

@@ -17,7 +17,7 @@ spec = importlib.util.spec_from_file_location(
 qc = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(qc)
 
-GOOD = {"lufs_ok": True, "tp_ok": True, "missing_cuts": [], "lines": [{"passed": True}],
+GOOD = {"title_card": True, "lufs_ok": True, "tp_ok": True, "missing_cuts": [], "lines": [{"passed": True}],
         "edit": {"ok": True, "measured": True}}
 
 

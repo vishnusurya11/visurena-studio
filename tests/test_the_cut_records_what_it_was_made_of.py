@@ -121,14 +121,14 @@ def test_a_take_deleted_since_the_cut_is_stale(tmp_path):
 
 def test_an_unmeasured_edit_block_does_not_pass():
     from scripts.episode import qc
-    report = {"lufs_ok": True, "tp_ok": True, "missing_cuts": [], "lines": [],
+    report = {"title_card": True, "lufs_ok": True, "tp_ok": True, "missing_cuts": [], "lines": [],
               "edit": {"ok": True, "measured": False, "note": "not measured: 2 take files missing"}}
     assert qc.verdict(report) is False
 
 
 def test_a_measured_and_clean_edit_passes():
     from scripts.episode import qc
-    report = {"lufs_ok": True, "tp_ok": True, "missing_cuts": [], "lines": [],
+    report = {"title_card": True, "lufs_ok": True, "tp_ok": True, "missing_cuts": [], "lines": [],
               "edit": {"ok": True, "measured": True}}
     assert qc.verdict(report) is True
 
@@ -136,5 +136,5 @@ def test_a_measured_and_clean_edit_passes():
 def test_an_absent_edit_block_does_not_pass():
     """`.get("edit", {}).get("ok", True)` made a missing block a pass twice over."""
     from scripts.episode import qc
-    report = {"lufs_ok": True, "tp_ok": True, "missing_cuts": [], "lines": []}
+    report = {"title_card": True, "lufs_ok": True, "tp_ok": True, "missing_cuts": [], "lines": []}
     assert qc.verdict(report) is False

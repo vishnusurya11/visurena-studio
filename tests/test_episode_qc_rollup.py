@@ -15,7 +15,7 @@ qc = importlib.util.module_from_spec(spec)
 sys.modules["ep_qc_rollup"] = qc
 spec.loader.exec_module(qc)
 
-GOOD = {"lufs_ok": True, "tp_ok": True, "missing_cuts": [], "lines": [{"passed": True}],
+GOOD = {"title_card": True, "lufs_ok": True, "tp_ok": True, "missing_cuts": [], "lines": [{"passed": True}],
         "edit": {"ok": True, "measured": True}}
 """The edit block carries `measured` now.  An ABSENT or UNMEASURED block is no
 longer a pass: `.get("edit", {}).get("ok", True)` made a missing measurement
