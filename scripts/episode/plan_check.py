@@ -143,6 +143,13 @@ def main(book_id: str, number: int) -> int:
     print("PLAN GATES   :", len(pg) or "clean"); hard += len(pg)
     for f in pg:
         print("   ", f[:170])
+    from studio import cell_gates
+    cg = cell_gates.faults(ep, cell_gates.pack_prompts(book))
+    print("CELL GATES   :", len(cg) or "clean"); hard += len(cg)
+    for f in cg:
+        print("   ", f[:170])
+    for n in cell_gates.advisories(ep):
+        print("  advisory:", n[:150])
     mf = ep.still_motions()
     bad = [(i, c) for i, c, w in mf if c in spec.HARD_MOTION]
     print("MOTION hard  :", bad or "clean"); hard += len(bad)
