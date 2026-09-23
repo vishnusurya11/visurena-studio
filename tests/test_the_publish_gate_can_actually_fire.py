@@ -31,6 +31,7 @@ def episode(tmp_path: Path, **verdicts) -> Path:
     for name, passed in verdicts.items():
         (room / f"{name}.mp4").write_bytes(b"mp4")
         (room / f"{name}.dq.json").write_text(json.dumps({"passed": passed}), encoding="utf-8")
+        (room / f"{name}.content.json").write_text(json.dumps({"passed": True}), encoding="utf-8")
     return tmp_path
 
 

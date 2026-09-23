@@ -64,10 +64,12 @@ def drifted(seen: Seen, physical: str) -> list[str]:
 
 
 def take_faults(reads: list[Seen], planned: int, crowd: bool, flat: bool,
-                night: bool, physical: str, frame: str, banned=()) -> list[str]:
-    """Every way this take disagrees with the shot that asked for it."""
+                night: bool, physical: str, frame: str, banned=(),
+                size: str = "", extras: int = 0) -> list[str]:
+    """Every way this take disagrees with the shot that asked for it -- judged
+    by the same rules as its panel: the shot's size and its declared extras."""
     seen = busiest(reads)
     out = faults(seen, frame=frame, planned=planned, crowd=crowd, flat=flat,
-                 night=night, banned=banned, physical=physical)
+                 night=night, banned=banned, physical=physical, size=size, extras=extras)
     out += [f"{h} where the row says otherwise" for h in drifted(seen, physical)]
     return out

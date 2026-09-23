@@ -49,6 +49,8 @@ def test_the_takes_rollup_counts_passes_and_names_the_failures(tmp_path):
     write(tmp_path / "T00.dq.json", {"passed": True, "score": 100.0})
     write(tmp_path / "T01.dq.json", {"passed": False, "score": 47.5, "budget_spent": True})
     write(tmp_path / "T02.dq.json", {"passed": False, "score": 70.0, "budget_spent": False})
+    for n in range(3):
+        write(tmp_path / f"T{n:02d}.content.json", {"passed": True})
     roll = qc.takes_rollup(tmp_path)
     assert roll["pass"] == 1 and roll["of"] == 3
     assert roll["fail"] == ["T01", "T02"] and roll["budget_spent"] == ["T01"]

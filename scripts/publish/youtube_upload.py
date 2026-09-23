@@ -93,7 +93,14 @@ def failed_takes(home: Path, engine: str = "r2v") -> list[str]:
     # AND EVERY TAKE NOBODY JUDGED: counting only the reports that exist let a
     # take rendered and never measured reach the one irreversible step
     # (audit 2026-09-22, item 6).
-    out += [f"{name} (never judged)" for name in judged.unjudged_takes(folder)]
+    # WHAT IS IN THE PICTURE counts too: ep08 went public with a newspaper
+    # printed "NEWSPAPER BOY" and four identical shopmen, at 100/100 on the
+    # take gate, because no content verdict reached this refusal.
+    for report in sorted(folder.glob("T*.content.json")):
+        said = json.loads(report.read_text(encoding="utf-8"))
+        if not said.get("passed"):
+            out.append(f"{report.stem.split('.')[0]} (content: {'; '.join(said.get('faults', []))[:80]})")
+    out += [f"{name} (never judged)" for name in judged.unjudged_takes(folder, kinds=("dq", "content"))]
     return out
 
 
