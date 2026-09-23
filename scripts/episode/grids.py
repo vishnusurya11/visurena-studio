@@ -2,7 +2,7 @@
 """Draw one setup's storyboard grid, from the plan's own prose. Local, $0.
 
     uv run python scripts/episode/grids.py <book_id> <episode> <setup> <cols> <rows> [tag]
-                                           [--shots=1,2,3] [--seed-bump=N]
+                                           [--shots=1,2,3] [--seed-bump=N] [--prompt=v1|v2]
 
 Qwen-Image-2.1 edit-multi, up to three references: cast sheets first (the
 identity slots), the setup's own place picture last (the scene and style
@@ -111,7 +111,7 @@ def cast_of(book: Path, shots: list) -> tuple[list[dict], dict]:
         said = re.sub(r"^(my|the|a|an)\s+", "", row["name"].strip(), flags=re.I).upper()
         people.append({
             "ref": ref, "name": said, "entity": name,
-            "wear": " ".join(row["physical"].split())[:600],
+            "wear": " ".join(row["physical"].split()),
             "against": (f"{said} is no other person in this storyboard: nobody else wears "
                         f"these clothes and {said} never wears anyone else's")})
     return people, slots
@@ -147,13 +147,16 @@ def grid_shots(ep, setup: str, cols: int, rows: int, only: list[int] | None) -> 
 
 
 def _v1(blocks: list, cols: int, rows: int, place: tuple, cast: list, style_slot: int) -> str:
+    cast = [{**p, "wear": p["wear"][:600]} for p in cast]      # v1's own cut, kept byte for byte
     text = grid_prompt(blocks, cols, rows, place=place, cast=cast, style=STYLE.format(scene=style_slot))
     return text + "\n\n" + no_duplicates([p["name"] for p in cast])
 
 
 PROMPTS = {"v1": _v1, "v2": grid_prompt_v2}
-"""v2 (subject first, no truncated identity block, no "panel" in a single
-picture) stays beside v1 until a same-seed A/B on ep09 decides."""
+"""v2 (subject first, garments not a cut-off identity block, no "panel" in a
+single picture) is the default since the same-seed A/B on ep09 (2026-09-22,
+docs/calibration/grid_prompt_ab.md): v1 cloned both leads at tea and drew the
+lawn's insert as a copy of its wide. v1 stays callable to reproduce old grids."""
 
 
 def compose(version: str, blocks: list, cols: int, rows: int, place: tuple, cast: list,
@@ -164,11 +167,11 @@ def compose(version: str, blocks: list, cols: int, rows: int, place: tuple, cast
 
 
 def prompt_version(argv: list[str]) -> str:
-    return next((a.split("=", 1)[1] for a in argv if a.startswith("--prompt=")), "v1")
+    return next((a.split("=", 1)[1] for a in argv if a.startswith("--prompt=")), "v2")
 
 
 def prompt_for(book: Path, ep, setup: str, shots: list, cols: int, rows: int,
-               version: str = "v1") -> tuple[str, dict]:
+               version: str = "v2") -> tuple[str, dict]:
     """(the grid prompt, {LoadImage node: picture}). Only the shots this grid
     OWNS put people in the slots; a borrowed shot's cast drew line-ups."""
     owned = [s for s in shots if s.setup == setup] or shots
@@ -211,7 +214,7 @@ def file_grid(book: Path, number: int, name: str, made: list, text: str, manifes
 
 
 def main(book_id: str, number: int, setup: str, cols: int, rows: int, tag: str = "",
-         only: list[int] | None = None, seed_bump: int = 0, version: str = "v1") -> None:
+         only: list[int] | None = None, seed_bump: int = 0, version: str = "v2") -> None:
     book = episode_home.book_dir(book_id)
     ep = episode_home.load_plan(book, number)
     from studio import cast_refs

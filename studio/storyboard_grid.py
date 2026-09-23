@@ -190,6 +190,23 @@ def _who_v2(who: list[str], extras: int) -> str:
     return "It is a picture of the place alone: ground, growth, sky and built things."
 
 
+def worn_items(wear: str, most: int = 5) -> list[str]:
+    """The row's clothes after "Wearing:": each sentence cut at a colon (what
+    follows one is parts of the same garment), then split on commas. The face
+    is the sheet's; these are what a panel drops (ep09 A/B: bound by name alone
+    the wife lost her shawl; cut at the first comma she lost her skirt's green,
+    which moved to her blouse)."""
+    _, _, clothes = wear.partition("Wearing:")
+    items = [i.strip().rstrip(".") for s in clothes.split(". ") for i in s.split(":", 1)[0].split(",")]
+    return [i for i in items if i][:most]
+
+
+def _binding(p: dict) -> str:
+    items = worn_items(p.get("wear", ""))
+    worn = f", wearing: {'; '.join(items)}" if items else ""
+    return f"{p['name']} is the person in <image{p['ref']}>{worn}."
+
+
 def _block_v2(label: str, s: dict) -> str:
     return (f"{label}{s['size']}: {s['body']} Framing: {s['cut']}. "
             f"{_who_v2(s.get('who') or [], s.get('extras', 0))}")
@@ -213,13 +230,13 @@ def grid_prompt_v2(shots: list[dict], cols: int, rows: int, place: tuple[list[in
                   f"same size, thin white gutters between them, no lettering anywhere.")
         blocks = [_block_v2(f"PANEL {i} ({where}), ", s)
                   for i, (where, s) in enumerate(zip(cells, shots), start=1)]
-    binding = [f"{p['name']} is the person in <image{p['ref']}>." for p in cast if p.get("ref")]
+    binding = [_binding(p) for p in cast if p.get("ref")]
     if len(binding) > 1:
         binding.append(f"{' and '.join(p['name'] for p in cast if p.get('ref'))} are never dressed alike.")
     refs = " and ".join(f"<image{n}>" for n in place[0])
     where = (f"The picture is set at {refs}: {place[1]}." if single else
              f"Every panel is set at {refs}, at the same hour: {place[1]}.")
-    parts = [layout] + blocks + ([" ".join(binding)] if binding else []) + [where,
+    parts = [layout] + blocks + binding + [where,
                                                                             STYLE_V2.format(n=style_slot)]
     return "\n\n".join(_one_picture(x) if single else x for x in parts)
 

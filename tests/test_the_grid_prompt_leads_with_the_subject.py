@@ -12,7 +12,7 @@ v2 orders it: one layout line, the panels subject-first, one binding line per
 person, the place, the style. It stays beside v1 until a same-seed render of
 ep09 grids decides between them.
 """
-from studio.storyboard_grid import grid_prompt, grid_prompt_v2
+from studio.storyboard_grid import grid_prompt, grid_prompt_v2, worn_items
 
 PLACE = ([3], "the walled lawn on the crest of Maybury Hill with the valley below it on fire")
 CAST = [{"ref": 1, "name": "NARRATOR", "entity": "n", "wear": "x" * 900, "against": "a"},
@@ -62,3 +62,28 @@ def test_v2_is_shorter_than_v1_for_the_same_grid():
     v1 = grid_prompt(shots, 2, 2, PLACE, CAST[:1], style="DRAWN IN THE STYLE OF <image3>")
     v2 = grid_prompt_v2(shots, 2, 2, PLACE, CAST[:1], 3)
     assert len(v2.split()) < len(v1.split())
+
+
+WIFE = ("Woman of 29, slim. Oval face, wide hazel eyes. Wearing: Cream cotton blouse with high "
+        "collar and pin-tucked front, sage-green wool skirt to the ankle. Low brown boots. Paisley "
+        "cashmere shawl in rust and cream folded over one arm. Small sage-green felt toque trimmed "
+        "with a cream ostrich tip. Grey kid gloves. A cameo brooch.")
+
+
+def test_the_binding_line_carries_the_worn_items_whole_and_at_most_five():
+    """ep09 A/B, lawn 2x2: bound by name alone, the wife lost her shawl in both
+    panels she was in; v1's cut-off identity block had kept it."""
+    cast = [{"ref": 2, "name": "WIFE", "entity": "w", "wear": WIFE, "against": "b"}]
+    text = grid_prompt_v2([panel("she stands", ["WIFE"])], 1, 1, PLACE, cast, 3)
+    line = next(x for x in text.split("\n\n") if x.startswith("WIFE is"))
+    assert "Paisley cashmere shawl in rust and cream folded over one arm" in line
+    assert "Cream cotton blouse with high collar and pin-tucked front" in line
+    assert "sage-green wool skirt to the ankle" in line      # after a comma; ep09 v2b dropped it
+    assert "hazel" not in line and "cameo" not in line       # the face is the sheet's; five items
+
+
+def test_a_colon_introduces_parts_of_one_item_not_new_items():
+    wear = ("Wearing: Mid-grey tweed lounge suit: single-breasted jacket, matching waistcoat. "
+            "White shirt, dark green tie. Straw boater.")
+    assert worn_items(wear) == ["Mid-grey tweed lounge suit", "White shirt", "dark green tie",
+                                "Straw boater"]

@@ -29,7 +29,7 @@ def test_an_unknown_version_is_refused():
         compose("v3", BLOCKS, 1, 1, PLACE, CAST, 2)
 
 
-def test_the_version_comes_from_the_command_line_and_defaults_to_v1():
-    assert prompt_version(["grids.py", "wotw", "9", "--prompt=v2"]) == "v2"
-    assert prompt_version(["grids.py", "wotw", "9"]) == "v1"
+def test_the_version_comes_from_the_command_line_and_defaults_to_v2():
+    assert prompt_version(["grids.py", "wotw", "9", "--prompt=v1"]) == "v1"
+    assert prompt_version(["grids.py", "wotw", "9"]) == "v2"      # won the ep09 A/B
     assert set(PROMPTS) == {"v1", "v2"}
