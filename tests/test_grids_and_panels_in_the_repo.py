@@ -187,3 +187,13 @@ def test_a_manifest_whose_inputs_changed_is_stale(monkeypatch):
     real = cast_refs.row
     monkeypatch.setattr(cast_refs, "row", lambda b, who: {**real(b, who), "physical": "Wearing: A red coat."})
     assert panels.stale_grids([row], "p", ep, book) == ["g"]
+
+
+def test_a_shaved_panel_is_cropped_square_never_stretched():
+    """ep09 shot 14 lost a 97-px spill down its left side and the 895x992 crop
+    was resized to 1024x1024 -- stretched 11% sideways into H3's reference."""
+    import numpy as np
+    grid = np.full((200, 600, 3), 60, dtype=np.uint8)
+    grid[:, 200 + 30:200 + 36] = 250                  # a gutter inside the middle cell
+    panel = panels.cut(Image.fromarray(grid), {"cols": 3, "rows": 1}, 1)
+    assert panel.size[0] == panel.size[1]

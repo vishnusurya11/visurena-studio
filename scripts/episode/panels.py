@@ -84,7 +84,17 @@ def save_if_changed(img: Image.Image, out: Path) -> bool:
 def cut(grid: Image.Image, row: dict, slot: int) -> Image.Image:
     """One panel out of its grid, less the gutter the fixed trim left behind."""
     panel = grid.crop(panel_box(slot, row["cols"], row["rows"], grid.size))
-    return panel.crop(seam_box(np.asarray(panel)))
+    panel = panel.crop(seam_box(np.asarray(panel)))
+    return panel.crop(centre_square(panel.size))
+
+
+def centre_square(size: tuple[int, int]) -> tuple[int, int, int, int]:
+    """The largest centred square: a shaved panel is cropped square, never
+    resized out of shape (ep09 shot 14's 895x992 went into H3 stretched 11%)."""
+    w, h = size
+    side = min(w, h)
+    left, top = (w - side) // 2, (h - side) // 2
+    return left, top, left + side, top + side
 
 
 def main(book_id: str, number: int) -> None:
