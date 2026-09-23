@@ -59,52 +59,37 @@ WHERE = "Maybury, Surrey, 1894"
 LIGHT = "low raking sun and black shadows"
 LOOK = "Angular stylised 3D animation, brush-stroke texture"
 
-# ---- the four new people, each a silhouette the other six do not have -------
-MILKMAN = ("the milkman, a stocky short-legged man of forty-four with strong shoulders, a round "
-           "ruddy face, a snub nose, cheerful creases at the eyes, bright blue eyes and short "
-           "chestnut curly hair, a thick chestnut walrus moustache covering his upper lip, in a "
-           "brown felt pork-pie hat with a narrow brim, a buff holland linen dairyman's coat to "
-           "the thigh and a long white apron to the shin")
-SAPPER = ("Snippy the sapper, a wiry narrow-shouldered man of twenty-six with quick hands, a long "
-          "narrow face, a sharp pointed nose, thin lips and a prominent Adam's apple, fair freckled "
-          "skin sunburnt at the neck, sandy mouse-brown hair cropped short, clean-shaven, "
-          "pale grey eyes set close together and a small white scar through his right "
-          "eyebrow, in a small round dark-blue pillbox cap with a narrow yellow band on a chin "
-          "strap and a dirty brick-red serge jacket with garter-blue collar and cuffs hanging "
-          "unbuttoned over a blue-grey flannel shirt")
-LANDLORD = ("the landlord of the Spotted Dog, a sturdy barrel-chested man of fifty-two with a thick "
-            "neck and heavy forearms, a broad red face, a fleshy nose and small shrewd blue eyes, "
-            "brown hair flecked with grey and thinning on the crown and brushed flat, heavy "
-            "grey-brown mutton-chop whiskers joined to a full moustache with a clean-shaven chin, "
-            "bare-headed, in a white cotton shirt with the sleeves rolled to the elbow and black "
-            "sleeve garters, a black broadcloth waistcoat with a brass watch chain and a long tan "
-            "leather cellarman's apron from chest to shin")
-HUSSAR = ("the dismounted hussar, a lean horseman of twenty-two with long thighs and narrow hips, "
-          "an oval olive-tanned face, a straight nose, dark brown eyes, brown curly hair cropped "
-          "close to the skull, a clean-shaven boyish jaw and a thin pale scar across his left "
-          "eyebrow, in a dark green pillbox forage cap with a yellow band on a chin strap and a "
-          "dark rifle-green serge hussar jacket with yellow cord frogging and a yellow-edged "
-          "collar, its right sleeve torn and blackened with soot")
+# ---- the cast: SHORT TAGS QUOTED FROM THE BOUND ROWS, checked at build -------
+# Each tag is the person's name and a few verbatim fragments of their row in
+# refs.json -- face first, then the silhouette. `cast_refs.tag` refuses a
+# fragment the row does not say, so a plan can no longer contradict its cast
+# (ep07's four characters, Snippy's moustache and the gloves all did), and the
+# take prompt -- which already defines each staged person IN FULL from the row
+# -- stops saying every description twice. Inlining the full rows pushed seven
+# ep09 take prompts past the lint's 360-word block (audit 2026-09-22).
+from studio import cast_refs  # noqa: E402
 
-# ---- the three bound people, quoted from their rows in refs.json ------------
-NARRATOR = ("the narrator, a slender narrow-shouldered man of thirty-four with long limbs, a long "
-            "oval face, a high forehead, a long straight nose, straight dark brows and grey eyes, "
-            "his dark brown hair cut short at the back and sides and parted on the left, a neat "
-            "close-trimmed dark brown moustache with shaven cheeks and chin, in a mid-grey "
-            "herringbone tweed jacket and waistcoat with a silver watch chain, a white starched "
-            "turn-down collar and a dark green knitted tie")
-WIFE = ("the narrator's wife, a slim straight-carried woman of twenty-nine with an oval face, wide "
-        "hazel eyes, softly arched chestnut brows and light freckles across the nose, her thick "
-        "chestnut-auburn hair waved and swept up into a soft pompadour, in a sage-green linen "
-        "walking costume with a short fitted jacket over a cream high-collared blouse and a long "
-        "sage-green skirt, a small sage-green felt toque with a cream ostrich tip pinned to her "
-        "hair")
-NEIGHBOUR = ("the neighbour, a tall spare stooping man of forty-eight with long arms, a long "
-             "hollow-cheeked face with prominent cheekbones, mild hazel eyes, grey-brown hair "
-             "receding at the temples and a short pointed grey goatee with shaved cheeks and lip, "
-             "in a wide-brimmed straw gardening hat, a collarless white shirt with the sleeves "
-             "rolled and sky-blue sleeve garters, a tan canvas gardening apron and white "
-             "flannel trousers")
+NARRATOR = cast_refs.tag(BOOK, "unnamed_first_person_narrator", "the narrator", [
+    "Neat close-trimmed dark brown moustache", "Mid-grey herringbone tweed lounge suit",
+    "Straw boater with a black band"])
+WIFE = cast_refs.tag(BOOK, "narrators_wife", "the narrator's wife", [
+    "Thick chestnut-auburn hair", "Sage-green linen walking costume",
+    "Small sage-green felt toque with a cream ostrich tip"])
+NEIGHBOUR = cast_refs.tag(BOOK, "unnamed_neighbour", "the neighbour", [
+    "Short pointed grey goatee", "Wide-brimmed straw gardening hat", "tan canvas gardening apron"])
+MILKMAN = cast_refs.tag(BOOK, "unnamed_milkman", "the milkman", [
+    "Thick chestnut walrus moustache", "Brown felt pork-pie hat with a narrow brim",
+    "long white apron to the shin"])
+SAPPER = cast_refs.tag(BOOK, "snippy", "Snippy the sapper", [
+    "Sandy mouse-brown hair cropped short, clean-shaven", "Small round dark blue pillbox cap",
+    "dirty brick-red serge jacket"])
+LANDLORD = cast_refs.tag(BOOK, "unnamed_landlord", "the landlord of the Spotted Dog", [
+    "Heavy grey-brown mutton-chop whiskers joined to a full moustache",
+    "Brown hair flecked with grey, thinning on the crown", "long tan leather cellarman's apron"])
+HUSSAR = cast_refs.tag(BOOK, "unnamed_hussar", "the dismounted hussar", [
+    "Brown curly hair cropped close to the skull", "Clean-shaven boyish jaw",
+    "dark rifle-green serge hussar jacket with yellow cord frogging",
+    "right sleeve torn and blackened with soot"])
 
 # ---- the five places, each naming its own light and where it comes from -----
 GARDEN_MORNING = (

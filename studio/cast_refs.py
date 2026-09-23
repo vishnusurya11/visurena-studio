@@ -25,6 +25,7 @@ is "hairstyle, body proportions, wardrobe, and silhouette".
 from __future__ import annotations
 
 import json
+import re
 from pathlib import Path
 
 from studio import trailer_refs
@@ -251,3 +252,24 @@ def chapter_refusal(book: Path, chapter: int) -> str | None:
         return (f"refs.json holds chapter {stamped}'s cast, not chapter {chapter}'s: run "
                 f"scripts/refs/cast_rows.py <book> {chapter} <cast...> first")
     return None
+
+
+def _words(text: str) -> str:
+    """Lower case, punctuation gone, single spaces: what a fragment is matched on."""
+    return " ".join(re.sub(r"[^a-z0-9'-]+", " ", (text or "").lower()).split())
+
+
+def tag(book: Path, who: str, said: str, fragments: list[str]) -> str:
+    """A plan's short name for a person: `said`, then fragments QUOTED from the
+    person's bound row, as a comma list of the row's own words.
+
+    Refuses any fragment the row does not say, word for word. Descriptions
+    typed into plans contradicted their rows three times (ep07's four
+    characters, Snippy's moustache, the gloves), and inlining the whole row
+    into the shot prose pushed seven ep09 take prompts past the lint's block
+    (audit 2026-09-22, items 24 and 34)."""
+    r = row(book, who)
+    body = _words(" ".join([r.get("physical", "")] + list((r.get("wardrobe") or {}).values())))
+    if missing := [f for f in fragments if _words(f) not in body]:
+        raise ValueError(f"{who}: the row does not say {missing}")
+    return ", ".join([said] + [f.strip().lower() for f in fragments])
