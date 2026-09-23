@@ -517,6 +517,13 @@ SEAM_THIN = 24
 broader pale band is a wall or a sky, and a picture keeps it."""
 
 
+SEAM_EDGE, SEAM_REACH = 48, 120
+"""The deepest gutter AT the edge, and how far in a gutter may sit. Measured:
+real edge gutters 5-20 px, ep09 shot 14's spill 93-97 px; a hazy sky ran 260
+rows at the edge and a white rail sat at row 150, and both were shaved as
+gutter before these limits (grid-stage audit, 2026-09-23)."""
+
+
 def _is_seam(line) -> bool:
     return line.mean() > SEAM_PALE and line.std() < SEAM_FLAT
 
@@ -530,7 +537,9 @@ def _seam_depth(grey, most: int) -> int:
     depth = 0
     while depth < most and seam[depth]:
         depth += 1
-    for i in range(depth, most):
+    if depth > SEAM_EDGE:          # a pale band this deep is sky, not a gutter
+        depth = 0
+    for i in range(depth, min(most, SEAM_REACH)):
         if seam[i] and (i == 0 or not seam[i - 1]):
             end = next((j for j in range(i, most) if not seam[j]), most)
             if end - i <= SEAM_THIN and end < most and _between_picture(grey, i, end):

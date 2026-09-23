@@ -87,3 +87,19 @@ def test_a_pale_graded_sky_is_never_taken_for_a_gutter():
     for r in range(60):
         frame[r, :] = 228 + (r % 3) * 5          # 228 / 233 / 238: sky flickering across the line
     assert seam_box(frame)[1] == 0
+
+
+def test_a_deep_pale_sky_at_the_edge_is_picture():
+    """ep09 superseded garden 2x2 slot 3: rows 0-259 of hazy sky at mean 236-238,
+    std under 1, all counted as seam; 248 rows were cut (grid-stage audit)."""
+    frame = picture(992)
+    frame[:260, :] = 237
+    assert seam_box(frame)[1] == 0
+
+
+def test_a_white_rail_across_the_picture_is_not_a_gutter():
+    """A 10-px white rail at row 150 cut 160 rows of picture (grid-stage audit):
+    ep09's garden has a white paling rail running edge to edge."""
+    frame = picture(992)
+    frame[150:160, :] = 250
+    assert seam_box(frame)[1] == 0
