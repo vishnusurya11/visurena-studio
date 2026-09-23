@@ -52,6 +52,16 @@ def row_for(book: Path, number: int) -> dict:
     return found
 
 
+def public_gates(book: Path, number: int, row: dict, engine: str = "r2v") -> list[str]:
+    """The machine gates on the cut the ledger says is on the channel."""
+    sys.path.insert(0, str(Path(__file__).resolve().parent))
+    from youtube_upload import failed_takes
+    home = episode_home.home(book, number)
+    engine, _master, qc_path = yp.deliverable(home, engine)
+    qc = json.loads(qc_path.read_text(encoding="utf-8")) if qc_path.exists() else {}
+    return yp.public_refusals(qc, failed_takes(home, engine), row)
+
+
 def live_status(api, video_id: str) -> dict:
     got = api.videos().list(part="status", id=video_id).execute()
     if not got.get("items"):
@@ -96,6 +106,8 @@ def main(argv: list[str]) -> None:
     print(f"asking    {privacy}")
     if why:
         print(f"why       {why}")
+    if privacy == "public" and (stops := public_gates(book, number, row)):
+        raise SystemExit("NOT MADE PUBLIC:\n  " + "\n  ".join(stops))
     if dry:
         print("\n--dry-run: nothing was changed.")
         return

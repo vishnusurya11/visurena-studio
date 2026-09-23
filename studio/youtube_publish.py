@@ -110,6 +110,21 @@ def waived(qc: dict, dq_failed: list[str], *, override: str) -> dict | None:
             "dq_failed": list(dq_failed)}
 
 
+def public_refusals(qc: dict, dq_failed: list[str], row: dict) -> list[str]:
+    """Every machine reason not to flip an uploaded episode PUBLIC, as the takes
+    and QC stand now, about the file the ledger row says was uploaded. The
+    owner's standing instruction waives the human sign-off; nothing waives
+    these (publish audit, 2026-09-23: the flip used to check nothing)."""
+    out = []
+    if (measured := qc.get("sha8")) != row.get("sha8"):
+        out.append(f"qc measured {measured or 'no recorded'} sha8, the uploaded cut is "
+                   f"{row.get('sha8')}; re-run qc on the file that is on the channel")
+    if not qc.get("passed"):
+        out.append("qc says passed:false")
+    out += [f"take {t} fails or was never judged" for t in dq_failed]
+    return out
+
+
 def refusals(qc: dict, dq_failed: list[str], *, privacy: str, watched: str,
              digest: str, already: dict | None, audited: bool = False,
              override: str = "") -> list[str]:
