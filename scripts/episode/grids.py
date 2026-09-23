@@ -191,6 +191,9 @@ def main(book_id: str, number: int, setup: str, cols: int, rows: int, tag: str =
          only: list[int] | None = None, seed_bump: int = 0) -> None:
     book = episode_home.book_dir(book_id)
     ep = episode_home.load_plan(book, number)
+    from studio import cast_refs
+    if why := cast_refs.chapter_refusal(book, number):   # this chapter's clothes (audit item 9)
+        raise SystemExit(why)
     shots = grid_shots(ep, setup, cols, rows, only)
     text, slots = prompt_for(book, ep, setup, shots, cols, rows)
     name = grid_name(number, setup, cols, rows, tag)

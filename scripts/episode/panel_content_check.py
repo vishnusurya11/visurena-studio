@@ -73,6 +73,9 @@ def row_for(book: Path, shot, setup, path: Path) -> dict:
 def main(book_id: str, number: int) -> int:
     book = episode_home.book_dir(book_id)
     ep = episode_home.load_plan(book, number)
+    from studio import cast_refs
+    if why := cast_refs.chapter_refusal(book, number):   # this chapter's clothes (audit item 9)
+        raise SystemExit(why)
     home = episode_home.home(book, number) / "storyboard"
     rows, missing = [], []
     for shot in ep.shots:

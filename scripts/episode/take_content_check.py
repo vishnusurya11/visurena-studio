@@ -77,6 +77,9 @@ def judge_take(book: Path, ep, record: dict, take_dir: Path, work: Path) -> dict
 def main(book_id: str, number: int, only: list[int]) -> int:
     book = episode_home.book_dir(book_id)
     ep = episode_home.load_plan(book, number)
+    from studio import cast_refs
+    if why := cast_refs.chapter_refusal(book, number):   # this chapter's clothes (audit item 9)
+        raise SystemExit(why)
     take_dir = episode_home.takes_dir(book, number, "r2v")
     records = [r for r in episode_home.read_json(take_dir / "shots.json")
                if (take_dir / f"T{r['index']:02d}.mp4").exists() and (not only or r["index"] in only)]

@@ -26,6 +26,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 
 from studio.episode_home import episode_arg
+from studio import cast_refs
 from studio import panel_dq
 from studio import approval, canvas, episode_board as board, episode_home, episode_ref_official as ro, episode_ref_prompt as rp
 from studio import house_style, pack_refs
@@ -791,6 +792,9 @@ def opened(book_id: str, number: int):
     global W, H
     book = episode_home.book_dir(book_id)
     episode = episode_home.load_plan(book, number)
+    # the cast rows are THIS chapter's clothes (audit item 9)
+    if why := cast_refs.chapter_refusal(book, number):
+        raise SystemExit(why)
     W, H = canvas.size(episode.aspect)
     # AND THE PLACE, on the same road and for the same reason the canvas is
     # here.  Episode 8 was drawn and rendered saying "1881 London" over an

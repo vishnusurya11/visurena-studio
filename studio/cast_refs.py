@@ -235,3 +235,19 @@ def card_unbound(book: Path, who: str, r: dict, state: str) -> list[str]:
     if not (Path(book) / named).exists():
         return [f"{who}: cards[{state}] names {named} and it is not on disk"]
     return []
+
+
+def chapter_refusal(book: Path, chapter: int) -> str | None:
+    """Why the cast rows on disk may NOT be used for this chapter, or None.
+
+    refs.json holds one chapter's clothes per character; cast_rows.py rewrites
+    it per episode and stamps the chapter, and nothing read the stamp -- so a
+    retake of episode 8 under chapter 9's rows would dress the wife for a
+    journey she has not taken yet (audit 2026-09-22, item 9)."""
+    stamped = load(book).get("chapter")
+    if stamped is None:
+        return "refs.json names no chapter: rebind it with scripts/refs/cast_rows.py"
+    if int(stamped) != int(chapter):
+        return (f"refs.json holds chapter {stamped}'s cast, not chapter {chapter}'s: run "
+                f"scripts/refs/cast_rows.py <book> {chapter} <cast...> first")
+    return None
