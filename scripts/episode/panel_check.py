@@ -58,7 +58,8 @@ def judge(shot, setup, frame: np.ndarray, control: dict[str, float]) -> dict:
         sharp=panel_dq.edge_strength(frame) / control[hour],
         ink=panel_dq.inkiness(frame), tiled=panel_dq.tiledness(frame),
         crowd=bool((setup.crowd or "").strip()), size=shot.size,
-        extras=getattr(shot, "extras", 0), prose=f"{shot.frame} {shot.at_rest}")
+        extras=getattr(shot, "extras", 0), prose=f"{shot.frame} {shot.at_rest}",
+        stacked=panel_dq.stacked(frame))
     row["shot"], row["hour"] = shot.index, hour
     return row
 

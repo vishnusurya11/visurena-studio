@@ -44,6 +44,13 @@ lettering. MEASURED on the ep05 grids that drew WIDE / MEDIUM / INSERT into
 their corners."""
 
 TILED = 0.90
+
+STACKED, STACK_OFF, STACK_STEP = 0.90, 4, 18.0
+"""Two pictures stacked in one panel: the share of a full row or column that
+stands STACK_STEP luma above or below both neighbours STACK_OFF px away, at 512.
+MEASURED on 127 published panels (Tier-4 calibration, 2026-09-23): ep07 S12,
+S13, S14 read 1.000; the 124 clean panels read at most 0.748 (ep09 S07, a
+real chalk cross). Wall 0.90."""
 """How equal two halves may be. A panel whose top half repeats its bottom half
 is the mosaic the six 1x1 'grids' came back as."""
 
@@ -184,9 +191,26 @@ def back_view(prose: str) -> bool:
     return bool(BACK_VIEW.search(prose or ""))
 
 
+def stacked(frame) -> float:
+    """The strongest full-width or full-height gutter line in the panel, 5-95%."""
+    import cv2
+    rgb = cv2.resize(np.asarray(frame)[:, :, :3], (512, 512), interpolation=cv2.INTER_AREA).astype(np.float32)
+    y = 0.2126 * rgb[..., 0] + 0.7152 * rgb[..., 1] + 0.0722 * rgb[..., 2]
+    return max(_line_share(y), _line_share(y.T))
+
+
+def _line_share(a) -> float:
+    n, k = a.shape[0], STACK_OFF
+    c = a[k:n - k]
+    up, dn = c - a[:n - 2 * k], c - a[2 * k:]
+    share = (((up > STACK_STEP) & (dn > STACK_STEP)) | ((up < -STACK_STEP) & (dn < -STACK_STEP))).mean(axis=1)
+    lo, hi = int(0.05 * n), int(0.95 * n)
+    return float(share[lo:hi].max())
+
+
 def verdict(faces: list[float], planned: int, sharp: float, ink: float,
             tiled: float, crowd: bool = False, size: str = "", extras: int = 0,
-            prose: str = "") -> dict:
+            prose: str = "", stacked: float = 0.0) -> dict:
     """Every fault this panel carries, named. An empty list is a clean panel."""
     from studio import people_count
 
@@ -212,6 +236,8 @@ def verdict(faces: list[float], planned: int, sharp: float, ink: float,
         flags.append("blur")
     if ink > INK:
         flags.append("text")
+    if stacked > STACKED:
+        flags.append("stacked")
     if tiled > TILED:
         flags.append("tiled")
     return {"faces": len(faces), "cast_faces": len(near), "planned": planned,
