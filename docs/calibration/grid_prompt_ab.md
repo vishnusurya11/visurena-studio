@@ -26,7 +26,7 @@ Versions of v2, same seeds:
 old grid can be reproduced.
 
 **Open in v2c:** lawn panel 4 (shot 17, planned medium close) came back as a
-full figure. That is the panel-scale gate's to refuse. The grid prompts are
+full figure, and no gate refuses it (below). The grid prompts are
 still over the audit's budgets (1x1 at most 150 words, 2x2 at most 350). What
 remains is the plan's own frame prose, which the prompt carries whole rather
 than cutting.

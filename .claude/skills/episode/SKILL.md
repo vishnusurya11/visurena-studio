@@ -62,7 +62,7 @@ and none of them defaults to 1.
 | 5 | Voices (new speakers only) | `uv run python scripts/cast/cast_voices.py <codex> --only <who>` | pairwise similarity under the wall; at most 4 voices an episode |
 | 6 | Lines | `uv run python scripts/episode/say_lines.py <book> <n>` | every line heard as written (listen gate) |
 | 7 | Timeline | `uv run python scripts/episode/respot.py <book> <n>` then `uv run python scripts/episode/timeline.py <book> <n>` | fingerprinted to the plan AND the measured voice; every reader refuses a stale one |
-| 8 | Grids | `uv run python scripts/episode/grids.py <book> <n> <setup> <cols> <rows> [tag] [--shots=..]` | filed under `storyboard/grids/` with a manifest and the plan's hash |
+| 8 | Grids | `uv run python scripts/episode/grids.py <book> <n> <setup> <cols> <rows> [tag] [--shots=..]` | filed under `storyboard/grids/` with a manifest, the plan's hash and the prompt version (v2 default; `--prompt=v1` reproduces old grids, see docs/calibration/grid_prompt_ab.md) |
 | 9 | Panels | `uv run python scripts/episode/panels.py <book> <n>` | every shot from exactly one grid, drawn from THIS plan |
 | 10 | Panel gates | `uv run python scripts/episode/panel_check.py <book> <n>` and `uv run python scripts/episode/panel_content_check.py <book> <n>` | both must exit 0; `takes_r2v` refuses without both verdicts |
 | 11 | Takes | `uv run python scripts/episode/takes_r2v.py <book> <n> --from-refs --approved=render` | the take lint; a take is current only to its words AND its pictures |
