@@ -15,6 +15,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 
+from studio.episode_home import episode_arg
 from studio import episode_seq_board as sq
 from studio import house_style
 from studio import canvas, episode_home
@@ -135,4 +136,4 @@ def main(book_id: str, number: int) -> None:
 
 
 if __name__ == "__main__":
-    main(sys.argv[1], int(sys.argv[2]) if len(sys.argv) > 2 else 1)
+    main(sys.argv[1], episode_arg(sys.argv))

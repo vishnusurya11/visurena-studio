@@ -31,6 +31,7 @@ sys.path.insert(0, str(ROOT))
 import numpy as np
 from PIL import Image
 
+from studio.episode_home import episode_arg
 from studio import actor_gate, episode_board as board, episode_gutter, episode_home, episode_seq_board as sq, prop_refs, route_gate, sheet_gate
 from studio import cast_refs, look_gate, plan_gates
 from studio import house_style
@@ -568,7 +569,7 @@ if __name__ == "__main__":
     if "--remeasure" in sys.argv:
         # FREE: retake every sheet verdict from the cells on disk, for when a
         # gate has been recalibrated since the draw. Never redraws.
-        number = int(sys.argv[2]) if len(sys.argv) > 2 and sys.argv[2].isdigit() else 1
+        number = episode_arg(sys.argv)
         boards = episode_home.boards_dir(episode_home.book_dir(sys.argv[1]), number)
         took = remeasure(boards)
         print(f"re-measured {len(took)} sheet report(s): {', '.join(took) or 'none'}")
@@ -576,4 +577,4 @@ if __name__ == "__main__":
     ACCEPT_DIRTY = "--accept-dirty" in sys.argv
     only = next((a.split("=", 1)[1] for a in sys.argv if a.startswith("--setup=")), None)
     one = next((int(a.split("=", 1)[1]) for a in sys.argv if a.startswith("--sheet=")), None)
-    main(sys.argv[1], int(sys.argv[2]) if len(sys.argv) > 2 and sys.argv[2].isdigit() else 1, only, one)
+    main(sys.argv[1], episode_arg(sys.argv), only, one)

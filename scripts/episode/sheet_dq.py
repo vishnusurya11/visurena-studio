@@ -24,6 +24,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT))
 
+from studio.episode_home import episode_arg
 from studio import episode_home, sheet_gate, episode_seq_board as sq, sheet_gate as gate
 
 
@@ -100,4 +101,4 @@ def main(book_id: str, number: int, only: str | None = None) -> dict:
 
 if __name__ == "__main__":
     setup = next((a.split("=", 1)[1] for a in sys.argv if a.startswith("--setup=")), None)
-    main(sys.argv[1], int(sys.argv[2]) if len(sys.argv) > 2 and sys.argv[2].isdigit() else 1, setup)
+    main(sys.argv[1], episode_arg(sys.argv), setup)

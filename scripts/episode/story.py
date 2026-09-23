@@ -21,6 +21,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT))
 
+from studio.episode_home import episode_arg
 from studio import episode_home, story_bible as sb, story_layer
 from studio import episode_seq_board as sq
 
@@ -117,7 +118,7 @@ def flag(argv: list[str], name: str) -> str | None:
 
 
 def main(argv: list[str]) -> None:
-    book_id, number = argv[1], int(argv[2]) if len(argv) > 2 and argv[2].isdigit() else 1
+    book_id, number = argv[1], episode_arg(argv)
     what, why, nxt = flag(argv, "decide"), flag(argv, "because"), flag(argv, "next")
     edit = None
     if what:

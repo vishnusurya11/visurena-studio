@@ -198,6 +198,19 @@ def qc_path(book: Path, number: int, engine: str = "i2v") -> Path:
     return reports_dir(book, number) / ("qc.json" if engine == "i2v" else f"qc_{engine}.json")
 
 
+def episode_arg(argv: list[str]) -> int:
+    """The episode number: the second plain (non-flag) argument, or a refusal.
+
+    Twenty CLIs used to fall back to episode 1, and takes_r2v tested
+    `isdigit()` on argv[2], so `takes_r2v.py <book> --retake=3` would have
+    re-rendered EPISODE ONE's take 3 on the GPU. A default episode is a guess
+    about the one thing the command is for (audit 2026-09-22, item 7)."""
+    plain = [a for a in argv[1:] if not a.startswith("--")]
+    if len(plain) < 2 or not plain[1].isdigit() or int(plain[1]) < 1:
+        raise SystemExit(f"say which episode: {argv[0]} <book> <episode> ...  (got {plain[1:2] or 'nothing'})")
+    return int(plain[1])
+
+
 def engine_arg(argv: list[str]) -> str:
     return next((a.split("=", 1)[1] for a in argv if a.startswith("--engine=")), "i2v")
 

@@ -21,6 +21,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 
+from studio.episode_home import episode_arg
 from studio import approval, canvas, episode_home, image_spend as spend
 from studio.comfy import run, stage_image
 from studio.h3 import frames_for
@@ -228,7 +229,7 @@ def main(book_id: str, number: int, approved: bool = False, rendering: bool = Fa
 
 def _cli(argv: list[str]) -> None:
     args = [a for a in argv[1:] if not a.startswith("--")]
-    main(args[0], int(args[1]) if len(args) > 1 else 1,
+    main(args[0], episode_arg(argv),
          approval.approved_for("title", argv), approval.approved_for("render", argv),
          "--local" in argv)
 

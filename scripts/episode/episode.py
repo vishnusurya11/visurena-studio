@@ -16,6 +16,8 @@ from pathlib import Path
 HERE = Path(__file__).resolve().parent
 sys.path.insert(0, str(HERE.parents[1]))
 
+from studio.episode_home import episode_arg
+
 STEPS = ("say_lines", "timeline", "frames", "storyboard:grids", "shots", "storyboard:review",
          "assemble", "qc")
 
@@ -55,4 +57,4 @@ def main(book_id: str, number: int, until: str = "") -> None:
 if __name__ == "__main__":
     args = [a for a in sys.argv[1:] if not a.startswith("--")]
     until = next((a.split("=", 1)[1] for a in sys.argv if a.startswith("--until=")), "")
-    main(args[0], int(args[1]) if len(args) > 1 else 1, until)
+    main(args[0], episode_arg(sys.argv), until)

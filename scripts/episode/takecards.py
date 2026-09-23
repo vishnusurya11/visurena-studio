@@ -18,6 +18,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 
 import importlib.util as _iu
 
+from studio.episode_home import episode_arg
 from studio import episode_home, episode_ref_official as ro
 from studio import episode_seq_board as sq
 
@@ -142,4 +143,4 @@ def main(book_id: str, number: int) -> None:
 
 
 if __name__ == "__main__":
-    main(sys.argv[1], int(sys.argv[2]) if len(sys.argv) > 2 else 1)
+    main(sys.argv[1], episode_arg(sys.argv))

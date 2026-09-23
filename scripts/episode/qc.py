@@ -25,6 +25,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 
+from studio.episode_home import episode_arg
 from studio import edit_gate, episode_home, gap_owner, episode_seq_board as sq, voice_qc, youtube_publish as yp
 from studio import episode_takes as tk
 from studio.episode_spec import Episode
@@ -366,4 +367,4 @@ def main(book_id: str, number: int, engine: str = "i2v") -> None:
 
 if __name__ == "__main__":
     args = [a for a in sys.argv[1:] if not a.startswith("--")]
-    main(args[0], int(args[1]) if len(args) > 1 else 1, episode_home.engine_arg(sys.argv))
+    main(args[0], episode_arg(sys.argv), episode_home.engine_arg(sys.argv))

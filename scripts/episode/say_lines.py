@@ -17,6 +17,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 
+from studio.episode_home import episode_arg
 from studio import episode_home, voice, voice_ear, voice_qc, voice_say
 from studio.episode_spec import Episode, Line
 
@@ -278,4 +279,4 @@ def main(book_id: str, number: int, redo: list[int] | None = None) -> None:
 if __name__ == "__main__":
     args = [a for a in sys.argv[1:] if not a.startswith("--")]
     redo = [int(v) for a in sys.argv if a.startswith("--redo=") for v in a.split("=", 1)[1].split(",") if v]
-    main(args[0], int(args[1]) if len(args) > 1 else 1, redo)
+    main(args[0], episode_arg(sys.argv), redo)

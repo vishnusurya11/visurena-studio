@@ -25,6 +25,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 
+from studio.episode_home import episode_arg
 from studio import approval, canvas, episode_board as board, episode_home, episode_ref_official as ro, episode_ref_prompt as rp
 from studio import house_style, pack_refs
 from studio import take_currency
@@ -944,7 +945,7 @@ if __name__ == "__main__":
     _set_no_ends(sys.argv)
     _set_from_refs(sys.argv)
     _set_pin_panel(sys.argv)
-    number = int(sys.argv[2]) if len(sys.argv) > 2 and sys.argv[2].isdigit() else 1
+    number = episode_arg(sys.argv)
     retake, why = retake_list(sys.argv), retake_why(sys.argv)
     if refused := retake_refusal(retake, why, "--last" in sys.argv):
         raise SystemExit(refused)

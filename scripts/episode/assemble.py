@@ -18,6 +18,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 
+from studio.episode_home import episode_arg
 from studio import card_fade, canvas, edit_gate, episode_bed, episode_gutter, episode_home
 from studio import finished_file
 from studio.comfy import run
@@ -840,6 +841,6 @@ def next_iteration(home: Path) -> int:
 
 if __name__ == "__main__":
     args = [a for a in sys.argv[1:] if not a.startswith("--")]
-    main(args[0], int(args[1]) if len(args) > 1 else 1, episode_home.engine_arg(sys.argv),
+    main(args[0], episode_arg(sys.argv), episode_home.engine_arg(sys.argv),
          next((a.split("=", 1)[1] for a in sys.argv if a.startswith("--bed=")),
               BED_ENGINE_DEFAULT))
