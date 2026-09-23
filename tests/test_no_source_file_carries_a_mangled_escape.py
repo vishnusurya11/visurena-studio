@@ -30,11 +30,18 @@ MANGLED = {"\x07": "\\a", "\x08": "\\b", "\x0b": "\\v", "\x0c": "\\f"}
 """Control bytes a shell heredoc produces from the escapes a regex wants."""
 
 WATCHED = ("studio", "scripts", "tests")
+WRITTEN = ((".claude", "*.md"), ("docs", "*.md"), ("scripts", "*.sh"))
+"""The skills, agents and docs are text a heredoc writes too. MEASURED
+2026-09-22: the rewritten episode skill's worktree path reached disk as
+"KingdomOfViSuReNa<BEL>lpha<VT>isurena_studio_wotw", and this guard -- which
+scanned only .py files -- could not see it (audit, guard G10)."""
 
 
 def sources() -> list[Path]:
-    return [p for folder in WATCHED for p in (ROOT / folder).rglob("*.py")
-            if "__pycache__" not in p.parts]
+    code = [p for folder in WATCHED for p in (ROOT / folder).rglob("*.py")]
+    text = [p for folder, pattern in WRITTEN if (ROOT / folder).exists()
+            for p in (ROOT / folder).rglob(pattern)]
+    return [p for p in code + text if "__pycache__" not in p.parts]
 
 
 def test_the_scan_has_something_to_scan():

@@ -29,3 +29,7 @@ def test_rows_for_another_chapter_refuse_and_say_how_to_fix_it(tmp_path):
 
 def test_unstamped_rows_refuse(tmp_path):
     assert chapter_refusal(refs(tmp_path, None), 8) is not None
+
+
+def test_a_book_with_no_cast_rows_has_nothing_to_dress_wrongly(tmp_path):
+    assert chapter_refusal(tmp_path, 8) is None

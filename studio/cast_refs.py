@@ -245,6 +245,8 @@ def chapter_refusal(book: Path, chapter: int) -> str | None:
     it per episode and stamps the chapter, and nothing read the stamp -- so a
     retake of episode 8 under chapter 9's rows would dress the wife for a
     journey she has not taken yet (audit 2026-09-22, item 9)."""
+    if not (Path(book) / "refs" / "refs.json").exists():
+        return None                      # no cast rows: nothing to dress wrongly
     stamped = load(book).get("chapter")
     if stamped is None:
         return "refs.json names no chapter: rebind it with scripts/refs/cast_rows.py"

@@ -234,6 +234,8 @@ def test_printed_matter_may_carry_print():
     assert prints_words("Insert on the front page of an evening paper")
     assert prints_words("the shuttered bookstall with its board")
     assert not prints_words("Insert on the cold joint and the loaf")
+    # the SIZE decides it now (audit 2026-09-22): type is expected only where a
+    # printed thing is the subject of an insert or close
     got = faults(seen(text=True), frame="Insert on the front page of an evening paper",
-                 planned=0, crowd=False, flat=True, night=True)
+                 planned=0, crowd=False, flat=True, night=True, size="insert")
     assert not any("text" in f or "lettering" in f for f in got)

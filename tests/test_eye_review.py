@@ -179,6 +179,14 @@ def library(tmp_path: Path, clip: Path) -> tuple[Path, str]:
     (home / "qc_r2v.json").write_text(json.dumps({"passed": True, "sha8": digest}), encoding="utf-8")
     (home / "youtube.json").write_text(json.dumps({"title": "Ep 1", "description": "d",
                                                   "synthetic": True}), encoding="utf-8")
+    # A REAL EPISODE HAS A TAKES ROOM: the upload refuses one with no record of
+    # which takes exist (audit 2026-09-22, item 6), so this one has a judged take.
+    room = home / "takes" / "r2v"
+    room.mkdir(parents=True)
+    (room / "shots.json").write_text(json.dumps([{"index": 0}]), encoding="utf-8")
+    (room / "T00.mp4").write_bytes(b"mp4")
+    for kind in ("dq", "content"):
+        (room / f"T00.{kind}.json").write_text(json.dumps({"passed": True}), encoding="utf-8")
     return book, digest
 
 

@@ -242,11 +242,11 @@ def worn_by_someone(frame: str) -> bool:
     return bool(WORN.search(frame or ""))
 
 PRINTED = re.compile(
-    r"\b(?:newspapers?|papers?|pages?|placards?|posters?|signboards?|signs?|timetables?|"
-    r"letters?|telegrams?|books?|labels?|tickets?|headlines?)\b",
+    r"\b(?:newspapers?|papers?|pages?|placards?|posters?|signboards?|boards?|signs?|"
+    r"timetables?|bookstalls?|letters?|telegrams?|books?|labels?|tickets?|headlines?)\b",
     re.I)
-"""WHOLE WORDS, and "print" and "board" are gone: "boot print" is not a page and
-"cupboard" is not a signboard. Without boundaries "papered wall" was paper."""
+"""WHOLE WORDS: "boot print" is not a page, and with a boundary "cupboard" is no
+longer a board. Without boundaries "papered wall" was paper."""
 
 LETTERING_SIZES = ("insert", "close", "extreme_close", "medium_close")
 
