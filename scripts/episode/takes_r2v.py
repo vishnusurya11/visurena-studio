@@ -185,9 +185,12 @@ def adopt_names(rows: list[dict]) -> None:
     ro.DISPLAY.clear()
     ro.WOMEN.clear()
     ro.CREATURES.clear()
+    ro.YOUNG.clear()
     for r in rows:
         if r.get("kind") != "character":
             continue
+        if (age := ro.age_of(r.get("physical", ""))) is not None and age < 16:
+            ro.YOUNG.add(r["entity_id"])
         if r.get("display"):
             ro.DISPLAY[r["entity_id"]] = r["display"]
         if r.get("gender") == "female":

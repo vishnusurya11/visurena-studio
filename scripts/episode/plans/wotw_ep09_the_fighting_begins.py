@@ -71,29 +71,29 @@ from studio import cast_refs  # noqa: E402
 
 NARRATOR = cast_refs.tag(BOOK, "unnamed_first_person_narrator", "the narrator", [
     "Neat close-trimmed dark brown moustache", "Mid-grey herringbone tweed lounge suit",
-    "Straw boater with a black band"])
+    "Straw boater with a black band"], chapter=9)
 NARRATOR_BAREHEADED = cast_refs.tag(BOOK, "unnamed_first_person_narrator", "the narrator", [
-    "Neat close-trimmed dark brown moustache", "Mid-grey herringbone tweed lounge suit"])
+    "Neat close-trimmed dark brown moustache", "Mid-grey herringbone tweed lounge suit"], chapter=9)
 """Shot 11 holds the boater in his hand. Tagged with it too, the panel drew a
 boater on his head AND one in his hand (2026-09-23)."""
 WIFE = cast_refs.tag(BOOK, "narrators_wife", "the narrator's wife", [
     "Thick chestnut-auburn hair", "Sage-green linen walking costume",
-    "Small sage-green felt toque with a cream ostrich tip"])
+    "Small sage-green felt toque with a cream ostrich tip"], chapter=9)
 NEIGHBOUR = cast_refs.tag(BOOK, "unnamed_neighbour", "the neighbour", [
-    "Short pointed grey goatee", "Wide-brimmed straw gardening hat", "tan canvas gardening apron"])
+    "Short pointed grey goatee", "Wide-brimmed straw gardening hat", "tan canvas gardening apron"], chapter=9)
 MILKMAN = cast_refs.tag(BOOK, "unnamed_milkman", "the milkman", [
     "Thick chestnut walrus moustache", "Brown felt pork-pie hat with a narrow brim",
-    "long white apron to the shin"])
+    "long white apron to the shin"], chapter=9)
 SAPPER = cast_refs.tag(BOOK, "snippy", "Snippy the sapper", [
     "Sandy mouse-brown hair cropped short, clean-shaven", "Small round dark blue pillbox cap",
-    "dirty brick-red serge jacket"])
+    "dirty brick-red serge jacket"], chapter=9)
 LANDLORD = cast_refs.tag(BOOK, "unnamed_landlord", "the landlord of the Spotted Dog", [
     "Heavy grey-brown mutton-chop whiskers joined to a full moustache",
-    "Brown hair flecked with grey, thinning on the crown", "long tan leather cellarman's apron"])
+    "Brown hair flecked with grey, thinning on the crown", "long tan leather cellarman's apron"], chapter=9)
 HUSSAR = cast_refs.tag(BOOK, "unnamed_hussar", "the dismounted hussar", [
     "Brown curly hair cropped close to the skull", "Clean-shaven boyish jaw",
     "dark rifle-green serge hussar jacket with yellow cord frogging",
-    "right sleeve torn and blackened with soot"])
+    "right sleeve torn and blackened with soot"], chapter=9)
 
 # ---- the five places, each naming its own light and where it comes from -----
 GARDEN_MORNING = (

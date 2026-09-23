@@ -261,7 +261,7 @@ def _words(text: str) -> str:
     return " ".join(re.sub(r"[^a-z0-9'-]+", " ", (text or "").lower()).split())
 
 
-def tag(book: Path, who: str, said: str, fragments: list[str]) -> str:
+def tag(book: Path, who: str, said: str, fragments: list[str], chapter: int | None = None) -> str:
     """A plan's short name for a person: `said`, then fragments QUOTED from the
     person's bound row, as a comma list of the row's own words.
 
@@ -270,8 +270,16 @@ def tag(book: Path, who: str, said: str, fragments: list[str]) -> str:
     characters, Snippy's moustache, the gloves), and inlining the whole row
     into the shot prose pushed seven ep09 take prompts past the lint's block
     (audit 2026-09-22, items 24 and 34)."""
-    r = row(book, who)
+    # A PLAN TAGS AGAINST ITS OWN CHAPTER: refs.json holds one chapter, so with
+    # the next one bound an earlier plan could never regenerate (2026-09-23).
+    if chapter is not None:
+        from studio import pack_refs
+        r = pack_refs.character_row(book, who, chapter)
+    else:
+        r = row(book, who)
     body = _words(" ".join([r.get("physical", "")] + list((r.get("wardrobe") or {}).values())))
     if missing := [f for f in fragments if _words(f) not in body]:
         raise ValueError(f"{who}: the row does not say {missing}")
-    return ", ".join([said] + [f.strip().lower() for f in fragments])
+    # CLOSED IN PARENTHESES: an open comma list ran on into the plan's next verb,
+    # "long white apron to the shin standing at the side gate" (ep09 T01).
+    return f"{said} ({', '.join(f.strip().lower() for f in fragments)})" if fragments else said

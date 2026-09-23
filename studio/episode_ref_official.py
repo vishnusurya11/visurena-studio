@@ -72,6 +72,18 @@ WOMEN: set[str] = set()
 """Who the builder calls a woman (refs.json `gender`), set per run.  Every
 subject used to be "this man" and every speaker "His mouth"."""
 CREATURES: set[str] = set()
+YOUNG: set[str] = set()
+"""Cast under 16, read from their rows' own age (`age_of`): a 13-year-old
+newspaper boy was 'this man' in four rendered prompts (audit, 2026-09-23)."""
+STILL_GERUNDS = ("keeping", "holding")
+"""A camera that keeps or holds its frame has no move to arrive with."""
+
+
+def age_of(physical: str) -> int | None:
+    """The age a row states: 'Boy of 13', 'Man of 34', '52 years old'."""
+    m = re.search(r"\b(?:boy|girl|man|woman|lad|child) of (\d{1,2})\b|\b(\d{1,2}) years? old\b",
+                  physical or "", re.I)
+    return int(m.group(1) or m.group(2)) if m else None
 """Who is not a person at all (refs.json `gender: "creature"`), set per run.
 WotW ep04: the Martian is a bear-sized bulk that is WHOLLY HEAD, with no arms,
 no legs and no torso, and the whole reveal is that absence -- and the builder
@@ -93,6 +105,8 @@ def surname(who: str) -> str:
 def noun(who: str) -> str:
     if who in CREATURES:
         return "creature"
+    if who in YOUNG:
+        return "girl" if who in WOMEN else "boy"
     return "woman" if who in WOMEN else "man"
 
 
@@ -366,7 +380,8 @@ def last_frame_text(seg: dict) -> str:
 
 GERUND = {"tracks": "tracking", "pushes": "pushing", "pulls": "pulling", "dollies": "dollying",
           "zooms": "zooming", "pans": "panning", "tilts": "tilting", "cranes": "craning",
-          "orbits": "orbiting", "moves": "moving", "holds": "holding"}
+          "orbits": "orbiting", "moves": "moving", "holds": "holding", "rises": "rising",
+          "descends": "descending", "racks": "racking", "keeps": "keeping"}
 """Every value `CAMERA` can produce, spelled out.
 
 English is not regular enough to derive these: `pushes` needs -es off (not -s,
@@ -465,6 +480,8 @@ def arrival_clause(seg: dict, names=()) -> str:
     held, tail = arrival_end(seg.get("end_frame") or "", names)
     cam, _subject = camera_clause(clauses_of(seg.get("motion", ""))[0])
     move = move_verb(cam) if cam else ""
+    if move.split(" ")[0] in STILL_GERUNDS:
+        move = ""                 # "the camera is keeping through the last frame" (22 prompts)
     if move:
         # Two gates shaped this sentence and both were right: `holds` is on the L2
         # stillness list (a stillness verb in a block measured 0.77 frozen against

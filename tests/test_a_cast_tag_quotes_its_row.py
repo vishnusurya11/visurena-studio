@@ -29,8 +29,9 @@ def book(tmp_path):
 def test_a_tag_is_the_name_and_the_rows_own_words(tmp_path):
     got = tag(book(tmp_path), "narrator", "the narrator",
               ["neat close-trimmed dark brown moustache", "mid-grey herringbone tweed lounge suit"])
-    assert got == ("the narrator, neat close-trimmed dark brown moustache, "
-                   "mid-grey herringbone tweed lounge suit")
+    # closed in parentheses so the plan's next verb cannot run on (ep09 T01)
+    assert got == ("the narrator (neat close-trimmed dark brown moustache, "
+                   "mid-grey herringbone tweed lounge suit)")
 
 
 def test_a_fragment_the_row_does_not_say_refuses_the_plan(tmp_path):
@@ -43,3 +44,13 @@ def test_matching_ignores_case_and_punctuation_but_not_words(tmp_path):
     assert tag(b, "narrator", "the narrator", ["Neat close-trimmed dark brown moustache"])
     with pytest.raises(ValueError):
         tag(b, "narrator", "the narrator", ["neat dark moustache"])
+
+
+def test_a_plan_tags_against_its_own_chapter_whatever_is_bound():
+    """refs.json holds ONE chapter. With chapter 10 bound, ep09's plan could no
+    longer regenerate: its narrator wears the chapter-9 boater (2026-09-23)."""
+    from studio import episode_home
+    book = episode_home.book_dir("20260827135508_the-war-of-the-worlds")
+    got = tag(book, "unnamed_first_person_narrator", "the narrator",
+              ["Straw boater with a black band"], chapter=9)
+    assert "straw boater" in got
