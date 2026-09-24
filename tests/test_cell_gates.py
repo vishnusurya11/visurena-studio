@@ -123,3 +123,26 @@ def test_the_owners_neighbour_shot_is_refused_by_the_real_ep09_plan():
 def test_the_place_pictures_are_read_by_location_and_view():
     got = cell_gates.pack_prompts(episode_home.book_dir(WOTW))
     assert "maybury_hill/wide_lawn_burning" in got and got["maybury_hill/wide_lawn_burning"]
+
+
+# ---- G-LAID
+def test_a_close_on_a_lying_man_from_low_over_him_is_caught():  # ep10 shot 18, published
+    from studio.cell_gates import laid_unseen
+    s = shot(size="close", faces=["landlord"], frame="Close on the landlord lying back on the sand",
+             camera="low over him, two paces away, an 85mm lens")
+    assert laid_unseen(s)
+
+
+def test_looking_down_or_level_with_the_face_passes():
+    from studio.cell_gates import laid_unseen
+    for camera in ("above him looking down, two paces away", "on the ground level with his face, a 50mm lens"):
+        s = shot(size="close", faces=["landlord"], frame="Close on the landlord lying on the sand", camera=camera)
+        assert not laid_unseen(s)
+
+
+def test_a_medium_or_a_two_shot_is_left_alone():  # ep07 4, ep10 17
+    from studio.cell_gates import laid_unseen
+    assert not laid_unseen(shot(size="medium", faces=["a"], frame="Medium on a man lying in the road",
+                                camera="low over him"))
+    assert not laid_unseen(shot(size="medium_close", faces=["a", "b"], camera="low in the lane",
+                                frame="Medium close on the narrator kneeling by the landlord lying at the fence"))

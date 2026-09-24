@@ -199,12 +199,35 @@ def anchor_faults(episode: Episode) -> list[str]:
             for s in episode.shots if (why := anchored_truck(s))]
 
 
+# ---- G-LAID ----------------------------------------------------------------------------
+LAID = re.compile(r"\b(?:lying|lies|lay|laid|sprawled|prone|supine)\b", re.I)
+SEEN_LAID = re.compile(r"\blooking down\b|\bfrom above\b|\boverhead\b|\bstraight down\b"
+                       r"|\blevel with (?:his|her|their) (?:face|head|eyes)\b|\bon the ground\b", re.I)
+
+
+def laid_unseen(s: Shot) -> bool:
+    """A close on one person lying down whose camera neither looks down on the
+    face nor lies level with it. ep10 shot 18 said "low over him"; the drawer
+    stood the landlord up against the lane, and H3 turned the world round his
+    face to lay him on the sand."""
+    if s.size not in ("close", "medium_close", "extreme_close") or len(s.faces or []) != 1:
+        return False
+    return bool(LAID.search(f"{s.frame} {s.at_rest}")) and not SEEN_LAID.search(s.camera or "")
+
+
+def laid_faults(episode: Episode) -> list[str]:
+    return [f"G-LAID shot {s.index}: a {s.size} of a person lying down, and the camera {s.camera.split(',')[0]!r} "
+            f"neither looks down on the face nor lies level with it; the drawer stands them up (ep10 T18). "
+            f"Say 'above him looking down' or 'on the ground level with his face'"
+            for s in episode.shots if laid_unseen(s)]
+
+
 # ---- the verdict -------------------------------------------------------------------------
 
 def faults(episode: Episode, pictures: dict[str, str]) -> list[str]:
     """Every cell reason this plan should not be drawn: hard."""
     return (aim_faults(episode) + hat_faults(episode)[0] + place_faults(episode, pictures)
-            + anchor_faults(episode))
+            + anchor_faults(episode) + laid_faults(episode))
 
 
 def advisories(episode: Episode) -> list[str]:

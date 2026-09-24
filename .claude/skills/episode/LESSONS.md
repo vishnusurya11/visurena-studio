@@ -184,5 +184,13 @@ SKILL.md.
   11 frames of the machine sheet on two, and both were right to the end. A
   hand-written `heads.json` entry (narration shots only, and the take must
   still cover its shot) cuts past it, and `take_dq` now judges from the head.
+- **A picture that contradicts the words makes H3 reconcile them, badly.**
+  ep10 T18 asked for the landlord "lying back on the sand"; the panel stood
+  him against the lane, and the take turned the whole world round his fixed
+  face until sand filled the frame. Every gate passed it, and the face
+  detector lost him at the end so no take-level measure could see it (a
+  first-vs-last colour check read 0.51 on an accepted ep06 take: no wall).
+  Caught upstream now: G-LAID in the plan and the posture question in the
+  panel content gate.
 - **A small dark subject under a truck freezes.** T07 read 52 % frozen as a
   sideways truck on a silhouette; as a crane-up the same shot read 26-37 %.

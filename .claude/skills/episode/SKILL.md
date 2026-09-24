@@ -61,6 +61,10 @@ hold (2026-09-23), and each cost ep09 renders before it existed:**
   person without it and say "bareheaded".
 - **G-PLACE:** a landmark the setup's words and picture lack is dropped or
   invented (ep09 shot 18's bridge on the lawn).
+- **G-LAID:** a close on one person lying down says "above him looking down"
+  or "on the ground level with his face". "Low over him" drew the landlord
+  upright, and H3 turned the world round his face to lay him down (ep10 T18,
+  passed by every gate).
 
 `plan_check` exits 1 whenever it refuses anything. **An exit of 1 is a stop.**
 It used to fail every WotW plan for another book's reasons, and people read
