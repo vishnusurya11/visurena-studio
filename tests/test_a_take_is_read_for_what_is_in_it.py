@@ -88,3 +88,14 @@ def test_a_take_that_invents_a_person_is_named():
                       planned=1, crowd=False, flat=True, night=True,
                       physical="", frame="a man on the road")
     assert got and any("copies" in f or "figure" in f for f in got)
+
+
+def test_a_take_keeps_the_posture_most_of_its_frames_show():
+    """ep11 T06, T09, T16: busiest() rebuilt the take's Seen without posture, so
+    every take read 'unread' and failed a shot that asks for sitting. ep10 T18
+    stood for two frames and lay for one: the take reads standing."""
+    from studio.panel_content import Seen as S
+    from studio.take_content import busiest
+    reads = [S(people=1, posture="standing"), S(people=1, posture="standing"), S(people=1, posture="lying")]
+    assert busiest(reads).posture == "standing"
+    assert busiest([S(people=1, posture=""), S(people=1, posture="sitting")]).posture == "sitting"

@@ -47,7 +47,15 @@ def busiest(reads: list[Seen]) -> Seen:
         text=any(r.text for r in reads),
         hour=fullest.hour,
         subjects=subjects,
+        posture=usual_posture(reads),
     )
+
+
+def usual_posture(reads: list[Seen]) -> str:
+    """The posture most of the take's frames show, ties to the earliest. ep10
+    T18 stood for two frames and lay for one: it reads standing, and fails."""
+    said = [r.posture for r in reads if r.posture]
+    return max(said, key=lambda p: (said.count(p), -said.index(p))) if said else ""
 
 
 def drifted(seen: Seen, physical: str) -> list[str]:
