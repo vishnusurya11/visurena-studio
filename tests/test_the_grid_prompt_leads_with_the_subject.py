@@ -116,3 +116,22 @@ def test_a_staged_prop_is_bound_as_an_object_not_a_person():
                           props=[{"ref": 1, "name": "the Martian fighting-machine"}])
     assert "the Martian fighting-machine is the object in <image1>" in text
     assert "is the person in <image1>" not in text
+
+
+HOUSE = ("the front of a pale house at night: rows of lit windows, a gravel drive, two gate piers; "
+         "the light is lamplight from the open door, so the gravel reads warm")
+
+
+def test_a_grid_of_tight_shots_names_the_place_briefly():
+    """ep10 shot 1, a medium close on the wife: a 100-word description of the
+    whole house front drew the house every time, the wife 0.02-0.04 of the frame
+    across five seeds. The staged picture carries the place; a tight grid gets
+    its name and its light only."""
+    text = grid_prompt_v2([panel("her face", ["WIFE"], size="MEDIUM CLOSE")], 1, 1, ([2], HOUSE), [], 3)
+    assert "gate piers" not in text and "the front of a pale house at night" in text
+    assert "the light is lamplight from the open door" in text
+
+
+def test_a_grid_with_a_wide_keeps_the_whole_place():
+    text = grid_prompt_v2([panel("the house", size="WIDE")], 1, 1, ([2], HOUSE), [], 3)
+    assert "gate piers" in text

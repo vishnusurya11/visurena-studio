@@ -30,3 +30,13 @@ def test_the_verdict_flags_a_stacked_panel():
     row = panel_dq.verdict(faces=[], planned=0, sharp=1.0, ink=0.0, tiled=0.0, stacked=1.0)
     assert "stacked" in row["flags"] and not row["passed"]
     assert panel_dq.verdict(faces=[], planned=0, sharp=1.0, ink=0.0, tiled=0.0, stacked=0.75)["passed"]
+
+
+def test_a_door_jamb_is_not_a_gutter():
+    """ep10 shot 1: a full-height door jamb scored 1.0 and failed the wife's
+    correct medium close. The real gutters (ep07 S12-S14) are pale (193-245)
+    and flat (std 1.5-4.6); the jamb read 106 and 14.7."""
+    frame = texture()
+    rng = np.random.default_rng(4)
+    frame[:, 254:258, :] = np.clip(rng.normal(140, 15, (512, 4, 1)), 0, 255).astype(np.uint8)
+    assert panel_dq.stacked(frame) < 0.5

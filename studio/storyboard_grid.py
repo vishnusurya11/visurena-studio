@@ -222,6 +222,19 @@ def _block_v2(label: str, s: dict) -> str:
             f"{_who_v2(s.get('who') or [], s.get('extras', 0))}")
 
 
+TIGHT = ("MEDIUM CLOSE", "BIG CLOSE-UP", "CLOSE", "INSERT")
+"""Sizes whose picture is a subject, not a place. ep10 shot 1, a medium close on
+the wife, drew the whole house front five seeds running (her face 0.02-0.04 of
+the frame) under a 100-word description of that house."""
+
+
+def brief_place(described: str) -> str:
+    """The place's name and its light: the staged picture carries the rest."""
+    head = described.split(":", 1)[0].strip()
+    light = described[described.find("; the light is") + 2:] if "; the light is" in described else ""
+    return f"{head}; {light}" if light else head
+
+
 def grid_prompt_v2(shots: list[dict], cols: int, rows: int, place: tuple[list[int], str],
                    cast: list[dict], style_slot: int, props: list[dict] | None = None) -> str:
     """Layout (one line), the panels SUBJECT FIRST, one binding line per person,
@@ -248,8 +261,9 @@ def grid_prompt_v2(shots: list[dict], cols: int, rows: int, place: tuple[list[in
     if len(binding) > 1:
         binding.append(f"{' and '.join(p['name'] for p in cast if p.get('ref'))} are never dressed alike.")
     refs = " and ".join(f"<image{n}>" for n in place[0])
-    where = (f"The picture is set at {refs}: {place[1]}." if single else
-             f"Every panel is set at {refs}, at the same hour: {place[1]}.")
+    said = brief_place(place[1]) if all(s["size"] in TIGHT for s in shots) else place[1]
+    where = (f"The picture is set at {refs}: {said}." if single else
+             f"Every panel is set at {refs}, at the same hour: {said}.")
     parts = [layout] + blocks + binding + [where,
                                                                             STYLE_V2.format(n=style_slot)]
     return "\n\n".join(_one_picture(x) if single else x for x in parts)

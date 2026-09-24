@@ -51,6 +51,9 @@ stands STACK_STEP luma above or below both neighbours STACK_OFF px away, at 512.
 MEASURED on 127 published panels (Tier-4 calibration, 2026-09-23): ep07 S12,
 S13, S14 read 1.000; the 124 clean panels read at most 0.748 (ep09 S07, a
 real chalk cross). Wall 0.90."""
+GUTTER_PALE, GUTTER_FLAT = 170.0, 8.0
+"""A line counts only if it is pale and even. MEASURED 2026-09-23: the ep07
+gutters read mean 193-245, std 1.5-4.6; ep10 shot 1's door jamb 106, 14.7."""
 """How equal two halves may be. A panel whose top half repeats its bottom half
 is the mosaic the six 1x1 'grids' came back as."""
 
@@ -204,8 +207,15 @@ def _line_share(a) -> float:
     c = a[k:n - k]
     up, dn = c - a[:n - 2 * k], c - a[2 * k:]
     share = (((up > STACK_STEP) & (dn > STACK_STEP)) | ((up < -STACK_STEP) & (dn < -STACK_STEP))).mean(axis=1)
+    share = share * _gutter_like(c)
     lo, hi = int(0.05 * n), int(0.95 * n)
     return float(share[lo:hi].max())
+
+
+def _gutter_like(lines):
+    """A gutter is a pale, even line; a door jamb is neither. ep07 S12-S14's
+    gutters read mean 193-245, std 1.5-4.6; ep10 shot 1's jamb read 106, 14.7."""
+    return (lines.mean(axis=1) >= GUTTER_PALE) & (lines.std(axis=1) <= GUTTER_FLAT)
 
 
 def verdict(faces: list[float], planned: int, sharp: float, ink: float,
