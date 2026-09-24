@@ -83,3 +83,10 @@ def test_back_view_reads_the_phrases_a_plan_uses():
         assert back_view(said), said
     for said in ("a hand's breadth from his shoulder", "her shoulders square", "he looks back"):
         assert not back_view(said), said
+
+
+def test_walking_away_from_the_camera_is_a_back_view():
+    """ep10 shot 14: 'walking up it away from the camera' failed 'missing' with
+    the narrator's back filling the panel (2026-09-23)."""
+    assert back_view("the narrator walking up it away from the camera")
+    assert not back_view("he turns away from the fire toward the camera")

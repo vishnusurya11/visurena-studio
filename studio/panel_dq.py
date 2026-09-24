@@ -183,7 +183,7 @@ for, which `back_view` exempts. So mediums are held to it too."""
 
 BACK_VIEW = re.compile(
     r"\b(?:past the (?:near )?shoulder|over the shoulder|from behind|"
-    r"(?:his|her|their) backs? (?:to|turned))\b", re.I)
+    r"(?:his|her|their) backs? (?:to|turned)|away from the camera)\b", re.I)
 
 
 def back_view(prose: str) -> bool:

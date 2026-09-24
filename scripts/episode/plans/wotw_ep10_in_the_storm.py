@@ -59,14 +59,14 @@ LOOK = "Angular stylised 3D animation, brush-stroke texture"
 from studio import cast_refs  # noqa: E402
 
 NARRATOR = cast_refs.tag(BOOK, "unnamed_first_person_narrator", "the narrator", [
-    "Neat close-trimmed dark brown moustache", "Bareheaded, hair plastered flat to the brow by rain",
+    "Neat close-trimmed dark brown moustache", "Hatless, his dark brown hair plastered flat to the brow by rain",
     "Mid-grey tweed lounge suit soaked to dark charcoal and clinging"], chapter=10)
 WIFE = cast_refs.tag(BOOK, "narrators_wife", "the narrator's wife", [
     "Thick chestnut-auburn hair", "Sage-green linen walking costume",
     "Small sage-green felt toque with a cream ostrich tip"], chapter=10)
 LANDLORD = cast_refs.tag(BOOK, "unnamed_landlord", "the landlord of the Spotted Dog", [
     "Heavy grey-brown mutton-chop whiskers joined to a full moustache",
-    "Bare head with hair plastered flat by rain"], chapter=10)
+    "Hatless, his brown hair flecked with grey plastered flat by rain"], chapter=10)
 HUSSAR = cast_refs.tag(BOOK, "unnamed_hussar", "the hussar", [
     "Brown curly hair cropped close to the skull", "Clean-shaven boyish jaw",
     "dark rifle-green serge hussar jacket with yellow cord frogging"], chapter=10)
