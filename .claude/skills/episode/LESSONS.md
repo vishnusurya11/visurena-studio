@@ -167,3 +167,15 @@ SKILL.md.
   of fence. Whether a held subject is a fault is the plan's call.
 - **Calibrate before you wall.** A darkness wall would have failed 39 of 127
   accepted takes, and layout correlation 19 accepted pairs; neither was built.
+- **"Bareheaded" in a cast row draws a bald man.** ep10's storm rows drew the
+  narrator and the landlord with no hair until they said "Hatless, his dark
+  brown hair plastered flat by rain".
+- **A tight grid gets a short place.** Under the full place text a 1x1 medium
+  close of the wife came back as the house front, five seeds running. With
+  every shot tight, `brief_place` gives only the place's head and its light.
+- **A gutter is pale and even.** The stacked check failed ep10 shot 1 on a
+  door jamb (mean 106, std 14.7). Real gutters read 193-245 and std 1.5-4.6;
+  counting only pale, flat lines took the worst clean panel from 0.748 to 0.020.
+- **Lookalikes are counted among people.** Two tripods the book asks for read
+  "0 people, 2 lookalikes" and failed ep10 shot 13; the count is capped by the
+  people seen.

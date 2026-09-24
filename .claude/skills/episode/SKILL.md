@@ -194,6 +194,8 @@ riders and the two on foot, and the content gate held it to the guess.
 
 **A person with a hat in his hand is "bareheaded"** in that panel's words;
 that word is what drops headwear from the binding (G-HAT refuses the clash).
+In a CAST ROW or tag never write "Bareheaded"/"Bare head": the drawer reads it
+as a bald scalp (ep10 narrator and landlord). Write "Hatless, <his hair>".
 
 **Panels.** `panels.py` cuts each shot from its grid, sheds the gutter it
 measures (at the edge up to 48 px, or a thin run within 120 px when the model
