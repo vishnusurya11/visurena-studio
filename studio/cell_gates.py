@@ -165,7 +165,10 @@ def pack_prompts(book: Path) -> dict[str, str]:
 
 
 # ---- G-ANCHOR --------------------------------------------------------------------------
-TRUCK = re.compile(r"\b(?:tracks? sideways|truck|dolly sideways|crab)\b", re.I)
+TRUCK = re.compile(r"\b(?:tracks? sideways|truck|dolly sideways|crab|pans?)\b", re.I)
+"""A pan slides the set past a held person as a truck does: ep11 T06 panned
+across the narrator in his desk chair and read held 0.85 over 320 px. One case;
+no pan across an anchored person in ep05-10 to set against it."""
 WITH_SUBJECT = re.compile(r"\bwith (?:him|her|them)\b|\bat (?:his|her|their) own pace\b|\balongside (?:him|her|them)\b"
                           r"|\bkeeping (?:him|her|them)\b", re.I)
 ANCHOR = re.compile(
@@ -193,7 +196,7 @@ def anchored_truck(s: Shot) -> str:
 
 
 def anchor_faults(episode: Episode) -> list[str]:
-    return [f"G-ANCHOR shot {s.index}: a sideways truck on a {s.size} of a person {why!r}; H3 keeps the "
+    return [f"G-ANCHOR shot {s.index}: a sideways truck or pan on a {s.size} of a person {why!r}; H3 keeps the "
             f"person where the cell put them and slides the scenery through them (ep09 T02, the fence "
             f"through the neighbour). Push in, crane, or hold"
             for s in episode.shots if (why := anchored_truck(s))]

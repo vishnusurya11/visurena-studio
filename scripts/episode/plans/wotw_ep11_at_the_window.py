@@ -67,14 +67,16 @@ GUNNER = cast_refs.tag(BOOK, "artilleryman", "the artilleryman", [
 # ---- the five places, each naming its hour, its light and where it comes from ----
 STUDY_NIGHT = (
     "a tall open sash window glowing red with fire, seen across the narrator's dark study at Maybury "
-    "at night in 1894: the window frame full of a valley burning orange and red far below under "
+    "at night in 1894: the window frame full of flat country burning orange and red far below, "
+    "out to a low flat dark horizon under "
     "rolling red smoke, a writing desk and a turned desk chair black against it, bookshelves along "
     "the left wall lost in shadow, and the red reflections of a nearer fire dancing on the wall and "
     "the ceiling; the light is the red glare through the open window AHEAD, so the window reads red, "
     "the desk and chair read as black shapes against it and the room reads black")
 VALLEY_NIGHT = (
-    "a whole valley on fire at night in 1894, seen from a hillside window at Maybury: a broad "
-    "hillside set thick with tongues of orange flame, a wrecked train burning with a vivid glare on "
+    "flat Surrey country on fire at night in 1894, seen from a hillside window at Maybury: a long "
+    "low slope and the level fields beyond set thick with tongues of orange flame out to a low "
+    "flat dark horizon, a wrecked train burning with a vivid glare on "
     "the railway near an arch at the centre, the houses about Woking station glowing as red ruins at "
     "the left, the far common about the sand-pits lit blood red, black smoke rolling up red-lit into "
     "the sky, and the dark tops of trees and the railway line in the foreground; the light is the "
@@ -110,7 +112,7 @@ GEO_STUDY = (
     "black ceiling crosses the TOP edge with the red light flickering on it.")
 GEO_VALLEY = (
     "The dark tree tops cross the BOTTOM third from the LEFT edge to the RIGHT edge. The burning "
-    "hillside fills the CENTRE with its small tongues of flame, the glowing ruins about the station "
+    "level fields fill the CENTRE with its small tongues of flame, the glowing ruins about the station "
     "stand at the LEFT third, the burning train lies at the CENTRE on the railway, the red-lit "
     "common lies far off at the RIGHT third, and red smoke fills the TOP third.")
 GEO_GARDEN = (
@@ -268,21 +270,23 @@ S = [
 
     # ---- valley: what the window holds -------------------------------------------------
     ("valley", "wide", [], 0.2, "pan_to",
-     "Wide from a hillside window at night over a whole valley on fire, a broad hillside set with "
-     "small tongues of flame, the station ruins glowing and red smoke rolling over it all.",
-     "The camera pans from the burning hillside across to the station ruins already in the "
+     "Wide from a hillside window at night over flat country on fire, the level fields set with "
+     "small tongues of flame out to a low flat horizon, the station ruins glowing and red smoke "
+     "rolling over it all.",
+     "The camera pans from the burning fields across to the station ruins already in the "
      "picture until the ruins are at the centre, travelling a hand's breadth; the small flames go "
      "on swaying; the red smoke goes on rolling across the sky.",
      "at the open window at a standing man's eye, a 35mm lens. The red glare comes from the fires "
      "BELOW; the smoke reads red and the country reads black",
      GEO_VALLEY, "setup", "It seemed indeed as if the whole country in that direction was on fire."),
 
-    ("valley", "medium", [], 0.4, "push_in",
+    ("valley", "medium", [], 0.4, "track_lateral",
      "Medium across the red glare at night on three huge black tripods far off on the common, "
      "moving busily to and fro across the light like grotesque shapes.",
-     "The camera pushes in toward the three tripods already in the picture with small amplitude, "
-     "travelling a hand's breadth; the three tripods go on moving to and fro across the glare; the "
-     "smoke goes on drifting between them.",
+     "The camera tracks sideways to the right past the dark tree tops, a truck with small "
+     "amplitude, until the three tripods already in the picture stand at the centre, travelling "
+     "one short stride; the three tripods go on striding to and fro across the glare; the flames "
+     "go on leaping below them.",
      "at the open window looking out over the valley, a 135mm lens. The red glare comes from the "
      "fires BEHIND them; the tripods read black and the glare reads red",
      GEO_SHAPES, "spike", "Across the light huge black shapes, grotesque and strange, moved busily to and fro."),
@@ -308,12 +312,12 @@ S = [
      GEO_FIGURES, "friction", "I saw against the light of Woking station a number of black figures hurrying across the line."),
 
     # ---- study: the chair, and the question ---------------------------------------------
-    ("study", "medium", ["unnamed_first_person_narrator"], 0.6, "pan_to",
+    ("study", "medium", ["unnamed_first_person_narrator"], 0.6, "push_in",
      "Medium on " + NARRATOR + " sitting in his desk chair turned to the open window at night, "
      "staring out at the blackened country, his elbows on his knees.",
-     "The camera pans from the dark bookshelves across to the open window already in the picture "
-     "until the window is at the centre, travelling a hand's breadth; he goes on staring out at "
-     "the valley; his head goes on turning after the far shapes.",
+     "The camera pushes in toward him with small amplitude until his head and shoulders fill the "
+     "middle of the picture, travelling a hand's breadth; he goes on staring out at the valley; "
+     "his head goes on turning after the far shapes.",
      "in the study level with his chest, four paces from him, a 50mm lens. The red glare comes from "
      "the window at the RIGHT; his face reads red and the shelves read black",
      GEO_CHAIR, "friction", "I turned my desk chair to the window, sat down, and stared at the blackened country."),
@@ -327,11 +331,12 @@ S = [
      "RIGHT; the knuckles read pale and the wood reads black",
      GEO_HANDS, "friction", "Did a Martian sit within each, ruling, directing, using?"),
 
-    ("valley", "insert", [], 0.9, "locked",
+    ("valley", "insert", [], 0.9, "tilt_up",
      "Insert at night on the little red pinpoint of Mars dropping into the west, low in a clear dark "
      "sky over the smoke of the burning land.",
-     "The camera holds a locked-off frame; the pinpoint of Mars goes on sinking a thumb's width; the red "
-     "smoke goes on drifting below it.",
+     "The camera tilts up from the red smoke to the red point of Mars already in the picture "
+     "until the point stands in the middle of the frame, travelling a forearm; the red smoke goes "
+     "on rolling up below it; the flames go on flickering along the bottom of the smoke.",
      "at the window looking up into the west, a 135mm lens. The only light is the red glow of the "
      "fires from BELOW; the sky reads black and the point reads red",
      GEO_MARS, "reaction", "Over the smoke the little fading pinpoint of Mars was dropping into the west."),

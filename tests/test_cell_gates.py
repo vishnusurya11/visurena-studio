@@ -146,3 +146,11 @@ def test_a_medium_or_a_two_shot_is_left_alone():  # ep07 4, ep10 17
                                 camera="low over him"))
     assert not laid_unseen(shot(size="medium_close", faces=["a", "b"], camera="low in the lane",
                                 frame="Medium close on the narrator kneeling by the landlord lying at the fence"))
+
+
+def test_a_pan_across_a_seated_man_is_caught_too():  # ep11 T06, held 0.85 over 320 px
+    s = shot(size="medium", faces=["narrator"],
+             frame="Medium on the narrator sitting in his desk chair turned to the open window at night",
+             motion="The camera pans from the dark bookshelves across to the open window already in the "
+                    "picture until the window is at the centre; he goes on staring")
+    assert anchored_truck(s) == "sitting in"
