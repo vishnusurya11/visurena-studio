@@ -48,7 +48,7 @@ sys.path.insert(0, str(ROOT))
 
 from PIL import Image, ImageDraw
 
-from studio import av_sync, cut_landing as cl, episode_home, episode_seq_board as sq, frame_match as fm, motion_gate, take_verdict as tv
+from studio import av_sync, cut_landing as cl, edit_gate, episode_home, episode_seq_board as sq, frame_match as fm, motion_gate, take_verdict as tv
 from studio.trailer_assemble import clip_seconds
 
 SAMPLES = 8
@@ -298,12 +298,27 @@ def record(best, attempts: list, prior: dict | None = None) -> dict:
     return out
 
 
+def judged_file(video: Path, head: float, work: Path) -> Path:
+    """The take as the cut plays it: from its written head (`heads.json`) on.
+
+    MEASURED ep10 T07/T12: ten frames of another picture, on two seeds, then
+    right to the end. The cut starts past them; the gate must judge the same."""
+    if head <= 0:
+        return video
+    work.mkdir(parents=True, exist_ok=True)
+    out = work / f"{video.stem}_head.mp4"
+    subprocess.run(["ffmpeg", "-y", "-v", "error", "-ss", f"{head:.3f}", "-i", str(video),
+                    "-c:v", "libx264", "-crf", "12", "-c:a", "aac", str(out)], check=True)
+    return out
+
+
 def measure_attempt(video: Path, rec: dict, index: int, cells: Path, work: Path, take_dir: Path,
                     kinds: dict, line: str, attempt: int):
     """One attempt: its audio, then the one verdict every gate feeds.
 
     `cells` is the CELLS room, `boards/cells/`, not `boards/`: `tv.measure`
     resolves every anchor name against it."""
+    video = judged_file(video, rec.get("head", 0.0), work)
     seconds = min(clip_seconds(video), rec["placed_seconds"])
     composite = take_dir / (f"voice_{index:02d}.wav" if rec["audio"] != "silence" else f"silence_{index:02d}.wav")
     audio = audio_dq(video, composite, rec["lane"] == "dialogue", work, index)
@@ -356,6 +371,7 @@ def main(book_id: str, number: int, indices: list[int], attempts: bool = False) 
         rec["size"] = planned_size(episode, rec)
         rec["placed_seconds"] = current_placed(episode_home.load_placed(book, number, episode), rec)
         rec["daylight"] = daylit(episode, rec)
+        rec["head"] = edit_gate.heads_in(home).get(index, 0.0)
         files = episode_home.attempts_of(take_dir, index) if attempts else [book / rec["rel_path"]]
         judged = {f: measure_attempt(f, rec, index, cells, work, take_dir, kinds, line, k)
                   for k, f in enumerate(files)}
