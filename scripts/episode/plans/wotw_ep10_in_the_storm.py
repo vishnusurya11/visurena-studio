@@ -342,12 +342,12 @@ S = [
      "RIGHT; the tripod reads black and the field reads dark",
      GEO_FAR_TRIPOD, "spike", "A monstrous tripod, higher than many houses, striding over the young pine trees."),
 
-    ("road", "medium", [], 0.75, "track_lateral",
+    ("road", "medium", [], 0.75, "crane_up",
      "Medium over the heather at night on a tripod heeling over as it strides, one long leg lifted "
      "high in the air, the red glow low on the horizon behind it.",
-     "The camera tracks sideways to the left along the hedge, a truck with small amplitude, until "
-     "the tripod already in the picture is at the centre, travelling one short stride; the tripod "
-     "goes on heeling over and swinging its lifted leg forward; the heather goes on tossing.",
+     "The camera rises above the heather with small amplitude until the tripod already in the "
+     "picture stands at the centre, travelling one short stride; the tripod goes on heeling over "
+     "and swinging its lifted leg forward; the heather goes on tossing.",
      "on the road at a driver's eye, a 50mm lens. The red glow comes from the horizon at the RIGHT; "
      "the tripod reads dark metal and the heather reads black",
      GEO_HEELING, "friction", "Can you imagine a milking stool tilted and bowled violently along the ground?"),
@@ -504,7 +504,7 @@ S = [
 
 MOVES = {i: s[4] for i, s in enumerate(S)}
 
-BEATS = {18: (1.0, 1.4), 19: (1.2, 1.4), 20: (1.4, 1.2), 21: (1.0, 1.0), 22: (1.2, 1.5)}
+BEATS = {18: (1.0, 1.4), 19: (1.5, 1.5), 20: (1.5, 1.5), 21: (0.5, 0.5), 22: (1.5, 1.5)}
 """Everything else takes the default (0.8, 0.9). The shot before the button
 holds a beat of 1.0 s or more (the contract); the silent last shot takes the
 longest coda the 6.0 s silence wall allows with the button's coda before it."""

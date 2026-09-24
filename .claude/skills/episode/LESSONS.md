@@ -179,3 +179,10 @@ SKILL.md.
 - **Lookalikes are counted among people.** Two tripods the book asks for read
   "0 people, 2 lookalikes" and failed ep10 shot 13; the count is capped by the
   people seen.
+- **The same bad opening on every seed wants a head, not a fourth render.**
+  ep10 T07 opened on 8 frames of a cart on the road on three seeds and T12 on
+  11 frames of the machine sheet on two, and both were right to the end. A
+  hand-written `heads.json` entry (narration shots only, and the take must
+  still cover its shot) cuts past it, and `take_dq` now judges from the head.
+- **A small dark subject under a truck freezes.** T07 read 52 % frozen as a
+  sideways truck on a silhouette; as a crane-up the same shot read 26-37 %.
