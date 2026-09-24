@@ -26,6 +26,23 @@ RAISED = ("hills", "mountains", "cliffs")
 
 HOURS = ("day", "dusk", "night")
 
+POSTURES = ("standing", "walking", "running", "sitting", "crouching", "kneeling", "lying", "none")
+"""The main figure's posture as the reader may name it. ep10 shot 18 asked for
+a man lying on the sand and the panel stood him against a fence; H3 turned the
+world round his face to make the sand, and every gate passed the take."""
+
+FAMILY = {"sitting": "sitting", "crouching": "low", "kneeling": "low", "lying": "lying"}
+"""Which answers agree. Crouching and kneeling are one family: the reader
+calls the same squat either."""
+
+ASKED = {
+    "lying": re.compile(r"\b(?:lying|lies|lay|laid|sprawled|sprawls|prone|supine)\b", re.I),
+    "low": re.compile(r"\b(?:crouch\w*|kneel\w*|knelt|squat\w*)\b", re.I),
+    "sitting": re.compile(r"\b(?:sits|sitting|seated|sat)\b", re.I),
+}
+"""The postures a shot may ask for by name. Standing is the default and is
+never judged: a picture has to be told to lay a man down."""
+
 
 @dataclass(frozen=True)
 class Seen:
@@ -36,6 +53,7 @@ class Seen:
     text: bool = False
     hour: str = "night"
     subjects: list[str] = field(default_factory=list)
+    posture: str = ""
 
 
 ASK = (
@@ -48,9 +66,28 @@ ASK = (
     '"text": true if any letters, words, numbers or captions appear anywhere, '
     "else false.\n"
     '"hour": the time of day the LIGHT says, one of ' + ", ".join(HOURS) + ".\n"
+    '"posture": what the MAIN person in the picture is doing with his body, one of '
+    + ", ".join(POSTURES) + ".\n"
     '"subjects": a list of the things in the picture, each a short plain noun '
     "phrase, everything you can name, including anything unexpected."
 )
+
+
+def asked_posture(prose: str) -> str | None:
+    """The one posture family the shot names, or None when it names none or
+    several (the narrator kneels by a man who lies: no single answer)."""
+    named = [family for family, word in ASKED.items() if word.search(prose or "")]
+    return named[0] if len(named) == 1 else None
+
+
+def posture_fault(seen: "Seen", prose: str, planned: int) -> str | None:
+    """The shot lays, seats or crouches its one person and the picture does not."""
+    wanted = asked_posture(prose)
+    if wanted is None or planned != 1 or seen.people > 1:
+        return None
+    if FAMILY.get(seen.posture) == wanted:
+        return None
+    return f"posture {seen.posture or 'unread'!r}: the shot asks for {wanted}"
 
 
 def forbidden_landform(seen: Seen, flat: bool) -> bool:
@@ -162,6 +199,8 @@ def faults(seen: Seen, frame: str, planned: int, crowd: bool,
                    f"{extras} extras), {seen.lookalikes} of them copies of another")
     if missing_cast(seen, planned, size, frame):
         out.append(f"{seen.people} figure(s) for {planned} named: someone the shot casts is missing")
+    if bad := posture_fault(seen, frame, planned):
+        out.append(bad)
     if seen.text and not lettering_expected(frame, size):
         out.append("text or lettering in the picture")
     # AN INTERIOR HAS NO HOUR TO READ. A lamplit dining room came back 'day'
@@ -249,6 +288,7 @@ def parse(said: str) -> Seen:
             text=truthy(got["text"]),
             hour=str(got["hour"]).lower().strip(),
             subjects=subject_list(got.get("subjects")),
+            posture=str(got.get("posture") or "").lower().strip(),
         )
     except (TypeError, ValueError) as bad:
         raise Unreadable(str(bad)) from bad
