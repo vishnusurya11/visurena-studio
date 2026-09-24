@@ -141,6 +141,18 @@ def confident_faces(found) -> list[float]:
     return sorted(float(f["h"]) for f in (found or []) if f.get("score", 0.0) >= FACE_SCORE)
 
 
+PRESENT_SCORE = 0.7
+"""Enough to say a PLANNED face is there, never enough to count a person.
+ep11 shot 21's soot-streaked frontal face read 0.74-0.77 on four draws, inside
+smoke's range, so it cannot count; an empty panel is also caught by the
+content gate's missing-cast check, so the lower floor loses little."""
+
+
+def present_faces(found) -> list[float]:
+    """Heights of the faces that answer 'is the planned person there'."""
+    return sorted(float(f["h"]) for f in (found or []) if f.get("score", 0.0) >= PRESENT_SCORE)
+
+
 def cast_faces(faces: list[float], floor: float = CAST_FACE) -> list[float]:
     """The faces big enough to be somebody, rather than a head in a crowd."""
     return [f for f in faces if f >= floor]
@@ -220,7 +232,7 @@ def _gutter_like(lines):
 
 def verdict(faces: list[float], planned: int, sharp: float, ink: float,
             tiled: float, crowd: bool = False, size: str = "", extras: int = 0,
-            prose: str = "", stacked: float = 0.0) -> dict:
+            prose: str = "", stacked: float = 0.0, present: list[float] | None = None) -> dict:
     """Every fault this panel carries, named. An empty list is a clean panel."""
     from studio import people_count
 
@@ -240,7 +252,8 @@ def verdict(faces: list[float], planned: int, sharp: float, ink: float,
     # AND GOING UNDER, which nobody ever asked it about. ep09's button was a
     # big close-up of the hussar shouting; it came back an empty garden and
     # this printed `faces 0/1` and passed.
-    if planned > 0 and not near and size in FACE_IS_THE_PICTURE and not back_view(prose):
+    there = near or cast_faces(present or [])
+    if planned > 0 and not there and size in FACE_IS_THE_PICTURE and not back_view(prose):
         flags.append("missing")
     if sharp < SHARP_FLOOR:   # `sharp` is the panel OVER the set median
         flags.append("blur")

@@ -66,18 +66,18 @@ GUNNER = cast_refs.tag(BOOK, "artilleryman", "the artilleryman", [
 
 # ---- the five places, each naming its hour, its light and where it comes from ----
 STUDY_NIGHT = (
-    "the narrator's dark study at Maybury at night in 1894, lit only from outside: a tall sash window "
-    "standing wide open in the far wall, and through it a whole valley burning red far below under "
-    "drifting smoke; a writing desk and a turned desk chair in front of the window, bookshelves along "
+    "a tall open sash window glowing red with fire, seen across the narrator's dark study at Maybury "
+    "at night in 1894: the window frame full of a valley burning orange and red far below under "
+    "rolling red smoke, a writing desk and a turned desk chair black against it, bookshelves along "
     "the left wall lost in shadow, and the red reflections of a nearer fire dancing on the wall and "
     "the ceiling; the light is the red glare through the open window AHEAD, so the window reads red, "
     "the desk and chair read as black shapes against it and the room reads black")
 VALLEY_NIGHT = (
-    "the view from a hillside window at Maybury at night in 1894 over a valley on fire: the dark "
-    "tops of trees and a railway line in the foreground, a whole broad hillside beyond set with "
-    "small tongues of flame under a red glare, the far common about the sand-pits lit blood red, "
-    "the houses about Woking station glowing as ruins at the left, a wrecked train burning on the "
-    "railway near an arch at the centre, and red-lit smoke and cloud scud above; the light is the "
+    "a whole valley on fire at night in 1894, seen from a hillside window at Maybury: a broad "
+    "hillside set thick with tongues of orange flame, a wrecked train burning with a vivid glare on "
+    "the railway near an arch at the centre, the houses about Woking station glowing as red ruins at "
+    "the left, the far common about the sand-pits lit blood red, black smoke rolling up red-lit into "
+    "the sky, and the dark tops of trees and the railway line in the foreground; the light is the "
     "red glare of the fires AHEAD and below, so the smoke reads red, the country reads black and "
     "the sky reads dark red")
 GARDEN_NIGHT = (
@@ -156,10 +156,13 @@ GEO_CHAIR = (
 GEO_HANDS = (
     "Two hands grip the dark wooden arms of the desk chair at the CENTRE, lit red from the RIGHT "
     "by the window, a grey herringbone tweed cuff at the LEFT third and the dark floor across the "
-    "BOTTOM third.")
+    "BOTTOM third. The red glare of the open window falls across the RIGHT third, and the dark "
+    "legs of the desk stand behind the chair at the TOP third.")
 GEO_MARS = (
     "A single small red point of light stands low in the clear dark sky at the CENTRE LEFT. The red "
-    "smoke of the burning land crosses the BOTTOM third and the dark clear sky fills the TOP half.")
+    "smoke of the burning land crosses the BOTTOM third and the dark clear sky fills the TOP half. "
+    "A few faint stars stand at the TOP RIGHT, and the red glow of the fires lights the underside "
+    "of the smoke from the BOTTOM edge.")
 GEO_FENCE = (
     "The artilleryman sits astride the black paling fence at the CENTRE, seen from above, one leg "
     "over, his open jacket hanging, the dark lawn below him across the BOTTOM half and the faint "
@@ -196,7 +199,7 @@ GEO_SILL = (
     "over his shoulder, his hands on the sill, the valley of ashes filling the window at the "
     "CENTRE RIGHT with grey smoke rising from it. His head is a quarter of the frame's height.")
 GEO_GUNNER_DAWN = (
-    "The artilleryman's blackened face fills the CENTRE, lit grey from the RIGHT by the dawn "
+    "The artilleryman's streaked face fills the CENTRE, lit pale from the RIGHT by the dawn "
     "through the window, his black hair falling over his brow, the pale window at the RIGHT third. "
     "His head is half the frame's height.")
 
@@ -454,12 +457,12 @@ S = [
      GEO_SILL, "runout", "In one night the valley had become a valley of ashes."),
 
     ("dawn", "close", ["artilleryman"], 0.6, "locked",
-     "Close at dawn on the blackened face of " + GUNNER + " at the study window, looking out at the "
-     "valley of ashes, grey light on his face.",
-     "The camera holds a locked-off frame; he speaks quietly with his face to the window; his head goes on "
-     "turning across the ruined valley.",
+     "Close at dawn on the streaked face of " + GUNNER + " turned from the study window toward the "
+     "camera, looking straight ahead, the valley of ashes over his shoulder, dawn light on his face.",
+     "The camera holds a locked-off frame; he speaks quietly, facing the camera; his head goes on "
+     "lowering toward his chest.",
      "in the study level with his eyes, two paces from him, an 85mm lens. The grey dawn comes from "
-     "the window at the RIGHT; his face reads grey and his hair reads black",
+     "the window at the RIGHT onto his face; his skin reads pale through streaks of soot and his hair reads black",
      GEO_GUNNER_DAWN, "button", "'Just like parade it had been a minute before -- then stumble, bang, swish!'"),
 
     ("dawn", "wide", [], 0.9, "crane_up",
@@ -489,35 +492,35 @@ LINES = [
     ("narration", "unnamed_first_person_narrator",
      "The storm had passed. The whole country toward the common was on fire.", 2),
     ("narration", "unnamed_first_person_narrator",
-     "Across the light, huge black shapes moved busily to and fro.", 3),
+     "Across the red light, huge black shapes, grotesque and strange, went busily to and fro.", 3),
     ("narration", "unnamed_first_person_narrator",
-     "A glare on the railway. A wrecked train, the fore part burning.", 4),
+     "A glare on the railway. A wrecked train, its fore part burning.", 4),
     ("narration", "unnamed_first_person_narrator",
-     "Black figures hurried, one after another, across the line.", 5),
+     "Later, against the light of the station, black figures hurried across the line.", 5),
     ("narration", "unnamed_first_person_narrator",
-     "I turned my chair to the window, and sat, and stared.", 6),
+     "I turned my chair to the window, and sat, and stared at the blackened country.", 6),
     ("narration", "unnamed_first_person_narrator",
-     "Did a Martian sit within each, as a brain sits in a body?", 7),
+     "Did a Martian sit within each, ruling it as a brain rules a body?", 7),
     ("narration", "unnamed_first_person_narrator",
-     "Over the smoke, the little pinpoint of Mars was dropping into the west.", 8),
+     "Over the smoke, the small red point of Mars was sinking west.", 8),
     ("narration", "unnamed_first_person_narrator",
-     "Then a soldier came into my garden, over the palings.", 9),
-    ("dialogue", "unnamed_first_person_narrator", "Hist! Up here!", 10),
-    ("dialogue", "artilleryman", "Who's there?", 11),
+     "Then, near dawn, a soldier came clambering into my garden, over the palings.", 9),
+    ("dialogue", "unnamed_first_person_narrator", "You there, in the garden! Up here!", 10),
+    ("dialogue", "artilleryman", "Who is that? Who is there?", 11),
     ("dialogue", "unnamed_first_person_narrator", "Are you trying to hide?", 12),
-    ("dialogue", "artilleryman", "God knows. That's it.", 13),
+    ("dialogue", "artilleryman", "God knows. That is it.", 13),
     ("dialogue", "unnamed_first_person_narrator", "Come into the house.", 14),
-    ("narration", "unnamed_first_person_narrator", "I poured him out a stiff dose of whisky.", 15),
+    ("narration", "unnamed_first_person_narrator", "I poured him out a stiff dose of whisky, and he drank it down.", 15),
     ("narration", "unnamed_first_person_narrator",
-     "He put his head on his arms and wept like a little boy.", 16),
+     "He sat down, put his head on his arms, and wept like a little boy.", 16),
     ("dialogue", "artilleryman", "They wiped us out. Simply wiped us out.", 17),
     ("narration", "unnamed_first_person_narrator",
-     "A driver in the artillery. Nothing living was left on the common.", 18),
+     "He was a driver in the artillery. Nothing living was left upon the common.", 18),
     ("narration", "unnamed_first_person_narrator",
      "We lit no lamp. Our hands would touch upon bread, or meat.", 19),
     ("narration", "unnamed_first_person_narrator",
-     "At dawn the valley had become a valley of ashes.", 20),
-    ("dialogue", "artilleryman", "Just like parade, it was, a minute before.", 21),
+     "At dawn we went up again. The valley was a valley of ashes.", 20),
+    ("dialogue", "artilleryman", "Just like parade, a minute before.", 21),
 ]
 
 BEDS = [{"from_shot": 0, "tone": "grave"}, {"from_shot": 9, "tone": "uneasy"},

@@ -140,3 +140,24 @@ def test_a_figure_where_the_plan_wants_none_is_still_caught():
     from studio.panel_dq import verdict
     assert "people" in verdict(faces=[0.25], planned=0, sharp=1.0, ink=0.0,
                                tiled=0.0, crowd=False)["flags"]
+
+
+def test_a_soot_blackened_face_is_present_though_not_counted():
+    from studio import panel_dq
+    """ep11 shot 21: the artilleryman's streaked face, frontal and clear, read
+    0.74-0.77 on four draws -- inside smoke's 0.51-0.78, so it may not COUNT as
+    a person, but it answers whether the planned face is there at all."""
+    found = [{"score": 0.77, "h": 0.49}]
+    assert panel_dq.confident_faces(found) == []
+    assert panel_dq.present_faces(found) == [0.49]
+    row = panel_dq.verdict(faces=[], planned=1, sharp=1.0, ink=0.0, tiled=0.0, size="close",
+                           present=[0.49])
+    assert "missing" not in row["flags"]
+
+
+def test_nothing_near_a_face_is_still_missing():
+    from studio import panel_dq
+    found = [{"score": 0.55, "h": 0.3}]
+    row = panel_dq.verdict(faces=[], planned=1, sharp=1.0, ink=0.0, tiled=0.0, size="close",
+                           present=panel_dq.present_faces(found))
+    assert "missing" in row["flags"]

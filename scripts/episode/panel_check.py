@@ -39,11 +39,6 @@ CONTROLS = {"day": "wide_establishing.png", "night": "wide_night.png"}
 its hardest edges are under SHARP_FLOOR of the control for its own hour."""
 
 
-def faces_of(frame: np.ndarray) -> list[float]:
-    """Heights of the faces the detector is sure of, as fractions of the frame."""
-    return panel_dq.confident_faces(face_end.faces(frame))
-
-
 def controls(book: Path) -> dict[str, float]:
     folder = Path(book) / "refs" / "locations" / CONTROL_PLACE
     return {hour: panel_dq.edge_strength(np.asarray(Image.open(folder / name).convert("RGB")))
@@ -53,8 +48,10 @@ def controls(book: Path) -> dict[str, float]:
 def judge(shot, setup, frame: np.ndarray, control: dict[str, float]) -> dict:
     """One panel's verdict, with who may be in it read from the plan."""
     hour = "night" if panel_dq.at_night(setup.described) else "day"
+    found = face_end.faces(frame)
     row = panel_dq.verdict(
-        faces=faces_of(frame), planned=len(shot.faces or []),
+        faces=panel_dq.confident_faces(found), present=panel_dq.present_faces(found),
+        planned=len(shot.faces or []),
         sharp=panel_dq.edge_strength(frame) / control[hour],
         ink=panel_dq.inkiness(frame), tiled=panel_dq.tiledness(frame),
         crowd=bool((setup.crowd or "").strip()), size=shot.size,
