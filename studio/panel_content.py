@@ -96,7 +96,9 @@ def stem(word: str) -> str:
 
 def people_fault(seen: Seen, planned: int, crowd: bool) -> bool:
     """More faces than the shot casts, or a crowd made of one repeated person."""
-    if seen.lookalikes:
+    # Lookalikes are counted AMONG the people. ep10 shot 13 read 0 people and
+    # 2 lookalikes: two tripods the book asks for, not a copied person.
+    if min(seen.lookalikes, seen.people):
         return True
     return not crowd and seen.people > planned
 

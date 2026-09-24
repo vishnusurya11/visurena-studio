@@ -239,3 +239,12 @@ def test_printed_matter_may_carry_print():
     got = faults(seen(text=True), frame="Insert on the front page of an evening paper",
                  planned=0, crowd=False, flat=True, night=True, size="insert")
     assert not any("text" in f or "lettering" in f for f in got)
+
+
+def test_two_identical_machines_are_not_copied_people():
+    """ep10 shot 13: two tripods over a cylinder, no one in the field. The
+    reader said 0 people and 2 lookalikes; lookalikes are 'of those figures',
+    so with nobody there, the copies are machines the book asks for."""
+    from studio.panel_content import Seen, people_fault
+    assert not people_fault(Seen(people=0, lookalikes=2), planned=0, crowd=False)
+    assert people_fault(Seen(people=3, lookalikes=2), planned=3, crowd=True)
