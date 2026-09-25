@@ -148,12 +148,17 @@ def observe(frames: list[np.ndarray], segments: list, bank: dict, detect, embed)
     return out
 
 
+def sample_shares(samples: int):
+    """Where in the take (as shares of its length) the `samples` frames are read."""
+    return SAMPLE_AT if samples == len(SAMPLE_AT) else tuple(np.linspace(0.02, 0.98, samples))
+
+
 def sample_frames(video: Path, samples: int) -> list[np.ndarray]:
     """`samples` RGB frames spread evenly through the take."""
     import cv2
     cap = cv2.VideoCapture(str(video))
     n = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
-    at = SAMPLE_AT if samples == len(SAMPLE_AT) else np.linspace(0.02, 0.98, samples)
+    at = sample_shares(samples)
     out = []
     for share in at:
         cap.set(cv2.CAP_PROP_POS_FRAMES, min(n - 1, int(share * n)))

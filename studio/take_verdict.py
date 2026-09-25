@@ -561,7 +561,8 @@ def measure(video: Path, record: dict, cells: Path, seconds: float, attempt: int
                     [], segs, motion["frozen_spans"], [round(float(x), 1) for x in motion["bins"]],
                     sampled_foreign(per_frame), coherence(video, record, cells, seconds),
                     bytes=video.stat().st_size if video.is_file() else 0)
-    identity = identity_gate.identity_dq(video, segs, record.get("faces", []), record.get("refs", []))
+    starts = identity_gate.sample_starts([s.start_s for s in segs], seconds)
+    identity = identity_gate.identity_dq(video, starts, record.get("faces", []), record.get("refs", []))
     v.zoom = zoom_of(video, record, v.coherence)
     v.gates = gates(v, audio, line_text, unplanned_from(rows), identity, plan_motions(record),
                     record.get("size", ""), picture_rows(video, record, seconds))

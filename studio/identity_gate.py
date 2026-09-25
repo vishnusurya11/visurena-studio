@@ -256,6 +256,18 @@ def observe(video, segments: list, sheets: dict, samples: int = 8,
     return faces.observe(frames, segments, bank, detect, embed)
 
 
+def sample_starts(starts_s: list[float], seconds: float, samples: int = 8) -> list[int]:
+    """Each segment's start as the index of the first sample read at or after it.
+    ep12 T02: SegmentReports went in where sample indices belong (TypeError)."""
+    from studio.measure import faces
+    shares = faces.sample_shares(samples)
+    out = []
+    for s in starts_s:
+        share = s / seconds if seconds else 0.0
+        out.append(next((k for k, at in enumerate(shares) if at >= share), len(shares) - 1))
+    return out
+
+
 NOT_MEASURED = {"measured": False, "ok": True, "note": "not measured: face model not installed",
                 "flags": [], "hard": [], "present": {}}
 
