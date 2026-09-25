@@ -1,7 +1,7 @@
 # Episode department — build
 
-**Status:** IN PROGRESS (started 2026-09-24; the owner delegated the decisions for this
-build: "make decisions on your own").
+**Status:** DONE 2026-09-24 (the owner delegated the decisions for this build: "make
+decisions on your own"). Full suite: 6,415 passed, 2 skipped, 3 xfailed; pushed at `9a5ad26`.
 
 **Decision:** [../decisions/2026-09-24_future_departments.md](../decisions/2026-09-24_future_departments.md)
 §2.3 (refs), §2.4 (episode), §3 (owner gates), §5 (registry). Owner's scope answers,
@@ -81,7 +81,7 @@ library; the suite is green; nothing here touches a GPU or a paid model in a tes
   `.claude/skills/episode/SKILL.md` carries it between markers; `.claude/agents/episode.md`
   names the runner; test asserts equality. `docs/DECISIONS.md` line; the architecture
   README/index states flip to "runner built; gates escalate".
-- [ ] **C8 full suite green, push.**
+- [x] **C8 full suite green, push.** — 6,415 passed; ledger-id fix `eaadb61` found by running two steps alone on a finished episode.
 
 ## Log
 
