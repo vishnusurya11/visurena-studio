@@ -41,7 +41,7 @@ library; the suite is green; nothing here touches a GPU or a paid model in a tes
 ## Commits
 
 - [x] **C0 plan** — this file.
-- [ ] **C1 registry keys and the unit column** — tests first: `tests/test_registry_units.py`
+- [x] **C1 registry keys and the unit column** — tests first: `tests/test_registry_units.py`
   (a stage's `unit` and `requires` parse; a stage without them parses as before;
   `stage_names()` equals the yaml), `tests/test_events_carry_a_unit.py` (two units of one
   stage do not collide; `unit` NULL for book-level stages; `mark_stage` refuses an
@@ -50,7 +50,7 @@ library; the suite is green; nothing here touches a GPU or a paid model in a tes
   from the registry, `events.unit` column with an idempotent migration,
   `add_event(unit=)`, `unit_status`; `studio/tracking.Tracker(unit=)`; `models.yaml`
   `local` tier. Registry: the `refs` and `episode` blocks land here too (ids fixed).
-- [ ] **C2 the runner shape** — `studio/escalate.py` (`Escalation`), `studio/stage_run.py`
+- [x] **C2 the runner shape** — `studio/escalate.py` (`Escalation`), `studio/stage_run.py`
   (`StageContext`: conn, codex, book_dir, unit, tracker, `hold()`), `studio/step_runner.py`
   (`run_steps(ctx, steps)`: skip when `done`, bracket events, catch `Escalation` →
   `escalated` + stop, `SystemExit` → `failed`), `studio/subprocess_step.py` (launch a
@@ -74,7 +74,7 @@ library; the suite is green; nothing here touches a GPU or a paid model in a tes
   brief → write → `plan_check` → improve ≤2 → lock (`write_plan`) → ESCALATE PLAN. Tests
   with a FakeModel: schema validates; a refusal is quoted back; the loop stops at 2; an
   existing `plan.json` is never rewritten.
-- [ ] **C6 plans under the library** — move the 18 scripts; `PATCHED_BY_HAND` markers;
+- [x] **C6 plans under the library** — move the 18 scripts; `PATCHED_BY_HAND` markers;
   `test_a_plan_script_regenerates_its_plan.py` globs the library; delete
   `scripts/episode/episode.py`; move `grids_ep11.sh`.
 - [ ] **C7 the desk** — `scripts/episode/commands.py` generates the command table;
@@ -86,3 +86,4 @@ library; the suite is green; nothing here touches a GPU or a paid model in a tes
 ## Log
 
 - 2026-09-24 — plan written; owner away, decisions delegated.
+- 2026-09-24 — C1 `0a5153f`, C2 `6bcf854`, C6 `3cdf25a` on master. C3/C4/C5 built in parallel by three subagents; C7 desk edits staged.
