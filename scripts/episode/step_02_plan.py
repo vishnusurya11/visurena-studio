@@ -27,6 +27,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 from agents import episode_writer  # noqa: E402
 from studio import episode_home, plan_brief, plan_verdict, step_cli  # noqa: E402
 from studio.escalate import Escalation  # noqa: E402
+from pydantic import ValidationError  # noqa: E402
 
 STEP_ID = "02"
 NAME = "plan"
@@ -83,10 +84,23 @@ def set_aside(plan: Path) -> Path:
 
 
 def draft(ctx, plan: Path, brief: dict, refusals: list[str] | None) -> tuple[int, str]:
-    """One round: the writer's plan through write_plan, then the gate on it."""
-    episode = episode_writer.write(brief, refusals)
+    """One round: the writer's plan through write_plan, then the gate on it.
+
+    A draft the CONTRACT refuses is a refusal like the gate's, not a crash:
+    ep12's first draft said 'slowly' on four shots, the Episode validators
+    raised inside the agent's parse, and the step died before this loop could
+    quote the refusal back to the writer."""
+    try:
+        episode = episode_writer.write(brief, refusals)
+    except ValidationError as bad:
+        return 1, contract_refusals(bad)
     episode_home.write_plan(plan, episode.model_dump())
     return ctx.capture_script(PLAN_CHECK)
+
+
+def contract_refusals(bad: ValidationError) -> str:
+    """The contract's refusals, one per line, as the gate prints its own."""
+    return "\n".join(f"CONTRACT {'.'.join(str(p) for p in e['loc'])}: {e['msg']}" for e in bad.errors())
 
 
 def author(ctx, plan: Path) -> None:
@@ -101,7 +115,8 @@ def author(ctx, plan: Path) -> None:
         refusals = refusal_lines(out)
         ctx.log(f"plan_check refused round {round_no}:\n" + "\n".join(refusals),
                 step_id=STEP_ID, level="WARNING")
-    set_aside(plan)
+    if plan.exists():   # every round may have died on the contract before writing one
+        set_aside(plan)
     raise Escalation("PLAN", unit_file(ctx, "plan.json"),
                      f"the writer could not satisfy plan_check after {MAX_IMPROVE} rounds; "
                      f"refusals in the log")

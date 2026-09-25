@@ -222,3 +222,28 @@ def test_help_prints_without_a_book(capsys):
     from studio import step_cli
     assert step_cli.main(step, ["step_02_plan.py", "--help"]) == 0
     assert "plan" in capsys.readouterr().out
+
+
+# ---- a draft the contract refuses is a refusal, not a crash (ep12, 2026-09-24) ----------
+
+class ContractBreaker(Writer):
+    """First draft breaks the Episode contract (the agent's parse raises); then canned."""
+
+    def write(self, brief, refusals=None, usage=None):
+        self.calls.append(refusals)
+        if len(self.calls) == 1:
+            Episode.model_validate({"number": "not a number"})
+        return Episode.model_validate(canned_plan(brief["number"]))
+
+
+def test_a_draft_the_contract_refuses_goes_back_to_the_writer(ctx, monkeypatch):
+    """ep12's first draft said 'slowly' on four shots; the contract raised inside the
+    agent's parse and killed the step before the improve loop could quote it back."""
+    writer = ContractBreaker()
+    monkeypatch.setattr(step, "episode_writer", writer)
+    ctx.capture = Capture((0, CLEAN_OUT))
+    with pytest.raises(Escalation):
+        step.run(ctx)
+    assert len(writer.calls) == 2 and writer.calls[0] is None
+    assert any("number" in line for line in writer.calls[1])
+    assert _plan(ctx).exists()
