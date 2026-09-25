@@ -273,6 +273,7 @@ table.v td code{white-space:nowrap}
   <div id="tab-current">
 
 
+
 <section class="block">
     <div class="head"><h2>Org chart</h2><p>Every box reports to the one above it. A step script is a unit head: it calls its agents in order and owns their output.</p></div>
     <div class="chart-tools">
@@ -487,12 +488,12 @@ table.v td code{white-space:nowrap}
                   <ul>
                     <li><div class="node built"><div class="n">Analysis</div><div class="r">12 agents · unit: book</div><div class="f">analysis.py</div><div class="st built">built</div></div></li>
                     <li><div class="node built"><div class="n">Screenplay</div><div class="r">4 agents · unit: book × target</div><div class="f">screenplay.py</div><div class="st built">built</div></div></li>
-                    <li><div class="node partial"><div class="n">Refs &amp; Cast</div><div class="r">Sheets, voices, the LOOK gate · unit: book × style</div><div class="f">refs.py</div><div class="st partial">scripts exist</div></div></li>
+                    <li><div class="node built"><div class="n">Refs &amp; Cast</div><div class="r">4 steps, look-back agent, the LOOK gate · unit: book × style</div><div class="f">refs.py</div><div class="st built">built 2026-09-24</div></div></li>
                   </ul>
                 </li>
                 <li><div class="node lead div"><div class="n">Production</div><div class="r">One stage per format line. Ends at a master; never publishes.</div></div>
                   <ul>
-                    <li><div class="node partial"><div class="n">Episode (TV)</div><div class="r">12 steps · unit: book × chapter(s)</div><div class="f">episode.py</div><div class="st partial">scripts exist</div></div></li>
+                    <li><div class="node built"><div class="n">Episode (TV)</div><div class="r">12 steps, writer agent, eyes as files · unit: book × chapter(s)</div><div class="f">episode.py</div><div class="st built">built 2026-09-24</div></div></li>
                     <li><div class="node built"><div class="n">Trailer</div><div class="r">10 steps · ordered by Marketing</div><div class="f">trailer.py</div><div class="st built">built</div></div></li>
                     <li><div class="node missing"><div class="n">Shorts</div><div class="r">Paid line · unit: book × scene</div><div class="f">shorts.py</div><div class="st missing">skills only</div></div></li>
                     <li><div class="node slot"><div class="n">Feature</div><div class="r">book × target · sequence → scene → shot</div><div class="st slot">slot</div></div></li>
@@ -602,9 +603,9 @@ table.v td code{white-space:nowrap}
       <div class="mini migr">
         <h3>Ten commits</h3>
         <ol>
-          <li><b>Registry keys and the unit column</b> · <code>unit</code>, <code>requires</code>; <code>events.unit</code>; <code>db.STAGES</code> from the registry · ~150 lines, 5 tests</li>
-          <li><b><code>refs</code> stage</b> · runner from the trailer template; four wrappers; the LOOK verdict file · ~300 lines, 8 tests</li>
-          <li><b><code>episode</code> stage, wrappers only</b> · every eye = ESCALATE; the skill's command table generated from the registry · ~1,400 lines, ~30 tests</li>
+          <li><b>Registry keys and the unit column</b> — done 2026-09-24 · <code>unit</code>, <code>requires</code>; <code>events.unit</code>; <code>db.STAGES</code> from the registry · ~150 lines, 5 tests</li>
+          <li><b><code>refs</code> stage</b> — done · runner from the trailer template; four wrappers; the LOOK verdict file · ~300 lines, 8 tests</li>
+          <li><b><code>episode</code> stage</b> — done, with the writer agent · every eye = ESCALATE; the skill's command table generated from the registry · ~1,400 lines, ~30 tests</li>
           <li><b>Distribution contracts</b> · FinishedFile, PublishManifest, CatalogEntry; a <code>local</code> model tier · ~200 lines</li>
           <li><b><code>publish</code> stage</b> · intake, catalogue, in-repo notify; publishing leaves the format line · ~700 lines</li>
           <li><b>The new agents</b> · episode_writer, cast_lister, metadata_writer, look_back, each behind a deterministic gate · ~600 lines</li>
@@ -617,8 +618,8 @@ table.v td code{white-space:nowrap}
       <div class="mini">
         <h3>What exists vs what's a slot</h3>
         <ul>
-          <li><span class="pill">built</span> analysis, screenplay, trailer</li>
-          <li><span class="pill">scripts, no stage</span> refs, episode, publish</li>
+          <li><span class="pill">built</span> analysis, screenplay, trailer, refs, episode (2026-09-24)</li>
+          <li><span class="pill">scripts, no stage</span> publish</li>
           <li><span class="pill">missing</span> analytics, promo, notify, scheduler, R&amp;D ledger</li>
           <li><span class="pill">skills only</span> shorts — registered as an empty slot</li>
           <li><span class="pill">slots</span> feature, song, audiobook, game, book; the own platform as an adapter inside publish, after the catalogue</li>
@@ -680,24 +681,24 @@ table.v td code{white-space:nowrap}
       U('03','Draft','Two calls per beat','built','step_03_draft.py',[A('Screenwriter','action + dialogue','reasoning'),A('Shot designer','camera on the frozen stream')]),
       U('04','Render','Code only','built','step_04_render.py'),
       U('05','Verify','Guards, then a sampled audit','built','step_05_verify.py',[A('Adaptation auditor','contradiction, never difference','qc')])]},
-    {n:'Refs & Cast',r:'Pre-production · unit: book × style · leader refs.py · the only writer of refs.json',st:'partial',kids:[
-      U('01','Canon','Which entities this book binds','partial','wraps cast_rows.py',[A('Casting director','rows: who appears')]),
-      U('02','Sheets','One sheet per character and key prop','partial','wraps build_pack, prop_refs',[A('Trait reader','differs in ≥3 traits?'),A('Look back','does the picture show its prompt?')]),
-      U('03','Voices','A register nobody else holds','partial','wraps cast_voices.py',[A('Voice director','region, body, speech')]),
-      U('04','Verdict','ESCALATE — LOOK, once per book','missing','step_04_verdict.py',[],'LOOK')]},
-    {n:'Episode (TV)',r:'Production · unit: book × chapter(s) · leader episode.py · $0 local GPU',st:'partial',kids:[
-      U('01','Bind','This unit’s cast, stamped','partial','wraps cast_rows.py',[A('Cast lister','who is in this chapter')]),
-      U('02','Plan','The contract, gated before anything is made','partial','wraps plan_check',[A('Episode writer','setups, shots, cells, moves, lines','reasoning')],'PLAN'),
-      U('03','Places','Location + view at this unit’s hour','partial','wraps places.py',[A('Look back','landmark and hour present?')]),
-      U('04','Record','Every line measured and listened to','partial','wraps say_lines, speaker_check',[A('Listener','what words are on this file?','qc')]),
-      U('05','Timeline','Audio first: the animatic','partial','wraps respot, timeline'),
-      U('06','Prompts','Built and linted for $0, before any grid','partial','wraps takes_r2v --prompts'),
-      U('07','Board','Storyboard grids from the plan’s prose','partial','wraps grids.py'),
-      U('08','Panels','Two machine gates, then an eye','partial','wraps panels, panel_check, panel_content_check',[A('Panel reader','lists what is in the picture','qc'),A('Eye','a fault no measurement names','qc')],'EYE'),
-      U('09','Shoot','Takes on the local video model; retake ladder','partial','wraps takes_r2v, take_dq, take_content_check',[A('Panel reader','three frames, read alone','qc'),A('Eye','the strip','qc')],'EYE'),
-      U('10','Edit','Title, measured bed, cut, mix','partial','wraps series_title, assemble'),
-      U('11','QC','Measure the delivered master','partial','wraps qc, eye_review, dossier',[],'MASTER'),
-      U('12','Deliver','Manifest + notify; never publishes','missing','step_12_deliver.py')]},
+    {n:'Refs & Cast',r:'Pre-production · unit: book × style · leader refs.py · the only writer of refs.json',st:'built',kids:[
+      U('01','Canon','Which entities this book binds','built','step_01_canon.py wraps cast_rows.py',[A('Casting director','rows: who appears')]),
+      U('02','Sheets','One sheet per character and key prop','built','step_02_sheets.py wraps build_pack',[A('Trait reader','differs in ≥3 traits?'),A('Look back','does the picture show its prompt?')]),
+      U('03','Voices','A register nobody else holds','built','step_03_voices.py wraps cast_voices.py',[A('Voice director','region, body, speech')]),
+      U('04','Verdict','ESCALATE — LOOK, once per book','built','step_04_verdict.py · refs/verdict.json',[],'LOOK')]},
+    {n:'Episode (TV)',r:'Production · unit: book × chapter(s) · leader episode.py · $0 local GPU',st:'built',kids:[
+      U('01','Bind','This unit’s cast, stamped','built','step_01 wraps cast_rows.py',[A('Cast rows (code)','who is in this chapter — from analysis')]),
+      U('02','Plan','The contract, gated before anything is made','built','step_02 wraps plan_check',[A('Episode writer','setups, shots, cells, moves, lines','reasoning')],'PLAN'),
+      U('03','Places','Location + view at this unit’s hour','built','step_03 wraps places.py',[A('Look back','landmark and hour present?')]),
+      U('04','Record','Every line measured and listened to','built','step_04 wraps say_lines, speaker_check',[A('Whisper (in say_lines)','what words are on this file?','qc')]),
+      U('05','Timeline','Audio first: the animatic','built','step_05 wraps respot, timeline'),
+      U('06','Prompts','Built and linted for $0, before any grid','built','step_06 wraps takes_r2v --prompts'),
+      U('07','Board','Storyboard grids from the plan’s prose','built','step_07 wraps grids.py'),
+      U('08','Panels','Two machine gates, then an eye','built','step_08 wraps panels, panel_check, panel_content_check',[A('Panel reader','lists what is in the picture','qc'),A('Eye','a fault no measurement names','qc')],'EYE'),
+      U('09','Shoot','Takes on the local video model; retake ladder','built','step_09 wraps takes_r2v, take_dq, take_content_check',[A('Panel reader','three frames, read alone','qc'),A('Eye','the strip','qc')],'EYE'),
+      U('10','Edit','Title, measured bed, cut, mix','built','step_10 wraps series_title, assemble'),
+      U('11','QC','Measure the delivered master','built','step_11 wraps qc, eye_review, dossier',[],'MASTER'),
+      U('12','Deliver','Manifest, the path first; never publishes','built','step_12_deliver.py')]},
     {n:'Trailer',r:'Production · unit: book · leader trailer.py · ordered by Marketing',st:'built',kids:[
       U('01','Story','Lead, figure, turn; register, thesis','built','step_01_story.py',[A('Story','register + thesis')]),
       U('02','Refs','Reference sheets, trait-card gate','built','step_02_refs.py',[A('Trait reader','VLM trait card')]),
@@ -720,9 +721,9 @@ table.v td code{white-space:nowrap}
       U('02','Versions','Each platform’s bundle','missing','step_02_versions.py',[A('Subject keeper','where to crop so the subject stays')]),
       U('03','Metadata','Title from the series record; the rest drafted','partial','series_title() exists',[A('Metadata writer','description, tags, chapters')]),
       U('04','Art','Thumbnail from the master’s own frames','missing','step_04_art.py',[A('Thumbnail director','one frame, three words')]),
-      U('05','Upload','Private insert; one adapter per platform','partial','wraps youtube_upload.py · own platform: slot'),
-      U('06','Review','The master eye for this sha8','partial','wraps the eye verdict'),
-      U('07','Release','ESCALATE — PUBLISH; the flip to public','partial','wraps youtube_privacy.py',[],'PUBLISH'),
+      U('05','Upload','Private insert; one adapter per platform','built','step_05 wraps youtube_upload.py · own platform: slot'),
+      U('06','Review','The master eye for this sha8','built','step_06 wraps the eye verdict'),
+      U('07','Release','ESCALATE — PUBLISH; the flip to public','built','step_07 wraps youtube_privacy.py',[],'PUBLISH'),
       U('08','Catalog','The title record every platform derives from','missing','step_08_catalog.py'),
       U('09','Notify','Link, path, spend, time','missing','step_09_notify.py')]},
     {n:'Analytics',r:'Distribution · unit: master × platform · scheduled · never moves a gate',st:'missing',kids:[

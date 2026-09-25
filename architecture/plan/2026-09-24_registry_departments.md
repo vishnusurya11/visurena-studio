@@ -1,6 +1,6 @@
 # Registry departments — the proposal into stages
 
-**Status:** NOT STARTED — awaiting the owner's ruling on
+**Status:** IN PROGRESS (2026-09-24: steps 1, 2, 3 and 6 landed through the episode build; the owner delegated) — the ruling on the rest of
 [../decisions/2026-09-24_future_departments.md](../decisions/2026-09-24_future_departments.md).
 
 **Decision:** the big-studio shape: five divisions by function, one registry stage per
@@ -19,20 +19,20 @@ scripts that exist today, organised.
 
 Sizes from the codebase memo (§5 of the decision). Tests first, every step.
 
-- [ ] **1. Registry keys and the unit column** — ~150 lines, 5 tests.
+- [x] **1. Registry keys and the unit column** — ~150 lines, 5 tests.
   Tests: a stage's `unit` parses; `requires` parses; `mark_stage` accepts a registered
   stage and refuses an unregistered one; two units of one stage do not collide in
   `events`; `codex_ready_for_stage(stage, unit)` takes a unit.
   Code: `studio/registry.py` reads `unit`/`requires`; `events.unit` column with an
   idempotent migration; `db.STAGES` derived from `stages.yaml`.
-- [ ] **2. `refs` stage** — ~300 lines, 8 tests.
+- [x] **2. `refs` stage** — ~300 lines, 8 tests.
   Tests: registry ids match module `STEP_ID`s; the runner brackets each step in events;
   `refs.json` is written only by this stage (a test greps the writers); the verdict
   file binds to the pack sha and a stale pack is refused.
   Code: `refs.py` from the `trailer.py` template; wrappers over `cast_rows`,
   `build_pack`/`prop_refs`, `cast_voices`; `refs/verdict.json` writer; the
   `cast-voices` skill becomes the desk.
-- [ ] **3. `episode` stage, wrappers only** — ~1,400 lines, ~30 tests.
+- [x] **3. `episode` stage, wrappers only** — ~1,400 lines, ~30 tests.
   Tests: ids match; every eye step parks the unit and writes no verdict; a take step
   refuses without all three panel verdicts; the skill's command table equals the
   registry; `RENDER_HOLD` stops the runner before the first GPU step.
@@ -44,7 +44,7 @@ Sizes from the codebase memo (§5 of the decision). Tests first, every step.
 - [ ] **5. `publish` stage** — ~700 lines, 15 tests. `publish.py` +
   `studio/publish_run.py`; wrappers for upload/review/release; intake, catalog,
   `studio/notify.py` (pinned client, replaces the trailer's subprocess); `episode/12 deliver`.
-- [ ] **6. The new agents** — ~600 lines, 12 tests. `episode_writer` + `plan_brief` +
+- [x] **6. The new agents** — ~600 lines, 12 tests. `episode_writer` + `plan_brief` +
   improve loop; `cast_lister`; `metadata_writer`; `look_back`; each behind its
   deterministic gate with FakeModel tests; the plan scripts move under the library.
 - [ ] **7. `studio.py` scheduler** — ~250 lines, 6 tests. The loop over `requires`;

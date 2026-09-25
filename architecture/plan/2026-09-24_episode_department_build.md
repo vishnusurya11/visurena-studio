@@ -57,19 +57,19 @@ library; the suite is green; nothing here touches a GPU or a paid model in a tes
   script under the clock and the GPU guard, injectable). Tests: `tests/test_step_runner.py`
   (done → skipped; escalation parks and stops; failure → failed; RENDER_HOLD refuses
   before the first GPU step; ids match the registry).
-- [ ] **C3 `refs` stage** — `refs.py`; `scripts/refs/step_01_canon.py` (wraps cast_rows),
+- [x] **C3 `refs` stage** — `refs.py`; `scripts/refs/step_01_canon.py` (wraps cast_rows),
   `step_02_sheets.py` (wraps build_pack + prop_refs; look_back advisory), `step_03_voices.py`
   (wraps cast_voices), `step_04_verdict.py` (ESCALATE LOOK → `refs/verdict.json` bound to
   `pack.jsonl` sha); `agents/look_back.py` + `agents/skills/look_back.md` +
   `studio/look_back.py`. Tests: ids match; runner brackets; verdict binds to the pack
   sha and a stale pack is refused; look_back diff with a fake reader.
-- [ ] **C4 `episode` stage, wrappers** — `episode.py`, `studio/episode_run.py`;
+- [x] **C4 `episode` stage, wrappers** — `episode.py`, `studio/episode_run.py`;
   `scripts/episode/step_01_bind.py` … `step_12_deliver.py` (deliver = manifest + the
   path printed first; notify stays out of scope). Every eye = `Escalation`. Tests:
   ids match; every step is importable and runnable alone (`--help`); eye steps park
   without a verdict and pass with one; the take step refuses without the three panel
   verdicts; the runner on a finished episode skips every step.
-- [ ] **C5 `episode_writer`** — `agents/episode_writer.py` + `agents/skills/episode_writer.md`
+- [x] **C5 `episode_writer`** — `agents/episode_writer.py` + `agents/skills/episode_writer.md`
   (book-neutral, distilled from the skill's plan rules) + `studio/plan_brief.py`; step 02:
   brief → write → `plan_check` → improve ≤2 → lock (`write_plan`) → ESCALATE PLAN. Tests
   with a FakeModel: schema validates; a refusal is quoted back; the loop stops at 2; an
@@ -77,7 +77,7 @@ library; the suite is green; nothing here touches a GPU or a paid model in a tes
 - [x] **C6 plans under the library** — move the 18 scripts; `PATCHED_BY_HAND` markers;
   `test_a_plan_script_regenerates_its_plan.py` globs the library; delete
   `scripts/episode/episode.py`; move `grids_ep11.sh`.
-- [ ] **C7 the desk** — `scripts/episode/commands.py` generates the command table;
+- [x] **C7 the desk** — `scripts/episode/commands.py` generates the command table;
   `.claude/skills/episode/SKILL.md` carries it between markers; `.claude/agents/episode.md`
   names the runner; test asserts equality. `docs/DECISIONS.md` line; the architecture
   README/index states flip to "runner built; gates escalate".
@@ -86,4 +86,5 @@ library; the suite is green; nothing here touches a GPU or a paid model in a tes
 ## Log
 
 - 2026-09-24 — plan written; owner away, decisions delegated.
-- 2026-09-24 — C1 `0a5153f`, C2 `6bcf854`, C6 `3cdf25a` on master. C3/C4/C5 built in parallel by three subagents; C7 desk edits staged.
+- 2026-09-24 — C1 `0a5153f`, C2 `6bcf854`, C6 `3cdf25a`, C3 `820d64a`, C5 `004d219`, C4 `d0ea098`, C7 `ea0a7df` on master. Three subagents built C3/C4/C5 in parallel; one conflict (a raw `placed.json` path in step 02) fixed through `episode_home.has_timeline`.
+- 2026-09-24 — D13 (added during the build): a plan whose timeline already exists is grandfathered past the PLAN signature; a plan is never rewritten once it ran. D14: `cast_lister` dropped (D6) and `listener` dropped (D7) as agents; `look_back` and `episode_writer` are the two new registered agents.
