@@ -17,6 +17,9 @@ import json
 from pathlib import Path
 
 RENDER_NODE = "MiniMaxH3ReferenceToVideo"
+UNFINISHED_S = 60.0
+"""A graph this much newer than its video belongs to a render that never landed
+(a real render takes minutes after its graph is written)."""
 
 
 def prompt_of(graph: dict) -> str | None:
@@ -68,6 +71,13 @@ def is_current(built: str, take: Path, pictures: list | None = None) -> bool:
     Whitespace is not a picture, so a re-wrap does not spend 200 s of GPU."""
     take = Path(take)
     if not take.exists():
+        return False
+    # AN UNFINISHED RENDER IS NOT CURRENT: takes_r2v writes the graph before it
+    # renders, so ep12 T16's interrupted run left a new graph beside the old
+    # video and the runner kept it.  A graph more than a minute newer than
+    # its video describes a render that never landed.
+    graph = take.with_suffix(".graph.json")
+    if graph.exists() and graph.stat().st_mtime - take.stat().st_mtime > UNFINISHED_S:
         return False
     said = recorded_prompt(take)
     if said is None or said.strip() != (built or "").strip():

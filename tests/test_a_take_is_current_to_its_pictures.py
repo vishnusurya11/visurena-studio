@@ -66,3 +66,23 @@ def test_changed_words_are_still_not_current(tmp_path):
 def test_without_pictures_it_asks_only_about_the_words(tmp_path):
     take = graph(tmp_path, "the prompt", ["whatever_0.png"])
     assert is_current("the prompt", take)
+
+
+def test_a_graph_written_after_its_video_is_an_unfinished_render(tmp_path):
+    """ep12 T16: the narration render was interrupted after takes_r2v wrote its
+    graph (08:45) but before the video (still the 07:59 dialogue take) was
+    replaced; the new graph made the old video read as current and the runner
+    never re-rendered it. A graph minutes newer than its video proves nothing."""
+    import os
+    take = graph(tmp_path, "new words", [])
+    os.utime(take, (1_000_000, 1_000_000))
+    os.utime(take.with_suffix(".graph.json"), (1_000_000 + 2760, 1_000_000 + 2760))
+    assert not is_current("new words", take)
+
+
+def test_a_graph_written_just_before_its_video_is_current(tmp_path):
+    import os
+    take = graph(tmp_path, "words", [])
+    os.utime(take.with_suffix(".graph.json"), (1_000_000, 1_000_000))
+    os.utime(take, (1_000_000 + 228, 1_000_000 + 228))
+    assert is_current("words", take)
