@@ -22,3 +22,14 @@ def test_a_later_segment_starts_at_the_first_sample_after_it():
 
 def test_sample_frames_and_the_starts_read_the_same_shares():
     assert list(faces.sample_shares(len(faces.SAMPLE_AT))) == list(faces.SAMPLE_AT)
+
+
+def test_no_cast_sheets_is_not_measured_rather_than_a_crash(monkeypatch):
+    """ep12 T02: take_verdict calls identity_dq with no sheets; the empty bank left
+    every face with no scores and Face.best raised on max() of nothing."""
+    monkeypatch.setattr(identity_gate, "enabled", lambda: True)
+    face = identity_gate.Face(k=0, h=0.3, scores={})
+    monkeypatch.setattr(identity_gate, "observe", lambda *a, **kw: [face])
+    report = identity_gate.identity_dq("take.mp4", [0], ["artilleryman"], ["char-artilleryman.png"])
+    assert report["measured"] is False and report["ok"] is True
+    assert "sheet" in report["note"]

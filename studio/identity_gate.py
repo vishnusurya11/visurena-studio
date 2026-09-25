@@ -279,7 +279,12 @@ def identity_dq(video, segments: list, expected: list[str], refs: list[str],
     Armed, a hard finding fails the take; disarmed it rides in `flags` and `note`."""
     if not enabled():
         return dict(NOT_MEASURED)
-    v = judge(observe(video, segments, sheets or {}, **measure), expected, refs)
+    seen = observe(video, segments, sheets or {}, **measure)
+    # NO SHEETS, NOTHING TO COMPARE: ep12 T02 was called with none, every face
+    # scored against an empty bank, and Face.best raised on max() of nothing.
+    if seen and not any(f.scores for f in seen):
+        return dict(NOT_MEASURED, note="not measured: no cast sheets to compare faces with")
+    v = judge(seen, expected, refs)
     hard = v.hard if ARMED else []
     note = "" if ARMED or not v.hard else "advisory for one episode: " + "; ".join(v.hard)
     return {"measured": True, "ok": not hard, "note": note, "flags": v.flags, "hard": hard, "present": v.present}
