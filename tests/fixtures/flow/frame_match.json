@@ -1,0 +1,12 @@
+{
+ "note": "frame_match cosines recorded off two masters, ids scrubbed. `last_vs_cell`: each shot's last sampled frame against its own storyboard panel -- `on` is a master on its board (every shot over ON_BOARD .50), `off` is the one bad episode's class (three of four shots under, the worst at .075). `pairs`: representative-frame pairs over REPEAT .90 with whether one setup explains them; a pair two setups share is a repeat, a pair inside one setup is the same room drawn twice and is not.",
+ "last_vs_cell": {
+  "on": {"1": 0.82, "2": 0.71, "3": 0.66, "4": 0.58},
+  "off": {"1": 0.12, "2": 0.075, "3": 0.61, "4": 0.09}
+ },
+ "pairs": [
+  {"a": 3, "b": 5, "cosine": 0.95, "shared_setup": true},
+  {"a": 2, "b": 8, "cosine": 0.96, "shared_setup": false},
+  {"a": 1, "b": 4, "cosine": 0.52, "shared_setup": false}
+ ]
+}

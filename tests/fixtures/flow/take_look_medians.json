@@ -1,0 +1,23 @@
+{
+ "note": "take_look.stats rows over the sampled frames of two masters, ids scrubbed. `floored` keeps a true black in most frames (p5 4-7, near-black .3-.6: the class every shipped episode sits in); `lifted` sits off the floor (p5 16-18, near-black .01-.03, 94 % of its colour one hue: the one bad episode's class). The master eye's shadow field takes their medians against look_gate's floor (p5 > 20 AND near-black < .08 is no floor).",
+ "floored": [
+  {"p5": 4.1, "near_black": 0.41, "share": 0.35, "mean": 62.0},
+  {"p5": 5.3, "near_black": 0.38, "share": 0.31, "mean": 70.5},
+  {"p5": 6.8, "near_black": 0.30, "share": 0.44, "mean": 81.2},
+  {"p5": 3.9, "near_black": 0.58, "share": 0.29, "mean": 48.0},
+  {"p5": 7.2, "near_black": 0.27, "share": 0.40, "mean": 88.1},
+  {"p5": 4.6, "near_black": 0.36, "share": 0.33, "mean": 66.4},
+  {"p5": 5.0, "near_black": 0.44, "share": 0.37, "mean": 58.9},
+  {"p5": 6.1, "near_black": 0.33, "share": 0.42, "mean": 74.3}
+ ],
+ "lifted": [
+  {"p5": 16.5, "near_black": 0.02, "share": 0.94, "mean": 118.0},
+  {"p5": 17.8, "near_black": 0.01, "share": 0.91, "mean": 121.4},
+  {"p5": 15.9, "near_black": 0.03, "share": 0.95, "mean": 109.7},
+  {"p5": 18.2, "near_black": 0.01, "share": 0.93, "mean": 125.0},
+  {"p5": 16.1, "near_black": 0.02, "share": 0.90, "mean": 112.6},
+  {"p5": 17.0, "near_black": 0.02, "share": 0.96, "mean": 119.8},
+  {"p5": 21.4, "near_black": 0.01, "share": 0.92, "mean": 130.2},
+  {"p5": 16.7, "near_black": 0.03, "share": 0.94, "mean": 115.5}
+ ]
+}
