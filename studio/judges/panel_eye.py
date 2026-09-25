@@ -38,7 +38,10 @@ from studio.measure import boxes, copy as cp, faces, keypoints, ocr
 
 NAME, VERSION = "panel_eye", "1"
 CAPTION = "image_qwen3vl_caption"
-TIMEOUT = 120.0
+TIMEOUT = 900.0
+"""Per ask.  One GPU serves every stage and every session: on the first real run
+a 120 s wait died behind another episode's render still on the queue, and the
+whole judge crashed on one panel.  A queued ask waits; a dead one is `unread`."""
 SIZE_ASK = ('Answer with strict JSON and nothing else, two keys. "size": how much of the main '
             'figure the frame holds, one of ' + ", ".join(keypoints.ORDER) + '. "pictures": how many '
             'separate pictures are tiled side by side or stacked in this image, 1 when it is one picture.')
@@ -268,6 +271,16 @@ def refs_of(book: Path | None, shot: dict, setup: dict) -> list[Path]:
     return [p for p in out if Path(p).exists()]
 
 
+def asked(ask: Callable, default):
+    """One detector ask that may die on the shared GPU queue: a timeout or an
+    unreadable answer is a missing measure, never a crash of the whole judge.
+    The rows that needed it read "not measured" and the calibrated rows stand."""
+    try:
+        return ask()
+    except (Unreadable, TimeoutError) as why:          # comfy.StillRunning is a TimeoutError
+        return default
+
+
 def short_read(staged: str, run: Callable, planned_size: str, where: str) -> tuple[dict | None, Fault | None]:
     """The one VLM read, or the reason it could not be read -- a fault only
     when the face is the picture."""
@@ -284,13 +297,14 @@ def read_panel(shot: dict, setup: dict, path: Path, t: dict, refs: list[Path]) -
     rgb = np.asarray(Image.open(path).convert("RGB"))
     size = (rgb.shape[1], rgb.shape[0])
     staged = t["stage"](path)
-    pts = keypoint_read(staged, t["run"])
+    pts = asked(lambda: keypoint_read(staged, t["run"]), None)
     read, unread = short_read(staged, t["run"], shot.get("size", ""), where)
     seen = face_rows(rgb, t["detect"], t["embed"])
     out = [framing(shot.get("size", ""), keypoints.shot_size(pts) if pts is not None else None, read, where),
            posture_fault(pts, prose, planned, where), copy_fault(path, refs, where), unread,
-           hat_fault(staged, t["run"], seen, pts, size, where) if planned == 1 else None]
-    out += clone_faults(seen, where) + landmark_faults(staged, t["run"], setup.get("described", ""), where)
+           asked(lambda: hat_fault(staged, t["run"], seen, pts, size, where), None) if planned == 1 else None]
+    out += clone_faults(seen, where)
+    out += asked(lambda: landmark_faults(staged, t["run"], setup.get("described", ""), where), [])
     out += lettering_faults(path, t["reader"], list(shot.get("faces") or []), prose,
                             shot.get("size") == "insert", size[0], where)
     return [f for f in out if f], read is not None

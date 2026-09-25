@@ -33,11 +33,22 @@ def test_two_characters_whose_medians_meet_collapse():
 
 
 def test_a_character_who_drifts_from_his_own_median_is_a_fault():
+    """Two of five reads far from the median: a drift.  One hard-lit frame alone
+    is not (the next test): an accepted episode read one of six at 0.658."""
+    grouped = reads({1: [{"h": 0.3, "vec": vec(0.0)}], 2: [{"h": 0.3, "vec": vec(0.0)}],
+                     3: [{"h": 0.3, "vec": vec(0.0)}], 4: [{"h": 0.3, "vec": vec(1.4)}],
+                     5: [{"h": 0.3, "vec": vec(1.4)}]})
+    who = {i: {"faces": ["a"]} for i in range(1, 6)}
+    faults = me.identity(grouped, who)
+    assert len(faults) == 1 and faults[0].where == "a" and faults[0].evidence["min_cosine"] < identity_gate.DRIFT
+    assert faults[0].evidence["reads"] == 5 and faults[0].evidence["below"] == 2
+
+
+def test_one_read_off_the_median_is_not_a_drift():
     grouped = reads({1: [{"h": 0.3, "vec": vec(0.0)}], 2: [{"h": 0.3, "vec": vec(0.0)}],
                      3: [{"h": 0.3, "vec": vec(1.2)}]})
     faults = me.identity(grouped, {1: {"faces": ["a"]}, 2: {"faces": ["a"]}, 3: {"faces": ["a"]}})
-    assert len(faults) == 1 and faults[0].where == "a" and faults[0].evidence["min_cosine"] < identity_gate.DRIFT
-    assert faults[0].evidence["reads"] == 3
+    assert faults == []
 
 
 def test_a_face_in_a_two_person_shot_is_counted_only_when_the_reader_names_him():

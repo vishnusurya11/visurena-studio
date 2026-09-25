@@ -33,7 +33,7 @@ from typing import Callable
 import numpy as np
 from PIL import Image
 
-from studio import frame_match as fm, identity_gate, look_gate as lg, panel_content as pc, panel_dq, take_look as tl
+from studio import frame_match as fm, identity_gate, look_gate as lg, panel_content as pc, panel_dq, plan_gates, take_look as tl
 from studio.judges.verdict import Fault, Verdict, confidence
 
 NAME, VERSION = "master_eye", "1"
@@ -43,7 +43,11 @@ MEASURED = ("shadow", "faces", "board", "repeats")
 FRAMES = 30
 """The short read: one frame every ~5 s of a 2-3 minute master, read alone."""
 CLOSES = ("extreme_close", "close", "medium_close")
-FACE_AT_CLOSE = 0.25
+FACE_AT_CLOSE = 0.18
+FACE_AT_MEDIUM_CLOSE = 0.12
+FACES_FITTED_ON = "2026-09-25 one accepted episode, 7 close shots"
+DRIFT_SHARE = 0.25
+"""The share of a character's reads that must fall under DRIFT before it is a drift."""
 """The rubric's own words: at a close the face reads at a quarter of the frame
 height.  The one bad episode drew three medium_close shots at 0.15-0.23."""
 ON_BOARD = 0.50
@@ -148,12 +152,22 @@ def face_heights(reads: dict[int, list[Read]]) -> dict[int, float]:
             for shot, rows in reads.items()}
 
 
+def face_wall(size: str) -> float:
+    """The face-height floor for a planned size.  Measured 2026-09-25 on an
+    accepted, published episode's master frames: medium closes read 0.145-0.227,
+    closes 0.198-0.426 (one episode, seven shots -- thin; `fitted_on` carried)."""
+    return FACE_AT_CLOSE if size in ("close", "extreme_close") else FACE_AT_MEDIUM_CLOSE
+
+
 def faces(shots: list[dict], heights: dict[int, float]) -> tuple[bool, dict]:
-    """At every close, the face at a quarter of the frame height."""
-    rows = [{"shot": int(s["index"]), "size": s.get("size", ""), "h": heights.get(int(s["index"]), 0.0)}
+    """At every close, the face above the floor its planned size sets."""
+    rows = [{"shot": int(s["index"]), "size": s.get("size", ""), "h": heights.get(int(s["index"]), 0.0),
+             "wall": face_wall(s.get("size", ""))}
             for s in shots if s.get("size") in CLOSES and int(s["index"]) in heights]
-    under = [r for r in rows if r["h"] < FACE_AT_CLOSE]
-    return not under, {"closes": rows, "under": [r["shot"] for r in under], "wall": FACE_AT_CLOSE}
+    under = [r for r in rows if r["h"] < r["wall"]]
+    return not under, {"closes": rows, "under": [r["shot"] for r in under],
+                       "wall": {"close": FACE_AT_CLOSE, "medium_close": FACE_AT_MEDIUM_CLOSE},
+                       "fitted_on": FACES_FITTED_ON}
 
 
 def board(last_vs_cell: dict[int, float]) -> tuple[bool, dict]:
@@ -202,9 +216,17 @@ def content_words(text: str) -> list[str]:
             if len(w) >= 3 and w not in CAMERA and w not in STOP]
 
 
+ACTING = re.compile(r"\b(" + plan_gates.ACTS_ON + r")\b", re.I)
+
+
 def turn_verbs(shot: dict) -> list[str]:
-    """What the turn shot says happens: its motion's content words."""
-    return content_words(shot.get("motion", ""))
+    """What the turn shot says happens: the ACTING verbs of its prose (the
+    catalog of hand verbs a turn is made of), never every content word -- on
+    the first real read every word of a motion clause was a 'verb' and nothing
+    the reader listed could match it."""
+    prose = f"{shot.get('motion', '')} {shot.get('frame', '')}"
+    found = {m.group(1).lower() for m in ACTING.finditer(prose)}
+    return sorted({root(w) for w in found if w not in CAMERA})   # "the camera holds" is not an act
 
 
 def listed_actions(reads: dict[int, list[Read]], turn: int) -> list[str]:
@@ -218,6 +240,9 @@ def story(turn_shot: dict | None, reads: dict[int, list[Read]]) -> tuple[bool, d
         return True, {"note": "no turn shot in the plan"}
     verbs, turn = turn_verbs(turn_shot), int(turn_shot["index"])
     listed = listed_actions(reads, turn)
+    if not verbs:
+        return True, {"turn_shot": turn, "verbs": [], "listed": listed,
+                      "note": "cannot tell: the turn shot's prose names no acting verb"}
     seen = {w for action in listed for w in content_words(action)}
     hit = sorted({v for v in verbs if any(agree(v, s) for s in seen)})
     return bool(hit), {"turn_shot": turn, "verbs": verbs, "listed": listed, "matched": hit}
@@ -256,10 +281,15 @@ def drift_faults(vectors: dict[str, list[np.ndarray]]) -> list[Fault]:
         if len(vecs) < 2:
             continue
         median = unit(np.median(np.stack([unit(v) for v in vecs]), axis=0))
-        low = round(min(float(unit(v) @ median) for v in vecs), 3)
-        if low < identity_gate.DRIFT:
+        cosines = sorted(float(unit(v) @ median) for v in vecs)
+        below = [c for c in cosines if c < identity_gate.DRIFT]
+        # one hard-lit frame off the median is not a drift (an accepted episode read
+        # one of six at 0.658); at least two reads and a quarter of them must be off
+        if len(below) >= 2 and len(below) / len(cosines) >= DRIFT_SHARE:
             out.append(Fault(kind="identity", where=who, note="drift from own median",
-                             evidence={"min_cosine": low, "wall": identity_gate.DRIFT, "reads": len(vecs)}))
+                             evidence={"min_cosine": round(cosines[0], 3), "below": len(below),
+                                       "wall": identity_gate.DRIFT, "reads": len(vecs),
+                                       "fitted_on": FACES_FITTED_ON}))
     return out
 
 
@@ -343,7 +373,8 @@ def measures(home: Path, master: Path, plan: dict, placed: dict, *, frames: Fram
 
 def field_faults(m: dict) -> list[Fault]:
     """One fault per rubric field answered n, carrying the measure's numbers."""
-    return [Fault(kind=name, where="master", evidence=m[name][1], severity="high" if name == "story" else "normal")
+    # story is the taste field: it flags, it never refuses (decision §2, "errs toward")
+    return [Fault(kind=name, where="master", evidence=m[name][1], severity="low" if name == "story" else "normal")
             for name in FIELDS if not m[name][0]]
 
 

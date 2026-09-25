@@ -33,7 +33,9 @@ def test_a_neighbour_shot_counts_and_a_far_shot_does_not():
 
 def test_another_action_listed_is_an_n_with_the_listed_actions_as_evidence():
     ok, evidence = me.story(TURN, reads_of({7: "walking", 8: "standing"}))
-    assert not ok and evidence["listed"] == ["walking", "standing"] and evidence["verbs"] == ["curb", "catch", "bridle"]
+    # the verbs are the ACTING ones (the hand verbs a turn is made of), not every content word
+    assert not ok and evidence["listed"] == ["walking", "standing"] and "catch" in evidence["verbs"]
+    assert "curb" not in evidence["verbs"] and "bridle" not in evidence["verbs"]
 
 
 def test_the_reader_answers_carry_the_action_into_the_read():

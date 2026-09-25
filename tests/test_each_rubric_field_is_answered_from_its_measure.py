@@ -63,7 +63,8 @@ def test_a_clean_master_answers_y_on_every_field_with_its_numbers(tmp_path):
     shadow = doc["rubric"]["shadow"]["evidence"]
     assert shadow["p5"] == 0.0 and shadow["near_black"] >= 0.25 and shadow["wall"]["p5"] == 20.0
     faces = doc["rubric"]["faces"]["evidence"]
-    assert faces["closes"] == [{"shot": 2, "size": "close", "h": 0.4}] and faces["wall"] == 0.25
+    assert faces["closes"] == [{"shot": 2, "size": "close", "h": 0.4, "wall": me.FACE_AT_CLOSE}]
+    assert faces["wall"] == {"close": me.FACE_AT_CLOSE, "medium_close": me.FACE_AT_MEDIUM_CLOSE}
     board = doc["rubric"]["board"]["evidence"]
     assert set(board["last_vs_cell"]) == {1, 2, 3} and all(v >= me.ON_BOARD for v in board["last_vs_cell"].values())
     assert doc["rubric"]["repeats"]["evidence"]["count"] == 0
