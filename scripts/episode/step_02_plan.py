@@ -112,8 +112,11 @@ def author(ctx, plan: Path) -> None:
         if rc == 0:
             ctx.log(f"plan_check clean on round {round_no}; plan locked at {plan.name}", step_id=STEP_ID)
             return
-        refusals = refusal_lines(out)
-        ctx.log(f"plan_check refused round {round_no}:\n" + "\n".join(refusals),
+        # EVERY REFUSAL SO FAR, not only this round's: each draft is written from
+        # scratch, and ep12 traded 'slowly' for 'crawl' for a long style line.
+        fresh = refusal_lines(out)
+        refusals = (refusals or []) + [line for line in fresh if line not in (refusals or [])]
+        ctx.log(f"plan_check refused round {round_no}:\n" + "\n".join(fresh),
                 step_id=STEP_ID, level="WARNING")
     if plan.exists():   # every round may have died on the contract before writing one
         set_aside(plan)

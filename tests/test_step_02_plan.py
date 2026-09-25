@@ -247,3 +247,15 @@ def test_a_draft_the_contract_refuses_goes_back_to_the_writer(ctx, monkeypatch):
     assert len(writer.calls) == 2 and writer.calls[0] is None
     assert any("number" in line for line in writer.calls[1])
     assert _plan(ctx).exists()
+
+
+def test_every_refusal_so_far_goes_back_to_the_writer(ctx, monkeypatch):
+    """ep12: 'slowly' refused in round 0, 'crawl' in round 1, the style line in
+    round 2 -- each draft was written from scratch and saw only the last round's
+    refusals, so it traded one fault for another. The writer is shown them all."""
+    writer, _ = _wire(ctx, monkeypatch, (1, "VERDICT      : REFUSED\n    G-A first\n"),
+                      (1, "VERDICT      : REFUSED\n    G-B second\n"), (0, CLEAN_OUT))
+    with pytest.raises(Escalation):
+        step.run(ctx)
+    third = writer.calls[2]
+    assert any("G-A first" in line for line in third) and any("G-B second" in line for line in third)
