@@ -41,8 +41,9 @@ def plan_of(ctx) -> Path:
     return episode_home.plan_path(ctx.book_dir, ctx.number)
 
 
-def placed_of(ctx) -> Path:
-    return episode_home.home(ctx.book_dir, ctx.number) / "placed.json"
+def ran_downstream(ctx) -> bool:
+    """A timeline beside the plan: this plan already ran; existence only."""
+    return episode_home.has_timeline(ctx.book_dir, ctx.number)
 
 
 def unit_file(ctx, name: str) -> str:
@@ -59,7 +60,7 @@ def done(ctx) -> bool:
     would park every finished episode behind a gate that did not exist when it
     was made."""
     plan = plan_of(ctx)
-    return plan.exists() and (plan_verdict.current(plan) or placed_of(ctx).exists())
+    return plan.exists() and (plan_verdict.current(plan) or ran_downstream(ctx))
 
 
 def wants_rewrite(ctx) -> bool:
@@ -108,12 +109,12 @@ def author(ctx, plan: Path) -> None:
 
 def run(ctx) -> None:
     plan = plan_of(ctx)
-    if wants_rewrite(ctx) and placed_of(ctx).exists():
+    if wants_rewrite(ctx) and ran_downstream(ctx):
         ctx.log("--rewrite refused: placed.json exists, this plan already ran downstream",
                 step_id=STEP_ID, level="WARNING")
     elif wants_rewrite(ctx) or not plan.exists():
         author(ctx, plan)
-    if plan_verdict.current(plan) or placed_of(ctx).exists():
+    if plan_verdict.current(plan) or ran_downstream(ctx):
         return
     raise Escalation("PLAN", unit_file(ctx, "plan.verdict.json"), "read the plan and sign")
 

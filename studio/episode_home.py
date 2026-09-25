@@ -77,6 +77,12 @@ def audio_dir(book: Path, number: int) -> Path:
     return home(book, number) / "audio"
 
 
+def has_timeline(book: Path, number: int) -> bool:
+    """Whether a timeline exists at all -- for a step deciding if a plan ever ran
+    downstream.  Existence only; reading it goes through load_placed."""
+    return (home(book, number) / "placed.json").exists()
+
+
 def load_placed(book: Path, number: int, episode) -> dict:
     """THE door to placed.json: the timeline, refused when it is not the
     timeline of this plan and this voice.
