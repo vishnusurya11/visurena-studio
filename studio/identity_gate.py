@@ -2,23 +2,22 @@
 the same person from a segment's first frame to its last?
 
 Two halves.  The JUDGE (everything above `observe`) is pure arithmetic over face
-observations and is always available.  The MEASURER needs a face EMBEDDER
-(facenet-pytorch: MTCNN boxes + a VGGFace2 embedding), which is NOT in this
-venv, so it sits behind a feature flag: `enabled()` is False, `identity_dq`
-returns "not measured", and no take fails on an identity the gate never read.
-(The venv does carry OpenCV's YuNet -- boxes and five landmarks, no embedding
--- for studio/face_end.py; a detector cannot say WHO, so `observe` waits.)
-
-To turn it on:  uv add torchvision==0.29.0
-                uv pip install --no-deps facenet-pytorch==2.6.0  (needs tqdm too)
-                uv sync --all-groups      (uv add strips the music/voice groups)
-                then write `observe` from dq10/A/scan.py (embed, yaw, bank_of).
+observations and is always available.  The MEASURER is `studio/measure/faces.py`
+(facenet-pytorch: MTCNN boxes + five landmarks, a VGGFace2 embedding), in the
+`measures` dependency group; `observe` samples the take, embeds every face and
+scores it against the cast bank.  `enabled()` still asks three things -- the
+backend imports, the switch is not `off`, and there is a measurer to run -- and
+`identity_dq` answers "not measured" when any is missing, so no take fails on
+an identity the gate never read.  `detect=` and `embed=` are injectable, so a
+test measures from recorded vectors and never loads the model.
 
 RECALIBRATED on episode 10 (docs/calibration/identity.md, dq10/A): the gate
 as first calibrated on ep01 would have hard-failed four GOOD ep10 takes on
 drift (T06 0.60, T21 0.69, T29 0.43, T33 0.67 -- all the same person, all
 pose) and caught no swap, because there was none.  READABLE, FRONTAL and the
-drift statistic moved; the row stays ADVISORY (`ARMED`) for one episode.
+drift statistic moved.  ARMED since the judges replaced the eye
+(architecture/decisions/2026-09-24_judges_replace_the_eye.md §1.1): a
+STRANGER or DRIFT finding is hard, and the take ladder climbs on it.
 """
 from __future__ import annotations
 
@@ -31,11 +30,13 @@ import numpy as np
 SWITCH = "VISURENA_IDENTITY_GATE"
 """Set to `off` to silence a working backend; anything else leaves it to the import."""
 
-ARMED = False
-"""False: a STRANGER or DRIFT finding is reported in `flags` and fails nothing.
-ep10's only hard flags were four same-person takes read in a bad pose; the
-gate's only true positives are two ep01 takes.  One clean episode on the
-recalibrated numbers, then True."""
+ARMED = True
+"""True: a STRANGER or DRIFT finding is hard.  It was False for one episode
+after the last recalibration (four same-person takes read in a bad pose had
+hard-failed on the first walls); the recalibrated walls were clean on that
+episode, and the judges decision (2026-09-24) puts identity on the take
+ladder, where a finding must refuse the rung, not print an advisory nobody
+reads."""
 
 READABLE = 0.15
 """CALIBRATION: face box height / frame height.  docs/calibration/identity.md -- faces at
@@ -226,9 +227,33 @@ def enabled() -> bool:
             and _measurer_exists())
 
 
-def observe(video, segments: list, sheets: dict, samples: int = 8) -> list[Face]:
-    """Sampled faces of one take, scored against the cast sheets.  Needs the backend."""
-    raise NotImplementedError("identity measuring needs facenet-pytorch; see this module's docstring")
+def _frames(video, samples: int) -> list:
+    """The frames to read: none for nothing, the list given, or `samples` off the file."""
+    if video is None:
+        return []
+    if isinstance(video, (list, tuple)):
+        return list(video)
+    from studio.measure import faces
+    return faces.sample_frames(Path(video), samples)
+
+
+def observe(video, segments: list, sheets: dict, samples: int = 8,
+            detect=None, embed=None, bank: dict | None = None) -> list[Face]:
+    """Sampled faces of one take, scored against the cast sheets.
+
+    `video` is a path or a list of RGB frames; `detect` / `embed` default to
+    facenet through `measure.faces.embedder()` and are built only when there
+    is a frame to read; `bank` may be handed in ready (vectors per character)
+    instead of being embedded from `sheets`."""
+    from studio.measure import faces
+    frames = _frames(video, samples)
+    if not frames:
+        return []
+    if detect is None or embed is None:
+        detect, embed = faces.embedder()
+    if bank is None:
+        bank = faces.bank_of(sheets or {}, detect, embed)
+    return faces.observe(frames, segments, bank, detect, embed)
 
 
 NOT_MEASURED = {"measured": False, "ok": True, "note": "not measured: face model not installed",
@@ -236,13 +261,13 @@ NOT_MEASURED = {"measured": False, "ok": True, "note": "not measured: face model
 
 
 def identity_dq(video, segments: list, expected: list[str], refs: list[str],
-                sheets: dict | None = None) -> dict:
+                sheets: dict | None = None, **measure) -> dict:
     """The take's identity report, or the honest 'not measured' when the flag is
-    off.  Until `ARMED`, a hard finding is carried in `flags` and `note` and
-    fails nothing: the row prints, the take passes."""
+    off.  `measure` (detect=, embed=, bank=) reaches `observe` untouched.
+    Armed, a hard finding fails the take; disarmed it rides in `flags` and `note`."""
     if not enabled():
         return dict(NOT_MEASURED)
-    v = judge(observe(video, segments, sheets or {}), expected, refs)
+    v = judge(observe(video, segments, sheets or {}, **measure), expected, refs)
     hard = v.hard if ARMED else []
     note = "" if ARMED or not v.hard else "advisory for one episode: " + "; ".join(v.hard)
     return {"measured": True, "ok": not hard, "note": note, "flags": v.flags, "hard": hard, "present": v.present}

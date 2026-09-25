@@ -189,18 +189,17 @@ def test_an_explicit_off_switch_disables_a_working_backend(monkeypatch):
     assert g.enabled()
 
 
-def test_a_measured_verdict_carries_the_flags_and_stays_advisory(monkeypatch):
-    """ARMED is False for one episode: on ep10 every hard flag the calibrated
-    gate raised was pose (four same-person takes), and its only true positives
-    are two ep01 takes.  The finding is kept, in `flags`, and fails nothing."""
+def test_a_measured_verdict_carries_the_flags_and_is_armed(monkeypatch):
+    """ARMED was False for one episode after the ep10 recalibration; since the
+    judges replaced the eye (2026-09-24) a hard finding fails the take and the
+    take ladder climbs on it.  The finding is in `hard` and in `flags` both."""
     faces = [face(2, 0.3, 0.40, 0.43, 0.28)]
     monkeypatch.setattr(g, "_backend", lambda: object())
     monkeypatch.setattr(g, "observe", lambda *args, **kw: faces)
     report = g.identity_dq("T09.mp4", [], ["john_watson"], ["char-john_watson.png"])
-    assert report["measured"] and report["ok"]
-    assert report["hard"] == [] and not g.ARMED
-    assert report["flags"] == ["STRANGER frame 2: best sherlock_holmes 0.43 < 0.45"]
-    assert "advisory" in report["note"]
+    assert report["measured"] and not report["ok"] and g.ARMED
+    assert report["hard"] == ["STRANGER frame 2: best sherlock_holmes 0.43 < 0.45"]
+    assert report["flags"] == report["hard"] and report["note"] == ""
 
 
 def test_arming_the_gate_makes_the_same_finding_hard(monkeypatch):
@@ -212,10 +211,8 @@ def test_arming_the_gate_makes_the_same_finding_hard(monkeypatch):
     assert not report["ok"] and report["hard"] == ["STRANGER frame 2: best sherlock_holmes 0.43 < 0.45"]
 
 
-def test_observe_is_still_the_placeholder_without_facenet():
-    """The venv has OpenCV's YuNet (boxes and landmarks; studio/face_end.py)
-    and not facenet-pytorch (embeddings), so the measurer stays unwritten and
-    the gate stays honestly 'not measured'."""
-    import pytest
-    with pytest.raises(NotImplementedError):
-        g.observe(None, [], {})
+def test_observe_reads_nothing_from_no_frames():
+    """The measurer is written (studio/measure/faces.py, facenet-pytorch in the
+    `measures` group).  Asked about nothing it answers nothing and loads no
+    model -- which is how `enabled()` probes it."""
+    assert g.observe(None, [], {}) == []

@@ -37,9 +37,15 @@ from studio import identity_gate as g
 
 
 def test_the_switch_is_off_while_the_measurer_raises(monkeypatch):
-    """Even with a backend present and the switch not set to off."""
+    """Even with a backend present and the switch not set to off.  The measurer
+    is written now (2026-09-24), so the raising one is supplied here: the guard
+    must still hold for whoever replaces `observe` with a stub again."""
     monkeypatch.setattr(g, "_backend", lambda: object())
     monkeypatch.delenv(g.SWITCH, raising=False)
+
+    def unwritten(video, segments, sheets, samples=8, **kw):
+        raise NotImplementedError("stub")
+    monkeypatch.setattr(g, "observe", unwritten)
     assert g.enabled() is False, (
         "enabled() armed a gate whose observe() raises; installing facenet would "
         "crash take_dq on every take of every episode")
@@ -68,9 +74,11 @@ def test_no_backend_is_still_off(monkeypatch):
     assert g.enabled() is False
 
 
-def test_the_measurer_is_still_unwritten_and_says_so():
-    """When this fails, `observe()` has been written and the gate can be turned on."""
-    import pytest
-
-    with pytest.raises(NotImplementedError):
-        g.observe(None, [], {})
+def test_the_measurer_is_written_and_the_switch_follows_it(monkeypatch):
+    """`observe()` was written on 2026-09-24 (studio/measure/faces.py behind
+    it); the earlier form of this test raised NotImplementedError to say it was
+    not.  Asked about nothing it reads nothing, and the switch follows."""
+    assert g.observe(None, [], {}) == []
+    monkeypatch.setattr(g, "_backend", lambda: object())
+    monkeypatch.delenv(g.SWITCH, raising=False)
+    assert g.enabled() is True

@@ -46,11 +46,16 @@ their corners."""
 TILED = 0.90
 
 STACKED, STACK_OFF, STACK_STEP = 0.90, 4, 18.0
-"""Two pictures stacked in one panel: the share of a full row or column that
-stands STACK_STEP luma above or below both neighbours STACK_OFF px away, at 512.
+"""Two pictures stacked in one panel: the share of a row or column that
+stands STACK_STEP luma above or below both neighbours STACK_OFF px away, at 512,
+scored BY THIRDS (a line's score is the second-best of its three thirds).
 MEASURED on 127 published panels (Tier-4 calibration, 2026-09-23): ep07 S12,
 S13, S14 read 1.000; the 124 clean panels read at most 0.748 (ep09 S07, a
-real chalk cross). Wall 0.90."""
+real chalk cross) before the pale-and-even test, 0.020 after it.
+RE-MEASURED by thirds on 2026-09-24 over 173 published panels: the three
+positives still read 1.000 and the worst clean panel reads 0.023, so the wall
+stands at 0.90 and a gutter a figure stands across now reads through the two
+thirds it runs clean through."""
 GUTTER_PALE, GUTTER_FLAT = 170.0, 8.0
 """A line counts only if it is pale and even. MEASURED 2026-09-23: the ep07
 gutters read mean 193-245, std 1.5-4.6; ep10 shot 1's door jamb 106, 14.7."""
@@ -207,7 +212,11 @@ def back_view(prose: str) -> bool:
 
 
 def stacked(frame) -> float:
-    """The strongest full-width or full-height gutter line in the panel, 5-95%."""
+    """The strongest gutter line in the panel, 5-95%, scored BY THIRDS: a line's
+    score is the second-best of its three thirds, so a gutter a figure stands
+    across still reads through the two it runs clean through.  Over the full
+    width the figure broke the line's share and its evenness both, and a
+    stacked panel with a man in the middle passed."""
     import cv2
     rgb = cv2.resize(np.asarray(frame)[:, :, :3], (512, 512), interpolation=cv2.INTER_AREA).astype(np.float32)
     y = 0.2126 * rgb[..., 0] + 0.7152 * rgb[..., 1] + 0.0722 * rgb[..., 2]
@@ -218,10 +227,18 @@ def _line_share(a) -> float:
     n, k = a.shape[0], STACK_OFF
     c = a[k:n - k]
     up, dn = c - a[:n - 2 * k], c - a[2 * k:]
-    share = (((up > STACK_STEP) & (dn > STACK_STEP)) | ((up < -STACK_STEP) & (dn < -STACK_STEP))).mean(axis=1)
-    share = share * _gutter_like(c)
+    steps = ((up > STACK_STEP) & (dn > STACK_STEP)) | ((up < -STACK_STEP) & (dn < -STACK_STEP))
     lo, hi = int(0.05 * n), int(0.95 * n)
-    return float(share[lo:hi].max())
+    return float(_by_thirds(steps, c)[lo:hi].max())
+
+
+def _by_thirds(steps, lines) -> np.ndarray:
+    """Each line's gutter score as the second-best of its thirds, each third
+    judged on its own share and its own paleness and evenness."""
+    w = steps.shape[1]
+    cuts = [0, w // 3, 2 * w // 3, w]
+    thirds = [steps[:, a:b].mean(axis=1) * _gutter_like(lines[:, a:b]) for a, b in zip(cuts, cuts[1:])]
+    return np.sort(np.stack(thirds, axis=1), axis=1)[:, 1]
 
 
 def _gutter_like(lines):

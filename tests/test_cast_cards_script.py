@@ -44,7 +44,9 @@ def a_book(tmp_path, row=ROW):
 
 
 class TestTheFreeCheck:
-    def test_a_clean_character_reports_nothing(self, tmp_path):
+    def test_a_clean_character_reports_nothing(self, tmp_path, monkeypatch):
+        from studio import cast_agree
+        monkeypatch.setattr(cast_agree, "detector", lambda: None)   # blank cards, no face to find
         assert cards.check_all(a_book(tmp_path), ["x"]) == {}
 
     def test_a_character_with_a_stored_prompt_is_reported_by_name(self, tmp_path):

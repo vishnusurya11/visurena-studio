@@ -190,9 +190,11 @@ class TestTheWholeCheck:
                                  "identity": {"traits": {"headgear": "none"}}})
         assert any("R1" in line for line in ca.check(book, "x"))
 
-    def test_a_clean_row_with_a_clean_picture_has_nothing_to_say(self, tmp_path):
+    def test_a_clean_row_with_a_clean_picture_has_nothing_to_say(self, tmp_path, monkeypatch):
         """The indoor card is drawn, because R5 counts a wardrobe line with no
-        picture as a promise nobody can keep."""
+        picture as a promise nobody can keep.  The card is a blank rectangle, so
+        the face model is stood down: this test is about the rows, not the face."""
+        monkeypatch.setattr(ca, "detector", lambda: None)
         book = a_book(tmp_path, {"ref_id": "char-x", "kind": "character", "entity_id": "x",
                                  "physical": WATSON_NEW,
                                  "wardrobe": {"indoor": "is bare-headed"},

@@ -50,3 +50,23 @@ invent notices.
   counted the three identical women as 4 figures and 0 copies, and the head
   count caught them instead. Face-embedding similarity (Tier 4, item 29) is
   the check that does not depend on the reader noticing.
+
+## Stacked panels, scored by thirds (2026-09-24)
+
+`panel_dq.stacked` used to score a gutter over the full width of a row: a
+figure standing across the gutter broke both its share and its evenness, and
+a stacked panel with a man in the middle could pass. It now scores each line
+as the second-best of its three thirds, each third judged on its own share
+and its own paleness and evenness (`_by_thirds`).
+
+Re-measured over the 173 published panels on disk (ep05-ep09):
+
+| set | panels | thirds score |
+|---|---|---|
+| stacked positives (ep07 S12, S13, S14) | 3 | 1.000, 1.000, 1.000 |
+| clean | 170 | at most 0.023 (ep09 S03, S07) |
+
+The wall `STACKED = 0.90` stands; the margin is the widest of any row in the
+picture eye. Test: `tests/test_a_gutter_that_stops_at_a_figure_is_still_a_gutter.py`
+(a synthetic two-picture panel with a dark figure across the middle third of
+the gutter scores over the wall; a plain picture under 0.5).
