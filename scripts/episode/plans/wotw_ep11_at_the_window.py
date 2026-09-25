@@ -249,13 +249,13 @@ SETUPS = {
 #  setup   size   faces  path  move   frame / motion / camera / cells / section / why
 S = [
     # ---- study: the window, and the burning valley in it -------------------------------
-    ("study", "wide", [], 0.1, "push_in",
+    ("study", "wide", [], 0.1, "crane_up",
      "Wide on the narrator's dark study at night, its tall window standing wide open in the far wall "
      "and a whole valley burning red far below inside the frame of it, the desk and turned chair "
      "black against the glare.",
-     "The camera pushes in toward the open window already in the picture with small amplitude, "
-     "travelling one short stride; the red glare goes on flickering on the wall; the smoke goes on "
-     "drifting across the window.",
+     "The camera rises from the dark floorboards with small amplitude until the open window already "
+     "in the picture stands at the centre, travelling one short stride; the red glare goes on "
+     "flickering on the wall; the smoke goes on rolling across the window.",
      "in the dark doorway at a standing man's eye, a 35mm lens. The red glare comes through the "
      "window AHEAD at the CENTRE; the window reads red and the room reads black",
      GEO_STUDY, "hook", "The passage was dark, and the side of the room seemed impenetrably dark."),

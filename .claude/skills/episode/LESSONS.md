@@ -192,5 +192,16 @@ SKILL.md.
   first-vs-last colour check read 0.51 on an accepted ep06 take: no wall).
   Caught upstream now: G-LAID in the plan and the posture question in the
   panel content gate.
+- **Write the action, not a posture, for a person who moves.** ep11 shot 9's
+  cell said the soldier "sits astride" the fence; the take rightly climbed
+  over and walked, and the posture check failed it for not sitting. The book's
+  own verb ("clambers over") asks for no posture.
+- **A flat country needs its horizon said.** "A broad hillside set with flame"
+  and "a valley" drew a far ridge that the reader called mountains in five
+  ep11 shots across panels and takes; "level fields out to a low flat horizon"
+  cleared every one.
+- **Dark, distant subjects freeze under a push or a crane.** ep11 T03 (far
+  tripods) and T08 (Mars) froze 51-100 % on two move types; a track past
+  near tree tops and a tilt from the smoke read 10 % and 0 %.
 - **A small dark subject under a truck freezes.** T07 read 52 % frozen as a
   sideways truck on a silhouette; as a crane-up the same shot read 26-37 %.
