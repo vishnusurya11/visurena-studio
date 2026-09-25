@@ -35,7 +35,18 @@ def done(ctx) -> bool:
     return rendered(episode_home.read_json(plan), episode_home.read_json(sheet))
 
 
+def voiceless(ctx) -> list[str]:
+    """This plan's speakers with no design clip at book level: cast them first,
+    just in time, so the line never waits on the bible for a voice."""
+    from studio import cast_home
+    plan = episode_home.read_json(ctx.home / "plan.json")
+    who = {line.get("speaker") or line.get("who") for line in plan.get("lines") or []}
+    return sorted(w for w in who if w and not cast_home.clip(ctx.book_dir, w).exists())
+
+
 def run(ctx) -> None:
+    if missing := voiceless(ctx):
+        ctx.run_script("scripts/cast/cast_voices.py", f"--only={','.join(missing)}", gpu=GPU, clock="cast")
     extra = getattr(ctx, "extra", None) or []
     ctx.run_script("scripts/episode/say_lines.py", *extra, gpu=GPU, clock="lines")
     ctx.run_script("scripts/episode/speaker_check.py", clock="speaker_check")

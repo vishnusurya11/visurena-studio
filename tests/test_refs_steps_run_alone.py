@@ -130,12 +130,19 @@ def test_step_02_look_back_skips_a_picture_that_was_not_drawn(tmp_path, book):
 
 # --- 03 voices --------------------------------------------------------------
 
-def test_step_03_is_done_when_every_card_has_its_design_clip(tmp_path, book):
+def test_step_03_is_done_when_every_bound_speaker_has_its_design_clip(tmp_path, book):
+    """Voices are for SPEAKERS the bible binds: a card alone asks for nothing;
+    a bound speaker of a plan without a clip is the one thing left to do."""
     ctx = a_ctx(tmp_path, book)
-    assert voices.done(ctx) is False
+    assert voices.done(ctx) is True                       # nobody bound, nobody speaks
     card = cast_home.card(book, "narrator")
     card.parent.mkdir(parents=True)
     card.write_text("{}", encoding="utf-8")
+    (book / "refs").mkdir(exist_ok=True)
+    (book / "refs" / "refs.json").write_text(json.dumps({"refs": [{"entity_id": "narrator", "kind": "character"}]}), encoding="utf-8")
+    home = book / "episodes" / "ep01"
+    home.mkdir(parents=True)
+    (home / "plan.json").write_text(json.dumps({"lines": [{"speaker": "narrator", "text": "x"}]}), encoding="utf-8")
     assert voices.done(ctx) is False
     clip = cast_home.clip(book, "narrator")
     clip.parent.mkdir(parents=True)

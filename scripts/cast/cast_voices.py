@@ -139,8 +139,10 @@ def gender_of(card: dict) -> str:
 
 
 def book_dir(codex_id: str) -> Path:
-    """The library folder for a codex id."""
-    found = sorted(Path("library").glob(f"{codex_id}_*"))
+    """The library folder for a codex id, or for the folder's own name (a
+    runner hands the step the folder name; the ledger uses the 14-digit id)."""
+    stem = codex_id[:14] if len(codex_id) > 14 and codex_id[14] == "_" else codex_id
+    found = sorted(Path("library").glob(f"{stem}_*"))
     if not found:
         raise SystemExit(f"no book in library/ for codex id {codex_id}")
     return found[0]

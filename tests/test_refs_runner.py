@@ -50,8 +50,9 @@ def test_a_run_brackets_every_step_on_unit_main_and_the_judge_signs_the_look(con
     codex = db.insert_codex(conn, "Book", codex_id="20260901000001")
     outcome = refs.process(conn, codex, ["--chapter=1", "--cast=a=Alpha:male"], **opts(tmp_path))
     assert outcome == "completed"
+    # 03 is skipped: nobody the bible binds speaks in a plan without a clip (voices are for speakers)
     assert db.unit_status(conn, codex, "refs", "main") == {
-        "01": "completed", "02": "skipped", "03": "completed", "04": "completed"}
+        "01": "completed", "02": "skipped", "03": "skipped", "04": "completed"}
     assert conn.execute("SELECT COUNT(*) FROM events WHERE unit IS NULL").fetchone()[0] == 0
     assert "OWNER" not in capsys.readouterr().out
     from studio import refs_verdict
