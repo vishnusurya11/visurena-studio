@@ -117,7 +117,11 @@ than one take: one line, or two short ones, per shot.
   follows from it. `props` lists the prop ids whose sheets bind this setup.
 - `where` (place and date, six words or fewer) and `light` (a light DIRECTION
   that throws shadow into frame, and a named BLACK) are declared together or
-  not at all. `aspect` is the delivery shape and is declared once.
+  not at all. **Together they are 16 words or fewer** -- they render as one
+  style line and the contract refuses a longer one. Published pairs:
+  "Surrey, 1894" + "violet lightning from the west, black shadows";
+  "Surrey, 1894" + "red firelight from the valley, deep black shadows".
+  `aspect` is the delivery shape and is declared once.
 
 ---
 
@@ -147,8 +151,11 @@ extreme_close, close, medium_close, medium, full, wide.
 **Words the models cannot read:**
 - negations — "no", "not", "without", "nothing", "never". Name what occupies
   the place instead.
-- "slow" and every pace word. Name the AMOUNT (a thumb's width, one whole
-  tread) or the gait at a normal pace.
+- "slow" and every pace word -- slow, slowly, crawl, crawling, creep, creeping,
+  gradually, leisurely, languid -- in EVERY field, `crowd` included. Name the
+  AMOUNT (a thumb's width, one whole tread, a hand's breadth) or the gait at a
+  normal pace. A person who crawls in the book "goes on hands and knees".
+  Every first draft since the writer was registered has been refused for this.
 - an absence of any kind in a drawn field. Only `why` may explain an absence.
 - the DQ rules' banned subjects, anywhere.
 
