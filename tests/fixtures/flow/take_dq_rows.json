@@ -1,0 +1,127 @@
+{
+ "note": "the judged rows of one synthetic dialogue take: a truck over a held man whose set slides through him, a world turning with no roll planned, a five-frame sheet leak, a refs-only take off its panel, two cut votes, a mouth three frames late",
+ "motion": "The camera tracks sideways to the right along the fence, a truck with small amplitude, travelling one short stride; he goes on holding the basket out",
+ "measures": {
+  "pass_through": {
+   "pass_through": 0.97,
+   "lock": 0.99,
+   "scen": -345.2,
+   "subj": -2.5,
+   "steps": 23,
+   "fitted_on": "take-gate audit 2026-09-23, one book: 2 eligible fires (1.01 over 1055 px, 1.05 over 632 px) against 3 eligible passes topping out at -0.42; margin one take wide"
+  },
+  "rotation": {
+   "cum_theta": -17.57,
+   "measured": true,
+   "fitted_on": "one owner-caught take (the room turned round a laid-down man's face); synthetic accuracy in the tests only: advisory until the bench has a second row"
+  },
+  "leak": {
+   "frames": 5,
+   "seconds": 0.208,
+   "covers": true,
+   "best": [
+    "hero_5e6f7a8b.png",
+    "hero_5e6f7a8b.png",
+    "hero_5e6f7a8b.png",
+    "hero_5e6f7a8b.png",
+    "hero_5e6f7a8b.png",
+    "Q03_0_1a2b3c4d.png",
+    "Q03_0_1a2b3c4d.png",
+    "Q03_0_1a2b3c4d.png",
+    "Q03_0_1a2b3c4d.png",
+    "Q03_0_1a2b3c4d.png",
+    "Q03_0_1a2b3c4d.png",
+    "Q03_0_1a2b3c4d.png"
+   ],
+   "against": [
+    "Q03_0_1a2b3c4d.png",
+    "hero_5e6f7a8b.png",
+    "plate_road_9c0d1e2f.png"
+   ],
+   "fitted_on": "three owner-caught heads of 8-12 frames, no negatives benched: advisory; the cure costs no GPU"
+  },
+  "board": {
+   "frames": 20,
+   "offboard_share": 1.0,
+   "last_vs_cell": 0.255,
+   "last_cell": "shot_03.png",
+   "onboard_last": [
+    -1
+   ],
+   "raw_diff": 1.6,
+   "nonrigid": 1.6,
+   "hard_cut": 1.6,
+   "hard_cut_at": 13,
+   "cells": "panel"
+  },
+  "cut_vote": {
+   "votes": {
+    "jump": true,
+    "step": true,
+    "scene": false
+   },
+   "count": 2,
+   "cut": true,
+   "fitted_on": "the two named jumps and three named brightness cuts of one book; scenedetect at its default 3.0",
+   "scene_cuts": []
+  },
+  "lag": {
+   "measured": true,
+   "lag_frames": 3,
+   "lag_s": 0.125,
+   "corr": 0.912,
+   "readable": 1.0,
+   "fitted_on": "two owner-caught lagging takes against seven passes, unbenched: advisory; the cure is the shorter take"
+  }
+ },
+ "gates": [
+  {
+   "name": "pass-through",
+   "value": 0.97,
+   "ok": false,
+   "hard": true,
+   "note": "0.97 of the body rode with the camera over 345px HARD: the set slides through the person",
+   "penalty": 40.0
+  },
+  {
+   "name": "rotation",
+   "value": -17.57,
+   "ok": false,
+   "hard": false,
+   "note": "17.6deg turned, no roll planned",
+   "penalty": 20.0
+  },
+  {
+   "name": "leak",
+   "value": 5,
+   "ok": false,
+   "hard": false,
+   "note": "5 frames of sheet before the panel",
+   "penalty": 25.0
+  },
+  {
+   "name": "last-vs-panel",
+   "value": 0.255,
+   "ok": false,
+   "hard": false,
+   "note": "0.26",
+   "penalty": 7.250000000000001
+  },
+  {
+   "name": "cut-vote",
+   "value": 2,
+   "ok": false,
+   "hard": true,
+   "note": "jump+step HARD: an unplanned cut",
+   "penalty": 40.0
+  },
+  {
+   "name": "lag",
+   "value": 3,
+   "ok": false,
+   "hard": false,
+   "note": "+3f (+0.125s) corr 0.91",
+   "penalty": 10.0
+  }
+ ]
+}

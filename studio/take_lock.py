@@ -23,6 +23,15 @@ import numpy as np
 S = 256
 WALL, TRAVEL = 0.75, 100.0
 """Hard at lock >= WALL when the set moved at least TRAVEL px (at 768)."""
+FITTED_ON = ("take-gate audit 2026-09-23, one book: 2 eligible fires (1.01 over 1055 px, 1.05 over 632 px) "
+             "against 3 eligible passes topping out at -0.42; margin one take wide")
+PASS_WALL = 0.5
+"""Pass-through: at least this share of the body band rode with the camera fit
+while the face held (lock >= WALL) over TRAVEL px.  Synthetic only so far: the
+band reads ~1.0 with the set drawn through the man and ~0 when he is on it."""
+BAND_W, BAND_H = 1.6, 3.0
+"""The body band under the face box: BAND_W face heights either side of the
+face centre, BAND_H face heights down from the chin (the torso the rails cross)."""
 
 MOVES = re.compile(r"\b(?:truck|tracks? sideways|pans?)\b", re.I)
 WITH = re.compile(r"\bwith (?:him|her|them)\b|\bkeeping (?:him|her|them)\b|\bfollows?\b"
@@ -90,7 +99,79 @@ def lock(frames: list[np.ndarray], track=face_track) -> dict | None:
     k = 768 / S
     s, lo, hi = float(np.sum(subj)) * k, float(np.sum(low)) * k, float(np.sum(high)) * k
     b = lo if abs(lo) >= abs(hi) else hi
-    return {"lock": round(1 - s / b, 2) if abs(b) > 1 else None, "scen": round(b, 1), "subj": round(s, 1)}
+    return {"lock": round(1 - s / b, 2) if abs(b) > 1 else None, "scen": round(b, 1), "subj": round(s, 1),
+            "fitted_on": FITTED_ON}
+
+
+# ---- the dense read: the set drawn THROUGH the held man --------------------------
+
+def face_region(cx: float, cy: float, h: float, shape: tuple[int, int] = (S, S)) -> np.ndarray:
+    """The face box as a boolean mask."""
+    ys, xs = np.mgrid[0:shape[0], 0:shape[1]]
+    return (np.abs(ys - cy) <= h / 2) & (np.abs(xs - cx) <= h / 2)
+
+
+def body_band(cx: float, cy: float, h: float, shape: tuple[int, int] = (S, S)) -> np.ndarray:
+    """The torso under the face: where a set drawn through the man shows."""
+    ys, xs = np.mgrid[0:shape[0], 0:shape[1]]
+    return (ys > cy + h / 2) & (ys <= cy + h / 2 + BAND_H * h) & (np.abs(xs - cx) <= BAND_W * h)
+
+
+def grey_frames(frames: list[np.ndarray]) -> list[np.ndarray]:
+    import cv2
+    return [cv2.resize(cv2.cvtColor(f, cv2.COLOR_RGB2GRAY), (S, S)) for f in frames]
+
+
+def step_pass(field: np.ndarray, face: dict, person: np.ndarray | None) -> tuple[float, float, float | None] | None:
+    """One step: (face flow, camera tx, share of the band on the camera fit)."""
+    from studio.measure import flow as fl
+    cx, cy, h = face["cx"] * S, face["cy"] * S, face["h"] * S
+    box, band = face_region(cx, cy, h), body_band(cx, cy, h)
+    mask = (person | box) if person is not None else (band | box)
+    cam = fl.camera(field, mask=mask)
+    if not cam["measured"]:
+        return None
+    region = ((person & ~box) if person is not None else band)
+    share = fl.agreement(field, cam["sol"], region) if abs(cam["tx"]) >= 0.5 else None
+    return float(np.median(field[..., 0][box])), cam["tx"], share
+
+
+def pass_through(frames: list[np.ndarray], track=face_track, mask=None) -> dict | None:
+    """{'pass_through', 'lock', 'scen', 'subj', 'steps', 'fitted_on'} or None
+    with no face.  `mask(i, shape)` is a person mask per frame (v2); without
+    one the body band under the face stands for the person."""
+    from studio.measure import flow as fl
+    faces = track(frames)
+    if len(faces) < 0.5 * len(range(0, len(frames), 6)):
+        return None
+    grey = grey_frames(frames)
+    subj, cam, shares = [], [], []
+    for i in range(1, len(grey)):
+        f = faces[max((j for j in faces if j <= i), default=min(faces))]
+        got = step_pass(fl.dis(grey[i - 1], grey[i]), f, mask(i, (S, S)) if mask else None)
+        if got:
+            subj.append(got[0]); cam.append(got[1]); shares += [got[2]] if got[2] is not None else []
+    k = 768 / S
+    s, c = float(np.sum(subj)) * k, float(np.sum(cam)) * k
+    return {"pass_through": round(float(np.mean(shares)), 2) if shares else None,
+            "lock": round(1 - s / c, 2) if abs(c) > 1 else None, "scen": round(c, 1), "subj": round(s, 1),
+            "steps": len(shares), "fitted_on": FITTED_ON}
+
+
+def pass_through_row(got: dict | None, motion: str):
+    """HARD when the plan keeps the subject in place (`eligible`, the held
+    row's own rule), the face held (lock >= WALL), the set travelled TRAVEL
+    px and PASS_WALL of the body band rode with the camera fit."""
+    from studio.take_verdict import Gate
+    if not got or got.get("pass_through") is None or got.get("lock") is None:
+        return Gate("pass-through", None, True, True, "not measured")
+    if not eligible(motion):
+        return Gate("pass-through", None, True, True, "n/a by the plan")
+    share = got["pass_through"]
+    fault = share >= PASS_WALL and got["lock"] >= WALL and abs(got["scen"]) >= TRAVEL
+    note = f"{share:.2f} of the body rode with the camera over {abs(got['scen']):.0f}px"
+    note += " HARD: the set slides through the person" if fault else ""
+    return Gate("pass-through", share, not fault, True, note, 40.0 if fault else 0.0)
 
 
 def row(got: dict | None, motion: str):

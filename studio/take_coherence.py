@@ -198,6 +198,41 @@ def best_match(sigs: np.ndarray, sigbank: dict[str, np.ndarray]) -> np.ndarray:
     return (sigs @ np.concatenate(list(sigbank.values())).T).max(axis=1)
 
 
+# ---- a refs-only take: its storyboard panel is its board -----------------------
+
+def panel_path(home: Path, shot: int) -> Path:
+    """The panel a person looks at, `storyboard/shot_NN.png` (scripts/episode/panels.py)."""
+    return Path(home) / "storyboard" / f"shot_{shot:02d}.png"
+
+
+def panels(home: Path, shots: list[int]) -> dict[str, Image.Image]:
+    """The take's shots' panels that are on disk, in shot order."""
+    out = {}
+    for shot in shots:
+        p = panel_path(home, shot)
+        if p.is_file():
+            out[p.name] = fm.load(p)
+    return out
+
+
+def last_vs(frame: np.ndarray, cell: Image.Image) -> float:
+    """One grey frame against every re-framing of one cell."""
+    sig = fm.signature(Image.fromarray(frame)).ravel()
+    return round(float((bank({"c": cell})["c"] @ sig).max()), 3)
+
+
+def refs_only(fr: np.ndarray, home: Path, shots: list[int]) -> dict | None:
+    """`measure` for a take with no pinned cell, against its storyboard
+    panels; the last frame is read against the LAST shot's panel.  None when
+    no panel is on disk (`cells: "panel"` says which board was read)."""
+    cells = panels(home, shots)
+    if not cells or not len(fr):
+        return None
+    m = measure(fr, cells)
+    last = list(cells)[-1]
+    return m | {"last_cell": last, "last_vs_cell": last_vs(fr[-1], cells[last]), "cells": "panel"}
+
+
 # ---- rigid versus non-rigid motion ---------------------------------------------
 
 def downscale(f: np.ndarray, k: int = DOWN) -> np.ndarray:

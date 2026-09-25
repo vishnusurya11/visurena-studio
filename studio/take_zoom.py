@@ -99,6 +99,11 @@ grew, i.e. the camera FOLLOWED the subject.  ep10 T06: the whole frame read
 1.57x while the subject fit read 1.14x because the men's backs fill the
 centre; the plan asked one stride and the frame ended inside the doorway.
 T29 s1 (1.59 vs 1.31, 0.28) sits just under the line."""
+ROLL_WALL = 5.0
+"""Degrees of cumulative roll over a take whose plan asked for none: the world
+turned round a fixed face.  ROLL_FITTED_ON says how thin this is."""
+ROLL_FITTED_ON = ("one owner-caught take (the room turned round a laid-down man's face); "
+                  "synthetic accuracy in the tests only: advisory until the bench has a second row")
 EXIT_FIELD = 0.75
 """A planned exit (`has_exit`) is read only to the step where the subject
 field breaks up: the first step whose agreeing windows fall under this
@@ -279,6 +284,16 @@ def step_scale(a: np.ndarray, b: np.ndarray) -> tuple[float, int]:
     return step_fields(a, b)[0]
 
 
+def step_theta(a: np.ndarray, b: np.ndarray) -> tuple[float, int]:
+    """The rotation (degrees) the whole field agrees on from a to b, and the
+    windows that agreed: the fourth parameter over the same lattice."""
+    from studio.measure import flow as fl
+    pts, disp = flow(a, b)
+    centre = np.array(a.shape, float) / 2
+    sim = fl.similarity(pts, disp, centre, INLIER_FRAC * min(a.shape), MIN_INLIERS)
+    return (sim["theta"] if sim["measured"] else 0.0), sim["inliers"]
+
+
 def step_between(frames: np.ndarray, i: int, j: int, depth: int = 4) -> tuple[tuple[float, int], tuple[float, int]]:
     """Subject and camera scales from frame i to frame j; a large step is read
     through its middle frame so that every phase correlation stays inside its window."""
@@ -315,9 +330,11 @@ def zoom_frames(frames: np.ndarray, samples: int = SAMPLES) -> dict:
         camera.append(c)
     ratio, measured = compound(subject)
     cam, _ = compound(camera)
+    thetas = [step_theta(frames[i], frames[j])[0] for i, j in zip(idx, idx[1:])]
     return {"ratio": ratio, "monotonic": is_monotonic([s for s, _ in subject]), "measured": measured,
             "per_step": [float(s) for s, _ in subject], "inliers": [n for _, n in subject],
-            "camera": cam, "camera_steps": [float(s) for s, _ in camera], "frames": idx}
+            "camera": cam, "camera_steps": [float(s) for s, _ in camera], "frames": idx,
+            "theta_steps": [round(t, 2) for t in thetas], "cum_theta": round(float(np.sum(thetas)), 2)}
 
 
 def zoom(video: Path, samples: int = SAMPLES, end_frame: int | None = None) -> dict:
@@ -376,7 +393,7 @@ def zoom_take(video: Path, anchors: list, samples: int = SAMPLES,
         if k < len(caps) and caps[k] is not None:
             z = exit_cap(z, caps[k])
         segs.append(z | {"start": a, "end": b})
-    return dict(segs[0]) | {"segments": segs}
+    return dict(segs[0]) | {"segments": segs, "cum_theta": round(sum(s["cum_theta"] for s in segs), 2)}
 
 
 # ---- the verdict ---------------------------------------------------------------
@@ -517,6 +534,26 @@ def row(z: dict, planned: str | list[str]):
     rows = [segment_row(s, p, k, len(segs)) for k, (s, p) in enumerate(zip(segs, plans))]
     return max(rows, key=lambda g: (g.penalty, not g.ok))
 
+
+
+def planned_roll(motion: str) -> bool:
+    """Did the plan ask the camera to turn about its axis?"""
+    return bool(re.search(r"\b(?:rolls?|rolling|dutch|rotat\w*|spins?|tilts? (?:the )?(?:frame|camera))\b",
+                          (motion or "").lower()))
+
+
+def rotation_row(z: dict | None, planned: str):
+    """G-ROLL: the take's cumulative theta against a plan with no roll.
+    ADVISORY (see ROLL_FITTED_ON); quiet when the zoom was not measured."""
+    from studio.take_verdict import Gate
+    if not z or z.get("cum_theta") is None or not z.get("measured", True):
+        return Gate("rotation", None, True, False, "not measured")
+    turn, deg = z["cum_theta"], abs(z["cum_theta"])
+    if planned_roll(planned):
+        return Gate("rotation", turn, True, False, f"{deg:.1f}deg, roll planned")
+    if deg >= ROLL_WALL:
+        return Gate("rotation", turn, False, False, f"{deg:.1f}deg turned, no roll planned", 20.0)
+    return Gate("rotation", turn, True, False, f"{deg:.1f}deg")
 
 
 def is_pan(motion) -> bool:

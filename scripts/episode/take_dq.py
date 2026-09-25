@@ -48,7 +48,7 @@ sys.path.insert(0, str(ROOT))
 
 from PIL import Image, ImageDraw
 
-from studio import av_sync, cut_landing as cl, edit_gate, episode_home, episode_seq_board as sq, frame_match as fm, motion_gate, take_verdict as tv
+from studio import av_sync, cut_landing as cl, edit_gate, episode_home, episode_seq_board as sq, frame_match as fm, motion_gate, take_coherence as tc, take_verdict as tv, take_zoom as tz
 from studio.trailer_assemble import clip_seconds
 
 SAMPLES = 8
@@ -161,6 +161,121 @@ def audio_dq(video: Path, composite: Path, dialogue: bool, work: Path, index: in
         out["heard"] = voice_qc.any_transcriber()(track)
     return out
 
+
+
+# ---- the judged measures: flow, rotation, leak, the panel, the cut vote, the mouth ----
+#
+# Each is a number with the calibration it was fitted on (`fitted_on`), read off
+# the frames the verdict already decoded; each row is ADDED to the verdict's
+# gates and the score re-summed.  No existing row changes meaning.
+
+def gate_value(v, name: str):
+    return next((g.value for g in v.gates if g.name == name), None)
+
+
+def cut_vote(v, frames: list, anchors: list) -> dict:
+    """The three readers of an unplanned cut: the picture jump (`jump` row),
+    the brightness step (coherence `hard_cut`), PySceneDetect."""
+    from studio import take_jump
+    from studio.measure import cuts
+
+    scene = cuts.unplanned(cuts.scene_cuts(frames), anchors, tc.PIN_TOL)
+    jump = gate_value(v, "jump")
+    return cuts.vote(jump=jump is not None and jump < take_jump.WALL,
+                     step=float((v.coherence or {}).get("hard_cut", 0.0)) > tc.CUT_HARD,
+                     scene=bool(scene)) | {"scene_cuts": scene}
+
+
+def picture_measures(frames: list, v, rec: dict) -> dict:
+    """pass_through, rotation, cut_vote: the rows that need only the RGB frames."""
+    from studio import take_lock
+
+    z = v.zoom or {}
+    return {"pass_through": take_lock.pass_through(frames),
+            "rotation": ({"cum_theta": z.get("cum_theta"), "measured": z.get("measured", False),
+                          "fitted_on": tz.ROLL_FITTED_ON} if "cum_theta" in z else {}),
+            "cut_vote": cut_vote(v, frames, rec.get("anchors") or [])}
+
+
+def staged_measures(video: Path, rec: dict, v, home: Path, seconds: float, embed=None, inputs: Path | None = None,
+                    source: Path | None = None) -> dict:
+    """leak (against the take's own staged pictures, when an embedder is
+    given) and board (`last_vs_cell` against the storyboard panel for a take
+    with no pinned cell).  `source` is the take as rendered -- its graph sits
+    beside it -- when `video` is the headed copy the cut plays."""
+    from studio import take_leak, take_lock
+
+    leak = None
+    if embed is not None and inputs is not None:
+        pictures = take_leak.staged_pictures(source or video, inputs)
+        leak = take_leak.leak(take_lock.frames(video, take_leak.HEAD_FRAMES / 24), pictures, embed)
+    board = None
+    if (v.coherence or {}).get("cells") is False:
+        board = tc.refs_only(tc.frames(video, seconds), home, rec.get("shots") or [rec.get("index")])
+    return {"leak": leak, "board": board}
+
+
+def voice_measure(frames: list, rec: dict, landmarker=None, voice=None) -> dict:
+    """lag: the mouth against the voice, a dialogue take with a landmarker only."""
+    from studio.measure import mouth
+
+    if rec.get("lane") != "dialogue" or landmarker is None or voice is None:
+        return {"lag": None}
+    return {"lag": mouth.lag(mouth.apertures(frames, landmarker), voice)}
+
+
+def judge_rows(m: dict, rec: dict) -> list:
+    """The six rows, in print order, from the measures dict."""
+    from studio import take_leak, take_lock
+    from studio.measure import cuts, mouth
+
+    motions = tv.plan_motions(rec) or [""]
+    board = m.get("board")
+    panel = (tc.last_row(board["last_vs_cell"], tz.has_exit(motions[-1])) if board
+             else tv.Gate("last-vs-panel", None, True, False, "not measured"))
+    panel.name = "last-vs-panel"
+    return [take_lock.pass_through_row(m.get("pass_through"), motions[0]),
+            tz.rotation_row(m.get("rotation"), motions[0]), take_leak.row(m.get("leak")), panel,
+            cuts.row(m.get("cut_vote")), mouth.row(m.get("lag"))]
+
+
+def extend_verdict(v, m: dict, rec: dict):
+    """Append the judged rows and re-sum the score; the existing rows are untouched."""
+    v.gates.extend(judge_rows(m, rec))
+    v.score, v.passed = tv.score(v.gates)
+    return v
+
+
+def embedder():
+    """The production patch embedder and ComfyUI's input dir, or (None, None)
+    when the `image_embed` workflow is not installed: the leak row then reads
+    `not measured` rather than guessing."""
+    from studio import comfy, take_leak
+
+    try:
+        comfy.load_workflow(take_leak.EMBED_WORKFLOW)
+    except Exception:
+        return None, None
+    return take_leak.dino_embed, comfy.COMFY_ROOT / "input"
+
+
+def landmarker():
+    """FaceMesh when its model is on disk, else None (the lag row cannot tell)."""
+    from studio.measure import mouth
+
+    try:
+        return mouth.facemesh()
+    except (FileNotFoundError, ImportError):
+        return None
+
+
+def voice_of(composite: Path, dialogue: bool):
+    """The per-frame envelope of the wav that drove a dialogue take."""
+    from studio.measure import mouth
+
+    if not dialogue or not composite.exists():
+        return None
+    return mouth.voice_envelope(av_sync.load_mono(composite, 24000), 24000)
 
 
 def segment_kinds(episode, anchors: list) -> dict[str, str]:
@@ -313,17 +428,25 @@ def judged_file(video: Path, head: float, work: Path) -> Path:
 
 
 def measure_attempt(video: Path, rec: dict, index: int, cells: Path, work: Path, take_dir: Path,
-                    kinds: dict, line: str, attempt: int):
-    """One attempt: its audio, then the one verdict every gate feeds.
+                    kinds: dict, line: str, attempt: int, judges: dict | None = None):
+    """One attempt: its audio, then the one verdict every gate feeds, then the
+    judged measures (`judges`: home, embed, inputs, landmarker) as extra rows.
 
     `cells` is the CELLS room, `boards/cells/`, not `boards/`: `tv.measure`
     resolves every anchor name against it."""
-    video = judged_file(video, rec.get("head", 0.0), work)
+    from studio import take_lock
+
+    source, video = video, judged_file(video, rec.get("head", 0.0), work)
     seconds = min(clip_seconds(video), rec["placed_seconds"])
     composite = take_dir / (f"voice_{index:02d}.wav" if rec["audio"] != "silence" else f"silence_{index:02d}.wav")
     audio = audio_dq(video, composite, rec["lane"] == "dialogue", work, index)
     v = tv.measure(video, rec, cells, seconds, attempt, audio, line, kinds)
-    return v, audio
+    j = judges or {}
+    frames = take_lock.frames(video, seconds)
+    m = (picture_measures(frames, v, rec)
+         | staged_measures(video, rec, v, j.get("home", take_dir), seconds, j.get("embed"), j.get("inputs"), source)
+         | voice_measure(frames, rec, j.get("landmarker"), voice_of(composite, rec["lane"] == "dialogue")))
+    return extend_verdict(v, m, rec), audio, m
 
 
 def wanted(records: dict, indices: list[int]) -> list[int]:
@@ -364,6 +487,8 @@ def main(book_id: str, number: int, indices: list[int], attempts: bool = False) 
         # a take gate that measured nothing has passed nothing (audit item 6)
         raise SystemExit(f"episode {number}: no takes to judge under "
                          f"{episode_home.relative(book, take_dir)}")
+    embed, inputs = embedder()
+    judges = {"home": home, "embed": embed, "inputs": inputs, "landmarker": landmarker()}
     for index in wanted(records, indices):
         rec = records[index]
         kinds, line = segment_kinds(episode, rec.get("anchors", [])), line_text(episode, rec)
@@ -373,15 +498,16 @@ def main(book_id: str, number: int, indices: list[int], attempts: bool = False) 
         rec["daylight"] = daylit(episode, rec)
         rec["head"] = edit_gate.heads_in(home).get(index, 0.0)
         files = episode_home.attempts_of(take_dir, index) if attempts else [book / rec["rel_path"]]
-        judged = {f: measure_attempt(f, rec, index, cells, work, take_dir, kinds, line, k)
+        judged = {f: measure_attempt(f, rec, index, cells, work, take_dir, kinds, line, k, judges)
                   for k, f in enumerate(files)}
-        verdicts = {f: v for f, (v, _) in judged.items()}
+        verdicts = {f: v for f, (v, _, _) in judged.items()}
         best = (settle(take_dir, index, fitting(verdicts, rec["placed_seconds"], clip_seconds))
                 if attempts else files[0])
-        v, audio = judged[best]
+        v, audio, measures = judged[best]
         kept = take_dir / f"T{index:02d}.mp4" if attempts else best
         report = record(v, list(verdicts.values()), prior_record(take_dir, index))
         report["audio"], report["camera"] = audio, camera_dq(kept, v.seconds, [f / 24 for _, f in rec.get("anchors", [])][1:])
+        report["measures"] = measures
         # RELATIVE, never a drive letter (CLAUDE.md; audit item 15): this line
         # had put the worktree's absolute path into ~200 take reports.
         report["strip"] = episode_home.relative(book, tv.strip(v, kept, cells, work / f"take_T{index:02d}.png"))
