@@ -85,6 +85,26 @@ The seam is **JSON contracts on disk** inside a self-contained production folder
 The procedure lives in Python; the skill is a thin interactive driver over it. One
 implementation, two drivers — never two implementations.
 
+## One folder
+
+Decided 2026-09-24 by the owner, after a per-book git worktree
+(`visurena_studio_wotw`, branch `wotw-refs-poc`) drifted 115 commits from
+`master` and left the skill in two uncommitted copies.
+
+1. **One checkout.** The studio is `D:\Projects\KingdomOfViSuReNa\alpha\visurena_studio`
+   on `master`. Never create a worktree, a per-book branch, a symlinked library or a
+   second copy of the repo. Work that is not ready is a commit on master behind a gate,
+   not a folder next door.
+2. **The code tree is book-neutral.** `studio/`, `scripts/`, `tests/`, `.claude/` and
+   `docs/` hold machinery and rules only: no book title, character, place, episode or
+   take identifier, no owner quote tied to one production. A rule states the failure
+   mode; the evidence lives with the book. `tests/test_skills_are_book_neutral.py`
+   enforces this for skills and agents.
+3. **Everything book-specific lives under `library/<book>/`.** Plans, casebooks (the
+   episode/take evidence behind every rule), per-book constants (era, wardrobe, accents,
+   banned props, title face), handoffs and series goals. The code reads them by path;
+   the prose never repeats their values.
+
 ## "Windows now, server later" — obey from line one
 
 1. `ArtifactStore` protocol — `LocalStore` now, `S3Store` later. Departments never call `open()`.

@@ -1,6 +1,6 @@
 #!/usr/bin/env sh
 # ep11 grids: faces one to a 1x1 (a 1x1 holds its framing and count), the
-# faceless wides and inserts grouped (ep10's split). Runs from the worktree.
+# faceless wides and inserts grouped (ep10's split). Runs from the repo root.
 B=20260827135508_the-war-of-the-worlds
 g() { uv run python scripts/episode/grids.py "$B" 11 "$@" 2>&1 | tail -1; }
 g study 2 1 room --shots=0,7

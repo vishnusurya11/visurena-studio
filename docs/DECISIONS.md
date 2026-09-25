@@ -4,6 +4,26 @@ Newest first. Every architectural change gets an entry.
 
 ---
 
+## 2026-09-24 — One folder; the code tree is book-neutral (owner decision)
+
+**Decision.** The studio is one checkout, `visurena_studio` on `master`. No git
+worktrees, no per-book branches, no symlinked or copied libraries. The code tree
+(`studio/`, `scripts/`, `tests/`, `.claude/`, `docs/`) names no book, character,
+place, episode or take; everything book-specific lives under `library/<book>/`.
+See [ARCHITECTURE.md](ARCHITECTURE.md), "One folder".
+
+**Why.** A worktree made on 2026-09-18 for the War of the Worlds refs-only POC
+(`visurena_studio_wotw`, branch `wotw-refs-poc`) ran 115 commits ahead of `master`
+while the skill was mirrored into `master` by hand, uncommitted. Sessions opened in
+either folder read a different skill. In the same period the skills and agents filled
+with one book's episode and take IDs, character names and owner quotes, and an agent on
+another book read them as canon (audit `docs/audit/2026-09-24_skills_book_neutral_plan.md`).
+
+**Done the same day.** `master` fast-forwarded to `f6ea1e0` (the POC branch; `master`
+had no commits of its own); the worktree and branch removed; the episode skill's
+"where to run" rewritten. The scrub of the skills and the move of book content out of
+the code tree follow the audit's plan.
+
 ## 2026-08-22 — Library structure: flat, book-id-anchored (owner decision)
 
 **Every book has a unique id (the codex id) and everything starts from there.** Folder

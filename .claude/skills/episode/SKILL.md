@@ -5,10 +5,11 @@ description: "Turn one book chapter into a 2-3 minute square (1:1) episode at $0
 
 # Episode
 
-**Where to run.** Every command below runs from the worktree
-`D:\Projects\KingdomOfViSuReNa\alpha\visurena_studio_wotw` (branch
-`wotw-refs-poc`), which holds the code this skill names. `master` is behind
-it. The library is shared between the two by a symlink.
+**Where to run.** Every command below runs from the repo root,
+`D:\Projects\KingdomOfViSuReNa\alpha\visurena_studio`, on `master`. There is
+one checkout. Never create a worktree, a per-book branch or a second copy of
+the repo; the owner's rule (2026-09-24) is that everything lives in this one
+folder, and everything book-specific lives under its `library/<book>/`.
 
 One chapter is one episode: 2-3 minutes, 1:1, $0, every step local. The owner's
 word outranks anything in this file; when he corrects the work, the correction
@@ -300,5 +301,3 @@ Stop a run by killing its process tree by command line, never `uv.exe` alone
 - **Never pipe a test run into `tail` and then `&&` a commit.** The pipe
   swallows pytest's exit code. Run `pytest; echo EXIT=$?`.
 - **A take POST is not idempotent.** Ask the queue before re-posting.
-- **The library is a symlink from the worktree to the main repo's library.**
-  A path under it resolves to the main repo.
