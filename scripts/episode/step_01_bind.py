@@ -40,16 +40,34 @@ def done(ctx) -> bool:
     return not cast_of(getattr(ctx, "extra", None) or []) and stamped(ctx.book_dir, ctx.number)
 
 
+def present_in(book: Path, number: int) -> set[str]:
+    """The canonical ids PRESENT in the chapter's scenes (analysis/scenes.json,
+    the standardize step's remap).  A journey row alone is not presence: a
+    figure only spoken of in a chapter has a journey row there too, and binding
+    it would order a sheet for someone who is never on screen."""
+    import json
+    path = Path(book) / "analysis" / "scenes.json"
+    if not path.exists():
+        return set()
+    doc = json.loads(path.read_text(encoding="utf-8"))
+    scenes = doc if isinstance(doc, list) else doc.get("scenes") or []
+    return {who for s in scenes if s.get("chapter") == number for who in (s.get("characters") or [])}
+
+
 def chapter_cast(book: Path, number: int) -> list[str]:
     """The chapter's individuals from the analysis, protagonist first then by
-    appearances.  ep12: the step asked for --cast by hand though every
-    character file's `journey` already lists its chapters.  Groups have no
-    single face and are never bound."""
+    appearances: present in a scene of the chapter (scenes.json), never a
+    group, never a figure the chapter only mentions.  Falls back to the
+    journey when scenes.json is absent (an older analysis)."""
     import json
-    rows = []
+    present, rows = present_in(book, number), []
     for f in sorted((Path(book) / "analysis" / "characters").glob("*.json")):
         row = json.loads(f.read_text(encoding="utf-8"))
-        if row.get("role") != "group" and any(j.get("chapter") == number for j in row.get("journey") or []):
+        if row.get("role") == "group":
+            continue
+        on_screen = row["id"] in present if present else any(
+            j.get("chapter") == number for j in row.get("journey") or [])
+        if on_screen:
             rows.append(row)
     rows.sort(key=lambda r: (r.get("role") != "protagonist", -int(r.get("appearances") or 0)))
     return [r["id"] for r in rows]
