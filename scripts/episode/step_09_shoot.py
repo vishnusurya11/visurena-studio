@@ -99,6 +99,22 @@ def judge_takes(ctx, flag: str) -> Path:
         terminal=take_ladder.terminal_for(ctx, plan))
 
 
+def measured(ctx, script: str, clock: str, suffix: str) -> None:
+    """Run a take checker; a checker that FOUND faults hands them to the judge.
+
+    ep12: take_content_check exits 1 when a take fails, run_script made that a
+    refusal, and the take judge and its ladder never ran.  Exit 1 is also a
+    crash, so it passes only when every take has its verdict file on disk."""
+    try:
+        ctx.run_script(script, gpu=GPU, clock=clock)
+    except SystemExit as refused:
+        room = ctx.home / TAKES
+        missing = [t.name for t in takes_of(room) if not t.with_suffix(suffix).exists()]
+        if not str(refused).endswith("exit 1") or missing or not takes_of(room):
+            raise
+        ctx.log(f"{script}: faults found; the take judge reads them", step_id=STEP_ID)
+
+
 def run(ctx) -> None:
     if why := panel_refusals(ctx.home):
         raise SystemExit("REFUSED: the takes wait on the panels: " + "; ".join(why))
@@ -110,8 +126,8 @@ def run(ctx) -> None:
     extra = getattr(ctx, "extra", None) or []
     ctx.run_script("scripts/episode/takes_r2v.py", "--from-refs", "--no-ends", flag,
                    *extra, gpu=GPU, clock="takes")
-    ctx.run_script("scripts/episode/take_dq.py", gpu=GPU, clock="take_dq")
-    ctx.run_script("scripts/episode/take_content_check.py", gpu=GPU, clock="take_content")
+    measured(ctx, "scripts/episode/take_dq.py", "take_dq", ".dq.json")
+    measured(ctx, "scripts/episode/take_content_check.py", "take_content", ".content.json")
     ctx.run_script("scripts/episode/take_strip.py", clock="strip")
     if not takes_of(ctx.home / TAKES):
         raise SystemExit(f"REFUSED: no takes under {TAKES.as_posix()}/ after the render")

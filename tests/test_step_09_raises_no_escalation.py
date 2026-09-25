@@ -98,3 +98,21 @@ def test_the_panel_refusal_still_stands_in_front_of_the_render(ctx):
     with pytest.raises(SystemExit, match="panel_dq.json"):
         step.run(ctx)
     assert ctx.launched == []
+
+
+def test_a_content_fault_goes_to_the_judge_not_out_of_the_step(ctx):
+    """ep12: take_content_check exits 1 when a take fails; run_script turned that
+    into a refusal and the take judge and its ladder never ran. A checker that
+    wrote every take's verdict and found faults hands them to the judge."""
+    take(ctx)
+    ctx.launch = lambda cmd: ctx.launched.append(cmd[1:]) or (1 if "take_content_check" in cmd[1] else 0)
+    step.run(ctx)
+    assert any("take_strip" in c[0] for c in ctx.launched)
+
+
+def test_a_checker_that_left_a_take_unjudged_still_refuses(ctx):
+    t = take(ctx)
+    (t.parent / "T01.content.json").unlink()
+    ctx.launch = lambda cmd: ctx.launched.append(cmd[1:]) or (1 if "take_content_check" in cmd[1] else 0)
+    with pytest.raises(SystemExit, match="take_content_check"):
+        step.run(ctx)
