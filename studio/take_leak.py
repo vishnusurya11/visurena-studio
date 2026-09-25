@@ -130,5 +130,5 @@ def dino_embed(image: np.ndarray) -> np.ndarray:
 
     with tempfile.NamedTemporaryFile(suffix=".png", delete=False) as tmp:
         Image.fromarray(np.asarray(image)).save(tmp.name)
-        text = comfy.run_text(EMBED_WORKFLOW, {"image": comfy.stage_image(Path(tmp.name))})
+        text = comfy.run_text(EMBED_WORKFLOW, {"image_1": comfy.stage_image(Path(tmp.name))})
     return np.array(json.loads(text), dtype=float).ravel()
