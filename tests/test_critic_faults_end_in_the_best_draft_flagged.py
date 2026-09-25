@@ -19,7 +19,7 @@ TITLES = ("Draft A", "Draft B", "Draft C", "Draft D", "Draft E")
 class Drafts(Writer):
     """A different title every call, so every draft has its own sha8."""
 
-    def write(self, brief, refusals=None, usage=None, _agent=None):
+    def write(self, brief, refusals=None, usage=None, _agent=None, previous=None):
         self.calls.append(refusals)
         self.agents.append(_agent)
         return Episode.model_validate({**canned_plan(brief["number"]), "title": TITLES[len(self.calls) - 1]})

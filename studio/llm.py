@@ -134,10 +134,15 @@ class _NativeStructuredCaller:
 
     def __call__(self, prompt: str, structured_output_model=None):
         from openai import ContentFilterFinishReasonError
+        from pydantic import ValidationError
         try:
             return self._parse(prompt, structured_output_model)
         except ContentFilterFinishReasonError as exc:
             raise ContentFiltered(str(exc)) from exc
+        except ValidationError as exc:
+            # `parse` validates the JSON itself: a rule refusing inside the schema
+            # is a schema violation to re-ask on, never a transient to sleep on
+            raise StructuredOutputException(f"output did not match schema: {exc}") from exc
 
     def _parse(self, prompt: str, structured_output_model=None):
         completion = self._client.chat.completions.parse(
@@ -225,16 +230,29 @@ def structured(tier: str, prompt: str, schema, *, retries: int = 3,
             time.sleep(_TRANSIENT_BACKOFF[min(attempt, len(_TRANSIENT_BACKOFF) - 1)])
 
 
+REFUSED = "--- REFUSED, fix these ---"
+"""The heading under which a re-ask quotes the refusal back."""
+
+
+def re_ask(prompt: str, exc: Exception) -> str:
+    """The original prompt with the LATEST refusal under it -- never a stack of
+    them.  Episode 13 (2026-09-25): ten from-scratch drafts refused on rules
+    the skill states, because a re-ask repeated the same prompt and the model
+    never heard what was wrong."""
+    return (f"{prompt}\n\n{REFUSED}\nThe previous answer was refused: {exc}\n"
+            "Return the whole answer again with every refusal fixed.")
+
+
 def _structured_once(agent, prompt, schema, retries, usage, tier):
-    last_error = None
+    last_error, asked = None, prompt
     for _ in range(retries):
         try:
-            result = agent(prompt, structured_output_model=schema)
+            result = agent(asked, structured_output_model=schema)
             if usage is not None:
                 usage.update(_extract_usage(result), tier=tier)
             return _validated(result.structured_output, schema)
         except StructuredOutputException as exc:
-            last_error = exc
+            last_error, asked = exc, re_ask(prompt, exc)
     raise last_error
 
 

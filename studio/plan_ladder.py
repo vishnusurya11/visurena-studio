@@ -23,15 +23,21 @@ from dataclasses import dataclass, field
 from datetime import date as _date
 from pathlib import Path
 
-from pydantic import ValidationError
+import re
 
-from studio import episode_home, llm, plan_brief, plan_verdict
+from pydantic import ValidationError
+from strands.types.exceptions import StructuredOutputException
+
+from studio import episode_home, episode_spec, llm, plan_brief, plan_verdict
 from studio.judges import plan as plan_judge
 from studio.judges.verdict import Fault, Verdict
 from studio.ladder import Ladder, Rung
 
 IMPROVE, FRESH_BRIEF, MODEL_TIER, DEFER = "improve", "fresh_brief", "model_tier", "defer"
-MODEL_TIER_NAME = "reasoning"
+MODEL_TIER_NAME = "canon"
+"""The tier the model_tier rung asks: the one that reasons.  The "reasoning"
+tier is the workhorse model with reasoning off (models.yaml, the owner's cost
+choice), and a rung that changes nothing is no rung."""
 """The tier the model_tier rung writes on; a yaml row, never a model name."""
 DEFERRED = "plan.deferred.json"
 BATTERY = "battery"
@@ -57,7 +63,28 @@ def is_battery(verdict: Verdict) -> bool:
 
 def contract_refusals(bad: ValidationError) -> list[str]:
     """The contract's refusals, one per line, as the gate prints its own."""
-    return [f"CONTRACT {'.'.join(str(p) for p in e['loc'])}: {e['msg']}" for e in bad.errors()]
+    return episode_spec.refusal_lines(bad)
+
+
+CONTRACT_LINE = re.compile(r"CONTRACT [^\n\[]+")
+"""A contract refusal inside the gateway's message (pydantic appends ` [type=...]`)."""
+
+
+def refused_lines(spent: StructuredOutputException) -> list[str]:
+    """What a spent re-ask carried: the contract's refusals off the pydantic cause
+    (a field rule refusing inside the schema has no CONTRACT text of its own),
+    else the CONTRACT lines in the message; none for a provider failure."""
+    cause = spent.__cause__
+    while cause is not None and not isinstance(cause, ValidationError):
+        cause = cause.__cause__
+    if cause is not None:
+        return contract_refusals(cause)
+    return contract_lines(str(spent))
+
+
+def contract_lines(said: str) -> list[str]:
+    """The contract lines a spent re-ask carried; none for a provider failure."""
+    return [m.group(0).strip() for m in CONTRACT_LINE.finditer(said)]
 
 
 def merged(so_far: list[str], fresh: list[str]) -> list[str]:
@@ -113,14 +140,23 @@ class Desk:
             self.brief = plan_brief.build(self.ctx.book_dir, self.ctx.number)
         return self.brief
 
-    def write(self, refusals: list[str] | None, agent=None) -> None:
-        """One draft through write_plan; a draft the CONTRACT refuses is a
-        pending refusal for the next rung, not a crash."""
+    def refused_plan(self) -> dict | None:
+        """The plan on disk the battery refused: what an improve rung edits."""
+        return episode_home.read_json(self.plan) if self.plan.exists() else None
+
+    def write(self, refusals: list[str] | None, agent=None, previous: dict | None = None) -> None:
+        """One draft through write_plan, editing `previous` when there is one; a
+        draft the CONTRACT refuses is a pending refusal for the next rung, not a crash."""
         kwargs = {"_agent": agent} if agent is not None else {}
         try:
-            episode = self.writer.write(self.brief_(), refusals, **kwargs)
+            episode = self.writer.write(self.brief_(), refusals, previous=previous, **kwargs)
         except ValidationError as bad:
             self.pending = contract_refusals(bad)
+            return
+        except StructuredOutputException as spent:
+            self.pending = refused_lines(spent)
+            if not self.pending:
+                raise                                 # a provider failure, not a refusal
             return
         self.pending = None
         episode_home.write_plan(self.plan, episode.model_dump())
@@ -135,13 +171,13 @@ class Desk:
         self.remember(verdict)
         self.refusals = merged(self.refusals, refusal_lines_of(verdict))
         if rung.name == IMPROVE:
-            self.write(self.refusals)
+            self.write(self.refusals, previous=self.refused_plan())
         elif rung.name == FRESH_BRIEF:
             self.brief_(fresh=True)
             self.refusals = []
             self.write(None)
         elif rung.name == MODEL_TIER and not self.drafts:
-            self.write(self.refusals, agent=Caller(MODEL_TIER_NAME))
+            self.write(self.refusals, agent=Caller(MODEL_TIER_NAME), previous=self.refused_plan())
 
     def terminal(self, verdict: Verdict) -> Verdict:
         """By cause: no draft ever passed the battery -> defer; else the best

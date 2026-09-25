@@ -37,6 +37,39 @@ WORDS_PER_SECOND = 3.0
 speech for ~430 words (2026-09-10).  Used only to PROJECT the runtime before
 the lines exist; the timeline uses the measured files."""
 MAX_WORDS = 18
+
+
+def refusal_lines(bad) -> list[str]:
+    """A ValidationError's refusals, one per line, as the plan gate prints its own:
+    `CONTRACT <loc>: <msg>`, the "Value error, " prefix dropped, and the text of
+    the field the rule names quoted after it -- the writer fixes a sentence it can
+    see (episode 13: 'slowly' survived three re-asks that named only the shot)."""
+    return [f"CONTRACT {'.'.join(str(p) for p in e['loc'])}: {message(e)}{quoted_field(e)}"
+            for e in bad.errors()]
+
+
+def message(error: dict) -> str:
+    """The rule's own words, without pydantic's 'Value error, ' prefix."""
+    return re.sub(r"^(Value|Assertion) error, ", "", error["msg"])
+
+
+SPOKEN_FIELDS = ("text", "motion", "frame")
+"""What a row rule is usually about, when its message names no field."""
+
+
+def quoted_field(error: dict) -> str:
+    """` -- <field>: '<text>'` for the first quoted name in the message that is a
+    string field of the refused input, else the first SPOKEN field it has, else
+    the input itself when it is a string."""
+    given = error.get("input")
+    if isinstance(given, str):
+        return f" -- {error['loc'][-1] if error['loc'] else 'text'}: {given!r}"
+    if not isinstance(given, dict):
+        return ""
+    for name in [*re.findall(r"'(\w+)'", error["msg"]), *SPOKEN_FIELDS]:
+        if isinstance(given.get(name), str):
+            return f" -- {name}: {given[name]!r}"
+    return ""
 MAX_BEAT = 1.5
 """The longest silence a shot may name between its lines and the cut."""
 MAX_CODA = 4.0

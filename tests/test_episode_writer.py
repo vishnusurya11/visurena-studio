@@ -191,7 +191,8 @@ def test_a_wrong_shape_surfaces_as_a_structured_output_exception():
 
 
 def test_a_plan_the_contract_refuses_surfaces_as_a_validation_error():
-    """The draft's shape passes; the contract's rules refuse it on conversion."""
+    """The draft's shape passes; the contract's rules refuse on conversion, the
+    writer edits its draft CONTRACT_RETRIES times, then the last refusal is raised."""
     from pydantic import ValidationError
     broken = {**canned_draft(), "lines": []}
     with pytest.raises(ValidationError, match="no button"):

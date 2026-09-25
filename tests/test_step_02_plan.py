@@ -52,7 +52,7 @@ class Writer:
     def __init__(self):
         self.calls, self.agents = [], []
 
-    def write(self, brief, refusals=None, usage=None, _agent=None):
+    def write(self, brief, refusals=None, usage=None, _agent=None, previous=None):
         self.calls.append(refusals)
         self.agents.append(_agent)
         return Episode.model_validate(canned_plan(brief["number"]))
@@ -253,7 +253,7 @@ def test_help_prints_without_a_book(capsys):
 class ContractBreaker(Writer):
     """First draft breaks the Episode contract (the agent's parse raises); then canned."""
 
-    def write(self, brief, refusals=None, usage=None, _agent=None):
+    def write(self, brief, refusals=None, usage=None, _agent=None, previous=None):
         self.calls.append(refusals)
         if len(self.calls) == 1:
             Episode.model_validate({"number": "not a number"})

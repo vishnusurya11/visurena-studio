@@ -15,18 +15,27 @@ rows -- and `to_episode` folds it into the contract, whose rules then judge it.
 """
 from __future__ import annotations
 
+import json
 from pathlib import Path
 from typing import Literal
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, ValidationError
 
 from studio import canvas, llm, plan_brief
-from studio.episode_spec import Episode, Line, Setup, Shot
+from studio.episode_spec import Episode, Line, Setup, Shot, refusal_lines
 
 TIER = "local"
 SKILL_PATH = Path(__file__).parent / "skills" / "episode_writer.md"
 REFUSED = "--- REFUSED, fix these ---"
 """The heading of the section that quotes plan_check's refusals back, verbatim."""
+PREVIOUS = "--- YOUR PREVIOUS PLAN ---"
+"""The heading over the plan the refusals are about: the writer EDITS it.  A
+refusal names rows; a rewrite from nothing fixes them and trips other rules
+(episode 13, 2026-09-25: four passes, five rungs each, a different rule every
+rung)."""
+CONTRACT_RETRIES = 3
+"""How many times the writer edits its own draft under the contract before the
+refusal reaches the ladder."""
 
 
 class NamedSetup(Setup):
@@ -82,13 +91,39 @@ def refused_section(refusals: list[str] | None) -> str:
             f"plan again.\n" + "\n".join(refusals))
 
 
-def prompt_for(brief: dict, refusals: list[str] | None = None) -> str:
+def previous_section(previous: dict | None) -> str:
+    """The plan the refusals are about, as JSON, with the one instruction that
+    matters: change what the refusals name and keep the rest."""
+    if not previous:
+        return ""
+    return (f"\n\n{PREVIOUS}\n{json.dumps(previous, ensure_ascii=False)}\n"
+            "Return this SAME plan with only the refused rows changed; keep every other "
+            "shot, line and word as it is.")
+
+
+def prompt_for(brief: dict, refusals: list[str] | None = None, previous: dict | None = None) -> str:
     return (f"{load_skill()}\n\n--- THE BRIEF ---\n{plan_brief.render(brief)}"
-            f"{refused_section(refusals)}\n\nReturn the plan.")
+            f"{previous_section(previous)}{refused_section(refusals)}\n\nReturn the plan.")
+
+
+def contract_lines_of(bad: Exception) -> list[str]:
+    """The contract's refusals of a draft, one per line."""
+    if isinstance(bad, ValidationError):
+        return refusal_lines(bad)
+    return [f"CONTRACT setups: {bad}"]
 
 
 def write(brief: dict, refusals: list[str] | None = None, usage: dict | None = None,
-          _agent=None) -> Episode:
-    """One plan for one unit: the draft from the model, the contract's rules on the way back."""
-    draft = llm.structured(TIER, prompt_for(brief, refusals), Draft, usage=usage, _agent=_agent)
-    return to_episode(draft)
+          _agent=None, previous: dict | None = None) -> Episode:
+    """One plan for one unit: the draft from the model, edited under the contract
+    up to CONTRACT_RETRIES times with the refused draft shown; the last refusal
+    is raised for the ladder."""
+    asked, shown = refusals, previous
+    for _ in range(CONTRACT_RETRIES):
+        draft = llm.structured(TIER, prompt_for(brief, asked, shown), Draft, usage=usage, _agent=_agent)
+        try:
+            return to_episode(draft)
+        except ValueError as bad:
+            refused, shown = bad, draft.model_dump()
+            asked = list(refusals or []) + contract_lines_of(bad)
+    raise refused

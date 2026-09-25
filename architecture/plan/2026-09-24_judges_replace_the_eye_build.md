@@ -298,3 +298,13 @@ C8; everything else is serial.
   decisions delegated.
 - 2026-09-24 — built: C1/C2 `c4d2b6a`, C3/C4 `d737534`, C8 `27f01e2`, C10 `d573d8f`, C5 `cdeff9a`, C11 `6e28d0a`, C9 `59fc491`, C6 `9e65517`, C7 `081c370`, C12 `d181fd6`, C13 (this commit). Eight builders in three waves; two cross-builder conflicts (a raw timeline path; the face model loading on blank test cards) fixed at integration. Known gaps carried: no DINOv3 embedding node exists in the installed ComfyUI packs (the `image_embed` workflow is a marked placeholder; the leak and style measures read "not measured" until one does); the critic runs on the same model family as the writer until a second provider is configured; the DWPose pack's checkpoint path needs a one-time copy on first run.
 - 2026-09-25 — first contact: the three judges run for real over an accepted episode (`judge_dry_run`, scratch, nothing signed). take_eye passed (57 s); panel_eye crashed on a 120 s ask timeout behind another session's render (fixed: 900 s, a dead ask is a missing measure); master_eye wrongly flagged faces, story and identity on an accepted master (walls re-fitted, `7029a99`; docs/calibration/master_eye.md).
+- 2026-09-25 — LOOK on the real bible: first read 971 faults on an accepted cast (uncalibrated
+  rows, unbound sheets, names as nouns) `f0b4071`; re-fitted (HARD = must_noun/lettering/limbs,
+  the rest advisory, bound scope, grandfathered light read); second read found one real
+  lettering fault, the sheet ladder redrew it at $0 and signed `3c34da9`. `docs/calibration/look.md`.
+- 2026-09-25 — episode 13 unattended, four passes, no plan yet: the writer failed the CONTRACT
+  every rung on rules its skill states. Fixed in turn: a fault's note reaches the learning
+  `d997486`; a deferred unit stops (`Deferred`, event `deferred`) instead of running step 03
+  on no plan `258a10b`; a gateway re-ask carries the refusal; a field rule's refusal is a
+  pending refusal, quoted with its sentence; the writer EDITS its previous plan instead of
+  rewriting; `model_tier` asks a tier that reasons. `docs/calibration/plan_writer.md`.

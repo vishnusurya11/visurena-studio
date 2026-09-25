@@ -204,3 +204,42 @@ def test_transient_errors_exhaust_loudly(monkeypatch):
     with pytest.raises(RuntimeError, match="Connection error"):
         llm.structured("workhorse", "p", Toy, _agent=fake, transient_retries=2)
     assert fake.calls == 3           # 1 + 2 retries
+
+
+class Recorder(FakeAgent):
+    """FakeAgent that keeps every prompt it was asked."""
+
+    def __init__(self, obj, fail_times=0):
+        super().__init__(obj, fail_times)
+        self.prompts = []
+
+    def __call__(self, prompt, structured_output_model=None):
+        self.prompts.append(prompt)
+        return super().__call__(prompt, structured_output_model)
+
+
+def test_a_retry_carries_the_refusal_back_to_the_model():
+    """Episode 13, 2026-09-25: five rungs of from-scratch drafts, each refused on a
+    rule the skill states, because a re-ask repeated the same prompt and the
+    model never heard what was wrong."""
+    fake = Recorder(Toy(answer="ok"), fail_times=1)
+    llm.structured("workhorse", "prompt", Toy, _agent=fake, retries=3)
+    assert fake.prompts[0] == "prompt"
+    assert fake.prompts[1].startswith("prompt") and llm.REFUSED in fake.prompts[1]
+    assert "schema mismatch" in fake.prompts[1]
+
+
+def test_every_re_ask_quotes_the_latest_refusal_over_the_original_prompt():
+    fake = Recorder(Toy(answer="ok"), fail_times=2)
+    llm.structured("workhorse", "prompt", Toy, _agent=fake, retries=3)
+    assert fake.prompts[2].count(llm.REFUSED) == 1 and fake.prompts[2].startswith("prompt")
+
+
+def test_the_native_caller_turns_a_pydantic_refusal_into_a_schema_violation():
+    """`chat.completions.parse` validates the model's JSON itself; a contract rule
+    that refuses inside the schema is a schema violation to the gateway, retried
+    there, never a transient failure slept on."""
+    caller = object.__new__(llm._NativeStructuredCaller)
+    caller._parse = lambda prompt, model: Toy.model_validate({"answer": 5})
+    with pytest.raises(StructuredOutputException, match="did not match schema"):
+        caller("prompt", Toy)
