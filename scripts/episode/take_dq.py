@@ -253,8 +253,12 @@ def embedder():
     from studio import comfy, take_leak
 
     try:
-        comfy.load_workflow(take_leak.EMBED_WORKFLOW)
+        template, _ = comfy.load_workflow(take_leak.EMBED_WORKFLOW)
     except Exception:
+        return None, None
+    # A PLACEHOLDER IS NOT AN INSTALL: ep12's image_embed.json named its node
+    # "TODO verify node class ..." and every take died on missing_node_type.
+    if any(str(n.get("class_type", "")).startswith("TODO") for n in template.values()):
         return None, None
     return take_leak.dino_embed, comfy.COMFY_ROOT / "input"
 
