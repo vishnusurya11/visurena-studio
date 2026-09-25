@@ -231,6 +231,11 @@ table.v td .lose{font-family:"IBM Plex Mono",monospace;font-size:10px;letter-spa
 table.v td .win{font-family:"IBM Plex Mono",monospace;font-size:10px;letter-spacing:.06em;text-transform:uppercase;color:var(--ok);border:1px solid var(--ok);padding:1px 5px;border-radius:2px;margin-right:6px;white-space:nowrap}
 table.v td .half{font-family:"IBM Plex Mono",monospace;font-size:10px;letter-spacing:.06em;text-transform:uppercase;color:var(--qc);border:1px solid var(--qc);padding:1px 5px;border-radius:2px;margin-right:6px;white-space:nowrap}
 table.v td code{white-space:nowrap}
+pre.wire{font-family:"IBM Plex Mono",monospace;font-size:11.5px;line-height:1.35;color:var(--ink);background:var(--code);border:1px solid var(--rule);border-radius:3px;padding:12px 14px;margin:10px 0 0;overflow-x:auto;white-space:pre}
+pre.ddl{font-family:"IBM Plex Mono",monospace;font-size:11px;line-height:1.4;color:var(--code-ink);background:var(--code);border:1px solid var(--rule);border-radius:3px;padding:12px 14px;margin:10px 0 0;overflow-x:auto;white-space:pre}
+.states{display:flex;flex-wrap:wrap;gap:8px 14px;margin-top:10px;font-family:"IBM Plex Mono",monospace;font-size:11px;color:var(--ink-2)}
+.states b{font-weight:600;color:var(--ink)}
+.states .dev{color:var(--accent)} .states .own{color:var(--ink);font-weight:700} .states .amb{color:var(--qc)} .states .nxt{color:var(--invent)} .states .run{color:var(--think)} .states .ok{color:var(--ok)}
 .two-col{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:18px;margin-top:14px}
 .two-col>div{min-width:0}
 .mini{border:1px solid var(--rule-2);background:var(--paper-2);padding:12px 14px}
@@ -269,7 +274,7 @@ table.v td code{white-space:nowrap}
 
   <!-- ===== ORG CHART ===== -->
   
-  <nav class="tabs" role="tablist"><button role="tab" data-tab="current" aria-selected="true">Current architecture<span class="sub">built</span></button><button role="tab" data-tab="future" aria-selected="false">Future architecture<span class="sub">proposed</span></button></nav>
+  <nav class="tabs" role="tablist"><button role="tab" data-tab="current" aria-selected="true">Current architecture<span class="sub">built</span></button><button role="tab" data-tab="future" aria-selected="false">Future architecture<span class="sub">proposed</span></button><button role="tab" data-tab="command" aria-selected="false">Command Center<span class="sub">proposed · for review</span></button></nav>
   <div id="tab-current">
 
 
@@ -649,6 +654,200 @@ table.v td code{white-space:nowrap}
   </section>
 
 </div>
+<div id="tab-command" hidden>
+
+  <p class="lede" style="margin-top:18px"><b>Proposed 2026-09-25, for the owner's review.</b> The ask: a local board to watch every job, each department with its own table, and the tables driving the departments through standard inputs and outputs. Five reports argued it (a data modeller, an orchestration engineer, a production-office manager, an operations-UI designer, the codebase's own integrator); the chair ruled. The ruling, the data model, the contract, the drive and the board are below; the full text is <code>architecture/decisions/2026-09-25_command_center.md</code>, the task-level plan <code>architecture/plan/2026-09-25_command_center_build.md</code>, the reports under <code>decisions/research/2026-09-25_command_center/</code>.</p>
+
+  <!-- the brick -->
+  <section class="block">
+    <div class="head"><h2>The brick</h2><p>One rule that regenerates every department's table.</p></div>
+    <p style="max-width:78ch;margin:10px 0 0;color:var(--ink-2)"><b>One work-order row per (book, department, unit).</b> A row is <code>queued</code> when every row it <code>requires</code> (the registry's edge) is <code>done</code> and its declared inputs exist on disk. A runner claims the earliest queued row of its department and runs the registry's steps for that unit; the row's state is whatever the run's last event says. The department's last step writes the unit's <code>manifest.json</code>, which is the next department's declared input. Every department's table is <code>stages.yaml</code> applied to <code>work_orders</code>; the disk stays the truth of a step, the events table the journal, the row their projection — written from one place, rebuildable from disk.</p>
+  </section>
+
+  <!-- the debate ruled -->
+  <section class="block">
+    <div class="head"><h2>The debate, ruled</h2><p>Where a report lost, it says so and names the replacement.</p></div>
+    <div class="tbl-wrap"><table class="v">
+      <tr><th>Point</th><th>Positions</th><th>Verdict</th></tr>
+      <tr><td>Grain of the row</td><td>A: one row per (unit, step). B, C, D, E: one row per (department, unit)</td><td><span class="win">unit grain</span> A coordinator's row is a unit. A's per-step row survives as <code>work_steps</code> under the order — the unit page's chips, never the queue's grain.</td></tr>
+      <tr><td>"Each department its own table"</td><td>A, E: one table + a generated VIEW per department</td><td><span class="win">one table, one view each</span> <code>episode_orders</code>, <code>refs_orders</code>… generated from the registry like the codex status columns. The hand columns (priority, hold, redo, note) live on the row, so the view has them. <span class="lose">physical table per department</span> twelve DDLs drifting from the registry.</td></tr>
+      <tr><td>Standard inputs / outputs</td><td>A: constants on the step module + a manifest. C, E: <code>in:</code>/<code>out:</code> in <code>stages.yaml</code></td><td><span class="win">the registry declares</span> once, per step, book-relative globs; a drift-guard test holds them to each step's <code>done()</code>. <span class="win">the manifest crosses the boundary</span> a department's last step writes <code>manifest.json</code>; a <code>requires</code> is satisfied by the upstream manifest's row being done, never by a sentence. <span class="lose">module constants</span> two declarations of one fact.</td></tr>
+      <tr><td>Push, pull, scheduler</td><td>all: materialize on a tick, pull by one worker</td><td><span class="win">tick + pull</span> <code>studio.py tick</code> inserts rows from the registry × the slate, promotes <code>blocked → queued</code>, mirrors <code>RENDER_HOLD</code>, sweeps leases. <span class="lose">push</span> refs/04 fans out to N episodes; episode/01 orders refs back upstream.</td></tr>
+      <tr><td>Explicit invocation</td><td>E: must keep working</td><td><span class="win">unchanged</span> <code>episode.py &lt;book&gt; &lt;n&gt;</code> claims its own row; the no-unit form drains the queue in <code>priority, sequence</code> order. The UI never runs a step; it writes orders.</td></tr>
+      <tr><td>The one GPU</td><td>A: a partial unique index. B: lease columns. E: keep the live ComfyUI read</td><td><span class="win">all three</span> <code>claimed_by</code>/<code>lease_until</code> (15 min, renewed by the writes the runner already makes); a unique index on running GPU rows makes a second claim an IntegrityError; <code>comfy.busy()</code> and the <code>RENDER_HOLD</code> file stay (the file is the owner's one-second brake; the tick mirrors it).</td></tr>
+      <tr><td>States</td><td>B: 9. A: 10. C: 11 coordinator words. D: 11 glyphs</td><td><span class="win">nine stored</span> blocked, queued, running, stale, held, deferred, escalated, failed, done. <code>flagged</code> is a count on a done row; <code>published</code> is the publish department's own row. C's words are the legend over these; D's glyphs and colour rule stand.</td></tr>
+      <tr><td>Takes and panels</td><td>B: <code>items</code> rows. A: artefacts. D: a progress column</td><td><span class="half">v1 column, v2 rows</span> a <code>progress</code> column the runner writes ("18/25 · T10 attempt 3 move_type"); <code>items</code> when the take loop stops being a subprocess. Nothing globs the disk on a poll.</td></tr>
+      <tr><td>A deferred unit</td><td>B: wait for a bump or a changed input</td><td><span class="win">waits</span> episode 13 burned six identical ladders unattended. Resumed only by an order (<code>retry</code>) or a changed <code>input_sha8</code>, and the resume edits the kept draft.</td></tr>
+      <tr><td>Owner actions</td><td>D: an <code>orders</code> table. C: <code>redo.jsonl</code></td><td><span class="win">one writer: orders</span> hold, lift, redo, bump, retry, requeue — with a note and <code>taken_by_run</code>; runners take them at the top of each loop; a redo's note also goes to the casebook. A second redo on the same class is a bench case, not a third render.</td></tr>
+      <tr><td>Events vs rows</td><td>E's doubt: a second truth</td><td><span class="win">events stay the journal</span> the row is upserted inside <code>db.add_event</code> — one place, zero runner edits. <code>studio.py verify</code> diffs rows against disk and marks <code>stale</code>; it never auto-resolves.</td></tr>
+      <tr><td>UI stack</td><td>D: FastAPI. E: Starlette (already installed, transitive)</td><td><span class="win">FastAPI + Jinja2 + htmx</span> pinned, port 8700, <code>uv run python command_center.py</code>. Read-only SQLite from the web process; artefacts from <code>library/</code> behind a resolved-path check; tests in-process, never a server.</td></tr>
+      <tr><td>This page</td><td>D: keep it, link it</td><td><span class="win">stays</span> served at <code>/org</code>; the board copies its tokens (test-enforced).</td></tr>
+    </table></div>
+  </section>
+
+  <!-- data model -->
+  <section class="block">
+    <div class="head"><h2>The data model</h2><p>Four tables beside codex and events; one view per department, generated.</p></div>
+    <div class="tbl-wrap"><table class="v">
+      <tr><th>Table</th><th>One row is</th><th>Columns that matter</th></tr>
+      <tr><td><code>work_orders</code></td><td>a unit in a department — the department's table</td><td>codex_id · stage · unit · number · kind · home · <b>state</b> · step_id · progress · priority · sequence · gpu · attempts · flags · input_sha8 · blocked_on · claimed_by · lease_until · run_id · requested/started/updated/finished_at · gpu_seconds · cost_usd · deliverable · verdicts (JSON) · hold_reason · redo · note · source (run | queue | backfill). UNIQUE (codex_id, stage, unit); a unique index on running GPU rows.</td></tr>
+      <tr><td><code>work_steps</code></td><td>one step of one order — the unit page's chips</td><td>order_id · step_id · state · attempt · run_id · started/ended_at · seconds · gpu · verdict_path/by/word · terminal · outputs (JSON, book-relative) · detail</td></tr>
+      <tr><td><code>orders</code></td><td>the owner's intent, one writer</td><td>ts · kind (hold | lift | redo | bump | retry | requeue) · scope (studio | book | unit) · codex_id · stage · unit · step_id · note · by · taken_ts · taken_by_run</td></tr>
+      <tr><td><code>holds</code></td><td>a brake at a scope</td><td>scope · codex_id · stage · unit · reason · held_by · held_at · lifted_at — <code>RENDER_HOLD</code> mirrored in</td></tr>
+      <tr><td><code>episode_orders</code> …</td><td>a VIEW per registered department</td><td><code>SELECT * FROM work_orders WHERE stage = 'episode'</code>; studio-wide <code>v_queue</code> and <code>v_attention</code></td></tr>
+      <tr><td>existing</td><td>two columns each</td><td><code>events.order_id</code> · <code>usage.unit</code>, <code>usage.order_id</code>; <code>timing.jsonl</code> → <code>work_steps.seconds</code>; learnings and audit rows stay files the board tails</td></tr>
+    </table></div>
+    <pre class="ddl">state machine   blocked → queued → running → done | failed | deferred | escalated
+                 + held (a hold at any scope) · stale (input sha moved after done, or a lease expired)
+who transitions  the tick materializes and promotes · the runner claims and settles (add_event does it)
+                 judges and the owner only sign files and write orders — nobody types a state</pre>
+    <div class="states">
+      <span><b>○ queued</b></span><span><b>◌ blocked</b></span><span class="run"><b>● running</b> live 18/25</span><span class="ok"><b>✓ done</b></span><span class="amb"><b>⚑ n flagged</b> needs nobody now</span><span class="nxt"><b>↩ deferred</b> needs the next pass</span><span class="dev"><b>✕ failed</b> needs a developer</span><span class="own"><b>✋ escalated</b> needs the owner</span><span><b>⏸ held</b></span><span><b>~ stale</b></span>
+    </div>
+  </section>
+
+  <!-- the contract -->
+  <section class="block">
+    <div class="head"><h2>The standard department contract</h2><p>Seven columns, the same for every department, current and future. The registry carries three already.</p></div>
+    <div class="tbl-wrap"><table class="v">
+      <tr><th>Department</th><th>Unit</th><th>Turnover IN (<code>in:</code>)</th><th>Deliverables OUT (<code>out:</code>, named by the manifest)</th><th>Final when</th><th>Progress</th></tr>
+      <tr><td>analysis</td><td>book</td><td>source, the codex row</td><td>book.json, chapters, extraction/ch_NN.json, scenes, characters, locations, qc_report.json</td><td>06 verify done</td><td>chapters / chapters</td></tr>
+      <tr><td>screenplay</td><td>(book, target)</td><td>analysis manifest, targets.yaml row</td><td>plan, screenplay, elements, .fountain, qc_report.json</td><td>05 verify done</td><td>beats / beats</td></tr>
+      <tr><td>refs — the bible</td><td>(book, style)</td><td>analysis manifest, the cast list</td><td>refs.json, sheets, pack.jsonl, voices, refs/verdict.json</td><td><code>judge:look@1</code> signs the pack sha</td><td>bound / needed</td></tr>
+      <tr><td>episode — production</td><td>(book, chapter)</td><td>analysis + refs manifests, rows stamped for the unit</td><td>plan + verdict, lines, placed.json, panels + eye, takes + eye, cut/master_iterN.mp4, qc, review eye, manifest.json</td><td>12 deliver done: every verdict's sha8 matches the master</td><td>takes judged / shots</td></tr>
+      <tr><td>trailer</td><td>(book, main)</td><td>screenplay + refs manifests</td><td>story, metre, clips, master, qc, manifest</td><td>10 deliver done</td><td>clips / setups</td></tr>
+      <tr><td>publish <i>(future)</i></td><td>(master sha8, platform)</td><td>a production manifest, the master eye, the series policy</td><td>publish/&lt;sha8&gt;/&lt;platform&gt;.json, bundle, uploads.jsonl row</td><td>the platform's live status read back</td><td>items / 5</td></tr>
+      <tr><td>promo <i>(future)</i></td><td>release</td><td>a publish row, an analytics reading</td><td>campaign, orders, key art, cutdowns, posts</td><td>every order delivered and posted</td><td>orders / orders</td></tr>
+    </table></div>
+  </section>
+
+  <!-- the drive -->
+  <section class="block">
+    <div class="head"><h2>How a department is driven</h2><p>The table is the queue; the runner is unchanged; the board only writes orders.</p></div>
+    <pre class="ddl">tick(conn)    rows from the registry × the slate (INSERT OR IGNORE) · blocked → queued when requires are done
+              and in: exist · RENDER_HOLD → holds · expired leases → stale
+claim(conn)   UPDATE work_orders SET state='running', claimed_by=?, lease_until=now+15m
+              WHERE id = (SELECT id FROM v_queue WHERE stage=? LIMIT 1) RETURNING *
+run           step_runner.run_steps(ctx, steps)          -- unchanged; add_event upserts the row
+settle        the last event's word; outputs, gpu_seconds, cost from what the run wrote
+orders        taken at the top of each loop: hold/lift → holds · bump → priority 0
+              retry → deferred|failed → queued · redo → the named step re-runs although done()
+
+explicit      uv run python episode.py &lt;book&gt; &lt;n&gt;     claims that one row (works today, unchanged)
+no unit       uv run python episode.py &lt;book&gt;          drains queued rows in priority, sequence order
+not built     a worker loop that starts a five-hour GPU job unattended — a queued row is a REQUEST
+              until the owner says it is an instruction</pre>
+  </section>
+
+  <!-- the board -->
+  <section class="block">
+    <div class="head"><h2>The board</h2><p>Six pages; the studio home is the landing page. Wireframes from report D; v1 read-only, v2 adds the order buttons.</p></div>
+    <h3 style="margin:18px 0 0;font-size:14px">Studio home <code>/</code> — on the floor, needs you, the department lanes, today</h3>
+    <pre class="wire">┌ Visurena Studio ─────────────── Home · Floor · Books · Org chart ── ◐ ┐
+│ ON THE FLOOR  ● Episode › WotW › ep13 · 09 shoot · takes 18/25         │
+│               attempt 2 · gpu 1h42 of 5h · started 14:02 · next: ep14  │
+│ NEEDS YOU (2) ✋ Shorts › s07 · approve render 340 cr  [Approve][Refuse]│
+│               ✕ Refs › Dracula › style krea2 · 02 sheets · KeyError … ▸│
+├──────────┬──────────┬──────────┬──────────┬──────────┬────────────────┤
+│ ANALYSIS │SCREENPLAY│ REFS     │ TRAILER  │ EPISODE  │ DISTRIBUTION   │
+│ 3 units  │ 2 units  │ 2 units  │ 1 unit   │ 13 units │ 11 published   │
+│ ▮▮▮      │ ▮▮       │ ▮▮       │ ▮        │ ▮▮▮▮▮▮▮▮▮▮▮▮● │ ▮▮▮▮▮▮▮▮▮▮▮ │
+│ ✓3       │ ✓2       │ ✓1 ✕1    │ ✓1       │ ✓5 ⚑6 ●1 ↩1 │ ✓11           │
+│          │          │          │          │          │                │
+│ WotW  ✓  │ WotW  ✓  │ WotW  ✓  │ WotW  ✓  │ ep13 ● 18/25 │ ep11 public │
+│ Dracula ✓│ Dracula ✓│ Dracula ✕│          │ ep12 ⚑5 iter2│ ep10 public │
+│ Frankst ✓│          │          │          │ ep14 ↩ defer │ ep09 public │
+│          │          │          │          │ ep10 ⚑2      │ …           │
+│ open ▸   │ open ▸   │ open ▸   │ open ▸   │ open ▸   │ open ▸         │
+├──────────┴──────────┴──────────┴──────────┴──────────┴────────────────┤
+│ TODAY  07:40 ep12 qc 412s ✓ · 08:45 ep12 prompts 2s ✓ · 15:52 ep12     │
+│        bind ✓ · 15:52 ep12 takes 3s ✓ · 20:54 ep13 PLAN ↩ · 22:20 …    │
+│ legend  ○ queued ◌ blocked ● running ✓ passed ⚑ flagged ↩ deferred      │
+│         ✕ failed ✋ escalated ⏸ held ~ stale – skipped                   │
+└────────────────────────────────────────────────────────────────────────┘</pre>
+    <h3 style="margin:18px 0 0;font-size:14px">Floor <code>/floor</code> — the one GPU's day: now, next, waiting on, held</h3>
+    <pre class="wire">┌ Studio › Floor ─────────────────────────────────── GPU: RTX 4090 ─ ◐ ┐
+│ NOW   ● Episode WotW ep13 · 09 shoot · round 2 · take T18 of 25         │
+│       ▮▮▮▮▮▮▮▮▮▮▮▮▮▮▮▮▮▮░░░░░░░ 72% · 1h42 of 5h ceiling · ETA 16:40   │
+│       run 20260827135508_episode_20260925140212 · [log tail ▾]         │
+│                                                                        │
+│ NEXT  1  Episode WotW ep14        02 plan     ↑ priority 1   [hold]     │
+│       2  Refs  Dracula krea2       02 sheets   after fix ✕    [hold]    │
+│       3  Episode WotW ep15        01 bind     queued          [↑][hold]│
+│       4  Trailer Dracula           03 music    ◌ needs refs/04          │
+│ HELD  ⏸ Episode Frankenstein *    all         owner 09-24: &quot;after ref&quot;  │
+│                                                                        │
+│ TODAY ─ 07:40 ─── 08:45 ── 15:52 ─── 20:54 ──── 22:20 ─── now         │
+│   ep12 ▮qc 412s ▮prompts ▮bind ▮takes   ep13 ▮plan ↩  ▮plan ↩  ●shoot │
+│   gpu busy 3h11 · idle 9h02 · steps 9 · flagged 1 · deferred 2         │
+└────────────────────────────────────────────────────────────────────────┘</pre>
+    <h3 style="margin:18px 0 0;font-size:14px">Department <code>/d/episode</code> — the department's table</h3>
+    <pre class="wire">┌ Studio › Episode ───────────── 13 units · 5h ceiling per unit ─── ◐ ┐
+│ filter [all books ▾] [state ▾] [flagged only □]   sort: attention ▾   │
+├─────┬────────┬──────┬────────────────────┬────────┬─────┬──────┬──────┤
+│ st  │ book   │ unit │ step · progress    │ last   │ att │ gpu  │ verd │
+├─────┼────────┼──────┼────────────────────┼────────┼─────┼──────┼──────┤
+│ ●   │ WotW   │ ep13 │ 09 shoot ▮▮▮▮░ 18/25│ 14:02  │ 2   │ 1h42 │ ✓✓⚑○○│ [hold]
+│ ✋  │ WotW   │ ep16 │ 09 shoot · render  │ 13:10  │ 1   │ 0    │ ✓✓✓○○│ [Approve]
+│ ↩   │ WotW   │ ep14 │ 02 plan · deferred │ 22:20  │ 5   │ 0    │ ↩    │ [run]
+│ ✕   │ Drac   │ ep01 │ 04 record · Error  │ 09-24  │ 1   │ 0:04 │ ✓○○○○│ [run]
+│ ⚑ 5 │ WotW   │ ep12 │ 12 deliver ✓ iter2 │ 15:52  │ 5   │ 4h58 │ ✓✓⚑⚑✓│ [redo]
+│ ⚑ 2 │ WotW   │ ep10 │ 12 deliver ✓ iter1 │ 09-23  │ 3   │ 3h20 │ ✓✓⚑✓✓│
+│ ✓   │ WotW   │ ep11 │ 12 deliver ✓ public│ 09-22  │ 3   │ 4h01 │ ✓✓✓✓✓│
+│ ○   │ WotW   │ ep15 │ 01 bind            │ –      │ 0   │ –    │ ○○○○○│ [↑]
+│ ◌   │ Drac   │ ep02 │ needs refs/04      │ –      │ 0   │ –    │      │
+│ ⏸   │ Frank  │ ep01 │ held 09-24         │ –      │ 0   │ –    │      │
+├─────┴────────┴──────┴────────────────────┴────────┴─────┴──────┴──────┤
+│ row hover: thumbnails strip (contact.png) · click unit → unit page      │
+│ footer: ✓5 ⚑6 ●1 ↩1 ✕1 ○… · gpu this week 21h · legend                 │
+└────────────────────────────────────────────────────────────────────────┘</pre>
+    <h3 style="margin:18px 0 0;font-size:14px">Unit <code>/d/episode/&lt;book&gt;/ep12</code> — steps, master, verdicts, panels, takes, learnings, log, timing</h3>
+    <pre class="wire">┌ Studio › Episode › War of the Worlds › ep12 &quot;Weybridge and Shepperton&quot; ┐
+│ ⚑ 5 flagged · 12 deliver ✓ · master_iter2 · 4h58 gpu · 5 attempts     │
+│ [run/resume] [redo ▾ with note] [hold] [audit sheet ▸] [dossier ▸]      │
+├────────────────────────────────────────────────────────────────────────┤
+│ STEPS  01 ✓ 02 ✓ 03 ✓ 04 ✓ 05 ✓ 06 ✓ 07 ✓ 08 ⚑ 09 ⚑ 10 ✓ 11 ✓ 12 ✓      │
+│        bind plan places record timeline prompts board panels shoot …   │
+│        click a chip → its timing row, its log slice, its gate faults   │
+├──────────────────────────────────┬─────────────────────────────────────┤
+│ MASTER  ┌──────────────┐         │ VERDICTS                            │
+│         │ ▶ master_iter2│ 160 s  │ PLAN   ✓ judge:plan@1  56bd2e17     │
+│         │   1:1  -14.1  │ LUFS   │ LAYOUT ✓ grid_layout@1              │
+│         └──────────────┘         │ PANELS ⚑ panel_eye@1 c7e3eb93       │
+│  iter1 · r2v  · qc: 23/23 cuts,  │   landmark at shot_00 (x28) ▸       │
+│  23/23 lines heard, gap 5.8/6.0  │ TAKES  ⚑ take_eye@1 21227f91        │
+│                                  │   face-at-end T16 0.74 · lag T16 ·  │
+│ PLAN  Q: &quot;Can the guns stop      │   cut T19 · jump T19 → still        │
+│ them?&quot; · answer shot 19 · 24     │ MASTER ○ not yet signed             │
+│ shots · 23 lines · 3 beds ▸json  │ [redo PANELS with note]             │
+├──────────────────────────────────┴─────────────────────────────────────┤
+│ PANELS (contact.png)   TAKES (strip_*.png)                             │
+│ [00][01][02][03][04]   [T00][T01][T02]…[T16⚑][T17][T18][T19⚑ still]   │
+│ [05][06][07]…  ▸ all   hover: &lt;video preload=metadata&gt;; click: lightbox│
+├────────────────────────────────────────────────────────────────────────┤
+│ LEARNINGS (tail 5)                 │ LOG run …140212 (tail, WARN+)     │
+│ 14:09 09 EYE_TAKES keep_best ⚑ …  │ 22:20 WARN plan_check refused: …  │
+│ 14:09 09 EYE_TAKES replan_cell 5   │ 22:19 WARN PLAN: measured 24.0 →  │
+│ 14:08 09 EYE_TAKES head_cut 4      │ …                                 │
+├────────────────────────────────────┴───────────────────────────────────┤
+│ TIMING  bind 0.1s · plan 31s · … · shoot 2h50 · edit 6m · qc 412s      │
+└────────────────────────────────────────────────────────────────────────┘</pre>
+    <p style="max-width:78ch;margin:12px 0 0;color:var(--ink-2)">Also <code>/b/&lt;book&gt;</code> (units across, departments down, ▲ for a public upload) and <code>/org</code> (this page). htmx partials on a 2 s poll for the floor and running cells, 10 s for tables; a JSON twin per partial. The web process opens SQLite read-only, never runs a step, never globs the disk on a poll; thumbnails are the files the steps already write.</p>
+  </section>
+
+  <!-- migration and what is not built -->
+  <section class="block">
+    <div class="head"><h2>Migration, and what is not built</h2><p>Zero loss; nothing renamed; a projection you can rebuild.</p></div>
+    <div class="tbl-wrap"><table class="v">
+      <tr><th>Item</th><th>Ruling</th></tr>
+      <tr><td>Backfill</td><td><code>scripts/audit/backfill_work_orders.py</code> derives rows from disk and events: a signed plan verdict → plan done; <code>cut/master_iterN.mp4</code> → edit done; <code>qc_r2v.json</code> passed → qc done; <code>youtube.json</code> / <code>uploads.jsonl</code> → the publish row; <code>plan.deferred.json</code> → deferred. Dry-run first; <code>source='backfill'</code>; never a row with a live run. Verified on disk: 25 of 27 episode folders derive without judgement; ep12 is ambiguous (a hand-signed verdict, a live run) and is listed, not guessed.</td></tr>
+      <tr><td>Not built, on purpose</td><td>Crew scheduling, revision colours, VFX version trees, per-line budgets, Kanban, @mentions, ETA models, Approve/Reject on judged gates (a redo + a note replaces them), any daemon, executor, replay engine or pool.</td></tr>
+      <tr><td>Open for the owner</td><td>1. Is a <code>queued</code> row an instruction (a worker loop drains it) or a request (a runner invocation takes it)? The plan builds the request. &nbsp;2. A Distribution lane read from <code>uploads.jsonl</code> before a <code>publish</code> stage exists, or wait for the stage? &nbsp;3. <code>flagged</code> as a count on a done row (this ruling) or a state of its own?</td></tr>
+      <tr><td>The plan</td><td>Eleven commits, ~30 tests, ~1,850 lines, four days: the table (C1–C3), the contract and the hand (C4–C6), the drive (C7–C9), the board (C10–C11). <code>architecture/plan/2026-09-25_command_center_build.md</code>.</td></tr>
+    </table></div>
+  </section>
+
+</div>
 </div>
 
 <script>
@@ -657,7 +856,7 @@ table.v td code{white-space:nowrap}
 
   /* ---------- tabs ---------- */
   var tabs=[].slice.call(document.querySelectorAll('.tabs button'));
-  var panes={current:document.getElementById('tab-current'),future:document.getElementById('tab-future')};
+  var panes={current:document.getElementById('tab-current'),future:document.getElementById('tab-future'),command:document.getElementById('tab-command')};
   function showTab(name){
     if(!panes[name])name='current';
     tabs.forEach(function(b){b.setAttribute('aria-selected',b.dataset.tab===name?'true':'false');});

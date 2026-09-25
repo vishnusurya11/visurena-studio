@@ -8,7 +8,7 @@ brick (`docs/ARCHITECTURE.md`).
 
 | where | what |
 |---|---|
-| [index.html](index.html) | **The main architecture page.** Open it in a browser. Tab *Current*: the book → screenplay org chart (who reports to whom), an animated walk-through of one book's run, the roster. Tab *Future*: the proposed big-studio shape — the debate's verdicts, the five-division org chart with built / partial / missing / slot states, unit-of-work grammar, the owner gates, an animated future run, the order of work. Published copy: https://claude.ai/artifact/6HCxs36mcpFk2TJS389QXr |
+| [index.html](index.html) | **The main architecture page.** Open it in a browser. Tab *Current*: the book → screenplay org chart (who reports to whom), an animated walk-through of one book's run, the roster. Tab *Future*: the proposed big-studio shape — the debate's verdicts, the five-division org chart with built / partial / missing / slot states, unit-of-work grammar, the owner gates, an animated future run, the order of work. Tab *Command Center*: the proposed department tables, the standard contract, the drive and the monitoring board, for review. Published copy: https://claude.ai/artifact/6HCxs36mcpFk2TJS389QXr |
 | [decisions/](decisions/) | Architecture decisions, one dated file each, with the debate that produced them. A decision that the owner has ruled on also gets its line in `docs/DECISIONS.md`. |
 | [plan/](plan/) | Plans and trackers for the work that follows a decision. One file per initiative; status at the top; checkboxes per step. |
 
@@ -29,12 +29,14 @@ brick (`docs/ARCHITECTURE.md`).
 | date | file | status |
 |---|---|---|
 | 2026-09-24 | [decisions/2026-09-24_future_departments.md](decisions/2026-09-24_future_departments.md) + [stages_future.yaml](decisions/2026-09-24_stages_future.yaml) | PROPOSAL — the big-studio shape: five divisions, one registry stage per format line, unit grammar, seven owner gates. Awaiting the owner. |
+| 2026-09-25 | [decisions/2026-09-25_command_center.md](decisions/2026-09-25_command_center.md) + [research/](decisions/research/2026-09-25_command_center/) | PROPOSAL — the Command Center: one work-order row per (book, department, unit), a view per department, standard `in:`/`out:` in the registry and a `manifest.json` across the boundary, tick + pull drive, the local board. Tab *Command Center* on the page. Awaiting the owner. |
 | 2026-09-24 | [decisions/2026-09-24_judges_replace_the_eye.md](decisions/2026-09-24_judges_replace_the_eye.md) | DECIDED (owner) — no refs/episode step parks on a person: judges with priced ladders sign LOOK, PLAN, EYE ×2, MASTER as pass or flagged; the owner audits after the fact; casebook + bench + ratchet. |
 
 ## Plans
 
 | date | file | status |
 |---|---|---|
+| 2026-09-25 | [plan/2026-09-25_command_center_build.md](plan/2026-09-25_command_center_build.md) | PROPOSED — eleven commits: the tables, the contract, the drive, the board; waits for the owner's review |
 | 2026-09-24 | [plan/2026-09-24_registry_departments.md](plan/2026-09-24_registry_departments.md) | IN PROGRESS — commits 1-3 and 6 done by the episode build; 4, 5, 7-10 open |
 | 2026-09-24 | [plan/2026-09-24_episode_department_build.md](plan/2026-09-24_episode_department_build.md) | DONE 2026-09-24 — refs + episode as registry departments with runners, twelve independent steps, the writer agent, eyes as files |
 | 2026-09-24 | [plan/2026-09-24_judges_replace_the_eye_build.md](plan/2026-09-24_judges_replace_the_eye_build.md) | DONE 2026-09-24 — casebook, bench, ratchet; gates.yaml; picture, take, plan and master judges with priced ladders; every refs/episode park removed; the audit sheet |
