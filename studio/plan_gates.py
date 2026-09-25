@@ -17,6 +17,7 @@ constant with no world attached is the fault this repo produces most.
 """
 from __future__ import annotations
 
+import difflib
 import json
 import math
 import re
@@ -582,6 +583,188 @@ def name_advisories(episode: Episode, earlier_lines: list[str]) -> list[str]:
     return [f"G-NAMES line {k}: first hearing of {name!r} in the series carries no role (advisory: say "
             f"once who it is -- {', '.join(story_layer.ROLE_NOUNS[:5])}, ...)"
             for k, name in story_layer.naked_names(texts, earlier_lines)]
+
+
+# ---- G-MOVES: the plan cuts between different camera moves -----------------------
+# The camera catalog's rule (docs/calibration/camera_catalog.md, owner 2026-09-19:
+# "almost every other shot is a circle around the object ... not good visually"),
+# prose only until 2026-09-24.  HELD ONLY ON A PLAN OF THE NEW FORM
+# (`Episode.new_form`): every plan written before the catalog reads 2-7 moves
+# with one on half its shots, and reading a historical plan is not endorsing it.
+# Fixture lock: tests/fixtures/episodes/moves_{orbit,varied}.json.
+
+MIN_MOVES = 8
+"""Distinct catalog moves over the plan.  MEASURED: the orbiting plan 3 ids
+over 23 shots; the varied plan 12; the ten plans written after the varied one
+with the rule in prose only, 6-9."""
+
+MAX_MOVE_SHARE = 0.25
+"""The top move's share of the shots.  MEASURED: the orbiting plan 0.78 (18 pans
+whose subject keeps its third -- an orbit request); the varied plan 0.22; the
+ten after it 0.21-0.52, seven of them over a quarter -- the drift the wall
+exists to stop."""
+
+OVER_SHOULDER = re.compile(r"\bover (?:\w+ ){0,2}?\w+(?:'s|’s)? shoulder\b", re.I)
+LOW_ANGLE = re.compile(r"\blow angle\b|\blooking up\b|\bknee height\b", re.I)
+HIGH_ANGLE = re.compile(r"\bhigh angle\b|\blooking down\b", re.I)
+"""The catalog's two angle rows are a `camera` LINE plus one move, so they are
+read from the camera line -- only the plain words; "looking out", "looking
+along" and "level with" are eye height."""
+
+MOVE_VERBS = (
+    ("orbit", r"\b(?:orbits?|circles?)\b"), ("handheld", r"\bhandheld\b"),
+    ("rack_focus", r"\bfocus\b|\bracks?\b"),
+    ("crane_up", r"\b(?:rises?|cranes? up)\b"), ("crane_down", r"\b(?:descends?|cranes? down)\b"),
+    ("follow", r"\btracks? (?:behind|beside|with|after|ahead of|in front of)\b|\btracking\b"),
+    ("track_lateral", r"\b(?:tracks?|trucks?|dollies|dolly)\b"),
+    ("push_slow", r"\bpush(?:es)?\b|\bzooms? in\b"), ("pull_reveal", r"\bpulls?\b|\bzooms? (?:out|back)\b"),
+    ("pan_to", r"\bpans?\b"), ("tilt_up", r"\btilts? up\b"), ("tilt_down", r"\btilts? down\b"),
+    ("tilt", r"\btilts?\b"))
+"""Catalog id by the camera clause's verb, first match wins: `tracks behind` is
+a follow before it is a track.  A head with no camera verb is `locked` (the
+catalog: "a locked-off shot is a move").  `tilt` names no direction and is no
+catalog row: write which way."""
+
+TRAVELS = frozenset({"push_slow", "pull_reveal", "track_lateral", "follow", "crane_up", "crane_down",
+                     "orbit", "handheld"})
+"""Moves that carry the camera somewhere, and so are named by their travel.  A
+camera that stays put -- a hold, a pan, a tilt -- is named by the angle its
+`camera` line gives it, when it gives one."""
+
+
+def move_verb(cam: str) -> str:
+    for move, pattern in MOVE_VERBS:
+        if re.search(pattern, cam or "", re.I):
+            return move
+    return "locked"
+
+
+def move_id(motion: str, camera: str) -> str:
+    """This shot's catalog move: over-shoulder first, then a travel by its verb,
+    then an angle from the camera line, then the verb (or `locked`)."""
+    head = head_of(motion)
+    cam, _ = camera_clause(head)
+    move = move_verb(cam)
+    if OVER_SHOULDER.search(f"{head} {camera or ''}"):
+        return "over_shoulder"
+    if move in TRAVELS:
+        return move
+    if LOW_ANGLE.search(camera or ""):
+        return "low_angle"
+    if HIGH_ANGLE.search(camera or ""):
+        return "high_angle"
+    return move
+
+
+def move_ids(shots) -> list[str]:
+    return [move_id(s.motion, getattr(s, "camera", "") or "") for s in shots]
+
+
+def distinct_fault(ids: list[str]) -> list[str]:
+    if len(set(ids)) >= MIN_MOVES:
+        return []
+    return [fault("G-MOVES", "plan", f"distinct catalog moves over {len(ids)} shots", len(set(ids)), MIN_MOVES)]
+
+
+def share_fault(ids: list[str]) -> list[str]:
+    top = max(set(ids), key=ids.count) if ids else ""
+    got = round(ids.count(top) / len(ids), 2) if ids else 0.0
+    if got <= MAX_MOVE_SHARE:
+        return []
+    return [fault("G-MOVES", "plan", f"{top!r} share of the {len(ids)} shots", got, MAX_MOVE_SHARE)]
+
+
+def running_faults(shots, ids: list[str]) -> list[str]:
+    return [fault("G-MOVES", f"shot {shot.index}", f"{move!r} follows the same move on shot "
+                  f"{shots[k - 1].index} (twice running)", 2, 1)
+            for k, (shot, move) in enumerate(zip(shots, ids)) if k and move == ids[k - 1]]
+
+
+def moves_faults(episode) -> list[str]:
+    """G-MOVES over a plan (anything with `.shots` carrying `motion` and `camera`)."""
+    ids = move_ids(episode.shots)
+    return distinct_fault(ids) + share_fault(ids) + running_faults(list(episode.shots), ids)
+
+
+# ---- G-SOURCE: a claim about the chapter carries the chapter's words ------------
+# The two plan-level refusals the owner made that no gate caught were inventions:
+# a count guessed at 6 where the chapter gives 8; "sits astride" where the
+# chapter says "clambers over".  `Shot.source` carries the spans; this gate
+# refuses a claim with none, and a span the chapter does not contain.  Held on
+# a plan of the new form only (`Episode.new_form`).
+
+SPAN_MATCH = 0.85
+"""`difflib` ratio between a span and the closest same-length window of the
+chapter's words.  One slipped letter in a ten-word span reads ~0.98; a
+paraphrase of the same sentence reads 0.5-0.7.  A wall, not a similarity
+search: a span is the chapter's words copied, so anything under it was
+written, not copied."""
+
+POSTURE = re.compile(r"\b(?:lying|lies|lay|laid|sprawled|prone|supine|sits?|sitting|seated|sat|"
+                     r"kneels?|kneeling|knelt|crouch(?:es|ed|ing)?|astride)\b", re.I)
+"""A body state the chapter either gives or does not (`cell_gates.LAID` widened
+to the seated and kneeling families)."""
+
+CLAIM_FIELDS = ("frame", "motion", "at_rest", "end")
+
+
+def claim_prose(shot) -> str:
+    return " ".join(getattr(shot, name, "") or "" for name in CLAIM_FIELDS)
+
+
+def staged_props(shot, setup) -> list[str]:
+    """The setup's prop ids this shot's prose names by a token of the id
+    (`pack_refs.props_named` without the book: the id's own words, over 3 letters)."""
+    low = claim_prose(shot).lower()
+    return [pid for pid in (getattr(setup, "props", None) or [])
+            if any(re.search(rf"\b{re.escape(t)}s?\b", low) for t in pid.lower().split("_") if len(t) > 3)]
+
+
+def claims(shot, setup) -> list[str]:
+    """What this shot asserts about the chapter: a count, a posture, a prop."""
+    out = [f"extras {shot.extras}"] if getattr(shot, "extras", 0) else []
+    if hit := POSTURE.search(claim_prose(shot)):
+        out.append(f"posture {hit.group(0)!r}")
+    return out + [f"prop {pid!r}" for pid in staged_props(shot, setup)]
+
+
+def _words_of(text: str) -> list[str]:
+    return re.findall(r"[a-z0-9']+", (text or "").replace("’", "'").lower())
+
+
+def span_match(span: str, chapter: str) -> float:
+    """The best ratio of the span against the chapter's windows of its own length,
+    tried at every place the span's first or second word occurs."""
+    want, have = _words_of(span), _words_of(chapter)
+    if not want or not have:
+        return 0.0
+    n, target = len(want), " ".join(want)
+    starts = {j - k for k in range(min(2, n)) for j, w in enumerate(have) if w == want[k]}
+    best = 0.0
+    for start in sorted(s for s in starts if s >= 0):
+        best = max(best, difflib.SequenceMatcher(None, target, " ".join(have[start:start + n])).ratio())
+    return round(best, 2)
+
+
+def span_faults(shot, chapter: str | None) -> list[str]:
+    if chapter is None:
+        return [fault("G-SOURCE", f"shot {shot.index}", f"no chapter text to find its {len(shot.source)} span(s) in",
+                      0, len(shot.source))]
+    return [fault("G-SOURCE", f"shot {shot.index}", f"span {span[:60]!r} is not in the chapter", got, SPAN_MATCH)
+            for span in shot.source if (got := span_match(span, chapter)) < SPAN_MATCH]
+
+
+def source_faults(episode, chapter: str | None) -> list[str]:
+    """G-SOURCE over a plan: every claim has a span, every span is in the chapter.
+    `chapter` None with spans to check is a refusal, never a pass."""
+    out = []
+    for shot in episode.shots:
+        said = claims(shot, episode.setups[shot.setup])
+        if said and not shot.source:
+            out += [fault("G-SOURCE", f"shot {shot.index}", f"{claim} has no chapter span", 0, 1) for claim in said]
+        elif shot.source:
+            out += span_faults(shot, chapter)
+    return out
 
 
 # ---- the verdict ---------------------------------------------------------------

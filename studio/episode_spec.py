@@ -215,6 +215,24 @@ class Shot(Framed):
     """Unnamed people this shot puts in the picture beyond its `faces`: a
     sentry, a man at a counter. A CROWD is the setup's to declare; this is
     the count for everyone else, so no gate has to guess it from prose."""
+    source: list[str] = Field(default_factory=list)
+    """The chapter's own words behind what this shot CLAIMS -- verbatim spans.
+
+    A count (`extras > 0`), a posture word in the shot's prose (kneels, sits,
+    lying, astride) and a staged prop id are claims about the chapter, and the
+    two the owner refused by eye were both invented: a guessed 6 where the
+    chapter gives 8, "sits astride" where the chapter says "clambers over".
+    `plan_gates.source_faults` (G-SOURCE) refuses a claim with no span and a
+    span the chapter text does not contain by fuzzy match.
+
+    DEFAULTS EMPTY, and the requirement lives in the gate and not here: a plan
+    written before the field must still load (`long_shots`).  THE FIELD IS THE
+    SWITCH: a plan that writes a span anywhere was written under the form that
+    asks for them, and that plan alone is refused on G-SOURCE and G-MOVES
+    (`Episode.new_form`) -- the `palette` -> `where` + `light` rule again.  A
+    version number on the plan was the other choice; the writer's draft model
+    mirrors this contract's fields one for one, so the switch is a field the
+    writer already has to fill."""
     """Whose face is frontal and readable in the panel."""
     take: int = Field(default=0, ge=0)
     beat_s: float = Field(default=0.0, ge=0, le=MAX_BEAT)
@@ -449,6 +467,13 @@ class Episode(BaseModel):
     def dialogue_share(self) -> float:
         words = sum(line.words() for line in self.lines) or 1
         return sum(line.words() for line in self.dialogue()) / words
+
+    def new_form(self) -> bool:
+        """Is this plan held to G-MOVES and G-SOURCE (2026-09-24)?  Yes when any
+        shot carries a `source` span: a plan that writes spans was written under
+        the form that asks for them.  Every plan before that day carries none
+        and fails G-MOVES, and reading a historical plan is not endorsing it."""
+        return any(shot.source for shot in self.shots)
 
     # ---- the rules ---------------------------------------------------------
     @model_validator(mode="after")

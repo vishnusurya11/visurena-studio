@@ -22,7 +22,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
-from studio import actor_gate, cast_refs, episode_home, episode_ref_official as ro, episode_spec as spec, house_style, plan_gates, timeline_fresh
+from studio import actor_gate, cast_refs, episode_home, episode_ref_official as ro, episode_spec as spec, house_style, plan_brief, plan_gates, timeline_fresh
 from studio import episode_takes as tk
 from studio.episode_takes import BUDGET
 
@@ -89,6 +89,20 @@ def unpaced_shots(episode) -> list[tuple[int, str]]:
     return out
 
 
+def catalog_gates(episode, chapter: str | None) -> int:
+    """G-MOVES and G-SOURCE, the deterministic plan judges: HARD on a plan of
+    the new form (a `source` span on any shot), printed as advisories on an
+    older one -- every plan written before the camera catalog fails G-MOVES,
+    and reading a historical plan is not endorsing it.  Hard count."""
+    found = plan_gates.moves_faults(episode) + plan_gates.source_faults(episode, chapter)
+    hard = episode.new_form()
+    said = (len(found) or "clean") if hard else f"{len(found)} advisory (no `source` span on any shot; hard once one is written)"
+    print("MOVES/SOURCE :", said)
+    for f in found:
+        print("   " if hard else "  advisory:", f[:170])
+    return len(found) if hard else 0
+
+
 def measured_or_projected(book: Path, number: int, episode, rate: float) -> list[dict]:
     """The timeline's own shots when it has been written, else the projection."""
     placed = episode_home.home(book, number) / "placed.json"
@@ -143,6 +157,7 @@ def main(book_id: str, number: int) -> int:
     print("PLAN GATES   :", len(pg) or "clean"); hard += len(pg)
     for f in pg:
         print("   ", f[:170])
+    hard += catalog_gates(ep, plan_brief.chapter_text(book, number))
     from studio import cell_gates
     cg = cell_gates.faults(ep, cell_gates.pack_prompts(book))
     print("CELL GATES   :", len(cg) or "clean"); hard += len(cg)
