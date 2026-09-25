@@ -362,7 +362,9 @@ def measured(ctx, script: str, clock: str, suffix: str, *extra: str) -> None:
         verdicts = [t.with_suffix(suffix) for t in takes]
         missing = [v.name for v in verdicts if not v.exists()]
         # a leftover verdict from an earlier run is not proof this one finished
-        fresh = any(v.exists() and v.stat().st_mtime >= started for v in verdicts)
+        # one second of slack: a file written in the same instant can carry a
+        # timestamp a few ms before time.time() (flaky in the full suite)
+        fresh = any(v.exists() and v.stat().st_mtime >= started - 1.0 for v in verdicts)
         if not str(refused).endswith("exit 1") or missing or not takes or not fresh:
             raise
         ctx.log(f"{script}: faults found; the take judge reads them")
