@@ -1,0 +1,598 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Visurena Story Department</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=IBM+Plex+Sans:ital,wght@0,400;0,500;0,600;1,400&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+:root{
+  --paper:#f6f3ec; --paper-2:#eee9df; --ink:#1d1a16; --ink-2:#4d473d; --ink-3:#7d7566;
+  --rule:#d6cfc0; --rule-2:#bfb6a3; --line:#9c937f;
+  --code:#e9e4d7; --code-ink:#3b352c;
+  --accent:#a4341f; --accent-ink:#ffffff;
+  --think:#2c4f6b; --think-bg:#e3ebf2;
+  --qc:#5f4b1c; --qc-bg:#f1e8c9;
+  --invent:#6a3b8f; --invent-bg:#ece3f3;
+  --ok:#2f6b3a; --ok-bg:#dfeee2;
+  --lead:#1d1a16; --lead-ink:#f6f3ec;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    color-scheme:dark;
+    --paper:#181613; --paper-2:#211e1a; --ink:#ece7dc; --ink-2:#c3bbab; --ink-3:#8f8778;
+    --rule:#3a352d; --rule-2:#4d473d; --line:#6a6254;
+    --code:#2a2621; --code-ink:#d8d1c2;
+    --accent:#e0664c; --accent-ink:#1d1a16;
+    --think:#9dc0dd; --think-bg:#1f2e3b;
+    --qc:#e2c979; --qc-bg:#332b16;
+    --invent:#c8a6e0; --invent-bg:#2c2035;
+    --ok:#8fcf9b; --ok-bg:#1e3323;
+    --lead:#ece7dc; --lead-ink:#181613;
+  }
+}
+:root[data-theme="dark"]{
+  color-scheme:dark;
+  --paper:#181613; --paper-2:#211e1a; --ink:#ece7dc; --ink-2:#c3bbab; --ink-3:#8f8778;
+  --rule:#3a352d; --rule-2:#4d473d; --line:#6a6254;
+  --code:#2a2621; --code-ink:#d8d1c2;
+  --accent:#e0664c; --accent-ink:#1d1a16;
+  --think:#9dc0dd; --think-bg:#1f2e3b;
+  --qc:#e2c979; --qc-bg:#332b16;
+  --invent:#c8a6e0; --invent-bg:#2c2035;
+  --ok:#8fcf9b; --ok-bg:#1e3323;
+  --lead:#ece7dc; --lead-ink:#181613;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--paper);color:var(--ink);font-family:"IBM Plex Sans",system-ui,sans-serif;font-size:14px;line-height:1.45}
+.wrap{max-width:1180px;margin:0 auto;padding-block:28px 56px;padding-inline:16px}
+h1,h2,h3{font-family:"Barlow Condensed","Arial Narrow",sans-serif;text-wrap:balance;margin:0}
+h1{font-size:42px;font-weight:700;letter-spacing:.01em;line-height:1}
+h2{font-size:30px;font-weight:700}
+.eyebrow{font-family:"IBM Plex Mono",monospace;font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-3)}
+.lede{max-width:66ch;color:var(--ink-2);margin-top:10px}
+.lede b{color:var(--ink)}
+code,.mono{font-family:"IBM Plex Mono",ui-monospace,monospace;font-size:12px}
+code{background:var(--code);color:var(--code-ink);padding:1px 5px;border-radius:3px}
+section.block{margin-top:44px;border-top:3px solid var(--ink);padding-top:12px}
+section.block .head{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:baseline;gap:8px 16px}
+section.block .head p{margin:0;color:var(--ink-2);max-width:66ch}
+.chip{display:inline-block;font-family:"IBM Plex Mono",monospace;font-size:10.5px;letter-spacing:.06em;text-transform:uppercase;padding:2px 7px;border-radius:2px;border:1px solid var(--rule-2);color:var(--ink-2);background:var(--paper)}
+.chip.think{border-color:var(--think);color:var(--think);background:var(--think-bg)}
+.chip.qc{border-color:var(--qc);color:var(--qc);background:var(--qc-bg)}
+.chip.code{border-color:var(--rule-2);color:var(--ink-3);background:var(--code)}
+.legend{display:flex;flex-wrap:wrap;gap:10px 18px;margin-top:14px;color:var(--ink-2);font-size:12.5px;align-items:center}
+.legend .k{display:inline-flex;align-items:center;gap:6px}
+.swatch{width:14px;height:14px;border:1px solid var(--rule-2);display:inline-block}
+.swatch.lead{background:var(--lead)}
+.swatch.agent{background:var(--paper-2);border-left:4px solid var(--accent)}
+.swatch.qc{background:var(--paper-2);border-left:4px solid var(--qc)}
+.swatch.think{background:var(--paper-2);border-left:4px solid var(--think)}
+
+/* ===== ORG CHART (tree) ===== */
+.chart-tools{display:flex;flex-wrap:wrap;gap:8px 14px;align-items:center;margin-top:14px;color:var(--ink-3);font-size:12.5px}
+button.btn{font:inherit;font-size:12.5px;padding:5px 11px;border:1px solid var(--rule-2);background:var(--paper-2);color:var(--ink);border-radius:3px;cursor:pointer}
+button.btn[aria-pressed="true"]{background:var(--ink);color:var(--paper);border-color:var(--ink)}
+button.btn:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.chart-scroll{overflow-x:auto;margin-top:12px;padding-bottom:6px}
+.chart-fit{transform-origin:top left}
+.tree{display:inline-block}
+.tree ul{display:flex;justify-content:center;padding:26px 0 0;margin:0;list-style:none;position:relative}
+.tree ul ul::before{content:"";position:absolute;top:0;left:50%;width:2px;margin-left:-1px;height:26px;background:var(--line)}
+.tree li{position:relative;padding:26px 6px 0;display:flex;flex-direction:column;align-items:center}
+.tree li::before,.tree li::after{content:"";position:absolute;top:0;right:50%;width:50%;height:26px;border-top:2px solid var(--line)}
+.tree li::after{right:auto;left:50%;border-left:2px solid var(--line)}
+.tree li:only-child::before,.tree li:only-child::after{display:none}
+.tree li:only-child{padding-top:0}
+.tree li:first-child::before,.tree li:last-child::after{border:0 none}
+.tree li:last-child::before{border-right:2px solid var(--line);border-radius:0 6px 0 0}
+.tree li:first-child::after{border-radius:6px 0 0 0}
+.tree>ul{padding-top:0}
+.node{width:158px;border:1px solid var(--rule-2);background:var(--paper-2);text-align:left;padding:8px 10px 8px 12px;position:relative;font-size:12px;line-height:1.3}
+.node::before{content:"";position:absolute;left:0;top:0;bottom:0;width:4px;background:var(--accent)}
+.node .n{font-family:"Barlow Condensed",sans-serif;font-size:16px;font-weight:600;line-height:1.1}
+.node .r{color:var(--ink-2);margin-top:2px}
+.node .f{font-family:"IBM Plex Mono",monospace;font-size:10.5px;color:var(--ink-3);margin-top:4px;word-break:break-all}
+.node .chip{margin-top:6px}
+.node.lead{background:var(--lead);color:var(--lead-ink);border-color:var(--lead)}
+.node.lead::before{display:none}
+.node.lead .r,.node.lead .f{color:var(--lead-ink);opacity:.8}
+.node.lead .n{font-size:17px}
+.node.dept{width:210px}
+.node.dept .n{font-size:20px}
+.node.qc::before{background:var(--qc)}
+.node.think::before{background:var(--think)}
+.node.dept.invent{background:var(--invent);border-color:var(--invent);color:#fff}
+.node.dept.invent .r,.node.dept.invent .f{color:#fff}
+.node.owner{width:190px;background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
+.node.owner::before{display:none}
+.node.owner .r{color:var(--accent-ink);opacity:.9}
+.tree .grp{font-family:"IBM Plex Mono",monospace;font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-3);margin-bottom:-18px;padding-top:6px}
+.dept-trees{display:grid;gap:26px;margin-top:8px}
+
+/* ===== FLOW (animated run) ===== */
+.flow{margin-top:14px;border:1px solid var(--rule-2);background:var(--paper-2)}
+.flow-top{display:flex;flex-wrap:wrap;align-items:center;gap:8px 12px;padding:10px 12px;border-bottom:1px solid var(--rule)}
+.flow-top .status{font-family:"IBM Plex Mono",monospace;font-size:12px;color:var(--ink-2);margin-left:auto;font-variant-numeric:tabular-nums}
+.flow-top .status b{color:var(--ink)}
+.track-scroll{overflow-x:auto}
+.track{display:block;width:100%;min-width:760px;height:auto}
+.track text{font-family:"IBM Plex Sans",system-ui,sans-serif;fill:var(--ink)}
+.track .lane-label{font-family:"Barlow Condensed",sans-serif;font-size:15px;font-weight:700;fill:var(--ink-3);letter-spacing:.04em}
+.track .lane-label.invent{fill:var(--invent)}
+.track .edge{stroke:var(--line);stroke-width:2;fill:none}
+.track .edge.done{stroke:var(--ink)}
+.track .loop{stroke:var(--qc);stroke-width:1.5;fill:none;stroke-dasharray:4 3;opacity:.35}
+.track .loop.on{opacity:1}
+.track .nd rect{fill:var(--paper);stroke:var(--rule-2);stroke-width:1.5}
+.track .nd .id{font-family:"IBM Plex Mono",monospace;font-size:10px;fill:var(--ink-3)}
+.track .nd .nm{font-family:"Barlow Condensed",sans-serif;font-size:15px;font-weight:600}
+.track .nd.done rect{stroke:var(--ink)}
+.track .nd.done .tick{opacity:1}
+.track .nd .tick{opacity:0;fill:var(--ok);font-size:12px;font-weight:600}
+.track .nd.on rect{stroke:var(--accent);stroke-width:2.5;fill:var(--paper)}
+.track .nd.invent.on rect{stroke:var(--invent)}
+.track .dot{fill:var(--accent);stroke:var(--paper);stroke-width:2}
+.track .dot.invent{fill:var(--invent)}
+.flow-body{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,1fr);gap:0;border-top:1px solid var(--rule)}
+.flow-body>div{min-width:0;padding:12px 14px}
+.flow-body>div+div{border-left:1px solid var(--rule)}
+.inside .eyebrow{margin-bottom:6px}
+.inside h3{font-size:22px;font-weight:600}
+.inside .why{color:var(--ink-2);margin:4px 0 10px;min-height:2.6em}
+.subs{display:flex;flex-direction:column;gap:5px}
+.sub{display:grid;grid-template-columns:22px 1fr auto;gap:8px;align-items:center;padding:6px 8px;border:1px solid transparent;background:var(--paper);font-size:12.5px;color:var(--ink-3)}
+.sub .m{font-family:"IBM Plex Mono",monospace;font-size:10px;text-align:center}
+.sub .who{font-family:"IBM Plex Mono",monospace;font-size:10.5px;color:var(--ink-3);text-align:right;white-space:nowrap}
+.sub.done{color:var(--ink-2)}
+.sub.done .m{color:var(--ok)}
+.sub.on{border-color:var(--accent);color:var(--ink);background:var(--paper)}
+.sub.on.agent{border-color:var(--accent)}
+.sub.on.qc{border-color:var(--qc)}
+.sub.on.think{border-color:var(--think)}
+.sub.on .who{color:var(--ink)}
+.sub .bar{grid-column:1/-1;height:3px;background:var(--rule);overflow:hidden;display:none}
+.sub.on .bar{display:block}
+.sub .bar i{display:block;height:100%;width:0;background:var(--accent);transition:width .12s linear}
+.sub.qc.on .bar i{background:var(--qc)}
+.sub.think.on .bar i{background:var(--think)}
+.log{font-family:"IBM Plex Mono",monospace;font-size:11.5px;line-height:1.5;color:var(--ink-2);max-height:360px;overflow-y:auto;padding:8px 10px;background:var(--paper);border:1px solid var(--rule)}
+.log div{padding:1px 0;border-bottom:1px dotted var(--rule)}
+.log .t{color:var(--ink-3)}
+.log .a{color:var(--accent)}
+.log .q{color:var(--qc)}
+.log .k{color:var(--ok)}
+.log .v{color:var(--invent)}
+.progress{height:4px;background:var(--rule);position:relative}
+.progress i{position:absolute;left:0;top:0;bottom:0;width:0;background:var(--accent);transition:width .2s linear}
+.flow-note{color:var(--ink-3);font-size:12.5px;margin-top:8px;max-width:70ch}
+
+/* ===== ROSTER (reference) ===== */
+.roster{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin-top:14px}
+.card{position:relative;border:1px solid var(--rule-2);background:var(--paper-2);padding:10px 12px 10px 14px;min-width:0}
+.card::before{content:"";position:absolute;left:0;top:0;bottom:0;width:4px;background:var(--accent)}
+.card.qc::before{background:var(--qc)}
+.card.think::before{background:var(--think)}
+.card .name{font-family:"Barlow Condensed",sans-serif;font-size:19px;font-weight:600;line-height:1.1}
+.card .title{color:var(--ink-2);font-size:13px;margin-top:2px}
+.card .io{margin-top:7px;font-size:12.5px;color:var(--ink-2)}
+.card .io span{color:var(--ink-3)}
+.card .meta{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+.tally{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin-top:22px}
+.tally div{border-top:1px solid var(--rule-2);padding-top:6px}
+.tally .n{font-family:"Barlow Condensed",sans-serif;font-size:30px;font-weight:700;line-height:1;font-variant-numeric:tabular-nums}
+.tally .l{font-size:12px;color:var(--ink-3);margin-top:2px}
+
+@media (max-width:820px){
+  h1{font-size:34px}
+  .flow-body{grid-template-columns:1fr}
+  .flow-body>div+div{border-left:0;border-top:1px solid var(--rule)}
+  .roster{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .tally{grid-template-columns:repeat(2,minmax(0,1fr))}
+}
+@media (max-width:460px){.roster{grid-template-columns:1fr}}
+@media (prefers-reduced-motion:reduce){
+  .sub .bar i,.progress i{transition:none}
+}
+</style>
+</head>
+<body>
+
+<div class="wrap">
+  <div class="eyebrow">Visurena Studio · part one · book → screenplay</div>
+  <h1>The Story Department</h1>
+  <p class="lede">Seventeen agents, read as a company. <b>Code is management</b>: every step script decides the order, hands out briefs, assembles, counts and checks. <b>Agents are specialists</b>: each gets one brief and returns one typed object. Nobody edits a file; nobody reads another agent's answer. The chart below is who reports to whom; the flow after it is one book going through a typical run.</p>
+
+  <div class="legend">
+    <span class="k"><span class="swatch lead"></span> leader (code: a runner or step script)</span>
+    <span class="k"><span class="swatch agent"></span> agent, workhorse tier</span>
+    <span class="k"><span class="swatch think"></span> agent, reasoning tier</span>
+    <span class="k"><span class="swatch qc"></span> QC agent: judges work, never the book</span>
+  </div>
+
+  <!-- ===== ORG CHART ===== -->
+  <section class="block">
+    <div class="head"><h2>Org chart</h2><p>Every box reports to the one above it. A step script is a unit head: it calls its agents in order and owns their output.</p></div>
+    <div class="chart-tools">
+      <button class="btn" id="fitBtn" aria-pressed="true">Fit to width</button>
+      <button class="btn" id="fullBtn" aria-pressed="false">100 %</button>
+      <span>Drag sideways to scroll at 100 %.</span>
+    </div>
+
+    <div class="chart-scroll"><div class="chart-fit" id="chart1"><div class="tree">
+      <ul>
+        <li><div class="node owner"><div class="n">Owner</div><div class="r">Studio head. Every gate that spends escalates here; his word outranks every file.</div></div>
+          <ul>
+            <li><div class="node lead"><div class="n">Production office</div><div class="r">Order, run, hire</div><div class="f">stages.yaml · analysis.py · studio/llm.py + models.yaml</div></div>
+              <ul>
+                <li><div class="node lead dept"><div class="n">Analysis dept.</div><div class="r">Asserts what the book says. 6 units, run in file order by the manager.</div><div class="f">analysis.py</div></div></li>
+                <li><div class="node lead dept invent"><div class="n">Screenplay dept.</div><div class="r">Invents. 5 units, run per (book, target); never inside analysis.</div><div class="f">scripts/screenplay/step_0N_*.py</div></div></li>
+                <li><div class="node lead dept"><div class="n">Audit bench</div><div class="r">Blind second opinions, on request.</div><div class="f">scripts/*/audit_locations.py</div></div>
+                  <ul>
+                    <li><div class="node qc"><div class="n">Location auditor</div><div class="r">Where does this scene happen? Sees nobody else's answer.</div><span class="chip qc">QC</span></div></li>
+                  </ul>
+                </li>
+              </ul>
+            </li>
+          </ul>
+        </li>
+      </ul>
+    </div></div></div>
+
+    <div class="dept-trees">
+      <div>
+        <div class="eyebrow">Analysis department · units and their agents</div>
+        <div class="chart-scroll"><div class="chart-fit" id="chart2"><div class="tree">
+          <ul>
+            <li><div class="node lead dept"><div class="n">Analysis dept.</div><div class="r">Manager: analysis.py</div></div>
+              <ul>
+                <li><div class="node lead"><div class="n">01 Ingest</div><div class="r">EPUB → numbered chapters</div><div class="f">step_01_ingest.py</div></div>
+                  <ul>
+                    <li><div class="node"><div class="n">Book cartographer</div><div class="r">Maps the book's real divisions</div><div class="f">01_03</div></div></li>
+                    <li><div class="node qc"><div class="n">Ingest validator</div><div class="r">Was the parse clean?</div><div class="f">01_05</div></div></li>
+                  </ul>
+                </li>
+                <li><div class="node lead"><div class="n">02 Extract</div><div class="r">The crew, per chapter</div><div class="f">step_02_extract.py</div></div>
+                  <ul>
+                    <li><div class="node"><div class="n">Scene breakdown</div><div class="r">1st AD. Cuts the scenes; everyone below uses its numbers</div><div class="f">02_01</div></div>
+                      <ul>
+                        <li><div class="node"><div class="n">Script supervisor</div><div class="r">Time evidence, continuity</div><div class="f">02_02 · 1st</div></div></li>
+                        <li><div class="node"><div class="n">Casting director</div><div class="r">Who is in each scene</div><div class="f">02_02 · 2nd</div></div></li>
+                        <li><div class="node"><div class="n">Story analyst</div><div class="r">What happens</div><div class="f">02_02 · 3rd</div></div></li>
+                        <li><div class="node"><div class="n">Dialogue editor</div><div class="r">Who speaks to whom</div><div class="f">02_02 · 4th</div></div></li>
+                      </ul>
+                    </li>
+                    <li><div class="node qc"><div class="n">Extraction auditor</div><div class="r">Checks the crew's work per dimension</div><div class="f">02_05</div></div></li>
+                  </ul>
+                </li>
+                <li><div class="node lead"><div class="n">03 Standardize</div><div class="r">Canonical ids + coordinates</div><div class="f">step_03_standardize.py</div></div>
+                  <ul>
+                    <li><div class="node"><div class="n">Entity resolver</div><div class="r">Merges surface forms; geocodes places</div><div class="f">03_02</div></div></li>
+                  </ul>
+                </li>
+                <li><div class="node lead"><div class="n">04 Timeline</div><div class="r">Worldlines, contradictions</div><div class="f">step_04_timeline.py</div></div>
+                  <ul>
+                    <li><div class="node"><div class="n">Gap filler</div><div class="r">Every scene gets a place and hour</div><div class="f">04_06</div></div></li>
+                    <li><div class="node"><div class="n">Journey tracer</div><div class="r">A moving span is a route</div><div class="f">04</div></div></li>
+                  </ul>
+                </li>
+                <li><div class="node lead"><div class="n">05 Consolidate</div><div class="r">Per-character, per-place files</div><div class="f">step_05_consolidate.py</div></div>
+                  <ul>
+                    <li><div class="node"><div class="n">Profile writer</div><div class="r">Profiles from the dossier only</div><div class="f">05_02</div></div></li>
+                  </ul>
+                </li>
+                <li><div class="node lead"><div class="n">06 Verify</div><div class="r">Code only, zero LLM</div><div class="f">step_06_verify.py</div></div></li>
+              </ul>
+            </li>
+          </ul>
+        </div></div></div>
+      </div>
+
+      <div>
+        <div class="eyebrow">Screenplay department · units and their agents</div>
+        <div class="chart-scroll"><div class="chart-fit" id="chart3"><div class="tree">
+          <ul>
+            <li><div class="node lead dept invent"><div class="n">Screenplay dept.</div><div class="r">Run per (book, target)</div></div>
+              <ul>
+                <li><div class="node lead"><div class="n">01 Dossier</div><div class="r">Code only. One record per source scene</div><div class="f">step_01_dossier.py</div></div></li>
+                <li><div class="node lead"><div class="n">02 Plan</div><div class="r">What survives, in what order</div><div class="f">step_02_plan.py</div></div>
+                  <ul>
+                    <li><div class="node think"><div class="n">Story editor</div><div class="r">Chooses which scenes exist; lists every omission</div><div class="f">02_02</div><span class="chip think">reasoning</span></div></li>
+                  </ul>
+                </li>
+                <li><div class="node lead"><div class="n">03 Draft</div><div class="r">Per beat, two calls in order</div><div class="f">step_03_draft.py</div></div>
+                  <ul>
+                    <li><div class="node think"><div class="n">Screenwriter</div><div class="r">Action + dialogue, provenance on every line</div><div class="f">03_01 · first</div><span class="chip think">reasoning</span></div></li>
+                    <li><div class="node"><div class="n">Shot designer</div><div class="r">Camera on the frozen stream; rewrites nothing</div><div class="f">03_02 · second</div></div></li>
+                  </ul>
+                </li>
+                <li><div class="node lead"><div class="n">04 Render</div><div class="r">Code only. json → fountain → pdf</div><div class="f">step_04_render.py</div></div></li>
+                <li><div class="node lead"><div class="n">05 Verify</div><div class="r">Guards, then one sampled audit</div><div class="f">step_05_verify.py</div></div>
+                  <ul>
+                    <li><div class="node qc"><div class="n">Adaptation auditor</div><div class="r">Contradiction, never difference</div><div class="f">05_02</div></div></li>
+                  </ul>
+                </li>
+              </ul>
+            </li>
+          </ul>
+        </div></div></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== FLOW ===== -->
+  <section class="block">
+    <div class="head"><h2>A typical run</h2><p>One book, start to finish. Press play: the dot is the book, the panel shows who is working inside the current step, the log is what the step scripts print. Numbers are illustrative for a 14-chapter novel.</p></div>
+    <div class="flow">
+      <div class="flow-top">
+        <button class="btn" id="play">Play</button>
+        <button class="btn" id="stepBtn">Step</button>
+        <button class="btn" id="reset">Restart</button>
+        <span style="color:var(--ink-3);font-size:12.5px">Speed</span>
+        <button class="btn spd" data-s="1" aria-pressed="true">1×</button>
+        <button class="btn spd" data-s="2" aria-pressed="false">2×</button>
+        <button class="btn spd" data-s="4" aria-pressed="false">4×</button>
+        <span class="status" id="status"><b>ready</b> · 0 / 0</span>
+      </div>
+      <div class="progress"><i id="prog"></i></div>
+      <div class="track-scroll"><svg class="track" id="track" viewBox="0 0 1000 250" role="img" aria-label="Pipeline track: analysis steps 01 to 06, then screenplay steps 01 to 05"></svg></div>
+      <div class="flow-body">
+        <div class="inside">
+          <div class="eyebrow" id="inLane">Inside the step</div>
+          <h3 id="inName">Press play</h3>
+          <div class="why" id="inWhy">The run starts at Analysis 01 with the EPUB and ends with screenplay.json handed to the trailer and episode departments.</div>
+          <div class="subs" id="subs"></div>
+        </div>
+        <div>
+          <div class="eyebrow" style="margin-bottom:6px">Run log</div>
+          <div class="log" id="log"></div>
+        </div>
+      </div>
+    </div>
+    <p class="flow-note">The dashed return arrows are the three improve loops. Each is capped at two rounds; the run shown takes one round in Extract (the auditor flags one chapter's dialogue, and only that specialist is re-run). Nothing in this stage spends money on media; every call is a text model on the <code>workhorse</code> or <code>reasoning</code> tier.</p>
+  </section>
+
+  <!-- ===== ROSTER ===== -->
+  <section class="block">
+    <div class="head"><h2>Roster</h2><p>What each agent is handed and what it returns. One skill file each in <code>agents/skills/</code>; the return type is a pydantic model, validated before anyone downstream sees it.</p></div>
+    <div class="roster">
+      <div class="card"><div class="name">Book cartographer</div><div class="title">Analysis 01_03</div><div class="io">Gets every heading + the TOC · <span>returns</span> BookMap</div><div class="meta"><span class="chip">workhorse</span></div></div>
+      <div class="card qc"><div class="name">Ingest validator</div><div class="title">Analysis 01_05</div><div class="io">Gets manifest + chapter samples · <span>returns</span> Verdict</div><div class="meta"><span class="chip qc">QC</span><span class="chip">workhorse</span></div></div>
+      <div class="card"><div class="name">Scene breakdown (1st AD)</div><div class="title">Analysis 02_01</div><div class="io">Gets numbered paragraphs · <span>returns</span> CallSheet</div><div class="meta"><span class="chip">workhorse</span></div></div>
+      <div class="card"><div class="name">Script supervisor</div><div class="title">Analysis 02_02</div><div class="io">Gets chapter + call sheet · <span>returns</span> TimeReport</div><div class="meta"><span class="chip">workhorse</span></div></div>
+      <div class="card"><div class="name">Casting director</div><div class="title">Analysis 02_02</div><div class="io">Gets chapter + call sheet · <span>returns</span> CastReport</div><div class="meta"><span class="chip">workhorse</span></div></div>
+      <div class="card"><div class="name">Story analyst</div><div class="title">Analysis 02_02</div><div class="io">Gets chapter + call sheet · <span>returns</span> EventReport</div><div class="meta"><span class="chip">workhorse</span></div></div>
+      <div class="card"><div class="name">Dialogue editor</div><div class="title">Analysis 02_02</div><div class="io">Gets chapter + call sheet · <span>returns</span> DialogueReport</div><div class="meta"><span class="chip">workhorse</span></div></div>
+      <div class="card qc"><div class="name">Extraction auditor</div><div class="title">Analysis 02_05</div><div class="io">Gets full chapter + extraction · <span>returns</span> AuditVerdict</div><div class="meta"><span class="chip qc">QC</span><span class="chip">workhorse</span></div></div>
+      <div class="card"><div class="name">Entity resolver</div><div class="title">Analysis 03_02</div><div class="io">Gets observed forms + chapters · <span>returns</span> CharacterRegistry, LocationRegistry</div><div class="meta"><span class="chip">workhorse</span></div></div>
+      <div class="card"><div class="name">Gap filler</div><div class="title">Analysis 04_06</div><div class="io">Gets scene + neighbours + place list · <span>returns</span> Placement</div><div class="meta"><span class="chip">workhorse</span></div></div>
+      <div class="card"><div class="name">Journey tracer</div><div class="title">Analysis 04</div><div class="io">Gets a travelling span + neighbours · <span>returns</span> Journey</div><div class="meta"><span class="chip">workhorse</span></div></div>
+      <div class="card"><div class="name">Profile writer</div><div class="title">Analysis 05_02</div><div class="io">Gets an evidence dossier · <span>returns</span> CharacterProfile / LocationProfile</div><div class="meta"><span class="chip">workhorse</span></div></div>
+      <div class="card think"><div class="name">Story editor</div><div class="title">Screenplay 02_02</div><div class="io">Gets a scene index + target · <span>returns</span> ScreenplayPlan</div><div class="meta"><span class="chip think">reasoning</span></div></div>
+      <div class="card think"><div class="name">Screenwriter</div><div class="title">Screenplay 03_01</div><div class="io">Gets source scenes verbatim + voices + style · <span>returns</span> SceneDraft</div><div class="meta"><span class="chip think">reasoning</span></div></div>
+      <div class="card"><div class="name">Shot designer</div><div class="title">Screenplay 03_02</div><div class="io">Gets the frozen element stream · <span>returns</span> ShotPlan</div><div class="meta"><span class="chip">workhorse</span></div></div>
+      <div class="card qc"><div class="name">Adaptation auditor</div><div class="title">Screenplay 05_02</div><div class="io">Gets a drafted scene + its paragraphs · <span>returns</span> AuditVerdict</div><div class="meta"><span class="chip qc">QC</span><span class="chip">workhorse</span></div></div>
+      <div class="card qc"><div class="name">Location auditor</div><div class="title">Audit bench</div><div class="io">Gets verbatim scene text + place list · <span>returns</span> LocationVerdict</div><div class="meta"><span class="chip qc">QC</span><span class="chip">workhorse</span></div></div>
+    </div>
+    <div class="tally">
+      <div><div class="n">17</div><div class="l">agents</div></div>
+      <div><div class="n">2</div><div class="l">reasoning tier — both resolve to the same model as workhorse today</div></div>
+      <div><div class="n">4</div><div class="l">QC judges</div></div>
+      <div><div class="n">3</div><div class="l">improve loops, max 2 rounds each</div></div>
+    </div>
+  </section>
+</div>
+
+<script>
+(function(){
+  /* ---------- org chart fit ---------- */
+  var fits=[].slice.call(document.querySelectorAll('.chart-fit'));
+  var mode='fit';
+  function layout(){
+    fits.forEach(function(el){
+      var tree=el.firstElementChild, parent=el.parentElement;
+      el.style.transform='none'; el.style.height='auto';
+      var w=tree.offsetWidth, h=tree.offsetHeight, avail=parent.clientWidth;
+      var s=(mode==='fit')?Math.min(1,avail/w):1;
+      el.style.transform='scale('+s+')';
+      el.style.height=(h*s)+'px';
+      el.style.width=w+'px';
+    });
+  }
+  var fitBtn=document.getElementById('fitBtn'), fullBtn=document.getElementById('fullBtn');
+  fitBtn.addEventListener('click',function(){mode='fit';fitBtn.setAttribute('aria-pressed','true');fullBtn.setAttribute('aria-pressed','false');layout();});
+  fullBtn.addEventListener('click',function(){mode='full';fitBtn.setAttribute('aria-pressed','false');fullBtn.setAttribute('aria-pressed','true');layout();});
+  window.addEventListener('resize',layout);
+  if(document.fonts&&document.fonts.ready){document.fonts.ready.then(layout);}
+  layout(); setTimeout(layout,300);
+
+  /* ---------- the run ---------- */
+  var reduce=window.matchMedia&&window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  var STEPS=[
+    {lane:'A',id:'01',name:'Ingest',why:'EPUB in. Code establishes the (chapter, paragraph) grid every later claim anchors to.',subs:[
+      {m:'01_01',t:'read_source: open the EPUB, parse spine + TOC',who:'code',k:'code',d:1.2,log:'ingest: 14 spine docs, TOC 16 entries'},
+      {m:'01_02',t:'clean: drop cover/colophon, strip license boilerplate',who:'code',k:'code',d:1,log:'clean: 2 non-content docs dropped'},
+      {m:'01_03',t:'chapterize: which headings are real divisions?',who:'book cartographer',k:'agent',d:2,log:'<span class="a">book_cartographer</span> → BookMap: 2 parts, 14 chapters, 1 preface'},
+      {m:'01_04',t:'finalize: counts match TOC, contiguous numbering, sha256',who:'code',k:'code',d:1,log:'checks: 14/14 chapters, 1,204 paragraphs, book.json written'},
+      {m:'01_05',t:'agent_check: was the parse clean?',who:'ingest validator',k:'qc',d:1.8,log:'<span class="q">ingest_validator</span> → Verdict ok, 0 issues'},
+      {m:'01_06',t:'improve: skipped, nothing flagged',who:'code',k:'code',d:.5,log:'<span class="k">step 01 completed</span>'}]},
+    {lane:'A',id:'02',name:'Extract',why:'Per chapter: the 1st AD cuts the scenes, then four specialists work from those scene numbers, in this order.',subs:[
+      {m:'02_01',t:'ch 1 · breakdown: cut where the camera could not keep rolling',who:'scene breakdown',k:'agent',d:2,log:'ch 1 breakdown… <span class="a">scene_breakdown</span> → 7 scenes'},
+      {m:'02_02',t:'ch 1 · time evidence + continuity',who:'script supervisor',k:'agent',d:1.4,log:'ch 1 time… <span class="a">script_supervisor</span> → TimeReport'},
+      {m:'02_02',t:'ch 1 · who is in each scene',who:'casting director',k:'agent',d:1.4,log:'ch 1 characters… <span class="a">casting_director</span> → CastReport'},
+      {m:'02_02',t:'ch 1 · what happens (asserted realis only)',who:'story analyst',k:'agent',d:1.4,log:'ch 1 events… <span class="a">story_analyst</span> → EventReport'},
+      {m:'02_02',t:'ch 1 · who speaks to whom',who:'dialogue editor',k:'agent',d:1.4,log:'ch 1 dialogue… <span class="a">dialogue_editor</span> → DialogueReport'},
+      {m:'02_03',t:'ch 1 · assemble by scene number',who:'code',k:'code',d:.7,log:'ch 1 assembled → extraction/ch_01.json'},
+      {m:'02_04',t:'ch 1 · every quote verbatim in its paragraphs',who:'code',k:'code',d:.7,log:'ch 1 grounding: 41/41 quotes verbatim'},
+      {m:'—',t:'chapters 2 – 14: the same crew, the same order',who:'crew ×13',k:'agent',d:3,log:'ch 2…14 (resume skips chapters already extracted) · 13 × 5 calls'},
+      {m:'02_05',t:'audit: completeness + faithfulness per dimension',who:'extraction auditor',k:'qc',d:2,log:'<span class="q">extraction_auditor</span> → ch 5 dialogue: one exchange attributed to the wrong speaker'},
+      {m:'02_06',t:'improve round 1: re-run ONLY (ch 5 × dialogue), reassemble, re-check',who:'dialogue editor',k:'agent',d:1.8,loop:true,log:'improve: <span class="a">dialogue_editor</span> ch 5 re-run → re-check ok · <span class="k">step 02 completed</span> (round 1 of max 2)'}]},
+    {lane:'A',id:'03',name:'Standardize',why:'Surface forms become canonical ids with aliases and map coordinates. Never re-reads the book.',subs:[
+      {m:'03_01',t:'collect every character / location surface form',who:'code',k:'code',d:.8,log:'collect: 118 character forms, 52 location forms'},
+      {m:'03_02',t:'resolve characters: "the detective", "my companion", "Mr. …" → one id',who:'entity resolver',k:'agent',d:2,log:'<span class="a">entity_resolver</span> → CharacterRegistry: 23 canonical, 118 aliases'},
+      {m:'03_02',t:'resolve locations, with lat/lon',who:'entity resolver',k:'agent',d:1.6,log:'<span class="a">entity_resolver</span> → LocationRegistry: 24 places, 24 geocoded'},
+      {m:'03_03',t:'remap every scene to canonical ids',who:'code',k:'code',d:.7,log:'scenes.json: 92 scenes tagged'},
+      {m:'03_04',t:'coverage + coordinate + orphan-id checks',who:'code',k:'code',d:.6,log:'checks pass · <span class="k">step 03 completed</span>'}]},
+    {lane:'A',id:'04',name:'Timeline',why:'Code solves story time into worldlines. Two agents place what the solver cannot.',subs:[
+      {m:'04_01',t:'partition: main frame vs embedded flashback',who:'code',k:'code',d:.7,log:'2 narrative tracks'},
+      {m:'04_02',t:'day axis: merge per-chapter story days',who:'code',k:'code',d:.7,log:'day axis: 31 story days'},
+      {m:'04_03',t:'worldlines per character',who:'code',k:'code',d:.8,log:'worldlines: 23 characters'},
+      {m:'04_04',t:'contradictions: bilocation, travel feasibility',who:'code',k:'code',d:.7,log:'contradict: 0 bilocations, 1 travel warning'},
+      {m:'04_06',t:'3 scenes have no place or hour: place them from neighbours',who:'gap filler',k:'agent',d:2,log:'<span class="a">gap_filler</span> ×3 → Placement (inferred)'},
+      {m:'04',t:'1 span crosses several places: is it a route?',who:'journey tracer',k:'agent',d:1.4,log:'<span class="a">journey_tracer</span> → Journey, 4 legs'},
+      {m:'04_05',t:'emit timeline.json',who:'code',k:'code',d:.5,log:'timeline.json · <span class="k">step 04 completed</span>'}]},
+    {lane:'A',id:'05',name:'Consolidate',why:'One file per character and per place, with evolution over the story: the building blocks for voice, image and song.',subs:[
+      {m:'05_01',t:'gather per entity: journey, state changes, quotes, companions',who:'code',k:'code',d:.8,log:'dossiers: 23 characters, 24 locations'},
+      {m:'05_02',t:'profiles from the dossier only, never the book',who:'profile writer',k:'agent',d:3,log:'<span class="a">profile_writer</span> ×47 → CharacterProfile / LocationProfile'},
+      {m:'05_03',t:'emit characters/<id>.json, locations/<id>.json',who:'code',k:'code',d:.5,log:'47 files written'},
+      {m:'05_04',t:'every entity has a non-empty journey',who:'code',k:'code',d:.5,log:'checks pass · <span class="k">step 05 completed</span>'}]},
+    {lane:'A',id:'06',name:'Verify',why:'Whole-chain QC, code only, zero cost. Proves the acceptance test is answerable.',subs:[
+      {m:'06_01',t:'integrity: every artifact present, counts agree',who:'code',k:'code',d:.6,log:'integrity ok'},
+      {m:'06_02',t:'coverage: resolution rates, every location geocoded',who:'code',k:'code',d:.6,log:'coverage: scenes 100 %, places 100 %'},
+      {m:'06_03',t:'timeline: worldline queryable per story day',who:'code',k:'code',d:.6,log:'queryable: 31/31 days'},
+      {m:'06_04',t:'qc_report.json + verdict',who:'code',k:'code',d:.6,log:'<span class="k">analysis complete</span> — the book is a set of facts now'}]},
+    {lane:'S',id:'01',name:'Dossier',why:'Code joins what analysis scattered into one record per source scene. Shared by every target of this book.',subs:[
+      {m:'01_01',t:'gather the six analysis families, hash them',who:'code',k:'code',d:.7,log:'<span class="v">screenplay</span> dossier: input_sha256 computed'},
+      {m:'01_02',t:'join: names → ids, attach int/ext, dialogue, events, pov',who:'code',k:'code',d:.9,log:'92 scenes joined'},
+      {m:'01_03',t:'checks: every scene has int_ext, place, DAY|NIGHT',who:'code',k:'code',d:.6,log:'checks pass (warn: 3 speakers lack a voice note)'},
+      {m:'01_04',t:'emit dossier.json',who:'code',k:'code',d:.4,log:'dossier.json · <span class="k">step 01 completed</span>'}]},
+    {lane:'S',id:'02',name:'Plan',why:'What survives and in what order. One reasoning call per target; every source scene is either in a beat or listed as omitted with a reason.',subs:[
+      {m:'02_01',t:'brief: target config + a one-line-per-scene index',who:'code',k:'code',d:.7,log:'brief: 92 lines, ~5k tokens'},
+      {m:'02_02',t:'select: group scenes into sequences; decide what exists',who:'story editor',k:'think',d:3,log:'<span class="v">story_editor</span> (reasoning) → ScreenplayPlan: 22 beats, 16 scenes omitted with reasons'},
+      {m:'02_03',t:'checks: every beat exists, roster ⊂ registry, nothing silently dropped',who:'code',k:'code',d:.7,log:'checks: 92/92 scenes accounted for'},
+      {m:'02_04',t:'emit plan.json + source fingerprint',who:'code',k:'code',d:.4,log:'plan.json · <span class="k">step 02 completed</span>'}]},
+    {lane:'S',id:'03',name:'Draft',why:'The paid work. Two calls per beat, in order. Each scene file is written the moment it exists, so a crash keeps everything before it.',subs:[
+      {m:'03_01',t:'beat 1 · write: action + dialogue, provenance on every line',who:'screenwriter',k:'think',d:2.2,log:'beat 1 <span class="v">screenwriter</span> (reasoning) → SceneDraft, 38 elements'},
+      {m:'03_02',t:'beat 1 · shoot: camera on the frozen stream',who:'shot designer',k:'agent',d:1.4,log:'beat 1 <span class="a">shot_designer</span> → ShotPlan, 11 shots'},
+      {m:'03_03',t:'beat 1 · assemble: sluglines, CONT’D, page eighths',who:'code',k:'code',d:.6,log:'scenes/sc_0001.json written'},
+      {m:'—',t:'beats 2 – 22: write, shoot, assemble',who:'×21',k:'think',d:3.5,log:'beats 2…22 · 21 × 2 calls · every file saved as it lands'},
+      {m:'—',t:'scene numbering across the whole draft',who:'code',k:'code',d:.5,log:'22 scenes numbered · <span class="k">step 03 completed</span>'}]},
+    {lane:'S',id:'04',name:'Render',why:'Code, byte-stable, free. screenplay.json is THE artifact; Fountain and PDF are rendered from it, never parsed back.',subs:[
+      {m:'04_01',t:'screenplay.json',who:'code',k:'code',d:.5,log:'screenplay.json'},
+      {m:'04_02',t:'screenplay.fountain, rendered from the json',who:'code',k:'code',d:.5,log:'screenplay.fountain'},
+      {m:'04_03',t:'screenplay.pdf via screenplain',who:'code',k:'code',d:.7,log:'screenplay.pdf, 27 pages'},
+      {m:'04_04',t:'elements.json: flat shot list for the video stage',who:'code',k:'code',d:.4,log:'elements.json: 243 shots'},
+      {m:'04_05',t:'round-trip lint: parse our own output, assert the typing',who:'code',k:'code',d:.7,log:'lint: 0 misparsed lines, 24 min vs 22–33 target · <span class="k">step 04 completed</span>'}]},
+    {lane:'S',id:'05',name:'Verify',why:'Deterministic guards first; one agent over a 3-scene sample second. It checks contradiction, never difference.',subs:[
+      {m:'05_01',t:'guards G1–G4: coordinates, roster, place-and-time, verbatim claims',who:'code',k:'code',d:1,log:'guards: 2 verbatim claims downgraded to adapted (counts, never fails)'},
+      {m:'05_02',t:'audit K=3 sampled scenes against their paragraphs',who:'adaptation auditor',k:'qc',d:2.2,log:'<span class="q">adaptation_auditor</span> ×3 → 1 issue, non-blocking'},
+      {m:'05_03',t:'improve: no blocking findings, skipped',who:'code',k:'code',d:.5,log:'improve: 0 rounds'},
+      {m:'05_04',t:'qc_report.json',who:'code',k:'code',d:.6,log:'<span class="k">screenplay complete</span> → hands off to trailer, episode, shorts'}]}
+  ];
+
+  /* svg track */
+  var svg=document.getElementById('track'), NS='http://www.w3.org/2000/svg';
+  function el(n,a,txt){var e=document.createElementNS(NS,n);for(var k in a)e.setAttribute(k,a[k]);if(txt!=null)e.textContent=txt;return e;}
+  var W=1000, laneY={A:78,S:190}, nodeW=118, nodeH=46, gap=16, left=110;
+  var nodes=[];
+  svg.appendChild(el('text',{x:16,y:laneY.A+5,'class':'lane-label'},'ANALYSIS'));
+  svg.appendChild(el('text',{x:16,y:laneY.S+5,'class':'lane-label invent'},'SCREENPLAY'));
+  var edges=[];
+  STEPS.forEach(function(s,i){
+    var idx=(s.lane==='A')?i:i-6, x=left+idx*(nodeW+gap), y=laneY[s.lane]-nodeH/2;
+    var g=el('g',{'class':'nd'+(s.lane==='S'?' invent':'')});
+    g.appendChild(el('rect',{x:x,y:y,width:nodeW,height:nodeH,rx:3}));
+    g.appendChild(el('text',{x:x+9,y:y+15,'class':'id'},(s.lane==='A'?'analysis/':'screenplay/')+s.id));
+    g.appendChild(el('text',{x:x+9,y:y+34,'class':'nm'},s.name));
+    g.appendChild(el('text',{x:x+nodeW-16,y:y+15,'class':'tick'},'✓'));
+    svg.appendChild(g);
+    s.cx=x+nodeW/2; s.cy=laneY[s.lane]; s.x=x; s.y=y; s.g=g;
+    nodes.push(g);
+  });
+  function edge(d,cls){var p=el('path',{d:d,'class':cls});svg.insertBefore(p,svg.firstChild);return p;}
+  STEPS.forEach(function(s,i){
+    var n=STEPS[i+1]; if(!n)return;
+    if(s.lane===n.lane){edges.push(edge('M'+(s.x+nodeW)+' '+s.cy+' L'+n.x+' '+n.cy,'edge'));}
+    else{ /* A06 -> S01: down and back to the left */
+      var d='M'+s.cx+' '+(s.y+nodeH)+' V'+(s.cy+56)+' H'+n.cx+' V'+n.y;
+      edges.push(edge(d,'edge'));
+      svg.appendChild(el('text',{x:(s.cx+n.cx)/2,y:s.cy+50,'text-anchor':'middle','class':'id',style:'font-family:IBM Plex Mono,monospace;font-size:10px;fill:var(--ink-3)'},'analysis complete → one analysis feeds many screenplays'));
+    }
+  });
+  /* improve loops: 01, 02 (analysis), 05 (screenplay) */
+  var loops={};
+  [0,1,10].forEach(function(i){
+    var s=STEPS[i]; var d='M'+(s.x+nodeW-14)+' '+s.y+' C'+(s.x+nodeW-14)+' '+(s.y-26)+' '+(s.x+14)+' '+(s.y-26)+' '+(s.x+14)+' '+s.y;
+    loops[i]=edge(d,'loop');
+    var a=el('path',{d:'M'+(s.x+10)+' '+(s.y-6)+' L'+(s.x+14)+' '+s.y+' L'+(s.x+19)+' '+(s.y-5),'class':'loop'});svg.insertBefore(a,svg.firstChild);loops[i+'a']=a;
+  });
+  var dot=el('circle',{r:7,'class':'dot',cx:STEPS[0].x,cy:STEPS[0].cy});svg.appendChild(dot);
+
+  /* flat list of substeps */
+  var flat=[]; STEPS.forEach(function(s,si){s.subs.forEach(function(u,ui){flat.push({s:si,u:ui});});});
+  var pos=-1, playing=false, speed=1, timer=null, raf=null;
+  var subsEl=document.getElementById('subs'), logEl=document.getElementById('log'), statusEl=document.getElementById('status'), prog=document.getElementById('prog');
+  var inLane=document.getElementById('inLane'), inName=document.getElementById('inName'), inWhy=document.getElementById('inWhy');
+  var playBtn=document.getElementById('play');
+
+  function renderStep(si){
+    var s=STEPS[si];
+    inLane.textContent=(s.lane==='A'?'Analysis · step ':'Screenplay · step ')+s.id;
+    inName.textContent=s.name; inWhy.textContent=s.why;
+    subsEl.innerHTML='';
+    s.subs.forEach(function(u){
+      var d=document.createElement('div'); d.className='sub '+u.k;
+      d.innerHTML='<span class="m">'+u.m+'</span><span>'+u.t+'</span><span class="who">'+u.who+'</span><span class="bar"><i></i></span>';
+      subsEl.appendChild(d);
+    });
+  }
+  function moveDot(s,cb){
+    if(reduce){dot.setAttribute('cx',s.cx);dot.setAttribute('cy',s.cy);cb();return;}
+    var x0=+dot.getAttribute('cx'),y0=+dot.getAttribute('cy'),t0=performance.now(),dur=420/speed;
+    function f(t){var k=Math.min(1,(t-t0)/dur);k=k*k*(3-2*k);dot.setAttribute('cx',x0+(s.cx-x0)*k);dot.setAttribute('cy',y0+(s.cy-y0)*k);if(k<1)raf=requestAnimationFrame(f);else cb();}
+    raf=requestAnimationFrame(f);
+  }
+  function setStatus(txt){statusEl.innerHTML='<b>'+txt+'</b> · '+(pos+1)+' / '+flat.length;prog.style.width=((pos+1)/flat.length*100)+'%';}
+  function log(html){var d=document.createElement('div');var st=STEPS[flat[pos].s];d.innerHTML='<span class="t">'+(st.lane==='A'?'A':'S')+st.id+'</span> '+html;logEl.appendChild(d);logEl.scrollTop=logEl.scrollHeight;}
+
+  function advance(then){
+    if(pos>=flat.length-1){finish();return;}
+    var prev=pos>=0?flat[pos]:null; pos++;
+    var cur=flat[pos], s=STEPS[cur.s], u=s.subs[cur.u];
+    var newStep=!prev||prev.s!==cur.s;
+    function go(){
+      if(newStep){
+        if(prev){STEPS[prev.s].g.classList.remove('on');STEPS[prev.s].g.classList.add('done');edges[prev.s]&&edges[prev.s].classList.add('done');}
+        s.g.classList.add('on'); dot.setAttribute('class','dot'+(s.lane==='S'?' invent':''));
+        renderStep(cur.s);
+      }
+      var rows=subsEl.children;
+      for(var i=0;i<rows.length;i++){rows[i].classList.remove('on');if(i<cur.u)rows[i].classList.add('done');}
+      var row=rows[cur.u]; row.classList.add('on'); row.scrollIntoView({block:'nearest'});
+      if(u.loop){var L=loops[cur.s];if(L){L.classList.add('on');loops[cur.s+'a'].classList.add('on');}}
+      log(u.log); setStatus(u.who==='code'?'code':u.who);
+      var bar=row.querySelector('.bar i'), dur=u.d*1000/speed, t0=performance.now();
+      function tick(t){var k=Math.min(1,(t-t0)/dur);bar.style.width=(k*100)+'%';if(k<1&&playing)raf=requestAnimationFrame(tick);else if(playing){row.classList.remove('on');row.classList.add('done');then&&then();}}
+      if(playing)raf=requestAnimationFrame(tick); else bar.style.width='100%';
+    }
+    if(newStep&&playing)moveDot(s,go); else if(newStep){dot.setAttribute('cx',s.cx);dot.setAttribute('cy',s.cy);go();} else go();
+  }
+  function loop(){if(!playing)return;advance(function(){if(playing)loop();});}
+  function finish(){playing=false;playBtn.textContent='Play';var last=STEPS[STEPS.length-1];last.g.classList.remove('on');last.g.classList.add('done');setStatus('done');inName.textContent='screenplay.json delivered';inWhy.textContent='The trailer, episode and shorts departments read this file. Nothing in this stage generated a picture or a sound.';}
+  function reset(){
+    playing=false;playBtn.textContent='Play';if(raf)cancelAnimationFrame(raf);
+    pos=-1;STEPS.forEach(function(s){s.g.classList.remove('on','done');});edges.forEach(function(e){e.classList.remove('done');});
+    for(var k in loops)loops[k].classList.remove('on');
+    dot.setAttribute('cx',STEPS[0].x);dot.setAttribute('cy',STEPS[0].cy);dot.setAttribute('class','dot');
+    subsEl.innerHTML='';logEl.innerHTML='';inLane.textContent='Inside the step';inName.textContent='Press play';inWhy.textContent='The run starts at Analysis 01 with the EPUB and ends with screenplay.json handed to the trailer and episode departments.';
+    statusEl.innerHTML='<b>ready</b> · 0 / '+flat.length;prog.style.width='0%';
+  }
+  playBtn.addEventListener('click',function(){
+    if(pos>=flat.length-1){reset();}
+    playing=!playing;playBtn.textContent=playing?'Pause':'Play';
+    if(playing){ if(pos>=0){var row=subsEl.children[flat[pos].u];row&&(row.classList.remove('on'),row.classList.add('done'));} loop(); }
+    else if(raf)cancelAnimationFrame(raf);
+  });
+  document.getElementById('stepBtn').addEventListener('click',function(){
+    playing=false;playBtn.textContent='Play';if(raf)cancelAnimationFrame(raf);
+    if(pos>=flat.length-1){finish();return;}
+    advance();
+  });
+  document.getElementById('reset').addEventListener('click',reset);
+  [].forEach.call(document.querySelectorAll('.spd'),function(b){b.addEventListener('click',function(){speed=+b.dataset.s;[].forEach.call(document.querySelectorAll('.spd'),function(x){x.setAttribute('aria-pressed',x===b?'true':'false');});});});
+  reset();
+})();
+</script>
+
+</body>
+</html>
