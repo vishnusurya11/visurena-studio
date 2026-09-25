@@ -205,3 +205,16 @@ SKILL.md.
   near tree tops and a tilt from the smoke read 10 % and 0 %.
 - **A small dark subject under a truck freezes.** T07 read 52 % frozen as a
   sideways truck on a silhouette; as a crane-up the same shot read 26-37 %.
+- **Run every new measure once on a real input before arming it.** ep12 was
+  the first episode through the judged department; eight of its stops were
+  measures built on fakes that crashed on the live ComfyUI or on real take
+  records (docs/audit/2026-09-25_ep12_flow_findings.md, items 20-31).
+- **A checker that found faults is not a crashed checker.** Both exit 1; a
+  step must hand the first to its judge and ladder and refuse only the second
+  (a verdict file written this run is the difference).
+- **A head leak repeats on every seed and is cured by a head, not a render.**
+  The step measure (`take_leak.step_leak`) finds it without an embedder: four
+  published and unpublished heads read 0.85-1.17, nothing else above 0.62.
+- **Dialogue a take cannot lip-sync goes over the shot as narration.** ep12
+  T16's shout lagged 0.43-0.67 s on two lengths; voiced over the shot it needs
+  no lip lock and the man still shouts on screen.
