@@ -55,12 +55,37 @@ def passthrough(extra: list[str]) -> list[str]:
     return out
 
 
-def jobs(ctx) -> list:
-    """The pictures build_pack would draw now: every job without its file on disk."""
+BOUND_KINDS = ("characters", "props")
+"""What the reference bible draws on its own: the characters and props the
+line has BOUND (rows in refs/refs.json).  Never every entity the analysis
+knows -- the first unattended run wanted 66 pictures for a chapter that needed
+one -- and never locations: a place is drawn per episode at its own hour."""
+
+
+def bound(book_dir: Path) -> list[str] | None:
+    """The entity ids refs.json binds, or None when no bible exists yet (an old
+    book before its first bind: then every flag decides, as before)."""
+    import json
+    path = Path(book_dir) / "refs" / "refs.json"
+    if not path.exists():
+        return None
+    return [r["entity_id"] for r in json.loads(path.read_text(encoding="utf-8")).get("refs", [])
+            if r.get("kind") in ("character", "prop", "characters", "props")]
+
+
+def scope(ctx) -> tuple[tuple[str, ...], list[str] | None]:
+    """(kinds, only): the flags when given, else the bound rows of the bible."""
     bp = pack_module()
     extra = extra_of(ctx)
-    kinds = values(extra, "--kind") or bp.KINDS
-    only = values(extra, "--only") or None
+    kinds = tuple(values(extra, "--kind")) or (BOUND_KINDS if bound(ctx.book_dir) is not None else bp.KINDS)
+    only = values(extra, "--only") or bound(ctx.book_dir)
+    return kinds, only
+
+
+def jobs(ctx) -> list:
+    """The pictures build_pack would draw now: every BOUND job without its file on disk."""
+    bp = pack_module()
+    kinds, only = scope(ctx)
     return bp.pending(bp.all_jobs(ctx.book_dir, kinds, only), lambda rel: (ctx.book_dir / rel).exists())
 
 
@@ -86,9 +111,21 @@ def advise(ctx, asked: list, look=None) -> list[str]:
     return misses
 
 
+def scope_flags(ctx) -> list[str]:
+    """What build_pack is told to draw: the caller's flags when given, else the
+    bound scope spelled out, so the script can never widen to the whole book."""
+    extra = extra_of(ctx)
+    if values(extra, "--kind") or values(extra, "--only") or bound(ctx.book_dir) is None:
+        return passthrough(extra)
+    kinds, only = scope(ctx)
+    return [f"--kind={k}" for k in kinds] + [f"--only={w}" for w in (only or [])] + passthrough(extra)
+
+
 def run(ctx) -> None:
     asked = jobs(ctx)
-    ctx.run_script(SCRIPT, *passthrough(extra_of(ctx)), gpu=GPU)
+    if not asked:
+        return                                       # nothing bound is missing; no GPU
+    ctx.run_script(SCRIPT, *scope_flags(ctx), gpu=GPU)
     advise(ctx, asked, getattr(ctx, "look", None))
 
 
