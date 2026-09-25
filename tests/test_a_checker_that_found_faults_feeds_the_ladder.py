@@ -13,13 +13,15 @@ import pytest
 from studio import take_ladder
 
 
-def ctx_with(tmp_path, rc: int):
+def ctx_with(tmp_path, rc: int, writes: bool = True):
     room = tmp_path / "takes" / "r2v"
     room.mkdir(parents=True)
     (room / "T10.mp4").write_bytes(b"take")
     logged = []
 
     def run_script(script, *extra, gpu=False, clock=None):
+        if writes and (room / "T10.content.json").exists():
+            (room / "T10.content.json").write_text("{}", encoding="utf-8")
         if rc:
             raise SystemExit(f"REFUSED: {script} exit {rc}")
         return 0
@@ -44,5 +46,17 @@ def test_a_take_left_without_a_verdict_still_refuses(tmp_path):
 def test_any_other_exit_code_refuses(tmp_path):
     ctx, room, _ = ctx_with(tmp_path, 2)
     (room / "T10.content.json").write_text("{}", encoding="utf-8")
+    with pytest.raises(SystemExit):
+        take_ladder.measured(ctx, "scripts/episode/take_content_check.py", "take_content", ".content.json")
+
+
+def test_a_leftover_verdict_from_an_earlier_run_is_not_proof(tmp_path):
+    """Every verdict on disk but none written this run: a crash before any
+    take was read must still refuse."""
+    import os
+    ctx, room, _ = ctx_with(tmp_path, 1, writes=False)
+    verdict = room / "T10.content.json"
+    verdict.write_text("{}", encoding="utf-8")
+    os.utime(verdict, (1, 1))
     with pytest.raises(SystemExit):
         take_ladder.measured(ctx, "scripts/episode/take_content_check.py", "take_content", ".content.json")

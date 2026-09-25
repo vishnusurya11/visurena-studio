@@ -104,8 +104,16 @@ def test_a_content_fault_goes_to_the_judge_not_out_of_the_step(ctx):
     """ep12: take_content_check exits 1 when a take fails; run_script turned that
     into a refusal and the take judge and its ladder never ran. A checker that
     wrote every take's verdict and found faults hands them to the judge."""
-    take(ctx)
-    ctx.launch = lambda cmd: ctx.launched.append(cmd[1:]) or (1 if "take_content_check" in cmd[1] else 0)
+    t = take(ctx)
+
+    def launch(cmd):
+        ctx.launched.append(cmd[1:])
+        if "take_content_check" in cmd[1]:
+            t.with_suffix(".content.json").write_text('{"passed": false, "faults": ["text"]}', encoding="utf-8")
+            return 1
+        return 0
+
+    ctx.launch = launch
     step.run(ctx)
     assert any("take_strip" in c[0] for c in ctx.launched)
 
