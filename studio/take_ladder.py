@@ -346,12 +346,29 @@ def head_cuts(ctx, wanted: dict[int, list[Fault]]) -> None:
         take_leak.write_head(ctx.home, index, (dq.get("measures") or {}).get("leak"))
 
 
+def measured(ctx, script: str, clock: str, suffix: str, *extra: str) -> None:
+    """Run a take checker; a checker that FOUND faults hands them to the judge.
+
+    ep12: a checker exits 1 when a take fails; run_script made that a refusal,
+    so the judge (step 09) and this ladder's own re-check died on the fault
+    they exist to handle.  Exit 1 is also a crash, so it passes only when
+    every kept take has its verdict file on disk."""
+    try:
+        ctx.run_script(script, *extra, gpu=True, clock=clock)
+    except SystemExit as refused:
+        takes = sorted((ctx.home / TAKES).glob("T??.mp4"))
+        missing = [t.name for t in takes if not t.with_suffix(suffix).exists()]
+        if not str(refused).endswith("exit 1") or missing or not takes:
+            raise
+        ctx.log(f"{script}: faults found; the take judge reads them")
+
+
 def retake(ctx, indices: list[int], why: str, flag: str) -> None:
     """One batched round: the render, then both machine gates on those takes."""
     names = [str(i) for i in sorted(indices)]
     ctx.run_script(RENDER, "--from-refs", "--no-ends", flag, *retake_args(indices, why), gpu=True, clock="takes")
-    ctx.run_script("scripts/episode/take_dq.py", *names, "--attempts", gpu=True, clock="take_dq")
-    ctx.run_script("scripts/episode/take_content_check.py", *names, gpu=True, clock="take_content")
+    measured(ctx, "scripts/episode/take_dq.py", "take_dq", ".dq.json", *names, "--attempts")
+    measured(ctx, "scripts/episode/take_content_check.py", "take_content", ".content.json", *names)
 
 
 def rungs(ctx, plan, flag: str, records: dict[int, dict] | None = None) -> judged_gate.Rungs:
