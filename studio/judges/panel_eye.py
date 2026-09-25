@@ -38,6 +38,14 @@ from studio.measure import boxes, copy as cp, faces, keypoints, ocr
 
 NAME, VERSION = "panel_eye", "1"
 CAPTION = "image_qwen3vl_caption"
+SCORED_BOXES = False
+"""Whether the installed box workflow is a SCORED open-vocabulary detector.
+Measured 2026-09-25 on a finished episode: the LayerMask ObjectDetectorMask
+route returns a mask for every word asked (225 "bridge" boxes on one panel,
+39 "gasworks"), so hats and landmarks read as 587 false faults over 23 panels
+and the asks (27 words x 23 panels = 621 GPU jobs) took 70 minutes.  Until a
+node emits boxes WITH scores and labels, the hat and landmark measures are
+not measured: no ask, no fault, `not_measured` in the evidence."""
 TIMEOUT = 900.0
 """Per ask.  One GPU serves every stage and every session: on the first real run
 a 120 s wait died behind another episode's render still on the queue, and the
@@ -302,9 +310,11 @@ def read_panel(shot: dict, setup: dict, path: Path, t: dict, refs: list[Path]) -
     seen = face_rows(rgb, t["detect"], t["embed"])
     out = [framing(shot.get("size", ""), keypoints.shot_size(pts) if pts is not None else None, read, where),
            posture_fault(pts, prose, planned, where), copy_fault(path, refs, where), unread,
-           asked(lambda: hat_fault(staged, t["run"], seen, pts, size, where), None) if planned == 1 else None]
+           asked(lambda: hat_fault(staged, t["run"], seen, pts, size, where), None)
+           if planned == 1 and SCORED_BOXES else None]
     out += clone_faults(seen, where)
-    out += asked(lambda: landmark_faults(staged, t["run"], setup.get("described", ""), where), [])
+    if SCORED_BOXES:
+        out += asked(lambda: landmark_faults(staged, t["run"], setup.get("described", ""), where), [])
     out += lettering_faults(path, t["reader"], list(shot.get("faces") or []), prose,
                             shot.get("size") == "insert", size[0], where)
     return [f for f in out if f], read is not None
