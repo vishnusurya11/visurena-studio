@@ -143,3 +143,35 @@ def test_nothing_deferred_means_nothing_resumed(tmp_path):
     writer = Recorder()
     desk = plan_ladder.Desk(SimpleNamespace(book_dir=tmp_path, number=3), tmp_path / "plan.json", writer=writer)
     assert desk.resume() is False and writer.previous == []
+
+
+def test_the_best_refused_draft_is_the_one_deferred(tmp_path, monkeypatch):
+    """Pass 6 of episode 13: two edits took the draft from 34 battery lines to one,
+    then fresh_brief and model_tier wrote from nothing and the deferral kept the
+    LAST draft.  The desk keeps the draft with the fewest battery lines and
+    defers that one, so the next pass resumes from the best."""
+    from types import SimpleNamespace
+
+    class Titled:
+        def __init__(self):
+            self.n = 0
+
+        def write(self, brief, refusals=None, previous=None, _agent=None, **kw):
+            from studio.episode_spec import Episode
+            self.n += 1
+            return Episode.model_validate({**canned_plan(3), "title": f"Draft {self.n}"})
+
+    monkeypatch.setattr(plan_ladder, "plan_brief", SimpleNamespace(build=lambda b, n, targets=None: {"number": n}))
+    plan = tmp_path / "plan.json"
+    plan.write_text(json.dumps({**canned_plan(3), "title": "Draft 0"}), encoding="utf-8")
+    desk = plan_ladder.Desk(SimpleNamespace(book_dir=tmp_path, number=3), plan, writer=Titled())
+    rungs = plan_ladder.ladder().rungs
+    lines = [34, 1, 5, 7]                       # Draft 0 -> 34 lines, Draft 1 -> 1, Draft 2 -> 5, Draft 3 -> 7
+    for rung, i, n in [(rungs[0], 0, 34), (rungs[0], 1, 1), (rungs[1], 0, 5), (rungs[2], 0, 7)]:
+        desk.take(rung, i, plan_ladder.battery_verdict([f"G-X {k}" for k in range(n)]))
+    final = plan_ladder.battery_verdict(["G-X 0", "G-X 1"])      # Draft 4 -> 2 lines
+    verdict = desk.terminal(final)
+    aside = desk.sign(verdict)
+    doc = json.loads(aside.read_text(encoding="utf-8"))
+    assert doc["draft"]["title"] == "Draft 1"
+    assert len(doc["faults"]) == 1 and doc["faults"][0]["note"] == "G-X 0"

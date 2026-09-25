@@ -157,3 +157,12 @@ class TestWhatTheStoryboardDraws:
                  changed="the glass reaches his mouth")
         Shot(index=0, section="hook", setup="lab", size="wide", frame="f", motion="m",
              end="The glass rests at his lips.", changed="the glass reaches his mouth")
+
+
+def test_the_dialogue_dial_refuses_with_one_decimal():
+    """Pass 6 of episode 13: 'dialogue is 20% of the words; the dial is 5%-20%'
+    refused a 20.4 % draft and read as a contradiction to the writer."""
+    from studio.episode_spec import DIALOGUE_SHARE, dial_message
+    assert dial_message(0.204) == "dialogue is 20.4% of the words; the dial is 5%-20% (at most 20.0%)"
+    assert dial_message(0.03) == "dialogue is 3.0% of the words; the dial is 5%-20% (at least 5.0%)"
+    assert DIALOGUE_SHARE == (0.05, 0.20)

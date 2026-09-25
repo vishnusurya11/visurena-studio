@@ -75,6 +75,14 @@ MAX_BEAT = 1.5
 MAX_CODA = 4.0
 """The picture after the button, with no voice."""
 DIALOGUE_SHARE = (0.05, 0.20)
+
+
+def dial_message(share: float) -> str:
+    """The dialogue dial's refusal, to one decimal: '20%' against a 20% ceiling
+    read as a contradiction (episode 13, 20.4 %)."""
+    low, high = DIALOGUE_SHARE
+    edge = f"at most {high:.1%}" if share > high else f"at least {low:.1%}"
+    return f"dialogue is {share:.1%} of the words; the dial is {low:.0%}-{high:.0%} ({edge})"
 """Dialogue words as a share of all words: the 90/10 dial, adjustable."""
 MAX_LINES_PER_SHOT = 2
 MAX_SPEAKING = 4
@@ -659,8 +667,7 @@ class Episode(BaseModel):
                                  f"{line.speaker}'s face at close or medium_close (lips are driven)")
         share = self.dialogue_share()
         if not DIALOGUE_SHARE[0] <= share <= DIALOGUE_SHARE[1]:
-            raise ValueError(f"dialogue is {share:.0%} of the words; the dial is "
-                             f"{DIALOGUE_SHARE[0]:.0%}-{DIALOGUE_SHARE[1]:.0%}")
+            raise ValueError(dial_message(share))
         if len({line.speaker for line in self.lines}) > MAX_SPEAKING:
             raise ValueError(f"more than {MAX_SPEAKING} voices")
         return self

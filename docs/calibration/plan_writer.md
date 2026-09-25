@@ -12,6 +12,7 @@ already states; the battery (`plan_check`) and the critic never got a draft.
 | 2 | same | 'slowly' ×2; rule 5; shot numbering; 'slowly' ×3; 19-word lines ×2 | deferred |
 | 3 | one rung, three gateway re-asks | 'slowly' at shots 8 and 14, three times | crashed: the refusal carried no CONTRACT line |
 | 5 | same, the writer editing its draft | ordering; rule 5; a beat before the button; ordering -- then the `canon` rung (337 s) passed the CONTRACT and the battery refused ~80 lines (light directions, at_rest floors, head fractions, `source` spans saying "chapter 13", 11 takes over 8 s) | deferred with a contract-valid draft the next pass would have thrown away |
+| 6 | resumed on `canon` | the resumed draft: CONTRACT OK, G-LIGHT clean, 34 lines (was 80); two improve rungs stuck on the dialogue dial (20.4 % / 22 % against 20 %, printed "20%"); fresh_brief wrote a new contract-valid draft; model_tier's failed ordering | deferred with the fresh draft -- the 34-line one was overwritten |
 | 4 | same as 1, three re-asks each | 'slowly'; 3 lines on one shot; 20-word lines ×2; a dialogue face not at close; 'slowly' ×3 | deferred: every rung fixed what was named and, rewriting from nothing, tripped another rule |
 
 ~50–75 s and cents per draft; a ladder is ~8 min.
@@ -60,6 +61,14 @@ already states; the battery (`plan_check`) and the critic never got a draft.
   into `plan.deferred.json` with its 80 lines and the next pass authored from
   nothing. Step 02 now RESUMES it: the reasoner edits the deferred draft under
   its own refusal lines before the ladder starts.
+
+- **The deferral kept the last draft, not the best.** The desk now remembers
+  the battery-refused draft with the fewest lines and defers that one.
+- **"20%" refused by a 20% ceiling.** The dialogue dial's message prints one
+  decimal and the edge it crossed.
+
+Cost so far: passes 1-4 on the cheap tier ~cents each; passes 5-6 on `canon`
+5-10 min a draft (reasoning tokens), a ladder ~30-40 min.
 
 Unchanged and to be measured on the next passes: `MAX_IMPROVE = 2` (now with three
 re-asks each), the 18-word wall, the no-slow rule.

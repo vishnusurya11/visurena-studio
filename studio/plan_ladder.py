@@ -135,6 +135,7 @@ class Desk:
     drafts: list[tuple[dict, Verdict]] = field(default_factory=list)
     judged: dict[str, Verdict] = field(default_factory=dict)
     agent: object | None = None             # the reasoner, once a rule miss handed it the climb
+    best: tuple | None = None               # (doc, n, faults): the battery-refused draft with the fewest lines
 
     def brief_(self, fresh: bool = False) -> dict:
         if self.brief is None or fresh:
@@ -182,9 +183,17 @@ class Desk:
         episode_home.write_plan(self.plan, episode.model_dump())
 
     def remember(self, verdict: Verdict) -> None:
-        """The draft on disk with its verdict, when the battery let it through."""
-        if self.plan.exists() and not is_battery(verdict):
-            self.drafts.append((episode_home.read_json(self.plan), verdict))
+        """The draft on disk with its verdict, when the battery let it through;
+        else the battery-refused draft with the fewest lines so far (pass 6 of
+        episode 13: two edits took a draft to one line, then fresh_brief and
+        model_tier wrote from nothing and the deferral kept the last)."""
+        if not self.plan.exists():
+            return
+        doc = episode_home.read_json(self.plan)
+        if not is_battery(verdict):
+            self.drafts.append((doc, verdict))
+        elif self.best is None or len(verdict.faults) < self.best[1]:
+            self.best = (doc, len(verdict.faults), list(verdict.faults))
 
     def take(self, rung: Rung, i: int, verdict: Verdict) -> None:
         """One rung: remember the draft it faulted, then draft again."""
@@ -206,10 +215,22 @@ class Desk:
         draft back in plan.json and its verdict, flagged."""
         self.remember(verdict)
         if not self.drafts:
-            return verdict.model_copy(update={"terminal": self.battery_terminal})
+            return self.best_refused(verdict).model_copy(update={"terminal": self.battery_terminal})
         doc, best = min(self.drafts, key=lambda pair: len(pair[1].faults))
         episode_home.write_plan(self.plan, doc)
         return best.model_copy(update={"terminal": verdict.terminal})
+
+    def best_refused(self, verdict: Verdict) -> Verdict:
+        """The best battery-refused draft back on disk for the deferral, and the
+        verdict that refused it: what the next pass resumes from."""
+        if self.best is None or len(verdict.faults) <= self.best[1]:
+            return verdict
+        episode_home.write_plan(self.plan, self.best[0])
+        return battery_verdict([f.note for f in self.best_faults()])
+
+    def best_faults(self) -> list[Fault]:
+        """The battery lines the best refused draft was refused on."""
+        return self.best[2] if self.best and len(self.best) > 2 else []
 
     def sign(self, verdict: Verdict) -> Path:
         """A pass or a keep_best is signed in the judge's name; a defer is set aside."""
