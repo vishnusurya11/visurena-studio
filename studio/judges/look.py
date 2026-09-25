@@ -221,6 +221,8 @@ def style_of(picture, tools: Tools):
 def read_bound(book_dir, row: dict, tools: Tools, acc: Reads) -> None:
     """A row already signed: read only what the new rows are compared against."""
     where, picture = row["path"], picture_of(book_dir, row)
+    if book_dir is not None and not Path(picture).exists():
+        return                                        # a logged row whose picture is gone: not bound to anything
     if kind_of(where) == CHARACTERS:
         try:
             card = describe.parse_card(tools("reader")(picture, describe.prompt_for()))

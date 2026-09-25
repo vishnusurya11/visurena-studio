@@ -87,7 +87,8 @@ def judge_of(ctx, paths: list[str]):
     rest of the pack bound; every fault is logged with its evidence."""
     def judge():
         rows = sheet_ladder.pack_rows(ctx.book_dir)
-        others = [p for p in dict.fromkeys(r["path"] for r in rows) if p not in paths]
+        others = [p for p in dict.fromkeys(r["path"] for r in rows)
+                  if p not in paths and judged_path(ctx.book_dir, p)]
         verdict = look.judge(ctx.book_dir, sheet_ladder.latest(rows, paths),
                              bound=sheet_ladder.latest(rows, others), **tools_of(ctx))
         for f in verdict.faults:

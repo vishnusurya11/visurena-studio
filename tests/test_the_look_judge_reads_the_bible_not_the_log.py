@@ -38,3 +38,17 @@ def test_only_bible_sheets_on_disk_are_judged(tmp_path):
     ctx = StageContext(conn, CODEX, book, "refs", unit="main", logs_root=tmp_path / "logs",
                        busy=lambda: False, hold=tmp_path / "HOLD", launch=lambda cmd: 0)
     assert verdict.paths_to_judge(ctx) == ["refs/characters/lead/sheet.png", "refs/props/lamp/sheet.png"]
+
+
+def test_a_bound_row_whose_picture_is_gone_is_read_from_nothing(tmp_path):
+    from studio.judges import look
+    asked = []
+
+    def reader(picture, question):
+        asked.append(picture)
+        return "{}"
+
+    acc = look.Reads()
+    look.read_bound(tmp_path, {"path": "refs/characters/gone/sheet.png"},
+                    lambda name: reader if name == "reader" else (lambda p: None), acc)
+    assert asked == [] and acc.cards == {} and acc.faces == {}
