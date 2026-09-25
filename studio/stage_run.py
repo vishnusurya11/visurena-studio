@@ -27,10 +27,17 @@ def launch(cmd: list[str]) -> int:
     return subprocess.run(cmd).returncode
 
 
+def capture(cmd: list[str]) -> tuple[int, str]:
+    """Run one script to completion with its stdout and stderr caught, for a
+    step that READS what the script printed (a gate's refusals)."""
+    run = subprocess.run(cmd, capture_output=True, text=True, errors="replace")
+    return run.returncode, (run.stdout or "") + (run.stderr or "")
+
+
 class StageContext:
     def __init__(self, conn, codex_id: str, book_dir: Path, stage: str, *, unit: str | None = None,
                  number: int | None = None, logs_root: Path | None = None, busy=None,
-                 hold: Path = approval.HOLD, launch=launch):
+                 hold: Path = approval.HOLD, launch=launch, capture=capture):
         self.conn = conn
         self.codex_id = codex_id
         self.book_dir = Path(book_dir)
@@ -42,6 +49,7 @@ class StageContext:
         self.busy = busy or comfy.busy
         self.hold = Path(hold)
         self.launch = launch
+        self.capture = capture
         self.sleep = time.sleep
         self.wait_cap = WAIT_CAP
         self.wait_poll = WAIT_POLL
@@ -88,3 +96,10 @@ class StageContext:
         if rc:
             raise SystemExit(f"REFUSED: {script} exit {rc}")
         return rc
+
+    def capture_script(self, script: str, *extra: str) -> tuple[int, str]:
+        """Launch an existing script with the same argv `run_script` builds and
+        hand back (exit code, everything it printed).  No clock, no GPU guard,
+        no refusal: the caller reads the code, because a non-zero exit from a
+        gate is the answer it asked for, not a failure of the step."""
+        return self.capture(self.command(script, extra))
