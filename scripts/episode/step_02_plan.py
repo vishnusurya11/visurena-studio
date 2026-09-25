@@ -29,6 +29,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 
 from agents import episode_writer, plan_reader  # noqa: E402
+from studio.deferral import Deferred  # noqa: E402
 from studio import episode_home, gate_policy, judged_gate, plan_ladder, plan_verdict, step_cli  # noqa: E402
 from studio.judges import plan as plan_judge  # noqa: E402
 
@@ -121,6 +122,11 @@ def clear(ctx, desk) -> Path:
     return signed
 
 
+def deferred_note(aside: Path) -> str:
+    """The terminal verdict's summary as the deferred file holds it."""
+    return episode_home.read_json(aside).get("note", "deferred")
+
+
 def run(ctx) -> None:
     plan = plan_of(ctx)
     desk = plan_ladder.Desk(ctx, plan, writer=episode_writer)
@@ -131,7 +137,9 @@ def run(ctx) -> None:
         desk.write(None)
     if plan_verdict.current(plan) or grandfathered(ctx):
         return
-    clear(ctx, desk)
+    signed = clear(ctx, desk)
+    if signed.name == plan_ladder.DEFERRED:
+        raise Deferred(GATE, str(signed.relative_to(ctx.book_dir)).replace("\\", "/"), deferred_note(signed))
 
 
 if __name__ == "__main__":

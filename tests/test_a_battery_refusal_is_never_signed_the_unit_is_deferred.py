@@ -7,14 +7,19 @@ from __future__ import annotations
 
 import json
 
+import pytest
+
 from studio import audit_rows, learnings, plan_verdict
+from studio.deferral import Deferred
 from tests.test_step_02_plan import (CLEAN_OUT, REFUSED_OUT, Capture, Reader, Writer, _plan,  # noqa: F401
                                      _wire, conn, ctx, step)
 
 
 def test_the_whole_ladder_is_climbed_then_the_draft_is_deferred(ctx, monkeypatch):
     writer, gate = _wire(ctx, monkeypatch, (1, REFUSED_OUT))
-    step.run(ctx)
+    with pytest.raises(Deferred) as aside:
+        step.run(ctx)
+    assert aside.value.gate == "PLAN" and aside.value.aside == "episodes/ep03/plan.deferred.json"
     # round 0, improve, improve, fresh_brief, model_tier
     assert len(writer.calls) == 5 and len(gate.commands) == 5
     assert writer.calls[3] is None, "a fresh brief starts without the refusal history"
@@ -24,7 +29,8 @@ def test_the_whole_ladder_is_climbed_then_the_draft_is_deferred(ctx, monkeypatch
 
 def test_the_deferred_file_holds_the_draft_and_no_verdict_exists(ctx, monkeypatch):
     _wire(ctx, monkeypatch, (1, REFUSED_OUT))
-    step.run(ctx)
+    with pytest.raises(Deferred):
+        step.run(ctx)
     plan = _plan(ctx)
     aside = plan.with_name(step.plan_ladder.DEFERRED)
     assert aside.exists() and not plan.exists()
@@ -39,14 +45,16 @@ def test_the_deferred_file_holds_the_draft_and_no_verdict_exists(ctx, monkeypatc
 def test_the_critic_is_never_asked_while_the_battery_refuses(ctx, monkeypatch):
     critic = Reader()
     _wire(ctx, monkeypatch, (1, REFUSED_OUT), reader=critic)
-    step.run(ctx)
+    with pytest.raises(Deferred):
+        step.run(ctx)
     assert critic.texts == []
 
 
 def test_a_second_pass_counts_and_the_audit_row_names_the_terminal(ctx, monkeypatch):
     _wire(ctx, monkeypatch, (1, REFUSED_OUT))
-    step.run(ctx)
-    step.run(ctx)
+    for _ in range(2):
+        with pytest.raises(Deferred):
+            step.run(ctx)
     aside = _plan(ctx).with_name(step.plan_ladder.DEFERRED)
     assert json.loads(aside.read_text(encoding="utf-8"))["passes"] == 2
     rows = audit_rows.load(ctx.book_dir)
@@ -58,7 +66,8 @@ def test_a_second_pass_counts_and_the_audit_row_names_the_terminal(ctx, monkeypa
 
 def test_a_deferred_unit_is_authored_again_and_signs_when_the_battery_passes(ctx, monkeypatch):
     _wire(ctx, monkeypatch, (1, REFUSED_OUT))
-    step.run(ctx)
+    with pytest.raises(Deferred):
+        step.run(ctx)
     _wire(ctx, monkeypatch, (0, CLEAN_OUT))
     step.run(ctx)
     assert plan_verdict.current(_plan(ctx))

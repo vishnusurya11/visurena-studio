@@ -13,6 +13,7 @@ from __future__ import annotations
 import importlib
 
 from studio import registry
+from studio.deferral import Deferred
 from studio.escalate import Escalation
 
 
@@ -34,7 +35,8 @@ def _done(step, ctx) -> bool:
 
 
 def run_steps(ctx, steps: list) -> str:
-    """'completed', or 'escalated' when a step parked the unit.  Raises on failure."""
+    """'completed'; 'escalated' when a step parked the unit; 'deferred' when a
+    judge set it aside.  Raises on failure."""
     for step in steps:
         if getattr(step, "GPU", False) and ctx.held():
             raise SystemExit(f"HELD: {ctx.hold.name} is there; {ctx.label} stops before step {step.STEP_ID}")
@@ -52,6 +54,12 @@ def run_steps(ctx, steps: list) -> str:
             ctx.log(line, step_id=step.STEP_ID, level="WARNING")
             print(line)
             return "escalated"
+        except Deferred as aside:
+            line = aside.line(ctx.label)
+            ctx.tracker.event(step.STEP_ID, "deferred", detail=line[:200])
+            ctx.log(line, step_id=step.STEP_ID, level="WARNING")
+            print(line)
+            return "deferred"
         except SystemExit as exc:
             ctx.tracker.event(step.STEP_ID, "failed", detail=str(exc)[:200])
             raise RuntimeError(str(exc)) from exc

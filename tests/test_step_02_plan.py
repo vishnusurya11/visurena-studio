@@ -171,8 +171,11 @@ def test_two_refusals_then_a_pass_locks_the_plan(ctx, monkeypatch):
 
 
 def test_a_battery_that_keeps_refusing_defers_the_unit_after_the_whole_ladder(ctx, monkeypatch):
+    from studio.deferral import Deferred
     writer, gate = _wire(ctx, monkeypatch, (1, REFUSED_OUT))
-    step.run(ctx)
+    with pytest.raises(Deferred) as aside:
+        step.run(ctx)
+    assert aside.value.gate == "PLAN" and aside.value.aside.endswith(step.plan_ladder.DEFERRED)
     assert len(writer.calls) == 5 and len(gate.commands) == 5
     assert not _plan(ctx).exists(), "a refused draft is not left where the next run would take it as written"
     assert (ctx.home / step.plan_ladder.DEFERRED).exists()

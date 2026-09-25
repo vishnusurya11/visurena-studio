@@ -41,7 +41,7 @@ class TestTheShape:
         last = ep.lines[-1]
         ep.lines[-1] = Line(index=last.index, kind="dialogue", speaker="b", text="What?", shot=last.shot)
         ep.shots[last.shot] = shot(last.shot, "button", "close", ["b"])
-        with pytest.raises(ValidationError, match="not the protagonist"):
+        with pytest.raises(ValidationError, match="is the protagonist's"):
             Episode(**ep.model_dump())
 
     def test_a_shot_with_no_line_and_no_beat_is_a_hole(self):

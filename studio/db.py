@@ -17,9 +17,11 @@ from studio import registry
 
 DB_PATH = Path("db") / "visurena_studio.db"
 
-EVENT_VOCABULARY = ("started", "completed", "failed", "skipped", "escalated")
+EVENT_VOCABULARY = ("started", "completed", "failed", "skipped", "escalated", "deferred")
 """`escalated`: the step parked its unit for an owner signature (decision
-2026-09-24, owner gates); the next run resumes past it once the verdict exists."""
+2026-09-24, owner gates); the next run resumes past it once the verdict exists.
+`deferred`: a judge's terminal set the unit aside (a plan the battery never let
+through); the unit stops and the next pass authors again."""
 
 _DDL = """
 CREATE TABLE IF NOT EXISTS codex (
@@ -40,7 +42,7 @@ CREATE TABLE IF NOT EXISTS events (
   codex_id TEXT NOT NULL REFERENCES codex(id),
   stage    TEXT NOT NULL,
   step_id  TEXT NOT NULL,
-  event    TEXT NOT NULL CHECK (event IN ('started', 'completed', 'failed', 'skipped', 'escalated')),
+  event    TEXT NOT NULL CHECK (event IN ('started', 'completed', 'failed', 'skipped', 'escalated', 'deferred')),
   run_id   TEXT,
   detail   TEXT,
   unit     TEXT
@@ -84,14 +86,15 @@ def _migrate(conn: sqlite3.Connection) -> None:
 
 
 def _migrate_events(conn: sqlite3.Connection) -> None:
-    """Bring an older events table forward: the `unit` column, and `escalated` in the
-    CHECK.  SQLite cannot edit a CHECK, so a table that lacks the word is rebuilt
-    row for row under the current DDL (idempotent: a current table is left alone)."""
+    """Bring an older events table forward: the `unit` column, and every word of
+    the vocabulary in the CHECK.  SQLite cannot edit a CHECK, so a table that lacks
+    a word is rebuilt row for row under the current DDL (idempotent: a current
+    table is left alone)."""
     cols = {row["name"] for row in conn.execute("PRAGMA table_info(events)")}
     if "unit" not in cols:
         conn.execute("ALTER TABLE events ADD COLUMN unit TEXT")
     sql = conn.execute("SELECT sql FROM sqlite_master WHERE name = 'events'").fetchone()["sql"]
-    if "escalated" in sql:
+    if all(word in sql for word in EVENT_VOCABULARY):
         return
     conn.execute("ALTER TABLE events RENAME TO events_old")
     conn.execute("DROP INDEX IF EXISTS ix_events_status")

@@ -582,7 +582,8 @@ class Episode(BaseModel):
         if self.shot(button.shot).section != "button":
             raise ValueError("the last line plays on the button shot")
         if button.speaker == self.protagonist:
-            raise ValueError("the last line is not the protagonist's (rule 5)")
+            raise ValueError(f"the last line is the protagonist's ({self.protagonist}); "
+                             "the button is another voice's line (rule 5)")
         if any(self.lines_of(s.index) for s in self.shots if s.index > button.shot):
             raise ValueError("no line after the button; the coda is picture only")
         if button.shot > 0 and self.shot(button.shot - 1).beat_s < 1.0:

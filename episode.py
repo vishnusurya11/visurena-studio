@@ -52,8 +52,8 @@ def parse(argv: list[str]) -> tuple[str, int | None, list[str]]:
 
 
 def process(conn, codex_id: str, number: int, extra: list[str], **kw) -> str:
-    """One unit through every step: 'completed' or 'escalated'; a failure raises
-    after the stage is marked failed."""
+    """One unit through every step: 'completed', 'escalated' or 'deferred'; a
+    failure raises after the stage is marked failed."""
     ctx = episode_run.context(conn, codex_id, number, **kw)
     ctx.extra = list(extra)
     print(f"=== EPISODE start | {ctx.label} | run {ctx.tracker.run_id} ===")
@@ -78,7 +78,7 @@ def main(argv: list[str], conn=None, tools: tuple[str, ...] = TOOLS, **kw) -> in
     if not numbers:
         raise SystemExit(f"REFUSED: no episodes/epNN folder with a plan.json for {codex_id}")
     outcomes = [process(conn, codex_id, n, extra, **kw) for n in numbers]
-    return PARKED if "escalated" in outcomes else 0
+    return PARKED if any(o != "completed" for o in outcomes) else 0
 
 
 if __name__ == "__main__":
