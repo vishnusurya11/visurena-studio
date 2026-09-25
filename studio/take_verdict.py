@@ -531,8 +531,19 @@ def segment_rows(anchors: list, cells: Path, seconds: float, sigs: np.ndarray,
     return out
 
 
+def sheets_of(record: dict, book: Path | None) -> dict:
+    """{who: sheet} for each cast face the take staged a sheet for (ep12: the
+    identity gate was handed none and compared nobody)."""
+    if book is None:
+        return {}
+    refs = record.get("refs") or []
+    return {who: Path(book) / ref for who in record.get("faces") or []
+            for ref in refs if f"/characters/{who}/" in ref.replace("\\", "/")}
+
+
 def measure(video: Path, record: dict, cells: Path, seconds: float, attempt: int = 0,
-            audio: dict | None = None, line_text: str = "", kinds: dict | None = None) -> TakeVerdict:
+            audio: dict | None = None, line_text: str = "", kinds: dict | None = None,
+            book: Path | None = None) -> TakeVerdict:
     """Decode the take once and read every gate off it."""
     frames = motion_gate.frames(video, seconds)
     anchors = record.get("anchors") or []
@@ -562,6 +573,11 @@ def measure(video: Path, record: dict, cells: Path, seconds: float, attempt: int
                     sampled_foreign(per_frame), coherence(video, record, cells, seconds),
                     bytes=video.stat().st_size if video.is_file() else 0)
     starts = identity_gate.sample_starts([s.start_s for s in segs], seconds)
+    # The sheets are ready (`sheets_of`) and NOT handed in yet: measured 2026-09-25
+    # on 34 face takes of ep10-ep12, the armed gate with sheets failed 3 correct
+    # takes (ep11 T11 STRANGER 0.29-0.42, ep12 T02 STRANGER 0.36, ep10 T17 DRIFT
+    # 0.72) and caught no real fault. Hand them in once STRANGER/DRIFT are
+    # recalibrated on stylised, soot-dark and turned faces.
     identity = identity_gate.identity_dq(video, starts, record.get("faces", []), record.get("refs", []))
     v.zoom = zoom_of(video, record, v.coherence)
     v.gates = gates(v, audio, line_text, unplanned_from(rows), identity, plan_motions(record),

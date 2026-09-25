@@ -448,7 +448,9 @@ def measure_attempt(video: Path, rec: dict, index: int, cells: Path, work: Path,
     seconds = min(clip_seconds(video), rec["placed_seconds"])
     composite = take_dir / (f"voice_{index:02d}.wav" if rec["audio"] != "silence" else f"silence_{index:02d}.wav")
     audio = audio_dq(video, composite, rec["lane"] == "dialogue", work, index)
-    v = tv.measure(video, rec, cells, seconds, attempt, audio, line, kinds)
+    # the book is four folders above the take room (episodes/epNN/takes/r2v);
+    # the identity gate reads the cast sheets the record names from it
+    v = tv.measure(video, rec, cells, seconds, attempt, audio, line, kinds, book=take_dir.parents[3])
     j = judges or {}
     frames = take_lock.frames(video, seconds)
     m = (picture_measures(frames, v, rec)
