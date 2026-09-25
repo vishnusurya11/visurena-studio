@@ -26,3 +26,13 @@ def test_a_terminal_verdict_says_which_rung_ended_it():
     v = Verdict(judge="take_eye", version="1", passed=False, confidence=1.0, reads=3,
                 faults=[Fault(kind="lag", where="T09")], terminal="keep_best")
     assert "keep_best" in v.summary()
+
+
+def test_a_fault_with_a_note_is_summarised_with_it():
+    """Episode 13's first learning read 'battery at plan' five times: the note
+    carried the refusal lines and the summary dropped them."""
+    from studio.judges.verdict import Fault, Verdict
+    v = Verdict(judge="plan", version="1", passed=False, confidence=1.0, faults=[
+        Fault(kind="battery", where="plan", note="T03 camera verb missing"),
+        Fault(kind="battery", where="plan")])
+    assert v.summary() == "battery at plan: T03 camera verb missing; battery at plan"

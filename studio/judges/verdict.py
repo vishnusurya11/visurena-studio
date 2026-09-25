@@ -59,8 +59,14 @@ def summary(v: Verdict) -> str:
     if v.passed:
         text = f"no fault named in {v.reads} read(s)"
     else:
-        text = "; ".join(f"{f.kind} at {f.where}" for f in v.faults) or "faulted with no fault named"
+        text = "; ".join(fault_line(f) for f in v.faults) or "faulted with no fault named"
     return f"{text} -> {v.terminal}" if v.terminal else text
+
+
+def fault_line(f: Fault) -> str:
+    """`kind at where`, and the note when the judge wrote one: a learning that
+    says 'battery at plan' five times teaches nothing."""
+    return f"{f.kind} at {f.where}: {f.note}" if f.note else f"{f.kind} at {f.where}"
 
 
 def word(v: Verdict) -> str:
