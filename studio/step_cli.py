@@ -45,7 +45,13 @@ def main(module, argv: list[str], conn=None) -> int:
 
 def registry_stage_of(module) -> str:
     """A module run as __main__ has no package name; find its stage by its script name."""
-    script = module.__file__.replace("\\", "/").rsplit("/", 1)[-1].removesuffix(".py")
+    parts = module.__file__.replace("\\", "/").rsplit("/", 2)
+    script, folder = parts[-1].removesuffix(".py"), parts[-2] if len(parts) > 1 else ""
+    # A SCRIPT NAME IS NOT UNIQUE ACROSS STAGES: screenplay and episode both
+    # have step_02_plan, and the first match sent ep12's plan to screenplay.
+    # The folder names the stage; fall back to the first match only without one.
+    if folder in registry.stage_names() and any(s["script"] == script for s in registry.steps(folder)):
+        return folder
     for stage in registry.stage_names():
         if any(step["script"] == script for step in registry.steps(stage)):
             return stage
