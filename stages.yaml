@@ -390,3 +390,385 @@ stages:
         script: step_10_deliver
         desc: manifest.json (every rung taken, every measured number), Telegram send
           (retry x3), learnings closed. Never publishes; the orchestrator does.
+
+
+  # =================================================================================
+  # DIVISION — PRE-PRODUCTION (continued).  refs: the reference bible.
+  # One sheet per character, one per key prop, one voice per speaker, per (book,
+  # style). The ONLY writer of refs/refs.json; every format line reads it, none
+  # writes it. Run just-in-time: the scheduler launches it when a plan binds an
+  # entity with no row. LOOK is the owner's once-per-book taste gate.
+  # =================================================================================
+
+  refs:
+    unit: [book, style]
+    requires: [analysis/05]
+    steps:
+      - id: "01"
+        name: canon
+        script: step_01_canon                     # WRAP scripts/refs/cast_rows.py + agents/casting_director.py
+        desc: >-
+          Which entities this book binds. AGENT casting_director rows name who
+          appears; code writes one refs.json row per character (display name,
+          gender, chapter stamp) and refuses an id outside the analysis registry.
+        substeps:
+          - id: "01_01"
+            name: list
+            desc: >-
+              AGENT (workhorse, local tier) -> CastList from analysis scenes.
+          - id: "01_02"
+            name: rows
+            desc: >-
+              Code writes and stamps the rows (cast_rows). Every later reader
+              refuses a row stamped for another unit.
+
+      - id: "02"
+        name: sheets
+        script: step_02_sheets                    # WRAP build_pack, prop_refs, cast_bust; trait card from trailer step_02_refs
+        desc: >-
+          One sheet per character and per key prop from profile.design on the
+          local image model; pack.jsonl records prompt and seed. A picture on disk
+          is never redrawn. Paid sheet route only behind approval kind sheets.
+        substeps:
+          - id: "02_01"
+            name: draw
+            desc: >-
+              Local render; content-addressed staging.
+          - id: "02_02"
+            name: traits
+            desc: >-
+              AGENT trait_reader (local VLM) -> TraitCard; code refuses a new
+              face that does not differ from every bound face in the calibrated
+              number of seen traits. Reroll seed x1, distinguish x3, then UNBOUND.
+          - id: "02_03"
+            name: look_back
+            desc: >-  # MISSING
+              AGENT look_back (local VLM) reads each new sheet against its own
+              prompt (must-appear nouns, facial hair both ways); a miss is redrawn
+              with the defining state first; then ESCALATE.
+
+      - id: "03"
+        name: voices
+        script: step_03_voices                    # WRAP scripts/cast/cast_voices.py
+        desc: >-
+          New speakers only. AGENT voice_director -> VoiceDesign (region, body,
+          speech, a register nobody else holds); local TTS renders the design clip;
+          code measures pairwise similarity against every bound voice and refuses
+          a match. Filed at book level under cast/<id>/voice/.
+
+      - id: "04"
+        name: verdict
+        script: step_04_verdict                   # MISSING
+        desc: >-
+          ESCALATE - LOOK. The owner's one taste verdict per (book, style),
+          written as refs/verdict.json bound to the pack.jsonl sha. Re-opened only
+          for a newly bound entity. Every format line refuses a pack without a
+          current verdict.
+
+  # =================================================================================
+  # DIVISION — PRODUCTION.  One stage per FORMAT LINE.  Step vocabulary shared by
+  # every line: plan, record, board, shoot, edit, qc, deliver. A line may skip a
+  # word, never reorder one. A line ENDS at deliver (master + qc + manifest) and
+  # never publishes; Distribution does.
+  # ---------------------------------------------------------------------------------
+  # episode: one unit of story (a chapter, or a chapter range) -> one finished
+  # master, $0, local GPU. Contract: studio/episode_spec.Episode. Gates:
+  # .claude/skills/episode/GATES.md. Every step: typed input -> typed output -> a
+  # gate that can fail -> an adapt ladder -> ESCALATE (never a silent terminal rung
+  # on a picture the owner has not seen). GPU time is approved per kind.
+  # =================================================================================
+
+
+  # =================================================================================
+  # DIVISION — PRODUCTION.  One stage per FORMAT LINE.  Step vocabulary shared by
+  # every line: plan, record, board, shoot, edit, qc, deliver. A line may skip a
+  # word, never reorder one. A line ENDS at deliver (master + qc + manifest) and
+  # never publishes; Distribution does.
+  # ---------------------------------------------------------------------------------
+  # episode: one unit of story (a chapter, or a chapter range) -> one finished
+  # master, $0, local GPU. Contract: studio/episode_spec.Episode. Gates:
+  # .claude/skills/episode/GATES.md. Every step: typed input -> typed output -> a
+  # gate that can fail -> an adapt ladder -> ESCALATE (never a silent terminal rung
+  # on a picture the owner has not seen). GPU time is approved per kind.
+  # =================================================================================
+
+  episode:
+    unit: [book, chapter]                         # "ch04" or a range "ch04-05"
+    requires: [analysis/06, refs/04]              # reads screenplay/<target> when present
+    steps:
+      - id: "01"
+        name: bind
+        script: step_01_bind                      # WRAP scripts/refs/cast_rows.py (chapter stamp)
+        desc: >-
+          This unit's cast. Code stamps the bound rows with the unit; a
+          character with no refs row parks the unit and orders refs for it.
+        substeps:
+          - id: "01_01"
+            name: cast
+            desc: >-  # MISSING
+              AGENT cast_lister (workhorse, local tier) -> CastList for the
+              unit's scenes; code refuses an id outside the registry.
+          - id: "01_02"
+            name: rows
+            desc: >-
+              Code rewrites refs.json rows for this unit (cast_rows).
+
+      - id: "02"
+        name: plan
+        script: step_02_plan                      # WRAP plan_check; the writer is new
+        desc: >-
+          The contract, gated before anything is voiced or drawn. plan.json is
+          data under the unit folder; no plan lives in the code tree.
+        substeps:
+          - id: "02_01"
+            name: brief
+            desc: >-
+              Code assembles the chapter's analysis rows, the screenplay
+              elements for those scenes where a target exists, the bound rows, the
+              place rows, the camera catalog and the book's dq_rules.
+          - id: "02_02"
+            name: write
+            desc: >-  # MISSING
+              AGENT episode_writer (reasoning, local tier) -> Episode. Names
+              people only through cast_refs.tag from the bound row; declares every
+              unnamed person; one picture per place per unit.
+          - id: "02_03"
+            name: checks
+            desc: >-
+              Code - every free gate in one pass (plan_check + cell gates +
+              take-path lint). Exit 1 is a stop.
+          - id: "02_04"
+            name: improve
+            desc: >-  # MISSING
+              Refusals quoted back to the writer; max 2 rounds; then
+              ESCALATE.
+          - id: "02_05"
+            name: lock
+            desc: >-
+              Code writes plan.json only through episode_home.write_plan, then
+              ESCALATE - PLAN: the owner's verdict as plan.verdict.json bound to
+              the plan sha. Retirable per format by the count rule.
+
+      - id: "03"
+        name: places
+        script: step_03_places                    # WRAP scripts/refs/places.py
+        desc: >-
+          Each setup's location+view at THIS unit's hour, drawn from its own
+          described words on the local image model. A recurring place is never
+          pinned to one picture.
+        substeps:
+          - id: "03_01"
+            name: draw
+            desc: >-
+              Every setup resolves to a picture on disk (guard test).
+          - id: "03_02"
+            name: look_back
+            desc: >-  # MISSING
+              AGENT look_back reads each new picture against its prompt (the
+              landmark, the hour); a miss is redrawn; then ESCALATE.
+
+      - id: "04"
+        name: record
+        script: step_04_record                    # WRAP say_lines + speaker_check
+        desc: >-
+          Every line in its character's voice, MEASURED and LISTENED to.
+        substeps:
+          - id: "04_01"
+            name: say
+            desc: >-
+              Local TTS clone per line; seconds measured from the file.
+          - id: "04_02"
+            name: listen
+            desc: >-
+              AGENT listener (Whisper) reads each clip back; not word-perfect
+              -> re-roll once -> refuse. Similarity to the design clip.
+          - id: "04_03"
+            name: spread
+            desc: >-
+              One speaker, one voice across the unit (advisory).
+
+      - id: "05"
+        name: timeline
+        script: step_05_timeline                  # WRAP respot + timeline
+        desc: >-
+          AUDIO FIRST - the animatic. Every shot's seconds derive from the
+          measured voice; placed.json is fingerprinted to the plan AND the voice;
+          every reader goes through load_placed.
+        substeps:
+          - id: "05_01"
+            name: respot
+            desc: >-
+              Cuts rescaled measured/projected on the grid.
+          - id: "05_02"
+            name: place
+            desc: >-
+              placed.json inside the format's band; misaligned() refuses a
+              line off its shot's start plus the handle.
+
+      - id: "06"
+        name: prompts
+        script: step_06_prompts                   # WRAP takes_r2v --prompts + no_last_frame
+        desc: >-
+          Every take prompt built and linted for $0 with no GPU, BEFORE any
+          grid: length per block, style line, banned props, no last frame, no
+          fragments. HARD.
+
+      - id: "07"
+        name: board
+        script: step_07_board                     # WRAP grids
+        desc: >-
+          Storyboard grids on the local image model from the plan's prose, up
+          to three references - cast sheets first, the setup's place last.
+        substeps:
+          - id: "07_01"
+            name: layout
+            desc: >-  # MISSING
+              Code lays a setup out by shot size (cols x rows = shots); the
+              minimum grid is a constant with its decision date.
+          - id: "07_02"
+            name: draw
+            desc: >-
+              One render per grid; the manifest written AFTER the render with
+              the prompt and every staged picture's bytes.
+
+      - id: "08"
+        name: panels
+        script: step_08_panels                    # WRAP panels + panel_check + panel_content_check
+        desc: >-
+          One panel per shot, two machine gates, then an eye. The takes refuse
+          without all three verdicts.
+        substeps:
+          - id: "08_01"
+            name: cut
+            desc: >-
+              Panels cut between measured gutters, cropped square; a stale
+              grid or a shot in two grids is refused.
+          - id: "08_02"
+            name: dq
+            desc: >-
+              People vs faces+extras, missing face, sharpness, ink, stacked.
+              HARD. Nothing judged = nothing passed.
+          - id: "08_03"
+            name: content
+            desc: >-
+              AGENT panel_reader (local VLM, shown no plan) LISTS; code JUDGES
+              against the plan, the landform and the book's banned list. Unread
+              = fail.
+          - id: "08_04"
+            name: contact
+            desc: >-  # MISSING
+              Code writes one contact sheet of every panel.
+          - id: "08_05"
+            name: eye
+            desc: >-
+              ESCALATE - EYE. A rubric file storyboard/eye_<sha8>.json (pass /
+              fault named / cannot tell) the takes refuse without. Owner today;
+              AGENT eye (local VLM rubric) once calibrated on the casebook.
+          - id: "08_06"
+            name: improve
+            desc: >-  # partial
+              A failed grid is superseded and redrawn (shots, tag or seed
+              bump); old files move to storyboard/superseded/. Max 2 rounds per
+              grid.
+
+      - id: "09"
+        name: shoot
+        script: step_09_shoot                     # WRAP takes_r2v render, take_dq, take_content_check, take_strip
+        desc: >-
+          The slow step. ref2va takes on the local video model, staged from
+          the panel, the sheets the shot's faces need and the line's wav. A take
+          is current only to its words AND its pictures. Approval kind render;
+          the GPU lease: one GPU, one stage; the queue is read before every POST.
+        substeps:
+          - id: "09_01"
+            name: round
+            desc: >-
+              Every live shot's next take rendered back to back with the model
+              resident.
+          - id: "09_02"
+            name: dq
+            desc: >-
+              Frozen start, cut landing, churn, zoom, face at end, look,
+              pulse, lip-sync lag and WER, held, jump. HARD rows as marked.
+          - id: "09_03"
+            name: content
+            desc: >-
+              AGENT panel_reader on three frames past the head leak, each
+              read alone; code judges.
+          - id: "09_04"
+            name: strip
+            desc: >-
+              Code writes a strip of every take, then ESCALATE - EYE:
+              takes/r2v/eye_<sha8>.json the cut refuses without.
+          - id: "09_05"
+            name: retake
+            desc: >-  # partial
+              LADDER matching cure to cause: moving take froze -> seed; still
+              take froze -> change the move TYPE; lag -> shorter take; the same
+              fault on a fresh seed -> back to the PLAN (re-aim at what the cell
+              holds) -> ESCALATE. One batched round, --why recorded; the losing
+              attempt kept under attempts/.
+
+      - id: "10"
+        name: edit
+        script: step_10_edit                      # WRAP series_title + assemble (+ trailer metre for the bed)
+        desc: >-
+          Title card, measured bed, cut, mix. Picture cut to the measured
+          voice. cut/master_iterN.mp4, never overwriting.
+        substeps:
+          - id: "10_01"
+            name: title
+            desc: >-
+              Series base once per book; the unit's lettering read back by
+              OCR; short animated card.
+          - id: "10_02"
+            name: bed
+            desc: >-  # partial
+              Tone spans -> local music bed, metre MEASURED and ranked on
+              fitness (the trailer's music step); bed gate.
+          - id: "10_03"
+            name: cut
+            desc: >-
+              Takes trimmed to placed.json, lines at their at, mix to the
+              house loudness, captions, end chip.
+          - id: "10_04"
+            name: sound
+            desc: >-  # MISSING
+              Ambience and spot effects when the format asks; otherwise
+              skipped.
+
+      - id: "11"
+        name: qc
+        script: step_11_qc                        # WRAP qc + eye_review + dossier
+        desc: >-
+          Measure the DELIVERED master, never the intention. Stamps the sha8
+          it measured. No import from the edit step.
+        substeps:
+          - id: "11_01"
+            name: measure
+            desc: >-
+              Loudness, every planned cut, every line heard on the mix, the
+              silent-gap wall naming its shot, edit is the takes, every take
+              judged twice, title card present.
+          - id: "11_02"
+            name: recut
+            desc: >-  # partial
+              Fail -> the silent shot gets a line or the silence moves;
+              re-cut x2 (free); then ESCALATE.
+          - id: "11_03"
+            name: eye
+            desc: >-
+              ESCALATE - MASTER. review/eye_<sha8>.json; an n needs a waiver
+              the owner signs. Waivable per series only by series.json policy.
+          - id: "11_04"
+            name: dossier
+            desc: >-
+              Code - one page of every input, prompt, picture, take, verdict.
+
+      - id: "12"
+        name: deliver
+        script: step_12_deliver                   # MISSING (trailer step 10 is the model, without the external subprocess)
+        desc: >-
+          manifest.json beside the master (every gate verdict, every rung,
+          timing totals), the deliverable's full path printed first, notify()
+          through the platform. Never publishes; Distribution does.

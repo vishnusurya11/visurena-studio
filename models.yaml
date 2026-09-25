@@ -31,6 +31,11 @@ tiers:
     model: gpt-5.6-luna
     params:
       reasoning_effort: none
+  local:                  # the $0 tier for the format lines' agents (episode_writer, look_back)
+    provider: openai      # OWNER 2026-09-24: the paid workhorse for now; making it free is a
+    model: gpt-5.6-luna   # yaml edit (provider: lmstudio, model: gpt-oss:20b), no code change
+    params:
+      reasoning_effort: none
   canon:                  # the look the world knows a character by (studio/canon.py)
     provider: openai
     # Measured 2026-09-04 on Watson: at effort none, three asks AGREED on a short

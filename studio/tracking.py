@@ -30,10 +30,12 @@ def make_run_id(codex_id: str, stage: str) -> str:
 class Tracker:
     """One per stage run. Emits standardized events and JSONL log lines."""
 
-    def __init__(self, conn, codex_id: str, stage: str, *, logs_root: Path = LOGS_ROOT):
+    def __init__(self, conn, codex_id: str, stage: str, *, logs_root: Path = LOGS_ROOT,
+                 unit: str | None = None):
         self.conn = conn
         self.codex_id = codex_id
         self.stage = stage
+        self.unit = unit
         self.run_id = make_run_id(codex_id, stage)
         self.log_path = Path(logs_root) / codex_id / stage / f"{self.run_id}.log"
 
@@ -54,7 +56,7 @@ class Tracker:
     def event(self, step_id: str, event: str, *, detail: str | None = None) -> None:
         """One event row, stamped with this run's id."""
         db.add_event(self.conn, self.codex_id, self.stage, step_id, event,
-                     run_id=self.run_id, detail=detail)
+                     run_id=self.run_id, detail=detail, unit=self.unit)
 
     @contextmanager
     def step(self, step_id: str):

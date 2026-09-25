@@ -13,9 +13,13 @@ import sqlite3
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
+from studio import registry
+
 DB_PATH = Path("db") / "visurena_studio.db"
 
-EVENT_VOCABULARY = ("started", "completed", "failed", "skipped")
+EVENT_VOCABULARY = ("started", "completed", "failed", "skipped", "escalated")
+"""`escalated`: the step parked its unit for an owner signature (decision
+2026-09-24, owner gates); the next run resumes past it once the verdict exists."""
 
 _DDL = """
 CREATE TABLE IF NOT EXISTS codex (
@@ -36,9 +40,10 @@ CREATE TABLE IF NOT EXISTS events (
   codex_id TEXT NOT NULL REFERENCES codex(id),
   stage    TEXT NOT NULL,
   step_id  TEXT NOT NULL,
-  event    TEXT NOT NULL CHECK (event IN ('started', 'completed', 'failed', 'skipped')),
+  event    TEXT NOT NULL CHECK (event IN ('started', 'completed', 'failed', 'skipped', 'escalated')),
   run_id   TEXT,
-  detail   TEXT
+  detail   TEXT,
+  unit     TEXT
 );
 
 CREATE INDEX IF NOT EXISTS ix_events_status
@@ -56,8 +61,8 @@ def get_connection(db_path: str | Path = DB_PATH) -> sqlite3.Connection:
 
 # Per-stage summary columns on codex (owner design: 3 per stage — status, started,
 # updated). Denormalized at-a-glance view; the events table stays the detailed record.
-# New stages get their trio here when they are built.
-STAGES = ("analysis", "screenplay", "trailer")
+# The registry decides which stages exist; a new stage gets its trio by being registered.
+STAGES = tuple(registry.stage_names())
 STAGE_STATUSES = ("pending", "running", "completed", "failed")
 
 
@@ -75,6 +80,31 @@ def _migrate(conn: sqlite3.Connection) -> None:
                          f" NOT NULL DEFAULT 'pending'")
             conn.execute(f"ALTER TABLE codex ADD COLUMN {started_col} TEXT")
             conn.execute(f"ALTER TABLE codex ADD COLUMN {updated_col} TEXT")
+    _migrate_events(conn)
+
+
+def _migrate_events(conn: sqlite3.Connection) -> None:
+    """Bring an older events table forward: the `unit` column, and `escalated` in the
+    CHECK.  SQLite cannot edit a CHECK, so a table that lacks the word is rebuilt
+    row for row under the current DDL (idempotent: a current table is left alone)."""
+    cols = {row["name"] for row in conn.execute("PRAGMA table_info(events)")}
+    if "unit" not in cols:
+        conn.execute("ALTER TABLE events ADD COLUMN unit TEXT")
+    sql = conn.execute("SELECT sql FROM sqlite_master WHERE name = 'events'").fetchone()["sql"]
+    if "escalated" in sql:
+        return
+    conn.execute("ALTER TABLE events RENAME TO events_old")
+    conn.execute("DROP INDEX IF EXISTS ix_events_status")
+    conn.executescript(_events_ddl())
+    conn.execute("INSERT INTO events (id, event_ts, codex_id, stage, step_id, event, run_id, detail, unit)"
+                 " SELECT id, event_ts, codex_id, stage, step_id, event, run_id, detail, unit FROM events_old")
+    conn.execute("DROP TABLE events_old")
+
+
+def _events_ddl() -> str:
+    """The events table's CREATE statements alone (table + index), from the DDL."""
+    start = _DDL.index("CREATE TABLE IF NOT EXISTS events")
+    return _DDL[start:]
 
 
 def init_db(conn: sqlite3.Connection) -> None:
@@ -203,16 +233,30 @@ def add_event(
     *,
     run_id: str | None = None,
     detail: str | None = None,
+    unit: str | None = None,
 ) -> str:
-    """Append one event. Returns its timestamp. Long detail belongs in logs, not here."""
+    """Append one event. Returns its timestamp. Long detail belongs in logs, not here.
+    `unit` names the production below the book (an episode, a cue); NULL for a
+    book-level stage."""
     event_ts = utc_now().strftime("%Y-%m-%dT%H:%M:%S.%fZ")
     conn.execute(
-        "INSERT INTO events (event_ts, codex_id, stage, step_id, event, run_id, detail)"
-        " VALUES (?, ?, ?, ?, ?, ?, ?)",
-        (event_ts, codex_id, stage, step_id, event, run_id, detail),
+        "INSERT INTO events (event_ts, codex_id, stage, step_id, event, run_id, detail, unit)"
+        " VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
+        (event_ts, codex_id, stage, step_id, event, run_id, detail, unit),
     )
     conn.commit()
     return event_ts
+
+
+def unit_status(conn: sqlite3.Connection, codex_id: str, stage: str, unit: str) -> dict[str, str]:
+    """Derived status of ONE unit of a stage: latest event per step, pipeline order."""
+    rows = conn.execute(
+        "SELECT step_id, event, MAX(event_ts) AS event_ts FROM events"
+        " WHERE codex_id = ? AND stage = ? AND unit = ?"
+        " GROUP BY step_id ORDER BY step_id",
+        (codex_id, stage, unit),
+    )
+    return {row["step_id"]: row["event"] for row in rows}
 
 
 def codex_pending_stage(
