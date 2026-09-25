@@ -271,6 +271,8 @@ table.v td code{white-space:nowrap}
   
   <nav class="tabs" role="tablist"><button role="tab" data-tab="current" aria-selected="true">Current architecture<span class="sub">built</span></button><button role="tab" data-tab="future" aria-selected="false">Future architecture<span class="sub">proposed</span></button></nav>
   <div id="tab-current">
+
+
 <section class="block">
     <div class="head"><h2>Org chart</h2><p>Every box reports to the one above it. A step script is a unit head: it calls its agents in order and owns their output.</p></div>
     <div class="chart-tools">
@@ -445,7 +447,7 @@ table.v td code{white-space:nowrap}
 
 <div id="tab-future" hidden>
 
-  <p class="lede" style="margin-top:18px">Proposed, not decided. Five reports (two web researches, a production executive, an organisation designer, the codebase's own constraints) argued it out; a chair ruled each point. The shape is a <b>big studio from day one</b>: five divisions by function, one registry stage per format line inside Production, the IP as a data key. Episodes are the only line built; every other line has a defined empty slot and grows into it without a reorganisation. Full record: <code>docs/architecture/future_departments.md</code>; draft registry: <code>docs/architecture/stages_future.yaml</code>.</p>
+  <p class="lede" style="margin-top:18px">Proposed, not decided. Five reports (two web researches, a production executive, an organisation designer, the codebase's own constraints) argued it out; a chair ruled each point. The shape is a <b>big studio from day one</b>: five divisions by function, one registry stage per format line inside Production, the IP as a data key. Episodes are the only line built; every other line has a defined empty slot and grows into it without a reorganisation. Full record: <code>architecture/decisions/2026-09-24_future_departments.md</code>; draft registry: <code>architecture/decisions/2026-09-24_stages_future.yaml</code>.</p>
 
   <!-- verdicts -->
   <section class="block">
@@ -517,6 +519,16 @@ table.v td code{white-space:nowrap}
         </li>
       </ul>
     </div></div></div>
+
+    <div class="head" style="margin-top:26px"><h2 style="font-size:24px">Broken down by team</h2><p>Every department that has a team: its units in execution order, and the agents each unit calls. Border states as above; a unit's script note says whether it wraps an existing script or is still to be written.</p></div>
+    <div class="legend">
+      <span class="k"><span class="swatch lead"></span> unit leader (a step script)</span>
+      <span class="k"><span class="swatch agent"></span> agent</span>
+      <span class="k"><span class="swatch think"></span> agent, reasoning tier</span>
+      <span class="k"><span class="swatch qc"></span> QC agent</span>
+      <span class="k"><span class="chip qc">OWNER</span> a unit that parks for one of your signatures</span>
+    </div>
+    <div id="dept-trees-future" class="dept-trees"></div>
 
     <div class="two-col">
       <div class="mini">
@@ -618,7 +630,6 @@ table.v td code{white-space:nowrap}
   </section>
 
 </div>
-
 </div>
 
 <script>
@@ -636,6 +647,116 @@ table.v td code{white-space:nowrap}
     layout();
   }
   tabs.forEach(function(b){b.addEventListener('click',function(){showTab(b.dataset.tab);if(history.replaceState)history.replaceState(null,'','#'+b.dataset.tab);});});
+
+  /* ---------- future: department trees, generated from data ---------- */
+  /* node: [kind, name, role, file, state, chip]  kind: dept|lead|agent|think|qc|slot ; state: built|partial|missing|slot */
+  var A=function(n,r,tier){return {k:(tier==='reasoning'?'think':tier==='qc'?'qc':'agent'),n:n,r:r,chip:tier||'workhorse'};};
+  var U=function(id,name,role,state,file,kids,owner){return {k:'lead',n:id+' '+name,r:role,f:file,st:state,kids:kids||[],owner:owner};};
+  var TEAMS=[
+    {n:'Studio office',r:'The head of production is a loop over the registry',st:'missing',kids:[
+      U('','Scheduler','Finds (book, unit) pairs whose requires are complete; launches the runner; parks on ESCALATE; batches a call sheet','missing','studio.py'),
+      U('','Slate','Ordered unit list, targets, synthetic declaration, publish policy','partial','library/<book>/series.json'),
+      U('','Brake','Every runner and the GPU lease read it on the way in','built','RENDER_HOLD'),
+      U('','Decisions','Every gate retirement with its count','built','docs/DECISIONS.md')]},
+    {n:'Platform',r:'Shared services; no deliverable of its own',st:'partial',kids:[
+      U('','Model gateway','Tiers, not models; a local tier is a yaml edit','built','studio/llm.py · models.yaml'),
+      U('','GPU lease','One GPU, one stage; reads RENDER_HOLD','partial','studio/comfy.py'),
+      U('','Ledger / DB','STAGES from the registry; a unit column','partial','studio/db.py · spend.py'),
+      U('','Approval','Per kind, per run','built','studio/approval.py'),
+      U('','Measures','A measure returns a number; a gate returns a verdict','partial','studio/measure/'),
+      U('','Notify','Every department calls it; none copies it','missing','studio/notify.py'),
+      U('','Publish clients','One pinned client per platform','partial','studio/youtube.py · higgsfield.py'),
+      U('','R&D ledger','Hypothesis, variants, measures, verdict, cost','missing','experiments/<id>/manifest.json')]},
+    {n:'Analysis',r:'Pre-production · unit: book · leader analysis.py',st:'built',kids:[
+      U('01','Ingest','EPUB → numbered chapters','built','step_01_ingest.py',[A('Book cartographer','real divisions'),A('Ingest validator','was the parse clean?','qc')]),
+      U('02','Extract','The crew, per chapter','built','step_02_extract.py',[A('Scene breakdown','1st AD: cuts the scenes'),A('Script supervisor','time, continuity'),A('Casting director','who is in scene'),A('Story analyst','what happens'),A('Dialogue editor','who speaks to whom'),A('Extraction auditor','completeness, faithfulness','qc')]),
+      U('03','Standardize','Canonical ids + coordinates','built','step_03_standardize.py',[A('Entity resolver','merge forms; geocode')]),
+      U('04','Timeline','Worldlines, contradictions','built','step_04_timeline.py',[A('Gap filler','a place and hour for every scene'),A('Journey tracer','a moving span is a route')]),
+      U('05','Consolidate','Per-entity files with evolution','built','step_05_consolidate.py',[A('Profile writer','from the dossier only')]),
+      U('06','Verify','Code only','built','step_06_verify.py')]},
+    {n:'Screenplay',r:'Pre-production · unit: book × target · leader screenplay.py',st:'built',kids:[
+      U('01','Dossier','Code only','built','step_01_dossier.py'),
+      U('02','Plan','What survives, in what order','built','step_02_plan.py',[A('Story editor','which scenes exist','reasoning')]),
+      U('03','Draft','Two calls per beat','built','step_03_draft.py',[A('Screenwriter','action + dialogue','reasoning'),A('Shot designer','camera on the frozen stream')]),
+      U('04','Render','Code only','built','step_04_render.py'),
+      U('05','Verify','Guards, then a sampled audit','built','step_05_verify.py',[A('Adaptation auditor','contradiction, never difference','qc')])]},
+    {n:'Refs & Cast',r:'Pre-production · unit: book × style · leader refs.py · the only writer of refs.json',st:'partial',kids:[
+      U('01','Canon','Which entities this book binds','partial','wraps cast_rows.py',[A('Casting director','rows: who appears')]),
+      U('02','Sheets','One sheet per character and key prop','partial','wraps build_pack, prop_refs',[A('Trait reader','differs in ≥3 traits?'),A('Look back','does the picture show its prompt?')]),
+      U('03','Voices','A register nobody else holds','partial','wraps cast_voices.py',[A('Voice director','region, body, speech')]),
+      U('04','Verdict','ESCALATE — LOOK, once per book','missing','step_04_verdict.py',[],'LOOK')]},
+    {n:'Episode (TV)',r:'Production · unit: book × chapter(s) · leader episode.py · $0 local GPU',st:'partial',kids:[
+      U('01','Bind','This unit’s cast, stamped','partial','wraps cast_rows.py',[A('Cast lister','who is in this chapter')]),
+      U('02','Plan','The contract, gated before anything is made','partial','wraps plan_check',[A('Episode writer','setups, shots, cells, moves, lines','reasoning')],'PLAN'),
+      U('03','Places','Location + view at this unit’s hour','partial','wraps places.py',[A('Look back','landmark and hour present?')]),
+      U('04','Record','Every line measured and listened to','partial','wraps say_lines, speaker_check',[A('Listener','what words are on this file?','qc')]),
+      U('05','Timeline','Audio first: the animatic','partial','wraps respot, timeline'),
+      U('06','Prompts','Built and linted for $0, before any grid','partial','wraps takes_r2v --prompts'),
+      U('07','Board','Storyboard grids from the plan’s prose','partial','wraps grids.py'),
+      U('08','Panels','Two machine gates, then an eye','partial','wraps panels, panel_check, panel_content_check',[A('Panel reader','lists what is in the picture','qc'),A('Eye','a fault no measurement names','qc')],'EYE'),
+      U('09','Shoot','Takes on the local video model; retake ladder','partial','wraps takes_r2v, take_dq, take_content_check',[A('Panel reader','three frames, read alone','qc'),A('Eye','the strip','qc')],'EYE'),
+      U('10','Edit','Title, measured bed, cut, mix','partial','wraps series_title, assemble'),
+      U('11','QC','Measure the delivered master','partial','wraps qc, eye_review, dossier',[],'MASTER'),
+      U('12','Deliver','Manifest + notify; never publishes','missing','step_12_deliver.py')]},
+    {n:'Trailer',r:'Production · unit: book · leader trailer.py · ordered by Marketing',st:'built',kids:[
+      U('01','Story','Lead, figure, turn; register, thesis','built','step_01_story.py',[A('Story','register + thesis')]),
+      U('02','Refs','Reference sheets, trait-card gate','built','step_02_refs.py',[A('Trait reader','VLM trait card')]),
+      U('03','Music','4 seeds, measured metre, ranked','built','step_03_music.py',[A('Cue author','the caption in register')]),
+      U('04','Lines','Four pools, iconicity, function labels','built','step_04_lines.py',[A('Function labeller','hook, answer, threat, title, button')]),
+      U('05','Voice','One reference per speaker; similarity gate','built','step_05_voice.py'),
+      U('06','Plan','Beat walk over the metre','built','step_06_plan.py'),
+      U('07','Clips','~11 min per take; trait gate per take','built','step_07_clips.py',[A('Trait reader','three frames vs the card','qc')]),
+      U('08','Assemble','Cut, grade, title, mix','built','step_08_assemble.py'),
+      U('09','QC','Reads the delivered master','built','step_09_qc.py'),
+      U('10','Deliver','Manifest, notify','built','step_10_deliver.py')]},
+    {n:'Shorts',r:'Production · unit: book × scene · paid credits · a slot until a Python client exists',st:'slot',kids:[
+      U('','Plan','Scene + shot list','slot','skills shorts-story, shorts-screenwriter'),
+      U('','Board','Start frames · spends','slot','skill shorts-art'),
+      U('','Shoot','Clips · spends','slot','skill shorts-cinematographer'),
+      U('','Edit','Sound plan, assembly','slot','skills shorts-sound, shorts-editor'),
+      U('','Desk','The showrunner skill loses the wallet to the runner','slot','skill shorts-showrunner → shorts.py')]},
+    {n:'Publish',r:'Distribution · unit: master × platform · leader publish.py · irreversible',st:'partial',kids:[
+      U('01','Intake','The finished-file registry','missing','step_01_intake.py'),
+      U('02','Versions','Each platform’s bundle','missing','step_02_versions.py',[A('Subject keeper','where to crop so the subject stays')]),
+      U('03','Metadata','Title from the series record; the rest drafted','partial','series_title() exists',[A('Metadata writer','description, tags, chapters')]),
+      U('04','Art','Thumbnail from the master’s own frames','missing','step_04_art.py',[A('Thumbnail director','one frame, three words')]),
+      U('05','Upload','Private insert; one adapter per platform','partial','wraps youtube_upload.py · own platform: slot'),
+      U('06','Review','The master eye for this sha8','partial','wraps the eye verdict'),
+      U('07','Release','ESCALATE — PUBLISH; the flip to public','partial','wraps youtube_privacy.py',[],'PUBLISH'),
+      U('08','Catalog','The title record every platform derives from','missing','step_08_catalog.py'),
+      U('09','Notify','Link, path, spend, time','missing','step_09_notify.py')]},
+    {n:'Analytics',r:'Distribution · unit: master × platform · scheduled · never moves a gate',st:'missing',kids:[
+      U('01','Ingest','Views, retention, impressions, CTR','missing','step_01_ingest.py'),
+      U('02','Join','Numbers joined to the dossier','missing','step_02_join.py'),
+      U('03','Retrospect','What did the numbers say against the intention?','missing','step_03_retrospect.py',[A('Retrospect','rule candidates','reasoning')])]},
+    {n:'Promo',r:'Marketing · unit: release · leader promo.py · decides; never renders; never posts itself',st:'missing',kids:[
+      U('01','Campaign','Assets, dates, platforms, budget','missing','step_01_campaign.py',[A('Campaign planner','what carries this release?','reasoning')]),
+      U('02','Orders','Rows the scheduler turns into Production units','missing','step_02_orders.py'),
+      U('03','Key art','The pool, one picture per entity','missing','step_03_keyart.py'),
+      U('04','Cutdowns','ffmpeg on placed.json; no render','missing','step_04_cutdowns.py'),
+      U('05','Posts','Per platform; shipped through publish','missing','step_05_posts.py',[A('Copywriter','what does this post say?')],'PUBLISH')]}
+  ];
+  function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;');}
+  function nodeHtml(x){
+    if(x.k==='lead'){
+      var cls='node lead '+(x.st||'');
+      if(x.st==='slot')cls='node slot';
+      if(x.st==='missing')cls='node missing';
+      return '<div class="'+cls+'"><div class="n">'+esc(x.n)+(x.owner?' <span class="chip qc">OWNER · '+x.owner+'</span>':'')+'</div><div class="r">'+esc(x.r)+'</div>'+(x.f?'<div class="f">'+esc(x.f)+'</div>':'')+(x.st?'<div class="st '+x.st+'">'+(x.st==='partial'?'wraps existing':x.st)+'</div>':'')+'</div>';
+    }
+    return '<div class="node '+x.k+'"><div class="n">'+esc(x.n)+'</div><div class="r">'+esc(x.r)+'</div><span class="chip '+(x.k==='think'?'think':x.k==='qc'?'qc':'')+'">'+(x.k==='qc'?'QC':x.chip)+'</span></div>';
+  }
+  function li(x){var h='<li>'+nodeHtml(x);if(x.kids&&x.kids.length){h+='<ul>'+x.kids.map(li).join('')+'</ul>';}return h+'</li>';}
+  var host=document.getElementById('dept-trees-future');
+  if(host){
+    TEAMS.forEach(function(T,i){
+      var d=document.createElement('div');
+      d.innerHTML='<div class="eyebrow">'+esc(T.n)+' · '+esc(T.r)+'</div><div class="chart-scroll"><div class="chart-fit" id="team'+i+'"><div class="tree"><ul>'+
+        '<li><div class="node lead dept'+(T.st==='slot'?' slot':'')+'"><div class="n">'+esc(T.n)+'</div><div class="st '+T.st+'">'+(T.st==='partial'?'scripts exist':T.st)+'</div></div><ul>'+T.kids.map(li).join('')+'</ul></li>'+
+        '</ul></div></div></div>';
+      host.appendChild(d);
+    });
+  }
 
   /* ---------- org chart fit ---------- */
   var fits=[].slice.call(document.querySelectorAll('.chart-fit'));

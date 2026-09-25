@@ -3,6 +3,7 @@
 | Doc | What it holds |
 |---|---|
 | [ARCHITECTURE.md](ARCHITECTURE.md) | The brick, the four layers, the load-bearing rule, gate policy, phases |
+| [../architecture/](../architecture/README.md) | The studio as a company: the animated org chart (`index.html`), architecture decisions, and the plans that track the work |
 | [DECISIONS.md](DECISIONS.md) | Decision log — what was chosen, what was rejected, and why |
 | [db/SCHEMA.md](db/SCHEMA.md) | The `codex` table, the id scheme, deferred stage tracking |
 | [db/EVENT_MODEL.md](db/EVENT_MODEL.md) | **Owner-directed** — the 3-piece model: codex + events table + file logs + step registry |

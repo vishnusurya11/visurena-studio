@@ -2,8 +2,8 @@
 
 Status: **PROPOSAL, awaiting the owner's decision** (2026-09-24). Nothing here is
 applied; `stages.yaml` is unchanged. The draft registry is beside this file as
-[stages_future.yaml](stages_future.yaml); the visual is the "Future architecture"
-tab of [story_department.html](story_department.html).
+[2026-09-24_stages_future.yaml](2026-09-24_stages_future.yaml); the visual is the "Future architecture"
+tab of [../index.html](../index.html).
 
 How it was made: five reports — two web researches (film/TV/animation org; YouTube,
 streaming and transmedia operations), a production executive, an organisation
