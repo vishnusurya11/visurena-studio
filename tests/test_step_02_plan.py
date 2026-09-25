@@ -284,3 +284,15 @@ def test_the_critics_faults_go_back_to_the_writer_as_gate_lines(ctx, monkeypatch
     writer, _ = _wire(ctx, monkeypatch, (0, CLEAN_OUT), reader=Reader(reading("no_answer")))
     step.run(ctx)
     assert writer.calls[1] and all(line.startswith("G-READER ") for line in writer.calls[1])
+
+
+def test_a_plan_edited_after_its_signature_is_not_grandfathered(ctx):
+    """ep12: the plan was signed, ran downstream, then edited (shot 16 locked,
+    extras declared); the runner said 'step 02 skipped: output exists' because a
+    timeline sat beside it. Grandfathering is for a plan that never had a
+    signature -- one whose signature went stale is judged again."""
+    episode_home.write_plan(_plan(ctx), canned_plan())
+    plan_verdict.sign(_plan(ctx), "read")
+    _placed(ctx).write_text("{}", encoding="utf-8")
+    episode_home.write_plan(_plan(ctx), {**canned_plan(), "title": "Edited after signing"})
+    assert step.done(ctx) is False

@@ -59,7 +59,13 @@ def done(ctx) -> bool:
     would hold every finished episode behind a gate that did not exist when it
     was made."""
     plan = plan_of(ctx)
-    return plan.exists() and (plan_verdict.current(plan) or ran_downstream(ctx))
+    return plan.exists() and (plan_verdict.current(plan) or grandfathered(ctx))
+
+
+def grandfathered(ctx) -> bool:
+    """Ran downstream AND never signed: a legacy plan.  One whose signature went
+    stale was edited after it was judged (ep12: skipped on 'output exists')."""
+    return ran_downstream(ctx) and not (plan_of(ctx).parent / plan_verdict.FILE).exists()
 
 
 def wants_rewrite(ctx) -> bool:
@@ -123,7 +129,7 @@ def run(ctx) -> None:
                 step_id=STEP_ID, level="WARNING")
     elif wants_rewrite(ctx) or not plan.exists():
         desk.write(None)
-    if plan_verdict.current(plan) or ran_downstream(ctx):
+    if plan_verdict.current(plan) or grandfathered(ctx):
         return
     clear(ctx, desk)
 
