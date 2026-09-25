@@ -4,6 +4,32 @@ Newest first. Every architectural change gets an entry.
 
 ---
 
+## 2026-09-24 — Automate the taste gates (owner decision)
+
+Decision id: `2026-09-24-automate-the-taste-gates`
+
+**Decision.** No step of the refs or episode line parks on a person. LOOK, PLAN, the
+EYE on the storyboard panels, the EYE on the takes and the MASTER rubric are signed by
+judges (`signed_by: judge:<name>@<version>`): detectors for counts and geometry,
+embeddings for identity, a local VLM that only names, code that judges. Every judge
+climbs a priced adapt ladder under the episode's time ceiling and ends in `pass` or
+`flagged` — never a park, never a silent pass, never a waiver. Every terminal rung
+writes a flagged verdict, a learning and an audit-sheet row. The owner's eye moves
+off the critical path: `library/<book>/audit/<unit>.html` shows every flag and a
+seeded sample; his findings append to the casebook and re-calibrate the judges through
+a bench with a ratchet test. Who signs each gate is `gates.yaml`, every refs/episode
+row `auto` with this decision id. PUBLISH, MONEY (paid credits), OVERRIDE, the synthetic
+declaration and `RENDER_HOLD` stand. Design and debate:
+`architecture/decisions/2026-09-24_judges_replace_the_eye.md`; build:
+`architecture/plan/2026-09-24_judges_replace_the_eye_build.md`.
+
+**Why.** The owner, 2026-09-24: "It says there are human eye checks, DQ checks, gates —
+remove them. We should automate them all, using agents or existing ComfyUI models. Fix
+all of them." Five research reports found no owner-signed verdict file on disk and
+~8 owner catches with an artefact id: the human gate was already retired in practice
+without evidence. The judges make the casebook executable and measurable; the audit
+sheet makes the owner's taste a recorded input instead of a gate.
+
 ## 2026-09-24 — The episode line is a registry department led by a runner (owner-delegated)
 
 **Decision.** `refs` and `episode` are stages in `stages.yaml`, led by root runners

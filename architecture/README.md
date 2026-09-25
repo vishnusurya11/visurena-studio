@@ -29,6 +29,7 @@ brick (`docs/ARCHITECTURE.md`).
 | date | file | status |
 |---|---|---|
 | 2026-09-24 | [decisions/2026-09-24_future_departments.md](decisions/2026-09-24_future_departments.md) + [stages_future.yaml](decisions/2026-09-24_stages_future.yaml) | PROPOSAL — the big-studio shape: five divisions, one registry stage per format line, unit grammar, seven owner gates. Awaiting the owner. |
+| 2026-09-24 | [decisions/2026-09-24_judges_replace_the_eye.md](decisions/2026-09-24_judges_replace_the_eye.md) | DECIDED (owner) — no refs/episode step parks on a person: judges with priced ladders sign LOOK, PLAN, EYE ×2, MASTER as pass or flagged; the owner audits after the fact; casebook + bench + ratchet. |
 
 ## Plans
 
@@ -36,6 +37,7 @@ brick (`docs/ARCHITECTURE.md`).
 |---|---|---|
 | 2026-09-24 | [plan/2026-09-24_registry_departments.md](plan/2026-09-24_registry_departments.md) | IN PROGRESS — commits 1-3 and 6 done by the episode build; 4, 5, 7-10 open |
 | 2026-09-24 | [plan/2026-09-24_episode_department_build.md](plan/2026-09-24_episode_department_build.md) | DONE 2026-09-24 — refs + episode as registry departments with runners, twelve independent steps, the writer agent, eyes as files |
+| 2026-09-24 | [plan/2026-09-24_judges_replace_the_eye_build.md](plan/2026-09-24_judges_replace_the_eye_build.md) | IN PROGRESS — casebook, bench, ratchet; gates.yaml; picture, take, plan and master judges; every park removed; the audit sheet (14 commits) |
 | 2026-09-24 | [docs/audit/2026-09-24_skills_book_neutral_plan.md](../docs/audit/2026-09-24_skills_book_neutral_plan.md) | NOT STARTED — scrub every book name and episode id out of the skills; guard test |
 
 ## Rules this folder inherits

@@ -275,6 +275,7 @@ table.v td code{white-space:nowrap}
 
 
 
+
 <section class="block">
     <div class="head"><h2>Org chart</h2><p>Every box reports to the one above it. A step script is a unit head: it calls its agents in order and owns their output.</p></div>
     <div class="chart-tools">
@@ -464,7 +465,7 @@ table.v td code{white-space:nowrap}
 
 <div id="tab-future" hidden>
 
-  <p class="lede" style="margin-top:18px">Proposed, not decided. Five reports (two web researches, a production executive, an organisation designer, the codebase's own constraints) argued it out; a chair ruled each point. The shape is a <b>big studio from day one</b>: five divisions by function, one registry stage per format line inside Production, the IP as a data key. Episodes are the only line built; every other line has a defined empty slot and grows into it without a reorganisation. Full record: <code>architecture/decisions/2026-09-24_future_departments.md</code>; draft registry: <code>architecture/decisions/2026-09-24_stages_future.yaml</code>.</p>
+  <p class="lede" style="margin-top:18px">Proposed, not decided. Five reports (two web researches, a production executive, an organisation designer, the codebase's own constraints) argued it out; a chair ruled each point. The shape is a <b>big studio from day one</b>: five divisions by function, one registry stage per format line inside Production, the IP as a data key. Episodes are the only line built; every other line has a defined empty slot and grows into it without a reorganisation. Amended 2026-09-24 by the owner: no step of the refs or episode line parks on a person — every taste gate is a judge with a priced ladder, and the owner audits after the fact (<code>architecture/decisions/2026-09-24_judges_replace_the_eye.md</code>). Full record: <code>architecture/decisions/2026-09-24_future_departments.md</code>; draft registry: <code>architecture/decisions/2026-09-24_stages_future.yaml</code>.</p>
 
   <!-- verdicts -->
   <section class="block">
@@ -474,7 +475,7 @@ table.v td code{white-space:nowrap}
       <tr><td>"Post-production"</td><td>One department: finishing + publishing + promotion</td><td><span class="lose">word loses</span><span class="win">list wins</span> Everything after the master leaves the format line, but as two divisions with different unit keys: <b>Distribution</b> (publish, analytics; per master × platform; irreversible; owns the catalogue) and <b>Marketing</b> (promo; per release; writes orders). The cut, mix and QC stay as the last steps of each production line, because picture is cut to the measured voice. Retire the word.</td></tr>
       <tr><td>Trailer</td><td>Under promotion</td><td><span class="lose">placement loses</span><span class="win">purpose wins</span> A Production format line that Marketing orders. It has a 10-step DAG, a runner and event history; moving it renumbers stable ids and breaks ten tests. Same rule for shorts, cutdowns, key art: Marketing decides, Production or Distribution makes.</td></tr>
       <tr><td>Promotion</td><td>A unit of post</td><td><span class="half">split</span> The decision (assets, dates, platforms, budget) is Marketing's step; the manufacture of anything that needs a render is a Production order; the shipping is Distribution. Marketing never touches a GPU or a platform API.</td></tr>
-      <tr><td>Owner gates</td><td>—</td><td><span class="win">ruled</span> Three classes (money, publish, taste), seven mechanical signatures today, a retirement rule that shrinks taste to three: LOOK once per book, MASTER, PUBLISH as policy. Money for credits and OVERRIDE never retire.</td></tr>
+      <tr><td>Owner gates</td><td>"Remove them. Automate them all."</td><td><span class="win">owner decision</span> The taste gates (LOOK, PLAN, EYE ×2, MASTER) are judged from day one, never signed by a person: detectors for counts and geometry, embeddings for identity, a VLM that only names, code that judges; a priced ladder per gate; the terminal rung signs <b>flagged</b> and writes an audit row. What stays a signature: PUBLISH, MONEY for paid credits, OVERRIDE. The owner's eye becomes an audit sheet whose findings re-calibrate the judges through a bench and a ratchet test.</td></tr>
       <tr><td>Organising axis</td><td>"A big studio with TV, movies, music, games, books"</td><td><span class="win">stands</span> Function on top (five divisions), one registry stage per format line inside Production, IP as the data key plus one owned record (<code>series.json</code> + catalogue). Every line names its steps from six words: plan, record, board, shoot, edit, qc. Never a department per book.</td></tr>
       <tr><td>Research</td><td>One department, later</td><td><span class="lose">loses</span> Three things wear the word and each gets a slot now: <b>R&amp;D</b> (models, prompts, calibration) under Platform with its own experiments ledger; <b>Analytics</b> as a Distribution stage, read-only, and a view count may never move a gate threshold; <b>Development</b> (the slate: what to make next) at Studio level.</td></tr>
       <tr><td>Unit of work</td><td>"A chapter can be a unit; it can expand"</td><td><span class="win">stands, mechanised</span> A <code>unit</code> column on the events table; each stage declares its own grammar: <code>ch04</code>, <code>ch04-05</code>, <code>scene_12</code>, <code>cue_03</code>, <code>&lt;sha8&gt;@youtube</code>. A season is the ordered unit list in <code>series.json</code>; a feature is one unit whose steps fan out per sequence.</td></tr>
@@ -543,7 +544,7 @@ table.v td code{white-space:nowrap}
       <span class="k"><span class="swatch agent"></span> agent</span>
       <span class="k"><span class="swatch think"></span> agent, reasoning tier</span>
       <span class="k"><span class="swatch qc"></span> QC agent</span>
-      <span class="k"><span class="chip qc">OWNER</span> a unit that parks for one of your signatures</span>
+      <span class="k"><span class="chip qc">JUDGE</span> a judge signs the gate; <span class="chip qc">OWNER</span> only PUBLISH parks for a signature</span>
     </div>
     <div id="dept-trees-future" class="dept-trees"></div>
 
@@ -564,25 +565,23 @@ table.v td code{white-space:nowrap}
         </ul>
       </div>
       <div class="mini">
-        <h3>Owner gates, seven signatures</h3>
-        <p>Each is a file or a flag the ledger records. A sentence in chat is not a decision.</p>
+        <h3>Signatures, five — and what is judged instead</h3>
+        <p>Each is a file or a flag the ledger records. A sentence in chat signs nothing.</p>
         <ul>
-          <li><b>MONEY</b> · any cost kind · <code>--approved=&lt;kind&gt;</code> · credits never retire</li>
-          <li><b>LOOK</b> · once per book × style · <code>refs/verdict.json</code></li>
-          <li><b>PLAN</b> · per unit, before anything is voiced or drawn · <code>plan.verdict.json</code></li>
-          <li><b>EYE</b> · board and takes · <code>eye_&lt;sha8&gt;.json</code>, the next step refuses without it</li>
-          <li><b>MASTER</b> · per master · <code>review/eye_&lt;sha8&gt;.json</code></li>
+          <li><b>MONEY</b> · any paid cost kind · <code>--approved=&lt;kind&gt;</code> · never retires (these lines spend none)</li>
           <li><b>PUBLISH</b> · every public write · <code>--approved=publish</code> · retirable per series × platform</li>
           <li><b>OVERRIDE</b> · any waiver of a machine gate · never retires</li>
+          <li><b>Synthetic declaration</b> · <code>series.json</code> <code>synthetic</code> · typed once</li>
+          <li><b>RENDER_HOLD</b> · a file; the brake, not a gate</li>
         </ul>
-        <p><b>Retirement:</b> K consecutive clean approvals on one (format, gate), a line in <code>DECISIONS.md</code> with the count, expressed as a policy value the runner reads. Suggested K = 5.</p>
+        <p><b>Judged, not signed:</b> LOOK, PLAN, EYE (board, takes) and MASTER are signed by <code>judge:&lt;name&gt;@&lt;version&gt;</code> from day one (decision <code>2026-09-24-automate-the-taste-gates</code>). A judge signs <code>pass</code> or <code>flagged</code>, never <code>fault</code>; it never waives. <b>Audit, not gate:</b> <code>library/&lt;book&gt;/audit/&lt;unit&gt;.html</code> shows every flag and a seeded sample; the owner's findings append to the casebook and re-calibrate the judges through the bench. No step reads it.</p>
       </div>
     </div>
   </section>
 
   <!-- future flow -->
   <section class="block">
-    <div class="head"><h2>A typical run, future shape</h2><p>One chapter unit, from bound cast to a promoted release. Gold-edged steps park the run for one of your signatures. Numbers are illustrative.</p></div>
+    <div class="head"><h2>A typical run, future shape</h2><p>One chapter unit, from bound cast to a promoted release. Gold JUDGE rows are the judges; a flagged terminal is gold in the log. Nothing in the line parks on a person. Numbers are illustrative.</p></div>
     <div class="flow" id="flow2">
       <div class="flow-top">
         <button class="btn" data-role="play">Play</button>
@@ -609,7 +608,7 @@ table.v td code{white-space:nowrap}
         </div>
       </div>
     </div>
-    <p class="flow-note">The trailer is shown being ordered by Marketing and made by Production: the same run, one loop later. Nothing in a production line publishes; nothing in Marketing renders or posts.</p>
+    <p class="flow-note">The trailer is shown being ordered by Marketing and made by Production: the same run, one loop later. Nothing in a production line publishes; nothing in Marketing renders or posts; nothing in a line waits for a person — the only signature left in this run is PUBLISH.</p>
   </section>
 
   <!-- migration -->
@@ -629,6 +628,7 @@ table.v td code{white-space:nowrap}
           <li><b><code>analytics</code>, <code>promo</code></b> · the loop closes: numbers feed the next brief · ~600 lines</li>
           <li><b>Higgsfield client + credit ledger → <code>shorts</code></b> · the showrunner skill retires as manager · ~1,700 lines</li>
           <li><b>Gate retirements</b> · one (format, gate) at a time, each a DECISIONS line with its count</li>
+          <li><b>Judges replace the eye</b> · casebook + bench + ratchet; <code>gates.yaml</code>; picture, take, plan and master judges with priced ladders; every refs/episode park removed; the audit sheet · ~3,450 lines, ~110 tests · in progress</li>
         </ol>
       </div>
       <div class="mini">
@@ -639,9 +639,10 @@ table.v td code{white-space:nowrap}
           <li><span class="pill">missing</span> analytics, promo, notify, scheduler, R&amp;D ledger</li>
           <li><span class="pill">skills only</span> shorts — registered as an empty slot</li>
           <li><span class="pill">slots</span> feature, song, audiobook, game, book; the own platform as an adapter inside publish, after the catalogue</li>
+          <li><span class="pill">parks, to be judged</span> LOOK, PLAN, EYE ×2, MASTER — judges land commit by commit (owner decision 2026-09-24)</li>
         </ul>
         <h3 style="margin-top:14px">Publishable on their own</h3>
-        <p>Standalone packages this design implies, each generalisable beyond this repo: <b>stepwise</b> (the step runner with credits-and-artefacts resume), <b>publish-manifest</b> (typed multi-platform publishing with a quota ledger), <b>higgsfield-client</b>, <b>list-then-judge</b> (the VLM content-gate pattern), <b>trait-card</b> (identity binding for reference sheets), <b>measured-timeline</b> (the animatic as code), <b>metre</b>, <b>title-record</b>, <b>registry-org-chart</b>.</p>
+        <p>Standalone packages this design implies, each generalisable beyond this repo: <b>stepwise</b> (the step runner with credits-and-artefacts resume), <b>publish-manifest</b> (typed multi-platform publishing with a quota ledger), <b>higgsfield-client</b>, <b>list-then-judge</b> (the VLM content-gate pattern), <b>casebook-locked calibration</b> (rows, bench, ratchet, the flag-not-park contract), <b>trait-card</b> (identity binding for reference sheets), <b>measured-timeline</b> (the animatic as code), <b>metre</b>, <b>title-record</b>, <b>registry-org-chart</b>.</p>
       </div>
     </div>
   </section>
@@ -674,13 +675,16 @@ table.v td code{white-space:nowrap}
       U('','Scheduler','Finds (book, unit) pairs whose requires are complete; launches the runner; parks on ESCALATE; batches a call sheet','missing','studio.py'),
       U('','Slate','Ordered unit list, targets, synthetic declaration, publish policy','partial','library/<book>/series.json'),
       U('','Brake','Every runner and the GPU lease read it on the way in','built','RENDER_HOLD'),
-      U('','Decisions','Every gate retirement with its count','built','docs/DECISIONS.md')]},
+      U('','Decisions','Every gate retirement with its count','built','docs/DECISIONS.md'),
+      U('','Audit sheet','Every flag and a seeded sample per unit; the owner reads it when he likes; findings append to the casebook; no step reads it','missing','scripts/audit/sheet.py · library/<book>/audit/')]},
     {n:'Platform',r:'Shared services; no deliverable of its own',st:'partial',kids:[
       U('','Model gateway','Tiers, not models; a local tier is a yaml edit','built','studio/llm.py · models.yaml'),
       U('','GPU lease','One GPU, one stage; reads RENDER_HOLD','partial','studio/comfy.py'),
       U('','Ledger / DB','STAGES from the registry; a unit column','partial','studio/db.py · spend.py'),
       U('','Approval','Per kind, per run','built','studio/approval.py'),
-      U('','Measures','A measure returns a number; a gate returns a verdict','partial','studio/measure/'),
+      U('','Measures','A measure returns a number: faces and identity (embedding), keypoints, boxes, flow, OCR, copy, patch embedding','partial','studio/measure/'),
+      U('','Judge bench','Casebook rows per book; recall on owner catches, false refusals, flag rate; a ratchet test refuses a commit that loses a catch','missing','studio/judge_bench.py · library/<book>/casebook/ · docs/calibration/bench/'),
+      U('','Gate policy','Who signs each gate: auto with a decision id; shadow = a newer judge version benched beside the current one','missing','gates.yaml · studio/gate_policy.py'),
       U('','Notify','Every department calls it; none copies it','missing','studio/notify.py'),
       U('','Publish clients','One pinned client per platform','partial','studio/youtube.py · higgsfield.py'),
       U('','R&D ledger','Hypothesis, variants, measures, verdict, cost','missing','experiments/<id>/manifest.json')]},
@@ -701,19 +705,19 @@ table.v td code{white-space:nowrap}
       U('01','Canon','Which entities this book binds','built','step_01_canon.py wraps cast_rows.py',[A('Casting director','rows: who appears')]),
       U('02','Sheets','One sheet per character and key prop','built','step_02_sheets.py wraps build_pack',[A('Trait reader','differs in ≥3 traits?'),A('Look back','does the picture show its prompt?')]),
       U('03','Voices','A register nobody else holds','built','step_03_voices.py wraps cast_voices.py',[A('Voice director','region, body, speech')]),
-      U('04','Verdict','ESCALATE — LOOK, once per book','built','step_04_verdict.py · refs/verdict.json',[],'LOOK')]},
+      U('04','Verdict','judge:look signs refs/verdict.json; a sheet failing a hard row is redrawn (seed, then defining state first); the terminal binds the best sheet flagged','partial','step_04_verdict.py · studio/judges/look.py',[A('Look judge','must nouns, faces distinct (embedding), no lettering, limb count, style outlier','qc')])]},
     {n:'Episode (TV)',r:'Production · unit: book × chapter(s) · leader episode.py · $0 local GPU',st:'built',kids:[
       U('01','Bind','This unit’s cast, stamped','built','step_01 wraps cast_rows.py',[A('Cast rows (code)','who is in this chapter — from analysis')]),
-      U('02','Plan','The contract, gated before anything is made','built','step_02 wraps plan_check',[A('Episode writer','setups, shots, cells, moves, lines','reasoning')],'PLAN'),
+      U('02','Plan','The contract, gated before anything is voiced or drawn; the battery refuses, the critic lists, code judges','partial','step_02 wraps plan_check · studio/judges/plan.py',[A('Episode writer','setups, shots, cells, moves, lines','reasoning'),A('Plan critic','turn, answer, coverage, claims — each with a chapter span','qc')]),
       U('03','Places','Location + view at this unit’s hour','built','step_03 wraps places.py',[A('Look back','landmark and hour present?')]),
       U('04','Record','Every line measured and listened to','built','step_04 wraps say_lines, speaker_check',[A('Whisper (in say_lines)','what words are on this file?','qc')]),
       U('05','Timeline','Audio first: the animatic','built','step_05 wraps respot, timeline'),
       U('06','Prompts','Built and linted for $0, before any grid','built','step_06 wraps takes_r2v --prompts'),
-      U('07','Board','Storyboard grids from the plan’s prose','built','step_07 wraps grids.py'),
-      U('08','Panels','Two machine gates, then an eye','built','step_08 wraps panels, panel_check, panel_content_check',[A('Panel reader','lists what is in the picture','qc'),A('Eye','a fault no measurement names','qc')],'EYE'),
-      U('09','Shoot','Takes on the local video model; retake ladder','built','step_09 wraps takes_r2v, take_dq, take_content_check',[A('Panel reader','three frames, read alone','qc'),A('Eye','the strip','qc')],'EYE'),
+      U('07','Board','Layout by rule (grids of at most nine, cols × rows = shots); storyboard grids from the plan’s prose','partial','step_07 wraps grids.py · studio/grid_layout.py'),
+      U('08','Panels','Two machine gates, then the panel judges; a fault climbs seed → reprose, then the best panel is kept flagged','partial','step_08 wraps panels, panel_check, panel_content_check · studio/judges/panel_eye.py',[A('Panel reader','lists what is in the picture','qc'),A('Panel judges','hats, gutter, copy, posture, framing, clones, lettering, landmark','qc')]),
+      U('09','Shoot','Takes on the local video model; the take judges; cure-to-cause ladder under the GPU ceiling; terminal: a still from the panel or the best take flagged','partial','step_09 wraps takes_r2v, take_dq, take_content_check · studio/judges/take_eye.py',[A('Panel reader','three frames, read alone','qc'),A('Take judges','identity, clones, pass-through, rotation, leak, lag','qc')]),
       U('10','Edit','Title, measured bed, cut, mix','built','step_10 wraps series_title, assemble'),
-      U('11','QC','Measure the delivered master','built','step_11 wraps qc, eye_review, dossier',[],'MASTER'),
+      U('11','QC','Measure the delivered master; the master ensemble fills the rubric; recut, then one retake; an n is flagged, never waived','partial','step_11 wraps qc · studio/judges/master_eye.py',[A('Master ensemble','shadow, faces, board, repeats, story; 30-frame read; cross-take identity','qc')]),
       U('12','Deliver','Manifest, the path first; never publishes','built','step_12_deliver.py')]},
     {n:'Trailer',r:'Production · unit: book · leader trailer.py · ordered by Marketing',st:'built',kids:[
       U('01','Story','Lead, figure, turn; register, thesis','built','step_01_story.py',[A('Story','register + thesis')]),
@@ -1000,28 +1004,30 @@ table.v td code{white-space:nowrap}
 
   /* ---------- dataset: future run ---------- */
   var O=function(t){return '<span class="q">OWNER</span> '+t;};
+  var FL=function(t){return '<span class="f">FLAGGED</span> '+t;};
   var FUTURE={
     lanes:[{key:'P',label:'PRE-PRODUCTION',cls:''},{key:'E',label:'PRODUCTION · episode',cls:'invent'},{key:'D',label:'DISTRIBUTION',cls:'dist'},{key:'M',label:'MARKETING',cls:'mkt'}],
-    left:150, laneGap:100, top:70, nodeW:104, loops:[3,6,10,11],
-    startWhy:'The scheduler finds a chapter whose requirements are complete and launches the line. It parks on every owner gate, batches the escalations into one call sheet, and moves on.',
+    left:150, laneGap:100, top:70, nodeW:104, loops:[4,10,11,13],
+    startWhy:'The scheduler finds a chapter whose requirements are complete and launches the line. Nothing in the line parks on a person: every taste gate is a judge with a priced ladder; a terminal rung signs flagged and writes an audit row. The owner reads the audit sheet when he likes.',
     endName:'Release promoted; a trailer ordered', endWhy:'The order row becomes a Production unit on the trailer line, which ends at its own master and goes through the same Distribution steps. The loop closes when analytics reads the numbers into the next campaign brief.',
     steps:[
     {lane:'P',id:'analysis',name:'Analysis',done:true,subs:[]},
     {lane:'P',id:'screenplay',name:'Screenplay',done:true,subs:[]},
-    {lane:'P',id:'refs',name:'Refs & Cast',owner:'LOOK',why:'The reference bible: one sheet per character and key prop, one voice per speaker, per book × style. The only writer of refs.json. Run just-in-time when a plan binds a new entity.',bridge:'refs/04 complete → the line may start',subs:[
+    {lane:'P',id:'refs',name:'Refs & Cast',why:'The reference bible: one sheet per character and key prop, one voice per speaker, per book × style. The only writer of refs.json. Judged, never parked.',bridge:'refs/04 complete → the line may start',subs:[
       {m:'01',t:'canon: which entities this book binds; one row per character',who:'casting director',k:'agent',d:1.4,log:'<span class="a">casting_director</span> → CastList · code writes 6 refs.json rows'},
       {m:'02',t:'sheets: draw on the local image model; trait card; look-back against the prompt',who:'trait reader · look back',k:'agent',d:2.6,log:'sheets ×6 · <span class="a">trait_reader</span>: every new face differs in ≥3 traits · <span class="a">look_back</span>: 1 redraw (defining state moved first)'},
       {m:'03',t:'voices: a register nobody else holds; pairwise similarity wall',who:'voice director',k:'agent',d:1.8,log:'<span class="a">voice_director</span> ×3 → VoiceDesign · similarity 0.42 max, under the wall'},
-      {m:'04',t:'verdict: ESCALATE — LOOK, once per book × style',who:'owner',k:'own',d:1.6,log:O('refs/verdict.json bound to pack sha · APPROVE')+' · <span class="k">refs complete</span>'}]},
+      {m:'04',t:'verdict: judge:look over every sheet; ladder; sign',who:'look judge',k:'judge',d:1.6,log:'<span class="q">judge:look@1</span> · 6 sheets · must nouns 6/6 · faces distinct · OCR 0 words · 1 style outlier '+FL('')+' · refs/verdict.json signed · <span class="k">refs complete</span>'}]},
     {lane:'E',id:'episode/01',name:'Bind',why:'This unit’s cast. Rows stamped with the unit; a character with no refs row parks the unit and orders refs for it.',subs:[
       {m:'01_01',t:'cast for the unit’s scenes',who:'cast lister',k:'agent',d:1.2,log:'unit <b>ch04</b> · <span class="a">cast_lister</span> → 4 characters, all in the registry'},
       {m:'01_02',t:'stamp the bound rows',who:'code',k:'code',d:.5,log:'refs.json rows stamped ch04 · <span class="k">bind completed</span>'}]},
-    {lane:'E',id:'episode/02',name:'Plan',owner:'PLAN',why:'The contract, gated before anything is voiced or drawn. plan.json is data under the unit folder; no plan lives in the code tree.',subs:[
+    {lane:'E',id:'episode/02',name:'Plan',why:'The contract, gated before anything is voiced or drawn. The battery refuses; the critic lists in a closed vocabulary with chapter spans; code judges. Never parked: a battery refusal defers the unit, a critic fault ends in the best draft flagged.',subs:[
       {m:'02_01',t:'brief: analysis rows + screenplay elements + bound rows + places + camera catalog + dq rules',who:'code',k:'code',d:.8,log:'brief assembled: 9 scenes, 4 bound rows, 3 places'},
       {m:'02_02',t:'write the Episode: setups, shots, cells, camera moves, lines',who:'episode writer',k:'think',d:3,log:'<span class="v">episode_writer</span> (reasoning, local) → Episode: 6 setups, 23 shots, 2 spoken lines'},
-      {m:'02_03',t:'checks: plan_check + cell gates + take-path lint in one pass',who:'code',k:'code',d:1,log:'checks: 2 refusals (a prompt over length; a hat worn and held)'},
+      {m:'02_03',t:'checks: plan_check + cell gates + G-MOVES + G-SOURCE + take-path lint',who:'code',k:'code',d:1,log:'checks: 2 refusals (a hat worn and held; extras 6 with no chapter span)'},
       {m:'02_04',t:'improve round 1: refusals quoted back to the writer',who:'episode writer',k:'think',d:1.8,loop:true,log:'<span class="v">episode_writer</span> round 1 → 0 refusals'},
-      {m:'02_05',t:'lock: write plan.json through write_plan; ESCALATE — PLAN',who:'owner',k:'own',d:1.6,log:O('plan.verdict.json bound to plan sha · APPROVE')+' · <span class="k">plan completed</span>'}]},
+      {m:'02_05',t:'critic: turn, answer, coverage, claims — listed with spans; code judges',who:'plan critic',k:'judge',d:1.6,log:'<span class="q">judge:plan@1</span> → turn = shot 14, two people, a hand verb · answer on line 12 · 9/9 events covered · 0 claims without a span'},
+      {m:'02_06',t:'lock: write plan.json through write_plan; sign',who:'code',k:'code',d:.5,log:'plan.verdict.json · signed_by judge:plan@1 · <span class="k">plan completed</span>'}]},
     {lane:'E',id:'episode/03',name:'Places',why:'Each setup’s location and view at this unit’s hour, from its own described words. A recurring place is never pinned to one picture.',subs:[
       {m:'03_01',t:'draw every setup’s place picture',who:'code · local GPU',k:'code',d:1.8,log:'places ×6 drawn (local image model)'},
       {m:'03_02',t:'look-back: landmark and hour present?',who:'look back',k:'agent',d:1.2,log:'<span class="a">look_back</span> ×6 → 6 ok'}]},
@@ -1035,30 +1041,32 @@ table.v td code{white-space:nowrap}
     {lane:'E',id:'episode/06',name:'Prompts',why:'Every take prompt built and linted for $0 with no GPU, before any grid.',subs:[
       {m:'06',t:'build + lint: length per block, style line, banned props, no last frame',who:'code',k:'code',d:.9,log:'23 prompts · lint 0 refusals · <span class="k">prompts completed</span>'}]},
     {lane:'E',id:'episode/07',name:'Board',why:'Storyboard grids on the local image model from the plan’s prose, up to three references: cast sheets first, the setup’s place last.',subs:[
-      {m:'07_01',t:'layout by shot size: cols × rows = shots',who:'code',k:'code',d:.5,log:'6 setups → 4 grids 2×2, 2 grids 1×1'},
+      {m:'07_01',t:'layout by rule: grids of at most nine, cols × rows = shots',who:'code',k:'code',d:.5,log:'6 setups → 4 grids 2×2, 1 grid 3×2, 1 grid 1×1 · layout.json'},
       {m:'07_02',t:'draw; manifest written after the render',who:'code · local GPU',k:'code',d:2.4,log:'grids ×6 drawn · manifests written'}]},
-    {lane:'E',id:'episode/08',name:'Panels',owner:'EYE',why:'One panel per shot, two machine gates, then an eye. The takes refuse without all three verdicts.',subs:[
+    {lane:'E',id:'episode/08',name:'Panels',why:'One panel per shot, two machine gates, then the panel judges. A fault climbs seed → reprose (cell prose only, the timeline stays current); at most two grids climb; the terminal keeps the best panel flagged. The takes refuse without the three verdicts.',subs:[
       {m:'08_01',t:'cut panels between measured gutters, crop square',who:'code',k:'code',d:.7,log:'23 panels cut'},
-      {m:'08_02',t:'dq: people vs faces, missing face, sharpness, ink, stacked',who:'code',k:'code',d:.9,log:'panel dq: 22 pass, 1 fail (stacked)'},
+      {m:'08_02',t:'dq: people vs faces, missing face, sharpness, ink, stacked (by thirds)',who:'code',k:'code',d:.9,log:'panel dq: 22 pass, 1 fail (stacked)'},
       {m:'08_03',t:'content: the reader lists, shown no plan; code judges',who:'panel reader',k:'qc',d:1.8,log:'<span class="q">panel_reader</span> ×23 → 1 mismatch (an extra person)'},
-      {m:'08_06',t:'improve: the failed grid superseded and redrawn',who:'code · local GPU',k:'code',d:1.4,loop:true,log:'1 grid redrawn (seed bump) → dq pass, content pass'},
-      {m:'08_04',t:'contact sheet of every panel',who:'code',k:'code',d:.5,log:'storyboard/contact.png'},
-      {m:'08_05',t:'ESCALATE — EYE: pass / fault named / cannot tell',who:'owner',k:'own',d:1.6,log:O('storyboard/eye_3f9a1c2d.json · pass')+' · <span class="k">panels completed</span>'}]},
-    {lane:'E',id:'episode/09',name:'Shoot',owner:'EYE',why:'The slow step. Takes on the local video model, staged from the panel, the sheets the shot’s faces need and the line’s wav. GPU lease: one GPU, one stage.',subs:[
-      {m:'09_01',t:'round: every live shot’s next take, model resident',who:'code · local GPU',k:'code',d:3,log:'approval kind <b>render</b> ok · round 1: 23 takes'},
-      {m:'09_02',t:'dq: frozen start, churn, zoom, look, lip-sync, held, jump',who:'code',k:'code',d:1,log:'take dq: 20 pass, 3 fail (2 frozen, 1 held)'},
-      {m:'09_03',t:'content: three frames each, read alone',who:'panel reader',k:'qc',d:1.6,log:'<span class="q">panel_reader</span> ×23 → 23 match'},
-      {m:'09_05',t:'retake ladder: cure matched to cause; one batched round',who:'code · local GPU',k:'code',d:2,loop:true,log:'retakes: 2 seeds, 1 move-type change → 3/3 pass'},
-      {m:'09_04',t:'strip of every take; ESCALATE — EYE',who:'owner',k:'own',d:1.6,log:O('takes/r2v/eye_7b21e0aa.json · pass')+' · <span class="k">shoot completed</span>'}]},
+      {m:'08_05',t:'judges: hats, copy, posture, framing, clones, lettering, landmark; one short size read as the second vote',who:'panel judges',k:'judge',d:1.6,log:'<span class="q">judge:panel_eye@1</span> · keypoints ×23 · boxes ×23 · OCR 0 strings · 1 clone pair (shot 04) · 1 held+worn hat (shot 11)'},
+      {m:'08_06',t:'ladder: redraw seed → reprose from the cure table; cap 2 grids',who:'code · local GPU',k:'code',d:1.4,loop:true,log:'grid A: seed → clones gone · grid B: reprose (held clause struck) → hat ok · 0 flags'},
+      {m:'08_04',t:'contact sheet; sign storyboard/eye_<sha8>.json',who:'code',k:'code',d:.5,log:'storyboard/contact.png · eye_3f9a1c2d.json signed_by judge:panel_eye@1 · <span class="k">panels completed</span>'}]},
+    {lane:'E',id:'episode/09',name:'Shoot',why:'The slow step. Takes on the local video model; the take judges; a cure-to-cause ladder priced under the GPU ceiling. Terminal: a still from the passed panel on a narration shot (at most two, never adjacent), else the best take kept flagged. Never a park, never a dropped shot.',subs:[
+      {m:'09_01',t:'round: every live shot\u2019s next take, model resident; ceiling checked first',who:'code · local GPU',k:'code',d:3,log:'ceiling 5 h · 4 h 10 left · round 1: 23 takes'},
+      {m:'09_02',t:'dq: frozen, churn, zoom, look, held (flow), jump (+ cut vote), rotation, leak vs staged pictures',who:'code',k:'code',d:1,log:'take dq: 19 pass, 4 fail (2 frozen, 1 held, 1 leak → heads.json 9 frames)'},
+      {m:'09_03',t:'content: three frames each, read alone; framing and action named',who:'panel reader',k:'qc',d:1.6,log:'<span class="q">panel_reader</span> ×23 → 22 match, 1 posture (T18 standing for lying)'},
+      {m:'09_04',t:'judges: identity vs sheet, clones per frame, pass-through, mouth lag (advisory)',who:'take judges',k:'judge',d:1.4,log:'<span class="q">judge:take_eye@1</span> · faces 61 readable · 0 strangers · 1 drift (T09 0.71 vs 0.75) · 0 clone pairs'},
+      {m:'09_05',t:'ladder: seed → move type → shorter → head cut → re-plan the cell; one batched round',who:'code · local GPU',k:'code',d:2,loop:true,log:'retakes: 2 seeds, 1 move type (truck → push in), 1 head cut (0 GPU), 1 re-plan (T18 camera looks down) → 4/5 pass · T09 '+FL('keep_best')},
+      {m:'09_06',t:'strip; sign takes/r2v/eye_<sha8>.json; audit row',who:'code',k:'code',d:.6,log:'eye_7b21e0aa.json flagged · signed_by judge:take_eye@1 · audit row T09 · <span class="k">shoot completed</span>'}]},
     {lane:'E',id:'episode/10',name:'Edit',why:'Title card, measured bed, cut, mix. Picture cut to the measured voice. master_iterN, never overwriting.',subs:[
       {m:'10_01',t:'title: series base once per book; unit lettering read back by OCR',who:'code · local GPU',k:'code',d:1,log:'title card ok (OCR read-back)'},
       {m:'10_02',t:'bed: tone spans → local music; metre measured and ranked',who:'code · local GPU',k:'code',d:1.6,log:'bed: 4 seeds, best fitness 0.81'},
       {m:'10_03',t:'cut: takes trimmed to placed.json; lines at their at; mix; captions',who:'code',k:'code',d:1.2,log:'cut/master_iter1.mp4 · 152.0 s'},
       {m:'10_04',t:'sound: ambience and spot effects if the format asks',who:'code',k:'code',d:.4,log:'sound: skipped (format does not ask) · <span class="k">edit completed</span>'}]},
-    {lane:'E',id:'episode/11',name:'QC',owner:'MASTER',why:'Measure the delivered master, never the intention. Stamps the sha8 it measured.',subs:[
-      {m:'11_01',t:'measure: loudness, every cut, every line heard, silent-gap wall, title present',who:'code',k:'code',d:1.2,log:'qc: 23/23 cuts, 14/14 lines heard, -16.1 LUFS, no gap'},
-      {m:'11_03',t:'ESCALATE — MASTER: the eye on the master',who:'owner',k:'own',d:1.6,log:O('review/eye_9c04d1f7.json · pass')},
-      {m:'11_04',t:'dossier: one page of every input, prompt, picture, take, verdict',who:'code',k:'code',d:.6,log:'dossier.html · <span class="k">qc completed</span>'}]},
+    {lane:'E',id:'episode/11',name:'QC',why:'Measure the delivered master, never the intention. The master ensemble answers the five rubric questions from measurements and one 30-frame read; recut twice, one retake; an n is flagged with its evidence, never waived.',subs:[
+      {m:'11_01',t:'measure: loudness, every cut (+ scene-change vote), every line heard, silent-gap wall, title present',who:'code',k:'code',d:1.2,log:'qc: 23/23 cuts, 14/14 lines heard, -16.1 LUFS, no gap'},
+      {m:'11_03',t:'ensemble: shadow, faces, board, repeats, story; 30-frame read; cross-take identity',who:'master ensemble',k:'judge',d:1.8,log:'<span class="q">judge:master_eye@1</span> · p5 luma 6 · closes 0.27 · board 0.62 · repeats 0 unexplained · story: turn verb listed on shot 14 · rubric y y y y y'},
+      {m:'11_02',t:'ladder: recut ×2 → retake one shot',who:'code',k:'code',d:.8,loop:true,log:'no rung taken'},
+      {m:'11_04',t:'dossier; audit sheet for this unit',who:'code',k:'code',d:.6,log:'dossier.html · audit/ch04.html: 1 flag (T09), 3 sampled passes per gate · <span class="k">qc completed</span>'}]},
     {lane:'E',id:'episode/12',name:'Deliver',why:'manifest.json beside the master; the full path printed first; notify through the platform. Never publishes.',bridge:'a finished file → Distribution',subs:[
       {m:'12',t:'manifest + notify',who:'code',k:'code',d:.8,log:'manifest.json · notify → owner channel · <span class="k">episode ch04 delivered</span>'}]},
     {lane:'D',id:'publish/01',name:'Intake',why:'The finished-file registry: which master, its sha8, its qc, its master eye, its kind, its series position.',subs:[
@@ -1072,7 +1080,7 @@ table.v td code{white-space:nowrap}
     {lane:'D',id:'publish/05',name:'Upload',why:'Private insert, machine-gated; the ledger row written before the call; thumbnail, captions, playlist set. One adapter per platform, our own included.',subs:[
       {m:'05',t:'private upload via the youtube adapter',who:'code',k:'code',d:1.4,log:'approval kind <b>publish</b> ok · private id written to uploads.jsonl'}]},
     {lane:'D',id:'publish/06',name:'Review',why:'The human gate for anything a stranger will see: the master eye for this sha8, with its waivers.',subs:[
-      {m:'06',t:'read the master eye verdict for this sha8',who:'code',k:'code',d:.6,log:'review: eye_9c04d1f7 pass, 0 waivers'}]},
+      {m:'06',t:'read the master rubric for this sha8: judge, flags, waivers',who:'code',k:'code',d:.6,log:'review: eye_9c04d1f7 · judge:master_eye@1 · 0 waivers · 1 flag carried to uploads.jsonl'}]},
     {lane:'D',id:'publish/07',name:'Release',owner:'PUBLISH',why:'ESCALATE — PUBLISH. The flip to public at the scheduled time re-checks every machine gate as it stands, reads the live status back.',subs:[
       {m:'07',t:'flip to public at publish_at; re-check gates; record what the platform returned',who:'owner',k:'own',d:1.8,log:O('--approved=publish · public at 18:00 · status read back: public')}]},
     {lane:'D',id:'publish/08',name:'Catalog',why:'The title record: every public artefact by kind, platform ids, dates, artwork set. The own platform reads this.',subs:[
@@ -1103,9 +1111,9 @@ table.v td code{white-space:nowrap}
   epNow[epNow.length-1].bridge=undefined;
   var CURRENT_NOW={
     lanes:[{key:'A',label:'ANALYSIS',cls:''},{key:'S',label:'SCREENPLAY',cls:'invent'},{key:'R',label:'REFS & CAST',cls:''},{key:'E',label:'EPISODE',cls:'invent'}],
-    left:150, laneGap:100, top:70, nodeW:104, loops:[0,1,10,13,19,20],
-    startWhy:'The run starts at Analysis 01 with the EPUB and ends with an episode master delivered by the episode line.',
-    endName:'Episode master delivered', endWhy:'manifest.json sits beside the master with every gate verdict and timing total. Publishing is the next department; today the upload scripts run by hand.',
+    left:150, laneGap:100, top:70, nodeW:104, loops:[0,1,10,13,19,20,22],
+    startWhy:'The run starts at Analysis 01 with the EPUB and ends with an episode master delivered by the episode line. Nothing in the line parks on a person; the owner reads the audit sheet when he likes.',
+    endName:'Episode master delivered', endWhy:'manifest.json sits beside the master with every gate verdict and timing total; the audit sheet for the unit sits beside the dossier, and the owner reads it when he likes. Publishing is the next department; today the upload scripts run by hand.',
     steps:CURRENT.steps.concat([refsNow]).concat(epNow)
   };
   buildFlow(document.getElementById('flow1'),CURRENT_NOW);
