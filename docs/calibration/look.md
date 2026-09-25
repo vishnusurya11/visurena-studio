@@ -21,3 +21,13 @@ faces, DWPose limbs) over every character sheet the pack log named: 1 h 43 min,
 Cost: ~2 min per sheet with the VLM asks (trait card + must nouns); the light
 read is seconds. A new bound row costs its own full read plus one card per
 bound sheet it is compared against.
+
+## Second contact 2026-09-25 — the same bible, judged on the re-fitted rows
+
+`refs.py` over the 19 bound sheets, grandfathered (OCR + limbs only, no VLM ask):
+10 min per pass. One hard fault: OCR read `BA` on the newspaper boy's sheet (a
+printed masthead on the papers under his arm). The ladder redrew once on a bumped
+seed (171 s), the re-read found no string, the pack signed `judge:look@1` APPROVE,
+0 faults, sha8 4b0a9ecd. The kept sheet holds the boy's identity (cap, corduroy
+jacket, satchel, freckles) with unlettered papers; try 1 is under `superseded/`.
+First live proof of the sheet ladder on a real fault at $0.
