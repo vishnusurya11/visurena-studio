@@ -38,14 +38,14 @@ def process(conn, codex_id: str, extra=(), **kw) -> str:
     ctx = refs_run.context(conn, codex_id, **kw)
     ctx.extra = list(extra)
     print(f"=== REFS start | {ctx.label} | run {ctx.tracker.run_id} ===")
-    db.mark_stage(conn, codex_id, STAGE, "running")
+    db.mark_stage(conn, ctx.codex_id, STAGE, "running")
     try:
         outcome = step_runner.run_steps(ctx, step_runner.load_steps(STAGE))
     except Exception:
-        db.mark_stage(conn, codex_id, STAGE, "failed")
+        db.mark_stage(conn, ctx.codex_id, STAGE, "failed")
         raise
     # parked at an owner gate is neither running nor failed: it waits
-    db.mark_stage(conn, codex_id, STAGE, "completed" if outcome == "completed" else "pending")
+    db.mark_stage(conn, ctx.codex_id, STAGE, "completed" if outcome == "completed" else "pending")
     print(f"=== REFS {outcome} | {ctx.label} ===")
     return outcome
 

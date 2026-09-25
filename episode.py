@@ -57,14 +57,14 @@ def process(conn, codex_id: str, number: int, extra: list[str], **kw) -> str:
     ctx = episode_run.context(conn, codex_id, number, **kw)
     ctx.extra = list(extra)
     print(f"=== EPISODE start | {ctx.label} | run {ctx.tracker.run_id} ===")
-    db.mark_stage(conn, codex_id, STAGE, "running")
+    db.mark_stage(conn, ctx.codex_id, STAGE, "running")
     try:
         outcome = step_runner.run_steps(ctx, step_runner.load_steps(STAGE))
     except Exception:
-        db.mark_stage(conn, codex_id, STAGE, "failed")
+        db.mark_stage(conn, ctx.codex_id, STAGE, "failed")
         raise
     if outcome == "completed":
-        db.mark_stage(conn, codex_id, STAGE, "completed")
+        db.mark_stage(conn, ctx.codex_id, STAGE, "completed")
     print(f"=== EPISODE {outcome} | {ctx.label} ===")
     return outcome
 

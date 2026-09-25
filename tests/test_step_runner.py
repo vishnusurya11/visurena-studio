@@ -112,6 +112,25 @@ def test_a_script_step_refuses_when_the_queue_never_drains(conn, tmp_path):
         ctx.run_script("scripts/episode/say_lines.py", gpu=True)
 
 
+def test_a_library_folder_name_keys_the_ledger_by_its_id_and_the_scripts_by_its_name(conn, tmp_path):
+    codex_id = db.insert_codex(conn, "Book", codex_id="20260901000001")
+    launched = []
+    ctx = StageContext(conn, codex_id + "_a-book-slug", tmp_path / "book", "episode", unit="ep01",
+                       number=1, logs_root=tmp_path / "logs", busy=lambda: False,
+                       hold=tmp_path / "HOLD", launch=lambda cmd: launched.append(cmd) or 0)
+    ctx.run_script("scripts/episode/timeline.py")
+    assert ctx.codex_id == codex_id
+    assert launched[0][2] == codex_id + "_a-book-slug"
+    ctx.tracker.event("05", "completed")
+    assert db.unit_status(conn, codex_id, "episode", "ep01") == {"05": "completed"}
+
+
+def test_an_unregistered_book_is_refused_before_any_step(conn, tmp_path):
+    from studio import episode_run
+    with pytest.raises(SystemExit, match="register"):
+        episode_run.context(conn, "20260901000009_nobody", 1)
+
+
 def test_a_failing_script_is_a_refusal_with_its_exit_code(conn, tmp_path):
     ctx = _ctx(conn, tmp_path, launch=lambda cmd: 2)
     with pytest.raises(SystemExit, match="exit 2"):

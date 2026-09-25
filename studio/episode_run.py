@@ -8,7 +8,7 @@ far; a unit that spans chapters is a new folder name, never a renamed one
 from __future__ import annotations
 
 from studio import episode_home
-from studio.stage_run import StageContext
+from studio.stage_run import StageContext, require_registered
 
 STAGE = "episode"
 
@@ -20,6 +20,7 @@ def unit_of(number: int) -> str:
 def context(conn, codex_id: str, number: int | None, **kw) -> StageContext:
     if number is None:
         raise SystemExit("the episode stage needs an episode number: <codex_id> <n>")
+    require_registered(conn, codex_id)
     ctx = StageContext(conn, codex_id, episode_home.book_dir(codex_id), STAGE,
                        unit=unit_of(number), number=number, **kw)
     ctx.home = episode_home.home(ctx.book_dir, number)

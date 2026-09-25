@@ -7,13 +7,14 @@ pack folder and a second unit.  The stage has no episode number.
 from __future__ import annotations
 
 from studio import episode_home
-from studio.stage_run import StageContext
+from studio.stage_run import StageContext, require_registered
 
 STAGE = "refs"
 UNIT = "main"
 
 
 def context(conn, codex_id: str, number: int | None = None, **kw) -> StageContext:
+    require_registered(conn, codex_id)
     ctx = StageContext(conn, codex_id, episode_home.book_dir(codex_id), STAGE, unit=UNIT, **kw)
     ctx.refs_dir = ctx.book_dir / "refs"
     return ctx

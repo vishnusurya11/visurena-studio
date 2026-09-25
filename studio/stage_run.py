@@ -22,6 +22,22 @@ WAIT_CAP = 7200.0
 (two hours covers a full run of thirty takes)."""
 
 
+def ledger_id(book_id: str) -> str:
+    """The codex table keys a book by its 14-digit id; a library folder is that id
+    plus a slug.  Either spelling on the command line, one id in the events."""
+    return book_id[:14] if len(book_id) > 14 and book_id[14] == "_" else book_id
+
+
+def require_registered(conn, codex_id: str) -> None:
+    """A stage may not run on a book the codex table does not know: every event
+    references the row, and a silent foreign-key failure is not a stop."""
+    from studio import db
+    try:
+        db.get_codex(conn, ledger_id(codex_id))
+    except ValueError as exc:
+        raise SystemExit(f"REFUSED: {exc}; register the book (studio/intake) before running a stage")
+
+
 def launch(cmd: list[str]) -> int:
     """Run one script to completion in its own process; its exit code comes back."""
     return subprocess.run(cmd).returncode
@@ -39,13 +55,14 @@ class StageContext:
                  number: int | None = None, logs_root: Path | None = None, busy=None,
                  hold: Path = approval.HOLD, launch=launch, capture=capture):
         self.conn = conn
-        self.codex_id = codex_id
+        self.book_id = codex_id                 # what the scripts take: the folder name or the id
+        self.codex_id = ledger_id(codex_id)     # what the ledger keys on: the 14-digit id
         self.book_dir = Path(book_dir)
         self.stage = stage
         self.unit = unit
         self.number = number
         kwargs = {"logs_root": logs_root} if logs_root else {}
-        self.tracker = Tracker(conn, codex_id, stage, unit=unit, **kwargs)
+        self.tracker = Tracker(conn, self.codex_id, stage, unit=unit, **kwargs)
         self.busy = busy or comfy.busy
         self.hold = Path(hold)
         self.launch = launch
@@ -65,7 +82,7 @@ class StageContext:
         self.tracker.log(msg, level=level, step_id=step_id)
 
     def command(self, script: str, extra: tuple[str, ...] = ()) -> list[str]:
-        args = [sys.executable, script, self.codex_id]
+        args = [sys.executable, script, self.book_id]
         if self.number is not None:
             args.append(str(self.number))
         return [*args, *extra]
