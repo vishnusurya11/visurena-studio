@@ -40,11 +40,26 @@ def done(ctx) -> bool:
     return not cast_of(getattr(ctx, "extra", None) or []) and stamped(ctx.book_dir, ctx.number)
 
 
+def chapter_cast(book: Path, number: int) -> list[str]:
+    """The chapter's individuals from the analysis, protagonist first then by
+    appearances.  ep12: the step asked for --cast by hand though every
+    character file's `journey` already lists its chapters.  Groups have no
+    single face and are never bound."""
+    import json
+    rows = []
+    for f in sorted((Path(book) / "analysis" / "characters").glob("*.json")):
+        row = json.loads(f.read_text(encoding="utf-8"))
+        if row.get("role") != "group" and any(j.get("chapter") == number for j in row.get("journey") or []):
+            rows.append(row)
+    rows.sort(key=lambda r: (r.get("role") != "protagonist", -int(r.get("appearances") or 0)))
+    return [r["id"] for r in rows]
+
+
 def run(ctx) -> None:
-    cast = cast_of(getattr(ctx, "extra", None) or [])
+    cast = cast_of(getattr(ctx, "extra", None) or []) or chapter_cast(ctx.book_dir, ctx.number)
     if not cast:
-        raise SystemExit(f"REFUSED: refs.json is not stamped for this unit and no cast was given\n"
-                         f"  usage: {USAGE}")
+        raise SystemExit(f"REFUSED: refs.json is not stamped for this unit, no cast was given, and the "
+                         f"analysis names nobody in chapter {ctx.number}\n  usage: {USAGE}")
     ctx.run_script("scripts/refs/cast_rows.py", *cast, gpu=GPU, clock="bind")
 
 
