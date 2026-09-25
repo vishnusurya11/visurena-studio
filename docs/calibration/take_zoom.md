@@ -175,3 +175,34 @@ Flags on unlabelled takes, checked on their frame strips:
 - Low-inlier reads (T04 11, T05 9, T06 8, T27 10, T04_fail1 9): measured, but
   on the fewest windows; T06 (Brigham walking, stride) reads 1.14 subject vs
   1.57 camera and is non-monotonic -- the man's walk, not the camera's.
+
+## Bench 2026-09-24 -- take_zoom@747e488a
+
+rows 802 (384 without this judge's inputs, not counted); machine_version git:ceec663; flag rate 0.047; refusals per unit {'20260822113400/ep10': 6, '20260822113400/ep11': 6, '20260822113400/ep12': 3, '20260822113400/ep13': 3, '20260822113400/ep14': 2, '20260827135508/ep01': 4, '20260827135508/ep02': 2, '20260827135508/ep03': 1, '20260827135508/ep04': 1, '20260827135508/ep08': 2, '20260827135508/ep09': 3, '20260827135508/ep10': 2, '20260827135508/ep11': 3}; expected GPU minutes 266
+
+- recall on owner rows: 0.000 [0.000, 0.000] on 0/0
+- recall on all rows: 0.000 [0.000, 0.000] on 0/0
+- synthetic (own column): 0.000 [0.000, 0.000] on 0/0
+- reject-only recall (unknown class): 0.235 [0.096, 0.473] on 4/17
+- false refusals (weighted): 0.085 [0.061, 0.116] on 34/401
+
+
+| class | tp | fn | synthetic tp/n | fp | tn | unmeasured |
+|---|---|---|---|---|---|---|
+| pass | 0 | 0 | 0/0 | 34 | 367 | 218 |
+| unknown | 4 | 13 | 0/0 | 0 | 0 | 166 |
+
+misses (fault rows passed), by path:
+- episodes/ep11/takes/r2v/attempts/T00_fail1.mp4
+- episodes/ep11/takes/r2v/attempts/T03_fail1.mp4
+- episodes/ep11/takes/r2v/attempts/T06_fail1.mp4
+- episodes/ep11/takes/r2v/attempts/T06_fail2.mp4
+- episodes/ep11/takes/r2v/attempts/T06_fail3.mp4
+- episodes/ep11/takes/r2v/attempts/T07_fail1.mp4
+- episodes/ep11/takes/r2v/attempts/T13_fail2.mp4
+- episodes/ep11/takes/r2v/attempts/T15_fail1.mp4
+- episodes/ep11/takes/r2v/attempts/T16_fail1.mp4
+- episodes/ep11/takes/r2v/attempts/T19_fail2.mp4
+- episodes/ep11/takes/r2v/attempts/T20_fail1.mp4
+- episodes/ep12/takes/r2v/attempts/T13_fail1.mp4
+- episodes/ep12/takes/r2v/attempts/T16_fail1.mp4

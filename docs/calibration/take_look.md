@@ -67,3 +67,38 @@ unconditional share wall had fired at sheet time on Q09_0 (0.60), Q18_0A
 effect (ep09 median share 0.67 over p5 17.8 / near-black 0.09 still fails
 both ways; ep07 and ep10 pass), and `tests/test_look_gate.py::TestCalibration`
 still holds on the cells on disk.
+
+## Bench 2026-09-24 -- take_look@244a1b74
+
+rows 802 (414 without this judge's inputs, not counted); machine_version git:ceec663; flag rate 0.001; refusals per unit {'20260822113400/ep14': 1}; expected GPU minutes 7
+
+- recall on owner rows: 0.000 [0.000, 0.000] on 0/0
+- recall on all rows: 0.000 [0.000, 0.000] on 0/0
+- synthetic (own column): 0.000 [0.000, 0.000] on 0/0
+- reject-only recall (unknown class): 0.000 [0.000, 0.184] on 0/17
+- false refusals (weighted): 0.003 [0.001, 0.015] on 1/371
+
+
+| class | tp | fn | synthetic tp/n | fp | tn | unmeasured |
+|---|---|---|---|---|---|---|
+| pass | 0 | 0 | 0/0 | 1 | 370 | 248 |
+| unknown | 0 | 17 | 0/0 | 0 | 0 | 166 |
+
+misses (fault rows passed), by path:
+- episodes/ep11/takes/r2v/attempts/T00_fail1.mp4
+- episodes/ep11/takes/r2v/attempts/T03_fail1.mp4
+- episodes/ep11/takes/r2v/attempts/T06_fail1.mp4
+- episodes/ep11/takes/r2v/attempts/T06_fail2.mp4
+- episodes/ep11/takes/r2v/attempts/T06_fail3.mp4
+- episodes/ep11/takes/r2v/attempts/T07_fail1.mp4
+- episodes/ep11/takes/r2v/attempts/T09_fail1.mp4
+- episodes/ep11/takes/r2v/attempts/T13_fail2.mp4
+- episodes/ep11/takes/r2v/attempts/T15_fail1.mp4
+- episodes/ep11/takes/r2v/attempts/T16_fail1.mp4
+- episodes/ep11/takes/r2v/attempts/T19_fail1.mp4
+- episodes/ep11/takes/r2v/attempts/T19_fail2.mp4
+- episodes/ep11/takes/r2v/attempts/T20_fail1.mp4
+- episodes/ep12/takes/r2v/attempts/T13_fail1.mp4
+- episodes/ep12/takes/r2v/attempts/T16_fail1.mp4
+- episodes/ep12/takes/r2v/attempts/T24_fail1.mp4
+- episodes/ep13/takes/r2v/attempts/T08_fail1.mp4

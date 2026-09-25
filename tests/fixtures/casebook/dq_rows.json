@@ -1,0 +1,37 @@
+{
+  "take": 5,
+  "attempt": 0,
+  "file": "T05.mp4",
+  "seconds": 3.5,
+  "lane": "dialogue",
+  "gates": [
+    {"name": "frozen-at-start", "value": 0.0, "ok": true, "hard": true, "note": "0.0s", "penalty": 0.0},
+    {"name": "frozen-share", "value": 0.0, "ok": true, "hard": false, "note": "0%", "penalty": 0.0},
+    {"name": "foreign", "value": 0, "ok": true, "hard": true, "note": "0", "penalty": 0.0},
+    {"name": "zoom", "value": 1.71, "ok": false, "hard": false, "note": "1.71x hand", "penalty": 15.0},
+    {"name": "face-at-end", "value": 0.82, "ok": false, "hard": true, "note": "0.82 clipped bottom", "penalty": 20.0},
+    {"name": "look", "value": 10.4, "ok": false, "hard": false, "note": "p5 10 black 0.28 hue 0.45", "penalty": 5.0},
+    {"name": "lip-sync", "value": 0.02, "ok": true, "hard": true, "note": "lag 0.02s", "penalty": 0.0},
+    {"name": "identity", "value": null, "ok": true, "hard": false, "note": "not measured", "penalty": 0.0}
+  ],
+  "segments": [],
+  "frozen_spans": [],
+  "energy_q": [],
+  "coherence": {"frames": 84, "cells": true},
+  "zoom": {"ratio": 1.71, "monotonic": true, "measured": true, "camera": 1.68, "inliers": [30, 31],
+           "segments": [{"ratio": 1.71, "monotonic": true, "measured": true, "camera": 1.68}]},
+  "score": 60.0,
+  "passed": false,
+  "verdict_line": "T05 a0 FAIL 60/100",
+  "attempts": [
+    {"take": 5, "attempt": 0, "file": "T05.mp4", "seconds": 3.5, "lane": "dialogue", "score": 60.0, "passed": false,
+     "gates": [{"name": "face-at-end", "value": 0.82, "ok": false, "hard": true, "note": "0.82 clipped bottom", "penalty": 20.0}],
+     "zoom": {"ratio": 1.71, "monotonic": true, "measured": true, "camera": 1.68}},
+    {"take": 5, "attempt": 1, "file": "T05_fail1.mp4", "seconds": 3.5, "lane": "dialogue", "score": 45.0, "passed": false,
+     "gates": [{"name": "frozen-at-start", "value": 1.2, "ok": false, "hard": true, "note": "1.2s", "penalty": 30.0}],
+     "zoom": {"ratio": 1.02, "monotonic": true, "measured": true, "camera": 1.01}},
+    {"take": 5, "attempt": 2, "file": "T05_fail2_wrong_lettering.mp4", "seconds": 3.5, "lane": "dialogue", "score": 100.0, "passed": true,
+     "gates": [], "zoom": {"ratio": 1.3, "monotonic": true, "measured": true, "camera": 1.3}}
+  ],
+  "budget_spent": true
+}

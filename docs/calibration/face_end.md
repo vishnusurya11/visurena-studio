@@ -92,3 +92,38 @@ T28's 0.74 leaving frame-left is the fault.  Hence `CLIPPED_HARD`.
 is on disk and in the module's path, and needs `!studio/models/yunet.onnx` (or
 a download step) before it can be committed.  Origin: OpenCV zoo,
 `face_detection_yunet_2023mar.onnx`, md5 `4ae92eeb150c82ce15ac80738b3b8167`.
+
+## Bench 2026-09-24 -- face_end@52c4134a
+
+rows 802 (414 without this judge's inputs, not counted); machine_version git:ceec663; flag rate 0.000; refusals per unit {}; expected GPU minutes 0
+
+- recall on owner rows: 0.000 [0.000, 0.000] on 0/0
+- recall on all rows: 0.000 [0.000, 0.000] on 0/0
+- synthetic (own column): 0.000 [0.000, 0.000] on 0/0
+- reject-only recall (unknown class): 0.000 [0.000, 0.184] on 0/17
+- false refusals (weighted): 0.000 [0.000, 0.010] on 0/371
+
+
+| class | tp | fn | synthetic tp/n | fp | tn | unmeasured |
+|---|---|---|---|---|---|---|
+| pass | 0 | 0 | 0/0 | 0 | 371 | 248 |
+| unknown | 0 | 17 | 0/0 | 0 | 0 | 166 |
+
+misses (fault rows passed), by path:
+- episodes/ep11/takes/r2v/attempts/T00_fail1.mp4
+- episodes/ep11/takes/r2v/attempts/T03_fail1.mp4
+- episodes/ep11/takes/r2v/attempts/T06_fail1.mp4
+- episodes/ep11/takes/r2v/attempts/T06_fail2.mp4
+- episodes/ep11/takes/r2v/attempts/T06_fail3.mp4
+- episodes/ep11/takes/r2v/attempts/T07_fail1.mp4
+- episodes/ep11/takes/r2v/attempts/T09_fail1.mp4
+- episodes/ep11/takes/r2v/attempts/T13_fail2.mp4
+- episodes/ep11/takes/r2v/attempts/T15_fail1.mp4
+- episodes/ep11/takes/r2v/attempts/T16_fail1.mp4
+- episodes/ep11/takes/r2v/attempts/T19_fail1.mp4
+- episodes/ep11/takes/r2v/attempts/T19_fail2.mp4
+- episodes/ep11/takes/r2v/attempts/T20_fail1.mp4
+- episodes/ep12/takes/r2v/attempts/T13_fail1.mp4
+- episodes/ep12/takes/r2v/attempts/T16_fail1.mp4
+- episodes/ep12/takes/r2v/attempts/T24_fail1.mp4
+- episodes/ep13/takes/r2v/attempts/T08_fail1.mp4
