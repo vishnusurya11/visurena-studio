@@ -86,6 +86,12 @@ def read_timeline(home_dir: Path) -> dict:
     return read_json(path) if path.exists() else {}
 
 
+def timeline_path(book: Path, number: int) -> Path:
+    """Where the timeline lives, for a caller that needs its timestamp only
+    (step 10's currency); reading it still goes through load_placed."""
+    return home(book, number) / "placed.json"
+
+
 def has_timeline(book: Path, number: int) -> bool:
     """Whether a timeline exists at all -- for a step deciding if a plan ever ran
     downstream.  Existence only; reading it goes through load_placed."""
