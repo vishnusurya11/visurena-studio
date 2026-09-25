@@ -122,7 +122,7 @@ def parse_size(said: str) -> dict:
 
 def size_read(staged: str, run: Callable, seed: int = 11) -> dict:
     return parse_size(run(CAPTION, {"image_1": staged, "prompt": SIZE_ASK, "seed": seed,
-                                    "max_new_tokens": 64}, TIMEOUT))
+                                    "max_new_tokens": 128}, TIMEOUT))   # the Qwen3_VQA node floor
 
 
 def framing(planned: str, measured: str | None, read: dict | None, where: str) -> Fault | None:
