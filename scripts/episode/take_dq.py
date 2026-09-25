@@ -209,6 +209,10 @@ def staged_measures(video: Path, rec: dict, v, home: Path, seconds: float, embed
     if embed is not None and inputs is not None:
         pictures = take_leak.staged_pictures(source or video, inputs)
         leak = take_leak.leak(take_lock.frames(video, take_leak.HEAD_FRAMES / 24), pictures, embed)
+    else:
+        # NO EMBEDDER (image_embed is a placeholder): the one switch in the first
+        # second, so the head-cut rung can still fire (ep12 T19, ep06 T01).
+        leak = take_leak.step_leak(take_lock.frames(video, (take_leak.STEP_HEAD + 12) / 24))
     board = None
     if (v.coherence or {}).get("cells") is False:
         board = tc.refs_only(tc.frames(video, seconds), home, rec.get("shots") or [rec.get("index")])

@@ -72,6 +72,33 @@ def leak(frames, pictures: dict[str, np.ndarray], embed, head: int = HEAD_FRAMES
             "against": names, "fitted_on": FITTED_ON}
 
 
+STEP_WALL, STEP_HEAD, STEP_SETTLED = 0.75, 24, 0.2
+STEP_FITTED = ("290 takes ep01-ep12: the four heads (ep06 T01, ep10 T07, T12, ep12 T19) "
+               "read 0.85-1.17, every other take at most 0.62; wall 0.75")
+"""The embedder-free head: the largest brightness-normalised step between
+frames in the first second, when the take settles after it."""
+
+
+def _normalised(frame) -> np.ndarray:
+    import cv2
+    g = cv2.resize(cv2.cvtColor(np.asarray(frame), cv2.COLOR_RGB2GRAY), (64, 64)).astype(float)
+    return (g - g.mean()) / (g.std() + 1e-6)
+
+
+def step_leak(frames, wall: float = STEP_WALL, head: int = STEP_HEAD) -> dict:
+    """The head leak read as ONE picture switch in the first `head` frames and a
+    settled take after it (ep12 T19: 11 frames of the wading tripod, then its
+    own burst).  A flash changes brightness, not the picture, and reads 0."""
+    g = [_normalised(f) for f in frames[:head + 12]]
+    steps = [float(np.abs(g[i] - g[i - 1]).mean()) for i in range(1, len(g))]
+    k = int(np.argmax(steps[:head])) if steps[:head] else 0
+    after = steps[k + 1:k + 11]
+    leaked = bool(steps) and steps[k] >= wall and (not after or float(np.median(after)) < STEP_SETTLED)
+    n = k + 1 if leaked else 0
+    return {"frames": n, "seconds": head_seconds(n), "covers": True,
+            "best": ["plate"] * n + ["panel"], "against": [], "fitted_on": STEP_FITTED}
+
+
 def head_seconds(frames: int, fps: int = FPS) -> float:
     return round(frames / fps, 3)
 

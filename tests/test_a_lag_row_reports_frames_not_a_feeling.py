@@ -114,9 +114,10 @@ def test_the_staged_measures_read_the_panel_for_a_refs_only_take_and_skip_the_le
     Image.fromarray(picture(63)).save(tc.panel_path(tmp_path, 3))
     monkeypatch.setattr(tc, "frames", lambda video, seconds=None: hold(picture(63), 10))
     m = dq.staged_measures(tmp_path / "T03.mp4", {"index": 3, "shots": [3]}, fake_verdict(cells=False), tmp_path, 1.0)
-    assert m["leak"] is None and m["board"]["last_vs_cell"] > 0.9 and m["board"]["cells"] == "panel"
+    # without an embedder the leak is the step measure (ep12), not skipped: no switch, no head
+    assert m["leak"]["frames"] == 0 and m["board"]["last_vs_cell"] > 0.9 and m["board"]["cells"] == "panel"
     with_cells = dq.staged_measures(tmp_path / "T03.mp4", {"index": 3}, fake_verdict(cells=True), tmp_path, 1.0)
-    assert with_cells == {"leak": None, "board": None}
+    assert with_cells["board"] is None and with_cells["leak"]["frames"] == 0
 
 
 def test_the_voice_measure_runs_only_on_a_dialogue_take_with_a_landmarker():
