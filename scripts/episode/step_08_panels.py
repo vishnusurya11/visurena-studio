@@ -62,17 +62,34 @@ def done(ctx) -> bool:
     return bool(panels_of(board)) and (board / "contact.png").exists() and not panel_refusals(ctx.home)
 
 
+def checked(ctx, script: str, clock: str, verdict: str, gpu: bool = False) -> None:
+    """Run a panel checker; one that FOUND faults hands them to the judge.
+
+    ep12: panel_content_check exited 1 on three failing panels, run_script made
+    that a refusal, and the panel judge and its redraw ladder never ran.  Exit 1
+    is also a crash, so it passes only when the checker rewrote its verdict."""
+    path = ctx.home / BOARD / verdict
+    before = path.stat().st_mtime if path.exists() else None
+    try:
+        ctx.run_script(script, gpu=gpu, clock=clock)
+    except SystemExit as refused:
+        fresh = path.exists() and (before is None or path.stat().st_mtime > before)
+        if not str(refused).endswith("exit 1") or not fresh:
+            raise
+        ctx.log(f"{script}: faults found; the panel judge reads them")
+
+
 def rebuild(ctx) -> list[Path]:
     """The panels cut, both machine gates run (the vision gate only when its
     verdict is stale), the contact sheet written; the panels as they stand."""
     board = ctx.home / BOARD
     ctx.run_script("scripts/episode/panels.py", clock="panels")
-    ctx.run_script("scripts/episode/panel_check.py", clock="panel_dq")
+    checked(ctx, "scripts/episode/panel_check.py", "panel_dq", "panel_dq.json")
     panels = panels_of(board)
     if not panels:
         raise SystemExit(f"REFUSED: no panels under {BOARD}/ after panels.py")
     if panel_dq.panel_refusal(board / "panel_content.json", panels, wanted(ctx.home)):
-        ctx.run_script("scripts/episode/panel_content_check.py", gpu=GPU, clock="panel_content")
+        checked(ctx, "scripts/episode/panel_content_check.py", "panel_content", "panel_content.json", gpu=GPU)
     panel_contact.write(panels, board / "contact.png")
     return panels
 
