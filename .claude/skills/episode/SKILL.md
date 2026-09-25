@@ -104,7 +104,7 @@ The references sheets and voices live in their own department: `uv run python re
 | 05 | timeline | `uv run python scripts/episode/step_05_timeline.py <book> <n>` | AUDIO FIRST - the animatic. |
 | 06 | prompts | `uv run python scripts/episode/step_06_prompts.py <book> <n>` | Every take prompt built and linted for $0 with no GPU, BEFORE any grid: length per block, style line, banned props, no last frame, no fragments. |
 | 07 | board | `uv run python scripts/episode/step_07_board.py <book> <n>` | Storyboard grids on the local image model from the plan's prose, up to three references - cast sheets first, the setup's place last. |
-| 08 | panels | `uv run python scripts/episode/step_08_panels.py <book> <n>` | One panel per shot, two machine gates, then an eye. |
+| 08 | panels | `uv run python scripts/episode/step_08_panels.py <book> <n>` | One panel per shot, two machine gates, then `judge:panel_eye`. |
 | 09 | shoot | `uv run python scripts/episode/step_09_shoot.py <book> <n>` | The slow step. |
 | 10 | edit | `uv run python scripts/episode/step_10_edit.py <book> <n>` | Title card, measured bed, cut, mix. |
 | 11 | qc | `uv run python scripts/episode/step_11_qc.py <book> <n>` | Measure the DELIVERED master, never the intention. |
@@ -292,7 +292,7 @@ first second that is not the panel. The gates passed ep09 T02 at 92.6 before
 | the same fault on a fresh seed | the PLAN: re-aim the move at what the cell holds (ep09 shots 14, 15, 18 repeated on new seeds) |
 | a person pinned while the set slides | the plan: push in or crane instead of the truck (G-ANCHOR) |
 
-Retakes run in ONE batched round, after the take review AND the eye strips:
+Retakes run in ONE batched round, after the take gates AND `judge:take_eye`:
 `takes_r2v.py <book> <n> --from-refs --approved=render --retake=a,b --why="<gate row or finding>"`.
 `--why` is required; a round of one take is refused unless `--last` declares
 it the last round for this master. The failed take is kept as
@@ -334,7 +334,7 @@ Stop a run by killing its process tree by command line, never `uv.exe` alone
 | a plan gate or take-lint refusal | the plan `.py` (never `plan.json`) |
 | a person in the wrong clothes, or the wrong person | `cast_rows.py` for this chapter; the plan's `tag`s |
 | a picture missing its subject, or drawing the place instead | G-SCALE cells; the subject first in the prompt |
-| a panel gate failure, or a fault found by eye | redraw that grid (`--shots=` plus a tag, or `--seed-bump=`) after moving the old one to `storyboard/superseded/`; never patch the panel |
+| a panel gate failure, or a fault `judge:panel_eye` lists | redraw that grid (`--shots=` plus a tag, or `--seed-bump=`) after moving the old one to `storyboard/superseded/`; never patch the panel |
 | a person's count or clothes wrong in the grid | `extras` from the book; the chapter row (`cast_rows.py`); the grid goes stale by itself |
 | a take that is "current" but wrong | its pictures changed; currency now sees that |
 | QC's silent gap | the silent shot inside it (docs/calibration/silent_gaps.md) |
