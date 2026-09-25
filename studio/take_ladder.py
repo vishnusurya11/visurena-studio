@@ -271,7 +271,7 @@ def hard(fault: Fault) -> bool:
 
 
 def placed_seconds(home: Path, index: int) -> float:
-    doc = take_eye.read_json(Path(home) / "placed.json") or {}
+    doc = episode_home.read_timeline(home)
     return float(next((s["seconds"] for s in doc.get("shots", []) if s["index"] == index), 0.0))
 
 

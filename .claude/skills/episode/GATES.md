@@ -153,3 +153,28 @@ content gate existed, would be refused for unjudged or lettered takes.
   the known dark fault is only the second darkest) and same-setup layout
   correlation (19 accepted pairs above 0.75; one camera position per place is
   owner decision D4).
+
+## Judges — the taste gates are signed by code, never by a person (2026-09-24)
+
+Decision `2026-09-24-automate-the-taste-gates` (owner). `gates.yaml` names who signs
+each gate; every refs/episode row is `auto`. A judge signs `pass` or `flagged`, never
+`fault`, never a waiver; a terminal rung writes a flagged verdict, a learning and an
+audit row (`library/<book>/audit/rows.jsonl`); no step reads the audit sheet. Each
+judge is benched against the casebook (`scripts/calibration/bench.py`) and a ratchet
+test refuses a commit that loses a catch. `fitted_on` is carried on every measure.
+
+| gate | judge | measures | ladder | terminal | errs toward |
+|---|---|---|---|---|---|
+| LOOK (refs/04) | `judge:look@1` | must nouns (look_back), recognised strings (OCR), extra limbs (keypoints), lookalike pair (trait card), stranger (face embedding); style outlier and near voice as flags | redraw on the next seed → defining state first | best sheet kept flagged; a lookalike pair bound flagged | refuse on nouns, lettering, identity; flag on style |
+| PLAN (episode/02) | `judge:plan@1` | the battery (plan_check, cell gates, G-MOVES, G-SOURCE); the critic lists turn, answer, coverage, claims with spans ×3; code judges | improve ×2 → fresh brief → reasoning tier | critic fault: best draft signed flagged; battery still refusing: defer (plan.deferred.json, no signature) | the battery refuses; the critic flags |
+| LAYOUT (episode/07) | `grid_layout@1` | a rule: grids ≤ 9, cols × rows = shots, a face alone in a 1x1 when a setup mixes sizes | — | — | deterministic |
+| EYE panels (episode/08) | `judge:panel_eye@1` | stored dq + content rows; hats worn and held; a reference handed back; posture; framing; clones; lettering; invented landmark; repeats; one short size read | redraw grid seed → reprose the frame (timing untouched); cap 2 grids | best panel kept flagged | refuse on calibrated rows; flag on thin rows |
+| EYE takes (episode/09) | `judge:take_eye@1` | dq rows incl. pass-through, rotation, leak, cut vote, lag; content; identity vs sheet; clones | seed → move type → shorter → head cut → re-plan the cell (priced) | a still from the panel on a narration shot (≤2, never adjacent), else best take flagged, high on dialogue/turn/button | refuse where calibrated; "cannot tell" on wides |
+| MASTER (episode/11) | `judge:master_eye@1` | qc hard rows; shadow, faces, board, repeats, story from measures; a 30-frame read; cross-take identity | recut ×2 → one retake through the take ladder | the rubric flagged with evidence; never waived by a judge | refuse → recut on measured fields; flag on story |
+
+The owner's eye: `library/<book>/audit/<unit>.html` (`scripts/audit/sheet.py`), every
+flag with its numbers beside the wall and a seeded sample of passes per gate; a finding
+is `scripts/audit/note.py <codex> <unit> <artefact> <class> "<words>"` → the casebook
+overlay → the bench → the ratchet. What still needs a signature: PUBLISH, paid credits,
+OVERRIDE, the synthetic declaration; `RENDER_HOLD` is the brake.
+

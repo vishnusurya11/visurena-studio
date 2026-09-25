@@ -77,6 +77,15 @@ def audio_dir(book: Path, number: int) -> Path:
     return home(book, number) / "audio"
 
 
+def read_timeline(home_dir: Path) -> dict:
+    """The timeline for a JUDGE that only needs seconds and shot order, after the
+    line has already passed through load_placed (step 05 refuses a stale one
+    before anything downstream runs).  A judge never acts on the GPU or the cut
+    from this read; an actor still goes through load_placed."""
+    path = Path(home_dir) / "placed.json"
+    return read_json(path) if path.exists() else {}
+
+
 def has_timeline(book: Path, number: int) -> bool:
     """Whether a timeline exists at all -- for a step deciding if a plan ever ran
     downstream.  Existence only; reading it goes through load_placed."""

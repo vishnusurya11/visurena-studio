@@ -64,11 +64,12 @@ def approved(policy: gate_policy.Policy) -> str:
 
 
 def opened(ctx) -> Budget:
-    """The step's budget share, opened through the context when it has one."""
+    """The step's budget share: the context's own budget when it carries one
+    (opened through open_step where the context has it), else a fresh one."""
     if hasattr(ctx, "open_step"):
         ctx.open_step(STEP_ID)
         return ctx.budget
-    budget = Budget(EPISODE_CEILING_SECONDS, EPISODE_SHARES)
+    budget = getattr(ctx, "budget", None) or Budget(EPISODE_CEILING_SECONDS, EPISODE_SHARES)
     budget.start(STEP_ID)
     return budget
 

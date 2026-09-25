@@ -276,6 +276,7 @@ table.v td code{white-space:nowrap}
 
 
 
+
 <section class="block">
     <div class="head"><h2>Org chart</h2><p>Every box reports to the one above it. A step script is a unit head: it calls its agents in order and owns their output.</p></div>
     <div class="chart-tools">
@@ -628,7 +629,7 @@ table.v td code{white-space:nowrap}
           <li><b><code>analytics</code>, <code>promo</code></b> · the loop closes: numbers feed the next brief · ~600 lines</li>
           <li><b>Higgsfield client + credit ledger → <code>shorts</code></b> · the showrunner skill retires as manager · ~1,700 lines</li>
           <li><b>Gate retirements</b> · one (format, gate) at a time, each a DECISIONS line with its count</li>
-          <li><b>Judges replace the eye</b> · casebook + bench + ratchet; <code>gates.yaml</code>; picture, take, plan and master judges with priced ladders; every refs/episode park removed; the audit sheet · ~3,450 lines, ~110 tests · in progress</li>
+          <li><b>Judges replace the eye</b> · casebook + bench + ratchet; <code>gates.yaml</code>; picture, take, plan and master judges with priced ladders; every refs/episode park removed; the audit sheet · done 2026-09-24</li>
         </ol>
       </div>
       <div class="mini">
@@ -639,7 +640,7 @@ table.v td code{white-space:nowrap}
           <li><span class="pill">missing</span> analytics, promo, notify, scheduler, R&amp;D ledger</li>
           <li><span class="pill">skills only</span> shorts — registered as an empty slot</li>
           <li><span class="pill">slots</span> feature, song, audiobook, game, book; the own platform as an adapter inside publish, after the catalogue</li>
-          <li><span class="pill">parks, to be judged</span> LOOK, PLAN, EYE ×2, MASTER — judges land commit by commit (owner decision 2026-09-24)</li>
+          <li><span class="pill">judged</span> LOOK, PLAN, EYE ×2, MASTER — signed by judges since 2026-09-24 (owner decision); the owner audits after the fact</li>
         </ul>
         <h3 style="margin-top:14px">Publishable on their own</h3>
         <p>Standalone packages this design implies, each generalisable beyond this repo: <b>stepwise</b> (the step runner with credits-and-artefacts resume), <b>publish-manifest</b> (typed multi-platform publishing with a quota ledger), <b>higgsfield-client</b>, <b>list-then-judge</b> (the VLM content-gate pattern), <b>casebook-locked calibration</b> (rows, bench, ratchet, the flag-not-park contract), <b>trait-card</b> (identity binding for reference sheets), <b>measured-timeline</b> (the animatic as code), <b>metre</b>, <b>title-record</b>, <b>registry-org-chart</b>.</p>
@@ -676,15 +677,15 @@ table.v td code{white-space:nowrap}
       U('','Slate','Ordered unit list, targets, synthetic declaration, publish policy','partial','library/<book>/series.json'),
       U('','Brake','Every runner and the GPU lease read it on the way in','built','RENDER_HOLD'),
       U('','Decisions','Every gate retirement with its count','built','docs/DECISIONS.md'),
-      U('','Audit sheet','Every flag and a seeded sample per unit; the owner reads it when he likes; findings append to the casebook; no step reads it','missing','scripts/audit/sheet.py · library/<book>/audit/')]},
+      U('','Audit sheet','Every flag and a seeded sample per unit; the owner reads it when he likes; findings append to the casebook; no step reads it','built','scripts/audit/sheet.py · library/<book>/audit/')]},
     {n:'Platform',r:'Shared services; no deliverable of its own',st:'partial',kids:[
       U('','Model gateway','Tiers, not models; a local tier is a yaml edit','built','studio/llm.py · models.yaml'),
       U('','GPU lease','One GPU, one stage; reads RENDER_HOLD','partial','studio/comfy.py'),
       U('','Ledger / DB','STAGES from the registry; a unit column','partial','studio/db.py · spend.py'),
       U('','Approval','Per kind, per run','built','studio/approval.py'),
-      U('','Measures','A measure returns a number: faces and identity (embedding), keypoints, boxes, flow, OCR, copy, patch embedding','partial','studio/measure/'),
-      U('','Judge bench','Casebook rows per book; recall on owner catches, false refusals, flag rate; a ratchet test refuses a commit that loses a catch','missing','studio/judge_bench.py · library/<book>/casebook/ · docs/calibration/bench/'),
-      U('','Gate policy','Who signs each gate: auto with a decision id; shadow = a newer judge version benched beside the current one','missing','gates.yaml · studio/gate_policy.py'),
+      U('','Measures','A measure returns a number: faces and identity (embedding), keypoints, boxes, flow, OCR, copy, patch embedding','built','studio/measure/'),
+      U('','Judge bench','Casebook rows per book; recall on owner catches, false refusals, flag rate; a ratchet test refuses a commit that loses a catch','built','studio/judge_bench.py · library/<book>/casebook/ · docs/calibration/bench/'),
+      U('','Gate policy','Who signs each gate: auto with a decision id; shadow = a newer judge version benched beside the current one','built','gates.yaml · studio/gate_policy.py'),
       U('','Notify','Every department calls it; none copies it','missing','studio/notify.py'),
       U('','Publish clients','One pinned client per platform','partial','studio/youtube.py · higgsfield.py'),
       U('','R&D ledger','Hypothesis, variants, measures, verdict, cost','missing','experiments/<id>/manifest.json')]},
@@ -705,19 +706,19 @@ table.v td code{white-space:nowrap}
       U('01','Canon','Which entities this book binds','built','step_01_canon.py wraps cast_rows.py',[A('Casting director','rows: who appears')]),
       U('02','Sheets','One sheet per character and key prop','built','step_02_sheets.py wraps build_pack',[A('Trait reader','differs in ≥3 traits?'),A('Look back','does the picture show its prompt?')]),
       U('03','Voices','A register nobody else holds','built','step_03_voices.py wraps cast_voices.py',[A('Voice director','region, body, speech')]),
-      U('04','Verdict','judge:look signs refs/verdict.json; a sheet failing a hard row is redrawn (seed, then defining state first); the terminal binds the best sheet flagged','partial','step_04_verdict.py · studio/judges/look.py',[A('Look judge','must nouns, faces distinct (embedding), no lettering, limb count, style outlier','qc')])]},
+      U('04','Verdict','judge:look signs refs/verdict.json; a sheet failing a hard row is redrawn (seed, then defining state first); the terminal binds the best sheet flagged','built','step_04_verdict.py · studio/judges/look.py',[A('Look judge','must nouns, faces distinct (embedding), no lettering, limb count, style outlier','qc')])]},
     {n:'Episode (TV)',r:'Production · unit: book × chapter(s) · leader episode.py · $0 local GPU',st:'built',kids:[
       U('01','Bind','This unit’s cast, stamped','built','step_01 wraps cast_rows.py',[A('Cast rows (code)','who is in this chapter — from analysis')]),
-      U('02','Plan','The contract, gated before anything is voiced or drawn; the battery refuses, the critic lists, code judges','partial','step_02 wraps plan_check · studio/judges/plan.py',[A('Episode writer','setups, shots, cells, moves, lines','reasoning'),A('Plan critic','turn, answer, coverage, claims — each with a chapter span','qc')]),
+      U('02','Plan','The contract, gated before anything is voiced or drawn; the battery refuses, the critic lists, code judges','built','step_02 wraps plan_check · studio/judges/plan.py',[A('Episode writer','setups, shots, cells, moves, lines','reasoning'),A('Plan critic','turn, answer, coverage, claims — each with a chapter span','qc')]),
       U('03','Places','Location + view at this unit’s hour','built','step_03 wraps places.py',[A('Look back','landmark and hour present?')]),
       U('04','Record','Every line measured and listened to','built','step_04 wraps say_lines, speaker_check',[A('Whisper (in say_lines)','what words are on this file?','qc')]),
       U('05','Timeline','Audio first: the animatic','built','step_05 wraps respot, timeline'),
       U('06','Prompts','Built and linted for $0, before any grid','built','step_06 wraps takes_r2v --prompts'),
-      U('07','Board','Layout by rule (grids of at most nine, cols × rows = shots); storyboard grids from the plan’s prose','partial','step_07 wraps grids.py · studio/grid_layout.py'),
-      U('08','Panels','Two machine gates, then the panel judges; a fault climbs seed → reprose, then the best panel is kept flagged','partial','step_08 wraps panels, panel_check, panel_content_check · studio/judges/panel_eye.py',[A('Panel reader','lists what is in the picture','qc'),A('Panel judges','hats, gutter, copy, posture, framing, clones, lettering, landmark','qc')]),
-      U('09','Shoot','Takes on the local video model; the take judges; cure-to-cause ladder under the GPU ceiling; terminal: a still from the panel or the best take flagged','partial','step_09 wraps takes_r2v, take_dq, take_content_check · studio/judges/take_eye.py',[A('Panel reader','three frames, read alone','qc'),A('Take judges','identity, clones, pass-through, rotation, leak, lag','qc')]),
+      U('07','Board','Layout by rule (grids of at most nine, cols × rows = shots); storyboard grids from the plan’s prose','built','step_07 wraps grids.py · studio/grid_layout.py'),
+      U('08','Panels','Two machine gates, then the panel judges; a fault climbs seed → reprose, then the best panel is kept flagged','built','step_08 wraps panels, panel_check, panel_content_check · studio/judges/panel_eye.py',[A('Panel reader','lists what is in the picture','qc'),A('Panel judges','hats, gutter, copy, posture, framing, clones, lettering, landmark','qc')]),
+      U('09','Shoot','Takes on the local video model; the take judges; cure-to-cause ladder under the GPU ceiling; terminal: a still from the panel or the best take flagged','built','step_09 wraps takes_r2v, take_dq, take_content_check · studio/judges/take_eye.py',[A('Panel reader','three frames, read alone','qc'),A('Take judges','identity, clones, pass-through, rotation, leak, lag','qc')]),
       U('10','Edit','Title, measured bed, cut, mix','built','step_10 wraps series_title, assemble'),
-      U('11','QC','Measure the delivered master; the master ensemble fills the rubric; recut, then one retake; an n is flagged, never waived','partial','step_11 wraps qc · studio/judges/master_eye.py',[A('Master ensemble','shadow, faces, board, repeats, story; 30-frame read; cross-take identity','qc')]),
+      U('11','QC','Measure the delivered master; the master ensemble fills the rubric; recut, then one retake; an n is flagged, never waived','built','step_11 wraps qc · studio/judges/master_eye.py',[A('Master ensemble','shadow, faces, board, repeats, story; 30-frame read; cross-take identity','qc')]),
       U('12','Deliver','Manifest, the path first; never publishes','built','step_12_deliver.py')]},
     {n:'Trailer',r:'Production · unit: book · leader trailer.py · ordered by Marketing',st:'built',kids:[
       U('01','Story','Lead, figure, turn; register, thesis','built','step_01_story.py',[A('Story','register + thesis')]),

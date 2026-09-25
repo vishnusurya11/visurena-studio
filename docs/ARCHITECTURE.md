@@ -73,6 +73,18 @@ per-department, deliberately, only after that department has proven itself.
 
 **Automation is not a mode you switch on — it is gates you retire one at a time.**
 
+**The taste gates are judged from day one (owner decision 2026-09-24,
+`2026-09-24-automate-the-taste-gates`).** In the refs and episode lines no step parks
+on a person: LOOK, PLAN, the EYE on panels and takes, and MASTER are signed by
+judges — detectors for counts and geometry, embeddings for identity, a local VLM
+that only names, code that judges — each behind a priced adapt ladder whose terminal
+rung signs `flagged`, never `fault`, never a waiver, and writes an audit row.
+`gates.yaml` says who signs each gate; a judge is benched against the casebook
+(`library/<book>/casebook/`) and a ratchet test refuses a commit that loses a catch.
+The owner's eye is an audit, never a gate: `library/<book>/audit/<unit>.html`. What
+still needs a signature: going public, paid credits, an override, the synthetic
+declaration; `RENDER_HOLD` is the brake.
+
 ## Two runtimes, one contract
 
 | Runtime | What it does |

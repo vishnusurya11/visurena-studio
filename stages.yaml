@@ -397,7 +397,7 @@ stages:
   # One sheet per character, one per key prop, one voice per speaker, per (book,
   # style). The ONLY writer of refs/refs.json; every format line reads it, none
   # writes it. Run just-in-time: the scheduler launches it when a plan binds an
-  # entity with no row. LOOK is the owner's once-per-book taste gate.
+  # entity with no row. LOOK is judged (judge:look), never signed by a person.
   # =================================================================================
 
   refs:
@@ -445,7 +445,7 @@ stages:
             desc: >-  # MISSING
               AGENT look_back (local VLM) reads each new sheet against its own
               prompt (must-appear nouns, facial hair both ways); a miss is redrawn
-              with the defining state first; then ESCALATE.
+              with the defining state first; the look judge (step 04) signs.
 
       - id: "03"
         name: voices
@@ -460,10 +460,13 @@ stages:
         name: verdict
         script: step_04_verdict                   # MISSING
         desc: >-
-          ESCALATE - LOOK. The owner's one taste verdict per (book, style),
-          written as refs/verdict.json bound to the pack.jsonl sha. Re-opened only
-          for a newly bound entity. Every format line refuses a pack without a
-          current verdict.
+          LOOK, judged. JUDGE look (studio/judges/look.py): must nouns, a
+          recognised string, an extra limb, a lookalike pair and a stranger are
+          hard; a style outlier and a near voice are flags. Ladder: redraw on the
+          next seed, then with the defining state first; the terminal keeps the
+          best sheet flagged. Signs refs/verdict.json bound to the pack.jsonl sha
+          (signed_by judge:look@1); a stale pack judges only its new rows. Every
+          format line refuses a pack without a current verdict.
 
   # =================================================================================
   # DIVISION — PRODUCTION.  One stage per FORMAT LINE.  Step vocabulary shared by
@@ -474,8 +477,8 @@ stages:
   # episode: one unit of story (a chapter, or a chapter range) -> one finished
   # master, $0, local GPU. Contract: studio/episode_spec.Episode. Gates:
   # .claude/skills/episode/GATES.md. Every step: typed input -> typed output -> a
-  # gate that can fail -> an adapt ladder -> ESCALATE (never a silent terminal rung
-  # on a picture the owner has not seen). GPU time is approved per kind.
+  # gate that can fail -> an adapt ladder -> a terminal rung that signs flagged and
+  # writes an audit row (never a silent pass, never a park). GPU time is a ceiling.
   # =================================================================================
 
 
@@ -488,8 +491,8 @@ stages:
   # episode: one unit of story (a chapter, or a chapter range) -> one finished
   # master, $0, local GPU. Contract: studio/episode_spec.Episode. Gates:
   # .claude/skills/episode/GATES.md. Every step: typed input -> typed output -> a
-  # gate that can fail -> an adapt ladder -> ESCALATE (never a silent terminal rung
-  # on a picture the owner has not seen). GPU time is approved per kind.
+  # gate that can fail -> an adapt ladder -> a terminal rung that signs flagged and
+  # writes an audit row (never a silent pass, never a park). GPU time is a ceiling.
   # =================================================================================
 
   episode:
@@ -540,14 +543,18 @@ stages:
           - id: "02_04"
             name: improve
             desc: >-  # MISSING
-              Refusals quoted back to the writer; max 2 rounds; then
-              ESCALATE.
+              Refusals quoted back to the writer; max 2 rounds; then a fresh brief,
+              then the reasoning tier; a battery that still refuses defers the unit
+              (plan.deferred.json, an audit row, no signature).
           - id: "02_05"
             name: lock
             desc: >-
-              Code writes plan.json only through episode_home.write_plan, then
-              ESCALATE - PLAN: the owner's verdict as plan.verdict.json bound to
-              the plan sha. Retirable per format by the count rule.
+              JUDGE plan (agents/plan_reader + studio/judges/plan.py): the critic
+              LISTS the turn, the answer, the coverage and every claim with its
+              chapter span, three times; code judges. A critic fault ends in the best
+              draft signed flagged. Code writes plan.json only through
+              episode_home.write_plan and signs plan.verdict.json bound to the plan
+              sha (signed_by judge:plan@1).
 
       - id: "03"
         name: places
@@ -565,7 +572,7 @@ stages:
             name: look_back
             desc: >-  # MISSING
               AGENT look_back reads each new picture against its prompt (the
-              landmark, the hour); a miss is redrawn; then ESCALATE.
+              landmark, the hour); a miss is redrawn; a second miss is flagged.
 
       - id: "04"
         name: record
@@ -623,8 +630,9 @@ stages:
           - id: "07_01"
             name: layout
             desc: >-  # MISSING
-              Code lays a setup out by shot size (cols x rows = shots); the
-              minimum grid is a constant with its decision date.
+              Code lays a setup out by rule (studio/grid_layout, judge grid_layout@1):
+              grids of at most nine, cols x rows = shots, a face alone in a 1x1 when a
+              setup mixes a close with wides; writes storyboard/layout.json.
           - id: "07_02"
             name: draw
             desc: >-
@@ -661,9 +669,11 @@ stages:
           - id: "08_05"
             name: eye
             desc: >-
-              ESCALATE - EYE. A rubric file storyboard/eye_<sha8>.json (pass /
-              fault named / cannot tell) the takes refuse without. Owner today;
-              AGENT eye (local VLM rubric) once calibrated on the casebook.
+              JUDGE panel_eye (studio/judges/panel_eye.py): the stored dq and content
+              rows plus hats worn and held, a reference handed back, posture, framing,
+              clones, lettering, an invented landmark and repeats, with one short size
+              read as the second vote. Signs storyboard/eye_<sha8>.json (signed_by
+              judge:panel_eye@1); the takes refuse without it.
           - id: "08_06"
             name: improve
             desc: >-  # partial
@@ -698,16 +708,21 @@ stages:
           - id: "09_04"
             name: strip
             desc: >-
-              Code writes a strip of every take, then ESCALATE - EYE:
-              takes/r2v/eye_<sha8>.json the cut refuses without.
+              Code writes a strip of every take; JUDGE take_eye
+              (studio/judges/take_eye.py): dq rows, content, identity against the
+              sheet, clones, pass-through, rotation, leak, a cut vote and mouth lag.
+              Signs takes/r2v/eye_<sha8>.json (signed_by judge:take_eye@1); the cut
+              refuses without it.
           - id: "09_05"
             name: retake
             desc: >-  # partial
-              LADDER matching cure to cause: moving take froze -> seed; still
-              take froze -> change the move TYPE; lag -> shorter take; the same
-              fault on a fresh seed -> back to the PLAN (re-aim at what the cell
-              holds) -> ESCALATE. One batched round, --why recorded; the losing
-              attempt kept under attempts/.
+              LADDER matching cure to cause: moving take froze -> seed; still take
+              froze -> change the move TYPE; lag -> shorter take; the same fault on a
+              fresh seed -> back to the PLAN (re-aim at what the cell holds) -> a
+              still from the passed panel on a narration shot (at most two, never
+              adjacent) or the best take kept flagged, high on a dialogue, turn or
+              button shot. One batched round, --why recorded; the losing attempt kept
+              under attempts/; never a dropped shot.
 
       - id: "10"
         name: edit
@@ -753,17 +768,28 @@ stages:
           - id: "11_02"
             name: recut
             desc: >-  # partial
-              Fail -> the silent shot gets a line or the silence moves;
-              re-cut x2 (free); then ESCALATE.
+              Fail -> the silent shot gets a line or the silence moves; re-cut x2
+              (free); then one retake through the take ladder; then the rubric is
+              flagged with its evidence.
           - id: "11_03"
             name: eye
             desc: >-
-              ESCALATE - MASTER. review/eye_<sha8>.json; an n needs a waiver
-              the owner signs. Waivable per series only by series.json policy.
+              JUDGE master_eye (studio/judges/master_eye.py) answers the five rubric
+              questions from measures - shadow, faces, board, repeats, story - plus a
+              thirty-frame read and a cross-take identity pass; writes
+              review/eye_<sha8>.json (signed_by judge:master_eye@1); an n carries the
+              judge's evidence and is never waived by a judge.
           - id: "11_04"
             name: dossier
             desc: >-
               Code - one page of every input, prompt, picture, take, verdict.
+          - id: "11_05"
+            name: audit
+            desc: >-
+              Code - the unit's audit sheet (scripts/audit/sheet.py): every flag
+              with the judge's numbers beside the wall and a seeded sample of
+              passes per gate, under library/<book>/audit/. No step reads it;
+              the owner does, when he likes, and his notes append to the casebook.
 
       - id: "12"
         name: deliver

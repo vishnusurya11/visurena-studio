@@ -143,7 +143,7 @@ def judge_master(ctx, memo: dict):
     """The master as it stands, read; the measures kept for the rubric's y fields."""
     master, _qc = pair(ctx.home, engine_of(getattr(ctx, "extra", None) or []))
     plan = episode_home.read_json(ctx.home / "plan.json")
-    placed = episode_home.read_json(ctx.home / "placed.json")
+    placed = episode_home.read_timeline(ctx.home)
     verdict, measures = read_master(ctx.home, master, plan, placed)
     memo.update(verdict=verdict, measures=measures)
     return verdict

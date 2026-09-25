@@ -20,8 +20,8 @@ brick (`docs/ARCHITECTURE.md`).
 | Screenplay — invents, per (book, target) | `stages.yaml: screenplay`, 5 steps | `scripts/screenplay/step_0N_*.py` | story editor, screenwriter, shot designer, adaptation auditor | text model only |
 | Audit bench | — | `scripts/*/audit_locations.py` | location auditor | text model only |
 | Trailer | `stages.yaml: trailer`, 10 steps | `trailer.py` + `.claude/skills/trailer` | skill-driven | $0, local GPU |
-| Refs & Cast — the reference bible | `stages.yaml: refs`, 4 steps | `refs.py` → `scripts/refs/step_0N_*.py` | look_back (local VLM); the LOOK gate is `refs/verdict.json` | $0, local GPU |
-| Episode — one chapter, one master | `stages.yaml: episode`, 12 steps | `episode.py` → `scripts/episode/step_NN_*.py` | episode_writer (plan through plan_check + improve loop); panel reader, Whisper inside the wrapped scripts; PLAN / EYE ×2 / MASTER are verdict files | $0, local GPU |
+| Refs & Cast — the reference bible | `stages.yaml: refs`, 4 steps | `refs.py` → `scripts/refs/step_0N_*.py` | look_back (local VLM); `judge:look` signs `refs/verdict.json` | $0, local GPU |
+| Episode — one chapter, one master | `stages.yaml: episode`, 12 steps | `episode.py` → `scripts/episode/step_NN_*.py` | episode_writer + plan_reader (critic); panel reader, Whisper inside the wrapped scripts; judges `plan`, `panel_eye`, `take_eye`, `master_eye` sign PLAN / EYE ×2 / MASTER; no step parks on a person | $0, local GPU |
 | Shorts | not in the registry yet | `.claude/skills/shorts-*` (8 Claude skills) | showrunner, story, screenwriter, art, cinematographer, sound, editor, publisher | Higgsfield credits, gated |
 
 ## Decisions
@@ -37,7 +37,7 @@ brick (`docs/ARCHITECTURE.md`).
 |---|---|---|
 | 2026-09-24 | [plan/2026-09-24_registry_departments.md](plan/2026-09-24_registry_departments.md) | IN PROGRESS — commits 1-3 and 6 done by the episode build; 4, 5, 7-10 open |
 | 2026-09-24 | [plan/2026-09-24_episode_department_build.md](plan/2026-09-24_episode_department_build.md) | DONE 2026-09-24 — refs + episode as registry departments with runners, twelve independent steps, the writer agent, eyes as files |
-| 2026-09-24 | [plan/2026-09-24_judges_replace_the_eye_build.md](plan/2026-09-24_judges_replace_the_eye_build.md) | IN PROGRESS — casebook, bench, ratchet; gates.yaml; picture, take, plan and master judges; every park removed; the audit sheet (14 commits) |
+| 2026-09-24 | [plan/2026-09-24_judges_replace_the_eye_build.md](plan/2026-09-24_judges_replace_the_eye_build.md) | DONE 2026-09-24 — casebook, bench, ratchet; gates.yaml; picture, take, plan and master judges with priced ladders; every refs/episode park removed; the audit sheet |
 | 2026-09-24 | [docs/audit/2026-09-24_skills_book_neutral_plan.md](../docs/audit/2026-09-24_skills_book_neutral_plan.md) | NOT STARTED — scrub every book name and episode id out of the skills; guard test |
 
 ## Rules this folder inherits

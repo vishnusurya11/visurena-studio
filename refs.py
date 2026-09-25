@@ -5,7 +5,8 @@
 
 One unit per book today ("main", studio/refs_run.py); the steps come from the
 registry's `refs` block in file order; a step whose output is on disk is skipped;
-the LOOK gate parks the book with an `escalated` event and a printed call-sheet
+the LOOK gate is judged (judge:look); an `escalated` outcome is a legacy path the
+runner still honours with an event and a printed call-sheet
 line (exit 2) -- never a `failed`.  Flags pass through to the steps as ctx.extra.
 """
 from __future__ import annotations

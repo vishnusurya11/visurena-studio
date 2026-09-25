@@ -1,6 +1,6 @@
 # Judges replace the eye — build
 
-**Status:** IN PROGRESS (2026-09-24; the owner delegated: "remove them. We should
+**Status:** DONE 2026-09-24 ( the owner delegated: "remove them. We should
 automate them all, using agents or existing ComfyUI models. Fix all of them.")
 
 **Decision:** [../decisions/2026-09-24_judges_replace_the_eye.md](../decisions/2026-09-24_judges_replace_the_eye.md)
@@ -39,10 +39,10 @@ model, or a paid API (recorded fixtures and synthetic pictures only).
 
 ### Group 1 — calibration ledger, harvest, bench, ratchet
 
-- [ ] **C0 plan + decision** — this file under `architecture/plan/`; the decision
+- [x] **C0 plan + decision** — this file under `architecture/plan/`; the decision
   file; the `docs/DECISIONS.md` entry; `architecture/README.md` index line. Docs only.
 
-- [ ] **C1 the casebook** — ~180 lines, 6 tests.
+- [x] **C1 the casebook** — ~180 lines, 6 tests.
   Tests first: `tests/test_a_casebook_row_names_a_class_from_the_closed_list.py`,
   `test_an_unverified_row_is_not_counted.py`, `test_an_owner_row_outweighs_a_default_row.py`,
   `test_a_harvested_line_becomes_a_candidate_row.py`,
@@ -57,7 +57,7 @@ model, or a paid API (recorded fixtures and synthetic pictures only).
   `take_dq.main(attempts=True)` behind an injectable runner).
   Fixtures: `tests/fixtures/casebook/{story_snippet.md, placed.json, dq_rows.json}`.
 
-- [ ] **C2 bench, synthetic negatives, ratchet** — ~280 lines, 9 tests.
+- [x] **C2 bench, synthetic negatives, ratchet** — ~280 lines, 9 tests.
   Tests first: `test_a_judge_that_refuses_nothing_has_zero_recall.py`,
   `test_a_judge_that_refuses_everything_has_full_false_refusals.py`,
   `test_recall_carries_a_wilson_interval.py`, `test_misses_name_paths_not_content.py`,
@@ -79,7 +79,7 @@ model, or a paid API (recorded fixtures and synthetic pictures only).
 
 ### Group 2 — the judge contract, the policy file, signed_by
 
-- [ ] **C3 `Verdict` and the three signatures** — ~150 lines, 7 tests.
+- [x] **C3 `Verdict` and the three signatures** — ~150 lines, 7 tests.
   Tests first: `test_a_judge_signs_a_pass_or_a_flag_never_a_fault.py`,
   `test_a_flagged_verdict_lets_the_next_step_run.py`,
   `test_a_fault_file_is_still_refused_by_require.py`,
@@ -94,7 +94,7 @@ model, or a paid API (recorded fixtures and synthetic pictures only).
   (`refusals` accepts `flagged_by`; `flags()`); `studio/youtube_publish.py` (flags
   recorded beside waivers in `uploads.jsonl`); `tests/conftest.py` (the ComfyUI trap).
 
-- [ ] **C4 `gates.yaml`, policy, `judged_gate.clear`, audit rows, the ceiling** — ~240 lines, 10 tests.
+- [x] **C4 `gates.yaml`, policy, `judged_gate.clear`, audit rows, the ceiling** — ~240 lines, 10 tests.
   Tests first: `test_every_refs_and_episode_gate_is_auto_with_a_decision.py`
   (and the decision slug is a heading in `docs/DECISIONS.md`),
   `test_an_auto_row_without_a_decision_id_is_refused.py`,
@@ -116,7 +116,7 @@ model, or a paid API (recorded fixtures and synthetic pictures only).
 
 ### Group 3 — picture judges
 
-- [ ] **C5 measures: keypoints, boxes, copy, OCR, faces, gutter thirds** — ~420 lines, 12 tests.
+- [x] **C5 measures: keypoints, boxes, copy, OCR, faces, gutter thirds** — ~420 lines, 12 tests.
   Tests first: `test_a_hat_on_a_head_is_worn_and_at_a_wrist_is_held.py`,
   `test_a_handed_back_reference_is_a_copy.py` (pHash <= 10; SSIM corroborates a crop),
   `test_a_gutter_that_stops_at_a_figure_is_still_a_gutter.py` (thirds),
@@ -145,7 +145,7 @@ model, or a paid API (recorded fixtures and synthetic pictures only).
   Fixtures: `tests/fixtures/measures/{dwpose_*.json, gdino_*.json, ocr_*.json,
   faces_*.npy}`; synthetic panels drawn in-test.
 
-- [ ] **C6 `panel_eye`, the panel ladder, the layout rule; step 07 and 08 rewired** — ~320 lines, 10 tests.
+- [x] **C6 `panel_eye`, the panel ladder, the layout rule; step 07 and 08 rewired** — ~320 lines, 10 tests.
   Tests first: `test_a_setup_lays_out_into_grids_of_at_most_nine.py`
   (5 -> 3 + 2; 7 -> 4 + 3; `cols x rows == shots`), `test_a_board_never_parks_for_a_layout.py`,
   `test_rows_become_faults_with_a_where.py`, `test_an_unread_close_is_a_fault_an_unread_wide_is_not.py`,
@@ -163,7 +163,7 @@ model, or a paid API (recorded fixtures and synthetic pictures only).
   Fixtures: `tests/fixtures/vlm/{panel_content_rows.json, size_reads.json}` (one
   malformed answer must raise `Unreadable`).
 
-- [ ] **C7 `look`, the sheet ladder; refs/04 rewired** — ~220 lines, 7 tests.
+- [x] **C7 `look`, the sheet ladder; refs/04 rewired** — ~220 lines, 7 tests.
   Tests first: `test_a_sheet_missing_a_must_noun_is_redrawn_state_first.py`,
   `test_two_sheets_that_read_as_one_face_are_bound_flagged_lookalikes.py`,
   `test_a_lettered_sheet_is_refused.py`, `test_a_style_outlier_is_flagged_never_refused.py`,
@@ -177,7 +177,7 @@ model, or a paid API (recorded fixtures and synthetic pictures only).
 
 ### Group 4 — take judges
 
-- [ ] **C8 measures: flow, rotation, leak, refs-only board, cut vote, mouth** — ~340 lines, 9 tests.
+- [x] **C8 measures: flow, rotation, leak, refs-only board, cut vote, mouth** — ~340 lines, 9 tests.
   Tests first: `test_scenery_that_slides_through_a_held_man_is_a_pass_through.py`
   (synthetic: a translating background with a fixed patch),
   `test_a_world_that_turns_round_a_fixed_face_is_a_rotation.py` (synthetic rotation),
@@ -197,7 +197,7 @@ model, or a paid API (recorded fixtures and synthetic pictures only).
   Fixtures: numpy-generated frame sequences; `tests/fixtures/flow/{take_dq_rows.json,
   lag_arrays.json}`.
 
-- [ ] **C9 `take_eye`, the take ladder, the still; step 09 rewired** — ~380 lines, 11 tests.
+- [x] **C9 `take_eye`, the take ladder, the still; step 09 rewired** — ~380 lines, 11 tests.
   Tests first: `test_a_stochastic_row_gets_one_seed_then_the_cause_rung.py`,
   `test_a_row_that_repeated_on_a_fresh_seed_skips_the_seed.py`,
   `test_a_lag_row_never_takes_a_seed.py`, `test_a_length_just_changed_is_restored_before_shortened.py`,
@@ -217,7 +217,7 @@ model, or a paid API (recorded fixtures and synthetic pictures only).
 
 ### Group 5 — plan critic
 
-- [ ] **C10 G-MOVES and G-SOURCE** — ~160 lines, 6 tests.
+- [x] **C10 G-MOVES and G-SOURCE** — ~160 lines, 6 tests.
   Tests first: `test_fewer_than_eight_moves_is_a_refusal.py`,
   `test_one_move_on_a_quarter_of_the_shots_is_a_refusal.py`,
   `test_the_same_move_twice_running_is_a_refusal.py`,
@@ -230,7 +230,7 @@ model, or a paid API (recorded fixtures and synthetic pictures only).
   prop id), `scripts/episode/plan_check.py`.
   Fixtures: `tests/fixtures/episodes/moves_{orbit,varied}.json`, a chapter snippet.
 
-- [ ] **C11 `plan_reader` critic; step 02 rewired** — ~300 lines, 9 tests.
+- [x] **C11 `plan_reader` critic; step 02 rewired** — ~300 lines, 9 tests.
   Tests first (FakeModel returns a canned `PlanReading`):
   `test_the_critic_lists_and_the_code_judges.py`,
   `test_a_turn_with_no_two_people_is_a_story_fault.py`,
@@ -250,7 +250,7 @@ model, or a paid API (recorded fixtures and synthetic pictures only).
 
 ### Group 6 — master ensemble and the audit sheet
 
-- [ ] **C12 `master_eye`, recut/retake ladder, audit sheet; step 11 rewired** — ~340 lines, 10 tests.
+- [x] **C12 `master_eye`, recut/retake ladder, audit sheet; step 11 rewired** — ~340 lines, 10 tests.
   Tests first: `test_each_rubric_field_is_answered_from_its_measure.py`,
   `test_a_judge_flags_an_n_and_never_waives.py`, `test_a_flagged_rubric_clears_the_master_step.py`,
   `test_the_story_field_is_a_listed_action_against_the_plans_verb.py`,
@@ -266,7 +266,7 @@ model, or a paid API (recorded fixtures and synthetic pictures only).
 
 ### Group 7 — wiring checks, docs, the org chart
 
-- [ ] **C13 no park anywhere; docs; the Future tab** — ~120 lines of code, 4 tests, docs.
+- [x] **C13 no park anywhere; docs; the Future tab** — ~120 lines of code, 4 tests, docs.
   Tests first: `test_no_refs_or_episode_step_raises_an_escalation.py` (grep + import),
   `test_every_auto_gate_names_its_judge_in_the_registry_desc.py`,
   `test_the_skill_command_table_is_the_registry.py` (existing, regenerated),
@@ -296,3 +296,4 @@ C8; everything else is serial.
 
 - 2026-09-24 — plan written from the chair's ruling over reports A-E; owner away,
   decisions delegated.
+- 2026-09-24 — built: C1/C2 `c4d2b6a`, C3/C4 `d737534`, C8 `27f01e2`, C10 `d573d8f`, C5 `cdeff9a`, C11 `6e28d0a`, C9 `59fc491`, C6 `9e65517`, C7 `081c370`, C12 `d181fd6`, C13 (this commit). Eight builders in three waves; two cross-builder conflicts (a raw timeline path; the face model loading on blank test cards) fixed at integration. Known gaps carried: no DINOv3 embedding node exists in the installed ComfyUI packs (the `image_embed` workflow is a marked placeholder; the leak and style measures read "not measured" until one does); the critic runs on the same model family as the writer until a second provider is configured; the DWPose pack's checkpoint path needs a one-time copy on first run.

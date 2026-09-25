@@ -111,12 +111,17 @@ The references sheets and voices live in their own department: `uv run python re
 | 12 | deliver | `uv run python scripts/episode/step_12_deliver.py <book> <n>` | manifest.json beside the master (every gate verdict, every rung, timing totals), the deliverable's full path printed first, notify() through the platform. |
 <!-- /registry:episode -->
 
-An owner gate parks the unit until its signature file exists: LOOK
-(`refs/verdict.json`, `scripts/refs/sign_look.py`), PLAN
-(`episodes/epNN/plan.verdict.json`, `scripts/episode/sign_plan.py`), EYE on the
-panels and on the takes (`scripts/episode/sign_eye.py`), MASTER
-(`review/eye_<sha8>.json`, `scripts/episode/eye_review.py`). A sentence in chat
-signs nothing.
+No step parks on a person (decision `2026-09-24-automate-the-taste-gates`).
+Each taste gate is signed by a judge named in `gates.yaml`: LOOK by `judge:look`
+(`refs/verdict.json`), PLAN by `judge:plan` (`episodes/epNN/plan.verdict.json`),
+the EYE on panels and takes by `judge:panel_eye` / `judge:take_eye`
+(`eye_<sha8>.json`), MASTER by `judge:master_eye` (`review/eye_<sha8>.json`). A
+judge signs `pass` or `flagged`, never a fault, never a waiver; a terminal rung
+writes an audit row. The owner reads `library/<book>/audit/<unit>.html` when he
+likes; a finding goes through `scripts/audit/note.py` into the casebook, and the
+bench (`scripts/calibration/bench.py`) is what changes a judge. The `sign_*.py`
+scripts remain for a person who chooses to write a verdict; they are not a step.
+See GATES.md "Judges".
 
 ### The tools each step wraps
 
