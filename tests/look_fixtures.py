@@ -65,12 +65,21 @@ def add_row(book: Path, rel: str, prompt: str = PROMPT, seed: int = 1) -> dict:
     return row
 
 
+def bind(book: Path, entity_id: str, kind: str = "character") -> None:
+    """One row in refs/refs.json: the bible binds this entity (the judge reads bound sheets only)."""
+    path = book / "refs" / "refs.json"
+    bible = json.loads(path.read_text(encoding="utf-8")) if path.exists() else {"refs": []}
+    bible["refs"].append({"ref_id": f"{kind[:4]}-{entity_id}", "kind": kind, "entity_id": entity_id})
+    path.write_text(json.dumps(bible), encoding="utf-8")
+
+
 def character(book: Path, who: str, prompt: str = PROMPT, silhouette: str = "") -> dict:
-    """The analysis row build_pack draws a sheet from, and the pack row of that sheet."""
+    """The analysis row build_pack draws a sheet from, the binding, and the pack row of that sheet."""
     folder = book / "analysis" / "characters"
     folder.mkdir(parents=True, exist_ok=True)
     design = {"sheet_prompt": prompt, **({"silhouette": silhouette} if silhouette else {})}
     (folder / f"{who}.json").write_text(json.dumps({"name": who, "profile": {"design": design}}), encoding="utf-8")
+    bind(book, who)
     return add_row(book, f"refs/characters/{who}/sheet.png", prompt)
 
 

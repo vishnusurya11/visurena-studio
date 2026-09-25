@@ -41,7 +41,7 @@ def test_a_new_row_is_still_compared_with_the_bound_cast(tmp_path):
     assert signed["faults"][0]["kind"] == "lookalike"
     assert signed["faults"][0]["where"] == "refs/characters/b/sheet.png"
     assert signed["faults"][0]["evidence"]["other"] == "refs/characters/a/sheet.png"
-    assert all("characters_b" in d["filename_prefix"] for d in drawn) and len(drawn) == 2
+    assert signed["faults"][0]["severity"] == "advisory" and drawn == []   # listed, never redrawn
 
 
 def test_a_current_pack_judges_every_row(tmp_path):

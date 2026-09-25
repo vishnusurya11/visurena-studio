@@ -38,7 +38,17 @@ from studio.judges.verdict import Fault, Verdict
 from studio.measure import faces, keypoints as kp, ocr
 
 NAME, VERSION = "look", "1"
-HARD = frozenset({"must_noun", "lettering", "extra_limb", "lookalike", "identity"})
+HARD = frozenset({"must_noun", "lettering", "extra_limb"})
+"""What refuses a NEW sheet: a must noun the picture does not show (four
+recorded misses; the extractor no longer counts a name or a place as a noun),
+lettering (synthetic negatives; a recognised string), an extra limb (keypoints).
+Measured on the first real bible 2026-09-25 (49 accepted sheets, 12 published
+episodes): identity cosines between DIFFERENT characters ran 0.45-0.82 (median
+0.60) against a STRANGER wall of 0.45 fitted on another style, and trait cards
+sat 2.0-2.5 apart on most pairs -- 904 "faults" on an accepted cast.  Those two
+rows FLAG (severity advisory) until the bench fits them on this style; a
+flagged sheet is bound, never refused."""
+ADVISORY = frozenset({"lookalike", "identity", "voice", "unread", "style"})
 STYLE_OUTLIER = 0.5
 """DINOv3 cosine to the mean of the pack's place pictures under which a sheet is
 another style.  Two books of evidence (refused 3D sheets vs an approved pack);
@@ -283,17 +293,46 @@ def style_outliers(judged: list[str], styles: dict[str, np.ndarray]) -> list[Fau
     return out
 
 
+def read_light(book_dir, row: dict, tools: Tools, acc: Reads) -> None:
+    """A GRANDFATHERED sheet (bound before a verdict file existed, used by a
+    published episode): only the calibrated rows are read -- lettering and
+    limbs -- with no VLM ask and no pairwise comparison.  Its identity was
+    judged by the episodes that shipped with it."""
+    where, picture = row["path"], picture_of(book_dir, row)
+    if book_dir is not None and not Path(picture).exists():
+        return
+    read_lettering(picture, tools("ocr"), acc, where)
+    if kind_of(where) == CHARACTERS:
+        read_limbs(picture, tools("keypoints"), acc, where)
+
+
+def graded(faults: list[Fault]) -> list[Fault]:
+    """Every fault outside HARD is advisory: listed, signed with the sheet, never a refusal."""
+    for f in faults:
+        if f.kind not in HARD:
+            f.severity = "advisory"
+    return faults
+
+
 def judge(book_dir, rows: list[dict], *, bound: list[dict] = (), must=(), reader=None, embed=None,
-          ocr=None, keypoints=None, style_embed=None) -> Verdict:
+          ocr=None, keypoints=None, style_embed=None, light: bool = False) -> Verdict:
     """The verdict over `rows` (pack rows: path, prompt, seed), compared against
-    `bound` rows already signed.  Pass when no HARD fault is listed."""
+    `bound` rows already signed.  Pass when no HARD fault is listed.  `light`
+    reads the grandfathered bible: calibrated rows only, no pairwise."""
     tools = Tools(reader=reader, embed=embed, ocr=ocr, keypoints=keypoints, style_embed=style_embed)
     acc = Reads()
+    if light:
+        for row in rows:
+            read_light(book_dir, row, tools, acc)
+        faults = graded(acc.faults)
+        return Verdict(judge=NAME, version=VERSION, passed=not any(f.kind in HARD for f in faults),
+                       faults=faults, confidence=jv.confidence(acc.readable, acc.reads), reads=acc.reads)
     for row in bound:
         read_bound(book_dir, row, tools, acc)
     for row in rows:
         read_row(book_dir, row, tools, must, acc)
     judged = [r["path"] for r in rows]
-    faults = acc.faults + lookalikes(judged, acc.cards) + identities(judged, acc.faces) + style_outliers(judged, acc.styles)
+    faults = graded(acc.faults + lookalikes(judged, acc.cards) + identities(judged, acc.faces)
+                    + style_outliers(judged, acc.styles))
     return Verdict(judge=NAME, version=VERSION, passed=not any(f.kind in HARD for f in faults), faults=faults,
                    confidence=jv.confidence(acc.readable, acc.reads), reads=acc.reads)

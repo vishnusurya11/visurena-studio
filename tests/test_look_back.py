@@ -18,9 +18,16 @@ def test_nouns_after_with_holding_wearing_are_the_heads_of_their_phrases():
     assert look_back.nouns_of(prompt) == ["beard", "hat", "cape", "lantern"]
 
 
-def test_a_capitalised_word_inside_a_sentence_is_a_noun_and_a_sentence_start_is_not():
+def test_a_capitalised_word_asks_for_the_thing_it_qualifies_and_a_sentence_start_is_not():
     prompt = "Character reference sheet. The man carries a Gladstone bag."
-    assert look_back.nouns_of(prompt) == ["gladstone"]
+    assert look_back.nouns_of(prompt) == ["bag"]
+
+
+def test_a_name_asks_for_nothing():
+    """The first real bible's 39 misses were names, countries and ranks."""
+    prompt = "Albin Blythe, a lieutenant of the Royal Navy, home from England, in a blue coat."
+    assert look_back.nouns_of(prompt) == []
+    assert look_back.nouns_of("Old Albin, on the Kent road at dusk.") == ["road"]
 
 
 def test_a_must_word_present_in_the_prompt_is_asked_for_and_an_absent_one_is_not():

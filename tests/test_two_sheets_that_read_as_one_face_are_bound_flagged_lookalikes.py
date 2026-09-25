@@ -1,8 +1,9 @@
 """Two sheets whose trait cards sit under DISTINCT_AT read as one face; so do
-two whose facenet cosine reaches STRANGER.  Both are hard for the ladder, and
-when the rungs run out the terminal keeps the best try of each, signs the pack
-flagged with the pair named, writes the audit row -- and leaves BOTH sheets
-bound: the take identity judge catches the consequence."""
+two whose facenet cosine reaches STRANGER.  Since first contact with a real
+bible (2026-09-25: different characters read 0.6 alike on full-figure sheets,
+cards 2.0-2.5 apart) both rows are ADVISORY: the pair is listed with the
+signed pack, severity advisory, nothing is redrawn and no audit row is owed --
+the take identity judge catches the consequence in the episode."""
 from __future__ import annotations
 
 import numpy as np
@@ -13,7 +14,7 @@ from studio.judges import look
 from tests import look_fixtures as lf
 
 
-def test_lookalike_cards_end_bound_and_flagged(tmp_path):
+def test_lookalike_cards_end_bound_and_listed_advisory(tmp_path):
     book = lf.a_book(tmp_path)
     lf.character(book, "a")
     lf.character(book, "b")
@@ -21,17 +22,15 @@ def test_lookalike_cards_end_bound_and_flagged(tmp_path):
     ctx = lf.a_ctx(tmp_path, book, **lf.tools(reader=lf.reader_of({"a": "base", "b": "d2"})),
                    draw=lf.drawer(drawn, book))
     step.run(ctx)
-    assert len(drawn) == 2 and all("characters_b" in d["filename_prefix"] for d in drawn)
+    assert drawn == []
     signed = lf.verdict(book)
     assert signed["verdict"] == "APPROVE" and signed["signed_by"] == "judge:look@1"
     fault = signed["faults"][0]
     assert fault["kind"] == "lookalike" and fault["where"] == "refs/characters/b/sheet.png"
     assert fault["evidence"]["other"] == "refs/characters/a/sheet.png" and fault["evidence"]["distance"] == 2.0
-    assert "bound" in fault["note"]
+    assert fault["severity"] == "advisory"
     assert (book / "refs/characters/a/sheet.png").exists() and (book / "refs/characters/b/sheet.png").exists()
-    rows = audit_rows.load(book)
-    assert len(rows) == 1 and rows[0].terminal == "keep_best" and rows[0].judge == "judge:look@1"
-    assert rows[0].artefact == "refs/verdict.json" and rows[0].sha8 == signed["pack_sha8"]
+    assert audit_rows.load(book) == []
     assert step.done(ctx) is True
 
 
@@ -72,7 +71,7 @@ def test_two_faces_at_or_above_stranger_are_one_identity():
     tools = lf.tools(embed=lf.faces_of({"a": v, "b": near}), reader=lf.reader_of({"a": "base", "b": "d4"}))
     verdict = look.judge(None, [{"path": "refs/characters/a/sheet.png", "prompt": lf.PROMPT, "seed": 1},
                                 {"path": "refs/characters/b/sheet.png", "prompt": lf.PROMPT, "seed": 1}], **tools)
-    assert not verdict.passed
+    assert verdict.passed and verdict.faults[0].severity == "advisory"
     assert verdict.faults[0].kind == "identity" and verdict.faults[0].evidence["wall"] == identity_gate.STRANGER
     assert verdict.faults[0].evidence["cosine"] >= identity_gate.STRANGER
 

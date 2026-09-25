@@ -5,12 +5,13 @@ the vision model is never asked whether the picture is right (a VLM says yes);
 it is asked to LIST what it sees, and the comparison with the prompt's must-
 appear nouns is done here, in code.  Which nouns a prompt asks for is a small
 deterministic extraction -- the heads of the phrases after "with", "holding",
-"wearing", "carrying", any capitalised word inside a sentence, and any word of
-a MUST list the caller passes -- so the same prompt always asks for the same
-things and a test can say so.
+"wearing", "carrying", the thing a capitalised word qualifies ("Gladstone bag"
+asks for a bag; "England," or "Royal Navy" asks for nothing -- a picture cannot
+show a name), and any word of a MUST list the caller passes -- so the same
+prompt always asks for the same things and a test can say so.
 
-Advisory this pass (decision 2026-09-24, D8): there is no calibration yet, so
-a miss is logged and nothing is refused.
+The first real bible (2026-09-25) listed 39 "missing" nouns that were all
+names, countries and ranks; since then a name is no noun.
 """
 from __future__ import annotations
 
@@ -33,6 +34,10 @@ PHRASE = re.compile(r"\b(?:with|holding|wearing|carrying)\s+([^,.;:]+)", re.I)
 ARTICLES = frozenset({"a", "an", "the", "his", "her", "their", "its", "one", "two", "some"})
 WORD = re.compile(r"[a-z]+")
 CAPITALISED = re.compile(r"^[A-Z][a-z]+$")
+LOWER = re.compile(r"^[a-z]+$")
+SMALL = ARTICLES | {"and", "or", "of", "in", "on", "at", "by", "to", "for", "from", "as", "is",
+                    "was", "are", "with", "who", "that", "which"}
+"""What can follow a name without being the thing it qualifies."""
 
 ASK = (
     "List what is in this picture. Output strict JSON with these keys.\n"
@@ -64,12 +69,25 @@ def phrase_heads(prompt: str) -> list[str]:
     return heads
 
 
+def qualified(word: str, after: str | None) -> str | None:
+    """The plain thing a capitalised word qualifies ("Gladstone bag" -> bag), or
+    None: a name at a clause end, before another name or before a small word
+    is a name, and a picture shows no names."""
+    if not CAPITALISED.match(word.strip(",;:")) or word[-1] in ",;:" or after is None:
+        return None
+    after = after.strip(",;:")
+    return after if LOWER.match(after) and after not in SMALL else None
+
+
 def capitalised_nouns(prompt: str) -> list[str]:
-    """A capitalised word that does not open its sentence names a thing."""
+    """The things the capitalised words inside a sentence qualify."""
     found = []
     for sentence in re.split(r"[.!?]+", prompt or ""):
         words = sentence.split()
-        found += [w.strip(",;:").lower() for w in words[1:] if CAPITALISED.match(w.strip(",;:"))]
+        for i, w in enumerate(words[1:], 1):
+            noun = qualified(w, words[i + 1] if i + 1 < len(words) else None)
+            if noun:
+                found.append(noun)
     return found
 
 
