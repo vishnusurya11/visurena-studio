@@ -1,0 +1,16 @@
+[
+ {"shot": 1, "passed": true, "faults": [], "people": 1, "lookalikes": 0, "hour": "night",
+  "landform": "flat", "text": false, "subjects": ["a man in a coat", "a lamp", "a wall"]},
+ {"shot": 2, "passed": false,
+  "faults": ["3 figure(s) for 1 declared (1 cast + 0 extras), 2 of them copies of another"],
+  "people": 3, "lookalikes": 2, "hour": "night", "landform": "flat", "text": false,
+  "subjects": ["three men in the same coat", "a lamp"]},
+ {"shot": 3, "passed": false, "faults": ["text or lettering in the picture"],
+  "people": 0, "lookalikes": 0, "hour": "day", "landform": "flat", "text": true,
+  "subjects": ["a wall", "a sign"]},
+ {"shot": 4, "passed": false, "faults": ["unread: no JSON in 'The picture shows a garden at dusk'"]},
+ {"shot": 5, "passed": false,
+  "faults": ["1 figure(s) for 2 named: someone the shot casts is missing", "posture 'standing': the shot asks for lying"],
+  "people": 1, "lookalikes": 0, "hour": "night", "landform": "flat", "text": false,
+  "subjects": ["a man standing", "sand"]}
+]
