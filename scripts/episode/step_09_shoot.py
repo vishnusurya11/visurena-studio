@@ -24,7 +24,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 
 from scripts.episode.step_08_panels import panel_refusals  # noqa: E402
-from studio import episode_clock, episode_home, eye_verdict, gate_policy, judged_gate, step_cli, take_ladder  # noqa: E402
+from studio import episode_clock, episode_home, eye_verdict, gate_policy, judged_gate, step_cli, take_currency, take_ladder  # noqa: E402
 from studio.judges import take_eye  # noqa: E402
 from studio.run_budget import EPISODE_CEILING_SECONDS, EPISODE_SHARES, Budget  # noqa: E402
 
@@ -50,9 +50,25 @@ def judged(takes: list[Path]) -> bool:
                for t in takes)
 
 
+def card_pictures(c: dict, book: Path, number: int) -> list[Path]:
+    from scripts.episode import takes_r2v
+    return takes_r2v.card_pictures(c, book, number)
+
+
+def stale_takes(ctx) -> list[int]:
+    """Takes that are not the take their card in prompts.json would render now.
+    ep12: shot 16 was re-planned and the runner skipped step 09 on existence."""
+    path = ctx.home / TAKES / "prompts.json"
+    cards = episode_home.read_json(path) if path.exists() else []
+    return [int(c["index"]) for c in cards
+            if not take_currency.is_current(c.get("prompt") or "", ctx.home / TAKES / f"T{int(c['index']):02d}.mp4",
+                                            pictures=card_pictures(c, ctx.book_dir, ctx.number))]
+
+
 def done(ctx) -> bool:
     takes = takes_of(ctx.home / TAKES)
-    return bool(takes) and judged(takes) and eye_verdict.passed(ctx.home / TAKES, takes)
+    return (bool(takes) and judged(takes) and eye_verdict.passed(ctx.home / TAKES, takes)
+            and not stale_takes(ctx))
 
 
 def approved(policy: gate_policy.Policy) -> str:

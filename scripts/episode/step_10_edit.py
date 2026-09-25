@@ -37,9 +37,21 @@ def title_clip(ctx) -> Path:
     return ctx.book_dir / "title" / f"ep{ctx.number:02d}.mp4"
 
 
+def inputs(ctx) -> list[Path]:
+    """What the cut is made from: the kept takes, the timeline, the heads, the card."""
+    takes = sorted((ctx.home / "takes" / "r2v").glob("T??.mp4"))
+    return takes + [p for p in (ctx.home / "placed.json", ctx.home / "heads.json", title_clip(ctx))
+                    if p.exists()]
+
+
 def done(ctx) -> bool:
+    """A master exists AND is newer than everything it was cut from.  ep12: a
+    retaken T16 and a new heads.json sat under a master the runner called done."""
     engine = engine_of(getattr(ctx, "extra", None) or [])
-    return title_clip(ctx).exists() and episode_home.master_path(ctx.book_dir, ctx.number, engine).exists()
+    master = episode_home.master_path(ctx.book_dir, ctx.number, engine)
+    if not (title_clip(ctx).exists() and master.exists()):
+        return False
+    return all(p.stat().st_mtime <= master.stat().st_mtime for p in inputs(ctx))
 
 
 def run(ctx) -> None:
