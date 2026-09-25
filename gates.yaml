@@ -1,0 +1,23 @@
+# gates.yaml -- who signs each gate.  Read by studio/gate_policy.py.
+#
+#   auto    the judge signs pass|flagged and never parks; the row carries the
+#           decision id (YYYY-MM-DD-<slug>, literally in docs/DECISIONS.md) that
+#           retired the person.
+#   shadow  a FIELD, not a state: a newer judge version runs beside `judge`,
+#           writes <verdict>.shadow.json, signs nothing, and is benched.
+#   human   a person signs; legal only outside the refs and episode lines.
+#
+# terminal names are the trailer's (studio/ladder.Ladder.terminal):
+# keep_best | still | flag | defer.  `park` does not exist in these lines.
+gates:
+  refs:
+    LOOK:        { state: auto, judge: look@1,        decision: 2026-09-24-automate-the-taste-gates, terminal: keep_best }
+  episode:
+    PLAN:        { state: auto, judge: plan@1,        decision: 2026-09-24-automate-the-taste-gates, terminal: keep_best, battery_terminal: defer }
+    LAYOUT:      { state: auto, judge: grid_layout@1, decision: 2026-09-24-automate-the-taste-gates }   # a rule, no ladder
+    EYE_PANELS:  { state: auto, judge: panel_eye@1,   decision: 2026-09-24-automate-the-taste-gates, terminal: keep_best, max_grids: 2 }
+    EYE_TAKES:   { state: auto, judge: take_eye@1,    decision: 2026-09-24-automate-the-taste-gates, terminal: keep_best, still_max: 2 }
+    MASTER:      { state: auto, judge: master_eye@1,  decision: 2026-09-24-automate-the-taste-gates, terminal: flag }
+    RENDER:      { state: auto, decision: 2026-09-24-episode-department, ceiling_seconds: 18000 }
+promotion:
+  units: 3          # a shadow version is promoted after this many units where its bench is not worse

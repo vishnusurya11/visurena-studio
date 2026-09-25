@@ -106,3 +106,35 @@ def build_fixture_epub(path):
 @pytest.fixture()
 def fixture_epub(tmp_path):
     return build_fixture_epub(tmp_path / "test.epub")
+
+
+# ---- the ComfyUI trap ----------------------------------------------------------
+#
+# No test may reach ComfyUI (a GPU, a model, a queue).  Every judge and every
+# reader takes an injected callable; one constructed without injection trips
+# here, and the failure names the reason.
+
+@pytest.fixture(autouse=True)
+def comfy_trap(monkeypatch):
+    """`studio.comfy.run` and `run_text` raise for the whole test.  The real
+    functions come back as the fixture's value, for `real_comfy` only."""
+    from studio import comfy
+
+    real = {"run": comfy.run, "run_text": comfy.run_text}
+
+    def trip(*_args, **_kwargs):
+        raise RuntimeError("a test reached ComfyUI")
+
+    monkeypatch.setattr(comfy, "run", trip)
+    monkeypatch.setattr(comfy, "run_text", trip)
+    return real
+
+
+@pytest.fixture()
+def real_comfy(comfy_trap, monkeypatch):
+    """For the tests OF `comfy.run` / `run_text` themselves, with the server
+    mocked underneath them (submit, wait_record); nothing else asks for this."""
+    from studio import comfy
+
+    for name, fn in comfy_trap.items():
+        monkeypatch.setattr(comfy, name, fn)

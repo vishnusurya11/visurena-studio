@@ -20,6 +20,21 @@ TRAILER_SHARES: dict[str, float] = {
 }
 """Minutes of the 360, as fractions (BLUEPRINT.md, Time shares)."""
 
+EPISODE_CEILING_SECONDS = 5 * 3600
+"""The render approval, as the thing it protected: the owner's GPU hours.
+18 000 s against today's 3.5-4 h episode (decision 2026-09-24-automate-the-
+taste-gates, cost); `RENDER_HOLD` stays the brake."""
+
+EPISODE_SHARES: dict[str, float] = {
+    "01": 3 / 300, "02": 8 / 300, "03": 12 / 300, "04": 12 / 300, "05": 2 / 300,
+    "06": 3 / 300, "07": 4 / 300, "08": 20 / 300, "09": 135 / 300, "10": 8 / 300,
+    "11": 8 / 300, "12": 2 / 300,
+    "judges": 15 / 300, "ladders": 60 / 300, "slack": 8 / 300,
+}
+"""Minutes of the 300, as fractions, keyed by episode step id; the judges
+(capped at 15 GPU min) and the ladders (60 min: panels 10, takes 40, master
+retake 10) hold shares of their own.  Unused time rolls forward."""
+
 
 class Budget:
     """Wall-clock shares per step, rolling forward, under one ceiling."""

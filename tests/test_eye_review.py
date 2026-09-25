@@ -165,7 +165,8 @@ def test_the_flag_with_a_filled_rubric_is_accepted_and_ledgered(tmp_path):
     stops, eye = youtube_upload.eye_stops(tmp_path, DIGEST, DIGEST)
     assert stops == []
     assert eye == {"sha8": DIGEST, "reviewed_by": "owner",
-                   "waived": {"repeats": "the wide is the same room twice, on purpose"}}
+                   "waived": {"repeats": "the wide is the same room twice, on purpose"},
+                   "flags": {}}
 
 
 def library(tmp_path: Path, clip: Path) -> tuple[Path, str]:

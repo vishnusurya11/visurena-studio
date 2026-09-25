@@ -15,6 +15,8 @@ import json
 from datetime import datetime, timezone
 from pathlib import Path
 
+from studio.judges import verdict as jv
+
 PACK = "refs/pack.jsonl"
 VERDICT = "refs/verdict.json"
 APPROVE = "APPROVE"
@@ -64,11 +66,13 @@ def new_rows(book_dir: Path | str) -> int:
     return max(pack_rows(book_dir) - int(signed), 0)
 
 
-def sign(book_dir: Path | str, note: str) -> Path:
-    """Write the owner's APPROVE for the pack as it stands, and return the file."""
+def sign(book_dir: Path | str, note: str, *, signed_by: str = jv.OWNER,
+         faults: list[dict] | None = None) -> Path:
+    """Write the APPROVE for the pack as it stands, and return the file.  A
+    judge re-judges a stale pack's new rows only and re-signs the same way."""
     body = {"pack_sha8": pack_sha8(book_dir), "verdict": APPROVE, "note": note,
             "date": datetime.now(timezone.utc).isoformat(timespec="seconds"),
-            "rows": pack_rows(book_dir)}
+            "rows": pack_rows(book_dir), **jv.signature(signed_by, faults)}
     path = verdict_path(book_dir)
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(json.dumps(body, indent=2, ensure_ascii=False), encoding="utf-8")

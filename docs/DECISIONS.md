@@ -32,6 +32,8 @@ sheet makes the owner's taste a recorded input instead of a gate.
 
 ## 2026-09-24 — The episode line is a registry department led by a runner (owner-delegated)
 
+Decision id: `2026-09-24-episode-department`
+
 **Decision.** `refs` and `episode` are stages in `stages.yaml`, led by root runners
 (`refs.py`, `episode.py`) like analysis, screenplay and trailer. A stage declares its
 `unit` (the grain of its production id: `[book, chapter]` for episodes, unit string

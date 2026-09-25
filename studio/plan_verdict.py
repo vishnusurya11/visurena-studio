@@ -15,6 +15,8 @@ import json
 from datetime import date as _date
 from pathlib import Path
 
+from studio.judges import verdict as jv
+
 APPROVE = "APPROVE"
 FILE = "plan.verdict.json"
 
@@ -45,10 +47,14 @@ def current(plan: Path) -> bool:
     return bool(doc) and doc.get("verdict") == APPROVE and doc.get("plan_sha8") == plan_sha8(plan)
 
 
-def sign(plan: Path, note: str, date: str | None = None) -> Path:
-    """Write the owner's APPROVE for the plan as it stands now."""
+def sign(plan: Path, note: str, date: str | None = None, *, signed_by: str = jv.OWNER,
+         faults: list[dict] | None = None, flagged: bool = False) -> Path:
+    """Write the APPROVE for the plan as it stands now.  `verdict` stays APPROVE
+    (the file's contract); a judge's terminal rung adds `flagged: true` and
+    the faults it kept the best draft with."""
     doc = {"plan_sha8": plan_sha8(plan), "verdict": APPROVE, "note": note,
-           "date": date or _date.today().isoformat()}
+           "date": date or _date.today().isoformat(),
+           **jv.signature(signed_by, faults, flagged=flagged)}
     out = verdict_path(plan)
     out.write_text(json.dumps(doc, indent=1, ensure_ascii=False), encoding="utf-8")
     return out

@@ -20,7 +20,8 @@ def test_texts_of_ignores_non_strings_and_empty_records():
     assert comfy.texts_of({}) == []
 
 
-def test_run_text_returns_the_joined_text_of_the_finished_job(monkeypatch):
+def test_run_text_returns_the_joined_text_of_the_finished_job(monkeypatch, real_comfy):
+    """The one test OF run_text: the conftest trap is lifted, the server is mocked."""
     seen = {}
     monkeypatch.setattr(comfy, "load_workflow",
                         lambda name: ({"2": {"inputs": {"text": ""}}}, {"prompt": {"node": "2", "field": "text"}}))

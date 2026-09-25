@@ -21,6 +21,13 @@ dependencies = [
 dev = [
     "pytest==8.4.1",
 ]
+measures = [
+    "easyocr==1.7.2",
+    "facenet-pytorch==2.6.0",
+    "mediapipe==1.0.1",
+    "scenedetect==0.7.1",
+    "torchvision==0.29.0",
+]
 music = [
     "beat-this==1.1.0",
     "torch==2.14.0",
@@ -45,3 +52,7 @@ build-backend = "hatchling.build"
 
 [tool.hatch.build.targets.wheel]
 packages = ["studio"]
+
+[tool.uv]
+# facenet-pytorch pins an old torch; the studio runs the torch the music group pins.
+override-dependencies = ["torch==2.14.0", "torchvision==0.29.0", "numpy==2.5.2"]

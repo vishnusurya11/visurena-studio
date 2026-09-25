@@ -159,11 +159,28 @@ def unanswered(rubric: dict) -> list[str]:
     return out
 
 
+def _said_n(cell: dict) -> bool:
+    return str(cell.get("answer", "")).strip().lower() == "n"
+
+
+def flags(rubric: dict) -> dict[str, dict]:
+    """{field: {flagged_by, evidence}} for every n a judge flagged.  A judge
+    never waives: it names itself (`judge:<name>@<version>`) and shows its
+    numbers.  A flag without evidence is a feeling, and counts for nothing."""
+    out = {}
+    for field, _q in RUBRIC:
+        cell = rubric.get("rubric", {}).get(field, {})
+        by, evidence = str(cell.get("flagged_by", "")).strip(), cell.get("evidence") or {}
+        if _said_n(cell) and by.startswith("judge:") and evidence:
+            out[field] = {"flagged_by": by, "evidence": evidence}
+    return out
+
+
 def unwaived(rubric: dict) -> list[str]:
-    """Every field answered n with no reason written beside it."""
-    fields = rubric.get("rubric", {})
+    """Every field answered n with neither a reason nor a judge's flag beside it."""
+    fields, flagged = rubric.get("rubric", {}), flags(rubric)
     return [field for field, _q in RUBRIC
-            if str(fields.get(field, {}).get("answer", "")).strip().lower() == "n"
+            if _said_n(fields.get(field, {})) and field not in flagged
             and not str(fields.get(field, {}).get("waived_because", "")).strip()]
 
 
@@ -186,8 +203,8 @@ def refusals(rubric: dict, digest: str, path: Path) -> list[str]:
         out.append(f"{path} leaves {', '.join(missing)} unanswered; look at the contact sheet "
                    f"and answer every field")
     if bare := unwaived(rubric):
-        out.append(f"{path} answers n on {', '.join(bare)} with no waived_because; "
-                   f"fix the cut or write the reason the owner would sign")
+        out.append(f"{path} answers n on {', '.join(bare)} with no waived_because and no "
+                   f"judge's flag; fix the cut or write the reason the owner would sign")
     return out
 
 

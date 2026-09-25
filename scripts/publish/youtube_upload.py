@@ -62,8 +62,8 @@ def eye_stops(home: Path, watched: str, digest: str) -> tuple[list[str], dict]:
     stops, rubric = eye_review.verdict(home, watched, digest)
     if stops:
         return stops, {}
-    return [], {"sha8": rubric.get("sha8"), "reviewed_by": rubric.get("reviewed_by", ""),
-                "waived": eye_review.waivers(rubric)}
+    return [], yp.eye_record(rubric.get("sha8"), rubric.get("reviewed_by", ""),
+                             waived=eye_review.waivers(rubric), flags=eye_review.flags(rubric))
 
 
 def metadata(home: Path) -> dict:

@@ -110,6 +110,15 @@ def waived(qc: dict, dq_failed: list[str], *, override: str) -> dict | None:
             "dq_failed": list(dq_failed)}
 
 
+def eye_record(sha8: str, reviewed_by: str, *, waived: dict, flags: dict) -> dict:
+    """What the ledger keeps of the eye review beside the video id: the cut it
+    described, who reviewed it, the owner's waivers and, beside them, the
+    judge's flags -- an `n` a judge answered with its evidence, never waived.
+    A flag that ships is recorded; a silent one is what episode 9 was."""
+    return {"sha8": sha8, "reviewed_by": reviewed_by,
+            "waived": dict(waived), "flags": dict(flags)}
+
+
 def public_refusals(qc: dict, dq_failed: list[str], row: dict) -> list[str]:
     """Every machine reason not to flip an uploaded episode PUBLIC, as the takes
     and QC stand now, about the file the ledger row says was uploaded. The
