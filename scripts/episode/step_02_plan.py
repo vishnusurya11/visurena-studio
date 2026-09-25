@@ -1,18 +1,22 @@
 #!/usr/bin/env python
-"""Step 02 of the episode stage: the plan, gated before anything is voiced or drawn.
+"""Step 02 of the episode stage: the plan, judged before anything is voiced or drawn.
 
     uv run python scripts/episode/step_02_plan.py <codex_id> <n> [--rewrite]
 
-    brief (02_01)  ->  write (02_02)  ->  checks (02_03)  ->  improve (02_04, at most 2)
-                                                          ->  lock (02_05)  ->  OWNER PLAN
+    brief (02_01)  ->  write (02_02)  ->  battery + critic (02_03)  ->  ladder (02_04)
+                                                                    ->  signed (02_05)
 
 The brief is gathered off disk (`studio.plan_brief`); the writer is the
-registered agent (`agents.episode_writer`); the gate is `plan_check`, launched
-as a script so it reads the draft exactly as every later step will; a refusal
-is quoted back verbatim; a draft the gate still refuses after MAX_IMPROVE
-rounds parks the unit.  The plan is written only through
-`episode_home.write_plan`.  Then the PLAN signature: `plan.verdict.json` beside
-the plan, bound to its sha8, written by `scripts/episode/sign_plan.py`.
+registered agent (`agents.episode_writer`); the judge is two-fold: the
+battery (`plan_check`, launched as a script so it reads the draft exactly as
+every later step will) and, once the battery passes, the critic
+(`agents.plan_reader` lists, `studio.judges.plan` judges).  A fault climbs
+`studio.plan_ladder` -- improve x2, fresh_brief x1, model_tier x1 -- under
+`judged_gate.clear`, and ends in one of two terminals that ask nobody: a
+critic fault keeps the best draft and signs it flagged; a battery that never
+passed defers the unit (plan.deferred.json, no signature, an audit row).
+The plan is written only through `episode_home.write_plan`; the signature is
+`plan.verdict.json` beside it, bound to its sha8, signed `judge:plan@1`.
 
 `--rewrite` authors a fresh plan over an unsigned one, and never over a plan
 that already ran downstream (`placed.json` beside it).
@@ -24,18 +28,17 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 
-from agents import episode_writer  # noqa: E402
-from studio import episode_home, plan_brief, plan_verdict, step_cli  # noqa: E402
-from studio.escalate import Escalation  # noqa: E402
-from pydantic import ValidationError  # noqa: E402
+from agents import episode_writer, plan_reader  # noqa: E402
+from studio import episode_home, gate_policy, judged_gate, plan_ladder, plan_verdict, step_cli  # noqa: E402
+from studio.judges import plan as plan_judge  # noqa: E402
 
 STEP_ID = "02"
 NAME = "plan"
 GPU = False
+GATE = "PLAN"
 MAX_IMPROVE = 2
-"""Rounds in which the gate's refusals go back to the writer, after the first draft."""
+"""Tries of the `improve` rung: rounds in which every refusal so far goes back to the writer."""
 PLAN_CHECK = "scripts/episode/plan_check.py"
-REFUSED_ASIDE = "plan.refused.json"
 
 
 def plan_of(ctx) -> Path:
@@ -47,18 +50,13 @@ def ran_downstream(ctx) -> bool:
     return episode_home.has_timeline(ctx.book_dir, ctx.number)
 
 
-def unit_file(ctx, name: str) -> str:
-    """A signature's place, relative to the book, as the call-sheet prints it."""
-    return f"episodes/{ctx.unit}/{name}"
-
-
 def done(ctx) -> bool:
     """plan.json exists AND it is signed, or the unit is GRANDFATHERED.
 
     Grandfathered: `placed.json` beside the plan.  The timeline is built from
     the plan, so a plan with a timeline already ran downstream -- it was judged
     by the owner before verdict files existed, and asking for a signature now
-    would park every finished episode behind a gate that did not exist when it
+    would hold every finished episode behind a gate that did not exist when it
     was made."""
     plan = plan_of(ctx)
     return plan.exists() and (plan_verdict.current(plan) or ran_downstream(ctx))
@@ -74,67 +72,60 @@ def refusal_lines(out: str) -> list[str]:
             if line.strip() and "advisory:" not in line]
 
 
-def set_aside(plan: Path) -> Path:
-    """A refused draft moves out of plan.json's place so the next run authors again."""
-    aside = plan.with_name(REFUSED_ASIDE)
-    if aside.exists():
-        aside.unlink()
-    plan.rename(aside)
-    return aside
+def battery(ctx, desk) -> list[str] | None:
+    """plan_check's refusals for the draft as it stands, or None when it passes;
+    a draft the contract refused is a refusal like the gate's."""
+    if desk.pending is not None:
+        return desk.pending
+    rc, out = ctx.capture_script(PLAN_CHECK)
+    if rc == 0:
+        return None
+    lines = refusal_lines(out)
+    ctx.log("plan_check refused:\n" + "\n".join(lines), step_id=STEP_ID, level="WARNING")
+    return lines
 
 
-def draft(ctx, plan: Path, brief: dict, refusals: list[str] | None) -> tuple[int, str]:
-    """One round: the writer's plan through write_plan, then the gate on it.
-
-    A draft the CONTRACT refuses is a refusal like the gate's, not a crash:
-    ep12's first draft said 'slowly' on four shots, the Episode validators
-    raised inside the agent's parse, and the step died before this loop could
-    quote the refusal back to the writer."""
-    try:
-        episode = episode_writer.write(brief, refusals)
-    except ValidationError as bad:
-        return 1, contract_refusals(bad)
-    episode_home.write_plan(plan, episode.model_dump())
-    return ctx.capture_script(PLAN_CHECK)
+def critic(ctx, desk):
+    """The critic reads the plan as plain text; the same bytes get the same verdict."""
+    key = plan_verdict.plan_sha8(desk.plan)
+    if key not in desk.judged:
+        brief, doc = desk.brief_(), episode_home.read_json(desk.plan)
+        readings = plan_reader.read(plan_reader.plain_text(doc), plan_judge.rows_of(brief),
+                                    chapter_text=brief.get("chapter_text"))
+        desk.judged[key] = plan_judge.judge(doc, brief, readings)
+    return desk.judged[key]
 
 
-def contract_refusals(bad: ValidationError) -> str:
-    """The contract's refusals, one per line, as the gate prints its own."""
-    return "\n".join(f"CONTRACT {'.'.join(str(p) for p in e['loc'])}: {e['msg']}" for e in bad.errors())
+def judge(ctx, desk):
+    """The battery first (free, deterministic); the critic only on a draft it let through."""
+    refused = battery(ctx, desk)
+    if refused is not None:
+        return plan_ladder.battery_verdict(refused)
+    return critic(ctx, desk)
 
 
-def author(ctx, plan: Path) -> None:
-    """Brief -> write -> check, improving on the gate's refusals at most MAX_IMPROVE times."""
-    brief = plan_brief.build(ctx.book_dir, ctx.number)
-    refusals = None
-    for round_no in range(MAX_IMPROVE + 1):
-        rc, out = draft(ctx, plan, brief, refusals)
-        if rc == 0:
-            ctx.log(f"plan_check clean on round {round_no}; plan locked at {plan.name}", step_id=STEP_ID)
-            return
-        # EVERY REFUSAL SO FAR, not only this round's: each draft is written from
-        # scratch, and ep12 traded 'slowly' for 'crawl' for a long style line.
-        fresh = refusal_lines(out)
-        refusals = (refusals or []) + [line for line in fresh if line not in (refusals or [])]
-        ctx.log(f"plan_check refused round {round_no}:\n" + "\n".join(fresh),
-                step_id=STEP_ID, level="WARNING")
-    if plan.exists():   # every round may have died on the contract before writing one
-        set_aside(plan)
-    raise Escalation("PLAN", unit_file(ctx, "plan.json"),
-                     f"the writer could not satisfy plan_check after {MAX_IMPROVE} rounds; "
-                     f"refusals in the log")
+def clear(ctx, desk) -> Path:
+    """The judged gate over the plan: pass -> signed; fault -> the ladder; spent -> a terminal."""
+    policy = gate_policy.of(ctx.stage, GATE)
+    desk.battery_terminal = policy.battery_terminal or plan_ladder.DEFER
+    rungs = judged_gate.Rungs(plan_ladder.ladder(MAX_IMPROVE), take=desk.take)
+    signed = judged_gate.clear(ctx, GATE, judge=lambda: judge(ctx, desk), sign=desk.sign,
+                               ladder=rungs, terminal=desk.terminal, policy=policy)
+    ctx.log(f"{GATE}: {signed.name} written", step_id=STEP_ID)
+    return signed
 
 
 def run(ctx) -> None:
     plan = plan_of(ctx)
+    desk = plan_ladder.Desk(ctx, plan, writer=episode_writer)
     if wants_rewrite(ctx) and ran_downstream(ctx):
         ctx.log("--rewrite refused: placed.json exists, this plan already ran downstream",
                 step_id=STEP_ID, level="WARNING")
     elif wants_rewrite(ctx) or not plan.exists():
-        author(ctx, plan)
+        desk.write(None)
     if plan_verdict.current(plan) or ran_downstream(ctx):
         return
-    raise Escalation("PLAN", unit_file(ctx, "plan.verdict.json"), "read the plan and sign")
+    clear(ctx, desk)
 
 
 if __name__ == "__main__":

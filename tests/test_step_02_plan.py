@@ -1,8 +1,10 @@
-"""Step 02 of the episode stage: brief -> write -> plan_check -> improve (at
-most twice) -> lock -> the PLAN signature.
+"""Step 02 of the episode stage: brief -> write -> plan_check + the critic ->
+the plan ladder (improve x2, fresh_brief, model_tier) -> the PLAN signature
+in the judge's name, or the draft deferred when the battery never passes.
 
-A fake writer and a fake capture stand in for the agent and the gate script;
-nothing here calls a model, and `plan_check` is never launched.
+A fake writer, a fake capture and a fake reader stand in for the agent, the
+gate script and the critic; nothing here calls a model, and `plan_check` is
+never launched.
 """
 from __future__ import annotations
 
@@ -13,9 +15,9 @@ import pytest
 
 from scripts.episode import step_02_plan as step
 from studio import db, episode_home, plan_verdict
-from studio.escalate import Escalation
+from studio.episode_run import EpisodeContext
 from studio.episode_spec import Episode
-from studio.stage_run import StageContext
+from tests.plan_reader_fixtures import reading
 from tests.test_episode_writer import canned_plan
 
 REFUSED_OUT = "CONTRACT OK: The Yard | 24 shots | 140s projected\nPLAN GATES   : 1\n    G-SCALE shot 4: a close with no cell\n  advisory: L8 shot 2: 'walks' with no pace word\nVERDICT      : REFUSED\n"
@@ -33,13 +35,14 @@ def conn(tmp_path):
 def ctx(conn, tmp_path, monkeypatch):
     codex_id = db.insert_codex(conn, "Book", codex_id="20260901000001")
     book = tmp_path / "book"
-    context = StageContext(conn, codex_id, book, "episode", unit="ep03", number=3,
-                           logs_root=tmp_path / "logs", busy=lambda: False,
-                           hold=tmp_path / "RENDER_HOLD", launch=lambda cmd: 0)
+    context = EpisodeContext(conn, codex_id, book, "episode", unit="ep03", number=3,
+                             logs_root=tmp_path / "logs", busy=lambda: False,
+                             hold=tmp_path / "RENDER_HOLD", launch=lambda cmd: 0)
     context.home = episode_home.home(book, 3)
     context.home.mkdir(parents=True)
     context.extra = []
-    monkeypatch.setattr(step, "plan_brief", SimpleNamespace(build=lambda b, n, targets=None: {"number": n}))
+    monkeypatch.setattr(step.plan_ladder, "plan_brief",
+                        SimpleNamespace(build=lambda b, n, targets=None: {"number": n}))
     return context
 
 
@@ -47,10 +50,11 @@ class Writer:
     """A fake episode_writer: the canned plan every time; records the refusals it was given."""
 
     def __init__(self):
-        self.calls = []
+        self.calls, self.agents = [], []
 
-    def write(self, brief, refusals=None, usage=None):
+    def write(self, brief, refusals=None, usage=None, _agent=None):
         self.calls.append(refusals)
+        self.agents.append(_agent)
         return Episode.model_validate(canned_plan(brief["number"]))
 
 
@@ -65,9 +69,22 @@ class Capture:
         return self.results.pop(0) if len(self.results) > 1 else self.results[0]
 
 
-def _wire(ctx, monkeypatch, *gate_results):
-    writer, gate = Writer(), Capture(*gate_results)
+class Reader:
+    """A fake critic: the good reading three times; records every plan text it read."""
+
+    def __init__(self, *readings):
+        self.readings = list(readings) or [reading("good")]
+        self.texts = []
+
+    def __call__(self, plan_text, rows, k=3, **kw):
+        self.texts.append(plan_text)
+        return [self.readings[0]] * k
+
+
+def _wire(ctx, monkeypatch, *gate_results, reader=None):
+    writer, gate, critic = Writer(), Capture(*gate_results), reader or Reader()
     monkeypatch.setattr(step, "episode_writer", writer)
+    monkeypatch.setattr(step.plan_reader, "read", critic)
     ctx.capture = gate
     return writer, gate
 
@@ -80,10 +97,14 @@ def _placed(ctx):
     return ctx.home / "placed.json"
 
 
+def _verdict(ctx) -> dict:
+    return json.loads(plan_verdict.verdict_path(_plan(ctx)).read_text(encoding="utf-8"))
+
+
 # ---- the module's contract ----------------------------------------------------------
 
 def test_the_step_declares_itself():
-    assert (step.STEP_ID, step.NAME, step.GPU, step.MAX_IMPROVE) == ("02", "plan", False, 2)
+    assert (step.STEP_ID, step.NAME, step.GPU, step.MAX_IMPROVE, step.GATE) == ("02", "plan", False, 2, "PLAN")
 
 
 def test_capture_script_builds_the_same_argv_as_run_script(ctx):
@@ -122,62 +143,61 @@ def test_a_stale_verdict_is_not_done(ctx):
 
 # ---- run -----------------------------------------------------------------------------
 
-def test_a_missing_plan_is_written_through_write_plan_then_the_plan_gate_parks(ctx, monkeypatch):
+def test_a_missing_plan_is_written_through_write_plan_then_judged_and_signed(ctx, monkeypatch):
     writer, gate = _wire(ctx, monkeypatch, (0, CLEAN_OUT))
     written = []
     real = episode_home.write_plan
-    monkeypatch.setattr(step.episode_home, "write_plan", lambda out, doc: written.append(out) or real(out, doc))
-    with pytest.raises(Escalation) as parked:
-        step.run(ctx)
+    monkeypatch.setattr(step.plan_ladder.episode_home, "write_plan",
+                        lambda out, doc: written.append(out) or real(out, doc))
+    step.run(ctx)
     assert written == [_plan(ctx)]
-    assert parked.value.gate == "PLAN" and parked.value.verdict == "episodes/ep03/plan.verdict.json"
-    assert parked.value.ask == "read the plan and sign"
     assert json.loads(_plan(ctx).read_text(encoding="utf-8"))["title"] == "The Yard"
     assert writer.calls == [None]
     assert gate.commands[0][-3:] == ["scripts/episode/plan_check.py", "20260901000001", "3"]
+    doc = _verdict(ctx)
+    assert doc["verdict"] == "APPROVE" and doc["signed_by"] == "judge:plan@1"
+    assert doc["faults"] == [] and not doc.get("flagged")
+    assert step.done(ctx) is True
 
 
 def test_two_refusals_then_a_pass_locks_the_plan(ctx, monkeypatch):
     writer, gate = _wire(ctx, monkeypatch, (1, REFUSED_OUT), (1, REFUSED_OUT), (0, CLEAN_OUT))
-    with pytest.raises(Escalation) as parked:
-        step.run(ctx)
-    assert parked.value.gate == "PLAN" and parked.value.verdict.endswith("plan.verdict.json")
+    step.run(ctx)
     assert len(writer.calls) == 3 and writer.calls[0] is None
     assert writer.calls[1] == ["CONTRACT OK: The Yard | 24 shots | 140s projected", "PLAN GATES   : 1",
                                "    G-SCALE shot 4: a close with no cell", "VERDICT      : REFUSED"]
-    assert _plan(ctx).exists() and not (ctx.home / "plan.refused.json").exists()
+    assert _plan(ctx).exists() and not (ctx.home / step.plan_ladder.DEFERRED).exists()
+    assert _verdict(ctx)["signed_by"] == "judge:plan@1" and plan_verdict.current(_plan(ctx))
 
 
-def test_three_refusals_escalate_naming_two_rounds(ctx, monkeypatch):
+def test_a_battery_that_keeps_refusing_defers_the_unit_after_the_whole_ladder(ctx, monkeypatch):
     writer, gate = _wire(ctx, monkeypatch, (1, REFUSED_OUT))
-    with pytest.raises(Escalation) as parked:
-        step.run(ctx)
-    assert len(writer.calls) == 3 and len(gate.commands) == 3
-    assert parked.value.gate == "PLAN" and parked.value.verdict == "episodes/ep03/plan.json"
-    assert "after 2 rounds" in parked.value.ask and "refusals in the log" in parked.value.ask
+    step.run(ctx)
+    assert len(writer.calls) == 5 and len(gate.commands) == 5
     assert not _plan(ctx).exists(), "a refused draft is not left where the next run would take it as written"
-    assert (ctx.home / "plan.refused.json").exists()
+    assert (ctx.home / step.plan_ladder.DEFERRED).exists()
+    assert not plan_verdict.verdict_path(_plan(ctx)).exists()
     logged = ctx.tracker.log_path.read_text(encoding="utf-8")
     assert "G-SCALE shot 4" in logged
 
 
-def test_an_existing_unsigned_plan_is_not_rewritten_only_parked(ctx, monkeypatch):
+def test_an_existing_unsigned_plan_is_not_rewritten_only_judged(ctx, monkeypatch):
     writer, gate = _wire(ctx, monkeypatch, (0, CLEAN_OUT))
     episode_home.write_plan(_plan(ctx), {**canned_plan(), "title": "Kept"})
-    with pytest.raises(Escalation):
-        step.run(ctx)
-    assert writer.calls == [] and gate.commands == []
+    step.run(ctx)
+    assert writer.calls == [] and len(gate.commands) == 1
     assert json.loads(_plan(ctx).read_text(encoding="utf-8"))["title"] == "Kept"
+    assert _verdict(ctx)["signed_by"] == "judge:plan@1"
 
 
 def test_rewrite_writes_a_new_plan_when_nothing_ran_downstream(ctx, monkeypatch):
     writer, _ = _wire(ctx, monkeypatch, (0, CLEAN_OUT))
     episode_home.write_plan(_plan(ctx), {**canned_plan(), "title": "Old"})
     ctx.extra = ["--rewrite"]
-    with pytest.raises(Escalation):
-        step.run(ctx)
+    step.run(ctx)
     assert len(writer.calls) == 1
     assert json.loads(_plan(ctx).read_text(encoding="utf-8"))["title"] == "The Yard"
+    assert plan_verdict.current(_plan(ctx))
 
 
 def test_a_plan_that_ran_downstream_is_never_rewritten(ctx, monkeypatch):
@@ -190,12 +210,12 @@ def test_a_plan_that_ran_downstream_is_never_rewritten(ctx, monkeypatch):
     assert json.loads(_plan(ctx).read_text(encoding="utf-8"))["title"] == "Ran"
 
 
-def test_a_signed_plan_runs_through_without_parking(ctx, monkeypatch):
-    writer, _ = _wire(ctx, monkeypatch, (0, CLEAN_OUT))
+def test_a_signed_plan_runs_through_without_a_second_judgement(ctx, monkeypatch):
+    writer, gate = _wire(ctx, monkeypatch, (0, CLEAN_OUT))
     episode_home.write_plan(_plan(ctx), canned_plan())
     plan_verdict.sign(_plan(ctx), "read")
     step.run(ctx)
-    assert writer.calls == []
+    assert writer.calls == [] and gate.commands == []
 
 
 def test_refusal_lines_keep_the_gate_text_and_drop_advisories_and_blanks():
@@ -211,11 +231,12 @@ def test_the_runner_skips_a_grandfathered_unit(ctx, monkeypatch):
     assert db.unit_status(ctx.conn, ctx.codex_id, "episode", "ep03") == {"02": "skipped"}
 
 
-def test_the_runner_records_the_plan_gate_as_escalated(ctx, monkeypatch):
+def test_the_runner_completes_the_plan_step_on_the_judges_signature(ctx, monkeypatch):
     from studio import step_runner
     _wire(ctx, monkeypatch, (0, CLEAN_OUT))
-    assert step_runner.run_steps(ctx, [step]) == "escalated"
-    assert db.unit_status(ctx.conn, ctx.codex_id, "episode", "ep03") == {"02": "escalated"}
+    assert step_runner.run_steps(ctx, [step]) == "completed"
+    assert db.unit_status(ctx.conn, ctx.codex_id, "episode", "ep03") == {"02": "completed"}
+    assert _verdict(ctx)["signed_by"] == "judge:plan@1"
 
 
 def test_help_prints_without_a_book(capsys):
@@ -224,12 +245,12 @@ def test_help_prints_without_a_book(capsys):
     assert "plan" in capsys.readouterr().out
 
 
-# ---- a draft the contract refuses is a refusal, not a crash (ep12, 2026-09-24) ----------
+# ---- a draft the contract refuses is a refusal, not a crash (2026-09-24) --------------
 
 class ContractBreaker(Writer):
     """First draft breaks the Episode contract (the agent's parse raises); then canned."""
 
-    def write(self, brief, refusals=None, usage=None):
+    def write(self, brief, refusals=None, usage=None, _agent=None):
         self.calls.append(refusals)
         if len(self.calls) == 1:
             Episode.model_validate({"number": "not a number"})
@@ -237,25 +258,29 @@ class ContractBreaker(Writer):
 
 
 def test_a_draft_the_contract_refuses_goes_back_to_the_writer(ctx, monkeypatch):
-    """ep12's first draft said 'slowly' on four shots; the contract raised inside the
-    agent's parse and killed the step before the improve loop could quote it back."""
+    """A first draft that breaks a contract rule raised inside the agent's parse and
+    killed the step before the improve loop could quote it back."""
     writer = ContractBreaker()
     monkeypatch.setattr(step, "episode_writer", writer)
+    monkeypatch.setattr(step.plan_reader, "read", Reader())
     ctx.capture = Capture((0, CLEAN_OUT))
-    with pytest.raises(Escalation):
-        step.run(ctx)
+    step.run(ctx)
     assert len(writer.calls) == 2 and writer.calls[0] is None
     assert any("number" in line for line in writer.calls[1])
-    assert _plan(ctx).exists()
+    assert _plan(ctx).exists() and plan_verdict.current(_plan(ctx))
 
 
 def test_every_refusal_so_far_goes_back_to_the_writer(ctx, monkeypatch):
-    """ep12: 'slowly' refused in round 0, 'crawl' in round 1, the style line in
-    round 2 -- each draft was written from scratch and saw only the last round's
-    refusals, so it traded one fault for another. The writer is shown them all."""
+    """Each draft is written from scratch: shown only the last round's refusals it
+    traded one fault for another.  The writer is shown them all."""
     writer, _ = _wire(ctx, monkeypatch, (1, "VERDICT      : REFUSED\n    G-A first\n"),
                       (1, "VERDICT      : REFUSED\n    G-B second\n"), (0, CLEAN_OUT))
-    with pytest.raises(Escalation):
-        step.run(ctx)
+    step.run(ctx)
     third = writer.calls[2]
     assert any("G-A first" in line for line in third) and any("G-B second" in line for line in third)
+
+
+def test_the_critics_faults_go_back_to_the_writer_as_gate_lines(ctx, monkeypatch):
+    writer, _ = _wire(ctx, monkeypatch, (0, CLEAN_OUT), reader=Reader(reading("no_answer")))
+    step.run(ctx)
+    assert writer.calls[1] and all(line.startswith("G-READER ") for line in writer.calls[1])
