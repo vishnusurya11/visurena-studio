@@ -195,8 +195,22 @@ def read_row(book_dir, row: dict, tools: Tools, must, acc: Reads) -> None:
         voice = voice_fault(book_dir, entity_of(where), where)
         if voice:
             acc.faults.append(voice)
-    acc.styles[where] = np.asarray(tools("style_embed")(picture), dtype=float)
+    if (style := style_of(picture, tools)) is not None:
+        acc.styles[where] = style
 
+
+
+def style_of(picture, tools: Tools):
+    """The style vector, or None when it cannot be measured: the embedding
+    workflow is a placeholder until a node emits one (first real run: ComfyUI
+    rejected the graph and the whole LOOK judge died on it), and a dead ask on
+    the shared GPU is a missing measure, never a crash.  A row without a style
+    is simply not compared; the calibrated rows stand."""
+    try:
+        vec = tools("style_embed")(picture)
+    except (RuntimeError, TimeoutError, ValueError) as why:
+        return None
+    return None if vec is None else np.asarray(vec, dtype=float)
 
 def read_bound(book_dir, row: dict, tools: Tools, acc: Reads) -> None:
     """A row already signed: read only what the new rows are compared against."""
@@ -211,7 +225,8 @@ def read_bound(book_dir, row: dict, tools: Tools, acc: Reads) -> None:
         vec = tools("embed")(picture)
         if vec is not None:
             acc.faces[where] = np.asarray(vec, dtype=float)
-    acc.styles[where] = np.asarray(tools("style_embed")(picture), dtype=float)
+    if (style := style_of(picture, tools)) is not None:
+        acc.styles[where] = style
 
 
 # ---- the pairwise rows -------------------------------------------------------------
