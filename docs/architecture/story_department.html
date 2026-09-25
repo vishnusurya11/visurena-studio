@@ -194,6 +194,63 @@ button.btn:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
 @media (prefers-reduced-motion:reduce){
   .sub .bar i,.progress i{transition:none}
 }
+
+/* ===== TABS ===== */
+.tabs{display:flex;gap:0;margin-top:22px;border-bottom:2px solid var(--ink)}
+.tabs button{font:inherit;font-family:"Barlow Condensed",sans-serif;font-size:18px;font-weight:600;letter-spacing:.02em;padding:8px 18px;border:1px solid var(--rule-2);border-bottom:0;background:var(--paper-2);color:var(--ink-2);cursor:pointer;margin-bottom:-2px}
+.tabs button[aria-selected="true"]{background:var(--ink);color:var(--paper);border-color:var(--ink)}
+.tabs button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.tabs .sub{font-family:"IBM Plex Mono",monospace;font-size:10px;letter-spacing:.08em;text-transform:uppercase;opacity:.75;margin-left:8px}
+
+/* ===== FUTURE: states ===== */
+.node.built{border-style:solid}
+.node.partial{border-style:dashed;border-color:var(--accent)}
+.node.missing{border-style:dotted;border-color:var(--ink-3);background:var(--paper)}
+.node.slot{border-style:dashed;border-color:var(--rule-2);background:transparent;color:var(--ink-3)}
+.node.slot::before{background:var(--rule-2)}
+.node.slot .n{color:var(--ink-3)}
+.node.div{width:170px}
+.node.div .n{font-size:18px}
+.node .st{font-family:"IBM Plex Mono",monospace;font-size:10px;letter-spacing:.06em;text-transform:uppercase;margin-top:5px}
+.st.built{color:var(--ok)}
+.st.partial{color:var(--accent)}
+.st.missing{color:var(--ink-3)}
+.st.slot{color:var(--ink-3)}
+.legend .sw{width:26px;height:14px;display:inline-block;border:1px solid var(--rule-2);background:var(--paper-2)}
+.legend .sw.partial{border:1px dashed var(--accent)}
+.legend .sw.missing{border:1px dotted var(--ink-3);background:var(--paper)}
+.legend .sw.slot{border:1px dashed var(--rule-2);background:transparent}
+
+/* ===== FUTURE: verdict table ===== */
+.tbl-wrap{overflow-x:auto;margin-top:14px}
+table.v{border-collapse:collapse;width:100%;min-width:640px;font-size:13px}
+table.v th{font-family:"IBM Plex Mono",monospace;font-size:10.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-3);text-align:left;padding:6px 8px;border-bottom:2px solid var(--ink)}
+table.v td{padding:8px;border-bottom:1px solid var(--rule);vertical-align:top;color:var(--ink-2)}
+table.v td:first-child{color:var(--ink);font-weight:500;width:22%}
+table.v td .lose{font-family:"IBM Plex Mono",monospace;font-size:10px;letter-spacing:.06em;text-transform:uppercase;color:var(--accent);border:1px solid var(--accent);padding:1px 5px;border-radius:2px;margin-right:6px;white-space:nowrap}
+table.v td .win{font-family:"IBM Plex Mono",monospace;font-size:10px;letter-spacing:.06em;text-transform:uppercase;color:var(--ok);border:1px solid var(--ok);padding:1px 5px;border-radius:2px;margin-right:6px;white-space:nowrap}
+table.v td .half{font-family:"IBM Plex Mono",monospace;font-size:10px;letter-spacing:.06em;text-transform:uppercase;color:var(--qc);border:1px solid var(--qc);padding:1px 5px;border-radius:2px;margin-right:6px;white-space:nowrap}
+table.v td code{white-space:nowrap}
+.two-col{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:18px;margin-top:14px}
+.two-col>div{min-width:0}
+.mini{border:1px solid var(--rule-2);background:var(--paper-2);padding:12px 14px}
+.mini h3{font-size:20px;font-weight:600}
+.mini p{margin:6px 0 0;color:var(--ink-2)}
+.mini ul{margin:8px 0 0;padding-left:18px;color:var(--ink-2)}
+.mini li{margin:3px 0}
+.pill{display:inline-block;font-family:"IBM Plex Mono",monospace;font-size:10px;letter-spacing:.06em;text-transform:uppercase;padding:1px 6px;border-radius:2px;border:1px solid var(--rule-2);color:var(--ink-3);margin-right:4px}
+.track .nd.owner rect{stroke:var(--qc)}
+.track .own{font-family:"IBM Plex Mono",monospace;font-size:9px;fill:var(--qc);letter-spacing:.06em}
+.track .lane-label.dist{fill:var(--think)}
+.track .lane-label.mkt{fill:var(--accent)}
+.track .nd.pre rect{}
+.track .dot.dist{fill:var(--think)}
+.track .dot.mkt{fill:var(--accent)}
+.sub.own{border-left:3px solid var(--qc)}
+.migr ol{margin:8px 0 0;padding-left:22px;color:var(--ink-2)}
+.migr li{margin:4px 0}
+.migr li b{color:var(--ink)}
+@media (max-width:820px){.two-col{grid-template-columns:1fr}}
 </style>
 </head>
 <body>
@@ -211,11 +268,14 @@ button.btn:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
   </div>
 
   <!-- ===== ORG CHART ===== -->
-  <section class="block">
+  
+  <nav class="tabs" role="tablist"><button role="tab" data-tab="current" aria-selected="true">Current architecture<span class="sub">built</span></button><button role="tab" data-tab="future" aria-selected="false">Future architecture<span class="sub">proposed</span></button></nav>
+  <div id="tab-current">
+<section class="block">
     <div class="head"><h2>Org chart</h2><p>Every box reports to the one above it. A step script is a unit head: it calls its agents in order and owns their output.</p></div>
     <div class="chart-tools">
-      <button class="btn" id="fitBtn" aria-pressed="true">Fit to width</button>
-      <button class="btn" id="fullBtn" aria-pressed="false">100 %</button>
+      <button class="btn" data-fit="fit" aria-pressed="true">Fit to width</button>
+      <button class="btn" data-fit="full" aria-pressed="false">100 %</button>
       <span>Drag sideways to scroll at 100 %.</span>
     </div>
 
@@ -323,29 +383,29 @@ button.btn:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
   <!-- ===== FLOW ===== -->
   <section class="block">
     <div class="head"><h2>A typical run</h2><p>One book, start to finish. Press play: the dot is the book, the panel shows who is working inside the current step, the log is what the step scripts print. Numbers are illustrative for a 14-chapter novel.</p></div>
-    <div class="flow">
+    <div class="flow" id="flow1">
       <div class="flow-top">
-        <button class="btn" id="play">Play</button>
-        <button class="btn" id="stepBtn">Step</button>
-        <button class="btn" id="reset">Restart</button>
+        <button class="btn" data-role="play">Play</button>
+        <button class="btn" data-role="step">Step</button>
+        <button class="btn" data-role="reset">Restart</button>
         <span style="color:var(--ink-3);font-size:12.5px">Speed</span>
         <button class="btn spd" data-s="1" aria-pressed="true">1×</button>
         <button class="btn spd" data-s="2" aria-pressed="false">2×</button>
         <button class="btn spd" data-s="4" aria-pressed="false">4×</button>
-        <span class="status" id="status"><b>ready</b> · 0 / 0</span>
+        <span class="status" data-role="status"><b>ready</b> · 0 / 0</span>
       </div>
-      <div class="progress"><i id="prog"></i></div>
-      <div class="track-scroll"><svg class="track" id="track" viewBox="0 0 1000 250" role="img" aria-label="Pipeline track: analysis steps 01 to 06, then screenplay steps 01 to 05"></svg></div>
+      <div class="progress"><i data-role="prog"></i></div>
+      <div class="track-scroll"><svg class="track" data-role="track" role="img" aria-label="Pipeline track: analysis steps 01 to 06, then screenplay steps 01 to 05"></svg></div>
       <div class="flow-body">
         <div class="inside">
-          <div class="eyebrow" id="inLane">Inside the step</div>
-          <h3 id="inName">Press play</h3>
-          <div class="why" id="inWhy">The run starts at Analysis 01 with the EPUB and ends with screenplay.json handed to the trailer and episode departments.</div>
-          <div class="subs" id="subs"></div>
+          <div class="eyebrow" data-role="lane">Inside the step</div>
+          <h3 data-role="name">Press play</h3>
+          <div class="why" data-role="why">The run starts at Analysis 01 with the EPUB and ends with screenplay.json handed to the trailer and episode departments.</div>
+          <div class="subs" data-role="subs"></div>
         </div>
         <div>
           <div class="eyebrow" style="margin-bottom:6px">Run log</div>
-          <div class="log" id="log"></div>
+          <div class="log" data-role="log"></div>
         </div>
       </div>
     </div>
@@ -381,16 +441,209 @@ button.btn:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
       <div><div class="n">3</div><div class="l">improve loops, max 2 rounds each</div></div>
     </div>
   </section>
+  </div>
+
+<div id="tab-future" hidden>
+
+  <p class="lede" style="margin-top:18px">Proposed, not decided. Five reports (two web researches, a production executive, an organisation designer, the codebase's own constraints) argued it out; a chair ruled each point. The shape is a <b>big studio from day one</b>: five divisions by function, one registry stage per format line inside Production, the IP as a data key. Episodes are the only line built; every other line has a defined empty slot and grows into it without a reorganisation. Full record: <code>docs/architecture/future_departments.md</code>; draft registry: <code>docs/architecture/stages_future.yaml</code>.</p>
+
+  <!-- verdicts -->
+  <section class="block">
+    <div class="head"><h2>The debate, ruled</h2><p>Where your framing lost, it says so and names the replacement.</p></div>
+    <div class="tbl-wrap"><table class="v">
+      <tr><th>Point</th><th>Your framing</th><th>Verdict</th></tr>
+      <tr><td>"Post-production"</td><td>One department: finishing + publishing + promotion</td><td><span class="lose">word loses</span><span class="win">list wins</span> Everything after the master leaves the format line, but as two divisions with different unit keys: <b>Distribution</b> (publish, analytics; per master × platform; irreversible; owns the catalogue) and <b>Marketing</b> (promo; per release; writes orders). The cut, mix and QC stay as the last steps of each production line, because picture is cut to the measured voice. Retire the word.</td></tr>
+      <tr><td>Trailer</td><td>Under promotion</td><td><span class="lose">placement loses</span><span class="win">purpose wins</span> A Production format line that Marketing orders. It has a 10-step DAG, a runner and event history; moving it renumbers stable ids and breaks ten tests. Same rule for shorts, cutdowns, key art: Marketing decides, Production or Distribution makes.</td></tr>
+      <tr><td>Promotion</td><td>A unit of post</td><td><span class="half">split</span> The decision (assets, dates, platforms, budget) is Marketing's step; the manufacture of anything that needs a render is a Production order; the shipping is Distribution. Marketing never touches a GPU or a platform API.</td></tr>
+      <tr><td>Owner gates</td><td>—</td><td><span class="win">ruled</span> Three classes (money, publish, taste), seven mechanical signatures today, a retirement rule that shrinks taste to three: LOOK once per book, MASTER, PUBLISH as policy. Money for credits and OVERRIDE never retire.</td></tr>
+      <tr><td>Organising axis</td><td>"A big studio with TV, movies, music, games, books"</td><td><span class="win">stands</span> Function on top (five divisions), one registry stage per format line inside Production, IP as the data key plus one owned record (<code>series.json</code> + catalogue). Every line names its steps from six words: plan, record, board, shoot, edit, qc. Never a department per book.</td></tr>
+      <tr><td>Research</td><td>One department, later</td><td><span class="lose">loses</span> Three things wear the word and each gets a slot now: <b>R&amp;D</b> (models, prompts, calibration) under Platform with its own experiments ledger; <b>Analytics</b> as a Distribution stage, read-only, and a view count may never move a gate threshold; <b>Development</b> (the slate: what to make next) at Studio level.</td></tr>
+      <tr><td>Unit of work</td><td>"A chapter can be a unit; it can expand"</td><td><span class="win">stands, mechanised</span> A <code>unit</code> column on the events table; each stage declares its own grammar: <code>ch04</code>, <code>ch04-05</code>, <code>scene_12</code>, <code>cue_03</code>, <code>&lt;sha8&gt;@youtube</code>. A season is the ordered unit list in <code>series.json</code>; a feature is one unit whose steps fan out per sequence.</td></tr>
+      <tr><td>The episode plan</td><td>—</td><td><span class="win">ruled</span> Production's first step, written by a registered <code>episode_writer</code> agent, stored as data under <code>library/&lt;book&gt;/episodes/&lt;unit&gt;/plan.json</code>. Never a <code>.py</code> in the code tree; the 18 plan scripts move under the library.</td></tr>
+      <tr><td>Who leads a department</td><td>—</td><td><span class="win">unanimous</span> A root runner, always. A skill is the owner's desk over it, with a command table generated from the registry. Episode and Shorts are led by skills today: the largest defect, and the first migration target.</td></tr>
+      <tr><td>Trailer and Shorts in the registry</td><td>—</td><td><span class="win">ruled</span> Own stages. Trailer untouched. Shorts registers as an honest empty slot until a Python client for its paid service and a credit ledger exist. The episode stage is named <code>episode</code>, not <code>production</code>: production is the division.</td></tr>
+    </table></div>
+  </section>
+
+  <!-- future org chart -->
+  <section class="block">
+    <div class="head"><h2>The studio, future shape</h2><p>Five divisions. Every box reports to the one above it; a box's border says how much of it exists.</p></div>
+    <div class="legend">
+      <span class="k"><span class="sw"></span> built and registered</span>
+      <span class="k"><span class="sw partial"></span> scripts exist, stage and runner missing</span>
+      <span class="k"><span class="sw missing"></span> missing</span>
+      <span class="k"><span class="sw slot"></span> defined empty slot</span>
+    </div>
+    <div class="chart-scroll"><div class="chart-fit" id="chart4"><div class="tree">
+      <ul>
+        <li><div class="node owner"><div class="n">Owner</div><div class="r">Three signatures: money, publish, taste. RENDER_HOLD is the brake.</div></div>
+          <ul>
+            <li><div class="node lead"><div class="n">Studio office</div><div class="r">Scheduler (head of production), the slate, decisions</div><div class="f">studio.py · series.json · DECISIONS.md</div><div class="st missing">scheduler missing</div></div>
+              <ul>
+                <li><div class="node lead div"><div class="n">Platform</div><div class="r">Shared services. No deliverable of its own.</div><div class="f">llm · GPU lease · ledger · approval · measures · notify · publish clients · R&amp;D ledger</div><div class="st partial">mostly built</div></div></li>
+                <li><div class="node lead div"><div class="n">Pre-production</div><div class="r">Asserts, invents, binds identity</div></div>
+                  <ul>
+                    <li><div class="node built"><div class="n">Analysis</div><div class="r">12 agents · unit: book</div><div class="f">analysis.py</div><div class="st built">built</div></div></li>
+                    <li><div class="node built"><div class="n">Screenplay</div><div class="r">4 agents · unit: book × target</div><div class="f">screenplay.py</div><div class="st built">built</div></div></li>
+                    <li><div class="node partial"><div class="n">Refs &amp; Cast</div><div class="r">Sheets, voices, the LOOK gate · unit: book × style</div><div class="f">refs.py</div><div class="st partial">scripts exist</div></div></li>
+                  </ul>
+                </li>
+                <li><div class="node lead div"><div class="n">Production</div><div class="r">One stage per format line. Ends at a master; never publishes.</div></div>
+                  <ul>
+                    <li><div class="node partial"><div class="n">Episode (TV)</div><div class="r">12 steps · unit: book × chapter(s)</div><div class="f">episode.py</div><div class="st partial">scripts exist</div></div></li>
+                    <li><div class="node built"><div class="n">Trailer</div><div class="r">10 steps · ordered by Marketing</div><div class="f">trailer.py</div><div class="st built">built</div></div></li>
+                    <li><div class="node missing"><div class="n">Shorts</div><div class="r">Paid line · unit: book × scene</div><div class="f">shorts.py</div><div class="st missing">skills only</div></div></li>
+                    <li><div class="node slot"><div class="n">Feature</div><div class="r">book × target · sequence → scene → shot</div><div class="st slot">slot</div></div></li>
+                    <li><div class="node slot"><div class="n">Song</div><div class="r">book × cue · section → bar</div><div class="st slot">slot</div></div></li>
+                    <li><div class="node slot"><div class="n">Audiobook</div><div class="r">book × chapter · paragraph → line</div><div class="st slot">slot</div></div></li>
+                    <li><div class="node slot"><div class="n">Game</div><div class="r">book × arc · level → screen · build replaces shoot</div><div class="st slot">slot</div></div></li>
+                    <li><div class="node slot"><div class="n">Book</div><div class="r">book × prose · chapter → scene</div><div class="st slot">slot</div></div></li>
+                  </ul>
+                </li>
+                <li><div class="node lead div"><div class="n">Distribution</div><div class="r">Per master × platform. Irreversible. Owns the catalogue.</div></div>
+                  <ul>
+                    <li><div class="node partial"><div class="n">Publish</div><div class="r">9 steps · adapters per platform, incl. our own</div><div class="f">publish.py</div><div class="st partial">upload exists</div></div></li>
+                    <li><div class="node missing"><div class="n">Analytics</div><div class="r">Read-only, scheduled · never moves a gate</div><div class="f">analytics.py</div><div class="st missing">missing</div></div></li>
+                  </ul>
+                </li>
+                <li><div class="node lead div"><div class="n">Marketing</div><div class="r">Per release. Decides; never renders; never posts itself.</div></div>
+                  <ul>
+                    <li><div class="node missing"><div class="n">Promo</div><div class="r">campaign → orders → key art → cutdowns → posts</div><div class="f">promo.py</div><div class="st missing">missing</div></div></li>
+                  </ul>
+                </li>
+              </ul>
+            </li>
+          </ul>
+        </li>
+      </ul>
+    </div></div></div>
+
+    <div class="two-col">
+      <div class="mini">
+        <h3>Unit of work, per stage</h3>
+        <p>The grain each stage runs at, and how it subdivides. A stage declares it in the registry; the events table carries it.</p>
+        <ul>
+          <li><b>analysis</b> · book → chapter → scene → paragraph</li>
+          <li><b>screenplay</b> · book × target → sequence → scene → element</li>
+          <li><b>refs</b> · book × style → entity (character, prop, voice)</li>
+          <li><b>episode</b> · book × chapter or range (<code>ch04-05</code>) → setup → shot → take</li>
+          <li><b>trailer</b> · book (<code>main</code>) → beat → take</li>
+          <li><b>shorts</b> · book × scene → shot → clip</li>
+          <li><b>publish</b> · master × platform (<code>&lt;sha8&gt;@youtube</code>) → deliverable bundle</li>
+          <li><b>promo</b> · release → order → asset → post</li>
+          <li><b>feature / song / audiobook / game / book</b> · defined above, in the slots</li>
+        </ul>
+      </div>
+      <div class="mini">
+        <h3>Owner gates, seven signatures</h3>
+        <p>Each is a file or a flag the ledger records. A sentence in chat is not a decision.</p>
+        <ul>
+          <li><b>MONEY</b> · any cost kind · <code>--approved=&lt;kind&gt;</code> · credits never retire</li>
+          <li><b>LOOK</b> · once per book × style · <code>refs/verdict.json</code></li>
+          <li><b>PLAN</b> · per unit, before anything is voiced or drawn · <code>plan.verdict.json</code></li>
+          <li><b>EYE</b> · board and takes · <code>eye_&lt;sha8&gt;.json</code>, the next step refuses without it</li>
+          <li><b>MASTER</b> · per master · <code>review/eye_&lt;sha8&gt;.json</code></li>
+          <li><b>PUBLISH</b> · every public write · <code>--approved=publish</code> · retirable per series × platform</li>
+          <li><b>OVERRIDE</b> · any waiver of a machine gate · never retires</li>
+        </ul>
+        <p><b>Retirement:</b> K consecutive clean approvals on one (format, gate), a line in <code>DECISIONS.md</code> with the count, expressed as a policy value the runner reads. Suggested K = 5.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- future flow -->
+  <section class="block">
+    <div class="head"><h2>A typical run, future shape</h2><p>One chapter unit, from bound cast to a promoted release. Gold-edged steps park the run for one of your signatures. Numbers are illustrative.</p></div>
+    <div class="flow" id="flow2">
+      <div class="flow-top">
+        <button class="btn" data-role="play">Play</button>
+        <button class="btn" data-role="step">Step</button>
+        <button class="btn" data-role="reset">Restart</button>
+        <span style="color:var(--ink-3);font-size:12.5px">Speed</span>
+        <button class="btn spd" data-s="1" aria-pressed="true">1×</button>
+        <button class="btn spd" data-s="2" aria-pressed="false">2×</button>
+        <button class="btn spd" data-s="4" aria-pressed="false">4×</button>
+        <span class="status" data-role="status"><b>ready</b> · 0 / 0</span>
+      </div>
+      <div class="progress"><i data-role="prog"></i></div>
+      <div class="track-scroll"><svg class="track" data-role="track" role="img" aria-label="Future pipeline: pre-production, the episode line, distribution, marketing"></svg></div>
+      <div class="flow-body">
+        <div class="inside">
+          <div class="eyebrow" data-role="lane">Inside the step</div>
+          <h3 data-role="name">Press play</h3>
+          <div class="why" data-role="why">The scheduler finds a chapter whose requirements are complete and launches the line. It parks on every owner gate, batches the escalations into one call sheet, and moves on.</div>
+          <div class="subs" data-role="subs"></div>
+        </div>
+        <div>
+          <div class="eyebrow" style="margin-bottom:6px">Run log</div>
+          <div class="log" data-role="log"></div>
+        </div>
+      </div>
+    </div>
+    <p class="flow-note">The trailer is shown being ordered by Marketing and made by Production: the same run, one loop later. Nothing in a production line publishes; nothing in Marketing renders or posts.</p>
+  </section>
+
+  <!-- migration -->
+  <section class="block">
+    <div class="head"><h2>Order of work</h2><p>Cheapest and highest leverage first. Nothing here adds a capability the scripts don't have; it adds the org.</p></div>
+    <div class="two-col">
+      <div class="mini migr">
+        <h3>Ten commits</h3>
+        <ol>
+          <li><b>Registry keys and the unit column</b> · <code>unit</code>, <code>requires</code>; <code>events.unit</code>; <code>db.STAGES</code> from the registry · ~150 lines, 5 tests</li>
+          <li><b><code>refs</code> stage</b> · runner from the trailer template; four wrappers; the LOOK verdict file · ~300 lines, 8 tests</li>
+          <li><b><code>episode</code> stage, wrappers only</b> · every eye = ESCALATE; the skill's command table generated from the registry · ~1,400 lines, ~30 tests</li>
+          <li><b>Distribution contracts</b> · FinishedFile, PublishManifest, CatalogEntry; a <code>local</code> model tier · ~200 lines</li>
+          <li><b><code>publish</code> stage</b> · intake, catalogue, in-repo notify; publishing leaves the format line · ~700 lines</li>
+          <li><b>The new agents</b> · episode_writer, cast_lister, metadata_writer, look_back, each behind a deterministic gate · ~600 lines</li>
+          <li><b><code>studio.py</code> scheduler</b> · the loop over <code>requires</code>; batched call sheet · ~250 lines</li>
+          <li><b><code>analytics</code>, <code>promo</code></b> · the loop closes: numbers feed the next brief · ~600 lines</li>
+          <li><b>Higgsfield client + credit ledger → <code>shorts</code></b> · the showrunner skill retires as manager · ~1,700 lines</li>
+          <li><b>Gate retirements</b> · one (format, gate) at a time, each a DECISIONS line with its count</li>
+        </ol>
+      </div>
+      <div class="mini">
+        <h3>What exists vs what's a slot</h3>
+        <ul>
+          <li><span class="pill">built</span> analysis, screenplay, trailer</li>
+          <li><span class="pill">scripts, no stage</span> refs, episode, publish</li>
+          <li><span class="pill">missing</span> analytics, promo, notify, scheduler, R&amp;D ledger</li>
+          <li><span class="pill">skills only</span> shorts — registered as an empty slot</li>
+          <li><span class="pill">slots</span> feature, song, audiobook, game, book; the own platform as an adapter inside publish, after the catalogue</li>
+        </ul>
+        <h3 style="margin-top:14px">Publishable on their own</h3>
+        <p>Standalone packages this design implies, each generalisable beyond this repo: <b>stepwise</b> (the step runner with credits-and-artefacts resume), <b>publish-manifest</b> (typed multi-platform publishing with a quota ledger), <b>higgsfield-client</b>, <b>list-then-judge</b> (the VLM content-gate pattern), <b>trait-card</b> (identity binding for reference sheets), <b>measured-timeline</b> (the animatic as code), <b>metre</b>, <b>title-record</b>, <b>registry-org-chart</b>.</p>
+      </div>
+    </div>
+  </section>
+
+</div>
+
 </div>
 
 <script>
 (function(){
+  var reduce=window.matchMedia&&window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  /* ---------- tabs ---------- */
+  var tabs=[].slice.call(document.querySelectorAll('.tabs button'));
+  var panes={current:document.getElementById('tab-current'),future:document.getElementById('tab-future')};
+  function showTab(name){
+    if(!panes[name])name='current';
+    tabs.forEach(function(b){b.setAttribute('aria-selected',b.dataset.tab===name?'true':'false');});
+    for(var k in panes){panes[k].hidden=(k!==name);}
+    try{localStorage.setItem('sd-tab',name);}catch(e){}
+    layout();
+  }
+  tabs.forEach(function(b){b.addEventListener('click',function(){showTab(b.dataset.tab);if(history.replaceState)history.replaceState(null,'','#'+b.dataset.tab);});});
+
   /* ---------- org chart fit ---------- */
   var fits=[].slice.call(document.querySelectorAll('.chart-fit'));
   var mode='fit';
   function layout(){
     fits.forEach(function(el){
       var tree=el.firstElementChild, parent=el.parentElement;
+      if(parent.offsetParent===null&&parent.clientWidth===0)return;
       el.style.transform='none'; el.style.height='auto';
       var w=tree.offsetWidth, h=tree.offsetHeight, avail=parent.clientWidth;
       var s=(mode==='fit')?Math.min(1,avail/w):1;
@@ -399,24 +652,149 @@ button.btn:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
       el.style.width=w+'px';
     });
   }
-  var fitBtn=document.getElementById('fitBtn'), fullBtn=document.getElementById('fullBtn');
-  fitBtn.addEventListener('click',function(){mode='fit';fitBtn.setAttribute('aria-pressed','true');fullBtn.setAttribute('aria-pressed','false');layout();});
-  fullBtn.addEventListener('click',function(){mode='full';fitBtn.setAttribute('aria-pressed','false');fullBtn.setAttribute('aria-pressed','true');layout();});
+  [].forEach.call(document.querySelectorAll('[data-fit]'),function(b){
+    b.addEventListener('click',function(){
+      mode=b.dataset.fit;
+      [].forEach.call(document.querySelectorAll('[data-fit]'),function(x){x.setAttribute('aria-pressed',x.dataset.fit===mode?'true':'false');});
+      layout();
+    });
+  });
   window.addEventListener('resize',layout);
   if(document.fonts&&document.fonts.ready){document.fonts.ready.then(layout);}
-  layout(); setTimeout(layout,300);
 
-  /* ---------- the run ---------- */
-  var reduce=window.matchMedia&&window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-  var STEPS=[
-    {lane:'A',id:'01',name:'Ingest',why:'EPUB in. Code establishes the (chapter, paragraph) grid every later claim anchors to.',subs:[
+  /* ---------- flow engine ---------- */
+  var NS='http://www.w3.org/2000/svg';
+  function el(n,a,txt){var e=document.createElementNS(NS,n);for(var k in a)e.setAttribute(k,a[k]);if(txt!=null)e.textContent=txt;return e;}
+
+  function buildFlow(root,cfg){
+    var q=function(r){return root.querySelector('[data-role="'+r+'"]');};
+    var svg=q('track'), subsEl=q('subs'), logEl=q('log'), statusEl=q('status'), prog=q('prog');
+    var inLane=q('lane'), inName=q('name'), inWhy=q('why'), playBtn=q('play');
+    var STEPS=cfg.steps, LANES=cfg.lanes;
+    var nodeW=cfg.nodeW||118, nodeH=46, gap=16, left=cfg.left||124, laneGap=cfg.laneGap||104, top=cfg.top||78;
+    var cols=0; var perLane={};
+    STEPS.forEach(function(s){perLane[s.lane]=perLane[s.lane]||0;s.col=perLane[s.lane]++;cols=Math.max(cols,perLane[s.lane]);});
+    var W=left+cols*(nodeW+gap)+12, H=top+(LANES.length-1)*laneGap+60;
+    svg.setAttribute('viewBox','0 0 '+W+' '+H);
+    svg.style.minWidth=Math.max(760,Math.round(W*0.78))+'px';
+    LANES.forEach(function(L,i){svg.appendChild(el('text',{x:16,y:top+i*laneGap+5,'class':'lane-label '+(L.cls||'')},L.label));});
+    var edges=[],loops={};
+    function edge(d,cls){var p=el('path',{d:d,'class':cls});svg.insertBefore(p,svg.firstChild);return p;}
+    STEPS.forEach(function(s){
+      var li=LANES.findIndex(function(L){return L.key===s.lane;});
+      var x=left+s.col*(nodeW+gap), y=top+li*laneGap-nodeH/2;
+      var g=el('g',{'class':'nd '+(LANES[li].cls||'')+(s.owner?' owner':'')});
+      g.appendChild(el('rect',{x:x,y:y,width:nodeW,height:nodeH,rx:3}));
+      g.appendChild(el('text',{x:x+9,y:y+15,'class':'id'},s.id));
+      g.appendChild(el('text',{x:x+9,y:y+34,'class':'nm'},s.name));
+      g.appendChild(el('text',{x:x+nodeW-16,y:y+15,'class':'tick'},'✓'));
+      if(s.owner)g.appendChild(el('text',{x:x+nodeW/2,y:y-6,'text-anchor':'middle','class':'own'},'OWNER · '+s.owner));
+      svg.appendChild(g);
+      s.cx=x+nodeW/2; s.cy=top+li*laneGap; s.x=x; s.y=y; s.g=g; s.li=li;
+    });
+    STEPS.forEach(function(s,i){
+      var n=STEPS[i+1]; if(!n)return;
+      if(s.li===n.li){edges.push(edge('M'+(s.x+nodeW)+' '+s.cy+' L'+n.x+' '+n.cy,'edge'));}
+      else{
+        var d='M'+s.cx+' '+(s.y+nodeH)+' V'+(s.cy+laneGap/2)+' H'+n.cx+' V'+n.y;
+        edges.push(edge(d,'edge'));
+        if(s.bridge)svg.appendChild(el('text',{x:(s.cx+n.cx)/2,y:s.cy+laneGap/2-5,'text-anchor':'middle',style:'font-family:IBM Plex Mono,monospace;font-size:10px;fill:var(--ink-3)'},s.bridge));
+      }
+    });
+    (cfg.loops||[]).forEach(function(i){
+      var s=STEPS[i]; var d='M'+(s.x+nodeW-14)+' '+s.y+' C'+(s.x+nodeW-14)+' '+(s.y-26)+' '+(s.x+14)+' '+(s.y-26)+' '+(s.x+14)+' '+s.y;
+      loops[i]=edge(d,'loop');
+      var a=el('path',{d:'M'+(s.x+10)+' '+(s.y-6)+' L'+(s.x+14)+' '+s.y+' L'+(s.x+19)+' '+(s.y-5),'class':'loop'});svg.insertBefore(a,svg.firstChild);loops[i+'a']=a;
+    });
+    var dot=el('circle',{r:7,'class':'dot',cx:STEPS[0].x,cy:STEPS[0].cy});svg.appendChild(dot);
+
+    var flat=[]; STEPS.forEach(function(s,si){if(s.done)return;s.subs.forEach(function(u,ui){flat.push({s:si,u:ui});});});
+    var pos=-1, playing=false, speed=1, raf=null;
+
+    function renderStep(si){
+      var s=STEPS[si], L=LANES[s.li];
+      inLane.textContent=L.label+' · '+s.id;
+      inName.textContent=s.name; inWhy.textContent=s.why;
+      subsEl.innerHTML='';
+      s.subs.forEach(function(u){
+        var d=document.createElement('div'); d.className='sub '+u.k;
+        d.innerHTML='<span class="m">'+u.m+'</span><span>'+u.t+'</span><span class="who">'+u.who+'</span><span class="bar"><i></i></span>';
+        subsEl.appendChild(d);
+      });
+    }
+    function moveDot(s,cb){
+      if(reduce){dot.setAttribute('cx',s.cx);dot.setAttribute('cy',s.cy);cb();return;}
+      var x0=+dot.getAttribute('cx'),y0=+dot.getAttribute('cy'),t0=performance.now(),dur=420/speed;
+      function f(t){var k=Math.min(1,(t-t0)/dur);k=k*k*(3-2*k);dot.setAttribute('cx',x0+(s.cx-x0)*k);dot.setAttribute('cy',y0+(s.cy-y0)*k);if(k<1)raf=requestAnimationFrame(f);else cb();}
+      raf=requestAnimationFrame(f);
+    }
+    function setStatus(txt){statusEl.innerHTML='<b>'+txt+'</b> · '+(pos+1)+' / '+flat.length;prog.style.width=((pos+1)/flat.length*100)+'%';}
+    function log(html){var d=document.createElement('div');var st=STEPS[flat[pos].s];d.innerHTML='<span class="t">'+st.id+'</span> '+html;logEl.appendChild(d);logEl.scrollTop=logEl.scrollHeight;}
+
+    function advance(then){
+      if(pos>=flat.length-1){finish();return;}
+      var prev=pos>=0?flat[pos]:null; pos++;
+      var cur=flat[pos], s=STEPS[cur.s], u=s.subs[cur.u];
+      var newStep=!prev||prev.s!==cur.s;
+      function go(){
+        if(newStep){
+          if(prev){var ps=STEPS[prev.s];ps.g.classList.remove('on');ps.g.classList.add('done');edges[prev.s]&&edges[prev.s].classList.add('done');}
+          s.g.classList.add('on'); dot.setAttribute('class','dot '+(LANES[s.li].cls||''));
+          renderStep(cur.s);
+        }
+        var rows=subsEl.children;
+        for(var i=0;i<rows.length;i++){rows[i].classList.remove('on');if(i<cur.u)rows[i].classList.add('done');}
+        var row=rows[cur.u]; row.classList.add('on'); row.scrollIntoView({block:'nearest'});
+        if(u.loop){var L=loops[cur.s];if(L){L.classList.add('on');loops[cur.s+'a'].classList.add('on');}}
+        log(u.log); setStatus(u.who==='code'?'code':u.who);
+        var bar=row.querySelector('.bar i'), dur=u.d*1000/speed, t0=performance.now();
+        function tick(t){var k=Math.min(1,(t-t0)/dur);bar.style.width=(k*100)+'%';if(k<1&&playing)raf=requestAnimationFrame(tick);else if(playing){row.classList.remove('on');row.classList.add('done');then&&then();}}
+        if(playing)raf=requestAnimationFrame(tick); else bar.style.width='100%';
+      }
+      if(newStep&&playing)moveDot(s,go); else if(newStep){dot.setAttribute('cx',s.cx);dot.setAttribute('cy',s.cy);go();} else go();
+    }
+    function loop(){if(!playing)return;advance(function(){if(playing)loop();});}
+    function finish(){playing=false;playBtn.textContent='Play';var last=STEPS[STEPS.length-1];last.g.classList.remove('on');last.g.classList.add('done');setStatus('done');inName.textContent=cfg.endName;inWhy.textContent=cfg.endWhy;}
+    function reset(){
+      playing=false;playBtn.textContent='Play';if(raf)cancelAnimationFrame(raf);
+      pos=-1;STEPS.forEach(function(s){s.g.classList.remove('on','done');if(s.done)s.g.classList.add('done');});edges.forEach(function(e,i){e.classList.remove('done');if(STEPS[i].done)e.classList.add('done');});
+      for(var k in loops)loops[k].classList.remove('on');
+      var first=STEPS[flat[0].s];
+      dot.setAttribute('cx',first.x);dot.setAttribute('cy',first.cy);dot.setAttribute('class','dot');
+      subsEl.innerHTML='';logEl.innerHTML='';inLane.textContent='Inside the step';inName.textContent='Press play';inWhy.textContent=cfg.startWhy;
+      statusEl.innerHTML='<b>ready</b> · 0 / '+flat.length;prog.style.width='0%';
+    }
+    playBtn.addEventListener('click',function(){
+      if(pos>=flat.length-1){reset();}
+      playing=!playing;playBtn.textContent=playing?'Pause':'Play';
+      if(playing){ if(pos>=0){var row=subsEl.children[flat[pos].u];row&&(row.classList.remove('on'),row.classList.add('done'));} loop(); }
+      else if(raf)cancelAnimationFrame(raf);
+    });
+    q('step').addEventListener('click',function(){
+      playing=false;playBtn.textContent='Play';if(raf)cancelAnimationFrame(raf);
+      if(pos>=flat.length-1){finish();return;}
+      advance();
+    });
+    q('reset').addEventListener('click',reset);
+    [].forEach.call(root.querySelectorAll('.spd'),function(b){b.addEventListener('click',function(){speed=+b.dataset.s;[].forEach.call(root.querySelectorAll('.spd'),function(x){x.setAttribute('aria-pressed',x===b?'true':'false');});});});
+    reset();
+  }
+
+  /* ---------- dataset: current run ---------- */
+  var CURRENT={
+    lanes:[{key:'A',label:'ANALYSIS',cls:''},{key:'S',label:'SCREENPLAY',cls:'invent'}],
+    left:110, laneGap:112, top:78, loops:[0,1,10],
+    startWhy:'The run starts at Analysis 01 with the EPUB and ends with screenplay.json handed to the trailer and episode departments.',
+    endName:'screenplay.json delivered', endWhy:'The trailer, episode and shorts departments read this file. Nothing in this stage generated a picture or a sound.',
+    steps:[
+    {lane:'A',id:'analysis/01',name:'Ingest',why:'EPUB in. Code establishes the (chapter, paragraph) grid every later claim anchors to.',subs:[
       {m:'01_01',t:'read_source: open the EPUB, parse spine + TOC',who:'code',k:'code',d:1.2,log:'ingest: 14 spine docs, TOC 16 entries'},
       {m:'01_02',t:'clean: drop cover/colophon, strip license boilerplate',who:'code',k:'code',d:1,log:'clean: 2 non-content docs dropped'},
       {m:'01_03',t:'chapterize: which headings are real divisions?',who:'book cartographer',k:'agent',d:2,log:'<span class="a">book_cartographer</span> → BookMap: 2 parts, 14 chapters, 1 preface'},
       {m:'01_04',t:'finalize: counts match TOC, contiguous numbering, sha256',who:'code',k:'code',d:1,log:'checks: 14/14 chapters, 1,204 paragraphs, book.json written'},
       {m:'01_05',t:'agent_check: was the parse clean?',who:'ingest validator',k:'qc',d:1.8,log:'<span class="q">ingest_validator</span> → Verdict ok, 0 issues'},
       {m:'01_06',t:'improve: skipped, nothing flagged',who:'code',k:'code',d:.5,log:'<span class="k">step 01 completed</span>'}]},
-    {lane:'A',id:'02',name:'Extract',why:'Per chapter: the 1st AD cuts the scenes, then four specialists work from those scene numbers, in this order.',subs:[
+    {lane:'A',id:'analysis/02',name:'Extract',why:'Per chapter: the 1st AD cuts the scenes, then four specialists work from those scene numbers, in this order.',subs:[
       {m:'02_01',t:'ch 1 · breakdown: cut where the camera could not keep rolling',who:'scene breakdown',k:'agent',d:2,log:'ch 1 breakdown… <span class="a">scene_breakdown</span> → 7 scenes'},
       {m:'02_02',t:'ch 1 · time evidence + continuity',who:'script supervisor',k:'agent',d:1.4,log:'ch 1 time… <span class="a">script_supervisor</span> → TimeReport'},
       {m:'02_02',t:'ch 1 · who is in each scene',who:'casting director',k:'agent',d:1.4,log:'ch 1 characters… <span class="a">casting_director</span> → CastReport'},
@@ -427,13 +805,13 @@ button.btn:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
       {m:'—',t:'chapters 2 – 14: the same crew, the same order',who:'crew ×13',k:'agent',d:3,log:'ch 2…14 (resume skips chapters already extracted) · 13 × 5 calls'},
       {m:'02_05',t:'audit: completeness + faithfulness per dimension',who:'extraction auditor',k:'qc',d:2,log:'<span class="q">extraction_auditor</span> → ch 5 dialogue: one exchange attributed to the wrong speaker'},
       {m:'02_06',t:'improve round 1: re-run ONLY (ch 5 × dialogue), reassemble, re-check',who:'dialogue editor',k:'agent',d:1.8,loop:true,log:'improve: <span class="a">dialogue_editor</span> ch 5 re-run → re-check ok · <span class="k">step 02 completed</span> (round 1 of max 2)'}]},
-    {lane:'A',id:'03',name:'Standardize',why:'Surface forms become canonical ids with aliases and map coordinates. Never re-reads the book.',subs:[
+    {lane:'A',id:'analysis/03',name:'Standardize',why:'Surface forms become canonical ids with aliases and map coordinates. Never re-reads the book.',subs:[
       {m:'03_01',t:'collect every character / location surface form',who:'code',k:'code',d:.8,log:'collect: 118 character forms, 52 location forms'},
       {m:'03_02',t:'resolve characters: "the detective", "my companion", "Mr. …" → one id',who:'entity resolver',k:'agent',d:2,log:'<span class="a">entity_resolver</span> → CharacterRegistry: 23 canonical, 118 aliases'},
       {m:'03_02',t:'resolve locations, with lat/lon',who:'entity resolver',k:'agent',d:1.6,log:'<span class="a">entity_resolver</span> → LocationRegistry: 24 places, 24 geocoded'},
       {m:'03_03',t:'remap every scene to canonical ids',who:'code',k:'code',d:.7,log:'scenes.json: 92 scenes tagged'},
       {m:'03_04',t:'coverage + coordinate + orphan-id checks',who:'code',k:'code',d:.6,log:'checks pass · <span class="k">step 03 completed</span>'}]},
-    {lane:'A',id:'04',name:'Timeline',why:'Code solves story time into worldlines. Two agents place what the solver cannot.',subs:[
+    {lane:'A',id:'analysis/04',name:'Timeline',why:'Code solves story time into worldlines. Two agents place what the solver cannot.',subs:[
       {m:'04_01',t:'partition: main frame vs embedded flashback',who:'code',k:'code',d:.7,log:'2 narrative tracks'},
       {m:'04_02',t:'day axis: merge per-chapter story days',who:'code',k:'code',d:.7,log:'day axis: 31 story days'},
       {m:'04_03',t:'worldlines per character',who:'code',k:'code',d:.8,log:'worldlines: 23 characters'},
@@ -441,156 +819,150 @@ button.btn:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
       {m:'04_06',t:'3 scenes have no place or hour: place them from neighbours',who:'gap filler',k:'agent',d:2,log:'<span class="a">gap_filler</span> ×3 → Placement (inferred)'},
       {m:'04',t:'1 span crosses several places: is it a route?',who:'journey tracer',k:'agent',d:1.4,log:'<span class="a">journey_tracer</span> → Journey, 4 legs'},
       {m:'04_05',t:'emit timeline.json',who:'code',k:'code',d:.5,log:'timeline.json · <span class="k">step 04 completed</span>'}]},
-    {lane:'A',id:'05',name:'Consolidate',why:'One file per character and per place, with evolution over the story: the building blocks for voice, image and song.',subs:[
+    {lane:'A',id:'analysis/05',name:'Consolidate',why:'One file per character and per place, with evolution over the story: the building blocks for voice, image and song.',subs:[
       {m:'05_01',t:'gather per entity: journey, state changes, quotes, companions',who:'code',k:'code',d:.8,log:'dossiers: 23 characters, 24 locations'},
       {m:'05_02',t:'profiles from the dossier only, never the book',who:'profile writer',k:'agent',d:3,log:'<span class="a">profile_writer</span> ×47 → CharacterProfile / LocationProfile'},
       {m:'05_03',t:'emit characters/<id>.json, locations/<id>.json',who:'code',k:'code',d:.5,log:'47 files written'},
       {m:'05_04',t:'every entity has a non-empty journey',who:'code',k:'code',d:.5,log:'checks pass · <span class="k">step 05 completed</span>'}]},
-    {lane:'A',id:'06',name:'Verify',why:'Whole-chain QC, code only, zero cost. Proves the acceptance test is answerable.',subs:[
+    {lane:'A',id:'analysis/06',name:'Verify',why:'Whole-chain QC, code only, zero cost. Proves the acceptance test is answerable.',bridge:'analysis complete → one analysis feeds many screenplays',subs:[
       {m:'06_01',t:'integrity: every artifact present, counts agree',who:'code',k:'code',d:.6,log:'integrity ok'},
       {m:'06_02',t:'coverage: resolution rates, every location geocoded',who:'code',k:'code',d:.6,log:'coverage: scenes 100 %, places 100 %'},
       {m:'06_03',t:'timeline: worldline queryable per story day',who:'code',k:'code',d:.6,log:'queryable: 31/31 days'},
       {m:'06_04',t:'qc_report.json + verdict',who:'code',k:'code',d:.6,log:'<span class="k">analysis complete</span> — the book is a set of facts now'}]},
-    {lane:'S',id:'01',name:'Dossier',why:'Code joins what analysis scattered into one record per source scene. Shared by every target of this book.',subs:[
+    {lane:'S',id:'screenplay/01',name:'Dossier',why:'Code joins what analysis scattered into one record per source scene. Shared by every target of this book.',subs:[
       {m:'01_01',t:'gather the six analysis families, hash them',who:'code',k:'code',d:.7,log:'<span class="v">screenplay</span> dossier: input_sha256 computed'},
       {m:'01_02',t:'join: names → ids, attach int/ext, dialogue, events, pov',who:'code',k:'code',d:.9,log:'92 scenes joined'},
       {m:'01_03',t:'checks: every scene has int_ext, place, DAY|NIGHT',who:'code',k:'code',d:.6,log:'checks pass (warn: 3 speakers lack a voice note)'},
       {m:'01_04',t:'emit dossier.json',who:'code',k:'code',d:.4,log:'dossier.json · <span class="k">step 01 completed</span>'}]},
-    {lane:'S',id:'02',name:'Plan',why:'What survives and in what order. One reasoning call per target; every source scene is either in a beat or listed as omitted with a reason.',subs:[
+    {lane:'S',id:'screenplay/02',name:'Plan',why:'What survives and in what order. One reasoning call per target; every source scene is either in a beat or listed as omitted with a reason.',subs:[
       {m:'02_01',t:'brief: target config + a one-line-per-scene index',who:'code',k:'code',d:.7,log:'brief: 92 lines, ~5k tokens'},
       {m:'02_02',t:'select: group scenes into sequences; decide what exists',who:'story editor',k:'think',d:3,log:'<span class="v">story_editor</span> (reasoning) → ScreenplayPlan: 22 beats, 16 scenes omitted with reasons'},
       {m:'02_03',t:'checks: every beat exists, roster ⊂ registry, nothing silently dropped',who:'code',k:'code',d:.7,log:'checks: 92/92 scenes accounted for'},
       {m:'02_04',t:'emit plan.json + source fingerprint',who:'code',k:'code',d:.4,log:'plan.json · <span class="k">step 02 completed</span>'}]},
-    {lane:'S',id:'03',name:'Draft',why:'The paid work. Two calls per beat, in order. Each scene file is written the moment it exists, so a crash keeps everything before it.',subs:[
+    {lane:'S',id:'screenplay/03',name:'Draft',why:'The paid work. Two calls per beat, in order. Each scene file is written the moment it exists, so a crash keeps everything before it.',subs:[
       {m:'03_01',t:'beat 1 · write: action + dialogue, provenance on every line',who:'screenwriter',k:'think',d:2.2,log:'beat 1 <span class="v">screenwriter</span> (reasoning) → SceneDraft, 38 elements'},
       {m:'03_02',t:'beat 1 · shoot: camera on the frozen stream',who:'shot designer',k:'agent',d:1.4,log:'beat 1 <span class="a">shot_designer</span> → ShotPlan, 11 shots'},
       {m:'03_03',t:'beat 1 · assemble: sluglines, CONT’D, page eighths',who:'code',k:'code',d:.6,log:'scenes/sc_0001.json written'},
       {m:'—',t:'beats 2 – 22: write, shoot, assemble',who:'×21',k:'think',d:3.5,log:'beats 2…22 · 21 × 2 calls · every file saved as it lands'},
       {m:'—',t:'scene numbering across the whole draft',who:'code',k:'code',d:.5,log:'22 scenes numbered · <span class="k">step 03 completed</span>'}]},
-    {lane:'S',id:'04',name:'Render',why:'Code, byte-stable, free. screenplay.json is THE artifact; Fountain and PDF are rendered from it, never parsed back.',subs:[
+    {lane:'S',id:'screenplay/04',name:'Render',why:'Code, byte-stable, free. screenplay.json is THE artifact; Fountain and PDF are rendered from it, never parsed back.',subs:[
       {m:'04_01',t:'screenplay.json',who:'code',k:'code',d:.5,log:'screenplay.json'},
       {m:'04_02',t:'screenplay.fountain, rendered from the json',who:'code',k:'code',d:.5,log:'screenplay.fountain'},
       {m:'04_03',t:'screenplay.pdf via screenplain',who:'code',k:'code',d:.7,log:'screenplay.pdf, 27 pages'},
       {m:'04_04',t:'elements.json: flat shot list for the video stage',who:'code',k:'code',d:.4,log:'elements.json: 243 shots'},
       {m:'04_05',t:'round-trip lint: parse our own output, assert the typing',who:'code',k:'code',d:.7,log:'lint: 0 misparsed lines, 24 min vs 22–33 target · <span class="k">step 04 completed</span>'}]},
-    {lane:'S',id:'05',name:'Verify',why:'Deterministic guards first; one agent over a 3-scene sample second. It checks contradiction, never difference.',subs:[
+    {lane:'S',id:'screenplay/05',name:'Verify',why:'Deterministic guards first; one agent over a 3-scene sample second. It checks contradiction, never difference.',subs:[
       {m:'05_01',t:'guards G1–G4: coordinates, roster, place-and-time, verbatim claims',who:'code',k:'code',d:1,log:'guards: 2 verbatim claims downgraded to adapted (counts, never fails)'},
       {m:'05_02',t:'audit K=3 sampled scenes against their paragraphs',who:'adaptation auditor',k:'qc',d:2.2,log:'<span class="q">adaptation_auditor</span> ×3 → 1 issue, non-blocking'},
       {m:'05_03',t:'improve: no blocking findings, skipped',who:'code',k:'code',d:.5,log:'improve: 0 rounds'},
       {m:'05_04',t:'qc_report.json',who:'code',k:'code',d:.6,log:'<span class="k">screenplay complete</span> → hands off to trailer, episode, shorts'}]}
-  ];
+  ]};
 
-  /* svg track */
-  var svg=document.getElementById('track'), NS='http://www.w3.org/2000/svg';
-  function el(n,a,txt){var e=document.createElementNS(NS,n);for(var k in a)e.setAttribute(k,a[k]);if(txt!=null)e.textContent=txt;return e;}
-  var W=1000, laneY={A:78,S:190}, nodeW=118, nodeH=46, gap=16, left=110;
-  var nodes=[];
-  svg.appendChild(el('text',{x:16,y:laneY.A+5,'class':'lane-label'},'ANALYSIS'));
-  svg.appendChild(el('text',{x:16,y:laneY.S+5,'class':'lane-label invent'},'SCREENPLAY'));
-  var edges=[];
-  STEPS.forEach(function(s,i){
-    var idx=(s.lane==='A')?i:i-6, x=left+idx*(nodeW+gap), y=laneY[s.lane]-nodeH/2;
-    var g=el('g',{'class':'nd'+(s.lane==='S'?' invent':'')});
-    g.appendChild(el('rect',{x:x,y:y,width:nodeW,height:nodeH,rx:3}));
-    g.appendChild(el('text',{x:x+9,y:y+15,'class':'id'},(s.lane==='A'?'analysis/':'screenplay/')+s.id));
-    g.appendChild(el('text',{x:x+9,y:y+34,'class':'nm'},s.name));
-    g.appendChild(el('text',{x:x+nodeW-16,y:y+15,'class':'tick'},'✓'));
-    svg.appendChild(g);
-    s.cx=x+nodeW/2; s.cy=laneY[s.lane]; s.x=x; s.y=y; s.g=g;
-    nodes.push(g);
-  });
-  function edge(d,cls){var p=el('path',{d:d,'class':cls});svg.insertBefore(p,svg.firstChild);return p;}
-  STEPS.forEach(function(s,i){
-    var n=STEPS[i+1]; if(!n)return;
-    if(s.lane===n.lane){edges.push(edge('M'+(s.x+nodeW)+' '+s.cy+' L'+n.x+' '+n.cy,'edge'));}
-    else{ /* A06 -> S01: down and back to the left */
-      var d='M'+s.cx+' '+(s.y+nodeH)+' V'+(s.cy+56)+' H'+n.cx+' V'+n.y;
-      edges.push(edge(d,'edge'));
-      svg.appendChild(el('text',{x:(s.cx+n.cx)/2,y:s.cy+50,'text-anchor':'middle','class':'id',style:'font-family:IBM Plex Mono,monospace;font-size:10px;fill:var(--ink-3)'},'analysis complete → one analysis feeds many screenplays'));
-    }
-  });
-  /* improve loops: 01, 02 (analysis), 05 (screenplay) */
-  var loops={};
-  [0,1,10].forEach(function(i){
-    var s=STEPS[i]; var d='M'+(s.x+nodeW-14)+' '+s.y+' C'+(s.x+nodeW-14)+' '+(s.y-26)+' '+(s.x+14)+' '+(s.y-26)+' '+(s.x+14)+' '+s.y;
-    loops[i]=edge(d,'loop');
-    var a=el('path',{d:'M'+(s.x+10)+' '+(s.y-6)+' L'+(s.x+14)+' '+s.y+' L'+(s.x+19)+' '+(s.y-5),'class':'loop'});svg.insertBefore(a,svg.firstChild);loops[i+'a']=a;
-  });
-  var dot=el('circle',{r:7,'class':'dot',cx:STEPS[0].x,cy:STEPS[0].cy});svg.appendChild(dot);
+  /* ---------- dataset: future run ---------- */
+  var O=function(t){return '<span class="q">OWNER</span> '+t;};
+  var FUTURE={
+    lanes:[{key:'P',label:'PRE-PRODUCTION',cls:''},{key:'E',label:'PRODUCTION · episode',cls:'invent'},{key:'D',label:'DISTRIBUTION',cls:'dist'},{key:'M',label:'MARKETING',cls:'mkt'}],
+    left:150, laneGap:100, top:70, nodeW:104, loops:[3,6,10,11],
+    startWhy:'The scheduler finds a chapter whose requirements are complete and launches the line. It parks on every owner gate, batches the escalations into one call sheet, and moves on.',
+    endName:'Release promoted; a trailer ordered', endWhy:'The order row becomes a Production unit on the trailer line, which ends at its own master and goes through the same Distribution steps. The loop closes when analytics reads the numbers into the next campaign brief.',
+    steps:[
+    {lane:'P',id:'analysis',name:'Analysis',done:true,subs:[]},
+    {lane:'P',id:'screenplay',name:'Screenplay',done:true,subs:[]},
+    {lane:'P',id:'refs',name:'Refs & Cast',owner:'LOOK',why:'The reference bible: one sheet per character and key prop, one voice per speaker, per book × style. The only writer of refs.json. Run just-in-time when a plan binds a new entity.',bridge:'refs/04 complete → the line may start',subs:[
+      {m:'01',t:'canon: which entities this book binds; one row per character',who:'casting director',k:'agent',d:1.4,log:'<span class="a">casting_director</span> → CastList · code writes 6 refs.json rows'},
+      {m:'02',t:'sheets: draw on the local image model; trait card; look-back against the prompt',who:'trait reader · look back',k:'agent',d:2.6,log:'sheets ×6 · <span class="a">trait_reader</span>: every new face differs in ≥3 traits · <span class="a">look_back</span>: 1 redraw (defining state moved first)'},
+      {m:'03',t:'voices: a register nobody else holds; pairwise similarity wall',who:'voice director',k:'agent',d:1.8,log:'<span class="a">voice_director</span> ×3 → VoiceDesign · similarity 0.42 max, under the wall'},
+      {m:'04',t:'verdict: ESCALATE — LOOK, once per book × style',who:'owner',k:'own',d:1.6,log:O('refs/verdict.json bound to pack sha · APPROVE')+' · <span class="k">refs complete</span>'}]},
+    {lane:'E',id:'episode/01',name:'Bind',why:'This unit’s cast. Rows stamped with the unit; a character with no refs row parks the unit and orders refs for it.',subs:[
+      {m:'01_01',t:'cast for the unit’s scenes',who:'cast lister',k:'agent',d:1.2,log:'unit <b>ch04</b> · <span class="a">cast_lister</span> → 4 characters, all in the registry'},
+      {m:'01_02',t:'stamp the bound rows',who:'code',k:'code',d:.5,log:'refs.json rows stamped ch04 · <span class="k">bind completed</span>'}]},
+    {lane:'E',id:'episode/02',name:'Plan',owner:'PLAN',why:'The contract, gated before anything is voiced or drawn. plan.json is data under the unit folder; no plan lives in the code tree.',subs:[
+      {m:'02_01',t:'brief: analysis rows + screenplay elements + bound rows + places + camera catalog + dq rules',who:'code',k:'code',d:.8,log:'brief assembled: 9 scenes, 4 bound rows, 3 places'},
+      {m:'02_02',t:'write the Episode: setups, shots, cells, camera moves, lines',who:'episode writer',k:'think',d:3,log:'<span class="v">episode_writer</span> (reasoning, local) → Episode: 6 setups, 23 shots, 2 spoken lines'},
+      {m:'02_03',t:'checks: plan_check + cell gates + take-path lint in one pass',who:'code',k:'code',d:1,log:'checks: 2 refusals (a prompt over length; a hat worn and held)'},
+      {m:'02_04',t:'improve round 1: refusals quoted back to the writer',who:'episode writer',k:'think',d:1.8,loop:true,log:'<span class="v">episode_writer</span> round 1 → 0 refusals'},
+      {m:'02_05',t:'lock: write plan.json through write_plan; ESCALATE — PLAN',who:'owner',k:'own',d:1.6,log:O('plan.verdict.json bound to plan sha · APPROVE')+' · <span class="k">plan completed</span>'}]},
+    {lane:'E',id:'episode/03',name:'Places',why:'Each setup’s location and view at this unit’s hour, from its own described words. A recurring place is never pinned to one picture.',subs:[
+      {m:'03_01',t:'draw every setup’s place picture',who:'code · local GPU',k:'code',d:1.8,log:'places ×6 drawn (local image model)'},
+      {m:'03_02',t:'look-back: landmark and hour present?',who:'look back',k:'agent',d:1.2,log:'<span class="a">look_back</span> ×6 → 6 ok'}]},
+    {lane:'E',id:'episode/04',name:'Record',why:'Every line in its character’s voice, measured and listened to. Audio first.',subs:[
+      {m:'04_01',t:'say: local TTS per line; seconds measured from the file',who:'code · local TTS',k:'code',d:1.6,log:'lines ×14 · 148.2 s measured'},
+      {m:'04_02',t:'listen: read each clip back; re-roll once; refuse',who:'listener',k:'qc',d:1.4,log:'<span class="q">listener</span> (Whisper) → 13/14 word-perfect · 1 re-roll ok'},
+      {m:'04_03',t:'spread: one speaker, one voice across the unit',who:'code',k:'code',d:.5,log:'speaker spread ok · <span class="k">record completed</span>'}]},
+    {lane:'E',id:'episode/05',name:'Timeline',why:'The animatic. Every shot’s seconds derive from the measured voice; placed.json is fingerprinted to the plan and the voice.',subs:[
+      {m:'05_01',t:'respot cuts on the measured grid',who:'code',k:'code',d:.6,log:'23 cuts respotted'},
+      {m:'05_02',t:'place inside the band; refuse a line off its shot’s start',who:'code',k:'code',d:.6,log:'placed.json 152.0 s, inside 120–180 · <span class="k">timeline completed</span>'}]},
+    {lane:'E',id:'episode/06',name:'Prompts',why:'Every take prompt built and linted for $0 with no GPU, before any grid.',subs:[
+      {m:'06',t:'build + lint: length per block, style line, banned props, no last frame',who:'code',k:'code',d:.9,log:'23 prompts · lint 0 refusals · <span class="k">prompts completed</span>'}]},
+    {lane:'E',id:'episode/07',name:'Board',why:'Storyboard grids on the local image model from the plan’s prose, up to three references: cast sheets first, the setup’s place last.',subs:[
+      {m:'07_01',t:'layout by shot size: cols × rows = shots',who:'code',k:'code',d:.5,log:'6 setups → 4 grids 2×2, 2 grids 1×1'},
+      {m:'07_02',t:'draw; manifest written after the render',who:'code · local GPU',k:'code',d:2.4,log:'grids ×6 drawn · manifests written'}]},
+    {lane:'E',id:'episode/08',name:'Panels',owner:'EYE',why:'One panel per shot, two machine gates, then an eye. The takes refuse without all three verdicts.',subs:[
+      {m:'08_01',t:'cut panels between measured gutters, crop square',who:'code',k:'code',d:.7,log:'23 panels cut'},
+      {m:'08_02',t:'dq: people vs faces, missing face, sharpness, ink, stacked',who:'code',k:'code',d:.9,log:'panel dq: 22 pass, 1 fail (stacked)'},
+      {m:'08_03',t:'content: the reader lists, shown no plan; code judges',who:'panel reader',k:'qc',d:1.8,log:'<span class="q">panel_reader</span> ×23 → 1 mismatch (an extra person)'},
+      {m:'08_06',t:'improve: the failed grid superseded and redrawn',who:'code · local GPU',k:'code',d:1.4,loop:true,log:'1 grid redrawn (seed bump) → dq pass, content pass'},
+      {m:'08_04',t:'contact sheet of every panel',who:'code',k:'code',d:.5,log:'storyboard/contact.png'},
+      {m:'08_05',t:'ESCALATE — EYE: pass / fault named / cannot tell',who:'owner',k:'own',d:1.6,log:O('storyboard/eye_3f9a1c2d.json · pass')+' · <span class="k">panels completed</span>'}]},
+    {lane:'E',id:'episode/09',name:'Shoot',owner:'EYE',why:'The slow step. Takes on the local video model, staged from the panel, the sheets the shot’s faces need and the line’s wav. GPU lease: one GPU, one stage.',subs:[
+      {m:'09_01',t:'round: every live shot’s next take, model resident',who:'code · local GPU',k:'code',d:3,log:'approval kind <b>render</b> ok · round 1: 23 takes'},
+      {m:'09_02',t:'dq: frozen start, churn, zoom, look, lip-sync, held, jump',who:'code',k:'code',d:1,log:'take dq: 20 pass, 3 fail (2 frozen, 1 held)'},
+      {m:'09_03',t:'content: three frames each, read alone',who:'panel reader',k:'qc',d:1.6,log:'<span class="q">panel_reader</span> ×23 → 23 match'},
+      {m:'09_05',t:'retake ladder: cure matched to cause; one batched round',who:'code · local GPU',k:'code',d:2,loop:true,log:'retakes: 2 seeds, 1 move-type change → 3/3 pass'},
+      {m:'09_04',t:'strip of every take; ESCALATE — EYE',who:'owner',k:'own',d:1.6,log:O('takes/r2v/eye_7b21e0aa.json · pass')+' · <span class="k">shoot completed</span>'}]},
+    {lane:'E',id:'episode/10',name:'Edit',why:'Title card, measured bed, cut, mix. Picture cut to the measured voice. master_iterN, never overwriting.',subs:[
+      {m:'10_01',t:'title: series base once per book; unit lettering read back by OCR',who:'code · local GPU',k:'code',d:1,log:'title card ok (OCR read-back)'},
+      {m:'10_02',t:'bed: tone spans → local music; metre measured and ranked',who:'code · local GPU',k:'code',d:1.6,log:'bed: 4 seeds, best fitness 0.81'},
+      {m:'10_03',t:'cut: takes trimmed to placed.json; lines at their at; mix; captions',who:'code',k:'code',d:1.2,log:'cut/master_iter1.mp4 · 152.0 s'},
+      {m:'10_04',t:'sound: ambience and spot effects if the format asks',who:'code',k:'code',d:.4,log:'sound: skipped (format does not ask) · <span class="k">edit completed</span>'}]},
+    {lane:'E',id:'episode/11',name:'QC',owner:'MASTER',why:'Measure the delivered master, never the intention. Stamps the sha8 it measured.',subs:[
+      {m:'11_01',t:'measure: loudness, every cut, every line heard, silent-gap wall, title present',who:'code',k:'code',d:1.2,log:'qc: 23/23 cuts, 14/14 lines heard, -16.1 LUFS, no gap'},
+      {m:'11_03',t:'ESCALATE — MASTER: the eye on the master',who:'owner',k:'own',d:1.6,log:O('review/eye_9c04d1f7.json · pass')},
+      {m:'11_04',t:'dossier: one page of every input, prompt, picture, take, verdict',who:'code',k:'code',d:.6,log:'dossier.html · <span class="k">qc completed</span>'}]},
+    {lane:'E',id:'episode/12',name:'Deliver',why:'manifest.json beside the master; the full path printed first; notify through the platform. Never publishes.',bridge:'a finished file → Distribution',subs:[
+      {m:'12',t:'manifest + notify',who:'code',k:'code',d:.8,log:'manifest.json · notify → owner channel · <span class="k">episode ch04 delivered</span>'}]},
+    {lane:'D',id:'publish/01',name:'Intake',why:'The finished-file registry: which master, its sha8, its qc, its master eye, its kind, its series position.',subs:[
+      {m:'01',t:'register the master; refuse if qc or eye is about other bytes',who:'code',k:'code',d:.7,log:'<span class="v">publish</span> unit <b>9c04d1f7@youtube</b> · qc + eye match sha8'}]},
+    {lane:'D',id:'publish/02',name:'Versions',why:'From the master, each platform’s bundle: aspect versions, platform loudness, sidecar captions.',subs:[
+      {m:'02',t:'aspect versions: where to crop so the subject stays',who:'subject keeper',k:'agent',d:1.4,log:'<span class="a">subject_keeper</span> → CropPath · 1:1 master, 9:16 version, captions.vtt'}]},
+    {lane:'D',id:'publish/03',name:'Metadata',why:'Title from the series record (code); description, tags and chapter markers drafted inside the platform’s walls; the synthetic declaration read, never generated.',subs:[
+      {m:'03',t:'draft description, tags, chapters; lint',who:'metadata writer',k:'agent',d:1.6,log:'<span class="a">metadata_writer</span> → PlatformMetadata · lint ok · synthetic: true (from series.json)'}]},
+    {lane:'D',id:'publish/04',name:'Art',why:'Thumbnail from the master’s own frames plus the series lettering; OCR read-back; poster still for the catalogue.',subs:[
+      {m:'04',t:'pick one frame and at most three words',who:'thumbnail director',k:'agent',d:1.4,log:'<span class="a">thumbnail_director</span> → ThumbnailBrief · drawn locally · OCR ok'}]},
+    {lane:'D',id:'publish/05',name:'Upload',why:'Private insert, machine-gated; the ledger row written before the call; thumbnail, captions, playlist set. One adapter per platform, our own included.',subs:[
+      {m:'05',t:'private upload via the youtube adapter',who:'code',k:'code',d:1.4,log:'approval kind <b>publish</b> ok · private id written to uploads.jsonl'}]},
+    {lane:'D',id:'publish/06',name:'Review',why:'The human gate for anything a stranger will see: the master eye for this sha8, with its waivers.',subs:[
+      {m:'06',t:'read the master eye verdict for this sha8',who:'code',k:'code',d:.6,log:'review: eye_9c04d1f7 pass, 0 waivers'}]},
+    {lane:'D',id:'publish/07',name:'Release',owner:'PUBLISH',why:'ESCALATE — PUBLISH. The flip to public at the scheduled time re-checks every machine gate as it stands, reads the live status back.',subs:[
+      {m:'07',t:'flip to public at publish_at; re-check gates; record what the platform returned',who:'owner',k:'own',d:1.8,log:O('--approved=publish · public at 18:00 · status read back: public')}]},
+    {lane:'D',id:'publish/08',name:'Catalog',why:'The title record: every public artefact by kind, platform ids, dates, artwork set. The own platform reads this.',subs:[
+      {m:'08',t:'write catalog.json',who:'code',k:'code',d:.6,log:'catalog.json: +1 episode, 2 versions, 1 artwork'}]},
+    {lane:'D',id:'publish/09',name:'Notify',why:'The public link, the path, the spend and the time to the owner’s channel.',subs:[
+      {m:'09',t:'send',who:'code',k:'code',d:.5,log:'notify → owner channel · <span class="k">published</span>'}]},
+    {lane:'D',id:'analytics',name:'Analytics',why:'Read-only, on a schedule. Numbers joined to the dossier: which shot the drop-off lands on, which thumbnail won. Never moves a gate.',bridge:'a release exists → Marketing',subs:[
+      {m:'01',t:'ingest views, retention, impressions, click-through',who:'code',k:'code',d:.8,log:'stats: day 7 · 3,120 views · 61 % retention'},
+      {m:'02',t:'join to the dossier',who:'code',k:'code',d:.6,log:'reading.json: drop-off on shot 14'},
+      {m:'03',t:'retrospect: what did the numbers say against the intention?',who:'retrospect',k:'think',d:1.8,log:'<span class="v">retrospect</span> → 2 rule candidates appended to the casebook (R&amp;D decides)'}]},
+    {lane:'M',id:'promo/01',name:'Campaign',why:'Which assets, on which dates and platforms, inside the budget, reading the last analytics.',subs:[
+      {m:'01',t:'plan the campaign',who:'campaign planner',k:'think',d:2,log:'<span class="v">campaign_planner</span> → CampaignPlan: 1 trailer, 2 cutdowns, 4 stills, 6 posts · inside budget'}]},
+    {lane:'M',id:'promo/02',name:'Orders',why:'Order rows the scheduler turns into Production units, each with a format and a cost ceiling.',subs:[
+      {m:'02',t:'write order.json rows',who:'code',k:'code',d:.7,log:'order: trailer (ceiling: GPU time) → scheduler launches trailer.py'}]},
+    {lane:'M',id:'promo/03',name:'Key art',why:'The key-art pool: N candidates from the refs pack and the master’s frames, one picture per entity. Analytics reports the winner.',subs:[
+      {m:'03',t:'draw the pool locally',who:'code · local GPU',k:'code',d:1.4,log:'keyart: 4 candidates'}]},
+    {lane:'M',id:'promo/04',name:'Cutdowns',why:'Vertical and short cuts from the master’s best takes on placed.json. ffmpeg, no render. A cut that needs new pictures is a shorts order.',subs:[
+      {m:'04',t:'cut on placed.json',who:'code',k:'code',d:.9,log:'cutdowns ×2 (9:16, 28 s and 41 s)'}]},
+    {lane:'M',id:'promo/05',name:'Posts',owner:'PUBLISH',why:'Post per platform, claims lint, walls in code; shipped through publish with ESCALATE per platform account.',subs:[
+      {m:'05',t:'write the posts',who:'copywriter',k:'agent',d:1.4,log:'<span class="a">copywriter</span> ×6 → Post · claims lint ok'},
+      {m:'—',t:'ship through publish/05; ESCALATE per platform account',who:'owner',k:'own',d:1.6,log:O('posts approved for 2 accounts · 1 platform still private-only')+' · <span class="k">release promoted</span>'}]}
+  ]};
 
-  /* flat list of substeps */
-  var flat=[]; STEPS.forEach(function(s,si){s.subs.forEach(function(u,ui){flat.push({s:si,u:ui});});});
-  var pos=-1, playing=false, speed=1, timer=null, raf=null;
-  var subsEl=document.getElementById('subs'), logEl=document.getElementById('log'), statusEl=document.getElementById('status'), prog=document.getElementById('prog');
-  var inLane=document.getElementById('inLane'), inName=document.getElementById('inName'), inWhy=document.getElementById('inWhy');
-  var playBtn=document.getElementById('play');
+  buildFlow(document.getElementById('flow1'),CURRENT);
+  buildFlow(document.getElementById('flow2'),FUTURE);
 
-  function renderStep(si){
-    var s=STEPS[si];
-    inLane.textContent=(s.lane==='A'?'Analysis · step ':'Screenplay · step ')+s.id;
-    inName.textContent=s.name; inWhy.textContent=s.why;
-    subsEl.innerHTML='';
-    s.subs.forEach(function(u){
-      var d=document.createElement('div'); d.className='sub '+u.k;
-      d.innerHTML='<span class="m">'+u.m+'</span><span>'+u.t+'</span><span class="who">'+u.who+'</span><span class="bar"><i></i></span>';
-      subsEl.appendChild(d);
-    });
-  }
-  function moveDot(s,cb){
-    if(reduce){dot.setAttribute('cx',s.cx);dot.setAttribute('cy',s.cy);cb();return;}
-    var x0=+dot.getAttribute('cx'),y0=+dot.getAttribute('cy'),t0=performance.now(),dur=420/speed;
-    function f(t){var k=Math.min(1,(t-t0)/dur);k=k*k*(3-2*k);dot.setAttribute('cx',x0+(s.cx-x0)*k);dot.setAttribute('cy',y0+(s.cy-y0)*k);if(k<1)raf=requestAnimationFrame(f);else cb();}
-    raf=requestAnimationFrame(f);
-  }
-  function setStatus(txt){statusEl.innerHTML='<b>'+txt+'</b> · '+(pos+1)+' / '+flat.length;prog.style.width=((pos+1)/flat.length*100)+'%';}
-  function log(html){var d=document.createElement('div');var st=STEPS[flat[pos].s];d.innerHTML='<span class="t">'+(st.lane==='A'?'A':'S')+st.id+'</span> '+html;logEl.appendChild(d);logEl.scrollTop=logEl.scrollHeight;}
-
-  function advance(then){
-    if(pos>=flat.length-1){finish();return;}
-    var prev=pos>=0?flat[pos]:null; pos++;
-    var cur=flat[pos], s=STEPS[cur.s], u=s.subs[cur.u];
-    var newStep=!prev||prev.s!==cur.s;
-    function go(){
-      if(newStep){
-        if(prev){STEPS[prev.s].g.classList.remove('on');STEPS[prev.s].g.classList.add('done');edges[prev.s]&&edges[prev.s].classList.add('done');}
-        s.g.classList.add('on'); dot.setAttribute('class','dot'+(s.lane==='S'?' invent':''));
-        renderStep(cur.s);
-      }
-      var rows=subsEl.children;
-      for(var i=0;i<rows.length;i++){rows[i].classList.remove('on');if(i<cur.u)rows[i].classList.add('done');}
-      var row=rows[cur.u]; row.classList.add('on'); row.scrollIntoView({block:'nearest'});
-      if(u.loop){var L=loops[cur.s];if(L){L.classList.add('on');loops[cur.s+'a'].classList.add('on');}}
-      log(u.log); setStatus(u.who==='code'?'code':u.who);
-      var bar=row.querySelector('.bar i'), dur=u.d*1000/speed, t0=performance.now();
-      function tick(t){var k=Math.min(1,(t-t0)/dur);bar.style.width=(k*100)+'%';if(k<1&&playing)raf=requestAnimationFrame(tick);else if(playing){row.classList.remove('on');row.classList.add('done');then&&then();}}
-      if(playing)raf=requestAnimationFrame(tick); else bar.style.width='100%';
-    }
-    if(newStep&&playing)moveDot(s,go); else if(newStep){dot.setAttribute('cx',s.cx);dot.setAttribute('cy',s.cy);go();} else go();
-  }
-  function loop(){if(!playing)return;advance(function(){if(playing)loop();});}
-  function finish(){playing=false;playBtn.textContent='Play';var last=STEPS[STEPS.length-1];last.g.classList.remove('on');last.g.classList.add('done');setStatus('done');inName.textContent='screenplay.json delivered';inWhy.textContent='The trailer, episode and shorts departments read this file. Nothing in this stage generated a picture or a sound.';}
-  function reset(){
-    playing=false;playBtn.textContent='Play';if(raf)cancelAnimationFrame(raf);
-    pos=-1;STEPS.forEach(function(s){s.g.classList.remove('on','done');});edges.forEach(function(e){e.classList.remove('done');});
-    for(var k in loops)loops[k].classList.remove('on');
-    dot.setAttribute('cx',STEPS[0].x);dot.setAttribute('cy',STEPS[0].cy);dot.setAttribute('class','dot');
-    subsEl.innerHTML='';logEl.innerHTML='';inLane.textContent='Inside the step';inName.textContent='Press play';inWhy.textContent='The run starts at Analysis 01 with the EPUB and ends with screenplay.json handed to the trailer and episode departments.';
-    statusEl.innerHTML='<b>ready</b> · 0 / '+flat.length;prog.style.width='0%';
-  }
-  playBtn.addEventListener('click',function(){
-    if(pos>=flat.length-1){reset();}
-    playing=!playing;playBtn.textContent=playing?'Pause':'Play';
-    if(playing){ if(pos>=0){var row=subsEl.children[flat[pos].u];row&&(row.classList.remove('on'),row.classList.add('done'));} loop(); }
-    else if(raf)cancelAnimationFrame(raf);
-  });
-  document.getElementById('stepBtn').addEventListener('click',function(){
-    playing=false;playBtn.textContent='Play';if(raf)cancelAnimationFrame(raf);
-    if(pos>=flat.length-1){finish();return;}
-    advance();
-  });
-  document.getElementById('reset').addEventListener('click',reset);
-  [].forEach.call(document.querySelectorAll('.spd'),function(b){b.addEventListener('click',function(){speed=+b.dataset.s;[].forEach.call(document.querySelectorAll('.spd'),function(x){x.setAttribute('aria-pressed',x===b?'true':'false');});});});
-  reset();
+  var initial='current';
+  try{var h=(location.hash||'').replace('#','');if(h==='future'||h==='current')initial=h;else{var s=localStorage.getItem('sd-tab');if(s==='future')initial=s;}}catch(e){}
+  showTab(initial);
+  setTimeout(layout,300);
 })();
 </script>
 
