@@ -97,8 +97,8 @@ DINING_NIGHT = (
 DAWN_WINDOW = (
     "the view from a hillside study window at Maybury at dawn in 1894 over a valley of ashes: grey "
     "streamers of smoke rising from the countless ruins of gutted houses and blackened trees, a "
-    "white railway signal standing untouched amid the wreckage, the blackened common beyond with "
-    "the pit at the centre, three tall metallic tripods standing about it with their hooded heads "
+    "white railway signal standing untouched amid the wreckage, the blackened level common beyond, "
+    "out to a low flat horizon, with the pit at the centre, three tall metallic tripods standing about it with their hooded heads "
     "turned, puffs of green vapour rising out of the pit, and pillars of red smoke far off; the "
     "light is the grey dawn in the east AHEAD at the RIGHT, so the smoke reads grey, the country "
     "reads black and the sky reads pale and cold")
@@ -131,7 +131,8 @@ GEO_DAWN = (
     "The blackened country fills the BOTTOM half with grey streamers of smoke rising from its "
     "ruins, the pit lies at the CENTRE with three tall tripods standing about it, green vapour "
     "rising between them, the white railway signal stands at the LEFT third, and the pale dawn sky "
-    "fills the TOP third with red pillars of smoke at the RIGHT edge. The gutted shells of houses "
+    "fills the TOP third above a low flat horizon, with red pillars of smoke at the RIGHT edge. The "
+    "gutted shells of houses "
     "stand along the BOTTOM third, and the end of a white greenhouse stands at the BOTTOM RIGHT.")
 
 # ---- the cells of every tighter shot: where ITS subject sits (G-SCALE) ---------------
@@ -146,7 +147,7 @@ GEO_SHAPES = (
 GEO_TRAIN = (
     "The wrecked train lies along the railway at the CENTRE, its fore part a black heap in a vivid "
     "orange glare at the LEFT third and its hinder carriages a row of lit yellow windows at the "
-    "RIGHT third. The black embankment crosses the BOTTOM third and red smoke fills the TOP third.")
+    "RIGHT third. The dark railway line runs across the BOTTOM third and red smoke fills the TOP third.")
 GEO_FIGURES = (
     "A line of small black figures hurries across the railway at the CENTRE against the red glow "
     "of the station ruins behind them, which fill the TOP half. The dark embankment crosses the "
@@ -158,15 +159,15 @@ GEO_CHAIR = (
 GEO_HANDS = (
     "Two hands grip the dark wooden arms of the desk chair at the CENTRE, lit red from the RIGHT "
     "by the window, a grey herringbone tweed cuff at the LEFT third and the dark floor across the "
-    "BOTTOM third. The red glare of the open window falls across the RIGHT third, and the dark "
-    "legs of the desk stand behind the chair at the TOP third.")
+    "BOTTOM third. Red firelight falls across the dark panelled wall at the RIGHT third, and the "
+    "dark legs of the desk stand behind the chair at the TOP third.")
 GEO_MARS = (
     "A single small red point of light stands low in the clear dark sky at the CENTRE LEFT. The red "
     "smoke of the burning land crosses the BOTTOM third and the dark clear sky fills the TOP half. "
     "A few faint stars stand at the TOP RIGHT, and the red glow of the fires lights the underside "
     "of the smoke from the BOTTOM edge.")
 GEO_FENCE = (
-    "The artilleryman sits astride the black paling fence at the CENTRE, seen from above, one leg "
+    "The artilleryman clambers over the black paling fence at the CENTRE, seen from above, one leg "
     "over, his open jacket hanging, the dark lawn below him across the BOTTOM half and the faint "
     "red glare above the fence at the TOP third. His head is a sixth of the frame's height.")
 GEO_LEAN = (
@@ -294,7 +295,7 @@ S = [
     ("valley", "insert", [], 0.55, "tilt_up",
      "Insert at night on a wrecked train on the railway below the hill, its fore part a black heap "
      "in a vivid glare and its hinder carriages a row of lit yellow windows.",
-     "The camera tilts up from the black embankment to the burning train already in the picture "
+     "The camera tilts up from the dark railway line to the burning train already in the picture "
      "until the train stands in the middle of the frame, travelling a forearm; the glare goes on "
      "flaring; the red smoke goes on rising.",
      "at the window looking down the hill, a 135mm lens. The glare comes from the burning engine at "
