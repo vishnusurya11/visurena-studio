@@ -570,21 +570,66 @@ def refuse_dialogue_heads(heads: dict[int, float], placed: dict) -> None:
                          + ", ".join(f"T{i:02d}" for i in bad))
 
 
-def picture(placed: dict, takes: dict[int, Path], work: Path, heads: dict[int, float] | None = None) -> Path:
+STILL_PUSH = 1.06
+"""How far a still's slow push travels over its seconds: six percent, a
+hand's breadth -- enough that the frame is never a frozen picture, under
+the take gate's own zoom walls."""
+
+
+def stills_of(take_dir: Path, book: Path) -> dict[int, Path]:
+    """Which shots the cut holds as a PANEL, from `stills.json` beside the
+    takes (the take ladder's terminal rung writes it): take index -> the
+    passed panel, resolved from its book-relative path."""
+    path = Path(take_dir) / "stills.json"
+    if not path.exists():
+        return {}
+    doc = episode_home.read_json(path)
+    return {int(k): Path(book) / v["panel"] for k, v in doc.items()}
+
+
+def still_segment(panel: Path, seconds: float, out: Path, width: int, height: int, fps: int,
+                  ffmpeg=None) -> Path:
+    """The panel held for its placed seconds with a slow push in: the still
+    substitute for a narration shot whose take the eye could not pass.  One
+    image in, exactly `seconds` of picture out, silent like a take's segment."""
+    frames = round(seconds * fps)
+    push = (f"scale={width * 2}:{height * 2}:force_original_aspect_ratio=increase,crop={width * 2}:{height * 2},"
+            f"zoompan=z='1+({STILL_PUSH}-1)*on/{max(frames - 1, 1)}':d={frames}"
+            f":x='iw/2-(iw/zoom/2)':y='ih/2-(ih/zoom/2)':s={width}x{height}:fps={fps},format=yuv420p")
+    out.parent.mkdir(parents=True, exist_ok=True)
+    (ffmpeg or subprocess.run)(
+        ["ffmpeg", "-y", "-v", "error", "-i", str(panel), "-vf", push, "-frames:v", str(frames),
+         "-t", trailer_assemble.frames_arg(seconds, fps), "-an",
+         "-c:v", "libx264", "-preset", "fast", "-crf", "17", str(out)], check=True)
+    return out
+
+
+def segment(index: int, seconds: float, takes: dict, stills: dict, heads: dict, work: Path,
+            guarded: dict, ffmpeg=None) -> Path:
+    """One segment of the cut: the still when the shot is held on its panel,
+    else the take trimmed from its head, guarded against the gutter."""
+    out = work / f"seg{index:02d}.mp4"
+    if index in stills:
+        return still_segment(stills[index], seconds, out, W, H, FPS, ffmpeg=ffmpeg)
+    crop = guard(takes[index], seconds, work)
+    if crop:
+        guarded[index] = crop
+    return extract(takes[index], heads.get(index, 0.0), seconds, out, W, H, FPS, pre=crop)
+
+
+def picture(placed: dict, takes: dict[int, Path], work: Path, heads: dict[int, float] | None = None,
+            stills: dict[int, Path] | None = None, ffmpeg=None) -> Path:
     """Every take trimmed from its first frame (or its written head) to its
-    PLACED seconds, guarded against the storyboard gutter, joined in order.
+    PLACED seconds, guarded against the storyboard gutter, joined in order;
+    a shot in `stills` is its panel held for the same seconds instead.
     `work/gutter.json` says what was cropped where."""
-    segments, guarded, heads = [], {}, heads or {}
+    segments, guarded, heads, stills = [], {}, heads or {}, stills or {}
     order = segments_of(placed, takes)
     refuse_dialogue_heads(heads, placed)
-    refuse_short(short_takes(order, lambda i: clip_seconds(takes[i]) - heads.get(i, 0.0)))
+    refuse_short(short_takes([(i, s) for i, s in order if i not in stills],
+                             lambda i: clip_seconds(takes[i]) - heads.get(i, 0.0)))
     for index, seconds in order:
-        crop = guard(takes[index], seconds, work)
-        if crop:
-            guarded[index] = crop
-        seg = extract(takes[index], heads.get(index, 0.0), seconds, work / f"seg{index:02d}.mp4",
-                      W, H, FPS, pre=crop)
-        segments.append(seg)
+        segments.append(segment(index, seconds, takes, stills, heads, work, guarded, ffmpeg))
     episode_home.write_json(work / "gutter.json", guarded)
     print(f"gutter guard cropped {len(guarded)} takes: {guarded}", flush=True)
     return concat(segments, work / "picture.mp4")
@@ -782,7 +827,8 @@ def main(book_id: str, number: int, engine: str = "i2v",
     episode_home.make_rooms(book, number)   # free; the bed and the mix in front of it are not
     write_cut_manifest(work, episode_home.read_json(
         episode_home.takes_dir(book, number, engine) / "shots.json"), book)
-    cut = picture(placed, takes, work, heads_of(home))
+    cut = picture(placed, takes, work, heads_of(home),
+                  stills_of(episode_home.takes_dir(book, number, engine), book))
     music = quiet_bed(toned_bed(home, number, episode.beds, placed, bed_engine),
                       placed["duration_s"], work / "bed_quiet.wav", normalise=False)
     # audio reviewer, iteration 3: 10 dB in 20 ms on every line pumped; the bed now sits lower

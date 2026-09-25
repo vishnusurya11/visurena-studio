@@ -15,6 +15,7 @@ from __future__ import annotations
 
 import re
 
+from studio import panel_content as pc
 from studio.panel_content import Seen, faults
 
 HAIR = ("grey hair", "gray hair", "white hair", "bald", "red hair", "blonde hair",
@@ -81,3 +82,67 @@ def take_faults(reads: list[Seen], planned: int, crowd: bool, flat: bool,
                  night=night, banned=banned, physical=physical, size=size, extras=extras)
     out += [f"{h} where the row says otherwise" for h in drifted(seen, physical)]
     return out
+
+
+# ---- the second vote: framing and action, named in a closed vocabulary --------
+#
+# The detector decides a count, a position, an identity or a copy; the reader
+# keeps what it does well -- naming.  Its framing and action are a SECOND VOTE
+# beside the plan's size and motion (decision 2026-09-24-automate-the-taste-
+# gates, §1.1): a disagreement is a low fault the take eye lists, never a wall
+# on its own, because the bench holds no owner row for either yet.
+
+FRAMING = ("insert", "extreme_close", "close", "medium_close", "medium", "full", "wide")
+"""The plan's own Size vocabulary, so the read and the plan compare word for word."""
+
+ACTIONS = ("standing", "walking", "running", "sitting", "kneeling", "lying", "turning",
+           "reaching", "pointing", "speaking", "writing", "climbing", "none")
+"""What the MAIN figure does, one word; `none` when the reader cannot say."""
+
+ACTION_WORDS = {
+    "standing": ("stand",), "walking": ("walk", "stride", "step", "pace"),
+    "running": ("run", "sprint", "dash"), "sitting": ("sit", "seat", "sat"),
+    "kneeling": ("kneel", "knelt"), "lying": ("lie", "lying", "lies", "lay", "sprawl"),
+    "turning": ("turn",), "reaching": ("reach",), "pointing": ("point",),
+    "speaking": ("speak", "says", "talk"), "writing": ("writ", "pen"), "climbing": ("climb", "clamber"),
+}
+"""The motion's words that ask for each action; a stem, so "strides" answers walking."""
+
+ASK = (pc.ASK + "\n"
+       '"framing": how much of the MAIN person the frame holds, one of ' + ", ".join(FRAMING) + ".\n"
+       '"action": what the MAIN person is doing, one of ' + ", ".join(ACTIONS) + ".")
+"""The panel's ask plus the two take names; the same closed-list rule."""
+
+FRAMING_SLACK = 1
+"""Sizes apart a read may sit from the plan and still agree: a medium close
+read as a close is the reader's eye, two sizes off is another shot."""
+
+
+def framing_vote(said: str, planned: str) -> str | None:
+    """The disagreement, or None when the read agrees or cannot tell."""
+    if said not in FRAMING or planned not in FRAMING:
+        return None
+    if abs(FRAMING.index(said) - FRAMING.index(planned)) <= FRAMING_SLACK:
+        return None
+    return f"framing reads {said!r}, the shot is a {planned}"
+
+
+def action_vote(said: str, motion: str) -> str | None:
+    """An action the motion's own words never ask for, or None."""
+    if said not in ACTION_WORDS:
+        return None
+    low = (motion or "").lower()
+    if any(w in low for w in ACTION_WORDS[said]):
+        return None
+    return f"action reads {said!r}, the motion never asks for it"
+
+
+def second_vote(said: str) -> dict:
+    """The reader's framing and action from its answer, however wrapped;
+    `Unreadable` without both -- never a default that agrees."""
+    got = pc._loads(said)
+    if isinstance(got, list) and got:
+        got = pc._loads(got[0]) if isinstance(got[0], str) else got[0]
+    if not isinstance(got, dict) or "framing" not in got or "action" not in got:
+        raise pc.Unreadable("the reader's answer has no framing or action")
+    return {"framing": str(got["framing"]).lower().strip(), "action": str(got["action"]).lower().strip()}

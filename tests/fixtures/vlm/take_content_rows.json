@@ -1,0 +1,19 @@
+{
+ "note": "content verdicts (T??.content.json rows) and the reader's second-vote answers for three synthetic takes; ids scrubbed. T01 is clean, T02 holds a HARD content fault (a second figure), T03 came back unread. The T03 vote is malformed on purpose: second_vote must raise Unreadable on it, never default.",
+ "content": {
+  "T01": {"passed": true, "faults": [], "people": 1, "lookalikes": 0, "hour": "day", "text": false},
+  "T02": {"passed": false,
+          "faults": ["2 figure(s) for 1 declared (1 cast + 0 extras), 0 of them copies of another"],
+          "people": 2, "lookalikes": 0, "hour": "day", "text": false},
+  "T03": {"passed": false, "faults": ["unread: no JSON in 'The picture shows a man at a table'"]}
+ },
+ "votes": {
+  "T01": "[\"{\\\"landform\\\": \\\"indoors\\\", \\\"people\\\": 1, \\\"lookalikes\\\": 0, \\\"text\\\": false, \\\"hour\\\": \\\"day\\\", \\\"posture\\\": \\\"sitting\\\", \\\"subjects\\\": [\\\"a man\\\", \\\"a table\\\", \\\"a pen\\\"], \\\"framing\\\": \\\"medium_close\\\", \\\"action\\\": \\\"writing\\\"}\"]",
+  "T02": "{\"landform\": \"flat\", \"people\": 2, \"lookalikes\": 0, \"text\": false, \"hour\": \"day\", \"posture\": \"walking\", \"subjects\": [\"two men\", \"a fence\"], \"framing\": \"wide\", \"action\": \"running\"}",
+  "T03": "The picture shows a man at a table"
+ },
+ "planned": {
+  "T01": {"size": "medium_close", "motion": "The camera holds a locked-off frame; he writes; his head lifts"},
+  "T02": {"size": "medium_close", "motion": "The camera tracks beside the walker as he strides at a normal walking pace; his stick swings"}
+ }
+}

@@ -158,34 +158,28 @@ def test_prompts_launch_the_lint_then_the_last_frame_check(ctx):
 
 # ---- 07 board -----------------------------------------------------------------
 
-def test_board_parks_the_unit_without_a_layout(ctx):
+def test_board_writes_the_layout_by_rule_and_parks_on_nobody(ctx):
     assert not step_07_board.done(ctx)
-    with pytest.raises(Escalation) as got:
-        step_07_board.run(ctx)
-    assert got.value.gate == "PLAN" and got.value.verdict == "storyboard/layout.json"
-    assert ctx.launched == []
-
-
-def test_board_draws_every_laid_out_grid_and_is_done_when_they_exist(ctx):
-    _json(ctx.home / "storyboard" / "layout.json",
-          [{"setup": "yard", "cols": 2, "rows": 1}, {"setup": "room", "cols": 1, "rows": 1, "tag": "b"}])
     step_07_board.run(ctx)
-    assert ctx.launched == [["scripts/episode/grids.py", CODEX, "4", "yard", "2", "1"],
-                            ["scripts/episode/grids.py", CODEX, "4", "room", "1", "1", "b"]]
+    assert ctx.launched == [["scripts/episode/grids.py", CODEX, "4", "yard", "2", "1", "--shots=1,2"]]
+    assert episode_home.read_json(ctx.home / "storyboard" / "layout.json") == [
+        {"setup": "yard", "cols": 2, "rows": 1, "shots": [1, 2]}]
+
+
+def test_board_is_done_when_every_grid_of_the_rule_exists(ctx):
     assert not step_07_board.done(ctx)
     _png(ctx.home / "storyboard" / "grids" / "ep04_grid_yard_2x1.png")
-    _png(ctx.home / "storyboard" / "grids" / "ep04_grid_room_1x1_b.png")
     assert step_07_board.done(ctx)
 
 
 def test_board_redraws_an_existing_grid_only_when_a_flag_asks(ctx):
-    _json(ctx.home / "storyboard" / "layout.json", [{"setup": "yard", "cols": 2, "rows": 1}])
     _png(ctx.home / "storyboard" / "grids" / "ep04_grid_yard_2x1.png")
     step_07_board.run(ctx)
     assert ctx.launched == []
     ctx.extra = ["--seed-bump=1"]
     step_07_board.run(ctx)
-    assert ctx.launched == [["scripts/episode/grids.py", CODEX, "4", "yard", "2", "1", "--seed-bump=1"]]
+    assert ctx.launched == [["scripts/episode/grids.py", CODEX, "4", "yard", "2", "1", "--shots=1,2",
+                             "--seed-bump=1"]]
 
 
 # ---- 08 panels ----------------------------------------------------------------
@@ -200,23 +194,34 @@ def _verdicts(ctx) -> None:
     _json(ctx.home / "storyboard" / "panel_content.json", rows)
 
 
-def test_panels_runs_the_cutter_and_both_gates_then_asks_for_the_eye(ctx):
+def _judged(ctx, monkeypatch) -> None:
+    """The budget the judged gate climbs on and a panel eye that passes."""
+    from studio.judges.verdict import Verdict
+    from studio.run_budget import EPISODE_SHARES, Budget
+    ctx.budget = Budget(18000, EPISODE_SHARES, clock=lambda: 0.0)
+    ctx.learn = lambda learning: None
+    ctx.open_step = lambda step_id: ctx.budget.start(step_id)
+    passing = Verdict(judge="panel_eye", version="1", passed=True, confidence=1.0, reads=2)
+    monkeypatch.setattr(step_08_panels, "judge_of", lambda ctx: lambda: passing)
+
+
+def test_panels_runs_the_cutter_and_both_gates_then_the_judge_signs(ctx, monkeypatch):
     panels = _panels(ctx)
-    with pytest.raises(Escalation) as got:
-        step_08_panels.run(ctx)
+    _judged(ctx, monkeypatch)
+    step_08_panels.run(ctx)
     assert ctx.launched == [["scripts/episode/panels.py", CODEX, "4"],
                             ["scripts/episode/panel_check.py", CODEX, "4"],
                             ["scripts/episode/panel_content_check.py", CODEX, "4"]]
-    assert got.value.gate == "EYE"
-    assert got.value.verdict == f"storyboard/eye_{eye_verdict.fingerprint(panels)}.json"
+    signed = ctx.home / "storyboard" / f"eye_{eye_verdict.fingerprint(panels)}.json"
+    assert json.loads(signed.read_text(encoding="utf-8"))["signed_by"] == "judge:panel_eye@1"
     assert (ctx.home / "storyboard" / "contact.png").exists()
 
 
-def test_panels_skips_the_vision_gate_when_its_verdict_is_current(ctx):
+def test_panels_skips_the_vision_gate_when_its_verdict_is_current(ctx, monkeypatch):
     _panels(ctx)
     _verdicts(ctx)
-    with pytest.raises(Escalation):
-        step_08_panels.run(ctx)
+    _judged(ctx, monkeypatch)
+    step_08_panels.run(ctx)
     assert [c[0] for c in ctx.launched] == ["scripts/episode/panels.py", "scripts/episode/panel_check.py"]
 
 
@@ -231,30 +236,54 @@ def test_panels_is_done_with_both_verdicts_the_sheet_and_a_signed_eye(ctx):
     assert step_08_panels.panel_refusals(ctx.home) == []
 
 
-def test_panels_refuses_when_the_cutter_left_nothing(ctx):
+def test_panels_refuses_when_the_cutter_left_nothing(ctx, monkeypatch):
+    _judged(ctx, monkeypatch)
     with pytest.raises(SystemExit, match="no panels"):
         step_08_panels.run(ctx)
 
 
 # ---- 09 shoot -----------------------------------------------------------------
 
-def test_shoot_launches_the_chain_with_the_exact_argv_then_asks_for_the_eye(ctx):
+def _judged_take(ctx, monkeypatch) -> Path:
+    """A kept take with both machine verdicts passing, a plan the contract
+    accepts, and the budget the judged gate climbs on; no clone model."""
+    import shutil
+
+    from studio.run_budget import EPISODE_SHARES, Budget
+    plan = Path(__file__).resolve().parent / "fixtures" / "episodes" / "ep05_plan.json"
+    shutil.copy(plan, ctx.home / "plan.json")
+    rows = [{"shot": s["index"], "passed": True} for s in json.loads(plan.read_text(encoding="utf-8"))["shots"]]
+    _json(ctx.home / "storyboard" / "panel_dq.json", rows)
+    _json(ctx.home / "storyboard" / "panel_content.json", rows)
+    ctx.budget = Budget(18000, EPISODE_SHARES, clock=lambda: 0.0)
+    ctx.learn = lambda learning: None
+    ctx.open_step = lambda step_id: ctx.budget.start(step_id)
+    monkeypatch.setattr(step_09_shoot, "CLONES", lambda take: [])
+    room = ctx.home / "takes" / "r2v"
+    take = room / "T01.mp4"
+    take.parent.mkdir(parents=True)
+    take.write_bytes(b"take")
+    _json(room / "T01.dq.json", {"file": "T01.mp4", "gates": [], "attempts": []})
+    _json(room / "T01.content.json", {"passed": True, "faults": []})
+    return take
+
+
+def test_shoot_launches_the_chain_with_the_exact_argv_then_the_judge_signs(ctx, monkeypatch):
     panels = _panels(ctx)
     _verdicts(ctx)
     eye_verdict.sign(ctx.home / "storyboard", panels, "pass", "clean")
-    take = ctx.home / "takes" / "r2v" / "T01.mp4"
-    take.parent.mkdir(parents=True)
-    take.write_bytes(b"take")
+    take = _judged_take(ctx, monkeypatch)
     ctx.extra = ["--retake=1", "--why=froze"]
-    with pytest.raises(Escalation) as got:
-        step_09_shoot.run(ctx)
+    step_09_shoot.run(ctx)
     assert ctx.launched == [
         ["scripts/episode/takes_r2v.py", CODEX, "4", "--from-refs", "--no-ends", "--approved=render",
          "--retake=1", "--why=froze"],
         ["scripts/episode/take_dq.py", CODEX, "4"],
         ["scripts/episode/take_content_check.py", CODEX, "4"],
         ["scripts/episode/take_strip.py", CODEX, "4"]]
-    assert got.value.verdict == f"takes/r2v/eye_{eye_verdict.fingerprint([take])}.json"
+    signed = ctx.home / "takes" / "r2v" / f"eye_{eye_verdict.fingerprint([take])}.json"
+    assert json.loads(signed.read_text(encoding="utf-8"))["signed_by"] == "judge:take_eye@1"
+    assert step_09_shoot.done(ctx)
 
 
 def test_shoot_is_done_when_every_kept_take_is_judged_twice_and_signed(ctx):
@@ -309,13 +338,19 @@ def test_qc_names_the_pair_the_publish_ladder_reads(ctx):
     assert master == ctx.home / "cut" / "master_r2v.mp4" and qc == ctx.home / "qc_r2v.json"
 
 
-def test_qc_launches_qc_then_parks_on_the_master_eye(ctx):
+def test_qc_launches_qc_then_the_judge_signs_then_the_dossier_and_the_sheet(ctx, monkeypatch):
+    from studio.judges.verdict import Verdict
     ctx.launch = lambda cmd: ctx.launched.append(cmd[1:]) or _master(ctx) and 0
-    with pytest.raises(Escalation) as got:
-        step_11_qc.run(ctx)
-    assert ctx.launched == [["scripts/episode/qc.py", CODEX, "4", "--engine=r2v"]]
+    _json(ctx.home / "placed.json", {"duration_s": 150.0, "shots": [], "lines": []})
+    passing = Verdict(judge="master_eye", version="1", passed=True, confidence=1.0, reads=30)
+    monkeypatch.setattr(step_11_qc, "read_master", lambda home, master, plan, placed, tools_=None: (passing, {}))
+    monkeypatch.setattr(step_11_qc, "contact_sheet", lambda home, master, sha8: home / "review" / f"contact_{sha8}.png")
+    step_11_qc.run(ctx)
+    assert ctx.launched == [["scripts/episode/qc.py", CODEX, "4", "--engine=r2v"],
+                            ["scripts/episode/dossier.py", CODEX, "4"],
+                            ["scripts/audit/sheet.py", CODEX, "4"]]
     sha8 = yp.sha8(episode_home.master_path(ctx.book_dir, 4, "r2v"))
-    assert got.value.gate == "MASTER" and got.value.verdict == f"review/eye_{sha8}.json"
+    assert step_11_qc.rubric_signed(ctx.home, sha8) and step_11_qc.done(ctx)
 
 
 def test_qc_refuses_a_failed_report(ctx):
