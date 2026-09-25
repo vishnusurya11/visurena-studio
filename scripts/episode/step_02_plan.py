@@ -134,7 +134,7 @@ def run(ctx) -> None:
         ctx.log("--rewrite refused: placed.json exists, this plan already ran downstream",
                 step_id=STEP_ID, level="WARNING")
     elif wants_rewrite(ctx) or not plan.exists():
-        desk.write(None)
+        desk.resume() or desk.write(None)
     if plan_verdict.current(plan) or grandfathered(ctx):
         return
     signed = clear(ctx, desk)

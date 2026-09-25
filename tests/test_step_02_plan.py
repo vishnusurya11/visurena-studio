@@ -184,6 +184,18 @@ def test_a_battery_that_keeps_refusing_defers_the_unit_after_the_whole_ladder(ct
     assert "G-SCALE shot 4" in logged
 
 
+def test_a_deferred_draft_is_resumed_not_authored_again(ctx, monkeypatch):
+    writer, gate = _wire(ctx, monkeypatch, (0, CLEAN_OUT))
+    aside = ctx.home / step.plan_ladder.DEFERRED
+    faults = [{"kind": "battery", "where": "plan", "note": "G-LIGHT setup 'room': no light direction"}]
+    aside.write_text(json.dumps({"verdict": "DEFERRED", "passes": 1, "faults": faults,
+                                 "draft": canned_plan(3)}), encoding="utf-8")
+    step.run(ctx)
+    assert writer.calls[0] == ["G-LIGHT setup 'room': no light direction"]
+    assert writer.agents[0].tier == step.plan_ladder.MODEL_TIER_NAME
+    assert _verdict(ctx)["signed_by"] == "judge:plan@1"
+
+
 def test_an_existing_unsigned_plan_is_not_rewritten_only_judged(ctx, monkeypatch):
     writer, gate = _wire(ctx, monkeypatch, (0, CLEAN_OUT))
     episode_home.write_plan(_plan(ctx), {**canned_plan(), "title": "Kept"})

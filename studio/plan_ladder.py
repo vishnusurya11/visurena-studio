@@ -134,6 +134,7 @@ class Desk:
     pending: list[str] | None = None        # the contract's refusals of a draft that was never written
     drafts: list[tuple[dict, Verdict]] = field(default_factory=list)
     judged: dict[str, Verdict] = field(default_factory=dict)
+    agent: object | None = None             # the reasoner, once a rule miss handed it the climb
 
     def brief_(self, fresh: bool = False) -> dict:
         if self.brief is None or fresh:
@@ -144,9 +145,28 @@ class Desk:
         """The plan on disk the battery refused: what an improve rung edits."""
         return episode_home.read_json(self.plan) if self.plan.exists() else None
 
+    def escalate(self) -> None:
+        """The reasoner writes from here on.  Episode 13 (2026-09-25): four rungs on
+        the cheap tier failed the CONTRACT; the reasoner's one rung passed it."""
+        if self.agent is None:
+            self.agent = Caller(MODEL_TIER_NAME)
+
+    def resume(self) -> bool:
+        """A deferred draft edited under its own refusal lines by the reasoner --
+        it passed the CONTRACT once; the battery's lines are what is left."""
+        aside = self.plan.with_name(DEFERRED)
+        doc = json.loads(aside.read_text(encoding="utf-8")) if aside.exists() else {}
+        if not doc.get("draft"):
+            return False
+        self.escalate()
+        self.refusals = [f["note"] for f in doc.get("faults", []) if f.get("note")]
+        self.write(self.refusals, previous=doc["draft"])
+        return True
+
     def write(self, refusals: list[str] | None, agent=None, previous: dict | None = None) -> None:
         """One draft through write_plan, editing `previous` when there is one; a
         draft the CONTRACT refuses is a pending refusal for the next rung, not a crash."""
+        agent = agent or self.agent
         kwargs = {"_agent": agent} if agent is not None else {}
         try:
             episode = self.writer.write(self.brief_(), refusals, previous=previous, **kwargs)
@@ -170,6 +190,8 @@ class Desk:
         """One rung: remember the draft it faulted, then draft again."""
         self.remember(verdict)
         self.refusals = merged(self.refusals, refusal_lines_of(verdict))
+        if is_battery(verdict):
+            self.escalate()                       # a rule miss: the reasoner edits from here
         if rung.name == IMPROVE:
             self.write(self.refusals, previous=self.refused_plan())
         elif rung.name == FRESH_BRIEF:
@@ -177,7 +199,7 @@ class Desk:
             self.refusals = []
             self.write(None)
         elif rung.name == MODEL_TIER and not self.drafts:
-            self.write(self.refusals, agent=Caller(MODEL_TIER_NAME), previous=self.refused_plan())
+            self.write(self.refusals, previous=self.refused_plan())
 
     def terminal(self, verdict: Verdict) -> Verdict:
         """By cause: no draft ever passed the battery -> defer; else the best

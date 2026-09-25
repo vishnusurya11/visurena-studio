@@ -47,11 +47,12 @@ def test_the_gates_refusals_and_the_previous_plan_both_reach_the_prompt():
 
 class Recorder:
     def __init__(self):
-        self.previous, self.refusals = [], []
+        self.previous, self.refusals, self.agents = [], [], []
 
-    def write(self, brief, refusals=None, previous=None, **kw):
+    def write(self, brief, refusals=None, previous=None, _agent=None, **kw):
         self.previous.append(previous)
         self.refusals.append(refusals)
+        self.agents.append(_agent)
         from studio.episode_spec import Episode
         return Episode.model_validate(canned_plan(3))
 
@@ -89,3 +90,56 @@ def test_the_model_tier_rung_is_a_tier_that_reasons():
     params = llm.resolve_tier(plan_ladder.MODEL_TIER_NAME).get("params") or {}
     assert params.get("reasoning_effort", "none") != "none"
     assert plan_ladder.MODEL_TIER_NAME != ew.TIER
+
+
+def _tier(agent):
+    return None if agent is None else agent.tier
+
+
+def test_a_battery_refusal_escalates_the_desk_to_the_reasoner_for_the_rest_of_the_climb(tmp_path):
+    """Pass 5 of episode 13: four rungs on the cheap tier failed the CONTRACT; the
+    reasoner's one rung passed it.  A rule miss is what the reasoner is for."""
+    writer = Recorder()
+    desk = _desk(tmp_path, writer)
+    rungs = plan_ladder.ladder().rungs
+    desk.take(rungs[0], 0, plan_ladder.battery_verdict(["G-LIGHT setup 'room': no light direction"]))
+    desk.take(rungs[0], 1, plan_ladder.battery_verdict(["G-SIZE shot 3: no head fraction"]))
+    assert [_tier(a) for a in writer.agents] == [plan_ladder.MODEL_TIER_NAME] * 2
+    assert writer.previous[1]["title"] == "The Yard"
+
+
+def test_a_critics_fault_stays_on_the_cheap_tier(tmp_path):
+    from studio.judges.verdict import Fault
+    writer = Recorder()
+    desk = _desk(tmp_path, writer)
+    judged = Verdict(judge="plan", version="1", passed=False, confidence=1.0,
+                     faults=[Fault(kind="answer", where="plan", note="G-READER the answer names no shot")])
+    desk.take(plan_ladder.ladder().rungs[0], 0, judged)
+    assert writer.agents == [None]
+
+
+def test_a_deferred_draft_is_resumed_under_its_own_refusals_by_the_reasoner(tmp_path):
+    """The deferred draft passed the CONTRACT; its faults are the battery's lines.
+    The next pass edits it instead of authoring from nothing."""
+    from types import SimpleNamespace
+    writer = Recorder()
+    plan = tmp_path / "plan.json"
+    aside = plan.with_name(plan_ladder.DEFERRED)
+    faults = [{"kind": "battery", "where": "plan", "note": "G-LIGHT setup 'room': no light direction"},
+              {"kind": "battery", "where": "plan", "note": "VERDICT      : REFUSED"}]
+    aside.write_text(json.dumps({"verdict": "DEFERRED", "passes": 1, "faults": faults,
+                                 "draft": canned_plan(3)}), encoding="utf-8")
+    desk = plan_ladder.Desk(SimpleNamespace(book_dir=tmp_path, number=3), plan, writer=writer)
+    desk.brief = {}
+    assert desk.resume() is True
+    assert writer.previous == [canned_plan(3)]
+    assert writer.refusals == [["G-LIGHT setup 'room': no light direction", "VERDICT      : REFUSED"]]
+    assert _tier(writer.agents[0]) == plan_ladder.MODEL_TIER_NAME
+    assert plan.exists()
+
+
+def test_nothing_deferred_means_nothing_resumed(tmp_path):
+    from types import SimpleNamespace
+    writer = Recorder()
+    desk = plan_ladder.Desk(SimpleNamespace(book_dir=tmp_path, number=3), tmp_path / "plan.json", writer=writer)
+    assert desk.resume() is False and writer.previous == []

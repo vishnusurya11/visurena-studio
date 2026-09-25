@@ -11,6 +11,7 @@ already states; the battery (`plan_check`) and the critic never got a draft.
 | 1 | improve, improve, fresh_brief, model_tier | 5 contract faults; rule 5; rule 5; 4 faults; rule 5 | deferred; step 03 then ran on no plan.json |
 | 2 | same | 'slowly' ×2; rule 5; shot numbering; 'slowly' ×3; 19-word lines ×2 | deferred |
 | 3 | one rung, three gateway re-asks | 'slowly' at shots 8 and 14, three times | crashed: the refusal carried no CONTRACT line |
+| 5 | same, the writer editing its draft | ordering; rule 5; a beat before the button; ordering -- then the `canon` rung (337 s) passed the CONTRACT and the battery refused ~80 lines (light directions, at_rest floors, head fractions, `source` spans saying "chapter 13", 11 takes over 8 s) | deferred with a contract-valid draft the next pass would have thrown away |
 | 4 | same as 1, three re-asks each | 'slowly'; 3 lines on one shot; 20-word lines ×2; a dialogue face not at close; 'slowly' ×3 | deferred: every rung fixed what was named and, rewriting from nothing, tripped another rule |
 
 ~50–75 s and cents per draft; a ladder is ~8 min.
@@ -50,6 +51,15 @@ already states; the battery (`plan_check`) and the critic never got a draft.
   workhorse model with reasoning off (the owner's cost choice for every other
   caller); the rung now asks `canon`, the one tier that reasons, on a deferred
   unit only.
+
+- **The reasoner came last.** Pass 5: four rungs on the cheap tier failed the
+  CONTRACT; the reasoner's one rung passed it and reached the battery. A rule
+  miss (contract or battery) now escalates the desk to `canon` for the rest of
+  the climb; the critic's judgement faults stay on the cheap tier.
+- **A deferred draft was thrown away.** The draft that reached the battery went
+  into `plan.deferred.json` with its 80 lines and the next pass authored from
+  nothing. Step 02 now RESUMES it: the reasoner edits the deferred draft under
+  its own refusal lines before the ladder starts.
 
 Unchanged and to be measured on the next passes: `MAX_IMPROVE = 2` (now with three
 re-asks each), the 18-word wall, the no-slow rule.

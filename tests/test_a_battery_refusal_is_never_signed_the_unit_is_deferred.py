@@ -23,8 +23,9 @@ def test_the_whole_ladder_is_climbed_then_the_draft_is_deferred(ctx, monkeypatch
     # round 0, improve, improve, fresh_brief, model_tier
     assert len(writer.calls) == 5 and len(gate.commands) == 5
     assert writer.calls[3] is None, "a fresh brief starts without the refusal history"
-    assert writer.agents[4] is not None and writer.agents[4].tier == step.plan_ladder.MODEL_TIER_NAME
-    assert writer.agents[:4] == [None] * 4
+    assert writer.agents[0] is None, "the first draft is the cheap tier's"
+    assert [a.tier for a in writer.agents[1:]] == [step.plan_ladder.MODEL_TIER_NAME] * 4, \
+        "a battery refusal hands the climb to the reasoner"
 
 
 def test_the_deferred_file_holds_the_draft_and_no_verdict_exists(ctx, monkeypatch):
