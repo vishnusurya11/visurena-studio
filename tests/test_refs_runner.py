@@ -1,7 +1,7 @@
 """refs.py: the refs department's runner.  The registry's ids are the modules'
 ids; every step is bracketed in events on unit "main"; a book is ready when
-the stage it requires has completed; an escalated run parks (exit 2) and marks
-nothing failed."""
+the stage it requires has completed; the LOOK step signs in the judge's name
+(an empty pack reads nothing) and the run completes (exit 0)."""
 from __future__ import annotations
 
 import pytest
@@ -34,7 +34,7 @@ def test_the_registry_and_the_step_modules_agree_on_ids_and_names():
     steps = step_runner.load_steps("refs")
     assert [s.STEP_ID for s in steps] == ["01", "02", "03", "04"]
     assert [s.NAME for s in steps] == [e["name"] for e in registry.steps("refs")]
-    assert [s.GPU for s in steps] == [False, True, True, False]
+    assert [s.GPU for s in steps] == [False, True, True, True]
 
 
 def test_ready_needs_the_required_analysis_step_and_not_a_finished_refs_stage(conn):
@@ -46,22 +46,24 @@ def test_ready_needs_the_required_analysis_step_and_not_a_finished_refs_stage(co
     assert refs.ready(conn) == []
 
 
-def test_a_run_brackets_every_step_on_unit_main_and_parks_at_the_look(conn, tmp_path, book, capsys):
+def test_a_run_brackets_every_step_on_unit_main_and_the_judge_signs_the_look(conn, tmp_path, book, capsys):
     codex = db.insert_codex(conn, "Book", codex_id="20260901000001")
     outcome = refs.process(conn, codex, ["--chapter=1", "--cast=a=Alpha:male"], **opts(tmp_path))
-    assert outcome == "escalated"
+    assert outcome == "completed"
     assert db.unit_status(conn, codex, "refs", "main") == {
-        "01": "completed", "02": "skipped", "03": "completed", "04": "escalated"}
+        "01": "completed", "02": "skipped", "03": "completed", "04": "completed"}
     assert conn.execute("SELECT COUNT(*) FROM events WHERE unit IS NULL").fetchone()[0] == 0
-    assert "OWNER LOOK" in capsys.readouterr().out
-    assert db.get_codex(conn, codex)["refs_status"] != "failed"
-
-
-def test_main_exits_2_on_an_escalation_and_0_when_the_book_is_done(conn, tmp_path, book):
-    codex = db.insert_codex(conn, "Book", codex_id="20260901000001")
-    assert refs.main([codex, "--chapter=1", "--cast=a"], conn=conn, **opts(tmp_path)) == 2
+    assert "OWNER" not in capsys.readouterr().out
     from studio import refs_verdict
-    refs_verdict.sign(book, "fine")
+    assert refs_verdict.current(book)["signed_by"] == "judge:look@1"
+    assert db.get_codex(conn, codex)["refs_status"] == "completed"
+
+
+def test_main_exits_0_when_the_judge_signs_and_again_when_the_book_is_done(conn, tmp_path, book):
+    codex = db.insert_codex(conn, "Book", codex_id="20260901000001")
+    assert refs.main([codex, "--chapter=1", "--cast=a"], conn=conn, **opts(tmp_path)) == 0
+    from studio import refs_verdict
+    assert refs_verdict.current(book) is not None
     assert refs.main([codex, "--chapter=1", "--cast=a"], conn=conn, **opts(tmp_path)) == 0
     assert db.get_codex(conn, codex)["refs_status"] == "completed"
 

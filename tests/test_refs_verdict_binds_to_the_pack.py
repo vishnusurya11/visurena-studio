@@ -1,16 +1,17 @@
 """The LOOK verdict is bound to the pack it was given on: refs/verdict.json carries
 the sha8 of refs/pack.jsonl, and a pack that has grown since is a pack nobody has
-looked at whole -- done() is False again and the step re-escalates saying so."""
+looked at whole -- done() is False again and the step re-judges the new rows,
+saying so, and re-signs in the judge's name."""
 from __future__ import annotations
 
 import json
 
-import pytest
-
 from scripts.refs import step_04_verdict as step
 from studio import db, refs_verdict
-from studio.escalate import Escalation
 from studio.stage_run import StageContext
+from tests import look_fixtures as lf
+
+CARDS = {"c0": "base", "c1": "d4", "p": "d3"}
 
 
 def a_book(tmp_path, rows=2):
@@ -26,8 +27,10 @@ def a_ctx(tmp_path, book):
     conn = db.get_connection(tmp_path / "t.db")
     db.init_db(conn)
     codex = db.insert_codex(conn, "Book", codex_id="20260901000001")
-    return StageContext(conn, codex, book, "refs", unit="main", logs_root=tmp_path / "logs",
-                        busy=lambda: False, hold=tmp_path / "HOLD", launch=lambda cmd: 0)
+    ctx = StageContext(conn, codex, book, "refs", unit="main", logs_root=tmp_path / "logs",
+                       busy=lambda: False, hold=tmp_path / "HOLD", launch=lambda cmd: 0)
+    ctx.look_tools = lf.tools(reader=lf.reader_of(CARDS))
+    return ctx
 
 
 def test_sign_then_current_returns_the_verdict_bound_to_this_pack(tmp_path):
@@ -40,15 +43,15 @@ def test_sign_then_current_returns_the_verdict_bound_to_this_pack(tmp_path):
     assert got["date"][:2] == "20"
 
 
-def test_no_verdict_means_nothing_current_and_the_step_asks_for_a_look(tmp_path):
+def test_no_verdict_means_nothing_current_and_the_step_judges_and_signs(tmp_path):
     book = a_book(tmp_path)
     ctx = a_ctx(tmp_path, book)
     assert refs_verdict.current(book) is None
     assert step.done(ctx) is False
-    with pytest.raises(Escalation) as parked:
-        step.run(ctx)
-    assert parked.value.gate == "LOOK" and parked.value.verdict == "refs/verdict.json"
-    assert "look at every sheet" in parked.value.ask
+    step.run(ctx)
+    got = refs_verdict.current(book)
+    assert got and got["signed_by"] == "judge:look@1" and got["faults"] == [] and got["rows"] == 2
+    assert step.done(ctx) is True
 
 
 def test_a_signed_pack_is_done(tmp_path):
@@ -57,7 +60,7 @@ def test_a_signed_pack_is_done(tmp_path):
     assert step.done(a_ctx(tmp_path, book)) is True
 
 
-def test_a_changed_pack_undoes_the_verdict_and_the_step_escalates_naming_the_new_rows(tmp_path):
+def test_a_changed_pack_undoes_the_verdict_and_the_step_rejudges_naming_the_new_rows(tmp_path):
     book = a_book(tmp_path)
     refs_verdict.sign(book, "ok")
     with (book / "refs" / "pack.jsonl").open("a", encoding="utf-8") as fh:
@@ -65,11 +68,11 @@ def test_a_changed_pack_undoes_the_verdict_and_the_step_escalates_naming_the_new
     ctx = a_ctx(tmp_path, book)
     assert refs_verdict.current(book) is None
     assert step.done(ctx) is False
-    with pytest.raises(Escalation) as parked:
-        step.run(ctx)
-    assert "changed" in parked.value.ask and "1 new row" in parked.value.ask
+    step.run(ctx)
+    got = refs_verdict.current(book)
+    assert got and got["rows"] == 3 and got["signed_by"] == "judge:look@1"
     logged = "".join(p.read_text(encoding="utf-8") for p in (tmp_path / "logs").rglob("*.log"))
-    assert "stale" in logged
+    assert "stale" in logged and "1 new row" in logged
 
 
 def test_a_book_with_no_pack_yet_hashes_the_empty_pack(tmp_path):
