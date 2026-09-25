@@ -36,3 +36,26 @@
 - Departments import neither — typed inputs in, typed artifacts out.
 - Never store an absolute path. `production_id` + relative path only.
 - Default gate policy for any credit-spending step is ESCALATE.
+- One checkout, on `master`. Never a worktree, a per-book branch or a copied library.
+  The code tree names no book; everything book-specific lives under `library/<book>/`.
+
+## The architecture page is the org chart — keep it true
+The studio is read as a company: code is management (runners, step scripts), agents
+are specialists, `stages.yaml` is the org chart the code runs. The page
+`architecture/index.html` is where that reading lives, and it goes stale the moment a
+change lands without it. So:
+- **Every architecture change, proposed or implemented, updates `architecture/index.html`
+  in the same commit.** Proposed → the *Future architecture* tab. Implemented → the
+  *Current architecture* tab (and the Future tab's state for that slot flips to built).
+  Architecture change means: a stage, step or department added, removed or renamed; a
+  runner or leader changed; who reports to whom; a unit of work; an owner gate; an agent
+  registered or retired; a shared service added.
+- A **proposal** also gets a dated file in `architecture/decisions/`; work that follows a
+  decision gets a tracker in `architecture/plan/` (status line, checkboxes per commit,
+  a dated log); the owner's ruling gets its line in `docs/DECISIONS.md`.
+- `architecture/README.md` indexes the departments, decisions and plans; update its tables
+  with the same commit.
+- The page is one self-contained HTML file: the org trees are markup, the Future tab's
+  per-team trees come from the `TEAMS` table in its script, the animated runs from the
+  `CURRENT` / `FUTURE` step tables. Edit the data, not the drawing. Republish the
+  claude.ai copy linked from the README when the page changes.
