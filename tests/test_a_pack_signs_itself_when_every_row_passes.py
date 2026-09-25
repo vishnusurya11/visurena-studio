@@ -24,7 +24,7 @@ def test_a_passing_pack_is_signed_by_the_judge_and_bound_to_its_sha8(tmp_path):
     assert signed["note"].startswith("no fault named in")
     assert drawn == [] and audit_rows.load(book) == []
     assert not (book / "refs" / "learnings.jsonl").exists()
-    assert {p.parent.name for p, q in asked if "absent" in q} == {"room", "a", "b"}
+    assert {p.parent.name for p, q in asked if "absent" in q} == {"a", "b"}   # a place is judged by the line at its own hour, not by the bible
     assert step.done(ctx) is True
 
 

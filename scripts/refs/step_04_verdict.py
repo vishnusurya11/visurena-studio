@@ -53,15 +53,27 @@ def equipped(ctx):
     return ctx
 
 
+BIBLE = ("refs/characters/", "refs/props/")
+"""What the LOOK judge reads: the sheets that bind an identity.  A place picture
+is drawn per episode at its own hour and judged there (the line's look-back);
+the first real run would have read 178 pack paths, 150 of them places."""
+
+
+def judged_path(book_dir: Path, path: str) -> bool:
+    """A bible sheet whose picture is on disk.  pack.jsonl is a log: a row whose
+    file is gone is a superseded view, not a promise."""
+    return path.startswith(BIBLE) and (Path(book_dir) / path).exists()
+
+
 def paths_to_judge(ctx) -> list[str]:
-    """Every path in the pack, or only the new rows' paths when the verdict is stale."""
+    """Every bible path in the pack, or only the new rows' paths when the verdict is stale."""
     rows = sheet_ladder.pack_rows(ctx.book_dir)
     if refs_verdict.read(ctx.book_dir):
         n = refs_verdict.new_rows(ctx.book_dir)
         ctx.log(f"stale: {refs_verdict.VERDICT} signs another pack; {n} new row(s) since are judged",
                 step_id=STEP_ID, level="WARNING")
         rows = rows[len(rows) - n:] if n else []
-    return list(dict.fromkeys(r["path"] for r in rows))
+    return [p for p in dict.fromkeys(r["path"] for r in rows) if judged_path(ctx.book_dir, p)]
 
 
 def tools_of(ctx) -> dict:

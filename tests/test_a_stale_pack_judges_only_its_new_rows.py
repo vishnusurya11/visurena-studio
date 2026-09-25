@@ -19,10 +19,10 @@ def test_only_the_new_rows_are_read_back(tmp_path):
     asked = []
     ctx = lf.a_ctx(tmp_path, book, **lf.tools(reader=lf.reader_of({"a": "base", "b": "d3", "c": "d4"}, asked=asked)))
     assert step.done(ctx) is False and refs_verdict.new_rows(book) == 2
-    assert step.paths_to_judge(ctx) == ["refs/characters/c/sheet.png", "refs/locations/room/wide_establishing.png"]
+    assert step.paths_to_judge(ctx) == ["refs/characters/c/sheet.png"]   # places are not the bible's to judge
     step.run(ctx)
     looked = {p.parent.name for p, q in asked if "absent" in q}
-    assert looked == {"c", "room"}
+    assert looked == {"c"}
     signed = refs_verdict.current(book)
     assert signed and signed["rows"] == 4 and signed["signed_by"] == "judge:look@1"
     assert "stale" in lf.logged(tmp_path) and "2 new row" in lf.logged(tmp_path)

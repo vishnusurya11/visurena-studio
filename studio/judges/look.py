@@ -184,6 +184,12 @@ def voice_fault(book_dir, who: str, where: str) -> Fault | None:
 def read_row(book_dir, row: dict, tools: Tools, must, acc: Reads) -> None:
     """Every row of one judged sheet; a character's face rows only on a character."""
     where, picture = row["path"], picture_of(book_dir, row)
+    if book_dir is not None and not Path(picture).exists():
+        # pack.jsonl is a log: a row whose picture is gone is a superseded view
+        # (a state the bible no longer keeps), not a promise.  Nothing to read;
+        # the sheets step is what refuses a BOUND picture that is missing.
+        # (No book at all is a stub read: every reader is injected, nothing is opened.)
+        return
     read_nouns(picture, row.get("prompt", ""), tools("reader"), must, acc, where)
     read_lettering(picture, tools("ocr"), acc, where)
     if kind_of(where) == CHARACTERS:
