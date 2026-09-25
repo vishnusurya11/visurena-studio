@@ -256,9 +256,9 @@ table.v td code{white-space:nowrap}
 <body>
 
 <div class="wrap">
-  <div class="eyebrow">Visurena Studio · part one · book → screenplay</div>
+  <div class="eyebrow">Visurena Studio · book → screenplay → episode</div>
   <h1>The Story Department</h1>
-  <p class="lede">Seventeen agents, read as a company. <b>Code is management</b>: every step script decides the order, hands out briefs, assembles, counts and checks. <b>Agents are specialists</b>: each gets one brief and returns one typed object. Nobody edits a file; nobody reads another agent's answer. The chart below is who reports to whom; the flow after it is one book going through a typical run.</p>
+  <p class="lede">Nineteen agents in five departments, read as a company. <b>Code is management</b>: every step script decides the order, hands out briefs, assembles, counts and checks. <b>Agents are specialists</b>: each gets one brief and returns one typed object. Nobody edits a file; nobody reads another agent's answer. The chart below is who reports to whom; the flow after it is one book going through a typical run, from the EPUB to a delivered episode master. Updated 2026-09-24: the reference bible (refs) and the episode line are departments with runners.</p>
 
   <div class="legend">
     <span class="k"><span class="swatch lead"></span> leader (code: a runner or step script)</span>
@@ -274,6 +274,7 @@ table.v td code{white-space:nowrap}
 
 
 
+
 <section class="block">
     <div class="head"><h2>Org chart</h2><p>Every box reports to the one above it. A step script is a unit head: it calls its agents in order and owns their output.</p></div>
     <div class="chart-tools">
@@ -284,12 +285,23 @@ table.v td code{white-space:nowrap}
 
     <div class="chart-scroll"><div class="chart-fit" id="chart1"><div class="tree">
       <ul>
-        <li><div class="node owner"><div class="n">Owner</div><div class="r">Studio head. Every gate that spends escalates here; his word outranks every file.</div></div>
+        <li><div class="node owner"><div class="n">Owner</div><div class="r">Studio head. Three signatures: money, publish, taste. Every gate that spends escalates here.</div></div>
           <ul>
-            <li><div class="node lead"><div class="n">Production office</div><div class="r">Order, run, hire</div><div class="f">stages.yaml · analysis.py · studio/llm.py + models.yaml</div></div>
+            <li><div class="node lead"><div class="n">Production office</div><div class="r">Order, run, hire, record</div><div class="f">stages.yaml · studio/registry.py · studio/llm.py + models.yaml · studio/db.py (events with a unit)</div></div>
               <ul>
-                <li><div class="node lead dept"><div class="n">Analysis dept.</div><div class="r">Asserts what the book says. 6 units, run in file order by the manager.</div><div class="f">analysis.py</div></div></li>
-                <li><div class="node lead dept invent"><div class="n">Screenplay dept.</div><div class="r">Invents. 5 units, run per (book, target); never inside analysis.</div><div class="f">scripts/screenplay/step_0N_*.py</div></div></li>
+                <li><div class="node lead dept"><div class="n">Pre-production</div><div class="r">Asserts, invents, binds identity</div></div>
+                  <ul>
+                    <li><div class="node lead"><div class="n">Analysis</div><div class="r">Asserts what the book says · 6 units · unit: book</div><div class="f">analysis.py</div></div></li>
+                    <li><div class="node lead"><div class="n">Screenplay</div><div class="r">Invents · 5 units · unit: book × target</div><div class="f">screenplay.py</div></div></li>
+                    <li><div class="node lead"><div class="n">Refs &amp; Cast</div><div class="r">The reference bible · 4 units · unit: book × style · LOOK gate</div><div class="f">refs.py</div></div></li>
+                  </ul>
+                </li>
+                <li><div class="node lead dept invent"><div class="n">Production</div><div class="r">Format lines. End at a master; never publish.</div></div>
+                  <ul>
+                    <li><div class="node lead"><div class="n">Episode</div><div class="r">One chapter, one master · 12 units · unit: book × chapter · PLAN, EYE ×2, MASTER gates</div><div class="f">episode.py</div></div></li>
+                    <li><div class="node lead"><div class="n">Trailer</div><div class="r">Music-first cut · 10 units · unit: book</div><div class="f">trailer.py</div></div></li>
+                  </ul>
+                </li>
                 <li><div class="node lead dept"><div class="n">Audit bench</div><div class="r">Blind second opinions, on request.</div><div class="f">scripts/*/audit_locations.py</div></div>
                   <ul>
                     <li><div class="node qc"><div class="n">Location auditor</div><div class="r">Where does this scene happen? Sees nobody else's answer.</div><span class="chip qc">QC</span></div></li>
@@ -381,11 +393,12 @@ table.v td code{white-space:nowrap}
         </div></div></div>
       </div>
     </div>
+    <div id="dept-trees-current" class="dept-trees" style="margin-top:26px"></div>
   </section>
 
   <!-- ===== FLOW ===== -->
   <section class="block">
-    <div class="head"><h2>A typical run</h2><p>One book, start to finish. Press play: the dot is the book, the panel shows who is working inside the current step, the log is what the step scripts print. Numbers are illustrative for a 14-chapter novel.</p></div>
+    <div class="head"><h2>A typical run</h2><p>One book, start to finish: analysis, screenplay, the reference bible, then one chapter through the episode line to a delivered master. Press play: the dot is the work, the panel shows who is inside the current step, the log is what the runners print. Gold-edged steps park for one of your signatures. Numbers are illustrative.</p></div>
     <div class="flow" id="flow1">
       <div class="flow-top">
         <button class="btn" data-role="play">Play</button>
@@ -412,7 +425,7 @@ table.v td code{white-space:nowrap}
         </div>
       </div>
     </div>
-    <p class="flow-note">The dashed return arrows are the three improve loops. Each is capped at two rounds; the run shown takes one round in Extract (the auditor flags one chapter's dialogue, and only that specialist is re-run). Nothing in this stage spends money on media; every call is a text model on the <code>workhorse</code> or <code>reasoning</code> tier.</p>
+    <p class="flow-note">The dashed return arrows are the improve loops, each capped at two rounds. Pre-production spends only text-model tokens; the episode line is $0 on the local GPU. Publishing is not a step of any line yet: the master is delivered, and the upload scripts run by hand until the publish department exists (Future tab).</p>
   </section>
 
   <!-- ===== ROSTER ===== -->
@@ -436,12 +449,15 @@ table.v td code{white-space:nowrap}
       <div class="card"><div class="name">Shot designer</div><div class="title">Screenplay 03_02</div><div class="io">Gets the frozen element stream · <span>returns</span> ShotPlan</div><div class="meta"><span class="chip">workhorse</span></div></div>
       <div class="card qc"><div class="name">Adaptation auditor</div><div class="title">Screenplay 05_02</div><div class="io">Gets a drafted scene + its paragraphs · <span>returns</span> AuditVerdict</div><div class="meta"><span class="chip qc">QC</span><span class="chip">workhorse</span></div></div>
       <div class="card qc"><div class="name">Location auditor</div><div class="title">Audit bench</div><div class="io">Gets verbatim scene text + place list · <span>returns</span> LocationVerdict</div><div class="meta"><span class="chip qc">QC</span><span class="chip">workhorse</span></div></div>
+      <div class="card"><div class="name">Look back</div><div class="title">Refs 02 · Episode 03</div><div class="io">Gets a drawn picture + its prompt · <span>returns</span> LookReading (seen, missing) · advisory until calibrated</div><div class="meta"><span class="chip">local VLM</span></div></div>
+      <div class="card think"><div class="name">Episode writer</div><div class="title">Episode 02</div><div class="io">Gets the chapter brief (scenes, text, screenplay elements, bound rows, places, camera catalog, dq rules) · <span>returns</span> Episode, through plan_check + an improve loop of two</div><div class="meta"><span class="chip think">reasoning · local tier</span></div></div>
+      <div class="card qc"><div class="name">Panel reader</div><div class="title">Episode 08, 09 · inside the wrapped scripts</div><div class="io">Gets one panel or three take frames, shown no plan · <span>returns</span> a list; code judges it</div><div class="meta"><span class="chip qc">QC</span><span class="chip">local VLM</span></div></div>
     </div>
     <div class="tally">
-      <div><div class="n">17</div><div class="l">agents</div></div>
-      <div><div class="n">2</div><div class="l">reasoning tier — both resolve to the same model as workhorse today</div></div>
-      <div><div class="n">4</div><div class="l">QC judges</div></div>
-      <div><div class="n">3</div><div class="l">improve loops, max 2 rounds each</div></div>
+      <div><div class="n">19</div><div class="l">agents (+ Whisper and the panel reader inside the wrapped scripts)</div></div>
+      <div><div class="n">3</div><div class="l">reasoning tier: story editor, screenwriter, episode writer — all resolve to the same model today</div></div>
+      <div><div class="n">5</div><div class="l">QC judges: ingest, extraction, adaptation, location, panel reader</div></div>
+      <div><div class="n">6</div><div class="l">owner signatures as files: LOOK, PLAN, EYE ×2, MASTER, PUBLISH</div></div>
     </div>
   </section>
   </div>
@@ -748,16 +764,18 @@ table.v td code{white-space:nowrap}
     return '<div class="node '+x.k+'"><div class="n">'+esc(x.n)+'</div><div class="r">'+esc(x.r)+'</div><span class="chip '+(x.k==='think'?'think':x.k==='qc'?'qc':'')+'">'+(x.k==='qc'?'QC':x.chip)+'</span></div>';
   }
   function li(x){var h='<li>'+nodeHtml(x);if(x.kids&&x.kids.length){h+='<ul>'+x.kids.map(li).join('')+'</ul>';}return h+'</li>';}
-  var host=document.getElementById('dept-trees-future');
-  if(host){
-    TEAMS.forEach(function(T,i){
+  function renderTeams(host,teams,prefix){
+    teams.forEach(function(T,i){
       var d=document.createElement('div');
-      d.innerHTML='<div class="eyebrow">'+esc(T.n)+' · '+esc(T.r)+'</div><div class="chart-scroll"><div class="chart-fit" id="team'+i+'"><div class="tree"><ul>'+
+      d.innerHTML='<div class="eyebrow">'+esc(T.n)+' · '+esc(T.r)+'</div><div class="chart-scroll"><div class="chart-fit" id="'+prefix+i+'"><div class="tree"><ul>'+
         '<li><div class="node lead dept'+(T.st==='slot'?' slot':'')+'"><div class="n">'+esc(T.n)+'</div><div class="st '+T.st+'">'+(T.st==='partial'?'scripts exist':T.st)+'</div></div><ul>'+T.kids.map(li).join('')+'</ul></li>'+
         '</ul></div></div></div>';
       host.appendChild(d);
     });
   }
+  var hostF=document.getElementById('dept-trees-future'); if(hostF)renderTeams(hostF,TEAMS,'team');
+  var hostC=document.getElementById('dept-trees-current');
+  if(hostC)renderTeams(hostC,TEAMS.filter(function(T){return ['Refs & Cast','Episode (TV)','Trailer'].indexOf(T.n)>=0;}),'now');
 
   /* ---------- org chart fit ---------- */
   var fits=[].slice.call(document.querySelectorAll('.chart-fit'));
@@ -1078,7 +1096,19 @@ table.v td code{white-space:nowrap}
       {m:'—',t:'ship through publish/05; ESCALATE per platform account',who:'owner',k:'own',d:1.6,log:O('posts approved for 2 accounts · 1 platform still private-only')+' · <span class="k">release promoted</span>'}]}
   ]};
 
-  buildFlow(document.getElementById('flow1'),CURRENT);
+  /* the current run continues from the screenplay into refs and the episode line (built 2026-09-24) */
+  var lastPre=CURRENT.steps[CURRENT.steps.length-1]; lastPre.bridge='screenplay complete → the reference bible binds identity';
+  var refsNow=Object.assign({},FUTURE.steps.filter(function(s){return s.id==='refs';})[0],{lane:'R',bridge:'refs/04 complete → the episode line'});
+  var epNow=FUTURE.steps.filter(function(s){return s.lane==='E';}).map(function(s){return Object.assign({},s);});
+  epNow[epNow.length-1].bridge=undefined;
+  var CURRENT_NOW={
+    lanes:[{key:'A',label:'ANALYSIS',cls:''},{key:'S',label:'SCREENPLAY',cls:'invent'},{key:'R',label:'REFS & CAST',cls:''},{key:'E',label:'EPISODE',cls:'invent'}],
+    left:150, laneGap:100, top:70, nodeW:104, loops:[0,1,10,13,19,20],
+    startWhy:'The run starts at Analysis 01 with the EPUB and ends with an episode master delivered by the episode line.',
+    endName:'Episode master delivered', endWhy:'manifest.json sits beside the master with every gate verdict and timing total. Publishing is the next department; today the upload scripts run by hand.',
+    steps:CURRENT.steps.concat([refsNow]).concat(epNow)
+  };
+  buildFlow(document.getElementById('flow1'),CURRENT_NOW);
   buildFlow(document.getElementById('flow2'),FUTURE);
 
   var initial='current';
