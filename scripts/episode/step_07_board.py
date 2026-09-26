@@ -41,9 +41,26 @@ def grid_path(ctx, row: dict) -> Path:
     return ctx.home / "storyboard" / "grids" / f"{grid_layout.name_of(ctx.number, row)}.png"
 
 
+def stale_names(ctx) -> set[str]:
+    """The grids panels.py would refuse as drawn from an older plan -- the same
+    question, asked here (ep13: 'skipped: output exists' over a changed plan)."""
+    sys.path.insert(0, str(Path(__file__).resolve().parent))
+    import panels
+    drawn = panels.manifests(ctx.book_dir, ctx.number)
+    if not drawn:
+        return set()
+    ep = episode_home.load_plan(ctx.book_dir, ctx.number)
+    return set(panels.stale_grids(drawn, panels.plan_sha(ctx.book_dir, ctx.number), ep, ctx.book_dir))
+
+
+def current(ctx, row: dict, stale: set[str]) -> bool:
+    return grid_path(ctx, row).exists() and grid_layout.name_of(ctx.number, row) not in stale
+
+
 def done(ctx) -> bool:
     rows = layout(ctx)
-    return bool(rows) and all(grid_path(ctx, row).exists() for row in rows)
+    stale = stale_names(ctx) if rows else set()
+    return bool(rows) and all(current(ctx, row, stale) for row in rows)
 
 
 def run(ctx) -> None:
@@ -52,8 +69,9 @@ def run(ctx) -> None:
         raise SystemExit(f"REFUSED: the plan has no shots to lay out into {LAYOUT}")
     grid_layout.write(ctx.home, rows)
     extra = getattr(ctx, "extra", None) or []
+    stale = stale_names(ctx)
     for row in rows:
-        if grid_path(ctx, row).exists() and not extra:
+        if current(ctx, row, stale) and not extra:
             continue
         ctx.run_script("scripts/episode/grids.py", *grid_layout.argv(row), *extra, gpu=GPU, clock="grids")
 
