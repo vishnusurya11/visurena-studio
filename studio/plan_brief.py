@@ -72,6 +72,15 @@ def chapter_text(book_dir: Path, number: int) -> str | None:
     return None
 
 
+def chapter_paragraphs(book_dir: Path, number: int) -> tuple[str, list[str]]:
+    """(title, paragraph texts) from the source copy, for G-COVER; ('', []) when absent."""
+    path = Path(book_dir) / "source" / "chapters" / f"ch_{number:02d}.json"
+    if not path.exists():
+        return "", []
+    doc = _read(path)
+    return doc.get("title", ""), [p.get("text", "") for p in doc.get("paragraphs", [])]
+
+
 # ---- the screenplay -----------------------------------------------------------------
 
 def _targets(book_dir: Path, targets: list[str] | None) -> list[Path]:

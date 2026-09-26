@@ -767,6 +767,59 @@ def source_faults(episode, chapter: str | None) -> list[str]:
     return out
 
 
+# ---- G-COVER and G-SHOUT: the plan reaches the chapter's end (root cause 2026-09-26) ----
+
+COVER = 0.9
+"""The share of the chapter's paragraphs the plan's last span must reach.  ep12
+reached 57 of 69 (0.83) and left out the chapter's title event."""
+TITLE_WORD = 6
+"""A title word long enough to name its event: WEYBRIDGE, SHEPPERTON, CURATE --
+not HOW, FELL, WHAT or SAW."""
+
+
+def span_paragraph(span: str, paragraphs: list[str]) -> int | None:
+    """The 1-based paragraph a verbatim span comes from, or None."""
+    best = max(((span_match(span, text), i) for i, text in enumerate(paragraphs, 1)), default=(0.0, 0))
+    return best[1] if best[0] >= SPAN_MATCH else None
+
+
+def title_words(title: str) -> set[str]:
+    """The long words of the chapter title, lower case."""
+    return {w for w in _words_of(title) if len(w) >= TITLE_WORD}
+
+
+def title_last(paragraphs: list[str], words: set[str]) -> int:
+    """The last 1-based paragraph naming any title word; 0 when none does."""
+    return max((i for i, text in enumerate(paragraphs, 1) if words & set(_words_of(text))), default=0)
+
+
+def covered_end(episode, paragraphs: list[str]) -> int:
+    """The furthest paragraph any shot's span is placed on."""
+    found = [span_paragraph(span, paragraphs) for shot in episode.shots for span in shot.source]
+    return max((n for n in found if n), default=0)
+
+
+def cover_faults(episode, paragraphs: list[str], title: str) -> list[str]:
+    """G-COVER: every shot is placed in the chapter, and the plan reaches both
+    COVER of its paragraphs and the last one that names the title's event."""
+    out = [fault("G-COVER", f"shot {s.index}", "no chapter span places it in the chapter", 0, 1)
+           for s in episode.shots if not s.source]
+    end, total = covered_end(episode, paragraphs), len(paragraphs)
+    if end < round(COVER * total):
+        out.append(fault("G-COVER", "plan", f"reaches paragraph {end} of {total}", end, round(COVER * total)))
+    if end < (last := title_last(paragraphs, title_words(title))):
+        out.append(fault("G-COVER", "plan", "stops before the chapter's title event", end, last))
+    return out
+
+
+def shout_faults(episode) -> list[str]:
+    """G-SHOUT: a line ending in '!' is somebody shouting, so it is dialogue --
+    filed as narration it is read in the calm narrating voice (ep12 line 16)."""
+    return [fault("G-SHOUT", f"line {l.index}", "a shout filed as narration is read as calm prose; make it dialogue",
+                  "narration", "dialogue")
+            for l in episode.lines if l.kind == "narration" and l.text.rstrip(" \"'’”").endswith("!")]
+
+
 # ---- the verdict ---------------------------------------------------------------
 
 def sync_faults(episode: Episode) -> list[str]:

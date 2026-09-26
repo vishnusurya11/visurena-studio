@@ -103,6 +103,20 @@ def catalog_gates(episode, chapter: str | None) -> int:
     return len(found) if hard else 0
 
 
+def cover_gates(episode, book, number: int) -> int:
+    """G-COVER and G-SHOUT, HARD (root cause 2026-09-26): the plan reaches the
+    chapter's end and its title event, and no shout is filed as narration.
+    ep12 reached paragraph 57 of 69 and read "Get under the water!" calmly."""
+    title, paragraphs = plan_brief.chapter_paragraphs(book, number)
+    found = (plan_gates.cover_faults(episode, paragraphs, title) if paragraphs
+             else [f"G-COVER plan: no source chapter for {number} to measure coverage against"])
+    found += plan_gates.shout_faults(episode)
+    print("COVER/SHOUT  :", len(found) or "clean")
+    for f in found:
+        print("   ", f[:170])
+    return len(found)
+
+
 def measured_or_projected(book: Path, number: int, episode, rate: float) -> list[dict]:
     """The timeline's own shots when it has been written, else the projection."""
     placed = episode_home.home(book, number) / "placed.json"
@@ -158,6 +172,7 @@ def main(book_id: str, number: int) -> int:
     for f in pg:
         print("   ", f[:170])
     hard += catalog_gates(ep, plan_brief.chapter_text(book, number))
+    hard += cover_gates(ep, book, number)
     from studio import cell_gates
     cg = cell_gates.faults(ep, cell_gates.pack_prompts(book))
     print("CELL GATES   :", len(cg) or "clean"); hard += len(cg)
