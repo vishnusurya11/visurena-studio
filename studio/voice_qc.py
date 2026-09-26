@@ -298,11 +298,19 @@ def ends_abruptly(clip: Path) -> bool:
     return level > -RELEASE_DB
 
 
+PACE_MIN_WORDS = 5
+"""Under this a line has no pace to measure: WPS_MAX was fitted on episode 10's
+lines of six words and more, and a three-word question spends its time on three
+short words (ep13's 'What are we?' at 0.69 s, refused as rushed on every roll)."""
+
+
 def words_per_second(text: str, seconds: float) -> float:
-    """The pace of the line, from the words it was given and the seconds measured."""
-    if seconds <= 0:
+    """The pace of the line, from the words it was given and the seconds measured;
+    0 (not measured) for a line under PACE_MIN_WORDS."""
+    words = len(normalised(text))
+    if seconds <= 0 or words < PACE_MIN_WORDS:
         return 0.0
-    return len(normalised(text)) / seconds
+    return words / seconds
 
 
 def judge(rate: float, stretch: float, wps: float = 0.0, abrupt: bool = False) -> tuple[bool, str]:

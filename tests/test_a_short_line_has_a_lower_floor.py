@@ -22,6 +22,7 @@ in 1.50 s, also the loudest line) against an episode mean of 3.02.  WPS_MAX 3.8.
 """
 from __future__ import annotations
 
+import pytest
 import importlib.util
 import sys
 from pathlib import Path
@@ -162,3 +163,10 @@ def test_a_record_the_plan_no_longer_has_is_dropped():
 
     records = {0: {"index": 0}, 1: {"index": 1}, 25: {"index": 25}, 28: {"index": 28}}
     assert sorted(say_lines.prune_stale(records, 2)) == [0, 1]
+
+
+def test_the_pace_of_a_line_too_short_to_have_one_is_not_measured():
+    """WPS_MAX was fitted on episode 10's lines of six words and more; ep13's
+    'What are we?' read at 0.69 s was refused as rushed on every roll."""
+    assert voice_qc.words_per_second("What are we?", 0.69) == 0.0
+    assert voice_qc.words_per_second("But they won't let us leave.", 1.5) == pytest.approx(4.0)
