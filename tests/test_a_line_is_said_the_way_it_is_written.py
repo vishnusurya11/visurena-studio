@@ -111,3 +111,11 @@ def test_a_flat_shout_is_a_failed_line(tmp_path, monkeypatch):
     rec = {"delivery": "shouting", "speaker": "narrator"}
     assert not say.lift_ok(tmp_path, rec, tmp_path / "l16.wav") and rec["lift_st"] < 1.0
     assert say.lift_ok(tmp_path, {"delivery": "calm", "speaker": "narrator"}, tmp_path / "l16.wav")
+
+
+def test_the_cast_record_is_the_instruction_it_was_designed_from():
+    """voice.json keeps the structured instruction as a dict; what VoiceDesign was
+    sent is `persona` and `sheet` (cast_voices SHAPE 'both')."""
+    said = ee.instruct_for({"instruction": {"character": "curate"}, "persona": "A curate of 34.",
+                            "sheet": "Gender: male."}, "hushed")
+    assert said.startswith("A curate of 34.\n\nGender: male.") and "whisper" in said

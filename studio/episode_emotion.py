@@ -38,10 +38,19 @@ def delivery_of(line) -> str:
     return "shouting" if line.text.rstrip(" \"'’”").endswith("!") else voice_bank.TIMBRE
 
 
+def designed_from(sheet: dict) -> str:
+    """What VoiceDesign was sent for this cast voice: `persona` then `sheet`
+    (cast_voices SHAPE 'both'); an older record's plain `instruction` string."""
+    if sheet.get("persona") or sheet.get("sheet"):
+        return f"{sheet.get('persona', '').strip()}\n\n{sheet.get('sheet', '').strip()}".strip()
+    said = sheet.get("instruction", "")
+    return said.strip() if isinstance(said, str) else ""
+
+
 def instruct_for(sheet: dict, register: str) -> str:
     """The speaker's own design instruction with the register's delivery note."""
     note = voice_bank.DELIVERY.get(register, voice_bank.DELIVERY[voice_bank.TIMBRE])
-    return f"{sheet.get('instruction', '').strip()} Speak this {note}"
+    return f"{designed_from(sheet)} Speak this {note}"
 
 
 def voice_dir(book: Path, speaker: str) -> Path:
