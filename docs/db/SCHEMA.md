@@ -113,6 +113,69 @@ quietly inventing a fifth state.
 
 ---
 
+## `work_orders` — the department table (Command Center, decided 2026-09-25)
+
+One row per (book, department, unit): `UNIQUE (codex_id, stage, unit)`. The row is a
+projection — disk stays the truth of a step, `events` the journal — written from one
+place and rebuildable from disk. DDL: `studio/db.py` `_WORK_ORDERS_DDL`; ruling and
+column-by-column intent: `architecture/decisions/2026-09-25_command_center.md`.
+
+| Column | Type | Notes |
+|---|---|---|
+| `id` | `INTEGER` PK | `events.order_id`, `usage.order_id`, `work_steps.order_id` point here |
+| `codex_id` | `TEXT` | → `codex.id` |
+| `stage` | `TEXT` | a key of `stages.yaml` |
+| `unit` | `TEXT` | `ep04` \| `main` \| `book` … — default `book` |
+| `number`, `kind`, `home` | | the runner's `<n>`; `book\|chapter\|style\|target\|master\|release\|scene`; book-relative posix folder |
+| `state` | `TEXT` CHECK | `blocked, queued, running, stale, held, deferred, escalated, failed, done` |
+| `step_id`, `progress` | | the step the state is about; `18/25 · T10 attempt 3 move_type` |
+| `priority`, `sequence` | `INTEGER` | lower first, 0 = bumped; slate order |
+| `gpu`, `attempts`, `flags` | `INTEGER` | current step's GPU flag; `started` events; audit rows |
+| `input_sha8`, `blocked_on` | `TEXT` | resume key; `refs/04` while waiting |
+| `claimed_by`, `lease_until`, `run_id` | `TEXT` | the lease (15 min) |
+| `requested_at`, `started_at`, `updated_at`, `finished_at` | `TEXT` | ISO-8601 UTC; `updated_at` NOT NULL |
+| `gpu_seconds`, `cost_usd` | `REAL` | `cost_usd` NULL while an unpriced call exists |
+| `deliverable`, `verdicts` | `TEXT` | book-relative path; JSON `{gate: {word, by, sha8, faults}}` |
+| `hold_reason`, `redo`, `note` | `TEXT` | the hand columns |
+| `source` | `TEXT` | `run` \| `queue` \| `backfill` |
+
+Indexes: `ix_work_orders_queue (stage, state, priority, sequence)`; the partial unique
+`ux_gpu_lease (gpu) WHERE gpu = 1 AND state = 'running'` — a second running GPU row is an
+`IntegrityError`, so one GPU is enforced by the database, not by a runner's memory.
+
+### `work_steps` — the unit page's chips
+
+`PRIMARY KEY (order_id, step_id)`: `state`, `attempt`, `run_id`, `started_at`, `ended_at`,
+`seconds`, `gpu`, `verdict_path`, `verdict_by`, `verdict_word`, `terminal`, `outputs`
+(JSON, book-relative paths), `detail` (≤ 200 chars).
+
+### `orders` — the owner's intent, one writer
+
+`kind` CHECK `hold|lift|redo|bump|retry|requeue`; `scope` CHECK `studio|book|unit`;
+`codex_id`, `stage`, `unit`, `step_id`, `note`, `by` (default `owner`), `taken_ts`,
+`taken_by_run`. Runners take rows at the top of each loop; the UI writes nothing else.
+
+### `holds` — `RENDER_HOLD` mirrored, plus book and unit holds
+
+`scope`, `codex_id`, `stage`, `unit`, `reason`, `held_by`, `held_at`, `lifted_at`.
+
+### Views — one per registered department, generated from the registry
+
+`<stage>_orders AS SELECT * FROM work_orders WHERE stage = '<stage>'` for every
+`registry.stage_names()` (`analysis_orders`, `episode_orders`, …): a department
+registered in `stages.yaml` has its table without a DDL. Studio-wide: `v_queue` (state
+`queued`, in `stage, priority, sequence, unit` order) and `v_attention` (`failed`,
+`deferred`, `escalated`, `stale` — oldest first).
+
+### Columns added to older tables
+
+`events.order_id INTEGER`, `usage.unit TEXT`, `usage.order_id INTEGER` — idempotent
+`ADD COLUMN`s in `db._migrate_work_orders`. That migration only CREATEs IF NOT EXISTS
+and ADDs COLUMNs: it never renames, drops or rebuilds a table, because a runner may be
+writing the live file while it runs (a test guards this).
+
+---
+
 ## Open items
 
 | Item | Blocking |

@@ -7,7 +7,7 @@ W5 = C10 · W6 = C11. Each commit is green on the full suite before it lands.
 
 ## Progress
 
-- [ ] C1 the tables, the migration, a view per department
+- [x] C1 the tables, the migration, a view per department — 19 tests; the migration only CREATEs and ADDs (a live runner was writing; the plan's "rebuild" wording is superseded)
 - [ ] C2 rows written from `add_event`
 - [ ] C3 verdicts and flags on the row
 - [ ] C4 `in:`/`out:` in the registry, the manifest, the drift guard

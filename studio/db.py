@@ -13,7 +13,7 @@ import sqlite3
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
-from studio import registry
+from studio import registry, spend
 
 DB_PATH = Path("db") / "visurena_studio.db"
 
@@ -52,6 +52,70 @@ CREATE INDEX IF NOT EXISTS ix_events_status
   ON events (codex_id, stage, step_id, event_ts);
 """
 
+# The Command Center (decision 2026-09-25): one work-order row per (book, department,
+# unit) drives the departments; a view per registered stage is that department's table.
+# A sibling of _DDL so _events_ddl() keeps slicing the codex + events block alone.
+_WORK_ORDERS_DDL = """
+CREATE TABLE IF NOT EXISTS work_orders (
+  id           INTEGER PRIMARY KEY,
+  codex_id     TEXT NOT NULL REFERENCES codex(id),
+  stage        TEXT NOT NULL,
+  unit         TEXT NOT NULL DEFAULT 'book',
+  number       INTEGER,
+  kind         TEXT NOT NULL DEFAULT 'book',
+  home         TEXT NOT NULL,
+  state        TEXT NOT NULL CHECK (state IN ('blocked','queued','running','stale','held',
+                                              'deferred','escalated','failed','done')),
+  step_id      TEXT,
+  progress     TEXT,
+  priority     INTEGER NOT NULL DEFAULT 0,
+  sequence     INTEGER,
+  gpu          INTEGER NOT NULL DEFAULT 0,
+  attempts     INTEGER NOT NULL DEFAULT 0,
+  flags        INTEGER NOT NULL DEFAULT 0,
+  input_sha8   TEXT, blocked_on TEXT,
+  claimed_by   TEXT, lease_until TEXT, run_id TEXT,
+  requested_at TEXT, started_at TEXT, updated_at TEXT NOT NULL, finished_at TEXT,
+  gpu_seconds  REAL NOT NULL DEFAULT 0, cost_usd REAL,
+  deliverable  TEXT, verdicts TEXT,
+  hold_reason  TEXT, redo TEXT, note TEXT,
+  source       TEXT NOT NULL DEFAULT 'run',
+  UNIQUE (codex_id, stage, unit)
+);
+CREATE INDEX IF NOT EXISTS ix_work_orders_queue ON work_orders (stage, state, priority, sequence);
+CREATE UNIQUE INDEX IF NOT EXISTS ux_gpu_lease ON work_orders (gpu) WHERE gpu = 1 AND state = 'running';
+
+CREATE TABLE IF NOT EXISTS work_steps (
+  order_id INTEGER NOT NULL REFERENCES work_orders(id), step_id TEXT NOT NULL,
+  state TEXT NOT NULL, attempt INTEGER NOT NULL DEFAULT 0, run_id TEXT,
+  started_at TEXT, ended_at TEXT, seconds REAL NOT NULL DEFAULT 0, gpu INTEGER NOT NULL DEFAULT 0,
+  verdict_path TEXT, verdict_by TEXT, verdict_word TEXT, terminal TEXT NOT NULL DEFAULT '',
+  outputs TEXT, detail TEXT,
+  PRIMARY KEY (order_id, step_id)
+);
+
+CREATE TABLE IF NOT EXISTS orders (
+  id INTEGER PRIMARY KEY, ts TEXT NOT NULL,
+  kind TEXT NOT NULL CHECK (kind IN ('hold','lift','redo','bump','retry','requeue')),
+  scope TEXT NOT NULL CHECK (scope IN ('studio','book','unit')),
+  codex_id TEXT, stage TEXT, unit TEXT, step_id TEXT,
+  note TEXT, by TEXT NOT NULL DEFAULT 'owner', taken_ts TEXT, taken_by_run TEXT
+);
+CREATE TABLE IF NOT EXISTS holds (
+  id INTEGER PRIMARY KEY, scope TEXT NOT NULL, codex_id TEXT, stage TEXT, unit TEXT,
+  reason TEXT NOT NULL, held_by TEXT, held_at TEXT NOT NULL, lifted_at TEXT
+);
+
+CREATE VIEW IF NOT EXISTS v_queue AS
+  SELECT * FROM work_orders WHERE state = 'queued' ORDER BY stage, priority, sequence, unit;
+CREATE VIEW IF NOT EXISTS v_attention AS
+  SELECT * FROM work_orders WHERE state IN ('failed', 'deferred', 'escalated', 'stale')
+  ORDER BY updated_at, id;
+"""
+
+WORK_ORDER_STATES = ("blocked", "queued", "running", "stale", "held",
+                     "deferred", "escalated", "failed", "done")
+
 
 def get_connection(db_path: str | Path = DB_PATH) -> sqlite3.Connection:
     """Open a connection with row access by name and FK enforcement on."""
@@ -83,6 +147,7 @@ def _migrate(conn: sqlite3.Connection) -> None:
             conn.execute(f"ALTER TABLE codex ADD COLUMN {started_col} TEXT")
             conn.execute(f"ALTER TABLE codex ADD COLUMN {updated_col} TEXT")
     _migrate_events(conn)
+    _migrate_work_orders(conn)
 
 
 def _migrate_events(conn: sqlite3.Connection) -> None:
@@ -108,6 +173,28 @@ def _events_ddl() -> str:
     """The events table's CREATE statements alone (table + index), from the DDL."""
     start = _DDL.index("CREATE TABLE IF NOT EXISTS events")
     return _DDL[start:]
+
+
+def _add_column(conn: sqlite3.Connection, table: str, column: str, type_: str) -> None:
+    """ADD one column if the table lacks it (idempotent, by PRAGMA table_info)."""
+    cols = {row["name"] for row in conn.execute(f"PRAGMA table_info({table})")}
+    if column not in cols:
+        conn.execute(f"ALTER TABLE {table} ADD COLUMN {column} {type_}")
+
+
+def _migrate_work_orders(conn: sqlite3.Connection) -> None:
+    """The Command Center's tables, brought in beside a live runner: only CREATE IF
+    NOT EXISTS and ADD COLUMN -- nothing here renames, drops or rebuilds a table.
+    `usage` is created from its own DDL first (an old DB may not have it), then
+    widened; one view per registered department, generated from the registry."""
+    conn.executescript(spend._DDL)
+    conn.executescript(_WORK_ORDERS_DDL)
+    _add_column(conn, "events", "order_id", "INTEGER")
+    _add_column(conn, "usage", "unit", "TEXT")
+    _add_column(conn, "usage", "order_id", "INTEGER")
+    for stage in STAGES:
+        conn.execute(f"CREATE VIEW IF NOT EXISTS {stage}_orders AS"
+                     f" SELECT * FROM work_orders WHERE stage = '{stage}'")
 
 
 def init_db(conn: sqlite3.Connection) -> None:
@@ -309,3 +396,75 @@ def stage_status(conn: sqlite3.Connection, codex_id: str, stage: str) -> dict[st
         (codex_id, stage),
     )
     return {row["step_id"]: row["event"] for row in rows}
+
+
+# --- work orders: the department table (decision 2026-09-25) ---
+
+
+def work_order(conn: sqlite3.Connection, codex_id: str, stage: str, unit: str) -> sqlite3.Row | None:
+    """The one row of a (book, department, unit); None before anything ordered it."""
+    return conn.execute(
+        "SELECT * FROM work_orders WHERE codex_id = ? AND stage = ? AND unit = ?",
+        (codex_id, stage, unit),
+    ).fetchone()
+
+
+def _order_defaults(stage: str, unit: str) -> dict[str, str]:
+    """`home` and `kind` from the registry's unit grammar: an episode lives under
+    episodes/<unit> and is a chapter; every other department is book-level and
+    lives in its own folder (`refs`, `analysis`, `trailer`, ...)."""
+    if stage == "episode":
+        return {"home": f"episodes/{unit}", "kind": "chapter"}
+    return {"home": stage, "kind": "book"}
+
+
+def _insert_work_order(conn: sqlite3.Connection, codex_id: str, stage: str, unit: str,
+                       fields: dict) -> int:
+    """INSERT the row with the grammar's defaults under the given fields; its id."""
+    values = {**_order_defaults(stage, unit), "state": "blocked", **fields,
+              "codex_id": codex_id, "stage": stage, "unit": unit,
+              "updated_at": utc_now().strftime("%Y-%m-%dT%H:%M:%SZ")}
+    cols = ", ".join(values)
+    marks = ", ".join("?" * len(values))
+    cur = conn.execute(f"INSERT INTO work_orders ({cols}) VALUES ({marks})", tuple(values.values()))
+    conn.commit()
+    return cur.lastrowid
+
+
+def _update_work_order(conn: sqlite3.Connection, order_id: int, fields: dict) -> int:
+    """UPDATE the given columns of one row; updated_at always; the same id back."""
+    fields = {**fields, "updated_at": utc_now().strftime("%Y-%m-%dT%H:%M:%SZ")}
+    assignments = ", ".join(f"{col} = ?" for col in fields)
+    conn.execute(f"UPDATE work_orders SET {assignments} WHERE id = ?",
+                 (*fields.values(), order_id))
+    conn.commit()
+    return order_id
+
+
+def upsert_work_order(conn: sqlite3.Connection, codex_id: str, stage: str, unit: str,
+                      **fields) -> int:
+    """One row per (book, department, unit): INSERT it (home/kind from the unit
+    grammar) or UPDATE the given columns.  Returns the row id.  A column the
+    table lacks is an OperationalError -- the DDL is the contract, not a kwarg."""
+    row = work_order(conn, codex_id, stage, unit)
+    if row is None:
+        return _insert_work_order(conn, codex_id, stage, unit, fields)
+    return _update_work_order(conn, row["id"], fields)
+
+
+def department_rows(conn: sqlite3.Connection, stage: str) -> list[sqlite3.Row]:
+    """A department's table: its registry-generated view, queue order."""
+    if stage not in STAGES:
+        raise ValueError(f"unknown stage {stage!r}; known: {STAGES}")
+    return list(conn.execute(
+        f"SELECT * FROM {stage}_orders ORDER BY priority, sequence, unit"))
+
+
+def claim_gpu(conn: sqlite3.Connection, order_id: int) -> None:
+    """Mark a row running on the GPU.  The partial unique index ux_gpu_lease makes
+    a second running GPU row an IntegrityError: one GPU, one claim."""
+    conn.execute(
+        "UPDATE work_orders SET state = 'running', gpu = 1, updated_at = ? WHERE id = ?",
+        (utc_now().strftime("%Y-%m-%dT%H:%M:%SZ"), order_id),
+    )
+    conn.commit()
