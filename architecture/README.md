@@ -29,14 +29,14 @@ brick (`docs/ARCHITECTURE.md`).
 | date | file | status |
 |---|---|---|
 | 2026-09-24 | [decisions/2026-09-24_future_departments.md](decisions/2026-09-24_future_departments.md) + [stages_future.yaml](decisions/2026-09-24_stages_future.yaml) | PROPOSAL — the big-studio shape: five divisions, one registry stage per format line, unit grammar, seven owner gates. Awaiting the owner. |
-| 2026-09-25 | [decisions/2026-09-25_command_center.md](decisions/2026-09-25_command_center.md) + [research/](decisions/research/2026-09-25_command_center/) | PROPOSAL — the Command Center: one work-order row per (book, department, unit), a view per department, standard `in:`/`out:` in the registry and a `manifest.json` across the boundary, tick + pull drive, the local board. Tab *Command Center* on the page. Awaiting the owner. |
+| 2026-09-25 | [decisions/2026-09-25_command_center.md](decisions/2026-09-25_command_center.md) + [research/](decisions/research/2026-09-25_command_center/) | DECIDED (owner, 2026-09-25) — the Command Center: one work-order row per (book, department, unit), a view per department, standard `in:`/`out:` in the registry and a `manifest.json` across the boundary, tick + pull drive, the local board. Tab *Command Center* on the page. Building. |
 | 2026-09-24 | [decisions/2026-09-24_judges_replace_the_eye.md](decisions/2026-09-24_judges_replace_the_eye.md) | DECIDED (owner) — no refs/episode step parks on a person: judges with priced ladders sign LOOK, PLAN, EYE ×2, MASTER as pass or flagged; the owner audits after the fact; casebook + bench + ratchet. |
 
 ## Plans
 
 | date | file | status |
 |---|---|---|
-| 2026-09-25 | [plan/2026-09-25_command_center_build.md](plan/2026-09-25_command_center_build.md) | PROPOSED — eleven commits: the tables, the contract, the drive, the board; waits for the owner's review |
+| 2026-09-25 | [plan/2026-09-25_command_center_build.md](plan/2026-09-25_command_center_build.md) | IN PROGRESS — eleven commits in six waves: the tables, the contract, the drive, the board |
 | 2026-09-24 | [plan/2026-09-24_registry_departments.md](plan/2026-09-24_registry_departments.md) | IN PROGRESS — commits 1-3 and 6 done by the episode build; 4, 5, 7-10 open |
 | 2026-09-24 | [plan/2026-09-24_episode_department_build.md](plan/2026-09-24_episode_department_build.md) | DONE 2026-09-24 — refs + episode as registry departments with runners, twelve independent steps, the writer agent, eyes as files |
 | 2026-09-24 | [plan/2026-09-24_judges_replace_the_eye_build.md](plan/2026-09-24_judges_replace_the_eye_build.md) | DONE 2026-09-24 — casebook, bench, ratchet; gates.yaml; picture, take, plan and master judges with priced ladders; every refs/episode park removed; the audit sheet |

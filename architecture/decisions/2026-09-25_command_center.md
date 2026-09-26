@@ -1,6 +1,6 @@
 # The Command Center: departments driven by their tables, and the board that shows them
 
-**Status: PROPOSED 2026-09-25 — awaiting the owner's review** (`architecture/index.html`, tab
+**Status: DECIDED 2026-09-25 — the owner ruled "looks good"; building** (was PROPOSED the same day) (`architecture/index.html`, tab
 *Command Center*). Five reports under `research/2026-09-25_command_center/` (A data model,
 B execution model, C production office, D operations UI, E codebase migration); this file is
 the chair's ruling over them. Tracker: `architecture/plan/2026-09-25_command_center_build.md`.

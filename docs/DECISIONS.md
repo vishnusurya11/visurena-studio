@@ -4,6 +4,20 @@ Newest first. Every architectural change gets an entry.
 
 ---
 
+## 2026-09-25 — The Command Center: departments driven by their tables (owner decision)
+
+**Ruling (owner, "looks good"):** one work-order row per (book, department, unit) in a
+`work_orders` table with a generated view per department; standard inputs and outputs
+declared once per step in `stages.yaml` (`in:`/`out:`) and carried across a department
+boundary by the unit's `manifest.json`; rows materialized on a tick from the registry's
+`requires`, pulled by the runner (`episode.py <book> <n>` unchanged; the no-unit form drains
+the queue); nine stored states; a deferred unit waits for an order; the owner's hand is one
+`orders` table; a local read-only board (FastAPI + Jinja2 + htmx, port 8700) over the ledger.
+Not built on purpose: a worker loop that starts a GPU job unattended — a queued row is a
+request until the owner rules it an instruction. Full ruling and the five reports:
+`architecture/decisions/2026-09-25_command_center.md`; tracker
+`architecture/plan/2026-09-25_command_center_build.md`.
+
 ## 2026-09-24 — Automate the taste gates (owner decision)
 
 Decision id: `2026-09-24-automate-the-taste-gates`

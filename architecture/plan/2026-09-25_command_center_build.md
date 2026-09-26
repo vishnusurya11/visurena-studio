@@ -1,9 +1,23 @@
 # Command Center build — the department tables and the board
 
-**Status: PROPOSED — waiting for the owner's review of
-`architecture/decisions/2026-09-25_command_center.md`** (tab *Command Center* on
-`architecture/index.html`). Nothing below is built. Each commit is green on its own; the
-tests are named in the repo's sentence style and written before the code.
+**Status: IN PROGRESS — owner ruled "looks good" 2026-09-25; build started the same day.**
+Decision: `architecture/decisions/2026-09-25_command_center.md`. Built in waves so no two
+agents edit the same file: W1 = C1 · W2 = C2 + C4 + C6 · W3 = C3 + C5 + C7 · W4 = C8 + C9 ·
+W5 = C10 · W6 = C11. Each commit is green on the full suite before it lands.
+
+## Progress
+
+- [ ] C1 the tables, the migration, a view per department
+- [ ] C2 rows written from `add_event`
+- [ ] C3 verdicts and flags on the row
+- [ ] C4 `in:`/`out:` in the registry, the manifest, the drift guard
+- [ ] C5 cost per unit
+- [ ] C6 holds, orders, `studio_cli`
+- [ ] C7 the tick, `v_queue`, `v_attention`; Current tab + README
+- [ ] C8 backfill (dry-run listed to the owner before `--write`)
+- [ ] C9 runners take the queue
+- [ ] C10 the board, read-only (FastAPI pinned when no GPU run is live)
+- [ ] C11 actions; README, DECISIONS, republish
 
 ## Rules for every commit
 
@@ -47,3 +61,4 @@ that would make it an instruction is a separate decision.
 - 2026-09-25 — five reports (A–E) under `architecture/decisions/research/2026-09-25_command_center/`;
   the chair's ruling in the decision file; this tracker; the *Command Center* tab on the page.
   Owner review pending.
+- 2026-09-25 — owner: "looks good .. use sub agents and also a way to track progress and build it". Status → IN PROGRESS; this list is the tracker.
