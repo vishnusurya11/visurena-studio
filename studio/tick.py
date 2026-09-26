@@ -174,6 +174,21 @@ def settle_skipped(conn: sqlite3.Connection, codex_id: str, stage: str, unit: st
     return True
 
 
+def settle_from_ledger(conn: sqlite3.Connection, codex_id: str, stage: str, unit: str) -> bool:
+    """A book-level row the ledger already calls finished is done: runners write
+    codex.<stage>_status = 'completed' (db.mark_stage).  Only for the book grain,
+    whose one unit that column describes; a per-unit stage settles from disk."""
+    row = db.work_order(conn, codex_id, stage, unit)
+    if row is None or row["state"] not in QUEUEABLE or unit != book_unit(stage):
+        return False
+    status = db.get_codex(conn, codex_id)[f"{stage}_status"]
+    if status != "completed":
+        return False
+    db.upsert_work_order(conn, codex_id, stage, unit, state="done", blocked_on=None,
+                         step_id=registry.steps(stage)[-1]["id"], finished_at=_now())
+    return True
+
+
 # --- holds on the rows ---
 
 
@@ -254,7 +269,8 @@ def verify(conn: sqlite3.Connection, codex_id: str, stage: str, unit: str, book_
 def tick_unit(conn: sqlite3.Connection, codex_id: str, stage: str, unit: str, book_dir: Path) -> Counter:
     """One row through the desk: settle, release, promote, park, cost."""
     before = db.work_order(conn, codex_id, stage, unit)["state"]
-    settled = settle_skipped(conn, codex_id, stage, unit, book_dir)
+    settled = (settle_skipped(conn, codex_id, stage, unit, book_dir)
+               or settle_from_ledger(conn, codex_id, stage, unit))
     release_held(conn, codex_id, stage, unit)
     promote(conn, codex_id, stage, unit, book_dir)
     state = park_held(conn, codex_id, stage, unit)
