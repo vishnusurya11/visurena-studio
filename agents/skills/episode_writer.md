@@ -196,6 +196,31 @@ extreme_close, close, medium_close, medium, full, wide.
 AUTHORED from the context, never derived from the section label: one drone
 under a breakfast, a joke and a killing is wrong about two of them.
 
+## The whole chapter, its sound and its voice (2026-09-26)
+
+Episode 12 shipped without its chapter's title event, without a single sound
+effect, and with its shouts read as calm prose. Each is now a refusal.
+
+- **Cover the chapter to its end (G-COVER).** Every shot carries at least one
+  verbatim `source` span from the chapter. The furthest span must reach 90 % of
+  the chapter's paragraphs AND the last paragraph that names the title's event
+  (for "What I Saw of the Destruction of Weybridge and Shepperton", the
+  destruction itself). Read the WHOLE chapter before choosing the turn and the
+  answer; budget shots by dramatic weight, not in paragraph order. A long
+  chapter is compressed, never cut short.
+- **A shout is dialogue (G-SHOUT).** A line that ends in `!` is somebody calling
+  out: `kind: "dialogue"`, its speaker the one who shouts.
+- **Say how a line is said.** `delivery` on a line: `hushed`, `urgent`,
+  `shouting`, `exultant`, `grieving`, `threatening`, `cold`, `curious`, or empty
+  for calm (a `!` line with no delivery is shouted). A shout must rise; a
+  whisper sits under the narration in the mix.
+- **Name the sounds (G-SOUND).** Every setup has an `ambience` (what the place
+  sounds like under everything: "larks, wind in the pines, a slow river"). Every
+  shot whose frame or motion names a loud event — guns, a shell, a crash, a
+  splash, hooves, a scream — carries `sounds`: `[{"sound": "six field guns firing
+  together, a heavy concussion", "at": 0.5, "seconds": 3.0}]`. One event per
+  sound, plain words, no echo or reverb words (they multiply the hits).
+
 ---
 
 ## The output contract, in words
@@ -230,3 +255,6 @@ again — the gates read the plan, never a diff.
    still going; at least eight distinct moves; no move twice in a row.
 8. Dialogue inside the dial, on readable faces; narration written, not lifted;
    the narrator acts; the line lengths vary.
+9. Every shot has a `source` span; the plan reaches the chapter's end and its
+   title event; every `!` line is dialogue with a delivery.
+10. Every setup has an `ambience`; every loud event in the prose has its `sounds`.

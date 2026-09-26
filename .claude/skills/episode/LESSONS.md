@@ -6,6 +6,14 @@ SKILL.md.
 
 ## Process
 
+- **A terminal is not a pass (ep12, 2026-09-26).** Every judged gate on ep12
+  ended `keep_best` or `flag`, one at attempt 0 with the budget 2993 s overdrawn,
+  one repeating a single fault 531 times -- and it was published as "the gates
+  passed". The episode also had no sound effects (an empty cue list since
+  2026-09-13), flat shouts (the reading clip was the emotion reference), a plan
+  that dropped the chapter's title event, and five frozen shots the block-max
+  meter could not see. `docs/audit/2026-09-26_ep12_root_cause.md`.
+
 - **Gate the plan through the take-prompt battery before audio or pictures.**
   ep06 paid for three picture stages by skipping it. ep09 skipped it too, and
   seven over-long prompts and four banned props surfaced only at the takes

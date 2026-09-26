@@ -304,6 +304,21 @@ panel gates: the takes refuse a verdict older than its panel.
 
 ---
 
+## Before anything leaves the machine (2026-09-26)
+
+Episode 12 was published because the runner finished and QC was green. Every
+taste gate had ended in a terminal, the plan stopped at paragraph 57 of 69, the
+mix had no sound effects and the shouts were flat. Nobody watched it. So, for
+every episode, before `youtube_upload.py`:
+
+1. Read `learnings.jsonl`: any gate whose last row is a terminal is OPEN. Fix it
+   or ask the owner; never write `review/waiver.json` yourself.
+2. Watch the master FULL SIZE and LISTEN to it, start to end. Read every take
+   strip. Check the plan's last span against the chapter's last paragraph.
+3. Write `review/director_signoff.md` (Watched / Take strips / Coverage / Flags)
+   naming the cut's sha8. The lock refuses without it.
+4. A run the owner calls a test stays local or private until he says public.
+
 ## Cut and QC
 
 **Audio first, always.** The picture is cut to the measured voice. Every line

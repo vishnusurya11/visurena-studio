@@ -32,6 +32,11 @@ missing input, or an unread picture.
 | SHEET TEXT | the Scarlet book's paid-sheet check; skipped for sheet books, and a crash is printed, never counted silently | HARD where it applies |
 | G-STORY advisories, G-NAMES, G-RATE, G-MOTION, L8 pace, G-SUNSPLIT, G-LIGHT-SIDE, G-HAT with "bareheaded" | caption-like lines, first hearing of a name, speaking rate, motion wording, a face split under a sun, the light side of a face, a hat clash the picture already resolves | advisory |
 
+**2026-09-26 additions, all HARD:** G-COVER (every shot a `source` span; the
+furthest reaches 90 % of the chapter's paragraphs and the title event's last
+paragraph -- ep12 reached 57 of 69), G-SHOUT (a `!` line is dialogue), G-SOUND
+(every setup an `ambience`; a loud event in the prose carries `sounds`).
+
 ## Timeline — `timeline.py` (HARD)
 
 The measured runtime must sit in 120-180 s, and every line at its shot's start
@@ -115,11 +120,27 @@ QC fails on any of these:
 - an unmeasured edit;
 - **any take without a current dq AND content verdict;**
 - **no title card** (`title_card` false).
+- **a planned sound the master does not let you hear** (`sound`, `episode_sound.presence`,
+  6 dB over the second before it) -- 2026-09-26.
 
 A take that failed and spent its retake budget does not fail the master. That
 is the owner's call, and it was measured.
 
 ## Publish — `youtube_upload.py`
+
+**THE PUBLISH LOCK (2026-09-26, `studio/publish_lock.py`).** Both doors -- the
+upload and the public flip -- refuse on:
+
+- **an open terminal**: any gate whose last row in `learnings.jsonl` ended
+  `keep_best`, `flag` or `still`. ep12 went public with PLAN, EYE_PANELS,
+  EYE_TAKES and MASTER all ended in terminals. Only the OWNER clears one, in
+  `review/waiver.json` (`{"MASTER": "reason"}`); the assistant never writes it.
+- **a voice that is not one voice**: `review/speaker_check.json` `ok: false`.
+- **no director's sign-off**: `review/director_signoff.md` naming THIS cut's
+  sha8, with four written sections -- `## Watched` (the master full size WITH
+  sound, timestamped notes), `## Take strips` (every strip read), `## Coverage`
+  (the plan's last paragraph against the chapter's), `## Flags` (every open flag
+  accepted or refused). A green QC is not a watch.
 
 It refuses on failed takes, content failures and unjudged takes. One
 `--override="<reason>"` waives the QC pass and the take roll-up and is

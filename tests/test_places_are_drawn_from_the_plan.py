@@ -75,3 +75,20 @@ def test_an_existing_row_is_never_rewritten(tmp_path):
     before = (b / "analysis" / "locations" / "common.json").read_text()
     places.ensure_rows(b, {"pit": Setup("common", "wide_pit_day")}, names={"common": "x"}, number=9)
     assert (b / "analysis" / "locations" / "common.json").read_text() == before
+
+
+def test_a_place_is_drawn_in_the_books_look(tmp_path):
+    """Root cause 2026-09-26 (D13): the place pictures had no style words, the
+    house model drew them painterly, and from ep09 the storyboard copied its
+    style from the place -- 3D people pasted onto paintings."""
+    b = book(tmp_path, ["common"])
+    asked = []
+
+    def draw(prompt, target):
+        asked.append(prompt)
+        target.parent.mkdir(parents=True, exist_ok=True)
+        target.write_bytes(b"png")
+    places.draw_missing(b, {"b": Setup("common", "wide_new", "a meadow at noon")}, draw,
+                        look="Angular stylised 3D animation, brush-stroke texture")
+    assert asked[0].startswith("a meadow at noon") and "Angular stylised 3D animation" in asked[0]
+    assert "not a painting" in asked[0].lower()

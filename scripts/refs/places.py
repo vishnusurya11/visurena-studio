@@ -73,13 +73,27 @@ def ensure_rows(book: Path, setups: dict, names: dict[str, str], number: int) ->
     return wrote
 
 
-def draw_missing(book: Path, setups: dict, draw) -> list[Path]:
-    """Draw every missing view with `draw(prompt, target)`, from its setup's words."""
+LOOK = ("Rendered in exactly the same look as the characters that will stand in it: {look}, "
+        "broad simplified 3D shapes, flat high-chroma colour, clean edges -- a frame from a stylised "
+        "3D animated film, not a painting and not a photograph.")
+"""Root cause 2026-09-26 (D13): with no style words the house model drew places
+painterly while it drew the cast as stylised 3D figures, and the storyboard takes
+its style from the place picture -- people pasted onto paintings from ep09 on."""
+
+
+def styled(described: str, look: str) -> str:
+    """The setup's words, then the book's look when it declares one."""
+    return f"{described} {LOOK.format(look=look.strip().rstrip('.'))}" if look.strip() else described
+
+
+def draw_missing(book: Path, setups: dict, draw, look: str = "") -> list[Path]:
+    """Draw every missing view with `draw(prompt, target)`, from its setup's words
+    in the book's look."""
     made = []
     for name, loc, view, state in status(book, setups):
         if state == "missing" and picture(book, loc, view) not in made:
             target = picture(book, loc, view)
-            draw(setups[name].described, target)
+            draw(styled(setups[name].described, look), target)
             made.append(target)
     return made
 
@@ -105,11 +119,12 @@ def krea(book: Path):
 
 def main(book_id: str, number: int, drawing: bool, names: dict[str, str]) -> int:
     book = episode_home.book_dir(book_id)
-    setups = episode_home.load_plan(book, number).setups
+    plan = episode_home.load_plan(book, number)
+    setups = plan.setups
     for loc in ensure_rows(book, setups, names, number):
         print(f"  new row: {loc}")
     if drawing:
-        draw_missing(book, setups, krea(book))
+        draw_missing(book, setups, krea(book), look=plan.look)
     rows = status(book, setups)
     for name, loc, view, state in rows:
         print(f"  {state:8} {name:10} {loc}/{view}.png")
