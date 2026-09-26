@@ -65,6 +65,17 @@ def test_a_head_written_after_the_cut_is_not_done(tmp_path, monkeypatch):
     assert edit.done(ctx) is False
 
 
+def test_a_still_written_after_the_cut_is_not_done(tmp_path, monkeypatch):
+    ctx = ctx_for(tmp_path)
+    now = time.time()
+    monkeypatch.setattr(edit, "title_clip", lambda c: tmp_path / "title.mp4")
+    touch(tmp_path / "title.mp4", now - 100)
+    touch(episode_home.master_path(ctx.book_dir, 12, "r2v"), now - 50)
+    touch(ctx.home / "takes" / "r2v" / "stills.json", now - 5)
+    ctx.extra = ["--engine=r2v"]
+    assert edit.done(ctx) is False
+
+
 # ---- step 09: every take current to its built card -----------------------------------
 
 def test_a_take_stale_to_its_card_is_not_done(tmp_path, monkeypatch):

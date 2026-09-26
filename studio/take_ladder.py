@@ -21,6 +21,7 @@ from __future__ import annotations
 
 import json
 import re
+import time
 from pathlib import Path
 
 from studio import episode_home, episode_ref_official as ro, judged_gate, plan_gates, take_leak
@@ -249,7 +250,8 @@ def write_still(home: Path, index: int, panel: Path, seconds: float, why: str) -
     """One more still, keyed by take index, the panel book-relative."""
     stills = {str(k): v for k, v in load_stills(home).items()}
     book = Path(home).parents[1]
-    stills[str(index)] = {"panel": episode_home.relative(book, panel), "seconds": seconds, "why": why}
+    stills[str(index)] = {"panel": episode_home.relative(book, panel), "seconds": seconds, "why": why,
+                          "decided": time.time()}
     return episode_home.write_json(stills_path(home), stills)
 
 

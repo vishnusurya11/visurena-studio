@@ -584,7 +584,15 @@ def stills_of(take_dir: Path, book: Path) -> dict[int, Path]:
     if not path.exists():
         return {}
     doc = episode_home.read_json(path)
-    return {int(k): Path(book) / v["panel"] for k, v in doc.items()}
+    return {int(k): Path(book) / v["panel"] for k, v in doc.items()
+            if not retaken(Path(take_dir) / f"T{int(k):02d}.mp4", v.get("decided", path.stat().st_mtime))}
+
+
+def retaken(take: Path, decided: float) -> bool:
+    """The take was rendered again after its still was decided, so the still
+    answers a take that no longer exists.  ep12: T19 was stilled at 07:09,
+    retaken at 08:03 and passed, and the cut still held the panel."""
+    return take.exists() and take.stat().st_mtime > decided
 
 
 def still_segment(panel: Path, seconds: float, out: Path, width: int, height: int, fps: int,

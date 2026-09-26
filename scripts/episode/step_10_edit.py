@@ -38,10 +38,12 @@ def title_clip(ctx) -> Path:
 
 
 def inputs(ctx) -> list[Path]:
-    """What the cut is made from: the kept takes, the timeline, the heads, the card."""
+    """What the cut is made from: the kept takes, the timeline, the heads, the
+    stills, the card."""
     takes = sorted((ctx.home / "takes" / "r2v").glob("T??.mp4"))
     timeline = episode_home.timeline_path(ctx.book_dir, ctx.number)
-    return takes + [p for p in (timeline, ctx.home / "heads.json", title_clip(ctx))
+    stills = ctx.home / "takes" / "r2v" / "stills.json"
+    return takes + [p for p in (timeline, ctx.home / "heads.json", stills, title_clip(ctx))
                     if p.exists()]
 
 
