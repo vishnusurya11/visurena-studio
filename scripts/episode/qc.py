@@ -29,6 +29,7 @@ from studio.episode_home import episode_arg
 from studio import judged
 from studio import edit_gate, episode_home, gap_owner, episode_seq_board as sq, voice_qc, youtube_publish as yp
 from studio import episode_takes as tk
+from studio import episode_sound
 from studio.episode_spec import Episode
 from studio.trailer_assemble import clip_seconds, integrated, true_peak
 
@@ -294,7 +295,10 @@ def verdict(report: dict) -> bool:
             # A CUT WITH NO TITLE CARD IS NOT A PASS: assemble.tail appends only
             # the black chip when no card exists, and title_card:false was
             # written but never judged (publish audit, 2026-09-23).
-            and report.get("title_card") is True)
+            and report.get("title_card") is True
+            # EVERY PLANNED SOUND IS HEARD (root cause 2026-09-26, D10): twelve
+            # episodes shipped with an empty cue list and nothing here noticed.
+            and all(row.get("ok") for row in report.get("sound", [])))
 
 
 def main(book_id: str, number: int, engine: str = "i2v") -> None:
@@ -339,6 +343,7 @@ def main(book_id: str, number: int, engine: str = "i2v") -> None:
     report["missing_cuts"] = drop_on_grid(
         missing_cuts(planned_cuts(placed), seen, proven=report["edit"].get("cuts")),
         report["internal_cut_rows"])
+    report["sound"] = episode_sound.presence(master, episode, placed)
     report["takes"] = takes_rollup(take_dir)
     report["sheets"] = sheets_rollup(episode_home.boards_dir(book, number), book)
     report["passed"] = verdict(report)

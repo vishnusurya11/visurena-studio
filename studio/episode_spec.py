@@ -110,6 +110,15 @@ READABLE = {"close", "medium_close"}
 """Where a speaking mouth reads on a phone: a dialogue shot must be one of these."""
 
 
+class Sound(BaseModel):
+    """One sound effect on a shot: what it is, when after the shot starts, how
+    long, how loud against the cue default (studio/sfx_cues.py)."""
+    sound: str = Field(min_length=3)
+    at: float = Field(default=0.0, ge=0.0)
+    seconds: float = Field(default=2.0, ge=1.0, le=10.0)
+    gain_db: float = Field(default=0.0, ge=-20.0, le=12.0)
+
+
 class Line(BaseModel):
     index: int = Field(ge=0)
     kind: Literal["dialogue", "narration"]
@@ -261,6 +270,10 @@ class Shot(Framed):
     """Unnamed people this shot puts in the picture beyond its `faces`: a
     sentry, a man at a counter. A CROWD is the setup's to declare; this is
     the count for everyone else, so no gate has to guess it from prose."""
+    sounds: list[Sound] = Field(default_factory=list)
+    """The sound effects on this shot (root cause 2026-09-26, D10): a gun, a shell
+    burst, a splash.  G-SOUND refuses a shot whose prose names a loud event and
+    carries none; QC fails a sound the master does not let you hear."""
     source: list[str] = Field(default_factory=list)
     """The chapter's own words behind what this shot CLAIMS -- verbatim spans.
 
@@ -373,6 +386,11 @@ class Setup(BaseModel):
     outdoors: bool = False
     """True when this setup stands under the sky.  The hat rule for the whole
     sheet is a function of it, stated flat instead of as a conditional."""
+    ambience: str = ""
+    """What this place SOUNDS like under everything -- larks and a slow river, a
+    crowd murmuring in a street.  Root cause 2026-09-26 (D10): twelve episodes had
+    no sound but voice and a violin; `studio/episode_sound.py` lays this under the
+    setup's shots and G-SOUND refuses a setup without one."""
     props: list[str] = Field(default_factory=list)
     """Prop plates attached as references (`plate_<name>.png`): the one that
     binds a vehicle across the setups that share it.  The cab was bound by

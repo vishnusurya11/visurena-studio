@@ -117,6 +117,17 @@ def cover_gates(episode, book, number: int) -> int:
     return len(found)
 
 
+def sound_gates(episode) -> int:
+    """G-SOUND, HARD (root cause 2026-09-26, D10): every setup names its
+    ambience and every shot whose prose names a loud event carries a sound."""
+    from studio import episode_sound
+    found = episode_sound.sound_faults(episode)
+    print("SOUND        :", len(found) or "clean")
+    for f in found:
+        print("   ", f[:170])
+    return len(found)
+
+
 def measured_or_projected(book: Path, number: int, episode, rate: float) -> list[dict]:
     """The timeline's own shots when it has been written, else the projection."""
     placed = episode_home.home(book, number) / "placed.json"
@@ -173,6 +184,7 @@ def main(book_id: str, number: int) -> int:
         print("   ", f[:170])
     hard += catalog_gates(ep, plan_brief.chapter_text(book, number))
     hard += cover_gates(ep, book, number)
+    hard += sound_gates(ep)
     from studio import cell_gates
     cg = cell_gates.faults(ep, cell_gates.pack_prompts(book))
     print("CELL GATES   :", len(cg) or "clean"); hard += len(cg)

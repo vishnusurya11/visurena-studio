@@ -20,7 +20,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 
 from studio.episode_home import episode_arg
 from studio import card_fade, canvas, edit_gate, episode_bed, episode_gutter, episode_home
-from studio import finished_file
+from studio import episode_emotion, episode_sound, finished_file
 from studio.comfy import run
 from studio.episode_spec import Episode
 from studio import trailer_assemble
@@ -843,9 +843,16 @@ def main(book_id: str, number: int, engine: str = "i2v",
     # (BED_TRIM_DB) and ducks gently: at least 4 dB, 0.15 s attack, 0.25 s pre-delay, 1.0 s release
     trailer_assemble.DUCK_DEPTH_DB, trailer_assemble.DUCK_ATTACK = 4.0, 0.15
     trailer_assemble.DUCK_PREDELAY, trailer_assemble.DUCK_RELEASE = 0.25, 1.0
-    mixed = mix_with_lines(cut, music, [], [(line["at"], wavs[line["index"]])
-                                            for line in placed["lines"]],
-                           work / "mixed.mp4", seconds=placed["duration_s"])
+    # THE SOUND LAYER AND THE DELIVERY (root cause 2026-09-26, D10/D11): this was
+    # `[]` for twelve episodes -- voice and a violin, the guns silent -- and every
+    # line sat at one level whether it was a whisper or a scream.
+    sound = episode_sound.layer(home, episode, placed)
+    said = {r["index"]: r for r in episode_home.read_json(episode_home.lines_dir(book, number) / "lines.json")}
+    offsets = [episode_emotion.offset_of(said.get(line["index"], {}).get("delivery", "calm"))
+               for line in placed["lines"]]
+    mixed = mix_with_lines(cut, music, sound, [(line["at"], wavs[line["index"]])
+                                               for line in placed["lines"]],
+                           work / "mixed.mp4", seconds=placed["duration_s"], offsets=offsets)
     card = book / "title" / f"ep{number:02d}.mp4"
     # The master's NAME goes on a finished file, never on a growing one: the
     # join is `-preset slow -crf 14` over three minutes of picture, and while it
