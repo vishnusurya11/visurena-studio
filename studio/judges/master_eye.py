@@ -235,13 +235,15 @@ def listed_actions(reads: dict[int, list[Read]], turn: int) -> list[str]:
 
 
 def story(turn_shot: dict | None, reads: dict[int, list[Read]]) -> tuple[bool, dict]:
-    """The turn lands as an ACTION on screen: the plan's verb among the listed ones."""
+    """The turn lands as an ACTION on screen: the plan's verb among the listed ones.
+    CANNOT TELL IS AN n (root cause 2026-09-26, A3): ep12's story field was y
+    on a turn shot whose prose named no act, and that y shipped the episode."""
     if turn_shot is None:
-        return True, {"note": "no turn shot in the plan"}
+        return False, {"note": "cannot tell: no turn shot in the plan"}
     verbs, turn = turn_verbs(turn_shot), int(turn_shot["index"])
     listed = listed_actions(reads, turn)
     if not verbs:
-        return True, {"turn_shot": turn, "verbs": [], "listed": listed,
+        return False, {"turn_shot": turn, "verbs": [], "listed": listed,
                       "note": "cannot tell: the turn shot's prose names no acting verb"}
     seen = {w for action in listed for w in content_words(action)}
     hit = sorted({v for v in verbs if any(agree(v, s) for s in seen)})

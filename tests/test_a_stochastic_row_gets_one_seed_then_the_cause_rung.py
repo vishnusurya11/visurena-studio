@@ -84,5 +84,5 @@ def test_one_seed_then_the_move_type_through_write_plan(tmp_path):
     assert ctx.launched[3][4:6] == ["--retake=7", "--why=move_type: frozen-at-start"]
     after = episode_home.load_plan(ctx.book_dir, 5).shot(7).motion
     assert after != before and after.startswith("The camera")
-    assert [l.action for l in ctx.learned] == ["seed", "move_type"]
+    assert [l.action for l in ctx.learned] == ["seed", "move_type", "pass"]
     assert ctx.learned[0].seconds == 756.0 + 46.0 + 18.0

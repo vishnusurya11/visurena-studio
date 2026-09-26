@@ -69,7 +69,7 @@ def test_the_step_runs_the_chain_then_the_judge_signs(ctx, monkeypatch):
     assert (board / "contact.png").exists()
     doc = json.loads(eye_verdict.path(board, eye_verdict.fingerprint(panels)).read_text(encoding="utf-8"))
     assert doc["verdict"] == "pass" and doc["signed_by"] == "judge:panel_eye@1"
-    assert step.done(ctx) and step.panel_refusals(ctx.home) == [] and ctx.learned == []
+    assert step.done(ctx) and step.panel_refusals(ctx.home) == [] and [l.action for l in ctx.learned] == ["pass"]
 
 
 def test_a_stale_content_verdict_sends_the_panels_back_through_the_vision_gate(ctx, monkeypatch):

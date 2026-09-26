@@ -49,7 +49,7 @@ def test_a_pass_is_signed_in_the_judge_name(tmp_path):
     doc = json.loads(signed.read_text(encoding="utf-8"))
     assert doc["verdict"] == "pass" and doc["signed_by"].startswith("judge:panel_eye@1")
     assert ev.passed(board, pics)
-    assert taken == [] and ctx.learned == []
+    assert taken == [] and [l.action for l in ctx.learned] == ["pass"]
     assert not (ctx.book_dir / "audit" / "rows.jsonl").exists()
 
 

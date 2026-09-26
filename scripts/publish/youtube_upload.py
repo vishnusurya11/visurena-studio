@@ -66,6 +66,14 @@ def eye_stops(home: Path, watched: str, digest: str) -> tuple[list[str], dict]:
                              waived=eye_review.waivers(rubric), flags=eye_review.flags(rubric))
 
 
+def lock_stops(home: Path, digest: str) -> list[str]:
+    """The publish lock on this cut (studio/publish_lock.py): an open terminal,
+    a voice that is not one voice, or no director's sign-off.  Private or not:
+    ep12 was uploaded with four taste gates ended in terminals."""
+    from studio import publish_lock
+    return publish_lock.stops(home, digest)
+
+
 def metadata(home: Path) -> dict:
     path = home / "youtube.json"
     if not path.exists():
@@ -150,7 +158,7 @@ def main(argv: list[str], send=send) -> None:
                         audited="--audited" in argv, override=override)
     waived = yp.waived(qc, dq_failed, override=override)
     seen, eye = eye_stops(home, watched, digest)
-    stops += seen
+    stops += seen + lock_stops(home, digest)
 
     print(f"file      {master}")
     print(f"size      {master.stat().st_size / 1e6:.1f} MB   sha8 {digest}")

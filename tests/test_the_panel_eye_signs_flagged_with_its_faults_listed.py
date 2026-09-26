@@ -76,7 +76,7 @@ def test_a_clean_board_is_signed_pass_by_the_judge(tmp_path):
     board, plan = board_of(tmp_path, [])
     doc = json.loads(clear(ctx, board, plan).read_text(encoding="utf-8"))
     assert doc["verdict"] == "pass" and doc["signed_by"] == "judge:panel_eye@1"
-    assert doc["faults"] == [] and "1 read" in doc["note"] and ctx.learned == []
+    assert doc["faults"] == [] and "1 read" in doc["note"] and [l.action for l in ctx.learned] == ["pass"]
 
 
 def test_the_judge_names_itself_and_counts_its_reads(tmp_path):

@@ -48,4 +48,4 @@ def test_the_shadow_writes_a_sidecar_and_the_current_judge_signs(tmp_path):
     side = json.loads(sidecar.read_text(encoding="utf-8"))
     assert side["judge"] == "panel_eye" and side["version"] == "2" and side["passed"] is False
     assert sorted(p.name for p in board.glob("eye_*")) == [signed.name, sidecar.name]
-    assert ev.passed(board, pics) and ctx.learned == []
+    assert ev.passed(board, pics) and [l.action for l in ctx.learned] == ["pass"]

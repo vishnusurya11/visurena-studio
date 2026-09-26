@@ -47,6 +47,13 @@ def test_the_reader_answers_carry_the_action_into_the_read():
     assert me.story(TURN, {7: [catch]})[0] and not me.story(TURN, {7: [unread]})[0]
 
 
-def test_no_turn_shot_in_the_plan_is_answered_y_with_a_note():
+def test_no_turn_shot_in_the_plan_is_answered_n_with_a_note():
+    """Root cause 2026-09-26 (A3): 'cannot tell' was scored y, and ep12's story
+    field passed on a turn the judge could not read."""
     ok, evidence = me.story(None, {})
-    assert ok and "note" in evidence
+    assert not ok and "note" in evidence
+
+
+def test_a_turn_with_no_acting_verb_cannot_tell_and_is_an_n():
+    ok, evidence = me.story({"index": 3, "motion": "the camera holds on the river"}, {})
+    assert not ok and evidence["note"].startswith("cannot tell")

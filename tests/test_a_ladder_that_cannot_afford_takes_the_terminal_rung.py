@@ -1,5 +1,5 @@
-"""A rung the budget cannot afford is not taken: the climb ends at the terminal
-rung with a `budget` learning, no re-render, and the flagged signature."""
+"""A rung the budget cannot afford is not taken, and nothing is signed: the run
+defers with a `budget` learning (root cause 2026-09-26, A2)."""
 from __future__ import annotations
 
 import json
@@ -31,7 +31,10 @@ def failing():
                    faults=[Fault(kind="lag", where="T07")])
 
 
-def test_out_of_time_means_the_terminal_and_no_render(tmp_path):
+def test_out_of_time_defers_with_no_render_and_no_signature(tmp_path):
+    """Root cause 2026-09-26 (A2): out of time used to sign the terminal rung --
+    ep12's panels were kept at attempt 0 unjudged.  Now the run stops, resumable."""
+    import pytest
     now = [17_900.0]                                    # 100 s left under the 18 000 s ceiling
     ctx = Ctx(tmp_path, clock=lambda: now[0])
     ctx.budget.t0 = 0.0
@@ -39,15 +42,13 @@ def test_out_of_time_means_the_terminal_and_no_render(tmp_path):
     room.mkdir(parents=True)
     (room / "T07.mp4").write_bytes(b"take")
     rendered = []
-    signed = judged_gate.clear(
-        ctx, "EYE_TAKES", judge=failing,
-        sign=lambda v: ev.sign_verdict(room, [room / "T07.mp4"], v),
-        ladder=judged_gate.Rungs(Ladder([Rung("seed", 300), Rung("shorter_take", 300)], "keep_best"),
-                                 take=lambda rung, i, v: rendered.append(rung.name)),
-        terminal=lambda v: v, policy=AUTO)
-    assert rendered == []
-    doc = json.loads(signed.read_text(encoding="utf-8"))
-    assert doc["verdict"] == "flagged" and doc["terminal"] == "keep_best"
-    gates = [(l.gate, l.action, l.terminal) for l in ctx.learned]
-    assert gates == [("budget", "keep_best", True), ("EYE_TAKES", "keep_best", True)]
+    with pytest.raises(SystemExit, match="DEFERRED"):
+        judged_gate.clear(
+            ctx, "EYE_TAKES", judge=failing,
+            sign=lambda v: ev.sign_verdict(room, [room / "T07.mp4"], v),
+            ladder=judged_gate.Rungs(Ladder([Rung("seed", 300), Rung("shorter_take", 300)], "keep_best"),
+                                     take=lambda rung, i, v: rendered.append(rung.name)),
+            terminal=lambda v: v, policy=AUTO)
+    assert rendered == [] and not list(room.glob("eye_*"))
+    assert [(l.gate, l.action, l.terminal) for l in ctx.learned] == [("budget", "defer", False)]
     assert ctx.learned[0].threshold == 300

@@ -52,7 +52,7 @@ def test_a_fault_climbs_one_rung_then_signs_the_pass(tmp_path):
     assert seen == [("redraw_grid_seed", 0, ["clones"], [])]
     doc = json.loads(signed.read_text(encoding="utf-8"))
     assert doc["verdict"] == "pass" and doc["signed_by"] == "judge:panel_eye@1"
-    assert [l.action for l in ctx.learned] == ["redraw_grid_seed"]
+    assert [l.action for l in ctx.learned] == ["redraw_grid_seed", "pass"]
     assert ctx.learned[0].gate == "EYE_PANELS" and ctx.learned[0].terminal is False
     assert "clones" in ctx.learned[0].note
     assert not (ctx.book_dir / "audit" / "rows.jsonl").exists()

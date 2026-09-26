@@ -33,6 +33,9 @@ Terminal = Callable[[Verdict], Verdict | None]
 
 LADDERS = "ladders"
 """The budget share a ladder climbs on when no step is open."""
+MAX_REPEAT = 12
+"""One (kind, where) returned more often than this is a broken measure, not a
+verdict: ep12's panel judge wrote "landmark at shot_00" 531 times and signed."""
 
 
 @dataclass
@@ -57,21 +60,42 @@ def step_of(ctx) -> str:
     return ctx.budget.step
 
 
-def affordable(ctx, rung: Rung, terminal: str, taken: int) -> bool:
-    """Whether the budget pays for this rung; a no is a budget learning."""
+def affordable(ctx, gate: str, rung: Rung, taken: int) -> bool:
+    """Whether the budget pays for this rung.  A no DEFERS the run -- a budget
+    learning, then a stop the next run resumes -- and never reaches the
+    terminal: ep12's panels were signed keep_best at attempt 0, unjudged,
+    because the share was already 2993 s overdrawn (root cause A2)."""
     step = step_of(ctx)
     if ctx.budget.can_afford(step, rung.cost_seconds):
         return True
-    ctx.learn(Learning(step=step, gate="budget", measured=ctx.budget.remaining(step),
-                       threshold=rung.cost_seconds, action=terminal, attempt=taken, terminal=True))
-    return False
+    left = ctx.budget.remaining(step)
+    ctx.learn(Learning(step=step, gate="budget", measured=left, threshold=rung.cost_seconds,
+                       action="defer", attempt=taken))
+    raise SystemExit(f"DEFERRED: {gate} needs {rung.cost_seconds:.0f} s for its '{rung.name}' rung and "
+                     f"the run's {step} share has {left:.0f} s; nothing signed -- run again to resume")
+
+
+def repeated(verdict: Verdict) -> str | None:
+    """'kind at where xN' when one fault repeats past MAX_REPEAT, else None."""
+    from collections import Counter
+    counts = Counter((f.kind, f.where) for f in verdict.faults)
+    (kind, where), n = counts.most_common(1)[0] if counts else (("", ""), 0)
+    return f"{kind} at {where} x{n}" if n > MAX_REPEAT else None
+
+
+def valid(verdict: Verdict, gate: str) -> Verdict:
+    """The verdict, or a stop when it is a broken measure's output (root cause A3)."""
+    if said := repeated(verdict):
+        raise SystemExit(f"INVALID VERDICT: {gate}'s judge returned {said} -- a broken measure, "
+                         f"not a signature; fix the judge before the gate can clear")
+    return verdict
 
 
 def climbed(ctx, gate: str, judge: Judge, rungs: Rungs, terminal: str) -> tuple[Verdict, list[str]]:
     """The verdict as it stands, then after every rung taken; the rungs taken."""
-    verdict, taken = judge(), []
+    verdict, taken = valid(judge(), gate), []
     for rung, i in tries(rungs.ladder):
-        if verdict.passed or not affordable(ctx, rung, terminal, len(taken)):
+        if verdict.passed or not affordable(ctx, gate, rung, len(taken)):
             break
         started = ctx.budget.clock()
         rungs.take(rung, i, verdict)
@@ -79,7 +103,7 @@ def climbed(ctx, gate: str, judge: Judge, rungs: Rungs, terminal: str) -> tuple[
         ctx.learn(Learning(step=step_of(ctx), gate=gate, measured=len(verdict.faults),
                            action=rung.name, attempt=len(taken), note=verdict.summary(),
                            seconds=ctx.budget.clock() - started))
-        verdict = judge()
+        verdict = valid(judge(), gate)
     return verdict, taken
 
 
@@ -126,7 +150,11 @@ def clear(ctx, gate: str, judge: Judge, sign: Sign, ladder: Rungs, terminal: Ter
         raise SystemExit(f"{ctx.stage}/{gate} is {policy.state} in gates.yaml; a judge clears auto gates only")
     name = policy.terminal or ladder.ladder.terminal
     verdict, taken = climbed(ctx, gate, judge, ladder, name)
-    if not verdict.passed:
+    if verdict.passed:
+        # A PASS IS WRITTEN DOWN, so the publish lock (studio/publish_lock.py)
+        # can tell a gate that passed from one that never ran.
+        ctx.learn(Learning(step=step_of(ctx), gate=gate, measured=0, action="pass", attempt=len(taken)))
+    else:
         verdict = ended(ctx, gate, verdict, name, terminal, len(taken))
     signed = sign(verdict)
     if verdict.terminal:

@@ -76,7 +76,7 @@ def test_a_clean_round_is_signed_by_the_judge_and_the_step_is_done(ctx):
                                             "scripts/episode/take_content_check.py", "scripts/episode/take_strip.py"]
     doc = json.loads(eye_verdict.path(t.parent, eye_verdict.fingerprint([t])).read_text(encoding="utf-8"))
     assert doc["verdict"] == "pass" and doc["signed_by"] == "judge:take_eye@1"
-    assert ctx.opened == ["09"] and ctx.learned == [] and step.done(ctx)
+    assert ctx.opened == ["09"] and [l.action for l in ctx.learned] == ["pass"] and step.done(ctx)
 
 
 def test_a_fault_climbs_and_ends_flagged_never_parked(ctx):

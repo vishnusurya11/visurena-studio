@@ -53,13 +53,15 @@ def row_for(book: Path, number: int) -> dict:
 
 
 def public_gates(book: Path, number: int, row: dict, engine: str = "r2v") -> list[str]:
-    """The machine gates on the cut the ledger says is on the channel."""
-    sys.path.insert(0, str(Path(__file__).resolve().parent))
-    from youtube_upload import failed_takes
+    """The machine gates on the cut the ledger says is on the channel, and the
+    publish lock on that cut: no open terminal, one voice, a director's
+    sign-off (root cause 2026-09-26 -- ep12 went public through this door)."""
+    from scripts.publish import youtube_upload as up
     home = episode_home.home(book, number)
     engine, _master, qc_path = yp.deliverable(home, engine)
     qc = json.loads(qc_path.read_text(encoding="utf-8")) if qc_path.exists() else {}
-    return yp.public_refusals(qc, failed_takes(home, engine), row)
+    return (yp.public_refusals(qc, up.failed_takes(home, engine), row)
+            + up.lock_stops(home, str(row.get("sha8", ""))))
 
 
 def live_status(api, video_id: str) -> dict:
