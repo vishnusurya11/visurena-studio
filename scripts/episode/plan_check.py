@@ -129,13 +129,17 @@ def sound_gates(episode) -> int:
 
 
 def measured_or_projected(book: Path, number: int, episode, rate: float) -> list[dict]:
-    """The timeline's own shots when it has been written, else the projection."""
+    """The timeline's own shots when it has been written and is current, else
+    the projection.  A STALE timeline is not a plan fault (ep13): the plan step
+    runs before the timeline step, and refusing here meant an edited plan could
+    never reach the step that rebuilds it."""
     placed = episode_home.home(book, number) / "placed.json"
     if placed.exists():
         try:
             episode_home.load_placed(book, number, episode)
         except SystemExit as why:
-            raise SystemExit(f"TIMELINE     : {why}")
+            print(f"TIMELINE     : {why} (advisory: projected from the plan; step 05 rebuilds it)")
+            return projected(episode, rate)
         by = {s.index: s for s in episode.shots}
         return [dict(s, setup=by[s["index"]].setup, cuts=list(by[s["index"]].cuts))
                 for s in episode_home.read_json(placed)["shots"] if s["index"] in by]

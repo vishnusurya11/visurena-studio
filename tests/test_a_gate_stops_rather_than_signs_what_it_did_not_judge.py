@@ -85,3 +85,10 @@ def test_a_pass_is_not_a_rung_in_the_runner(tmp_path):
     ctx.learn(Learning(step="08", gate="EYE_PANELS", action="pass"))
     assert ctx.rungs_in_step == 0 and ctx.tracker.level == "INFO"
     assert [r.action for r in load(tmp_path / "learnings.jsonl")] == ["pass"]
+
+
+def test_different_faults_at_one_place_are_a_verdict():
+    """ep13: the plan battery files every refusal as ('battery', 'plan') with its own
+    note; thirteen different refusals are a verdict, not one fault repeated."""
+    faults = [Fault(kind="battery", where="plan", note=f"refusal {k}") for k in range(judged_gate.MAX_REPEAT + 1)]
+    assert judged_gate.repeated(verdict(False, faults)) is None

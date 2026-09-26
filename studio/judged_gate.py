@@ -76,10 +76,12 @@ def affordable(ctx, gate: str, rung: Rung, taken: int) -> bool:
 
 
 def repeated(verdict: Verdict) -> str | None:
-    """'kind at where xN' when one fault repeats past MAX_REPEAT, else None."""
+    """'kind at where xN' when one fault -- kind, place AND note -- repeats past
+    MAX_REPEAT, else None.  Different refusals filed at one place (the plan
+    battery's) are a verdict (ep13)."""
     from collections import Counter
-    counts = Counter((f.kind, f.where) for f in verdict.faults)
-    (kind, where), n = counts.most_common(1)[0] if counts else (("", ""), 0)
+    counts = Counter((f.kind, f.where, f.note) for f in verdict.faults)
+    (kind, where, _note), n = counts.most_common(1)[0] if counts else (("", "", ""), 0)
     return f"{kind} at {where} x{n}" if n > MAX_REPEAT else None
 
 
