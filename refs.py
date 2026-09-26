@@ -1,6 +1,6 @@
 """Refs stage runner -- the reference bible.  A SIBLING of analysis.py and trailer.py.
 
-    uv run python refs.py                                   # every book whose analysis/05 completed
+    uv run python refs.py                                   # every book whose refs row the desk has queued
     uv run python refs.py <codex_id> --chapter=N --cast=a,b=Display:gender [--kind=..] [--only=..]
 
 One unit per book today ("main", studio/refs_run.py); the steps come from the
@@ -8,25 +8,39 @@ registry's `refs` block in file order; a step whose output is on disk is skipped
 the LOOK gate is judged (judge:look); an `escalated` outcome is a legacy path the
 runner still honours with an event and a printed call-sheet
 line (exit 2) -- never a `failed`.  Flags pass through to the steps as ctx.extra.
+
+The no-book form reads the department's table (decision 2026-09-25, C9): the
+books whose refs row is `queued`, in the desk's order -- the rows are what the
+last tick left (`studio.py tick`, or any run's start).  A database no tick has
+reached (no refs row at all) falls back to the events rule, so nothing regresses.
 """
 from __future__ import annotations
 
 import sys
 
-from studio import db, llm, refs_run, registry, step_runner
+from studio import db, llm, queue, refs_run, registry, step_runner
 
 STAGE = refs_run.STAGE
 FINAL_STEP_ID = registry.steps(STAGE)[-1]["id"]
 
 
-def ready(conn) -> list[str]:
-    """Books that completed every stage this one requires and have not finished it."""
+def ready_by_events(conn) -> list[str]:
+    """Books that completed every stage this one requires and have not finished
+    it -- the rule before the desk, kept for a database it never reached."""
     books: list[str] | None = None
     for requirement in registry.requires_of(STAGE):
         after, step_id = requirement.split("/")
         found = db.codex_ready_for_stage(conn, STAGE, FINAL_STEP_ID, after, step_id)
         books = found if books is None else [b for b in books if b in found]
     return books or []
+
+
+def ready(conn) -> list[str]:
+    """Books whose refs row the desk has queued, first to run first; the events
+    rule when the department has no row at all."""
+    if queue.has_rows(conn, STAGE):
+        return queue.queued_books(conn, STAGE, refs_run.UNIT)
+    return ready_by_events(conn)
 
 
 def split(argv: list[str]) -> tuple[list[str], list[str]]:

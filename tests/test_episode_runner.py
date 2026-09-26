@@ -1,6 +1,8 @@
 """episode.py: the registry's ids are the modules' ids; every step runs alone
 and answers --help; a finished unit is skipped step by step; an owner gate
-exits 2 having marked nothing failed; a bare codex id finds every unit.
+exits 2 having marked nothing failed; `--all` finds every planned unit off the
+disk (a bare codex id takes the desk's queue instead -- C9, tested in
+test_the_no_unit_form_takes_the_queue_in_order.py).
 
 Nothing here launches a script, touches a GPU or reads the library.
 """
@@ -120,20 +122,20 @@ def test_an_escalation_exits_2_and_marks_nothing_failed(conn, book, tmp_path, mo
     assert db.get_codex(conn, CODEX)["episode_status"] != "failed"
 
 
-def test_a_bare_codex_runs_every_planned_unit_in_order(conn, book, tmp_path, monkeypatch):
+def test_all_runs_every_planned_unit_in_order(conn, book, tmp_path, monkeypatch):
     for n in (2, 1):
         (book / "episodes" / f"ep{n:02d}").mkdir(parents=True)
         (book / "episodes" / f"ep{n:02d}" / "plan.json").write_text("{}", encoding="utf-8")
     seen = []
     for step in step_runner.load_steps("episode"):
         monkeypatch.setattr(step, "done", lambda ctx, s=step: seen.append((ctx.unit, s.STEP_ID)) or True)
-    assert episode.main([CODEX], conn=conn, tools=(), **_opts(tmp_path)) == 0
+    assert episode.main([CODEX, "--all"], conn=conn, tools=(), **_opts(tmp_path)) == 0
     assert [u for u, _ in seen][:1] == ["ep01"] and [u for u, _ in seen][-1] == "ep02"
 
 
-def test_a_book_with_no_planned_unit_is_refused(conn, book, tmp_path):
+def test_all_on_a_book_with_no_planned_unit_is_refused(conn, book, tmp_path):
     with pytest.raises(SystemExit, match="plan.json"):
-        episode.main([CODEX], conn=conn, tools=(), **_opts(tmp_path))
+        episode.main([CODEX, "--all"], conn=conn, tools=(), **_opts(tmp_path))
 
 
 def test_the_flags_reach_the_step(conn, book, tmp_path, monkeypatch):

@@ -1,12 +1,18 @@
 """Trailer stage runner — the blind path.  A SIBLING of analysis.py and screenplay.py.
 
-    uv run python trailer.py              # every book whose screenplay completed
+    uv run python trailer.py              # every book whose trailer row the desk has queued
     uv run python trailer.py <codex_id>   # one book
 
 One 6-hour wall-clock ceiling per book, zero credits (every model runs on the local
 ComfyUI), no questions: a failed gate climbs its adapt ladder and the terminal rung
 always exists.  Contract per step: .claude/skills/trailer/BLUEPRINT.md.  Registry:
 the `trailer` stage of stages.yaml — file order = execution order.
+
+The no-book form reads the department's table (decision 2026-09-25, C9): the
+books whose trailer row is `queued`, in the desk's order; a database no tick
+has reached (no trailer row at all) falls back to the events rule.  The trailer
+line still runs on its own RunContext and does not claim its row: its events
+make the row running and renew the lease through the tracker.
 """
 from __future__ import annotations
 
@@ -17,7 +23,7 @@ from pathlib import Path
 
 import yaml
 
-from studio import db, llm, paths
+from studio import db, llm, paths, queue, tick
 from studio.trailer_run import RunContext
 
 REGISTRY_PATH = Path("stages.yaml")
@@ -49,9 +55,19 @@ def load_steps(stage: str = STAGE) -> list:
     return [_import_step(stage, entry) for entry in load_registry(stage)["steps"]]
 
 
-def ready(conn) -> list[str]:
+def ready_by_events(conn) -> list[str]:
+    """Books whose screenplay completed and whose trailer did not -- the rule
+    before the desk, kept for a database it never reached."""
     return db.codex_ready_for_stage(conn, STAGE, FINAL_STEP_ID,
                                     REQUIRES_STAGE, REQUIRES_STEP_ID)
+
+
+def ready(conn) -> list[str]:
+    """Books whose trailer row the desk has queued, first to run first; the
+    events rule when the department has no row at all."""
+    if queue.has_rows(conn, STAGE):
+        return queue.queued_books(conn, STAGE, tick.book_unit(STAGE))
+    return ready_by_events(conn)
 
 
 def preflight(tools: tuple[str, ...] = TOOLS) -> list[str]:

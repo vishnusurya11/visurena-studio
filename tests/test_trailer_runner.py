@@ -54,6 +54,16 @@ class TestReadiness:
         db.add_event(conn, codex_id, "trailer", trailer.FINAL_STEP_ID, "completed")
         assert trailer.ready(conn) == []
 
+    def test_ready_reads_the_desks_queue_once_the_department_has_rows(self, conn):
+        """C9: a queued trailer row makes the book ready, in the desk's order;
+        the events rule stands only while the department has no row."""
+        codex_id = _book(conn)
+        _finish_screenplay(conn, codex_id)
+        db.upsert_work_order(conn, codex_id, "trailer", "book", state="blocked")
+        assert trailer.ready(conn) == [] and trailer.ready_by_events(conn) == [codex_id]
+        db.upsert_work_order(conn, codex_id, "trailer", "book", state="queued")
+        assert trailer.ready(conn) == [codex_id]
+
     def test_the_codex_table_knows_the_stage(self, conn):
         codex_id = _book(conn)
         db.mark_stage(conn, codex_id, "trailer", "running")

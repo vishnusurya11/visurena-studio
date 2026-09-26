@@ -17,7 +17,7 @@ import traceback
 from contextlib import contextmanager
 from pathlib import Path
 
-from studio import db, llm
+from studio import db, llm, queue
 
 LOGS_ROOT = Path("logs")
 
@@ -59,9 +59,12 @@ class Tracker:
 
     def event(self, step_id: str, event: str, *, detail: str | None = None) -> None:
         """One event row, stamped with this run's id.  A `started` also tells
-        the spend gateway which step the next paid call belongs to."""
+        the spend gateway which step the next paid call belongs to.  Every
+        event renews the unit's GPU lease (decision 2026-09-25, "The GPU":
+        renewed by the writes the runner already makes); no row is a no-op."""
         db.add_event(self.conn, self.codex_id, self.stage, step_id, event,
                      run_id=self.run_id, detail=detail, unit=self.unit)
+        queue.renew(self.conn, self.codex_id, self.stage, self.unit or "book")
         if event == "started":
             llm.spend_step(step_id)
 

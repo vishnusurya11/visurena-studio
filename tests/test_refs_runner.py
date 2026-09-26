@@ -37,6 +37,21 @@ def test_the_registry_and_the_step_modules_agree_on_ids_and_names():
     assert [s.GPU for s in steps] == [False, True, True, True]
 
 
+def test_ready_reads_the_desks_queue_once_the_department_has_rows(conn):
+    """C9: the no-book form is the table.  Until the desk has a refs row the
+    events rule stands (the test below); from the first row on, only a queued
+    row makes a book ready, in the desk's order."""
+    first = db.insert_codex(conn, "Book", codex_id="20260901000001")
+    second = db.insert_codex(conn, "Other", codex_id="20260901000002")
+    db.add_event(conn, first, "analysis", "05", "completed")
+    db.upsert_work_order(conn, first, "refs", "main", state="blocked", blocked_on="analysis/05")
+    assert refs.ready(conn) == []
+    db.upsert_work_order(conn, second, "refs", "main", state="queued", priority=0)
+    db.upsert_work_order(conn, first, "refs", "main", state="queued", priority=1)
+    assert refs.ready(conn) == [second, first]
+    assert refs.ready_by_events(conn) == [first]
+
+
 def test_ready_needs_the_required_analysis_step_and_not_a_finished_refs_stage(conn):
     codex = db.insert_codex(conn, "Book", codex_id="20260901000001")
     assert refs.ready(conn) == []
