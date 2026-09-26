@@ -1,8 +1,10 @@
-"""The web process is a reader (decision 2026-09-25, the board): it never runs a
-step, spawns a subprocess, writes a file under library/ or opens the DB for
-writing.  Enforced by grep over the package: no `subprocess`, no `run_script`,
-no SQL INSERT/UPDATE, and no import of a runner, a step script or a stage
-module; the connection is opened `mode=ro`."""
+"""The web process is a reader with one hand (decision 2026-09-25, the board;
+C11 the actions): it never runs a step, spawns a subprocess or writes a file
+under library/ itself.  Enforced by grep over the package: no `subprocess`, no
+`run_script`, no SQL INSERT/UPDATE, and no import of a runner, a step script or
+a stage module; the read connection is opened `mode=ro`.  The only writes are
+the actions module's calls into studio/work_orders -- `hold`, `lift`, `order`
+(and the pure `default_artefact`) -- and every hx-post goes to /act/."""
 from __future__ import annotations
 
 import re
@@ -33,6 +35,28 @@ def test_the_connection_is_read_only():
     assert "mode=ro" in text and "uri=True" in text and "busy_timeout" in text
 
 
-def test_the_templates_post_nothing_yet():
+def test_the_actions_module_is_covered_by_the_grep():
+    assert PACKAGE / "actions.py" in SOURCES
+
+
+def test_the_only_write_path_is_work_orders_hold_lift_and_order():
+    calls = set()
+    for source in SOURCES:
+        calls |= set(re.findall(r"\bwork_orders\.(\w+)\(", source.read_text(encoding="utf-8")))
+    assert calls == {"hold", "lift", "order", "default_artefact"}
+    for source in SOURCES:
+        if source.name != "actions.py":
+            assert "work_orders." not in source.read_text(encoding="utf-8"), source.name
+
+
+def test_the_write_connection_is_a_separate_factory():
+    text = (PACKAGE / "app.py").read_text(encoding="utf-8")
+    assert "def writable_factory" in text and "def readonly_factory" in text
+    assert "request.app.state.write_factory" in text and "Depends(_write_conn)" in text
+
+
+def test_every_template_post_goes_to_an_action_route():
+    posts = []
     for page in (PACKAGE / "templates").glob("*.html"):
-        assert "hx-post" not in page.read_text(encoding="utf-8"), page.name
+        posts += re.findall(r'hx-post="([^"]*)"', page.read_text(encoding="utf-8"))
+    assert posts and all(p.startswith("/act/") for p in posts), posts

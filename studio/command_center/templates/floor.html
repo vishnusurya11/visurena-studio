@@ -1,8 +1,10 @@
 {% extends "base.html" %}
+{% import "_macros.html" as act with context %}
 {% block title %}Floor · Visurena Studio{% endblock %}
 {% block crumbs %}<div class="crumbs"><a href="/">Studio</a> › Floor</div>{% endblock %}
 {% block body %}
 <h1>Call sheet</h1>
+<div class="actions">{{ act.hold('studio', label='hold studio') }} <span class="muted">a studio hold stops every run before its first GPU step</span></div>
 <section class="strip" hx-get="/partials/floor" hx-trigger="every 2s" hx-swap="innerHTML">
 <span hidden>NOW</span>
 {% include "_floor.html" %}
@@ -23,7 +25,7 @@
   <td>{{ r.step_id or '' }} {{ r.step_name }}</td>
   <td>{{ r.priority }}</td>
   <td>{{ r.blocked_on or '' }}</td>
-  <td><button class="btn" disabled title="C11">↑</button> <button class="btn" disabled title="C11">hold</button></td>
+  <td>{{ act.order('bump', r.codex_id, r.stage, r.unit, '↑') }}{{ act.hold('unit', r.codex_id, r.stage, r.unit) }}</td>
 </tr>
 {% else %}
 <tr><td colspan="9" class="muted">nothing queued</td></tr>
@@ -34,7 +36,7 @@
 <div class="eyebrow">Held</div>
 <span hidden>HELD</span>
 {% for h in holds %}
-<div class="row"><span class="st grey">⏸</span> {{ h.scope }}{% if h.codex_id %} · {{ books.get(h.codex_id, h.codex_id) }}{% endif %}{% if h.stage %} · {{ h.stage }}{% endif %}{% if h.unit %} · {{ h.unit }}{% endif %} · <span class="muted">{{ h.held_by or '' }} {{ h.held_at[:16] }}: "{{ h.reason }}"</span></div>
+<div class="row"><span class="st grey">⏸</span> {{ h.scope }}{% if h.codex_id %} · {{ books.get(h.codex_id, h.codex_id) }}{% endif %}{% if h.stage %} · {{ h.stage }}{% endif %}{% if h.unit %} · {{ h.unit }}{% endif %} · <span class="muted">{{ h.held_by or '' }} {{ h.held_at[:16] }}: "{{ h.reason }}"</span> {{ act.lift(h.id) }}</div>
 {% else %}
 <div class="row muted">no holds</div>
 {% endfor %}

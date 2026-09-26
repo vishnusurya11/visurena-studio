@@ -17,7 +17,7 @@ from __future__ import annotations
 import argparse
 import sys
 
-from studio import casebook, db, registry, work_orders
+from studio import db, work_orders
 from studio.stage_run import ledger_id
 
 
@@ -58,26 +58,11 @@ def _unit_order(conn, args) -> int:
                              stage=args.stage, unit=args.unit)
 
 
-def _artefact_of(args) -> str:
-    """The artefact the note is about: as given, else the step's first declared
-    output when the casebook can name its kind; otherwise ask for it."""
-    if args.artefact:
-        return args.artefact
-    outs = registry.outputs_of(args.stage, args.step_id, args.unit)
-    for out in outs:
-        try:
-            casebook.kind_of(out)
-            return out
-        except ValueError:
-            continue
-    raise SystemExit(f"say which artefact the note is about: --artefact <book-relative path>"
-                     f" (step {args.step_id} declares {outs or 'no output'})")
-
-
 def _redo(conn, args) -> int:
     return work_orders.order(conn, "redo", "unit", codex_id=ledger_id(args.codex), stage=args.stage,
                              unit=args.unit, step_id=args.step_id, note=args.note,
-                             artefact=_artefact_of(args), fault=args.fault)
+                             artefact=work_orders.default_artefact(args.stage, args.step_id, args.unit, args.artefact),
+                             fault=args.fault)
 
 
 COMMANDS = {"hold": _hold, "lift": _lift, "bump": _unit_order, "retry": _unit_order,

@@ -1,11 +1,26 @@
 {% extends "base.html" %}
+{% import "_macros.html" as act with context %}
 {% set r = unit.row %}
 {% block title %}{{ r.unit }} · {{ stage }} · Visurena Studio{% endblock %}
 {% block crumbs %}<div class="crumbs"><a href="/">Studio</a> › <a href="/d/{{ stage }}">{{ stage }}</a> › <a href="/b/{{ codex }}">{{ unit.book_name }}</a> › {{ r.unit }}</div>{% endblock %}
 {% block body %}
 <h1><span class="st {{ r.css }}">{{ r.glyph }}</span> {{ r.unit }} <span class="muted" style="font-size:18px">{{ r.shown }} · {{ r.step_id or '' }} {{ r.step_name }}{% if r.progress %} · {{ r.progress }}{% endif %}</span></h1>
 <div class="muted">attempt {{ r.attempts }}{% if r.gpu_seconds %} · gpu {{ (r.gpu_seconds / 60) | round | int }}m{% endif %}{% if r.run_id %} · run <code>{{ r.run_id }}</code>{% endif %}{% if r.blocked_on %} · on {{ r.blocked_on }}{% endif %}{% if r.hold_reason %} · held: {{ r.hold_reason }}{% endif %}</div>
-<div style="margin:8px 0"><button class="btn" disabled title="C11">run / resume</button> <button class="btn" disabled title="C11">redo with note</button> <button class="btn" disabled title="C11">hold</button></div>
+<div class="actions">
+{{ act.hold('unit', codex, stage, r.unit) }}
+{% if r.state in ('deferred', 'failed') %}{{ act.order('retry', codex, stage, r.unit) }}{% endif %}
+{{ act.order('requeue', codex, stage, r.unit) }}
+{{ act.order('bump', codex, stage, r.unit) }}
+<details class="redo"><summary class="btn">redo ▾</summary>
+<form class="act redo" hx-post="/act/redo" hx-target="find .receipt" hx-swap="innerHTML" hx-on::after-request="if(event.detail.successful) this.reset()">
+{{ act.unit_fields(codex, stage, r.unit) }}
+<label>step <select name="step_id">{% for s in unit.steps %}<option value="{{ s.step_id }}">{{ s.step_id }} {{ s.name }}</option>{% endfor %}</select></label>
+<textarea name="note" rows="2" required placeholder="what is wrong, in words"></textarea>
+<input name="artefact" placeholder="artefact (book-relative; default: the step's first output)" size="44">
+<span class="muted">The step runs again at the unit's next run although its output exists. The note also becomes a casebook row (the owner's words, about the artefact).</span>
+{{ act.btn('redo') }}<span class="receipt"></span>
+</form></details>
+</div>
 
 <section class="strip">
 <div class="eyebrow">Steps</div><span hidden>STEPS</span>
@@ -33,8 +48,7 @@
 {% for c in unit.verdicts %}
 <div class="row"><b>{{ c.gate }}</b> <span class="st {{ c.css }}">{{ c.glyph }}</span>
 {% if c.by or c.word %}{{ c.word }} {{ c.by }}{% if c.sha8 %} <code>{{ c.sha8 }}</code>{% endif %}{% if c.terminal %} · {{ c.terminal }}{% endif %}{% if c.faults %} · {{ c.faults }} fault{{ '' if c.faults == 1 else 's' }}{% endif %}{% if c.path %} · <a href="/lib/{{ codex }}/{{ c.path }}">file</a>{% endif %}
-{% else %}<span class="muted">not yet signed</span>{% endif %}
-<button class="btn" disabled title="C11">redo</button></div>
+{% else %}<span class="muted">not yet signed</span>{% endif %}</div>
 {% else %}<div class="muted">this department has no judged gate</div>{% endfor %}
 </section>
 </div>

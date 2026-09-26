@@ -1,3 +1,4 @@
+{% import "_macros.html" as act with context %}
 <div class="tbl-wrap"><table>
 <thead><tr><th>st</th><th>book</th><th>unit</th><th>step · progress</th><th>last</th><th>att</th><th>gpu</th><th>cost</th><th>verdicts</th><th></th></tr></thead>
 <tbody>
@@ -12,7 +13,7 @@
   <td>{% if r.gpu_seconds %}{{ (r.gpu_seconds / 60) | round | int }}m{% else %}–{% endif %}</td>
   <td>{% if r.cost_usd is none %}<span class="muted">?</span>{% else %}${{ '%.2f' | format(r.cost_usd) }}{% endif %}</td>
   <td>{% for c in r.strip %}<span class="chip {{ c.css }}" title="{{ c.gate }}{% if c.by %} · {{ c.by }}{% endif %}{% if c.faults %} · {{ c.faults }} faults{% endif %}">{{ c.gate }} {{ c.glyph }}</span>{% endfor %}</td>
-  <td><button class="btn" disabled title="C11">run</button> <button class="btn" disabled title="C11">hold</button> <button class="btn" disabled title="C11">redo</button></td>
+  <td>{{ act.hold('unit', r.codex_id, r.stage, r.unit) }}{% if r.state in ('deferred', 'failed') %}{{ act.order('retry', r.codex_id, r.stage, r.unit) }}{% else %}{{ act.order('bump', r.codex_id, r.stage, r.unit, '↑ bump') }}{% endif %}</td>
 </tr>
 {% else %}
 <tr><td colspan="10" class="muted">no units</td></tr>

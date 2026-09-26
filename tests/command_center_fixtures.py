@@ -96,3 +96,14 @@ def make_app(tmp_path: Path, monkeypatch):
     logs = make_logs(tmp_path)
     path = make_db(tmp_path, library)
     return cc_app.make_app(cc_app.readonly_factory(path), library, logs=logs)
+
+
+def make_writable_app(tmp_path: Path, monkeypatch):
+    """(app, db path): the board with its write factory on the same tmp DB --
+    reads stay `mode=ro`, the action routes write through the second factory."""
+    library = make_library(tmp_path, monkeypatch)
+    logs = make_logs(tmp_path)
+    path = make_db(tmp_path, library)
+    app = cc_app.make_app(cc_app.readonly_factory(path), library, logs=logs,
+                          write_factory=cc_app.writable_factory(path))
+    return app, path

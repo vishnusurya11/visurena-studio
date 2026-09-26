@@ -9,7 +9,7 @@
   <button class="btn" type="submit">filter</button>
   <a href="/org#{{ dept.stage }}" class="muted">org chart ▸</a>
 </form>
-<section id="rows" hx-get="/partials/d/{{ dept.stage }}{% if book or state %}?{% if book %}book={{ book }}{% endif %}{% if book and state %}&amp;{% endif %}{% if state %}state={{ state }}{% endif %}{% endif %}" hx-trigger="every 10s" hx-swap="innerHTML">
+<section id="rows" hx-get="/partials/d/{{ dept.stage }}{% if book or state %}?{% if book %}book={{ book }}{% endif %}{% if book and state %}&amp;{% endif %}{% if state %}state={{ state }}{% endif %}{% endif %}" hx-trigger="every 10s [!document.activeElement.closest('#rows form')]" hx-swap="innerHTML">
 {% include "_rows.html" %}
 </section>
 {% endblock %}

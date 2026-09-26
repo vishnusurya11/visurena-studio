@@ -31,7 +31,8 @@ def test_the_rows_carry_the_verdict_strip_in_gates_order(client):
 
 def test_the_table_polls_every_ten_seconds_and_keeps_its_filters(client):
     page = client.get("/d/episode?book=" + CODEX + "&state=failed").text
-    assert 'hx-trigger="every 10s"' in page
+    assert 'hx-trigger="every 10s [' in page  # paused while a row's form has the focus (C11)
+    assert "document.activeElement.closest(&#39;#rows form&#39;)" in page or "activeElement.closest('#rows form')" in page
     assert f'hx-get="/partials/d/episode?book={CODEX}&amp;state=failed"' in page
     assert "ep05" in page and "ep04" not in page
 

@@ -1,11 +1,12 @@
 {% extends "base.html" %}
+{% import "_macros.html" as act with context %}
 {% block title %}{{ book.name }} · Visurena Studio{% endblock %}
 {% block crumbs %}<div class="crumbs"><a href="/">Studio</a> › Books › {{ book.name }}</div>{% endblock %}
 {% block body %}
 <h1>{{ book.name }} <span class="muted mono" style="font-size:14px">{{ book.codex_id }}</span></h1>
 <div class="muted">{{ book.units | length }} units · published {{ book.published | length }}{% if book.gpu_seconds %} · gpu {{ (book.gpu_seconds / 3600) | round(1) }}h{% endif %}
 {% for h in book.holds %} · <span class="st grey">⏸</span> {{ h.scope }} hold: "{{ h.reason }}"{% endfor %}</div>
-<div style="margin:8px 0"><button class="btn" disabled title="C11">hold book</button> <a href="/org" class="muted">org chart ▸</a></div>
+<div class="actions">{{ act.hold('book', book.codex_id, label='hold book') }}{% for h in book.holds %}<span class="muted">hold {{ h.id }}</span> {{ act.lift(h.id) }}{% endfor %} <a href="/org" class="muted">org chart ▸</a></div>
 <div class="tbl-wrap"><table class="grid">
 <thead><tr><th>department</th>{% for u in book.units %}<th>{{ u }}</th>{% endfor %}</tr></thead>
 <tbody>

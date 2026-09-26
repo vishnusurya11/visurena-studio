@@ -1,0 +1,19 @@
+<div class="eyebrow">Orders (last {{ orders | length }}) <span class="muted">— taken by a run, pending until one does; a hold or lift acts at once</span></div>
+<span hidden>ORDERS</span>
+<div class="tbl-wrap"><table>
+<thead><tr><th>#</th><th>ts</th><th>kind</th><th>scope</th><th>target</th><th>note</th><th>taken by</th></tr></thead>
+<tbody>
+{% for o in orders %}
+<tr>
+  <td class="mono">{{ o.id }}</td>
+  <td class="mono">{{ (o.ts or '')[5:16] }}</td>
+  <td>{{ o.kind }}</td>
+  <td>{{ o.scope }}</td>
+  <td>{% if o.scope == 'book' %}{{ books.get(o.target, o.target) }}{% else %}{% if o.scope == 'unit' %}<span class="muted">{{ books.get(o.codex_id, o.codex_id) | truncate(14, True, '…') }} ›</span> {% endif %}{{ o.target }}{% endif %}</td>
+  <td>{{ o.note or '' }}</td>
+  <td>{% if o.taken_by_run %}<code>{{ o.taken }}</code>{% else %}<span class="muted">{{ o.taken }}</span>{% endif %}</td>
+</tr>
+{% else %}
+<tr><td colspan="7" class="muted">no orders yet</td></tr>
+{% endfor %}
+</tbody></table></div>

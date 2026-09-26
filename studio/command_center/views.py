@@ -137,6 +137,31 @@ def holds(conn: sqlite3.Connection) -> list[dict]:
     return [dict(r) for r in conn.execute("SELECT * FROM holds WHERE lifted_at IS NULL ORDER BY id")]
 
 
+def order_target(row: sqlite3.Row | dict) -> str:
+    """Whom an order reaches: `studio`, the book's id, or `stage › unit` (with its step)."""
+    r = dict(row)
+    if r["scope"] == "studio":
+        return "studio"
+    if r["scope"] == "book":
+        return r["codex_id"]
+    step = f" · step {r['step_id']}" if r.get("step_id") else ""
+    return f"{r['stage']} › {r['unit']}{step}"
+
+
+def order_taken(row: sqlite3.Row | dict) -> str:
+    """The run that took the order; a hold or lift not yet taken is already
+    applied (it acts at once); any other untaken order is pending."""
+    if row["taken_by_run"]:
+        return row["taken_by_run"]
+    return "applied" if row["kind"] in ("hold", "lift") else "pending"
+
+
+def recent_orders(conn: sqlite3.Connection, limit: int = 10) -> list[dict]:
+    """The last `limit` orders rows, newest first, each with its target and taker."""
+    rows = conn.execute("SELECT * FROM orders ORDER BY id DESC LIMIT ?", (limit,))
+    return [{**dict(r), "target": order_target(r), "taken": order_taken(r)} for r in rows]
+
+
 def lane(conn: sqlite3.Connection, stage: str) -> dict:
     """One department's lane: the count, counts by shown state, the glyph
     tally in attention order, and the six rows that matter most."""

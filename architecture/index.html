@@ -274,7 +274,7 @@ pre.ddl{font-family:"IBM Plex Mono",monospace;font-size:11px;line-height:1.4;col
 
   <!-- ===== ORG CHART ===== -->
   
-  <nav class="tabs" role="tablist"><button role="tab" data-tab="current" aria-selected="true">Current architecture<span class="sub">built</span></button><button role="tab" data-tab="future" aria-selected="false">Future architecture<span class="sub">proposed</span></button><button role="tab" data-tab="command" aria-selected="false">Command Center<span class="sub">decided · building</span></button></nav>
+  <nav class="tabs" role="tablist"><button role="tab" data-tab="current" aria-selected="true">Current architecture<span class="sub">built</span></button><button role="tab" data-tab="future" aria-selected="false">Future architecture<span class="sub">proposed</span></button><button role="tab" data-tab="command" aria-selected="false">Command Center<span class="sub">built</span></button></nav>
   <div id="tab-current">
 
 
@@ -405,13 +405,13 @@ pre.ddl{font-family:"IBM Plex Mono",monospace;font-size:11px;line-height:1.4;col
 
   <!-- ===== THE DESK ===== -->
   <section class="block">
-    <div class="head"><h2>The desk</h2><p>Built 2026-09-26 (decision 2026-09-25, the Command Center, commits C1–C7). The production office keeps one work-order row per (book, department, unit); each department's table is a view over it. The runners are unchanged: a row is written from one place (<code>db.add_event</code>) and the disk stays the truth of a step. The desk refreshes the rows on a <b>tick</b> — the first act of every run, and <code>uv run python studio.py tick</code> from a shell.</p></div>
+    <div class="head"><h2>The desk</h2><p>Built 2026-09-26 (decision 2026-09-25, the Command Center, commits C1–C11). The production office keeps one work-order row per (book, department, unit); each department's table is a view over it. The runners are unchanged: a row is written from one place (<code>db.add_event</code>) and the disk stays the truth of a step. The desk refreshes the rows on a <b>tick</b> — the first act of every run, and <code>uv run python studio.py tick</code> from a shell.</p></div>
     <div class="tbl-wrap"><table class="v">
       <tr><th>What</th><th>One row is</th><th>Who writes it</th></tr>
       <tr><td><code>work_orders</code></td><td>a unit in a department: state (blocked · queued · running · done · failed · deferred · escalated · held · stale), step, priority, sequence, attempts, flags, gpu seconds, cost, deliverable, verdicts</td><td><code>db.add_event</code> projects every event onto it (the runner claims and settles by running); the tick materializes, settles, promotes, parks and sweeps; the owner's orders land on it when a run takes them</td></tr>
       <tr><td><code>work_steps</code></td><td>one step of one order: the unit page's chip, with its verdict file, signer and word</td><td><code>db.add_event</code>, and the signature read off the file when the step completes</td></tr>
-      <tr><td><code>orders</code></td><td>the owner's intent: hold · lift · redo · bump · retry · requeue</td><td><code>studio_cli.py</code>; a runner takes them at the top of <code>run_steps</code></td></tr>
-      <tr><td><code>holds</code></td><td>a brake at studio, book or unit scope; <code>RENDER_HOLD</code> mirrored in</td><td><code>studio_cli.py hold | lift</code>; the tick mirrors the file</td></tr>
+      <tr><td><code>orders</code></td><td>the owner's intent: hold · lift · redo · bump · retry · requeue</td><td><code>studio_cli.py</code> and the board's buttons (<code>POST /act/*</code>); a runner takes them at the top of <code>run_steps</code></td></tr>
+      <tr><td><code>holds</code></td><td>a brake at studio, book or unit scope; <code>RENDER_HOLD</code> mirrored in</td><td><code>studio_cli.py hold | lift</code> and the board's hold / lift buttons; the tick mirrors the file</td></tr>
       <tr><td><code>episode_orders</code> … · <code>v_queue</code> · <code>v_attention</code></td><td>a view per registered department, generated from <code>stages.yaml</code>; the queue in priority, sequence order; the rows that need a person (failed · deferred · escalated · stale)</td><td>nobody — a view</td></tr>
     </table></div>
     <div class="tbl-wrap" style="margin-top:14px"><table class="v">
@@ -424,6 +424,13 @@ pre.ddl{font-family:"IBM Plex Mono",monospace;font-size:11px;line-height:1.4;col
       <tr><td>sweep</td><td>a running row whose lease ran out is <code>stale</code> — never requeued; a <code>requeue</code> order does that</td><td><code>tick.sweep_leases</code></td></tr>
       <tr><td>verify</td><td>rows against the disk: a moved signature or a missing deliverable is named and marked <code>stale</code>; nothing is resolved</td><td><code>studio.py verify</code></td></tr>
       <tr><td>from a shell</td><td><code>studio.py tick [--book]</code> · <code>queue &lt;codex&gt; &lt;stage&gt; [&lt;unit&gt;] [--priority N]</code> · <code>verify &lt;codex&gt; &lt;stage&gt; &lt;unit&gt;</code> · <code>board</code> (the queue and the attention strip as text — the terminal preview of the web board, C10)</td><td><code>studio.py</code> · <code>studio_cli.py</code> for the hand</td></tr>
+    </table></div>
+    <div class="tbl-wrap" style="margin-top:14px"><table class="v">
+      <tr><th>The board</th><th>What it does</th><th>Where</th></tr>
+      <tr><td>open it</td><td><code>uv run python command_center.py</code> → <code>http://127.0.0.1:8700</code>, bound to the loopback only; <code>--read-only</code> shows the studio and refuses every order (405); <code>--check</code> prints the routes and serves nothing</td><td><code>command_center.py</code></td></tr>
+      <tr><td>the pages</td><td>studio home <code>/</code> (on the floor, needs you, a lane per department, the Orders strip — the last ten orders and the run that took each, today) · <code>/floor</code> (now, next, held) · <code>/d/&lt;stage&gt;</code> (the department's table) · <code>/d/&lt;stage&gt;/&lt;codex&gt;/&lt;unit&gt;</code> (steps, verdicts, deliverable, thumbnails, tails, timing) · <code>/b/&lt;codex&gt;</code> (the book down every department) · <code>/org</code> (this page); htmx partials on a poll, a JSON twin per partial</td><td><code>studio/command_center/</code> <code>app</code> · <code>views</code> · <code>models</code> · <code>templates</code></td></tr>
+      <tr><td>the actions</td><td>hold (studio · book · unit, with a reason) · lift · bump · retry (a deferred or failed unit) · requeue · redo (a step and a note; the note is also a casebook row). Each is ONE call into <code>studio/work_orders</code> — one <code>orders</code> row (a hold adds its <code>holds</code> row) — and answers with the row's id and its effect: "queued at next run", "held — runs stop before the first GPU step"</td><td><code>studio/command_center/actions.py</code> → <code>work_orders.hold | lift | order</code></td></tr>
+      <tr><td>the guards</td><td>pages read through a <code>mode=ro</code> connection; the actions write through a separate writable factory; a POST from a foreign Origin/Referer is refused 403; an unregistered stage, an unknown book or unit 404; an empty reason or note 422; no route spawns a process or imports a runner (grep-tested); <code>/lib</code> serves a book's artefacts behind a resolved-path check and a suffix allowlist</td><td><code>tests/test_an_action_is_one_orders_row_and_never_a_subprocess.py</code> · <code>test_the_web_process_imports_nothing_from_scripts.py</code></td></tr>
     </table></div>
     <p class="flow-note">A queued row is a request, not an instruction: no worker loop drains it (not built, on purpose). The explicit runners — <code>episode.py &lt;book&gt; &lt;n&gt;</code>, <code>refs.py &lt;book&gt;</code> — run as before; C9 teaches the no-unit form to take the queue in order. Rows for the books already made come from the backfill (C8), never from the tick guessing.</p>
   </section>
@@ -681,7 +688,7 @@ pre.ddl{font-family:"IBM Plex Mono",monospace;font-size:11px;line-height:1.4;col
 </div>
 <div id="tab-command" hidden>
 
-  <p class="lede" style="margin-top:18px"><b>Decided 2026-09-25 (owner: "looks good"); being built — the tracker is <code>architecture/plan/2026-09-25_command_center_build.md</code>.</b> The ask: a local board to watch every job, each department with its own table, and the tables driving the departments through standard inputs and outputs. Five reports argued it (a data modeller, an orchestration engineer, a production-office manager, an operations-UI designer, the codebase's own integrator); the chair ruled. The ruling, the data model, the contract, the drive and the board are below; the full text is <code>architecture/decisions/2026-09-25_command_center.md</code>, the task-level plan <code>architecture/plan/2026-09-25_command_center_build.md</code>, the reports under <code>decisions/research/2026-09-25_command_center/</code>.</p>
+  <p class="lede" style="margin-top:18px"><b>Decided 2026-09-25 (owner: "looks good"); built 2026-09-26 — all eleven commits, the tracker is <code>architecture/plan/2026-09-25_command_center_build.md</code>. Open it: <code>uv run python command_center.py</code> → <code>http://127.0.0.1:8700</code>.</b> The ask: a local board to watch every job, each department with its own table, and the tables driving the departments through standard inputs and outputs. Five reports argued it (a data modeller, an orchestration engineer, a production-office manager, an operations-UI designer, the codebase's own integrator); the chair ruled. The ruling, the data model, the contract, the drive and the board are below; the full text is <code>architecture/decisions/2026-09-25_command_center.md</code>, the task-level plan <code>architecture/plan/2026-09-25_command_center_build.md</code>, the reports under <code>decisions/research/2026-09-25_command_center/</code>.</p>
 
   <!-- the brick -->
   <section class="block">
@@ -766,7 +773,7 @@ not built     a worker loop that starts a five-hour GPU job unattended — a que
 
   <!-- the board -->
   <section class="block">
-    <div class="head"><h2>The board</h2><p>Six pages; the studio home is the landing page. Wireframes from report D; v1 read-only, v2 adds the order buttons.</p></div>
+    <div class="head"><h2>The board</h2><p>Six pages; the studio home is the landing page. Wireframes from report D; v1 read-only (C10) and v2's order buttons (C11) are both built, 2026-09-26.</p></div>
     <h3 style="margin:18px 0 0;font-size:14px">Studio home <code>/</code> — on the floor, needs you, the department lanes, today</h3>
     <pre class="wire">┌ Visurena Studio ─────────────── Home · Floor · Books · Org chart ── ◐ ┐
 │ ON THE FLOOR  ● Episode › WotW › ep13 · 09 shoot · takes 18/25         │
@@ -857,7 +864,7 @@ not built     a worker loop that starts a five-hour GPU job unattended — a que
 ├────────────────────────────────────┴───────────────────────────────────┤
 │ TIMING  bind 0.1s · plan 31s · … · shoot 2h50 · edit 6m · qc 412s      │
 └────────────────────────────────────────────────────────────────────────┘</pre>
-    <p style="max-width:78ch;margin:12px 0 0;color:var(--ink-2)">Also <code>/b/&lt;book&gt;</code> (units across, departments down, ▲ for a public upload) and <code>/org</code> (this page). htmx partials on a 2 s poll for the floor and running cells, 10 s for tables; a JSON twin per partial. The web process opens SQLite read-only, never runs a step, never globs the disk on a poll; thumbnails are the files the steps already write.</p>
+    <p style="max-width:78ch;margin:12px 0 0;color:var(--ink-2)">Also <code>/b/&lt;book&gt;</code> (units across, departments down, ▲ for a public upload) and <code>/org</code> (this page). htmx partials on a 2 s poll for the floor and running cells, 10 s for tables; a JSON twin per partial. The web process reads SQLite read-only, writes only <code>orders</code> (and a hold's <code>holds</code> row) through a second connection, never runs a step, never globs the disk on a poll; thumbnails are the files the steps already write.</p>
   </section>
 
   <!-- migration and what is not built -->
@@ -868,7 +875,7 @@ not built     a worker loop that starts a five-hour GPU job unattended — a que
       <tr><td>Backfill</td><td><code>scripts/audit/backfill_work_orders.py</code> derives rows from disk and events: a signed plan verdict → plan done; <code>cut/master_iterN.mp4</code> → edit done; <code>qc_r2v.json</code> passed → qc done; <code>youtube.json</code> / <code>uploads.jsonl</code> → the publish row; <code>plan.deferred.json</code> → deferred. Dry-run first; <code>source='backfill'</code>; never a row with a live run. Verified on disk: 25 of 27 episode folders derive without judgement; ep12 is ambiguous (a hand-signed verdict, a live run) and is listed, not guessed.</td></tr>
       <tr><td>Not built, on purpose</td><td>Crew scheduling, revision colours, VFX version trees, per-line budgets, Kanban, @mentions, ETA models, Approve/Reject on judged gates (a redo + a note replaces them), any daemon, executor, replay engine or pool.</td></tr>
       <tr><td>Open for the owner</td><td>1. Is a <code>queued</code> row an instruction (a worker loop drains it) or a request (a runner invocation takes it)? The plan builds the request. &nbsp;2. A Distribution lane read from <code>uploads.jsonl</code> before a <code>publish</code> stage exists, or wait for the stage? &nbsp;3. <code>flagged</code> as a count on a done row (this ruling) or a state of its own?</td></tr>
-      <tr><td>The plan</td><td>Eleven commits, ~30 tests, ~1,850 lines, four days: the table (C1–C3), the contract and the hand (C4–C6), the drive (C7–C9), the board (C10–C11). <code>architecture/plan/2026-09-25_command_center_build.md</code>.</td></tr>
+      <tr><td>The plan</td><td>Eleven commits, ~30 tests, ~1,850 lines, four days: the table (C1–C3), the contract and the hand (C4–C6), the drive (C7–C9), the board (C10–C11). Built 2026-09-26. <code>architecture/plan/2026-09-25_command_center_build.md</code>.</td></tr>
     </table></div>
   </section>
 

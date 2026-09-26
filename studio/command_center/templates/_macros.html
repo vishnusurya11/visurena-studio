@@ -1,0 +1,18 @@
+{#- The owner's hand (C11): every button is a form that hx-posts to /act/ and
+    swaps the receipt (or the refusal) into its own .receipt span.  Imported
+    `with context` so a read-only board renders them disabled. -#}
+{% macro btn(label) -%}
+<button class="btn" type="submit"{% if not writable %} disabled title="{{ read_only }}"{% endif %}>{{ label }}</button>
+{%- endmacro %}
+{% macro unit_fields(codex, stage, unit) -%}
+<input type="hidden" name="codex" value="{{ codex }}"><input type="hidden" name="stage" value="{{ stage }}"><input type="hidden" name="unit" value="{{ unit }}">
+{%- endmacro %}
+{% macro order(kind, codex, stage, unit, label=None) -%}
+<form class="act" hx-post="/act/{{ kind }}" hx-target="find .receipt" hx-swap="innerHTML">{{ unit_fields(codex, stage, unit) }}{{ btn(label or kind) }}<span class="receipt"></span></form>
+{%- endmacro %}
+{% macro hold(scope, codex='', stage='', unit='', label='hold') -%}
+<form class="act" hx-post="/act/hold" hx-target="find .receipt" hx-swap="innerHTML" hx-on::after-request="if(event.detail.successful) this.reset()"><input type="hidden" name="scope" value="{{ scope }}">{% if codex %}{{ unit_fields(codex, stage, unit) }}{% endif %}<input name="reason" required placeholder="why hold?" size="12">{{ btn(label) }}<span class="receipt"></span></form>
+{%- endmacro %}
+{% macro lift(hold_id) -%}
+<form class="act" hx-post="/act/lift/{{ hold_id }}" hx-target="find .receipt" hx-swap="innerHTML">{{ btn('lift') }}<span class="receipt"></span></form>
+{%- endmacro %}

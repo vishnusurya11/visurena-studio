@@ -1,29 +1,35 @@
 """The board's web process (decision 2026-09-25, "the board"): FastAPI +
-Jinja2 + htmx, read-only.  `make_app(conn_factory, library)` builds it; the
-connection is opened per request from the injected factory (`readonly_factory`
-opens `mode=ro` with a 250 ms busy timeout, so a poll never blocks a runner),
-the pages render the views, the partials are the same fragments the pages
-include, the JSON twins answer with the models.  No route runs a step, spawns
-a process, writes a file or writes a row."""
+Jinja2 + htmx.  `make_app(conn_factory, library, write_factory=None)` builds
+it; every read route opens its connection per request from the read-only
+factory (`readonly_factory` opens `mode=ro` with a 250 ms busy timeout, so a
+poll never blocks a runner), the pages render the views, the partials are the
+same fragments the pages include, the JSON twins answer with the models.  The
+POST routes under /act/ (C11) are the owner's hand: each opens the SEPARATE
+write factory and makes one call through `actions` into studio/work_orders --
+an orders row (and a holds row for a hold), nothing else.  Without a write
+factory they answer 405; from a foreign page, 403.  No route runs a step,
+spawns a process or writes a file."""
 from __future__ import annotations
 
 import sqlite3
 from collections.abc import Callable, Iterator
 from pathlib import Path
 
-from fastapi import APIRouter, Depends, FastAPI, HTTPException, Request
+from fastapi import APIRouter, Depends, FastAPI, Form, HTTPException, Request
 from fastapi.responses import FileResponse, HTMLResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 from starlette.exceptions import HTTPException as StarletteHTTPException
 
 from studio import registry
-from studio.command_center import library_paths, models, views
+from studio.command_center import actions, library_paths, models, views
 
 HERE = Path(__file__).resolve().parent
 ORG_PAGE = registry.ROOT / "architecture" / "index.html"
 templates = Jinja2Templates(directory=str(HERE / "templates"))
 router = APIRouter()
+READ_ONLY = ("the board was started read-only (command_center.py --read-only): it can show"
+             " the studio but not give an order")
 
 
 def readonly_factory(db_path: str | Path) -> Callable[[], sqlite3.Connection]:
@@ -35,6 +41,20 @@ def readonly_factory(db_path: str | Path) -> Callable[[], sqlite3.Connection]:
     def open_connection() -> sqlite3.Connection:
         conn = sqlite3.connect(uri, uri=True, timeout=0.25)
         conn.execute("PRAGMA busy_timeout = 250")
+        conn.row_factory = sqlite3.Row
+        return conn
+    return open_connection
+
+
+def writable_factory(db_path: str | Path) -> Callable[[], sqlite3.Connection]:
+    """A factory of writable connections to the same file, for the /act/ routes
+    only (5 s busy timeout, foreign keys on, rows by name)."""
+    path = Path(db_path).resolve()
+
+    def open_connection() -> sqlite3.Connection:
+        conn = sqlite3.connect(path, timeout=5)
+        conn.execute("PRAGMA busy_timeout = 5000")
+        conn.execute("PRAGMA foreign_keys = ON")
         conn.row_factory = sqlite3.Row
         return conn
     return open_connection
@@ -52,7 +72,8 @@ def _conn(request: Request) -> Iterator[sqlite3.Connection]:
 def _render(request: Request, name: str, **context) -> HTMLResponse:
     """A template with what every page shares: the legend, the nav's stages."""
     return templates.TemplateResponse(request, name, {
-        "legend": views.LEGEND, "stages": registry.stage_names(), **context})
+        "legend": views.LEGEND, "stages": registry.stage_names(),
+        "writable": request.app.state.write_factory is not None, "read_only": READ_ONLY, **context})
 
 
 def _department(conn: sqlite3.Connection, stage: str, book: str | None, state: str | None) -> dict:
@@ -78,7 +99,8 @@ def _unit(request: Request, conn: sqlite3.Connection, stage: str, codex: str, un
 @router.get("/", response_class=HTMLResponse)
 def home(request: Request, conn: sqlite3.Connection = Depends(_conn)):
     return _render(request, "home.html", floor=views.floor(conn), attention=views.attention(conn),
-                   lanes=views.lanes(conn), today=views.today(conn), books=views.book_names(conn))
+                   lanes=views.lanes(conn), today=views.today(conn), orders=views.recent_orders(conn),
+                   books=views.book_names(conn))
 
 
 @router.get("/floor", response_class=HTMLResponse)
@@ -130,6 +152,11 @@ def attention_partial(request: Request, conn: sqlite3.Connection = Depends(_conn
     return _render(request, "_attention.html", attention=views.attention(conn), books=views.book_names(conn))
 
 
+@router.get("/partials/orders", response_class=HTMLResponse)
+def orders_partial(request: Request, conn: sqlite3.Connection = Depends(_conn)):
+    return _render(request, "_orders.html", orders=views.recent_orders(conn), books=views.book_names(conn))
+
+
 @router.get("/partials/lanes", response_class=HTMLResponse)
 def lanes_partial(request: Request, conn: sqlite3.Connection = Depends(_conn)):
     return _render(request, "_lanes.html", lanes=views.lanes(conn), books=views.book_names(conn))
@@ -179,6 +206,74 @@ def artefact(request: Request, codex: str, path: str):
     return FileResponse(target, headers={"Cache-Control": "no-store"})
 
 
+# --- the owner's hand: POST /act/*, one work_orders call each ---
+
+
+def _local(request: Request) -> None:
+    """The CSRF guard: a POST from a page on another host is refused."""
+    if not actions.local_origin(request.headers):
+        raise actions.Refused(403, "refused: this order came from a page that is not the board")
+
+
+def _write_conn(request: Request) -> Iterator[sqlite3.Connection]:
+    """One writable connection per action; 405 when the board was started read-only."""
+    factory = request.app.state.write_factory
+    if factory is None:
+        raise actions.Refused(405, READ_ONLY)
+    conn = factory()
+    try:
+        yield conn
+    finally:
+        conn.close()
+
+
+act = APIRouter(prefix="/act", dependencies=[Depends(_local)])
+
+
+def _receipt(request: Request, done: dict) -> HTMLResponse:
+    """The receipt fragment; `orders-changed` tells the Orders strip to refresh."""
+    response = _render(request, "_receipt.html", done=done)
+    response.headers["HX-Trigger"] = "orders-changed"
+    return response
+
+
+@act.post("/hold", response_class=HTMLResponse)
+def hold_action(request: Request, scope: str = Form(""), reason: str = Form(""), codex: str = Form(""),
+                stage: str = Form(""), unit: str = Form(""),
+                conn: sqlite3.Connection = Depends(_write_conn)):
+    return _receipt(request, actions.hold(conn, scope, reason, codex, stage, unit))
+
+
+@act.post("/lift/{hold_id}", response_class=HTMLResponse)
+def lift_action(request: Request, hold_id: int, conn: sqlite3.Connection = Depends(_write_conn)):
+    return _receipt(request, actions.lift(conn, hold_id))
+
+
+def _unit_order_route(kind: str) -> None:
+    """POST /act/<kind> for a bump, retry or requeue on one unit."""
+    def unit_order_action(request: Request, codex: str = Form(""), stage: str = Form(""),
+                          unit: str = Form(""), conn: sqlite3.Connection = Depends(_write_conn)):
+        return _receipt(request, actions.unit_order(conn, kind, codex, stage, unit))
+    act.post(f"/{kind}", response_class=HTMLResponse, name=f"{kind}_action")(unit_order_action)
+
+
+for _kind in actions.UNIT_KINDS:
+    _unit_order_route(_kind)
+
+
+@act.post("/redo", response_class=HTMLResponse)
+def redo_action(request: Request, codex: str = Form(""), stage: str = Form(""), unit: str = Form(""),
+                step_id: str = Form(""), note: str = Form(""), artefact: str = Form(""),
+                conn: sqlite3.Connection = Depends(_write_conn)):
+    return _receipt(request, actions.redo(conn, codex, stage, unit, step_id, note, artefact))
+
+
+async def _refused(request: Request, exc: actions.Refused):
+    """A refused action is a fragment with the reason, swapped where the receipt goes."""
+    return templates.TemplateResponse(request, "_refused.html", {"detail": exc.detail},
+                                      status_code=exc.status)
+
+
 async def _not_found(request: Request, exc: StarletteHTTPException):
     """Every refusal is a plain page with the reason; never a stack, never a 403."""
     return templates.TemplateResponse(request, "404.html", {"detail": exc.detail, "status": exc.status_code},
@@ -186,15 +281,20 @@ async def _not_found(request: Request, exc: StarletteHTTPException):
 
 
 def make_app(conn_factory: Callable[[], sqlite3.Connection], library: Path,
-             logs: Path | None = None, org_page: Path = ORG_PAGE) -> FastAPI:
-    """The board over one connection factory, one library root and one logs
-    root (default: the library's sibling `logs/`)."""
+             logs: Path | None = None, org_page: Path = ORG_PAGE,
+             write_factory: Callable[[], sqlite3.Connection] | None = None) -> FastAPI:
+    """The board over one read-only connection factory, one library root and
+    one logs root (default: the library's sibling `logs/`); with a write
+    factory, the /act/ routes can give orders, else they answer 405."""
     app = FastAPI(title="Visurena Studio — Command Center")
     app.state.conn_factory = conn_factory
+    app.state.write_factory = write_factory
     app.state.library = Path(library)
     app.state.logs = Path(logs) if logs else Path(library).parent / "logs"
     app.state.org_page = Path(org_page)
     app.mount("/static", StaticFiles(directory=str(HERE / "static")), name="static")
     app.include_router(router)
+    app.include_router(act)
     app.add_exception_handler(StarletteHTTPException, _not_found)
+    app.add_exception_handler(actions.Refused, _refused)
     return app

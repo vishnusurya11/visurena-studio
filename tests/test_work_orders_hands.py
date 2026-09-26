@@ -136,3 +136,13 @@ def test_a_hold_order_taken_applies_nothing_more(conn):
     assert [o["kind"] for o in taken] == ["hold"]
     row = db.work_order(conn, BOOK, "episode", "ep04")
     assert row["state"] == "queued" and row["priority"] == 3
+
+
+def test_a_redos_default_artefact_is_as_given_else_the_steps_first_casebook_output():
+    assert work_orders.default_artefact("episode", "02", "ep04", "episodes/ep04/x.png") == "episodes/ep04/x.png"
+    assert work_orders.default_artefact("episode", "02", "ep04") == "episodes/ep04/plan.json"
+
+
+def test_a_redo_whose_output_the_casebook_cannot_read_asks_for_the_artefact():
+    with pytest.raises(ValueError, match="artefact"):
+        work_orders.default_artefact("episode", "05", "ep04")

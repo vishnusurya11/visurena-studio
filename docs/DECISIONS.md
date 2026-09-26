@@ -36,6 +36,10 @@ Not built on purpose: a worker loop that starts a GPU job unattended — a queue
 request until the owner rules it an instruction. Full ruling and the five reports:
 `architecture/decisions/2026-09-25_command_center.md`; tracker
 `architecture/plan/2026-09-25_command_center_build.md`.
+**Built 2026-09-26:** all eleven commits; open it with `uv run python command_center.py` →
+http://127.0.0.1:8700 (loopback only; `--read-only` refuses every order) — pages read the
+ledger read-only, and the hold / lift / bump / retry / requeue / redo buttons each write one
+`orders` row through `studio/work_orders`; the home page's Orders strip shows which run took it.
 
 ## 2026-09-24 — Automate the taste gates (owner decision)
 

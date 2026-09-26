@@ -110,6 +110,14 @@ button.btn[disabled]{opacity:.45;cursor:not-allowed}
 .filters select,.filters input{font:inherit;font-size:13px;padding:3px 6px;border:1px solid var(--rule-2);background:var(--paper);color:var(--ink)}
 .grid td.cell{text-align:center}
 .plain{max-width:60ch;margin:64px auto;padding:0 16px}
+.actions{display:flex;flex-wrap:wrap;gap:6px 10px;align-items:flex-start;margin:8px 0}
+form.act{display:inline-flex;flex-wrap:wrap;gap:4px;align-items:center;margin:0 4px 0 0}
+form.act input,form.act select,form.act textarea{font:inherit;font-size:12.5px;padding:2px 6px;border:1px solid var(--rule-2);background:var(--paper);color:var(--ink);max-width:100%}
+form.act.redo{display:flex;flex-direction:column;align-items:flex-start;gap:6px;margin-top:6px;max-width:60ch}
+form.act.redo textarea{width:100%}
+details.redo summary{list-style:none;display:inline-block}
+.receipt{font-size:12px}
+.receipt .ok{color:var(--ok)} .receipt .refused{color:var(--accent)}
 </style>
 <script src="/static/htmx.min.js"></script>
 </head>
@@ -134,6 +142,10 @@ button.btn[disabled]{opacity:.45;cursor:not-allowed}
 </footer>
 </main>
 <script>
+document.body.addEventListener('htmx:beforeSwap', function(e){
+  var x = e.detail.xhr, path = (e.detail.requestConfig || {}).path || '';
+  if (x && x.status >= 400 && x.status < 500 && path.indexOf('/act/') === 0) { e.detail.shouldSwap = true; e.detail.isError = false; }
+});
 (function(){
   var key='cc-theme', root=document.documentElement;
   try{var t=localStorage.getItem(key); if(t){root.dataset.theme=t;}}catch(e){}

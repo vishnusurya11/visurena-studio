@@ -1,6 +1,6 @@
 # Command Center build — the department tables and the board
 
-**Status: IN PROGRESS — owner ruled "looks good" 2026-09-25; build started the same day.**
+**Status: DONE 2026-09-26 — owner ruled "looks good" 2026-09-25; C1–C11 built by 2026-09-26.**
 Decision: `architecture/decisions/2026-09-25_command_center.md`. Built in waves so no two
 agents edit the same file: W1 = C1 · W2 = C2 + C4 + C6 · W3 = C3 + C5 + C7 · W4 = C8 + C9 ·
 W5 = C10 · W6 = C11. Each commit is green on the full suite before it lands.
@@ -17,7 +17,7 @@ W5 = C10 · W6 = C11. Each commit is green on the full suite before it lands.
 - [x] C8 backfill (dry-run listed to the owner before `--write`) — 39 tests; listing in `docs/audit/2026-09-26_backfill.md`: 31 rows, 20 derivable, 11 ambiguous; `--write` NOT run
 - [x] C9 runners take the queue — `studio/queue.py`; `episode.py <book>` drains what is queued now and exits; `--all` keeps the old every-folder form; explicit `<n>` refused only by a hold
 - [x] C10 the board, read-only — FastAPI 0.141.1 pinned; 16 routes; htmx vendored; read-only SQLite per request; guarded `/lib`; tokens byte-equal to the org chart (89 tests)
-- [ ] C11 actions; README, DECISIONS, republish
+- [x] C11 actions — `POST /act/hold|lift/{id}|bump|retry|requeue|redo`, each one `work_orders` call through a separate writable factory (`studio/command_center/actions.py`); CSRF guard (foreign Origin/Referer 403), read-only start 405; buttons on the unit, department, floor and book pages; the Orders strip on the home page; `work_orders.default_artefact` moved out of `studio_cli.py`; README, DECISIONS, Current + Command Center tabs. Republish of the claude.ai copy follows the commit
 
 ## Rules for every commit
 
@@ -65,3 +65,4 @@ that would make it an instruction is a separate decision.
 - 2026-09-26 — C1–C8 landed (five agents in three waves). Full suite over C3+C5: 7274 passed, 2 failed in tests that read the live library (`test_a_plan_script_regenerates_its_plan[ep12]`, `test_every_place_resolves[ep13]`) — library state, listed for the book-neutral scrub. Episode 12's run finished 02:14Z under the new judges (plan judge-signed, manifest present, 4 flags).
 - 2026-09-26 — C9 and C10 agents hit the model's rate limit mid-build; finished by hand (a test that assumed step 03 was step 09, FastAPI 0.141's included-router wrapper in the route list, an unescaped `&` in an `hx-get`, the legend's glyph split from its word).
 - 2026-09-26 — LIVE. Ledger backed up to `db/backup/visurena_studio_pre_command_center_20260926.db`, migrated (additive), ticked: 147 rows. The first tick read all 30 analyses as queued — book-level stages with no `out:` cannot settle from disk; `tick.settle_from_ledger` now settles them from `codex.<stage>_status`. Backfill `--write` of the 20 unambiguous rows; the 11 ambiguous wait for the owner (`docs/audit/2026-09-26_backfill.md`). Board up: `uv run python command_center.py` → http://127.0.0.1:8700 — every page 200 in < 0.1 s, a `..` path 404.
+- 2026-09-26 — C11 landed: the board gives orders. Six POST routes, one `orders` row each (a hold adds its `holds` row), a receipt with the row's id and its effect; the Orders strip shows the run that took each order or `pending`. Tests: `test_an_action_is_one_orders_row_and_never_a_subprocess.py`, `test_the_orders_strip_shows_what_a_runner_took.py`; the grep guard now pins the write path to `work_orders.hold|lift|order`. Status → DONE.

@@ -19,7 +19,7 @@ import json
 import sqlite3
 from pathlib import Path
 
-from studio import casebook, db, episode_home
+from studio import casebook, db, episode_home, registry
 
 KINDS = ("hold", "lift", "redo", "bump", "retry", "requeue")
 SCOPES = ("studio", "book", "unit")
@@ -69,6 +69,22 @@ def _note_redo(codex_id: str, unit: str, artefact: str | None, fault: str, note:
     if not artefact:
         raise ValueError("a redo's note is about an artefact: name it (book-relative path)")
     return casebook.note_owner(episode_home.book_dir(codex_id), codex_id, unit, artefact, fault, note)
+
+
+def default_artefact(stage: str, step_id: str, unit: str, given: str | None = None) -> str:
+    """What a redo's note is about: `given` when named, else the step's first
+    declared output whose kind the casebook can read; ValueError otherwise."""
+    if given:
+        return given
+    outs = registry.outputs_of(stage, step_id, unit)
+    for out in outs:
+        try:
+            casebook.kind_of(out)
+            return out
+        except ValueError:
+            continue
+    raise ValueError(f"say which artefact the note is about: a book-relative path (--artefact on the"
+                     f" CLI); step {step_id} declares {outs or 'no output'}")
 
 
 def hold(conn: sqlite3.Connection, scope: str, reason: str, *, codex_id: str | None = None,

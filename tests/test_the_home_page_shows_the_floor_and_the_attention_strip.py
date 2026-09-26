@@ -58,9 +58,9 @@ def test_the_floor_page_lists_now_next_and_held(client):
     assert "derived" in page
 
 
-def test_the_buttons_are_affordances_until_c11(client):
+def test_the_buttons_post_orders_since_c11(client):
     page = client.get("/d/episode").text
-    assert 'disabled title="C11"' in page
+    assert 'title="C11"' not in page and 'hx-post="/act/hold"' in page
 
 
 def test_the_org_chart_is_served_unchanged(client, tmp_path):

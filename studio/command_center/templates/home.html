@@ -12,6 +12,9 @@
 <section id="lanes" hx-get="/partials/lanes" hx-trigger="every 10s" hx-swap="innerHTML">
 {% include "_lanes.html" %}
 </section>
+<section class="strip" id="orders" hx-get="/partials/orders" hx-trigger="every 5s, orders-changed from:body" hx-swap="innerHTML">
+{% include "_orders.html" %}
+</section>
 <section class="strip">
 {% include "_today.html" %}
 </section>
