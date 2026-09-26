@@ -127,3 +127,13 @@ def test_the_cast_record_is_the_instruction_it_was_designed_from():
     said = ee.instruct_for({"instruction": {"character": "curate"}, "persona": "A curate of 34.",
                             "sheet": "Gender: male."}, "hushed")
     assert said.startswith("A curate of 34.\n\nGender: male.") and "whisper" in said
+
+
+def test_a_line_said_with_feeling_has_a_lower_similarity_floor():
+    """ep13 MEASURED: the speaker embedding moves with pitch and effort -- the
+    curate's shout lifted +7.9 st at 0.44, the narrator's 'Be a man!' +4.8 st at
+    0.58 -- while a DIFFERENT voice (the designed clips) measured 0.13-0.28."""
+    from scripts.episode import say_lines as say
+    assert say.line_floor(3.0, "calm") == say.similar_floor(3.0)
+    assert say.line_floor(3.0, "shouting") == round(say.similar_floor(3.0) - ee.FEELING_FLOOR_DROP, 2)
+    assert 0.30 < say.line_floor(0.8, "hushed") < 0.45

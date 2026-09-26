@@ -66,6 +66,13 @@ def similar_floor(seconds: float) -> float:
     return next(floor for at, floor in FLOORS if seconds >= at)
 
 
+def line_floor(seconds: float, delivery: str) -> float:
+    """The floor for THIS line: a line said with feeling sits FEELING_FLOOR_DROP
+    under the calm floor (the embedding moves with pitch and effort)."""
+    drop = 0.0 if delivery in ("", "calm") else episode_emotion.FEELING_FLOOR_DROP
+    return round(similar_floor(seconds) - drop, 2)
+
+
 def episode_voice(book: Path, records: dict, record: dict, similarity=None) -> float | None:
     """Mean line-vs-line similarity of an alternate-reference render against the
     speaker's other PASSED lines in this episode.  None for a design-clip render
@@ -190,7 +197,8 @@ def listen_all(records: list[dict], book: Path, listen, among: dict | None = Non
         clip = book / record["rel_path"]
         verdict = voice_qc.check(clip, record["text"], transcribe=listen)
         similarity = voice_ear.similarity(reference_for(book, record["speaker"]), clip)
-        floor, room = similar_floor(verdict.seconds), episode_voice(book, among, record)
+        floor = line_floor(verdict.seconds, record.get("delivery", "calm"))
+        room = episode_voice(book, among, record)
         passed = verdict.passed and similarity >= floor and alternate_ok(room) and lift_ok(book, record, clip)
         record.update(heard=verdict.heard, error_rate=verdict.error_rate, why=verdict.why,
                       similarity=round(float(similarity), 3), floor=floor,

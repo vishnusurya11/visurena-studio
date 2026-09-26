@@ -32,11 +32,11 @@ measure -1.5 to +1.1; the one line that was heard as raised (ep02 Ogilvy) +2.3."
 
 
 VECTORS = {
-    "hushed": {"emotion_afraid": 0.35, "emotion_calm": 0.6, "emotion_melancholic": 0.3},
+    "hushed": {"emotion_afraid": 0.25, "emotion_calm": 0.45},
     "urgent": {"emotion_afraid": 0.7, "emotion_surprised": 0.35},
     "shouting": {"emotion_angry": 0.6, "emotion_afraid": 0.6, "emotion_surprised": 0.5},
     "exultant": {"emotion_happy": 0.9, "emotion_surprised": 0.7},
-    "grieving": {"emotion_sad": 0.85, "emotion_melancholic": 0.6},
+    "grieving": {"emotion_sad": 0.6, "emotion_melancholic": 0.35},
     "threatening": {"emotion_angry": 0.6, "emotion_calm": 0.35},
     "cold": {"emotion_calm": 0.8, "emotion_disgusted": 0.2},
     "curious": {"emotion_surprised": 0.4, "emotion_happy": 0.25},
@@ -45,6 +45,12 @@ VECTORS = {
 a designed emotion CLIP is another voice -- VoiceDesign has no seed -- and the
 narrator's urgent, cold and shouted lines fell to 0.25-0.54 similarity.  The
 vector moves the feeling while the timbre stays on the speaker's own clip."""
+
+
+FEELING_FLOOR_DROP = 0.2
+"""How far a line said WITH feeling may sit under the calm similarity floor.
+ep13 MEASURED: shouts that lifted +4.8 and +7.9 st scored 0.58 and 0.44 against
+the cast clip; a designed clip that was another man's voice scored 0.13-0.28."""
 
 
 def vector_for(register: str) -> dict:
