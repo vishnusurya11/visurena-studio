@@ -25,6 +25,8 @@ or OPEN (with what fixing it needs). Numbers are the order they were found.
 | 28a | the identity gate crashed on faces with no sheet to compare | 'not measured' | e8359be |
 | 29, 30 | a take checker that found faults (exit 1) killed step 09 and the take ladder's retake rung | one shared `take_ladder.measured()`, fresh-verdict rule | 3cb7053, dd44b32, 313743f |
 | 31 | the head-cut rung never fired: its leak measure needs the missing DINOv3 | `take_leak.step_leak`: the one switch in the first second, calibrated on 290 takes (heads 0.85-1.17, others <= 0.62, wall 0.75) | 1c99d43 |
+| 32 | an interrupted render left a new graph beside the old video, and currency read the take as current | a graph >60 s newer than its video is an unfinished render | 82c291c |
+| 34 | `stills.json` outlived a retake: T19 was stilled at 07:09, retaken at 08:03 and passed, and every cut kept holding the panel, so QC failed the edit | a still row stamps `decided`; `assemble.stills_of` drops a row whose take is newer; `stills.json` is a step-10 input | 7157cc7 |
 
 ## Open -- needs a decision or more than a code fix
 
@@ -41,3 +43,5 @@ or OPEN (with what fixing it needs). Numbers are the order they were found.
 | 11, 17 | two sessions share one checkout: one `uv run` re-synced the venv under the other's tests and half-removed Pillow; one ComfyUI queue timed a 600 s wait out | tooling | a lock around `uv sync`, `--no-sync` in the runner, a GPU lease the runner holds |
 | 22 | the judges and measures were built on fakes and never run live before this episode (items 20-31 above) | process | run each new measure once on a real input before arming it |
 | -- | ep06 T01, published, opens on 12 frames of the pit wide before its mirror close (a head leak the new step measure finds) | a published episode | a `heads.json` entry for ep06 and a re-cut, if the owner wants it republished |
+| 33 | `heads.json` is not bound to the render it trims: a retake keeps the old head | design | stamp each head with the take's graph hash; drop it when the take changes (the same rule as 34) |
+| 35 | QC's edit gate compares every segment against its take, so a genuine still (the ladder's terminal rung) can never pass QC | design | the gate reads `stills.json` and matches a still segment against its panel's push, not the take |
