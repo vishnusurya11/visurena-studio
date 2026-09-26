@@ -85,23 +85,31 @@ def test_the_mix_offset_follows_the_delivery():
 
 # ---- say_lines: the emotion clip goes in, and a flat shout comes back as a failure ----
 
-def test_a_shouted_line_is_rendered_with_its_emotion_clip(tmp_path, monkeypatch):
+def test_a_shouted_line_keeps_its_timbre_and_carries_a_vector(tmp_path, monkeypatch):
     from scripts.episode import say_lines as say
     from studio import voice_say
     seen = {}
     monkeypatch.setattr(say, "line_reference", lambda book, records, line, attempt: tmp_path / "design.wav")
-    monkeypatch.setattr(say.episode_emotion, "emotion_clip", lambda book, who, reg: tmp_path / f"{reg}.wav")
     monkeypatch.setattr(say, "ENGINE", "indextts2")
     monkeypatch.setattr(say.episode_home, "relative", lambda book, p: p.name)
 
-    def fake_say(text, timbre, emotion, seed, out, index=0, speaker=None):
-        seen.update(timbre=timbre, emotion=emotion)
+    def fake_say(text, timbre, emotion, seed, out, index=0, speaker=None, vector=None):
+        seen.update(timbre=timbre, emotion=emotion, vector=vector)
         return NS(seconds=1.2, seed=seed)
     monkeypatch.setattr(voice_say, "say", fake_say)
     line = Line(index=16, kind="dialogue", speaker="narrator", text="Get under the water!", shot=16)
     rec = say.render(tmp_path, NS(number=13), line, tmp_path, 0)
-    assert seen == {"timbre": tmp_path / "design.wav", "emotion": tmp_path / "shouting.wav"}
-    assert rec["delivery"] == "shouting"
+    assert seen["timbre"] == seen["emotion"] == tmp_path / "design.wav"
+    assert seen["vector"] == ee.vector_for("shouting") and rec["delivery"] == "shouting"
+
+
+def test_every_register_has_a_vector_on_the_eight_axes():
+    axes = {"emotion_happy", "emotion_angry", "emotion_sad", "emotion_surprised", "emotion_afraid",
+            "emotion_disgusted", "emotion_calm", "emotion_melancholic"}
+    assert ee.vector_for("calm") == {}
+    for register in ("hushed", "urgent", "shouting", "exultant", "grieving", "threatening", "cold", "curious"):
+        got = ee.vector_for(register)
+        assert got and set(got) <= axes and all(0.0 < v <= 1.2 for v in got.values())
 
 
 def test_a_flat_shout_is_a_failed_line(tmp_path, monkeypatch):

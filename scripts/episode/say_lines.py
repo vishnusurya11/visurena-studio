@@ -162,13 +162,14 @@ def render(book: Path, episode: Episode, line: Line, out_dir: Path, attempt: int
     out = out_dir / f"l{line.index:02d}.wav"
     reference = line_reference(book, records or {}, line, attempt)
     seed = seed_for(episode.number, line, attempt)
-    # HOW, NOT ONLY WHO (root cause 2026-09-26, D11): the reading clip was the
-    # emotion reference too, so every line in twelve episodes was one temperature.
+    # HOW, NOT ONLY WHO (root cause 2026-09-26, D11): every line in twelve
+    # episodes was one temperature.  The delivery rides as IndexTTS2's emotion
+    # VECTOR on the speaker's own clip -- a designed emotion clip was another
+    # voice (ep13: the narrator's shouts at 0.25-0.54 similarity).
     delivery = episode_emotion.delivery_of(line)
     if ENGINE == "indextts2":
-        emotion = episode_emotion.emotion_clip(book, line.speaker, delivery)
-        said = voice_say.say(line.text, reference, emotion, seed, out,
-                             index=line.index, speaker=line.speaker)
+        said = voice_say.say(line.text, reference, reference, seed, out, index=line.index,
+                             speaker=line.speaker, vector=episode_emotion.vector_for(delivery))
     else:
         said = voice.clone_line(reference, line.text, seed, out, index=line.index, speaker=line.speaker)
     return {"index": line.index, "speaker": line.speaker, "kind": line.kind, "shot": line.shot,

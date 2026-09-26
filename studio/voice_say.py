@@ -46,21 +46,22 @@ def pad_room(out: Path, seconds: float = ROOM_S) -> Path:
 
 
 def values_for(text: str, timbre: Path, emotion: Path, seed: int,
-               alpha: float = ALPHA) -> dict:
-    """What the workflow is filled with for one spoken line."""
+               alpha: float = ALPHA, vector: dict | None = None) -> dict:
+    """What the workflow is filled with for one spoken line; `vector` sets the
+    8-axis emotion channel (`emotion_angry` ... 0-1.2) beside the clip."""
     return {"text": text, "seed": seed, "emotion_alpha": alpha,
             "ref_audio": _stage_reference(Path(timbre)),
             "emotion_audio": _stage_reference(Path(emotion)),
-            "filename_prefix": "trailer_say"}
+            "filename_prefix": "trailer_say", **(vector or {})}
 
 
 def say(text: str, timbre: Path, emotion: Path, seed: int, out: Path,
         index: int = 0, speaker: str | None = None, alpha: float = ALPHA,
-        run=None) -> VoiceLine:
+        run=None, vector: dict | None = None) -> VoiceLine:
     """One line, in this character's voice, with this beat's feeling."""
     out = Path(out)
     out.parent.mkdir(parents=True, exist_ok=True)
-    produced = (run or comfy.run)(WORKFLOW, values_for(text, timbre, emotion, seed, alpha),
+    produced = (run or comfy.run)(WORKFLOW, values_for(text, timbre, emotion, seed, alpha, vector),
                                   timeout=TIMEOUT)
     post_process(produced[0], out)
     pad_room(out)

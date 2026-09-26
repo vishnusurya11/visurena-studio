@@ -47,3 +47,13 @@ def test_a_line_is_said_through_the_indextts_workflow(tmp_path, monkeypatch):
     assert made["name"] == "audio_indextts2_tts_single_speaker"
     assert line.seconds == 2.4 and line.speaker == "jefferson_hope"
     assert line.text == "Choose and eat."
+
+
+def test_an_emotion_vector_rides_with_the_values(tmp_path):
+    """ep13: a designed emotion CLIP is a different voice (VoiceDesign has no
+    seed), and the narrator's lines fell to 0.25 similarity.  The 8-axis VECTOR
+    moves the feeling and leaves the timbre on the speaker's own clip."""
+    clip = tmp_path / "design.wav"
+    clip.write_bytes(b"RIFF0000WAVEcalm")
+    values = voice_say.values_for("Be a man!", clip, clip, seed=1, vector={"emotion_angry": 0.7})
+    assert values["emotion_angry"] == 0.7 and values["ref_audio"] == values["emotion_audio"]

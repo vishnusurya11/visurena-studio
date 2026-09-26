@@ -31,6 +31,27 @@ LIFT_ST = 2.0
 measure -1.5 to +1.1; the one line that was heard as raised (ep02 Ogilvy) +2.3."""
 
 
+VECTORS = {
+    "hushed": {"emotion_afraid": 0.35, "emotion_calm": 0.6, "emotion_melancholic": 0.3},
+    "urgent": {"emotion_afraid": 0.7, "emotion_surprised": 0.35},
+    "shouting": {"emotion_angry": 0.6, "emotion_afraid": 0.6, "emotion_surprised": 0.5},
+    "exultant": {"emotion_happy": 0.9, "emotion_surprised": 0.7},
+    "grieving": {"emotion_sad": 0.85, "emotion_melancholic": 0.6},
+    "threatening": {"emotion_angry": 0.6, "emotion_calm": 0.35},
+    "cold": {"emotion_calm": 0.8, "emotion_disgusted": 0.2},
+    "curious": {"emotion_surprised": 0.4, "emotion_happy": 0.25},
+}
+"""IndexTTS2's 8-axis emotion vector per register (each 0-1.2).  ep13 MEASURED:
+a designed emotion CLIP is another voice -- VoiceDesign has no seed -- and the
+narrator's urgent, cold and shouted lines fell to 0.25-0.54 similarity.  The
+vector moves the feeling while the timbre stays on the speaker's own clip."""
+
+
+def vector_for(register: str) -> dict:
+    """The emotion vector for a register; calm is the plain clone."""
+    return dict(VECTORS.get(register, {}))
+
+
 def delivery_of(line) -> str:
     """The written delivery, else a shout for a line that ends in '!', else calm."""
     if getattr(line, "delivery", ""):
