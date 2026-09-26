@@ -9,11 +9,12 @@ Design: docs/db/SCHEMA.md and docs/db/EVENT_MODEL.md.
 
 from __future__ import annotations
 
+import json
 import sqlite3
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
-from studio import registry, spend
+from studio import episode_home, registry, spend
 
 DB_PATH = Path("db") / "visurena_studio.db"
 
@@ -355,7 +356,71 @@ def project_event(conn: sqlite3.Connection, codex_id: str, stage: str, unit: str
     order_id = _write_work_order(conn, codex_id, stage, unit, row, fields)
     _project_step(conn, order_id, step_id, event, run_id, event_ts,
                   None if detail is None else detail[:200])
+    if event == "completed":
+        _project_completion(conn, order_id, codex_id, stage, unit, step_id, row)
     return order_id
+
+
+def _book_dir(codex_id: str) -> Path | None:
+    """The book's library folder, or None when it has none (a test's book, a
+    book-level stage with no home): the projection then reads no disk."""
+    try:
+        return episode_home.book_dir(codex_id)
+    except (FileNotFoundError, NotADirectoryError):
+        return None
+
+
+def _project_completion(conn: sqlite3.Connection, order_id: int, codex_id: str, stage: str,
+                        unit: str, step_id: str, row) -> None:
+    """What a `completed` step leaves on its rows beyond the state (C3): the
+    verdict it is answerable for on its chip and in the order's verdicts JSON,
+    the flags count, and on the stage's last step the deliverable once it is
+    on disk.  The files are read through studio.verdict_rows (a lazy import:
+    it reads the manifest, which reads this module)."""
+    from studio import verdict_rows
+    book = _book_dir(codex_id)
+    if book is None:
+        return
+    signed = verdict_rows.step_rows(book, stage, step_id, unit)
+    fields = {"verdicts": _merged_verdicts(row, signed), "flags": verdict_rows.flags(book, unit)}
+    if step_id == _final_step_id(stage) and (out := verdict_rows.deliverable(book, stage, unit)):
+        fields["deliverable"] = out
+    _update_work_order(conn, order_id, fields)
+    for rec in signed.values():
+        _write_step_verdict(conn, order_id, step_id, rec)
+
+
+def _merged_verdicts(row, signed: dict[str, dict]) -> str:
+    """The order's verdicts JSON -- {gate: {word, by, terminal, sha8, faults,
+    path}} -- with this step's gates written over the ones the row kept."""
+    kept = json.loads(row["verdicts"]) if row is not None and row["verdicts"] else {}
+    return json.dumps({**kept, **signed}, sort_keys=True)
+
+
+def _write_step_verdict(conn: sqlite3.Connection, order_id: int, step_id: str, rec: dict) -> None:
+    """The chip's verdict columns from one gate's row."""
+    conn.execute(
+        "UPDATE work_steps SET verdict_path = ?, verdict_by = ?, verdict_word = ?, terminal = ?"
+        " WHERE order_id = ? AND step_id = ?",
+        (rec["path"], rec["by"], rec["word"], rec["terminal"], order_id, step_id),
+    )
+
+
+def mark_stale_verdicts(conn: sqlite3.Connection, codex_id: str, stage: str, unit: str,
+                        book_dir: Path) -> list[str]:
+    """A done unit whose signatures no longer name the artefacts as they stand
+    is `stale` (decision 2026-09-25, the state machine): each recorded sha8
+    against the artefact's now, `blocked_on` naming the gates that moved.
+    Verify's call (C7), never add_event's.  A row not done is left as it is."""
+    from studio import verdict_rows
+    row = work_order(conn, codex_id, stage, unit)
+    if row is None or row["state"] != "done":
+        return []
+    gates = verdict_rows.stale_gates(book_dir, unit, json.loads(row["verdicts"] or "{}"))
+    if gates:
+        _update_work_order(conn, row["id"], {"state": "stale", "blocked_on": ",".join(gates)})
+        conn.commit()
+    return gates
 
 
 def _final_step_id(stage: str) -> str | None:
@@ -553,6 +618,48 @@ def department_rows(conn: sqlite3.Connection, stage: str) -> list[sqlite3.Row]:
         raise ValueError(f"unknown stage {stage!r}; known: {STAGES}")
     return list(conn.execute(
         f"SELECT * FROM {stage}_orders ORDER BY priority, sequence, unit"))
+
+
+# --- cost per unit (decision 2026-09-25, C5): usage rows answer to the order's unit;
+# a book-level stage's rows carry NULL and answer to the unit 'book' ---
+
+_UNIT_USAGE = "codex_id = ? AND stage = ? AND COALESCE(unit, 'book') = ?"
+
+
+def unit_usage(conn: sqlite3.Connection, codex_id: str, stage: str, unit: str) -> list[sqlite3.Row]:
+    """Every paid call of one (book, department, unit), in the order made."""
+    spend.init(conn)
+    return list(conn.execute(
+        f"SELECT * FROM usage WHERE {_UNIT_USAGE} ORDER BY id", (codex_id, stage, unit)))
+
+
+def unit_cost(conn: sqlite3.Connection, codex_id: str, stage: str, unit: str) -> float | None:
+    """The unit's paid cost in USD: the sum of its rows, 0.0 when it made no
+    call, and None while ANY of its calls is unpriced -- an unknown cost never
+    becomes a confident $0.00 (the row's `cost_usd` rule)."""
+    spend.init(conn)
+    row = conn.execute(
+        f"SELECT COALESCE(SUM(cost_usd), 0.0) AS usd,"
+        f" SUM(CASE WHEN cost_usd IS NULL THEN 1 ELSE 0 END) AS unpriced"
+        f" FROM usage WHERE {_UNIT_USAGE}", (codex_id, stage, unit)).fetchone()
+    if row["unpriced"]:
+        return None
+    return round(row["usd"], 6)
+
+
+def link_usage_to_orders(conn: sqlite3.Connection) -> int:
+    """Backfill `usage.order_id` from the (book, department, unit) row where it
+    is NULL; a row whose unit has no order yet is left for the next call.
+    Idempotent.  Returns how many rows were linked."""
+    cur = conn.execute(
+        "UPDATE usage SET order_id = (SELECT w.id FROM work_orders w"
+        " WHERE w.codex_id = usage.codex_id AND w.stage = usage.stage"
+        " AND w.unit = COALESCE(usage.unit, 'book'))"
+        " WHERE order_id IS NULL AND EXISTS (SELECT 1 FROM work_orders w"
+        " WHERE w.codex_id = usage.codex_id AND w.stage = usage.stage"
+        " AND w.unit = COALESCE(usage.unit, 'book'))")
+    conn.commit()
+    return cur.rowcount
 
 
 def claim_gpu(conn: sqlite3.Connection, order_id: int) -> None:

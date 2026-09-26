@@ -20,14 +20,22 @@ from studio import db, registry
 from studio.judges import verdict as jv
 
 FILE = "manifest.json"
-VERDICTS: dict[str, tuple[tuple[str, str], ...]] = {
-    "episode": (("PLAN", "episodes/{unit}/plan.verdict.json"),
-                ("EYE_PANELS", "episodes/{unit}/storyboard/eye_*.json"),
-                ("EYE_TAKES", "episodes/{unit}/takes/r2v/eye_*.json"),
-                ("MASTER", "episodes/{unit}/review/eye_*.json")),
-    "refs": (("LOOK", "refs/verdict.json"),),
+VERDICTS: dict[str, tuple[tuple[str, str, str], ...]] = {
+    "episode": (("PLAN", "02", "episodes/{unit}/plan.verdict.json"),
+                ("EYE_PANELS", "08", "episodes/{unit}/storyboard/eye_*.json"),
+                ("EYE_TAKES", "09", "episodes/{unit}/takes/r2v/eye_*.json"),
+                ("MASTER", "11", "episodes/{unit}/review/eye_*.json")),
+    "refs": (("LOOK", "04", "refs/verdict.json"),),
 }
-"""Where each judged gate signs, by stage: the gate names are gates.yaml's."""
+"""Where each judged gate signs, by stage: (gate, the step answerable for it, the
+file).  The gate names are gates.yaml's; the file is that step's `out:` in the
+registry (a test holds them together); the step id is what the Command Center
+reads when the step completes (C3)."""
+
+
+def gates_of(stage: str, step_id: str) -> list[tuple[str, str]]:
+    """The (gate, file pattern) pairs one step signs; [] for a step that signs nothing."""
+    return [(gate, pattern) for gate, step, pattern in VERDICTS.get(stage, ()) if step == step_id]
 
 
 class Input(BaseModel):
@@ -142,7 +150,7 @@ def read_verdict(book_dir: Path, gate: str, rel: str) -> VerdictRow:
 
 def verdicts_for(book_dir: Path, stage: str, unit: str) -> list[VerdictRow]:
     rows = []
-    for gate, pattern in VERDICTS.get(stage, ()):
+    for gate, _step, pattern in VERDICTS.get(stage, ()):
         rows += [read_verdict(book_dir, gate, rel) for rel in matched(book_dir, [pattern.replace("{unit}", unit)])]
     return rows
 
