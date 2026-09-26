@@ -849,9 +849,11 @@ stages:
               house loudness, captions, end chip.
           - id: "10_04"
             name: sound
-            desc: >-  # MISSING
-              Ambience and spot effects when the format asks; otherwise
-              skipped.
+            desc: >-
+              The plan's spot effects (Shot.sounds) and a per-setup ambience
+              (Setup.ambience), rendered locally by Stable Audio 3 SFX
+              (studio/episode_sound.py); lines offset by their delivery. QC
+              fails a planned sound the master does not let you hear.
 
       - id: "11"
         name: qc

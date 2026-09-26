@@ -4,6 +4,25 @@ Newest first. Every architectural change gets an entry.
 
 ---
 
+## 2026-09-26 — A terminal is not a pass; the episode has sound and a voice (owner decision)
+
+**Decision.** The owner, after episode 12 was judged bad: "finish all 1-d" of the root
+cause (`docs/audit/2026-09-26_ep12_root_cause.md`). A gate that cannot afford a rung
+DEFERS the run instead of signing its terminal; a judge repeating one fault is an
+invalid verdict; "cannot tell" is an n; every pass is learned. Both publish doors
+(`youtube_upload`, `youtube_privacy public`) refuse on `studio/publish_lock.py`: an
+open terminal without the owner's waiver, a speaker that is not one voice, or no
+`review/director_signoff.md` for the cut. The plan must cover its chapter (G-COVER:
+90 % of paragraphs and the title event) and file shouts as dialogue (G-SHOUT). Lines
+carry a delivery and are said with a per-register emotion clip, lifted and levelled
+by it. The episode has a sound layer (Shot.sounds, Setup.ambience, Stable Audio 3,
+G-SOUND, a QC row). The take gate reads whole-frame stillness (`frozen-whole`).
+
+**Why.** Episode 12 went public with every taste gate ended in a terminal, a plan that
+stopped at paragraph 57 of 69, no sound effects (an empty cue list since 2026-09-13),
+shouts read flat (the reading clip was the emotion reference), and five frozen shots
+the block-max meter could not see. The owner: "this is fucked up and not acceptable".
+
 ## 2026-09-25 — The Command Center: departments driven by their tables (owner decision)
 
 **Ruling (owner, "looks good"):** one work-order row per (book, department, unit) in a
