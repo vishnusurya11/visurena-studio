@@ -262,7 +262,7 @@ because nothing between the generator and the mix ever listened to it.  Hence
 
 
 def bed_request(engine: str, seconds: float, seed: int,
-                tone: str = "") -> tuple[str, dict]:
+                tone: str = "", tones: dict | None = None) -> tuple[str, dict]:
     """The workflow and the values for one bed, by engine.
 
     Pure: no network, no GPU, so the ask is testable without spending a minute
@@ -279,7 +279,7 @@ def bed_request(engine: str, seconds: float, seed: int,
         # whose lyrics field promises nothing -- given `(instrumental)` it sang
         # invented verse, and given "" it sang again.
         return "audio_yue2_song_olmpack", {
-            "style": episode_bed.tone_style(tone) if tone else BED_STYLE,
+            "style": (tones or episode_bed.TONES)[tone].style if tone else BED_STYLE,
             "lyrics": BED_INSTRUMENTAL[engine], "cot": "full",
             "seed": seed, "abc": "", "filename_prefix": "ep_bed",
             # the duration control, at 25 tokens a second; it was never set
@@ -288,7 +288,7 @@ def bed_request(engine: str, seconds: float, seed: int,
     # separate values on this request, so a tone that changed only its tags
     # would arrive at 60 BPM in D minor like every other -- which is the
     # sameness the owner heard.
-    voice = episode_bed.TONES.get(tone)
+    voice = (tones or episode_bed.TONES).get(tone)
     return BED_WORKFLOW, {
         "tags": voice.tags if voice else BED_TAGS,
         "lyrics": BED_INSTRUMENTAL[engine], "seconds": seconds,
@@ -363,10 +363,15 @@ def tone_fault(out: Path, loudness: float | None, target: float, want: float) ->
     return ""
 
 
+def book_tones(out: Path) -> dict:
+    """The tones of the book a bed file belongs to (<book>/episodes/epNN/audio/x.wav)."""
+    return episode_bed.tones_for(Path(out).parents[3])
+
+
 def generate(out: Path, number: int, roll: int, tone: str, want: float, engine: str) -> Path:
     """One roll of one tone onto disk, its seed moved along by the roll number."""
     seed = bed_seed(out, number) + 977 * roll
-    workflow, values = bed_request(engine, want, seed, tone)
+    workflow, values = bed_request(engine, want, seed, tone, tones=book_tones(out))
     got = run(workflow, values, timeout=BED_TIMEOUT)
     out.write_bytes(got[0].read_bytes())
     return out
@@ -400,7 +405,7 @@ def one_tone(room: Path, number: int, tone: str, want: float, engine: str) -> Pa
     RE-ROLL RATHER THAN RE-ASK: four good beds came from the same prose in the
     same minute, so there is nothing in the request to repair."""
     out = room / f"bed_{tone}.wav"
-    target = episode_bed.tone_lufs(tone)
+    target = book_tones(out)[tone].lufs
     for roll in range(BED_ROLLS):
         if not out.exists():
             generate(out, number, roll, tone, want, engine)

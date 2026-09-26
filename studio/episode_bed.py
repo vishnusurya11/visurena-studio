@@ -210,6 +210,20 @@ class Span:
         return round(self.end - self.start, 3)
 
 
+def tones_for(book) -> dict[str, Tone]:
+    """The house tones with the book's own `audio/bed_tones.json` laid over them:
+    any tone's style, tags, bpm, key or lufs replaced, or a new tone added.
+    Root cause 2026-09-26: every WotW bed was the Holmes violin, "Victorian London"."""
+    import json
+    from dataclasses import replace
+    path = Path(book) / "audio" / "bed_tones.json"
+    doc = json.loads(path.read_text(encoding="utf-8")) if path.exists() else {}
+    out = dict(TONES)
+    for name, fields in doc.items():
+        out[name] = replace(out[name], **fields) if name in out else Tone(**fields)
+    return out
+
+
 def tone_style(name: str) -> str:
     """The prose handed to the music model for this tone."""
     if name not in TONES:
