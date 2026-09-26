@@ -203,6 +203,10 @@ def test_the_dry_run_refuses_watched_until_the_rubric_is_filled(tmp_path, clip, 
              digest, every=0.5)
     path = er.rubric_path(book / "episodes" / "ep01", digest)
     path.write_text(json.dumps(filled(digest=digest)), encoding="utf-8")
+    # AND THE DIRECTOR SIGNED THIS CUT (publish lock, root cause 2026-09-26)
+    (book / "episodes" / "ep01" / "review" / "director_signoff.md").write_text(
+        f"# ep01 {digest}\n\n## Watched\nfull size, with sound\n\n## Take strips\nall read\n\n"
+        f"## Coverage\nto the last paragraph\n\n## Flags\nnone open\n", encoding="utf-8")
     youtube_upload.main(argv, send=lambda *a: pytest.fail("never reached"))
     assert "all gates pass" in capsys.readouterr().out
 

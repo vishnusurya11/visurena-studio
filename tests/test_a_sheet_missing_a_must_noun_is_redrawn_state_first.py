@@ -27,7 +27,8 @@ def test_a_missing_noun_climbs_seed_then_state_first_and_signs(tmp_path):
     tries = sorted(p.name for p in (book / "refs" / "characters" / "a" / "superseded").iterdir())
     assert tries == ["sheet_try1.png", "sheet_try2.png"]
     learned = learnings.load(book / "refs" / "learnings.jsonl")
-    assert [(l.action, l.gate) for l in learned] == [("redraw_seed", "LOOK"), ("defining_state_first", "LOOK")]
+    assert [(l.action, l.gate) for l in learned] == [("redraw_seed", "LOOK"), ("defining_state_first", "LOOK"),
+                                                              ("pass", "LOOK")]
     assert "must_noun" in learned[0].note and "lantern" in lf.logged(tmp_path)
 
 

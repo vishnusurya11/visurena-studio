@@ -40,7 +40,8 @@ def learner(ctx):
     def learn(learning):
         learnings.record(Path(ctx.book_dir) / LEARNINGS, learning)
         ctx.log(f"{learning.gate}: {learning.action} (attempt {learning.attempt}) {learning.note}"
-                + (" (terminal)" if learning.terminal else ""), step_id=STEP_ID, level="WARNING")
+                + (" (terminal)" if learning.terminal else ""), step_id=STEP_ID,
+                level="INFO" if learning.action == "pass" else "WARNING")
     return learn
 
 

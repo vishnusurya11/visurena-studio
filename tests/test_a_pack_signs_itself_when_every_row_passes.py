@@ -23,7 +23,8 @@ def test_a_passing_pack_is_signed_by_the_judge_and_bound_to_its_sha8(tmp_path):
     assert signed["signed_by"] == "judge:look@1" and signed["faults"] == []
     assert signed["note"].startswith("no fault named in")
     assert drawn == [] and audit_rows.load(book) == []
-    assert not (book / "refs" / "learnings.jsonl").exists()
+    from studio.learnings import load     # the pass is learned (root cause 2026-09-26), nothing else
+    assert [r.action for r in load(book / "refs" / "learnings.jsonl")] == ["pass"]
     assert {p.parent.name for p, q in asked if "absent" in q} == {"a", "b"}   # a place is judged by the line at its own hour, not by the bible
     assert step.done(ctx) is True
 
