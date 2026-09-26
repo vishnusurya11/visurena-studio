@@ -12,7 +12,7 @@ W5 = C10 · W6 = C11. Each commit is green on the full suite before it lands.
 - [ ] C3 verdicts and flags on the row
 - [x] C4 `in:`/`out:` in the registry, the manifest, the drift guard — all 16 episode+refs steps covered; `deliverable_of('episode')` is the manifest (it names the master)
 - [ ] C5 cost per unit
-- [ ] C6 holds, orders, `studio_cli`
+- [x] C6 holds, orders, `studio_cli` — 38 tests; a hold row stops a run where RENDER_HOLD does; orders taken at the top of run_steps; a redo's note is a casebook row through the one door (`casebook.note_owner`)
 - [ ] C7 the tick, `v_queue`, `v_attention`; Current tab + README — must also settle a unit whose every step was `skipped` (outputs on disk): it stays `blocked` under C2's map until the tick/verify marks it done
 - [ ] C8 backfill (dry-run listed to the owner before `--write`)
 - [ ] C9 runners take the queue

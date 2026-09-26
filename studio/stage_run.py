@@ -76,7 +76,12 @@ class StageContext:
         return f"{self.codex_id} {self.stage}/{self.unit or 'book'}"
 
     def held(self) -> bool:
-        return self.hold.exists()
+        """The owner's brake: the RENDER_HOLD file (first, one stat, from any shell)
+        or an open hold row that reaches this unit (studio/work_orders)."""
+        if self.hold.exists():
+            return True
+        from studio import work_orders
+        return work_orders.is_held(self.conn, self.codex_id, self.stage, self.unit or "book")
 
     def log(self, msg: str, *, step_id: str = "", level: str = "INFO") -> None:
         self.tracker.log(msg, level=level, step_id=step_id)

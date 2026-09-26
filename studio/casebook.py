@@ -22,6 +22,8 @@ from pathlib import Path
 
 from pydantic import BaseModel, field_validator, model_validator
 
+from studio import db
+
 KINDS = ("sheet", "plan", "grid", "panel", "take", "master")
 VERDICTS = ("pass", "fault")
 BY = ("owner", "agent", "default", "synthetic", "unverified")
@@ -160,3 +162,36 @@ def append_owner(casebook_dir: Path, row: Row) -> Path:
     with target.open("a", encoding="utf-8") as fh:
         fh.write(json.dumps(row.model_dump(), ensure_ascii=False) + "\n")
     return target
+
+
+KINDS_BY_PATH = (("storyboard/grids", "grid"), ("storyboard/shot_", "panel"), ("/takes/", "take"),
+                 ("/cut/", "master"), ("/review/", "master"), ("refs/", "sheet"), ("plan", "plan"))
+"""The first match names the kind; the grids row sits before the panels' folder."""
+
+
+def kind_of(artefact: str) -> str:
+    """An artefact's casebook kind, read off its book-relative path."""
+    path = artefact.replace("\\", "/")
+    for needle, kind in KINDS_BY_PATH:
+        if needle in path:
+            return kind
+    raise ValueError(f"{artefact}: not a sheet, plan, grid, panel, take or master path")
+
+
+def owner_row(codex: str, unit: str, artefact: str, cls: str, words: str, book: Path) -> Row:
+    """The owner's row: a fault of the named class, or a pass; the file's sha8 when it is there."""
+    today = db.utc_now().strftime("%Y-%m-%d")
+    if cls != "pass" and cls not in CLASSES:
+        raise ValueError(f"{cls!r} is not a fault class; one of pass, {', '.join(CLASSES)}")
+    return Row(codex=codex, unit=unit, kind=kind_of(artefact), path=artefact,
+               sha8=sha8_of(Path(book) / artefact),
+               verdict="pass" if cls == "pass" else "fault", fault_class=None if cls == "pass" else cls,
+               verdict_by="owner", verdict_at=today, source=f"owner note {today}: {words.strip()}")
+
+
+def note_owner(book: Path, codex: str, unit: str, artefact: str, cls: str, words: str) -> Path:
+    """One finding of the owner's onto the end of the book's owner.jsonl -- the
+    one door for scripts/audit/note.py and for a redo order's note."""
+    if not words.strip():
+        raise ValueError("say what was seen: the words may not be empty")
+    return append_owner(Path(book) / "casebook", owner_row(codex, unit, artefact, cls, words, book))
