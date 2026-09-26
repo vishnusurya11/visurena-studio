@@ -76,7 +76,10 @@ ASK = (
 def asked_posture(prose: str) -> str | None:
     """The one posture family the shot names, or None when it names none or
     several (the narrator kneels by a man who lies: no single answer)."""
-    named = [family for family, word in ASKED.items() if word.search(prose or "")]
+    # A BOUND TAG IS NOT AN ACTION: the curate's row has curls "lying on a low
+    # forehead", and ep13's panel of him springing up was refused as not lying down.
+    said = re.sub(r"\([^)]*\)", "", prose or "")
+    named = [family for family, word in ASKED.items() if word.search(said)]
     return named[0] if len(named) == 1 else None
 
 

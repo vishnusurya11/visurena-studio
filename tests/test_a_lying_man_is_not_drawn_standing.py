@@ -45,3 +45,11 @@ def test_the_reader_is_asked_for_the_posture():
     assert '"posture"' in pc.ASK
     assert pc.parse('{"landform": "flat", "people": 1, "lookalikes": 0, "text": false, '
                     '"hour": "night", "posture": "Lying", "subjects": []}').posture == "lying"
+
+
+def test_a_word_inside_a_bound_tag_is_not_a_posture():
+    """ep13 shot 24: the curate's row says his curls are 'lying on a low forehead',
+    and the panel of him springing to his feet was refused as a man not lying down."""
+    prose = ("Medium close on the curate (crisp, almost flaxen curls cut short and lying on a low "
+             "forehead, soot-smudged shirt sleeves) springing to his feet, one hand raised.")
+    assert pc.asked_posture(prose) is None
