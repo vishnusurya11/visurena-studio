@@ -116,6 +116,15 @@ CREATE VIEW IF NOT EXISTS v_attention AS
 WORK_ORDER_STATES = ("blocked", "queued", "running", "stale", "held",
                      "deferred", "escalated", "failed", "done")
 
+# The state map (decision 2026-09-25, "the state machine"): what an event does to
+# its unit's work-order row.  `completed` is decided by the step -- the stage's LAST
+# step makes the unit `done`, any other keeps it `running` with step_id advanced --
+# and `skipped` leaves the state alone (a new row stays `blocked`); see _order_state.
+ORDER_STATE_OF_EVENT = {"started": "running", "failed": "failed",
+                        "escalated": "escalated", "deferred": "deferred"}
+# The (order, step) chip's state: the event's word, with two renamed.
+STEP_STATE_OF_EVENT = {"started": "running", "completed": "done"}
+
 
 def get_connection(db_path: str | Path = DB_PATH) -> sqlite3.Connection:
     """Open a connection with row access by name and FK enforcement on."""
@@ -314,28 +323,104 @@ def update_codex(conn: sqlite3.Connection, codex_id: str, **fields) -> None:
     conn.commit()
 
 
-def add_event(
-    conn: sqlite3.Connection,
-    codex_id: str,
-    stage: str,
-    step_id: str,
-    event: str,
-    *,
-    run_id: str | None = None,
-    detail: str | None = None,
-    unit: str | None = None,
-) -> str:
-    """Append one event. Returns its timestamp. Long detail belongs in logs, not here.
-    `unit` names the production below the book (an episode, a cue); NULL for a
-    book-level stage."""
+def add_event(conn: sqlite3.Connection, codex_id: str, stage: str, step_id: str, event: str,
+              *, run_id: str | None = None, detail: str | None = None,
+              unit: str | None = None) -> str:
+    """Append one event and project it onto the unit's work-order row (one writer,
+    same transaction).  Returns its timestamp.  Long detail belongs in logs, not
+    here.  `unit` names the production below the book (an episode, a cue); NULL
+    for a book-level stage."""
     event_ts = utc_now().strftime("%Y-%m-%dT%H:%M:%S.%fZ")
-    conn.execute(
+    cur = conn.execute(
         "INSERT INTO events (event_ts, codex_id, stage, step_id, event, run_id, detail, unit)"
         " VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
         (event_ts, codex_id, stage, step_id, event, run_id, detail, unit),
     )
+    order_id = project_event(conn, codex_id, stage, unit, step_id, event, run_id, event_ts, detail)
+    conn.execute("UPDATE events SET order_id = ? WHERE id = ?", (order_id, cur.lastrowid))
     conn.commit()
     return event_ts
+
+
+def project_event(conn: sqlite3.Connection, codex_id: str, stage: str, unit: str | None,
+                  step_id: str, event: str, run_id: str | None, event_ts: str,
+                  detail: str | None) -> int:
+    """The Command Center's one writer (decision 2026-09-25, "events vs rows"):
+    every event lands on its unit's work-order row and on the (order, step) chip
+    inside add_event's transaction, so no runner writes a row.  A book-level
+    stage (unit NULL) is the unit 'book'.  Returns the order id."""
+    unit = unit or "book"
+    row = work_order(conn, codex_id, stage, unit)
+    fields = _order_fields(stage, step_id, event, run_id, event_ts, row)
+    order_id = _write_work_order(conn, codex_id, stage, unit, row, fields)
+    _project_step(conn, order_id, step_id, event, run_id, event_ts,
+                  None if detail is None else detail[:200])
+    return order_id
+
+
+def _final_step_id(stage: str) -> str | None:
+    """The department's last step, from the registry; None for a stage the
+    registry does not know (nothing can finish it) or one with no steps."""
+    try:
+        entries = registry.steps(stage)
+    except ValueError:
+        return None
+    return entries[-1]["id"] if entries else None
+
+
+def _order_state(stage: str, step_id: str, event: str) -> str | None:
+    """The state a work order takes from an event; None leaves it as it is."""
+    if event == "completed":
+        return "done" if step_id == _final_step_id(stage) else "running"
+    return ORDER_STATE_OF_EVENT.get(event)
+
+
+def _opens_a_pass(row, run_id: str | None) -> bool:
+    """The attempts rule: `attempts` counts PASSES over the unit, not steps
+    started.  A `started` opens a new pass unless the row is already running
+    under this very run_id -- so the twelve steps of one run are one attempt,
+    and a deferral, failure or escalation followed by the next run's started
+    is a second.  A run that died without a `failed` still counts on its
+    successor, because the run_id differs."""
+    return row is None or row["state"] != "running" or row["run_id"] != run_id
+
+
+def _order_fields(stage: str, step_id: str, event: str, run_id: str | None,
+                  event_ts: str, row) -> dict:
+    """The row's columns an event moves: step_id and updated_at always (the
+    writer stamps updated_at); state per the map; on `started` the run, the
+    clock (set once) and an attempt when it opens a pass; finished_at on done."""
+    fields: dict = {"step_id": step_id}
+    state = _order_state(stage, step_id, event)
+    if state:
+        fields["state"] = state
+    if event == "started":
+        fields["run_id"] = run_id
+        fields["started_at"] = (row["started_at"] if row else None) or event_ts
+        if _opens_a_pass(row, run_id):
+            fields["attempts"] = (row["attempts"] if row else 0) + 1
+    if state == "done":
+        fields["finished_at"] = event_ts
+    return fields
+
+
+def _project_step(conn: sqlite3.Connection, order_id: int, step_id: str, event: str,
+                  run_id: str | None, event_ts: str, detail: str | None) -> None:
+    """The (order, step) chip: state = the event's word (STEP_STATE_OF_EVENT);
+    attempt counts the step's own started events; a started sets the clock and
+    clears the end, every other event ends it; the last detail wins."""
+    started = event == "started"
+    conn.execute(
+        "INSERT INTO work_steps (order_id, step_id, state, attempt, run_id, started_at, ended_at, detail)"
+        " VALUES (?, ?, ?, ?, ?, ?, ?, ?)"
+        " ON CONFLICT (order_id, step_id) DO UPDATE SET state = excluded.state,"
+        " attempt = work_steps.attempt + excluded.attempt,"
+        " run_id = COALESCE(excluded.run_id, work_steps.run_id),"
+        " started_at = COALESCE(excluded.started_at, work_steps.started_at),"
+        " ended_at = excluded.ended_at, detail = excluded.detail",
+        (order_id, step_id, STEP_STATE_OF_EVENT.get(event, event), int(started), run_id,
+         event_ts if started else None, None if started else event_ts, detail),
+    )
 
 
 def unit_status(conn: sqlite3.Connection, codex_id: str, stage: str, unit: str) -> dict[str, str]:
@@ -420,25 +505,35 @@ def _order_defaults(stage: str, unit: str) -> dict[str, str]:
 
 def _insert_work_order(conn: sqlite3.Connection, codex_id: str, stage: str, unit: str,
                        fields: dict) -> int:
-    """INSERT the row with the grammar's defaults under the given fields; its id."""
+    """INSERT the row with the grammar's defaults under the given fields; its id.
+    No commit: the caller's transaction (add_event's, or upsert_work_order's)."""
     values = {**_order_defaults(stage, unit), "state": "blocked", **fields,
               "codex_id": codex_id, "stage": stage, "unit": unit,
               "updated_at": utc_now().strftime("%Y-%m-%dT%H:%M:%SZ")}
     cols = ", ".join(values)
     marks = ", ".join("?" * len(values))
     cur = conn.execute(f"INSERT INTO work_orders ({cols}) VALUES ({marks})", tuple(values.values()))
-    conn.commit()
     return cur.lastrowid
 
 
 def _update_work_order(conn: sqlite3.Connection, order_id: int, fields: dict) -> int:
-    """UPDATE the given columns of one row; updated_at always; the same id back."""
+    """UPDATE the given columns of one row; updated_at always; the same id back.
+    No commit: the caller's transaction."""
     fields = {**fields, "updated_at": utc_now().strftime("%Y-%m-%dT%H:%M:%SZ")}
     assignments = ", ".join(f"{col} = ?" for col in fields)
     conn.execute(f"UPDATE work_orders SET {assignments} WHERE id = ?",
                  (*fields.values(), order_id))
-    conn.commit()
     return order_id
+
+
+def _write_work_order(conn: sqlite3.Connection, codex_id: str, stage: str, unit: str,
+                      row, fields: dict) -> int:
+    """INSERT when the (book, department, unit) has no row yet, else UPDATE the
+    one it has; the row id either way.  No commit -- add_event and
+    upsert_work_order each own their transaction."""
+    if row is None:
+        return _insert_work_order(conn, codex_id, stage, unit, fields)
+    return _update_work_order(conn, row["id"], fields)
 
 
 def upsert_work_order(conn: sqlite3.Connection, codex_id: str, stage: str, unit: str,
@@ -447,9 +542,9 @@ def upsert_work_order(conn: sqlite3.Connection, codex_id: str, stage: str, unit:
     grammar) or UPDATE the given columns.  Returns the row id.  A column the
     table lacks is an OperationalError -- the DDL is the contract, not a kwarg."""
     row = work_order(conn, codex_id, stage, unit)
-    if row is None:
-        return _insert_work_order(conn, codex_id, stage, unit, fields)
-    return _update_work_order(conn, row["id"], fields)
+    order_id = _write_work_order(conn, codex_id, stage, unit, row, fields)
+    conn.commit()
+    return order_id
 
 
 def department_rows(conn: sqlite3.Connection, stage: str) -> list[sqlite3.Row]:
