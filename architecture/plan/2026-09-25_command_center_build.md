@@ -10,7 +10,7 @@ W5 = C10 · W6 = C11. Each commit is green on the full suite before it lands.
 - [x] C1 the tables, the migration, a view per department — 19 tests; the migration only CREATEs and ADDs (a live runner was writing; the plan's "rebuild" wording is superseded)
 - [x] C2 rows written from `add_event` — 31 tests; attempts = passes over the unit (a `started` under a new run_id)
 - [ ] C3 verdicts and flags on the row
-- [ ] C4 `in:`/`out:` in the registry, the manifest, the drift guard
+- [x] C4 `in:`/`out:` in the registry, the manifest, the drift guard — all 16 episode+refs steps covered; `deliverable_of('episode')` is the manifest (it names the master)
 - [ ] C5 cost per unit
 - [ ] C6 holds, orders, `studio_cli`
 - [ ] C7 the tick, `v_queue`, `v_attention`; Current tab + README — must also settle a unit whose every step was `skipped` (outputs on disk): it stays `blocked` under C2's map until the tick/verify marks it done

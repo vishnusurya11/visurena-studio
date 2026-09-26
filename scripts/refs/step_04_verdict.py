@@ -20,7 +20,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 
-from studio import judged_gate, learnings, refs_verdict, sheet_ladder, step_cli  # noqa: E402
+from studio import judged_gate, learnings, manifest as unit_manifest, refs_verdict, sheet_ladder, step_cli  # noqa: E402
 from studio.judges import look  # noqa: E402
 
 STEP_ID = "04"
@@ -151,6 +151,14 @@ def run(ctx) -> None:
     judged_gate.clear(ctx, GATE, judge_of(ctx, paths), sign_of(ctx),
                       judged_gate.Rungs(sheet_ladder.LADDER, ladder.take), ladder.keep_best)
     ctx.log(f"{GATE}: signed by judge:{look.NAME}@{look.VERSION} over {len(paths)} row(s)", step_id=STEP_ID)
+    write_manifest(ctx)
+
+
+def write_manifest(ctx) -> Path:
+    """The bible's manifest (studio/manifest.UnitManifest) at refs/, after the
+    sign: what crosses to every format line that requires refs/04."""
+    home = unit_manifest.home_of(ctx.stage, ctx.unit or "main")
+    return unit_manifest.write_manifest(ctx.book_dir, home, unit_manifest.manifest_for(ctx, ctx.stage))
 
 
 if __name__ == "__main__":

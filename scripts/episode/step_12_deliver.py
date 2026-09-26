@@ -5,9 +5,12 @@
 
 episodes/epNN/manifest.json: the master (relative to the library), the QC
 summary, every step's latest event (db.unit_status) and the wall time the
-clock stamped (studio/episode_clock).  The deliverable is the pair whose QC
-passed (studio/youtube_publish.deliverable).  Never publishes, never sends:
-the manifest is written and the master's absolute path is printed on its own
+clock stamped (studio/episode_clock) -- and beside them the department
+contract, studio/manifest.UnitManifest: the registry's declared inputs and
+outputs matched on disk with their sha8, every verdict with its signer, the
+cost.  The deliverable is the pair whose QC passed
+(studio/youtube_publish.deliverable).  Never publishes, never sends: the
+manifest is written and the master's absolute path is printed on its own
 line first.
 """
 from __future__ import annotations
@@ -17,7 +20,8 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 
-from studio import db, episode_clock, episode_home, step_cli, youtube_publish as yp  # noqa: E402
+from studio import db, episode_clock, episode_home, manifest as unit_manifest, step_cli  # noqa: E402
+from studio import youtube_publish as yp  # noqa: E402
 
 STEP_ID = "12"
 NAME = "deliver"
@@ -64,9 +68,16 @@ def done(ctx) -> bool:
     return episode_home.read_json(out).get("qc", {}).get("sha8") == episode_home.read_json(qc).get("sha8")
 
 
+def write(ctx, master: Path, report: dict) -> Path:
+    """The contract's manifest at the unit's home, this step's own keys beside it."""
+    contract = unit_manifest.manifest_for(ctx, ctx.stage)
+    return unit_manifest.write_manifest(ctx.book_dir, unit_manifest.home_of(ctx.stage, ctx.unit),
+                                        contract, extra=manifest(ctx, master, report))
+
+
 def run(ctx) -> None:
     _engine, master, qc = yp.deliverable(ctx.home, "")
-    out = episode_home.write_json(ctx.home / "manifest.json", manifest(ctx, master, episode_home.read_json(qc)))
+    out = write(ctx, master, episode_home.read_json(qc))
     print(str(master.resolve()))
     print(f"manifest -> {out}")
 

@@ -407,6 +407,11 @@ stages:
       - id: "01"
         name: canon
         script: step_01_canon                     # WRAP scripts/refs/cast_rows.py + agents/casting_director.py
+        in:
+          - analysis/scenes.json
+          - analysis/characters/*.json
+        out:
+          - refs/refs.json
         desc: >-
           Which entities this book binds. AGENT casting_director rows name who
           appears; code writes one refs.json row per character (display name,
@@ -425,6 +430,14 @@ stages:
       - id: "02"
         name: sheets
         script: step_02_sheets                    # WRAP build_pack, prop_refs, cast_bust; trait card from trailer step_02_refs
+        in:
+          - refs/refs.json
+          - analysis/characters/*.json
+          - analysis/props/*.json
+        out:
+          - refs/characters/*/sheet.png
+          - refs/props/*/sheet.png
+          - refs/pack.jsonl
         desc: >-
           One sheet per character and per key prop from profile.design on the
           local image model; pack.jsonl records prompt and seed. A picture on disk
@@ -450,6 +463,12 @@ stages:
       - id: "03"
         name: voices
         script: step_03_voices                    # WRAP scripts/cast/cast_voices.py
+        in:
+          - refs/refs.json
+          - cast/*/character.json
+          - episodes/*/plan.json
+        out:
+          - cast/*/voice/*
         desc: >-
           New speakers only. AGENT voice_director -> VoiceDesign (region, body,
           speech, a register nobody else holds); local TTS renders the design clip;
@@ -459,6 +478,14 @@ stages:
       - id: "04"
         name: verdict
         script: step_04_verdict                   # MISSING
+        in:
+          - refs/pack.jsonl
+          - refs/refs.json
+          - refs/characters/*/sheet.png
+          - refs/props/*/sheet.png
+        out:
+          - refs/verdict.json
+          - refs/manifest.json
         desc: >-
           LOOK, judged. JUDGE look (studio/judges/look.py): must nouns, a
           recognised string, an extra limb, a lookalike pair and a stranger are
@@ -502,6 +529,11 @@ stages:
       - id: "01"
         name: bind
         script: step_01_bind                      # WRAP scripts/refs/cast_rows.py (chapter stamp)
+        in:
+          - analysis/scenes.json
+          - refs/refs.json
+        out:
+          - refs/refs.json
         desc: >-
           This unit's cast. Code stamps the bound rows with the unit; a
           character with no refs row parks the unit and orders refs for it.
@@ -519,6 +551,16 @@ stages:
       - id: "02"
         name: plan
         script: step_02_plan                      # WRAP plan_check; the writer is new
+        in:
+          - analysis/scenes.json
+          - analysis/characters/*.json
+          - analysis/locations/*.json
+          - analysis/dq_rules.json
+          - screenplay/*/elements.json
+          - refs/refs.json
+        out:
+          - episodes/{unit}/plan.json
+          - episodes/{unit}/plan.verdict.json
         desc: >-
           The contract, gated before anything is voiced or drawn. plan.json is
           data under the unit folder; no plan lives in the code tree.
@@ -559,6 +601,11 @@ stages:
       - id: "03"
         name: places
         script: step_03_places                    # WRAP scripts/refs/places.py
+        in:
+          - episodes/{unit}/plan.json
+          - analysis/locations/*.json
+        out:
+          - refs/locations/*/*.png
         desc: >-
           Each setup's location+view at THIS unit's hour, drawn from its own
           described words on the local image model. A recurring place is never
@@ -577,6 +624,13 @@ stages:
       - id: "04"
         name: record
         script: step_04_record                    # WRAP say_lines + speaker_check
+        in:
+          - episodes/{unit}/plan.json
+          - cast/*/voice/design.wav
+        out:
+          - episodes/{unit}/audio/lines/*.wav
+          - episodes/{unit}/audio/lines/lines.json
+          - episodes/{unit}/review/speaker_check.json
         desc: >-
           Every line in its character's voice, MEASURED and LISTENED to.
         substeps:
@@ -597,6 +651,11 @@ stages:
       - id: "05"
         name: timeline
         script: step_05_timeline                  # WRAP respot + timeline
+        in:
+          - episodes/{unit}/plan.json
+          - episodes/{unit}/audio/lines/lines.json
+        out:
+          - episodes/{unit}/placed.json
         desc: >-
           AUDIO FIRST - the animatic. Every shot's seconds derive from the
           measured voice; placed.json is fingerprinted to the plan AND the voice;
@@ -615,6 +674,12 @@ stages:
       - id: "06"
         name: prompts
         script: step_06_prompts                   # WRAP takes_r2v --prompts + no_last_frame
+        in:
+          - episodes/{unit}/plan.json
+          - episodes/{unit}/audio/lines/lines.json
+          - episodes/{unit}/placed.json
+        out:
+          - episodes/{unit}/takes/r2v/prompts.json
         desc: >-
           Every take prompt built and linted for $0 with no GPU, BEFORE any
           grid: length per block, style line, banned props, no last frame, no
@@ -623,6 +688,14 @@ stages:
       - id: "07"
         name: board
         script: step_07_board                     # WRAP grids
+        in:
+          - episodes/{unit}/plan.json
+          - refs/characters/*/sheet.png
+          - refs/props/*/sheet.png
+          - refs/locations/*/*.png
+        out:
+          - episodes/{unit}/storyboard/layout.json
+          - episodes/{unit}/storyboard/grids/*.png
         desc: >-
           Storyboard grids on the local image model from the plan's prose, up
           to three references - cast sheets first, the setup's place last.
@@ -642,8 +715,17 @@ stages:
       - id: "08"
         name: panels
         script: step_08_panels                    # WRAP panels + panel_check + panel_content_check
+        in:
+          - episodes/{unit}/plan.json
+          - episodes/{unit}/storyboard/grids/*.png
+        out:
+          - episodes/{unit}/storyboard/shot_*.png
+          - episodes/{unit}/storyboard/panel_dq.json
+          - episodes/{unit}/storyboard/panel_content.json
+          - episodes/{unit}/storyboard/contact.png
+          - episodes/{unit}/storyboard/eye_*.json
         desc: >-
-          One panel per shot, two machine gates, then an eye. The takes refuse
+          One panel per shot, two machine gates, then `judge:panel_eye`. The takes refuse
           without all three verdicts.
         substeps:
           - id: "08_01"
@@ -684,6 +766,17 @@ stages:
       - id: "09"
         name: shoot
         script: step_09_shoot                     # WRAP takes_r2v render, take_dq, take_content_check, take_strip
+        in:
+          - episodes/{unit}/storyboard/shot_*.png
+          - episodes/{unit}/storyboard/eye_*.json
+          - refs/characters/*/sheet.png
+          - episodes/{unit}/audio/lines/*.wav
+          - episodes/{unit}/takes/r2v/prompts.json
+        out:
+          - episodes/{unit}/takes/r2v/T??.mp4
+          - episodes/{unit}/takes/r2v/T??.dq.json
+          - episodes/{unit}/takes/r2v/T??.content.json
+          - episodes/{unit}/takes/r2v/eye_*.json
         desc: >-
           The slow step. ref2va takes on the local video model, staged from
           the panel, the sheets the shot's faces need and the line's wav. A take
@@ -727,6 +820,14 @@ stages:
       - id: "10"
         name: edit
         script: step_10_edit                      # WRAP series_title + assemble (+ trailer metre for the bed)
+        in:
+          - episodes/{unit}/takes/r2v/T??.mp4
+          - episodes/{unit}/takes/r2v/eye_*.json
+          - episodes/{unit}/placed.json
+          - episodes/{unit}/audio/lines/*.wav
+        out:
+          - title/{unit}.mp4
+          - episodes/{unit}/cut/master_r2v.mp4
         desc: >-
           Title card, measured bed, cut, mix. Picture cut to the measured
           voice. cut/master_iterN.mp4, never overwriting.
@@ -755,6 +856,13 @@ stages:
       - id: "11"
         name: qc
         script: step_11_qc                        # WRAP qc + eye_review + dossier
+        in:
+          - episodes/{unit}/cut/master_r2v.mp4
+          - episodes/{unit}/plan.json
+          - episodes/{unit}/placed.json
+        out:
+          - episodes/{unit}/qc_r2v.json
+          - episodes/{unit}/review/eye_*.json
         desc: >-
           Measure the DELIVERED master, never the intention. Stamps the sha8
           it measured. No import from the edit step.
@@ -794,6 +902,16 @@ stages:
       - id: "12"
         name: deliver
         script: step_12_deliver                   # MISSING (trailer step 10 is the model, without the external subprocess)
+        in:
+          - episodes/{unit}/cut/master_r2v.mp4
+          - episodes/{unit}/qc_r2v.json
+          - episodes/{unit}/plan.verdict.json
+          - episodes/{unit}/storyboard/eye_*.json
+          - episodes/{unit}/takes/r2v/eye_*.json
+          - episodes/{unit}/review/eye_*.json
+          - episodes/{unit}/timing.jsonl
+        out:
+          - episodes/{unit}/manifest.json
         desc: >-
           manifest.json beside the master (every gate verdict, every rung,
           timing totals), the deliverable's full path printed first, notify()

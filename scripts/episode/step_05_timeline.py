@@ -31,8 +31,8 @@ def fresh(book: Path, number: int) -> bool:
     that fault, `done` only answers no."""
     try:
         episode_home.load_placed(book, number, episode_home.load_plan(book, number))
-    except (SystemExit, ValidationError):
-        return False
+    except (SystemExit, ValidationError, FileNotFoundError):
+        return False                       # no plan at all: no timeline of it either
     return True
 
 
