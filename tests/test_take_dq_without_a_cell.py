@@ -243,6 +243,8 @@ def fake_decode(monkeypatch, n: int = 8):
     monkeypatch.setattr(tv, "zoom_of", lambda video, record, coherence_: {})
     monkeypatch.setattr(tv, "picture_rows", lambda video, record, seconds: tv.unmeasured(
         "face-at-end", "look", "post-cut", "pulse"))
+    monkeypatch.setattr(tv, "stillness_row", lambda video, seconds, record: tv.Gate(
+        "frozen-whole", 0.0, True, True, "moving", 0.0))
 
 
 def test_measure_judges_a_take_whose_cells_room_is_empty(monkeypatch, tmp_path):

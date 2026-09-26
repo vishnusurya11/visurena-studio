@@ -41,7 +41,7 @@ TAKES = Path("takes") / "r2v"
 STILLS = "stills.json"
 RENDER = "scripts/episode/takes_r2v.py"
 
-FROZEN = frozenset({"frozen-at-start", "frozen-share"})
+FROZEN = frozenset({"frozen-at-start", "frozen-share", "frozen-whole"})
 LAG = frozenset({"lag", "lip-sync"})
 CONTENT = take_eye.HARD_CONTENT
 MOTION = take_eye.GEOMETRY | FROZEN | {"churn"}
@@ -49,7 +49,7 @@ MOTION = take_eye.GEOMETRY | FROZEN | {"churn"}
 NEVER_SEED = LAG | {"leak"}
 
 CAUSE_OF = {
-    "frozen-at-start": "frozen", "frozen-share": "frozen",
+    "frozen-at-start": "frozen", "frozen-share": "frozen", "frozen-whole": "frozen",
     "pass-through": "anchored", "held": "anchored",
     "rotation": "rotation", "zoom": "overrun", "face-at-end": "overrun",
     "coherence off-board": "board", "last-vs-cell": "board", "last-vs-panel": "board", "drift": "board",

@@ -31,7 +31,7 @@ CURABLE_ADVISORY = frozenset({"lag", "leak", "rotation"})
 """Advisory rows the ladder has a rung for; every other advisory row is points off, not a fault."""
 HARD_CONTENT = frozenset({"content", "clones", "identity", "unread"})
 GEOMETRY = frozenset({"pass-through", "held", "cut-vote", "cut", "jump", "cut-landing", "foreign",
-                      "frozen-at-start", "frozen-share", "coherence off-board", "last-vs-cell",
+                      "frozen-at-start", "frozen-share", "frozen-whole", "coherence off-board", "last-vs-cell",
                       "last-vs-panel", "drift", "face-at-end", "zoom", "rotation"})
 """The fault kinds a still may answer on a narration shot (decision §1.2, EYE-takes terminal)."""
 
