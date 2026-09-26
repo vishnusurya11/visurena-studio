@@ -73,9 +73,8 @@ def ensure_rows(book: Path, setups: dict, names: dict[str, str], number: int) ->
     return wrote
 
 
-LOOK = ("Rendered in exactly the same look as the characters that will stand in it: {look}, "
-        "broad simplified 3D shapes, flat high-chroma colour, clean edges -- a frame from a stylised "
-        "3D animated film, not a painting and not a photograph.")
+LOOK = ("Rendered as an empty frame from a stylised 3D animated film: {look}, broad simplified "
+        "3D shapes, flat high-chroma colour, clean edges -- not a painting and not a photograph.")
 """Root cause 2026-09-26 (D13): with no style words the house model drew places
 painterly while it drew the cast as stylised 3D figures, and the storyboard takes
 its style from the place picture -- people pasted onto paintings from ep09 on."""
