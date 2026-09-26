@@ -64,17 +64,20 @@ def init(conn: sqlite3.Connection) -> None:
 
 def record(conn: sqlite3.Connection, codex_id: str, stage: str, step_id: str,
            tier: str | None, model: str | None,
-           input_tokens: int, output_tokens: int) -> float | None:
-    """Append one call's usage. Returns its cost, or None if the model is unpriced."""
+           input_tokens: int, output_tokens: int, unit: str | None = None) -> float | None:
+    """Append one call's usage. Returns its cost, or None if the model is unpriced.
+    `unit` names the production below the book (an episode, a pack); NULL for a
+    book-level stage (decision 2026-09-25: a unit's paid cost is answerable)."""
     from studio import db
 
     init(conn)
+    db._add_column(conn, "usage", "unit", "TEXT")
     usd = cost(model or "", input_tokens, output_tokens)
     conn.execute(
         "INSERT INTO usage (recorded_at, codex_id, stage, step_id, tier, model,"
-        " input_tokens, output_tokens, cost_usd) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)",
+        " input_tokens, output_tokens, cost_usd, unit) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
         (db.utc_now().strftime("%Y-%m-%dT%H:%M:%S.%fZ"), codex_id, stage, step_id,
-         tier, model, input_tokens, output_tokens, usd))
+         tier, model, input_tokens, output_tokens, usd, unit))
     conn.commit()
     return usd
 

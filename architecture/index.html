@@ -403,6 +403,31 @@ pre.ddl{font-family:"IBM Plex Mono",monospace;font-size:11px;line-height:1.4;col
     <div id="dept-trees-current" class="dept-trees" style="margin-top:26px"></div>
   </section>
 
+  <!-- ===== THE DESK ===== -->
+  <section class="block">
+    <div class="head"><h2>The desk</h2><p>Built 2026-09-26 (decision 2026-09-25, the Command Center, commits C1–C7). The production office keeps one work-order row per (book, department, unit); each department's table is a view over it. The runners are unchanged: a row is written from one place (<code>db.add_event</code>) and the disk stays the truth of a step. The desk refreshes the rows on a <b>tick</b> — the first act of every run, and <code>uv run python studio.py tick</code> from a shell.</p></div>
+    <div class="tbl-wrap"><table class="v">
+      <tr><th>What</th><th>One row is</th><th>Who writes it</th></tr>
+      <tr><td><code>work_orders</code></td><td>a unit in a department: state (blocked · queued · running · done · failed · deferred · escalated · held · stale), step, priority, sequence, attempts, flags, gpu seconds, cost, deliverable, verdicts</td><td><code>db.add_event</code> projects every event onto it (the runner claims and settles by running); the tick materializes, settles, promotes, parks and sweeps; the owner's orders land on it when a run takes them</td></tr>
+      <tr><td><code>work_steps</code></td><td>one step of one order: the unit page's chip, with its verdict file, signer and word</td><td><code>db.add_event</code>, and the signature read off the file when the step completes</td></tr>
+      <tr><td><code>orders</code></td><td>the owner's intent: hold · lift · redo · bump · retry · requeue</td><td><code>studio_cli.py</code>; a runner takes them at the top of <code>run_steps</code></td></tr>
+      <tr><td><code>holds</code></td><td>a brake at studio, book or unit scope; <code>RENDER_HOLD</code> mirrored in</td><td><code>studio_cli.py hold | lift</code>; the tick mirrors the file</td></tr>
+      <tr><td><code>episode_orders</code> … · <code>v_queue</code> · <code>v_attention</code></td><td>a view per registered department, generated from <code>stages.yaml</code>; the queue in priority, sequence order; the rows that need a person (failed · deferred · escalated · stale)</td><td>nobody — a view</td></tr>
+    </table></div>
+    <div class="tbl-wrap" style="margin-top:14px"><table class="v">
+      <tr><th>The tick's verb</th><th>Rule</th><th>Where</th></tr>
+      <tr><td>slate · materialize</td><td>every <code>episodes/epNN</code> folder is an episode unit; every other department has its book-level unit (<code>main</code> for refs, <code>book</code> for the rest). One <code>blocked</code> row each, <code>source = queue</code>, never twice</td><td><code>studio/tick.py</code></td></tr>
+      <tr><td>settle</td><td>a blocked or queued row whose every declared <code>out:</code> of every step is on disk, and whose deliverable exists, is <code>done</code> — the unit whose every step was skipped</td><td><code>tick.settle_skipped</code></td></tr>
+      <tr><td>promote</td><td><code>blocked → queued</code> when every <code>requires</code> row is done and the first step's <code>in:</code> exist; back to <code>blocked</code> when they stop, <code>blocked_on</code> naming the first want (<code>refs/04</code>, <code>in: refs/refs.json</code>). No other state is touched</td><td><code>tick.promote</code></td></tr>
+      <tr><td>hold</td><td>a hold that reaches the unit parks a blocked or queued row as <code>held</code>; on lift it returns to <code>blocked</code> and the same tick promotes it again — the pre-hold state is never stored, it is re-derived</td><td><code>tick.park_held</code> · <code>release_held</code></td></tr>
+      <tr><td>cost</td><td>GPU seconds off the unit's clock (every pass, retries included); dollars off <code>usage</code>, NULL while a call is unpriced</td><td><code>tick.project_costs</code> · <code>studio/timing_sum.py</code></td></tr>
+      <tr><td>sweep</td><td>a running row whose lease ran out is <code>stale</code> — never requeued; a <code>requeue</code> order does that</td><td><code>tick.sweep_leases</code></td></tr>
+      <tr><td>verify</td><td>rows against the disk: a moved signature or a missing deliverable is named and marked <code>stale</code>; nothing is resolved</td><td><code>studio.py verify</code></td></tr>
+      <tr><td>from a shell</td><td><code>studio.py tick [--book]</code> · <code>queue &lt;codex&gt; &lt;stage&gt; [&lt;unit&gt;] [--priority N]</code> · <code>verify &lt;codex&gt; &lt;stage&gt; &lt;unit&gt;</code> · <code>board</code> (the queue and the attention strip as text — the terminal preview of the web board, C10)</td><td><code>studio.py</code> · <code>studio_cli.py</code> for the hand</td></tr>
+    </table></div>
+    <p class="flow-note">A queued row is a request, not an instruction: no worker loop drains it (not built, on purpose). The explicit runners — <code>episode.py &lt;book&gt; &lt;n&gt;</code>, <code>refs.py &lt;book&gt;</code> — run as before; C9 teaches the no-unit form to take the queue in order. Rows for the books already made come from the backfill (C8), never from the tick guessing.</p>
+  </section>
+
   <!-- ===== FLOW ===== -->
   <section class="block">
     <div class="head"><h2>A typical run</h2><p>One book, start to finish: analysis, screenplay, the reference bible, then one chapter through the episode line to a delivered master. Press play: the dot is the work, the panel shows who is inside the current step, the log is what the runners print. Gold-edged steps park for one of your signatures. Numbers are illustrative.</p></div>

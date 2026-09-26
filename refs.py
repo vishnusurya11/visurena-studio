@@ -13,7 +13,7 @@ from __future__ import annotations
 
 import sys
 
-from studio import db, refs_run, registry, step_runner
+from studio import db, llm, refs_run, registry, step_runner
 
 STAGE = refs_run.STAGE
 FINAL_STEP_ID = registry.steps(STAGE)[-1]["id"]
@@ -41,7 +41,9 @@ def process(conn, codex_id: str, extra=(), **kw) -> str:
     print(f"=== REFS start | {ctx.label} | run {ctx.tracker.run_id} ===")
     db.mark_stage(conn, ctx.codex_id, STAGE, "running")
     try:
-        outcome = step_runner.run_steps(ctx, step_runner.load_steps(STAGE))
+        # every paid call inside is the pack's, attributed to the step the journal started
+        with llm.spend_context(conn, ctx.codex_id, STAGE, None, unit=ctx.unit):
+            outcome = step_runner.run_steps(ctx, step_runner.load_steps(STAGE))
     except Exception:
         db.mark_stage(conn, ctx.codex_id, STAGE, "failed")
         raise

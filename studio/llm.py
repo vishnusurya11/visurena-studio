@@ -174,15 +174,29 @@ _SPEND: dict = {}
 
 
 @contextmanager
-def spend_context(conn, codex_id: str, stage: str, step_id: str):
-    """Attribute every call made inside this block to one (book, stage, step)."""
+def spend_context(conn, codex_id: str, stage: str, step_id: str | None, unit: str | None = None):
+    """Attribute every call made inside this block to one (book, stage, step, unit).
+
+    `unit` is the production below the book (an episode, a pack); None for a
+    book-level stage.  A context opened with `step_id=None` FOLLOWS THE JOURNAL:
+    a runner wraps its whole run in one, and each `started` the tracker journals
+    (`spend_step`) moves the step the next call is attributed to -- so a step
+    is never asked to cooperate.  An explicit step id is pinned."""
     previous = dict(_SPEND)
-    _SPEND.update(conn=conn, codex_id=codex_id, stage=stage, step_id=step_id)
+    _SPEND.update(conn=conn, codex_id=codex_id, stage=stage, step_id=step_id,
+                  unit=unit, follows=step_id is None)
     try:
         yield
     finally:
         _SPEND.clear()
         _SPEND.update(previous)
+
+
+def spend_step(step_id: str) -> None:
+    """A step was journaled `started`: a following context now attributes to
+    it.  A pinned context, or none at all, is left alone."""
+    if _SPEND.get("conn") and _SPEND.get("follows"):
+        _SPEND["step_id"] = step_id
 
 
 def model_for(tier: str) -> str | None:
@@ -199,8 +213,9 @@ def _record_spend(tier: str, usage: dict) -> None:
     try:
         from studio import spend
         spend.record(_SPEND["conn"], _SPEND["codex_id"], _SPEND["stage"],
-                     _SPEND["step_id"], tier, model_for(tier),
-                     usage.get("input_tokens", 0), usage.get("output_tokens", 0))
+                     _SPEND["step_id"] or "", tier, model_for(tier),
+                     usage.get("input_tokens", 0), usage.get("output_tokens", 0),
+                     unit=_SPEND.get("unit"))
     except Exception:                      # never break a call that already succeeded
         pass
 

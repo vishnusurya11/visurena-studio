@@ -17,7 +17,7 @@ import traceback
 from contextlib import contextmanager
 from pathlib import Path
 
-from studio import db
+from studio import db, llm
 
 LOGS_ROOT = Path("logs")
 
@@ -38,6 +38,10 @@ class Tracker:
         self.unit = unit
         self.run_id = make_run_id(codex_id, stage)
         self.log_path = Path(logs_root) / codex_id / stage / f"{self.run_id}.log"
+        # every run's first act: its book's desk refreshed (decision 2026-09-25,
+        # "tick + pull"); one book, cheap, and never a stop for the run
+        from studio import tick
+        tick.tick_book(conn, codex_id)
 
     def log(self, msg: str, *, level: str = "INFO", step_id: str = "") -> None:
         """Append one JSONL line to this run's log file."""
@@ -54,9 +58,12 @@ class Tracker:
             fh.write(json.dumps(line, ensure_ascii=False) + "\n")
 
     def event(self, step_id: str, event: str, *, detail: str | None = None) -> None:
-        """One event row, stamped with this run's id."""
+        """One event row, stamped with this run's id.  A `started` also tells
+        the spend gateway which step the next paid call belongs to."""
         db.add_event(self.conn, self.codex_id, self.stage, step_id, event,
                      run_id=self.run_id, detail=detail, unit=self.unit)
+        if event == "started":
+            llm.spend_step(step_id)
 
     @contextmanager
     def step(self, step_id: str):

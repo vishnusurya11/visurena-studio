@@ -8,7 +8,7 @@ brick (`docs/ARCHITECTURE.md`).
 
 | where | what |
 |---|---|
-| [index.html](index.html) | **The main architecture page.** Open it in a browser. Tab *Current*: the book → screenplay org chart (who reports to whom), an animated walk-through of one book's run, the roster. Tab *Future*: the proposed big-studio shape — the debate's verdicts, the five-division org chart with built / partial / missing / slot states, unit-of-work grammar, the owner gates, an animated future run, the order of work. Tab *Command Center*: the proposed department tables, the standard contract, the drive and the monitoring board, for review. Published copy: https://claude.ai/artifact/6HCxs36mcpFk2TJS389QXr |
+| [index.html](index.html) | **The main architecture page.** Open it in a browser. Tab *Current*: the book → screenplay org chart (who reports to whom), the desk (the work-order tables, the views and the tick's verbs — built C1–C7), an animated walk-through of one book's run, the roster. Tab *Future*: the proposed big-studio shape — the debate's verdicts, the five-division org chart with built / partial / missing / slot states, unit-of-work grammar, the owner gates, an animated future run, the order of work. Tab *Command Center*: the proposed department tables, the standard contract, the drive and the monitoring board, for review. Published copy: https://claude.ai/artifact/6HCxs36mcpFk2TJS389QXr |
 | [decisions/](decisions/) | Architecture decisions, one dated file each, with the debate that produced them. A decision that the owner has ruled on also gets its line in `docs/DECISIONS.md`. |
 | [plan/](plan/) | Plans and trackers for the work that follows a decision. One file per initiative; status at the top; checkboxes per step. |
 
@@ -23,6 +23,7 @@ brick (`docs/ARCHITECTURE.md`).
 | Refs & Cast — the reference bible | `stages.yaml: refs`, 4 steps | `refs.py` → `scripts/refs/step_0N_*.py` | look_back (local VLM); `judge:look` signs `refs/verdict.json` | $0, local GPU |
 | Episode — one chapter, one master | `stages.yaml: episode`, 12 steps | `episode.py` → `scripts/episode/step_NN_*.py` | episode_writer + plan_reader (critic); panel reader, Whisper inside the wrapped scripts; judges `plan`, `panel_eye`, `take_eye`, `master_eye` sign PLAN / EYE ×2 / MASTER; no step parks on a person | $0, local GPU |
 | Shorts | not in the registry yet | `.claude/skills/shorts-*` (8 Claude skills) | showrunner, story, screenwriter, art, cinematographer, sound, editor, publisher | Higgsfield credits, gated |
+| Studio desk — the department tables and the tick (2026-09-26) | `work_orders` + a view per registered stage, `work_steps`, `orders`, `holds`, `v_queue`, `v_attention` | `studio.py tick · queue · verify · board` → `studio/tick.py`; `studio_cli.py` for the owner's hand; every run ticks its own book first (`Tracker`) | none — code only; judges and the owner sign files, nobody types a state | nothing |
 
 ## Decisions
 

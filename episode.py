@@ -16,7 +16,7 @@ import shutil
 import sys
 from pathlib import Path
 
-from studio import db, episode_home, episode_run, step_runner
+from studio import db, episode_home, episode_run, llm, step_runner
 
 STAGE = episode_run.STAGE
 TOOLS = ("ffmpeg",)
@@ -59,7 +59,9 @@ def process(conn, codex_id: str, number: int, extra: list[str], **kw) -> str:
     print(f"=== EPISODE start | {ctx.label} | run {ctx.tracker.run_id} ===")
     db.mark_stage(conn, ctx.codex_id, STAGE, "running")
     try:
-        outcome = step_runner.run_steps(ctx, step_runner.load_steps(STAGE))
+        # every paid call inside is the unit's, attributed to the step the journal started
+        with llm.spend_context(conn, ctx.codex_id, STAGE, None, unit=ctx.unit):
+            outcome = step_runner.run_steps(ctx, step_runner.load_steps(STAGE))
     except Exception:
         db.mark_stage(conn, ctx.codex_id, STAGE, "failed")
         raise
