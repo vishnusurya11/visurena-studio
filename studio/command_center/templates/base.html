@@ -118,6 +118,70 @@ form.act.redo textarea{width:100%}
 details.redo summary{list-style:none;display:inline-block}
 .receipt{font-size:12px}
 .receipt .ok{color:var(--ok)} .receipt .refused{color:var(--accent)}
+/* the department table at a glance */
+.depthead{display:flex;flex-wrap:wrap;align-items:baseline;gap:6px 14px}
+h1.cap{text-transform:capitalize}
+.tally{display:flex;flex-wrap:wrap;gap:6px;margin:10px 0 4px}
+.tpill{font-family:"IBM Plex Mono",monospace;font-size:12px;text-decoration:none;color:var(--ink-2);border:1px solid var(--rule-2);border-radius:999px;padding:3px 10px;background:var(--paper)}
+.tpill b{color:var(--ink);font-weight:600;margin-left:3px}
+.tpill:hover{border-color:var(--ink-2)}
+.tpill.on{background:var(--ink);color:var(--paper);border-color:var(--ink)} .tpill.on b{color:var(--paper)}
+.tpill.running{color:var(--think);border-color:var(--think)} .tpill.done{color:var(--ok);border-color:var(--ok)}
+.tpill.flagged{color:var(--qc);border-color:var(--qc)} .tpill.deferred{color:var(--invent);border-color:var(--invent)}
+.tpill.failed,.tpill.stale{color:var(--accent);border-color:var(--accent)} .tpill.escalated{color:var(--ink);border-width:2px}
+.bookgroup{margin-top:22px}
+.bookhead{display:flex;flex-wrap:wrap;align-items:center;gap:6px 14px;border-bottom:2px solid var(--ink);padding-bottom:6px}
+.bookname{font-family:"Barlow Condensed","Arial Narrow",sans-serif;font-size:22px;font-weight:700;color:var(--ink);text-decoration:none}
+.bookname:hover{text-decoration:underline}
+.minibar{display:inline-flex;gap:2px;flex:1;min-width:120px;max-width:360px;height:10px}
+.minibar i{flex:1;background:var(--rule-2);border-radius:1px}
+.minibar i.green{background:var(--ok)} .minibar i.amber{background:var(--qc)} .minibar i.blue{background:var(--think)}
+.minibar i.red{background:var(--accent)} .minibar i.purple{background:var(--invent)} .minibar i.black{background:var(--ink)}
+table.dept{margin-top:2px}
+table.dept th{padding-top:8px}
+table.dept td{vertical-align:middle;padding:7px 8px}
+table.dept tbody tr:hover td{background:var(--paper-2)}
+table.dept tr.emph td{background:var(--think-bg)}
+table.dept tr.row-red.emph td{background:transparent;box-shadow:inset 3px 0 0 var(--accent)}
+th.gate,td.gate{text-align:center;padding-left:4px;padding-right:4px}
+th.num,td.num{text-align:right}
+td.unit a{font-family:"IBM Plex Mono",monospace;font-weight:600;font-size:14px;color:var(--ink)}
+.pill{display:inline-flex;align-items:center;gap:6px;font-family:"IBM Plex Mono",monospace;font-size:11.5px;padding:2px 9px 2px 7px;border-radius:999px;border:1px solid var(--rule-2);color:var(--ink-3);background:var(--paper);min-width:92px}
+.pill .word{letter-spacing:.02em}
+.pill.green{color:var(--ok);border-color:var(--ok);background:var(--ok-bg)}
+.pill.amber{color:var(--qc);border-color:var(--qc);background:var(--qc-bg)}
+.pill.blue{color:var(--think);border-color:var(--think);background:var(--think-bg)}
+.pill.purple{color:var(--invent);border-color:var(--invent);background:var(--invent-bg)}
+.pill.red{color:var(--accent-ink);border-color:var(--accent);background:var(--accent)}
+.pill.black{color:var(--paper);border-color:var(--ink);background:var(--ink)}
+.pill.blue{animation:pulse 2s ease-in-out infinite}
+.steps-cell{min-width:190px}
+.sbar{display:flex;gap:2px;height:9px;width:190px}
+.sbar i{flex:1;background:var(--rule);border-radius:1px}
+.sbar i.green{background:var(--ok)} .sbar i.amber{background:var(--qc)} .sbar i.blue{background:var(--think);animation:pulse 1.4s ease-in-out infinite}
+.sbar i.red{background:var(--accent)} .sbar i.purple{background:var(--invent)} .sbar i.black{background:var(--ink)} .sbar i.grey{background:var(--line)}
+.sbar i.cur{outline:2px solid var(--ink);outline-offset:1px}
+.sline{font-size:12px;color:var(--ink-2);margin-top:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:300px}
+.sline b{font-weight:500;color:var(--ink)}
+.dot{display:inline-block;min-width:22px;font-family:"IBM Plex Mono",monospace;font-size:12px;font-weight:600;color:var(--line)}
+.dot.green{color:var(--ok)} .dot.amber{color:var(--qc)} .dot.red{color:var(--accent)} .dot.purple{color:var(--invent)} .dot.blue{color:var(--think)}
+td.acts{width:1%;text-align:right}
+details.menu{position:relative;display:inline-block}
+details.menu summary{list-style:none;cursor:pointer;font-size:16px;line-height:1;padding:2px 8px;border-radius:3px;color:var(--ink-3)}
+details.menu summary::-webkit-details-marker{display:none}
+details.menu[open] summary,details.menu summary:hover{background:var(--paper-2);color:var(--ink)}
+details.menu .menu-body{position:absolute;right:0;top:calc(100% + 4px);z-index:5;display:flex;flex-direction:column;align-items:flex-end;gap:6px;background:var(--paper);border:1px solid var(--rule-2);box-shadow:0 4px 16px rgba(0,0,0,.12);padding:8px;white-space:nowrap}
+@media (max-width:760px){
+  table.dept thead{display:none}
+  table.dept,table.dept tbody{display:block}
+  table.dept tr{display:grid;grid-template-columns:auto 1fr auto;gap:4px 10px;align-items:center;padding:10px 0;border-bottom:1px solid var(--rule)}
+  table.dept td{border:0;padding:0}
+  table.dept td.gate,table.dept td.num:not(:first-of-type){display:none}
+  table.dept td.steps-cell{grid-column:1 / -1;min-width:0}
+  .sbar{width:100%}
+  .sline{max-width:none;white-space:normal}
+  .pill{min-width:0}
+}
 </style>
 <script src="/static/htmx.min.js"></script>
 </head>

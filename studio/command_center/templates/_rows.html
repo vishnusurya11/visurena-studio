@@ -1,22 +1,33 @@
 {% import "_macros.html" as act with context %}
-<div class="tbl-wrap"><table>
-<thead><tr><th>st</th><th>book</th><th>unit</th><th>step · progress</th><th>last</th><th>att</th><th>gpu</th><th>cost</th><th>verdicts</th><th></th></tr></thead>
-<tbody>
-{% for r in dept.rows %}
-<tr{% if r.shown in ('escalated', 'failed', 'running') %} class="emph"{% endif %}>
-  <td><span class="st {{ r.css }}" title="{{ r.shown }}">{{ r.glyph }}</span></td>
-  <td><a href="/b/{{ r.codex_id }}">{{ books.get(r.codex_id, r.codex_id) | truncate(18, True, '…') }}</a></td>
-  <td><a href="/d/{{ r.stage }}/{{ r.codex_id }}/{{ r.unit }}">{{ r.unit }}</a></td>
-  <td>{{ r.step_id or '' }} {{ r.step_name }}{% if r.progress %} · {{ r.progress }}{% endif %}{% if r.shown == 'running' and r.elapsed %} · {{ r.elapsed }}{% endif %}{% if r.blocked_on %} · <span class="muted">on {{ r.blocked_on }}</span>{% endif %}{% if r.hold_reason %} · <span class="muted">{{ r.hold_reason }}</span>{% endif %}</td>
-  <td class="mono">{{ (r.updated_at or '')[5:16] }}</td>
-  <td>{{ r.attempts }}</td>
-  <td>{% if r.gpu_seconds %}{{ (r.gpu_seconds / 60) | round | int }}m{% else %}–{% endif %}</td>
-  <td>{% if r.cost_usd is none %}<span class="muted">?</span>{% else %}${{ '%.2f' | format(r.cost_usd) }}{% endif %}</td>
-  <td>{% for c in r.strip %}<span class="chip {{ c.css }}" title="{{ c.gate }}{% if c.by %} · {{ c.by }}{% endif %}{% if c.faults %} · {{ c.faults }} faults{% endif %}">{{ c.gate }} {{ c.glyph }}</span>{% endfor %}</td>
-  <td>{{ act.hold('unit', r.codex_id, r.stage, r.unit) }}{% if r.state in ('deferred', 'failed') %}{{ act.order('retry', r.codex_id, r.stage, r.unit) }}{% else %}{{ act.order('bump', r.codex_id, r.stage, r.unit, '↑ bump') }}{% endif %}</td>
-</tr>
+{% set ngates = dept.gates | length %}
+{% for g in dept.groups %}
+<section class="bookgroup">
+  <div class="bookhead">
+    <a class="bookname" href="/b/{{ g.codex_id }}">{{ g.name }}</a>
+    <span class="muted mono">{{ g.done }} / {{ g.total }} done</span>
+    <span class="minibar" aria-hidden="true">{% for r in g.rows %}<i class="{{ r.css }}" title="{{ r.unit }} · {{ r.shown }}"></i>{% endfor %}</span>
+  </div>
+  <div class="tbl-wrap"><table class="dept">
+  <thead><tr><th>state</th><th>unit</th><th>steps</th>{% for l in dept.gate_labels %}<th class="gate">{{ l }}</th>{% endfor %}<th class="num">moved</th><th class="num">gpu</th><th class="num">cost</th><th class="acts"></th></tr></thead>
+  <tbody>
+  {% for r in g.rows %}
+  {% set finished = r.shown in ('done', 'flagged') %}
+  <tr class="row-{{ r.css }}{% if r.shown in ('escalated', 'failed', 'running') %} emph{% endif %}">
+    <td><span class="pill {{ r.css }}" title="{{ r.shown }}">{{ r.glyph }}<span class="word">{{ r.shown }}</span></span></td>
+    <td class="unit"><a href="/d/{{ r.stage }}/{{ r.codex_id }}/{{ r.unit }}">{{ r.unit }}</a></td>
+    <td class="steps-cell">
+      <span class="sbar">{% for s in r.bar %}<i class="{{ s.css }}{% if s.id == r.step_id and not finished %} cur{% endif %}" title="{{ s.id }} {{ s.name }} · {{ s.state }}"></i>{% endfor %}</span>
+      {% if not finished %}<div class="sline">{% if r.step_id %}<b>{{ r.step_id }} {{ r.step_name }}</b>{% endif %}{% if r.progress %} · {{ r.progress }}{% endif %}{% if r.shown == 'running' and r.elapsed %} · {{ r.elapsed }}{% endif %}{% if r.blocked_on %} <span class="muted">· waiting on {{ r.blocked_on }}</span>{% endif %}{% if r.hold_reason %} <span class="muted">· {{ r.hold_reason }}</span>{% endif %}</div>{% endif %}
+    </td>
+    {% for c in r.strip[:ngates] %}<td class="gate"><span class="dot {{ c.css }}" title="{{ c.gate }}{% if c.word %} · {{ c.word }}{% endif %}{% if c.by %} · {{ c.by }}{% endif %}{% if c.faults %} · {{ c.faults }} faults{% endif %}">{{ c.glyph }}</span></td>{% endfor %}
+    <td class="num muted" title="{{ r.updated_at or '' }}">{{ r.ago or '–' }}</td>
+    <td class="num{% if r.gpu_h == '–' %} muted{% endif %}">{{ r.gpu_h }}</td>
+    <td class="num{% if not r.cost_usd %} muted{% endif %}">{% if r.cost_usd is none %}?{% elif r.cost_usd %}${{ '%.2f' | format(r.cost_usd) }}{% else %}–{% endif %}</td>
+    <td class="acts"><details class="menu"><summary title="actions">⋯</summary><div class="menu-body">{{ act.hold('unit', r.codex_id, r.stage, r.unit) }}{% if r.state in ('deferred', 'failed') %}{{ act.order('retry', r.codex_id, r.stage, r.unit) }}{% else %}{{ act.order('bump', r.codex_id, r.stage, r.unit, '↑ bump') }}{% endif %}</div></details></td>
+  </tr>
+  {% endfor %}
+  </tbody></table></div>
+</section>
 {% else %}
-<tr><td colspan="10" class="muted">no units</td></tr>
+<p class="muted">no units</p>
 {% endfor %}
-</tbody></table></div>
-<div class="muted mono">{% for word, n in dept.counts.items() %}{{ word }} {{ n }}{% if not loop.last %} · {% endif %}{% endfor %}</div>

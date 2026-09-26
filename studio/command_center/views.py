@@ -234,6 +234,97 @@ def verdict_strip(verdicts: dict, gates: list[str]) -> list[dict]:
     return [verdict_chip(gate, verdicts.get(gate)) for gate in order]
 
 
+# --- a department at a glance ---
+
+
+def ago(ts: str | None) -> str:
+    """`just now` / `12m ago` / `7h ago` / `3d ago` since an ISO timestamp."""
+    if not ts:
+        return ""
+    try:
+        then = datetime.fromisoformat(ts.replace("Z", "+00:00"))
+    except ValueError:
+        return ""
+    minutes = max(0, int((datetime.now(timezone.utc) - then).total_seconds() // 60))
+    if minutes < 1:
+        return "just now"
+    if minutes < 60:
+        return f"{minutes}m ago"
+    return f"{minutes // 60}h ago" if minutes < 24 * 60 else f"{minutes // (24 * 60)}d ago"
+
+
+def gpu_hours(seconds: float | None) -> str:
+    """GPU time as a person reads it: `9.8 h`, `23 m`, or a dash for none."""
+    if not seconds:
+        return "–"
+    return f"{seconds / 3600:.1f} h" if seconds >= 3600 else f"{round(seconds / 60)} m"
+
+
+STEP_CSS = {"skipped": "green"}
+"""A skipped step's output was already on disk: it reads as done."""
+
+
+def cursor_state(step_id: str, row: dict) -> str:
+    """A step's state when it has no step row: every step of a done unit is
+    done; before the cursor done, at the cursor the unit's own state."""
+    cursor = row.get("step_id") or ""
+    if row["state"] == "done" or (cursor and step_id < cursor):
+        return "done"
+    return row["state"] if step_id == cursor else ""
+
+
+def step_bar(row: dict, chips: dict[str, str]) -> list[dict]:
+    """One segment per registry step, coloured by that step's own state (its
+    work_steps row), else by where the unit's cursor stands."""
+    bar = []
+    for sid, name in step_names(row["stage"]).items():
+        state = chips.get(sid) or cursor_state(sid, row)
+        css = STEP_CSS.get(state) or (colour_class(state) if state else "none")
+        bar.append({"id": sid, "name": name, "state": state or "not yet", "css": css})
+    return bar
+
+
+def step_states(conn: sqlite3.Connection, order_ids: list[int]) -> dict[int, dict[str, str]]:
+    """{order_id: {step_id: state}} for every row shown, in one query."""
+    out: dict[int, dict[str, str]] = {i: {} for i in order_ids}
+    if not order_ids:
+        return out
+    marks = ",".join("?" * len(order_ids))
+    for r in conn.execute(f"SELECT order_id, step_id, state FROM work_steps WHERE order_id IN ({marks})",
+                          order_ids):
+        out[r["order_id"]][r["step_id"]] = r["state"]
+    return out
+
+
+def gate_label(gate: str) -> str:
+    """A gate's column head: `EYE_PANELS` reads `panels`."""
+    return gate.removeprefix("EYE_").lower()
+
+
+def book_groups(rows: list[dict], names: dict[str, str]) -> list[dict]:
+    """The rows under their book, each book in its rows' order; the book whose
+    first row needs the most attention leads."""
+    groups: dict[str, dict] = {}
+    for r in rows:
+        g = groups.setdefault(r["codex_id"], {"codex_id": r["codex_id"], "rows": [], "done": 0,
+                                               "name": names.get(r["codex_id"], r["codex_id"])})
+        g["rows"].append(r)
+        g["done"] += r["shown"] in ("done", "flagged")
+    for g in groups.values():
+        g["total"] = len(g["rows"])
+        g["rank"] = min(rank(r) for r in g["rows"])
+    return sorted(groups.values(), key=lambda g: g["rank"])
+
+
+def dress(row: dict, chips: dict[str, str], gates: list[str]) -> dict:
+    """A shown row with everything the glance needs."""
+    row["strip"] = verdict_strip(row["verdicts"], gates)
+    row["gate_labels"] = [gate_label(c["gate"]) for c in row["strip"]]
+    row["bar"] = step_bar(row, chips)
+    row["ago"], row["gpu_h"] = ago(row.get("updated_at")), gpu_hours(row.get("gpu_seconds"))
+    return row
+
+
 # --- a department ---
 
 
@@ -247,9 +338,10 @@ def department(conn: sqlite3.Connection, stage: str, book: str | None = None,
     names = book_names(conn)
     counts = Counter(r["shown"] for r in rows)
     kept = [r for r in rows if (not book or r["codex_id"] == book) and (not state or r["shown"] == state)]
-    for r in kept:
-        r["strip"] = verdict_strip(r["verdicts"], gates)
+    chips = step_states(conn, [r["id"] for r in kept])
+    kept = [dress(r, chips[r["id"]], gates) for r in kept]
     return {"stage": stage, "rows": kept, "gates": gates, "counts": dict(counts),
+            "gate_labels": [gate_label(g) for g in gates], "groups": book_groups(kept, names),
             "books": {c: names.get(c, c) for c in sorted({r["codex_id"] for r in rows})}}
 
 
