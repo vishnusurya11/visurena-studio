@@ -71,3 +71,17 @@ def test_one_fault_repeated_past_the_cap_is_an_invalid_verdict(tmp_path):
 def test_repeats_under_the_cap_are_a_verdict(tmp_path):
     faults = [Fault(kind="lag", where="T07")] * judged_gate.MAX_REPEAT
     assert judged_gate.repeated(verdict(False, faults)) is None
+
+
+def test_a_pass_is_not_a_rung_in_the_runner(tmp_path):
+    from studio.episode_run import EpisodeContext
+    from studio.learnings import Learning, load
+
+    class Tracker:
+        def log(self, *a, **k):
+            self.level = k.get("level")
+    ctx = EpisodeContext.__new__(EpisodeContext)
+    ctx.home, ctx.rungs_in_step, ctx.tracker = tmp_path, 0, Tracker()
+    ctx.learn(Learning(step="08", gate="EYE_PANELS", action="pass"))
+    assert ctx.rungs_in_step == 0 and ctx.tracker.level == "INFO"
+    assert [r.action for r in load(tmp_path / "learnings.jsonl")] == ["pass"]

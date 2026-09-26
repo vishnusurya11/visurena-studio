@@ -37,13 +37,16 @@ class EpisodeContext(StageContext):
         return Path(self.home) / "learnings.jsonl"
 
     def learn(self, learning: Learning) -> None:
-        """A rung was taken: write it for the retrospect and warn in the log."""
+        """A rung was taken: write it for the retrospect and warn in the log.
+        A PASS is written too (the publish lock reads the last row per gate),
+        but it is not a rung and not a warning."""
         record(self.learnings_path, learning)
-        self.rungs_in_step += 1
+        passed = learning.action == "pass"
+        self.rungs_in_step += 0 if passed else 1
         self.tracker.log(f"{learning.gate}: measured {learning.measured} vs "
                          f"{learning.threshold} -> {learning.action}"
                          + (" (terminal)" if learning.terminal else ""),
-                         level="WARNING", step_id=learning.step)
+                         level="INFO" if passed else "WARNING", step_id=learning.step)
 
     def open_step(self, step_id: str) -> None:
         self.budget.start(step_id)

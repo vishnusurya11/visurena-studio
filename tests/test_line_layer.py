@@ -274,6 +274,13 @@ class TestLevel:
         assert ta.integrated(levelled.path) == pytest.approx(ta.LINE_TARGET_LUFS, abs=1.5)
         assert ta.integrated(levelled.path) < ta.integrated(line)
 
+    def test_an_offset_moves_a_line_off_the_target(self, tmp_path, bed, quiet_line):
+        """Root cause 2026-09-26 (D11): one target for every line made a whisper
+        and a scream sit level.  A delivery's offset moves the target."""
+        up, = ta.level_lines(bed, [(LINE_AT, quiet_line)], tmp_path / "up", offsets=[3.0])
+        down, = ta.level_lines(bed, [(LINE_AT, quiet_line)], tmp_path / "down", offsets=[-5.0])
+        assert ta.integrated(up.path) - ta.integrated(down.path) == pytest.approx(8.0, abs=1.5)
+
     def test_a_levelled_line_never_reaches_the_ceiling(self, tmp_path, line):
         """The whole point: a gain stage with a ceiling at the end of it."""
         hot = ta.level_line(line, 18.0, tmp_path / "hot.wav")

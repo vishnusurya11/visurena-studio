@@ -135,6 +135,21 @@ DELIVERY = {
         "pitch sits at the bottom of the range. Let the pauses run slightly "
         "too long, and let the last sentence land softer than the one "
         "before it."),
+    "shouting": (
+        "as a shout, at the top of the voice, calling out over noise to someone who must "
+        "hear it now. The pitch jumps high and stays high, the volume is loud, "
+        "the vowels are open and pushed, the consonants hit hard, and the breath "
+        "is taken fast and loud between the phrases. Nothing is held back."),
+    "hushed": (
+        "barely above a whisper, close to the listener, so no one else will hear. "
+        "The breath is audible and the voice is thin and soft, the pitch low and "
+        "level, the pace slow and careful, and the ends of the phrases fall away "
+        "into the breath."),
+    "exultant": (
+        "with a sudden burst of joy and disbelief, as though the thing just "
+        "happened in front of you. The pitch leaps up and rings, the volume is "
+        "raised, the pace quickens, and the words tumble out with a laugh "
+        "caught behind them."),
 }
 """How each one is SPOKEN, in the words a director gives an actor.
 

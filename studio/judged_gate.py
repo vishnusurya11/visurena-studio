@@ -153,7 +153,8 @@ def clear(ctx, gate: str, judge: Judge, sign: Sign, ladder: Rungs, terminal: Ter
     if verdict.passed:
         # A PASS IS WRITTEN DOWN, so the publish lock (studio/publish_lock.py)
         # can tell a gate that passed from one that never ran.
-        ctx.learn(Learning(step=step_of(ctx), gate=gate, measured=0, action="pass", attempt=len(taken)))
+        if hasattr(ctx, "learn"):       # a bare StageContext (a step run alone) keeps no learnings
+            ctx.learn(Learning(step=step_of(ctx), gate=gate, measured=0, action="pass", attempt=len(taken)))
     else:
         verdict = ended(ctx, gate, verdict, name, terminal, len(taken))
     signed = sign(verdict)

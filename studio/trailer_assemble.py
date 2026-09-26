@@ -655,14 +655,17 @@ def level_line(line: Path, gain_db: float, output: Path,
     return output
 
 
-def level_lines(bed: Path, lines: list[tuple[float, Path]], out_dir: Path) -> list[Levelled]:
-    """Each line at LINE_TARGET_LUFS, and the depth its window has to duck."""
+def level_lines(bed: Path, lines: list[tuple[float, Path]], out_dir: Path,
+                offsets: list[float] | None = None) -> list[Levelled]:
+    """Each line at LINE_TARGET_LUFS plus its delivery's offset (a shout above,
+    a whisper under -- root cause 2026-09-26, D11), and the depth its window ducks."""
     readings = momentary(bed)
+    offsets = offsets or [0.0] * len(lines)
     out = []
     for index, (at, path) in enumerate(lines):
         seconds = clip_seconds(path)
         peak = bed_peak(readings, at, at + seconds)
-        levelled = level_line(path, line_gain(integrated(path)),
+        levelled = level_line(path, line_gain(integrated(path), LINE_TARGET_LUFS + offsets[index]),
                               out_dir / f"line-{index}.level.wav")
         out.append(Levelled(at, seconds, levelled, duck_depth(peak), peak))
     return out
@@ -694,7 +697,8 @@ def write_level_sheet(out_dir: Path, levelled: list[Levelled],
 
 def mix_with_lines(picture: Path, bed: Path, cues: list[tuple[float, Path]],
                    lines: list[tuple[float, Path]], output: Path,
-                   seconds: float | None = None, hard_out: float | None = None) -> Path:
+                   seconds: float | None = None, hard_out: float | None = None,
+                   offsets: list[float] | None = None) -> Path:
     """`mix` with the line layer and the shaped bed.
 
     Each line is levelled to an absolute target through a limiter, the bed
@@ -703,7 +707,7 @@ def mix_with_lines(picture: Path, bed: Path, cues: list[tuple[float, Path]],
     what was done are kept beside the master, so QC can measure the mix
     without un-mixing anything.
     """
-    levelled = level_lines(bed, lines, Path(output).parent)
+    levelled = level_lines(bed, lines, Path(output).parent, offsets)
     write_level_sheet(Path(output).parent, levelled, hard_out)
     shaped = shape_bed(bed, duck_windows(levelled), hard_out,
                        Path(output).with_name(f"{Path(output).stem}.bed-ducked.wav"))

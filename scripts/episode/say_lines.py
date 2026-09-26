@@ -18,7 +18,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 
 from studio.episode_home import episode_arg
-from studio import episode_home, voice, voice_ear, voice_qc, voice_say
+from studio import episode_emotion, episode_home, voice, voice_ear, voice_qc, voice_say
 from studio.episode_spec import Episode, Line
 
 SEED_BASE = 71000
@@ -162,14 +162,18 @@ def render(book: Path, episode: Episode, line: Line, out_dir: Path, attempt: int
     out = out_dir / f"l{line.index:02d}.wav"
     reference = line_reference(book, records or {}, line, attempt)
     seed = seed_for(episode.number, line, attempt)
+    # HOW, NOT ONLY WHO (root cause 2026-09-26, D11): the reading clip was the
+    # emotion reference too, so every line in twelve episodes was one temperature.
+    delivery = episode_emotion.delivery_of(line)
     if ENGINE == "indextts2":
-        said = voice_say.say(line.text, reference, reference, seed, out,
+        emotion = episode_emotion.emotion_clip(book, line.speaker, delivery)
+        said = voice_say.say(line.text, reference, emotion, seed, out,
                              index=line.index, speaker=line.speaker)
     else:
         said = voice.clone_line(reference, line.text, seed, out, index=line.index, speaker=line.speaker)
     return {"index": line.index, "speaker": line.speaker, "kind": line.kind, "shot": line.shot,
             "text": line.text, "rel_path": episode_home.relative(book, out), "seconds": said.seconds,
-            "seed": said.seed, "tries": attempt + 1, "reference": reference.name}
+            "seed": said.seed, "tries": attempt + 1, "reference": reference.name, "delivery": delivery}
 
 
 def listen_all(records: list[dict], book: Path, listen, among: dict | None = None) -> list[int]:
@@ -186,13 +190,24 @@ def listen_all(records: list[dict], book: Path, listen, among: dict | None = Non
         verdict = voice_qc.check(clip, record["text"], transcribe=listen)
         similarity = voice_ear.similarity(reference_for(book, record["speaker"]), clip)
         floor, room = similar_floor(verdict.seconds), episode_voice(book, among, record)
-        passed = verdict.passed and similarity >= floor and alternate_ok(room)
+        passed = verdict.passed and similarity >= floor and alternate_ok(room) and lift_ok(book, record, clip)
         record.update(heard=verdict.heard, error_rate=verdict.error_rate, why=verdict.why,
                       similarity=round(float(similarity), 3), floor=floor,
                       episode_voice=room, passed=passed)
         if not passed:
             failed.append(record["index"])
     return failed
+
+
+def lift_ok(book: Path, record: dict, clip: Path) -> bool:
+    """A shouted or exultant line rises LIFT_ST over the speaker's calm design
+    read; any other delivery is not asked.  The measured lift is kept."""
+    register = record.get("delivery", "calm")
+    if register not in episode_emotion.LIFTED:
+        return True
+    calm = episode_emotion.f0_median(reference_for(book, record["speaker"]))
+    record["lift_st"] = round(episode_emotion.lift_st(clip, calm), 2)
+    return record["lift_st"] >= episode_emotion.LIFT_ST
 
 
 def keep_best(new: dict, previous: dict | None, wav: Path) -> dict:

@@ -116,6 +116,11 @@ class Line(BaseModel):
     speaker: str
     text: str
     shot: int = Field(ge=0)
+    delivery: Literal["", "calm", "hushed", "urgent", "shouting", "exultant", "grieving",
+                      "threatening", "cold", "curious"] = ""
+    """HOW the line is said -- its emotion reference (studio/episode_emotion.py).
+    Empty reads as calm, or as shouting when the text ends in '!'.  Root cause
+    2026-09-26: every line in twelve episodes was said at one temperature."""
     """The shot this line plays on.  Lines are in playback order."""
 
     def words(self) -> int:
