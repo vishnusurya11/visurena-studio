@@ -66,9 +66,19 @@ def similar_floor(seconds: float) -> float:
     return next(floor for at, floor in FLOORS if seconds >= at)
 
 
+SIM_MEASURABLE_S = 2.0
+"""Under this a line's similarity is recorded, never gated.  MEASURED 2026-09-26:
+one-second slices of the narrator's OWN passing lines scored min 0.07, p10 0.32
+against his cast clip; 2.5 s slices min 0.51.  ep13's 'What are we?' failed as
+three different men.  Words and pace still gate a short line."""
+
+
 def line_floor(seconds: float, delivery: str) -> float:
-    """The floor for THIS line: a line said with feeling sits FEELING_FLOOR_DROP
-    under the calm floor (the embedding moves with pitch and effort)."""
+    """The floor for THIS line: none when it is too short to measure; a line said
+    with feeling sits FEELING_FLOOR_DROP under the calm floor (the embedding moves
+    with pitch and effort)."""
+    if seconds < SIM_MEASURABLE_S:
+        return 0.0
     drop = 0.0 if delivery in ("", "calm") else episode_emotion.FEELING_FLOOR_DROP
     return round(similar_floor(seconds) - drop, 2)
 

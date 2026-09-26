@@ -60,7 +60,7 @@ def test_lucys_true_voice_at_one_and_a_half_seconds_now_passes(tmp_path, monkeyp
     monkeypatch.setattr(say, "reference_for", lambda book, who: clip)
     monkeypatch.setattr(say.voice_ear, "similarity", lambda ref, clip: 0.64)
     assert say.listen_all(records, tmp_path, lambda c: records[0]["text"]) == []
-    assert records[0]["floor"] == 0.60
+    assert records[0]["floor"] == 0.0     # under SIM_MEASURABLE_S: recorded, not gated (2026-09-26)
 
 
 def test_a_long_line_still_needs_the_full_floor(tmp_path, monkeypatch):

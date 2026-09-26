@@ -136,4 +136,13 @@ def test_a_line_said_with_feeling_has_a_lower_similarity_floor():
     from scripts.episode import say_lines as say
     assert say.line_floor(3.0, "calm") == say.similar_floor(3.0)
     assert say.line_floor(3.0, "shouting") == round(say.similar_floor(3.0) - ee.FEELING_FLOOR_DROP, 2)
-    assert 0.30 < say.line_floor(0.8, "hushed") < 0.45
+    assert 0.40 <= say.line_floor(2.5, "hushed") < 0.60
+
+
+def test_a_line_too_short_to_measure_is_not_judged_on_similarity():
+    """MEASURED 2026-09-26 on 36 one-second slices of the narrator's own passing
+    lines: similarity to his cast clip min 0.07, p10 0.32; at 2.5 s min 0.51.
+    Under SIM_MEASURABLE_S the embedding cannot tell him from anyone."""
+    from scripts.episode import say_lines as say
+    assert say.line_floor(1.0, "calm") == 0.0 and say.line_floor(1.9, "shouting") == 0.0
+    assert say.line_floor(2.5, "calm") == say.similar_floor(2.5)
