@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+{% block title %}Studio home · Visurena Studio{% endblock %}
+{% block crumbs %}<div class="crumbs">Studio</div>{% endblock %}
+{% block body %}
+<h1>Studio home</h1>
+<section class="strip" id="floor" hx-get="/partials/floor" hx-trigger="every 2s" hx-swap="innerHTML">
+{% include "_floor.html" %}
+</section>
+<section class="strip" id="attention" hx-get="/partials/attention" hx-trigger="every 2s" hx-swap="innerHTML">
+{% include "_attention.html" %}
+</section>
+<section id="lanes" hx-get="/partials/lanes" hx-trigger="every 10s" hx-swap="innerHTML">
+{% include "_lanes.html" %}
+</section>
+<section class="strip">
+{% include "_today.html" %}
+</section>
+{% endblock %}

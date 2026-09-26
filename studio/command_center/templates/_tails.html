@@ -1,0 +1,12 @@
+<div class="cols">
+<div class="panel">
+<div class="eyebrow">Learnings (tail {{ unit.learnings | length }})</div>
+<pre class="tail">{% for l in unit.learnings %}{{ (l.ts or '')[11:19] }} {{ l.step or '' }} {{ l.gate or '' }} {{ l.action or '' }}{% if l.attempt is defined %} #{{ l.attempt }}{% endif %}{% if l.measured is defined and l.measured is not none %} {{ l.measured }}{% if l.threshold is not none and l.threshold is defined %}/{{ l.threshold }}{% endif %}{% endif %}{% if l.terminal %} terminal{% endif %}{% if l.note %} — {{ l.note }}{% endif %}{% if l.raw %}{{ l.raw }}{% endif %}
+{% else %}no learnings yet{% endfor %}</pre>
+</div>
+<div class="panel">
+<div class="eyebrow">Log {% if unit.log_name %}<code>{{ unit.log_name }}</code>{% endif %} (tail, WARNING+)</div>
+<pre class="tail">{% for l in unit.log %}<span class="{{ l.level or '' }}">{{ (l.ts or '')[11:19] }} {{ l.level or '' }}</span> {{ l.step_id or '' }} {{ l.msg or l.raw or '' }}
+{% else %}nothing at WARNING or above{% endfor %}</pre>
+</div>
+</div>

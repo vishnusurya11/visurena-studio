@@ -1,0 +1,21 @@
+<div class="tbl-wrap"><table>
+<thead><tr><th>st</th><th>book</th><th>unit</th><th>step · progress</th><th>last</th><th>att</th><th>gpu</th><th>cost</th><th>verdicts</th><th></th></tr></thead>
+<tbody>
+{% for r in dept.rows %}
+<tr{% if r.shown in ('escalated', 'failed', 'running') %} class="emph"{% endif %}>
+  <td><span class="st {{ r.css }}" title="{{ r.shown }}">{{ r.glyph }}</span></td>
+  <td><a href="/b/{{ r.codex_id }}">{{ books.get(r.codex_id, r.codex_id) | truncate(18, True, '…') }}</a></td>
+  <td><a href="/d/{{ r.stage }}/{{ r.codex_id }}/{{ r.unit }}">{{ r.unit }}</a></td>
+  <td>{{ r.step_id or '' }} {{ r.step_name }}{% if r.progress %} · {{ r.progress }}{% endif %}{% if r.shown == 'running' and r.elapsed %} · {{ r.elapsed }}{% endif %}{% if r.blocked_on %} · <span class="muted">on {{ r.blocked_on }}</span>{% endif %}{% if r.hold_reason %} · <span class="muted">{{ r.hold_reason }}</span>{% endif %}</td>
+  <td class="mono">{{ (r.updated_at or '')[5:16] }}</td>
+  <td>{{ r.attempts }}</td>
+  <td>{% if r.gpu_seconds %}{{ (r.gpu_seconds / 60) | round | int }}m{% else %}–{% endif %}</td>
+  <td>{% if r.cost_usd is none %}<span class="muted">?</span>{% else %}${{ '%.2f' | format(r.cost_usd) }}{% endif %}</td>
+  <td>{% for c in r.strip %}<span class="chip {{ c.css }}" title="{{ c.gate }}{% if c.by %} · {{ c.by }}{% endif %}{% if c.faults %} · {{ c.faults }} faults{% endif %}">{{ c.gate }} {{ c.glyph }}</span>{% endfor %}</td>
+  <td><button class="btn" disabled title="C11">run</button> <button class="btn" disabled title="C11">hold</button> <button class="btn" disabled title="C11">redo</button></td>
+</tr>
+{% else %}
+<tr><td colspan="10" class="muted">no units</td></tr>
+{% endfor %}
+</tbody></table></div>
+<div class="muted mono">{% for word, n in dept.counts.items() %}{{ word }} {{ n }}{% if not loop.last %} · {% endif %}{% endfor %}</div>

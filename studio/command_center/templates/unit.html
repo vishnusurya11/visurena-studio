@@ -1,0 +1,67 @@
+{% extends "base.html" %}
+{% set r = unit.row %}
+{% block title %}{{ r.unit }} · {{ stage }} · Visurena Studio{% endblock %}
+{% block crumbs %}<div class="crumbs"><a href="/">Studio</a> › <a href="/d/{{ stage }}">{{ stage }}</a> › <a href="/b/{{ codex }}">{{ unit.book_name }}</a> › {{ r.unit }}</div>{% endblock %}
+{% block body %}
+<h1><span class="st {{ r.css }}">{{ r.glyph }}</span> {{ r.unit }} <span class="muted" style="font-size:18px">{{ r.shown }} · {{ r.step_id or '' }} {{ r.step_name }}{% if r.progress %} · {{ r.progress }}{% endif %}</span></h1>
+<div class="muted">attempt {{ r.attempts }}{% if r.gpu_seconds %} · gpu {{ (r.gpu_seconds / 60) | round | int }}m{% endif %}{% if r.run_id %} · run <code>{{ r.run_id }}</code>{% endif %}{% if r.blocked_on %} · on {{ r.blocked_on }}{% endif %}{% if r.hold_reason %} · held: {{ r.hold_reason }}{% endif %}</div>
+<div style="margin:8px 0"><button class="btn" disabled title="C11">run / resume</button> <button class="btn" disabled title="C11">redo with note</button> <button class="btn" disabled title="C11">hold</button></div>
+
+<section class="strip">
+<div class="eyebrow">Steps</div><span hidden>STEPS</span>
+<div class="steps">
+{% for s in unit.steps %}
+<span class="step" title="{{ s.state }}{% if s.attempt %} · attempt {{ s.attempt }}{% endif %}{% if s.seconds %} · {{ s.seconds | round | int }}s{% endif %}{% if s.detail %} · {{ s.detail }}{% endif %}"><span><span class="st {{ s.css }}">{{ s.glyph }}</span> {{ s.step_id }}</span><small>{{ s.name }}</small></span>
+{% endfor %}
+</div>
+</section>
+
+<div class="cols">
+<section class="panel">
+<div class="eyebrow">Deliverable</div>
+{% if unit.deliverable %}
+<div><code>{{ unit.deliverable.rel }}</code> {% if unit.deliverable.exists %}<a href="{{ unit.deliverable.url }}">open ▸</a>{% else %}<span class="muted">missing on disk</span>{% endif %}</div>
+{% else %}<div class="muted">none yet</div>{% endif %}
+{% for t in unit.thumbnails if t.kind == 'master' %}
+<div class="eyebrow" style="margin-top:8px">Master</div>
+<video controls preload="metadata" src="{{ t.url }}"></video>
+<div class="muted mono">{{ t.rel }}</div>
+{% endfor %}
+</section>
+<section class="panel">
+<div class="eyebrow">Verdicts</div><span hidden>VERDICTS</span>
+{% for c in unit.verdicts %}
+<div class="row"><b>{{ c.gate }}</b> <span class="st {{ c.css }}">{{ c.glyph }}</span>
+{% if c.by or c.word %}{{ c.word }} {{ c.by }}{% if c.sha8 %} <code>{{ c.sha8 }}</code>{% endif %}{% if c.terminal %} · {{ c.terminal }}{% endif %}{% if c.faults %} · {{ c.faults }} fault{{ '' if c.faults == 1 else 's' }}{% endif %}{% if c.path %} · <a href="/lib/{{ codex }}/{{ c.path }}">file</a>{% endif %}
+{% else %}<span class="muted">not yet signed</span>{% endif %}
+<button class="btn" disabled title="C11">redo</button></div>
+{% else %}<div class="muted">this department has no judged gate</div>{% endfor %}
+</section>
+</div>
+
+{% set panels = unit.thumbnails | selectattr('kind', 'equalto', 'panels') | list %}
+{% set takes = unit.thumbnails | selectattr('kind', 'equalto', 'takes') | list %}
+{% if panels or takes %}
+<section class="strip">
+{% if panels %}<div class="eyebrow">Panels ({{ panels | length }})</div>
+<div class="thumbs">{% for t in panels %}<a href="{{ t.url }}" title="{{ t.rel }}"><img loading="lazy" src="{{ t.url }}" alt="{{ t.rel }}"></a>{% endfor %}</div>{% endif %}
+{% if takes %}<div class="eyebrow">Takes</div>
+<div class="thumbs">{% for t in takes %}<a href="{{ t.url }}" title="{{ t.rel }}"><img class="wide" loading="lazy" src="{{ t.url }}" alt="{{ t.rel }}"></a>{% endfor %}</div>{% endif %}
+</section>
+{% endif %}
+
+<section class="strip" id="tails"{% if unit.running %} hx-get="/partials/unit/{{ stage }}/{{ codex }}/{{ r.unit }}/tails" hx-trigger="every 3s" hx-swap="innerHTML"{% endif %}>
+{% include "_tails.html" %}
+</section>
+
+<section class="strip">
+<div class="eyebrow">Timing</div><span hidden>TIMING</span>
+<div class="tbl-wrap"><table>
+<thead><tr><th>stage</th><th>seconds</th><th>ok</th><th>note</th></tr></thead>
+<tbody>
+{% for t in unit.timing %}
+<tr><td>{{ t.stage or t.raw }}</td><td class="mono">{{ t.seconds if t.seconds is defined else '' }}</td><td>{{ '✓' if t.ok else ('✕' if t.ok is defined else '') }}</td><td class="muted">{{ t.note or '' }}</td></tr>
+{% else %}<tr><td colspan="4" class="muted">no timing rows</td></tr>{% endfor %}
+</tbody></table></div>
+</section>
+{% endblock %}

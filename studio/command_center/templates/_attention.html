@@ -1,0 +1,14 @@
+<div class="eyebrow">Needs you ({{ attention | length }})</div>
+<span hidden>NEEDS YOU</span>
+{% for r in attention %}
+<div class="row">
+  <span class="st {{ r.css }}">{{ r.glyph }}</span>
+  <a href="/d/{{ r.stage }}/{{ r.codex_id }}/{{ r.unit }}">{{ r.stage }} › {{ books.get(r.codex_id, r.codex_id) }} › {{ r.unit }}</a>
+  · {{ r.state }} at {{ r.step_id }} {{ r.step_name }}
+  {% if r.blocked_on %}· on <code>{{ r.blocked_on }}</code>{% endif %}
+  {% if r.detail %}· <span class="muted">{{ r.detail }}</span>{% endif %}
+  {% if r.updated_at %}· <span class="muted">{{ r.updated_at[:16] }}</span>{% endif %}
+</div>
+{% else %}
+<div class="row muted">nothing needs you</div>
+{% endfor %}

@@ -15,8 +15,8 @@ W5 = C10 · W6 = C11. Each commit is green on the full suite before it lands.
 - [x] C6 holds, orders, `studio_cli` — 38 tests; a hold row stops a run where RENDER_HOLD does; orders taken at the top of run_steps; a redo's note is a casebook row through the one door (`casebook.note_owner`)
 - [x] C7 the tick, `v_queue`, `v_attention`; Current tab + README — 57 tests; `studio.py tick|queue|verify|board`; every run ticks its book from `Tracker.__init__` (4.3 s first, 10 ms after); must also settle a unit whose every step was `skipped` (outputs on disk): it stays `blocked` under C2's map until the tick/verify marks it done
 - [x] C8 backfill (dry-run listed to the owner before `--write`) — 39 tests; listing in `docs/audit/2026-09-26_backfill.md`: 31 rows, 20 derivable, 11 ambiguous; `--write` NOT run
-- [ ] C9 runners take the queue
-- [ ] C10 the board, read-only (FastAPI pinned when no GPU run is live)
+- [x] C9 runners take the queue — `studio/queue.py`; `episode.py <book>` drains what is queued now and exits; `--all` keeps the old every-folder form; explicit `<n>` refused only by a hold
+- [x] C10 the board, read-only — FastAPI 0.141.1 pinned; 16 routes; htmx vendored; read-only SQLite per request; guarded `/lib`; tokens byte-equal to the org chart (89 tests)
 - [ ] C11 actions; README, DECISIONS, republish
 
 ## Rules for every commit
@@ -63,3 +63,4 @@ that would make it an instruction is a separate decision.
   Owner review pending.
 - 2026-09-25 — owner: "looks good .. use sub agents and also a way to track progress and build it". Status → IN PROGRESS; this list is the tracker.
 - 2026-09-26 — C1–C8 landed (five agents in three waves). Full suite over C3+C5: 7274 passed, 2 failed in tests that read the live library (`test_a_plan_script_regenerates_its_plan[ep12]`, `test_every_place_resolves[ep13]`) — library state, listed for the book-neutral scrub. Episode 12's run finished 02:14Z under the new judges (plan judge-signed, manifest present, 4 flags).
+- 2026-09-26 — C9 and C10 agents hit the model's rate limit mid-build; finished by hand (a test that assumed step 03 was step 09, FastAPI 0.141's included-router wrapper in the route list, an unescaped `&` in an `hx-get`, the legend's glyph split from its word).

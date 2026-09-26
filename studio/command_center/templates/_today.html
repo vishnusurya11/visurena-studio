@@ -1,0 +1,12 @@
+<div class="eyebrow">Today</div>
+<span hidden>TODAY</span>
+<div class="row">
+{% for t in today %}
+<span class="mono">{{ t.ended_at[11:16] }}</span>
+<a href="/d/{{ t.stage }}/{{ t.codex_id }}/{{ t.unit }}">{{ t.stage }} {{ t.unit }}</a>
+{{ t.step_name or t.step_id }}{% if t.seconds %} {{ t.seconds | round | int }}s{% endif %}
+<span class="st {{ t.css }}">{{ t.glyph }}</span>{% if not loop.last %} · {% endif %}
+{% else %}
+<span class="muted">nothing finished today</span>
+{% endfor %}
+</div>

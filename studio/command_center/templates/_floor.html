@@ -1,0 +1,17 @@
+<div class="eyebrow">On the floor</div>
+<span hidden>ON THE FLOOR</span>
+{% for r in floor.running %}
+<div class="row">
+  <span class="st {{ r.css }}">{{ r.glyph }}</span>
+  <a href="/d/{{ r.stage }}/{{ r.codex_id }}/{{ r.unit }}">{{ r.stage }} › {{ books.get(r.codex_id, r.codex_id) }} › {{ r.unit }}</a>
+  · {{ r.step_id }} {{ r.step_name }}{% if r.progress %} · {{ r.progress }}{% endif %}
+  · attempt {{ r.attempts }}{% if r.elapsed %} · running {{ r.elapsed }}{% endif %}
+  {% if r.started_at %}· started {{ r.started_at[11:16] }}{% endif %}
+  {% if r.run_id %}· run <code>{{ r.run_id }}</code>{% endif %}
+</div>
+{% else %}
+<div class="row muted">idle — nothing is running</div>
+{% endfor %}
+<div class="row muted">next:
+{% for r in floor.next %}<a href="/d/{{ r.stage }}/{{ r.codex_id }}/{{ r.unit }}">{{ r.stage }} {{ r.unit }}</a>{% if not loop.last %} · {% endif %}{% else %}nothing queued{% endfor %}
+</div>

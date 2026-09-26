@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+{% block title %}Floor · Visurena Studio{% endblock %}
+{% block crumbs %}<div class="crumbs"><a href="/">Studio</a> › Floor</div>{% endblock %}
+{% block body %}
+<h1>Call sheet</h1>
+<section class="strip" hx-get="/partials/floor" hx-trigger="every 2s" hx-swap="innerHTML">
+<span hidden>NOW</span>
+{% include "_floor.html" %}
+</section>
+<section class="strip">
+<div class="eyebrow">Next <span class="muted">(derived: priority, slate order, unit — no scheduler yet)</span></div>
+<span hidden>NEXT</span>
+<div class="tbl-wrap"><table>
+<thead><tr><th>#</th><th>st</th><th>department</th><th>book</th><th>unit</th><th>step</th><th>priority</th><th>waits on</th><th></th></tr></thead>
+<tbody>
+{% for r in queue %}
+<tr>
+  <td>{{ loop.index }}</td>
+  <td><span class="st {{ r.css }}">{{ r.glyph }}</span></td>
+  <td><a href="/d/{{ r.stage }}">{{ r.stage }}</a></td>
+  <td><a href="/b/{{ r.codex_id }}">{{ books.get(r.codex_id, r.codex_id) }}</a></td>
+  <td><a href="/d/{{ r.stage }}/{{ r.codex_id }}/{{ r.unit }}">{{ r.unit }}</a></td>
+  <td>{{ r.step_id or '' }} {{ r.step_name }}</td>
+  <td>{{ r.priority }}</td>
+  <td>{{ r.blocked_on or '' }}</td>
+  <td><button class="btn" disabled title="C11">↑</button> <button class="btn" disabled title="C11">hold</button></td>
+</tr>
+{% else %}
+<tr><td colspan="9" class="muted">nothing queued</td></tr>
+{% endfor %}
+</tbody></table></div>
+</section>
+<section class="strip">
+<div class="eyebrow">Held</div>
+<span hidden>HELD</span>
+{% for h in holds %}
+<div class="row"><span class="st grey">⏸</span> {{ h.scope }}{% if h.codex_id %} · {{ books.get(h.codex_id, h.codex_id) }}{% endif %}{% if h.stage %} · {{ h.stage }}{% endif %}{% if h.unit %} · {{ h.unit }}{% endif %} · <span class="muted">{{ h.held_by or '' }} {{ h.held_at[:16] }}: "{{ h.reason }}"</span></div>
+{% else %}
+<div class="row muted">no holds</div>
+{% endfor %}
+</section>
+<section class="strip">
+{% include "_today.html" %}
+</section>
+{% endblock %}

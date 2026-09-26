@@ -1,0 +1,17 @@
+<div class="lanes">
+{% for lane in lanes %}
+<div class="lane">
+  <h3><a href="/d/{{ lane.stage }}">{{ lane.stage }}</a></h3>
+  <div class="muted">{{ lane.total }} unit{{ '' if lane.total == 1 else 's' }}</div>
+  <div class="bar">{% for css in lane.bar %}<i class="{{ css }}"></i>{% endfor %}</div>
+  <div class="mono">{% for mark, n in lane.tally %}{{ mark }}{{ n }} {% endfor %}</div>
+  {% for r in lane.rows %}
+  <div class="row"><span class="st {{ r.css }}">{{ r.glyph }}</span>
+    <a href="/d/{{ r.stage }}/{{ r.codex_id }}/{{ r.unit }}">{{ r.unit }}</a>
+    <span class="muted">{{ books.get(r.codex_id, r.codex_id) | truncate(14, True, '…') }}{% if r.progress %} · {{ r.progress }}{% endif %}</span>
+  </div>
+  {% endfor %}
+  <div><a href="/d/{{ lane.stage }}">open ▸</a></div>
+</div>
+{% endfor %}
+</div>

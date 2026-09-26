@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+{% block title %}{{ dept.stage }} · Visurena Studio{% endblock %}
+{% block crumbs %}<div class="crumbs"><a href="/">Studio</a> › {{ dept.stage }}</div>{% endblock %}
+{% block body %}
+<h1>{{ dept.stage }} <span class="muted" style="font-size:18px">{{ dept.rows | length }} units{% if book or state %} shown{% endif %}</span></h1>
+<form class="filters" method="get" action="/d/{{ dept.stage }}">
+  <label>book <select name="book"><option value="">all books</option>{% for c, name in dept.books.items() %}<option value="{{ c }}" {% if c == book %}selected{% endif %}>{{ name }}</option>{% endfor %}</select></label>
+  <label>state <select name="state"><option value="">any</option>{% for mark, word in legend %}<option value="{{ word }}" {% if word == state %}selected{% endif %}>{{ mark }} {{ word }}</option>{% endfor %}</select></label>
+  <button class="btn" type="submit">filter</button>
+  <a href="/org#{{ dept.stage }}" class="muted">org chart ▸</a>
+</form>
+<section id="rows" hx-get="/partials/d/{{ dept.stage }}{% if book or state %}?{% if book %}book={{ book }}{% endif %}{% if book and state %}&amp;{% endif %}{% if state %}state={{ state }}{% endif %}{% endif %}" hx-trigger="every 10s" hx-swap="innerHTML">
+{% include "_rows.html" %}
+</section>
+{% endblock %}

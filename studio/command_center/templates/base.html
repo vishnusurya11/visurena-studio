@@ -1,0 +1,145 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>{% block title %}Visurena Studio{% endblock %}</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=IBM+Plex+Sans:ital,wght@0,400;0,500;0,600;1,400&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+:root{
+  --paper:#f6f3ec; --paper-2:#eee9df; --ink:#1d1a16; --ink-2:#4d473d; --ink-3:#7d7566;
+  --rule:#d6cfc0; --rule-2:#bfb6a3; --line:#9c937f;
+  --code:#e9e4d7; --code-ink:#3b352c;
+  --accent:#a4341f; --accent-ink:#ffffff;
+  --think:#2c4f6b; --think-bg:#e3ebf2;
+  --qc:#5f4b1c; --qc-bg:#f1e8c9;
+  --invent:#6a3b8f; --invent-bg:#ece3f3;
+  --ok:#2f6b3a; --ok-bg:#dfeee2;
+  --lead:#1d1a16; --lead-ink:#f6f3ec;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    color-scheme:dark;
+    --paper:#181613; --paper-2:#211e1a; --ink:#ece7dc; --ink-2:#c3bbab; --ink-3:#8f8778;
+    --rule:#3a352d; --rule-2:#4d473d; --line:#6a6254;
+    --code:#2a2621; --code-ink:#d8d1c2;
+    --accent:#e0664c; --accent-ink:#1d1a16;
+    --think:#9dc0dd; --think-bg:#1f2e3b;
+    --qc:#e2c979; --qc-bg:#332b16;
+    --invent:#c8a6e0; --invent-bg:#2c2035;
+    --ok:#8fcf9b; --ok-bg:#1e3323;
+    --lead:#ece7dc; --lead-ink:#181613;
+  }
+}
+:root[data-theme="dark"]{
+  color-scheme:dark;
+  --paper:#181613; --paper-2:#211e1a; --ink:#ece7dc; --ink-2:#c3bbab; --ink-3:#8f8778;
+  --rule:#3a352d; --rule-2:#4d473d; --line:#6a6254;
+  --code:#2a2621; --code-ink:#d8d1c2;
+  --accent:#e0664c; --accent-ink:#1d1a16;
+  --think:#9dc0dd; --think-bg:#1f2e3b;
+  --qc:#e2c979; --qc-bg:#332b16;
+  --invent:#c8a6e0; --invent-bg:#2c2035;
+  --ok:#8fcf9b; --ok-bg:#1e3323;
+  --lead:#ece7dc; --lead-ink:#181613;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--paper);color:var(--ink);font-family:"IBM Plex Sans",system-ui,sans-serif;font-size:14px;line-height:1.45}
+a{color:var(--ink)}
+.wrap{max-width:1180px;margin:0 auto;padding:12px 16px 56px}
+h1,h2,h3{font-family:"Barlow Condensed","Arial Narrow",sans-serif;text-wrap:balance;margin:0}
+h1{font-size:34px;font-weight:700;letter-spacing:.01em;line-height:1.05}
+h2{font-size:22px;font-weight:700}
+h3{font-size:18px;font-weight:600}
+.eyebrow{font-family:"IBM Plex Mono",monospace;font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-3)}
+code,.mono{font-family:"IBM Plex Mono",ui-monospace,monospace;font-size:12px}
+code{background:var(--code);color:var(--code-ink);padding:1px 5px;border-radius:3px}
+header.top{display:flex;flex-wrap:wrap;gap:8px 18px;align-items:baseline;border-bottom:3px solid var(--ink);padding:10px 16px;max-width:1180px;margin:0 auto}
+header.top .brand{font-family:"Barlow Condensed",sans-serif;font-size:26px;font-weight:700;text-decoration:none;color:var(--ink)}
+header.top nav{display:flex;flex-wrap:wrap;gap:4px 14px;font-size:13px}
+header.top nav a{color:var(--ink-2);text-decoration:none}
+header.top nav a:hover{color:var(--ink);text-decoration:underline}
+header.top .spacer{flex:1}
+.crumbs{color:var(--ink-3);font-size:12.5px;margin:8px 0 4px}
+.crumbs a{color:var(--ink-2);text-decoration:none}
+.strip{border-top:1px solid var(--rule);padding:10px 0}
+.strip .row{padding:3px 0}
+.st{display:inline-block;min-width:1.7em;text-align:center;font-family:"IBM Plex Mono",monospace;font-weight:600;line-height:1.3}
+.st.red{color:var(--accent)}
+.st.black{color:var(--ink);font-weight:700;border:2px solid var(--ink);border-radius:2px;padding:0 2px}
+.st.amber{color:var(--qc)}
+.st.purple{color:var(--invent)}
+.st.blue{color:var(--think);animation:pulse 1.4s ease-in-out infinite}
+.st.green{color:var(--ok)}
+.st.grey{color:var(--ink-3)}
+@keyframes pulse{50%{opacity:.35}}
+.lanes{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:12px;margin-top:14px}
+.lane{border:1px solid var(--rule);background:var(--paper-2);padding:10px;min-width:0}
+.lane .row{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-size:13px}
+.bar{display:flex;height:8px;gap:1px;margin:6px 0}
+.bar i{display:block;flex:1;background:var(--rule-2)}
+.bar i.green{background:var(--ok)} .bar i.amber{background:var(--qc)} .bar i.blue{background:var(--think)}
+.bar i.red{background:var(--accent)} .bar i.purple{background:var(--invent)} .bar i.black{background:var(--ink)}
+.tbl-wrap{overflow-x:auto;margin-top:8px}
+table{border-collapse:collapse;width:100%;font-variant-numeric:tabular-nums}
+th,td{text-align:left;padding:5px 8px;border-bottom:1px solid var(--rule);white-space:nowrap;vertical-align:top}
+th{font-family:"IBM Plex Mono",monospace;font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-3);font-weight:500}
+tr.emph td{background:var(--paper-2)}
+.muted{color:var(--ink-3)}
+.chip{display:inline-block;font-family:"IBM Plex Mono",monospace;font-size:10.5px;letter-spacing:.06em;text-transform:uppercase;padding:2px 7px;border-radius:2px;border:1px solid var(--rule-2);color:var(--ink-2);background:var(--paper);margin:2px 2px 2px 0}
+.chip.red{border-color:var(--accent);color:var(--accent)} .chip.green{border-color:var(--ok);color:var(--ok);background:var(--ok-bg)}
+.chip.amber{border-color:var(--qc);color:var(--qc);background:var(--qc-bg)} .chip.blue{border-color:var(--think);color:var(--think);background:var(--think-bg)}
+.chip.purple{border-color:var(--invent);color:var(--invent);background:var(--invent-bg)} .chip.black{border-color:var(--ink);color:var(--ink);border-width:2px}
+.steps{display:flex;flex-wrap:wrap;gap:6px;margin:8px 0}
+.steps .step{display:inline-flex;flex-direction:column;align-items:center;min-width:52px;border:1px solid var(--rule);padding:4px 6px;background:var(--paper-2);font-size:12px}
+.steps .step small{color:var(--ink-3);font-family:"IBM Plex Mono",monospace;font-size:10.5px}
+.cols{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:12px}
+@media (max-width:720px){.cols{grid-template-columns:1fr}}
+.panel{border-top:1px solid var(--rule);padding-top:8px;min-width:0}
+.thumbs{display:flex;flex-wrap:wrap;gap:6px;margin:6px 0}
+.thumbs img{width:120px;height:120px;object-fit:cover;border:1px solid var(--rule-2);background:var(--code)}
+.thumbs img.wide{width:100%;height:auto;max-height:180px;object-fit:contain}
+video{max-width:100%;background:#000;display:block}
+.tail{font-family:"IBM Plex Mono",monospace;font-size:12px;white-space:pre-wrap;word-break:break-word;margin:0}
+.tail .WARNING{color:var(--qc)} .tail .ERROR,.tail .CRITICAL{color:var(--accent)}
+button.btn{font:inherit;font-size:12px;padding:3px 9px;border:1px solid var(--rule-2);background:var(--paper-2);color:var(--ink);border-radius:3px;cursor:pointer}
+button.btn[disabled]{opacity:.45;cursor:not-allowed}
+.legend{display:flex;flex-wrap:wrap;gap:6px 16px;margin-top:28px;padding-top:10px;border-top:1px solid var(--rule);color:var(--ink-2);font-size:12.5px}
+.legend .k{display:inline-flex;align-items:center;gap:6px}
+.filters{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-top:8px;font-size:13px}
+.filters select,.filters input{font:inherit;font-size:13px;padding:3px 6px;border:1px solid var(--rule-2);background:var(--paper);color:var(--ink)}
+.grid td.cell{text-align:center}
+.plain{max-width:60ch;margin:64px auto;padding:0 16px}
+</style>
+<script src="/static/htmx.min.js"></script>
+</head>
+<body>
+<header class="top">
+  <a class="brand" href="/">Visurena Studio</a>
+  <nav>
+    <a href="/">Home</a>
+    <a href="/floor">Floor</a>
+    {% for s in stages %}<a href="/d/{{ s }}">{{ s }}</a>{% endfor %}
+    <a href="/org">Org chart</a>
+  </nav>
+  <span class="spacer"></span>
+  <button class="btn" id="theme" type="button" title="light / dark">◐</button>
+</header>
+<main class="wrap">
+{% block crumbs %}{% endblock %}
+{% block body %}{% endblock %}
+<footer class="legend" aria-label="legend">
+  <span class="eyebrow">legend</span>
+  {% for mark, word in legend %}<span class="k st {{ word }}">{{ mark }} {{ word }}</span>{% endfor %}
+</footer>
+</main>
+<script>
+(function(){
+  var key='cc-theme', root=document.documentElement;
+  try{var t=localStorage.getItem(key); if(t){root.dataset.theme=t;}}catch(e){}
+  var b=document.getElementById('theme');
+  if(b){b.onclick=function(){var n=root.dataset.theme==='dark'?'light':'dark'; root.dataset.theme=n; try{localStorage.setItem(key,n);}catch(e){}};}
+})();
+</script>
+</body>
+</html>
