@@ -46,6 +46,14 @@ SKILL.md.
 
 ## Cast
 
+- **Quote the hair when the chapter state is bareheaded (ep13, 2026-09-26).** The
+  narrator's sheet wears a boater in every view, so the drawer had never seen his
+  hair: five of ep13's first panels drew a bald man with a handlebar moustache.
+  And never quote a row's colour word the sheet contradicts -- the curate's row
+  says flaxen, his sheet is brown, and the board split between the two. The sheet
+  binds every take; the tag must agree with it. No gate compares one character
+  across panels; look at the whole board before the takes.
+
 - **Describe the cast from its rows, never from memory.** ep07 shipped four
   characters that contradicted their rows. In ep09 all four newly written
   descriptions contradicted theirs; one milkman had sandy side-whiskers where

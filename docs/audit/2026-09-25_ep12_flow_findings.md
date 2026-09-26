@@ -54,3 +54,5 @@ or OPEN (with what fixing it needs). Numbers are the order they were found.
 | 42 | step 07 said 'skipped: output exists' over grids drawn from an older plan; panels.py then refused | fixed: the board asks panels.py's staleness question (commit after 27a0d27) | -- |
 | 43 | step 04 and step 06 refusals reach the runner log as 'exit 1' only; the script's own reason is not captured | tooling | capture the child's last lines into the refusal |
 | 44 | 2026-09-26 ~05:33 local: ComfyUI died on 'CUDA error: unknown error'; nvidia-smi: 'GPU is lost. Reboot the system to recover' | hardware/driver | reboot; ep13 resumes at step 07 (board) |
+| 45 | no gate compares one character ACROSS panels: ep13's board had the narrator bald in 5 panels (his sheet wears a hat; the tag named no hair) and the curate two colours (row flaxen, sheet brown); caught by eye | gate | a cross-panel identity row (face embedding per cast member across the board, outliers refused) |
+| 46 | a detached runner launched from cmd.exe has no ffmpeg on PATH (the bash PATH has C:/Users/vishn/bin) | tooling | put ffmpeg on the system PATH, or have the runner resolve it from a config |
