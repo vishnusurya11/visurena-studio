@@ -9,12 +9,12 @@ W5 = C10 · W6 = C11. Each commit is green on the full suite before it lands.
 
 - [x] C1 the tables, the migration, a view per department — 19 tests; the migration only CREATEs and ADDs (a live runner was writing; the plan's "rebuild" wording is superseded)
 - [x] C2 rows written from `add_event` — 31 tests; attempts = passes over the unit (a `started` under a new run_id)
-- [ ] C3 verdicts and flags on the row
+- [x] C3 verdicts and flags on the row — 23 tests; `verdict_rows` reads the judge files; `mark_stale_verdicts` flips a done row whose artefact moved
 - [x] C4 `in:`/`out:` in the registry, the manifest, the drift guard — all 16 episode+refs steps covered; `deliverable_of('episode')` is the manifest (it names the master)
-- [ ] C5 cost per unit
+- [x] C5 cost per unit — 26 tests; episode/refs open a unit-scoped spend context; `unit_cost` NULL while any call is unpriced; `timing_sum` maps every real timing name
 - [x] C6 holds, orders, `studio_cli` — 38 tests; a hold row stops a run where RENDER_HOLD does; orders taken at the top of run_steps; a redo's note is a casebook row through the one door (`casebook.note_owner`)
-- [ ] C7 the tick, `v_queue`, `v_attention`; Current tab + README — must also settle a unit whose every step was `skipped` (outputs on disk): it stays `blocked` under C2's map until the tick/verify marks it done
-- [ ] C8 backfill (dry-run listed to the owner before `--write`)
+- [x] C7 the tick, `v_queue`, `v_attention`; Current tab + README — 57 tests; `studio.py tick|queue|verify|board`; every run ticks its book from `Tracker.__init__` (4.3 s first, 10 ms after); must also settle a unit whose every step was `skipped` (outputs on disk): it stays `blocked` under C2's map until the tick/verify marks it done
+- [x] C8 backfill (dry-run listed to the owner before `--write`) — 39 tests; listing in `docs/audit/2026-09-26_backfill.md`: 31 rows, 20 derivable, 11 ambiguous; `--write` NOT run
 - [ ] C9 runners take the queue
 - [ ] C10 the board, read-only (FastAPI pinned when no GPU run is live)
 - [ ] C11 actions; README, DECISIONS, republish
@@ -62,3 +62,4 @@ that would make it an instruction is a separate decision.
   the chair's ruling in the decision file; this tracker; the *Command Center* tab on the page.
   Owner review pending.
 - 2026-09-25 — owner: "looks good .. use sub agents and also a way to track progress and build it". Status → IN PROGRESS; this list is the tracker.
+- 2026-09-26 — C1–C8 landed (five agents in three waves). Full suite over C3+C5: 7274 passed, 2 failed in tests that read the live library (`test_a_plan_script_regenerates_its_plan[ep12]`, `test_every_place_resolves[ep13]`) — library state, listed for the book-neutral scrub. Episode 12's run finished 02:14Z under the new judges (plan judge-signed, manifest present, 4 flags).
