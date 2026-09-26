@@ -4,21 +4,26 @@ version = "0.1.0"
 description = "Visurena Studio - AI content studio: books to audiobooks, shorts, songs, novels"
 requires-python = ">=3.12"
 dependencies = [
+    "fastapi==0.141.1",
     "google-api-python-client==2.149.0",
     "google-auth-httplib2==0.2.0",
     "google-auth-oauthlib==1.2.1",
     "imageio-ffmpeg==0.6.0",
+    "jinja2==3.1.6",
     "matplotlib==3.10.7",
     "openai-whisper==20250625",
     "opencv-python-headless==5.0.0.93",
+    "python-multipart==0.0.32",
     "pyyaml==6.0.2",
     "screenplain[pdf]==0.11.0",
     "speechbrain==1.0.3",
     "strands-agents[ollama,openai]==1.53.0",
+    "uvicorn==0.52.4",
 ]
 
 [dependency-groups]
 dev = [
+    "httpx==0.28.1",
     "pytest==8.4.1",
 ]
 measures = [
