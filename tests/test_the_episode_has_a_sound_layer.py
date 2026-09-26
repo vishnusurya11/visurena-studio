@@ -86,3 +86,10 @@ def test_plan_check_runs_the_sound_gate(capsys):
     ep = plan([shot(0, frame="the guns fire")], {"meadow": NS(ambience="")})
     assert plan_check.sound_gates(ep) == 2
     assert "G-SOUND" in capsys.readouterr().out
+
+
+def test_a_voice_shouting_is_not_a_sound_effect():
+    """A shout is carried by its line's delivery, not by a cue (ep13 shots 17-18)."""
+    ep = plan([shot(0, frame="the curate shouts, pointing"), shot(1, frame="a woman screams on the bank")],
+              {"meadow": NS(ambience="larks")})
+    assert es.sound_faults(ep) == []

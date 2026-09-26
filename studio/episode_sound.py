@@ -21,9 +21,11 @@ EVENT_DB = 6.0
 heard (sfx_cues.event_db).  The generator's builder named 6 as its guess; the
 first real master re-fits it."""
 LOUD = re.compile(r"\b(fires?|fired|firing|guns?|shells?|burst(s|ing)?|explo\w*|crash\w*|thunder\w*|"
-                  r"splash\w*|gallop\w*|hooves|screams?|scream\w*|shouts?|howl\w*|roar\w*|collaps\w*|"
+                  r"splash\w*|gallop\w*|hooves|howl\w*|roar\w*|collaps\w*|"
                   r"falls? with|topples?|smash\w*|bells?|whistles?)\b", re.I)
-"""Prose words that name an event a viewer expects to HEAR."""
+"""Prose words that name an event a viewer expects to HEAR.  A person shouting or
+screaming is not here: a voice is carried by its line and its delivery, and ep13's
+two shouted lines were refused for want of a cue they did not need."""
 
 
 def cues_of(episode) -> list[sfx_cues.Cue]:
