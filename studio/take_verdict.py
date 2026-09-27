@@ -263,10 +263,15 @@ def lip_gate(lane: str, audio: dict | None, line_text: str) -> Gate:
         return Gate("lip-sync", None, True, True, "not measured")
     lag = float(audio.get("mux_lag_s", audio.get("lag_s", 0.0)))   # old sidecars carry lag_s
     wer = word_error(audio, line_text)
-    ok = abs(lag) <= LAG_TOL and (wer is None or wer <= WER_CEIL)
-    pen = min(40.0, 20.0 * max(0.0, abs(lag) - LAG_TOL) / LAG_TOL)
+    # A LATE soundtrack the edit lays within its shot is where the mouth is
+    # (studio/line_laid; ep13 T11 +1.08 s, checked in sync on the master).
+    room = audio.get("room_s")
+    laid = room is not None and LAG_TOL < lag <= float(room)
+    ok = (abs(lag) <= LAG_TOL or laid) and (wer is None or wer <= WER_CEIL)
+    pen = 0.0 if laid else min(40.0, 20.0 * max(0.0, abs(lag) - LAG_TOL) / LAG_TOL)
     pen += 50.0 * max(0.0, wer - WER_CEIL) if wer is not None else 0.0
-    return Gate("lip-sync", lag, ok, True, f"mux lag {lag:+.3f}s" + (f" wer {wer:.2f}" if wer is not None else ""), pen)
+    note = f"mux lag {lag:+.3f}s" + (" laid by the edit" if laid else "") + (f" wer {wer:.2f}" if wer is not None else "")
+    return Gate("lip-sync", lag, ok, True, note, pen)
 
 
 def identity_gate_row(report: dict | None) -> Gate:

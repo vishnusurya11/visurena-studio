@@ -334,6 +334,16 @@ def line_text(episode, rec: dict) -> str:
 
 
 
+def line_room(placed: dict, rec: dict) -> float | None:
+    """Seconds between the end of the take's dialogue line and its shot's end:
+    how late a soundtrack the edit can lay (studio/line_laid); None with no dialogue."""
+    ends = {s["index"]: float(s["t_end"]) for s in placed.get("shots", [])}
+    run = rec.get("shots") or [rec.get("index")]
+    rooms = [ends[l["shot"]] - (float(l["at"]) + float(l["seconds"])) for l in placed.get("lines", [])
+             if l.get("kind") == "dialogue" and l.get("shot") in run and l.get("shot") in ends]
+    return round(min(rooms), 3) if rooms else None
+
+
 def current_placed(placed: dict, rec: dict) -> float:
     """The take's placed seconds from the CURRENT timeline (the sum over its
     run of shots), not the render record: a line shortened after the render
@@ -448,6 +458,8 @@ def measure_attempt(video: Path, rec: dict, index: int, cells: Path, work: Path,
     seconds = min(clip_seconds(video), rec["placed_seconds"])
     composite = take_dir / (f"voice_{index:02d}.wav" if rec["audio"] != "silence" else f"silence_{index:02d}.wav")
     audio = audio_dq(video, composite, rec["lane"] == "dialogue", work, index)
+    if audio is not None:
+        audio["room_s"] = rec.get("line_room")
     # the book is four folders above the take room (episodes/epNN/takes/r2v);
     # the identity gate reads the cast sheets the record names from it
     v = tv.measure(video, rec, cells, seconds, attempt, audio, line, kinds, book=take_dir.parents[3])
@@ -505,7 +517,9 @@ def main(book_id: str, number: int, indices: list[int], attempts: bool = False) 
         rec["motion"], rec["motions"] = planned_motion(episode, rec), planned_motions(episode, rec)
         rec["size"] = planned_size(episode, rec)
         rec["still"] = any(episode.shot(i).still for i in rec.get("shots", [index]))
-        rec["placed_seconds"] = current_placed(episode_home.load_placed(book, number, episode), rec)
+        placed = episode_home.load_placed(book, number, episode)
+        rec["placed_seconds"] = current_placed(placed, rec)
+        rec["line_room"] = line_room(placed, rec)
         rec["daylight"] = daylit(episode, rec)
         rec["head"] = edit_gate.heads_in(home).get(index, 0.0)
         files = episode_home.attempts_of(take_dir, index) if attempts else [book / rec["rel_path"]]
