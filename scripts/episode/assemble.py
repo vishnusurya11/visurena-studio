@@ -774,12 +774,18 @@ def tail(master: Path, title: Path | None, out: Path, work: Path, number: int = 
     # frames short shipped without anyone seeing it, so the join counts itself.
     want = sum(video_frames(p) for p in parts)
     got = video_frames(out)
-    if got != want:
+    if join_lost(got, want):
         raise RuntimeError(
             f"the join lost picture: {got} frames out of {want} "
             f"({', '.join(f'{p.name} {video_frames(p)}f' for p in parts)}). "
             f"A part whose size, rate or pixel format differs is dropped silently.")
     return out
+
+
+def join_lost(got: int, want: int) -> bool:
+    """A part dropped (frames short) or more than one frame added; cfr output
+    may pad ONE frame at a join (ep13: 4025 of 4024), which loses nothing."""
+    return got < want or got > want + 1
 
 
 TARGET_LUFS, FLOOR_LUFS, TP_CEILING = -14.0, -15.5, -1.0
