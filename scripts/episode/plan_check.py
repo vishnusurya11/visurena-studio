@@ -90,11 +90,12 @@ def unpaced_shots(episode) -> list[tuple[int, str]]:
 
 
 def catalog_gates(episode, chapter: str | None) -> int:
-    """G-MOVES and G-SOURCE, the deterministic plan judges: HARD on a plan of
+    """G-MOVES, G-STILL and G-SOURCE, the deterministic plan judges: HARD on a plan of
     the new form (a `source` span on any shot), printed as advisories on an
     older one -- every plan written before the camera catalog fails G-MOVES,
     and reading a historical plan is not endorsing it.  Hard count."""
-    found = plan_gates.moves_faults(episode) + plan_gates.source_faults(episode, chapter)
+    found = (plan_gates.moves_faults(episode) + plan_gates.still_faults(episode)
+             + plan_gates.source_faults(episode, chapter))
     hard = episode.new_form()
     said = (len(found) or "clean") if hard else f"{len(found)} advisory (no `source` span on any shot; hard once one is written)"
     print("MOVES/SOURCE :", said)

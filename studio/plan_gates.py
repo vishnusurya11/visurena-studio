@@ -686,6 +686,36 @@ def moves_faults(episode) -> list[str]:
     return distinct_fault(ids) + share_fault(ids) + running_faults(list(episode.shots), ids)
 
 
+# ---- G-STILL: a move the model ignores is refused before it renders ---------------
+
+IGNORED = {"crane_down": "crane_up", "rack_focus": "pull_reveal", "tilt_down": "pull_reveal"}
+"""docs/calibration/camera_catalog.md: "Moves H3 ignores: crane_down (became a
+follow), rack_focus (nothing), tilt_down (became a pull-back)", with its
+substitutes.  ep13 first pass: rack_focus 2/2, tilt_down 2/2 failed."""
+ANGLES = ("low_angle", "high_angle")
+"""An angle is a `camera` line PLUS one move; held with no move, ep13's three
+read 82-100 % static (T14 failed frozen-whole at 100 %)."""
+
+
+def still_fault(shot) -> str | None:
+    """Why this shot's move will render still, or None."""
+    verb = move_verb(camera_clause(head_of(shot.motion))[0])
+    if verb in IGNORED:
+        return fault("G-STILL", f"shot {shot.index}", f"{verb!r} is a move H3 ignores; "
+                     f"use {IGNORED[verb]!r}", verb, "an obeyed move")
+    angle = move_id(shot.motion, getattr(shot, "camera", "") or "")
+    if verb == "locked" and angle in ANGLES and not getattr(shot, "still", False):
+        return fault("G-STILL", f"shot {shot.index}", f"{angle!r} held with no move renders still; "
+                     "pair the angle with crane_up, push_slow or track_lateral, or declare the shot still",
+                     angle, "an angle plus one move")
+    return None
+
+
+def still_faults(episode) -> list[str]:
+    """G-STILL over a plan: the moves that render a frozen take (speed plan #8)."""
+    return [f for s in episode.shots if (f := still_fault(s))]
+
+
 # ---- G-SOURCE: a claim about the chapter carries the chapter's words ------------
 # The two plan-level refusals the owner made that no gate caught were inventions:
 # a count guessed at 6 where the chapter gives 8; "sits astride" where the
