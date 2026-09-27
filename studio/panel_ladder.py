@@ -30,6 +30,11 @@ from studio.ladder import Ladder, Rung
 
 GRID_SECONDS = 102.0
 """One grid render: 1.7 GPU minutes (decision §2, EYE-panels)."""
+RUNG_SECONDS = 1900.0
+"""What a rung COSTS, measured on ep13 (2026-09-27): the redraw, the rebuild
+with its content read (1107-1224 s) and the eye's read of every panel (~740 s).
+Priced at one grid, the gate climbed into rungs it could not finish and
+deferred after the work was spent (speed plan #3)."""
 CAP = 2
 """Distinct grids that may climb per episode."""
 SUPERSEDED = "superseded"
@@ -174,7 +179,7 @@ class Climb:
 
 
 def ladder() -> Ladder:
-    return Ladder([Rung("redraw_grid_seed", GRID_SECONDS), Rung("reprose", GRID_SECONDS)], "keep_best")
+    return Ladder([Rung("redraw_grid_seed", RUNG_SECONDS), Rung("reprose", RUNG_SECONDS)], "keep_best")
 
 
 def climb(ctx, rebuild: Callable[[], None], cap: int = CAP) -> Climb:

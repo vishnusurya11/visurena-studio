@@ -117,8 +117,8 @@ def test_a_pass_after_the_seed_rung_never_reproses(tmp_path):
     assert audit_rows.load(ctx.book_dir) == []
 
 
-def test_the_rungs_are_priced_at_a_grid_each_under_keep_best():
+def test_the_rungs_are_priced_at_their_measured_cost_under_keep_best():
     ladder = panel_ladder.rungs(Ctx(Path(".")), lambda: None).ladder
     assert [(r.name, r.tries) for r in ladder.rungs] == [("redraw_grid_seed", 1), ("reprose", 1)]
-    assert all(r.cost_seconds == panel_ladder.GRID_SECONDS for r in ladder.rungs)
+    assert all(r.cost_seconds == panel_ladder.RUNG_SECONDS for r in ladder.rungs)
     assert ladder.terminal == "keep_best"

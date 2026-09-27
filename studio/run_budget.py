@@ -2,8 +2,8 @@
 
 Nothing in the trailer chain spends money -- MiniMax Music 3, MiniMax-H3 and
 Qwen3-TTS all run on the local ComfyUI -- so the one budget is wall-clock.
-Each step owns a SHARE of the ceiling; unused time rolls forward, overruns
-are charged forward, and the ceiling itself binds last.  A step asks
+Each step owns a SHARE of the ceiling; unused time rolls forward, an
+overrun is absorbed by the ceiling, which binds last.  A step asks
 `can_afford` before every render; a "no" means "take the terminal rung".
 """
 from __future__ import annotations
@@ -58,7 +58,10 @@ class Budget:
         if step not in self.shares:
             raise KeyError(f"no time share for step {step!r}")
         if self.step is not None:
-            self.carry = self.remaining(self.step)
+            # UNUSED time rolls forward; an OVERRUN is not charged to the next
+            # step -- the ceiling alone binds it (ep13: 08's 1034 s overrun
+            # refused the takes twice, after 08 had signed; speed plan #3).
+            self.carry = max(0.0, self.remaining(self.step))
         self.step = step
         self.step_started = self.clock()
 
