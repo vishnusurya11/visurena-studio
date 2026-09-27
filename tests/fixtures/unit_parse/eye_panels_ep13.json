@@ -1,0 +1,252 @@
+{
+ "sha8": "f3ba61bc",
+ "verdict": "flagged",
+ "files": [
+  "shot_00.png",
+  "shot_01.png",
+  "shot_02.png",
+  "shot_03.png",
+  "shot_04.png",
+  "shot_05.png",
+  "shot_06.png",
+  "shot_07.png",
+  "shot_08.png",
+  "shot_09.png",
+  "shot_10.png",
+  "shot_11.png",
+  "shot_12.png",
+  "shot_13.png",
+  "shot_14.png",
+  "shot_15.png",
+  "shot_16.png",
+  "shot_17.png",
+  "shot_18.png",
+  "shot_19.png",
+  "shot_20.png",
+  "shot_21.png",
+  "shot_22.png",
+  "shot_23.png",
+  "shot_24.png"
+ ],
+ "signed_at": "2026-09-27T04:00:17Z",
+ "signed_by": "judge:panel_eye@1",
+ "faults": [
+  {
+   "kind": "missing",
+   "where": "shot_04",
+   "evidence": {
+    "source": "panel_dq",
+    "sharp": 0.58,
+    "ink": 0.0,
+    "tiled": 0.0,
+    "cast_faces": 0,
+    "planned": 1,
+    "calibrated": true,
+    "climbed": true
+   },
+   "severity": "normal",
+   "note": ""
+  },
+  {
+   "kind": "framing",
+   "where": "shot_03",
+   "evidence": {
+    "planned": "insert",
+    "keypoints": "wide",
+    "read": "medium",
+    "calibrated": false,
+    "climbed": true
+   },
+   "severity": "normal",
+   "note": "framing 'wide': the shot asks for 'insert'"
+  },
+  {
+   "kind": "posture",
+   "where": "shot_09",
+   "evidence": {
+    "asked": "lying",
+    "seen": "standing",
+    "calibrated": false,
+    "climbed": false
+   },
+   "severity": "normal",
+   "note": "posture 'standing': the shot asks for lying"
+  },
+  {
+   "kind": "framing",
+   "where": "shot_11",
+   "evidence": {
+    "planned": "medium_close",
+    "keypoints": "full",
+    "read": "medium",
+    "calibrated": false,
+    "climbed": false
+   },
+   "severity": "advisory",
+   "note": "framing 'full': the shot asks for 'medium_close'"
+  },
+  {
+   "kind": "posture",
+   "where": "shot_11",
+   "evidence": {
+    "asked": "sitting",
+    "seen": "low",
+    "calibrated": false,
+    "climbed": false
+   },
+   "severity": "normal",
+   "note": "posture 'low': the shot asks for sitting"
+  },
+  {
+   "kind": "framing",
+   "where": "shot_12",
+   "evidence": {
+    "planned": "insert",
+    "keypoints": "medium",
+    "read": "extreme_close",
+    "calibrated": false,
+    "climbed": false
+   },
+   "severity": "advisory",
+   "note": "framing 'medium': the shot asks for 'insert'"
+  },
+  {
+   "kind": "framing",
+   "where": "shot_15",
+   "evidence": {
+    "planned": "medium_close",
+    "keypoints": "full",
+    "read": "medium",
+    "calibrated": false,
+    "climbed": false
+   },
+   "severity": "advisory",
+   "note": "framing 'full': the shot asks for 'medium_close'"
+  },
+  {
+   "kind": "posture",
+   "where": "shot_15",
+   "evidence": {
+    "asked": "sitting",
+    "seen": "low",
+    "calibrated": false,
+    "climbed": false
+   },
+   "severity": "normal",
+   "note": "posture 'low': the shot asks for sitting"
+  },
+  {
+   "kind": "posture",
+   "where": "shot_16",
+   "evidence": {
+    "asked": "sitting",
+    "seen": "low",
+    "calibrated": false,
+    "climbed": false
+   },
+   "severity": "normal",
+   "note": "posture 'low': the shot asks for sitting"
+  },
+  {
+   "kind": "framing",
+   "where": "shot_17",
+   "evidence": {
+    "planned": "close",
+    "keypoints": "full",
+    "read": "medium",
+    "calibrated": false,
+    "climbed": false
+   },
+   "severity": "normal",
+   "note": "framing 'full': the shot asks for 'close'"
+  },
+  {
+   "kind": "posture",
+   "where": "shot_17",
+   "evidence": {
+    "asked": "sitting",
+    "seen": "standing",
+    "calibrated": false,
+    "climbed": false
+   },
+   "severity": "normal",
+   "note": "posture 'standing': the shot asks for sitting"
+  },
+  {
+   "kind": "framing",
+   "where": "shot_18",
+   "evidence": {
+    "planned": "medium_close",
+    "keypoints": "full",
+    "read": "medium_close",
+    "calibrated": false,
+    "climbed": false
+   },
+   "severity": "advisory",
+   "note": "framing 'full': the shot asks for 'medium_close'"
+  },
+  {
+   "kind": "posture",
+   "where": "shot_19",
+   "evidence": {
+    "asked": "sitting",
+    "seen": "standing",
+    "calibrated": false,
+    "climbed": false
+   },
+   "severity": "normal",
+   "note": "posture 'standing': the shot asks for sitting"
+  },
+  {
+   "kind": "posture",
+   "where": "shot_21",
+   "evidence": {
+    "asked": "sitting",
+    "seen": "low",
+    "calibrated": false,
+    "climbed": false
+   },
+   "severity": "normal",
+   "note": "posture 'low': the shot asks for sitting"
+  },
+  {
+   "kind": "framing",
+   "where": "shot_22",
+   "evidence": {
+    "planned": "medium_close",
+    "keypoints": "full",
+    "read": "medium",
+    "calibrated": false,
+    "climbed": false
+   },
+   "severity": "advisory",
+   "note": "framing 'full': the shot asks for 'medium_close'"
+  },
+  {
+   "kind": "posture",
+   "where": "shot_22",
+   "evidence": {
+    "asked": "sitting",
+    "seen": "low",
+    "calibrated": false,
+    "climbed": false
+   },
+   "severity": "normal",
+   "note": "posture 'low': the shot asks for sitting"
+  },
+  {
+   "kind": "framing",
+   "where": "shot_24",
+   "evidence": {
+    "planned": "medium_close",
+    "keypoints": "full",
+    "read": "medium",
+    "calibrated": false,
+    "climbed": false
+   },
+   "severity": "advisory",
+   "note": "framing 'full': the shot asks for 'medium_close'"
+  }
+ ],
+ "terminal": "keep_best"
+}

@@ -1,7 +1,8 @@
-"""A unit page (report D §5d) is one row opened with its folder read from disk:
-the twelve step chips in registry order, the verdicts with their signers, the
-deliverable, the thumbnails the steps already wrote, the learnings and log tails
-(polled every 3 s only while the row is running) and the timing rows."""
+"""A unit page (report D §5d, redesigned in research F) is one row opened with
+its folder read from disk: the twelve steps in registry order, the verdicts with
+their signers, the deliverable, the pictures the steps already wrote, and the
+learnings, log and timing rows in a collapsed raw band.  The head polls every
+3 s only while the row is running; the raw tails poll only while running."""
 from __future__ import annotations
 
 import pytest
@@ -35,8 +36,9 @@ def test_the_thumbnails_and_the_master_are_lib_urls(client):
     page = client.get(f"/d/episode/{CODEX}/ep04").text
     assert f'src="/lib/{CODEX}/episodes/ep04/storyboard/shot_00.png"' in page
     assert f'src="/lib/{CODEX}/episodes/ep04/reports/strip_T00_T05.png"' in page
-    assert f'/lib/{CODEX}/episodes/ep04/cut/master_iter2.mp4' in page and "<video" in page
-    assert "master_iter1" not in page
+    assert f'src="/lib/{CODEX}/episodes/ep04/cut/master_iter2.mp4"' in page and "<video" in page
+    assert f'src="/lib/{CODEX}/episodes/ep04/cut/master_iter1.mp4"' not in page
+    assert f'href="/lib/{CODEX}/episodes/ep04/cut/master_iter1.mp4"' in page
 
 
 def test_the_deliverable_is_shown_when_the_row_names_one(client):
@@ -47,10 +49,11 @@ def test_the_deliverable_is_shown_when_the_row_names_one(client):
 def test_the_tails_poll_only_while_running(client):
     running = client.get(f"/d/episode/{CODEX}/ep04").text
     assert f'hx-get="/partials/unit/episode/{CODEX}/ep04/tails"' in running
-    assert 'hx-trigger="every 3s"' in running
+    assert f'hx-get="/partials/unit/episode/{CODEX}/ep04/head"' in running
+    assert 'hx-trigger="every 3s' in running and 'hx-trigger="every 5s' in running
     assert "MASTER: measured 3.0" in running and RUN in running
     done = client.get(f"/d/episode/{CODEX}/ep03").text
-    assert 'hx-trigger="every 3s"' not in done
+    assert 'hx-trigger="every 3s' not in done and "/ep03/tails" not in done
 
 
 def test_the_tails_partial_is_the_same_fragment(client):
@@ -62,6 +65,8 @@ def test_an_unknown_unit_is_a_plain_404(client):
     assert client.get(f"/d/episode/{CODEX}/ep99").status_code == 404
     assert client.get(f"/d/publish/{CODEX}/ep04").status_code == 404
     assert client.get(f"/partials/unit/episode/{CODEX}/ep99/tails").status_code == 404
+    assert client.get(f"/partials/unit/episode/{CODEX}/ep99/head").status_code == 404
+    assert client.get(f"/partials/unit/episode/{CODEX}/ep99/orders").status_code == 404
 
 
 def test_the_book_page_is_units_across_departments_down(client):

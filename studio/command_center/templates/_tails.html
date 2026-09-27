@@ -1,12 +1,43 @@
-<div class="cols">
-<div class="panel">
-<div class="eyebrow">Learnings (tail {{ unit.learnings | length }})</div>
-<pre class="tail">{% for l in unit.learnings %}{{ (l.ts or '')[11:19] }} {{ l.step or '' }} {{ l.gate or '' }} {{ l.action or '' }}{% if l.attempt is defined %} #{{ l.attempt }}{% endif %}{% if l.measured is defined and l.measured is not none %} {{ l.measured }}{% if l.threshold is not none and l.threshold is defined %}/{{ l.threshold }}{% endif %}{% endif %}{% if l.terminal %} terminal{% endif %}{% if l.note %} — {{ l.note }}{% endif %}{% if l.raw %}{{ l.raw }}{% endif %}
-{% else %}no learnings yet{% endfor %}</pre>
+{#- Band 7 (research F §5): the raw rows as tables with one-line digests.  No
+    text over 160 characters renders open: a long row is a <details> whose
+    summary is the digest the parser built. -#}
+{% set lb = unit.raw.learnings %}
+<div class="rawpart">
+  <div class="eyebrow">Learnings <span class="muted">newest {{ lb.rows | length }} of {{ lb.total }}{% if lb.rows | length < lb.total %} (repeats merged){% endif %}</span></div>
+  <div class="tbl-wrap"><table class="small learn">
+    <thead><tr><th>time</th><th>step</th><th>gate</th><th>rung</th><th class="num">#</th><th class="num">measured</th><th>ended</th><th>faults</th></tr></thead>
+    <tbody>
+    {% for l in lb.rows %}
+    <tr><td class="mono">{{ l.at }}</td><td>{{ l.step or '' }}</td><td>{{ l.gate or '' }}</td><td>{{ l.rung or '' }}{% if l.times > 1 %} <b>×{{ l.times }}</b>{% endif %}</td><td class="num">{{ l.attempt if l.attempt is not none else '' }}</td>
+      <td class="num">{% if l.measured is not none %}{{ l.measured }}{% if l.threshold is not none %}/{{ l.threshold }}{% endif %}{% endif %}</td><td>{{ l.ended_as or '' }}</td>
+      <td class="note">{% if l.faults %}<details><summary>{{ l.digest }}</summary><ul class="items">{% for f in l.faults %}<li class="{% if f.head %}head{% elif f.advisory or f.info %}adv{% endif %}"><b>{{ f.code }}</b> {% if f.where and f.where != 'plan' %}<span class="muted">{{ f.where }}</span> {% endif %}{{ f.text | truncate(300) }}</li>{% endfor %}{% if l.more %}<li class="muted">+{{ l.more }} more in learnings.jsonl</li>{% endif %}</ul></details>{% endif %}</td></tr>
+    {% else %}<tr><td colspan="8" class="muted">no learnings yet</td></tr>{% endfor %}
+    </tbody></table></div>
+  {% if lb.older %}<details class="more"><summary class="muted">show {{ lb.older | length }} older rows</summary><div class="tbl-wrap"><table class="small learn"><tbody>
+    {% for l in lb.older %}<tr><td class="mono">{{ l.at }}</td><td>{{ l.gate or '' }}</td><td>{{ l.rung or '' }}{% if l.times > 1 %} ×{{ l.times }}{% endif %}</td><td>{{ l.ended_as or '' }}</td><td class="note muted">{{ l.digest }}</td></tr>{% endfor %}
+  </tbody></table></div></details>{% endif %}
 </div>
-<div class="panel">
-<div class="eyebrow">Log {% if unit.log_name %}<code>{{ unit.log_name }}</code>{% endif %} (tail, WARNING+)</div>
-<pre class="tail">{% for l in unit.log %}<span class="{{ l.level or '' }}">{{ (l.ts or '')[11:19] }} {{ l.level or '' }}</span> {{ l.step_id or '' }} {{ l.msg or l.raw or '' }}
-{% else %}nothing at WARNING or above{% endfor %}</pre>
+
+<div class="rawpart">
+  <div class="eyebrow">Log {% if unit.log_name %}<code title="{{ unit.log_name }}">{{ unit.log_name[-20:] }}</code>{% endif %} <span class="muted">WARNING+ and the ladders</span></div>
+  <div class="tbl-wrap"><table class="small">
+    <tbody>
+    {% for l in unit.raw.log %}
+    <tr class="{{ l.level or '' }}"><td class="mono">{{ l.at }}</td><td class="lvl {{ l.level or '' }}">{{ (l.level or '')[:4] }}</td><td class="mono">{{ l.step_id or '' }}</td>
+      <td class="note">{% if l.kind == 'refusal' %}<details><summary>{{ l.line }}</summary>
+        <div class="muted small">{{ l['items'] | selectattr('mark', 'equalto', 'new') | list | length }} new · {{ l['items'] | rejectattr('mark', 'equalto', 'new') | list | length }} still{% if l.gone %} · {{ l.gone | length }} gone: {% for g in l.gone[:8] %}{{ g.code }} {{ g.where }}{% if not loop.last %}, {% endif %}{% endfor %}{% endif %}</div>
+        <ul class="items">{% for i in l['items'] %}<li class="{% if i.info %}adv{% endif %}"><span class="mark">{{ i.mark }}</span> <b>{{ i.code }}</b> {% if i.where and i.where != 'plan' %}<span class="muted">{{ i.where }}</span> {% endif %}{{ i.text | truncate(300) }}</li>{% endfor %}</ul></details>
+      {% elif l.rest %}<details><summary>{{ l.line }}</summary><pre class="tail">{{ l.rest }}</pre></details>{% else %}{{ l.line }}{% endif %}</td></tr>
+    {% else %}<tr><td class="muted">nothing at WARNING or above</td></tr>{% endfor %}
+    </tbody></table></div>
 </div>
+
+<div class="rawpart">
+  <div class="eyebrow">Timing <span class="muted">{{ unit.raw.timing_n }} rows by script{% if unit.raw.unplaced %} · {{ unit.raw.unplaced }} outside any step window{% endif %}</span></div><span hidden>TIMING</span>
+  <div class="tbl-wrap"><table class="small">
+    <thead><tr><th>script</th><th class="num">runs</th><th class="num">total</th><th>last ok</th></tr></thead>
+    <tbody>
+    {% for t in unit.raw.timing[:14] %}<tr><td>{{ t.stage }}</td><td class="num">{{ t.count }}</td><td class="num">{{ '%.0f' | format(t.total_s) }} s</td><td>{{ '✓' if t.last_ok else ('✕' if t.last_ok is not none else '') }}</td></tr>
+    {% else %}<tr><td colspan="4" class="muted">no timing rows</td></tr>{% endfor %}
+    </tbody></table></div>
 </div>

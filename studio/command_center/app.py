@@ -22,7 +22,7 @@ from fastapi.templating import Jinja2Templates
 from starlette.exceptions import HTTPException as StarletteHTTPException
 
 from studio import registry
-from studio.command_center import actions, library_paths, models, views
+from studio.command_center import actions, library_paths, models, unit_view, views
 
 HERE = Path(__file__).resolve().parent
 ORG_PAGE = registry.ROOT / "architecture" / "index.html"
@@ -39,7 +39,9 @@ def readonly_factory(db_path: str | Path) -> Callable[[], sqlite3.Connection]:
     uri = f"file:{Path(db_path).resolve().as_posix()}?mode=ro"
 
     def open_connection() -> sqlite3.Connection:
-        conn = sqlite3.connect(uri, uri=True, timeout=0.25)
+        # one connection per request, but FastAPI may open it (the dependency) and
+        # use it (the route) on two pool threads: it is never shared, so the check is off
+        conn = sqlite3.connect(uri, uri=True, timeout=0.25, check_same_thread=False)
         conn.execute("PRAGMA busy_timeout = 250")
         conn.row_factory = sqlite3.Row
         return conn
@@ -85,9 +87,9 @@ def _department(conn: sqlite3.Connection, stage: str, book: str | None, state: s
 
 
 def _unit(request: Request, conn: sqlite3.Connection, stage: str, codex: str, unit: str) -> dict:
-    """The unit view, or a 404 when it has no row."""
+    """The unit view with every band of the page, or a 404 when it has no row."""
     state = request.app.state
-    found = views.unit(conn, state.library, codex, stage, unit, logs=state.logs)
+    found = unit_view.unit(conn, state.library, codex, stage, unit, logs=state.logs)
     if found is None:
         raise HTTPException(404, f"no unit {stage}/{codex}/{unit}")
     return found
@@ -172,7 +174,22 @@ def department_partial(request: Request, stage: str, book: str | None = None, st
 @router.get("/partials/unit/{stage}/{codex}/{unit}/tails", response_class=HTMLResponse)
 def tails_partial(request: Request, stage: str, codex: str, unit: str,
                   conn: sqlite3.Connection = Depends(_conn)):
-    return _render(request, "_tails.html", unit=_unit(request, conn, stage, codex, unit))
+    return _render(request, "_tails.html", unit=_unit(request, conn, stage, codex, unit),
+                   stage=stage, codex=codex)
+
+
+@router.get("/partials/unit/{stage}/{codex}/{unit}/head", response_class=HTMLResponse)
+def unit_head_partial(request: Request, stage: str, codex: str, unit: str,
+                      conn: sqlite3.Connection = Depends(_conn)):
+    return _render(request, "_unit_head.html", unit=_unit(request, conn, stage, codex, unit),
+                   stage=stage, codex=codex)
+
+
+@router.get("/partials/unit/{stage}/{codex}/{unit}/orders", response_class=HTMLResponse)
+def unit_orders_partial(request: Request, stage: str, codex: str, unit: str,
+                        conn: sqlite3.Connection = Depends(_conn)):
+    return _render(request, "_unit_orders.html", unit=_unit(request, conn, stage, codex, unit),
+                   stage=stage, codex=codex)
 
 
 # --- the JSON twins ---

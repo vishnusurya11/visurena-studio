@@ -1,0 +1,6 @@
+<div class="eyebrow">Orders for {{ unit.row.unit }}</div>
+{% for o in unit.orders %}
+<div class="orow"><span class="mono muted">{{ (o.ts or '')[5:16] }}</span> <b>{{ o.kind }}</b>{% if o.step_id %} {{ o.step_id }}{% endif %} {% if o.taken_by_run %}<span class="ok" title="{{ o.taken_by_run }}">✓ taken</span>{% else %}<span class="muted">{{ o.taken }}</span>{% endif %}{% if o.note %}<div class="muted clip1" title="{{ o.note | truncate(300) }}">{{ o.note | truncate(150) }}</div>{% endif %}</div>
+{% else %}
+<div class="muted">no orders for this unit</div>
+{% endfor %}

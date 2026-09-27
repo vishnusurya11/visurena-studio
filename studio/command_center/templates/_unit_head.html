@@ -1,0 +1,44 @@
+{#- Band 1 + 2 (research F §1): who the unit is, where it stands, whether it is
+    alive, and the twelve steps with their durations and failure reasons.
+    Polls itself every 3 s while running; a terminal row renders without the
+    trigger, so the swap that brings it stops the poll. -#}
+{% set r = unit.row %}{% set h = unit.head %}
+<section id="head" class="uhead"{% if unit.running %} hx-get="/partials/unit/{{ stage }}/{{ codex }}/{{ r.unit }}/head" hx-trigger="every 3s [!document.activeElement.closest('form,dialog')]" hx-swap="outerHTML"{% endif %}>
+  <div class="uhead-top">
+    <h1>{{ r.unit }}</h1>
+    {% if h.title %}<span class="utitle">{{ h.title }}</span>{% endif %}
+    <span class="spacer"></span>
+    {% if h.lease.state == 'stale' %}<span class="pill red" title="the lease ran out at {{ h.lease.until }}: the runner may be gone">~<span class="word">stale lease</span></span>
+    {% else %}<span class="pill {{ r.css }}" title="{{ r.shown }}">{{ r.glyph }}<span class="word">{{ r.shown }}</span></span>{% endif %}
+    {% if r.step_id %}<span class="where"><b>{{ r.step_id }} {{ r.step_name }}</b>{% if r.progress %} · {{ r.progress }}{% endif %}</span>{% endif %}
+  </div>
+  {% if h.question %}<div class="uq">“{{ h.question }}”</div>{% endif %}
+  <div class="umeta">
+    <span>attempt {{ r.attempts }}</span>
+    {% if r.gpu_seconds %}<span>{{ h.gpu_h }} gpu</span>{% endif %}
+    {% if r.cost_usd %}<span>${{ '%.2f' | format(r.cost_usd) }}</span>{% endif %}
+    {% if h.started %}<span>started {{ h.started }}</span>{% endif %}
+    {% if h.finished %}<span>done {{ h.finished }}</span>{% endif %}
+    {% if h.moved %}<span title="{{ r.updated_at }}">moved {{ h.moved }}</span>{% endif %}
+    {% if h.lease.state == 'ok' %}<span class="ok">lease ok to {{ h.lease.until }}</span>{% endif %}
+    {% if r.run_id %}<span>run <code title="{{ r.run_id }}">{{ h.run_short }}</code></span>{% endif %}
+    {% if r.blocked_on %}<span>waiting on {{ r.blocked_on }}</span>{% endif %}
+    {% if r.hold_reason %}<span>held: {{ r.hold_reason | truncate(80) }}</span>{% endif %}
+    {% if unit.deliverable %}<span>deliverable <code>{{ unit.deliverable.rel }}</code> {% if unit.deliverable.exists %}<a href="{{ unit.deliverable.url }}">open ▸</a>{% else %}<span class="muted">missing on disk</span>{% endif %}</span>{% endif %}
+    {% if unit.master and unit.master.published %}<span><a href="/lib/{{ codex }}/{{ unit.master.published }}">published ▸</a></span>{% endif %}
+  </div>
+  <span hidden>STEPS</span>
+  <div class="ubar" role="list">
+    {% for s in unit.bar %}
+    <div class="seg {{ s.css }}{% if s.cur %} cur{% endif %}" role="listitem" title="{{ s.step_id }} {{ s.name }} · {{ s.state }}{% if s.attempt %} · attempt {{ s.attempt }}{% endif %}{% if s.runs %} · {{ s.runs }} run{{ '' if s.runs == 1 else 's' }}{% endif %}{% if s.script %} · scripts ≈ {{ s.script }}{% endif %}{% if s.reason %} · {{ s.reason }}{% endif %}">
+      <i></i>
+      <span class="sid"><span class="st {{ s.css }}">{{ s.glyph }}</span>{{ s.step_id }}</span>
+      <small>{{ s.name }}</small>
+      <span class="dur">{% if s.wall %}{{ s.wall }}{% elif s.state == 'skipped' %}kept{% else %}·{% endif %}</span>
+    </div>
+    {% endfor %}
+  </div>
+  {% for s in unit.bar if s.reason %}
+  <div class="reason"><span class="st {{ s.css }}">{{ s.glyph }}</span><b>{{ s.step_id }} {{ s.name }}</b> {{ s.reason }}</div>
+  {% endfor %}
+</section>

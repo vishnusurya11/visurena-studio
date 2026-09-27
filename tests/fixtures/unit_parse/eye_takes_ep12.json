@@ -1,0 +1,93 @@
+{
+ "sha8": "21227f91",
+ "verdict": "flagged",
+ "files": [
+  "T00.mp4",
+  "T01.mp4",
+  "T02.mp4",
+  "T03.mp4",
+  "T04.mp4",
+  "T05.mp4",
+  "T06.mp4",
+  "T07.mp4",
+  "T08.mp4",
+  "T09.mp4",
+  "T10.mp4",
+  "T11.mp4",
+  "T12.mp4",
+  "T13.mp4",
+  "T14.mp4",
+  "T15.mp4",
+  "T16.mp4",
+  "T17.mp4",
+  "T18.mp4",
+  "T19.mp4",
+  "T20.mp4",
+  "T21.mp4",
+  "T22.mp4",
+  "T23.mp4"
+ ],
+ "signed_at": "2026-09-25T14:09:56Z",
+ "signed_by": "judge:take_eye@1",
+ "faults": [
+  {
+   "kind": "face-at-end",
+   "where": "T16",
+   "evidence": {
+    "value": 0.74,
+    "penalty": 30.0,
+    "repeated": false
+   },
+   "severity": "high",
+   "note": "0.74 clipped top"
+  },
+  {
+   "kind": "lag",
+   "where": "T16",
+   "evidence": {
+    "value": -9,
+    "penalty": 30.0,
+    "repeated": true
+   },
+   "severity": "high",
+   "note": "-9f (-0.375s) corr 0.61"
+  },
+  {
+   "kind": "cut",
+   "where": "T19",
+   "evidence": {
+    "value": 62.0,
+    "penalty": 40.0,
+    "repeated": true,
+    "still": "storyboard/shot_19.png"
+   },
+   "severity": "normal",
+   "note": "62.0"
+  },
+  {
+   "kind": "jump",
+   "where": "T19",
+   "evidence": {
+    "value": -0.013,
+    "penalty": 40.0,
+    "repeated": true,
+    "still": "storyboard/shot_19.png"
+   },
+   "severity": "normal",
+   "note": "-0.01 HARD: another picture"
+  },
+  {
+   "kind": "cut-vote",
+   "where": "T19",
+   "evidence": {
+    "value": 3,
+    "penalty": 40.0,
+    "repeated": true,
+    "still": "storyboard/shot_19.png"
+   },
+   "severity": "normal",
+   "note": "jump+step+scene HARD: an unplanned cut"
+  }
+ ],
+ "terminal": "still"
+}

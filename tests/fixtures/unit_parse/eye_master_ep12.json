@@ -1,0 +1,93 @@
+{
+ "sha8": "faf11c8f",
+ "faults": [
+  {
+   "kind": "faces",
+   "where": "master",
+   "evidence": {
+    "closes": [
+     {
+      "shot": 2,
+      "size": "medium_close",
+      "h": 0.164,
+      "wall": 0.12
+     },
+     {
+      "shot": 6,
+      "size": "medium_close",
+      "h": 0.102,
+      "wall": 0.12
+     },
+     {
+      "shot": 7,
+      "size": "medium_close",
+      "h": 0.551,
+      "wall": 0.12
+     },
+     {
+      "shot": 11,
+      "size": "close",
+      "h": 0.31,
+      "wall": 0.18
+     },
+     {
+      "shot": 16,
+      "size": "medium_close",
+      "h": 0.245,
+      "wall": 0.12
+     },
+     {
+      "shot": 20,
+      "size": "close",
+      "h": 0.354,
+      "wall": 0.18
+     },
+     {
+      "shot": 22,
+      "size": "medium_close",
+      "h": 0.131,
+      "wall": 0.12
+     }
+    ],
+    "under": [
+     6
+    ],
+    "wall": {
+     "close": 0.18,
+     "medium_close": 0.12
+    },
+    "fitted_on": "2026-09-25 one accepted episode, 7 close shots"
+   },
+   "severity": "normal",
+   "note": ""
+  },
+  {
+   "kind": "identity",
+   "where": "artilleryman",
+   "evidence": {
+    "min_cosine": 0.409,
+    "below": 2,
+    "wall": 0.75,
+    "reads": 4,
+    "fitted_on": "2026-09-25 one accepted episode, 7 close shots"
+   },
+   "severity": "normal",
+   "note": "drift from own median"
+  },
+  {
+   "kind": "identity",
+   "where": "unnamed_first_person_narrator",
+   "evidence": {
+    "min_cosine": 0.205,
+    "below": 5,
+    "wall": 0.75,
+    "reads": 9,
+    "fitted_on": "2026-09-25 one accepted episode, 7 close shots"
+   },
+   "severity": "normal",
+   "note": "drift from own median"
+  }
+ ],
+ "terminal": "flag",
+ "reviewed_by": "judge:master_eye@1"
+}

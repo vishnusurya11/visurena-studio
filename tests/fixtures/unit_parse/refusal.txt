@@ -1,0 +1,62 @@
+plan_check refused:
+CONTRACT OK: The Destruction of Weybridge | 26 shots | 157s projected
+G-LIGHT      : ["G-LIGHT: setup 'common': `described` names no light source with a direction -- ep09's 'hard morning sunlight' is a brightness, not a light; say where it comes from", "G-LIGHT: setup 'river': `described` names no light source with a direction -- ep09's 'hard morning sunlight' is a brightness, not a light; say where it comes from", "G-LIGHT: setup 'bank': `described` names no light source with a direction -- ep09's 'hard morning sunlight' is a brightness, not a light; say where it comes from"]
+PLAN GATES   : 20
+    G-FIRSTFRAME plan: median at_rest per shot is under the floor, measured 17.5 against 40
+    G-FIRSTFRAME plan: median frame-edge per shot is under the floor, measured 0.0 against 3
+    G-FIRSTFRAME plan: median setup described words is under the floor, measured 25.0 against 90
+    G-FIRSTFRAME plan: median setup geometry words is under the floor, measured 39.0 against 60
+    G-VARIETY plan: insert shots for 26 shots, measured 0 against 5
+    G-VARIETY plan: wide+full share of the shots, measured 0.38 against 0.25
+    G-STORY shot 11: first dialogue line at 68.7 s of 156.6 s projected, measured 0.44 against 0.25
+    G-SIZE shot 4: a medium_close whose at_rest names no head fraction; the size is 'a third the frame's height', not the span (ep07 20/26 at_rests, ep10 0/34), measured none
+    G-SIZE shot 5: a medium_close whose at_rest names no head fraction; the size is 'a third the frame's height', not the span (ep07 20/26 at_rests, ep10 0/34), measured none
+    G-SIZE shot 11: a close whose at_rest names no head fraction; the size is 'half the frame's height', not the span (ep07 20/26 at_rests, ep10 0/34), measured none against
+    G-SIZE shot 12: a close whose at_rest names no head fraction; the size is 'half the frame's height', not the span (ep07 20/26 at_rests, ep10 0/34), measured none against
+    G-SIZE shot 13: a medium_close whose at_rest names no head fraction; the size is 'a third the frame's height', not the span (ep07 20/26 at_rests, ep10 0/34), measured non
+    G-SIZE shot 14: a medium_close whose at_rest names no head fraction; the size is 'a third the frame's height', not the span (ep07 20/26 at_rests, ep10 0/34), measured non
+    G-SIZE shot 16: a medium_close whose at_rest names no head fraction; the size is 'a third the frame's height', not the span (ep07 20/26 at_rests, ep10 0/34), measured non
+    G-SIZE shot 17: a medium_close whose at_rest names no head fraction; the size is 'a third the frame's height', not the span (ep07 20/26 at_rests, ep10 0/34), measured non
+    G-SIZE shot 18: a close whose at_rest names no head fraction; the size is 'half the frame's height', not the span (ep07 20/26 at_rests, ep10 0/34), measured none against
+    G-SIZE shot 22: a medium_close whose at_rest names no head fraction; the size is 'a third the frame's height', not the span (ep07 20/26 at_rests, ep10 0/34), measured non
+    G-SIZE shot 24: a close whose at_rest names no head fraction; the size is 'half the frame's height', not the span (ep07 20/26 at_rests, ep10 0/34), measured none against
+    G-SYNC line 14: a dialogue line must be the first line on its shot (shot 13 already carries line 13), measured second against first
+    G-SYNC line 18: a dialogue line must be the first line on its shot (shot 16 already carries line 17), measured second against first
+MOVES/SOURCE : 5
+    G-MOVES plan: 'locked' share of the 26 shots, measured 0.35 against 0.25
+    G-MOVES shot 12: 'locked' follows the same move on shot 11 (twice running), measured 2 against 1
+    G-MOVES shot 22: 'locked' follows the same move on shot 21 (twice running), measured 2 against 1
+    G-SOURCE shot 24: span 'Distant guns roll beyond the low hills. A remote, strange cr' is not in the chapter, measured 0.47 against 0.85
+    G-SOURCE shot 25: span 'He pulls the curate onto the path. Together they move north,' is not in the chapter, measured 0.51 against 0.85
+COVER/SHOUT  : clean
+SOUND        : clean
+CELL GATES   : 7
+    G-AIM shot 1: the camera aims at 'blackened heath across the whole shot', which the cell (at_rest) does not hold; a move toward what is not drawn invents it. Name it in a
+    G-AIM shot 17: the camera aims at 'face across the whole shot', which the cell (at_rest) does not hold; a move toward what is not drawn invents it. Name it in at_rest, or
+    G-AIM shot 19: the camera starts on 'hedge grass', which the cell (at_rest) does not hold; a move toward what is not drawn invents it. Name it in at_rest, or aim at what
+    G-AIM shot 19: the camera aims at 'flicker across the whole shot', which the cell (at_rest) does not hold; a move toward what is not drawn invents it. Name it in at_rest,
+    G-AIM shot 20: the camera starts on 'heliograph', which the cell (at_rest) does not hold; a move toward what is not drawn invents it. Name it in at_rest, or aim at what a
+    G-AIM shot 20: the camera aims at 'smoky hills across the whole shot', which the cell (at_rest) does not hold; a move toward what is not drawn invents it. Name it in at_r
+    G-LAID shot 11: a close of a person lying down, and the camera 'At face height two feet from the narrator' neither looks down on the face nor lies level with it; the draw
+MOTION hard  : [(9, 'M2'), (21, 'M2')]
+    M2 shot 9: the head names no camera move. Open with one, before the first semicolon, with a measured amount and `across the whole shot` -- a move writt
+    M6 shot 12: the LAST clause moves a face part too small to measure ('his pale eyes keep searching the dark.'). The tail needs a limb, a head, a torso or
+    M6 shot 13: the LAST clause moves a face part too small to measure ('his pale eyes keep searching the sky.'). The tail needs a limb, a head, a torso or
+    M6 shot 17: the LAST clause moves a face part too small to measure ('his eyes rise toward the narrator.'). The tail needs a limb, a head, a torso or a t
+    M5 shot 18: the LAST clause states an end state ('his fingers settle on the hedge branch.'), and the builder appends `continues to the last frame` to it
+    M2 shot 21: the head names no camera move. Open with one, before the first semicolon, with a measured amount and `across the whole shot` -- a move writt
+MARKS        : clean | unmeasured 0
+ACTOR        : clean
+CAST BOUND   : all bound
+QUOTE        : clean
+ONE PER TAKE : [(24, 25)]
+TAKE LENGTH  : [(13, 11.04), (16, 12.77), (23, 9.15)] (at 2.60 words/s, budget 8.0 s)
+TAKE BUILDER : shot 13 projects 9.87 s; shot 16 projects 11.4 s; shot 23 projects 8.33 s -- longer than a take (8.0 s). Split each into two shots with two lines; a run can be split by t
+  advisory shot 12 M6: the LAST clause moves a face part too small to measure ('his pale eyes keep searching the dark.'). The tail needs a limb, a head, a torso or a travelling object.
+  advisory shot 13 M6: the LAST clause moves a face part too small to measure ('his pale eyes keep searching the sky.'). The tail needs a limb, a head, a torso or a travelling object.
+  advisory shot 17 M6: the LAST clause moves a face part too small to measure ('his eyes rise toward the narrator.'). The tail needs a limb, a head, a torso or a travelling object.
+  advisory shot 18 M5: the LAST clause states an end state ('his fingers settle on the hedge branch.'), and the builder appends `continues to the last frame` to it. End on something still going: `runs along`, `comes down`, `lifts`.
+TAKE BUILDER : shot 9 M2: the head names no camera move. Open with one, before the first semicolon, with a measured amount and `across the whole shot` -- a move written after a semicolo
+SHEET TEXT   :
+    not applicable: this book draws storyboard grids, not seq_boards sheets
+VERDICT      : REFUSED

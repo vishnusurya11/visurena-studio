@@ -115,3 +115,14 @@ class Unit(BaseModel):
     timing: list[dict[str, Any]]
     running: bool
     book_name: str
+    # the redesigned page's bands (research F/G); optional so an older view still validates
+    head: dict[str, Any] | None = None
+    bar: list[dict[str, Any]] = []
+    health: dict[str, Any] | None = None
+    gates: list[dict[str, Any]] = []
+    pictures: dict[str, Any] | None = None
+    master: dict[str, Any] | None = None
+    orders: list[dict[str, Any]] = []
+    hold: dict[str, Any] | None = None
+    suggest: dict[str, Any] | None = None
+    raw: dict[str, Any] | None = None
