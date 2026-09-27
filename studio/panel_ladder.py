@@ -12,6 +12,9 @@
     keep_best            -> the terminal: the panels stand as drawn, the
                             verdict is signed flagged with every fault listed
 
+A framing or posture fault takes no rung (REDRAW_CANNOT_CURE): it goes to
+keep_best, flagged, since no rung ever moved one on ep13.
+
 At most CAP distinct grids climb per episode (gates.yaml `max_grids`); a
 third faulted grid is kept as drawn and flagged.  Each rung is priced at one
 grid render (GRID_SECONDS, 1.7 GPU min); the judged gate refuses a rung the
@@ -38,6 +41,10 @@ deferred after the work was spent (speed plan #3)."""
 CAP = 2
 """Distinct grids that may climb per episode."""
 SUPERSEDED = "superseded"
+REDRAW_CANNOT_CURE = frozenset({"framing", "posture"})
+"""MEASURED on ep13 (speed plan #4): nine climbs, and no seed or reprose rung
+ever moved a framing or posture fault; a prompt fix (9cb4609) and judge fixes
+did.  Such a fault goes to keep_best, flagged, at no GPU cost."""
 CURES = {
     "clones": "Each person in the picture is a different man with his own face, build and dress.",
     "clone": "Each person in the picture is a different man with his own face, build and dress.",
@@ -157,10 +164,12 @@ class Climb:
 
     def take(self, rung: Rung, i: int, verdict: Verdict) -> None:
         """One rung: the climbing grids reprosed (that rung only) and redrawn;
-        the panels and rows rebuilt for the judge's next read."""
-        rows = self.climbing(grid_layout.read(self.home), shots_of(verdict.faults))
+        the panels and rows rebuilt for the judge's next read.  Only the faults
+        a redraw can cure choose the grids."""
+        faults = cured_by_redraw(verdict)
+        rows = self.climbing(grid_layout.read(self.home), shots_of(faults))
         if rung.name == "reprose":
-            self.cure_prose(rows, verdict.faults)
+            self.cure_prose(rows, faults)
         for row in rows:
             self.redraw(row)
         self.rebuild()
@@ -175,7 +184,16 @@ class Climb:
 
     @property
     def rungs(self) -> judged_gate.Rungs:
-        return judged_gate.Rungs(ladder(), self.take)
+        return judged_gate.Rungs(ladder(), self.take, curable=curable)
+
+
+def cured_by_redraw(verdict: Verdict) -> list[Fault]:
+    return [f for f in verdict.faults if f.kind not in REDRAW_CANNOT_CURE]
+
+
+def curable(verdict: Verdict) -> bool:
+    """Whether a redraw can move any of these faults."""
+    return bool(cured_by_redraw(verdict))
 
 
 def ladder() -> Ladder:

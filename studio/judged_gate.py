@@ -45,6 +45,8 @@ class Rungs:
     reads again afterwards."""
     ladder: Ladder
     take: Take
+    curable: Callable[[Verdict], bool] | None = None
+    """Whether any fault is one the rungs can move; None climbs on every fault."""
 
 
 def tries(ladder: Ladder) -> Iterator[tuple[Rung, int]]:
@@ -93,11 +95,16 @@ def valid(verdict: Verdict, gate: str) -> Verdict:
     return verdict
 
 
+def climbable(rungs: Rungs, verdict: Verdict) -> bool:
+    """A rung is worth taking only on a fault the rungs can cure (speed plan #4)."""
+    return rungs.curable is None or rungs.curable(verdict)
+
+
 def climbed(ctx, gate: str, judge: Judge, rungs: Rungs, terminal: str) -> tuple[Verdict, list[str]]:
     """The verdict as it stands, then after every rung taken; the rungs taken."""
     verdict, taken = valid(judge(), gate), []
     for rung, i in tries(rungs.ladder):
-        if verdict.passed or not affordable(ctx, gate, rung, len(taken)):
+        if verdict.passed or not climbable(rungs, verdict) or not affordable(ctx, gate, rung, len(taken)):
             break
         started = ctx.budget.clock()
         rungs.take(rung, i, verdict)
