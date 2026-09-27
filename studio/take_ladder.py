@@ -144,7 +144,14 @@ def cost(rung: Rung, takes: int) -> float:
 
 
 def can_afford(ctx, rung: Rung, takes: int) -> bool:
-    return ctx.budget.can_afford(judged_gate.step_of(ctx), cost(rung, takes))
+    """The step's share, else the ladders' pool (judged_gate drew the rung's
+    price from it); a round neither can pay DEFERS -- it was skipped in silence
+    on ep13, and shorter_take never reached T11's +1.08 s lag."""
+    price, step = cost(rung, takes), judged_gate.step_of(ctx)
+    if ctx.budget.can_afford(step, price) or ctx.budget.pool_left() >= price:
+        return True
+    raise SystemExit(f"DEFERRED: EYE_TAKES' {rung.name} round of {takes} takes needs {price:.0f} s; "
+                     f"the {step} share and the ladders' pool cannot pay; nothing signed -- run again to resume")
 
 
 # ---- plan edits, through write_plan ----------------------------------------------
