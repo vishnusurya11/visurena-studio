@@ -161,3 +161,14 @@ def test_nothing_near_a_face_is_still_missing():
     row = panel_dq.verdict(faces=[], planned=1, sharp=1.0, ink=0.0, tiled=0.0, size="close",
                            present=panel_dq.present_faces(found))
     assert "missing" in row["flags"]
+
+
+def test_an_insert_has_its_own_blur_floor():
+    """MEASURED 2026-09-26 over ep09-13's panels: wides, mediums and closes never
+    scored under 0.69 against the control; 22 inserts ran down to 0.468, and the
+    only two ever flagged -- ep13's hands on a gunwale (0.468) and on a knee
+    (0.493) -- were crisp by eye: smooth skin and water have soft edges."""
+    from studio.panel_dq import verdict
+    assert "blur" not in verdict(faces=[], planned=0, sharp=0.47, ink=0.0, tiled=0.0, size="insert")["flags"]
+    assert "blur" in verdict(faces=[], planned=0, sharp=0.35, ink=0.0, tiled=0.0, size="insert")["flags"]
+    assert "blur" in verdict(faces=[], planned=0, sharp=0.47, ink=0.0, tiled=0.0, size="wide")["flags"]

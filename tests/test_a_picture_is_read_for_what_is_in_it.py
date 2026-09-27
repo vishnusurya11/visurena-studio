@@ -248,3 +248,15 @@ def test_two_identical_machines_are_not_copied_people():
     from studio.panel_content import Seen, people_fault
     assert not people_fault(Seen(people=0, lookalikes=2), planned=0, crowd=False)
     assert people_fault(Seen(people=3, lookalikes=2), planned=3, crowd=True)
+
+
+def test_a_landform_ban_follows_the_readers_own_landform():
+    """ep13 shot 10, three draws running: the reader answered landform 'gentle
+    rise' and listed 'mountains' among the subjects for a low far horizon.  A
+    landform ban is judged by the landform answer; a stated mountain still fails."""
+    from studio.panel_content import Seen, banned_subject
+    low = Seen(landform="gentle rise", subjects=["man", "sky", "mountains"])
+    high = Seen(landform="mountains", subjects=["man", "mountains"])
+    assert banned_subject(low, ("mountain",)) == []
+    assert banned_subject(high, ("mountain",)) == ["mountain"]
+    assert banned_subject(Seen(landform="flat", subjects=["doll"]), ("doll",)) == ["doll"]

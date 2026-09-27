@@ -22,6 +22,11 @@ import re
 import numpy as np
 
 SHARP_FLOOR = 0.5
+INSERT_FLOOR = 0.4
+"""An insert's own floor.  MEASURED 2026-09-26 over ep09-13: wides, mediums and
+closes never scored under 0.69 of the control; 22 inserts ran down to 0.468, and
+the only two ever flagged (ep13's hands on a gunwale and on a knee, 0.468 and
+0.493) were crisp by eye -- smooth skin and water have soft edges, not blur."""
 """How soft a panel may be AGAINST THE MEDIAN OF ITS OWN SET.
 
 MEASURED 2026-09-20, and it was wrong first: this began as an absolute 0.45
@@ -272,7 +277,7 @@ def verdict(faces: list[float], planned: int, sharp: float, ink: float,
     there = near or cast_faces(present or [])
     if planned > 0 and not there and size in FACE_IS_THE_PICTURE and not back_view(prose):
         flags.append("missing")
-    if sharp < SHARP_FLOOR:   # `sharp` is the panel OVER the set median
+    if sharp < (INSERT_FLOOR if size == "insert" else SHARP_FLOOR):   # the panel OVER its control
         flags.append("blur")
     if ink > INK:
         flags.append("text")

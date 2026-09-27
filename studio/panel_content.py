@@ -175,7 +175,20 @@ def banned_subject(seen: Seen, banned) -> list[str]:
     # singulars (VLM-gate audit, 2026-09-23).
     words = {stem(w) for w in WORD.findall(said)}
     return [b for b in (banned or ())
-            if (want := {stem(w) for w in WORD.findall(b.lower())}) and want <= words]
+            if (want := {stem(w) for w in WORD.findall(b.lower())}) and want <= words
+            and landform_agrees(b, seen)]
+
+
+LANDFORM_BANS = {"mountain": ("mountains", "hills"), "cliff": ("cliffs",), "hill": ("hills", "mountains")}
+"""A ban on a landform is judged by the reader's own LANDFORM answer, not its
+subject list: ep13 shot 10 read 'gentle rise' and listed 'mountains' for a low
+far horizon, three draws running."""
+
+
+def landform_agrees(banned: str, seen: "Seen") -> bool:
+    """True unless `banned` is a landform the reader's landform answer denies."""
+    allowed = LANDFORM_BANS.get(stem(banned.lower().strip()))
+    return allowed is None or seen.landform in allowed
 
 
 def faults(seen: Seen, frame: str, planned: int, crowd: bool,
