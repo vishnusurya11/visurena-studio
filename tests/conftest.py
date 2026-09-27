@@ -120,7 +120,7 @@ def comfy_trap(monkeypatch):
     functions come back as the fixture's value, for `real_comfy` only."""
     from studio import comfy
 
-    real = {"run": comfy.run, "run_text": comfy.run_text}
+    real = {"run": comfy.run, "run_text": comfy.run_text, "free_models": comfy.free_models}
 
     def trip(*_args, **_kwargs):
         raise RuntimeError("a test reached ComfyUI")

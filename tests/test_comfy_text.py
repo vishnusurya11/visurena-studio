@@ -37,7 +37,7 @@ def test_wait_record_returns_the_whole_record_on_completion(monkeypatch):
     assert comfy.wait("job-1", timeout=1.0) == comfy.outputs_of(RECORD)
 
 
-def test_free_models_posts_the_unload_request(monkeypatch):
+def test_free_models_posts_the_unload_request(monkeypatch, real_comfy):
     sent = {}
 
     def fake_urlopen(request, timeout=None):
