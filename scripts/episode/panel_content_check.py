@@ -37,8 +37,8 @@ off mid-JSON, which `parse` rightly refused to read."""
 def read(path: Path, seed: int = 11) -> pc.Seen:
     """One panel through the vision model, into the closed vocabulary. Raises
     `Unreadable` rather than ever returning a guessed answer."""
-    said = comfy.run_text(WORKFLOW, {"image_1": comfy.stage_image(path), "prompt": pc.ASK,
-                                     "seed": seed, "max_new_tokens": TOKENS})
+    said = comfy.cached_text(WORKFLOW, {"image_1": comfy.stage_image(path), "prompt": pc.ASK,
+                                     "seed": seed, "max_new_tokens": TOKENS}, readable=pc.readable)
     return pc.parse(said if isinstance(said, str) else str(said))
 
 

@@ -261,6 +261,21 @@ def repeat_faults(board: Path, plan: dict, content: list[dict]) -> list[Fault]:
 
 # ---- the tools and the judge -------------------------------------------------------
 
+def is_json(text: str) -> bool:
+    try:
+        json.loads(text.strip())
+    except ValueError:
+        return False
+    return True
+
+
+def cached_run(name: str, values: dict, timeout: float = 600.0) -> str:
+    """A ComfyUI text read through the vlm cache; only a JSON answer is kept,
+    so a garbled one is asked again (speed plan #5)."""
+    from studio import comfy
+    return comfy.cached_text(name, values, readable=is_json, timeout=timeout)
+
+
 def tools(run=None, stage=None, reader=None, detect=None, embed=None) -> dict:
     """The five readers, the injected ones kept and the rest built once:
     ComfyUI for the workflows, EasyOCR for strings, facenet for faces."""
@@ -271,7 +286,7 @@ def tools(run=None, stage=None, reader=None, detect=None, embed=None) -> dict:
         reader = _DEFAULT.setdefault("reader", ocr.default_reader())
     if run is None or stage is None:
         from studio import comfy
-        run, stage = run or comfy.run_text, stage or comfy.stage_image
+        run, stage = run or cached_run, stage or comfy.stage_image
     return {"run": run, "stage": stage, "reader": reader, "detect": detect, "embed": embed}
 
 

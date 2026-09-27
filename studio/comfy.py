@@ -361,3 +361,31 @@ def run_text(name: str, values: dict[str, Any], timeout: float = 600.0) -> str:
     template, inject = load_workflow(name)
     record = wait_record(submit(apply_inject(template, inject, values)), timeout=timeout)
     return "\n".join(texts_of(record))
+
+
+TEXT_CACHE = Path(__file__).resolve().parents[1] / "library" / ".vlm_cache"
+TEXT_CACHE_VERSION = "1"
+"""Bump when a node's behaviour changes under an unchanged workflow JSON."""
+
+
+def text_key(name: str, values: dict[str, Any]) -> str:
+    """Everything that makes a text answer: the workflow, its inject map and
+    the values (a staged image name is content-addressed, so it is the bytes)."""
+    template, inject = load_workflow(name)
+    body = json.dumps([TEXT_CACHE_VERSION, name, template, inject, values], sort_keys=True, default=str)
+    return hashlib.sha256(body.encode("utf-8")).hexdigest()
+
+
+def cached_text(name: str, values: dict[str, Any], readable, timeout: float = 600.0,
+                root: Path | None = None) -> str:
+    """`run_text`, served from the cache when these exact inputs were read
+    before; an answer `readable` refuses is returned but never kept (speed plan #5)."""
+    key = text_key(name, values)
+    path = Path(root or TEXT_CACHE) / key[:2] / f"{key}.txt"
+    if path.exists():
+        return path.read_text(encoding="utf-8")
+    text = run_text(name, values, timeout)
+    if readable(text):
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_text(text, encoding="utf-8")
+    return text

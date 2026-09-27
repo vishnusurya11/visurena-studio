@@ -278,6 +278,15 @@ class Unreadable(ValueError):
 REQUIRED = ("landform", "people", "lookalikes", "text", "hour")
 
 
+def readable(said: str) -> bool:
+    """Whether `parse` can read this answer; the vlm cache keeps only these."""
+    try:
+        parse(said)
+    except Unreadable:
+        return False
+    return True
+
+
 def parse(said: str) -> Seen:
     """The reader's answer, however the workflow wrapped it.
 

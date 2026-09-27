@@ -33,8 +33,8 @@ SAMPLES = 3
 
 
 def read_frame(path: Path, seed: int) -> pc.Seen:
-    said = comfy.run_text(WORKFLOW, {"image_1": comfy.stage_image(path), "prompt": pc.ASK,
-                                     "seed": seed, "max_new_tokens": 1024})
+    said = comfy.cached_text(WORKFLOW, {"image_1": comfy.stage_image(path), "prompt": pc.ASK,
+                                     "seed": seed, "max_new_tokens": 1024}, readable=pc.readable)
     return pc.parse(said if isinstance(said, str) else str(said))
 
 
