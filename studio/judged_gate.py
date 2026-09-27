@@ -70,6 +70,9 @@ def affordable(ctx, gate: str, rung: Rung, taken: int) -> bool:
     step = step_of(ctx)
     if ctx.budget.can_afford(step, rung.cost_seconds):
         return True
+    if ctx.budget.pool_left() >= rung.cost_seconds:     # the ladders' own share pays (finding 55)
+        ctx.budget.draw(rung.cost_seconds)
+        return True
     left = ctx.budget.remaining(step)
     ctx.learn(Learning(step=step, gate="budget", measured=left, threshold=rung.cost_seconds,
                        action="defer", attempt=taken))

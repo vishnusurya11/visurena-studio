@@ -51,7 +51,8 @@ class Budget:
         self.t0 = clock()
         self.step: str | None = None
         self.step_started = self.t0
-        self.carry = 0.0          # unused (+) or overrun (-) from earlier steps
+        self.carry = 0.0          # unused time from earlier steps
+        self.pool_drawn = 0.0     # the `ladders` share drawn by rungs
 
     def start(self, step: str) -> None:
         """Close the running step, carry its balance, open `step`."""
@@ -77,3 +78,12 @@ class Budget:
 
     def can_afford(self, step: str, seconds: float) -> bool:
         return self.remaining(step) >= seconds
+
+    def pool_left(self) -> float:
+        """The `ladders` share not yet drawn, capped by the ceiling: what pays a
+        rung its own step can no longer pay for (finding 55)."""
+        total_left = self.ceiling - (self.clock() - self.t0)
+        return min(self.shares.get("ladders", 0.0) * self.ceiling - self.pool_drawn, total_left)
+
+    def draw(self, seconds: float) -> None:
+        self.pool_drawn += seconds
