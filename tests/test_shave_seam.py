@@ -103,3 +103,19 @@ def test_a_white_rail_across_the_picture_is_not_a_gutter():
     frame = picture(992)
     frame[150:160, :] = 250
     assert seam_box(frame)[1] == 0
+
+
+def test_a_side_gutter_a_quarter_in_takes_the_spill_with_it():
+    """ep13 shot 7: the model split its 2x1 grid off-centre, and the right panel
+    kept 229 columns of the burning-houses panel, then a 13-column white gutter --
+    past the fixed 120-px reach. A 2x1 spills from the SIDE; side reach is a
+    quarter of the width, and the top and bottom keep 120 px (the white rail)."""
+    frame = picture(992)
+    frame[:, 229:242] = 250
+    assert seam_box(frame)[0] == 242
+
+
+def test_a_white_post_down_the_picture_near_the_edge_is_a_gutter_only_with_spill_outside():
+    frame = picture(992)
+    frame[:, 400:410] = 250          # a post in the middle: beyond a quarter, kept
+    assert seam_box(frame)[0] == 0

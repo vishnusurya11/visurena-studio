@@ -525,8 +525,12 @@ def seam_box(frame) -> tuple:
     height, width = grey.shape
     top = _seam_depth(grey, int(height * SEAM_MOST))
     bottom = _seam_depth(grey[::-1], int(height * SEAM_MOST))
-    left = _seam_depth(grey.T, int(width * SEAM_MOST))
-    right = _seam_depth(grey.T[::-1], int(width * SEAM_MOST))
+    # A SIDE gutter may sit a quarter in (ep13 shot 7: a 2x1 split off-centre
+    # left 229 columns of the neighbour); top and bottom keep SEAM_REACH, which
+    # protects the white rail across ep09's garden.
+    side = int(width * SEAM_MOST)
+    left = _seam_depth(grey.T, side, reach=side)
+    right = _seam_depth(grey.T[::-1], side, reach=side)
     return (left, top, width - right, height - bottom)
 
 
@@ -546,7 +550,7 @@ def _is_seam(line) -> bool:
     return line.mean() > SEAM_PALE and line.std() < SEAM_FLAT
 
 
-def _seam_depth(grey, most: int) -> int:
+def _seam_depth(grey, most: int, reach: int = SEAM_REACH) -> int:
     """How many leading rows of `grey` are gutter, capped at `most`: the pale,
     flat run at the edge, or -- when the model drew the panel narrower than its
     cell -- a thin pale run inside the band, with the neighbour's spill outside
@@ -557,7 +561,7 @@ def _seam_depth(grey, most: int) -> int:
         depth += 1
     if depth > SEAM_EDGE:          # a pale band this deep is sky, not a gutter
         depth = 0
-    for i in range(depth, min(most, SEAM_REACH)):
+    for i in range(depth, min(most, reach)):
         if seam[i] and (i == 0 or not seam[i - 1]):
             end = next((j for j in range(i, most) if not seam[j]), most)
             if end - i <= SEAM_THIN and end < most and _between_picture(grey, i, end):
