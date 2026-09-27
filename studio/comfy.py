@@ -13,6 +13,7 @@ import json
 import shutil
 import time
 import urllib.request
+from contextlib import contextmanager
 from pathlib import Path
 from typing import Any
 
@@ -356,10 +357,36 @@ def run(name: str, values: dict[str, Any], timeout: float = 3600.0) -> list[Path
     return wait(submit(apply_inject(template, inject, values)), timeout=timeout)
 
 
+KEEP_LOADED = False
+"""Set inside `model_kept()`: text jobs keep their model between reads."""
+
+
+def keep_loaded(prompt: dict) -> dict:
+    """Every node that can keep its model, told to keep it."""
+    for node in prompt.values():
+        if "keep_model_loaded" in node.get("inputs", {}):
+            node["inputs"]["keep_model_loaded"] = True
+    return prompt
+
+
+@contextmanager
+def model_kept():
+    """A batch of reads that loads its model once; it always ends with /free,
+    so the VL model never sits beside H3 (speed plan #6)."""
+    global KEEP_LOADED
+    KEEP_LOADED = True
+    try:
+        yield
+    finally:
+        KEEP_LOADED = False
+        free_models()
+
+
 def run_text(name: str, values: dict[str, Any], timeout: float = 600.0) -> str:
     """Fill in a text-producing workflow (a VLM caption), run it, and return the text."""
     template, inject = load_workflow(name)
-    record = wait_record(submit(apply_inject(template, inject, values)), timeout=timeout)
+    prompt = apply_inject(template, inject, values)
+    record = wait_record(submit(keep_loaded(prompt) if KEEP_LOADED else prompt), timeout=timeout)
     return "\n".join(texts_of(record))
 
 

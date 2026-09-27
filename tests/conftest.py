@@ -127,6 +127,9 @@ def comfy_trap(monkeypatch):
 
     monkeypatch.setattr(comfy, "run", trip)
     monkeypatch.setattr(comfy, "run_text", trip)
+    # A test's `model_kept()` ends with /free: it must never unload the live
+    # engine's models under a running render (speed plan #6).
+    monkeypatch.setattr(comfy, "free_models", lambda: None)
     return real
 
 

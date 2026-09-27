@@ -78,15 +78,16 @@ def main(book_id: str, number: int) -> int:
         raise SystemExit(why)
     home = episode_home.home(book, number) / "storyboard"
     rows, missing = [], []
-    for shot in ep.shots:
-        path = home / f"shot_{shot.index:02d}.png"
-        if not path.exists():
-            missing.append(shot.index)
-            continue
-        row = row_for(book, shot, ep.setups[shot.setup], path)
-        rows.append(row)
-        print(f"  {'ok  ' if row['passed'] else 'FAIL'} shot {shot.index:02d}  "
-              f"{'; '.join(row['faults'])}", flush=True)
+    with comfy.model_kept():        # the VL model loaded once for the batch (speed plan #6)
+        for shot in ep.shots:
+            path = home / f"shot_{shot.index:02d}.png"
+            if not path.exists():
+                missing.append(shot.index)
+                continue
+            row = row_for(book, shot, ep.setups[shot.setup], path)
+            rows.append(row)
+            print(f"  {'ok  ' if row['passed'] else 'FAIL'} shot {shot.index:02d}  "
+                  f"{'; '.join(row['faults'])}", flush=True)
     episode_home.write_json(home / "panel_content.json", rows)
     failed = [r["shot"] for r in rows if not r["passed"]]
     print(f"\n{len(rows) - len(failed)}/{len(ep.shots)} panels clean on content; "

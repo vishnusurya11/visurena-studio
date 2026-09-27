@@ -88,13 +88,14 @@ def main(book_id: str, number: int, only: list[int]) -> int:
         return 1
     work = episode_home.work_dir(book, number, "r2v") / "content"
     failed = []
-    for record in records:
-        row = judge_take(book, ep, record, take_dir, work)
-        episode_home.write_json(take_dir / f"T{record['index']:02d}.content.json", row)
-        print(f"  {'ok  ' if row['passed'] else 'FAIL'} T{record['index']:02d}  "
-              f"{'; '.join(row['faults'])}", flush=True)
-        if not row["passed"]:
-            failed.append(record["index"])
+    with comfy.model_kept():        # the VL model loaded once for the batch (speed plan #6)
+        for record in records:
+            row = judge_take(book, ep, record, take_dir, work)
+            episode_home.write_json(take_dir / f"T{record['index']:02d}.content.json", row)
+            print(f"  {'ok  ' if row['passed'] else 'FAIL'} T{record['index']:02d}  "
+                  f"{'; '.join(row['faults'])}", flush=True)
+            if not row["passed"]:
+                failed.append(record["index"])
     print(f"\n{len(records) - len(failed)}/{len(records)} takes clean on content; failing {failed}")
     return 1 if failed else 0
 
