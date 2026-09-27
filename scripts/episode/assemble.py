@@ -19,7 +19,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 
 from studio.episode_home import episode_arg
-from studio import card_fade, canvas, edit_gate, episode_bed, episode_gutter, episode_home
+from studio import card_fade, canvas, edit_gate, episode_bed, episode_gutter, episode_home, line_laid
 from studio import episode_emotion, episode_sound, finished_file
 from studio.comfy import run
 from studio.episode_spec import Episode
@@ -861,8 +861,8 @@ def main(book_id: str, number: int, engine: str = "i2v",
     said = {r["index"]: r for r in episode_home.read_json(episode_home.lines_dir(book, number) / "lines.json")}
     offsets = [episode_emotion.offset_of(said.get(line["index"], {}).get("delivery", "calm"))
                for line in placed["lines"]]
-    mixed = mix_with_lines(cut, music, sound, [(line["at"], wavs[line["index"]])
-                                               for line in placed["lines"]],
+    laid = line_laid.laid_lines(placed, episode_home.takes_dir(book, number, engine))
+    mixed = mix_with_lines(cut, music, sound, [(line["at"], wavs[line["index"]]) for line in laid],
                            work / "mixed.mp4", seconds=placed["duration_s"], offsets=offsets)
     card = book / "title" / f"ep{number:02d}.mp4"
     # The master's NAME goes on a finished file, never on a growing one: the

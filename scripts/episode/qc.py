@@ -27,7 +27,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 
 from studio.episode_home import episode_arg
 from studio import judged
-from studio import edit_gate, episode_home, gap_owner, episode_seq_board as sq, voice_qc, youtube_publish as yp
+from studio import edit_gate, episode_home, gap_owner, episode_seq_board as sq, line_laid, voice_qc, youtube_publish as yp
 from studio import episode_takes as tk
 from studio import episode_sound
 from studio.episode_spec import Episode
@@ -307,10 +307,10 @@ def main(book_id: str, number: int, engine: str = "i2v") -> None:
     master = episode_home.master_path(book, number, engine)
     work = episode_home.work_dir(book, number, engine)
     placed = episode_home.load_placed(book, number, episode)   # refused when stale
-    lines = placed["lines"]
+    take_dir = episode_home.takes_dir(book, number, engine)
+    lines = line_laid.laid_lines(placed, take_dir)   # where the master laid each line (ep13 T11)
     lufs, tp = integrated(master), true_peak(master)
     seen = seen_cuts(master)
-    take_dir = episode_home.takes_dir(book, number, engine)
     records = episode_home.read_json(take_dir / "shots.json")
     report = {
         "master": episode_home.relative(book, master),
