@@ -24,6 +24,7 @@ the defaults are ComfyUI, EasyOCR and facenet, built once.
 """
 from __future__ import annotations
 
+import re
 import json
 from pathlib import Path
 from typing import Callable
@@ -161,13 +162,22 @@ def keypoint_read(staged: str, run: Callable) -> np.ndarray | None:
     return person_of(keypoints.parse(run(keypoints.WORKFLOW, {"image_1": staged}, TIMEOUT)))
 
 
-def posture_fault(pts: np.ndarray | None, prose: str, planned: int, where: str) -> Fault | None:
-    """The shot lays, seats or crouches its one person; the keypoints disagree."""
+UNPOSED = ("insert", "extreme_close", "close", "medium_close")
+"""Framings that crop the body: no posture can be read from them."""
+TOP_DOWN = re.compile(r"\blooking down\b|\bhigh angle\b|\bfrom above\b", re.I)
+"""A camera straight above a lying man gives the same 2D keypoints as a man standing."""
+
+
+def posture_fault(pts: np.ndarray | None, prose: str, planned: int, where: str,
+                  size: str = "") -> Fault | None:
+    """The shot lays, seats or crouches its one person; the keypoints disagree.
+    Judged by eye on ep13's board: sitting on the ground reads 'low', a top-down
+    lying man reads 'standing', and a chest-up frame has no legs to read."""
     wanted = panel_content.asked_posture(prose)
-    if wanted is None or planned != 1 or pts is None:
+    if wanted is None or planned != 1 or pts is None or size in UNPOSED or TOP_DOWN.search(prose):
         return None
     seen = keypoints.posture(pts)
-    if seen in ("unread", wanted):
+    if seen in ("unread", wanted) or (wanted == "sitting" and seen == "low"):
         return None
     return fault("posture", where, note=f"posture {seen!r}: the shot asks for {wanted}", asked=wanted, seen=seen)
 
@@ -309,7 +319,7 @@ def read_panel(shot: dict, setup: dict, path: Path, t: dict, refs: list[Path]) -
     read, unread = short_read(staged, t["run"], shot.get("size", ""), where)
     seen = face_rows(rgb, t["detect"], t["embed"])
     out = [framing(shot.get("size", ""), keypoints.shot_size(pts) if pts is not None else None, read, where),
-           posture_fault(pts, prose, planned, where), copy_fault(path, refs, where), unread,
+           posture_fault(pts, prose, planned, where, shot.get("size", "")), copy_fault(path, refs, where), unread,
            asked(lambda: hat_fault(staged, t["run"], seen, pts, size, where), None)
            if planned == 1 and SCORED_BOXES else None]
     out += clone_faults(seen, where)

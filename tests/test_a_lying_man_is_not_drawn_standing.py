@@ -53,3 +53,20 @@ def test_a_word_inside_a_bound_tag_is_not_a_posture():
     prose = ("Medium close on the curate (crisp, almost flaxen curls cut short and lying on a low "
              "forehead, soot-smudged shirt sleeves) springing to his feet, one hand raised.")
     assert pc.asked_posture(prose) is None
+
+
+def test_the_keypoint_posture_is_not_judged_where_it_cannot_be_read(monkeypatch):
+    """ep13's panel judge, read against the board by eye: a man lying flat seen
+    from straight above read 'standing' (2D keypoints are the same), six seated
+    figures read 'low', and a chest-up medium close read 'standing' with no legs
+    in frame.  Sitting accepts low; a close framing or a top-down camera is not
+    judged for posture at all."""
+    from studio.judges import panel_eye as pe
+    pts = object()
+    monkeypatch.setattr(pe.keypoints, "posture", lambda p: "low")
+    assert pe.posture_fault(pts, "he sits in the grass", 1, "shot_15", size="medium") is None
+    monkeypatch.setattr(pe.keypoints, "posture", lambda p: "standing")
+    assert pe.posture_fault(pts, "he sits in the grass", 1, "shot_19", size="medium_close") is None
+    assert pe.posture_fault(pts, "lying on his back, high angle, looking down on him", 1, "shot_09",
+                            size="medium") is None
+    assert pe.posture_fault(pts, "he sits in the grass", 1, "shot_21", size="medium") is not None
