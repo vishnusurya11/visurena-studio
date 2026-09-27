@@ -53,7 +53,8 @@ def test_an_insert_or_a_back_view_may_hold_fewer_faces():
 
 
 def test_a_banned_singular_bans_its_plural():
-    got = faults(seen(subjects=["mountains", "sky"]), frame="Wide", planned=0, crowd=False,
+    # the reader's landform answer agrees: a landform ban follows it (ep13 shot 10, 7b798d1)
+    got = faults(seen(subjects=["mountains", "sky"], landform="mountains"), frame="Wide", planned=0, crowd=False,
                  flat=True, night=False, banned=["mountain"], size="wide")
     assert any("banned" in f for f in got)
 
