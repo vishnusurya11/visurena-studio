@@ -169,6 +169,6 @@ def test_an_insert_has_its_own_blur_floor():
     only two ever flagged -- ep13's hands on a gunwale (0.468) and on a knee
     (0.493) -- were crisp by eye: smooth skin and water have soft edges."""
     from studio.panel_dq import verdict
-    assert "blur" not in verdict(faces=[], planned=0, sharp=0.47, ink=0.0, tiled=0.0, size="insert")["flags"]
-    assert "blur" in verdict(faces=[], planned=0, sharp=0.35, ink=0.0, tiled=0.0, size="insert")["flags"]
+    assert "blur" not in verdict(faces=[], planned=0, sharp=0.34, ink=0.0, tiled=0.0, size="insert")["flags"]
+    assert "blur" in verdict(faces=[], planned=0, sharp=0.20, ink=0.0, tiled=0.0, size="insert")["flags"]
     assert "blur" in verdict(faces=[], planned=0, sharp=0.47, ink=0.0, tiled=0.0, size="wide")["flags"]

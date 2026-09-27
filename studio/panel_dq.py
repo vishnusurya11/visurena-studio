@@ -22,11 +22,12 @@ import re
 import numpy as np
 
 SHARP_FLOOR = 0.5
-INSERT_FLOOR = 0.4
-"""An insert's own floor.  MEASURED 2026-09-26 over ep09-13: wides, mediums and
-closes never scored under 0.69 of the control; 22 inserts ran down to 0.468, and
-the only two ever flagged (ep13's hands on a gunwale and on a knee, 0.468 and
-0.493) were crisp by eye -- smooth skin and water have soft edges, not blur."""
+INSERT_FLOOR = 0.25
+"""An insert's own floor, set from a BLURRED CONTROL (2026-09-26): ep13's panels
+blurred by a barely visible sigma 1.5 score 0.06-0.20, the crisp ones 0.34-0.99,
+the hand inserts included (a gunwale 0.34, a knee 0.49 -- smooth skin and water
+have soft edges, not blur).  Over ep09-13, wides, mediums and closes never
+scored under 0.69; only inserts ever reached this low."""
 """How soft a panel may be AGAINST THE MEDIAN OF ITS OWN SET.
 
 MEASURED 2026-09-20, and it was wrong first: this began as an absolute 0.45
