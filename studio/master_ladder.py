@@ -1,5 +1,6 @@
-"""The master's ladder: recut x2 (free) -> retake_shot x1 (through the take
-ladder) -> flag.
+"""The master's ladder: retake_shot x1 (through the take ladder, then a
+recut) -> flag.  No free recut rung: step 11 runs on a master newer than every
+cut input, so a recut re-made the same bytes (ep12 iter5 == iter7; speed plan #7).
 
 A fault on a MEASURED rubric field (shadow, faces, board, repeats) climbs;
 a story fault, the short read's and the identity pass's faults ride along on
@@ -20,12 +21,10 @@ from studio.judges import master_eye
 from studio.judges.verdict import Verdict
 from studio.ladder import Ladder, Rung
 
-RECUT_SECONDS = 0.0
-"""A recut is ffmpeg over takes already on disk: no GPU."""
 RETAKE_SECONDS = 9 * 60.0
 """One shot through the take ladder, 4-9 GPU minutes; the ceiling's worst case."""
 TERMINAL = "flag"
-LADDER = Ladder([Rung("recut", RECUT_SECONDS, tries=2), Rung("retake_shot", RETAKE_SECONDS, tries=1)], TERMINAL)
+LADDER = Ladder([Rung("retake_shot", RETAKE_SECONDS, tries=1)], TERMINAL)
 EMPTY = Ladder([], TERMINAL)
 
 Recut = Callable[[], None]

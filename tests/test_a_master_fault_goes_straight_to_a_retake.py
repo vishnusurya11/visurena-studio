@@ -1,7 +1,12 @@
 """The master's ladder under judged_gate.clear: a fault on a measured field
-takes recut, recut, then one retake of the shot the evidence names (followed
-by its recut), and the terminal signs the rubric flagged with an audit row.  A
-story-only fault has no rung: it is flagged straight away, at no cost."""
+takes one retake of the shot the evidence names (followed by its recut), and
+the terminal signs the rubric flagged with an audit row.  A story-only fault
+has no rung: it is flagged straight away, at no cost.
+
+2026-09-27 (speed plan #7): the two free `recut` rungs are gone.  Step 11 runs
+only on a master newer than every cut input, so a recut re-made the same bytes
+(ep12 master_iter5 == iter7 by md5) and spent ~9 min of qc a rung while the
+one rung that can move a fault, retake_shot, was starved of budget."""
 from __future__ import annotations
 
 import json
@@ -48,13 +53,13 @@ def climb(tmp_path, verdict: Verdict):
     return ctx, taken, json.loads(signed.read_text(encoding="utf-8"))
 
 
-def test_recut_twice_then_one_retake_of_the_named_shot_then_flag(tmp_path):
+def test_one_retake_of_the_named_shot_then_flag(tmp_path):
     ctx, taken, doc = climb(tmp_path, off_board())
-    assert taken == ["recut", "recut", ("retake", 3), "recut"]
+    assert taken == [("retake", 3), "recut"]
     assert doc["terminal"] == "flag" and doc["rubric"]["board"]["answer"] == "n"
     assert doc["rubric"]["board"]["flagged_by"] == "judge:master_eye@1"
     actions = [(l.action, l.terminal) for l in ctx.learned]
-    assert actions == [("recut", False), ("recut", False), ("retake_shot", False), ("flag", True)]
+    assert actions == [("retake_shot", False), ("flag", True)]
     rows = audit_rows.load(ctx.book_dir)
     assert len(rows) == 1 and rows[0].gate == "MASTER" and rows[0].terminal == "flag"
     assert rows[0].artefact == "episodes/ep01/review/eye_abc12345.json" and rows[0].sha8 == "abc12345"
