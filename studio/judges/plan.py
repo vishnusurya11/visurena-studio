@@ -167,12 +167,25 @@ def unfound(claim: Claim, chapter: str | None) -> bool:
     return chapter is not None and bool(claim.span.strip()) and span_match(claim.span, chapter) < SPAN_MATCH
 
 
-def invented(readings: list[PlanReading], chapter: str | None, shots: set[int]) -> dict[tuple[int, str], Claim]:
+def backed(claim: Claim, spans: list[str]) -> bool:
+    """The claim's head noun stands in one of its shot's own verified spans."""
+    words = re.findall(r"[a-z]+", claim.claim.lower())
+    head = words[-1] if words else ""
+    return bool(head) and any(head in re.findall(r"[a-z]+", span.lower()) or head + "s" in
+                              re.findall(r"[a-z]+", span.lower()) for span in spans)
+
+
+def invented(readings: list[PlanReading], chapter: str | None, shots: set[int],
+             spans: dict[int, list[str]] | None = None) -> dict[tuple[int, str], Claim]:
     """The union over readings of every claim with no span, a span the chapter
-    lacks, or a shot the plan lacks."""
+    lacks, or a shot the plan lacks -- less a claim its shot's own verified
+    `source` span backs (ep13: a flaky reading misquoted 'Horsell Common')."""
+    spans = spans or {}
     out: dict[tuple[int, str], Claim] = {}
     for reading in readings:
         for claim in reading.claims:
+            if claim.shot in shots and backed(claim, spans.get(claim.shot, [])):
+                continue
             if not claim.span.strip() or unfound(claim, chapter) or claim.shot not in shots:
                 out.setdefault((claim.shot, claim.claim), claim)
     return out
@@ -193,8 +206,9 @@ def claim_note(claim: Claim, chapter: str | None, shots: set[int]) -> tuple[str,
 
 def claim_faults(plan: Episode, readings: list[PlanReading], chapter: str | None) -> list[Fault]:
     shots = {s.index for s in plan.shots}
+    spans = {s.index: list(getattr(s, "source", None) or []) for s in plan.shots}
     out = []
-    for (shot, _), claim in invented(readings, chapter, shots).items():
+    for (shot, _), claim in invented(readings, chapter, shots, spans).items():
         note, evidence = claim_note(claim, chapter, shots)
         out.append(Fault(kind="invented", where=where(shot), note=note, evidence=evidence))
     return out
