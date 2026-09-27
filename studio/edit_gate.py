@@ -233,6 +233,12 @@ def headed(frames: np.ndarray, head_s: float, fps: int = FPS) -> np.ndarray:
     return frames[int(round(head_s * fps)):]
 
 
+def last_used(frames: np.ndarray, n: int) -> np.ndarray:
+    """The segment's last frame: the take's own last one when the cut held past
+    it (ep13: 147 frames asked of a 146-frame take crashed QC)."""
+    return frames[min(n, len(frames)) - 1]
+
+
 def edit_integrity(master_path: Path, placed: dict, records: list[dict], book: Path,
                    card: Path | None, manifest: dict | None = None,
                    heads: dict[int, float] | None = None) -> dict:
@@ -244,7 +250,7 @@ def edit_integrity(master_path: Path, placed: dict, records: list[dict], book: P
              for row in plan}
     segments = [{**row, **segment_match(master, takes[row["take"]], row["start"], row["n"])} for row in plan]
     cuts = [{"at": nxt["start"],
-             "exact": cut_exact(master, nxt["start"], takes[prev["take"]][prev["n"] - 1], takes[nxt["take"]][0])}
+             "exact": cut_exact(master, nxt["start"], last_used(takes[prev["take"]], prev["n"]), takes[nxt["take"]][0])}
             for prev, nxt in zip(plan, plan[1:])]
     holes = timestamp_holes(frame_times(master_path))
     tail = tail_check(master, int(round(placed["duration_s"] * FPS)), grey_frames(card) if card else None)
