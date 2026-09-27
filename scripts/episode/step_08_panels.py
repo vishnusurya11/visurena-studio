@@ -44,6 +44,16 @@ def wanted(home: Path) -> list[int]:
     return [int(s["index"]) for s in (episode_home.read_json(plan).get("shots") or [])] if plan.exists() else []
 
 
+def redrawn_grids(board: Path) -> list[str]:
+    """Grids drawn after the last cut: the newest panel or contact sheet is the
+    cut (panels.py leaves an unchanged panel's file alone, the contact is rewritten)."""
+    board = Path(board)
+    cut = [p.stat().st_mtime for p in panels_of(board) + [board / "contact.png"] if p.exists()]
+    if not cut:
+        return []
+    return sorted(g.name for g in (board / "grids").glob("*.png") if g.stat().st_mtime > max(cut))
+
+
 def panel_refusals(home: Path) -> list[str]:
     """Why the takes may not be built from these panels: each machine verdict
     missing, incomplete, failed or older than a panel (panel_dq.panel_refusal),
@@ -52,6 +62,7 @@ def panel_refusals(home: Path) -> list[str]:
     panels, shots = panels_of(board), wanted(home)
     out = [f"{name}: {why}" for name in VERDICTS
            if (why := panel_dq.panel_refusal(board / name, panels, shots))]
+    out += [f"{g}: redrawn after the panels were cut" for g in redrawn_grids(board)]
     if not eye_verdict.passed(board, panels):
         out.append(f"no current panel eye verdict ({BOARD}/eye_<sha8>.json)")
     return out
