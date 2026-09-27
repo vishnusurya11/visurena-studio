@@ -26,11 +26,15 @@ EPISODE_CEILING_SECONDS = 5 * 3600
 taste-gates, cost); `RENDER_HOLD` stays the brake."""
 
 EPISODE_SHARES: dict[str, float] = {
-    "01": 3 / 300, "02": 8 / 300, "03": 12 / 300, "04": 12 / 300, "05": 2 / 300,
-    "06": 3 / 300, "07": 4 / 300, "08": 20 / 300, "09": 135 / 300, "10": 8 / 300,
+    "01": 3 / 300, "02": 8 / 300, "03": 6 / 300, "04": 6 / 300, "05": 2 / 300,
+    "06": 3 / 300, "07": 4 / 300, "08": 60 / 300, "09": 125 / 300, "10": 8 / 300,
     "11": 8 / 300, "12": 2 / 300,
-    "judges": 15 / 300, "ladders": 60 / 300, "slack": 8 / 300,
+    "judges": 15 / 300, "ladders": 50 / 300, "slack": 0 / 300,
 }
+# RE-PRICED 2026-09-27 from ep13's clock: step 08 spent ~15 min on the content read
+# and ~13 min on the judge's reads per pass -- 28 min of a 20-min share, so every run
+# deferred before one redraw rung.  08 now holds its reads plus one full rung; the
+# takes keep 125 min (ep13 asked 7176 s); places and lines are mostly cached (6 each).
 """Minutes of the 300, as fractions, keyed by episode step id; the judges
 (capped at 15 GPU min) and the ladders (60 min: panels 10, takes 40, master
 retake 10) hold shares of their own.  Unused time rolls forward."""
