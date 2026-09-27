@@ -63,3 +63,4 @@ or OPEN (with what fixing it needs). Numbers are the order they were found.
 | 51 | the ep12 plan no longer regenerates byte-identical (`test_a_plan_script_regenerates_its_plan[ep12]`) since the curate/tripod row edits of 2026-09-26 | data drift | regenerate ep12's plan.json or pin the test to the rows it was built from |
 | 52 | step 08 said 'skipped: output exists' after step 07 redrew 13 grids: the old panels still carried their verdicts | fixed: a grid newer than the last cut is a refusal (d0c4fea) | -- |
 | 53 | the EYE_PANELS judge reads a hands insert whose chest is in the frame as 'medium' (ep13 shot 12, three draws) | calibration | an insert asks whether the hands are the picture's subject, not whether a torso shows |
+| 54 | step 09 checks all 25 takes on the CPU (~1 min each) before it re-renders any; the GPU idled ~20 min on ep13 | design | pipeline: queue a failed take's retake to ComfyUI as soon as its check fails, while the next take is checked |
