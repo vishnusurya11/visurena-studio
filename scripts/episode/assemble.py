@@ -789,6 +789,11 @@ def join_lost(got: int, want: int) -> bool:
 
 
 TARGET_LUFS, FLOOR_LUFS, TP_CEILING = -14.0, -15.5, -1.0
+LIMIT_DB = 3.0
+"""What the limiter after the final gain may take off the loudest transients.
+ep13 master_iter2: the gun and the shouts left 0.7 dB of headroom and the
+master sat at -15.86 LUFS under QC's -15.5 floor; the limiter is there for
+exactly those peaks (2026-09-27)."""
 
 
 def final_gain(lufs: float, tp: float) -> float:
@@ -799,7 +804,7 @@ def final_gain(lufs: float, tp: float) -> float:
     headroom left (first master, 2026-09-10).  Spend that headroom, no more."""
     if lufs >= FLOOR_LUFS:
         return 0.0
-    return round(max(0.0, min(TARGET_LUFS - lufs, TP_CEILING - 0.1 - tp)), 2)
+    return round(max(0.0, min(TARGET_LUFS - lufs, TP_CEILING - 0.1 - tp + LIMIT_DB)), 2)
 
 
 LIMIT = 0.794
