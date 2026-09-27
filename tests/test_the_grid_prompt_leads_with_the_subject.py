@@ -135,3 +135,25 @@ def test_a_grid_of_tight_shots_names_the_place_briefly():
 def test_a_grid_with_a_wide_keeps_the_whole_place():
     text = grid_prompt_v2([panel("the house", size="WIDE")], 1, 1, ([2], HOUSE), [], 3)
     assert "gate piers" in text
+
+
+BARE = ("Man. Wearing: Bare to the waist. Water-soaked charcoal-grey worsted trousers. braces "
+        "hanging loose at the hips. stockinged feet in grey wool socks. Bareheaded.")
+
+
+def test_a_chest_up_picture_is_not_bound_to_trousers_and_socks():
+    """ep13, 2026-09-27: six medium closes and closes came back as whole seated
+    figures, and each binding line listed trousers, braces and socks -- the
+    drawer drew what it was told he was wearing."""
+    cast = [{"ref": 1, "name": "NARRATOR", "entity": "n", "wear": BARE, "against": "a"}]
+    text = grid_prompt_v2([panel("his face", ["NARRATOR"], size="MEDIUM CLOSE")], 1, 1, PLACE, cast, 3)
+    line = next(x for x in text.split("\n\n") if x.startswith("NARRATOR is"))
+    assert "Bare to the waist" in line
+    for word in ("trousers", "hips", "socks"):
+        assert word not in line, word
+
+
+def test_a_full_figure_keeps_the_whole_wardrobe():
+    cast = [{"ref": 1, "name": "NARRATOR", "entity": "n", "wear": BARE, "against": "a"}]
+    text = grid_prompt_v2([panel("he sits", ["NARRATOR"], size="MEDIUM")], 1, 1, PLACE, cast, 3)
+    assert "trousers" in next(x for x in text.split("\n\n") if x.startswith("NARRATOR is"))

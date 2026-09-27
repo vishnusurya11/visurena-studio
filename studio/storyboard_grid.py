@@ -211,8 +211,20 @@ def bareheaded(name: str, shots: list[dict]) -> bool:
     return any(BAREHEADED.search(s["body"]) for s in shots if name in (s.get("who") or []))
 
 
-def _binding(p: dict, bare: bool = False) -> str:
-    items = [i for i in worn_items(p.get("wear", "")) if not (bare and HEADWEAR.search(i))]
+BELOW_CHEST = re.compile(r"\b(?:trousers|breeches|boots?|shoes|socks|stockings|stockinged|feet|"
+                         r"skirt|petticoats?|gaiters|hips|knees?)\b", re.I)
+
+
+def chest_up(name: str, shots: list[dict]) -> bool:
+    """Is every picture this person is in a close of some kind? ep13: six closes
+    drew whole seated figures, the binding line having listed trousers and socks."""
+    mine = [s for s in shots if name in (s.get("who") or [])]
+    return bool(mine) and all("CLOSE" in s["size"] for s in mine)
+
+
+def _binding(p: dict, bare: bool = False, chest: bool = False) -> str:
+    items = [i for i in worn_items(p.get("wear", ""))
+             if not (bare and HEADWEAR.search(i)) and not (chest and BELOW_CHEST.search(i))]
     worn = f", wearing: {'; '.join(items)}" if items else ""
     return f"{p['name']} is the person in <image{p['ref']}>{worn}."
 
@@ -253,7 +265,8 @@ def grid_prompt_v2(shots: list[dict], cols: int, rows: int, place: tuple[list[in
                   f"same size, thin white gutters between them, no lettering anywhere.")
         blocks = [_block_v2(f"PANEL {i} ({where}), ", s)
                   for i, (where, s) in enumerate(zip(cells, shots), start=1)]
-    binding = [_binding(p, bareheaded(p["name"], shots)) for p in cast if p.get("ref")]
+    binding = [_binding(p, bareheaded(p["name"], shots), chest_up(p["name"], shots))
+               for p in cast if p.get("ref")]
     # A PROP IS AN OBJECT, bound to its sheet: ep10's tripod drawn from words
     # alone would differ in every panel (ep10 prep audit, 2026-09-23).
     binding += [f"{p['name']} is the object in <image{p['ref']}>, exactly as drawn there."
