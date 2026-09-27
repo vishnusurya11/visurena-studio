@@ -51,6 +51,13 @@ def ran_downstream(ctx) -> bool:
     return episode_home.has_timeline(ctx.book_dir, ctx.number)
 
 
+def rendered(ctx) -> bool:
+    """Takes on disk: the plan has been spent on.  The battery guards spend
+    BEFORE a render; after it the take gates judge the takes, and the writer
+    never rewrites a plan its takes were rendered from (ep13, 2026-09-27)."""
+    return any((ctx.home / "takes" / "r2v").glob("T??.mp4"))
+
+
 def done(ctx) -> bool:
     """plan.json exists AND it is signed, or the unit is GRANDFATHERED.
 
@@ -60,7 +67,7 @@ def done(ctx) -> bool:
     would hold every finished episode behind a gate that did not exist when it
     was made."""
     plan = plan_of(ctx)
-    return plan.exists() and (plan_verdict.current(plan) or grandfathered(ctx))
+    return plan.exists() and (plan_verdict.current(plan) or grandfathered(ctx) or rendered(ctx))
 
 
 def grandfathered(ctx) -> bool:
@@ -136,6 +143,10 @@ def run(ctx) -> None:
     elif wants_rewrite(ctx) or not plan.exists():
         desk.resume() or desk.write(None)
     if plan_verdict.current(plan) or grandfathered(ctx):
+        return
+    if rendered(ctx):
+        ctx.log("the plan's takes are rendered: the take gates judge it now; no re-judge, no rewrite",
+                step_id=STEP_ID, level="WARNING")
         return
     signed = clear(ctx, desk)
     if signed.name == plan_ladder.DEFERRED:
