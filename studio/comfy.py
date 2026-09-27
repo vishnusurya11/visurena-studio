@@ -310,7 +310,7 @@ def lost(prompt_id: str) -> bool:
 QUEUE_SECONDS = 7200.0
 
 
-def wait_record(prompt_id: str, timeout: float = 3600.0, poll: float = 5.0) -> dict:
+def wait_record(prompt_id: str, timeout: float = 3600.0, poll: float = 0.5) -> dict:
     """Block until a job finishes and return its record; raise on engine error
     or timeout.  The clock starts when the job leaves the queue: a sheet
     queued behind an 11-minute take had timed out before it ran a second."""

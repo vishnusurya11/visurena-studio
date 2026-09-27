@@ -227,3 +227,10 @@ def test_pending_reads_the_engines_queue(monkeypatch):
     monkeypatch.setattr(comfy, "_get", lambda path: queue)
     assert comfy.pending("job-1") is True
     assert comfy.pending("job-0") is False
+
+
+def test_a_finished_job_is_seen_within_half_a_second():
+    """2026-09-27 speed plan #2: a 27.5 s VLM read waited on average 2.6 s for
+    the 5 s poll; 675 panel reads on ep13 lost ~30 min to it."""
+    import inspect
+    assert inspect.signature(comfy.wait_record).parameters["poll"].default <= 0.5
