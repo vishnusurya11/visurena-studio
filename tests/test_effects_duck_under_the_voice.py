@@ -41,3 +41,13 @@ def test_a_cue_no_line_touches_is_still_trimmed(tmp_path):
     got = episode_sound.ducked(cues, [(10.0, 12.0)], tmp_path, run=lambda args: ran.append(args))
     assert got[0][1].name.endswith(".ducked.wav") and len(ran) == 1
     assert f"{episode_sound.db_gain(-episode_sound.CUE_TRIM_DB):.6f}" in " ".join(ran[0])
+
+
+def test_an_ambience_has_its_spikes_compressed_and_an_effect_does_not(tmp_path):
+    """iter10: the loudest between-line moments (68.1 s, 91.6 s, 120.5 s, 3.1
+    dB under the voice) were animal calls inside ambience loops, ~10 LU over
+    the loop's own average.  An effect's transient is the point of it."""
+    ran = []
+    cues = [(0.0, tmp_path / "amb_a.loop.wav"), (5.0, tmp_path / "shot03_b.wav")]
+    episode_sound.ducked(cues, [], tmp_path, run=lambda args: ran.append(" ".join(args)))
+    assert "acompressor" in ran[0] and "acompressor" not in ran[1]

@@ -68,6 +68,11 @@ CUE_TRIM_DB = 3.0
 between-line moment only 3.1 dB under the voice; Sherlock's median was 6."""
 
 
+AMBIENCE_TAME = "acompressor=threshold=0.03:ratio=8:attack=5:release=250"
+"""An ambience loop's own spikes (a cow, a horse: ~10 LU over its average)
+pressed down to the bed they belong to; -30 dBFS sits above the loops' -34."""
+
+
 def db_gain(db: float) -> float:
     return 10 ** (db / 20.0)
 
@@ -93,7 +98,8 @@ def ducked(cues: list[tuple[float, Path]], lines: list[tuple[float, float]], out
         windows = [w for w in cue_windows(lines, when, duck_depth(path)) if w[1] > 0]
         target = Path(out_dir) / f"{Path(path).stem}.ducked.wav"
         expr = f"{db_gain(-CUE_TRIM_DB):.6f}*{duck_expr(windows)}"
-        run(["ffmpeg", "-y", "-v", "error", "-i", str(path), "-af", f"volume='{expr}':eval=frame", str(target)])
+        tame = f"{AMBIENCE_TAME}," if Path(path).name.startswith("amb_") else ""
+        run(["ffmpeg", "-y", "-v", "error", "-i", str(path), "-af", f"{tame}volume='{expr}':eval=frame", str(target)])
         out.append((when, target))
     return out
 
