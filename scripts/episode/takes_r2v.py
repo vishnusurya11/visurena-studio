@@ -593,12 +593,18 @@ def end_numbers(segs: list[tuple[int, int]], ends: list[tuple[int, int]]) -> lis
     return [segs.index(e) + 1 for e in ends]
 
 
+def attach_paths(measured: dict, rows: list[dict]) -> None:
+    """Each placed line's voiced file; a line the cut omits has no place (ep13)."""
+    for row in rows:
+        if row["index"] in measured:
+            measured[row["index"]]["rel_path"] = row["rel_path"]
+
+
 def cards(book: Path, episode: Episode, number: int) -> list[dict]:
     placed = episode_home.load_placed(book, number, episode)   # refused when stale
     shots = [dict(s, setup=episode.shot(s["index"]).setup) for s in placed["shots"]]
     measured = {l["index"]: l for l in placed["lines"]}
-    for l in episode_home.read_json(episode_home.lines_dir(book, number) / "lines.json"):
-        measured[l["index"]]["rel_path"] = l["rel_path"]
+    attach_paths(measured, episode_home.read_json(episode_home.lines_dir(book, number) / "lines.json"))
     out, refused = [], []
     for take in tk.takes(shots):
         take["placed"] = shots

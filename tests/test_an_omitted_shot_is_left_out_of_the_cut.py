@@ -54,3 +54,17 @@ def test_a_bed_span_on_an_omitted_shot_starts_at_the_next_shot_in_the_cut():
     got = episode_bed.spans([{"from_shot": 0, "tone": "grave"}, {"from_shot": 3, "tone": "uneasy"}],
                             {1: 0.0, 2: 5.0, 3: 9.0}, 20.0)
     assert [(s.start, s.end, s.tone) for s in got] == [(0.0, 9.0, "grave"), (9.0, 20.0, "uneasy")]
+
+
+def test_a_voiced_line_of_an_omitted_shot_is_not_attached_to_the_timeline():
+    """ep13 step 06: lines.json still lists line 0 (voiced before the omit);
+    the take cards attached a path to every row and died on KeyError 0."""
+    import importlib.util
+    import sys
+    spec = importlib.util.spec_from_file_location("takes_r2v_omit", ROOT / "scripts/episode/takes_r2v.py")
+    tr = importlib.util.module_from_spec(spec)
+    sys.modules["takes_r2v_omit"] = tr
+    spec.loader.exec_module(tr)
+    measured = {1: {"index": 1}}
+    tr.attach_paths(measured, [{"index": 0, "rel_path": "l00.wav"}, {"index": 1, "rel_path": "l01.wav"}])
+    assert measured == {1: {"index": 1, "rel_path": "l01.wav"}}
