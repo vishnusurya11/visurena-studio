@@ -63,6 +63,15 @@ under narration (speech 9.8 LU over the gaps; WotW ep10-12 and Sherlock
 11.3-16.5).  Effects and ambience now duck under every line, at mix time."""
 
 
+CUE_TRIM_DB = 3.0
+"""Every cue, in the pauses too: master_iter9 (ducked) still had its loudest
+between-line moment only 3.1 dB under the voice; Sherlock's median was 6."""
+
+
+def db_gain(db: float) -> float:
+    return 10 ** (db / 20.0)
+
+
 def duck_depth(cue: Path) -> float:
     """An ambience bed ducks less than an event: it is already low."""
     return AMBIENCE_DUCK_DB if Path(cue).name.startswith("amb_") else EFFECT_DUCK_DB
@@ -75,19 +84,16 @@ def cue_windows(lines: list[tuple[float, float]], when: float, depth: float) -> 
 
 def ducked(cues: list[tuple[float, Path]], lines: list[tuple[float, float]], out_dir: Path,
            run=None) -> list[tuple[float, Path]]:
-    """Every cue a line overlaps, written ducked beside the mix; the rest as they are."""
+    """Every cue trimmed by CUE_TRIM_DB and ducked under the lines it overlaps, beside the mix."""
     import subprocess
     from studio.trailer_assemble import duck_expr
     run = run or (lambda args: subprocess.run(args, check=True))
     out = []
     for when, path in cues:
         windows = [w for w in cue_windows(lines, when, duck_depth(path)) if w[1] > 0]
-        if not windows:
-            out.append((when, path))
-            continue
         target = Path(out_dir) / f"{Path(path).stem}.ducked.wav"
-        run(["ffmpeg", "-y", "-v", "error", "-i", str(path),
-             "-af", f"volume='{duck_expr(windows)}':eval=frame", str(target)])
+        expr = f"{db_gain(-CUE_TRIM_DB):.6f}*{duck_expr(windows)}"
+        run(["ffmpeg", "-y", "-v", "error", "-i", str(path), "-af", f"volume='{expr}':eval=frame", str(target)])
         out.append((when, target))
     return out
 

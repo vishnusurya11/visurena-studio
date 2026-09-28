@@ -32,7 +32,12 @@ def test_every_cue_is_written_ducked_and_keeps_its_time(tmp_path):
     assert len(ran) == 2 and "volume=" in " ".join(ran[0])
 
 
-def test_a_cue_no_line_touches_is_laid_as_it_is(tmp_path):
+def test_a_cue_no_line_touches_is_still_trimmed(tmp_path):
+    """iter9 measured the loudest moment between lines only 3.1 dB under the
+    voice (Sherlock's median 6): the cues in the pauses were never ducked.
+    Every cue carries CUE_TRIM_DB, applied at mix time."""
+    ran = []
     cues = [(100.0, tmp_path / "shot24_z.wav")]
-    got = episode_sound.ducked(cues, [(10.0, 12.0)], tmp_path, run=lambda args: None)
-    assert got == cues
+    got = episode_sound.ducked(cues, [(10.0, 12.0)], tmp_path, run=lambda args: ran.append(args))
+    assert got[0][1].name.endswith(".ducked.wav") and len(ran) == 1
+    assert f"{episode_sound.db_gain(-episode_sound.CUE_TRIM_DB):.6f}" in " ".join(ran[0])
