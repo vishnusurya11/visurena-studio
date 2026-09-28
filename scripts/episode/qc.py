@@ -27,7 +27,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 
 from studio.episode_home import episode_arg
 from studio import judged
-from studio import edit_gate, episode_home, gap_owner, episode_seq_board as sq, line_laid, voice_qc, youtube_publish as yp
+from studio import edit_gate, episode_home, gap_owner, episode_seq_board as sq, line_laid, speech_gap, voice_qc, youtube_publish as yp
 from studio import episode_takes as tk
 from studio import episode_sound
 from studio.episode_spec import Episode
@@ -38,7 +38,7 @@ TP_CEILING = -1.0
 CUT_TOLERANCE = 0.12
 """How far an EDIT-MADE cut may sit from its plan. A cut the model makes inside
 a take-run is judged at its grid frame instead (`grid_cut`)."""
-MAX_GAP_S = 6.0
+MAX_GAP_S = speech_gap.MAX_GAP_S
 """The longest hole in speech a delivered master may carry (ep10 synthesis
 B6/F6): Scarlet ep05 4.4 s, ep07 4.5 s, ep09 3.25 s pass; ep10's 11.25 s
 wordless tail after the button fails. The plan gate's twin, read off the file.
@@ -133,15 +133,7 @@ def heard_on_master(master: Path, lines: list[dict], work: Path, listen) -> list
     return out
 
 
-def longest_gap(lines: list[dict], until: float) -> float:
-    """The longest hole in speech, from the placed lines' measured windows."""
-    ordered = sorted(lines, key=lambda line: line["at"])
-    gaps, end = [], ordered[0]["at"] if ordered else 0.0
-    for line in ordered:
-        gaps.append(line["at"] - end)
-        end = max(end, line["at"] + line["seconds"])
-    gaps.append(until - end)
-    return round(max(gaps), 2) if gaps else until
+longest_gap = speech_gap.longest_gap
 
 
 def internal_pairs(placed: dict, records: list[dict]) -> list[tuple[float, float]]:

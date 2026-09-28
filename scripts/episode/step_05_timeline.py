@@ -17,7 +17,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 
 from pydantic import ValidationError  # noqa: E402
 
-from studio import episode_home, step_cli  # noqa: E402
+from studio import episode_home, speech_gap, step_cli  # noqa: E402
 
 STEP_ID = "05"
 NAME = "timeline"
@@ -36,13 +36,26 @@ def fresh(book: Path, number: int) -> bool:
     return True
 
 
+def placed_of(book: Path, number: int) -> dict:
+    """The timeline to measure; an unreadable plan measures nothing here (the
+    contract refuses it at its own door)."""
+    try:
+        return episode_home.load_placed(book, number, episode_home.load_plan(book, number))
+    except (SystemExit, ValidationError, FileNotFoundError):
+        return {}
+
+
 def done(ctx) -> bool:
-    return fresh(ctx.book_dir, ctx.number)
+    """Fresh AND carrying no hole in speech over the wall (finding 64): a
+    resume must not skip past a gap QC would refuse after the render."""
+    return fresh(ctx.book_dir, ctx.number) and speech_gap.refusal(placed_of(ctx.book_dir, ctx.number)) is None
 
 
 def run(ctx) -> None:
     ctx.run_script("scripts/episode/respot.py", clock="respot")
     ctx.run_script("scripts/episode/timeline.py", clock="timeline")
+    if why := speech_gap.refusal(placed_of(ctx.book_dir, ctx.number)):
+        raise SystemExit(why)
 
 
 if __name__ == "__main__":
