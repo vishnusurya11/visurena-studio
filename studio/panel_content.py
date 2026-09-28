@@ -79,8 +79,35 @@ def asked_posture(prose: str) -> str | None:
     # A BOUND TAG IS NOT AN ACTION: the curate's row has curls "lying on a low
     # forehead", and ep13's panel of him springing up was refused as not lying down.
     said = re.sub(r"\([^)]*\)", "", prose or "")
-    named = [family for family, word in ASKED.items() if word.search(said)]
+    clauses = re.split(r"[.;:]", said)
+    named = [family for family, word in ASKED.items() if any(of_a_person(word, c) for c in clauses)]
     return named[0] if len(named) == 1 else None
+
+
+PERSON = re.compile(r"\b(?:[Hh]e|[Ss]he|[Hh]is|[Hh]er|man|men|woman|women|boy|girl|brother|narrator|figure|"
+                    r"body|person|soldier|officer|curate|artilleryman|driver|child)\b|(?<=\w )[A-Z][a-z]{2,}\b|"
+                    r"^\s*(?!The\b|This\b|That\b|Its\b|An?\b)[A-Z][a-z]{2,}\b")
+"""A person named in the words before a posture verb: a pronoun, a person noun, or a
+proper name (a capital mid-clause, or a clause's first word that is no determiner)."""
+LEAD = re.compile(r"^\s*(?:[Tt]he|[Aa]n?)?\s*$")
+FINITE = re.compile(r"^(?:lies|lay|laid|sits|sat|rests)$", re.I)
+"""The verb forms an object takes ("the sheet lies", "the lamp sits"); a participle
+("the landlord lying at the fence") still counts without a listed person noun."""
+
+
+def of_a_person(word: re.Pattern, clause: str) -> bool:
+    """AN OBJECT THAT LIES IS NOT A POSTURE: ep14 shot 7's "the telegram sheet
+    lies on the counter" asked the standing brother to lie down.  A finite posture
+    verb counts when nothing stands before it in its clause or what stands before
+    it names a person; a participle counts as it always did."""
+    return any(not FINITE.match(h.group(0)) or LEAD.match(subject(clause[:h.start()]))
+               or PERSON.search(subject(clause[:h.start()])) for h in word.finditer(clause))
+
+
+def subject(before: str) -> str:
+    """The words since the last comma or joining word: "the brother presses the pen
+    while the folded paper lies" -- the paper lies, not the brother (ep14 shot 2)."""
+    return re.split(r",|\b(?:while|whilst|and|as|where|but|when)\b", before)[-1]
 
 
 def posture_fault(seen: "Seen", prose: str, planned: int) -> str | None:

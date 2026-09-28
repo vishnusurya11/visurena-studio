@@ -70,3 +70,23 @@ def test_the_keypoint_posture_is_not_judged_where_it_cannot_be_read(monkeypatch)
     assert pe.posture_fault(pts, "lying on his back, high angle, looking down on him", 1, "shot_09",
                             size="medium") is None
     assert pe.posture_fault(pts, "he sits in the grass", 1, "shot_21", size="medium") is not None
+
+
+def test_an_object_that_lies_asks_no_posture():
+    """ep14 shot 7 (2026-09-28): "the telegram sheet lies on the counter" asked the
+    standing brother to lie down; a posture word counts only in a clause naming a person."""
+    from studio import panel_content
+    assert panel_content.asked_posture(
+        "the telegram sheet lies on the counter at the left edge; the brother stands before the gate") is None
+    assert panel_content.asked_posture("the notes and coins lie inside the open drawer") is None
+    assert panel_content.asked_posture("the lamp sits on the table; he faces the window") is None
+    assert panel_content.asked_posture("the brother lies on the platform, one arm flung out") == "lying"
+    assert panel_content.asked_posture("He sits on the bench with the paper") == "sitting"
+    assert panel_content.asked_posture("Ogilvy lies in the heather beside the pit") == "lying"
+
+
+def test_the_thing_that_lies_is_the_nearest_subject():
+    from studio import panel_content
+    assert panel_content.asked_posture(
+        "The brother presses the pen into the final line while the folded paper lies open beside his hand") is None
+    assert panel_content.asked_posture("The folded newspaper lies beside the microscope") is None

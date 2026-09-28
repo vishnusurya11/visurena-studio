@@ -47,8 +47,8 @@ def test_faces_together_are_not_split_into_ones():
 
 def test_every_grid_of_a_setup_has_its_own_name():
     rows = gl.layout({"a": {}}, shots("a", 16))
-    assert len({gl.name_of(4, r) for r in rows}) == len(rows) == 2
-    assert [r["tag"] for r in rows] == ["a", "b"]
+    assert len({gl.name_of(4, r) for r in rows}) == len(rows) == 4
+    assert [r["tag"] for r in rows] == ["a", "b", "c", "d"]
 
 
 def test_setups_keep_plan_order_and_an_empty_setup_draws_nothing():
@@ -65,3 +65,12 @@ def test_the_layout_is_written_beside_the_grids(tmp_path):
 
 def test_the_rule_supersedes_the_audit_question_by_date():
     assert "D3" in gl.__doc__ and "2026-09-24" in gl.__doc__
+
+
+def test_a_grid_holds_at_most_four_because_sharpness_falls_with_cells():
+    """MEASURED 2026-09-28 over WotW ep01-14 panel_dq: median sharpness 1.04-1.44
+    and 0-6 % under 0.5 for 1-4 cells; 0.69 / 17 % at 6; 0.41 / 88 % at 8.
+    ep14's attic 4x2 failed blur on five of eight panels and no rung could cure it."""
+    assert gl.MOST == 4
+    assert [(r["cols"], r["rows"]) for r in gl.layout({"a": {}}, shots("a", 8))] == [(2, 2), (2, 2)]
+    assert [(r["cols"], r["rows"]) for r in gl.layout({"a": {}}, shots("a", 6))] == [(3, 1), (3, 1)]

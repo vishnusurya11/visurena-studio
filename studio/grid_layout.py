@@ -8,7 +8,7 @@ D3: ep09 drew 1x1, 2x1 and 3x1 because its setups hold 2, 3, 5 and 8 shots).
 This rule SUPERSEDES D3 as of 2026-09-24 (decision
 2026-09-24-automate-the-taste-gates: no episode step parks on a person):
 
-- a grid holds at most nine cells and `cols x rows == shots`, because a blank
+- a grid holds at most four cells (MOST, measured; nine until 2026-09-28) and `cols x rows == shots`, because a blank
   cell is a cell the drawer fills with its own invention (`grid_shape`);
 - a count with no square-ish shape splits into the fewest, most balanced
   pieces: 5 -> 3 + 2, 7 -> 4 + 3, 10 -> 6 + 4, 19 -> 6 + 4 + 9;
@@ -25,9 +25,12 @@ from __future__ import annotations
 import json
 from pathlib import Path
 
-MOST = 9
-"""Cells a grid may hold."""
-GOOD = (1, 2, 3, 4, 6, 8, 9)
+MOST = 4
+"""Cells a grid may hold.  MEASURED 2026-09-28 over WotW ep01-14 panel_dq: median
+sharpness 1.04-1.44 and 0-6 % of panels under 0.5 for 1-4 cells; 0.69 / 17 % at
+6; 0.41 / 88 % at 8 (ep14's attic 4x2 failed blur on five of eight panels, and
+no seed or reprose rung can cure a cell's share of the pixels).  Was nine."""
+GOOD = (1, 2, 3, 4)
 """Counts that lay out as one grid without a hole or a long strip."""
 FACES = ("extreme_close", "close", "medium_close")
 WIDES = ("wide", "full")
