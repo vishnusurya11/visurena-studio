@@ -39,6 +39,48 @@ def consent(env: Path, blob: Path | None = None) -> str:
     return creds.refresh_token
 
 
+PASTE_REDIRECT = "http://localhost:8765/"
+PENDING = Path("library") / ".youtube_consent.json"
+"""The PKCE verifier between the two halves of a pasted consent; library/ is gitignored."""
+
+
+def code_from(url: str) -> str:
+    """The one-time code in the failed localhost redirect the owner pasted."""
+    from urllib.parse import parse_qs, urlparse
+    code = parse_qs(urlparse(url.strip()).query).get("code", [""])[0]
+    if not code:
+        raise SystemExit(f"no code in that address (did the consent say allow?): {url[:120]}")
+    return code
+
+
+def paste_flow(env: Path, blob: Path | None, verifier: str | None = None):
+    from google_auth_oauthlib.flow import InstalledAppFlow
+    return InstalledAppFlow.from_client_config(youtube.client_config(env, blob), youtube.SCOPES,
+                                               redirect_uri=PASTE_REDIRECT, code_verifier=verifier,
+                                               autogenerate_code_verifier=verifier is None)
+
+
+def paste_link(env: Path, blob: Path | None) -> str:
+    """Half one, from any device: the link to open; the verifier kept for half two."""
+    import json
+    flow = paste_flow(env, blob)
+    url, _state = flow.authorization_url(prompt="consent", access_type="offline")
+    PENDING.write_text(json.dumps({"verifier": flow.code_verifier}), encoding="utf-8")
+    return url
+
+
+def paste_token(env: Path, blob: Path | None, redirected: str) -> str:
+    """Half two: the pasted address's code exchanged for the refresh token."""
+    import json
+    verifier = json.loads(PENDING.read_text(encoding="utf-8"))["verifier"]
+    flow = paste_flow(env, blob, verifier)
+    flow.fetch_token(code=code_from(redirected))
+    PENDING.unlink(missing_ok=True)
+    if not flow.credentials.refresh_token:
+        raise SystemExit("Google returned no refresh token; open a fresh --paste-link and consent again.")
+    return flow.credentials.refresh_token
+
+
 def whose_channel(env: Path) -> dict:
     """Which channel this token can actually upload to."""
     from googleapiclient.discovery import build
@@ -61,8 +103,16 @@ def main(argv: list[str]) -> None:
     if blob:
         print(f"using the OAuth client from {blob} (it cannot go stale like a copied secret)")
     print(f"scopes: {', '.join(youtube.SCOPES)}")
-    print("a browser will open -- sign in as the owner of The Keeper's Lantern\n")
-    youtube.save_refresh_token(env, consent(env, blob))
+    if "--paste-link" in argv:
+        print("open on ANY device, approve, then paste the localhost address it fails on:\n")
+        print(paste_link(env, blob))
+        return
+    pasted = next((a.split("=", 1)[1] for a in argv if a.startswith("--paste=")), None)
+    if pasted:
+        youtube.save_refresh_token(env, paste_token(env, blob, pasted))
+    else:
+        print("a browser will open -- sign in as the owner of The Keeper's Lantern\n")
+        youtube.save_refresh_token(env, consent(env, blob))
     print(f"refresh token stored in {env} (value not shown)\n")
 
     channel = whose_channel(env)
