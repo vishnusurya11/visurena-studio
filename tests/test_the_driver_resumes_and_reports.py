@@ -23,7 +23,7 @@ def test_a_dirty_tree_is_refused_and_library_is_not_the_tree():
 
 
 def test_a_deferred_run_is_resumed_until_it_completes():
-    runs, told = iter(["DEFERRED: budget", "DEFERRED: budget", "=== EPISODE completed | x ==="]), []
+    runs, told = iter(["DEFERRED: EYE_TAKES needs 528 s", "DEFERRED: EYE_TAKES needs 528 s", "=== EPISODE completed | x ==="]), []
     code = drive.drive(run=lambda: next(runs), notify=told.append, max_runs=5)
     assert code == 0 and len(told) == 1 and "completed" in told[0]
 
@@ -36,7 +36,7 @@ def test_a_refusal_stops_and_tells_the_owner_its_last_lines():
 
 def test_resumes_are_capped():
     told = []
-    code = drive.drive(run=lambda: "DEFERRED: budget", notify=told.append, max_runs=3)
+    code = drive.drive(run=lambda: "DEFERRED: EYE_TAKES needs 528 s", notify=told.append, max_runs=3)
     assert code == 1 and "3 runs" in told[-1]
 
 
@@ -44,3 +44,10 @@ def test_a_silent_log_is_reported_once():
     assert drive.silent(last_growth=0.0, now=1300.0, told=False)
     assert not drive.silent(last_growth=0.0, now=1300.0, told=True)
     assert not drive.silent(last_growth=0.0, now=600.0, told=False)
+
+
+def test_a_plan_deferral_is_not_resumed():
+    """ep14 (2026-09-28): the driver resumed six 'DEFERRED PLAN' runs (~2.5 h);
+    a plan deferral waits on a plan fix, not on budget, so a rerun repeats it."""
+    assert drive.outcome("DEFERRED PLAN | x | battery at plan: CONTRACT : ... -> defer") == "refused"
+    assert drive.outcome("RuntimeError: DEFERRED: EYE_TAKES needs 528 s for its rung") == "deferred"

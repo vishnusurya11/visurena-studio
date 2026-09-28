@@ -23,8 +23,10 @@ def outcome(log: str) -> str:
     """completed | deferred | refused | failed, from how the run's log ended."""
     if "EPISODE completed" in log:
         return "completed"
+    if re.search(r"DEFERRED: .* needs [\d.]+ s", log):
+        return "deferred"            # a budget deferral: the next run resumes at its rung
     if "DEFERRED" in log:
-        return "deferred"
+        return "refused"             # a plan deferral waits on a plan fix (ep14: six reruns, ~2.5 h)
     if "REFUSED" in log:
         return "refused"
     return "failed"
