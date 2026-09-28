@@ -27,6 +27,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 
 from studio.episode_home import episode_arg
 from studio import cast_refs
+from studio import plan_brief
 from studio import panel_dq
 from studio import approval, canvas, episode_board as board, episode_home, episode_ref_official as ro, episode_ref_prompt as rp
 from studio import house_style, pack_refs
@@ -834,7 +835,7 @@ def opened(book_id: str, number: int):
     # first-frame prose was a quarter of ep04-08's under a colour-list style line.
     if unlit := house_style.faults(episode):
         raise SystemExit("G-LIGHT refuses the plan:\n  " + "\n  ".join(unlit))
-    if thin := plan_gates.faults(episode):
+    if thin := plan_gates.faults(episode, plan_gates.quote_share(plan_brief.chapter_paragraphs(book, number)[1])):
         raise SystemExit("the plan fails the authoring gates:\n  " + "\n  ".join(thin))
     refuse_long_shots(episode)
     refuse_still_motions(episode)

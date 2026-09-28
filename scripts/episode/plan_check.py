@@ -184,7 +184,7 @@ def main(book_id: str, number: int) -> int:
     rate = plan_gates.series_rate(book, number)
     for n in plan_gates.advisories(ep, plan_gates.series_lines(book, number), rate=rate):
         print("  advisory:", n[:150])
-    pg = plan_gates.faults(ep)
+    pg = plan_gates.faults(ep, plan_gates.quote_share(plan_brief.chapter_paragraphs(book, number)[1]))
     print("PLAN GATES   :", len(pg) or "clean"); hard += len(pg)
     for f in pg:
         print("   ", f[:170])

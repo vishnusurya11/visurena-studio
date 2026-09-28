@@ -391,10 +391,28 @@ def turn_acts_on(episode: Episode) -> str:
     return ""
 
 
-def story_faults(episode: Episode) -> list[str]:
+QUOTES = ('"', "“", "”")
+
+
+def quote_share(paragraphs: list[str]) -> float | None:
+    """Where the chapter's first quoted speech falls, as a share of its text; None without text."""
+    text = "\n".join(paragraphs)
+    if not text:
+        return None
+    first = min((i for i in (text.find(q) for q in QUOTES) if i >= 0), default=len(text))
+    return round(first / len(text), 3)
+
+
+def dialogue_wall_holds(share: float | None) -> bool:
+    """The first-dialogue wall holds unless the chapter itself speaks past it
+    (ep13: its patched flash-forward, 2026-09-27); unknown means it holds."""
+    return share is None or share <= FIRST_DIALOGUE_SHARE
+
+
+def story_faults(episode: Episode, quote_at: float | None = None) -> list[str]:
     runtime, out = episode.projected_seconds(), []
     at, shot = first_dialogue_at(episode)
-    if at / runtime > FIRST_DIALOGUE_SHARE:
+    if at / runtime > FIRST_DIALOGUE_SHARE and dialogue_wall_holds(quote_at):
         out.append(fault("G-STORY", f"shot {shot}", f"first dialogue line at {at:.1f} s of {runtime:.1f} s projected",
                          round(at / runtime, 2), FIRST_DIALOGUE_SHARE))
     for run, first, last in narration_runs(episode):
@@ -894,11 +912,12 @@ def sync_faults(episode: Episode) -> list[str]:
     return out
 
 
-def faults(episode: Episode) -> list[str]:
-    """Every reason this plan should not be drawn, free to compute."""
+def faults(episode: Episode, quote_at: float | None = None) -> list[str]:
+    """Every reason this plan should not be drawn, free to compute.  `quote_at`
+    is where the chapter first speaks (`quote_share`); None holds every wall."""
     from studio import picture_gates  # G-SIZE and the picture advisories (ep10 synthesis C)
     return (firstframe_faults(episode) + variety_faults(episode)
-            + move_faults(episode) + rate_faults(episode) + story_faults(episode)
+            + move_faults(episode) + rate_faults(episode) + story_faults(episode, quote_at)
             + picture_gates.faults(episode) + sync_faults(episode))
 
 
