@@ -290,7 +290,20 @@ def verdict(report: dict) -> bool:
             and report.get("title_card") is True
             # EVERY PLANNED SOUND IS HEARD (root cause 2026-09-26, D10): twelve
             # episodes shipped with an empty cue list and nothing here noticed.
-            and all(row.get("ok") for row in report.get("sound", [])))
+            and all(row.get("ok") for row in report.get("sound", []))
+            # AND NOT TOO LOUD (owner 2026-09-27, ep13 iter8 at 10.9 dB): speech
+            # stands over the gaps between lines; legacy reports carry no value.
+            and speech_gap.band_ok(report.get("speech_over_gap_db", speech_gap.SPEECH_OVER_GAP_DB)))
+
+
+def speech_band(master: Path, lines: list[dict], until: float, work: Path) -> float:
+    """Speech over the gaps on the master itself, dB (studio/speech_gap)."""
+    import soundfile
+    wav = Path(work) / "qc_band.wav"
+    subprocess.run(["ffmpeg", "-y", "-v", "error", "-i", str(master), "-vn", "-ac", "1", "-ar", "16000", str(wav)],
+                   check=True)
+    audio, sr = soundfile.read(wav)
+    return speech_gap.speech_over_gaps(audio, sr, lines, until)
 
 
 def main(book_id: str, number: int, engine: str = "i2v") -> None:
@@ -320,6 +333,7 @@ def main(book_id: str, number: int, engine: str = "i2v") -> None:
         "missing_cuts": [],          # filled below, once the edit gate has spoken
         "internal_cuts": internal_cuts(placed, records),
         "lines": heard_on_master(master, lines, work, voice_qc.any_transcriber()),
+        "speech_over_gap_db": speech_band(master, lines, placed["duration_s"], work),
         # THE PICTURE'S END, not the last line's START.  With the start, the final
         # `until - end` is negative and the tail is thrown away by `max()`:
         # ep03 reported 2.03 s while a 3.26 s run-out sat at the end of the

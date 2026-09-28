@@ -40,3 +40,27 @@ def refusal(placed: dict) -> str | None:
     shot = next((s["index"] for s in placed.get("shots", []) if s["t_start"] <= start < s["t_end"]), "?")
     return (f"REFUSED: a {end - start:.2f} s hole in speech from {start:.2f} s (shot {shot}) against the "
             f"{MAX_GAP_S} s wall; shorten the holds (beat_s/coda_s) of the shots in it, or give one a line")
+
+
+SPEECH_OVER_GAP_DB = 11.0
+"""Speech over the gaps between lines, RMS dB.  OWNER 2026-09-27 on ep13
+master_iter8 (10.9): "the sound effects are good but too loud".  WotW ep10-12
+measured 11.3-13.5, Sherlock 9.8-16.5; iter11 after the duck and trim 12.0."""
+
+
+def _db(x) -> float:
+    import numpy as np
+    return float(20 * np.log10(np.sqrt(np.mean(np.square(x))) + 1e-9)) if len(x) else -120.0
+
+
+def speech_over_gaps(audio, sr: int, lines: list[dict], until: float) -> float:
+    """Mean dB under the lines minus mean dB of the gaps (a second or longer) between them."""
+    import numpy as np
+    said = [_db(audio[int(l["at"] * sr):int((l["at"] + l["seconds"]) * sr)]) for l in lines]
+    holes = [(a + 0.2, b - 0.2) for a, b in gaps(lines, until) if b - a > 1.0]
+    quiet = [_db(audio[int(a * sr):int(b * sr)]) for a, b in holes]
+    return round(float(np.mean(said) - np.mean(quiet)), 2) if said and quiet else 99.0
+
+
+def band_ok(db: float) -> bool:
+    return db >= SPEECH_OVER_GAP_DB
