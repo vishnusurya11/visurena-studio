@@ -27,6 +27,56 @@ master as `cut/master_iterN.mp4`, and never overwrite the only copy.
 
 ---
 
+## THE RUN, ON ONE PAGE (ten-agent debate, 2026-09-27; docs/audit/2026-09-27_ep13_ten_agent_plan.md)
+
+ep13 took 43 hours and 12 masters for about 5 hours of real work: code debugged on a
+live episode, re-reads of unchanged pictures, retries on faults no retry cures, runs
+nobody watched, and hand edits to pipeline state. Sherlock ep04-14 took 1 master each.
+The rules below are what closes that gap. **The owner's standing order: no input from
+him in production.** The chapter number and its cast are the only inputs.
+
+**Before the run (once, never mid-run).** Repo root, `master`, a CLEAN tree: all code
+committed. `nvidia-smi` and ComfyUI `/queue` idle. Bind the cast:
+`uv run python scripts/episode/step_01_bind.py <book> <n> --cast=a,b,...`
+
+**The run.** One launcher, and it is watched:
+
+    uv run python scripts/episode/drive.py <book> <n>
+
+It refuses a dirty tree, records the SHA in `episodes/epNN/drive.jsonl`, runs
+`episode.py`, resumes a DEFERRED run, and messages the owner on Telegram when the run
+completes, stops, or goes silent 20 minutes. Launch it detached AND put a background
+waiter on `drive.jsonl` in the same turn. Never end a turn with a run nobody watches.
+
+| step | stops on (HARD) | what you do, without stopping the runner |
+|---|---|---|
+| 02 plan | battery: CONTRACT, CELL, G-STILL, G-ORDER, G-COVER, G-SOUND, G-STORY (first-dialogue wall only when the chapter speaks early) | nothing: a rendered plan is judged in report mode, never rewritten |
+| 05 timeline | the MEASURED speech gap over 6.0 s (`studio/speech_gap`) | - |
+| 07-08 board, panels | panel gates; EYE_PANELS climbs only on redraw-curable faults | read the contact sheet while 09 renders |
+| 09 shoot | HARD take rows; EYE_TAKES climbs on hard faults (advisory lag/rotation are points off) | read the take strips |
+| 11 qc | any QC row, incl. the sound band: speech 11 dB over the gaps | - |
+| 12 deliver | the publish lock | watch + listen full size; the sign-off |
+
+**The non-negotiables.**
+1. **$0**, and no test spends.
+2. **One writer per file.** Before the first rendered take, `plan.py` or the writer agent
+   writes `plan.json`. After it, only the ladders do. Never hand-edit `plan.json`,
+   `heads.json`, `stills.json`, graphs or take files, and never `touch` a timestamp.
+   A plan.json the ladders edited carries `PATCHED_BY_HAND = True` in its plan.py.
+3. **One launcher:** `drive.py`. No guard-stops, no scratch drivers, no bare step scripts
+   mid-run. What the runner cannot do is a finding and a fix, then ONE relaunch.
+4. **No code changes on a live episode.** Fix, test, commit, then resume once.
+5. **A terminal is not a pass.** Only the owner waives (`review/waiver.json`).
+6. **Watch and listen before anything leaves the machine**; the lock needs the sign-off.
+7. **Audio first.** Picture cut to the measured voice. Effects duck under every line
+   (6 dB), ambience 3 dB, every cue trimmed 3 dB (`studio/episode_sound`).
+8. **Shots follow the chapter** across scenes (G-ORDER). A flash-forward is omitted
+   (`omit` in the plan), never slipped in to pass a gate.
+9. **Deliverable first**; every `master_iterN.mp4` kept.
+10. **When the owner says upload, it goes public.**
+
+---
+
 ## RULE ONE — gate the plan before anything is made
 
 Nothing is rendered until the plan passes both batteries. Each battery needs
@@ -84,7 +134,8 @@ them defaults to 1.
 
 **The runner is the leader; this skill is the desk over it.** One command runs
 the whole chain over one unit, skipping every step whose output exists and
-parking on every owner gate with a call-sheet line:
+stopping only on a hard refusal. Drive it with `scripts/episode/drive.py` (above);
+`episode.py` is what the driver runs:
 
     uv run python episode.py <book> <n>        # one episode
     uv run python episode.py <book>            # every episodes/epNN with a plan.json
@@ -152,10 +203,12 @@ upload, it goes public.** He corrected the work for making it private once.
 
 ## Writing the plan
 
-The plan is the contract (`studio/episode_spec.py`). The plan `.py` is the
-source, and `plan.json` is always what running it produces. **Never patch
-`plan.json` directly.** ep01, ep03 and ep04 were patched that way; their plan
-scripts would revert what shipped, and a strict guard names them.
+The plan is the contract (`studio/episode_spec.py`). Before the first rendered
+take, the plan `.py` (or the writer agent) is the source of `plan.json`. From the
+first rendered take on, only the ladders write it: re-running the plan `.py` then
+erases their cures (ep13 finding 49), so its plan.py declares
+`PATCHED_BY_HAND = True`. **Never patch `plan.json` by hand.** ep01, ep03 and ep04
+were patched that way; a strict guard names them.
 
 **The story.** One chapter, one brick: a QUESTION, a TURN (the lead's choice,
 50-75% of the way in), an ANSWER, and a BUTTON (the last line, never the
@@ -230,9 +283,9 @@ match the picture.
 - an unused LoadImage slot feeds the encoder ComfyUI's example doll, so
   `stage_only` removes it.
 
-The 2x2 minimum is an OPEN owner decision (audit Tier 0, D3). ep09 drew
-1x1, 2x1 and 3x1 grids because its setups hold 5, 3 and 2 shots; the owner
-has not ruled. Say which layout you use in the report.
+The layout is ruled by `grid_layout` (by setup and shot size); a close is bound by
+the items above the chest only (9cb4609: six ep13 closes drew whole seated figures
+when bound to trousers and socks).
 
 **Lay a grid out by shot size**: wides with wides, faces with faces. A mixed
 2x2 drew a medium close as a full figure; head counts are a lottery across
@@ -287,7 +340,7 @@ first second that is not the panel. The gates passed ep09 T02 at 92.6 before
 | a moving take froze | re-roll the seed |
 | a still take froze | change the move TYPE, not its amount |
 | a take froze after its OWN length changed | put the length back; a fresh seed is not the cure (ep08 T16: 51%, then 75%, then 10% frozen once restored) |
-| lip-sync lags | shorten the take |
+| lip-sync lags (HARD mux lag) | the edit lays the line where the take's soundtrack put it (`studio/line_laid`); an advisory lag or rotation is points off, never a rung (ep13: five lag rounds, 157 min, none cured) |
 | a hard cut appears early | the take opened on another staged picture, or on the place its prompt names three times |
 | the same fault on a fresh seed | the PLAN: re-aim the move at what the cell holds (ep09 shots 14, 15, 18 repeated on new seeds) |
 | a person pinned while the set slides | the plan: push in or crane instead of the truck (G-ANCHOR) |
@@ -334,7 +387,8 @@ never a moving shot's coda.
 
 ## Resuming
 
-1. Read `episodes/epNN/story.md` and say back where the episode is.
+1. Read `episodes/epNN/drive.jsonl` and the last `drive_runNN.log`, and say back where
+   the episode is. Resume with `drive.py`, once.
 2. Check the GPU and ComfyUI's queue before starting a run.
 3. If a job ignores `/interrupt`, restart ComfyUI; see memory
    `project_comfy_restart`.
