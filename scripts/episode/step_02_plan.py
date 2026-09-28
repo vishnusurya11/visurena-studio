@@ -134,6 +134,16 @@ def deferred_note(aside: Path) -> str:
     return episode_home.read_json(aside).get("note", "deferred")
 
 
+def report(ctx) -> None:
+    """A rendered plan is judged in REPORT mode: the battery runs, its refusals
+    are logged, nothing is rewritten (ten-agent debate 2026-09-27: G-STILL would
+    have named ep13's shots 9, 18 and 19, all visible on the master)."""
+    rc, out = ctx.capture_script(PLAN_CHECK)
+    said = "\n".join(refusal_lines(out)) if rc else "clean"
+    ctx.log(f"the plan's takes are rendered: battery in report mode, no rewrite:\n{said}",
+            step_id=STEP_ID, level="WARNING")
+
+
 def run(ctx) -> None:
     plan = plan_of(ctx)
     desk = plan_ladder.Desk(ctx, plan, writer=episode_writer)
@@ -145,8 +155,7 @@ def run(ctx) -> None:
     if plan_verdict.current(plan) or grandfathered(ctx):
         return
     if rendered(ctx):
-        ctx.log("the plan's takes are rendered: the take gates judge it now; no re-judge, no rewrite",
-                step_id=STEP_ID, level="WARNING")
+        report(ctx)
         return
     signed = clear(ctx, desk)
     if signed.name == plan_ladder.DEFERRED:
