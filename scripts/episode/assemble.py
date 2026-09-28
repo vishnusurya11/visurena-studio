@@ -867,6 +867,8 @@ def main(book_id: str, number: int, engine: str = "i2v",
     offsets = [episode_emotion.offset_of(said.get(line["index"], {}).get("delivery", "calm"))
                for line in placed["lines"]]
     laid = line_laid.laid_lines(placed, episode_home.takes_dir(book, number, engine))
+    # EFFECTS DUCK UNDER THE VOICE like the bed (owner 2026-09-27: "too loud")
+    sound = episode_sound.ducked(sound, [(l["at"], l["at"] + l["seconds"]) for l in laid], work)
     mixed = mix_with_lines(cut, music, sound, [(line["at"], wavs[line["index"]]) for line in laid],
                            work / "mixed.mp4", seconds=placed["duration_s"], offsets=offsets)
     card = book / "title" / f"ep{number:02d}.mp4"

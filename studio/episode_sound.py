@@ -55,6 +55,43 @@ def layer(home: Path, episode, placed: dict, run=None) -> list[tuple[float, Path
     return out
 
 
+EFFECT_DUCK_DB = 6.0
+AMBIENCE_DUCK_DB = 3.0
+"""Owner 2026-09-27 on ep13: "the sound effects are good but too loud".  The
+mix ducked only the bed; 5 of 8 effects and every ambience played at full level
+under narration (speech 9.8 LU over the gaps; WotW ep10-12 and Sherlock
+11.3-16.5).  Effects and ambience now duck under every line, at mix time."""
+
+
+def duck_depth(cue: Path) -> float:
+    """An ambience bed ducks less than an event: it is already low."""
+    return AMBIENCE_DUCK_DB if Path(cue).name.startswith("amb_") else EFFECT_DUCK_DB
+
+
+def cue_windows(lines: list[tuple[float, float]], when: float, depth: float) -> list[tuple[float, float, float]]:
+    """The master's line windows on the cue's own clock (it starts at `when`)."""
+    return [(start - when, end - when, depth) for start, end in lines]
+
+
+def ducked(cues: list[tuple[float, Path]], lines: list[tuple[float, float]], out_dir: Path,
+           run=None) -> list[tuple[float, Path]]:
+    """Every cue a line overlaps, written ducked beside the mix; the rest as they are."""
+    import subprocess
+    from studio.trailer_assemble import duck_expr
+    run = run or (lambda args: subprocess.run(args, check=True))
+    out = []
+    for when, path in cues:
+        windows = [w for w in cue_windows(lines, when, duck_depth(path)) if w[1] > 0]
+        if not windows:
+            out.append((when, path))
+            continue
+        target = Path(out_dir) / f"{Path(path).stem}.ducked.wav"
+        run(["ffmpeg", "-y", "-v", "error", "-i", str(path),
+             "-af", f"volume='{duck_expr(windows)}':eval=frame", str(target)])
+        out.append((when, target))
+    return out
+
+
 def presence(master: Path, episode, placed: dict) -> list[dict]:
     """Per planned cue: where it sits in the master and how far it rises there."""
     rows = {int(s["index"]): s for s in placed["shots"]}
