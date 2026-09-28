@@ -161,8 +161,16 @@ BUT_NOT_ISE = {"wise", "rise", "promise", "premise", "surprise", "advise", "devi
 `iz`, and `promise` and `rise` with it."""
 
 
+ENCE_STEMS = ("defen", "offen", "preten", "licen")
+"""The `-ence`/`-ense` pairs, by stem: defence/defense, ...  A word list, like
+-re: a rule would fold `fence`, `hence` and `pence` (ep14 line 24)."""
+
+
 def spelling(word: str) -> str:
     """One canonical spelling for a word two dialects write differently."""
+    for stem in ENCE_STEMS:
+        if word.startswith(stem + "ce"):
+            return stem + "se" + word[len(stem) + 2:]
     for stem in RE_STEMS:
         for tail, into in (("re", "er"), ("res", "ers"), ("red", "ered"), ("ring", "ering")):
             if word == stem + tail:

@@ -94,3 +94,15 @@ def test_two_different_words_are_not_folded_together():
     """The fold must not hide a real error by collapsing distinct words."""
     assert error_rate("he poured it", "he pored it") > 0.0
     assert error_rate("the floor", "the flour") > 0.0
+
+
+def test_defence_is_defense_and_heard_across_a_seam():
+    """ep14 line 24 (2026-09-28): "Defences forced!" read correctly, heard as
+    "Defense is forced!", scored 0.29 and failed twice: -ence was no fold."""
+    assert error_rate("the defense", "the defence") == 0.0
+    assert error_rate("London in danger of suffocation? Defense is forced!",
+                      "London in danger of suffocation! Defences forced!") <= 0.2
+
+
+def test_a_fence_is_not_folded():
+    assert error_rate("the fense", "the fence") > 0.0
