@@ -20,7 +20,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 
-from studio import episode_home, grid_layout, step_cli  # noqa: E402
+from studio import episode_home, grid_layout, panel_ladder, step_cli  # noqa: E402
 
 STEP_ID = "07"
 NAME = "board"
@@ -57,10 +57,17 @@ def current(ctx, row: dict, stale: set[str]) -> bool:
     return grid_path(ctx, row).exists() and grid_layout.name_of(ctx.number, row) not in stale
 
 
+def strays(ctx, rows: list[dict]) -> list[str]:
+    """Grids on disk the layout no longer names (ep14: the grid cap split the attic
+    4x2 into two 2x2s and panels.py refused 'shots drawn by two grids')."""
+    names = {grid_layout.name_of(ctx.number, row) for row in rows}
+    return sorted(g.stem for g in (ctx.home / "storyboard" / "grids").glob("*.png") if g.stem not in names)
+
+
 def done(ctx) -> bool:
     rows = layout(ctx)
     stale = stale_names(ctx) if rows else set()
-    return bool(rows) and all(current(ctx, row, stale) for row in rows)
+    return bool(rows) and all(current(ctx, row, stale) for row in rows) and not strays(ctx, rows)
 
 
 def run(ctx) -> None:
@@ -68,6 +75,8 @@ def run(ctx) -> None:
     if not rows:
         raise SystemExit(f"REFUSED: the plan has no shots to lay out into {LAYOUT}")
     grid_layout.write(ctx.home, rows)
+    for name in strays(ctx, rows):
+        panel_ladder.supersede(ctx.home / "storyboard", name)
     extra = getattr(ctx, "extra", None) or []
     stale = stale_names(ctx)
     for row in rows:

@@ -66,3 +66,15 @@ def test_a_plan_with_no_shots_is_refused_not_parked(ctx):
     (ctx.home / "plan.json").write_text(json.dumps({"setups": {}, "shots": []}), encoding="utf-8")
     with pytest.raises(SystemExit, match="no shots"):
         step.run(ctx)
+
+
+def test_a_grid_the_layout_no_longer_names_is_superseded(ctx):
+    """ep14 (2026-09-28): the grid cap split the attic 4x2 into two 2x2s; the old
+    4x2 stayed in grids/ and panels.py refused 'shots drawn by two grids'."""
+    grids = ctx.home / "storyboard" / "grids"
+    grids.mkdir(parents=True)
+    for ext in ("png", "json", "txt"):
+        (grids / f"ep04_grid_yard_5x1.{ext}").write_text("old", encoding="utf-8")
+    step.run(ctx)
+    assert not list(grids.glob("ep04_grid_yard_5x1.*"))
+    assert (ctx.home / "storyboard" / "superseded" / "ep04_grid_yard_5x1_v1.png").exists()
