@@ -27,7 +27,7 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Callable
 
-from studio import episode_home, grid_layout, judged_gate
+from studio import episode_home, grid_layout, judged_gate, panel_dq
 from studio.judges.verdict import Fault, Verdict
 from studio.ladder import Ladder, Rung
 
@@ -182,9 +182,13 @@ class Climb:
                   for f in verdict.faults]
         return verdict.model_copy(update={"faults": faults})
 
+    def curable(self, verdict: Verdict) -> bool:
+        """A redraw could move a fault AND the machine gates still fail a panel."""
+        return curable(verdict) and not machine_clean(self.home)
+
     @property
     def rungs(self) -> judged_gate.Rungs:
-        return judged_gate.Rungs(ladder(), self.take, curable=curable)
+        return judged_gate.Rungs(ladder(), self.take, curable=self.curable)
 
 
 def cured_by_redraw(verdict: Verdict) -> list[Fault]:
@@ -194,6 +198,21 @@ def cured_by_redraw(verdict: Verdict) -> list[Fault]:
 def curable(verdict: Verdict) -> bool:
     """Whether a redraw can move any of these faults."""
     return bool(cured_by_redraw(verdict))
+
+
+MACHINE = ("panel_dq.json", "panel_content.json")
+
+
+def machine_clean(home: Path) -> bool:
+    """Both machine gates pass every panel the plan names.  A RUNG MAY NOT UNDO A
+    CLEAN BOARD: ep14 (2026-09-28) -- the seed rung left 30/30 panels clean, the
+    eye's OCR lettering still read curable, the reprose rung redrew the Waterloo
+    grid, lettering came back on shot 5 and keep_best kept it; the takes refused.
+    Past this point the eye's faults are signed flagged, not climbed."""
+    board, plan = Path(home) / "storyboard", Path(home) / "plan.json"
+    shots = [int(s["index"]) for s in episode_home.read_json(plan).get("shots") or []] if plan.exists() else []
+    panels = sorted(board.glob("shot_*.png"))
+    return bool(shots) and not any(panel_dq.panel_refusal(board / name, panels, shots) for name in MACHINE)
 
 
 def ladder() -> Ladder:

@@ -122,3 +122,26 @@ def test_the_rungs_are_priced_at_their_measured_cost_under_keep_best():
     assert [(r.name, r.tries) for r in ladder.rungs] == [("redraw_grid_seed", 1), ("reprose", 1)]
     assert all(r.cost_seconds == panel_ladder.RUNG_SECONDS for r in ladder.rungs)
     assert ladder.terminal == "keep_best"
+
+
+def machine_verdicts(board: Path, shots: list[int], failing: int | None = None) -> None:
+    for name in ("panel_dq.json", "panel_content.json"):
+        rows = [{"shot": i, "passed": i != failing} for i in shots]
+        (board / name).write_text(json.dumps(rows), encoding="utf-8")
+
+
+def test_a_board_both_machine_gates_pass_climbs_no_rung(tmp_path):
+    """ep14 (2026-09-28): the seed rung made all 30 panels clean on both machine gates;
+    the eye's OCR lettering still read curable, the reprose rung redrew the Waterloo
+    grid, lettering came back on shot 5, and keep_best kept that -- the takes refused.
+    A rung may not undo a board the machine gates pass: the eye's faults go flagged."""
+    ctx = Ctx(tmp_path)
+    board, _ = board_of(ctx)
+    shots = [s["index"] for s in json.loads(PLAN.read_text(encoding="utf-8"))["shots"]]
+    lettered = Verdict(judge="panel_eye", version="1", passed=False, confidence=1.0,
+                       faults=[Fault(kind="lettering", where="shot_05", note="gibberish")])
+    machine_verdicts(board, shots)
+    climb = panel_ladder.climb(ctx, rebuild=lambda: None)
+    assert not climb.rungs.curable(lettered)
+    machine_verdicts(board, shots, failing=shots[0])
+    assert climb.rungs.curable(lettered)
