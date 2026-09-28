@@ -27,8 +27,11 @@ from studio import take_content
 from studio.judges.verdict import Fault, Verdict, confidence
 
 NAME, VERSION = "take_eye", "1"
-CURABLE_ADVISORY = frozenset({"lag", "leak", "rotation"})
-"""Advisory rows the ladder has a rung for; every other advisory row is points off, not a fault."""
+CURABLE_ADVISORY = frozenset({"leak"})
+"""Advisory rows the ladder has a rung for; every other advisory row is points off, not a fault.
+MEASURED on ep13 (2026-09-27): `lag` took five shorter_take rounds (157 min) and
+cured none; `rotation`'s only cure, a locked camera, froze T21.  `leak` stays:
+its cure is a head trim, no render."""
 HARD_CONTENT = frozenset({"content", "clones", "identity", "unread"})
 GEOMETRY = frozenset({"pass-through", "held", "cut-vote", "cut", "jump", "cut-landing", "foreign",
                       "frozen-at-start", "frozen-share", "frozen-whole", "coherence off-board", "last-vs-cell",

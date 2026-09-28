@@ -19,13 +19,16 @@ def lagging() -> dict:
     return {"file": "T05.mp4", "gates": [g for g in rows if g["name"] == "lag"] + [mux], "attempts": []}
 
 
-def test_the_advisory_lag_row_is_a_low_fault_the_ladder_can_cure():
+def test_the_advisory_lag_row_is_points_off_not_a_fault():
+    """MEASURED on ep13 (2026-09-27, finding 61): five shorter_take rounds on
+    advisory lag rows (T00 -6..-8 f, T11 +19 f) cost 157 min and cured none --
+    every T00 attempt already passed.  The HARD lip-sync row still climbs."""
     by = {f.kind: f for f in take_eye.dq_faults(5, lagging())}
-    assert by["lag"].severity == "low" and by["lag"].evidence["value"] == 3
+    assert "lag" not in by
     assert by["lip-sync"].severity == "normal"
 
 
-def test_neither_lag_row_takes_a_seed_and_both_take_the_shorter_take():
+def test_the_lip_sync_row_takes_the_shorter_take_never_a_seed():
     for fault in take_eye.dq_faults(5, lagging()):
         assert not take_ladder.wants(fault, "seed", "The camera holds a locked-off frame; he speaks")
         assert take_ladder.wants(fault, "shorter_take", "")
