@@ -261,4 +261,4 @@ again — the gates read the plan, never a diff.
 
 ## Camera moves the model obeys (G-STILL)
 
-Never write `rack_focus`, `tilt_down` or `crane_down`: MiniMax-H3 ignores them and the take renders frozen (ep13: 4 of 4). Use `pull_reveal` or `crane_up`. A low or high angle is a camera line PLUS one move (`crane_up`, `push_slow`, `track_lateral`); a held angle renders still unless the shot is declared `still` on purpose.
+Never write `rack_focus`, `tilt_down` or `crane_down`: MiniMax-H3 ignores them and the take renders frozen (measured: 4 of 4). Use `pull_reveal` or `crane_up`. A low or high angle is a camera line PLUS one move (`crane_up`, `push_slow`, `track_lateral`); a held angle renders still unless the shot is declared `still` on purpose.

@@ -64,6 +64,8 @@ class Draft(BaseModel):
     shots: list[Shot]
     lines: list[Line]
     beds: list[Bed] = Field(default_factory=list)
+    omit: list[int] = Field(default_factory=list)
+    """The contract's omitted shots; a writer's first draft omits none."""
 
 
 def to_episode(draft: Draft) -> Episode:
