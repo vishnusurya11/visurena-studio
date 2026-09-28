@@ -842,6 +842,33 @@ def cover_faults(episode, paragraphs: list[str], title: str) -> list[str]:
     return out
 
 
+ORDER_SLACK = 2
+"""Paragraphs a shot may step back from the one before it (a reaction to a line
+just read); ep13's patched opening stepped back 13."""
+
+
+def event_paragraph(shot, paragraphs: list[str]) -> int | None:
+    """Where the shot's event sits: its LATEST span (an earlier span is often a
+    description quoted from where a character was introduced)."""
+    found = [n for span in shot.source if (n := span_paragraph(span, paragraphs))]
+    return max(found) if found else None
+
+
+def order_faults(episode, paragraphs: list[str]) -> list[str]:
+    """G-ORDER: the cut's shots follow the chapter (ten-agent debate 2026-09-27)."""
+    out, last, scene = [], 0, None
+    omitted = set(getattr(episode, "omit", []) or [])
+    for shot in episode.shots:
+        at = None if shot.index in omitted else event_paragraph(shot, paragraphs)
+        if at is None:
+            continue
+        if at < last - ORDER_SLACK and getattr(shot, "setup", None) != scene:
+            out.append(fault("G-ORDER", f"shot {shot.index}", "comes before the shot ahead of it in the chapter; "
+                             "follow the chapter, or omit the flash-forward", at, last))
+        last, scene = at, getattr(shot, "setup", None)
+    return out
+
+
 def shout_faults(episode) -> list[str]:
     """G-SHOUT: a line ending in '!' is somebody shouting, so it is dialogue --
     filed as narration it is read in the calm narrating voice (ep12 line 16)."""
