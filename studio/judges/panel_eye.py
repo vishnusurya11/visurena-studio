@@ -219,7 +219,8 @@ def hat_fault(staged: str, run: Callable, seen: list[dict], pts, size: tuple[int
 def lettering_faults(path: Path, reader: Callable, cast: list[str], prose: str, insert: bool,
                      width: int, where: str) -> list[Fault]:
     found = ocr.lettering(ocr.read(path, reader), cast, prose, insert=insert, width=width)
-    return [fault("lettering", where, note=f"{r['kind']}: {r['text']!r}", **r) for r in found]
+    return [fault("lettering", where, note=f"{r['kind']}: {r['text']!r}", found=r["kind"],
+                  **{k: v for k, v in r.items() if k != "kind"}) for r in found]
 
 
 def landmark_faults(staged: str, run: Callable, place: str, where: str) -> list[Fault]:
