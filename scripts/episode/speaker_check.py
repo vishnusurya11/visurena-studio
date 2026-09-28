@@ -20,6 +20,17 @@ from studio import episode_home, voice_ear
 from studio.speaker_spread import SAME_SPEAKER_FLOOR, spread
 
 
+MEASURABLE_S = 2.0
+"""say_lines.SIM_MEASURABLE_S: under 2 s a voice embedding scores one man's own
+slices 0.07-0.58 (finding 40); ep13's two "split voices" were "Listen!" and
+"What are we?"."""
+
+
+def long_enough(wav: Path) -> bool:
+    import soundfile
+    return soundfile.info(str(wav)).duration >= MEASURABLE_S
+
+
 def lines_by_speaker(home: Path) -> dict[str, list[tuple[str, Path]]]:
     rows = json.loads((home / "audio" / "lines" / "lines.json").read_text(encoding="utf-8"))
     rows = rows["lines"] if isinstance(rows, dict) else rows
@@ -27,7 +38,7 @@ def lines_by_speaker(home: Path) -> dict[str, list[tuple[str, Path]]]:
     for row in rows:
         who = row.get("who") or row.get("speaker") or "narration"
         wav = home / "audio" / "lines" / (row.get("file") or f"l{row['index']:02d}.wav")
-        if wav.exists():
+        if wav.exists() and long_enough(wav):
             out.setdefault(who, []).append((wav.stem, wav))
     return out
 
