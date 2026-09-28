@@ -60,6 +60,13 @@ def repeats(frames: np.ndarray, dup: float = DUP) -> set[int]:
     return {k for k in range(len(frames) - 1) if frame_diff(frames[k], frames[k + 1]) < dup}
 
 
+def in_cut(records: list[dict], placed: dict) -> list[dict]:
+    """The take records whose shots the timeline places; a take of an omitted
+    shot stays on disk and out of the cut's measures (ep13, 2026-09-27)."""
+    here = {s["index"] for s in placed["shots"]}
+    return [r for r in records if all(i in here for i in (r.get("shots") or [r["index"]]))]
+
+
 def segment_plan(placed: dict, records: list[dict], fps: int = FPS) -> list[dict]:
     """One row per take-run in cut order: master start frame and frames placed."""
     by = {s["index"]: s for s in placed["shots"]}

@@ -68,3 +68,11 @@ def test_a_voiced_line_of_an_omitted_shot_is_not_attached_to_the_timeline():
     measured = {1: {"index": 1}}
     tr.attach_paths(measured, [{"index": 0, "rel_path": "l00.wav"}, {"index": 1, "rel_path": "l01.wav"}])
     assert measured == {1: {"index": 1, "rel_path": "l01.wav"}}
+
+
+def test_a_take_of_an_omitted_shot_is_not_measured_against_the_cut():
+    """ep13 QC died on KeyError 0: it looked the omitted T00 up in the timeline."""
+    from studio import edit_gate
+    placed = {"shots": [{"index": 1, "t_start": 0.0, "seconds": 2.0}]}
+    records = [{"index": 0, "shots": [0]}, {"index": 1, "shots": [1]}]
+    assert edit_gate.in_cut(records, placed) == [{"index": 1, "shots": [1]}]

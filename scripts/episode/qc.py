@@ -311,7 +311,7 @@ def main(book_id: str, number: int, engine: str = "i2v") -> None:
     lines = line_laid.laid_lines(placed, take_dir)   # where the master laid each line (ep13 T11)
     lufs, tp = integrated(master), true_peak(master)
     seen = seen_cuts(master)
-    records = episode_home.read_json(take_dir / "shots.json")
+    records = edit_gate.in_cut(episode_home.read_json(take_dir / "shots.json"), placed)
     report = {
         "master": episode_home.relative(book, master),
         # WHICH BYTES THIS REPORT MEASURED.  Without it a report can outlive the
