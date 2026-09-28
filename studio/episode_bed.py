@@ -237,6 +237,15 @@ def tone_lufs(name: str) -> float:
     return TONES[name].lufs
 
 
+def in_cut(shot: int, at: dict[int, float]) -> int:
+    """The shot a span starts on: itself, or the next one in the cut when the
+    plan omits it (ep13's omitted opening, 2026-09-27)."""
+    later = [s for s in at if s >= shot]
+    if not later:
+        raise ValueError(f"bed span names shot {shot}, which this episode does not have")
+    return min(later)
+
+
 def spans(beds: list[dict], at: dict[int, float], total: float) -> list[Span]:
     """The episode cut into contiguous tone spans, covering every second of it.
 
@@ -252,8 +261,7 @@ def spans(beds: list[dict], at: dict[int, float], total: float) -> list[Span]:
         tone, shot = entry["tone"], entry["from_shot"]
         if tone not in TONES:
             raise ValueError(f"{tone!r} is not a bed tone; say one of {tuple(TONES)}")
-        if shot not in at:
-            raise ValueError(f"bed span names shot {shot}, which this episode does not have")
+        shot = in_cut(shot, at)
         marks.append((shot, tone))
     if marks != sorted(marks, key=lambda m: m[0]):
         raise ValueError("bed spans are written in story order; these are out of order")

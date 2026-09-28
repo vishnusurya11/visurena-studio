@@ -489,6 +489,10 @@ class Episode(BaseModel):
     setups: dict[str, Setup]
     shots: list[Shot]
     lines: list[Line]
+    omit: list[int] = Field(default_factory=list)
+    """Rendered shots left out of the CUT: the timeline skips them and their
+    lines; their takes, panels and verdicts stay on disk and current.  OWNER
+    2026-09-27: ep13's flash-forward opening goes without renumbering 25 takes."""
     beds: list[dict] = Field(default_factory=list)
     """The music bed's tone spans: `[{"from_shot": 0, "tone": "plain"}, ...]`.
 
@@ -505,6 +509,10 @@ class Episode(BaseModel):
     # ---- lookups -----------------------------------------------------------
     def shot(self, index: int) -> Shot:
         return next(s for s in self.shots if s.index == index)
+
+    def cut_shots(self) -> list[Shot]:
+        """The shots in the cut: every shot but the omitted."""
+        return [s for s in self.shots if s.index not in self.omit]
 
     def lines_of(self, shot_index: int) -> list[Line]:
         return [line for line in self.lines if line.shot == shot_index]
@@ -566,6 +574,15 @@ class Episode(BaseModel):
         kind, n = hit.group(1), int(hit.group(2))
         if n >= len(self.shots if kind == "shot" else self.lines):
             raise ValueError(f"answer {self.answer!r} names a {kind} the plan does not have")
+        return self
+
+    @model_validator(mode="after")
+    def _omit_names_shots(self) -> "Episode":
+        known = {s.index for s in self.shots}
+        if bad := [i for i in self.omit if i not in known]:
+            raise ValueError(f"omit names shots the plan does not have: {bad}")
+        if known and set(self.omit) >= known:
+            raise ValueError("omit leaves no shot in the cut")
         return self
 
     @model_validator(mode="after")

@@ -31,7 +31,7 @@ two shouted lines were refused for want of a cue they did not need."""
 def cues_of(episode) -> list[sfx_cues.Cue]:
     """Every sound the plan names, as a cue on its shot."""
     return [sfx_cues.Cue(shot=s.index, sound=x.sound, at=x.at, seconds=x.seconds, gain_db=x.gain_db)
-            for s in episode.shots for x in (getattr(s, "sounds", None) or [])]
+            for s in episode.cut_shots() for x in (getattr(s, "sounds", None) or [])]
 
 
 def setup_rows(episode, placed: dict) -> dict[str, list[dict]]:

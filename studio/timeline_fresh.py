@@ -22,7 +22,8 @@ def _inputs(episode) -> list:
     """Exactly what the timeline is derived from, in a stable order."""
     shots = sorted((s.index, s.beat_s, s.coda_s) for s in episode.shots)
     lines = sorted((l.index, l.shot, l.text) for l in episode.lines)
-    return [shots, lines]
+    omitted = sorted(getattr(episode, "omit", []) or [])
+    return [shots, lines] + ([omitted] if omitted else [])
 
 
 def fingerprint(episode, lines: list[dict] | None = None) -> str:

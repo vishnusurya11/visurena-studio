@@ -30,7 +30,7 @@ def on_frame(seconds: float) -> float:
 def place(episode: Episode, measured: dict[int, float]) -> dict:
     """`measured` maps line index -> seconds of the rendered file."""
     shots, lines, t = [], [], 0.0
-    for shot in episode.shots:
+    for shot in episode.cut_shots():
         start, cursor = t, t + HANDLE
         for k, line in enumerate(episode.lines_of(shot.index)):
             if k:
