@@ -369,13 +369,18 @@ def cast_one(book: Path, card: dict, setting: str, era: str, hertz: int,
     return got
 
 
-def main() -> None:
+def parser() -> argparse.ArgumentParser:
     ap = argparse.ArgumentParser(description=__doc__)
     ap.add_argument("codex_id")
+    ap.add_argument("episode", nargs="?", help="ignored: the episode runner appends it (ep14 step 04)")
     ap.add_argument("--only", default="", help="comma-separated character ids")
     ap.add_argument("--recast", action="store_true",
                     help="redesign the --only characters: the old clip is kept as design_vN.wav")
-    args = ap.parse_args()
+    return ap
+
+
+def main() -> None:
+    args = parser().parse_args()
 
     book = book_dir(args.codex_id)
     setting, era = world(book)
