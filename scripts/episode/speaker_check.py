@@ -17,6 +17,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 
 from studio import episode_home, voice_ear
+from studio.episode_emotion import FEELING_FLOOR_DROP
 from studio.speaker_spread import SAME_SPEAKER_FLOOR, spread
 
 
@@ -43,13 +44,33 @@ def lines_by_speaker(home: Path) -> dict[str, list[tuple[str, Path]]]:
     return out
 
 
+def deliveries(home: Path) -> dict[str, str]:
+    """Line stem -> its delivery, from lines.json."""
+    rows = json.loads((home / "audio" / "lines" / "lines.json").read_text(encoding="utf-8"))
+    rows = rows["lines"] if isinstance(rows, dict) else rows
+    return {f"l{r['index']:02d}": r.get("delivery") or "calm" for r in rows}
+
+
+def omitted_stems(book: Path, number: int) -> set[str]:
+    """The lines of shots the plan omits from the cut: nobody hears them."""
+    ep = episode_home.load_plan(book, number)
+    return {f"l{l.index:02d}" for l in ep.lines if l.shot in (ep.omit or [])}
+
+
+def allowance(pair: tuple[str, str], said: dict[str, str]) -> float:
+    return sum(FEELING_FLOOR_DROP for stem in pair if said.get(stem, "calm") != "calm")
+
+
 def main(book_id: str, number: int) -> None:
-    home = episode_home.book_dir(book_id) / "episodes" / f"ep{number:02d}"
+    book = episode_home.book_dir(book_id)
+    home = book / "episodes" / f"ep{number:02d}"
     report, worst_overall = {}, 1.0
+    said, gone = deliveries(home), omitted_stems(book, number)
     for who, lines in sorted(lines_by_speaker(home).items()):
+        lines = [l for l in lines if l[0] not in gone]
         sims = {(a[0], b[0]): voice_ear.similarity(a[1], b[1])
                 for a, b in itertools.combinations(lines, 2)}
-        out = spread(sims)
+        out = spread(sims, allow={pair: allowance(pair, said) for pair in sims})
         report[who] = out | {"lines": len(lines)}
         mark = "" if out["ok"] else "SPLIT VOICE"
         worst = f"{out['worst']:.2f}" if out["worst"] is not None else "n/a"

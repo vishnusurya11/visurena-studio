@@ -30,3 +30,15 @@ def test_a_line_under_two_seconds_is_left_out(tmp_path):
                                      encoding="utf-8")
     got = sc.lines_by_speaker(tmp_path)
     assert [name for name, _ in got["curate"]] == ["l00", "l02"]
+
+
+def test_an_emotional_pair_gets_the_floor_say_lines_gives_each_line():
+    """ep13's curate: l12 grieving and l16 shouting each passed their
+    delivery-aware floor against his design (0.48, 0.54) and measured 0.37
+    against each other.  Each emotional line lowers the pair's floor by
+    FEELING_FLOOR_DROP; a calm pair keeps 0.70 (ep05's real split was 0.58)."""
+    from studio import speaker_spread as sp
+    sims = {("l12", "l16"): 0.37}
+    assert sp.spread(sims, allow={("l12", "l16"): 0.4})["ok"]
+    assert not sp.spread({("a", "b"): 0.58})["ok"]
+    assert not sp.spread({("a", "b"): 0.58}, allow={("a", "b"): 0.0})["ok"]
