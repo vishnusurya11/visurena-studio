@@ -28,7 +28,7 @@ def test_inside_a_batch_the_model_is_kept_and_freed_at_the_end(monkeypatch, real
         comfy.run_text("caption", {"prompt": "a"})
         comfy.run_text("caption", {"prompt": "b"})
     assert [p["1"]["inputs"]["keep_model_loaded"] for p in sent] == [True, True]
-    assert freed == [1]
+    assert freed == [1, 1]          # before the batch (the render's model) and after it
 
 
 def test_outside_a_batch_the_workflow_is_as_written(monkeypatch, real_comfy):
@@ -42,4 +42,15 @@ def test_a_batch_that_fails_still_frees_the_model(monkeypatch):
     with pytest.raises(RuntimeError):
         with comfy.model_kept():
             raise RuntimeError("reader died")
-    assert freed == [1]
+    assert freed == [1, 1]
+
+
+def test_a_batch_frees_the_render_model_before_its_first_read(monkeypatch):
+    """ep14 (2026-09-29): take_content_check's first read after a render round
+    hung 600 s twice -- MiniMax-H3 still staged, 5.5 GB of 24 free, the VL
+    model loading half on the CPU.  The batch frees the GPU on the way in."""
+    order = []
+    monkeypatch.setattr(comfy, "free_models", lambda: order.append("free"))
+    with comfy.model_kept():
+        order.append("read")
+    assert order == ["free", "read", "free"]

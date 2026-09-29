@@ -371,9 +371,12 @@ def keep_loaded(prompt: dict) -> dict:
 
 @contextmanager
 def model_kept():
-    """A batch of reads that loads its model once; it always ends with /free,
-    so the VL model never sits beside H3 (speed plan #6)."""
+    """A batch of reads that loads its model once; it begins AND ends with
+    /free, so the VL model never sits beside H3 (speed plan #6).  ep14
+    (2026-09-29): the first read after a render round hung 600 s twice with H3
+    still staged -- 5.5 GB of 24 free, the VL model loading half on the CPU."""
     global KEEP_LOADED
+    free_models()
     KEEP_LOADED = True
     try:
         yield
