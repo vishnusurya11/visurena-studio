@@ -1,4 +1,4 @@
-"""Step 03b (2026-09-28): cells are written FROM the drawn place picture -- the
+"""Step 03, second half (2026-09-28): cells are written FROM the drawn place picture -- the
 vision model lists the fixed things by frame third and band, code writes the
 setup's geometry and every shot's at_rest behind the writer's subject sentence.
 A plan the battery then refuses keeps the writer's cells; the step never parks."""
@@ -7,7 +7,7 @@ from __future__ import annotations
 import json
 from pathlib import Path
 
-from scripts.episode import step_03b_cells as step
+from scripts.episode import step_03_places as step
 from studio import cells_from_picture as cells, db, episode_home, picture_read, plan_verdict
 from studio.stage_run import StageContext
 from tests.test_episode_writer import canned_plan
@@ -73,7 +73,7 @@ def test_the_step_writes_the_cells_resigns_the_verdict_and_is_done(tmp_path, mon
     step.run(ctx)
     assert step.done(ctx) and plan_verdict.current(plan)
     signed = plan_verdict.read(plan)
-    assert signed["flagged"] is True and signed["signed_by"] == "judge:plan@1" and "03b" in signed["note"]
+    assert signed["flagged"] is True and signed["signed_by"] == "judge:plan@1" and "(03)" in signed["note"]
     assert "MIDDLE LEFT" in episode_home.read_json(plan)["setups"]["room"]["geometry"]
     assert step.stamp(ctx.home)["from_picture"] is True
 

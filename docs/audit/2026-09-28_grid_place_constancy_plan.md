@@ -142,8 +142,8 @@ drift reads on screen, ep14 iterates on P1 (master_iter2) — the owner judges, 
 ## 6. Built (2026-09-28, owner: "fix all that")
 
 P1 `studio/grid_room.py` + `grids.py` + `storyboard_grid.py` + `step_07` + `panel_ladder.py`;
-P2 as registry step `03b cells` (`studio/picture_read.py`, `studio/cells_from_picture.py`,
-`scripts/episode/step_03b_cells.py`); P3 `studio/measure/place.py` + `panel_eye.place_faults`
+P2 as the second half of step 03 (`studio/picture_read.py`, `studio/cells_from_picture.py`,
+`step_03_places.write_cells`); P3 `studio/measure/place.py` + `panel_eye.place_faults`
 (advisory; `docs/calibration/panel_place.md`); P4 `MAX_SETUP_SECONDS = 50` (measured, not the
 30 s first written: held plans peak at 33-50 s), `plan_gates.setup_faults`, advisory on a
 rendered plan. The 2026-09-24 "never pinned" text is superseded in three files. Tracker:

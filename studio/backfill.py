@@ -104,9 +104,19 @@ def last_step(stage: str, outputs: dict[str, tuple[bool, list[str]]]) -> str | N
                  if any("{unit}" in p for p in registry.outputs_of(stage, step_id))}
     last = None
     for step_id, (_all, files) in outputs.items():
-        if files and (step_id in templated or not templated):
+        mine = unit_files(stage, step_id, files) if step_id in templated else files
+        if mine and (step_id in templated or not templated):
             last = step_id
     return last
+
+
+def unit_files(stage: str, step_id: str, files: list[str]) -> list[str]:
+    """The files that match a `{unit}`-templated output: a step that owes both a
+    book-level picture and a unit-level marker (places, since 2026-09-28) is
+    placed by the marker, never by another episode's picture."""
+    import fnmatch
+    patterns = [p.replace("{unit}", "*") for p in registry.outputs_of(stage, step_id) if "{unit}" in p]
+    return [f for f in files if any(fnmatch.fnmatch(f, p) for p in patterns)]
 
 
 def state_of(book_dir: Path, home: str, deliverable: str | None, last: str | None) -> tuple[str, str | None]:

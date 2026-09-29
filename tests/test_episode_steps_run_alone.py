@@ -88,9 +88,13 @@ def test_places_names_one_picture_per_located_setup(ctx):
     assert pics == [ctx.book_dir / "refs" / "locations" / "yard" / "wide_establishing.png"]
 
 
-def test_places_is_done_when_every_picture_exists(ctx):
+def test_places_is_done_when_every_picture_exists_and_the_cells_are_written_from_them(ctx):
+    from studio import plan_verdict
     assert not step_03_places.done(ctx)
     _png(ctx.book_dir / "refs" / "locations" / "yard" / "wide_establishing.png")
+    assert not step_03_places.done(ctx)                 # the pictures alone: the cells are still the writer's
+    _json(ctx.home / "storyboard" / "cells_from_picture.json",
+          {"plan_sha8": plan_verdict.plan_sha8(ctx.home / "plan.json"), "from_picture": True, "readings": {}})
     assert step_03_places.done(ctx)
 
 

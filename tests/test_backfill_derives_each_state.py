@@ -82,7 +82,9 @@ def test_a_book_level_output_another_episode_made_does_not_move_this_units_step(
     (book / "refs" / "locations" / "common" / "wide.png").write_bytes(b"png")
     episode_home.write_json(book / "episodes" / "ep13" / "plan.json", {"number": 13})
     outputs = backfill.step_outputs(book, "episode", "ep13")
-    assert outputs["03"] == (True, ["refs/locations/common/wide.png"])
+    # since 2026-09-28 step 03 also owes the unit its cells marker, so the book-level picture
+    # alone leaves 03 undone -- which is the truth this test wanted all along
+    assert outputs["03"] == (False, ["refs/locations/common/wide.png"])
     assert backfill.last_step("episode", outputs) == "02"
     assert backfill.last_step("refs", {"01": (True, ["refs/refs.json"]), "02": (False, [])}) == "01"
     assert backfill.last_step("episode", {}) is None

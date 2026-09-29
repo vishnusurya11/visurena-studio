@@ -3,8 +3,8 @@
 Status: DECIDED (owner, 2026-09-28: "fix all that") and BUILT the same day — tracker
 `architecture/plan/2026-09-28_one_room_per_setup.md`; ruling in `docs/DECISIONS.md`.
 Debate and evidence: `docs/audit/2026-09-28_grid_place_constancy_plan.md`. As built, item 2
-below is a new registry step `03b cells` after 03 rather than a split of 02: the writer still
-drafts the whole plan; 03b rewrites `geometry` and every `at_rest` from the picture.
+below is the second half of step 03 (`03_03 cells`) rather than a split of 02: the writer still
+drafts the whole plan; 03 rewrites `geometry` and every `at_rest` from the pictures it drew.
 
 ## The finding
 ep12-14's storyboard grids draw a different room per render of one setup. The grid code did not

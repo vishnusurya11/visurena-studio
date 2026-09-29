@@ -151,7 +151,6 @@ The references sheets and voices live in their own department: `uv run python re
 | 01 | bind | `uv run python scripts/episode/step_01_bind.py <book> <n>` | This unit's cast. |
 | 02 | plan | `uv run python scripts/episode/step_02_plan.py <book> <n>` | The contract, gated before anything is voiced or drawn. |
 | 03 | places | `uv run python scripts/episode/step_03_places.py <book> <n>` | Each setup's location+view at THIS unit's hour, drawn from its own described words on the local image model. |
-| 03b | cells | `uv run python scripts/episode/step_03b_cells.py <book> <n>` | Cells FROM the drawn picture: the vision model lists each place's fixed things by frame third and band; code writes geometry and every at_rest behind the writer's subject sentence; the battery re-judges; the verdict is re-signed. A refused rewrite keeps the writer's cells. |
 | 04 | record | `uv run python scripts/episode/step_04_record.py <book> <n>` | Every line in its character's voice, MEASURED and LISTENED to. |
 | 05 | timeline | `uv run python scripts/episode/step_05_timeline.py <book> <n>` | AUDIO FIRST - the animatic. |
 | 06 | prompts | `uv run python scripts/episode/step_06_prompts.py <book> <n>` | Every take prompt built and linted for $0 with no GPU, BEFORE any grid: length per block, style line, banned props, no last frame, no fragments. |
