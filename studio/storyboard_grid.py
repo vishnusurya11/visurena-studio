@@ -225,8 +225,29 @@ def chest_up(name: str, shots: list[dict]) -> bool:
 def _binding(p: dict, bare: bool = False, chest: bool = False) -> str:
     items = [i for i in worn_items(p.get("wear", ""))
              if not (bare and HEADWEAR.search(i)) and not (chest and BELOW_CHEST.search(i))]
-    worn = f", wearing: {'; '.join(items)}" if items else ""
-    return f"{p['name']} is the person in <image{p['ref']}>{worn}."
+    return f"The person in <image{p['ref']}> wears: {'; '.join(items)}." if items else f"The person in <image{p['ref']}>."
+
+
+UNWRITTEN = "No name, word or label is written anywhere in the picture."
+"""ep14 (2026-09-29): "In it: GEORGE" and "NEWSPAPER BOY is the person in <image2>"
+came back as a placard lettered GEORGE NEWSPAPER GEORGE and a paper lettered
+NENSPAPER BOY on the last shot: the drawer letters a capitalised name.  People are
+named by their slot; a person with no sheet by plain lower-case words."""
+
+
+def called(cast: list[dict]) -> dict[str, str]:
+    """How the prompt says each person: their slot, never their name."""
+    out = {}
+    for p in cast:
+        words = re.sub(r"\s+", " ", str(p["name"])).strip().lower()
+        out[p["name"]] = f"the person in <image{p['ref']}>" if p.get("ref") else f"a {words}"
+    return out
+
+
+def _unnamed(shots: list[dict], cast: list[dict]) -> list[dict]:
+    """The shots with every named person said by slot."""
+    say = called(cast)
+    return [{**s, "who": [say.get(n, n.lower()) for n in (s.get("who") or [])]} for s in shots]
 
 
 def _block_v2(label: str, s: dict) -> str:
@@ -278,22 +299,25 @@ def grid_prompt_v2(shots: list[dict], cols: int, rows: int, place: tuple[list[in
     if len(shots) != len(cells):
         raise ValueError(f"{len(shots)} shots for {len(cells)} cells")
     single = len(shots) == 1
+    said = _unnamed(shots, cast)
     if single:
         layout = "One full-frame illustration, edge to edge, with no lettering anywhere."
-        blocks = [_one_picture(_block_v2("", shots[0]))]
+        blocks = [_one_picture(_block_v2("", said[0]))]
     else:
         layout = (f"A storyboard of {len(shots)} panels in {cols} columns and {rows} rows, all the "
                   f"same size, thin white gutters between them, no lettering anywhere.")
         blocks = [_block_v2(f"PANEL {i} ({where}), ", s)
-                  for i, (where, s) in enumerate(zip(cells, shots), start=1)]
+                  for i, (where, s) in enumerate(zip(cells, said), start=1)]
     binding = [_binding(p, bareheaded(p["name"], shots), chest_up(p["name"], shots))
                for p in cast if p.get("ref")]
     # A PROP IS AN OBJECT, bound to its sheet: ep10's tripod drawn from words
     # alone would differ in every panel (ep10 prep audit, 2026-09-23).
     binding += [f"{p['name']} is the object in <image{p['ref']}>, exactly as drawn there."
                 for p in props or [] if p.get("ref")]
-    if len(binding) > 1:
-        binding.append(f"{' and '.join(p['name'] for p in cast if p.get('ref'))} are never dressed alike.")
+    people = [f"<image{p['ref']}>" for p in cast if p.get("ref")]
+    if len(people) > 1:
+        binding.append(f"The people in {' and '.join(people)} are never dressed alike.")
+    binding.append(UNWRITTEN)
     slots = list(place[0]) + ([room] if room is not None and room not in place[0] else [])
     refs = " and ".join(f"<image{n}>" for n in slots)
     said = brief_place(place[1], light) if all(s["size"] in TIGHT for s in shots) else place[1]

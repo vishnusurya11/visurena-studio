@@ -27,7 +27,7 @@ def panel(body, who=(), extras=0, size="MEDIUM"):
 def test_the_first_panel_comes_before_the_cast_the_place_and_the_style():
     text = grid_prompt_v2([panel("THE HUSSAR SHOUTS", ["NARRATOR"])], 1, 1, PLACE, CAST[:1], 3)
     at = text.index("THE HUSSAR SHOUTS")
-    assert at < text.index("NARRATOR is the person") and at < text.index("Maybury Hill")
+    assert at < text.index("The person in <image1>") and at < text.index("Maybury Hill")
     assert at < text.lower().index("art style")
 
 
@@ -75,7 +75,7 @@ def test_the_binding_line_carries_the_worn_items_whole_and_at_most_five():
     panels she was in; v1's cut-off identity block had kept it."""
     cast = [{"ref": 2, "name": "WIFE", "entity": "w", "wear": WIFE, "against": "b"}]
     text = grid_prompt_v2([panel("she stands", ["WIFE"])], 1, 1, PLACE, cast, 3)
-    line = next(x for x in text.split("\n\n") if x.startswith("WIFE is"))
+    line = next(x for x in text.split("\n\n") if x.startswith("The person in <image2>"))
     assert "Paisley cashmere shawl in rust and cream folded over one arm" in line
     assert "Cream cotton blouse with high collar and pin-tucked front" in line
     assert "sage-green wool skirt to the ankle" in line      # after a comma; ep09 v2b dropped it
@@ -99,7 +99,7 @@ def test_a_bareheaded_person_is_not_bound_to_wear_a_hat():
     cast = [{"ref": 1, "name": "NARRATOR", "entity": "n", "wear": NARR, "against": "a"}]
     text = grid_prompt_v2([panel("bareheaded in the heather, his boater in one hand", ["NARRATOR"])],
                           1, 1, PLACE, cast, 3)
-    line = next(x for x in text.split("\n\n") if x.startswith("NARRATOR is"))
+    line = next(x for x in text.split("\n\n") if x.startswith("The person in <image1>"))
     assert "boater" not in line and "Mid-grey tweed lounge suit" in line
 
 
@@ -147,7 +147,7 @@ def test_a_chest_up_picture_is_not_bound_to_trousers_and_socks():
     drawer drew what it was told he was wearing."""
     cast = [{"ref": 1, "name": "NARRATOR", "entity": "n", "wear": BARE, "against": "a"}]
     text = grid_prompt_v2([panel("his face", ["NARRATOR"], size="MEDIUM CLOSE")], 1, 1, PLACE, cast, 3)
-    line = next(x for x in text.split("\n\n") if x.startswith("NARRATOR is"))
+    line = next(x for x in text.split("\n\n") if x.startswith("The person in <image1>"))
     assert "Bare to the waist" in line
     for word in ("trousers", "hips", "socks"):
         assert word not in line, word
@@ -156,7 +156,7 @@ def test_a_chest_up_picture_is_not_bound_to_trousers_and_socks():
 def test_a_full_figure_keeps_the_whole_wardrobe():
     cast = [{"ref": 1, "name": "NARRATOR", "entity": "n", "wear": BARE, "against": "a"}]
     text = grid_prompt_v2([panel("he sits", ["NARRATOR"], size="MEDIUM")], 1, 1, PLACE, cast, 3)
-    assert "trousers" in next(x for x in text.split("\n\n") if x.startswith("NARRATOR is"))
+    assert "trousers" in next(x for x in text.split("\n\n") if x.startswith("The person in <image1>"))
 
 
 # ---- one room per setup (2026-09-28) ------------------------------------------
@@ -192,3 +192,21 @@ def test_a_tight_grid_gets_the_head_of_an_inventory_and_the_setup_light():
     assert brief_place(attic, "low sun from the west, long black shadows") == (
         "A small attic room in a Marylebone lodging house; the light is low sun from the west, long black shadows")
     assert brief_place("the lawn: gravel, roses; the light is high haze") == "the lawn; the light is high haze"
+
+
+
+def test_no_name_is_written_where_the_drawer_can_letter_it():
+    """ep14 (2026-09-29): "In it: GEORGE" and "NEWSPAPER BOY is the person in
+    <image2>" came back as a placard lettered GEORGE NEWSPAPER GEORGE and a paper
+    lettered NENSPAPER BOY on the episode's last shot -- the drawer letters a
+    capitalised name.  People are named by their slot, never by a word."""
+    text = grid_prompt_v2([panel("the boy holds out a paper", ["NARRATOR", "WIFE"])], 1, 1, PLACE, CAST, 3)
+    assert "NARRATOR" not in text and "WIFE" not in text
+    assert "In it: the person in <image1>, the person in <image2>." in text
+    assert "No name, word or label is written anywhere" in text
+
+
+def test_a_person_with_no_sheet_is_named_in_plain_lower_case():
+    cast = [{"ref": None, "name": "NEWSPAPER BOY", "entity": "boy", "wear": "", "against": "b"}]
+    text = grid_prompt_v2([panel("the boy shouts", ["NEWSPAPER BOY"])], 1, 1, PLACE, cast, 3)
+    assert "NEWSPAPER BOY" not in text and "In it: a newspaper boy." in text

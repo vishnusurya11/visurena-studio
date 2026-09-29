@@ -97,12 +97,24 @@ def centre_square(size: tuple[int, int]) -> tuple[int, int, int, int]:
     return left, top, left + side, top + side
 
 
+def stale_refusal(old: list[str], home: Path) -> str | None:
+    """Why stale grids refuse the cut, or None.  A unit with rendered takes cuts
+    its older grids as drawn: a builder fix after the render must not block the
+    panels it was redrawn for (ep14, 2026-09-29; step 07's own rule)."""
+    if not old:
+        return None
+    if any((Path(home) / "takes" / "r2v").glob("T??.mp4")):
+        print(f"grids older than the builder, cut as drawn under rendered takes: {old}", flush=True)
+        return None
+    return f"grids drawn from an older plan -- redraw them: {old}"
+
+
 def main(book_id: str, number: int) -> None:
     book = episode_home.book_dir(book_id)
     ep = episode_home.load_plan(book, number)
     rows = manifests(book, number)
-    if old := stale_grids(rows, plan_sha(book, number), ep, book):
-        raise SystemExit(f"grids drawn from an older plan -- redraw them: {old}")
+    if why := stale_refusal(stale_grids(rows, plan_sha(book, number), ep, book), episode_home.home(book, number)):
+        raise SystemExit(why)
     owner = owner_of(rows, [s.index for s in ep.shots])
     out = episode_home.home(book, number) / "storyboard"
     (out / "h3").mkdir(parents=True, exist_ok=True)
