@@ -1275,7 +1275,7 @@ not built     a worker loop that starts a five-hour GPU job unattended — a que
     {lane:'E',id:'episode/06',name:'Prompts',why:'Every take prompt built and linted for $0 with no GPU, before any grid.',subs:[
       {m:'06',t:'build + lint: length per block, style line, banned props, no last frame',who:'code',k:'code',d:.9,log:'23 prompts · lint 0 refusals · <span class="k">prompts completed</span>'}]},
     {lane:'E',id:'episode/07',name:'Board',why:'Storyboard grids on the local image model from the plan’s prose, up to three references: cast sheets first, the setup’s place last.',subs:[
-      {m:'07_01',t:'layout by rule: grids of at most nine, cols × rows = shots',who:'code',k:'code',d:.5,log:'6 setups → 4 grids 2×2, 1 grid 3×2, 1 grid 1×1 · layout.json'},
+      {m:'07_01',t:'layout by rule: grids of at most four, cols × rows = shots (proposed: widest first, later grids chained on the first-drawn panel)',who:'code',k:'code',d:.5,log:'6 setups → 5 grids 2×2, 2 grids 1×1 · layout.json'},
       {m:'07_02',t:'draw; manifest written after the render',who:'code · local GPU',k:'code',d:2.4,log:'grids ×6 drawn · manifests written'}]},
     {lane:'E',id:'episode/08',name:'Panels',why:'One panel per shot, two machine gates, then the panel judges. A fault climbs seed → reprose (cell prose only, the timeline stays current); at most two grids climb; the terminal keeps the best panel flagged. The takes refuse without the three verdicts.',subs:[
       {m:'08_01',t:'cut panels between measured gutters, crop square',who:'code',k:'code',d:.7,log:'23 panels cut'},
