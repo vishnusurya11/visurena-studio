@@ -38,6 +38,11 @@ furthest reaches 90 % of the chapter's paragraphs and the title event's last
 paragraph -- ep12 reached 57 of 69), G-SHOUT (a `!` line is dialogue), G-SOUND
 (every setup an `ambience`; a loud event in the prose carries `sounds`).
 
+**2026-09-29 addition:** G-BED (HARD) -- every bed tone is one of the five
+(`plain`, `light`, `uneasy`, `grave`, `thrilling`); a synonym the bed folds
+(alarm -> thrilling, dread -> grave, ...) is an advisory. ep14's writer wrote
+five words the bed did not know and the episode was refused at assembly.
+
 **2026-09-28 addition:** G-SETUP (HARD before anything is rendered, advisory
 after) -- a setup holds at most `MAX_SETUP_SECONDS` = 50 s of projected picture;
 measured on the plans whose place held (33-50 s) against those that drifted
