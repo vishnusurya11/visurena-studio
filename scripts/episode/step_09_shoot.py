@@ -90,10 +90,25 @@ def opened(ctx) -> Budget:
     return budget
 
 
+def share_missing(room: Path, shots: list[dict]) -> float:
+    """The share of the plan's shots that still have no take: what a render
+    round would actually draw.  ep14 (2026-09-28): a resume with all 30 takes
+    on disk was refused for the price of rendering them again."""
+    if not shots:
+        return 1.0
+    missing = [s for s in shots if not (Path(room) / f"T{int(s['index']):02d}.mp4").exists()]
+    return len(missing) / len(shots)
+
+
 def affordable(ctx) -> tuple[bool, float, float]:
-    """(can the render run, what it costs, what the ceiling leaves this step)."""
+    """(can the render run, what it costs, what the ceiling leaves this step).
+    The cost is the step's norm scaled to the takes still to render; the
+    ladder prices its own rungs."""
     budget = opened(ctx)
-    cost = episode_clock.stage_norm("takes", episode_clock.conditions(ctx.book_dir, ctx.number))
+    norm = episode_clock.stage_norm("takes", episode_clock.conditions(ctx.book_dir, ctx.number))
+    plan = ctx.home / "plan.json"
+    shots = episode_home.read_json(plan).get("shots") or [] if plan.exists() else []
+    cost = norm * share_missing(ctx.home / TAKES, shots)
     return budget.can_afford(STEP_ID, cost), cost, budget.remaining(STEP_ID)
 
 
