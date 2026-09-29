@@ -105,13 +105,28 @@ def ducked(cues: list[tuple[float, Path]], lines: list[tuple[float, float]], out
     return out
 
 
+def baseline_start(spans: list[tuple[float, float]], i: int) -> float:
+    """Where the quiet before cue `i` ends: its own start, or the start of the
+    earliest cue still sounding into it, followed back through a chain.
+    ep14 shot 20 (2026-09-29): the cabs began 0.6 s into the hooves and were
+    measured against hooves -- 2.4 dB, a failed QC for a sound that was there."""
+    start = spans[i][0]
+    for s, seconds in sorted(spans[:i], reverse=True):
+        if s < start <= s + seconds:
+            start = s
+    return start
+
+
 def presence(master: Path, episode, placed: dict) -> list[dict]:
-    """Per planned cue: where it sits in the master and how far it rises there."""
+    """Per planned cue: where it sits in the master and how far it rises there
+    over the quiet before it (before the earlier cue it overlaps, if any)."""
     rows = {int(s["index"]): s for s in placed["shots"]}
+    cues = list(cues_of(episode))
+    spans = [(sfx_cues.start_of(c, rows), c.seconds) for c in cues]
     out = []
-    for cue in cues_of(episode):
-        at = sfx_cues.start_of(cue, rows)
-        got = round(float(sfx_cues.event_db(master, at, cue.seconds)), 1)
+    for i, cue in enumerate(cues):
+        at, quiet = spans[i][0], baseline_start(spans, i)
+        got = round(float(sfx_cues.event_db(master, at, cue.seconds, quiet_until=quiet)), 1)
         out.append({"shot": cue.shot, "sound": cue.sound, "at": at, "db": got, "ok": got >= EVENT_DB})
     return out
 

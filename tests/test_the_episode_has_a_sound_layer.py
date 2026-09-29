@@ -56,7 +56,7 @@ def test_the_layer_is_the_placed_cues_and_each_setups_ambience(tmp_path, monkeyp
 def test_a_cue_that_is_not_heard_is_a_fault(monkeypatch):
     ep = plan([shot(2, sounds=[Sound(sound="a shell burst", at=0.5)])], {})
     placed = {"shots": [{"index": 2, "t_start": 10.0, "seconds": 4.0}]}
-    monkeypatch.setattr(es.sfx_cues, "event_db", lambda master, start, seconds: 2.0)
+    monkeypatch.setattr(es.sfx_cues, "event_db", lambda master, start, seconds, **_: 2.0)
     rows = es.presence(Path("m.mp4"), ep, placed)
     assert rows == [{"shot": 2, "sound": "a shell burst", "at": 10.5, "db": 2.0, "ok": False}]
 

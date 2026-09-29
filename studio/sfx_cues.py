@@ -304,12 +304,16 @@ def window_db(samples: np.ndarray, rate: int, window: float = WINDOW) -> np.ndar
     return 20.0 * np.log10(np.maximum(rms, 1e-10))
 
 
-def event_db(master: Path, start: float, seconds: float, around: float = 1.0) -> float:
+def event_db(master: Path, start: float, seconds: float, around: float = 1.0,
+             quiet_until: float | None = None) -> float:
     """dB by which the cue window's loudest 50 ms stands over the median of the
-    `around` seconds before it.  A named sound the master lacks reads ~0."""
-    lead = min(around, start)
+    `around` seconds before `quiet_until` (the cue's own start by default; the
+    start of an earlier cue it overlaps, 2026-09-29).  A named sound the master
+    lacks reads ~0."""
+    quiet = start if quiet_until is None else min(quiet_until, start)
+    lead = min(around, quiet)
     if lead < WINDOW:
-        raise ValueError(f"no audio before {start:.2f}s to compare the cue against")
-    levels = window_db(decode(master, start - lead, lead + seconds), RATE)
-    split = int(round(lead / WINDOW))
-    return round(float(levels[split:].max() - np.median(levels[:split])), 2)
+        raise ValueError(f"no audio before {quiet:.2f}s to compare the cue against")
+    base = window_db(decode(master, quiet - lead, lead), RATE)
+    cue = window_db(decode(master, start, seconds), RATE)
+    return round(float(cue.max() - np.median(base)), 2)
