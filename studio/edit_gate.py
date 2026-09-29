@@ -110,9 +110,27 @@ def segment_match(master: np.ndarray, take: np.ndarray, start: int, n: int) -> d
     offset, _ = best_offset(master, take, start, n)
     row = {"offset": offset, "mean": round(float(np.mean(per)), 3),
            "frames_off": [i for i, d in enumerate(per) if d > SAME_FRAME],
-           "held": held_runs(repeats(master[start:start + n + 1]), repeats(take[:n + 1]))}
-    row["ok"] = offset == 0 and row["mean"] <= SEGMENT_MEAN and not row["frames_off"] and not row["held"]
+           "held": held_runs(repeats(master[start:start + n + 1]), repeats(take[:n + 1])),
+           "flat": level_shift(per)}
+    close = row["mean"] <= SEGMENT_MEAN or row["flat"]
+    row["ok"] = offset == 0 and close and not row["frames_off"] and not row["held"]
     return row
+
+
+LEVEL_SHIFT = 2.0
+"""The most a uniform level shift may lift the mean.  ep14 T26 (2026-09-29): a dark
+insert (grey mean 23) measured 1.00-1.05 on EVERY frame, mean 1.011 over the 1.0
+cap -- one grey level of the encoder's range handling, not a wrong frame."""
+FLAT = 0.1
+"""Per-frame spread (p90 - p10) of a level shift; a slipped frame is uneven (T26: 0.05)."""
+
+
+def level_shift(per: list[float]) -> bool:
+    """Every frame off by the same small amount: the picture is the take's."""
+    if not per:
+        return False
+    return (float(np.mean(per)) <= LEVEL_SHIFT
+            and float(np.percentile(per, 90) - np.percentile(per, 10)) <= FLAT)
 
 
 def cut_exact(master: np.ndarray, at: int, prev_last: np.ndarray, first: np.ndarray) -> bool:

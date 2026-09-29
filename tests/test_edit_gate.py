@@ -118,3 +118,20 @@ def test_every_frame_of_a_clip_is_timed(tmp_path):
     times = gate.frame_times(clip)
     assert len(times) == 12 == len(gate.grey_frames(clip))
     assert gate.timestamp_holes(times) == []
+
+
+def test_a_dark_take_one_grey_level_off_on_every_frame_is_the_take():
+    """ep14 T26 (2026-09-29): every frame of a dark insert measured 1.00-1.05 against
+    its take (grey mean 23; the others 41-43), mean 1.011 over a 1.0 cap, offset 0 and
+    no frame over the same-picture line: a uniform level shift, not a wrong frame."""
+    take = moving(20).astype(np.int16)
+    shifted = np.clip(take + 2, 0, 255).astype(np.uint8)       # over the old cap, inside the ceiling
+    row = gate.segment_match(shifted, take.astype(np.uint8), start=0, n=12)
+    assert row["offset"] == 0 and row["frames_off"] == [] and row["mean"] > gate.SEGMENT_MEAN
+    assert row["ok"] and row["flat"]
+
+
+def test_a_level_shift_past_the_ceiling_is_still_refused():
+    take = moving(20).astype(np.int16)
+    shifted = np.clip(take + 3, 0, 255).astype(np.uint8)
+    assert not gate.segment_match(shifted, take.astype(np.uint8), start=0, n=12)["ok"]
