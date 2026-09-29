@@ -178,6 +178,7 @@ def band() -> dict:
             "max_lines_per_shot": episode_spec.MAX_LINES_PER_SHOT,
             "max_voices": episode_spec.MAX_SPEAKING, "max_setups": episode_spec.MAX_SETUPS,
             "max_setup_seconds": episode_spec.MAX_SETUP_SECONDS,
+            "bed_tones": list(__import__("studio.episode_bed", fromlist=["TONES"]).TONES),
             "dialogue_share": list(episode_spec.DIALOGUE_SHARE),
             "turn_band": list(episode_spec.TURN_BAND)}
 

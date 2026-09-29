@@ -196,6 +196,8 @@ extreme_close, close, medium_close, medium, full, wide.
 ## Beds
 
 `beds` are the music bed's tone spans, `[{"from_shot": 0, "tone": "plain"}, …]`,
+each `tone` one of `bed_tones` exactly (`plain`, `light`, `uneasy`, `grave`,
+`thrilling`; alarm, dread, panic and their kin are refused, G-BED),
 AUTHORED from the context, never derived from the section label: one drone
 under a breakfast, a joke and a killing is wrong about two of them.
 

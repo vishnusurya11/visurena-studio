@@ -224,17 +224,38 @@ def tones_for(book) -> dict[str, Tone]:
     return out
 
 
+SYNONYMS = {
+    "alarm": "thrilling", "panic": "thrilling", "flight": "thrilling", "chase": "thrilling",
+    "urgent": "thrilling", "frantic": "thrilling", "terror": "thrilling",
+    "dread": "grave", "stark": "grave", "grim": "grave", "solemn": "grave", "mourning": "grave",
+    "bleak": "grave", "sombre": "grave", "somber": "grave",
+    "tense": "uneasy", "unease": "uneasy", "anxious": "uneasy", "nervous": "uneasy",
+    "suspense": "uneasy", "wary": "uneasy", "ominous": "uneasy",
+    "calm": "plain", "quiet": "plain", "domestic": "plain", "neutral": "plain", "still": "plain",
+    "wry": "light", "amused": "light", "hopeful": "light", "bright": "light", "warm": "light",
+}
+"""A writer's word for a tone, folded to the nearest of the five.  ep14
+(2026-09-29): alarm, dread, panic, flight and stark in the plan's beds, read by
+no gate, refused the whole episode at assembly."""
+
+
+def tone_of(name: str) -> str:
+    """One of the five tones, or the five's nearest for a synonym; else refused."""
+    said = (name or "").strip().lower()
+    if said in TONES:
+        return said
+    if said in SYNONYMS:
+        return SYNONYMS[said]
+    raise ValueError(f"{name!r} is not a bed tone; say one of {tuple(TONES)}")
+
+
 def tone_style(name: str) -> str:
     """The prose handed to the music model for this tone."""
-    if name not in TONES:
-        raise ValueError(f"{name!r} is not a bed tone; say one of {tuple(TONES)}")
-    return TONES[name].style
+    return TONES[tone_of(name)].style
 
 
 def tone_lufs(name: str) -> float:
-    if name not in TONES:
-        raise ValueError(f"{name!r} is not a bed tone; say one of {tuple(TONES)}")
-    return TONES[name].lufs
+    return TONES[tone_of(name)].lufs
 
 
 def in_cut(shot: int, at: dict[int, float]) -> int:
@@ -258,9 +279,7 @@ def spans(beds: list[dict], at: dict[int, float], total: float) -> list[Span]:
         return [Span(0.0, round(total, 3), DEFAULT)]
     marks = []
     for entry in beds:
-        tone, shot = entry["tone"], entry["from_shot"]
-        if tone not in TONES:
-            raise ValueError(f"{tone!r} is not a bed tone; say one of {tuple(TONES)}")
+        tone, shot = tone_of(entry["tone"]), entry["from_shot"]
         shot = in_cut(shot, at)
         marks.append((shot, tone))
     if marks != sorted(marks, key=lambda m: m[0]):

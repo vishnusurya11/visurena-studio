@@ -206,6 +206,10 @@ def main(book_id: str, number: int) -> int:
     for f in pg:
         print("   ", f[:170])
     hard += setup_gate(ep, book, number)
+    bad, folded = plan_gates.bed_faults(ep)
+    print("G-BED        :", len(bad) or "clean"); hard += len(bad)
+    for f in bad + folded:
+        print("   " if f in bad else "  advisory:", f[:170])
     hard += catalog_gates(ep, plan_brief.chapter_text(book, number))
     hard += cover_gates(ep, book, number)
     hard += sound_gates(ep)

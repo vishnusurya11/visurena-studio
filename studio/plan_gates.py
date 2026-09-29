@@ -409,6 +409,26 @@ def dialogue_wall_holds(share: float | None) -> bool:
     return share is None or share <= FIRST_DIALOGUE_SHARE
 
 
+def bed_faults(episode: Episode) -> tuple[list[str], list[str]]:
+    """(G-BED refusals, advisories): a bed tone outside the five is refused
+    before anything renders; a synonym the bed will fold is named as advice.
+    ep14 (2026-09-29): five of seven spans were words the bed did not know and
+    the episode was refused at assembly, eight hours in."""
+    from studio import episode_bed
+    hard, soft = [], []
+    for entry in episode.beds or []:
+        said = str(entry.get("tone", ""))
+        try:
+            folded = episode_bed.tone_of(said)
+        except ValueError:
+            hard.append(fault("G-BED", f"shot {entry.get('from_shot')}", f"bed tone {said!r} is none of the five",
+                              said, tuple(episode_bed.TONES)))
+            continue
+        if folded != said.strip().lower():
+            soft.append(f"G-BED shot {entry.get('from_shot')}: bed tone {said!r} folds to {folded!r}")
+    return hard, soft
+
+
 def setup_seconds(episode: Episode) -> dict[str, float]:
     """Projected seconds of picture per setup, in plan order."""
     out: dict[str, float] = {}
