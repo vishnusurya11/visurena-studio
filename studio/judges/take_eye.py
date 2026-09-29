@@ -35,7 +35,7 @@ its cure is a head trim, no render."""
 HARD_CONTENT = frozenset({"content", "clones", "identity", "unread"})
 GEOMETRY = frozenset({"pass-through", "held", "cut-vote", "cut", "jump", "cut-landing", "foreign",
                       "frozen-at-start", "frozen-share", "frozen-whole", "coherence off-board", "last-vs-cell",
-                      "last-vs-panel", "drift", "face-at-end", "zoom", "rotation"})
+                      "last-vs-panel", "drift", "face-at-end", "zoom", "rotation", "letterbox"})
 """The fault kinds a still may answer on a narration shot (decision §1.2, EYE-takes terminal)."""
 
 Reader = Callable[[Path], dict | None]

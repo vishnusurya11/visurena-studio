@@ -295,7 +295,10 @@ def settle_take(home: Path, plan, index: int, faults: list[Fault], order: list[i
     if shot_kind(plan, index) != "narration":
         return "high"
     panel = still_for(home, index, faults)
-    if panel is None or not can_still(index, load_stills(home), order, cap):
+    # A HELD PANEL IS NEVER WORSE THAN BLACK BARS: ep14 T20 (2026-09-29) came back
+    # letterboxed on every seed, the two stills were spent, and keep_best kept the bars.
+    boxed = any(f.kind == "letterbox" for f in faults)
+    if panel is None or not (boxed or can_still(index, load_stills(home), order, cap)):
         return "high" if panel is not None else "keep_best"
     write_still(home, index, panel, placed_seconds(home, index), why_of("still", faults))
     return "still"

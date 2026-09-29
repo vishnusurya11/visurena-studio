@@ -61,3 +61,17 @@ def test_a_narration_take_beside_the_faulted_dialogue_take_may_still_be_a_still(
     assert out.terminal == "still"
     assert {f.where: f.severity for f in out.faults} == {"T04": "high", "T09": "normal"}
     assert sorted(take_ladder.load_stills(where)) == [9]
+
+
+def test_a_letterboxed_narration_take_is_a_still_past_the_cap(tmp_path):
+    """ep14 T20 (2026-09-29): every attempt came back letterboxed; the two stills
+    were spent, so the terminal kept black bars.  A held panel is never worse than
+    bars: a letterboxed narration take is stilled whatever the cap."""
+    where = home(tmp_path)
+    plan = episode_home.load_plan(tmp_path / "book", 5)
+    take_ladder.write_still(where, 9, where / "storyboard" / "shot_09.png", 4.0, "content")
+    take_ladder.write_still(where, 11, where / "storyboard" / "shot_11.png", 4.0, "content")
+    boxed = Verdict(judge="take_eye", version="1", passed=False, confidence=1.0, reads=1, terminal="keep_best",
+                    faults=[Fault(kind="letterbox", where="T10", evidence={"hard": True})])
+    out = take_ladder.terminal(where, plan, boxed, order=[9, 10, 11, 13])
+    assert out.terminal == "still" and sorted(take_ladder.load_stills(where)) == [9, 10, 11]
