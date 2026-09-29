@@ -32,6 +32,7 @@ brick (`docs/ARCHITECTURE.md`).
 | 2026-09-24 | [decisions/2026-09-24_future_departments.md](decisions/2026-09-24_future_departments.md) + [stages_future.yaml](decisions/2026-09-24_stages_future.yaml) | PROPOSAL — the big-studio shape: five divisions, one registry stage per format line, unit grammar, seven owner gates. Awaiting the owner. |
 | 2026-09-25 | [decisions/2026-09-25_command_center.md](decisions/2026-09-25_command_center.md) + [research/](decisions/research/2026-09-25_command_center/) | DECIDED (owner, 2026-09-25) — the Command Center: one work-order row per (book, department, unit), a view per department, standard `in:`/`out:` in the registry and a `manifest.json` across the boundary, tick + pull drive, the local board. Tab *Command Center* on the page. BUILT 2026-09-26. |
 | 2026-09-24 | [decisions/2026-09-24_judges_replace_the_eye.md](decisions/2026-09-24_judges_replace_the_eye.md) | DECIDED (owner) — no refs/episode step parks on a person: judges with priced ladders sign LOOK, PLAN, EYE ×2, MASTER as pass or flagged; the owner audits after the fact; casebook + bench + ratchet. |
+| 2026-09-28 | [decisions/2026-09-28_one_room_per_setup.md](decisions/2026-09-28_one_room_per_setup.md) + [the debate](../docs/audit/2026-09-28_grid_place_constancy_plan.md) | PROPOSAL — one room per setup: a setup's grids are chained on its first-drawn panel (step 07), step 02 splits into draft / cells-from-picture around 03, a cross-panel `panel_place` rung on EYE_PANELS (needs D4), the ladder's copy/repeat cures retired. Awaiting the owner. |
 
 ## Plans
 
