@@ -99,7 +99,10 @@ than one take: one line, or two short ones, per shot.
 
 ## Places and setups
 
-- At most `max_setups` setups. A setup is one place at one hour with one cast.
+- At most `max_setups` setups. A setup is one place at one hour with one cast,
+  seen from one side, and holds at most `max_setup_seconds` of picture (G-SETUP):
+  an attic, the street seen from its dormer, its doorstep and the street itself
+  are four setups, each on its own picture, never one.
 - A setup names its `location` (the book's location id) and the `view` it uses:
   ONE picture of that place for this unit, chosen by the setup. A shot never
   picks its own view. The hour comes from the picture, never from the words.

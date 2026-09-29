@@ -27,7 +27,7 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Callable
 
-from studio import episode_home, grid_layout, judged_gate, panel_dq
+from studio import episode_home, grid_layout, grid_room, judged_gate, panel_dq
 from studio.judges.verdict import Fault, Verdict
 from studio.ladder import Ladder, Rung
 
@@ -41,7 +41,7 @@ deferred after the work was spent (speed plan #3)."""
 CAP = 2
 """Distinct grids that may climb per episode."""
 SUPERSEDED = "superseded"
-REDRAW_CANNOT_CURE = frozenset({"framing", "posture"})
+REDRAW_CANNOT_CURE = frozenset({"framing", "posture", "place"})
 """MEASURED on ep13 (speed plan #4): nine climbs, and no seed or reprose rung
 ever moved a framing or posture fault; a prompt fix (9cb4609) and judge fixes
 did.  Such a fault goes to keep_best, flagged, at no GPU cost."""
@@ -59,8 +59,8 @@ CURES = {
     "landmark": "The skyline is the plain skyline of this place.",
     "posture": "The person is {asked} in the picture.",
     "framing": "The frame is cut as a {planned} shot.",
-    "copy": "A freshly composed view, closer in than the place picture and turned from it.",
-    "repeat": "A view of its own, composed differently from every other shot of this place.",
+    "copy": "The same room as the staged place picture, seen closer, with the same walls, furniture, windows and light.",
+    "repeat": "The same room as the other shots of this place, with its own subject and framing.",
     "hour": "The light is the hour the place describes.",
     "landform": "The ground runs flat to the horizon.",
     "banned": "The picture holds only the things of this place and its time.",
@@ -148,10 +148,26 @@ class Climb:
         names = {grid_layout.name_of(getattr(self.ctx, "number", 0), r): r for r in self.grids_of(rows, shots)}
         return [r for name, r in names.items() if name not in self.redrawn]
 
-    def redraw(self, row: dict) -> None:
+    def draw(self, row: dict) -> None:
         bump = supersede(self.home / "storyboard", grid_layout.name_of(self.ctx.number, row))
         self.ctx.run_script("scripts/episode/grids.py", *grid_layout.argv(row), f"--seed-bump={bump}",
                             gpu=True, clock="grids")
+
+    def redraw(self, row: dict) -> None:
+        """A redrawn ANCHOR re-cuts its setup's room and redraws the siblings
+        that stage it (one room per setup, 2026-09-28); any other grid alone."""
+        self.draw(row)
+        rows = grid_layout.read(self.home)
+        name = grid_layout.name_of(self.ctx.number, row)
+        mine = next((r for r in rows if grid_layout.name_of(self.ctx.number, r) == name), None)
+        cells = episode_home.read_json(self.home / "plan.json").get("shots") or []
+        kin = grid_room.siblings(rows, mine, cells) if mine else []
+        if kin:
+            grid = self.home / "storyboard" / "grids" / f"{name}.png"
+            grid_room.cut_room(grid, mine, grid_room.anchor_shot(cells, mine["setup"]),
+                               grid_room.room_path(self.home, mine["setup"]))
+            for r in kin:
+                self.draw(r)
 
     def cure_prose(self, rows: list[dict], faults: list[Fault]) -> None:
         plan = self.home / "plan.json"

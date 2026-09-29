@@ -291,6 +291,47 @@ def tools(run=None, stage=None, reader=None, detect=None, embed=None) -> dict:
     return {"run": run, "stage": stage, "reader": reader, "detect": detect, "embed": embed}
 
 
+LOOSE = ("wide", "full", "medium", "medium_close")
+"""Sizes whose background is the room; a close or an insert shows too little of it."""
+
+
+def room_of(home: Path, book: Path | None, name: str, setup: dict) -> Path | None:
+    """What the setup's grids were told the room is: the anchor cell when cut,
+    else the place picture (studio/grid_room)."""
+    from studio import grid_room
+    room = grid_room.room_path(home, name)
+    if room.exists():
+        return room
+    if book is None:
+        return None
+    try:
+        from studio import pack_refs
+        return pack_refs.location_view(book, setup.get("location") or "", view=setup.get("view") or "")
+    except Exception:
+        return None
+
+
+def place_faults(home: Path, plan: dict, book: Path | None) -> list[Fault]:
+    """panel_place: a loose panel that is the staged room's MIRROR (ep14's
+    Waterloo drew the rails on the right where the plate has them left).
+    ADVISORY: it never fails the verdict and takes no rung until calibrated
+    over five episodes (docs/calibration/panel_place.md)."""
+    from studio.measure import place
+    board, setups, out = Path(home) / "storyboard", plan.get("setups") or {}, []
+    rooms = {name: room_of(home, book, name, setup) for name, setup in setups.items()}
+    for shot in plan.get("shots") or []:
+        panel, room = board / f"{where_of(shot['index'])}.png", rooms.get(shot.get("setup"))
+        if shot.get("size") not in LOOSE or room is None or not panel.exists():
+            continue
+        read = place.versus(place.load(panel), place.load(room))
+        if place.mirrored(read):
+            out.append(Fault(kind="place", where=panel.stem, severity="advisory",
+                             note=f"the room's mirror: profile {read['prof_same']:+.2f}, light "
+                                  f"{read['side_panel']:+.2f} vs {read['side_ref']:+.2f}",
+                             evidence={**read, "room": room.name, "calibrated": False}))
+    return out
+
+
 def refs_of(book: Path | None, shot: dict, setup: dict) -> list[Path]:
     """The pictures the grid staged for this shot: its cast's sheets and the
     setup's place picture, when the book is at hand."""
@@ -360,5 +401,6 @@ def judge(home: Path, plan: dict, *, book: Path | None = None, run=None, stage=N
         found, ok = read_panel(shot, setup, path, t, refs_of(book, shot, setup))
         faults, reads, readable = faults + found, reads + 1, readable + int(ok)
     faults += repeat_faults(board, plan, rows_of(board, "panel_content.json"))
+    faults += place_faults(home, plan, book)
     return Verdict(judge=NAME, version=VERSION, passed=not any(f.severity != "advisory" for f in faults),
                    faults=faults, confidence=jv.confidence(readable, reads), reads=reads)

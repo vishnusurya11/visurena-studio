@@ -139,6 +139,17 @@ attic / dormer view / doorstep / street (ep11 did exactly this with three views 
 The takes are rendering on the current panels. Its master gets the full watch; if the place
 drift reads on screen, ep14 iterates on P1 (master_iter2) — the owner judges, the ladder does not.
 
-## 6. Time and cost
+## 6. Built (2026-09-28, owner: "fix all that")
+
+P1 `studio/grid_room.py` + `grids.py` + `storyboard_grid.py` + `step_07` + `panel_ladder.py`;
+P2 as registry step `03b cells` (`studio/picture_read.py`, `studio/cells_from_picture.py`,
+`scripts/episode/step_03b_cells.py`); P3 `studio/measure/place.py` + `panel_eye.place_faults`
+(advisory; `docs/calibration/panel_place.md`); P4 `MAX_SETUP_SECONDS = 50` (measured, not the
+30 s first written: held plans peak at 33-50 s), `plan_gates.setup_faults`, advisory on a
+rendered plan. The 2026-09-24 "never pinned" text is superseded in three files. Tracker:
+`architecture/plan/2026-09-28_one_room_per_setup.md`. Open: the calibration run of
+`panel_place` over five episodes; the first episode drawn under the chain, measured.
+
+## 7. Time and cost
 P1 ≈ 3 h code + one grid stage on ep15 (or an ep14 iteration) to verify: $0, local.
 P2 ≈ 1 day. P3 ≈ half a day + calibration run over five episodes' panels (CPU). P4 ≈ 1 h.

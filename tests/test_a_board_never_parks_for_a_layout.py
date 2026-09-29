@@ -8,6 +8,8 @@ from pathlib import Path
 
 import pytest
 
+from PIL import Image
+
 from scripts.episode import step_07_board as step
 from studio import db, episode_home, grid_layout
 from studio.stage_run import StageContext
@@ -57,9 +59,10 @@ def test_a_grid_on_disk_is_not_redrawn_and_the_step_is_done_with_all_of_them(ctx
     for row in grid_layout.layout(PLAN["setups"], PLAN["shots"]):
         path = ctx.home / "storyboard" / "grids" / f"{grid_layout.name_of(4, row)}.png"
         path.parent.mkdir(parents=True, exist_ok=True)
-        path.write_bytes(b"grid")
+        Image.new("RGB", (256 * row["cols"], 256 * row["rows"]), "white").save(path)
     step.run(ctx)
     assert ctx.launched == [] and step.done(ctx)
+    assert (ctx.home / "storyboard" / "anchors" / "yard.png").exists()   # the room, cut at no GPU cost
 
 
 def test_a_plan_with_no_shots_is_refused_not_parked(ctx):
@@ -78,3 +81,26 @@ def test_a_grid_the_layout_no_longer_names_is_superseded(ctx):
     step.run(ctx)
     assert not list(grids.glob("ep04_grid_yard_5x1.*"))
     assert (ctx.home / "storyboard" / "superseded" / "ep04_grid_yard_5x1_v1.png").exists()
+
+
+def test_the_anchor_grid_is_drawn_first_and_its_room_is_cut_before_the_siblings(ctx):
+    """One room per setup (2026-09-28): the grid holding the widest shot leads,
+    its widest cell becomes storyboard/anchors/<setup>.png, and the siblings
+    are drawn after it (they stage that room)."""
+    plan = {"setups": {"yard": {"described": "a yard"}},
+            "shots": [{"index": i, "setup": "yard", "size": "medium"} for i in range(1, 4)]
+                     + [{"index": 4, "setup": "yard", "size": "wide"}, {"index": 5, "setup": "yard", "size": "medium"}]}
+    (ctx.home / "plan.json").write_text(json.dumps(plan), encoding="utf-8")
+
+    def draw(cmd):
+        ctx.launched.append(cmd[1:])
+        plain = [a for a in cmd[1:] if not a.startswith("--")]
+        row = {"setup": plain[3], "cols": int(plain[4]), "rows": int(plain[5]), "tag": plain[6]}
+        out = ctx.home / "storyboard" / "grids" / f"{grid_layout.name_of(4, row)}.png"
+        out.parent.mkdir(parents=True, exist_ok=True)
+        Image.new("RGB", (1024 * row["cols"], 1024 * row["rows"]), "white").save(out)
+        return 0
+    ctx.launch = draw
+    step.run(ctx)
+    assert [c[4] for c in ctx.launched] == ["2", "3"]          # the 2x1 (shots 4, 5) before the 3x1
+    assert (ctx.home / "storyboard" / "anchors" / "yard.png").exists()

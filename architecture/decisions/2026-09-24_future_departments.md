@@ -180,8 +180,11 @@ Two lines are led by skills today (episode, shorts); that is the largest defect 
 - **Refs as a department** (D) vs inside PREP (C) vs episode steps 1/3/5 (E draft):
   own stage `refs`, keyed `(book, style)`, the only writer of `refs.json`, run
   just-in-time per unit by the scheduler (memory: build only what the episode needs).
-  Per-episode place pictures stay in the line because a recurring location is never
-  pinned to one picture.
+  Per-episode place pictures stay in the line as that place at this unit's hour.
+  [Superseded 2026-09-28: this sentence went on "because a recurring location is never
+  pinned to one picture" — it quoted the Baker Street FAULT as the rule. The owner's
+  2026-09-17 ruling stands and was ruled again with "fix all that": a recurring place is
+  PINNED to one book picture; `architecture/decisions/2026-09-28_one_room_per_setup.md`.]
 - **Finishing to spec** (versions per aspect and loudness, sidecar captions): a
   Distribution step (`publish/02 versions`), because the format line delivers one
   master and the platform decides the shape (A §1, B Q2 reading, C FINISH).

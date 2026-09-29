@@ -20,7 +20,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 
-from studio import episode_home, grid_layout, panel_ladder, step_cli  # noqa: E402
+from studio import episode_home, grid_layout, grid_room, panel_ladder, step_cli  # noqa: E402
 
 STEP_ID = "07"
 NAME = "board"
@@ -64,10 +64,28 @@ def strays(ctx, rows: list[dict]) -> list[str]:
     return sorted(g.stem for g in (ctx.home / "storyboard" / "grids").glob("*.png") if g.stem not in names)
 
 
+def shots(ctx) -> list[dict]:
+    plan = ctx.home / "plan.json"
+    return list(episode_home.read_json(plan).get("shots") or []) if plan.exists() else []
+
+
+def room_wanted(ctx, rows: list[dict], row: dict, shots: list[dict]) -> bool:
+    """An anchor grid with siblings owes its setup a ROOM, cut from its widest
+    cell, that is not older than the grid (studio/grid_room)."""
+    grid = grid_path(ctx, row)
+    return grid.exists() and bool(grid_room.siblings(rows, row, shots)) and grid_room.room_stale(ctx.home, row.get("setup", ""), grid)
+
+
+def cut_room(ctx, row: dict, shots: list[dict]) -> None:
+    anchor = grid_room.anchor_shot(shots, row["setup"])
+    grid_room.cut_room(grid_path(ctx, row), row, anchor, grid_room.room_path(ctx.home, row["setup"]))
+
+
 def done(ctx) -> bool:
     rows = layout(ctx)
     stale = stale_names(ctx) if rows else set()
-    return bool(rows) and all(current(ctx, row, stale) for row in rows) and not strays(ctx, rows)
+    return (bool(rows) and all(current(ctx, row, stale) for row in rows) and not strays(ctx, rows)
+            and not any(room_wanted(ctx, rows, row, shots(ctx)) for row in rows))
 
 
 def run(ctx) -> None:
@@ -78,11 +96,15 @@ def run(ctx) -> None:
     for name in strays(ctx, rows):
         panel_ladder.supersede(ctx.home / "storyboard", name)
     extra = getattr(ctx, "extra", None) or []
-    stale = stale_names(ctx)
-    for row in rows:
-        if current(ctx, row, stale) and not extra:
-            continue
-        ctx.run_script("scripts/episode/grids.py", *grid_layout.argv(row), *extra, gpu=GPU, clock="grids")
+    stale, cells = stale_names(ctx), shots(ctx)
+    # ONE ROOM PER SETUP: the anchor grid first; its room cut before any sibling
+    # is drawn, and the siblings re-read as stale once the room exists.
+    for row in grid_room.draw_order(rows, cells):
+        if not (current(ctx, row, stale) and not extra):
+            ctx.run_script("scripts/episode/grids.py", *grid_layout.argv(row), *extra, gpu=GPU, clock="grids")
+        if room_wanted(ctx, rows, row, cells):
+            cut_room(ctx, row, cells)
+            stale = stale_names(ctx)
 
 
 if __name__ == "__main__":

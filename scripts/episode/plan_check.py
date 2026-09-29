@@ -45,6 +45,23 @@ def contract(book: Path, number: int):
         return None
 
 
+def rendered(book: Path, number: int) -> bool:
+    """Has anything been drawn or shot from this plan?  Then G-SETUP is advice:
+    a wall raised after the render must not stop the run that made it."""
+    home = episode_home.home(book, number)
+    return (home / "storyboard" / "grids").exists() or (home / "takes").exists()
+
+
+def setup_gate(episode, book: Path, number: int) -> int:
+    """G-SETUP printed; counted as hard only before anything is rendered."""
+    found = plan_gates.setup_faults(episode)
+    advisory = bool(found) and rendered(book, number)
+    print("G-SETUP      :", ("advisory (rendered plan): " if advisory else "") + (f"{len(found)}" if found else "clean"))
+    for f in found:
+        print("   ", f[:170])
+    return 0 if advisory else len(found)
+
+
 def long_shots(episode, rate: float, budget: float = BUDGET) -> list[tuple[int, float]]:
     """(shot, projected seconds) for every shot that projects past a take at the
     narrator's measured rate: handles, words, a breath between two lines, the
@@ -188,6 +205,7 @@ def main(book_id: str, number: int) -> int:
     print("PLAN GATES   :", len(pg) or "clean"); hard += len(pg)
     for f in pg:
         print("   ", f[:170])
+    hard += setup_gate(ep, book, number)
     hard += catalog_gates(ep, plan_brief.chapter_text(book, number))
     hard += cover_gates(ep, book, number)
     hard += sound_gates(ep)

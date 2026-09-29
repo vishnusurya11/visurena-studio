@@ -151,6 +151,7 @@ The references sheets and voices live in their own department: `uv run python re
 | 01 | bind | `uv run python scripts/episode/step_01_bind.py <book> <n>` | This unit's cast. |
 | 02 | plan | `uv run python scripts/episode/step_02_plan.py <book> <n>` | The contract, gated before anything is voiced or drawn. |
 | 03 | places | `uv run python scripts/episode/step_03_places.py <book> <n>` | Each setup's location+view at THIS unit's hour, drawn from its own described words on the local image model. |
+| 03b | cells | `uv run python scripts/episode/step_03b_cells.py <book> <n>` | Cells FROM the drawn picture: the vision model lists each place's fixed things by frame third and band; code writes geometry and every at_rest behind the writer's subject sentence; the battery re-judges; the verdict is re-signed. A refused rewrite keeps the writer's cells. |
 | 04 | record | `uv run python scripts/episode/step_04_record.py <book> <n>` | Every line in its character's voice, MEASURED and LISTENED to. |
 | 05 | timeline | `uv run python scripts/episode/step_05_timeline.py <book> <n>` | AUDIO FIRST - the animatic. |
 | 06 | prompts | `uv run python scripts/episode/step_06_prompts.py <book> <n>` | Every take prompt built and linted for $0 with no GPU, BEFORE any grid: length per block, style line, banned props, no last frame, no fragments. |
@@ -278,10 +279,26 @@ match the picture.
 
 **Grids.** Qwen-Image-2.1 edit-multi takes 1-3 references:
 - cast sheets first, the identity slots;
-- the setup's own place picture last, the scene and style slot;
+- the setup's own place picture, the scene slot; on a chained grid the ROOM
+  last (the style slot): the setup's first-drawn panel, `storyboard/anchors/<setup>.png`,
+  named "this exact room, already drawn" — the plate stays beside it only when
+  the grid holds a wide or a full;
 - only the cast of the shots a grid OWNS, since a borrowed cast draws line-ups;
 - an unused LoadImage slot feeds the encoder ComfyUI's example doll, so
   `stage_only` removes it.
+
+**One room per setup (2026-09-28, owner: "fix all that").** A place is held by
+pixels, not words: within one render the room holds, between renders of one
+setup the drawer re-dresses it (ep14: two biology classrooms, a mirrored
+Waterloo, an attic that became a street). So the grid holding the setup's
+widest shot is its ANCHOR and is drawn first; its widest cell is cut to the
+room; every sibling grid stages the room; the `inputs` hash covers the staged
+bytes, so a redrawn anchor re-cuts the room and the ladder redraws the siblings
+on it. The prompt says the location "is identical in every panel and never
+changes" again, carries the setup's `geometry` and `landmark`, and a tight grid
+gets the place's first clause plus `Setup.light`. `panel_place` reads every
+loose panel against the room and names its mirror — advisory until calibrated
+(`docs/calibration/panel_place.md`). G-SETUP holds a setup to 50 s of picture.
 
 The layout is ruled by `grid_layout` (by setup and shot size); a close is bound by
 the items above the chest only (9cb4609: six ep13 closes drew whole seated figures

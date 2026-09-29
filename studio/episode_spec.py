@@ -97,6 +97,14 @@ which may not be the protagonist's. Narrating any one of them away loses the
 scene. The real ceiling is the cast voices, and all four exist
 (`cast/<who>/voice/design.wav`). A fifth voice is still refused."""
 MAX_SETUPS = 6
+MAX_SETUP_SECONDS = 50.0
+"""One place at one hour from one side, and no more than this of projected
+picture (the battery's G-SETUP, never the contract's: a rendered plan is judged
+in report mode).  MEASURED 2026-09-28 over the plans whose place held: WotW
+ep05-12 peak at 33-50 s a setup (ep06 knots 45, ep10 lane 50); the plans whose
+place drifted: ep13 hedge 89 s (16 shots, 12 renders), ep14 attic 52 s (attic,
+dormer view, doorstep and street on one night picture, 6 renders).  Sherlock's
+retired contract said ~25 s, but its sheets held a room in one generation."""
 BREATH = 0.70  # audio reviewer, iteration 3: 0.50 was the entire pause between two sentences (wavs carry <= 0.04 s of silence)
 HANDLE = 0.25
 TURN_BAND = (0.50, 0.75)

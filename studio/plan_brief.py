@@ -177,6 +177,7 @@ def band() -> dict:
             "max_words_per_line": episode_spec.MAX_WORDS,
             "max_lines_per_shot": episode_spec.MAX_LINES_PER_SHOT,
             "max_voices": episode_spec.MAX_SPEAKING, "max_setups": episode_spec.MAX_SETUPS,
+            "max_setup_seconds": episode_spec.MAX_SETUP_SECONDS,
             "dialogue_share": list(episode_spec.DIALOGUE_SHARE),
             "turn_band": list(episode_spec.TURN_BAND)}
 

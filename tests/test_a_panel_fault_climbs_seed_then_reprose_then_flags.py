@@ -37,8 +37,11 @@ class Ctx:
         self.launched.append([script, *extra])
         plain = [a for a in extra if not a.startswith("--")]
         row = {"setup": plain[0], "cols": int(plain[1]), "rows": int(plain[2]), "tag": plain[3] if len(plain) > 3 else ""}
-        for ext in ("png", "json", "txt"):
+        for ext in ("json", "txt"):
             (self.home / "storyboard" / "grids" / f"{grid_layout.name_of(self.number, row)}.{ext}").write_bytes(b"drawn")
+        from PIL import Image                       # a real grid: the anchor's room is cut from it
+        Image.new("RGB", (256 * row["cols"], 256 * row["rows"]), "white").save(
+            self.home / "storyboard" / "grids" / f"{grid_layout.name_of(self.number, row)}.png")
         return 0
 
 
@@ -51,9 +54,11 @@ def board_of(ctx) -> tuple[Path, list[dict]]:
     grid_layout.write(ctx.home, rows)
     grids = ctx.home / "storyboard" / "grids"
     grids.mkdir(parents=True)
+    from PIL import Image
     for row in rows:
-        for ext in ("png", "json", "txt"):
+        for ext in ("json", "txt"):
             (grids / f"{grid_layout.name_of(5, row)}.{ext}").write_text(ext, encoding="utf-8")
+        Image.new("RGB", (256 * row["cols"], 256 * row["rows"]), "white").save(grids / f"{grid_layout.name_of(5, row)}.png")
     for shot in plan["shots"]:
         (ctx.home / "storyboard" / f"shot_{shot['index']:02d}.png").write_bytes(bytes([shot["index"]]) * 8)
     return ctx.home / "storyboard", rows
@@ -83,12 +88,18 @@ def test_seed_then_reprose_then_flagged(tmp_path):
         terminal=panel_ladder.keep_best, policy=AUTO)
 
     argv = grid_layout.argv(grid)
+    # one room per setup (2026-09-28): the faulted grid is its setup's anchor, so each rung
+    # redraws it and then its sibling (the 1x1) on the room cut from it
+    sibling = grid_layout.argv(next(r for r in rows if 12 in r["shots"]))
     assert ctx.launched == [["scripts/episode/grids.py", *argv, "--seed-bump=1"],
-                            ["scripts/episode/grids.py", *argv, "--seed-bump=2"]]
-    assert rebuilt == [1, 2] and files_while_climbing == [[], []]
-    superseded = sorted(p.name for p in (board / "superseded").iterdir())
+                            ["scripts/episode/grids.py", *sibling, "--seed-bump=1"],
+                            ["scripts/episode/grids.py", *argv, "--seed-bump=2"],
+                            ["scripts/episode/grids.py", *sibling, "--seed-bump=2"]]
+    assert rebuilt == [2, 4] and files_while_climbing == [[], []]
+    superseded = sorted(p.name for p in (board / "superseded").iterdir() if p.name.startswith(name))
     assert superseded == sorted(f"{name}_v{k}.{ext}" for k in (1, 2) for ext in ("png", "json", "txt"))
-    assert (board / "grids" / f"{name}.png").read_bytes() == b"drawn"       # the fresh render stands
+    assert (board / "grids" / f"{name}.png").stat().st_size > 0            # the fresh render stands
+    assert (board / "anchors" / f"{grid['setup']}.png").exists()           # the room, cut from the anchor
 
     plan = json.loads((ctx.home / "plan.json").read_text(encoding="utf-8"))
     frame = next(s["frame"] for s in plan["shots"] if s["index"] == 9)
@@ -111,7 +122,7 @@ def test_a_pass_after_the_seed_rung_never_reproses(tmp_path):
         ctx, "EYE_PANELS", judge=lambda: next(reads),
         sign=lambda v: eye_verdict.sign_verdict(board, sorted(board.glob("shot_*.png")), v),
         ladder=panel_ladder.rungs(ctx, lambda: None, cap=2), terminal=panel_ladder.keep_best, policy=AUTO)
-    assert len(ctx.launched) == 1 and ctx.launched[0][-1] == "--seed-bump=1"
+    assert len(ctx.launched) == 2 and ctx.launched[0][-1] == "--seed-bump=1"   # the anchor, then its sibling
     assert (ctx.home / "plan.json").read_text(encoding="utf-8") == before
     assert json.loads(signed.read_text(encoding="utf-8"))["verdict"] == "pass"
     assert audit_rows.load(ctx.book_dir) == []

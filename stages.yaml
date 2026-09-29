@@ -608,8 +608,9 @@ stages:
           - refs/locations/*/*.png
         desc: >-
           Each setup's location+view at THIS unit's hour, drawn from its own
-          described words on the local image model. A recurring place is never
-          pinned to one picture.
+          described words on the local image model. A recurring place is PINNED
+          to its one book picture (owner, 2026-09-17; ruled again 2026-09-28):
+          a per-episode view is that place at this hour, never a fresh room.
         substeps:
           - id: "03_01"
             name: draw
@@ -620,6 +621,32 @@ stages:
             desc: >-  # MISSING
               AGENT look_back reads each new picture against its prompt (the
               landmark, the hour); a miss is redrawn; a second miss is flagged.
+
+      - id: "03b"
+        name: cells
+        script: step_03b_cells
+        in:
+          - episodes/{unit}/plan.json
+          - refs/locations/*/*.png
+        out:
+          - episodes/{unit}/storyboard/cells_from_picture.json
+        desc: >-
+          Cells written FROM the drawn picture (owner, 2026-09-28): the local
+          vision model lists each place picture's fixed things by frame third
+          and band; code writes the setup's geometry and every shot's at_rest
+          behind the writer's subject sentence; the battery re-judges; the plan
+          verdict is re-signed for the new bytes. A refused rewrite keeps the
+          writer's cells and logs why. Never parks.
+        substeps:
+          - id: "03b_01"
+            name: read
+            desc: >-
+              AGENT picture reader: what fixed thing stands at which third and
+              band, in a closed vocabulary; never a judgement.
+          - id: "03b_02"
+            name: write
+            desc: >-
+              Code rewrites geometry and at_rest; plan_check; re-sign.
 
       - id: "04"
         name: record
@@ -696,6 +723,7 @@ stages:
         out:
           - episodes/{unit}/storyboard/layout.json
           - episodes/{unit}/storyboard/grids/*.png
+          - episodes/{unit}/storyboard/anchors/*.png
         desc: >-
           Storyboard grids on the local image model from the plan's prose, up
           to three references - cast sheets first, the setup's place last.

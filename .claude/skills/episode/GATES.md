@@ -38,6 +38,14 @@ furthest reaches 90 % of the chapter's paragraphs and the title event's last
 paragraph -- ep12 reached 57 of 69), G-SHOUT (a `!` line is dialogue), G-SOUND
 (every setup an `ambience`; a loud event in the prose carries `sounds`).
 
+**2026-09-28 addition:** G-SETUP (HARD before anything is rendered, advisory
+after) -- a setup holds at most `MAX_SETUP_SECONDS` = 50 s of projected picture;
+measured on the plans whose place held (33-50 s) against those that drifted
+(ep13 hedge 89 s, ep14 attic 52 s). One place at one hour from one side: split
+attic / dormer view / doorstep / street the way ep11 gave one location three
+views. On the board, `panel_place` (EYE_PANELS) names a loose panel that is the
+staged room's mirror -- ADVISORY, no rung, until calibrated.
+
 ## Timeline — `timeline.py` (HARD)
 
 The measured runtime must sit in 120-180 s, and every line at its shot's start

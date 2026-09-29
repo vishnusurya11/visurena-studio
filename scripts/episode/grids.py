@@ -38,7 +38,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 
-from studio import cast_refs, episode_home, pack_refs
+from studio import cast_refs, episode_home, grid_room, pack_refs
 from studio.comfy import load_workflow, stage_image, submit, wait
 from studio.episode_home import episode_arg
 from studio.ref_slots import stage_only
@@ -83,10 +83,11 @@ def plan_sha(book: Path, number: int) -> str:
 
 
 SHOT_FIELDS = ("index", "setup", "size", "frame", "at_rest", "faces", "extras")
-SETUP_FIELDS = ("location", "view", "described")
+SETUP_FIELDS = ("location", "view", "described", "geometry", "landmark", "landmark_at", "landmark_size", "light")
 """Exactly what `prompt_for` reads. A shot's `motion` is the take's, not the
 grid's: ep09's retakes changed three camera moves, and hashing the whole shot
-would have redrawn three good grids for words they never saw."""
+would have redrawn three good grids for words they never saw.  The geometry
+fields joined on 2026-09-28: they were filled in every plan and read by nothing."""
 
 
 def shots_sha(ep, indices: list[int]) -> str:
@@ -102,13 +103,35 @@ def shots_sha(ep, indices: list[int]) -> str:
 
 
 def drawn_inputs(book: Path, ep, setup: str, indices: list[int], cols: int, rows: int,
-                 version: str) -> str:
+                 version: str, number: int | None = None) -> str:
     """Everything a grid is drawn from: the prompt it would be given now and the
     bytes of every picture it would stage. Plan fields alone missed a rebound
     row, a redrawn sheet or place, and a prompt-builder fix -- so the chapter-6
-    wardrobe on every ep09 grid could never have read as stale (2026-09-23)."""
+    wardrobe on every ep09 grid could never have read as stale (2026-09-23).
+    The room a chained grid stages is among those bytes: a redrawn anchor
+    makes its siblings stale (2026-09-28)."""
     shots = [s for s in ep.shots if s.index in indices]
-    return inputs_sha(*prompt_for(book, ep, setup, shots, cols, rows, version))
+    room = room_of(book, number, ep, setup, indices) if number is not None else None
+    return inputs_sha(*prompt_for(book, ep, setup, shots, cols, rows, version, room=room))
+
+
+def room_of(book: Path, number: int, ep, setup: str, indices: list[int]) -> Path | None:
+    """The setup's first-drawn panel this grid stages as its room, if it is not
+    the anchor grid itself and the room is cut (studio/grid_room)."""
+    home = episode_home.home(book, number)
+    return grid_room.room_for(home, setup, indices, grid_room.anchor_shot(ep.shots, setup))
+
+
+def place_words(setup) -> str:
+    """The setup's GEOMETRY (which frame edge, what apparent size) and its
+    landmark: the block Sherlock's sheets carried and the grids never did."""
+    parts = [g] if (g := (getattr(setup, "geometry", "") or "").strip()) else []
+    if mark := (getattr(setup, "landmark", "") or "").strip():
+        end = "far end" if getattr(setup, "landmark_at", "far_end") == "far_end" else "start"
+        size = (getattr(setup, "landmark_size", "") or "").strip()
+        parts.append(f"{mark} stands at the {end} of the route in every panel"
+                     + (f", at most {size}" if size else "") + ".")
+    return " ".join(parts)
 
 
 def inputs_sha(text: str, slots: dict) -> str:
@@ -129,9 +152,10 @@ def sheet_of(book: Path, who: str) -> Path | None:
     return p if p.exists() else None
 
 
-def cast_of(book: Path, shots: list) -> tuple[list[dict], dict]:
+def cast_of(book: Path, shots: list, reserve: int = 1) -> tuple[list[dict], dict]:
     """Every person the panels name, from the bound rows, and the slots their
-    sheets go in -- what is staged and what is said are the same list."""
+    sheets go in -- what is staged and what is said are the same list.
+    `reserve` slots are kept for the place and, on a chained grid, the room."""
     who = [f for s in shots for f in (s.faces or [])]
     who = list(dict.fromkeys(who))                      # first-appearance order
     people, slots, n = [], {}, 0
@@ -142,7 +166,7 @@ def cast_of(book: Path, shots: list) -> tuple[list[dict], dict]:
         # (2026-09-23).
         row = cast_refs.row(book, name)
         sheet, ref = sheet_of(book, name), None
-        if sheet is not None and n < MAX_SLOTS - 1:     # one slot is always the place
+        if sheet is not None and n < MAX_SLOTS - reserve:
             n += 1
             ref = n
             slots[str(100 + n)] = sheet
@@ -185,7 +209,7 @@ def grid_shots(ep, setup: str, cols: int, rows: int, only: list[int] | None) -> 
 
 
 def _v1(blocks: list, cols: int, rows: int, place: tuple, cast: list, style_slot: int,
-        props: list | None = None) -> str:
+        props: list | None = None, **_) -> str:
     cast = [{**p, "wear": p["wear"][:600]} for p in cast]      # v1's own cut, kept byte for byte
     text = grid_prompt(blocks, cols, rows, place=place, cast=cast, style=STYLE.format(scene=style_slot))
     return text + "\n\n" + no_duplicates([p["name"] for p in cast])
@@ -199,10 +223,10 @@ lawn's insert as a copy of its wide. v1 stays callable to reproduce old grids.""
 
 
 def compose(version: str, blocks: list, cols: int, rows: int, place: tuple, cast: list,
-            style_slot: int, props: list | None = None) -> str:
+            style_slot: int, props: list | None = None, **extra) -> str:
     if version not in PROMPTS:
         raise SystemExit(f"--prompt={version}: known versions are {sorted(PROMPTS)}")
-    return PROMPTS[version](blocks, cols, rows, place, cast, style_slot, props)
+    return PROMPTS[version](blocks, cols, rows, place, cast, style_slot, props, **extra)
 
 
 def props_of(book: Path, pids: list[str], shots: list) -> list[dict]:
@@ -212,11 +236,11 @@ def props_of(book: Path, pids: list[str], shots: list) -> list[dict]:
     return [{"name": name, "sheet": sheet} for sheet, (name, _text) in named]
 
 
-def stage_props(props: list[dict], used: int) -> tuple[list[dict], dict]:
-    """Props into the slots the cast left, the place keeping the last one."""
+def stage_props(props: list[dict], used: int, reserve: int = 1) -> tuple[list[dict], dict]:
+    """Props into the slots the cast left, the place (and the room) keeping the last."""
     out, slots = [], {}
     for p in props:
-        if used >= MAX_SLOTS - 1:
+        if used >= MAX_SLOTS - reserve:
             break
         used += 1
         out.append({**p, "ref": used})
@@ -229,21 +253,33 @@ def prompt_version(argv: list[str]) -> str:
 
 
 def prompt_for(book: Path, ep, setup: str, shots: list, cols: int, rows: int,
-               version: str = "v2") -> tuple[str, dict]:
+               version: str = "v2", room: Path | None = None) -> tuple[str, dict]:
     """(the grid prompt, {LoadImage node: picture}). Only the shots this grid
-    OWNS put people in the slots; a borrowed shot's cast drew line-ups."""
+    OWNS put people in the slots; a borrowed shot's cast drew line-ups.  A
+    chained grid stages its setup's ROOM (grid_room) last, the place picture
+    beside it only when the grid holds a wide; the style is anchored on the
+    last picture staged."""
     owned = [s for s in shots if s.setup == setup] or shots
-    cast, char_slots = cast_of(book, owned)
-    props, prop_slots = stage_props(props_of(book, ep.setups[setup].props, owned), len(char_slots))
-    place_slot = len(char_slots) + len(prop_slots) + 1
-    slots = {**char_slots, **prop_slots, str(100 + place_slot): wide_for(book, ep.setups[shots[0].setup])}
+    plate = room is None or grid_room.stages_plate(shots)
+    reserve = int(plate) + int(room is not None)
+    cast, char_slots = cast_of(book, owned, reserve)
+    props, prop_slots = stage_props(props_of(book, ep.setups[setup].props, owned), len(char_slots), reserve)
+    nxt, slots, plate_slots = len(char_slots) + len(prop_slots) + 1, {**char_slots, **prop_slots}, []
+    if plate:
+        slots[str(100 + nxt)], plate_slots, nxt = wide_for(book, ep.setups[shots[0].setup]), [nxt], nxt + 1
+    room_slot = nxt if room is not None else None
+    if room is not None:
+        slots[str(100 + nxt)] = Path(room)
+    style_slot = room_slot if room_slot is not None else plate_slots[0]
     said_as = {p["entity"]: p["name"] for p in cast}
     blocks = [{"size": SAID[s.size], "body": body_of(s),
                "cut": cut_clause(s.size, peopled=bool(s.faces)),
                "who": [said_as[f] for f in (s.faces or []) if f in said_as],
                "extras": getattr(s, "extras", 0)} for s in shots]
-    place = ([place_slot], ep.setups[shots[0].setup].described)
-    return compose(version, blocks, cols, rows, place, cast, place_slot, props), slots
+    here = ep.setups[shots[0].setup]
+    place = (plate_slots, here.described)
+    return compose(version, blocks, cols, rows, place, cast, style_slot, props, room=room_slot,
+                   geometry=place_words(here), light=getattr(here, "light", "") or ""), slots
 
 
 def graph_for(text: str, slots: dict, cols: int, rows: int, seed: int, name: str) -> dict:
@@ -280,7 +316,8 @@ def main(book_id: str, number: int, setup: str, cols: int, rows: int, tag: str =
     if why := cast_refs.chapter_refusal(book, number):   # this chapter's clothes (audit item 9)
         raise SystemExit(why)
     shots = grid_shots(ep, setup, cols, rows, only)
-    text, slots = prompt_for(book, ep, setup, shots, cols, rows, version)
+    room = room_of(book, number, ep, setup, [s.index for s in shots])
+    text, slots = prompt_for(book, ep, setup, shots, cols, rows, version, room=room)
     name = grid_name(number, setup, cols, rows, tag)
     seed = 40500 + sum(s.index for s in shots) + seed_bump
     print(f"{name}: shots {[s.index for s in shots]} | slots {sorted(slots)} | prompt {len(text)} chars",
@@ -291,7 +328,8 @@ def main(book_id: str, number: int, setup: str, cols: int, rows: int, tag: str =
         "name": name, "episode": number, "setup": setup, "cols": cols, "rows": rows,
         "shots": [s.index for s in shots], "seed": seed, "plan": plan_sha(book, number),
         "drawn_from": shots_sha(ep, [s.index for s in shots]),
-        "inputs": inputs_sha(text, slots), "prompt": version})
+        "inputs": inputs_sha(text, slots), "prompt": version,
+        "room": episode_home.relative(book, room) if room else None})
     print(f"{name} in {time.time() - began:.0f}s -> {episode_home.relative(book, grid)}", flush=True)
 
 

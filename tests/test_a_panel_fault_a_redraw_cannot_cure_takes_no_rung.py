@@ -9,7 +9,9 @@ is written, and the publish lock stops on it until the director looks.
 """
 from __future__ import annotations
 
-from test_a_panel_fault_climbs_seed_then_reprose_then_flags import AUTO, Ctx, board_of
+import json
+
+from test_a_panel_fault_climbs_seed_then_reprose_then_flags import AUTO, PLAN, Ctx, board_of
 
 from studio import eye_verdict, grid_layout, judged_gate, panel_ladder
 from studio.judges.verdict import Fault, Verdict
@@ -36,13 +38,22 @@ def test_framing_and_posture_alone_take_no_rung(tmp_path):
     assert [(l.action, l.terminal) for l in ctx.learned] == [("keep_best", True)]
 
 
+def call_of(call: list) -> list:
+    return [a for a in call[1:] if not a.startswith("--seed-bump")]
+
+
 def test_a_curable_fault_still_climbs_and_only_its_grid_is_redrawn(tmp_path):
     ctx = Ctx(tmp_path)
     board, rows = board_of(ctx)
     bad = verdict(("clones", "shot_09"), ("framing", "shot_03"))
     clear(ctx, board, iter([bad, bad, bad]))
     grid = next(r for r in rows if 9 in r["shots"])
-    assert all(call[1:1 + len(grid_layout.argv(grid))] == grid_layout.argv(grid) for call in ctx.launched)
+    # one room per setup (2026-09-28): the faulted grid, and its siblings when it is the setup's anchor
+    from studio import grid_room
+    shots = json.loads(PLAN.read_text(encoding="utf-8"))["shots"]
+    kin = [grid_layout.argv(r) for r in [grid] + grid_room.siblings(rows, grid, shots)]
+    assert call_of(ctx.launched[0]) == grid_layout.argv(grid)
+    assert all(call_of(call) in kin for call in ctx.launched)
     assert [l.action for l in ctx.learned] == ["redraw_grid_seed", "reprose", "keep_best"]
 
 

@@ -156,8 +156,9 @@ stages:
         script: step_03_places                    # WRAP scripts/refs/places.py
         desc: >-
           Each setup's location+view at THIS unit's hour, drawn from its own
-          described words on the local image model. A recurring place is never
-          pinned to one picture.
+          described words on the local image model. A recurring place is PINNED
+          to its one book picture (superseded 2026-09-28: this said "never pinned",
+          which quoted the ep13/Baker Street FAULT as if it were the rule).
         substeps:
           - id: "03_01"
             name: draw

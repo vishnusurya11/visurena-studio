@@ -240,19 +240,40 @@ the wife, drew the whole house front five seeds running (her face 0.02-0.04 of
 the frame) under a 100-word description of that house."""
 
 
-def brief_place(described: str) -> str:
+def place_head(described: str) -> str:
+    """The place's name: its first clause.  ep14's writer wrote inventories with
+    no colon and no light clause, and `split(":")` handed a 1x1 close the whole
+    attic-and-street list (2026-09-28)."""
+    return re.split(r"[:;,]", described, 1)[0].strip()
+
+
+def brief_place(described: str, light: str = "") -> str:
     """The place's name and its light: the staged picture carries the rest."""
-    head = described.split(":", 1)[0].strip()
-    light = described[described.find("; the light is") + 2:] if "; the light is" in described else ""
+    head = place_head(described)
+    if not light and "; the light is" in described:
+        light = described[described.find("; the light is") + 2:]
+    if light and not light.lower().startswith("the light"):
+        light = f"the light is {light}"
     return f"{head}; {light}" if light else head
 
 
+ROOM_V2 = ("<image{n}> is this exact room, already drawn: every panel is set in it, with the "
+           "same walls, furniture, windows and light.")
+"""A chained grid's room -- the setup's first-drawn panel (studio/grid_room)."""
+CONSTANT_V2 = ("The location is identical in every panel and never changes -- the same ground, "
+               "the same horizon, the same weather and the same hour of light in all of them.")
+"""v1's sentence, dropped by v2 on 2026-09-22 and back on 2026-09-28: nothing else
+in the prompt said the place may not change between panels."""
+
+
 def grid_prompt_v2(shots: list[dict], cols: int, rows: int, place: tuple[list[int], str],
-                   cast: list[dict], style_slot: int, props: list[dict] | None = None) -> str:
-    """Layout (one line), the panels SUBJECT FIRST, one binding line per person,
-    the place, the style. No description is truncated -- the sheet in the slot
-    carries the face and the panel prose carries the tag -- and a single
-    picture never says storyboard, grid or panel."""
+                   cast: list[dict], style_slot: int, props: list[dict] | None = None, *,
+                   room: int | None = None, geometry: str = "", light: str = "") -> str:
+    """Layout (one line), the room when the grid is chained, the panels SUBJECT
+    FIRST, one binding line per person, the place with its geometry, the style.
+    No description is truncated -- the sheet in the slot carries the face and
+    the panel prose carries the tag -- and a single picture never says
+    storyboard, grid or panel."""
     cells = cell_names(cols, rows)
     if len(shots) != len(cells):
         raise ValueError(f"{len(shots)} shots for {len(cells)} cells")
@@ -273,12 +294,15 @@ def grid_prompt_v2(shots: list[dict], cols: int, rows: int, place: tuple[list[in
                 for p in props or [] if p.get("ref")]
     if len(binding) > 1:
         binding.append(f"{' and '.join(p['name'] for p in cast if p.get('ref'))} are never dressed alike.")
-    refs = " and ".join(f"<image{n}>" for n in place[0])
-    said = brief_place(place[1]) if all(s["size"] in TIGHT for s in shots) else place[1]
+    slots = list(place[0]) + ([room] if room is not None and room not in place[0] else [])
+    refs = " and ".join(f"<image{n}>" for n in slots)
+    said = brief_place(place[1], light) if all(s["size"] in TIGHT for s in shots) else place[1]
     where = (f"The picture is set at {refs}: {said}." if single else
-             f"Every panel is set at {refs}, at the same hour: {said}.")
-    parts = [layout] + blocks + binding + [where,
-                                                                            STYLE_V2.format(n=style_slot)]
+             f"Every panel is set at {refs}, at the same hour: {said}. {CONSTANT_V2}")
+    if geometry.strip():
+        where += " " + geometry.strip()
+    lead = [ROOM_V2.format(n=room)] if room is not None else []
+    parts = [layout] + lead + blocks + binding + [where, STYLE_V2.format(n=style_slot)]
     return "\n\n".join(_one_picture(x) if single else x for x in parts)
 
 

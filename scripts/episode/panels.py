@@ -62,7 +62,7 @@ def stale_grids(rows: list[dict], current: str, ep=None, book=None) -> list[str]
     def stale(r: dict) -> bool:
         if ep is not None and book is not None and "inputs" in r:
             return r["inputs"] != drawn_inputs(book, ep, r["setup"], r["shots"], r["cols"],
-                                               r["rows"], r.get("prompt", "v1"))
+                                               r["rows"], r.get("prompt", "v1"), number=r.get("episode"))
         if ep is not None and "drawn_from" in r:
             return r["drawn_from"] != shots_sha(ep, r["shots"])
         return r.get("plan") != current

@@ -4,6 +4,25 @@ Newest first. Every architectural change gets an entry.
 
 ---
 
+## 2026-09-28 — One room per setup (owner decision: "fix all that")
+
+**Decision.** The owner, on ep14's grids ("the background keeps on changing for the
+character"), after the five-agent debate (`docs/audit/2026-09-28_grid_place_constancy_plan.md`,
+proposal `architecture/decisions/2026-09-28_one_room_per_setup.md`): "fix all that". Ruled
+with it: D4 (a cross-panel place gate) is BUILT as `panel_place`, advisory until calibrated;
+a recurring place is PINNED — the 2026-09-24 decision text "never pinned to one picture"
+is superseded by the owner's 2026-09-17 ruling (one picture per place, staged everywhere;
+per-episode views are drawn from it); D3 (the 2x2 minimum) is closed as moot under the
+four-cell cap; the panel ladder's `copy`/`repeat` cures no longer push a panel off the
+place picture. The rule: a place is held by pixels — every panel of a setup is conditioned
+on the same picture of that place (one render, or later renders staged on the first
+render's own cut panel), and words pin only what the picture leaves free.
+
+**Why.** The grid code did not change between ep11 (held) and ep12 (broke); a setup had
+become 2-12 independently seeded renders, redrawn one at a time, from cells written before
+any picture existed. Measured: panels from one render agree 0.56, from different renders
+0.31; ep14 drew two biology classrooms, a mirrored Waterloo and an attic that became a street.
+
 ## 2026-09-26 — A terminal is not a pass; the episode has sound and a voice (owner decision)
 
 **Decision.** The owner, after episode 12 was judged bad: "finish all 1-d" of the root

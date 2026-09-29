@@ -149,6 +149,17 @@ def ep03_out(book, home):
     return [_place(book)]
 
 
+def ep03b_in(book, home):
+    _json(home / "plan.json", _plan_doc())
+    _place(book)
+
+
+def ep03b_out(book, home):
+    plan = home / "plan.json"
+    return [_json(home / "storyboard" / "cells_from_picture.json",
+                  {"plan_sha8": plan_verdict.plan_sha8(plan), "from_picture": True, "readings": {}})]
+
+
 def ep04_in(book, home):
     _json(home / "plan.json", _plan_doc())
     _file(book / "cast" / "lead" / "voice" / "design.wav")
@@ -192,7 +203,9 @@ def ep07_out(book, home):
     plan = _plan_doc()
     rows = grid_layout.layout(plan["setups"], plan["shots"])
     grids = [_file(home / "storyboard" / "grids" / f"{grid_layout.name_of(4, row)}.png") for row in rows]
-    return grids + [grid_layout.write(home, rows)]
+    # one room per setup (2026-09-28): a setup of several grids owes its room, cut from its anchor grid
+    rooms = [_file(home / "storyboard" / "anchors" / f"{setup}.png") for setup in plan["setups"]]
+    return grids + [grid_layout.write(home, rows)] + rooms
 
 
 def ep08_in(book, home):
@@ -304,6 +317,7 @@ def refs04_out(book, home):
 
 MAKERS = {
     "episode/01": (ep01_in, ep01_out), "episode/02": (ep02_in, ep02_out), "episode/03": (ep03_in, ep03_out),
+    "episode/03b": (ep03b_in, ep03b_out),
     "episode/04": (ep04_in, ep04_out), "episode/05": (ep05_in, ep05_out), "episode/06": (ep06_in, ep06_out),
     "episode/07": (ep07_in, ep07_out), "episode/08": (ep08_in, ep08_out), "episode/09": (ep09_in, ep09_out),
     "episode/10": (ep10_in, ep10_out), "episode/11": (ep11_in, ep11_out), "episode/12": (ep12_in, ep12_out),

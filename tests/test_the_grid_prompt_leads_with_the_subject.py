@@ -157,3 +157,38 @@ def test_a_full_figure_keeps_the_whole_wardrobe():
     cast = [{"ref": 1, "name": "NARRATOR", "entity": "n", "wear": BARE, "against": "a"}]
     text = grid_prompt_v2([panel("he sits", ["NARRATOR"], size="MEDIUM")], 1, 1, PLACE, cast, 3)
     assert "trousers" in next(x for x in text.split("\n\n") if x.startswith("NARRATOR is"))
+
+
+# ---- one room per setup (2026-09-28) ------------------------------------------
+
+def test_a_chained_grid_names_its_room_before_the_panels_and_anchors_the_style_on_it():
+    text = grid_prompt_v2([panel("A"), panel("B")], 2, 1, ([], "the attic"), [], 2, room=2)
+    room = text.index("<image2> is this exact room, already drawn")
+    assert room < text.index("PANEL 1") and "set at <image2>" in text
+    assert "art style of <image2>" in text
+
+
+def test_a_wide_in_a_chained_grid_keeps_the_plate_beside_the_room():
+    text = grid_prompt_v2([panel("A", size="WIDE"), panel("B")], 2, 1, ([2], "the attic"), [], 3, room=3)
+    assert "set at <image2> and <image3>" in text and "<image3> is this exact room" in text
+
+
+def test_several_panels_say_the_location_never_changes():
+    text = grid_prompt_v2([panel("A"), panel("B")], 2, 1, PLACE, [], 3)
+    assert "identical in every panel and never changes" in text
+    assert "never changes" not in grid_prompt_v2([panel("A")], 1, 1, PLACE, [], 3)
+
+
+def test_the_setup_geometry_follows_the_place():
+    text = grid_prompt_v2([panel("A"), panel("B")], 2, 1, PLACE, [], 3,
+                          geometry="The mantelpiece holds the LEFT edge.")
+    assert text.index("Maybury Hill") < text.index("The mantelpiece holds the LEFT edge.")
+
+
+def test_a_tight_grid_gets_the_head_of_an_inventory_and_the_setup_light():
+    from studio.storyboard_grid import brief_place
+    attic = "A small attic room in a Marylebone lodging house, with a dormer window, an iron bed, a deal table"
+    assert brief_place(attic) == "A small attic room in a Marylebone lodging house"
+    assert brief_place(attic, "low sun from the west, long black shadows") == (
+        "A small attic room in a Marylebone lodging house; the light is low sun from the west, long black shadows")
+    assert brief_place("the lawn: gravel, roses; the light is high haze") == "the lawn; the light is high haze"

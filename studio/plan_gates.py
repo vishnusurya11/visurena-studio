@@ -27,7 +27,7 @@ from pathlib import Path
 from studio import story_layer
 from studio.episode_ref_official import AMOUNT, camera_clause
 from studio.episode_seq_board import HOLDS, TRAVEL
-from studio.episode_spec import Episode, Line, Setup, Shot
+from studio.episode_spec import MAX_SETUP_SECONDS, Episode, Line, Setup, Shot
 
 
 def fault(gate: str, where: str, why: str, got, wall) -> str:
@@ -407,6 +407,24 @@ def dialogue_wall_holds(share: float | None) -> bool:
     """The first-dialogue wall holds unless the chapter itself speaks past it
     (ep13: its patched flash-forward, 2026-09-27); unknown means it holds."""
     return share is None or share <= FIRST_DIALOGUE_SHARE
+
+
+def setup_seconds(episode: Episode) -> dict[str, float]:
+    """Projected seconds of picture per setup, in plan order."""
+    out: dict[str, float] = {}
+    for shot in episode.shots:
+        out[shot.setup] = out.get(shot.setup, 0.0) + episode.shot_seconds(shot)
+    return out
+
+
+def setup_faults(episode: Episode) -> list[str]:
+    """G-SETUP: a setup that holds more than MAX_SETUP_SECONDS of picture is
+    several places, hours or sides wearing one name; split it (ep11 gave one
+    location three setups on three views).  Kept out of `faults()` on purpose:
+    the take builder calls that on a rendered plan (episode_spec.MAX_SETUP_SECONDS)."""
+    return [fault("G-SETUP", f"setup {name}", "projected seconds of picture in one setup",
+                  round(seconds, 1), MAX_SETUP_SECONDS)
+            for name, seconds in setup_seconds(episode).items() if seconds > MAX_SETUP_SECONDS + 1e-6]
 
 
 def story_faults(episode: Episode, quote_at: float | None = None) -> list[str]:
