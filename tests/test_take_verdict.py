@@ -211,11 +211,11 @@ def test_the_picture_rows_are_not_measured_while_their_modules_are_absent(monkey
     be silent and be taken for a pass."""
     import sys
     import studio
-    for name in ("studio.face_end", "studio.take_look", "studio.take_edit"):
+    for name in ("studio.face_end", "studio.take_look", "studio.take_edit", "studio.take_frame"):
         monkeypatch.setitem(sys.modules, name, None)          # `from studio import x` raises ImportError
         monkeypatch.delattr(studio, name.split(".")[-1], raising=False)   # and the package attribute cache
     rows = {g.name: g for g in tv.picture_rows(Path("T01.mp4"), {"placed_seconds": 5.0}, 5.0)}
-    assert list(rows) == ["face-at-end", "look", "post-cut", "pulse"]
+    assert list(rows) == ["face-at-end", "look", "post-cut", "pulse", "letterbox"]
     assert all(g.value is None and g.ok and not g.hard and g.note == "not measured" for g in rows.values())
 
 
@@ -226,21 +226,25 @@ def test_the_picture_rows_are_wired_by_interface_when_the_modules_exist(monkeypa
     from types import ModuleType
     seen = {}
     face_end, take_look, take_edit = ModuleType("studio.face_end"), ModuleType("studio.take_look"), ModuleType("studio.take_edit")
+    take_frame = ModuleType("studio.take_frame")
+    take_frame.row = lambda video, seconds, work: tv.Gate("letterbox", 0, True, True, "0/3 frames letterboxed")
     face_end.row = lambda video, record: seen.setdefault("face", (video, record)) and tv.Gate("face-at-end", 0.86, False, True, "0.86 clipped")
     take_look.row = lambda video, seconds, daylight=False: seen.setdefault("look", seconds) and tv.Gate("look", 0.02, True, True, "floor 0.02")
     take_edit.rows = lambda video, seconds, placed: seen.setdefault("edit", (seconds, placed)) and [
         tv.Gate("post-cut", 8.6, False, False, "8.6", 5.0), tv.Gate("pulse", 0.1, True, False, "0.1")]
-    for name, mod in (("studio.face_end", face_end), ("studio.take_look", take_look), ("studio.take_edit", take_edit)):
+    for name, mod in (("studio.face_end", face_end), ("studio.take_look", take_look), ("studio.take_edit", take_edit),
+                      ("studio.take_frame", take_frame)):
         monkeypatch.setitem(sys.modules, name, mod)
         monkeypatch.setattr(__import__("studio"), name.split(".")[-1], mod, raising=False)
     record = {"placed_seconds": 5.0, "seconds": 5.3}
     rows = tv.picture_rows(Path("T01.mp4"), record, 5.0)
-    assert [g.name for g in rows] == ["face-at-end", "look", "post-cut", "pulse"]
+    assert [g.name for g in rows] == ["face-at-end", "look", "post-cut", "pulse", "letterbox"]
     assert rows[0].hard and not rows[0].ok and rows[2].penalty == 5.0
     assert seen == {"face": (Path("T01.mp4"), record), "look": 5.0, "edit": (5.3, 5.0)}
     v = tv.TakeVerdict(1, 0, "T01.mp4", 5.0, "narration", [], [seg()])
     v.gates = tv.gates(v, None, "", [], picture=rows)
-    assert [g.name for g in v.gates] == ROW_ORDER and not tv.score(v.gates)[1]
+    order = ROW_ORDER[:14] + ["letterbox"] + ROW_ORDER[14:]      # the picture rows now end with G-FRAME
+    assert [g.name for g in v.gates] == order and not tv.score(v.gates)[1]
 
 
 def test_the_plan_size_reaches_the_churn_row():

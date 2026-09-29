@@ -378,14 +378,27 @@ def edit_rows(video: Path, seconds: float, placed_seconds: float) -> list[Gate]:
     return list(take_edit.rows(video, seconds, placed_seconds))
 
 
+def frame_row(video: Path, seconds: float) -> list[Gate]:
+    """G-FRAME, by interface: the take fills its square (studio.take_frame).
+    ep14 T26 (2026-09-29) was drawn letterboxed and every other row passed it."""
+    try:
+        from studio import take_frame
+    except ImportError:
+        return unmeasured("letterbox")
+    try:
+        return [take_frame.row(video, seconds, Path(video).parent / ".frames")]
+    except Exception as why:          # an unreadable file is a missing measure, never a pass
+        return [Gate("letterbox", None, True, False, f"not measured: {why}"[:80])]
+
+
 def picture_rows(video: Path, record: dict, seconds: float) -> list[Gate]:
-    """face-at-end, look, post-cut, pulse -- the rows another implementer
-    measures, each imported lazily so an absent module prints `not measured`
-    instead of a silent pass (test_the_picture_rows_are_not_measured...)."""
+    """face-at-end, look, post-cut, pulse, letterbox -- the rows another
+    implementer measures, each imported lazily so an absent module prints `not
+    measured` instead of a silent pass (test_the_picture_rows_are_not_measured...)."""
     placed = float(record.get("placed_seconds", seconds))
     clip = float(record.get("measured_seconds") or record.get("seconds") or seconds)
     return (face_end_row(video, record) + look_row(video, seconds, bool(record.get("daylight")))
-            + edit_rows(video, clip, placed))
+            + edit_rows(video, clip, placed) + frame_row(video, clip))
 
 
 def gates(v: TakeVerdict, audio: dict | None, line_text: str, unplanned: list[float],
