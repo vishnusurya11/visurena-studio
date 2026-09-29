@@ -104,3 +104,20 @@ def test_the_anchor_grid_is_drawn_first_and_its_room_is_cut_before_the_siblings(
     step.run(ctx)
     assert [c[4] for c in ctx.launched] == ["2", "3"]          # the 2x1 (shots 4, 5) before the 3x1
     assert (ctx.home / "storyboard" / "anchors" / "yard.png").exists()
+
+
+def test_a_board_whose_takes_are_rendered_is_never_redrawn_by_a_code_change(ctx):
+    """ep14 (2026-09-28): the prompt builder gained the geometry fields and the room,
+    every rendered grid read as stale, and a resume walked back into step 07 under 30
+    rendered takes. A unit that has been shot is done at the board as long as its
+    grids exist -- the same rule the plan has (report mode)."""
+    for row in grid_layout.layout(PLAN["setups"], PLAN["shots"]):
+        path = ctx.home / "storyboard" / "grids" / f"{grid_layout.name_of(4, row)}.png"
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_bytes(b"an old render, stale under the new prompt")
+    take = ctx.home / "takes" / "r2v" / "T01.mp4"
+    take.parent.mkdir(parents=True)
+    take.write_bytes(b"take")
+    assert step.done(ctx)
+    step.run(ctx)
+    assert ctx.launched == []

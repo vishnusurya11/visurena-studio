@@ -81,8 +81,18 @@ def cut_room(ctx, row: dict, shots: list[dict]) -> None:
     grid_room.cut_room(grid_path(ctx, row), row, anchor, grid_room.room_path(ctx.home, row["setup"]))
 
 
+def rendered(ctx) -> bool:
+    """Takes on disk: the board has been shot from.  A prompt-builder change
+    after that must not walk a resume back into a redraw (ep14, 2026-09-28:
+    the geometry fields and the room made every rendered grid read as stale
+    under 30 rendered takes) -- the plan's own report-mode rule."""
+    return any((ctx.home / "takes" / "r2v").glob("T??.mp4"))
+
+
 def done(ctx) -> bool:
     rows = layout(ctx)
+    if rows and rendered(ctx):
+        return all(grid_path(ctx, row).exists() for row in rows)
     stale = stale_names(ctx) if rows else set()
     return (bool(rows) and all(current(ctx, row, stale) for row in rows) and not strays(ctx, rows)
             and not any(room_wanted(ctx, rows, row, shots(ctx)) for row in rows))
@@ -92,6 +102,9 @@ def run(ctx) -> None:
     rows = layout(ctx)
     if not rows:
         raise SystemExit(f"REFUSED: the plan has no shots to lay out into {LAYOUT}")
+    if rendered(ctx) and all(grid_path(ctx, row).exists() for row in rows):
+        ctx.log("the board's takes are rendered: no grid is redrawn under them", step_id=STEP_ID, level="WARNING")
+        return
     grid_layout.write(ctx.home, rows)
     for name in strays(ctx, rows):
         panel_ladder.supersede(ctx.home / "storyboard", name)
