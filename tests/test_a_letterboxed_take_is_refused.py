@@ -28,3 +28,14 @@ def test_a_full_frame_take_passes_and_a_letterboxed_one_is_refused_hard():
 
 def test_a_thin_border_is_not_a_letterbox():
     assert take_frame.row_of([square(5)]).ok
+
+
+def test_the_move_type_rung_skips_a_take_it_has_no_substitute_for():
+    """ep14 (2026-09-29): the rung met T20 with only a letterbox and content faults,
+    none in its cause table, and `next()` crashed step 09 after four retakes."""
+    from studio import take_ladder
+    from studio.judges.verdict import Fault
+    doc = {"shots": [{"index": 20, "motion": "The camera pans from the houses to the carriage", "at_rest": ""}]}
+    before = dict(doc["shots"][0])
+    out = take_ladder.move_type(doc, 20, [Fault(kind="letterbox", where="T20"), Fault(kind="content", where="T20")])
+    assert out["shots"][0] == before

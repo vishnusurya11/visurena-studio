@@ -189,7 +189,9 @@ def substitute(kind: str, motion: str, at_rest: str = "") -> str:
 
 def move_type(doc: dict, index: int, faults: list[Fault]) -> dict:
     shot = shot_doc(doc, index)
-    kind = next(f.kind for f in faults if f.kind in CAUSE_OF)
+    kind = next((f.kind for f in faults if f.kind in CAUSE_OF), None)
+    if kind is None:       # nothing a move answers (ep14 T20: letterbox, content) -- the terminal will
+        return doc
     shot["motion"] = substitute(kind, shot["motion"], shot.get("at_rest", ""))
     return doc
 
