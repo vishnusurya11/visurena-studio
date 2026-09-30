@@ -329,12 +329,16 @@ def at_night(described: str) -> bool:
     return bool(NIGHT_WORDS.search(described or ""))
 
 
-def panel_refusal(verdict_path, panels: list, wanted: list[int]) -> str | None:
+def panel_refusal(verdict_path, panels: list, wanted: list[int], judged_ok: bool = False) -> str | None:
     """Why takes may NOT be rendered from these panels, or None when they may.
 
     takes_r2v never read panel_dq.json, so a failed panel went to the GPU; and
     a verdict could say nothing about a shot it skipped. The verdict must
-    exist, cover every shot, pass every shot, and be newer than every panel."""
+    exist, cover every shot, pass every shot, and be newer than every panel.
+    `judged_ok`: a CURRENT panel-eye signature (pass or keep_best flagged) covers
+    these exact pictures -- then a failed row is the judge's recorded fault, not
+    a wall (ep14, 2026-09-30: lettered station panels signed keep_best parked
+    the takes on an owner waiver the 2026-09-24 decision forbids)."""
     from pathlib import Path
     import json
     path = Path(verdict_path)
@@ -344,7 +348,7 @@ def panel_refusal(verdict_path, panels: list, wanted: list[int]) -> str | None:
     judged = {r.get("shot"): r for r in rows}
     if unjudged := [i for i in wanted if i not in judged]:
         return f"the panel verdict never judged shots {unjudged}"
-    if failed := [i for i in wanted if not judged[i].get("passed")]:
+    if (failed := [i for i in wanted if not judged[i].get("passed")]) and not judged_ok:
         return f"panels failed the panel gate: shots {failed}"
     stamp = path.stat().st_mtime
     if newer := [Path(q).name for q in panels if Path(q).stat().st_mtime > stamp]:

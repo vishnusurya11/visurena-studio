@@ -60,8 +60,9 @@ def panel_refusals(home: Path) -> list[str]:
     and no eye verdict signed for these exact pictures."""
     board = Path(home) / BOARD
     panels, shots = panels_of(board), wanted(home)
+    judged_ok = eye_verdict.passed(board, panels)
     out = [f"{name}: {why}" for name in VERDICTS
-           if (why := panel_dq.panel_refusal(board / name, panels, shots))]
+           if (why := panel_dq.panel_refusal(board / name, panels, shots, judged_ok=judged_ok))]
     out += [f"{g}: redrawn after the panels were cut" for g in redrawn_grids(board)]
     if not eye_verdict.passed(board, panels):
         out.append(f"no current panel eye verdict ({BOARD}/eye_<sha8>.json)")
