@@ -353,6 +353,49 @@ def edit_plan(ctx, rung: Rung, wanted: dict[int, list[Fault]], records: dict[int
     return action
 
 
+ROUNDS_CAP = 4
+"""Retake rounds an episode may take, ACROSS RESUMES.  Three-agent debate
+2026-09-29: the old process allowed one batched round per master, chosen by a
+person (ep10 synthesis F1); the ladder ran ep12 in 4 rounds, ep13 in 10 and
+ep14 in 14 -- rounds 3-14 of ep14 ended with the identical terminal verdict."""
+MAX_TAKE_ATTEMPTS = 3
+"""Archived attempts after which a take is never retaken again (ep14: T19 x8,
+T05 x7 -- lettering and clones live in the panel, not the seed)."""
+LADDER_FILE = "ladder.json"
+
+
+def rounds_of(room: Path) -> int:
+    """Rounds this episode has taken, read off the room (a resume reads the same file)."""
+    path = Path(room) / LADDER_FILE
+    return len(json.loads(path.read_text(encoding="utf-8")).get("rounds", [])) if path.exists() else 0
+
+
+def count_round(room: Path, why: str) -> None:
+    import time
+    path = Path(room) / LADDER_FILE
+    doc = json.loads(path.read_text(encoding="utf-8")) if path.exists() else {}
+    doc.setdefault("rounds", []).append({"why": why, "at": round(time.time(), 1)})
+    path.write_text(json.dumps(doc, indent=1), encoding="utf-8")
+
+
+def attempts_of(room: Path, index: int) -> int:
+    return len(list((Path(room) / "attempts").glob(f"T{index:02d}_fail*.mp4")))
+
+
+def under_cap(room: Path, wanted: dict[int, list[Fault]]) -> dict[int, list[Fault]]:
+    """The takes still allowed a retake."""
+    return {i: fs for i, fs in wanted.items() if attempts_of(room, i) < MAX_TAKE_ATTEMPTS}
+
+
+def still_curable(room: Path, verdict: Verdict) -> bool:
+    """May the climb take another rung?  Not past the round cap, and not when
+    every faulted take is out of attempts -- the terminal (a still or the best
+    take, flagged) answers those, not another render of the same fault."""
+    if rounds_of(room) >= ROUNDS_CAP:
+        return False
+    return bool(under_cap(room, {index_of(f.where): [f] for f in verdict.faults}))
+
+
 def head_cuts(ctx, wanted: dict[int, list[Fault]]) -> None:
     """The leak measured is the head cut: heads.json through take_leak.write_head, no GPU."""
     for index in wanted:
@@ -396,16 +439,20 @@ def rungs(ctx, plan, flag: str, records: dict[int, dict] | None = None) -> judge
     """The priced ladder and how a rung is taken for this episode."""
     records = records or {}
 
+    room = Path(ctx.home) / TAKES
+
     def take(rung: Rung, _try: int, verdict: Verdict) -> None:
-        wanted = takes_for(verdict, rung.name, lambda i: take_eye.planned(plan, i)[1])
+        wanted = under_cap(room, takes_for(verdict, rung.name, lambda i: take_eye.planned(plan, i)[1]))
         if not wanted:
             return
         if rung.name == HEAD_CUT.name:
             return head_cuts(ctx, wanted)
-        if not can_afford(ctx, rung, len(wanted)):
+        if not can_afford(ctx, rung, len(wanted)) or rounds_of(room) >= ROUNDS_CAP:
             return
         action = edit_plan(ctx, rung, wanted, records)
         if action == "shorten":
             ctx.run_script("scripts/episode/timeline.py", clock="timeline")
-        retake(ctx, list(wanted), why_of(rung.name, [f for fs in wanted.values() for f in fs]), flag)
-    return judged_gate.Rungs(LADDER, take)
+        why = why_of(rung.name, [f for fs in wanted.values() for f in fs])
+        count_round(room, why)
+        retake(ctx, list(wanted), why, flag)
+    return judged_gate.Rungs(LADDER, take, curable=lambda v: still_curable(room, v))

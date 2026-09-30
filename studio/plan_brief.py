@@ -179,6 +179,7 @@ def band() -> dict:
             "max_voices": episode_spec.MAX_SPEAKING, "max_setups": episode_spec.MAX_SETUPS,
             "max_setup_seconds": episode_spec.MAX_SETUP_SECONDS,
             "bed_tones": list(__import__("studio.episode_bed", fromlist=["TONES"]).TONES),
+            "aspect": episode_spec.canvas.DEFAULT if hasattr(episode_spec, "canvas") else "1:1",
             "dialogue_share": list(episode_spec.DIALOGUE_SHARE),
             "turn_band": list(episode_spec.TURN_BAND)}
 

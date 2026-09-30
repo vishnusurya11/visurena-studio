@@ -496,6 +496,22 @@ def daylit(episode, rec: dict) -> bool:
     return bool(setup) and take_look.is_daylight(setup.described, setup.outdoors)
 
 
+def take_sha8(path: Path) -> str:
+    import hashlib
+    return hashlib.sha256(Path(path).read_bytes()).hexdigest()[:8]
+
+
+def cached(take_dir: Path, index: int, kept: Path) -> dict | None:
+    """The verdict already written for exactly these bytes, or None.
+    2026-09-29: 8 full passes decoded every unchanged take (2.1 h on ep14)."""
+    path = Path(take_dir) / f"T{index:02d}.dq.json"
+    if not path.exists() or not Path(kept).exists():
+        return None
+    import json
+    report = json.loads(path.read_text(encoding="utf-8"))
+    return report if report.get("take_sha8") == take_sha8(kept) else None
+
+
 def main(book_id: str, number: int, indices: list[int], attempts: bool = False) -> None:
     book = episode_home.book_dir(book_id)
     home = episode_home.home(book, number)
@@ -522,6 +538,9 @@ def main(book_id: str, number: int, indices: list[int], attempts: bool = False) 
         rec["line_room"] = line_room(placed, rec)
         rec["daylight"] = daylit(episode, rec)
         rec["head"] = edit_gate.heads_in(home).get(index, 0.0)
+        if not attempts and (hit := cached(take_dir, index, book / rec["rel_path"])) is not None:
+            print(f"T{index:02d} cached ({hit.get('score', '?')}/100, bytes unchanged)", flush=True)
+            continue
         files = episode_home.attempts_of(take_dir, index) if attempts else [book / rec["rel_path"]]
         judged = {f: measure_attempt(f, rec, index, cells, work, take_dir, kinds, line, k, judges)
                   for k, f in enumerate(files)}
@@ -536,6 +555,7 @@ def main(book_id: str, number: int, indices: list[int], attempts: bool = False) 
         # RELATIVE, never a drive letter (CLAUDE.md; audit item 15): this line
         # had put the worktree's absolute path into ~200 take reports.
         report["strip"] = episode_home.relative(book, tv.strip(v, kept, cells, work / f"take_T{index:02d}.png"))
+        report["take_sha8"] = take_sha8(kept)
         episode_home.write_json(take_dir / f"T{index:02d}.dq.json", report)
         print(row(index, v, best.name if attempts else "", len(files)), flush=True)
 

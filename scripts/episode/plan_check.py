@@ -206,6 +206,8 @@ def main(book_id: str, number: int) -> int:
     for f in pg:
         print("   ", f[:170])
     hard += setup_gate(ep, book, number)
+    asp = plan_gates.aspect_faults(ep, plan_gates.series_aspect(book))
+    print("G-ASPECT     :", asp or "clean"); hard += len(asp)
     bad, folded = plan_gates.bed_faults(ep)
     print("G-BED        :", len(bad) or "clean"); hard += len(bad)
     for f in bad + folded:

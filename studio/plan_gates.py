@@ -409,6 +409,27 @@ def dialogue_wall_holds(share: float | None) -> bool:
     return share is None or share <= FIRST_DIALOGUE_SHARE
 
 
+def series_aspect(book) -> str:
+    """The shape every episode of this book ships in: series.json's `aspect`,
+    else the canvas default.  A format change is the owner's, never a draft's."""
+    from pathlib import Path
+    from studio import canvas
+    path = Path(book) / "series.json"
+    if path.exists():
+        return json.loads(path.read_text(encoding="utf-8")).get("aspect", canvas.DEFAULT)
+    return canvas.DEFAULT
+
+
+def aspect_faults(episode, series: str) -> list[str]:
+    """G-ASPECT: ep14 (2026-09-29) rendered 9:16 from a writer's guess into a
+    series of thirteen 1:1 episodes -- 1.75x the pixels a frame (2.88 s/frame
+    against 1.29-1.67) and square panels letterboxed into the portrait canvas."""
+    got = getattr(episode, "aspect", series)
+    if got == series:
+        return []
+    return [fault("G-ASPECT", "plan", "the episode's aspect is not the series'", got, series)]
+
+
 def bed_faults(episode: Episode) -> tuple[list[str], list[str]]:
     """(G-BED refusals, advisories): a bed tone outside the five is refused
     before anything renders; a synonym the bed will fold is named as advice.
