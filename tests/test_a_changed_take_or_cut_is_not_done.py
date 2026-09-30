@@ -94,3 +94,22 @@ def test_takes_current_to_their_cards_are_not_stale(tmp_path, monkeypatch):
     monkeypatch.setattr(shoot, "card_pictures", lambda c, book, n: [])
     monkeypatch.setattr(shoot.take_currency, "is_current", lambda built, take, pictures=None: True)
     assert shoot.stale_takes(ctx) == []
+
+
+def test_a_take_rendered_on_another_canvas_is_not_current(tmp_path):
+    """ep14 (2026-09-30): the aspect flip changed neither the prompt nor the
+    pictures, so 7 portrait takes read as current and were skipped by the square
+    round.  The graph records the canvas; a take that cannot prove its canvas,
+    or proves another, is re-rendered."""
+    import json
+    from studio import take_currency as tc
+    take = tmp_path / "T02.mp4"
+    take.write_bytes(b"video")
+    graph = {"5": {"class_type": tc.RENDER_NODE, "inputs": {"prompt": "the words", "width": 768, "height": 1344}}}
+    (tmp_path / "T02.graph.json").write_text(json.dumps(graph), encoding="utf-8")
+    assert tc.is_current("the words", take, canvas=(768, 1344))
+    assert not tc.is_current("the words", take, canvas=(768, 768))
+    graph["5"]["inputs"].pop("width")
+    (tmp_path / "T02.graph.json").write_text(json.dumps(graph), encoding="utf-8")
+    assert not tc.is_current("the words", take, canvas=(768, 768))   # unprovable is not current
+    assert tc.is_current("the words", take)                          # no canvas asked: as before

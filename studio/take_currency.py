@@ -58,7 +58,24 @@ def staged_images(take: Path) -> set[str]:
             if n.get("class_type") == "LoadImage" and isinstance(n.get("inputs", {}).get("image"), str)}
 
 
-def is_current(built: str, take: Path, pictures: list | None = None) -> bool:
+def recorded_canvas(take: Path) -> tuple[int, int] | None:
+    """The width and height this take actually rendered at, off its own graph."""
+    beside = Path(take).with_suffix(".graph.json")
+    if not beside.exists():
+        return None
+    try:
+        graph = json.loads(beside.read_text(encoding="utf-8"))
+    except (ValueError, OSError):
+        return None
+    for node in graph.values():
+        inputs = node.get("inputs", {})
+        if isinstance(inputs.get("width"), int) and isinstance(inputs.get("height"), int):
+            return (inputs["width"], inputs["height"])
+    return None
+
+
+def is_current(built: str, take: Path, pictures: list | None = None,
+               canvas: tuple[int, int] | None = None) -> bool:
     """True only when this take exists AND was rendered from this prompt -- and,
     when `pictures` is given, from exactly these pictures' bytes.
 
@@ -81,6 +98,10 @@ def is_current(built: str, take: Path, pictures: list | None = None) -> bool:
         return False
     said = recorded_prompt(take)
     if said is None or said.strip() != (built or "").strip():
+        return False
+    # THE CANVAS IS AN INPUT: ep14 (2026-09-30) flipped 9:16 -> 1:1, the words
+    # and pictures were unchanged, and 7 portrait takes read as current.
+    if canvas is not None and recorded_canvas(take) != tuple(canvas):
         return False
     if pictures is None:
         return True

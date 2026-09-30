@@ -982,7 +982,8 @@ def main(book_id: str, number: int, retake: list[int] | None = None, approved: b
         # kept, the fix reaching no picture while DQ repeated the old numbers.
         elif (c["index"] in records and records[c["index"]].get("shots") == c["shots"]
               and take_currency.is_current(c.get("prompt") or "", out,
-                                           pictures=card_pictures(c, book, number))):
+                                           pictures=card_pictures(c, book, number),
+                                           canvas=(W, H))):
             continue
         graph = graph_for(c, book, number, take_dir)
         episode_home.write_json(out.with_suffix(".graph.json"), graph)  # the exact graph this take ran with
