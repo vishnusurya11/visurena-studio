@@ -22,6 +22,19 @@ def unjudged_takes(take_dir: Path, kinds: tuple[str, ...] = ("dq",)) -> list[str
 
 
 def _stale(take_dir: Path, name: str, kind: str) -> bool:
-    """No verdict of this kind for this take, or one older than the take."""
+    """No verdict of this kind for this take, or one about other bytes.  A
+    verdict naming the take's exact bytes (take_sha8) is current whatever the
+    clocks say: ep14 (2026-09-30) re-rendered identical bytes, the byte-cache
+    kept the report, and the mtime rule called a judged take unjudged."""
     take, report = take_dir / f"{name}.mp4", take_dir / f"{name}.{kind}.json"
-    return not report.exists() or (take.exists() and take.stat().st_mtime > report.stat().st_mtime)
+    if not report.exists():
+        return True
+    if not take.exists() or take.stat().st_mtime <= report.stat().st_mtime:
+        return False
+    import hashlib
+    import json
+    try:
+        said = json.loads(report.read_text(encoding="utf-8")).get("take_sha8")
+    except (ValueError, OSError):
+        return True
+    return said != hashlib.sha256(take.read_bytes()).hexdigest()[:8]

@@ -539,6 +539,7 @@ def main(book_id: str, number: int, indices: list[int], attempts: bool = False) 
         rec["daylight"] = daylit(episode, rec)
         rec["head"] = edit_gate.heads_in(home).get(index, 0.0)
         if not attempts and (hit := cached(take_dir, index, book / rec["rel_path"])) is not None:
+            episode_home.write_json(take_dir / f"T{index:02d}.dq.json", hit)   # a fresh mtime for mtime readers
             print(f"T{index:02d} cached ({hit.get('score', '?')}/100, bytes unchanged)", flush=True)
             continue
         files = episode_home.attempts_of(take_dir, index) if attempts else [book / rec["rel_path"]]
