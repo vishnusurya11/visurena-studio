@@ -264,18 +264,54 @@ def last_used(frames: np.ndarray, n: int) -> np.ndarray:
     return frames[min(n, len(frames)) - 1]
 
 
+STILL_FIRST = 8.0
+"""The panel against the master's first still frame: the push starts at zoom 1.0,
+so the pictures are the same through one scale and one encode (SAME_FRAME is 4.0
+for take-vs-take; the PNG-vs-x264 path is allowed twice that)."""
+
+
+def panel_grey(panel: Path) -> "np.ndarray":
+    from PIL import Image
+    return np.asarray(Image.open(panel).convert("L").resize((GREY_W, GREY_H), Image.LANCZOS), dtype=np.float64)
+
+
+def still_match(master: "np.ndarray", start: int, n: int, panel) -> dict:
+    """A still segment IS its panel pushed: the first frame is the panel, and no
+    frame inside is another picture (the push moves slowly).  ep14 (2026-09-30):
+    the gate compared held segments against take files assemble never used."""
+    panel = panel if isinstance(panel, np.ndarray) else panel_grey(panel)
+    first = frame_diff(master[start], panel) if start < len(master) else 255.0
+    steps = [frame_diff(master[start + i], master[start + i + 1])
+             for i in range(n - 1) if start + i + 1 < len(master)]
+    inside = max(steps) if steps else 0.0
+    return {"still": True, "offset": 0, "mean": round(first, 3), "frames_off": [], "held": [],
+            "inside_max": round(inside, 3), "ok": first <= STILL_FIRST and inside <= SAME_FRAME}
+
+
+def cut_beside_still(master: "np.ndarray", at: int) -> bool:
+    """A cut next to a still: the master itself changes picture at the frame."""
+    if not 0 < at < len(master):
+        return False
+    return frame_diff(master[at - 1], master[at]) > SAME_FRAME
+
+
 def edit_integrity(master_path: Path, placed: dict, records: list[dict], book: Path,
                    card: Path | None, manifest: dict | None = None,
-                   heads: dict[int, float] | None = None) -> dict:
+                   heads: dict[int, float] | None = None,
+                   stills: dict[int, Path] | None = None) -> dict:
     """The whole gate: every segment, every cut, every timestamp, the tail, provenance."""
     master = grey_frames(master_path)
     plan = segment_plan(placed, records)
-    heads = heads or {}
+    heads, stills = heads or {}, stills or {}
     takes = {row["take"]: headed(grey_frames(book / row["rel_path"]), heads.get(row["take"], 0.0))
-             for row in plan}
-    segments = [{**row, **segment_match(master, takes[row["take"]], row["start"], row["n"])} for row in plan]
+             for row in plan if row["take"] not in stills}
+    segments = [{**row, **(still_match(master, row["start"], row["n"], stills[row["take"]])
+                           if row["take"] in stills else
+                           segment_match(master, takes[row["take"]], row["start"], row["n"]))} for row in plan]
     cuts = [{"at": nxt["start"],
-             "exact": cut_exact(master, nxt["start"], last_used(takes[prev["take"]], prev["n"]), takes[nxt["take"]][0])}
+             "exact": (cut_beside_still(master, nxt["start"])
+                       if prev["take"] in stills or nxt["take"] in stills else
+                       cut_exact(master, nxt["start"], last_used(takes[prev["take"]], prev["n"]), takes[nxt["take"]][0]))}
             for prev, nxt in zip(plan, plan[1:])]
     holes = timestamp_holes(frame_times(master_path))
     tail = tail_check(master, int(round(placed["duration_s"] * FPS)), grey_frames(card) if card else None)

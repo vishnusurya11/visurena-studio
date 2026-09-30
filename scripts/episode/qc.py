@@ -264,8 +264,11 @@ def edit_report(master: Path, placed: dict, records: list[dict], book: Path, num
         # has not approved the master.
         return {"ok": False, "measured": False,
                 "note": f"not measured: {len(missing)} take files missing"}
+    from studio import take_ladder
+    home = episode_home.home(book, number)
+    stills = {int(k): book / v["panel"] for k, v in take_ladder.load_stills(home).items()}
     out = edit_gate.edit_integrity(master, placed, records, book, card_path(book, number), cut_json(work),
-                                   heads=edit_gate.heads_in(episode_home.home(book, number)))
+                                   heads=edit_gate.heads_in(home), stills=stills)
     return out | {"measured": True}
 
 
