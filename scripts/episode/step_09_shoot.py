@@ -62,7 +62,18 @@ def stale_takes(ctx) -> list[int]:
     cards = episode_home.read_json(path) if path.exists() else []
     return [int(c["index"]) for c in cards
             if not take_currency.is_current(c.get("prompt") or "", ctx.home / TAKES / f"T{int(c['index']):02d}.mp4",
-                                            pictures=card_pictures(c, ctx.book_dir, ctx.number))]
+                                            pictures=card_pictures(c, ctx.book_dir, ctx.number),
+                                            canvas=episode_canvas(ctx))]
+
+
+def episode_canvas(ctx) -> tuple[int, int]:
+    """This episode's (W, H), read off the plan.  ep14 (2026-09-30): seven
+    portrait takes passed done() into a square master; the canvas is part of
+    what a rendered take must prove."""
+    from studio import canvas as cv
+    plan = ctx.home / "plan.json"
+    aspect = (episode_home.read_json(plan).get("aspect") or cv.DEFAULT) if plan.exists() else cv.DEFAULT
+    return cv.size(aspect)
 
 
 def done(ctx) -> bool:

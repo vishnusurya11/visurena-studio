@@ -83,7 +83,7 @@ def test_a_take_stale_to_its_card_is_not_done(tmp_path, monkeypatch):
     room = ctx.home / "takes" / "r2v"
     episode_home.write_json(room / "prompts.json", [{"index": 16, "prompt": "new", "anchors": []}])
     monkeypatch.setattr(shoot, "card_pictures", lambda c, book, n: [])
-    monkeypatch.setattr(shoot.take_currency, "is_current", lambda built, take, pictures=None: built == "old")
+    monkeypatch.setattr(shoot.take_currency, "is_current", lambda built, take, pictures=None, canvas=None: built == "old")
     assert shoot.stale_takes(ctx) == [16]
 
 
@@ -92,7 +92,7 @@ def test_takes_current_to_their_cards_are_not_stale(tmp_path, monkeypatch):
     room = ctx.home / "takes" / "r2v"
     episode_home.write_json(room / "prompts.json", [{"index": 16, "prompt": "same", "anchors": []}])
     monkeypatch.setattr(shoot, "card_pictures", lambda c, book, n: [])
-    monkeypatch.setattr(shoot.take_currency, "is_current", lambda built, take, pictures=None: True)
+    monkeypatch.setattr(shoot.take_currency, "is_current", lambda built, take, pictures=None, canvas=None: True)
     assert shoot.stale_takes(ctx) == []
 
 
@@ -113,3 +113,18 @@ def test_a_take_rendered_on_another_canvas_is_not_current(tmp_path):
     (tmp_path / "T02.graph.json").write_text(json.dumps(graph), encoding="utf-8")
     assert not tc.is_current("the words", take, canvas=(768, 768))   # unprovable is not current
     assert tc.is_current("the words", take)                          # no canvas asked: as before
+
+
+def test_step_09_reads_the_canvas_off_the_plan(tmp_path):
+    """A portrait graph under a square plan is stale (ep14, 2026-09-30)."""
+    import json
+    from scripts.episode import step_09_shoot as shoot
+
+    class Ctx:
+        home = tmp_path
+        book_dir = tmp_path / "book"
+        number = 14
+    (tmp_path / "plan.json").write_text(json.dumps({"aspect": "1:1"}), encoding="utf-8")
+    assert shoot.episode_canvas(Ctx()) == (768, 768)
+    (tmp_path / "plan.json").write_text(json.dumps({"aspect": "9:16"}), encoding="utf-8")
+    assert shoot.episode_canvas(Ctx()) == (768, 1344)
