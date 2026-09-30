@@ -934,10 +934,14 @@ def refuse_failed_panels(book: Path, number: int, episode: Episode) -> None:
         return
     wanted = [s.index for s in episode.shots]
     # BOTH panel gates: the statistics (panel_check) and what is actually IN
-    # the picture (panel_content_check). Same row shape, same refusal.
+    # the picture (panel_content_check). Same row shape, same refusal.  A board
+    # the panel eye signed (pass or keep_best flagged) is judged: a failed row
+    # under a current signature is its recorded fault, not a wall (finding 77).
+    from studio import eye_verdict
+    judged_ok = eye_verdict.passed(home, panels)
     for verdict, runner in (("panel_dq.json", "panel_check.py"),
                             ("panel_content.json", "panel_content_check.py")):
-        if why := panel_dq.panel_refusal(home / verdict, panels, wanted):
+        if why := panel_dq.panel_refusal(home / verdict, panels, wanted, judged_ok=judged_ok):
             raise SystemExit(f"takes refused ({verdict}): {why}\n  run: uv run python "
                              f"scripts/episode/{runner} <book> {number}")
 

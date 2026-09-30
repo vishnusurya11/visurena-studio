@@ -4,7 +4,11 @@ from __future__ import annotations
 
 import json
 
+from pathlib import Path
+
 from studio import eye_verdict as ev, plan_verdict, refs_verdict
+
+ROOT = Path(__file__).resolve().parents[1]
 
 
 def _pictures(folder):
@@ -74,3 +78,34 @@ def test_a_board_the_eye_kept_flagged_is_not_a_park_for_the_takes(tmp_path):
     assert step.panel_refusals(home) == []
     (board / "shot_01.png").write_bytes(b"changed")           # the verdict is about other bytes
     assert step.panel_refusals(home) != []
+
+
+def test_the_take_builder_honours_the_same_signature(tmp_path, monkeypatch):
+    """takes_r2v carries its own copy of the panel wall; it reads the eye too."""
+    import json
+    import sys
+    from PIL import Image
+    from studio import eye_verdict
+    from studio.judges.verdict import Fault, Verdict
+    sys.path.insert(0, str(ROOT / "scripts" / "episode"))
+    import takes_r2v
+    board = tmp_path / "storyboard"
+    board.mkdir()
+    for i in (0, 1):
+        Image.new("RGB", (8, 8), (i, 0, 0)).save(board / f"shot_{i:02d}.png")
+    rows = [{"shot": 0, "passed": True}, {"shot": 1, "passed": False}]
+    for name in ("panel_dq.json", "panel_content.json"):
+        (board / name).write_text(json.dumps(rows), encoding="utf-8")
+
+    class Shot:
+        index = 0
+    class Ep:
+        shots = [Shot(), type("S1", (), {"index": 1})()]
+    monkeypatch.setattr(takes_r2v.episode_home, "home", lambda book, number: tmp_path)
+    import pytest
+    with pytest.raises(SystemExit, match="failed the panel gate"):
+        takes_r2v.refuse_failed_panels(tmp_path, 14, Ep())
+    flagged = Verdict(judge="panel_eye", version="1", passed=False, confidence=1.0, reads=2,
+                      terminal="keep_best", faults=[Fault(kind="lettering", where="shot_01")])
+    eye_verdict.sign_verdict(board, sorted(board.glob("shot_*.png")), flagged)
+    takes_r2v.refuse_failed_panels(tmp_path, 14, Ep())
