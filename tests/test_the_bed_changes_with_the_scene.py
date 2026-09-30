@@ -120,8 +120,11 @@ def test_the_first_span_always_starts_at_zero():
 # ---- refusals ---------------------------------------------------------------
 
 def test_an_unknown_tone_is_refused():
-    with pytest.raises(ValueError, match="sombre"):
-        spans([{"from_shot": 0, "tone": "sombre"}], AT, total=130.0)
+    # "sombre" folds to "grave" since 58228d5 (the ep14 assembly refusal);
+    # only a word with no nearest tone is refused now.
+    with pytest.raises(ValueError, match="crepuscular"):
+        spans([{"from_shot": 0, "tone": "crepuscular"}], AT, total=130.0)
+    assert spans([{"from_shot": 0, "tone": "sombre"}], AT, total=130.0)[0].tone == "grave"
 
 
 def test_spans_out_of_order_are_refused():
