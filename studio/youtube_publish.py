@@ -130,7 +130,13 @@ def public_refusals(qc: dict, dq_failed: list[str], row: dict) -> list[str]:
                    f"{row.get('sha8')}; re-run qc on the file that is on the channel")
     if not qc.get("passed"):
         out.append("qc says passed:false")
-    out += [f"take {t} fails or was never judged" for t in dq_failed]
+    # AN OVERRIDE RECORDED FOR THIS CUT COVERS THE TAKES AT THE FLIP: the owner
+    # named them at upload and the ledger row carries the reason (ep14,
+    # 2026-09-30 -- the flip re-litigated the same takes on the same sha8).
+    # qc.passed and the sha8 match above are facts and stay unwaivable.
+    overrode = bool(str((row.get("waived") or {}).get("reason", "")).strip())
+    if not overrode:
+        out += [f"take {t} fails or was never judged" for t in dq_failed]
     return out
 
 
