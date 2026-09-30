@@ -42,11 +42,12 @@ def read(path: Path, seed: int = 11) -> pc.Seen:
     return pc.parse(said if isinstance(said, str) else str(said))
 
 
-def physical_of(book: Path, who: list[str]) -> str:
-    """The bound rows of everyone the shot casts. A missing row raises: CAST
-    BOUND refuses the plan before this can run, and a silent skip here would
-    drop the facial-hair check without a word."""
-    return " ".join(cast_refs.row(book, name).get("physical", "") for name in who)
+def physical_of(book: Path, who: list[str]) -> list[str]:
+    """The bound rows of everyone the shot casts, ONE PER FACE (the hair check
+    reads each row alone since 2026-09-30). A missing row raises: CAST BOUND
+    refuses the plan before this can run, and a silent skip here would drop
+    the facial-hair check without a word."""
+    return [cast_refs.row(book, name).get("physical", "") for name in who]
 
 
 def judge(book: Path, shot, setup, seen: pc.Seen) -> list[str]:

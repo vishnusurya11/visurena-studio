@@ -117,7 +117,11 @@ def level(m: dict) -> str:
     return ""
 
 
-DAY_WORDS = re.compile(r"\b(?:sun|sunlit|sunlight|daylight|overcast|grey sky|low grey sky)\b", re.I)
+DAY_WORDS = re.compile(r"\b(?:sun|sunlit|sunlight|daylight|overcast|grey sky|low grey sky|"
+                       r"dusk|dawn|sunset|sunrise|twilight)\b", re.I)
+"""Dusk and dawn joined 2026-09-30: ep14 T10's rosy dusk over bright water read
+p5 22-26 on EVERY seed -- a constant of the grade, not a black-floor fault; the
+floor was calibrated on Sherlock (five-expert debate)."""
 LAMP_LIT = re.compile(r"\b(?:lamp|fire|candle|candles|brand|lantern|moon|match)\b[^;.]{0,40}\bthe only light\b", re.I)
 
 

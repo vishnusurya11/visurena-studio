@@ -65,7 +65,11 @@ def test_a_subject_the_shot_named_is_not():
 
 # ---- the clones -----------------------------------------------------------
 def test_people_who_look_alike_are_a_fault():
-    assert people_fault(seen(people=3, lookalikes=2), planned=0, crowd=True)
+    """Recalibrated 2026-09-30 (five-expert debate): in a DECLARED crowd, era
+    dress reads as 'copies' -- two lookalikes are the wardrobe, three a fault."""
+    assert not people_fault(seen(people=3, lookalikes=2), planned=0, crowd=True)
+    assert people_fault(seen(people=5, lookalikes=3), planned=0, crowd=True)
+    assert people_fault(seen(people=3, lookalikes=2), planned=3, crowd=False)
 
 
 def test_a_crowd_of_different_people_is_not():
@@ -247,7 +251,7 @@ def test_two_identical_machines_are_not_copied_people():
     so with nobody there, the copies are machines the book asks for."""
     from studio.panel_content import Seen, people_fault
     assert not people_fault(Seen(people=0, lookalikes=2), planned=0, crowd=False)
-    assert people_fault(Seen(people=3, lookalikes=2), planned=3, crowd=True)
+    assert people_fault(Seen(people=3, lookalikes=3), planned=3, crowd=True)   # 2026-09-30: crowd walls at 3
 
 
 def test_a_landform_ban_follows_the_readers_own_landform():

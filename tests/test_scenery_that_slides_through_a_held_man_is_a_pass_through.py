@@ -40,11 +40,14 @@ def test_a_body_band_that_rides_with_the_camera_fit_is_a_pass_through():
     assert got["fitted_on"] == tl.FITTED_ON
 
 
-def test_the_pass_through_row_is_hard_on_a_truck_over_a_kept_subject():
+def test_the_pass_through_row_is_advisory_on_a_truck_over_a_kept_subject():
+    """Demoted 2026-09-30 (five-expert debate): PASS_WALL's own provenance says
+    'synthetic only so far', margin one take wide, and ep14 T11's 0.88 shipped
+    invisible at speed; advisory until benched on WotW owner rows."""
     frames = pin_person(pan())
     got = tl.pass_through(frames, track=fixed_face)
     row = tl.pass_through_row(got, TRUCK)
-    assert not row.ok and row.hard and row.value == got["pass_through"] and "slides through" in row.note
+    assert not row.ok and not row.hard and row.value == got["pass_through"] and "rides with" in row.note
 
 
 def test_a_person_who_rides_with_the_set_is_not_a_pass_through():

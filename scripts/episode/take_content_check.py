@@ -49,7 +49,7 @@ def verdict_for(book: Path, shot, setup, reads: list[pc.Seen]) -> dict:
     got = tc.take_faults(
         reads, planned=len(shot.faces or []), crowd=bool((setup.crowd or "").strip()),
         flat=pc.flat_place(book, setup.location), night=panel_dq.at_night(setup.described),
-        physical=" ".join(pc_row(book, w) for w in (shot.faces or [])),
+        physical=[pc_row(book, w) for w in (shot.faces or [])],
         frame=f"{shot.frame} {shot.at_rest}", banned=pc.banned_subjects(book),
         size=shot.size, extras=getattr(shot, "extras", 0))
     whole = tc.busiest(reads)

@@ -165,9 +165,15 @@ def people_fault(seen: Seen, planned: int, crowd: bool) -> bool:
     """More faces than the shot casts, or a crowd made of one repeated person."""
     # Lookalikes are counted AMONG the people. ep10 shot 13 read 0 people and
     # 2 lookalikes: two tripods the book asks for, not a copied person.
+    # A DECLARED CROWD IS NOT A CLONE FARM: era dress reads as "copies" (ep14
+    # T03: a classroom the plan orders; T12, T19: constables in uniform).  With
+    # a crowd, only three or more lookalikes is a fault; the figure count is
+    # the crowd's own business (five-expert debate, 2026-09-30).
+    if crowd:
+        return seen.lookalikes >= 3
     if min(seen.lookalikes, seen.people):
         return True
-    return not crowd and seen.people > planned
+    return seen.people > planned
 
 BEARDS = ("beard", "moustache", "mustache", "whiskers", "goatee", "stubble")
 """Facial hair a reader may name. A cast row that says clean-shaven and a
@@ -175,6 +181,8 @@ picture that shows a moustache are two different men, and the take that
 follows the picture carries the wrong face into the cut."""
 
 CLEAN = re.compile(r"\bclean[- ]shaven\b", re.I)
+BEARD_WORD = re.compile(r"\b(?:beards?|m(?:ou|u)staches?|whiskers|goatees?|stubble)\b", re.I)
+"""A row that asks for facial hair licenses it in the picture."""
 
 
 def contradictions(seen: Seen, physical: str) -> list[str]:
@@ -184,9 +192,16 @@ def contradictions(seen: Seen, physical: str) -> list[str]:
     panels and his row reads "a lean clean-shaven man of thirty-five".
     Nothing in this pipeline compared the two.
     """
-    out = []
+    rows = physical if isinstance(physical, (list, tuple)) else [physical or ""]
     said = " ".join(seen.subjects).lower()
-    if CLEAN.search(physical or "") and (hair := [b for b in BEARDS if b in said]):
+    # PER FACE ROW, never the concatenation: ep14 T19 put George (clean-shaven)
+    # beside constables whose row DEMANDS "full drooping moustaches", and the
+    # joined string fired "mustache on a clean-shaven character" every round
+    # on regulation hair (five-expert debate, 2026-09-30).
+    if any(BEARD_WORD.search(r or "") for r in rows):
+        return []
+    out = []
+    if any(CLEAN.search(r or "") for r in rows) and (hair := [b for b in BEARDS if b in said]):
         out.append(f"{hair[0]} on a clean-shaven character")
     return out
 
@@ -383,7 +398,8 @@ def worn_by_someone(frame: str) -> bool:
 
 PRINTED = re.compile(
     r"\b(?:newspapers?|papers?|pages?|placards?|posters?|signboards?|boards?|signs?|"
-    r"timetables?|bookstalls?|letters?|telegrams?|books?|labels?|tickets?|headlines?)\b",
+    r"timetables?|bookstalls?|letters?|telegrams?|books?|labels?|tickets?|headlines?|"
+    r"maps?|sheets?|notes?|notices?|blackboards?|manuscripts?)\b",
     re.I)
 """WHOLE WORDS: "boot print" is not a page, and with a boundary "cupboard" is no
 longer a board. Without boundaries "papered wall" was paper."""
@@ -398,8 +414,14 @@ def lettering_expected(frame: str, size: str) -> bool:
     A printed noun anywhere in the prose used to excuse lettering anywhere in
     the picture: five ep07 dining-room wides say "papered wall" and the gate
     never looked at them, in the room that had a lettered engraving. A poster
-    on the far wall of a wide is set dressing, not a page to read."""
-    return size in LETTERING_SIZES and bool(PRINTED.search(frame or ""))
+    on the far wall of a wide is set dressing, not a page to read.
+
+    STAGED PRINT IS NOT LETTERING (2026-09-30): ep14's chapter IS the newspaper
+    panic -- the plan stages the Woking board (a medium), the map-shop window,
+    the newspaper under the lamp -- and this wall billed the renderer five
+    replan rounds for the script's own props.  Any size but a wide expects the
+    print its prose stages; ep07's lesson stands for wides."""
+    return size not in ("wide", "full") and bool(PRINTED.search(frame or ""))
 """Things that carry words because that is what they are. ep08's shot 6 is an
 insert on the front page of an evening paper and the lettering check called
 it a fault; a page without type is not a page."""

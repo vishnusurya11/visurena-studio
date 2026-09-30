@@ -168,10 +168,14 @@ def pass_through_row(got: dict | None, motion: str):
     if not eligible(motion):
         return Gate("pass-through", None, True, True, "n/a by the plan")
     share = got["pass_through"]
+    # ADVISORY until benched on WotW owner rows (five-expert debate 2026-09-30):
+    # PASS_WALL's own provenance says "synthetic only so far" with a one-take
+    # margin, and ep14 T11's 0.88 shipped invisible at speed.  `held` stays a
+    # wall -- it truly caught T22's morphing set.
     fault = share >= PASS_WALL and got["lock"] >= WALL and abs(got["scen"]) >= TRAVEL
     note = f"{share:.2f} of the body rode with the camera over {abs(got['scen']):.0f}px"
-    note += " HARD: the set slides through the person" if fault else ""
-    return Gate("pass-through", share, not fault, True, note, 40.0 if fault else 0.0)
+    note += " adv: the set rides with the person" if fault else ""
+    return Gate("pass-through", share, not fault, False, note, 20.0 if fault else 0.0)
 
 
 def row(got: dict | None, motion: str):
