@@ -1,6 +1,13 @@
 """A row that failed on the kept take AND on another attempt of the same take
-repeated on a fresh seed: the judge marks it `repeated`, and the seed rung
-passes it by.  A row that failed only now is stochastic and gets its seed."""
+repeated on a fresh seed: the judge marks it `repeated`, and no seed is spent
+on it again -- a fresh seed already reproduced it.  A row that failed only now
+is stochastic and may still ride a seed when no cause cure claims it first.
+
+Recalibrated 2026-09-30 (five-expert debate): pass-through is an advisory now
+(unbenched wall, ep14 T11 false alarm), so `dq_faults` no longer lifts it; the
+repeated/fresh distinction is carried on `leak` (curable advisory) and
+`cut-vote` (hard), and the seed-skip lives in the batched router's `cure_of`.
+"""
 from __future__ import annotations
 
 import json
@@ -17,27 +24,29 @@ def gates() -> list[dict]:
 
 
 def record() -> dict:
-    """The kept T07 fails pass-through and cut-vote; the displaced attempt
-    failed pass-through alone."""
+    """The kept T07 fails every row; the displaced attempt failed leak alone."""
     rows = gates()
-    lost = [dict(g, ok=g["name"] != "pass-through") for g in rows]
+    lost = [dict(g, ok=g["name"] != "leak") for g in rows]
     return {"file": "T07.mp4", "gates": rows,
             "attempts": [{"file": "T07_fail1.mp4", "gates": lost}, {"file": "T07.mp4", "gates": rows}]}
 
 
 def test_the_repeated_row_is_marked_and_the_fresh_one_is_not():
     by = {f.kind: f for f in take_eye.dq_faults(7, record())}
-    assert by["pass-through"].evidence["repeated"] is True
+    assert by["leak"].evidence["repeated"] is True
     assert by["cut-vote"].evidence["repeated"] is False
-    assert by["pass-through"].where == "T07" and by["pass-through"].severity == "normal"
+    assert by["leak"].where == "T07" and by["leak"].severity == "low"
 
 
-def test_the_seed_rung_skips_the_repeated_row_and_the_cause_rung_takes_it():
+def test_the_router_never_seeds_a_repeated_or_never_seed_row():
     by = {f.kind: f for f in take_eye.dq_faults(7, record())}
-    moving = "The camera tracks sideways to the right along the fence; he holds the basket out"
-    assert not take_ladder.wants(by["pass-through"], "seed", moving)
-    assert take_ladder.wants(by["pass-through"], "move_type", moving)
-    assert take_ladder.wants(by["cut-vote"], "seed", moving)
+    assert not take_ladder.wants(by["leak"], "seed")                # NEVER_SEED
+    assert take_ladder.wants(by["cut-vote"], "seed")                # fresh, so a seed COULD take it
+    assert take_ladder.cure_of([by["cut-vote"]]) == "move_type"     # but the cause cure claims it first
+    assert take_ladder.cure_of([by["leak"]]) == ""                  # uncovered leak: terminal, never a seed
+    repeated = by["cut-vote"].model_copy(
+        update={"kind": "shimmer", "evidence": {**by["cut-vote"].evidence, "repeated": True}})
+    assert take_ladder.cure_of([repeated]) == ""                    # a fresh seed already reproduced it
 
 
 def test_a_first_attempt_has_nothing_to_repeat():

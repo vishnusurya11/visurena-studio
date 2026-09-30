@@ -430,6 +430,30 @@ def aspect_faults(episode, series: str) -> list[str]:
     return [fault("G-ASPECT", "plan", "the episode's aspect is not the series'", got, series)]
 
 
+def crowd_faults(episode) -> list[str]:
+    """G-CROWD (five-expert debate 2026-09-30): a wide or full shot over a
+    setup whose `crowd` prose stages people, while the shot declares no
+    extras, is born self-contradictory -- the panel draws the crowd and the
+    count judge reads the plan's zero.  Eleven ep14 shots carried this
+    through three picture stages; here the fix is one field."""
+    out = []
+    for shot in episode.shots:
+        crowd = (getattr(episode.setups[shot.setup], "crowd", "") or "").strip()
+        if crowd and shot.size in ("wide", "full") and not getattr(shot, "extras", 0):
+            out.append(fault("G-CROWD", f"shot {shot.index}",
+                             f"a {shot.size} over {crowd[:60]!r} with no extras declared", 0, ">= 1"))
+    return out
+
+
+def expects_text(episode) -> list[int]:
+    """The shots whose prose stages printed matter at a size where it reads
+    (the expects-text set): listed by the battery so the writer and the
+    lettering gate agree on where text belongs before anything is drawn."""
+    from studio import panel_content
+    return [s.index for s in episode.shots
+            if panel_content.lettering_expected(f"{s.frame} {getattr(s, 'at_rest', '')}", s.size)]
+
+
 def bed_faults(episode: Episode) -> tuple[list[str], list[str]]:
     """(G-BED refusals, advisories): a bed tone outside the five is refused
     before anything renders; a synonym the bed will fold is named as advice.

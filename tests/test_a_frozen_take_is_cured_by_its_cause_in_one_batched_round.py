@@ -1,8 +1,9 @@
-"""A moving take that froze is a stochastic fault: one fresh seed, batched into
-one retake round with its reason on the argv.  The same row back on that seed
-is no longer stochastic, so the next rung is the CAUSE's -- the move type,
-swapped for the catalog's substitute through write_plan -- and every rung's
-learning carries the seconds the round really cost (the clock fixture)."""
+"""A moving take that froze goes STRAIGHT to its cause's cure: the move type,
+swapped for the catalog's substitute through write_plan, rendered in the one
+batched round with its reason on the argv.  The old ladder spent a seed round
+first -- measured ~0% solo across ep12-14 (five-expert debate 2026-09-30) --
+so the seed rung is gone; the rung's learning still carries the seconds the
+round really cost (the clock fixture)."""
 from __future__ import annotations
 
 import json
@@ -61,7 +62,7 @@ def test_the_freeze_on_a_moving_take_wants_a_seed_and_repeated_wants_the_move():
     assert take_ladder.wants(frozen(False).faults[0], "move_type", locked)
 
 
-def test_one_seed_then_the_move_type_through_write_plan(tmp_path):
+def test_the_move_type_cure_renders_in_the_first_round_through_write_plan(tmp_path):
     ctx = Ctx(tmp_path)
     room = ctx.home / "takes" / "r2v"
     room.mkdir(parents=True)
@@ -70,7 +71,7 @@ def test_one_seed_then_the_move_type_through_write_plan(tmp_path):
                                                    "rel_path": "episodes/ep05/takes/r2v/T07.mp4"}])
     (room / "T07.mp4").write_bytes(b"take")
     before = episode_home.load_plan(ctx.book_dir, 5).shot(7).motion
-    reads = iter([frozen(False), frozen(True),
+    reads = iter([frozen(False),
                   Verdict(judge="take_eye", version="1", passed=True, confidence=1.0, reads=1)])
     rungs = take_ladder.rungs(ctx, episode_home.load_plan(ctx.book_dir, 5), "--approved=render")
     signed = judged_gate.clear(ctx, "EYE_TAKES", judge=lambda: next(reads),
@@ -78,11 +79,11 @@ def test_one_seed_then_the_move_type_through_write_plan(tmp_path):
                                ladder=rungs, terminal=lambda v: v, policy=AUTO)
     assert json.loads(signed.read_text(encoding="utf-8"))["verdict"] == "pass"
     assert ctx.launched[0] == ["scripts/episode/takes_r2v.py", "--from-refs", "--no-ends", "--approved=render",
-                               "--retake=7", "--why=seed: frozen-at-start", "--last"]
+                               "--retake=7", "--why=batched_cures: frozen-at-start", "--last"]
     assert ctx.launched[1:3] == [["scripts/episode/take_dq.py", "7", "--attempts"],
                                  ["scripts/episode/take_content_check.py", "7"]]
-    assert ctx.launched[3][4:6] == ["--retake=7", "--why=move_type: frozen-at-start"]
+    assert len(ctx.launched) == 3                       # ONE round, no seed round before it
     after = episode_home.load_plan(ctx.book_dir, 5).shot(7).motion
     assert after != before and after.startswith("The camera")
-    assert [l.action for l in ctx.learned] == ["seed", "move_type", "pass"]
+    assert [l.action for l in ctx.learned] == ["batched_cures", "pass"]
     assert ctx.learned[0].seconds == 756.0 + 46.0 + 18.0

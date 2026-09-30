@@ -208,6 +208,11 @@ def main(book_id: str, number: int) -> int:
     hard += setup_gate(ep, book, number)
     asp = plan_gates.aspect_faults(ep, plan_gates.series_aspect(book))
     print("G-ASPECT     :", asp or "clean"); hard += len(asp)
+    cf = plan_gates.crowd_faults(ep)
+    print("G-CROWD      :", cf or "clean"); hard += len(cf)
+    for f in cf:
+        print("   ", f[:170])
+    print("EXPECTS TEXT :", plan_gates.expects_text(ep) or "no shot stages printed matter")
     bad, folded = plan_gates.bed_faults(ep)
     print("G-BED        :", len(bad) or "clean"); hard += len(bad)
     for f in bad + folded:

@@ -4,6 +4,25 @@ Newest first. Every architectural change gets an entry.
 
 ---
 
+## 2026-09-30 — Every cure rides one batched round (owner decision: "why 32 rounds .. debate and come up with solution")
+
+**Decision.** The owner, on ep14's timing table (takes 18.8 h over 32 rounds), ordered
+the five-expert debate (`docs/audit/2026-09-30_rounds_debate.md`, proposal
+`architecture/decisions/2026-09-30_batched_ladder.md`) and its solution built. Ruled
+with it: the judges' five truth fixes land first (9 of ep14's 11 standing refusals were
+false alarms, ~4 GPU-h); the rung-serial ladder is replaced by ONE `batched_cures` rung
+(tries 2) — a router assigns every faulted take its measured cure, free cures (head cut,
+timeline trim) cost no round, input-borne faults go straight to the terminal, a fault
+whose signature does not progress after its own cure is structural and stops;
+`ROUNDS_CAP` falls 4 → 2 across resumes; G-CROWD refuses crowd prose under a wide with
+`extras=0` at plan time and the battery lists the expects-text set.
+
+**Why.** Measured on ep12-14: seed cured ~0% solo (3.6 GPU-h spent), shorter-on-lag
+0/15 (lag is arithmetic — the free trim cures it), replan-content 3/21 (panel redraw
+1/1), move_type 89-100% at ~8 min a cure; 86% of ep14's take faults mirrored a panel or
+prompt fault. The old process (ep10 synthesis F1) was one person-chosen batched round
+per master — automation had lost the batching, not the taste.
+
 ## 2026-09-28 — One room per setup (owner decision: "fix all that")
 
 **Decision.** The owner, on ep14's grids ("the background keeps on changing for the

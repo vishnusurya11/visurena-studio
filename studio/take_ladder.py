@@ -35,7 +35,16 @@ MOVE_TYPE = Rung("move_type", COLD_S + TAKE_S)
 SHORTER_TAKE = Rung("shorter_take", COLD_S + TAKE_S)
 HEAD_CUT = Rung("head_cut", 0.0)
 REPLAN_CELL = Rung("replan_cell", REPLAN_S)
-LADDER = Ladder([SEED, MOVE_TYPE, SHORTER_TAKE, HEAD_CUT, REPLAN_CELL], "keep_best")
+BATCH = Rung("batched_cures", COLD_S + TAKE_S, tries=2)
+LADDER = Ladder([BATCH], "keep_best")
+"""ONE batched rung (five-expert debate, 2026-09-30; the old F1 rule as code):
+the rung-serial ladder spent a round per rung and re-judged between rungs, and
+the measured cure rates were seed ~0% solo (3.6 GPU-h), shorter-on-lag 0/15,
+replan-content 3/21 -- while move_type ran 89-100% at ~8 min a cure.  Now a
+router assigns every faulted take its own cure and the union renders in ONE
+round; free cures (a timeline trim for lag, a head cut for leak) cost no round;
+input-borne kinds take no render at all.  The older rungs stay defined for
+their prices and the tests that name them."""
 STILL_MAX = 2
 TAKES = Path("takes") / "r2v"
 STILLS = "stills.json"
@@ -47,6 +56,77 @@ CONTENT = take_eye.HARD_CONTENT
 MOTION = take_eye.GEOMETRY | FROZEN | {"churn"}
 """Faults of the MOVE: cured by another move type from the catalog."""
 NEVER_SEED = LAG | {"leak"}
+INPUT_BORNE = frozenset({"content", "clones", "identity", "unread", "lettering", "text",
+                         "look", "letterbox"})
+"""Kinds that live in the panel, the prompt or the grade: no seed reroll ever
+cured one (economist, 2026-09-30 -- content by take render 3/21, by panel
+redraw 1/1; look constant across every seed).  They go to the terminal, and
+the BOARD owns the cure."""
+MOVABLE = (FROZEN | {"held", "pass-through", "last-vs-panel", "last-vs-cell", "drift",
+                     "jump", "cut", "cut-vote", "cut-landing", "foreign", "churn", "zoom",
+                     "face-at-end", "coherence off-board"})
+"""Kinds a changed MOVE cures: measured 89-100% on frozen/held, 67% on
+last-vs-panel; even the 'sampling' cures came from the plan edit, not the roll."""
+
+
+def cure_of(faults: list[Fault]) -> str:
+    """One cure for one take, from what its faults measure as curable.
+    '' means no render buys anything: the terminal answers."""
+    kinds = {f.kind for f in faults}
+    if kinds & MOVABLE:
+        return "move_type"
+    if kinds & LAG:
+        return "timeline_trim"                    # free: lag follows placed length
+    if "leak" in kinds and kinds - {"leak"} <= INPUT_BORNE and any(
+            f.evidence.get("covers") for f in faults if f.kind == "leak"):
+        return "head_cut"                         # free: heads.json
+    if kinds <= INPUT_BORNE or kinds & NEVER_SEED:
+        return ""                                 # an uncovered leak has no render cure
+    if all(f.evidence.get("repeated") for f in faults):
+        return ""                                 # a fresh seed already reproduced it
+    return "seed"
+
+
+def route(verdict: Verdict, room: Path, try_i: int = 1) -> dict[str, dict[int, list[Fault]]]:
+    """cure -> {take index -> its faults}, capped and (on the second try)
+    limited to takes whose fault signature progressed."""
+    by: dict[int, list[Fault]] = {}
+    for f in verdict.faults:
+        by.setdefault(index_of(f.where), []).append(f)
+    out: dict[str, dict[int, list[Fault]]] = {}
+    for i, fs in sorted(by.items()):
+        if attempts_of(room, i) >= MAX_TAKE_ATTEMPTS:
+            continue
+        if try_i >= 2 and not progressed(room, i, sorted({f.kind for f in fs})):
+            continue
+        if cure := cure_of(fs):
+            out.setdefault(cure, {})[i] = fs
+    return out
+
+
+def renders_of(routed: dict[str, dict[int, list[Fault]]]) -> list[int]:
+    """The takes a batched round actually re-renders."""
+    return sorted({i for cure in ("move_type", "seed") for i in routed.get(cure, {})})
+
+
+def signatures(verdict: Verdict) -> dict[str, list[str]]:
+    by: dict[int, set[str]] = {}
+    for f in verdict.faults:
+        by.setdefault(index_of(f.where), set()).add(f.kind)
+    return {str(i): sorted(kinds) for i, kinds in by.items()}
+
+
+def progressed(room: Path, index: int, kinds_now: list[str]) -> bool:
+    """A second cure only when the fault CHANGED kind (re-routed) or shrank;
+    an identical signature after its own cure is structural -- the judge or
+    the input, never the seed -- and goes to the terminal (the calibrator's
+    circuit-breaker, 2026-09-30)."""
+    path = Path(room) / LADDER_FILE
+    if not path.exists():
+        return True
+    rounds = json.loads(path.read_text(encoding="utf-8")).get("rounds", [])
+    prev = next((r["faults"].get(str(index)) for r in reversed(rounds) if str(index) in r.get("faults", {})), None)
+    return prev is None or set(kinds_now) != set(prev) or len(kinds_now) < len(prev)
 
 CAUSE_OF = {
     "frozen-at-start": "frozen", "frozen-share": "frozen", "frozen-whole": "frozen",
@@ -353,11 +433,13 @@ def edit_plan(ctx, rung: Rung, wanted: dict[int, list[Fault]], records: dict[int
     return action
 
 
-ROUNDS_CAP = 4
-"""Retake rounds an episode may take, ACROSS RESUMES.  Three-agent debate
-2026-09-29: the old process allowed one batched round per master, chosen by a
-person (ep10 synthesis F1); the ladder ran ep12 in 4 rounds, ep13 in 10 and
-ep14 in 14 -- rounds 3-14 of ep14 ended with the identical terminal verdict."""
+ROUNDS_CAP = 2
+"""Batched retake rounds an episode may take, ACROSS RESUMES.  Five-expert
+debate 2026-09-30: with every cure batched into ONE round (the old F1 rule as
+code), two rounds cover a first cure and one re-route; ep14 spent 14 rounds
+and rounds 3-14 all ended with the identical terminal verdict.  A fault still
+alive after two batched rounds is structural -- the judge or the input -- and
+belongs to the terminal, not to another render."""
 MAX_TAKE_ATTEMPTS = 3
 """Archived attempts after which a take is never retaken again (ep14: T19 x8,
 T05 x7 -- lettering and clones live in the panel, not the seed)."""
@@ -370,11 +452,14 @@ def rounds_of(room: Path) -> int:
     return len(json.loads(path.read_text(encoding="utf-8")).get("rounds", [])) if path.exists() else 0
 
 
-def count_round(room: Path, why: str) -> None:
+def count_round(room: Path, why: str, sigs: dict[str, list[str]] | None = None) -> None:
+    """One round in the room's book, with each take's fault signature when
+    given: `progressed` reads them back to break a circling cure."""
     import time
     path = Path(room) / LADDER_FILE
     doc = json.loads(path.read_text(encoding="utf-8")) if path.exists() else {}
-    doc.setdefault("rounds", []).append({"why": why, "at": round(time.time(), 1)})
+    doc.setdefault("rounds", []).append({"why": why, "at": round(time.time(), 1)}
+                                        | ({"faults": sigs} if sigs else {}))
     path.write_text(json.dumps(doc, indent=1), encoding="utf-8")
 
 
@@ -388,12 +473,13 @@ def under_cap(room: Path, wanted: dict[int, list[Fault]]) -> dict[int, list[Faul
 
 
 def still_curable(room: Path, verdict: Verdict) -> bool:
-    """May the climb take another rung?  Not past the round cap, and not when
-    every faulted take is out of attempts -- the terminal (a still or the best
-    take, flagged) answers those, not another render of the same fault."""
+    """May the climb take another round?  Not past the cap, and only while
+    the router still has a cure to assign: capped takes, unprogressed
+    signatures and input-borne kinds all route to nothing, and the terminal
+    (a still or the best take, flagged) answers those, not another render."""
     if rounds_of(room) >= ROUNDS_CAP:
         return False
-    return bool(under_cap(room, {index_of(f.where): [f] for f in verdict.faults}))
+    return bool(route(verdict, room, try_i=rounds_of(room) + 1))
 
 
 def head_cuts(ctx, wanted: dict[int, list[Fault]]) -> None:
@@ -442,17 +528,34 @@ def rungs(ctx, plan, flag: str, records: dict[int, dict] | None = None) -> judge
     room = Path(ctx.home) / TAKES
 
     def take(rung: Rung, _try: int, verdict: Verdict) -> None:
-        wanted = under_cap(room, takes_for(verdict, rung.name, lambda i: take_eye.planned(plan, i)[1]))
-        if not wanted:
+        """ONE batched round: free cures first (no render, no round), then the
+        union of renderable cures in a single retake."""
+        routed = route(verdict, room, try_i=max(_try + 1, rounds_of(room) + 1))
+        if not routed:
             return
-        if rung.name == HEAD_CUT.name:
-            return head_cuts(ctx, wanted)
-        if not can_afford(ctx, rung, len(wanted)) or rounds_of(room) >= ROUNDS_CAP:
-            return
-        action = edit_plan(ctx, rung, wanted, records)
-        if action == "shorten":
+        if leaks := routed.get("head_cut"):
+            head_cuts(ctx, leaks)                       # free: heads.json
+        renders = dict(routed.get("move_type", {})) | dict(routed.get("seed", {}))
+        path = Path(ctx.home) / "plan.json"
+        doc, trims = json.loads(path.read_text(encoding="utf-8")), []
+        for index, faults in routed.get("timeline_trim", {}).items():
+            doc, action = shorten(doc, index, placed_seconds(ctx.home, index),
+                                  float(records.get(index, {}).get("measured_seconds") or 0.0))
+            if action == "restore":                     # length changed under it: render at the placed length
+                renders[index] = faults
+            elif action == "shorten":
+                trims.append(index)
+        for index, faults in routed.get("move_type", {}).items():
+            doc = move_type(doc, index, faults)         # a seed-routed take keeps its plan
+        if trims or routed.get("move_type"):
+            episode_home.write_plan(path, doc)
+        if trims:                                       # free: re-place and re-measure, no render
             ctx.run_script("scripts/episode/timeline.py", clock="timeline")
-        why = why_of(rung.name, [f for fs in wanted.values() for f in fs])
-        count_round(room, why)
-        retake(ctx, list(wanted), why, flag)
+            measured(ctx, "scripts/episode/take_dq.py", "take_dq", ".dq.json",
+                     *[str(i) for i in sorted(trims)])
+        if not renders or rounds_of(room) >= ROUNDS_CAP or not can_afford(ctx, rung, len(renders)):
+            return
+        why = why_of(rung.name, [f for fs in renders.values() for f in fs])
+        count_round(room, why, signatures(verdict))
+        retake(ctx, sorted(renders), why, flag)
     return judged_gate.Rungs(LADDER, take, curable=lambda v: still_curable(room, v))

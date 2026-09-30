@@ -23,7 +23,10 @@ def test_rounds_are_counted_on_disk_and_survive_a_new_reader(tmp_path):
     tl.count_round(room, "seed: content")
     tl.count_round(room, "move_type: last-vs-panel")
     assert tl.rounds_of(room) == 2                       # a fresh process reads the same file
-    assert tl.ROUNDS_CAP == 4 and tl.MAX_TAKE_ATTEMPTS == 3
+    # ROUNDS_CAP fell 4 -> 2 with the batched ladder (five-expert debate
+    # 2026-09-30): every cure now rides one round, so two rounds cover a first
+    # cure and one re-route; ep14's rounds 3-14 changed nothing.
+    assert tl.ROUNDS_CAP == 2 and tl.MAX_TAKE_ATTEMPTS == 3
 
 
 def test_a_take_with_three_archived_attempts_is_out(tmp_path):
@@ -38,14 +41,16 @@ def test_a_take_with_three_archived_attempts_is_out(tmp_path):
 
 def test_the_climb_is_incurable_at_the_round_cap_or_when_every_take_is_out(tmp_path):
     room = room_of(tmp_path)
+    # `held` is a MOVABLE kind: a `content` fault is input-borne since
+    # 2026-09-30 and routes to the terminal even on a fresh take.
     v = Verdict(judge="take_eye", version="1", passed=False, confidence=1.0, reads=1,
-                faults=[Fault(kind="content", where="T19")])
+                faults=[Fault(kind="held", where="T19")])
     assert tl.still_curable(room, v)
     for k in range(tl.MAX_TAKE_ATTEMPTS):
         (room / "attempts" / f"T19_fail{k}.mp4").write_bytes(b"x")
     assert not tl.still_curable(room, v)                 # its one take is out of attempts
     v2 = Verdict(judge="take_eye", version="1", passed=False, confidence=1.0, reads=1,
-                 faults=[Fault(kind="content", where="T05")])
+                 faults=[Fault(kind="held", where="T05")])
     for n in range(tl.ROUNDS_CAP):
         tl.count_round(room, f"round {n}")
     assert not tl.still_curable(room, v2)                # the episode is out of rounds
