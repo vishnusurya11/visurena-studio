@@ -88,9 +88,14 @@ def refusal_lines(out: str) -> list[str]:
 
 def battery(ctx, desk) -> list[str] | None:
     """plan_check's refusals for the draft as it stands, or None when it passes;
-    a draft the contract refused is a refusal like the gate's."""
-    if desk.pending is not None:
+    a draft the contract refused is a refusal like the gate's -- but only while
+    there is NO plan on disk to judge.  THE DISK IS THE TRUTH OF A STEP (ep15,
+    2026-10-01): a failed improve left its refusals as `pending`, battery()
+    answered with that ghost over a VALID plan on disk, and the ladder deferred
+    the clean draft under the ghost's note for eleven passes."""
+    if desk.pending is not None and not desk.plan.exists():
         return desk.pending
+    desk.pending = None
     rc, out = ctx.capture_script(PLAN_CHECK)
     if rc == 0:
         return None
