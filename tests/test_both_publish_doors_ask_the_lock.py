@@ -21,18 +21,18 @@ def unit(tmp_path, monkeypatch):
     qc.write_text(json.dumps({"passed": True}), encoding="utf-8")
     monkeypatch.setattr(yp, "deliverable", lambda h, e: ("r2v", master, qc))
     monkeypatch.setattr(youtube_upload, "failed_takes", lambda h, e="r2v": [])
-    record(home / "learnings.jsonl", Learning(step="11", gate="MASTER", action="flag", terminal=True))
+    record(home / "learnings.jsonl", Learning(step="11", gate="EPILOGUE", action="flag", terminal=True))
     return book, home, master
 
 
 def test_the_privacy_flip_is_refused_by_an_open_terminal(tmp_path, monkeypatch):
     book, _home, master = unit(tmp_path, monkeypatch)
     stops = youtube_privacy.public_gates(book, 13, {"sha8": yp.sha8(master)})
-    assert any(s.startswith("MASTER ended flag") for s in stops)
+    assert any(s.startswith("EPILOGUE ended flag") for s in stops)
     assert any("director_signoff.md is missing" in s for s in stops)
 
 
 def test_the_upload_lists_the_lock_stops(tmp_path, monkeypatch):
     _book, home, master = unit(tmp_path, monkeypatch)
     stops = youtube_upload.lock_stops(home, yp.sha8(master))
-    assert any(s.startswith("MASTER ended flag") for s in stops)
+    assert any(s.startswith("EPILOGUE ended flag") for s in stops)
