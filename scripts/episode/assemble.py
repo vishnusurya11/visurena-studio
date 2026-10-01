@@ -772,10 +772,15 @@ def tail(master: Path, title: Path | None, out: Path, work: Path, number: int = 
     # The zero start that setpts was added for (the 0.041 s concat offset,
     # 2026-09-12) is already held by cfr + the mux flags: measured on the same
     # listing, first frame at 0.000, 4056 of 4055 frames (one cfr pad).
+    # VFR PASSTHROUGH, not cfr (ep15, 2026-10-01): every part is already a
+    # uniform cfr-24 encode, so the join carries their timestamps verbatim --
+    # measured on the same listing: 4055 of 4055 frames, 24.000 fps, first
+    # frame at 0.000.  cfr re-judging here padded one frame and shifted every
+    # cut against the takes (QC: segments off 21/22, tail 4056/4055).
     subprocess.run(["ffmpeg", "-y", "-v", "error", "-f", "concat", "-safe", "0", "-i", str(listing),
                     "-vf", f"scale={up_w}:{up_h}:flags=lanczos,format=yuv420p",
                     "-af", "asetpts=PTS-STARTPTS",
-                    "-fps_mode", "cfr", "-r", str(FPS), "-muxdelay", "0", "-muxpreload", "0",
+                    "-fps_mode", "vfr", "-muxdelay", "0", "-muxpreload", "0",
                     "-c:v", "libx264", "-preset", "slow", "-crf", "14",
                     "-pix_fmt", "yuv420p", "-movflags", "+faststart",
                     "-c:a", "aac", "-b:a", "256k",
