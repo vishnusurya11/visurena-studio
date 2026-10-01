@@ -766,8 +766,14 @@ def tail(master: Path, title: Path | None, out: Path, work: Path, number: int = 
     # `slow` and CRF 14 here rather than `fast` and 17: this runs once per
     # episode and the file it makes is the deliverable.
     up_w, up_h = W * canvas.DELIVER, H * canvas.DELIVER
+    # NO VIDEO setpts HERE (ep15, 2026-10-01): under `-fps_mode cfr` the
+    # rebased pts made the encoder drop a still segment's 205 frames in
+    # silence -- the join came up 8.5 s short with every PART decoding whole.
+    # The zero start that setpts was added for (the 0.041 s concat offset,
+    # 2026-09-12) is already held by cfr + the mux flags: measured on the same
+    # listing, first frame at 0.000, 4056 of 4055 frames (one cfr pad).
     subprocess.run(["ffmpeg", "-y", "-v", "error", "-f", "concat", "-safe", "0", "-i", str(listing),
-                    "-vf", f"setpts=PTS-STARTPTS,scale={up_w}:{up_h}:flags=lanczos,format=yuv420p",
+                    "-vf", f"scale={up_w}:{up_h}:flags=lanczos,format=yuv420p",
                     "-af", "asetpts=PTS-STARTPTS",
                     "-fps_mode", "cfr", "-r", str(FPS), "-muxdelay", "0", "-muxpreload", "0",
                     "-c:v", "libx264", "-preset", "slow", "-crf", "14",
