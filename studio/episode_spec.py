@@ -883,7 +883,10 @@ def motion_faults(motion: str) -> list[tuple[str, str]]:
         out.append(("M5", f"the LAST clause states an end state ({last!r}), and the builder "
                           f"appends `continues to the last frame` to it. End on something "
                           f"still going: `runs along`, `comes down`, `lifts`."))
-    if FEATURES.search(last):
+    # the cast constants ride every clause as "(grey eyes)" parentheticals
+    # (describe-cast-from-its-rows); an identity is not the thing that moves,
+    # and ep16's forearms were accused over it -- strip them before the scan
+    if FEATURES.search(re.sub(r"\([^)]*\)", "", last)):
         out.append(("M6", f"the LAST clause moves a face part too small to measure "
                           f"({last!r}). The tail needs a limb, a head, a torso or a "
                           f"travelling object."))
