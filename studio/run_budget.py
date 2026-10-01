@@ -54,6 +54,17 @@ class Budget:
         self.carry = 0.0          # unused time from earlier steps
         self.pool_drawn = 0.0     # the `ladders` share drawn by rungs
 
+    def charge(self, spent: float) -> None:
+        """Seconds earlier RUNS of this episode already spent (timing.jsonl):
+        the ceiling covers the episode, not the process.  ep14's 31 driver
+        runs each opened a fresh 5 h (five-hour plan fix 1, 2026-09-30)."""
+        self.t0 -= max(0.0, spent)
+
+    def ceiling_spent(self) -> bool:
+        """The episode's whole ceiling is gone: no rung can ever be paid for
+        again, so a refusal here is TERMINAL, never a deferral."""
+        return self.clock() - self.t0 >= self.ceiling
+
     def start(self, step: str) -> None:
         """Close the running step, carry its balance, open `step`."""
         if step not in self.shares:
@@ -87,3 +98,22 @@ class Budget:
 
     def draw(self, seconds: float) -> None:
         self.pool_drawn += seconds
+
+
+def spent_before(home) -> float:
+    """Seconds this episode's earlier runs logged (timing.jsonl), 0.0 when
+    there is none yet.  What `Budget.charge` is charged with at context
+    creation, so the ceiling binds across resumes."""
+    import json
+    from pathlib import Path
+    path = Path(home) / "timing.jsonl"
+    if not path.exists():
+        return 0.0
+    total = 0.0
+    for line in path.read_text(encoding="utf-8").splitlines():
+        if line.strip():
+            try:
+                total += float(json.loads(line).get("seconds") or 0.0)
+            except (ValueError, TypeError):
+                continue
+    return total

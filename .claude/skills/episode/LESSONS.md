@@ -234,3 +234,10 @@ SKILL.md.
 - **Dialogue a take cannot lip-sync goes over the shot as narration.** ep12
   T16's shout lagged 0.43-0.67 s on two lengths; voiced over the shot it needs
   no lip lock and the man still shouts on screen.
+- **The delivered master is the Short, not the picture.** Every runtime wall
+  capped the picture at 180 s while assemble appends the ~4.5 s title card and
+  the 0.25 s chip after it; ep14 placed 177.9 s, delivered 182.6 s, and YouTube
+  filed it as a regular video (hard requirement broken). The budget is derived
+  once in `episode_spec` (`SHORT_WALL_S - TAIL_ALLOWANCE_S`), and the upload
+  and public-flip doors read the FILE itself (`youtube_publish.file_refusals`:
+  length AND 1:1), because `--override` waives `qc.passed` -- 2026-09-30.

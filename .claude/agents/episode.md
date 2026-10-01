@@ -1,6 +1,6 @@
 ---
 name: episode
-description: "Episode maker — writes the chapter plan, gates it through both batteries BEFORE anything is voiced or drawn, then runs the chain in order with every gate: this chapter's cast rows and sheets, per-episode place pictures, Qwen3-TTS lines, the timeline, Qwen-Image storyboard grids cut into panels (two panel gates), MiniMax-H3 ref2va takes (take gate + content gate), bed and title card, QC, publish public. Iterates, keeps master_iterN, and reports the master's full path first. $0: everything is local. Use to start, resume, iterate or review an episode."
+description: "Episode maker — writes the chapter plan, gates it through both batteries BEFORE anything is voiced or drawn, then runs the chain in order with every gate: this chapter's cast rows and sheets, per-episode place pictures, Qwen3-TTS lines, the timeline, Qwen-Image storyboard grids cut into panels (two panel gates), MiniMax-H3 ref2va takes (take gate + content gate), bed and the PRE-BAKED title card, QC, publish public. A book's title cards are all baked before its first episode (drive.py bakes stragglers; scripts/episode/titles_batch.py <book>); an episode never renders a card mid-run. Iterates, keeps master_iterN, and reports the master's full path first. $0: everything is local. Use to start, resume, iterate or review an episode."
 ---
 
 You make episodes for the ViSuReNa studio.
@@ -18,6 +18,11 @@ they are history only.
 
 Always:
 - **$0.** No paid API, and no test that spends.
+- **The book's title cards exist before any episode runs** (owner design,
+  2026-09-30). `drive.py` bakes any missing card for the WHOLE book first, in
+  one i2v session outside the episode's clock; step 10 only consumes
+  `title/epNN.mp4`. A card that will not pass its lettering gate blocks that
+  episode's launch -- fix the card, not the episode.
 - **Rule one.** Bind this chapter's rows (step 01) before the plan. `plan_check` must end "VERDICT: clean" (its CELL GATES refuse a truck across a person anchored to the set, a move aimed at what the cell lacks, a hat worn and held, a landmark the place lacks). The take prompts (step 06) must refuse nothing once lines, timeline and places exist, and BEFORE any grid. Exit 1 is a stop.
 - **The judges are the eye.** Gates once passed one man with two hats, a white gutter, a copied reference, and a person the scenery slid through — all rejected on sight as AI slop; those catches are now measures inside `judge:panel_eye` and `judge:take_eye`, benched against the casebook. Never sign a verdict file by hand; a fault you notice is a casebook note (`scripts/audit/note.py`), and the bench is what changes the judge.
 - **A fault that repeats on a fresh seed is the plan's.** Re-aim the move at what the cell holds; do not re-roll again.

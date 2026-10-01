@@ -54,9 +54,12 @@ def horizontal(plate) -> bool:
 
 
 def chapter_name(raw: str) -> str:
-    """'I. THE EVE OF THE WAR.' -> 'THE EVE OF THE WAR'."""
+    """'I. THE EVE OF THE WAR.' -> 'THE EVE OF THE WAR'.  Quote glyphs leave
+    the card's line (ep17, 2026-09-30: THE "THUNDER CHILD" failed the
+    stray-glyph wall on every draw; the card reads fine without them and the
+    wall stays to police quotes the drawer invents)."""
     name = re.sub(r"^\s*[IVXLC]+\.\s*", "", raw.strip())
-    return name.rstrip(". ").upper()
+    return STRAY.sub("", name).rstrip(". ").upper()
 
 
 def card_lines(series: str, number: int, chapter_title: str) -> list[str]:

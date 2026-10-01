@@ -93,8 +93,12 @@ def vlm_reader(work: Path):
         path = Path(work) / "read.png"
         path.parent.mkdir(parents=True, exist_ok=True)
         Image.fromarray(np.asarray(frame).astype(np.uint8)).save(path)
-        return comfy.run_text(WORKFLOW, {"image_1": comfy.stage_image(path), "prompt": ASK,
-                                         "seed": 11, "max_new_tokens": 1024})
+        # cached_text (five-hour plan fix 5): an unchanged master's re-read is
+        # free, and the answer cache keys on the frame's own bytes.
+        said = comfy.cached_text(WORKFLOW, {"image_1": comfy.stage_image(path), "prompt": ASK,
+                                            "seed": 11, "max_new_tokens": 1024},
+                                 readable=lambda text: bool(text and text.strip()))
+        return said if isinstance(said, str) else str(said)
     return reader
 
 
@@ -128,23 +132,43 @@ def contact_sheet(home: Path, master: Path, sha8: str) -> Path:
 # ---- the judged gate ------------------------------------------------------------------------
 
 def qc_report(ctx, extra: list[str]) -> dict:
-    """qc.py over the master; a FAIL on its hard rows is a refusal."""
+    """qc.py over the master; a FAIL on its hard rows is a refusal.
+
+    A report that already measured THESE EXACT BYTES is reused, pass or fail
+    (five-hour plan fix 3, 2026-09-30): qc ran 8x on ep14 at ~9 min a pass,
+    and a failed report on an unchanged master was thrown away and re-measured
+    with no assemble in between.  A recut changes the sha8 and qc runs again."""
+    master, qc = pair(ctx.home, engine_of(extra))
+    if qc.exists() and master.exists():
+        report = episode_home.read_json(qc)
+        if report.get("sha8") == yp.sha8(master):
+            if report.get("passed"):
+                ctx.log(f"qc: {qc.name} already measured sha8 {report['sha8']}; reused")
+                return report
+            raise SystemExit(f"REFUSED: qc FAIL in {qc.name} for these exact bytes; "
+                             f"fix the cut before anyone watches it")
     ctx.run_script("scripts/episode/qc.py", *engine_flags(extra), gpu=GPU, clock="qc")
-    _master, qc = pair(ctx.home, engine_of(extra))
     if not qc.exists():
         raise SystemExit(f"REFUSED: qc.py left no report at {qc.name}")
     report = episode_home.read_json(qc)
+    if master.exists() and report.get("sha8") != yp.sha8(master):
+        raise SystemExit(f"REFUSED: {qc.name} still measures {report.get('sha8')}, not the master's "
+                         f"bytes; qc.py did not finish")
     if not report.get("passed"):
         raise SystemExit(f"REFUSED: qc FAIL in {qc.name}; fix the cut before anyone watches it")
     return report
 
 
 def judge_master(ctx, memo: dict):
-    """The master as it stands, read; the measures kept for the rubric's y fields."""
+    """The master as it stands, read; the measures kept for the rubric's y
+    fields.  The whole read runs in ONE VL window (five-hour plan fix 5:
+    ~36 frames a master, each read was reloading the judge's weights)."""
+    from studio import episode_clock
     master, _qc = pair(ctx.home, engine_of(getattr(ctx, "extra", None) or []))
     plan = episode_home.read_json(ctx.home / "plan.json")
     placed = episode_home.read_timeline(ctx.home)
-    verdict, measures = read_master(ctx.home, master, plan, placed)
+    with episode_clock.timed(ctx.book_dir, ctx.number, "master_eye"), comfy.model_kept():
+        verdict, measures = read_master(ctx.home, master, plan, placed)
     memo.update(verdict=verdict, measures=measures)
     return verdict
 

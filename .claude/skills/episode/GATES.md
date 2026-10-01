@@ -53,9 +53,11 @@ staged room's mirror -- ADVISORY, no rung, until calibrated.
 
 ## Timeline — `timeline.py` (HARD)
 
-The measured runtime must sit in 120-180 s, and every line at its shot's start
-plus the handle (`misaligned`). The fingerprint covers only timing inputs, so a
-reworded frame does not stale it.
+The measured runtime must sit in 120-174 s — the PICTURE's budget, derived in
+`episode_spec` as the 180 s YouTube-Shorts wall less the ~6 s tail (title card
++ chip) that assemble appends after the picture; never restate either number.
+Every line at its shot's start plus the handle (`misaligned`). The fingerprint
+covers only timing inputs, so a reworded frame does not stale it.
 
 ## Grids and the panel cut — `grids.py`, `panels.py` (HARD)
 
@@ -134,6 +136,9 @@ QC fails on any of these:
 - an unmeasured edit;
 - **any take without a current dq AND content verdict;**
 - **no title card** (`title_card` false).
+- **a delivered master past the 180 s Shorts wall, or unmeasured**
+  (`episode_spec.short_refusal` on `seconds`) -- 2026-09-30, ep14 shipped as a
+  video at 182.58 s.
 - **a planned sound the master does not let you hear** (`sound`, `episode_sound.presence`,
   6 dB over the second before it) -- 2026-09-26.
 
@@ -213,3 +218,21 @@ is `scripts/audit/note.py <codex> <unit> <artefact> <class> "<words>"` → the c
 overlay → the bench → the ratchet. What still needs a signature: PUBLISH, paid credits,
 OVERRIDE, the synthetic declaration; `RENDER_HOLD` is the brake.
 
+
+## The run itself (five-hour plan, 2026-09-30)
+
+- **One episode, one clock.** The 5 h ceiling covers the EPISODE across resumes
+  (`Budget.charge(spent_before(home))`); a spent ceiling takes terminals, and the
+  driver never auto-resumes past it. ep14 got 31 fresh ceilings.
+- **One episode, one commit.** The driver warns when HEAD moved since the episode
+  started (ep14 ran on 23 commits). Fix bugs after the ship, not during it.
+- **All renders first, then the checks** (owner). A retake round renders every take,
+  THEN runs take_dq + take_content in one window; trims re-measure in that same
+  window. The H3 stack evicts the judge, so an interleaved check pays two cold loads.
+- **A book's title cards ALL exist before its first episode** (owner design):
+  `scripts/episode/titles_batch.py <book>` bakes every missing card in one i2v
+  session; drive.py runs it automatically before any launch, outside the
+  episode's clock. A card without a plan takes the series aspect; a card that
+  fails its lettering gate blocks that episode's launch.
+- **The working set lives on the NVMe** (`extra_model_paths.yaml`, `nvme_fast` stanza,
+  C:\comfy_models). Never delete the `.hdd_bak` originals without a verified load.

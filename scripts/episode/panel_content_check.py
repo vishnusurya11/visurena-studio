@@ -71,16 +71,21 @@ def row_for(book: Path, shot, setup, path: Path) -> dict:
             "text": seen.text, "subjects": seen.subjects}
 
 
-def main(book_id: str, number: int) -> int:
+def main(book_id: str, number: int, only: list[int] | None = None) -> int:
+    """All panels, or -- after a redraw -- ONLY the redrawn shots, their fresh
+    rows merged into panel_content.json beside the untouched ones (five-hour
+    plan fix 2c, 2026-09-30: a rung re-read the whole board at ~15 min a pass;
+    ep13 paid 28 passes)."""
     book = episode_home.book_dir(book_id)
     ep = episode_home.load_plan(book, number)
-    from studio import cast_refs
+    from studio import cast_refs, panel_ladder
     if why := cast_refs.chapter_refusal(book, number):   # this chapter's clothes (audit item 9)
         raise SystemExit(why)
     home = episode_home.home(book, number) / "storyboard"
+    wanted = [s for s in ep.shots if not only or s.index in only]
     rows, missing = [], []
     with comfy.model_kept():        # the VL model loaded once for the batch (speed plan #6)
-        for shot in ep.shots:
+        for shot in wanted:
             path = home / f"shot_{shot.index:02d}.png"
             if not path.exists():
                 missing.append(shot.index)
@@ -89,7 +94,10 @@ def main(book_id: str, number: int) -> int:
             rows.append(row)
             print(f"  {'ok  ' if row['passed'] else 'FAIL'} shot {shot.index:02d}  "
                   f"{'; '.join(row['faults'])}", flush=True)
-    episode_home.write_json(home / "panel_content.json", rows)
+    out = home / "panel_content.json"
+    if only:
+        rows = panel_ladder.merge_content_rows(episode_home.read_json(out) if out.exists() else [], rows)
+    episode_home.write_json(out, rows)
     failed = [r["shot"] for r in rows if not r["passed"]]
     print(f"\n{len(rows) - len(failed)}/{len(ep.shots)} panels clean on content; "
           f"failing {failed}; missing {missing}")
@@ -97,4 +105,5 @@ def main(book_id: str, number: int) -> int:
 
 
 if __name__ == "__main__":
-    raise SystemExit(main(sys.argv[1], episode_arg(sys.argv)))
+    plain = [a for a in sys.argv[1:] if not a.startswith("--")]
+    raise SystemExit(main(plain[0], episode_arg(sys.argv), [int(a) for a in plain[2:] if a.isdigit()]))

@@ -5,7 +5,12 @@ from studio.series_title import (card_lines, chapter_name, lines_read,
 
 def test_chapter_name_drops_the_roman_numeral_and_full_stop():
     assert chapter_name("I. THE EVE OF THE WAR.") == "THE EVE OF THE WAR"
-    assert chapter_name("XVII. THE “THUNDER CHILD”.") == "THE “THUNDER CHILD”"
+    # Quote glyphs leave the CARD's asked line (2026-09-30): ep17's card asked
+    # for THE "THUNDER CHILD" and the stray-glyph wall rightly refused every
+    # draw's quotes for 6 tries -- the card reads fine without them, and the
+    # wall keeps policing quotes the drawer invents.
+    assert chapter_name("XVII. THE “THUNDER CHILD”.") == "THE THUNDER CHILD"
+    assert chapter_name('XVII. THE "THUNDER CHILD".') == "THE THUNDER CHILD"
 
 
 def test_card_lines_are_series_episode_then_chapter():

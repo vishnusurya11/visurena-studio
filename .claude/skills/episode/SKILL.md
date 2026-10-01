@@ -1,6 +1,6 @@
 ---
 name: episode
-description: "Turn one book chapter into a 2-3 minute square (1:1) episode at $0, entirely local: first-person narration and a few spoken lines laid over pictures cut to the measured voice. Chain: plan (gated) -> per-episode place pictures + one sheet per character -> Qwen3-TTS lines -> timeline -> Qwen-Image storyboard grids cut into panels (two panel gates) -> MiniMax-H3 ref2va takes (take gate + content gate) -> assemble with bed and title card -> QC -> publish public. Use when writing, building, fixing, resuming or reviewing an episode under library/<book>/episodes/."
+description: "Turn one book chapter into a square (1:1) YouTube SHORT episode (delivered master <= 180 s, picture <= 174 s) at $0, entirely local: first-person narration and a few spoken lines laid over pictures cut to the measured voice. Chain: plan (gated) -> per-episode place pictures + one sheet per character -> Qwen3-TTS lines -> timeline -> Qwen-Image storyboard grids cut into panels (two panel gates) -> MiniMax-H3 ref2va takes (take gate + content gate) -> assemble with bed and the pre-baked title card -> QC -> publish public. Use when writing, building, fixing, resuming or reviewing an episode under library/<book>/episodes/."
 ---
 
 # Episode
@@ -11,7 +11,10 @@ one checkout. Never create a worktree, a per-book branch or a second copy of
 the repo; the owner's rule (2026-09-24) is that everything lives in this one
 folder, and everything book-specific lives under its `library/<book>/`.
 
-One chapter is one episode: 2-3 minutes, 1:1, $0, every step local. The owner's
+One chapter is one episode, and it is a YouTube SHORT: 1:1 square and at most 3:00 DELIVERED (picture <= 174 s; assemble appends the ~4.5 s title card and the chip after it), $0, every step local. Both are the owner's hard requirements (2026-09-30): ep14 delivered 182.6 s and YouTube filed it as a regular video. The book's title cards are ALL baked before its first episode
+(`uv run python scripts/episode/titles_batch.py <book>`; drive.py bakes
+stragglers automatically, outside the episode's clock) -- an episode never
+renders a card mid-run (owner design, 2026-09-30). The owner's
 word outranks anything in this file; when he corrects the work, the correction
 goes here and into memory.
 

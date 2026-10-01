@@ -60,4 +60,6 @@ def context(conn, codex_id: str, number: int | None, **kw) -> EpisodeContext:
     ctx = EpisodeContext(conn, codex_id, episode_home.book_dir(codex_id), STAGE,
                          unit=unit_of(number), number=number, **kw)
     ctx.home = episode_home.home(ctx.book_dir, number)
+    from studio import run_budget
+    ctx.budget.charge(run_budget.spent_before(ctx.home))   # the ceiling covers the EPISODE (fix 1)
     return ctx

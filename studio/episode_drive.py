@@ -37,6 +37,22 @@ def dirty(porcelain: str) -> bool:
     return any(line.strip() and not re.match(r"^\?\? library/", line) for line in porcelain.splitlines())
 
 
+def first_sha(ledger_text: str) -> str | None:
+    """The commit the episode STARTED on, from drive.jsonl (five-hour plan
+    fix 7: ep14 ran across 23 commits; one episode runs on one commit, and a
+    drive on moved code says so out loud)."""
+    import json as _json
+    for line in ledger_text.splitlines():
+        if line.strip():
+            try:
+                row = _json.loads(line)
+            except ValueError:
+                continue
+            if row.get("sha"):
+                return str(row["sha"])
+    return None
+
+
 def silent(last_growth: float, now: float, told: bool) -> bool:
     return not told and now - last_growth >= SILENCE_S
 
@@ -45,8 +61,11 @@ def tail(log: str, n: int = LAST_LINES) -> str:
     return "\n".join(log.strip().splitlines()[-n:])
 
 
-def drive(run: Callable[[], str], notify: Callable[[str], None], max_runs: int = MAX_RUNS) -> int:
-    """Run, resume a deferral, stop and tell on anything else; 0 when the episode completes."""
+def drive(run: Callable[[], str], notify: Callable[[str], None], max_runs: int = MAX_RUNS,
+          over_budget: Callable[[], bool] = lambda: False) -> int:
+    """Run, resume a deferral, stop and tell on anything else; 0 when the
+    episode completes.  A SPENT episode is never auto-resumed (five-hour plan
+    fix 1): ep14's 31 runs each opened a fresh 5 h."""
     log = ""
     for n in range(1, max_runs + 1):
         log = run()
@@ -56,6 +75,10 @@ def drive(run: Callable[[], str], notify: Callable[[str], None], max_runs: int =
             return 0
         if got != "deferred":
             notify(f"episode {got} on run {n}:\n{tail(log)}")
+            return 1
+        if over_budget():
+            notify(f"episode ceiling spent after run {n}; not resuming -- the next manual run "
+                   f"takes terminals, it does not retake:\n{tail(log)}")
             return 1
     notify(f"episode still deferred after {max_runs} runs:\n{tail(log)}")
     return 1

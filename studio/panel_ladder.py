@@ -107,6 +107,62 @@ def reprose_plan(path: Path, doc: dict, index: int, faults: list[Fault]) -> Path
     return episode_home.write_plan(Path(path), reprose(doc, index, faults))
 
 
+def write_cured(plan: Path, doc: dict) -> Path:
+    """A frame-only cure written AND re-signed for the new bytes (step 03's
+    resign pattern).  ep14 (five-hour plan, 2026-09-30): a reprose left the
+    plan's signature on the old sha8, so every restart between the reprose and
+    the first take re-ran the whole plan ladder and redrew the grids -- 3.5 h.
+    A reprose edits only `frame`, which the timing contract does not read, so
+    the judged verdict still covers the plan."""
+    from studio import plan_verdict
+    out = episode_home.write_plan(Path(plan), doc)
+    if previous := plan_verdict.read(Path(plan)):
+        kw = {"signed_by": previous["signed_by"]} if previous.get("signed_by") else {}
+        plan_verdict.sign(Path(plan), f"{previous.get('note', '')} · reprose (08)".strip(" ·"),
+                          faults=previous.get("faults"), flagged=bool(previous.get("flagged", False)), **kw)
+    return out
+
+
+# ---- the climb remembered on disk (five-hour plan fix 2, 2026-09-30) -------------
+
+LADDER_FILE = "ladder.json"
+"""storyboard/ladder.json, mirroring takes/r2v/ladder.json: which grids have
+climbed, ACROSS RESUMES.  `Climb.redrawn` was process memory, and ep14 redrew
+waterloo_station 9 times against a cap of 2."""
+
+
+def _ladder_path(home: Path) -> Path:
+    return Path(home) / "storyboard" / LADDER_FILE
+
+
+def load_climbed(home: Path) -> list[str]:
+    path = _ladder_path(home)
+    if not path.exists():
+        return []
+    import json
+    return list(json.loads(path.read_text(encoding="utf-8")).get("climbed", []))
+
+
+def remember_climbed(home: Path, name: str) -> None:
+    import json
+    import time
+    path = _ladder_path(home)
+    doc = json.loads(path.read_text(encoding="utf-8")) if path.exists() else {}
+    if name not in doc.setdefault("climbed", []):
+        doc["climbed"].append(name)
+        doc.setdefault("at", {})[name] = round(time.time(), 1)
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_text(json.dumps(doc, indent=1), encoding="utf-8")
+
+
+def merge_content_rows(old: list[dict], fresh: list[dict]) -> list[dict]:
+    """A partial content read lands beside the untouched rows (fix 2c: a
+    redraw re-reads only its own panels), replacing by shot, never wiping."""
+    by = {int(r["shot"]): r for r in old}
+    by.update({int(r["shot"]): r for r in fresh})
+    return [by[k] for k in sorted(by)]
+
+
 def supersede(board: Path, name: str) -> int:
     """Move the grid's png/json/txt to superseded/<name>_v<k>.*; k is the seed bump."""
     room = Path(board) / SUPERSEDED
@@ -176,19 +232,26 @@ class Climb:
             for index in row.get("shots") or []:
                 if index in shots_of(faults):
                     doc = reprose(doc, int(index), faults)
-        episode_home.write_plan(plan, doc)
+        write_cured(plan, doc)      # written AND re-signed: a resume must not re-open the plan
 
     def take(self, rung: Rung, i: int, verdict: Verdict) -> None:
-        """One rung: the climbing grids reprosed (that rung only) and redrawn;
-        the panels and rows rebuilt for the judge's next read.  Only the faults
-        a redraw can cure choose the grids."""
+        """One rung: the climbing grids reprosed (that rung only) and ALL
+        redrawn back to back (the grid model stays resident), then ONE rebuild
+        scoped to the redrawn shots.  Only the faults a redraw can cure choose
+        the grids; each climb is remembered on disk so the cap survives a
+        resume."""
         faults = cured_by_redraw(verdict)
         rows = self.climbing(grid_layout.read(self.home), shots_of(faults))
         if rung.name == "reprose":
             self.cure_prose(rows, faults)
         for row in rows:
+            remember_climbed(self.home, grid_layout.name_of(getattr(self.ctx, "number", 0), row))
             self.redraw(row)
-        self.rebuild()
+        touched = sorted({int(i) for r in rows for i in r.get("shots") or []})
+        try:
+            self.rebuild(touched or None)
+        except TypeError:           # an older caller's rebuild takes no scope
+            self.rebuild()
 
     def keep_best(self, verdict: Verdict) -> Verdict:
         """The terminal: the panels stand; each fault says whether its grid climbed."""
@@ -236,7 +299,7 @@ def ladder() -> Ladder:
 
 
 def climb(ctx, rebuild: Callable[[], None], cap: int = CAP) -> Climb:
-    return Climb(ctx, Path(ctx.home), rebuild, cap)
+    return Climb(ctx, Path(ctx.home), rebuild, cap, redrawn=load_climbed(Path(ctx.home)))
 
 
 def rungs(ctx, rebuild: Callable[[], None], cap: int = CAP) -> judged_gate.Rungs:

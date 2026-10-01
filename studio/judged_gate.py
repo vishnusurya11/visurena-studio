@@ -73,6 +73,13 @@ def affordable(ctx, gate: str, rung: Rung, taken: int) -> bool:
     if ctx.budget.pool_left() >= rung.cost_seconds:     # the ladders' own share pays (finding 55)
         ctx.budget.draw(rung.cost_seconds)
         return True
+    if ctx.budget.ceiling_spent():
+        # THE EPISODE'S WHOLE CEILING IS GONE (five-hour plan fix 1): a
+        # deferral exists so a later run can pay, and with one episode-wide
+        # clock nothing ever pays again -- the terminal answers, flagged.
+        ctx.learn(Learning(step=step, gate="budget", measured=0.0, threshold=rung.cost_seconds,
+                           action="terminal", attempt=taken))
+        return False
     left = ctx.budget.remaining(step)
     ctx.learn(Learning(step=step, gate="budget", measured=left, threshold=rung.cost_seconds,
                        action="defer", attempt=taken))

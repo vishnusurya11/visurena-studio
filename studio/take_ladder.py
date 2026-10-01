@@ -29,7 +29,10 @@ from studio.judges import take_eye
 from studio.judges.verdict import Fault, Verdict
 from studio.ladder import Ladder, Rung
 
-COLD_S, TAKE_S, REPLAN_S = 300.0, 228.0, 720.0
+COLD_S, TAKE_S, REPLAN_S = 300.0, 265.0, 720.0
+"""TAKE_S re-priced 228 -> 265 (GPU economist, 2026-09-30): measured per-take
+cost crept from 204 s (WotW ep05) to 274-281 s (ep12-14) at the same frames;
+the old price let can_afford approve rounds that then overran their share."""
 SEED = Rung("seed", COLD_S + TAKE_S)
 MOVE_TYPE = Rung("move_type", COLD_S + TAKE_S)
 SHORTER_TAKE = Rung("shorter_take", COLD_S + TAKE_S)
@@ -226,10 +229,14 @@ def cost(rung: Rung, takes: int) -> float:
 def can_afford(ctx, rung: Rung, takes: int) -> bool:
     """The step's share, else the ladders' pool (judged_gate drew the rung's
     price from it); a round neither can pay DEFERS -- it was skipped in silence
-    on ep13, and shorter_take never reached T11's +1.08 s lag."""
+    on ep13, and shorter_take never reached T11's +1.08 s lag.  A SPENT
+    CEILING is terminal instead (five-hour plan fix 1): with the episode-wide
+    clock nothing ever pays again, so the best takes ship flagged."""
     price, step = cost(rung, takes), judged_gate.step_of(ctx)
     if ctx.budget.can_afford(step, price) or ctx.budget.pool_left() >= price:
         return True
+    if ctx.budget.ceiling_spent():
+        return False
     raise SystemExit(f"DEFERRED: EYE_TAKES' {rung.name} round of {takes} takes needs {price:.0f} s; "
                      f"the {step} share and the ladders' pool cannot pay; nothing signed -- run again to resume")
 
@@ -513,11 +520,19 @@ def measured(ctx, script: str, clock: str, suffix: str, *extra: str) -> None:
         ctx.log(f"{script}: faults found; the take judge reads them")
 
 
-def retake(ctx, indices: list[int], why: str, flag: str) -> None:
-    """One batched round: the render, then both machine gates on those takes."""
+def retake(ctx, indices: list[int], why: str, flag: str, trims: list[int] | None = None) -> None:
+    """One batched round: ALL renders first, then ONE measure window (owner,
+    2026-09-30: "first run all model executions once then do the dq check to
+    avoid cold starts").  The H3 stack stages ~40 GB and evicts the judge's
+    weights, so a measure between renders pays a cold load both ways; the
+    trimmed takes' re-measures ride the same window, never their own."""
     names = [str(i) for i in sorted(indices)]
     ctx.run_script(RENDER, "--from-refs", "--no-ends", flag, *retake_args(indices, why), gpu=True, clock="takes")
     measured(ctx, "scripts/episode/take_dq.py", "take_dq", ".dq.json", *names, "--attempts")
+    if trims:
+        # no --attempts: a trim renders nothing, so there is nothing to archive
+        measured(ctx, "scripts/episode/take_dq.py", "take_dq", ".dq.json",
+                 *[str(i) for i in sorted(trims)])
     measured(ctx, "scripts/episode/take_content_check.py", "take_content", ".content.json", *names)
 
 
@@ -549,13 +564,14 @@ def rungs(ctx, plan, flag: str, records: dict[int, dict] | None = None) -> judge
             doc = move_type(doc, index, faults)         # a seed-routed take keeps its plan
         if trims or routed.get("move_type"):
             episode_home.write_plan(path, doc)
-        if trims:                                       # free: re-place and re-measure, no render
-            ctx.run_script("scripts/episode/timeline.py", clock="timeline")
-            measured(ctx, "scripts/episode/take_dq.py", "take_dq", ".dq.json",
-                     *[str(i) for i in sorted(trims)])
+        if trims:                                       # free: re-placed now, re-MEASURED after the
+            ctx.run_script("scripts/episode/timeline.py", clock="timeline")   # renders (one window)
         if not renders or rounds_of(room) >= ROUNDS_CAP or not can_afford(ctx, rung, len(renders)):
+            if trims:                                   # no render round: the trims still re-measure
+                measured(ctx, "scripts/episode/take_dq.py", "take_dq", ".dq.json",
+                         *[str(i) for i in sorted(trims)])
             return
         why = why_of(rung.name, [f for fs in renders.values() for f in fs])
         count_round(room, why, signatures(verdict))
-        retake(ctx, sorted(renders), why, flag)
+        retake(ctx, sorted(renders), why, flag, trims=trims)
     return judged_gate.Rungs(LADDER, take, curable=lambda v: still_curable(room, v))

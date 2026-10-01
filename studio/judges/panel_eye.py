@@ -393,13 +393,15 @@ def judge(home: Path, plan: dict, *, book: Path | None = None, run=None, stage=N
     board, t = Path(home) / "storyboard", tools(run, stage, reader, detect, embed)
     setups = plan.get("setups") or {}
     faults, reads, readable = stored_faults(board), 0, 0
-    for shot in plan.get("shots") or []:
-        path = board / f"{where_of(shot['index'])}.png"
-        if not path.exists():
-            continue
-        setup = setups.get(shot.get("setup"), {}) or {}
-        found, ok = read_panel(shot, setup, path, t, refs_of(book, shot, setup))
-        faults, reads, readable = faults + found, reads + 1, readable + int(ok)
+    from studio import comfy
+    with comfy.model_kept():    # ~30 reads, ONE VL load (five-hour plan fix 5; ~9.7 s a reload)
+        for shot in plan.get("shots") or []:
+            path = board / f"{where_of(shot['index'])}.png"
+            if not path.exists():
+                continue
+            setup = setups.get(shot.get("setup"), {}) or {}
+            found, ok = read_panel(shot, setup, path, t, refs_of(book, shot, setup))
+            faults, reads, readable = faults + found, reads + 1, readable + int(ok)
     faults += repeat_faults(board, plan, rows_of(board, "panel_content.json"))
     faults += place_faults(home, plan, book)
     return Verdict(judge=NAME, version=VERSION, passed=not any(f.severity != "advisory" for f in faults),

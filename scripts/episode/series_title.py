@@ -101,6 +101,17 @@ def animate(card: Path, lines: list[str], out: Path, aspect: str, number: int) -
     return out
 
 
+def aspect_of(book, number: int) -> str:
+    """The episode plan's aspect when a plan exists, else the SERIES aspect --
+    so a card can be pre-baked before its episode is written (five-hour plan
+    fix 3b, 2026-09-30: the 17-25 min card sat on every episode's critical
+    path).  A plan may not carry a foreign aspect anyway (G-ASPECT)."""
+    from studio import plan_gates
+    if (Path(episode_home.home(book, number)) / "plan.json").exists():
+        return episode_home.load_plan(book, number).aspect
+    return plan_gates.series_aspect(book)
+
+
 def main(book_id: str, number: int) -> None:
     book = episode_home.book_dir(book_id)
     folder = book / "title"
@@ -112,7 +123,7 @@ def main(book_id: str, number: int) -> None:
         lettered_card(base_art(folder), lines, card)
     video = folder / f"ep{number:02d}.mp4"
     if not video.exists():
-        animate(card, lines, video, episode_home.load_plan(book, number).aspect, number)
+        animate(card, lines, video, aspect_of(book, number), number)
     print(f"title card -> {video}", flush=True)
 
 

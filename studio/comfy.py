@@ -177,8 +177,19 @@ def _post(path: str, body: dict | None = None) -> None:
 
 def free_models() -> None:
     """Unload every staged model.  A VLM asked to load beside H3's DiT and
-    text encoder lands half on the CPU and answers in ten minutes, not one."""
-    _post("/free", {"unload_models": True, "free_memory": True})
+    text encoder lands half on the CPU and answers in ten minutes, not one.
+    BEST-EFFORT AND NEVER RETRIED: with no engine up there is nothing staged
+    to free, and a judge batch of fake readers (every eye test) must not sit
+    in _open's restart loop (five-hour plan fix 5 wrapped the eyes in
+    model_kept)."""
+    try:
+        data = json.dumps({"unload_models": True, "free_memory": True}).encode("utf-8")
+        request = urllib.request.Request(f"{HOST}/free", data=data,
+                                         headers={"Content-Type": "application/json"})
+        with urllib.request.urlopen(request, timeout=10.0):
+            return None
+    except OSError:
+        pass
 
 
 def interrupt() -> None:

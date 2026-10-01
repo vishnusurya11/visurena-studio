@@ -128,6 +128,14 @@ def records_of(room: Path) -> dict[int, dict]:
     return {r["index"]: r for r in episode_home.read_json(path)} if path.exists() else {}
 
 
+def timed_judge(ctx, read):
+    """One eye pass, stamped in timing.jsonl (five-hour plan fix 6: ~2.6 h of
+    ep14's eye reads were invisible to the clock)."""
+    from studio import episode_clock
+    with episode_clock.timed(ctx.book_dir, ctx.number, "take_eye"):
+        return read()
+
+
 def judge_takes(ctx, flag: str) -> Path:
     """The EYE_TAKES row: the take eye over the kept takes, the take ladder
     under the ceiling, a still or keep_best at the end; signed in the judge's name."""
@@ -135,7 +143,7 @@ def judge_takes(ctx, flag: str) -> Path:
     plan = episode_home.load_plan(ctx.book_dir, ctx.number)
     return judged_gate.clear(
         ctx, GATE,
-        judge=lambda: take_eye.judge(takes_of(room), plan=plan, clones=CLONES),
+        judge=lambda: timed_judge(ctx, lambda: take_eye.judge(takes_of(room), plan=plan, clones=CLONES)),
         sign=lambda v: eye_verdict.sign_verdict(room, takes_of(room), v),
         ladder=take_ladder.rungs(ctx, plan, flag, records_of(room)),
         terminal=take_ladder.terminal_for(ctx, plan))

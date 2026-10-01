@@ -73,7 +73,28 @@ def main(codex: str, number: int) -> int:
         return 2
     home = episode_home.home(episode_home.book_dir(codex), number)
     home.mkdir(parents=True, exist_ok=True)
+    # THE BOOK'S TITLE CARDS EXIST BEFORE ANY EPISODE RUNS (owner design,
+    # 2026-09-30): the card depends only on the book, so it is baked book-wide
+    # in one i2v session, outside the episode's clock, never mid-run.
+    from scripts.episode import titles_batch
+    book = episode_home.book_dir(codex)
+    if wanted := titles_batch.missing(book):
+        notify(f"{label}: baking {len(wanted)} missing title card(s) for the book first")
+        baked = subprocess.run(["uv", "run", "--no-sync", "python", "scripts/episode/titles_batch.py",
+                                codex], cwd=ROOT, timeout=7200)
+        if still := titles_batch.missing(book):
+            if number in still:
+                notify(f"{label}: REFUSED: ep{number:02d}'s title card could not be baked "
+                       f"(exit {baked.returncode}); fix the card, not the episode")
+                return 2
+            notify(f"{label}: WARNING cards still missing for {still}; this episode's own card is on disk")
     sha, runs = git("rev-parse", "HEAD").strip(), iter(range(1, 1000))
+    log = home / "drive.jsonl"
+    began = episode_drive.first_sha(log.read_text(encoding="utf-8")) if log.exists() else None
+    if began and began != sha:
+        # ONE EPISODE, ONE COMMIT (five-hour plan fix 7): ep14 ran across 23.
+        notify(f"{label}: WARNING code moved mid-episode: started on {began[:8]}, "
+               f"resuming on {sha[:8]}; fix bugs after the ship, not during it")
     ledger(home, {"event": "start", "sha": sha})
 
     def run() -> str:
@@ -81,7 +102,10 @@ def main(codex: str, number: int) -> int:
         text = run_once(codex, number, home / f"drive_run{n:02d}.log", label)
         ledger(home, {"event": "run", "n": n, "sha": sha, "outcome": episode_drive.outcome(text)})
         return text
-    code = episode_drive.drive(run, lambda text: notify(f"{label}: {text}"))
+    from studio import run_budget
+    code = episode_drive.drive(run, lambda text: notify(f"{label}: {text}"),
+                               over_budget=lambda: run_budget.spent_before(home)
+                               >= run_budget.EPISODE_CEILING_SECONDS)
     ledger(home, {"event": "end", "code": code, "sha": sha})
     return code
 

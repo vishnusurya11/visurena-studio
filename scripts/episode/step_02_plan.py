@@ -145,19 +145,23 @@ def report(ctx) -> None:
 
 
 def run(ctx) -> None:
-    plan = plan_of(ctx)
-    desk = plan_ladder.Desk(ctx, plan, writer=episode_writer)
-    if wants_rewrite(ctx) and ran_downstream(ctx):
-        ctx.log("--rewrite refused: placed.json exists, this plan already ran downstream",
-                step_id=STEP_ID, level="WARNING")
-    elif wants_rewrite(ctx) or not plan.exists():
-        desk.resume() or desk.write(None)
-    if plan_verdict.current(plan) or grandfathered(ctx):
-        return
-    if rendered(ctx):
-        report(ctx)
-        return
-    signed = clear(ctx, desk)
+    # CLOCKED (five-hour plan fix 6): ep14 spent 3.3 h in this step and
+    # timing.jsonl never saw a second of it.
+    from studio import episode_clock
+    with episode_clock.timed(ctx.book_dir, ctx.number, "plan"):
+        plan = plan_of(ctx)
+        desk = plan_ladder.Desk(ctx, plan, writer=episode_writer)
+        if wants_rewrite(ctx) and ran_downstream(ctx):
+            ctx.log("--rewrite refused: placed.json exists, this plan already ran downstream",
+                    step_id=STEP_ID, level="WARNING")
+        elif wants_rewrite(ctx) or not plan.exists():
+            desk.resume() or desk.write(None)
+        if plan_verdict.current(plan) or grandfathered(ctx):
+            return
+        if rendered(ctx):
+            report(ctx)
+            return
+        signed = clear(ctx, desk)
     if signed.name == plan_ladder.DEFERRED:
         raise Deferred(GATE, str(signed.relative_to(ctx.book_dir)).replace("\\", "/"), deferred_note(signed))
 

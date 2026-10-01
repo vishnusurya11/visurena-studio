@@ -4,6 +4,50 @@ Newest first. Every architectural change gets an entry.
 
 ---
 
+## 2026-09-30 — The five-hour episode (owner decision: "see how we can get next episode run to 5hrs or less like before")
+
+**Decision.** Five experts read the past ~28 runs (verdict
+`docs/audit/2026-09-30_five_hour_plan.md`): the work grew x1.07, the hours x11 — the
+loops did it, not the quality layers (~70 min in a single pass). The owner ordered the
+P0 fixes built: ONE clock for the whole episode (the 5 h ceiling spans resumes; a spent
+ceiling takes terminals, and the driver never auto-resumes it — ep14 got 31 fresh
+ceilings); an idempotent picture stage (a reprose re-signs the plan, the climb persists
+in storyboard/ladder.json, a redraw re-reads only its panels); QC once per set of
+master bytes and the season's title cards pre-baked; ALL renders first then ONE measure
+window (the owner's own emphasis); the VL judge resident per pass; TAKE_S re-priced
+228 -> 265 and the four unclocked stages stamped; one episode on one commit; and the
+105.7 GB working set moved to the C: NVMe (H3 staged ~115 s of weights per take off
+the HDD). Tracker: `architecture/plan/2026-09-30_five_hour_build.md`.
+
+**Why.** Every <= 5 h run ever shipped was one pass: one render, at most one batched
+retake, one QC, nothing redrawn. Projection with P0: ~4.9 h wall for a 30-shot episode.
+
+**Amended same day (owner): a book's title cards are ALL baked before its first
+episode.** The card is the chain's one purely book-deterministic artifact (base art +
+chapter title + series aspect), so it is book-level pre-production: drive.py bakes any
+missing card book-wide in one i2v session before launching, outside the episode's
+clock, and refuses the launch if the episode's own card cannot pass its lettering gate.
+Quote glyphs leave the card's asked line (ep17: THE "THUNDER CHILD" failed 6 draws on
+its quotes). The just-in-time rule stands for every CREATIVE render; the card is the
+exception because nothing an episode produces can change it.
+
+## 2026-09-30 — The delivered master is a Short (owner decision: "these are hard requirements")
+
+**Decision.** ep14 shipped as a regular video at 182.58 s — YouTube files a square
+upload as a Short only up to 3:00, and every runtime wall capped the PICTURE at 180 s
+while assemble appends the ~4.7 s card + chip after it. The owner: "it has to be
+short .. the format has to be 1*1". Now: `SHORT_WALL_S` (180) and `TAIL_ALLOWANCE_S`
+(6) live in the contract and `MAX_SECONDS` (174, the picture budget) is DERIVED —
+contract, writer brief, G-RATE and timeline all inherit it; assemble and qc refuse a
+delivered master over the wall; and both publish doors judge the FILE itself
+(`youtube_publish.file_refusals`: ≤ 180 s and width == height), unwaivable past
+`--override`, which had waived qc.passed on the ep14 upload. Proposal:
+`architecture/decisions/2026-09-30_the_master_is_a_short.md`.
+
+**Why.** ep01-13 delivered 139.6-175.8 s; ep14 was the first picture cut past 175 s,
+so the ungated tail never showed. qc measured 182.58 s and judged it by nothing; no
+stage ever opened the final mp4 for length or squareness.
+
 ## 2026-09-30 — Every cure rides one batched round (owner decision: "why 32 rounds .. debate and come up with solution")
 
 **Decision.** The owner, on ep14's timing table (takes 18.8 h over 32 rounds), ordered

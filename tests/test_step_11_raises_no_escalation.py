@@ -92,4 +92,6 @@ def test_a_signed_rubric_is_not_judged_again(ctx, monkeypatch):
     step_11_qc.run(ctx)
     monkeypatch.setattr(step_11_qc, "read_master", lambda *a, **k: (_ for _ in ()).throw(AssertionError("judged twice")))
     step_11_qc.run(ctx)
-    assert [c[0] for c in ctx.launched].count("scripts/episode/qc.py") == 2
+    # qc measures a set of master bytes ONCE (five-hour plan fix 3, 2026-09-30:
+    # ep14 ran the ~9 min pass 8x); the second run reuses the matching report.
+    assert [c[0] for c in ctx.launched].count("scripts/episode/qc.py") == 1
