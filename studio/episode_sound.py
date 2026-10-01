@@ -53,7 +53,8 @@ def lift_cures(rows: list[dict], existing: dict[str, float]) -> dict[str, float]
     any earlier lift (the recut re-measures) and clamped at MAX_LIFT_DB."""
     out = dict(existing)
     for row in rows or []:
-        if not row.get("ok"):
+        # a measure a voice line masks moves 0.0 dB per lifted dB (ep15)
+        if not row.get("ok") and not row.get("under_line"):
             key = lift_key(row["shot"], row["sound"])
             out[key] = min(MAX_LIFT_DB,
                            round(out.get(key, 0.0) + (EVENT_DB - float(row["db"])) + LIFT_MARGIN_DB, 1))
@@ -166,9 +167,36 @@ def baseline_start(spans: list[tuple[float, float]], i: int) -> float:
     return start
 
 
+STEM_SLACK_DB = 1.5
+"""How far under its commanded level a rendered stem may sit and still count."""
+
+
+def voiced_over(lines: list[dict], at: float, seconds: float) -> bool:
+    """Whether a placed voice line sounds anywhere over [at, at+seconds]."""
+    return any(l["at"] < at + seconds and at < l["at"] + l["seconds"] for l in lines)
+
+
+def stem_heard(sfx: Path, cue) -> tuple[float, bool]:
+    """The cue's leveled stem against the target its sidecar records: the one
+    presence a voice line cannot mask (the stem IS in the mix; the edit gate
+    proves the mix is the master)."""
+    wav = Path(sfx) / sfx_cues.file_name(cue)
+    side = wav.with_suffix(".json")
+    if not (wav.exists() and side.exists()):
+        return float("-inf"), False
+    target = float(json.loads(side.read_text(encoding="utf-8"))["target"])
+    got = float(sfx_cues.peak_momentary(wav))
+    return round(got, 1), got >= target - STEM_SLACK_DB
+
+
 def presence(master: Path, episode, placed: dict) -> list[dict]:
     """Per planned cue: where it sits in the master and how far it rises there
-    over the quiet before it (before the earlier cue it overlaps, if any)."""
+    over the quiet before it (before the earlier cue it overlaps, if any).
+
+    A cue a voice line covers CANNOT be measured as a rise in the full mix
+    (ep15, 2026-10-01: ducked 6 dB under the voice by design, the window's
+    maximum IS the voice -- a +5 dB lift moved the measure 0.0 dB).  Such a
+    cue is judged by its stem instead, and the row says so."""
     rows = {int(s["index"]): s for s in placed["shots"]}
     cues = list(cues_of(episode))
     spans = [(sfx_cues.start_of(c, rows), c.seconds) for c in cues]
@@ -176,7 +204,11 @@ def presence(master: Path, episode, placed: dict) -> list[dict]:
     for i, cue in enumerate(cues):
         at, quiet = spans[i][0], baseline_start(spans, i)
         got = round(float(sfx_cues.event_db(master, at, cue.seconds, quiet_until=quiet)), 1)
-        out.append({"shot": cue.shot, "sound": cue.sound, "at": at, "db": got, "ok": got >= EVENT_DB})
+        row = {"shot": cue.shot, "sound": cue.sound, "at": at, "db": got, "ok": got >= EVENT_DB}
+        if not row["ok"] and voiced_over(placed.get("lines", []), at, cue.seconds):
+            stem_db, ok = stem_heard(Path(master).parent.parent / "audio" / "sfx", cue)
+            row.update({"under_line": True, "stem_db": stem_db, "ok": ok})
+        out.append(row)
     return out
 
 
