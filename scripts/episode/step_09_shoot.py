@@ -149,12 +149,24 @@ def judge_takes(ctx, flag: str) -> Path:
         terminal=take_ladder.terminal_for(ctx, plan))
 
 
+def round_zero(room: Path) -> bool:
+    """No kept take yet: the episode's FIRST render.  The ceiling binds
+    retakes; round 0 runs regardless (ep15, 2026-10-01: the plan fight spent
+    the whole ceiling before one take existed, and the refusal left the
+    terminals nothing to keep -- a unit that can never finish)."""
+    return not takes_of(room)
+
+
 def run(ctx) -> None:
     if why := panel_refusals(ctx.home):
         raise SystemExit("REFUSED: the takes wait on the panels: " + "; ".join(why))
     flag = approved(gate_policy.of(ctx.stage, "RENDER"))
     ok, cost, left = affordable(ctx)
-    if not ok:
+    if not ok and round_zero(ctx.home / TAKES):
+        ctx.log(f"the takes want {cost:.0f} s and the ceiling leaves {left:.0f} s -- ROUND 0 "
+                f"renders anyway: the terminals need a best take to keep", step_id=STEP_ID,
+                level="WARNING")
+    elif not ok:
         raise SystemExit(f"REFUSED: the takes want {cost:.0f} s and the episode ceiling leaves "
                          f"{left:.0f} s; a run over the ceiling takes terminal rungs, not renders")
     extra = getattr(ctx, "extra", None) or []
