@@ -777,7 +777,12 @@ def tail(master: Path, title: Path | None, out: Path, work: Path, number: int = 
     # measured on the same listing: 4055 of 4055 frames, 24.000 fps, first
     # frame at 0.000.  cfr re-judging here padded one frame and shifted every
     # cut against the takes (QC: segments off 21/22, tail 4056/4055).
-    subprocess.run(["ffmpeg", "-y", "-v", "error", "-f", "concat", "-safe", "0", "-i", str(listing),
+    # -itsoffset -1/24 (ep15, 2026-10-01): the first part's one-frame start
+    # offset rides any passthrough (QC: a 0.041 s hole at index 0), and every
+    # setpts variant silently ate a still segment's frames.  A constant demux
+    # shift preserves count and spacing: measured 4055/4055, t0=0.000, 0 holes.
+    subprocess.run(["ffmpeg", "-y", "-v", "error", "-itsoffset", "-0.0416667",
+                    "-f", "concat", "-safe", "0", "-i", str(listing),
                     "-vf", f"scale={up_w}:{up_h}:flags=lanczos,format=yuv420p",
                     "-af", "asetpts=PTS-STARTPTS",
                     "-fps_mode", "vfr", "-muxdelay", "0", "-muxpreload", "0",
