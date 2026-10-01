@@ -610,9 +610,14 @@ def still_segment(panel: Path, seconds: float, out: Path, width: int, height: in
             f"zoompan=z='1+({STILL_PUSH}-1)*on/{max(frames - 1, 1)}':d={frames}"
             f":x='iw/2-(iw/zoom/2)':y='ih/2-(ih/zoom/2)':s={width}x{height}:fps={fps},format=yuv420p")
     out.parent.mkdir(parents=True, exist_ok=True)
+    # EXPLICIT OUTPUT CADENCE (ep15, 2026-10-01): a single-image zoompan has no
+    # input rate, and without `-fps_mode cfr -r` the muxer can write the whole
+    # segment on broken timestamps -- ep15's shot-3 still carried 205 bad-pts
+    # frames that the master join then dropped SILENTLY, 8.5 s of picture gone.
     (ffmpeg or subprocess.run)(
         ["ffmpeg", "-y", "-v", "error", "-i", str(panel), "-vf", push, "-frames:v", str(frames),
          "-t", trailer_assemble.frames_arg(seconds, fps), "-an",
+         "-fps_mode", "cfr", "-r", str(fps),
          "-c:v", "libx264", "-preset", "fast", "-crf", "17", str(out)], check=True)
     return out
 
