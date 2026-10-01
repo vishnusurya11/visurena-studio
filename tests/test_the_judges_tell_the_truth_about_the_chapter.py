@@ -53,3 +53,16 @@ def test_dusk_is_daylight_to_the_look_floor():
     assert take_look.is_daylight("dawn light over the street", True)
     assert not take_look.is_daylight("a lamp is the only light in the parlour", False)
     assert not take_look.is_daylight("moonlight, the lantern the only light", True)
+
+
+def test_drifted_reads_one_row_per_face():
+    """ep15 (2026-10-01): the beard fix made the checkers pass a LIST of rows
+    and drifted() crashed on .lower(); a hair drifts only when NO row allows it."""
+    from studio.panel_content import Seen
+    from studio.take_content import drifted
+    seen = Seen(people=2, lookalikes=0, hour="day", landform="", text=False,
+                subjects=["a grey hair man", "a woman"])
+    assert drifted(seen, ["thick chestnut-auburn hair", "grey hair, lined face"]) == []
+    assert drifted(seen, ["thick chestnut-auburn hair"]) != []
+    assert drifted(seen, "grey hair") == []
+    assert drifted(seen, []) == []

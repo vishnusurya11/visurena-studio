@@ -59,17 +59,20 @@ def usual_posture(reads: list[Seen]) -> str:
     return max(said, key=lambda p: (said.count(p), -said.index(p))) if said else ""
 
 
-def drifted(seen: Seen, physical: str) -> list[str]:
+def drifted(seen: Seen, physical) -> list[str]:
     """Hair the cast row rules out, seen in the take.
 
     MEASURED on ep07 T26: the take showed grey hair on a woman whose row says
-    thick chestnut-auburn. Nothing compared them.
-    """
-    if not physical:
+    thick chestnut-auburn. Nothing compared them.  `physical` is one row or
+    ONE ROW PER FACE (the 2026-09-30 beard fix made the checkers pass lists;
+    ep15 was the first episode through this path and it crashed on .lower()).
+    A hair drifts only when NO staged row allows it."""
+    rows = [physical] if isinstance(physical, str) else list(physical or [])
+    rows = [r.lower() for r in rows if r]
+    if not rows:
         return []
     said = " ".join(seen.subjects).lower()
-    row = physical.lower()
-    return [h for h in HAIR if h in said and h.split()[0] not in row]
+    return [h for h in HAIR if h in said and all(h.split()[0] not in r for r in rows)]
 
 
 def take_faults(reads: list[Seen], planned: int, crowd: bool, flat: bool,

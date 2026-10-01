@@ -176,7 +176,11 @@ def test_a_battery_that_keeps_refusing_defers_the_unit_after_the_whole_ladder(ct
     with pytest.raises(Deferred) as aside:
         step.run(ctx)
     assert aside.value.gate == "PLAN" and aside.value.aside.endswith(step.plan_ladder.DEFERRED)
-    assert len(writer.calls) == 5 and len(gate.commands) == 5
+    # 5 battery reads + ONE plan_repair attempt before the deferral surfaces
+    # (2026-10-01: the cure table runs on the aside; only when it cannot clean
+    # the battery does the unit defer)
+    assert len(writer.calls) == 5 and len(gate.commands) == 6
+    assert gate.commands[-1][1].endswith("plan_repair.py")
     assert not _plan(ctx).exists(), "a refused draft is not left where the next run would take it as written"
     assert (ctx.home / step.plan_ladder.DEFERRED).exists()
     assert not plan_verdict.verdict_path(_plan(ctx)).exists()

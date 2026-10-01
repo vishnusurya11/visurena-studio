@@ -168,6 +168,18 @@ def run(ctx) -> None:
             return
         signed = clear(ctx, desk)
     if signed.name == plan_ladder.DEFERRED:
+        # THE CURE TABLE BEFORE THE DEFERRAL SURFACES (2026-10-01): 97% of
+        # ep14-15's plan hours were paid rewrites of MECHANICAL faults whose
+        # cures are template arithmetic.  plan_repair runs them in seconds on
+        # the aside's best draft; a clean battery re-enters the judge in the
+        # SAME run, and only CREATIVE faults ever cost another writer round.
+        rc, out = ctx.capture_script("scripts/episode/plan_repair.py", "--from-aside")
+        ctx.log("plan_repair:\n" + out[-800:], step_id=STEP_ID,
+                level="WARNING" if rc else "INFO")
+        if rc == 0:
+            fresh = plan_ladder.Desk(ctx, plan_of(ctx), writer=episode_writer)
+            signed = clear(ctx, fresh)
+    if signed.name == plan_ladder.DEFERRED:
         raise Deferred(GATE, str(signed.relative_to(ctx.book_dir)).replace("\\", "/"), deferred_note(signed))
 
 
