@@ -35,9 +35,31 @@ SECTIONS = {
     "cast": "## THE BOUND CAST ROWS (name people only through these)",
     "places": "## THE PLACES THIS CHAPTER VISITS",
     "camera_catalog": "## THE CAMERA CATALOG",
+    "picture_rules": "## THE PICTURE RULES (hard gates; a draft that skips one is refused)",
     "dq_rules": "## THE BOOK'S DQ RULES",
 }
 """Section headings in render order; a brief key with no value renders no section."""
+
+
+PICTURE_RULES = [
+    "Every setup's `described` names a LIGHT SOURCE WITH A DIRECTION (G-LIGHT): "
+    "a practical (lamp, fire, window, doorway) or sky light plus where it falls from "
+    "-- e.g. 'Grey daylight falls in from the window at the left.' A brightness alone "
+    "('hard morning sunlight') is refused.",
+    "Every close and medium_close `at_rest` names the HEAD FRACTION (G-SIZE): "
+    "e.g. 'his head a third of the frame's height' (close: half; medium: a quarter).",
+    "The camera head AIMS only at something the same shot's `at_rest` already names "
+    "(G-AIM): a move toward what is not drawn invents it.",
+    "No camera move id repeats on two shots running (G-MOVES); vary the catalog.",
+    "At least one shot carries no line (a silent shot, G-STORY), and about one insert "
+    "shot per five shots (G-VARIETY).",
+    "Each setup's `described` runs ~90 words or more and each shot's `frame` names "
+    "its edges (G-FIRSTFRAME: the drawer needs the room's geometry, not a mood).",
+]
+"""The standing picture gates, told to the WRITER up front (2026-10-01, ep15:
+three generations of drafts omitted light directions because no section said
+so; the gates each learned their rule from an owner audit, the writer never
+did)."""
 
 
 def _read(path: Path):
@@ -193,7 +215,8 @@ def build(book_dir: Path, number: int, targets: list[str] | None = None) -> dict
              "chapter_text": chapter_text(book_dir, number),
              "screenplay": screenplay(book_dir, number, targets),
              "cast": cast_rows(book_dir, number), "places": places(book_dir, number),
-             "camera_catalog": camera_catalog(), "dq_rules": dq_rules(book_dir)}
+             "camera_catalog": camera_catalog(), "picture_rules": PICTURE_RULES,
+             "dq_rules": dq_rules(book_dir)}
     return {k: v for k, v in found.items() if v not in (None, [], {}) or k in ("number", "band", "scenes")}
 
 
