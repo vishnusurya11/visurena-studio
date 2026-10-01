@@ -280,6 +280,30 @@ def holds(doc: dict, rate: float = 3.0) -> dict:
                 s["coda_s"] = round(float(s.get("coda_s") or 0) - cut, 2)
                 over = round(over - cut, 2)
 
+    # 3b. no speech hole after a line's last word: ep16's 6.14 s hole at shot
+    # 23 was the VOICED shot's own coda plus its silent successor, found only
+    # at the MEASURED timeline.  A hole starts where speech ENDS, so each cap
+    # covers the preceding voiced shot's coda plus every unvoiced shot after
+    # it, at HOLE_WALL_S - 0.5, shaved from the largest holds first.
+    secs = _shot_secs(doc, rate)
+    tail: list[tuple[dict, str]] = []   # (shot, key) pairs that make the hole
+    hole = 0.0
+    for s in shots + [None]:
+        if s is not None and s["index"] not in voiced:
+            tail += [(s, "coda_s"), (s, "beat_s")]
+            hole += secs[s["index"]]
+            continue
+        over = hole - (HOLE_WALL_S - 0.5)
+        for r, key in sorted(tail, key=lambda rk: -float(rk[0].get(rk[1]) or 0)):
+            if over <= 0:
+                break
+            cut = round(min(over, float(r.get(key) or 0)), 2)
+            if cut > 0:
+                r[key] = round(float(r.get(key) or 0) - cut, 2)
+                over = round(over - cut, 2)
+        if s is not None:   # this voiced shot's coda opens the next hole
+            tail, hole = [(s, "coda_s")], float(s.get("coda_s") or 0)
+
     # 4. no single shot past the take budget: the pair growth above may have
     # pushed one over (ep16 shot 16, 8.05 s); shave its own coda then beat.
     # A clamped shot keeps its pair split: the partner's handles alone hold

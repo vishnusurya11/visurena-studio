@@ -73,3 +73,25 @@ def test_apply_routes_the_checkers_rate_into_holds(monkeypatch):
     monkeypatch.setattr(pc, "holds", lambda doc, rate=3.0: seen.setdefault("rate", rate) or doc)
     pr.apply({"shots": [], "lines": []}, ["ONE PER TAKE : [(1, 2)]"], Path("."), rate=2.54)
     assert seen["rate"] == 2.54
+
+
+def test_holds_patches_the_hole_after_a_lines_last_word():
+    """ep16: the 6.14 s hole at shot 23 was the VOICED shot's own 2.5 s coda
+    plus its silent successor -- a hole starts where speech ENDS, so the cap
+    covers the voiced shot's coda plus every unvoiced shot that follows it,
+    at HOLE_WALL_S - 0.5, shaved from the largest holds first."""
+    a = {"index": 0, "setup": "a", "beat_s": 1.5, "coda_s": 2.5}   # voiced, long coda
+    b = {"index": 1, "setup": "a", "beat_s": 1.0, "coda_s": 2.1}   # silent
+    c = {"index": 2, "setup": "a", "beat_s": 0.1, "coda_s": 0.1}   # voiced again
+    doc = doc_with([a, b, c], [{"shot": 0, "text": "two words"},
+                               {"shot": 2, "text": "one line here"}])
+    hole = 2.5 + pc._shot_secs(doc, RATE)[1]
+    assert hole > pc.HOLE_WALL_S                                   # the ep16 state
+    cured = pc.holds(doc, rate=RATE)
+    secs = pc._shot_secs(cured, RATE)
+    coda0 = float({s["index"]: s for s in cured["shots"]}[0]["coda_s"])
+    assert coda0 + secs[1] <= pc.HOLE_WALL_S - 0.4                 # patched with margin
+    silent_only = doc_with([dict(a), dict(b), dict(c)], [{"shot": 2, "text": "one line here"}])
+    cured2 = pc.holds(silent_only, rate=RATE)
+    secs2 = pc._shot_secs(cured2, RATE)
+    assert secs2[0] + secs2[1] <= pc.HOLE_WALL_S - 0.4             # a fully silent run too
