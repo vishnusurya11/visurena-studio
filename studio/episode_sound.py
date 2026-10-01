@@ -10,6 +10,7 @@ one whether the master lets you hear it.
 """
 from __future__ import annotations
 
+import json
 import re
 from pathlib import Path
 
@@ -28,9 +29,56 @@ screaming is not here: a voice is carried by its line and its delivery, and ep13
 two shouted lines were refused for want of a cue they did not need."""
 
 
-def cues_of(episode) -> list[sfx_cues.Cue]:
-    """Every sound the plan names, as a cue on its shot."""
-    return [sfx_cues.Cue(shot=s.index, sound=x.sound, at=x.at, seconds=x.seconds, gain_db=x.gain_db)
+LIFT_MARGIN_DB = 1.0
+"""Past the measured deficit, so a cue lands clear of the wall, not on it."""
+MAX_LIFT_DB = 12.0
+"""The Cue schema's own gain ceiling; a lift never asks past it."""
+
+
+def lift_key(shot: int, sound: str) -> str:
+    """How a qc sound row and a plan cue name the same event."""
+    return f"{shot}|{sound}"
+
+
+def lifts_of(home: Path) -> dict[str, float]:
+    """audio/cue_lifts.json: dB added to a cue because a MEASURED master could
+    not hear it (ep15: three refused cues with no cure but editing the signed
+    plan).  Absent file = no lifts."""
+    path = Path(home) / "audio" / "cue_lifts.json"
+    return json.loads(path.read_text(encoding="utf-8")) if path.exists() else {}
+
+
+def lift_cures(rows: list[dict], existing: dict[str, float]) -> dict[str, float]:
+    """Each unheard cue's lift: its measured deficit plus the margin, stacked on
+    any earlier lift (the recut re-measures) and clamped at MAX_LIFT_DB."""
+    out = dict(existing)
+    for row in rows or []:
+        if not row.get("ok"):
+            key = lift_key(row["shot"], row["sound"])
+            out[key] = min(MAX_LIFT_DB,
+                           round(out.get(key, 0.0) + (EVENT_DB - float(row["db"])) + LIFT_MARGIN_DB, 1))
+    return out
+
+
+def cure_from_qc(home: Path, engine: str) -> dict[str, float]:
+    """Before a recut: the last measured master's unheard cues become lifts."""
+    qc = Path(home) / f"qc_{engine}.json"
+    rows = json.loads(qc.read_text(encoding="utf-8")).get("sound", []) if qc.exists() else []
+    lifts = lift_cures(rows, lifts_of(home))
+    if lifts:
+        out = Path(home) / "audio" / "cue_lifts.json"
+        out.parent.mkdir(parents=True, exist_ok=True)
+        out.write_text(json.dumps(lifts, indent=1), encoding="utf-8")
+    return lifts
+
+
+def cues_of(episode, lifts: dict[str, float] | None = None) -> list[sfx_cues.Cue]:
+    """Every sound the plan names, as a cue on its shot, lifted where a measured
+    master could not hear it."""
+    lifted = lifts or {}
+    return [sfx_cues.Cue(shot=s.index, sound=x.sound, at=x.at, seconds=x.seconds,
+                         gain_db=min(MAX_LIFT_DB,
+                                     x.gain_db + lifted.get(lift_key(s.index, x.sound), 0.0)))
             for s in episode.shots if s.index not in (getattr(episode, "omit", None) or [])
             for x in (getattr(s, "sounds", None) or [])]
 
@@ -47,7 +95,8 @@ def setup_rows(episode, placed: dict) -> dict[str, list[dict]]:
 def layer(home: Path, episode, placed: dict, run=None) -> list[tuple[float, Path]]:
     """The effects on their shots, then every setup's ambience under its shots."""
     folder, seed = Path(home) / "audio" / "sfx", SEED + 1000 * episode.number
-    out = sfx_cues.placed(sfx_cues.render_all(cues_of(episode), folder, seed, run, where=episode.where),
+    out = sfx_cues.placed(sfx_cues.render_all(cues_of(episode, lifts_of(home)), folder, seed, run,
+                                              where=episode.where),
                           placed["shots"])
     for n, (name, rows) in enumerate(setup_rows(episode, placed).items()):
         sound = (getattr(episode.setups.get(name), "ambience", "") or "").strip()

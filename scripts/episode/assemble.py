@@ -883,6 +883,9 @@ def main(book_id: str, number: int, engine: str = "i2v",
     # THE SOUND LAYER AND THE DELIVERY (root cause 2026-09-26, D10/D11): this was
     # `[]` for twelve episodes -- voice and a violin, the guns silent -- and every
     # line sat at one level whether it was a whisper or a scream.
+    # A cue the last MEASURED master could not hear is lifted before this
+    # recut (ep15: three quiet cues, no cure but editing the signed plan).
+    episode_sound.cure_from_qc(home, engine)
     sound = episode_sound.layer(home, episode, placed)
     said = {r["index"]: r for r in episode_home.read_json(episode_home.lines_dir(book, number) / "lines.json")}
     offsets = [episode_emotion.offset_of(said.get(line["index"], {}).get("delivery", "calm"))
