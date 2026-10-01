@@ -119,6 +119,36 @@ def eye_record(sha8: str, reviewed_by: str, *, waived: dict, flags: dict) -> dic
             "waived": dict(waived), "flags": dict(flags)}
 
 
+def file_facts(master) -> tuple[float, int, int]:
+    """(seconds, width, height) read off the file itself, 0s when unreadable."""
+    import cv2
+    cap = cv2.VideoCapture(str(master))
+    n, fps = cap.get(cv2.CAP_PROP_FRAME_COUNT), cap.get(cv2.CAP_PROP_FPS)
+    w, h = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH)), int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
+    cap.release()
+    return (n / fps if fps else 0.0), w, h
+
+
+def file_refusals(seconds: float, width: int, height: int) -> list[str]:
+    """The FACTS of the file being sent -- a Short, and square -- measured off
+    the master itself at both doors (upload and the public flip).  No
+    --override, waiver or stale qc report reaches them: --override waives
+    qc.passed, and ep14 (2026-09-30) went up at 182.58 s through exactly that
+    door -- YouTube filed it as a video.  Both are the owner's hard
+    requirements of the same day: "it has to be short .. the format has to
+    be 1*1"."""
+    from studio import episode_spec
+    if not seconds or not width or not height:
+        return ["the master's length or size could not be read; nothing unmeasured goes up"]
+    out = []
+    if why := episode_spec.short_refusal(seconds):
+        out.append(why)
+    if width != height:
+        out.append(f"the master is {width}x{height}, not the square (1:1) the series ships "
+                   "(hard requirement, owner 2026-09-30)")
+    return out
+
+
 def public_refusals(qc: dict, dq_failed: list[str], row: dict) -> list[str]:
     """Every machine reason not to flip an uploaded episode PUBLIC, as the takes
     and QC stand now, about the file the ledger row says was uploaded. The

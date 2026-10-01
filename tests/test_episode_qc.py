@@ -20,7 +20,7 @@ def test_the_verdict_needs_every_gate():
     returned `measured: False` on every episode ever cut, because nothing wrote
     the manifest it needs."""
     good = {"title_card": True, "lufs_ok": True, "tp_ok": True, "missing_cuts": [], "lines": [{"passed": True}],
-            "edit": {"ok": True, "measured": True}}
+            "edit": {"ok": True, "measured": True}, "seconds": 160.0}
     assert qc.verdict(good)
     assert not qc.verdict({**good, "lines": [{"passed": False}]})
     assert not qc.verdict({**good, "missing_cuts": [5.0]})
@@ -42,7 +42,7 @@ def test_a_soft_cut_inside_a_take_run_does_not_fail_the_verdict():
     placed = {"shots": [{"index": 0, "t_start": 0.0}, {"index": 1, "t_start": 4.0}, {"index": 2, "t_start": 9.0}]}
     assert qc.internal_cuts(placed, [{"index": 0, "shots": [0, 1]}, {"index": 2, "shots": [2]}]) == [4.0]
     report = {"title_card": True, "lufs_ok": True, "tp_ok": True, "missing_cuts": [4.0], "internal_cuts": [4.0],
-              "lines": [], "edit": {"ok": True, "measured": True}}
+              "lines": [], "edit": {"ok": True, "measured": True}, "seconds": 160.0}
     assert qc.verdict(report) is True
     report["missing_cuts"] = [4.0, 9.0]
     assert qc.verdict(report) is False

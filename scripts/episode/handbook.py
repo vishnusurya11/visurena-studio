@@ -354,7 +354,7 @@ def main() -> None:
         for n, name, cmd, cost, what, gate in STAGES)
     head = (
         '<section id="top"><h2>A chapter becomes an episode</h2>'
-        "<p>One chapter, one episode, two to three minutes, 9:16. First-person narration over pictures "
+        "<p>One chapter, one episode: a 1:1 square YouTube Short, at most 3:00 delivered. First-person narration over pictures "
         "cut to the measured voice, in the chapter's own locations, drawn as one storyboard sequence per "
         "setup and rendered take by take on a local MiniMax-H3.</p>"
         "<p>Run the stages in order. Each one is free unless it says PAID, and every paid step and every "

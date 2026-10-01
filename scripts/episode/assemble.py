@@ -19,7 +19,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 
 from studio.episode_home import episode_arg
-from studio import card_fade, canvas, edit_gate, episode_bed, episode_gutter, episode_home, line_laid
+from studio import card_fade, canvas, edit_gate, episode_bed, episode_gutter, episode_home, episode_spec, line_laid
 from studio import episode_emotion, episode_sound, finished_file
 from studio.comfy import run
 from studio.episode_spec import Episode
@@ -880,6 +880,12 @@ def main(book_id: str, number: int, engine: str = "i2v",
     out = tail(mixed, card if card.exists() else book / "title" / "title.mp4",
                finished_file.scratch_for(master, work), work, number)
     out = trim(out, work)
+    # THE MASTER IS A SHORT (hard requirement, owner 2026-09-30): the wall is
+    # checked on the finished file, tail card and chip included, before the
+    # name goes on it.  ep14 delivered 182.6 s -- picture 177.9 under every
+    # picture-only wall, plus the 4.46 s card -- and shipped as a video.
+    if why := episode_spec.short_refusal(video_frames(out) / FPS):
+        raise SystemExit(f"{why}; cut beats/codas or lines in the plan and re-place")
     finished_file.publish(out, master)
     keep = next_iteration(home)
     (home / "cut" / f"master_iter{keep}.mp4").write_bytes(master.read_bytes())

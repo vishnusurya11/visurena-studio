@@ -1027,13 +1027,19 @@ def series_rate(book, number: int) -> float:
 
 def rate_advisory(episode: Episode, rate: float) -> list[str]:
     """G-RATE: the runtime re-projected at the measured rate, printed when it
-    leaves the 120-180 s band the contract checks at 3.0 words a second."""
+    leaves the picture budget the contract checks at 3.0 words a second.
+    Against MAX_SECONDS, never a restated number (2026-09-30): ep14 projected
+    177 s at the measured rate and this gate compared it to a hardcoded 180 --
+    silent -- then the master delivered 182.6 s with the tail card and shipped
+    as a video, not a Short."""
+    from studio.episode_spec import MAX_SECONDS
     words = sum(len(l.text.split()) for l in episode.lines)
     rest = sum(s.beat_s + s.coda_s + 0.5 for s in episode.shots)
     projected = words / rate + rest
-    if projected > 180:
+    if projected > MAX_SECONDS:
         return [f"G-RATE plan: at the narrator's measured {rate:.2f} words/s the cut projects to "
-                f"{projected:.0f} s, over 180 -- cut lines now, before the GPU measures it (advisory)"]
+                f"{projected:.0f} s, over the {MAX_SECONDS:.0f} s picture budget -- cut lines now, "
+                f"before the GPU measures it (advisory)"]
     return []
 
 

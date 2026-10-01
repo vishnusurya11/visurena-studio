@@ -32,7 +32,7 @@ sys.modules["ep_qc_proven"] = qc
 _spec.loader.exec_module(qc)
 
 GOOD = {"title_card": True, "lufs_ok": True, "tp_ok": True, "lines": [{"passed": True}],
-        "edit": {"ok": True, "measured": True}}
+        "edit": {"ok": True, "measured": True}, "seconds": 160.0}
 
 
 def test_a_cut_the_scene_metric_saw_is_present():

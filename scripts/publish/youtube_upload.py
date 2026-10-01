@@ -157,6 +157,8 @@ def main(argv: list[str], send=send) -> None:
                         watched=watched, digest=digest, already=yp.uploaded(book, key),
                         audited="--audited" in argv, override=override)
     waived = yp.waived(qc, dq_failed, override=override)
+    # the file's own facts -- a Short, and square -- past every override
+    stops += yp.file_refusals(*yp.file_facts(master))
     seen, eye = eye_stops(home, watched, digest)
     stops += seen + lock_stops(home, digest)
 

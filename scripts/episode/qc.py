@@ -3,7 +3,9 @@
 
     uv run python scripts/episode/qc.py <codex_id> <episode>
 
-Read off `master.mp4`: it runs the planned length plus the chip; it sits at the
+Read off `master.mp4`: it is a SHORT -- at most 180 s delivered, tail card and
+chip included (`episode_spec.short_refusal`; ep14 shipped as a video at
+182.58 s, 2026-09-30); it sits at the
 platform loudness; every cut the plan asked for is in the picture; every line
 can be HEARD on the master -- Whisper reads each line's window of the final mix
 back, because a line levelled correctly on its own can still be lost in the sum
@@ -276,7 +278,13 @@ def verdict(report: dict) -> bool:
     """Loudness, the planned cuts, every line heard, and the edit being the takes.
     The take and sheet roll-ups are printed, never failed on."""
     hard = [c for c in report["missing_cuts"] if c not in report.get("internal_cuts", [])]
+    from studio import episode_spec
     return (report["lufs_ok"] and report["tp_ok"] and not hard
+            # THE MASTER IS A SHORT (hard requirement, owner 2026-09-30): ep14's
+            # qc passed at 182.58 s -- `seconds` was measured and judged by
+            # nothing, and YouTube filed the episode as a regular video.  An
+            # unmeasured length is not a pass either.
+            and not episode_spec.short_refusal(float(report.get("seconds") or 1e9))
             and report.get("longest_gap_s", 0.0) <= MAX_GAP_S
             and all(row["passed"] for row in report["lines"])
             # AN ABSENT EDIT BLOCK IS NOT A PASS.  `.get("edit", {}).get("ok", True)`

@@ -6,7 +6,9 @@
 Runs after `say_lines.py` and before any picture.  The result is the source
 of every shot time downstream (panels are one per shot, takes are cut to
 these seconds, the mix lays lines at these `at`s, QC checks against them).
-Refuses if the measured runtime leaves the 120-180 s band.
+Refuses if the measured runtime leaves the contract's band (MIN_SECONDS to
+MAX_SECONDS -- the picture budget, derived from the 180 s Shorts wall less
+the tail assemble appends; 174 s today, never restated here).
 """
 from __future__ import annotations
 

@@ -33,7 +33,7 @@ def test_qc_fails_a_master_whose_speech_does_not_stand_over_the_gaps():
     sys.modules["qc_band"] = qc
     spec.loader.exec_module(qc)
     ok = {"lufs_ok": True, "tp_ok": True, "missing_cuts": [], "internal_cuts": [], "longest_gap_s": 5.0,
-          "lines": [], "edit": {"ok": True, "measured": True}, "takes": {}, "title_card": True, "sound": [],
+          "lines": [], "edit": {"ok": True, "measured": True}, "seconds": 160.0, "takes": {}, "title_card": True, "sound": [],
           "speech_over_gap_db": 12.0}
     assert qc.verdict(ok)
     assert not qc.verdict({**ok, "speech_over_gap_db": 10.9})

@@ -18,7 +18,7 @@ qc = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(qc)
 
 GOOD = {"title_card": True, "lufs_ok": True, "tp_ok": True, "missing_cuts": [], "lines": [{"passed": True}],
-        "edit": {"ok": True, "measured": True}}
+        "edit": {"ok": True, "measured": True}, "seconds": 160.0}
 
 
 def test_a_cut_on_the_grid_is_late_not_missing():

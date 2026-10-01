@@ -58,9 +58,11 @@ def public_gates(book: Path, number: int, row: dict, engine: str = "r2v") -> lis
     sign-off (root cause 2026-09-26 -- ep12 went public through this door)."""
     from scripts.publish import youtube_upload as up
     home = episode_home.home(book, number)
-    engine, _master, qc_path = yp.deliverable(home, engine)
+    engine, master, qc_path = yp.deliverable(home, engine)
     qc = json.loads(qc_path.read_text(encoding="utf-8")) if qc_path.exists() else {}
     return (yp.public_refusals(qc, up.failed_takes(home, engine), row)
+            # the file's own facts -- a Short, and square -- past every override
+            + yp.file_refusals(*yp.file_facts(master))
             + up.lock_stops(home, str(row.get("sha8", ""))))
 
 

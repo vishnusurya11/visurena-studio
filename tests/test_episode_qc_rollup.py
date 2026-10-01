@@ -16,7 +16,7 @@ sys.modules["ep_qc_rollup"] = qc
 spec.loader.exec_module(qc)
 
 GOOD = {"title_card": True, "lufs_ok": True, "tp_ok": True, "missing_cuts": [], "lines": [{"passed": True}],
-        "edit": {"ok": True, "measured": True}}
+        "edit": {"ok": True, "measured": True}, "seconds": 160.0}
 """The edit block carries `measured` now.  An ABSENT or UNMEASURED block is no
 longer a pass: `.get("edit", {}).get("ok", True)` made a missing measurement
 clean twice over, and G5.6 provenance was returning `measured: False` on every

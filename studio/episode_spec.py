@@ -30,8 +30,30 @@ the budget and nothing downstream refuses it.  Measured on episode 4's first
 plan, five of nineteen takes ran 9.4-12.25 s and every one was a shot carrying
 two lines -- the band that passed 0 of 2 in episode 3 at a mean of 3.75."""
 
-MIN_SECONDS, MAX_SECONDS = 120.0, 180.0
-"""An episode is the WHOLE chapter, two to three minutes (owner, 2026-09-10)."""
+SHORT_WALL_S = 180.0
+"""HARD REQUIREMENT (owner, 2026-09-30): every episode is a YouTube SHORT.
+YouTube files a square upload as a Short only up to 3:00; one second past it
+the episode is a regular video.  ep01-13 delivered 139.6-175.8 s, all Shorts;
+ep14 delivered 182.6 s and shipped as a video."""
+TAIL_ALLOWANCE_S = 6.0
+"""What assemble appends AFTER the picture, priced with margin: the book's
+animated title card (ep14.mp4: 4.46 s) + the 0.25 s black chip + 1.29 s of
+margin for a longer card.  The picture's budget must leave room for it --
+capping the picture alone at 180 is exactly what shipped ep14 as a video."""
+MIN_SECONDS, MAX_SECONDS = 120.0, SHORT_WALL_S - TAIL_ALLOWANCE_S
+"""An episode is the WHOLE chapter, two to three minutes (owner, 2026-09-10)
+-- and the ceiling is DERIVED from the Shorts wall less the tail, never
+restated (2026-09-30)."""
+
+
+def short_refusal(master_seconds: float) -> str:
+    """The one sentence every wall past the cut speaks about a delivered
+    master, '' when it is a Short."""
+    if master_seconds <= SHORT_WALL_S:
+        return ""
+    return (f"the delivered master runs {master_seconds:.1f} s; past {SHORT_WALL_S:.0f} s "
+            f"YouTube files it as a video, not a Short (hard requirement, owner 2026-09-30)")
+
 WORDS_PER_SECOND = 3.0
 """IndexTTS2 on the cast voices, measured on chapter 1: 33 lines, 147 s of
 speech for ~430 words (2026-09-10).  Used only to PROJECT the runtime before

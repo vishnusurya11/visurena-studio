@@ -129,7 +129,7 @@ def test_an_unmeasured_edit_block_does_not_pass():
 def test_a_measured_and_clean_edit_passes():
     from scripts.episode import qc
     report = {"title_card": True, "lufs_ok": True, "tp_ok": True, "missing_cuts": [], "lines": [],
-              "edit": {"ok": True, "measured": True}}
+              "edit": {"ok": True, "measured": True}, "seconds": 160.0}
     assert qc.verdict(report) is True
 
 

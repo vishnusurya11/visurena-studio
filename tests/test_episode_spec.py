@@ -34,7 +34,8 @@ def episode(n_narration=24):
 
 class TestTheShape:
     def test_a_sound_plan_validates_and_projects_inside_the_band(self):
-        assert 120 <= episode().projected_seconds() <= 180
+        from studio.episode_spec import MAX_SECONDS, MIN_SECONDS
+        assert MIN_SECONDS <= episode().projected_seconds() <= MAX_SECONDS
 
     def test_the_last_line_is_the_button_and_not_the_lead(self):
         ep = episode()
