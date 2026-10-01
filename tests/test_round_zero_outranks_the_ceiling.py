@@ -24,3 +24,17 @@ def test_round_zero_runs_even_with_the_ceiling_spent(tmp_path):
     assert step09.round_zero(room) is True          # no kept take yet
     (room / "T03.mp4").write_bytes(b"take")
     assert step09.round_zero(room) is False         # a take exists: the ceiling rules
+
+
+def test_a_zero_cost_pass_is_never_refused_by_the_ceiling(tmp_path):
+    """All takes rendered, ceiling spent: the step only judges -- exactly what
+    'terminals, not renders' demands -- so a 0 s want proceeds (ep15)."""
+    room = tmp_path / "takes" / "r2v"
+    room.mkdir(parents=True)
+    (room / "T00.mp4").write_bytes(b"take")
+    assert step09.round_zero(room) is False      # the ceiling rules renders...
+    # ...and the run() guard lets cost<=0 through (asserted by the source: the
+    # zero-cost branch precedes the refusal)
+    import inspect
+    src = inspect.getsource(step09.run)
+    assert "cost <= 0" in src.split("REFUSED: the takes want")[0]

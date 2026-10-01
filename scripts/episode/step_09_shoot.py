@@ -162,7 +162,13 @@ def run(ctx) -> None:
         raise SystemExit("REFUSED: the takes wait on the panels: " + "; ".join(why))
     flag = approved(gate_policy.of(ctx.stage, "RENDER"))
     ok, cost, left = affordable(ctx)
-    if not ok and round_zero(ctx.home / TAKES):
+    if not ok and cost <= 0:
+        # NOTHING LEFT TO RENDER: the pass only measures and judges, which is
+        # exactly what a spent ceiling demands (terminals, not renders) -- a
+        # zero-cost refusal would park the unit forever (ep15, 2026-10-01).
+        ctx.log(f"ceiling leaves {left:.0f} s and the takes want 0 s -- judging only",
+                step_id=STEP_ID, level="WARNING")
+    elif not ok and round_zero(ctx.home / TAKES):
         ctx.log(f"the takes want {cost:.0f} s and the ceiling leaves {left:.0f} s -- ROUND 0 "
                 f"renders anyway: the terminals need a best take to keep", step_id=STEP_ID,
                 level="WARNING")
