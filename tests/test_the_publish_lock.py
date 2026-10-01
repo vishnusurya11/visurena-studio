@@ -4,8 +4,10 @@ ep12 was uploaded and made public with PLAN kept-best, EYE_PANELS kept-best at
 attempt 0, EYE_TAKES kept-best and MASTER flagged -- every taste gate ended in a
 terminal and nothing between the runner and the channel read that.  The lock
 reads the unit's learnings, its voice check and the director's sign-off, and
-lists every reason the master may not reach the platform.  Only an owner-written
-waiver clears a terminal."""
+lists every reason the master may not reach the platform.  A judge-signed
+terminal on a gates.yaml `auto` gate clears itself (owner 2026-10-01, "Remove
+that human waiver .. we need automation"); on any OTHER gate, only an
+owner-written waiver clears a terminal -- the ep12 default survives there."""
 from __future__ import annotations
 
 import json
@@ -52,8 +54,10 @@ def test_a_clean_unit_has_no_stops(tmp_path):
 
 
 def test_a_terminal_is_a_stop(tmp_path):
-    home = home_with(tmp_path, [row("EYE_PANELS", "keep_best", True, "landmark at shot_00")])
-    assert pl.open_terminals(home) == ["EYE_PANELS ended keep_best: landmark at shot_00"]
+    # open_terminals still lists every terminal; only an auto gate's clears itself,
+    # so the stop is asserted on a gate the registry does not know (ep12 default)
+    home = home_with(tmp_path, [row("EPILOGUE", "keep_best", True, "landmark at shot_00")])
+    assert pl.open_terminals(home) == ["EPILOGUE ended keep_best: landmark at shot_00"]
     assert len(pl.stops(home, SHA)) == 1
 
 
@@ -63,15 +67,16 @@ def test_the_last_row_per_gate_decides_and_budget_rows_do_not(tmp_path):
 
 
 def test_an_owner_waiver_clears_a_named_terminal(tmp_path):
-    home = home_with(tmp_path, [row("MASTER", "flag", True, "faces at master")])
-    (home / "review" / "waiver.json").write_text(json.dumps({"MASTER": "owner: face size accepted"}),
+    # EPILOGUE is no auto gate, so the owner's hand is still the only key
+    home = home_with(tmp_path, [row("EPILOGUE", "flag", True, "faces at master")])
+    (home / "review" / "waiver.json").write_text(json.dumps({"EPILOGUE": "owner: face size accepted"}),
                                                  encoding="utf-8")
     assert pl.stops(home, SHA) == []
 
 
 def test_an_empty_waiver_reason_clears_nothing(tmp_path):
-    home = home_with(tmp_path, [row("MASTER", "flag", True)])
-    (home / "review" / "waiver.json").write_text(json.dumps({"MASTER": " "}), encoding="utf-8")
+    home = home_with(tmp_path, [row("EPILOGUE", "flag", True)])
+    (home / "review" / "waiver.json").write_text(json.dumps({"EPILOGUE": " "}), encoding="utf-8")
     assert len(pl.stops(home, SHA)) == 1
 
 

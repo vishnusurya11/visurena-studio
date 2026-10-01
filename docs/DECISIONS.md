@@ -4,6 +4,24 @@ Newest first. Every architectural change gets an entry.
 
 ---
 
+## 2026-10-01 — No human input at publish (owner decision: "Remove that human waiver .. we need automation")
+
+Decision id: `2026-10-01-no-human-input-at-publish`
+
+**Decision.** The publish lock no longer demands an owner-hand `review/waiver.json`
+for a terminal that a judge signed. A terminal on a gates.yaml `auto` gate clears the
+lock under that gate's decision id, and the upload ledger records the judge's name
+beside the clearance (`auto_cleared`). The take roll-up at the upload door carries the
+same ruling: judge-signed take terminals ride an automatic override. What still stops
+an upload, past every automation: a gate the registry does not call `auto`, a take
+nobody judged, a speaker that is not one voice, a missing or unwritten director
+sign-off, QC `passed:false` on these bytes, and the Short/square file facts. Context:
+`publish_lock.py` (2026-09-26, the ep12 root cause) predated the judges and demanded
+the owner's hand; ep13/ep14 masked the gap with per-episode owner orders. Detail:
+`architecture/decisions/2026-10-01_no_human_input_at_publish.md`.
+
+---
+
 ## 2026-09-30 — The five-hour episode (owner decision: "see how we can get next episode run to 5hrs or less like before")
 
 **Decision.** Five experts read the past ~28 runs (verdict

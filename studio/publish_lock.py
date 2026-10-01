@@ -41,6 +41,26 @@ def open_terminals(home: Path) -> list[str]:
             for gate, r in rows.items() if r.terminal]
 
 
+def judge_waivers(home: Path, stage: str = "episode") -> dict[str, str]:
+    """{gate: reason} for terminals on gates whose registry row is `auto`: the
+    judge signed the terminal and the decision id retired the person (owner,
+    2026-10-01: "Remove that human waiver .. we need automation").  A gate the
+    registry does not know, or does not call auto, stays the owner's -- the
+    ep12 lesson (an unread terminal) survives as the default."""
+    from studio import gate_policy
+    out: dict[str, str] = {}
+    for line in open_terminals(home):
+        gate = line.split(" ", 1)[0]
+        try:
+            row = gate_policy.of(stage, gate)
+        except SystemExit:
+            continue
+        if row.state == "auto":
+            out[gate] = (f"auto-cleared: judge:{row.judge or 'runner'} signed the terminal "
+                         f"under decision {row.decision} (no-human-input publish, owner 2026-10-01)")
+    return out
+
+
 def waivers(home: Path) -> dict[str, str]:
     """{gate: reason} the owner wrote; a blank reason waives nothing."""
     path = Path(home) / "review" / "waiver.json"
@@ -76,8 +96,9 @@ def signoff_stops(home: Path, sha8: str) -> list[str]:
 
 
 def stops(home: Path, sha8: str) -> list[str]:
-    """Every reason this cut may not be published, owner waivers applied."""
-    waived = waivers(home)
+    """Every reason this cut may not be published: judge auto-clears first,
+    the owner's hand over anything the judges did not sign."""
+    waived = {**judge_waivers(home), **waivers(home)}
     held = [t for t in open_terminals(home) if t.split(" ", 1)[0] not in waived]
     voice = [] if "speaker_check" in waived else speaker_stops(home)
     return held + voice + signoff_stops(home, sha8)

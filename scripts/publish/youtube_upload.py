@@ -112,6 +112,16 @@ def failed_takes(home: Path, engine: str = "r2v") -> list[str]:
     return out
 
 
+def auto_override(dq_failed: list[str]) -> str:
+    """The owner's standing override for judge-signed take terminals (ruling
+    2026-10-01: "Remove that human waiver .. we need automation").  An entry
+    the judges never measured keeps its stop: nothing unjudged goes up."""
+    if not dq_failed or any("(never judged)" in t for t in dq_failed):
+        return ""
+    return (f"auto: {len(dq_failed)} judge-signed take terminal(s) under "
+            f"2026-09-24-automate-the-taste-gates; no-human-input publish, owner 2026-10-01")
+
+
 def send(path: Path, body: dict, creds) -> dict:
     """The one call that publishes.  Injected in tests; never reached by them."""
     from googleapiclient.discovery import build
@@ -153,6 +163,7 @@ def main(argv: list[str], send=send) -> None:
     body = yp.spec(meta["title"], meta["description"], meta.get("tags", []),
                    synthetic=meta["synthetic"], privacy=privacy)
     dq_failed = failed_takes(home, engine)
+    override = override or auto_override(dq_failed)
     stops = yp.refusals(qc, dq_failed, privacy=body["status"]["privacyStatus"],
                         watched=watched, digest=digest, already=yp.uploaded(book, key),
                         audited="--audited" in argv, override=override)
@@ -198,7 +209,9 @@ def main(argv: list[str], send=send) -> None:
                      approval.approved_for("publish", argv))
     got = send(master, body, youtube.credentials())
     video_id = got.get("id")
+    from studio import publish_lock
     yp.record(book, {"key": key, "episode": number, "video_id": video_id, "waived": waived,
+                     "auto_cleared": publish_lock.judge_waivers(home),
                      "eye": eye, "privacy": got.get("status", {}).get("privacyStatus"),
                      "title": body["snippet"]["title"], "sha8": digest,
                      "at": dt.datetime.now().isoformat(timespec="seconds")})

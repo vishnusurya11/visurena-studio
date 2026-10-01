@@ -292,7 +292,7 @@ pre.ddl{font-family:"IBM Plex Mono",monospace;font-size:11px;line-height:1.4;col
 
     <div class="chart-scroll"><div class="chart-fit" id="chart1"><div class="tree">
       <ul>
-        <li><div class="node owner"><div class="n">Owner</div><div class="r">Studio head. Three signatures: money, publish, taste. Every gate that spends escalates here.</div></div>
+        <li><div class="node owner"><div class="n">Owner</div><div class="r">Studio head. One signature left: money. Taste retired 2026-09-24 (judges sign); publish retired 2026-10-01 (judge-signed terminals auto-clear the lock; the owner audits after). Every gate that spends escalates here.</div></div>
           <ul>
             <li><div class="node lead"><div class="n">Production office</div><div class="r">Order, run, hire, record</div><div class="f">stages.yaml · studio/registry.py · studio/llm.py + models.yaml · studio/db.py (events with a unit)</div></div>
               <ul>
@@ -464,7 +464,7 @@ pre.ddl{font-family:"IBM Plex Mono",monospace;font-size:11px;line-height:1.4;col
         </div>
       </div>
     </div>
-    <p class="flow-note">The dashed return arrows are the improve loops, each capped at two rounds. Pre-production spends only text-model tokens; the episode line is $0 on the local GPU. Publishing is not a step of any line yet: the master is delivered, and the upload scripts run by hand until the publish department exists (Future tab).</p>
+    <p class="flow-note">The dashed return arrows are the improve loops, each capped at two rounds. Pre-production spends only text-model tokens; the episode line is $0 on the local GPU. Publishing is not a step of any line yet: the master is delivered and the upload script runs unattended — judge-signed terminals auto-clear the publish lock (2026-10-01) — until the publish department exists (Future tab).</p>
   </section>
 
   <!-- ===== ROSTER ===== -->
@@ -607,7 +607,7 @@ pre.ddl{font-family:"IBM Plex Mono",monospace;font-size:11px;line-height:1.4;col
         <p>Each is a file or a flag the ledger records. A sentence in chat signs nothing.</p>
         <ul>
           <li><b>MONEY</b> · any paid cost kind · <code>--approved=&lt;kind&gt;</code> · never retires (these lines spend none)</li>
-          <li><b>PUBLISH</b> · every public write · <code>--approved=publish</code> · retirable per series × platform</li>
+          <li><b>PUBLISH</b> · every public write · <code>--approved=publish</code> · retired for WotW × YouTube 2026-10-01 (judge-signed terminals auto-clear)</li>
           <li><b>OVERRIDE</b> · any waiver of a machine gate · never retires</li>
           <li><b>Synthetic declaration</b> · <code>series.json</code> <code>synthetic</code> · typed once</li>
           <li><b>RENDER_HOLD</b> · a file; the brake, not a gate</li>
