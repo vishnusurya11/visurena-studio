@@ -1837,7 +1837,13 @@ def l17_cross_cut(text, facts):
 
 
 def l18_banned_prop(text, facts):
-    return [f"L18 BANNED PROP: {w!r} (the book gives bare hands)" for w in BANNED_PROPS if w in text.lower()]
+    """A banned word BORNE BY A BOUND CAST ROW is exempt (ep16: the builder
+    injected the Elphinstone rows' designed gauntlet/kid gloves and this rule
+    banned its own injection).  The sheet already shows the prop, so the
+    render copying it is correct; a glove the text invents is still refused."""
+    rows = str((facts or {}).get("cast_rows", "")).lower()
+    return [f"L18 BANNED PROP: {w!r} (the book gives bare hands)"
+            for w in BANNED_PROPS if w in text.lower() and w not in rows]
 
 
 # ---- L19-L23  take prompt hygiene (docs/analysis/ep08_ep09_why_worse.md §5) --
@@ -2122,5 +2128,6 @@ def build(shots: list[Shot], placed: list[dict], lines: list[Line], at: dict, fr
     if check_lint:
         facts = prompt_facts(frames, segs, faces, spoken, at, offset, setup, strip, refs, fps,
                              has_plate, life, cells_staged)
-        check(text, {**facts, "panel": bool(panel_slot)})
+        check(text, {**facts, "panel": bool(panel_slot),
+                     "cast_rows": " ".join(str(v) for v in (physical or {}).values()).lower()})
     return text
