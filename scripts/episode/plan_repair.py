@@ -65,8 +65,11 @@ def shot_indices(rows: list[str]) -> list[int]:
     return sorted({int(m.group(1)) for r in rows for m in [re.search(r"shot (\d+)", r)] if m})
 
 
-def apply(doc: dict, rows: list[str], book) -> tuple[dict, list[str]]:
-    """Every cured family once per round; the rows nothing cures come back."""
+def apply(doc: dict, rows: list[str], book, rate: float = 3.0) -> tuple[dict, list[str]]:
+    """Every cured family once per round; the rows nothing cures come back.
+    `rate` is the narrator's measured words/s -- THE CHECKER'S RATE, or the
+    holds algebra cures numbers the battery never measures (ep16: 8.05 s at
+    2.54 read as 7.5 s at the default 3.0 and the clamp saw nothing)."""
     legal = {p[:-5] for p in os.listdir(book / "analysis" / "props")} \
         if (book / "analysis" / "props").exists() else set()
     uncured, names = [], set()
@@ -89,7 +92,7 @@ def apply(doc: dict, rows: list[str], book) -> tuple[dict, list[str]]:
         elif name == "legal_props":
             doc = pc.legal_props(doc, legal)
         elif name == "holds":
-            doc = pc.holds(doc)
+            doc = pc.holds(doc, rate=rate)
         elif name == "edge_cases":
             doc = pc.edge_cases(doc)
         elif name == "pin_series":
@@ -115,7 +118,8 @@ def main(book_id: str, number: int, from_aside: bool = False) -> int:
             print(f"BATTERY CLEAN after {round_ - 1} repair round(s)")
             return 0
         doc = episode_home.read_json(path)
-        doc, uncured = apply(doc, rows, book)
+        from studio import plan_gates
+        doc, uncured = apply(doc, rows, book, rate=plan_gates.series_rate(book, number))
         try:
             Episode(**doc)
             episode_home.write_plan(path, doc)

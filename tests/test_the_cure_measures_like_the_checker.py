@@ -66,3 +66,10 @@ def test_fault_rows_sees_the_checkers_top_level_lists():
     assert any(r.startswith("ONE PER TAKE") for r in rows)
     assert any("G-LIGHT" in r for r in rows)
     assert not any("EXPECTS TEXT" in r for r in rows)   # informational, never a repair target
+
+
+def test_apply_routes_the_checkers_rate_into_holds(monkeypatch):
+    seen = {}
+    monkeypatch.setattr(pc, "holds", lambda doc, rate=3.0: seen.setdefault("rate", rate) or doc)
+    pr.apply({"shots": [], "lines": []}, ["ONE PER TAKE : [(1, 2)]"], Path("."), rate=2.54)
+    assert seen["rate"] == 2.54
