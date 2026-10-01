@@ -199,11 +199,20 @@ MAX_BEAT_S, MAX_CODA_S = 1.5, 4.0
 HOLE_WALL_S, TAKE_BUDGET_S, SETUP_CAP_S = 6.0, 8.0, 50.0
 
 
+HANDLE_S = 0.25
+BREATH_S = 0.70
+"""plan_check.projected's constants: 2 x HANDLE_S a shot, BREATH_S between its
+lines.  The cure MEASURES LIKE THE CHECKER or it cures numbers nobody judges
+(ep16: shot 16 at 8.05 s was invisible to a model that lacked these)."""
+
+
 def _shot_secs(doc: dict, rate: float) -> dict[int, float]:
-    words = {}
+    words, lines = {}, {}
     for line in doc.get("lines") or []:
         words[line["shot"]] = words.get(line["shot"], 0) + len(str(line["text"]).split())
-    return {s["index"]: words.get(s["index"], 0) / rate
+        lines[line["shot"]] = lines.get(line["shot"], 0) + 1
+    return {s["index"]: 2 * HANDLE_S + words.get(s["index"], 0) / rate
+            + BREATH_S * max(0, lines.get(s["index"], 0) - 1)
             + float(s.get("beat_s") or 0) + float(s.get("coda_s") or 0)
             for s in doc.get("shots") or []}
 
@@ -270,6 +279,21 @@ def holds(doc: dict, rate: float = 3.0) -> dict:
             if cut > 0:
                 s["coda_s"] = round(float(s.get("coda_s") or 0) - cut, 2)
                 over = round(over - cut, 2)
+
+    # 4. no single shot past the take budget: the pair growth above may have
+    # pushed one over (ep16 shot 16, 8.05 s); shave its own coda then beat.
+    # A clamped shot keeps its pair split: the partner's handles alone hold
+    # the pair's total over the budget.
+    secs = _shot_secs(doc, rate)
+    for s in shots:
+        over = secs[s["index"]] - TAKE_BUDGET_S
+        for key in ("coda_s", "beat_s"):
+            if over <= 0:
+                break
+            cut = round(min(over + 0.05, float(s.get(key) or 0)), 2)
+            if cut > 0:
+                s[key] = round(float(s.get(key) or 0) - cut, 2)
+                over = round(over - cut, 2)
     return button_beat(doc)
 
 
@@ -283,7 +307,7 @@ CURES: list[tuple[re.Pattern, str]] = [
     (re.compile(r"beat of >= 1\.0 s of silence"), "button_beat"),
     (re.compile(r"G-MOVES|G-STILL|G-AIM"), "vary_heads"),
     (re.compile(r"props.*\.json|names setup .* not defined|prop "), "legal_props"),
-    (re.compile(r"projects to .* an episode is|ONE PER TAKE|G-SETUP|hole in speech|of the runtime"), "holds"),
+    (re.compile(r"projects to .* an episode is|ONE PER TAKE|TAKE LENGTH|G-SETUP|hole in speech|of the runtime"), "holds"),
     (re.compile(r"median (?:frame-edge|at_rest)"), "edge_cases"),
     (re.compile(r"G-ASPECT|style line is \d+ words|look"), "pin_series"),
 ]

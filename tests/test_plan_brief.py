@@ -225,7 +225,8 @@ def test_render_has_a_section_per_present_input_in_a_fixed_order():
         "number": 3, "band": {"min_seconds": 120.0}, "scenes": [{"n": 1, "summary": "Meet."}],
         "chapter_text": "Prose.", "screenplay": [{"target": "feature"}],
         "cast": [{"entity_id": "lead"}], "places": [{"id": "yard"}],
-        "camera_catalog": "moves", "dq_rules": {"banned_subjects": ["doll"]}})
+        "camera_catalog": "moves", "picture_rules": "no last-frame pin",
+        "dq_rules": {"banned_subjects": ["doll"]}})
     order = [text.index(h) for h in plan_brief.SECTIONS.values()]
     assert order == sorted(order)
     assert "Meet." in text and "Prose." in text and "moves" in text and '"doll"' in text

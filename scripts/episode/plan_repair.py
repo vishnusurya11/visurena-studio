@@ -29,14 +29,22 @@ from studio.episode_spec import Episode  # noqa: E402
 ROUNDS = 6
 
 
+HARD_LISTS = ("ONE PER TAKE : [", "TAKE LENGTH  : [", "CONTRACT :")
+"""The checker's top-level rows that are HARD and list-formed; EXPECTS TEXT
+and SHEET TEXT print the same way and are informational (ep16: TAKE LENGTH
+was invisible to the repairer and three rounds deferred over 0.05 s)."""
+
+
+def fault_rows(stdout: str) -> list[str]:
+    return [l.strip() for l in stdout.splitlines()
+            if (l.startswith("    ") or any(k in l for k in HARD_LISTS))
+            and "advisory" not in l and "not applicable" not in l and l.strip()]
+
+
 def battery_rows(book_id: str, number: int) -> tuple[bool, list[str]]:
     rc = subprocess.run([sys.executable, "scripts/episode/plan_check.py", book_id, str(number)],
                         capture_output=True, text=True, cwd=str(Path(__file__).resolve().parents[2]))
-    clean = "VERDICT      : clean" in rc.stdout
-    rows = [l.strip() for l in rc.stdout.splitlines()
-            if (l.startswith("    ") or "CONTRACT :" in l or "ONE PER TAKE : [" in l)
-            and "advisory" not in l and "not applicable" not in l and l.strip()]
-    return clean, rows
+    return "VERDICT      : clean" in rc.stdout, fault_rows(rc.stdout)
 
 
 def series_pin_values(book) -> dict:
@@ -116,8 +124,8 @@ def main(book_id: str, number: int, from_aside: bool = False) -> int:
             return 1
         print(f"round {round_}: {len(rows) - len(uncured)} fault row(s) cured, "
               f"{len(uncured)} creative row(s) remain")
-        if uncured and len(uncured) == len(rows):
-            break
+        if (uncured and len(uncured) == len(rows)) or not rows:
+            break   # nothing this table cures, or nothing collected: stop looping
     clean, rows = battery_rows(book_id, number)
     if clean:
         print("BATTERY CLEAN")
