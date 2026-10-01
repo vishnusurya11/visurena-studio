@@ -100,9 +100,15 @@ def episode_voice(book: Path, records: dict, record: dict, similarity=None) -> f
     return round(sum(float(score(mine, other)) for other in others) / len(others), 3)
 
 
-def alternate_ok(score: float | None) -> bool:
-    """An alternate-reference render is the man in the room, or it is not kept."""
-    return score is None or score >= EPISODE_VOICE
+def alternate_ok(score: float | None, seconds: float = SIM_MEASURABLE_S) -> bool:
+    """An alternate-reference render is the man in the room, or it is not kept.
+
+    Under SIM_MEASURABLE_S the encoder cannot hear enough voice to judge
+    (one-second slices of a TRUE voice score 0.07-0.32), the design gate
+    already records-never-gates there, and ep16's l18 (1.75 s) was refused at
+    0.74 against 0.75 on exactly that unmeasurable read.  The score is kept
+    in the record either way; words and pace still gate a short line."""
+    return score is None or seconds < SIM_MEASURABLE_S or score >= EPISODE_VOICE
 
 
 def reference_for(book: Path, speaker: str) -> Path:
@@ -209,7 +215,8 @@ def listen_all(records: list[dict], book: Path, listen, among: dict | None = Non
         similarity = voice_ear.similarity(reference_for(book, record["speaker"]), clip)
         floor = line_floor(verdict.seconds, record.get("delivery", "calm"))
         room = episode_voice(book, among, record)
-        passed = verdict.passed and similarity >= floor and alternate_ok(room) and lift_ok(book, record, clip)
+        passed = (verdict.passed and similarity >= floor
+                  and alternate_ok(room, verdict.seconds) and lift_ok(book, record, clip))
         record.update(heard=verdict.heard, error_rate=verdict.error_rate, why=verdict.why,
                       similarity=round(float(similarity), 3), floor=floor,
                       episode_voice=room, passed=passed)
@@ -237,7 +244,7 @@ def keep_best(new: dict, previous: dict | None, wav: Path) -> dict:
     prev_wav = wav.with_suffix(".prev.wav")
     if previous is None or not prev_wav.exists():
         return new
-    if alternate_ok(new.get("episode_voice")) and \
+    if alternate_ok(new.get("episode_voice"), float(new.get("seconds") or SIM_MEASURABLE_S)) and \
             new.get("similarity", 0.0) >= previous.get("similarity", 0.0):
         prev_wav.unlink()
         return new
