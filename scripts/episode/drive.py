@@ -23,6 +23,16 @@ sys.path.insert(0, str(ROOT))
 
 from studio import episode_drive, episode_home  # noqa: E402
 
+
+def utf8_console() -> None:
+    """The console never kills the run: a quoted chapter span can carry any
+    character, and Windows hands the drive a cp1252 stdout (ep16, 2026-10-01:
+    the deferral summary print raised UnicodeEncodeError and the drive died
+    mid-episode).  Logs are opened utf-8 already; this covers the console."""
+    for stream in (sys.stdout, sys.stderr):
+        if hasattr(stream, "reconfigure"):
+            stream.reconfigure(encoding="utf-8", errors="replace")
+
 NOTIFY = Path("D:/Projects/KingdomOfViSuReNa/alpha/comfy_studio/poc/2026-08-25_2k-video-pipeline/scripts/notify_bench.py")
 FFMPEG_DIR = "C:/Users/vishn/bin"
 POLL_S = 30
@@ -111,4 +121,5 @@ def main(codex: str, number: int) -> int:
 
 
 if __name__ == "__main__":
+    utf8_console()
     raise SystemExit(main(sys.argv[1], int(sys.argv[2])))
