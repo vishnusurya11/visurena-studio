@@ -34,6 +34,10 @@ from studio.judges.verdict import Fault, Verdict
 from studio.ladder import Ladder, Rung
 
 IMPROVE, FRESH_BRIEF, MODEL_TIER, DEFER = "improve", "fresh_brief", "model_tier", "defer"
+CONVERGED = 2
+"""A draft within this many battery faults of passing is EDITED by every rung,
+never thrown away (ep15, 2026-10-01: fresh_brief discarded 1-fault drafts
+eight times)."""
 MODEL_TIER_NAME = "canon"
 """The tier the model_tier rung asks: the one that reasons.  The "reasoning"
 tier is the workhorse model with reasoning off (models.yaml, the owner's cost
@@ -196,12 +200,17 @@ class Desk:
             self.best = (doc, len(verdict.faults), list(verdict.faults))
 
     def take(self, rung: Rung, i: int, verdict: Verdict) -> None:
-        """One rung: remember the draft it faulted, then draft again."""
+        """One rung: remember the draft it faulted, then draft again.  A
+        CONVERGED draft (within CONVERGED faults of passing) is EDITED by every
+        rung, never discarded: ep15 (2026-10-01) ran eight passes in which
+        improve reached one fault and fresh_brief then wrote from nothing
+        (39-57 faults back), ~3.5 h of paid calls to stand still."""
         self.remember(verdict)
         self.refusals = merged(self.refusals, refusal_lines_of(verdict))
         if is_battery(verdict):
             self.escalate()                       # a rule miss: the reasoner edits from here
-        if rung.name == IMPROVE:
+        near = len(verdict.faults) <= CONVERGED and self.refused_plan() is not None
+        if rung.name == IMPROVE or near:
             self.write(self.refusals, previous=self.refused_plan())
         elif rung.name == FRESH_BRIEF:
             self.brief_(fresh=True)

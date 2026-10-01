@@ -82,8 +82,12 @@ def test_a_fresh_brief_starts_from_nothing(tmp_path, monkeypatch):
     writer = Recorder()
     desk = _desk(tmp_path, writer)
     fresh = next(r for r in plan_ladder.ladder().rungs if r.name == plan_ladder.FRESH_BRIEF)
-    desk.take(fresh, 0, plan_ladder.battery_verdict(["G-SCALE shot 4"]))
+    # a draft well off the mark starts over; a CONVERGED one (<= 2 faults) is
+    # edited instead, never discarded (ep15, 2026-10-01: eight passes lost)
+    desk.take(fresh, 0, plan_ladder.battery_verdict([f"G-SCALE shot {k}" for k in range(4)]))
     assert writer.previous == [None] and writer.refusals == [None]
+    desk.take(fresh, 0, plan_ladder.battery_verdict(["G-SCALE shot 4"]))
+    assert writer.previous[-1] is not None            # the near-pass was edited
 
 
 def test_the_model_tier_rung_is_a_tier_that_reasons():
