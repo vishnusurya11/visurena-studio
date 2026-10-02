@@ -169,6 +169,15 @@ class Line(BaseModel):
         return self.words() / WORDS_PER_SECOND
 
     @model_validator(mode="after")
+    def _nothing_bracketed_is_spoken(self) -> "Line":
+        # ep16: "the brother (grey eyes)" was read aloud as "the brother Gray
+        # Eyes" in six lines; QC heard what the script said, so it passed
+        if "(" in self.text or ")" in self.text:
+            raise ValueError(f"line {self.index} carries a parenthesis; spoken text is "
+                             f"read aloud whole, so identity notes never ride in it")
+        return self
+
+    @model_validator(mode="after")
     def _short_enough_to_land(self) -> "Line":
         if self.words() > MAX_WORDS:
             raise ValueError(f"line {self.index} is {self.words()} words; the wall is {MAX_WORDS}")
