@@ -236,11 +236,19 @@ named by their slot; a person with no sheet by plain lower-case words."""
 
 
 def called(cast: list[dict]) -> dict[str, str]:
-    """How the prompt says each person: their slot, never their name."""
+    """How the prompt says each person: their slot, never their name.
+
+    A face with NO sheet carries its row's worn items in the same plain
+    lower-case words (ep16: "a mrs. elphinstone" with no wardrobe drew as a
+    purple clone of the sheeted sister; her row says white muslin)."""
     out = {}
     for p in cast:
         words = re.sub(r"\s+", " ", str(p["name"])).strip().lower()
-        out[p["name"]] = f"the person in <image{p['ref']}>" if p.get("ref") else f"a {words}"
+        if p.get("ref"):
+            out[p["name"]] = f"the person in <image{p['ref']}>"
+            continue
+        worn = ", ".join(worn_items(p.get("wear", ""))[:3]).lower()
+        out[p["name"]] = f"a {words} wearing {worn}" if worn else f"a {words}"
     return out
 
 

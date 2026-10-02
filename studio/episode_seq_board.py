@@ -1176,7 +1176,7 @@ def wardrobe_block(setup: Setup, physical: dict) -> str:
 PEOPLE = re.compile(
     r"\b(?:men|women|man|woman|people|folk|crowd|boys?|girls?|children|drivers?|herdsmen|immigrants?|"
     r"clerks?|porters?|farm hands?|riders?|horsemen|soldiers?|students?|waiters?|drinkers?|pedestrians?|"
-    r"passers-by|walkers?|nurses?|loafers?|constables?|figures?|indians|labourers?|workmen|cabmen|cabman|refugees?|fugitives?|wayfarers?|washerwomen|mob|throng|multitude|families|"
+    r"passers-by|walkers?|nurses?|loafers?|constables?|figures?|indians|labourers?|workmen|cabmen|cabman|refugees?|fugitives?|wayfarers?|washerwomen|mob|throng|multitude|families|robbers?|attackers?|thieves|highwaymen|"
     r"urchins?|barmen|barman|maids?|servants?|guards?|elders?|pilgrims?|settlers?|travellers?|traders?|"
     r"onlookers?|bystanders?|villagers?|townsfolk|congregation|worshippers?)\b", re.I)
 """The nouns that make a crowd a crowd: a closed list, so that a horse at a
