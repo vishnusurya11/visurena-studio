@@ -274,8 +274,10 @@ def called(who: str) -> re.Pattern:
     # plan never declared in eight takes and tagged Mrs as Miss's picture).
     shared = sum(1 for v in DISPLAY.values() if v.split()[-1] == surname(who)) > 1
     if shared and who in DISPLAY:
-        return re.compile(rf"()\b{re.escape(DISPLAY[who])}\b")
-    return re.compile(rf"()\b{word}\b")
+        # (?i): lower_lead() lowercases a sentence's first word, and "mrs.
+        # Elphinstone faces the road" rode past a case-sensitive bind (ep16)
+        return re.compile(rf"(?i)()\b{re.escape(DISPLAY[who])}\b")
+    return re.compile(rf"(?i)()\b{word}\b")
 
 
 def _label(m: re.Match, k: int) -> str:
@@ -2148,13 +2150,21 @@ def build(shots: list[Shot], placed: list[dict], lines: list[Line], at: dict, fr
         subs = subs + chr(10) + take_refs.panel_definition(panel_slot)
     dd, life = describe(shots, placed, lines, at, faces, physical, narrator, frames, cells, setup, fps,
                         not (ends or []), cells_staged, bool(panel_slot))
-    text = six_sections(subs, summary(frames, segs, cells, described, faces, spoken, fps, has_plate,
-                                      cells_staged),
-                        retention(faces, segs, cells, strip, ends or [], described, has_plate, outdoors,
-                                  cells_staged, props)
-                        + ((chr(10) + take_refs.panel_relation(panel_slot, 1, pin)) if panel_slot else "")
-                        + strangers_line(bool(life)),
-                        dd, soundscape(described, getattr(setup, "crowd", ""), outdoors, bool(life)))
+    # ONE CHOKE POINT FOR NAMES (ep16, published cut deleted 2026-10-02): the
+    # camera and at-rest composers injected raw prose, so "the brother's hand"
+    # and "aimed at Miss Elphinstone" rode untagged beside <Subject 1> and H3
+    # drew the pinned man again as a stranger.  Every assembled section passes
+    # tagged() whole; no single composer can leak a bare cast name again.
+    text = six_sections(subs,
+                        tagged(summary(frames, segs, cells, described, faces, spoken, fps, has_plate,
+                                       cells_staged), faces),
+                        tagged(retention(faces, segs, cells, strip, ends or [], described, has_plate,
+                                         outdoors, cells_staged, props)
+                               + ((chr(10) + take_refs.panel_relation(panel_slot, 1, pin)) if panel_slot else "")
+                               + strangers_line(bool(life)), faces),
+                        tagged(dd, faces),
+                        tagged(soundscape(described, getattr(setup, "crowd", ""), outdoors, bool(life)),
+                               faces))
     if bad := negations(text):
         raise ValueError(f"the prompt carries negation MiniMax cannot read: {bad}")
     if check_lint:
