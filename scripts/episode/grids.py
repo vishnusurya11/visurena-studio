@@ -152,6 +152,18 @@ def sheet_of(book: Path, who: str) -> Path | None:
     return p if p.exists() else None
 
 
+WIDE_SIZES = ("wide", "full")
+
+
+def wide_only(name: str, shots: list) -> bool:
+    """Is this person only ever WIDE/FULL in this grid?  Then the grid draws them
+    from their wardrobe words, never from the sheet: ep16 shot 19 drew all four
+    turnaround poses as four women, twice -- once with the prompt saying the
+    sheet is one person drawn once.  Words do not beat a staged picture."""
+    mine = [s for s in shots if name in (s.faces or [])]
+    return bool(mine) and all(str(getattr(s, "size", "")).lower() in WIDE_SIZES for s in mine)
+
+
 def cast_of(book: Path, shots: list, reserve: int = 1) -> tuple[list[dict], dict]:
     """Every person the panels name, from the bound rows, and the slots their
     sheets go in -- what is staged and what is said are the same list.
@@ -166,7 +178,7 @@ def cast_of(book: Path, shots: list, reserve: int = 1) -> tuple[list[dict], dict
         # (2026-09-23).
         row = cast_refs.row(book, name)
         sheet, ref = sheet_of(book, name), None
-        if sheet is not None and n < MAX_SLOTS - reserve:
+        if sheet is not None and n < MAX_SLOTS - reserve and not wide_only(name, shots):
             n += 1
             ref = n
             slots[str(100 + n)] = sheet
