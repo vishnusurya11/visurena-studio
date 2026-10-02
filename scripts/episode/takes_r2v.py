@@ -190,6 +190,13 @@ def adopt_names(rows: list[dict]) -> None:
     for r in rows:
         if r.get("kind") != "character":
             continue
+        # A ROW WITHOUT GENDER REFUSES HERE (ep16: four new rows born bare,
+        # and both Elphinstone women were prompted as "this man" -- "His
+        # mouth shapes every syllable" on a speaking woman).  The default
+        # noun is not a fallback; it is a wrong picture.
+        if r.get("gender") not in ("male", "female", "creature"):
+            raise SystemExit(f"REFUSED: cast row {r.get('entity_id')!r} has no gender; "
+                             f"write display+gender on the row before anything renders")
         if (age := ro.age_of(r.get("physical", ""))) is not None and age < 16:
             ro.YOUNG.add(r["entity_id"])
         if r.get("display"):

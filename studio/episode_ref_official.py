@@ -269,6 +269,12 @@ def called(who: str) -> re.Pattern:
         # (?!'s): "the narrator's wife" is the wife; binding the narrator there
         # staged his sheet into her solo take (ep09 T17, caught before render)
         return re.compile(rf"(?i)\b(the(?:\s+[\w'-]+){{0,2}}\s+){word}\b(?!'s)")
+    # A SHARED SURNAME BINDS ONLY ITS FULL DISPLAY (ep16: both Elphinstone
+    # sisters surname to "Elphinstone", and the bare bind staged a sheet the
+    # plan never declared in eight takes and tagged Mrs as Miss's picture).
+    shared = sum(1 for v in DISPLAY.values() if v.split()[-1] == surname(who)) > 1
+    if shared and who in DISPLAY:
+        return re.compile(rf"()\b{re.escape(DISPLAY[who])}\b")
     return re.compile(rf"()\b{word}\b")
 
 
