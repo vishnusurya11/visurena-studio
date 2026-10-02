@@ -225,7 +225,12 @@ def chest_up(name: str, shots: list[dict]) -> bool:
 def _binding(p: dict, bare: bool = False, chest: bool = False) -> str:
     items = [i for i in worn_items(p.get("wear", ""))
              if not (bare and HEADWEAR.search(i)) and not (chest and BELOW_CHEST.search(i))]
-    return f"The person in <image{p['ref']}> wears: {'; '.join(items)}." if items else f"The person in <image{p['ref']}>."
+    # ep16 shot 19: a wide naming one woman drew all four poses of her
+    # turnaround sheet as four women; the sheet is one person, drawn once
+    once = (f" <image{p['ref']}> is a reference sheet of one person seen from several "
+            f"angles; that one person appears exactly once in each picture.")
+    return (f"The person in <image{p['ref']}> wears: {'; '.join(items)}." if items
+            else f"The person in <image{p['ref']}>.") + once
 
 
 UNWRITTEN = "No name, word or label is written anywhere in the picture."
