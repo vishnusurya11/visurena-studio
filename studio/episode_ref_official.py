@@ -288,11 +288,23 @@ def _label(m: re.Match, k: int) -> str:
 
 def tagged(text: str, faces: list[str]) -> str:
     """People become their `<Subject k>` labels; a person with no sheet staged keeps
-    his name -- ref-en §2 lets only a DEFINED label be cited."""
+    his name -- ref-en §2 lets only a DEFINED label be cited.
+
+    A face's OWN possessive is tagged too (ep16, published cut deleted
+    2026-10-02: "the brother's hand" rode untagged beside <Subject 1> in every
+    face take, a pinned man plus a named stranger, and H3 drew him twice in
+    most shots).  A display that is the PREFIX of another cast member's
+    display -- "the narrator" inside "the narrator's wife" -- still never
+    binds through the possessive (ep09 T17)."""
     for k, who in enumerate(faces, start=1):
         if not re.match(r"(?i)(the|a|an)\s", DISPLAY.get(who, "")):
             text = re.sub(rf"\b{re.escape(name_of(who))}\b", f"<Subject {k}>", text)
         text = called(who).sub(lambda m, k=k: _label(m, k), text)
+        mine = DISPLAY.get(who, "")
+        owns_another = any(v.lower().startswith(mine.lower() + "'s")
+                           for w, v in DISPLAY.items() if w != who and mine)
+        if mine and not owns_another:
+            text = re.sub(rf"(?i)\b{re.escape(mine)}(?='s\b)", f"<Subject {k}>", text)
     return text
 
 
