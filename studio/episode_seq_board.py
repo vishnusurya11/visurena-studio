@@ -1176,7 +1176,7 @@ def wardrobe_block(setup: Setup, physical: dict) -> str:
 PEOPLE = re.compile(
     r"\b(?:men|women|man|woman|people|folk|crowd|boys?|girls?|children|drivers?|herdsmen|immigrants?|"
     r"clerks?|porters?|farm hands?|riders?|horsemen|soldiers?|students?|waiters?|drinkers?|pedestrians?|"
-    r"passers-by|walkers?|nurses?|loafers?|constables?|figures?|indians|labourers?|workmen|cabmen|cabman|"
+    r"passers-by|walkers?|nurses?|loafers?|constables?|figures?|indians|labourers?|workmen|cabmen|cabman|refugees?|fugitives?|wayfarers?|washerwomen|mob|throng|multitude|families|"
     r"urchins?|barmen|barman|maids?|servants?|guards?|elders?|pilgrims?|settlers?|travellers?|traders?|"
     r"onlookers?|bystanders?|villagers?|townsfolk|congregation|worshippers?)\b", re.I)
 """The nouns that make a crowd a crowd: a closed list, so that a horse at a
@@ -1197,7 +1197,12 @@ def crowd_block(setup: Setup) -> str:
         return ""
     return ("This is a public place in a working city and people fill it in every panel. The people behind "
             "the action are different people in different postures in every panel, a fresh group drawn for "
-            "each panel. They are busy with their own business, their eyes on their own work.")
+            "each panel. They are busy with their own business, their eyes on their own work. "
+            # ep16 (2026-10-01): the grids filled the exodus crowds with COPIES
+            # of the cast -- three brothers in the same suit, duplicate purple
+            # women -- and the takes animated them faithfully.
+            "Every one of them is a stranger, each background figure distinct from every named "
+            "character in face, dress, colours and build.")
 
 
 def crowd_clause(seg: dict, setup: Setup) -> str:

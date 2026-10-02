@@ -880,6 +880,19 @@ def life_sentence(crowd: str, t0: int, t1: int, behind: str = "") -> str:
     return f"{lead} {crowd}, {during(t0, t1)}."
 
 
+CROWD_STRANGERS = ("Every background figure is a stranger with their own face, build "
+                   "and dress, each one distinct from every Subject and from every named "
+                   "character.")
+"""ep16 (2026-10-01): "many fugitives" beside bound sheets minted clone parades
+of the cast even behind clean panels.  Stated ONCE in the retention rules when
+any life sentence exists -- the life sentence itself stays one clean clause
+(L19 counts it; overflow drops it first)."""
+
+
+def strangers_line(life: bool) -> str:
+    return (chr(10) + CROWD_STRANGERS) if life else ""
+
+
 def staged(seg: dict, faces: list[str]) -> list[str]:
     """Whose face this BLOCK shows among the take's staged sheets: the shot's own
     `faces` (readable in the panel) that have a `<Subject k>`.  A take's sheets
@@ -2127,7 +2140,8 @@ def build(shots: list[Shot], placed: list[dict], lines: list[Line], at: dict, fr
                                       cells_staged),
                         retention(faces, segs, cells, strip, ends or [], described, has_plate, outdoors,
                                   cells_staged, props)
-                        + ((chr(10) + take_refs.panel_relation(panel_slot, 1, pin)) if panel_slot else ""),
+                        + ((chr(10) + take_refs.panel_relation(panel_slot, 1, pin)) if panel_slot else "")
+                        + strangers_line(bool(life)),
                         dd, soundscape(described, getattr(setup, "crowd", ""), outdoors, bool(life)))
     if bad := negations(text):
         raise ValueError(f"the prompt carries negation MiniMax cannot read: {bad}")
