@@ -65,6 +65,14 @@ class Budget:
         again, so a refusal here is TERMINAL, never a deferral."""
         return self.clock() - self.t0 >= self.ceiling
 
+    def headroom(self) -> float:
+        """Seconds the episode's ceiling has left.  Shares are an ALLOCATION
+        of the ceiling, so headroom pays what an exhausted share cannot
+        (ep16: an empty 09 share deferred 'run again to resume' forever while
+        the clock sat at 4.6 of 5 h -- idling clocks nothing, so that money
+        could never appear)."""
+        return max(0.0, self.ceiling - (self.clock() - self.t0))
+
     def start(self, step: str) -> None:
         """Close the running step, carry its balance, open `step`."""
         if step not in self.shares:

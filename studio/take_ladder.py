@@ -235,10 +235,12 @@ def can_afford(ctx, rung: Rung, takes: int) -> bool:
     price, step = cost(rung, takes), judged_gate.step_of(ctx)
     if ctx.budget.can_afford(step, price) or ctx.budget.pool_left() >= price:
         return True
-    if ctx.budget.ceiling_spent():
-        return False
-    raise SystemExit(f"DEFERRED: EYE_TAKES' {rung.name} round of {takes} takes needs {price:.0f} s; "
-                     f"the {step} share and the ladders' pool cannot pay; nothing signed -- run again to resume")
+    # THE DEFERRAL IS GONE (ep16, 2026-10-01): with the share and the pool
+    # empty it said "run again to resume", and idling clocks nothing, so every
+    # resume met the same state -- an unresolvable deferral spinning the
+    # drive.  Shares are an allocation of the ceiling: remaining episode
+    # headroom pays what they cannot, and true exhaustion is terminal.
+    return ctx.budget.headroom() >= price
 
 
 # ---- plan edits, through write_plan ----------------------------------------------

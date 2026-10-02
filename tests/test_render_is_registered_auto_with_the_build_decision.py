@@ -60,9 +60,23 @@ def ctx(tmp_path):
 
 
 def test_over_the_ceiling_the_render_is_refused_before_launch(ctx):
+    """With a KEPT take on disk: round 0 is over, so past the ceiling the
+    refusal fires (round 0 itself renders regardless -- ep15 ruling)."""
     now = [17_950.0]
     ctx.budget = Budget(EPISODE_CEILING_SECONDS, EPISODE_SHARES, clock=lambda: now[0])
     ctx.budget.t0 = 0.0
+    room = ctx.home / "takes" / "r2v"
+    room.mkdir(parents=True, exist_ok=True)
+    (room / "T01.mp4").write_bytes(b"kept take")
+    # a second shot still unrendered: cost > 0, so the ceiling refusal fires
+    (ctx.home / "plan.json").write_text(
+        json.dumps({"shots": [{"index": 1}, {"index": 2}]}), encoding="utf-8")
+    board = ctx.home / "storyboard"
+    Image.new("RGB", (8, 8), (30, 30, 30)).save(board / "shot_02.png")
+    for name in ("panel_dq.json", "panel_content.json"):
+        episode_home.write_json(board / name, [{"shot": 1, "passed": True},
+                                               {"shot": 2, "passed": True}])
+    eye_verdict.sign(board, [board / "shot_01.png", board / "shot_02.png"], "pass", "fine")
     with pytest.raises(SystemExit, match="ceiling"):
         step.run(ctx)
     assert ctx.launched == []
