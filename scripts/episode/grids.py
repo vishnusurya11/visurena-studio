@@ -190,7 +190,7 @@ def cast_of(book: Path, shots: list, reserve: int = 1) -> tuple[list[dict], dict
             slots[str(100 + n)] = sheet
         said = re.sub(r"^(my|the|a|an)\s+", "", row["name"].strip(), flags=re.I).upper()
         people.append({
-            "ref": ref, "name": said, "entity": name,
+            "ref": ref, "name": said, "entity": name, "display": row.get("display") or row["name"],
             "wear": " ".join(row["physical"].split()),
             "against": (f"{said} is no other person in this storyboard: nobody else wears "
                         f"these clothes and {said} never wears anyone else's")})

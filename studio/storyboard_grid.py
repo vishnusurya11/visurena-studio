@@ -257,10 +257,27 @@ def called(cast: list[dict]) -> dict[str, str]:
     return out
 
 
+def _slotted(body: str, cast: list[dict]) -> str:
+    """A STAGED person's names in the panel prose become their slot phrase.
+
+    ep16 attempt 4: 'the person in <image1>' was defined while the prose also
+    said 'the brother stands beside it', and the drawer drew two brothers --
+    the take prompts' double identity, one module over.  An unstaged person
+    keeps their words (the who-line dresses them)."""
+    for p in cast:
+        if not p.get("ref"):
+            continue
+        slot = f"the person in <image{p['ref']}>"
+        for phrase in filter(None, (p.get("display"), p.get("name"))):
+            body = re.sub(rf"(?i)\b{re.escape(phrase)}\b", slot, body)
+    return re.sub(r"(?i)\bthe (the person in <image\d+>)", r"\1", body)
+
+
 def _unnamed(shots: list[dict], cast: list[dict]) -> list[dict]:
-    """The shots with every named person said by slot."""
+    """The shots with every named person said by slot, in the who-line AND the prose."""
     say = called(cast)
-    return [{**s, "who": [say.get(n, n.lower()) for n in (s.get("who") or [])]} for s in shots]
+    return [{**s, "who": [say.get(n, n.lower()) for n in (s.get("who") or [])],
+             **({"body": _slotted(s["body"], cast)} if "body" in s else {})} for s in shots]
 
 
 def _block_v2(label: str, s: dict) -> str:
