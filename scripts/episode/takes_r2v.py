@@ -208,11 +208,12 @@ def adopt_names(rows: list[dict]) -> None:
             ro.CREATURES.add(r["entity_id"])
 
 
-FRONT_SHEETS = os.environ.get("TAKE_FRONT_SHEETS") == "1"
+FRONT_SHEETS = os.environ.get("TAKE_FRONT_SHEETS", "1") != "0"
 """Stage the one-figure crop (studio.sheet_front) in place of the whole sheet.
-ep16 attempt 4: clean panels, yet T12 put two copies of Mrs. Elphinstone in
-the background -- her sheet's other poses placed as people.  Off by default
-until an A/B on the takes proves it."""
+ep16 attempt 4: clean panels, yet T11 put two copies of Mrs. Elphinstone in
+the background and T25 merged the two women -- the sheets' other poses placed
+as people.  A/B on T11/T25 (2026-10-02): the crops fixed both.  ON by default;
+TAKE_FRONT_SHEETS=0 restores the whole sheet."""
 
 
 def one_figure(sheet: Path) -> Path:
