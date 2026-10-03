@@ -18,6 +18,7 @@ is your final frame; match the voice timeline").
 """
 from __future__ import annotations
 
+import os
 import subprocess
 import sys
 import time
@@ -207,6 +208,20 @@ def adopt_names(rows: list[dict]) -> None:
             ro.CREATURES.add(r["entity_id"])
 
 
+FRONT_SHEETS = os.environ.get("TAKE_FRONT_SHEETS") == "1"
+"""Stage the one-figure crop (studio.sheet_front) in place of the whole sheet.
+ep16 attempt 4: clean panels, yet T12 put two copies of Mrs. Elphinstone in
+the background -- her sheet's other poses placed as people.  Off by default
+until an A/B on the takes proves it."""
+
+
+def one_figure(sheet: Path) -> Path:
+    """The sheet's one-figure crop when one exists beside it, else the sheet."""
+    sheet = Path(sheet)
+    front = sheet.with_name("sheet_front.png")
+    return front if sheet.name == "sheet.png" and front.exists() else sheet
+
+
 def reference_list(book: Path, boards: Path, faces: list[str], setup: str,
                    segs: list[tuple[int, int]], ends: list[tuple[int, int]], strip: Path,
                    state: str = "", sizes: list[str] | None = None) -> list[Path]:
@@ -214,6 +229,8 @@ def reference_list(book: Path, boards: Path, faces: list[str], setup: str,
     the order `episode_ref_official` numbers them (spec 1.1): cast sheets, the plate,
     every pinned cell in first-pin order, the END cells, the strip."""
     refs = [sq.cast_sheet(book, who, setup, state) for who in faces]
+    if FRONT_SHEETS:
+        refs = [one_figure(r) for r in refs]
     # THE PLATE WAS THE EPISODE'S TOP OPEN FAULT.  MEASURED on episode 2: 13 of
     # the 14 foreign frames are the take's OWN plate at 0.988-0.998, and every
     # one came from a close or insert segment with no wider cell in the take
@@ -300,6 +317,8 @@ def refs_from_cards(book: Path, boards: Path, faces: list[str], setup: str,
     The exception is not a preference: a take with no cast sheet has nothing else
     to stage, and `graph_for` reads `paths[0]` before it counts."""
     refs = [sq.cast_sheet(book, who, setup, state) for who in faces]
+    if FRONT_SHEETS:
+        refs = [one_figure(r) for r in refs]
     # THE PLACE IS ALWAYS STAGED HERE.  `places_the_plate` withholds the room from
     # a take of nothing but tight cells, because beside a close-up CELL the room
     # becomes the only whole picture the model can fall back on (ep02, 13 of 14
