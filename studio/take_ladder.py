@@ -340,6 +340,18 @@ def load_stills(home: Path) -> dict[int, dict]:
     return {int(k): v for k, v in json.loads(path.read_text(encoding="utf-8")).items()}
 
 
+def live_stills(home: Path) -> dict[int, dict]:
+    """The stills the CUT holds: a take rendered again after its still was
+    decided retires the still (ep12 T19).  assemble and qc both read this --
+    ep16: qc read stills.json raw and failed two shots the cut had taken."""
+    path = stills_path(home)
+    room = path.parent
+    return {k: v for k, v in load_stills(home).items()
+            if not ((room / f"T{k:02d}.mp4").exists()
+                    and (room / f"T{k:02d}.mp4").stat().st_mtime
+                    > v.get("decided", path.stat().st_mtime))}
+
+
 def neighbours(index: int, order: list[int]) -> set[int]:
     """The takes either side in CUT order (the numbering has holes)."""
     order = sorted(order)
