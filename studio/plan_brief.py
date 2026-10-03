@@ -53,8 +53,21 @@ PICTURE_RULES = [
     "No camera move id repeats on two shots running (G-MOVES); vary the catalog.",
     "At least one shot carries no line (a silent shot, G-STORY), and about one insert "
     "shot per five shots (G-VARIETY).",
-    "Each setup's `described` runs ~90 words or more and each shot's `frame` names "
-    "its edges (G-FIRSTFRAME: the drawer needs the room's geometry, not a mood).",
+    "Each setup's `described` runs ~90 words or more (G-FIRSTFRAME: the drawer needs "
+    "the room's geometry, not a mood).",
+    # ep16 (2026-10-03): 'frame names its edges' turned every frame into an
+    # inventory -- no subject, action, lens or light -- and the takes blurred and
+    # duplicated people.  The hand-authored era's shot form, measured on ep05/ep07:
+    "Write each shot as ONE camera's view of ONE subject. `frame` opens with the size "
+    "first, then who is in it and what they are doing, e.g. 'Medium past the near "
+    "shoulder of the narrator as a workman comes up over the arch of the bridge'.",
+    "`camera` gives a position, height and distance, a lens ('a 50mm lens') and the "
+    "side the light comes from ('The works lamps come from the RIGHT').",
+    "`at_rest` names ONE focus ('THE FOCUS OF THE PICTURE IS ...') and places two or "
+    "three other things around it; never an inventory of ten objects.",
+    "At most two faces a shot, each seen whole -- a person who is only a hand or an arm "
+    "is not a face; a crowd belongs only on wide shots, as a distant mass, never on a "
+    "close or medium shot.",
 ]
 """The standing picture gates, told to the WRITER up front (2026-10-01, ep15:
 three generations of drafts omitted light directions because no section said
