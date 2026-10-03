@@ -254,8 +254,15 @@ def aim_of(motion: str, at_rest: str = "") -> str:
     else the first clause of `at_rest`, else the figure."""
     cam, _ = ro.camera_clause(plan_gates.head_of(motion))
     if found := AIM.search(cam or ""):
-        return found.group(1).strip(" ,.")
-    return (at_rest or "").split(",")[0].strip(" .") or "the figure"
+        return " ".join(found.group(1).strip(" ,.").split()[:AIM_WORDS])
+    # at_rest clauses are SEMICOLON-separated (ep16: a comma split made the
+    # whole paragraph the aim and the motion lint refused the cure, M9)
+    first = re.split(r"[;,.]", at_rest or "")[0].strip(" .")
+    return " ".join(first.split()[:AIM_WORDS]) or "the figure"
+
+
+AIM_WORDS = 6
+"""A substitute move aims at one short noun phrase, never a sentence."""
 
 
 def substitute_id(kind: str, motion: str) -> str:
