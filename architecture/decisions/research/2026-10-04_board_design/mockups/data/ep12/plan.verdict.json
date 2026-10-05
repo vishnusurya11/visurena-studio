@@ -1,0 +1,71 @@
+{
+ "plan_sha8": "1b468fb2",
+ "verdict": "APPROVE",
+ "note": "story at shot_11: the plan marks shot 16 as its turn; the reading found it on shot 11; story at shot_11: the turn is not an act between two named people of its setup; invented at shot_05: count 'three hussars': span 'we saw ... three cavalry soldiers riding slowly towards Woki' is not in the chapter; invented at shot_00: count 'small amplitude' has no chapter span; invented at shot_01: prop 'torn letter' has no chapter span; invented at shot_08: prop 'stone drinking fountain' has no chapter span; invented at shot_22: posture 'knee-deep' has no chapter span -> keep_best",
+ "date": "2026-09-25",
+ "signed_by": "judge:plan@1",
+ "faults": [
+  {
+   "kind": "story",
+   "where": "shot_11",
+   "evidence": {
+    "read": 11,
+    "marked": 16
+   },
+   "severity": "normal",
+   "note": "the plan marks shot 16 as its turn; the reading found it on shot 11"
+  },
+  {
+   "kind": "story",
+   "where": "shot_11",
+   "evidence": {
+    "actor": "unnamed_first_person_narrator",
+    "acted_on": "old man",
+    "cast": [
+     "unnamed_first_person_narrator"
+    ]
+   },
+   "severity": "normal",
+   "note": "the turn is not an act between two named people of its setup"
+  },
+  {
+   "kind": "invented",
+   "where": "shot_05",
+   "evidence": {
+    "match": 0.49,
+    "wall": 0.85
+   },
+   "severity": "normal",
+   "note": "count 'three hussars': span 'we saw ... three cavalry soldiers riding slowly towards Woki' is not in the chapter"
+  },
+  {
+   "kind": "invented",
+   "where": "shot_00",
+   "evidence": {},
+   "severity": "normal",
+   "note": "count 'small amplitude' has no chapter span"
+  },
+  {
+   "kind": "invented",
+   "where": "shot_01",
+   "evidence": {},
+   "severity": "normal",
+   "note": "prop 'torn letter' has no chapter span"
+  },
+  {
+   "kind": "invented",
+   "where": "shot_08",
+   "evidence": {},
+   "severity": "normal",
+   "note": "prop 'stone drinking fountain' has no chapter span"
+  },
+  {
+   "kind": "invented",
+   "where": "shot_22",
+   "evidence": {},
+   "severity": "normal",
+   "note": "posture 'knee-deep' has no chapter span"
+  }
+ ],
+ "flagged": true
+}

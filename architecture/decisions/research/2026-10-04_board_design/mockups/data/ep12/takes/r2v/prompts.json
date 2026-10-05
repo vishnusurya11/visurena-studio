@@ -1,0 +1,736 @@
+[
+  {
+    "index": 0,
+    "shots": [
+      0
+    ],
+    "section": "hook",
+    "setup": "hill",
+    "lane": "narration",
+    "workflow": "video_minimax_h3_r2v_turbo_ref8 + anchors",
+    "model": "MiniMax-H3 ref2va + Ref2V 8-step LoRA",
+    "mode": "reference-to-video from the references alone (--from-refs): a cast sheet for every face the take shows + the location plate, always; no storyboard cell, nothing pinned; the dialogue wavs at their offsets anchored at frame 0",
+    "refs": [
+      "episodes/ep12/storyboard/h3/shot_00.png"
+    ],
+    "faces": [],
+    "ref_image_size": "match",
+    "anchors": [],
+    "audio": "silence",
+    "width": 768,
+    "height": 768,
+    "fps": 24,
+    "placed_seconds": 7.0,
+    "frames": 175,
+    "seconds": 7.29,
+    "steps": 8,
+    "seed": 93000,
+    "prompt": "subject_definitions:\n<Audio 1> is the take's complete audio track and runs silent for its whole length.\n<Picture 1> is the storyboard frame drawn for this shot: the place, the people in it and the clothes they wear, at this hour of the day, in the house art style.\n\nsummary:\n[reference generation + audio reuse] One 7.29-second take of 1 shot in a deserted road running down Maybury Hill at dawn in 1894 between garden walls and villas with shaven chimney tops. [Shot 1] runs from 00:00 to 00:07. The take carries the place through [Shot 1] in that order. <Audio 1> is the complete audio track.\n\nretention_analysis:\n<Audio 1>: fully_copy - <Audio 1> is reused 1:1 as the take's complete final audio track.\n<Picture 1> ([Shot 1] first frame): fully_preserved - subject placement, wardrobe and light.\n\ndetailed_description:\nAngular stylised 3D animation, brush-stroke texture, Surrey, 1894, warm sun from the east, crisp black shadows.\n[Shot 1] From 00:00 to 00:07. The shot opens on a wide down a deserted road on Maybury Hill at dawn, things dropped on the gravel, a horseless cart heeled over on a broken wheel at the corner, level country beyond. The camera is on the road at a standing man's eye, a 35mm lens. The dawn comes from the east at the RIGHT. At the first frame the pale road runs from the BOTTOM CENTRE down the hill away to the CENTRE, garden walls line it along the LEFT third and the RIGHT third, the heeled-over cart stands at the corner at the RIGHT third, dropped things lie on the gravel across the BOTTOM third, and the level country and low flat horizon cross the TOP third with the dawn sky above it at the TOP edge. The camera rises above the garden wall with small amplitude until the heeled-over cart already in the picture stands at the centre as the dawn light goes on spreading down the road, from 00:00 to 00:04. At 00:04 a torn curtain goes on stirring in a villa window, and the movement continues to the last frame of the shot. By 00:07 the camera is rising through the last frame, and the action continues with it.\n\noverall_soundscape: Open air under the action; cloth, footsteps and hands at work.\n\nnon_diegetic_music: N/A"
+  },
+  {
+    "index": 1,
+    "shots": [
+      1
+    ],
+    "section": "setup",
+    "setup": "hill",
+    "lane": "narration",
+    "workflow": "video_minimax_h3_r2v_turbo_ref8 + anchors",
+    "model": "MiniMax-H3 ref2va + Ref2V 8-step LoRA",
+    "mode": "reference-to-video from the references alone (--from-refs): a cast sheet for every face the take shows + the location plate, always; no storyboard cell, nothing pinned; the dialogue wavs at their offsets anchored at frame 0",
+    "refs": [
+      "episodes/ep12/storyboard/h3/shot_01.png"
+    ],
+    "faces": [],
+    "ref_image_size": "match",
+    "anchors": [],
+    "audio": "silence",
+    "width": 768,
+    "height": 768,
+    "fps": 24,
+    "placed_seconds": 8.166667,
+    "frames": 209,
+    "seconds": 8.71,
+    "steps": 8,
+    "seed": 93001,
+    "prompt": "subject_definitions:\n<Audio 1> is the take's complete audio track and runs silent for its whole length.\n<Picture 1> is the storyboard frame drawn for this shot: the place, the people in it and the clothes they wear, at this hour of the day, in the house art style.\n\nsummary:\n[reference generation + audio reuse] One 8.71-second take of 1 shot in a deserted road running down Maybury Hill at dawn in 1894 between garden walls and villas with shaven chimney tops. [Shot 1] runs from 00:00 to 00:08. The take carries the place through [Shot 1] in that order. <Audio 1> is the complete audio track.\n\nretention_analysis:\n<Audio 1>: fully_copy - <Audio 1> is reused 1:1 as the take's complete final audio track.\n<Picture 1> ([Shot 1] first frame): fully_preserved - subject placement, wardrobe and light.\n\ndetailed_description:\nAngular stylised 3D animation, brush-stroke texture, Surrey, 1894, warm sun from the east, crisp black shadows.\n[Shot 1] From 00:00 to 00:08. The shot opens on an insert at dawn on a brass carriage clock, a lady's slipper and a silver spoon dropped on the pale gravel of the road; only that object and what touches it is in frame. The camera is low over the road looking down, a 50mm lens. The dawn comes from the RIGHT; the brass reads gold. At the first frame a brass carriage clock, a lady's slipper and a silver spoon lie scattered at the CENTRE on the pale gravel, the long black shadow of a garden wall across the BOTTOM third, and the heeled-over cart's broken wheel at the TOP RIGHT. A torn letter lies beside the spoon at the BOTTOM LEFT, and the dawn light lies gold along the gravel from the RIGHT edge. The camera pushes in on the clock at the centre of the picture as the long wall shadow goes on shortening across the gravel, from 00:00 to 00:04. At 00:04 the clock's hands go on ticking, and the movement continues to the last frame of the shot. By 00:08 the camera is pushing in through the last frame, and the action continues with it.\n\noverall_soundscape: Open air under the action; cloth, footsteps and hands at work.\n\nnon_diegetic_music: N/A"
+  },
+  {
+    "index": 2,
+    "shots": [
+      2
+    ],
+    "section": "setup",
+    "setup": "hill",
+    "lane": "dialogue",
+    "workflow": "video_minimax_h3_r2v_turbo_ref8 + anchors",
+    "model": "MiniMax-H3 ref2va + Ref2V 8-step LoRA",
+    "mode": "reference-to-video from the references alone (--from-refs): a cast sheet for every face the take shows + the location plate, always; no storyboard cell, nothing pinned; the dialogue wavs at their offsets anchored at frame 0",
+    "refs": [
+      "refs/characters/artilleryman/sheet.png",
+      "episodes/ep12/storyboard/h3/shot_02.png"
+    ],
+    "faces": [
+      "artilleryman"
+    ],
+    "ref_image_size": "match",
+    "anchors": [],
+    "audio": [
+      [
+        "l02.wav",
+        0.25
+      ]
+    ],
+    "width": 768,
+    "height": 768,
+    "fps": 24,
+    "placed_seconds": 6.791667,
+    "frames": 175,
+    "seconds": 7.29,
+    "steps": 8,
+    "seed": 93002,
+    "prompt": "subject_definitions:\n<Subject 1> is the artilleryman in <Picture 1>: Square weather-browned face, heavy black brows, dark brown eyes, broad nose. Thick straight black hair cut short at the sides and falling forward over the brow and eyes. Full black moustache. Broad calloused hands. Wearing: Royal Horse Artillery driver's dark blue serge frock jacket with scarlet stand collar and brass buttons, hanging unbuttoned; dark blue pantaloons with a broad scarlet stripe; black riding boots with steel spurs. Hatless, his thick black hair falling forward over his brow. Uniform and face blackened with ash and soot, back of the jacket scorched brown. <Picture 1> defines this man alone; each shot keeps the framing its own words describe.\n<Audio 1> is the take's complete audio track: the one line spoken on camera at 00:00, over silence for the rest of its length.\n<Picture 2> is the storyboard frame drawn for this shot: the place, the people in it and the clothes they wear, at this hour of the day, in the house art style.\n\nsummary:\n[reference generation + audio reuse] One 7.29-second take of 1 shot in a deserted road running down Maybury Hill at dawn in 1894 between garden walls and villas with shaven chimney tops. [Shot 1] runs from 00:00 to 00:07. The take carries <Subject 1> through [Shot 1] in that order. <Audio 1> carries that spoken line and is the complete audio track.\n\nretention_analysis:\n<Subject 1> (the man in [Shot 1]): partially_preserved - the face, hair, build and clothes of <Picture 1> carry into every shot that shows him; <Picture 1> serves as a definition of the man and each shot keeps the framing its own words describe.\n<Audio 1>: fully_copy - <Audio 1> is reused 1:1 as the take's complete final audio track.\n<Picture 2> ([Shot 1] first frame): fully_preserved - subject placement, wardrobe and light.\n\ndetailed_description:\nAngular stylised 3D animation, brush-stroke texture, Surrey, 1894, warm sun from the east, crisp black shadows.\n[Shot 1] From 00:00 to 00:07. The shot opens on a medium close shot at dawn on <Subject 1> (full black moustache, royal horse artillery driver's dark blue serge frock jacket with scarlet stand collar and brass buttons, hanging unbuttoned, hatless, his thick black hair falling forward over his brow) standing in the road, turned to the camera, his face sooty, speaking low. The camera is on the road level with his eyes, three paces from him, an 85mm lens. The dawn comes from the east at the RIGHT. At the first frame the artilleryman stands at the CENTRE on the road, turned to the camera, his open jacket and sooty face lit gold from the RIGHT. The camera pushes in toward him with small amplitude until his head and shoulders fill the middle of the picture as he speaks and shakes his head, from 00:00 to 00:05. <Subject 1> (S1), on screen, square weather-browned face, with a clipped English voice at an even pace, says: <d>[English] It's no kindness to the right sort of wife, to make her a widow.</d> His mouth shapes every syllable as the line is heard and closes on the last word. At 00:05, as the line ends, his hand goes on buttoning a biscuit packet into his jacket, and the movement continues to the last frame of the shot. By 00:07 the camera is pushing in through the last frame, and the action continues with it.\n\noverall_soundscape: Open air under the action; cloth, footsteps and hands at work.\n\nnon_diegetic_music: N/A"
+  },
+  {
+    "index": 3,
+    "shots": [
+      3
+    ],
+    "section": "setup",
+    "setup": "woods",
+    "lane": "narration",
+    "workflow": "video_minimax_h3_r2v_turbo_ref8 + anchors",
+    "model": "MiniMax-H3 ref2va + Ref2V 8-step LoRA",
+    "mode": "reference-to-video from the references alone (--from-refs): a cast sheet for every face the take shows + the location plate, always; no storyboard cell, nothing pinned; the dialogue wavs at their offsets anchored at frame 0",
+    "refs": [
+      "episodes/ep12/storyboard/h3/shot_03.png"
+    ],
+    "faces": [],
+    "ref_image_size": "match",
+    "anchors": [],
+    "audio": "silence",
+    "width": 768,
+    "height": 768,
+    "fps": 24,
+    "placed_seconds": 7.791667,
+    "frames": 209,
+    "seconds": 8.71,
+    "steps": 8,
+    "seed": 93003,
+    "prompt": "subject_definitions:\n<Audio 1> is the take's complete audio track and runs silent for its whole length.\n<Picture 1> is the storyboard frame drawn for this shot: the place, the people in it and the clothes they wear, at this hour of the day, in the house art style.\n\nsummary:\n[reference generation + audio reuse] One 8.71-second take of 1 shot in a clearing in a pine wood near Maybury on a Sunday morning in 1894. [Shot 1] runs from 00:00 to 00:08. The take carries the place through [Shot 1] in that order. <Audio 1> is the complete audio track.\n\nretention_analysis:\n<Audio 1>: fully_copy - <Audio 1> is reused 1:1 as the take's complete final audio track.\n<Picture 1> ([Shot 1] first frame): fully_preserved - subject placement, wardrobe and light.\n\ndetailed_description:\nAngular stylised 3D animation, brush-stroke texture, Surrey, 1894, morning sun from the left, black shadows.\n[Shot 1] From 00:00 to 00:08. The shot opens on a wide across a pine clearing on a Sunday morning, felled trunks in rows, a sawing machine by its heap of sawdust, and a deserted hut. The camera is in the clearing at a standing man's eye, a 35mm lens. The morning sun comes from the east at the LEFT. At the first frame the felled pine trunks lie in rows across the BOTTOM third, the sawing machine and its heap of pale sawdust stand at the CENTRE LEFT, the small wooden hut stands at the RIGHT third, and tall straight pine stems fill the TOP half from the LEFT edge to the RIGHT edge, with the sandy road showing between them at the CENTRE and sun shafts slanting across from the LEFT. The camera tracks sideways to the right past the felled trunks, a truck with small amplitude, until the sawing machine already in the picture stands at the centre as the sun shafts go on slanting through the stems, from 00:00 to 00:04. At 00:04 the dust goes on drifting in them, and the movement continues to the last frame of the shot. By 00:08 the camera is tracking through the last frame, and the action continues with it.\n\noverall_soundscape: Open air under the action; cloth, footsteps and hands at work.\n\nnon_diegetic_music: N/A"
+  },
+  {
+    "index": 4,
+    "shots": [
+      4
+    ],
+    "section": "friction",
+    "setup": "woods",
+    "lane": "narration",
+    "workflow": "video_minimax_h3_r2v_turbo_ref8 + anchors",
+    "model": "MiniMax-H3 ref2va + Ref2V 8-step LoRA",
+    "mode": "reference-to-video from the references alone (--from-refs): a cast sheet for every face the take shows + the location plate, always; no storyboard cell, nothing pinned; the dialogue wavs at their offsets anchored at frame 0",
+    "refs": [
+      "refs/characters/unnamed_first_person_narrator/sheet.png",
+      "episodes/ep12/storyboard/h3/shot_04.png"
+    ],
+    "faces": [
+      "unnamed_first_person_narrator"
+    ],
+    "ref_image_size": "match",
+    "anchors": [],
+    "audio": "silence",
+    "width": 768,
+    "height": 768,
+    "fps": 24,
+    "placed_seconds": 6.791667,
+    "frames": 175,
+    "seconds": 7.29,
+    "steps": 8,
+    "seed": 93004,
+    "prompt": "subject_definitions:\n<Subject 1> is the Narrator in <Picture 1>: Long oval face, high forehead, long straight nose, straight dark brows, grey eyes. Fair English skin lightly tanned on face and hands. Dark brown hair cut short at back and sides, parted on the left and combed smooth. Neat close-trimmed dark brown moustache; shaven cheeks and chin. Wearing: A dry second suit in the same mid-grey herringbone tweed: single-breasted jacket buttoned high, waistcoat, narrow trousers. White shirt with soft turn-down collar, dark green knitted tie. Brown boots. <Picture 1> defines this man alone; each shot keeps the framing its own words describe.\n<Audio 1> is the take's complete audio track and runs silent for its whole length.\n<Picture 2> is the storyboard frame drawn for this shot: the place, the people in it and the clothes they wear, at this hour of the day, in the house art style.\n\nsummary:\n[reference generation + audio reuse] One 7.29-second take of 1 shot in a clearing in a pine wood near Maybury on a Sunday morning in 1894. [Shot 1] runs from 00:00 to 00:07. The take carries <Subject 1> through [Shot 1] in that order. <Audio 1> is the complete audio track.\n\nretention_analysis:\n<Subject 1> (the man in [Shot 1]): partially_preserved - the face, hair, build and clothes of <Picture 1> carry into every shot that shows him; <Picture 1> serves as a definition of the man and each shot keeps the framing its own words describe.\n<Audio 1>: fully_copy - <Audio 1> is reused 1:1 as the take's complete final audio track.\n<Picture 2> ([Shot 1] first frame): fully_preserved - subject placement, wardrobe and light.\n\ndetailed_description:\nAngular stylised 3D animation, brush-stroke texture, Surrey, 1894, morning sun from the left, black shadows.\n[Shot 1] From 00:00 to 00:07. The shot opens on a medium shot in the pine wood on a Sunday morning on <Subject 1> (neat close-trimmed dark brown moustache, spare straw boater with a black band, a dry second suit in the same mid-grey herringbone tweed) walking between the stems, turned to look back over his shoulder. The camera is among the pines level with his chest, four paces from him, a 50mm lens. The morning sun comes from the LEFT through the stems. At the first frame the narrator walks at the CENTRE among the pine stems, turned to look back over his shoulder, a pine trunk at the LEFT third and the felled logs at the BOTTOM third. The camera tracks beside him among the pine stems as he walks at a normal walking pace, a follow with small amplitude as he goes on walking at a steady pace, from 00:00 to 00:04. At 00:04 his head goes on turning back over his shoulder, and the turn continues to the last frame of the shot. <Subject 1>'s mouth is closed from 00:00 to 00:05 while he goes on walking at a steady pace. By 00:07 the camera is tracking through the last frame, and the action continues with it.\n\noverall_soundscape: Open air under the action; cloth, footsteps and hands at work.\n\nnon_diegetic_music: N/A"
+  },
+  {
+    "index": 5,
+    "shots": [
+      5
+    ],
+    "section": "friction",
+    "setup": "woods",
+    "lane": "narration",
+    "workflow": "video_minimax_h3_r2v_turbo_ref8 + anchors",
+    "model": "MiniMax-H3 ref2va + Ref2V 8-step LoRA",
+    "mode": "reference-to-video from the references alone (--from-refs): a cast sheet for every face the take shows + the location plate, always; no storyboard cell, nothing pinned; the dialogue wavs at their offsets anchored at frame 0",
+    "refs": [
+      "episodes/ep12/storyboard/h3/shot_05.png"
+    ],
+    "faces": [],
+    "ref_image_size": "match",
+    "anchors": [],
+    "audio": "silence",
+    "width": 768,
+    "height": 768,
+    "fps": 24,
+    "placed_seconds": 8.458333,
+    "frames": 209,
+    "seconds": 8.71,
+    "steps": 8,
+    "seed": 93005,
+    "prompt": "subject_definitions:\n<Audio 1> is the take's complete audio track and runs silent for its whole length.\n<Picture 1> is the storyboard frame drawn for this shot: the place, the people in it and the clothes they wear, at this hour of the day, in the house art style.\n\nsummary:\n[reference generation + audio reuse] One 8.71-second take of 1 shot in a clearing in a pine wood near Maybury on a Sunday morning in 1894. [Shot 1] runs from 00:00 to 00:08. The take carries the place through [Shot 1] in that order. <Audio 1> is the complete audio track.\n\nretention_analysis:\n<Audio 1>: fully_copy - <Audio 1> is reused 1:1 as the take's complete final audio track.\n<Picture 1> ([Shot 1] first frame): fully_preserved - subject placement, wardrobe and light.\n\ndetailed_description:\nAngular stylised 3D animation, brush-stroke texture, Surrey, 1894, morning sun from the left, black shadows.\n[Shot 1] From 00:00 to 00:08. The shot opens on a medium shot through the pine stems on a Sunday morning at three hussars on horseback riding along a sandy road at a normal trot, a heliograph strapped to one saddle. The camera is among the pines at a standing man's eye, a 50mm lens. The morning sun comes from the LEFT. At the first frame three hussars on horseback ride along the sandy road at the CENTRE, seen between the pine stems that stand at the LEFT third and the RIGHT third, a small brass heliograph on its stand strapped to one saddle, sun shafts across the road at the TOP third. The camera pans from the pine stems across to the three hussars already in the picture until the hussars are at the centre as the horses go on walking at a steady pace, from 00:00 to 00:04. At 00:04 the sun shafts go on flickering over them, and the movement continues to the last frame of the shot. By 00:08 the camera is panning through the last frame, and the action continues with it.\n\noverall_soundscape: Open air under the action; cloth, footsteps and hands at work.\n\nnon_diegetic_music: N/A"
+  },
+  {
+    "index": 6,
+    "shots": [
+      6
+    ],
+    "section": "friction",
+    "setup": "woods",
+    "lane": "dialogue",
+    "workflow": "video_minimax_h3_r2v_turbo_ref8 + anchors",
+    "model": "MiniMax-H3 ref2va + Ref2V 8-step LoRA",
+    "mode": "reference-to-video from the references alone (--from-refs): a cast sheet for every face the take shows + the location plate, always; no storyboard cell, nothing pinned; the dialogue wavs at their offsets anchored at frame 0",
+    "refs": [
+      "refs/characters/artilleryman/sheet.png",
+      "episodes/ep12/storyboard/h3/shot_06.png"
+    ],
+    "faces": [
+      "artilleryman"
+    ],
+    "ref_image_size": "match",
+    "anchors": [],
+    "audio": [
+      [
+        "l06.wav",
+        0.25
+      ]
+    ],
+    "width": 768,
+    "height": 768,
+    "fps": 24,
+    "placed_seconds": 5.583333,
+    "frames": 141,
+    "seconds": 5.88,
+    "steps": 8,
+    "seed": 93006,
+    "prompt": "subject_definitions:\n<Subject 1> is the artilleryman in <Picture 1>: Square weather-browned face, heavy black brows, dark brown eyes, broad nose. Thick straight black hair cut short at the sides and falling forward over the brow and eyes. Full black moustache. Broad calloused hands. Wearing: Royal Horse Artillery driver's dark blue serge frock jacket with scarlet stand collar and brass buttons, hanging unbuttoned; dark blue pantaloons with a broad scarlet stripe; black riding boots with steel spurs. Hatless, his thick black hair falling forward over his brow. Uniform and face blackened with ash and soot, back of the jacket scorched brown. <Picture 1> defines this man alone; each shot keeps the framing its own words describe.\n<Audio 1> is the take's complete audio track: the one line spoken on camera at 00:00, over silence for the rest of its length.\n<Picture 2> is the storyboard frame drawn for this shot: the place, the people in it and the clothes they wear, at this hour of the day, in the house art style.\n\nsummary:\n[reference generation + audio reuse] One 5.88-second take of 1 shot in a clearing in a pine wood near Maybury on a Sunday morning in 1894. [Shot 1] runs from 00:00 to 00:05. The take carries <Subject 1> through [Shot 1] in that order. <Audio 1> carries that spoken line and is the complete audio track.\n\nretention_analysis:\n<Subject 1> (the man in [Shot 1]): partially_preserved - the face, hair, build and clothes of <Picture 1> carry into every shot that shows him; <Picture 1> serves as a definition of the man and each shot keeps the framing its own words describe.\n<Audio 1>: fully_copy - <Audio 1> is reused 1:1 as the take's complete final audio track.\n<Picture 2> ([Shot 1] first frame): fully_preserved - subject placement, wardrobe and light.\n\ndetailed_description:\nAngular stylised 3D animation, brush-stroke texture, Surrey, 1894, morning sun from the left, black shadows.\n[Shot 1] From 00:00 to 00:05. The shot opens on a medium close shot on <Subject 1> (full black moustache, royal horse artillery driver's dark blue serge frock jacket with scarlet stand collar and brass buttons, hanging unbuttoned, hatless, his thick black hair falling forward over his brow) standing in the sandy road on a Sunday morning, saluting and reporting to an officer on horseback beside him. The camera is in the road level with his eyes, three paces from him, an 85mm lens. The morning sun comes from the LEFT. At the first frame the artilleryman stands at the CENTRE in the sandy road, saluting with his right hand at his brow. The camera keeps a locked-off frame as he salutes and speaks, from 00:00 to 00:04. <Subject 1> (S1), on screen, square weather-browned face, with a clipped English voice at an even pace, says: <d>[English] Giants in armour, sir. A hundred feet high.</d> His mouth shapes every syllable as the line is heard and closes on the last word. At 00:04, as the line ends, his free hand goes on sketching the height of the thing in the air, and the movement continues to the last frame of the shot. By 00:05 the action of that shot continues through the last frame.\n\noverall_soundscape: Open air under the action; cloth, footsteps and hands at work.\n\nnon_diegetic_music: N/A"
+  },
+  {
+    "index": 7,
+    "shots": [
+      7
+    ],
+    "section": "friction",
+    "setup": "woods",
+    "lane": "dialogue",
+    "workflow": "video_minimax_h3_r2v_turbo_ref8 + anchors",
+    "model": "MiniMax-H3 ref2va + Ref2V 8-step LoRA",
+    "mode": "reference-to-video from the references alone (--from-refs): a cast sheet for every face the take shows + the location plate, always; no storyboard cell, nothing pinned; the dialogue wavs at their offsets anchored at frame 0",
+    "refs": [
+      "refs/characters/unnamed_first_person_narrator/sheet.png",
+      "episodes/ep12/storyboard/h3/shot_07.png"
+    ],
+    "faces": [
+      "unnamed_first_person_narrator"
+    ],
+    "ref_image_size": "match",
+    "anchors": [],
+    "audio": [
+      [
+        "l07.wav",
+        0.25
+      ]
+    ],
+    "width": 768,
+    "height": 768,
+    "fps": 24,
+    "placed_seconds": 4.208333,
+    "frames": 107,
+    "seconds": 4.46,
+    "steps": 8,
+    "seed": 93007,
+    "prompt": "subject_definitions:\n<Subject 1> is the Narrator in <Picture 1>: Long oval face, high forehead, long straight nose, straight dark brows, grey eyes. Fair English skin lightly tanned on face and hands. Dark brown hair cut short at back and sides, parted on the left and combed smooth. Neat close-trimmed dark brown moustache; shaven cheeks and chin. Wearing: A dry second suit in the same mid-grey herringbone tweed: single-breasted jacket buttoned high, waistcoat, narrow trousers. White shirt with soft turn-down collar, dark green knitted tie. Brown boots. <Picture 1> defines this man alone; each shot keeps the framing its own words describe.\n<Audio 1> is the take's complete audio track: the one line spoken on camera at 00:00, over silence for the rest of its length.\n<Picture 2> is the storyboard frame drawn for this shot: the place, the people in it and the clothes they wear, at this hour of the day, in the house art style.\n\nsummary:\n[reference generation + audio reuse] One 4.46-second take of 1 shot in a clearing in a pine wood near Maybury on a Sunday morning in 1894. [Shot 1] runs from 00:00 to 00:04. The take carries <Subject 1> through [Shot 1] in that order. <Audio 1> carries that spoken line and is the complete audio track.\n\nretention_analysis:\n<Subject 1> (the man in [Shot 1]): partially_preserved - the face, hair, build and clothes of <Picture 1> carry into every shot that shows him; <Picture 1> serves as a definition of the man and each shot keeps the framing its own words describe.\n<Audio 1>: fully_copy - <Audio 1> is reused 1:1 as the take's complete final audio track.\n<Picture 2> ([Shot 1] first frame): fully_preserved - subject placement, wardrobe and light.\n\ndetailed_description:\nAngular stylised 3D animation, brush-stroke texture, Surrey, 1894, morning sun from the left, black shadows.\n[Shot 1] From 00:00 to 00:04. The shot opens on a medium close shot from the road on <Subject 1> (neat close-trimmed dark brown moustache, spare straw boater with a black band, a dry second suit in the same mid-grey herringbone tweed) standing on the bank above it on a Sunday morning, answering down to an officer on horseback. The camera is a low angle from the road looking up at the bank, three paces from him, an 85mm lens. The morning sun comes from the LEFT. At the first frame the narrator stands at the CENTRE on the bank above the road, his straw boater lit by the sun from the LEFT. The camera keeps a locked-off frame from below as he speaks and nods, from 00:00 to 00:02. <Subject 1> (S1), on screen, long oval face, with a clipped English voice at an even pace, says: <d>[English] It is perfectly true.</d> His mouth shapes every syllable as the line is heard and closes on the last word. At 00:02, as the line ends, his hand goes on pointing south over the treetops, and the movement continues to the last frame of the shot. By 00:04 the action of that shot continues through the last frame.\n\noverall_soundscape: Open air under the action; cloth, footsteps and hands at work.\n\nnon_diegetic_music: N/A"
+  },
+  {
+    "index": 8,
+    "shots": [
+      8
+    ],
+    "section": "friction",
+    "setup": "weybridge",
+    "lane": "narration",
+    "workflow": "video_minimax_h3_r2v_turbo_ref8 + anchors",
+    "model": "MiniMax-H3 ref2va + Ref2V 8-step LoRA",
+    "mode": "reference-to-video from the references alone (--from-refs): a cast sheet for every face the take shows + the location plate, always; no storyboard cell, nothing pinned; the dialogue wavs at their offsets anchored at frame 0",
+    "refs": [
+      "episodes/ep12/storyboard/h3/shot_08.png"
+    ],
+    "faces": [],
+    "ref_image_size": "match",
+    "anchors": [],
+    "audio": "silence",
+    "width": 768,
+    "height": 768,
+    "fps": 24,
+    "placed_seconds": 7.583333,
+    "frames": 192,
+    "seconds": 8.0,
+    "steps": 8,
+    "seed": 93008,
+    "prompt": "subject_definitions:\n<Audio 1> is the take's complete audio track and runs silent for its whole length.\n<Picture 1> is the storyboard frame drawn for this shot: the place, the people in it and the clothes they wear, at this hour of the day, in the house art style.\n\nsummary:\n[reference generation + audio reuse] One 8.00-second take of 1 shot in the village street of Weybridge on a sunny Sunday morning in 1894 in a tumult. [Shot 1] runs from 00:00 to 00:08. The take carries the place through [Shot 1] in that order. <Audio 1> is the complete audio track.\n\nretention_analysis:\n<Audio 1>: fully_copy - <Audio 1> is reused 1:1 as the take's complete final audio track.\n<Picture 1> ([Shot 1] first frame): fully_preserved - subject placement, wardrobe and light.\n\ndetailed_description:\nAngular stylised 3D animation, brush-stroke texture, Weybridge, 1894, morning sun from the right, black shadows.\n[Shot 1] From 00:00 to 00:08. The shot opens on a wide down the village street of Weybridge on a sunny Sunday morning in a tumult, carts and an old omnibus being loaded, people in their best clothes carrying boxes. The camera is in the street at a standing man's eye, a 35mm lens. The morning sun comes from the east at the RIGHT. At the first frame the street runs from the BOTTOM CENTRE away to the CENTRE, loaded carts and a black government waggon stand along the LEFT third, the old omnibus stands at the RIGHT third, the stone drinking fountain stands at the CENTRE, people in Sunday clothes carry boxes across the BOTTOM third, and brick shop fronts line both sides up to the TOP third under a clear sky at the TOP edge. The camera rises above the carts with small amplitude until the stone drinking fountain already in the picture stands at the centre as the people go on loading the carts, from 00:00 to 00:04. At 00:04 a horse goes on tossing its head, and the movement continues to the last frame of the shot. Beyond the foreground people in Sunday clothes loading carts, a dozen of them, from 00:00 to 00:08. By 00:08 the camera is rising through the last frame, and the action continues with it.\n\noverall_soundscape: Open air under the action; cloth, footsteps and the people nearby.\n\nnon_diegetic_music: N/A"
+  },
+  {
+    "index": 9,
+    "shots": [
+      9
+    ],
+    "section": "friction",
+    "setup": "weybridge",
+    "lane": "narration",
+    "workflow": "video_minimax_h3_r2v_turbo_ref8 + anchors",
+    "model": "MiniMax-H3 ref2va + Ref2V 8-step LoRA",
+    "mode": "reference-to-video from the references alone (--from-refs): a cast sheet for every face the take shows + the location plate, always; no storyboard cell, nothing pinned; the dialogue wavs at their offsets anchored at frame 0",
+    "refs": [
+      "episodes/ep12/storyboard/h3/shot_09.png"
+    ],
+    "faces": [],
+    "ref_image_size": "match",
+    "anchors": [],
+    "audio": "silence",
+    "width": 768,
+    "height": 768,
+    "fps": 24,
+    "placed_seconds": 6.041667,
+    "frames": 158,
+    "seconds": 6.58,
+    "steps": 8,
+    "seed": 93009,
+    "prompt": "subject_definitions:\n<Audio 1> is the take's complete audio track and runs silent for its whole length.\n<Picture 1> is the storyboard frame drawn for this shot: the place, the people in it and the clothes they wear, at this hour of the day, in the house art style.\n\nsummary:\n[reference generation + audio reuse] One 6.58-second take of 1 shot in the village street of Weybridge on a sunny Sunday morning in 1894 in a tumult. [Shot 1] runs from 00:00 to 00:06. The take carries the place through [Shot 1] in that order. <Audio 1> is the complete audio track.\n\nretention_analysis:\n<Audio 1>: fully_copy - <Audio 1> is reused 1:1 as the take's complete final audio track.\n<Picture 1> ([Shot 1] first frame): fully_preserved - subject placement, wardrobe and light.\n\ndetailed_description:\nAngular stylised 3D animation, brush-stroke texture, Weybridge, 1894, morning sun from the right, black shadows.\n[Shot 1] From 00:00 to 00:06. The shot opens on a medium shot on four grenadiers in white fatigue jackets among the loaded carts on a sunny Sunday morning, waving the people on. The camera is in the street at a standing man's eye, a 50mm lens. The morning sun comes from the RIGHT. At the first frame Four grenadiers in white fatigue jackets stand at the CENTRE among the loaded carts, waving people on, a black government waggon at the LEFT third and people in Sunday clothes with boxes at the RIGHT third. An old omnibus stands behind them at the TOP third, and a dropped hatbox lies in the street at the BOTTOM LEFT. The brick shop fronts rise behind the carts to the TOP edge, and the morning sun lies warm across the cobbles from the RIGHT edge. The camera pushes in toward the grenadiers already in the picture with small amplitude as the grenadiers go on waving the people on, from 00:00 to 00:03. At 00:03 the people go on carrying their boxes past, and the movement continues to the last frame of the shot. Beyond the foreground people in Sunday clothes loading carts, a dozen of them, from 00:00 to 00:06. By 00:06 the camera is pushing in through the last frame, and the action continues with it.\n\noverall_soundscape: Open air under the action; cloth, footsteps and the people nearby.\n\nnon_diegetic_music: N/A"
+  },
+  {
+    "index": 10,
+    "shots": [
+      10
+    ],
+    "section": "friction",
+    "setup": "weybridge",
+    "lane": "narration",
+    "workflow": "video_minimax_h3_r2v_turbo_ref8 + anchors",
+    "model": "MiniMax-H3 ref2va + Ref2V 8-step LoRA",
+    "mode": "reference-to-video from the references alone (--from-refs): a cast sheet for every face the take shows + the location plate, always; no storyboard cell, nothing pinned; the dialogue wavs at their offsets anchored at frame 0",
+    "refs": [
+      "episodes/ep12/storyboard/h3/shot_10.png"
+    ],
+    "faces": [],
+    "ref_image_size": "match",
+    "anchors": [],
+    "audio": "silence",
+    "width": 768,
+    "height": 768,
+    "fps": 24,
+    "placed_seconds": 6.625,
+    "frames": 175,
+    "seconds": 7.29,
+    "steps": 8,
+    "seed": 93010,
+    "prompt": "subject_definitions:\n<Audio 1> is the take's complete audio track and runs silent for its whole length.\n<Picture 1> is the storyboard frame drawn for this shot: the place, the people in it and the clothes they wear, at this hour of the day, in the house art style.\n\nsummary:\n[reference generation + audio reuse] One 7.29-second take of 1 shot in the village street of Weybridge on a sunny Sunday morning in 1894 in a tumult. [Shot 1] runs from 00:00 to 00:07. The take carries the place through [Shot 1] in that order. <Audio 1> is the complete audio track.\n\nretention_analysis:\n<Audio 1>: fully_copy - <Audio 1> is reused 1:1 as the take's complete final audio track.\n<Picture 1> ([Shot 1] first frame): fully_preserved - subject placement, wardrobe and light.\n\ndetailed_description:\nAngular stylised 3D animation, brush-stroke texture, Weybridge, 1894, morning sun from the right, black shadows.\n[Shot 1] From 00:00 to 00:07. The shot opens on a medium shot in the sunny street on an old man in a black coat beside a huge wooden box with pots of orchids on its lid, pointing at them and arguing. The camera is in the street at a standing man's eye, a 50mm lens. The morning sun comes from the RIGHT. At the first frame an old man in a black coat stands at the CENTRE beside a huge wooden box with pots of orchids on its lid, pointing at them, a loaded cart behind him at the LEFT third and the brick shop fronts at the RIGHT third. A grenadier in a white fatigue jacket stands behind him at the TOP LEFT, and more pots of orchids stand on the cobbles at the BOTTOM RIGHT. The camera keeps a locked-off frame as he goes on pointing at his orchids, from 00:00 to 00:04. At 00:04 his other hand goes on waving, and the movement continues to the last frame of the shot. Beyond the foreground people in Sunday clothes loading carts, a dozen of them, from 00:00 to 00:07. By 00:07 the action of that shot continues through the last frame.\n\noverall_soundscape: Open air under the action; cloth, footsteps and the people nearby.\n\nnon_diegetic_music: N/A"
+  },
+  {
+    "index": 11,
+    "shots": [
+      11
+    ],
+    "section": "friction",
+    "setup": "weybridge",
+    "lane": "dialogue",
+    "workflow": "video_minimax_h3_r2v_turbo_ref8 + anchors",
+    "model": "MiniMax-H3 ref2va + Ref2V 8-step LoRA",
+    "mode": "reference-to-video from the references alone (--from-refs): a cast sheet for every face the take shows + the location plate, always; no storyboard cell, nothing pinned; the dialogue wavs at their offsets anchored at frame 0",
+    "refs": [
+      "refs/characters/unnamed_first_person_narrator/sheet.png",
+      "episodes/ep12/storyboard/h3/shot_11.png"
+    ],
+    "faces": [
+      "unnamed_first_person_narrator"
+    ],
+    "ref_image_size": "match",
+    "anchors": [],
+    "audio": [
+      [
+        "l11.wav",
+        0.25
+      ]
+    ],
+    "width": 768,
+    "height": 768,
+    "fps": 24,
+    "placed_seconds": 4.458333,
+    "frames": 124,
+    "seconds": 5.17,
+    "steps": 8,
+    "seed": 93011,
+    "prompt": "subject_definitions:\n<Subject 1> is the Narrator in <Picture 1>: Long oval face, high forehead, long straight nose, straight dark brows, grey eyes. Fair English skin lightly tanned on face and hands. Dark brown hair cut short at back and sides, parted on the left and combed smooth. Neat close-trimmed dark brown moustache; shaven cheeks and chin. Wearing: A dry second suit in the same mid-grey herringbone tweed: single-breasted jacket buttoned high, waistcoat, narrow trousers. White shirt with soft turn-down collar, dark green knitted tie. Brown boots. <Picture 1> defines this man alone; each shot keeps the framing its own words describe.\n<Audio 1> is the take's complete audio track: the one line spoken on camera at 00:00, over silence for the rest of its length.\n<Picture 2> is the storyboard frame drawn for this shot: the place, the people in it and the clothes they wear, at this hour of the day, in the house art style.\n\nsummary:\n[reference generation + audio reuse] One 5.17-second take of 1 shot in the village street of Weybridge on a sunny Sunday morning in 1894 in a tumult. [Shot 1] runs from 00:00 to 00:05. The take carries <Subject 1> through [Shot 1] in that order. <Audio 1> carries that spoken line and is the complete audio track.\n\nretention_analysis:\n<Subject 1> (the man in [Shot 1]): partially_preserved - the face, hair, build and clothes of <Picture 1> carry into every shot that shows him; <Picture 1> serves as a definition of the man and each shot keeps the framing its own words describe.\n<Audio 1>: fully_copy - <Audio 1> is reused 1:1 as the take's complete final audio track.\n<Picture 2> ([Shot 1] first frame): fully_preserved - subject placement, wardrobe and light.\n\ndetailed_description:\nAngular stylised 3D animation, brush-stroke texture, Weybridge, 1894, morning sun from the right, black shadows.\n[Shot 1] From 00:00 to 00:05. The shot opens on a close shot in the sunny street on <Subject 1> (neat close-trimmed dark brown moustache, spare straw boater with a black band, a dry second suit in the same mid-grey herringbone tweed) gripping an old man's black sleeve and shouting into his face, pointing past him at the far pine tops. The camera is in the street level with his eyes, two paces from him, an 85mm lens. The morning sun comes from the RIGHT. At the first frame the narrator fills the CENTRE. The camera pushes in toward his face with small amplitude until it fills the middle of the picture as he shouts, from 00:00 to 00:02. <Subject 1> (S1), on screen, long oval face, with a clipped English voice at an even pace, says: <d>[English] Death is coming! Death!</d> His mouth shapes every syllable as the line is heard and closes on the last word. At 00:02, as the line ends, his arm goes on pointing at the pine tops, and the movement continues to the last frame of the shot. Behind <Subject 1> people in Sunday clothes loading carts, a dozen of them, from 00:00 to 00:05. By 00:05 the camera is pushing in through the last frame, and the action continues with it.\n\noverall_soundscape: Open air under the action; cloth, footsteps and the people nearby.\n\nnon_diegetic_music: N/A"
+  },
+  {
+    "index": 12,
+    "shots": [
+      12
+    ],
+    "section": "reaction",
+    "setup": "weybridge",
+    "lane": "narration",
+    "workflow": "video_minimax_h3_r2v_turbo_ref8 + anchors",
+    "model": "MiniMax-H3 ref2va + Ref2V 8-step LoRA",
+    "mode": "reference-to-video from the references alone (--from-refs): a cast sheet for every face the take shows + the location plate, always; no storyboard cell, nothing pinned; the dialogue wavs at their offsets anchored at frame 0",
+    "refs": [
+      "episodes/ep12/storyboard/h3/shot_12.png"
+    ],
+    "faces": [],
+    "ref_image_size": "match",
+    "anchors": [],
+    "audio": "silence",
+    "width": 768,
+    "height": 768,
+    "fps": 24,
+    "placed_seconds": 6.208333,
+    "frames": 158,
+    "seconds": 6.58,
+    "steps": 8,
+    "seed": 93012,
+    "prompt": "subject_definitions:\n<Audio 1> is the take's complete audio track and runs silent for its whole length.\n<Picture 1> is the storyboard frame drawn for this shot: the place, the people in it and the clothes they wear, at this hour of the day, in the house art style.\n\nsummary:\n[reference generation + audio reuse] One 6.58-second take of 1 shot in the village street of Weybridge on a sunny Sunday morning in 1894 in a tumult. [Shot 1] runs from 00:00 to 00:06. The take carries the place through [Shot 1] in that order. <Audio 1> is the complete audio track.\n\nretention_analysis:\n<Audio 1>: fully_copy - <Audio 1> is reused 1:1 as the take's complete final audio track.\n<Picture 1> ([Shot 1] first frame): fully_preserved - subject placement, wardrobe and light.\n\ndetailed_description:\nAngular stylised 3D animation, brush-stroke texture, Weybridge, 1894, morning sun from the right, black shadows.\n[Shot 1] From 00:00 to 00:06. The shot opens on an insert in the sunny street on two hands breaking a slice of bread and meat over a plain brown paper wrapping on the stone step of a drinking fountain; only that object and what touches it is in frame. The camera is above the step looking down, a 50mm lens. The morning sun comes from the RIGHT. At the first frame two hands break a slice of bread and meat at the CENTRE over a plain brown paper wrapping on the pale stone step of the drinking fountain, a grey herringbone tweed cuff at the LEFT third and the fountain's basin rim across the TOP third. The shadow of a passing cart wheel crosses the step at the RIGHT third, and crumbs lie on the stone at the BOTTOM edge. The camera pushes in on the bread at the centre of the picture as the hands go on breaking the bread, from 00:00 to 00:03. At 00:03 the shadows of passing carts go on sliding over the step, and the step continues to the last frame of the shot. By 00:06 the camera is pushing in through the last frame, and the action continues with it.\n\noverall_soundscape: Open air under the action; cloth, footsteps and hands at work.\n\nnon_diegetic_music: N/A"
+  },
+  {
+    "index": 13,
+    "shots": [
+      13
+    ],
+    "section": "friction",
+    "setup": "bank",
+    "lane": "narration",
+    "workflow": "video_minimax_h3_r2v_turbo_ref8 + anchors",
+    "model": "MiniMax-H3 ref2va + Ref2V 8-step LoRA",
+    "mode": "reference-to-video from the references alone (--from-refs): a cast sheet for every face the take shows + the location plate, always; no storyboard cell, nothing pinned; the dialogue wavs at their offsets anchored at frame 0",
+    "refs": [
+      "episodes/ep12/storyboard/h3/shot_13.png"
+    ],
+    "faces": [],
+    "ref_image_size": "match",
+    "anchors": [],
+    "audio": "silence",
+    "width": 768,
+    "height": 768,
+    "fps": 24,
+    "placed_seconds": 8.041667,
+    "frames": 209,
+    "seconds": 8.71,
+    "steps": 8,
+    "seed": 93013,
+    "prompt": "subject_definitions:\n<Audio 1> is the take's complete audio track and runs silent for its whole length.\n<Picture 1> is the storyboard frame drawn for this shot: the place, the people in it and the clothes they wear, at this hour of the day, in the house art style.\n\nsummary:\n[reference generation + audio reuse] One 8.71-second take of 1 shot in the gravel bank where the river Wey meets the Thames near Shepperton Lock at midday in 1894. [Shot 1] runs from 00:00 to 00:08. The take carries the place through [Shot 1] in that order. <Audio 1> is the complete audio track.\n\nretention_analysis:\n<Audio 1>: fully_copy - <Audio 1> is reused 1:1 as the take's complete final audio track.\n<Picture 1> ([Shot 1] first frame): fully_preserved - subject placement, wardrobe and light.\n\ndetailed_description:\nAngular stylised 3D animation, brush-stroke texture, Surrey, 1894, midday sun from the left, black shadows.\n[Shot 1] From 00:00 to 00:08. The shot opens on a wide at midday over the gravel bank where the Wey meets the Thames, a crowd of fugitives with bundles at the water, the big ferryboat crossing, the church tower above the trees. The camera is on the gravel bank at a standing man's eye, a 35mm lens. The midday sun comes from the LEFT. At the first frame the gravel bank and the crowd with its bundles fill the BOTTOM third, the water runs across the CENTRE with the big ferryboat at the CENTRE LEFT and rowing boats at the CENTRE RIGHT, the inn lawn and the square church tower stand on the far side at the RIGHT third, and flat meadows with pollard willows run out to the low flat horizon across the TOP third at the LEFT. The camera pans from the crowd across to the big ferryboat already in the picture until the ferryboat is at the centre as the ferryboat goes on crossing, from 00:00 to 00:04. At 00:04 the crowd goes on pressing to the water, and the movement continues to the last frame of the shot. Beyond the foreground fugitives with bundles at the water's edge, a score of them, from 00:00 to 00:08. By 00:08 the camera is panning through the last frame, and the action continues with it.\n\noverall_soundscape: Open air under the action; cloth, footsteps and the people nearby.\n\nnon_diegetic_music: N/A"
+  },
+  {
+    "index": 14,
+    "shots": [
+      14
+    ],
+    "section": "spike",
+    "setup": "bank",
+    "lane": "narration",
+    "workflow": "video_minimax_h3_r2v_turbo_ref8 + anchors",
+    "model": "MiniMax-H3 ref2va + Ref2V 8-step LoRA",
+    "mode": "reference-to-video from the references alone (--from-refs): a cast sheet for every face the take shows + the location plate, always; no storyboard cell, nothing pinned; the dialogue wavs at their offsets anchored at frame 0",
+    "refs": [
+      "episodes/ep12/storyboard/h3/shot_14.png"
+    ],
+    "faces": [],
+    "ref_image_size": "match",
+    "anchors": [],
+    "audio": "silence",
+    "width": 768,
+    "height": 768,
+    "fps": 24,
+    "placed_seconds": 8.0,
+    "frames": 209,
+    "seconds": 8.71,
+    "steps": 8,
+    "seed": 93014,
+    "prompt": "subject_definitions:\n<Audio 1> is the take's complete audio track and runs silent for its whole length.\n<Picture 1> is the storyboard frame drawn for this shot: the place, the people in it and the clothes they wear, at this hour of the day, in the house art style.\n\nsummary:\n[reference generation + audio reuse] One 8.71-second take of 1 shot in the gravel bank where the river Wey meets the Thames near Shepperton Lock at midday in 1894. [Shot 1] runs from 00:00 to 00:08. The take carries the place through [Shot 1] in that order. <Audio 1> is the complete audio track.\n\nretention_analysis:\n<Audio 1>: fully_copy - <Audio 1> is reused 1:1 as the take's complete final audio track.\n<Picture 1> ([Shot 1] first frame): fully_preserved - subject placement, wardrobe and light.\n\ndetailed_description:\nAngular stylised 3D animation, brush-stroke texture, Surrey, 1894, midday sun from the left, black shadows.\n[Shot 1] From 00:00 to 00:08. The shot opens on an insert at midday over the flat meadows toward Chertsey on a single white puff of smoke jerking up above the far trees, cows grazing below; only that object and what touches it is in frame. The camera is on the bank looking up the river, a 135mm lens. The midday sun comes from the LEFT. At the first frame a single white puff of smoke hangs above the far trees at the CENTRE, small against the sky, the flat meadows with cows and pollard willows across the BOTTOM half and the low flat horizon at the CENTRE. A line of silvery pollard willows crosses the BOTTOM third from the LEFT edge to the RIGHT edge, and a haze hangs over the far trees at the TOP third. The camera pushes in toward the puff of smoke already in the picture with small amplitude as the puff of smoke goes on rising and hanging, from 00:00 to 00:04. At 00:04 the cows go on grazing, and the movement continues to the last frame of the shot. By 00:08 the camera is pushing in through the last frame, and the action continues with it.\n\noverall_soundscape: Open air under the action; cloth, footsteps and hands at work.\n\nnon_diegetic_music: N/A"
+  },
+  {
+    "index": 15,
+    "shots": [
+      15
+    ],
+    "section": "spike",
+    "setup": "bank",
+    "lane": "narration",
+    "workflow": "video_minimax_h3_r2v_turbo_ref8 + anchors",
+    "model": "MiniMax-H3 ref2va + Ref2V 8-step LoRA",
+    "mode": "reference-to-video from the references alone (--from-refs): a cast sheet for every face the take shows + the location plate, always; no storyboard cell, nothing pinned; the dialogue wavs at their offsets anchored at frame 0",
+    "refs": [
+      "refs/props/fighting_machine/sheet.png",
+      "episodes/ep12/storyboard/h3/shot_15.png"
+    ],
+    "faces": [],
+    "ref_image_size": "match",
+    "anchors": [],
+    "audio": "silence",
+    "width": 768,
+    "height": 768,
+    "fps": 24,
+    "placed_seconds": 7.458333,
+    "frames": 192,
+    "seconds": 8.0,
+    "steps": 8,
+    "seed": 93015,
+    "prompt": "subject_definitions:\n<Subject 1> is the Martian fighting-machine in <Picture 1>: A walking engine of glittering white metal, higher than many houses, like a great boiler on three stilts: three very long thin jointed legs that stride with a rolling, heeling gait. The main body is a broad aluminium-bright carapace; on top sits a riveted dome of burnished brass plates that swings to and fro, with one broad slit of dark green glass across its front. Behind the body hangs a huge mass of white metal shaped like a gigantic fisherman's basket. Long flexible glittering tentacles and articulate ropes of steel swing from beneath the body, and puffs of green smoke squirt from the joints of the legs. One jointed arm carries a small box with a funnel mouth. About a hundred feet high. <Picture 1> defines this object alone; each shot keeps the framing its own words describe.\n<Audio 1> is the take's complete audio track and runs silent for its whole length.\n<Picture 2> is the storyboard frame drawn for this shot: the place, the people in it and the clothes they wear, at this hour of the day, in the house art style.\n\nsummary:\n[reference generation + audio reuse] One 8.00-second take of 1 shot in the gravel bank where the river Wey meets the Thames near Shepperton Lock at midday in 1894. [Shot 1] runs from 00:00 to 00:08. The take carries the place through [Shot 1] in that order. <Audio 1> is the complete audio track.\n\nretention_analysis:\n<Subject 1> (the Martian fighting-machine in [Shot 1]): partially_preserved - the shape, surface and scale of <Picture 1> carry into every shot that shows it; <Picture 1> serves as a definition of the object and each shot keeps the framing its own words describe.\n<Audio 1>: fully_copy - <Audio 1> is reused 1:1 as the take's complete final audio track.\n<Picture 2> ([Shot 1] first frame): fully_preserved - subject placement, wardrobe and light.\n\ndetailed_description:\nAngular stylised 3D animation, brush-stroke texture, Surrey, 1894, midday sun from the left, black shadows.\n[Shot 1] From 00:00 to 00:08. The shot opens on a medium shot at midday across the flat meadows at four armoured tripods far off, striding toward the river with a rolling motion, glittering in the sun. The camera is on the bank at a standing man's eye, a 50mm lens. The midday sun comes from the LEFT. At the first frame Four tall armoured tripods stride across the flat meadows at the CENTRE, far off, each a sixth of the height of the frame, glittering in the sun, the pollard willows along the BOTTOM third and the low flat horizon behind them. Cows graze in the meadow at the BOTTOM LEFT, and a thin haze of smoke rises over the far trees at the TOP RIGHT. The camera tracks sideways to the left past the pollard willows, a truck with small amplitude, until the four tripods already in the picture stand at the centre as the four tripods go on striding toward the river, from 00:00 to 00:04. At 00:04 the willows go on sliding by in the foreground, and the movement continues to the last frame of the shot. Beyond the foreground fugitives with bundles at the water's edge, a score of them, from 00:00 to 00:08. By 00:08 the camera is tracking through the last frame, and the action continues with it.\n\noverall_soundscape: Open air under the action; cloth, footsteps and the people nearby.\n\nnon_diegetic_music: N/A"
+  },
+  {
+    "index": 16,
+    "shots": [
+      16
+    ],
+    "section": "turn",
+    "setup": "bank",
+    "lane": "narration",
+    "workflow": "video_minimax_h3_r2v_turbo_ref8 + anchors",
+    "model": "MiniMax-H3 ref2va + Ref2V 8-step LoRA",
+    "mode": "reference-to-video from the references alone (--from-refs): a cast sheet for every face the take shows + the location plate, always; no storyboard cell, nothing pinned; the dialogue wavs at their offsets anchored at frame 0",
+    "refs": [
+      "refs/characters/unnamed_first_person_narrator/sheet.png",
+      "episodes/ep12/storyboard/h3/shot_16.png"
+    ],
+    "faces": [
+      "unnamed_first_person_narrator"
+    ],
+    "ref_image_size": "match",
+    "anchors": [],
+    "audio": "silence",
+    "width": 768,
+    "height": 768,
+    "fps": 24,
+    "placed_seconds": 3.041667,
+    "frames": 90,
+    "seconds": 3.75,
+    "steps": 8,
+    "seed": 93016,
+    "prompt": "subject_definitions:\n<Subject 1> is the Narrator in <Picture 1>: Long oval face, high forehead, long straight nose, straight dark brows, grey eyes. Fair English skin lightly tanned on face and hands. Dark brown hair cut short at back and sides, parted on the left and combed smooth. Neat close-trimmed dark brown moustache; shaven cheeks and chin. Wearing: A dry second suit in the same mid-grey herringbone tweed: single-breasted jacket buttoned high, waistcoat, narrow trousers. White shirt with soft turn-down collar, dark green knitted tie. Brown boots. <Picture 1> defines this man alone; each shot keeps the framing its own words describe.\n<Audio 1> is the take's complete audio track and runs silent for its whole length.\n<Picture 2> is the storyboard frame drawn for this shot: the place, the people in it and the clothes they wear, at this hour of the day, in the house art style.\n\nsummary:\n[reference generation + audio reuse] One 3.75-second take of 1 shot in the gravel bank where the river Wey meets the Thames near Shepperton Lock at midday in 1894. [Shot 1] runs from 00:00 to 00:03. The take carries <Subject 1> through [Shot 1] in that order. <Audio 1> is the complete audio track.\n\nretention_analysis:\n<Subject 1> (the man in [Shot 1]): partially_preserved - the face, hair, build and clothes of <Picture 1> carry into every shot that shows him; <Picture 1> serves as a definition of the man and each shot keeps the framing its own words describe.\n<Audio 1>: fully_copy - <Audio 1> is reused 1:1 as the take's complete final audio track.\n<Picture 2> ([Shot 1] first frame): fully_preserved - subject placement, wardrobe and light.\n\ndetailed_description:\nAngular stylised 3D animation, brush-stroke texture, Surrey, 1894, midday sun from the left, black shadows.\n[Shot 1] From 00:00 to 00:03. The shot opens on a medium close shot at midday on <Subject 1> (neat close-trimmed dark brown moustache, spare straw boater with a black band, a dry second suit in the same mid-grey herringbone tweed) at the water's edge, turned to the fleeing crowd and shouting, the river behind him. The camera is on the gravel level with his eyes, three paces from him, an 85mm lens. The midday sun comes from the LEFT. At the first frame the narrator stands at the CENTRE at the water's edge, turned to the crowd and shouting, his straw boater pushed back, the river behind him at the TOP third and people running at the RIGHT third. His head is half the frame's height. The camera keeps a locked-off frame as he shouts to the crowd with his mouth wide open, from 00:00 to 00:02. At 00:02 his arm goes on sweeping toward the water, and the movement continues to the last frame of the shot. Behind <Subject 1> fugitives with bundles at the water's edge, a score of them, from 00:00 to 00:03. <Subject 1>'s mouth is closed from 00:00 to 00:02 while he shouts to the crowd with his mouth wide open. By 00:03 the action of that shot continues through the last frame.\n\noverall_soundscape: Open air under the action; cloth, footsteps and the people nearby.\n\nnon_diegetic_music: N/A"
+  },
+  {
+    "index": 17,
+    "shots": [
+      17
+    ],
+    "section": "spike",
+    "setup": "bank",
+    "lane": "narration",
+    "workflow": "video_minimax_h3_r2v_turbo_ref8 + anchors",
+    "model": "MiniMax-H3 ref2va + Ref2V 8-step LoRA",
+    "mode": "reference-to-video from the references alone (--from-refs): a cast sheet for every face the take shows + the location plate, always; no storyboard cell, nothing pinned; the dialogue wavs at their offsets anchored at frame 0",
+    "refs": [
+      "refs/characters/unnamed_first_person_narrator/sheet.png",
+      "episodes/ep12/storyboard/h3/shot_17.png"
+    ],
+    "faces": [
+      "unnamed_first_person_narrator"
+    ],
+    "ref_image_size": "match",
+    "anchors": [],
+    "audio": "silence",
+    "width": 768,
+    "height": 768,
+    "fps": 24,
+    "placed_seconds": 6.875,
+    "frames": 175,
+    "seconds": 7.29,
+    "steps": 8,
+    "seed": 93017,
+    "prompt": "subject_definitions:\n<Subject 1> is the Narrator in <Picture 1>: Long oval face, high forehead, long straight nose, straight dark brows, grey eyes. Fair English skin lightly tanned on face and hands. Dark brown hair cut short at back and sides, parted on the left and combed smooth. Neat close-trimmed dark brown moustache; shaven cheeks and chin. Wearing: A dry second suit in the same mid-grey herringbone tweed: single-breasted jacket buttoned high, waistcoat, narrow trousers. White shirt with soft turn-down collar, dark green knitted tie. Brown boots. <Picture 1> defines this man alone; each shot keeps the framing its own words describe.\n<Audio 1> is the take's complete audio track and runs silent for its whole length.\n<Picture 2> is the storyboard frame drawn for this shot: the place, the people in it and the clothes they wear, at this hour of the day, in the house art style.\n\nsummary:\n[reference generation + audio reuse] One 7.29-second take of 1 shot in the gravel bank where the river Wey meets the Thames near Shepperton Lock at midday in 1894. [Shot 1] runs from 00:00 to 00:07. The take carries <Subject 1> through [Shot 1] in that order. <Audio 1> is the complete audio track.\n\nretention_analysis:\n<Subject 1> (the man in [Shot 1]): partially_preserved - the face, hair, build and clothes of <Picture 1> carry into every shot that shows him; <Picture 1> serves as a definition of the man and each shot keeps the framing its own words describe.\n<Audio 1>: fully_copy - <Audio 1> is reused 1:1 as the take's complete final audio track.\n<Picture 2> ([Shot 1] first frame): fully_preserved - subject placement, wardrobe and light.\n\ndetailed_description:\nAngular stylised 3D animation, brush-stroke texture, Surrey, 1894, midday sun from the left, black shadows.\n[Shot 1] From 00:00 to 00:07. The shot opens on a medium shot at midday on <Subject 1> (neat close-trimmed dark brown moustache, a dry second suit in the same mid-grey herringbone tweed) seen from behind, running waist-deep into the river toward the far bank, splashes flying around him. The camera is at the water's edge behind him at a standing man's eye, four paces from him, a 35mm lens. The midday sun comes from the LEFT. At the first frame the narrator runs away from the camera at the CENTRE, waist-deep in the river, his arms thrown forward, splashes around him, the far bank and the church tower at the TOP third. The camera tracks behind him into the water as he runs, a follow with small amplitude as he goes on running through the water at a hard pace, from 00:00 to 00:04. At 00:04 his arms go on throwing forward, and the movement continues to the last frame of the shot. Behind <Subject 1> fugitives with bundles at the water's edge, a score of them, from 00:00 to 00:07. <Subject 1>'s mouth is closed from 00:00 to 00:05 while he goes on running through the water at a hard pace. By 00:07 the camera is tracking through the last frame, and the action continues with it.\n\noverall_soundscape: Open air under the action; cloth, footsteps and the people nearby.\n\nnon_diegetic_music: N/A"
+  },
+  {
+    "index": 18,
+    "shots": [
+      18
+    ],
+    "section": "spike",
+    "setup": "water",
+    "lane": "narration",
+    "workflow": "video_minimax_h3_r2v_turbo_ref8 + anchors",
+    "model": "MiniMax-H3 ref2va + Ref2V 8-step LoRA",
+    "mode": "reference-to-video from the references alone (--from-refs): a cast sheet for every face the take shows + the location plate, always; no storyboard cell, nothing pinned; the dialogue wavs at their offsets anchored at frame 0",
+    "refs": [
+      "refs/props/fighting_machine/sheet.png",
+      "episodes/ep12/storyboard/h3/shot_18.png"
+    ],
+    "faces": [],
+    "ref_image_size": "match",
+    "anchors": [],
+    "audio": "silence",
+    "width": 768,
+    "height": 768,
+    "fps": 24,
+    "placed_seconds": 8.25,
+    "frames": 209,
+    "seconds": 8.71,
+    "steps": 8,
+    "seed": 93018,
+    "prompt": "subject_definitions:\n<Subject 1> is the Martian fighting-machine in <Picture 1>: A walking engine of glittering white metal, higher than many houses, like a great boiler on three stilts: three very long thin jointed legs that stride with a rolling, heeling gait. The main body is a broad aluminium-bright carapace; on top sits a riveted dome of burnished brass plates that swings to and fro, with one broad slit of dark green glass across its front. Behind the body hangs a huge mass of white metal shaped like a gigantic fisherman's basket. Long flexible glittering tentacles and articulate ropes of steel swing from beneath the body, and puffs of green smoke squirt from the joints of the legs. One jointed arm carries a small box with a funnel mouth. About a hundred feet high. <Picture 1> defines this object alone; each shot keeps the framing its own words describe.\n<Audio 1> is the take's complete audio track and runs silent for its whole length.\n<Picture 2> is the storyboard frame drawn for this shot: the place, the people in it and the clothes they wear, at this hour of the day, in the house art style.\n\nsummary:\n[reference generation + audio reuse] One 8.71-second take of 1 shot in the wide flat Thames at Shepperton at midday in 1894 seen from the water's surface. [Shot 1] runs from 00:00 to 00:08. The take carries the place through [Shot 1] in that order. <Audio 1> is the complete audio track.\n\nretention_analysis:\n<Subject 1> (the Martian fighting-machine in [Shot 1]): partially_preserved - the shape, surface and scale of <Picture 1> carry into every shot that shows it; <Picture 1> serves as a definition of the object and each shot keeps the framing its own words describe.\n<Audio 1>: fully_copy - <Audio 1> is reused 1:1 as the take's complete final audio track.\n<Picture 2> ([Shot 1] first frame): fully_preserved - subject placement, wardrobe and light.\n\ndetailed_description:\nAngular stylised 3D animation, brush-stroke texture, Surrey, 1894, midday sun from the left, black shadows.\n[Shot 1] From 00:00 to 00:08. The shot opens on a medium shot from the river's surface at midday up at a tall tripod wading across the Thames, its hood swinging toward the unseen batteries. The camera is a low angle from the water's surface looking up, a 24mm lens. The midday sun comes from the LEFT. At the first frame a tall tripod wades the river at the CENTRE, seen from the water's surface, its three legs reaching from the water at the BOTTOM third to its hooded body at the TOP third, the church tower of Shepperton at the RIGHT third. The water churns white round its legs at the BOTTOM third, and the far bank with its reeds crosses the CENTRE from the LEFT edge. The camera tilts up from the water to the tripod already in the picture until the tripod stands in the middle of the frame as the tripod goes on wading across the river, from 00:00 to 00:04. At 00:04 the water goes on churning round its legs, and the movement continues to the last frame of the shot. By 00:08 the camera is tilting up through the last frame, and the action continues with it.\n\noverall_soundscape: Open air under the action; cloth, footsteps and hands at work.\n\nnon_diegetic_music: N/A"
+  },
+  {
+    "index": 19,
+    "shots": [
+      19
+    ],
+    "section": "answer",
+    "setup": "water",
+    "lane": "narration",
+    "workflow": "video_minimax_h3_r2v_turbo_ref8 + anchors",
+    "model": "MiniMax-H3 ref2va + Ref2V 8-step LoRA",
+    "mode": "reference-to-video from the references alone (--from-refs): a cast sheet for every face the take shows + the location plate, always; no storyboard cell, nothing pinned; the dialogue wavs at their offsets anchored at frame 0",
+    "refs": [
+      "refs/props/fighting_machine/sheet.png",
+      "episodes/ep12/storyboard/h3/shot_19.png"
+    ],
+    "faces": [],
+    "ref_image_size": "match",
+    "anchors": [],
+    "audio": "silence",
+    "width": 768,
+    "height": 768,
+    "fps": 24,
+    "placed_seconds": 6.416667,
+    "frames": 175,
+    "seconds": 7.29,
+    "steps": 8,
+    "seed": 93019,
+    "prompt": "subject_definitions:\n<Subject 1> is the Martian fighting-machine in <Picture 1>: A walking engine of glittering white metal, higher than many houses, like a great boiler on three stilts: three very long thin jointed legs that stride with a rolling, heeling gait. The main body is a broad aluminium-bright carapace; on top sits a riveted dome of burnished brass plates that swings to and fro, with one broad slit of dark green glass across its front. Behind the body hangs a huge mass of white metal shaped like a gigantic fisherman's basket. Long flexible glittering tentacles and articulate ropes of steel swing from beneath the body, and puffs of green smoke squirt from the joints of the legs. One jointed arm carries a small box with a funnel mouth. About a hundred feet high. <Picture 1> defines this object alone; each shot keeps the framing its own words describe.\n<Audio 1> is the take's complete audio track and runs silent for its whole length.\n<Picture 2> is the storyboard frame drawn for this shot: the place, the people in it and the clothes they wear, at this hour of the day, in the house art style.\n\nsummary:\n[reference generation + audio reuse] One 7.29-second take of 1 shot in the wide flat Thames at Shepperton at midday in 1894 seen from the water's surface. [Shot 1] runs from 00:00 to 00:07. The take carries the place through [Shot 1] in that order. <Audio 1> is the complete audio track.\n\nretention_analysis:\n<Subject 1> (the Martian fighting-machine in [Shot 1]): partially_preserved - the shape, surface and scale of <Picture 1> carry into every shot that shows it; <Picture 1> serves as a definition of the object and each shot keeps the framing its own words describe.\n<Audio 1>: fully_copy - <Audio 1> is reused 1:1 as the take's complete final audio track.\n<Picture 2> ([Shot 1] first frame): fully_preserved - subject placement, wardrobe and light.\n\ndetailed_description:\nAngular stylised 3D animation, brush-stroke texture, Surrey, 1894, midday sun from the left, black shadows.\n[Shot 1] From 00:00 to 00:07. The shot opens on an insert at midday on the brass hood of a tripod bursting apart in a white flash and a round ball of grey smoke as a shell strikes it, three large torn brass plates falling away against the bright sky above the Thames; only that object and what touches it is in frame. The camera is from the river looking up, a 135mm lens. The midday sun comes from the LEFT. At the first frame the brass hood of a tripod fills the CENTRE, bursting apart in a white flash and a round ball of grey smoke, three large torn brass plates falling away to the LEFT third and the RIGHT third against the bright sky. Grey smoke spreads from the burst across the TOP third, and the tripod's white body hangs below the hood at the BOTTOM third. The camera pushes in toward the bursting hood already in the picture with small amplitude as the torn plates go on falling away, from 00:00 to 00:04. At 00:04 the smoke goes on spreading, and the movement continues to the last frame of the shot. By 00:07 the camera is pushing in through the last frame, and the action continues with it.\n\noverall_soundscape: Open air under the action; cloth, footsteps and hands at work.\n\nnon_diegetic_music: N/A"
+  },
+  {
+    "index": 20,
+    "shots": [
+      20
+    ],
+    "section": "reaction",
+    "setup": "water",
+    "lane": "dialogue",
+    "workflow": "video_minimax_h3_r2v_turbo_ref8 + anchors",
+    "model": "MiniMax-H3 ref2va + Ref2V 8-step LoRA",
+    "mode": "reference-to-video from the references alone (--from-refs): a cast sheet for every face the take shows + the location plate, always; no storyboard cell, nothing pinned; the dialogue wavs at their offsets anchored at frame 0",
+    "refs": [
+      "refs/characters/unnamed_first_person_narrator/sheet.png",
+      "episodes/ep12/storyboard/h3/shot_20.png"
+    ],
+    "faces": [
+      "unnamed_first_person_narrator"
+    ],
+    "ref_image_size": "match",
+    "anchors": [],
+    "audio": [
+      [
+        "l20.wav",
+        0.25
+      ]
+    ],
+    "width": 768,
+    "height": 768,
+    "fps": 24,
+    "placed_seconds": 4.541667,
+    "frames": 124,
+    "seconds": 5.17,
+    "steps": 8,
+    "seed": 93020,
+    "prompt": "subject_definitions:\n<Subject 1> is the Narrator in <Picture 1>: Long oval face, high forehead, long straight nose, straight dark brows, grey eyes. Fair English skin lightly tanned on face and hands. Dark brown hair cut short at back and sides, parted on the left and combed smooth. Neat close-trimmed dark brown moustache; shaven cheeks and chin. Wearing: A dry second suit in the same mid-grey herringbone tweed: single-breasted jacket buttoned high, waistcoat, narrow trousers. White shirt with soft turn-down collar, dark green knitted tie. Brown boots. <Picture 1> defines this man alone; each shot keeps the framing its own words describe.\n<Audio 1> is the take's complete audio track: the one line spoken on camera at 00:00, over silence for the rest of its length.\n<Picture 2> is the storyboard frame drawn for this shot: the place, the people in it and the clothes they wear, at this hour of the day, in the house art style.\n\nsummary:\n[reference generation + audio reuse] One 5.17-second take of 1 shot in the wide flat Thames at Shepperton at midday in 1894 seen from the water's surface. [Shot 1] runs from 00:00 to 00:05. The take carries <Subject 1> through [Shot 1] in that order. <Audio 1> carries that spoken line and is the complete audio track.\n\nretention_analysis:\n<Subject 1> (the man in [Shot 1]): partially_preserved - the face, hair, build and clothes of <Picture 1> carry into every shot that shows him; <Picture 1> serves as a definition of the man and each shot keeps the framing its own words describe.\n<Audio 1>: fully_copy - <Audio 1> is reused 1:1 as the take's complete final audio track.\n<Picture 2> ([Shot 1] first frame): fully_preserved - subject placement, wardrobe and light.\n\ndetailed_description:\nAngular stylised 3D animation, brush-stroke texture, Surrey, 1894, midday sun from the left, black shadows.\n[Shot 1] From 00:00 to 00:05. The shot opens on a close shot at midday on the face of <Subject 1> (neat close-trimmed dark brown moustache, a dry second suit in the same mid-grey herringbone tweed) chest-deep in the river, soaked, crying out with his arms up. The camera is at the water's surface level with his eyes, two paces from him, an 85mm lens. The midday sun comes from the LEFT. At the first frame the narrator's face fills the CENTRE, chest-deep in the river, water streaming from his hair, his mouth open in a cry, the bright water at the BOTTOM third. His head is half the frame's height. The camera keeps a locked-off frame as he cries out, from 00:00 to 00:03. <Subject 1> (S1), on screen, long oval face, with a clipped English voice at an even pace, says: <d>[English] Hit! They have hit it!</d> His mouth shapes every syllable as the line is heard and closes on the last word. At 00:03, as the line ends, his head goes on tipping back with the shout, and the movement continues to the last frame of the shot. By 00:05 the action of that shot continues through the last frame.\n\noverall_soundscape: Open air under the action; cloth, footsteps and hands at work.\n\nnon_diegetic_music: N/A"
+  },
+  {
+    "index": 21,
+    "shots": [
+      21
+    ],
+    "section": "reaction",
+    "setup": "water",
+    "lane": "narration",
+    "workflow": "video_minimax_h3_r2v_turbo_ref8 + anchors",
+    "model": "MiniMax-H3 ref2va + Ref2V 8-step LoRA",
+    "mode": "reference-to-video from the references alone (--from-refs): a cast sheet for every face the take shows + the location plate, always; no storyboard cell, nothing pinned; the dialogue wavs at their offsets anchored at frame 0",
+    "refs": [
+      "refs/props/fighting_machine/sheet.png",
+      "episodes/ep12/storyboard/h3/shot_21.png"
+    ],
+    "faces": [],
+    "ref_image_size": "match",
+    "anchors": [],
+    "audio": "silence",
+    "width": 768,
+    "height": 768,
+    "fps": 24,
+    "placed_seconds": 7.75,
+    "frames": 192,
+    "seconds": 8.0,
+    "steps": 8,
+    "seed": 93021,
+    "prompt": "subject_definitions:\n<Subject 1> is the Martian fighting-machine in <Picture 1>: A walking engine of glittering white metal, higher than many houses, like a great boiler on three stilts: three very long thin jointed legs that stride with a rolling, heeling gait. The main body is a broad aluminium-bright carapace; on top sits a riveted dome of burnished brass plates that swings to and fro, with one broad slit of dark green glass across its front. Behind the body hangs a huge mass of white metal shaped like a gigantic fisherman's basket. Long flexible glittering tentacles and articulate ropes of steel swing from beneath the body, and puffs of green smoke squirt from the joints of the legs. One jointed arm carries a small box with a funnel mouth. About a hundred feet high. <Picture 1> defines this object alone; each shot keeps the framing its own words describe.\n<Audio 1> is the take's complete audio track and runs silent for its whole length.\n<Picture 2> is the storyboard frame drawn for this shot: the place, the people in it and the clothes they wear, at this hour of the day, in the house art style.\n\nsummary:\n[reference generation + audio reuse] One 8.00-second take of 1 shot in the wide flat Thames at Shepperton at midday in 1894 seen from the water's surface. [Shot 1] runs from 00:00 to 00:08. The take carries the place through [Shot 1] in that order. <Audio 1> is the complete audio track.\n\nretention_analysis:\n<Subject 1> (the Martian fighting-machine in [Shot 1]): partially_preserved - the shape, surface and scale of <Picture 1> carry into every shot that shows it; <Picture 1> serves as a definition of the object and each shot keeps the framing its own words describe.\n<Audio 1>: fully_copy - <Audio 1> is reused 1:1 as the take's complete final audio track.\n<Picture 2> ([Shot 1] first frame): fully_preserved - subject placement, wardrobe and light.\n\ndetailed_description:\nAngular stylised 3D animation, brush-stroke texture, Surrey, 1894, midday sun from the left, black shadows.\n[Shot 1] From 00:00 to 00:08. The shot opens on a wide at midday on the headless tripod reeling across Shepperton, striking the square church tower down, and a spout of steam and water leaping from the river. The camera is at the water's surface, a 35mm lens. The midday sun comes from the LEFT. At the first frame the headless tripod reels at the CENTRE, one leg striking the square church tower at the RIGHT third, the tower breaking apart, and a tall white spout of steam and water rising from the river at the LEFT third. Broken masonry falls from the tower at the RIGHT edge, and the grey water heaves across the BOTTOM third. The roofs of Shepperton stand along the TOP third, and empty boats pitch on the waves at the BOTTOM LEFT. The camera pans from the steam across to the church tower already in the picture until the tower is at the centre as the tower goes on breaking apart, from 00:00 to 00:04. At 00:04 the steam goes on leaping up, and the movement continues to the last frame of the shot. By 00:08 the camera is panning through the last frame, and the action continues with it.\n\noverall_soundscape: Open air under the action; cloth, footsteps and hands at work.\n\nnon_diegetic_music: N/A"
+  },
+  {
+    "index": 22,
+    "shots": [
+      22
+    ],
+    "section": "button",
+    "setup": "bank",
+    "lane": "dialogue",
+    "workflow": "video_minimax_h3_r2v_turbo_ref8 + anchors",
+    "model": "MiniMax-H3 ref2va + Ref2V 8-step LoRA",
+    "mode": "reference-to-video from the references alone (--from-refs): a cast sheet for every face the take shows + the location plate, always; no storyboard cell, nothing pinned; the dialogue wavs at their offsets anchored at frame 0",
+    "refs": [
+      "refs/characters/artilleryman/sheet.png",
+      "episodes/ep12/storyboard/h3/shot_22.png"
+    ],
+    "faces": [
+      "artilleryman"
+    ],
+    "ref_image_size": "match",
+    "anchors": [],
+    "audio": [
+      [
+        "l22.wav",
+        0.25
+      ]
+    ],
+    "width": 768,
+    "height": 768,
+    "fps": 24,
+    "placed_seconds": 5.958333,
+    "frames": 158,
+    "seconds": 6.58,
+    "steps": 8,
+    "seed": 93022,
+    "prompt": "subject_definitions:\n<Subject 1> is the artilleryman in <Picture 1>: Square weather-browned face, heavy black brows, dark brown eyes, broad nose. Thick straight black hair cut short at the sides and falling forward over the brow and eyes. Full black moustache. Broad calloused hands. Wearing: Royal Horse Artillery driver's dark blue serge frock jacket with scarlet stand collar and brass buttons, hanging unbuttoned; dark blue pantaloons with a broad scarlet stripe; black riding boots with steel spurs. Hatless, his thick black hair falling forward over his brow. Uniform and face blackened with ash and soot, back of the jacket scorched brown. <Picture 1> defines this man alone; each shot keeps the framing its own words describe.\n<Audio 1> is the take's complete audio track: the one line spoken on camera at 00:00, over silence for the rest of its length.\n<Picture 2> is the storyboard frame drawn for this shot: the place, the people in it and the clothes they wear, at this hour of the day, in the house art style.\n\nsummary:\n[reference generation + audio reuse] One 6.58-second take of 1 shot in the gravel bank where the river Wey meets the Thames near Shepperton Lock at midday in 1894. [Shot 1] runs from 00:00 to 00:06. The take carries <Subject 1> through [Shot 1] in that order. <Audio 1> carries that spoken line and is the complete audio track.\n\nretention_analysis:\n<Subject 1> (the man in [Shot 1]): partially_preserved - the face, hair, build and clothes of <Picture 1> carry into every shot that shows him; <Picture 1> serves as a definition of the man and each shot keeps the framing its own words describe.\n<Audio 1>: fully_copy - <Audio 1> is reused 1:1 as the take's complete final audio track.\n<Picture 2> ([Shot 1] first frame): fully_preserved - subject placement, wardrobe and light.\n\ndetailed_description:\nAngular stylised 3D animation, brush-stroke texture, Surrey, 1894, midday sun from the left, black shadows.\n[Shot 1] From 00:00 to 00:06. The shot opens on a medium close shot at midday on <Subject 1> (full black moustache, royal horse artillery driver's dark blue serge frock jacket with scarlet stand collar and brass buttons, hanging unbuttoned, hatless, his thick black hair falling forward over his brow) knee-deep at the river's edge, turned to the camera, white steam rising behind him. The camera is at the water's edge level with his eyes, three paces from him, an 85mm lens. The midday sun comes from the LEFT. At the first frame the artilleryman stands at the CENTRE on the gravel bank, turned to the camera, water to his knees. The camera keeps a locked-off frame as he speaks bitterly, from 00:00 to 00:04. <Subject 1> (S1), on screen, square weather-browned face, with a clipped English voice at an even pace, says: <d>[English] It is bows and arrows against the lightning, anyhow.</d> His mouth shapes every syllable as the line is heard and closes on the last word. At 00:04, as the line ends, his hand goes on wiping the water from his face, and the movement continues to the last frame of the shot. Behind <Subject 1> fugitives with bundles at the water's edge, a score of them, from 00:00 to 00:06. By 00:06 the action of that shot continues through the last frame.\n\noverall_soundscape: Open air under the action; cloth, footsteps and the people nearby.\n\nnon_diegetic_music: N/A"
+  },
+  {
+    "index": 23,
+    "shots": [
+      23
+    ],
+    "section": "runout",
+    "setup": "water",
+    "lane": "narration",
+    "workflow": "video_minimax_h3_r2v_turbo_ref8 + anchors",
+    "model": "MiniMax-H3 ref2va + Ref2V 8-step LoRA",
+    "mode": "reference-to-video from the references alone (--from-refs): a cast sheet for every face the take shows + the location plate, always; no storyboard cell, nothing pinned; the dialogue wavs at their offsets anchored at frame 0",
+    "refs": [
+      "refs/props/fighting_machine/sheet.png",
+      "episodes/ep12/storyboard/h3/shot_23.png"
+    ],
+    "faces": [],
+    "ref_image_size": "match",
+    "anchors": [],
+    "audio": "silence",
+    "width": 768,
+    "height": 768,
+    "fps": 24,
+    "placed_seconds": 3.5,
+    "frames": 90,
+    "seconds": 3.75,
+    "steps": 8,
+    "seed": 93023,
+    "prompt": "subject_definitions:\n<Subject 1> is the Martian fighting-machine in <Picture 1>: A walking engine of glittering white metal, higher than many houses, like a great boiler on three stilts: three very long thin jointed legs that stride with a rolling, heeling gait. The main body is a broad aluminium-bright carapace; on top sits a riveted dome of burnished brass plates that swings to and fro, with one broad slit of dark green glass across its front. Behind the body hangs a huge mass of white metal shaped like a gigantic fisherman's basket. Long flexible glittering tentacles and articulate ropes of steel swing from beneath the body, and puffs of green smoke squirt from the joints of the legs. One jointed arm carries a small box with a funnel mouth. About a hundred feet high. <Picture 1> defines this object alone; each shot keeps the framing its own words describe.\n<Audio 1> is the take's complete audio track and runs silent for its whole length.\n<Picture 2> is the storyboard frame drawn for this shot: the place, the people in it and the clothes they wear, at this hour of the day, in the house art style.\n\nsummary:\n[reference generation + audio reuse] One 3.75-second take of 1 shot in the wide flat Thames at Shepperton at midday in 1894 seen from the water's surface. [Shot 1] runs from 00:00 to 00:03. The take carries the place through [Shot 1] in that order. <Audio 1> is the complete audio track.\n\nretention_analysis:\n<Subject 1> (the Martian fighting-machine in [Shot 1]): partially_preserved - the shape, surface and scale of <Picture 1> carry into every shot that shows it; <Picture 1> serves as a definition of the object and each shot keeps the framing its own words describe.\n<Audio 1>: fully_copy - <Audio 1> is reused 1:1 as the take's complete final audio track.\n<Picture 2> ([Shot 1] first frame): fully_preserved - subject placement, wardrobe and light.\n\ndetailed_description:\nAngular stylised 3D animation, brush-stroke texture, Surrey, 1894, midday sun from the left, black shadows.\n[Shot 1] From 00:00 to 00:03. The shot opens on a wide at midday over the river filled with white steam, four grey tripods standing huge and dim in it, the boiling water rolling toward a gravel spit. The camera is at the water's surface, a 35mm lens. The midday sun comes from the LEFT through the steam. At the first frame White steam fills the TOP half above the river, four tall grey tripods standing in it at the CENTRE, dim and huge, the boiling water across the BOTTOM third and the gravel spit at the BOTTOM LEFT. Heads of people in the water show at the BOTTOM RIGHT, and the burning roofs of Weybridge glow through the steam at the LEFT edge. The camera rises above the water with small amplitude until the four tripods already in the picture stand at the centre as the steam goes on rolling across the river, from 00:00 to 00:02. At 00:02 the four tripods go on striding through it, and the movement continues to the last frame of the shot. By 00:03 the camera is rising through the last frame, and the action continues with it.\n\noverall_soundscape: Open air under the action; cloth, footsteps and hands at work.\n\nnon_diegetic_music: N/A"
+  }
+]

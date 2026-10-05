@@ -140,6 +140,10 @@
   .panel-h,.panel-b{padding-left:14px;padding-right:14px}
   .panel-h{flex-wrap:wrap} .panel-h .sub{flex-basis:100%}
 }
+/* v3: the expand chip sits top-right; a poster's own top-right badge (published, running) steps aside for it */
+.poster.has-xp:is(:hover,:focus-within) .frame .tr{right:44px}
+@media (hover:none){.poster.has-xp .frame .tr{right:44px}}
+.cast .frame.vpic:focus-visible{outline:2px solid var(--focus);outline-offset:2px}
 </style>
 </head>
 <body data-page="book">
@@ -203,7 +207,10 @@
   var f = document.getElementById('hero-feat');
   f.href = 'unit-finished.html?u=' + r.unit;
   f.setAttribute('aria-label', 'Newest finished: ' + r.unit + ' ' + r.title);
-  f.innerHTML = '<span class="pic"><img src="' + API + '/thumb/' + W + '/320/' + r.face + '" alt="" width="320" height="320"><span class="tag">Newest finished</span></span>' +
+  var nm = r.face.split('/').pop();
+  f.classList.add('has-xp');
+  f.innerHTML = '<span class="pic"><img src="' + API + '/thumb/' + W + '/320/' + r.face + '" alt="" width="320" height="320"><span class="tag">Newest finished</span>' +
+    '<button class="xp" type="button" data-view="' + r.face + '" data-kind="image" data-set="newest" data-unit="" data-src="' + API + '/lib/' + W + '/' + r.face + '" data-thumb="' + API + '/thumb/' + W + '/320/' + r.face + '" data-label="' + r.unit + ' · ' + nm + '" aria-label="View ' + nm + '"><svg class="i" aria-hidden="true"><use href="assets/icons.svg#maximize-2"/></svg></button></span>' +
     '<span class="ft"><span class="id">' + r.unit + '</span>' + r.title + '</span><span class="chips">' + chips + '</span>';
   document.getElementById('hero-blurb').innerHTML = 'Newest finished: <b style="color:#fff;font-weight:500">' + r.unit + ' ' + r.title + '</b>, ' + r.iters + ' iterations. Book I is cut; Book II is not planned yet.';
 })();

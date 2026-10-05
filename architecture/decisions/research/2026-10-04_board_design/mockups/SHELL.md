@@ -15,14 +15,14 @@ builder. Brief: `DIRECTION_v2.md`. Do not fork board.css or v2.css; page-only CS
 That is all. On DOMContentLoaded `shell.js` renders, from one place (`NAV`, `DEPTS`, `PINS`, `GPU`,
 `MOCKS` at the top of its v2 block):
 
-- the **sidebar** (232 px; icon rail ≤ 1100 px): brand, Now · Inbox (badge 5) · Queue 92 · Books 30;
+- the **sidebar** (232 px; icon rail ≤ 1100 px): brand, Home · Inbox (badge 5) · Queue 92 · Books 30 · Architecture (architecture.html, the live :8700/org framed);
   Departments with counts and state dots (running blue / flagged amber / all-done green); Pinned
   units with 24 px faces; a collapsed "Mockup pages" footer; the **live GPU card** (ep17 · 07 board,
   progress line, ~21:35); search (Ctrl K), theme, keys, org;
 - the **slim 56 px content header**: if the page has no `<header class="ph">`, the shell builds one
   and *moves the page's first `<nav class="crumbs">` into it*; put page actions in any element with
   `data-ph-actions` and they move to the right side (default: a "live · 19:21" chip);
-- **phone (≤ 640 px)**: sidebar hidden, bottom tabs Now · Inbox · Queue · Books · More; More opens a
+- **phone (≤ 640 px)**: sidebar hidden, bottom tabs Home · Inbox · Queue · Books · More; More opens a
   sheet holding the whole sidebar; the header gains a GPU chip;
 - the ⌘K palette, `?` keyboard sheet, `g` chords, `j/k` rows, `t` theme, `[data-order]` receipts —
   all delegated, so injected controls work too.

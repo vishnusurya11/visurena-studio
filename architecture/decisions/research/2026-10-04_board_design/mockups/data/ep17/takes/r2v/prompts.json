@@ -1,0 +1,671 @@
+[
+  {
+    "index": 0,
+    "shots": [
+      0
+    ],
+    "section": "hook",
+    "setup": "london_pool",
+    "lane": "narration",
+    "workflow": "video_minimax_h3_r2v_turbo_ref8 + anchors",
+    "model": "MiniMax-H3 ref2va + Ref2V 8-step LoRA",
+    "mode": "reference-to-video from the references alone (--from-refs): a cast sheet for every face the take shows + the location plate, always; no storyboard cell, nothing pinned; the dialogue wavs at their offsets anchored at frame 0",
+    "refs": [
+      "refs/locations/london/wide_pool_of_london.png"
+    ],
+    "faces": [],
+    "ref_image_size": "match",
+    "anchors": [],
+    "audio": "silence",
+    "width": 768,
+    "height": 768,
+    "fps": 24,
+    "placed_seconds": 6.833333,
+    "frames": 175,
+    "seconds": 7.29,
+    "steps": 8,
+    "seed": 105919,
+    "prompt": "subject_definitions:\n<Subject 1> is the location in <Picture 1>: The Pool of London lies beneath a grey summer sky, with Tower Bridge fixed across the far end of the river and the Tower of London on the left bank. Steamers, lighters, barges and sailing craft fill the brown water in layered rows. Black vapour hangs between the bridge arches. The south-bank parapet occupies the near foreground, wharves run along the right edge, and the river opens toward Limehouse at the far edge. Grey daylight falls from the east across the water, while deep black shadows gather beneath the bridge, along the warehouses and between the jammed hulls. River spray, shouted orders, steam whistles and hull knocks fill the air. <Picture 1> defines this place alone; each shot keeps the framing its own words describe.\n<Audio 1> is the take's complete audio track and runs silent for its whole length.\n\nsummary:\n[reference generation + audio reuse] One 7.29-second take of 1 shot in <Subject 1>, the Pool of London lies beneath a grey summer sky. [Shot 1] runs from 00:00 to 00:07. The take carries <Subject 1> through [Shot 1] in that order. <Audio 1> is the complete audio track.\n\nretention_analysis:\n<Subject 1> (the location behind [Shot 1]): partially_preserved - the materials, furniture and light of <Picture 1> carry into every shot behind the people; <Picture 1> serves as a definition of the place and each shot keeps the framing its own words describe.\n<Audio 1>: fully_copy - <Audio 1> is reused 1:1 as the take's complete final audio track.\n\ndetailed_description:\nAngular stylised 3D animation, brush-stroke texture, London, 1898, grey daylight from the east, black shadows.\n[Shot 1] From 00:00 to 00:07. The shot opens on a wide view across the Pool of London, six million distant fugitives streaming along the riverfront and boats filling the lower water beneath Tower Bridge; St Paul's stands at the upper left edge and black vapour marks the far right arches. The camera is Camera on the south-bank parapet at eye height, a 35mm lens, the grey daylight comes from the RIGHT. At the first frame tHE FOCUS OF THE PICTURE IS Tower Bridge at the far end; St Paul's rises at the LEFT upper edge, jammed boats fill the lower middle, the south-bank parapet crosses the lower foreground, black vapour hangs between the arches, and the brown river opens toward Limehouse at the RIGHT far edge. The shot is inside this place: The Pool of London lies beneath a grey summer sky, with Tower Bridge fixed across the far end of the river and the Tower of London on the left bank. Steamers, lighters, barges and sailing craft fill the brown water in layered rows. Black vapour hangs between the bridge arches. The south-bank parapet occupies the near foreground. The camera pans from St Paul's across to Tower Bridge across the whole shot as fugitives stream along the riverfront, from 00:00 to 00:04. At 00:04 vapour spreads between the bridge arches, and the movement continues to the last frame of the shot. By 00:07 the camera is panning through the last frame, with tower Bridge now in frame, and the action continues with it.\n\noverall_soundscape: Open air under the action; cloth, footsteps and hands at work.\n\nnon_diegetic_music: N/A"
+  },
+  {
+    "index": 1,
+    "shots": [
+      1
+    ],
+    "section": "setup",
+    "setup": "london_pool",
+    "lane": "narration",
+    "workflow": "video_minimax_h3_r2v_turbo_ref8 + anchors",
+    "model": "MiniMax-H3 ref2va + Ref2V 8-step LoRA",
+    "mode": "reference-to-video from the references alone (--from-refs): a cast sheet for every face the take shows + the location plate, always; no storyboard cell, nothing pinned; the dialogue wavs at their offsets anchored at frame 0",
+    "refs": [
+      "refs/locations/london/wide_pool_of_london.png"
+    ],
+    "faces": [],
+    "ref_image_size": "match",
+    "anchors": [],
+    "audio": "silence",
+    "width": 768,
+    "height": 768,
+    "fps": 24,
+    "placed_seconds": 7.75,
+    "frames": 192,
+    "seconds": 8.0,
+    "steps": 8,
+    "seed": 105920,
+    "prompt": "subject_definitions:\n<Subject 1> is the location in <Picture 1>: The Pool of London lies beneath a grey summer sky, with Tower Bridge fixed across the far end of the river and the Tower of London on the left bank. Steamers, lighters, barges and sailing craft fill the brown water in layered rows. Black vapour hangs between the bridge arches. The south-bank parapet occupies the near foreground, wharves run along the right edge, and the river opens toward Limehouse at the far edge. Grey daylight falls from the east across the water, while deep black shadows gather beneath the bridge, along the warehouses and between the jammed hulls. River spray, shouted orders, steam whistles and hull knocks fill the air. <Picture 1> defines this place alone; each shot keeps the framing its own words describe.\n<Audio 1> is the take's complete audio track and runs silent for its whole length.\n\nsummary:\n[reference generation + audio reuse] One 8.00-second take of 1 shot in <Subject 1>, the Pool of London lies beneath a grey summer sky. [Shot 1] runs from 00:00 to 00:08. The take carries <Subject 1> through [Shot 1] in that order. <Audio 1> is the complete audio track.\n\nretention_analysis:\n<Subject 1> (the location behind [Shot 1]): partially_preserved - the materials, furniture and light of <Picture 1> carry into every shot behind the people; <Picture 1> serves as a definition of the place and each shot keeps the framing its own words describe.\n<Audio 1>: fully_copy - <Audio 1> is reused 1:1 as the take's complete final audio track.\n\ndetailed_description:\nAngular stylised 3D animation, brush-stroke texture, London, 1898, grey daylight from the east, black shadows.\n[Shot 1] From 00:00 to 00:08. The shot opens on a medium shot view of London roofs, bridges and river frontage as black vapour stains the country map; St Paul's anchors the left edge, Blackfriars Bridge crosses the centre, and smoke occupies the upper right. The camera is Camera on Waterloo Bridge at bridge height, a 40mm lens, grey daylight comes from the RIGHT. At the first frame tHE FOCUS OF THE PICTURE IS the black vapour above the City roofs; Blackfriars Bridge crosses the middle distance, St Paul's stands at the LEFT edge, river craft fill the lower frame, the parapet cuts the lower left, and warehouses occupy the RIGHT edge. The shot is inside this place: The Pool of London lies beneath a grey summer sky, with Tower Bridge fixed across the far end of the river and the Tower of London on the left bank. Steamers, lighters, barges and sailing craft fill the brown water in layered rows. Black vapour hangs between the bridge arches. The south-bank parapet occupies the near foreground. The camera tracks sideways to the RIGHT past the south-bank parapet, with the bridges behind it, across the whole shot as black vapour spreads over roofs and river, from 00:00 to 00:04. At 00:04 smoke trails over the warehouses, and the movement continues to the last frame of the shot. By 00:08 the camera is tracking through the last frame, and the action continues with it, and the black vapour covers the City roofs, Blackfriars Bridge cuts the centre, St Paul's is at the left, and smoke crosses the river.\n\noverall_soundscape: Open air under the action; cloth, footsteps and hands at work.\n\nnon_diegetic_music: N/A"
+  },
+  {
+    "index": 2,
+    "shots": [
+      2
+    ],
+    "section": "friction",
+    "setup": "london_pool",
+    "lane": "narration",
+    "workflow": "video_minimax_h3_r2v_turbo_ref8 + anchors",
+    "model": "MiniMax-H3 ref2va + Ref2V 8-step LoRA",
+    "mode": "reference-to-video from the references alone (--from-refs): a cast sheet for every face the take shows + the location plate, always; no storyboard cell, nothing pinned; the dialogue wavs at their offsets anchored at frame 0",
+    "refs": [
+      "refs/locations/london/wide_pool_of_london.png"
+    ],
+    "faces": [],
+    "ref_image_size": "match",
+    "anchors": [],
+    "audio": "silence",
+    "width": 768,
+    "height": 768,
+    "fps": 24,
+    "placed_seconds": 7.041667,
+    "frames": 192,
+    "seconds": 8.0,
+    "steps": 8,
+    "seed": 105921,
+    "prompt": "subject_definitions:\n<Subject 1> is the location in <Picture 1>: The Pool of London lies beneath a grey summer sky, with Tower Bridge fixed across the far end of the river and the Tower of London on the left bank. Steamers, lighters, barges and sailing craft fill the brown water in layered rows. Black vapour hangs between the bridge arches. The south-bank parapet occupies the near foreground, wharves run along the right edge, and the river opens toward Limehouse at the far edge. Grey daylight falls from the east across the water, while deep black shadows gather beneath the bridge, along the warehouses and between the jammed hulls. River spray, shouted orders, steam whistles and hull knocks fill the air. <Picture 1> defines this place alone; each shot keeps the framing its own words describe.\n<Audio 1> is the take's complete audio track and runs silent for its whole length.\n\nsummary:\n[reference generation + audio reuse] One 8.00-second take of 1 shot in <Subject 1>, the Pool of London lies beneath a grey summer sky. [Shot 1] runs from 00:00 to 00:08. The take carries <Subject 1> through [Shot 1] in that order. <Audio 1> is the complete audio track.\n\nretention_analysis:\n<Subject 1> (the location behind [Shot 1]): partially_preserved - the materials, furniture and light of <Picture 1> carry into every shot behind the people; <Picture 1> serves as a definition of the place and each shot keeps the framing its own words describe.\n<Audio 1>: fully_copy - <Audio 1> is reused 1:1 as the take's complete final audio track.\n\ndetailed_description:\nAngular stylised 3D animation, brush-stroke texture, London, 1898, grey daylight from the east, black shadows.\n[Shot 1] From 00:00 to 00:08. The shot opens on a medium shot view across Tower Bridge and the Pool, boats jammed under the northern arch and riverfront people pressing toward them; the bridge towers rise at the upper centre, the Tower of London anchors the left edge, and collision fills the lower right. The camera is Camera high above the south bank at bridge height, a 35mm lens, grey daylight comes from the RIGHT. At the first frame tHE FOCUS OF THE PICTURE IS the jammed northern arch of Tower Bridge; the Tower of London stands at the LEFT edge, barges fill the lower water, the riverfront crowd occupies the RIGHT bank, the bridge deck crosses the upper frame, and black vapour rests beyond the far arch. The shot is inside this place: The Pool of London lies beneath a grey summer sky, with Tower Bridge fixed across the far end of the river and the Tower of London on the left bank. Steamers, lighters, barges and sailing craft fill the brown water in layered rows. Black vapour hangs between the bridge arches. The south-bank parapet occupies the near foreground. The camera pulls back one yard from the jammed northern arch, widening to show Tower Bridge across the whole shot as boats collide beneath the bridge, from 00:00 to 00:04. At 00:04 sailors brace against the riverfront crowd, and the movement continues to the last frame of the shot. By 00:08 the camera is pulling back through the last frame, and the action continues with it, and tower Bridge keeps the centre, barges grind together beneath the northern arch, sailors brace at the right bank, and people crowd toward the piers.\n\noverall_soundscape: Open air under the action; cloth, footsteps and hands at work.\n\nnon_diegetic_music: N/A"
+  },
+  {
+    "index": 3,
+    "shots": [
+      3
+    ],
+    "section": "payoff",
+    "setup": "london_pool",
+    "lane": "narration",
+    "workflow": "video_minimax_h3_r2v_turbo_ref8 + anchors",
+    "model": "MiniMax-H3 ref2va + Ref2V 8-step LoRA",
+    "mode": "reference-to-video from the references alone (--from-refs): a cast sheet for every face the take shows + the location plate, always; no storyboard cell, nothing pinned; the dialogue wavs at their offsets anchored at frame 0",
+    "refs": [
+      "refs/locations/london/wide_pool_of_london.png"
+    ],
+    "faces": [],
+    "ref_image_size": "match",
+    "anchors": [],
+    "audio": "silence",
+    "width": 768,
+    "height": 768,
+    "fps": 24,
+    "placed_seconds": 6.541667,
+    "frames": 175,
+    "seconds": 7.29,
+    "steps": 8,
+    "seed": 105922,
+    "prompt": "subject_definitions:\n<Subject 1> is the location in <Picture 1>: The Pool of London lies beneath a grey summer sky, with Tower Bridge fixed across the far end of the river and the Tower of London on the left bank. Steamers, lighters, barges and sailing craft fill the brown water in layered rows. Black vapour hangs between the bridge arches. The south-bank parapet occupies the near foreground, wharves run along the right edge, and the river opens toward Limehouse at the far edge. Grey daylight falls from the east across the water, while deep black shadows gather beneath the bridge, along the warehouses and between the jammed hulls. River spray, shouted orders, steam whistles and hull knocks fill the air. <Picture 1> defines this place alone; each shot keeps the framing its own words describe.\n<Audio 1> is the take's complete audio track and runs silent for its whole length.\n\nsummary:\n[reference generation + audio reuse] One 7.29-second take of 1 shot in <Subject 1>, the Pool of London lies beneath a grey summer sky. [Shot 1] runs from 00:00 to 00:07. The take carries <Subject 1> through [Shot 1] in that order. <Audio 1> is the complete audio track.\n\nretention_analysis:\n<Subject 1> (the location behind [Shot 1]): partially_preserved - the materials, furniture and light of <Picture 1> carry into every shot behind the people; <Picture 1> serves as a definition of the place and each shot keeps the framing its own words describe.\n<Audio 1>: fully_copy - <Audio 1> is reused 1:1 as the take's complete final audio track.\n\ndetailed_description:\nAngular stylised 3D animation, brush-stroke texture, London, 1898, grey daylight from the east, black shadows.\n[Shot 1] From 00:00 to 00:07. The shot opens on an insert view of wreckage floating above Limehouse beneath the thinning black vapour; broken timbers occupy the lower centre, bridge masonry frames the upper left, and brown water reaches the right edge; only that object and what touches it is in frame. The camera is Camera on a river barge at shoulder height, a 50mm lens, grey daylight comes from the LEFT. At the first frame tHE FOCUS OF THE PICTURE IS broken timbers floating above Limehouse; the dark vapour hangs at the upper left, bridge masonry frames the upper edge, brown water fills the lower field, and the distant Limehouse warehouses occupy the far RIGHT edge. The shot is inside this place: The Pool of London lies beneath a grey summer sky, with Tower Bridge fixed across the far end of the river and the Tower of London on the left bank. Steamers, lighters, barges and sailing craft fill the brown water in layered rows. Black vapour hangs between the bridge arches. The south-bank parapet occupies the near foreground. The camera tracks laterally to the RIGHT past broken timbers across the whole shot as vapour thins between the arches, from 00:00 to 00:04. At 00:04 river water carries the wreckage east, and the movement continues to the last frame of the shot. By 00:07 the camera is tracking through the last frame, and the action continues with it, and broken timbers float across the brown water, the vapour thins between the arches, and Limehouse warehouses line the far bank.\n\noverall_soundscape: Open air under the action; cloth, footsteps and hands at work.\n\nnon_diegetic_music: N/A"
+  },
+  {
+    "index": 4,
+    "shots": [
+      4
+    ],
+    "section": "setup",
+    "setup": "road_east",
+    "lane": "narration",
+    "workflow": "video_minimax_h3_r2v_turbo_ref8 + anchors",
+    "model": "MiniMax-H3 ref2va + Ref2V 8-step LoRA",
+    "mode": "reference-to-video from the references alone (--from-refs): a cast sheet for every face the take shows + the location plate, always; no storyboard cell, nothing pinned; the dialogue wavs at their offsets anchored at frame 0",
+    "refs": [
+      "refs/characters/narrators_brother/sheet_front.png",
+      "refs/locations/colchester_road/wide_road_east.png"
+    ],
+    "faces": [
+      "narrators_brother"
+    ],
+    "ref_image_size": "match",
+    "anchors": [],
+    "audio": "silence",
+    "width": 768,
+    "height": 768,
+    "fps": 24,
+    "placed_seconds": 7.125,
+    "frames": 192,
+    "seconds": 8.0,
+    "steps": 8,
+    "seed": 105923,
+    "prompt": "subject_definitions:\n<Subject 1> is the brother in <Picture 1>: Long face with a square jaw and a small cleft chin; long straight nose, straight dark brows and grey eyes. Fresh ruddy complexion. Dark brown hair worn fuller on top with a centre parting and a loose forelock. Wearing: Brown herringbone Norfolk jacket grey with road dust and salt spray, left wrist bound in a grey-stained handkerchief, fawn trousers creased and dusty. Scabbed lower lip, yellow-green bruise along the jaw, fading red welt on one cheek, three days of dark stubble. Brown flat cloth cap. <Picture 1> defines this man alone; each shot keeps the framing its own words describe.\n<Subject 2> is the location in <Picture 2>: The Essex high road runs from the left frame edge toward a village at the far right, its white dust bordered by tall hawthorn hedges and elm trees. A timber-framed farmhouse and weatherboarded barns occupy the near left, while a meadow and green wheat field fill the near right. The village church tower stands at the end of the road. Low south-west hills sit beyond the fields. Grey daylight falls from the east across the road, with black shadows beneath the hedges and barn eaves. Wheat heads stir above the ditch, dust lifts from passing feet, and distant hoofbeats mingle with summer insects. The road surface gives the travelers a clear eastward route through the flat country. <Picture 2> defines this place alone; each shot keeps the framing its own words describe.\n<Audio 1> is the take's complete audio track and runs silent for its whole length.\n\nsummary:\n[reference generation + audio reuse] One 8.00-second take of 1 shot in <Subject 2>, the Essex high road runs from the left frame edge toward a village at the far right. [Shot 1] runs from 00:00 to 00:08. The take carries <Subject 1> through [Shot 1] in that order. <Audio 1> is the complete audio track.\n\nretention_analysis:\n<Subject 1> (the man in [Shot 1]): partially_preserved - the face, hair, build and clothes of <Picture 1> carry into every shot that shows him; <Picture 1> serves as a definition of the man and each shot keeps the framing its own words describe.\n<Subject 2> (the location behind [Shot 1]): partially_preserved - the materials, furniture and light of <Picture 2> carry into every shot behind the people; <Picture 2> serves as a definition of the place and each shot keeps the framing its own words describe.\n<Audio 1>: fully_copy - <Audio 1> is reused 1:1 as the take's complete final audio track.\n\ndetailed_description:\nAngular stylised 3D animation, brush-stroke texture, Essex coast, 1898, grey daylight from the east, black shadows.\n[Shot 1] From 00:00 to 00:08. The shot opens on a medium shot view along the Essex road as <Subject 1> leads the travelers east past hedges, farmhouse and wheat; the farmhouse fills the left edge, wheat fills the right edge, and the church tower marks the far centre. The camera is Camera on the road at chest height, a 35mm lens, grey daylight comes from the RIGHT. At the first frame tHE FOCUS OF THE PICTURE IS <Subject 1>, walking in the road; the farmhouse stands at the LEFT edge, green wheat fills the RIGHT edge, the white road runs through the lower centre, the women occupy the middle distance, and the church tower marks the far upper centre. The shot is inside this place: The Essex high road runs from the left frame edge toward a village at the far right, its white dust bordered by tall hawthorn hedges and elm trees. A timber-framed farmhouse and weatherboarded barns occupy the near left, while a meadow and green wheat field fill the near right. The village church tower stands at the end of the road. The camera tracks behind <Subject 1> as he walks toward the village road across the whole shot as the women follow through the dusty lane at a normal walking pace, from 00:00 to 00:04. At 00:04 wheat bends beside the hedge, and the movement continues to the last frame of the shot. <Subject 1>'s mouth is closed from 00:00 to 00:05 while the women follow through the dusty lane. By 00:08 the camera is tracking through the last frame, with <Subject 1> leads toward the church tower now in frame, and the action continues with it.\n\noverall_soundscape: Open air under the action; cloth, footsteps and hands at work.\n\nnon_diegetic_music: N/A"
+  },
+  {
+    "index": 5,
+    "shots": [
+      5
+    ],
+    "section": "friction",
+    "setup": "road_east",
+    "lane": "narration",
+    "workflow": "video_minimax_h3_r2v_turbo_ref8 + anchors",
+    "model": "MiniMax-H3 ref2va + Ref2V 8-step LoRA",
+    "mode": "reference-to-video from the references alone (--from-refs): a cast sheet for every face the take shows + the location plate, always; no storyboard cell, nothing pinned; the dialogue wavs at their offsets anchored at frame 0",
+    "refs": [
+      "refs/characters/narrators_brother/sheet_front.png",
+      "refs/locations/colchester_road/wide_road_east.png"
+    ],
+    "faces": [
+      "narrators_brother"
+    ],
+    "ref_image_size": "match",
+    "anchors": [],
+    "audio": "silence",
+    "width": 768,
+    "height": 768,
+    "fps": 24,
+    "placed_seconds": 6.375,
+    "frames": 175,
+    "seconds": 7.29,
+    "steps": 8,
+    "seed": 105924,
+    "prompt": "subject_definitions:\n<Subject 1> is the brother in <Picture 1>: Long face with a square jaw and a small cleft chin; long straight nose, straight dark brows and grey eyes. Fresh ruddy complexion. Dark brown hair worn fuller on top with a centre parting and a loose forelock. Wearing: Brown herringbone Norfolk jacket grey with road dust and salt spray, left wrist bound in a grey-stained handkerchief, fawn trousers creased and dusty. Scabbed lower lip, yellow-green bruise along the jaw, fading red welt on one cheek, three days of dark stubble. Brown flat cloth cap. <Picture 1> defines this man alone; each shot keeps the framing its own words describe.\n<Subject 2> is the location in <Picture 2>: The Essex high road runs from the left frame edge toward a village at the far right, its white dust bordered by tall hawthorn hedges and elm trees. A timber-framed farmhouse and weatherboarded barns occupy the near left, while a meadow and green wheat field fill the near right. The village church tower stands at the end of the road. Low south-west hills sit beyond the fields. Grey daylight falls from the east across the road, with black shadows beneath the hedges and barn eaves. Wheat heads stir above the ditch, dust lifts from passing feet, and distant hoofbeats mingle with summer insects. The road surface gives the travelers a clear eastward route through the flat country. <Picture 2> defines this place alone; each shot keeps the framing its own words describe.\n<Audio 1> is the take's complete audio track and runs silent for its whole length.\n\nsummary:\n[reference generation + audio reuse] One 7.29-second take of 1 shot in <Subject 2>, the Essex high road runs from the left frame edge toward a village at the far right. [Shot 1] runs from 00:00 to 00:07. The take carries <Subject 1> through [Shot 1] in that order. <Audio 1> is the complete audio track.\n\nretention_analysis:\n<Subject 1> (the man in [Shot 1]): partially_preserved - the face, hair, build and clothes of <Picture 1> carry into every shot that shows him; <Picture 1> serves as a definition of the man and each shot keeps the framing its own words describe.\n<Subject 2> (the location behind [Shot 1]): partially_preserved - the materials, furniture and light of <Picture 2> carry into every shot behind the people; <Picture 2> serves as a definition of the place and each shot keeps the framing its own words describe.\n<Audio 1>: fully_copy - <Audio 1> is reused 1:1 as the take's complete final audio track.\n\ndetailed_description:\nAngular stylised 3D animation, brush-stroke texture, Essex coast, 1898, grey daylight from the east, black shadows.\n[Shot 1] From 00:00 to 00:07. The shot opens on a medium close shot view of <Subject 1> standing beside the east road, turning his face toward the distant hills; the hedge fills the left edge, the road lies at the lower right, and low hills sit behind the wheat. The camera is Camera above the hawthorn hedge at a high angle looking down at the standing <Subject 1>, a 75mm lens, grey daylight comes from the LEFT. At the first frame tHE FOCUS OF THE PICTURE IS <Subject 1> standing upright, with his head a quarter of the frame's height; the hedge runs behind his LEFT shoulder, the road lies at the lower RIGHT, low hills sit beyond the wheat at the upper centre, and dust crosses the lower edge. The shot is inside this place: The Essex high road runs from the left frame edge toward a village at the far right, its white dust bordered by tall hawthorn hedges and elm trees. A timber-framed farmhouse and weatherboarded barns occupy the near left, while a meadow and green wheat field fill the near right. The village church tower stands at the end of the road. The camera orbits to the left around <Subject 1> across the whole shot as <Subject 1> turns toward the south-west hills, from 00:00 to 00:04. At 00:04 dust curls along the hedge behind him, and the movement continues to the last frame of the shot. <Subject 1>'s mouth is closed from 00:00 to 00:05 while he turns toward the south-west hills. By 00:07 the camera is orbiting through the last frame, and the action continues with it, and <Subject 1> faces the low hills, his cap shades his brow, the road brightens behind him, and dust curls beside the hedge.\n\noverall_soundscape: Open air under the action; cloth, footsteps and hands at work.\n\nnon_diegetic_music: N/A"
+  },
+  {
+    "index": 6,
+    "shots": [
+      6
+    ],
+    "section": "friction",
+    "setup": "tillingham_sea",
+    "lane": "narration",
+    "workflow": "video_minimax_h3_r2v_turbo_ref8 + anchors",
+    "model": "MiniMax-H3 ref2va + Ref2V 8-step LoRA",
+    "mode": "reference-to-video from the references alone (--from-refs): a cast sheet for every face the take shows + the location plate, always; no storyboard cell, nothing pinned; the dialogue wavs at their offsets anchored at frame 0",
+    "refs": [
+      "refs/locations/tillingham/wide_road_to_sea.png"
+    ],
+    "faces": [],
+    "ref_image_size": "match",
+    "anchors": [],
+    "audio": "silence",
+    "width": 768,
+    "height": 768,
+    "fps": 24,
+    "placed_seconds": 7.0,
+    "frames": 175,
+    "seconds": 7.29,
+    "steps": 8,
+    "seed": 105925,
+    "prompt": "subject_definitions:\n<Subject 1> is the location in <Picture 1>: Tillingham's marsh road rises gently from the village toward the eastern sea. The road occupies the centre of the frame, with thorn hedges and water-filled dykes at both edges. White and black weatherboarded cottages sit behind the left hedge, and the flint church tower rises at the far left. Beyond the rise, the calm grey-blue sea fills the horizon, carrying a sickle-shaped curve of fishing smacks, launches, merchant ships and liners. Grey daylight falls from the east over the marsh, with black shadows beneath the hedges and cottage eaves. Haze softens the far shipping, while dry grass, insects and dyke water give the village its empty midday sound. The road and rise form a continuous route from village to sea. <Picture 1> defines this place alone; each shot keeps the framing its own words describe.\n<Audio 1> is the take's complete audio track and runs silent for its whole length.\n\nsummary:\n[reference generation + audio reuse] One 7.29-second take of 1 shot in <Subject 1>, Tillingham's marsh road rises gently from the village toward the eastern sea. The road occupies the centre of the frame. [Shot 1] runs from 00:00 to 00:07. The take carries <Subject 1> through [Shot 1] in that order. <Audio 1> is the complete audio track.\n\nretention_analysis:\n<Subject 1> (the location behind [Shot 1]): partially_preserved - the materials, furniture and light of <Picture 1> carry into every shot behind the people; <Picture 1> serves as a definition of the place and each shot keeps the framing its own words describe.\n<Audio 1>: fully_copy - <Audio 1> is reused 1:1 as the take's complete final audio track.\n\ndetailed_description:\nAngular stylised 3D animation, brush-stroke texture, Essex coast, 1898, grey daylight from the east, black shadows.\n[Shot 1] From 00:00 to 00:07. The shot opens on a medium shot view of the Tillingham road rising toward the sea, with cottages and furtive searchers; the church tower anchors the left edge, cottage doors line the middle, and marsh dykes lead toward the right horizon. The camera is Camera on the road at shoulder height, a 35mm lens, grey daylight comes from the EAST. At the first frame tHE FOCUS OF THE PICTURE IS the eastern road and sea beyond it; the church tower stands at the LEFT edge, cottages line the near middle, a few plunderers work around doorways at the RIGHT, marsh dykes cut the lower frame, and the sea lies at the far upper edge. The shot is inside this place: Tillingham's marsh road rises gently from the village toward the eastern sea. The road occupies the centre of the frame, with thorn hedges and water-filled dykes at both edges. White and black weatherboarded cottages sit behind the left hedge, and the flint church tower rises at the far left. Beyond the rise, the calm grey-blue sea fills the horizon. The camera pushes in toward the plunderers across the whole shot as plunderers search doorways, from 00:00 to 00:04. At 00:04 marsh grass bends beside the dykes, and the movement continues to the last frame of the shot. By 00:07 the camera is pushing in through the last frame, and the action continues with it, and the eastern road opens toward the sea, plunderers search the cottages, the church tower stands at the left, and marsh dykes shine beside the track.\n\noverall_soundscape: Open air under the action; cloth, footsteps and hands at work.\n\nnon_diegetic_music: N/A"
+  },
+  {
+    "index": 7,
+    "shots": [
+      7
+    ],
+    "section": "payoff",
+    "setup": "tillingham_sea",
+    "lane": "narration",
+    "workflow": "video_minimax_h3_r2v_turbo_ref8 + anchors",
+    "model": "MiniMax-H3 ref2va + Ref2V 8-step LoRA",
+    "mode": "reference-to-video from the references alone (--from-refs): a cast sheet for every face the take shows + the location plate, always; no storyboard cell, nothing pinned; the dialogue wavs at their offsets anchored at frame 0",
+    "refs": [
+      "refs/locations/tillingham/wide_road_to_sea.png"
+    ],
+    "faces": [],
+    "ref_image_size": "match",
+    "anchors": [],
+    "audio": "silence",
+    "width": 768,
+    "height": 768,
+    "fps": 24,
+    "placed_seconds": 7.041667,
+    "frames": 192,
+    "seconds": 8.0,
+    "steps": 8,
+    "seed": 105926,
+    "prompt": "subject_definitions:\n<Subject 1> is the location in <Picture 1>: Tillingham's marsh road rises gently from the village toward the eastern sea. The road occupies the centre of the frame, with thorn hedges and water-filled dykes at both edges. White and black weatherboarded cottages sit behind the left hedge, and the flint church tower rises at the far left. Beyond the rise, the calm grey-blue sea fills the horizon, carrying a sickle-shaped curve of fishing smacks, launches, merchant ships and liners. Grey daylight falls from the east over the marsh, with black shadows beneath the hedges and cottage eaves. Haze softens the far shipping, while dry grass, insects and dyke water give the village its empty midday sound. The road and rise form a continuous route from village to sea. <Picture 1> defines this place alone; each shot keeps the framing its own words describe.\n<Audio 1> is the take's complete audio track and runs silent for its whole length.\n\nsummary:\n[reference generation + audio reuse] One 8.00-second take of 1 shot in <Subject 1>, Tillingham's marsh road rises gently from the village toward the eastern sea. The road occupies the centre of the frame. [Shot 1] runs from 00:00 to 00:08. The take carries <Subject 1> through [Shot 1] in that order. <Audio 1> is the complete audio track.\n\nretention_analysis:\n<Subject 1> (the location behind [Shot 1]): partially_preserved - the materials, furniture and light of <Picture 1> carry into every shot behind the people; <Picture 1> serves as a definition of the place and each shot keeps the framing its own words describe.\n<Audio 1>: fully_copy - <Audio 1> is reused 1:1 as the take's complete final audio track.\n\ndetailed_description:\nAngular stylised 3D animation, brush-stroke texture, Essex coast, 1898, grey daylight from the east, black shadows.\n[Shot 1] From 00:00 to 00:08. The shot opens on a wide view from the rise over the marsh to the calm sea and the sickle-shaped shipping curve; the road enters from the lower left, dykes cross the lower centre, the ironclad rests at the far right, and the fleet fades into mist at the far left. The camera is Camera on the eastern rise at waist height, a 28mm lens, grey daylight comes from the EAST. At the first frame tHE FOCUS OF THE PICTURE IS the sea beyond the marsh road; the church tower stands at the LEFT edge; the road occupies the lower LEFT, dykes cut the lower centre, the ironclad lies low at the far RIGHT, the shipping curve fades into mist at the far LEFT, and the sea spans the far upper edge beneath the bright horizon. The shot is inside this place: Tillingham's marsh road rises gently from the village toward the eastern sea. The road occupies the centre of the frame, with thorn hedges and water-filled dykes at both edges. White and black weatherboarded cottages sit behind the left hedge, and the flint church tower rises at the far left. Beyond the rise, the calm grey-blue sea fills the horizon. The camera keeps a locked-off frame as the travelers crest the rise, from 00:00 to 00:04. At 00:04 haze gathers over the far vessels, and the movement continues to the last frame of the shot. By 00:08 the action of that shot continues through the last frame, with the sea now in frame.\n\noverall_soundscape: Open air under the action; cloth, footsteps and hands at work.\n\nnon_diegetic_music: N/A"
+  },
+  {
+    "index": 8,
+    "shots": [
+      8
+    ],
+    "section": "friction",
+    "setup": "tillingham_sea",
+    "lane": "dialogue",
+    "workflow": "video_minimax_h3_r2v_turbo_ref8 + anchors",
+    "model": "MiniMax-H3 ref2va + Ref2V 8-step LoRA",
+    "mode": "reference-to-video from the references alone (--from-refs): a cast sheet for every face the take shows + the location plate, always; no storyboard cell, nothing pinned; the dialogue wavs at their offsets anchored at frame 0",
+    "refs": [
+      "refs/characters/mrs_elphinstone/sheet_front.png",
+      "refs/locations/tillingham/wide_road_to_sea.png"
+    ],
+    "faces": [
+      "mrs_elphinstone"
+    ],
+    "ref_image_size": "match",
+    "anchors": [],
+    "audio": [
+      [
+        "l08.wav",
+        0.25
+      ]
+    ],
+    "width": 768,
+    "height": 768,
+    "fps": 24,
+    "placed_seconds": 6.833333,
+    "frames": 175,
+    "seconds": 7.29,
+    "steps": 8,
+    "seed": 105927,
+    "prompt": "subject_definitions:\n<Subject 1> is Mrs. Elphinstone in <Picture 1>: Woman of 41, 5 ft 1 in, short and plump with a soft rounded figure. Round face with full cheeks, small pale blue eyes, small mouth. Fair pink skin freckled across the nose. Light brown hair threaded with grey, worn in a smooth bun at the crown. Wearing: White muslin dress gone grey-brown with dust to the knees and creased, lace collar torn at one side. Wide white straw hat bent at the brim, veil torn. Grey-soiled kid gloves. Brown leather travelling bag clutched to her chest. <Picture 1> defines this woman alone; each shot keeps the framing its own words describe.\n<Subject 2> is the location in <Picture 2>: Tillingham's marsh road rises gently from the village toward the eastern sea. The road occupies the centre of the frame, with thorn hedges and water-filled dykes at both edges. White and black weatherboarded cottages sit behind the left hedge, and the flint church tower rises at the far left. Beyond the rise, the calm grey-blue sea fills the horizon, carrying a sickle-shaped curve of fishing smacks, launches, merchant ships and liners. Grey daylight falls from the east over the marsh, with black shadows beneath the hedges and cottage eaves. Haze softens the far shipping, while dry grass, insects and dyke water give the village its empty midday sound. The road and rise form a continuous route from village to sea. <Picture 2> defines this place alone; each shot keeps the framing its own words describe.\n<Audio 1> is the take's complete audio track: the one line spoken on camera at 00:00, over silence for the rest of its length.\n\nsummary:\n[reference generation + audio reuse] One 7.29-second take of 1 shot in <Subject 2>, Tillingham's marsh road rises gently from the village toward the eastern sea. The road occupies the centre of the frame. [Shot 1] runs from 00:00 to 00:07. The take carries <Subject 1> through [Shot 1] in that order. <Audio 1> carries that spoken line and is the complete audio track.\n\nretention_analysis:\n<Subject 1> (the woman in [Shot 1]): partially_preserved - the face, hair, build and clothes of <Picture 1> carry into every shot that shows her; <Picture 1> serves as a definition of the woman and each shot keeps the framing its own words describe.\n<Subject 2> (the location behind [Shot 1]): partially_preserved - the materials, furniture and light of <Picture 2> carry into every shot behind the people; <Picture 2> serves as a definition of the place and each shot keeps the framing its own words describe.\n<Audio 1>: fully_copy - <Audio 1> is reused 1:1 as the take's complete final audio track.\n\ndetailed_description:\nAngular stylised 3D animation, brush-stroke texture, Essex coast, 1898, grey daylight from the east, black shadows.\n[Shot 1] From 00:00 to 00:07. The shot opens on a medium close shot view of <Subject 1> at the rise, her face turned from the water toward the road; the sea occupies the right edge, the road rises at the left, and her travelling bag rests below her face. The camera is Camera at the rise at eye height, a 75mm lens, grey daylight comes from the RIGHT. At the first frame tHE FOCUS OF THE PICTURE IS <Subject 1>, standing with her head a quarter of the frame's height; her brown leather travelling bag rests against her chest, the sea fills the RIGHT background, the road rises at the LEFT, and the marsh horizon crosses behind her shoulders. The shot is inside this place: Tillingham's marsh road rises gently from the village toward the eastern sea. The road occupies the centre of the frame, with thorn hedges and water-filled dykes at both edges. White and black weatherboarded cottages sit behind the left hedge, and the flint church tower rises at the far left. Beyond the rise, the calm grey-blue sea fills the horizon. The camera pushes in on <Subject 1> across the whole shot as <Subject 1> grips her travelling bag and turns inland, from 00:00 to 00:05. <Subject 1> (S1), on screen, woman of 41, with a clipped English voice at an even pace, says: <d>[English] I would rather die than trust myself friendless in a foreign country.</d> Her mouth shapes every syllable as the line is heard and closes on the last word. At 00:05, as the line ends, her hat veil lifts in the sea air, and the lift continues to the last frame of the shot. By 00:07 the camera is pushing in through the last frame, and the action continues with it, and <Subject 1> faces inland with both hands on her bag, the sea lies behind her, the road rises at the left, and her bent straw hat frames her face.\n\noverall_soundscape: Open air under the action; cloth, footsteps and hands at work.\n\nnon_diegetic_music: N/A"
+  },
+  {
+    "index": 9,
+    "shots": [
+      9
+    ],
+    "section": "payoff",
+    "setup": "beach_transfer",
+    "lane": "narration",
+    "workflow": "video_minimax_h3_r2v_turbo_ref8 + anchors",
+    "model": "MiniMax-H3 ref2va + Ref2V 8-step LoRA",
+    "mode": "reference-to-video from the references alone (--from-refs): a cast sheet for every face the take shows + the location plate, always; no storyboard cell, nothing pinned; the dialogue wavs at their offsets anchored at frame 0",
+    "refs": [
+      "refs/characters/narrators_brother/sheet_front.png",
+      "refs/characters/mrs_elphinstone/sheet_front.png",
+      "refs/locations/essex_coast_beach/medium_surf_landing.png"
+    ],
+    "faces": [
+      "narrators_brother",
+      "mrs_elphinstone"
+    ],
+    "ref_image_size": "match",
+    "anchors": [],
+    "audio": "silence",
+    "width": 768,
+    "height": 768,
+    "fps": 24,
+    "placed_seconds": 6.875,
+    "frames": 175,
+    "seconds": 7.29,
+    "steps": 8,
+    "seed": 105928,
+    "prompt": "subject_definitions:\n<Subject 1> is the brother in <Picture 1>: Long face with a square jaw and a small cleft chin; long straight nose, straight dark brows and grey eyes. Fresh ruddy complexion. Dark brown hair worn fuller on top with a centre parting and a loose forelock. Wearing: Brown herringbone Norfolk jacket grey with road dust and salt spray, left wrist bound in a grey-stained handkerchief, fawn trousers creased and dusty. Scabbed lower lip, yellow-green bruise along the jaw, fading red welt on one cheek, three days of dark stubble. Brown flat cloth cap. <Picture 1> defines this man alone; each shot keeps the framing its own words describe.\n<Subject 2> is Mrs. Elphinstone in <Picture 2>: Woman of 41, 5 ft 1 in, short and plump with a soft rounded figure. Round face with full cheeks, small pale blue eyes, small mouth. Fair pink skin freckled across the nose. Light brown hair threaded with grey, worn in a smooth bun at the crown. Wearing: White muslin dress gone grey-brown with dust to the knees and creased, lace collar torn at one side. Wide white straw hat bent at the brim, veil torn. Grey-soiled kid gloves. Brown leather travelling bag clutched to her chest. <Picture 2> defines this woman alone; each shot keeps the framing its own words describe.\n<Subject 3> is the location in <Picture 3>: The Essex beach stretches from the grassy sea wall at the western frame edge to shallow surf at the eastern edge. Shingle and grey mud occupy the foreground, with a wooden rowing boat resting in the shallows. A paddle steamer lies a few hundred yards offshore, its white paddle boxes and crowded rails clear against the bright sea. Fishing smacks and larger vessels form a vast curve behind it. Grey daylight falls from the east across wet sand, with black shadows under the sea wall and beneath the boat. The tide makes small bright lines across firm sand, while oars dip and ropes strain near the landing. The sea wall, boat and steamer make a clear route from shore to passage. <Picture 3> defines this place alone; each shot keeps the framing its own words describe.\n<Audio 1> is the take's complete audio track and runs silent for its whole length.\n\nsummary:\n[reference generation + audio reuse] One 7.29-second take of 1 shot in <Subject 3>, the Essex beach stretches from the grassy sea wall at the western frame edge to shallow surf at the eastern edge. Shingle and grey mud occupy the foreground. [Shot 1] runs from 00:00 to 00:07. The take carries <Subject 1>, <Subject 2> through [Shot 1] in that order. <Audio 1> is the complete audio track.\n\nretention_analysis:\n<Subject 1> (the man in [Shot 1]): partially_preserved - the face, hair, build and clothes of <Picture 1> carry into every shot that shows him; <Picture 1> serves as a definition of the man and each shot keeps the framing its own words describe.\n<Subject 2> (the woman in [Shot 1]): partially_preserved - the face, hair, build and clothes of <Picture 2> carry into every shot that shows her; <Picture 2> serves as a definition of the woman and each shot keeps the framing its own words describe.\n<Subject 3> (the location behind [Shot 1]): partially_preserved - the materials, furniture and light of <Picture 3> carry into every shot behind the people; <Picture 3> serves as a definition of the place and each shot keeps the framing its own words describe.\n<Audio 1>: fully_copy - <Audio 1> is reused 1:1 as the take's complete final audio track.\n\ndetailed_description:\nAngular stylised 3D animation, brush-stroke texture, Essex coast, 1898, grey daylight from the east, black shadows.\n[Shot 1] From 00:00 to 00:07. The shot opens on a medium shot view at the water's edge as <Subject 1> raises both arms toward the offshore paddle steamer, with <Subject 2> behind him; the rowing boat occupies the lower centre, surf crosses the lower edge, and the steamer rises at the far right. The camera is Camera at knee height in the shallows, a 35mm lens, grey daylight comes from the EAST. At the first frame tHE FOCUS OF THE PICTURE IS <Subject 1>, standing at the water's edge; <Subject 2> stands behind him at the LEFT, the rowing boat rests in the lower centre, the paddle steamer lies offshore at the RIGHT, and the sea wall runs along the far left edge. The shot is inside this place: The Essex beach stretches from the grassy sea wall at the western frame edge to shallow surf at the eastern edge. Shingle and grey mud occupy the foreground, with a wooden rowing boat resting in the shallows. A paddle steamer lies a few hundred yards offshore, its white paddle boxes and crowded rails clear against the bright sea. The camera pulls back one yard from <Subject 1>, widening to show the rowing boat and paddle steamer across the whole shot as <Subject 1> raises both arms, from 00:00 to 00:04. At 00:04 surf runs around the boat, and the movement continues to the last frame of the shot. <Subject 1>'s mouth is closed from 00:00 to 00:05 while he raises both arms. By 00:07 the camera is pulling back through the last frame, and the action continues with it, and <Subject 1> signals from the shallows, <Subject 2> faces the steamer, the rowing boat rides the surf, and the steamer's funnel rises beyond them.\n\noverall_soundscape: Open air under the action; cloth, footsteps and hands at work.\n\nnon_diegetic_music: N/A"
+  },
+  {
+    "index": 10,
+    "shots": [
+      10
+    ],
+    "section": "setup",
+    "setup": "beach_transfer",
+    "lane": "narration",
+    "workflow": "video_minimax_h3_r2v_turbo_ref8 + anchors",
+    "model": "MiniMax-H3 ref2va + Ref2V 8-step LoRA",
+    "mode": "reference-to-video from the references alone (--from-refs): a cast sheet for every face the take shows + the location plate, always; no storyboard cell, nothing pinned; the dialogue wavs at their offsets anchored at frame 0",
+    "refs": [
+      "refs/characters/narrators_brother/sheet_front.png",
+      "refs/locations/essex_coast_beach/medium_surf_landing.png"
+    ],
+    "faces": [
+      "narrators_brother"
+    ],
+    "ref_image_size": "match",
+    "anchors": [],
+    "audio": "silence",
+    "width": 768,
+    "height": 768,
+    "fps": 24,
+    "placed_seconds": 6.666667,
+    "frames": 175,
+    "seconds": 7.29,
+    "steps": 8,
+    "seed": 105929,
+    "prompt": "subject_definitions:\n<Subject 1> is the brother in <Picture 1>: Long face with a square jaw and a small cleft chin; long straight nose, straight dark brows and grey eyes. Fresh ruddy complexion. Dark brown hair worn fuller on top with a centre parting and a loose forelock. Wearing: Brown herringbone Norfolk jacket grey with road dust and salt spray, left wrist bound in a grey-stained handkerchief, fawn trousers creased and dusty. Scabbed lower lip, yellow-green bruise along the jaw, fading red welt on one cheek, three days of dark stubble. Brown flat cloth cap. <Picture 1> defines this man alone; each shot keeps the framing its own words describe.\n<Subject 2> is the location in <Picture 2>: The Essex beach stretches from the grassy sea wall at the western frame edge to shallow surf at the eastern edge. Shingle and grey mud occupy the foreground, with a wooden rowing boat resting in the shallows. A paddle steamer lies a few hundred yards offshore, its white paddle boxes and crowded rails clear against the bright sea. Fishing smacks and larger vessels form a vast curve behind it. Grey daylight falls from the east across wet sand, with black shadows under the sea wall and beneath the boat. The tide makes small bright lines across firm sand, while oars dip and ropes strain near the landing. The sea wall, boat and steamer make a clear route from shore to passage. <Picture 2> defines this place alone; each shot keeps the framing its own words describe.\n<Audio 1> is the take's complete audio track and runs silent for its whole length.\n\nsummary:\n[reference generation + audio reuse] One 7.29-second take of 1 shot in <Subject 2>, the Essex beach stretches from the grassy sea wall at the western frame edge to shallow surf at the eastern edge. Shingle and grey mud occupy the foreground. [Shot 1] runs from 00:00 to 00:07. The take carries <Subject 1> through [Shot 1] in that order. <Audio 1> is the complete audio track.\n\nretention_analysis:\n<Subject 1> (the man in [Shot 1]): partially_preserved - the face, hair, build and clothes of <Picture 1> carry into every shot that shows him; <Picture 1> serves as a definition of the man and each shot keeps the framing its own words describe.\n<Subject 2> (the location behind [Shot 1]): partially_preserved - the materials, furniture and light of <Picture 2> carry into every shot behind the people; <Picture 2> serves as a definition of the place and each shot keeps the framing its own words describe.\n<Audio 1>: fully_copy - <Audio 1> is reused 1:1 as the take's complete final audio track.\n\ndetailed_description:\nAngular stylised 3D animation, brush-stroke texture, Essex coast, 1898, grey daylight from the east, black shadows.\n[Shot 1] From 00:00 to 00:07. The shot opens on an insert view of <Subject 1>'s open palm holding gold above the wet shingle beside the beached boat; the coins occupy the lower centre, the boat gunwale crosses the left edge, surf reaches the right edge, and the steamer stands far beyond; only that object and what touches it is in frame. The camera is Camera at waist height beside the beached boat, a 75mm lens, grey daylight comes from the LEFT. At the first frame tHE FOCUS OF THE PICTURE IS gold coins in <Subject 1>'s open palm; wet shingle fills the lower field, the boat gunwale fills the LEFT edge and runs across the lower frame, shallow surf reaches the RIGHT edge, and the paddle steamer sits at the far upper centre. The shot is inside this place: The Essex beach stretches from the grassy sea wall at the western frame edge to shallow surf at the eastern edge. Shingle and grey mud occupy the foreground, with a wooden rowing boat resting in the shallows. A paddle steamer lies a few hundred yards offshore, its white paddle boxes and crowded rails clear against the bright sea. The camera tilts up to the gold across the whole shot as gold extends toward the landing, from 00:00 to 00:04. At 00:04 the rowing boat rocks in the shallows, and the movement continues to the last frame of the shot. By 00:07 the camera is tilting up through the last frame, and the action continues with it, and <Subject 1> extends the gold toward the boat, coins shine above the shingle, the boat rocks behind him, and the steamer keeps the far water.\n\noverall_soundscape: Open air under the action; cloth, footsteps and hands at work.\n\nnon_diegetic_music: N/A"
+  },
+  {
+    "index": 11,
+    "shots": [
+      11
+    ],
+    "section": "setup",
+    "setup": "beach_transfer",
+    "lane": "narration",
+    "workflow": "video_minimax_h3_r2v_turbo_ref8 + anchors",
+    "model": "MiniMax-H3 ref2va + Ref2V 8-step LoRA",
+    "mode": "reference-to-video from the references alone (--from-refs): a cast sheet for every face the take shows + the location plate, always; no storyboard cell, nothing pinned; the dialogue wavs at their offsets anchored at frame 0",
+    "refs": [
+      "refs/characters/captain/sheet.png",
+      "refs/locations/essex_coast_beach/medium_surf_landing.png"
+    ],
+    "faces": [
+      "captain"
+    ],
+    "ref_image_size": "match",
+    "anchors": [],
+    "audio": "silence",
+    "width": 768,
+    "height": 768,
+    "fps": 24,
+    "placed_seconds": 5.958333,
+    "frames": 158,
+    "seconds": 6.58,
+    "steps": 8,
+    "seed": 105930,
+    "prompt": "subject_definitions:\n<Subject 1> is the captain in <Picture 1>: Man of 55, 5 ft 9 in, stout and barrel-chested. Weathered red-brown face with deep crow's feet, pale grey eyes, broad nose. Iron-grey hair cut short. Full iron-grey beard trimmed square. Thick tarred hands, a faded blue anchor tattoo on the back of the left hand, gold ring in the right earlobe. Wearing: Brick-red knitted wool guernsey jersey under an open black pilot-cloth pea jacket with brass buttons, tan duck trousers, black sea boots wet with spray. Brass speaking trumpet in one hand. <Picture 1> defines this man alone; each shot keeps the framing its own words describe.\n<Subject 2> is the location in <Picture 2>: The Essex beach stretches from the grassy sea wall at the western frame edge to shallow surf at the eastern edge. Shingle and grey mud occupy the foreground, with a wooden rowing boat resting in the shallows. A paddle steamer lies a few hundred yards offshore, its white paddle boxes and crowded rails clear against the bright sea. Fishing smacks and larger vessels form a vast curve behind it. Grey daylight falls from the east across wet sand, with black shadows under the sea wall and beneath the boat. The tide makes small bright lines across firm sand, while oars dip and ropes strain near the landing. The sea wall, boat and steamer make a clear route from shore to passage. <Picture 2> defines this place alone; each shot keeps the framing its own words describe.\n<Audio 1> is the take's complete audio track and runs silent for its whole length.\n\nsummary:\n[reference generation + audio reuse] One 6.58-second take of 1 shot in <Subject 2>, the Essex beach stretches from the grassy sea wall at the western frame edge to shallow surf at the eastern edge. Shingle and grey mud occupy the foreground. [Shot 1] runs from 00:00 to 00:06. The take carries <Subject 1> through [Shot 1] in that order. <Audio 1> is the complete audio track.\n\nretention_analysis:\n<Subject 1> (the man in [Shot 1]): partially_preserved - the face, hair, build and clothes of <Picture 1> carry into every shot that shows him; <Picture 1> serves as a definition of the man and each shot keeps the framing its own words describe.\n<Subject 2> (the location behind [Shot 1]): partially_preserved - the materials, furniture and light of <Picture 2> carry into every shot behind the people; <Picture 2> serves as a definition of the place and each shot keeps the framing its own words describe.\n<Audio 1>: fully_copy - <Audio 1> is reused 1:1 as the take's complete final audio track.\n\ndetailed_description:\nAngular stylised 3D animation, brush-stroke texture, Essex coast, 1898, grey daylight from the east, black shadows.\n[Shot 1] From 00:00 to 00:06. The shot opens on a medium close shot view over the brother's shoulder toward <Subject 1> beside the boat's gunwale; <Subject 1>'s face fills the centre, the jacketed shoulder occupies the lower left, coins lie between them, and the steamer rail runs across the right edge. The camera is Camera behind the brother at chest height, a 75mm lens, grey daylight comes from the RIGHT. At the first frame tHE FOCUS OF THE PICTURE IS <Subject 1>, his head a quarter of the frame's height; the brother's jacketed shoulder fills the near LEFT, coins lie between them at the lower centre, the boat gunwale crosses the lower RIGHT, and the paddle steamer's rail runs behind <Subject 1>. The shot is inside this place: The Essex beach stretches from the grassy sea wall at the western frame edge to shallow surf at the eastern edge. Shingle and grey mud occupy the foreground, with a wooden rowing boat resting in the shallows. A paddle steamer lies a few hundred yards offshore, its white paddle boxes and crowded rails clear against the bright sea. The camera keeps a locked-off frame as <Subject 1> counts coins in his thick hand, from 00:00 to 00:03. At 00:03 the boatman steadies the gunwale, and the movement continues to the last frame of the shot. <Subject 1>'s mouth is closed from 00:00 to 00:04 while he counts coins in his thick hand. By 00:06 the action of that shot continues through the last frame, with <Subject 1> closes his hand now in frame.\n\noverall_soundscape: Open air under the action; cloth, footsteps and hands at work.\n\nnon_diegetic_music: N/A"
+  },
+  {
+    "index": 12,
+    "shots": [
+      12
+    ],
+    "section": "turn",
+    "setup": "beach_transfer",
+    "lane": "narration",
+    "workflow": "video_minimax_h3_r2v_turbo_ref8 + anchors",
+    "model": "MiniMax-H3 ref2va + Ref2V 8-step LoRA",
+    "mode": "reference-to-video from the references alone (--from-refs): a cast sheet for every face the take shows + the location plate, always; no storyboard cell, nothing pinned; the dialogue wavs at their offsets anchored at frame 0",
+    "refs": [
+      "refs/characters/narrators_brother/sheet_front.png",
+      "refs/characters/mrs_elphinstone/sheet_front.png",
+      "refs/locations/essex_coast_beach/medium_surf_landing.png"
+    ],
+    "faces": [
+      "narrators_brother",
+      "mrs_elphinstone"
+    ],
+    "ref_image_size": "match",
+    "anchors": [],
+    "audio": "silence",
+    "width": 768,
+    "height": 768,
+    "fps": 24,
+    "placed_seconds": 6.333333,
+    "frames": 158,
+    "seconds": 6.58,
+    "steps": 8,
+    "seed": 105931,
+    "prompt": "subject_definitions:\n<Subject 1> is the brother in <Picture 1>: Long face with a square jaw and a small cleft chin; long straight nose, straight dark brows and grey eyes. Fresh ruddy complexion. Dark brown hair worn fuller on top with a centre parting and a loose forelock. Wearing: Brown herringbone Norfolk jacket grey with road dust and salt spray, left wrist bound in a grey-stained handkerchief, fawn trousers creased and dusty. Scabbed lower lip, yellow-green bruise along the jaw, fading red welt on one cheek, three days of dark stubble. Brown flat cloth cap. <Picture 1> defines this man alone; each shot keeps the framing its own words describe.\n<Subject 2> is Mrs. Elphinstone in <Picture 2>: Woman of 41, 5 ft 1 in, short and plump with a soft rounded figure. Round face with full cheeks, small pale blue eyes, small mouth. Fair pink skin freckled across the nose. Light brown hair threaded with grey, worn in a smooth bun at the crown. Wearing: White muslin dress gone grey-brown with dust to the knees and creased, lace collar torn at one side. Wide white straw hat bent at the brim, veil torn. Grey-soiled kid gloves. Brown leather travelling bag clutched to her chest. <Picture 2> defines this woman alone; each shot keeps the framing its own words describe.\n<Subject 3> is the location in <Picture 3>: The Essex beach stretches from the grassy sea wall at the western frame edge to shallow surf at the eastern edge. Shingle and grey mud occupy the foreground, with a wooden rowing boat resting in the shallows. A paddle steamer lies a few hundred yards offshore, its white paddle boxes and crowded rails clear against the bright sea. Fishing smacks and larger vessels form a vast curve behind it. Grey daylight falls from the east across wet sand, with black shadows under the sea wall and beneath the boat. The tide makes small bright lines across firm sand, while oars dip and ropes strain near the landing. The sea wall, boat and steamer make a clear route from shore to passage. <Picture 3> defines this place alone; each shot keeps the framing its own words describe.\n<Audio 1> is the take's complete audio track and runs silent for its whole length.\n\nsummary:\n[reference generation + audio reuse] One 6.58-second take of 1 shot in <Subject 3>, the Essex beach stretches from the grassy sea wall at the western frame edge to shallow surf at the eastern edge. Shingle and grey mud occupy the foreground. [Shot 1] runs from 00:00 to 00:06. The take carries <Subject 1>, <Subject 2> through [Shot 1] in that order. <Audio 1> is the complete audio track.\n\nretention_analysis:\n<Subject 1> (the man in [Shot 1]): partially_preserved - the face, hair, build and clothes of <Picture 1> carry into every shot that shows him; <Picture 1> serves as a definition of the man and each shot keeps the framing its own words describe.\n<Subject 2> (the woman in [Shot 1]): partially_preserved - the face, hair, build and clothes of <Picture 2> carry into every shot that shows her; <Picture 2> serves as a definition of the woman and each shot keeps the framing its own words describe.\n<Subject 3> (the location behind [Shot 1]): partially_preserved - the materials, furniture and light of <Picture 3> carry into every shot behind the people; <Picture 3> serves as a definition of the place and each shot keeps the framing its own words describe.\n<Audio 1>: fully_copy - <Audio 1> is reused 1:1 as the take's complete final audio track.\n\ndetailed_description:\nAngular stylised 3D animation, brush-stroke texture, Essex coast, 1898, grey daylight from the east, black shadows.\n[Shot 1] From 00:00 to 00:06. The shot opens on a medium shot view at the gangway as <Subject 1> pays and <Subject 2> climbs toward the steamer deck at a normal walking pace; the gangway rises through the centre, the white rail frames the right edge, <Subject 1> stands at the left, and crowded seats fill the far background. The camera is Camera on the beach at chest height, a 50mm lens, grey daylight comes from the EAST. At the first frame tHE FOCUS OF THE PICTURE IS <Subject 1> and <Subject 2>; the gangway rises between them from lower centre to upper centre, the white rail frames the RIGHT edge, the beach occupies the lower LEFT, and the deck seats sit behind them at the far upper edge. The shot is inside this place: The Essex beach stretches from the grassy sea wall at the western frame edge to shallow surf at the eastern edge. Shingle and grey mud occupy the foreground, with a wooden rowing boat resting in the shallows. A paddle steamer lies a few hundred yards offshore, its white paddle boxes and crowded rails clear against the bright sea. The camera pushes in on <Subject 1> across the whole shot as <Subject 1> pays at the rail while <Subject 2> climbs beside him, from 00:00 to 00:03. At 00:03 the gangway ropes sway above the water, and the movement continues to the last frame of the shot. <Subject 1>'s mouth is closed from 00:00 to 00:04 while he pays at the rail. By 00:06 the camera is pushing in through the last frame, with <Subject 1> now in frame, and the action continues with it.\n\noverall_soundscape: Open air under the action; cloth, footsteps and hands at work.\n\nnon_diegetic_music: N/A"
+  },
+  {
+    "index": 13,
+    "shots": [
+      13
+    ],
+    "section": "friction",
+    "setup": "steamer_forward",
+    "lane": "narration",
+    "workflow": "video_minimax_h3_r2v_turbo_ref8 + anchors",
+    "model": "MiniMax-H3 ref2va + Ref2V 8-step LoRA",
+    "mode": "reference-to-video from the references alone (--from-refs): a cast sheet for every face the take shows + the location plate, always; no storyboard cell, nothing pinned; the dialogue wavs at their offsets anchored at frame 0",
+    "refs": [
+      "refs/characters/captain/sheet.png",
+      "refs/locations/paddle_steamer/wide_establishing.png"
+    ],
+    "faces": [
+      "captain"
+    ],
+    "ref_image_size": "match",
+    "anchors": [],
+    "audio": "silence",
+    "width": 768,
+    "height": 768,
+    "fps": 24,
+    "placed_seconds": 7.75,
+    "frames": 192,
+    "seconds": 8.0,
+    "steps": 8,
+    "seed": 105932,
+    "prompt": "subject_definitions:\n<Subject 1> is the captain in <Picture 1>: Man of 55, 5 ft 9 in, stout and barrel-chested. Weathered red-brown face with deep crow's feet, pale grey eyes, broad nose. Iron-grey hair cut short. Full iron-grey beard trimmed square. Thick tarred hands, a faded blue anchor tattoo on the back of the left hand, gold ring in the right earlobe. Wearing: Brick-red knitted wool guernsey jersey under an open black pilot-cloth pea jacket with brass buttons, tan duck trousers, black sea boots wet with spray. Brass speaking trumpet in one hand. <Picture 1> defines this man alone; each shot keeps the framing its own words describe.\n<Subject 2> is the location in <Picture 2>: The forward deck of the paddle steamer runs from the camera on the bridge to the bow at the far eastern edge. Varnished teak seats line both sides, white rails frame the sea, and the curved paddle boxes occupy the near left and right edges. The capstan and anchor sit at the bow. Beyond them, the refugee fleet spreads across smooth grey-blue water, with the Essex coast beneath a bright haze. Grey daylight falls from the east over the bow, with black shadows under seats and along the paddle boxes. Steam, spray, shouted orders, passenger voices and timber deck creaks fill the deck as the crowded vessel turns toward open water. The bridge, capstan and bow establish the ship's eastward route. <Picture 2> defines this place alone; each shot keeps the framing its own words describe.\n<Audio 1> is the take's complete audio track and runs silent for its whole length.\n\nsummary:\n[reference generation + audio reuse] One 8.00-second take of 1 shot in <Subject 2>, the forward deck of the paddle steamer runs from the camera on the bridge to the bow at the far eastern edge. Varnished teak seats line both sides. [Shot 1] runs from 00:00 to 00:08. The take carries <Subject 1> through [Shot 1] in that order. <Audio 1> is the complete audio track.\n\nretention_analysis:\n<Subject 1> (the man in [Shot 1]): partially_preserved - the face, hair, build and clothes of <Picture 1> carry into every shot that shows him; <Picture 1> serves as a definition of the man and each shot keeps the framing its own words describe.\n<Subject 2> (the location behind [Shot 1]): partially_preserved - the materials, furniture and light of <Picture 2> carry into every shot behind the people; <Picture 2> serves as a definition of the place and each shot keeps the framing its own words describe.\n<Audio 1>: fully_copy - <Audio 1> is reused 1:1 as the take's complete final audio track.\n\ndetailed_description:\nAngular stylised 3D animation, brush-stroke texture, Essex coast, 1898, grey daylight from the east, black shadows.\n[Shot 1] From 00:00 to 00:08. The shot opens on a medium shot view over the forward deck as passengers turn from the southern water toward three ironclads under black smoke; the capstan anchors the lower centre, passengers fill the left and right edges, and smoke rises along the far horizon. The camera is Camera on the bridge platform at eye height, a 35mm lens, grey daylight comes from the LEFT. At the first frame tHE FOCUS OF THE PICTURE IS the three ironclads on the southeast horizon; <Subject 1> stands at the bridge near the upper centre, about forty passengers fill the seats at the LEFT and RIGHT edges, the forward capstan anchors the lower CENTRE, and black smoke rises beyond the bow. The shot is inside this place: The forward deck of the paddle steamer runs from the camera on the bridge to the bow at the far eastern edge. Varnished teak seats line both sides, white rails frame the sea, and the curved paddle boxes occupy the near left and right edges. The capstan and anchor sit at the bow. Beyond them. The camera keeps a locked-off frame as passengers turn toward the guns, from 00:00 to 00:04. At 00:04 smoke rises behind the ironclads, and the movement continues to the last frame of the shot. <Subject 1>'s mouth is closed from 00:00 to 00:06 while passengers turn toward the guns. By 00:08 the action of that shot continues through the last frame, and three ironclads rise beneath black smoke, <Subject 1> faces the horizon, passengers crowd the rails, and the capstan keeps the lower centre.\n\noverall_soundscape: Open air under the action; cloth, footsteps and hands at work.\n\nnon_diegetic_music: N/A"
+  },
+  {
+    "index": 14,
+    "shots": [
+      14
+    ],
+    "section": "spike",
+    "setup": "steamer_forward",
+    "lane": "narration",
+    "workflow": "video_minimax_h3_r2v_turbo_ref8 + anchors",
+    "model": "MiniMax-H3 ref2va + Ref2V 8-step LoRA",
+    "mode": "reference-to-video from the references alone (--from-refs): a cast sheet for every face the take shows + the location plate, always; no storyboard cell, nothing pinned; the dialogue wavs at their offsets anchored at frame 0",
+    "refs": [
+      "refs/characters/martians/sheet.png",
+      "refs/locations/paddle_steamer/wide_establishing.png"
+    ],
+    "faces": [
+      "martians"
+    ],
+    "ref_image_size": "match",
+    "anchors": [],
+    "audio": "silence",
+    "width": 768,
+    "height": 768,
+    "fps": 24,
+    "placed_seconds": 7.083333,
+    "frames": 192,
+    "seconds": 8.0,
+    "steps": 8,
+    "seed": 105933,
+    "prompt": "subject_definitions:\n<Subject 1> is the Martian in <Picture 1>: A rounded grey-brown bulk the size of a bear and four feet across, whose whole body is one huge head. Oily grey-brown skin, fungoid, glistening like wet leather and pulsing with laboured breath. Face: two immense dark eyes, below them a fleshy beak and a quivering V-shaped lipless mouth with a pointed upper lip and a wedgelike lower lip; a smooth domed brow. Sixteen slender grey whiplike tentacles as thick as a walking stick, hanging in two drooping bunches of eight on either side of the mouth and taking the bulk's weight on the ground. A tight pale drum-skin ear disc on the back of the bulk. Wearing: Bare oily brown-grey skin glistening like wet leather, saliva dripping from the V-shaped mouth, body heaving and pulsating with laboured breathing, tentacles gripping the rim of the cylinder, streaks of pale sand dust on the underside. <Picture 1> defines this creature alone; each shot keeps the framing its own words describe.\n<Subject 2> is the location in <Picture 2>: The forward deck of the paddle steamer runs from the camera on the bridge to the bow at the far eastern edge. Varnished teak seats line both sides, white rails frame the sea, and the curved paddle boxes occupy the near left and right edges. The capstan and anchor sit at the bow. Beyond them, the refugee fleet spreads across smooth grey-blue water, with the Essex coast beneath a bright haze. Grey daylight falls from the east over the bow, with black shadows under seats and along the paddle boxes. Steam, spray, shouted orders, passenger voices and timber deck creaks fill the deck as the crowded vessel turns toward open water. The bridge, capstan and bow establish the ship's eastward route. <Picture 2> defines this place alone; each shot keeps the framing its own words describe.\n<Audio 1> is the take's complete audio track and runs silent for its whole length.\n\nsummary:\n[reference generation + audio reuse] One 8.00-second take of 1 shot in <Subject 2>, the forward deck of the paddle steamer runs from the camera on the bridge to the bow at the far eastern edge. Varnished teak seats line both sides. [Shot 1] runs from 00:00 to 00:08. The take carries <Subject 1> through [Shot 1] in that order. <Audio 1> is the complete audio track.\n\nretention_analysis:\n<Subject 1> (the creature in [Shot 1]): partially_preserved - the face, hair, build and clothes of <Picture 1> carry into every shot that shows it; <Picture 1> serves as a definition of the creature and each shot keeps the framing its own words describe.\n<Subject 2> (the location behind [Shot 1]): partially_preserved - the materials, furniture and light of <Picture 2> carry into every shot behind the people; <Picture 2> serves as a definition of the place and each shot keeps the framing its own words describe.\n<Audio 1>: fully_copy - <Audio 1> is reused 1:1 as the take's complete final audio track.\n\ndetailed_description:\nAngular stylised 3D animation, brush-stroke texture, Essex coast, 1898, grey daylight from the east, black shadows.\n[Shot 1] From 00:00 to 00:08. The shot opens on a medium shot low-angle view from the starboard rail toward a Martian wading beyond the refugee ships; the paddle box fills the near right edge, <Subject 1> rises at the far centre, and the fleet crosses the lower horizon. The camera is A low angle from knee height looking up at <Subject 1>, thirty yards from the starboard rail, a 35mm lens, grey daylight comes from the RIGHT. At the first frame tHE FOCUS OF THE PICTURE IS <Subject 1> beyond the rail; the paddle box fills the near RIGHT edge, the refugee fleet occupies the middle water, the Essex coast lies beneath the creature at the far LEFT, and bright sea occupies the lower frame. The shot is inside this place: The forward deck of the paddle steamer runs from the camera on the bridge to the bow at the far eastern edge. Varnished teak seats line both sides, white rails frame the sea, and the curved paddle boxes occupy the near left and right edges. The capstan and anchor sit at the bow. Beyond them. The camera cranes up above <Subject 1> across the whole shot as <Subject 1> wades through the bright water, from 00:00 to 00:04. At 00:04 distant vessels turn across the sea, and the turn continues to the last frame of the shot. <Subject 1>'s mouth is closed from 00:00 to 00:05 while he wades through the bright water. By 00:08 the camera is craning up through the last frame, and the action continues with it, and <Subject 1> towers beyond the rail, its tentacles enter the water, refugee vessels turn across the middle distance, and the coast lies behind them.\n\noverall_soundscape: Open air under the action; cloth, footsteps and hands at work.\n\nnon_diegetic_music: N/A"
+  },
+  {
+    "index": 15,
+    "shots": [
+      15
+    ],
+    "section": "friction",
+    "setup": "steamer_forward",
+    "lane": "narration",
+    "workflow": "video_minimax_h3_r2v_turbo_ref8 + anchors",
+    "model": "MiniMax-H3 ref2va + Ref2V 8-step LoRA",
+    "mode": "reference-to-video from the references alone (--from-refs): a cast sheet for every face the take shows + the location plate, always; no storyboard cell, nothing pinned; the dialogue wavs at their offsets anchored at frame 0",
+    "refs": [
+      "refs/characters/narrators_brother/sheet_front.png",
+      "refs/locations/paddle_steamer/wide_establishing.png"
+    ],
+    "faces": [
+      "narrators_brother"
+    ],
+    "ref_image_size": "match",
+    "anchors": [],
+    "audio": "silence",
+    "width": 768,
+    "height": 768,
+    "fps": 24,
+    "placed_seconds": 7.541667,
+    "frames": 192,
+    "seconds": 8.0,
+    "steps": 8,
+    "seed": 105934,
+    "prompt": "subject_definitions:\n<Subject 1> is the brother in <Picture 1>: Long face with a square jaw and a small cleft chin; long straight nose, straight dark brows and grey eyes. Fresh ruddy complexion. Dark brown hair worn fuller on top with a centre parting and a loose forelock. Wearing: Brown herringbone Norfolk jacket grey with road dust and salt spray, left wrist bound in a grey-stained handkerchief, fawn trousers creased and dusty. Scabbed lower lip, yellow-green bruise along the jaw, fading red welt on one cheek, three days of dark stubble. Brown flat cloth cap. <Picture 1> defines this man alone; each shot keeps the framing its own words describe.\n<Subject 2> is the location in <Picture 2>: The forward deck of the paddle steamer runs from the camera on the bridge to the bow at the far eastern edge. Varnished teak seats line both sides, white rails frame the sea, and the curved paddle boxes occupy the near left and right edges. The capstan and anchor sit at the bow. Beyond them, the refugee fleet spreads across smooth grey-blue water, with the Essex coast beneath a bright haze. Grey daylight falls from the east over the bow, with black shadows under seats and along the paddle boxes. Steam, spray, shouted orders, passenger voices and timber deck creaks fill the deck as the crowded vessel turns toward open water. The bridge, capstan and bow establish the ship's eastward route. <Picture 2> defines this place alone; each shot keeps the framing its own words describe.\n<Audio 1> is the take's complete audio track and runs silent for its whole length.\n\nsummary:\n[reference generation + audio reuse] One 8.00-second take of 1 shot in <Subject 2>, the forward deck of the paddle steamer runs from the camera on the bridge to the bow at the far eastern edge. Varnished teak seats line both sides. [Shot 1] runs from 00:00 to 00:08. The take carries <Subject 1> through [Shot 1] in that order. <Audio 1> is the complete audio track.\n\nretention_analysis:\n<Subject 1> (the man in [Shot 1]): partially_preserved - the face, hair, build and clothes of <Picture 1> carry into every shot that shows him; <Picture 1> serves as a definition of the man and each shot keeps the framing its own words describe.\n<Subject 2> (the location behind [Shot 1]): partially_preserved - the materials, furniture and light of <Picture 2> carry into every shot behind the people; <Picture 2> serves as a definition of the place and each shot keeps the framing its own words describe.\n<Audio 1>: fully_copy - <Audio 1> is reused 1:1 as the take's complete final audio track.\n\ndetailed_description:\nAngular stylised 3D animation, brush-stroke texture, Essex coast, 1898, grey daylight from the east, black shadows.\n[Shot 1] From 00:00 to 00:08. The shot opens on a medium shot view of <Subject 1> gripping the starboard bulwark as Thunder Child tears past the steamer; <Subject 1> occupies the left centre, the white bulwark crosses the lower frame, foam rises at the right edge, and the sea opens behind him. The camera is Camera beside the starboard seats at waist height, a 50mm lens, grey daylight comes from the RIGHT. At the first frame tHE FOCUS OF THE PICTURE IS <Subject 1>, his head a quarter of the frame's height; his hands grip the deck beside the seat at the lower LEFT, the white bulwark runs behind him, the sea fills the RIGHT background, and the paddle box occupies the far lower edge. The shot is inside this place: The forward deck of the paddle steamer runs from the camera on the bridge to the bow at the far eastern edge. Varnished teak seats line both sides, white rails frame the sea, and the curved paddle boxes occupy the near left and right edges. The capstan and anchor sit at the bow. Beyond them. The camera pushes in on <Subject 1> across the whole shot as <Subject 1> drops onto his hands as the steamer swings, from 00:00 to 00:04. At 00:04 Thunder Child drives past the starboard rail, and the movement continues to the last frame of the shot. <Subject 1>'s mouth is closed from 00:00 to 00:06 while he drops onto his hands as the steamer swings. By 00:08 the camera is pushing in through the last frame, and the action continues with it, and <Subject 1> braces against the deck, Thunder Child cuts across the right background, foam rises beside the paddle box, and the bulwark shakes under his hands.\n\noverall_soundscape: Open air under the action; cloth, footsteps and hands at work.\n\nnon_diegetic_music: N/A"
+  },
+  {
+    "index": 16,
+    "shots": [
+      16
+    ],
+    "section": "friction",
+    "setup": "steamer_forward",
+    "lane": "narration",
+    "workflow": "video_minimax_h3_r2v_turbo_ref8 + anchors",
+    "model": "MiniMax-H3 ref2va + Ref2V 8-step LoRA",
+    "mode": "reference-to-video from the references alone (--from-refs): a cast sheet for every face the take shows + the location plate, always; no storyboard cell, nothing pinned; the dialogue wavs at their offsets anchored at frame 0",
+    "refs": [
+      "refs/characters/martians/sheet.png",
+      "refs/locations/paddle_steamer/wide_establishing.png"
+    ],
+    "faces": [
+      "martians"
+    ],
+    "ref_image_size": "match",
+    "anchors": [],
+    "audio": "silence",
+    "width": 768,
+    "height": 768,
+    "fps": 24,
+    "placed_seconds": 6.333333,
+    "frames": 158,
+    "seconds": 6.58,
+    "steps": 8,
+    "seed": 105935,
+    "prompt": "subject_definitions:\n<Subject 1> is the Martian in <Picture 1>: A rounded grey-brown bulk the size of a bear and four feet across, whose whole body is one huge head. Oily grey-brown skin, fungoid, glistening like wet leather and pulsing with laboured breath. Face: two immense dark eyes, below them a fleshy beak and a quivering V-shaped lipless mouth with a pointed upper lip and a wedgelike lower lip; a smooth domed brow. Sixteen slender grey whiplike tentacles as thick as a walking stick, hanging in two drooping bunches of eight on either side of the mouth and taking the bulk's weight on the ground. A tight pale drum-skin ear disc on the back of the bulk. Wearing: Bare oily brown-grey skin glistening like wet leather, saliva dripping from the V-shaped mouth, body heaving and pulsating with laboured breathing, tentacles gripping the rim of the cylinder, streaks of pale sand dust on the underside. <Picture 1> defines this creature alone; each shot keeps the framing its own words describe.\n<Subject 2> is the location in <Picture 2>: The forward deck of the paddle steamer runs from the camera on the bridge to the bow at the far eastern edge. Varnished teak seats line both sides, white rails frame the sea, and the curved paddle boxes occupy the near left and right edges. The capstan and anchor sit at the bow. Beyond them, the refugee fleet spreads across smooth grey-blue water, with the Essex coast beneath a bright haze. Grey daylight falls from the east over the bow, with black shadows under seats and along the paddle boxes. Steam, spray, shouted orders, passenger voices and timber deck creaks fill the deck as the crowded vessel turns toward open water. The bridge, capstan and bow establish the ship's eastward route. <Picture 2> defines this place alone; each shot keeps the framing its own words describe.\n<Audio 1> is the take's complete audio track and runs silent for its whole length.\n\nsummary:\n[reference generation + audio reuse] One 6.58-second take of 1 shot in <Subject 2>, the forward deck of the paddle steamer runs from the camera on the bridge to the bow at the far eastern edge. Varnished teak seats line both sides. [Shot 1] runs from 00:00 to 00:06. The take carries <Subject 1> through [Shot 1] in that order. <Audio 1> is the complete audio track.\n\nretention_analysis:\n<Subject 1> (the creature in [Shot 1]): partially_preserved - the face, hair, build and clothes of <Picture 1> carry into every shot that shows it; <Picture 1> serves as a definition of the creature and each shot keeps the framing its own words describe.\n<Subject 2> (the location behind [Shot 1]): partially_preserved - the materials, furniture and light of <Picture 2> carry into every shot behind the people; <Picture 2> serves as a definition of the place and each shot keeps the framing its own words describe.\n<Audio 1>: fully_copy - <Audio 1> is reused 1:1 as the take's complete final audio track.\n\ndetailed_description:\nAngular stylised 3D animation, brush-stroke texture, Essex coast, 1898, grey daylight from the east, black shadows.\n[Shot 1] From 00:00 to 00:06. The shot opens on a medium shot view from the bridge over Thunder Child charging the three Martians across the sea; the capstan occupies the lower centre, the refugee ships fill the left water, and the Martians stand beyond the ram at the upper right. The camera is Camera on the bridge platform at shoulder height, a 28mm lens, grey daylight comes from the LEFT. At the first frame tHE FOCUS OF THE PICTURE IS Thunder Child between the steamer and the three Martians; the capstan sits at the lower CENTRE, the refugee ships fill the LEFT water, the Martians stand beyond the ram at the upper RIGHT, and the Essex coast forms a low line behind them. The shot is inside this place: The forward deck of the paddle steamer runs from the camera on the bridge to the bow at the far eastern edge. Varnished teak seats line both sides, white rails frame the sea, and the curved paddle boxes occupy the near left and right edges. The capstan and anchor sit at the bow. Beyond them. The camera rises above the forward capstan, looking down over the place across the whole shot as Thunder Child charges toward the Martians, from 00:00 to 00:03. At 00:03 foam streams behind the ram, and the movement continues to the last frame of the shot. <Subject 1>'s mouth is closed from 00:00 to 00:04 while he Child charges toward the Martians. By 00:06 the camera is rising through the last frame, and the action continues with it, and thunder Child drives through the centre, the three Martians rise beyond it, refugee ships scatter at the left, and foam trails behind the iron hull.\n\noverall_soundscape: Open air under the action; cloth, footsteps and hands at work.\n\nnon_diegetic_music: N/A"
+  },
+  {
+    "index": 17,
+    "shots": [
+      17
+    ],
+    "section": "spike",
+    "setup": "steamer_forward",
+    "lane": "narration",
+    "workflow": "video_minimax_h3_r2v_turbo_ref8 + anchors",
+    "model": "MiniMax-H3 ref2va + Ref2V 8-step LoRA",
+    "mode": "reference-to-video from the references alone (--from-refs): a cast sheet for every face the take shows + the location plate, always; no storyboard cell, nothing pinned; the dialogue wavs at their offsets anchored at frame 0",
+    "refs": [
+      "refs/characters/martians/sheet.png",
+      "refs/locations/paddle_steamer/wide_establishing.png"
+    ],
+    "faces": [
+      "martians"
+    ],
+    "ref_image_size": "match",
+    "anchors": [],
+    "audio": "silence",
+    "width": 768,
+    "height": 768,
+    "fps": 24,
+    "placed_seconds": 8.458333,
+    "frames": 209,
+    "seconds": 8.71,
+    "steps": 8,
+    "seed": 105936,
+    "prompt": "subject_definitions:\n<Subject 1> is the Martian in <Picture 1>: A rounded grey-brown bulk the size of a bear and four feet across, whose whole body is one huge head. Oily grey-brown skin, fungoid, glistening like wet leather and pulsing with laboured breath. Face: two immense dark eyes, below them a fleshy beak and a quivering V-shaped lipless mouth with a pointed upper lip and a wedgelike lower lip; a smooth domed brow. Sixteen slender grey whiplike tentacles as thick as a walking stick, hanging in two drooping bunches of eight on either side of the mouth and taking the bulk's weight on the ground. A tight pale drum-skin ear disc on the back of the bulk. Wearing: Bare oily brown-grey skin glistening like wet leather, saliva dripping from the V-shaped mouth, body heaving and pulsating with laboured breathing, tentacles gripping the rim of the cylinder, streaks of pale sand dust on the underside. <Picture 1> defines this creature alone; each shot keeps the framing its own words describe.\n<Subject 2> is the location in <Picture 2>: The forward deck of the paddle steamer runs from the camera on the bridge to the bow at the far eastern edge. Varnished teak seats line both sides, white rails frame the sea, and the curved paddle boxes occupy the near left and right edges. The capstan and anchor sit at the bow. Beyond them, the refugee fleet spreads across smooth grey-blue water, with the Essex coast beneath a bright haze. Grey daylight falls from the east over the bow, with black shadows under seats and along the paddle boxes. Steam, spray, shouted orders, passenger voices and timber deck creaks fill the deck as the crowded vessel turns toward open water. The bridge, capstan and bow establish the ship's eastward route. <Picture 2> defines this place alone; each shot keeps the framing its own words describe.\n<Audio 1> is the take's complete audio track and runs silent for its whole length.\n\nsummary:\n[reference generation + audio reuse] One 8.71-second take of 1 shot in <Subject 2>, the forward deck of the paddle steamer runs from the camera on the bridge to the bow at the far eastern edge. Varnished teak seats line both sides. [Shot 1] runs from 00:00 to 00:08. The take carries <Subject 1> through [Shot 1] in that order. <Audio 1> is the complete audio track.\n\nretention_analysis:\n<Subject 1> (the creature in [Shot 1]): partially_preserved - the face, hair, build and clothes of <Picture 1> carry into every shot that shows it; <Picture 1> serves as a definition of the creature and each shot keeps the framing its own words describe.\n<Subject 2> (the location behind [Shot 1]): partially_preserved - the materials, furniture and light of <Picture 2> carry into every shot behind the people; <Picture 2> serves as a definition of the place and each shot keeps the framing its own words describe.\n<Audio 1>: fully_copy - <Audio 1> is reused 1:1 as the take's complete final audio track.\n\ndetailed_description:\nAngular stylised 3D animation, brush-stroke texture, Essex coast, 1898, grey daylight from the east, black shadows.\n[Shot 1] From 00:00 to 00:08. The shot opens on an insert view of Black Smoke peeling from Thunder Child as steam rises around the first falling <Subject 1>; black gas fills the upper left, white steam fills the lower centre, gunfire crosses the right edge, and refugee ships are at the far horizon; only that object and what touches it is in frame. The camera is Camera on the bridge platform at eye height, a 50mm lens, grey daylight comes from the LEFT. At the first frame tHE FOCUS OF THE PICTURE IS the black gas striking the ironclad; white steam rises at the lower centre, the first <Subject 1> stands beyond the vapour at the upper RIGHT, refugee ships occupy the far LEFT water, and the paddle box frames the near RIGHT edge. The shot is inside this place: The forward deck of the paddle steamer runs from the camera on the bridge to the bow at the far eastern edge. Varnished teak seats line both sides, white rails frame the sea, and the curved paddle boxes occupy the near left and right edges. The capstan and anchor sit at the bow. Beyond them. The camera pulls back from the black gas, widening to show the steam and ironclad across the whole shot as steam rises where the Heat-Ray touches water, from 00:00 to 00:04. At 00:04 naval guns fire through the vapour, and the movement continues to the last frame of the shot. By 00:08 the camera is pulling back through the last frame, and the action continues with it, and black gas peels seaward, steam rises around the first <Subject 1>, Thunder Child fires through the reek, and refugee ships turn across the left water.\n\noverall_soundscape: Open air under the action; cloth, footsteps and hands at work.\n\nnon_diegetic_music: N/A"
+  },
+  {
+    "index": 18,
+    "shots": [
+      18
+    ],
+    "section": "answer",
+    "setup": "steamer_forward",
+    "lane": "dialogue",
+    "workflow": "video_minimax_h3_r2v_turbo_ref8 + anchors",
+    "model": "MiniMax-H3 ref2va + Ref2V 8-step LoRA",
+    "mode": "reference-to-video from the references alone (--from-refs): a cast sheet for every face the take shows + the location plate, always; no storyboard cell, nothing pinned; the dialogue wavs at their offsets anchored at frame 0",
+    "refs": [
+      "refs/characters/captain/sheet.png",
+      "refs/locations/paddle_steamer/wide_establishing.png"
+    ],
+    "faces": [
+      "captain"
+    ],
+    "ref_image_size": "match",
+    "anchors": [],
+    "audio": [
+      [
+        "l18.wav",
+        0.25
+      ]
+    ],
+    "width": 768,
+    "height": 768,
+    "fps": 24,
+    "placed_seconds": 2.791667,
+    "frames": 90,
+    "seconds": 3.75,
+    "steps": 8,
+    "seed": 105937,
+    "prompt": "subject_definitions:\n<Subject 1> is the captain in <Picture 1>: Man of 55, 5 ft 9 in, stout and barrel-chested. Weathered red-brown face with deep crow's feet, pale grey eyes, broad nose. Iron-grey hair cut short. Full iron-grey beard trimmed square. Thick tarred hands, a faded blue anchor tattoo on the back of the left hand, gold ring in the right earlobe. Wearing: Brick-red knitted wool guernsey jersey under an open black pilot-cloth pea jacket with brass buttons, tan duck trousers, black sea boots wet with spray. Brass speaking trumpet in one hand. <Picture 1> defines this man alone; each shot keeps the framing its own words describe.\n<Subject 2> is the location in <Picture 2>: The forward deck of the paddle steamer runs from the camera on the bridge to the bow at the far eastern edge. Varnished teak seats line both sides, white rails frame the sea, and the curved paddle boxes occupy the near left and right edges. The capstan and anchor sit at the bow. Beyond them, the refugee fleet spreads across smooth grey-blue water, with the Essex coast beneath a bright haze. Grey daylight falls from the east over the bow, with black shadows under seats and along the paddle boxes. Steam, spray, shouted orders, passenger voices and timber deck creaks fill the deck as the crowded vessel turns toward open water. The bridge, capstan and bow establish the ship's eastward route. <Picture 2> defines this place alone; each shot keeps the framing its own words describe.\n<Audio 1> is the take's complete audio track: the one line spoken on camera at 00:00, over silence for the rest of its length.\n\nsummary:\n[reference generation + audio reuse] One 3.75-second take of 1 shot in <Subject 2>, the forward deck of the paddle steamer runs from the camera on the bridge to the bow at the far eastern edge. Varnished teak seats line both sides. [Shot 1] runs from 00:00 to 00:03. The take carries <Subject 1> through [Shot 1] in that order. <Audio 1> carries that spoken line and is the complete audio track.\n\nretention_analysis:\n<Subject 1> (the man in [Shot 1]): partially_preserved - the face, hair, build and clothes of <Picture 1> carry into every shot that shows him; <Picture 1> serves as a definition of the man and each shot keeps the framing its own words describe.\n<Subject 2> (the location behind [Shot 1]): partially_preserved - the materials, furniture and light of <Picture 2> carry into every shot behind the people; <Picture 2> serves as a definition of the place and each shot keeps the framing its own words describe.\n<Audio 1>: fully_copy - <Audio 1> is reused 1:1 as the take's complete final audio track.\n\ndetailed_description:\nAngular stylised 3D animation, brush-stroke texture, Essex coast, 1898, grey daylight from the east, black shadows.\n[Shot 1] From 00:00 to 00:03. The shot opens on a medium close shot view of <Subject 1> on the bridge shouting toward the smoke and burning wreckage; his face fills the centre, the bridge rail crosses the lower edge, the speaking trumpet rises at the left, and fire glows through smoke at the right. The camera is Camera on the bridge at chest height, a 75mm lens, grey daylight comes from the LEFT. At the first frame tHE FOCUS OF THE PICTURE IS <Subject 1>, his head a quarter of the frame's height; his brass speaking trumpet rests in one hand at the LEFT, the bridge rail cuts the lower frame, smoke fills the RIGHT background, and burning wreckage glows beyond his shoulder. The shot is inside this place: The forward deck of the paddle steamer runs from the camera on the bridge to the bow at the far eastern edge. Varnished teak seats line both sides, white rails frame the sea, and the curved paddle boxes occupy the near left and right edges. The capstan and anchor sit at the bow. Beyond them. The camera keeps a locked-off frame across the whole shot as <Subject 1> points toward the smoke, from 00:00 to 00:01. <Subject 1> (S1), on screen, man of 55, with a clipped English voice at an even pace, says: <d>[English] Two!</d> His mouth shapes every syllable as the line is heard and closes on the last word. At 00:01, as the line ends, his speaking trumpet lifts as steam rolls behind him, and the lift continues to the last frame of the shot. By 00:03 the action of that shot continues through the last frame, and <Subject 1> points into the smoke, the speaking trumpet rises beside his beard, the bridge rail crosses below him, and burning wreckage glows behind.\n\noverall_soundscape: Open air under the action; cloth, footsteps and hands at work.\n\nnon_diegetic_music: N/A"
+  },
+  {
+    "index": 19,
+    "shots": [
+      19
+    ],
+    "section": "runout",
+    "setup": "steamer_stern",
+    "lane": "narration",
+    "workflow": "video_minimax_h3_r2v_turbo_ref8 + anchors",
+    "model": "MiniMax-H3 ref2va + Ref2V 8-step LoRA",
+    "mode": "reference-to-video from the references alone (--from-refs): a cast sheet for every face the take shows + the location plate, always; no storyboard cell, nothing pinned; the dialogue wavs at their offsets anchored at frame 0",
+    "refs": [
+      "refs/locations/paddle_steamer/wide_stern_wake.png"
+    ],
+    "faces": [],
+    "ref_image_size": "match",
+    "anchors": [],
+    "audio": "silence",
+    "width": 768,
+    "height": 768,
+    "fps": 24,
+    "placed_seconds": 2.833333,
+    "frames": 90,
+    "seconds": 3.75,
+    "steps": 8,
+    "seed": 105938,
+    "prompt": "subject_definitions:\n<Subject 1> is the location in <Picture 1>: The stern deck opens westward from the white stern rail and ensign staff in the foreground. Two wooden boats hang in davits at the frame edges, while the wake runs through the centre toward a blue-grey coast. Smoke strips drift across the sea and scattered refugee vessels cross the wake. The sky deepens from warm gold at the low western edge to blue-grey above. Twilight light falls from the west across the wake, with black shadows under the davits, seats and stern rail. The steamer's vibration travels through the teak deck, and distant guns carry over the water toward the passengers. The wake provides a route from the battle toward the darkening coast. <Picture 1> defines this place alone; each shot keeps the framing its own words describe.\n<Audio 1> is the take's complete audio track and runs silent for its whole length.\n\nsummary:\n[reference generation + audio reuse] One 3.75-second take of 1 shot in <Subject 1>, the stern deck opens westward from the white stern rail and ensign staff in the foreground. Two wooden boats hang in davits at the frame edges. [Shot 1] runs from 00:00 to 00:03. The take carries <Subject 1> through [Shot 1] in that order. <Audio 1> is the complete audio track.\n\nretention_analysis:\n<Subject 1> (the location behind [Shot 1]): partially_preserved - the materials, furniture and light of <Picture 1> carry into every shot behind the people; <Picture 1> serves as a definition of the place and each shot keeps the framing its own words describe.\n<Audio 1>: fully_copy - <Audio 1> is reused 1:1 as the take's complete final audio track.\n\ndetailed_description:\nAngular stylised 3D animation, brush-stroke texture, Essex coast, 1898, grey daylight from the east, black shadows.\n[Shot 1] From 00:00 to 00:03. The shot opens on an insert view from the stern over the wake as the refugee fleet scatters and warships pass into evening haze; the stern staff occupies the lower left, smoke crosses the upper centre, scattered vessels mark the right water, and the coast fades at the far edge; only that object and what touches it is in frame. The camera is Camera at the stern rail at eye height, a 50mm lens, evening light comes from the LEFT. At the first frame tHE FOCUS OF THE PICTURE IS the wake running toward the hazy coast; the stern ensign staff stands at the lower LEFT, smoke strips cross the upper centre, scattered refugee vessels occupy the RIGHT water, davit boats frame the lower edge, and the fading coast lies at the far horizon. The shot is inside this place: The stern deck opens westward from the white stern rail and ensign staff in the foreground. Two wooden boats hang in davits at the frame edges, while the wake runs through the centre toward a blue-grey coast. Smoke strips drift across the sea and scattered refugee vessels cross the wake. The camera tracks laterally to the LEFT past the stern ensign staff across the whole shot as smoke strips drift over the wake, from 00:00 to 00:02. At 00:02 refugee vessels scatter across the water, and the movement continues to the last frame of the shot. By 00:03 the camera is tracking through the last frame, and the action continues with it, and the wake leads into blue haze, refugee vessels scatter northeast, warships pass southward, and smoke strips drift across the fading coast.\n\noverall_soundscape: Open air under the action; cloth, footsteps and hands at work.\n\nnon_diegetic_music: N/A"
+  },
+  {
+    "index": 20,
+    "shots": [
+      20
+    ],
+    "section": "reaction",
+    "setup": "steamer_stern",
+    "lane": "narration",
+    "workflow": "video_minimax_h3_r2v_turbo_ref8 + anchors",
+    "model": "MiniMax-H3 ref2va + Ref2V 8-step LoRA",
+    "mode": "reference-to-video from the references alone (--from-refs): a cast sheet for every face the take shows + the location plate, always; no storyboard cell, nothing pinned; the dialogue wavs at their offsets anchored at frame 0",
+    "refs": [
+      "refs/locations/paddle_steamer/wide_stern_wake.png"
+    ],
+    "faces": [],
+    "ref_image_size": "match",
+    "anchors": [],
+    "audio": "silence",
+    "width": 768,
+    "height": 768,
+    "fps": 24,
+    "placed_seconds": 6.666667,
+    "frames": 175,
+    "seconds": 7.29,
+    "steps": 8,
+    "seed": 105939,
+    "prompt": "subject_definitions:\n<Subject 1> is the location in <Picture 1>: The stern deck opens westward from the white stern rail and ensign staff in the foreground. Two wooden boats hang in davits at the frame edges, while the wake runs through the centre toward a blue-grey coast. Smoke strips drift across the sea and scattered refugee vessels cross the wake. The sky deepens from warm gold at the low western edge to blue-grey above. Twilight light falls from the west across the wake, with black shadows under the davits, seats and stern rail. The steamer's vibration travels through the teak deck, and distant guns carry over the water toward the passengers. The wake provides a route from the battle toward the darkening coast. <Picture 1> defines this place alone; each shot keeps the framing its own words describe.\n<Audio 1> is the take's complete audio track and runs silent for its whole length.\n\nsummary:\n[reference generation + audio reuse] One 7.29-second take of 1 shot in <Subject 1>, the stern deck opens westward from the white stern rail and ensign staff in the foreground. Two wooden boats hang in davits at the frame edges. [Shot 1] runs from 00:00 to 00:07. The take carries <Subject 1> through [Shot 1] in that order. <Audio 1> is the complete audio track.\n\nretention_analysis:\n<Subject 1> (the location behind [Shot 1]): partially_preserved - the materials, furniture and light of <Picture 1> carry into every shot behind the people; <Picture 1> serves as a definition of the place and each shot keeps the framing its own words describe.\n<Audio 1>: fully_copy - <Audio 1> is reused 1:1 as the take's complete final audio track.\n\ndetailed_description:\nAngular stylised 3D animation, brush-stroke texture, Essex coast, 1898, grey daylight from the east, black shadows.\n[Shot 1] From 00:00 to 00:07. The shot opens on a wide view from the stern toward the western glare as passengers crowd the rail and black shadows move behind smoke; the stern staff anchors the lower left, the wake leads through the lower centre, grey clouds fill the upper frame, and the coast forms a low line at the far edge. The camera is Camera at the stern rail at shoulder height, a 28mm lens, sunset light comes from the LEFT. At the first frame tHE FOCUS OF THE PICTURE IS the western glare beyond the coast; the western glare fills the far upper edge, the stern ensign staff stands at the lower LEFT, the wake runs through the lower CENTRE, black shadows move within smoke at the upper RIGHT, grey clouds fill the upper frame, and the low coast forms the far edge. The shot is inside this place: The stern deck opens westward from the white stern rail and ensign staff in the foreground. Two wooden boats hang in davits at the frame edges, while the wake runs through the centre toward a blue-grey coast. Smoke strips drift across the sea and scattered refugee vessels cross the wake. The camera pans to the right across the crowded stern across the whole shot as passengers crowd the stern rail, from 00:00 to 00:04. At 00:04 black shadows move through the smoke, and the movement continues to the last frame of the shot. By 00:07 the camera is panning through the last frame, and the action continues with it, and the western glare burns behind smoke, passengers crowd the rail, black shadows move across the sky, and the wake darkens below.\n\noverall_soundscape: Open air under the action; cloth, footsteps and hands at work.\n\nnon_diegetic_music: N/A"
+  },
+  {
+    "index": 21,
+    "shots": [
+      21
+    ],
+    "section": "button",
+    "setup": "steamer_stern",
+    "lane": "narration",
+    "workflow": "video_minimax_h3_r2v_turbo_ref8 + anchors",
+    "model": "MiniMax-H3 ref2va + Ref2V 8-step LoRA",
+    "mode": "reference-to-video from the references alone (--from-refs): a cast sheet for every face the take shows + the location plate, always; no storyboard cell, nothing pinned; the dialogue wavs at their offsets anchored at frame 0",
+    "refs": [
+      "refs/locations/paddle_steamer/wide_stern_wake.png"
+    ],
+    "faces": [],
+    "ref_image_size": "match",
+    "anchors": [],
+    "audio": "silence",
+    "width": 768,
+    "height": 768,
+    "fps": 24,
+    "placed_seconds": 7.041667,
+    "frames": 192,
+    "seconds": 8.0,
+    "steps": 8,
+    "seed": 105940,
+    "prompt": "subject_definitions:\n<Subject 1> is the location in <Picture 1>: The stern deck opens westward from the white stern rail and ensign staff in the foreground. Two wooden boats hang in davits at the frame edges, while the wake runs through the centre toward a blue-grey coast. Smoke strips drift across the sea and scattered refugee vessels cross the wake. The sky deepens from warm gold at the low western edge to blue-grey above. Twilight light falls from the west across the wake, with black shadows under the davits, seats and stern rail. The steamer's vibration travels through the teak deck, and distant guns carry over the water toward the passengers. The wake provides a route from the battle toward the darkening coast. <Picture 1> defines this place alone; each shot keeps the framing its own words describe.\n<Audio 1> is the take's complete audio track and runs silent for its whole length.\n\nsummary:\n[reference generation + audio reuse] One 8.00-second take of 1 shot in <Subject 1>, the stern deck opens westward from the white stern rail and ensign staff in the foreground. Two wooden boats hang in davits at the frame edges. [Shot 1] runs from 00:00 to 00:08. The take carries <Subject 1> through [Shot 1] in that order. <Audio 1> is the complete audio track.\n\nretention_analysis:\n<Subject 1> (the location behind [Shot 1]): partially_preserved - the materials, furniture and light of <Picture 1> carry into every shot behind the people; <Picture 1> serves as a definition of the place and each shot keeps the framing its own words describe.\n<Audio 1>: fully_copy - <Audio 1> is reused 1:1 as the take's complete final audio track.\n\ndetailed_description:\nAngular stylised 3D animation, brush-stroke texture, Essex coast, 1898, grey daylight from the east, black shadows.\n[Shot 1] From 00:00 to 00:08. The shot opens on a wide view from the stern toward the darkening western sky as a flat broad shape rises above the coast and curves into night; the stern staff anchors the lower left, the wake leads through the lower centre, grey clouds fill the upper frame, and darkness gathers over the far land. The camera is Camera at the stern rail at shoulder height, a 28mm lens, sunset light comes from the LEFT. At the first frame tHE FOCUS OF THE PICTURE IS the flat broad shape rising above the western coast at the upper centre; the stern ensign staff stands at the lower LEFT, the wake runs through the lower CENTRE, grey clouds fill the upper frame, and the coast forms a low line at the far edge. The shot is inside this place: The stern deck opens westward from the white stern rail and ensign staff in the foreground. Two wooden boats hang in davits at the frame edges, while the wake runs through the centre toward a blue-grey coast. Smoke strips drift across the sea and scattered refugee vessels cross the wake. The camera keeps a locked-off frame as the flat broad shape rises above the clouds, from 00:00 to 00:04. At 00:04 the dark creeps on over the country toward the coast, and the movement continues to the last frame of the shot. By 00:08 the action of that shot continues through the last frame, and the flat broad shape curves above the clouds, the wake darkens below, the coast becomes a low silhouette, and darkness covers the land.\n\noverall_soundscape: Open air under the action; cloth, footsteps and hands at work.\n\nnon_diegetic_music: N/A"
+  }
+]

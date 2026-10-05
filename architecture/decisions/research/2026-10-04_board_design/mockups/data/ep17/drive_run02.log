@@ -1,0 +1,18 @@
+[drive] 20260827135508_the-war-of-the-worlds ep17: WARNING code moved mid-episode: started on 7e3ad5b9, resuming on f86f4d1f; fix bugs after the ship, not during it
+warning: `VIRTUAL_ENV=D:\Projects\KingdomOfViSuReNa\alpha\visurena_studio\.venv` does not match the project environment path `D:\Projects\KingdomOfViSuReNa\alpha\comfy_studio\.venv` and will be ignored; use `--active` to target the active environment instead
+ok
+[drive] 20260827135508_the-war-of-the-worlds ep17: episode refused on run 1:
+  File "D:\Projects\KingdomOfViSuReNa\alpha\visurena_studio\episode.py", line 136, in take_explicit
+    return run_unit(ctx)
+           ^^^^^^^^^^^^^
+  File "D:\Projects\KingdomOfViSuReNa\alpha\visurena_studio\episode.py", line 95, in run_unit
+    outcome = step_runner.run_steps(ctx, step_runner.load_steps(STAGE))
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\Projects\KingdomOfViSuReNa\alpha\visurena_studio\studio\step_runner.py", line 95, in run_steps
+    outcome = _run_one(step, ctx)
+              ^^^^^^^^^^^^^^^^^^^
+  File "D:\Projects\KingdomOfViSuReNa\alpha\visurena_studio\studio\step_runner.py", line 75, in _run_one
+    raise RuntimeError(str(exc)) from exc
+RuntimeError: REFUSED: scripts/episode/takes_r2v.py exit 1
+warning: `VIRTUAL_ENV=D:\Projects\KingdomOfViSuReNa\alpha\visurena_studio\.venv` does not match the project environment path `D:\Projects\KingdomOfViSuReNa\alpha\comfy_studio\.venv` and will be ignored; use `--active` to target the active environment instead
+ok

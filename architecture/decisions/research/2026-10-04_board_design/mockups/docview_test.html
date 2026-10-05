@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>docview self-test</title>
+<link rel="stylesheet" href="assets/viewer.css">
+<style>
+  body{margin:0;padding:24px;background:#08090a;color:#e8e9eb;font:14px/20px "IBM Plex Sans",system-ui,sans-serif}
+  h1{font-size:18px;margin:0 0 12px}
+  #out{list-style:none;padding:0;margin:0 0 16px;font:12px/18px "IBM Plex Mono",monospace}
+  #out li.pass::before{content:"PASS  ";color:#86cf95}
+  #out li.fail::before{content:"FAIL  ";color:#f2735a}
+  #summary{font-weight:600;margin:0 0 16px}
+  .host{height:320px;margin:0 0 16px}
+</style>
+</head>
+<body>
+<h1>docview self-test — angle-bracket tokens must survive every view</h1>
+<p id="summary">running…</p>
+<ul id="out"></ul>
+<div class="host" id="h"></div>
+<script src="assets/docview.js"></script>
+<script>
+/* A prompt carries <Subject 1>, <Picture 1>, <image1>: innerHTML would parse them as unknown tags and drop them.
+   The rule under test: every value reaches the page through textContent. */
+(function () {
+  const PROMPT = 'subject_definitions:\n<Subject 1> is the Martian sheet.\n<Picture 1> is the storyboard frame.\n\ndetailed_description:\n<Subject 1> wades past <image1> at dawn & "quotes" <b>not bold</b>.';
+  const doc = [{ index: 0, shots: [0], refs: ['episodes/ep12/storyboard/h3/shot_00.png'], seed: 93000, prompt: PROMPT }];
+  const text = JSON.stringify(doc, null, 1);
+  const out = document.getElementById('out'), results = [];
+  const check = (name, ok) => { results.push(ok); const li = document.createElement('li'); li.className = ok ? 'pass' : 'fail'; li.textContent = name; out.appendChild(li); };
+  const host = document.getElementById('h');
+  const C = DocView.render(host, { text, rel: 'takes/r2v/prompts.json', refs: doc[0].refs });
+  ['read', 'tree', 'raw', 'table'].forEach(v => {
+    C.setView(v);
+    const t = host.textContent;
+    check(`${v}: "<Subject 1>" survives`, t.includes('<Subject 1>'));
+    check(`${v}: "<Picture 1>" survives`, v === 'read' ? host.querySelector('button.dv-tok') !== null && t.includes('<Picture 1>') : t.includes('<Picture 1>'));
+    check(`${v}: no injected <b> element`, host.querySelector('.dv-body b:not(.dv-ph b)') === null || ![...host.querySelectorAll('.dv-body b')].some(b => b.textContent === 'not bold'));
+  });
+  C.setView('read');
+  check('read: <Picture 1> chip resolves to refs[0]', (host.querySelector('button.dv-tok') || {}).title === '<Picture 1> = episodes/ep12/storyboard/h3/shot_00.png');
+  const p = DocView.prose(PROMPT);
+  check('prose(): "<image1>" chip survives', p.textContent.includes('<image1>'));
+  check('prose(): "<b>not bold</b>" stays text', p.textContent.includes('<b>not bold</b>') && !p.querySelector('b:not(.dv-ph b)'));
+  C.search('Subject');
+  check('search: 3 hits for "subject" in Read (key + 2 tokens)', C.hits.length === 3);
+  check('jqPath: .faults[12].note', DocView.jqPath(['faults', 12, 'note']) === '.faults[12].note');
+  check('jqPath: non-identifier key', DocView.jqPath(['7', 'inputs']) === '["7"].inputs');
+  check('kindOf: plain log', DocView.kindOf('drive_run01.log', '[drive] ok') === 'textlog');
+  check('kindOf: JSONL log', DocView.kindOf('x.log', '{"level":"INFO","msg":"a"}') === 'log');
+  const ok = results.every(Boolean);
+  const s = document.getElementById('summary');
+  s.textContent = `${results.filter(Boolean).length} of ${results.length} passed`;
+  s.style.color = ok ? '#86cf95' : '#f2735a';
+  document.title = (ok ? 'PASS' : 'FAIL') + ' · docview self-test';
+  window.DOCVIEW_TEST = { ok, n: results.length };
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,243 @@
+{
+ "sha8": "faf11c8f",
+ "master": "master_r2v.mp4",
+ "contact": "contact_faf11c8f.png",
+ "frames_every_s": 5.0,
+ "frames": 30,
+ "how": "answer each field y or n; y is always the good answer; an n passes only with a waived_because the owner would sign; notes may not be empty",
+ "rubric": {
+  "shadow": {
+   "question": "Is there a true black somewhere in most frames? (ep09: 5th-percentile luma 16.5 against 4-7 for ep05-07; the histogram lifted off the floor and 94 % of its colour was one orange)",
+   "answer": "y",
+   "waived_because": "",
+   "evidence": {
+    "p5": 19.29,
+    "near_black": 0.0873,
+    "frames": 30,
+    "wall": {
+     "p5": 20.0,
+     "near_black": 0.08
+    }
+   }
+  },
+  "faces": {
+   "question": "In the closes, is the face readable at a quarter of the frame height? (ep09: three medium_close shots written 'two-shot' and drawn at 0.15-0.23)",
+   "answer": "n",
+   "waived_because": "",
+   "evidence": {
+    "closes": [
+     {
+      "shot": 2,
+      "size": "medium_close",
+      "h": 0.164,
+      "wall": 0.12
+     },
+     {
+      "shot": 6,
+      "size": "medium_close",
+      "h": 0.102,
+      "wall": 0.12
+     },
+     {
+      "shot": 7,
+      "size": "medium_close",
+      "h": 0.551,
+      "wall": 0.12
+     },
+     {
+      "shot": 11,
+      "size": "close",
+      "h": 0.31,
+      "wall": 0.18
+     },
+     {
+      "shot": 16,
+      "size": "medium_close",
+      "h": 0.245,
+      "wall": 0.12
+     },
+     {
+      "shot": 20,
+      "size": "close",
+      "h": 0.354,
+      "wall": 0.18
+     },
+     {
+      "shot": 22,
+      "size": "medium_close",
+      "h": 0.131,
+      "wall": 0.12
+     }
+    ],
+    "under": [
+     6
+    ],
+    "wall": {
+     "close": 0.18,
+     "medium_close": 0.12
+    },
+    "fitted_on": "2026-09-25 one accepted episode, 7 close shots"
+   },
+   "flagged_by": "judge:master_eye@1"
+  },
+  "board": {
+   "question": "Does each frame still resemble its storyboard cell? (ep09: 62 % of frames off-board; last frame vs own cell 0.075)",
+   "answer": "y",
+   "waived_because": "",
+   "evidence": {
+    "last_vs_cell": {
+     "0": 0.912,
+     "1": 0.542,
+     "2": 0.576,
+     "3": 0.594,
+     "4": 0.502,
+     "5": 0.514,
+     "6": 0.968,
+     "7": 0.003,
+     "8": 0.758,
+     "9": 0.592,
+     "10": 0.995,
+     "11": 0.984,
+     "12": 0.102,
+     "13": 0.697,
+     "14": 0.98,
+     "15": 0.945,
+     "16": 0.873,
+     "17": 0.849,
+     "18": 0.61,
+     "19": 0.634,
+     "20": 0.867,
+     "21": 0.79,
+     "22": 0.987,
+     "23": 0.984
+    },
+    "off": {
+     "7": 0.003,
+     "12": 0.102
+    },
+    "share": 0.083,
+    "wall": {
+     "cell": 0.5,
+     "share": 0.5
+    }
+   }
+  },
+  "repeats": {
+   "question": "Is every picture drawn once -- no wide repeated, no close of the same face with the same list? (ep09: 9 of 30 shots the same close of Lucy; 14 of 44 panels 'the same moment as panel k')",
+   "answer": "y",
+   "waived_because": "",
+   "evidence": {
+    "pairs": [],
+    "count": 0,
+    "wall": 0.9
+   }
+  },
+  "story": {
+   "question": "Does the turn land as an ACTION on screen? (ep09: the rescue -- a hand catching the horse by the curb -- is not in the episode; it cuts from the danger to 'You're not hurt, I hope, miss')",
+   "answer": "y",
+   "waived_because": "",
+   "evidence": {
+    "turn_shot": 16,
+    "verbs": [],
+    "listed": [
+     "standing",
+     "standing",
+     "walking through water"
+    ],
+    "note": "cannot tell: the turn shot's prose names no acting verb"
+   }
+  }
+ },
+ "notes": "faces at master; identity at artilleryman: drift from own median; identity at unnamed_first_person_narrator: drift from own median -> flag",
+ "reviewed_by": "judge:master_eye@1",
+ "reviewed_at": "2026-09-26T02:14:20Z",
+ "terminal": "flag",
+ "faults": [
+  {
+   "kind": "faces",
+   "where": "master",
+   "evidence": {
+    "closes": [
+     {
+      "shot": 2,
+      "size": "medium_close",
+      "h": 0.164,
+      "wall": 0.12
+     },
+     {
+      "shot": 6,
+      "size": "medium_close",
+      "h": 0.102,
+      "wall": 0.12
+     },
+     {
+      "shot": 7,
+      "size": "medium_close",
+      "h": 0.551,
+      "wall": 0.12
+     },
+     {
+      "shot": 11,
+      "size": "close",
+      "h": 0.31,
+      "wall": 0.18
+     },
+     {
+      "shot": 16,
+      "size": "medium_close",
+      "h": 0.245,
+      "wall": 0.12
+     },
+     {
+      "shot": 20,
+      "size": "close",
+      "h": 0.354,
+      "wall": 0.18
+     },
+     {
+      "shot": 22,
+      "size": "medium_close",
+      "h": 0.131,
+      "wall": 0.12
+     }
+    ],
+    "under": [
+     6
+    ],
+    "wall": {
+     "close": 0.18,
+     "medium_close": 0.12
+    },
+    "fitted_on": "2026-09-25 one accepted episode, 7 close shots"
+   },
+   "severity": "normal",
+   "note": ""
+  },
+  {
+   "kind": "identity",
+   "where": "artilleryman",
+   "evidence": {
+    "min_cosine": 0.409,
+    "below": 2,
+    "wall": 0.75,
+    "reads": 4,
+    "fitted_on": "2026-09-25 one accepted episode, 7 close shots"
+   },
+   "severity": "normal",
+   "note": "drift from own median"
+  },
+  {
+   "kind": "identity",
+   "where": "unnamed_first_person_narrator",
+   "evidence": {
+    "min_cosine": 0.205,
+    "below": 5,
+    "wall": 0.75,
+    "reads": 9,
+    "fitted_on": "2026-09-25 one accepted episode, 7 close shots"
+   },
+   "severity": "normal",
+   "note": "drift from own median"
+  }
+ ]
+}

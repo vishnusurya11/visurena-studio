@@ -20,6 +20,31 @@
   const icon = (id, cls = "") => `<svg class="i ${cls}" aria-hidden="true"><use href="assets/icons.svg#${id}"/></svg>`;
   const thumb = (codex, rel, w = 160) => `${API}/thumb/${codex}/${w}/${rel}`;
   const pad = (n) => String(n).padStart(2, "0");
+
+  /* ---------- the Viewer (SPEC_v3): [data-view] = a path relative to the book folder; viewer.js resolves it.
+     The Viewer knows one codex (The War of the Worlds); a picture from another book carries its own data-src. */
+  const XP = `<svg class="i" aria-hidden="true"><use href="assets/icons.svg#maximize-2"/></svg>`;
+  function viewAttrs(codex, unit, rel, set, label) {
+    /* data-unit="" keeps the click on this page's sequence; a data-unit hands it to the unit provider (prov.js) */
+    return `data-view="${esc(rel)}" data-kind="image" data-set="${set}" data-unit="" data-src="${API}/lib/${codex}/${rel}" data-thumb="${thumb(codex, rel, 320)}" data-label="${esc(label)}"`;
+  }
+  function xpChip(codex, unit, rel, set, label) {
+    return `<button class="xp" type="button" ${viewAttrs(codex, unit, rel, set, label)} aria-label="View ${esc(label)}">${XP}</button>`;
+  }
+  /* a gate's verdict file, newest per unit (read-only listing of library/<book>/episodes/epNN, 2026-10-04) */
+  const EYE = { ep12: ["c7e3eb93", "20cc84ad", "faf11c8f"], ep13: ["d6a87ec3", "219e6d72", "3927e8c3"], ep14: ["f1e036d4", "8e1f5da4", "abf09823"],
+    ep15: ["9d36376d", "a4ab2c76", "13dd9d77"], ep16: ["0f62d72a", "e3eec490", "3969b71b"] };
+  const SNAP = { ep12: 1, ep17: 1 };   /* units whose JSON is snapshotted under mockups/data/ (no CORS on :8700) */
+  function verdictRel(unit, gate) {
+    const e = EYE[unit] || [];
+    const f = { PLAN: "plan.verdict.json", LAYOUT: "storyboard/layout.json", RENDER: "qc_r2v.json",
+      EYE_PANELS: e[0] && `storyboard/eye_${e[0]}.json`, EYE_TAKES: e[1] && `takes/r2v/eye_${e[1]}.json`, MASTER: e[2] && `review/eye_${e[2]}.json` }[gate];
+    return f || "";   /* relative to the unit folder: the provider's Files sequence keys files that way */
+  }
+  function verdictAttrs(r, gate) {   /* JSON: no data-kind, the Viewer infers the doc renderer from .json */
+    const rel = r.codex_id === WOTW && SNAP[r.unit] ? verdictRel(r.unit, gate) : "";
+    return rel ? ` data-view="${rel}" data-set="files" data-unit="${r.unit}" data-label="${r.unit} · ${gate} verdict" role="button" tabindex="0"` : "";
+  }
   function ago(ts) {
     const m = Math.max(0, (NOW - Date.parse(ts)) / 60000);
     return m < 60 ? `${Math.round(m)}m` : m < 1440 ? `${Math.round(m / 60)}h` : `${Math.round(m / 1440)}d`;
@@ -77,12 +102,12 @@
   function gatesCell(r) {
     const bad = nonPass(r);
     if (!bad.length) return Object.keys(r.gates || {}).length ? `<span class="chip2 ok gate">${icon("check")}gates pass</span>` : "";
-    return bad.map(([g, v]) => `<span class="chip2 flag gate" title="${esc(`${g} flagged ${v[0]}${v[2] ? " · kept: " + v[2] : ""} · ${v[4]}`)}"><span>${GATE_SHORT[g]}</span>${icon("flag")}<b>${v[0]}</b></span>`)
+    return bad.map(([g, v]) => `<span class="chip2 flag gate"${verdictAttrs(r, g)} title="${esc(`${g} flagged ${v[0]}${v[2] ? " · kept: " + v[2] : ""} · ${v[4]} — open the verdict`)}"><span>${GATE_SHORT[g]}</span>${icon("flag")}<b>${v[0]}</b></span>`)
       .join("");
   }
-  function face(r, size = 160) {
+  function face(r, size = 160, set = "faces") {
     if (!r.face) return `<span class="face"></span>`;
-    return `<span class="face"><img decoding="async" class="${r.face_src === "take frame" ? "strip3" : ""}" src="${thumb(r.codex_id, r.face, size)}" alt="" title="face today: ${esc(r.face_src)} · pipeline poster.jpg (proposed)"></span>`;
+    return `<span class="face vpic" ${viewAttrs(r.codex_id, r.unit, r.face, set, `${r.unit} · ${r.title || ""} · ${r.face.split("/").pop()}`)}><img decoding="async" class="${r.face_src === "take frame" ? "strip3" : ""}" src="${thumb(r.codex_id, r.face, size)}" alt="" title="face today: ${esc(r.face_src)} · pipeline poster.jpg (proposed)"></span>`;
   }
   function nowLine(r) {
     const s = shown(r), pub = PUB[r.codex_id] && PUB[r.codex_id].has(r.unit);
@@ -192,12 +217,12 @@
     let signed = 0, clean = 0;
     units.forEach((r) => taste.forEach((g) => { const v = r.gates[g]; if (v) { signed++; if (v[3] === "✓") clean++; } }));
     const head = B.gates.map((g) => `<th title="${g}">${GATE_SHORT[g]}</th>`).join("");
-    const body = units.map((r) => `<tr><td class="u">${face(r)}<b>${r.unit}</b><span class="ft">${esc(r.title)}</span></td>${B.gates.map((g) => {
+    const body = units.map((r) => `<tr><td class="u">${face(r, 160, "matrix-faces")}<b>${r.unit}</b><span class="ft">${esc(r.title)}</span></td>${B.gates.map((g) => {
       const v = r.gates[g];
       if (!v) return `<td><span class="fc f0" title="${g}: not signed">·</span></td>`;
-      if (v[3] === "✓") return `<td><span class="fc ok" title="${g} pass · ${esc(v[4])}">${icon("check")}pass</span></td>`;
+      if (v[3] === "✓") return `<td><span class="fc ok"${verdictAttrs(r, g)} title="${g} pass · ${esc(v[4])}">${icon("check")}pass</span></td>`;
       const kept = v[2] ? `<span class="k">${v[2] === "keep_best" ? "kept" : v[2]}</span>` : "";
-      return `<td><span class="fc ${binOf(v[0])}" title="${esc(`${g} ${v[0]} faults · ${v[2] || v[1]} · ${v[4]}`)}">${icon("flag")}${v[0]}${kept}</span></td>`;
+      return `<td><span class="fc ${binOf(v[0])}"${verdictAttrs(r, g)} title="${esc(`${g} ${v[0]} faults · ${v[2] || v[1]} · ${v[4]}`)}">${icon("flag")}${v[0]}${kept}</span></td>`;
     }).join("")}<td class="num">${r.flags}</td></tr>`).join("");
     return `<div class="panel-h"><h2>Gate × unit faults</h2><span class="sub">signed verdicts, every episode with a gate</span></div>
       <div class="panel-b"><div class="stat"><b>${clean} of ${signed}</b><span class="soft">taste gates clean (panels · takes · master) across ${units.length - units.filter((r) => r.state === "running").length} finished episodes — a terminal is not a pass.</span></div>
@@ -220,13 +245,13 @@
   function onDeptClick(e) {
     const fp = e.target.closest(".fpill"); if (fp) return applyFilter(fp.dataset.f);
     const gh = e.target.closest(".ghead"); if (gh && !e.target.closest("a")) { const g = gh.closest(".grp"); return setOpen(g, g.dataset.open !== "true"); }
-    const view = e.target.closest("[data-view]"); if (view) return setView(view.dataset.view);
+    const view = e.target.closest("[data-mode]"); if (view) return setView(view.dataset.mode);
     const act = e.target.closest("[data-act]");
     if (act) { e.preventDefault(); return act.dataset.act === "menu" ? openMenu(act) : confirmAct(act.dataset.act, act.closest(".urow")); }
     if (!e.target.closest(".rmenu")) closeMenus();
   }
   function setView(v) {
-    document.querySelectorAll("[data-view]").forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.view === v)));
+    document.querySelectorAll("[data-mode]").forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.mode === v)));
     $("#list").hidden = v !== "list"; $("#pills").hidden = v !== "list"; $("#faults").hidden = v !== "faults";
   }
   function openMenu(btn) {
@@ -268,7 +293,8 @@
     const src = r.face ? thumb(WOTW, r.face, 320) : "";
     const kind = r.contact ? "contact" : r.frames && r.frames.length > 1 ? "frames" : "";
     const label = { "storyboard panel": "PANEL", "take frame": "TAKE", "storyboard grid": "GRID" }[r.face_src] || "";
-    return `<a class="poster" href="${UNIT_HREF(r)}" data-unit="${r.unit}" data-scrub="${kind}" aria-label="${r.unit} ${esc(r.title)}">
+    const seen = r.face || r.contact;
+    return `<a class="poster${seen ? " has-xp" : ""}" href="${UNIT_HREF(r)}" data-unit="${r.unit}" data-scrub="${kind}" aria-label="${r.unit} ${esc(r.title)}">
       <span class="frame ${s === "flagged" ? "flagged" : ""}">
         ${src ? `<img loading="lazy" src="${src}" alt="">` : r.contact ? `<span class="sprite still" style="background-image:url(${API}/lib/${WOTW}/${r.contact});background-position:25% 20%"></span>` : `<span class="frame waiting" style="position:absolute;inset:0">no picture today<br>poster.jpg (proposed)</span>`}
         <span class="sprite"></span><span class="scrubbar"></span>
@@ -276,6 +302,7 @@
         ${pub ? `<span class="tr pub" title="published">▲</span>` : s === "running" ? `<span class="tr" style="background:var(--st-running-bar);color:#fff">● ${r.step_id} ${r.step_name}</span>` : ""}
         ${label || r.contact ? `<span class="bl" title="face today; pipeline poster.jpg proposed">${label || "CONTACT"} · today</span>` : ""}
         ${r.iters ? `<span class="br">iter${r.iters}</span>` : ""}
+        ${seen ? xpChip(WOTW, r.unit, seen, "season", `${r.unit} ${r.title} · ${seen.split("/").pop()}`) : ""}
       </span>
       <span class="cap"><span class="t">${esc(r.title)}</span></span>
       <span class="cap">${gdots(r)}<span class="pill ${s}" style="padding:2px 7px;font-size:10px">${(PILL[s] || [])[1] || s}</span></span>
@@ -336,7 +363,7 @@
     return `<div class="smx"><span></span>${fam}<span></span><span class="h">unit</span>${names}<span class="h">steps · iter · flags · ▲</span>${body}</div>`;
   }
   function cast() {
-    return B.wotw.cast.map((c) => `<figure><span class="frame"><img loading="lazy" src="${thumb(WOTW, c.sheet, 320)}" alt="${esc(c.name)} character sheet"></span><figcaption>${esc(c.name.replace(/_/g, " "))}</figcaption></figure>`).join("");
+    return B.wotw.cast.map((c) => `<figure><span class="frame vpic" ${viewAttrs(WOTW, "", c.sheet, "cast", `${c.name.replace(/_/g, " ")} · sheet`)} role="button" tabindex="0" aria-label="View ${esc(c.name.replace(/_/g, " "))}'s sheet"><img loading="lazy" src="${thumb(WOTW, c.sheet, 320)}" alt="${esc(c.name)} character sheet"></span><figcaption>${esc(c.name.replace(/_/g, " "))}</figcaption></figure>`).join("");
   }
   function book() {
     const rows = B.dept.rows.filter((r) => r.codex_id === WOTW);
@@ -445,6 +472,15 @@
       document.querySelectorAll("#shelf .bcard").forEach((c) => { c.hidden = q && !c.dataset.name.includes(q); });
     });
   }
+
+  document.addEventListener("keydown", (e) => {
+    if ((e.key !== " " && e.key !== "Enter") || e.defaultPrevented || e.ctrlKey || e.metaKey || e.altKey) return;
+    const t = e.target; if (!t || !t.closest || t.matches("button,input,textarea,select,summary,[contenteditable]")) return;
+    if (window.Viewer && window.Viewer.isOpen && window.Viewer.isOpen()) return;
+    const own = t.matches("[data-view][role=button]") ? t : null;
+    const v = own || (e.key === " " ? t.querySelector("[data-view]") : null); if (!v) return;
+    e.preventDefault(); e.stopPropagation(); v.click();
+  }, true);
 
   const page = document.body.dataset.page;
   ({ department, book, books }[page] || (() => {}))();

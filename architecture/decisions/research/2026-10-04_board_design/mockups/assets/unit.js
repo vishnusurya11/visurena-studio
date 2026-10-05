@@ -24,6 +24,9 @@ const iso = s => Date.parse(s.endsWith('Z') ? s : s + 'Z') / 1000;
 const dur = s => { s = Math.max(0, s); if (s < 60) return `${Math.round(s)}s`; if (s < 3600) return `${Math.round(s / 60)}m`; const h = Math.floor(s / 3600); return `${h}h${pad(Math.round((s - h * 3600) / 60))}`; };
 const tc = t => `${Math.floor(t / 60)}:${(t % 60).toFixed(2).padStart(5, '0')}`;
 const S2 = i => pad(i);
+const UREL = p => String(p || '').replace(new RegExp(`^episodes/${EP}/`), '');
+const VA = (rel, set, extra = '') => `data-view="${esc(rel)}" data-set="${set}" ${extra}`;   /* the Viewer's [data-view] contract */
+const FIC = rel => /\.mp4$/.test(rel) ? 'film' : /\.png$/.test(rel) ? 'image' : /\.(log|jsonl)$/.test(rel) ? 'scroll-text' : /\.txt$/.test(rel) ? 'scroll-text' : 'layers';
 const IDS = ['01','02','03','04','05','06','07','08','09','10','11','12'];
 const NAME = Object.fromEntries(IDS.map((id, k) => [id, U.names[k]]));
 const CLASS = { '01':3, '02':2, '03':1, '04':1, '05':3, '06':2, '07':1, '08':1, '09':1, '10':3, '11':3, '12':3 };
@@ -135,12 +138,15 @@ function renderProps() {
     ['Finished', `<span class="mono-v">${dhm(iso(row.finished_at))}</span><span class="sub">wall ${dur(iso(row.finished_at) - RUNS[0].start)}</span>`],
     ['Lease', `<span class="mono-v">—</span><span class="sub">released</span>`],
   ];
-  const gl = nonpass.map(g => `<li><span class="gate flag">${ic('flag')}${g}</span><span class="r">${VER[g].faults}${VER[g].terminal ? ' · ' + VER[g].terminal : ''}</span></li>`).join('')
-    + passed.map(g => `<li><span class="gate ok">${ic('check')}${g}</span><span class="r">pass</span></li>`).join('')
+  const gv = g => VER[g] && VER[g].path ? VA(UREL(VER[g].path), 'files', `data-kind="doc" title="open ${esc(UREL(VER[g].path))}"`) : '';
+  const gl = nonpass.map(g => `<li><span class="gate flag" ${gv(g)}>${ic('flag')}${g}</span><span class="r">${VER[g].faults}${VER[g].terminal ? ' · ' + VER[g].terminal : ''}</span></li>`).join('')
+    + passed.map(g => `<li><span class="gate ok" ${gv(g)}>${ic('check')}${g}</span><span class="r">pass</span></li>`).join('')
     + (unsigned.length ? `<li><span class="gate">${ic('circle-dashed')}${unsigned.length} not signed</span><span class="r">${unsigned.map(g => g.replace('EYE_', '')).join(' · ').toLowerCase()}</span></li>` : '');
-  const fl = files.map(([n, rel, r]) => `<li>${ic('external-link')}<a href="${LIB(rel)}" target="_blank" rel="noopener">${n}</a>${r ? `<span class="r">${r}</span>` : ''}</li>`).join('');
-  const jumps = (RUNNING ? [['now', 'Now'], ['shots', 'Shots'], ['gates', 'Gates'], ['runs', 'Runs'], ['activity', 'Activity']]
-    : [['screen', 'Screen'], ['shots', 'Shots'], ['gates', 'Gates'], ['runs', 'Runs'], ['activity', 'Activity']]).map(([h, t]) => `<a href="#${h}">${t}</a>`).join('');
+  const setOf = rel => /^cut\//.test(rel) ? 'masters' : /^storyboard\/grids\//.test(rel) ? 'grids' : 'files';
+  const fl = files.map(([n, rel, r]) => { const v = rel.endsWith('/') ? (U.grids ? U.grids[U.grids.length - 1].rel : rel) : rel;
+    return `<li>${ic(FIC(v))}<a href="${LIB(v)}" target="_blank" rel="noopener" ${VA(v, setOf(v))}>${n}</a>${r ? `<span class="r">${r}</span>` : ''}</li>`; }).join('');
+  const jumps = (RUNNING ? [['now', 'Now'], ['shots', 'Shots'], ['gates', 'Gates'], ['runs', 'Runs'], ['files', 'Files'], ['activity', 'Activity']]
+    : [['screen', 'Screen'], ['shots', 'Shots'], ['gates', 'Gates'], ['runs', 'Runs'], ['files', 'Files'], ['activity', 'Activity']]).map(([h, t]) => `<a href="#${h}">${t}</a>`).join('');
   $('#props').innerHTML = `<nav class="jump" aria-label="Sections">${jumps}</nav>
     <dl>${rows.map(([k, v]) => `<div><dt>${k}</dt><dd>${v}</dd></div>`).join('')}
     <h4>Gates · not passing</h4><ul class="list">${gl}</ul>
@@ -173,9 +179,9 @@ function renderNow() {
     return `<div class="st2 ${cls}" role="listitem" title="${id} ${NAME[id]} · ${x ? WORD[x.ev] : 'waiting'} ${du}"><i></i><span class="nm">${NAME[id]}</span><span class="du"><span>${id}</span>${du}</span></div>`;
   }).join('');
   $('#now').innerHTML = `<section class="panel live2" aria-label="Now">
-    <div class="poster"><a class="pic" href="#shots" aria-label="The look so far"><img src="${TH(320, g.rel)}" alt="newest storyboard grid, ${esc(g.setup)}" width="320" height="320"><span class="tag">newest grid · ${esc(g.setup.replace(/_/g, ' '))}</span></a></div>
+    <div class="poster"><a class="pic" href="${LIB(g.rel)}" ${VA(g.rel, 'grids')} aria-label="View the newest grid, ${esc(g.setup)}"><img src="${TH(320, g.rel)}" alt="newest storyboard grid, ${esc(g.setup)}" width="320" height="320"><span class="tag">newest grid · ${esc(g.setup.replace(/_/g, ' '))}</span></a></div>
     <div class="body">
-      <div class="top"><span class="pill running">${ic('loader')}Running</span><span class="where">${cs} ${NAME[cs]} · run #${run.n} of ${RUNS.length} · captured ${hm(NOW)}</span></div>
+      <div class="top"><span class="pill running">${ic('loader')}Running</span><span class="where">${cs} ${NAME[cs]} · run #${run.n} of ${RUNS.length}</span><span class="snapchip" title="A frozen capture of the ledger for this mockup; the real board updates live">snapshot ${hm(NOW)} · not live</span></div>
       <div class="eta"><div class="big"><span>Done around</span><b class="${long ? 'long' : ''}">${hm(E.p50)}</b></div>
         <div class="band">${band}<div class="cap"><b>p50 ${hm(E.p50)}</b> · p90 <span class="m">${hm(E.p90)}${day(E.p90) !== day(NOW) ? ' +1d' : ''}</span> · every step's completed runs, n ≥ ${E.n}</div></div></div>
       <div class="stepline"><span class="sl-n">${cs} ${NAME[cs]} <b>${dur(el)}</b></span>
@@ -196,13 +202,14 @@ function renderShotsRunning() {
   const g = U.grids, shots = U.plan.shots, covered = new Set(g.flatMap(x => x.shots));
   const st08 = stat('08'), run = RUNS[RUNS.length - 1], s08 = run.st['08'];
   const eta08 = s08 ? s08.start + st08.p50 : null;
-  const figs = g.slice().reverse().map((x, k) => `<figure class="pic ${k === 0 ? 'new' : ''}"><img src="${TH(320, x.rel)}" alt="grid ${esc(x.setup)}, shots ${x.shots.join(', ')}" loading="lazy" decoding="async" width="320" height="320">${k === 0 ? '<span class="newtag">Newest</span>' : ''}<figcaption><span class="s">${esc(x.setup.replace(/_/g, ' '))} <i>${x.cols}×${x.rows}</i></span><span class="m">shots ${x.shots.map(S2).join(' ')} · ${hm(x.mtime)}</span></figcaption></figure>`).join('');
+  const figs = g.slice().reverse().map((x, k) => `<figure class="pic vw-hover ${k === 0 ? 'new' : ''}" ${VA(x.rel, 'grids')} tabindex="0" role="button" aria-label="View grid ${esc(x.setup)}"><img src="${TH(320, x.rel)}" alt="grid ${esc(x.setup)}, shots ${x.shots.join(', ')}" loading="lazy" decoding="async" width="320" height="320">${k === 0 ? '<span class="newtag">Newest</span>' : ''}<figcaption><span class="s">${esc(x.setup.replace(/_/g, ' '))} <i>${x.cols}×${x.rows}</i></span><span class="m">shots ${x.shots.map(S2).join(' ')} · ${hm(x.mtime)}</span></figcaption></figure>`).join('');
   $('#shots').innerHTML = `<header><h2>Shots</h2><span class="sub">${shots.length} planned</span></header>
     <div class="empty2">${ic('clock')}<div><b>Panels arrive during 08 panels</b><span>Cutting began ${s08 ? hm(s08.start) : '—'}, 0 of ${shots.length} so far, typical end ~${eta08 ? hm(eta08) : '—'} (p50 ${dur(st08.p50)}). Takes follow at 09 shoot.</span></div></div>
+    <div class="subh" id="panels-now-h" hidden><h3>Panels on disk now</h3><span class="sub" id="panels-now-s"></span></div><div class="pstrip" id="panels-now"></div>
     <div class="subh"><h3>The look so far</h3><span class="sub">${g.length} storyboard grids from 07 board · ${covered.size} of ${shots.length} shots drawn</span></div>
     <div class="mosaic">${figs}</div>
     <details class="planlist"><summary>${ic('chevron-right')} The shot list from plan.json (${shots.length})</summary>
-      <ol>${shots.map(s => `<li><span class="mono">${S2(s.i)}</span><span class="mono">${esc(s.size)}</span><span>${esc(s.setup)}${s.faces.length ? ' · ' + esc(s.faces.join(', ').replace(/_/g, ' ')) : ''}</span></li>`).join('')}</ol></details>`;
+      <ol>${shots.map(s => `<li ${VA('plan.json', 'files', `data-kind="doc" data-path=".shots[${s.i}]" tabindex="0" role="button"`)} title="plan.json › shots[${s.i}]"><span class="mono">${S2(s.i)}</span><span class="mono">${esc(s.size)}</span><span>${esc(s.setup)}${s.faces.length ? ' · ' + esc(s.faces.join(', ').replace(/_/g, ' ')) : ''}</span></li>`).join('')}</ol></details>`;
 }
 
 /* ------------------------------------------------------------ gates: verdict threads */
@@ -263,15 +270,15 @@ function renderGates() {
     const rl = rows.map(r => {
       const run = runOfTs(r.ts), sep = run !== lastRun ? `<li class="sep">run #${run.n} · ${dhm(run.start)}</li>` : '';
       lastRun = run;
-      return `${sep}<li class="${r.terminal ? 'term' : ''}"><span>${hm(r.ts)}</span><span><span class="k">rung</span> ${r.attempt}</span><span>${Math.round(r.measured)}</span><span>${esc(r.action)}${r.terminal ? ' ■' : ''}</span><span class="note" title="${esc(r.note)}">${r.seconds ? dur(r.seconds) + ' · ' : ''}${esc(r.note)}</span></li>`;
+      return `${sep}<li class="${r.terminal ? 'term' : ''}" ${VA('learnings.jsonl', 'files', `data-kind="doc" data-path="[${U.learnings.indexOf(r)}]" tabindex="0" role="button"`)} title="learnings.jsonl › row ${U.learnings.indexOf(r) + 1}"><span>${hm(r.ts)}</span><span><span class="k">rung</span> ${r.attempt}</span><span>${Math.round(r.measured)}</span><span>${esc(r.action)}${r.terminal ? ' ■' : ''}</span><span class="note" title="${esc(r.note)}">${r.seconds ? dur(r.seconds) + ' · ' : ''}${esc(r.note)}</span></li>`;
     }).join('');
-    const chips = gs => gs.shots.map(i => EP === 'ep12' ? `<button class="chipnum" data-shot="${i}">${S2(i)}</button>` : `<span class="chipnum">${S2(i)}</span>`).join('');
+    const chips = gs => gs.shots.map(i => `<button class="chipnum" ${VA(`storyboard/shot_${S2(i)}.png`, 'shots', `data-depth="${RUNNING ? 'panel' : 'take'}"`)} aria-label="View shot ${S2(i)}">${S2(i)}</button>`).join('');
     const fk = groups.length ? `<div class="fk">${groups.map(x => `<span class="kind">${ic('flag')}${esc(x.kind)} ×${x.n}</span><span class="shs">${x.shots.length >= 24 ? '<span class="chipnum">every shot 00–23</span>' : chips(x)}</span>${x.ev ? `<span class="ev">${esc(x.ev)}</span>` : ''}`).join('')}</div>` : '';
     const word = flag ? `${v.word || 'FLAGGED'} · ⚑ ${v.faults}` : 'PASSED';
     out.push(`<details class="thread ${flag ? 'flag' : 'pass'}" ${flag && !out.length ? 'open' : ''}>
       <summary><span class="gname">${ic(flag ? 'flag' : 'check')}${GN[g]}${g !== GN[g].toUpperCase() ? `<span class="gid">${g}</span>` : ''}</span>
       <span class="gsum">${esc(word)}${v.terminal ? ` · ${esc(v.terminal)}` : ''} · ${rows.length} rung${rows.length === 1 ? '' : 's'} <span class="by">· ${esc(v.by)} · ${at}</span></span>
-      ${rows.length > 1 ? ladderSvg(rows) : '<span></span>'}</summary>
+      ${rows.length > 1 ? ladderSvg(rows) : '<span></span>'}${v.path ? `<a class="vfile" href="${LIB(UREL(v.path))}" ${VA(UREL(v.path), 'files', 'data-kind="doc"')}>${ic('layers')}${esc(UREL(v.path).split('/').pop())}</a>` : ''}</summary>
       <div class="body">${fk}${rl ? `<ul class="rounds" aria-label="rounds">${rl}</ul>` : '<p class="gnotyet">signed in one read, no ladder</p>'}</div></details>`);
   }
   const ny = unsigned.length ? `<p class="gnotyet">${ic('circle-dashed')} ${unsigned.join(' · ')} — not signed yet${RUNNING ? '; they arrive at ' + unsigned.map(g => `${gateArrives[g] || '—'}`).join(', ') : ''}</p>` : '';
@@ -426,6 +433,24 @@ function activityEntries(r) {
   for (const l of r.log) e.push({ ts: l.ts, step: l.step === 'ladders' ? 'gates' : l.step, level: l.level, msg: l.msg });
   return e.sort((a, b) => a.ts - b.ts);
 }
+const FILE_RE = /(?:episodes\/(ep\d\d)\/)?((?:[\w.-]+\/)*[\w.-]+\.(?:json|jsonl|png|mp4|txt|log))\b/g;
+function marked(t, re) { return re ? esc(t).replace(re, mm => `<mark>${mm}</mark>`) : esc(t); }
+function msgHTML(msg, re) {
+  /* split on file names first, so a search mark never lands inside an attribute */
+  let out = '', last = 0; FILE_RE.lastIndex = 0; let m;
+  while ((m = FILE_RE.exec(msg))) {
+    out += marked(msg.slice(last, m.index), re); last = m.index + m[0].length;
+    const other = m[1] && m[1] !== EP, rel = m[2];
+    out += other ? marked(m[0], re) : `<a class="fl" href="${LIB(rel)}" ${VA(rel, /\.png$/.test(rel) ? 'shots' : /\.mp4$/.test(rel) ? 'takes' : 'files')} title="View ${esc(rel)}">${marked(m[0], re)}</a>`;
+  }
+  return out + marked(msg.slice(last), re);
+}
+let LOGS = [];
+function fullLogBtn(r) {
+  const l = LOGS.find(x => x.run === r.id);
+  return l ? `<button class="btn sm ghost" ${VA(l.rel, 'files', 'data-kind="log"')} title="Open ${esc(l.rel.split('/').pop())} in the Viewer">${ic('scroll-text')}Full log</button>`
+    : `<button class="btn sm ghost" disabled title="${r.log.length ? 'only the last 2 runs\u2019 logs are in the mockup snapshot' : 'no run log kept for this run'}">${ic('scroll-text')}Full log</button>`;
+}
 function renderActivity() {
   const r = RUNS[SEL], ents = activityEntries(r), groups = new Map();
   for (const x of ents) { if (!groups.has(x.step)) groups.set(x.step, []); groups.get(x.step).push(x); }
@@ -440,7 +465,7 @@ function renderActivity() {
     const bad = ['failed', 'escalated', 'killed'].includes(ev), def = ev === 'deferred';
     const lines = xs.filter(x => LV[x.level] !== false).map(x => {
       const hit = re && re.test(x.msg); if (re) re.lastIndex = 0;
-      const m = re ? esc(x.msg).replace(re, mm => `<mark>${mm}</mark>`) : esc(x.msg);
+      const m = msgHTML(x.msg, re);
       return `<div class="ln ${x.level}" ${re && !hit ? 'hidden' : ''} id="L${Math.round(x.ts * 10)}"><span class="t">${hm(x.ts)}:${pad(D(x.ts).getUTCSeconds())}</span><span class="lv">${x.level === 'EVENT' ? 'EVENT' : x.level}</span><span class="m">${m}</span></div>`;
     }).join('');
     const anyHit = re ? xs.some(x => { const h = re.test(x.msg); re.lastIndex = 0; return h; }) : true;
@@ -456,7 +481,7 @@ function renderActivity() {
   const on = Object.values(LV).filter(Boolean).length;
   const host = $('#activity');
   if (!host.dataset.built) {
-    host.innerHTML = `<header><h2>Activity</h2><span class="sub" id="act-l"></span></header>
+    host.innerHTML = `<header><h2>Activity</h2><span class="sub" id="act-l"></span><span class="r" id="act-full"></span></header>
       <div class="act-tools"><label class="search">${ic('search')}<input id="q" type="search" placeholder="Search this run's log" aria-label="Search the log"></label><span id="lvls" class="lvls"></span></div>
       <div id="act-b"></div>`;
     host.dataset.built = 1;
@@ -467,6 +492,7 @@ function renderActivity() {
     });
   }
   $('#act-l').textContent = `run #${r.n} · ${dhm(r.start)} · ${on} of 4 levels`;
+  $('#act-full').innerHTML = fullLogBtn(r);
   $('#lvls').innerHTML = chips;
   $('#act-b').innerHTML = `${nolog}<div class="lgroups">${html || '<p class="empty">nothing matches</p>'}</div>`;
 }
@@ -513,7 +539,7 @@ function faultRows() {
 
 function renderScreen() {
   const q = U.qc, me = U.master_eye, rows = faultRows();
-  const stamp = (g, cls, word, glyph, by, at, extra) => `<div class="stamp ${cls}"><div class="st-top"><span class="g">${GN[g]}${g !== GN[g].toUpperCase() ? `<span class="gid">${g}</span>` : ''}</span><span class="w">${ic(glyph)}${word}</span></div><span class="x">${extra}</span><span class="by" title="${by}">${by.replace('judge:', '')} · ${at}</span></div>`;
+  const stamp = (g, cls, word, glyph, by, at, extra) => `<div class="stamp ${cls}" ${VER[g] && VER[g].path ? VA(UREL(VER[g].path), 'files', `data-kind="doc" role="button" tabindex="0" aria-label="Open ${esc(UREL(VER[g].path))}"`) : ''}><div class="st-top"><span class="g">${GN[g]}${g !== GN[g].toUpperCase() ? `<span class="gid">${g}</span>` : ''}</span><span class="w">${ic(glyph)}${word}</span></div><span class="x">${extra}</span><span class="by" title="${by}">${by.replace('judge:', '')} · ${at}</span></div>`;
   const lastPlan = U.learnings.filter(l => l.gate === 'PLAN').pop();
   const stamps = [
     stamp('MASTER', 'flag', 'flagged', 'flag', me.by, dhm(me.at), `faces n · identity ×2 · ${me.terminal}`),
@@ -587,21 +613,24 @@ function setT(t, seek) {
   const sh = shotAt(curT);
   $('#tc').innerHTML = `<b>${tc(curT)}</b> · f${Math.round(curT * FPS)} · shot ${S2(sh.i)}`;
   $$('#lanes .seg').forEach(g => g.classList.toggle('cur', +g.dataset.shot === sh.i));
-  if (seek && VIDEO && VIDEO.parentNode.id === 'player') { ensureMaster(); try { VIDEO.currentTime = curT; } catch (e) {} }
+  if (seek && VIDEO) { ensureMaster(); try { VIDEO.currentTime = curT; } catch (e) {} }
 }
 function masterSrc() { return LIB(`cut/master_iter${VERS}.mp4`); }
-function ensureMaster() {
-  if (VIDEO.dataset.src !== masterSrc()) { VIDEO.src = masterSrc(); VIDEO.dataset.src = masterSrc(); VIDEO.preload = 'metadata'; }
+function showPlayer() {
+  /* the one way the screening room shows its picture: called by every play path and by the play event */
   VIDEO.hidden = false; $('#poster').hidden = true; $('#bigplay').hidden = true;
 }
+function ensureMaster() {
+  if (VIDEO.dataset.src !== masterSrc()) { VIDEO.src = masterSrc(); VIDEO.dataset.src = masterSrc(); VIDEO.preload = 'metadata'; }
+  showPlayer();
+}
 function playPause() {
-  if (VIDEO.parentNode.id !== 'player') parkVideo();
   ensureMaster();
   if (VIDEO.paused) { if (Math.abs(VIDEO.currentTime - curT) > .2) VIDEO.currentTime = curT; VIDEO.play().catch(() => {}); } else VIDEO.pause();
 }
 function wirePlayer(rows) {
-  VIDEO.addEventListener('timeupdate', () => { if (VIDEO.parentNode.id === 'player' && VIDEO.dataset.src === masterSrc()) setT(VIDEO.currentTime); });
-  VIDEO.addEventListener('play', () => { $('#pp').innerHTML = ic('pause'); });
+  VIDEO.addEventListener('timeupdate', () => { if (VIDEO.dataset.src === masterSrc()) setT(VIDEO.currentTime); });
+  VIDEO.addEventListener('play', () => { showPlayer(); $('#pp').innerHTML = ic('pause'); });   /* guard: a playing master is always visible */
   VIDEO.addEventListener('pause', () => { $('#pp').innerHTML = ic('play'); });
   $('#bigplay').onclick = playPause; $('#pp').onclick = playPause;
   const vb = $('#vbadge'), vs = $('#vstack');
@@ -610,7 +639,7 @@ function wirePlayer(rows) {
     const b = e.target.closest('button[data-v]'); if (!b) return;
     if (e.shiftKey) { openCompare(+b.dataset.v); vs.hidden = true; return; }
     VERS = +b.dataset.v; vb.innerHTML = `v${VERS} ${ic('chevron-down')}`; renderVstack(); vs.hidden = true;
-    if (!VIDEO.hidden) { ensureMaster(); VIDEO.currentTime = curT; }
+    if (!VIDEO.hidden) { const was = !VIDEO.paused; ensureMaster(); VIDEO.currentTime = curT; if (was) VIDEO.play().catch(() => {}); }
     toast(`v${VERS} loaded on the player (${VERSIONS.find(x => x.v === VERS).iter})`);
   });
   document.addEventListener('click', e => { if (!e.target.closest('#vstack,#vbadge')) { vs.hidden = true; vb.setAttribute('aria-expanded', 'false'); } });
@@ -665,117 +694,106 @@ function stageGlyphs(s) {
 }
 function renderShotsFinished() {
   const cnt = { all: SH.length, master: SH.filter(s => s.master.length).length, retried: SH.filter(s => s.take.tries > 1).length, plan: SH.filter(s => s.plan.length).length };
-  const cards = SH.map(s => `<button class="shot ${s.master.some(m => !m.wide) ? 'flag' : ''}" data-i="${s.i}" aria-label="shot ${s.i}, ${s.size}, try ${s.take.tries}${s.master.length ? ', master flagged' : ''}">
-      <div class="pair"><div class="frame"><img src="${TH(160, `storyboard/shot_${S2(s.i)}.png`)}" alt="" loading="lazy" decoding="async" width="160" height="160"><span class="tl">P</span></div>
-      <div class="frame tk"><img class="tki" src="${TH(160, `takes/work/content/T${S2(s.i)}_1.png`)}" alt="" loading="lazy" decoding="async" width="160" height="160"><span class="tl">T${S2(s.i)}</span><span class="br">${s.take.secs ? s.take.secs.toFixed(1) + 's' : ''}</span><span class="scrub"><i></i></span></div></div>
+  const cards = SH.map(s => `<button class="shot ${s.master.some(m => !m.wide) ? 'flag' : ''}" data-i="${s.i}" ${VA(`storyboard/shot_${S2(s.i)}.png`, 'shots', 'data-depth="take"')} aria-label="shot ${s.i}, ${s.size}, try ${s.take.tries}${s.master.length ? ', master flagged' : ''}">
+      <div class="pair"><div class="frame" ${VA(`storyboard/shot_${S2(s.i)}.png`, 'shots', 'data-depth="panel"')}><img src="${TH(160, `storyboard/shot_${S2(s.i)}.png`)}" alt="" loading="lazy" decoding="async" width="160" height="160"><span class="tl">P</span></div>
+      <div class="frame tk" ${VA(`storyboard/shot_${S2(s.i)}.png`, 'shots', 'data-depth="take"')}><img class="tki" src="${TH(160, `takes/work/content/T${S2(s.i)}_1.png`)}" alt="" loading="lazy" decoding="async" width="160" height="160"><span class="tl">T${S2(s.i)}</span><span class="br">${s.take.secs ? s.take.secs.toFixed(1) + 's' : ''}</span><span class="scrub"><i></i></span></div></div>
       <div class="m"><div class="m1">${S2(s.i)}<span class="sz">${esc(s.size.replace('_', ' '))}${s.faces.length ? ' · ' + esc(s.faces[0].replace('unnamed_first_person_', '').replace('_', ' ')) : ''}</span><span class="try ${s.take.tries > 1 ? 're' : ''}">${s.take.tries > 1 ? ic('rotate-ccw') + ' try ' + s.take.tries : 'try 1'}</span></div>
       <div class="stg">${stageGlyphs(s)}</div></div></button>`).join('');
   $('#shots').innerHTML = `<header><h2>Shots</h2><span class="sub">24 · panel → take → master</span><span class="r"><span class="filters segmented" role="group" aria-label="Filter shots">
     ${[['all', 'All'], ['master', '⚑ Master'], ['retried', '↻ Retried'], ['plan', '⚑ Plan']].map(([f, t]) => `<button class="fchip" data-filter="${f}" aria-pressed="${f === FILTER}">${t} ${cnt[f]}</button>`).join('')}</span></span></header>
     <div class="shots" id="shotgrid">${cards}</div>
-    <p class="hint" style="margin-top:12px">Hover a take to scrub its three content frames; rest on it to play (the page's one video moves here). Click for the shot view.</p>`;
+    <p class="hint" style="margin-top:12px">Hover a take to scrub its three content frames. Click P for the panel, T for the take: the Viewer opens on the Shots sequence (↑ ↓ panel · staged · take · master, R redo).</p>`;
   $$('.fchip').forEach(b => b.onclick = () => { FILTER = b.dataset.filter; $$('.fchip').forEach(x => x.setAttribute('aria-pressed', x === b)); $$('.shot').forEach(c => { const s = SH[+c.dataset.i]; c.hidden = !(FILTER === 'all' || (FILTER === 'master' && s.master.length) || (FILTER === 'retried' && s.take.tries > 1) || (FILTER === 'plan' && s.plan.length)); }); });
   const grid = $('#shotgrid');
-  grid.addEventListener('click', e => { const c = e.target.closest('.shot'); if (c) openShot(+c.dataset.i, 1); });
-  let dwell = null;
   grid.addEventListener('pointermove', e => {
     const f = e.target.closest('.frame.tk'); if (!f) return;
     const i = +f.closest('.shot').dataset.i, r = f.getBoundingClientRect(), k = Math.max(0, Math.min(2, Math.floor(3 * (e.clientX - r.left) / r.width)));
     const img = f.querySelector('.tki'), want = TH(160, `takes/work/content/T${S2(i)}_${k}.png`);
     if (img.src !== want) img.src = want;
     f.style.setProperty('--k', k);
-    clearTimeout(dwell);
-    if (!matchMedia('(prefers-reduced-motion: reduce)').matches) dwell = setTimeout(() => hoverPlay(f, i), 700);
   });
-  grid.addEventListener('pointerout', e => { const f = e.target.closest('.frame.tk'); if (f && !f.contains(e.relatedTarget)) { clearTimeout(dwell); if (VIDEO.parentNode === f) parkVideo(); } });
 }
-function hoverPlay(f, i) {
-  if (VIDEO.parentNode === f) return;
-  VIDEO.pause(); f.appendChild(VIDEO); VIDEO.hidden = false; VIDEO.muted = true; VIDEO.loop = true;
-  VIDEO.src = LIB(`takes/r2v/T${S2(i)}.mp4`); VIDEO.dataset.src = VIDEO.src; VIDEO.play().catch(() => {});
+/* ------------------------------------------------------------ redo (R) — the old shot view #sv is now the Viewer's Shots sequence */
+const GHOST = {};
+function wireViewer() {
+  if (!window.Viewer) return;
+  window.Viewer.action('redo', {
+    key: 'r', label: 'Redo this shot',
+    applies: (it, L) => !RUNNING && it.unit === EP && it.shot !== undefined && (L.name === 'panel' || L.name === 'staged' || L.name === 'take' || L.name === 'master' || L.name === 'kept'),
+    choices: (it, L) => [['08', 'redraw the panel · 08', L.name === 'panel' || L.name === 'staged'], ['09', 'reshoot the take · 09', !(L.name === 'panel' || L.name === 'staged')]],
+    note: it => { const s = SH[it.shot]; return s ? [...s.master.filter(m => !m.wide).map(m => `MASTER ${m.kind}: ${m.ev}`), ...s.plan.map(f => `PLAN ${f.kind}: ${f.note}`)].join('; ') || `shot ${S2(it.shot)}: ` : ''; },
+    submit: (it, L, step, note) => { GHOST[it.shot] = note; it.chips = (it.chips || []).filter(c => !/redo queued/.test(c.t)).concat({ t: `redo queued · ${step}`, cls: 'warn' }); return `Mock: redo of shot ${S2(it.shot)} queued — order would read “${step}” · ${note.slice(0, 60)}`; },
+  });
 }
-function parkVideo() {
-  VIDEO.pause(); VIDEO.loop = false; VIDEO.muted = false;
-  const p = $('#player'); p.insertBefore(VIDEO, $('#bigplay'));
-  VIDEO.removeAttribute('src'); VIDEO.dataset.src = ''; VIDEO.load();
-  VIDEO.hidden = true; $('#poster').hidden = false; $('#bigplay').hidden = false;
-}
+window.UnitPage = {
+  jumpToRun(runId) { const k = RUNS.findIndex(r => r.id === runId); if (k >= 0) { selectRun(k); $('#activity').scrollIntoView({ block: 'start' }); } },
+  jumpToLine(k, ts) {
+    selectRun(k); Q = ''; const q = $('#q'); if (q) q.value = ''; renderActivity();
+    const ln = document.getElementById(`L${Math.round(ts * 10)}`); if (!ln) return;
+    const d = ln.closest('details'); if (d) d.open = true;
+    ln.classList.add('open', 'flash'); ln.scrollIntoView({ block: 'center' }); setTimeout(() => ln.classList.remove('flash'), 2200);
+  },
+};
 
-/* ------------------------------------------------------------ shot view (lightbox) */
-let SV = { i: 0, st: 1, redo: false, ghost: {} };
-const STAGES = ['panel', 'take', 'master'];
-function openShot(i, st) {
-  SV.i = i; SV.st = st ?? 1; SV.redo = false;
-  const d = $('#sv'); drawShot(); if (!d.open) d.showModal();
-  history.replaceState(null, '', `#shot-${S2(i)}`);
+/* ------------------------------------------------------------ files: the unit's files grouped by kind (from the snapshot index) */
+function renderFiles(idx) {
+  const host = $('#files'); if (!host) return;
+  if (!idx) { host.innerHTML = `<header><h2>Files</h2><span class="sub">no snapshot index for ${EP}</span></header>`; return; }
+  const F = idx.files.filter(f => !/(^|\/)__pycache__\/|\.py$|\.sh$/.test(f.rel));
+  const by = re => F.filter(f => re.test(f.rel));
+  const size = xs => { const n = xs.reduce((a, f) => a + f.size, 0); return n > 1048576 ? `${(n / 1048576).toFixed(n > 1e8 ? 0 : 1)} MB` : `${Math.max(1, Math.round(n / 1024))} KB`; };
+  const one = f => f && `<li><button type="button" class="frow" ${VA(f.rel, setFor(f.rel), `data-kind="${kindFor(f.rel)}"`)}>${ic(FIC(f.rel))}<span class="fn">${esc(f.rel)}</span><span class="fm">${size([f])}${f.snap || !/\.(json|jsonl|txt|log)$/.test(f.rel) ? '' : ' · not in snapshot'}</span></button></li>`;
+  const many = (label, xs, set, depth) => xs.length ? `<li><button type="button" class="frow many" ${VA(xs[0].rel, set, depth ? `data-depth="${depth}"` : '')}>${ic(FIC(xs[0].rel))}<span class="fn">${label}</span><span class="fm">${xs.length} · ${size(xs)}</span></button></li>` : '';
+  const folder = (label, xs) => xs.length ? `<li><button type="button" class="frow many" data-folder="${esc(label)}">${ic(FIC(xs[0].rel))}<span class="fn">${label}</span><span class="fm">${xs.length} · ${size(xs)}</span></button></li>` : '';
+  const groups = [
+    ['Plan and verdicts', [one(F.find(f => f.rel === 'plan.json')), one(F.find(f => f.rel === 'plan.verdict.json')), ...by(/^plan\.(deferred\.json|json\.bak)/).map(one), one(F.find(f => f.rel === 'storyboard/layout.json'))]],
+    ['Storyboard', [many('storyboard/shot_NN.png · panels', by(/^storyboard\/shot_\d\d\.png$/), 'shots', 'panel'), many('storyboard/h3/ · staged for H3', by(/^storyboard\/h3\//), 'shots', 'staged'), many('storyboard/grids/*.png · grids', by(/^storyboard\/grids\/[^/]+\.png$/), 'grids'), folder('storyboard/grids/*.txt · grid prompts', by(/^storyboard\/grids\/[^/]+\.txt$/)), folder('superseded grid draws', by(/^storyboard\/(superseded\/|grids\/[^/]+\/)[^/]+\.png$/)), folder('storyboard/anchors/', by(/^storyboard\/anchors\//)), one(F.find(f => f.rel === 'storyboard/contact.png')), ...by(/^storyboard\/(eye_|panel_)/).map(one)]],
+    ['Takes', [many('takes/r2v/TNN.mp4 · kept takes', by(/^takes\/r2v\/T\d\d\.mp4$/), 'takes'), folder('takes/r2v/attempts/ · retired renders', by(/^takes\/r2v\/attempts\//)), one(F.find(f => f.rel === 'takes/r2v/prompts.json')), one(F.find(f => f.rel === 'takes/r2v/shots.json')), one(F.find(f => f.rel === 'takes/r2v/stills.json')), ...by(/^takes\/r2v\/eye_/).map(one), folder('takes/r2v/TNN.graph.json · as run', by(/^takes\/r2v\/T\d\d\.graph\.json$/)), folder('takes/r2v/TNN.dq.json · take DQ', by(/^takes\/r2v\/T\d\d\.dq\.json$/)), folder('takes/work/content/ · content frames', by(/^takes\/work\/content\//)), folder('takes/work/dq/ · DQ strips', by(/^takes\/work\/dq\/.*\.png$/))]],
+    ['Master', [many('cut/master_iterN.mp4 · cuts', by(/^cut\/master_iter\d+\.mp4$/), 'masters'), one(F.find(f => f.rel === 'qc_r2v.json')), ...by(/^review\/(eye_|speaker)/).map(one), ...by(/^review\/contact_/).map(one), folder('review/work/ · judge frames', by(/^review\/work\/.*\.png$/)), one(F.find(f => f.rel === 'placed.json')), one(F.find(f => f.rel === 'reports/strip_T00_T23.png'))]],
+    ['Audio', [one(F.find(f => f.rel === 'audio/lines/lines.json')), folder('audio/lines/lNN.wav · voiced lines', by(/^audio\/lines\/l\d\d\.wav$/)), folder('audio/bed*.wav · beds', by(/^audio\/bed.*\.wav$/))]],
+    ['Run records and logs', [one(F.find(f => f.rel === 'learnings.jsonl')), one(F.find(f => f.rel === 'timing.jsonl')), one(F.find(f => f.rel === 'drive.jsonl')), ...by(/^drive_run\d+\.log$/).map(one), ...(idx.logs || []).map(l => `<li><button type="button" class="frow" ${VA(l.rel, 'files', 'data-kind="log"')}>${ic('scroll-text')}<span class="fn">logs/…/episode/${esc(l.rel.split('/').pop())}</span><span class="fm">run log · ${size([l])}</span></button></li>`), ...['manifest.json', 'moves.json', 'heads.json', 'youtube.json'].map(r => one(F.find(f => f.rel === r)))]],
+  ].map(([t, rows]) => [t, rows.filter(Boolean)]).filter(([, rows]) => rows.length);
+  host.innerHTML = `<header><h2>Files</h2><span class="sub">${F.length} files · ${size(F)} · grouped by kind · JSON and logs from the read-only snapshot</span></header>
+    <div class="fgroups">${groups.map(([t, rows]) => `<section class="fgrp"><h3>${t}</h3><ul>${rows.join('')}</ul></section>`).join('')}</div>`;
+  FOLDERS = {};
+  groups.forEach(([, rows]) => rows.forEach(r => { const m = r.match(/data-folder="([^"]+)"/); if (m) FOLDERS[m[1]] = null; }));
+  host.addEventListener('click', e => {
+    const b = e.target.closest('[data-folder]'); if (!b || !window.Viewer) return;
+    const label = b.dataset.folder, re = FOLDER_RE[label.split(' ')[0]] || null;
+    const xs = F.filter(f => folderMatch(label, f.rel));
+    window.Viewer.open({ seq: label.split(' · ')[0], items: xs.map(f => ({ rel: f.rel, label: f.rel.split('/').pop(), unit: EP })), index: 0, opener: b, unit: EP });
+  });
 }
-function drawShot() {
-  const s = SH[SV.i], d = $('#sv'), take = s.take;
-  if (VIDEO.parentNode && VIDEO.parentNode.closest && VIDEO.parentNode.closest('#sv')) parkVideo();
-  const learn = U.learnings.filter(l => l.gate === 'EYE_TAKES' && new RegExp(`T${S2(s.i)}\\b`).test(l.note));
-  const pk = Object.entries(s.pk).sort((a, b) => b[1] - a[1]);
-  const col = (k, title, v, body, ft) => `<div class="stg3" data-st="${k}" aria-current="${SV.st === k}"><div class="hd"><span>${title}</span><span class="v">${v}</span></div>${body}<div class="ft">${ft}</div></div>`;
-  const panel = col(0, 'Panel · 08', `shot_${S2(s.i)}.png`, `<div class="frame"><img src="${TH(320, `storyboard/shot_${S2(s.i)}.png`)}" alt="panel ${s.i}"></div>`,
-    `<span class="fl">⚑ EYE_PANELS ${s.pn}</span> · ${pk.map(([k, n]) => `${k} ×${n}`).join(' · ')}`);
-  const tframe = SV.st === 1 ? `<div class="frame" id="svtake"><img src="${TH(320, `takes/work/content/T${S2(s.i)}_1.png`)}" alt="take ${s.i}"><span class="bl">T${S2(s.i)} · ${take.secs}s</span><span class="br">Space plays</span></div>` : `<div class="frame"><img src="${TH(320, `takes/work/content/T${S2(s.i)}_1.png`)}" alt="take ${s.i}"></div>`;
-  const ghost = SV.ghost[s.i] ? `<div class="ghost">${ic('rotate-ccw')}try ${take.tries + 1} · queued · “${esc(SV.ghost[s.i].slice(0, 60))}”</div>` : '';
-  const takeC = col(1, 'Take · 09', `try ${take.tries}${take.tries > 1 ? ` · ${take.tries - 1} failed` : ''}`, tframe + ghost,
-    `<span class="ok">✓ EYE_TAKES pass</span>${take.dq_bad.length ? ` · soft misses: ${take.dq_bad.join(', ')}` : ' · dq clean'} · content ${take.content_ok ? 'ok' : 'fault'}`);
-  const masterC = col(2, 'In the master · v7', `${tc(s.t0)}–${tc(s.t1)}`, `<div class="frame" id="svmaster"><img src="${TH(320, `takes/work/content/T${S2(s.i)}_2.png`)}" alt="master segment ${s.i}"><span class="bl">f${Math.round(s.t0 * FPS)}–f${Math.round(s.t1 * FPS)}</span><span class="br">Space plays the segment</span></div>`,
-    s.master.length ? s.master.map(m => `<span class="fl">⚑ ${m.kind}</span> ${esc(m.ev)}`).join('<br>') : '<span class="ok">✓ MASTER: nothing named here</span>');
-  const faults = [
-    ...s.plan.map(f => `<li><span class="g fl">PLAN ⚑</span>${esc(f.kind)} · ${esc(f.note)}</li>`),
-    ...pk.map(([k, n]) => `<li><span class="g fl">EYE_PANELS ⚑</span>${k} ×${n}</li>`),
-    ...take.dq_bad.map(g => `<li><span class="g">take dq</span>${g} (soft; passed)</li>`),
-    ...s.master.map(m => `<li><span class="g fl">MASTER ⚑</span>${m.kind} · ${esc(m.ev)}${m.wide ? ' · character-wide' : ''}</li>`),
-  ].join('') || '<li><span class="g ok">✓</span>no fault names this shot</li>';
-  const tries = learn.length ? learn.map(l => `<li><span class="g">${dhm(l.ts)}</span>rung ${l.attempt} · ${esc(l.action)} · ${esc((l.note.match(new RegExp(`[^;]*T${S2(s.i)}[^;]*`)) || [''])[0].trim())}</li>`).join('') : `<li>${take.tries > 1 ? `${take.tries - 1} failed attempt(s) in takes/r2v/attempts/` : 'first take kept'}</li>`;
-  const note = [...s.master.filter(m => !m.wide).map(m => `MASTER ${m.kind}: ${m.ev}`), ...s.plan.map(f => `PLAN ${f.kind}: ${f.note}`)].join('; ') || `shot ${S2(s.i)}: `;
-  d.innerHTML = `<div class="sv-h"><h2>Shot ${S2(s.i)}</h2><span class="meta">${esc(s.size.replace('_', ' '))} · ${esc(s.setup)} · ${esc(s.section)}${s.faces.length ? ' · ' + esc(s.faces.join(', ').replace(/_/g, ' ')) : ''}</span><span class="sp"></span>
-    <span class="stabs">${STAGES.map((n, k) => `<button class="fchip" data-goto="${k}" aria-pressed="${SV.st === k}">${n}</button>`).join('')}</span>
-    <button class="btn stg icon" data-nav="-1" aria-label="Previous shot">←</button><span class="meta">${SV.i + 1}/24</span><button class="btn stg icon" data-nav="1" aria-label="Next shot">→</button>
-    <button class="btn stg" data-close>${ic('x')}Esc</button></div>
-    <div class="sv-b"><div class="stages3">${panel}${takeC}${masterC}</div>
-    <div class="sv-txt"><div><h4>Frame</h4><p>${esc(s.frame)}</p><h4>Motion</h4><p>${esc(s.motion)}</p><h4>Camera</h4><p>${esc(s.camera)}</p></div>
-      <div><h4>Faults naming shot ${S2(s.i)}</h4><ul>${faults}</ul><h4>Take history</h4><ul>${tries}</ul></div></div>
-    <div class="redo"><button class="btn st" id="redob">${ic('rotate-ccw')}Redo this shot <span class="kbd" style="margin-left:4px">R</span></button>
-      <div class="keys"><span><span class="kbd">←</span><span class="kbd">→</span> shots</span><span><span class="kbd">↑</span><span class="kbd">↓</span> stages</span><span><span class="kbd">Space</span> play</span><span><span class="kbd">Esc</span> close</span></div>
-      <div class="box" id="redobox" ${SV.redo ? '' : 'hidden'}><label><input type="radio" name="rs" value="08" ${SV.st === 0 ? 'checked' : ''}> redraw the panel · 08</label><label><input type="radio" name="rs" value="09" ${SV.st !== 0 ? 'checked' : ''}> reshoot the take · 09</label>
-        <textarea id="redonote" aria-label="Note for the redo">${esc(note)}</textarea>
-        <div style="display:flex;gap:8px;margin-top:8px"><button class="btn st" id="redogo">Queue redo ↵</button><button class="btn stg" id="redocancel">Cancel</button><span class="micro" style="color:var(--stage-ink-3);align-self:center">posts /act/redo (mock) · confirm dialog in the build</span></div></div></div></div>`;
-  d.querySelector('[data-close]').onclick = () => d.close();
-  d.querySelectorAll('[data-nav]').forEach(b => b.onclick = () => nav(+b.dataset.nav));
-  d.querySelectorAll('[data-goto]').forEach(b => b.onclick = () => { SV.st = +b.dataset.goto; drawShot(); });
-  d.querySelectorAll('.stg3').forEach(c => c.onclick = e => { if (+c.dataset.st !== SV.st) { SV.st = +c.dataset.st; drawShot(); } else if (SV.st) svPlay(); });
-  $('#redob').onclick = () => { SV.redo = true; $('#redobox').hidden = false; $('#redonote').focus(); };
-  $('#redocancel').onclick = () => { SV.redo = false; $('#redobox').hidden = true; };
-  $('#redogo').onclick = () => { SV.ghost[s.i] = $('#redonote').value; SV.redo = false; toast(`Mock: redo of shot ${S2(s.i)} queued — order would read “${d.querySelector('input[name=rs]:checked').value}”`); drawShot(); };
+let FOLDERS = {};
+const FOLDER_RE = {};
+function folderMatch(label, rel) {
+  const L = label.split(' ')[0];
+  if (L === 'superseded') return /^storyboard\/(superseded\/|grids\/[^/]+\/)[^/]+\.png$/.test(rel);
+  if (L === 'storyboard/grids/*.txt') return /^storyboard\/grids\/[^/]+\.txt$/.test(rel);
+  if (L === 'takes/r2v/TNN.graph.json') return /^takes\/r2v\/T\d\d\.graph\.json$/.test(rel);
+  if (L === 'takes/r2v/TNN.dq.json') return /^takes\/r2v\/T\d\d\.dq\.json$/.test(rel);
+  if (L === 'takes/work/dq/') return /^takes\/work\/dq\/.*\.png$/.test(rel);
+  if (L === 'review/work/') return /^review\/work\/.*\.png$/.test(rel);
+  if (L === 'audio/lines/lNN.wav') return /^audio\/lines\/l\d\d\.wav$/.test(rel);
+  if (L === 'audio/bed*.wav') return /^audio\/bed.*\.wav$/.test(rel);
+  return rel.startsWith(L);
 }
-function svPlay() {
-  const s = SH[SV.i], slot = SV.st === 1 ? $('#svtake') : SV.st === 2 ? $('#svmaster') : null;
-  if (!slot) return;
-  if (VIDEO.parentNode === slot) { VIDEO.paused ? VIDEO.play().catch(() => {}) : VIDEO.pause(); return; }
-  VIDEO.pause(); slot.appendChild(VIDEO); VIDEO.hidden = false; VIDEO.muted = false; VIDEO.loop = SV.st === 1;
-  VIDEO.src = SV.st === 1 ? LIB(`takes/r2v/T${S2(s.i)}.mp4`) : `${masterSrc()}#t=${s.t0.toFixed(2)},${s.t1.toFixed(2)}`;
-  VIDEO.dataset.src = VIDEO.src; VIDEO.play().catch(() => {});
+function setFor(rel) { return /^cut\/master_/.test(rel) ? 'masters' : /^storyboard\/shot_\d\d\.png$/.test(rel) ? 'shots' : /^storyboard\/grids\/[^/]+\.png$/.test(rel) ? 'grids' : /^takes\/r2v\/T\d\d\.mp4$/.test(rel) ? 'takes' : 'files'; }
+function kindFor(rel) { return /\.log$/.test(rel) ? 'log' : /\.(json|jsonl|txt)$/.test(rel) ? 'doc' : /\.mp4$/.test(rel) ? 'video' : /\.wav$/.test(rel) ? 'audio' : 'image'; }
+function renderPanelsNow(U) {
+  const box = $('#panels-now'); if (!box || !U) return;
+  const shots = U.seqs.find(x => x.id === 'shots').items.filter(x => !x.layers[0].missing);
+  if (!shots.length) return;
+  $('#panels-now-h').hidden = false;
+  $('#panels-now-s').textContent = `${shots.length} of ${U.plan.shots.length} cut · read from the snapshot index, newer than this page's capture`;
+  box.innerHTML = shots.map(x => `<button type="button" class="pthumb" ${VA(x.id, 'shots', 'data-depth="panel"')} aria-label="View ${esc(x.label)}"><img src="${TH(160, x.id)}" alt="" loading="lazy" width="80" height="80"><span>${esc(x.short)}</span></button>`).join('');
 }
-function nav(k) { SV.i = (SV.i + k + SH.length) % SH.length; SV.redo = false; drawShot(); history.replaceState(null, '', `#shot-${S2(SV.i)}`); }
 
 /* ------------------------------------------------------------ keys */
 function wireKeys() {
   document.addEventListener('keydown', e => {
     if (e.target.closest('input,textarea,select')) return;
-    const sv = $('#sv');
-    if (sv && sv.open) {
-      if (e.key === 'ArrowRight') { e.preventDefault(); nav(1); }
-      else if (e.key === 'ArrowLeft') { e.preventDefault(); nav(-1); }
-      else if (e.key === 'ArrowDown') { e.preventDefault(); SV.st = Math.min(2, SV.st + 1); drawShot(); }
-      else if (e.key === 'ArrowUp') { e.preventDefault(); SV.st = Math.max(0, SV.st - 1); drawShot(); }
-      else if (e.key === ' ') { e.preventDefault(); svPlay(); }
-      else if (e.key === 'r' || e.key === 'R') { e.preventDefault(); $('#redob').click(); }
-      return;
-    }
-    if ($('#cmp')?.open) return;
+    if (document.querySelector('dialog[open]')) return;   /* each open dialog owns its keys (V08 F1) */
     if (e.target.closest('.mx-scroll') || document.activeElement === document.body) {
       if (e.key === 'ArrowRight' && e.target.closest('.mx-scroll')) { e.preventDefault(); selectRun(SEL + 1); }
       if (e.key === 'ArrowLeft' && e.target.closest('.mx-scroll')) { e.preventDefault(); selectRun(SEL - 1); }
@@ -788,11 +806,9 @@ function wireKeys() {
       const nx = bs[Math.max(0, Math.min(bs.length - 1, cur + (e.key === 'ArrowDown' ? 1 : -1)))]; nx.click(); nx.focus();
     }
   });
-  const sv = $('#sv'); if (sv) sv.addEventListener('close', () => { if (VIDEO && VIDEO.parentNode !== $('#player')) parkVideo(); history.replaceState(null, '', location.pathname); });
   $$('.mx-scroll').forEach(m => m.tabIndex = 0);
   document.addEventListener('click', e => {
     const m = e.target.closest('[data-mock]'); if (m) toast(`Mock — ${m.dataset.mock}`);
-    const c = e.target.closest('.chipnum[data-shot]'); if (c && EP === 'ep12') openShot(+c.dataset.shot, 1);
   });
 }
 
@@ -802,7 +818,8 @@ if (RUNNING) { const gp = $('.gpu-pill'), E = etaCalc(), cs = curStep(); if (gp)
 if (RUNNING) { renderNow(); renderShotsRunning(); }
 else { buildShots(); renderScreen(); renderShotsFinished(); }
 renderGates(); renderRuns(); renderActivity(); wireKeys();
+const withProv = fn => (window.Prov ? fn() : document.addEventListener('prov:ready', fn, { once: true }));
+withProv(() => { wireViewer(); window.Prov.load(EP).then(P => { LOGS = P.idx.logs || []; renderActivity(); renderFiles(P.idx); if (RUNNING) renderPanelsNow(P); }).catch(() => renderFiles(null)); });
 let rz; window.addEventListener('resize', () => { clearTimeout(rz); rz = setTimeout(renderWaterfall, 120); });
-if (!RUNNING && /^#shot-\d\d$/.test(location.hash)) openShot(+location.hash.slice(6), 1);
 document.title = RUNNING ? `● ${curStep()} ${NAME[curStep()]} · ~${hm(etaCalc().p50)} · ${EP}` : `✓ ${EP} · done · ⚑ flagged`;
 })();

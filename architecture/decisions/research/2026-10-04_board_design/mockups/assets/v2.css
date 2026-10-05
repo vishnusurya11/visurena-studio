@@ -272,3 +272,29 @@ a.kpi:hover{border-color:var(--rule-2);background:var(--surface-2)}
 .pcard .pt .id{font:600 12px/19px var(--f-mono);color:var(--ink-3);margin-right:6px}
 .pcard .pm{font:400 12px/16px var(--f-text);color:var(--ink-3)}
 .pcard:hover .pt{text-decoration:underline;text-decoration-color:var(--rule-2);text-underline-offset:3px}
+
+/* ---------- v3: what opens the Viewer (SPEC_v3 · V10 §3) ----------
+   View pictures (the picture is the content) carry [data-view] and open on a plain click: zoom-in + inner ring, no scale.
+   Nav pictures (posters that link to a unit) keep their link and gain .xp, a 28 px expand chip holding the [data-view]. */
+.vpic{position:relative;cursor:zoom-in}
+.vpic:hover img{filter:brightness(1.06)}
+.vpic:hover::after{content:"";position:absolute;inset:0;border-radius:inherit;box-shadow:inset 0 0 0 1px rgb(255 255 255 / .18);pointer-events:none;z-index:3}
+.has-xp{position:relative}
+.xp{position:absolute;top:8px;right:8px;z-index:4;width:28px;height:28px;display:grid;place-items:center;padding:0;margin:0;border:0;border-radius:6px;background:rgb(0 0 0 / .62);backdrop-filter:blur(4px);color:#fff;cursor:zoom-in;opacity:0;transition:opacity var(--d1),background var(--d1)}
+.xp .i{width:14px;height:14px;stroke-width:2.25}
+.xp:hover{background:rgb(0 0 0 / .8)}
+.has-xp:hover .xp,.has-xp:focus-within .xp,.xp:focus-visible{opacity:1}
+.xp:focus-visible{outline:2px solid var(--focus);outline-offset:2px}
+.xp.play{top:auto;bottom:8px;left:8px;right:auto;width:auto;height:24px;padding:0 8px;display:inline-flex;gap:5px;align-items:center;font:500 11px/1 var(--f-text);cursor:pointer}
+.xp.play .i{width:10px;height:10px;fill:currentColor}
+.xp.sm{width:20px;height:20px;top:auto;bottom:2px;right:2px;border-radius:5px}
+.xp.sm .i{width:12px;height:12px}
+@media (hover:none){.xp{opacity:.85}}
+a.fl{font-family:var(--f-mono);color:var(--focus);text-decoration:underline dotted;text-underline-offset:2px;cursor:pointer}
+a.fl:hover{text-decoration-style:solid}
+.chip2[data-view],.fc[data-view]{cursor:pointer}
+.chip2[data-view]:hover,.fc[data-view]:hover{filter:brightness(1.15)}
+
+/* ---------- v3: no page scrolls sideways, at any width. Wide children (shelves, the cast row, matrices)
+   scroll inside themselves; the content column never grows past the viewport. */
+.page,body > main,body > header.ph{overflow-x:clip;min-width:0}

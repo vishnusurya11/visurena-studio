@@ -28,16 +28,17 @@
     { g: 'Departments', ic: 'film', l: 'trailer', s: '30 units · 30 queued', h: 'department.html?stage=trailer' },
     { g: 'Departments', ic: 'book-open', l: 'screenplay', s: '30 units · 30 queued', h: 'department.html?stage=screenplay' },
     { g: 'Departments', ic: 'search', l: 'analysis', s: '30 units · all done', h: 'department.html?stage=analysis' },
-    { g: 'Pages', ic: 'gauge', l: 'Now', s: 'the GPU, needs you, up next', h: 'index.html', k: 'G N' },
+    { g: 'Pages', ic: 'house', l: 'Home', s: 'now on the GPU, needs you, up next', h: 'index.html', k: 'G H' },
     { g: 'Pages', ic: 'inbox', l: 'Needs you', s: '5 shipped with flags, not acknowledged', h: 'index.html#needs', k: 'G I' },
     { g: 'Pages', ic: 'clock', l: 'Queue', s: 'GPU lane · 92 queued', h: 'queue.html', k: 'G Q' },
-    { g: 'Pages', ic: 'external-link', l: 'Org chart', s: 'architecture page', h: 'http://127.0.0.1:8700/org', k: 'G O' },
+    { g: 'Pages', ic: 'network', l: 'Architecture', s: 'the org chart · current, future, command center', h: 'architecture.html', k: 'G A' },
+    { g: 'Pages', ic: 'external-link', l: 'Org chart', s: 'architecture page, standalone', h: 'http://127.0.0.1:8700/org', k: 'G O' },
     { g: 'Actions', ic: 'sun-moon', l: 'Toggle theme', s: 'studio black / graphite', act: 'theme', k: 'T' },
     { g: 'Actions', ic: 'circle-dashed', l: 'Keyboard shortcuts', s: '', act: 'keys', k: '?' },
     { g: 'Actions', ic: 'check', l: 'Acknowledge ep16 flags…', s: 'opens the confirm, places an ack order', act: 'ack' },
     { g: 'Actions', ic: 'pause', l: 'Hold studio…', s: 'stops every run before its next GPU step', act: 'hold' }
   ];
-  var CHORDS = { n: 'index.html', i: 'index.html#needs', q: 'queue.html', b: 'books.html', r: 'unit-running.html', e: 'department.html?stage=episode', o: 'http://127.0.0.1:8700/org' };
+  var CHORDS = { h: 'index.html', n: 'index.html', a: 'architecture.html', i: 'index.html#needs', q: 'queue.html', b: 'books.html', r: 'unit-running.html', e: 'department.html?stage=episode', o: 'http://127.0.0.1:8700/org' };
 
   /* ---------------------------------------------------------- dialogs (injected once) */
   function inject() {
@@ -57,12 +58,13 @@
           '<dt><span class="kbd">Ctrl</span><span class="kbd">K</span></dt><dd>search &amp; jump (⌘K on a Mac)</dd>' +
           '<dt><span class="kbd">/</span></dt><dd>search</dd>' +
           '<dt><span class="kbd">?</span></dt><dd>this sheet</dd>' +
-          '<dt><span class="kbd">G</span><span class="kbd">N</span></dt><dd>Now</dd>' +
+          '<dt><span class="kbd">G</span><span class="kbd">H</span></dt><dd>Home (G N too)</dd>' +
           '<dt><span class="kbd">G</span><span class="kbd">I</span></dt><dd>Needs you</dd>' +
           '<dt><span class="kbd">G</span><span class="kbd">Q</span></dt><dd>Queue</dd>' +
           '<dt><span class="kbd">G</span><span class="kbd">B</span></dt><dd>Books</dd>' +
           '<dt><span class="kbd">G</span><span class="kbd">R</span></dt><dd>the running unit</dd>' +
           '<dt><span class="kbd">G</span><span class="kbd">E</span></dt><dd>episode department</dd>' +
+          '<dt><span class="kbd">G</span><span class="kbd">A</span></dt><dd>Architecture</dd>' +
           '<dt><span class="kbd">T</span></dt><dd>toggle theme</dd>' +
           '<dt><span class="kbd">Esc</span></dt><dd>close, clear</dd>' +
         '</dl></div><div><h3>Lists</h3><dl>' +
@@ -164,10 +166,11 @@
   var GPU = { unit: 'ep17', title: 'The Thunder Child', step: '07 board', eta: '21:35', pct: 16,
     face: THUMB + '160/episodes/ep17/storyboard/anchors/steamer_forward.png', h: 'unit-running.html' };
   var NAV = [
-    { id: 'now', ic: 'gauge', l: 'Now', h: 'index.html', k: 'G N' },
+    { id: 'now', ic: 'house', l: 'Home', h: 'index.html', k: 'G H' },
     { id: 'inbox', ic: 'inbox', l: 'Inbox', h: 'index.html#needs', bdg: 5, k: 'G I' },
     { id: 'queue', ic: 'list-ordered', l: 'Queue', h: 'queue.html', n: 92, k: 'G Q' },
-    { id: 'books', ic: 'library', l: 'Books', h: 'books.html', n: 30, k: 'G B' }
+    { id: 'books', ic: 'library', l: 'Books', h: 'books.html', n: 30, k: 'G B' },
+    { id: 'arch', ic: 'network', l: 'Architecture', h: 'architecture.html', k: 'G A' }
   ];
   var DEPTS = [   /* units in the department; dots = the state tally (running blue, flagged amber) */
     { id: 'analysis', ic: 'search', n: 30, dots: [['done', 30, 'all 30 done']] },
@@ -180,8 +183,8 @@
     { u: 'ep17', l: 'The Thunder Child', sub: 'running', st: 'running', h: 'unit-running.html', face: THUMB + '160/episodes/ep17/storyboard/anchors/steamer_forward.png' },
     { u: 'ep16', l: 'The Exodus Northward', sub: 'flagged', st: 'flagged', h: 'unit-finished.html?u=ep16', face: THUMB + '160/episodes/ep16/storyboard/shot_05.png' }
   ];
-  var MOCKS = [['index.html', 'Now'], ['queue.html', 'Queue'], ['unit-running.html', 'Unit · running'], ['unit-finished.html', 'Unit · finished'],
-    ['department.html', 'Department'], ['book.html', 'Book'], ['books.html', 'Books']];
+  var MOCKS = [['index.html', 'Home'], ['queue.html', 'Queue'], ['unit-running.html', 'Unit · running'], ['unit-finished.html', 'Unit · finished'],
+    ['department.html', 'Department'], ['book.html', 'Book'], ['books.html', 'Books'], ['architecture.html', 'Architecture']];
   var MARK = '<svg viewBox="0 0 32 32" aria-hidden="true"><circle cx="16" cy="16" r="10" fill="none" stroke="#d6d8dd" stroke-width="4.5"/><path d="M16 6a10 10 0 0 1 10 10" fill="none" stroke="#7db6e3" stroke-width="4.5"/><circle cx="26" cy="6" r="4" fill="#e9b44c"/></svg>';
 
   function here() {
@@ -226,7 +229,7 @@
   }
   function sideHTML(at) {
     var mocks = MOCKS.map(function (m) { return '<a href="' + m[0] + '"' + cur(m[0] === at.file) + '>' + m[1] + '</a>'; }).join('');
-    return '<div class="sb-top"><a class="sb-mark" href="index.html" aria-label="Visurena Studio, Now">' + MARK + '</a>' +
+    return '<div class="sb-top"><a class="sb-mark" href="index.html" aria-label="Visurena Studio, Home">' + MARK + '</a>' +
         '<a class="sb-brand" href="index.html">Visurena</a><button class="sb-studio" type="button" data-palette title="Jump anywhere (Ctrl K)" aria-label="Jump anywhere">' + icon('chevrons-up-down') + '</button></div>' +
       '<div class="sb-scroll"><nav aria-label="Board">' + navHTML(at) + '</nav>' +
         '<div class="sb-sec"><div class="sb-h">Departments</div>' + deptHTML(at) + '</div>' +
@@ -235,7 +238,7 @@
       footHTML();
   }
   function tabsHTML(at) {
-    var t = [['now', 'gauge', 'Now', 'index.html'], ['inbox', 'inbox', 'Inbox', 'index.html#needs'], ['queue', 'list-ordered', 'Queue', 'queue.html'], ['books', 'library', 'Books', 'books.html']];
+    var t = [['now', 'house', 'Home', 'index.html'], ['inbox', 'inbox', 'Inbox', 'index.html#needs'], ['queue', 'list-ordered', 'Queue', 'queue.html'], ['books', 'library', 'Books', 'books.html']];
     return t.map(function (x) {
       var on = x[0] === at.page || (x[0] === 'books' && at.page === 'book');
       return '<a href="' + x[3] + '"' + cur(on) + '>' + icon(x[1]) + x[2] + (x[0] === 'inbox' ? '<span class="bdg" data-needs>5</span>' : '') + '</a>';
@@ -271,11 +274,26 @@
     sheet.addEventListener('click', function (ev) { if (ev.target === sheet || ev.target.closest('a')) sheet.close(); });
   }
 
+  /* ---------------------------------------------------------- the Viewer (SPEC_v3): one <dialog id="viewer"> on every page.
+     Loads viewer.css + docview.js + viewer.js + prov.js in order, then mounts the dialog once. */
+  var VWV = Date.now();   /* mockup: never serve a stale viewer from the browser cache */
+  function injectViewer() {
+    if (document.getElementById('vw-css')) return;
+    var css = document.createElement('link'); css.id = 'vw-css'; css.rel = 'stylesheet'; css.href = 'assets/viewer.css?v=' + VWV;
+    document.head.appendChild(css);
+    ['docview.js', 'viewer.js', 'prov.js'].forEach(function (f) {
+      var sc = document.createElement('script'); sc.src = 'assets/' + f + '?v=' + VWV; sc.async = false;
+      if (f === 'viewer.js') sc.onload = function () { if (window.Viewer) window.Viewer.mount(); };
+      document.head.appendChild(sc);
+    });
+  }
+
   /* ---------------------------------------------------------- wiring */
   var saved = store('palette'); setPalette(saved === 'graphite' ? 'graphite' : 'studio');
   document.addEventListener('DOMContentLoaded', function () {
     mountShell();
     inject();
+    injectViewer();
     var q = document.getElementById('pal-q');
     q.addEventListener('input', function () { sel = 0; render(); });
     q.addEventListener('keydown', function (ev) {
@@ -313,6 +331,7 @@
   var gPending = 0;
   document.addEventListener('keydown', function (ev) {
     var tag = (ev.target.tagName || '').toLowerCase();
+    var vw = document.getElementById('viewer'); if (vw && vw.open) return;   /* the Viewer owns every key while open */
     if ((ev.metaKey || ev.ctrlKey) && ev.key.toLowerCase() === 'k') { ev.preventDefault(); openPalette(); return; }
     if (tag === 'input' || tag === 'textarea' || tag === 'select' || ev.target.isContentEditable) return;
     if (document.querySelector('dialog[open]') || ev.metaKey || ev.ctrlKey || ev.altKey) return;

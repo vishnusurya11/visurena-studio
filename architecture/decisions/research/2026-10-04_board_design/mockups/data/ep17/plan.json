@@ -1,0 +1,1063 @@
+{
+ "number": 17,
+ "title": "The Thunder Child",
+ "question": "Today, can the brother (grey eyes, Brown herringbone Norfolk jacket grey with road dust and salt spray) get the women aboard and escape the Martians?",
+ "where": "Essex coast, 1898",
+ "light": "grey daylight from the east, black shadows",
+ "palette": "sea grey-blue, mud grey, shingle buff, marsh green-grey, smoke black",
+ "look": "Angular stylised 3D animation, brush-stroke texture",
+ "aspect": "1:1",
+ "answer": "shot 21",
+ "protagonist": "narrators_brother",
+ "setups": {
+  "london_pool": {
+   "described": "The Pool of London lies beneath a grey summer sky, with Tower Bridge fixed across the far end of the river and the Tower of London on the left bank. Steamers, lighters, barges and sailing craft fill the brown water in layered rows. Black vapour hangs between the bridge arches. The south-bank parapet occupies the near foreground, wharves run along the right edge, and the river opens toward Limehouse at the far edge. Grey daylight falls from the east across the water, while deep black shadows gather beneath the bridge, along the warehouses and between the jammed hulls. River spray, shouted orders, steam whistles and hull knocks fill the air.",
+   "cast": [],
+   "landmark": "Tower Bridge",
+   "landmark_at": "far_end",
+   "landmark_size": "wide",
+   "route": "south-bank parapet to Tower Bridge and Limehouse",
+   "geometry": "Tower Bridge spans the far frame edge at wide size, with its two towers occupying the upper middle and upper right. The Tower of London stands at the left frame edge at medium size. Jammed boats fill the lower middle from left to right. The south-bank parapet crosses the lower foreground. Black vapour occupies the upper centre between the bridge arches. The river opens behind the boats toward Limehouse at the far edge. Warehouses line the right frame edge, while the bridge approaches run horizontally behind the boats.",
+   "location": "london",
+   "view": "wide_pool_of_london",
+   "crowd": "six million distant fugitives press along the riverfront and bridges, with boats packed into the Pool",
+   "outdoors": true,
+   "ambience": "river slap, steam whistles, shouted orders, bridge traffic and hull knocks",
+   "props": []
+  },
+  "road_east": {
+   "described": "The Essex high road runs from the left frame edge toward a village at the far right, its white dust bordered by tall hawthorn hedges and elm trees. A timber-framed farmhouse and weatherboarded barns occupy the near left, while a meadow and green wheat field fill the near right. The village church tower stands at the end of the road. Low south-west hills sit beyond the fields. Grey daylight falls from the east across the road, with black shadows beneath the hedges and barn eaves. Wheat heads stir above the ditch, dust lifts from passing feet, and distant hoofbeats mingle with summer insects. The road surface gives the travelers a clear eastward route through the flat country.",
+   "cast": [
+    "narrators_brother",
+    "miss_elphinstone",
+    "mrs_elphinstone"
+   ],
+   "landmark": "village church tower",
+   "landmark_at": "far_end",
+   "landmark_size": "wide",
+   "route": "meadow hedge to the village road and eastward toward Colchester",
+   "geometry": "The farmhouse fills the left frame edge at medium size, with weatherboarded barns behind it. The meadow occupies the right foreground at full size, and the green wheat field lies beyond the right hedge. The white road runs from the lower centre to the far centre. Tall hedges border both sides of the road. The church tower stands at the far upper centre. Low hills sit beyond the right field at small apparent size. The travelers use the road's lower centre, with the eastward route opening between the hedges.",
+   "location": "colchester_road",
+   "view": "wide_road_east",
+   "crowd": "one distant fugitive walks east beyond the travelers while dust crosses the hedges",
+   "outdoors": true,
+   "ambience": "elm leaves, wheat stems, distant hoofbeats, dust and summer insects",
+   "props": []
+  },
+  "tillingham_sea": {
+   "described": "Tillingham's marsh road rises gently from the village toward the eastern sea. The road occupies the centre of the frame, with thorn hedges and water-filled dykes at both edges. White and black weatherboarded cottages sit behind the left hedge, and the flint church tower rises at the far left. Beyond the rise, the calm grey-blue sea fills the horizon, carrying a sickle-shaped curve of fishing smacks, launches, merchant ships and liners. Grey daylight falls from the east over the marsh, with black shadows beneath the hedges and cottage eaves. Haze softens the far shipping, while dry grass, insects and dyke water give the village its empty midday sound. The road and rise form a continuous route from village to sea.",
+   "cast": [
+    "narrators_brother",
+    "miss_elphinstone",
+    "mrs_elphinstone"
+   ],
+   "landmark": "St Nicholas church tower",
+   "landmark_at": "start",
+   "landmark_size": "wide",
+   "route": "Tillingham village road to the eastern rise and sea",
+   "geometry": "The church tower stands at the left frame edge at medium size, behind the cottage roofs. The road runs from the lower centre through the village to the eastern rise at the far centre. Thorn hedges form the left and right frame edges. Water-filled dykes run between the road and both hedges. The sea and shipping occupy the far upper edge beyond the rise. The marsh spreads between the road and the water. Cottage doors sit behind the left hedge, and the eastern route opens above the right-hand dyke.",
+   "location": "tillingham",
+   "view": "wide_road_to_sea",
+   "crowd": "a few furtive plunderers search cottage doorways while marsh grass bends beside the dykes",
+   "outdoors": true,
+   "ambience": "marsh insects, dry grass, distant gulls, dyke water and faint village creaks",
+   "props": []
+  },
+  "beach_transfer": {
+   "described": "The Essex beach stretches from the grassy sea wall at the western frame edge to shallow surf at the eastern edge. Shingle and grey mud occupy the foreground, with a wooden rowing boat resting in the shallows. A paddle steamer lies a few hundred yards offshore, its white paddle boxes and crowded rails clear against the bright sea. Fishing smacks and larger vessels form a vast curve behind it. Grey daylight falls from the east across wet sand, with black shadows under the sea wall and beneath the boat. The tide makes small bright lines across firm sand, while oars dip and ropes strain near the landing. The sea wall, boat and steamer make a clear route from shore to passage.",
+   "cast": [
+    "narrators_brother",
+    "miss_elphinstone",
+    "mrs_elphinstone",
+    "captain"
+   ],
+   "landmark": "paddle steamer funnel",
+   "landmark_at": "far_end",
+   "landmark_size": "medium",
+   "route": "sea wall to rowing boat, shallows and paddle steamer",
+   "geometry": "The sea wall fills the left frame edge at full size, with its grassy top above the beach. The rowing boat occupies the lower centre at medium size, its bow aimed toward the water. The three fugitives use the lower right beach. The paddle steamer stands at the far centre with its funnel at medium size. The sickle-shaped fleet curves from the steamer toward the far left horizon. Shallow surf crosses the lower edge. The landing route runs from the sea wall, across the boat, and toward the steamer's crowded rail.",
+   "location": "essex_coast_beach",
+   "view": "medium_surf_landing",
+   "crowd": "about forty passengers lean over the paddle steamer rails while a boat crew rows in the shallows",
+   "outdoors": true,
+   "ambience": "small surf, oars dipping, gulls, rope strain and distant ship bells",
+   "props": []
+  },
+  "steamer_forward": {
+   "described": "The forward deck of the paddle steamer runs from the camera on the bridge to the bow at the far eastern edge. Varnished teak seats line both sides, white rails frame the sea, and the curved paddle boxes occupy the near left and right edges. The capstan and anchor sit at the bow. Beyond them, the refugee fleet spreads across smooth grey-blue water, with the Essex coast beneath a bright haze. Grey daylight falls from the east over the bow, with black shadows under seats and along the paddle boxes. Steam, spray, shouted orders, passenger voices and timber deck creaks fill the deck as the crowded vessel turns toward open water. The bridge, capstan and bow establish the ship's eastward route.",
+   "cast": [
+    "narrators_brother",
+    "miss_elphinstone",
+    "mrs_elphinstone",
+    "captain"
+   ],
+   "landmark": "forward capstan",
+   "landmark_at": "far_end",
+   "landmark_size": "medium",
+   "route": "aft seats to bridge, capstan and eastern bow",
+   "geometry": "The left paddle box fills the near left frame edge at medium size, and the right paddle box fills the near right edge. Slatted seats lead through the lower centre toward the capstan at the far centre. The bridge crosses the middle frame behind the seats. The refugee fleet occupies the far left water. Three Martian fighting-machines, brass cowled hoods on three long jointed metal legs, wade knee-deep in the far right water beyond the bow. The Essex coast forms a low horizontal line beneath the pale sky. White rails guide the eye from the foreground seats to the capstan and the open sea.",
+   "location": "paddle_steamer",
+   "view": "wide_establishing",
+   "crowd": "about forty passengers fill the seats and rails, turning toward the southern water",
+   "outdoors": true,
+   "ambience": "paddle churn, steam hiss, shouted orders, passenger voices and timber deck creaks",
+   "props": [
+    "fighting_machine",
+    "thunder_child"
+   ]
+  },
+  "steamer_stern": {
+   "described": "The stern deck opens westward from the white stern rail and ensign staff in the foreground. Two wooden boats hang in davits at the frame edges, while the wake runs through the centre toward a blue-grey coast. Smoke strips drift across the sea and scattered refugee vessels cross the wake. The sky deepens from warm gold at the low western edge to blue-grey above. Twilight light falls from the west across the wake, with black shadows under the davits, seats and stern rail. The steamer's vibration travels through the teak deck, and distant guns carry over the water toward the passengers. The wake provides a route from the battle toward the darkening coast.",
+   "cast": [
+    "narrators_brother",
+    "captain"
+   ],
+   "landmark": "stern ensign staff",
+   "landmark_at": "start",
+   "landmark_size": "medium",
+   "route": "forward deck to stern rail and western wake",
+   "geometry": "The stern rail occupies the lower frame edge at medium size, with the ensign staff at the lower left. Davit boats hang at the left and right frame edges. The wake leads through the lower centre toward the hazy coast at the far edge. Smoke crosses the upper water from left to right. Refugee vessels occupy the middle distance. The western sky fills the upper frame, changing from gold near the coast to blue-grey above. The stern route runs from the forward deck toward the rail, wake and fading land.",
+   "location": "paddle_steamer",
+   "view": "wide_stern_wake",
+   "crowd": "about forty passengers cluster along the stern rail and watch the smoke over the water",
+   "outdoors": true,
+   "ambience": "paddle beat, wake hiss, distant guns, passenger voices and evening wind",
+   "props": []
+  }
+ },
+ "shots": [
+  {
+   "frame": "Wide view across the Pool of London, six million distant fugitives streaming along the riverfront and boats filling the lower water beneath Tower Bridge; St Paul's stands at the upper left edge and black vapour marks the far right arches.",
+   "motion": "The camera pans from St Paul's across to Tower Bridge across the whole shot; fugitives stream along the riverfront; vapour spreads between the bridge arches.",
+   "camera": "Camera on the south-bank parapet at eye height, a 35mm lens, the grey daylight comes from the RIGHT.",
+   "at_rest": "THE FOCUS OF THE PICTURE IS Tower Bridge at the far end; St Paul's rises at the LEFT upper edge, jammed boats fill the lower middle, the south-bank parapet crosses the lower foreground, black vapour hangs between the arches, and the brown river opens toward Limehouse at the RIGHT far edge.",
+   "end": "Tower Bridge fills the far centre, black vapour lies between its arches, boats press against the lower frame, and fugitives stream along the banks.",
+   "changed": "London flight becomes civilization's rout",
+   "crowd": "six million distant fugitives stream east along roads and riverfronts",
+   "view": "wide_pool_of_london",
+   "still": false,
+   "index": 0,
+   "section": "hook",
+   "setup": "london_pool",
+   "size": "wide",
+   "faces": [],
+   "extras": 6000000,
+   "sounds": [],
+   "source": [
+    "poured the same frantic rout",
+    "six million people unarmed and unprovisioned, driving headlong"
+   ],
+   "take": 1,
+   "beat_s": 1.0,
+   "coda_s": 0.7,
+   "cuts": [],
+   "path": 0.1,
+   "turn": "London appears ordered before the flight; the city becomes a human torrent with civilization at stake",
+   "why": "The scale of the flight establishes the question and shows the brother's world already moving beyond control."
+  },
+  {
+   "frame": "Medium view of London roofs, bridges and river frontage as black vapour stains the country map; St Paul's anchors the left edge, Blackfriars Bridge crosses the centre, and smoke occupies the upper right.",
+   "motion": "The camera tracks sideways to the RIGHT past the south-bank parapet, with the bridges behind it, across the whole shot; black vapour spreads over roofs and river; smoke trails over the warehouses.",
+   "camera": "Camera on Waterloo Bridge at bridge height, a 40mm lens, grey daylight comes from the RIGHT.",
+   "at_rest": "THE FOCUS OF THE PICTURE IS the black vapour above the City roofs; Blackfriars Bridge crosses the middle distance, St Paul's stands at the LEFT edge, river craft fill the lower frame, the parapet cuts the lower left, and warehouses occupy the RIGHT edge.",
+   "end": "The black vapour covers the City roofs, Blackfriars Bridge cuts the centre, St Paul's remains at the left, and smoke crosses the river.",
+   "changed": "Conquest stains the country map",
+   "crowd": "distant fugitives stream along roads while river crews push craft through the haze",
+   "view": "wide_skyline_thames",
+   "still": false,
+   "index": 1,
+   "section": "setup",
+   "setup": "london_pool",
+   "size": "medium",
+   "faces": [],
+   "extras": 6000000,
+   "sounds": [],
+   "source": [
+    "houses, churches, squares, crescents, gardens—already derelict",
+    "calmly and methodically spreading their poison cloud over this patch of country and then over that"
+   ],
+   "take": 1,
+   "beat_s": 1.0,
+   "coda_s": 0.6,
+   "cuts": [],
+   "path": 0.3,
+   "turn": "London's settled map comes first; the Martians turn it into conquered country",
+   "why": "The spreading vapour and derelict streets show systematic conquest rather than a single attack."
+  },
+  {
+   "frame": "Medium view across Tower Bridge and the Pool, boats jammed under the northern arch and riverfront people pressing toward them; the bridge towers rise at the upper centre, the Tower of London anchors the left edge, and collision fills the lower right.",
+   "motion": "The camera pulls back one yard from the jammed northern arch, widening to show Tower Bridge across the whole shot; boats collide beneath the bridge; sailors brace against the riverfront crowd.",
+   "camera": "Camera high above the south bank at bridge height, a 35mm lens, grey daylight comes from the RIGHT.",
+   "at_rest": "THE FOCUS OF THE PICTURE IS the jammed northern arch of Tower Bridge; the Tower of London stands at the LEFT edge, barges fill the lower water, the riverfront crowd occupies the RIGHT bank, the bridge deck crosses the upper frame, and black vapour rests beyond the far arch.",
+   "end": "Tower Bridge holds the centre, barges grind together beneath the northern arch, sailors brace at the right bank, and people crowd toward the piers.",
+   "changed": "River traffic becomes fighting chaos",
+   "crowd": "six million distant fugitives press along the riverfront while sailors and lightermen brace on boats",
+   "view": "wide_pool_of_london",
+   "still": false,
+   "index": 2,
+   "section": "friction",
+   "setup": "london_pool",
+   "size": "medium",
+   "faces": [],
+   "extras": 6000000,
+   "sounds": [
+    {
+     "sound": "boats collide beneath Tower Bridge, wood and iron striking together",
+     "at": 0.5,
+     "seconds": 2.5,
+     "gain_db": -6.0
+    }
+   ],
+   "source": [
+    "the Pool became a scene of mad confusion, fighting, and collision",
+    "a multitude of boats and barges jammed in the northern arch of the Tower Bridge"
+   ],
+   "take": 1,
+   "beat_s": 1.0,
+   "coda_s": 0.8,
+   "cuts": [],
+   "path": 0.6,
+   "turn": "River passage offers escape at first; the jam turns passage into fighting",
+   "why": "The Pool gives the chapter its first physical bottleneck and shows ordinary people turning against one another."
+  },
+  {
+   "frame": "Insert view of wreckage floating above Limehouse beneath the thinning black vapour; broken timbers occupy the lower centre, bridge masonry frames the upper left, and brown water reaches the right edge.",
+   "motion": "The camera tracks laterally to the RIGHT past broken timbers across the whole shot; vapour thins between the arches; river water carries the wreckage east.",
+   "camera": "Camera on a river barge at shoulder height, a 50mm lens, grey daylight comes from the LEFT.",
+   "at_rest": "THE FOCUS OF THE PICTURE IS broken timbers floating above Limehouse; the dark vapour hangs at the upper left, bridge masonry frames the upper edge, brown water fills the lower field, and the distant Limehouse warehouses occupy the far RIGHT edge.",
+   "end": "Broken timbers float across the brown water, the vapour thins between the arches, and Limehouse warehouses line the far bank.",
+   "changed": "Vapour reveals wreckage above Limehouse",
+   "crowd": "small river crews guide craft around floating timbers",
+   "view": "wide_pool_of_london",
+   "still": false,
+   "index": 3,
+   "section": "payoff",
+   "setup": "london_pool",
+   "size": "insert",
+   "faces": [],
+   "extras": 0,
+   "sounds": [],
+   "source": [
+    "When, an hour later, a Martian appeared beyond the Clock Tower and waded down the river",
+    "nothing but wreckage floated above Limehouse"
+   ],
+   "take": 1,
+   "beat_s": 1.0,
+   "coda_s": 0.7,
+   "cuts": [],
+   "path": 0.9,
+   "turn": "The river carries crowded flight at midday; wreckage marks the Martian's reach",
+   "why": "The wreckage makes the destruction tangible and shifts the story from city-wide flight toward the brother's route."
+  },
+  {
+   "frame": "Medium view along the Essex road as the brother leads the travelers east past hedges, farmhouse and wheat; the farmhouse fills the left edge, wheat fills the right edge, and the church tower marks the far centre.",
+   "motion": "The camera tracks behind the brother as he walks toward the village road across the whole shot; the women follow through the dusty lane; wheat bends beside the hedge.",
+   "camera": "Camera on the road at chest height, a 35mm lens, grey daylight comes from the RIGHT.",
+   "at_rest": "THE FOCUS OF THE PICTURE IS the brother, walking in the road; the farmhouse stands at the LEFT edge, green wheat fills the RIGHT edge, the white road runs through the lower centre, the women occupy the middle distance, and the church tower marks the far upper centre.",
+   "end": "The brother leads toward the church tower, the women follow along the road, dust lifts behind their feet, and the wheat field fills the right edge.",
+   "changed": "Brother leads the travelers east",
+   "crowd": "dust crosses the hedges",
+   "view": "wide_road_east",
+   "still": false,
+   "index": 4,
+   "section": "setup",
+   "setup": "road_east",
+   "size": "medium",
+   "faces": [
+    "narrators_brother"
+   ],
+   "extras": 0,
+   "sounds": [],
+   "source": [
+    "My brother, keeping watch beside the women in the chaise in a meadow, saw the green flash of it far beyond the hills",
+    "made its way through the swarming country towards Colchester"
+   ],
+   "take": 1,
+   "beat_s": 1.0,
+   "coda_s": 0.7,
+   "cuts": [],
+   "path": 0.2,
+   "turn": "The party waits beside the meadow; the brother commits to the eastern road",
+   "why": "The brother becomes the active guide, choosing movement while the wider country loses order."
+  },
+  {
+   "frame": "Medium close view of the brother standing beside the east road, turning his face toward the distant hills; the hedge fills the left edge, the road lies at the lower right, and low hills sit behind the wheat.",
+   "motion": "The camera orbits to the left around the brother across the whole shot, travelling a hand's breadth; the brother turns toward the south-west hills; dust curls along the hedge behind him.",
+   "camera": "Camera above the hawthorn hedge at a high angle looking down at the standing brother, a 75mm lens, grey daylight comes from the LEFT.",
+   "at_rest": "THE FOCUS OF THE PICTURE IS the brother standing upright, with his head a quarter of the frame's height; the hedge runs behind his LEFT shoulder, the road lies at the lower RIGHT, low hills sit beyond the wheat at the upper centre, and dust crosses the lower edge.",
+   "end": "The brother faces the low hills, his cap shades his brow, the road brightens behind him, and dust curls beside the hedge.",
+   "changed": "Brother's watch turns toward distant hills",
+   "crowd": "",
+   "view": "wide_road_east",
+   "still": false,
+   "index": 5,
+   "section": "friction",
+   "setup": "road_east",
+   "size": "medium_close",
+   "faces": [
+    "narrators_brother"
+   ],
+   "extras": 0,
+   "sounds": [],
+   "source": [
+    "The sixth star fell at Wimbledon",
+    "saw the green flash of it far beyond the hills"
+   ],
+   "take": 1,
+   "beat_s": 1.0,
+   "coda_s": 0.5,
+   "cuts": [],
+   "path": 0.4,
+   "turn": "News and warning surround the travelers; the brother keeps the escape plan alive",
+   "why": "The brother's watch connects the distant cylinders to the immediate journey and shows his resolve."
+  },
+  {
+   "frame": "Medium view of the Tillingham road rising toward the sea, with cottages and marsh dykes; the church tower anchors the left edge, cottage doors line the middle, and marsh dykes lead toward the right horizon.",
+   "motion": "The camera pushes in one hand's breadth toward the cottage doors across the whole shot; dust crosses cottage thresholds; marsh grass bends beside the dykes.",
+   "camera": "Camera on the road at shoulder height, a 35mm lens, grey daylight comes from the EAST.",
+   "at_rest": "THE FOCUS OF THE PICTURE IS the eastern road and sea beyond it; the church tower stands at the LEFT edge, cottages line the near middle, open cottage doors stand at the RIGHT, marsh dykes cut the lower frame, and the sea lies at the far upper edge.",
+   "end": "The eastern road opens toward the sea, open cottage doors face the road, the church tower stands at the left, and marsh dykes shine beside the track.",
+   "changed": "Silent village frames hungry searchers",
+   "crowd": "marsh grass bends beside the dykes",
+   "view": "wide_road_to_sea",
+   "still": false,
+   "index": 6,
+   "section": "friction",
+   "setup": "tillingham_sea",
+   "size": "medium",
+   "faces": [],
+   "extras": 0,
+   "sounds": [],
+   "source": [
+    "On Wednesday the three fugitives—they had passed the night in a field of unripe wheat—reached Chelmsford",
+    "Tillingham, which, strangely enough, seemed to be quite silent and deserted, save for a few furtive plunderers hunting for food"
+   ],
+   "take": 1,
+   "beat_s": 1.0,
+   "coda_s": 0.7,
+   "cuts": [],
+   "path": 0.2,
+   "turn": "The road offers settlement and provisions; hunger turns the village into a search",
+   "why": "The village confirms that property and authority have weakened before the party reaches the sea."
+  },
+  {
+   "frame": "Wide view from the rise over the marsh to the calm sea and the sickle-shaped shipping curve; the road enters from the lower left, dykes cross the lower centre, the ironclad rests at the far right, and the fleet fades into mist at the far left.",
+   "motion": "The camera holds a locked-off frame; the travelers crest the rise; haze gathers over the far vessels.",
+   "camera": "Camera on the eastern rise at waist height, a 28mm lens, grey daylight comes from the EAST.",
+   "at_rest": "THE FOCUS OF THE PICTURE IS the sea beyond the marsh road; the church tower stands at the LEFT edge; the road occupies the lower LEFT, dykes cut the lower centre, the ironclad lies low at the far RIGHT, the shipping curve fades into mist at the far LEFT, and the sea spans the far upper edge beneath the bright horizon.",
+   "end": "The sea fills the horizon, the sickle-shaped fleet curves through haze, the low ironclad rests at the right, and the marsh road leads toward the water.",
+   "changed": "Road reveals sea and shipping",
+   "crowd": "a multitude of distant crews move among fishing smacks and launches",
+   "view": "wide_road_to_sea",
+   "still": false,
+   "index": 7,
+   "section": "payoff",
+   "setup": "tillingham_sea",
+   "size": "wide",
+   "faces": [],
+   "extras": 0,
+   "sounds": [],
+   "source": [
+    "Near Tillingham they suddenly came in sight of the sea, and the most amazing crowd of shipping of all sorts that it is possible to imagine",
+    "They lay in a huge sickle-shaped curve that vanished into mist at last towards the Naze"
+   ],
+   "take": 1,
+   "beat_s": 1.0,
+   "coda_s": 0.8,
+   "cuts": [],
+   "path": 0.5,
+   "turn": "The eastern road promises a route onward; the sea presents a vast exposed crossing",
+   "why": "The shipping creates the possible escape that the brother must seize before the Martians reach it."
+  },
+  {
+   "frame": "Medium close view of Mrs. Elphinstone at the rise, her face turned from the water toward the road; the sea occupies the right edge, the road rises at the left, and her clasped hands rest below her face.",
+   "motion": "The camera pushes in on Mrs. Elphinstone across the whole shot, travelling a finger's breadth; Mrs. Elphinstone clasps her hands and turns inland; her hat veil lifts in the sea air.",
+   "camera": "Camera at the rise at eye height, a 75mm lens, grey daylight comes from the RIGHT.",
+   "at_rest": "THE FOCUS OF THE PICTURE IS Mrs. Elphinstone, standing with her head a quarter of the frame's height; her clasped hands rest against her chest, the sea fills the RIGHT background, the road rises at the LEFT, and the marsh horizon crosses behind her shoulders.",
+   "end": "Mrs. Elphinstone faces inland with both hands clasped, the sea lies behind her, the road rises at the left, and her bent straw hat frames her face.",
+   "changed": "Mrs. Elphinstone faces foreign water",
+   "crowd": "",
+   "view": "wide_road_to_sea",
+   "still": false,
+   "index": 8,
+   "section": "friction",
+   "setup": "tillingham_sea",
+   "size": "medium_close",
+   "faces": [
+    "mrs_elphinstone"
+   ],
+   "extras": 0,
+   "sounds": [],
+   "source": [
+    "At the sight of the sea, Mrs. Elphinstone, in spite of the assurances of her sister-in-law, gave way to panic",
+    "Her great idea was to return to Stanmore"
+   ],
+   "take": 1,
+   "beat_s": 1.0,
+   "coda_s": 0.4,
+   "cuts": [],
+   "path": 0.8,
+   "turn": "The sea promises escape; Mrs. Elphinstone chooses Stanmore and familiar safety",
+   "why": "Her panic gives the brother a human obstacle beside the Martian threat."
+  },
+  {
+   "frame": "Medium view at the water's edge as the brother raises both arms toward the offshore paddle steamer, with Mrs. Elphinstone behind him; the rowing boat occupies the lower centre, surf crosses the lower edge, and the steamer rises at the far right.",
+   "motion": "The camera pulls back one yard from the brother, widening to show the rowing boat and paddle steamer across the whole shot; the brother raises both arms; surf runs around the boat.",
+   "camera": "Camera at knee height in the shallows, a 35mm lens, grey daylight comes from the EAST.",
+   "at_rest": "THE FOCUS OF THE PICTURE IS the brother, standing at the water's edge; Mrs. Elphinstone stands behind him at the LEFT, the rowing boat rests in the lower centre, the paddle steamer lies offshore at the RIGHT, and the sea wall runs along the far left edge.",
+   "end": "The brother signals from the shallows, Mrs. Elphinstone faces the steamer, the rowing boat rides the surf, and the steamer's funnel rises beyond them.",
+   "changed": "Brother's raised arms summon passage",
+   "crowd": "surf runs around the boat",
+   "view": "medium_surf_landing",
+   "still": false,
+   "index": 9,
+   "section": "payoff",
+   "setup": "beach_transfer",
+   "size": "medium",
+   "faces": [
+    "narrators_brother",
+    "mrs_elphinstone"
+   ],
+   "extras": 0,
+   "sounds": [
+    {
+     "sound": "rowing boat meets shallow surf, oars and hull striking water",
+     "at": 1.0,
+     "seconds": 2.0,
+     "gain_db": -8.0
+    }
+   ],
+   "source": [
+    "my brother succeeded in attracting the attention of some men on a paddle steamer from the Thames",
+    "They sent a boat and drove a bargain for thirty-six pounds for the three"
+   ],
+   "take": 1,
+   "beat_s": 1.0,
+   "coda_s": 0.7,
+   "cuts": [],
+   "path": 0.2,
+   "turn": "The brother faces hesitation; he calls the steamer and makes passage possible",
+   "why": "His action answers the immediate obstacle with a deliberate choice shared with Mrs. Elphinstone."
+  },
+  {
+   "frame": "Insert view of the brother's open palm holding gold above the wet shingle beside the beached boat; the coins occupy the lower centre, the boat gunwale crosses the left edge, surf reaches the right edge, and the steamer stands far beyond.",
+   "motion": "The camera tilts up to the gold across the whole shot, travelling a finger's breadth; gold extends toward the landing; the rowing boat rocks in the shallows.",
+   "camera": "Camera at waist height beside the beached boat, a 75mm lens, grey daylight comes from the LEFT.",
+   "at_rest": "THE FOCUS OF THE PICTURE IS gold coins in the brother's open palm; wet shingle fills the lower field, the boat gunwale fills the LEFT edge and runs across the lower frame, shallow surf reaches the RIGHT edge, and the paddle steamer sits at the far upper centre.",
+   "end": "The brother extends the gold toward the boat, coins shine above the shingle, the boat rocks behind him, and the steamer holds the far water.",
+   "changed": "Gold becomes a promised passage",
+   "crowd": "",
+   "view": "medium_surf_landing",
+   "still": false,
+   "index": 10,
+   "section": "setup",
+   "setup": "beach_transfer",
+   "size": "insert",
+   "faces": [
+    "narrators_brother"
+   ],
+   "extras": 0,
+   "sounds": [],
+   "source": [
+    "They sent a boat and drove a bargain for thirty-six pounds for the three",
+    "The steamer was going, these men said, to Ostend"
+   ],
+   "take": 1,
+   "beat_s": 1.0,
+   "coda_s": 0.4,
+   "cuts": [],
+   "path": 0.4,
+   "turn": "The party has only its money; the gold becomes a place aboard the steamer",
+   "why": "The coins give the escape a measurable cost and show the brother spending the party's last resource."
+  },
+  {
+   "frame": "Medium close view over the brother's shoulder toward the captain beside the boat's gunwale; the captain's face fills the centre, the jacketed shoulder occupies the lower left, coins lie between them, and the steamer rail runs across the right edge.",
+   "motion": "The camera holds a locked-off frame; the captain counts coins in his thick hand; the boatman steadies the gunwale.",
+   "camera": "Camera behind the brother at chest height, a 75mm lens, grey daylight comes from the RIGHT.",
+   "at_rest": "THE FOCUS OF THE PICTURE IS the captain, his head a quarter of the frame's height; the brother's jacketed shoulder fills the near LEFT, coins lie between them at the lower centre, the boat gunwale crosses the lower RIGHT, and the paddle steamer's rail runs behind the captain.",
+   "end": "The captain closes his hand over the coins, the brother's shoulder fills the near left, the boatman holds the gunwale, and the steamer rail runs behind them.",
+   "changed": "Captain accepts fare for passage",
+   "crowd": "",
+   "view": "medium_surf_landing",
+   "still": false,
+   "index": 11,
+   "section": "setup",
+   "setup": "beach_transfer",
+   "size": "medium_close",
+   "faces": [
+    "captain"
+   ],
+   "extras": 0,
+   "sounds": [],
+   "source": [
+    "The captain lay off the Blackwater until five in the afternoon, picking up passengers",
+    "my brother succeeded in attracting the attention of some men on a paddle steamer from the Thames"
+   ],
+   "take": 1,
+   "beat_s": 1.0,
+   "coda_s": 0.5,
+   "cuts": [],
+   "path": 0.6,
+   "turn": "The fare remains contested; the captain counts and accepts it, opening the gangway",
+   "why": "The captain's decision converts the brother's bargain into a real route aboard."
+  },
+  {
+   "frame": "Medium view at the gangway as the brother pays and Mrs. Elphinstone climbs toward the steamer deck; the gangway rises through the centre, the white rail frames the right edge, the brother stands at the left, and crowded seats fill the far background.",
+   "motion": "The camera pushes in on the brother across the whole shot, travelling a finger's breadth; the brother pays at the rail while Mrs. Elphinstone climbs beside him; the gangway ropes sway above the water.",
+   "camera": "Camera on the beach at chest height, a 50mm lens, grey daylight comes from the EAST.",
+   "at_rest": "THE FOCUS OF THE PICTURE IS the brother and Mrs. Elphinstone; the gangway rises between them from lower centre to upper centre, the white rail frames the RIGHT edge, the beach occupies the lower LEFT, and the deck seats sit behind them at the far upper edge.",
+   "end": "The brother stands on the gangway with money extended, Mrs. Elphinstone climbs to the deck, the white rail frames the right edge, and the water moves below.",
+   "changed": "Stranded party gains passage aboard",
+   "crowd": "about forty passengers fill the visible deck seats behind the gangway",
+   "view": "medium_surf_landing",
+   "still": false,
+   "index": 12,
+   "section": "turn",
+   "setup": "beach_transfer",
+   "size": "medium",
+   "faces": [
+    "narrators_brother",
+    "mrs_elphinstone"
+   ],
+   "extras": 0,
+   "sounds": [],
+   "source": [
+    "my brother, having paid their fares at the gangway, found himself safely aboard the steamboat with his charges",
+    "the three of them contrived to eat a meal on one of the seats forward"
+   ],
+   "take": 1,
+   "beat_s": 1.0,
+   "coda_s": 0.6,
+   "cuts": [],
+   "path": 0.9,
+   "turn": "stranded on the open beach -> aboard the steamer and bound away",
+   "why": "This is the brother's decisive choice: he spends the fare and moves the women from the exposed beach into a vessel bound for escape."
+  },
+  {
+   "frame": "Medium view over the forward deck as passengers turn from the southern water toward three ironclads under black smoke; the capstan anchors the lower centre, passengers fill the left and right edges, and smoke rises along the far horizon.",
+   "motion": "The camera holds a locked-off frame; passengers turn toward the guns; smoke rises behind the ironclads.",
+   "camera": "Camera on the bridge platform at eye height, a 35mm lens, grey daylight comes from the LEFT.",
+   "at_rest": "THE FOCUS OF THE PICTURE IS the three ironclads on the southeast horizon; the captain stands at the bridge near the upper centre, about forty passengers fill the seats at the LEFT and RIGHT edges, the forward capstan anchors the lower CENTRE, and black smoke rises beyond the bow.",
+   "end": "Three ironclads rise beneath black smoke, the captain faces the horizon, passengers crowd the rails, and the capstan holds the lower centre.",
+   "changed": "Guns turn attention toward warships",
+   "crowd": "about forty passengers turn from the seats toward the southern firing",
+   "view": "wide_establishing",
+   "still": false,
+   "index": 13,
+   "section": "friction",
+   "setup": "steamer_forward",
+   "size": "medium",
+   "faces": [
+    "captain"
+   ],
+   "extras": 0,
+   "sounds": [
+    {
+     "sound": "distant guns firing in the south, rolling concussion over water",
+     "at": 0.4,
+     "seconds": 2.5,
+     "gain_db": -7.0
+    },
+    {
+     "sound": "small naval gun firing from the ironclad, sharp report",
+     "at": 2.2,
+     "seconds": 1.0,
+     "gain_db": -5.0
+    }
+   ],
+   "source": [
+    "the sound of guns that began about that hour in the south",
+    "the ironclad seaward fired a small gun and hoisted a string of flags",
+    "the masts and upperworks of three ironclads rose one after the other out of the sea"
+   ],
+   "take": 1,
+   "beat_s": 1.0,
+   "coda_s": 0.8,
+   "cuts": [],
+   "path": 0.2,
+   "turn": "The steamer carries refugees east; distant warships announce a battle around the route",
+   "why": "The growing gunfire brings organized resistance into the same water as the escape."
+  },
+  {
+   "frame": "Medium low-angle view from the starboard rail out across a mile of open sea toward a hundred-foot Martian fighting-machine, a brass cowled hood on one long leg reaching forward and two long legs reaching back like a camera tripod, wading knee-deep far out in the water beyond the refugee ships; the paddle box fills the near right edge, the white rail crosses the lower frame, the fighting-machine rises out of the sea at the far centre, and the fleet of small steamers crosses the horizon.",
+   "motion": "The camera cranes up one whole tread above the fighting-machine across the whole shot; the fighting-machine wades through the bright water; distant vessels turn across the sea.",
+   "camera": "A low angle from knee height at the starboard rail looking up and out to sea at the fighting-machine a mile away, a 35mm lens, grey daylight comes from the RIGHT.",
+   "at_rest": "THE FOCUS OF THE PICTURE IS the fighting-machine far out in the sea; the paddle box fills the near RIGHT edge, the white rail and the empty deck edge cross the lower frame, the refugee steamers occupy the middle water, and the Essex coast lies low at the far LEFT.",
+   "end": "The Martian towers beyond the rail, its tentacles enter the water, refugee vessels turn across the middle distance, and the coast lies behind them.",
+   "changed": "Martians threaten the refugee fleet",
+   "crowd": "about forty passengers stand at the rails while distant crews steer among the vessels",
+   "view": "medium_rail_starboard",
+   "still": false,
+   "index": 14,
+   "section": "spike",
+   "setup": "steamer_forward",
+   "size": "medium",
+   "faces": [],
+   "extras": 0,
+   "sounds": [],
+   "source": [
+    "a Martian appeared, small and faint in the remote distance, advancing along the muddy coast",
+    "Then, far away beyond the Crouch, came another, striding over some stunted trees, and then yet another"
+   ],
+   "take": 1,
+   "beat_s": 1.0,
+   "coda_s": 0.7,
+   "cuts": [],
+   "path": 0.4,
+   "turn": "The fleet sees distant figures; three Martians move seaward to intercept it",
+   "why": "The Martians turn the open route into a trap and make the approaching ships the unit's central danger."
+  },
+  {
+   "frame": "Medium view of the brother gripping the starboard bulwark as Thunder Child tears past the steamer; the brother occupies the left centre, the white bulwark crosses the lower frame, foam rises at the right edge, and the sea opens behind him.",
+   "motion": "The camera pushes in one hand's breadth on the brother across the whole shot; the brother drops onto his hands as the steamer swings; Thunder Child drives past the starboard rail.",
+   "camera": "Camera beside the starboard seats at waist height, a 50mm lens, grey daylight comes from the RIGHT.",
+   "at_rest": "THE FOCUS OF THE PICTURE IS the brother, his head a quarter of the frame's height; his hands grip the deck beside the seat at the lower LEFT, the white bulwark runs behind him, the sea fills the RIGHT background, and the paddle box occupies the far lower edge.",
+   "end": "The brother braces against the deck, Thunder Child cuts across the right background, foam rises beside the paddle box, and the bulwark shakes under his hands.",
+   "changed": "Peril meets an iron rescue",
+   "crowd": "about forty passengers grip seats and rails as the vessel pitches around the passing ram",
+   "view": "medium_rail_starboard",
+   "still": false,
+   "index": 15,
+   "section": "friction",
+   "setup": "steamer_forward",
+   "size": "medium",
+   "faces": [
+    "narrators_brother"
+   ],
+   "extras": 0,
+   "sounds": [
+    {
+     "sound": "Thunder Child tears through the water, heavy spray and wave impact",
+     "at": 0.8,
+     "seconds": 2.5,
+     "gain_db": -5.0
+    }
+   ],
+   "source": [
+    "And then a swift movement of the steamboat (she had suddenly come round to avoid being run down) flung him headlong from the seat upon which he was standing",
+    "a vast iron bulk like the blade of a plough tearing through the water",
+    "It was the torpedo ram, Thunder Child, steaming headlong, coming to the rescue"
+   ],
+   "take": 1,
+   "beat_s": 1.0,
+   "coda_s": 0.7,
+   "cuts": [],
+   "path": 0.6,
+   "turn": "The refugee steamer reels before the Martians; Thunder Child places its iron hull between them",
+   "why": "The brother's view changes from personal danger to a rescue that gives the fleet a defender."
+  },
+  {
+   "frame": "Medium view from the bridge over Thunder Child charging the three fighting-machines, each a brass cowled hood on one long leg reaching forward and two long legs reaching back like a camera tripod wading knee-deep, across the sea; the capstan occupies the lower centre, the refugee ships fill the left water, and the fighting-machines stand beyond the ram at the upper right.",
+   "motion": "The camera rises one whole tread above the forward capstan, looking down over the place across the whole shot; Thunder Child charges toward the fighting-machines; foam streams behind the ram.",
+   "camera": "Camera on the bridge platform at shoulder height, a 28mm lens, grey daylight comes from the LEFT.",
+   "at_rest": "THE FOCUS OF THE PICTURE IS Thunder Child between the steamer and the three fighting-machines; the capstan sits at the lower CENTRE, the refugee ships fill the LEFT water, the fighting-machines stand beyond the ram at the upper RIGHT, and the Essex coast forms a low line behind them.",
+   "end": "Thunder Child drives through the centre, the three fighting-machines rise beyond it, refugee ships scatter at the left, and foam trails behind the iron hull.",
+   "changed": "Thunder Child charges the Martians",
+   "crowd": "about forty passengers stand along the rails while refugee crews steer across the far water",
+   "view": "wide_establishing",
+   "still": false,
+   "index": 16,
+   "section": "friction",
+   "setup": "steamer_forward",
+   "size": "medium",
+   "faces": [],
+   "extras": 0,
+   "sounds": [
+    {
+     "sound": "ironclad engines and funnels blast across the water",
+     "at": 0.7,
+     "seconds": 2.5,
+     "gain_db": -6.0
+    }
+   ],
+   "source": [
+    "The Thunder Child fired no gun, but simply drove full speed towards them",
+    "She was steaming at such a pace that in a minute she seemed halfway between the steamboat and the Martians"
+   ],
+   "take": 1,
+   "beat_s": 1.0,
+   "coda_s": 0.8,
+   "cuts": [],
+   "path": 0.8,
+   "turn": "Thunder Child approaches under fire; its charge carries the rescue into the enemy's reach",
+   "why": "The ram's choice to close the distance gives the refugees their first visible chance against the Martians."
+  },
+  {
+   "frame": "Insert view of Black Smoke peeling from Thunder Child as steam rises around the first fighting-machine, a brass cowled hood on one long leg reaching forward and two long legs reaching back like a camera tripod, reeling in the water; black gas fills the upper left, white steam fills the lower centre, gunfire crosses the right edge, and refugee ships remain at the far horizon.",
+   "motion": "The camera pulls back a thumb's width from the black gas, widening to show the steam and ironclad across the whole shot; steam rises where the Heat-Ray touches water; naval guns fire through the vapour.",
+   "camera": "Camera on the bridge platform at eye height, a 50mm lens, grey daylight comes from the LEFT.",
+   "at_rest": "THE FOCUS OF THE PICTURE IS the black gas striking the ironclad; white steam rises at the lower centre, the first fighting-machine stands beyond the vapour at the upper RIGHT, refugee ships occupy the far LEFT water, and the paddle box frames the near RIGHT edge.",
+   "end": "Black gas peels seaward, steam rises around the first fighting-machine, Thunder Child fires through the reek, and refugee ships turn across the left water.",
+   "changed": "Martian falls beneath naval fire",
+   "crowd": "about forty passengers remain at the rails while distant crews steer through the smoke",
+   "view": "wide_establishing",
+   "still": false,
+   "index": 17,
+   "section": "spike",
+   "setup": "steamer_forward",
+   "size": "insert",
+   "faces": [],
+   "extras": 0,
+   "sounds": [
+    {
+     "sound": "naval guns fire one after another through steam",
+     "at": 1.0,
+     "seconds": 2.5,
+     "gain_db": -4.0
+    },
+    {
+     "sound": "shell strikes water and smashes a fishing smack to matchwood",
+     "at": 2.8,
+     "seconds": 1.8,
+     "gain_db": -3.0
+    }
+   ],
+   "source": [
+    "discharged a canister of the black gas at the ironclad",
+    "a bank of steam sprang from the water at its touch",
+    "In another moment he was cut down",
+    "The guns of the Thunder Child sounded through the reek, going off one after the other"
+   ],
+   "take": 1,
+   "beat_s": 1.0,
+   "coda_s": 0.8,
+   "cuts": [],
+   "path": 1.0,
+   "turn": "The Martians bring gas and Heat-Ray against the ram; naval fire cuts down the foremost one",
+   "why": "The first victory proves that the Martians can be hurt, while the smoke keeps the second attack hidden."
+  },
+  {
+   "frame": "Medium close view of the captain on the bridge shouting toward the smoke and burning wreckage; his face fills the centre, the bridge rail crosses the lower edge, and fire glows through smoke at the right.",
+   "motion": "The camera holds a locked-off frame across the whole shot; the captain points toward the smoke; his hand lifts as steam rolls behind him.",
+   "camera": "Camera on the bridge at chest height, a 75mm lens, grey daylight comes from the LEFT.",
+   "at_rest": "THE FOCUS OF THE PICTURE IS the captain, his head a quarter of the frame's height; the bridge rail cuts the lower frame, smoke fills the RIGHT background, and burning wreckage glows beyond his shoulder.",
+   "end": "The captain points into the smoke, his hand rises beside his beard, the bridge rail crosses below him, and burning wreckage glows behind.",
+   "changed": "Two enemies fall amid fire",
+   "crowd": "",
+   "view": "wide_establishing",
+   "still": false,
+   "index": 18,
+   "section": "answer",
+   "setup": "steamer_forward",
+   "size": "medium_close",
+   "faces": [
+    "captain"
+   ],
+   "extras": 0,
+   "sounds": [
+    {
+     "sound": "violent ironclad explosion, heavy thud and breaking metal",
+     "at": 0.5,
+     "seconds": 2.5,
+     "gain_db": -2.0
+    },
+    {
+     "sound": "passengers cheer across the steamer and refugee ships",
+     "at": 2.8,
+     "seconds": 2.0,
+     "gain_db": -4.0
+    }
+   ],
+   "source": [
+    "with a violent thud, a blinding flash, her decks, her funnels, leaped upward",
+    "the flaming wreckage, still driving forward with the impetus of its pace, had struck him",
+    "“Two!” yelled the captain"
+   ],
+   "take": 1,
+   "beat_s": 1.0,
+   "coda_s": 0.4,
+   "cuts": [],
+   "path": 1.0,
+   "turn": "The ram and second Martian threaten mutual destruction; wreckage kills the Martian and the captain counts two",
+   "why": "The captain's shout answers the question in the battle's visible result: the steamer's escape has survived two destroyed enemies."
+  },
+  {
+   "frame": "Insert view from the stern over the wake as the refugee fleet scatters and warships pass into evening haze; the stern staff occupies the lower left, smoke crosses the upper centre, scattered vessels mark the right water, and the coast fades at the far edge.",
+   "motion": "The camera tracks laterally to the LEFT past the stern ensign staff across the whole shot; smoke strips drift over the wake; refugee vessels scatter across the water.",
+   "camera": "Camera at the stern rail at eye height, a 50mm lens, evening light comes from the LEFT.",
+   "at_rest": "THE FOCUS OF THE PICTURE IS the wake running toward the hazy coast; the stern ensign staff stands at the lower LEFT, smoke strips cross the upper centre, scattered refugee vessels occupy the RIGHT water, davit boats frame the lower edge, and the fading coast lies at the far horizon.",
+   "end": "The wake leads into blue haze, refugee vessels scatter northeast, warships pass southward, and smoke strips drift across the fading coast.",
+   "changed": "Battle smoke veils fleeing ships",
+   "crowd": "about forty passengers line the stern rail while crews guide scattered vessels through haze",
+   "view": "wide_stern_wake",
+   "still": false,
+   "index": 19,
+   "section": "runout",
+   "setup": "steamer_stern",
+   "size": "insert",
+   "faces": [],
+   "extras": 0,
+   "sounds": [],
+   "source": [
+    "The little vessel continued to beat its way seaward",
+    "The fleet of refugees was scattering to the northeast",
+    "the warships turned northward, and then abruptly went about and passed into the thickening haze of evening southward"
+   ],
+   "take": 1,
+   "beat_s": 1.5,
+   "coda_s": 0.8,
+   "cuts": [],
+   "path": 0.3,
+   "turn": "The battle fills the water with smoke; the steamer and refugee fleet separate into open sea",
+   "why": "The silent aftermath lets the victory settle while the surviving passengers move beyond the battle."
+  },
+  {
+   "frame": "Wide view from the stern toward the western glare as black shadows move behind smoke; the stern staff anchors the lower left, the wake leads through the lower centre, grey clouds fill the upper frame, and the coast forms a low line at the far edge.",
+   "motion": "The camera pans to the right across the wake toward the western glare across the whole shot; black shadows move through the smoke; the wake darkens below.",
+   "camera": "Camera at the stern rail at shoulder height, a 28mm lens, sunset light comes from the LEFT.",
+   "at_rest": "THE FOCUS OF THE PICTURE IS the western glare beyond the coast; the western glare fills the far upper edge, the stern ensign staff stands at the lower LEFT, the wake runs through the lower CENTRE, black shadows move within smoke at the upper RIGHT, grey clouds fill the upper frame, and the low coast forms the far edge.",
+   "end": "The western glare burns behind smoke, black shadows move across the sky, the wake darkens below, and the coast fades at the far edge.",
+   "changed": "Evening guns deepen the suspense",
+   "crowd": "black shadows move through smoke over the wake",
+   "view": "wide_stern_wake",
+   "still": false,
+   "index": 20,
+   "section": "reaction",
+   "setup": "steamer_stern",
+   "size": "wide",
+   "faces": [],
+   "extras": 0,
+   "sounds": [
+    {
+     "sound": "distant guns firing beyond the western haze, rolling concussion over water",
+     "at": 0.5,
+     "seconds": 2.5,
+     "gain_db": -5.0
+    }
+   ],
+   "source": [
+    "Then suddenly out of the golden haze of the sunset came the vibration of guns",
+    "Everyone struggled to the rail of the steamer and peered into the blinding furnace of the west"
+   ],
+   "take": 1,
+   "beat_s": 1.0,
+   "coda_s": 0.5,
+   "cuts": [],
+   "path": 0.5,
+   "turn": "The cheering aftermath gives way to suspense as guns and shadows return",
+   "why": "The passengers' attention leaves the battle and turns toward a new threat rising over the land."
+  },
+  {
+   "frame": "Wide view from the stern toward the darkening western sky as a flat broad shape rises above the coast and curves into night; the stern staff anchors the lower left, the wake leads through the lower centre, grey clouds fill the upper frame, and darkness gathers over the far land.",
+   "motion": "The camera holds a locked-off frame; the flat broad shape rises above the clouds; the dark creeps on over the country toward the coast.",
+   "camera": "Camera at the stern rail at shoulder height, a 28mm lens, sunset light comes from the LEFT.",
+   "at_rest": "THE FOCUS OF THE PICTURE IS the flat broad shape rising above the western coast at the upper centre; the stern ensign staff stands at the lower LEFT, the wake runs through the LOWER CENTRE, grey clouds fill the upper frame, and the coast forms a low line at the far edge.",
+   "end": "The flat broad shape curves above the clouds, the wake darkens below, the coast becomes a low silhouette, and darkness covers the land.",
+   "changed": "Skyborne darkness covers distant land",
+   "crowd": "darkness gathers over the coast",
+   "view": "wide_stern_wake",
+   "still": false,
+   "index": 21,
+   "section": "button",
+   "setup": "steamer_stern",
+   "size": "wide",
+   "faces": [],
+   "extras": 0,
+   "sounds": [],
+   "source": [
+    "Something flat and broad, and very large, that swept round in a vast curve, grew smaller, sank slowly, and vanished again into the grey mystery of the night",
+    "And as it flew it rained down darkness upon the land"
+   ],
+   "take": 1,
+   "beat_s": 1.0,
+   "coda_s": 1.2,
+   "cuts": [],
+   "path": 0.6,
+   "turn": "The survivors reach open water; a vast Martian shape rises and darkens the land",
+   "why": "The world's answer follows the victory: escape continues across the water while Martian power covers the land in darkness."
+  }
+ ],
+ "lines": [
+  {
+   "index": 0,
+   "kind": "narration",
+   "speaker": "unnamed_first_person_narrator",
+   "text": "I map the flight from London as civilization breaks into a human torrent.",
+   "shot": 0,
+   "delivery": ""
+  },
+  {
+   "index": 1,
+   "kind": "narration",
+   "speaker": "unnamed_first_person_narrator",
+   "text": "The Martians spread vapour across roads, bridges, railways, and homes.",
+   "shot": 1,
+   "delivery": "cold"
+  },
+  {
+   "index": 2,
+   "kind": "narration",
+   "speaker": "unnamed_first_person_narrator",
+   "text": "At the Pool, escape becomes fighting among jammed boats and desperate people.",
+   "shot": 2,
+   "delivery": "urgent"
+  },
+  {
+   "index": 3,
+   "kind": "narration",
+   "speaker": "unnamed_first_person_narrator",
+   "text": "An hour later, wreckage floats above Limehouse.",
+   "shot": 3,
+   "delivery": "grieving"
+  },
+  {
+   "index": 4,
+   "kind": "narration",
+   "speaker": "unnamed_first_person_narrator",
+   "text": "George leads the two women east, carrying the last plan for escape.",
+   "shot": 4,
+   "delivery": ""
+  },
+  {
+   "index": 5,
+   "kind": "narration",
+   "speaker": "unnamed_first_person_narrator",
+   "text": "He hears of cylinders falling beyond the hills and keeps watch.",
+   "shot": 5,
+   "delivery": "hushed"
+  },
+  {
+   "index": 6,
+   "kind": "narration",
+   "speaker": "unnamed_first_person_narrator",
+   "text": "At Tillingham, hunger searches every cottage and property loses its meaning.",
+   "shot": 6,
+   "delivery": "cold"
+  },
+  {
+   "index": 7,
+   "kind": "narration",
+   "speaker": "unnamed_first_person_narrator",
+   "text": "Then the sea opens, carrying a fleet large enough to promise escape.",
+   "shot": 7,
+   "delivery": "curious"
+  },
+  {
+   "index": 8,
+   "kind": "dialogue",
+   "speaker": "mrs_elphinstone",
+   "text": "I would rather die than trust myself friendless in a foreign country.",
+   "shot": 8,
+   "delivery": "grieving"
+  },
+  {
+   "index": 9,
+   "kind": "narration",
+   "speaker": "unnamed_first_person_narrator",
+   "text": "George answers her panic with both arms raised toward the steamer.",
+   "shot": 9,
+   "delivery": "urgent"
+  },
+  {
+   "index": 10,
+   "kind": "narration",
+   "speaker": "unnamed_first_person_narrator",
+   "text": "Thirty-six pounds buys the three fugitives a place on the water.",
+   "shot": 10,
+   "delivery": ""
+  },
+  {
+   "index": 11,
+   "kind": "narration",
+   "speaker": "unnamed_first_person_narrator",
+   "text": "The captain counts the fare, and the boat brings them passage.",
+   "shot": 11,
+   "delivery": ""
+  },
+  {
+   "index": 12,
+   "kind": "narration",
+   "speaker": "unnamed_first_person_narrator",
+   "text": "George pays at the gangway, then puts the women aboard.",
+   "shot": 12,
+   "delivery": "urgent"
+  },
+  {
+   "index": 13,
+   "kind": "narration",
+   "speaker": "unnamed_first_person_narrator",
+   "text": "As the decks fill, guns speak southward and three ironclads appear.",
+   "shot": 13,
+   "delivery": "urgent"
+  },
+  {
+   "index": 14,
+   "kind": "narration",
+   "speaker": "unnamed_first_person_narrator",
+   "text": "Three Martians wade toward the refugee fleet, closing the open route.",
+   "shot": 14,
+   "delivery": "threatening"
+  },
+  {
+   "index": 15,
+   "kind": "narration",
+   "speaker": "unnamed_first_person_narrator",
+   "text": "The steamer swings, George falls, and Thunder Child tears between them.",
+   "shot": 15,
+   "delivery": "urgent"
+  },
+  {
+   "index": 16,
+   "kind": "narration",
+   "speaker": "unnamed_first_person_narrator",
+   "text": "The ironclad drives straight at the Martians, carrying the fleet's hope.",
+   "shot": 16,
+   "delivery": "exultant"
+  },
+  {
+   "index": 17,
+   "kind": "narration",
+   "speaker": "unnamed_first_person_narrator",
+   "text": "Gas, Heat-Ray, steam, and naval fire turn the water into a battlefield.",
+   "shot": 17,
+   "delivery": "urgent"
+  },
+  {
+   "index": 18,
+   "kind": "dialogue",
+   "speaker": "captain",
+   "text": "Two!",
+   "shot": 18,
+   "delivery": "shouting"
+  },
+  {
+   "index": 19,
+   "kind": "narration",
+   "speaker": "unnamed_first_person_narrator",
+   "text": "The cheers fade behind us as the fleet scatters into evening haze.",
+   "shot": 20,
+   "delivery": "hushed"
+  },
+  {
+   "index": 20,
+   "kind": "narration",
+   "speaker": "unnamed_first_person_narrator",
+   "text": "The world answers with darkness over the land.",
+   "shot": 21,
+   "delivery": "grieving"
+  }
+ ],
+ "omit": [],
+ "beds": [
+  {
+   "from_shot": 0,
+   "tone": "plain"
+  },
+  {
+   "from_shot": 3,
+   "tone": "uneasy"
+  },
+  {
+   "from_shot": 8,
+   "tone": "light"
+  },
+  {
+   "from_shot": 13,
+   "tone": "thrilling"
+  },
+  {
+   "from_shot": 18,
+   "tone": "grave"
+  }
+ ]
+}
