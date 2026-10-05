@@ -1,0 +1,120 @@
+WARN 20260827135508 episode/ep14: the desk says failed; running on the owner's word -- the disk is the truth of a step
+=== EPISODE start | 20260827135508 episode/ep14 | run 20260827135508__episode__20260930060105 ===
+--- step 01 (bind) skipped: output exists
+--- step 02 (plan) skipped: output exists
+--- step 03 (places) skipped: output exists
+--- step 04 (record) skipped: output exists
+--- step 05 (timeline) skipped: output exists
+--- step 06 (prompts) | 20260827135508 episode/ep14 ---
+take cards -> <abs>/prompts.json
+sheet prompts asking for an END panel : 0
+END cells drawn on disk               : 0
+take prompts read (shots.json): 30
+take prompts with a last frame        : 0
+
+CLEAN: no last frame anywhere
+--- step 07 (board) skipped: output exists
+--- step 08 (panels) skipped: output exists
+--- step 09 (shoot) | 20260827135508 episode/ep14 ---
+  queueing 1 takes in one go: T07
+  T07 shots [7] 141f 5.87s in 491s
+30 takes -> <abs>/shots.json
+WARNING: Logging before InitGoogle() is written to STDERR
+W0000 00:00:1790748574.175353   33776 face_landmarker_graph.cc:180] Sets FaceBlendshapesGraph acceleration to xnnpack by default.
+INFO: Created TensorFlow Lite XNNPACK delegate for CPU.
+W0000 00:00:1790748574.189271   45816 inference_feedback_manager.cc:121] Feedback manager requires a model with a single signature inference. Disabling support for feedback tensors.
+W0000 00:00:1790748574.195520   57220 inference_feedback_manager.cc:121] Feedback manager requires a model with a single signature inference. Disabling support for feedback tensors.
+T00 cached (100.0/100, bytes unchanged)
+T01 cached (95.0/100, bytes unchanged)
+T02 cached (85.0/100, bytes unchanged)
+T03 cached (64.1/100, bytes unchanged)
+T04 cached (88.5/100, bytes unchanged)
+T05 cached (85.0/100, bytes unchanged)
+T06 cached (82.3/100, bytes unchanged)
+T07 PASS 88.6/100 (16 of 26 rows live) | frozen-at-start 0.0s | frozen-share 0% | foreign not measured (no cell) | cut-landing not measured (no cell) | drift not measured (no cell) | coherence off-board not measured (no cell) | last-vs-cell not measured (no cell) | cut 8.3 | churn 2.2 | zoom 1.00x hand | face-at-end 0.15 | look p5 12 black 0.36 hue 0.51 | post-cut 0.47->0.30 max 0.6 | pulse r 0.70 | letterbox 0/3 frames letterboxed | lip-sync n/a narration | identity not measured | jump 0.89 | held n/a by the plan | frozen-whole 57% static, run 0.46s | pass-through not measured | rotation 0.1deg | leak opens on its panel | last-vs-panel 0.75 | cut-vote none | lag not measured
+T08 cached (100.0/100, bytes unchanged)
+T09 cached (100.0/100, bytes unchanged)
+T10 cached (65.0/100, bytes unchanged)
+T11 cached (93.2/100, bytes unchanged)
+T12 cached (81.5/100, bytes unchanged)
+T13 cached (100.0/100, bytes unchanged)
+T14 cached (74.7/100, bytes unchanged)
+T15 cached (90.3/100, bytes unchanged)
+T16 cached (91.1/100, bytes unchanged)
+T17 cached (70.7/100, bytes unchanged)
+T18 cached (100.0/100, bytes unchanged)
+T19 cached (82.5/100, bytes unchanged)
+T20 cached (97.6/100, bytes unchanged)
+T21 cached (94.0/100, bytes unchanged)
+T22 cached (42.7/100, bytes unchanged)
+T23 cached (89.3/100, bytes unchanged)
+T24 cached (97.8/100, bytes unchanged)
+T25 cached (80.0/100, bytes unchanged)
+T26 cached (88.7/100, bytes unchanged)
+T27 cached (70.5/100, bytes unchanged)
+T28 cached (84.9/100, bytes unchanged)
+T29 cached (100.0/100, bytes unchanged)
+  ok   T00  
+  ok   T01  
+  ok   T02  
+  ok   T03  
+  ok   T04  
+  FAIL T05  text or lettering in the picture
+  ok   T06  
+  ok   T07  
+  ok   T08  
+  ok   T09  
+  ok   T10  
+  ok   T11  
+  ok   T12  
+  FAIL T13  text or lettering in the picture
+  ok   T14  
+  ok   T15  
+  ok   T16  
+  ok   T17  
+  ok   T18  
+  FAIL T19  moustache on a clean-shaven character; 7 figure(s) for 2 declared (2 cast + 0 extras), 4 of them copies of another
+  ok   T20  
+  ok   T21  
+  ok   T22  
+  ok   T23  
+  ok   T24  
+  ok   T25  
+  ok   T26  
+  ok   T27  
+  ok   T28  
+  ok   T29  
+
+27/30 takes clean on content; failing [5, 13, 19]
+<abs>/strip_T00_T29.png
+  queueing 3 takes in one go: T05, T13, T19
+  T05 shots [5] 158f 6.58s in 517s
+  T13 shots [13] 158f 6.58s in 272s
+  T19 shots [19]  73f 3.04s in 216s
+30 takes -> <abs>/shots.json
+WARNING: Logging before InitGoogle() is written to STDERR
+W0000 00:00:1790750211.303631   62576 face_landmarker_graph.cc:180] Sets FaceBlendshapesGraph acceleration to xnnpack by default.
+INFO: Created TensorFlow Lite XNNPACK delegate for CPU.
+W0000 00:00:1790750211.319144    4136 inference_feedback_manager.cc:121] Feedback manager requires a model with a single signature inference. Disabling support for feedback tensors.
+W0000 00:00:1790750211.325287   54808 inference_feedback_manager.cc:121] Feedback manager requires a model with a single signature inference. Disabling support for feedback tensors.
+T05 PASS 99.6/100 (16 of 26 rows live) | frozen-at-start 0.0s | frozen-share 0% | foreign not measured (no cell) | cut-landing not measured (no cell) | drift not measured (no cell) | coherence off-board not measured (no cell) | last-vs-cell not measured (no cell) | cut 6.1 | churn 4.2 | zoom 1.05x push | face-at-end 0.47 | look p5 19 black 0.08 hue 0.49 | post-cut 0.31->0.18 max 0.4 | pulse r 0.44 | letterbox 0/3 frames letterboxed | lip-sync n/a narration | identity not measured | jump 0.99 | held n/a by the plan | frozen-whole 15% static, run 0.75s | pass-through not measured | rotation 1.3deg | leak opens on its panel | last-vs-panel 0.39 adv | cut-vote none | lag not measured | kept T05.mp4 of 2
+T13 PASS 100/100 (16 of 26 rows live) | frozen-at-start 0.5s | frozen-share 0% | foreign not measured (no cell) | cut-landing not measured (no cell) | drift not measured (no cell) | coherence off-board not measured (no cell) | last-vs-cell not measured (no cell) | cut 3.2 | churn 1.7 | zoom 1.00x push | face-at-end no face, none planned | look p5 8 black 0.24 hue 0.37 | post-cut 0.23->0.22 max 0.5 | pulse r 0.30 | letterbox 0/3 frames letterboxed | lip-sync n/a narration | identity 0 cast on screen | jump 0.99 | held not measured | frozen-whole 46% static, run 1.83s | pass-through not measured | rotation 0.3deg | leak opens on its panel | last-vs-panel 0.96 | cut-vote none | lag not measured | kept T13.mp4 of 2
+[zone_info_source.cc : 129] RAW: Falling back to critical America/Los_Angeles zoneinfo data
+T19 PASS 82.8/100 (17 of 26 rows live) | frozen-at-start 0.0s | frozen-share 0% | foreign not measured (no cell) | cut-landing not measured (no cell) | drift not measured (no cell) | coherence off-board not measured (no cell) | last-vs-cell not measured (no cell) | cut 2.2 | churn 0.6 | zoom 1.00x hand | face-at-end 0.09 | look p5 3 black 0.50 hue 0.51 | post-cut 0.12->0.11 max 0.2 | pulse r 0.22 | letterbox 0/3 frames letterboxed | lip-sync mux lag -0.010s wer 0.00 | identity not measured | jump 0.99 | held n/a by the plan | frozen-whole 86% static, run 1.71s | pass-through not measured | rotation 0.1deg | leak opens on its panel | last-vs-panel 0.99 | cut-vote none | lag cannot tell: no readable face | kept T19.mp4 of 3
+  FAIL T05  text or lettering in the picture
+  FAIL T13  text or lettering in the picture
+  FAIL T19  mustache on a clean-shaven character; 5 figure(s) for 2 declared (2 cast + 0 extras), 4 of them copies of another
+
+0/3 takes clean on content; failing [5, 13, 19]
+--- step 10 (edit) | 20260827135508 episode/ep14 ---
+gutter guard cropped 7 takes: {2: 'crop=768:1344:0:0', 3: 'crop=768:1344:0:0', 4: 'crop=768:1344:0:0', 10: 'crop=768:1344:0:0', 11: 'crop=768:1344:0:0', 22: 'crop=768:1344:0:0', 27: 'crop=768:1344:0:0'}
+  bed: 7 span(s), 4 tone(s) to make
+    grave        40.8s at  -29.0 LUFS -> bed_grave.wav
+    plain        29.0s at  -31.0 LUFS -> bed_plain.wav
+    thrilling    37.8s at  -26.5 LUFS -> bed_thrilling.wav
+    uneasy       19.2s at  -29.0 LUFS -> bed_uneasy.wav
+  bed bed.wav: composed per span, already at level
+title card ep14.mp4 is 768x1344 but this episode is 768x768: conforming it would crop the lettering off.
+  make this episode's own card:  uv run python scripts/episode/title.py <codex_id> 14 --approved
+Traceback (most recent call last):
+  File "<abs>/step_runner.py", line 65, in _run_one
