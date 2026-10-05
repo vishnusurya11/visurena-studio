@@ -6,109 +6,134 @@
 <title>(5) ● ep17 07 board · ~21:35 · Now — Visurena</title>
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='16' cy='16' r='11' fill='none' stroke='%23d6cfc0' stroke-width='5'/%3E%3Cpath d='M16 5a11 11 0 0 1 11 11' fill='none' stroke='%231f5a86' stroke-width='5'/%3E%3Ccircle cx='26.5' cy='5.5' r='5' fill='%23b07a12'/%3E%3C/svg%3E">
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
 <link rel="stylesheet" href="assets/board.css">
 <link rel="stylesheet" href="assets/shell.css">
+<link rel="stylesheet" href="assets/v2.css">
 <script src="assets/shell.js"></script>
 <style>
-/* ---------- Now page ---------- */
-.pagehead{display:flex;align-items:baseline;gap:var(--sp-4);padding-top:var(--sp-6);padding-bottom:var(--sp-4)}
-.pagehead .live{display:inline-flex;align-items:center;gap:6px;font:500 12px/16px var(--f-mono);color:var(--ink-3)}
-.pagehead .live i{width:6px;height:6px;border-radius:50%;background:var(--st-done)}
+/* ---------- Now v2 (DIRECTION_v2 §Home) ---------- */
+.title-row{display:flex;align-items:flex-end;gap:16px;margin:4px 0 20px}
+.title-row h1{font:700 34px/36px var(--f-display);letter-spacing:.01em}
+.title-row .tally{display:flex;gap:14px;font:400 13px/18px var(--f-text);color:var(--ink-3);padding-bottom:3px}
+.title-row .tally b{font:600 13px/18px var(--f-mono);color:var(--ink)}
+.title-row .tally .r b{color:var(--st-running)} .title-row .tally .f b{color:var(--st-flagged)}
 
-/* since-you-looked strip */
-.since{display:flex;align-items:center;gap:var(--sp-4);border:1px solid var(--rule);border-left:3px solid var(--st-running);background:var(--paper);padding:8px var(--sp-4);font-size:13px;margin-bottom:var(--sp-5)}
-.since .when{font:600 12px/16px var(--f-mono);white-space:nowrap;display:inline-flex;gap:6px;align-items:center}
-.since ul{display:flex;flex-wrap:wrap;gap:4px var(--sp-5);list-style:none;margin:0;padding:0;flex:1}
-.since li{display:inline-flex;align-items:center;gap:6px;color:var(--ink-2)}
-.since li b{font:500 12px/16px var(--f-mono);color:var(--ink)}
-.since .x{color:var(--st-failed)} .since .d{color:var(--st-deferred)} .since .ok{color:var(--st-done)} .since .run{color:var(--st-running)}
-.since .seen{margin-left:auto;white-space:nowrap}
-.since.is-seen{border-left-color:var(--rule-2)}
-.since.is-seen ul{display:none}
+/* 1 · hero row */
+.hero-row{display:grid;grid-template-columns:minmax(0,1fr) 300px;gap:16px;align-items:stretch}
+.live{display:grid;grid-template-columns:332px minmax(0,1fr);grid-template-areas:"poster body" "rail rail";overflow:hidden}
+.live .poster{grid-area:poster;padding:12px 0 0 12px}
+.live .poster .pic{aspect-ratio:1;width:100%}
+.live .poster .pic .tag.r{top:8px;bottom:auto}
+.live .body{grid-area:body;padding:20px 24px 0 24px;display:flex;flex-direction:column;gap:10px;min-width:0}
+.live .top{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.live .top .where{font:400 13px/18px var(--f-text);color:var(--ink-3)}
+.live .top .acts{margin-left:auto;display:flex;gap:6px;align-items:center}
+.live .name{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap;margin-top:2px}
+.live .name .id{font:600 15px/1 var(--f-mono);color:var(--ink-3)}
+.live .name h2{font:700 42px/44px var(--f-display);letter-spacing:.005em}
+.live .name h2 a{text-decoration:none}
+.live .name h2 a:hover{text-decoration:underline;text-decoration-thickness:2px;text-underline-offset:5px}
+.live .q{font:400 14px/20px var(--f-text);color:var(--ink-2);max-width:60ch;margin:-2px 0 0}
+.eta{display:grid;grid-template-columns:auto minmax(0,1fr);gap:28px;align-items:end;margin-top:6px}
+.eta .big span{display:block;font:500 12px/16px var(--f-text);color:var(--ink-3)}
+.eta .big b{display:block;font:700 60px/54px var(--f-display);letter-spacing:.005em;font-variant-numeric:tabular-nums;color:var(--ink)}
+.eta .band svg{width:100%;height:52px;display:block;overflow:visible}
+.eta .band .cap{font:400 12px/16px var(--f-text);color:var(--ink-3);margin-top:4px}
+.eta .band .cap b{font:600 12px/16px var(--f-mono);color:var(--ink)}
+.eta .band .cap .m{font-family:var(--f-mono)}
+.live .stats{display:flex;flex-wrap:wrap;gap:6px 18px;font:400 12px/16px var(--f-text);color:var(--ink-3);margin-top:4px}
+.live .stats b{font:500 12px/16px var(--f-mono);color:var(--ink-2)}
+.live .stats .now{color:var(--st-running)}
+.words{display:grid;grid-template-columns:auto minmax(0,1fr);gap:4px 12px;align-items:baseline;margin-top:auto;padding:10px 12px;border-radius:8px;background:var(--surface-2);font-size:12px}
+.words .lbl2{white-space:nowrap}
+.words code{font:400 12px/17px var(--f-mono);color:var(--ink-2);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.words .g{grid-column:2;display:flex;gap:14px;color:var(--ink-3)}
+.words .g .ok{color:var(--st-done);display:inline-flex;gap:4px;align-items:center}
+.words .g .mono{font-size:12px;color:var(--ink-2)}
+/* the 12-step rail across the card */
+.rail2{grid-area:rail;display:grid;grid-template-columns:repeat(12,minmax(0,1fr));gap:4px;padding:18px 24px 18px 12px;margin-top:16px;border-top:1px solid var(--rule);background:linear-gradient(var(--hl),transparent)}
+.rail2 .st2{min-width:0;display:grid;gap:6px}
+.rail2 .st2 i{display:block;height:6px;border-radius:3px;background:var(--rule-2)}
+.rail2 .st2.done i{background:var(--st-done-bar)}
+.rail2 .st2.skipped i{background:color-mix(in srgb,var(--st-done-bar) 30%,var(--surface))}
+.rail2 .st2.running i{background:var(--st-running);box-shadow:0 0 0 3px rgb(125 182 227 / .16);animation:breathe 2.4s var(--ease-out) infinite}
+.rail2 .nm{font:500 12px/16px var(--f-text);color:var(--ink-3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.rail2 .nm span{font:500 11px/16px var(--f-mono);margin-right:4px;color:var(--line)}
+.rail2 .du span{color:var(--ink-3);margin-right:5px}
+.rail2 .du{font:400 11px/14px var(--f-mono);color:var(--line);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:-4px}
+.rail2 .done .nm{color:var(--ink-2)}
+.rail2 .running .nm{color:var(--ink);font-weight:600}
+.rail2 .running .du span,.rail2 .running .du{color:var(--st-running)}
 
-/* the GPU lane card */
-.lane{display:grid;grid-template-columns:232px minmax(0,1fr) 300px;border:1px solid var(--rule-2);background:var(--paper);box-shadow:var(--e-2)}
-.lane .poster{padding:var(--sp-3);background:var(--stage-2)}
-.lane .poster .frame{width:100%}
-.lane .body{padding:var(--sp-5) var(--sp-6);display:flex;flex-direction:column;gap:var(--sp-3);min-width:0}
-.lane .top{display:flex;align-items:center;gap:var(--sp-3);flex-wrap:wrap}
-.lane .unit{display:flex;align-items:baseline;gap:var(--sp-3);flex-wrap:wrap}
-.lane .unit .id{font:600 15px/1 var(--f-mono);color:var(--ink-2)}
-.lane .unit h2{font-size:34px;line-height:36px}
-.lane .unit h2 a{text-decoration:none}
-.lane .unit h2 a:hover{text-decoration:underline;text-decoration-thickness:2px}
-.lane .stepline{font:500 13px/18px var(--f-mono);color:var(--ink-2)}
-.lane .stepline b{color:var(--st-running);font-weight:600;text-transform:uppercase;letter-spacing:.04em}
-.eta{display:grid;grid-template-columns:auto minmax(0,1fr);gap:var(--sp-6);align-items:end;margin-top:var(--sp-2)}
-.eta .hero{display:flex;flex-direction:column}
-.eta .hero span{font:500 11px/16px var(--f-mono);letter-spacing:.12em;text-transform:uppercase;color:var(--ink-3)}
-.eta .hero b{font:700 64px/56px var(--f-display);letter-spacing:.01em;font-variant-numeric:tabular-nums}
-.eta .range svg{width:100%;height:50px;display:block;overflow:visible}
-.eta .range .cap{font:500 12px/16px var(--f-mono);color:var(--ink-2);margin-top:2px}
-.eta .range .cap b{color:var(--ink);font-weight:500}
-.lane .sub{font:400 12px/16px var(--f-mono);color:var(--ink-3);display:flex;gap:var(--sp-4);flex-wrap:wrap}
-.rail{margin-top:var(--sp-3)}
-.rail .sbar{height:10px}
-.rail .lbl{display:grid;grid-template-columns:repeat(12,1fr);gap:2px;margin-top:5px;font:500 10px/12px var(--f-mono);color:var(--ink-3)}
-.rail .lbl span{overflow:hidden;text-overflow:clip;white-space:nowrap}
-.rail .lbl .cur{color:var(--st-running);font-weight:600}
-.lane aside{border-left:1px solid var(--rule);padding:var(--sp-5);display:flex;flex-direction:column;gap:var(--sp-4);background:var(--paper)}
-.lane aside .words{font:400 12px/17px var(--f-mono);color:var(--ink-2);background:var(--code);padding:var(--sp-3);border-radius:var(--r-1);overflow-wrap:anywhere}
-.lane aside dl{margin:0;display:grid;grid-template-columns:auto 1fr;gap:4px var(--sp-4);font-size:13px}
-.lane aside dt{color:var(--ink-3);font:500 11px/18px var(--f-mono);letter-spacing:.08em;text-transform:uppercase}
-.lane aside dd{margin:0}
-.lane aside .acts{display:flex;gap:var(--sp-3);margin-top:auto;align-items:center}
+/* KPI column */
+.kpis{display:grid;grid-template-rows:repeat(3,minmax(0,1fr));gap:16px}
+.kpi .spark-l{stroke:var(--focus);stroke-width:1.5;fill:none}
+.kpi .spark-a{fill:url(#kfade)}
+.kpi .spark-d{fill:var(--focus)}
+.kpi .spark-ax{font:400 10px/1 var(--f-mono);fill:var(--line)}
+.kpi .lane-s rect{rx:2}
 
-/* two-column middle */
-.cols{display:grid;grid-template-columns:minmax(0,2fr) minmax(0,1fr);gap:var(--sp-7);margin-top:var(--sp-7)}
-.sec-h{display:flex;align-items:baseline;gap:var(--sp-3);border-bottom:2px solid var(--ink);padding-bottom:var(--sp-3);margin-bottom:0}
-.sec-h h2{font-size:22px;line-height:26px}
-.sec-h .n{font:600 13px/1 var(--f-mono);background:var(--accent);color:var(--accent-ink);border-radius:var(--r-pill);padding:3px 7px;align-self:center}
-.sec-h .n.zero{background:none;color:var(--ink-3);border:1px solid var(--rule-2)}
-.sec-h .spacer{flex:1}
-.sec-h .meta{font:500 12px/16px var(--f-mono);color:var(--ink-3)}
+/* 2 · needs you + activity */
+.mid{display:grid;grid-template-columns:minmax(0,1fr) 340px;gap:16px;margin-top:40px;align-items:start}
+.needs2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;list-style:none;margin:0;padding:0}
+.nc{display:grid;grid-template-columns:96px minmax(0,1fr);gap:14px;padding:12px;border-radius:var(--r-card);background:var(--surface);border:1px solid var(--rule);transition:border-color var(--d1),background var(--d1);outline-offset:2px}
+.nc:hover,.nc:focus-visible{border-color:var(--rule-2);background:color-mix(in srgb,var(--surface) 60%,var(--surface-2))}
+.nc .pic{width:96px;height:96px}
+.nc .pic .flagdot{position:absolute;top:6px;left:6px;width:20px;height:20px;border-radius:6px;display:grid;place-items:center;background:rgb(0 0 0 / .6);color:var(--st-flagged)}
+.nc .pic .flagdot .i{width:12px;height:12px}
+.nc .who{min-width:0;display:flex;flex-direction:column;gap:6px}
+.nc .who a.t{text-decoration:none;font:500 15px/20px var(--f-text);color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.nc .who a.t:hover{text-decoration:underline;text-underline-offset:3px;text-decoration-color:var(--rule-2)}
+.nc .who .id{font:600 13px/20px var(--f-mono);color:var(--ink-3);margin-right:6px}
+.nc .meta{font:400 12px/16px var(--f-text);color:var(--ink-3);margin-top:-4px}
+.nc .meta b{font:500 12px/16px var(--f-mono);color:var(--ink-2)}
+.nc .chips{display:flex;flex-wrap:wrap;gap:4px}
+.nc .chip2{padding:0 7px;height:22px}
+.nc .acts{display:flex;gap:6px;margin-top:2px}
+.nc.acked{grid-template-columns:96px minmax(0,1fr);opacity:.72}
+.nc.acked .done-msg{display:flex;flex-direction:column;gap:8px;justify-content:center;font-size:13px;color:var(--ink-2)}
+.nc.acked .done-msg .ok{color:var(--st-done);display:inline-flex;gap:6px;align-items:center;font-weight:500}
+.nc.acked .pic img{filter:grayscale(.6) brightness(.7)}
+.allclear{display:none;padding:28px;text-align:center;color:var(--ink-3)}
 
-/* needs-you rows */
-.kind{display:flex;align-items:center;gap:var(--sp-3);padding:var(--sp-3) 0 6px;font:500 11px/16px var(--f-mono);letter-spacing:.12em;text-transform:uppercase;color:var(--st-flagged)}
-.needs{list-style:none;margin:0;padding:0}
-.need{display:grid;grid-template-columns:20px minmax(0,1.15fr) minmax(0,1fr) 40px auto;gap:var(--sp-4);align-items:center;padding:10px var(--sp-2) 10px var(--sp-3);border-bottom:1px solid var(--rule);outline-offset:-2px;transition:background var(--d1)}
-.need:hover,.need:focus-visible{background:var(--paper-2)}
-.need > .i{color:var(--st-flagged);width:16px;height:16px}
-.need .who{min-width:0}
-.need .who a{text-decoration:none;display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.need .who .id{font:600 13px/18px var(--f-mono);margin-right:6px}
-.need .who .t{font-weight:500}
-.need .who small{display:block;font:400 11px/14px var(--f-mono);color:var(--ink-3)}
-.need .why{font:500 12px/16px var(--f-mono);color:var(--ink-2);display:flex;flex-wrap:wrap;gap:2px var(--sp-3)}
-.need .why .g{white-space:nowrap}
-.need .why .g b{color:var(--st-flagged);font-weight:600}
-.need .why .g.term{color:var(--ink-3)}
-.need .age{font:400 12px/16px var(--f-mono);color:var(--ink-3);text-align:right}
-.need .acts{display:flex;gap:var(--sp-2)}
-.need .acts .btn{padding:6px 10px;font-size:12px}
-.need.acked{grid-template-columns:20px minmax(0,1fr) auto;color:var(--ink-3)}
-.need.acked > .i{color:var(--st-done)}
-.need.acked .why,.need.acked .age{display:none}
-.zeros{font:400 12px/16px var(--f-mono);color:var(--ink-3);padding:var(--sp-3) 0;display:flex;flex-wrap:wrap;gap:4px var(--sp-4)}
-.zeros b{color:var(--ink-2);font-weight:500}
-.allclear{padding:var(--sp-5) 0;color:var(--ink-3);display:none}
+.feed{list-style:none;margin:0;padding:0}
+.feed li{display:grid;grid-template-columns:28px minmax(0,1fr) auto;gap:10px;align-items:start;padding:9px 0;font-size:13px;line-height:18px;color:var(--ink-2)}
+.feed li + li{border-top:1px solid var(--rule)}
+.feed .ic{width:24px;height:24px;border-radius:7px;display:grid;place-items:center;background:var(--surface-2)}
+.feed .ic .i{width:13px;height:13px}
+.feed .x{color:var(--st-failed)} .feed .d{color:var(--st-deferred)} .feed .ok{color:var(--st-done)} .feed .run{color:var(--st-running)}
+.feed b{font:600 12px/18px var(--f-mono);color:var(--ink);margin-right:4px}
+.feed time{font:400 12px/18px var(--f-mono);color:var(--ink-3)}
+.feed.seen li{display:none}
+.feed-empty{display:none;color:var(--ink-3);font-size:13px;padding:6px 0}
+.feed.seen + .feed-empty{display:block}
+.zeros{display:grid;grid-template-columns:1fr 1fr;gap:2px 16px;margin:0}
+.zeros div{display:flex;justify-content:space-between;padding:6px 0;font-size:13px;color:var(--ink-3);border-bottom:1px solid var(--rule)}
+.zeros div:nth-last-child(-n+2){border-bottom:0}
+.zeros dd{margin:0;font:500 12px/18px var(--f-mono);color:var(--ink-2)}
+.zeros dt{margin:0}
+.side-col{display:grid;gap:16px}
 
-/* up next */
-.next{list-style:none;margin:0;padding:0;counter-reset:n}
-.next li{display:grid;grid-template-columns:24px minmax(0,1fr);gap:var(--sp-3);padding:12px 0;border-bottom:1px solid var(--rule)}
-.next li::before{counter-increment:n;content:counter(n);font:600 12px/20px var(--f-mono);color:var(--ink-3)}
-.next a{text-decoration:none;font-weight:500}
-.next a:hover{text-decoration:underline}
-.next .id{font:600 13px/18px var(--f-mono);margin-right:6px}
-.next .when{font:400 12px/16px var(--f-mono);color:var(--ink-3);display:block;margin-top:2px}
-.next .when b{color:var(--ink-2);font-weight:500}
-.ghost{height:6px;margin-top:6px;background:repeating-linear-gradient(135deg,var(--rule-2) 0 2px,transparent 2px 6px);border:1px dashed var(--line);border-radius:1px}
-.then{font-size:13px;color:var(--ink-3);padding:10px 0;display:flex;justify-content:space-between;gap:var(--sp-3)}
+/* 3 · up next */
+.sect{margin-top:40px}
+.nextstrip{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:16px}
+.nx{display:grid;gap:10px;text-decoration:none;color:var(--ink);min-width:0}
+.nx .pic{aspect-ratio:16/10;box-shadow:inset 0 0 0 1px rgb(255 255 255 / .05)}
+.nx .pic .pos{position:absolute;top:8px;left:8px;width:24px;height:24px;border-radius:7px;display:grid;place-items:center;font:600 12px/1 var(--f-mono);background:rgb(0 0 0 / .62);color:#e6e6e6;backdrop-filter:blur(4px)}
+.nx .pic .when{position:absolute;right:8px;bottom:8px;font:500 12px/1 var(--f-mono);color:#fff;background:rgb(0 0 0 / .62);padding:5px 8px;border-radius:6px;backdrop-filter:blur(4px)}
+.nx .pic .when small{font:400 11px/1 var(--f-text);color:#bdbdbd;margin-right:4px}
+.nx:hover .pic img{transform:scale(1.03)}
+.nx .pt{font:500 14px/19px var(--f-text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.nx .pt .id{font:600 12px/19px var(--f-mono);color:var(--ink-3);margin-right:6px}
+.nx .pm{font:400 12px/16px var(--f-text);color:var(--ink-3);margin-top:-6px}
+.nx .pm b{font:500 12px/16px var(--f-mono);color:var(--ink-2)}
+.nx.then .pic img{object-position:50% 30%;filter:saturate(.85)}
+.foot2{font:400 12px/16px var(--f-text);color:var(--ink-3);margin-top:12px}
 
-/* where the GPU went */
-.gpuwent{display:grid;grid-template-columns:minmax(0,1.6fr) minmax(0,1fr);gap:var(--sp-7);padding-top:var(--sp-5)}
-.finding{font:600 20px/24px var(--f-display);letter-spacing:.01em;margin:0 0 var(--sp-2)}
+/* 4 · where the GPU went */
+.went{display:grid;grid-template-columns:minmax(0,1.65fr) minmax(0,1fr);gap:32px}
+.finding{font:600 26px/30px var(--f-display);letter-spacing:.005em;margin:0 0 6px;color:var(--ink)}
 .finding em{font-style:normal;color:var(--st-failed)}
 .chart svg{width:100%;height:auto;display:block}
 .chart .ax{font:400 11px/1 var(--f-mono);fill:var(--ink-3)}
@@ -117,297 +142,378 @@
 .chart .grid{stroke:var(--rule);stroke-width:1}
 .chart .ceil{stroke:var(--rule-2);stroke-width:1;stroke-dasharray:3 3}
 .chart .col:hover .seg{opacity:.85}
-.key{display:flex;flex-wrap:wrap;gap:var(--sp-2) var(--sp-5);font:400 12px/16px var(--f-mono);color:var(--ink-2);margin-top:var(--sp-3)}
+.key{display:flex;flex-wrap:wrap;gap:6px 18px;font:400 12px/16px var(--f-text);color:var(--ink-2);margin-top:10px}
 .key span{display:inline-flex;align-items:center;gap:6px}
-.sw{width:12px;height:12px;display:inline-block;border-radius:1px}
+.sw{width:10px;height:10px;display:inline-block;border-radius:2px}
 .sw.ok{background:var(--st-done-bar)}
 .sw.burn{background:repeating-linear-gradient(45deg,var(--st-failed-bar) 0 3px,var(--st-failed-bg) 3px 6px)}
 .sw.live{background:var(--st-running-bar)}
-.foot{font:400 12px/16px var(--f-text);color:var(--ink-3);margin-top:var(--sp-3)}
-.lead h3{font-size:16px;margin-bottom:var(--sp-3)}
+.lead h3{font:600 14px/20px var(--f-text);letter-spacing:0;margin:4px 0 12px}
 .lead ol{list-style:none;margin:0;padding:0}
-.lead li{display:grid;grid-template-columns:80px minmax(0,1fr) 112px;gap:var(--sp-3);align-items:center;padding:7px 0;border-bottom:1px solid var(--rule);font-size:13px}
-.lead li .s{font:500 12px/16px var(--f-mono)}
-.lead .bar{height:10px;background:var(--st-done-bar);position:relative;border-radius:1px}
+.lead li{display:grid;grid-template-columns:76px minmax(0,1fr) 104px;gap:12px;align-items:center;padding:9px 0;font-size:13px}
+.lead li + li{border-top:1px solid var(--rule)}
+.lead li .s{font:500 12px/16px var(--f-text);color:var(--ink-2)}
+.lead li .s span{font-family:var(--f-mono);color:var(--ink-3);margin-right:4px}
+.lead .track{height:8px;border-radius:4px;background:var(--surface-2);overflow:hidden}
+.lead .bar{display:block;height:100%;background:var(--st-done-bar);position:relative;border-radius:4px;overflow:hidden}
 .lead .bar i{position:absolute;inset:0 auto 0 0;background:repeating-linear-gradient(45deg,var(--st-failed-bar) 0 3px,var(--st-failed-bg) 3px 6px)}
-.lead .v{font:400 12px/16px var(--f-mono);color:var(--ink-2);text-align:right}
+.lead .v{font:400 12px/16px var(--f-mono);color:var(--ink-3);text-align:right}
 .lead .v b{color:var(--st-failed);font-weight:600}
+.lever{margin-top:14px;padding:12px 14px;border-radius:8px;background:var(--st-failed-bg);color:var(--ink-2);font-size:13px;line-height:19px}
+.lever b{color:var(--st-failed);font-weight:600}
+details.tbl-d{margin-top:10px;font-size:12px;color:var(--ink-3)}
+details.tbl-d summary{cursor:pointer}
 
-/* shipped with flags (quiet lane) */
-.quiet .sec-h{border-bottom-width:1px;border-color:var(--rule-2)}
-.quiet .sec-h h2{font-size:18px;color:var(--ink-2)}
-.shelf{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:var(--sp-4);padding-top:var(--sp-4)}
-.ship{text-decoration:none;display:grid;grid-template-columns:72px minmax(0,1fr);gap:4px var(--sp-3);align-content:start;color:var(--ink-2)}
-.ship .frame{grid-row:1/span 3;border-radius:var(--r-1);opacity:.9}
-.ship .frame .tl{display:none}
-.ship .t{font-size:13px;line-height:17px;color:var(--ink);display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
-.ship .t .id{font:600 12px/16px var(--f-mono);margin-right:4px}
-.ship .gl{font:500 11px/15px var(--f-mono);color:var(--ink-3);display:flex;flex-wrap:wrap;gap:0 6px}
-.ship .gl .f{color:var(--st-flagged)} .ship .gl .p{color:var(--st-done)}
-.ship .ack{font:500 11px/15px var(--f-mono);display:inline-flex;gap:4px;align-items:center}
-.ship .ack.no{color:var(--ink-3)} .ship .ack.yes{color:var(--st-done)}
-.ship:hover .t{text-decoration:underline}
+/* 5 · shipped with flags */
+.ship2 .pic .flagtag{position:absolute;left:8px;top:8px;display:inline-flex;align-items:center;gap:4px;font:500 11px/1 var(--f-text);color:var(--st-flagged);background:rgb(0 0 0 / .62);padding:5px 7px;border-radius:6px;backdrop-filter:blur(4px)}
+.ship2 .pic .flagtag .i{width:11px;height:11px}
+.ship2 .gl{display:flex;flex-wrap:wrap;gap:4px 10px;font:400 12px/16px var(--f-text);color:var(--ink-3);margin-top:-4px}
+.ship2 .gl b{font:600 12px/16px var(--f-mono);color:var(--st-flagged);margin-left:2px}
+.ship2 .gl .p b{color:var(--st-done)}
+.ship2 .ack{font:400 12px/16px var(--f-text);display:inline-flex;gap:5px;align-items:center;color:var(--ink-3);margin-top:-4px}
+.ship2 .ack.yes{color:var(--st-done)}
+.ship2 .ack .i{width:12px;height:12px}
 
-main{padding-bottom:var(--sp-8)}
-
+@media (max-width:1280px){
+  .live{grid-template-columns:280px minmax(0,1fr)}
+}
 @media (max-width:1100px){
-  .lane{grid-template-columns:180px minmax(0,1fr)}
-  .lane aside{grid-column:1/-1;border-left:0;border-top:1px solid var(--rule);flex-direction:row;flex-wrap:wrap}
-  .lane aside .words{flex:1 1 320px}
-  .cols,.gpuwent{grid-template-columns:1fr}
+  .hero-row{grid-template-columns:1fr}
+  .kpis{grid-template-rows:none;grid-template-columns:repeat(3,minmax(0,1fr))}
+  .mid{grid-template-columns:1fr}
+  .side-col{grid-template-columns:1fr 1fr;align-items:start}
+  .went{grid-template-columns:1fr}
+}
+@media (max-width:820px){
+  .live{grid-template-columns:200px minmax(0,1fr)}
+  .live .name h2{font-size:34px;line-height:36px}
+  .needs2{grid-template-columns:1fr}
+  .nextstrip{grid-template-columns:repeat(2,minmax(0,1fr))}
 }
 @media (max-width:640px){
-  .pagehead{padding-top:var(--sp-4)}
-  .pagehead h1{font-size:28px;line-height:30px}
-  .since{flex-wrap:wrap;gap:var(--sp-2) var(--sp-3)}
-  .since ul{flex:1 1 100%;order:3;flex-direction:column;gap:4px}
-  .since .seen{margin-left:auto;padding:4px 10px}
-  .lane{grid-template-columns:96px minmax(0,1fr)}
-  .lane .poster{padding:var(--sp-2)}
-  .lane .body{padding:var(--sp-3) var(--sp-4)}
-  .lane .unit h2{font-size:24px;line-height:26px}
-  .eta{grid-column:1/-1;grid-template-columns:1fr;gap:var(--sp-2)}
-  .lane .body{display:contents}
-  .lane .top,.lane .unit,.lane .stepline{grid-column:2;padding-inline:var(--sp-4)}
-  .lane .top{padding-top:var(--sp-3)}
-  .lane .poster{grid-row:1/span 3}
-  .lane .poster .bl{display:none}
-  .eta,.lane .sub,.rail{grid-column:1/-1;padding-inline:var(--sp-4)}
-  .eta .hero b{font-size:52px;line-height:48px}
-  .rail{padding-bottom:var(--sp-4)}
-  .rail .lbl span{font-size:0} .rail .lbl span::before{content:attr(data-n);font-size:9px}
-  .lane aside{flex-direction:column;padding:var(--sp-4)}
-  .lane aside .acts .btn{flex:1;justify-content:center}
-  .need{grid-template-columns:20px minmax(0,1fr) auto;padding:12px var(--sp-2);row-gap:6px}
-  .need .why{grid-column:2/-1;grid-row:2}
-  .need .age{display:none}
-  .need .acts .btn.ack span{display:none}
-  .need .acts .btn{min-height:40px}
-  .lead li{grid-template-columns:72px minmax(0,1fr) 100px}
-  .lead .v{font-size:11px}
-  .finding{font-size:18px;line-height:22px}
-  .shelf{display:flex;overflow-x:auto;scroll-snap-type:x mandatory;padding-bottom:var(--sp-3)}
-  .ship{flex:0 0 240px;scroll-snap-align:start}
+  .title-row{margin-bottom:14px;flex-wrap:wrap;gap:4px 12px}
+  .title-row h1{font-size:30px;line-height:32px}
+  .live{grid-template-columns:1fr;grid-template-areas:"poster" "body" "rail"}
+  .live .poster{padding:12px 12px 0}
+  .live .poster .pic{aspect-ratio:16/10}
+  .live .body{padding:16px 16px 0}
+  .live .top .acts{display:none}
+  .live .name h2{font-size:32px;line-height:34px}
+  .eta{grid-template-columns:1fr;gap:6px}
+  .eta .big b{font-size:52px;line-height:48px}
+  .live .m-acts{display:flex!important;gap:8px}
+  .live .m-acts .btn{flex:1;justify-content:center;height:40px}
+  .words{grid-template-columns:1fr}
+  .words .g{grid-column:1}
+  .rail2{padding:14px 16px;gap:3px}
+  .rail2 .nm{display:none} .rail2 .du{font-size:0} .rail2 .du span{font-size:10px;margin:0}
+  .kpis{grid-template-columns:1fr}
+  .side-col{grid-template-columns:1fr}
+  .nc{grid-template-columns:72px minmax(0,1fr)}
+  .nc .pic{width:72px;height:72px}
+  .nc .acts .btn{height:36px;flex:1;justify-content:center}
+  .nextstrip{display:grid;grid-auto-flow:column;grid-template-columns:none;grid-auto-columns:72%;overflow-x:auto;scroll-snap-type:x mandatory;padding-bottom:6px}
+  .nx{scroll-snap-align:start}
+  .finding{font-size:22px;line-height:26px}
+  .lead li{grid-template-columns:72px minmax(0,1fr) 92px}
+  .shelf2{grid-auto-columns:46%}
+  .panel-h,.panel-b{padding-left:16px;padding-right:16px}
+  .sh,.panel-h{flex-wrap:wrap;row-gap:2px}
+  .sh .sub,.panel-h .sub{order:3;flex-basis:100%}
+  .title-row .tally{flex-wrap:wrap}
 }
+.live .m-acts{display:none}
 </style>
 </head>
-<body>
-<div class="mock-ribbon"><div class="wrap"><b>Mockups</b>
-  <a href="index.html" aria-current="page">Now</a><a href="queue.html">Queue</a><a href="unit-running.html">Unit · running</a>
-  <a href="unit-finished.html">Unit · finished</a><a href="department.html">Department</a>
-  <a href="book.html">Book</a><a href="books.html">Books</a>
-  <span class="spacer"></span><a href="#" data-keys>? keys</a>
-</div></div>
-<header class="topbar"><div class="wrap">
-  <a class="brand" href="index.html">Visurena<span class="b-sub"> Studio</span></a>
-  <nav class="nav" aria-label="Board">
-    <a href="index.html" aria-current="page">Now</a>
-    <a href="queue.html">Queue</a>
-    <a href="books.html">Books</a>
-    <details class="menu"><summary>Departments <svg class="i"><use href="assets/icons.svg#chevron-down"/></svg></summary>
-      <div class="pop">
-        <a href="department.html?stage=analysis">analysis <span class="muted">30 done</span></a>
-        <a href="department.html?stage=screenplay">screenplay <span class="muted">30 queued</span></a>
-        <a href="department.html?stage=trailer">trailer <span class="muted">30 queued</span></a>
-        <a href="department.html?stage=refs">refs <span class="muted">29 queued</span></a>
-        <a href="department.html?stage=episode">episode <span class="muted">1 running</span></a>
-      </div></details>
-    <a href="http://127.0.0.1:8700/org">Org</a>
-  </nav>
+<body data-page="now">
+<aside id="side"></aside>
+
+<header class="ph">
+  <nav class="crumbs" aria-label="Breadcrumb"><a href="index.html">Studio</a><svg class="i"><use href="assets/icons.svg#chevron-right"/></svg><span aria-current="page">Now</span></nav>
   <span class="spacer"></span>
-  <button class="cmdk" type="button" data-palette aria-label="Search (Ctrl K)"><svg class="i"><use href="assets/icons.svg#search"/></svg>Search or jump to…<span class="kbd">Ctrl K</span></button>
-  <a class="gpu-pill" href="unit-running.html" title="GPU: episode ep17 The Thunder Child, step 07 board, done around 21:35 (20:20–22:40)"><span class="dot"></span><b class="gp-unit">ep17</b> 07 board · ~21:35</a>
-  <a class="inbox" href="index.html#needs" title="Needs you: 5"><svg class="i"><use href="assets/icons.svg#inbox"/></svg><span class="badge" data-needs>5</span><span class="vh">need you</span></a>
-  <button class="iconbtn theme-btn" type="button" data-theme-toggle aria-label="Toggle theme (T)"><svg class="i"><use href="assets/icons.svg#sun-moon"/></svg></button>
-</div></header>
+  <div class="ph-actions">
+    <span class="livechip"><i></i>live · Sun 4 Oct, 19:21</span>
+    <button class="btn sm ghost hide-sm" type="button" data-order="hold studio"><svg class="i"><use href="assets/icons.svg#pause"/></svg>Hold studio…</button>
+  </div>
+</header>
 
-<main class="wrap">
-  <div class="pagehead">
+<main class="page">
+  <div class="title-row">
     <h1>Now</h1>
-    <span class="live"><i></i>live · Sun 4 Oct, 19:21</span>
+    <div class="tally"><span class="r"><b>1</b> running</span><span class="f"><b data-needs>5</b> need you</span><span><b>92</b> queued</span></div>
   </div>
 
-  <!-- what changed while you were away (events since cc-seen) -->
-  <div class="since" id="since">
-    <span class="when"><svg class="i"><use href="assets/icons.svg#history"/></svg>Since 14:02</span>
-    <ul>
-      <li><svg class="i x"><use href="assets/icons.svg#x"/></svg><b>ep17</b> refused at 06 prompts · 18:53</li>
-      <li><svg class="i d"><use href="assets/icons.svg#corner-up-left"/></svg><b>ep17</b> 02 plan deferred · 18:11</li>
-      <li><svg class="i ok"><use href="assets/icons.svg#check"/></svg><b>ep17</b> 02 plan passed, kept best of 5 rounds · 19:11</li>
-      <li><svg class="i run"><use href="assets/icons.svg#play"/></svg><b>ep17</b> run 3 started · 18:55</li>
-    </ul>
-    <button class="btn seen" type="button" id="markseen">Mark seen</button>
-  </div>
+  <!-- 1 · hero: the running unit + KPI tiles -->
+  <div class="hero-row">
+    <section class="panel live" aria-label="On the GPU">
+      <div class="poster">
+        <a class="pic" href="unit-running.html" aria-label="Open ep17">
+          <img src="http://127.0.0.1:8700/thumb/20260827135508/320/episodes/ep17/storyboard/anchors/steamer_forward.png" alt="ep17 anchor: the steamer, looking forward" width="320" height="320">
+          <span class="tag">anchor · steamer forward</span>
+        </a>
+      </div>
+      <div class="body">
+        <div class="top">
+          <span class="pill running"><svg class="i"><use href="assets/icons.svg#loader"/></svg>Running</span>
+          <span class="where">On the GPU · Episode · The War of the Worlds</span>
+          <span class="acts">
+            <a class="btn primary sm" href="unit-running.html">Open unit<svg class="i"><use href="assets/icons.svg#chevron-right"/></svg></a>
+            <button class="btn sm" type="button" data-order="notify me: ep17"><svg class="i"><use href="assets/icons.svg#bell"/></svg>Notify me</button>
+            <details class="rowmenu"><summary aria-label="More actions"><svg class="i"><use href="assets/icons.svg#ellipsis"/></svg></summary>
+              <div class="pop">
+                <button type="button" data-order="redo ep17 07"><svg class="i"><use href="assets/icons.svg#rotate-ccw"/></svg>Redo 07 board…</button>
+                <button type="button" data-order="hold ep17"><svg class="i"><use href="assets/icons.svg#pause"/></svg>Hold ep17…</button>
+                <button type="button" data-order="hold studio"><svg class="i"><use href="assets/icons.svg#hand"/></svg>Hold studio…</button>
+              </div></details>
+          </span>
+        </div>
+        <div class="name"><span class="id">ep17</span><h2><a href="unit-running.html">The Thunder Child</a></h2></div>
+        <p class="q">Today, can the brother get the women aboard and escape the Martians?</p>
+        <div class="eta">
+          <div class="big"><span>Done around</span><b>21:35</b></div>
+          <div class="band">
+            <svg viewBox="0 0 420 52" role="img" aria-label="Finish estimate: p50 21:35, earliest 20:20, p90 22:40; now 19:21">
+              <!-- axis 19:00 → 23:00 = 0 → 420 (105 px / h) -->
+              <line x1="0" y1="22" x2="420" y2="22" style="stroke:var(--rule-2)"/>
+              <rect x="139" y="14" width="245" height="16" rx="8" style="fill:var(--st-running-bg)"/>
+              <line x1="270" y1="9" x2="270" y2="35" style="stroke:var(--st-running);stroke-width:3;stroke-linecap:round"/>
+              <line x1="37" y1="6" x2="37" y2="38" style="stroke:var(--accent);stroke-width:2"/>
+              <circle cx="37" cy="22" r="4" style="fill:var(--accent)"/>
+              <text x="44" y="11" style="font:500 10px var(--f-text);fill:var(--accent)">now 19:21</text>
+              <g style="font:400 10px var(--f-mono);fill:var(--ink-3)">
+                <text x="0" y="51">19:00</text><text x="105" y="51" text-anchor="middle">20:00</text><text x="210" y="51" text-anchor="middle">21:00</text><text x="315" y="51" text-anchor="middle">22:00</text><text x="420" y="51" text-anchor="end">23:00</text>
+              </g>
+            </svg>
+            <div class="cap"><b>p50 21:35</b> · p90 <span class="m">22:40</span> · earliest <span class="m">20:20</span> · 31 runs</div>
+          </div>
+        </div>
+        <div class="stats"><span class="now"><b style="color:inherit">07 board</b> · panel 00 of 22 · attempt 1</span><span>run <b>26 min</b></span><span>step <b>10 min</b> · p50 <b>9</b></span><span>run <b>3</b> today</span><span>last log <b>8 s</b> ago</span></div>
+        <div class="words">
+          <span class="lbl2">Last words</span><code title="ep17_grid_steamer_forward_3x1_a: shots [13, 14, 15] | slots ['101', '102', '103'] | prompt 4815 chars">ep17_grid_steamer_forward_3x1_a: shots [13, 14, 15] | slots ['101', '102', '103'] | prompt 4815 chars</code>
+          <span class="g"><span class="ok"><svg class="i"><use href="assets/icons.svg#check"/></svg>Plan 16 · kept best of 5</span><span>GPU <span class="mono">0.3 h · $0.35</span></span></span>
+        </div>
+        <div class="m-acts">
+          <a class="btn primary" href="unit-running.html">Open unit</a>
+          <button class="btn" type="button" data-order="notify me: ep17"><svg class="i"><use href="assets/icons.svg#bell"/></svg>Notify me</button>
+        </div>
+      </div>
+      <div class="rail2" role="list" aria-label="12 steps: 2 done, 4 skipped, 07 board running, 5 waiting">
+        <div class="st2 skipped" role="listitem" title="01 bind · skipped (cached)"><i></i><span class="nm">bind</span><span class="du"><span>01</span>cached</span></div>
+        <div class="st2 done" role="listitem" title="02 plan · done 15m53"><i></i><span class="nm">plan</span><span class="du"><span>02</span>15m53</span></div>
+        <div class="st2 skipped" role="listitem" title="03 places · skipped"><i></i><span class="nm">places</span><span class="du"><span>03</span>cached</span></div>
+        <div class="st2 skipped" role="listitem" title="04 record · skipped"><i></i><span class="nm">record</span><span class="du"><span>04</span>cached</span></div>
+        <div class="st2 skipped" role="listitem" title="05 timeline · skipped"><i></i><span class="nm">timeline</span><span class="du"><span>05</span>cached</span></div>
+        <div class="st2 done" role="listitem" title="06 prompts · done 1s"><i></i><span class="nm">prompts</span><span class="du"><span>06</span>1s</span></div>
+        <div class="st2 running" role="listitem" title="07 board · running 10 min"><i></i><span class="nm">board</span><span class="du"><span>07</span>10 min</span></div>
+        <div class="st2" role="listitem" title="08 panels · waiting · p50 44m"><i></i><span class="nm">panels</span><span class="du"><span>08</span>~44m</span></div>
+        <div class="st2" role="listitem" title="09 shoot · waiting · p50 63m"><i></i><span class="nm">shoot</span><span class="du"><span>09</span>~63m</span></div>
+        <div class="st2" role="listitem" title="10 edit · waiting"><i></i><span class="nm">edit</span><span class="du"><span>10</span>—</span></div>
+        <div class="st2" role="listitem" title="11 qc · waiting · p50 22m"><i></i><span class="nm">qc</span><span class="du"><span>11</span>~22m</span></div>
+        <div class="st2" role="listitem" title="12 deliver · waiting"><i></i><span class="nm">deliver</span><span class="du"><span>12</span>—</span></div>
+      </div>
+    </section>
 
-  <!-- the GPU lane card -->
-  <section class="lane" aria-label="On the GPU">
-    <div class="poster">
-      <a class="frame" href="unit-running.html" aria-label="Open ep17">
-        <img src="http://127.0.0.1:8700/thumb/20260827135508/320/episodes/ep17/storyboard/anchors/tillingham_sea.png" alt="ep17 anchor: Tillingham, the sea" width="216" height="216">
-        <span class="bl">anchor · tillingham sea</span>
+    <div class="kpis">
+      <a class="kpi" href="#went" title="GPU-hours today: 1.47 (0.84 productive, 0.46 burned, 0.17 running)">
+        <span class="k-l"><svg class="i"><use href="assets/icons.svg#zap"/></svg>GPU today</span>
+        <span class="k-v">1.5<small>h · 0.5 burned</small></span>
+        <span class="k-s">7 days <b>75 h</b> · busiest Tue <b>20.9 h</b></span>
+        <svg id="spark-gpu" viewBox="0 0 260 36" preserveAspectRatio="none" aria-hidden="true"></svg>
+      </a>
+      <a class="kpi" href="queue.html" title="Episode lane, p50 of a clean pass">
+        <span class="k-l"><svg class="i"><use href="assets/icons.svg#list-ordered"/></svg>Episode lane clears</span>
+        <span class="k-v">~05:29<small>Mon</small></span>
+        <span class="k-s"><b>4</b> in the lane · then refs · A Study in Scarlet</span>
+        <svg id="spark-lane" viewBox="0 0 260 36" preserveAspectRatio="none" aria-hidden="true"></svg>
+      </a>
+      <a class="kpi" href="#needs" title="Shipped with flags, not acknowledged">
+        <span class="k-l"><svg class="i"><use href="assets/icons.svg#inbox"/></svg>Needs you</span>
+        <span class="k-v"><span data-needs>5</span><small>shipped with flags</small></span>
+        <span class="k-s">oldest <b>9 d</b> (ep12) · newest <b>28 h</b> (ep16)</span>
+        <svg id="spark-needs" viewBox="0 0 260 36" preserveAspectRatio="none" aria-hidden="true"></svg>
       </a>
     </div>
-    <div class="body">
-      <div class="top">
-        <span class="pill running"><svg class="i"><use href="assets/icons.svg#loader"/></svg>running</span>
-        <span class="eyebrow">On the GPU · episode · The War of the Worlds</span>
-      </div>
-      <div class="unit"><span class="id">ep17</span><h2><a href="unit-running.html">The Thunder Child</a></h2></div>
-      <div class="stepline"><b>07 board</b> · panel 00 of 22 · attempt 1 · run 3 today</div>
-      <div class="eta">
-        <div class="hero"><span>done around</span><b>21:35</b></div>
-        <div class="range">
-          <svg viewBox="0 0 420 50" role="img" aria-label="Finish estimate: p50 21:35, earliest 20:20, p90 22:40; now 19:21">
-            <!-- axis 19:00 → 23:00 = 0 → 420 (105 px / h) -->
-            <line x1="0" y1="22" x2="420" y2="22" style="stroke:var(--rule)" />
-            <rect x="139" y="15" width="245" height="14" rx="2" style="fill:var(--st-running-bg)"/>
-            <line x1="270" y1="10" x2="270" y2="34" style="stroke:var(--st-running);stroke-width:3"/>
-            <line x1="37" y1="6" x2="37" y2="38" style="stroke:var(--accent);stroke-width:2"/>
-            <text x="37" y="4" text-anchor="middle" class="ax" style="font:500 10px var(--f-mono);fill:var(--accent)">now</text>
-            <g style="font:400 10px var(--f-mono);fill:var(--ink-3)">
-              <text x="0" y="49">19:00</text><text x="105" y="49" text-anchor="middle">20:00</text><text x="210" y="49" text-anchor="middle">21:00</text><text x="315" y="49" text-anchor="middle">22:00</text><text x="420" y="49" text-anchor="end">23:00</text>
-            </g>
-          </svg>
-          <div class="cap"><b>p50 21:35</b> · p90 22:40 · earliest 20:20 · 31 runs measured</div>
-        </div>
-      </div>
-      <div class="sub"><span>run 26 min</span><span>step 10 min · p50 9</span><span>last log 8 s ago</span></div>
-      <div class="rail" aria-label="12 steps: 2 done, 4 skipped, 07 board running, 5 waiting">
-        <div class="sbar">
-          <i class="skipped" title="01 bind · skipped (cached)"></i><i class="done" title="02 plan · done 15m53"></i><i class="skipped" title="03 places · skipped"></i><i class="skipped" title="04 record · skipped"></i><i class="skipped" title="05 timeline · skipped"></i><i class="done" title="06 prompts · done 1s"></i><i class="running cur" title="07 board · running 10 min"></i><i title="08 panels · waiting · p50 44m"></i><i title="09 shoot · waiting · p50 63m"></i><i title="10 edit · waiting"></i><i title="11 qc · waiting · p50 22m"></i><i title="12 deliver · waiting"></i>
-        </div>
-        <div class="lbl"><span data-n="01" title="01 bind">bind</span><span data-n="02" title="02 plan">plan</span><span data-n="03" title="03 places">places</span><span data-n="04" title="04 record">record</span><span data-n="05" title="05 timeline">timeline</span><span data-n="06" title="06 prompts">prompts</span><span data-n="07" title="07 board" class="cur">board</span><span data-n="08" title="08 panels">panels</span><span data-n="09" title="09 shoot">shoot</span><span data-n="10" title="10 edit">edit</span><span data-n="11" title="11 qc">qc</span><span data-n="12" title="12 deliver">deliver</span></div>
-      </div>
-    </div>
-    <aside>
-      <div>
-        <div class="eyebrow" style="margin-bottom:6px">Last words</div>
-        <div class="words">ep17_grid_steamer_forward_3x1_a: shots [13, 14, 15] | slots ['101', '102', '103'] | prompt 4815 chars</div>
-      </div>
-      <dl>
-        <dt>Gate</dt><dd><span class="gate ok"><svg class="i"><use href="assets/icons.svg#check"/></svg>PLAN 16</span> <span class="muted small">kept best of 5</span></dd>
-        <dt>GPU</dt><dd class="mono">0.3 h · $0.35</dd>
-      </dl>
-      <div class="acts">
-        <a class="btn primary" href="unit-running.html">Open unit<svg class="i"><use href="assets/icons.svg#chevron-right"/></svg></a>
-        <button class="btn" type="button" data-order="notify me: ep17"><svg class="i"><use href="assets/icons.svg#bell"/></svg>Notify me</button>
-        <details class="rowmenu"><summary aria-label="More actions"><svg class="i"><use href="assets/icons.svg#ellipsis"/></svg></summary>
-          <div class="pop">
-            <button type="button" data-order="redo ep17 07"><svg class="i"><use href="assets/icons.svg#rotate-ccw"/></svg>Redo 07 board…</button>
-            <button type="button" data-order="hold ep17"><svg class="i"><use href="assets/icons.svg#pause"/></svg>Hold ep17…</button>
-            <button type="button" data-order="hold studio"><svg class="i"><use href="assets/icons.svg#hand"/></svg>Hold studio…</button>
-          </div></details>
-      </div>
-    </aside>
-  </section>
-
-  <div class="cols">
-    <!-- NEEDS YOU -->
-    <section id="needs" aria-labelledby="needs-h">
-      <div class="sec-h"><h2 id="needs-h">Needs you</h2><span class="n" data-needs>5</span><span class="spacer"></span><span class="meta">oldest first</span></div>
-      <div class="kind"><svg class="i"><use href="assets/icons.svg#flag"/></svg>Shipped with flags, not acknowledged</div>
-      <ul class="needs" id="needlist">
-        <li class="need" data-row data-u="ep12" tabindex="0">
-          <svg class="i"><use href="assets/icons.svg#flag"/></svg>
-          <div class="who"><a href="unit-finished.html?u=ep12"><span class="id">ep12</span><span class="t">Weybridge and Shepperton</span></a><small>War of the Worlds · 31 runs</small></div>
-          <div class="why"><span class="g">EYE_PANELS <b>⚑531</b></span><span class="g term">kept best</span><span class="g">MASTER <b>⚑3</b></span></div>
-          <span class="age" title="finished 2026-09-25 19:14">8 d</span>
-          <span class="acts"><button class="btn ack" type="button"><svg class="i"><use href="assets/icons.svg#check"/></svg><span>Acknowledge</span></button><a class="btn" href="unit-finished.html?u=ep12#gate-MASTER">Open</a></span>
-        </li>
-        <li class="need" data-row data-u="ep13" tabindex="0">
-          <svg class="i"><use href="assets/icons.svg#flag"/></svg>
-          <div class="who"><a href="unit-finished.html?u=ep13"><span class="id">ep13</span><span class="t">How I Fell in with the Curate</span></a><small>War of the Worlds · 52 runs</small></div>
-          <div class="why"><span class="g">EYE_PANELS <b>⚑4</b></span><span class="g">EYE_TAKES <b>⚑2</b></span><span class="g term">kept best</span><span class="g">MASTER <b>⚑3</b></span></div>
-          <span class="age" title="finished 2026-09-27 23:10">6 d</span>
-          <span class="acts"><button class="btn ack" type="button"><svg class="i"><use href="assets/icons.svg#check"/></svg><span>Acknowledge</span></button><a class="btn" href="unit-finished.html?u=ep13#gate-MASTER">Open</a></span>
-        </li>
-        <li class="need" data-row data-u="ep14" tabindex="0">
-          <svg class="i"><use href="assets/icons.svg#flag"/></svg>
-          <div class="who"><a href="unit-finished.html?u=ep14"><span class="id">ep14</span><span class="t">The Great Panic</span></a><small>War of the Worlds · 34 runs · redo 09 taken</small></div>
-          <div class="why"><span class="g">EYE_PANELS <b>⚑21</b></span><span class="g">EYE_TAKES <b>⚑10</b></span><span class="g term">kept best</span><span class="g">MASTER <b>⚑8</b></span></div>
-          <span class="age" title="finished 2026-09-30 03:26">4 d</span>
-          <span class="acts"><button class="btn ack" type="button"><svg class="i"><use href="assets/icons.svg#check"/></svg><span>Acknowledge</span></button><a class="btn" href="unit-finished.html?u=ep14#gate-MASTER">Open</a></span>
-        </li>
-        <li class="need" data-row data-u="ep15" tabindex="0">
-          <svg class="i"><use href="assets/icons.svg#flag"/></svg>
-          <div class="who"><a href="unit-finished.html?u=ep15"><span class="id">ep15</span><span class="t">What Had Happened in Surrey</span></a><small>War of the Worlds · 36 runs</small></div>
-          <div class="why"><span class="g">EYE_PANELS <b>⚑13</b></span><span class="g">EYE_TAKES <b>⚑12</b></span><span class="g term">stilled</span><span class="g">MASTER <b>⚑11</b></span></div>
-          <span class="age" title="finished 2026-10-01 08:39">3 d</span>
-          <span class="acts"><button class="btn ack" type="button"><svg class="i"><use href="assets/icons.svg#check"/></svg><span>Acknowledge</span></button><a class="btn" href="unit-finished.html?u=ep15#gate-MASTER">Open</a></span>
-        </li>
-        <li class="need" data-row data-u="ep16" tabindex="0">
-          <svg class="i"><use href="assets/icons.svg#flag"/></svg>
-          <div class="who"><a href="unit-finished.html?u=ep16"><span class="id">ep16</span><span class="t">The Exodus Northward</span></a><small>War of the Worlds · 31 runs</small></div>
-          <div class="why"><span class="g">EYE_PANELS <b>⚑23</b></span><span class="g">EYE_TAKES <b>⚑21</b></span><span class="g term">stilled</span><span class="g">MASTER <b>⚑5</b></span></div>
-          <span class="age" title="finished 2026-10-03 15:38">28 h</span>
-          <span class="acts"><button class="btn ack" type="button"><svg class="i"><use href="assets/icons.svg#check"/></svg><span>Acknowledge</span></button><a class="btn" href="unit-finished.html?u=ep16#gate-MASTER">Open</a></span>
-        </li>
-      </ul>
-      <p class="allclear" id="allclear">Nothing needs you · checked 19:21:22</p>
-      <div class="zeros"><span>Failed <b>0</b></span><span>Escalated <b>0</b></span><span>Deferred <b>0</b></span><span>Stale <b>0</b></span><span>Looping <b>0</b></span><span>Holds &gt; 24 h <b>0</b></span><span>Refused orders <b>0</b></span></div>
-    </section>
-
-    <!-- UP NEXT -->
-    <section aria-labelledby="next-h">
-      <div class="sec-h"><h2 id="next-h">Up next</h2><span class="spacer"></span><a class="linkish" href="queue.html">queue · 92<svg class="i"><use href="assets/icons.svg#chevron-right"/></svg></a></div>
-      <ol class="next">
-        <li><div><a href="queue.html#q-episode"><span class="id">ep01</span>The Eve of the War</a><span class="when">starts <b>~21:35</b> · done ~00:13</span><div class="ghost" style="width:46%"></div></div></li>
-        <li><div><a href="queue.html#q-episode"><span class="id">ep02</span>The Falling Star</a><span class="when">starts <b>~00:13</b> · done ~02:51</span><div class="ghost" style="width:46%"></div></div></li>
-        <li><div><a href="queue.html#q-episode"><span class="id">ep05</span>The Heat-Ray</a><span class="when">starts <b>~02:51</b> · 2.4 GPU-h already spent</span><div class="ghost" style="width:46%"></div></div></li>
-      </ol>
-      <div class="then"><span>then refs · A Study in Scarlet · 03 voices 2/4</span></div>
-      <p class="foot">Starts are p50 of a clean pass (2h38, sum of step medians); p90 is 5h42. All three are The War of the Worlds.</p>
-    </section>
   </div>
 
-  <!-- WHERE THE GPU WENT · 7 DAYS -->
-  <section class="section" style="margin-top:var(--sp-7);padding-top:0;border-top:0" aria-labelledby="went-h">
-    <div class="sec-h"><h2 id="went-h">Where the GPU went · 7 days</h2><span class="spacer"></span><a class="linkish" href="queue.html">timeline<svg class="i"><use href="assets/icons.svg#chevron-right"/></svg></a></div>
-    <div class="gpuwent">
+  <!-- 2 · needs you (cards) + since 14:02 -->
+  <div class="mid">
+    <section id="needs" aria-labelledby="needs-h">
+      <div class="sh"><h2 id="needs-h">Needs you</h2><span class="count hot" data-needs>5</span><span class="sub">shipped with flags, not acknowledged · oldest first</span><span class="spacer"></span></div>
+      <ul class="needs2" id="needlist">
+        <li class="nc" data-row data-u="ep12" tabindex="0">
+          <a class="pic" href="unit-finished.html?u=ep12"><img src="http://127.0.0.1:8700/thumb/20260827135508/160/episodes/ep12/storyboard/shot_05.png" alt="" width="96" height="96"><span class="flagdot"><svg class="i"><use href="assets/icons.svg#flag"/></svg></span></a>
+          <div class="who">
+            <a class="t" href="unit-finished.html?u=ep12"><span class="id">ep12</span>Weybridge and Shepperton</a>
+            <span class="meta">War of the Worlds · <b>31</b> runs · <b title="2026-09-25 19:14">9 d</b> ago · kept best</span>
+            <span class="chips"><span class="chip2 flag" title="EYE_PANELS"><span>Panels</span><b>⚑531</b></span><span class="chip2 flag" title="MASTER"><span>Master</span><b>⚑3</b></span></span>
+            <span class="acts"><button class="btn sm ack" type="button"><svg class="i"><use href="assets/icons.svg#check"/></svg>Acknowledge</button><a class="btn sm ghost" href="unit-finished.html?u=ep12#gate-MASTER">Open</a></span>
+          </div>
+        </li>
+        <li class="nc" data-row data-u="ep13" tabindex="0">
+          <a class="pic" href="unit-finished.html?u=ep13"><img src="http://127.0.0.1:8700/thumb/20260827135508/160/episodes/ep13/storyboard/shot_05.png" alt="" width="96" height="96"><span class="flagdot"><svg class="i"><use href="assets/icons.svg#flag"/></svg></span></a>
+          <div class="who">
+            <a class="t" href="unit-finished.html?u=ep13"><span class="id">ep13</span>How I Fell in with the Curate</a>
+            <span class="meta">War of the Worlds · <b>52</b> runs · <b title="2026-09-27 23:10">6 d</b> ago · kept best</span>
+            <span class="chips"><span class="chip2 flag" title="EYE_PANELS"><span>Panels</span><b>⚑4</b></span><span class="chip2 flag" title="EYE_TAKES"><span>Takes</span><b>⚑2</b></span><span class="chip2 flag" title="MASTER"><span>Master</span><b>⚑3</b></span></span>
+            <span class="acts"><button class="btn sm ack" type="button"><svg class="i"><use href="assets/icons.svg#check"/></svg>Acknowledge</button><a class="btn sm ghost" href="unit-finished.html?u=ep13#gate-MASTER">Open</a></span>
+          </div>
+        </li>
+        <li class="nc" data-row data-u="ep14" tabindex="0">
+          <a class="pic" href="unit-finished.html?u=ep14"><img src="http://127.0.0.1:8700/thumb/20260827135508/160/episodes/ep14/storyboard/shot_05.png" alt="" width="96" height="96"><span class="flagdot"><svg class="i"><use href="assets/icons.svg#flag"/></svg></span></a>
+          <div class="who">
+            <a class="t" href="unit-finished.html?u=ep14"><span class="id">ep14</span>The Great Panic</a>
+            <span class="meta">War of the Worlds · <b>34</b> runs · redo 09 taken · <b title="2026-09-30 03:26">4 d</b> ago · kept best</span>
+            <span class="chips"><span class="chip2 flag" title="EYE_PANELS"><span>Panels</span><b>⚑21</b></span><span class="chip2 flag" title="EYE_TAKES"><span>Takes</span><b>⚑10</b></span><span class="chip2 flag" title="MASTER"><span>Master</span><b>⚑8</b></span></span>
+            <span class="acts"><button class="btn sm ack" type="button"><svg class="i"><use href="assets/icons.svg#check"/></svg>Acknowledge</button><a class="btn sm ghost" href="unit-finished.html?u=ep14#gate-MASTER">Open</a></span>
+          </div>
+        </li>
+        <li class="nc" data-row data-u="ep15" tabindex="0">
+          <a class="pic" href="unit-finished.html?u=ep15"><img src="http://127.0.0.1:8700/thumb/20260827135508/160/episodes/ep15/storyboard/shot_05.png" alt="" width="96" height="96"><span class="flagdot"><svg class="i"><use href="assets/icons.svg#flag"/></svg></span></a>
+          <div class="who">
+            <a class="t" href="unit-finished.html?u=ep15"><span class="id">ep15</span>What Had Happened in Surrey</a>
+            <span class="meta">War of the Worlds · <b>36</b> runs · <b title="2026-10-01 08:39">3 d</b> ago · stilled</span>
+            <span class="chips"><span class="chip2 flag" title="EYE_PANELS"><span>Panels</span><b>⚑13</b></span><span class="chip2 flag" title="EYE_TAKES"><span>Takes</span><b>⚑12</b></span><span class="chip2 flag" title="MASTER"><span>Master</span><b>⚑11</b></span></span>
+            <span class="acts"><button class="btn sm ack" type="button"><svg class="i"><use href="assets/icons.svg#check"/></svg>Acknowledge</button><a class="btn sm ghost" href="unit-finished.html?u=ep15#gate-MASTER">Open</a></span>
+          </div>
+        </li>
+        <li class="nc" data-row data-u="ep16" tabindex="0">
+          <a class="pic" href="unit-finished.html?u=ep16"><img src="http://127.0.0.1:8700/thumb/20260827135508/160/episodes/ep16/storyboard/shot_05.png" alt="" width="96" height="96"><span class="flagdot"><svg class="i"><use href="assets/icons.svg#flag"/></svg></span></a>
+          <div class="who">
+            <a class="t" href="unit-finished.html?u=ep16"><span class="id">ep16</span>The Exodus Northward</a>
+            <span class="meta">War of the Worlds · <b>31</b> runs · <b title="2026-10-03 15:38">28 h</b> ago · stilled</span>
+            <span class="chips"><span class="chip2 flag" title="EYE_PANELS"><span>Panels</span><b>⚑23</b></span><span class="chip2 flag" title="EYE_TAKES"><span>Takes</span><b>⚑21</b></span><span class="chip2 flag" title="MASTER"><span>Master</span><b>⚑5</b></span></span>
+            <span class="acts"><button class="btn sm ack" type="button"><svg class="i"><use href="assets/icons.svg#check"/></svg>Acknowledge</button><a class="btn sm ghost" href="unit-finished.html?u=ep16#gate-MASTER">Open</a></span>
+          </div>
+        </li>
+      </ul>
+      <p class="allclear panel" id="allclear">Nothing needs you · checked 19:21:22</p>
+    </section>
+
+    <div class="side-col">
+      <section class="panel" aria-labelledby="since-h">
+        <div class="panel-h"><h2 id="since-h">Since 14:02</h2><span class="sub">ep17 · 4 events</span><span class="spacer"></span><button class="btn sm ghost" type="button" id="markseen">Mark seen</button></div>
+        <div class="panel-b" style="padding-top:8px">
+          <ul class="feed" id="feed">
+            <li><span class="ic ok"><svg class="i"><use href="assets/icons.svg#check"/></svg></span><span><b>ep17</b>02 plan passed, kept best of 5 rounds</span><time>19:11</time></li>
+            <li><span class="ic run"><svg class="i"><use href="assets/icons.svg#play"/></svg></span><span><b>ep17</b>run 3 started</span><time>18:55</time></li>
+            <li><span class="ic x"><svg class="i"><use href="assets/icons.svg#x"/></svg></span><span><b>ep17</b>refused at 06 prompts</span><time>18:53</time></li>
+            <li><span class="ic d"><svg class="i"><use href="assets/icons.svg#corner-up-left"/></svg></span><span><b>ep17</b>02 plan deferred</span><time>18:11</time></li>
+          </ul>
+          <p class="feed-empty">Nothing new since 19:21.</p>
+        </div>
+      </section>
+      <section class="panel" aria-labelledby="clear-h">
+        <div class="panel-h"><h2 id="clear-h">Everything else is clear</h2></div>
+        <div class="panel-b" style="padding-top:8px">
+          <dl class="zeros">
+            <div><dt>Failed</dt><dd>0</dd></div><div><dt>Escalated</dt><dd>0</dd></div>
+            <div><dt>Deferred</dt><dd>0</dd></div><div><dt>Stale</dt><dd>0</dd></div>
+            <div><dt>Looping</dt><dd>0</dd></div><div><dt>Holds &gt; 24 h</dt><dd>0</dd></div>
+            <div><dt>Refused orders</dt><dd>0</dd></div>
+          </dl>
+        </div>
+      </section>
+    </div>
+  </div>
+
+  <!-- 3 · up next -->
+  <section class="sect" aria-labelledby="next-h">
+    <div class="sh"><h2 id="next-h">Up next</h2><span class="sub">after ep17 · starts are p50 of a clean pass</span><span class="spacer"></span><a class="more" href="queue.html">Queue · 92<svg class="i"><use href="assets/icons.svg#chevron-right"/></svg></a></div>
+    <div class="nextstrip">
+      <a class="nx" href="queue.html#q-episode">
+        <span class="pic"><img src="http://127.0.0.1:8700/thumb/20260827135508/320/episodes/ep01/review/work/b2c111e9/f03.png" alt="" width="320" height="200"><span class="pos">1</span><span class="when"><small>starts</small>~21:35</span><span class="tag" style="top:8px;bottom:auto;left:auto;right:8px">earlier cut</span></span>
+        <span class="pt"><span class="id">ep01</span>The Eve of the War</span>
+        <span class="pm">done <b>~00:13</b> · The War of the Worlds</span>
+      </a>
+      <a class="nx" href="queue.html#q-episode">
+        <span class="pic"><img src="http://127.0.0.1:8700/thumb/20260827135508/320/episodes/ep02/review/T11_mid.png" alt="" width="320" height="200"><span class="pos">2</span><span class="when"><small>starts</small>~00:13</span><span class="tag" style="top:8px;bottom:auto;left:auto;right:8px">earlier take</span></span>
+        <span class="pt"><span class="id">ep02</span>The Falling Star</span>
+        <span class="pm">done <b>~02:51</b> · The War of the Worlds</span>
+      </a>
+      <a class="nx" href="queue.html#q-episode">
+        <span class="pic"><img src="http://127.0.0.1:8700/thumb/20260827135508/320/episodes/ep05/storyboard/shot_05.png" alt="" width="320" height="200"><span class="pos">3</span><span class="when"><small>starts</small>~02:51</span></span>
+        <span class="pt"><span class="id">ep05</span>The Heat-Ray</span>
+        <span class="pm"><b>2.4</b> GPU-h already spent · done <b>~05:29</b></span>
+      </a>
+      <a class="nx then" href="queue.html#q-refs">
+        <span class="pic"><img src="http://127.0.0.1:8700/thumb/20260822113400/320/refs/characters/char-john_watson.png" alt="" width="320" height="200"><span class="pos">4</span><span class="when"><small>then</small>refs</span></span>
+        <span class="pt"><span class="id">refs</span>A Study in Scarlet</span>
+        <span class="pm">waiting at <b>03</b> voices · <b>2/4</b> done</span>
+      </a>
+    </div>
+    <p class="foot2">A clean pass is 2 h 38 (sum of step medians); p90 is 5 h 42. The first three are The War of the Worlds.</p>
+  </section>
+
+  <!-- 4 · where the GPU went -->
+  <section class="panel sect" id="went" aria-labelledby="went-h">
+    <div class="panel-h"><h2 id="went-h">Where the GPU went</h2><span class="sub">last 7 days · step time from events</span><span class="spacer"></span><a class="more" href="queue.html">Timeline<svg class="i"><use href="assets/icons.svg#chevron-right"/></svg></a></div>
+    <div class="panel-b went">
       <div class="chart">
         <p class="finding"><em>34 of 75</em> GPU-hours burned on steps that ended failed or deferred</p>
         <svg viewBox="0 0 640 220" role="img" aria-labelledby="went-cap" id="went-svg"></svg>
         <div class="key"><span><i class="sw ok"></i>productive (step completed)</span><span><i class="sw burn"></i>burned (step failed or deferred)</span><span><i class="sw live"></i>running now</span></div>
-        <p class="foot" id="went-cap">Step time from <span class="mono">events</span>, started → completed / failed / deferred, local days. All time: 52 of 116 GPU-h burned. Killed runs have no end event and are not counted. The dashed line is 24 h, the whole day of one GPU.</p>
-        <details class="foot"><summary>table</summary>
-          <table class="tbl" style="margin-top:8px"><thead><tr><th>day</th><th class="num">productive h</th><th class="num">burned h</th></tr></thead><tbody id="went-tbl"></tbody></table>
+        <p class="foot2" id="went-cap">Started → completed / failed / deferred, local days. All time: 52 of 116 GPU-h burned. Killed runs have no end event and are not counted. The dashed line is 24 h, the whole day of one GPU.</p>
+        <details class="tbl-d"><summary>Table</summary>
+          <table class="dgrid" style="margin-top:8px"><thead><tr><th>Day</th><th class="num">Productive h</th><th class="num">Burned h</th></tr></thead><tbody id="went-tbl"></tbody></table>
         </details>
       </div>
       <div class="lead">
-        <h3>Burned by step · 7 days</h3>
+        <h3>Burned by step</h3>
         <ol>
-          <li><span class="s">09 shoot</span><span class="bar" style="width:100%"><i style="width:55%"></i></span><span class="v"><b>21.0</b> of 38.1 h</span></li>
-          <li><span class="s">02 plan</span><span class="bar" style="width:35%"><i style="width:69%"></i></span><span class="v"><b>9.2</b> of 13.4 h</span></li>
-          <li><span class="s">11 qc</span><span class="bar" style="width:14%"><i style="width:38%"></i></span><span class="v"><b>2.1</b> of 5.5 h</span></li>
-          <li><span class="s">04 record</span><span class="bar" style="width:4%"><i style="width:64%"></i></span><span class="v"><b>0.9</b> of 1.4 h</span></li>
-          <li><span class="s">08 panels</span><span class="bar" style="width:20%"><i style="width:4%"></i></span><span class="v"><b>0.3</b> of 7.8 h</span></li>
+          <li><span class="s"><span>09</span>shoot</span><span class="track"><span class="bar" style="width:100%"><i style="width:55%"></i></span></span><span class="v"><b>21.0</b> of 38.1 h</span></li>
+          <li><span class="s"><span>02</span>plan</span><span class="track"><span class="bar" style="width:35%"><i style="width:69%"></i></span></span><span class="v"><b>9.2</b> of 13.4 h</span></li>
+          <li><span class="s"><span>11</span>qc</span><span class="track"><span class="bar" style="width:14%"><i style="width:38%"></i></span></span><span class="v"><b>2.1</b> of 5.5 h</span></li>
+          <li><span class="s"><span>04</span>record</span><span class="track"><span class="bar" style="width:4%"><i style="width:64%"></i></span></span><span class="v"><b>0.9</b> of 1.4 h</span></li>
+          <li><span class="s"><span>08</span>panels</span><span class="track"><span class="bar" style="width:20%"><i style="width:4%"></i></span></span><span class="v"><b>0.3</b> of 7.8 h</span></li>
         </ol>
-        <p class="foot">09 shoot is the lever: 55 % of its hours this week ended in a refusal. 113 runs in 7 days: 60 failed, 25 deferred, 15 killed, 12 done, 1 running.</p>
+        <p class="lever"><b>09 shoot is the lever:</b> 55 % of its hours this week ended in a refusal. 113 runs in 7 days: 60 failed, 25 deferred, 15 killed, 12 done, 1 running.</p>
       </div>
     </div>
   </section>
 
-  <!-- SHIPPED WITH FLAGS (quiet lane) -->
-  <section class="quiet" style="margin-top:var(--sp-6)" aria-labelledby="ship-h">
-    <div class="sec-h"><h2 id="ship-h">Shipped with flags</h2><span class="meta">· taste gates clean: 1 of 15</span><span class="spacer"></span><a class="linkish" href="book.html">season<svg class="i"><use href="assets/icons.svg#chevron-right"/></svg></a></div>
-    <div class="shelf">
-      <a class="ship" href="unit-finished.html?u=ep12" data-ship="ep12"><span class="frame"><img src="http://127.0.0.1:8700/thumb/20260827135508/160/episodes/ep12/storyboard/shot_05.png" alt="" width="160" height="160"><span class="tl">ep12</span></span><span class="t"><span class="id">ep12</span>Weybridge and Shepperton</span><span class="gl"><span class="f">panels ⚑531</span><span class="p">takes ✓</span><span class="f">master ⚑3</span></span><span class="ack no"><svg class="i"><use href="assets/icons.svg#flag"/></svg>not acknowledged</span></a>
-      <a class="ship" href="unit-finished.html?u=ep13" data-ship="ep13"><span class="frame"><img src="http://127.0.0.1:8700/thumb/20260827135508/160/episodes/ep13/storyboard/shot_05.png" alt="" width="160" height="160"><span class="tl">ep13</span></span><span class="t"><span class="id">ep13</span>How I Fell in with the Curate</span><span class="gl"><span class="f">panels ⚑4</span><span class="f">takes ⚑2</span><span class="f">master ⚑3</span></span><span class="ack no"><svg class="i"><use href="assets/icons.svg#flag"/></svg>not acknowledged</span></a>
-      <a class="ship" href="unit-finished.html?u=ep14" data-ship="ep14"><span class="frame"><img src="http://127.0.0.1:8700/thumb/20260827135508/160/episodes/ep14/storyboard/shot_05.png" alt="" width="160" height="160"><span class="tl">ep14</span></span><span class="t"><span class="id">ep14</span>The Great Panic</span><span class="gl"><span class="f">panels ⚑21</span><span class="f">takes ⚑10</span><span class="f">master ⚑8</span></span><span class="ack no"><svg class="i"><use href="assets/icons.svg#flag"/></svg>not acknowledged</span></a>
-      <a class="ship" href="unit-finished.html?u=ep15" data-ship="ep15"><span class="frame"><img src="http://127.0.0.1:8700/thumb/20260827135508/160/episodes/ep15/storyboard/shot_05.png" alt="" width="160" height="160"><span class="tl">ep15</span></span><span class="t"><span class="id">ep15</span>What Had Happened in Surrey</span><span class="gl"><span class="f">panels ⚑13</span><span class="f">takes ⚑12</span><span class="f">master ⚑11</span></span><span class="ack no"><svg class="i"><use href="assets/icons.svg#flag"/></svg>not acknowledged</span></a>
-      <a class="ship" href="unit-finished.html?u=ep16" data-ship="ep16"><span class="frame"><img src="http://127.0.0.1:8700/thumb/20260827135508/160/episodes/ep16/storyboard/shot_05.png" alt="" width="160" height="160"><span class="tl">ep16</span></span><span class="t"><span class="id">ep16</span>The Exodus Northward</span><span class="gl"><span class="f">panels ⚑23</span><span class="f">takes ⚑21</span><span class="f">master ⚑5</span></span><span class="ack no"><svg class="i"><use href="assets/icons.svg#flag"/></svg>not acknowledged</span></a>
+  <!-- 5 · shipped with flags (poster shelf) -->
+  <section class="sect" aria-labelledby="ship-h">
+    <div class="sh"><h2 id="ship-h">Shipped with flags</h2><span class="sub">taste gates clean: 1 of 15</span><span class="spacer"></span><a class="more" href="book.html">Season<svg class="i"><use href="assets/icons.svg#chevron-right"/></svg></a></div>
+    <div class="shelf2">
+      <a class="pcard ship2" href="unit-finished.html?u=ep12" data-ship="ep12"><span class="pic"><img src="http://127.0.0.1:8700/thumb/20260827135508/320/episodes/ep12/storyboard/shot_05.png" alt="" width="320" height="320"><span class="flagtag"><svg class="i"><use href="assets/icons.svg#flag"/></svg>2 gates</span></span><span class="pt"><span class="id">ep12</span>Weybridge and Shepperton</span><span class="gl"><span>panels<b>⚑531</b></span><span class="p">takes<b>✓</b></span><span>master<b>⚑3</b></span></span><span class="ack"><svg class="i"><use href="assets/icons.svg#flag"/></svg>not acknowledged</span></a>
+      <a class="pcard ship2" href="unit-finished.html?u=ep13" data-ship="ep13"><span class="pic"><img src="http://127.0.0.1:8700/thumb/20260827135508/320/episodes/ep13/storyboard/shot_05.png" alt="" width="320" height="320"><span class="flagtag"><svg class="i"><use href="assets/icons.svg#flag"/></svg>3 gates</span></span><span class="pt"><span class="id">ep13</span>How I Fell in with the Curate</span><span class="gl"><span>panels<b>⚑4</b></span><span>takes<b>⚑2</b></span><span>master<b>⚑3</b></span></span><span class="ack"><svg class="i"><use href="assets/icons.svg#flag"/></svg>not acknowledged</span></a>
+      <a class="pcard ship2" href="unit-finished.html?u=ep14" data-ship="ep14"><span class="pic"><img src="http://127.0.0.1:8700/thumb/20260827135508/320/episodes/ep14/storyboard/shot_05.png" alt="" width="320" height="320"><span class="flagtag"><svg class="i"><use href="assets/icons.svg#flag"/></svg>3 gates</span></span><span class="pt"><span class="id">ep14</span>The Great Panic</span><span class="gl"><span>panels<b>⚑21</b></span><span>takes<b>⚑10</b></span><span>master<b>⚑8</b></span></span><span class="ack"><svg class="i"><use href="assets/icons.svg#flag"/></svg>not acknowledged</span></a>
+      <a class="pcard ship2" href="unit-finished.html?u=ep15" data-ship="ep15"><span class="pic"><img src="http://127.0.0.1:8700/thumb/20260827135508/320/episodes/ep15/storyboard/shot_05.png" alt="" width="320" height="320"><span class="flagtag"><svg class="i"><use href="assets/icons.svg#flag"/></svg>3 gates</span></span><span class="pt"><span class="id">ep15</span>What Had Happened in Surrey</span><span class="gl"><span>panels<b>⚑13</b></span><span>takes<b>⚑12</b></span><span>master<b>⚑11</b></span></span><span class="ack"><svg class="i"><use href="assets/icons.svg#flag"/></svg>not acknowledged</span></a>
+      <a class="pcard ship2" href="unit-finished.html?u=ep16" data-ship="ep16"><span class="pic"><img src="http://127.0.0.1:8700/thumb/20260827135508/320/episodes/ep16/storyboard/shot_05.png" alt="" width="320" height="320"><span class="flagtag"><svg class="i"><use href="assets/icons.svg#flag"/></svg>3 gates</span></span><span class="pt"><span class="id">ep16</span>The Exodus Northward</span><span class="gl"><span>panels<b>⚑23</b></span><span>takes<b>⚑21</b></span><span>master<b>⚑5</b></span></span><span class="ack"><svg class="i"><use href="assets/icons.svg#flag"/></svg>not acknowledged</span></a>
     </div>
   </section>
 </main>
 
-<nav class="tabs" aria-label="Phone">
-  <a href="index.html" aria-current="page"><svg class="i"><use href="assets/icons.svg#gauge"/></svg>Now</a>
-  <a href="index.html#needs"><svg class="i"><use href="assets/icons.svg#inbox"/></svg>Inbox<span class="badge" data-needs>5</span></a>
-  <a href="books.html"><svg class="i"><use href="assets/icons.svg#book-open"/></svg>Books</a>
-  <a href="#" data-palette><svg class="i"><use href="assets/icons.svg#search"/></svg>Search</a>
-</nav>
-
 <script>
+/* ---------- KPI sparklines (real values, captured 19:21) ---------- */
+(function () {
+  var NS = 'http://www.w3.org/2000/svg';
+  function put(id, html) { document.getElementById(id).innerHTML = html; }
+  /* GPU-hours per day, Mon 28 → today (sum of the chart columns below) */
+  var gpu = [15.55, 20.88, 5.19, 17.63, 9.96, 4.43, 1.47], W = 260, H = 30, max = 24;
+  var pts = gpu.map(function (v, i) { return [i * W / (gpu.length - 1), 2 + H - v / max * H]; });
+  var line = pts.map(function (p, i) { return (i ? 'L' : 'M') + p[0].toFixed(1) + ' ' + p[1].toFixed(1); }).join(' ');
+  put('spark-gpu', '<defs><linearGradient id="kfade" x1="0" x2="0" y1="0" y2="1"><stop offset="0" stop-color="var(--focus)" stop-opacity=".28"/><stop offset="1" stop-color="var(--focus)" stop-opacity="0"/></linearGradient></defs>' +
+    '<path class="spark-a" d="' + line + ' L' + W + ' 36 L0 36 Z"/><path class="spark-l" d="' + line + '" vector-effect="non-scaling-stroke"/>' +
+    '<circle class="spark-d" cx="' + pts[6][0] + '" cy="' + pts[6][1].toFixed(1) + '" r="3"/>');
+  /* the episode lane: now 19:21 → 05:29, one block per unit at its p50 */
+  var lane = [['ep17', 19 * 60 + 21, 21 * 60 + 35, 'var(--st-running)'], ['ep01', 21 * 60 + 35, 24 * 60 + 13, 'var(--line)'], ['ep02', 24 * 60 + 13, 26 * 60 + 51, 'var(--line)'], ['ep05', 26 * 60 + 51, 29 * 60 + 29, 'var(--line)']];
+  var t0 = lane[0][1], t1 = lane[3][2], sx = function (t) { return (t - t0) / (t1 - t0) * W; }, s = '';
+  lane.forEach(function (u, i) {
+    var x = sx(u[1]) + (i ? 2 : 0), w = sx(u[2]) - x;
+    s += '<rect x="' + x.toFixed(1) + '" y="8" width="' + w.toFixed(1) + '" height="10" rx="3" style="fill:' + u[3] + (i ? ';opacity:' + (0.75 - i * 0.15) : '') + '"/>' +
+      '<text class="spark-ax" x="' + (x + 2).toFixed(1) + '" y="32">' + u[0] + '</text>';
+  });
+  put('spark-lane', s);
+  /* needs you: when each flagged unit finished, over the last 10 days (now at the right edge) */
+  var ago = [['ep12', 9.0], ['ep13', 6.84], ['ep14', 4.66], ['ep15', 3.45], ['ep16', 1.15]], days = 10, n = '';
+  for (var d = 0; d <= days; d += 1) n += '<line x1="' + (W - d / days * W).toFixed(1) + '" x2="' + (W - d / days * W).toFixed(1) + '" y1="20" y2="24" style="stroke:var(--rule-2)"/>';
+  n += '<line x1="0" x2="' + W + '" y1="22" y2="22" style="stroke:var(--rule-2)"/>';
+  ago.forEach(function (a) { var x = W - a[1] / days * W; n += '<circle data-dot="' + a[0] + '" cx="' + x.toFixed(1) + '" cy="12" r="4.5" style="fill:var(--st-flagged)"><title>' + a[0] + ' finished ' + a[1].toFixed(1) + ' d ago</title></circle>'; });
+  n += '<text class="spark-ax" x="0" y="34">10 d ago</text><text class="spark-ax" x="' + W + '" y="34" text-anchor="end">now</text>';
+  put('spark-needs', n);
+})();
+
 /* ---------- Where the GPU went: hand-drawn SVG from the ledger (events, step-level, PDT days) ---------- */
 (function () {
   var DAYS = [
@@ -419,70 +525,76 @@ main{padding-bottom:var(--sp-8)}
     { d: 'Sat 3', ok: 4.43, burn: 0, live: 0 },
     { d: 'Sun 4', ok: 0.84, burn: 0.46, live: 0.17 }
   ];
-  var svgEl = document.getElementById('went-svg'), W = Math.max(340, Math.min(640, svgEl.parentNode.clientWidth || 640)), top = 18, H = W < 500 ? 150 : 168, L = 34, colW = W < 500 ? 30 : 44, step = (W - L - 8) / DAYS.length;
+  var svgEl = document.getElementById('went-svg'), W = Math.max(320, Math.min(720, svgEl.parentNode.clientWidth || 640)), top = 18, H = W < 500 ? 150 : 180, L = 34, colW = W < 500 ? 26 : 48, step = (W - L - 8) / DAYS.length;
   var y = function (h) { return top + H - h / 24 * H; };
   var s = '<defs><pattern id="hatchF" width="6" height="6" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">' +
     '<rect width="6" height="6" style="fill:var(--st-failed-bg)"/><rect width="3" height="6" style="fill:var(--st-failed-bar)"/></pattern></defs>';
-  [0, 6, 12, 18].forEach(function (h) {
+  [6, 12, 18].forEach(function (h) {
     s += '<line class="grid" x1="' + L + '" x2="' + W + '" y1="' + y(h) + '" y2="' + y(h) + '"/>' +
-      '<text class="ax" x="' + (L - 6) + '" y="' + (y(h) + 4) + '" text-anchor="end">' + h + '</text>';
+      '<text class="ax" x="' + (L - 8) + '" y="' + (y(h) + 4) + '" text-anchor="end">' + h + '</text>';
   });
   s += '<line class="ceil" x1="' + L + '" x2="' + W + '" y1="' + y(24) + '" y2="' + y(24) + '"/>' +
-    '<text class="ax" x="' + (L - 6) + '" y="' + (y(24) + 4) + '" text-anchor="end">24 h</text>';
+    '<text class="ax" x="' + (L - 8) + '" y="' + (y(24) + 4) + '" text-anchor="end">24 h</text>';
   var max = DAYS.reduce(function (m, d) { return Math.max(m, d.ok + d.burn + d.live); }, 0), tb = '';
   DAYS.forEach(function (d, i) {
-    var x = L + i * step + (step - colW) / 2, tot = d.ok + d.burn + d.live, yy = y(0), g = '';
-    function seg(h, style, cls) { if (h <= 0) return; var hh = h / 24 * H; yy -= hh; g += '<rect class="seg" x="' + x + '" y="' + yy.toFixed(1) + '" width="' + colW + '" height="' + Math.max(hh, 1).toFixed(1) + '" style="' + style + '"/>'; }
+    var x = L + i * step + (step - colW) / 2, tot = d.ok + d.burn + d.live, yy = y(0), g = '', first = true;
+    function seg(h, style) { if (h <= 0) return; var hh = h / 24 * H; yy -= hh; g += '<rect class="seg" x="' + x + '" y="' + yy.toFixed(1) + '" width="' + colW + '" height="' + Math.max(hh, 1).toFixed(1) + '" style="' + style + '"/>'; }
     seg(d.ok, 'fill:var(--st-done-bar)');
     seg(d.live, 'fill:var(--st-running-bar)');
     seg(d.burn, 'fill:url(#hatchF)');
     var isMax = tot === max, today = i === DAYS.length - 1;
-    s += '<g class="col"><title>' + d.d + ': ' + tot.toFixed(1) + ' GPU-h · ' + d.ok.toFixed(1) + ' productive · ' + d.burn.toFixed(1) + ' burned' + (d.live ? ' · ' + d.live.toFixed(1) + ' running' : '') + '</title>' + g +
-      '<text class="vl' + (isMax ? ' max' : '') + '" x="' + (x + colW / 2) + '" y="' + (yy - 6) + '" text-anchor="middle">' + tot.toFixed(1) + (isMax ? ' h' : '') + '</text>' +
-      '<text class="ax" x="' + (x + colW / 2) + '" y="' + (top + H + 18) + '" text-anchor="middle"' + (today ? ' style="fill:var(--ink);font-weight:600"' : '') + '>' + (today ? 'today' : (W < 500 ? d.d.slice(0, 3) : d.d)) + '</text></g>';
+    s += '<g class="col"><title>' + d.d + ': ' + tot.toFixed(1) + ' GPU-h · ' + d.ok.toFixed(1) + ' productive · ' + d.burn.toFixed(1) + ' burned' + (d.live ? ' · ' + d.live.toFixed(1) + ' running' : '') + '</title>' +
+      '<clipPath id="cp' + i + '"><rect x="' + x + '" y="' + (yy) + '" width="' + colW + '" height="' + (y(0) - yy) + '" rx="4"/></clipPath><g clip-path="url(#cp' + i + ')">' + g + '</g>' +
+      '<text class="vl' + (isMax ? ' max' : '') + '" x="' + (x + colW / 2) + '" y="' + (yy - 7) + '" text-anchor="middle">' + tot.toFixed(1) + (isMax ? ' h' : '') + '</text>' +
+      '<text class="ax" x="' + (x + colW / 2) + '" y="' + (top + H + 20) + '" text-anchor="middle"' + (today ? ' style="fill:var(--ink);font-weight:600"' : '') + '>' + (today ? 'today' : (W < 500 ? d.d.slice(0, 3) : d.d)) + '</text></g>';
     tb += '<tr><td>' + d.d + '</td><td class="num">' + d.ok.toFixed(2) + '</td><td class="num">' + d.burn.toFixed(2) + '</td></tr>';
   });
-  s += '<line x1="' + L + '" x2="' + W + '" y1="' + y(0) + '" y2="' + y(0) + '" style="stroke:var(--ink-3)"/>';
-  svgEl.setAttribute('viewBox', '0 0 ' + W + ' ' + (top + H + 26));
+  s += '<line x1="' + L + '" x2="' + W + '" y1="' + y(0) + '" y2="' + y(0) + '" style="stroke:var(--rule-2)"/>';
+  svgEl.setAttribute('viewBox', '0 0 ' + W + ' ' + (top + H + 28));
   svgEl.innerHTML = s;
   document.getElementById('went-tbl').innerHTML = tb;
 })();
 
-/* ---------- Acknowledge (mockup: real build places an `ack` order) ---------- */
+/* ---------- Acknowledge (mockup: the real build places an `ack` order) ---------- */
 (function () {
   var list = document.getElementById('needlist');
-  function count() { return list.querySelectorAll('.need:not(.acked)').length; }
+  function count() { return list.querySelectorAll('.nc:not(.acked)').length; }
   function sync() {
     var n = count();
-    document.querySelectorAll('[data-needs]').forEach(function (b) { b.textContent = n; b.hidden = n === 0; });
+    document.querySelectorAll('[data-needs]').forEach(function (b) { b.textContent = n; });
     document.getElementById('allclear').style.display = n ? 'none' : 'block';
     document.title = (n ? '(' + n + ') ' : '') + '● ep17 07 board · ~21:35 · Now — Visurena';
   }
   function setShip(u, yes) {
     var a = document.querySelector('[data-ship="' + u + '"] .ack');
-    a.className = 'ack ' + (yes ? 'yes' : 'no');
+    a.className = 'ack ' + (yes ? 'yes' : '');
     a.innerHTML = window.board.icon(yes ? 'check' : 'flag') + (yes ? 'acknowledged 19:21' : 'not acknowledged');
+    var dot = document.querySelector('#spark-needs [data-dot="' + u + '"]');
+    if (dot) dot.style.fill = yes ? 'var(--st-done)' : 'var(--st-flagged)';
   }
   list.addEventListener('click', function (ev) {
     var b = ev.target.closest('button'); if (!b) return;
-    var row = b.closest('.need'), u = row.dataset.u;
+    var row = b.closest('.nc'), u = row.dataset.u;
     if (b.classList.contains('ack')) {
-      row.dataset.html = row.innerHTML;
+      var who = row.querySelector('.who');
+      row.dataset.html = who.innerHTML;
       row.classList.add('acked');
-      row.innerHTML = window.board.icon('check') + '<span><b class="mono">' + u + '</b> acknowledged · order ack placed, pending</span>' +
-        '<span class="acts"><button class="btn undo" type="button">' + window.board.icon('undo-2') + 'Undo</button></span>';
+      who.className = 'who done-msg';
+      who.innerHTML = '<span class="ok">' + window.board.icon('check') + u + ' acknowledged</span><span class="meta">order <b>ack</b> placed · pending until a run takes it</span>' +
+        '<span class="acts"><button class="btn sm undo" type="button">' + window.board.icon('undo-2') + 'Undo</button></span>';
       setShip(u, true);
     } else if (b.classList.contains('undo')) {
-      row.classList.remove('acked'); row.innerHTML = row.dataset.html; setShip(u, false);
+      var w = row.querySelector('.who');
+      row.classList.remove('acked'); w.className = 'who'; w.innerHTML = row.dataset.html; setShip(u, false);
     }
     sync();
   });
   list.addEventListener('keydown', function (ev) {
-    if ((ev.key === 'a' || ev.key === 'A') && ev.target.matches('.need')) { var b = ev.target.querySelector('.ack'); if (b) b.click(); }
+    if ((ev.key === 'a' || ev.key === 'A') && ev.target.matches('.nc')) { var b = ev.target.querySelector('.ack'); if (b) b.click(); }
   });
   document.getElementById('markseen').addEventListener('click', function () {
-    var s = document.getElementById('since'); s.classList.add('is-seen');
-    s.querySelector('.when').lastChild.textContent = 'Nothing new since 19:21';
+    document.getElementById('feed').classList.add('seen');
+    document.getElementById('since-h').textContent = 'Since 19:21';
     this.hidden = true;
   });
 })();

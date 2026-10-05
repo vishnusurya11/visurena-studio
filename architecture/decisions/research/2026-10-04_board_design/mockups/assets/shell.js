@@ -32,7 +32,7 @@
     { g: 'Pages', ic: 'inbox', l: 'Needs you', s: '5 shipped with flags, not acknowledged', h: 'index.html#needs', k: 'G I' },
     { g: 'Pages', ic: 'clock', l: 'Queue', s: 'GPU lane · 92 queued', h: 'queue.html', k: 'G Q' },
     { g: 'Pages', ic: 'external-link', l: 'Org chart', s: 'architecture page', h: 'http://127.0.0.1:8700/org', k: 'G O' },
-    { g: 'Actions', ic: 'sun-moon', l: 'Toggle theme', s: 'paper / screening room', act: 'theme', k: 'T' },
+    { g: 'Actions', ic: 'sun-moon', l: 'Toggle theme', s: 'studio black / graphite', act: 'theme', k: 'T' },
     { g: 'Actions', ic: 'circle-dashed', l: 'Keyboard shortcuts', s: '', act: 'keys', k: '?' },
     { g: 'Actions', ic: 'check', l: 'Acknowledge ep16 flags…', s: 'opens the confirm, places an ack order', act: 'ack' },
     { g: 'Actions', ic: 'pause', l: 'Hold studio…', s: 'stops every run before its next GPU step', act: 'hold' }
@@ -140,11 +140,14 @@
   }
 
   /* ---------------------------------------------------------- theme, toast */
-  function toggleTheme() {
+  function toggleTheme() {            /* v2: Studio black is the default, Graphite the light option */
+    var p = document.documentElement.dataset.palette === 'graphite' ? 'studio' : 'graphite';
+    setPalette(p);
+  }
+  function setPalette(p) {
     var root = document.documentElement;
-    var dark = root.dataset.theme ? root.dataset.theme === 'dark' : matchMedia('(prefers-color-scheme: dark)').matches;
-    root.dataset.theme = dark ? 'light' : 'dark';
-    store('cc-theme', root.dataset.theme);
+    root.dataset.palette = p; root.dataset.theme = p === 'studio' ? 'dark' : 'light';
+    store('palette', p);
   }
   var tt;
   function toast(msg) {
@@ -152,11 +155,126 @@
     t.innerHTML = icon('check') + '<span>' + esc(msg) + '</span>'; t.hidden = false;
     clearTimeout(tt); tt = setTimeout(function () { t.hidden = true; }, 3600);
   }
-  window.board = { toast: toast, icon: icon, openPalette: openPalette };
+  window.board = { toast: toast, icon: icon, openPalette: openPalette, toggleTheme: toggleTheme };
+
+  /* ---------------------------------------------------------- v2 shell: sidebar, slim header, phone tabs
+     One place for every page: <body data-page="now|inbox|queue|books|book|department|unit">.
+     Values captured read-only 2026-10-04 19:21 PDT. The build renders this server-side. */
+  var THUMB = 'http://127.0.0.1:8700/thumb/20260827135508/';
+  var GPU = { unit: 'ep17', title: 'The Thunder Child', step: '07 board', eta: '21:35', pct: 16,
+    face: THUMB + '160/episodes/ep17/storyboard/anchors/steamer_forward.png', h: 'unit-running.html' };
+  var NAV = [
+    { id: 'now', ic: 'gauge', l: 'Now', h: 'index.html', k: 'G N' },
+    { id: 'inbox', ic: 'inbox', l: 'Inbox', h: 'index.html#needs', bdg: 5, k: 'G I' },
+    { id: 'queue', ic: 'list-ordered', l: 'Queue', h: 'queue.html', n: 92, k: 'G Q' },
+    { id: 'books', ic: 'library', l: 'Books', h: 'books.html', n: 30, k: 'G B' }
+  ];
+  var DEPTS = [   /* units in the department; dots = the state tally (running blue, flagged amber) */
+    { id: 'analysis', ic: 'search', n: 30, dots: [['done', 30, 'all 30 done']] },
+    { id: 'screenplay', ic: 'scroll-text', n: 30, dots: [] },
+    { id: 'trailer', ic: 'film', n: 30, dots: [] },
+    { id: 'refs', ic: 'user-round', n: 30, dots: [['flag', 1, '1 flagged (The War of the Worlds)']] },
+    { id: 'episode', ic: 'clapperboard', n: 31, dots: [['run', 1, '1 running'], ['flag', 5, '5 flagged, not acknowledged']] }
+  ];
+  var PINS = [
+    { u: 'ep17', l: 'The Thunder Child', sub: 'running', st: 'running', h: 'unit-running.html', face: THUMB + '160/episodes/ep17/storyboard/anchors/steamer_forward.png' },
+    { u: 'ep16', l: 'The Exodus Northward', sub: 'flagged', st: 'flagged', h: 'unit-finished.html?u=ep16', face: THUMB + '160/episodes/ep16/storyboard/shot_05.png' }
+  ];
+  var MOCKS = [['index.html', 'Now'], ['queue.html', 'Queue'], ['unit-running.html', 'Unit · running'], ['unit-finished.html', 'Unit · finished'],
+    ['department.html', 'Department'], ['book.html', 'Book'], ['books.html', 'Books']];
+  var MARK = '<svg viewBox="0 0 32 32" aria-hidden="true"><circle cx="16" cy="16" r="10" fill="none" stroke="#d6d8dd" stroke-width="4.5"/><path d="M16 6a10 10 0 0 1 10 10" fill="none" stroke="#7db6e3" stroke-width="4.5"/><circle cx="26" cy="6" r="4" fill="#e9b44c"/></svg>';
+
+  function here() {
+    var b = document.body, page = b.dataset.page || 'now', file = location.pathname.split('/').pop() || 'index.html';
+    var stage = new URLSearchParams(location.search).get('stage') || 'episode';
+    return { page: page, file: file, unit: b.dataset.unit || '', dept: page === 'department' ? stage : (page === 'unit' && !PINS.some(function (p) { return p.u === b.dataset.unit; }) ? 'episode' : '') };
+  }
+  function cur(on) { return on ? ' aria-current="page"' : ''; }
+  function navHTML(at) {
+    return NAV.map(function (x) {
+      var on = x.id === at.page || (x.id === 'books' && at.page === 'book');
+      return '<a class="sb-item" href="' + x.h + '"' + cur(on) + ' title="' + x.l + ' (' + x.k + ')">' + icon(x.ic) + '<span class="lbl">' + x.l + '</span>' +
+        (x.bdg ? '<span class="bdg" data-needs>' + x.bdg + '</span>' : (x.n ? '<span class="n">' + x.n + '</span>' : '')) + '</a>';
+    }).join('');
+  }
+  function deptHTML(at) {
+    return DEPTS.map(function (d) {
+      var dots = d.dots.map(function (t) { return '<i class="' + t[0] + '" title="' + t[2] + '">' + (t[0] === 'done' ? '' : t[1]) + '</i>'; }).join('');
+      var lead = d.dots.length ? d.dots[d.dots.length - 1][0] : '';
+      return '<a class="sb-item dept" href="department.html?stage=' + d.id + '"' + cur(at.dept === d.id) + (lead ? ' data-dot="' + lead + '"' : '') +
+        ' title="' + d.id + ' · ' + d.n + ' units">' + icon(d.ic) + '<span class="lbl">' + d.id + '</span><span class="sb-dots">' + dots + '</span><span class="n">' + d.n + '</span></a>';
+    }).join('');
+  }
+  function pinHTML(at) {
+    return PINS.map(function (p) {
+      return '<a class="sb-item sb-pin" href="' + p.h + '"' + cur(at.unit === p.u) + ' title="' + p.u + ' ' + p.l + ' · ' + p.sub + '">' +
+        '<span class="sb-face"><img src="' + p.face + '" alt="" width="24" height="24"><span class="st ' + p.st + '"></span></span>' +
+        '<span class="lbl"><b class="pin-id">' + p.u + '</b>' + p.l + '</span></a>';
+    }).join('');
+  }
+  function footHTML() {
+    return '<div class="sb-foot"><a class="gpu-card" href="' + GPU.h + '" title="On the GPU: ' + GPU.unit + ' ' + GPU.title + ', ' + GPU.step + ', done around ' + GPU.eta + ' (20:20–22:40)">' +
+        '<span class="face"><img src="' + GPU.face + '" alt="" width="40" height="40"></span>' +
+        '<span class="t1"><span class="live"></span>On the GPU<span class="eta">~' + GPU.eta + '</span></span>' +
+        '<span class="t2"><b>' + GPU.unit + '</b>' + GPU.step + '</span>' +
+        '<span class="prog" aria-label="run ' + GPU.pct + '% of its p50"><i style="width:' + GPU.pct + '%"></i></span></a>' +
+      '<button class="sb-search" type="button" data-palette>' + icon('search') + '<span>Search or jump</span><span class="kbd">Ctrl K</span></button>' +
+      '<div class="sb-tools"><button type="button" data-theme-toggle title="Theme (T)" aria-label="Toggle theme">' + icon('sun-moon') + '</button>' +
+        '<button type="button" data-keys title="Keyboard (?)" aria-label="Keyboard shortcuts">' + icon('keyboard') + '</button>' +
+        '<a href="http://127.0.0.1:8700/org" title="Org chart (G O)" aria-label="Org chart">' + icon('layers') + '</a>' +
+        '<span class="who">19:21 PDT</span></div></div>';
+  }
+  function sideHTML(at) {
+    var mocks = MOCKS.map(function (m) { return '<a href="' + m[0] + '"' + cur(m[0] === at.file) + '>' + m[1] + '</a>'; }).join('');
+    return '<div class="sb-top"><a class="sb-mark" href="index.html" aria-label="Visurena Studio, Now">' + MARK + '</a>' +
+        '<a class="sb-brand" href="index.html">Visurena</a><button class="sb-studio" type="button" data-palette title="Jump anywhere (Ctrl K)" aria-label="Jump anywhere">' + icon('chevrons-up-down') + '</button></div>' +
+      '<div class="sb-scroll"><nav aria-label="Board">' + navHTML(at) + '</nav>' +
+        '<div class="sb-sec"><div class="sb-h">Departments</div>' + deptHTML(at) + '</div>' +
+        '<div class="sb-sec"><div class="sb-h">Pinned</div>' + pinHTML(at) + '</div>' +
+        '<details class="sb-mock"><summary>' + icon('chevron-right') + 'Mockup pages</summary>' + mocks + '</details></div>' +
+      footHTML();
+  }
+  function tabsHTML(at) {
+    var t = [['now', 'gauge', 'Now', 'index.html'], ['inbox', 'inbox', 'Inbox', 'index.html#needs'], ['queue', 'list-ordered', 'Queue', 'queue.html'], ['books', 'library', 'Books', 'books.html']];
+    return t.map(function (x) {
+      var on = x[0] === at.page || (x[0] === 'books' && at.page === 'book');
+      return '<a href="' + x[3] + '"' + cur(on) + '>' + icon(x[1]) + x[2] + (x[0] === 'inbox' ? '<span class="bdg" data-needs>5</span>' : '') + '</a>';
+    }).join('') + '<button type="button" data-sheet>' + icon('menu') + 'More</button>';
+  }
+  function headerFor() {   /* a page may write its own <header class="ph">; else the shell builds one from its crumbs */
+    var ph = document.querySelector('header.ph');
+    if (!ph) {
+      ph = document.createElement('header'); ph.className = 'ph';
+      var crumbs = document.querySelector('nav.crumbs');
+      if (!crumbs) { crumbs = document.createElement('nav'); crumbs.className = 'crumbs'; crumbs.innerHTML = '<span>' + esc(document.title.split('·').pop().split('—')[0].trim()) + '</span>'; }
+      ph.appendChild(crumbs);
+      ph.insertAdjacentHTML('beforeend', '<span class="spacer"></span><div class="ph-actions"></div>');
+      var acts = document.querySelector('[data-ph-actions]');
+      ph.querySelector('.ph-actions').appendChild(acts || document.createRange().createContextualFragment('<span class="livechip"><i></i>live · 19:21</span>'));
+      document.body.insertBefore(ph, document.body.firstChild);
+    }
+    var pa = ph.querySelector('.ph-actions');
+    if (pa && !pa.querySelector('.gpuchip')) pa.insertAdjacentHTML('beforeend', '<a class="gpuchip" href="' + GPU.h + '"><i></i>' + GPU.unit + ' · ~' + GPU.eta + '</a>');
+  }
+  function mountShell() {
+    var at = here();
+    document.querySelectorAll('.mock-ribbon, header.topbar, nav.tabs').forEach(function (n) { n.remove(); });   /* v1 shell, if a page still has it */
+    headerFor();
+    var side = document.getElementById('side') || document.createElement('aside');
+    side.id = 'side'; side.className = 'side'; side.setAttribute('aria-label', 'Studio'); side.innerHTML = sideHTML(at);
+    document.body.insertBefore(side, document.body.firstChild);
+    var tabs = document.createElement('nav'); tabs.className = 'btabs'; tabs.setAttribute('aria-label', 'Phone'); tabs.innerHTML = tabsHTML(at);
+    document.body.appendChild(tabs);
+    var sheet = document.createElement('dialog'); sheet.className = 'sheet'; sheet.id = 'sheet'; sheet.setAttribute('aria-label', 'Studio menu');
+    sheet.innerHTML = '<div class="grab"></div><div class="side">' + sideHTML(at) + '</div>';
+    document.body.appendChild(sheet);
+    sheet.addEventListener('click', function (ev) { if (ev.target === sheet || ev.target.closest('a')) sheet.close(); });
+  }
 
   /* ---------------------------------------------------------- wiring */
-  var saved = store('cc-theme'); if (saved) document.documentElement.dataset.theme = saved;
+  var saved = store('palette'); setPalette(saved === 'graphite' ? 'graphite' : 'studio');
   document.addEventListener('DOMContentLoaded', function () {
+    mountShell();
     inject();
     var q = document.getElementById('pal-q');
     q.addEventListener('input', function () { sel = 0; render(); });
@@ -175,12 +293,18 @@
       var dlg = document.getElementById(id);
       dlg.addEventListener('click', function (ev) { if (ev.target === dlg || ev.target.closest('[data-close]')) dlg.close(); });
     });
-    document.querySelectorAll('[data-palette]').forEach(function (b) { b.addEventListener('click', function (ev) { ev.preventDefault(); openPalette(); }); });
-    document.querySelectorAll('[data-theme-toggle]').forEach(function (b) { b.addEventListener('click', toggleTheme); });
-    document.querySelectorAll('[data-keys]').forEach(function (b) { b.addEventListener('click', function (ev) { ev.preventDefault(); document.getElementById('keysheet').showModal(); }); });
-    document.querySelectorAll('[data-order]').forEach(function (b) {   /* any order button: receipt only */
-      b.addEventListener('click', function (ev) { ev.preventDefault(); var m = b.closest('details'); if (m) m.open = false; toast('Mockup: order “' + b.dataset.order + '” would be placed · pending until a run takes it.'); });
-    });
+  });
+  document.addEventListener('click', function (ev) {   /* delegated, so the injected sidebar's controls work too */
+    var t = ev.target.closest('[data-palette]:not(html),[data-theme-toggle],[data-keys],[data-order],[data-sheet]');
+    if (!t) return;
+    ev.preventDefault();
+    var sh = document.getElementById('sheet');
+    if (sh && sh.open && !t.hasAttribute('data-sheet')) sh.close();
+    if (t.hasAttribute('data-palette')) openPalette();
+    else if (t.hasAttribute('data-theme-toggle')) toggleTheme();
+    else if (t.hasAttribute('data-keys')) document.getElementById('keysheet').showModal();
+    else if (t.hasAttribute('data-sheet')) sh.showModal();
+    else { var m = t.closest('details'); if (m) m.open = false; toast('Mockup: order “' + t.dataset.order + '” would be placed · pending until a run takes it.'); }
   });
   document.addEventListener('click', function (ev) {   /* close open ⋯ / ▾ menus on outside click */
     document.querySelectorAll('details.rowmenu[open], details.menu[open]').forEach(function (d) { if (!d.contains(ev.target)) d.open = false; });
@@ -207,26 +331,3 @@
   });
 })();
 
-/* palette picker (owner, 2026-10-04: the warm paper is retired) */
-(function () {
-  var P = [["graphite", "#f4f5f7"], ["white", "#ffffff"], ["slate", "#eef2f6"], ["studio", "#0f1012"]];
-  function get() { try { return localStorage.getItem("palette") || "studio"; } catch (e) { return "studio"; } }
-  function set(p) {
-    document.documentElement.dataset.palette = p;
-    try { localStorage.setItem("palette", p); } catch (e) {}
-    document.querySelectorAll(".palette-pick button").forEach(function (b) { b.setAttribute("aria-pressed", b.dataset.p === p); });
-  }
-  set(get());
-  function mount() {
-    var bar = document.querySelector(".topbar .wrap") || document.querySelector(".topbar");
-    if (!bar || bar.querySelector(".palette-pick")) return;
-    var box = document.createElement("span"); box.className = "palette-pick"; box.title = "palette";
-    box.appendChild(document.createTextNode("palette "));
-    P.forEach(function (x) {
-      var b = document.createElement("button"); b.type = "button"; b.dataset.p = x[0]; b.title = x[0];
-      b.style.background = x[1]; b.addEventListener("click", function () { set(x[0]); }); box.appendChild(b);
-    });
-    bar.appendChild(box); set(get());
-  }
-  if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", mount); else mount();
-})();

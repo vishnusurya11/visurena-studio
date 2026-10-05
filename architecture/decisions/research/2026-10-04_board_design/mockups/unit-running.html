@@ -10,41 +10,12 @@
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
 <link rel="stylesheet" href="assets/board.css">
 <link rel="stylesheet" href="assets/shell.css">
+<link rel="stylesheet" href="assets/v2.css">
 <script src="assets/shell.js"></script>
 <link rel="stylesheet" href="assets/unit.css">
 </head>
 <body data-page="unit" data-unit="ep17">
-<!-- SHELL (pasted from SHELL.md) -->
-<div class="mock-ribbon"><div class="wrap"><b>Mockups</b>
-  <a href="index.html">Now</a><a href="queue.html">Queue</a><a href="unit-running.html" aria-current="page">Unit · running</a>
-  <a href="unit-finished.html">Unit · finished</a><a href="department.html">Department</a>
-  <a href="book.html">Book</a><a href="books.html">Books</a>
-  <span class="spacer"></span><a href="#" data-keys>? keys</a>
-</div></div>
-<header class="topbar"><div class="wrap">
-  <a class="brand" href="index.html">Visurena<span class="b-sub"> Studio</span></a>
-  <nav class="nav" aria-label="Board">
-    <a href="index.html">Now</a>
-    <a href="queue.html">Queue</a>
-    <a href="books.html">Books</a>
-    <details class="menu"><summary aria-current="page">Departments <svg class="i"><use href="assets/icons.svg#chevron-down"/></svg></summary>
-      <div class="pop">
-        <a href="department.html?stage=analysis">analysis <span class="muted">30 done</span></a>
-        <a href="department.html?stage=screenplay">screenplay <span class="muted">30 queued</span></a>
-        <a href="department.html?stage=trailer">trailer <span class="muted">30 queued</span></a>
-        <a href="department.html?stage=refs">refs <span class="muted">29 queued</span></a>
-        <a href="department.html?stage=episode">episode <span class="muted">1 running</span></a>
-      </div></details>
-    <a href="http://127.0.0.1:8700/org">Org</a>
-  </nav>
-  <span class="spacer"></span>
-  <button class="cmdk" type="button" data-palette aria-label="Search (Ctrl K)"><svg class="i"><use href="assets/icons.svg#search"/></svg>Search or jump to…<span class="kbd">Ctrl K</span></button>
-  <a class="gpu-pill" href="unit-running.html" title="GPU: episode ep17 The Thunder Child, step 07 board, done around 21:35 (20:20–22:40)"><span class="dot"></span><b class="gp-unit">ep17</b> 07 board · ~21:35</a>
-  <a class="inbox" href="index.html#needs" title="Needs you: 5"><svg class="i"><use href="assets/icons.svg#inbox"/></svg><span class="badge">5</span><span class="vh">need you</span></a>
-  <button class="iconbtn theme-btn" type="button" data-theme-toggle aria-label="Toggle theme (T)"><svg class="i"><use href="assets/icons.svg#sun-moon"/></svg></button>
-</div></header>
-<!-- /SHELL -->
-
+<aside id="side"></aside>
 <div class="wrap">
   <nav class="crumbs" aria-label="Breadcrumb"><a href="#">Episode</a><svg class="i"><use href="assets/icons.svg#chevron-right"/></svg><a href="#">The War of the Worlds</a><svg class="i"><use href="assets/icons.svg#chevron-right"/></svg><span>ep17</span></nav>
   <header class="u-head" id="u-head"></header>
@@ -63,11 +34,5 @@
 
 <script src="assets/data_ep17.js"></script>
 <script src="assets/unit.js" defer></script>
-<nav class="tabs" aria-label="Phone">
-  <a href="index.html"><svg class="i"><use href="assets/icons.svg#gauge"/></svg>Now</a>
-  <a href="index.html#needs"><svg class="i"><use href="assets/icons.svg#inbox"/></svg>Inbox<span class="badge">5</span></a>
-  <a href="books.html"><svg class="i"><use href="assets/icons.svg#book-open"/></svg>Books</a>
-  <a href="#" data-palette><svg class="i"><use href="assets/icons.svg#search"/></svg>Search</a>
-</nav>
 </body>
 </html>
