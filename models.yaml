@@ -6,6 +6,12 @@
 
 default_tier: workhorse
 
+# The owner's money wall (2026-10-04): "3 dollar max for episode generation".
+# Every paid request checks the episode's recorded spend + its own estimate first
+# and is refused BEFORE it is sent if it would cross this (studio/llm.guard_spend).
+money:
+  episode_ceiling_usd: 3.00
+
 # Rates in USD per MILLION tokens. Nothing may be priced from memory: an unlisted model
 # records its tokens and a NULL cost rather than a confident zero, because an unknown
 # cost silently becoming $0.00 is how a spend estimate turns into a lie.

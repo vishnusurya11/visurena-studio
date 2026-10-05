@@ -58,7 +58,9 @@ def cost(model: str, input_tokens: int, output_tokens: int) -> float | None:
 
 
 def init(conn: sqlite3.Connection) -> None:
+    from studio import db
     conn.executescript(_DDL)
+    db._add_column(conn, "usage", "unit", "TEXT")   # the money wall sums by unit
     conn.commit()
 
 
@@ -96,6 +98,11 @@ def _row(conn: sqlite3.Connection, where: str, args: tuple) -> dict:
     return {"calls": row["calls"], "input_tokens": row["input_tokens"],
             "output_tokens": row["output_tokens"],
             "cost_usd": round(row["cost_usd"], 6), "unpriced_calls": row["unpriced_calls"]}
+
+
+def unit_spent(conn: sqlite3.Connection, codex_id: str, unit: str) -> float:
+    """USD already recorded for one production unit (an episode) of one book."""
+    return _row(conn, "codex_id = ? AND unit = ?", (codex_id, unit))["cost_usd"]
 
 
 def total(conn: sqlite3.Connection, codex_id: str) -> dict:

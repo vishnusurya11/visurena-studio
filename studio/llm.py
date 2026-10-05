@@ -113,6 +113,42 @@ def _extract_usage(result) -> dict:
             "total_tokens": raw.get("totalTokens", 0)}
 
 
+class OverBudget(RuntimeError):
+    """A paid call refused BEFORE it was sent: the episode would cross its USD
+    ceiling (owner 2026-10-04: "3 dollar max for episode generation")."""
+
+
+EXPECTED_OUTPUT_TOKENS = 13_000
+"""The median writer call's output (usage table, 400 calls, 2026-10-04): the
+part of the next call's cost a prompt length cannot tell."""
+
+
+def episode_ceiling_usd() -> float:
+    """The per-episode spend ceiling from models.yaml (`money.episode_ceiling_usd`)."""
+    return float((load_models_config().get("money") or {}).get("episode_ceiling_usd", 3.00))
+
+
+def estimated_cost(model: str, prompt: str) -> float:
+    """This call's likely USD: prompt chars/4 in, the median output out; 0 if unpriced."""
+    from studio import spend
+    rate = spend.rate_for(model) or {}
+    return (len(prompt) / 4 * rate.get("input_per_m", 0)
+            + EXPECTED_OUTPUT_TOKENS * rate.get("output_per_m", 0)) / 1e6
+
+
+def guard_spend(model: str, prompt: str, ceiling: float | None = None) -> None:
+    """Refuse the call when the episode's recorded spend plus this call would
+    cross the ceiling.  Outside an episode (no unit in the context): no wall."""
+    if not _SPEND.get("conn") or not _SPEND.get("unit"):
+        return
+    from studio import spend
+    cap = episode_ceiling_usd() if ceiling is None else ceiling
+    spent = spend.unit_spent(_SPEND["conn"], _SPEND["codex_id"], _SPEND["unit"])
+    if spent + estimated_cost(model, prompt) > cap:
+        raise OverBudget(f"episode {_SPEND['unit']} has spent ${spent:.2f} of its ${cap:.2f} "
+                         f"ceiling; this call would cross it, so it was not sent")
+
+
 _TRANSIENT_BACKOFF = (3, 10)  # seconds between transient-error retries
 
 
@@ -145,6 +181,7 @@ class _NativeStructuredCaller:
             raise StructuredOutputException(f"output did not match schema: {exc}") from exc
 
     def _parse(self, prompt: str, structured_output_model=None):
+        guard_spend(self._model, prompt)
         completion = self._client.chat.completions.parse(
             model=self._model,
             messages=[{"role": "user", "content": prompt}],
