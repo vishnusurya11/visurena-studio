@@ -2,7 +2,7 @@
 {% import "_macros.html" as act with context %}
 {% set r = unit.row %}{% set hl = unit.health %}{% set pics = unit.pictures %}{% set m = unit.master %}{% set sg = unit.suggest %}
 {% set finished = r.shown in ('done', 'flagged') %}
-{% block title %}{{ r.unit }} · {{ stage }} · Visurena Studio{% endblock %}
+{% block title %}{% if live %}{{ live.title }}{% else %}{{ r.unit }} · {{ stage }} · Visurena Studio{% endif %}{% endblock %}
 {% block crumbs %}<div class="crumbs"><a href="/">Studio</a> › <a href="/d/{{ stage }}">{{ stage }}</a> › <a href="/b/{{ codex }}">{{ unit.book_name }}</a> › {{ r.unit }}</div>{% endblock %}
 
 {#- one picture tile: the shot number, the planned size, a badge per fault kind,
@@ -74,6 +74,7 @@
 {%- endmacro %}
 
 {% block body %}
+{% if live %}{% include "_unit_live.html" %}{% endif %}
 {% include "_unit_head.html" %}
 
 <section id="health" class="band">

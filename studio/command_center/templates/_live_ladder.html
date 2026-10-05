@@ -1,0 +1,10 @@
+{#- The ladder chips: each rung of the running step's ladders, measured value
+    then the action; a terminal rung is a hollow ⊘ "kept, not passed", never
+    a tick.  On a loop step this is what the owner watches argue with itself. -#}
+<div class="lv-ladder" data-k="ladder">
+{% for g in ns_.rounds | groupby('gate') %}
+  <span class="lv-gate"><span class="eyebrow">{{ g.grouper }}</span>
+  {% for r in g.list %}{% if not loop.first %}<span class="arr" aria-hidden="true">→</span>{% endif %}<span class="rung{% if r.terminal %} term{% endif %}" title="{{ g.grouper }}: measured {{ r.measured }} -> {{ r.action }}{% if r.terminal %} (terminal){% endif %}">{% if r.terminal %}⊘ {% endif %}{% if r.measured is not none %}<b>{{ '%g' | format(r.measured) }}</b> {% endif %}{{ r.action }}{% if r.terminal %} <small>kept, not passed</small>{% endif %}</span>{% endfor %}
+  </span>
+{% endfor %}
+</div>

@@ -171,3 +171,37 @@ def test_the_lru_evicts_the_oldest_past_its_budget():
 def test_webp_is_an_artefact_suffix():
     from studio.command_center import library_paths
     assert ".webp" in library_paths.SUFFIXES
+
+
+# --- the page's helpers ---
+
+
+def test_mmss_reads_minutes_then_hours():
+    assert progress_view.mmss(2467) == "41:07" and progress_view.mmss(7389) == "2:03:09"
+
+
+def test_the_trace_is_flat_without_signals_and_spikes_per_signal():
+    assert progress_view.trace_points({"now": 1000.0, "trace": []}) == "0,18 240,18"
+    one = progress_view.trace_points({"now": 1000.0, "trace": [1000.0 - 900]})
+    assert "120.0,4" in one and one.count(",4") == 1
+
+
+def test_the_shape_changes_with_the_step_and_the_vital_only():
+    p = {"vital": "live", "now_step": {"id": "09", "kind": "counted"}, "items": [1, 2]}
+    assert progress_view.shape(p) == progress_view.shape({**p, "vital": "quiet"})
+    assert progress_view.shape(p) != progress_view.shape({**p, "vital": "dead"})
+
+
+def test_the_valuetext_says_count_and_finish():
+    p = {"now_step": {"id": "09", "name": "shoot", "kind": "counted", "done": 11, "total": 26},
+         "eta": {"finish": "02:45"}}
+    assert progress_view.valuetext(p) == "take 11 of 26, done around 02:45"
+
+
+def test_the_card_shows_a_run_not_an_old_completion():
+    now = 1e9
+    assert progress_view.show({"vital": "live", "now": now}, finished=True)
+    assert not progress_view.show({"vital": "idle", "now": now}, finished=False)
+    assert not progress_view.show({"vital": "done", "now": now, "run_started": now - 86400}, finished=True)
+    assert not progress_view.show({"vital": "dead", "now": now}, finished=True)
+    assert progress_view.show({"vital": "dead", "now": now}, finished=False)

@@ -1,0 +1,20 @@
+{#- The hero: done/total for a counted step (takes, panels), the step's
+    elapsed mm:ss for a loop step (the plan, QC, a ladder).  One rounded
+    finish time, then the range, the run count and the clocks in --ink-2. -#}
+{% set e = p.eta %}
+{% set noun = 'takes' if ns_ and ns_.id == '09' else 'panels' %}
+{% set counted = ns_ and ns_.kind == 'counted' %}
+<div class="lv-hero" role="progressbar" aria-valuemin="0"
+  aria-valuemax="{{ ns_.total if counted else 1 }}" aria-valuenow="{{ ns_.done if counted else 0 }}"
+  aria-valuetext="{{ live_valuetext }}" data-k="hero">
+  <div class="lv-big">
+    {% if counted %}<span data-k="big">{{ ns_.done }}<span class="of">/{{ ns_.total }}</span></span><small data-k="noun">{{ noun }}</small>
+    {% elif ns_ %}<span data-clock="step-mmss">{{ (p.now - (p.step_started or p.now)) | mmss }}</span><small>in {{ ns_.name }}</small>
+    {% else %}<span>–</span><small>no run</small>{% endif %}
+  </div>
+  <div class="lv-what">
+    {% if ns_ %}<div class="lv-step"><b>{{ ns_.id }} {{ ns_.name }}</b>{% if ns_.current %} <span class="cur" data-k="current">· {{ ns_.current }}</span>{% else %} <span class="cur" data-k="current"></span>{% endif %}</div>{% endif %}
+    <div class="lv-finish" data-k="finish">{% if p.vital == 'done' %}done{% elif e.long %}running long <span class="lv-why">past every measured run of this step</span>{% elif e.finish %}done around <b>{{ e.finish }}</b>{% if e.capped %} <span class="lv-why">at the 5 h ceiling</span>{% endif %}{% else %}&nbsp;{% endif %}</div>
+    <div class="lv-range"><span data-k="range">{% if e.range and not e.long %}range {{ e.range }} · {% endif %}{% if e.n_runs %}{{ e.n_runs }} runs{% if e.basis %} · {{ e.basis }}{% endif %} · {% endif %}</span><span data-clock="step">{{ (p.now - (p.step_started or p.now)) | span or '0s' }}</span> in step · <span data-clock="work" data-base="{{ p.work_s - p.elapsed_s }}">{{ p.work_s | span or '0s' }}</span> / {{ (p.ceiling_s / 3600) | int }}h</div>
+  </div>
+</div>

@@ -1,0 +1,12 @@
+{#- The vital line: the unit, the vital in words (the only aria-live region,
+    never a clock), the last runner signal's age, and the signal trace --
+    thirty minutes across 240 px, a 6 px spike per runner signal. -#}
+{% set words = {'live': 'live', 'quiet': 'quiet', 'stalled': 'stalled', 'dead': 'dead', 'refused': 'refused', 'deferred': 'deferred', 'done': 'done', 'idle': 'idle'} %}
+<div class="lv-top">
+  <span class="lv-name">{{ p.unit }}{% if unit and unit.head and unit.head.title %} <small>· {{ unit.head.title }}</small>{% endif %}</span>
+  <span class="spacer"></span>
+  <span class="lv-vital" aria-live="polite"><span class="vdot{% if p.vital == 'live' %} beat{% endif %}" data-k="dot"></span><span data-k="vword">{{ words[p.vital] }}</span>{% if ns_ %} <span class="lv-where" data-k="where">{{ ns_.id }} {{ ns_.name }}</span>{% endif %}</span>
+  <span class="lv-sign"><span class="lv-reason" data-k="reason">{% if p.vital in ('quiet', 'stalled') %}{{ p.vital_reason }}{% endif %}</span>last sign <span data-clock="quiet" data-at="{{ p.trace[-1] if p.trace else '' }}">{% if p.quiet_s is not none %}{{ p.quiet_s | span or '0s' }}{% else %}–{% endif %}</span></span>
+  <svg class="lv-trace" viewBox="0 0 240 24" width="240" height="24" aria-hidden="true"><polyline data-k="trace" points="{{ trace_points(p) }}"/></svg>
+  <button class="btn lv-notify" type="button" data-k="notify" hidden>notify me</button>
+</div>

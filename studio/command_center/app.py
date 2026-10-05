@@ -27,6 +27,8 @@ from studio.command_center import actions, library_paths, models, procs, progres
 HERE = Path(__file__).resolve().parent
 ORG_PAGE = registry.ROOT / "architecture" / "index.html"
 templates = Jinja2Templates(directory=str(HERE / "templates"))
+templates.env.filters.update(clock=progress_view.clock, span=unit_view.span, mmss=progress_view.mmss)
+templates.env.globals.update(trace_points=progress_view.trace_points)
 router = APIRouter()
 READ_ONLY = ("the board was started read-only (command_center.py --read-only): it can show"
              " the studio but not give an order")
@@ -121,8 +123,20 @@ def department_page(request: Request, stage: str, book: str | None = None, state
 @router.get("/d/{stage}/{codex}/{unit}", response_class=HTMLResponse)
 def unit_page(request: Request, stage: str, codex: str, unit: str,
               conn: sqlite3.Connection = Depends(_conn)):
-    return _render(request, "unit.html", unit=_unit(request, conn, stage, codex, unit),
-                   stage=stage, codex=codex, books=views.book_names(conn))
+    found = _unit(request, conn, stage, codex, unit)
+    return _render(request, "unit.html", unit=found, stage=stage, codex=codex, books=views.book_names(conn),
+                   **_live(request, conn, stage, codex, unit, found["row"]["shown"] in ("done", "flagged")))
+
+
+def _live(request: Request, conn: sqlite3.Connection, stage: str, codex: str, unit: str, finished: bool) -> dict:
+    """The live card's context for an episode unit with a run worth showing, else none."""
+    if stage != "episode":
+        return {"live": None}
+    state = request.app.state
+    p = progress_view.progress(state.library, conn, codex, unit, logs=state.logs, proc_rows=state.procs())
+    if not progress_view.show(p, finished):
+        return {"live": None}
+    return {"live": p, "live_shape": progress_view.shape(p), "live_valuetext": progress_view.valuetext(p)}
 
 
 @router.get("/b/{codex}", response_class=HTMLResponse)
@@ -183,6 +197,16 @@ def unit_head_partial(request: Request, stage: str, codex: str, unit: str,
                       conn: sqlite3.Connection = Depends(_conn)):
     return _render(request, "_unit_head.html", unit=_unit(request, conn, stage, codex, unit),
                    stage=stage, codex=codex)
+
+
+@router.get("/partials/unit/episode/{codex}/{unit}/live", response_class=HTMLResponse)
+def unit_live_partial(request: Request, codex: str, unit: str, conn: sqlite3.Connection = Depends(_conn)):
+    """The live card alone, for the client to swap in when the run's shape changes."""
+    found = _unit(request, conn, "episode", codex, unit)
+    context = _live(request, conn, "episode", codex, unit, found["row"]["shown"] in ("done", "flagged"))
+    if context["live"] is None:
+        return HTMLResponse("")
+    return _render(request, "_unit_live.html", unit=found, stage="episode", codex=codex, **context)
 
 
 @router.get("/partials/unit/{stage}/{codex}/{unit}/orders", response_class=HTMLResponse)

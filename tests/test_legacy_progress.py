@@ -139,3 +139,10 @@ def test_the_last_words_are_the_newest_of_the_runner_and_the_drive_log():
     newer_runner = lp.last_words("--- step 02 (plan) | x ---\n", 1.0, rows)
     assert newer_runner == "plan_check refused: G-MOVE shot 17: travels"
     assert lp.last_words("  T05 shots [5] 192f 8.00s in 182s\n", 9e9, rows) == "T05 shots [5] 192f 8.00s in 182s"
+
+
+def test_a_deferral_reads_as_its_head_and_first_fault():
+    rows = [{"msg": "DEFERRED PLAN | 2026 episode/ep17 | battery at plan: CONTRACT OK: x | 22 shots; "
+                    "battery at plan: G-LIGHT      : clean; battery at plan: PLAN GATES   : 1; "
+                    "battery at plan:     G-STORY turn shot 12: the turn names no value that flips"}]
+    assert lp.refusal(rows) == "DEFERRED PLAN: G-STORY turn shot 12: the turn names no value that flips"

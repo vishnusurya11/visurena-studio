@@ -200,14 +200,24 @@ def runner_rounds(rows: list[dict]) -> list[dict]:
     return out
 
 
+FAULT = re.compile(r"^(?:[A-Z]+-[A-Z-]+|M\d+)\b.*\b(?:shot \d+|plan)\b.*:")
+
+
+def segments(msg: str) -> list[str]:
+    """A battery message cut into its parts: lines and `; ` joins, without the `battery at plan:` prefix."""
+    parts = re.split(r"\n|; ", msg)
+    return [re.sub(r"^battery at \w+:\s*", "", p.strip()).strip() for p in parts if p.strip()]
+
+
 def refusal(rows: list[dict]) -> str:
-    """The runner log's last refusal, as one sentence (its first line with a fault)."""
+    """The runner log's last refusal or deferral as one sentence: its head and its first fault."""
     for r in reversed(rows):
         msg = str(r.get("msg") or "")
-        if "refused" in msg.lower():
-            lines = [l.strip() for l in msg.splitlines() if l.strip()]
-            fault = next((l for l in lines[1:] if not l.startswith("CONTRACT OK") and "clean" not in l), "")
-            return f"{lines[0].rstrip(':')}: {fault}"[:240] if fault else lines[0][:240]
+        if "refused" in msg.lower() or msg.startswith("DEFERRED"):
+            segs = segments(msg)
+            head = segs[0].split("|")[0].strip().rstrip(":")
+            fault = next((x for x in segs[1:] if FAULT.match(x)), "")
+            return (f"{head}: {fault}" if fault else head)[:240]
     return ""
 
 

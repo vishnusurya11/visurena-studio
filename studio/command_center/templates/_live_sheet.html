@@ -1,0 +1,12 @@
+{#- The darkroom contact sheet: one square tile per planned take (or panel).
+    Landed = the panel at full ink; the one rendering develops from a ghost as
+    --dev rises (the client's clock over the take's prior); waiting = a ghost
+    behind a dashed rule.  Hover loads the take itself (preload=none). -#}
+<div class="lv-sheet" data-k="sheet" role="list">
+{% for t in p['items'] %}
+<figure class="lt st-{{ t.state }}" role="listitem" data-id="{{ t.id }}"{% if t.prior_s %} data-prior="{{ '%.1f' | format(t.prior_s) }}"{% endif %}{% if t.video %} data-video="{{ t.video }}"{% endif %} title="{{ t.id }} · {{ t.state }}{% if t.secs %} · {{ '%.0f' | format(t.secs) }} s{% endif %}">
+  {% if t.panel %}<img src="{{ p.media_base }}{{ t.panel }}" alt="" loading="lazy" decoding="async" width="160" height="160">{% endif %}
+  <span class="lt-id">{{ t.id }}</span>
+</figure>
+{% endfor %}
+</div>

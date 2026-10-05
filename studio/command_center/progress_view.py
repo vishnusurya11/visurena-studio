@@ -307,3 +307,54 @@ def card(library, codex, unit, home, state, db_rows, hist, names, derived, v, ti
             "eta": e, "trace": [round(t, 1) for t in vitals.trace(derived["signals"], now)],
             "last_words": derived["refusal"] if v["vital"] == "refused" else derived["last_words"],
             "title": title(v["vital"], step, e.get("finish", ""), unit), "master": url, "qc": qc}
+
+
+# --- the page's helpers (templates and the client share these rules) ---
+
+
+SHOW_DONE_S = 12 * 3600
+
+
+def mmss(secs) -> str:
+    """`41:07` (or `2:03:09` past an hour) for a loop step's hero."""
+    s = max(0, int(secs or 0))
+    return f"{s // 3600}:{(s % 3600) // 60:02d}:{s % 60:02d}" if s >= 3600 else f"{s // 60}:{s % 60:02d}"
+
+
+def trace_points(p: dict, width: float = 240.0, base: float = 18.0, top: float = 4.0) -> str:
+    """The signal trace's polyline: flat at `base`, a 6 px spike per runner signal
+    in the last thirty minutes (x grows to the right, now at the right edge)."""
+    xs = sorted(width - (p["now"] - t) / vitals.TRACE_S * width for t in p.get("trace") or [])
+    pts = [f"0,{base:g}"]
+    for x in xs:
+        x = min(max(x, 3.0), width - 3.0)
+        pts += [f"{x - 3:.1f},{base:g}", f"{x:.1f},{top:g}", f"{x + 3:.1f},{base:g}"]
+    return " ".join(pts + [f"{width:g},{base:g}"])
+
+
+def shape(p: dict) -> str:
+    """What forces a re-render instead of a patch: the vital's kind, the step, the plan's size."""
+    step = p.get("now_step") or {}
+    group = "run" if p["vital"] in RUNNING else p["vital"]
+    return f"{group}|{step.get('id')}|{step.get('kind')}|{len(p.get('items') or [])}"
+
+
+def valuetext(p: dict) -> str:
+    """The progressbar's words: `take 11 of 26, done around 02:45`."""
+    step, e = p.get("now_step") or {}, p.get("eta") or {}
+    if not step:
+        return "no run"
+    noun = "take" if step.get("id") == "09" else "panel"
+    head = f"{noun} {step['done']} of {step['total']}" if step.get("kind") == "counted" else f"{step['id']} {step['name']}"
+    tail = "running long" if e.get("long") else (f"done around {e['finish']}" if e.get("finish") else "")
+    return f"{head}, {tail}" if tail else head
+
+
+def show(p: dict | None, finished: bool) -> bool:
+    """The card shows a run that is running, one that stopped short of a finished
+    unit, or a fresh completion (the hand-over to the master); never no run."""
+    if not p or p["vital"] == "idle":
+        return False
+    if p["vital"] == "done":
+        return bool(p.get("run_started")) and p["now"] - p["run_started"] < SHOW_DONE_S
+    return p["vital"] in RUNNING or not finished

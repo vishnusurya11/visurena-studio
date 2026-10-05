@@ -1,0 +1,38 @@
+{#- The live card (progress tracker spec §4): sits ABOVE #head, outside its
+    3 s outerHTML swap, so its animations never restart.  Rendered here so it
+    works without JavaScript; static/progress.js then polls the JSON twin
+    every 2 s and patches these nodes in place.  Only one thing moves, and
+    only while the vital is live: the running rail segment and the single
+    developing tile.  Any other vital sets data-still. -#}
+{% import "_macros.html" as act with context %}
+{% set p = live %}{% set ns_ = p.now_step %}
+{% set moving = p.vital in ('live', 'quiet', 'stalled') %}
+<section id="live" class="live" data-vital="{{ p.vital }}"{% if p.vital != 'live' %} data-still{% endif %}
+  data-src="/api/progress/episode/{{ p.codex }}/{{ p.unit }}.json" data-partial="/partials/unit/episode/{{ p.codex }}/{{ p.unit }}/live"
+  data-now="{{ p.now }}" data-run="{{ p.run_started or '' }}" data-step="{{ p.step_started or '' }}"
+  data-shape="{{ live_shape }}" data-inflight="{{ p.inflight_started or '' }}" data-media="{{ p.media_base }}" data-lib="{{ p.lib_base }}"
+  style="--age:{{ '%.1f' | format(p.now - (p.step_started or p.now)) }}" aria-label="live progress">
+  {% include "_live_vital.html" %}
+  {% if p.vital in ('dead', 'refused', 'deferred') %}
+  <div class="lv-stop">
+    <p class="lv-sentence">{% if p.vital == 'dead' %}Run stopped{% elif p.vital == 'refused' %}Run refused{% else %}Run deferred{% endif %}{% if p.quiet_s is not none %} at {{ (p.now - p.quiet_s) | clock }}{% endif %}{% if ns_ %} in {{ ns_.id }} {{ ns_.name }}{% endif %}.
+      {% if p.last_words %}Last words: <q>{{ p.last_words }}</q>{% endif %}</p>
+    {% if ns_ and ns_.rounds %}{% include "_live_ladder.html" %}{% endif %}
+    <div class="actions">{{ act.order('retry', p.codex, 'episode', p.unit) }}</div>
+  </div>
+  {% else %}
+  {% include "_live_hero.html" %}
+  {% if p.vital == 'done' and p.master %}
+  <div class="lv-master">
+    <video controls muted preload="metadata" src="{{ p.master }}"></video>
+    <div class="lv-qc">{% if p.qc %}<div class="lv-qcline"><b>{{ '%.1f' | format(p.qc.seconds or 0) }} s</b></div>
+      <div>LUFS {{ p.qc.lufs }} <span class="st {{ 'green' if p.qc.lufs_ok else 'red' }}">{{ '✓' if p.qc.lufs_ok else '✕' }}</span> · peak {{ p.qc.true_peak }} <span class="st {{ 'green' if p.qc.tp_ok else 'red' }}">{{ '✓' if p.qc.tp_ok else '✕' }}</span></div>
+      {% else %}<div class="muted">no QC file yet</div>{% endif %}</div>
+  </div>
+  {% elif p['items'] %}{% include "_live_sheet.html" %}{% endif %}
+  {% include "_live_rail.html" %}
+  {% if ns_ and ns_.rounds %}{% include "_live_ladder.html" %}{% endif %}
+  {% if p.last_words %}<div class="lv-words"><span class="eyebrow">last words</span> <q data-k="words">{{ p.last_words }}</q></div>{% endif %}
+  {% endif %}
+</section>
+<script src="/static/progress.js" defer></script>

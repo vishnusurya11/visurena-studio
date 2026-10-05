@@ -1,0 +1,27 @@
+{#- The step rail: one segment per step, width proportional to its measured
+    median (18 px at least); the running segment widens to hold its item
+    ticks and is the only one that moves -- a fill for a counted step, slow
+    diagonal stripes for a loop, a sheen whose phase is pinned to the step's
+    age so a re-render never restarts it.  On a phone it folds into a line. -#}
+{% set total = (p.steps | map(attribute='median_s') | map('default', 0, true) | sum) or 1 %}
+{% set ns_rail = namespace(i=0) %}
+<ol class="lv-rail" data-k="rail" aria-label="steps">
+{% for s in p.steps %}
+  {% set med = s.median_s or 0 %}
+  {% set running = s.state == 'running' %}
+  {% set w = [med, total * 0.16] | max if running else med %}
+  {% set counted_here = running and ns_ and ns_.kind == 'counted' and ns_.id == s.id %}
+  {% set fill = (ns_.weight_done / ns_.weight_total) if counted_here and ns_.weight_total else (1 if s.state in ('done', 'skip', 'fail') else 0) %}
+  {% if running %}{% set ns_rail.i = loop.index %}{% endif %}
+  <li class="seg st-{{ s.state }}{% if running and not counted_here %} loop{% endif %}{% if running and moving %} is-moving{% endif %}"
+      style="--w:{{ '%.1f' | format(w + 1) }};--p:{{ '%.4f' | format(fill) }};--i:{{ loop.index0 }}{% if counted_here %};--n:{{ ns_.total }}{% endif %}"
+      data-id="{{ s.id }}" title="{{ s.id }} {{ s.name }} · {{ s.state }}{% if s.secs %} · {{ s.secs | span }}{% endif %}{% if s.median_s %} · median {{ s.median_s | span or '0s' }}{% endif %}{% if s.retries %} · started in {{ s.retries }} earlier run{{ '' if s.retries == 1 else 's' }}{% endif %}">
+    <i>{% if counted_here %}<b class="ticks"></b>{% endif %}</i>
+    <span class="lbl">{% if s.state in ('done', 'skip') %}<svg class="ck" viewBox="0 0 12 12" aria-hidden="true"><path d="M2 6.5l2.5 2.5L10 3.5"/></svg>{% elif s.state == 'fail' %}✕{% endif %}{{ s.id }}{% if running or w / total > 0.07 %} <small>{{ s.name }}</small>{% endif %}{% if s.retries %}<sup>×{{ s.retries + 1 }}</sup>{% endif %}</span>
+    {% if running or (s.secs and w / total > 0.07) %}<span class="dur"{% if running %} data-clock="step"{% endif %}>{{ s.secs | span or '' }}</span>{% endif %}
+  </li>
+{% endfor %}
+</ol>
+<details class="lv-railm"><summary>step {{ ns_rail.i or '–' }} of {{ p.steps | length }}{% if ns_ %} · {{ ns_.id }} {{ ns_.name }}{% endif %}</summary>
+  <ul>{% for s in p.steps %}<li class="st-{{ s.state }}"><b>{{ s.id }}</b> {{ s.name }} <span>{{ s.state }}{% if s.secs %} · {{ s.secs | span }}{% endif %}</span></li>{% endfor %}</ul>
+</details>
