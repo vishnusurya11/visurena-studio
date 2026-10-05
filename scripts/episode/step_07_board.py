@@ -20,7 +20,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 
-from studio import episode_home, grid_layout, grid_room, panel_ladder, step_cli  # noqa: E402
+from studio import episode_home, grid_layout, grid_room, pack_refs, panel_ladder, step_cli  # noqa: E402
 
 STEP_ID = "07"
 NAME = "board"
@@ -34,7 +34,19 @@ def layout(ctx) -> list[dict]:
     if not plan.exists():
         return []
     doc = episode_home.read_json(plan)
-    return grid_layout.layout(doc.get("setups") or {}, doc.get("shots") or [])
+    return grid_layout.layout(doc.get("setups") or {}, doc.get("shots") or [], needs_of(ctx.book_dir, doc))
+
+
+def needs_of(book: Path, doc: dict) -> dict[int, set]:
+    """What each shot stages: its faces and the setup props its prose names."""
+    setups = doc.get("setups") or {}
+    return {int(s["index"]): set(s.get("faces") or []) | named_props(book, setups.get(s["setup"]) or {}, s)
+            for s in doc.get("shots") or []}
+
+
+def named_props(book: Path, setup: dict, shot: dict) -> set:
+    text = " ".join(shot.get(k) or "" for k in ("frame", "motion", "at_rest"))
+    return {pid for pid in setup.get("props") or [] if pack_refs.props_named(book, [pid], text)}
 
 
 def grid_path(ctx, row: dict) -> Path:

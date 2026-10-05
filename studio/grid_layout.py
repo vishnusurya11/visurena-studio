@@ -35,6 +35,10 @@ GOOD = (1, 2, 3, 4)
 FACES = ("extreme_close", "close", "medium_close")
 WIDES = ("wide", "full")
 FILE = Path("storyboard") / "layout.json"
+BUDGET = 2
+"""Sheets a grid can stage: the image model takes three pictures and the place
+keeps one (ep17: two people filled grid a, the fighting-machine's sheet was
+dropped and the drawer invented a humanoid from the bare word)."""
 
 
 def shape(n: int) -> tuple[int, int]:
@@ -66,27 +70,47 @@ def row(setup: str, cols: int, rows: int, shots: list[int], tag: str = "") -> di
     return {**out, "tag": tag} if tag else out
 
 
-def rows_for(setup: str, shots: list[dict]) -> list[dict]:
-    """One setup's grids: the run of non-faces in pieces, then every face alone
-    when the setup mixes sizes."""
+def runs(indices: list[int], needs: dict | None) -> list[list[int]]:
+    """Consecutive shots packed while their staged sheets fit the BUDGET."""
+    if not needs:
+        return [indices] if indices else []
+    out, held = [], set()
+    for i in indices:
+        want = set(needs.get(i) or ())
+        if out and len(held | want) <= BUDGET:
+            out[-1].append(i)
+            held |= want
+        else:
+            out.append([i])
+            held = want
+    return out
+
+
+def rows_for(setup: str, shots: list[dict], needs: dict | None = None) -> list[dict]:
+    """One setup's grids: the non-faces in runs its slots can stage, each run in
+    pieces, then every face alone when the setup mixes sizes."""
     faces = [s for s in shots if s.get("size") in FACES] if mixed(shots) else []
     rest = [int(s["index"]) for s in shots if s not in faces]
-    parts, out, at = pieces(len(rest)) if rest else [], [], 0
-    for k, n in enumerate(parts):
-        tag = chr(ord("a") + k) if len(parts) > 1 else ""
-        out.append(row(setup, *shape(n), rest[at:at + n], tag))
-        at += n
+    parts = [chunk[at:at + n] for chunk in runs(rest, needs)
+             for at, n in zip(_starts(pieces(len(chunk))), pieces(len(chunk)))]
+    out = [row(setup, *shape(len(part)), part, chr(ord("a") + k) if len(parts) > 1 else "")
+           for k, part in enumerate(parts)]
     return out + [row(setup, 1, 1, [int(s["index"])], f"s{int(s['index']):02d}") for s in faces]
 
 
-def layout(setups: dict, shots: list[dict]) -> list[dict]:
-    """Every grid to draw, setups in plan order, shots in plan order."""
+def _starts(sizes: list[int]) -> list[int]:
+    return [sum(sizes[:k]) for k in range(len(sizes))]
+
+
+def layout(setups: dict, shots: list[dict], needs: dict | None = None) -> list[dict]:
+    """Every grid to draw, setups in plan order, shots in plan order.  `needs`
+    maps a shot index to the sheets it stages (faces and named props)."""
     order = list(setups or {}) + [s["setup"] for s in shots if s["setup"] not in (setups or {})]
     out = []
     for setup in dict.fromkeys(order):
         own = [s for s in shots if s["setup"] == setup]
         if own:
-            out += rows_for(setup, own)
+            out += rows_for(setup, own, needs)
     return out
 
 

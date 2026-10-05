@@ -68,6 +68,10 @@ PICTURE_RULES = [
     "At most two faces a shot, each seen whole -- a person who is only a hand or an arm "
     "is not a face; a crowd belongs only on wide shots, as a distant mass, never on a "
     "close or medium shot.",
+    "A machine, vessel or creature the book's props list is named by its card's name and "
+    "described in the shot ('the walking machine, a brass hood on three long jointed legs'), "
+    "never by a bare word ('a monster'); the setup that shows it lists it in "
+    "`props` so its drawn sheet is staged, and a thing inside a machine is not a face.",
 ]
 """The standing picture gates, told to the WRITER up front (2026-10-01, ep15:
 three generations of drafts omitted light directions because no section said

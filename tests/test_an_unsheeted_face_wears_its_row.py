@@ -16,7 +16,7 @@ def test_an_unsheeted_face_carries_its_worn_items():
             {"name": "the brother", "ref": 1, "wear": "Wearing: Brown Norfolk jacket."}]
     say = called(cast)
     assert say["the brother"] == "the person in <image1>"
-    assert say["Mrs. Elphinstone"].startswith("a mrs. elphinstone wearing ")
+    assert say["Mrs. Elphinstone"].startswith("a mrs. elphinstone (")
     assert "white muslin dress" in say["Mrs. Elphinstone"]
     assert say["Mrs. Elphinstone"] == say["Mrs. Elphinstone"].lower()   # the drawer letters capitals
 
