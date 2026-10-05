@@ -1,1 +1,14 @@
-<span class="ok">order #{{ done.order_id }} · {{ done.kind }} · {{ done.target }}{% if done.kind == 'hold' %} (hold {{ done.hold_id }}){% endif %} — {{ done.effect }}</span>
+{#- An order's receipt (PKG-6, 6.2/6.3): a chip bound to its order id, swapped into #receipts.
+    It never claims the effect early: a unit order is `pending` until a run takes it, and the
+    chip names that run -- or says no run will (data-dead).  orders.js speaks `data-say` and
+    moves the state word when the order is taken. -#}
+<div class="rcpt" id="rcpt-{{ done.order_id }}" data-order="{{ done.order_id }}" data-state="{{ done.state }}"{% if done.dead %} data-dead="1"{% endif %} data-say="{{ done.say }}">
+<span class="rc-id mono">#{{ done.order_id }}</span>
+<span class="rc-what">{{ done.kind }} · {{ done.target }}{% if done.hold_id %} · hold {{ done.hold_id }}{% endif %}</span>
+<span class="rc-state" data-k="state">{% if done.state == 'applied' %}● applied{% else %}○ pending{% endif %}</span> ·
+<span class="rc-eff">{% if done.again %}already placed: {% endif %}{{ done.effect }}{% if done.artefact %} ({{ done.artefact }}){% endif %}.</span>
+{%- if done.taker %}
+<span class="rc-taker{% if done.dead %} rc-dead{% endif %}">— {{ done.taker }}.</span>
+{%- endif %}
+<button type="button" class="btn ghost sm rc-x" data-dismiss aria-label="Dismiss receipt">×</button>
+</div>

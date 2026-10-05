@@ -15,7 +15,7 @@ from datetime import datetime, timezone
 from functools import lru_cache
 from pathlib import Path
 
-from studio import db, gate_policy, registry
+from studio import db, eta, gate_policy, registry
 from studio.command_center import library_paths, thumbs
 
 MARKS = {"queued": ("circle", "○"), "blocked": ("circle-dashed", "◌"), "running": ("loader", "●"),
@@ -97,9 +97,31 @@ def elapsed(started_at: str | None) -> str:
     return f"{seconds // 60}m" if seconds >= 60 else f"{seconds}s"
 
 
+def age(now: datetime, ts: str | None) -> str:
+    """How old a stamp is, in one unit: `now`, `2 m`, `3 h`, `9 d`; '' without one."""
+    try:
+        then = datetime.fromisoformat(str(ts).replace("Z", "+00:00")) if ts else None
+    except ValueError:
+        then = None
+    if then is None:
+        return ""
+    seconds = int((now - then).total_seconds())
+    if seconds < 60:
+        return "now"
+    if seconds < 3600:
+        return f"{seconds // 60} m"
+    return f"{seconds // 3600} h" if seconds < 86400 else f"{seconds // 86400} d"
+
+
+def utc_now() -> datetime:
+    """The clock the ages are read against."""
+    return datetime.now(timezone.utc)
+
+
 def row_view(row: sqlite3.Row | dict) -> dict:
     """A work-order row as the templates read it: the columns, the verdicts
-    JSON parsed, the shown state, its glyph and colour, the step's name."""
+    JSON parsed, the shown state, its glyph and colour, the step's name, the
+    age of its last write."""
     r = dict(row)
     r["verdicts"] = json.loads(r["verdicts"]) if r.get("verdicts") else {}
     r["shown"] = display_state(r["state"], r.get("flags") or 0)
@@ -107,6 +129,7 @@ def row_view(row: sqlite3.Row | dict) -> dict:
     r["css"] = colour_class(r["shown"])
     r["step_name"] = step_names(r["stage"]).get(r.get("step_id") or "", "")
     r["elapsed"] = elapsed(r.get("started_at")) if r["state"] == "running" else ""
+    r["age"] = age(utc_now(), r.get("updated_at"))
     return r
 
 
@@ -142,6 +165,12 @@ def attention(conn: sqlite3.Connection) -> list[dict]:
     return [row_view(r) for r in rows] + flagged_unacknowledged(conn)
 
 
+def inbox_count(conn: sqlite3.Connection) -> int:
+    """How many rows Needs you holds -- the one number the sidebar, the badge,
+    the pulse and the /inbox page all print."""
+    return len(attention(conn))
+
+
 def flagged_unacknowledged(conn: sqlite3.Connection) -> list[dict]:
     """The done rows with flags and no acknowledge for their current verdict
     state, each with its reason and its non-pass gates."""
@@ -163,8 +192,10 @@ def non_pass_gates(verdicts: dict) -> list[str]:
 
 
 def holds(conn: sqlite3.Connection) -> list[dict]:
-    """Every open hold, oldest first."""
-    return [dict(r) for r in conn.execute("SELECT * FROM holds WHERE lifted_at IS NULL ORDER BY id")]
+    """Every open hold, oldest first, with its age."""
+    now = utc_now()
+    return [{**dict(r), "age": age(now, r["held_at"])}
+            for r in conn.execute("SELECT * FROM holds WHERE lifted_at IS NULL ORDER BY id")]
 
 
 def order_target(row: sqlite3.Row | dict) -> str:
@@ -187,9 +218,9 @@ def order_taken(row: sqlite3.Row | dict) -> str:
 
 
 def recent_orders(conn: sqlite3.Connection, limit: int = 10) -> list[dict]:
-    """The last `limit` orders rows, newest first, each with its target and taker."""
-    rows = conn.execute("SELECT * FROM orders ORDER BY id DESC LIMIT ?", (limit,))
-    return [{**dict(r), "target": order_target(r), "taken": order_taken(r)} for r in rows]
+    """The last `limit` orders rows, newest first, each with its target, taker and age."""
+    rows, now = conn.execute("SELECT * FROM orders ORDER BY id DESC LIMIT ?", (limit,)), utc_now()
+    return [{**dict(r), "target": order_target(r), "taken": order_taken(r), "age": age(now, r["ts"])} for r in rows]
 
 
 def lane(conn: sqlite3.Connection, stage: str) -> dict:
@@ -224,13 +255,79 @@ def today(conn: sqlite3.Connection) -> list[dict]:
         " w.codex_id, w.stage, w.unit FROM work_steps s JOIN work_orders w ON w.id = s.order_id"
         " WHERE s.ended_at IS NOT NULL AND substr(s.ended_at, 1, 10) = strftime('%Y-%m-%d', 'now')"
         " ORDER BY s.ended_at DESC, s.step_id DESC LIMIT 30")
-    out = []
+    out, now = [], utc_now()
     for r in rows:
         d = dict(r)
         d["step_name"] = step_names(d["stage"]).get(d["step_id"], "")
         d["glyph"], d["css"] = glyph(d["state"]), colour_class(d["state"])
+        d["age"] = age(now, d["ended_at"])
         out.append(d)
     return out
+
+
+# --- the queue's finish (P06.4: a clean pass is not a unit as run) ---
+
+
+def clean_seconds(hist: dict[str, list[float]], from_step: str | None = None) -> float:
+    """A clean pass: the p50 of every step at or after `from_step` (all without one)."""
+    return sum(eta.band(xs)[1] for sid, xs in hist.items() if xs and (from_step is None or sid >= from_step))
+
+
+def unit_walls(conn: sqlite3.Connection, stage: str) -> list[float]:
+    """Seconds from first to last event of every done unit of the stage -- what a unit takes as run."""
+    rows = conn.execute("SELECT MIN(e.event_ts), MAX(e.event_ts) FROM events e JOIN work_orders w ON w.id = e.order_id"
+                        " WHERE w.stage = ? AND w.state = 'done' GROUP BY w.id", (stage,))
+    walls = [(eta.to_epoch(b) or 0.0) - (eta.to_epoch(a) or 0.0) for a, b in rows]
+    return [w for w in walls if w >= 0.0]
+
+
+def lane_eta(now: float, clean_left: float, units: int, walls: list[float]) -> dict:
+    """The lane's finish: `clean` at the p50s, `as_run` (with a p10-p90 band) at the
+    units' measured first-to-last walls; no as-run without a done unit."""
+    lo, mid, hi = eta.band(walls)
+    run = (lambda w: now + units * w) if walls else (lambda w: None)
+    return {"clean": now + clean_left, "as_run": run(mid), "as_run_lo": run(lo), "as_run_hi": run(hi),
+            "units": units}
+
+
+def day_span(lo: float, hi: float, tz) -> str:
+    """`Tue–Thu`, or one day's name when both fall on it."""
+    a, b = (datetime.fromtimestamp(x, tz).strftime("%a") for x in (lo, hi))
+    same = datetime.fromtimestamp(lo, tz).date() == datetime.fromtimestamp(hi, tz).date()
+    return a if same else f"{a}–{b}"
+
+
+def eta_words(e: dict, tz) -> dict:
+    """The KPI's words: `~Mon 05:29 if clean` and `as run Tue–Thu`."""
+    clean = datetime.fromtimestamp(e["clean"], tz).strftime("~%a %H:%M if clean")
+    as_run = f"as run {day_span(e['as_run_lo'], e['as_run_hi'], tz)}" if e["as_run"] else ""
+    return {"clean_text": clean, "as_run_text": as_run}
+
+
+_HISTORY: dict[tuple, dict] = {}
+
+
+def stage_history(conn: sqlite3.Connection, stage: str) -> dict[str, list[float]]:
+    """eta.step_history, read again only when a new event lands (per database file)."""
+    key = (conn.execute("PRAGMA database_list").fetchone()[2], stage,
+           conn.execute("SELECT MAX(id) FROM events").fetchone()[0])
+    if key not in _HISTORY:
+        _HISTORY.clear()
+        _HISTORY[key] = eta.step_history(conn, stage)
+    return _HISTORY[key]
+
+
+def queue_eta(conn: sqlite3.Connection, stage: str = "episode", now: float | None = None, tz=None) -> dict | None:
+    """When the stage's lane clears: the running units from their step, the queued
+    ones whole, clean and as run, with the KPI's words; None when the lane is empty."""
+    rows = conn.execute("SELECT state, step_id FROM work_orders WHERE stage = ? AND state IN ('running', 'queued')",
+                        (stage,)).fetchall()
+    if not rows:
+        return None
+    hist, now = stage_history(conn, stage), datetime.now(timezone.utc).timestamp() if now is None else now
+    left = sum(clean_seconds(hist, r["step_id"] if r["state"] == "running" else None) for r in rows)
+    e = lane_eta(now, left, len(rows), unit_walls(conn, stage))
+    return {**e, **eta_words(e, tz)}
 
 
 # --- verdicts ---

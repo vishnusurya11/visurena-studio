@@ -35,6 +35,7 @@ class Row(BaseModel):
     updated_at: str
     finished_at: str | None = None
     elapsed: str = ""
+    age: str = ""                    # "2 m" since updated_at (panel ruling 1.8)
     gpu_seconds: float = 0.0
     cost_usd: float | None = None
     deliverable: str | None = None
@@ -126,6 +127,58 @@ class Unit(BaseModel):
     hold: dict[str, Any] | None = None
     suggest: dict[str, Any] | None = None
     raw: dict[str, Any] | None = None
+
+
+# --- the pulse (panel ruling 2026-10-04, contract C1) ---
+
+
+class Pin(BaseModel):
+    href: str
+    label: str
+    state: str
+
+
+class Gpu(BaseModel):
+    href: str | None = None
+    unit: str | None = None
+    step: str | None = None
+    frac: float | None = None        # 0..1 from the run's start to its finish
+    finish: str | None = None        # "21:35" (local)
+    vital: str | None = None
+    held: bool = False
+
+
+class Hold(BaseModel):
+    id: int
+    since: str
+    reason: str
+
+
+class Shell(BaseModel):
+    needs: int                       # views.inbox_count(): the one "needs you" number
+    queue: int
+    dept_dots: dict[str, dict[str, int]]
+    pins: list[Pin]
+    gpu: Gpu | None = None
+    hold: Hold | None = None
+
+
+class Event(BaseModel):
+    model_config = ConfigDict(extra="allow")   # an order receipt also carries `order`
+    id: int | str                    # an events row id, or `ord-<orders id>`
+    ts: str
+    href: str | None = None
+    unit: str
+    text: str
+
+
+class Pulse(BaseModel):
+    boot: float                      # the server's start: a new one means reload
+    now: float
+    fp: dict[str, str]               # shell, floor, attention, orders, lanes, dept:*, book:*, unit:*
+    shell: Shell
+    events: list[Event]
+    cursor: int
 
 
 # --- the episode progress card (progress tracker spec §3) ---

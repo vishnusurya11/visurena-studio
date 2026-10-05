@@ -92,7 +92,7 @@ def test_a_static_url_carries_the_files_mtime():
 def test_the_palette_indexes_pages_units_books_and_departments(conn):
     sh = shell.shell(conn[0], conn[1], "/")
     groups = {e["g"] for e in sh["palette"]}
-    assert groups == {"Pages", "Units", "Books", "Departments"}
+    assert groups == {"Pages", "Units", "Actions", "Books", "Departments"}
     assert sh["palette"][0]["h"] == "/" and any(e["h"] == "/architecture" for e in sh["palette"])
 
 
@@ -150,13 +150,13 @@ def test_the_running_units_page_lights_its_pin_not_its_department(client):
 @pytest.mark.parametrize("route", ["/queue", "/floor"])
 def test_the_queue_answers_at_both_names(client, route):
     response = client.get(route)
-    assert response.status_code == 200 and "NEXT" in response.text
+    assert response.status_code == 200 and 'id="queue-h">Next' in response.text
     assert re.search(r'data-testid="nav-queue" aria-current="page"', sidebar(response.text))
 
 
 def test_the_books_page_lists_every_codex_row(client):
     page = client.get("/books").text
-    shelf = text_of(page, "shelf")
+    shelf = page[page.index('data-testid="shelf"'):]   # making episodes, then the rest of the shelf
     assert "A Book" in shelf and "Other Book" in shelf and f'href="/b/{OTHER}"' in page
 
 

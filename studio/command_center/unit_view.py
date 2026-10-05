@@ -11,13 +11,14 @@ row names -- the live verdict is the path the row's `verdicts[gate]` names, neve
 from __future__ import annotations
 
 import json
+import re
 import sqlite3
 from collections import Counter
 from datetime import datetime, timezone, tzinfo
 from pathlib import Path
 
 from studio import manifest
-from studio.command_center import library_paths, views
+from studio.command_center import library_paths, viewer_model, views
 from studio.command_center import unit_parse as up
 
 PICTURES = {"episode": {"plan": "plan.json", "panels": "storyboard/shot_*.png", "panel_gate": "EYE_PANELS",
@@ -115,7 +116,7 @@ def lease(row: dict, now: datetime) -> dict:
 def head_band(row: dict, plan: dict | None, now: datetime) -> dict:
     """Who the unit is and where it stands: plan title and question, lease, run, time."""
     plan = plan if isinstance(plan, dict) else {}
-    return {"title": str(plan.get("title") or ""), "question": up.clip(plan.get("question")),
+    return {"title": str(plan.get("title") or ""), "question": up.clip(display_question(plan.get("question"))),
             "lease": lease(row, now), "run_short": _run_short(row),
             "moved": views.ago(row.get("updated_at")), "gpu_h": views.gpu_hours(row.get("gpu_seconds")),
             "started": day_hhmm(row.get("started_at")), "finished": day_hhmm(row.get("finished_at"))}
@@ -317,6 +318,232 @@ def master_band(library: Path, codex: str, stage: str, book: Path | None, home: 
             "published": _rel_if(book, home, cfg.get("published", "")) if cfg else None}
 
 
+# --- truthful media (panel ruling 5.5, 5.6, 5.8) ---
+
+
+def display_question(q) -> str:
+    """The plan's question without its appearance parentheticals ("(grey eyes, …)")."""
+    text = re.sub(r"\s*\([^()]*\)", "", str(q or ""))
+    return re.sub(r"\s{2,}", " ", text).strip()
+
+
+def qc_checks(qc: dict) -> list[dict]:
+    """The master's five QC measures, each {name, ok, text}."""
+    lines = [l for l in qc.get("lines") or [] if isinstance(l, dict)]
+    cuts, missing = len(qc.get("planned_cuts") or []), len(qc.get("missing_cuts") or [])
+    takes = qc.get("takes") if isinstance(qc.get("takes"), dict) else {}
+    heard = sum(1 for l in lines if l.get("passed"))
+    return [{"name": "LUFS", "ok": bool(qc.get("lufs_ok")), "text": f"LUFS {qc.get('lufs')}"},
+            {"name": "peak", "ok": bool(qc.get("tp_ok")), "text": f"peak {qc.get('true_peak')}"},
+            {"name": "cuts", "ok": missing == 0, "text": f"cuts {cuts - missing}/{cuts}"},
+            {"name": "lines", "ok": heard == len(lines), "text": f"lines {heard}/{len(lines)}"},
+            {"name": "takes", "ok": takes.get("pass") == takes.get("of"),
+             "text": f"takes {takes.get('pass', '–')}/{takes.get('of', '–')}"}]
+
+
+def qc_summary(qc) -> dict | None:
+    """`QC 5/5 ✓` when every check passes; the failures in full otherwise; None with no QC."""
+    if not isinstance(qc, dict) or not qc:
+        return None
+    checks = qc_checks(qc)
+    fails = [c for c in checks if not c["ok"]]
+    return {"n_ok": len(checks) - len(fails), "n": len(checks), "all_ok": not fails, "fails": fails}
+
+
+def take_poster(home: Path | None, name: str) -> str | None:
+    """The take's own first frame (unit-relative), else its middle content frame, else None."""
+    for k in (0, 1):
+        rel = f"takes/work/content/{name}_{k}.png"
+        if home and (Path(home) / rel).is_file():
+            return rel
+    return None
+
+
+def master_poster(book: Path | None, unit: str) -> str | None:
+    """The publish thumbnail, else the pre-baked title card (the master's first frame)."""
+    for rel in (f"publish/{unit}.png", f"title/{unit}.png"):
+        if book and (Path(book) / rel).is_file():
+            return rel
+    return None
+
+
+def latest_master(home: Path | None) -> dict | None:
+    """The newest master file by mtime: its unit-relative path, name and `vN` label."""
+    hits = sorted(Path(home).glob("cut/master*.mp4"), key=lambda p: (p.stat().st_mtime, p.name)) if home else []
+    if not hits:
+        return None
+    name = hits[-1].stem.removeprefix("master_")
+    n = re.search(r"(\d+)$", name)
+    return {"rel": f"cut/{hits[-1].name}", "name": name, "short": f"v{n.group(1)}" if n else name}
+
+
+def unit_rel(rel: str, home_rel: str) -> str:
+    """A book-relative path as the Viewer names it: relative to the unit's home when inside it."""
+    prefix = home_rel.rstrip("/") + "/"
+    return rel[len(prefix):] if rel.startswith(prefix) else rel
+
+
+# --- the shot cards: panel and take joined by shot number ---
+
+
+def take_face(codex: str, book: Path | None, home_rel: str, take: dict) -> dict:
+    """The card's main picture for a take: its own frame as the poster, or the reason there is none."""
+    name = Path(take["rel"]).stem
+    home = Path(book) / home_rel if book else None
+    frame = take_poster(home, name)
+    poster = library_paths.thumb_url(codex, f"{home_rel}/{frame}", 320,
+                                     library_paths.stamp(home / frame)) if frame else ""
+    return {"rel": unit_rel(take["rel"], home_rel), "kind": "video", "depth": "take", "poster": poster,
+            "why": "" if frame else f"no frame of {name} on disk"}
+
+
+def panel_face(home_rel: str, panel: dict) -> dict:
+    """A panel as a card picture: its thumb and its unit-relative path."""
+    return {"rel": unit_rel(panel["rel"], home_rel), "kind": "image", "depth": "panel",
+            "poster": panel.get("thumb", ""), "why": ""}
+
+
+def shot_cards(codex: str, book: Path | None, home_rel: str, panels: list[dict], takes: list[dict]) -> list[dict]:
+    """One card per shot number: the take's frame as the main picture, the panel as its inset."""
+    by_panel = {p["index"]: p for p in panels}
+    by_take = {t["index"]: t for t in takes}
+    out = []
+    for i in sorted(set(by_panel) | set(by_take), key=lambda k: (not isinstance(k, int), str(k).zfill(4))):
+        p, t = by_panel.get(i), by_take.get(i)
+        take = take_face(codex, book, home_rel, t) if t else None
+        panel = panel_face(home_rel, p) if p else None
+        base = p or t
+        out.append({"index": i, "label": base["label"].lstrip("T"), "size": base.get("size", ""),
+                    "frame": base.get("frame", ""), "take": take, "panel": panel, "main": take or panel,
+                    "faults": (p or {}).get("faults", []) + (t or {}).get("faults", []),
+                    "dq": (p or {}).get("dq", []), "flagged": bool((p or {}).get("flagged") or (t or {}).get("flagged"))})
+    return out
+
+
+def grid_tiles(codex: str, book: Path | None, home: Path | None) -> list[dict]:
+    """The storyboard grids, newest first, each with its setup name and thumb."""
+    hits = sorted(Path(home).glob("storyboard/grids/*.png"), key=lambda p: -p.stat().st_mtime) if home else []
+    out = []
+    for p in hits:
+        rel = p.relative_to(home).as_posix()
+        name = re.sub(r"^(?:[a-z]+\d+_)?(?:grid_)?", "", p.stem).replace("_", " ")
+        out.append({"rel": rel, "name": name, "thumb": library_paths.thumb_url(
+            codex, p.relative_to(book).as_posix(), 320, library_paths.stamp(p))})
+    return out
+
+
+# --- the Files section ---
+
+
+FILE_BUCKETS = (("Plan and verdicts", None), ("Storyboard", "storyboard/"), ("Takes", "takes/"),
+                ("Master", ("cut/", "review/")), ("Audio", "audio/"), ("Reports", "reports/"),
+                ("Run records and logs", None))
+FILE_SETS = (("storyboard/shot_", "shots"), ("storyboard/grids/", "grids"), ("takes/r2v/T", "takes"),
+             ("cut/master", "masters"))
+
+
+def file_pattern(rel: str) -> str:
+    """The name with every short counter (1-3 digits, not inside a hex hash or a stamp) as N's."""
+    return re.sub(r"(?<![0-9A-Fa-f])\d{1,3}(?![0-9A-Fa-f])", lambda m: "N" * len(m.group()), rel)
+
+
+def file_bucket(rel: str) -> str:
+    """The Files group a unit-relative path belongs to."""
+    for name, prefix in FILE_BUCKETS:
+        if prefix and rel.startswith(prefix):
+            return name
+    return "Run records and logs" if rel.startswith("_logs/") or rel.endswith((".jsonl", ".log")) \
+        else "Plan and verdicts"
+
+
+def file_set(rel: str) -> str:
+    """The Viewer sequence a file opens in."""
+    return next((s for prefix, s in FILE_SETS if rel.startswith(prefix)), "files")
+
+
+DIR_FOLD = 6
+
+
+def fold_folder(rel: str) -> str:
+    """The folder a deep file may fold into: its first two path parts (`storyboard/grids`), '' when shallower."""
+    parts = rel.split("/")
+    return "/".join(parts[:2]) if len(parts) >= 3 else ""
+
+
+def file_keys(files: list[dict]) -> dict[str, list[dict]]:
+    """Files by fold key: a second-level folder with more than DIR_FOLD names folds whole, else by name pattern."""
+    per_dir: dict[str, set] = {}
+    for f in files:
+        per_dir.setdefault(fold_folder(f["rel"]), set()).add(file_pattern(f["rel"]))
+    by: dict[str, list[dict]] = {}
+    for f in files:
+        folder = fold_folder(f["rel"])
+        key = f"{folder}/…" if folder and len(per_dir[folder]) > DIR_FOLD else file_pattern(f["rel"])
+        by.setdefault(key, []).append(f)
+    return by
+
+
+def file_rows(files: list[dict]) -> list[dict]:
+    """One row per file, three or more files of one name pattern (or a crowded folder) folded into a counted row."""
+    by = file_keys(files)
+    rows = []
+    for pattern, fs in by.items():
+        many = len(fs) >= 3
+        rows.append({"label": pattern if many else fs[0]["rel"], "n": len(fs), "rel": fs[0]["rel"],
+                     "set": file_set(fs[0]["rel"]), "kind": fs[0].get("kind") or "doc",
+                     "size": vm_size(sum(int(f.get("size") or 0) for f in fs))})
+    return rows
+
+
+def file_groups(files: list[dict]) -> list[dict]:
+    """The unit folder by kind, in a fixed order, empty groups left out."""
+    groups = {name: [] for name, _ in FILE_BUCKETS}
+    for f in files:
+        groups[file_bucket(f["rel"])].append(f)
+    return [{"name": name, "rows": file_rows(fs), "n": len(fs)} for name, fs in groups.items() if fs]
+
+
+def vm_size(n: int) -> str:
+    """Bytes as `3.0 KB` / `31.9 MB` (the Viewer's own format)."""
+    return viewer_model.size(n)
+
+
+def unit_files(home: Path | None, logs: list[dict]) -> dict:
+    """The Files section: the unit folder's viewable files and the run logs, grouped."""
+    files = viewer_model.index_files(home) if home and Path(home).is_dir() else []
+    files += [{"rel": x["rel"], "size": x.get("size", 0), "kind": "log"} for x in logs]
+    return {"groups": file_groups(files), "n": len(files),
+            "size": vm_size(sum(int(f.get("size") or 0) for f in files))}
+
+
+# --- the sibling units and the gate word ---
+
+
+def natural(name: str) -> tuple:
+    """`ep9` before `ep10`: digit runs compare as numbers."""
+    return tuple(int(t) if t.isdigit() else t for t in re.split(r"(\d+)", name))
+
+
+def siblings(conn: sqlite3.Connection, codex: str, stage: str, unit: str) -> dict:
+    """The units before and after this one in this book's department, in natural name order."""
+    names = sorted((r[0] for r in conn.execute("SELECT unit FROM work_orders WHERE codex_id = ? AND stage = ?",
+                                               (codex, stage))), key=natural)
+    if unit not in names:
+        return {"prev": None, "next": None}
+    k = names.index(unit)
+    return {"prev": names[k - 1] if k > 0 else None, "next": names[k + 1] if k + 1 < len(names) else None}
+
+
+GATE_WORDS = {"amber": "flagged", "green": "passed", "purple": "deferred", "red": "failed"}
+
+
+def gate_state(chip: dict) -> str:
+    """One state word per gate: not signed, flagged, passed, deferred or failed."""
+    if not (chip.get("by") or chip.get("word")):
+        return "not signed"
+    return GATE_WORDS.get(chip.get("css"), "failed")
+
+
 # --- band 6: what to do ---
 
 
@@ -396,16 +623,52 @@ def bands(conn: sqlite3.Connection, library: Path, logs: Path, base: dict, codex
     plan = read_doc(library, codex, _rel(book, home, (PICTURES.get(stage) or {}).get("plan", "plan.json")))
     plan = plan if isinstance(plan, dict) else {}
     rows = up.passes(events, learnings, base["timing"], r["run_id"] if base["running"] else None, now, tz)
-    gates = gate_band(library, codex, stage, base["verdicts"])
+    gates = [{**g, "state": gate_state(g)} for g in gate_band(library, codex, stage, base["verdicts"])]
     steps = step_band(base["steps"], r, events, base["timing"], now, tz)
-    return {"head": head_band(r, plan, now), "bar": steps,
+    pics = media_band(codex, book, home, r["home"],
+                      pictures_band(library, codex, stage, book, home, plan, gates, steps))
+    return {"head": {**head_band(r, plan, now),
+                     "latest": latest_master(home)}, "bar": steps,
             "health": health_band(rows, learnings, r["shown"] in ("done", "flagged")),
-            "gates": gates, "pictures": pictures_band(library, codex, stage, book, home, plan, gates, steps),
-            "master": master_band(library, codex, stage, book, home, base["thumbnails"]),
+            "gates": gates, "pictures": pics,
+            "master": screen_band(library, codex, stage, book, home, r["unit"], base["thumbnails"]),
             "orders": unit_orders(conn, codex, stage, r["unit"]), "hold": unit_hold(conn, codex, stage, r["unit"]),
             "suggest": suggest(r, gates, stage, r["home"]),
+            "siblings": siblings(conn, codex, stage, r["unit"]),
+            "files": unit_files(home, viewer_model.run_logs(logs, codex, stage, run_ids(events))),
             "raw": raw_band(learnings, jsonl(log_file(logs, codex, stage, base["log_name"])), base["timing"],
                             events, now, tz)}
+
+
+def run_ids(events: list[dict]) -> list[str]:
+    """The unit's run ids in the order they first appear."""
+    return list(dict.fromkeys(e["run_id"] for e in events if e.get("run_id")))
+
+
+def media_band(codex: str, book: Path | None, home: Path | None, home_rel: str, pics: dict) -> dict:
+    """The pictures band plus the shot cards and the grids the page draws."""
+    return {**pics, "cards": shot_cards(codex, book, home_rel, pics["panels"], pics["takes"]),
+            "grids": grid_tiles(codex, book, home), "home": home_rel}
+
+
+def screen_band(library: Path, codex: str, stage: str, book: Path | None, home: Path | None,
+                unit_name: str, thumbs: list[dict]) -> dict | None:
+    """The master band plus what the screening room draws: poster, QC summary, unit-relative path."""
+    m = master_band(library, codex, stage, book, home, thumbs)
+    if m is None:
+        return None
+    qc = read_doc(library, codex, _rel(book, home, (PICTURES.get(stage) or {}).get("qc", ""))) if home else None
+    poster = master_poster(book, unit_name)
+    return {**m, "summary": qc_summary(qc), "sha8": (qc or {}).get("sha8", "") if isinstance(qc, dict) else "",
+            "vrel": unit_rel(m["rel"], Path(home).relative_to(book).as_posix()) if book and home else m["rel"],
+            "poster": master_poster_url(codex, book, poster)}
+
+
+def master_poster_url(codex: str, book: Path | None, poster: str | None) -> str:
+    """The screening room's poster: the 1024 WebP of the publish thumbnail ("" when there is none)."""
+    if not poster or book is None:
+        return ""
+    return library_paths.thumb_url(codex, poster, 1024, library_paths.stamp(Path(book) / poster))
 
 
 def unit(conn: sqlite3.Connection, library: Path, codex: str, stage: str, unit_name: str,

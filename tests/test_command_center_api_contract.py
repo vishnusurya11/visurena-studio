@@ -66,10 +66,12 @@ def test_the_unit_json_validates(client):
 
 
 def test_the_json_and_the_page_show_the_same_rows(client):
-    rows = [r["unit"] for r in client.get("/api/d/episode.json").json()["rows"]]
+    from studio.command_center import viz
+    rows = client.get("/api/d/episode.json").json()["rows"]
     page = main(client.get("/d/episode").text)   # the table, not the sidebar's pins
-    positions = [page.index(f">{unit}<") for unit in rows]
-    assert positions == sorted(positions)
+    for key in {viz.group_of(r["shown"]) for r in rows}:   # the page groups by state (PKG-4), in the JSON's order
+        positions = [page.index(f">{r['unit']}<") for r in rows if viz.group_of(r["shown"]) == key]
+        assert positions == sorted(positions), key
 
 
 def test_the_factory_opens_the_db_read_only(tmp_path, monkeypatch):

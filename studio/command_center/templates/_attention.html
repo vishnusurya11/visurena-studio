@@ -1,17 +1,27 @@
+{#- Needs you as cards (panel ruling PKG-4 4.2, 4.5): the poster, the unit and its book, what
+    it needs in plain words with its age, the non-pass gates as chips by severity, then
+    Acknowledge / Open (and Watch for a shipped episode).  Rows carry stable ids (C2). -#}
 {% import "_macros.html" as act with context %}
-<div class="eyebrow">Needs you ({{ attention | length }})</div>
-<span hidden>NEEDS YOU</span>
+{% from "_icon.html" import icon %}
+{% from "_viz.html" import tile, chips %}
+{% if attention %}
+<ul class="needs2" data-testid="needs-you">
 {% for r in attention %}
-<div class="row">
-  <span class="st {{ r.css }}">{{ r.glyph }}</span>
-  <a href="/d/{{ r.stage }}/{{ r.codex_id }}/{{ r.unit }}">{{ r.stage }} › {{ books.get(r.codex_id, r.codex_id) }} › {{ r.unit }}</a>
-  {% if r.reason %}· {{ r.reason }}{% if r.gates %} · {{ r.gates | join(" · ") }}{% endif %}
-  {% else %}· {{ r.state }} at {{ r.step_id }} {{ r.step_name }}{% endif %}
-  {% if r.blocked_on %}· on <code>{{ r.blocked_on }}</code>{% endif %}
-  {% if r.detail %}· <span class="muted">{{ r.detail }}</span>{% endif %}
-  {% if r.updated_at %}· <span class="muted">{{ r.updated_at[:16] }}</span>{% endif %}
-  {% if r.reason %}{{ act.acknowledge(r.codex_id, r.stage, r.unit) }}{% endif %}
-</div>
-{% else %}
-<div class="row muted">nothing needs you</div>
+{% set href = '/d/' ~ r.stage ~ '/' ~ r.codex_id ~ '/' ~ r.unit %}
+{% set book = books.get(r.codex_id, r.codex_id) %}
+<li class="nc" id="att-{{ r.codex_id }}-{{ r.stage }}-{{ r.unit }}" data-row data-state="{{ r.shown }}">
+  {% call tile(viz.face(request, r, 96), href, 'needs-you', r.unit ~ ' · ' ~ book, 96, '', r.unit) %}<span class="flagdot {{ r.shown }}" title="{{ r.shown }}">{{ icon(state_icons[r.shown]) }}</span>{% endcall %}
+  <div class="who">
+    <a class="t" href="{{ href }}"><span class="id">{{ r.unit }}</span>{{ book }}</a>
+    <span class="meta"><span class="cap">{{ r.stage }}</span> · {% if r.reason %}shipped with flags{% else %}{{ r.shown }} at <b>{{ r.step_id }}</b> {{ r.step_name }}{% endif %}{% if r.age or r.ago %} · <b title="{{ r.updated_at or '' }}">{{ r.age or r.ago }}</b>{% endif %}{% if r.blocked_on %} · on <b>{{ r.blocked_on }}</b>{% endif %}</span>
+    {% set cs = viz.chips(r) %}
+    {% if cs %}<span class="chips">{{ chips(cs) }}</span>{% endif %}
+    {% if r.detail and not r.reason %}<span class="detail" title="{{ r.detail }}">{{ r.detail }}</span>{% endif %}
+    <span class="acts">{% if r.reason %}{{ act.acknowledge(r.codex_id, r.stage, r.unit) }}{% endif %}<a class="btn sm ghost" href="{{ href }}">Open</a>{% if r.reason and r.stage == 'episode' %}<a class="btn sm ghost" href="{{ href }}#master?play">{{ icon('play') }}Watch</a>{% endif %}</span>
+  </div>
+</li>
 {% endfor %}
+</ul>
+{% else %}
+<p class="panel empty" data-testid="needs-you"><b>Nothing needs you.</b> A unit lands here when it fails, defers, escalates or ships with flags; acknowledging one takes it off until its flags change.</p>
+{% endif %}

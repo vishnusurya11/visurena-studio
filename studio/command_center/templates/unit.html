@@ -1,156 +1,174 @@
 {% extends "base.html" %}
 {% from "_icon.html" import icon %}
 {% import "_macros.html" as act with context %}
+{#- The unit page (mockups unit-running / unit-finished, panel ruling PKG-5): the head,
+    the screening room for a master, then the sections beside a properties card.
+    Every picture, take, grid, master, verdict and file is a [data-view] element:
+    the in-page Viewer (static/viewer) opens it over the page.  Polled regions
+    refresh on the unit's pulse (C3) and morph; no player sits inside one.
+    Templates write no JS: the page's behaviour is static/media.js. -#}
 {% set r = unit.row %}{% set hl = unit.health %}{% set pics = unit.pictures %}{% set m = unit.master %}{% set sg = unit.suggest %}
+{% set home = pics.home or r.home %}
 {% set finished = r.shown in ('done', 'flagged') %}
+{% set pk = 'pulse:unit:' ~ stage ~ '/' ~ codex ~ '/' ~ r.unit %}
+{% set base_url = '/partials/unit/' ~ stage ~ '/' ~ codex ~ '/' ~ r.unit %}
 {% block title %}{% if live %}{{ live.title }}{% else %}{{ r.unit }} · {{ stage }} · Visurena Studio{% endif %}{% endblock %}
-{% block crumbs %}<a href="/d/{{ stage }}">{{ stage }}</a>{{ icon('chevron-right') }}<a href="/b/{{ codex }}">{{ unit.book_name }}</a>{{ icon('chevron-right') }}<span aria-current="page">{{ r.unit }}</span>{% endblock %}
+{% block view_codex %}{{ codex }}{% endblock %}{% block view_stage %}{{ stage }}{% endblock %}{% block view_unit %}{{ r.unit }}{% endblock %}
 
-{#- one picture tile: the shot number, the planned size, a badge per fault kind,
-    and a <template> the lightbox clones: the picture, the shot's plan text,
-    the faults, and a redo prefilled for this one picture -#}
-{% macro tiles_grid(items, kind, step) -%}
-<div class="tiles" data-kind="{{ kind }}">
-{% for t in items %}
-<figure class="tile{% if t.flagged %} flagged{% endif %}" id="{{ kind }}-{{ t.label }}" data-lb="lb-{{ kind }}-{{ t.label }}" tabindex="0">
-  {% if kind == 'take' %}<video preload="none" muted loop playsinline{% if t.poster %} poster="{{ t.poster }}"{% endif %} src="{{ t.url }}"></video>{% else %}<img loading="lazy" decoding="async" width="120" height="120" src="{{ t.thumb }}" alt="{{ t.label }}">{% endif %}
-  <span class="num">{{ t.label }}</span>
-  {% if t.size %}<span class="size">{{ t.size }}</span>{% endif %}
-  <span class="badges">{% for f in t.faults[:3] %}<span class="badge{% if f.kind == 'missing' %} red{% endif %}" title="{{ f.text }}">⚑ {{ f.kind }}{% if f.n > 1 %} ×{{ f.n }}{% endif %}</span>{% endfor %}{% if t.faults | length > 3 %}<span class="badge">+{{ t.faults | length - 3 }}</span>{% endif %}{% for d in t.dq %}<span class="badge grey" title="panel dq flag">{{ d }}</span>{% endfor %}</span>
-  <template id="lb-{{ kind }}-{{ t.label }}">
-    <div class="lb-pic">{% if kind == 'take' %}<video controls autoplay src="{{ t.url }}"></video>{% else %}<img src="{{ t.url }}" alt="{{ t.label }}">{% endif %}</div>
-    <div class="lb-text">
-      <h3>{{ 'shot ' if kind == 'shot' else '' }}{{ t.label }}{% if t.size %} · {{ t.size }}{% endif %}{% if t.section %} · {{ t.section }}{% endif %}</h3>
-      {% if t.frame %}<div class="eyebrow">frame</div><p>{{ t.frame }}</p>{% endif %}
-      {% if t.motion %}<div class="eyebrow">motion</div><p>{{ t.motion }}</p>{% endif %}
-      {% if t.camera %}<div class="eyebrow">camera</div><p>{{ t.camera }}</p>{% endif %}
-      {% if t.faults or t.dq %}<div class="eyebrow">faults</div><ul class="lb-faults">{% for f in t.faults %}<li><b>{{ f.kind }}{% if f.n > 1 %} ×{{ f.n }}{% endif %}</b> {{ f.text }}</li>{% endfor %}{% for d in t.dq %}<li class="muted">dq flag: {{ d }}</li>{% endfor %}</ul>{% endif %}
-      <p class="muted mono">{{ t.rel }}</p>
-      <button class="btn lb-redo" type="button" data-step="{{ step }}" data-artefact="{{ t.rel }}" data-note="{{ t.label }}: {% for f in t.faults %}{{ f.text or f.kind }}{% if not loop.last %}; {% endif %}{% endfor %}">redo this shot</button>
-    </div>
-  </template>
-</figure>
-{% endfor %}
-</div>
-{%- endmacro %}
+{%- macro vrel(path) -%}{{ path[home | length + 1:] if path.startswith(home ~ '/') else path }}{%- endmacro -%}
 
-{% macro panels_block() -%}
-<div id="panels" class="pblock">
-  <div class="bandhead"><span class="eyebrow">Panels</span><span class="muted">{{ pics.panels | length }}{% if pics.flagged %} · {{ pics.flagged }} flagged{% endif %}</span>
-    {% if pics.flagged %}<span class="filt"><button type="button" class="tpill on" data-filter="all">all</button><button type="button" class="tpill" data-filter="flagged">⚑ flagged</button></span>{% endif %}
-    {% if pics.contact %}<a class="muted" href="/lib/{{ codex }}/{{ pics.contact }}">contact sheet ▸</a>{% endif %}</div>
-  {% if pics.panels %}{{ tiles_grid(pics.panels, 'shot', pics.panel_step) }}{% else %}<div class="muted">no panels yet</div>{% endif %}
-</div>
-{%- endmacro %}
-
-{% macro takes_block() -%}
-{% set strips = unit.thumbnails | selectattr('kind', 'equalto', 'takes') | list %}
-<div id="takes" class="pblock">
-  <div class="bandhead"><span class="eyebrow">Takes</span>{% if pics.takes %}<span class="muted">{{ pics.takes | length }} · hover plays, click opens</span>{% else %}<span class="muted clip1">not shot · {{ pics.wait }}</span>{% endif %}</div>
-  {% if pics.takes %}{{ tiles_grid(pics.takes, 'take', pics.take_step) }}
-  {% elif pics.slots %}<div class="slots">{% for s in pics.slots %}<span class="slot" data-testid="slot" title="{{ s.reason }}">{{ s.label }}</span>{% endfor %}</div>{% endif %}
-  {% for t in strips %}{% if pics.takes %}<a class="muted small" href="{{ t.url }}">{{ t.rel.split('/')[-1] }} ▸</a> {% else %}<a href="{{ t.url }}"><img class="strip" loading="lazy" decoding="async" src="{{ t.thumb }}" alt="{{ t.rel }}"></a>{% endif %}{% endfor %}
-</div>
-{%- endmacro %}
-
-{% macro master_block() -%}
-<section id="master" class="band">
-  <div class="bandhead"><span class="eyebrow">Master</span>
-  {% if m %}<code>{{ m.rel.split('/')[-1] }}</code>{% if m.qc %}<span class="muted">{{ '%.1f' | format(m.qc.seconds or 0) }} s{% if m.qc.planned %} (plan {{ '%.1f' | format(m.qc.planned) }}){% endif %}</span>{% endif %}
-  {% else %}<span class="muted">none yet{% if not finished %} · {{ unit.bar[-1].step_id if unit.bar else '' }} {{ unit.bar[-1].name if unit.bar else '' }} not reached{% endif %}</span>{% endif %}</div>
-  {% if m %}
-  <div class="mrow">
-    <video controls preload="metadata" src="{{ m.url }}"></video>
-    <div class="mqc">
-      {% if m.qc %}
-      <div>LUFS {{ m.qc.lufs }} <span class="st {{ 'green' if m.qc.lufs_ok else 'red' }}">{{ '✓' if m.qc.lufs_ok else '✕' }}</span> · peak {{ m.qc.peak }} <span class="st {{ 'green' if m.qc.peak_ok else 'red' }}">{{ '✓' if m.qc.peak_ok else '✕' }}</span></div>
-      <div>cuts {{ m.qc.cuts }} · lines heard {{ m.qc.heard }}</div>
-      {% else %}<div class="muted">no QC file yet</div>{% endif %}
-      {% if m.iterations %}<div class="iters">iterations: {% for i in m.iterations %}<a href="{{ i.url }}">{{ i.name }}</a>{% if not loop.last %} · {% endif %}{% endfor %}</div>{% endif %}
-      {% for g in unit.gates if g.gate == 'MASTER' and g.kinds %}{% for k in g.kinds %}<div class="kind"><span class="kname">{{ k.kind }} <b>×{{ k.n }}</b></span>{% for s in k.shots[:12] %}<span class="shotchip">{{ s }}</span>{% endfor %}</div>{% endfor %}{% endfor %}
-    </div>
+{#- the screening room: the master with its picture (a native <video>, nothing drawn
+    over it), the QC line, the judges' stamps and the master's faults -#}
+{% macro screen() -%}
+{% set sm = m.summary %}
+<section class="screen" id="master" aria-label="Screening room" data-latest="{{ unit.head.latest.rel if unit.head.latest else '' }}">
+ <div class="scr-in">
+  <div class="pcol">
+   <div class="qcline">
+    <span class="file"><b>{{ m.vrel.split('/')[-1] }}</b>{% if m.qc %} · {{ '%.1f' | format(m.qc.seconds or 0) }} s{% if m.qc.planned %} (plan {{ '%.1f' | format(m.qc.planned) }}){% endif %}{% endif %}</span>
+    {% if sm and sm.all_ok %}<span class="q ok" title="LUFS, peak, cuts, lines and takes all pass">QC {{ sm.n_ok }}/{{ sm.n }} ✓</span>
+    {% elif sm %}{% for f in sm.fails %}<span class="q bad">✕ {{ f.text }}</span>{% endfor %}<span class="q">QC {{ sm.n_ok }}/{{ sm.n }}</span>
+    {% else %}<span class="q">no QC file yet</span>{% endif %}
+    <span class="q vnew" data-k="vnew" hidden></span>
+   </div>
+   <div class="player" id="master-player" hx-preserve="true">
+    <video id="master-video" class="m-video" controls playsinline preload="metadata" src="{{ m.url }}"{% if m.poster %} poster="{{ m.poster }}"{% endif %} data-rel="{{ m.vrel }}" aria-label="{{ r.unit }} master"></video>
+   </div>
+   <div class="pctrl">
+    <button type="button" class="btn sm" data-view="{{ m.vrel }}" data-set="masters">{{ icon('film') }}Open in the Viewer</button>
+    {% if m.iterations %}<span class="iters">iterations {% for i in m.iterations %}<a class="chipnum" href="{{ i.url }}" data-view="{{ vrel(i.url.split('/', 3)[3]) }}" data-set="masters">{{ i.name }}</a>{% endfor %}</span>{% endif %}
+   </div>
   </div>
-  {% endif %}
+  <div class="sside">
+   <div class="scard">
+    <div class="sc-h"><h3>Judges</h3><span class="sc-s">{{ unit.gates | selectattr('by') | list | length }} signed</span></div>
+    <div class="stamps">
+    {% for g in unit.gates %}
+     <div class="stamp {{ 'flag' if g.state == 'flagged' else 'pass' if g.state == 'passed' else '' }}"{% if g.path %} data-view="{{ vrel(g.path) }}" data-set="files" role="button" tabindex="0"{% endif %}>
+      <span class="g">{{ g.gate | replace('EYE_', '') | lower | capitalize }}</span>
+      <span class="w">{{ g.state }}{% if g.faults %} · ⚑ {{ g.faults }}{% endif %}</span>
+      {% if g.by %}<span class="by">{{ g.by }}{% if g.signed %} · {{ g.signed }}{% endif %}</span>{% endif %}
+     </div>
+    {% endfor %}
+    </div>
+   </div>
+   {% for g in unit.gates if g.gate == 'MASTER' and g.kinds %}
+   <div class="scard">
+    <div class="sc-h"><h3>Faults on the master</h3><span class="sc-n">{{ g.faults }}</span></div>
+    <ul class="flist">{% for k in g.kinds[:8] %}<li><span class="gl">⚑</span><b>{{ k.kind }}</b> ×{{ k.n }} <span class="t">{% for s in k.shots[:8] %}{{ s }}{% if not loop.last %}, {% endif %}{% endfor %}</span>{% if k.notes %}<span class="e">{{ k.notes[0] | truncate(150) }}</span>{% endif %}</li>{% endfor %}</ul>
+   </div>
+   {% endfor %}
+  </div>
+ </div>
 </section>
+{%- endmacro %}
+
+{% macro shot_card(c) -%}
+{% set nn = '%02d' | format(c.index) if c.index is number else c.index %}
+<article class="shot{% if c.flagged %} flag{% endif %}" id="shot-{{ nn }}" data-flagged="{{ '1' if c.flagged else '0' }}">
+ <div class="pair">
+  {% if c.take and c.panel %}<button type="button" class="frame inset" data-view="{{ c.panel.rel }}" data-set="shots" data-shot="{{ c.index }}" data-depth="panel" aria-label="Shot {{ nn }}, panel"><img loading="lazy" decoding="async" width="64" height="64" src="{{ c.panel.poster }}" alt=""></button>{% endif %}
+  <button type="button" class="frame tk" data-view="{{ c.main.rel }}" data-set="shots" data-shot="{{ c.index }}" data-depth="{{ c.main.depth }}" aria-label="Shot {{ nn }}, {{ c.main.depth }}{% if c.frame %}: {{ c.frame | truncate(90) }}{% endif %}">
+   {% if c.main.poster %}<img loading="lazy" decoding="async" width="168" height="168" src="{{ c.main.poster }}" alt="">{% else %}<span class="why">{{ c.main.why or 'no picture yet' }}</span>{% endif %}
+   <span class="tl">{{ 'T' if c.take else '' }}{{ nn }}</span>{% if c.take %}<span class="br">{{ icon('play') }}</span>{% endif %}
+  </button>
+ </div>
+ <div class="m">
+  <div class="m1"><b>{{ nn }}</b><span class="sz">{{ c.size | replace('_', ' ') }}</span></div>
+  <div class="stg">{% if c.panel %}<span class="{{ 'fl' if (c.faults and not c.take) else 'ok' }}">panel</span>{% endif %}{% if c.take %}<span class="{{ 'fl' if c.flagged else 'ok' }}">take</span>{% endif %}{% for f in c.faults[:2] %}<span class="fl" title="{{ f.text }}">⚑ {{ f.kind }}{% if f.n > 1 %} ×{{ f.n }}{% endif %}</span>{% endfor %}{% if c.faults | length > 2 %}<span>+{{ c.faults | length - 2 }}</span>{% endif %}{% for d in c.dq %}<span title="panel dq flag">{{ d }}</span>{% endfor %}</div>
+ </div>
+</article>
 {%- endmacro %}
 
 {% block body %}
-{% if live %}{% include "_unit_live.html" %}{% endif %}
-{% include "_unit_head.html" %}
+<link rel="stylesheet" href="{{ static_url('css/unit.css') }}">
+{% for n in (unit.siblings or {}).values() if n %}<link rel="prefetch" href="/d/{{ stage }}/{{ codex }}/{{ n }}">{% endfor %}
+<div class="u-wrap" id="unit" data-codex="{{ codex }}" data-stage="{{ stage }}" data-unit="{{ r.unit }}" data-home="{{ home }}"
+  data-panel-step="{{ pics.panel_step }}" data-take-step="{{ pics.take_step }}">
+{% if live %}<div class="u-page">{% include "_unit_live.html" %}</div>{% endif %}
+<div class="u-page">
+  <section id="head" class="u-head" hx-get="{{ base_url }}/head" hx-trigger="{{ pk }} from:body" hx-swap="morph:innerHTML">
+  {% include "_unit_head.html" %}
+  </section>
+</div>
 
-<section id="health" class="band">
-  <div class="bandhead"><span class="eyebrow">Health</span>
-    {% if hl.loop.looping %}<span class="loop">⟳ LOOPING</span><span>{{ hl.loop.n }} of the last {{ hl.loop.of }} runs ended at {{ hl.loop.step }} {{ hl.loop.reason }}</span>
-    {% elif finished %}<span class="okline">✓ finished in {{ hl.n }} run{{ '' if hl.n == 1 else 's' }} · no loop</span>
-    {% elif hl.n %}<span class="muted">{{ hl.n }} run{{ '' if hl.n == 1 else 's' }} · no loop</span>
-    {% else %}<span class="muted">no runs yet</span>{% endif %}
-    {% if hl.drift %}<span class="warn" title="{{ hl.titles | join(' · ') }}">⚠ plan drift: {{ hl.titles | length }} titles</span>{% endif %}
-  </div>
-  {% if hl.passes %}
-  {% set shown = hl.passes[-14:] %}
-  <div class="passes" data-testid="passes" aria-label="one segment per run">{% if hl.passes | length > 14 %}<span class="pass more muted">+{{ hl.passes | length - 14 }} earlier</span>{% endif %}{% for p in shown %}<span class="pass {{ p.css }}" data-testid="pass" title="{{ p.run_id }} · {{ p.day }} · {{ p.wall }} · {{ p.how }}{% if p.detail %} · {{ p.detail }}{% endif %}"><b>{{ p.at }}</b> {{ p.label }}</span>{% endfor %}</div>
+{% if m and finished %}{{ screen() }}{% endif %}
+
+<div class="u-page">
+ <div class="u-grid">
+  <div class="u-main">
+
+  <section class="u-sec" id="shots" aria-labelledby="shots-h">
+   <header><h2 id="shots-h">Shots</h2>
+    <span class="sub">{{ pics.cards | length }} · {% if pics.takes %}take, panel inset{% else %}panels{% endif %}{% if pics.flagged %} · {{ pics.flagged }} flagged{% endif %}{% if pics.cards and not pics.takes and pics.wait %} · takes: {{ pics.wait | truncate(120) }}{% endif %}</span>
+    <span class="r">
+     {% if pics.cards | selectattr('flagged') | list %}<span class="segmented filters" role="group" aria-label="Show"><button type="button" data-filter="all" aria-pressed="true">All <span class="n">{{ pics.cards | length }}</span></button><button type="button" data-filter="flagged" aria-pressed="false">⚑ Flagged <span class="n">{{ pics.cards | selectattr('flagged') | list | length }}</span></button></span>{% endif %}
+     {% if pics.contact %}<button type="button" class="vfile" data-view="{{ vrel(pics.contact) }}" data-set="files">{{ icon('image') }}contact sheet</button>{% endif %}
+    </span>
+   </header>
+   {% if pics.grids and not finished %}
+   <div class="subh"><h3>The look so far</h3><span class="sub">{{ pics.grids | length }} storyboard grid{{ '' if pics.grids | length == 1 else 's' }}, newest first</span></div>
+   <div class="mosaic">{% for g in pics.grids[:9] %}<button type="button" class="pic sq{% if loop.first %} new{% endif %}" data-view="{{ g.rel }}" data-set="grids" aria-label="grid {{ g.name }}"><img loading="lazy" decoding="async" width="320" height="320" src="{{ g.thumb }}" alt=""><span class="tag">{% if loop.first %}Newest · {% endif %}{{ g.name }}</span></button>{% endfor %}</div>
+   {% endif %}
+   {% if pics.cards %}
+   <div class="shots" data-kind="shots">{% for c in pics.cards %}{{ shot_card(c) }}{% endfor %}</div>
+   {% else %}
+   <div class="empty2">{{ icon('clock') }}<div><b>No pictures yet</b><span class="clip1">{{ pics.wait or 'the panels arrive during the panels step' }}</span></div></div>
+   {% if pics.slots %}<div class="slots">{% for s in pics.slots %}<span class="slot" data-testid="slot" title="{{ s.reason }}">{{ s.label }}</span>{% endfor %}</div>{% endif %}
+   {% endif %}
+   {% set strips = unit.thumbnails | selectattr('kind', 'equalto', 'takes') | list %}
+   {% if strips %}<div class="strips">{% for t in strips %}<button type="button" class="vfile" data-view="{{ vrel(t.rel) }}" data-set="files">{{ icon('image') }}{{ t.rel.split('/')[-1] }}</button>{% endfor %}</div>{% endif %}
+  </section>
+
+  {% if m and not finished %}
+  <section class="u-sec" id="master" aria-label="Master">
+   <header><h2>Master</h2><span class="sub">{{ m.vrel }} · from an earlier run</span></header>
+   <div class="player small" id="master-player" hx-preserve="true"><video id="master-video" class="m-video" controls playsinline preload="metadata" src="{{ m.url }}"{% if m.poster %} poster="{{ m.poster }}"{% endif %} data-rel="{{ m.vrel }}"></video></div>
+  </section>
   {% endif %}
-  {% for t in hl.trend if t.series | length > 1 %}
-  <div class="trend"><b>{{ t.gate }}</b> <span class="mono">{% for v in t.series[-6:] %}{{ '%g' | format(v) }}{% if not loop.last %} ▸ {% endif %}{% endfor %}</span> {% if t.direction == 'improving' %}<span class="ok">↘ improving</span>{% else %}<span class="warn">→ stuck</span>{% endif %}</div>
-  {% endfor %}
-  {% if hl.ended and not finished %}<div class="trend muted">ended on {% for e in hl.ended[:5] %}<span>{{ e.step }} {{ e.reason }} ×{{ e.n }}</span>{% if not loop.last %} · {% endif %}{% endfor %}</div>{% endif %}
-  {% if hl.passes %}
-  <details class="why"><summary>why {{ hl.n }} attempt{{ '' if hl.n == 1 else 's' }} ▾</summary>
-    <div class="tbl-wrap"><table class="small">
-      <thead><tr><th>run</th><th>began</th><th>reached</th><th>ended</th><th>reason</th><th class="num">wall</th><th>ladder</th></tr></thead>
-      <tbody>{% for p in hl.passes | reverse %}<tr><td class="mono" title="{{ p.run_id }}">{{ p.at }}</td><td>{{ p.day }}</td><td class="mono">{{ p.done[-1] if p.done else '–' }}</td><td><span class="st {{ p.css }}">{{ p.ended_on }}</span> {{ p.how }}</td><td class="note">{{ p.detail }}</td><td class="num">{{ p.wall }}</td><td class="note muted">{{ p.ladder[:6] | join(' · ') }}{% if p.ladder | length > 6 %} · +{{ p.ladder | length - 6 }}{% endif %}</td></tr>{% endfor %}</tbody>
-    </table></div>
-    {% if hl.titles %}<div class="muted">plan titles drafted: {{ hl.titles | join(' · ') }}</div>{% endif %}
-  </details>
-  {% endif %}
-</section>
 
-{% if finished %}{{ master_block() }}{% endif %}
+  <section class="u-sec" id="gates" aria-labelledby="gates-h"><span hidden>VERDICTS</span>
+   <header><h2 id="gates-h">Gates</h2><span class="sub">{{ unit.gates | selectattr('by') | list | length }} signed · {{ unit.gates | selectattr('state', 'in', ['flagged', 'failed', 'deferred']) | list | length }} not passing</span></header>
+   <div class="threads">
+   {% for g in unit.gates if g.by or g.word %}
+    <details class="thread {{ 'flag' if g.state == 'flagged' else 'pass' if g.state == 'passed' else '' }}" id="gate-{{ g.gate }}"{% if g.state != 'passed' and g.kinds %} open{% endif %}>
+     <summary>
+      <span class="gname">{{ icon('flag' if g.state == 'flagged' else 'check' if g.state == 'passed' else 'circle') }}{{ g.gate }}</span>
+      <span class="gsum"><b>{{ g.state }}</b>{% if g.faults %} · ⚑ {{ g.faults }}{% endif %} · <span class="by">{{ g.by }}{% if g.terminal %} · {{ g.terminal }}{% endif %}{% if g.signed %} · {{ g.signed }}{% endif %}{% if g.step %} · step {{ g.step }}{% endif %}</span></span>
+      {% if g.path %}<a class="vfile" href="/lib/{{ codex }}/{{ g.path }}" data-view="{{ vrel(g.path) }}" data-set="files">{{ icon('braces') }}file</a>{% endif %}
+     </summary>
+     {% if g.kinds %}
+     <div class="body"><div class="fk">
+      {% for k in g.kinds[:8] %}
+      <span class="kind">⚑ {{ k.kind }} <b>×{{ k.n }}</b></span>
+      <span class="shs">{% for s in k.shots[:30] %}{% if s is number %}{% set sn = '%02d' | format(s) %}<button type="button" class="chipnum"{% if g.gate == 'EYE_TAKES' %} data-view="takes/r2v/T{{ sn }}.mp4" data-set="takes"{% else %} data-view="storyboard/shot_{{ sn }}.png" data-set="shots" data-shot="{{ s }}"{% endif %}>{{ sn }}</button>{% else %}<span class="chipnum">{{ s }}</span>{% endif %}{% endfor %}{% if k.shots | length > 30 %}<span class="muted">+{{ k.shots | length - 30 }}</span>{% endif %}</span>
+      {% if k.notes %}<span class="ev" title="{{ k.notes | join(' | ') | truncate(400) }}">{{ k.notes[0] | truncate(150) }}</span>{% endif %}
+      {% endfor %}
+     </div>{% if g.kinds | length > 8 %}<p class="muted small">+{{ g.kinds | length - 8 }} more kinds in the file</p>{% endif %}</div>
+     {% endif %}
+    </details>
+   {% endfor %}
+   </div>
+   {% set unsigned = unit.gates | rejectattr('by') | rejectattr('word') | map(attribute='gate') | list %}
+   {% if unsigned %}<p class="gnotyet">{{ icon('circle-dashed') }}not yet signed: {{ unsigned | join(' · ') }}</p>{% elif not unit.gates %}<p class="gnotyet">this department has no judged gate</p>{% endif %}
+  </section>
 
-<section id="gates" class="band"><span hidden>VERDICTS</span>
-  <div class="bandhead"><span class="eyebrow">Gates</span>
-    <span class="gchips">{% for g in unit.gates %}<a class="gchip" href="#gate-{{ g.gate }}" title="{{ g.gate }}{% if g.word %} · {{ g.word }}{% endif %}{% if g.by %} · {{ g.by }}{% else %} · not yet signed{% endif %}">{{ g.gate | replace('EYE_', '') }} <span class="dot {{ g.css }}">{{ g.glyph }}</span></a>{% else %}<span class="muted">this department has no judged gate</span>{% endfor %}</span>
-  </div>
-  {% for g in unit.gates if g.by or g.word %}
-  <div class="gate" id="gate-{{ g.gate }}">
-    <div class="ghead"><b>{{ g.gate }}</b> <span class="dot {{ g.css }}">{{ g.glyph }}</span> <span class="muted">{{ g.by }}{% if g.sha8 %} · <code>{{ g.sha8 }}</code>{% endif %}{% if g.word %} · {{ g.word }}{% endif %}{% if g.terminal %} · {{ g.terminal }}{% endif %}{% if g.signed %} · {{ g.signed }}{% endif %}{% if g.step %} · step {{ g.step }}{% endif %}</span>{% if g.path %} <a class="muted" href="/lib/{{ codex }}/{{ g.path }}">file</a>{% endif %}</div>
-    {% for k in g.kinds[:8] %}
-    <div class="kind"><span class="kname">{{ k.kind }} <b>×{{ k.n }}</b></span>{% for s in k.shots[:30] %}{% if s is number %}<a class="shotchip" href="#{{ 'take-T' if g.gate == 'EYE_TAKES' else 'shot-' }}{{ '%02d' | format(s) }}">{{ '%02d' | format(s) }}</a>{% else %}<span class="shotchip">{{ s }}</span>{% endif %}{% endfor %}{% if k.shots | length > 30 %}<span class="muted">+{{ k.shots | length - 30 }}</span>{% endif %}<span class="knote muted" title="{{ k.notes | join(' | ') }}">{{ k.notes[0] if k.notes else '' }}</span></div>
-    {% endfor %}
-    {% if g.kinds | length > 8 %}<div class="muted">+{{ g.kinds | length - 8 }} more kinds in the file</div>{% endif %}
-  </div>
-  {% endfor %}
-  {% set unsigned = unit.gates | rejectattr('by') | rejectattr('word') | map(attribute='gate') | list %}
-  {% if unsigned %}<div class="muted small">not yet signed: {{ unsigned | join(' · ') }}</div>{% endif %}
-</section>
-
-<section id="pictures" class="band">
-{% if finished %}
-  {{ takes_block() }}
-  <details class="pfold"><summary><span class="eyebrow">Panels</span> <span class="muted">{{ pics.panels | length }}{% if pics.flagged %} · {{ pics.flagged }} flagged{% endif %} · superseded by the takes ▸</span></summary>{{ panels_block() }}</details>
-{% else %}
-  {{ panels_block() }}
-  {{ takes_block() }}
-{% endif %}
-</section>
-
-{% if not finished %}{{ master_block() }}{% endif %}
-
-<section id="actions" class="band acts">
-  <div class="acts-main">
-    <div class="eyebrow">Actions</div>
+  <section class="u-sec" id="actions" aria-labelledby="actions-h">
+   <header><h2 id="actions-h">Actions</h2><span class="sub">orders go to the next run of {{ r.unit }}</span></header>
+   <div class="acts">
+   <div class="acts-main">
     <div class="actions">
       {% if unit.hold %}{{ act.lift(unit.hold.id) }}{% endif %}
-      {% if r.state in ('deferred', 'failed') %}{{ act.order('retry', codex, stage, r.unit) }}{% endif %}
+      {% if r.state in ('deferred', 'failed') %}{{ act.order('retry', codex, stage, r.unit, step=(r.step_id ~ ' ' ~ r.step_name) if r.step_id else '') }}{% endif %}
       <details class="drawer" id="redo"><summary class="btn primary">redo {{ sg.step_id }} ▾</summary>
-        <form class="act redo" hx-post="/act/redo" hx-target="find .receipt" hx-swap="innerHTML" hx-on::after-request="if(event.detail.successful) this.reset()">
+        <form class="act redo" {{ act.posts('/act/redo') }} data-reset>
           {{ act.unit_fields(codex, stage, r.unit) }}
           <label>step <select name="step_id">{% for s in unit.steps %}<option value="{{ s.step_id }}"{% if s.step_id == sg.step_id %} selected{% endif %}>{{ s.step_id }} {{ s.name }}</option>{% endfor %}</select></label>
           {% if sg.shots %}<div class="picks">shots {% for s in sg.shots %}<label><input type="checkbox" data-shot="{{ '%02d' | format(s) }}" checked> {{ '%02d' | format(s) }}</label>{% endfor %}</div>{% endif %}
           <textarea name="note" rows="3" required placeholder="what is wrong, in words">{{ sg.note }}</textarea>
           <input name="artefact" value="{{ sg.artefact }}" placeholder="artefact (book-relative; default: the step's first output)">
           <span class="muted small">The step runs again at the unit's next run although its output exists. The note also becomes a casebook row (the owner's words, about the artefact).</span>
-          {{ act.btn('redo') }}<span class="receipt"></span>
+          {{ act.btn('redo') }}
         </form>
       </details>
       <details class="menu"><summary title="more actions">⋯</summary><div class="menu-body">
@@ -159,60 +177,95 @@
         {{ act.order('requeue', codex, stage, r.unit) }}
       </div></details>
     </div>
-  </div>
-  <div id="orders" hx-get="/partials/unit/{{ stage }}/{{ codex }}/{{ r.unit }}/orders" hx-trigger="orders-changed from:body, every 10s [!document.activeElement.closest('form,dialog')]" hx-swap="innerHTML">
+   </div>
+   <div id="orders" hx-get="{{ base_url }}/orders" hx-trigger="{{ pk }} from:body, orders-changed from:body" hx-swap="morph:innerHTML">
     {% include "_unit_orders.html" %}
+   </div>
+   </div>
+  </section>
+
+  <section class="u-sec" id="runs" aria-labelledby="runs-h">
+   <header><h2 id="runs-h">Runs</h2>
+    {% if hl.loop.looping %}<span class="loop">⟳ LOOPING</span><span class="sub">{{ hl.loop.n }} of the last {{ hl.loop.of }} runs ended at {{ hl.loop.step }} {{ hl.loop.reason }}</span>
+    {% elif finished %}<span class="okline">✓ finished in {{ hl.n }} run{{ '' if hl.n == 1 else 's' }} · no loop</span>
+    {% elif hl.n %}<span class="sub">{{ hl.n }} run{{ '' if hl.n == 1 else 's' }} · no loop</span>
+    {% else %}<span class="sub">no runs yet</span>{% endif %}
+    {% if hl.drift %}<span class="warn" title="{{ hl.titles | join(' · ') }}">⚠ plan drift: {{ hl.titles | length }} titles</span>{% endif %}
+   </header>
+   {% if hl.passes %}
+   {% set shown = hl.passes[-14:] %}
+   <div class="passes" data-testid="passes" aria-label="one segment per run">{% if hl.passes | length > 14 %}<span class="pass more muted">+{{ hl.passes | length - 14 }} earlier</span>{% endif %}{% for p in shown %}<span class="pass {{ p.css }}" data-testid="pass" title="{{ p.run_id }} · {{ p.day }} · {{ p.wall }} · {{ p.how }}{% if p.detail %} · {{ p.detail }}{% endif %}"><b>{{ p.at }}</b> {{ p.label }}</span>{% endfor %}</div>
+   {% endif %}
+   {% for t in hl.trend if t.series | length > 1 %}
+   <div class="trend"><b>{{ t.gate }}</b> <span class="mono">{% for v in t.series[-6:] %}{{ '%g' | format(v) }}{% if not loop.last %} ▸ {% endif %}{% endfor %}</span> {% if t.direction == 'improving' %}<span class="ok">↘ improving</span>{% else %}<span class="warn">→ stuck</span>{% endif %}</div>
+   {% endfor %}
+   {% if hl.ended and not finished %}<div class="trend muted">ended on {% for e in hl.ended[:5] %}<span>{{ e.step }} {{ e.reason }} ×{{ e.n }}</span>{% if not loop.last %} · {% endif %}{% endfor %}</div>{% endif %}
+   {% if hl.passes %}
+   <details class="why"><summary>why {{ hl.n }} attempt{{ '' if hl.n == 1 else 's' }} ▾</summary>
+    <div class="tbl-wrap"><table class="small">
+      <thead><tr><th>run</th><th>began</th><th>reached</th><th>ended</th><th>reason</th><th class="num">wall</th><th>ladder</th></tr></thead>
+      <tbody>{% for p in hl.passes | reverse %}<tr><td class="mono" title="{{ p.run_id }}">{{ p.at }}</td><td>{{ p.day }}</td><td class="mono">{{ p.done[-1] if p.done else '–' }}</td><td><span class="st {{ p.css }}">{{ p.ended_on }}</span> {{ p.how }}</td><td class="note">{{ p.detail }}</td><td class="num">{{ p.wall }}</td><td class="note muted">{{ p.ladder[:6] | join(' · ') }}{% if p.ladder | length > 6 %} · +{{ p.ladder | length - 6 }}{% endif %}</td></tr>{% endfor %}</tbody>
+    </table></div>
+    {% if hl.titles %}<div class="muted">plan titles drafted: {{ hl.titles | join(' · ') }}</div>{% endif %}
+   </details>
+   {% endif %}
+  </section>
+
+  <section class="u-sec" id="files" aria-labelledby="files-h">
+   <header><h2 id="files-h">Files</h2><span class="sub">{{ unit.files.n }} files · {{ unit.files.size }} · grouped by kind · click opens the Viewer</span></header>
+   {% if unit.files.groups %}
+   <div class="fgroups">{% for g in unit.files.groups %}
+    <div class="fgrp"><h3>{{ g.name }}</h3><ul>{% for f in g.rows %}
+     <li><button type="button" class="frow{% if f.n >= 3 %} many{% endif %}" data-view="{{ f.rel }}" data-set="{{ f.set }}" title="{{ f.rel }}">{{ icon({'image': 'image', 'video': 'film', 'log': 'scroll-text', 'audio': 'activity'}.get(f.kind, 'braces')) }}<span class="fn">{{ f.label }}</span><span class="fm">{% if f.n >= 3 %}{{ f.n }} · {% endif %}{{ f.size }}</span></button></li>
+    {% endfor %}</ul></div>
+   {% endfor %}</div>
+   {% else %}<p class="empty">no files in the unit's folder yet</p>{% endif %}
+  </section>
+
+  <section class="u-sec" id="activity" aria-labelledby="activity-h">
+   <header><h2 id="activity-h">Activity</h2><span class="sub">{% if unit.log_name %}run log {{ unit.log_name[-19:-4] }} · {% endif %}WARNING+ and the ladders · learnings · timing</span>
+    <span class="r">{% if unit.log_name %}<button type="button" class="btn sm" id="act-full" data-view="_logs/{{ unit.log_name }}" data-set="files">{{ icon('scroll-text') }}Full log</button>{% endif %}</span>
+   </header>
+   <div id="tails"{% if unit.running %} hx-get="{{ base_url }}/tails" hx-trigger="{{ pk }}[!document.activeElement.closest('form,dialog')] from:body" hx-swap="morph:innerHTML"{% endif %}>
+   {% include "_tails.html" %}
+   </div>
+  </section>
+
   </div>
-</section>
 
-<details class="raw band" id="raw">
-  <summary><span class="eyebrow">Raw</span> <span class="muted">learnings {{ unit.raw.learnings.total }}{% if unit.raw.learnings.by_gate %} ({% for g, n in unit.raw.learnings.by_gate.items() %}{{ g }} {{ n }}{% if not loop.last %} · {% endif %}{% endfor %}){% endif %} · log {{ unit.raw.log | length }} lines · timing {{ unit.raw.timing_n }} rows ▸</span></summary>
-  <div id="tails"{% if unit.running %} hx-get="/partials/unit/{{ stage }}/{{ codex }}/{{ r.unit }}/tails" hx-trigger="every 5s [this.closest('details').open &amp;&amp; !document.activeElement.closest('form,dialog')]" hx-swap="innerHTML"{% endif %}>
-  {% include "_tails.html" %}
-  </div>
-</details>
-
-<dialog id="lightbox" aria-label="picture"><button class="btn lb-close" type="button" aria-label="close">✕</button><div class="lb-body"></div><div class="lb-nav muted">← → move · Esc closes</div></dialog>
-
-<script>
-(function(){
-  var dlg = document.getElementById('lightbox'), body = dlg.querySelector('.lb-body'), cur = -1;
-  function list(){ return Array.prototype.filter.call(document.querySelectorAll('figure.tile[data-lb]'), function(t){ return t.offsetParent !== null; }); }
-  function show(i){
-    var tiles = list(); if (!tiles.length) return;
-    cur = (i + tiles.length) % tiles.length;
-    var tpl = document.getElementById(tiles[cur].dataset.lb);
-    body.innerHTML = ''; body.appendChild(tpl.content.cloneNode(true));
-    if (!dlg.open) dlg.showModal();
-  }
-  function prefill(b){
-    var d = document.getElementById('redo'), f = d.querySelector('form');
-    d.open = true; f.step_id.value = b.dataset.step; f.artefact.value = b.dataset.artefact; f.note.value = b.dataset.note;
-    dlg.close(); d.scrollIntoView({block: 'center'}); f.note.focus();
-  }
-  function filter(b){
-    var head = b.closest('.pblock'), grid = head.querySelector('.tiles');
-    head.querySelectorAll('[data-filter]').forEach(function(x){ x.classList.toggle('on', x === b); });
-    if (grid) grid.classList.toggle('only-flagged', b.dataset.filter === 'flagged');
-  }
-  document.addEventListener('click', function(e){
-    var t = e.target.closest('figure.tile[data-lb]'); if (t) { show(list().indexOf(t)); return; }
-    var r = e.target.closest('.lb-redo'); if (r) { prefill(r); return; }
-    var f = e.target.closest('[data-filter]'); if (f) { filter(f); return; }
-    if (e.target.closest('.lb-close') || e.target === dlg) dlg.close();
-  });
-  document.addEventListener('keydown', function(e){
-    if (dlg.open && e.key === 'ArrowRight') show(cur + 1);
-    else if (dlg.open && e.key === 'ArrowLeft') show(cur - 1);
-    else if (!dlg.open && e.key === 'Enter' && e.target.matches && e.target.matches('figure.tile')) show(list().indexOf(e.target));
-  });
-  document.addEventListener('mouseover', function(e){ var v = e.target.closest('figure.tile video'); if (v && v.paused) { v.play().catch(function(){}); } });
-  document.addEventListener('mouseout', function(e){ var v = e.target.closest('figure.tile video'); if (v) v.pause(); });
-  document.addEventListener('change', function(e){
-    if (!e.target.matches('.picks input')) return;
-    var f = e.target.closest('form'), shots = Array.prototype.map.call(f.querySelectorAll('.picks input:checked'), function(x){ return x.dataset.shot; });
-    f.note.value = f.note.value.replace(/; shots [0-9, ]*$/, '') + (shots.length ? '; shots ' + shots.join(', ') : '');
-  });
-})();
-</script>
+  <aside class="props" id="props" aria-label="Properties">
+   <nav class="jump" aria-label="Sections"><a href="#shots">Shots</a><a href="#gates">Gates</a><a href="#runs">Runs</a><a href="#files">Files</a><a href="#activity">Activity</a></nav>
+   {% set h = unit.head %}
+   <dl>
+    <div><dt>State</dt><dd><span class="pill {{ r.shown }}">{{ r.glyph }} {{ r.shown }}</span></dd></div>
+    {% if r.step_id %}<div><dt>Step</dt><dd class="mono-v">{{ r.step_id }} {{ r.step_name }}{% if r.progress %}<span class="sub">{{ r.progress }}</span>{% endif %}</dd></div>{% endif %}
+    {% if m %}<div><dt>Master</dt><dd><button type="button" class="linkish mono-v" data-view="{{ m.vrel }}" data-set="masters">{{ m.vrel.split('/')[-1] }}</button>{% if m.qc %}<span class="sub">{{ '%.1f' | format(m.qc.seconds or 0) }} s{% if m.sha8 %} · <code title="QC hash">{{ m.sha8 }}</code>{% endif %}</span>{% endif %}</dd></div>
+    {% else %}<div><dt>Master</dt><dd class="muted">none yet{% if not finished and unit.bar %}<span class="sub">{{ unit.bar[-1].step_id }} {{ unit.bar[-1].name }} not reached</span>{% endif %}</dd></div>{% endif %}
+    <div><dt>Attempt</dt><dd class="mono-v">{{ r.attempts }}</dd></div>
+    {% if r.gpu_seconds %}<div><dt>GPU</dt><dd class="mono-v">{{ h.gpu_h }}</dd></div>{% endif %}
+    {% if r.cost_usd %}<div><dt>Cost</dt><dd class="mono-v">${{ '%.2f' | format(r.cost_usd) }}</dd></div>{% endif %}
+    {% if h.started %}<div><dt>Started</dt><dd>{{ h.started }}</dd></div>{% endif %}
+    {% if h.finished %}<div><dt>Finished</dt><dd>{{ h.finished }}</dd></div>{% endif %}
+    {% if h.moved %}<div><dt>Moved</dt><dd title="{{ r.updated_at }}">{{ h.moved }}</dd></div>{% endif %}
+    {% if h.lease.state == 'ok' %}<div><dt>Lease</dt><dd class="ok">lease ok to {{ h.lease.until }}</dd></div>
+    {% elif h.lease.state == 'stale' %}<div><dt>Lease</dt><dd class="bad">ran out at {{ h.lease.until }}</dd></div>{% endif %}
+    {% if r.run_id %}<div><dt>Run</dt><dd><code title="{{ r.run_id }}">{{ h.run_short }}</code></dd></div>{% endif %}
+    {% if r.blocked_on %}<div><dt>Waiting</dt><dd>{{ r.blocked_on }}</dd></div>{% endif %}
+    {% if r.hold_reason %}<div><dt>Held</dt><dd title="{{ r.hold_reason | truncate(300) }}">{{ r.hold_reason | truncate(80) }}</dd></div>{% endif %}
+    {% if unit.deliverable %}<div><dt>Deliver</dt><dd><code>{{ unit.deliverable.rel }}</code> {% if unit.deliverable.exists %}<a href="{{ unit.deliverable.url }}" data-view="{{ vrel(unit.deliverable.rel) }}" data-set="files">open</a>{% else %}<span class="muted">missing on disk</span>{% endif %}</dd></div>{% endif %}
+    {% if m and m.published %}<div><dt>Published</dt><dd><a href="/lib/{{ codex }}/{{ m.published }}" data-view="{{ vrel(m.published) }}" data-set="files">youtube.json</a></dd></div>{% endif %}
+   </dl>
+   {% set bad = unit.gates | selectattr('state', 'in', ['flagged', 'failed', 'deferred']) | list %}
+   <div class="pgroup">
+    <h4>Gates not passing</h4>
+    <ul class="list">{% for g in bad %}<li><span class="gate flag"{% if g.path %} data-view="{{ vrel(g.path) }}" data-set="files" role="button" tabindex="0"{% endif %}>{{ icon('flag') }}{{ g.gate }}</span><span class="r">{{ g.state }}{% if g.faults %} · {{ g.faults }}{% endif %}{% if g.terminal %} · {{ g.terminal }}{% endif %}</span></li>{% else %}<li class="muted">none</li>{% endfor %}</ul>
+    <h4>Files</h4>
+    <ul class="list">{% for f in ['plan.json', 'plan.verdict.json', 'learnings.jsonl', 'timing.jsonl'] %}<li><button type="button" class="linkish" data-view="{{ f }}" data-set="files">{{ icon('braces') }}{{ f }}</button></li>{% endfor %}
+     {% if unit.log_name %}<li><button type="button" class="linkish" data-view="_logs/{{ unit.log_name }}" data-set="files">{{ icon('scroll-text') }}run log</button></li>{% endif %}</ul>
+   </div>
+  </aside>
+ </div>
+</div>
+</div>
+<script src="{{ static_url('media.js') }}" defer></script>
 {% endblock %}

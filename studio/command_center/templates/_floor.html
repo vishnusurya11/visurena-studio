@@ -1,17 +1,65 @@
-<div class="eyebrow">On the floor</div>
-<span hidden>ON THE FLOOR</span>
-{% for r in floor.running %}
-<div class="row">
-  <span class="st {{ r.css }}">{{ r.glyph }}</span>
-  <a href="/d/{{ r.stage }}/{{ r.codex_id }}/{{ r.unit }}">{{ r.stage }} › {{ books.get(r.codex_id, r.codex_id) }} › {{ r.unit }}</a>
-  · {{ r.step_id }} {{ r.step_name }}{% if r.progress %} · {{ r.progress }}{% endif %}
-  · attempt {{ r.attempts }}{% if r.elapsed %} · running {{ r.elapsed }}{% endif %}
-  {% if r.started_at %}· started {{ r.started_at[11:16] }}{% endif %}
-  {% if r.run_id %}· run <code>{{ r.run_id }}</code>{% endif %}
+{#- On the floor (panel ruling PKG-4): #hero is the live card of the unit on the GPU (its poster,
+    where it is, its step, its rail), the other running units under it; #next is the Up next strip.
+    /partials/floor answers both; Home's hero section selects #hero and takes #next out of band.
+    `only` ('hero' | 'next') draws one of the two when a page includes it. -#}
+{% from "_icon.html" import icon %}
+{% from "_viz.html" import tile %}
+{% set only = only | default('') %}
+{% if only != 'next' %}
+{% set r = floor.running[0] if floor.running else none %}
+<div id="hero" class="hero">
+{% if r %}
+{% set href = '/d/' ~ r.stage ~ '/' ~ r.codex_id ~ '/' ~ r.unit %}
+{% set book = books.get(r.codex_id, r.codex_id) %}
+<section class="panel live2" aria-label="On the GPU" id="wo-{{ r.codex_id }}-{{ r.unit }}" data-state="{{ r.shown }}">
+  <div class="poster">{% call tile(viz.face(request, r, 320), href, 'on-the-gpu', r.unit ~ ' · ' ~ book, 320) %}<span class="tag">{{ r.unit }} · {{ r.step_name or r.stage }}</span>{% endcall %}</div>
+  <div class="body">
+    <div class="top">
+      <span class="pill {{ r.shown }}">{{ icon(state_icons[r.shown]) }}Running</span>
+      <span class="where">{% if r.gpu %}On the GPU · {% endif %}<span class="cap">{{ r.stage }}</span> · {{ book }}</span>
+      <span class="acts"><a class="btn primary sm" href="{{ href }}">Open unit{{ icon('chevron-right') }}</a></span>
+    </div>
+    <div class="name"><span class="id">{{ r.unit }}</span><h2><a href="{{ href }}">{{ book }}</a></h2></div>
+    <div class="stats">
+      <span class="now"><b>{{ r.step_id }} {{ r.step_name }}</b>{% if r.progress %} · {{ r.progress }}{% endif %} · attempt {{ r.attempts }}</span>
+      {% if r.elapsed %}<span>running <b>{{ r.elapsed }}</b></span>{% endif %}
+      {% if r.started_at %}<span>started <b title="{{ r.started_at }}">{{ r.started_at[11:16] }}</b></span>{% endif %}
+      {% if r.run_id %}<button class="btn ghost sm" type="button" data-copy="{{ r.run_id }}" title="Copy the run id {{ r.run_id }}">{{ icon('copy') }}run id</button>{% endif %}
+    </div>
+    {% if r.blocked_on or r.hold_reason %}<div class="words"><span class="lbl2">Waiting</span><code>{{ r.blocked_on or r.hold_reason }}</code></div>{% endif %}
+  </div>
+  {% set rail = viz.rail(request, r) %}
+  <ol class="rail3" style="--n:{{ rail | length }}" aria-label="{{ rail | length }} steps, {{ r.step_id }} {{ r.step_name }} running">
+    {% for s in rail %}<li class="{{ s.cls }}" title="{{ s.id }} {{ s.name }} · {{ s.state }}"><i></i><span class="nm"><span>{{ s.id }}</span>{{ s.name }}</span></li>{% endfor %}
+  </ol>
+  {% if floor.running | length > 1 %}
+  <div class="also">Also running:{% for o in floor.running[1:] %} <a href="/d/{{ o.stage }}/{{ o.codex_id }}/{{ o.unit }}" id="wo-{{ o.codex_id }}-{{ o.unit }}">{{ o.stage }} · {{ o.unit }} · {{ o.step_id }} {{ o.step_name }}</a>{% endfor %}</div>
+  {% endif %}
+</section>
+{% else %}
+<section class="panel idle-card" aria-label="On the GPU">
+  <span class="pill">{{ icon('pause') }}Idle</span>
+  <h2>Nothing is running</h2>
+  <p>{% if floor.next %}The GPU waits for a runner; the next unit in line is <a href="/d/{{ floor.next[0].stage }}/{{ floor.next[0].codex_id }}/{{ floor.next[0].unit }}">{{ floor.next[0].stage }} · {{ floor.next[0].unit }}</a>.{% else %}The queue is empty. Queue a unit from its department page to start the GPU.{% endif %}</p>
+</section>
+{% endif %}
+</div>
+{% endif %}
+{% if only != 'hero' %}
+<div id="next" class="nextstrip-wrap">
+{% if floor.next %}
+<div class="nextstrip">
+{% for n in floor.next %}
+{% set href = '/d/' ~ n.stage ~ '/' ~ n.codex_id ~ '/' ~ n.unit %}
+<div class="nx" id="next-{{ n.codex_id }}-{{ n.stage }}-{{ n.unit }}">
+  {% call tile(viz.face(request, n, 320), href, 'upnext', n.unit ~ ' · ' ~ books.get(n.codex_id, n.codex_id), 320, 'wide', n.stage ~ ' · ' ~ n.unit) %}<span class="pos">{{ loop.index }}</span>{% endcall %}
+  <a class="pt" href="{{ href }}"><span class="id">{{ n.unit }}</span>{{ books.get(n.codex_id, n.codex_id) }}</a>
+  <span class="pm"><span class="cap">{{ n.stage }}</span>{% if n.step_id %} · from <b>{{ n.step_id }}</b> {{ n.step_name }}{% endif %}{% if n.blocked_on %} · waits on <b>{{ n.blocked_on }}</b>{% endif %}</span>
+</div>
+{% endfor %}
 </div>
 {% else %}
-<div class="row muted">idle — nothing is running</div>
-{% endfor %}
-<div class="row muted">next:
-{% for r in floor.next %}<a href="/d/{{ r.stage }}/{{ r.codex_id }}/{{ r.unit }}">{{ r.stage }} {{ r.unit }}</a>{% if not loop.last %} · {% endif %}{% else %}nothing queued{% endfor %}
+<p class="panel empty">Nothing is queued. A unit joins the queue when its department plans it or you queue it again from its page.</p>
+{% endif %}
 </div>
+{% endif %}

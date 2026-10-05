@@ -1,12 +1,9 @@
-<div class="eyebrow">Today</div>
-<span hidden>TODAY</span>
-<div class="row">
+{#- What finished today, newest first (panel ruling PKG-4 4.3): a role=log feed; pulse.js
+    prepends the events after its cursor into #since-feed. -#}
+{% from "_icon.html" import icon %}
+<ul class="feed" id="since-feed" role="log" aria-live="off" aria-label="What changed today" data-testid="since">
 {% for t in today %}
-<span class="mono">{{ t.ended_at[11:16] }}</span>
-<a href="/d/{{ t.stage }}/{{ t.codex_id }}/{{ t.unit }}">{{ t.stage }} {{ t.unit }}</a>
-{{ t.step_name or t.step_id }}{% if t.seconds %} {{ t.seconds | round | int }}s{% endif %}
-<span class="st {{ t.css }}">{{ t.glyph }}</span>{% if not loop.last %} · {% endif %}
-{% else %}
-<span class="muted">nothing finished today</span>
+<li id="ev-{{ t.codex_id }}-{{ t.stage }}-{{ t.unit }}-{{ t.step_id }}-{{ t.attempt }}"><span class="ic {{ t.css }}">{{ icon(state_icons.get(t.state, 'circle')) }}</span><span><b>{{ t.unit }}</b>{{ t.step_id }} {{ t.step_name }} {{ t.state }}{% if t.seconds %} · {{ t.seconds | round | int }} s{% endif %}</span><time datetime="{{ t.ended_at }}" title="{{ t.ended_at }}">{{ t.ended_at[11:16] }}</time></li>
 {% endfor %}
-</div>
+</ul>
+{% if not today %}<p class="empty flat">Nothing finished today. Each step a runner ends lands here as it happens.</p>{% endif %}

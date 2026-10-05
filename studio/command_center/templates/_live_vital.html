@@ -7,6 +7,6 @@
   <span class="spacer"></span>
   <span class="lv-vital" aria-live="polite"><span class="vdot{% if p.vital == 'live' %} beat{% endif %}" data-k="dot"></span><span data-k="vword">{{ words[p.vital] }}</span>{% if ns_ %} <span class="lv-where" data-k="where">{{ ns_.id }} {{ ns_.name }}</span>{% endif %}</span>
   <span class="lv-sign"><span class="lv-reason" data-k="reason">{% if p.vital in ('quiet', 'stalled') %}{{ p.vital_reason }}{% endif %}</span>last sign <span data-clock="quiet" data-at="{{ p.trace[-1] if p.trace else '' }}">{% if p.quiet_s is not none %}{{ p.quiet_s | span or '0s' }}{% else %}–{% endif %}</span></span>
-  <svg class="lv-trace" viewBox="0 0 240 24" width="240" height="24" aria-hidden="true"><polyline data-k="trace" points="{{ trace_points(p) }}"/></svg>
+  <svg class="lv-trace" viewBox="0 0 240 24" width="240" height="24" aria-hidden="true"><polyline data-k="trace" points="{{ trace_points(p) }}"/>{% if p.budget_x is not none %}<line class="lv-budget" data-k="budget" x1="{{ p.budget_x }}" x2="{{ p.budget_x }}" y1="1" y2="23"><title>stall budget: a signal left of this line is older than the step's budget</title></line>{% endif %}</svg>
   <button class="btn lv-notify" type="button" data-k="notify" hidden>notify me</button>
 </div>

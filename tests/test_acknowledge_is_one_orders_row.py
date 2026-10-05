@@ -6,6 +6,8 @@ for a unit with nothing to acknowledge.  The home's Needs you strip offers the
 button on a flagged row, and the strip and the nav count it."""
 from __future__ import annotations
 
+import json
+
 import subprocess
 
 import pytest
@@ -49,7 +51,7 @@ def test_an_acknowledge_is_one_orders_row_and_a_receipt(board):
         "acknowledge", "unit", CODEX, "episode", "ep03")
     assert row["note"].startswith("flags 2 · verdicts ") and row["note"].endswith("— seen")
     assert f"#{row['id']}" in response.text and "acknowledged" in response.text
-    assert response.headers["HX-Trigger"] == "orders-changed"
+    assert "orders-changed" in json.loads(response.headers["HX-Trigger"])
 
 
 def test_an_acknowledged_unit_leaves_the_home_strip(board):
@@ -82,7 +84,8 @@ def test_a_unit_with_no_row_or_no_flags_is_refused(board, unit, status):
 def test_the_home_strip_offers_acknowledge_on_the_flagged_row_and_counts_it(board):
     client, _ = board
     page = client.get("/").text
-    assert "Needs you (3)" in page and "shipped with flags, not acknowledged" in page
+    assert '<h2 id="needs-h">Needs you</h2><span class="count hot" data-needs>3</span>' in page
+    assert "shipped with flags" in page   # the card's words since the PKG-4 port (was "Needs you (3)")
     assert page.count('hx-post="/act/acknowledge"') == 1 and 'name="unit" value="ep03"' in page
 
 

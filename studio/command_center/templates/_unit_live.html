@@ -18,13 +18,13 @@
     <p class="lv-sentence">{% if p.vital == 'dead' %}Run stopped{% elif p.vital == 'refused' %}Run refused{% else %}Run deferred{% endif %}{% if p.quiet_s is not none %} at {{ (p.now - p.quiet_s) | clock }}{% endif %}{% if ns_ %} in {{ ns_.id }} {{ ns_.name }}{% endif %}.
       {% if p.last_words %}Last words: <q>{{ p.last_words }}</q>{% endif %}</p>
     {% if ns_ and ns_.rounds %}{% include "_live_ladder.html" %}{% endif %}
-    <div class="actions">{{ act.order('retry', p.codex, 'episode', p.unit) }}</div>
+    <div class="actions">{{ act.order('retry', p.codex, 'episode', p.unit, step=(ns_.id ~ ' ' ~ ns_.name) if ns_ else '') }}</div>
   </div>
   {% else %}
   {% include "_live_hero.html" %}
   {% if p.vital == 'done' and p.master %}
   <div class="lv-master">
-    <video controls muted preload="metadata" src="{{ p.master }}"></video>
+    <video controls playsinline preload="metadata" src="{{ p.master }}"></video>
     <div class="lv-qc">{% if p.qc %}<div class="lv-qcline"><b>{{ '%.1f' | format(p.qc.seconds or 0) }} s</b></div>
       <div>LUFS {{ p.qc.lufs }} <span class="st {{ 'green' if p.qc.lufs_ok else 'red' }}">{{ '✓' if p.qc.lufs_ok else '✕' }}</span> · peak {{ p.qc.true_peak }} <span class="st {{ 'green' if p.qc.tp_ok else 'red' }}">{{ '✓' if p.qc.tp_ok else '✕' }}</span></div>
       {% else %}<div class="muted">no QC file yet</div>{% endif %}</div>

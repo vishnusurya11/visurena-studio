@@ -8,9 +8,9 @@ row of `architecture/index.html` (Current tab) moves with the shell, home and un
 ## Progress
 
 - [x] P0.1 tiles through /thumb · - [x] P0.2 inbox + acknowledge · - [x] P0.3 --ink-3 + contrast test
-- [ ] P0.4 one colour per state · - [ ] P0.5 live notify bugs (with the progress session) · - [ ] P0.6 /books, /org back link
-- [x] F1 tests pin answers · - [x] F2 CSS out · - [x] F3 fonts · - [x] F4 tokens · - [x] F5 icons · - [ ] F6 macros · - [ ] F7 morph · - [ ] F8 pulse · - [ ] F9 harness
-- [x] G1 shell · - [ ] G2 Now · - [ ] G3 Queue · - [ ] G4 Department · - [ ] G5 Unit running · - [ ] G6 Unit finished · - [ ] G7 Book + Books · - [ ] G8 notifications
+- [ ] P0.4 one colour per state · - [ ] P0.5 live notify bugs (with the progress session) · - [x] P0.6 /books, /org back link
+- [x] F1 tests pin answers · - [x] F2 CSS out · - [x] F3 fonts · - [x] F4 tokens · - [x] F5 icons · - [ ] F6 macros · - [x] F7 morph · - [x] F8 pulse · - [ ] F9 harness
+- [x] G1 shell · - [x] G2 Now · - [x] G3 Queue · - [x] G4 Department · - [x] G5 Unit running · - [x] G6 Unit finished · - [x] G7 Book + Books · - [x] G8 notifications
 
 ## Log
 
@@ -19,6 +19,8 @@ row of `architecture/index.html` (Current tab) moves with the shell, home and un
 
 - 2026-10-04 — Viewer ported (`9641cd3`): one dialog, four renderers, provenance panel; read-only `/json`, `/log`, `/files`, `/viewer/…json`.
 - 2026-10-04 — P0.3, F1–F5, G1: Studio black default + Graphite light, CSS out to `static/css/{tokens,components,pages}.css`, self-hosted Plex/Barlow, Lucide sprite, the sidebar shell on every page (Home first, Inbox, Queue, Books, Architecture, departments, pinned, live GPU card, ⌘K); new `/queue`, `/books`, `/architecture` (the org chart inside the board). 1007 board tests green.
+
+- 2026-10-05 — the UX panel's six packages (`PANEL_RULING.md`, all built in parallel, file-disjoint): PKG-1 pulse server (`/api/pulse.json` fingerprints, 204 on an unchanged `?v=`, `/inbox`, async thumbs ≤ 2 at once + 1024 width, `/lib` ETag/304, the error page in the shell, ages, queue ETA "if clean"); PKG-2 shell client (`pulse.js` one 2 s loop, idiomorph morph, heartbeat chip, live title + favicon, announce, held bar, ⌘K over every unit, one key registry, crumbs from Home, the Viewer loaded on every page); PKG-3 style system (motion/type/radius tokens, one looping animation, `.chg` wash, `[data-stale]`, old page overrides removed); PKG-4 lists and Home (pulse + morph everywhere, Needs-you cards, server-SVG GPU chart `viz.py`, department grid by state, `/inbox` page); PKG-5 unit and media (`media.js` one player, every picture/take/grid/file/log opens the Viewer, truthful posters, sibling nav, new-master badge); PKG-6 orders (no double submit, live receipts pending → taken, honest dead letters, Acknowledge with 5 s Undo, verb labels). Lead's ruling: department rows keep their order controls, so the department grid's partial budget is 12 KB (others 6 KB). Open for the owner: a redo on a finished unit has no taker (needs `work_orders`/`tick`, frozen while a drive runs).
 
 ## Rules for every commit
 

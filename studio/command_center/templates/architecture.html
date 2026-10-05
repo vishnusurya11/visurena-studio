@@ -1,11 +1,10 @@
 {% extends "base.html" %}
 {% from "_icon.html" import icon %}
 {% block title %}Architecture · Visurena Studio{% endblock %}
-{% block crumbs %}<a href="/">Studio</a>{{ icon('chevron-right') }}<span aria-current="page">Architecture</span>{% endblock %}
-{% block actions %}<a class="btn ghost sm hide-sm" href="/org" target="_blank" rel="noopener">{{ icon('external-link') }}Open alone</a>{% endblock %}
+{% block actions %}<a class="btn ghost sm hide-sm" href="/org" target="_blank" rel="noopener" data-testid="org-standalone" title="The org chart alone, at /org">Standalone{{ icon('external-link') }}</a>{% endblock %}
 {% block main_class %} flush{% endblock %}
 {% block body %}
 {#- The org chart (architecture/index.html, served at /org) inside the shell; board.js hands
-    it the board's theme through ?theme=. -#}
+    it the board's theme through ?theme=.  "Standalone" opens /org on its own (P04.7). -#}
 <iframe class="orgframe" src="/org?theme=dark" data-org title="The studio's architecture: the org chart" data-testid="org-frame"></iframe>
 {% endblock %}

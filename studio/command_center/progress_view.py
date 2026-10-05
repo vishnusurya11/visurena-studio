@@ -298,7 +298,7 @@ def card(library, codex, unit, home, state, db_rows, hist, names, derived, v, ti
     step = now_step(state, names, tiles)
     url, qc = master(library, codex, home) if v["vital"] == "done" else (None, None)
     return {"codex": codex, "unit": unit, "run_id": state["run"], "vital": v["vital"], "vital_reason": v["reason"],
-            "quiet_s": v["quiet_s"], "budget_s": v["budget_s"], "run_started": state["t0"],
+            "quiet_s": v["quiet_s"], "budget_s": v["budget_s"], "budget_x": budget_x(v), "run_started": state["t0"],
             "step_started": state["step_t"], "now": now, "elapsed_s": now - state["t0"] if state["t0"] else 0.0,
             "work_s": work, "ceiling_s": float(EPISODE_CEILING_SECONDS),
             "steps": rail(state, db_rows, hist, names, now), "now_step": step, "items": tiles,
@@ -319,6 +319,15 @@ def mmss(secs) -> str:
     """`41:07` (or `2:03:09` past an hour) for a loop step's hero."""
     s = max(0, int(secs or 0))
     return f"{s // 3600}:{(s % 3600) // 60:02d}:{s % 60:02d}" if s >= 3600 else f"{s // 60}:{s % 60:02d}"
+
+
+def budget_x(p: dict, width: float = 240.0) -> float | None:
+    """Where the step's stall budget sits on the thirty-minute trace: a signal left
+    of this x is older than the budget (panel ruling 5.9); None with no budget."""
+    budget = p.get("budget_s")
+    if not budget:
+        return None
+    return round(max(0.0, width - min(float(budget), vitals.TRACE_S) / vitals.TRACE_S * width), 1)
 
 
 def trace_points(p: dict, width: float = 240.0, base: float = 18.0, top: float = 4.0) -> str:

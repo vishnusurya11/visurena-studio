@@ -1,32 +1,52 @@
-{% from "_shell.html" import sidebar, tabs, dialogs %}
+{% from "_shell.html" import sidebar, sheet, tabs, dialogs, crumbs, holdbar, heartbeat %}
 <!doctype html>
 <html lang="en" data-theme="dark">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>{% block title %}Visurena Studio{% endblock %}</title>
-<script>try{if(localStorage.getItem('cc-theme')==='light')document.documentElement.dataset.theme='light'}catch(e){}</script>
+<script>try{var t=new URLSearchParams(location.search).get('theme')||localStorage.getItem('cc-theme');if(t==='light')document.documentElement.dataset.theme='light'}catch(e){}
+addEventListener('pagereveal',function(e){try{if(e.viewTransition&&navigation.activation.navigationType==='traverse')e.viewTransition.skipTransition()}catch(x){}});</script>
+<link rel="preload" href="/static/fonts/ibm-plex-sans-latin.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="/static/fonts/ibm-plex-mono-400-latin.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="stylesheet" href="{{ static_url('css/tokens.css') }}">
 <link rel="stylesheet" href="{{ static_url('css/components.css') }}">
 <link rel="stylesheet" href="{{ static_url('css/pages.css') }}">
+<link rel="stylesheet" href="{{ static_url('viewer/viewer.css') }}">
 <script src="{{ static_url('htmx.min.js') }}"></script>
+<script src="{{ static_url('idiomorph-ext.min.js') }}"></script>
 <script src="{{ static_url('board.js') }}" defer></script>
+<script src="{{ static_url('orders.js') }}" defer></script>
+<script src="{{ static_url('pulse.js') }}" defer></script>
+<script src="{{ static_url('viewer/docview.js') }}" defer></script>
+<script src="{{ static_url('viewer/viewer.js') }}" defer></script>
+<script src="{{ static_url('viewer/prov.js') }}" defer></script>
+<script type="speculationrules">{"prefetch":[{"where":{"or":[{"href_matches":"/d/*"},{"href_matches":"/b/*"},{"href_matches":"/books"},{"href_matches":"/queue"},{"href_matches":"/inbox"}]},"eagerness":"moderate"}]}</script>
 </head>
-<body data-page="{{ shell.at if shell else '' }}">
+{#- The Viewer reads the page's book, stage and unit from <body data-*>: a unit page fills
+    view_codex / view_stage / view_unit; every other page leaves them empty. -#}
+{%- set v_codex, v_stage, v_unit = self.view_codex() | trim, self.view_stage() | trim, self.view_unit() | trim %}
+<body data-page="{{ shell.at if shell else '' }}" hx-ext="morph"{% if v_codex %} data-codex="{{ v_codex }}"{% endif %}{% if v_stage %} data-stage="{{ v_stage }}"{% endif %}{% if v_unit %} data-unit="{{ v_unit }}"{% endif %}>
+<a class="skip" href="#main">Skip to content</a>
 {% if shell %}<aside class="side" id="side" aria-label="Studio" data-testid="sidebar">{{ sidebar(shell) }}</aside>{% endif %}
 <header class="ph">
-  <nav class="crumbs" aria-label="Breadcrumb">{% block crumbs %}<span>Visurena Studio</span>{% endblock %}</nav>
+  <nav class="crumbs" aria-label="Breadcrumb">{% block crumbs %}{% if shell and shell.crumbs %}{{ crumbs(shell.crumbs) }}{% else %}<span>Visurena Studio</span>{% endif %}{% endblock %}</nav>
+  {% if shell %}{{ holdbar(shell.hold) }}{% endif %}
   <span class="spacer"></span>
-  <div class="ph-actions">{% block actions %}{% endblock %}{% if shell and shell.gpu %}<a class="gpuchip" href="{{ shell.gpu.href }}"><i></i>{{ shell.gpu.unit }}<span data-eta></span></a>{% endif %}</div>
+  <div class="ph-actions">{% block actions %}{% endblock %}{% if shell %}{{ heartbeat() }}<a class="gpuchip" href="{{ shell.gpu.href if shell.gpu else '/queue' }}" data-gpuchip{% if not shell.gpu %} hidden{% endif %}><i></i><span data-gc-unit>{{ shell.gpu.unit if shell.gpu else '' }}</span><span data-eta></span></a>{% endif %}</div>
 </header>
-<main id="main" class="page{% block main_class %}{% endblock %}">
+<main id="main" class="page{% block main_class %}{% endblock %}" tabindex="-1">
 {% block body %}{% endblock %}
 </main>
 {% if shell %}
 {{ tabs(shell) }}
-<dialog class="sheet" id="sheet" aria-label="Studio menu"><div class="grab"></div><div class="side">{{ sidebar(shell) }}</div></dialog>
+{{ sheet(shell) }}
 <script type="application/json" id="pal-data">{{ shell.palette | tojson }}</script>
+<script type="application/json" id="keys-data">{{ shell.key_rows | tojson }}</script>
+<script type="application/json" id="pulse-cfg">{{ shell.heartbeat | tojson }}</script>
 {% endif %}
-{{ dialogs(legend, state_icons) }}
+{{ dialogs(legend, state_icons, shell.key_rows if shell else []) }}
 </body>
 </html>
+{#- unused unless a page fills them -#}
+{%- if false %}{% block view_codex %}{% endblock %}{% block view_stage %}{% endblock %}{% block view_unit %}{% endblock %}{% endif %}

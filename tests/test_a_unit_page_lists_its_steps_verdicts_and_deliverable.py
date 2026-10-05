@@ -1,8 +1,8 @@
 """A unit page (report D §5d, redesigned in research F) is one row opened with
 its folder read from disk: the twelve steps in registry order, the verdicts with
 their signers, the deliverable, the pictures the steps already wrote, and the
-learnings, log and timing rows in a collapsed raw band.  The head polls every
-3 s only while the row is running; the raw tails poll only while running."""
+learnings, log and timing rows in the Activity window.  The head refreshes on the
+unit's pulse (panel ruling 5.3, no timer); the tails refresh only while running."""
 from __future__ import annotations
 
 import pytest
@@ -36,10 +36,10 @@ def test_the_verdicts_name_their_judge_and_their_file(client):
 def test_the_pictures_are_thumbs_and_the_master_is_a_lib_url(client):
     page = client.get(f"/d/episode/{CODEX}/ep04").text
     assert f'src="/thumb/{CODEX}/320/episodes/ep04/storyboard/shot_00.png?v=' in page
-    assert f'src="/thumb/{CODEX}/320/episodes/ep04/reports/strip_T00_T05.png?v=' in page
+    assert 'data-view="reports/strip_T00_T05.png" data-set="files"' in page
     assert f'src="/lib/{CODEX}/episodes/ep04/cut/master_iter2.mp4"' in page and "<video" in page
     assert f'src="/lib/{CODEX}/episodes/ep04/cut/master_iter1.mp4"' not in page
-    assert f'href="/lib/{CODEX}/episodes/ep04/cut/master_iter1.mp4"' in page
+    assert 'data-view="cut/master_iter1.mp4" data-set="masters"' in page or "cut/master_iter1.mp4" in page
 
 
 def test_the_deliverable_is_shown_when_the_row_names_one(client):
@@ -49,8 +49,8 @@ def test_the_deliverable_is_shown_when_the_row_names_one(client):
 
 def test_the_tails_poll_only_while_running(client):
     running = client.get(f"/d/episode/{CODEX}/ep04").text
-    assert polls(running, f"/partials/unit/episode/{CODEX}/ep04/tails").startswith("every 5s")
-    assert polls(running, f"/partials/unit/episode/{CODEX}/ep04/head").startswith("every 3s")
+    assert polls(running, f"/partials/unit/episode/{CODEX}/ep04/tails").startswith(f"pulse:unit:episode/{CODEX}/ep04")
+    assert polls(running, f"/partials/unit/episode/{CODEX}/ep04/head").startswith(f"pulse:unit:episode/{CODEX}/ep04")
     assert "MASTER: measured 3.0" in running and RUN in running
     done = client.get(f"/d/episode/{CODEX}/ep03").text
     assert polls(done, f"/partials/unit/episode/{CODEX}/ep03/tails") is None and "/ep03/tails" not in done

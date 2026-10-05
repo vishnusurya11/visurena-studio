@@ -9,7 +9,7 @@
      [data-view] elements anywhere: data-view = rel path, data-set = sequence, data-kind, data-unit,
      data-depth, data-path (focus inside a doc), data-src / data-thumb for non-unit pictures,
      data-codex (else <body data-codex>) for the book.
-   Board port: pictures from /thumb/{codex}/{160|320}/{path} then /lib/{codex}/{path}; video and
+   Board port: pictures from /thumb/{codex}/{160|320}/{path} then the 1024 WebP (the original behind a link); video and
    originals from /lib; JSON from /json; logs from /log; a unit's sequences from /viewer (prov.js). */
 (function () {
 'use strict';
@@ -57,7 +57,7 @@ const phone = () => matchMedia('(max-width: 640px)').matches;
 function libRel(unit, rel) { return !unit || /^(episodes|refs)\//.test(rel) ? rel : `${(PLACE[unit] && PLACE[unit].home) || 'episodes/' + unit}/${rel}`; }
 function thumbUrl(unit, rel, w) {
   const c = codexOf(unit), b = libRel(unit, rel), v = VER.get(`${c}/${b}`);
-  return `/thumb/${c}/${(w || 320) <= 160 ? 160 : 320}/${b}${v ? '?v=' + v : ''}`;
+  return `/thumb/${c}/${(w || 320) >= 1024 ? 1024 : (w || 320) <= 160 ? 160 : 320}/${b}${v ? '?v=' + v : ''}`;
 }
 function docUrl(unit, rel) {
   /* a run log (_logs/<name>) or a .log of the book -> /log; JSON/JSONL -> /json (2 MB cap, slices); text -> /lib */
@@ -85,7 +85,7 @@ function normLayer(L, item) {
   const unit = L.unit || item.unit, kind = L.kind || kindOfRel(L.rel);
   const out = Object.assign({ unit, kind, name: L.name || '' }, L);
   const book = !!codexOf(unit);
-  if (!out.src && out.rel) out.src = !book ? out.rel : kind === 'doc' || kind === 'log' || kind === 'text' ? URLS.data(unit, out.rel) : URLS.lib(unit, out.rel);
+  if (!out.src && out.rel) out.src = !book ? out.rel : kind === 'doc' || kind === 'log' || kind === 'text' ? URLS.data(unit, out.rel) : kind === 'image' && book ? URLS.thumb(unit, out.rel, 1024) : URLS.lib(unit, out.rel);
   if (!out.thumb && kind === 'image' && out.rel && book) out.thumb = URLS.thumb(unit, out.rel, 320);
   out.kind = kind;
   return out;

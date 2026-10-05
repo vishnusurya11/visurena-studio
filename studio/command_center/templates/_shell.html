@@ -1,107 +1,145 @@
-{#- The v2 shell (plan G1, mockups/SHELL.md), rendered server-side from `shell`
-    (studio/command_center/shell.py): the sidebar (drawn twice: the desktop column
-    and the phone sheet), the phone's bottom tabs, the ⌘K palette and the keyboard
-    sheet with the state legend. -#}
+{#- The shell (plan G1, mockups/SHELL.md, panel ruling PKG-2), rendered server-side from
+    `shell` (studio/command_center/shell.py): the sidebar, the phone's sheet (departments and
+    pins first) and bottom tabs, the header's crumbs, held bar and heartbeat chip, the ⌘K
+    palette, the `?` sheet drawn from shell.KEYS, the live regions and the receipt toast.
+    pulse.js patches what carries a data-* hook here; nothing in the shell polls on its own. -#}
 {% from "_icon.html" import icon %}
 
 {% macro cur(on) %}{% if on %} aria-current="page"{% endif %}{% endmacro %}
 
-{% macro nav_item(id, href, ic, label, at, key, extra="") -%}
-<a class="sb-item" href="{{ href }}" data-testid="nav-{{ id }}"{{ cur(at == id) }} title="{{ label }} ({{ key }})">{{ icon(ic) }}<span class="lbl">{{ label }}</span>{{ extra | safe }}</a>
+{% macro caps(list) %}{% for c in list %}<span class="kbd">{{ c }}</span>{% endfor %}{% endmacro %}
+
+{% macro nav_item(shell, id, href, ic, label, extra="") -%}
+{%- set k = shell.chord[href] if shell.chord else '' -%}
+<a class="sb-item" href="{{ href }}" data-testid="nav-{{ id }}"{{ cur(shell.at == id) }} title="{{ label }}{% if k %} ({{ k }}){% endif %}">{{ icon(ic) }}<span class="lbl">{{ label }}</span>{{ extra | safe }}</a>
+{%- endmacro %}
+
+{% macro pages_nav(shell, testid) -%}
+<nav aria-label="Board" data-testid="{{ testid }}">
+  {{ nav_item(shell, 'home', '/', 'house', 'Home') }}
+  {{ nav_item(shell, 'inbox', '/inbox', 'inbox', 'Needs you', '<span class="bdg" data-needs data-testid="inbox-badge" data-n="' ~ shell.needs ~ '">' ~ shell.needs ~ '</span>') }}
+  {{ nav_item(shell, 'queue', '/queue', 'list-ordered', 'Queue', '<span class="n" data-queue data-testid="queue-count">' ~ shell.queue ~ '</span>') }}
+  {{ nav_item(shell, 'books', '/books', 'library', 'Books', '<span class="n" data-testid="books-count">' ~ shell.books ~ '</span>') }}
+  {{ nav_item(shell, 'architecture', '/architecture', 'network', 'Architecture') }}
+</nav>
+{%- endmacro %}
+
+{% macro departments(shell, testid) -%}
+<div class="sb-sec" data-testid="{{ testid }}">
+  <div class="sb-h">Departments</div>
+  {% for d in shell.departments %}
+  <a class="sb-item dept" href="/d/{{ d.stage }}" data-testid="dept-{{ d.stage }}"{{ cur(shell.at == 'd:' ~ d.stage) }} data-dept="{{ d.stage }}" data-total="{{ d.total }}"{% if d.lead %} data-dot="{{ d.lead }}"{% endif %} aria-label="{{ d.label }}" title="{{ d.label }} · {{ d.total }} units">{{ icon(d.icon) }}<span class="lbl">{{ d.stage }}</span><span class="sb-dots" aria-hidden="true">{% for key, n, words in d.dots %}<i class="{{ key }}" title="{{ words }}">{% if key != 'done' %}{{ n }}{% endif %}</i>{% endfor %}</span><span class="n" aria-hidden="true" data-testid="dept-count">{{ d.total }}</span></a>
+  {% endfor %}
+</div>
+{%- endmacro %}
+
+{% macro pins(shell, testid) -%}
+<div class="sb-sec" data-testid="{{ testid }}" data-pins>
+  <div class="sb-h">Pinned</div>
+  {% for p in shell.pins %}
+  <a class="sb-item sb-pin" href="{{ p.href }}" data-testid="pin"{{ cur(shell.path == p.href) }} data-pin="{{ p.href }}" title="{{ p.unit }} · {{ p.book }} · {{ p.state }} {{ p.step }}"><span class="sb-face">{% if p.face %}<img src="{{ p.face }}" alt="" width="24" height="24">{% else %}{{ icon('loader') }}{% endif %}<span class="sdot {{ p.state }}"></span></span><span class="lbl"><b class="pin-id">{{ p.unit }}</b>{{ p.book }}</span></a>
+  {% endfor %}
+  <div class="sb-empty"{% if shell.pins %} hidden{% endif %}>nothing running</div>
+</div>
+{%- endmacro %}
+
+{% macro gpu_card(shell) -%}
+{%- set g, h = shell.gpu, shell.hold -%}
+{%- set label = ('Held · finishing its step' if h else 'On the GPU') if g else ('Studio held' if h else 'GPU idle') -%}
+<a class="gpu-card{% if not g %} idle{% endif %}{% if h %} held{% endif %}" href="{{ g.href if g else '/queue' }}" data-testid="gpu-card" data-gpu{% if g and g.progress_url %} data-progress="{{ g.progress_url }}"{% endif %} title="{% if g %}On the GPU: {{ g.unit }} · {{ g.book }} · {{ g.step }}{% else %}{{ label }}{% endif %}">
+  <span class="face" data-gc-face>{% if g and g.face %}<img src="{{ g.face }}" alt="" width="40" height="40">{% else %}{{ icon('pause' if h and not g else 'cpu', 'lg') }}{% endif %}</span>
+  <span class="t1"><span class="gc-dot" aria-hidden="true"></span><span data-gc-label>{{ label }}</span><span class="eta" data-gc-eta></span></span>
+  <span class="t2"><b data-gc-unit>{{ g.unit if g else '' }}</b><span data-gc-step>{% if g %}{{ g.step or g.stage }}{% elif h %}nothing starts until you lift{% else %}nothing running{% endif %}</span></span>
+  <span class="prog" aria-hidden="true"{% if not g %} hidden{% endif %}><i data-prog style="width:0%"></i></span>
+</a>
+{%- endmacro %}
+
+{% macro tools(aria) -%}
+<div class="sb-tools">
+  <button type="button" data-theme-toggle title="Theme: Studio black / Graphite (T)" aria-label="Toggle theme" aria-keyshortcuts="{{ aria['t'] }}">{{ icon('sun-moon') }}</button>
+  <button type="button" data-keys title="Keyboard (?)" aria-label="Keyboard shortcuts" aria-keyshortcuts="{{ aria['?'] }}">{{ icon('keyboard') }}</button>
+  <button type="button" data-notify title="Notify me when the GPU unit stops or needs you" aria-label="Notifications" aria-pressed="false" hidden>{{ icon('bell') }}</button>
+</div>
 {%- endmacro %}
 
 {% macro sidebar(shell) -%}
 <div class="sb-top">
   <a class="sb-mark" href="/" aria-label="Visurena Studio, Home"><svg viewBox="0 0 32 32" aria-hidden="true"><circle cx="16" cy="16" r="10" fill="none" stroke="#d6d8dd" stroke-width="4.5"/><path d="M16 6a10 10 0 0 1 10 10" fill="none" stroke="#7db6e3" stroke-width="4.5"/><circle cx="26" cy="6" r="4" fill="#e9b44c"/></svg></a>
   <a class="sb-brand" href="/">Visurena</a>
-  <button class="sb-studio" type="button" data-palette title="Jump anywhere (Ctrl K)" aria-label="Jump anywhere">{{ icon('chevrons-up-down') }}</button>
+  <button class="sb-studio" type="button" data-palette title="Jump anywhere (Ctrl K)" aria-label="Jump anywhere" aria-keyshortcuts="{{ shell.aria['ctrl+k'] }}">{{ icon('chevrons-up-down') }}</button>
 </div>
 <div class="sb-scroll">
-  <nav aria-label="Board" data-testid="sidebar-nav">
-    {{ nav_item('home', '/', 'house', 'Home', shell.at, 'G H') }}
-    {{ nav_item('inbox', '/#attention', 'inbox', 'Inbox', shell.at, 'G I', '<span class="bdg" data-needs data-testid="inbox-badge" data-n="' ~ shell.inbox ~ '">' ~ shell.inbox ~ '</span>') }}
-    {{ nav_item('queue', '/queue', 'list-ordered', 'Queue', shell.at, 'G Q', '<span class="n" data-testid="queue-count">' ~ shell.queue ~ '</span>') }}
-    {{ nav_item('books', '/books', 'library', 'Books', shell.at, 'G B', '<span class="n" data-testid="books-count">' ~ shell.books ~ '</span>') }}
-    {{ nav_item('architecture', '/architecture', 'network', 'Architecture', shell.at, 'G A') }}
-  </nav>
-  <div class="sb-sec" data-testid="sidebar-departments">
-    <div class="sb-h">Departments</div>
-    {% for d in shell.departments %}
-    <a class="sb-item dept" href="/d/{{ d.stage }}" data-testid="dept-{{ d.stage }}"{{ cur(shell.at == 'd:' ~ d.stage) }}{% if d.lead %} data-dot="{{ d.lead }}"{% endif %} title="{{ d.stage }} · {{ d.total }} units">{{ icon(d.icon) }}<span class="lbl">{{ d.stage }}</span><span class="sb-dots">{% for key, n, words in d.dots %}<i class="{{ key }}" title="{{ words }}">{% if key != 'done' %}{{ n }}{% endif %}</i>{% endfor %}</span><span class="n" data-testid="dept-count">{{ d.total }}</span></a>
-    {% endfor %}
-  </div>
-  <div class="sb-sec" data-testid="sidebar-pinned">
-    <div class="sb-h">Pinned</div>
-    {% for p in shell.pins %}
-    <a class="sb-item sb-pin" href="{{ p.href }}" data-testid="pin"{{ cur(shell.path == p.href) }} title="{{ p.unit }} · {{ p.book }} · {{ p.state }} {{ p.step }}"><span class="sb-face">{% if p.face %}<img src="{{ p.face }}" alt="" width="24" height="24">{% else %}{{ icon('loader') }}{% endif %}<span class="sdot {{ p.state }}"></span></span><span class="lbl"><b class="pin-id">{{ p.unit }}</b>{{ p.book }}</span></a>
-    {% else %}
-    <div class="sb-empty">nothing running</div>
-    {% endfor %}
-  </div>
+  {{ pages_nav(shell, 'sidebar-nav') }}
+  {{ departments(shell, 'sidebar-departments') }}
+  {{ pins(shell, 'sidebar-pinned') }}
 </div>
 <div class="sb-foot">
-  {% set g = shell.gpu %}
-  {% if g %}
-  <a class="gpu-card" href="{{ g.href }}" data-testid="gpu-card"{% if g.progress_url %} data-progress="{{ g.progress_url }}"{% endif %} title="On the GPU: {{ g.unit }} · {{ g.book }} · {{ g.step }}">
-    <span class="face">{% if g.face %}<img src="{{ g.face }}" alt="" width="40" height="40">{% else %}{{ icon('cpu', 'lg') }}{% endif %}</span>
-    <span class="t1"><span class="gdot"></span>On the GPU<span class="eta"></span></span>
-    <span class="t2"><b>{{ g.unit }}</b>{{ g.step or g.stage }}</span>
-    <span class="prog" aria-hidden="true"><i data-prog style="width:0%"></i></span>
-  </a>
-  {% else %}
-  <a class="gpu-card idle" href="/queue" data-testid="gpu-card" title="The GPU is idle">
-    <span class="face">{{ icon('cpu', 'lg') }}</span>
-    <span class="t1"><span class="gdot"></span>GPU idle</span>
-    <span class="t2">nothing running</span>
-  </a>
-  {% endif %}
-  <button class="sb-search" type="button" data-palette>{{ icon('search') }}<span>Search or jump</span><span class="kbd">Ctrl K</span></button>
-  <div class="sb-tools">
-    <button type="button" data-theme-toggle title="Theme: Studio black / Graphite (T)" aria-label="Toggle theme">{{ icon('sun-moon') }}</button>
-    <button type="button" data-keys title="Keyboard (?)" aria-label="Keyboard shortcuts">{{ icon('keyboard') }}</button>
-  </div>
+  {{ gpu_card(shell) }}
+  <button class="sb-search" type="button" data-palette aria-keyshortcuts="{{ shell.aria['ctrl+k'] }}">{{ icon('search') }}<span>Search or jump</span><span class="kbd">Ctrl K</span></button>
+  {{ tools(shell.aria) }}
 </div>
+{%- endmacro %}
+
+{% macro sheet(shell) -%}
+<dialog class="sheet" id="sheet" aria-label="Studio menu"><div class="grab"></div><div class="side">
+<div class="sb-scroll">
+  {{ departments(shell, 'sheet-departments') }}
+  {{ pins(shell, 'sheet-pinned') }}
+  <div class="sb-sec" data-testid="sheet-pages">{{ pages_nav(shell, 'sheet-nav') }}</div>
+</div>
+<div class="sb-foot">{{ gpu_card(shell) }}{{ tools(shell.aria) }}</div>
+</div></dialog>
 {%- endmacro %}
 
 {% macro tabs(shell) -%}
 <nav class="btabs" aria-label="Phone">
   <a href="/"{{ cur(shell.at == 'home') }}>{{ icon('house') }}Home</a>
-  <a href="/#attention">{{ icon('inbox') }}Inbox<span class="bdg" data-needs data-n="{{ shell.inbox }}">{{ shell.inbox }}</span></a>
+  <a href="/inbox"{{ cur(shell.at == 'inbox') }}>{{ icon('inbox') }}Needs you<span class="bdg" data-needs data-n="{{ shell.needs }}">{{ shell.needs }}</span></a>
   <a href="/queue"{{ cur(shell.at == 'queue') }}>{{ icon('list-ordered') }}Queue</a>
   <a href="/books"{{ cur(shell.at == 'books') }}>{{ icon('library') }}Books</a>
   <button type="button" data-sheet>{{ icon('menu') }}More</button>
 </nav>
 {%- endmacro %}
 
-{% macro dialogs(legend, state_icons) -%}
+{% macro crumbs(trail) -%}
+{% for label, href in trail %}{% if not loop.first %}{{ icon('chevron-right') }}{% endif %}{% if href %}<a href="{{ href }}">{{ label }}</a>{% else %}<span aria-current="page">{{ label }}</span>{% endif %}{% endfor %}
+{%- endmacro %}
+
+{% macro holdbar(hold) -%}
+<div class="pill held holdbar" id="holdbar" data-testid="holdbar"{% if not hold %} hidden{% endif %}>{{ icon('pause') }}<span>Studio held since <time data-hold-at datetime="{{ hold.since if hold else '' }}">{{ hold.at if hold else '' }}</time></span><span class="hide-sm" data-hold-reason>· “{{ hold.reason if hold else '' }}”</span><button class="btn sm" type="button" data-lift="{{ hold.id if hold else '' }}">Lift</button></div>
+{%- endmacro %}
+
+{% macro heartbeat() -%}
+<button class="livechip" id="hb" type="button" data-hb="live" title="How old the board's data is">
+  <span data-hb-text>● live</span></button>
+{%- endmacro %}
+
+{% macro keysheet(keys, legend, state_icons) -%}
+<dialog id="keysheet" class="keysheet" aria-label="Keyboard shortcuts">
+  <header><h2>Keyboard</h2><button class="iconbtn" type="button" data-close aria-label="Close">{{ icon('x') }}</button></header>
+  <div class="cols">
+    {% for group, rows in keys | groupby('group') %}
+    <div><h3>{{ group }}</h3><dl>
+      {% for k in rows %}<dt data-keys="{{ k['keys'] }}">{{ caps(k.caps) }}</dt><dd>{{ k.does }}</dd>
+      {% endfor %}
+    </dl></div>
+    {% endfor %}
+    <div class="legend" aria-label="legend" data-testid="legend">
+      {% for mark, word in legend %}<span class="pill {{ word }}" data-state="{{ word }}" title="{{ mark }}">{{ icon(state_icons[word]) }}{{ word }}</span>{% endfor %}
+    </div>
+    <label class="keys-switch" data-testid="keys-switch"><input type="checkbox" data-keys-switch checked> Single-key shortcuts (off: only Ctrl K and Esc)</label>
+  </div>
+</dialog>
+{%- endmacro %}
+
+{% macro dialogs(legend, state_icons, keys) -%}
 <dialog id="palette" class="palette" aria-label="Search and jump">
   <div class="pal-head">{{ icon('search') }}<input id="pal-q" type="text" placeholder="Jump to a page, unit, book or department…" autocomplete="off" spellcheck="false" role="combobox" aria-controls="pal-list" aria-expanded="true"><span class="kbd">Esc</span></div>
   <ul id="pal-list" class="pal-list" role="listbox"></ul>
   <div class="pal-foot"><span><span class="kbd">↑</span><span class="kbd">↓</span>move</span><span><span class="kbd">↵</span>open</span><span><span class="kbd">G</span> then a letter goes anywhere</span></div>
 </dialog>
-<dialog id="keysheet" class="keysheet" aria-label="Keyboard shortcuts">
-  <header><h2>Keyboard</h2><button class="iconbtn" type="button" data-close aria-label="Close">{{ icon('x') }}</button></header>
-  <div class="cols">
-    <div><h3>Everywhere</h3><dl>
-      <dt><span class="kbd">Ctrl</span><span class="kbd">K</span></dt><dd>search &amp; jump (⌘K on a Mac)</dd>
-      <dt><span class="kbd">/</span></dt><dd>search</dd>
-      <dt><span class="kbd">?</span></dt><dd>this sheet</dd>
-      <dt><span class="kbd">T</span></dt><dd>Studio black / Graphite</dd>
-      <dt><span class="kbd">Esc</span></dt><dd>close</dd>
-    </dl></div>
-    <div><h3>Go to</h3><dl>
-      <dt><span class="kbd">G</span><span class="kbd">H</span></dt><dd>Home</dd>
-      <dt><span class="kbd">G</span><span class="kbd">I</span></dt><dd>Inbox</dd>
-      <dt><span class="kbd">G</span><span class="kbd">Q</span></dt><dd>Queue</dd>
-      <dt><span class="kbd">G</span><span class="kbd">B</span></dt><dd>Books</dd>
-      <dt><span class="kbd">G</span><span class="kbd">A</span></dt><dd>Architecture</dd>
-      <dt><span class="kbd">G</span><span class="kbd">R</span></dt><dd>the unit on the GPU</dd>
-      <dt><span class="kbd">J</span><span class="kbd">K</span></dt><dd>next / previous row</dd>
-    </dl></div>
-    <div class="legend" aria-label="legend" data-testid="legend">
-      {% for mark, word in legend %}<span class="pill {{ word }}" data-state="{{ word }}" title="{{ mark }}">{{ icon(state_icons[word]) }}{{ word }}</span>{% endfor %}
-    </div>
-  </div>
-</dialog>
-<div id="toast" class="toast" role="status" hidden></div>
+{{ keysheet(keys or [], legend, state_icons) }}
+<div id="receipts" class="toast" data-testid="receipts" hidden></div>
+<div id="sr-status" class="vh" aria-live="polite" aria-atomic="true"></div>
+<div id="sr-alert" class="vh" role="alert" aria-atomic="true"></div>
 {%- endmacro %}

@@ -1,22 +1,99 @@
 {% extends "base.html" %}
 {% from "_icon.html" import icon %}
+{% from "_viz.html" import spark, went_chart %}
 {% block title %}Home · Visurena Studio{% endblock %}
-{% block crumbs %}<a href="/">Studio</a>{{ icon('chevron-right') }}<span aria-current="page">Home</span>{% endblock %}
 {% block body %}
-<h1>Home</h1>
-<section class="strip" id="floor" hx-get="/partials/floor" hx-trigger="every 2s" hx-swap="innerHTML">
-{% include "_floor.html" %}
+{#- Home (DIRECTION_v2 §Home, panel ruling PKG-4): the unit on the GPU, then what needs you, the
+    burn line, what runs next, where the GPU went, the departments and the orders.  Every live
+    section refreshes on its pulse key (C3) and morphs in place; nothing polls on a clock. -#}
+<link rel="stylesheet" href="{{ static_url('css/lists.css') }}">
+{% set w = viz.went(request) %}
+<div class="title-row">
+  <h1>Home</h1>
+  <div class="tally" data-testid="tally"><span class="r"><b>{{ floor.running | length }}</b> running</span><span class="f"><b data-needs>{{ attention | length }}</b> need you</span><span><b data-queue>{{ shell.queue if shell else 0 }}</b> queued</span></div>
+</div>
+
+<div class="hero-row">
+  <section id="floor" aria-label="On the floor" hx-get="/partials/floor" hx-select="#hero" hx-select-oob="#next" hx-trigger="pulse:floor from:body" data-v="{{ viz.fp(request, 'floor') }}" hx-swap="morph:innerHTML">
+  {% with only = 'hero' %}{% include "_floor.html" %}{% endwith %}
+  </section>
+  <div class="kpis">
+    <a class="kpi" href="#went" title="GPU step time today: {{ '%.2f' | format(w.today.ok + w.today.burn + w.today.live) }} h ({{ '%.2f' | format(w.today.burn) }} burned)">
+      <span class="k-l">{{ icon('zap') }}GPU today</span>
+      <span class="k-v">{{ '%.1f' | format(w.today.ok + w.today.burn + w.today.live) }}<small>h · {{ '%.1f' | format(w.today.burn) }} burned</small></span>
+      <span class="k-s">7 days <b>{{ w.week }} h</b></span>
+      {{ spark(w.spark, 'GPU hours per day, the last 7 days') }}
+    </a>
+    <a class="kpi" href="/queue" title="The episode lane: the p50 of a clean pass for every unit in it">
+      <span class="k-l">{{ icon('list-ordered') }}Episode lane clears</span>
+      {% if queue_eta %}
+      <span class="k-v">{{ queue_eta.clean_text.split(' if ')[0] }}<small>if clean</small></span>
+      <span class="k-s"><b>{{ queue_eta.units }}</b> in the lane{% if queue_eta.as_run_text %} · {{ queue_eta.as_run_text }}{% endif %}</span>
+      {% else %}
+      <span class="k-v">—<small>lane empty</small></span>
+      <span class="k-s">nothing running or queued in episode</span>
+      {% endif %}
+    </a>
+  </div>
+</div>
+
+<div class="mid">
+  <section aria-labelledby="needs-h">
+    <div class="sh"><h2 id="needs-h">Needs you</h2><span class="count hot" data-needs>{{ attention | length }}</span><span class="sub">oldest first</span><span class="spacer"></span><a class="more" href="/inbox">All of it{{ icon('chevron-right') }}</a></div>
+    <div id="attention" hx-get="/partials/attention" hx-trigger="pulse:attention from:body" data-v="{{ viz.fp(request, 'attention') }}" hx-swap="morph:innerHTML">
+    {% include "_attention.html" %}
+    </div>
+  </section>
+  <div class="side-col">
+    <section class="panel" aria-labelledby="since-h">
+      <div class="panel-h"><h2 id="since-h">Today</h2><span class="sub">steps that ended, newest first</span></div>
+      <div class="panel-b">{% include "_today.html" %}</div>
+    </section>
+  </div>
+</div>
+
+{% if w.line %}<p class="foot2" data-testid="burn-line">{{ icon('zap') }} <a class="linkish" href="#went">{{ w.line }}</a></p>{% endif %}
+
+<section class="sect" aria-labelledby="next-h">
+  <div class="sh"><h2 id="next-h">Up next</h2><span class="sub">in the order a runner takes them</span><span class="spacer"></span><a class="more" href="/queue">Queue · <span data-queue>{{ shell.queue if shell else '' }}</span>{{ icon('chevron-right') }}</a></div>
+  {% with only = 'next' %}{% include "_floor.html" %}{% endwith %}
 </section>
-<section class="strip" id="attention" hx-get="/partials/attention" hx-trigger="every 2s" hx-swap="innerHTML">
-{% include "_attention.html" %}
+
+<section class="panel sect" id="went" aria-labelledby="went-h">
+  <div class="panel-h"><h2 id="went-h">Where the GPU went</h2><span class="sub">last 7 days · episode step time from events</span></div>
+  <div class="panel-b went" id="went-b">
+    <div class="chart">
+      <p class="finding">{% if w.line %}<em>{{ w.line.split(' GPU-h')[0] }}</em> GPU-hours burned on steps that ended failed or deferred{% else %}No episode step ran in the last 7 days{% endif %}</p>
+      {{ went_chart(w) }}
+      <div class="key"><span><i class="sw ok"></i>productive (step completed)</span><span><i class="sw burn"></i>burned (step failed or deferred)</span><span><i class="sw live"></i>running now</span></div>
+      <p class="foot2" id="went-cap">Started → completed / failed / deferred, paired inside one run, on the local day the step started. A killed run has no end event and is not counted. The dashed line is 24 h, the whole day of one GPU; today's red tick is the hours elapsed so far.</p>
+      <details class="tbl-d"><summary>Table</summary>
+        <table class="dgrid"><thead><tr><th>Day</th><th class="num">Productive h</th><th class="num">Burned h</th><th class="num">Running h</th></tr></thead>
+        <tbody>{% for d in w.days %}<tr><td>{{ d.label }}</td><td class="num">{{ '%.2f' | format(d.ok) }}</td><td class="num">{{ '%.2f' | format(d.burn) }}</td><td class="num">{{ '%.2f' | format(d.live) }}</td></tr>{% endfor %}</tbody></table>
+      </details>
+    </div>
+    <div class="lead3">
+      <h3>Burned by step</h3>
+      {% if w.steps %}
+      <ol>{% for s in w.steps %}<li id="burn-{{ s.step }}"><span class="s"><span>{{ s.step }}</span>{{ s.name }}</span><span class="track"><span class="bbar" style="width:{{ (100 * s.total / w.max_step) | round(1) if w.max_step else 0 }}%"><i style="width:{{ s.share }}%"></i></span></span><span class="v"><b>{{ '%.1f' | format(s.burn) }}</b> of {{ '%.1f' | format(s.total) }} h</span></li>{% endfor %}</ol>
+      {% set s = w.steps[0] %}
+      <p class="lever"><b>{{ s.step }} {{ s.name }} is the lever:</b> {{ s.share }} % of its hours this week ended failed or deferred.</p>
+      {% else %}<p class="empty flat">No step burned GPU time this week.</p>{% endif %}
+    </div>
+  </div>
 </section>
-<section id="lanes" hx-get="/partials/lanes" hx-trigger="every 10s" hx-swap="innerHTML">
-{% include "_lanes.html" %}
+
+<section class="sect" aria-labelledby="lanes-h">
+  <div class="sh"><h2 id="lanes-h">Departments</h2><span class="sub">every unit, by state</span></div>
+  <div id="lanes" hx-get="/partials/lanes" hx-trigger="pulse:lanes from:body" data-v="{{ viz.fp(request, 'lanes') }}" hx-swap="morph:innerHTML">
+  {% include "_lanes.html" %}
+  </div>
 </section>
-<section class="strip" id="orders" hx-get="/partials/orders" hx-trigger="every 5s, orders-changed from:body" hx-swap="innerHTML">
-{% include "_orders.html" %}
-</section>
-<section class="strip">
-{% include "_today.html" %}
+
+<section class="panel sect" aria-labelledby="orders-h">
+  <div class="panel-h"><h2 id="orders-h">Orders</h2><span class="sub">a hold, lift or acknowledge acts at once; any other order waits until a run takes it</span></div>
+  <div class="panel-b" id="orders" hx-get="/partials/orders" hx-trigger="pulse:orders from:body, orders-changed from:body" data-v="{{ viz.fp(request, 'orders') }}" hx-swap="morph:innerHTML">
+  {% include "_orders.html" %}
+  </div>
 </section>
 {% endblock %}

@@ -37,7 +37,10 @@ SMALL_TILE_PX = 80
 
 
 def thumb_width(tile_px: int) -> int:
-    """The `/thumb/` width for a tile drawn tile_px wide: 160 up to 80 px, else 320 (2x)."""
+    """The `/thumb/` width for a tile drawn tile_px wide: 160 up to 80 px, 1024 for a stage-size
+    picture (the screening poster, the Viewer), else 320 (2x)."""
+    if tile_px >= 1024:
+        return 1024
     return 160 if tile_px <= SMALL_TILE_PX else 320
 
 
@@ -54,6 +57,20 @@ def stamp(path: Path) -> str:
         return f"?v={Path(path).stat().st_mtime_ns:x}"
     except OSError:
         return ""
+
+
+def etag(path: Path) -> str:
+    """A strong ETag from the file's mtime and size: `"<mtime_ns hex>-<size hex>"`."""
+    st = Path(path).stat()
+    return f'"{st.st_mtime_ns:x}-{st.st_size:x}"'
+
+
+def etag_matches(if_none_match: str | None, tag: str) -> bool:
+    """Whether an `If-None-Match` header names the tag (weak or strong, `*` too)."""
+    if not if_none_match:
+        return False
+    tags = [t.strip().removeprefix("W/") for t in if_none_match.split(",")]
+    return tag in tags or "*" in tags
 
 
 def resolve_artefact(library: Path, codex_id: str, rel: str) -> Path | None:

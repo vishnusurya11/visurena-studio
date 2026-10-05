@@ -1,8 +1,8 @@
 """The unit page answers four questions in its first screen and a half
 (research F): where is it (the head, the step bar with durations and failure
 reasons), why is it looping (the pass timeline, the loop detector, the fault
-trend), what does it look like (panel tiles by shot number with fault badges,
-a lightbox with the shot's plan text) and what can I do (the actions and this
+trend), what does it look like (shot cards by shot number with fault badges,
+opened in the in-page Viewer since PKG-5) and what can I do (the actions and this
 unit's orders).  No text over 160 characters renders open; the raw rows sit in
 one collapsed band; the page stays small when a learning's note is 40 KB."""
 from __future__ import annotations
@@ -48,28 +48,27 @@ def test_the_fault_trend_reads_the_gates_measures(page):
 
 
 def test_faults_are_grouped_by_kind_with_shot_chips(page):
-    gates = page[page.index('id="gates"'):page.index('id="pictures"')]
-    assert re.search(r"framing\s*<b>×2</b>", gates) and 'href="#shot-01"' in gates
+    gates = page[page.index('id="gates"'):page.index('id="actions"')]
+    assert re.search(r"framing\s*<b>×2</b>", gates) and 'data-view="storyboard/shot_01.png" data-set="shots" data-shot="1"' in gates
     assert "posture" in gates and "missing" in gates
 
 
-def test_panel_tiles_carry_their_shot_number_and_a_badge(page):
-    tile = re.search(r'<figure[^>]*id="shot-01".*?</figure>', page, re.S).group(0)
-    assert ">01<" in tile and "medium_close" in tile and "framing ×2" in tile
-    dq = re.search(r'<figure[^>]*id="shot-00".*?</figure>', page, re.S).group(0)
+def test_shot_cards_carry_their_shot_number_and_a_badge(page):
+    card = re.search(r'<article[^>]*id="shot-01".*?</article>', page, re.S).group(0)
+    assert "<b>01</b>" in card and "medium close" in card and "framing ×2" in card
+    dq = re.search(r'<article[^>]*id="shot-00".*?</article>', page, re.S).group(0)
     assert "blur" in dq and "missing" in dq
 
 
-def test_the_lightbox_holds_the_shots_plan_text_and_a_redo(page):
-    assert '<dialog id="lightbox"' in page
-    lb = html.unescape(re.search(r'<template id="lb-shot-01">(.*?)</template>', page, re.S).group(1))
-    assert FRAME_1 in lb and "a 50mm lens" in lb and "redo this shot" in lb
-    assert 'data-artefact="episodes/ep08/storyboard/shot_01.png"' in lb and 'data-step="08"' in lb
+def test_a_shot_opens_in_the_viewer_with_its_plan_frame_and_the_redo_steps(page):
+    card = html.unescape(re.search(r'<article[^>]*id="shot-01".*?</article>', page, re.S).group(0))
+    assert 'data-view="storyboard/shot_01.png" data-set="shots" data-shot="1"' in card and FRAME_1[:60] in card
+    assert 'data-panel-step="08"' in page and 'data-home="episodes/ep08"' in page
 
 
-def test_takes_are_grey_slots_that_say_why(page):
-    takes = page[page.index('id="takes"'):]
-    assert takes.count('data-testid="slot"') == 3 and "the takes wait on the panels" in takes
+def test_shots_say_why_the_takes_wait(page):
+    shots = page[page.index('id="shots"'):page.index('id="gates"')]
+    assert "the takes wait on the panels" in shots and 'data-testid="slot"' not in shots   # 5.7: no empty state over tiles
 
 
 def test_the_redo_defaults_to_the_holding_step(page):
@@ -77,9 +76,10 @@ def test_the_redo_defaults_to_the_holding_step(page):
     assert "EYE_PANELS: framing ×2" in page
 
 
-def test_the_raw_band_is_collapsed(page):
-    raw = re.search(r'<details[^>]*id="raw"[^>]*>', page).group(0)
-    assert " open" not in raw
+def test_the_activity_window_folds_the_learnings(page):
+    act = page[page.index('id="activity"'):]
+    folds = re.findall(r'<details class="rawpart fold"[^>]*>', act)
+    assert len(folds) == 2 and all(" open" not in f for f in folds)
     assert "PLAN: measured 61.0 vs None -&gt; improve" in page or "PLAN: measured 61.0 vs None -> improve" in page
 
 
@@ -114,11 +114,9 @@ def test_the_page_stays_small_with_a_40kb_note(page):
     assert BIG_NOTE[:2000] not in page
 
 
-def test_the_head_partial_polls_while_running(client):
+def test_the_head_partial_is_the_heads_inside(client):
     head = client.get(f"/partials/unit/episode/{CODEX}/ep08/head").text
-    assert "<html" not in head and 'hx-trigger="every 3s' in head and "08 panels" in head
-    done = client.get(f"/partials/unit/episode/{CODEX}/ep03/head").text
-    assert "every 3s" not in done
+    assert "<html" not in head and "every " not in head and "08 panels" in head
 
 
 def test_this_units_orders_are_listed(page):

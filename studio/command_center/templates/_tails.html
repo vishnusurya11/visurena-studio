@@ -1,23 +1,9 @@
-{#- Band 7 (research F §5): the raw rows as tables with one-line digests.  No
+{#- The Activity window (research F §5; kept by the owner, 2026-10-04): the run's log
+    lines first, the learnings and the timing folded under it; file names in a line
+    become Viewer links (static/media.js).  The raw rows as tables with one-line digests.  No
     text over 160 characters renders open: a long row is a <details> whose
     summary is the digest the parser built. -#}
 {% set lb = unit.raw.learnings %}
-<div class="rawpart">
-  <div class="eyebrow">Learnings <span class="muted">newest {{ lb.rows | length }} of {{ lb.total }}{% if lb.rows | length < lb.total %} (repeats merged){% endif %}</span></div>
-  <div class="tbl-wrap"><table class="small learn">
-    <thead><tr><th>time</th><th>step</th><th>gate</th><th>rung</th><th class="num">#</th><th class="num">measured</th><th>ended</th><th>faults</th></tr></thead>
-    <tbody>
-    {% for l in lb.rows %}
-    <tr><td class="mono">{{ l.at }}</td><td>{{ l.step or '' }}</td><td>{{ l.gate or '' }}</td><td>{{ l.rung or '' }}{% if l.times > 1 %} <b>×{{ l.times }}</b>{% endif %}</td><td class="num">{{ l.attempt if l.attempt is not none else '' }}</td>
-      <td class="num">{% if l.measured is not none %}{{ l.measured }}{% if l.threshold is not none %}/{{ l.threshold }}{% endif %}{% endif %}</td><td>{{ l.ended_as or '' }}</td>
-      <td class="note">{% if l.faults %}<details><summary>{{ l.digest }}</summary><ul class="items">{% for f in l.faults %}<li class="{% if f.head %}head{% elif f.advisory or f.info %}adv{% endif %}"><b>{{ f.code }}</b> {% if f.where and f.where != 'plan' %}<span class="muted">{{ f.where }}</span> {% endif %}{{ f.text | truncate(300) }}</li>{% endfor %}{% if l.more %}<li class="muted">+{{ l.more }} more in learnings.jsonl</li>{% endif %}</ul></details>{% endif %}</td></tr>
-    {% else %}<tr><td colspan="8" class="muted">no learnings yet</td></tr>{% endfor %}
-    </tbody></table></div>
-  {% if lb.older %}<details class="more"><summary class="muted">show {{ lb.older | length }} older rows</summary><div class="tbl-wrap"><table class="small learn"><tbody>
-    {% for l in lb.older %}<tr><td class="mono">{{ l.at }}</td><td>{{ l.gate or '' }}</td><td>{{ l.rung or '' }}{% if l.times > 1 %} ×{{ l.times }}{% endif %}</td><td>{{ l.ended_as or '' }}</td><td class="note muted">{{ l.digest }}</td></tr>{% endfor %}
-  </tbody></table></div></details>{% endif %}
-</div>
-
 <div class="rawpart">
   <div class="eyebrow">Log {% if unit.log_name %}<code title="{{ unit.log_name }}">{{ unit.log_name[-20:] }}</code>{% endif %} <span class="muted">WARNING+ and the ladders</span></div>
   <div class="tbl-wrap"><table class="small">
@@ -32,12 +18,28 @@
     </tbody></table></div>
 </div>
 
-<div class="rawpart">
-  <div class="eyebrow">Timing <span class="muted">{{ unit.raw.timing_n }} rows by script{% if unit.raw.unplaced %} · {{ unit.raw.unplaced }} outside any step window{% endif %}</span></div><span hidden>TIMING</span>
+<details class="rawpart fold">
+  <summary class="eyebrow">Learnings <span class="muted">newest {{ lb.rows | length }} of {{ lb.total }}{% if lb.rows | length < lb.total %} (repeats merged){% endif %}</span></summary>
+  <div class="tbl-wrap"><table class="small learn">
+    <thead><tr><th>time</th><th>step</th><th>gate</th><th>rung</th><th class="num">#</th><th class="num">measured</th><th>ended</th><th>faults</th></tr></thead>
+    <tbody>
+    {% for l in lb.rows %}
+    <tr><td class="mono">{{ l.at }}</td><td>{{ l.step or '' }}</td><td>{{ l.gate or '' }}</td><td>{{ l.rung or '' }}{% if l.times > 1 %} <b>×{{ l.times }}</b>{% endif %}</td><td class="num">{{ l.attempt if l.attempt is not none else '' }}</td>
+      <td class="num">{% if l.measured is not none %}{{ l.measured }}{% if l.threshold is not none %}/{{ l.threshold }}{% endif %}{% endif %}</td><td>{{ l.ended_as or '' }}</td>
+      <td class="note">{% if l.faults %}<details><summary>{{ l.digest }}</summary><ul class="items">{% for f in l.faults %}<li class="{% if f.head %}head{% elif f.advisory or f.info %}adv{% endif %}"><b>{{ f.code }}</b> {% if f.where and f.where != 'plan' %}<span class="muted">{{ f.where }}</span> {% endif %}{{ f.text | truncate(300) }}</li>{% endfor %}{% if l.more %}<li class="muted">+{{ l.more }} more in learnings.jsonl</li>{% endif %}</ul></details>{% endif %}</td></tr>
+    {% else %}<tr><td colspan="8" class="muted">no learnings yet</td></tr>{% endfor %}
+    </tbody></table></div>
+  {% if lb.older %}<details class="more"><summary class="muted">show {{ lb.older | length }} older rows</summary><div class="tbl-wrap"><table class="small learn"><tbody>
+    {% for l in lb.older %}<tr><td class="mono">{{ l.at }}</td><td>{{ l.gate or '' }}</td><td>{{ l.rung or '' }}{% if l.times > 1 %} ×{{ l.times }}{% endif %}</td><td>{{ l.ended_as or '' }}</td><td class="note muted">{{ l.digest }}</td></tr>{% endfor %}
+  </tbody></table></div></details>{% endif %}
+</details>
+
+<details class="rawpart fold">
+  <summary class="eyebrow">Timing <span class="muted">{{ unit.raw.timing_n }} rows by script{% if unit.raw.unplaced %} · {{ unit.raw.unplaced }} outside any step window{% endif %}</span></summary><span hidden>TIMING</span>
   <div class="tbl-wrap"><table class="small">
     <thead><tr><th>script</th><th class="num">runs</th><th class="num">total</th><th>last ok</th></tr></thead>
     <tbody>
     {% for t in unit.raw.timing[:14] %}<tr><td>{{ t.stage }}</td><td class="num">{{ t.count }}</td><td class="num">{{ '%.0f' | format(t.total_s) }} s</td><td>{{ '✓' if t.last_ok else ('✕' if t.last_ok is not none else '') }}</td></tr>
     {% else %}<tr><td colspan="4" class="muted">no timing rows</td></tr>{% endfor %}
     </tbody></table></div>
-</div>
+</details>

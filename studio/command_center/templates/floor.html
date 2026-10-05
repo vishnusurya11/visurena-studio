@@ -1,48 +1,74 @@
 {% extends "base.html" %}
 {% from "_icon.html" import icon %}
 {% import "_macros.html" as act with context %}
+{% from "_viz.html" import tile %}
 {% block title %}Queue · Visurena Studio{% endblock %}
-{% block crumbs %}<a href="/">Studio</a>{{ icon('chevron-right') }}<span aria-current="page">Queue</span>{% endblock %}
 {% block body %}
-<h1>Call sheet</h1>
-<div class="actions">{{ act.hold('studio', label='hold studio') }} <span class="muted">a studio hold stops every run before its first GPU step</span></div>
-<section class="strip" hx-get="/partials/floor" hx-trigger="every 2s" hx-swap="innerHTML">
-<span hidden>NOW</span>
-{% include "_floor.html" %}
+{#- The queue (panel ruling PKG-4): what runs now, what runs next in the order a runner takes it
+    (derived: priority, slate order, unit -- there is no scheduler), what is held, what finished
+    today.  Live on pulse:floor; the queued and done groups are below the fold. -#}
+<link rel="stylesheet" href="{{ static_url('css/lists.css') }}">
+<div class="title-row">
+  <h1>Queue</h1>
+  <p class="sub"><span><b>{{ floor.running | length }}</b> running</span><span><b>{{ queue | length }}</b> queued</span><span><b>{{ holds | length }}</b> held</span>{% if queue_eta %}<span>episode lane clears <b>{{ queue_eta.clean_text }}</b></span>{% endif %}</p>
+  <div class="end">{{ act.hold('studio') }}</div>
+</div>
+<p class="foot2" data-testid="hold-effect">{{ icon('pause') }} A studio hold: {{ HOLD_EFFECT }}</p>
+
+<section class="sect" aria-labelledby="now-h">
+  <div class="sh"><h2 id="now-h">Now</h2></div>
+  <div id="floor" hx-get="/partials/floor" hx-trigger="pulse:floor from:body" data-v="{{ viz.fp(request, 'floor') }}" hx-swap="morph:innerHTML">
+  {% include "_floor.html" %}
+  </div>
 </section>
-<section class="strip">
-<div class="eyebrow">Next <span class="muted">(derived: priority, slate order, unit — no scheduler yet)</span></div>
-<span hidden>NEXT</span>
-<div class="tbl-wrap"><table>
-<thead><tr><th>#</th><th>st</th><th>department</th><th>book</th><th>unit</th><th>step</th><th>priority</th><th>waits on</th><th></th></tr></thead>
-<tbody>
-{% for r in queue %}
-<tr>
-  <td>{{ loop.index }}</td>
-  <td><span class="st {{ r.css }}">{{ r.glyph }}</span></td>
-  <td><a href="/d/{{ r.stage }}">{{ r.stage }}</a></td>
-  <td><a href="/b/{{ r.codex_id }}">{{ books.get(r.codex_id, r.codex_id) }}</a></td>
-  <td><a href="/d/{{ r.stage }}/{{ r.codex_id }}/{{ r.unit }}">{{ r.unit }}</a></td>
-  <td>{{ r.step_id or '' }} {{ r.step_name }}</td>
-  <td>{{ r.priority }}</td>
-  <td>{{ r.blocked_on or '' }}</td>
-  <td>{{ act.order('bump', r.codex_id, r.stage, r.unit, '↑') }}{{ act.hold('unit', r.codex_id, r.stage, r.unit) }}</td>
-</tr>
-{% else %}
-<tr><td colspan="9" class="muted">nothing queued</td></tr>
-{% endfor %}
-</tbody></table></div>
+
+<section class="panel sect" aria-labelledby="queue-h">
+  <div class="panel-h"><h2 id="queue-h">Next</h2><span class="sub">derived: priority, slate order, unit (no scheduler yet)</span></div>
+  <div class="panel-b" id="queue-b" hx-get="/queue" hx-select="#queue-b" hx-target="this" hx-trigger="pulse:floor from:body" data-v="{{ viz.fp(request, 'floor') }}" hx-swap="morph:outerHTML">
+  {% if queue %}
+  <div class="tscroll"><table class="dgrid dg" data-testid="queue">
+  <colgroup><col style="width:44px"><col class="c-face"><col class="c-state"><col class="c-unit"><col><col><col style="width:90px"><col class="c-acts"></colgroup>
+  <thead><tr><th class="num">#</th><th></th><th>State</th><th>Unit</th><th>Department</th><th>Step</th><th class="num">Priority</th><th></th></tr></thead>
+  <tbody>
+  {% for r in queue[:20] %}
+  {% set href = '/d/' ~ r.stage ~ '/' ~ r.codex_id ~ '/' ~ r.unit %}
+  {% set p = viz.face(request, r, 80) %}
+  <tr id="q-{{ r.codex_id }}-{{ r.stage }}-{{ r.unit }}" data-row>
+    <td class="num ph-hide">{{ loop.index }}</td>
+    <td class="face-td">{% if p %}<img class="face" src="{{ p.thumb }}" alt="" width="36" height="36" loading="lazy">{% endif %}</td>
+    <td><span class="pill {{ r.shown }}">{{ icon(state_icons[r.shown]) }}{{ r.shown }}</span></td>
+    <td><a class="uid" href="{{ href }}">{{ r.unit }}</a><span class="ttl">{{ books.get(r.codex_id, r.codex_id) }}</span></td>
+    <td class="cap ph-hide"><a class="linkish" href="/d/{{ r.stage }}">{{ r.stage }}</a></td>
+    <td class="ph-wide muted">{% if r.step_id %}{{ r.step_id }} {{ r.step_name }}{% endif %}{% if r.blocked_on %} <span class="muted">· waits on {{ r.blocked_on }}</span>{% endif %}</td>
+    <td class="num ph-hide">{{ r.priority }}</td>
+    <td class="acts-td">{% if loop.index <= 12 %}<details class="rowmenu"><summary aria-label="Actions for {{ r.unit }}">{{ icon('ellipsis') }}</summary><div class="pop">{{ act.order('bump', r.codex_id, r.stage, r.unit) }}{{ act.hold('unit', r.codex_id, r.stage, r.unit) }}</div></details>{% endif %}</td>
+  </tr>
+  {% endfor %}
+  </tbody></table></div>
+  {% if queue | length > 20 %}
+  <details class="more-q"><summary>{{ queue | length - 20 }} more in line</summary>
+  <ol class="morelist" start="21">{% for r in queue[20:] %}<li id="q-{{ r.codex_id }}-{{ r.stage }}-{{ r.unit }}"><a href="/d/{{ r.stage }}/{{ r.codex_id }}/{{ r.unit }}">{{ r.stage }} · {{ r.unit }} · {{ books.get(r.codex_id, r.codex_id) }}</a></li>{% endfor %}</ol>
+  </details>
+  {% endif %}
+  {% else %}
+  <p class="empty flat">Nothing is queued. A unit joins when its department plans it, or when you queue it again from its page.</p>
+  {% endif %}
+  </div>
 </section>
-<section class="strip">
-<div class="eyebrow">Held</div>
-<span hidden>HELD</span>
-{% for h in holds %}
-<div class="row"><span class="st grey">⏸</span> {{ h.scope }}{% if h.codex_id %} · {{ books.get(h.codex_id, h.codex_id) }}{% endif %}{% if h.stage %} · {{ h.stage }}{% endif %}{% if h.unit %} · {{ h.unit }}{% endif %} · <span class="muted">{{ h.held_by or '' }} {{ h.held_at[:16] }}: "{{ h.reason }}"</span> {{ act.lift(h.id) }}</div>
-{% else %}
-<div class="row muted">no holds</div>
-{% endfor %}
+
+<section class="panel sect" aria-labelledby="held-h">
+  <div class="panel-h"><h2 id="held-h">Held</h2><span class="sub">{{ HOLD_EFFECT }}</span></div>
+  <div class="panel-b">
+  {% for h in holds %}
+  <div class="row" id="hold-{{ h.id }}">{{ icon('pause') }} <b class="cap">{{ h.scope }}</b>{% if h.codex_id %} · {{ books.get(h.codex_id, h.codex_id) }}{% endif %}{% if h.stage %} · {{ h.stage }}{% endif %}{% if h.unit %} · {{ h.unit }}{% endif %} · <span class="muted" title="{{ h.held_at }}">{{ h.held_by or '' }} {{ h.age or h.held_at[:16] }}: "{{ h.reason }}"</span> {{ act.lift(h.id) }}</div>
+  {% else %}
+  <p class="empty flat">Nothing is held. Hold the studio, a book or a unit when you need the GPU to stop after its current step.</p>
+  {% endfor %}
+  </div>
 </section>
-<section class="strip">
-{% include "_today.html" %}
+
+<section class="panel sect" aria-labelledby="today-h">
+  <div class="panel-h"><h2 id="today-h">Today</h2><span class="sub">steps that ended, newest first</span></div>
+  <div class="panel-b">{% include "_today.html" %}</div>
 </section>
 {% endblock %}

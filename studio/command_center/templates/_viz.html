@@ -1,0 +1,43 @@
+{#- The lists' picture and chart macros (panel ruling PKG-4): a poster tile is a stretched
+    link with a SIBLING Viewer button (never a button inside a link, 4.7); the button carries
+    what static/viewer/viewer.js reads (data-view = the book-relative path, data-set = the
+    sequence, data-codex, data-src / data-thumb, data-unit="" so the page's own list is the
+    sequence).  The charts are server SVG from viz.py with keyed mark ids (4.8). -#}
+{% from "_icon.html" import icon %}
+
+{% macro opener(p, set, label, cls='xp') -%}
+<button class="{{ cls }}" type="button" data-view="{{ p.rel }}" data-kind="image" data-set="{{ set }}" data-codex="{{ p.codex }}" data-unit="" data-src="{{ p.src }}" data-thumb="{{ p.thumb }}" data-label="{{ label }}" aria-label="View {{ label }}">{{ icon('maximize-2') }}</button>
+{%- endmacro %}
+
+{% macro tile(p, href, set, label, px, cls='', name='') -%}
+<div class="pic has-xp{% if cls %} {{ cls }}{% endif %}">
+{%- if p %}<a class="stretch" href="{{ href }}" tabindex="-1" aria-hidden="true"><img src="{{ p.thumb }}"{% if px <= 80 %} srcset="{{ p.thumb }} 1x, {{ p.thumb2 }} 2x"{% endif %} alt="" width="{{ px }}" height="{{ px }}" loading="lazy" decoding="async"></a>{{ opener(p, set, label) }}
+{%- else %}<a class="stretch" href="{{ href }}" tabindex="-1" aria-hidden="true"><span class="none">{{ name or 'no picture yet' }}</span></a>{% endif %}
+{%- if caller %}{{ caller() }}{% endif -%}
+</div>
+{%- endmacro %}
+
+{% macro chip_cls(css) %}{{ {'red': 'fail', 'black': 'fail', 'amber': 'flag', 'purple': 'defer'}.get(css, 'mute') }}{% endmacro %}
+
+{% macro chips(list) -%}
+{% for c in list %}<span class="chip2 {{ chip_cls(c.css) }}" title="{{ c.gate }}: {{ c.title }}{% if c.by %} · {{ c.by }}{% endif %}"><span>{{ c.label }}</span><b>{{ c.glyph[:1] }}{{ c.count }}</b></span>{% endfor %}
+{%- endmacro %}
+
+{% macro spark(d, label) -%}
+<svg viewBox="0 0 260 36" preserveAspectRatio="none" role="img" aria-label="{{ label }}"><path class="spark-l" d="{{ d }}" vector-effect="non-scaling-stroke"/></svg>
+{%- endmacro %}
+
+{% macro went_chart(w) -%}
+{%- set c = w.chart -%}
+<svg viewBox="0 0 {{ c.width }} {{ c.height }}" role="img" aria-labelledby="went-cap" id="went-svg">
+<defs><pattern id="went-hatch" width="6" height="6" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><rect width="6" height="6" style="fill:var(--st-failed-bg)"/><rect width="3" height="6" style="fill:var(--st-failed-bar)"/></pattern></defs>
+{% for g in c.grid %}<line class="grid" x1="34" x2="{{ c.width }}" y1="{{ g.y }}" y2="{{ g.y }}"/><text class="ax" x="26" y="{{ g.y + 4 }}" text-anchor="end">{{ g.h }}</text>{% endfor %}
+<line class="ceil" x1="34" x2="{{ c.width }}" y1="{{ c.line24 }}" y2="{{ c.line24 }}"/><text class="ax" x="26" y="{{ c.line24 + 4 }}" text-anchor="end">24 h</text>
+{% for col in c.cols %}<g class="col" id="{{ col.id }}"><title>{{ col.day.label }}: {{ '%.1f' | format(col.total) }} GPU-h · {{ '%.1f' | format(col.day.ok) }} productive · {{ '%.1f' | format(col.day.burn) }} burned{% if col.day.live %} · {{ '%.1f' | format(col.day.live) }} running{% endif %}</title>
+{% for s in col.segs %}<rect class="seg {{ s.kind }}" id="{{ s.id }}" x="{{ s.x }}" y="{{ s.y }}" width="{{ s.w }}" height="{{ s.h }}"{% if s.kind == 'burn' %} style="fill:url(#went-hatch)"{% endif %}/>{% endfor %}
+{% if col.ceiling is not none %}<line class="sofar" x1="{{ col.x - 4 }}" x2="{{ col.x + col.w + 4 }}" y1="{{ col.ceiling }}" y2="{{ col.ceiling }}"><title>elapsed so far today</title></line>{% endif %}
+{% if col.total %}<text class="vl{% if col.total == c.max %} max{% endif %}" x="{{ col.cx }}" y="{{ col.top - 7 }}" text-anchor="middle">{{ '%.1f' | format(col.total) }}</text>{% endif %}
+<text class="ax{% if col.day.today %} now{% endif %}" x="{{ col.cx }}" y="{{ c.base + 20 }}" text-anchor="middle">{{ col.day.label }}</text></g>
+{% endfor %}<line class="base" x1="34" x2="{{ c.width }}" y1="{{ c.base }}" y2="{{ c.base }}"/>
+</svg>
+{%- endmacro %}

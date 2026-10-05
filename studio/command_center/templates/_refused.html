@@ -1,1 +1,6 @@
-<span class="refused">refused: {{ detail }}</span>
+{#- A refused order (actions.Refused): a chip in #receipts with the reason in words. -#}
+<div class="rcpt" data-state="refused" data-say="Refused: {{ detail }}">
+<span class="rc-state" data-k="state">⊘ refused</span> ·
+<span class="rc-eff">{{ detail }}</span>
+<button type="button" class="btn ghost sm rc-x" data-dismiss aria-label="Dismiss receipt">×</button>
+</div>

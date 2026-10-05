@@ -1,19 +1,20 @@
-<div class="eyebrow">Orders (last {{ orders | length }}) <span class="muted">— taken by a run, pending until one does; a hold or lift acts at once</span></div>
-<span hidden>ORDERS</span>
-<div class="tbl-wrap"><table>
-<thead><tr><th>#</th><th>ts</th><th>kind</th><th>scope</th><th>target</th><th>note</th><th>taken by</th></tr></thead>
+{#- The orders (panel ruling PKG-4 4.5): newest first, each with its age; a hold, lift or
+    acknowledge acts at once, any other order waits until a run takes it.  Rows: ord-<id>. -#}
+{% if orders %}
+<div class="tscroll"><table class="dgrid" data-testid="orders">
+<thead><tr><th class="num">#</th><th>when</th><th>order</th><th>target</th><th class="note">note</th><th>taken by</th></tr></thead>
 <tbody>
 {% for o in orders %}
-<tr>
-  <td class="mono">{{ o.id }}</td>
-  <td class="mono">{{ (o.ts or '')[5:16] }}</td>
+<tr id="ord-{{ o.id }}">
+  <td class="num">{{ o.id }}</td>
+  <td class="mono" title="{{ o.ts or '' }}">{{ o.age or (o.ts or '')[5:16] }}</td>
   <td>{{ o.kind }}</td>
-  <td>{{ o.scope }}</td>
-  <td>{% if o.scope == 'book' %}{{ books.get(o.target, o.target) }}{% else %}{% if o.scope == 'unit' %}<span class="muted">{{ books.get(o.codex_id, o.codex_id) | truncate(14, True, '…') }} ›</span> {% endif %}{{ o.target }}{% endif %}</td>
-  <td>{{ o.note or '' }}</td>
-  <td>{% if o.taken_by_run %}<code>{{ o.taken }}</code>{% else %}<span class="muted">{{ o.taken }}</span>{% endif %}</td>
+  <td>{% if o.scope == 'book' %}{{ books.get(o.target, o.target) }}{% else %}{% if o.scope == 'unit' %}<span class="muted">{{ books.get(o.codex_id, o.codex_id) | truncate(18, True, '…') }} ›</span> {% endif %}{{ o.target }}{% endif %}</td>
+  <td class="note">{{ o.note or "" }}</td>
+  <td>{% if o.taken_by_run %}<span class="mono" title="{{ o.taken }}">{{ o.taken[-14:] }}</span>{% else %}<span class="muted">{{ o.taken }}</span>{% endif %}</td>
 </tr>
-{% else %}
-<tr><td colspan="7" class="muted">no orders yet</td></tr>
 {% endfor %}
 </tbody></table></div>
+{% else %}
+<p class="empty">No orders yet. A hold, a retry or an acknowledge you give here is listed until a run takes it.</p>
+{% endif %}

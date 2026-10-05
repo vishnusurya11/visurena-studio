@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+{% from "_icon.html" import icon %}
+{% block title %}Needs you · Visurena Studio{% endblock %}
+{% block body %}
+{#- Needs you as a page (panel ruling PKG-4 4.10, the sidebar's place at /inbox): the attention
+    list -- exactly views.inbox_count() rows -- oldest first, as cards.  "Acknowledge all" is the
+    page key Shift+A (C4: board.js clicks the control marked data-key). -#}
+<link rel="stylesheet" href="{{ static_url('css/lists.css') }}">
+{% set acks = attention | selectattr('reason') | list | length %}
+<div class="title-row">
+  <h1>Needs you</h1>
+  <p class="sub"><span><b data-needs>{{ attention | length }}</b> waiting</span>{% if acks %}<span><b>{{ acks }}</b> shipped with flags</span>{% endif %}<span>oldest first</span></p>
+  {% if acks %}<div class="end"><button class="btn sm" type="button" data-key="A" data-ack-all aria-keyshortcuts="Shift+A" title="Acknowledge every shipped-with-flags unit on this page (Shift A)"{% if not writable %} disabled{% endif %}>{{ icon('check') }}Acknowledge all {{ acks }}</button></div>{% endif %}
+</div>
+<section id="attention" aria-label="Needs you" hx-get="/partials/attention" hx-trigger="pulse:attention from:body" data-v="{{ viz.fp(request, 'attention') }}" hx-swap="morph:innerHTML">
+{% include "_attention.html" %}
+</section>
+{% endblock %}

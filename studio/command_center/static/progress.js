@@ -10,7 +10,7 @@
   if (!card || card.dataset.wired) return;
   card.dataset.wired = '1';
   var STOP = { done: 1, dead: 1 }, RUN = { live: 1, quiet: 1, stalled: 1 };
-  var skew = num(card.dataset.now) - Date.now() / 1000, last = null, timer = null, lastSign = 0;
+  var skew = num(card.dataset.now) - Date.now() / 1000, last = null, timer = null, lastSign = 0, lastOk = Date.now();
 
   function num(x) { var n = parseFloat(x); return isNaN(n) ? null : n; }
   function now() { return Date.now() / 1000 + skew; }
@@ -33,6 +33,7 @@
 
   /* --- every second: the clocks and the developing tile --- */
   function tick() {
+    if (document.documentElement.hasAttribute('data-stale')) return;   /* the board is stale: every clock freezes (5.9) */
     var t = now(), stepT = num(card.dataset.step), runT = num(card.dataset.run);
     card.querySelectorAll('[data-clock]').forEach(function (n) {
       var k = n.dataset.clock, v = '';
@@ -66,8 +67,16 @@
     lastSign = newest;
     var q = card.querySelector('[data-clock="quiet"]'); if (q) q.dataset.at = newest || '';
   }
+  function valuetext(p) {             /* progress_view.valuetext's words: `take 11 of 26, done around 02:45` */
+    var st = p.now_step, e = p.eta || {};
+    if (!st) return 'no run';
+    var head = st.kind === 'counted' ? (st.id === '09' ? 'take' : 'panel') + ' ' + st.done + ' of ' + st.total : st.id + ' ' + st.name;
+    var tail = e.long ? 'running long' : (e.finish ? 'done around ' + e.finish : '');
+    return tail ? head + ', ' + tail : head;
+  }
   function patchHero(p) {
     var st = p.now_step, e = p.eta || {};
+    var bar = $('hero'); if (bar && bar.getAttribute('aria-valuetext') !== valuetext(p)) bar.setAttribute('aria-valuetext', valuetext(p));
     if (st && st.kind === 'counted') {
       var big = $('big'); if (big) big.innerHTML = st.done + '<span class="of">/' + st.total + '</span>';
       var hero = $('hero'); hero.setAttribute('aria-valuenow', st.done); hero.setAttribute('aria-valuemax', st.total);
@@ -104,9 +113,21 @@
       if (it.prior_s) tile.dataset.prior = it.prior_s; else delete tile.dataset.prior;
       if (it.video) tile.dataset.video = it.video;
       var img = tile.querySelector('img');
-      if (img && it.panel && img.getAttribute('src') !== p.media_base + it.panel) img.setAttribute('src', p.media_base + it.panel);
+      if (img && it.panel && img.getAttribute('src') !== p.media_base + it.panel) reveal(img, p.media_base + it.panel);
       tile.title = it.id + ' · ' + it.state + (it.secs ? ' · ' + Math.round(it.secs) + ' s' : '');
     });
+  }
+  function reveal(img, src) {        /* a new panel is decoded off-screen, then shown: never a blank tile (5.9) */
+    var pre = new Image(); pre.src = src;
+    (pre.decode ? pre.decode() : Promise.resolve()).then(function () { img.setAttribute('src', src); }, function () { img.setAttribute('src', src); });
+  }
+  function say(p, prev) {             /* the step change, spoken once before the card is replaced (C5) */
+    var st = p.now_step || {}, text = p.unit + (p.vital !== prev ? ' ' + p.vital : '') + (st.id ? ' now ' + st.id + ' ' + st.name : '');
+    if (window.board && window.board.announce) window.board.announce(text, { key: 'live:' + p.unit, urgent: p.vital === 'dead' || p.vital === 'refused' });
+  }
+  function watchLate() {             /* the card's own poll two beats late: the vital turns amber (5.9) */
+    var late = lastOk && Date.now() - lastOk > 2 * 2000 + 1500;
+    if (late) card.setAttribute('data-late', ''); else card.removeAttribute('data-late');
   }
   function favicon(p) {
     var c = document.createElement('canvas'); c.width = c.height = 32;
@@ -131,17 +152,19 @@
       if (!html.trim()) return;
       var box = document.createElement('div'); box.innerHTML = html;
       var fresh = box.querySelector('#live'); if (!fresh) return;
-      card.replaceWith(fresh); card = fresh; card.dataset.wired = '1';
+      if (window.Idiomorph) { window.Idiomorph.morph(card, fresh); card = document.getElementById('live') || card; }   /* nodes survive: no blank frame */
+      else { card.replaceWith(fresh); card = fresh; }
+      card.dataset.wired = '1';
       if (p.vital === 'done' && prev !== 'done') { var r = card.querySelector('.lv-rail'); if (r) r.classList.add('sweep'); }
-      wireHover(); schedule(p);
+      wireHover(); wireNotify(); schedule(p);
     });
   }
   function apply(p) {
     var prev = card.dataset.vital;
     skew = p.now - Date.now() / 1000;
     card.dataset.step = p.step_started || ''; card.dataset.run = p.run_started || '';
-    document.title = p.title; favicon(p); notify(prev, p);
-    if (shape(p) !== card.dataset.shape) { swap(p, prev); return; }
+    document.title = p.title; favicon(p); notify(prev, p); lastOk = Date.now(); watchLate();
+    if (shape(p) !== card.dataset.shape) { say(p, prev); swap(p, prev); return; }
     patchVital(p); patchHero(p); patchRail(p); patchSheet(p); tick(); schedule(p);
   }
   function poll() {
@@ -152,6 +175,7 @@
   }
   function schedule(p) { if (!timer && !(p && STOP[p.vital])) timer = setTimeout(poll, 2000); }
   function wireHover() {
+    if (card._hover) return; card._hover = 1;   /* a morphed card keeps its node and its listeners */
     card.addEventListener('mouseover', function (e) {
       var t = e.target.closest('.lt[data-video]'); if (!t || t.querySelector('video')) return;
       var v = document.createElement('video'); v.muted = true; v.loop = true; v.playsInline = true; v.preload = 'auto';
@@ -160,6 +184,9 @@
     card.addEventListener('mouseout', function (e) {
       var t = e.target.closest('.lt'); if (t && !t.contains(e.relatedTarget)) { var v = t.querySelector('video'); if (v) v.remove(); }
     });
+    wireNotify();
+  }
+  function wireNotify() {
     var b = $('notify');
     if (b && window.Notification) {
       b.hidden = false;
@@ -171,6 +198,7 @@
 
   wireHover();
   setInterval(tick, 1000); tick();
+  setInterval(function () { if (!STOP[card.dataset.vital] && document.visibilityState === 'visible') watchLate(); }, 1000);
   document.addEventListener('visibilitychange', function () { if (document.visibilityState === 'visible' && !timer) poll(); });
   if (!STOP[card.dataset.vital]) schedule(null);
 })();

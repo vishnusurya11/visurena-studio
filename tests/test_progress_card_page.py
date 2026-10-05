@@ -102,22 +102,24 @@ def _blocks(css: str, head: str) -> list[tuple[int, int]]:
     return out
 
 
-def test_every_animation_is_gated_behind_no_preference():
+def test_every_animation_in_the_card_runs_on_motion_tokens():
+    """Panel ruling 3.1: a duration is a token from tokens.css, never a literal in the card."""
     css = _live_css()
-    gated = _blocks(css, "@media (prefers-reduced-motion: no-preference)")
-    uses = [m.start() for m in re.finditer(r"animation:(?!none)", css)]
-    assert uses and gated
-    assert all(any(a <= u <= b for a, b in gated) for u in uses)
+    uses = re.findall(r"animation:([^;}]+)", css)
+    assert uses and all(u.strip() == "none" or "var(--" in u for u in uses), uses
+    assert not re.search(r"\d+(\.\d+)?m?s\b", re.sub(r"var\([^)]*\)", "", css))
 
 
-def test_reduced_motion_stops_everything_in_the_card():
-    assert "@media (prefers-reduced-motion: reduce){.live *{animation:none!important;transition-duration:1ms!important}}" in PAGES
+def test_still_mode_is_a_token_flip_that_stops_the_card():
+    """Panel ruling 3.2: reduced motion and data-motion=still set the motion tokens to 1 ms."""
+    tokens = (Path(__file__).resolve().parents[1] / "studio" / "command_center" / "static" / "css" / "tokens.css").read_text(encoding="utf-8")
+    assert "@media (prefers-reduced-motion:reduce)" in tokens and ':root[data-motion="still"]' in tokens
+    assert "--breathe:1ms" in tokens and "--sheen:1ms" in tokens
 
 
-def test_the_motion_tokens_are_the_cards_own_root_block():
-    assert ":root{--ease-out" in _live_css()
-    for token in ("--d4:900ms", "--breathe:2.8s", "--sheen:2.4s", "--stripe:1.6s"):
-        assert token in _live_css()
+def test_the_card_keeps_no_root_block_of_its_own():
+    """Panel ruling 3.1: the motion tokens live in tokens.css alone."""
+    assert ":root" not in _live_css()
     assert "@property --dev" in PAGES   # registered outside the layer
 
 
@@ -134,8 +136,10 @@ def test_every_text_pair_the_card_uses_holds_4_5(theme, fg, bg):
     assert _contrast(t[fg], t[bg]) >= 4.5, (theme, fg, bg, _contrast(t[fg], t[bg]))
 
 
-def test_the_card_never_sets_text_in_ink_3():
-    assert "--ink-3" not in _live_css()
+def test_the_cards_muted_text_holds_4_5():
+    """ink-3 (the demoted last-words line, ruling 3.5) meets 4.5:1 since P0.3 re-toned it."""
+    for theme, t in THEMES.items():
+        assert _contrast(t["ink-3"], t["paper"]) >= 4.5, theme
 
 
 def test_the_card_never_reuses_the_health_bands_loop_class():

@@ -43,7 +43,7 @@ def test_the_only_write_path_is_work_orders_hold_lift_and_order():
     calls = set()
     for source in SOURCES:
         calls |= set(re.findall(r"\bwork_orders\.(\w+)\(", source.read_text(encoding="utf-8")))
-    assert calls == {"hold", "lift", "order", "default_artefact"}
+    assert calls == {"hold", "lift", "order", "default_artefact", "pending_orders"}   # pending_orders: a SELECT (PKG-6 receipts)
     for source in SOURCES:
         if source.name != "actions.py":
             assert "work_orders." not in source.read_text(encoding="utf-8"), source.name
@@ -58,5 +58,7 @@ def test_the_write_connection_is_a_separate_factory():
 def test_every_template_post_goes_to_an_action_route():
     posts = []
     for page in (PACKAGE / "templates").glob("*.html"):
-        posts += re.findall(r'hx-post="([^"]*)"', page.read_text(encoding="utf-8"))
+        text = page.read_text(encoding="utf-8")
+        posts += [p for p in re.findall(r'hx-post="([^"]*)"', text) if p != "{{ path }}"]   # the posts() macro
+        posts += re.findall(r"posts\('([^']*)'", text)   # its callers
     assert posts and all(p.startswith("/act/") for p in posts), posts

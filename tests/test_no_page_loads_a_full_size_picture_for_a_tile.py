@@ -49,13 +49,13 @@ def picture_urls(html: str) -> list[str]:
 def test_every_tile_poster_and_strip_on_the_unit_page_is_a_thumb(page):
     urls = picture_urls(main(page))   # the shell's faces are thumbs too, but not this page's tiles
     assert all(u.startswith(f"/thumb/{CODEX}/") for u in picture_urls(page))
-    assert len(urls) == 4  # 2 panels, 2 posters; with takes on disk the strip is a link
+    assert len(urls) == 2  # 2 panel insets; a take with no frame of its own says why (PKG-5 5.5)
     assert [u for u in urls if not u.startswith(f"/thumb/{CODEX}/")] == []
-    assert f'poster="/thumb/{CODEX}/320/episodes/ep04/storyboard/shot_00.png?v=' in page
+    assert "no frame of T00 on disk" in page
 
 
 def test_the_video_and_the_open_file_links_stay_on_lib(page):
-    assert f'src="/lib/{CODEX}/episodes/ep04/takes/r2v/T00.mp4"' in page
+    assert 'data-view="takes/r2v/T00.mp4" data-set="shots"' in page  # the Viewer streams it from /lib
     assert f'src="/lib/{CODEX}/episodes/ep04/cut/master_iter2.mp4"' in page
 
 

@@ -1,25 +1,75 @@
 {% extends "base.html" %}
 {% from "_icon.html" import icon %}
 {% import "_macros.html" as act with context %}
+{% from "_viz.html" import tile, chips %}
 {% block title %}{{ book.name }} · Visurena Studio{% endblock %}
-{% block crumbs %}<a href="/">Studio</a>{{ icon('chevron-right') }}<a href="/books">Books</a>{{ icon('chevron-right') }}<span aria-current="page">{{ book.name }}</span>{% endblock %}
+{% block view_codex %}{{ book.codex_id }}{% endblock %}
 {% block body %}
-<h1>{{ book.name }} <span class="muted mono" style="font-size:14px">{{ book.codex_id }}</span></h1>
-<div class="muted">{{ book.units | length }} units · published {{ book.published | length }}{% if book.gpu_seconds %} · gpu {{ (book.gpu_seconds / 3600) | round(1) }}h{% endif %}
-{% for h in book.holds %} · <span class="st grey">⏸</span> {{ h.scope }} hold: "{{ h.reason }}"{% endfor %}</div>
-<div class="actions">{{ act.hold('book', book.codex_id, label='hold book') }}{% for h in book.holds %}<span class="muted">hold {{ h.id }}</span> {{ act.lift(h.id) }}{% endfor %} <a href="/org" class="muted">org chart ▸</a></div>
-<div class="tbl-wrap"><table class="grid">
-<thead><tr><th>department</th>{% for u in book.units %}<th>{{ u }}</th>{% endfor %}</tr></thead>
-<tbody>
-{% for s in book.stages %}
-<tr><td><a href="/d/{{ s }}">{{ s }}</a></td>
-{% for u in book.units %}{% set c = book.cells[s].get(u) %}
-<td class="cell">{% if c %}<a href="/d/{{ s }}/{{ book.codex_id }}/{{ u }}" title="{{ c.state }}{% if c.step_id %} · {{ c.step_id }}{% endif %}"><span class="st {{ c.css }}">{{ c.glyph }}</span></a>{% else %}<span class="muted">·</span>{% endif %}</td>
-{% endfor %}</tr>
-{% endfor %}
-<tr><td>publish</td>
-{% for u in book.units %}{% set src = book.published.get(u) %}
-<td class="cell">{% if src %}<span title="from {{ src }}">▲ <small class="muted">{{ src }}</small></span>{% else %}<span class="muted">·</span>{% endif %}</td>
-{% endfor %}</tr>
-</tbody></table></div>
+{#- A book (DIRECTION_v2: "the book page leads with a big season wall", panel ruling PKG-4):
+    the book's numbers, then a poster per episode, then every department down the units.  The
+    wall and the grid are live on pulse:book:<codex> (the page itself, selected). -#}
+<link rel="stylesheet" href="{{ static_url('css/lists.css') }}">
+{% set season = viz.season(request, book.codex_id) %}
+{% set running = season | selectattr('shown', 'equalto', 'running') | list %}
+{% set needs = season | selectattr('shown', 'in', ['flagged', 'failed', 'deferred', 'escalated', 'stale']) | list %}
+{% set newest = season | selectattr('shown', 'in', ['done', 'flagged']) | selectattr('poster') | selectattr('updated_at') | list | sort(attribute='updated_at') | last %}
+<div id="book-live" hx-get="/b/{{ book.codex_id }}" hx-select="#book-live" hx-trigger="pulse:book:{{ book.codex_id }} from:body" data-v="{{ viz.fp(request, 'book:' ~ book.codex_id) }}" hx-swap="morph:outerHTML">
+<section class="panel bookhero" aria-labelledby="book-h">
+  <div>
+    <span class="pill">{{ icon('book-open') }}Book</span> <span class="mono muted">{{ book.codex_id }}</span>
+    <h1 id="book-h">{{ book.name }}</h1>
+    <div class="stats">
+      <div><b>{{ book.units | length }}</b><span>units</span></div>
+      <div><b>{{ book.published | length }}</b><span>published</span></div>
+      {% if needs %}<div><b class="need">{{ needs | length }}</b><span>need you</span></div>{% endif %}
+      {% if running %}<div><b>{{ running | length }}</b><span>running · {{ running[0].unit }} {{ running[0].step_id }}</span></div>{% endif %}
+      {% if book.gpu_seconds %}<div><b>{{ (book.gpu_seconds / 3600) | round(1) }}</b><span>GPU h</span></div>{% endif %}
+    </div>
+    <div class="acts">{{ act.hold('book', book.codex_id) }}<a class="btn sm" href="/d/episode?book={{ book.codex_id }}">{{ icon('clapperboard') }}Episode department</a>
+    {% for h in book.holds %}<span class="muted">{{ icon('pause') }} {{ h.scope }} hold: "{{ h.reason }}"</span> {{ act.lift(h.id) }}{% endfor %}</div>
+  </div>
+  {% if newest %}
+  <div class="newest">
+    {% set href = '/d/episode/' ~ book.codex_id ~ '/' ~ newest.unit %}
+    {% call tile(newest.poster, href, 'newest', newest.unit, 320) %}<span class="tag">Newest finished</span>{% endcall %}
+    <p><a href="{{ href }}"><b class="mono">{{ newest.unit }}</b></a> · {{ newest.shown }}</p>
+    {% set cs = viz.chips(newest) %}{% if cs %}<span class="chips">{{ chips(cs) }}</span>{% endif %}
+  </div>
+  {% endif %}
+</section>
+
+{% if season %}
+<section class="sect" aria-labelledby="season-h" id="season">
+  <div class="sh"><h2 id="season-h">Season</h2><span class="sub">{{ season | length }} episodes · a poster opens in the Viewer</span></div>
+  <ul class="wall">
+  {% for e in season %}
+  {% set href = '/d/episode/' ~ book.codex_id ~ '/' ~ e.unit %}
+  <li class="ep" id="ep-{{ book.codex_id }}-{{ e.unit }}" data-state="{{ e.shown }}">
+    {% call tile(e.poster, href, 'season', e.unit, 320, '', 'no picture yet') %}<span class="eid">{{ e.unit }}</span>{% if book.published.get(e.unit) %}<span class="pub" title="published ({{ book.published[e.unit] }})">{{ icon('check') }}</span>{% endif %}{% endcall %}
+    <div class="row2"><a href="{{ href }}">{{ e.unit }}{% if e.shown == 'running' and e.step_id %} · {{ e.step_id }} {{ e.step_name }}{% endif %}</a><span class="pill {{ e.shown }}">{{ e.shown }}</span></div>
+    {% if e.flags %}<span class="fl" title="{{ e.flags }} judge flags">⚑{{ e.flags }}</span>{% endif %}
+  </li>
+  {% endfor %}
+  </ul>
+</section>
+{% endif %}
+
+<section class="panel sect" aria-labelledby="grid-h">
+  <div class="panel-h"><h2 id="grid-h">Every department</h2><span class="sub">units across, departments down</span><span class="spacer"></span><a class="more" href="/architecture">Org chart{{ icon('chevron-right') }}</a></div>
+  <div class="panel-b tscroll"><table class="dgrid matrix" data-testid="book-grid">
+  <thead><tr><th>Department</th>{% for u in book.units %}<th class="cell mono">{{ u }}</th>{% endfor %}</tr></thead>
+  <tbody>
+  {% for s in book.stages %}
+  <tr id="row-{{ s }}"><td class="cap"><a class="linkish" href="/d/{{ s }}?book={{ book.codex_id }}">{{ s }}</a></td>
+  {% for u in book.units %}{% set c = book.cells[s].get(u) %}
+  <td class="cell">{% if c %}<a href="/d/{{ s }}/{{ book.codex_id }}/{{ u }}" title="{{ u }} · {{ c.state }}{% if c.step_id %} · {{ c.step_id }}{% endif %}"><span class="st {{ c.css }}">{{ c.glyph }}</span></a>{% else %}<span class="muted">·</span>{% endif %}</td>
+  {% endfor %}</tr>
+  {% endfor %}
+  <tr><td>Publish</td>
+  {% for u in book.units %}{% set src = book.published.get(u) %}
+  <td class="cell">{% if src %}<span class="st green" title="published · from {{ src }}">▲</span>{% else %}<span class="muted">·</span>{% endif %}</td>
+  {% endfor %}</tr>
+  </tbody></table></div>
+</section>
+</div>
 {% endblock %}

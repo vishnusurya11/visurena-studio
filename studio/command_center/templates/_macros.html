@@ -1,21 +1,46 @@
-{#- The owner's hand (C11): every button is a form that hx-posts to /act/ and
-    swaps the receipt (or the refusal) into its own .receipt span.  Imported
-    `with context` so a read-only board renders them disabled. -#}
-{% macro btn(label) -%}
-<button class="btn" type="submit"{% if not writable %} disabled title="{{ read_only }}"{% endif %}>{{ label }}</button>
+{#- The owner's hand (C11; panel ruling PKG-6): every button is a form that
+    hx-posts to /act/ and swaps its receipt (or refusal) into the ONE receipts
+    region (#receipts, outside every polled block; static/orders.js keeps it).
+    While a POST is in flight the submit button is disabled and a second press
+    is dropped.  A button says what will happen (`verb`); a caller's old short
+    label ('↑', '↑ bump') is ignored for a kind that has a verb.  A hold offers
+    reason chips (orders.js fills the field; Enter submits) and states the one
+    hold sentence (actions.HOLD_EFFECT, a template global).  An acknowledge is
+    deferred five seconds with an Undo by orders.js; without the script it is a
+    plain post.  Imported `with context` so a read-only board renders them disabled. -#}
+{% set REASONS = ['checking output', 'GPU needed elsewhere', 'wrong direction: stop'] %}
+{% macro verb(kind, stage='', step='', scope='unit') -%}
+{%- if kind == 'bump' %}Move to front
+{%- elif kind == 'requeue' %}Queue again
+{%- elif kind == 'retry' %}Retry{% if step %} from {{ step }}{% endif %}
+{%- elif kind == 'hold' and scope == 'studio' %}Hold the studio
+{%- elif kind == 'hold' and scope == 'book' %}Hold this book
+{%- elif kind == 'hold' %}Hold this {{ stage or 'unit' }}
+{%- elif kind == 'lift' %}Lift the hold
+{%- elif kind == 'acknowledge' %}Acknowledge flags
+{%- else %}{{ kind }}{% endif %}
+{%- endmacro %}
+{% macro btn(label, title='') -%}
+<button class="btn" type="submit"{% if not writable %} disabled title="{{ read_only }}"{% elif title %} title="{{ title }}"{% endif %}>{{ label }}</button>
+{%- endmacro %}
+{% macro posts(path) -%}
+hx-post="{{ path }}" hx-target="#receipts" hx-swap="afterbegin" hx-disabled-elt="find button[type=submit]" hx-sync="this:drop"
 {%- endmacro %}
 {% macro unit_fields(codex, stage, unit) -%}
 <input type="hidden" name="codex" value="{{ codex }}"><input type="hidden" name="stage" value="{{ stage }}"><input type="hidden" name="unit" value="{{ unit }}">
 {%- endmacro %}
-{% macro order(kind, codex, stage, unit, label=None) -%}
-<form class="act" hx-post="/act/{{ kind }}" hx-target="find .receipt" hx-swap="innerHTML">{{ unit_fields(codex, stage, unit) }}{{ btn(label or kind) }}<span class="receipt"></span></form>
+{% macro order(kind, codex, stage, unit, label=None, step='') -%}
+<form class="act" {{ posts('/act/' ~ kind) }}>{{ unit_fields(codex, stage, unit) }}{{ btn(verb(kind, stage, step)) }}</form>
 {%- endmacro %}
-{% macro hold(scope, codex='', stage='', unit='', label='hold') -%}
-<form class="act" hx-post="/act/hold" hx-target="find .receipt" hx-swap="innerHTML" hx-on::after-request="if(event.detail.successful) this.reset()"><input type="hidden" name="scope" value="{{ scope }}">{% if codex %}{{ unit_fields(codex, stage, unit) }}{% endif %}<input name="reason" required placeholder="why hold?" size="12">{{ btn(label) }}<span class="receipt"></span></form>
+{% macro reasons() -%}
+<span class="reasons" role="group" aria-label="Reasons" hidden>{% for r in REASONS %}<button type="button" class="chip2" data-reason="{{ r }}"{% if not writable %} disabled{% endif %}>{{ r }}</button>{% endfor %}</span>
+{%- endmacro %}
+{% macro hold(scope, codex='', stage='', unit='', label=None) -%}
+<form class="act hold" {{ posts('/act/hold') }} data-reset><input type="hidden" name="scope" value="{{ scope }}">{% if codex %}{{ unit_fields(codex, stage, unit) }}{% endif %}<input name="reason" required placeholder="why hold?" size="12" aria-label="Why hold?" enterkeyhint="send"{% if not writable %} disabled{% endif %}>{{ btn(verb('hold', stage, scope=scope), HOLD_EFFECT) }}{{ reasons() }}</form>
 {%- endmacro %}
 {% macro lift(hold_id) -%}
-<form class="act" hx-post="/act/lift/{{ hold_id }}" hx-target="find .receipt" hx-swap="innerHTML">{{ btn('lift') }}<span class="receipt"></span></form>
+<form class="act" {{ posts('/act/lift/' ~ hold_id) }}>{{ btn(verb('lift')) }}</form>
 {%- endmacro %}
 {% macro acknowledge(codex, stage, unit) -%}
-<form class="act" hx-post="/act/acknowledge" hx-target="find .receipt" hx-swap="innerHTML">{{ unit_fields(codex, stage, unit) }}{{ btn('acknowledge') }}<span class="receipt"></span></form>
+<form class="act ack" {{ posts('/act/acknowledge') }} data-undo="5" data-unit="{{ unit }}">{{ unit_fields(codex, stage, unit) }}{{ btn(verb('acknowledge')) }}</form>
 {%- endmacro %}

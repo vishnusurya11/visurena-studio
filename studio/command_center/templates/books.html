@@ -1,19 +1,47 @@
 {% extends "base.html" %}
 {% from "_icon.html" import icon %}
+{% from "_viz.html" import tile %}
 {% block title %}Books · Visurena Studio{% endblock %}
-{% block crumbs %}<a href="/">Studio</a>{{ icon('chevron-right') }}<span aria-current="page">Books</span>{% endblock %}
 {% block body %}
-{#- The minimal shelf (plan P0.6) until G7 ports books.html: every codex row, its units. -#}
-<div class="sh"><h2>Books</h2><span class="sub">{{ shelf | length }} book{{ '' if shelf | length == 1 else 's' }}</span></div>
-<div class="panel"><div class="panel-b">
-<div class="tbl-wrap"><table class="dgrid" data-testid="shelf">
-<thead><tr><th>book</th><th>id</th><th class="num">units</th><th class="num">running</th><th class="num">done</th></tr></thead>
-<tbody>
-{% for b in shelf %}
-<tr data-row tabindex="-1"><td><a href="/b/{{ b.codex_id }}">{{ b.name }}</a></td><td class="mono muted">{{ b.codex_id }}</td><td class="num">{{ b.units }}</td><td class="num">{{ b.running or '' }}</td><td class="num">{{ b.done }}</td></tr>
-{% else %}
-<tr><td colspan="5" class="muted">no books yet</td></tr>
-{% endfor %}
-</tbody></table></div>
-</div></div>
+{#- The shelf (DIRECTION_v2, panel ruling PKG-4): the books making episodes first, each with a
+    mosaic of its newest pictures, then every other book as a card. -#}
+<link rel="stylesheet" href="{{ static_url('css/lists.css') }}">
+{% set making, rest = viz.shelf_split(request, shelf) %}
+<div class="title-row">
+  <h1>Books</h1>
+  <p class="sub"><span><b>{{ shelf | length }}</b> book{{ '' if shelf | length == 1 else 's' }}</span><span><b>{{ making | length }}</b> making episodes</span><span><b>{{ shelf | sum(attribute='running') }}</b> running</span></p>
+</div>
+<div id="shelf-live" data-testid="shelf">
+{% if making %}
+<section aria-labelledby="making-h">
+  <div class="sh"><h2 id="making-h">Making episodes</h2><span class="sub">newest pictures first</span></div>
+  <div class="making">
+  {% for b, pics in making %}
+  <article class="panel mk" id="book-{{ b.codex_id }}">
+    <div class="mosaic">{% for p in pics %}{% call tile(p.poster, '/d/episode/' ~ b.codex_id ~ '/' ~ p.unit, 'shelf-' ~ b.codex_id, p.unit, 160) %}<span class="eid">{{ p.unit }}</span>{% endcall %}{% endfor %}</div>
+    <div class="mk-b">
+      <h2><a href="/b/{{ b.codex_id }}">{{ b.name }}</a></h2>
+      <div class="nums"><div><b>{{ b.units }}</b><span>units</span></div><div><b>{{ b.done }}</b><span>done</span></div>{% if b.running %}<div><b>{{ b.running }}</b><span>running</span></div>{% endif %}</div>
+    </div>
+  </article>
+  {% endfor %}
+  </div>
+</section>
+{% endif %}
+<section class="sect" aria-labelledby="shelf-h">
+  <div class="sh"><h2 id="shelf-h">On the shelf</h2><span class="sub">{{ rest | length }} book{{ '' if rest | length == 1 else 's' }}</span></div>
+  {% if rest %}
+  <ul class="shelf3">
+  {% for b in rest %}
+  <li><a class="bk" href="/b/{{ b.codex_id }}" id="book-{{ b.codex_id }}" data-row>
+    <span class="cover" aria-hidden="true">{{ viz.initials(b.name) }}</span>
+    <span><span class="bt">{{ b.name }}</span><span class="bm"><b>{{ b.units }}</b> units · <b>{{ b.done }}</b> done{% if b.running %} · <span class="run">{{ b.running }} running</span>{% endif %}</span><span class="bm mono">{{ b.codex_id }}</span></span>
+  </a></li>
+  {% endfor %}
+  </ul>
+  {% else %}
+  <p class="panel empty">Every book is making episodes. A new book lands here when its analysis starts.</p>
+  {% endif %}
+</section>
+</div>
 {% endblock %}

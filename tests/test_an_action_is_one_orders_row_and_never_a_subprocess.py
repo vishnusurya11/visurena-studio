@@ -8,6 +8,8 @@ reason or note 422.  Each action answers with the receipt fragment: the new
 orders row's id and what it will do."""
 from __future__ import annotations
 
+import json
+
 import sqlite3
 import subprocess
 
@@ -61,8 +63,8 @@ def test_a_unit_order_is_one_orders_row_and_a_receipt(board, kind):
     (row,) = _orders(read)
     assert (row["kind"], row["scope"], row["codex_id"], row["stage"], row["unit"]) == (kind, "unit", CODEX, "episode", "ep07")
     assert row["taken_ts"] is None and row["by"] == "owner"
-    assert f"#{row['id']}" in response.text and "queued at next run" in response.text
-    assert "<html" not in response.text and response.headers["HX-Trigger"] == "orders-changed"
+    assert f"#{row['id']}" in response.text and "pending" in response.text  # until a run takes it
+    assert "<html" not in response.text and "orders-changed" in json.loads(response.headers["HX-Trigger"])
 
 
 @pytest.mark.parametrize("fields", [
@@ -78,7 +80,7 @@ def test_a_hold_is_a_holds_row_and_one_orders_row(board, fields):
     assert order["kind"] == "hold" and order["scope"] == hold["scope"] == fields["scope"]
     assert hold["reason"] == "look again" and hold["lifted_at"] is None
     assert f"#{order['id']}" in response.text
-    assert "held — runs stop before the first GPU step" in response.text
+    assert actions.HOLD_EFFECT in response.text
 
 
 def test_a_studio_hold_ignores_the_ids_it_does_not_reach(board):
@@ -195,8 +197,8 @@ def test_the_writable_factory_writes_rows_by_name(tmp_path, monkeypatch):
 
 
 def test_the_effect_names_what_the_order_will_do():
-    assert actions.effect("hold") == "held — runs stop before the first GPU step"
-    assert actions.effect("bump").startswith("queued at next run")
+    assert actions.effect("hold") == actions.HOLD_EFFECT
+    assert actions.effect("bump") == "the unit goes first in its department's queue"
     assert "casebook" in actions.effect("redo", step_id="02")
     assert "02" in actions.effect("redo", step_id="02")
 

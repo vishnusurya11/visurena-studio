@@ -3,3 +3,9 @@
 {% macro icon(name, cls="") -%}
 <svg class="i{% if cls %} {{ cls }}{% endif %}" aria-hidden="true"><use href="{{ static_url('icons.svg') }}#{{ name }}"/></svg>
 {%- endmacro %}
+
+{#- The slot a tile shows when it has no picture yet (ruling 3.9, P09.5): the clapperboard
+    and the reason in words, in the tile's own reserved box -- never an empty grey square. -#}
+{% macro no_picture(why) -%}
+<span class="nopic" role="img" aria-label="No picture: {{ why }}">{{ icon('clapperboard') }}<span aria-hidden="true">{{ why }}</span></span>
+{%- endmacro %}

@@ -1,16 +1,22 @@
-<!doctype html>
-<html lang="en">
-<head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>{{ status }} · Visurena Studio</title>
-<style>body{margin:0;font-family:"IBM Plex Sans",system-ui,sans-serif;font-size:15px;color:#ededef;background:#0f1012}a{color:#ededef}.plain{max-width:60ch;margin:64px auto;padding:0 16px}code{font-family:"IBM Plex Mono",ui-monospace,monospace}</style>
-</head>
-<body>
-<div class="plain">
-<h1>{{ status }}</h1>
-<p>{{ detail }}</p>
-<p><a href="/">Home</a></p>
-</div>
-</body>
-</html>
+{% extends "base.html" %}
+{#- The error page (ruling 3.10, P09.4): a page of the board, in the shell.  One card: the code,
+    a plain sentence, the reason, the path that was asked for, and the way out -- Home and the
+    asked path's parent.  `path` comes from the error handler; the request's own path otherwise. -#}
+{% from "_icon.html" import icon %}
+{% block title %}{{ status }} · Visurena Studio{% endblock %}
+{% block body %}
+{% set asked = path or request.url.path %}
+{% set parent = asked.rstrip('/').rsplit('/', 1)[0] %}
+<section class="panel errcard" data-testid="error" aria-labelledby="error-h">
+  <div class="panel-b">
+    <p class="code">{{ status }}</p>
+    <h1 id="error-h">{% if status == 404 %}Nothing lives at this address.{% elif status >= 500 %}The board failed on this page.{% else %}The board refused this request.{% endif %}</h1>
+    {% if detail and detail != 'Not Found' %}<p class="soft">{{ detail }}</p>{% endif %}
+    <p class="muted">Asked for <code>{{ asked }}</code></p>
+    <p class="erracts">
+      <a class="btn primary" href="/">{{ icon('house') }}Home</a>
+      {% if parent %}<a class="btn" href="{{ parent }}" data-testid="error-up">{{ icon('corner-up-left') }}Up to {{ parent }}</a>{% endif %}
+    </p>
+  </div>
+</section>
+{% endblock %}

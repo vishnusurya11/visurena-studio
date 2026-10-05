@@ -1,6 +1,6 @@
 """A department page (report D §5c) is ITS table: every unit across books,
 attention first, with the state glyph, step and progress, attempts, gpu and
-the gates.yaml verdict strip.  The table is an htmx partial on a 10 s poll;
+the gates.yaml verdict strip.  The table is an htmx partial refreshed on its pulse key;
 a stage the registry does not know is a plain 404."""
 from __future__ import annotations
 
@@ -9,7 +9,6 @@ from fastapi.testclient import TestClient
 
 from board_html import main, polls
 from command_center_fixtures import CODEX, make_app
-from studio.command_center import views
 
 
 @pytest.fixture()
@@ -19,22 +18,19 @@ def client(tmp_path, monkeypatch):
 
 def test_the_page_is_the_departments_rows_in_attention_order(client):
     page = main(client.get("/d/episode").text)
-    assert page.index("ep05") < page.index("ep04") < page.index("ep07") < page.index("ep03") < page.index("ep06")
-    assert "5 units" in page and "shoot" in page and "18/25" in page
+    assert page.index("ep04") < page.index("ep05") < page.index("ep07") < page.index("ep03") < page.index("ep06")
+    assert "<b>5</b> units" in page and "shoot" in page and "18/25" in page   # grouped: running, needs you, queued
 
 
-def test_the_rows_carry_the_verdict_strip_in_gates_order(client):
+def test_the_rows_carry_their_non_pass_gates_with_the_judge(client):
     page = client.get("/d/episode").text
-    for gate in views.gate_order("episode"):
-        assert gate in page
-    assert "judge:plan@1" in page and "⚑1" in page
+    assert "judge:plan@1" in page and "⚑1" in page and 'title="PLAN: ' in page
 
 
-def test_the_table_polls_every_ten_seconds_and_keeps_its_filters(client):
+def test_the_table_refreshes_on_its_pulse_and_keeps_its_filters(client):
     page = main(client.get("/d/episode?book=" + CODEX + "&state=failed").text)
     trigger = polls(page, f"/partials/d/episode?book={CODEX}&amp;state=failed")
-    assert trigger.startswith("every 10s [")   # paused while a row's form has the focus (C11)
-    assert "activeElement.closest('#rows form')" in trigger
+    assert trigger == "pulse:dept:episode from:body"   # morphed in place: a focused field survives
     assert "ep05" in page and "ep04" not in page
 
 

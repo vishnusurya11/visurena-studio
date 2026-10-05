@@ -46,7 +46,7 @@ def outside_layers(text: str) -> str:
     for head in ("@layer tokens {", "@layer base {", "@layer components {", "@layer pages {"):
         while head in text:
             text = text.replace(head + block(text, head) + "}", "", 1)
-    text = re.sub(r"@(font-face|property\s+--[\w-]+)\{[^}]*\}", "", text)
+    text = re.sub(r"@(font-face|view-transition|property\s+--[\w-]+)\{[^}]*\}", "", text)
     return re.sub(r"@layer [\w, ]+;", "", text).strip()
 
 

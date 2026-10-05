@@ -48,15 +48,40 @@
   --invent:var(--st-deferred); --invent-bg:var(--st-deferred-bg);
   --lead:var(--ink); --lead-ink:var(--paper);
 
+  /* a boundary that means something (input, button, waiting slot): 3:1 on every ground (P07.7);
+     decorative dividers keep --rule */
+  --ctl-line:#6b6f78;
+
+  /* the live card's tints (progress tracker spec §5) */
+  --think-glow:color-mix(in srgb,var(--think) 45%,transparent);
+  --sheen-hi:color-mix(in srgb,#fff 22%,transparent);
+
   --sp-1:2px; --sp-2:4px; --sp-3:8px; --sp-4:12px; --sp-5:16px; --sp-6:24px; --sp-7:32px; --sp-8:48px;
   --gutter:24px;
+  /* radii: these, 0 or 50% -- nothing else (P09.7) */
   --r-0:0; --r-1:2px; --r-2:4px; --r-pill:999px; --r-card:10px; --r-ctl:6px; --r-pic:8px;
   --side-w:232px; --ph-h:56px;
-  --e-1:inset 0 -1px 0 var(--rule);
-  --e-2:0 1px 0 var(--rule-2),0 2px 6px rgb(0 0 0 / .3);
-  --e-3:0 0 0 1px var(--rule-2);
+  /* elevation = surface + ring; the one real shadow is for floating layers (P09.11) */
+  --e-1:0 0 0 1px var(--rule);
+  --e-2:0 0 0 1px var(--rule-2);
+  --e-3:var(--shadow-pop);
   --shadow-pop:0 12px 32px rgb(0 0 0 / .45),0 0 0 1px var(--rule-2);
-  --d1:120ms; --d2:200ms; --d3:320ms; --d4:600ms; --ease-out:cubic-bezier(.2,.8,.2,1);
+
+  /* type roles (P09.2): nothing smaller than --t-micro; mono only for ids, numbers, times */
+  --t-micro:11px; --t-label:12px; --t-body:13px; --t-lead:14px; --t-title:16px;
+  --t-h3:18px; --t-sub:22px; --t-h2:24px; --t-h1:34px; --t-hero:60px;
+
+  /* motion (P02.1): the only place a duration is written.  d0 still, d1 feedback, d2 a state
+     change, d3 an arrival, d4 a progress fill; exits are ~0.7x their entry; one wash per change */
+  --d0:0ms; --d1:120ms; --d2:200ms; --d3:320ms; --d4:600ms; --d-exit:140ms; --d-wash:1600ms;
+  --d-late:300ms;      /* a placeholder shows only after this: a fast answer never flashes one */
+  --d-stagger:40ms;    /* the rail's done sweep, per segment */
+  --sec:1s;            /* turns a number of seconds (--age) into a time */
+  --breathe:2.4s; --sheen:2.4s;
+  --loop:infinite;     /* the one place `infinite` is written; still mode turns it to 1 */
+  --ease-out:cubic-bezier(.2,.8,.2,1);   /* enter, arrive */
+  --ease-in:cubic-bezier(.4,0,1,1);      /* exit */
+  --ease-std:cubic-bezier(.4,0,.2,1);    /* change in place */
 
   --f-display:"Barlow Condensed","Arial Narrow",sans-serif;
   --f-text:"IBM Plex Sans",system-ui,sans-serif;
@@ -80,9 +105,19 @@
   --st-failed:#b42d1a;   --st-failed-bg:#f8e1db;   --st-failed-bar:#b42d1a;
   --st-held:#6b6457;
   --viz-1:#c4492c; --viz-2:#2b6cb0; --viz-3:#a98516; --viz-4:#7b4fa8;
-  --e-2:0 1px 0 var(--rule-2),0 2px 6px rgb(17 19 24 / .06);
-  --e-3:0 8px 28px rgb(17 19 24 / .18);
+  --ctl-line:#7a808a;
+  --sheen-hi:color-mix(in srgb,#fff 55%,transparent);
+  --think-glow:color-mix(in srgb,var(--think) 35%,transparent);
   --shadow-pop:0 12px 32px rgb(17 19 24 / .14),0 0 0 1px var(--rule-2);
   color-scheme:light;
 }
+
+/* Still mode is a token flip, not a second stylesheet (P02.2, P07.3): every move but the
+   hover/press feedback (--d1, a colour change, not motion) takes 1 ms, and every loop runs
+   once.  The OS asks for it with prefers-reduced-motion; the shell's switch with
+   data-motion="still" on <html>. */
+@media (prefers-reduced-motion:reduce){
+  :root{--d2:1ms; --d3:1ms; --d4:1ms; --d-exit:1ms; --d-wash:1ms; --d-stagger:0ms; --breathe:1ms; --sheen:1ms; --loop:1}
+}
+:root[data-motion="still"]{--d2:1ms; --d3:1ms; --d4:1ms; --d-exit:1ms; --d-wash:1ms; --d-stagger:0ms; --breathe:1ms; --sheen:1ms; --loop:1}
 }

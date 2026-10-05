@@ -27,7 +27,7 @@ def test_a_taken_order_names_its_run_and_an_untaken_one_says_pending(board):
     work_orders.take_orders(conn, CODEX, "episode", "ep07", "run-took-it")
     work_orders.order(conn, "retry", "unit", codex_id=CODEX, stage="episode", unit="ep05")
     page = client.get("/").text
-    assert "ORDERS" in page and "run-took-it" in page and "pending" in page
+    assert 'id="orders-h">Orders' in page and "run-took-it" in page and "pending" in page
     assert "episode › ep07" in page and "first" in page
 
 
@@ -50,7 +50,7 @@ def test_the_strip_polls_and_listens_for_an_action(board):
 
 def test_an_empty_strip_says_so(board):
     client, _ = board
-    assert "no orders yet" in client.get("/partials/orders").text
+    assert "No orders yet." in client.get("/partials/orders").text
 
 
 def test_recent_orders_carries_the_target_and_who_took_it(board):

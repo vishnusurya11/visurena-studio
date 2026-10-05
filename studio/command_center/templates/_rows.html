@@ -1,33 +1,46 @@
+{#- The department's grid (panel ruling PKG-4 4.4-4.6): a card per book (the name, its counts,
+    the state mix under the title), then the rows grouped Running / Needs you / Queued / Blocked /
+    Done -- Done collapsed -- as 44 px rows with a 36 px face, the state said once, the step bar
+    and the current step while unfinished, the non-pass gates as chips (failures first, 99+).
+    Rows carry stable ids (wo-<codex>-<unit>), so a pulse morphs them in place. -#}
 {% import "_macros.html" as act with context %}
-{% set ngates = dept.gates | length %}
+{% from "_icon.html" import icon %}
+{% from "_viz.html" import chips %}
 {% for g in dept.groups %}
-<section class="bookgroup">
-  <div class="bookhead">
-    <a class="bookname" href="/b/{{ g.codex_id }}">{{ g.name }}</a>
-    <span class="muted mono">{{ g.done }} / {{ g.total }} done</span>
-    <span class="minibar" aria-hidden="true">{% for r in g.rows %}<i class="{{ r.css }}" title="{{ r.unit }} · {{ r.shown }}"></i>{% endfor %}</span>
-  </div>
-  <div class="tbl-wrap" data-testid="dept-table"><table class="dept">
-  <thead><tr><th>state</th><th>unit</th><th>steps</th>{% for l in dept.gate_labels %}<th class="gate">{{ l }}</th>{% endfor %}<th class="num">moved</th><th class="num">gpu</th><th class="num">cost</th><th class="acts"></th></tr></thead>
-  <tbody>
-  {% for r in g.rows %}
-  {% set finished = r.shown in ('done', 'flagged') %}
-  <tr class="row-{{ r.css }}{% if r.shown in ('escalated', 'failed', 'running') %} emph{% endif %}">
-    <td><span class="pill {{ r.css }}" title="{{ r.shown }}">{{ r.glyph }}<span class="word">{{ r.shown }}</span></span></td>
-    <td class="unit"><a href="/d/{{ r.stage }}/{{ r.codex_id }}/{{ r.unit }}">{{ r.unit }}</a></td>
-    <td class="steps-cell">
-      <span class="sbar">{% for s in r.bar %}<i class="{{ s.css }}{% if s.id == r.step_id and not finished %} cur{% endif %}" title="{{ s.id }} {{ s.name }} · {{ s.state }}"></i>{% endfor %}</span>
-      {% if not finished %}<div class="sline">{% if r.step_id %}<b>{{ r.step_id }} {{ r.step_name }}</b>{% endif %}{% if r.progress %} · {{ r.progress }}{% endif %}{% if r.shown == 'running' and r.elapsed %} · {{ r.elapsed }}{% endif %}{% if r.blocked_on %} <span class="muted">· waiting on {{ r.blocked_on }}</span>{% endif %}{% if r.hold_reason %} <span class="muted">· {{ r.hold_reason }}</span>{% endif %}</div>{% endif %}
-    </td>
-    {% for c in r.strip[:ngates] %}<td class="gate"><span class="dot {{ c.css }}" title="{{ c.gate }}{% if c.word %} · {{ c.word }}{% endif %}{% if c.by %} · {{ c.by }}{% endif %}{% if c.faults %} · {{ c.faults }} faults{% endif %}">{{ c.glyph }}</span></td>{% endfor %}
-    <td class="num muted" title="{{ r.updated_at or '' }}">{{ r.ago or '–' }}</td>
-    <td class="num{% if r.gpu_h == '–' %} muted{% endif %}">{{ r.gpu_h }}</td>
-    <td class="num{% if not r.cost_usd %} muted{% endif %}">{% if r.cost_usd is none %}?{% elif r.cost_usd %}${{ '%.2f' | format(r.cost_usd) }}{% else %}–{% endif %}</td>
-    <td class="acts"><details class="menu"><summary title="actions">⋯</summary><div class="menu-body">{{ act.hold('unit', r.codex_id, r.stage, r.unit) }}{% if r.state in ('deferred', 'failed') %}{{ act.order('retry', r.codex_id, r.stage, r.unit) }}{% else %}{{ act.order('bump', r.codex_id, r.stage, r.unit, '↑ bump') }}{% endif %}</div></details></td>
-  </tr>
-  {% endfor %}
-  </tbody></table></div>
+{% set needs = g.rows | selectattr('shown', 'in', ['flagged', 'failed', 'deferred', 'escalated', 'stale']) | list | length %}
+<section class="panel bookblk" id="bk-{{ g.codex_id }}" aria-labelledby="bk-{{ g.codex_id }}-h">
+<header class="bookhead">
+<h2 id="bk-{{ g.codex_id }}-h"><a href="/b/{{ g.codex_id }}">{{ g.name }}</a></h2>
+<span class="meta"><b>{{ g.total }}</b> units · <b>{{ g.done }}</b> done{% if needs %} · <b class="need">{{ needs }}</b> need you{% endif %}</span>
+<span class="mix" aria-hidden="true">{% for r in g.rows %}<i class="{{ r.css }}"></i>{% endfor %}</span>
+</header>
+<div class="tscroll" data-testid="dept-table"><table class="dgrid dg dept-g">
+<thead><tr><th><span class="vh">Picture</span></th><th>State</th><th>Unit</th><th>Steps</th><th>Gates (non-pass)</th><th class="num">Moved</th><th class="num gpu">GPU</th><th><span class="vh">Actions</span></th></tr></thead>
+{% for grp in viz.state_groups(g.rows) %}
+<tbody class="grp {{ grp.key }}" id="grp-{{ g.codex_id }}-{{ grp.key }}">
+<tr class="ghead"><th colspan="8"><label><input type="checkbox" class="gtog"{% if grp.open %} checked{% endif %}>{{ grp.label }} <span class="count">{{ grp.rows | length }}</span>{% if grp.key == 'blocked' and grp.rows[0].blocked_on and (grp.rows | map(attribute='blocked_on') | unique | list | length) == 1 %}<span class="why">all waiting on <code>{{ grp.rows[0].blocked_on }}</code></span>{% endif %}</label></th></tr>
+{% for r in grp.rows -%}
+{%- set href = '/d/' ~ r.stage ~ '/' ~ r.codex_id ~ '/' ~ r.unit %}
+{%- set finished = r.shown in ('done', 'flagged') %}
+{%- set p = viz.face(request, r, 80) %}
+<tr id="wo-{{ r.codex_id }}-{{ r.unit }}" class="row-{{ r.css }}{% if r.shown in ('escalated', 'failed') %} emph{% endif %}" data-row data-state="{{ r.shown }}">
+<td class="face-td">{% if p %}<img class="face" src="{{ p.thumb }}" alt="" width="36" height="36" loading="lazy">{% endif %}</td>
+<td><span class="pill {{ r.shown }}">{{ icon(state_icons[r.shown]) }}{{ r.shown }}</span></td>
+<td><a class="uid" href="{{ href }}">{{ r.unit }}</a></td>
+<td class="stepcell">
+<span class="sbar" aria-hidden="true" title="step {{ r.step_id or '–' }} of {{ r.bar | length }}">{% for s in r.bar %}<i class="{{ s.css }}{% if s.id == r.step_id and not finished %} cur{% endif %}"></i>{% endfor %}</span>
+{% if not finished %}<div class="sline">{% if r.step_id %}<b>{{ r.step_id }} {{ r.step_name }}</b>{% endif %}{% if r.progress %} · {{ r.progress }}{% endif %}{% if r.shown == 'running' and r.elapsed %} · {{ r.elapsed }}{% endif %}{% if r.blocked_on %} · waits on {{ r.blocked_on }}{% endif %}{% if r.hold_reason %} · {{ r.hold_reason }}{% endif %}</div>{% endif %}
+</td>
+<td class="gates-td"><span class="gc">{{ chips(viz.gate_chips(r.strip)) }}</span></td>
+<td class="num moved" title="{{ r.updated_at or '' }}">{{ r.age or r.ago or '–' }}</td>
+<td class="num gpu">{{ r.gpu_h }}</td>
+<td class="acts-td">{% if r.state in ('deferred', 'failed', 'queued', 'blocked', 'running') %}<details class="rowmenu"><summary aria-label="Actions for {{ r.unit }}">{{ icon('ellipsis') }}</summary><div class="pop">{% if r.state in ('deferred', 'failed') %}{{ act.order('retry', r.codex_id, r.stage, r.unit, step=(r.step_id ~ ' ' ~ r.step_name) | trim) }}{% elif r.state != 'running' %}{{ act.order('bump', r.codex_id, r.stage, r.unit) }}{% endif %}{% if r.state in ('running', 'queued', 'blocked') %}{{ act.hold('unit', r.codex_id, r.stage, r.unit) }}{% endif %}</div></details>{% endif %}</td>
+</tr>
+{% endfor %}
+</tbody>
+{% endfor %}
+</table></div>
 </section>
 {% else %}
-<p class="muted">no units</p>
+<p class="panel empty">No units here{% if book or state %} for this filter. <a href="/d/{{ dept.stage }}">Show every unit</a>{% else %} yet. A unit appears when a book is planned for this department{% endif %}.</p>
 {% endfor %}
