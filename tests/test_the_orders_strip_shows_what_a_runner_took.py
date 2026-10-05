@@ -7,6 +7,7 @@ from __future__ import annotations
 import pytest
 from fastapi.testclient import TestClient
 
+from board_html import polls
 from command_center_fixtures import CODEX, make_writable_app
 from studio import db, work_orders
 from studio.command_center import views
@@ -44,7 +45,7 @@ def test_the_strip_shows_the_last_ten_newest_first(board):
 def test_the_strip_polls_and_listens_for_an_action(board):
     client, _ = board
     page = client.get("/").text
-    assert 'hx-get="/partials/orders"' in page and "orders-changed from:body" in page
+    assert "orders-changed from:body" in polls(page, "/partials/orders")
 
 
 def test_an_empty_strip_says_so(board):

@@ -12,11 +12,12 @@ from pathlib import Path
 import pytest
 from fastapi.testclient import TestClient
 
+import board_css
 from command_center_fixtures import CODEX
 from test_progress_card_api import _drive, board  # noqa: F401  (the fixture)
 
 ROOT = Path(__file__).resolve().parents[1]
-BASE = (ROOT / "studio" / "command_center" / "templates" / "base.html").read_text(encoding="utf-8")
+PAGES = board_css.css("pages")
 PAGE = f"/d/episode/{CODEX}/ep04"
 
 
@@ -34,9 +35,10 @@ def _card(html: str) -> str:
 
 def test_the_card_renders_without_javascript(board):
     card = _card(_page(board, _drive(time.time() - 3600)))
-    assert re.search(r'data-k="big">1<span class="of">/3', card)
+    big = re.search(r'data-k="big">(.*?)</span></span>', card, re.S).group(1)
+    assert re.sub(r"<[^>]+>", "", big) == "1/3"
     assert "done around <b>" in card and "09 shoot" in card
-    assert card.count('class="lt st-') == 3 and "st-rendering" in card
+    assert card.count('role="listitem"') == 3 and re.search(r'title="T\d+ · rendering', card)
 
 
 def test_the_card_sits_above_the_head(board):
@@ -52,14 +54,14 @@ def test_the_hero_is_a_progressbar_with_words(board):
 
 def test_the_live_region_holds_no_clock(board):
     card = _card(_page(board, _drive(time.time() - 3600)))
-    region = re.search(r'<span class="lv-vital" aria-live="polite">(.*?)</span></span>', card, re.S).group(1)
+    region = re.search(r'aria-live="polite">(.*?)</span></span>', card, re.S).group(1)
     assert "data-clock" not in region and card.count("aria-live") == 1
 
 
 def test_a_dead_run_is_one_still_sentence(board):
     card = _card(_page(board, []))
     assert "data-still" in card and "Run stopped" in card
-    assert "st-rendering" not in card and "is-moving" not in card and "lv-sheet" not in card
+    assert "· rendering" not in card and 'data-k="sheet"' not in card
 
 
 def test_the_tab_title_is_the_run(board):
@@ -83,7 +85,8 @@ def test_a_unit_without_a_run_has_no_card(tmp_path, monkeypatch):
 
 
 def _live_css() -> str:
-    return BASE[BASE.index("/* live card"):BASE.index("/* /live card */")]
+    """The card's block of pages.css (plan F2 moved it out of base.html)."""
+    return PAGES[PAGES.index("/* live card"):PAGES.index("/* /live card */")]
 
 
 def _blocks(css: str, head: str) -> list[tuple[int, int]]:
@@ -108,34 +111,18 @@ def test_every_animation_is_gated_behind_no_preference():
 
 
 def test_reduced_motion_stops_everything_in_the_card():
-    assert "@media (prefers-reduced-motion: reduce){.live *{animation:none!important;transition-duration:1ms!important}}" in BASE
+    assert "@media (prefers-reduced-motion: reduce){.live *{animation:none!important;transition-duration:1ms!important}}" in PAGES
 
 
-def test_the_motion_tokens_are_a_second_root_block():
-    assert BASE.index(":root{--ease-out") > BASE.index("*{box-sizing:border-box}")
-    for token in ("--d4:900ms", "--breathe:2.8s", "--sheen:2.4s", "--stripe:1.6s", "@property --dev"):
+def test_the_motion_tokens_are_the_cards_own_root_block():
+    assert ":root{--ease-out" in _live_css()
+    for token in ("--d4:900ms", "--breathe:2.8s", "--sheen:2.4s", "--stripe:1.6s"):
         assert token in _live_css()
+    assert "@property --dev" in PAGES   # registered outside the layer
 
 
-def _tokens(block: str) -> dict[str, str]:
-    return dict(re.findall(r"--([a-z0-9-]+):(#[0-9a-f]{6})", block))
-
-
-def _lum(hex_: str) -> float:
-    def ch(c):
-        c = int(c, 16) / 255
-        return c / 12.92 if c <= 0.03928 else ((c + 0.055) / 1.055) ** 2.4
-    r, g, b = (ch(hex_[i:i + 2]) for i in (1, 3, 5))
-    return 0.2126 * r + 0.7152 * g + 0.0722 * b
-
-
-def _contrast(a: str, b: str) -> float:
-    hi, lo = sorted((_lum(a), _lum(b)), reverse=True)
-    return (hi + 0.05) / (lo + 0.05)
-
-
-THEMES = {"light": _tokens(BASE[BASE.index(":root{"):BASE.index("@media (prefers-color-scheme: dark)")]),
-          "dark": _tokens(BASE[BASE.index(':root[data-theme="dark"]{'):BASE.index("*{box-sizing")])}
+THEMES = board_css.themes()   # Studio black and Graphite, var() resolved (static/css/tokens.css)
+_contrast = board_css.contrast
 PAIRS = [("ink", "paper"), ("ink-2", "paper"), ("think", "paper"), ("ok", "paper"), ("qc", "paper"),
          ("accent", "paper"), ("ink", "paper-2"), ("ink-2", "paper-2"), ("qc", "qc-bg"), ("paper", "think")]
 

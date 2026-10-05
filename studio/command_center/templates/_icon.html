@@ -1,0 +1,5 @@
+{#- One Lucide icon from the sprite (static/icons.svg, ISC).  Decorative: the word
+    beside it carries the meaning, so the svg is hidden from assistive tech. -#}
+{% macro icon(name, cls="") -%}
+<svg class="i{% if cls %} {{ cls }}{% endif %}" aria-hidden="true"><use href="{{ static_url('icons.svg') }}#{{ name }}"/></svg>
+{%- endmacro %}

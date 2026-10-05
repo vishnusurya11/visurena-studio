@@ -11,6 +11,7 @@ import subprocess
 import pytest
 from fastapi.testclient import TestClient
 
+from board_html import text_of
 from command_center_fixtures import CODEX, make_app, make_writable_app
 from studio import db
 
@@ -88,7 +89,7 @@ def test_the_home_strip_offers_acknowledge_on_the_flagged_row_and_counts_it(boar
 def test_the_nav_counts_what_needs_you(board):
     client, _ = board
     page = client.get("/").text
-    assert 'hx-get="/partials/needs-you-count"' in page
+    assert text_of(page, "inbox-badge") == "3"   # the sidebar's badge; board.js refreshes it
     assert client.get("/partials/needs-you-count").text.strip() == "3"
     client.post("/act/acknowledge", data=EP03, headers=LOCAL)
     assert client.get("/partials/needs-you-count").text.strip() == "2"

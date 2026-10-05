@@ -1,9 +1,10 @@
 {% extends "base.html" %}
+{% from "_icon.html" import icon %}
 {% import "_macros.html" as act with context %}
 {% set r = unit.row %}{% set hl = unit.health %}{% set pics = unit.pictures %}{% set m = unit.master %}{% set sg = unit.suggest %}
 {% set finished = r.shown in ('done', 'flagged') %}
 {% block title %}{% if live %}{{ live.title }}{% else %}{{ r.unit }} · {{ stage }} · Visurena Studio{% endif %}{% endblock %}
-{% block crumbs %}<div class="crumbs"><a href="/">Studio</a> › <a href="/d/{{ stage }}">{{ stage }}</a> › <a href="/b/{{ codex }}">{{ unit.book_name }}</a> › {{ r.unit }}</div>{% endblock %}
+{% block crumbs %}<a href="/d/{{ stage }}">{{ stage }}</a>{{ icon('chevron-right') }}<a href="/b/{{ codex }}">{{ unit.book_name }}</a>{{ icon('chevron-right') }}<span aria-current="page">{{ r.unit }}</span>{% endblock %}
 
 {#- one picture tile: the shot number, the planned size, a badge per fault kind,
     and a <template> the lightbox clones: the picture, the shot's plan text,
@@ -47,7 +48,7 @@
 <div id="takes" class="pblock">
   <div class="bandhead"><span class="eyebrow">Takes</span>{% if pics.takes %}<span class="muted">{{ pics.takes | length }} · hover plays, click opens</span>{% else %}<span class="muted clip1">not shot · {{ pics.wait }}</span>{% endif %}</div>
   {% if pics.takes %}{{ tiles_grid(pics.takes, 'take', pics.take_step) }}
-  {% elif pics.slots %}<div class="slots">{% for s in pics.slots %}<span class="slot" title="{{ s.reason }}">{{ s.label }}</span>{% endfor %}</div>{% endif %}
+  {% elif pics.slots %}<div class="slots">{% for s in pics.slots %}<span class="slot" data-testid="slot" title="{{ s.reason }}">{{ s.label }}</span>{% endfor %}</div>{% endif %}
   {% for t in strips %}{% if pics.takes %}<a class="muted small" href="{{ t.url }}">{{ t.rel.split('/')[-1] }} ▸</a> {% else %}<a href="{{ t.url }}"><img class="strip" loading="lazy" decoding="async" src="{{ t.thumb }}" alt="{{ t.rel }}"></a>{% endif %}{% endfor %}
 </div>
 {%- endmacro %}
@@ -87,7 +88,7 @@
   </div>
   {% if hl.passes %}
   {% set shown = hl.passes[-14:] %}
-  <div class="passes" aria-label="one segment per run">{% if hl.passes | length > 14 %}<span class="pass more muted">+{{ hl.passes | length - 14 }} earlier</span>{% endif %}{% for p in shown %}<span class="pass {{ p.css }}" title="{{ p.run_id }} · {{ p.day }} · {{ p.wall }} · {{ p.how }}{% if p.detail %} · {{ p.detail }}{% endif %}"><b>{{ p.at }}</b> {{ p.label }}</span>{% endfor %}</div>
+  <div class="passes" data-testid="passes" aria-label="one segment per run">{% if hl.passes | length > 14 %}<span class="pass more muted">+{{ hl.passes | length - 14 }} earlier</span>{% endif %}{% for p in shown %}<span class="pass {{ p.css }}" data-testid="pass" title="{{ p.run_id }} · {{ p.day }} · {{ p.wall }} · {{ p.how }}{% if p.detail %} · {{ p.detail }}{% endif %}"><b>{{ p.at }}</b> {{ p.label }}</span>{% endfor %}</div>
   {% endif %}
   {% for t in hl.trend if t.series | length > 1 %}
   <div class="trend"><b>{{ t.gate }}</b> <span class="mono">{% for v in t.series[-6:] %}{{ '%g' | format(v) }}{% if not loop.last %} ▸ {% endif %}{% endfor %}</span> {% if t.direction == 'improving' %}<span class="ok">↘ improving</span>{% else %}<span class="warn">→ stuck</span>{% endif %}</div>

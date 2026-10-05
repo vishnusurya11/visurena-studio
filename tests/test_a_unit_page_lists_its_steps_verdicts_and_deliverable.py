@@ -8,6 +8,7 @@ from __future__ import annotations
 import pytest
 from fastapi.testclient import TestClient
 
+from board_html import polls
 from command_center_fixtures import CODEX, RUN, make_app
 from studio import registry
 
@@ -48,12 +49,11 @@ def test_the_deliverable_is_shown_when_the_row_names_one(client):
 
 def test_the_tails_poll_only_while_running(client):
     running = client.get(f"/d/episode/{CODEX}/ep04").text
-    assert f'hx-get="/partials/unit/episode/{CODEX}/ep04/tails"' in running
-    assert f'hx-get="/partials/unit/episode/{CODEX}/ep04/head"' in running
-    assert 'hx-trigger="every 3s' in running and 'hx-trigger="every 5s' in running
+    assert polls(running, f"/partials/unit/episode/{CODEX}/ep04/tails").startswith("every 5s")
+    assert polls(running, f"/partials/unit/episode/{CODEX}/ep04/head").startswith("every 3s")
     assert "MASTER: measured 3.0" in running and RUN in running
     done = client.get(f"/d/episode/{CODEX}/ep03").text
-    assert 'hx-trigger="every 3s' not in done and "/ep03/tails" not in done
+    assert polls(done, f"/partials/unit/episode/{CODEX}/ep03/tails") is None and "/ep03/tails" not in done
 
 
 def test_the_tails_partial_is_the_same_fragment(client):

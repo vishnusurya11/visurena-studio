@@ -22,13 +22,14 @@ from fastapi.templating import Jinja2Templates
 from starlette.exceptions import HTTPException as StarletteHTTPException
 
 from studio import db, registry
-from studio.command_center import actions, library_paths, models, procs, progress_view, thumbs, unit_view, views
+from studio.command_center import actions, library_paths, models, procs, progress_view, shell, thumbs, unit_view, views
+from studio.command_center import viewer_routes
 
 HERE = Path(__file__).resolve().parent
 ORG_PAGE = registry.ROOT / "architecture" / "index.html"
 templates = Jinja2Templates(directory=str(HERE / "templates"))
 templates.env.filters.update(clock=progress_view.clock, span=unit_view.span, mmss=progress_view.mmss)
-templates.env.globals.update(trace_points=progress_view.trace_points)
+templates.env.globals.update(trace_points=progress_view.trace_points, static_url=shell.static_url)
 router = APIRouter()
 READ_ONLY = ("the board was started read-only (command_center.py --read-only): it can show"
              " the studio but not give an order")
@@ -74,10 +75,27 @@ def _conn(request: Request) -> Iterator[sqlite3.Connection]:
 
 
 def _render(request: Request, name: str, **context) -> HTMLResponse:
-    """A template with what every page shares: the legend, the nav's stages."""
+    """A template with what every page shares: the legend and its icons, the nav's stages."""
     return templates.TemplateResponse(request, name, {
-        "legend": views.LEGEND, "stages": registry.stage_names(),
+        "legend": views.LEGEND, "state_icons": views.ICONS, "stages": registry.stage_names(),
         "writable": request.app.state.write_factory is not None, "read_only": READ_ONLY, **context})
+
+
+def _page(request: Request, conn: sqlite3.Connection, name: str, **context) -> HTMLResponse:
+    """A whole page: the template inside the shell (sidebar, header, palette) drawn for its path."""
+    return _render(request, name, shell=shell.shell(conn, request.app.state.library, request.url.path), **context)
+
+
+class CachedStatic(StaticFiles):
+    """The static files; a versioned request (`?v=`, see shell.static_url) and a font
+    are cached for a year, immutable -- anything else is revalidated."""
+
+    async def get_response(self, path: str, scope) -> Response:
+        response = await super().get_response(path, scope)
+        if response.status_code == 200:
+            versioned = b"v=" in scope.get("query_string", b"") or path.replace("\\", "/").startswith("fonts/")
+            response.headers["Cache-Control"] = "public,max-age=31536000,immutable" if versioned else "no-cache"
+        return response
 
 
 def _department(conn: sqlite3.Connection, stage: str, book: str | None, state: str | None) -> dict:
@@ -102,21 +120,23 @@ def _unit(request: Request, conn: sqlite3.Connection, stage: str, codex: str, un
 
 @router.get("/", response_class=HTMLResponse)
 def home(request: Request, conn: sqlite3.Connection = Depends(_conn)):
-    return _render(request, "home.html", floor=views.floor(conn), attention=views.attention(conn),
+    return _page(request, conn, "home.html", floor=views.floor(conn), attention=views.attention(conn),
                    lanes=views.lanes(conn), today=views.today(conn), orders=views.recent_orders(conn),
                    books=views.book_names(conn))
 
 
+@router.get("/queue", response_class=HTMLResponse)
 @router.get("/floor", response_class=HTMLResponse)
 def floor_page(request: Request, conn: sqlite3.Connection = Depends(_conn)):
-    return _render(request, "floor.html", floor=views.floor(conn), queue=views.queue(conn),
+    """The queue (/queue; /floor is the old name and keeps answering)."""
+    return _page(request, conn, "floor.html", floor=views.floor(conn), queue=views.queue(conn),
                    holds=views.holds(conn), today=views.today(conn), books=views.book_names(conn))
 
 
 @router.get("/d/{stage}", response_class=HTMLResponse)
 def department_page(request: Request, stage: str, book: str | None = None, state: str | None = None,
                     conn: sqlite3.Connection = Depends(_conn)):
-    return _render(request, "department.html", dept=_department(conn, stage, book, state),
+    return _page(request, conn, "department.html", dept=_department(conn, stage, book, state),
                    book=book, state=state, books=views.book_names(conn))
 
 
@@ -124,7 +144,7 @@ def department_page(request: Request, stage: str, book: str | None = None, state
 def unit_page(request: Request, stage: str, codex: str, unit: str,
               conn: sqlite3.Connection = Depends(_conn)):
     found = _unit(request, conn, stage, codex, unit)
-    return _render(request, "unit.html", unit=found, stage=stage, codex=codex, books=views.book_names(conn),
+    return _page(request, conn, "unit.html", unit=found, stage=stage, codex=codex, books=views.book_names(conn),
                    **_live(request, conn, stage, codex, unit, found["row"]["shown"] in ("done", "flagged")))
 
 
@@ -144,7 +164,19 @@ def book_page(request: Request, codex: str, conn: sqlite3.Connection = Depends(_
     found = views.book(conn, request.app.state.library, codex)
     if found is None:
         raise HTTPException(404, f"no book {codex}")
-    return _render(request, "book.html", book=found, books=views.book_names(conn))
+    return _page(request, conn, "book.html", book=found, books=views.book_names(conn))
+
+
+@router.get("/books", response_class=HTMLResponse)
+def books_page(request: Request, conn: sqlite3.Connection = Depends(_conn)):
+    """The shelf: every book with its units."""
+    return _page(request, conn, "books.html", shelf=views.shelf(conn))
+
+
+@router.get("/architecture", response_class=HTMLResponse)
+def architecture_page(request: Request, conn: sqlite3.Connection = Depends(_conn)):
+    """The org chart inside the shell (an iframe of /org)."""
+    return _page(request, conn, "architecture.html")
 
 
 @router.get("/org")
@@ -379,9 +411,10 @@ def make_app(conn_factory: Callable[[], sqlite3.Connection], library: Path,
     app.state.org_page = Path(org_page)
     app.state.procs = procs.list_processes
     app.state.thumbs = thumbs.Lru()
-    app.mount("/static", StaticFiles(directory=str(HERE / "static")), name="static")
+    app.mount("/static", CachedStatic(directory=str(HERE / "static")), name="static")
     app.include_router(router)
     app.include_router(act)
+    app.include_router(viewer_routes.router)
     app.add_exception_handler(StarletteHTTPException, _not_found)
     app.add_exception_handler(actions.Refused, _refused)
     return app

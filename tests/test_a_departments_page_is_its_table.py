@@ -7,6 +7,7 @@ from __future__ import annotations
 import pytest
 from fastapi.testclient import TestClient
 
+from board_html import main, polls
 from command_center_fixtures import CODEX, make_app
 from studio.command_center import views
 
@@ -17,7 +18,7 @@ def client(tmp_path, monkeypatch):
 
 
 def test_the_page_is_the_departments_rows_in_attention_order(client):
-    page = client.get("/d/episode").text
+    page = main(client.get("/d/episode").text)
     assert page.index("ep05") < page.index("ep04") < page.index("ep07") < page.index("ep03") < page.index("ep06")
     assert "5 units" in page and "shoot" in page and "18/25" in page
 
@@ -30,10 +31,10 @@ def test_the_rows_carry_the_verdict_strip_in_gates_order(client):
 
 
 def test_the_table_polls_every_ten_seconds_and_keeps_its_filters(client):
-    page = client.get("/d/episode?book=" + CODEX + "&state=failed").text
-    assert 'hx-trigger="every 10s [' in page  # paused while a row's form has the focus (C11)
-    assert "document.activeElement.closest(&#39;#rows form&#39;)" in page or "activeElement.closest('#rows form')" in page
-    assert f'hx-get="/partials/d/episode?book={CODEX}&amp;state=failed"' in page
+    page = main(client.get("/d/episode?book=" + CODEX + "&state=failed").text)
+    trigger = polls(page, f"/partials/d/episode?book={CODEX}&amp;state=failed")
+    assert trigger.startswith("every 10s [")   # paused while a row's form has the focus (C11)
+    assert "activeElement.closest('#rows form')" in trigger
     assert "ep05" in page and "ep04" not in page
 
 
@@ -47,7 +48,7 @@ def test_the_partial_and_the_page_render_the_same_rows(client):
 
 def test_a_unit_links_to_its_page_and_wraps_for_a_phone(client):
     page = client.get("/d/episode").text
-    assert f'href="/d/episode/{CODEX}/ep04"' in page and 'class="tbl-wrap"' in page
+    assert f'href="/d/episode/{CODEX}/ep04"' in page and 'data-testid="dept-table"' in page
 
 
 def test_an_unknown_department_is_a_plain_404(client):

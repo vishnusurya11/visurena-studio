@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+{% from "_icon.html" import icon %}
+{% block title %}Books · Visurena Studio{% endblock %}
+{% block crumbs %}<a href="/">Studio</a>{{ icon('chevron-right') }}<span aria-current="page">Books</span>{% endblock %}
+{% block body %}
+{#- The minimal shelf (plan P0.6) until G7 ports books.html: every codex row, its units. -#}
+<div class="sh"><h2>Books</h2><span class="sub">{{ shelf | length }} book{{ '' if shelf | length == 1 else 's' }}</span></div>
+<div class="panel"><div class="panel-b">
+<div class="tbl-wrap"><table class="dgrid" data-testid="shelf">
+<thead><tr><th>book</th><th>id</th><th class="num">units</th><th class="num">running</th><th class="num">done</th></tr></thead>
+<tbody>
+{% for b in shelf %}
+<tr data-row tabindex="-1"><td><a href="/b/{{ b.codex_id }}">{{ b.name }}</a></td><td class="mono muted">{{ b.codex_id }}</td><td class="num">{{ b.units }}</td><td class="num">{{ b.running or '' }}</td><td class="num">{{ b.done }}</td></tr>
+{% else %}
+<tr><td colspan="5" class="muted">no books yet</td></tr>
+{% endfor %}
+</tbody></table></div>
+</div></div>
+{% endblock %}

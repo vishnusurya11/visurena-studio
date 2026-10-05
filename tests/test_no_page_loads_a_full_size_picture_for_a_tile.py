@@ -13,6 +13,7 @@ from pathlib import Path
 import pytest
 from fastapi.testclient import TestClient
 
+from board_html import main
 from command_center_fixtures import CODEX, make_app
 from studio.command_center import library_paths, unit_view
 
@@ -46,7 +47,8 @@ def picture_urls(html: str) -> list[str]:
 
 
 def test_every_tile_poster_and_strip_on_the_unit_page_is_a_thumb(page):
-    urls = picture_urls(page)
+    urls = picture_urls(main(page))   # the shell's faces are thumbs too, but not this page's tiles
+    assert all(u.startswith(f"/thumb/{CODEX}/") for u in picture_urls(page))
     assert len(urls) == 4  # 2 panels, 2 posters; with takes on disk the strip is a link
     assert [u for u in urls if not u.startswith(f"/thumb/{CODEX}/")] == []
     assert f'poster="/thumb/{CODEX}/320/episodes/ep04/storyboard/shot_00.png?v=' in page

@@ -1,7 +1,8 @@
 {% extends "base.html" %}
+{% from "_icon.html" import icon %}
 {% import "_macros.html" as act with context %}
 {% block title %}{{ book.name }} · Visurena Studio{% endblock %}
-{% block crumbs %}<div class="crumbs"><a href="/">Studio</a> › Books › {{ book.name }}</div>{% endblock %}
+{% block crumbs %}<a href="/">Studio</a>{{ icon('chevron-right') }}<a href="/books">Books</a>{{ icon('chevron-right') }}<span aria-current="page">{{ book.name }}</span>{% endblock %}
 {% block body %}
 <h1>{{ book.name }} <span class="muted mono" style="font-size:14px">{{ book.codex_id }}</span></h1>
 <div class="muted">{{ book.units | length }} units · published {{ book.published | length }}{% if book.gpu_seconds %} · gpu {{ (book.gpu_seconds / 3600) | round(1) }}h{% endif %}

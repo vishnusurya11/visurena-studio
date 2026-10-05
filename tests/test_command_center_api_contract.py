@@ -12,6 +12,7 @@ from pathlib import Path
 import pytest
 from fastapi.testclient import TestClient
 
+from board_html import main
 from command_center_fixtures import CODEX, make_app, make_db, make_library, make_logs
 from studio.command_center import app as cc_app, models
 
@@ -66,7 +67,7 @@ def test_the_unit_json_validates(client):
 
 def test_the_json_and_the_page_show_the_same_rows(client):
     rows = [r["unit"] for r in client.get("/api/d/episode.json").json()["rows"]]
-    page = client.get("/d/episode").text
+    page = main(client.get("/d/episode").text)   # the table, not the sidebar's pins
     positions = [page.index(f">{unit}<") for unit in rows]
     assert positions == sorted(positions)
 

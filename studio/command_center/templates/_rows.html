@@ -7,7 +7,7 @@
     <span class="muted mono">{{ g.done }} / {{ g.total }} done</span>
     <span class="minibar" aria-hidden="true">{% for r in g.rows %}<i class="{{ r.css }}" title="{{ r.unit }} · {{ r.shown }}"></i>{% endfor %}</span>
   </div>
-  <div class="tbl-wrap"><table class="dept">
+  <div class="tbl-wrap" data-testid="dept-table"><table class="dept">
   <thead><tr><th>state</th><th>unit</th><th>steps</th>{% for l in dept.gate_labels %}<th class="gate">{{ l }}</th>{% endfor %}<th class="num">moved</th><th class="num">gpu</th><th class="num">cost</th><th class="acts"></th></tr></thead>
   <tbody>
   {% for r in g.rows %}

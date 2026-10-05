@@ -7,8 +7,10 @@ from __future__ import annotations
 import pytest
 from fastapi.testclient import TestClient
 
+from board_html import polls
 from command_center_fixtures import CODEX, RUN, make_app
 from studio import registry
+from studio.command_center import views
 
 
 @pytest.fixture()
@@ -25,9 +27,8 @@ def test_the_home_page_shows_the_running_row_and_what_needs_you(client):
 
 def test_the_strips_poll_every_two_seconds_and_the_lanes_every_ten(client):
     page = client.get("/").text
-    assert 'hx-get="/partials/floor"' in page and 'hx-trigger="every 2s"' in page
-    assert 'hx-get="/partials/attention"' in page
-    assert 'hx-get="/partials/lanes"' in page and 'hx-trigger="every 10s"' in page
+    assert polls(page, "/partials/floor") == "every 2s" and polls(page, "/partials/attention") == "every 2s"
+    assert polls(page, "/partials/lanes") == "every 10s"
     assert "http-equiv" not in page and '/static/htmx.min.js' in page
 
 
@@ -49,11 +50,14 @@ def test_the_partials_render_the_same_rows_as_the_page(client):
 def test_today_and_the_legend_are_on_the_home_page(client):
     page = client.get("/").text
     assert "TODAY" in page and "refs" in page
-    assert "○ queued" in page and "✋ escalated" in page and "~ stale" in page
+    legend = page[page.index('data-testid="legend"'):]
+    for state in views.GLYPHS:
+        assert f'data-state="{state}"' in legend and f"{state}</span>" in legend
 
 
-def test_the_floor_page_lists_now_next_and_held(client):
-    page = client.get("/floor").text
+@pytest.mark.parametrize("route", ["/queue", "/floor"])
+def test_the_queue_page_lists_now_next_and_held(client, route):
+    page = client.get(route).text
     assert "NOW" in page and "NEXT" in page and "HELD" in page and "ep06" in page
     assert "derived" in page
 

@@ -1,7 +1,8 @@
 {% extends "base.html" %}
+{% from "_icon.html" import icon %}
 {% import "_macros.html" as act with context %}
-{% block title %}Floor · Visurena Studio{% endblock %}
-{% block crumbs %}<div class="crumbs"><a href="/">Studio</a> › Floor</div>{% endblock %}
+{% block title %}Queue · Visurena Studio{% endblock %}
+{% block crumbs %}<a href="/">Studio</a>{{ icon('chevron-right') }}<span aria-current="page">Queue</span>{% endblock %}
 {% block body %}
 <h1>Call sheet</h1>
 <div class="actions">{{ act.hold('studio', label='hold studio') }} <span class="muted">a studio hold stops every run before its first GPU step</span></div>

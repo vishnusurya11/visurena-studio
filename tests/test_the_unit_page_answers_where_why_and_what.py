@@ -34,8 +34,8 @@ def test_the_head_says_where_it_is_and_that_the_lease_is_alive(page):
 
 
 def test_the_pass_timeline_has_one_segment_per_run(page):
-    timeline = re.search(r'<div class="passes"[^>]*>(.*?)</div>', page, re.S).group(1)
-    assert timeline.count('class="pass ') == 4
+    timeline = re.search(r'<div[^>]*data-testid="passes"[^>]*>(.*?)</div>', page, re.S).group(1)
+    assert timeline.count('data-testid="pass"') == 4
     assert "09 refused" in timeline and "08 running" in timeline
 
 
@@ -54,9 +54,9 @@ def test_faults_are_grouped_by_kind_with_shot_chips(page):
 
 
 def test_panel_tiles_carry_their_shot_number_and_a_badge(page):
-    tile = re.search(r'<figure class="tile[^"]*" id="shot-01".*?</figure>', page, re.S).group(0)
+    tile = re.search(r'<figure[^>]*id="shot-01".*?</figure>', page, re.S).group(0)
     assert ">01<" in tile and "medium_close" in tile and "framing ×2" in tile
-    dq = re.search(r'<figure class="tile[^"]*" id="shot-00".*?</figure>', page, re.S).group(0)
+    dq = re.search(r'<figure[^>]*id="shot-00".*?</figure>', page, re.S).group(0)
     assert "blur" in dq and "missing" in dq
 
 
@@ -69,7 +69,7 @@ def test_the_lightbox_holds_the_shots_plan_text_and_a_redo(page):
 
 def test_takes_are_grey_slots_that_say_why(page):
     takes = page[page.index('id="takes"'):]
-    assert takes.count('class="slot"') == 3 and "the takes wait on the panels" in takes
+    assert takes.count('data-testid="slot"') == 3 and "the takes wait on the panels" in takes
 
 
 def test_the_redo_defaults_to_the_holding_step(page):
@@ -78,7 +78,7 @@ def test_the_redo_defaults_to_the_holding_step(page):
 
 
 def test_the_raw_band_is_collapsed(page):
-    raw = re.search(r'<details class="raw[^"]*"[^>]*>', page).group(0)
+    raw = re.search(r'<details[^>]*id="raw"[^>]*>', page).group(0)
     assert " open" not in raw
     assert "PLAN: measured 61.0 vs None -&gt; improve" in page or "PLAN: measured 61.0 vs None -> improve" in page
 

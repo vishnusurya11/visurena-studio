@@ -18,9 +18,15 @@ from pathlib import Path
 from studio import db, gate_policy, registry
 from studio.command_center import library_paths, thumbs
 
-GLYPHS = {"queued": "○", "blocked": "◌", "running": "●", "done": "✓", "flagged": "⚑",
-          "deferred": "↩", "failed": "✕", "escalated": "✋", "held": "⏸", "stale": "~",
-          "skipped": "–"}
+MARKS = {"queued": ("circle", "○"), "blocked": ("circle-dashed", "◌"), "running": ("loader", "●"),
+         "done": ("check", "✓"), "flagged": ("flag", "⚑"), "deferred": ("corner-up-left", "↩"),
+         "failed": ("x", "✕"), "escalated": ("hand", "✋"), "held": ("pause", "⏸"),
+         "stale": ("history", "~"), "skipped": ("minus", "–")}
+"""Each state's mark: its icon (a Lucide symbol in static/icons.svg, drawn with the
+`icon()` macro) and its Unicode glyph -- the text fallback for titles, the tab's
+name, the JSON twins and plain text."""
+ICONS = {state: name for state, (name, _) in MARKS.items()}
+GLYPHS = {state: mark for state, (_, mark) in MARKS.items()}
 COLOURS = {"failed": "red", "stale": "red", "escalated": "black", "flagged": "amber",
            "deferred": "purple", "running": "blue", "done": "green"}
 ATTENTION = ("escalated", "failed", "stale", "running", "deferred", "held", "flagged",
@@ -194,6 +200,16 @@ def lane(conn: sqlite3.Connection, stage: str) -> dict:
     tally = [(GLYPHS[s], counts[s]) for s in ATTENTION if counts.get(s)]
     return {"stage": stage, "total": len(rows), "counts": dict(counts), "tally": tally,
             "bar": [r["css"] for r in rows], "rows": rows[:6]}
+
+
+def shelf(conn: sqlite3.Connection) -> list[dict]:
+    """Every book (codex row) by name, with how many units it has, how many
+    run and how many are done -- the /books page."""
+    rows = conn.execute(
+        "SELECT c.id AS codex_id, c.name, COUNT(w.id) AS units,"
+        " COALESCE(SUM(w.state = 'running'), 0) AS running, COALESCE(SUM(w.state = 'done'), 0) AS done"
+        " FROM codex c LEFT JOIN work_orders w ON w.codex_id = c.id GROUP BY c.id ORDER BY c.name, c.id")
+    return [dict(r) for r in rows]
 
 
 def lanes(conn: sqlite3.Connection) -> list[dict]:

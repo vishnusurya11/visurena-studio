@@ -1,6 +1,7 @@
 {% extends "base.html" %}
+{% from "_icon.html" import icon %}
 {% block title %}{{ dept.stage }} · Visurena Studio{% endblock %}
-{% block crumbs %}<div class="crumbs"><a href="/">Studio</a> › {{ dept.stage }}</div>{% endblock %}
+{% block crumbs %}<a href="/">Studio</a>{{ icon('chevron-right') }}<span>Departments</span>{{ icon('chevron-right') }}<span aria-current="page">{{ dept.stage }}</span>{% endblock %}
 {% block body %}
 <div class="depthead">
   <h1 class="cap">{{ dept.stage }}</h1>
