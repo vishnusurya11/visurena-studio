@@ -76,9 +76,9 @@
   }
   function gatesCell(r) {
     const bad = nonPass(r);
-    if (!bad.length) return Object.keys(r.gates || {}).length ? `<span class="gate ok">${icon("check")}gates pass</span>` : "";
-    return bad.map(([g, v]) => `<span class="gate flag" title="${esc(`${g} flagged ${v[0]}${v[2] ? " · kept: " + v[2] : ""} · ${v[4]}`)}">${GATE_SHORT[g]}&nbsp;<b>!${v[0]}</b></span>`)
-      .join('<span class="gsep">·</span>');
+    if (!bad.length) return Object.keys(r.gates || {}).length ? `<span class="chip2 ok gate">${icon("check")}gates pass</span>` : "";
+    return bad.map(([g, v]) => `<span class="chip2 flag gate" title="${esc(`${g} flagged ${v[0]}${v[2] ? " · kept: " + v[2] : ""} · ${v[4]}`)}"><span>${GATE_SHORT[g]}</span>${icon("flag")}<b>${v[0]}</b></span>`)
+      .join("");
   }
   function face(r, size = 160) {
     if (!r.face) return `<span class="face"></span>`;
@@ -129,8 +129,8 @@
     const why = key === "blocked" ? sharedReason(rows) : (WHY[key] || (() => ""))();
     return `<section class="grp" data-g="${key}" data-open="${open}">
       <button class="ghead ${key}" aria-expanded="${open}" data-book="${book}" data-key="${key}">
-        ${icon("chevron-down", "chev")}<span class="gl">${icon(ic)}</span>${label}<span class="n">${rows.length}</span>
-        ${why ? `<span class="why">· ${why}</span>` : ""}
+        ${icon("chevron-down", "chev")}<span class="gl">${icon(ic)}</span><span class="gt">${label}</span><span class="count">${rows.length}</span>
+        ${why ? `<span class="why">${why}</span>` : ""}
       </button>
       <div class="rows" role="rowgroup">${rows.map(row).join("")}</div>
     </section>`;
@@ -148,14 +148,16 @@
       const rs = rows.filter((r) => groupOf(r) === k).sort((a, b) => a.unit.localeCompare(b.unit));
       return rs.length ? group(codex, k, l, ic, rs) : "";
     }).join("");
-    return `<section class="bookblk" data-book="${codex}">
+    return `<section class="bookblk panel" data-book="${codex}">
       <header class="bookhead">
-        <h2><a href="${codex === WOTW ? "book.html" : "#"}">${esc(name)}</a></h2>
-        <span class="meta">${rows.length} units · ${nDone} done${nNeed ? ` · <b style="color:var(--st-flagged)">${nNeed} need you</b>` : ""} · ${PUB[codex].size} published · ${shelf ? shelf.gpu_h : "–"} GPU h</span>
+        <div class="bh-t"><h2><a href="${codex === WOTW ? "book.html" : "#"}">${esc(name)}</a></h2>
+        <span class="meta"><b>${rows.length}</b> units · <b>${nDone}</b> done${nNeed ? ` · <b class="need">${nNeed}</b> need you` : ""} · <b>${PUB[codex].size}</b> published · <b>${shelf ? shelf.gpu_h : "–"}</b> GPU h</span></div>
         ${mix(rows)}
       </header>
+      <div class="dg" role="table" aria-label="${esc(name)} units">
       <div class="colhead" aria-hidden="true"><span></span><span>State</span><span>Unit</span><span>Steps</span><span class="c-g">Gates (non-pass)</span><span class="r c-m">Moved</span><span class="r">GPU</span><span></span></div>
       ${groups}
+      </div>
     </section>`;
   }
   function filterPills(rows) {
@@ -164,7 +166,7 @@
       ["needs", "Needs you", "flag", n("needs")], ["queued", "Queued", "circle", n("queued") + n("progress")],
       ["blocked", "Blocked", "circle-dashed", n("blocked")], ["done", "Done", "check", n("done")]];
     return ps.filter((p) => p[3] || p[0] === "all").map(([k, l, ic, c]) =>
-      `<button class="fpill ${k}" data-f="${k}" aria-pressed="${k === "all"}">${icon(ic)}${l} <b>${c}</b></button>`).join("");
+      `<button class="fpill ${k}" data-f="${k}" aria-pressed="${k === "all"}">${k === "all" ? "" : `<i class="dot ${k}"></i>`}${l}<span class="n">${c}</span></button>`).join("");
   }
   function applyFilter(f) {
     document.querySelectorAll(".fpill").forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.f === f)));
@@ -190,16 +192,17 @@
     let signed = 0, clean = 0;
     units.forEach((r) => taste.forEach((g) => { const v = r.gates[g]; if (v) { signed++; if (v[3] === "✓") clean++; } }));
     const head = B.gates.map((g) => `<th title="${g}">${GATE_SHORT[g]}</th>`).join("");
-    const body = units.map((r) => `<tr><td class="u"><b>${r.unit}</b>${esc(r.title)}</td>${B.gates.map((g) => {
+    const body = units.map((r) => `<tr><td class="u">${face(r)}<b>${r.unit}</b><span class="ft">${esc(r.title)}</span></td>${B.gates.map((g) => {
       const v = r.gates[g];
       if (!v) return `<td><span class="fc f0" title="${g}: not signed">·</span></td>`;
       if (v[3] === "✓") return `<td><span class="fc ok" title="${g} pass · ${esc(v[4])}">${icon("check")}pass</span></td>`;
       const kept = v[2] ? `<span class="k">${v[2] === "keep_best" ? "kept" : v[2]}</span>` : "";
       return `<td><span class="fc ${binOf(v[0])}" title="${esc(`${g} ${v[0]} faults · ${v[2] || v[1]} · ${v[4]}`)}">${icon("flag")}${v[0]}${kept}</span></td>`;
     }).join("")}<td class="num">${r.flags}</td></tr>`).join("");
-    return `<div class="stat"><b>${clean} of ${signed}</b><span class="soft">taste gates clean (panels · takes · master) across ${units.length - units.filter((r) => r.state === "running").length} finished episodes — a terminal is not a pass.</span></div>
-      <table class="fm"><thead><tr><th>Unit</th>${head}<th class="r">flags</th></tr></thead><tbody>${body}</tbody></table>
-      <p class="note">Cell = signed fault count from <code>work_orders.verdicts.*.faults</code>; tint bins 0 · 1–5 · 6–20 · 21+, the number is always printed. “kept” = the ladder ended on keep_best / still, not a pass.</p>`;
+    return `<div class="panel-h"><h2>Gate × unit faults</h2><span class="sub">signed verdicts, every episode with a gate</span></div>
+      <div class="panel-b"><div class="stat"><b>${clean} of ${signed}</b><span class="soft">taste gates clean (panels · takes · master) across ${units.length - units.filter((r) => r.state === "running").length} finished episodes — a terminal is not a pass.</span></div>
+      <div class="fm-wrap"><table class="fm"><thead><tr><th>Unit</th>${head}<th class="r">Flags</th></tr></thead><tbody>${body}</tbody></table></div>
+      <p class="note">Cell = signed fault count from <code>work_orders.verdicts.*.faults</code>; tint bins 0 · 1–5 · 6–20 · 21+, the number is always printed. “kept” = the ladder ended on keep_best / still, not a pass.</p></div>`;
   }
 
   function department() {
@@ -375,28 +378,60 @@
       return `<i class="${cls}" title="${r.unit} ${s}"></i>`;
     }).join("")}</span>`;
   }
+  /* v2 shelf: a department's state as a word + a class, and its progress as a mini bar */
+  function dstate(b, d) {
+    const o = b.orders[d], st = o ? o[0] : "", flags = o ? o[1] : 0;
+    const disk = b.disk[d === "episode" ? "episodes" : d];
+    if (st === "done" && flags) return ["flagged", `done · ${flags} flag`];
+    if (st === "done") return ["done", "done"];
+    if (st === "running") return ["running", "running"];
+    if (st === "blocked") return ["blocked", "blocked"];
+    if (disk) return ["disk", "on disk"];
+    return ["", st === "queued" ? "queued" : "not started"];
+  }
+  function epBar(b) {
+    const rows = B.dept.rows.filter((r) => r.codex_id === b.id), n = b.id === WOTW ? 27 : Math.max(rows.length, b.chapters);
+    const k = { pub: 0, flag: 0, run: 0, blk: 0 };
+    rows.forEach((r) => { const s = shown(r), c = s === "running" ? "run" : s === "flagged" ? "flag" : s === "blocked" ? "blk" : PUB[b.id].has(r.unit) ? "pub" : ""; if (c) k[c]++; });
+    const seg = (c, v) => v ? `<i class="${c}" style="width:${(v / n) * 100}%"></i>` : "";
+    return [`${seg("done", k.pub)}${seg("flagged", k.flag)}${seg("running", k.run)}${seg("blocked", k.blk)}`, `${b.published} of ${n}`];
+  }
+  function deptBars(b) {
+    return `<span class="dbars">${DEPTS.map(([d]) => {
+      const [cls, word] = dstate(b, d);
+      const [fill, frac] = d === "episode" && b.eps.units ? epBar(b) : [`<i class="${cls}" style="width:${cls ? 100 : 0}%"></i>`, word];
+      return `<span class="db" title="${d}: ${word}"><span class="dl">${d}</span><span class="mb">${fill}</span><span class="dw ${cls}">${frac}</span></span>`;
+    }).join("")}</span>`;
+  }
+  function dticks(b) {
+    return `<span class="dticks" aria-label="departments">${DEPTS.map(([d, l]) => { const [cls, word] = dstate(b, d); return `<i class="${cls}" title="${d}: ${word}">${l}</i>`; }).join("")}</span>`;
+  }
+  function monogram(name) {
+    const words = name.replace(/;.*$/, "").replace(/^(The|A|An)\s+/i, "").split(/[\s.-]+/).filter((w) => /^[A-Z]/.test(w));
+    const init = (words[0] || name)[0] + (words[1] ? words[1][0] : "");
+    let h = 0; for (const c of name) h = (h * 31 + c.charCodeAt(0)) % 360;
+    return `<span class="cover" style="--h:${h}" aria-hidden="true"><span class="ci">${esc(init)}</span><span class="cb"></span></span>`;
+  }
   function liveCard(b) {
     const rows = B.dept.rows.filter((r) => r.codex_id === b.id && r.face).sort((x, y) => y.unit.localeCompare(x.unit)).slice(0, 6);
     const run = B.dept.rows.find((r) => r.codex_id === b.id && r.state === "running");
     const need = B.dept.rows.filter((r) => r.codex_id === b.id && groupOf(r) === "needs").length;
     const blk = B.dept.rows.filter((r) => r.codex_id === b.id && groupOf(r) === "blocked").length;
-    return `<a class="bcard" href="${b.id === WOTW ? "book.html" : "#"}">
-      <span class="strip">${rows.map((r) => `<span class="frame"><img loading="lazy" src="${thumb(b.id, r.face, 160)}" alt=""><span class="tl">${r.unit}</span></span>`).join("")}</span>
+    const tag = (r) => r.state === "running" ? `<span class="tag r live">● ${r.step_id} ${r.step_name}</span>` : shown(r) === "flagged" ? `<span class="tag r flag">⚑</span>` : "";
+    return `<a class="bcard live panel" href="${b.id === WOTW ? "book.html" : "#"}">
+      <span class="mosaic">${rows.map((r) => `<span class="pic"><img loading="lazy" src="${thumb(b.id, r.face, 320)}" alt=""><span class="tag">${r.unit}</span>${tag(r)}</span>`).join("")}</span>
       <span class="body">
-        <span class="row1"><span><h3>${esc(b.name)}</h3><span class="au">${esc(b.author)}</span></span><span class="dms">${DEPTS.map(([d, l]) => dmark(b, d, l)).join("")}</span></span>
-        ${seasonStrip(b)}
-        <span class="facts"><span><b>${b.eps.units}</b> of ${b.id === WOTW ? 27 : b.eps.units} episodes planned</span><span><b>${b.published}</b> published</span>
-          ${run ? `<span style="color:var(--st-running)">● ${run.unit} ${run.step_id} ${run.step_name} · ~${run.eta}</span>` : ""}
-          ${need ? `<span style="color:var(--st-flagged)">⚑ ${need} need you</span>` : ""}${blk ? `<span>◌ ${blk} waiting on refs/04</span>` : ""}
-          <span><b>${b.gpu_h}</b> GPU h</span></span>
-        <span class="last">last activity ${ago(b.last)} ago</span>
+        <span class="hd"><span><h3>${esc(b.name)}</h3><span class="au">${esc(b.author)}</span></span><span class="last">${ago(b.last)} ago</span></span>
+        <span class="figs"><span><b>${b.eps.units}</b><small>of ${b.id === WOTW ? 27 : b.eps.units} planned</small></span><span><b>${b.published}</b><small>published</small></span>
+          <span><b>${b.gpu_h}</b><small>GPU h</small></span>${need ? `<span class="need"><b>${need}</b><small>need you</small></span>` : ""}</span>
+        ${deptBars(b)}
+        <span class="status">${run ? `<span class="run"><i></i>${run.unit} ${run.step_id} ${run.step_name} · done ~${run.eta}</span>` : ""}${blk ? `<span>${blk} waiting on <span class="mono">refs/04</span></span>` : ""}</span>
       </span></a>`;
   }
   function smallCard(b) {
-    return `<a class="bcard" href="#" data-name="${esc((b.name + " " + b.author).toLowerCase())}"><span class="body">
-      <span class="row1"><span><h3>${esc(b.name.replace(/;.*$/, ""))}</h3><span class="au">${esc(b.author)}</span></span></span>
-      <span class="row1"><span class="dms">${DEPTS.map(([d, l]) => dmark(b, d, l)).join("")}</span><span class="last">${b.chapters} chapters</span></span>
-      <span class="last">last activity ${ago(b.last)} ago</span></span></a>`;
+    return `<a class="bcard small" href="#" data-name="${esc((b.name + " " + b.author).toLowerCase())}">${monogram(b.name)}<span class="body">
+      <h3>${esc(b.name.replace(/;.*$/, ""))}</h3><span class="au">${esc(b.author)}</span>
+      <span class="meta">${dticks(b)}<span class="ch"><b>${b.chapters}</b> ch · ${ago(b.last)}</span></span></span></a>`;
   }
   function books() {
     const all = [...B.shelf].sort((a, b) => Date.parse(b.last) - Date.parse(a.last));

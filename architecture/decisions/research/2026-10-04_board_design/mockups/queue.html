@@ -12,213 +12,229 @@
 <link rel="stylesheet" href="assets/v2.css">
 <script src="assets/shell.js"></script>
 <style>
-/* ---------- Queue page ---------- */
-main{padding-bottom:var(--sp-8)}
-.pagehead{display:flex;align-items:center;gap:var(--sp-5);padding-top:var(--sp-6);padding-bottom:var(--sp-5);flex-wrap:wrap}
-.pagehead .counts{display:flex;gap:var(--sp-4);font:500 13px/18px var(--f-mono);color:var(--ink-2);flex-wrap:wrap}
-.pagehead .counts span{display:inline-flex;align-items:center;gap:5px}
-.pagehead .counts .run{color:var(--st-running)}
-.pagehead .spacer{flex:1}
+/* ---------- Queue v2 (DIRECTION_v2 §Other pages): the lane and the call sheet live in cards. */
+[hidden]{display:none!important}
+.title-row{display:flex;flex-wrap:wrap;align-items:flex-end;gap:8px 16px;margin:4px 0 20px}
+.title-row h1{font:700 34px/36px var(--f-display);letter-spacing:.01em}
+.tally{display:flex;flex-wrap:wrap;gap:14px;font:400 13px/18px var(--f-text);color:var(--ink-3);padding-bottom:3px}
+.tally b{font:600 13px/18px var(--f-mono);color:var(--ink)}
+.tally .r b{color:var(--st-running)}
+.title-row .spacer{flex:1}
+.mono{font-family:var(--f-mono)}
 
-/* the GPU lane */
-.lanecard{border:1px solid var(--rule-2);background:var(--paper);box-shadow:var(--e-2)}
-.lanecard > header{display:grid;grid-template-columns:auto minmax(0,1fr) auto;align-items:center;gap:var(--sp-5);padding:var(--sp-4) var(--sp-5);border-bottom:1px solid var(--rule)}
-.lanecard h2{font-size:22px;line-height:26px}
-.totals{display:flex;gap:2px var(--sp-4);font:400 12px/16px var(--f-mono);color:var(--ink-2);flex-wrap:wrap}
-.totals b{color:var(--ink);font-weight:600}
-.totals .bad b{color:var(--st-failed)}
-.seg{display:inline-flex;border:1px solid var(--rule-2);border-radius:var(--r-2);overflow:hidden;margin-left:auto}
-.seg button{all:unset;cursor:pointer;font:500 12px/1 var(--f-mono);padding:7px 12px;color:var(--ink-2)}
-.seg button + button{border-left:1px solid var(--rule-2)}
-.seg button[aria-pressed="true"]{background:var(--ink);color:var(--paper)}
-.seg button:focus-visible{outline:2px solid var(--accent);outline-offset:-2px}
-.tl{padding:var(--sp-4) var(--sp-5) var(--sp-2)}
+/* the GPU lane card */
+.lanecard{overflow:hidden}
+.lanecard .panel-h{flex-wrap:wrap;align-items:center;gap:12px 16px;padding:18px 20px 0}
+.lanecard .panel-h .spacer{flex:1}
+.figs{display:flex;flex-wrap:wrap;gap:10px 28px;padding:16px 20px 4px}
+.fig{display:flex;flex-direction:column;min-width:0}
+.fig b{font:700 26px/28px var(--f-display);letter-spacing:.01em;font-variant-numeric:tabular-nums;color:var(--ink)}
+.fig b small{font:500 13px/1 var(--f-text);color:var(--ink-3);margin-left:4px;letter-spacing:0}
+.fig > span{font:400 12px/16px var(--f-text);color:var(--ink-3)}
+.fig.bad b{color:var(--st-failed)} .fig.def b{color:var(--st-deferred)}
+.fig.sep{padding-left:28px;border-left:1px solid var(--rule)}
+.tl{padding:12px 20px 4px}
 .tl svg{display:block;width:100%;height:auto;overflow:visible}
 .tl .ax{font:400 11px/1 var(--f-mono);fill:var(--ink-3)}
-.tl .day{font:600 11px/1 var(--f-mono);fill:var(--ink-2);letter-spacing:.06em;text-transform:uppercase}
+.tl .day{font:500 12px/1 var(--f-text);fill:var(--ink-2)}
 .tl .lab{font:500 11px/1 var(--f-mono);pointer-events:none}
 .tl .bar{cursor:pointer}
 .tl .bar:hover rect.b,.tl .bar.sel rect.b{stroke:var(--ink);stroke-width:1.5}
 .tl .bar:focus{outline:none}
-.tl .bar:focus-visible rect.b{stroke:var(--accent);stroke-width:2}
-.legend{display:flex;flex-wrap:wrap;gap:var(--sp-2) var(--sp-5);padding:var(--sp-2) var(--sp-5) var(--sp-4);font:400 12px/16px var(--f-mono);color:var(--ink-2)}
-.legend span{display:inline-flex;align-items:center;gap:6px}
-.sw{width:14px;height:10px;display:inline-block;border-radius:1px}
+.tl .bar:focus-visible rect.b{stroke:var(--focus);stroke-width:2}
+.legend{display:flex;flex-wrap:wrap;gap:6px 18px;padding:6px 20px 14px;font:400 12px/16px var(--f-text);color:var(--ink-3)}
+.legend span{display:inline-flex;align-items:center;gap:7px}
+.sw{width:14px;height:10px;display:inline-block;border-radius:2px}
 .sw.done{background:var(--st-done-bar)}
 .sw.failed{background:repeating-linear-gradient(45deg,var(--st-failed-bar) 0 3px,var(--st-failed-bg) 3px 6px)}
 .sw.deferred{background-color:var(--st-deferred-bar);background-image:radial-gradient(var(--paper) 1px,transparent 1.3px);background-size:4px 4px}
 .sw.killed{background:var(--line)}
 .sw.running{background:var(--st-running-bar)}
 .sw.ghost{background:repeating-linear-gradient(135deg,var(--rule-2) 0 2px,transparent 2px 6px);outline:1px dashed var(--line);outline-offset:-1px}
-.sw.idle{background:var(--paper-2);outline:1px solid var(--rule);outline-offset:-1px}
-.readout{display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:var(--sp-4);align-items:center;margin:0 var(--sp-5) var(--sp-5);padding:var(--sp-3) var(--sp-4);background:var(--paper-2);border-left:3px solid var(--rule-2);font-size:13px}
-.readout .k{font:600 13px/18px var(--f-mono)}
-.readout .d{font:400 12px/16px var(--f-mono);color:var(--ink-2);overflow-wrap:anywhere}
-.readout[data-oc="failed"]{border-left-color:var(--st-failed)}
-.readout[data-oc="deferred"]{border-left-color:var(--st-deferred)}
-.readout[data-oc="done"]{border-left-color:var(--st-done)}
-.readout[data-oc="running"]{border-left-color:var(--st-running)}
-.eta-line{display:flex;flex-wrap:wrap;gap:4px var(--sp-4);padding:var(--sp-3) var(--sp-5);border-top:1px solid var(--rule);font:400 12px/16px var(--f-mono);color:var(--ink-2)}
-.eta-line b{color:var(--ink);font-weight:600}
+.sw.idle{background:var(--surface-2);outline:1px solid var(--rule-2);outline-offset:-1px}
+.readout{display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:14px;align-items:center;margin:0 20px 16px;padding:10px 12px 10px 16px;background:var(--surface-2);border:1px solid var(--rule);border-radius:8px;font:400 13px/18px var(--f-text);box-shadow:inset 3px 0 0 var(--rule-2)}
+.readout .k{font:600 13px/18px var(--f-text)}
+.readout .d{font:400 12px/16px var(--f-mono);color:var(--ink-3);overflow-wrap:anywhere}
+.readout[data-oc="failed"]{box-shadow:inset 3px 0 0 var(--st-failed)}
+.readout[data-oc="deferred"]{box-shadow:inset 3px 0 0 var(--st-deferred)}
+.readout[data-oc="done"]{box-shadow:inset 3px 0 0 var(--st-done)}
+.readout[data-oc="running"]{box-shadow:inset 3px 0 0 var(--st-running)}
+.readout .pill{font:500 12px/1 var(--f-text)}
+.eta{display:flex;flex-wrap:wrap;align-items:center;gap:8px 20px;padding:12px 20px;border-top:1px solid var(--rule);background:color-mix(in srgb,var(--surface-2) 50%,transparent);font:400 13px/18px var(--f-text);color:var(--ink-3)}
+.eta .e{display:inline-flex;align-items:baseline;gap:6px}
+.eta .e .mono{font-size:12px;color:var(--ink-2)}
+.eta .e b{font:600 13px/18px var(--f-mono);color:var(--ink)}
+.eta .e.now b{color:var(--st-running)}
 .phone-lane{display:none}
 
-/* queue groups */
-.groups{margin-top:var(--sp-7)}
-.groups > .sec-h{display:flex;align-items:baseline;gap:var(--sp-3);border-bottom:2px solid var(--ink);padding-bottom:var(--sp-3)}
-.sec-h h2{font-size:22px;line-height:26px}
-.sec-h .meta{font:500 12px/16px var(--f-mono);color:var(--ink-3)}
-.sec-h .spacer{flex:1}
-.grp{border-bottom:1px solid var(--rule)}
-.grp > summary{list-style:none;cursor:pointer;display:grid;grid-template-columns:18px 132px minmax(0,1fr) auto;gap:var(--sp-4);align-items:center;padding:12px var(--sp-2)}
+/* the call sheet: one card per group, rows as a data grid */
+.callsheet{margin-top:36px}
+.grp{margin-bottom:12px;overflow:hidden}
+.grp > summary{list-style:none;cursor:pointer;display:grid;grid-template-columns:16px auto minmax(0,1fr) auto;gap:12px;align-items:center;padding:14px 20px;transition:background var(--d1)}
 .grp > summary::-webkit-details-marker{display:none}
-.grp > summary:hover{background:var(--paper-2)}
-.grp > summary .chev{transition:transform var(--d1);color:var(--ink-3)}
+.grp > summary:hover{background:var(--surface-2)}
+.grp > summary:focus-visible{outline:2px solid var(--focus);outline-offset:-2px;border-radius:var(--r-card)}
+.grp > summary .chev{width:14px;height:14px;transition:transform var(--d1);color:var(--ink-3)}
 .grp[open] > summary .chev{transform:rotate(90deg)}
-.grp .dept{font:700 20px/1 var(--f-display);letter-spacing:.02em}
-.grp .cnt{display:flex;gap:var(--sp-4);font:500 12px/16px var(--f-mono);color:var(--ink-2);flex-wrap:wrap}
-.grp .cnt .x{color:var(--ink-3)}
-.grp .why{font:400 12px/16px var(--f-mono);color:var(--ink-3);text-align:right}
+.grp .dept{font:600 15px/20px var(--f-text);color:var(--ink)}
+.grp .cnt{display:flex;flex-wrap:wrap;gap:6px}
+.grp .cnt span{display:inline-flex;align-items:center;gap:5px;height:22px;padding:0 8px;border-radius:999px;font:500 12px/1 var(--f-text);background:var(--surface-2);color:var(--ink-2)}
+.grp .cnt span b{font:600 12px/1 var(--f-mono);color:var(--ink)}
+.grp .cnt .run{background:var(--st-running-bg);color:var(--st-running)} .grp .cnt .run b{color:var(--st-running)}
+.grp .cnt .x{background:transparent;color:var(--ink-3);padding:0 4px}
+.grp .cnt .x b{color:var(--ink-3);font-weight:500}
+.grp .why{font:400 13px/18px var(--f-text);color:var(--ink-3);text-align:right}
 .grp .why b{color:var(--ink-2);font-weight:500}
-.rows{list-style:none;margin:0 0 var(--sp-4);padding:0 0 0 calc(18px + var(--sp-4) + var(--sp-2))}
-.row{display:grid;grid-template-columns:28px 22px minmax(0,1.3fr) minmax(0,1fr) 170px 130px 32px;gap:var(--sp-3);align-items:center;padding:7px var(--sp-2);border-top:1px solid var(--rule);font-size:13px;outline-offset:-2px}
-.row:hover,.row:focus-visible{background:var(--paper-2)}
+.grp .why .mono{font-size:12px}
+.rows{list-style:none;margin:0;padding:0;border-top:1px solid var(--rule)}
+.row{display:grid;grid-template-columns:24px 36px minmax(0,1.4fr) minmax(0,1fr) 170px 130px 32px;gap:14px;align-items:center;min-height:44px;padding:4px 20px;border-bottom:1px solid var(--rule);font:400 14px/18px var(--f-text);outline-offset:-2px;transition:background var(--d1)}
+.rows > .row:last-child{border-bottom:0}
+.row:hover,.row:focus-visible{background:var(--surface-2)}
+.row:focus-visible{outline:2px solid var(--focus)}
 .row .n{font:400 12px/16px var(--f-mono);color:var(--ink-3);text-align:right}
-.row .g{color:var(--ink-3);display:grid;place-items:center}
-.row .g.run{color:var(--st-running)} .row .g.blk{color:var(--ink-3)}
+.row .face{width:36px;height:36px;border-radius:6px;overflow:hidden;background:var(--stage);position:relative;display:block}
+.row .face img{width:100%;height:100%;object-fit:cover;display:block}
+.row .face .st{position:absolute;right:2px;bottom:2px;width:9px;height:9px;border-radius:50%;border:2px solid var(--surface)}
+.row .face.cov{display:grid;place-items:center;background:linear-gradient(160deg,hsl(var(--h) 32% 30%),hsl(calc(var(--h) + 30) 38% 14%));font:700 14px/1 var(--f-display);color:rgb(255 255 255 / .88);box-shadow:inset 2px 0 0 rgb(0 0 0 / .3)}
+.row .face.blk img{opacity:.6;filter:grayscale(.5)}
+.row .face.none{background:var(--surface-2);box-shadow:inset 0 0 0 1px var(--rule)}
 .row .u{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.row .u a{text-decoration:none} .row .u a:hover{text-decoration:underline}
-.row .u .id{font:600 12px/16px var(--f-mono);margin-right:6px}
-.row .b{color:var(--ink-2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.row .u a{text-decoration:none;color:var(--ink)} .row .u a:hover{text-decoration:underline;text-decoration-color:var(--rule-2);text-underline-offset:3px}
+.row .u .id{font:600 12px/18px var(--f-mono);margin-right:8px;color:var(--ink)}
+.row .b{color:var(--ink-3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-size:13px}
 .row .s{font:400 12px/16px var(--f-mono);color:var(--ink-2)}
-.row .t{font:400 12px/16px var(--f-mono);color:var(--ink-3);text-align:right}
-.row .t b{color:var(--ink);font-weight:500}
-.row.cols-h{font:500 11px/16px var(--f-mono);letter-spacing:.12em;text-transform:uppercase;color:var(--ink-3);border-top:0}
+.row .s.live{color:var(--st-running)}
+.row .t{font:400 12px/16px var(--f-mono);color:var(--ink-3);text-align:right;white-space:nowrap}
+.row .t b{color:var(--ink);font-weight:600}
+.row.cols-h{min-height:36px;font:500 12px/16px var(--f-text);letter-spacing:0;text-transform:none;color:var(--ink-3);background:none}
 .row.cols-h:hover{background:none}
-.sub{margin:var(--sp-2) 0 0}
-.sub > summary{list-style:none;cursor:pointer;display:flex;gap:var(--sp-3);align-items:center;padding:8px var(--sp-2);border-top:1px dashed var(--rule-2);font:400 12px/16px var(--f-mono);color:var(--ink-2)}
+details.sub{border-top:1px solid var(--rule)}
+.sub > summary{list-style:none;cursor:pointer;display:flex;gap:10px;align-items:center;padding:12px 20px;font:400 13px/18px var(--f-text);color:var(--ink-3);background:color-mix(in srgb,var(--surface-2) 45%,transparent)}
+.sub > summary:hover{background:var(--surface-2)}
 .sub > summary::-webkit-details-marker{display:none}
 .sub > summary b{color:var(--ink);font-weight:600}
-.sub > summary .chev{color:var(--ink-3);transition:transform var(--d1)}
+.sub > summary .mono{font-size:12px;color:var(--ink-2)}
+.sub > summary .chev{width:14px;height:14px;color:var(--ink-3);transition:transform var(--d1)}
 .sub[open] > summary .chev{transform:rotate(90deg)}
-.sub .rows{padding-left:0}
-.done-note{font-size:13px;color:var(--ink-3);padding:var(--sp-4) var(--sp-2);display:flex;gap:var(--sp-5);flex-wrap:wrap}
-.holds{margin-top:var(--sp-6)}
-.holds p{color:var(--ink-3);font-size:13px;margin:var(--sp-3) 0 0}
+.done-note{font:400 13px/18px var(--f-text);color:var(--ink-3);padding:6px 4px 0;display:flex;gap:20px;flex-wrap:wrap;align-items:center}
+.done-note .i{width:14px;height:14px;vertical-align:-2px}
+.holds{margin-top:28px}
+.holds .panel-b p{margin:0;color:var(--ink-3);font-size:13px}
 
+@media (max-width:1100px){
+  .row{grid-template-columns:24px 36px minmax(0,1fr) 150px 120px 32px}
+  .row .b{display:none}
+}
 @media (max-width:900px){
-  .row{grid-template-columns:24px 20px minmax(0,1fr) 110px 32px}
-  .row .b,.row .s{display:none}
+  .row{grid-template-columns:36px minmax(0,1fr) 110px 32px}
+  .row .n,.row .s{display:none}
   .row.cols-h{display:none}
+  .fig.sep{padding-left:0;border-left:0}
 }
 @media (max-width:640px){
-  .pagehead{padding-top:var(--sp-4);gap:var(--sp-3)}
-  .pagehead h1{font-size:28px;line-height:30px}
-  .pagehead .spacer{display:none}
-  .lanecard > header{padding:var(--sp-3) var(--sp-4);grid-template-columns:1fr;gap:var(--sp-2)}
-  .seg,.tl,.legend,.readout{display:none}
-  .phone-lane{display:block;list-style:none;margin:0;padding:0 var(--sp-4)}
-  .phone-lane li{display:grid;grid-template-columns:20px minmax(0,1fr) auto;gap:var(--sp-3);align-items:center;padding:10px 0;border-top:1px solid var(--rule);font-size:13px}
-  .phone-lane li:first-child{border-top:0}
+  .title-row h1{font-size:30px;line-height:32px}
+  .title-row .spacer{display:none}
+  .lanecard .panel-h{padding:14px 14px 0}
+  .figs{padding:12px 14px 4px;gap:8px 20px}
+  .fig b{font-size:22px;line-height:24px}
+  .lanecard .segmented,.tl,.legend,.readout{display:none}
+  .phone-lane{display:block;list-style:none;margin:8px 0 0;padding:0 14px}
+  .phone-lane li{display:grid;grid-template-columns:20px minmax(0,1fr) auto;gap:12px;align-items:center;padding:10px 0;border-top:1px solid var(--rule);font:400 13px/18px var(--f-text)}
   .phone-lane .id{font:600 12px/16px var(--f-mono);margin-right:6px}
   .phone-lane .when{font:400 12px/16px var(--f-mono);color:var(--ink-2);text-align:right}
   .phone-lane .i{color:var(--ink-3)}
   .phone-lane .now .i{color:var(--st-running)}
   .phone-lane .past .i.x{color:var(--st-failed)} .phone-lane .past .i.d{color:var(--st-deferred)}
-  .grp > summary{grid-template-columns:16px minmax(0,1fr) auto;row-gap:2px;min-height:52px}
-  .grp .dept{font-size:18px}
-  .grp .cnt{grid-column:2/-1;grid-row:2}
-  .grp .why{display:none}
-  .groups > .sec-h .meta,.groups > .sec-h .linkish{display:none}
-  .sub > summary{flex-wrap:wrap}
-  .rows{padding-left:0}
-  .row{grid-template-columns:20px minmax(0,1fr) auto 32px;min-height:44px}
-  .row .n{display:none}
-  .row .t{white-space:nowrap}
+  .eta{padding:12px 14px;gap:6px 14px}
+  .grp > summary{grid-template-columns:14px minmax(0,1fr);row-gap:8px;padding:12px 14px}
+  .grp .cnt{grid-column:2}
+  .grp .why{grid-column:2;text-align:left}
+  .row{grid-template-columns:36px minmax(0,1fr) auto 28px;padding:6px 14px;gap:10px}
+  .sub > summary{flex-wrap:wrap;padding:12px 14px}
+  .sh{flex-wrap:wrap;row-gap:2px}
+  .sh .sub{flex-basis:100%}
+  .sh .more{display:none}
 }
 </style>
 </head>
 <body data-page="queue">
 <aside id="side"></aside>
-<main class="wrap">
-  <div class="pagehead">
+<main class="page">
+  <div class="title-row">
     <h1>Queue</h1>
-    <div class="counts">
-      <span class="run"><svg class="i"><use href="assets/icons.svg#loader"/></svg>1 running</span>
-      <span><svg class="i"><use href="assets/icons.svg#circle"/></svg>92 queued</span>
-      <span><svg class="i"><use href="assets/icons.svg#circle-dashed"/></svg>7 blocked</span>
-      <span><svg class="i"><use href="assets/icons.svg#pause"/></svg>0 held</span>
-    </div>
+    <div class="tally"><span class="r"><b>1</b> running</span><span><b>92</b> queued</span><span><b>7</b> blocked</span><span><b>0</b> held</span></div>
     <span class="spacer"></span>
     <button class="btn" type="button" data-order="hold studio"><svg class="i"><use href="assets/icons.svg#pause"/></svg>Hold studio…</button>
   </div>
 
   <!-- ONE GPU = ONE LANE -->
-  <section class="lanecard" aria-labelledby="lane-h">
-    <header>
-      <h2 id="lane-h">The GPU</h2>
-      <div class="totals" id="totals"></div>
-      <div class="seg" role="group" aria-label="Range">
+  <section class="panel lanecard" aria-labelledby="lane-h">
+    <div class="panel-h">
+      <h2 id="lane-h">The GPU</h2><span class="sub">one lane · every run, the running one, and the queue as p50 ghosts</span>
+      <span class="spacer"></span>
+      <div class="segmented" role="group" aria-label="Range">
         <button type="button" data-range="24" aria-pressed="true">24 h</button><button type="button" data-range="72" aria-pressed="false">3 d</button><button type="button" data-range="168" aria-pressed="false">7 d</button>
       </div>
-    </header>
+    </div>
+    <div class="figs" id="totals"></div>
     <div class="tl"><svg id="lane" role="img" aria-label="GPU lane timeline"></svg></div>
     <div class="legend">
       <span><i class="sw done"></i>done</span><span><i class="sw failed"></i>refused / failed</span><span><i class="sw deferred"></i>deferred</span>
       <span><i class="sw killed"></i>killed</span><span><i class="sw running"></i>running → p50, whisker p10–p90</span>
-      <span><i class="sw ghost"></i>queued, p50 of a clean pass (2h38)</span><span><i class="sw idle"></i>GPU idle</span>
+      <span><i class="sw ghost"></i>queued, p50 of a clean pass (2 h 38)</span><span><i class="sw idle"></i>GPU idle</span>
     </div>
     <div class="readout" id="readout" aria-live="polite"></div>
     <ul class="phone-lane" id="phonelane"></ul>
-    <div class="eta-line"><span>Queue ETA (p50):</span><span>ep17 <b>~21:35</b></span><span>ep01 <b>~00:13</b></span><span>ep02 <b>~02:51</b></span><span>ep05 <b>~05:29</b></span><span>then refs · A Study in Scarlet</span></div>
+    <div class="eta"><span>Queue ETA (p50)</span><span class="e now"><span class="mono">ep17</span><b>~21:35</b></span><span class="e"><span class="mono">ep01</span><b>~00:13</b></span><span class="e"><span class="mono">ep02</span><b>~02:51</b></span><span class="e"><span class="mono">ep05</span><b>~05:29</b></span><span>then refs · A Study in Scarlet</span></div>
   </section>
 
   <!-- the call sheet, grouped by department -->
-  <section class="groups" aria-labelledby="q-h">
-    <div class="sec-h"><h2 id="q-h">Call sheet</h2><span class="meta">priority, then slate order · no scheduler yet</span><span class="spacer"></span><a class="linkish" href="#" data-keys>j / k to move</a></div>
+  <section class="callsheet" aria-labelledby="q-h">
+    <div class="sh"><h2 id="q-h">Call sheet</h2><span class="sub">priority, then slate order · no scheduler yet</span><span class="spacer"></span><a class="more" href="#" data-keys><span class="kbd">j</span>&nbsp;<span class="kbd">k</span>&nbsp;to move</a></div>
 
-    <details class="grp" open>
-      <summary><svg class="i chev"><use href="assets/icons.svg#chevron-right"/></svg><span class="dept">On the GPU</span><span class="cnt"><span>1 running</span></span><span class="why">lease until 19:41 · heartbeat 8 s</span></summary>
+    <details class="grp panel" open>
+      <summary><svg class="i chev"><use href="assets/icons.svg#chevron-right"/></svg><span class="dept">On the GPU</span><span class="cnt"><span class="run"><b>1</b> running</span></span><span class="why">lease until <span class="mono">19:41</span> · heartbeat <span class="mono">8 s</span></span></summary>
       <ul class="rows">
-        <li class="row" data-row tabindex="0"><span class="n">—</span><span class="g run"><svg class="i"><use href="assets/icons.svg#loader"/></svg></span><span class="u"><a href="unit-running.html"><span class="id">ep17</span>The Thunder Child</a></span><span class="b">The War of the Worlds</span><span class="s">07 board · 0/22</span><span class="t">done <b>~21:35</b></span>
+        <li class="row" data-row tabindex="0"><span class="n">—</span><span class="face"><img src="http://127.0.0.1:8700/thumb/20260827135508/160/episodes/ep17/storyboard/shot_04.png" alt="" loading="lazy"><i class="st running"></i></span><span class="u"><a href="unit-running.html"><span class="id">ep17</span>The Thunder Child</a></span><span class="b">The War of the Worlds</span><span class="s live">07 board · 0/22</span><span class="t">done <b>~21:35</b></span>
           <details class="rowmenu"><summary aria-label="Actions for ep17"><svg class="i"><use href="assets/icons.svg#ellipsis"/></svg></summary><div class="pop"><a href="unit-running.html"><svg class="i"><use href="assets/icons.svg#external-link"/></svg>Open</a><button type="button" data-order="hold ep17"><svg class="i"><use href="assets/icons.svg#pause"/></svg>Hold ep17…</button><button type="button" data-order="redo ep17 07"><svg class="i"><use href="assets/icons.svg#rotate-ccw"/></svg>Redo 07 board…</button></div></details></li>
       </ul>
     </details>
 
-    <details class="grp" id="q-episode" open>
-      <summary><svg class="i chev"><use href="assets/icons.svg#chevron-right"/></svg><span class="dept">episode</span><span class="cnt"><span>3 queued</span><span class="x">7 blocked</span><span class="x">20 done</span></span><span class="why">next: <b>ep01 The Eve of the War</b> ~21:35</span></summary>
+    <details class="grp panel" id="q-episode" open>
+      <summary><svg class="i chev"><use href="assets/icons.svg#chevron-right"/></svg><span class="dept">Episode</span><span class="cnt"><span><b>3</b> queued</span><span class="x"><b>7</b> blocked</span><span class="x"><b>20</b> done</span></span><span class="why">next: <b>ep01 The Eve of the War</b> · <span class="mono">~21:35</span></span></summary>
       <ul class="rows">
-        <li class="row cols-h"><span>#</span><span></span><span>unit</span><span>book</span><span>step</span><span style="text-align:right">starts (p50)</span><span></span></li>
-        <li class="row" data-row tabindex="0"><span class="n">1</span><span class="g"><svg class="i"><use href="assets/icons.svg#circle"/></svg></span><span class="u"><a href="book.html"><span class="id">ep01</span>The Eve of the War</a></span><span class="b">The War of the Worlds</span><span class="s">—</span><span class="t"><b>~21:35</b> · 2h38</span>
+        <li class="row cols-h"><span>#</span><span></span><span>Unit</span><span>Book</span><span>Step</span><span style="text-align:right">Starts (p50)</span><span></span></li>
+        <li class="row" data-row tabindex="0"><span class="n">1</span><span class="face" title="face today: an earlier cut"><img src="http://127.0.0.1:8700/thumb/20260827135508/160/episodes/ep01/review/work/b2c111e9/f03.png" alt="" loading="lazy"></span><span class="u"><a href="book.html"><span class="id">ep01</span>The Eve of the War</a></span><span class="b">The War of the Worlds</span><span class="s">—</span><span class="t"><b>~21:35</b> · 2h38</span>
           <details class="rowmenu"><summary aria-label="Actions for ep01"><svg class="i"><use href="assets/icons.svg#ellipsis"/></svg></summary><div class="pop"><button type="button" data-order="bump ep01"><svg class="i"><use href="assets/icons.svg#arrow-up"/></svg>Bump to top<span class="kbd k">B</span></button><button type="button" data-order="hold ep01"><svg class="i"><use href="assets/icons.svg#pause"/></svg>Hold…<span class="kbd k">H</span></button><a href="book.html"><svg class="i"><use href="assets/icons.svg#external-link"/></svg>Open</a></div></details></li>
-        <li class="row" data-row tabindex="0"><span class="n">2</span><span class="g"><svg class="i"><use href="assets/icons.svg#circle"/></svg></span><span class="u"><a href="book.html"><span class="id">ep02</span>The Falling Star</a></span><span class="b">The War of the Worlds</span><span class="s">—</span><span class="t"><b>~00:13</b> · 2h38</span>
+        <li class="row" data-row tabindex="0"><span class="n">2</span><span class="face" title="face today: an earlier take"><img src="http://127.0.0.1:8700/thumb/20260827135508/160/episodes/ep02/review/T11_mid.png" alt="" loading="lazy"></span><span class="u"><a href="book.html"><span class="id">ep02</span>The Falling Star</a></span><span class="b">The War of the Worlds</span><span class="s">—</span><span class="t"><b>~00:13</b> · 2h38</span>
           <details class="rowmenu"><summary aria-label="Actions for ep02"><svg class="i"><use href="assets/icons.svg#ellipsis"/></svg></summary><div class="pop"><button type="button" data-order="bump ep02"><svg class="i"><use href="assets/icons.svg#arrow-up"/></svg>Bump to top<span class="kbd k">B</span></button><button type="button" data-order="hold ep02"><svg class="i"><use href="assets/icons.svg#pause"/></svg>Hold…<span class="kbd k">H</span></button><a href="book.html"><svg class="i"><use href="assets/icons.svg#external-link"/></svg>Open</a></div></details></li>
-        <li class="row" data-row tabindex="0"><span class="n">3</span><span class="g"><svg class="i"><use href="assets/icons.svg#circle"/></svg></span><span class="u"><a href="book.html"><span class="id">ep05</span>The Heat-Ray</a></span><span class="b">The War of the Worlds</span><span class="s">— · 2.4 GPU-h in</span><span class="t"><b>~02:51</b> · 2h38</span>
+        <li class="row" data-row tabindex="0"><span class="n">3</span><span class="face"><img src="http://127.0.0.1:8700/thumb/20260827135508/160/episodes/ep05/storyboard/shot_06.png" alt="" loading="lazy"></span><span class="u"><a href="book.html"><span class="id">ep05</span>The Heat-Ray</a></span><span class="b">The War of the Worlds</span><span class="s">— · 2.4 GPU-h in</span><span class="t"><b>~02:51</b> · 2h38</span>
           <details class="rowmenu"><summary aria-label="Actions for ep05"><svg class="i"><use href="assets/icons.svg#ellipsis"/></svg></summary><div class="pop"><button type="button" data-order="bump ep05"><svg class="i"><use href="assets/icons.svg#arrow-up"/></svg>Bump to top<span class="kbd k">B</span></button><button type="button" data-order="hold ep05"><svg class="i"><use href="assets/icons.svg#pause"/></svg>Hold…<span class="kbd k">H</span></button><a href="book.html"><svg class="i"><use href="assets/icons.svg#external-link"/></svg>Open</a></div></details></li>
       </ul>
       <details class="sub">
-        <summary><svg class="i chev"><use href="assets/icons.svg#chevron-right"/></svg><svg class="i"><use href="assets/icons.svg#circle-dashed"/></svg><b>7 waiting on refs/04</b> · A Study in Scarlet · ep01 ep02 ep10–ep14</summary>
+        <summary><svg class="i chev"><use href="assets/icons.svg#chevron-right"/></svg><svg class="i"><use href="assets/icons.svg#circle-dashed"/></svg><b>7 waiting on <span class="mono">refs/04</span></b> · A Study in Scarlet · <span class="mono">ep01 ep02 ep10–ep14</span></summary>
         <ul class="rows" id="blocked"></ul>
       </details>
     </details>
 
-    <details class="grp" id="q-refs">
-      <summary><svg class="i chev"><use href="assets/icons.svg#chevron-right"/></svg><span class="dept">refs</span><span class="cnt"><span>29 queued</span><span class="x">2 started</span><span class="x">1 done</span></span><span class="why">next: <b>A Study in Scarlet</b> · 03 voices 2/4</span></summary>
+    <details class="grp panel" id="q-refs">
+      <summary><svg class="i chev"><use href="assets/icons.svg#chevron-right"/></svg><span class="dept">Refs</span><span class="cnt"><span><b>29</b> queued</span><span class="x"><b>2</b> started</span><span class="x"><b>1</b> done</span></span><span class="why">next: <b>A Study in Scarlet</b> · <span class="mono">03 voices 2/4</span></span></summary>
       <ul class="rows" data-group="refs"></ul>
     </details>
-    <details class="grp" id="q-screenplay">
-      <summary><svg class="i chev"><use href="assets/icons.svg#chevron-right"/></svg><span class="dept">screenplay</span><span class="cnt"><span>30 queued</span><span class="x">none started</span></span><span class="why">next: <b>A Study in Scarlet</b></span></summary>
+    <details class="grp panel" id="q-screenplay">
+      <summary><svg class="i chev"><use href="assets/icons.svg#chevron-right"/></svg><span class="dept">Screenplay</span><span class="cnt"><span><b>30</b> queued</span><span class="x">none started</span></span><span class="why">next: <b>A Study in Scarlet</b></span></summary>
       <ul class="rows" data-group="screenplay"></ul>
     </details>
-    <details class="grp" id="q-trailer">
-      <summary><svg class="i chev"><use href="assets/icons.svg#chevron-right"/></svg><span class="dept">trailer</span><span class="cnt"><span>30 queued</span><span class="x">none started</span></span><span class="why">next: <b>A Study in Scarlet</b></span></summary>
+    <details class="grp panel" id="q-trailer">
+      <summary><svg class="i chev"><use href="assets/icons.svg#chevron-right"/></svg><span class="dept">Trailer</span><span class="cnt"><span><b>30</b> queued</span><span class="x">none started</span></span><span class="why">next: <b>A Study in Scarlet</b></span></summary>
       <ul class="rows" data-group="trailer"></ul>
     </details>
-    <div class="done-note"><span><svg class="i" style="color:var(--st-done)"><use href="assets/icons.svg#check"/></svg> analysis · all 30 done</span><span>Rows carry no forms: bump and hold live behind ⋯ (was 92 inputs).</span></div>
+    <div class="done-note"><span><svg class="i" style="color:var(--st-done)"><use href="assets/icons.svg#check"/></svg> Analysis · all 30 done</span><span>Rows carry no forms: bump and hold live behind ⋯ (was 92 inputs).</span></div>
   </section>
 
-  <section class="holds" aria-labelledby="h-h">
-    <div class="sec-h" style="display:flex;gap:var(--sp-3);border-bottom:1px solid var(--rule-2);padding-bottom:var(--sp-2)"><h2 id="h-h" style="font-size:18px">Holds</h2><span class="meta">0</span></div>
-    <p>No holds. A studio hold stops every run before its next GPU step; a hold older than 24 h joins Needs you.</p>
+  <section class="panel holds" aria-labelledby="h-h">
+    <div class="panel-h"><h2 id="h-h">Holds</h2><span class="count">0</span></div>
+    <div class="panel-b"><p>No holds. A studio hold stops every run before its next GPU step; a hold older than 24 h joins Needs you.</p></div>
   </section>
 </main>
 
@@ -438,11 +454,12 @@ var WORD = { done: 'done', failed: 'refused', deferred: 'deferred', escalated: '
     svg.innerHTML = s;
     busy += -ra;
     var refused = n.failed + n.escalated;
+    var fig = function (cls, v, l) { return '<div class="fig ' + cls + '"><b>' + v + '</b><span>' + l + '</span></div>'; };
     document.getElementById('totals').innerHTML =
-      '<span>last ' + (range <= 24 ? '24 h' : range / 24 + ' d') + ': GPU busy <b>' + dur(busy) + '</b> of ' + range + ' h</span>' +
-      '<span><b>' + (runs.length + 1) + '</b> runs</span>' +
-      '<span class="bad"><b>' + refused + '</b> refused</span><span><b>' + n.deferred + '</b> deferred</span><span><b>' + n.killed + '</b> killed</span><span><b>' + n.done + '</b> done</span>' +
-      '<span>longest idle <b>' + dur(longest[0]) + '</b> (' + dayOf(longest[1]).slice(0, 3) + ' ' + hhmm(longest[1]) + ' → ' + hhmm(longest[2]) + ')</span>';
+      fig('', dur(busy) + '<small>of ' + range + ' h</small>', 'GPU busy, last ' + (range <= 24 ? '24 h' : range / 24 + ' d')) +
+      fig('', runs.length + 1, 'runs') + fig('bad', refused, 'refused') + fig('def', n.deferred, 'deferred') +
+      fig('', n.killed, 'killed') + fig('', n.done, 'done') +
+      fig('sep', dur(longest[0]), 'longest idle · ' + dayOf(longest[1]).slice(0, 3) + ' ' + hhmm(longest[1]) + ' → ' + hhmm(longest[2]));
     svg.querySelectorAll('.bar').forEach(function (g) {
       g.addEventListener('click', function () { pick(g.dataset.i); });
       g.addEventListener('keydown', function (ev) { if (ev.key === 'Enter' || ev.key === ' ') { ev.preventDefault(); pick(g.dataset.i); } });
@@ -455,19 +472,19 @@ var WORD = { done: 'done', failed: 'refused', deferred: 'deferred', escalated: '
     var ro = document.getElementById('readout');
     if (i === 'run') {
       ro.dataset.oc = 'running';
-      ro.innerHTML = '<span class="pill running">' + I('loader') + 'running</span><div><span class="k">ep17 The Thunder Child</span> · 18:55 → now (26 min) · 07 board, panel 00 of 22 · <span class="d">done around 21:35 · p10 20:20 · p90 22:40</span></div><a class="btn" href="unit-running.html">Open run' + I('chevron-right') + '</a>';
+      ro.innerHTML = '<span class="pill running">' + I('loader') + 'running</span><div><span class="k"><span class="mono">ep17</span> The Thunder Child</span> · 18:55 → now (26 min) · 07 board, panel 00 of 22 · <span class="d">done around 21:35 · p10 20:20 · p90 22:40</span></div><a class="btn" href="unit-running.html">Open run' + I('chevron-right') + '</a>';
       return;
     }
     var r = RUNS[+i]; ro.dataset.oc = r[3];
     var page = r[0] === 'ep17' ? 'unit-running.html' : 'unit-finished.html?u=' + r[0];
     ro.innerHTML = '<span class="pill ' + (r[3] === 'killed' ? 'held' : r[3]) + '">' + I({ done: 'check', failed: 'x', deferred: 'corner-up-left', killed: 'minus', escalated: 'hand' }[r[3]]) + WORD[r[3]] + '</span>' +
-      '<div><span class="k">' + r[0] + '</span> · ' + dayOf(r[1]).slice(0, 3) + ' ' + hhmm(r[1]) + ' → ' + hhmm(r[2]) + ' (' + dur(r[2] - r[1]) + ') · ended at ' + r[4] + ' ' + (STEPS[r[4]] || '') +
+      '<div><span class="k mono">' + r[0] + '</span> · ' + dayOf(r[1]).slice(0, 3) + ' ' + hhmm(r[1]) + ' → ' + hhmm(r[2]) + ' (' + dur(r[2] - r[1]) + ') · ended at ' + r[4] + ' ' + (STEPS[r[4]] || '') +
       (r[5] ? '<div class="d">' + r[5].replace(/</g, '&lt;') + '</div>' : '') + '</div><a class="btn" href="' + page + '">Open run' + I('chevron-right') + '</a>';
   }
   var range = 24;
-  document.querySelectorAll('.seg button').forEach(function (b) {
+  document.querySelectorAll('.lanecard .segmented button').forEach(function (b) {
     b.addEventListener('click', function () {
-      document.querySelectorAll('.seg button').forEach(function (o) { o.setAttribute('aria-pressed', String(o === b)); });
+      document.querySelectorAll('.lanecard .segmented button').forEach(function (o) { o.setAttribute('aria-pressed', String(o === b)); });
       range = +b.dataset.range; draw(range);
     });
   });
@@ -488,8 +505,15 @@ var WORD = { done: 'done', failed: 'refused', deferred: 'deferred', escalated: '
       '<button type="button" data-order="hold ' + k + '">' + I('pause') + 'Hold…</button>' +
       '<a href="book.html">' + I('external-link') + 'Open</a></div></details>';
   }
+  function cover(name) {
+    var w = name.replace(/;.*$/, '').replace(/^(The|A|An)\s+/i, '').split(/[\s.-]+/).filter(function (x) { return /^[A-Z]/.test(x); });
+    var h = 0; for (var i = 0; i < name.length; i++) h = (h * 31 + name.charCodeAt(i)) % 360;
+    return '<span class="face cov" style="--h:' + h + '" aria-hidden="true">' + ((w[0] || name)[0] + (w[1] ? w[1][0] : '')) + '</span>';
+  }
+  var SIS_FACE = { ep01: 'boards/plates/plate_corridor.png', ep02: 'boards/panels/Q03_0E.before.png', ep10: 'boards/panels/Q20_0.before.png', ep11: 'boards/panels/Q13_0.before.png',
+    ep12: 'boards/plates/plate_drebber_house_bier.png', ep13: 'boards/panels/panel_Q04_0.png', ep14: 'boards/plates/plate_garden_path_morning.png' };
   function row(n, book, step, k) {
-    return '<li class="row" data-row tabindex="0"><span class="n">' + n + '</span><span class="g">' + I('circle') + '</span>' +
+    return '<li class="row" data-row tabindex="0"><span class="n">' + n + '</span>' + cover(book) +
       '<span class="u"><a href="book.html">' + book + '</a></span><span class="b">' + k.split(' ')[0] + '</span><span class="s">' + (step || '—') + '</span><span class="t"></span>' + menu(k) + '</li>';
   }
   document.querySelector('[data-group="refs"]').innerHTML = QUEUE.refs.map(function (r, i) { return row(i + 1, r[0], r[1], 'refs ' + r[0]); }).join('');
@@ -497,7 +521,7 @@ var WORD = { done: 'done', failed: 'refused', deferred: 'deferred', escalated: '
     document.querySelector('[data-group="' + g + '"]').innerHTML = QUEUE.shelf.map(function (b, i) { return row(i + 1, b, '', g + ' ' + b); }).join('');
   });
   document.getElementById('blocked').innerHTML = QUEUE.blocked.map(function (e) {
-    return '<li class="row" data-row tabindex="0"><span class="n"></span><span class="g blk">' + I('circle-dashed') + '</span><span class="u"><a href="book.html?b=scarlet"><span class="id">' + e[0] + '</span>' + e[1] + '</a></span><span class="b">A Study in Scarlet</span><span class="s">waits on refs/04</span><span class="t"></span>' + menu('episode ' + e[0]) + '</li>';
+    return '<li class="row" data-row tabindex="0"><span class="n"></span><span class="face blk"><img loading="lazy" alt="" src="http://127.0.0.1:8700/thumb/20260822113400/160/episodes/' + e[0] + '/' + SIS_FACE[e[0]] + '"></span><span class="u"><a href="book.html?b=scarlet"><span class="id">' + e[0] + '</span>' + e[1] + '</a></span><span class="b">A Study in Scarlet</span><span class="s">waits on refs/04</span><span class="t"></span>' + menu('episode ' + e[0]) + '</li>';
   }).join('');
 })();
 </script>

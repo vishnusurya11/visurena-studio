@@ -12,28 +12,141 @@
 <link rel="stylesheet" href="assets/v2.css">
 <script src="assets/shell.js"></script>
 <link rel="stylesheet" href="assets/dept.css">
+<style>
+/* ---------- Books v2: a poster-forward shelf. Unlayered: wins over dept.css (@layer pages). */
+[hidden]{display:none!important}
+.title-row{display:flex;flex-wrap:wrap;align-items:flex-end;gap:8px 16px;margin:4px 0 24px}
+.title-row h1{font:700 34px/36px var(--f-display);letter-spacing:.01em}
+.title-row .sub{margin:0;font:400 13px/18px var(--f-text);color:var(--ink-3);padding-bottom:3px}
+.title-row .sub b{font:600 13px/18px var(--f-mono);color:var(--ink)}
+.title-row .find{margin-left:auto;position:relative;display:flex;align-items:center}
+.title-row .find .i{position:absolute;left:10px;width:14px;height:14px;color:var(--ink-3);pointer-events:none}
+.filter{height:32px;min-width:240px;padding:0 10px 0 32px;border:1px solid var(--rule-2);border-radius:var(--r-ctl);background:var(--surface);color:var(--ink);font:400 13px/18px var(--f-text)}
+.filter:focus{outline:2px solid var(--focus);outline-offset:1px;border-color:transparent}
+.sh .sub b{font:500 13px/18px var(--f-mono);color:var(--ink-2)}
+
+/* live books: large cards */
+.shelf-live{display:grid;grid-template-columns:repeat(auto-fit,minmax(420px,1fr));gap:16px;margin:0 0 40px}
+.bcard{text-decoration:none;color:var(--ink);transition:border-color var(--d1),background var(--d1)}
+.bcard.live{display:flex;flex-direction:column;overflow:hidden;border:1px solid var(--rule);box-shadow:none}
+.bcard.live:hover,.bcard.live:focus-visible{border-color:var(--rule-2);box-shadow:none}
+.mosaic{display:grid;grid-template-columns:repeat(4,1fr);grid-template-rows:auto auto;gap:4px;padding:4px;background:var(--stage)}
+.mosaic .pic{border-radius:6px;aspect-ratio:1}
+.mosaic .pic:nth-child(-n+2){grid-column:span 2;aspect-ratio:16/9}
+.mosaic .pic img{transition:transform var(--d3) var(--ease-out)}
+.bcard.live:hover .mosaic .pic img{transform:scale(1.03)}
+.mosaic .tag{font:600 11px/1 var(--f-mono)}
+.mosaic .tag.r{top:8px;bottom:auto}
+.mosaic .tag.live{color:#fff;background:color-mix(in srgb,var(--st-running-bar) 85%,#000)}
+.mosaic .tag.flag{color:var(--st-flagged)}
+.bcard.live .body{display:flex;flex-direction:column;gap:16px;padding:18px 20px 20px}
+.bcard .hd{display:flex;align-items:flex-start;justify-content:space-between;gap:16px}
+.bcard h3{font:700 26px/28px var(--f-display);letter-spacing:.01em}
+.bcard .au{display:block;margin-top:2px;font:400 13px/18px var(--f-text);color:var(--ink-3)}
+.bcard .last{font:400 12px/16px var(--f-mono);color:var(--ink-3);white-space:nowrap}
+.figs{display:flex;flex-wrap:wrap;gap:6px 28px}
+.figs > span{display:flex;flex-direction:column}
+.figs b{font:700 28px/30px var(--f-display);letter-spacing:.01em;font-variant-numeric:tabular-nums}
+.figs small{font:500 12px/16px var(--f-text);color:var(--ink-3)}
+.figs .need b{color:var(--st-flagged)}
+/* five labelled department mini bars */
+.dbars{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:12px}
+.db{display:flex;flex-direction:column;gap:6px;min-width:0}
+.dl{font:500 12px/16px var(--f-text);color:var(--ink-2)}
+.mb{display:flex;gap:1px;height:6px;border-radius:3px;background:var(--surface-2);box-shadow:inset 0 0 0 1px var(--rule);overflow:hidden}
+.mb i{display:block;height:100%}
+.mb .done{background:var(--st-done-bar)} .mb .flagged{background:var(--st-flagged-bar)} .mb .running{background:var(--st-running-bar)}
+.mb .blocked{background:repeating-linear-gradient(45deg,var(--line) 0 2px,transparent 2px 5px)}
+.mb .disk{background:repeating-linear-gradient(90deg,var(--st-done-bar) 0 3px,transparent 3px 5px);opacity:.8}
+.dw{font:400 11px/14px var(--f-mono);color:var(--ink-3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.dw.done{color:var(--st-done)} .dw.flagged{color:var(--st-flagged)} .dw.running{color:var(--st-running)}
+.bcard .status{display:flex;flex-wrap:wrap;gap:4px 18px;font:400 13px/18px var(--f-text);color:var(--ink-3)}
+.bcard .status:empty{display:none}
+.bcard .status .run{color:var(--st-running);display:inline-flex;align-items:center;gap:8px}
+.bcard .status .run i{width:7px;height:7px;border-radius:50%;background:currentColor;box-shadow:0 0 0 3px var(--st-running-bg);animation:breathe 2.4s var(--ease-out) infinite}
+.bcard .mono{font:500 12px/18px var(--f-mono);color:var(--ink-2)}
+
+/* the rest of the shelf: compact cards with a cover-like monogram */
+.shelf{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:12px;margin:0}
+.bcard.small{display:grid;grid-template-columns:56px minmax(0,1fr);gap:14px;align-items:start;padding:12px;background:var(--surface);border:1px solid var(--rule);border-radius:var(--r-card);box-shadow:none}
+.bcard.small:hover,.bcard.small:focus-visible{background:var(--surface-2);border-color:var(--rule-2);box-shadow:none}
+.cover{position:relative;width:56px;aspect-ratio:2/3;border-radius:4px 6px 6px 4px;overflow:hidden;display:grid;place-items:center;
+  background:linear-gradient(160deg,hsl(var(--h) 32% 30%),hsl(calc(var(--h) + 30) 38% 14%));box-shadow:inset 3px 0 0 rgb(0 0 0 / .28),inset 0 0 0 1px rgb(255 255 255 / .07),0 2px 6px rgb(0 0 0 / .35)}
+.cover .ci{font:700 22px/1 var(--f-display);color:rgb(255 255 255 / .9);letter-spacing:.02em}
+.cover .cb{position:absolute;left:8px;right:8px;bottom:9px;height:1px;background:rgb(255 255 255 / .25)}
+.cover::after{content:"";position:absolute;left:8px;right:8px;top:9px;height:1px;background:rgb(255 255 255 / .25)}
+.bcard.small .body{display:flex;flex-direction:column;gap:2px;min-width:0;padding:2px 0 0}
+.bcard.small h3{font:600 14px/19px var(--f-text);letter-spacing:0;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.bcard.small .au{margin:0;font-size:12px;line-height:16px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.bcard.small .meta{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:6px 8px;margin-top:10px}
+.dticks{display:flex;gap:3px}
+.dticks i{width:18px;height:18px;display:grid;place-items:center;border-radius:4px;font:600 10px/1 var(--f-mono);font-style:normal;color:var(--ink-3);box-shadow:inset 0 0 0 1px var(--rule-2)}
+.dticks i.done{background:var(--st-done-bg);color:var(--st-done);box-shadow:none}
+.dticks i.disk{color:var(--st-done);box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--st-done-bar) 60%,transparent);background:repeating-linear-gradient(90deg,transparent 0 3px,color-mix(in srgb,var(--st-done-bar) 14%,transparent) 3px 5px)}
+.dticks i.flagged{background:var(--st-flagged-bg);color:var(--st-flagged);box-shadow:none}
+.dticks i.running{background:var(--st-running-bg);color:var(--st-running);box-shadow:none}
+.dticks i.blocked{box-shadow:none;outline:1px dashed var(--line);outline-offset:-1px}
+.ch{font:400 12px/16px var(--f-mono);color:var(--ink-3);white-space:nowrap}
+.ch b{font-weight:500;color:var(--ink-2)}
+
+/* legend */
+.legend2{display:flex;flex-wrap:wrap;gap:6px 18px;margin:16px 0 0;font:400 12px/16px var(--f-text);color:var(--ink-3)}
+.legend2 span{display:inline-flex;align-items:center;gap:7px}
+.legend2 .mb{width:22px}
+.legend2 .mb i{width:100%}
+
+:root[data-palette="graphite"] .cover{background:linear-gradient(160deg,hsl(var(--h) 30% 42%),hsl(calc(var(--h) + 30) 34% 24%))}
+
+@media (max-width:1100px){.shelf-live{grid-template-columns:1fr}}
+@media (max-width:640px){
+  .title-row h1{font-size:30px;line-height:32px}
+  .title-row .find{margin-left:0;width:100%}
+  .sh{flex-wrap:wrap;row-gap:2px}
+  .sh h2{white-space:nowrap}
+  .sh .sub{flex-basis:100%}
+  .mosaic .tag{font-size:10px;left:6px;bottom:6px}
+  .filter{width:100%;min-width:0}
+  .shelf-live{grid-template-columns:1fr;margin-bottom:32px}
+  .bcard.live .body{padding:14px 14px 16px;gap:14px}
+  .bcard h3{font-size:22px;line-height:24px}
+  .figs{gap:6px 20px}
+  .figs b{font-size:24px;line-height:26px}
+  .dbars{grid-template-columns:repeat(5,minmax(0,1fr));gap:8px}
+  .dl{font-size:11px}
+  .dw{font-size:10px}
+  .shelf{grid-template-columns:1fr;gap:8px}
+  .bcard.small{grid-template-columns:40px minmax(0,1fr);padding:10px;gap:12px}
+  .cover{width:40px}
+  .cover .ci{font-size:17px}
+  .cover .cb,.cover::after{left:6px;right:6px}
+  .bcard.small .meta{margin-top:6px}
+}
+</style>
 </head>
 <body data-page="books">
 <aside id="side"></aside>
-<main class="wrap">
+<main class="page">
   <nav class="crumbs" aria-label="Breadcrumb"><a href="index.html">Studio</a><svg class="i"><use href="assets/icons.svg#chevron-right"/></svg><span aria-current="page">Books</span></nav>
-  <header class="phead">
-    <div><h1>Books</h1></div>
+  <div class="title-row">
+    <h1>Books</h1>
     <p class="sub" id="sub"></p>
-    <div class="acts"><input class="filter" id="q" type="search" placeholder="Filter the shelf…" aria-label="Filter books"></div>
-  </header>
-  <p class="note" style="display:flex;gap:12px;flex-wrap:wrap;align-items:center">Departments:
-    <span class="dms"><span class="dm done">A</span></span>analysis
-    <span class="dms"><span class="dm disk">S</span></span>screenplay
-    <span class="dms"><span class="dm">T</span></span>trailer
-    <span class="dms"><span class="dm flagged">R</span></span>refs
-    <span class="dms"><span class="dm running">E</span></span>episode
-    <span style="flex-basis:100%">filled = done in the ledger · dotted = files on disk, not in the ledger · amber = flagged · blue = running · dashed = blocked · empty = queued</span></p>
-  <section><div class="shelf-live" id="live"></div></section>
-  <section class="section" style="margin-top:32px">
-    <header><h2>On the shelf</h2><span class="note" id="restn"></span></header>
-    <div class="shelf" id="shelf"></div>
-  </section>
+    <label class="find"><svg class="i"><use href="assets/icons.svg#search"/></svg><input class="filter" id="q" type="search" placeholder="Filter the shelf…" aria-label="Filter books"></label>
+  </div>
+
+  <div class="sh"><h2>Making episodes</h2><span class="sub">latest pictures first · department progress under each</span></div>
+  <section class="shelf-live" id="live" aria-label="Books making episodes"></section>
+
+  <div class="sh"><h2>On the shelf</h2><span class="sub" id="restn"></span></div>
+  <section class="shelf" id="shelf" aria-label="Other books"></section>
+  <p class="legend2" aria-label="Legend">
+    <span><span class="mb"><i class="done"></i></span>done in the ledger</span>
+    <span><span class="mb"><i class="disk"></i></span>files on disk, not in the ledger</span>
+    <span><span class="mb"><i class="flagged"></i></span>flagged</span>
+    <span><span class="mb"><i class="running"></i></span>running</span>
+    <span><span class="mb"><i class="blocked"></i></span>blocked</span>
+    <span><span class="mb"></span>queued</span>
+    <span>Letters: <b class="mono">A</b> analysis · <b class="mono">S</b> screenplay · <b class="mono">T</b> trailer · <b class="mono">R</b> refs · <b class="mono">E</b> episode</span>
+  </p>
 </main>
 <script src="assets/dept_data.js"></script>
 <script src="assets/dept.js"></script>

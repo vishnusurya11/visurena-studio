@@ -6,42 +6,207 @@
 <title>(5) ● ep17 07 board · ~21:35 · The War of the Worlds — Visurena</title>
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='16' cy='16' r='11' fill='none' stroke='%23d6cfc0' stroke-width='5'/%3E%3Cpath d='M16 5a11 11 0 0 1 11 11' fill='none' stroke='%231f5a86' stroke-width='5'/%3E%3Ccircle cx='26.5' cy='5.5' r='5' fill='%23b07a12'/%3E%3C/svg%3E">
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
 <link rel="stylesheet" href="assets/board.css">
 <link rel="stylesheet" href="assets/shell.css">
 <link rel="stylesheet" href="assets/v2.css">
 <script src="assets/shell.js"></script>
 <link rel="stylesheet" href="assets/dept.css">
+<style>
+/* ---------- Book v2: a season page (DIRECTION_v2 §Other pages). Unlayered: wins over dept.css's page layer. */
+.bk-hero{position:relative;overflow:hidden;border-radius:14px;min-height:440px;display:grid;grid-template-columns:minmax(0,1fr) 270px;gap:32px;align-items:end;padding:40px 40px 36px;background:#0b0c0e;color:#f2f2f3;isolation:isolate;box-shadow:0 0 0 1px var(--rule)}
+.bk-hero .bg{position:absolute;inset:0;z-index:-2;background:#0b0c0e center 30%/cover no-repeat;transform:scale(1.04);filter:saturate(.9)}
+.bk-hero::before{content:"";position:absolute;inset:0;z-index:-1;background:linear-gradient(90deg,rgb(11 12 14 / .97) 0%,rgb(11 12 14 / .88) 34%,rgb(11 12 14 / .45) 62%,rgb(11 12 14 / .2) 100%),linear-gradient(0deg,rgb(11 12 14 / .9) 0%,transparent 45%)}
+.bk-hero .in{min-width:0;display:flex;flex-direction:column;gap:14px}
+.bk-hero .eyebrow{text-transform:none;letter-spacing:0;display:flex;flex-wrap:wrap;align-items:center;gap:6px 12px;font:500 13px/18px var(--f-text);color:rgb(255 255 255 / .72)}
+.bk-hero .eyebrow .kind{font-weight:600;display:inline-flex;align-items:center;gap:6px;height:24px;padding:0 9px;border-radius:999px;background:rgb(255 255 255 / .1);color:#fff;backdrop-filter:blur(6px)}
+.bk-hero .eyebrow .kind .i{width:13px;height:13px}
+.bk-hero .eyebrow .mono{font:400 12px/18px var(--f-mono);color:rgb(255 255 255 / .5)}
+.bk-hero h1{font:700 76px/72px var(--f-display);letter-spacing:.005em;color:#fff;text-wrap:balance}
+.bk-hero .blurb{margin:0;max-width:60ch;font:400 15px/22px var(--f-text);color:rgb(255 255 255 / .78)}
+.bk-hero .kv{display:flex;flex-wrap:wrap;gap:12px 26px;margin:8px 0 4px;padding:0}
+.bk-hero .kv div{display:flex;flex-direction:column-reverse;gap:2px}
+.bk-hero .kv dt{font:500 12px/16px var(--f-text);letter-spacing:0;text-transform:none;color:rgb(255 255 255 / .6)}
+.bk-hero .kv dd{margin:0;display:flex;align-items:baseline;gap:6px;font:700 34px/36px var(--f-display);letter-spacing:.01em;font-variant-numeric:tabular-nums;color:#fff;white-space:nowrap}
+.bk-hero .kv dd small{font:400 12px/16px var(--f-text);margin:0;color:rgb(255 255 255 / .6);letter-spacing:0}
+.bk-hero .kv dd span[style]{color:#e9b44c!important}
+.bk-hero .acts{display:flex;flex-wrap:wrap;gap:8px;margin:6px 0 0;justify-content:flex-start}
+.bk-hero .btn{height:38px;padding:0 16px;font-size:14px}
+.bk-hero .btn.light{background:#fff;color:#0b0c0e;border-color:#fff}
+.bk-hero .btn.light:hover{background:#e6e6e6}
+.bk-hero .btn.glass{background:rgb(255 255 255 / .1);border-color:rgb(255 255 255 / .14);color:#fff;backdrop-filter:blur(8px)}
+.bk-hero .btn.glass:hover{background:rgb(255 255 255 / .18)}
+.bk-hero .feat{display:grid;gap:10px;text-decoration:none;color:#fff;min-width:0}
+.bk-hero .feat .pic{aspect-ratio:1;border-radius:10px;box-shadow:0 0 0 1px rgb(255 255 255 / .12),0 20px 50px rgb(0 0 0 / .6)}
+.bk-hero .feat:hover .pic img{transform:scale(1.03)}
+.bk-hero .feat .pic .tag{top:10px;bottom:auto;left:10px}
+.bk-hero .feat .ft{font:500 15px/20px var(--f-text)}
+.bk-hero .feat .ft .id{font:600 13px/20px var(--f-mono);color:rgb(255 255 255 / .55);margin-right:6px}
+.bk-hero .feat .chips{display:flex;flex-wrap:wrap;gap:4px}
+.bk-hero .feat .chip2{background:rgb(0 0 0 / .45);border-color:rgb(255 255 255 / .1);color:rgb(255 255 255 / .8);backdrop-filter:blur(6px)}
+.bk-hero .feat .chip2 b{color:#e9b44c}
+.bk-hero .feat .chip2.ok b{color:#86cf95}
+
+.sect{margin-top:40px}
+.sh .chip2{height:24px}
+
+/* season wall: poster grid */
+.wall{display:grid;grid-template-columns:repeat(auto-fill,minmax(176px,1fr));gap:24px 16px}
+.part{grid-column:1/-1;display:flex;align-items:baseline;gap:10px;border:0;padding:0;margin:8px 0 -4px}
+.part h3{font:600 15px/20px var(--f-text);letter-spacing:0}
+.part .note{font:400 13px/18px var(--f-text);color:var(--ink-3)}
+.wall > .part:not(:first-child){margin-top:20px}
+.poster{gap:8px}
+.poster .frame{border-radius:var(--r-pic);box-shadow:inset 0 0 0 1px rgb(255 255 255 / .05);background:var(--stage)}
+.poster .frame img{object-fit:cover;transition:transform var(--d3) var(--ease-out)}
+.poster:hover .frame,.poster:focus-visible .frame{box-shadow:0 0 0 2px var(--focus)}
+.poster:hover .frame img{transform:scale(1.03)}
+.poster .frame.flagged{box-shadow:inset 0 0 0 1px rgb(255 255 255 / .05)}
+.poster .frame .tl,.poster .frame .tr,.poster .frame .bl,.poster .frame .br{z-index:2;font:500 11px/1 var(--f-text);color:#ececec;background:rgb(0 0 0 / .6);backdrop-filter:blur(4px);padding:4px 7px;border-radius:5px}
+.poster .frame .tl{top:8px;left:8px;font-family:var(--f-mono);font-weight:600}
+.poster .frame .tr{top:8px;right:8px}
+.poster .frame .bl{bottom:8px;left:8px;text-transform:lowercase}
+.poster .frame .br{bottom:8px;right:8px;font-family:var(--f-mono)}
+.poster .frame .tr.pub{font-size:0;padding:0;width:22px;height:22px;border-radius:50%;display:grid;place-items:center;background:var(--st-done-bar);box-shadow:0 2px 6px rgb(0 0 0 / .4)}
+.poster .frame .tr.pub::after{content:"";width:0;height:0;border-left:5px solid transparent;border-right:5px solid transparent;border-bottom:8px solid #fff;margin-top:-2px}
+.poster .scrubbar{height:3px;border-radius:2px;background:#fff;z-index:3}
+.poster .cap .t{font:500 14px/19px var(--f-text);letter-spacing:0}
+.poster:hover .cap .t{text-decoration:underline;text-decoration-color:var(--rule-2);text-underline-offset:3px}
+.poster .cap .pill{height:20px;padding:0 8px!important;font:500 11px/1 var(--f-text)!important}
+.gdots{gap:4px}
+.gdots i{width:8px;height:8px}
+.gdots .t{font:600 11px/12px var(--f-mono)}
+.frame.waiting{border-radius:var(--r-pic);outline:0!important;box-shadow:inset 0 0 0 1px var(--rule-2)!important;background:repeating-linear-gradient(135deg,var(--surface) 0 10px,var(--surface-2) 10px 20px)!important;color:var(--ink-3)!important;font:400 12px/17px var(--f-text)!important}
+.poster.future{opacity:1}
+.poster.future .frame{border-radius:var(--r-pic);outline:0;box-shadow:inset 0 0 0 1px var(--rule)!important;background:var(--surface);color:var(--ink-3);font:500 12px/16px var(--f-mono)}
+.poster.future .cap .t{color:var(--ink-3)}
+.fwall{grid-template-columns:repeat(auto-fill,minmax(98px,1fr));gap:12px}
+.fwall .poster .frame{height:52px}
+.fwall .poster .cap .t{font:400 12px/16px var(--f-text)}
+
+/* season matrix in a card */
+.smx{font:500 12px/16px var(--f-mono);row-gap:3px}
+.smx .h{font:500 12px/16px var(--f-text);letter-spacing:0;text-transform:none}
+.cells,.fam{grid-template-columns:repeat(12,20px);gap:3px}
+.fam{font:500 11px/14px var(--f-text);text-transform:none;letter-spacing:0}
+.fam span{border-top:2px solid var(--rule-2);padding-top:4px;border-radius:1px}
+.sn{font:400 11px/20px var(--f-mono);height:64px}
+.c{width:20px;height:20px;border-radius:4px}
+.c .i{width:11px;height:11px}
+.c.running{outline-color:var(--focus);border-radius:4px}
+.smx .lab{padding:3px 0}
+.smx .lab span{font-size:13px}
+.smx .end{font:400 12px/16px var(--f-mono)}
+.mxwrap{overflow-x:auto;scrollbar-width:thin;padding-bottom:4px}
+.legend{font:400 12px/16px var(--f-text);color:var(--ink-3);gap:8px 18px;margin-top:16px;padding-top:14px;border-top:1px solid var(--rule)}
+.legend .c{width:16px;height:16px}
+
+/* cast: a shelf of character cards */
+.cast{display:grid;grid-auto-flow:column;grid-auto-columns:220px;gap:14px;overflow-x:auto;padding:0 0 8px;scroll-snap-type:x mandatory;scrollbar-width:thin;scrollbar-color:var(--rule-2) transparent}
+.cast figure{scroll-snap-align:start;margin:0;display:grid;gap:8px;padding:8px 8px 10px;border-radius:var(--r-card);background:var(--surface);border:1px solid var(--rule);transition:border-color var(--d1),background var(--d1)}
+.cast figure:hover{border-color:var(--rule-2);background:var(--surface-2)}
+.cast .frame{aspect-ratio:4/3;border-radius:6px;box-shadow:none;background:var(--stage)}
+.cast .frame img{object-fit:cover;object-position:50% 20%;transition:transform var(--d3) var(--ease-out)}
+.cast figure:hover .frame img{transform:scale(1.04)}
+.cast figcaption{font:500 14px/18px var(--f-text);color:var(--ink);text-transform:capitalize;padding:0 2px}
+
+@media (max-width:1100px){
+  .bk-hero{grid-template-columns:minmax(0,1fr) 240px;padding:32px;gap:24px;min-height:380px}
+  .bk-hero h1{font-size:60px;line-height:58px}
+}
+@media (max-width:820px){
+  .bk-hero{grid-template-columns:minmax(0,1fr)}
+  .bk-hero .feat{grid-template-columns:96px minmax(0,1fr);align-items:center;gap:6px 14px}
+  .bk-hero .feat .pic{grid-row:1/span 2;width:96px}
+  .bk-hero .feat .pic .tag{display:none}
+}
+@media (max-width:640px){
+  .bk-hero{padding:22px 18px 20px;border-radius:12px;min-height:0}
+  .bk-hero::before{background:linear-gradient(0deg,rgb(11 12 14 / .97) 0%,rgb(11 12 14 / .86) 55%,rgb(11 12 14 / .4) 100%)}
+  .bk-hero h1{font-size:44px;line-height:44px}
+  .bk-hero .blurb{font-size:14px;line-height:20px}
+  .bk-hero .kv{gap:12px 22px}
+  .bk-hero .kv dd{font-size:28px;line-height:30px}
+  .bk-hero .acts .btn{flex:1;justify-content:center}
+  .sect{margin-top:32px}
+  .sh{flex-wrap:wrap;row-gap:4px}
+  .sh .sub{flex-basis:100%;order:3}
+  .sh .chip2{display:none}
+  .wall{grid-template-columns:repeat(2,minmax(0,1fr));gap:18px 12px}
+  .fwall{grid-template-columns:repeat(3,minmax(0,1fr))}
+  .poster .frame .bl,.poster .frame .br{display:none}
+  .cast{grid-auto-columns:64%}
+  .cells,.fam{grid-template-columns:repeat(12,17px);gap:2px} .c{width:17px;height:17px} .sn{width:17px}
+  .panel-h,.panel-b{padding-left:14px;padding-right:14px}
+  .panel-h{flex-wrap:wrap} .panel-h .sub{flex-basis:100%}
+}
+</style>
 </head>
 <body data-page="book">
 <aside id="side"></aside>
-<main class="wrap">
-  <nav class="crumbs" aria-label="Breadcrumb"><a href="index.html">Studio</a><svg class="i"><use href="assets/icons.svg#chevron-right"/></svg><a href="books.html">Books</a><svg class="i"><use href="assets/icons.svg#chevron-right"/></svg><span aria-current="page">The War of the Worlds</span></nav>
-  <header class="phead">
-    <div><h1>The War of the Worlds</h1><p class="sub">H. G. Wells · 1898 · <span class="mono muted">/b/the-war-of-the-worlds</span></p></div>
-    <div class="acts"><a class="btn" href="department.html"><svg class="i"><use href="assets/icons.svg#layers"/></svg>Episode department</a><button class="btn" data-order="hold book the-war-of-the-worlds"><svg class="i"><use href="assets/icons.svg#pause"/></svg>Hold book</button></div>
-  </header>
-  <dl class="kv" id="kv"></dl>
-  <section class="section" style="margin-top:24px">
-    <header><h2>Season</h2><span class="note">hover a poster to scrub its contact sheet (or its panels) · zero video on this page</span>
-      <span class="spacer" style="flex:1"></span><span class="chip">PANEL · today</span><span class="chip prop">poster.jpg · proposed</span></header>
+<nav class="crumbs" aria-label="Breadcrumb"><a href="index.html">Studio</a><svg class="i"><use href="assets/icons.svg#chevron-right"/></svg><a href="books.html">Books</a><svg class="i"><use href="assets/icons.svg#chevron-right"/></svg><span aria-current="page">The War of the Worlds</span></nav>
+
+<main class="page">
+  <!-- hero banner: the newest finished episode's frame behind the title -->
+  <section class="bk-hero" aria-labelledby="bk-title">
+    <div class="bg" id="hero-bg"></div>
+    <div class="in">
+      <div class="eyebrow"><span class="kind"><svg class="i"><use href="assets/icons.svg#book-open"/></svg>Book</span><span>H. G. Wells · 1898 · 27 chapters in two books</span><span class="mono">/b/the-war-of-the-worlds</span></div>
+      <h1 id="bk-title">The War of the Worlds</h1>
+      <p class="blurb" id="hero-blurb">A season of square episodes, one per chapter: Book I is cut, Book II is not planned yet.</p>
+      <dl class="kv" id="kv"></dl>
+      <div class="acts">
+        <button class="btn light" type="button" data-order="hold book the-war-of-the-worlds"><svg class="i"><use href="assets/icons.svg#pause"/></svg>Hold book</button>
+        <a class="btn glass" href="department.html?stage=episode"><svg class="i"><use href="assets/icons.svg#layers"/></svg>Episode department</a>
+      </div>
+    </div>
+    <a class="feat" id="hero-feat" href="#"></a>
+  </section>
+
+  <section class="sect" aria-labelledby="season-h">
+    <div class="sh"><h2 id="season-h">Season</h2><span class="sub">hover a poster to scrub its contact sheet (or its panels) · zero video on this page</span><span class="spacer"></span><span class="chip2 mute">Panel · today</span><span class="chip2 mute">poster.jpg · proposed</span></div>
     <div class="wall" id="wall"></div>
   </section>
-  <section class="section">
-    <header><h2>Season matrix</h2><span class="note">27 chapters × 12 steps · one cell per <code>work_steps</code> row · dotted = done before the ledger (inferred)</span></header>
-    <div id="matrix" style="overflow-x:auto"></div>
-    <div class="legend">
-      <span><i class="c done"><svg class="i"><use href="assets/icons.svg#check"/></svg></i>done</span><span><i class="c skipped"><svg class="i"><use href="assets/icons.svg#check"/></svg></i>reused (skipped)</span>
-      <span><i class="c flagged"><svg class="i"><use href="assets/icons.svg#flag"/></svg></i>kept with flags</span><span><i class="c running"><svg class="i"><use href="assets/icons.svg#loader"/></svg></i>running</span>
-      <span><i class="c inferred"><svg class="i"><use href="assets/icons.svg#check"/></svg></i>done, pre-ledger</span><span><i class="c queued"></i>not run</span><span><i class="c future"></i>not planned</span>
+
+  <section class="panel sect" aria-labelledby="mx-h">
+    <div class="panel-h"><h2 id="mx-h">Season matrix</h2><span class="sub">27 chapters × 12 steps · one cell per <code>work_steps</code> row · dotted = done before the ledger (inferred)</span></div>
+    <div class="panel-b">
+      <div id="matrix" class="mxwrap"></div>
+      <div class="legend">
+        <span><i class="c done"><svg class="i"><use href="assets/icons.svg#check"/></svg></i>done</span><span><i class="c skipped"><svg class="i"><use href="assets/icons.svg#check"/></svg></i>reused (skipped)</span>
+        <span><i class="c flagged"><svg class="i"><use href="assets/icons.svg#flag"/></svg></i>kept with flags</span><span><i class="c running"><svg class="i"><use href="assets/icons.svg#loader"/></svg></i>running</span>
+        <span><i class="c inferred"><svg class="i"><use href="assets/icons.svg#check"/></svg></i>done, pre-ledger</span><span><i class="c queued"></i>not run</span><span><i class="c future"></i>not planned</span>
+      </div>
     </div>
   </section>
-  <section class="section">
-    <header><h2>Cast</h2><span class="note" id="castn"></span><span class="note">· <code>refs/characters/*/sheet.png</code> · refs/main done, 1 flag</span></header>
-    <div class="stage"><div class="cast" id="cast"></div></div>
+
+  <section class="sect" aria-labelledby="cast-h">
+    <div class="sh"><h2 id="cast-h">Cast</h2><span class="sub"><span id="castn"></span> · <code>refs/characters/*/sheet.png</code> · refs/main done, 1 flag</span><span class="spacer"></span></div>
+    <div class="cast" id="cast"></div>
   </section>
 </main>
 <script src="assets/dept_data.js"></script>
 <script src="assets/dept.js"></script>
+<script>
+/* hero: the newest finished episode (highest chapter that shipped through its gates) — read-only from window.BOARD */
+(function () {
+  var B = window.BOARD, W = '20260827135508', API = 'http://127.0.0.1:8700';
+  var done = B.dept.rows.filter(function (r) { return r.codex_id === W && r.state === 'done' && r.face && r.gates && Object.keys(r.gates).length; })
+    .sort(function (a, b) { return parseInt(b.unit.slice(2), 10) - parseInt(a.unit.slice(2), 10); });
+  var r = done[0]; if (!r) return;
+  document.getElementById('hero-bg').style.backgroundImage = 'url(' + API + '/lib/' + W + '/' + r.face + ')';
+  var NAME = { PLAN: 'Plan', EYE_PANELS: 'Panels', EYE_TAKES: 'Takes', MASTER: 'Master' };
+  var chips = ['EYE_PANELS', 'EYE_TAKES', 'MASTER'].filter(function (g) { return r.gates[g]; }).map(function (g) {
+    var v = r.gates[g], ok = v[3] === '✓';
+    return '<span class="chip2 ' + (ok ? 'ok' : '') + '">' + NAME[g] + ' <b>' + (ok ? '✓' : v[3]) + '</b></span>';
+  }).join('');
+  var f = document.getElementById('hero-feat');
+  f.href = 'unit-finished.html?u=' + r.unit;
+  f.setAttribute('aria-label', 'Newest finished: ' + r.unit + ' ' + r.title);
+  f.innerHTML = '<span class="pic"><img src="' + API + '/thumb/' + W + '/320/' + r.face + '" alt="" width="320" height="320"><span class="tag">Newest finished</span></span>' +
+    '<span class="ft"><span class="id">' + r.unit + '</span>' + r.title + '</span><span class="chips">' + chips + '</span>';
+  document.getElementById('hero-blurb').innerHTML = 'Newest finished: <b style="color:#fff;font-weight:500">' + r.unit + ' ' + r.title + '</b>, ' + r.iters + ' iterations. Book I is cut; Book II is not planned yet.';
+})();
+</script>
 </body>
 </html>

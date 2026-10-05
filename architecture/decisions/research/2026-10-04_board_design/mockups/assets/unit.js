@@ -77,6 +77,7 @@ function verdictMap() {
 const VER = verdictMap();
 const GATES = ['PLAN', 'LAYOUT', 'EYE_PANELS', 'EYE_TAKES', 'MASTER', 'RENDER'];
 const gateArrives = { LAYOUT: '07', EYE_PANELS: '08', EYE_TAKES: '09', MASTER: '11', RENDER: '12' };
+const GN = { PLAN: 'Plan', LAYOUT: 'Layout', EYE_PANELS: 'Panels', EYE_TAKES: 'Takes', MASTER: 'Master', RENDER: 'Render' };
 const isFlag = v => v && v.by && (v.faults > 0 || /flag/i.test(v.word) || v.terminal === 'flag');
 
 function curStep() { return RUNNING ? IDS.find(id => RUNS[RUNS.length - 1].st[id]?.ev === 'running') : '12'; }
@@ -95,9 +96,9 @@ function renderHead() {
        <button class="btn" data-mock="Redo… pick a step or a shot (opens the confirm dialog)">${ic('rotate-ccw')}Redo…</button>
        <button class="btn icon" aria-label="More actions" data-mock="⋯ Hold · Bump · Open folder · Copy path">${ic('ellipsis')}</button>`;
   $('#u-head').innerHTML = `
-    <div class="u-title"><span aria-hidden="true">${glyph}</span><span class="uid">${EP}</span><h1>${esc(p.title)}</h1>${pills}</div>
+    <div class="u-title"><span class="u-glyph" aria-hidden="true">${glyph}</span><span class="uid">${EP}</span><h1>${esc(p.title)}</h1><span class="u-pills">${pills}</span></div>
     <div class="u-actions">${acts}</div>
-    <p class="u-q"><span class="label">Question</span>${esc(p.question)}</p>`;
+    <p class="u-q">${esc(p.question)}</p>`;
 }
 
 function ringGlyph(frac) {
@@ -152,28 +153,42 @@ function renderNow() {
   const P = U.progress, run = RUNS[RUNS.length - 1], cs = curStep(), s = run.st[cs];
   const el = NOW - s.start, st = stat(cs), long = el > st.p90;
   const scale = Math.max(st.p90 * 1.15, el * 1.05);
-  const segs = IDS.map(id => {
-    const x = run.st[id];
-    const cls = !x ? '' : x.ev === 'skipped' ? 'skipped' : OUT[x.ev];
-    return `<i class="${cls}${id === cs ? ' cur' : ''}" title="${id} ${NAME[id]} · ${x ? WORD[x.ev] : 'not reached'}"></i>`;
+  const E = etaCalc(), g = U.grids[U.grids.length - 1];
+  // the finish band: now → the hour after p90, one tick per hour
+  const h0 = Math.floor((NOW + OFF) / 3600) * 3600 - OFF, h1 = Math.ceil((E.p90 + OFF + 900) / 3600) * 3600 - OFF, BW = 420;
+  const BX = t => (BW * (t - h0) / (h1 - h0)).toFixed(1);
+  const every = Math.max(1, Math.ceil((h1 - h0) / 3600 / 5)) * 3600;
+  let hrs = ''; for (let t = h0; t <= h1; t += every) hrs += `<line x1="${BX(t)}" x2="${BX(t)}" y1="19" y2="25" style="stroke:var(--rule-2)"/><text x="${BX(t)}" y="51" text-anchor="${t === h0 ? 'start' : t + every > h1 ? 'end' : 'middle'}">${hm(t)}</text>`;
+  const band = `<svg viewBox="0 0 ${BW} 52" role="img" aria-label="Finish estimate: p50 ${hm(E.p50)}, p90 ${hm(E.p90)}; now ${hm(NOW)}">
+    <line x1="0" y1="22" x2="${BW}" y2="22" style="stroke:var(--rule-2)"/>
+    <rect x="${BX(E.p50)}" y="14" width="${Math.max(8, BX(E.p90) - BX(E.p50))}" height="16" rx="8" style="fill:var(--st-running-bg)"/>
+    <line x1="${BX(E.p50)}" y1="9" x2="${BX(E.p50)}" y2="35" style="stroke:var(--st-running);stroke-width:3;stroke-linecap:round"/>
+    <line x1="${BX(NOW)}" y1="6" x2="${BX(NOW)}" y2="38" style="stroke:var(--accent);stroke-width:2"/><circle cx="${BX(NOW)}" cy="22" r="4" style="fill:var(--accent)"/>
+    <text x="${+BX(NOW) + 7}" y="11" style="font:500 10px var(--f-text);fill:var(--accent)">now ${hm(NOW)}</text>
+    <g style="font:400 10px var(--f-mono);fill:var(--ink-3)">${hrs}</g></svg>`;
+  const rail = IDS.map(id => {
+    const x = run.st[id], sp = stat(id);
+    const cls = !x ? '' : x.ev === 'skipped' ? 'skipped' : x.ev === 'completed' ? 'done' : x.ev === 'running' ? 'running' : OUT[x.ev];
+    const du = !x ? (sp.p50 ? '~' + dur(sp.p50) : '—') : x.ev === 'skipped' ? 'cached' : x.ev === 'running' ? dur(NOW - x.start) : dur(x.end - x.start);
+    return `<div class="st2 ${cls}" role="listitem" title="${id} ${NAME[id]} · ${x ? WORD[x.ev] : 'waiting'} ${du}"><i></i><span class="nm">${NAME[id]}</span><span class="du"><span>${id}</span>${du}</span></div>`;
   }).join('');
-  const labs = IDS.map(id => `<span class="${id === cs ? 'cur' : ''}">${id}<span class="hide-sm"> ${NAME[id]}</span></span>`).join('');
-  const E = etaCalc();
-  $('#now').innerHTML = `<div class="now">
-    <div class="eyebrow"><span class="label">Now · ${cs} ${NAME[cs]}</span><span class="micro muted">run #${run.n} · captured ${hm(NOW)}</span></div>
-    <div class="hero ${long ? 'long' : ''}"><small>done around</small>${hm(E.p50)}</div>
-    <div class="range"><span class="k">p50</span> <b>${hm(E.p50)}</b> · <span class="k">p90</span> <b>${hm(E.p90)}${day(E.p90) !== day(NOW) ? ' +1d' : ''}</b> · <span class="k">measured: every step's completed runs, n ≥ ${E.n}</span></div>
-    <div class="sbar" role="img" aria-label="12 steps, at ${cs} ${NAME[cs]}">${segs}</div>
-    <div class="sbar-l" aria-hidden="true">${labs}</div>
-    <div class="stepline"><span>${cs} ${NAME[cs]} · ${dur(el)}</span>
-      <div class="ebar" role="img" aria-label="step elapsed ${dur(el)} against p50 ${dur(st.p50)} and p90 ${dur(st.p90)}">
-        <div class="fill ${long ? 'long' : ''}" style="width:${Math.max(.6, 100 * el / scale)}%"></div>
-        <div class="tick" style="left:${100 * st.p50 / scale}%"><span>p50 ${dur(st.p50)}</span></div>
-        <div class="tick" style="left:${100 * st.p90 / scale}%"><span>p90 ${dur(st.p90)}</span></div>
-      </div><span class="muted">${long ? 'longer than 9 of 10' : `${st.n} measured`}</span></div>
-    <div class="secondary"><span>elapsed <b>${dur(NOW - run.start)}</b> this run</span><span><b>${dur(NOW - iso(U.row.started_at))}</b> since ${hm(iso(U.row.started_at))}</span><span>heartbeat <b>${dur(P.quiet_s)}</b> ago</span><span><b>${P.now_step.done}/${P.now_step.total}</b> panels cut${P.now_step.current ? ' · ' + esc(P.now_step.current) : ''}</span></div>
-    <div class="lastw"><span class="label">Last words</span><code title="${esc(P.last_words)}">${esc(P.last_words)}</code></div>
-  </div>`;
+  $('#now').innerHTML = `<section class="panel live2" aria-label="Now">
+    <div class="poster"><a class="pic" href="#shots" aria-label="The look so far"><img src="${TH(320, g.rel)}" alt="newest storyboard grid, ${esc(g.setup)}" width="320" height="320"><span class="tag">newest grid · ${esc(g.setup.replace(/_/g, ' '))}</span></a></div>
+    <div class="body">
+      <div class="top"><span class="pill running">${ic('loader')}Running</span><span class="where">${cs} ${NAME[cs]} · run #${run.n} of ${RUNS.length} · captured ${hm(NOW)}</span></div>
+      <div class="eta"><div class="big"><span>Done around</span><b class="${long ? 'long' : ''}">${hm(E.p50)}</b></div>
+        <div class="band">${band}<div class="cap"><b>p50 ${hm(E.p50)}</b> · p90 <span class="m">${hm(E.p90)}${day(E.p90) !== day(NOW) ? ' +1d' : ''}</span> · every step's completed runs, n ≥ ${E.n}</div></div></div>
+      <div class="stepline"><span class="sl-n">${cs} ${NAME[cs]} <b>${dur(el)}</b></span>
+        <div class="ebar" role="img" aria-label="step elapsed ${dur(el)} against p50 ${dur(st.p50)} and p90 ${dur(st.p90)}">
+          <div class="fill ${long ? 'long' : ''}" style="width:${Math.max(.6, 100 * el / scale)}%"></div>
+          <div class="tick" style="left:${100 * st.p50 / scale}%"><span>p50 ${dur(st.p50)}</span></div>
+          <div class="tick" style="left:${100 * st.p90 / scale}%"><span>p90 ${dur(st.p90)}</span></div>
+        </div><span class="sl-r">${long ? 'longer than 9 of 10' : `${st.n} measured`}</span></div>
+      <div class="stats"><span>run <b>${dur(NOW - run.start)}</b></span><span><b>${dur(NOW - iso(U.row.started_at))}</b> since ${hm(iso(U.row.started_at))}</span><span>heartbeat <b>${dur(P.quiet_s)}</b> ago</span><span class="now"><b>${P.now_step.done}/${P.now_step.total}</b> panels cut${P.now_step.current ? ' · ' + esc(P.now_step.current) : ''}</span></div>
+      <div class="words"><span class="lbl2">Last words</span><code title="${esc(P.last_words)}">${esc(P.last_words)}</code></div>
+    </div>
+    <div class="rail2" role="list" aria-label="12 steps, at ${cs} ${NAME[cs]}">${rail}</div>
+  </section>`;
 }
 
 /* ------------------------------------------------------------ shots (running): the look so far */
@@ -181,11 +196,11 @@ function renderShotsRunning() {
   const g = U.grids, shots = U.plan.shots, covered = new Set(g.flatMap(x => x.shots));
   const st08 = stat('08'), run = RUNS[RUNS.length - 1], s08 = run.st['08'];
   const eta08 = s08 ? s08.start + st08.p50 : null;
-  const figs = g.slice().reverse().map((x, k) => `<figure class="${k === 0 ? 'new' : ''}"><img src="${TH(320, x.rel)}" alt="grid ${esc(x.setup)}, shots ${x.shots.join(', ')}" loading="lazy" decoding="async"><figcaption><span>${esc(x.setup)} · ${x.cols}×${x.rows}</span><span>shots ${x.shots.map(S2).join(' ')} · ${hm(x.mtime)}</span></figcaption></figure>`).join('');
-  $('#shots').innerHTML = `<header><h2>Shots</h2><span class="label">${shots.length} planned</span></header>
-    <p class="empty">${ic('clock')}<span><b>Panels arrive during 08 panels</b> — cutting began ${s08 ? hm(s08.start) : '—'}, 0 of ${shots.length} so far, typical end ~${eta08 ? hm(eta08) : '—'} (p50 ${dur(st08.p50)}). Takes follow at 09 shoot.</span></p>
-    <div class="label" style="margin:16px 0 8px">The look so far · ${g.length} storyboard grids from 07 board · ${covered.size} of ${shots.length} shots drawn</div>
-    <div class="look">${figs}</div>
+  const figs = g.slice().reverse().map((x, k) => `<figure class="pic ${k === 0 ? 'new' : ''}"><img src="${TH(320, x.rel)}" alt="grid ${esc(x.setup)}, shots ${x.shots.join(', ')}" loading="lazy" decoding="async" width="320" height="320">${k === 0 ? '<span class="newtag">Newest</span>' : ''}<figcaption><span class="s">${esc(x.setup.replace(/_/g, ' '))} <i>${x.cols}×${x.rows}</i></span><span class="m">shots ${x.shots.map(S2).join(' ')} · ${hm(x.mtime)}</span></figcaption></figure>`).join('');
+  $('#shots').innerHTML = `<header><h2>Shots</h2><span class="sub">${shots.length} planned</span></header>
+    <div class="empty2">${ic('clock')}<div><b>Panels arrive during 08 panels</b><span>Cutting began ${s08 ? hm(s08.start) : '—'}, 0 of ${shots.length} so far, typical end ~${eta08 ? hm(eta08) : '—'} (p50 ${dur(st08.p50)}). Takes follow at 09 shoot.</span></div></div>
+    <div class="subh"><h3>The look so far</h3><span class="sub">${g.length} storyboard grids from 07 board · ${covered.size} of ${shots.length} shots drawn</span></div>
+    <div class="mosaic">${figs}</div>
     <details class="planlist"><summary>${ic('chevron-right')} The shot list from plan.json (${shots.length})</summary>
       <ol>${shots.map(s => `<li><span class="mono">${S2(s.i)}</span><span class="mono">${esc(s.size)}</span><span>${esc(s.setup)}${s.faces.length ? ' · ' + esc(s.faces.join(', ').replace(/_/g, ' ')) : ''}</span></li>`).join('')}</ol></details>`;
 }
@@ -251,16 +266,16 @@ function renderGates() {
       return `${sep}<li class="${r.terminal ? 'term' : ''}"><span>${hm(r.ts)}</span><span><span class="k">rung</span> ${r.attempt}</span><span>${Math.round(r.measured)}</span><span>${esc(r.action)}${r.terminal ? ' ■' : ''}</span><span class="note" title="${esc(r.note)}">${r.seconds ? dur(r.seconds) + ' · ' : ''}${esc(r.note)}</span></li>`;
     }).join('');
     const chips = gs => gs.shots.map(i => EP === 'ep12' ? `<button class="chipnum" data-shot="${i}">${S2(i)}</button>` : `<span class="chipnum">${S2(i)}</span>`).join('');
-    const fk = groups.length ? `<div class="fk">${groups.map(x => `<span class="kind">${ic('flag')}${esc(x.kind)} ×${x.n}</span><span class="sh">${x.shots.length >= 24 ? '<span class="chipnum">every shot 00–23</span>' : chips(x)}</span>${x.ev ? `<span class="ev">${esc(x.ev)}</span>` : ''}`).join('')}</div>` : '';
+    const fk = groups.length ? `<div class="fk">${groups.map(x => `<span class="kind">${ic('flag')}${esc(x.kind)} ×${x.n}</span><span class="shs">${x.shots.length >= 24 ? '<span class="chipnum">every shot 00–23</span>' : chips(x)}</span>${x.ev ? `<span class="ev">${esc(x.ev)}</span>` : ''}`).join('')}</div>` : '';
     const word = flag ? `${v.word || 'FLAGGED'} · ⚑ ${v.faults}` : 'PASSED';
     out.push(`<details class="thread ${flag ? 'flag' : 'pass'}" ${flag && !out.length ? 'open' : ''}>
-      <summary><span class="gname">${ic(flag ? 'flag' : 'check')}${g}</span>
+      <summary><span class="gname">${ic(flag ? 'flag' : 'check')}${GN[g]}${g !== GN[g].toUpperCase() ? `<span class="gid">${g}</span>` : ''}</span>
       <span class="gsum">${esc(word)}${v.terminal ? ` · ${esc(v.terminal)}` : ''} · ${rows.length} rung${rows.length === 1 ? '' : 's'} <span class="by">· ${esc(v.by)} · ${at}</span></span>
       ${rows.length > 1 ? ladderSvg(rows) : '<span></span>'}</summary>
       <div class="body">${fk}${rl ? `<ul class="rounds" aria-label="rounds">${rl}</ul>` : '<p class="gnotyet">signed in one read, no ladder</p>'}</div></details>`);
   }
   const ny = unsigned.length ? `<p class="gnotyet">${ic('circle-dashed')} ${unsigned.join(' · ')} — not signed yet${RUNNING ? '; they arrive at ' + unsigned.map(g => `${gateArrives[g] || '—'}`).join(', ') : ''}</p>` : '';
-  $('#gates').innerHTML = `<header><h2>Gates</h2><span class="label">verdict threads · non-pass open</span></header><div class="threads">${out.join('')}</div>${ny}`;
+  $('#gates').innerHTML = `<header><h2>Gates</h2><span class="sub">verdict threads · non-pass open</span></header><div class="threads">${out.join('')}</div>${ny}`;
 }
 
 /* ------------------------------------------------------------ run matrix (hand SVG) */
@@ -304,7 +319,7 @@ function renderRuns() {
   const bracketY = gridY + 12 * rowH + 8, H = bracketY + (LP.length ? 46 : 8) + 18;
   const maxWall = Math.max(...RUNS.map(r => r.end - r.start), 60);
   let s = `<svg class="mx" width="${W}" height="${H}" viewBox="0 0 ${W} ${H}" role="img" aria-label="Run matrix: ${n} runs by 12 steps${LP.length ? ', loops at ' + LP.map(l => l.id).join(', ') : ''}">${DEFS}`;
-  s += `<text x="0" y="${top + 10}" class="lab">RUN TIME</text><text x="0" y="${top + 22}">max ${dur(maxWall)}</text>`;
+  s += `<text x="0" y="${top + 10}" class="lab">Run time</text><text x="0" y="${top + 22}">max ${dur(maxWall)}</text>`;
   IDS.forEach((id, i) => { s += `<text class="rl" x="0" y="${gridY + i * rowH + cs - 2}">${id} ${NAME[id]}</text>`; });
   let lastDay = '';
   RUNS.forEach((r, k) => {
@@ -333,7 +348,7 @@ function renderRuns() {
     .map(([ev, w]) => `<span><svg viewBox="0 0 12 12">${DEFS}${cell(ev, 0, 0, 12)}</svg>${w}</span>`).join('');
   const totalWall = RUNS.reduce((a, r) => a + (r.end - r.start), 0);
   const burned = RUNS.filter(r => !['completed', 'running'].includes(r.outcome)).reduce((a, r) => a + (r.end - r.start), 0);
-  $('#runs').innerHTML = `<header><h2>Runs</h2><span class="label">${n} runs · ${dur(totalWall)} run time · ${dur(burned)} in runs that did not finish</span><span class="r micro muted">click a run · ← → move</span></header>
+  $('#runs').innerHTML = `<header><h2>Runs</h2><span class="sub">${n} runs · ${dur(totalWall)} run time · ${dur(burned)} in runs that did not finish</span><span class="r hint">click a run · ← → move</span></header>
     <div class="mx-scroll" id="mxs">${s}</div><div class="legend">${legend}</div>
     <div class="wfbox" id="wf"></div>`;
   const sc = $('#mxs'); sc.scrollLeft = sc.scrollWidth;
@@ -394,7 +409,7 @@ function renderWaterfall() {
   });
   s += `</svg>`;
   const cls = [1, 2, 3].map(k => `<span><svg viewBox="0 0 12 12"><rect width="12" height="12" style="fill:var(--viz-${k})"/></svg>${CLASS_NAME[k]}</span>`).join('');
-  box.innerHTML = `<header><h3>Run #${r.n}</h3><span class="mono muted">${dhm(r.start)} · ${dur(r.end - r.start)} · ended ${WORD[r.outcome]} at ${r.lastId} ${NAME[r.lastId]}</span><span class="micro muted" style="margin-left:auto">${r.id.split('__').pop()}</span></header>${s}
+  box.innerHTML = `<header><h3>Run #${r.n}</h3><span class="sub">${dhm(r.start)} · ${dur(r.end - r.start)} · ended ${WORD[r.outcome]} at ${r.lastId} ${NAME[r.lastId]}</span><span class="hint mono" style="margin-left:auto">${r.id.split('__').pop()}</span></header>${s}
     <div class="legend">${cls}<span><svg viewBox="0 0 12 12"><rect width="12" height="12" fill="url(#pg)" style="stroke:var(--line)"/></svg>expected (p50)</span><span>┆ p50 / p90 of this step</span><span><b style="color:var(--ink)">2</b>&nbsp;gate rung</span></div>`;
 }
 
@@ -437,12 +452,12 @@ function renderActivity() {
     html += `<details class="lg ${bad ? 'bad' : def ? 'def' : ''}" ${open ? 'open' : ''}><summary>${ic('chevron-right', 'chev')}<span class="s">${title}${c ? ` · ${WORD[ev]}` : ''}</span><span class="w">${esc(last.msg.split('\n')[0].slice(0, 140))}</span><span class="r">${xs.length} lines${span ? ' · ' + span : ''}</span></summary><div class="lines">${lines || '<div class="ln"><span></span><span></span><span class="m muted">no lines at the chosen levels</span></div>'}</div></details>`;
   }
   const nolog = r.log.length ? '' : `<p class="empty">${ic('minus')}No run log kept for run #${r.n}; the lines below are its ledger events.</p>`;
-  const chips = ['ERROR', 'WARNING', 'INFO', 'EVENT'].map(l => `<button class="lvl ${l === 'ERROR' ? 'err' : l === 'WARNING' ? 'warn' : ''}" aria-pressed="${LV[l]}" data-lv="${l}">${l} ${counts[l] || 0}</button>`).join('');
+  const chips = ['ERROR', 'WARNING', 'INFO', 'EVENT'].map(l => `<button class="lvl ${l === 'ERROR' ? 'err' : l === 'WARNING' ? 'warn' : ''}" aria-pressed="${LV[l]}" data-lv="${l}">${l[0] + l.slice(1).toLowerCase()} <b>${counts[l] || 0}</b></button>`).join('');
   const on = Object.values(LV).filter(Boolean).length;
   const host = $('#activity');
   if (!host.dataset.built) {
-    host.innerHTML = `<header><h2>Activity</h2><span class="label" id="act-l"></span></header>
-      <div class="act-tools"><label class="search">${ic('search')}<input id="q" type="search" placeholder="Search this run's log" aria-label="Search the log"></label><span id="lvls" style="display:flex;gap:4px;flex-wrap:wrap"></span></div>
+    host.innerHTML = `<header><h2>Activity</h2><span class="sub" id="act-l"></span></header>
+      <div class="act-tools"><label class="search">${ic('search')}<input id="q" type="search" placeholder="Search this run's log" aria-label="Search the log"></label><span id="lvls" class="lvls"></span></div>
       <div id="act-b"></div>`;
     host.dataset.built = 1;
     $('#q').addEventListener('input', e => { Q = e.target.value.trim(); renderActivity(); });
@@ -498,7 +513,7 @@ function faultRows() {
 
 function renderScreen() {
   const q = U.qc, me = U.master_eye, rows = faultRows();
-  const stamp = (g, cls, word, glyph, by, at, extra) => `<div class="stamp ${cls}"><span class="g">${g}</span><span class="w">${ic(glyph)}${word}</span><span>${extra}</span><span class="by" title="${by}">${by} · ${at}</span></div>`;
+  const stamp = (g, cls, word, glyph, by, at, extra) => `<div class="stamp ${cls}"><div class="st-top"><span class="g">${GN[g]}${g !== GN[g].toUpperCase() ? `<span class="gid">${g}</span>` : ''}</span><span class="w">${ic(glyph)}${word}</span></div><span class="x">${extra}</span><span class="by" title="${by}">${by.replace('judge:', '')} · ${at}</span></div>`;
   const lastPlan = U.learnings.filter(l => l.gate === 'PLAN').pop();
   const stamps = [
     stamp('MASTER', 'flag', 'flagged', 'flag', me.by, dhm(me.at), `faces n · identity ×2 · ${me.terminal}`),
@@ -506,11 +521,12 @@ function renderScreen() {
     stamp('EYE_PANELS', 'flag', 'flagged', 'flag', U.panel_eye.by, dhm(U.panel_eye.at), `${U.panel_eye.n} faults · ${U.panel_eye.terminal}`),
     stamp('PLAN', 'flag', 'approve ⚑7', 'flag', U.plan_verdict.by, dhm(lastPlan.ts), `story ×2 · invented ×5 · kept best`),
   ].join('');
-  const fl = rows.map((r, k) => `<li><button data-f="${k}" data-t="${r.t0}" data-shot="${r.shot}"><span class="gl ${r.minor ? 'tk' : ''}">${ic(r.minor ? 'minus' : 'flag')}</span><span><b>${r.k}</b> · ${esc(r.w)} <span class="micro" style="color:var(--stage-ink-3)">${r.g}</span></span><span class="t">${tc(r.t0)}</span><span class="e">${esc(r.e)}</span></button></li>`).join('');
+  const fl = rows.map((r, k) => `<li><button data-f="${k}" data-t="${r.t0}" data-shot="${r.shot}"><span class="gl ${r.minor ? 'tk' : ''}">${ic(r.minor ? 'minus' : 'flag')}</span><span class="f1"><b>${r.k}</b> · ${esc(r.w)}<span class="gt">${r.g}</span></span><span class="t">${tc(r.t0)}</span><span class="e">${esc(r.e)}</span></button></li>`).join('');
   const v = VERSIONS.find(x => x.v === VERS);
-  $('#screen').innerHTML = `<div class="wrap">
+  const nflag = [me, U.panel_eye, U.plan_verdict].length;
+  $('#screen').innerHTML = `<div class="scr-in">
     <div class="pcol">
-      <div class="qcline"><span><b>master_iter7.mp4</b> = iter5 = master_r2v</span><span>${q.sha8}</span><span>${tc(q.seconds)} <span style="color:var(--stage-ink-3)">(plan ${tc(q.planned_seconds)})</span></span><span>LUFS ${q.lufs} <span class="ok">✓</span></span><span>peak ${q.true_peak} <span class="ok">✓</span></span><span>cuts ${q.planned_cuts.length}/${q.planned_cuts.length} <span class="ok">✓</span></span><span>lines ${U.qc_lines.filter(l => l.passed).length}/${U.qc_lines.length} <span class="ok">✓</span></span></div>
+      <div class="qcline"><span class="file"><b>master_iter7.mp4</b> = iter5 = master_r2v · ${q.sha8}</span><span class="q">${tc(q.seconds)} <i>plan ${tc(q.planned_seconds)}</i></span><span class="q">LUFS ${q.lufs} <span class="ok">✓</span></span><span class="q">peak ${q.true_peak} <span class="ok">✓</span></span><span class="q">cuts ${q.planned_cuts.length}/${q.planned_cuts.length} <span class="ok">✓</span></span><span class="q">lines ${U.qc_lines.filter(l => l.passed).length}/${U.qc_lines.length} <span class="ok">✓</span></span></div>
       <div class="player" id="player">
         <img class="poster" id="poster" src="${LIB('takes/work/content/T19_1.png')}" alt="ep12 master, shot 19: the shell bursts in its face" decoding="async">
         <video id="vid" preload="none" playsinline hidden></video>
@@ -520,51 +536,57 @@ function renderScreen() {
         <div class="vstack" id="vstack" hidden role="menu"></div>
       </div>
       <div class="pctrl"><button class="pbtn" id="pp" aria-label="Play or pause">${ic('play')}</button><span class="tc" id="tc">0:00.00 · f0 · shot 00</span><span class="sp"></span>
-        <button class="pbtn" id="cmpb">${ic('layers')}Compare</button><span class="kbd dk">Space</span><span class="kbd dk">↑↓ faults</span><span class="kbd dk">C</span></div>
-      <div style="position:relative"><svg class="lanes" id="lanes" role="img" aria-label="Shots, faults and lines lanes over the master"></svg><div class="lane-tip" id="ltip" hidden></div></div>
+        <span class="keyh"><span class="kbd dk">Space</span> play <span class="kbd dk">↑↓</span> faults <span class="kbd dk">C</span> compare</span><button class="pbtn" id="cmpb">${ic('layers')}Compare</button></div>
     </div>
     <div class="sside">
-      <h3>Judges</h3><div class="stamps">${stamps}</div>
-      <div class="fhd"><h3 style="margin:0">Faults on the master</h3><span class="micro">${rows.length} · by time · click to seek</span></div>
+      <div class="scard"><div class="sc-h"><h3>Judges</h3><span class="sc-s">4 signed · ${nflag} flagged</span></div><div class="stamps">${stamps}</div></div>
+      <div class="scard faults"><div class="sc-h"><h3>Faults on the master</h3><span class="sc-n">${rows.length}</span><span class="sc-s">by time · click to seek</span></div>
       <ul class="flist" id="flist">${fl}</ul>
-      <p class="micro" style="color:var(--stage-ink-3);margin-top:10px">EYE_PANELS faults (531) stay on the panels in the shot strip; on this timeline they would be noise.</p>
-    </div></div>`;
+      <p class="sc-note">EYE_PANELS faults (531) stay on the panels in the shot strip; on this timeline they would be noise.</p></div>
+    </div>
+    <div class="tline"><div class="tl-h"><h3>Timeline</h3><span class="sc-s">shots · master faults · plan · qc · lines — drag to scrub</span></div>
+      <div class="tl-b"><svg class="lanes" id="lanes" role="img" aria-label="Shots, faults and lines lanes over the master"></svg><div class="lane-tip" id="ltip" hidden></div></div></div>
+    </div>`;
   VIDEO = $('#vid');
   renderVstack(); drawLanes(); wirePlayer(rows);
 }
 function renderVstack() {
-  $('#vstack').innerHTML = `<div class="hd">Versions · 7 cuts, 6 distinct by hash</div>${VERSIONS.map(x => `<button role="menuitem" data-v="${x.v}" ${x.v === VERS ? 'aria-current="true"' : ''}><span class="v">v${x.v}</span><span>${x.iter}${x.also ? ` <span style="color:var(--stage-ink-3)">= ${x.also}</span>` : ''}</span><span>${x.md5}</span><span class="d">${x.t} · ${x.mb} MB · <span class="${x.v === 7 ? 'w' : ''}">${x.verdict}</span></span></button>`).join('')}<div class="ft">iter5 and iter7 are byte-identical (md5 80dc87dd); shown once. Shift-click picks B for compare.</div>`;
+  $('#vstack').innerHTML = `<div class="hd"><b>Versions</b> · 7 cuts, 6 distinct by hash</div>${VERSIONS.map(x => `<button role="menuitem" data-v="${x.v}" ${x.v === VERS ? 'aria-current="true"' : ''}><span class="v">v${x.v}</span><span>${x.iter}${x.also ? ` <span style="color:var(--stage-ink-3)">= ${x.also}</span>` : ''}</span><span>${x.md5}</span><span class="d">${x.t} · ${x.mb} MB · <span class="${x.v === 7 ? 'w' : ''}">${x.verdict}</span></span></button>`).join('')}<div class="ft">iter5 and iter7 are byte-identical (md5 80dc87dd); shown once. Shift-click picks B for compare.</div>`;
 }
-function laneGeom() { const W = $('#lanes').parentNode.clientWidth || 600; return { W, L: 54, R: 4, T: U.qc.seconds }; }
+function laneGeom() { const W = $('#lanes').parentNode.clientWidth || 600; return { W, L: W < 560 ? 52 : 76, R: 6, T: U.qc.seconds }; }
 function drawLanes() {
-  const { W, L, R, T } = laneGeom(), X = t => L + (W - L - R) * t / T, rows = faultRows();
-  const yS = 14, hS = 22, yM = yS + hS + 6, yP = yM + 14, yC = yP + 14, yL = yC + 14, H = yL + 16;
-  let s = `${DEFS}<defs><pattern id="tt" width="5" height="5" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><rect width="5" height="5" fill="#1b1b1b"/><rect width="1.4" height="5" fill="#3a3a3a"/></pattern></defs>`;
-  for (let t = 0; t <= T; t += 30) s += `<text x="${X(t)}" y="9" text-anchor="${t ? 'middle' : 'start'}">${Math.floor(t / 60)}:${pad(t % 60)}</text>`;
-  s += `<text class="lab" x="0" y="${yS + 15}">SHOTS</text><text class="lab" x="0" y="${yM + 9}">MASTER</text><text class="lab" x="0" y="${yP + 9}">PLAN</text><text class="lab" x="0" y="${yC + 9}">QC</text><text class="lab" x="0" y="${yL + 9}">LINES</text>`;
+  // an NLE timeline: a ruler, five tracks on rounded beds, soft rounded clips, a playhead with a handle
+  const { W, L, R, T } = laneGeom(), X = t => L + (W - L - R) * t / T, rows = faultRows(), narrow = W < 560;
+  const yR = 0, hR = 20, yS = hR + 8, hS = narrow ? 30 : 40, th = 16, gp = 6;
+  const yM = yS + hS + gp, yP = yM + th + gp, yC = yP + th + gp, yL = yC + th + gp, H = yL + th + 2;
+  const bed = (y, h) => `<rect class="bed" x="${L}" y="${y}" width="${W - L - R}" height="${h}" rx="6"/>`;
+  let s = `<defs><pattern id="tt" width="6" height="6" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><rect width="6" height="6" fill="#16171a"/><rect width="2" height="6" fill="#2a2c31"/></pattern></defs>`;
+  s += `<rect class="ruler" x="${L}" y="${yR}" width="${W - L - R}" height="${hR}" rx="5"/>`;
+  for (let t = 0; t <= T; t += 5) { const x = X(t), maj = t % 30 === 0; s += `<line class="tk${maj ? ' maj' : ''}" x1="${x}" x2="${x}" y1="${maj ? 4 : hR - 6}" y2="${hR - 1}"/>`; if (maj) s += `<text class="tt" x="${x + 8}" y="13">${Math.floor(t / 60)}:${pad(t % 60)}</text>`; }
+  [['Shots', yS, hS], ['Master', yM, th], ['Plan', yP, th], ['QC', yC, th], ['Lines', yL, th]].forEach(([n, y, h]) => { s += `<text class="lab" x="0" y="${y + h / 2 + 4}">${n}</text>${bed(y, h)}`; });
   SH.forEach(sh => {
-    const x1 = X(sh.t0), x2 = X(sh.t1), fl = sh.master.some(m => !m.wide);
-    s += `<g class="seg" data-shot="${sh.i}"><rect x="${x1 + .5}" y="${yS}" width="${Math.max(1, x2 - x1 - 1)}" height="${hS}" fill="${fl ? '#3a2c10' : '#262626'}" stroke="${fl ? '#c8952a' : '#3a3a3a'}" stroke-width="1"/>${x2 - x1 > 16 ? `<text x="${(x1 + x2) / 2}" y="${yS + 15}" text-anchor="middle" style="fill:${fl ? '#e9b44c' : '#bdbdbd'}">${S2(sh.i)}</text>` : ''}</g>`;
+    const x1 = X(sh.t0), x2 = X(sh.t1), fl = sh.master.some(m => !m.wide), w = Math.max(1, x2 - x1 - 2);
+    s += `<g class="seg ${fl ? 'fl' : ''}" data-shot="${sh.i}"><rect x="${x1 + 1}" y="${yS + 2}" width="${w}" height="${hS - 4}" rx="4"/>${fl ? `<rect class="bar" x="${x1 + 1}" y="${yS + 2}" width="${w}" height="3" rx="1.5"/>` : ''}${x2 - x1 > 18 ? `<text x="${(x1 + x2) / 2}" y="${yS + hS / 2 + 4}" text-anchor="middle">${S2(sh.i)}</text>` : ''}</g>`;
   });
-  s += `<rect x="${X(U.qc.planned_seconds) + .5}" y="${yS}" width="${X(T) - X(U.qc.planned_seconds) - 1}" height="${hS}" fill="url(#tt)" stroke="#3a3a3a"><title>title card ${tc(U.qc.planned_seconds)}–${tc(T)}</title></rect>`;
+  s += `<rect x="${X(U.qc.planned_seconds) + 1}" y="${yS + 2}" width="${Math.max(1, X(T) - X(U.qc.planned_seconds) - 2)}" height="${hS - 4}" rx="4" fill="url(#tt)"><title>title card ${tc(U.qc.planned_seconds)}–${tc(T)}</title></rect>`;
   rows.forEach(r => {
-    if (r.g === 'MASTER' && !r.wide) s += `<rect x="${X(r.t0)}" y="${yM}" width="${X(r.t1) - X(r.t0)}" height="10" fill="#e9b44c"><title>${r.k} · ${r.w} · ${r.e}</title></rect><path d="M${X(r.t0)} ${yM - 3} l4 0 l-4 4z" fill="#e9b44c"/>`;
-    if (r.g === 'MASTER' && r.wide) r.wide.forEach(i => { s += `<rect x="${X(SH[i].t0) + 1}" y="${yM + 6}" width="${X(SH[i].t1) - X(SH[i].t0) - 2}" height="3" fill="#c8952a" opacity=".85"><title>${r.k} · ${r.w} (character-wide)</title></rect>`; });
-    if (r.g === 'PLAN') r.wide.forEach(i => { s += `<rect x="${X(SH[i].t0) + 1}" y="${yP + 2}" width="${X(SH[i].t1) - X(SH[i].t0) - 2}" height="6" fill="none" stroke="#c8952a" stroke-dasharray="2 1.5"><title>PLAN ${r.k} · shot ${S2(i)}</title></rect>`; });
-    if (r.g === 'QC') r.tick.forEach(c => { s += `<line x1="${X(c)}" x2="${X(c)}" y1="${yC}" y2="${yC + 10}" stroke="#e9b44c" stroke-width="1.5"><title>unplanned cut ${c.toFixed(2)} s</title></line>`; });
+    if (r.g === 'MASTER' && !r.wide) s += `<rect class="mf" x="${X(r.t0) + 1}" y="${yM + 3}" width="${Math.max(4, X(r.t1) - X(r.t0) - 2)}" height="${th - 6}" rx="3"><title>${r.k} · ${r.w} · ${r.e}</title></rect>`;
+    if (r.g === 'MASTER' && r.wide) r.wide.forEach(i => { s += `<rect class="mw" x="${X(SH[i].t0) + 2}" y="${yM + th / 2 - 1.5}" width="${Math.max(2, X(SH[i].t1) - X(SH[i].t0) - 4)}" height="3" rx="1.5"><title>${r.k} · ${r.w} (character-wide)</title></rect>`; });
+    if (r.g === 'PLAN') r.wide.forEach(i => { s += `<rect class="pf" x="${X(SH[i].t0) + 2}" y="${yP + 3}" width="${Math.max(2, X(SH[i].t1) - X(SH[i].t0) - 4)}" height="${th - 6}" rx="3"><title>PLAN ${r.k} · shot ${S2(i)}</title></rect>`; });
+    if (r.g === 'QC') r.tick.forEach(c => { s += `<g class="qt"><line x1="${X(c)}" x2="${X(c)}" y1="${yC + 3}" y2="${yC + th - 3}"/><circle cx="${X(c)}" cy="${yC + 3}" r="2"/><title>unplanned cut ${c.toFixed(2)} s</title></g>`; });
   });
-  U.qc_lines.forEach(l => { const pl = U.plan.lines[l.index], x = X(SH[pl.shot].t0 + .3); s += `<path d="M${x} ${yL + 10} l3 -8 l3 8z" fill="${l.error_rate > 0 ? '#e9b44c' : '#5aa76a'}"><title>line ${S2(l.index)} · ${pl.speaker.replace(/_/g, ' ')} · ${l.passed ? 'passed' : 'failed'}${l.error_rate ? ' · ' + Math.round(l.error_rate * 100) + '% off' : ''}</title></path>`; });
-  s += `<line id="ph" x1="${X(curT)}" x2="${X(curT)}" y1="${yS - 3}" y2="${H}" stroke="#fff" stroke-width="2"/>`;
+  U.qc_lines.forEach(l => { const pl = U.plan.lines[l.index], x = X(SH[pl.shot].t0 + .3); s += `<circle class="ln2 ${l.error_rate > 0 ? 'off' : ''}" cx="${x + 3}" cy="${yL + th / 2}" r="3.5"><title>line ${S2(l.index)} · ${pl.speaker.replace(/_/g, ' ')} · ${l.passed ? 'passed' : 'failed'}${l.error_rate ? ' · ' + Math.round(l.error_rate * 100) + '% off' : ''}</title></circle>`; });
+  s += `<g id="phg" class="phg" transform="translate(${X(curT)} 0)"><line x1="0" x2="0" y1="${hR - 2}" y2="${H}"/><path d="M-6 2 h12 v8 l-6 7 l-6 -7z"/></g>`;
   const svg = $('#lanes'); svg.setAttribute('viewBox', `0 0 ${W} ${H}`); svg.setAttribute('height', H); svg.innerHTML = s;
 }
 function shotAt(t) { return SH.find(s => t >= s.t0 && t < s.t1) || SH[SH.length - 1]; }
 function setT(t, seek) {
   curT = Math.max(0, Math.min(U.qc.seconds, t));
-  const { W, L, R, T } = laneGeom(), x = L + (W - L - R) * curT / T, ph = $('#ph');
-  if (ph) { ph.setAttribute('x1', x); ph.setAttribute('x2', x); }
+  const { W, L, R, T } = laneGeom(), x = L + (W - L - R) * curT / T, ph = $('#phg');
+  if (ph) ph.setAttribute('transform', `translate(${x} 0)`);
   const sh = shotAt(curT);
-  $('#tc').textContent = `${tc(curT)} · f${Math.round(curT * FPS)} · shot ${S2(sh.i)}`;
-  $$('#lanes .seg rect').forEach(r => r.setAttribute('stroke-width', +r.parentNode.dataset.shot === sh.i ? 2 : 1));
+  $('#tc').innerHTML = `<b>${tc(curT)}</b> · f${Math.round(curT * FPS)} · shot ${S2(sh.i)}`;
+  $$('#lanes .seg').forEach(g => g.classList.toggle('cur', +g.dataset.shot === sh.i));
   if (seek && VIDEO && VIDEO.parentNode.id === 'player') { ensureMaster(); try { VIDEO.currentTime = curT; } catch (e) {} }
 }
 function masterSrc() { return LIB(`cut/master_iter${VERS}.mp4`); }
@@ -601,8 +623,8 @@ function wirePlayer(rows) {
     const t = tAt(e); if (drag) setT(t, true);
     if (t < 0 || t > U.qc.seconds) { tip.hidden = true; return; }
     const sh = shotAt(t), r = svg.getBoundingClientRect(), x = Math.min(Math.max(e.clientX - r.left - 84, 0), r.width - 168);
-    tip.innerHTML = `<img src="${TH(160, `takes/work/content/T${S2(sh.i)}_1.png`)}" alt=""><div>shot ${S2(sh.i)} · ${esc(sh.size)}</div><div style="color:var(--stage-ink-3)">${tc(sh.t0)}–${tc(sh.t1)}</div>${sh.master.length ? `<div style="color:#e9b44c">⚑ ${sh.master.map(m => m.kind).join(', ')}</div>` : ''}`;
-    tip.style.left = x + 'px'; tip.style.bottom = (r.height + 8) + 'px'; tip.hidden = false;
+    tip.innerHTML = `<img src="${TH(160, `takes/work/content/T${S2(sh.i)}_1.png`)}" alt=""><div class="t1">Shot ${S2(sh.i)} · ${esc(sh.size.replace('_', ' '))}</div><div class="t2">${tc(sh.t0)}–${tc(sh.t1)}</div>${sh.master.length ? `<div class="t3">⚑ ${sh.master.map(m => m.kind).join(', ')}</div>` : ''}`;
+    tip.style.left = x + 'px'; tip.style.bottom = (r.height + 10) + 'px'; tip.hidden = false;
   });
   svg.addEventListener('pointerleave', () => { tip.hidden = true; });
   $('#flist').addEventListener('click', e => { const b = e.target.closest('button[data-t]'); if (!b) return; $$('#flist button').forEach(x => x.classList.toggle('on', x === b)); setT(+b.dataset.t + .01, true); });
@@ -648,10 +670,10 @@ function renderShotsFinished() {
       <div class="frame tk"><img class="tki" src="${TH(160, `takes/work/content/T${S2(s.i)}_1.png`)}" alt="" loading="lazy" decoding="async" width="160" height="160"><span class="tl">T${S2(s.i)}</span><span class="br">${s.take.secs ? s.take.secs.toFixed(1) + 's' : ''}</span><span class="scrub"><i></i></span></div></div>
       <div class="m"><div class="m1">${S2(s.i)}<span class="sz">${esc(s.size.replace('_', ' '))}${s.faces.length ? ' · ' + esc(s.faces[0].replace('unnamed_first_person_', '').replace('_', ' ')) : ''}</span><span class="try ${s.take.tries > 1 ? 're' : ''}">${s.take.tries > 1 ? ic('rotate-ccw') + ' try ' + s.take.tries : 'try 1'}</span></div>
       <div class="stg">${stageGlyphs(s)}</div></div></button>`).join('');
-  $('#shots').innerHTML = `<header><h2>Shots</h2><span class="label">24 · panel → take → master</span><span class="r"><span class="filters" role="group" aria-label="Filter shots">
+  $('#shots').innerHTML = `<header><h2>Shots</h2><span class="sub">24 · panel → take → master</span><span class="r"><span class="filters segmented" role="group" aria-label="Filter shots">
     ${[['all', 'All'], ['master', '⚑ Master'], ['retried', '↻ Retried'], ['plan', '⚑ Plan']].map(([f, t]) => `<button class="fchip" data-filter="${f}" aria-pressed="${f === FILTER}">${t} ${cnt[f]}</button>`).join('')}</span></span></header>
     <div class="shots" id="shotgrid">${cards}</div>
-    <p class="micro muted" style="margin-top:10px">Hover a take to scrub its three content frames; rest on it to play (the page's one video moves here). Click for the shot view.</p>`;
+    <p class="hint" style="margin-top:12px">Hover a take to scrub its three content frames; rest on it to play (the page's one video moves here). Click for the shot view.</p>`;
   $$('.fchip').forEach(b => b.onclick = () => { FILTER = b.dataset.filter; $$('.fchip').forEach(x => x.setAttribute('aria-pressed', x === b)); $$('.shot').forEach(c => { const s = SH[+c.dataset.i]; c.hidden = !(FILTER === 'all' || (FILTER === 'master' && s.master.length) || (FILTER === 'retried' && s.take.tries > 1) || (FILTER === 'plan' && s.plan.length)); }); });
   const grid = $('#shotgrid');
   grid.addEventListener('click', e => { const c = e.target.closest('.shot'); if (c) openShot(+c.dataset.i, 1); });

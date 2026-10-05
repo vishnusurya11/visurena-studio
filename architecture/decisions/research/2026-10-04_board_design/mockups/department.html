@@ -12,27 +12,173 @@
 <link rel="stylesheet" href="assets/v2.css">
 <script src="assets/shell.js"></script>
 <link rel="stylesheet" href="assets/dept.css">
+<style>
+/* ---------- Department v2 (DIRECTION_v2 §Other pages). Unlayered: wins over dept.css (@layer pages). */
+.title-row{display:flex;flex-wrap:wrap;align-items:flex-end;gap:8px 16px;margin:4px 0 20px}
+.title-row h1{font:700 34px/36px var(--f-display);letter-spacing:.01em}
+.title-row .sub{margin:0;font:400 13px/18px var(--f-text);color:var(--ink-3);padding-bottom:3px}
+.title-row .sub b{font:600 13px/18px var(--f-mono);color:var(--ink)}
+.title-row .note{margin-left:auto;padding-bottom:3px}
+.note{font:400 12px/16px var(--f-text);color:var(--ink-3)}
+[hidden]{display:none!important}
+
+/* toolbar: segmented count filter + view switch */
+.toolbar{position:sticky;top:var(--ph-h);z-index:10;display:flex;flex-wrap:wrap;align-items:center;gap:12px;padding:10px 0 14px;margin-bottom:4px;background:var(--paper);border:0}
+.toolbar .segmented{flex-wrap:wrap}
+.fpill{all:unset;cursor:pointer;height:26px;padding:0 10px;border-radius:var(--r-ctl);font:500 12px/26px var(--f-text);color:var(--ink-3);display:inline-flex;align-items:center;gap:7px}
+.fpill:hover{color:var(--ink)}
+.fpill:focus-visible{outline:2px solid var(--focus);outline-offset:1px}
+.fpill .n{font:500 11px/1 var(--f-mono);color:var(--ink-3)}
+.fpill[aria-pressed="true"] .n{color:var(--ink-2)}
+.fpill .dot{width:7px;height:7px;border-radius:50%;background:var(--line)}
+.fpill .dot.running{background:var(--st-running)} .fpill .dot.needs{background:var(--st-flagged)}
+.fpill .dot.done{background:var(--st-done)} .fpill .dot.queued{background:transparent;box-shadow:inset 0 0 0 1.5px var(--line)}
+.fpill .dot.blocked{background:transparent;box-shadow:inset 0 0 0 1.5px var(--line);outline:1px dashed var(--line);outline-offset:1px;width:5px;height:5px}
+.tb-right{margin-left:auto;display:flex;gap:12px;align-items:center}
+.segmented .i{width:14px;height:14px}
+
+/* book card */
+.bookblk{margin-top:16px;overflow:clip}
+.bookblk:first-child{margin-top:0}
+.bookhead{display:flex;flex-wrap:wrap;align-items:center;gap:10px 24px;padding:18px 20px 14px;border:0}
+.bh-t{display:flex;flex-wrap:wrap;align-items:baseline;gap:4px 14px;min-width:0}
+.bookhead h2{font:700 24px/28px var(--f-display);letter-spacing:.01em}
+.bookhead h2 a{text-decoration:none;color:var(--ink)} .bookhead h2 a:hover{text-decoration:underline;text-decoration-thickness:1px;text-underline-offset:4px}
+.bookhead .meta{font:400 13px/18px var(--f-text);color:var(--ink-3)}
+.bookhead .meta b{font:500 13px/18px var(--f-mono);color:var(--ink-2)}
+.bookhead .meta b.need{color:var(--st-flagged)}
+.mix{margin-left:auto;width:220px;height:8px;gap:2px;border-radius:4px;overflow:hidden;align-self:center}
+.mix i{border-radius:2px}
+.mix .done{background:var(--st-done-bar);opacity:.75}
+.mix .queued,.mix .progress{background:var(--rule-2)}
+.mix .blocked{background:repeating-linear-gradient(45deg,var(--rule-2) 0 3px,transparent 3px 6px);box-shadow:inset 0 0 0 1px var(--rule-2)}
+
+/* the data grid (div rows, so groups can collapse) */
+.dg{border-top:1px solid var(--rule)}
+.colhead,.urow{grid-template-columns:36px 96px minmax(180px,.9fr) 168px minmax(300px,1.5fr) 40px 48px 72px;gap:14px}
+.colhead{padding:10px 20px;font:500 12px/16px var(--f-text);letter-spacing:0;text-transform:none;color:var(--ink-3);border-bottom:1px solid var(--rule)}
+.urow{min-height:44px;padding:4px 20px;border-bottom:1px solid var(--rule);transition:background var(--d1)}
+.urow:hover,.urow:focus-within{background:var(--surface-2)}
+.urow:focus-visible{outline:2px solid var(--focus);outline-offset:-2px}
+.grp:last-child .urow:last-child{border-bottom:0}
+.face{width:36px;height:36px;border-radius:6px;overflow:hidden;background:var(--stage)}
+.face img{width:36px;height:36px;border-radius:6px;box-shadow:inset 0 0 0 1px rgb(255 255 255 / .06)}
+.urow .face:empty{background:var(--surface-2);box-shadow:inset 0 0 0 1px var(--rule)}
+.urow .pill{font:500 12px/1 var(--f-text);padding:4px 9px 4px 7px}
+.urow .pill .i{width:12px;height:12px}
+.who{align-items:baseline;gap:10px}
+.uid{font:600 12px/18px var(--f-mono);color:var(--ink)}
+.ttl{font:400 14px/18px var(--f-text);color:var(--ink-2)}
+.urow:hover .ttl{color:var(--ink)}
+.stp{gap:6px}
+.stp .now{font:400 11px/14px var(--f-mono)}
+.sbar{gap:2px}
+.sbar i{border-radius:2px}
+.gc{display:flex;flex-wrap:wrap;gap:4px;padding:6px 0}
+.chip2.gate{height:22px;padding:0 7px;gap:4px}
+.chip2.gate .i{width:11px;height:11px}
+.chip2.gate b{font:600 11px/1 var(--f-mono)}
+.chip2.gate.ok{background:transparent;border-color:transparent;padding-left:0}
+.num{font:400 12px/16px var(--f-mono)}
+.ib{border-radius:var(--r-ctl)}
+.ib:hover{background:var(--overlay);box-shadow:inset 0 0 0 1px var(--rule-2)}
+.ib:focus-visible{outline:2px solid var(--focus)}
+.rmenu{top:40px;background:var(--overlay);border:0;border-radius:8px;box-shadow:var(--shadow-pop);padding:4px}
+.rmenu button{border-radius:var(--r-ctl)}
+.rmenu button:hover,.rmenu button:focus-visible{background:var(--surface-2)}
+
+/* group subheads: quiet sans, count chip, collapsible */
+.ghead{padding:12px 20px 10px;gap:10px;font:600 13px/18px var(--f-text);letter-spacing:0;text-transform:none;color:var(--ink);background:color-mix(in srgb,var(--surface-2) 45%,transparent);border-bottom:1px solid var(--rule)}
+.ghead .chev{width:14px;height:14px;color:var(--ink-3)}
+.ghead .gl .i{width:14px;height:14px}
+.ghead .gl{color:var(--ink-3);display:inline-grid}
+.ghead .count{height:18px;min-width:20px;font-size:11px}
+.ghead.needs .count{background:var(--st-flagged-bg);color:var(--st-flagged)}
+.ghead.running .count{background:var(--st-running-bg);color:var(--st-running)}
+.ghead .why{font:400 13px/18px var(--f-text);color:var(--ink-3)}
+.ghead .why a{color:var(--ink-2);font:500 12px/18px var(--f-mono)}
+.ghead:hover{color:var(--ink);background:var(--surface-2)}
+.ghead:focus-visible{outline:2px solid var(--focus);outline-offset:-2px}
+.grp[data-open="false"] .ghead{border-bottom:1px solid var(--rule)}
+.grp:last-child[data-open="false"] .ghead{border-bottom:0}
+.rows{border-top:0}
+
+/* fault matrix card */
+#faults{padding:0}
+#faults .stat{margin:0 0 16px}
+#faults .stat b{font:700 34px/36px var(--f-display)}
+#faults .stat .soft{font:400 13px/18px var(--f-text);color:var(--ink-3)}
+.fm-wrap{overflow-x:auto;margin:0 -20px;padding:0 20px}
+.fm{border-collapse:separate;border-spacing:0;font:500 12px/16px var(--f-mono);width:100%}
+.fm th{font:500 12px/16px var(--f-text);letter-spacing:0;text-transform:none;color:var(--ink-3);padding:0 8px 10px;border-bottom:1px solid var(--rule)}
+.fm td{border-bottom:1px solid var(--rule);height:44px}
+.fm tbody tr:hover td{background:var(--surface-2)}
+.fm tbody tr:last-child td{border-bottom:0}
+.fm td.u{padding:4px 16px 4px 0;font:400 14px/18px var(--f-text)}
+.fm td.u .face{display:inline-block;vertical-align:middle;margin-right:12px}
+.fm td.u b{font:600 12px/18px var(--f-mono);margin-right:10px}
+.fm td.u .ft{color:var(--ink-2)}
+.fm td.num{text-align:right;padding-right:4px}
+.fc{height:30px;min-width:76px;margin:2px 4px;border-radius:var(--r-ctl);font:500 12px/1 var(--f-mono)}
+.fc .i{width:12px;height:12px}
+.fc.f1{background:color-mix(in srgb,var(--st-flagged-bar) 14%,var(--surface))}
+.fc.f2{background:color-mix(in srgb,var(--st-flagged-bar) 30%,var(--surface))}
+.fc.f3{background:color-mix(in srgb,var(--st-flagged-bar) 55%,var(--surface))}
+#faults .note{margin-top:14px}
+
+.foot{margin-top:32px;padding-top:16px;border-top:1px solid var(--rule);display:flex;flex-wrap:wrap;gap:8px 24px}
+.foot code{font:400 12px/16px var(--f-mono);color:var(--ink-2)}
+
+/* light theme: the step bar + mix keep their contrast on white */
+:root[data-palette="graphite"] .ghead{background:var(--surface-2)}
+
+@media (max-width:1100px){
+  .colhead,.urow{grid-template-columns:36px 96px minmax(160px,1fr) 150px minmax(180px,1fr) 44px 32px;gap:12px}
+  .urow .gpu,.colhead span:nth-child(7){display:none}
+}
+@media (min-width:641px) and (max-width:900px){
+  .colhead,.urow{grid-template-columns:36px 96px minmax(0,1fr) 140px 52px 34px}
+  .urow .gpu{display:block}
+  .colhead span:nth-child(7){display:block}
+}
+@media (max-width:640px){
+  .title-row h1{font-size:30px;line-height:32px}
+  .title-row .note{display:none}
+  .toolbar{position:static;padding-top:0}
+  .tb-right{margin-left:0}
+  .bookhead{padding:14px 14px 12px}
+  .bookhead h2{font-size:21px;line-height:24px}
+  .urow{grid-template-columns:36px minmax(0,1fr) 30px;padding:10px 14px;gap:6px 12px}
+  .urow .gpu{display:none}
+  .urow .gc{padding:0}
+  .ghead{padding:10px 14px}
+  .ghead .why{padding-left:24px}
+  .fm-wrap{margin:0 -14px;padding:0 14px}
+  #faults .panel-h{padding:14px 14px 0}
+  #faults .panel-b{padding:14px}
+}
+</style>
 </head>
 <body data-page="department">
 <aside id="side"></aside>
-<main class="wrap">
+<main class="page">
   <nav class="crumbs" aria-label="Breadcrumb"><a href="index.html">Studio</a><svg class="i"><use href="assets/icons.svg#chevron-right"/></svg><span>Departments</span><svg class="i"><use href="assets/icons.svg#chevron-right"/></svg><span aria-current="page">Episode</span></nav>
-  <header class="phead">
-    <div><h1>Episode</h1></div>
+  <div class="title-row">
+    <h1>Episode</h1>
     <p class="sub" id="sub"></p>
-    <div class="acts"><span class="note">/d/episode · captured read-only 2026-10-04 19:21 PDT</span></div>
-  </header>
+    <span class="note">/d/episode · captured read-only 2026-10-04 19:21 PDT</span>
+  </div>
   <div class="toolbar" role="toolbar" aria-label="Filter and view">
-    <div id="pills" style="display:flex;flex-wrap:wrap;gap:8px"></div>
+    <div id="pills" class="segmented" role="group" aria-label="Filter by state"></div>
     <div class="tb-right">
-      <div class="seg" role="group" aria-label="View">
+      <div class="segmented" role="group" aria-label="View">
         <button data-view="list" aria-pressed="true"><svg class="i"><use href="assets/icons.svg#layers"/></svg>List</button>
         <button data-view="faults" aria-pressed="false"><svg class="i"><use href="assets/icons.svg#flag"/></svg>Gate × unit faults</button>
       </div>
     </div>
   </div>
   <div id="list"></div>
-  <section id="faults" class="section" hidden></section>
+  <section id="faults" class="panel" hidden></section>
   <footer class="foot note">
     <span><b>Faces</b> are today's pictures (storyboard panel, take frame, board plate) through <code>/thumb/</code>; the build reads the pipeline's <code>poster.jpg</code> (proposed) and shows no face where none exists.</span>
     <span><b>Done</b> and <b>Blocked</b> start collapsed (remembered per viewer). <span class="kbd">j</span> <span class="kbd">k</span> walk rows, <span class="kbd">↵</span> opens, hover shows actions, <span class="kbd">⋯</span> holds the rest.</span>
