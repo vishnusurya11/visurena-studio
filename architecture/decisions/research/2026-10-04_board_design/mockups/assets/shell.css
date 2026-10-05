@@ -1,0 +1,111 @@
+/* Visurena Studio board — the SHELL (top bar, phone tabs, ⌘K palette, keyboard sheet).
+   Owned by the Now/Queue mockup builder; every mockup page links it after board.css.
+   Uses only board.css tokens. See SHELL.md for the copy-paste markup. */
+
+@layer components {
+
+/* review ribbon: mockup-only, links every page */
+.mock-ribbon{background:var(--paper-2);border-bottom:1px solid var(--rule);font:500 11px/16px var(--f-mono);color:var(--ink-3)}
+.mock-ribbon .wrap{display:flex;gap:var(--sp-4);align-items:center;height:28px;overflow-x:auto;white-space:nowrap;scrollbar-width:none}
+.mock-ribbon a{color:var(--ink-2);text-decoration:none}
+.mock-ribbon a:hover{color:var(--ink);text-decoration:underline}
+.mock-ribbon a[aria-current]{color:var(--ink);font-weight:600}
+.mock-ribbon b{letter-spacing:.12em;text-transform:uppercase;font-weight:500}
+
+/* top bar additions */
+.topbar .brand .b-sub{font-weight:500;color:var(--ink-2)}
+.topbar .nav{align-items:center}
+.topbar .nav a:hover{color:var(--ink)}
+.menu{position:relative}
+.menu > summary{list-style:none;cursor:pointer;color:var(--ink-2);display:inline-flex;align-items:center;gap:2px;padding:var(--sp-2) 0;border-bottom:2px solid transparent}
+.menu > summary::-webkit-details-marker{display:none}
+.menu > summary:hover{color:var(--ink)}
+.menu[open] > summary{color:var(--ink)}
+.menu .pop{position:absolute;top:calc(100% + 8px);left:-12px;min-width:220px;background:var(--paper);border:1px solid var(--rule-2);box-shadow:var(--e-3);padding:var(--sp-2);z-index:30;display:grid}
+.menu .pop a{display:flex;justify-content:space-between;gap:var(--sp-5);padding:7px 10px;border:0;border-radius:var(--r-2);color:var(--ink);text-decoration:none}
+.menu .pop a:hover,.menu .pop a:focus-visible{background:var(--paper-2)}
+.menu .pop a .muted{font:500 11px/16px var(--f-mono)}
+.menu .pop hr{border:0;border-top:1px solid var(--rule);margin:var(--sp-2) 0}
+
+.cmdk{cursor:pointer;font-family:var(--f-text)}
+.cmdk:hover{border-color:var(--ink-3);color:var(--ink-2)}
+.cmdk .kbd{margin-left:auto}
+.gpu-pill .dot{width:8px;height:8px;border-radius:50%;background:currentColor;flex:none}
+.gpu-pill b{font-weight:600}
+.gpu-pill:hover{box-shadow:inset 0 0 0 1px currentColor}
+.inbox{color:var(--ink-2);padding:6px 4px}
+.inbox:hover{color:var(--ink)}
+.inbox .badge{background:var(--accent);color:var(--accent-ink)}
+.iconbtn{display:inline-grid;place-items:center;width:32px;height:32px;border:1px solid var(--rule-2);border-radius:var(--r-2);background:var(--paper);color:var(--ink-2);cursor:pointer;padding:0}
+.iconbtn:hover{color:var(--ink);border-color:var(--ink-3)}
+
+/* phone: one-line bar; full nav lives in the bottom tabs */
+@media (max-width:640px){
+  .mock-ribbon .wrap{height:26px}
+  .topbar .wrap{height:48px;gap:var(--sp-3)}
+  .topbar .brand{font-size:20px}
+  .topbar .brand .b-sub{display:none}
+  .topbar .inbox,.topbar .theme-btn{display:none}
+  .gpu-pill{padding:6px 10px;font-size:11px}
+  .gpu-pill .gp-unit{display:none}
+  .tabs a{position:relative;min-height:52px;justify-content:center}
+  .tabs a .i{width:20px;height:20px;stroke-width:1.75}
+  .tabs a[aria-current]::before{content:"";position:absolute;top:0;left:30%;right:30%;height:2px;background:var(--ink)}
+  .tabs .badge{position:absolute;top:5px;left:calc(50% + 6px);font-size:10px;padding:2px 5px}
+}
+
+/* ⌘K palette — a <dialog>, no open/close animation (report 03 R11) */
+.palette{width:min(640px,calc(100vw - 32px));max-height:min(560px,calc(100vh - 120px));margin:12vh auto auto;padding:0;border:1px solid var(--rule-2);border-radius:var(--r-2);background:var(--paper);color:var(--ink);box-shadow:var(--e-3);overflow:hidden}
+.palette[open]{display:flex;flex-direction:column}
+.palette::backdrop{background:rgb(29 26 22 / .32)}
+.pal-head{display:flex;align-items:center;gap:var(--sp-3);padding:0 var(--sp-5);border-bottom:1px solid var(--rule)}
+.pal-head .i{width:16px;height:16px;color:var(--ink-3)}
+.pal-head input{flex:1;height:52px;border:0;outline:0;background:transparent;color:var(--ink);font:400 16px/1 var(--f-text)}
+.pal-head input::placeholder{color:var(--ink-3)}
+.pal-list{list-style:none;margin:0;padding:var(--sp-2) 0;overflow-y:auto;flex:1}
+.pal-group{font:500 11px/16px var(--f-mono);letter-spacing:.12em;text-transform:uppercase;color:var(--ink-3);padding:10px var(--sp-5) 4px}
+.pal-item{display:grid;grid-template-columns:20px 1fr auto;align-items:center;gap:var(--sp-3);padding:8px var(--sp-5);cursor:pointer;border-left:2px solid transparent}
+.pal-item .lbl{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.pal-item .lbl small{color:var(--ink-3);font-size:13px;margin-left:var(--sp-3)}
+.pal-item .meta{font:500 11px/16px var(--f-mono);color:var(--ink-3);display:flex;gap:var(--sp-3);align-items:center}
+.pal-item .i{color:var(--ink-3)}
+.pal-item[aria-selected="true"]{background:var(--paper-2);border-left-color:var(--accent)}
+.pal-item[aria-selected="true"] .i{color:var(--ink)}
+.pal-item mark{background:none;color:var(--ink);font-weight:600;text-decoration:underline;text-decoration-color:var(--accent);text-underline-offset:3px}
+.pal-empty{padding:var(--sp-6) var(--sp-5);color:var(--ink-3)}
+.pal-foot{display:flex;gap:var(--sp-5);padding:8px var(--sp-5);border-top:1px solid var(--rule);font:500 11px/16px var(--f-mono);color:var(--ink-3);background:var(--paper-2)}
+.pal-foot .kbd{margin-right:4px}
+
+/* keyboard sheet (replaces the legend footer) */
+.keysheet{width:min(720px,calc(100vw - 32px));margin:10vh auto auto;padding:0;border:1px solid var(--rule-2);border-radius:var(--r-2);background:var(--paper);color:var(--ink);box-shadow:var(--e-3)}
+.keysheet::backdrop{background:rgb(29 26 22 / .32)}
+.keysheet header{display:flex;align-items:center;justify-content:space-between;padding:var(--sp-5) var(--sp-6);border-bottom:2px solid var(--ink)}
+.keysheet .cols{display:grid;grid-template-columns:1fr 1fr;gap:0 var(--sp-7);padding:var(--sp-4) var(--sp-6) var(--sp-6)}
+.keysheet h3{margin:var(--sp-4) 0 var(--sp-2);font-size:16px}
+.keysheet dl{margin:0;display:grid;grid-template-columns:auto 1fr;gap:6px var(--sp-4);align-items:center}
+.keysheet dt{display:flex;gap:4px;justify-content:flex-end}
+.keysheet dd{margin:0;color:var(--ink-2);font-size:13px}
+.keysheet .legend{grid-column:1/-1;border-top:1px solid var(--rule);margin-top:var(--sp-5);padding-top:var(--sp-4);display:flex;flex-wrap:wrap;gap:var(--sp-3) var(--sp-5)}
+@media (max-width:640px){.keysheet .cols{grid-template-columns:1fr}}
+
+/* row action menu (⋯) */
+.rowmenu{position:relative;display:inline-block}
+.rowmenu > summary{list-style:none;cursor:pointer;display:inline-grid;place-items:center;width:28px;height:28px;border-radius:var(--r-2);color:var(--ink-3)}
+.rowmenu > summary::-webkit-details-marker{display:none}
+.rowmenu > summary:hover,.rowmenu[open] > summary{background:var(--paper-2);color:var(--ink)}
+.rowmenu .pop{position:absolute;right:0;top:calc(100% + 4px);min-width:200px;background:var(--paper);border:1px solid var(--rule-2);box-shadow:var(--e-3);padding:var(--sp-2);z-index:15;display:grid}
+.rowmenu .pop button,.rowmenu .pop a{all:unset;display:flex;align-items:center;gap:var(--sp-3);padding:7px 10px;border-radius:var(--r-2);font-size:13px;cursor:pointer;color:var(--ink)}
+.rowmenu .pop button:hover,.rowmenu .pop a:hover,.rowmenu .pop button:focus-visible{background:var(--paper-2)}
+.rowmenu .pop .k{margin-left:auto}
+
+/* receipt toast: what a real order would answer (mockup never posts) */
+.toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:var(--ink);color:var(--paper);font:500 13px/18px var(--f-text);padding:10px 16px;border-radius:var(--r-2);box-shadow:var(--e-3);z-index:60;display:flex;gap:var(--sp-3);align-items:center;max-width:calc(100vw - 32px)}
+.toast[hidden]{display:none}
+@media (max-width:640px){.toast{bottom:76px}}
+
+/* small shared bits */
+.eyebrow{font:500 11px/16px var(--f-mono);letter-spacing:.12em;text-transform:uppercase;color:var(--ink-3)}
+.vh{position:absolute!important;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+.linkish{color:var(--ink-2);text-decoration:none;font-size:13px;display:inline-flex;align-items:center;gap:2px}
+.linkish:hover{color:var(--ink);text-decoration:underline}
+}

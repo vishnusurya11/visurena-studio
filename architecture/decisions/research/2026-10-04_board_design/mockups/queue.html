@@ -1,0 +1,539 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>(5) ● ep17 07 board · ~21:35 · Queue — Visurena</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='16' cy='16' r='11' fill='none' stroke='%23d6cfc0' stroke-width='5'/%3E%3Cpath d='M16 5a11 11 0 0 1 11 11' fill='none' stroke='%231f5a86' stroke-width='5'/%3E%3Ccircle cx='26.5' cy='5.5' r='5' fill='%23b07a12'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
+<link rel="stylesheet" href="assets/board.css">
+<link rel="stylesheet" href="assets/shell.css">
+<script src="assets/shell.js"></script>
+<style>
+/* ---------- Queue page ---------- */
+main{padding-bottom:var(--sp-8)}
+.pagehead{display:flex;align-items:center;gap:var(--sp-5);padding-top:var(--sp-6);padding-bottom:var(--sp-5);flex-wrap:wrap}
+.pagehead .counts{display:flex;gap:var(--sp-4);font:500 13px/18px var(--f-mono);color:var(--ink-2);flex-wrap:wrap}
+.pagehead .counts span{display:inline-flex;align-items:center;gap:5px}
+.pagehead .counts .run{color:var(--st-running)}
+.pagehead .spacer{flex:1}
+
+/* the GPU lane */
+.lanecard{border:1px solid var(--rule-2);background:var(--paper);box-shadow:var(--e-2)}
+.lanecard > header{display:grid;grid-template-columns:auto minmax(0,1fr) auto;align-items:center;gap:var(--sp-5);padding:var(--sp-4) var(--sp-5);border-bottom:1px solid var(--rule)}
+.lanecard h2{font-size:22px;line-height:26px}
+.totals{display:flex;gap:2px var(--sp-4);font:400 12px/16px var(--f-mono);color:var(--ink-2);flex-wrap:wrap}
+.totals b{color:var(--ink);font-weight:600}
+.totals .bad b{color:var(--st-failed)}
+.seg{display:inline-flex;border:1px solid var(--rule-2);border-radius:var(--r-2);overflow:hidden;margin-left:auto}
+.seg button{all:unset;cursor:pointer;font:500 12px/1 var(--f-mono);padding:7px 12px;color:var(--ink-2)}
+.seg button + button{border-left:1px solid var(--rule-2)}
+.seg button[aria-pressed="true"]{background:var(--ink);color:var(--paper)}
+.seg button:focus-visible{outline:2px solid var(--accent);outline-offset:-2px}
+.tl{padding:var(--sp-4) var(--sp-5) var(--sp-2)}
+.tl svg{display:block;width:100%;height:auto;overflow:visible}
+.tl .ax{font:400 11px/1 var(--f-mono);fill:var(--ink-3)}
+.tl .day{font:600 11px/1 var(--f-mono);fill:var(--ink-2);letter-spacing:.06em;text-transform:uppercase}
+.tl .lab{font:500 11px/1 var(--f-mono);pointer-events:none}
+.tl .bar{cursor:pointer}
+.tl .bar:hover rect.b,.tl .bar.sel rect.b{stroke:var(--ink);stroke-width:1.5}
+.tl .bar:focus{outline:none}
+.tl .bar:focus-visible rect.b{stroke:var(--accent);stroke-width:2}
+.legend{display:flex;flex-wrap:wrap;gap:var(--sp-2) var(--sp-5);padding:var(--sp-2) var(--sp-5) var(--sp-4);font:400 12px/16px var(--f-mono);color:var(--ink-2)}
+.legend span{display:inline-flex;align-items:center;gap:6px}
+.sw{width:14px;height:10px;display:inline-block;border-radius:1px}
+.sw.done{background:var(--st-done-bar)}
+.sw.failed{background:repeating-linear-gradient(45deg,var(--st-failed-bar) 0 3px,var(--st-failed-bg) 3px 6px)}
+.sw.deferred{background-color:var(--st-deferred-bar);background-image:radial-gradient(var(--paper) 1px,transparent 1.3px);background-size:4px 4px}
+.sw.killed{background:var(--line)}
+.sw.running{background:var(--st-running-bar)}
+.sw.ghost{background:repeating-linear-gradient(135deg,var(--rule-2) 0 2px,transparent 2px 6px);outline:1px dashed var(--line);outline-offset:-1px}
+.sw.idle{background:var(--paper-2);outline:1px solid var(--rule);outline-offset:-1px}
+.readout{display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:var(--sp-4);align-items:center;margin:0 var(--sp-5) var(--sp-5);padding:var(--sp-3) var(--sp-4);background:var(--paper-2);border-left:3px solid var(--rule-2);font-size:13px}
+.readout .k{font:600 13px/18px var(--f-mono)}
+.readout .d{font:400 12px/16px var(--f-mono);color:var(--ink-2);overflow-wrap:anywhere}
+.readout[data-oc="failed"]{border-left-color:var(--st-failed)}
+.readout[data-oc="deferred"]{border-left-color:var(--st-deferred)}
+.readout[data-oc="done"]{border-left-color:var(--st-done)}
+.readout[data-oc="running"]{border-left-color:var(--st-running)}
+.eta-line{display:flex;flex-wrap:wrap;gap:4px var(--sp-4);padding:var(--sp-3) var(--sp-5);border-top:1px solid var(--rule);font:400 12px/16px var(--f-mono);color:var(--ink-2)}
+.eta-line b{color:var(--ink);font-weight:600}
+.phone-lane{display:none}
+
+/* queue groups */
+.groups{margin-top:var(--sp-7)}
+.groups > .sec-h{display:flex;align-items:baseline;gap:var(--sp-3);border-bottom:2px solid var(--ink);padding-bottom:var(--sp-3)}
+.sec-h h2{font-size:22px;line-height:26px}
+.sec-h .meta{font:500 12px/16px var(--f-mono);color:var(--ink-3)}
+.sec-h .spacer{flex:1}
+.grp{border-bottom:1px solid var(--rule)}
+.grp > summary{list-style:none;cursor:pointer;display:grid;grid-template-columns:18px 132px minmax(0,1fr) auto;gap:var(--sp-4);align-items:center;padding:12px var(--sp-2)}
+.grp > summary::-webkit-details-marker{display:none}
+.grp > summary:hover{background:var(--paper-2)}
+.grp > summary .chev{transition:transform var(--d1);color:var(--ink-3)}
+.grp[open] > summary .chev{transform:rotate(90deg)}
+.grp .dept{font:700 20px/1 var(--f-display);letter-spacing:.02em}
+.grp .cnt{display:flex;gap:var(--sp-4);font:500 12px/16px var(--f-mono);color:var(--ink-2);flex-wrap:wrap}
+.grp .cnt .x{color:var(--ink-3)}
+.grp .why{font:400 12px/16px var(--f-mono);color:var(--ink-3);text-align:right}
+.grp .why b{color:var(--ink-2);font-weight:500}
+.rows{list-style:none;margin:0 0 var(--sp-4);padding:0 0 0 calc(18px + var(--sp-4) + var(--sp-2))}
+.row{display:grid;grid-template-columns:28px 22px minmax(0,1.3fr) minmax(0,1fr) 170px 130px 32px;gap:var(--sp-3);align-items:center;padding:7px var(--sp-2);border-top:1px solid var(--rule);font-size:13px;outline-offset:-2px}
+.row:hover,.row:focus-visible{background:var(--paper-2)}
+.row .n{font:400 12px/16px var(--f-mono);color:var(--ink-3);text-align:right}
+.row .g{color:var(--ink-3);display:grid;place-items:center}
+.row .g.run{color:var(--st-running)} .row .g.blk{color:var(--ink-3)}
+.row .u{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.row .u a{text-decoration:none} .row .u a:hover{text-decoration:underline}
+.row .u .id{font:600 12px/16px var(--f-mono);margin-right:6px}
+.row .b{color:var(--ink-2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.row .s{font:400 12px/16px var(--f-mono);color:var(--ink-2)}
+.row .t{font:400 12px/16px var(--f-mono);color:var(--ink-3);text-align:right}
+.row .t b{color:var(--ink);font-weight:500}
+.row.cols-h{font:500 11px/16px var(--f-mono);letter-spacing:.12em;text-transform:uppercase;color:var(--ink-3);border-top:0}
+.row.cols-h:hover{background:none}
+.sub{margin:var(--sp-2) 0 0}
+.sub > summary{list-style:none;cursor:pointer;display:flex;gap:var(--sp-3);align-items:center;padding:8px var(--sp-2);border-top:1px dashed var(--rule-2);font:400 12px/16px var(--f-mono);color:var(--ink-2)}
+.sub > summary::-webkit-details-marker{display:none}
+.sub > summary b{color:var(--ink);font-weight:600}
+.sub > summary .chev{color:var(--ink-3);transition:transform var(--d1)}
+.sub[open] > summary .chev{transform:rotate(90deg)}
+.sub .rows{padding-left:0}
+.done-note{font-size:13px;color:var(--ink-3);padding:var(--sp-4) var(--sp-2);display:flex;gap:var(--sp-5);flex-wrap:wrap}
+.holds{margin-top:var(--sp-6)}
+.holds p{color:var(--ink-3);font-size:13px;margin:var(--sp-3) 0 0}
+
+@media (max-width:900px){
+  .row{grid-template-columns:24px 20px minmax(0,1fr) 110px 32px}
+  .row .b,.row .s{display:none}
+  .row.cols-h{display:none}
+}
+@media (max-width:640px){
+  .pagehead{padding-top:var(--sp-4);gap:var(--sp-3)}
+  .pagehead h1{font-size:28px;line-height:30px}
+  .pagehead .spacer{display:none}
+  .lanecard > header{padding:var(--sp-3) var(--sp-4);grid-template-columns:1fr;gap:var(--sp-2)}
+  .seg,.tl,.legend,.readout{display:none}
+  .phone-lane{display:block;list-style:none;margin:0;padding:0 var(--sp-4)}
+  .phone-lane li{display:grid;grid-template-columns:20px minmax(0,1fr) auto;gap:var(--sp-3);align-items:center;padding:10px 0;border-top:1px solid var(--rule);font-size:13px}
+  .phone-lane li:first-child{border-top:0}
+  .phone-lane .id{font:600 12px/16px var(--f-mono);margin-right:6px}
+  .phone-lane .when{font:400 12px/16px var(--f-mono);color:var(--ink-2);text-align:right}
+  .phone-lane .i{color:var(--ink-3)}
+  .phone-lane .now .i{color:var(--st-running)}
+  .phone-lane .past .i.x{color:var(--st-failed)} .phone-lane .past .i.d{color:var(--st-deferred)}
+  .grp > summary{grid-template-columns:16px minmax(0,1fr) auto;row-gap:2px;min-height:52px}
+  .grp .dept{font-size:18px}
+  .grp .cnt{grid-column:2/-1;grid-row:2}
+  .grp .why{display:none}
+  .groups > .sec-h .meta,.groups > .sec-h .linkish{display:none}
+  .sub > summary{flex-wrap:wrap}
+  .rows{padding-left:0}
+  .row{grid-template-columns:20px minmax(0,1fr) auto 32px;min-height:44px}
+  .row .n{display:none}
+  .row .t{white-space:nowrap}
+}
+</style>
+</head>
+<body>
+<div class="mock-ribbon"><div class="wrap"><b>Mockups</b>
+  <a href="index.html">Now</a><a href="queue.html" aria-current="page">Queue</a><a href="unit-running.html">Unit · running</a>
+  <a href="unit-finished.html">Unit · finished</a><a href="department.html">Department</a>
+  <a href="book.html">Book</a><a href="books.html">Books</a>
+  <span class="spacer"></span><a href="#" data-keys>? keys</a>
+</div></div>
+<header class="topbar"><div class="wrap">
+  <a class="brand" href="index.html">Visurena<span class="b-sub"> Studio</span></a>
+  <nav class="nav" aria-label="Board">
+    <a href="index.html">Now</a>
+    <a href="queue.html" aria-current="page">Queue</a>
+    <a href="books.html">Books</a>
+    <details class="menu"><summary>Departments <svg class="i"><use href="assets/icons.svg#chevron-down"/></svg></summary>
+      <div class="pop">
+        <a href="department.html?stage=analysis">analysis <span class="muted">30 done</span></a>
+        <a href="department.html?stage=screenplay">screenplay <span class="muted">30 queued</span></a>
+        <a href="department.html?stage=trailer">trailer <span class="muted">30 queued</span></a>
+        <a href="department.html?stage=refs">refs <span class="muted">29 queued</span></a>
+        <a href="department.html?stage=episode">episode <span class="muted">1 running</span></a>
+      </div></details>
+    <a href="http://127.0.0.1:8700/org">Org</a>
+  </nav>
+  <span class="spacer"></span>
+  <button class="cmdk" type="button" data-palette aria-label="Search (Ctrl K)"><svg class="i"><use href="assets/icons.svg#search"/></svg>Search or jump to…<span class="kbd">Ctrl K</span></button>
+  <a class="gpu-pill" href="unit-running.html" title="GPU: episode ep17 The Thunder Child, step 07 board, done around 21:35 (20:20–22:40)"><span class="dot"></span><b class="gp-unit">ep17</b> 07 board · ~21:35</a>
+  <a class="inbox" href="index.html#needs" title="Needs you: 5"><svg class="i"><use href="assets/icons.svg#inbox"/></svg><span class="badge">5</span><span class="vh">need you</span></a>
+  <button class="iconbtn theme-btn" type="button" data-theme-toggle aria-label="Toggle theme (T)"><svg class="i"><use href="assets/icons.svg#sun-moon"/></svg></button>
+</div></header>
+
+<main class="wrap">
+  <div class="pagehead">
+    <h1>Queue</h1>
+    <div class="counts">
+      <span class="run"><svg class="i"><use href="assets/icons.svg#loader"/></svg>1 running</span>
+      <span><svg class="i"><use href="assets/icons.svg#circle"/></svg>92 queued</span>
+      <span><svg class="i"><use href="assets/icons.svg#circle-dashed"/></svg>7 blocked</span>
+      <span><svg class="i"><use href="assets/icons.svg#pause"/></svg>0 held</span>
+    </div>
+    <span class="spacer"></span>
+    <button class="btn" type="button" data-order="hold studio"><svg class="i"><use href="assets/icons.svg#pause"/></svg>Hold studio…</button>
+  </div>
+
+  <!-- ONE GPU = ONE LANE -->
+  <section class="lanecard" aria-labelledby="lane-h">
+    <header>
+      <h2 id="lane-h">The GPU</h2>
+      <div class="totals" id="totals"></div>
+      <div class="seg" role="group" aria-label="Range">
+        <button type="button" data-range="24" aria-pressed="true">24 h</button><button type="button" data-range="72" aria-pressed="false">3 d</button><button type="button" data-range="168" aria-pressed="false">7 d</button>
+      </div>
+    </header>
+    <div class="tl"><svg id="lane" role="img" aria-label="GPU lane timeline"></svg></div>
+    <div class="legend">
+      <span><i class="sw done"></i>done</span><span><i class="sw failed"></i>refused / failed</span><span><i class="sw deferred"></i>deferred</span>
+      <span><i class="sw killed"></i>killed</span><span><i class="sw running"></i>running → p50, whisker p10–p90</span>
+      <span><i class="sw ghost"></i>queued, p50 of a clean pass (2h38)</span><span><i class="sw idle"></i>GPU idle</span>
+    </div>
+    <div class="readout" id="readout" aria-live="polite"></div>
+    <ul class="phone-lane" id="phonelane"></ul>
+    <div class="eta-line"><span>Queue ETA (p50):</span><span>ep17 <b>~21:35</b></span><span>ep01 <b>~00:13</b></span><span>ep02 <b>~02:51</b></span><span>ep05 <b>~05:29</b></span><span>then refs · A Study in Scarlet</span></div>
+  </section>
+
+  <!-- the call sheet, grouped by department -->
+  <section class="groups" aria-labelledby="q-h">
+    <div class="sec-h"><h2 id="q-h">Call sheet</h2><span class="meta">priority, then slate order · no scheduler yet</span><span class="spacer"></span><a class="linkish" href="#" data-keys>j / k to move</a></div>
+
+    <details class="grp" open>
+      <summary><svg class="i chev"><use href="assets/icons.svg#chevron-right"/></svg><span class="dept">On the GPU</span><span class="cnt"><span>1 running</span></span><span class="why">lease until 19:41 · heartbeat 8 s</span></summary>
+      <ul class="rows">
+        <li class="row" data-row tabindex="0"><span class="n">—</span><span class="g run"><svg class="i"><use href="assets/icons.svg#loader"/></svg></span><span class="u"><a href="unit-running.html"><span class="id">ep17</span>The Thunder Child</a></span><span class="b">The War of the Worlds</span><span class="s">07 board · 0/22</span><span class="t">done <b>~21:35</b></span>
+          <details class="rowmenu"><summary aria-label="Actions for ep17"><svg class="i"><use href="assets/icons.svg#ellipsis"/></svg></summary><div class="pop"><a href="unit-running.html"><svg class="i"><use href="assets/icons.svg#external-link"/></svg>Open</a><button type="button" data-order="hold ep17"><svg class="i"><use href="assets/icons.svg#pause"/></svg>Hold ep17…</button><button type="button" data-order="redo ep17 07"><svg class="i"><use href="assets/icons.svg#rotate-ccw"/></svg>Redo 07 board…</button></div></details></li>
+      </ul>
+    </details>
+
+    <details class="grp" id="q-episode" open>
+      <summary><svg class="i chev"><use href="assets/icons.svg#chevron-right"/></svg><span class="dept">episode</span><span class="cnt"><span>3 queued</span><span class="x">7 blocked</span><span class="x">20 done</span></span><span class="why">next: <b>ep01 The Eve of the War</b> ~21:35</span></summary>
+      <ul class="rows">
+        <li class="row cols-h"><span>#</span><span></span><span>unit</span><span>book</span><span>step</span><span style="text-align:right">starts (p50)</span><span></span></li>
+        <li class="row" data-row tabindex="0"><span class="n">1</span><span class="g"><svg class="i"><use href="assets/icons.svg#circle"/></svg></span><span class="u"><a href="book.html"><span class="id">ep01</span>The Eve of the War</a></span><span class="b">The War of the Worlds</span><span class="s">—</span><span class="t"><b>~21:35</b> · 2h38</span>
+          <details class="rowmenu"><summary aria-label="Actions for ep01"><svg class="i"><use href="assets/icons.svg#ellipsis"/></svg></summary><div class="pop"><button type="button" data-order="bump ep01"><svg class="i"><use href="assets/icons.svg#arrow-up"/></svg>Bump to top<span class="kbd k">B</span></button><button type="button" data-order="hold ep01"><svg class="i"><use href="assets/icons.svg#pause"/></svg>Hold…<span class="kbd k">H</span></button><a href="book.html"><svg class="i"><use href="assets/icons.svg#external-link"/></svg>Open</a></div></details></li>
+        <li class="row" data-row tabindex="0"><span class="n">2</span><span class="g"><svg class="i"><use href="assets/icons.svg#circle"/></svg></span><span class="u"><a href="book.html"><span class="id">ep02</span>The Falling Star</a></span><span class="b">The War of the Worlds</span><span class="s">—</span><span class="t"><b>~00:13</b> · 2h38</span>
+          <details class="rowmenu"><summary aria-label="Actions for ep02"><svg class="i"><use href="assets/icons.svg#ellipsis"/></svg></summary><div class="pop"><button type="button" data-order="bump ep02"><svg class="i"><use href="assets/icons.svg#arrow-up"/></svg>Bump to top<span class="kbd k">B</span></button><button type="button" data-order="hold ep02"><svg class="i"><use href="assets/icons.svg#pause"/></svg>Hold…<span class="kbd k">H</span></button><a href="book.html"><svg class="i"><use href="assets/icons.svg#external-link"/></svg>Open</a></div></details></li>
+        <li class="row" data-row tabindex="0"><span class="n">3</span><span class="g"><svg class="i"><use href="assets/icons.svg#circle"/></svg></span><span class="u"><a href="book.html"><span class="id">ep05</span>The Heat-Ray</a></span><span class="b">The War of the Worlds</span><span class="s">— · 2.4 GPU-h in</span><span class="t"><b>~02:51</b> · 2h38</span>
+          <details class="rowmenu"><summary aria-label="Actions for ep05"><svg class="i"><use href="assets/icons.svg#ellipsis"/></svg></summary><div class="pop"><button type="button" data-order="bump ep05"><svg class="i"><use href="assets/icons.svg#arrow-up"/></svg>Bump to top<span class="kbd k">B</span></button><button type="button" data-order="hold ep05"><svg class="i"><use href="assets/icons.svg#pause"/></svg>Hold…<span class="kbd k">H</span></button><a href="book.html"><svg class="i"><use href="assets/icons.svg#external-link"/></svg>Open</a></div></details></li>
+      </ul>
+      <details class="sub">
+        <summary><svg class="i chev"><use href="assets/icons.svg#chevron-right"/></svg><svg class="i"><use href="assets/icons.svg#circle-dashed"/></svg><b>7 waiting on refs/04</b> · A Study in Scarlet · ep01 ep02 ep10–ep14</summary>
+        <ul class="rows" id="blocked"></ul>
+      </details>
+    </details>
+
+    <details class="grp" id="q-refs">
+      <summary><svg class="i chev"><use href="assets/icons.svg#chevron-right"/></svg><span class="dept">refs</span><span class="cnt"><span>29 queued</span><span class="x">2 started</span><span class="x">1 done</span></span><span class="why">next: <b>A Study in Scarlet</b> · 03 voices 2/4</span></summary>
+      <ul class="rows" data-group="refs"></ul>
+    </details>
+    <details class="grp" id="q-screenplay">
+      <summary><svg class="i chev"><use href="assets/icons.svg#chevron-right"/></svg><span class="dept">screenplay</span><span class="cnt"><span>30 queued</span><span class="x">none started</span></span><span class="why">next: <b>A Study in Scarlet</b></span></summary>
+      <ul class="rows" data-group="screenplay"></ul>
+    </details>
+    <details class="grp" id="q-trailer">
+      <summary><svg class="i chev"><use href="assets/icons.svg#chevron-right"/></svg><span class="dept">trailer</span><span class="cnt"><span>30 queued</span><span class="x">none started</span></span><span class="why">next: <b>A Study in Scarlet</b></span></summary>
+      <ul class="rows" data-group="trailer"></ul>
+    </details>
+    <div class="done-note"><span><svg class="i" style="color:var(--st-done)"><use href="assets/icons.svg#check"/></svg> analysis · all 30 done</span><span>Rows carry no forms: bump and hold live behind ⋯ (was 92 inputs).</span></div>
+  </section>
+
+  <section class="holds" aria-labelledby="h-h">
+    <div class="sec-h" style="display:flex;gap:var(--sp-3);border-bottom:1px solid var(--rule-2);padding-bottom:var(--sp-2)"><h2 id="h-h" style="font-size:18px">Holds</h2><span class="meta">0</span></div>
+    <p>No holds. A studio hold stops every run before its next GPU step; a hold older than 24 h joins Needs you.</p>
+  </section>
+</main>
+
+<nav class="tabs" aria-label="Phone">
+  <a href="index.html"><svg class="i"><use href="assets/icons.svg#gauge"/></svg>Now</a>
+  <a href="index.html#needs"><svg class="i"><use href="assets/icons.svg#inbox"/></svg>Inbox<span class="badge">5</span></a>
+  <a href="books.html"><svg class="i"><use href="assets/icons.svg#book-open"/></svg>Books</a>
+  <a href="#" data-palette><svg class="i"><use href="assets/icons.svg#search"/></svg>Search</a>
+</nav>
+
+<script>
+/* Runs from events grouped by run_id, last 7 days, read-only capture 2026-10-04 19:21:22 PDT.
+   [unit, start min from now, end min from now, outcome, last step, detail of the ending event] */
+var RUNS = [
+["ep13", -10086, -10035, "done", "09", ""],
+["ep13", -10035, -10033, "killed", "11", ""],
+["ep13", -9889, -9889, "killed", "11", ""],
+["ep13", -9886, -9886, "failed", "06", "REFUSED: scripts/episode/takes_r2v.py exit 1"],
+["ep13", -9884, -9882, "failed", "11", "REFUSED: scripts/episode/qc.py exit 1"],
+["ep13", -9874, -9851, "done", "12", ""],
+["ep14", -9362, -9362, "done", "01", ""],
+["ep14", -9362, -9331, "deferred", "02", "DEFERRED PLAN | 20260827135508 episode/ep14 | battery at plan: CONTRACT : setup 'strand_square': shot 13 goes "],
+["ep14", -9331, -9304, "deferred", "02", "DEFERRED PLAN | 20260827135508 episode/ep14 | battery at plan: CONTRACT : dialogue line 32: shot 31 must show "],
+["ep14", -9303, -9257, "deferred", "02", "DEFERRED PLAN | 20260827135508 episode/ep14 | battery at plan: CONTRACT : setup 'waterloo_bridge': shot 12 goe"],
+["ep14", -9256, -9232, "deferred", "02", "DEFERRED PLAN | 20260827135508 episode/ep14 | battery at plan: CONTRACT : projects to 84 s; an episode is 120-"],
+["ep14", -9232, -9207, "deferred", "02", "DEFERRED PLAN | 20260827135508 episode/ep14 | battery at plan: CONTRACT : a line's shot never precedes an earl"],
+["ep14", -9207, -9193, "deferred", "02", "DEFERRED PLAN | 20260827135508 episode/ep14 | battery at plan: CONTRACT : projects to 120 s; an episode is 120"],
+["ep14", -9188, -9173, "failed", "04", "REFUSED: scripts/cast/cast_voices.py exit 2"],
+["ep14", -9171, -9146, "failed", "04", "REFUSED: scripts/episode/say_lines.py exit 1"],
+["ep14", -9145, -9144, "failed", "05", "REFUSED: scripts/episode/timeline.py exit 1"],
+["ep14", -9139, -9125, "failed", "06", "REFUSED: scripts/episode/takes_r2v.py exit 1"],
+["ep14", -9118, -9081, "failed", "08", "TypeError: fault() got multiple values for argument 'kind'"],
+["ep14", -9077, -9039, "failed", "09", "REFUSED: the takes wait on the panels: panel_dq.json: panels failed the panel gate: shots [8, 18, 20, 21, 27, "],
+["ep14", -9025, -8998, "failed", "08", "REFUSED: scripts/episode/panels.py exit 1"],
+["ep14", -8995, -8944, "failed", "09", "REFUSED: the takes wait on the panels: panel_content.json: panels failed the panel gate: shots [4, 5, 8]"],
+["ep14", -8942, -8876, "failed", "09", "REFUSED: the takes wait on the panels: panel_content.json: panels failed the panel gate: shots [5]"],
+["ep14", -8870, -8528, "failed", "09", "REFUSED: scripts/episode/take_content_check.py exit 1"],
+["ep14", -8518, -8517, "killed", "07", ""],
+["ep14", -8516, -8516, "failed", "09", "REFUSED: the takes want 7727 s and the episode ceiling leaves 7500 s; a run over the ceiling takes terminal ru"],
+["ep14", -8512, -8186, "failed", "09", "DEFERRED: EYE_TAKES needs 528 s for its 'shorter_take' rung and the run's 09 share has -12038 s; nothing signe"],
+["ep14", -8185, -8043, "failed", "10", "REFUSED: scripts/episode/assemble.py exit 1"],
+["ep14", -8039, -7866, "failed", "11", "REFUSED: qc FAIL in qc_r2v.json; fix the cut before anyone watches it"],
+["ep14", -7862, -7701, "failed", "11", "REFUSED: qc FAIL in qc_r2v.json; fix the cut before anyone watches it"],
+["ep14", -7682, -7467, "failed", "11", "REFUSED: qc FAIL in qc_r2v.json; fix the cut before anyone watches it"],
+["ep14", -7458, -7400, "failed", "09", "StopIteration: "],
+["ep14", -7398, -7398, "killed", "09", ""],
+["ep14", -7259, -7202, "failed", "09", "REFUSED: the takes wait on the panels: panel_content.json: panels failed the panel gate: shots [5, 8, 9]"],
+["ep14", -7197, -7197, "failed", "09", "REFUSED: scripts/episode/takes_r2v.py exit 1"],
+["ep14", -7195, -6981, "failed", "09", "DEFERRED: EYE_TAKES' replan_cell round of 3 takes needs 2160 s; the 09 share and the ladders' pool cannot pay;"],
+["ep14", -6980, -6931, "failed", "10", "REFUSED: scripts/episode/assemble.py exit 1"],
+["ep14", -6927, -6909, "failed", "11", "REFUSED: qc FAIL in qc_r2v.json; fix the cut before anyone watches it"],
+["ep14", -6902, -6826, "failed", "11", "REFUSED: qc FAIL in qc_r2v.json; fix the cut before anyone watches it"],
+["ep14", -6818, -6793, "failed", "11", "REFUSED: qc FAIL in qc_r2v.json; fix the cut before anyone watches it"],
+["ep14", -6790, -6715, "done", "12", ""],
+["ep15", -5619, -5587, "deferred", "02", "DEFERRED PLAN | 20260827135508 episode/ep15 | battery at plan: CONTRACT : projects to 114 s; an episode is 120"],
+["ep15", -5587, -5560, "deferred", "02", "DEFERRED PLAN | 20260827135508 episode/ep15 | battery at plan: CONTRACT : the shot before the button names a b"],
+["ep15", -5559, -5559, "killed", "02", ""],
+["ep15", -5555, -5528, "deferred", "02", "DEFERRED PLAN | 20260827135508 episode/ep15 | battery at plan: CONTRACT : the last line is the protagonist's ("],
+["ep15", -5520, -5495, "deferred", "02", "DEFERRED PLAN | 20260827135508 episode/ep15 | battery at plan: CONTRACT : shots are numbered 0..n-1 in cut ord"],
+["ep15", -5494, -5467, "deferred", "02", "DEFERRED PLAN | 20260827135508 episode/ep15 | battery at plan: CONTRACT : dialogue is 3.0% of the words; the d"],
+["ep15", -5465, -5450, "deferred", "02", "DEFERRED PLAN | 20260827135508 episode/ep15 | battery at plan: CONTRACT : projects to 119 s; an episode is 120"],
+["ep15", -5449, -5434, "deferred", "02", "DEFERRED PLAN | 20260827135508 episode/ep15 | battery at plan: CONTRACT : the shot before the button names a b"],
+["ep15", -5433, -5417, "deferred", "02", "DEFERRED PLAN | 20260827135508 episode/ep15 | battery at plan: CONTRACT : setup 'halliford_window': shot 23 go"],
+["ep15", -5412, -5386, "deferred", "02", "DEFERRED PLAN | 20260827135508 episode/ep15 | battery at plan: CONTRACT : dialogue is 3.9% of the words; the d"],
+["ep15", -5354, -5328, "failed", "05", "REFUSED: a 6.86 s hole in speech from 34.48 s (shot 4) against the 6.0 s wall; shorten the holds (beat_s/coda_"],
+["ep15", -5327, -5314, "deferred", "02", "DEFERRED PLAN | 20260827135508 episode/ep15 | battery at plan: CONTRACT : projects to 119 s; an episode is 120"],
+["ep15", -5313, -5300, "deferred", "02", "DEFERRED PLAN | 20260827135508 episode/ep15 | battery at plan: CONTRACT : shots are numbered 0..n-1 in cut ord"],
+["ep15", -5296, -5273, "deferred", "02", "DEFERRED PLAN | 20260827135508 episode/ep15 | battery at plan: CONTRACT OK: What Had Happened in Surrey | 20 s"],
+["ep15", -5270, -5252, "deferred", "02", "DEFERRED PLAN | 20260827135508 episode/ep15 | battery at plan: CONTRACT OK: What Had Happened in Surrey | 20 s"],
+["ep15", -5251, -5245, "deferred", "02", "DEFERRED PLAN | 20260827135508 episode/ep15 | battery at plan: CONTRACT OK: What Had Happened in Surrey | 22 s"],
+["ep15", -5244, -5241, "deferred", "02", "DEFERRED PLAN | 20260827135508 episode/ep15 | battery at plan: CONTRACT OK: What Had Happened in Surrey | 22 s"],
+["ep15", -5237, -5223, "failed", "04", "REFUSED: scripts/episode/say_lines.py exit 1"],
+["ep15", -5223, -5222, "failed", "06", "REFUSED: scripts/episode/takes_r2v.py exit 1"],
+["ep15", -5222, -5212, "failed", "06", "REFUSED: scripts/episode/takes_r2v.py exit 1"],
+["ep15", -5211, -5201, "failed", "06", "REFUSED: scripts/episode/takes_r2v.py exit 1"],
+["ep15", -5200, -5190, "failed", "06", "REFUSED: scripts/episode/takes_r2v.py exit 1"],
+["ep15", -5189, -5179, "failed", "06", "REFUSED: scripts/episode/takes_r2v.py exit 1"],
+["ep15", -5178, -5147, "failed", "09", "REFUSED: the takes want 7176 s and the episode ceiling leaves -3440 s; a run over the ceiling takes terminal r"],
+["ep15", -5144, -5144, "failed", "09", "REFUSED: scripts/episode/takes_r2v.py exit 1"],
+["ep15", -5142, -5141, "failed", "06", "REFUSED: scripts/episode/takes_r2v.py exit 1"],
+["ep15", -5140, -5059, "failed", "09", "REFUSED: scripts/episode/take_content_check.py exit 1"],
+["ep15", -5055, -5055, "failed", "09", "REFUSED: the takes want 0 s and the episode ceiling leaves -7788 s; a run over the ceiling takes terminal rung"],
+["ep15", -5054, -5045, "failed", "10", "REFUSED: scripts/episode/assemble.py exit 1"],
+["ep15", -5039, -5038, "failed", "10", "REFUSED: scripts/episode/assemble.py exit 1"],
+["ep15", -5034, -5026, "failed", "11", "REFUSED: qc FAIL in qc_r2v.json; fix the cut before anyone watches it"],
+["ep15", -5023, -5023, "failed", "11", "REFUSED: qc FAIL in qc_r2v.json for these exact bytes; fix the cut before anyone watches it"],
+["ep15", -5023, -5015, "failed", "11", "REFUSED: qc FAIL in qc_r2v.json; fix the cut before anyone watches it"],
+["ep15", -5010, -5002, "failed", "11", "REFUSED: qc FAIL in qc_r2v.json; fix the cut before anyone watches it"],
+["ep15", -4998, -4991, "failed", "11", "REFUSED: qc FAIL in qc_r2v.json; fix the cut before anyone watches it"],
+["ep15", -4981, -4975, "failed", "11", "REFUSED: qc FAIL in qc_r2v.json; fix the cut before anyone watches it"],
+["ep15", -4974, -4962, "done", "12", ""],
+["ep16", -4836, -4812, "deferred", "02", "DEFERRED PLAN | 20260827135508 episode/ep16 | battery at plan: CONTRACT OK: The Exodus Northward | 20 shots | "],
+["ep16", -4810, -4785, "deferred", "02", "DEFERRED PLAN | 20260827135508 episode/ep16 | battery at plan: CONTRACT OK: The Exodus Northward | 26 shots | "],
+["ep16", -4783, -4764, "deferred", "02", "DEFERRED PLAN | 20260827135508 episode/ep16 | battery at plan: CONTRACT OK: The Exodus Northward | 26 shots | "],
+["ep16", -4723, -4691, "failed", "04", "REFUSED: scripts/episode/say_lines.py exit 1"],
+["ep16", -4682, -4682, "failed", "05", "REFUSED: a 6.14 s hole in speech from 158.74 s (shot 23) against the 6.0 s wall; shorten the holds (beat_s/cod"],
+["ep16", -4676, -4653, "failed", "06", "REFUSED: scripts/episode/takes_r2v.py exit 1"],
+["ep16", -4649, -4630, "failed", "06", "REFUSED: scripts/episode/takes_r2v.py exit 1"],
+["ep16", -4629, -4463, "failed", "09", "DEFERRED: EYE_TAKES' batched_cures round of 3 takes needs 1095 s; the 09 share and the ladders' pool cannot pa"],
+["ep16", -4462, -4462, "killed", "09", ""],
+["ep16", -4425, -4408, "failed", "06", "REFUSED: scripts/episode/takes_r2v.py exit 1"],
+["ep16", -4407, -4346, "killed", "09", ""],
+["ep16", -4337, -4137, "failed", "09", "REFUSED: scripts/episode/takes_r2v.py exit 1"],
+["ep16", -4136, -4136, "failed", "06", "REFUSED: scripts/episode/takes_r2v.py exit 1"],
+["ep16", -4135, -4085, "done", "12", ""],
+["ep16", -3677, -3660, "killed", "09", ""],
+["ep16", -3621, -3621, "killed", "09", ""],
+["ep16", -3510, -3498, "killed", "08", ""],
+["ep16", -3493, -3481, "killed", "08", ""],
+["ep16", -3462, -3316, "failed", "11", "REFUSED: qc FAIL in qc_r2v.json; fix the cut before anyone watches it"],
+["ep16", -3314, -3289, "done", "12", ""],
+["ep16", -3286, -3274, "failed", "09", "REFUSED: the takes want 2227 s and the episode ceiling leaves -16 s; a run over the ceiling takes terminal run"],
+["ep16", -3272, -3214, "killed", "09", ""],
+["ep16", -3213, -3137, "killed", "08", ""],
+["ep16", -3128, -3118, "killed", "08", ""],
+["ep16", -3099, -2950, "failed", "09", "REFUSED: scripts/episode/takes_r2v.py exit 1"],
+["ep16", -2945, -2904, "done", "12", ""],
+["ep16", -2846, -2821, "failed", "11", "REFUSED: qc FAIL in qc_r2v.json; fix the cut before anyone watches it"],
+["ep16", -2810, -2794, "done", "12", ""],
+["ep16", -1934, -1873, "failed", "06", "REFUSED: scripts/episode/takes_r2v.py exit 1"],
+["ep16", -1870, -1699, "done", "12", ""],
+["ep16", -1698, -1677, "done", "12", ""],
+["ep16", -1676, -1663, "done", "12", ""],
+["ep17", -120, -120, "killed", "02", ""],
+["ep17", -98, -70, "deferred", "02", "DEFERRED PLAN | 20260827135508 episode/ep17 | battery at plan: CONTRACT OK: The Thunder Child | 22 shots | 122"],
+["ep17", -63, -28, "failed", "06", "REFUSED: scripts/episode/takes_r2v.py exit 1"],
+["ep17", -26, 0, "running", "07", ""]
+];
+var NOW_LOCAL_MIN = 19 * 60 + 21 + 22 / 60;   /* 19:21:22 PDT */
+var RUNNING = { u: 'ep17', a: -26, p50: 134, lo: 59, hi: 199, st: '07', label: 'ep17 · 07 board' };
+var GHOSTS = [
+  { u: 'ep01', t: 'The Eve of the War', a: 134, b: 292 },
+  { u: 'ep02', t: 'The Falling Star', a: 292, b: 450 },
+  { u: 'ep05', t: 'The Heat-Ray', a: 450, b: 608 },
+  { u: 'refs', t: 'A Study in Scarlet', a: 608, b: 731 }
+];
+var QUEUE = {
+  refs: [['A Study in Scarlet','03 voices · 2/4'],['Frankenstein; Or, The Modern Prometheus',''],['Dracula',''],['Pride and Prejudice',''],['The Adventures of Tom Sawyer',''],['Peter Pan',''],['Moby Dick; Or, The Whale',''],['Metamorphosis',''],['The Strange Case of Dr. Jekyll and Mr. Hyde','01 canon · 1/4'],['The Picture of Dorian Gray',''],['Heart of Darkness',''],['The Time Machine',''],['The Invisible Man',''],['A Christmas Carol',''],['The Call of the Wild',''],['Treasure Island',''],['The Turn of the Screw',''],['Wuthering Heights',''],['The Hound of the Baskervilles',''],["Alice's Adventures in Wonderland",''],['The Wonderful Wizard of Oz',''],['Robinson Crusoe',''],['Around the World in Eighty Days',''],['Twenty Thousand Leagues under the Sea',''],['The Secret Garden',''],['Black Beauty',''],['The Prince and the Pauper',''],['Dubliners',''],['Beowulf','']],
+  shelf: ['A Study in Scarlet','Frankenstein; Or, The Modern Prometheus','Dracula','Pride and Prejudice','The Adventures of Tom Sawyer','Peter Pan','Moby Dick; Or, The Whale','Metamorphosis','The Strange Case of Dr. Jekyll and Mr. Hyde','The Picture of Dorian Gray','Heart of Darkness','The Time Machine','The War of the Worlds','The Invisible Man','A Christmas Carol','The Call of the Wild','Treasure Island','The Turn of the Screw','Wuthering Heights','The Hound of the Baskervilles',"Alice's Adventures in Wonderland",'The Wonderful Wizard of Oz','Robinson Crusoe','Around the World in Eighty Days','Twenty Thousand Leagues under the Sea','The Secret Garden','Black Beauty','The Prince and the Pauper','Dubliners','Beowulf'],
+  blocked: [['ep01','A Study in Scarlet'],['ep02','The Science of Deduction'],['ep10','John Ferrier Talks with the Prophet'],['ep11','A Flight for Life'],['ep12','The Avenging Angels'],['ep13','A Continuation of the Reminiscences of John Watson, M.D.'],['ep14','The Conclusion']]
+};
+var STEPS = { '01': 'bind', '02': 'plan', '03': 'places', '04': 'record', '05': 'timeline', '06': 'prompts', '07': 'board', '08': 'panels', '09': 'shoot', '10': 'edit', '11': 'qc', '12': 'deliver' };
+var WORD = { done: 'done', failed: 'refused', deferred: 'deferred', escalated: 'escalated', killed: 'killed', running: 'running' };
+
+(function () {
+  var I = window.board.icon;
+  function hhmm(off) { var m = Math.round(((NOW_LOCAL_MIN + off) % 1440 + 1440) % 1440) % 1440; return String(Math.floor(m / 60)).padStart(2, '0') + ':' + String(Math.floor(m % 60)).padStart(2, '0'); }
+  function dur(min) { min = Math.round(min); return min < 60 ? min + ' min' : Math.floor(min / 60) + 'h' + String(min % 60).padStart(2, '0'); }
+  var WD = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'], MO = ['Sep', 'Oct'];
+  function dayOf(off) {   /* local calendar day of an offset from now (Sun 4 Oct 2026) */
+    var d = new Date(Date.UTC(2026, 9, 4 + Math.floor((NOW_LOCAL_MIN + off + 0.5) / 1440)));
+    return WD[d.getUTCDay()] + ' ' + d.getUTCDate() + ' ' + MO[d.getUTCMonth() - 8];
+  }
+  var svg = document.getElementById('lane'), sel = null;
+
+  function fillFor(oc) {
+    return { done: 'fill:var(--st-done-bar)', failed: 'fill:url(#pF)', deferred: 'fill:url(#pD)', escalated: 'fill:var(--ink)', killed: 'fill:var(--line)', running: 'fill:var(--st-running-bar)' }[oc];
+  }
+  function draw(range) {
+    var W = Math.max(600, svg.parentNode.clientWidth - 0), L = 0, R = W, from = -range * 60, to = 12 * 60;
+    var x = function (m) { return L + (m - from) / (to - from) * (R - L); };
+    var yTop = 56, laneH = 44, idleY = yTop + laneH + 10, H = idleY + 30;
+    svg.setAttribute('viewBox', '0 0 ' + W + ' ' + H);
+    var s = '<defs>' +
+      '<pattern id="pF" width="6" height="6" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><rect width="6" height="6" style="fill:var(--st-failed-bg)"/><rect width="3" height="6" style="fill:var(--st-failed-bar)"/></pattern>' +
+      '<pattern id="pD" width="4" height="4" patternUnits="userSpaceOnUse"><rect width="4" height="4" style="fill:var(--st-deferred-bar)"/><circle cx="2" cy="2" r="0.9" style="fill:var(--paper)"/></pattern>' +
+      
+      '<pattern id="pG" width="6" height="6" patternUnits="userSpaceOnUse" patternTransform="rotate(-45)"><rect width="6" height="6" style="fill:var(--paper)"/><rect width="2" height="6" style="fill:var(--rule-2)"/></pattern>' +
+      '</defs>';
+    /* hour grid + labels */
+    var stepH = range <= 24 ? 180 : range <= 72 ? 360 : 720;
+    for (var m = Math.ceil((NOW_LOCAL_MIN + from) / stepH) * stepH - NOW_LOCAL_MIN; m <= to; m += stepH) {
+      var abs = ((NOW_LOCAL_MIN + m) % 1440 + 1440) % 1440, midnight = Math.abs(abs) < 1 || Math.abs(abs - 1440) < 1;
+      s += '<line x1="' + x(m) + '" x2="' + x(m) + '" y1="' + (yTop - 6) + '" y2="' + (yTop + laneH) + '" style="stroke:var(' + (midnight ? '--rule-2' : '--rule') + ')"/>';
+      if (midnight && x(m) + 90 < W) s += '<text class="day" x="' + (x(m) + 4) + '" y="11">' + dayOf(m + 1) + '</text>';
+      if (Math.abs(x(m) - x(0)) > 34) s += '<text class="ax" x="' + x(m) + '" y="' + (yTop - 12) + '" text-anchor="middle">' + hhmm(m) + '</text>';
+    }
+    if (range <= 24) s += '<text class="day" x="2" y="11">' + dayOf(from) + '</text>';
+    s += '<rect x="' + L + '" y="' + yTop + '" width="' + (R - L) + '" height="' + laneH + '" style="fill:none;stroke:var(--rule)"/>';
+    /* past runs */
+    var runs = RUNS.filter(function (r) { return r[2] > from && r[3] !== 'running'; });
+    var busy = 0, n = { done: 0, failed: 0, deferred: 0, killed: 0, escalated: 0 }, spans = [];
+    runs.forEach(function (r, i) {
+      var a = Math.max(r[1], from), b = r[2], w = Math.max(x(b) - x(a), 2);
+      busy += b - a; n[r[3]]++; spans.push([a, b]);
+      var lbl = r[0] + ' ' + r[4];
+      s += '<g class="bar" tabindex="0" data-i="' + RUNS.indexOf(r) + '"><title>' + r[0] + ' · ' + hhmm(r[1]) + '–' + hhmm(r[2]) + ' · ' + dur(r[2] - r[1]) + ' · ' + WORD[r[3]] + ' at ' + r[4] + ' ' + (STEPS[r[4]] || '') + (r[5] ? ' · ' + r[5] : '') + '</title>' +
+        '<rect class="b" x="' + x(a) + '" y="' + (yTop + 6) + '" width="' + w + '" height="' + (laneH - 12) + '" rx="1" style="' + fillFor(r[3]) + '"/>' +
+        (w > 64 ? '<text class="lab" x="' + (x(a) + 5) + '" y="' + (yTop + laneH / 2 + 4) + '" style="fill:' + (r[3] === 'done' ? 'var(--paper)' : 'var(--ink)') + ';paint-order:stroke;stroke:' + (r[3] === 'done' ? 'none' : 'var(--paper)') + ';stroke-width:3px">' + lbl + '</text>' : '') + '</g>';
+    });
+    /* running: solid to now, forecast to p50, whisker p10–p90 */
+    var ra = Math.max(RUNNING.a, from);
+    s += '<g class="bar" tabindex="0" data-i="run"><title>ep17 · started 18:55 · running 07 board · done around 21:35 (20:20–22:40)</title>' +
+      '<rect class="b" x="' + x(ra) + '" y="' + (yTop + 6) + '" width="' + (x(0) - x(ra)) + '" height="' + (laneH - 12) + '" style="fill:var(--st-running-bar)"/>' +
+      '<rect x="' + x(0) + '" y="' + (yTop + 6) + '" width="' + (x(RUNNING.p50) - x(0)) + '" height="' + (laneH - 12) + '" style="fill:var(--st-running-bg);stroke:var(--st-running-bar);stroke-width:1"/>' +
+      '<line x1="' + x(RUNNING.lo) + '" x2="' + x(RUNNING.hi) + '" y1="' + (yTop + laneH - 3) + '" y2="' + (yTop + laneH - 3) + '" style="stroke:var(--st-running);stroke-width:2"/>' +
+      '<line x1="' + x(RUNNING.lo) + '" x2="' + x(RUNNING.lo) + '" y1="' + (yTop + laneH - 7) + '" y2="' + (yTop + laneH + 1) + '" style="stroke:var(--st-running);stroke-width:2"/>' +
+      '<line x1="' + x(RUNNING.hi) + '" x2="' + x(RUNNING.hi) + '" y1="' + (yTop + laneH - 7) + '" y2="' + (yTop + laneH + 1) + '" style="stroke:var(--st-running);stroke-width:2"/>' +
+      (x(RUNNING.p50) - x(0) > 96 ? '<text class="lab" x="' + (x(0) + 5) + '" y="' + (yTop + laneH / 2 + 4) + '" style="fill:var(--st-running)">ep17 → ~21:35</text>' : '') + '</g>';
+    /* queued ghosts, p50 length */
+    GHOSTS.forEach(function (g) {
+      if (g.a > to) return;
+      var b = Math.min(g.b, to), w = x(b) - x(g.a);
+      s += '<g><title>' + g.u + ' ' + g.t + ' · queued · starts ~' + hhmm(g.a) + ' · p50 ' + dur(g.b - g.a) + '</title>' +
+        '<rect x="' + (x(g.a) + 1) + '" y="' + (yTop + 6) + '" width="' + (w - 2) + '" height="' + (laneH - 12) + '" rx="1" style="fill:url(#pG);stroke:var(--line);stroke-dasharray:3 2"/>' +
+        (w > 50 ? '<text class="lab" x="' + (x(g.a) + 6) + '" y="' + (yTop + laneH / 2 + 4) + '" style="fill:var(--ink-2);paint-order:stroke;stroke:var(--paper);stroke-width:3px">' + g.u + '</text>' : '') + '</g>';
+    });
+    /* idle strip: gaps between runs in the past */
+    spans.push([RUNNING.a, 0]); spans.sort(function (p, q) { return p[0] - q[0]; });
+    var before = RUNS.filter(function (r) { return r[2] <= from; }), cur = from, idle = 0, longest = [0, 0, 0];
+    var trueStart = before.length ? before[before.length - 1][2] : from;
+    spans.concat([[0, 0]]).forEach(function (sp) {
+      if (sp[0] > cur + 1) {
+        var g = sp[0] - cur, real = cur === from ? sp[0] - trueStart : g, st = cur === from ? trueStart : cur; idle += g; if (real > longest[0]) longest = [real, st, sp[0]];
+        s += '<rect x="' + x(cur) + '" y="' + idleY + '" width="' + (x(sp[0]) - x(cur)) + '" height="8" style="fill:var(--paper-2);stroke:var(--rule)"><title>GPU idle ' + hhmm(cur) + '–' + hhmm(sp[0]) + ' · ' + dur(g) + '</title></rect>';
+        if (x(sp[0]) - x(cur) > 120) s += '<text class="ax" x="' + (x(cur) + 4) + '" y="' + (idleY + 22) + '">GPU idle ' + dur(real) + (cur === from ? ' · since ' + dayOf(trueStart).slice(0, 3) + ' ' + hhmm(trueStart) + ', when ep16 finished' : '') + '</text>';
+      }
+      cur = Math.max(cur, sp[1]);
+    });
+    /* now line */
+    s += '<line x1="' + x(0) + '" x2="' + x(0) + '" y1="' + (yTop - 10) + '" y2="' + (idleY + 10) + '" style="stroke:var(--accent);stroke-width:2"/>' +
+      '<rect x="' + (x(0) - 30) + '" y="' + (yTop - 28) + '" width="60" height="18" rx="2" style="fill:var(--accent)"/>' +
+      '<text x="' + x(0) + '" y="' + (yTop - 15) + '" text-anchor="middle" style="font:600 11px var(--f-mono);fill:var(--accent-ink)">now ' + hhmm(0) + '</text>';
+    svg.innerHTML = s;
+    busy += -ra;
+    var refused = n.failed + n.escalated;
+    document.getElementById('totals').innerHTML =
+      '<span>last ' + (range <= 24 ? '24 h' : range / 24 + ' d') + ': GPU busy <b>' + dur(busy) + '</b> of ' + range + ' h</span>' +
+      '<span><b>' + (runs.length + 1) + '</b> runs</span>' +
+      '<span class="bad"><b>' + refused + '</b> refused</span><span><b>' + n.deferred + '</b> deferred</span><span><b>' + n.killed + '</b> killed</span><span><b>' + n.done + '</b> done</span>' +
+      '<span>longest idle <b>' + dur(longest[0]) + '</b> (' + dayOf(longest[1]).slice(0, 3) + ' ' + hhmm(longest[1]) + ' → ' + hhmm(longest[2]) + ')</span>';
+    svg.querySelectorAll('.bar').forEach(function (g) {
+      g.addEventListener('click', function () { pick(g.dataset.i); });
+      g.addEventListener('keydown', function (ev) { if (ev.key === 'Enter' || ev.key === ' ') { ev.preventDefault(); pick(g.dataset.i); } });
+    });
+    pick(sel || 'run');
+  }
+  function pick(i) {
+    sel = i;
+    svg.querySelectorAll('.bar').forEach(function (g) { g.classList.toggle('sel', g.dataset.i === String(i)); });
+    var ro = document.getElementById('readout');
+    if (i === 'run') {
+      ro.dataset.oc = 'running';
+      ro.innerHTML = '<span class="pill running">' + I('loader') + 'running</span><div><span class="k">ep17 The Thunder Child</span> · 18:55 → now (26 min) · 07 board, panel 00 of 22 · <span class="d">done around 21:35 · p10 20:20 · p90 22:40</span></div><a class="btn" href="unit-running.html">Open run' + I('chevron-right') + '</a>';
+      return;
+    }
+    var r = RUNS[+i]; ro.dataset.oc = r[3];
+    var page = r[0] === 'ep17' ? 'unit-running.html' : 'unit-finished.html?u=' + r[0];
+    ro.innerHTML = '<span class="pill ' + (r[3] === 'killed' ? 'held' : r[3]) + '">' + I({ done: 'check', failed: 'x', deferred: 'corner-up-left', killed: 'minus', escalated: 'hand' }[r[3]]) + WORD[r[3]] + '</span>' +
+      '<div><span class="k">' + r[0] + '</span> · ' + dayOf(r[1]).slice(0, 3) + ' ' + hhmm(r[1]) + ' → ' + hhmm(r[2]) + ' (' + dur(r[2] - r[1]) + ') · ended at ' + r[4] + ' ' + (STEPS[r[4]] || '') +
+      (r[5] ? '<div class="d">' + r[5].replace(/</g, '&lt;') + '</div>' : '') + '</div><a class="btn" href="' + page + '">Open run' + I('chevron-right') + '</a>';
+  }
+  var range = 24;
+  document.querySelectorAll('.seg button').forEach(function (b) {
+    b.addEventListener('click', function () {
+      document.querySelectorAll('.seg button').forEach(function (o) { o.setAttribute('aria-pressed', String(o === b)); });
+      range = +b.dataset.range; draw(range);
+    });
+  });
+  draw(range);
+  var t; window.addEventListener('resize', function () { clearTimeout(t); t = setTimeout(function () { draw(range); }, 120); });
+
+  /* phone: the lane folds into a list (report 05 §5.6) */
+  var last = RUNS.filter(function (r) { return r[3] !== 'running'; }).slice(-3).reverse();
+  document.getElementById('phonelane').innerHTML =
+    '<li class="now">' + I('loader') + '<span><span class="id">ep17</span>07 board · running</span><span class="when">~21:35<br>20:20–22:40</span></li>' +
+    GHOSTS.slice(0, 3).map(function (g) { return '<li>' + I('circle') + '<span><span class="id">' + g.u + '</span>' + g.t + '</span><span class="when">~' + hhmm(g.a) + '</span></li>'; }).join('') +
+    last.map(function (r) { return '<li class="past">' + I(r[3] === 'failed' ? 'x' : r[3] === 'deferred' ? 'corner-up-left' : 'minus').replace('class="i"', 'class="i ' + (r[3] === 'failed' ? 'x' : 'd') + '"') + '<span><span class="id">' + r[0] + '</span>' + WORD[r[3]] + ' at ' + r[4] + ' ' + STEPS[r[4]] + '</span><span class="when">' + hhmm(r[1]) + '</span></li>'; }).join('');
+
+  /* collapsed groups: rows rendered once (server renders them on expand in the build) */
+  function menu(k) {
+    return '<details class="rowmenu"><summary aria-label="Actions"> ' + I('ellipsis') + '</summary><div class="pop">' +
+      '<button type="button" data-order="bump ' + k + '">' + I('arrow-up') + 'Bump to top</button>' +
+      '<button type="button" data-order="hold ' + k + '">' + I('pause') + 'Hold…</button>' +
+      '<a href="book.html">' + I('external-link') + 'Open</a></div></details>';
+  }
+  function row(n, book, step, k) {
+    return '<li class="row" data-row tabindex="0"><span class="n">' + n + '</span><span class="g">' + I('circle') + '</span>' +
+      '<span class="u"><a href="book.html">' + book + '</a></span><span class="b">' + k.split(' ')[0] + '</span><span class="s">' + (step || '—') + '</span><span class="t"></span>' + menu(k) + '</li>';
+  }
+  document.querySelector('[data-group="refs"]').innerHTML = QUEUE.refs.map(function (r, i) { return row(i + 1, r[0], r[1], 'refs ' + r[0]); }).join('');
+  ['screenplay', 'trailer'].forEach(function (g) {
+    document.querySelector('[data-group="' + g + '"]').innerHTML = QUEUE.shelf.map(function (b, i) { return row(i + 1, b, '', g + ' ' + b); }).join('');
+  });
+  document.getElementById('blocked').innerHTML = QUEUE.blocked.map(function (e) {
+    return '<li class="row" data-row tabindex="0"><span class="n"></span><span class="g blk">' + I('circle-dashed') + '</span><span class="u"><a href="book.html?b=scarlet"><span class="id">' + e[0] + '</span>' + e[1] + '</a></span><span class="b">A Study in Scarlet</span><span class="s">waits on refs/04</span><span class="t"></span>' + menu('episode ' + e[0]) + '</li>';
+  }).join('');
+})();
+</script>
+</body>
+</html>

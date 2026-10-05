@@ -1,0 +1,80 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>(5) ● ep17 07 board · ~21:35 · The War of the Worlds — Visurena</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='16' cy='16' r='11' fill='none' stroke='%23d6cfc0' stroke-width='5'/%3E%3Cpath d='M16 5a11 11 0 0 1 11 11' fill='none' stroke='%231f5a86' stroke-width='5'/%3E%3Ccircle cx='26.5' cy='5.5' r='5' fill='%23b07a12'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
+<link rel="stylesheet" href="assets/board.css">
+<link rel="stylesheet" href="assets/shell.css">
+<script src="assets/shell.js"></script>
+<link rel="stylesheet" href="assets/dept.css">
+</head>
+<body data-page="book">
+<div class="mock-ribbon"><div class="wrap"><b>Mockups</b>
+  <a href="index.html">Now</a><a href="queue.html">Queue</a><a href="unit-running.html">Unit · running</a>
+  <a href="unit-finished.html">Unit · finished</a><a href="department.html">Department</a>
+  <a href="book.html" aria-current="page">Book</a><a href="books.html" aria-current="page">Books</a>
+  <span class="spacer"></span><a href="#" data-keys>? keys</a>
+</div></div>
+<header class="topbar"><div class="wrap">
+  <a class="brand" href="index.html">Visurena<span class="b-sub"> Studio</span></a>
+  <nav class="nav" aria-label="Board">
+    <a href="index.html">Now</a>
+    <a href="queue.html">Queue</a>
+    <a href="books.html" aria-current="page">Books</a>
+    <details class="menu"><summary>Departments <svg class="i"><use href="assets/icons.svg#chevron-down"/></svg></summary>
+      <div class="pop">
+        <a href="department.html?stage=analysis">analysis <span class="muted">30 done</span></a>
+        <a href="department.html?stage=screenplay">screenplay <span class="muted">30 queued</span></a>
+        <a href="department.html?stage=trailer">trailer <span class="muted">30 queued</span></a>
+        <a href="department.html?stage=refs">refs <span class="muted">29 queued</span></a>
+        <a href="department.html?stage=episode">episode <span class="muted">1 running</span></a>
+      </div></details>
+    <a href="http://127.0.0.1:8700/org">Org</a>
+  </nav>
+  <span class="spacer"></span>
+  <button class="cmdk" type="button" data-palette aria-label="Search (Ctrl K)"><svg class="i"><use href="assets/icons.svg#search"/></svg>Search or jump to…<span class="kbd">Ctrl K</span></button>
+  <a class="gpu-pill" href="unit-running.html" title="GPU: episode ep17 The Thunder Child, step 07 board, done around 21:35 (20:20–22:40)"><span class="dot"></span><b class="gp-unit">ep17</b> 07 board · ~21:35</a>
+  <a class="inbox" href="index.html#needs" title="Needs you: 5"><svg class="i"><use href="assets/icons.svg#inbox"/></svg><span class="badge">5</span><span class="vh">need you</span></a>
+  <button class="iconbtn theme-btn" type="button" data-theme-toggle aria-label="Toggle theme (T)"><svg class="i"><use href="assets/icons.svg#sun-moon"/></svg></button>
+</div></header>
+<!-- /SHELL -->
+<main class="wrap">
+  <nav class="crumbs" aria-label="Breadcrumb"><a href="index.html">Studio</a><svg class="i"><use href="assets/icons.svg#chevron-right"/></svg><a href="books.html">Books</a><svg class="i"><use href="assets/icons.svg#chevron-right"/></svg><span aria-current="page">The War of the Worlds</span></nav>
+  <header class="phead">
+    <div><h1>The War of the Worlds</h1><p class="sub">H. G. Wells · 1898 · <span class="mono muted">/b/the-war-of-the-worlds</span></p></div>
+    <div class="acts"><a class="btn" href="department.html"><svg class="i"><use href="assets/icons.svg#layers"/></svg>Episode department</a><button class="btn" data-order="hold book the-war-of-the-worlds"><svg class="i"><use href="assets/icons.svg#pause"/></svg>Hold book</button></div>
+  </header>
+  <dl class="kv" id="kv"></dl>
+  <section class="section" style="margin-top:24px">
+    <header><h2>Season</h2><span class="note">hover a poster to scrub its contact sheet (or its panels) · zero video on this page</span>
+      <span class="spacer" style="flex:1"></span><span class="chip">PANEL · today</span><span class="chip prop">poster.jpg · proposed</span></header>
+    <div class="wall" id="wall"></div>
+  </section>
+  <section class="section">
+    <header><h2>Season matrix</h2><span class="note">27 chapters × 12 steps · one cell per <code>work_steps</code> row · dotted = done before the ledger (inferred)</span></header>
+    <div id="matrix" style="overflow-x:auto"></div>
+    <div class="legend">
+      <span><i class="c done"><svg class="i"><use href="assets/icons.svg#check"/></svg></i>done</span><span><i class="c skipped"><svg class="i"><use href="assets/icons.svg#check"/></svg></i>reused (skipped)</span>
+      <span><i class="c flagged"><svg class="i"><use href="assets/icons.svg#flag"/></svg></i>kept with flags</span><span><i class="c running"><svg class="i"><use href="assets/icons.svg#loader"/></svg></i>running</span>
+      <span><i class="c inferred"><svg class="i"><use href="assets/icons.svg#check"/></svg></i>done, pre-ledger</span><span><i class="c queued"></i>not run</span><span><i class="c future"></i>not planned</span>
+    </div>
+  </section>
+  <section class="section">
+    <header><h2>Cast</h2><span class="note" id="castn"></span><span class="note">· <code>refs/characters/*/sheet.png</code> · refs/main done, 1 flag</span></header>
+    <div class="stage"><div class="cast" id="cast"></div></div>
+  </section>
+</main>
+<script src="assets/dept_data.js"></script>
+<script src="assets/dept.js"></script>
+<nav class="tabs" aria-label="Phone">
+  <a href="index.html"><svg class="i"><use href="assets/icons.svg#gauge"/></svg>Now</a>
+  <a href="index.html#needs"><svg class="i"><use href="assets/icons.svg#inbox"/></svg>Inbox<span class="badge">5</span></a>
+  <a href="books.html" aria-current="page"><svg class="i"><use href="assets/icons.svg#book-open"/></svg>Books</a>
+  <a href="#" data-palette><svg class="i"><use href="assets/icons.svg#search"/></svg>Search</a>
+</nav>
+</body>
+</html>
