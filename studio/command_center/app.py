@@ -13,16 +13,16 @@ from __future__ import annotations
 
 import sqlite3
 from collections.abc import Callable, Iterator
-from pathlib import Path
+from pathlib import Path, PurePosixPath
 
 from fastapi import APIRouter, Depends, FastAPI, Form, HTTPException, Request
-from fastapi.responses import FileResponse, HTMLResponse
+from fastapi.responses import FileResponse, HTMLResponse, Response
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 from starlette.exceptions import HTTPException as StarletteHTTPException
 
-from studio import registry
-from studio.command_center import actions, library_paths, models, unit_view, views
+from studio import db, registry
+from studio.command_center import actions, library_paths, models, procs, progress_view, thumbs, unit_view, views
 
 HERE = Path(__file__).resolve().parent
 ORG_PAGE = registry.ROOT / "architecture" / "index.html"
@@ -212,6 +212,25 @@ def unit_json(request: Request, stage: str, codex: str, unit: str,
     return _unit(request, conn, stage, codex, unit)
 
 
+@router.get("/api/progress/episode/{codex}/{unit}.json", response_model=models.Progress,
+            response_model_exclude_none=True)
+def progress_json(request: Request, codex: str, unit: str, response: Response,
+                  conn: sqlite3.Connection = Depends(_conn)):
+    """The live card's poll (progress tracker spec §3): one episode run's progress."""
+    body = progress_card(request, conn, codex, unit)
+    response.headers["Cache-Control"] = "no-store"
+    return body
+
+
+def progress_card(request: Request, conn: sqlite3.Connection, codex: str, unit: str) -> dict:
+    """The card's data, or a 404 for a unit with no row or no folder."""
+    state = request.app.state
+    found = progress_view.progress(state.library, conn, codex, unit, logs=state.logs, proc_rows=state.procs())         if db.work_order(conn, codex, "episode", unit) is not None else None
+    if found is None:
+        raise HTTPException(404, f"no episode unit {codex}/{unit}")
+    return found
+
+
 # --- artefacts ---
 
 
@@ -220,7 +239,20 @@ def artefact(request: Request, codex: str, path: str):
     target = library_paths.resolve_artefact(request.app.state.library, codex, path)
     if target is None:
         raise HTTPException(404, "no such artefact")
-    return FileResponse(target, headers={"Cache-Control": "no-store"})
+    return FileResponse(target, headers={"Cache-Control": "no-cache"})
+
+
+@router.get("/thumb/{codex}/{width}/{path:path}")
+def thumb(request: Request, codex: str, width: int, path: str):
+    """A panel shrunk to 160/320 px WebP from the process LRU; the URL carries
+    the mtime, so the answer never changes and is cached forever."""
+    if width not in thumbs.WIDTHS or PurePosixPath(path).suffix.lower() not in thumbs.IMAGES:
+        raise HTTPException(404, "no such thumbnail")
+    target = library_paths.resolve_artefact(request.app.state.library, codex, path)
+    if target is None:
+        raise HTTPException(404, "no such artefact")
+    return Response(thumbs.thumb(target, path, width, request.app.state.thumbs), media_type="image/webp",
+                    headers={"Cache-Control": "public,max-age=31536000,immutable"})
 
 
 # --- the owner's hand: POST /act/*, one work_orders call each ---
@@ -309,6 +341,8 @@ def make_app(conn_factory: Callable[[], sqlite3.Connection], library: Path,
     app.state.library = Path(library)
     app.state.logs = Path(logs) if logs else Path(library).parent / "logs"
     app.state.org_page = Path(org_page)
+    app.state.procs = procs.list_processes
+    app.state.thumbs = thumbs.Lru()
     app.mount("/static", StaticFiles(directory=str(HERE / "static")), name="static")
     app.include_router(router)
     app.include_router(act)

@@ -1,7 +1,7 @@
 """`/lib/{codex}/{path}` serves a book's artefacts and nothing else (report D
 §3): the codex is 14 digits, the resolved path stays under that book's folder,
 the suffix is on the allowlist, and every refusal is a 404 -- never a 403 that
-confirms a file exists.  A served file is `Cache-Control: no-store`."""
+confirms a file exists.  A served file is `Cache-Control: no-cache` (revalidated by ETag, so a poll gets a 304)."""
 from __future__ import annotations
 
 import os
@@ -21,7 +21,7 @@ def client(tmp_path, monkeypatch):
 def test_a_real_png_under_the_book_is_served_without_caching(client):
     response = client.get(f"/lib/{CODEX}/episodes/ep04/storyboard/shot_00.png")
     assert response.status_code == 200 and response.content == b"x" * 16
-    assert response.headers["cache-control"] == "no-store"
+    assert response.headers["cache-control"] == "no-cache"
     assert response.headers["content-type"].startswith("image/png")
 
 

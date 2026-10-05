@@ -9,7 +9,7 @@ import re
 from pathlib import Path, PurePosixPath
 
 CODEX = re.compile(r"^\d{14}$")
-SUFFIXES = frozenset({".png", ".jpg", ".jpeg", ".mp4", ".wav", ".json", ".jsonl", ".txt", ".md", ".html"})
+SUFFIXES = frozenset({".png", ".jpg", ".jpeg", ".webp", ".mp4", ".wav", ".json", ".jsonl", ".txt", ".md", ".html"})
 
 
 def book_folder(library: Path, codex_id: str) -> Path | None:

@@ -132,3 +132,10 @@ def test_derive_folds_ep17_at_the_plan(tmp_path):
     assert state["step"] == "02" and state["steps"]["02"]["name"] == "plan"
     assert state["outcome"] is None and got["run_id"].endswith("20261005004347")
     assert got["signals"] and got["last_words"]
+
+
+def test_the_last_words_are_the_newest_of_the_runner_and_the_drive_log():
+    rows = [{"ts": "2026-10-05T00:49:12Z", "msg": "plan_check refused:\nCONTRACT OK: x\nG-MOVE shot 17: travels"}]
+    newer_runner = lp.last_words("--- step 02 (plan) | x ---\n", 1.0, rows)
+    assert newer_runner == "plan_check refused: G-MOVE shot 17: travels"
+    assert lp.last_words("  T05 shots [5] 192f 8.00s in 182s\n", 9e9, rows) == "T05 shots [5] 192f 8.00s in 182s"

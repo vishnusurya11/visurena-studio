@@ -111,3 +111,9 @@ def test_an_included_router_is_listed_route_by_route():
     app = FastAPI()
     app.include_router(inner)
     assert "GET /x" in cli.routes(app)
+
+
+def test_the_progress_json_validates(client):
+    body = client.get(f"/api/progress/episode/{CODEX}/ep04.json").json()
+    got = models.Progress.model_validate(body)
+    assert got.unit == "ep04" and got.codex == CODEX and got.vital in ("dead", "idle")

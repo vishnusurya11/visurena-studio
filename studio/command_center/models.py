@@ -126,3 +126,90 @@ class Unit(BaseModel):
     hold: dict[str, Any] | None = None
     suggest: dict[str, Any] | None = None
     raw: dict[str, Any] | None = None
+
+
+# --- the episode progress card (progress tracker spec §3) ---
+
+
+class RailStep(BaseModel):
+    id: str
+    name: str
+    state: str                       # waiting | running | done | skip | fail | deferred | refused | escalated
+    secs: float | None = None        # this run: done -> measured, running -> elapsed so far
+    median_s: float | None = None    # the measured norm the rail's width is proportional to
+    retries: int = 0                 # runs of this unit that started the step before this one
+
+
+class Sampler(BaseModel):
+    k: int
+    of: int
+    phase: str
+
+
+class Rung(BaseModel):
+    gate: str
+    measured: float | None = None
+    action: str
+    terminal: bool = False
+
+
+class NowStep(BaseModel):
+    id: str
+    name: str
+    kind: str                        # counted | loop
+    done: int = 0
+    total: int = 0
+    weight_done: float = 0.0
+    weight_total: float = 0.0
+    current: str | None = None
+    sampler: Sampler | None = None
+    rounds: list[Rung] = []
+
+
+class Item(BaseModel):
+    id: str
+    state: str                       # waiting | rendering | landed | failed | retake
+    panel: str | None = None         # under `media_base` (+ ?v=mtime): the panel thumbnail
+    video: str | None = None         # under `lib_base` (+ ?v=mtime): the take, loaded on hover only
+    secs: float | None = None
+    prior_s: float | None = None     # the take's modelled seconds x pace: drives the developing tile
+
+
+class Eta(BaseModel):
+    finish_at: float | None = None   # epoch, rounded to five minutes
+    lo: float | None = None
+    hi: float | None = None
+    finish: str = ""                 # "02:45" (local)
+    range: str = ""                  # "02:30–03:10"
+    basis: str = "estimate"          # norm | measured | estimate
+    n_runs: int = 0
+    long: bool = False
+    capped: bool = False
+
+
+class Progress(BaseModel):
+    codex: str
+    unit: str
+    run_id: str | None = None
+    vital: str                       # live | quiet | stalled | dead | refused | deferred | done | idle
+    vital_reason: str = ""
+    quiet_s: float | None = None
+    budget_s: float | None = None
+    run_started: float | None = None
+    step_started: float | None = None
+    now: float
+    elapsed_s: float = 0.0
+    work_s: float = 0.0
+    ceiling_s: float = 0.0
+    steps: list[RailStep] = []
+    now_step: NowStep | None = None
+    items: list[Item] = []
+    inflight_started: float | None = None
+    media_base: str = ""
+    lib_base: str = ""
+    eta: Eta = Eta()
+    trace: list[float] = []
+    last_words: str = ""
+    title: str = ""
+    master: str | None = None
+    qc: dict[str, Any] | None = None

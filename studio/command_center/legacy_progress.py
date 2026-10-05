@@ -286,5 +286,15 @@ def derive(home: Path, db_rows: list[dict], runner_rows: list[dict], run_id: str
     signals = [to_epoch(r.get("ts")) for r in runner_rows] + [e["t"] for e in evs if e["ev"] == "item"]
     signals += list(mtimes([log]).values()) if log else []
     return {"events": evs, "run_id": run_id, "signals": sorted(s for s in signals if s is not None),
-            "last_words": last_line(text) or str((runner_rows[-1:] or [{}])[0].get("msg", ""))[:240],
+            "last_words": last_words(text, (mtimes([log]).get(log.stem) if log else None), runner_rows),
             "refusal": refusal(runner_rows), "drive_ended": drive_ended(ledger), "log_n": n}
+
+
+def last_words(text: str, log_t: float | None, rows: list[dict]) -> str:
+    """The newest thing the run said: the runner log's last row when it is newer
+    than the drive log's last line (a refusal as its one sentence), else that line."""
+    newest = rows[-1] if rows else None
+    if newest and (log_t is None or (to_epoch(newest.get("ts")) or 0) >= log_t - 1):
+        msg = str(newest.get("msg") or "")
+        return refusal([newest]) if "refused" in msg.lower() else msg.strip().splitlines()[0][:240] if msg.strip() else ""
+    return last_line(text)
