@@ -16,6 +16,8 @@ six step-bar implementations, thirteen colour families, a state drawn three colo
 (06, 10). The redesign is therefore not new data — it is one component set, one token set, one
 state vocabulary, drawn at five zooms: **studio (home) → book → department → unit → shot**.
 
+**Palette (owner, 2026-10-04): DARK — "Studio" (#0f1012), the default; Graphite (#f4f5f7) only as the optional light theme.** First pick was Graphite; the owner then asked for dark. The warm beige paper (#f6f3ec) is retired — "the bg is shit colour". The page is cool neutral grey #f4f5f7 (raised #e9ebef, ink #111318, ink-2 #3f4450, ink-3 #5f6672, rules #dfe2e7/#c8ccd4); the dark theme is a true neutral dark (#0f1012). Every text and state colour measured ≥ 4.5:1 on both surfaces. "Paper" below means this page surface.
+
 **The identity rule (06):** *paper is the office, the stage is the screening room, ink is the
 voice, colour means state and nothing else.* Everything you read stays on warm paper (light or
 dark); every picture, take and master sits on a neutral-dark `--stage` well in both themes.

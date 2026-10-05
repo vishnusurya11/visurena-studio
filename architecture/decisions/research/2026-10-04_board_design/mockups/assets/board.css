@@ -9,9 +9,9 @@
 /* ---------------------------------------------------------------- tokens */
 @layer tokens {
 :root{
-  --paper:#f6f3ec; --paper-2:#eee9df; --ink:#1d1a16; --ink-2:#4d473d; --ink-3:#6f6759;
-  --rule:#d6cfc0; --rule-2:#bfb6a3; --line:#9c937f;
-  --code:#e9e4d7; --code-ink:#3b352c;
+  --paper:#f4f5f7; --paper-2:#e9ebef; --ink:#111318; --ink-2:#3f4450; --ink-3:#5f6672;
+  --rule:#dfe2e7; --rule-2:#c8ccd4; --line:#9aa1ad;
+  --code:#eceef2; --code-ink:#2b2f36;
   --accent:#a4341f; --accent-ink:#ffffff;
   --stage:#121212; --stage-2:#1b1b1b; --stage-line:#3a3a3a;
   --stage-ink:#e6e6e6; --stage-ink-2:#a8a8a8; --stage-ink-3:#8a8a8a;
@@ -178,3 +178,36 @@ h3{font-size:18px;line-height:22px;font-weight:600;letter-spacing:.02em}
   body{padding-bottom:64px}
 }
 }
+
+/* ---------------------------------------------------------- palettes
+   The warm paper (#f6f3ec) is retired (owner, 2026-10-04). Four neutral
+   candidates, switchable live (data-palette on <html>, picker in the top
+   bar). Unlayered, so they override the token layer. Every text and state
+   colour >= 4.5:1 on page and raised surface (measured). */
+:root[data-palette="graphite"]{
+  --paper:#f4f5f7; --paper-2:#e9ebef; --ink:#111318; --ink-2:#3f4450; --ink-3:#5f6672;
+  --rule:#dfe2e7; --rule-2:#c8ccd4; --line:#9aa1ad; --code:#eceef2; --code-ink:#2b2f36; color-scheme:light;
+}
+:root[data-palette="white"]{
+  --paper:#ffffff; --paper-2:#f4f4f5; --ink:#0a0a0a; --ink-2:#404040; --ink-3:#626262;
+  --rule:#e5e5e5; --rule-2:#d4d4d4; --line:#a3a3a3; --code:#f4f4f5; --code-ink:#27272a; color-scheme:light;
+}
+:root[data-palette="slate"]{
+  --paper:#eef2f6; --paper-2:#e2e8f0; --ink:#0f172a; --ink-2:#334155; --ink-3:#4f5b70;
+  --rule:#d5dde7; --rule-2:#b8c3d1; --line:#94a3b8; --code:#e2e8f0; --code-ink:#1e293b; color-scheme:light;
+}
+:root[data-palette="studio"],:root[data-theme="dark"]{
+  --paper:#0f1012; --paper-2:#18191c; --ink:#ededef; --ink-2:#b4b6bc; --ink-3:#8e9199;
+  --rule:#26282d; --rule-2:#34373d; --line:#4a4d55; --code:#1b1d21; --code-ink:#d4d6db;
+  --accent:#e0664c; --accent-ink:#0f1012; --stage:#000000; --stage-2:#0a0a0b; --stage-line:#26282d;
+  --st-running:#7db6e3; --st-running-bg:#152434; --st-running-bar:#7db6e3;
+  --st-done:#86cf95; --st-done-bg:#142a19; --st-done-bar:#5aa76a;
+  --st-flagged:#e9b44c; --st-flagged-bg:#33260c; --st-flagged-bar:#c8952a;
+  --st-deferred:#c7a3e3; --st-deferred-bg:#2a1f33; --st-deferred-bar:#a77fc6;
+  --st-failed:#f2735a; --st-failed-bg:#3a1912; --st-failed-bar:#e05a42; --st-held:#a3a6ad;
+  --viz-1:#d8603f; --viz-2:#4a88c8; --viz-3:#a8861c; --viz-4:#9a72c8;
+  --e-3:0 0 0 1px var(--rule-2); color-scheme:dark;
+}
+.palette-pick{display:inline-flex;gap:4px;align-items:center;font:500 11px/1 var(--f-mono);color:var(--ink-3)}
+.palette-pick button{width:18px;height:18px;border-radius:50%;border:1px solid var(--rule-2);cursor:pointer;padding:0}
+.palette-pick button[aria-pressed="true"]{outline:2px solid var(--ink);outline-offset:1px}

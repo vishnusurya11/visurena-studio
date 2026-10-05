@@ -206,3 +206,27 @@
     }
   });
 })();
+
+/* palette picker (owner, 2026-10-04: the warm paper is retired) */
+(function () {
+  var P = [["graphite", "#f4f5f7"], ["white", "#ffffff"], ["slate", "#eef2f6"], ["studio", "#0f1012"]];
+  function get() { try { return localStorage.getItem("palette") || "studio"; } catch (e) { return "studio"; } }
+  function set(p) {
+    document.documentElement.dataset.palette = p;
+    try { localStorage.setItem("palette", p); } catch (e) {}
+    document.querySelectorAll(".palette-pick button").forEach(function (b) { b.setAttribute("aria-pressed", b.dataset.p === p); });
+  }
+  set(get());
+  function mount() {
+    var bar = document.querySelector(".topbar .wrap") || document.querySelector(".topbar");
+    if (!bar || bar.querySelector(".palette-pick")) return;
+    var box = document.createElement("span"); box.className = "palette-pick"; box.title = "palette";
+    box.appendChild(document.createTextNode("palette "));
+    P.forEach(function (x) {
+      var b = document.createElement("button"); b.type = "button"; b.dataset.p = x[0]; b.title = x[0];
+      b.style.background = x[1]; b.addEventListener("click", function () { set(x[0]); }); box.appendChild(b);
+    });
+    bar.appendChild(box); set(get());
+  }
+  if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", mount); else mount();
+})();

@@ -8,6 +8,8 @@ the tracker is `architecture/plan/2026-10-04_premium_board_build.md`.
 shown at several zooms. The board has the table; the redesign gives it one voice — one component set,
 one token set, one state vocabulary — at five zooms: studio (Now) → book → department → unit → shot.
 
+**Palette (owner): dark by default** — "Studio": page #0f1012, raised #18191c, ink #ededef / #b4b6bc / #8e9199, rules #26282d / #34373d, media stage #000. The warm beige is retired; Graphite (#f4f5f7) is the optional light theme.
+
 **The identity rule:** paper is the office, the stage is the screening room, ink is the voice,
 colour means state and nothing else.
 

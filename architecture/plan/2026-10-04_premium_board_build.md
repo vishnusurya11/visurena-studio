@@ -35,7 +35,7 @@ row of `architecture/index.html` (Current tab) moves with the shell, home and un
 |---|---|---|---|
 | P0.1 | Every panel, take poster and contact tile through `/thumb/…/320/` (B1). ep12 unit page 36.4 MB → ≈ 1.2 MB; blank take tiles fixed. | `test_no_page_loads_a_full_size_picture_for_a_tile.py` (grep templates + render ep12 fixture: no `/lib/…png` in `<img src>`) | ~40 |
 | P0.2 | Inbox rule: Needs you counts flagged-not-acknowledged; `acknowledge` joins `orders.kind`; `/act/acknowledge` (B2). | `test_a_flagged_unit_needs_you_until_acknowledged.py`, `test_acknowledge_is_one_orders_row.py` | ~120 |
-| P0.3 | `--ink-3` → #6f6759 / #9a9282 in `architecture/index.html` and the board (B3); the contrast test. | `test_tokens_meet_contrast.py` (WCAG 4.5:1 for every text token on paper/paper-2, both themes) | ~80 |
+| P0.3 | **Dark "Studio" palette by default** (owner) replaces the beige on the board; Graphite as the optional light theme; `--ink-3` → #8e9199 dark / #5f6672 light in `architecture/index.html` and the board (B3); the contrast test. | `test_tokens_meet_contrast.py` (WCAG 4.5:1 for every text token on paper/paper-2, both themes) | ~80 |
 | P0.4 | One colour per state: `views.COLOURS`, `.live[data-vital]`, `.lv-rail` read one map (B4). | `test_a_state_has_one_colour_everywhere.py` | ~60 |
 | P0.5 | Live notify bugs (B6): poll continues hidden at 10 s, `Notification` in try/catch, 2-pulse hysteresis, "board offline" state. **Coordinated with the progress session** (its files). | `test_progress_js_keeps_polling_when_hidden.py` (static JS read), contract tests on the JSON | ~60 |
 | P0.6 | `/books` exists (B7); `/org` gets a back link. | `test_every_crumb_resolves.py` | ~60 |
@@ -84,3 +84,5 @@ start the moment the owner says so; it changes nothing he would see except fixes
 
 `htmx-pulse` (F8), `<review-player>` (G6), `css-token-contrast` (P0.3/F4), the tone-based Jinja
 component set + screenshot/axe harness (F6/F9) — each built so it can be lifted into its own repo.
+- 2026-10-04 — owner: the beige is retired ("the bg is shit colour"); four neutral palettes mocked live; owner picked **Graphite** (#f4f5f7). P0.3 carries it.
+- 2026-10-04 — owner, after picking Graphite: "need dark colour". Default palette = **Studio dark** (#0f1012); Graphite is the light option.
