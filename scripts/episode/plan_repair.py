@@ -91,6 +91,8 @@ def apply(doc: dict, rows: list[str], book, rate: float = 3.0) -> tuple[dict, li
             doc = pc.vary_heads(doc, shot_indices([r for r in rows if pc.cure_for(r) == "vary_heads"]))
         elif name == "legal_props":
             doc = pc.legal_props(doc, legal)
+        elif name == "close_crowds":
+            doc = pc.close_crowds(doc)
         elif name == "holds":
             doc = pc.holds(doc, rate=rate)
         elif name == "edge_cases":

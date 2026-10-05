@@ -212,6 +212,10 @@ def main(book_id: str, number: int) -> int:
     print("G-CROWD      :", cf or "clean"); hard += len(cf)
     for f in cf:
         print("   ", f[:170])
+    cc = plan_gates.close_crowd_faults(ep)
+    print("G-CROWD-CLOSE:", cc or "clean"); hard += len(cc)
+    for f in cc:
+        print("   ", f[:170])
     print("EXPECTS TEXT :", plan_gates.expects_text(ep) or "no shot stages printed matter")
     bad, folded = plan_gates.bed_faults(ep)
     print("G-BED        :", len(bad) or "clean"); hard += len(bad)

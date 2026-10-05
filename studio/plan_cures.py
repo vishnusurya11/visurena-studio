@@ -331,12 +331,21 @@ CURES: list[tuple[re.Pattern, str]] = [
     (re.compile(r"beat of >= 1\.0 s of silence"), "button_beat"),
     (re.compile(r"G-MOVES|G-STILL|G-AIM"), "vary_heads"),
     (re.compile(r"props.*\.json|names setup .* not defined|prop "), "legal_props"),
+    (re.compile(r"G-CROWD-CLOSE"), "close_crowds"),
     (re.compile(r"projects to .* an episode is|ONE PER TAKE|TAKE LENGTH|G-SETUP|hole in speech|of the runtime"), "holds"),
     (re.compile(r"median (?:frame-edge|at_rest)"), "edge_cases"),
     (re.compile(r"G-ASPECT|style line is \d+ words|look"), "pin_series"),
 ]
 """Fault-text patterns -> cure names, most specific first.  A row matching
 nothing is CREATIVE and goes back to the writer, one field at a time."""
+
+
+def close_crowds(doc: dict) -> dict:
+    """G-CROWD-CLOSE: a close or medium-close shot carries no crowd; wides keep theirs."""
+    for s in doc.get("shots") or []:
+        if s.get("size") in ("close", "medium_close", "big_close") and s.get("crowd"):
+            s["crowd"] = ""
+    return doc
 
 
 def cure_for(fault_row: str) -> str | None:

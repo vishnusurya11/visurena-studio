@@ -445,6 +445,17 @@ def crowd_faults(episode) -> list[str]:
     return out
 
 
+CLOSE_SIZES = ("close", "medium_close", "big_close")
+
+
+def close_crowd_faults(episode) -> list[str]:
+    """G-CROWD-CLOSE (ep17, 2026-10-04): a crowd behind a close face is where H3
+    minted cast copies in ep16; a crowd belongs on wides, as a distant mass."""
+    return [fault("G-CROWD-CLOSE", f"shot {s.index}", f"a {s.size} shot carries a crowd", 1, 0)
+            for s in episode.shots
+            if s.size in CLOSE_SIZES and (getattr(s, "crowd", "") or "").strip()]
+
+
 def expects_text(episode) -> list[int]:
     """The shots whose prose stages printed matter at a size where it reads
     (the expects-text set): listed by the battery so the writer and the
