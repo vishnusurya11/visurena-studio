@@ -4,6 +4,16 @@ Newest first. Every architectural change gets an entry.
 
 ---
 
+## 2026-10-04 — The board, premium (owner decision)
+
+**Ruling (owner, "looks good go"):** the whole board redesigned as one studio tracking tool —
+paper office, dark stage for media, colour means state only; Now landing page with an inbox that
+counts flagged-not-acknowledged units (`acknowledge` order kind); screening room for finished units;
+run matrix for loops; hand-SVG charts; pulse + morph live updates. Phase 0 fixes nine measured bugs
+first (a 36 MB unit page, "Needs you (0)" with five flagged episodes, failing contrast). Decision:
+`architecture/decisions/2026-10-04_premium_board.md`; tracker
+`architecture/plan/2026-10-04_premium_board_build.md`.
+
 ## 2026-10-01 — No human input at publish (owner decision: "Remove that human waiver .. we need automation")
 
 Decision id: `2026-10-01-no-human-input-at-publish`
