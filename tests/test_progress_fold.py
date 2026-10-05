@@ -76,3 +76,9 @@ def test_a_failed_item_and_a_round_and_the_end_are_kept():
 def test_fold_of_nothing_is_an_empty_state():
     state = progress.fold([])
     assert state["step"] is None and progress.counts(state) == (0, 0, 0, 0)
+
+
+def test_a_rung_never_moves_the_runs_start():
+    evs = [{"t": 50, "ev": "round", "gate": "PLAN", "action": "improve"},
+           {"t": 100, "ev": "step", "step": "02", "state": "start"}]
+    assert progress.fold(evs)["t0"] == 100

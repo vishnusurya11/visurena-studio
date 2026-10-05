@@ -17,7 +17,7 @@
       style="--w:{{ '%.1f' | format(w + 1) }};--p:{{ '%.4f' | format(fill) }};--i:{{ loop.index0 }}{% if counted_here %};--n:{{ ns_.total }}{% endif %}"
       data-id="{{ s.id }}" title="{{ s.id }} {{ s.name }} · {{ s.state }}{% if s.secs %} · {{ s.secs | span }}{% endif %}{% if s.median_s %} · median {{ s.median_s | span or '0s' }}{% endif %}{% if s.retries %} · started in {{ s.retries }} earlier run{{ '' if s.retries == 1 else 's' }}{% endif %}">
     <i>{% if counted_here %}<b class="ticks"></b>{% endif %}</i>
-    <span class="lbl">{% if s.state in ('done', 'skip') %}<svg class="ck" viewBox="0 0 12 12" aria-hidden="true"><path d="M2 6.5l2.5 2.5L10 3.5"/></svg>{% elif s.state == 'fail' %}✕{% endif %}{{ s.id }}{% if running or w / total > 0.07 %} <small>{{ s.name }}</small>{% endif %}{% if s.retries %}<sup>×{{ s.retries + 1 }}</sup>{% endif %}</span>
+    <span class="lbl">{% if s.state in ('done', 'skip') %}<svg class="ck" viewBox="0 0 12 12" aria-hidden="true"><path d="M2 6.5l2.5 2.5L10 3.5"/></svg>{% elif s.state == 'fail' %}✕{% endif %}{% if running or w / total > 0.035 %}{{ s.id }}{% endif %}{% if running or w / total > 0.07 %} <small>{{ s.name }}</small>{% endif %}{% if s.retries %}<sup>×{{ s.retries + 1 }}</sup>{% endif %}</span>
     {% if running or (s.secs and w / total > 0.07) %}<span class="dur"{% if running %} data-clock="step"{% endif %}>{{ s.secs | span or '' }}</span>{% endif %}
   </li>
 {% endfor %}

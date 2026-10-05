@@ -77,12 +77,14 @@ APPLY = {"step": _step, "plan": _plan, "item": _item, "round": _round,
 
 
 def fold(events: list[dict]) -> dict:
-    """The state after every event, in order."""
+    """The state after every event, in order.  The run starts at its first
+    step-side event; a ladder rung (another log's clock) never moves it."""
     s = empty()
     for ev in events:
         t = ev.get("t")
         if t is not None:
-            s["t0"] = t if s["t0"] is None else min(s["t0"], t)
+            if ev.get("ev") != "round":
+                s["t0"] = t if s["t0"] is None else min(s["t0"], t)
             s["last_t"] = t if s["last_t"] is None else max(s["last_t"], t)
         s["run"] = ev.get("run") or s["run"]
         if ev.get("ev") in APPLY:
