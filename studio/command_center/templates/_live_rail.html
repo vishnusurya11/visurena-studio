@@ -13,7 +13,7 @@
   {% set counted_here = running and ns_ and ns_.kind == 'counted' and ns_.id == s.id %}
   {% set fill = (ns_.weight_done / ns_.weight_total) if counted_here and ns_.weight_total else (1 if s.state in ('done', 'skip', 'fail') else 0) %}
   {% if running %}{% set ns_rail.i = loop.index %}{% endif %}
-  <li class="seg st-{{ s.state }}{% if running and not counted_here %} loop{% endif %}{% if running and moving %} is-moving{% endif %}"
+  <li class="seg st-{{ s.state }}{% if running and not counted_here %} is-loop{% endif %}{% if running and moving %} is-moving{% endif %}"
       style="--w:{{ '%.1f' | format(w + 1) }};--p:{{ '%.4f' | format(fill) }};--i:{{ loop.index0 }}{% if counted_here %};--n:{{ ns_.total }}{% endif %}"
       data-id="{{ s.id }}" title="{{ s.id }} {{ s.name }} · {{ s.state }}{% if s.secs %} · {{ s.secs | span }}{% endif %}{% if s.median_s %} · median {{ s.median_s | span or '0s' }}{% endif %}{% if s.retries %} · started in {{ s.retries }} earlier run{{ '' if s.retries == 1 else 's' }}{% endif %}">
     <i>{% if counted_here %}<b class="ticks"></b>{% endif %}</i>

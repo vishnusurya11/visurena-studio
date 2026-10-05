@@ -362,7 +362,7 @@ dialog#lightbox::backdrop{background:rgba(0,0,0,.6)}
 .lv-rail .st-skip i::before{width:100%;background:color-mix(in srgb,var(--ok) 40%,var(--rule))}
 .lv-rail .st-fail i::before,.lv-rail .st-refused i::before{width:100%;background:var(--accent)}
 .lv-rail .st-deferred i::before,.lv-rail .st-escalated i::before{width:100%;background:var(--qc)}
-.lv-rail .loop i::before{width:100%;background:repeating-linear-gradient(-45deg,var(--think) 0 6px,color-mix(in srgb,var(--think) 70%,var(--paper)) 6px 12px);background-size:16.97px 16.97px}
+.lv-rail .is-loop i::before{width:100%;background:repeating-linear-gradient(-45deg,var(--think) 0 6px,color-mix(in srgb,var(--think) 70%,var(--paper)) 6px 12px);background-size:16.97px 16.97px}
 .lv-rail i::after{content:"";position:absolute;inset:0;opacity:0;background:linear-gradient(100deg,transparent 30%,var(--sheen-hi) 50%,transparent 70%);background-size:200% 100%;transition:opacity var(--d2) var(--ease-std)}
 .lv-rail .ticks{position:absolute;inset:0;z-index:1;background:repeating-linear-gradient(90deg,transparent 0 calc(100% / var(--n) - 1px),var(--paper) calc(100% / var(--n) - 1px) calc(100% / var(--n)))}
 .lv-rail .lbl{display:flex;align-items:center;gap:3px;min-width:0;font-family:"IBM Plex Mono",monospace;font-size:10.5px;font-weight:600;color:var(--ink-2);white-space:nowrap;overflow:hidden}
@@ -398,7 +398,7 @@ dialog#lightbox::backdrop{background:rgba(0,0,0,.6)}
 @media (prefers-reduced-motion: no-preference){
   .live:not([data-still]) .vdot.beat{animation:lv-halo var(--breathe) var(--ease-out) 1}
   .live:not([data-still]) .seg.is-moving i::after{opacity:1;animation:lv-sheen var(--sheen) linear infinite;animation-delay:calc(var(--age) * -1s)}
-  .live:not([data-still]) .seg.is-moving.loop i::before{animation:lv-stripe var(--stripe) linear infinite;animation-delay:calc(var(--age) * -1s)}
+  .live:not([data-still]) .seg.is-moving.is-loop i::before{animation:lv-stripe var(--stripe) linear infinite;animation-delay:calc(var(--age) * -1s)}
   .lt.just img{animation:lv-reveal var(--d3) var(--ease-out) both}
   .lt.just::after{animation:lv-landed 2s var(--ease-out) both}
   .seg.just .ck path{animation:lv-draw 320ms var(--ease-out) both}

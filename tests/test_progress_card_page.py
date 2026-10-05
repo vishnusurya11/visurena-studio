@@ -149,3 +149,8 @@ def test_every_text_pair_the_card_uses_holds_4_5(theme, fg, bg):
 
 def test_the_card_never_sets_text_in_ink_3():
     assert "--ink-3" not in _live_css()
+
+
+def test_the_card_never_reuses_the_health_bands_loop_class():
+    rail = (ROOT / "studio" / "command_center" / "templates" / "_live_rail.html").read_text(encoding="utf-8")
+    assert " loop{" not in rail and "is-loop" in rail
