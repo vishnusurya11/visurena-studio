@@ -9,6 +9,7 @@ Design: docs/db/SCHEMA.md and docs/db/EVENT_MODEL.md.
 
 from __future__ import annotations
 
+import hashlib
 import json
 import sqlite3
 from datetime import datetime, timedelta, timezone
@@ -95,9 +96,11 @@ CREATE TABLE IF NOT EXISTS work_steps (
   PRIMARY KEY (order_id, step_id)
 );
 
+-- 'acknowledge' joined 2026-10-04; a table made before keeps its old CHECK and
+-- work_orders._insert_order waives it for that word (never rebuilt beside a runner).
 CREATE TABLE IF NOT EXISTS orders (
   id INTEGER PRIMARY KEY, ts TEXT NOT NULL,
-  kind TEXT NOT NULL CHECK (kind IN ('hold','lift','redo','bump','retry','requeue')),
+  kind TEXT NOT NULL CHECK (kind IN ('hold','lift','redo','bump','retry','requeue','acknowledge')),
   scope TEXT NOT NULL CHECK (scope IN ('studio','book','unit')),
   codex_id TEXT, stage TEXT, unit TEXT, step_id TEXT,
   note TEXT, by TEXT NOT NULL DEFAULT 'owner', taken_ts TEXT, taken_by_run TEXT
@@ -557,6 +560,35 @@ def work_order(conn: sqlite3.Connection, codex_id: str, stage: str, unit: str) -
         "SELECT * FROM work_orders WHERE codex_id = ? AND stage = ? AND unit = ?",
         (codex_id, stage, unit),
     ).fetchone()
+
+
+# --- acknowledgements: the owner has seen a shipped unit's flags (P0.2) ---
+
+
+def verdict_stamp(row: sqlite3.Row | dict) -> str:
+    """A unit's verdict state in words: `flags 4 · verdicts 1a2b3c4d` (the
+    first 8 of the sha1 of its verdicts JSON).  A new flag or verdict changes it."""
+    sha = hashlib.sha1((row["verdicts"] or "").encode("utf-8")).hexdigest()[:8]
+    return f"flags {row['flags'] or 0} · verdicts {sha}"
+
+
+def ack_note(row: sqlite3.Row | dict, words: str | None = None) -> str:
+    """An acknowledge's note: the stamp, then the owner's words if he gave any."""
+    words = (words or "").strip()
+    stamp = verdict_stamp(row)
+    return f"{stamp} — {words}" if words else stamp
+
+
+def acknowledged(conn: sqlite3.Connection, codex_id: str, stage: str, unit: str) -> bool:
+    """True when an acknowledge order on this unit carries its CURRENT stamp:
+    it holds until the unit's flags or verdicts change."""
+    row = work_order(conn, codex_id, stage, unit)
+    if row is None:
+        return False
+    stamp = verdict_stamp(row)
+    notes = conn.execute("SELECT note FROM orders WHERE kind = 'acknowledge' AND scope = 'unit'"
+                         " AND codex_id = ? AND stage = ? AND unit = ?", (codex_id, stage, unit))
+    return any(n[0] == stamp or (n[0] or "").startswith(f"{stamp} — ") for n in notes)
 
 
 def _order_defaults(stage: str, unit: str) -> dict[str, str]:

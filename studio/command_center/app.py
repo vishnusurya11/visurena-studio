@@ -168,6 +168,12 @@ def attention_partial(request: Request, conn: sqlite3.Connection = Depends(_conn
     return _render(request, "_attention.html", attention=views.attention(conn), books=views.book_names(conn))
 
 
+@router.get("/partials/needs-you-count", response_class=HTMLResponse)
+def needs_you_count(conn: sqlite3.Connection = Depends(_conn)):
+    """The nav's badge: how many rows Needs you holds, as bare text."""
+    return HTMLResponse(str(len(views.attention(conn))))
+
+
 @router.get("/partials/orders", response_class=HTMLResponse)
 def orders_partial(request: Request, conn: sqlite3.Connection = Depends(_conn)):
     return _render(request, "_orders.html", orders=views.recent_orders(conn), books=views.book_names(conn))
@@ -339,6 +345,12 @@ def redo_action(request: Request, codex: str = Form(""), stage: str = Form(""), 
                 step_id: str = Form(""), note: str = Form(""), artefact: str = Form(""),
                 conn: sqlite3.Connection = Depends(_write_conn)):
     return _receipt(request, actions.redo(conn, codex, stage, unit, step_id, note, artefact))
+
+
+@act.post("/acknowledge", response_class=HTMLResponse)
+def acknowledge_action(request: Request, codex: str = Form(""), stage: str = Form(""), unit: str = Form(""),
+                       note: str = Form(""), conn: sqlite3.Connection = Depends(_write_conn)):
+    return _receipt(request, actions.acknowledge(conn, codex, stage, unit, note))
 
 
 async def _refused(request: Request, exc: actions.Refused):

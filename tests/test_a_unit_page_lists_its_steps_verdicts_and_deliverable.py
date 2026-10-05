@@ -32,10 +32,10 @@ def test_the_verdicts_name_their_judge_and_their_file(client):
     assert "MASTER" in page and "not yet signed" in page
 
 
-def test_the_thumbnails_and_the_master_are_lib_urls(client):
+def test_the_pictures_are_thumbs_and_the_master_is_a_lib_url(client):
     page = client.get(f"/d/episode/{CODEX}/ep04").text
-    assert f'src="/lib/{CODEX}/episodes/ep04/storyboard/shot_00.png"' in page
-    assert f'src="/lib/{CODEX}/episodes/ep04/reports/strip_T00_T05.png"' in page
+    assert f'src="/thumb/{CODEX}/320/episodes/ep04/storyboard/shot_00.png?v=' in page
+    assert f'src="/thumb/{CODEX}/320/episodes/ep04/reports/strip_T00_T05.png?v=' in page
     assert f'src="/lib/{CODEX}/episodes/ep04/cut/master_iter2.mp4"' in page and "<video" in page
     assert f'src="/lib/{CODEX}/episodes/ep04/cut/master_iter1.mp4"' not in page
     assert f'href="/lib/{CODEX}/episodes/ep04/cut/master_iter1.mp4"' in page

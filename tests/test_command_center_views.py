@@ -61,7 +61,8 @@ def test_the_floor_is_the_running_gpu_row_and_the_next_four(conn):
 def test_attention_is_what_needs_a_person_oldest_first(conn):
     got = views.attention(conn)
     assert [(r["unit"], r["state"], r["glyph"], r["css"]) for r in got] == [
-        ("ep05", "failed", "✕", "red"), ("ep07", "deferred", "↩", "purple")]
+        ("ep05", "failed", "✕", "red"), ("ep07", "deferred", "↩", "purple"),
+        ("ep03", "done", "⚑2", "amber")]   # shipped with flags, not acknowledged (P0.2)
     assert got[0]["detail"] == "KeyError"
 
 
@@ -143,6 +144,8 @@ def test_a_units_thumbnails_are_the_files_the_steps_wrote(conn, library, logs):
         ("panels", "episodes/ep04/storyboard/shot_00.png"), ("panels", "episodes/ep04/storyboard/shot_01.png"),
         ("takes", "episodes/ep04/reports/strip_T00_T05.png"), ("master", "episodes/ep04/cut/master_iter2.mp4")]
     assert thumbs[0]["url"] == f"/lib/{CODEX}/episodes/ep04/storyboard/shot_00.png"
+    assert thumbs[0]["thumb"].startswith(f"/thumb/{CODEX}/320/episodes/ep04/storyboard/shot_00.png?v=")
+    assert thumbs[-1]["thumb"] is None  # the master is a video: no picture to shrink
     assert views.thumbnails(library / f"{CODEX}_a-book" / "refs", "refs", CODEX) == []
 
 

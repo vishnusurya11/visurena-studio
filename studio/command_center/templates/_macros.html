@@ -16,3 +16,6 @@
 {% macro lift(hold_id) -%}
 <form class="act" hx-post="/act/lift/{{ hold_id }}" hx-target="find .receipt" hx-swap="innerHTML">{{ btn('lift') }}<span class="receipt"></span></form>
 {%- endmacro %}
+{% macro acknowledge(codex, stage, unit) -%}
+<form class="act" hx-post="/act/acknowledge" hx-target="find .receipt" hx-swap="innerHTML">{{ unit_fields(codex, stage, unit) }}{{ btn('acknowledge') }}<span class="receipt"></span></form>
+{%- endmacro %}

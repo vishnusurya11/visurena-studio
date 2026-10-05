@@ -431,6 +431,7 @@ dialog#lightbox::backdrop{background:rgba(0,0,0,.6)}
   <a class="brand" href="/">Visurena Studio</a>
   <nav>
     <a href="/">Home</a>
+    <a href="/#attention">Needs you <span id="needs-you-count" hx-get="/partials/needs-you-count" hx-trigger="load, every 10s, orders-changed from:body" hx-swap="innerHTML"></span></a>
     <a href="/floor">Floor</a>
     {% for s in stages %}<a href="/d/{{ s }}">{{ s }}</a>{% endfor %}
     <a href="/org">Org chart</a>

@@ -255,13 +255,21 @@ def pictures_band(library: Path, codex: str, stage: str, book: Path | None, home
     dq = dq_flags(read_doc(library, codex, _rel(book, home, cfg["dq"])))
     panels = tiles(codex, book_files(book, home, cfg["panels"]), plan, by.get(cfg["panel_gate"]), dq, "")
     takes = tiles(codex, book_files(book, home, cfg["takes"]), plan, by.get(cfg["take_gate"]), {}, "T")
-    posters = {p["index"]: p["url"] for p in panels}
+    panels = with_thumbs(codex, book, panels)
+    posters = {p["index"]: p["thumb"] for p in panels}
     takes = [{**t, "poster": posters.get(t["index"], "")} for t in takes]
     wait = "" if takes else take_wait(steps)
     answer = gate_steps(stage)
     return {"panels": panels, "takes": takes, "slots": [] if takes else slots(plan, wait), "wait": wait,
             "flagged": sum(t["flagged"] for t in panels), "contact": _rel_if(book, home, cfg["contact"]),
             "panel_step": answer.get(cfg["panel_gate"], ""), "take_step": answer.get(cfg["take_gate"], "")}
+
+
+def with_thumbs(codex: str, book: Path | None, items: list[dict]) -> list[dict]:
+    """Picture tiles (120 px) with the versioned `/thumb/` URL they are drawn from."""
+    return [{**t, "thumb": library_paths.thumb_url(codex, t["rel"], 120,
+                                                   library_paths.stamp(Path(book) / t["rel"]) if book else "")}
+            for t in items]
 
 
 def take_wait(steps: list[dict]) -> str:

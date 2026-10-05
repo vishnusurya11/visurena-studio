@@ -12,7 +12,7 @@
 <div class="tiles" data-kind="{{ kind }}">
 {% for t in items %}
 <figure class="tile{% if t.flagged %} flagged{% endif %}" id="{{ kind }}-{{ t.label }}" data-lb="lb-{{ kind }}-{{ t.label }}" tabindex="0">
-  {% if kind == 'take' %}<video preload="none" muted loop playsinline{% if t.poster %} poster="{{ t.poster }}"{% endif %} src="{{ t.url }}"></video>{% else %}<img loading="lazy" src="{{ t.url }}" alt="{{ t.label }}">{% endif %}
+  {% if kind == 'take' %}<video preload="none" muted loop playsinline{% if t.poster %} poster="{{ t.poster }}"{% endif %} src="{{ t.url }}"></video>{% else %}<img loading="lazy" decoding="async" width="120" height="120" src="{{ t.thumb }}" alt="{{ t.label }}">{% endif %}
   <span class="num">{{ t.label }}</span>
   {% if t.size %}<span class="size">{{ t.size }}</span>{% endif %}
   <span class="badges">{% for f in t.faults[:3] %}<span class="badge{% if f.kind == 'missing' %} red{% endif %}" title="{{ f.text }}">⚑ {{ f.kind }}{% if f.n > 1 %} ×{{ f.n }}{% endif %}</span>{% endfor %}{% if t.faults | length > 3 %}<span class="badge">+{{ t.faults | length - 3 }}</span>{% endif %}{% for d in t.dq %}<span class="badge grey" title="panel dq flag">{{ d }}</span>{% endfor %}</span>
@@ -48,7 +48,7 @@
   <div class="bandhead"><span class="eyebrow">Takes</span>{% if pics.takes %}<span class="muted">{{ pics.takes | length }} · hover plays, click opens</span>{% else %}<span class="muted clip1">not shot · {{ pics.wait }}</span>{% endif %}</div>
   {% if pics.takes %}{{ tiles_grid(pics.takes, 'take', pics.take_step) }}
   {% elif pics.slots %}<div class="slots">{% for s in pics.slots %}<span class="slot" title="{{ s.reason }}">{{ s.label }}</span>{% endfor %}</div>{% endif %}
-  {% for t in strips %}{% if pics.takes %}<a class="muted small" href="{{ t.url }}">{{ t.rel.split('/')[-1] }} ▸</a> {% else %}<a href="{{ t.url }}"><img class="strip" loading="lazy" src="{{ t.url }}" alt="{{ t.rel }}"></a>{% endif %}{% endfor %}
+  {% for t in strips %}{% if pics.takes %}<a class="muted small" href="{{ t.url }}">{{ t.rel.split('/')[-1] }} ▸</a> {% else %}<a href="{{ t.url }}"><img class="strip" loading="lazy" decoding="async" src="{{ t.thumb }}" alt="{{ t.rel }}"></a>{% endif %}{% endfor %}
 </div>
 {%- endmacro %}
 

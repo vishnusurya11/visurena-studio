@@ -24,6 +24,7 @@ EFFECTS = {
     "bump": f"{QUEUED} — the unit goes first in its department's queue",
     "retry": f"{QUEUED} — a deferred or failed unit goes back to the queue once",
     "requeue": f"{QUEUED} — the unit goes back to the queue (not while it runs)",
+    "acknowledge": "acknowledged — off Needs you until its flags or verdicts change",
 }
 UNIT_KINDS = ("bump", "retry", "requeue")
 
@@ -151,3 +152,15 @@ def redo(conn: sqlite3.Connection, codex: str, stage: str, unit: str, step_id: s
     except (ValueError, FileNotFoundError) as exc:
         raise Refused(422, str(exc)) from None
     return receipt(order_id, "redo", f"{stage} › {unit} · step {step_id}", step_id, artefact=about)
+
+
+def acknowledge(conn: sqlite3.Connection, codex: str, stage: str, unit: str, note: str = "") -> dict:
+    """The owner has seen a shipped unit's flags: one acknowledge order stamped
+    with its verdict state; 422 when the unit is not done with flags."""
+    check_unit(conn, codex, stage, unit)
+    row = db.work_order(conn, codex, stage, unit)
+    if row["state"] != "done" or not row["flags"]:
+        raise Refused(422, f"{stage} › {unit} carries no flags to acknowledge")
+    order_id = work_orders.order(conn, "acknowledge", "unit", codex_id=codex, stage=stage, unit=unit,
+                                 note=db.ack_note(row, note))
+    return receipt(order_id, "acknowledge", f"{stage} › {unit}")

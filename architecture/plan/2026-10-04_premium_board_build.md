@@ -7,7 +7,7 @@ row of `architecture/index.html` (Current tab) moves with the shell, home and un
 
 ## Progress
 
-- [ ] P0.1 tiles through /thumb · - [ ] P0.2 inbox + acknowledge · - [ ] P0.3 --ink-3 + contrast test
+- [ ] P0.1 tiles through /thumb · - [x] P0.2 inbox + acknowledge · - [ ] P0.3 --ink-3 + contrast test
 - [ ] P0.4 one colour per state · - [ ] P0.5 live notify bugs (with the progress session) · - [ ] P0.6 /books, /org back link
 - [ ] F1 tests pin answers · - [ ] F2 CSS out · - [ ] F3 fonts · - [ ] F4 tokens · - [ ] F5 icons · - [ ] F6 macros · - [ ] F7 morph · - [ ] F8 pulse · - [ ] F9 harness
 - [ ] G1 shell · - [ ] G2 Now · - [ ] G3 Queue · - [ ] G4 Department · - [ ] G5 Unit running · - [ ] G6 Unit finished · - [ ] G7 Book + Books · - [ ] G8 notifications
@@ -15,6 +15,7 @@ row of `architecture/index.html` (Current tab) moves with the shell, home and un
 ## Log
 
 - 2026-10-04 — ten reports, the ruling, seven mockups (`3e75901`); owner: "looks good go".
+- 2026-10-04 — P0.2: Needs you counts flagged-not-acknowledged done units; `acknowledge` joins `orders.kind` (fresh DDL; an older table keeps its CHECK and `work_orders._insert_order` waives it for that one INSERT -- no rebuild beside a runner); `POST /act/acknowledge`; nav badge `/partials/needs-you-count`. Live: WotW refs/main + ep12–ep16 show.
 
 ## Rules for every commit
 

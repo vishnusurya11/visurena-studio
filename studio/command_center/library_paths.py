@@ -33,6 +33,29 @@ def artefact_url(codex_id: str, rel: str) -> str:
     return f"/lib/{codex_id}/{PurePosixPath(rel).as_posix()}"
 
 
+SMALL_TILE_PX = 80
+
+
+def thumb_width(tile_px: int) -> int:
+    """The `/thumb/` width for a tile drawn tile_px wide: 160 up to 80 px, else 320 (2x)."""
+    return 160 if tile_px <= SMALL_TILE_PX else 320
+
+
+def thumb_url(codex_id: str, rel: str, tile_px: int = 120, version: str = "") -> str:
+    """A picture drawn as a tile, a poster or a strip: the small WebP, never the
+    full file -- `/lib/` is for the one <video src>, downloads and open-file links."""
+    return f"/thumb/{codex_id}/{thumb_width(tile_px)}/{PurePosixPath(rel).as_posix()}{version}"
+
+
+def stamp(path: Path) -> str:
+    """`?v=<mtime_ns hex>`: a redrawn picture is a new URL (the thumb is cached
+    immutable); empty when the file is gone."""
+    try:
+        return f"?v={Path(path).stat().st_mtime_ns:x}"
+    except OSError:
+        return ""
+
+
 def resolve_artefact(library: Path, codex_id: str, rel: str) -> Path | None:
     """The file to serve, or None for anything that is not a listed artefact
     of this book: a codex that is not 14 digits, a path that resolves outside

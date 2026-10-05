@@ -16,7 +16,7 @@ from functools import lru_cache
 from pathlib import Path
 
 from studio import db, gate_policy, registry
-from studio.command_center import library_paths
+from studio.command_center import library_paths, thumbs
 
 GLYPHS = {"queued": "○", "blocked": "◌", "running": "●", "done": "✓", "flagged": "⚑",
           "deferred": "↩", "failed": "✕", "escalated": "✋", "held": "⏸", "stale": "~",
@@ -32,6 +32,9 @@ TAIL_BYTES = 64 * 1024
 THUMBS = {"episode": (("panels", "storyboard/shot_*.png"), ("takes", "reports/strip_*.png"),
                       ("master", "cut/master_iter*.mp4"))}
 PASSED = frozenset({"approve", "approved", "pass", "passed", "ok", "accept", "accepted"})
+FLAGGED_REASON = "shipped with flags, not acknowledged"
+APPLIED = ("hold", "lift", "acknowledge")
+"""Orders that act when given; a runner takes none of them."""
 
 
 # --- the vocabulary ---
@@ -124,12 +127,33 @@ def queue(conn: sqlite3.Connection) -> list[dict]:
 
 
 def attention(conn: sqlite3.Connection) -> list[dict]:
-    """Needs you: failed, deferred, escalated, stale -- oldest first, each with
-    the detail its current step left."""
+    """Needs you (research 07 §5): failed, deferred, escalated, stale -- oldest
+    first, each with the detail its current step left -- then every unit that
+    shipped with flags the owner has not acknowledged, oldest first."""
     rows = conn.execute(
         "SELECT w.*, (SELECT s.detail FROM work_steps s WHERE s.order_id = w.id"
         " AND s.step_id = w.step_id) AS detail FROM v_attention w ORDER BY w.updated_at, w.id")
-    return [row_view(r) for r in rows]
+    return [row_view(r) for r in rows] + flagged_unacknowledged(conn)
+
+
+def flagged_unacknowledged(conn: sqlite3.Connection) -> list[dict]:
+    """The done rows with flags and no acknowledge for their current verdict
+    state, each with its reason and its non-pass gates."""
+    rows = conn.execute("SELECT * FROM work_orders WHERE state = 'done' AND flags > 0"
+                        " ORDER BY updated_at, id").fetchall()
+    return [{**row_view(r), "reason": FLAGGED_REASON,
+             "gates": non_pass_gates(json.loads(r["verdicts"] or "{}"))}
+            for r in rows if not db.acknowledged(conn, r["codex_id"], r["stage"], r["unit"])]
+
+
+def non_pass_gates(verdicts: dict) -> list[str]:
+    """`GATE ⚑n` / `GATE ✕` for every signed gate that did not pass clean."""
+    out = []
+    for gate, rec in verdicts.items():
+        mark, css = verdict_glyph(rec or None)
+        if css not in ("green", "grey"):
+            out.append(f"{gate} {mark}")
+    return out
 
 
 def holds(conn: sqlite3.Connection) -> list[dict]:
@@ -149,11 +173,11 @@ def order_target(row: sqlite3.Row | dict) -> str:
 
 
 def order_taken(row: sqlite3.Row | dict) -> str:
-    """The run that took the order; a hold or lift not yet taken is already
-    applied (it acts at once); any other untaken order is pending."""
+    """The run that took the order; a hold, lift or acknowledge not yet taken
+    is already applied (it acts at once); any other untaken order is pending."""
     if row["taken_by_run"]:
         return row["taken_by_run"]
-    return "applied" if row["kind"] in ("hold", "lift") else "pending"
+    return "applied" if row["kind"] in APPLIED else "pending"
 
 
 def recent_orders(conn: sqlite3.Connection, limit: int = 10) -> list[dict]:
@@ -438,8 +462,16 @@ def thumbnails(home: Path, stage: str, codex_id: str) -> list[dict]:
         for hit in hits:
             rel = library_paths.book_relative(hit, codex_id)
             if rel:
-                out.append({"kind": kind, "rel": rel, "url": library_paths.artefact_url(codex_id, rel)})
+                out.append({"kind": kind, "rel": rel, "url": library_paths.artefact_url(codex_id, rel),
+                            "thumb": strip_thumb(codex_id, rel, hit)})
     return out
+
+
+def strip_thumb(codex_id: str, rel: str, hit: Path) -> str | None:
+    """The small WebP a picture is drawn with; None for a video."""
+    if hit.suffix.lower() not in thumbs.IMAGES:
+        return None
+    return library_paths.thumb_url(codex_id, rel, 320, library_paths.stamp(hit))
 
 
 def deliverable(book: Path | None, codex_id: str, rel: str | None) -> dict | None:
