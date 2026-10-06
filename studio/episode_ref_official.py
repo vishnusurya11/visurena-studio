@@ -2002,9 +2002,16 @@ def lint(text: str, facts: dict | None = None) -> list[str]:
 
 
 def check(text: str, facts: dict | None = None) -> None:
-    """Called by `build`, so a prompt that fails a rule can never reach the GPU."""
+    """Called by `build`, so a prompt that fails a rule can never reach the GPU.
+
+    The message format is a PARSED CONTRACT: `takes_r2v.parse_faults` splits it
+    back into rules for the G-TAKELINT plan gate.  The structured list rides on
+    the exception as `faults`, so a reworded message can never silently break
+    the parse (the regex split stays the fallback for a bare message)."""
     if bad := lint(text, facts):
-        raise ValueError(f"the prompt fails the lint ({len(bad)} faults): " + "; ".join(bad))
+        refused = ValueError(f"the prompt fails the lint ({len(bad)} faults): " + "; ".join(bad))
+        refused.faults = list(bad)
+        raise refused
 
 
 # ---- L24-L27  the wording H3 measurably ignores (ADVISORY, dq10/B.md §4, J.md §3-4) --

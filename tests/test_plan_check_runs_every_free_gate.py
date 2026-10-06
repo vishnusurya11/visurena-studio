@@ -66,17 +66,14 @@ def test_a_short_shot_that_packs_into_its_neighbours_take_is_named():
     assert packed == [(20, 21)]
 
 
-def test_a_walk_with_no_pace_is_named_before_the_dry_build():
-    """ep12 shot 1: 'leading a horse up the trail' failed L8 NO PACE in the dry
-    build, after the sheets were paid for. The plan check reads the same lint."""
+def test_the_take_lint_runs_on_the_dry_built_cards_not_on_raw_fields():
+    """The old unpaced_shots advisory read raw plan fields the builder then
+    rewrote ('the built prompt may differ') and is gone; the G-TAKELINT gate
+    runs the REAL lint on dry-built cards (takes_r2v.dry_faults) and the ROW
+    TEXT gate lints the injected row texts where they are stored."""
     import plan_check
 
-    class Shot:
-        def __init__(self, index, frame, motion):
-            self.index, self.frame, self.motion = index, frame, motion
-
-    class Ep:
-        shots = [Shot(1, "Medium of the trail at dawn.", "Jefferson Hope walks up the trail; his hand tightens."),
-                 Shot(2, "Medium of Jefferson Hope walking up the trail at a walking pace.", "his hand tightens.")]
-
-    assert plan_check.unpaced_shots(Ep()) == [(1, "walks")]
+    src = inspect.getsource(plan_check)
+    assert "def unpaced_shots" not in src
+    assert "dry_faults" in src and "take_lint_gate" in src
+    assert "row_text_gate" in src and "row_lint" in src

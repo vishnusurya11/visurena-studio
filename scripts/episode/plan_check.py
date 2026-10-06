@@ -22,7 +22,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
-from studio import actor_gate, cast_refs, episode_home, episode_ref_official as ro, episode_spec as spec, house_style, pack_refs, plan_brief, plan_gates, timeline_fresh
+from studio import actor_gate, cast_refs, episode_home, episode_spec as spec, house_style, pack_refs, plan_brief, plan_gates, timeline_fresh
 from studio import episode_takes as tk
 from studio.episode_takes import BUDGET
 
@@ -92,18 +92,50 @@ def packed_shots(episode, rate: float) -> list[tuple[int, ...]]:
     return [tuple(run) for run in tk.groups(projected(episode, rate)) if len(run) > 1]
 
 
-def unpaced_shots(episode) -> list[tuple[int, str]]:
-    """(shot, gait word) where the frame, motion or at-rest has a person's gait
-    and no pace word -- the dry build's L8, read on the plan before a sheet is
-    paid for.  ADVISORY: the lint proper reads the BUILT prompt, where a
-    wardrobe clause ("riding skirt") has been rewritten from the cast row."""
-    out = []
-    for s in episode.shots:
-        body = " ".join([s.frame, s.motion, getattr(s, "at_rest", "") or ""])
-        hits = ro.gaits(body)
-        if hits and not any(p in body.lower() for p in ro.PACE):
-            out.append((s.index, hits[0].group(0)))
+def take_lint_gate(book: Path, episode, number: int, rate: float) -> int:
+    """G-TAKELINT, HARD: episode_ref_official's REAL lint on take cards
+    dry-built from the projection (takes_r2v.dry_faults), each fault remapped
+    to its plan shot and tagged with the data layer that carries the word.
+    Supersedes the old unpaced_shots advisory, which read raw plan fields the
+    builder then rewrote.  A dry build the adoptions refuse is itself a row."""
+    import takes_r2v
+    try:
+        rows = takes_r2v.dry_faults(book, episode, number, projected(episode, rate), rate=rate)
+    except SystemExit as why:
+        rows = [f"G-TAKELINT dry build refused: {str(why)[:150]}"]
+    print("G-TAKELINT   :", len(rows) or "clean")
+    for f in rows:
+        print("   ", str(f)[:170])
+    return len(rows)
+
+
+def row_text_rows(book: Path) -> list[str]:
+    """G-ROWTEXT at read: every refs.json character physical and every
+    analysis/props card profile text under the row lint, tagged for the cure."""
+    from studio import row_lint
+    path = book / "refs" / "refs.json"
+    rows = (episode_home.read_json(path).get("refs") or []) if path.exists() else []
+    out = [f"G-ROWTEXT {fault} [row {r.get('entity_id')}]" for r in rows
+           if r.get("kind") == "character"
+           for fault in row_lint.row_faults(r.get("physical") or "")]
+    folder = book / "analysis" / "props"
+    for card in sorted(folder.glob("*.json")) if folder.exists() else []:
+        if card.stem == "index":
+            continue
+        prof = episode_home.read_json(card).get("profile") or {}
+        said = " ".join(str(prof.get(k) or "") for k in ("physical", "scale"))
+        out += [f"G-ROWTEXT {fault} [card {card.stem}]" for fault in row_lint.row_faults(said)]
     return out
+
+
+def row_text_gate(book: Path) -> int:
+    """The ROW TEXT section, HARD: these texts are injected verbatim into
+    every take prompt that stages them, so a dirty row poisons the episode."""
+    found = row_text_rows(book)
+    print("ROW TEXT     :", len(found) or "clean")
+    for f in found:
+        print("   ", f[:170])
+    return len(found)
 
 
 def catalog_gates(episode, chapter: str | None) -> int:
@@ -265,6 +297,7 @@ def main(book_id: str, number: int) -> int:
     print("MARKS        :", crossed or "clean", "| unmeasured", len(vague)); hard += len(crossed)
     actors = actor_gate.hard_episode(ep)
     print("ACTOR        :", actors or "clean"); hard += len(actors)
+    hard += row_text_gate(book)
     import seq_boards  # noqa: E402
     unbound = seq_boards.unbound_cast(book, ep)
     print("CAST BOUND   :", unbound or "all bound"); hard += len(unbound)
@@ -276,8 +309,6 @@ def main(book_id: str, number: int) -> int:
     print("G-HOLE       :", len(hf) or "clean"); hard += len(hf)
     for f in hf:
         print("   ", f[:170])
-    for i, word in unpaced_shots(ep):
-        print(f"  advisory: L8 shot {i}: {word!r} with no pace word (the built prompt may differ)")
     long = long_shots(ep, rate)
     print(f"TAKE LENGTH  : {long or 'every shot inside a take'} (at {rate:.2f} words/s, budget {BUDGET} s)")
     hard += len(long)
@@ -287,6 +318,7 @@ def main(book_id: str, number: int) -> int:
             refuse(ep)
         except SystemExit as e:
             print("TAKE BUILDER :", str(e)[:170]); hard += 1
+    hard += take_lint_gate(book, ep, number, rate)
     print("SHEET TEXT   :")
     hard += sheet_text(book_id, number)
     print("VERDICT      :", "REFUSED" if hard else "clean -- lines may render")

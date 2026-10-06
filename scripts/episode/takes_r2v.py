@@ -660,6 +660,178 @@ def named_card(build, take: dict) -> dict:
         raise SystemExit(f"T{take['shots'][0]:02d} (shots {take['shots']}): {e}") from e
 
 
+# ---- the DRY build: the take lint read at plan time (G-TAKELINT) -----------------
+#
+# Step 06 used to refuse AFTER the plan was signed, because the lint only ran
+# inside ro.build at take-build time while the words that trip it live in three
+# layers the battery never read: plan fields, refs.json physicals and the
+# analysis/props cards.  These functions assemble each take's prompt from the
+# PROJECTED timeline -- no boards read, nothing rendered, nothing pinned, $0 --
+# catch ro.check's refusal, and hand plan_check one row per rule, remapped to
+# plan shot indices and tagged with the layer whose text carries the word.
+
+DRY_BREATH = 0.70
+"""plan_check's BREATH: the projected gap between two lines of one shot."""
+
+
+def dry_placed(rows: list[dict]) -> list[dict]:
+    """The projected rows with the keys the take packer demands: t_start from
+    the cumulative seconds, cut times absolute like placed.json's."""
+    t, out = 0.0, []
+    for r in rows:
+        cuts = [round(t + float(getattr(c, "at_s", c)), 6) for c in r.get("cuts") or []]
+        out.append({**r, "t_start": round(t, 6), "cuts": cuts})
+        t += r["seconds"]
+    return out
+
+
+def dry_measured(episode: Episode, rows: list[dict], rate: float) -> dict[int, dict]:
+    """Each line placed as plan_check projects it: shot t_start + HANDLE, then
+    cumulative words at the narrator's measured rate + a BREATH between lines."""
+    starts = {r["index"]: r["t_start"] for r in rows}
+    out = {}
+    for r in rows:
+        at = starts[r["index"]] + tk.HANDLE
+        for line in [l for l in episode.lines if l.shot == r["index"]]:
+            seconds = len(line.text.split()) / rate
+            out[line.index] = {"at": round(at, 3), "seconds": round(seconds, 3),
+                               "rel_path": "lines/predicted.wav"}
+            at += seconds + DRY_BREATH
+    return out
+
+
+def dry_faces(episode: Episode, shots: list, from_refs: bool) -> list[str]:
+    """Who the dry card stages: the exact rule `card` uses for the mode --
+    `from_refs` is a PARAMETER here, never the mutated global."""
+    return (people_staged if from_refs else faces_of)(shots, staging_candidates(episode, shots))
+
+
+def dry_props(book: Path, episode: Episode, shots: list) -> list[tuple[str, tuple[str, str]]]:
+    """The drawn props this take's own prose names, with their pids -- the
+    staging rule of `card` (pack_refs.props_named), keyed for fault_origin."""
+    setup = episode.setups[shots[0].setup]
+    prose = pack_refs.shot_prose(shots)
+    out = []
+    for pid in list(getattr(setup, "props", []) or []):
+        if not (Path(book) / "analysis" / "props" / f"{pid}.json").exists():
+            continue
+        if pack_refs.prop_sheet(book, pid) and \
+                pack_refs.names_prop(prose, pack_refs.prop_terms(book, pid)):
+            out.append((pid, pack_refs.prop_row(book, pid)))
+    return out
+
+
+def dry_prompt(book: Path, episode: Episode, number: int, take: dict, measured: dict,
+               from_refs: bool) -> str:
+    """`card`'s own ro.build call with nothing staged from disk: refs=None and
+    panel=False keep the picture-count rules silent, ends stay empty (NO_ENDS
+    is the owner's rule anyway), and props ride only on a from-refs book."""
+    shots = [episode.shot(i) for i in take["shots"]]
+    setup = episode.setups[shots[0].setup]
+    sizes = [s.size for s in shots] + [c.size for s in shots for c in s.cuts]
+    faces = dry_faces(episode, shots, from_refs)
+    props = [row for _, row in dry_props(book, episode, shots)] if from_refs else []
+    lines = [l for l in episode.lines if l.shot in take["shots"]]
+    at = {l.index: (measured[l.index]["at"], measured[l.index]["seconds"]) for l in lines}
+    return ro.build(shots, take["placed"], lines, at, take["frames"], faces, physicals(book),
+                    setup.described, narrator_of(episode.lines), ends=[], setup=setup,
+                    refs=None, fps=FPS, props=props, panel=False,
+                    **staged_facts(sizes, from_refs, faces, panel=False))
+
+
+def parse_faults(err) -> list[str]:
+    """The lint's faults off its refusal: the structured list when `check`
+    attached one, else the pinned message format split on `; ` ONLY where the
+    next rule starts -- a semicolon inside a fault body stays inside it."""
+    import re
+    found = getattr(err, "faults", None)
+    if found is None and len(getattr(err, "args", ()) or ()) > 1:
+        found = err.args[1]
+    if found:
+        return [str(f) for f in found]
+    body = re.sub(r"^the prompt fails the lint \(\d+ faults?\): ", "", str(err))
+    return [f.strip() for f in re.split(r";\s(?=L\d+ )", body) if f.strip()]
+
+
+def remap_shots(bad: str, segment_shots: list[int]) -> tuple[int, str]:
+    """A fault's take-internal [Shot k] rewritten to the plan's own shot
+    index; the row is led by that index, else by the take's first shot."""
+    import re
+    found = [int(n) for n in re.findall(r"\[Shot (\d+)\]", bad)]
+    for k in set(found):
+        if 1 <= k <= len(segment_shots):
+            bad = bad.replace(f"[Shot {k}]", f"[shot {segment_shots[k - 1]}]")
+    lead = found[0] if found and 1 <= found[0] <= len(segment_shots) else 1
+    return segment_shots[min(lead, len(segment_shots)) - 1], bad
+
+
+def _origin_probe(bad: str):
+    """A predicate telling whether a layer's text carries the fault's words,
+    or None when the rule names nothing searchable (then the plan owns it)."""
+    import re
+    words = [w.lower() for w in re.findall(r"'([^']+)'", bad) if w.strip()]
+    if words:
+        return lambda text: any(re.search(rf"\b{re.escape(w)}\b", (text or "").lower())
+                                for w in words)
+    if "NO PACE" in bad or "NO LIMP" in bad:
+        return lambda text: bool(ro.gaits(text or ""))
+    if "SLOW" in bad:
+        return lambda text: bool(ro.SLOW.search(text or ""))
+    return None
+
+
+def fault_origin(bad: str, shot_body: str, physical: dict[str, str],
+                 cards: list[tuple[str, tuple[str, str]]]) -> str:
+    """`plan`, `row <entity_id>` or `card <pid>`: the layer whose own text
+    carries the flagged word, shot fields first (a word in two layers is the
+    plan's to answer -- its cure runs first and the battery re-reads)."""
+    probe = _origin_probe(bad)
+    if probe is None or probe(shot_body):
+        return "plan"
+    for who, said in (physical or {}).items():
+        if probe(said):
+            return f"row {who}"
+    for pid, (_, said) in cards or []:
+        if probe(said):
+            return f"card {pid}"
+    return "plan"
+
+
+def dry_shot_body(shots: list) -> str:
+    """Every plan-layer text the dry prompt is assembled from, for the probe."""
+    fields = ("frame", "motion", "camera", "at_rest", "end", "changed", "crowd")
+    parts = [getattr(s, f, "") or "" for s in shots for f in fields]
+    parts += [getattr(c, f, "") or "" for s in shots for c in s.cuts for f in fields]
+    return " ".join(parts)
+
+
+def dry_faults(book: Path, episode: Episode, number: int, projected_rows: list[dict],
+               rate: float = 3.0) -> list[str]:
+    """G-TAKELINT's rows: every fault the take lint would raise at step 06,
+    dry-built from the projection under `adopt_canon`, one row per rule --
+    `G-TAKELINT shot N: <fault> [plan|row <id>|card <pid>]`."""
+    adopt_canon(book, episode)
+    from_refs = cast_refs.casts_from_sheets(book)
+    rows = dry_placed(projected_rows)
+    measured = dry_measured(episode, rows, rate)
+    physical, out = physicals(book), []
+    for take in tk.takes(rows):
+        take["placed"] = rows
+        try:
+            dry_prompt(book, episode, number, take, measured, from_refs)
+        except ValueError as refused:
+            shots = [episode.shot(i) for i in take["shots"]]
+            segment_shots = [s.index for s in shots for _ in range(1 + len(s.cuts))]
+            cards = dry_props(book, episode, shots) if from_refs else []
+            staged = {w: physical[w] for w in dry_faces(episode, shots, from_refs)
+                      if w in physical}
+            for bad in parse_faults(refused):
+                index, said = remap_shots(bad, segment_shots)
+                layer = fault_origin(said, dry_shot_body(shots), staged, cards)
+                out.append(f"G-TAKELINT shot {index}: {said} [{layer}]")
+    return out
+
+
 def drop_second_slot(graph: dict, base: str) -> dict:
     """A take with ONE reference stages one picture, not the same one twice.
 
@@ -839,6 +1011,25 @@ def refuse_still_motions(episode) -> None:
                            "moving object a hand.")
 
 
+def adopt_canon(book: Path, episode: Episode) -> None:
+    """The canvas and the naming tables the plan declares, adopted in one
+    place: `opened` (the render road) and `dry_faults` (the plan battery's
+    G-TAKELINT) both take it, so the dry prompt is built under exactly the
+    adoptions the GPU prompt gets.
+
+    The canvas is here for the reason `opened` documents; AND THE PLACE, on
+    the same road -- episode 8 was drawn and rendered saying "1881 London"
+    over an 1847 Utah desert because `Episode.palette` reached the location
+    plate alone."""
+    global W, H
+    W, H = canvas.size(episode.aspect)
+    house_style.adopt(episode.where, episode.light)
+    house_style.adopt_look(getattr(episode, "look", ""))
+    house_style.adopt_places(place_names(book))
+    adopt_names(episode_home.read_json(book / "refs" / "refs.json").get("refs", [])
+                if (book / "refs" / "refs.json").exists() else [])
+
+
 def opened(book_id: str, number: int):
     """The ONE road into `cards`: the book, the plan, and the canvas the plan
     declares.  Both entry points take it.
@@ -848,21 +1039,12 @@ def opened(book_id: str, number: int):
     1:1, the preview cards said 768x1344, the graph that ran said 768x768.  A
     preview that differs from the run by one line of setup is a different
     program, and its whole job is to be the run."""
-    global W, H
     book = episode_home.book_dir(book_id)
     episode = episode_home.load_plan(book, number)
     # the cast rows are THIS chapter's clothes (audit item 9)
     if why := cast_refs.chapter_refusal(book, number):
         raise SystemExit(why)
-    W, H = canvas.size(episode.aspect)
-    # AND THE PLACE, on the same road and for the same reason the canvas is
-    # here.  Episode 8 was drawn and rendered saying "1881 London" over an
-    # 1847 Utah desert: `Episode.palette` reached the location plate alone.
-    house_style.adopt(episode.where, episode.light)
-    house_style.adopt_look(getattr(episode, "look", ""))
-    house_style.adopt_places(place_names(book))
-    adopt_names(episode_home.read_json(book / "refs" / "refs.json").get("refs", [])
-                if (book / "refs" / "refs.json").exists() else [])
+    adopt_canon(book, episode)
     # And the plan's light and authoring floors, before any GPU second: a take
     # prompt is built from the plan, and episode 9's were built from one whose
     # first-frame prose was a quarter of ep04-08's under a colour-list style line.

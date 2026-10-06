@@ -77,8 +77,11 @@ def test_a_drawn_card_still_wins_over_the_pack_sheet(tmp_path):
 
 
 def test_the_book_declares_display_names_and_women(tmp_path):
+    """A row WITHOUT gender refuses outright since 2026-10-01 (ep16: four bare
+    rows prompted both women as 'this man'); this fixture predated that wall."""
+    import pytest
     rows = [{"kind": "character", "entity_id": "narrators_wife", "display": "the Wife", "gender": "female"},
-            {"kind": "character", "entity_id": "ogilvy"}]
+            {"kind": "character", "entity_id": "ogilvy", "gender": "male"}]
     takes_r2v.adopt_names(rows)
     try:
         assert ro.name_of("narrators_wife") == "the Wife" and "narrators_wife" in ro.WOMEN
@@ -86,6 +89,9 @@ def test_the_book_declares_display_names_and_women(tmp_path):
     finally:
         takes_r2v.adopt_names([])
     assert ro.DISPLAY == {} and ro.WOMEN == set()
+    with pytest.raises(SystemExit, match="has no gender"):
+        takes_r2v.adopt_names([{"kind": "character", "entity_id": "ogilvy"}])
+    takes_r2v.adopt_names([])
 
 
 def test_the_narrator_is_whoever_speaks_the_narration():
