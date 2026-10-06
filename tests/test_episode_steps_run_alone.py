@@ -267,7 +267,9 @@ def _judged_take(ctx, monkeypatch) -> Path:
     take = room / "T01.mp4"
     take.parent.mkdir(parents=True)
     take.write_bytes(b"take")
-    _json(room / "T01.dq.json", {"file": "T01.mp4", "gates": [], "attempts": []})
+    # judged() is sha-bound now: a dq verdict names the bytes it measured
+    _json(room / "T01.dq.json", {"file": "T01.mp4", "gates": [], "attempts": [],
+                                 "take_sha8": step_09_shoot.sha8(take)})
     _json(room / "T01.content.json", {"passed": True, "faults": []})
     return take
 
@@ -298,7 +300,7 @@ def test_shoot_is_done_when_every_kept_take_is_judged_twice_and_signed(ctx):
     (room / "T01_fail1.mp4").write_bytes(b"lost")
     assert step_09_shoot.takes_of(room) == [take]
     assert not step_09_shoot.done(ctx)
-    _json(room / "T01.dq.json", {})
+    _json(room / "T01.dq.json", {"take_sha8": step_09_shoot.sha8(take)})
     _json(room / "T01.content.json", {})
     assert not step_09_shoot.done(ctx)
     eye_verdict.sign(room, [take], "pass", "moves")

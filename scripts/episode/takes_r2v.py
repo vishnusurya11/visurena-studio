@@ -38,7 +38,7 @@ from studio import plan_gates
 from studio import episode_seq_board as sq
 from studio import episode_takes as tk
 from studio import h3_anchors
-from studio.comfy import apply_inject, load_workflow, stage_image, submit, wait_record, outputs_of
+from studio.comfy import apply_inject, load_workflow, stage_image, submit, transient, wait_record, outputs_of
 from studio import episode_spec as spec
 from studio.episode_spec import Episode
 from studio.trailer_assemble import clip_seconds
@@ -924,6 +924,14 @@ def submit_all(jobs: list[tuple[dict, dict]], approved: bool = False) -> list[tu
     return [(c, submit(graph)) for c, graph in jobs]
 
 
+def retire_verdicts(out: Path) -> None:
+    """Fresh bytes retire the verdicts judged on the old ones: unlink the
+    .dq.json/.content.json sidecars the moment a take is (re)written, so no
+    existence check downstream mistakes a pre-retake verdict for current."""
+    out.with_suffix(".dq.json").unlink(missing_ok=True)
+    out.with_suffix(".content.json").unlink(missing_ok=True)
+
+
 def collect(c: dict, prompt_id: str, out: Path) -> dict:
     """Wait for one submitted take and keep its video."""
     began = time.time()
@@ -934,6 +942,7 @@ def collect(c: dict, prompt_id: str, out: Path) -> dict:
         raise RuntimeError(f"take {c['index']} produced no video: {made}")
     out.parent.mkdir(parents=True, exist_ok=True)
     out.write_bytes(video.read_bytes())
+    retire_verdicts(out)
     waited = round(time.time() - began, 1)
     return {**c, "measured_seconds": clip_seconds(out),
             "render_s": ran_for(record) if ran_for(record) is not None else waited,
@@ -961,6 +970,29 @@ def collect_all(tickets: list[tuple[dict, str]], where, on_take=None) -> tuple[l
         if on_take:
             on_take(c, record)
     return done, lost
+
+
+def worth_resubmitting(said: str) -> bool:
+    """A lost take whose cause is the machine's moment: comfy's TRANSIENT
+    class, or the engine restarting under the job (EngineLost's 'vanished')."""
+    return transient(said) or "vanished" in (said or "")
+
+
+def collect_twice(jobs: list[tuple[dict, dict]], where, on_take=None,
+                  approved: bool = False) -> tuple[list[dict], list[tuple[dict, str]]]:
+    """submit_all + collect_all, then ONE second batch of the transient-lost
+    (their graphs are still in `jobs`), merged.  One retry, never a loop: a
+    second failure of the same take is a real fault and stays lost."""
+    done, lost = collect_all(submit_all(jobs, approved), where, on_take)
+    again = {c["index"] for c, said in lost if worth_resubmitting(said)}
+    if not again:
+        return done, lost
+    retry = [(c, g) for c, g in jobs if c["index"] in again]
+    print(f"  resubmitting {len(retry)} transient-lost take(s) once: "
+          f"{', '.join('T%02d' % c['index'] for c, _ in retry)}", flush=True)
+    more, still = collect_all(submit_all(retry, approved), where, on_take)
+    hard = [(c, said) for c, said in lost if c["index"] not in again]
+    return done + more, hard + still
 
 
 def render(c: dict, graph: dict, out: Path, approved: bool = False) -> dict:
@@ -1214,7 +1246,7 @@ def main(book_id: str, number: int, retake: list[int] | None = None, approved: b
         print(f"  T{c['index']:02d} shots {c['shots']} {c['frames']:3}f {record['measured_seconds']:.2f}s "
               f"in {record['render_s']:.0f}s", flush=True)
 
-    _, lost = collect_all(submit_all(jobs, approved), lambda c: wheres[c["index"]], keep)
+    _, lost = collect_twice(jobs, lambda c: wheres[c["index"]], keep, approved)
     print(f"{len(records)} takes -> {sheet}", flush=True)
     if lost:
         # named, not swallowed: the run is incomplete and the next command has to know

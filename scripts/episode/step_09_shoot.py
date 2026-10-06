@@ -44,10 +44,35 @@ def takes_of(take_dir: Path) -> list[Path]:
     return sorted(Path(take_dir).glob("T??.mp4"))
 
 
+def sha8(path: Path) -> str:
+    """The first eight hex digits of the file's sha256: take_dq.take_sha8's
+    rule, inlined -- that module's model loads are heavy."""
+    import hashlib
+    return hashlib.sha256(Path(path).read_bytes()).hexdigest()[:8]
+
+
+def dq_current(t: Path) -> bool:
+    """The dq verdict exists and was measured on EXACTLY these bytes."""
+    path = t.with_suffix(".dq.json")
+    if not path.exists():
+        return False
+    doc = episode_home.read_json(path)
+    return isinstance(doc, dict) and doc.get("take_sha8") == sha8(t)
+
+
+def content_current(t: Path) -> bool:
+    """The content verdict exists and is no older than the take.  Content
+    records carry no sha; its only writer (take_content_check) always
+    re-reads the frames, so mtime is the honest bound."""
+    path = t.with_suffix(".content.json")
+    return path.exists() and path.stat().st_mtime >= t.stat().st_mtime
+
+
 def judged(takes: list[Path]) -> bool:
-    """Whether every kept take carries both machine verdicts."""
-    return all(t.with_suffix(".dq.json").exists() and t.with_suffix(".content.json").exists()
-               for t in takes)
+    """Whether every kept take carries both machine verdicts, measured on the
+    bytes that are there NOW.  Existence alone let a retaken T??.mp4 outlive
+    its pre-retake verdicts (qc: T00, T14, T18-T21 'unjudged')."""
+    return all(dq_current(t) and content_current(t) for t in takes)
 
 
 def card_pictures(c: dict, book: Path, number: int) -> list[Path]:

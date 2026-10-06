@@ -62,7 +62,9 @@ def take(ctx, passing: bool = True) -> Path:
     t = room / "T01.mp4"
     t.write_bytes(b"take")
     gates = [{"name": "jump", "value": 0.9, "ok": passing, "hard": True, "note": "0.90", "penalty": 0.0}]
-    episode_home.write_json(room / "T01.dq.json", {"file": "T01.mp4", "gates": gates, "attempts": []})
+    # judged() is sha-bound now: the dq verdict names the bytes it measured
+    episode_home.write_json(room / "T01.dq.json", {"file": "T01.mp4", "gates": gates, "attempts": [],
+                                                   "take_sha8": step.sha8(t)})
     episode_home.write_json(room / "T01.content.json", {"passed": True, "faults": []})
     episode_home.write_json(room / "shots.json", [{"index": 1, "shots": [1], "measured_seconds": 4.0, "frames": 101,
                                                    "rel_path": "episodes/ep05/takes/r2v/T01.mp4"}])

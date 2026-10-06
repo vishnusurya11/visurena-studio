@@ -92,6 +92,17 @@ def stage_image(path: Path) -> str:
 UNREACHABLE = (urllib.error.URLError, TimeoutError, ConnectionError)
 """What a call raises while the engine is down or restarting."""
 
+TRANSIENT = ("HostBuffer", "read_file_slice")
+"""Substrings of execution errors that are the machine's moment, not the
+graph's fault -- worth exactly ONE resubmission of the same filled graph.
+Deliberately narrow; extend only from observed drive logs (a renamed node
+error silently disables the retry, which fails safe: behaves as today)."""
+
+
+def transient(said: str) -> bool:
+    """Whether an execution failure belongs to the retriable class."""
+    return any(mark in (said or "") for mark in TRANSIENT)
+
 RESTART_SECONDS = 600.0
 """How long a call waits for an engine that cannot be reached.  The GPU is
 shared: another session restarts ComfyUI under a run (run 11 died twice to
@@ -362,10 +373,26 @@ def _first_error(record: dict) -> str:
     return "unknown error"
 
 
+def retried(graph: dict, timeout: float) -> list[Path]:
+    """Submit and wait once; on a TRANSIENT execution error or a lost engine,
+    the SAME filled graph goes in exactly once more -- then the failure is
+    real and propagates.  One retry, never a loop (G-TRANSIENT-RETRY: a
+    HostBuffer.read_file_slice moment used to become a fatal SystemExit)."""
+    try:
+        return wait(submit(graph), timeout=timeout)
+    except EngineLost:
+        return wait(submit(graph), timeout=timeout)
+    except RuntimeError as err:
+        if not transient(str(err)):
+            raise
+        return wait(submit(graph), timeout=timeout)
+
+
 def run(name: str, values: dict[str, Any], timeout: float = 3600.0) -> list[Path]:
-    """Fill in a workflow by name, run it, and return what it wrote."""
+    """Fill in a workflow by name, run it, and return what it wrote; a
+    transient engine failure is resubmitted once (`retried`)."""
     template, inject = load_workflow(name)
-    return wait(submit(apply_inject(template, inject, values)), timeout=timeout)
+    return retried(apply_inject(template, inject, values), timeout)
 
 
 KEEP_LOADED = False
