@@ -1,6 +1,6 @@
-"""The battery passes and the critic keeps finding a fault: after improve x2
-and fresh_brief x1 (model_tier is for a battery that still refuses, and is
-not taken), the terminal keeps the BEST draft -- the one the critic faulted
+"""The battery passes and the critic keeps finding a fault: after improve x2,
+fresh_brief x1 and model_tier x1 (each EDITS a converged draft, 33f11b4),
+the terminal keeps the BEST draft -- the one the critic faulted
 least -- writes it back as plan.json and signs it flagged in the judge's
 name, faults listed, with an audit row.  Never a park."""
 from __future__ import annotations
@@ -50,8 +50,10 @@ def _run(ctx, monkeypatch):
 
 def test_the_best_draft_is_kept_and_signed_flagged(ctx, monkeypatch):
     writer, critic = _run(ctx, monkeypatch)
-    assert [t[:7] for t in TITLES[:len(writer.calls)]] == ["Draft A", "Draft B", "Draft C", "Draft D"]
-    assert len(critic.texts) == 4, "model_tier is not taken once a draft has passed the battery"
+    # 33f11b4 (ep15): a converged draft (<= CONVERGED faults) is edited by every
+    # rung, model_tier too, so a near pass gets its last edit before the terminal
+    assert [t[:7] for t in TITLES[:len(writer.calls)]] == ["Draft A", "Draft B", "Draft C", "Draft D", "Draft E"]
+    assert len(critic.texts) == 5
     assert json.loads(_plan(ctx).read_text(encoding="utf-8"))["title"] == "Draft B"
     doc = json.loads(plan_verdict.verdict_path(_plan(ctx)).read_text(encoding="utf-8"))
     assert doc["verdict"] == "APPROVE" and doc["flagged"] is True
@@ -74,7 +76,8 @@ def test_the_writer_saw_the_critics_lines_and_the_fresh_brief_saw_none(ctx, monk
     writer, _ = _run(ctx, monkeypatch)
     assert writer.calls[0] is None
     assert all(line.startswith("G-READER ") for line in writer.calls[1])
-    assert writer.calls[3] is None
+    # 33f11b4 (ep15): a CONVERGED draft is edited by every rung, fresh_brief too
+    assert all(line.startswith("G-READER ") for line in writer.calls[3])
 
 
 def test_a_draft_the_battery_refused_is_never_the_best(ctx, monkeypatch):
