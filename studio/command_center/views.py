@@ -46,6 +46,26 @@ APPLIED = ("hold", "lift", "acknowledge")
 # --- the vocabulary ---
 
 
+# A running row whose lease ran out is not running (decision 2026-09-25: an expired lease is
+# `stale`). The tick writes that word only when it next runs; the board reads the rule itself.
+# Every lease is written as YYYY-MM-DDTHH:MM:SSZ (studio/queue.py), so text order is time order.
+LAPSED_SQL = ("(state = 'running' AND lease_until IS NOT NULL"
+              " AND lease_until < strftime('%Y-%m-%dT%H:%M:%SZ', 'now'))")
+LIVE_SQL = f"(state = 'running' AND NOT {LAPSED_SQL})"
+SHOWN_SQL = f"CASE WHEN {LAPSED_SQL} THEN 'stale' WHEN state = 'done' AND flags > 0 THEN 'flagged' ELSE state END"
+
+
+def lease_lapsed(row: dict, now: datetime) -> bool:
+    """A running row whose lease_until has passed: its run died without settling it."""
+    until = row.get("lease_until")
+    if row.get("state") != "running" or not until:
+        return False
+    try:
+        return datetime.fromisoformat(str(until).replace("Z", "+00:00")) < now
+    except ValueError:
+        return False
+
+
 def display_state(state: str, flags: int = 0) -> str:
     """What the row shows: `flagged` when a done unit carries judge flags."""
     return "flagged" if state == "done" and flags else state
@@ -124,11 +144,13 @@ def row_view(row: sqlite3.Row | dict) -> dict:
     age of its last write."""
     r = dict(row)
     r["verdicts"] = json.loads(r["verdicts"]) if r.get("verdicts") else {}
-    r["shown"] = display_state(r["state"], r.get("flags") or 0)
-    r["glyph"] = glyph(r["state"], r.get("flags") or 0)
+    lapsed = lease_lapsed(r, utc_now())
+    state = "stale" if lapsed else r["state"]
+    r["shown"] = display_state(state, r.get("flags") or 0)
+    r["glyph"] = glyph(state, r.get("flags") or 0)
     r["css"] = colour_class(r["shown"])
     r["step_name"] = step_names(r["stage"]).get(r.get("step_id") or "", "")
-    r["elapsed"] = elapsed(r.get("started_at")) if r["state"] == "running" else ""
+    r["elapsed"] = elapsed(r.get("started_at")) if state == "running" else ""
     r["age"] = age(utc_now(), r.get("updated_at"))
     return r
 
@@ -145,7 +167,7 @@ def floor(conn: sqlite3.Connection) -> dict:
     """On the floor: the running rows (the GPU's first) and the next four of
     the queue, in the order a runner would take them."""
     running = [row_view(r) for r in conn.execute(
-        "SELECT * FROM work_orders WHERE state = 'running' ORDER BY gpu DESC, started_at, id")]
+        f"SELECT * FROM work_orders WHERE {LIVE_SQL} ORDER BY gpu DESC, started_at, id")]
     nxt = [row_view(r) for r in conn.execute("SELECT * FROM v_queue LIMIT 4")]
     return {"running": running, "next": nxt}
 
@@ -238,7 +260,8 @@ def shelf(conn: sqlite3.Connection) -> list[dict]:
     run and how many are done -- the /books page."""
     rows = conn.execute(
         "SELECT c.id AS codex_id, c.name, COUNT(w.id) AS units,"
-        " COALESCE(SUM(w.state = 'running'), 0) AS running, COALESCE(SUM(w.state = 'done'), 0) AS done"
+        f" COALESCE(SUM({LIVE_SQL.replace('state', 'w.state').replace('lease_until', 'w.lease_until')}), 0) AS running,"
+        " COALESCE(SUM(w.state = 'done'), 0) AS done"
         " FROM codex c LEFT JOIN work_orders w ON w.codex_id = c.id GROUP BY c.id ORDER BY c.name, c.id")
     return [dict(r) for r in rows]
 

@@ -196,8 +196,7 @@ def dept_dots(conn: sqlite3.Connection) -> dict[str, dict[str, int]]:
     """{stage: {shown state: n}} for every registered stage, zero counts left out."""
     out: dict[str, dict[str, int]] = {s: {} for s in registry.stage_names()}
     for stage, shown, n in conn.execute(
-            "SELECT stage, CASE WHEN state = 'done' AND flags > 0 THEN 'flagged' ELSE state END, COUNT(*)"
-            " FROM work_orders GROUP BY 1, 2 ORDER BY 1, 2"):
+            f"SELECT stage, {views.SHOWN_SQL}, COUNT(*) FROM work_orders GROUP BY 1, 2 ORDER BY 1, 2"):
         if stage in out:
             out[stage][shown] = n
     return out
@@ -206,7 +205,7 @@ def dept_dots(conn: sqlite3.Connection) -> dict[str, dict[str, int]]:
 def running_rows(conn: sqlite3.Connection) -> list[dict]:
     """The running work orders, the GPU's first, as the views show them."""
     return [views.row_view(r) for r in conn.execute(
-        "SELECT * FROM work_orders WHERE state = 'running' ORDER BY gpu DESC, started_at, id")]
+        f"SELECT * FROM work_orders WHERE {views.LIVE_SQL} ORDER BY gpu DESC, started_at, id")]
 
 
 def pin(row: dict) -> dict:
