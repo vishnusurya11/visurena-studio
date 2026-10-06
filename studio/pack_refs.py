@@ -279,11 +279,26 @@ def shot_prose(shots) -> str:
                     f"{getattr(s, 'at_rest', '') or ''}" for s in shots)
 
 
+def refuse_dirty_rows(rows: list[dict]) -> None:
+    """G-ROWTEXT's bind-time wall: a character row's `physical` is injected
+    VERBATIM into every take prompt that stages it, so a stillness word, an
+    unpaced gait, `slow` or a negation filed here poisons every take of the
+    episode.  Refused at the write, every fault at once."""
+    from studio import row_lint
+    found = [f"row {r.get('entity_id')}: {fault}" for r in rows
+             if r.get("kind", "character") == "character"
+             for fault in row_lint.row_faults(r.get("physical") or "")]
+    if found:
+        raise SystemExit("G-ROWTEXT refuses the cast rows (cure the dossier text, or run "
+                         "scripts/episode/migrate_row_words.py):\n  " + "\n  ".join(found))
+
+
 def rows_for(book: Path, chapter: int, cast: list[str], old: list[dict],
              named: dict[str, tuple[str, str]] | None = None) -> list[dict]:
     """refs.json's character rows for one chapter: the cast rebuilt from the
     dossier in that chapter's clothes, each keeping its display name and gender
-    (or taking the ones `named` gives), and every other row kept as it was."""
+    (or taking the ones `named` gives), and every other row kept as it was.
+    A row text the take lint would refuse never gets filed (G-ROWTEXT)."""
     before = {r.get("entity_id"): r for r in old}
     rows = []
     for who in cast:
@@ -291,4 +306,6 @@ def rows_for(book: Path, chapter: int, cast: list[str], old: list[dict],
         display, gender = (named or {}).get(who, (before.get(who, {}).get("display"),
                                                    before.get(who, {}).get("gender")))
         rows.append({**row, **({"display": display} if display else {}), **({"gender": gender} if gender else {})})
-    return rows + [r for r in old if r.get("entity_id") not in cast]
+    rows += [r for r in old if r.get("entity_id") not in cast]
+    refuse_dirty_rows(rows)
+    return rows
