@@ -315,3 +315,17 @@ def test_a_plan_edited_after_its_signature_is_not_grandfathered(ctx):
     _placed(ctx).write_text("{}", encoding="utf-8")
     episode_home.write_plan(_plan(ctx), {**canned_plan(), "title": "Edited after signing"})
     assert step.done(ctx) is False
+
+
+def test_a_deferred_draft_is_cured_for_free_before_any_paid_round(ctx, monkeypatch):
+    """ep19 launch04 (2026-10-06): the aside draft passed every gate under the
+    new code, yet step 02 judged the stale plan.json and paid the writer first;
+    the episode crossed its $3 wall.  The aside is cured -- free -- first."""
+    writer, gate = _wire(ctx, monkeypatch, (0, CLEAN_OUT))
+    episode_home.write_plan(_plan(ctx), canned_plan())
+    (ctx.home / step.plan_ladder.DEFERRED).write_text(
+        json.dumps({"verdict": "DEFERRED", "passes": 1, "faults": [], "draft": canned_plan(3)}), encoding="utf-8")
+    step.run(ctx)
+    assert gate.commands[0][1].endswith("plan_repair.py") and "--from-aside" in gate.commands[0]
+    assert writer.calls == []
+    assert _verdict(ctx)["signed_by"] == "judge:plan@1"

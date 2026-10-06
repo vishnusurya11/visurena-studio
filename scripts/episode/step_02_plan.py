@@ -188,12 +188,26 @@ def report(ctx) -> None:
             step_id=STEP_ID, level="WARNING")
 
 
+def cure_aside_first(ctx, plan: Path) -> None:
+    """A draft an earlier run deferred is cured under today's code -- mechanical
+    cures only, $0 -- before any paid round judges the plan on disk (ep19
+    launch04: the aside passed every gate, the stale plan.json paid the writer,
+    and the episode crossed its $3 wall)."""
+    if not (ctx.home / plan_ladder.DEFERRED).exists() or plan_verdict.current(plan) or ran_downstream(ctx):
+        return
+    rc, out = ctx.capture_script("scripts/episode/plan_repair.py", "--from-aside", "--no-llm")
+    ctx.log("aside cured before any paid round:\n" + out[-800:], step_id=STEP_ID,
+            level="WARNING" if rc else "INFO")
+
+
 def run(ctx) -> None:
     # CLOCKED (five-hour plan fix 6): ep14 spent 3.3 h in this step and
     # timing.jsonl never saw a second of it.
     from studio import episode_clock
     with episode_clock.timed(ctx.book_dir, ctx.number, "plan"):
         plan = plan_of(ctx)
+        if not wants_rewrite(ctx):
+            cure_aside_first(ctx, plan)
         desk = plan_ladder.Desk(ctx, plan, writer=episode_writer)
         if wants_rewrite(ctx) and ran_downstream(ctx):
             ctx.log("--rewrite refused: placed.json exists, this plan already ran downstream",
