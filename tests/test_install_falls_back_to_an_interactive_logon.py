@@ -31,6 +31,17 @@ def test_install_retries_with_an_interactive_logon_when_s4u_is_refused():
     assert len(seen) == 2 and "LogonType Interactive" in seen[1] and "AtStartup" not in seen[1]
 
 
+def test_install_names_uv_by_its_full_path():
+    """The task's first start failed 0x80070002: Task Scheduler has no user PATH
+    (2026-10-06), so the action carries uv.exe resolved at install time."""
+    cli = fx.load()
+    cmd = cli.install_command(Path("x"), 5, uv="C:/Users/me/.local/bin/uv.exe")
+    assert "-Execute 'C:/Users/me/.local/bin/uv.exe'" in cmd
+    seen = []
+    cli.install(Path("x"), 5, None, run=lambda c: seen.append(c) or 0, which=lambda name: "D:/tools/uv.exe")
+    assert "-Execute 'D:/tools/uv.exe'" in seen[0]
+
+
 def test_install_stops_at_s4u_when_it_is_accepted():
     cli = fx.load()
     seen = []
