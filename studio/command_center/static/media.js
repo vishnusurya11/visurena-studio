@@ -11,10 +11,23 @@
    The unit page's wiring rides along: the Viewer is loaded when the shell has not loaded
    it, the body names the unit, the shot filter, the redo picks, the Viewer's R = redo,
    file names in the Activity window open the Viewer, and a new master iteration shows a
-   badge without ever reloading the playing player. */
-(function () {
+   badge without ever reloading the playing player.
+   The pure core at the top (newMaster: should the badge show, and say what) is exported
+   for node, where the tests run it. */
+(function (root) {
 'use strict';
-if (window.BoardMedia) return;
+
+/* 5.8, the decision: the head's newest master vs the one the screening room is showing
+   vs the one already badged.  null = leave the badge alone; the player is never touched. */
+function newMaster(latest, shown, badged) {
+  if (!latest || !latest.rel || latest.rel === shown || badged === latest.rel) return null;
+  return { rel: latest.rel, text: latest.short + ' •',
+           title: latest.rel + ' landed; open it in the Viewer',
+           say: 'A new master landed: ' + latest.short + '. The player keeps playing.' };
+}
+const core = { newMaster };
+if (typeof module === 'object' && module.exports) { module.exports = core; return; }
+if (root.BoardMedia) return;
 const WAIT_MS = 300;
 const $ = (s, r) => (r || document).querySelector(s);
 const $$ = (s, r) => [...(r || document).querySelectorAll(s)];
@@ -170,12 +183,13 @@ function linkActivity() {
 /* 5.8: a new master iteration lands -> a badge and a toast; the playing player is never reloaded */
 function checkNewMaster() {
   const screen = $('#master[data-latest]'), mark = $('#head [data-latest-master]'); if (!screen || !mark) return;
-  const latest = mark.dataset.latestMaster; if (!latest || latest === screen.dataset.latest) return;
-  const badge = $('[data-k="vnew"]', screen); if (!badge || badge.dataset.rel === latest) return;
-  badge.dataset.rel = latest; badge.textContent = `${mark.dataset.latestShort} •`; badge.title = `${latest} landed; open it in the Viewer`;
-  badge.hidden = false; badge.setAttribute('data-view', latest); badge.setAttribute('data-set', 'masters'); badge.setAttribute('role', 'button'); badge.tabIndex = 0;
-  const msg = `A new master landed: ${mark.dataset.latestShort}. The player keeps playing.`;
-  if (window.Viewer && window.Viewer.toast) window.Viewer.toast(msg); else if (window.board && window.board.toast) window.board.toast(msg);
+  const badge = $('[data-k="vnew"]', screen); if (!badge) return;
+  const b = newMaster({ rel: mark.dataset.latestMaster, short: mark.dataset.latestShort },
+                      screen.dataset.latest, badge.dataset.rel);
+  if (!b) return;
+  badge.dataset.rel = b.rel; badge.textContent = b.text; badge.title = b.title;
+  badge.hidden = false; badge.setAttribute('data-view', b.rel); badge.setAttribute('data-set', 'masters'); badge.setAttribute('role', 'button'); badge.tabIndex = 0;
+  if (window.Viewer && window.Viewer.toast) window.Viewer.toast(b.say); else if (window.board && window.board.toast) window.board.toast(b.say);
 }
 
 /* the Watch link (unit#master?play): the master plays at once, with sound when allowed */
@@ -206,5 +220,5 @@ function boot() {
 }
 if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot); else boot();
 
-window.BoardMedia = { playWithSound, unmute, emptyMedia };
-})();
+window.BoardMedia = { playWithSound, unmute, emptyMedia, core };
+})(typeof window !== 'undefined' ? window : this);

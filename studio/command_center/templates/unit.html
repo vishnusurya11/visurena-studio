@@ -10,7 +10,7 @@
 {% set r = unit.row %}{% set hl = unit.health %}{% set pics = unit.pictures %}{% set m = unit.master %}{% set sg = unit.suggest %}
 {% set home = pics.home or r.home %}
 {% set finished = r.shown in ('done', 'flagged') %}
-{% set pk = 'pulse:unit:' ~ stage ~ '/' ~ codex ~ '/' ~ r.unit %}
+{% set uk = 'unit:' ~ stage ~ '/' ~ codex ~ '/' ~ r.unit %}{% set pk = 'pulse:' ~ uk %}{% set vfp = viz.fp(request, uk) %}
 {% set base_url = '/partials/unit/' ~ stage ~ '/' ~ codex ~ '/' ~ r.unit %}
 {% block title %}{% if live %}{{ live.title }}{% else %}{{ r.unit }} · {{ stage }} · Visurena Studio{% endif %}{% endblock %}
 {% block view_codex %}{{ codex }}{% endblock %}{% block view_stage %}{{ stage }}{% endblock %}{% block view_unit %}{{ r.unit }}{% endblock %}
@@ -87,7 +87,7 @@
   data-panel-step="{{ pics.panel_step }}" data-take-step="{{ pics.take_step }}">
 {% if live %}<div class="u-page">{% include "_unit_live.html" %}</div>{% endif %}
 <div class="u-page">
-  <section id="head" class="u-head" hx-get="{{ base_url }}/head" hx-trigger="{{ pk }} from:body" hx-swap="morph:innerHTML">
+  <section id="head" class="u-head" hx-get="{{ base_url }}/head" hx-trigger="{{ pk }} from:body" data-v="{{ vfp }}" hx-swap="morph:innerHTML">
   {% include "_unit_head.html" %}
   </section>
 </div>
@@ -178,7 +178,7 @@
       </div></details>
     </div>
    </div>
-   <div id="orders" hx-get="{{ base_url }}/orders" hx-trigger="{{ pk }} from:body, orders-changed from:body" hx-swap="morph:innerHTML">
+   <div id="orders" hx-get="{{ base_url }}/orders" hx-trigger="{{ pk }} from:body, orders-changed from:body" data-v="{{ vfp }}" hx-swap="morph:innerHTML">
     {% include "_unit_orders.html" %}
    </div>
    </div>
@@ -226,7 +226,7 @@
    <header><h2 id="activity-h">Activity</h2><span class="sub">{% if unit.log_name %}run log {{ unit.log_name[-19:-4] }} · {% endif %}WARNING+ and the ladders · learnings · timing</span>
     <span class="r">{% if unit.log_name %}<button type="button" class="btn sm" id="act-full" data-view="_logs/{{ unit.log_name }}" data-set="files">{{ icon('scroll-text') }}Full log</button>{% endif %}</span>
    </header>
-   <div id="tails"{% if unit.running %} hx-get="{{ base_url }}/tails" hx-trigger="{{ pk }}[!document.activeElement.closest('form,dialog')] from:body" hx-swap="morph:innerHTML"{% endif %}>
+   <div id="tails"{% if unit.running %} hx-get="{{ base_url }}/tails" hx-trigger="{{ pk }}[!document.activeElement.closest('form,dialog')] from:body" data-v="{{ vfp }}" hx-swap="morph:innerHTML"{% endif %}>
    {% include "_tails.html" %}
    </div>
   </section>
