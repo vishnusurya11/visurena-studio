@@ -17,7 +17,7 @@ from __future__ import annotations
 import re
 from typing import Literal
 
-from pydantic import BaseModel, Field, model_validator
+from pydantic import BaseModel, Field, ValidationInfo, field_validator, model_validator
 
 from studio import canvas, house_style
 from studio.affirm import negations
@@ -614,6 +614,31 @@ class Episode(BaseModel):
         if n >= len(self.shots if kind == "shot" else self.lines):
             raise ValueError(f"answer {self.answer!r} names a {kind} the plan does not have")
         return self
+
+    @field_validator("beds")
+    @classmethod
+    def _beds_point_into_the_cut(cls, beds: list[dict], info: ValidationInfo) -> list[dict]:
+        """Every span starts on a shot the plan has, with a CUT shot at or
+        after it, in story order -- the condition `episode_bed.in_cut` needs,
+        checked where the plan is born, never first at assemble (ep18: a
+        signed plan's bed named a cut shot; the hand fix came hours later).
+        A field validator, not a model one, so the refusal carries the `beds`
+        loc and plan_check prints a row the cure dispatcher matches."""
+        shots = info.data.get("shots")
+        if shots is None:               # shots themselves refused; their fault speaks first
+            return beds
+        cut = {s.index for s in shots} - set(info.data.get("omit") or [])
+        last = -1
+        for entry in beds:
+            at = entry.get("from_shot")
+            if not isinstance(at, int) or isinstance(at, bool) or not 0 <= at < len(shots):
+                raise ValueError(f"bed span from_shot {at!r} names a shot outside 0..{len(shots) - 1}")
+            if not any(i >= at for i in cut):
+                raise ValueError(f"bed span from_shot {at} has no cut shot at or after it")
+            if at < last:
+                raise ValueError(f"bed span from_shot {at} is out of story order (spans are non-decreasing)")
+            last = at
+        return beds
 
     @model_validator(mode="after")
     def _omit_names_shots(self) -> "Episode":

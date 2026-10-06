@@ -29,10 +29,13 @@ from studio.episode_spec import Episode  # noqa: E402
 ROUNDS = 6
 
 
-HARD_LISTS = ("ONE PER TAKE : [", "TAKE LENGTH  : [", "CONTRACT :", "QUOTE        : [")
+HARD_LISTS = ("ONE PER TAKE : [", "TAKE LENGTH  : [", "CONTRACT:", "QUOTE        : [")
 """The checker's top-level rows that are HARD and list-formed; EXPECTS TEXT
 and SHEET TEXT print the same way and are informational (ep16: TAKE LENGTH
-was invisible to the repairer and three rounds deferred over 0.05 s)."""
+was invisible to the repairer and three rounds deferred over 0.05 s).
+'CONTRACT:' is the checker's OWN spelling (plan_check prints no space before
+the colon); the old 'CONTRACT :' entry matched nothing, so no contract
+refusal -- the bed-span one included -- ever reached this repairer."""
 
 
 def fault_rows(stdout: str) -> list[str]:
@@ -169,8 +172,10 @@ def cure_row_rows(book, rows: list[str]) -> list[str]:
 
 
 def apply(doc: dict, rows: list[str], book, number: int = 0,
-          rate: float = 3.0) -> tuple[dict, list[str]]:
-    """Every cured family once per round; the rows nothing cures come back.
+          rate: float = 3.0) -> tuple[dict, list[str], list[str]]:
+    """Every cured family once per round; the rows nothing cures come back,
+    and so do the SORTED NAMES of the cures that ran -- what the provenance
+    ledger records so a re-sign can prove the bytes moved mechanically.
     `rate` is the narrator's measured words/s -- THE CHECKER'S RATE, or the
     holds algebra cures numbers the battery never measures (ep16: 8.05 s at
     2.54 read as 7.5 s at the default 3.0 and the clamp saw nothing)."""
@@ -274,7 +279,9 @@ def apply(doc: dict, rows: list[str], book, number: int = 0,
         elif name == "row_words":
             own = [r for r in rows if pc.cure_for(r) == "row_words"]
             uncured += cure_row_rows(book, own)
-    return doc, uncured
+        elif name == "clamp_beds":
+            doc = pc.clamp_beds(doc)
+    return doc, uncured, sorted(names)
 
 
 def rate_blocked(doc: dict, rate: float) -> bool:
@@ -416,14 +423,19 @@ def main(book_id: str, number: int, from_aside: bool = False, no_llm: bool = Fal
                 print(f"BATTERY CLEAN after {round_ - 1} repair round(s)")
                 return 0
             doc = episode_home.read_json(path)
-            from studio import plan_gates
-            doc, uncured = apply(doc, rows, book, number, rate=plan_gates.series_rate(book, number))
+            from studio import plan_gates, plan_provenance, plan_verdict
+            before_sha8 = plan_verdict.plan_sha8(path)
+            doc, uncured, names = apply(doc, rows, book, number, rate=plan_gates.series_rate(book, number))
             try:
                 Episode(**doc)
                 episode_home.write_plan(path, doc)
             except Exception as bad:
                 print(f"round {round_}: a cure broke the contract, draft kept: {str(bad)[:140]}")
                 return 1
+            # THE LEDGER ROW, only after the write LANDED: step 02's re-sign
+            # walks these rows; a crash before this line leaves a chain gap,
+            # which fails safe (the critic reads once).
+            plan_provenance.record(path, before_sha8, names)
             print(f"round {round_}: {len(rows) - len(uncured)} fault row(s) cured, "
                   f"{len(uncured)} creative row(s) remain")
             if (uncured and len(uncured) == len(rows)) or not rows:

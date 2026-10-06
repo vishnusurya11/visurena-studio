@@ -57,5 +57,5 @@ def test_apply_without_chapter_text_leaves_source_rows_uncured(monkeypatch, tmp_
     from studio import plan_brief
     monkeypatch.setattr(plan_brief, "chapter_text", lambda book, number: None)
     row = "G-SOURCE shot 4: span 'six riders stood about' is not in the chapter, measured 0.7 against 0.85"
-    doc, uncured = pr.apply({"shots": [], "lines": []}, [row], tmp_path, number=7)
+    doc, uncured, _ = pr.apply({"shots": [], "lines": []}, [row], tmp_path, number=7)
     assert row in uncured

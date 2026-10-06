@@ -116,7 +116,7 @@ def test_plan_repair_routes_unfixed_shots_to_the_llm_and_keeps_their_rows(monkey
                         (seen.setdefault("unfixed", unfixed), (doc, [5]))[1])
     rows = ["G-MOVES plan: distinct catalog moves over 23 shots, measured 6 against 8",
             "M2 shot 5: the head names no camera move. Open with one, before the first semicolon"]
-    _, uncured = pr.apply({"shots": [], "lines": [], "setups": {}}, rows, root / "nowhere")
+    _, uncured, _ = pr.apply({"shots": [], "lines": [], "setups": {}}, rows, root / "nowhere")
     assert seen["idx"] == [5] and seen["unfixed"] == [5]
     assert uncured == [rows[1]]          # the plan-level row re-measures next round
 

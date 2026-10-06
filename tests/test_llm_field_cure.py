@@ -106,7 +106,7 @@ def test_no_llm_skips_the_pass_entirely(tmp_path, monkeypatch):
     from contextlib import nullcontext
     monkeypatch.setattr(pr.episode_home, "book_dir", lambda _: book)
     monkeypatch.setattr(pr, "battery_rows", lambda b, n: (False, rows))
-    monkeypatch.setattr(pr, "apply", lambda doc, r, b, n, rate=3.0: (doc, list(r)))
+    monkeypatch.setattr(pr, "apply", lambda doc, r, b, n, rate=3.0: (doc, list(r), []))
     monkeypatch.setattr(pr, "spend_guard", lambda b, n: nullcontext())
     monkeypatch.setattr(pr, "rewrite_round", lambda b, p, r: False)
     monkeypatch.setattr(pr, "fill_holes", lambda b, n: False)

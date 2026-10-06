@@ -30,8 +30,9 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 
 from agents import episode_writer, plan_reader  # noqa: E402
 from studio.deferral import Deferred  # noqa: E402
-from studio import episode_home, gate_policy, judged_gate, plan_ladder, plan_verdict, step_cli  # noqa: E402
+from studio import episode_home, gate_policy, judged_gate, plan_ladder, plan_provenance, plan_verdict, step_cli  # noqa: E402
 from studio.judges import plan as plan_judge  # noqa: E402
+from studio.judges import verdict as jv  # noqa: E402
 
 STEP_ID = "02"
 NAME = "plan"
@@ -74,6 +75,44 @@ def grandfathered(ctx) -> bool:
     """Ran downstream AND never signed: a legacy plan.  One whose signature went
     stale was edited after it was judged (ep12: skipped on 'output exists')."""
     return ran_downstream(ctx) and not (plan_of(ctx).parent / plan_verdict.FILE).exists()
+
+
+def stale_approve(plan: Path) -> dict | None:
+    """The APPROVE whose sha no longer matches the plan's bytes, or None."""
+    doc = plan_verdict.read(plan)
+    stale = (bool(doc) and doc.get("verdict") == plan_verdict.APPROVE
+             and doc.get("plan_sha8") != plan_verdict.plan_sha8(plan))
+    return doc if stale else None
+
+
+def resigned(ctx) -> bool:
+    """A stale APPROVE whose bytes moved ONLY through recorded cures
+    (plan.cures.jsonl), over a battery that passes NOW, is re-signed with
+    zero writer/critic calls (ep18: a mechanical repair lapsed the signature
+    and the paid climb ran again on an already-clean plan, $1.05).  A broken
+    chain or a dirty battery answers False and the ordinary climb runs."""
+    plan = plan_of(ctx)
+    if not plan.exists() or (old := stale_approve(plan)) is None:
+        return False
+    cures = plan_provenance.chain(plan.parent, old.get("plan_sha8") or "",
+                                  plan_verdict.plan_sha8(plan))
+    if cures is None:
+        return False
+    rc, _ = ctx.capture_script(PLAN_CHECK)
+    if rc != 0:
+        return False
+    resign(ctx, plan, old, cures)
+    return True
+
+
+def resign(ctx, plan: Path, old: dict, cures: list[str]) -> None:
+    """The old signature carried forward over the cured bytes: same signer,
+    same faults, same flag -- only the note says what moved them."""
+    names = ", ".join(cures) or "none"
+    plan_verdict.sign(plan, f"re-signed after mechanical cures: {names}",
+                      signed_by=old.get("signed_by") or jv.OWNER,
+                      faults=old.get("faults"), flagged=bool(old.get("flagged")))
+    ctx.log(f"{GATE} re-signed: bytes moved only through recorded cures ({names})", step_id=STEP_ID)
 
 
 def wants_rewrite(ctx) -> bool:
@@ -162,6 +201,8 @@ def run(ctx) -> None:
         elif wants_rewrite(ctx) or not plan.exists():
             desk.resume() or desk.write(None)
         if plan_verdict.current(plan) or grandfathered(ctx):
+            return
+        if resigned(ctx):
             return
         if rendered(ctx):
             report(ctx)

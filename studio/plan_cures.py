@@ -1366,6 +1366,7 @@ CURES: list[tuple[re.Pattern, str]] = [
     (re.compile(r"shots are numbered|lines are numbered|a line's shot never precedes"), "renumber"),
     (re.compile(r"G-LIGHT"), "light_directions"),
     (re.compile(r"G-SIZE"), "head_fractions"),
+    (re.compile(r"bed span from_shot"), "clamp_beds"),
     # The G-TAKELINT families, most specific first.  A row tagged [row]/[card]
     # is cured in ITS OWN file, never the plan, so that route outranks every
     # word cure; figurative_gaits sits ABOVE the generic NO PACE row so a
@@ -1399,6 +1400,20 @@ CURES: list[tuple[re.Pattern, str]] = [
 ]
 """Fault-text patterns -> cure names, most specific first.  A row matching
 nothing is CREATIVE and goes back to the writer, one field at a time."""
+
+
+def clamp_beds(doc: dict) -> dict:
+    """G-BED: keep only bed spans whose int `from_shot` names a shot with a
+    CUT shot at or after it, sorted into story order; an emptied list is
+    legal -- one plain span end to end (episode_bed.spans)."""
+    shots = len(doc.get("shots") or [])
+    omit = set(doc.get("omit") or [])
+    cut = [i for i in range(shots) if i not in omit]
+    kept = [b for b in doc.get("beds") or []
+            if isinstance(b.get("from_shot"), int) and not isinstance(b.get("from_shot"), bool)
+            and 0 <= b["from_shot"] < shots and any(i >= b["from_shot"] for i in cut)]
+    doc["beds"] = sorted(kept, key=lambda b: b["from_shot"])
+    return doc
 
 
 def close_crowds(doc: dict) -> dict:
