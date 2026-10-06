@@ -4,9 +4,14 @@ One small JSON, polled every two seconds by every open page, says for each
 section of the board a fingerprint -- a short digest of cheap DB aggregates
 (the newest work-order write, the newest order and its taking, the holds) and
 an age bucket for sections that print ages -- so a page refetches a section
-only when the studio changed it.  It also carries what the shell draws (the
-"needs you" count, the queue, the department dots, the pins, the GPU card, the
-studio hold) and the events after the client's cursor.  Reads only; the GPU
+only when the studio changed it.  Two changes never write a row and must still
+move the fingerprints: a running lease passing NOW (views.LAPSED_SQL shows the
+row as stale -- a pure clock flip, counted into every fingerprint whose section
+shows it) and a write landing within the same second as the last (stamps are
+to the second, so each scope's fingerprint carries a concat of its rows).
+It also carries what the shell draws (the "needs you" count, the queue, the
+department dots, the pins, the GPU card, the studio hold) and the events
+after the client's cursor.  Reads only; the GPU
 card's progress (files + the process list) is read at most once per TTL."""
 from __future__ import annotations
 
@@ -24,7 +29,12 @@ RECENT_S = 24 * 3600
 EVENTS_CAP = 20
 GPU_TTL_S = 4.0
 ATTENTION_SQL = ("state IN ('failed', 'deferred', 'escalated', 'stale')"
+                 f" OR {views.LAPSED_SQL}"
                  " OR (state = 'done' AND flags > 0)")
+ROWS_CONCAT = ("GROUP_CONCAT(id || state || COALESCE(step_id, '') || COALESCE(progress, '')"
+               " || COALESCE(flags, 0) || COALESCE(updated_at, '') ORDER BY id)")
+"""What a scope's rows show, as one string: a write within the same second as
+the last (stamps are to the second) still moves the scope's fingerprint."""
 
 
 # --- the pure parts ---
@@ -80,9 +90,12 @@ class Ttl:
 
 
 def totals(conn: sqlite3.Connection) -> dict:
-    """The studio-wide marks: work orders, orders, holds, the newest event."""
+    """The studio-wide marks: work orders (with their row concat), orders, holds,
+    the lapsed-lease count (the clock flip), the newest event."""
     one = lambda sql: tuple(conn.execute(sql).fetchone())
-    return {"wo": one("SELECT COUNT(*), MAX(updated_at), COALESCE(SUM(state = 'running'), 0) FROM work_orders"),
+    return {"wo": one("SELECT COUNT(*), MAX(updated_at), COALESCE(SUM(state = 'running'), 0),"
+                      f" {ROWS_CONCAT} FROM work_orders"),
+            "lapsed": one(f"SELECT COUNT(*) FROM work_orders WHERE {views.LAPSED_SQL}"),
             "orders": one("SELECT MAX(id), MAX(taken_ts), MAX(ts) FROM orders"),
             "holds": one("SELECT MAX(id), COUNT(lifted_at), MAX(lifted_at) FROM holds"),
             "attention": one("SELECT COUNT(*), MAX(updated_at), GROUP_CONCAT(id || state || COALESCE(step_id, '') || flags)"
@@ -91,17 +104,19 @@ def totals(conn: sqlite3.Connection) -> dict:
 
 
 def section_fps(t: dict, now: float) -> dict[str, str]:
-    """The studio-wide sections' fingerprints (the newest event too: stamps are to the second)."""
+    """The studio-wide sections' fingerprints; floor and lanes show the stale
+    flip, so they carry the lapsed count too."""
     running, newest = bool(t["wo"][2]), epoch(t["wo"][1])
-    return {"floor": digest(t["wo"], t["event"], t["holds"], bucket(now, newest, running)),
+    return {"floor": digest(t["wo"], t["event"], t["holds"], t["lapsed"], bucket(now, newest, running)),
             "attention": digest(t["attention"], t["orders"], bucket(now, epoch(t["attention"][1]))),
             "orders": digest(t["orders"], bucket(now, epoch(t["orders"][2]))),
-            "lanes": digest(t["wo"], t["event"], bucket(now, newest, running))}
+            "lanes": digest(t["wo"], t["event"], t["lapsed"], bucket(now, newest, running))}
 
 
 def group_marks(conn: sqlite3.Connection, column: str, where: str = "1", args: tuple = ()) -> dict:
-    """{value of column: (count, newest write, running)} over the work orders."""
-    rows = conn.execute(f"SELECT {column}, COUNT(*), MAX(updated_at), COALESCE(SUM(state = 'running'), 0)"
+    """{value of column: (count, newest write, running, lapsed, row concat)} over the work orders."""
+    rows = conn.execute(f"SELECT {column}, COUNT(*), MAX(updated_at), COALESCE(SUM(state = 'running'), 0),"
+                        f" COALESCE(SUM({views.LAPSED_SQL}), 0), {ROWS_CONCAT}"
                         f" FROM work_orders WHERE {where} GROUP BY {column}", args)
     return {r[0]: tuple(r[1:]) for r in rows}
 
@@ -117,15 +132,17 @@ def event_marks(conn: sqlite3.Connection) -> tuple[dict[str, int], dict[str, int
 
 
 def mark_fp(mark: tuple | None, event: int | None, holds: tuple, now: float) -> str:
-    """A department's or a book's fingerprint from its (count, newest, running) and newest event."""
-    mark = mark or (0, None, 0)
+    """A department's or a book's fingerprint from its group mark and newest event."""
+    mark = mark or (0, None, 0, 0, None)
     return digest(mark, event, holds, bucket(now, epoch(mark[1]), bool(mark[2])))
 
 
 def unit_row(conn: sqlite3.Connection, stage: str, codex: str, unit: str) -> tuple | None:
-    """The columns a unit's sections show, or None for no row."""
+    """The columns a unit's sections show -- last whether its lease lapsed
+    (the clock flip) -- or None for no row."""
     row = conn.execute("SELECT state, step_id, progress, flags, updated_at, verdicts, (SELECT MAX(e.id) FROM events e"
-                       " WHERE e.codex_id = w.codex_id AND e.stage = w.stage AND COALESCE(e.unit, 'book') = w.unit)"
+                       " WHERE e.codex_id = w.codex_id AND e.stage = w.stage AND COALESCE(e.unit, 'book') = w.unit),"
+                       f" {views.LAPSED_SQL}"
                        " FROM work_orders w WHERE stage = ? AND codex_id = ? AND unit = ?", (stage, codex, unit)).fetchone()
     return tuple(row) if row else None
 

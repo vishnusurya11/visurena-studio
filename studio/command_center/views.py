@@ -180,10 +180,14 @@ def queue(conn: sqlite3.Connection) -> list[dict]:
 def attention(conn: sqlite3.Connection) -> list[dict]:
     """Needs you (research 07 §5): failed, deferred, escalated, stale -- oldest
     first, each with the detail its current step left -- then every unit that
-    shipped with flags the owner has not acknowledged, oldest first."""
+    shipped with flags the owner has not acknowledged, oldest first.  Stale is
+    derived, not just stored: a running row whose lease has lapsed is a dead
+    run the tick has not named yet, and it needs a person now (referee D1)."""
     rows = conn.execute(
         "SELECT w.*, (SELECT s.detail FROM work_steps s WHERE s.order_id = w.id"
-        " AND s.step_id = w.step_id) AS detail FROM v_attention w ORDER BY w.updated_at, w.id")
+        " AND s.step_id = w.step_id) AS detail FROM work_orders w"
+        f" WHERE w.state IN ('failed', 'deferred', 'escalated', 'stale') OR {LAPSED_SQL.replace('state', 'w.state').replace('lease_until', 'w.lease_until')}"
+        " ORDER BY w.updated_at, w.id")
     return [row_view(r) for r in rows] + flagged_unacknowledged(conn)
 
 

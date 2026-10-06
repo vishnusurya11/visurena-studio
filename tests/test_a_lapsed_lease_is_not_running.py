@@ -55,6 +55,19 @@ def test_no_department_dot_calls_a_lapsed_unit_running(lapsed_client):
     assert "running" not in dots and dots.get("stale") == 1
 
 
+def test_a_lapsed_unit_lands_in_needs_you(lapsed_client):
+    """Referee D1: ep18's class of fault must not vanish from home -- it needs a person."""
+    shell = lapsed_client.get("/api/pulse.json").json()["shell"]
+    page = lapsed_client.get("/inbox").text
+    assert shell["needs"] == 4 and "ep04" in page   # seeded ep05 failed + ep07 deferred + ep03 flagged, + the lapsed ep04
+
+
+def test_a_lapsed_unit_is_in_the_attention_list_as_stale(lapsed_client):
+    inbox = lapsed_client.get("/inbox").text
+    card = inbox[inbox.index("ep04"):][:600]
+    assert "stale" in card
+
+
 def test_the_department_table_shows_it_stale(lapsed_client):
     rows = lapsed_client.get("/api/d/episode.json").json()["rows"]
     assert [r["shown"] for r in rows if r["unit"] == "ep04"] == ["stale"]
