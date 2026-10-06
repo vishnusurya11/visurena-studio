@@ -456,6 +456,77 @@ def close_crowd_faults(episode) -> list[str]:
             if s.size in CLOSE_SIZES and (getattr(s, "crowd", "") or "").strip()]
 
 
+# ---- G-PHANTOM: a setup's described/geometry is the EMPTY stage -------------------
+
+PERSON_NOUN = re.compile(
+    r"\b(?:man|men|woman|women|people|person|persons|figure|figures|child|children|"
+    r"boy|boys|girl|girls|crowd|onlookers?|bystanders?)\b", re.I)
+"""A generic person word in a place description.  `described`/`geometry` text
+is pasted verbatim into every grid cell and every take prompt of the setup
+(storyboard_grid's place clause, takes_r2v's setup block), so a person named
+there is DRAWN into every take as a phantom extra (ep18, 2026-10-05)."""
+
+NAME_ARTICLES = frozenset({"the", "and", "his", "her", "their"})
+"""Words a display name carries that name nobody ("the Narrator")."""
+
+SENTENCE_SPLIT = re.compile(r"(?<=[.!?])\s+")
+
+
+def name_words(row: dict) -> set[str]:
+    """One refs.json character row's name words: the entity_id's parts plus
+    the display and full-name words, lower case, over two letters."""
+    text = " ".join([str(row.get("entity_id") or "").replace("_", " "),
+                     str(row.get("display") or ""), str(row.get("name") or "")])
+    return {w for w in re.findall(r"[a-z]+", text.lower())
+            if len(w) > 2 and w not in NAME_ARTICLES}
+
+
+def person_tokens(refs: list[dict]) -> dict[str, str]:
+    """{token: entity_id} for every name word only one character row owns --
+    creatures included (gender=='creature' covers 'Martian')."""
+    claims: dict[str, set] = {}
+    for row in refs:
+        if row.get("kind", "character") != "character":
+            continue
+        for token in name_words(row):
+            claims.setdefault(token, set()).add(str(row.get("entity_id") or ""))
+    return {t: next(iter(s)) for t, s in claims.items() if len(s) == 1}
+
+
+def phantom_token(sentence: str, names: dict[str, str], place_words: set[str]) -> str:
+    """The first cast or person token this sentence names, or "".  A token
+    that is also a declared place's word (St John's Wood) names the place."""
+    for token in sorted(names):
+        if token not in place_words and re.search(rf"\b{re.escape(token)}(?:'s)?\b", sentence, re.I):
+            return token
+    hit = PERSON_NOUN.search(sentence)
+    if hit and hit.group(0).lower() not in place_words:
+        return hit.group(0).lower()
+    return ""
+
+
+def phantom_hits(text: str, names: dict[str, str], place_words: set[str]) -> list[tuple[str, str]]:
+    """(sentence, token) for every sentence of a setup field naming a person."""
+    return [(sent, token) for sent in SENTENCE_SPLIT.split(text or "")
+            if (token := phantom_token(sent, names, place_words))]
+
+
+def phantom_faults(episode, names: dict[str, str], place_words: set[str]) -> list[str]:
+    """G-PHANTOM over a plan: described and geometry stage nobody; `crowd` is
+    deliberately exempt -- it legitimately stages people and has its own gates.
+    Wired explicitly in plan_check (like G-CROWD-CLOSE), never in `faults()`,
+    because `faults()` has callers without refs access."""
+    out = []
+    for name, setup in episode.setups.items():
+        for field in ("described", "geometry"):
+            for sent, token in phantom_hits(getattr(setup, field, "") or "", names, place_words):
+                out.append(fault("G-PHANTOM", f"setup {name!r} ({field})",
+                                 f"sentence {sent[:50]!r} names {token!r}; a place description is "
+                                 f"the empty stage and this sentence prints a phantom into every "
+                                 f"take of the setup", 1, 0))
+    return out
+
+
 def expects_text(episode) -> list[int]:
     """The shots whose prose stages printed matter at a size where it reads
     (the expects-text set): listed by the battery so the writer and the

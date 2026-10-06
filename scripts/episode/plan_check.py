@@ -197,8 +197,11 @@ def main(book_id: str, number: int) -> int:
     print("CONTRACT OK:", ep.title, "|", len(ep.shots), "shots |", f"{ep.projected_seconds():.0f}s projected")
     hard = 0
     unlit = house_style.faults(ep)
-    print("G-LIGHT      :", unlit or "clean"); hard += len(unlit)
+    print("G-LIGHT      :", len(unlit) or "clean"); hard += len(unlit)
+    for f in unlit:
+        print("   ", f[:170])
     rate = plan_gates.series_rate(book, number)
+    refs = episode_home.read_json(book / "refs" / "refs.json")["refs"]
     for n in plan_gates.advisories(ep, plan_gates.series_lines(book, number), rate=rate):
         print("  advisory:", n[:150])
     pg = plan_gates.faults(ep, plan_gates.quote_share(plan_brief.chapter_paragraphs(book, number)[1]))
@@ -215,6 +218,10 @@ def main(book_id: str, number: int) -> int:
     cc = plan_gates.close_crowd_faults(ep)
     print("G-CROWD-CLOSE:", cc or "clean"); hard += len(cc)
     for f in cc:
+        print("   ", f[:170])
+    pf = plan_gates.phantom_faults(ep, plan_gates.person_tokens(refs), house_style.place_words())
+    print("G-PHANTOM    :", len(pf) or "clean"); hard += len(pf)
+    for f in pf:
         print("   ", f[:170])
     print("EXPECTS TEXT :", plan_gates.expects_text(ep) or "no shot stages printed matter")
     bad, folded = plan_gates.bed_faults(ep)
@@ -236,7 +243,6 @@ def main(book_id: str, number: int) -> int:
     print("MOTION hard  :", bad or "clean"); hard += len(bad)
     for i, c, w in mf:
         print(f"    {c} shot {i}: {w[:140]}")
-    refs = episode_home.read_json(book / "refs" / "refs.json")["refs"]
     crossed, vague = spec.plan_marks(ep, refs)
     print("MARKS        :", crossed or "clean", "| unmeasured", len(vague)); hard += len(crossed)
     actors = actor_gate.hard_episode(ep)

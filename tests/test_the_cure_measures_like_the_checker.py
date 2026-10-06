@@ -56,10 +56,12 @@ def test_take_length_routes_to_holds():
 
 def test_fault_rows_sees_the_checkers_top_level_lists():
     out = ("CONTRACT OK: x | 26 shots | 147s projected\n"
+           "G-LIGHT      : 1\n"
+           "    G-LIGHT: setup 'x': `described` names no light source with a direction"
+           " -- say where it comes from\n"
            "TAKE LENGTH  : [(16, 8.05)] (at 2.54 words/s, budget 8.0 s)\n"
            "ONE PER TAKE : [(9, 10)]\n"
            "EXPECTS TEXT : [7]\n"
-           "    G-LIGHT: setup 'x' names no light source\n"
            "VERDICT      : REFUSED\n")
     rows = pr.fault_rows(out)
     assert any(r.startswith("TAKE LENGTH") for r in rows)
