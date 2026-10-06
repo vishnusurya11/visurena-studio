@@ -94,7 +94,15 @@ def record(book: Path, row: dict, was: str, asked: str, got: str, why: str) -> N
         }, ensure_ascii=False) + "\n")
 
 
-def main(argv: list[str]) -> None:
+def _build_api():
+    """The real YouTube client -- the one network dependency, behind the seam
+    step 13 injects a fake through.  No gate or flow change: the import simply
+    moved here from the body of main()."""
+    from googleapiclient.discovery import build
+    return build("youtube", "v3", credentials=youtube.credentials(), cache_discovery=False)
+
+
+def main(argv: list[str], build_api=None) -> None:
     args = [a for a in argv[1:] if not a.startswith("--")]
     book_id, number, privacy = args[0], int(args[1]), args[2].lower()
     if privacy not in ALLOWED:
@@ -116,8 +124,7 @@ def main(argv: list[str]) -> None:
         print("\n--dry-run: nothing was changed.")
         return
 
-    from googleapiclient.discovery import build
-    api = build("youtube", "v3", credentials=youtube.credentials(), cache_discovery=False)
+    api = (build_api or _build_api)()
     was = live_status(api, row["video_id"]).get("privacyStatus")
     print(f"live      {was}")
     if was == privacy:
