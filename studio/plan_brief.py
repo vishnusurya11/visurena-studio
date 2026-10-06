@@ -72,6 +72,10 @@ PICTURE_RULES = [
     "described in the shot ('the walking machine, a brass hood on three long jointed legs'), "
     "never by a bare word ('a monster'); the setup that shows it lists it in "
     "`props` so its drawn sheet is staged, and a thing inside a machine is not a face.",
+    "A setup's `described` and `geometry` are the EMPTY stage (G-PHANTOM): never name a "
+    "cast member, a creature, or any person in them -- such a sentence is pasted into "
+    "every take of the setup and draws a phantom. People and creatures live only in "
+    "shot fields (`frame`, `at_rest`, `motion`) and in `crowd`.",
 ]
 """The standing picture gates, told to the WRITER up front (2026-10-01, ep15:
 three generations of drafts omitted light directions because no section said
