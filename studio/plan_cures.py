@@ -1412,6 +1412,7 @@ def enrich_at_rest(doc: dict, index: int, need_words: int, tier: str = "workhors
 
 CURES: list[tuple[re.Pattern, str]] = [
     (re.compile(r"G-ARTICLE"), "drop_stray_articles"),
+    (re.compile(r"G-SYNC line"), "dialogue_first"),
     (re.compile(r"G-GHOST"), "ghost_limbs"),
     (re.compile(r"G-TWICE"), "one_position"),
     (re.compile(r"shots are numbered|lines are numbered|a line's shot never precedes"), "renumber"),
@@ -1636,3 +1637,33 @@ def _article_repair(m) -> str:
     if last in ADJECTIVES or ADJECTIVE_END.search(last):
         return m.group(1)
     return m.group(1).rstrip() + ", the "
+
+
+def dialogue_first(doc: dict) -> dict:
+    """G-SYNC's free cure: a dialogue line second on its shot is seated first, in
+    the first way the contract's lines-per-shot cap allows -- it opens the next
+    shot; or the narration ahead of it moves back a shot; or, both neighbours full
+    (ep19 line 3), the two lines trade places within the shot."""
+    lines = doc.get("lines") or []
+    last = max((s["index"] for s in doc.get("shots") or []), default=-1)
+    for i, line in enumerate(lines):
+        if line.get("kind") == "dialogue" and i and lines[i - 1]["shot"] == line["shot"]:
+            _seat_dialogue(lines, i, last)
+    return doc
+
+
+def _seat_dialogue(lines: list[dict], i: int, last: int) -> None:
+    from studio.episode_spec import MAX_LINES_PER_SHOT as cap
+    shot = lines[i]["shot"]
+    count = lambda n: sum(1 for l in lines if l["shot"] == n)  # noqa: E731
+    ahead = [l for l in lines[:i] if l["shot"] == shot]
+    if shot < last and count(shot + 1) < cap and not any(l["shot"] == shot for l in lines[i + 1:]):
+        lines[i]["shot"] = shot + 1
+    elif shot > 0 and count(shot - 1) + len(ahead) <= cap:
+        for l in ahead:
+            l["shot"] = shot - 1
+    elif len(ahead) == 1:
+        a, b = lines[i - 1], lines[i]
+        a_body, b_body = {k: v for k, v in a.items() if k != "index"}, {k: v for k, v in b.items() if k != "index"}
+        a.update(b_body)
+        b.update(a_body)

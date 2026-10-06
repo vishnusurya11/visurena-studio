@@ -1082,7 +1082,7 @@ def opened(book_id: str, number: int):
     # first-frame prose was a quarter of ep04-08's under a colour-list style line.
     if unlit := house_style.faults(episode):
         raise SystemExit("G-LIGHT refuses the plan:\n  " + "\n  ".join(unlit))
-    if thin := plan_gates.faults(episode, plan_gates.quote_share(plan_brief.chapter_paragraphs(book, number)[1])):
+    if thin := plan_gates.chapter_faults(episode, plan_brief.chapter_paragraphs(book, number)[1]):
         raise SystemExit("the plan fails the authoring gates:\n  " + "\n  ".join(thin))
     refuse_long_shots(episode)
     refuse_still_motions(episode)

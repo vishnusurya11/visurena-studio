@@ -403,6 +403,34 @@ def quote_share(paragraphs: list[str]) -> float | None:
     return round(first / len(text), 3)
 
 
+QUOTED = re.compile(r"[\"“]([^\"“”]{1,600})[\"”]")
+SAYS = re.compile(r"\b(said|says|say|cried|asked|whispered|shouted|answered|replied|called|exclaimed|"
+                  r"muttered|murmured|repeated|began|went on|continued|added|screamed|yelled)\b", re.I)
+
+
+def is_speech(text: str, m: re.Match) -> bool:
+    """A quoted span is speech when it opens a paragraph or sits beside a speech
+    verb; a scare quote or a citation mid-sentence is not (ep19)."""
+    opens = m.start() == 0 or text[m.start() - 1] == "\n"
+    return opens or bool(SAYS.search(text[m.end():m.end() + 40]) or SAYS.search(text[max(0, m.start() - 40):m.start()]))
+
+
+def quiet_share(paragraphs: list[str]) -> float | None:
+    """The chapter's longest stretch without speech, as a share of its text; None without text."""
+    text = "\n".join(paragraphs)
+    if not text:
+        return None
+    spans = [(m.start(), m.end()) for m in QUOTED.finditer(text) if is_speech(text, m)]
+    marks = [0] + [i for span in spans for i in span] + [len(text)]
+    return round(max(b - a for a, b in zip(marks[::2], marks[1::2])) / len(text), 3)
+
+
+def narration_wall(runtime: float, quiet: float | None) -> float:
+    """G-STORY's narration-only wall: the fixed wall, stretched to the chapter's
+    own quiet (ep19: a chapter that speaks no line cannot be asked to)."""
+    return max(NARRATION_RUN_S, round(quiet * runtime, 1)) if quiet else NARRATION_RUN_S
+
+
 def dialogue_wall_holds(share: float | None) -> bool:
     """The first-dialogue wall holds unless the chapter itself speaks past it
     (ep13: its patched flash-forward, 2026-09-27); unknown means it holds."""
@@ -675,16 +703,17 @@ def setup_faults(episode: Episode) -> list[str]:
             for name, seconds in setup_seconds(episode).items() if seconds > MAX_SETUP_SECONDS + 1e-6]
 
 
-def story_faults(episode: Episode, quote_at: float | None = None) -> list[str]:
+def story_faults(episode: Episode, quote_at: float | None = None, quiet: float | None = None) -> list[str]:
     runtime, out = episode.projected_seconds(), []
+    wall = narration_wall(runtime, quiet)
     at, shot = first_dialogue_at(episode)
     if at / runtime > FIRST_DIALOGUE_SHARE and dialogue_wall_holds(quote_at):
         out.append(fault("G-STORY", f"shot {shot}", f"first dialogue line at {at:.1f} s of {runtime:.1f} s projected",
                          round(at / runtime, 2), FIRST_DIALOGUE_SHARE))
     for run, first, last in narration_runs(episode):
-        if run > NARRATION_RUN_S:
+        if run > wall:
             out.append(fault("G-STORY", f"shots {first}-{last}", "narration-only run in projected seconds",
-                             round(run, 1), NARRATION_RUN_S))
+                             round(run, 1), wall))
     if len(silent_shots(episode)) < MIN_SILENT_SHOTS:
         out.append(fault("G-STORY", "plan", "shots carrying no line (silent shots)",
                          len(silent_shots(episode)), MIN_SILENT_SHOTS))
@@ -1372,12 +1401,13 @@ def sync_faults(episode: Episode) -> list[str]:
     return out
 
 
-def faults(episode: Episode, quote_at: float | None = None) -> list[str]:
+def faults(episode: Episode, quote_at: float | None = None, quiet: float | None = None) -> list[str]:
     """Every reason this plan should not be drawn, free to compute.  `quote_at`
-    is where the chapter first speaks (`quote_share`); None holds every wall."""
+    is where the chapter first speaks (`quote_share`), `quiet` its longest
+    quote-free stretch (`quiet_share`); None holds every wall."""
     from studio import picture_gates  # G-SIZE and the picture advisories (ep10 synthesis C)
     return (firstframe_faults(episode) + variety_faults(episode)
-            + move_faults(episode) + rate_faults(episode) + story_faults(episode, quote_at)
+            + move_faults(episode) + rate_faults(episode) + story_faults(episode, quote_at, quiet)
             + picture_gates.faults(episode) + sync_faults(episode))
 
 
@@ -1509,3 +1539,8 @@ def article_faults(episode) -> list[str]:
             for hit in article_hits(getattr(s, f, "") or ""):
                 out.append(fault("G-ARTICLE", f"shot {s.index}", f"{f} reads {hit!r}", 1, 0))
     return out
+
+
+def chapter_faults(episode: Episode, paragraphs: list[str]) -> list[str]:
+    """`faults` with both chapter-relative walls read from the chapter's own text."""
+    return faults(episode, quote_share(paragraphs), quiet_share(paragraphs))
