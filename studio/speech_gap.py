@@ -11,6 +11,18 @@ MAX_GAP_S = 6.0
 """The longest hole in speech a delivered master may carry (ep10 synthesis
 B6/F6; Scarlet ep05 4.4 s, ep07 4.5 s, ep09 3.25 s pass; ep10's 11.25 s fails)."""
 
+HOLE_MARGIN_S = 0.5
+"""How far under MAX_GAP_S the plan battery projects a hole before refusing it.
+
+MEASURED on ep17/ep18: a hole's projected length at the series rate matches
+the measured hole to within 0.04 s (ep17 4.70 projected vs 4.73 measured;
+ep18 5.50 vs 5.54; pre-fix ep18's plan.json.bak_hole projected its hole at
+12.5 and timeline.py refused 12.52).  The mechanism: a hole contains no
+spoken words, so its length is only HANDLE 0.25 x2 + BREATH 0.70 + beat_s +
+coda_s constants plus the on_frame ceiling (<= 1/24 s per shot boundary) --
+the narrator's rate error never enters a hole.  0.5 s is 10x the observed
+error and aligns with the holds cure's existing HOLE_WALL_S - 0.5 target."""
+
 
 def gaps(lines: list[dict], until: float) -> list[tuple[float, float]]:
     """(start, end) of every hole between the placed lines, the tail included."""
@@ -27,16 +39,31 @@ def longest_gap(lines: list[dict], until: float) -> float:
     return round(max(b - a for a, b in holes), 2) if holes else until
 
 
-def refusal(placed: dict) -> str | None:
-    """Why this timeline may not render, or None: the gap, and the shot it opens in."""
+def over_wall(placed: dict, wall: float) -> list[tuple[float, float, list[int]]]:
+    """Every (start, end, shot_indices) hole longer than `wall`, in time order.
+
+    `refusal()` generalized to ALL holes over a given wall: the plan battery
+    projects against MAX_GAP_S - HOLE_MARGIN_S, the cures trim to the same
+    number, and step 05 keeps refusing at MAX_GAP_S via `refusal`."""
     if not placed.get("lines"):
-        return None
-    holes = gaps(placed["lines"], placed.get("duration_s", 0.0))
+        return []
+    out = []
+    for start, end in gaps(placed["lines"], placed.get("duration_s", 0.0)):
+        if end - start <= wall:
+            continue
+        shots = [s["index"] for s in placed.get("shots", [])
+                 if s["t_start"] < end and s["t_end"] > start]
+        out.append((start, end, shots))
+    return out
+
+
+def refusal(placed: dict) -> str | None:
+    """Why this timeline may not render, or None: the gap, and the shot it opens
+    in -- the largest-hole special case of `over_wall` at MAX_GAP_S."""
+    holes = over_wall(placed, MAX_GAP_S)
     if not holes:
         return None
-    start, end = max(holes, key=lambda h: h[1] - h[0])
-    if end - start <= MAX_GAP_S:
-        return None
+    start, end, _ = max(holes, key=lambda h: h[1] - h[0])
     shot = next((s["index"] for s in placed.get("shots", []) if s["t_start"] <= start < s["t_end"]), "?")
     return (f"REFUSED: a {end - start:.2f} s hole in speech from {start:.2f} s (shot {shot}) against the "
             f"{MAX_GAP_S} s wall; shorten the holds (beat_s/coda_s) of the shots in it, or give one a line")

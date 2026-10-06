@@ -272,6 +272,10 @@ def main(book_id: str, number: int) -> int:
     print("QUOTE        :", [(l["index"], l["lifted"]) for l in lifted] or "clean"); hard += len(lifted)
     packed = [tuple(run) for run in tk.groups(measured_or_projected(book, number, ep, rate)) if len(run) > 1]
     print("ONE PER TAKE :", packed or "every shot its own take"); hard += len(packed)
+    hf = plan_gates.hole_faults(ep, rate)
+    print("G-HOLE       :", len(hf) or "clean"); hard += len(hf)
+    for f in hf:
+        print("   ", f[:170])
     for i, word in unpaced_shots(ep):
         print(f"  advisory: L8 shot {i}: {word!r} with no pace word (the built prompt may differ)")
     long = long_shots(ep, rate)

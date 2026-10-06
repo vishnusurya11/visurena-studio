@@ -1409,6 +1409,29 @@ def rate_advisory(episode: Episode, rate: float) -> list[str]:
     return []
 
 
+def projected_place(episode: Episode, rate: float) -> dict:
+    """The timeline step 05 would write, before any line renders: the REAL
+    placement function (`episode_timeline.place`) fed projected line seconds
+    at the narrator's measured rate -- zero drift from the measured timeline
+    (a hole contains no words, so only the on_frame ceiling separates them)."""
+    from studio import episode_timeline
+    return episode_timeline.place(episode, {l.index: l.words() / rate for l in episode.lines})
+
+
+def hole_faults(episode: Episode, rate: float) -> list[str]:
+    """G-HOLE: every projected hole in speech over MAX_GAP_S - HOLE_MARGIN_S.
+
+    Rate-parameterized like G-RATE, so not in `faults()`; the words 'hole in
+    speech' are load-bearing -- the cure table routes them to the holds cure.
+    ep18 shipped a plan projecting a 12.5 s hole only timeline.py could refuse."""
+    from studio import speech_gap
+    wall = speech_gap.MAX_GAP_S - speech_gap.HOLE_MARGIN_S
+    return [fault("G-HOLE", f"shots {ids[0]}-{ids[-1]}" if ids else "plan",
+                  f"projected hole in speech from {start:.2f} s",
+                  round(end - start, 2), round(wall, 2))
+            for start, end, ids in speech_gap.over_wall(projected_place(episode, rate), wall)]
+
+
 def advisories(episode: Episode, earlier_lines: list[str] | None = None, rate: float | None = None) -> list[str]:
     """The story measures the fixtures proved cannot be refusals: printed,
     never counted.  ep05/07/08's turns are a curtsey, a knife on a pill and a

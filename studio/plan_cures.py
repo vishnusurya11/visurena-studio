@@ -802,7 +802,7 @@ CURES: list[tuple[re.Pattern, str]] = [
     (re.compile(r"props.*\.json|names setup .* not defined|prop (?!.*no chapter span)"), "legal_props"),
     (re.compile(r"G-CROWD-CLOSE"), "close_crowds"),
     (re.compile(r"G-PHANTOM"), "strip_phantoms"),
-    (re.compile(r"projects to .* an episode is|ONE PER TAKE|TAKE LENGTH|G-SETUP|hole in speech|of the runtime"), "holds"),
+    (re.compile(r"projects to .* an episode is|ONE PER TAKE|TAKE LENGTH|G-SETUP|G-HOLE|hole in speech|of the runtime"), "holds"),
     (re.compile(r"median (?:frame-edge|at_rest)"), "edge_cases"),
     (re.compile(r"G-ASPECT|style line is \d+ words|look"), "pin_series"),
 ]
