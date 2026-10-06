@@ -257,7 +257,8 @@
     if (S.boot === null) S.boot = p.boot; else if (p.boot !== S.boot) S.restart = true;
     keys = changedKeys(S.fp, p.fp || {}); S.fp = p.fp || {};
     if (p.cursor !== undefined && p.cursor !== null) S.cursor = p.cursor;
-    patchShell(p.shell || {}); watch(prev, p.shell || {}); fireSections(keys);
+    fireSections(keys);                                  /* sections first: a shell-patch error must not eat them */
+    patchShell(p.shell || {}); watch(prev, p.shell || {});
     S.last = p;
     doc.dispatchEvent(new CustomEvent('pulse', { detail: p }));
     if (p.events && p.events.length) doc.dispatchEvent(new CustomEvent('pulse:events', { detail: p.events }));
@@ -269,7 +270,8 @@
     var stop = setTimeout(function () { if (ctl) ctl.abort(); }, cfg.timeout * 1000);
     fetch('/api/pulse.json' + (S.cursor !== null ? '?since=' + encodeURIComponent(S.cursor) : ''), { cache: 'no-store', signal: ctl && ctl.signal })
       .then(function (r) { if (!r.ok) throw new Error('pulse ' + r.status); return r.json(); })
-      .then(ok, function () { S.fails += 1; })
+      .then(ok)
+      .catch(function () { S.fails += 1; })                /* a throw INSIDE ok() too: the loop must never die */
       .then(function () { clearTimeout(stop); S.busy = false; later(delay(S.fails, doc.hidden, cfg)); paintChip(); });
   }
   function now() { if (!S.busy) { S.gen++; tick(); } }
@@ -299,8 +301,10 @@
     t.__pulseSnap = null; markChanged(t, snap);
   });
   doc.addEventListener('htmx:afterRequest', function (e) {
-    var elt = e.detail.elt, x = e.detail.xhr;
-    if (elt && elt.__pulseFp && x && x.status === 200) { elt.setAttribute('data-v', elt.__pulseFp); elt.__pulseFp = null; }
+    var elt = e.detail.elt, x = e.detail.xhr, fp = elt && elt.__pulseFp;
+    if (!fp) return;
+    elt.__pulseFp = null;                               /* 204 = "you already draw this fp": land it too */
+    if (x && (x.status === 200 || x.status === 204)) elt.setAttribute('data-v', fp);
   });
 
   /* --- wiring --- */
