@@ -696,7 +696,19 @@ def _rename_first(text: str, term: str, name: str, card_names: list[str],
     if not m:
         return text, False
     said = name + (f", {clause}" if clause else "")
+    if EARLIER_DETERMINER.search(masked[:m.start()]):
+        said = ARTICLE.sub("", said, count=1)     # ep19: "the opened the Martian cylinder"
     return (text or "")[:m.start()] + said + (text or "")[m.end():], True
+
+
+ARTICLE = re.compile(r"^(?:the|a|an)\s+", re.I)
+EARLIER_DETERMINER = re.compile(
+    r"\b(?:the|a|an|his|her|its|their|this|that|these|those|one|two|three|four|five|six|"
+    r"seven|eight|nine|ten|some|each|every|several)\s+"
+    r"(?:(?!(?:of|at|in|on|to|from|with|beside|by|and|or|toward|towards|past|behind|beyond|"
+    r"near|over|under|into|across|through|while|as)\b)[A-Za-z'-]+\s+){1,2}$", re.I)
+"""The bare noun's own determiner, one or two modifier words earlier ("the
+opened ", "three long "): the inserted name's article would double it."""
 
 
 def _mentioned(doc: dict, name: str) -> bool:
@@ -1147,13 +1159,15 @@ def strip_banned_prop(doc: dict, cast_rows: str = "") -> dict:
 
 
 def _continuation(motion: str) -> str:
-    """The legal L21 closing clause, built from the motion's own head;
-    'continues' satisfies ro.MOVER and the L11 comment names it legal."""
-    head = re.sub(r"^The camera\s*", "", (motion or "").partition(";")[0].strip(),
-                  flags=re.I).strip(" .")
-    if not head or "locked" in head.lower():
-        return "The camera's move continues to the last frame of the shot."
-    return f"The {head} continues to the last frame of the shot."
+    """The legal L21 closing clause, built from the motion's own head, its
+    subject kept (ep19 shot 5: "The cranes up one whole yard ...") and its
+    own duration dropped; 'continues' satisfies ro.MOVER and the L11 comment
+    names it legal.  A head that is not the camera's closes on CAMERA_CONTINUES."""
+    head = (motion or "").partition(";")[0].strip().strip(" .")
+    head = re.sub(r",?\s*across the whole shot$", "", head, flags=re.I)
+    if not re.match(r"the camera\s+\w", head, re.I) or "locked" in head.lower():
+        return CAMERA_CONTINUES
+    return f"{head} and continues to the last frame of the shot."
 
 
 CAMERA_CONTINUES = "The camera's move continues to the last frame of the shot."

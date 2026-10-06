@@ -18,7 +18,9 @@ terminal asks anyone.
 """
 from __future__ import annotations
 
+import importlib
 import json
+import sys
 from dataclasses import dataclass, field
 from datetime import date as _date
 from pathlib import Path
@@ -46,6 +48,61 @@ choice), and a rung that changes nothing is no rung."""
 DEFERRED = "plan.deferred.json"
 BATTERY = "battery"
 """The fault kind plan_check's refusals are carried as; the critic's kinds are its own."""
+MECH_ROUNDS = 2
+"""The free mechanical rounds every landed draft gets before the battery
+re-judges it (F11): each shells plan_check once (~15 s), a writer round is ~4 min."""
+
+
+def repairer():
+    """scripts/episode/plan_repair -- the table step 02's repair already runs --
+    imported BY NAME, so it is the one module object a test monkeypatches."""
+    here = str(Path(__file__).resolve().parents[1] / "scripts" / "episode")
+    if here not in sys.path:
+        sys.path.insert(0, here)
+    return importlib.import_module("plan_repair")
+
+
+def mechanical_round(pr, plan: Path, book: Path, number: int) -> bool:
+    """One free round: battery rows -> `apply_each(llm=False)` -> the write
+    through the contract and its ledger row (plan_repair.main's own order, so
+    the free re-sign chain holds).  True when the plan's bytes moved."""
+    from studio import plan_gates, plan_provenance
+    clean, rows = pr.battery_rows(book.name.split("_", 1)[0], number)
+    if clean or not rows:
+        return False
+    doc = episode_home.read_json(plan)
+    cured, _, names = pr.apply_each(doc, rows, book, number,
+                                    rate=plan_gates.series_rate(book, number), llm=False)
+    if not names or cured == doc:
+        return False
+    before = plan_verdict.plan_sha8(plan)
+    episode_home.write_plan(plan, cured)
+    plan_provenance.record(plan, before, sorted(names))
+    return True
+
+
+def battery_reads(plan: Path, book: Path, number: int) -> bool:
+    """plan_check reads `<codex>_<slug>/episodes/epNN/plan.json`: is this that
+    plan?  A fixture book with no codex id is never shelled for."""
+    named = re.fullmatch(r"\d{14}_.+", book.name) is not None
+    return named and plan.resolve() == episode_home.plan_path(book, number).resolve()
+
+
+def mechanical_cures(plan: Path, book: Path, number: int, say=print) -> None:
+    """F11: the draft just landed gets up to MECH_ROUNDS free rounds before the
+    battery re-judges it, so the paid writer only ever hears creative faults
+    (ep19: G-CROWD-CLOSE on the same four shots through every round).  Only
+    the plan the battery reads, of a book plan_check names by codex id; never
+    raises -- a failure keeps the draft."""
+    if not battery_reads(Path(plan), Path(book), number):
+        return
+    try:
+        pr = repairer()
+        for _ in range(MECH_ROUNDS):
+            if not mechanical_round(pr, Path(plan), Path(book), number):
+                break
+    except (Exception, SystemExit) as why:     # noqa: BLE001 -- the draft stands as written
+        say(f"desk cure pass skipped, the writer's draft kept: {str(why)[:160]}")
 
 
 def ladder(improves: int = 2) -> Ladder:
@@ -202,9 +259,15 @@ class Desk:
         # fresh_brief, model_tier, resume -- is scrubbed of ghost body-part
         # clauses for free BEFORE the battery ever re-judges it.  The scrub
         # stays inside the try-less path: a scrub bug surfaces as write_plan's
-        # loud SystemExit, never a silent skip.
+        # loud SystemExit, never a silent skip.  Then F11: the rest of the
+        # mechanical table, which (unlike the scrub) never raises.
         doc = plan_cures.ghost_limbs(episode.model_dump(), self._names())
         episode_home.write_plan(self.plan, doc)
+        mechanical_cures(self.plan, Path(self.ctx.book_dir), self.ctx.number, say=self._say)
+
+    def _say(self, msg: str) -> None:
+        """The run's log when the ctx has one, else stdout."""
+        (getattr(self.ctx, "log", None) or print)(msg)
 
     def remember(self, verdict: Verdict) -> None:
         """The draft on disk with its verdict, when the battery let it through;

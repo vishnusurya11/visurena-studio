@@ -16,6 +16,7 @@ from __future__ import annotations
 import io
 import json
 import os
+import re
 import subprocess
 import sys
 from pathlib import Path
@@ -172,13 +173,15 @@ def cure_row_rows(book, rows: list[str]) -> list[str]:
 
 
 def apply(doc: dict, rows: list[str], book, number: int = 0,
-          rate: float = 3.0) -> tuple[dict, list[str], list[str]]:
+          rate: float = 3.0, llm: bool = True) -> tuple[dict, list[str], list[str]]:
     """Every cured family once per round; the rows nothing cures come back,
     and so do the SORTED NAMES of the cures that ran -- what the provenance
     ledger records so a re-sign can prove the bytes moved mechanically.
     `rate` is the narrator's measured words/s -- THE CHECKER'S RATE, or the
     holds algebra cures numbers the battery never measures (ep16: 8.05 s at
-    2.54 read as 7.5 s at the default 3.0 and the clamp saw nothing)."""
+    2.54 read as 7.5 s at the default 3.0 and the clamp saw nothing).
+    `llm=False` is the writer desk's free pass (F11): every llm escape inside a
+    family is skipped and its rows come back uncured for the writer."""
     legal = {p[:-5] for p in os.listdir(book / "analysis" / "props")} \
         if (book / "analysis" / "props").exists() else set()
     uncured, names = [], set()
@@ -208,8 +211,10 @@ def apply(doc: dict, rows: list[str], book, number: int = 0,
         elif name == "rebalance_heads":
             own = [r for r in rows if pc.cure_for(r) == "rebalance_heads"]
             doc, unfixed = pc.rebalance_heads(doc, shot_indices(own))
-            if unfixed:
-                import re
+            if unfixed and not llm:
+                uncured += [r for r in own if (m := re.search(r"shot (\d+)", r))
+                            and int(m.group(1)) in set(unfixed)]
+            elif unfixed:
                 from studio import move_llm
                 doc, still = move_llm.cure_unfixed(doc, unfixed, doc.get("setups") or {})
                 uncured += [r for r in own
@@ -233,7 +238,7 @@ def apply(doc: dict, rows: list[str], book, number: int = 0,
             doc = pc.pin_series(doc, **series_pin_values(book))
         elif name == "stage_machines":
             doc, unresolved = pc.stage_machines(doc, vocab)
-            if unresolved:
+            if unresolved and llm:
                 doc = pick_rows(doc, unresolved, vocab, book)
         elif name == "strip_creatures":
             doc = pc.strip_creatures(doc, vocab)
@@ -247,14 +252,14 @@ def apply(doc: dict, rows: list[str], book, number: int = 0,
             names_table = ghost_names(book)
             if names_table:
                 doc = pc.ghost_limbs(doc, names_table,
-                                     rewrite=plan_llm_cures.rewriter(doc, names_table))
+                                     rewrite=plan_llm_cures.rewriter(doc, names_table) if llm else None)
             else:
                 uncured += [r for r in rows if pc.cure_for(r) == "ghost_limbs"]
         elif name == "one_position":
             from studio import plan_llm_cures
             names_table = ghost_names(book)
             own = [r for r in rows if pc.cure_for(r) == "one_position"]
-            if names_table:
+            if names_table and llm:
                 doc = plan_llm_cures.one_position(doc, own, names_table)
             else:
                 uncured += own
@@ -405,7 +410,7 @@ def llm_cure_round(book, number: int, rows: list[str]) -> bool:
 
 
 def apply_each(doc: dict, rows: list[str], book, number: int = 0, rate: float = 3.0,
-               valid=lambda d: Episode(**d)) -> tuple[dict, list[str], set]:
+               valid=lambda d: Episode(**d), llm: bool = True) -> tuple[dict, list[str], set]:
     """One cure family at a time, each kept only if the contract still holds:
     a cure that breaks it is dropped ALONE and its rows come back uncured
     (ep19: one cure's "slowly" voided the light, crowd and move cures with it)."""
@@ -414,7 +419,7 @@ def apply_each(doc: dict, rows: list[str], book, number: int = 0, rate: float = 
         groups.setdefault(pc.cure_for(row) or row, []).append(row)
     uncured, names = [], set()
     for group in groups.values():
-        trial, left, ran = apply(json.loads(json.dumps(doc)), group, book, number, rate=rate)
+        trial, left, ran = apply(json.loads(json.dumps(doc)), group, book, number, rate=rate, llm=llm)
         try:
             valid(trial)
         except Exception:

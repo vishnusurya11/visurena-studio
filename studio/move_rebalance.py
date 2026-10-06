@@ -95,20 +95,53 @@ def prop_tokens(setup: dict | None) -> set[str]:
             for t in re.split(r"[_\W]+", str(p).lower()) if len(t) >= PROP_TOKEN_MIN}
 
 
+PARENTHESES = re.compile(r"\([^)]*\)")
+"""A person's tag -- "the narrator (grey eyes, cream flannel shirt)" -- describes
+him; it is never a thing to aim at (ep19 shots 0, 1: "pushes in toward the eyes")."""
+
+NOT_AIMS = {"edge", "edges", "corner", "corners", "height", "frame", "foreground", "background",
+            "middle", "distance", "centre", "center", "it", "them", "him", "her", "beyond",
+            "above", "below", "far", "near", "lower", "upper"}
+"""Layout positions and pronouns `head_noun` returns from a placement clause: a
+place in the picture, never a thing ("tilts up from the terrace to the edge")."""
+
+TRACKS_SUBJECT = {"follow"}
+"""Moves whose catalog entry tracks a moving figure ("tracks behind / beside
+<figure>"): aimed only at a figure in the shot's faces (ep19 shot 10:
+"tracks behind the terrace")."""
+
+
 def cell_aims(shot: dict, setup: dict | None = None) -> list[str]:
-    """Aim nouns `at_rest` provably holds: one head noun per clause, the FOCUS
-    clause first, and no setup-prop token the shot's pre-rewrite frame+motion
-    does not already name (G-SOURCE: a cure never acquires a new unspanned claim)."""
-    clauses = [c for c in re.split(r"[;.,]", shot.get("at_rest") or "") if c.strip()]
+    """Aim nouns `at_rest` provably holds: one head noun per clause (a person's
+    parenthetical tag removed first), the FOCUS clause first, no layout word,
+    and no setup-prop token the shot's pre-rewrite frame+motion does not
+    already name (G-SOURCE: a cure never acquires a new unspanned claim)."""
+    at_rest = PARENTHESES.sub("", shot.get("at_rest") or "")
+    clauses = [c for c in re.split(r"[;.,]", at_rest) if c.strip()]
     clauses.sort(key=lambda c: "FOCUS" not in c)        # stable: FOCUS clause first
     prose = f"{shot.get('frame') or ''} {shot.get('motion') or ''}".lower()
-    banned = {t for t in prop_tokens(setup) if not re.search(rf"\b{re.escape(t)}\b", prose)}
+    banned = NOT_AIMS | {t for t in prop_tokens(setup) if not re.search(rf"\b{re.escape(t)}\b", prose)}
     out: list[str] = []
     for clause in clauses:
         noun = episode_spec.head_noun(clause)
-        if noun and noun not in out and noun not in banned:
+        if noun and noun not in out and noun not in banned and not possessed(noun, clause):
             out.append(noun)
     return [n for n in out if cell_gates.in_cell(n, probe(shot))]
+
+
+def possessed(noun: str, clause: str) -> bool:
+    """'his LEFT shoulder': a part of someone, never a thing to aim at (ep19
+    shot 1: "tilts up from the narrator to the shoulder")."""
+    return re.search(rf"\b(?:his|her|its|their)\s+(?:[A-Za-z'-]+\s+)?{re.escape(noun)}\b",
+                     clause, re.I) is not None
+
+
+def figure_aims(shot: dict) -> list[str]:
+    """The shot's faces by their head noun ('unnamed_first_person_narrator' ->
+    'narrator'), each one `at_rest` names: the only aims a follow may take."""
+    at_rest = (shot.get("at_rest") or "").lower()
+    nouns = [episode_spec.head_noun(str(f).replace("_", " ")) for f in shot.get("faces") or []]
+    return [n for n in dict.fromkeys(nouns) if n and re.search(rf"\b{re.escape(n)}\b", at_rest)]
 
 
 def render_head(move: str, aims: list[str], travel: str) -> str | None:
@@ -165,10 +198,10 @@ def candidates(shot: dict, counts: Counter, prev_id: str, next_id: str,
     """Every size-legal head the gates accept, least-used move first.  A
     dialogue shot only ever goes locked (the catalog: locked carries dialogue best)."""
     legal = ["locked"] if dialogue else LEGAL.get(shot.get("size") or "", ["locked"])
-    aims = cell_aims(shot, setup)
+    aims, figures = cell_aims(shot, setup), figure_aims(shot)
     sns = setup_ns(setup)
     travel = amount_for(plan_gates.cap_for(probe(shot), sns)[0], seconds)
-    heads = [render_head(m, aims, travel)
+    heads = [render_head(m, figures if m in TRACKS_SUBJECT else aims, travel)
              for m in sorted(legal, key=lambda m: (counts.get(m, 0), legal.index(m)))]
     return [h for h in heads if h is not None and head_ok(probe(shot), h, prev_id, next_id, sns)]
 
