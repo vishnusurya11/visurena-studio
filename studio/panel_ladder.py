@@ -65,6 +65,9 @@ CURES = {
     "landform": "The ground runs flat to the horizon.",
     "banned": "The picture holds only the things of this place and its time.",
     "unread": "One clear main subject fills the frame.",
+    # affirmative on purpose: the plan contract refuses an absence word ("no
+    # second copy") in frame prose, so the once-ness is said positively
+    "twin": "Each person in the picture appears exactly once, with a face, hair and dress all his own.",
 }
 """kind -> the affirmative phrase that leads the cell prose (the skill: put the
 defining detail FIRST; a detail buried mid-sentence is dropped)."""
@@ -225,6 +228,36 @@ class Climb:
             for r in kin:
                 self.draw(r)
 
+    def isolate(self, index: int) -> bool:
+        """G-TWIN rung 2: shot `index` split into its own tagged 1x1 grid --
+        the exact form `rows_for` already emits for faces -- the shared grid
+        resized without it, both rows drawn and remembered so the cap and
+        resumes hold.  False when the shot already stands alone: a twin that
+        survives its own 1x1 is the terminal's business."""
+        rows = grid_layout.read(self.home)
+        mine = next((r for r in rows if index in (r.get("shots") or [])), None)
+        if mine is None or len(mine["shots"]) <= 1:
+            return False
+        number = getattr(self.ctx, "number", 0)
+        supersede(self.home / "storyboard", grid_layout.name_of(number, mine))
+        rest = [i for i in mine["shots"] if i != index]
+        mine["cols"], mine["rows"] = grid_layout.shape(len(rest))
+        mine["shots"] = rest
+        alone = grid_layout.row(mine["setup"], 1, 1, [index], tag=f"s{index:02d}")
+        rows.insert(rows.index(mine) + 1, alone)
+        grid_layout.write(self.home, rows)
+        for row in (mine, alone):
+            remember_climbed(self.home, grid_layout.name_of(number, row))
+            self.draw(row)
+        return True
+
+    def isolated(self, rows: list[dict], verdict: Verdict) -> list[int]:
+        """The twin-faulted shots inside the climbing grids, each split to its
+        own 1x1 (G-TWIN rung 2); a shot already alone is left to the terminal."""
+        allowed = {int(i) for r in rows for i in r.get("shots") or []}
+        twins = [f for f in verdict.faults if f.kind == "twin"]
+        return [i for i in shots_of(twins) if i in allowed and self.isolate(i)]
+
     def cure_prose(self, rows: list[dict], faults: list[Fault]) -> None:
         plan = self.home / "plan.json"
         doc = episode_home.read_json(plan)
@@ -244,7 +277,10 @@ class Climb:
         rows = self.climbing(grid_layout.read(self.home), shots_of(faults))
         if rung.name == "reprose":
             self.cure_prose(rows, faults)
+        split = self.isolated(rows, verdict) if rung.name == "reprose" else []   # G-TWIN rung 2
         for row in rows:
+            if set(row.get("shots") or []) & set(split):
+                continue                 # isolate already superseded and drew its two rows
             remember_climbed(self.home, grid_layout.name_of(getattr(self.ctx, "number", 0), row))
             self.redraw(row)
         touched = sorted({int(i) for r in rows for i in r.get("shots") or []})

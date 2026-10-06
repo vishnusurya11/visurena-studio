@@ -379,6 +379,84 @@ def _loads(text: str):
     except json.JSONDecodeError as bad:
         raise Unreadable(str(bad)) from bad
 
+# ---- G-TWIN: the duplicate-identity ask (2026-10-05) ------------------------
+
+TWIN_SIZES = ("medium", "medium_close", "close", "extreme_close")
+"""The sizes where a face is big enough for the same-face-AND-same-dress
+question to mean anything.  Wides and fulls keep their legitimately repeated
+crowd silhouettes, and an insert holds no face to compare."""
+
+TWIN_ASK = (
+    "Look only at the HUMAN FIGURES in this picture. Output strict JSON with "
+    "these keys and nothing else.\n"
+    '"figures": how many separate human figures you can see, as a number.\n'
+    '"distinct": how many DIFFERENT individual people those figures are, as a '
+    'number no larger than "figures". Two figures are the SAME individual only '
+    "when they share the same face, the same hair AND the same clothing.\n"
+    '"twins": for each individual who appears more than once, one short phrase '
+    'naming them by their dress and the count, like "woman in a grey shawl x2"; '
+    "an empty list when every figure is a different person."
+)
+
+TWIN_REQUIRED = ("figures", "distinct")
+
+
+@dataclass(frozen=True)
+class Twins:
+    """One picture's duplicate-identity read: how many figures, how many people."""
+    figures: int
+    distinct: int
+    twins: list[str] = field(default_factory=list)
+
+
+def parse_twins(said: str) -> Twins:
+    """The twin reader's answer, however the workflow wrapped it.
+
+    IT RAISES, IT NEVER DEFAULTS: a missing count, a count that is not a
+    number, or more distinct people than figures is `Unreadable` -- the same
+    rule `parse` learned when a malformed answer passed every panel of ep07."""
+    got = _loads(said)
+    if isinstance(got, list) and got:
+        got = _loads(got[0]) if isinstance(got[0], str) else got[0]
+    if not isinstance(got, dict):
+        raise Unreadable(f"no object in {said[:80]!r}")
+    if absent := [k for k in TWIN_REQUIRED if k not in got]:
+        raise Unreadable(f"the twin read has no {', '.join(absent)}")
+    try:
+        figures, distinct = int(got["figures"]), int(got["distinct"])
+    except (TypeError, ValueError) as bad:
+        raise Unreadable(str(bad)) from bad
+    if distinct > figures:
+        raise Unreadable(f"{distinct} distinct of {figures} figures cannot be")
+    return Twins(figures=figures, distinct=distinct, twins=subject_list(got.get("twins")))
+
+
+def twin_readable(said: str) -> bool:
+    """Whether `parse_twins` can read this answer; the vlm cache keeps only these."""
+    try:
+        parse_twins(said)
+    except Unreadable:
+        return False
+    return True
+
+
+def twin_applies(planned: int, size: str, people: int) -> bool:
+    """Whether the twin ask runs at all: a named cast, a face-sized frame and
+    two or more figures seen.  Wides, fulls, inserts and planned-0 pure-crowd
+    shots are never asked -- G-TWIN's false-positive guard, and its GPU economy."""
+    return planned >= 1 and size in TWIN_SIZES and people >= 2
+
+
+def twin_fault(t: Twins) -> str | None:
+    """The 'twin: ...' fault line when two figures share one identity -- the
+    ep17 T12 case, two identical Mrs. Elphinstones that the one weak
+    'lookalikes' count answered 0 on.  Judged in code, never by the model."""
+    if t.figures < 2 or t.distinct >= t.figures:
+        return None
+    named = t.twins[0] if t.twins else "two figures share one face and dress"
+    return f"twin: {named} ({t.figures} figures, {t.distinct} distinct)"
+
+
 WORN = re.compile(
     r"\b(?:throat|collar|lapel|cuffs?|sleeves?|shoulders?|"
     r"hands?|wrists?|fingers?|face|cheeks?|jaw|mouth|eyes|hair|boots?|foot|feet)\b",

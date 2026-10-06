@@ -272,6 +272,14 @@ def verdict(faces: list[float], planned: int, sharp: float, ink: float,
         flags.append("people")
     if not crowd and planned >= 0 and people_count.clones(near, planned):
         flags.append("clone")
+    # G-TWIN (2026-10-05): a cast-sized EXTRA face at medium-and-closer is a
+    # twin, crowd notwithstanding.  ep18 shot 16 read 'faces 3/2' and passed
+    # because the declared crowd stood the 'people' flag down; a face big
+    # enough to be somebody (`near` >= CAST_FACE) in a size where the face IS
+    # the picture cannot be an onlooker.  Wides and fulls are excluded, and a
+    # planned-0 pure-crowd shot casts nobody to duplicate.
+    if planned > 0 and size in FACE_IS_THE_PICTURE and len(near) > planned + extras:
+        flags.append("twin")
     # AND GOING UNDER, which nobody ever asked it about. ep09's button was a
     # big close-up of the hussar shouting; it came back an empty garden and
     # this printed `faces 0/1` and passed.

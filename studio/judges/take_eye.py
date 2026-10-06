@@ -32,7 +32,7 @@ CURABLE_ADVISORY = frozenset({"leak"})
 MEASURED on ep13 (2026-09-27): `lag` took five shorter_take rounds (157 min) and
 cured none; `rotation`'s only cure, a locked camera, froze T21.  `leak` stays:
 its cure is a head trim, no render."""
-HARD_CONTENT = frozenset({"content", "clones", "identity", "unread"})
+HARD_CONTENT = frozenset({"content", "clones", "identity", "unread", "twin"})
 GEOMETRY = frozenset({"pass-through", "held", "cut-vote", "cut", "jump", "cut-landing", "foreign",
                       "frozen-at-start", "frozen-share", "frozen-whole", "coherence off-board", "last-vs-cell",
                       "last-vs-panel", "drift", "face-at-end", "zoom", "rotation", "letterbox"})
@@ -100,9 +100,20 @@ def dq_faults(index: int, dq: dict) -> list[Fault]:
     return out
 
 
+def content_kind(text: str) -> str:
+    """The class of one content fault line.  'twin' keeps its own kind (G-TWIN):
+    collapsed to 'content' it would read INPUT_BORNE and the take ladder would
+    silently skip its one-retake cure."""
+    if text.startswith("unread"):
+        return "unread"
+    if text.startswith("twin"):
+        return "twin"
+    return "content"
+
+
 def content_faults(index: int, content: dict, repeated: bool = False) -> list[Fault]:
     """The content gate's faults, each HARD; an unread take is a fault of its own kind."""
-    return [Fault(kind="unread" if text.startswith("unread") else "content", where=where(index), note=text,
+    return [Fault(kind=content_kind(text), where=where(index), note=text,
                   evidence={"hard": True, "repeated": repeated})
             for text in content.get("faults") or []]
 

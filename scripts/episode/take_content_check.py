@@ -45,6 +45,39 @@ def read_take(video: Path, seconds: float, work: Path) -> list[pc.Seen]:
             for i, at in enumerate(frames.frame_times(seconds, SAMPLES))]
 
 
+def read_twin_frame(path: Path, seed: int) -> pc.Twins:
+    """The G-TWIN ask on one already-extracted take frame (seed 23+i, cached)."""
+    said = comfy.cached_text(WORKFLOW, {"image_1": comfy.stage_image(path), "prompt": pc.TWIN_ASK,
+                                     "seed": seed, "max_new_tokens": 256}, readable=pc.twin_readable)
+    return pc.parse_twins(said if isinstance(said, str) else str(said))
+
+
+def twin_faults_for(shot, reads: list[pc.Seen], work: Path, stem: str) -> list[str]:
+    """G-TWIN over the SAMPLES frames `read_take` already extracted -- zero
+    extra frame extraction.  A frame whose main read saw two people gets the
+    dedicated same-face-AND-same-dress ask; fewer distinct than figures is a
+    fault, and an unreadable ask on these sizes is one too."""
+    planned, out = len(shot.faces or []), []
+    for i, seen in enumerate(reads):
+        if not pc.twin_applies(planned, shot.size, seen.people):
+            continue
+        try:
+            t = read_twin_frame(work / f"{stem}_{i}.png", seed=23 + i)
+        except pc.Unreadable as why:
+            out.append(f"unread: twin {str(why)[:100]}")
+            continue
+        if bad := pc.twin_fault(t):
+            out.append(bad)
+    return out
+
+
+def with_twins(row: dict, twins: list[str]) -> dict:
+    """A take's verdict row with its twin faults carried; any twin fails it."""
+    if not twins:
+        return row
+    return {**row, "faults": list(row.get("faults") or []) + twins, "passed": False}
+
+
 def verdict_for(book: Path, shot, setup, reads: list[pc.Seen]) -> dict:
     got = tc.take_faults(
         reads, planned=len(shot.faces or []), crowd=bool((setup.crowd or "").strip()),
@@ -71,7 +104,8 @@ def judge_take(book: Path, ep, record: dict, take_dir: Path, work: Path) -> dict
         reads = read_take(video, float(record.get("seconds") or 4.0), work)
     except (pc.Unreadable, ValueError) as why:
         return {"passed": False, "faults": [f"unread: {str(why)[:120]}"]}
-    return verdict_for(book, shot, ep.setups[shot.setup], reads)
+    row = verdict_for(book, shot, ep.setups[shot.setup], reads)
+    return with_twins(row, twin_faults_for(shot, reads, work, video.stem))
 
 
 def main(book_id: str, number: int, only: list[int]) -> int:

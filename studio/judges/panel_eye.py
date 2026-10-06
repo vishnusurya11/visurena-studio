@@ -57,10 +57,12 @@ SIZE_ASK = ('Answer with strict JSON and nothing else, two keys. "size": how muc
 CLOSE = panel_dq.FACE_IS_THE_PICTURE
 """The sizes at which an unread panel is a fault."""
 CALIBRATED = frozenset({"stacked", "tiled", "people", "clone", "clones", "missing", "blur", "text",
-                        "lettering", "copy", "repeat", "unread", "banned"})
-"""Fault kinds with a measured margin (decision §1.4); the rest are thin."""
-CONTENT = (("unread", "unread"), ("missing", "missing"), ("lettering", "lettering"), ("posture", "posture"),
-           ("hour", "hour"), ("landform", "landform"), ("banned", "banned"))
+                        "lettering", "copy", "repeat", "unread", "banned", "twin"})
+"""Fault kinds with a measured margin (decision §1.4); the rest are thin.
+'twin' (G-TWIN, 2026-10-05) has a measured contract -- figures vs distinct,
+judged in code -- so it refuses rather than flags-as-thin."""
+CONTENT = (("unread", "unread"), ("twin", "twin"), ("missing", "missing"), ("lettering", "lettering"),
+           ("posture", "posture"), ("hour", "hour"), ("landform", "landform"), ("banned", "banned"))
 Unreadable = panel_content.Unreadable
 _DEFAULT: dict = {}
 

@@ -59,6 +59,9 @@ CONTENT = take_eye.HARD_CONTENT
 MOTION = take_eye.GEOMETRY | FROZEN | {"churn"}
 """Faults of the MOVE: cured by another move type from the catalog."""
 NEVER_SEED = LAG | {"leak"}
+# 'twin' is DELIBERATELY absent here (G-TWIN, 2026-10-05): it falls through
+# cure_of to ONE seed retake, then repeated-evidence sends it to the terminal.
+# Pinned by test_a_twin_take_routes_to_one_seed_retake.
 INPUT_BORNE = frozenset({"content", "clones", "identity", "unread", "lettering", "text",
                          "look", "letterbox"})
 """Kinds that live in the panel, the prompt or the grade: no seed reroll ever

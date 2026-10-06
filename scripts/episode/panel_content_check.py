@@ -42,6 +42,33 @@ def read(path: Path, seed: int = 11) -> pc.Seen:
     return pc.parse(said if isinstance(said, str) else str(said))
 
 
+TWIN_TOKENS = 256
+"""The twin read is three short keys; a tight budget keeps the ask cheap."""
+
+
+def read_twins(path: Path, seed: int = 17) -> pc.Twins:
+    """The G-TWIN ask on one panel -- same face AND same dress -- judged in
+    code by `pc.twin_fault`; the fixed seed keeps the vlm cache warm."""
+    said = comfy.cached_text(WORKFLOW, {"image_1": comfy.stage_image(path), "prompt": pc.TWIN_ASK,
+                                     "seed": seed, "max_new_tokens": TWIN_TOKENS},
+                             readable=pc.twin_readable)
+    return pc.parse_twins(said if isinstance(said, str) else str(said))
+
+
+def twin_check(shot, seen: pc.Seen, path: Path) -> tuple[list[str], dict]:
+    """The twin ask when it applies: (fault lines, the row's twin fields).
+    An Unreadable ask on these sizes is a fault of its own -- the face is the
+    picture, and a silent skip is a gate that passes everything."""
+    if not pc.twin_applies(len(shot.faces or []), shot.size, seen.people):
+        return [], {}
+    try:
+        t = read_twins(path)
+    except pc.Unreadable as why:
+        return [f"unread: twin {str(why)[:100]}"], {}
+    bad = pc.twin_fault(t)
+    return ([bad] if bad else []), {"figures": t.figures, "distinct": t.distinct, "twins": t.twins}
+
+
 def physical_of(book: Path, who: list[str]) -> list[str]:
     """The bound rows of everyone the shot casts, ONE PER FACE (the hair check
     reads each row alone since 2026-09-30). A missing row raises: CAST BOUND
@@ -65,10 +92,11 @@ def row_for(book: Path, shot, setup, path: Path) -> dict:
         seen = read(path)
     except pc.Unreadable as why:
         return {"shot": shot.index, "passed": False, "faults": [f"unread: {str(why)[:120]}"]}
-    got = judge(book, shot, setup, seen)
+    twins, fields = twin_check(shot, seen, path)                 # G-TWIN (2026-10-05)
+    got = judge(book, shot, setup, seen) + twins
     return {"shot": shot.index, "passed": not got, "faults": got, "people": seen.people,
             "lookalikes": seen.lookalikes, "hour": seen.hour, "landform": seen.landform,
-            "text": seen.text, "subjects": seen.subjects}
+            "text": seen.text, "subjects": seen.subjects, **fields}
 
 
 def main(book_id: str, number: int, only: list[int] | None = None) -> int:
