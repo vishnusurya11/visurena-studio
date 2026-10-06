@@ -223,9 +223,12 @@ def ep09_in(book, home):
 
 
 def ep09_out(book, home):
+    import hashlib
     take = _take(home)
     room = take.parent
-    return [take, _json(room / "T01.dq.json", {}), _json(room / "T01.content.json", {}),
+    # step 09's judged() is sha-bound now: the dq verdict names the bytes it measured
+    sha8 = hashlib.sha256(take.read_bytes()).hexdigest()[:8]
+    return [take, _json(room / "T01.dq.json", {"take_sha8": sha8}), _json(room / "T01.content.json", {}),
             eye_verdict.sign(room, [take], "pass", "moves", signed_by="judge:take_eye@1")]
 
 

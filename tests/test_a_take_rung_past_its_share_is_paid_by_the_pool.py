@@ -23,10 +23,17 @@ def test_the_pool_pays_a_take_rung_the_step_cannot():
     assert take_ladder.can_afford(ctx, take_ladder.SHORTER_TAKE, 1)
 
 
-def test_a_dry_pool_is_said_not_swallowed():
-    import pytest
+def test_headroom_pays_a_dry_pool_and_true_exhaustion_is_a_no():
+    """The deferral is gone (ep16 fix, then the five-hour verdict): a dry
+    share and pool are paid by the episode's remaining headroom; when even
+    the headroom cannot pay, can_afford answers False -- the ladder's
+    terminal rung acts on it in the same run, never 'run again to resume'."""
     t = [0.0]
     ctx = Ctx(t)
     t[0] = 9_990.0                                  # 10 s under the ceiling
-    with pytest.raises(SystemExit, match="DEFERRED"):
-        take_ladder.can_afford(ctx, take_ladder.SHORTER_TAKE, 1)
+    assert take_ladder.can_afford(ctx, take_ladder.SHORTER_TAKE, 1) is False
+    t[0] = 5_000.0                                  # dry share and pool would overdraw, headroom pays
+    ctx2 = Ctx(t)
+    ctx2.budget.draw(3_000.0)                       # the pool spent
+    t[0] = 6_500.0
+    assert take_ladder.can_afford(ctx2, take_ladder.SHORTER_TAKE, 1) is True
