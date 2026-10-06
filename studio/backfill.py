@@ -87,12 +87,15 @@ def legacy_deliverable(book_dir: Path, home: str) -> str | None:
 
 
 def deliverable_of(book_dir: Path, stage: str, unit: str, home: str) -> str | None:
-    """The department's deliverable as the registry names it (the manifest),
-    else, for an episode from before the manifest, the legacy pair."""
+    """The department's deliverable as the registry names it, else, for an
+    episode from before the manifest, the legacy pair.  An episode's
+    deliverable needs its master's QC passed: since step 13 (2026-10-05) the
+    registry's last output is youtube.json, which a failed cut can also have."""
     found = verdict_rows.deliverable(book_dir, stage, unit)
-    if found or stage != "episode":
+    if stage != "episode":
         return found
-    return legacy_deliverable(book_dir, home)
+    legacy = legacy_deliverable(book_dir, home)
+    return found if found and legacy else legacy
 
 
 def last_step(stage: str, outputs: dict[str, tuple[bool, list[str]]]) -> str | None:

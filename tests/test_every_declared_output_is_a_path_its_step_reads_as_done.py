@@ -268,6 +268,27 @@ def ep12_out(book, home):
     return [_json(home / "manifest.json", {"qc": {"sha8": sha8}})]
 
 
+def ep13_in(book, home):
+    ep12_in(book, home)
+    ep12_out(book, home)
+    _json(book / "publish" / "standing.json", {"kind": "publish", "by": "owner",
+                                               "decision": "2026-10-01-no-human-input-at-publish"})
+
+
+def ep13_out(book, home):
+    """Step 13's done() reads the ledger: the upload, the returned public, the poll."""
+    sha8 = yp.sha8(episode_home.master_path(book, 4, "r2v"))
+    key = yp.upload_key(book.name, 4, sha8)
+    for row in ({"key": key, "video_id": "v1"},
+                {"event": "privacy", "video_id": "v1", "privacy": "public"},
+                {"event": "shorts_poll", "video_id": "v1", "status": 200}):
+        ledger = yp.record(book, row)
+    signoff = home / "review" / "director_signoff.md"
+    signoff.parent.mkdir(parents=True, exist_ok=True)
+    signoff.write_text("measured", encoding="utf-8")
+    return [_json(home / "youtube.json", {"title": "t"}), signoff, ledger]
+
+
 # ---- refs ------------------------------------------------------------------------
 
 def refs01_in(book, home):
@@ -314,6 +335,7 @@ MAKERS = {
     "episode/04": (ep04_in, ep04_out), "episode/05": (ep05_in, ep05_out), "episode/06": (ep06_in, ep06_out),
     "episode/07": (ep07_in, ep07_out), "episode/08": (ep08_in, ep08_out), "episode/09": (ep09_in, ep09_out),
     "episode/10": (ep10_in, ep10_out), "episode/11": (ep11_in, ep11_out), "episode/12": (ep12_in, ep12_out),
+    "episode/13": (ep13_in, ep13_out),
     "refs/01": (refs01_in, refs01_out), "refs/02": (refs02_in, refs02_out),
     "refs/03": (refs03_in, refs03_out), "refs/04": (refs04_in, refs04_out),
 }

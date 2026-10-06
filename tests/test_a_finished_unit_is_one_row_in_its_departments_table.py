@@ -30,7 +30,7 @@ def test_a_finished_unit_is_one_done_row(conn):
     rows = list(conn.execute("SELECT * FROM episode_orders"))
     assert len(rows) == 1
     row = rows[0]
-    assert (row["unit"], row["state"], row["step_id"]) == ("ep03", "done", "12")
+    assert (row["unit"], row["state"], row["step_id"]) == ("ep03", "done", "13")
     assert row["step_id"] == registry.steps("episode")[-1]["id"]
     assert row["finished_at"] and row["started_at"] and row["run_id"] == "r1"
     assert row["attempts"] == 1
@@ -59,5 +59,5 @@ def test_only_the_stages_last_step_finishes_the_unit():
     assert db._order_state("episode", last, "completed") == "done"
     assert db._order_state("episode", "01", "completed") == "running"
     assert db._order_state("refs", registry.steps("refs")[-1]["id"], "completed") == "done"
-    assert db._final_step_id("episode") == "12"
+    assert db._final_step_id("episode") == "13"
     assert db._final_step_id("no-such-stage") is None

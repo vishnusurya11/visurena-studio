@@ -49,8 +49,9 @@ def published(book, unit="ep11", passed=True, qc=True):
 def test_a_published_episode_with_no_verdict_file_is_done_and_grandfathered(book):
     published(book)
     row = backfill.derive_unit(book, CODEX, "episode", "ep11", {})
-    assert (row["state"], row["step_id"], row["number"]) == ("done", "11", 11)
-    assert row["deliverable"] == "episodes/ep11/cut/master_r2v.mp4"
+    # step 13 (2026-10-05) owns youtube.json: a published legacy unit is done AT publish
+    assert (row["state"], row["step_id"], row["number"]) == ("done", "13", 11)
+    assert row["deliverable"] == "episodes/ep11/youtube.json"
     assert row["source"] == "backfill" and json.loads(row["verdicts"]) == {}
     assert "grandfathered: no verdict file" in row["note"] and "ts:mtime" in row["note"]
     assert row["started_at"] and row["finished_at"] and row["attempts"] == 0
@@ -59,7 +60,8 @@ def test_a_published_episode_with_no_verdict_file_is_done_and_grandfathered(book
 def test_a_qc_that_did_not_pass_leaves_the_unit_blocked_at_its_last_step(book):
     published(book, passed=False)
     row = backfill.derive_unit(book, CODEX, "episode", "ep11", {})
-    assert row["state"] == "blocked" and row["step_id"] == "11" and row["deliverable"] is None
+    # an uploaded file never makes a failed QC done: the deliverable needs the passed pair
+    assert row["state"] == "blocked" and row["deliverable"] is None
     assert row["finished_at"] is None and "grandfathered" not in (row["note"] or "")
 
 
@@ -67,7 +69,7 @@ def test_the_manifest_is_the_deliverable_before_the_legacy_pair(book):
     home = published(book, "ep12")
     episode_home.write_json(home / "manifest.json", {})
     row = backfill.derive_unit(book, CODEX, "episode", "ep12", {})
-    assert row["deliverable"] == "episodes/ep12/manifest.json" and row["step_id"] == "12"
+    assert row["deliverable"] == "episodes/ep12/youtube.json" and row["step_id"] == "13"
     assert backfill.legacy_deliverable(book, "episodes/ep12") == "episodes/ep12/cut/master_r2v.mp4"
 
 

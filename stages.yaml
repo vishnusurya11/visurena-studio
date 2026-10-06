@@ -943,6 +943,7 @@ stages:
         out:
           - episodes/{unit}/youtube.json
           - episodes/{unit}/review/director_signoff.md
+          - uploads.jsonl                         # done() reads the ledger: upload, returned public, poll
         desc: >-
           The last mile, unattended (decision 2026-10-05, under the standing
           hand of 2026-10-01): youtube.json from one guarded structured call,
