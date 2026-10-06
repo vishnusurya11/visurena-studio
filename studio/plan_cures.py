@@ -1156,24 +1156,55 @@ def _continuation(motion: str) -> str:
     return f"The {head} continues to the last frame of the shot."
 
 
-def arrival_ends(doc: dict, indices: list[int]) -> dict:
-    """L21's cure: the layout-final sentence of `end` (else `at_rest`) is
-    deleted when an earlier sentence already moves, else replaced with the
-    motion head's own continuation clause."""
+CAMERA_CONTINUES = "The camera's move continues to the last frame of the shot."
+"""The closing sentence that always passes: no layout word, and a mover."""
+
+
+def arrival_lays_out(end: str) -> bool:
+    """L21 as the take builder measures it: the arrival `ro.arrival_end` makes
+    of this `end` (a lent noun, or a trailing clause) carries a layout word."""
     from studio import episode_ref_official as ro
+    held, tail = ro.arrival_end(end or "")
+    return bool(ro.LAYOUT.search(held + tail))
+
+
+def _moves(sentences: list[str]) -> bool:
+    from studio import episode_ref_official as ro
+    return any(ro.MOVER.search(x) or ro.ACTION.search(x) for x in sentences)
+
+
+def cured_end(end: str, motion: str) -> str:
+    """The first of: the end less its last layout sentence, less every layout
+    sentence, plus the motion's continuation, plus `CAMERA_CONTINUES` -- whose
+    built arrival lends no layout word (ep19 shot 5: the continuation copied
+    the head's 'rubble edge', so the cure rewrote its own fault forever)."""
+    from studio import episode_ref_official as ro
+    said = ro.sentences(end or "")
+    kept = [x for x in said if not ro.LAYOUT.search(x)]
+    options = [said[:-1] if said and ro.LAYOUT.search(said[-1]) and _moves(said[:-1]) else [],
+               kept if _moves(kept) else [],
+               kept + [_continuation(motion)], kept + [CAMERA_CONTINUES]]
+    return next(" ".join(o) for o in options if o and not arrival_lays_out(" ".join(o)))
+
+
+def _cure_arrival(holder: dict, motion: str) -> None:
+    """One shot or cut: its `end` (else `at_rest`) re-closed when its last
+    sentence is a layout or its built arrival lends one."""
+    from studio import episode_ref_official as ro
+    field = "end" if holder.get("end") else "at_rest"
+    said = ro.sentences(holder.get(field) or "")
+    if said and (ro.LAYOUT.search(said[-1]) or (field == "end" and arrival_lays_out(holder[field]))):
+        holder[field] = cured_end(holder[field], motion)
+
+
+def arrival_ends(doc: dict, indices: list[int]) -> dict:
+    """L21's cure, on every flagged shot and its cuts (each closes its own block)."""
     by = {s["index"]: s for s in doc.get("shots") or []}
-    for i in indices:
-        s = by.get(i)
-        if not s:
-            continue
-        field = "end" if s.get("end") else "at_rest"
-        said = ro.sentences(s.get(field) or "")
-        if not said or not ro.LAYOUT.search(said[-1]):
-            continue
-        if any(ro.MOVER.search(x) or ro.ACTION.search(x) for x in said[:-1]):
-            s[field] = " ".join(said[:-1])
-        else:
-            s[field] = " ".join(said[:-1] + [_continuation(s.get("motion") or "")])
+    for s in (by[i] for i in indices if i in by):
+        _cure_arrival(s, s.get("motion") or "")
+        for cut in s.get("cuts") or []:
+            if cut.get("end"):
+                _cure_arrival(cut, cut.get("motion") or s.get("motion") or "")
     return doc
 
 
