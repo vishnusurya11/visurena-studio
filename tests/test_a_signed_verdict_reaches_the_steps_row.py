@@ -102,10 +102,10 @@ def test_a_step_that_signs_nothing_keeps_the_verdicts_the_order_has(conn, book):
 
 
 def test_the_last_step_sets_the_deliverable_once_it_exists(conn, book):
-    _complete(conn, "episode", "12", "ep04")
+    _complete(conn, "episode", registry.steps("episode")[-1]["id"], "ep04")
     assert db.work_order(conn, CODEX, "episode", "ep04")["deliverable"] is None
     episode_home.write_json(book / "episodes" / "ep04" / "manifest.json", {})
-    _complete(conn, "episode", "12", "ep04")
+    _complete(conn, "episode", registry.steps("episode")[-1]["id"], "ep04")
     assert db.work_order(conn, CODEX, "episode", "ep04")["deliverable"] == "episodes/ep04/manifest.json"
 
 

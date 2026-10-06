@@ -6,6 +6,8 @@ from __future__ import annotations
 import importlib.util
 from pathlib import Path
 
+from studio import registry
+
 ROOT = Path(__file__).resolve().parents[1]
 SKILL = ROOT / ".claude" / "skills" / "episode" / "SKILL.md"
 
@@ -21,7 +23,7 @@ def test_the_skill_carries_the_registry_table_verbatim():
 
 def test_every_registered_episode_step_is_a_row():
     rows = commands.table("episode").splitlines()[2:]
-    assert [r.split("|")[1].strip() for r in rows] == [f"{n:02d}" for n in range(1, 13)]
+    assert [r.split("|")[1].strip() for r in rows] == [s["id"] for s in registry.steps("episode")]
 
 
 def test_the_table_names_the_module_a_step_runs_alone_with():

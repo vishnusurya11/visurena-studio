@@ -7,12 +7,13 @@ from __future__ import annotations
 import json
 from pathlib import Path
 
-from studio import db, episode_home, plan_verdict
+from studio import db, episode_home, plan_verdict, registry
 from studio.command_center import app as cc_app
 
 CODEX = "20260901000001"
 OTHER = "20260901000002"
 RUN = f"{CODEX}__episode__20260926010203"
+FINAL = registry.steps("episode")[-1]["id"]  # the step that finishes an episode
 
 
 def make_library(tmp_path: Path, monkeypatch) -> Path:
@@ -71,7 +72,7 @@ def seed(conn, library: Path) -> None:
     db.add_event(conn, CODEX, "episode", "09", "started", run_id="r5", unit="ep05")
     db.add_event(conn, CODEX, "episode", "09", "failed", run_id="r5", unit="ep05", detail="KeyError")
     db.add_event(conn, CODEX, "episode", "02", "deferred", run_id="r7", unit="ep07")
-    db.add_event(conn, CODEX, "episode", "12", "completed", run_id="r3", unit="ep03")
+    db.add_event(conn, CODEX, "episode", FINAL, "completed", run_id="r3", unit="ep03")
     db.upsert_work_order(conn, CODEX, "episode", "ep03", flags=2, sequence=3,
                          deliverable="episodes/ep03/manifest.json")
     db.upsert_work_order(conn, CODEX, "episode", "ep06", state="queued", sequence=6)

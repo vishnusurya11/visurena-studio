@@ -12,7 +12,7 @@ from datetime import datetime, timedelta, timezone
 
 import pytest
 
-from studio import db, queue, step_runner, tick, tracking, work_orders
+from studio import db, queue, registry, step_runner, tick, tracking, work_orders
 
 CODEX = "20260901000001"
 OTHER = "20260901000002"
@@ -164,7 +164,8 @@ def test_the_tracker_renews_the_lease_with_every_event_it_writes(conn, tmp_path,
 def test_release_clears_the_claim_of_a_settled_row(conn, cpu_stage):
     _order(conn, "ep04", "queued")
     queue.claim(conn, CODEX, "episode", "ep04", "run-1")
-    db.add_event(conn, CODEX, "episode", "12", "completed", run_id="run-1", unit="ep04")
+    db.add_event(conn, CODEX, "episode", registry.steps("episode")[-1]["id"], "completed",
+                 run_id="run-1", unit="ep04")
     queue.release(conn, CODEX, "episode", "ep04", "run-1")
     row = _row(conn, "ep04")
     assert (row["state"], row["claimed_by"], row["lease_until"], row["run_id"]) == ("done", None, None, "run-1")

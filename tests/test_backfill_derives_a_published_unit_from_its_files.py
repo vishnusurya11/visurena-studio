@@ -11,9 +11,10 @@ import os
 
 import pytest
 
-from studio import audit_rows, backfill, db, episode_home, plan_verdict, refs_verdict
+from studio import audit_rows, backfill, db, episode_home, plan_verdict, refs_verdict, registry
 
 CODEX = "20260901000001"
+FINAL = registry.steps("episode")[-1]["id"]  # the step that finishes an episode
 
 
 @pytest.fixture()
@@ -49,9 +50,10 @@ def published(book, unit="ep11", passed=True, qc=True):
 def test_a_published_episode_with_no_verdict_file_is_done_and_grandfathered(book):
     published(book)
     row = backfill.derive_unit(book, CODEX, "episode", "ep11", {})
-    # step 13 (2026-10-05) owns youtube.json: a published legacy unit is done AT publish
-    assert (row["state"], row["step_id"], row["number"]) == ("done", "13", 11)
-    assert row["deliverable"] == "episodes/ep11/youtube.json"
+    # the publish step owns youtube.json, so a published legacy unit stands at the final
+    # step; what it delivered is still its master (no manifest yet), never youtube.json
+    assert (row["state"], row["step_id"], row["number"]) == ("done", FINAL, 11)
+    assert row["deliverable"] == "episodes/ep11/cut/master_r2v.mp4"
     assert row["source"] == "backfill" and json.loads(row["verdicts"]) == {}
     assert "grandfathered: no verdict file" in row["note"] and "ts:mtime" in row["note"]
     assert row["started_at"] and row["finished_at"] and row["attempts"] == 0
@@ -69,7 +71,7 @@ def test_the_manifest_is_the_deliverable_before_the_legacy_pair(book):
     home = published(book, "ep12")
     episode_home.write_json(home / "manifest.json", {})
     row = backfill.derive_unit(book, CODEX, "episode", "ep12", {})
-    assert row["deliverable"] == "episodes/ep12/youtube.json" and row["step_id"] == "13"
+    assert row["deliverable"] == "episodes/ep12/manifest.json" and row["step_id"] == FINAL
     assert backfill.legacy_deliverable(book, "episodes/ep12") == "episodes/ep12/cut/master_r2v.mp4"
 
 

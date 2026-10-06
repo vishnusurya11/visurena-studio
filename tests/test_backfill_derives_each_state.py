@@ -10,7 +10,7 @@ import sqlite3
 
 import pytest
 
-from studio import backfill, db, episode_home, plan_verdict
+from studio import backfill, db, episode_home, plan_verdict, registry
 
 CODEX = "20260901000001"
 
@@ -44,7 +44,7 @@ def test_a_deferred_plan_is_deferred_at_the_plan_step(book):
     episode_home.write_json(home / "plan.deferred.json", {"verdict": "DEFERRED", "passes": 5})
     row = backfill.derive_unit(book, CODEX, "episode", "ep13", {})
     assert row["state"] == "deferred" and row["step_id"] == "02" and row["deliverable"] is None
-    assert row["progress"] == "0/12" and row["finished_at"] is None
+    assert row["progress"] == f"0/{len(registry.steps('episode'))}" and row["finished_at"] is None
 
 
 def test_a_signed_plan_beside_an_old_deferral_is_not_deferred(book):
@@ -62,7 +62,7 @@ def test_a_unit_that_stopped_mid_way_is_blocked_at_its_last_step_with_an_output(
     (home / "audio" / "lines").mkdir(parents=True)
     (home / "audio" / "lines" / "l01.wav").write_bytes(b"wav")
     row = backfill.derive_unit(book, CODEX, "episode", "ep05", {})
-    assert (row["state"], row["step_id"], row["progress"]) == ("blocked", "05", "1/12")
+    assert (row["state"], row["step_id"], row["progress"]) == ("blocked", "05", f"1/{len(registry.steps('episode'))}")
     assert row["note"] == "ts:mtime"
 
 

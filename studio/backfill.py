@@ -89,8 +89,8 @@ def legacy_deliverable(book_dir: Path, home: str) -> str | None:
 def deliverable_of(book_dir: Path, stage: str, unit: str, home: str) -> str | None:
     """The department's deliverable as the registry names it, else, for an
     episode from before the manifest, the legacy pair.  An episode's
-    deliverable needs its master's QC passed: since step 13 (2026-10-05) the
-    registry's last output is youtube.json, which a failed cut can also have."""
+    deliverable (the stage's `deliverable:`, its manifest) still needs its
+    master's QC passed: the manifest file alone does not say the cut passed."""
     found = verdict_rows.deliverable(book_dir, stage, unit)
     if stage != "episode":
         return found

@@ -2,7 +2,9 @@
 (`in:` / `out:` per step in stages.yaml, decision 2026-09-25, the Command
 Center): one declaration, book-relative globs, `{unit}` templated.  A stage
 written before the keys existed declares nothing and answers with an empty
-list; the department's deliverable is its last step's first output."""
+list; the department's deliverable is the stage's `deliverable:` when it
+names one (an episode is delivered by its manifest, not by the publish step
+after it), else its last step's first output."""
 from __future__ import annotations
 
 import pytest
@@ -53,6 +55,24 @@ def test_the_deliverable_is_the_last_steps_first_output():
     assert registry.deliverable_of("episode") == "episodes/{unit}/manifest.json"
     assert registry.deliverable_of("episode", unit="ep04") == "episodes/ep04/manifest.json"
     assert registry.deliverable_of("refs") == "refs/verdict.json"
+
+
+def _stages(tmp_path, stage_keys: str):
+    path = tmp_path / "stages.yaml"
+    path.write_text("stages:\n  s:\n" + stage_keys + "    steps:\n"
+                    "      - {id: '01', out: ['a/{unit}.json']}\n"
+                    "      - {id: '02', out: ['b/{unit}.json']}\n", encoding="utf-8")
+    return path
+
+
+def test_a_stage_that_names_its_deliverable_is_delivered_by_it(tmp_path):
+    path = _stages(tmp_path, "    deliverable: a/{unit}.json\n")
+    assert registry.deliverable_of("s", unit="u1", path=path) == "a/u1.json"
+
+
+def test_a_stage_that_names_none_is_delivered_by_its_last_steps_first_output(tmp_path):
+    path = _stages(tmp_path, "")
+    assert registry.deliverable_of("s", unit="u1", path=path) == "b/u1.json"
 
 
 def test_every_existing_step_key_survives_beside_the_new_ones():

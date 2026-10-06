@@ -1,20 +1,25 @@
 """The registry, read: stages.yaml is the org chart the code runs.
 
 Every runner asks here for its stage's steps, its unit of work and what it
-requires, instead of hard-coding a sibling stage and a step id.  Two keys are
+requires, instead of hard-coding a sibling stage and a step id.  Three keys are
 optional on a stage and default for the stages written before they existed:
 
     unit:      the grain of the stage's production id, e.g. [book, chapter];
                default [book].  The events `unit` column carries the value.
     requires:  "<stage>/<step_id>" entries that must be `completed` before a
                unit of this stage is ready; default none.
+    deliverable: the book-relative file that says a unit is delivered, `{unit}`
+               templated; default the last step's first output.  An episode
+               names its manifest: the publish step after it writes youtube.json,
+               which a cut that failed QC can also have (2026-10-05).
 
 Two keys are optional on a step (decision 2026-09-25, the Command Center):
 
     in:   book-relative globs the step reads, `{unit}` templated
           (episodes/{unit}/plan.json); a book-level file is plain (refs/refs.json).
     out:  the same for what the step writes.  A department's deliverable is
-          its last step's first output.  A step declaring neither answers [].
+          the stage's `deliverable:`, else its last step's first output.  A
+          step declaring neither answers [].
 """
 from __future__ import annotations
 
@@ -87,8 +92,12 @@ def outputs_of(name: str, step_id: str, unit: str | None = None, path: Path = PA
 
 
 def deliverable_of(name: str, unit: str | None = None, path: Path = PATH) -> str | None:
-    """The department's deliverable: its last step's first output, or None
-    when the stage declares no outputs."""
+    """The department's deliverable: the stage's own `deliverable:` when it
+    names one, else its last step's first output, or None when it declares
+    neither."""
+    named = stage(name, path).get("deliverable")
+    if named:
+        return _templated([named], unit)[0]
     entries = steps(name, path)
     if not entries:
         return None

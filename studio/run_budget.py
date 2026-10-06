@@ -27,10 +27,12 @@ taste-gates, cost); `RENDER_HOLD` stays the brake."""
 
 EPISODE_SHARES: dict[str, float] = {
     "01": 3 / 300, "02": 8 / 300, "03": 6 / 300, "04": 6 / 300, "05": 2 / 300,
-    "06": 3 / 300, "07": 4 / 300, "08": 60 / 300, "09": 125 / 300, "10": 8 / 300,
-    "11": 8 / 300, "12": 2 / 300,
+    "06": 3 / 300, "07": 4 / 300, "08": 60 / 300, "09": 120 / 300, "10": 8 / 300,
+    "11": 8 / 300, "12": 2 / 300, "13": 5 / 300,
     "judges": 15 / 300, "ladders": 50 / 300, "slack": 0 / 300,
 }
+# 2026-10-06: 13 (publish: upload + the /shorts/ poll, capped 600 s) takes 5 min from
+# 09, whose measured need (ep13: 7176 s) fits 120.
 # RE-PRICED 2026-09-27 from ep13's clock: step 08 spent ~15 min on the content read
 # and ~13 min on the judge's reads per pass -- 28 min of a 20-min share, so every run
 # deferred before one redraw rung.  08 now holds its reads plus one full rung; the

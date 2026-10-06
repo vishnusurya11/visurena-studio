@@ -9,7 +9,7 @@ from datetime import datetime, timedelta, timezone
 import pytest
 
 from command_center_fixtures import CODEX, make_library, seed
-from studio import db
+from studio import db, registry
 from studio.command_center import views
 
 
@@ -46,7 +46,7 @@ def test_the_bar_takes_each_steps_own_state_first():
     row = {"stage": "episode", "state": "running", "step_id": "09"}
     bar = views.step_bar(row, {"01": "done", "02": "skipped", "09": "running"})
     by_id = {s["id"]: s["css"] for s in bar}
-    assert len(bar) == 12 and bar[0]["name"] == "bind"
+    assert len(bar) == len(registry.steps("episode")) and bar[0]["name"] == "bind"
     assert by_id["01"] == "green" and by_id["02"] == "green"      # skipped = its output was on disk
     assert by_id["09"] == "blue" and by_id["10"] == "none"
 
@@ -76,4 +76,4 @@ def test_the_department_carries_groups_bars_and_times(conn):
     dept = views.department(conn, "episode")
     assert dept["groups"] and sum(len(g["rows"]) for g in dept["groups"]) == len(dept["rows"])
     ep04 = next(r for r in dept["rows"] if r["unit"] == "ep04")
-    assert len(ep04["bar"]) == 12 and ep04["gpu_h"] and "ago" in ep04 and ep04["gate_labels"]
+    assert len(ep04["bar"]) == len(registry.steps("episode")) and ep04["gpu_h"] and "ago" in ep04 and ep04["gate_labels"]

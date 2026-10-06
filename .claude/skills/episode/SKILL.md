@@ -163,6 +163,7 @@ The references sheets and voices live in their own department: `uv run python re
 | 10 | edit | `uv run python scripts/episode/step_10_edit.py <book> <n>` | Title card, measured bed, cut, mix. |
 | 11 | qc | `uv run python scripts/episode/step_11_qc.py <book> <n>` | Measure the DELIVERED master, never the intention. |
 | 12 | deliver | `uv run python scripts/episode/step_12_deliver.py <book> <n>` | manifest.json beside the master (every gate verdict, every rung, timing totals), the deliverable's full path printed first, notify() through the platform. |
+| 13 | publish | `uv run python scripts/episode/step_13_publish.py <book> <n>` | The last mile, unattended (decision 2026-10-05, under the standing hand of 2026-10-01): youtube.json from one guarded structured call, the director's sign-off rendered from measures only, the gated upload, the public flip, the /shorts/ poll -- the public Short URL is the last line printed. |
 <!-- /registry:episode -->
 
 No step parks on a person (decision `2026-09-24-automate-the-taste-gates`).

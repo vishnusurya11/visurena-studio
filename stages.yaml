@@ -524,6 +524,7 @@ stages:
 
   episode:
     unit: [book, chapter]                         # "ch04" or a range "ch04-05"
+    deliverable: episodes/{unit}/manifest.json    # step 12's; step 13 publishes it
     requires: [analysis/06, refs/04]              # reads screenplay/<target> when present
     steps:
       - id: "01"
@@ -949,4 +950,5 @@ stages:
           hand of 2026-10-01): youtube.json from one guarded structured call,
           the director's sign-off rendered from measures only, the gated
           upload, the public flip, the /shorts/ poll -- the public Short URL is
-          the last line printed. Parks on G-STANDING without the owner's file.
+          the last line printed. With no publish/standing.json for the book the step stops
+          at G-STANDING and nothing uploads.
