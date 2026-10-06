@@ -781,7 +781,8 @@ def stage_machines(doc: dict, vocab: dict) -> tuple[dict, list[tuple[int, str, l
     for s in doc.get("shots") or []:
         setup = (doc.get("setups") or {}).get(s.get("setup")) or {}
         for pid, card in vocab["machines"].items():
-            prose = " ".join(s.get(f) or "" for f in SHOT_FIELDS)
+            prose = pack_refs.mask_other_cards(
+                " ".join(s.get(f) or "" for f in SHOT_FIELDS), vocab["machines"], pid)
             if not pack_refs.names_prop(prose, card["terms"]):
                 continue
             if pack_refs.first_term(pack_refs.mask_card_names(prose, names), card["terms"]):
@@ -790,7 +791,8 @@ def stage_machines(doc: dict, vocab: dict) -> tuple[dict, list[tuple[int, str, l
             _stage_pid(setup, pid)
     for setup in (doc.get("setups") or {}).values():
         for pid, card in vocab["machines"].items():
-            text = " ".join(setup.get(f) or "" for f in SETUP_FIELDS)
+            text = pack_refs.mask_other_cards(
+                " ".join(setup.get(f) or "" for f in SETUP_FIELDS), vocab["machines"], pid)
             if pack_refs.names_prop(text, card["terms"]):
                 _cure_fields(setup, SETUP_FIELDS, card, names, "")
                 _stage_pid(setup, pid)

@@ -490,6 +490,17 @@ def _machine_fault(where: str, text: str, pid: str, card: dict, staged: bool) ->
     return None
 
 
+def _machine_faults(where: str, text: str, vocab: dict, staged: set) -> list[str]:
+    """Every machine card against one prose body, each with the OTHER cards'
+    names masked -- the cure's own mask (ep19: 'the Martian cylinder' fired
+    the fighting-machine's 'martian' and the cure, masking, found nothing)."""
+    from studio import pack_refs
+    machines = vocab["machines"]
+    return [f for pid, card in machines.items()
+            if (f := _machine_fault(where, pack_refs.mask_other_cards(text, machines, pid),
+                                    pid, card, pid in staged))]
+
+
 def _creature_faults(where: str, text: str, vocab: dict) -> list[str]:
     """Bare creature words, after every machine card's name is masked out (so
     'the Martian fighting-machine' never re-fires on 'Martian')."""
@@ -512,14 +523,12 @@ def stage_faults(episode, vocab: dict) -> list[str]:
     for s in episode.shots:
         staged = set(getattr(episode.setups[s.setup], "props", None) or [])
         text = claim_prose(s)
-        out += [f for pid, card in vocab["machines"].items()
-                if (f := _machine_fault(f"shot {s.index}", text, pid, card, pid in staged))]
+        out += _machine_faults(f"shot {s.index}", text, vocab, staged)
         out += _creature_faults(f"shot {s.index}", text, vocab)
     for name, setup in episode.setups.items():
         staged = set(getattr(setup, "props", None) or [])
         text = setup_text(setup)
-        out += [f for pid, card in vocab["machines"].items()
-                if (f := _machine_fault(f"setup {name}", text, pid, card, pid in staged))]
+        out += _machine_faults(f"setup {name}", text, vocab, staged)
         out += _creature_faults(f"setup {name}", text, vocab)
     return out
 

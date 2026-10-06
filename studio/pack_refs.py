@@ -248,6 +248,14 @@ def mask_card_names(text: str, names: list[str]) -> str:
     return out
 
 
+def mask_other_cards(text: str, machines: dict, pid: str) -> str:
+    """`text` with every card name BUT `pid`'s blanked: a word inside another
+    card's name is that card, never a bare alias of this one (ep19: the
+    'Martian' of "the Martian cylinder" read as the fighting-machine's term).
+    The one mask G-STAGE and its cure both test through."""
+    return mask_card_names(text, [c["name"] for k, c in machines.items() if k != pid])
+
+
 def undrawn_named(book: Path, pids: list[str], text: str) -> list[str]:
     """The staged pids the prose names whose sheet is NOT drawn -- the exact
     set `props_named`'s `(sheet := prop_sheet(...))` filter drops SILENTLY,
