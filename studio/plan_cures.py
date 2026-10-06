@@ -1411,6 +1411,7 @@ def enrich_at_rest(doc: dict, index: int, need_words: int, tier: str = "workhors
 # ---- the dispatcher ---------------------------------------------------------------
 
 CURES: list[tuple[re.Pattern, str]] = [
+    (re.compile(r"G-ARTICLE"), "drop_stray_articles"),
     (re.compile(r"G-GHOST"), "ghost_limbs"),
     (re.compile(r"G-TWICE"), "one_position"),
     (re.compile(r"shots are numbered|lines are numbered|a line's shot never precedes"), "renumber"),
@@ -1609,3 +1610,29 @@ def rewrite_setups(doc: dict, names: dict, place_words: set, setup_names: list[s
         else:
             s["described"], s["geometry"] = got.described, got.geometry
     return doc, uncured
+
+
+def drop_stray_articles(doc: dict) -> dict:
+    """G-ARTICLE's free cure: the stray 'the' between a content word and a
+    capitalised name is dropped ('the opened the Martian cylinder' -> 'the
+    opened Martian cylinder'); after a noun it is a missing comma ('under the porch
+    the Narrator' -> 'under the porch, the Narrator').  The gate's own pattern finds it."""
+    from studio import plan_gates
+    for s in doc.get("shots") or []:
+        for f in plan_gates.ARTICLE_FIELDS:
+            if s.get(f):
+                s[f] = plan_gates.STRAY_ARTICLE.sub(_article_repair, s[f])
+    return doc
+
+
+ADJECTIVE_END = re.compile(r"(?:ed|al|ic|ous|ful|ive|en|ish|ent|ant|ar|less|y)$")
+ADJECTIVES = {"long", "hollow", "short", "tall", "huge", "vast", "great", "small", "big", "old",
+              "new", "dark", "grey", "gray", "black", "white", "red", "green", "open", "pale"}
+
+
+def _article_repair(m) -> str:
+    """Drop the stray 'the' after an adjective; after a noun, keep it behind a comma."""
+    last = m.group(1).split()[-1]
+    if last in ADJECTIVES or ADJECTIVE_END.search(last):
+        return m.group(1)
+    return m.group(1).rstrip() + ", the "

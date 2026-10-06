@@ -1471,3 +1471,41 @@ def advisories(episode: Episode, earlier_lines: list[str] | None = None, rate: f
     if rate is not None:
         out += rate_advisory(episode, rate)
     return out
+
+
+# ---- G-ARTICLE: garble a cure leaves behind (2026-10-06) -------------------------
+# ep19: a rename bug wrote "the opened the Martian cylinder" and "a metallic the
+# Martian handling-machine-crab" into six shots.  A determiner, one or two
+# modifiers, then "the" and a capitalised name is never English.  A function word
+# ("beside the Martian", "nearest the Curate"), an -s verb ("the pump occupies the
+# Kitchen") or an -ing verb ("her filling the Lantern") is English, not a modifier;
+# so is a plural layout verb ("his horse fill the Upper third").  An ALL-CAPS word
+# after "the" is a layout mark ("the porch the LEFT third"), not a name.
+
+FUNCTION_WORDS = ("and|or|but|nor|so|yet|of|to|in|on|at|by|for|with|from|into|onto|upon|over|"
+                  "under|near|beside|behind|before|after|above|below|beneath|across|past|through|"
+                  "toward|towards|around|against|along|among|between|beyond|within|without|than|"
+                  "as|like|while|where|when|is|are|was|were|be|been|being|then|that|which|whom|"
+                  "who|if|unless|until|till|since|about|off|out|up|down|via|all|both|once|here|"
+                  "there|the|a|an|nearest|nearer|next|opposite|"
+                  "fill|cross|hold|take|occupy|frame|span|cover|face|meet|reach|line|mark|block|top")
+DETERMINERS = ("the|a|an|this|its|his|her|their|one|two|three|four|five|six|seven|eight|nine|"
+               "ten|several|many|some")
+_MODIFIER = r"(?!(?:" + FUNCTION_WORDS + r")\b)[a-z][a-z-]*(?<![^s]s)(?<!ing)"
+STRAY_ARTICLE = re.compile(r"\b((?:" + DETERMINERS + r") (?:" + _MODIFIER + r" ){1,2})the (?=[A-Z][a-z])")
+ARTICLE_FIELDS = ("frame", "motion", "at_rest", "end", "camera")
+
+
+def article_hits(text: str) -> list[str]:
+    """Each 'determiner modifier the Name' run in `text`."""
+    return [m.group(0) + "..." for m in STRAY_ARTICLE.finditer(text or "")]
+
+
+def article_faults(episode) -> list[str]:
+    """G-ARTICLE, always hard: a stray 'the' a cure wrote; its cure is free."""
+    out = []
+    for s in episode.shots:
+        for f in ARTICLE_FIELDS:
+            for hit in article_hits(getattr(s, f, "") or ""):
+                out.append(fault("G-ARTICLE", f"shot {s.index}", f"{f} reads {hit!r}", 1, 0))
+    return out

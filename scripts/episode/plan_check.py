@@ -247,6 +247,10 @@ def main(book_id: str, number: int) -> int:
     print("G-CROWD      :", cf or "clean"); hard += len(cf)
     for f in cf:
         print("   ", f[:170])
+    af = plan_gates.article_faults(ep)
+    print("G-ARTICLE    :", len(af) or "clean"); hard += len(af)
+    for f in af:
+        print("   ", f[:170])
     cc = plan_gates.close_crowd_faults(ep)
     print("G-CROWD-CLOSE:", cc or "clean"); hard += len(cc)
     for f in cc:
