@@ -945,18 +945,57 @@ def _words_of(text: str) -> list[str]:
     return re.findall(r"[a-z0-9']+", (text or "").replace("’", "'").lower())
 
 
+def best_window(span: str, chapter: str) -> tuple[float, int, int]:
+    """The best (ratio, start_word_index, n_words) of the span against the
+    chapter's windows of its own length, tried at every place the span's first
+    or second word occurs -- `span_match`'s loop, keeping the argmax start the
+    scorer used to throw away (the snap cure replaces the span with it)."""
+    want, have = _words_of(span), _words_of(chapter)
+    if not want or not have:
+        return 0.0, 0, 0
+    n, target = len(want), " ".join(want)
+    starts = {j - k for k in range(min(2, n)) for j, w in enumerate(have) if w == want[k]}
+    best, at = 0.0, 0
+    for start in sorted(s for s in starts if s >= 0):
+        got = difflib.SequenceMatcher(None, target, " ".join(have[start:start + n])).ratio()
+        if got > best:
+            best, at = got, start
+    return best, at, min(n, len(have) - at)
+
+
 def span_match(span: str, chapter: str) -> float:
     """The best ratio of the span against the chapter's windows of its own length,
     tried at every place the span's first or second word occurs."""
-    want, have = _words_of(span), _words_of(chapter)
-    if not want or not have:
-        return 0.0
-    n, target = len(want), " ".join(want)
-    starts = {j - k for k in range(min(2, n)) for j, w in enumerate(have) if w == want[k]}
-    best = 0.0
-    for start in sorted(s for s in starts if s >= 0):
-        best = max(best, difflib.SequenceMatcher(None, target, " ".join(have[start:start + n])).ratio())
-    return round(best, 2)
+    return round(best_window(span, chapter)[0], 2)
+
+
+def _word_offsets(text: str) -> list[tuple[int, int]]:
+    """Char (start, end) per word of `_words_of`, indexing the ORIGINAL string:
+    both of its normalizations (curly apostrophe, lower case) are 1:1 in char
+    count, so the offsets survive them."""
+    low = (text or "").replace("’", "'").lower()
+    return [m.span() for m in re.finditer(r"[a-z0-9']+", low)]
+
+
+SENTENCE_END = re.compile(r"[.!?][\"”')’]*(?=\s|$)")
+"""A sentence terminator WITH its closing quotes: snapping between `!` and `”`
+would write a half-quote span (Doyle nests dialogue everywhere)."""
+
+
+def snap_sentences(chapter: str, a: int, b: int) -> str:
+    """The chapter slice [a, b) grown to complete sentences: back to the char
+    after the previous terminator or a paragraph break (else the text start),
+    forward through the next terminator inclusive; whitespace collapsed."""
+    start = 0
+    for m in SENTENCE_END.finditer(chapter):
+        if m.end() > a:
+            break
+        start = m.end()
+    cut = chapter.rfind("\n\n", 0, a)
+    if cut >= 0:
+        start = max(start, cut + 2)
+    hit = SENTENCE_END.search(chapter, b)
+    return " ".join(chapter[start:hit.end() if hit else len(chapter)].split())
 
 
 def span_faults(shot, chapter: str | None) -> list[str]:

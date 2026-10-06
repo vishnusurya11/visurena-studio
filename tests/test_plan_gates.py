@@ -515,3 +515,59 @@ def test_the_plan_is_reprojected_at_the_narrators_measured_rate():
     slow = [a for a in pg.advisories(Episode(**doc), rate=1.5) if a.startswith("G-RATE")]
     assert slow and "over the 174 s picture budget" in slow[0]
     assert not [a for a in pg.advisories(Episode(**doc), rate=3.0) if a.startswith("G-RATE")]
+
+
+# ---- best_window / _word_offsets / snap_sentences (G-SOURCE cure, 2026-10-05) ----
+
+SNAP_CHAPTER = (
+    "The pit had been silent since the sunset.\n\n"
+    "\u201cGet under the water!\u201d he said. And then followed such a concussion "
+    "as I had never heard before.\n\n"
+    "Close upon its heels came a second report."
+)
+
+
+def test_best_window_keeps_the_argmax_the_scorer_threw_away():
+    span = "Eight riders waited at the turn of the road"
+    chapter = (Path("tests/fixtures/episodes/chapter_snippet.txt")).read_text(encoding="utf-8")
+    ratio, start, n = pg.best_window(span, chapter)
+    assert ratio > 0.99
+    window = " ".join(pg._words_of(chapter)[start:start + n])
+    assert window == " ".join(pg._words_of(span))
+
+
+def test_span_match_is_byte_identical_to_the_pre_refactor_ratio():
+    chapter = (Path("tests/fixtures/episodes/chapter_snippet.txt")).read_text(encoding="utf-8")
+    assert pg.span_match("Eight riders waited at the turn of the road, two of them dismounted",
+                         chapter) == 1.0
+    slipped = pg.span_match("Eight riders waited at the turn of the raod, two of them dismounted",
+                            chapter)
+    assert pg.SPAN_MATCH <= slipped < 1.0           # one slipped letter, the docstring case
+    paraphrase = pg.span_match("six riders stood about at the crossroads", chapter)
+    assert 0.0 < paraphrase < pg.SPAN_MATCH         # a paraphrase reads under the wall
+
+
+def test_word_offsets_index_the_original_string_across_curly_marks():
+    text = "The horse\u2019s head\u2014its mane wet\u2014hung low."
+    offs = pg._word_offsets(text)
+    got = [text[a:b] for a, b in offs]
+    assert got == ["The", "horse\u2019s", "head", "its", "mane", "wet", "hung", "low"]
+
+
+def test_snap_sentences_expands_to_whole_sentences():
+    a = SNAP_CHAPTER.index("then followed")
+    b = SNAP_CHAPTER.index("never heard") + len("never heard")
+    assert pg.snap_sentences(SNAP_CHAPTER, a, b) == \
+        "And then followed such a concussion as I had never heard before."
+
+
+def test_snap_sentences_treats_a_closing_quote_as_part_of_the_terminator():
+    a = SNAP_CHAPTER.index("he said")
+    got = pg.snap_sentences(SNAP_CHAPTER, a, a + len("he said"))
+    assert got == "he said."                        # never a half-quote
+
+
+def test_snap_sentences_stops_at_a_paragraph_break():
+    a = SNAP_CHAPTER.index("Get under")
+    got = pg.snap_sentences(SNAP_CHAPTER, a, a + len("Get under"))
+    assert got == "\u201cGet under the water!\u201d"
