@@ -930,3 +930,22 @@ stages:
           manifest.json beside the master (every gate verdict, every rung,
           timing totals), the deliverable's full path printed first, notify()
           through the platform. Never publishes; Distribution does.
+
+      - id: "13"
+        name: publish
+        script: step_13_publish
+        in:
+          - episodes/{unit}/manifest.json
+          - episodes/{unit}/cut/master_r2v.mp4
+          - episodes/{unit}/qc_r2v.json
+          - episodes/{unit}/review/eye_*.json
+          - publish/standing.json
+        out:
+          - episodes/{unit}/youtube.json
+          - episodes/{unit}/review/director_signoff.md
+        desc: >-
+          The last mile, unattended (decision 2026-10-05, under the standing
+          hand of 2026-10-01): youtube.json from one guarded structured call,
+          the director's sign-off rendered from measures only, the gated
+          upload, the public flip, the /shorts/ poll -- the public Short URL is
+          the last line printed. Parks on G-STANDING without the owner's file.
