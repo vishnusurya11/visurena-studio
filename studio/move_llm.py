@@ -142,7 +142,7 @@ def cure_unfixed(doc: dict, unfixed: list[int], setups: dict,
     by = {s["index"]: s for s in shots}
     ids = plan_gates.move_ids([mr.probe(s) for s in shots])
     counts: Counter = Counter(ids)
-    talk = mr.dialogue_shots(doc)
+    talk, baseline = mr.dialogue_shots(doc), mr.contract_errors(doc)
     still: list[int] = []
     for i in sorted(i for i in unfixed if i in by):
         k = order.index(i)
@@ -150,10 +150,9 @@ def cure_unfixed(doc: dict, unfixed: list[int], setups: dict,
                              ids[k - 1] if k else "",
                              ids[k + 1] if k + 1 < len(ids) else "", caller,
                              dialogue=i in talk)
-        if head is None:
+        if head is None or mr.write_lawful(doc, by[i], [head], baseline) is None:
             still.append(i)
             continue
-        by[i]["motion"] = mr.splice(by[i].get("motion") or "", head)
         counts[ids[k]] -= 1
         ids[k] = plan_gates.move_id(by[i]["motion"], by[i].get("camera") or "")
         counts[ids[k]] += 1

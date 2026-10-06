@@ -36,7 +36,7 @@ class FakeCaller:
         return SimpleNamespace(structured_output={"head": got})
 
 
-GOOD = "The camera pushes in slowly toward the gate, travelling a forearm, across the whole shot"
+GOOD = "The camera pushes in toward the gate, travelling a forearm, across the whole shot"
 BAD_AIM = "The camera pans from the heliograph to the gate, travelling a forearm, across the whole shot"
 
 

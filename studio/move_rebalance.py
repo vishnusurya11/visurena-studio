@@ -22,7 +22,7 @@ from studio import episode_ref_official as ro
 
 HEADS = {
     "locked": "The camera holds a locked-off frame",
-    "push_slow": "The camera pushes in slowly toward the {aim}, travelling {amount}, "
+    "push_slow": "The camera pushes in toward the {aim}, travelling {amount}, "
                  "across the whole shot",
     "pull_reveal": "The camera pulls back from the {aim}, travelling {amount}, "
                    "across the whole shot",
@@ -34,12 +34,13 @@ HEADS = {
                      "travelling {amount}, across the whole shot",
     "follow": "The camera tracks behind the {aim}, travelling {amount}, "
               "across the whole shot",
-    "crane_up": "The camera rises slowly above the {aim}, travelling {amount}, "
+    "crane_up": "The camera rises above the {aim}, travelling {amount}, "
                 "across the whole shot",
 }
 """docs/calibration/camera_catalog.md, affirmative and direction only.  Each
 template round-trips to its own id through `plan_gates.MOVE_VERBS` first-match
-(the regex round-trip lock in tests); `, travelling` sits in `cell_gates.ENDS`'
+(the regex round-trip lock in tests); the catalog's "slowly" is NOT copied (ep19:
+the owner's no-slow rule is the contract, and a pushed/risen head broke it); `, travelling` sits in `cell_gates.ENDS`'
 lookahead so a pan's {b} is captured cleanly; `SAID_AMOUNT` strips the travel
 from the take prompt, per 'H3 obeys direction, not amount'."""
 
@@ -149,6 +150,8 @@ def head_faults(shot, head: str, prev_id: str, next_id: str, setup) -> list[str]
         out.append(f"G-MOVE: travel {got} over the cap {plan_gates.cap_for(p, setup)[0]}")
     if "M2" in {c for c, _ in episode_spec.motion_faults(new_motion)}:
         out.append("M2: the head names no camera move")
+    if word := episode_spec.slow_word(head):
+        out.append(f"NO-SLOW: the head asks for a slow shot ({word!r})")
     return out
 
 
@@ -157,19 +160,48 @@ def head_ok(shot, head: str, prev_id: str, next_id: str, setup) -> bool:
     return not head_faults(shot, head, prev_id, next_id, setup)
 
 
-def choose(shot: dict, counts: Counter, prev_id: str, next_id: str,
-           setup: dict | None, seconds: float, dialogue: bool = False) -> str | None:
-    """The least-used size-legal move whose rendered head the gates accept, or
-    None.  A dialogue shot only ever goes locked (the catalog: locked carries
-    dialogue best)."""
+def candidates(shot: dict, counts: Counter, prev_id: str, next_id: str,
+               setup: dict | None, seconds: float, dialogue: bool = False) -> list[str]:
+    """Every size-legal head the gates accept, least-used move first.  A
+    dialogue shot only ever goes locked (the catalog: locked carries dialogue best)."""
     legal = ["locked"] if dialogue else LEGAL.get(shot.get("size") or "", ["locked"])
     aims = cell_aims(shot, setup)
     sns = setup_ns(setup)
     travel = amount_for(plan_gates.cap_for(probe(shot), sns)[0], seconds)
-    for move in sorted(legal, key=lambda m: (counts.get(m, 0), legal.index(m))):
-        head = render_head(move, aims, travel)
-        if head is not None and head_ok(probe(shot), head, prev_id, next_id, sns):
+    heads = [render_head(m, aims, travel)
+             for m in sorted(legal, key=lambda m: (counts.get(m, 0), legal.index(m)))]
+    return [h for h in heads if h is not None and head_ok(probe(shot), h, prev_id, next_id, sns)]
+
+
+def choose(shot: dict, counts: Counter, prev_id: str, next_id: str,
+           setup: dict | None, seconds: float, dialogue: bool = False) -> str | None:
+    """The first accepted candidate, or None."""
+    return next(iter(candidates(shot, counts, prev_id, next_id, setup, seconds, dialogue)), None)
+
+
+def contract_errors(doc: dict) -> set[str]:
+    """The Episode contract's refusals, as comparable strings (empty = valid).
+    A partial doc's missing fields show up in both measurements and cancel."""
+    from pydantic import ValidationError
+    try:
+        episode_spec.Episode(**doc)
+    except ValidationError as why:
+        return {f"{e.get('loc')}: {e.get('msg')}" for e in why.errors()}
+    except Exception as why:    # noqa: BLE001 -- any refusal is a refusal
+        return {f"{type(why).__name__}: {why}"}
+    return set()
+
+
+def write_lawful(doc: dict, shot: dict, heads: list[str], baseline: set[str]) -> str | None:
+    """Splice the first head that leaves the FULL contract no worse than
+    `baseline`; every refused head is undone (ep19: "shots.1 'motion' asks for
+    a slow shot").  The written head, or None with the motion untouched."""
+    old = shot.get("motion") or ""
+    for head in heads:
+        shot["motion"] = splice(old, head)
+        if not contract_errors(doc) - baseline:
             return head
+    shot["motion"] = old
     return None
 
 
@@ -228,17 +260,16 @@ def rebalance(doc: dict, indices: list[int]) -> tuple[dict, list[int]]:
     ids = plan_gates.move_ids([probe(s) for s in shots])
     counts = Counter(ids)
     secs, talk = shot_seconds_of(doc), dialogue_shots(doc)
-    setups = doc.get("setups") or {}
+    setups, baseline = doc.get("setups") or {}, contract_errors(doc)
     unfixed: list[int] = []
     for i in sorted(rewrite_set(doc, list(ids), indices)):
         k = order.index(i)
-        head = choose(by[i], counts, ids[k - 1] if k else "",
-                      ids[k + 1] if k + 1 < len(ids) else "",
-                      setups.get(by[i].get("setup")), secs.get(i, 2.0), i in talk)
-        if head is None:
+        heads = candidates(by[i], counts, ids[k - 1] if k else "",
+                           ids[k + 1] if k + 1 < len(ids) else "",
+                           setups.get(by[i].get("setup")), secs.get(i, 2.0), i in talk)
+        if write_lawful(doc, by[i], heads, baseline) is None:
             unfixed.append(i)
             continue
-        by[i]["motion"] = splice(by[i].get("motion") or "", head)
         new_id = plan_gates.move_id(by[i]["motion"], by[i].get("camera") or "")
         counts[ids[k]] -= 1
         counts[new_id] += 1

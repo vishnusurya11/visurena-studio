@@ -94,7 +94,7 @@ def test_head_ok_refuses_sideways_on_an_anchored_medium_close():
     truck = ("The camera tracks sideways to the right, past the fence, "
              "travelling a forearm, across the whole shot")
     assert mr.head_ok(shot, truck, "", "", setup) is False
-    push = ("The camera pushes in slowly toward the fence, travelling a forearm, "
+    push = ("The camera pushes in toward the fence, travelling a forearm, "
             "across the whole shot")
     assert mr.head_ok(shot, push, "", "", setup) is True
 
