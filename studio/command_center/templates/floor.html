@@ -10,7 +10,7 @@
 <link rel="stylesheet" href="{{ static_url('css/lists.css') }}">
 <div class="title-row">
   <h1>Queue</h1>
-  <p class="sub"><span><b>{{ floor.running | length }}</b> running</span><span><b>{{ queue | length }}</b> queued</span><span><b>{{ holds | length }}</b> held</span>{% if queue_eta %}<span>episode lane clears <b>{{ queue_eta.clean_text }}</b></span>{% endif %}</p>
+  <p class="sub"><span><b data-running>{{ floor.running | length }}</b> running</span><span><b data-queue>{{ queue | length }}</b> queued</span><span><b>{{ holds | length }}</b> held</span>{% if queue_eta %}<span>episode lane clears <b>{{ queue_eta.clean_text }}</b></span>{% endif %}</p>
   <div class="end">{{ act.hold('studio') }}</div>
 </div>
 <p class="foot2" data-testid="hold-effect">{{ icon('pause') }} A studio hold: {{ HOLD_EFFECT }}</p>

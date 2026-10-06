@@ -169,6 +169,8 @@ def _plain_inbox(rows: list[dict]) -> HTMLResponse:
 @router.get("/floor", response_class=HTMLResponse)
 def floor_page(request: Request, conn: sqlite3.Connection = Depends(_conn)):
     """The queue (/queue; /floor is the old name and keeps answering)."""
+    if same := _unchanged(request, conn, "floor"):
+        return same
     return _page(request, conn, "floor.html", floor=views.floor(conn), queue=views.queue(conn),
                    holds=views.holds(conn), today=views.today(conn), books=views.book_names(conn),
                    queue_eta=views.queue_eta(conn))
@@ -205,12 +207,16 @@ def book_page(request: Request, codex: str, conn: sqlite3.Connection = Depends(_
     found = views.book(conn, request.app.state.library, codex)
     if found is None:
         raise HTTPException(404, f"no book {codex}")
+    if same := _unchanged(request, conn, f"book:{codex}"):
+        return same
     return _page(request, conn, "book.html", book=found, books=views.book_names(conn))
 
 
 @router.get("/books", response_class=HTMLResponse)
 def books_page(request: Request, conn: sqlite3.Connection = Depends(_conn)):
     """The shelf: every book with its units."""
+    if same := _unchanged(request, conn, "lanes"):
+        return same
     return _page(request, conn, "books.html", shelf=views.shelf(conn))
 
 

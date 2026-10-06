@@ -71,5 +71,10 @@ def test_a_patch_error_never_kills_the_heartbeat(report):
            "no promise leaks from the loop")
 
 
+def test_events_feed_the_today_log_and_the_running_count(report):
+    passed(report, "an event lands in the feed once, newest first", "an order receipt stays out of the feed",
+           "the feed empty-state hides", "running count follows the pins")
+
+
 def test_a_held_studio_reaches_the_bar_the_card_and_the_title(report):
     passed(report, "held bar shows and reads local time", "held card never says idle", "held title")

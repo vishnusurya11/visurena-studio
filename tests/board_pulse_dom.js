@@ -107,6 +107,11 @@ const hb = mount(body, make('button', 'hb'));
 mount(hb, el('span', { dataset: { hbText: '' } }));
 const needsBadge = mount(body, el('b', { dataset: { needs: '' }, textContent: '0' }));
 const queueCount = mount(body, el('span', { dataset: { queue: '' }, textContent: '0' }));
+const runningCount = mount(body, el('b', { dataset: { running: '' }, textContent: '0' }));
+const feedWrap = mount(body, el('div'));
+const feed = mount(feedWrap, make('ul', 'since-feed'));
+const feedEmpty = mount(feedWrap, el('p', { textContent: 'Nothing finished today.' }));
+feedEmpty.className = 'empty flat';
 const dept = mount(body, el('a', { dataset: { dept: 'episode', total: '9' } }));
 const dotBox = mount(dept, el('span')); dotBox.className = 'sb-dots';
 const pinBox = mount(body, el('div', { dataset: { pins: '' } }));
@@ -262,6 +267,23 @@ async function main() {
   check('held card never says idle', card._cls.has('held') && label.textContent === 'Studio held' &&
     stepEl.textContent === 'nothing starts until you lift', label.textContent);
   check('held title', doc.title === '⏸ held · Episode', doc.title);
+
+  /* 7. events feed the Today log, once each, newest first; pins feed [data-running] */
+  pulseOf(Object.assign({}, P1, { cursor: 12, fp: Object.assign({}, FP, { shell: 's3', attention: 'a5', floor: 'f4' }),
+    events: [{ id: 41, ts: 1700000000, href: '/d/episode/C1/ep17', unit: 'ep17', text: '09 shoot completed' },
+             { id: 'ord-9', order: 9, text: 'redo taken by run r1' }] }));
+  stepPulse(); await drain();
+  pulseOf(Object.assign({}, P1, { cursor: 13, fp: Object.assign({}, FP, { shell: 's4', attention: 'a6', floor: 'f5' }),
+    events: [{ id: 44, ts: 1700000600, href: '/d/episode/C1/ep18', unit: 'ep18', text: '02 plan completed' },
+             { id: 41, ts: 1700000000, href: '/d/episode/C1/ep17', unit: 'ep17', text: '09 shoot completed' }] }));
+  stepPulse(); await drain();
+  const feRows = feed.querySelectorAll('.fe');
+  check('an event lands in the feed once, newest first', feRows.length === 2 &&
+    feed.kids[0].id === 'pulse-ev-44' && feed.kids[1].id === 'pulse-ev-41', feed.kids.map(k => k.id));
+  check('an order receipt stays out of the feed', !feed.querySelector('#pulse-ev-ord-9'),
+    feRows.map(r => r.id));
+  check('the feed empty-state hides', feedEmpty.hidden === true, feedEmpty.hidden);
+  check('running count follows the pins', runningCount.textContent === '1', runningCount.textContent);
 
   await drain();
   check('no promise leaks from the loop', leaks.length === 0, leaks);

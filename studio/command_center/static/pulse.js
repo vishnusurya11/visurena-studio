@@ -92,6 +92,34 @@
       b.textContent = sh.needs; b.dataset.n = sh.needs; wash(b);
     });
     all('[data-queue]').forEach(function (n) { if (n.textContent !== String(sh.queue)) { n.textContent = sh.queue; wash(n); } });
+    all('[data-running]').forEach(function (n) {
+      var want = String((sh.pins || []).length);
+      if (n.textContent !== want) { n.textContent = want; wash(n); }
+    });
+  }
+
+  /* --- the Today feed: pulse events land as rows, once each, newest first --- */
+  function feedRow(ev) {
+    var li = doc.createElement('li'), ic = doc.createElement('span'), s = doc.createElement('span');
+    var b = doc.createElement('b'), t = doc.createElement('time'), d = new Date((ev.ts || 0) * 1000);
+    li.id = 'pulse-ev-' + ev.id; li.className = 'fe chg';
+    ic.className = 'ic'; b.textContent = ev.unit || ''; s.appendChild(b);
+    s.appendChild(doc.createTextNode(' ' + (ev.text || '')));
+    t.textContent = String(d.getHours()).padStart(2, '0') + ':' + String(d.getMinutes()).padStart(2, '0');
+    li.appendChild(ic); li.appendChild(s); li.appendChild(t);
+    return li;
+  }
+  function feedEvents(evs) {
+    var feed = $('since-feed');
+    if (!feed) return;
+    evs.slice().reverse().forEach(function (ev) {
+      if (String(ev.id).indexOf('ord-') === 0 || feed.querySelector('#pulse-ev-' + ev.id)) return;
+      feed.insertBefore(feedRow(ev), feed.querySelector('.fe'));
+    });
+    var rows = all('.fe', feed);
+    for (var i = rows.length - 1; i >= 40; i--) rows[i].remove();
+    var empty = feed.parentElement && feed.parentElement.querySelector('.empty');
+    if (empty && rows.length) empty.hidden = true;
   }
   function patchDept(a, counts) {
     var total = +a.dataset.total || 0, d = dots(counts || {}, total), sig = JSON.stringify(d);
@@ -261,7 +289,7 @@
     patchShell(p.shell || {}); watch(prev, p.shell || {});
     S.last = p;
     doc.dispatchEvent(new CustomEvent('pulse', { detail: p }));
-    if (p.events && p.events.length) doc.dispatchEvent(new CustomEvent('pulse:events', { detail: p.events }));
+    if (p.events && p.events.length) { feedEvents(p.events); doc.dispatchEvent(new CustomEvent('pulse:events', { detail: p.events })); }
   }
   function tick() {
     if (S.busy) return;

@@ -7,11 +7,14 @@
     mosaic of its newest pictures, then every other book as a card. -#}
 <link rel="stylesheet" href="{{ static_url('css/lists.css') }}">
 {% set making, rest = viz.shelf_split(request, shelf) %}
+{#- The whole shelf (tally included) is one live region: `lanes` is the pulse key that moves
+    on any work-order or event write, which is exactly what the shelf's numbers and mosaics
+    read.  /books is its own partial source, selected and morphed in place (as /b/<codex>). -#}
+<div id="shelf-live" data-testid="shelf" hx-get="/books" hx-select="#shelf-live" hx-trigger="pulse:lanes from:body" data-v="{{ viz.fp(request, 'lanes') }}" hx-swap="morph:outerHTML">
 <div class="title-row">
   <h1>Books</h1>
   <p class="sub"><span><b>{{ shelf | length }}</b> book{{ '' if shelf | length == 1 else 's' }}</span><span><b>{{ making | length }}</b> making episodes</span><span><b>{{ shelf | sum(attribute='running') }}</b> running</span></p>
 </div>
-<div id="shelf-live" data-testid="shelf">
 {% if making %}
 <section aria-labelledby="making-h">
   <div class="sh"><h2 id="making-h">Making episodes</h2><span class="sub">newest pictures first</span></div>

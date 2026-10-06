@@ -3,7 +3,7 @@
 {% from "_icon.html" import icon %}
 <ul class="feed" id="since-feed" role="log" aria-live="off" aria-label="What changed today" data-testid="since">
 {% for t in today %}
-<li id="ev-{{ t.codex_id }}-{{ t.stage }}-{{ t.unit }}-{{ t.step_id }}-{{ t.attempt }}"><span class="ic {{ t.css }}">{{ icon(state_icons.get(t.state, 'circle')) }}</span><span><b>{{ t.unit }}</b>{{ t.step_id }} {{ t.step_name }} {{ t.state }}{% if t.seconds %} · {{ t.seconds | round | int }} s{% endif %}</span><time datetime="{{ t.ended_at }}" title="{{ t.ended_at }}">{{ t.ended_at[11:16] }}</time></li>
+<li class="fe" id="ev-{{ t.codex_id }}-{{ t.stage }}-{{ t.unit }}-{{ t.step_id }}-{{ t.attempt }}"><span class="ic {{ t.css }}">{{ icon(state_icons.get(t.state, 'circle')) }}</span><span><b>{{ t.unit }}</b>{{ t.step_id }} {{ t.step_name }} {{ t.state }}{% if t.seconds %} · {{ t.seconds | round | int }} s{% endif %}</span><time datetime="{{ t.ended_at }}" title="{{ t.ended_at }}">{{ t.ended_at[11:16] }}</time></li>
 {% endfor %}
 </ul>
 {% if not today %}<p class="empty flat">Nothing finished today. Each step a runner ends lands here as it happens.</p>{% endif %}

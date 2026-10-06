@@ -10,7 +10,7 @@
 {% set w = viz.went(request) %}
 <div class="title-row">
   <h1>Home</h1>
-  <div class="tally" data-testid="tally"><span class="r"><b>{{ floor.running | length }}</b> running</span><span class="f"><b data-needs>{{ attention | length }}</b> need you</span><span><b data-queue>{{ shell.queue if shell else 0 }}</b> queued</span></div>
+  <div class="tally" data-testid="tally"><span class="r"><b data-running>{{ floor.running | length }}</b> running</span><span class="f"><b data-needs>{{ attention | length }}</b> need you</span><span><b data-queue>{{ shell.queue if shell else 0 }}</b> queued</span></div>
 </div>
 
 <div class="hero-row">

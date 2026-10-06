@@ -21,7 +21,8 @@ PARTIALS = [("/partials/floor", "floor"), ("/partials/attention", "attention"),
             ("/partials/needs-you-count", "attention"), ("/partials/orders", "orders"),
             ("/partials/lanes", "lanes"), ("/partials/d/episode", "dept:episode"),
             (f"/partials/unit/{UNIT}/tails", f"unit:{UNIT}"), (f"/partials/unit/{UNIT}/head", f"unit:{UNIT}"),
-            (f"/partials/unit/{UNIT}/orders", f"unit:{UNIT}"), (f"/partials/unit/{UNIT}/live", f"unit:{UNIT}")]
+            (f"/partials/unit/{UNIT}/orders", f"unit:{UNIT}"), (f"/partials/unit/{UNIT}/live", f"unit:{UNIT}"),
+            ("/queue", "floor"), ("/books", "lanes"), (f"/b/{CODEX}", f"book:{CODEX}")]
 
 
 @pytest.fixture()
