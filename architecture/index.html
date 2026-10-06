@@ -537,7 +537,7 @@ pre.ddl{font-family:"IBM Plex Mono",monospace;font-size:11px;line-height:1.4;col
       <ul>
         <li><div class="node owner"><div class="n">Owner</div><div class="r">Three signatures: money, publish, taste. RENDER_HOLD is the brake.</div></div>
           <ul>
-            <li><div class="node lead"><div class="n">Studio office</div><div class="r">Scheduler (head of production), the slate, decisions</div><div class="f">studio.py · series.json · DECISIONS.md</div><div class="st missing">scheduler missing</div></div>
+            <li><div class="node lead"><div class="n">Studio office</div><div class="r">Autopilot (head of production) + the brain on a leash, the slate, decisions</div><div class="f">scripts/episode/autopilot.py · studio/brain.py · series.json · DECISIONS.md</div><div class="st missing">autopilot proposed 2026-10-06</div></div>
               <ul>
                 <li><div class="node lead div"><div class="n">Platform</div><div class="r">Shared services. No deliverable of its own.</div><div class="f">llm · GPU lease · ledger · approval · measures · notify · publish clients · R&amp;D ledger</div><div class="st partial">mostly built</div></div></li>
                 <li><div class="node lead div"><div class="n">Pre-production</div><div class="r">Asserts, invents, binds identity</div></div>
@@ -905,7 +905,8 @@ not built     a worker loop that starts a five-hour GPU job unattended — a que
   var U=function(id,name,role,state,file,kids,owner){return {k:'lead',n:id+' '+name,r:role,f:file,st:state,kids:kids||[],owner:owner};};
   var TEAMS=[
     {n:'Studio office',r:'The head of production is a loop over the registry',st:'missing',kids:[
-      U('','Scheduler','Finds (book, unit) pairs whose requires are complete; launches the runner; parks on ESCALATE; batches a call sheet','missing','studio.py'),
+      U('','Autopilot (scheduler)','A Task-Scheduler-armed loop: launches drive.py for the next chapter, derives the episode state from disk every tick, retries, cures through work orders, parks with a reason and moves on; never a silent stop, never a wait on the owner (proposed 2026-10-06)','missing','scripts/episode/autopilot.py · studio/autopilot.py'),
+      U('','Brain (Agent SDK)','Claude on a leash: triages a stop mid-run (read-only, a JSON verdict); fixes with tests only between episodes under a mechanical ratchet; may never write library/, a verdict, a gate threshold or a model tier (proposed 2026-10-06)','missing','studio/brain.py · studio/ratchet.py'),
       U('','Slate','Ordered unit list, targets, synthetic declaration, publish policy','partial','library/<book>/series.json'),
       U('','Brake','Every runner and the GPU lease read it on the way in','built','RENDER_HOLD'),
       U('','Decisions','Every gate retirement with its count','built','docs/DECISIONS.md'),
