@@ -131,14 +131,38 @@ def core_next_unit(chapters: list[int], uploads: list[dict], parked: list[dict],
     return importlib.import_module("studio.autopilot").next_unit(chapters, uploads, parked, last)
 
 
+def brain_evidence(home: Path) -> tuple[list[str], list[dict]]:
+    """What the brief reads off disk: the aside's fault notes, the last learnings rows."""
+    aside = read_json(home / "plan.deferred.json", {}) or {}
+    faults = [str(f.get("note", f)) for f in aside.get("faults", []) if isinstance(f, (dict, str))]
+    return faults[-12:], rows_of(home / "learnings.jsonl")[-5:]
+
+
+def brain_prompt(core, book: Path, n: int, packet: dict) -> str:
+    """`studio.brain.brief` from the packet and the episode home, relative paths only."""
+    home = home_of(book, n)
+    faults, learnings = brain_evidence(home)
+    tail = " | ".join(str(packet.get(k, "")) for k in ("reason", "last_line") if packet.get(k))
+    return core.brief(packet.get("home", f"episodes/ep{n:02d}"), tail, faults, learnings,
+                      float(packet.get("media_spent_usd") or 0.0), ["redo", "retry", "requeue"])
+
+
+def verdict_doc(verdict: Any, meta: Any) -> dict:
+    """The brain's Verdict (response, reason, ...) as the dict the supervisor judges (verdict, why, ...)."""
+    raw = verdict.model_dump() if hasattr(verdict, "model_dump") else dict(verdict)
+    doc = {"verdict": raw.get("response") or raw.get("verdict"), "why": raw.get("reason") or raw.get("why", ""),
+           "commit": raw.get("commit"), "order": raw.get("order"), "finding_row": raw.get("finding_row", ""),
+           "proposed_diff": raw.get("proposed_diff", "")}
+    doc["meta"] = meta if isinstance(meta, dict) else str(meta)
+    return doc
+
+
 def run_brain(book: Path, codex: str, n: int, packet: dict, attempt: Path) -> dict:
     """One triage session of the brain under the 45-min leash; its verdict as a dict."""
     core = importlib.import_module("studio.brain")
-    prompt = core.brief(book, n, packet)
+    prompt = brain_prompt(core, book, n, packet)
     verdict, meta = asyncio.run(asyncio.wait_for(core.turn(prompt, core.triage_options(ROOT)), BRAIN_TIMEOUT_S))
-    doc = verdict.model_dump() if hasattr(verdict, "model_dump") else dict(verdict)
-    doc["meta"] = meta if isinstance(meta, dict) else str(meta)
-    return doc
+    return verdict_doc(verdict, meta)
 
 
 @dataclass
@@ -475,8 +499,18 @@ def judge_verdict(book: Path, codex: str, n: int, verdict: dict, deps: Deps) -> 
     if said == "relaunch" and clean and str(verdict.get("commit")) == head:
         event(book, {"event": "brain_relaunch", "episode": n, "commit": head[:8]})
         return {"action": "brain_relaunch", "state": "IDLE"}
+    if said in ("retry", "cure") and clean:
+        return triage_action(book, codex, n, said, verdict, deps)
     event(book, {"event": "brain_rejected", "episode": n, "verdict": said, "clean": clean})
     return {"action": "brain_rejected", "state": "NEEDS_BRAIN"}
+
+
+def triage_action(book: Path, codex: str, n: int, said: str, verdict: dict, deps: Deps) -> dict:
+    """A triage answer short of a fix: retry relaunches; cure places the desk order first."""
+    if said == "cure" and verdict.get("order"):
+        deps.order(codex, n, verdict["order"])
+    event(book, {"event": f"brain_{said}", "episode": n, "order": verdict.get("order")})
+    return {"action": f"brain_{said}", "state": "IDLE"}
 
 
 def wait_tree(book: Path, deps: Deps) -> dict:
