@@ -129,6 +129,26 @@ the autopilot stops launching and says so in the receipt: a pipeline that cannot
 its best-known code has nothing left to try unattended. The owner's next design change
 restarts it — the one touchpoint he approved.
 
+### Where workflows sit (owner's question, 2026-10-06; verified against code.claude.com/docs/en/workflows)
+
+The Agent SDK has the `Workflow` tool: a JavaScript script that holds the loop, branches on
+results, needs no human mid-run, runs headless under a `Workflow(<name>)` allow rule in
+`dontAsk` mode, and is resumable by session. Three documented limits put it INSIDE the
+brain, not above it: (1) its lifetime is the session's — a crash or reboot needs a Python
+process to relaunch the session and resume the run by `session_id`; (2) "no direct
+filesystem or shell access from the workflow itself" — every tick of the state machine
+would be a paid agent call to run `ls`, where `derive()` costs nothing and is pytest-able;
+(3) in SDK/headless mode a run that hits the subscription usage limit fails the agent
+instead of pausing — the supervisor sleeps on `RateLimitEvent`, a script cannot.
+**Workflows dictate what agents run next; Python dictates what processes run next.**
+
+So the fixer rung is a saved workflow, `.claude/workflows/fix-parked.js`: one fix agent per
+parked finding in its own worktree → three skeptics try to refute each fix → only
+survivors go to the ratchet → one commit per batch. The supervisor's allow list names
+exactly that workflow. The subagents page cites the TypeScript SDK version that added the
+tool; the Python SDK drives the same CLI, so this is confirmed on the first live turn,
+with the plain `Agent` fan-out as the fallback.
+
 ### Auth and billing — the owner's one choice inside this approval
 
 This box is logged into claude.ai Max; there is no `ANTHROPIC_API_KEY`. Two documented
