@@ -112,3 +112,21 @@ def test_the_dispatcher_names_a_cure_for_every_mechanical_family():
     for row in rows:
         assert pc.cure_for(row) is not None, row
     assert pc.cure_for("G-STORY plan: narration-only run in projected seconds") is None  # creative: the writer's
+
+
+def test_camera_rows_dispatch_to_rebalance_and_subject_rows_stay_the_writers():
+    """AREA 2 (2026-10-05): every camera-head family routes to the catalog-wide
+    rebalance -- including G-ANCHOR and M2, which matched nothing on ep18 and
+    bounced to the writer as hand edits.  M9/M10 accuse the SUBJECT clauses
+    and remain the writer's."""
+    rows = [
+        "G-MOVES plan: distinct catalog moves over 23 shots, measured 6 against 8",
+        "G-STILL shot 7: 'tilt_down' is a move H3 ignores; use 'pull_reveal'",
+        "G-AIM shot 14: the camera aims at 'ruin', which the cell (at_rest) does not hold",
+        "G-ANCHOR shot 3: a sideways truck or pan on a medium_close of a person 'leans on'",
+        "M2 shot 12: the head names no camera move. Open with one, before the first semicolon",
+    ]
+    for row in rows:
+        assert pc.cure_for(row) == "rebalance_heads", row
+    assert pc.cure_for("M9 shot 4: the tail clause names no moving thing") is None
+    assert pc.cure_for("M10 shot 2: the motion brings in what at_rest already holds") is None

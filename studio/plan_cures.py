@@ -161,6 +161,18 @@ def vary_heads(doc: dict, indices: list[int]) -> dict:
     return doc
 
 
+def rebalance_heads(doc: dict, indices: list[int]) -> tuple[dict, list[int]]:
+    """Catalog-wide head rebalancing (G-MOVES/G-STILL/G-AIM/G-ANCHOR/M2):
+    delegated to `studio.move_rebalance`, which replays the REAL gate
+    predicates on every candidate before writing it.  Pure and $0, so this
+    table keeps its no-llm charter; the shots it cannot cure come back as
+    `unfixed` for `move_llm`'s guarded escape (dispatched by plan_repair).
+    Supersedes `vary_heads`, whose two-head vocabulary drove ep18's push_slow
+    to share 0.30 while distinct moves stayed at 6 < MIN_MOVES 8."""
+    from studio import move_rebalance
+    return move_rebalance.rebalance(doc, indices)
+
+
 def legal_props(doc: dict, legal: set[str]) -> dict:
     """Setup props filtered to the analysis registry; scenery nouns stay in
     the prose, where they belong (one picture per entity)."""
@@ -433,7 +445,7 @@ CURES: list[tuple[re.Pattern, str]] = [
     (re.compile(r"G-SIZE"), "head_fractions"),
     (re.compile(r"NO PACE"), "pace_words"),
     (re.compile(r"beat of >= 1\.0 s of silence"), "button_beat"),
-    (re.compile(r"G-MOVES|G-STILL|G-AIM"), "vary_heads"),
+    (re.compile(r"G-MOVES|G-STILL|G-AIM|G-ANCHOR|\bM2 shot \d+:"), "rebalance_heads"),
     (re.compile(r"G-SOURCE shot \d+: span .* is not in the chapter"), "source_spans"),
     (re.compile(r"QUOTE\s+: \["), "quote_trim"),
     (re.compile(r"props.*\.json|names setup .* not defined|prop (?!.*no chapter span)"), "legal_props"),

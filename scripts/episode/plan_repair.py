@@ -122,8 +122,15 @@ def apply(doc: dict, rows: list[str], book, number: int = 0,
             doc = pc.pace_words(doc)
         elif name == "button_beat":
             doc = pc.button_beat(doc)
-        elif name == "vary_heads":
-            doc = pc.vary_heads(doc, shot_indices([r for r in rows if pc.cure_for(r) == "vary_heads"]))
+        elif name == "rebalance_heads":
+            own = [r for r in rows if pc.cure_for(r) == "rebalance_heads"]
+            doc, unfixed = pc.rebalance_heads(doc, shot_indices(own))
+            if unfixed:
+                import re
+                from studio import move_llm
+                doc, still = move_llm.cure_unfixed(doc, unfixed, doc.get("setups") or {})
+                uncured += [r for r in own
+                            if (m := re.search(r"shot (\d+)", r)) and int(m.group(1)) in set(still)]
         elif name == "legal_props":
             doc = pc.legal_props(doc, legal)
         elif name == "close_crowds":
