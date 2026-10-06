@@ -29,8 +29,8 @@ def test_the_rows_carry_their_non_pass_gates_with_the_judge(client):
 
 def test_the_table_refreshes_on_its_pulse_and_keeps_its_filters(client):
     page = main(client.get("/d/episode?book=" + CODEX + "&state=failed").text)
-    trigger = polls(page, f"/partials/d/episode?book={CODEX}&amp;state=failed")
-    assert trigger == "pulse:dept:episode from:body"   # morphed in place: a focused field survives
+    trigger = polls(page, f"/d/episode?book={CODEX}&amp;state=failed")   # the whole live region, counts included (2026-10-06)
+    assert trigger and trigger.startswith("pulse:dept:episode") and trigger.endswith("from:body")
     assert "ep05" in page and "ep04" not in page
 
 

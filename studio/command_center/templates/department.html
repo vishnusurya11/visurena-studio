@@ -9,6 +9,10 @@
 {% set total = dept.counts.values() | sum %}
 {% set needs = (dept.counts.get('flagged', 0) + dept.counts.get('failed', 0) + dept.counts.get('deferred', 0) + dept.counts.get('escalated', 0) + dept.counts.get('stale', 0)) %}
 {% set qs = '?' ~ ('book=' ~ book if book else '') ~ ('&' if book and state else '') ~ ('state=' ~ state if state else '') %}
+{#- One live region holds the counts, the tally AND the rows (owner, 2026-10-06: the rows
+    morphed while the numbers above them froze -- "it is not refreshing").  It refetches this
+    page and selects itself; a focused filter or form holds the morph off. -#}
+<div id="dept-live" hx-get="/d/{{ dept.stage }}{% if book or state %}{{ qs }}{% endif %}" hx-select="#dept-live" hx-swap="morph:outerHTML" hx-trigger="pulse:dept:{{ dept.stage }}[!document.activeElement.closest('#dept-live form,#dept-live select')] from:body" data-v="{{ viz.fp(request, 'dept:' ~ dept.stage) }}">
 <div class="title-row">
   <h1 class="cap">{{ dept.stage }}</h1>
   <p class="sub" data-testid="dept-sub"><span><b>{{ dept.rows | length }}</b> units{% if book or state %} shown{% endif %}</span><span><b>{{ dept.groups | length }}</b> book{{ '' if dept.groups | length == 1 else 's' }}</span>{% if needs %}<span class="f"><b>{{ needs }}</b> need you</span>{% endif %}</p>
@@ -30,7 +34,8 @@
     <a class="more" href="/architecture">Org chart{{ icon('chevron-right') }}</a>
   </div>
 </div>
-<section id="rows" hx-get="/partials/d/{{ dept.stage }}{% if book or state %}{{ qs }}{% endif %}" hx-trigger="pulse:dept:{{ dept.stage }} from:body" data-v="{{ viz.fp(request, 'dept:' ~ dept.stage) }}" hx-swap="morph:innerHTML">
+<section id="rows">
 {% include "_rows.html" %}
 </section>
+</div>
 {% endblock %}

@@ -150,6 +150,8 @@ def home(request: Request, conn: sqlite3.Connection = Depends(_conn)):
 @router.get("/inbox", response_class=HTMLResponse)
 def inbox_page(request: Request, conn: sqlite3.Connection = Depends(_conn)):
     """Needs you as a page: the attention list, `views.inbox_count()` rows."""
+    if same := _unchanged(request, conn, "attention"):
+        return same
     rows = views.attention(conn)
     if not (HERE / "templates" / INBOX_TEMPLATE).is_file():
         return _plain_inbox(rows)
@@ -179,7 +181,10 @@ def floor_page(request: Request, conn: sqlite3.Connection = Depends(_conn)):
 @router.get("/d/{stage}", response_class=HTMLResponse)
 def department_page(request: Request, stage: str, book: str | None = None, state: str | None = None,
                     conn: sqlite3.Connection = Depends(_conn)):
-    return _page(request, conn, "department.html", dept=_department(conn, stage, book, state),
+    dept = _department(conn, stage, book, state)
+    if same := _unchanged(request, conn, f"dept:{stage}"):
+        return same
+    return _page(request, conn, "department.html", dept=dept,
                    book=book, state=state, books=views.book_names(conn))
 
 
