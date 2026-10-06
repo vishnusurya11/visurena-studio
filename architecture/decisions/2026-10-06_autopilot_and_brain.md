@@ -1,12 +1,14 @@
 # The autopilot: a Python supervisor that never stops, and a Claude brain it calls on a leash
 
-**Date:** 2026-10-06 · **Status:** PROPOSED — awaiting the owner's approval of this design
-(owner, 2026-10-06: "I need brain of Claude with agent sdk .. but the comfort of python
-jobs to make sure they are triggered and monitored and not stopped in middle"; and: "when I
-say approve I need the design of how this works, not the actual episode or script — that
-should be autonomous") · **Debate:** four specialists, reports under
-[research/2026-10-06_autopilot/](research/2026-10-06_autopilot/) (SDK architect, ops
-engineer, skeptic, repo integrator) · **Tracker:** opens when approved.
+**Date:** 2026-10-06 · **Status:** APPROVED (owner, 2026-10-06: "Approve"; defaults
+taken for the sub-choices he left open: subscription login for the brain, ep19 parks and
+ep20 starts, the CLI upgrade stays) · asked as: "I need brain of Claude with agent sdk ..
+but the comfort of python jobs to make sure they are triggered and monitored and not
+stopped in middle"; and: "when I say approve I need the design of how this works, not the
+actual episode or script — that should be autonomous" · **Debate:** four specialists,
+reports under [research/2026-10-06_autopilot/](research/2026-10-06_autopilot/) (SDK
+architect, ops engineer, skeptic, repo integrator) · **Tracker:**
+[../plan/2026-10-06_autopilot_build.md](../plan/2026-10-06_autopilot_build.md).
 
 ## The problem, measured
 

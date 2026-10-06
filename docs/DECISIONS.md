@@ -4,6 +4,24 @@ Newest first. Every architectural change gets an entry.
 
 ---
 
+## 2026-10-06 — The autopilot and the brain on a leash (owner decision: "Approve")
+
+**Ruling:** a Python supervisor (`scripts/episode/autopilot.py`, re-armed by Windows Task
+Scheduler) owns the episode lifetime: launches `drive.py` for the next chapter, derives the
+state from disk every tick, retries, cures through work orders, parks with a reason and
+moves on. Never a silent stop; never a wait on the owner — PARKED is a record. A Claude
+Agent SDK brain triages a stop mid-run (read-only, JSON verdict) and fixes with tests only
+between episodes, through the saved `/fix-parked` workflow, under a mechanical ratchet
+(red-before-green on HEAD~1/HEAD, allow-set diff, no quieter battery on the last three
+plans). Gate thresholds, judges, cures' wording and model tiers stay report-only. Brain
+spend is ledgered in the `usage` table (`stage='brain'`), $1 triage / $3 fixer caps; the
+$3 media wall is unchanged and `OverBudget` becomes a ladder terminal, not a crash. Brain
+runs on the owner's subscription login. ep19 parks under the wall; ep20 starts. Decision
+`architecture/decisions/2026-10-06_autopilot_and_brain.md`; tracker
+`architecture/plan/2026-10-06_autopilot_build.md`.
+
+---
+
 ## 2026-10-06 — The episode writer is Claude Sonnet 5.5 (owner decision: "Sonnet 5.5")
 
 **Ruling:** the `local` tier (episode_writer, line_filler) moves from gpt-5.6-luna to
