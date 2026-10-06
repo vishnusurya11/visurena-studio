@@ -479,9 +479,15 @@ def card(book: Path, episode: Episode, number: int, take: dict, measured: dict) 
         # setup-level field, and staging all of it on every take of the setup
         # put chapter 5's humped dome at the mast's foot from shot zero, twenty
         # shots before it rises (`pack_refs.props_named`).
-        staged_props = pack_refs.props_named(
-            book, list(getattr(episode.setups[first.setup], "props", []) or []),
-            pack_refs.shot_prose(shots))
+        # G-SHEET-DRAWN: a named-but-undrawn prop refuses here instead of
+        # being silently dropped by props_named's sheet filter (step 03_02
+        # draws it; this wall should never fire in a driven run).
+        pids = list(getattr(episode.setups[first.setup], "props", []) or [])
+        undrawn = pack_refs.undrawn_named(book, pids, pack_refs.shot_prose(shots))
+        if undrawn:
+            raise SystemExit(f"take {first.index:02d}: prop(s) {undrawn} named by the prose "
+                             f"and refs/props/<pid>/sheet.png is not drawn; run step 03")
+        staged_props = pack_refs.props_named(book, pids, pack_refs.shot_prose(shots))
         refs += [path for path, _ in staged_props]
         props = [row for _, row in staged_props]
     else:

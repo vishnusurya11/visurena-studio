@@ -21,12 +21,13 @@ storyboard/cells_from_picture.json names the plan's current sha8.
 """
 from __future__ import annotations
 
+import json
 import sys
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 
-from studio import cells_from_picture as cells, episode_home, pack_refs, picture_read, plan_verdict, step_cli  # noqa: E402
+from studio import cells_from_picture as cells, episode_clock, episode_home, pack_refs, picture_read, plan_verdict, step_cli  # noqa: E402
 from studio.judges import verdict as jv  # noqa: E402
 
 STEP_ID = "03"
@@ -39,6 +40,9 @@ READ = None
 """A picture reader for tests; None is the local vision model (picture_read.read)."""
 CHECK = None
 """The battery for tests; None launches plan_check as every later step reads the plan."""
+PROMPT = None
+"""A sheet-prompt writer for tests; None is stage_pick.write_sheet_prompt (workhorse
+tier, behind studio.llm's guard_spend)."""
 
 
 def pictures(book: Path, plan: dict) -> list[Path]:
@@ -83,7 +87,70 @@ def done(ctx) -> bool:
     plan = ctx.home / "plan.json"
     if not plan.exists():
         return False
-    return all(p.exists() for p in pictures(ctx.book_dir, episode_home.read_json(plan))) and cells_done(ctx)
+    doc = episode_home.read_json(plan)
+    return all(p.exists() for p in pictures(ctx.book_dir, doc)) \
+        and not missing_sheets(ctx.book_dir, doc) and cells_done(ctx)
+
+
+# ---- 03_02: every staged prop's sheet exists before anything reads the stage ------
+
+def plan_props(doc: dict) -> list[str]:
+    """Every prop pid the plan's setups stage, each once, sorted."""
+    return sorted({pid for setup in (doc.get("setups") or {}).values()
+                   for pid in setup.get("props") or []})
+
+
+def missing_sheets(book: Path, doc: dict) -> list[str]:
+    """The staged pids whose refs/props/<pid>/sheet.png is not drawn."""
+    return [pid for pid in plan_props(doc) if pack_refs.prop_sheet(book, pid) is None]
+
+
+def example_prompts(book: Path, pid: str) -> list[str]:
+    """Up to two sheet prompts from the book's OTHER cards: the house form
+    travels by example, never by a constant (the code tree names no book)."""
+    out: list[str] = []
+    for path in sorted((Path(book) / "analysis" / "props").glob("*.json")):
+        if path.stem in (pid, "index") or len(out) == 2:
+            continue
+        design = ((json.loads(path.read_text(encoding="utf-8")).get("profile") or {})
+                  .get("design") or {})
+        if design.get("sheet_prompt"):
+            out.append(design["sheet_prompt"])
+    return out
+
+
+def sheet_prompted(book: Path, pid: str) -> dict:
+    """The pid's card, given a design.sheet_prompt when it has none (one
+    workhorse call through the PROMPT seam) -- written back APPEND-ONLY to
+    design.sheet_prompt, every other key kept by json round-trip."""
+    path = Path(book) / "analysis" / "props" / f"{pid}.json"
+    card = json.loads(path.read_text(encoding="utf-8"))
+    design = card.setdefault("profile", {}).setdefault("design", {})
+    if not design.get("sheet_prompt"):
+        from studio import stage_pick
+        write = PROMPT or stage_pick.write_sheet_prompt
+        design["sheet_prompt"] = write(card, example_prompts(book, pid))
+        path.write_text(json.dumps(card, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
+    return card
+
+
+def draw_prop_sheets(ctx, doc: dict) -> None:
+    """03_02, between places --draw and the cells: each missing sheet drawn
+    free on the local GPU via build_pack.draw IMPORTED DIRECTLY (its CLI takes
+    book_id positional and ctx.run_script injects codex_id+episode, so the
+    signatures do not line up).  `refs_pack.seed_for` makes a rerun redraw the
+    same picture, and done() re-enters while a sheet is missing."""
+    import importlib
+    import time
+    from studio import refs_pack
+    pack = importlib.import_module("scripts.refs.build_pack")
+    for pid in missing_sheets(ctx.book_dir, doc):
+        card = sheet_prompted(ctx.book_dir, pid)
+        for job in refs_pack.prop_jobs(pid, card.get("profile") or {}):
+            t = time.time()
+            drawn = pack.draw(ctx.book_dir, job)
+            pack.log(ctx.book_dir, job, time.time() - t)
+            ctx.log(f"  03_02: drew {refs_pack.relpath(job)} ({drawn})", step_id=STEP_ID)
 
 
 def resign(plan: Path, previous: dict | None) -> None:
@@ -133,6 +200,10 @@ def write_cells(ctx) -> None:
 def run(ctx) -> None:
     extra = getattr(ctx, "extra", None) or []
     ctx.run_script("scripts/refs/places.py", "--draw", *extra, gpu=GPU, clock="places")
+    doc = episode_home.read_json(ctx.home / "plan.json")
+    if missing_sheets(ctx.book_dir, doc):            # 03_02, on the episode's clock
+        with episode_clock.timed(ctx.book_dir, ctx.number, "places", note="03_02 prop sheets"):
+            draw_prop_sheets(ctx, doc)
     if not rendered(ctx):
         write_cells(ctx)
 

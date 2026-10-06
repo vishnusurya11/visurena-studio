@@ -249,8 +249,17 @@ def compose(version: str, blocks: list, cols: int, rows: int, place: tuple, cast
 
 def props_of(book: Path, pids: list[str], shots: list) -> list[dict]:
     """The setup's drawn props this grid's own shots NAME -- the take's rule
-    (`pack_refs.props_named`), so panel and take stage the same machine."""
-    named = pack_refs.props_named(book, list(pids or []), pack_refs.shot_prose(shots))
+    (`pack_refs.props_named`), so panel and take stage the same machine.
+
+    G-SHEET-DRAWN: a named-but-undrawn prop REFUSES here instead of being
+    silently dropped by props_named's sheet filter (the wall behind step
+    03_02's hook; it should never fire in a driven run)."""
+    prose = pack_refs.shot_prose(shots)
+    bad = pack_refs.undrawn_named(book, list(pids or []), prose)
+    if bad:
+        raise SystemExit(f"prop(s) {bad} named by this grid's shots and refs/props/<pid>/"
+                         f"sheet.png is not drawn; run step 03")
+    named = pack_refs.props_named(book, list(pids or []), prose)
     return [{"name": name, "sheet": sheet} for sheet, (name, _text) in named]
 
 
