@@ -677,8 +677,11 @@ full definition reaches every take via `pack_refs.props_named` anyway."""
 
 def physical_clause(physical: str) -> str:
     """The card's first physical clause, <= CLAUSE_WORDS words, lowercase-led."""
+    from studio.episode_spec import slow_word
     first = re.split(r"[,.;:]", physical or "", 1)[0].strip()
     said = " ".join(first.split()[:CLAUSE_WORDS])
+    if slow_word(said):     # ep19: "the top turning slowly" broke the contract
+        return ""
     return said[:1].lower() + said[1:] if said else ""
 
 

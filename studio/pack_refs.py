@@ -149,8 +149,12 @@ def props_for(book: Path, pids: list[str]) -> list[tuple[Path, tuple[str, str]]]
     return [(sheet, prop_row(book, pid)) for pid in pids if (sheet := prop_sheet(book, pid))]
 
 
-GENERIC = {"shape", "thing", "object", "machine", "case", "box", "appliance", "apparatus"}
-"""Alias head-nouns too common to identify anything.  `pit_mast_mirror`'s own
+GENERIC = {"shape", "thing", "object", "machine", "case", "box", "appliance", "apparatus",
+           "shot", "frame", "take", "cut", "scene", "view", "camera", "lens",
+           "star", "light"}
+"""Alias head-nouns too common to identify anything -- the film's own words
+included: the cylinder's alias "the shot" made every shot of ep19 a G-STAGE
+fault (2026-10-06).  `pit_mast_mirror`'s own
 aliases include "humped shape", and a take that says "the shape of the heather"
 is not naming a Martian machine."""
 
@@ -238,8 +242,9 @@ def mask_card_names(text: str, names: list[str]) -> str:
     re-fires a bare-word test on 'Martian'."""
     out = text or ""
     for name in names:
-        if name:
-            out = re.sub(re.escape(name), lambda m: " " * len(m.group(0)), out, flags=re.I)
+        bare = re.sub(r"^(?:the|a|an)\s+", "", (name or "").strip(), flags=re.I)
+        if bare:    # any article, or none: 'a hundred-foot Martian fighting-machine' (ep18)
+            out = re.sub(re.escape(bare), lambda m: " " * len(m.group(0)), out, flags=re.I)
     return out
 
 

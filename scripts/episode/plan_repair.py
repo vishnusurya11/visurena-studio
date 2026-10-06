@@ -404,6 +404,26 @@ def llm_cure_round(book, number: int, rows: list[str]) -> bool:
     return bool(cured)
 
 
+def apply_each(doc: dict, rows: list[str], book, number: int = 0, rate: float = 3.0,
+               valid=lambda d: Episode(**d)) -> tuple[dict, list[str], set]:
+    """One cure family at a time, each kept only if the contract still holds:
+    a cure that breaks it is dropped ALONE and its rows come back uncured
+    (ep19: one cure's "slowly" voided the light, crowd and move cures with it)."""
+    groups: dict = {}
+    for row in rows:
+        groups.setdefault(pc.cure_for(row) or row, []).append(row)
+    uncured, names = [], set()
+    for group in groups.values():
+        trial, left, ran = apply(json.loads(json.dumps(doc)), group, book, number, rate=rate)
+        try:
+            valid(trial)
+        except Exception:
+            uncured += group
+            continue
+        doc, uncured, names = trial, uncured + left, names | set(ran)
+    return doc, uncured, names
+
+
 def main(book_id: str, number: int, from_aside: bool = False, no_llm: bool = False) -> int:
     book = episode_home.book_dir(book_id)
     home = episode_home.home(book, number)
@@ -425,7 +445,7 @@ def main(book_id: str, number: int, from_aside: bool = False, no_llm: bool = Fal
             doc = episode_home.read_json(path)
             from studio import plan_gates, plan_provenance, plan_verdict
             before_sha8 = plan_verdict.plan_sha8(path)
-            doc, uncured, names = apply(doc, rows, book, number, rate=plan_gates.series_rate(book, number))
+            doc, uncured, names = apply_each(doc, rows, book, number, rate=plan_gates.series_rate(book, number))
             try:
                 Episode(**doc)
                 episode_home.write_plan(path, doc)

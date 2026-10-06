@@ -53,8 +53,8 @@ def test_person_tokens_drops_a_word_two_rows_claim():
 
 def test_name_words_reads_id_display_and_name():
     got = pg.name_words(ROWS[0])
-    assert {"narrator", "unnamed", "first", "person"} <= got
-    assert "the" not in got
+    assert "narrator" in got
+    assert not got & {"the", "unnamed", "first", "person"}   # id filler names nobody (ep18 'first')
 
 
 def test_phantom_faults_fire_on_the_ep18_evidence_sentences():

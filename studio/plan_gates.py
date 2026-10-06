@@ -556,8 +556,10 @@ is pasted verbatim into every grid cell and every take prompt of the setup
 (storyboard_grid's place clause, takes_r2v's setup block), so a person named
 there is DRAWN into every take as a phantom extra (ep18, 2026-10-05)."""
 
-NAME_ARTICLES = frozenset({"the", "and", "his", "her", "their"})
-"""Words a display name carries that name nobody ("the Narrator")."""
+NAME_ARTICLES = frozenset({"the", "and", "his", "her", "their",
+                           "unnamed", "first", "second", "third", "person"})
+"""Words a display name or id carries that name nobody ("the Narrator";
+'unnamed_first_person_narrator' made "first" a person token on ep18, 2026-10-06)."""
 
 SENTENCE_SPLIT = re.compile(r"(?<=[.!?])\s+")
 
