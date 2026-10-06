@@ -29,7 +29,7 @@ from studio.episode_spec import Episode  # noqa: E402
 ROUNDS = 6
 
 
-HARD_LISTS = ("ONE PER TAKE : [", "TAKE LENGTH  : [", "CONTRACT :")
+HARD_LISTS = ("ONE PER TAKE : [", "TAKE LENGTH  : [", "CONTRACT :", "QUOTE        : [")
 """The checker's top-level rows that are HARD and list-formed; EXPECTS TEXT
 and SHEET TEXT print the same way and are informational (ep16: TAKE LENGTH
 was invisible to the repairer and three rounds deferred over 0.05 s)."""
@@ -92,7 +92,8 @@ def shot_indices(rows: list[str]) -> list[int]:
     return sorted({int(m.group(1)) for r in rows for m in [re.search(r"shot (\d+)", r)] if m})
 
 
-def apply(doc: dict, rows: list[str], book, rate: float = 3.0) -> tuple[dict, list[str]]:
+def apply(doc: dict, rows: list[str], book, number: int = 0,
+          rate: float = 3.0) -> tuple[dict, list[str]]:
     """Every cured family once per round; the rows nothing cures come back.
     `rate` is the narrator's measured words/s -- THE CHECKER'S RATE, or the
     holds algebra cures numbers the battery never measures (ep16: 8.05 s at
@@ -103,6 +104,13 @@ def apply(doc: dict, rows: list[str], book, rate: float = 3.0) -> tuple[dict, li
     for row in rows:
         name = pc.cure_for(row)
         (names.add(name) if name else uncured.append(row))
+    chapter = None
+    if names & {"source_spans", "quote_trim"}:
+        from studio import plan_brief
+        chapter = plan_brief.chapter_text(book, number)
+        if chapter is None:     # never a silent pass: the rows come back uncured
+            uncured += [r for r in rows if pc.cure_for(r) in ("source_spans", "quote_trim")]
+            names -= {"source_spans", "quote_trim"}
     for name in names:
         if name == "renumber":
             doc = pc.renumber(doc)
@@ -126,6 +134,11 @@ def apply(doc: dict, rows: list[str], book, rate: float = 3.0) -> tuple[dict, li
             doc = pc.holds(doc, rate=rate)
         elif name == "edge_cases":
             doc = pc.edge_cases(doc)
+        elif name == "source_spans":
+            doc = pc.source_spans(doc, chapter)
+        elif name == "quote_trim":
+            import seq_boards  # sibling module, lazy so the importlib-loaded test never needs it
+            doc = pc.quote_trim(doc, seq_boards.book_words(book))
         elif name == "pin_series":
             doc = pc.pin_series(doc, **series_pin_values(book))
     return doc, uncured
@@ -150,7 +163,7 @@ def main(book_id: str, number: int, from_aside: bool = False) -> int:
             return 0
         doc = episode_home.read_json(path)
         from studio import plan_gates
-        doc, uncured = apply(doc, rows, book, rate=plan_gates.series_rate(book, number))
+        doc, uncured = apply(doc, rows, book, number, rate=plan_gates.series_rate(book, number))
         try:
             Episode(**doc)
             episode_home.write_plan(path, doc)

@@ -323,6 +323,108 @@ def holds(doc: dict, rate: float = 3.0) -> dict:
     return button_beat(doc)
 
 
+# ---- G-SOURCE and QUOTE: snap to the chapter's own words --------------------------
+
+SNAP_FLOOR = 0.50
+"""Below this `best_window` ratio a span is invention, not paraphrase, and is
+DROPPED (plan_gates' SPAN_MATCH docstring: a paraphrase of the right sentence
+reads 0.5-0.7; ep18 shot 16 read 0.75 and 0.78 -- snappable).  The drop IS the
+escalation: the existing 'has no chapter span' fault fires next round."""
+SNAP_WORDS = 40
+"""A snap longer than this keeps only the single sentence containing the
+matched window's midpoint, re-snapped -- a span is evidence, not a reprint."""
+
+
+def snap_span(span: str, chapter: str) -> str | None:
+    """A failing span replaced by the chapter window `best_window` already
+    found, expanded to complete sentences -- the ep18 hand-fix, codified.  The
+    final guard re-measures with the GATE'S own scorer: this cure can never
+    write a span the gate would refuse next round.  $0."""
+    from studio import plan_gates as pg
+    ratio, start, n = pg.best_window(span, chapter)
+    if ratio < SNAP_FLOOR or not n:
+        return None
+    offs = pg._word_offsets(chapter)
+    out = pg.snap_sentences(chapter, offs[start][0], offs[min(start + n, len(offs)) - 1][1])
+    if len(out.split()) > SNAP_WORDS:
+        mid = offs[start + n // 2]
+        out = pg.snap_sentences(chapter, mid[0], mid[1])
+    return out if pg.span_match(out, chapter) >= pg.SPAN_MATCH else None
+
+
+def source_spans(doc: dict, chapter: str) -> dict:
+    """Every shot's `source` rebuilt against the doc itself, never the fault
+    rows (they truncate spans at 60 chars): a passing span is kept as-is, a
+    failing one snapped, an invention dropped; duplicates collapse keeping
+    order (the ep18 'writer re-added it' case).  Idempotent: a verbatim span
+    scores ~1.0 and is never touched."""
+    from studio import plan_gates as pg
+    for s in doc.get("shots") or []:
+        out: list[str] = []
+        for span in s.get("source") or []:
+            kept = span if pg.span_match(span, chapter) >= pg.SPAN_MATCH \
+                else snap_span(span, chapter)
+            if kept is not None and kept not in out:
+                out.append(kept)
+        s["source"] = out
+    return doc
+
+
+def _trim_tail(text: str, spans: list[tuple[int, int]], b: int) -> str:
+    """The run reaches the line's end: keep its first QUOTE_WALL words and
+    re-attach the line's own terminal punctuation (the ep02 trim)."""
+    from studio import episode_spec as es
+    return text[:spans[es.QUOTE_WALL - 1][1]] + text[b:]
+
+
+def _trim_head(text: str, spans: list[tuple[int, int]], n: int) -> str:
+    """The run starts the line: drop its leading words down to QUOTE_WALL and
+    capitalize the new first word."""
+    from studio import episode_spec as es
+    keep = text[spans[n - es.QUOTE_WALL][0]:]
+    return keep[:1].upper() + keep[1:]
+
+
+def _trim_line(text: str, source: str) -> str:
+    """One narration line brought under the wall, at most 3 passes (a second,
+    shorter run may remain).  A mid-line lift is CREATIVE and comes back
+    byte-identical for the writer."""
+    from studio import episode_spec as es
+    for _ in range(3):
+        if es.lifted_run(text, source) <= es.QUOTE_WALL:
+            return text
+        a, b, n = es.lifted_offsets(text, source)
+        spans = [s for s in _word_spans(text) if a <= s[0] and s[1] <= b]
+        if re.fullmatch(r"[\s.!?,;:\"'”’)]*", text[b:]):
+            text = _trim_tail(text, spans, b)
+        elif re.fullmatch(r"[\s\"'“‘(]*", text[:a]):
+            text = _trim_head(text, spans, n)
+        else:
+            return text
+    return text
+
+
+def _word_spans(text: str) -> list[tuple[int, int]]:
+    """Char (start, end) per word, `episode_spec._tokens`' own normalization
+    (1:1 in char count, so the spans index the original line)."""
+    low = text.replace("’", "'").replace("—", " ").replace("–", " ").lower()
+    return [m.span() for m in re.finditer(r"[a-z']+", low)]
+
+
+def quote_trim(doc: dict, source: str) -> dict:
+    """QUOTE's mechanical cure: only the HARD lines (narration over the wall,
+    by the gate's own `quoted_lines` split) are trimmed; dialogue is advisory
+    and never touched.  Valid at the plan stage only -- narration text is
+    downstream audio."""
+    from studio import episode_spec as es
+    hard, _ = es.quoted_lines(doc.get("lines") or [], source)
+    over = {line["index"] for line in hard}
+    for line in doc.get("lines") or []:
+        if line.get("index") in over:
+            line["text"] = _trim_line(line.get("text") or "", source)
+    return doc
+
+
 # ---- the dispatcher ---------------------------------------------------------------
 
 CURES: list[tuple[re.Pattern, str]] = [
@@ -332,7 +434,9 @@ CURES: list[tuple[re.Pattern, str]] = [
     (re.compile(r"NO PACE"), "pace_words"),
     (re.compile(r"beat of >= 1\.0 s of silence"), "button_beat"),
     (re.compile(r"G-MOVES|G-STILL|G-AIM"), "vary_heads"),
-    (re.compile(r"props.*\.json|names setup .* not defined|prop "), "legal_props"),
+    (re.compile(r"G-SOURCE shot \d+: span .* is not in the chapter"), "source_spans"),
+    (re.compile(r"QUOTE\s+: \["), "quote_trim"),
+    (re.compile(r"props.*\.json|names setup .* not defined|prop (?!.*no chapter span)"), "legal_props"),
     (re.compile(r"G-CROWD-CLOSE"), "close_crowds"),
     (re.compile(r"G-PHANTOM"), "strip_phantoms"),
     (re.compile(r"projects to .* an episode is|ONE PER TAKE|TAKE LENGTH|G-SETUP|hole in speech|of the runtime"), "holds"),

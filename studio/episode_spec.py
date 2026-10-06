@@ -1235,6 +1235,31 @@ def _tokens(text: str) -> list[str]:
     return re.findall(r"[a-z']+", low.lower())
 
 
+def _seen_runs(found: list[str]) -> set[str]:
+    """Every over-wall run of the source's consecutive words, up to 20 long --
+    the set `lifted_run` and `lifted_offsets` both scan against."""
+    return {" ".join(found[i:i + n]) for n in range(QUOTE_WALL + 1, 21)
+            for i in range(len(found) - n + 1)}
+
+
+def lifted_offsets(line: str, source: str) -> tuple[int, int, int]:
+    """(start_char, end_char, n_words) of the longest lifted run, indexing the
+    ORIGINAL line string: `_tokens`' normalizations (curly apostrophe, em/en
+    dash to space, lower case) are all 1:1 in char count, so the offsets
+    survive them.  (0, 0, 0) when no run is over the wall -- the same
+    longest-first scan as `lifted_run`, which stays as-is for the checker."""
+    low = (line or "").replace("\u2019", "'").replace("\u2014", " ").replace("\u2013", " ").lower()
+    spans = [m.span() for m in re.finditer(r"[a-z']+", low)]
+    words = [low[a:b] for a, b in spans]
+    seen, best, out = _seen_runs(_tokens(source)), 0, (0, 0, 0)
+    for start in range(len(words)):
+        for end in range(len(words), start + max(best, QUOTE_WALL), -1):
+            if " ".join(words[start:end]) in seen:
+                best, out = end - start, (spans[start][0], spans[end - 1][1], end - start)
+                break
+    return out
+
+
 def lifted_run(line: str, source: str) -> int:
     """The longest run of consecutive words in `line` that appears in `source`.
 
@@ -1245,8 +1270,7 @@ def lifted_run(line: str, source: str) -> int:
     words, found = _tokens(line), _tokens(source)
     if not words or not found:
         return 0
-    seen = {" ".join(found[i:i + n]) for n in range(QUOTE_WALL + 1, 21)
-            for i in range(len(found) - n + 1)}
+    seen = _seen_runs(found)
     best = 0
     for start in range(len(words)):
         for end in range(len(words), start + best, -1):
