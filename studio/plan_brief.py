@@ -76,6 +76,12 @@ PICTURE_RULES = [
     "cast member, a creature, or any person in them -- such a sentence is pasted into "
     "every take of the setup and draws a phantom. People and creatures live only in "
     "shot fields (`frame`, `at_rest`, `motion`) and in `crowd`.",
+    "A body part belongs only to a face in the SAME shot (G-GHOST): never 'over the "
+    "brother's shoulder' or 'the curate's shoulder enters the frame' unless that person "
+    "is in faces -- an unstaged man's shoulder is drawn as a second whole man. Each "
+    "person holds ONE position per drawn picture (G-TWICE): place a man once in "
+    "frame+at_rest and once in end; two different anchors ('into the scullery' and "
+    "'at the kitchen door') double him.",
 ]
 """The standing picture gates, told to the WRITER up front (2026-10-01, ep15:
 three generations of drafts omitted light directions because no section said

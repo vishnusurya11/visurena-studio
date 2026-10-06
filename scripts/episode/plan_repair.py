@@ -92,6 +92,32 @@ def shot_indices(rows: list[str]) -> list[int]:
     return sorted({int(m.group(1)) for r in rows for m in [re.search(r"shot (\d+)", r)] if m})
 
 
+def ghost_names(book) -> dict:
+    """The unique-token table the two clone-text cures measure with -- the
+    GATE'S own (`plan_gates.names_from_refs`); {} (both cures disabled, the
+    rows stay creative) for a book without refs.json."""
+    from studio import plan_gates
+    path = book / "refs" / "refs.json"
+    if not path.exists():
+        return {}
+    return plan_gates.names_from_refs(episode_home.read_json(path).get("refs") or [])
+
+
+def spend_guard(book, number: int):
+    """The repair's OWN spend context: plan_repair runs as a subprocess, so
+    the runner's context never reaches it and guard_spend would silently
+    no-op around the llm cures.  A missing db degrades loudly, never crashes."""
+    from contextlib import nullcontext
+    try:
+        from studio import db, episode_run, llm
+        return llm.spend_context(db.get_connection(), book.name.split("_", 1)[0],
+                                 "episode", "02", unit=episode_run.unit_of(number))
+    except Exception as why:
+        print(f"WARNING: no spend guard for this repair ({str(why)[:120]}); "
+              f"llm cures would run unguarded")
+        return nullcontext()
+
+
 def stage_vocab_of(book, number: int) -> dict:
     """The G-STAGE vocabulary -- the GATE'S own (`pack_refs.stage_vocab`),
     built from the book's refs.json; empty tables when the book has none."""
@@ -190,6 +216,22 @@ def apply(doc: dict, rows: list[str], book, number: int = 0,
         elif name == "prop_spans":
             from studio import plan_brief
             doc = pc.prop_spans(doc, plan_brief.chapter_paragraphs(book, number)[1], vocab)
+        elif name == "ghost_limbs":
+            from studio import plan_llm_cures
+            names_table = ghost_names(book)
+            if names_table:
+                doc = pc.ghost_limbs(doc, names_table,
+                                     rewrite=plan_llm_cures.rewriter(doc, names_table))
+            else:
+                uncured += [r for r in rows if pc.cure_for(r) == "ghost_limbs"]
+        elif name == "one_position":
+            from studio import plan_llm_cures
+            names_table = ghost_names(book)
+            own = [r for r in rows if pc.cure_for(r) == "one_position"]
+            if names_table:
+                doc = plan_llm_cures.one_position(doc, own, names_table)
+            else:
+                uncured += own
     return doc, uncured
 
 
@@ -205,27 +247,28 @@ def main(book_id: str, number: int, from_aside: bool = False) -> int:
         Episode(**doc)
         episode_home.write_plan(path, doc)
         print("aside draft restored to plan.json")
-    for round_ in range(1, ROUNDS + 1):
+    with spend_guard(book, number):
+        for round_ in range(1, ROUNDS + 1):
+            clean, rows = battery_rows(book_id, number)
+            if clean:
+                print(f"BATTERY CLEAN after {round_ - 1} repair round(s)")
+                return 0
+            doc = episode_home.read_json(path)
+            from studio import plan_gates
+            doc, uncured = apply(doc, rows, book, number, rate=plan_gates.series_rate(book, number))
+            try:
+                Episode(**doc)
+                episode_home.write_plan(path, doc)
+            except Exception as bad:
+                print(f"round {round_}: a cure broke the contract, draft kept: {str(bad)[:140]}")
+                return 1
+            print(f"round {round_}: {len(rows) - len(uncured)} fault row(s) cured, "
+                  f"{len(uncured)} creative row(s) remain")
+            if (uncured and len(uncured) == len(rows)) or not rows:
+                break   # nothing this table cures, or nothing collected: stop looping
         clean, rows = battery_rows(book_id, number)
-        if clean:
-            print(f"BATTERY CLEAN after {round_ - 1} repair round(s)")
-            return 0
-        doc = episode_home.read_json(path)
-        from studio import plan_gates
-        doc, uncured = apply(doc, rows, book, number, rate=plan_gates.series_rate(book, number))
-        try:
-            Episode(**doc)
-            episode_home.write_plan(path, doc)
-        except Exception as bad:
-            print(f"round {round_}: a cure broke the contract, draft kept: {str(bad)[:140]}")
-            return 1
-        print(f"round {round_}: {len(rows) - len(uncured)} fault row(s) cured, "
-              f"{len(uncured)} creative row(s) remain")
-        if (uncured and len(uncured) == len(rows)) or not rows:
-            break   # nothing this table cures, or nothing collected: stop looping
-    clean, rows = battery_rows(book_id, number)
-    if not clean and rewrite_round(book, path, rows):
-        clean, rows = battery_rows(book_id, number)
+        if not clean and rewrite_round(book, path, rows):
+            clean, rows = battery_rows(book_id, number)
     if clean:
         print("BATTERY CLEAN")
         return 0

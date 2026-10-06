@@ -1,5 +1,6 @@
 """The plan cure table: every MECHANICAL battery fault repaired by template,
-never by a writer call.
+never by a WHOLE-PLAN writer call; one llm cure (studio/plan_llm_cures.py)
+rewrites a single shot's position fields.
 
 MEASURED (docs/audit/2026-10-01_plan_hours_debate.md): 97% of ep14-15's plan
 hours were paid whole-plan rewrites refused by rules whose cures are template
@@ -682,9 +683,108 @@ def prop_spans(doc: dict, paragraphs: list[str], vocab: dict) -> dict:
     return doc
 
 
+# ---- G-GHOST: the ghost body-part clause is cut out, for free ---------------------
+
+OVER_GHOST = re.compile(r"\bover\s+(?:the\s+)?([a-z][\w-]*)'s\s+shoulders?\b", re.I)
+GHOST_STRIP_SHARE = 0.30
+"""The largest share of a field's words the clause strip may delete; past it
+the field is left for the llm rewrite (a strip that eats the field is a
+rewrite wearing scissors)."""
+GHOST_FLOOR_WORDS = 10
+"""frame/at_rest keep at least this many words after a strip, or the strip
+is refused the same way."""
+
+
+def _ghost_owners(seg: str, faces: list, names: dict, prose: str) -> list[str]:
+    """The ghost owners this segment stages: the GATE'S own test (ghost_hits +
+    staged_elsewhere over the whole shot's prose) -- the cure measures like
+    the checker."""
+    from studio import plan_gates as pg
+    return [owner for _, _, owner in pg.ghost_hits(seg, names)
+            if owner not in faces and not pg.staged_elsewhere(prose, owner, names)]
+
+
+def _swap_over_shoulder(text: str, faces: list, names: dict, prose: str) -> str:
+    """'over the X's shoulder' -> 'from behind' when X is a ghost: the camera
+    position stays, the body goes (the ep17 shot 11 hand fix)."""
+    from studio import plan_gates as pg
+    norm = (text or "").replace("’", "'")
+    out, last = [], 0
+    for m in OVER_GHOST.finditer(norm):
+        owner = names.get(m.group(1).lower())
+        if owner and owner not in faces and not pg.staged_elsewhere(prose, owner, names):
+            out.append(text[last:m.start()] + "from behind")
+            last = m.end()
+    return "".join(out) + text[last:]
+
+
+def _ghost_strip(text: str, faces: list, names: dict, prose: str) -> tuple[str, int, int]:
+    """(stripped, dropped_words, total_words): every ;/.-delimited clause
+    staging a ghost cut out whole, separators collapsed (the ep18 15/19/21
+    hand surgery)."""
+    kept, dropped = [], 0
+    for seg in re.split(r"(?<=[;.])\s*", text or ""):
+        if _ghost_owners(seg, faces, names, prose):
+            dropped += len(seg.split())
+        else:
+            kept.append(seg)
+    out = " ".join(s for s in kept if s.strip())
+    out = re.sub(r"^[\s;.,]+", "", re.sub(r";\s*;", ";", out))
+    return out, dropped, len((text or "").split())
+
+
+def _ghost_cure(holder: dict, faces: list, names: dict, prose: str, rewrite, index) -> None:
+    """One shot's (or cut's) fields through both passes, under the strip guard:
+    a refused strip keeps the field and hands (shot_index, field) to `rewrite`."""
+    from studio import plan_gates as pg
+    for field in pg.GHOST_FIELDS:
+        text = holder.get(field) or ""
+        if not text:
+            continue
+        cured = _swap_over_shoulder(text, faces, names, prose)
+        if cured != text:
+            holder[field] = cured
+        if _ghost_owners(cured, faces, names, prose):
+            stripped, dropped, total = _ghost_strip(cured, faces, names, prose)
+            floor = GHOST_FLOOR_WORDS if field in ("frame", "at_rest") else 0
+            if dropped > GHOST_STRIP_SHARE * total or len(stripped.split()) < floor:
+                if rewrite is not None:
+                    rewrite(index, field)
+            else:
+                holder[field] = stripped
+
+
+def _dict_prose(s: dict) -> str:
+    """`plan_gates.shot_prose` on a plan DICT's shot."""
+    from studio import plan_gates as pg
+    fields = pg.GHOST_FIELDS + ("camera",)
+    parts = [s.get(f) or "" for f in fields]
+    for cut in s.get("cuts") or []:
+        parts += [cut.get(f) or "" for f in fields]
+    return " ".join(parts)
+
+
+def ghost_limbs(doc: dict, names: dict, rewrite=None) -> dict:
+    """G-GHOST's mechanical cure, the exact ep17/18 hand surgery, idempotent
+    and $0: 'over the X's shoulder' -> 'from behind', any other ghost clause
+    dropped whole.  A strip past GHOST_STRIP_SHARE of the field hands
+    (shot_index, field) to `rewrite` when one is given, else leaves the field
+    for the battery to re-flag.  names={} (a refs-less book) is a no-op."""
+    if not names:
+        return doc
+    for s in doc.get("shots") or []:
+        faces, prose = list(s.get("faces") or []), _dict_prose(s)
+        _ghost_cure(s, faces, names, prose, rewrite, s.get("index"))
+        for cut in s.get("cuts") or []:
+            _ghost_cure(cut, faces + list(cut.get("faces") or []), names, prose, None, s.get("index"))
+    return doc
+
+
 # ---- the dispatcher ---------------------------------------------------------------
 
 CURES: list[tuple[re.Pattern, str]] = [
+    (re.compile(r"G-GHOST"), "ghost_limbs"),
+    (re.compile(r"G-TWICE"), "one_position"),
     (re.compile(r"shots are numbered|lines are numbered|a line's shot never precedes"), "renumber"),
     (re.compile(r"G-LIGHT"), "light_directions"),
     (re.compile(r"G-SIZE"), "head_fractions"),

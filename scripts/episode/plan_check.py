@@ -232,6 +232,15 @@ def main(book_id: str, number: int) -> int:
     print("G-PHANTOM    :", len(pf) or "clean"); hard += len(pf)
     for f in pf:
         print("   ", f[:170])
+    names = plan_gates.names_from_refs(refs)
+    gg = plan_gates.ghost_limb_faults(ep, names)
+    print("G-GHOST      :", len(gg) or "clean"); hard += len(gg)
+    for f in gg:
+        print("   ", f[:170])
+    gt = plan_gates.double_position_faults(ep, names)
+    print("G-TWICE      :", len(gt) or "clean"); hard += len(gt)
+    for f in gt:
+        print("   ", f[:170])
     print("EXPECTS TEXT :", plan_gates.expects_text(ep) or "no shot stages printed matter")
     bad, folded = plan_gates.bed_faults(ep)
     print("G-BED        :", len(bad) or "clean"); hard += len(bad)

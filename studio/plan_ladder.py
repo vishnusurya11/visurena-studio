@@ -28,7 +28,7 @@ import re
 from pydantic import ValidationError
 from strands.types.exceptions import StructuredOutputException
 
-from studio import episode_home, episode_spec, llm, plan_brief, plan_verdict
+from studio import episode_home, episode_spec, llm, plan_brief, plan_cures, plan_verdict
 from studio.judges import plan as plan_judge
 from studio.judges.verdict import Fault, Verdict
 from studio.ladder import Ladder, Rung
@@ -140,6 +140,20 @@ class Desk:
     judged: dict[str, Verdict] = field(default_factory=dict)
     agent: object | None = None             # the reasoner, once a rule miss handed it the climb
     best: tuple | None = None               # (doc, n, faults): the battery-refused draft with the fewest lines
+    _names_cache: dict | None = None        # the refs-derived token table the ghost scrub reads
+
+    def _names(self) -> dict:
+        """The unique-token table for the ghost scrub, read once from the
+        book's refs.json; {} -- scrub disabled -- for a ctx or book without
+        one, so every refs-less Desk writes drafts verbatim."""
+        if self._names_cache is None:
+            try:
+                from studio import plan_gates
+                doc = episode_home.read_json(Path(self.ctx.book_dir) / "refs" / "refs.json")
+                self._names_cache = plan_gates.names_from_refs(doc.get("refs") or [])
+            except Exception:
+                self._names_cache = {}
+        return self._names_cache
 
     def brief_(self, fresh: bool = False) -> dict:
         if self.brief is None or fresh:
@@ -184,7 +198,13 @@ class Desk:
                 raise                                 # a provider failure, not a refusal
             return
         self.pending = None
-        episode_home.write_plan(self.plan, episode.model_dump())
+        # The re-add killer (2026-10-05): every rung's draft -- improve,
+        # fresh_brief, model_tier, resume -- is scrubbed of ghost body-part
+        # clauses for free BEFORE the battery ever re-judges it.  The scrub
+        # stays inside the try-less path: a scrub bug surfaces as write_plan's
+        # loud SystemExit, never a silent skip.
+        doc = plan_cures.ghost_limbs(episode.model_dump(), self._names())
+        episode_home.write_plan(self.plan, doc)
 
     def remember(self, verdict: Verdict) -> None:
         """The draft on disk with its verdict, when the battery let it through;

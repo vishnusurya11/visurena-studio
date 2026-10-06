@@ -1189,6 +1189,161 @@ def shout_faults(episode) -> list[str]:
             for l in episode.lines if l.kind == "narration" and l.text.rstrip(" \"'’”").endswith("!")]
 
 
+# ---- G-GHOST and G-TWICE: one person, one body, one position (2026-10-05) --------
+# H3 draws every person the text asserts: a possessive body part belonging to a
+# cast member absent from `faces` is drawn as a second whole man (ep17 shot 11,
+# ep18 shots 15/19/21), and one faces member given two world anchors inside one
+# drawn surface is drawn twice (ep18 shot 20).  Pure data in, fault strings out;
+# the names table is an argument, as paragraphs are to `cover_faults`.
+
+BODY_PART = re.compile(r"\b([a-z][\w-]*)'s\s+(shoulders?|hands?|arms?|back|head)\b", re.I)
+GHOST_FIELDS = ("frame", "at_rest", "end", "motion")
+"""The fields whose possessives stage a body.  `camera` is deliberately
+outside: it places the CAMERA, and the judged plans use it as a height idiom
+('level with a kneeling child's shoulder', ep08 shot 18; 'at the near chair
+over Watson's shoulder', ep05 shot 4) on shots the owner called right."""
+LOCATIVE = re.compile(r"\b(?:at|by|beside|against|behind|before|under|beneath|near|inside|into|"
+                      r"in|on|upon)\s+(?:the|a|an|his|her|its)?\s*([a-z][\w-]{3,})", re.I)
+SCREEN_ANCHORS = frozenset({"frame", "edge", "centre", "center", "left", "right", "third",
+                            "half", "foreground", "background", "corner", "height"})
+"""Placements in the PICTURE, not the world: 'at the LEFT frame edge' and 'at
+the kitchen door' are one position, not two."""
+PRONOUN_ANCHORS = frozenset({"them", "their", "theirs", "himself", "herself", "itself",
+                             "themselves"})
+BODY_ANCHORS = frozenset({"shoulder", "hand", "arm", "back", "head"})
+
+
+def names_from_refs(rows: list[dict]) -> dict[str, str]:
+    """{token: entity_id} for every name token exactly ONE character row
+    claims: id parts over 2 chars plus display words over 3.  Both Elphinstones
+    sharing 'elphinstone' drop the token -- a documented miss, their full
+    display phrase is not matched by these gates."""
+    claims: dict[str, set] = {}
+    for row in rows:
+        if row.get("kind", "character") != "character":
+            continue
+        who = str(row.get("entity_id") or "")
+        tokens = {t for t in who.lower().split("_") if len(t) > 2}
+        tokens |= {w for w in re.findall(r"[a-z]+", str(row.get("display") or "").lower())
+                   if len(w) > 3 and w not in NAME_ARTICLES}
+        for token in tokens:
+            claims.setdefault(token, set()).add(who)
+    return {t: next(iter(s)) for t, s in claims.items() if len(s) == 1}
+
+
+def ghost_hits(text: str, names: dict[str, str]) -> list[tuple[str, str, str]]:
+    """(token, part, owner) per possessive body part whose owner resolves to a
+    cast member; an unresolved possessive (the boat's, the frame's) is
+    nobody's.  Shared by the gate and the `ghost_limbs` cure."""
+    out = []
+    for m in BODY_PART.finditer((text or "").replace("’", "'")):
+        owner = names.get(m.group(1).lower())
+        if owner:
+            out.append((m.group(1), m.group(2), owner))
+    return out
+
+
+def staged_elsewhere(prose: str, owner: str, names: dict[str, str]) -> bool:
+    """A NON-possessive occurrence of any of the owner's tokens in the shot's
+    own prose: the person is staged deliberately -- ep05's reverse over-shoulder
+    coverage names Holmes whole in `motion`, ep08's crowd child walks in
+    `frame` -- so the possessive is that person's own limb, not a ghost."""
+    masked = BODY_PART.sub(" ", (prose or "").replace("’", "'"))
+    return any(re.search(rf"\b{re.escape(t)}\b", masked, re.I)
+               for t, e in names.items() if e == owner)
+
+
+def shot_prose(s) -> str:
+    """Everything this shot (and its cuts) says, for `staged_elsewhere`."""
+    fields = GHOST_FIELDS + ("camera",)
+    parts = [getattr(s, f, "") or "" for f in fields]
+    for c in getattr(s, "cuts", None) or []:
+        parts += [getattr(c, f, "") or "" for f in fields]
+    return " ".join(parts)
+
+
+def ghost_limb_faults(episode, names: dict[str, str]) -> list[str]:
+    """G-GHOST, always hard: a body part of a cast member who is NOT in faces
+    and NOWHERE staged whole in the shot's prose stages that whole man.  A
+    face's own shoulder is legal at plan level (the take-prompt side carries
+    its own-possessive tagging)."""
+    out = []
+    for s in episode.shots:
+        prose = shot_prose(s)
+        holders = [(s, list(getattr(s, "faces", []) or []))]
+        holders += [(c, holders[0][1] + list(getattr(c, "faces", []) or []))
+                    for c in getattr(s, "cuts", None) or []]
+        for holder, faces in holders:
+            for field in GHOST_FIELDS:
+                for token, part, owner in ghost_hits(getattr(holder, field, "") or "", names):
+                    if owner not in faces and not staged_elsewhere(prose, owner, names):
+                        out.append(fault("G-GHOST", f"shot {s.index}",
+                                         f"{field} stages {token}'s {part} and {owner} is not in "
+                                         f"faces {list(getattr(s, 'faces', []) or [])}",
+                                         owner, "a face, or absent"))
+    return out
+
+
+def anchors_of(clause: str, names: dict[str, str]) -> str:
+    """The clause's one world anchor: the first LOCATIVE noun that is not a
+    screen-space placement, a cast token, a pronoun or a body-part word
+    ('one step behind his LEFT side' anchors nothing)."""
+    for m in LOCATIVE.finditer((clause or "").replace("’", "'")):
+        raw = m.group(1).lower()
+        noun = raw.rstrip("s")
+        if raw in SCREEN_ANCHORS or noun in SCREEN_ANCHORS:
+            continue
+        if raw in names or noun in names or raw in PRONOUN_ANCHORS or noun in PRONOUN_ANCHORS:
+            continue
+        if noun in BODY_ANCHORS:
+            continue
+        return noun
+    return ""
+
+
+def _same_anchor(a: str, b: str) -> bool:
+    """door/doorway never conflict: either's first 4 letters prefix the other."""
+    return a.startswith(b[:4]) or b.startswith(a[:4])
+
+
+def _double_rows(s, surface: str, text: str, faces: list, names: dict[str, str]) -> list[str]:
+    """>= 2 distinct anchors for one faces member in ONE drawn surface."""
+    mine = {t: e for t, e in names.items() if e in faces}
+    found: dict[str, list[str]] = {}
+    for clause in re.split(r"[;.]", (text or "").replace("’", "'")):
+        anchor = anchors_of(clause, names)
+        if not anchor:
+            continue
+        for token, entity in mine.items():
+            if re.search(rf"\b{re.escape(token)}\b", clause, re.I):
+                held = found.setdefault(entity, [])
+                if all(not _same_anchor(anchor, a) for a in held):
+                    held.append(anchor)
+    return [fault("G-TWICE", f"shot {s.index}",
+                  f"{surface} places {entity} at both {held[0]!r} and {held[1]!r}; "
+                  f"one person holds one position per picture", 2, 1)
+            for entity, held in found.items() if len(held) >= 2]
+
+
+def double_position_faults(episode, names: dict[str, str]) -> list[str]:
+    """G-TWICE, always hard, over each shot's drawn surfaces: frame+at_rest,
+    end alone, and each cut's pair.  at_rest is NEVER compared against end --
+    motion legitimately moves a person between those two drawn pictures."""
+    out = []
+    for s in episode.shots:
+        faces = list(getattr(s, "faces", []) or [])
+        surfaces = [("frame+at_rest",
+                     f"{getattr(s, 'frame', '') or ''}. {getattr(s, 'at_rest', '') or ''}", faces),
+                    ("end", getattr(s, "end", "") or "", faces)]
+        surfaces += [(f"cut@{c.at_s} frame+at_rest",
+                      f"{getattr(c, 'frame', '') or ''}. {getattr(c, 'at_rest', '') or ''}",
+                      faces + list(getattr(c, "faces", []) or []))
+                     for c in getattr(s, "cuts", None) or []]
+        for surface, text, held in surfaces:
+            out += _double_rows(s, surface, text, held, names)
+    return out
+
+
 # ---- the verdict ---------------------------------------------------------------
 
 def sync_faults(episode: Episode) -> list[str]:
