@@ -22,7 +22,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
-from studio import actor_gate, cast_refs, episode_home, episode_ref_official as ro, episode_spec as spec, house_style, plan_brief, plan_gates, timeline_fresh
+from studio import actor_gate, cast_refs, episode_home, episode_ref_official as ro, episode_spec as spec, house_style, pack_refs, plan_brief, plan_gates, timeline_fresh
 from studio import episode_takes as tk
 from studio.episode_takes import BUDGET
 
@@ -218,6 +218,15 @@ def main(book_id: str, number: int) -> int:
     cc = plan_gates.close_crowd_faults(ep)
     print("G-CROWD-CLOSE:", cc or "clean"); hard += len(cc)
     for f in cc:
+        print("   ", f[:170])
+    vocab = pack_refs.stage_vocab(book, refs, number)
+    sf = plan_gates.stage_faults(ep, vocab)
+    print("G-STAGE      :", len(sf) or "clean"); hard += len(sf)
+    for f in sf:
+        print("   ", f[:170])
+    ff = plan_gates.creature_face_faults(ep, set(vocab["creatures"]))
+    print("G-FACE-KIND  :", len(ff) or "clean"); hard += len(ff)
+    for f in ff:
         print("   ", f[:170])
     pf = plan_gates.phantom_faults(ep, plan_gates.person_tokens(refs), house_style.place_words())
     print("G-PHANTOM    :", len(pf) or "clean"); hard += len(pf)

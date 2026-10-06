@@ -437,6 +437,251 @@ def quote_trim(doc: dict, source: str) -> dict:
     return doc
 
 
+# ---- G-STAGE / G-FACE-KIND: machines by card name, creatures never staged ---------
+
+SHOT_FIELDS = ("frame", "motion", "at_rest", "end")
+SETUP_FIELDS = ("described", "crowd", "geometry")
+CLAUSE_WORDS = 12
+"""The physical clause the FIRST cured mention carries, capped (owner rule:
+described in the shot); every later mention gets the card name alone -- the
+full definition reaches every take via `pack_refs.props_named` anyway."""
+
+
+def physical_clause(physical: str) -> str:
+    """The card's first physical clause, <= CLAUSE_WORDS words, lowercase-led."""
+    first = re.split(r"[,.;:]", physical or "", 1)[0].strip()
+    said = " ".join(first.split()[:CLAUSE_WORDS])
+    return said[:1].lower() + said[1:] if said else ""
+
+
+def _rename_first(text: str, term: str, name: str, card_names: list[str],
+                  clause: str = "") -> tuple[str, bool]:
+    """The first `(the|a|an)? term` phrase renamed to the card's `name` (plus
+    ', clause' when given); existing card names are masked first so a word
+    inside one is never renamed again.  (text, hit)."""
+    from studio import pack_refs
+    masked = pack_refs.mask_card_names(text or "", card_names)
+    m = re.search(rf"(?:\b(?:the|a|an)\s+)?\b{re.escape(term)}s?\b", masked, re.I)
+    if not m:
+        return text, False
+    said = name + (f", {clause}" if clause else "")
+    return (text or "")[:m.start()] + said + (text or "")[m.end():], True
+
+
+def _mentioned(doc: dict, name: str) -> bool:
+    """Is the card's name already in some shot's prose?  The physical clause
+    lands on the FIRST mention only."""
+    return any(re.search(re.escape(name), " ".join(s.get(f) or "" for f in SHOT_FIELDS), re.I)
+               for s in doc.get("shots") or [])
+
+
+def _stage_pid(setup: dict, pid: str) -> None:
+    props = setup.setdefault("props", [])
+    if pid not in props:
+        props.append(pid)
+
+
+def _cure_fields(holder: dict, fields: tuple, card: dict, names: list[str], clause: str) -> bool:
+    """The first bare term per field renamed to the card name; the clause is
+    spent on the first field cured.  True when anything hit."""
+    hit = False
+    for f in fields:
+        if not holder.get(f):
+            continue
+        for term in card["terms"]:
+            out, done = _rename_first(holder[f], term, card["name"], names,
+                                      "" if hit else clause)
+            if done:
+                holder[f], hit = out, True
+                break
+    return hit
+
+
+def _candidates(s: dict, doc: dict, vocab: dict) -> list[str]:
+    """The machine pids a bare creature word in this shot could mean: the
+    setup's own staged machines, else the chapter's whole vocabulary."""
+    setup = (doc.get("setups") or {}).get(s.get("setup")) or {}
+    staged = [p for p in setup.get("props") or [] if p in vocab["machines"]]
+    return staged or sorted(vocab["machines"])
+
+
+def rename_creature(doc: dict, shot_index: int, term: str, pid: str, vocab: dict) -> dict:
+    """One shot's creature phrase renamed to `pid`'s card name and the pid
+    staged -- the mechanical rerun after an llm pick, and the one-candidate
+    cure's workhorse.  The first mention carries the physical clause."""
+    card = vocab["machines"][pid]
+    names = [c["name"] for c in vocab["machines"].values()]
+    s = next((x for x in doc.get("shots") or [] if x.get("index") == shot_index), None)
+    if s is None:
+        return doc
+    clause = "" if _mentioned(doc, card["name"]) else physical_clause(card["physical"])
+    _cure_fields(s, SHOT_FIELDS, {**card, "terms": [term]}, names, clause)
+    _stage_pid((doc.get("setups") or {}).get(s.get("setup")) or {}, pid)
+    return doc
+
+
+def _cure_shot_creatures(doc: dict, vocab: dict, names: list[str]) -> list[tuple[int, str, list[str]]]:
+    """Bare creature words in SHOT prose: renamed to the one candidate machine
+    card; >= 2 candidates come back unresolved for the llm pick (ep17 shot 14:
+    'a Martian wading' -> 'the Martian fighting-machine wading')."""
+    from studio import pack_refs
+    unresolved = []
+    for s in doc.get("shots") or []:
+        masked = pack_refs.mask_card_names(" ".join(s.get(f) or "" for f in SHOT_FIELDS), names)
+        for terms in (vocab.get("creatures") or {}).values():
+            term = pack_refs.first_term(masked, terms)
+            if not term:
+                continue
+            cands = _candidates(s, doc, vocab)
+            if len(cands) == 1:
+                rename_creature(doc, s.get("index"), term, cands[0], vocab)
+            elif cands:
+                unresolved.append((s.get("index"), term, cands))
+    return unresolved
+
+
+def stage_machines(doc: dict, vocab: dict) -> tuple[dict, list[tuple[int, str, list[str]]]]:
+    """G-STAGE's mechanical cure: every bare machine word becomes its card name
+    with the pid staged in the setup's props; a bare creature word with one
+    candidate is renamed the same way.  Returns (doc, unresolved creature rows
+    for `stage_pick.pick_machine`).  $0."""
+    from studio import pack_refs
+    names = [c["name"] for c in vocab["machines"].values()]
+    for s in doc.get("shots") or []:
+        setup = (doc.get("setups") or {}).get(s.get("setup")) or {}
+        for pid, card in vocab["machines"].items():
+            prose = " ".join(s.get(f) or "" for f in SHOT_FIELDS)
+            if not pack_refs.names_prop(prose, card["terms"]):
+                continue
+            if pack_refs.first_term(pack_refs.mask_card_names(prose, names), card["terms"]):
+                clause = "" if _mentioned(doc, card["name"]) else physical_clause(card["physical"])
+                _cure_fields(s, SHOT_FIELDS, card, names, clause)
+            _stage_pid(setup, pid)
+    for setup in (doc.get("setups") or {}).values():
+        for pid, card in vocab["machines"].items():
+            text = " ".join(setup.get(f) or "" for f in SETUP_FIELDS)
+            if pack_refs.names_prop(text, card["terms"]):
+                _cure_fields(setup, SETUP_FIELDS, card, names, "")
+                _stage_pid(setup, pid)
+    return doc, _cure_shot_creatures(doc, vocab, names)
+
+
+def strip_creatures(doc: dict, vocab: dict) -> dict:
+    """G-STAGE row (d) in SETUP text: every sentence naming a bare creature
+    word is dropped -- a creature is never scenery of a place picture (ep17/18
+    hand fix).  Card names are masked first, the gate's own exemption."""
+    from studio import pack_refs
+    names = [c["name"] for c in vocab["machines"].values()]
+    terms = [t for ts in (vocab.get("creatures") or {}).values() for t in ts]
+    for setup in (doc.get("setups") or {}).values():
+        for f in SETUP_FIELDS:
+            if not setup.get(f):
+                continue
+            kept = [sent for sent in split_sentences(setup[f])
+                    if not pack_refs.first_term(pack_refs.mask_card_names(sent, names), terms)]
+            setup[f] = " ".join(kept)
+    return doc
+
+
+def drop_creature_faces(doc: dict, creature_ids: set[str]) -> dict:
+    """G-FACE-KIND's cure: creature ids filtered out of every shot's faces,
+    every cut's faces and every setup's cast; human ids and extras untouched.
+    Runs in the same round as stage_machines, so the shot that loses its
+    creature face gains the machine card name in the same pass."""
+    def kept(ids):
+        return [i for i in ids or [] if i not in creature_ids]
+    for s in doc.get("shots") or []:
+        s["faces"] = kept(s.get("faces"))
+        for cut in s.get("cuts") or []:
+            cut["faces"] = kept(cut.get("faces"))
+    for setup in (doc.get("setups") or {}).values():
+        setup["cast"] = kept(setup.get("cast"))
+    return doc
+
+
+# ---- G-SOURCE: a cured prop claim copies its chapter sentence ---------------------
+
+SPAN_WINDOW = 25
+"""The longest span the cure copies: a verbatim window around the term -- a
+span is evidence, not a reprint, and verbatim guarantees span_match >= 0.85."""
+
+
+def _names_pid(text: str, pid: str) -> bool:
+    """`plan_gates.staged_props`' pid-token test, on dicts."""
+    low = (text or "").lower()
+    return any(re.search(rf"\b{re.escape(t)}s?\b", low)
+               for t in pid.lower().split("_") if len(t) > 3)
+
+
+def _pid_terms(pid: str, vocab: dict) -> list[str]:
+    """The pid's alias terms from the vocab, else its own id tokens."""
+    said = (vocab.get("machines") or {}).get(pid) or {}
+    return said.get("terms") or [t for t in pid.lower().split("_") if len(t) > 3]
+
+
+def _unspanned_pids(s: dict, setup: dict, vocab: dict) -> list[str]:
+    """The staged pids this shot's prose names whose `source` has no span
+    naming any of the pid's terms (the 'has no chapter span' set)."""
+    prose = " ".join(s.get(f) or "" for f in SHOT_FIELDS)
+    spans = " ".join(s.get("source") or [])
+    from studio import pack_refs
+    return [pid for pid in setup.get("props") or []
+            if _names_pid(prose, pid)
+            and not pack_refs.first_term(spans, _pid_terms(pid, vocab))]
+
+
+def _chapter_sentences(paragraphs: list[str]) -> list[tuple[int, str]]:
+    """(1-based paragraph, sentence) for every chapter sentence --
+    `span_paragraph`'s own numbering."""
+    return [(k, sent) for k, para in enumerate(paragraphs, 1)
+            for sent in split_sentences(para) if sent.strip()]
+
+
+def _span_window(sentence: str, term: str) -> str:
+    """The sentence verbatim, or its <= SPAN_WINDOW-word contiguous window
+    centred on the term (still verbatim, so still ~1.0 on span_match)."""
+    said = sentence.split()
+    if len(said) <= SPAN_WINDOW:
+        return sentence
+    at = next((k for k, w in enumerate(said)
+               if re.search(rf"\b{re.escape(term)}s?\b", w, re.I)), len(said) // 2)
+    start = max(0, min(at - SPAN_WINDOW // 2, len(said) - SPAN_WINDOW))
+    return " ".join(said[start:start + SPAN_WINDOW])
+
+
+def _span_anchor(doc: dict, s: dict, paragraphs: list[str]) -> int:
+    """The paragraph the shot's own spans sit in, else the nearest neighbour
+    shot's, else 1."""
+    from studio import plan_gates
+    order = sorted(doc.get("shots") or [],
+                   key=lambda x: abs((x.get("index") or 0) - (s.get("index") or 0)))
+    for near in order:
+        for span in near.get("source") or []:
+            if (at := plan_gates.span_paragraph(span, paragraphs)) is not None:
+                return at
+    return 1
+
+
+def prop_spans(doc: dict, paragraphs: list[str], vocab: dict) -> dict:
+    """A staged pid claim with no chapter span gets a VERBATIM chapter sentence
+    nearest the shot's own paragraph, appended to `source`; zero candidates
+    leave the row uncured (creative, the writer's).  $0."""
+    from studio import pack_refs
+    for s in doc.get("shots") or []:
+        setup = (doc.get("setups") or {}).get(s.get("setup")) or {}
+        for pid in _unspanned_pids(s, setup, vocab):
+            found = [(k, sent, t) for k, sent in _chapter_sentences(paragraphs)
+                     if (t := pack_refs.first_term(sent, _pid_terms(pid, vocab)))]
+            if not found:
+                continue
+            anchor = _span_anchor(doc, s, paragraphs)
+            _, sent, term = min(found, key=lambda row: abs(row[0] - anchor))
+            span = _span_window(sent, term)
+            if span not in (s.get("source") or []):
+                s.setdefault("source", []).append(span)
+    return doc
+
+
 # ---- the dispatcher ---------------------------------------------------------------
 
 CURES: list[tuple[re.Pattern, str]] = [
@@ -448,6 +693,12 @@ CURES: list[tuple[re.Pattern, str]] = [
     (re.compile(r"G-MOVES|G-STILL|G-AIM|G-ANCHOR|\bM2 shot \d+:"), "rebalance_heads"),
     (re.compile(r"G-SOURCE shot \d+: span .* is not in the chapter"), "source_spans"),
     (re.compile(r"QUOTE\s+: \["), "quote_trim"),
+    # The stage families sit ABOVE the legal_props catch-all: its bare 'prop '
+    # alternative would otherwise swallow them into a no-op cure.
+    (re.compile(r"G-STAGE setup \S+: bare creature word"), "strip_creatures"),
+    (re.compile(r"G-STAGE"), "stage_machines"),
+    (re.compile(r"G-FACE-KIND"), "drop_creature_faces"),
+    (re.compile(r"prop '.+' has no chapter span"), "prop_spans"),
     (re.compile(r"props.*\.json|names setup .* not defined|prop (?!.*no chapter span)"), "legal_props"),
     (re.compile(r"G-CROWD-CLOSE"), "close_crowds"),
     (re.compile(r"G-PHANTOM"), "strip_phantoms"),

@@ -174,6 +174,84 @@ def names_prop(text: str, terms: list[str]) -> bool:
     return any(re.search(rf"\b{re.escape(t)}s?\b", low) for t in terms)
 
 
+def first_term(text: str, terms: list[str]) -> str | None:
+    """The first of `terms` the text names -- `names_prop`'s own word-boundary
+    test, answering WHICH word fired so a gate can quote it."""
+    low = (text or "").lower()
+    return next((t for t in terms if re.search(rf"\b{re.escape(t)}s?\b", low)), None)
+
+
+STAGE_KINDS = ("machine", "vessel", "vehicle")
+"""Prop-card kinds a plan may only show AS their drawn card (G-STAGE): a bare
+word ("tripod", "a Martian wading") stages a humanoid character sheet -- or
+nothing -- and the drawer invents a naked humanoid."""
+
+
+def head_terms(*names: str) -> list[str]:
+    """Head-noun terms of a row's names ('the Martians' -> ['martian']): the
+    last word, singular, less the generic heads -- `prop_terms`' own rule."""
+    heads = set()
+    for name in names:
+        words = re.findall(r"[a-z]+", (name or "").lower())
+        if words:
+            head = words[-1]
+            heads.add(head[:-1] if head.endswith("s") and len(head) > 3 else head)
+    return sorted(h for h in heads if len(h) > 2 and h not in GENERIC)
+
+
+def creature_terms(rows: list[dict]) -> dict[str, list[str]]:
+    """{entity_id: head-noun terms} for refs.json character rows with
+    gender=='creature'.  A book whose creature IS the walking cast
+    (Frankenstein's creature, a talking animal) must NOT carry
+    gender=='creature' on its row, or G-FACE-KIND defaces it -- the rule keys
+    on the row the book's cast step writes (constants outlive their world)."""
+    return {str(r.get("entity_id")): head_terms(str(r.get("name") or ""),
+                                                str(r.get("display") or ""))
+            for r in rows
+            if r.get("kind", "character") == "character" and r.get("gender") == "creature"}
+
+
+def stage_vocab(book: Path, refs_rows: list[dict], chapter: int) -> dict:
+    """The G-STAGE vocabulary for one episode (episode number == chapter
+    number): THIS chapter's machine/vessel/vehicle cards and the cast's
+    creature rows.  Chapter-filtering on the card's `appears` bounds alias
+    head-noun false positives ('hood' in innocent prose)."""
+    machines: dict[str, dict] = {}
+    folder = Path(book) / "analysis" / "props"
+    for path in sorted(folder.glob("*.json")) if folder.exists() else []:
+        if path.stem == "index":
+            continue
+        card = json.loads(path.read_text(encoding="utf-8"))
+        if card.get("kind") not in STAGE_KINDS or \
+                not any(a.get("chapter") == chapter for a in card.get("appears") or []):
+            continue
+        machines[path.stem] = {"name": card.get("name") or path.stem.replace("_", " "),
+                               "terms": prop_terms(book, path.stem),
+                               "physical": (card.get("profile") or {}).get("physical") or "",
+                               "aliases": card.get("aliases") or []}
+    return {"machines": machines, "creatures": creature_terms(refs_rows)}
+
+
+def mask_card_names(text: str, names: list[str]) -> str:
+    """Every card-name phrase blanked to spaces (length-preserving, so indices
+    into the original still hold): 'the Martian fighting-machine' never
+    re-fires a bare-word test on 'Martian'."""
+    out = text or ""
+    for name in names:
+        if name:
+            out = re.sub(re.escape(name), lambda m: " " * len(m.group(0)), out, flags=re.I)
+    return out
+
+
+def undrawn_named(book: Path, pids: list[str], text: str) -> list[str]:
+    """The staged pids the prose names whose sheet is NOT drawn -- the exact
+    set `props_named`'s `(sheet := prop_sheet(...))` filter drops SILENTLY,
+    which is how a plan's machine vanished from grid and take with no fault
+    anywhere (G-SHEET-DRAWN's wall)."""
+    return [pid for pid in pids
+            if names_prop(text, prop_terms(book, pid)) and prop_sheet(book, pid) is None]
+
+
 def props_named(book: Path, pids: list[str], text: str) -> list[tuple[Path, tuple[str, str]]]:
     """The setup's drawn props THIS take's own prose names.
 

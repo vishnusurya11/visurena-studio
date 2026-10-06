@@ -1,10 +1,11 @@
 """The repairer sees and routes the source/quote rows (2026-10-05): a failing
 span row dispatches `source_spans`, the checker's top-level QUOTE list row is
 collected (the ep16 TAKE LENGTH mechanism) and dispatches `quote_trim`, and a
-'has no chapter span' row stays CREATIVE -- in particular it no longer falls
-through to `legal_props` via that pattern's bare 'prop ' alternative (a no-op
-cure that cost six wasted rounds).  No chapter text on disk skips both cures
-so the rows come back uncured, never a silent pass."""
+'has no chapter span' row never falls through to `legal_props` via that
+pattern's bare 'prop ' alternative (a no-op cure that cost six wasted rounds):
+a POSTURE/EXTRAS one stays CREATIVE, a PROP one dispatches `prop_spans`
+(AREA 4, 2026-10-05).  No chapter text on disk skips both span cures so the
+rows come back uncured, never a silent pass."""
 from __future__ import annotations
 
 import importlib.util
@@ -34,7 +35,7 @@ def test_a_no_span_claim_row_stays_creative():
 
 def test_a_no_span_prop_row_no_longer_falls_through_to_legal_props():
     row = "G-SOURCE shot 4: prop 'copper_pan' has no chapter span, measured 0 against 1"
-    assert pc.cure_for(row) is None
+    assert pc.cure_for(row) == "prop_spans"      # AREA 4: copied verbatim from the chapter
 
 
 def test_fault_rows_collects_the_quote_list_and_routes_it_to_quote_trim():

@@ -456,6 +456,96 @@ def close_crowd_faults(episode) -> list[str]:
             if s.size in CLOSE_SIZES and (getattr(s, "crowd", "") or "").strip()]
 
 
+# ---- G-STAGE and G-FACE-KIND: a machine or creature shows only as its card -------
+
+SETUP_TEXT_FIELDS = ("described", "crowd", "geometry")
+
+
+def names_card(text: str, pid: str) -> bool:
+    """`staged_props`' card-name test for ONE pid: a token of the id over 3
+    letters, word-bounded, somewhere in the prose."""
+    low = (text or "").lower()
+    return any(re.search(rf"\b{re.escape(t)}s?\b", low)
+               for t in pid.lower().split("_") if len(t) > 3)
+
+
+def setup_text(setup) -> str:
+    """Everything a setup's own fields say about what is in the picture."""
+    return " ".join(getattr(setup, f, "") or "" for f in SETUP_TEXT_FIELDS)
+
+
+def _machine_fault(where: str, text: str, pid: str, card: dict, staged: bool) -> str | None:
+    """One pid against one prose body: named without a staged sheet, or named
+    by a bare alias word instead of its card name."""
+    from studio import pack_refs
+    term = pack_refs.first_term(text, card["terms"])
+    if term is None:
+        return None
+    if not staged:
+        return fault("G-STAGE", where, f"names {pid} by {term!r} and the setup stages no sheet",
+                     term, "card name + setup props entry")
+    if not names_card(text, pid):
+        return fault("G-STAGE", where, f"names {pid} by the bare word {term!r}, not its card name",
+                     term, "card name + setup props entry")
+    return None
+
+
+def _creature_faults(where: str, text: str, vocab: dict) -> list[str]:
+    """Bare creature words, after every machine card's name is masked out (so
+    'the Martian fighting-machine' never re-fires on 'Martian')."""
+    from studio import pack_refs
+    masked = pack_refs.mask_card_names(text, [c["name"] for c in vocab["machines"].values()])
+    return [fault("G-STAGE", where, f"bare creature word {term!r}; a drawn creature is its "
+                                    f"machine card", term, "its machine card's name")
+            for terms in (vocab.get("creatures") or {}).values()
+            if (term := pack_refs.first_term(masked, terms))]
+
+
+def stage_faults(episode, vocab: dict) -> list[str]:
+    """G-STAGE, always hard: a shot or setup showing a machine/vessel/vehicle
+    names its CARD NAME with the pid in Setup.props, and never shows a creature
+    by a bare word -- a bare word stages a humanoid sheet (or nothing) and the
+    drawer invents a naked humanoid.  `vocab` is `pack_refs.stage_vocab`'s:
+    this chapter's cards only, so the gate stays pure (no book parameter).  A
+    cured plan correctly stales drawn grids via `panels.stale_grids`."""
+    out = []
+    for s in episode.shots:
+        staged = set(getattr(episode.setups[s.setup], "props", None) or [])
+        text = claim_prose(s)
+        out += [f for pid, card in vocab["machines"].items()
+                if (f := _machine_fault(f"shot {s.index}", text, pid, card, pid in staged))]
+        out += _creature_faults(f"shot {s.index}", text, vocab)
+    for name, setup in episode.setups.items():
+        staged = set(getattr(setup, "props", None) or [])
+        text = setup_text(setup)
+        out += [f for pid, card in vocab["machines"].items()
+                if (f := _machine_fault(f"setup {name}", text, pid, card, pid in staged))]
+        out += _creature_faults(f"setup {name}", text, vocab)
+    return out
+
+
+def creature_face_faults(episode, creature_ids: set[str]) -> list[str]:
+    """G-FACE-KIND, always hard: no creature id in Shot.faces, SubShot.faces or
+    Setup.cast -- a creature's drawn form is a prop card, never a face.  This
+    refuses AT THE PLAN, before anything is drawn; `takes_r2v.adopt_names`
+    refuses only a MISSING gender at render time.  A book whose creature IS the
+    walking cast must not carry gender=='creature' on its refs.json row (see
+    `pack_refs.creature_terms`)."""
+    def rows(where: str, ids) -> list[str]:
+        return [fault("G-FACE-KIND", where, f"{cid!r} is a creature row staged as a face; "
+                                            f"its drawn form is a prop card",
+                      cid, "no creature-kind faces")
+                for cid in ids or [] if cid in creature_ids]
+    out = []
+    for s in episode.shots:
+        out += rows(f"shot {s.index}", s.faces)
+        for cut in getattr(s, "cuts", None) or []:
+            out += rows(f"shot {s.index}", cut.faces)
+    for name, setup in episode.setups.items():
+        out += rows(f"setup {name}", getattr(setup, "cast", None) or [])
+    return out
+
+
 # ---- G-PHANTOM: a setup's described/geometry is the EMPTY stage -------------------
 
 PERSON_NOUN = re.compile(

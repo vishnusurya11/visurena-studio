@@ -92,6 +92,35 @@ def shot_indices(rows: list[str]) -> list[int]:
     return sorted({int(m.group(1)) for r in rows for m in [re.search(r"shot (\d+)", r)] if m})
 
 
+def stage_vocab_of(book, number: int) -> dict:
+    """The G-STAGE vocabulary -- the GATE'S own (`pack_refs.stage_vocab`),
+    built from the book's refs.json; empty tables when the book has none."""
+    from studio import pack_refs
+    path = book / "refs" / "refs.json"
+    rows = (episode_home.read_json(path).get("refs") or []) if path.exists() else []
+    return pack_refs.stage_vocab(book, rows, number)
+
+
+def pick_rows(doc: dict, unresolved: list, vocab: dict, book) -> dict:
+    """Each >= 2-candidate creature row settled by ONE workhorse pick
+    (guard_spend fires inside studio.llm's caller), then the rename rerun
+    MECHANICALLY with the picked pid; a refused pick leaves the fault row
+    standing for the next round."""
+    from studio import plan_cures, stage_pick
+    title = book.name.split("_", 1)[-1].replace("-", " ").title()
+    for shot_index, term, cands in unresolved:
+        shot = next((s for s in doc.get("shots") or [] if s.get("index") == shot_index), {})
+        prose = " ".join(shot.get(f) or "" for f in plan_cures.SHOT_FIELDS)
+        rows = [{"pid": p, **vocab["machines"][p]} for p in cands]
+        try:
+            pid = stage_pick.pick_machine(prose, rows, term=term, book_title=title)
+        except Exception as why:
+            print(f"  stage pick for shot {shot_index} {term!r} refused: {str(why)[:140]}")
+            continue
+        doc = plan_cures.rename_creature(doc, shot_index, term, pid, vocab)
+    return doc
+
+
 def apply(doc: dict, rows: list[str], book, number: int = 0,
           rate: float = 3.0) -> tuple[dict, list[str]]:
     """Every cured family once per round; the rows nothing cures come back.
@@ -111,6 +140,8 @@ def apply(doc: dict, rows: list[str], book, number: int = 0,
         if chapter is None:     # never a silent pass: the rows come back uncured
             uncured += [r for r in rows if pc.cure_for(r) in ("source_spans", "quote_trim")]
             names -= {"source_spans", "quote_trim"}
+    vocab = stage_vocab_of(book, number) if names & {
+        "stage_machines", "strip_creatures", "drop_creature_faces", "prop_spans"} else None
     for name in names:
         if name == "renumber":
             doc = pc.renumber(doc)
@@ -148,6 +179,17 @@ def apply(doc: dict, rows: list[str], book, number: int = 0,
             doc = pc.quote_trim(doc, seq_boards.book_words(book))
         elif name == "pin_series":
             doc = pc.pin_series(doc, **series_pin_values(book))
+        elif name == "stage_machines":
+            doc, unresolved = pc.stage_machines(doc, vocab)
+            if unresolved:
+                doc = pick_rows(doc, unresolved, vocab, book)
+        elif name == "strip_creatures":
+            doc = pc.strip_creatures(doc, vocab)
+        elif name == "drop_creature_faces":
+            doc = pc.drop_creature_faces(doc, set(vocab["creatures"]))
+        elif name == "prop_spans":
+            from studio import plan_brief
+            doc = pc.prop_spans(doc, plan_brief.chapter_paragraphs(book, number)[1], vocab)
     return doc, uncured
 
 
