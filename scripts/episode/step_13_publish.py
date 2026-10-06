@@ -10,7 +10,8 @@ manifest instead of a URL.  Everything needed was already measured on disk,
 so this step only assembles and sends:
 
   G-STANDING   library/<book>/publish/standing.json is the owner's one-time
-               standing hand; absent, the unit PARKS (Escalation) and nothing
+               standing hand; absent, the unit PARKS (the one standing hand kept
+               by decision 2026-10-01; F3 writes it at book setup) and nothing
                uploads.  RENDER_HOLD still stops everything first (GPU=True
                puts this step behind the runner's brake too).
   G-META       metadata.ensure() is called IN-PROCESS so llm.spend_context /

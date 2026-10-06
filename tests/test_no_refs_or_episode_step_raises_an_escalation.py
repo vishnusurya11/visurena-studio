@@ -28,5 +28,7 @@ def test_the_step_imports(path: Path):
 
 
 def test_both_lines_have_their_steps():
-    assert sum(p.parent.name == "refs" for p in STEPS) == 4
-    assert sum(p.parent.name == "episode" for p in STEPS) == 12
+    """The count comes from the registry, never a literal (F12: step 13 moved it)."""
+    from studio import registry
+    for line in LINES:
+        assert sum(p.parent.name == line for p in STEPS) == len(registry.steps(line))
