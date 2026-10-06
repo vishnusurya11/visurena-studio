@@ -235,6 +235,96 @@ def apply(doc: dict, rows: list[str], book, number: int = 0,
     return doc, uncured
 
 
+def rate_blocked(doc: dict, rate: float) -> bool:
+    """The G-RATE guard on insertion: 14 more words at the measured rate must
+    not push the projection past MAX_SECONDS -- that residual IS creative (the
+    plan must lose picture, the writer's call)."""
+    from studio.episode_spec import MAX_SECONDS
+    words = sum(len(str(l.get("text") or "").split()) for l in doc.get("lines") or [])
+    rest = sum(float(s.get("beat_s") or 0) + float(s.get("coda_s") or 0) + 0.5
+               for s in doc.get("shots") or [])
+    return (words + 14) / rate + rest > MAX_SECONDS
+
+
+def micro_targets(doc: dict, rate: float) -> list[tuple[int, tuple]]:
+    """(shot, hole) for every residual projected hole an insertion can bridge,
+    then for every ONE PER TAKE pair no hole headroom lets split."""
+    from studio import speech_gap
+    wall = speech_gap.MAX_GAP_S - speech_gap.HOLE_MARGIN_S
+    out = []
+    for hole in speech_gap.over_wall(pc._projection(doc, rate), wall):
+        shot = pc.insertion_shot(doc, hole, rate)
+        if shot is not None:
+            out.append((shot, hole))
+    _, unsplit = pc.holds_and_unsplit(json.loads(json.dumps(doc)), rate)
+    for pair in unsplit:
+        target = pc.pair_insertion_shot(doc, pair, rate)
+        if target is not None and target[0] not in [t[0] for t in out]:
+            out.append(target)
+    return out
+
+
+def grounding(book, number: int, doc: dict, shot_index: int, hole: tuple,
+              rate: float) -> dict:
+    """What the micro-line prompt needs: the shot, the paragraph its LATEST
+    span places it on, the lines either side of the hole, the hole's seconds."""
+    from types import SimpleNamespace
+    from studio import plan_brief, plan_gates
+    start, end, _ = hole
+    shot = next(s for s in doc["shots"] if s["index"] == shot_index)
+    paragraphs = plan_brief.chapter_paragraphs(book, number)[1] or []
+    at = plan_gates.event_paragraph(SimpleNamespace(source=shot.get("source") or []),
+                                    paragraphs)
+    placed = pc._projection(doc, rate)
+    before = [l for l in placed["lines"] if l["at"] + l["seconds"] <= start + 1e-6]
+    after = [l for l in placed["lines"] if l["at"] >= end - 1e-6]
+    return {"shot": shot, "source_paragraph": paragraphs[at - 1] if at else "",
+            "prev_text": before[-1]["text"] if before else "",
+            "next_text": after[0]["text"] if after else "",
+            "gap_s": round(end - start, 2)}
+
+
+def micro_fill(book):
+    """The real micro-line caller: the book's words once, then the agent (its
+    `studio.llm` caller runs guard_spend before anything is sent)."""
+    import seq_boards
+    from agents import line_filler
+    words = seq_boards.book_words(book)
+
+    def call(ground: dict) -> str | None:
+        return line_filler.fill(ground["shot"], ground["source_paragraph"],
+                                ground["prev_text"], ground["next_text"],
+                                ground["gap_s"], words)
+    return call
+
+
+def fill_holes(book, number: int, max_inserts: int = 3, _fill=None) -> bool:
+    """The LLM micro-line round: residual G-HOLE holes and unsplit ONE PER
+    TAKE pairs bridged by one 8-14-word narration sentence each, spliced with
+    the exact reindex, written through the contract.  True when the plan
+    changed (the caller re-runs the battery); `_fill` is the test seam."""
+    from studio import plan_gates
+    path = episode_home.home(book, number) / "plan.json"
+    doc = episode_home.read_json(path)
+    rate = plan_gates.series_rate(book, number)
+    speaker = pc.narration_speaker(doc)
+    if speaker is None:
+        return False
+    fill, wrote = _fill or micro_fill(book), 0
+    for shot_index, hole in micro_targets(doc, rate)[:max_inserts]:
+        if rate_blocked(doc, rate):
+            break
+        text = fill(grounding(book, number, doc, shot_index, hole, rate))
+        if text is not None:
+            doc = pc.insert_line(doc, shot_index, text, speaker)
+            wrote += 1
+    if wrote:
+        Episode(**doc)
+        episode_home.write_plan(path, doc)
+        print(f"micro-line round: {wrote} narration bridge(s) inserted")
+    return bool(wrote)
+
+
 def main(book_id: str, number: int, from_aside: bool = False) -> int:
     book = episode_home.book_dir(book_id)
     home = episode_home.home(book, number)
@@ -268,6 +358,9 @@ def main(book_id: str, number: int, from_aside: bool = False) -> int:
                 break   # nothing this table cures, or nothing collected: stop looping
         clean, rows = battery_rows(book_id, number)
         if not clean and rewrite_round(book, path, rows):
+            clean, rows = battery_rows(book_id, number)
+        if not clean and any("G-HOLE" in r or "ONE PER TAKE" in r for r in rows) \
+                and fill_holes(book, number):
             clean, rows = battery_rows(book_id, number)
     if clean:
         print("BATTERY CLEAN")

@@ -232,36 +232,185 @@ def _shot_secs(doc: dict, rate: float) -> dict[int, float]:
             for s in doc.get("shots") or []}
 
 
+def _episode_shim(doc: dict):
+    """Just enough of Episode for `episode_timeline.place`: shots in list
+    order, lines indexed in playback order, no omits, no sub-shots -- the
+    cure must still measure a draft the contract refuses mid-repair."""
+    from types import SimpleNamespace
+    shots = [SimpleNamespace(index=s["index"], beat_s=float(s.get("beat_s") or 0),
+                             coda_s=float(s.get("coda_s") or 0), cuts=[])
+             for s in doc.get("shots") or []]
+    lines = [SimpleNamespace(index=k, kind=l.get("kind", "narration"),
+                             speaker=l.get("speaker", ""), text=str(l.get("text") or ""),
+                             shot=l["shot"],
+                             words=lambda t=str(l.get("text") or ""): len(t.split()))
+             for k, l in enumerate(doc.get("lines") or [])]
+    ep = SimpleNamespace(shots=shots, lines=lines)
+    ep.cut_shots = lambda: shots
+    ep.lines_of = lambda i: [l for l in lines if l.shot == i]
+    return ep
+
+
+def _as_episode(doc: dict):
+    """The doc as the placement function reads it: the contract's Episode when
+    it validates, else the shim with the same timing fields."""
+    from studio.episode_spec import Episode
+    try:
+        return Episode.model_validate(doc)
+    except Exception:
+        return _episode_shim(doc)
+
+
+def _projection(doc: dict, rate: float) -> dict:
+    """The placement step 05 would write for this draft, projected -- the
+    G-HOLE gate's own numbers (the cure MEASURES LIKE THE CHECKER)."""
+    from studio import plan_gates
+    return plan_gates.projected_place(_as_episode(doc), rate)
+
+
+def _floors(doc: dict) -> dict[tuple[int, str], float]:
+    """The hold floor per (shot, key): a wordless shot keeps coda_s >= 0.5
+    (the contract's no-line-no-beat rule and G-STORY's wordless tail; its
+    beat_s carries the floor instead when it holds the shot alone), the shot
+    before the button keeps beat_s >= 1.0 (contract), the button shot keeps
+    coda_s >= 0.6 (BUTTON_REST advisory); a voiced shot floors at 0."""
+    lines = doc.get("lines") or []
+    voiced = {l["shot"] for l in lines}
+    button = lines[-1]["shot"] if lines else None
+    out: dict[tuple[int, str], float] = {}
+    for s in doc.get("shots") or []:
+        i, wordless = s["index"], s["index"] not in voiced
+        beat = 1.0 if button is not None and i == button - 1 else 0.0
+        if wordless and not float(s.get("coda_s") or 0):
+            beat = max(beat, 0.5)                   # the beat holds the no-hole rule alone
+        out[(i, "beat_s")] = beat
+        out[(i, "coda_s")] = 0.5 if wordless else 0.6 if i == button else 0.0
+    return out
+
+
+def _hole_slots(doc: dict, shot_ids: list[int]) -> list[tuple[dict, str]]:
+    """(shot, key) holds inside the hole: beat_s and coda_s of every plan shot
+    the hole crosses -- never a shot outside it."""
+    own = [s for s in doc.get("shots") or [] if s["index"] in set(shot_ids)]
+    return [(s, key) for s in own for key in ("coda_s", "beat_s")]
+
+
+def _shave(slots: list[tuple[dict, str]], over: float, floors: dict) -> int:
+    """Cut `over` seconds from the largest holds first, never below a floor;
+    cuts round UP to the cent so the on_frame ceiling cannot strand a hole a
+    hair over the wall.  Returns how many holds were shaved."""
+    import math
+    cut_count = 0
+    for s, key in sorted(slots, key=lambda sk: floors.get((sk[0]["index"], sk[1]), 0.0)
+                         - float(sk[0].get(sk[1]) or 0)):
+        if over <= 0:
+            break
+        room = float(s.get(key) or 0) - floors.get((s["index"], key), 0.0)
+        cut = math.ceil(min(over, max(0.0, room)) * 100 - 1e-9) / 100
+        if cut > 0:
+            s[key] = round(float(s.get(key) or 0) - cut, 2)
+            over -= cut
+            cut_count += 1
+    return cut_count
+
+
+def _close_projected_holes(doc: dict, rate: float) -> dict:
+    """Every projected hole in speech trimmed to MAX_GAP_S - HOLE_MARGIN_S by
+    the checker's own placement, largest holds first, floors kept; <= 8
+    passes, each re-measuring (replaces the approximate step 3b that missed
+    beat_s, the 2xHANDLE seam, and voiced-to-voiced holes)."""
+    from studio import speech_gap
+    wall = speech_gap.MAX_GAP_S - speech_gap.HOLE_MARGIN_S
+    floors = _floors(doc)
+    for _ in range(8):
+        holes = speech_gap.over_wall(_projection(doc, rate), wall)
+        if not sum(_shave(_hole_slots(doc, ids), (end - start) - wall, floors)
+                   for start, end, ids in holes):
+            break
+    return doc
+
+
+def _headroom(doc: dict, rate: float, shot_index: int) -> float:
+    """Seconds the hole this shot's trailing silence sits in may still grow
+    before crossing MAX_GAP_S - HOLE_MARGIN_S, from the shared projection
+    (recomputed by the caller after every write)."""
+    from studio import speech_gap
+    placed = _projection(doc, rate)
+    shot = next((s for s in placed["shots"] if s["index"] == shot_index), None)
+    if shot is None:
+        return 0.0
+    wall = speech_gap.MAX_GAP_S - speech_gap.HOLE_MARGIN_S
+    t = shot["t_end"] - 1e-6
+    for a, b in speech_gap.gaps(placed["lines"], placed.get("duration_s", 0.0)):
+        if a <= t < b:
+            return round(wall - (b - a), 2)
+    return wall
+
+
+def _grow_pair(doc: dict, rate: float, a: dict, b: dict, voiced: set,
+               need: float) -> tuple[float, bool]:
+    """One pair's growth, each add capped by its silence's hole headroom;
+    (need left, True when zero headroom blocked an add)."""
+    blocked = False
+    for s in (a, b, a, b):
+        if need <= 0:
+            break
+        for key, cap in (("coda_s", MAX_CODA_S), ("beat_s", MAX_BEAT_S)):
+            room = cap - float(s.get(key) or 0)
+            if need <= 0 or room <= 0.1 or s["index"] not in voiced:
+                continue
+            head = _headroom(doc, rate, s["index"])
+            if head <= 0:
+                blocked = True
+                continue
+            add = round(min(need, room, 1.2, head), 2)
+            s[key] = round(float(s.get(key) or 0) + add, 2)
+            need = round(need - add, 2)
+    return need, blocked
+
+
+def _grow_pairs(doc: dict, rate: float) -> list[tuple[int, int]]:
+    """holds() step 1: consecutive same-setup pairs under the take budget grow
+    their holds past it; the pairs no hole headroom lets split come back for
+    the micro-line path (speech splits a take without opening silence)."""
+    shots = doc.get("shots") or []
+    voiced = {l["shot"] for l in doc.get("lines") or []}
+    unsplit, secs = [], _shot_secs(doc, rate)
+    for a, b in zip(shots, shots[1:]):
+        if a.get("setup") != b.get("setup"):
+            continue
+        need = TAKE_BUDGET_S + 0.3 - (secs[a["index"]] + secs[b["index"]])
+        if need <= 0:
+            continue
+        need, blocked = _grow_pair(doc, rate, a, b, voiced, need)
+        secs = _shot_secs(doc, rate)
+        if need > 0 and blocked:
+            unsplit.append((a["index"], b["index"]))
+    return unsplit
+
+
 def holds(doc: dict, rate: float = 3.0) -> dict:
+    """`holds_and_unsplit` for the callers that only want the doc (the cure
+    table's dispatcher, the older tests): same cure, report dropped."""
+    return holds_and_unsplit(doc, rate)[0]
+
+
+def holds_and_unsplit(doc: dict, rate: float = 3.0) -> tuple[dict, list[tuple[int, int]]]:
     """The hold algebra, solved the way the ep15 session solved it by hand:
     the band floor is lifted with PRE-TURN codas (the turn ratio rises with
-    them); a take-sharing pair grows past the budget; a setup past its cap is
-    shaved from shots outside the pairs.  Every move stays inside MAX_BEAT /
-    MAX_CODA and leaves the button's breath alone."""
+    them); a take-sharing pair grows past the budget (hole-aware: every add is
+    capped by its silence's hole headroom); a setup past its cap is shaved
+    from shots outside the pairs; every projected hole is closed by the
+    checker's own placement.  The second value is the ONE PER TAKE pairs no
+    headroom lets split -- plan_repair routes them to the micro-line path."""
     shots = doc.get("shots") or []
     if not shots:
-        return doc
-    by = {s["index"]: s for s in shots}
+        return doc, []
     turn_at = next((s["index"] for s in shots if s.get("section") == "turn"), len(shots) // 2)
     voiced = {line["shot"] for line in doc.get("lines") or []}
 
     # 1. ONE PER TAKE: consecutive pairs under the budget grow past it
-    secs = _shot_secs(doc, rate)
-    for a, b in zip(shots, shots[1:]):
-        i, j = a["index"], b["index"]
-        if a.get("setup") != b.get("setup"):
-            continue
-        need = TAKE_BUDGET_S + 0.3 - (secs[i] + secs[j])
-        for s in (a, b, a, b):
-            if need <= 0:
-                break
-            for key, cap in (("coda_s", MAX_CODA_S), ("beat_s", MAX_BEAT_S)):
-                room = cap - float(s.get(key) or 0)
-                if need > 0 and room > 0.1 and s["index"] in voiced:
-                    add = round(min(need, room, 1.2), 2)
-                    s[key] = round(float(s.get(key) or 0) + add, 2)
-                    need = round(need - add, 2)
-        secs = _shot_secs(doc, rate)
+    unsplit = _grow_pairs(doc, rate)
 
     # 2. the band floor: pre-turn codas rise until the projection clears 120
     def projection() -> float:
@@ -295,30 +444,6 @@ def holds(doc: dict, rate: float = 3.0) -> dict:
                 s["coda_s"] = round(float(s.get("coda_s") or 0) - cut, 2)
                 over = round(over - cut, 2)
 
-    # 3b. no speech hole after a line's last word: ep16's 6.14 s hole at shot
-    # 23 was the VOICED shot's own coda plus its silent successor, found only
-    # at the MEASURED timeline.  A hole starts where speech ENDS, so each cap
-    # covers the preceding voiced shot's coda plus every unvoiced shot after
-    # it, at HOLE_WALL_S - 0.5, shaved from the largest holds first.
-    secs = _shot_secs(doc, rate)
-    tail: list[tuple[dict, str]] = []   # (shot, key) pairs that make the hole
-    hole = 0.0
-    for s in shots + [None]:
-        if s is not None and s["index"] not in voiced:
-            tail += [(s, "coda_s"), (s, "beat_s")]
-            hole += secs[s["index"]]
-            continue
-        over = hole - (HOLE_WALL_S - 0.5)
-        for r, key in sorted(tail, key=lambda rk: -float(rk[0].get(rk[1]) or 0)):
-            if over <= 0:
-                break
-            cut = round(min(over, float(r.get(key) or 0)), 2)
-            if cut > 0:
-                r[key] = round(float(r.get(key) or 0) - cut, 2)
-                over = round(over - cut, 2)
-        if s is not None:   # this voiced shot's coda opens the next hole
-            tail, hole = [(s, "coda_s")], float(s.get("coda_s") or 0)
-
     # 4. no single shot past the take budget: the pair growth above may have
     # pushed one over (ep16 shot 16, 8.05 s); shave its own coda then beat.
     # A clamped shot keeps its pair split: the partner's handles alone hold
@@ -333,7 +458,114 @@ def holds(doc: dict, rate: float = 3.0) -> dict:
             if cut > 0:
                 s[key] = round(float(s.get(key) or 0) - cut, 2)
                 over = round(over - cut, 2)
-    return button_beat(doc)
+
+    # 5. (was 3b) no projected hole in speech over the wall: closed LAST, by
+    # the checker's own placement (G-HOLE's), largest holds first, floors
+    # kept -- button_beat raises a hold, so it must run before the close or
+    # it reopens the hole it sits in
+    return _close_projected_holes(button_beat(doc), rate), unsplit
+
+
+def trim_measured_holes(doc: dict, placed: dict) -> int:
+    """Step 05's bounded measured-hole cure: the shave of
+    `_close_projected_holes`, but hole boundaries and shot intersections come
+    from the MEASURED placed.json.  Trims only, inserts nothing, touches no
+    shot outside a hole, cuts at most hole - (MAX_GAP_S - HOLE_MARGIN_S) per
+    hole (the margin below the 6.0 wall gives the once-only re-time headroom),
+    respects every floor.  0 shaved = nothing trimmable: the step refuses."""
+    from studio import speech_gap
+    wall = speech_gap.MAX_GAP_S - speech_gap.HOLE_MARGIN_S
+    floors = _floors(doc)
+    return sum(_shave(_hole_slots(doc, ids), (end - start) - wall, floors)
+               for start, end, ids in speech_gap.over_wall(placed, wall))
+
+
+def insertion_shot(doc: dict, hole: tuple, rate: float) -> int | None:
+    """The shot a micro-line should land on: inside the hole, under
+    MAX_LINES_PER_SHOT, strictly before the button's shot (no line after the
+    button), still inside the take budget with 14 more words, wordless
+    preferred, splitting the hole most evenly.  None -> the row is creative."""
+    from studio.episode_spec import BREATH, HANDLE, MAX_LINES_PER_SHOT
+    from studio.episode_takes import BUDGET
+    start, end, ids = hole
+    lines = doc.get("lines") or []
+    button = lines[-1]["shot"] if lines else -1
+    placed = {s["index"]: s for s in _projection(doc, rate)["shots"]}
+    best = None
+    for s in doc.get("shots") or []:
+        i, own = s["index"], [l for l in lines if l["shot"] == s["index"]]
+        if i not in ids or i >= button or len(own) >= MAX_LINES_PER_SHOT or i not in placed:
+            continue
+        words = sum(len(str(l["text"]).split()) for l in own)
+        secs = (2 * HANDLE + (words + 14) / rate + BREATH * len(own)
+                + float(s.get("beat_s") or 0) + float(s.get("coda_s") or 0))
+        if secs > BUDGET:
+            continue
+        at = placed[i]["t_start"] + HANDLE + words / rate + BREATH * len(own)
+        score = (bool(own), max(at - start, end - at))
+        if best is None or score < best[0]:
+            best = (score, i)
+    return best[1] if best else None
+
+
+def pair_insertion_shot(doc: dict, pair: tuple[int, int], rate: float) -> tuple | None:
+    """An unsplit ONE PER TAKE pair's micro-line target: its line-light shot
+    and the hole its silence sits in -- a line there splits the take without
+    opening silence.  None when both shots are full or at/past the button."""
+    from studio import speech_gap
+    from studio.episode_spec import MAX_LINES_PER_SHOT
+    lines = doc.get("lines") or []
+    button = lines[-1]["shot"] if lines else -1
+    counts = {i: sum(1 for l in lines if l["shot"] == i) for i in pair}
+    cands = [i for i in pair if i < button and counts[i] < MAX_LINES_PER_SHOT]
+    if not cands:
+        return None
+    placed = _projection(doc, rate)
+    i = min(cands, key=lambda k: counts[k])
+    t = next(s["t_end"] for s in placed["shots"] if s["index"] == i) - 1e-6
+    hole = next(((a, b) for a, b in speech_gap.gaps(placed["lines"],
+                                                    placed.get("duration_s", 0.0))
+                 if a <= t < b), (t, t + 1e-6))
+    return i, (hole[0], hole[1], [i])
+
+
+def narration_speaker(doc: dict) -> str | None:
+    """Who a spliced micro-line speaks as: the first narration line's speaker;
+    a plan with no narration anywhere refuses insertion."""
+    return next((l["speaker"] for l in doc.get("lines") or []
+                 if l.get("kind") == "narration"), None)
+
+
+def _remap_answer(doc: dict, p: int) -> dict:
+    """'line N' answers at or past the insertion point move by one; 'shot N'
+    answers, omits and beds reference shots and are untouched."""
+    from studio.episode_spec import ANSWER
+    m = ANSWER.match(str(doc.get("answer") or ""))
+    if m and m.group(1) == "line" and int(m.group(2)) >= p:
+        doc["answer"] = f"line {int(m.group(2)) + 1}"
+    return doc
+
+
+def insert_line(doc: dict, shot_index: int, text: str, speaker: str) -> dict:
+    """Splice one narration micro-line with the EXACT reindex: the new line
+    lands after every existing line of its shot (lines are contract-sorted by
+    shot, so G-SYNC's dialogue-first rule holds and the button stays last),
+    indices renumber 0..n-1 in playback order, the answer is remapped."""
+    from studio.episode_spec import MAX_LINES_PER_SHOT
+    lines = doc.get("lines") or []
+    button = lines[-1]["shot"] if lines else -1
+    if shot_index >= button:
+        raise ValueError(f"shot {shot_index} is not before the button shot {button}; "
+                         f"no line lands on or after the button")
+    if sum(1 for l in lines if l["shot"] == shot_index) >= MAX_LINES_PER_SHOT:
+        raise ValueError(f"shot {shot_index} already carries {MAX_LINES_PER_SHOT} lines")
+    p = next((k for k, l in enumerate(lines) if l["shot"] > shot_index), len(lines))
+    lines.insert(p, {"index": -1, "kind": "narration", "speaker": speaker,
+                     "text": text, "shot": shot_index, "delivery": ""})
+    for k, l in enumerate(lines):
+        l["index"] = k
+    doc["lines"] = lines
+    return _remap_answer(doc, p)
 
 
 # ---- G-SOURCE and QUOTE: snap to the chapter's own words --------------------------
