@@ -641,7 +641,18 @@ def run_loop(book: Path, codex: str, deps: Deps, every: float = 30.0, ticks: int
 
 # ---- the scheduler ---------------------------------------------------------------
 
-def install_command(repo: Path, every: int, book: str | None = None) -> str:
+def install(repo: Path, every: int, book: str | None, run: Callable[[str], int] = None) -> int:
+    """Register the task: S4U first; refused (0x80070005 needs elevation this
+    shell lacks, 2026-10-06), the same task on an Interactive logon."""
+    run = run or powershell
+    for logon in ("S4U", "Interactive"):
+        if run(install_command(repo, every, book, logon=logon)) == 0:
+            print(f"task {TASK} registered with a {logon} logon, every {every} min")
+            return 0
+    return 1
+
+
+def install_command(repo: Path, every: int, book: str | None = None, logon: str = "S4U") -> str:
     """The Register-ScheduledTask line (ops §2): AtStartup + AtLogOn + every N
     min, IgnoreNew, no time limit, restart x3, wake, S4U limited.  Pure."""
     work = Path(repo).as_posix()
@@ -653,7 +664,7 @@ def install_command(repo: Path, every: int, book: str | None = None) -> str:
             f"$s = New-ScheduledTaskSettingsSet -MultipleInstances IgnoreNew "
             f"-ExecutionTimeLimit ([System.Xml.XmlConvert]::ToTimeSpan('PT0S')) -StartWhenAvailable "
             f"-RestartCount 3 -RestartInterval (New-TimeSpan -Minutes 1) -AllowStartIfOnBatteries -WakeToRun; "
-            f"$p = New-ScheduledTaskPrincipal -UserId $env:USERNAME -LogonType S4U -RunLevel Limited; "
+            f"$p = New-ScheduledTaskPrincipal -UserId $env:USERNAME -LogonType {logon} -RunLevel Limited; "
             f"Register-ScheduledTask -TaskName '{TASK}' -Action $a -Trigger $t -Settings $s -Principal $p -Force | Out-Null; "
             f"powercfg /change standby-timeout-ac 0")
 
@@ -719,7 +730,7 @@ def parser() -> argparse.ArgumentParser:
 def main(argv: list[str]) -> int:
     args = parser().parse_args(argv)
     if args.cmd == "install":
-        return powershell(install_command(ROOT, args.every, args.book))
+        return install(ROOT, args.every, args.book)
     if args.cmd == "uninstall":
         return powershell(uninstall_command())
     book = book_of(args.book)

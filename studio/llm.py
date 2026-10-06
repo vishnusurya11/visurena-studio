@@ -17,6 +17,7 @@ from pathlib import Path
 from types import SimpleNamespace
 
 import yaml
+from openai import BadRequestError
 from strands.types.exceptions import StructuredOutputException
 
 
@@ -208,20 +209,43 @@ class _NativeStructuredCaller:
 
     def _parse(self, prompt: str, structured_output_model=None):
         guard_spend(self._model, prompt, tier=self._tier)
-        completion = self._client.chat.completions.parse(
-            model=self._model,
-            messages=[{"role": "user", "content": prompt}],
-            response_format=structured_output_model,
-            **self._params,
-        )
-        u = completion.usage
-        return SimpleNamespace(
-            structured_output=completion.choices[0].message.parsed,
-            metrics=SimpleNamespace(accumulated_usage={
-                "inputTokens": getattr(u, "prompt_tokens", 0),
-                "outputTokens": getattr(u, "completion_tokens", 0),
-                "totalTokens": getattr(u, "total_tokens", 0)}),
-        )
+        messages = [{"role": "user", "content": prompt}]
+        try:
+            completion = self._client.chat.completions.parse(
+                model=self._model, messages=messages, response_format=structured_output_model, **self._params)
+            parsed = completion.choices[0].message.parsed
+        except BadRequestError as refused:
+            if not grammar_too_large(refused):
+                raise
+            completion, parsed = self._parse_loose(messages, structured_output_model)
+        return _result(parsed, completion.usage)
+
+    def _parse_loose(self, messages: list[dict], model):
+        """ep20 (2026-10-06): the strict grammar of a big schema is refused by the
+        provider; the same schema sent loose is answered, and we validate it."""
+        completion = self._client.chat.completions.create(
+            model=self._model, messages=messages, response_format=loose_schema(model), **self._params)
+        return completion, model.model_validate_json(completion.choices[0].message.content)
+
+
+def grammar_too_large(error: Exception) -> bool:
+    return "compiled grammar is too large" in str(error)
+
+
+def loose_schema(model) -> dict:
+    """The model's JSON schema as a non-strict response_format: no grammar compile."""
+    return {"type": "json_schema",
+            "json_schema": {"name": model.__name__, "strict": False, "schema": model.model_json_schema()}}
+
+
+def _result(parsed, u) -> SimpleNamespace:
+    return SimpleNamespace(
+        structured_output=parsed,
+        metrics=SimpleNamespace(accumulated_usage={
+            "inputTokens": getattr(u, "prompt_tokens", 0),
+            "outputTokens": getattr(u, "completion_tokens", 0),
+            "totalTokens": getattr(u, "total_tokens", 0)}),
+    )
 
 
 # --- spend recording -------------------------------------------------------------
