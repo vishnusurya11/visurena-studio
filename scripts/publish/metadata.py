@@ -89,6 +89,56 @@ def book_said(book) -> dict:
     return episode_home.read_json(Path(book) / "source" / "book.json")
 
 
+ORDINALS = ("One", "Two", "Three", "Four", "Five", "Six", "Seven", "Eight", "Nine", "Ten")
+
+
+def chapter_marker(book, number: int) -> tuple[str, str, int]:
+    """(roman, title, part) of the book's own chapter `number` from book.json:
+    'I. UNDER FOOT.' in part 2 -> ('I', 'Under Foot', 2)."""
+    chapter = book_said(book)["chapters"][number]
+    roman, _, rest = str(chapter.get("title", "")).partition(". ")
+    title = rest.rstrip(". ").replace("“", "").replace("”", "")
+    return roman.strip(), headline(title), int(chapter.get("part") or 1)
+
+
+SMALL = {"a", "an", "and", "at", "by", "for", "from", "in", "of", "on", "or", "the", "to", "with"}
+
+
+def headline(text: str) -> str:
+    """Title case with the small words lower, the first always up:
+    'WHAT WE SAW FROM THE RUINED HOUSE' -> 'What We Saw from the Ruined House'."""
+    words = text.lower().split()
+    return " ".join(w if (i and w in SMALL) else w[:1].upper() + w[1:] for i, w in enumerate(words))
+
+
+def house_style(prior_docs: list[dict]) -> tuple[str, str]:
+    """(division word, year) from the series' own prior attributions:
+    'Chapter XVI of Book One of ... (1898)' -> ('Book', '1898')."""
+    said = " ".join(str(d.get("description", "")) for d in prior_docs)
+    division = re.search(r"Chapter [IVXLC]+ of (\w+) ", said)
+    year = re.search(r"\((\d{4})\)", said)
+    return (division.group(1) if division else "Part"), (year.group(1) if year else "")
+
+
+def attribution(book, number: int, prior_docs: list[dict]) -> str:
+    """The attribution line, composed: a chapter number is a fact, never prose
+    (ep18 dry run: the model wrote 'Chapter XVIII of Book One')."""
+    roman, title, part = chapter_marker(book, number)
+    division, year = house_style(prior_docs)
+    said = book_said(book)
+    work = said.get("display_title") or said.get("title", "")
+    dated = f" ({year})" if year else ""
+    return (f"Chapter {roman} of {division} {ORDINALS[part - 1]} of {said.get('author', '')}'s "
+            f"{work}{dated}, \"{title}\", in the public domain.")
+
+
+def composed_attribution(book, number: int, prior_docs: list[dict]) -> str | None:
+    """The composed line when the book records its chapters, else None (the
+    model's line stands, G-META still checks it)."""
+    chapters = book_said(book).get("chapters") or []
+    return attribution(book, number, prior_docs) if 0 <= number < len(chapters) else None
+
+
 def title_for(book, number: int, plan: dict) -> str:
     """G-META check 1: composed from the book's own words, never typed."""
     series, display_title, total = series_of(book)
@@ -309,6 +359,8 @@ def generate(book, home, number: int, *, _agent=None) -> dict:
     asked = prompt
     for _ in range(RE_ASKS + 1):
         meta = llm.structured(TIER, asked, ShortMetadata, _agent=_agent)
+        if composed := composed_attribution(book, number, prior_docs):
+            meta = meta.model_copy(update={"attribution_line": composed})
         doc = assemble(book, home, number, plan, meta)
         if not (faults := check(doc, meta, book, number, plan, prior_docs)):
             return doc
