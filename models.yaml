@@ -45,18 +45,18 @@ tiers:
     model: gpt-5.6-luna
     params:
       reasoning_effort: none
-  local:                  # the $0 tier for the format lines' agents (episode_writer, look_back)
-    provider: openai      # OWNER 2026-09-24: the paid workhorse for now; making it free is a
-    model: gpt-5.6-luna   # yaml edit (provider: lmstudio, model: gpt-oss:20b), no code change
-    params:
-      reasoning_effort: none
+  local:                  # the creative writers: episode_writer, line_filler
+    # OWNER 2026-10-06: "Sonnet 5.5" -- luna failed ep19's plan three rounds running
+    # (12 shots for 121 s, first spoken line at 76 % of a chapter that speaks at 9 %).
+    # The $3/episode wall (money.episode_ceiling_usd) still gates every call.
+    provider: openrouter  # Claude Sonnet 5.5  $2.00 in / $10.00 out  ~$0.23/call
+    model: anthropic/claude-sonnet-5.5
+    # provider: openai    # previous: gpt-5.6-luna, reasoning_effort none, ~$0.03/call
+    # model: gpt-5.6-luna
     # ---- STORY-WRITER OPTIONS (2026-10-04, OpenRouter live prices, USD per M tokens) ----
     # Measured writer call: ~51k tokens in, ~13k out (usage table, 400 calls).
     # A healthy plan is ~5-10 calls; ep14-16 looped 120-169 calls ($2.70-4.10) on luna.
     # To switch: comment the three lines above, uncomment ONE block below.
-    #
-    # provider: openrouter  # Claude Sonnet 5.5  $2.00 in / $10.00 out  ~$0.23/call  ~$1.15-2.30/plan
-    # model: anthropic/claude-sonnet-5.5    # strongest prose + scene craft at a sane price
     #
     # provider: openrouter  # Claude Opus 5.5    $4.00 / $20.00   ~$0.46/call  ~$2.30-4.60/plan
     # model: anthropic/claude-opus-5.5      # best storytelling; can breach the $3 cap

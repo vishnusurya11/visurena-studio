@@ -4,6 +4,14 @@ Newest first. Every architectural change gets an entry.
 
 ---
 
+## 2026-10-06 — The episode writer is Claude Sonnet 5.5 (owner decision: "Sonnet 5.5")
+
+**Ruling:** the `local` tier (episode_writer, line_filler) moves from gpt-5.6-luna to
+anthropic/claude-sonnet-5.5 via OpenRouter ($2/$10 per M, ~$0.23 a call). Measured cause:
+luna failed ep19's plan three rounds running (12 shots for 121 s so takes overflowed; the
+first spoken line at 76 % of a chapter that speaks at 9 %). The $3/episode wall
+(money.episode_ceiling_usd, studio/llm.guard_spend) is unchanged and gates every call.
+
 ## 2026-10-05 — The pipeline cures itself (owner decision: "i need python scripts instead to do that using the open api call .. budget is $3 for episode")
 
 **Ruling:** every hand fix Claude made on ep17/ep18 becomes code: gates + cures in the plan
