@@ -158,11 +158,35 @@ def verdict_doc(verdict: Any, meta: Any) -> dict:
     return doc
 
 
+def ledger_conn():
+    """The studio db for the brain's spend rows; None when it cannot open (never fatal)."""
+    try:
+        from studio import db
+        return db.get_connection()
+    except Exception:
+        return None
+
+
+def ledger_brain(core, codex: str, n: int, meta: Any) -> None:
+    """One `stage='brain'` usage row for the episode's unit (the first live turn
+    left none, 2026-10-06); a ledger failure never loses the verdict."""
+    conn = ledger_conn()
+    if conn is None or not isinstance(meta, dict):
+        return
+    try:
+        core.ledger(conn, codex, f"ep{n:02d}", "triage", getattr(core, "TRIAGE_MODEL", "claude-sonnet-5-5"), 0.0, meta)
+    except Exception as why:
+        log.warning("brain ledger failed: %s", scrub(repr(why)))
+
+
 def run_brain(book: Path, codex: str, n: int, packet: dict, attempt: Path) -> dict:
     """One triage session of the brain under the 45-min leash; its verdict as a dict."""
     core = importlib.import_module("studio.brain")
     prompt = brain_prompt(core, book, n, packet)
     verdict, meta = asyncio.run(asyncio.wait_for(core.turn(prompt, core.triage_options(ROOT)), BRAIN_TIMEOUT_S))
+    ledger_brain(core, codex, n, meta)
+    if hasattr(core, "allowed") and hasattr(verdict, "model_dump"):
+        verdict = core.allowed(verdict, core.episode_step_ids())
     return verdict_doc(verdict, meta)
 
 
@@ -358,11 +382,32 @@ def signals_of(fields: dict):
         return SimpleNamespace(**fields)
 
 
+def retried_since(book: Path, n: int, drive_rows: list[dict]) -> bool:
+    """A `retry` event for N later than the drive ledger's last `end` row: the
+    old failure is history, not today's state (ep20, 2026-10-06)."""
+    retries = [r.get("ts", "") for r in rows_of(paths_of(book).events)
+               if r.get("event") == "retry" and r.get("episode") == n]
+    ends = [r.get("ts", "") for r in drive_rows if r.get("event") == "end"]
+    if not retries or not drive_rows:
+        return False
+    return not ends or when(retries[-1]) > when(ends[-1])
+
+
+def when(stamp: str) -> datetime:
+    """An ISO stamp as a datetime; an unreadable one sorts first."""
+    try:
+        return datetime.fromisoformat(str(stamp))
+    except ValueError:
+        return datetime.min.replace(tzinfo=timezone.utc)
+
+
 def gather(book: Path, codex: str, n: int, deps: Deps, series: dict):
     """Every signal `derive` reads, off disk and the process table, nothing spent."""
     home, rows = home_of(book, n), deps.procs()
     clear_stale_lock(book, codex, n, deps, rows)
     drive_rows = rows_of(home / "drive.jsonl")
+    if retried_since(book, n, drive_rows):
+        drive_rows = []                      # a retry newer than the last end row: launch again
     ends = [r for r in drive_rows if r.get("event") == "end"]
     attempts = brain_attempts_of(home)
     from studio import run_budget
@@ -695,8 +740,21 @@ def retry(book: Path, n: int) -> int:
     if len(kept) == len(rows):
         return 0
     path.write_text("".join(json.dumps(r, ensure_ascii=False) + "\n" for r in kept), encoding="utf-8")
+    retire_brain(home_of(book, n))
     event(book, {"event": "retry", "episode": n})
     return len(rows) - len(kept)
+
+
+def retire_brain(home: Path) -> Path | None:
+    """A retry starts the brain's count over: the old attempts move aside, so an
+    old `park` verdict is never read as today's (ep20, 2026-10-06)."""
+    folder = Path(home) / "brain"
+    if not folder.exists():
+        return None
+    n = 1 + len([p for p in Path(home).glob("brain_retired_*") if p.is_dir()])
+    retired = Path(home) / f"brain_retired_{n:02d}"
+    folder.rename(retired)
+    return retired
 
 
 def book_of(codex: str | None) -> Path | None:

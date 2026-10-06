@@ -123,3 +123,34 @@ def test_brain_attempts_past_the_cap_park_the_episode(tmp_path):
     doc = cli.tick(book, fx.CODEX, d, 1)
     assert doc["episode"]["state"] == "PARKED"
     assert cli.rows_of(book / "autopilot" / "parked.jsonl")[0]["reason"] == "brain_exhausted"
+
+
+def test_retry_retires_the_episodes_brain_attempts(tmp_path):
+    """ep20 (2026-10-06): a retry cleared the parked row, the next tick re-read the
+    old attempt_01 (park) as the current verdict and asked the brain again."""
+    cli, book = fx.load(), fx.book(tmp_path)
+    d = fx.deps(tmp_path, "PARKED", reason="over_budget")
+    cli.tick(book, fx.CODEX, d, 1)
+    home = book / "episodes" / "ep01"
+    (home / "brain").mkdir(parents=True)
+    (home / "brain" / "attempt_01.json").write_text('{"verdict": "park"}', encoding="utf-8")
+    assert cli.retry(book, 1) == 1
+    assert cli.brain_attempts_of(home) == []
+    assert (home / "brain_retired_01" / "attempt_01.json").exists()
+
+
+def test_after_a_retry_the_next_tick_launches_instead_of_judging_the_old_ledger(tmp_path):
+    """ep20 (2026-10-06): retry cleared the row, the tick re-derived the OLD end
+    row (failed) and asked the brain again.  A retry newer than the last end row
+    reads as a fresh launch; drive.py's resume skips the steps already done."""
+    cli, book = fx.load(), fx.book(tmp_path)
+    home = book / "episodes" / "ep01"
+    home.mkdir(parents=True)
+    (home / "drive.jsonl").write_text(
+        '{"ts": "2026-10-06T10:00:00+00:00", "event": "start", "sha": "abc"}\n'
+        '{"ts": "2026-10-06T10:00:30+00:00", "event": "run", "n": 1, "sha": "abc", "outcome": "failed"}\n'
+        '{"ts": "2026-10-06T10:00:31+00:00", "event": "end", "code": 1, "sha": "abc"}\n', encoding="utf-8")
+    cli.park(book, fx.CODEX, 1, "brain: x", {}, fx.deps(tmp_path))
+    assert cli.retry(book, 1) == 1
+    signals = cli.gather(book, fx.CODEX, 1, fx.deps(tmp_path), {})
+    assert signals.drive_rows == [] and signals.exit_code is None
