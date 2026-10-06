@@ -1,0 +1,142 @@
+{
+ "area": "AREA 7: take-prompt lint at plan time (G-TAKELINT) — run episode_ref_official's REAL lint on dry-built take cards inside the plan battery, route every fault to the data layer that caused it (plan field / refs.json row / analysis props card), cure mechanically by substitution table, fall back to one workhorse structured call per field.",
+ "summary": "Step 06 refuses after signing because the lint (studio/episode_ref_official.py RULES, line ~2040) only runs inside ro.build at take-build time, while the words that trip it live in three layers the battery never reads: plan fields, refs.json character physicals (takes_r2v.physicals, line 85) and analysis/props cards (pack_refs.prop_row, line 109). The mechanism: (1) a dry card builder in takes_r2v that assembles each take's prompt from the PROJECTED timeline (plan_check.projected already exists, line ~80) with refs=None/panel=False so picture-count rules stay silent, catches ro.check's ValueError, splits it into per-rule faults, remaps take-internal [Shot k] to plan shot indices and tags each fault with its originating layer; (2) plan_check.main folds these in as hard rows (\"G-TAKELINT shot N: L8 NO PACE ... [plan|row <id>|card <pid>]\") printed at the 4-space indent plan_repair.fault_rows already collects; (3) plan_cures grows a stillness/gait/arrival substitution table for plan fields plus a shared row-text curer applied as a one-time migration over refs.json + analysis/props and as a bind-time lint in pack_refs.rows_for so new rows never carry stillness words; (4) unmatched faults and L14 shortfalls go to llm.structured(\"workhorse\", ...) returning one rewritten field, accepted only after the triggering lint family re-passes locally. All writes to plan.json go through episode_home.write_plan, so plan.verdict.json lapses by sha8 automatically.",
+ "gates": [
+  {
+   "id": "G-TAKELINT",
+   "hard": true,
+   "where": "scripts/episode/plan_check.py main(), insert after the `for refuse in (takes_r2v.refuse_long_shots, takes_r2v.refuse_still_motions)` loop (~line 247) and before `print(\"SHEET TEXT   :\")`; new function take_lint_gate(book, ep, number, rate) ~15 lines. It calls takes_r2v.dry_faults(book, ep, number, projected(ep, rate)). Delete the unpaced_shots advisory loop (superseded by the real lint). hard += len(rows).",
+   "rule": "Every take card the plan projects to must pass episode_ref_official.lint when dry-built (refs=None, panel=False, props staged only when cast_refs.casts_from_sheets(book)). Each fault prints one row `    G-TAKELINT shot {plan_index}: {Lxx fault text} [{layer}]` where layer is `plan`, `row {entity_id}` or `card {pid}` — determined by which source text contains the flagged word (fault_origin(), ~12 lines: search shot fields, then physicals values, then prop-row texts). [Shot k] inside a fault is rewritten to the plan index take['shots'][k-1]. Dry build must NOT call takes_r2v.opened() (it re-runs plan_gates and would double-count); instead extract the adoption block of opened() (takes_r2v.py ~lines 845-860: canvas.size, house_style.adopt/adopt_look/adopt_places, adopt_names) into adopt_canon(book, episode) used by both."
+  },
+  {
+   "id": "G-ROWTEXT",
+   "hard": true,
+   "where": "studio/row_lint.py (new, ~40 lines): row_faults(text:str)->list[str] using ro.STILL, ro.gaits+ro.PACE, ro.SLOW, ro.NEGATIONS. Hooked (a) at write: studio/pack_refs.rows_for raises SystemExit listing faults before returning rows, so step_01_bind can never file a 'revolver held at her lap' physical; (b) at read: new plan_check.main section `ROW TEXT     :` just before the CAST BOUND section, linting every refs.json character `physical` and every analysis/props/<pid>.json profile.physical + profile.scale; hard count.",
+   "rule": "No character row physical and no prop-card profile text may contain a STILL-regex hit, a person gait with no PACE phrase, 'slow/slowly', or a negation. These texts are injected verbatim into every take prompt (ro.build subjects() and props), so a dirty row poisons every take of the episode; the lint runs where the data is written, not only where it is consumed."
+  },
+  {
+   "id": "G-CURE-VERIFY",
+   "hard": true,
+   "where": "studio/plan_cures.py llm_field_cure() (new): after llm.structured returns RewrittenField, run verify_family(rule_id, new_text) (new, ~15 lines: L2->not ro.STILL.search(scrub), L8->no unpaced ro.gaits, L21->last sentence not ro.LAYOUT and matches ro.MOVER|ro.ACTION|ro.GAIT, L14->word delta >= need, all->no ro.NEGATIONS hit and no banned word introduced).",
+   "rule": "An LLM rewrite is written to the plan/row/card ONLY if the lint family that ordered it passes on the rewritten text and no banned word (still/stays/remains/motionless/frozen/pauses/waits/unchanged/unmoving/holds/held/slow/slowly) was introduced. One re-ask with the verifier's complaint appended (llm.re_ask pattern, studio/llm.py line 289), then the row is left uncured and plan_repair exits 1 naming it — a failed cure never silently ships."
+  }
+ ],
+ "cures": [
+  {
+   "fault": "L2 STILLNESS in plan fields (frame/motion/at_rest/end/changed, cuts, setups described/crowd/geometry)",
+   "kind": "mechanical",
+   "how": "plan_cures.stillness_words(doc): ordered regex table applied to every prose field — (r'\\bholds her fire\\b','her guns silent'), (r'\\bheld at\\b','resting at'), (r'\\bheld in\\b','clutched in'), (r'\\bholds?\\b(?! a static shot)','grips'→only when object follows, else llm), (r'\\bheld\\b','clutched'), (r'\\bremains?\\b|\\bstays?\\b','keeps'), (r'\\bmotionless\\b|\\bfrozen\\b|\\bunmoving\\b','at rest'→only in at_rest field, else llm), (r'\\bwaits?\\b','stands ready'). Idempotent; a word the table misses stays in the row and falls to the llm cure. CURES entry: (re.compile(r'L2 STILLNESS.*\\[plan\\]'),'stillness_words').",
+   "est_cost_usd": "0",
+   "prompt_template": ""
+  },
+  {
+   "fault": "L2/L8/SLOW/NEGATION words in refs.json physicals and analysis/props cards (data outside the plan)",
+   "kind": "mechanical",
+   "how": "studio/row_lint.cure_row_text(text)->str applying the SAME table plus pace append; scripts/episode/migrate_row_words.py (new CLI, one-time): loads library/<book>/refs/refs.json and analysis/props/*.json, rewrites each flagged physical/scale via cure_row_text, prints a before/after diff, writes back (refs.json through its existing write path so any refs verdict lapses honestly). Ongoing protection is G-ROWTEXT at pack_refs.rows_for, so this migration never needs a second run. plan_repair.apply gains a branch: a row tagged `[row <id>]` or `[card <pid>]` dispatches to row_lint.cure_row_file(book, layer, id) instead of a doc cure.",
+   "est_cost_usd": "0",
+   "prompt_template": ""
+  },
+  {
+   "fault": "L8 NO PACE, person gait (walks/climbs/rides by someone ro.is_person accepts)",
+   "kind": "mechanical",
+   "how": "EXISTS: plan_cures.pace_words (CURES pattern r'NO PACE' already matches the new G-TAKELINT row text — verify with a test, no dispatcher change needed). Extend pace_words to also cover cuts[] fields and lines' stage text if any.",
+   "est_cost_usd": "0",
+   "prompt_template": ""
+  },
+  {
+   "fault": "L8 NO PACE, figurative non-gait subject ('fire climbs', 'the town climbs', ivy/smoke/road)",
+   "kind": "mechanical",
+   "how": "plan_cures.figurative_gaits(doc): for each L8-flagged field, for each ro.gaits match whose ro.clause_head fails a strict person test (PERSON regex only, NOT the capitalised-word fallback — the fallback is what mis-fired), swap the verb: climbs->spreads, climb->spread, walks->drifts, runs->streams, rides->rolls; subject-noun allowlist (fire, flame, smoke, fog, mist, shadow, light, town, road, ivy, water, tide) guards the swap; a non-person gait outside the allowlist goes to llm. CURES: (re.compile(r'L8 NO PACE.*\\[plan\\]'),'figurative_gaits') placed BEFORE the generic 'NO PACE' row so it runs first; it only swaps non-person clauses, then pace_words handles the person ones in the same round.",
+   "est_cost_usd": "0",
+   "prompt_template": ""
+  },
+  {
+   "fault": "L21 ARRIVAL (end/at_rest final sentence contains a LAYOUT word like 'edge', or names nothing that moves)",
+   "kind": "mechanical",
+   "how": "plan_cures.arrival_ends(doc, indices): for each flagged shot, split the end field (fallback at_rest) with ro.sentences(); if an earlier sentence matches ro.MOVER|ro.ACTION, delete the layout-final sentence; else replace it with f'The {head} continues to the last frame of the shot.' where head is the shot's motion first clause verb phrase (motion.partition(';')[0] stripped of 'The camera'), falling back to 'The camera's move continues to the last frame of the shot.' for a locked-off frame with a moving subject in at_rest; a shot where neither works goes to llm. 'continues' satisfies ro.MOVER and the L11 comment names this exact clause as legal.",
+   "est_cost_usd": "0",
+   "prompt_template": ""
+  },
+  {
+   "fault": "L23 PACE ON A THING (pace phrase on a non-person clause, usually left by an earlier blind injection)",
+   "kind": "mechanical",
+   "how": "plan_cures.drop_thing_pace(doc): for each ro.PACE_MARK match in a prose field whose ro.clause_head fails is_person, delete the pace phrase and collapse doubled spaces. Exact inverse of pace_words; ordered AFTER figurative_gaits in a round so a swap-then-strip cannot oscillate (both idempotent).",
+   "est_cost_usd": "0",
+   "prompt_template": ""
+  },
+  {
+   "fault": "L3 SLOW / L9 NO LIMP / L18 BANNED PROP (plan layer)",
+   "kind": "mechanical",
+   "how": "L3: plan_cures.strip_slow(doc) deletes r'\\bslow(ly)?\\b' with comma cleanup (the limp carries the slowness — ro.limp_clause doc). L9: apply ro.limp(text) to the flagged field (function exists, episode_ref_official.py line ~1072). L18: delete the banned-prop phrase from the plan field when the word is not borne by a cast row (ro.l18 already exempts row-borne words); residue to llm.",
+   "est_cost_usd": "0",
+   "prompt_template": ""
+  },
+  {
+   "fault": "L14 LENGTH short (<240-word prompt block; plan-side lever is thin at_rest/frame prose)",
+   "kind": "llm",
+   "how": "plan_cures.enrich_at_rest(doc, index, need_words, tier='workhorse'): one llm.structured call (studio/llm.py structured(), line 260 — native structured output, guard_spend inside, retries=3 on StructuredOutputException) with pydantic class RewrittenField(BaseModel): text: str. Accepted only through G-CURE-VERIFY. Cap: MAX_LLM_CURES=24 per plan_repair run (counter in apply loop); plan_repair gains --no-llm for tests and dispatches llm cures only AFTER a round in which mechanical cures changed nothing.",
+   "est_cost_usd": "~$0.0004/call (gpt-5.6-luna $0.20/M in, $1.20/M out; ~900 in + 250 out), <= $0.01/episode at the cap",
+   "prompt_template": "You are enriching ONE field of a film-shot plan so its built take prompt reaches the length floor.\nShot {index}'s block is {n} words; the floor is {low} words.\nThe field is shots[{index}].at_rest. Current text:\n---\n{at_rest}\n---\nThe shot's frame: {frame}\nThe setup: {described}\nAdd 1-3 sentences of VISIBLE at-rest state already implied by the frame and setup — posture, hands, light on surfaces, placement in the frame. Hard constraints:\n- never use: still, stays, remains, motionless, frozen, pauses, waits, unchanged, unmoving, holds, held, slow, slowly\n- no negations (no, not, never, without, barely, hardly)\n- any walk, climb or ride by a person ends its clause with 'at a normal walking pace'\n- the final sentence names the camera or a moving body, never a layout word (edge, corner, half, taller, smaller, larger)\n- invent no object, person or light source the frame and setup do not name\nReturn the full enriched at_rest text."
+  },
+  {
+   "fault": "Unmatched lint residue: L1 NEGATION, L4 NO ACTION, L14 long, L19 CROWD long sentence, L22 ABSENT MOUTH, and any table-missed L2/L8/L21 word, on any layer",
+   "kind": "llm",
+   "how": "plan_cures.llm_field_cure(book, doc, fault_row, tier='workhorse'): parses layer tag; resolves the target text (plan field via shot index + a field-locator that finds which prose field contains the flagged word; refs.json physical via entity_id; props card via pid); one llm.structured call with RewrittenField; G-CURE-VERIFY; writes plan fields into doc (caller round writes via episode_home.write_plan — contract-checked, verdict lapses), row/card targets via row_lint.cure writers. RULE_HELP: dict of one-paragraph canned help per rule id (L1: 'state what IS, never what is not'; L4: 'give the block one body-scale action: a turn, a reach, a step at a normal walking pace'; L19: 'split or shorten the sentence under 20 words'; L22: 'remove the named absent person; describe the staged faces only'; L14-long: 'condense, keep every concrete visual fact'). Builder-arithmetic rules get NO cure and surface as uncured (creative/bug) rows: L5 COVERAGE, L6 STAMPS, L7 PINS, L10 LIFE, L11 PICTURES, L12 SPEAKERS, L13 TASK TYPE, L15 SUMMARY LENGTH, L17 CROSS-CUT; L16 DIALOGUE TAIL maps to the existing 'holds' cure (coda room after the line); L20 STYLE maps to existing pin_series/light_directions.",
+   "est_cost_usd": "~$0.0004/call, bounded by MAX_LLM_CURES=24",
+   "prompt_template": "You are rewriting ONE field of a film-shot plan so it passes a mechanical lint. Change only what the fault requires; keep every concrete visual fact.\nThe fault: {fault_row}\nThe rule: {rule_help}\nThe field ({layer_said}) current text:\n---\n{text}\n---\nHard constraints:\n- never use: still, stays, remains, motionless, frozen, pauses, waits, unchanged, unmoving, holds, held, slow, slowly\n- no negations (no, not, never, nobody, nothing, without, barely, hardly)\n- any walk, climb or ride by a person ends its clause with 'at a normal walking pace'; a fire, road, town or light never walks or climbs — it spreads, runs or streams\n- the final sentence names the camera or a moving body, never a layout word (edge, corner, twice, taller, smaller, larger, half)\n- keep within {cap} words; invent nothing the plan does not already stage\nReturn the rewritten field text only."
+  }
+ ],
+ "files": [
+  {
+   "path": "D:\\Projects\\KingdomOfViSuReNa\\alpha\\visurena_studio\\scripts\\episode\\takes_r2v.py",
+   "change": "Extract adopt_canon(book, episode) from opened() (~lines 845-860; opened keeps its refusals and calls it). Add dry_measured(episode, projected_rows, rate) -> dict[int, dict] (per-line at/seconds from shot t_start + HANDLE 0.25 + cumulative words/rate + BREATH 0.70, rel_path='lines/predicted.wav'); dry_prompt(book, episode, number, take, measured, from_refs) mirroring card()'s ro.build call (line ~511) with refs=None, props=pack_refs.props_named(...) only when from_refs (staged_facts(sizes, from_refs, faces) line 342), panel=False, ends=[], anchors skipped — no boards read; dry_faults(book, episode, number, projected_rows) -> list[str]: tk.takes(projected_rows) (studio/episode_takes.py line 143 — CONFIRM take() accepts projected rows' keys; add t_start from cumulative seconds if it demands it), per take catch ValueError from ro.check, parse_faults(msg) (strip 'the prompt fails the lint (N faults): ', re.split(r';\\s(?=L\\d+ )')), remap r'\\[Shot (\\d+)\\]' -> f\"shot {take['shots'][k-1]}\", tag origin via fault_origin(bad, shots, physicals, prop_rows). from_refs = cast_refs.casts_from_sheets(book) — pass as a parameter, never mutate the FROM_REFS global (line 257)."
+  },
+  {
+   "path": "D:\\Projects\\KingdomOfViSuReNa\\alpha\\visurena_studio\\scripts\\episode\\plan_check.py",
+   "change": "Add take_lint_gate() + ROW TEXT section per G-TAKELINT/G-ROWTEXT above; remove the unpaced_shots advisory (function + its print loop, lines ~104-115 and ~244-245); rows print 4-space-indented so plan_repair.fault_rows (plan_repair.py line ~44) collects them unchanged."
+  },
+  {
+   "path": "D:\\Projects\\KingdomOfViSuReNa\\alpha\\visurena_studio\\studio\\plan_cures.py",
+   "change": "Add stillness_words, figurative_gaits, arrival_ends, drop_thing_pace, strip_slow, apply_limp, strip_banned_prop, enrich_at_rest, llm_field_cure, verify_family, RULE_HELP, RewrittenField, MAX_LLM_CURES=24. Extend CURES (line ~322): new patterns ordered most-specific-first — G-TAKELINT L2 [plan]->stillness_words, L8 [plan]->figurative_gaits (before the existing 'NO PACE'->pace_words row), L21->arrival_ends, L23->drop_thing_pace, L3->strip_slow, L9->apply_limp, L16->holds, L20 stays on pin_series/light_directions, '[row '/'[card '->row_words. Word table lives in studio/row_lint.py and is imported, so plan and row layers share one table."
+  },
+  {
+   "path": "D:\\Projects\\KingdomOfViSuReNa\\alpha\\visurena_studio\\studio\\row_lint.py",
+   "change": "NEW: row_faults(text), cure_row_text(text), cure_row_file(book, layer, ident) (refs.json physical by entity_id; analysis/props/<pid>.json profile.physical+scale), the shared substitution TABLE. Imports ro regexes; no book names, pure text in/out."
+  },
+  {
+   "path": "D:\\Projects\\KingdomOfViSuReNa\\alpha\\visurena_studio\\studio\\pack_refs.py",
+   "change": "rows_for (line ~207): before returning, run row_lint.row_faults on each row's physical and raise SystemExit listing every fault at once (bind-time wall so new rows never carry stillness words)."
+  },
+  {
+   "path": "D:\\Projects\\KingdomOfViSuReNa\\alpha\\visurena_studio\\scripts\\episode\\plan_repair.py",
+   "change": "apply() (line ~70): dispatch the new cure names; rows tagged [row/card] route to row_lint.cure_row_file. main(): after the mechanical ROUNDS loop, if uncured lint-family rows remain and '--no-llm' not passed, run one llm pass (llm_field_cure per row, counter-capped), re-run battery_rows, then the existing CREATIVE exit. Plan writes stay on episode_home.write_plan (episode_home.py line 58) so plan.verdict.json lapses by sha8 (studio/plan_verdict.py current(), line ~44)."
+  },
+  {
+   "path": "D:\\Projects\\KingdomOfViSuReNa\\alpha\\visurena_studio\\scripts\\episode\\migrate_row_words.py",
+   "change": "NEW one-time CLI: `uv run python scripts/episode/migrate_row_words.py <codex_id> [--write]` — lints refs.json + analysis/props/*.json, prints per-field before/after, writes only with --write."
+  },
+  {
+   "path": "D:\\Projects\\KingdomOfViSuReNa\\alpha\\visurena_studio\\studio\\episode_ref_official.py",
+   "change": "NO rule changes. The check() message format (line ~2050: 'the prompt fails the lint (N faults): ' + '; '.join) becomes a parsed contract — pin it with a test; if an implementer prefers, add faults list as ValueError.args[1] (check raises ValueError(msg, bad)) so parse_faults reads args[1] when present and falls back to the regex split."
+  }
+ ],
+ "tests": [
+  "tests/test_take_lint_dry.py — dry_faults on a fixture plan whose shot 14 motion says 'he climbs the lane' returns a row containing 'G-TAKELINT shot 14' and 'L8 NO PACE' tagged [plan]; a fixture refs.json physical 'revolver held at her lap' yields an L2 row tagged 'row <entity_id>'; a fixture props card 'she holds her fire' (from_refs book fixture) yields 'card <pid>'; parse_faults round-trips a canned check() message with a semicolon inside a fault body; [Shot 2] of a two-shot take maps to take['shots'][1]. All on fixture library dirs under tmp_path; zero network.",
+  "tests/test_still_table.py — cure_row_text/stillness_words: 'held at'->'resting at', 'holds her fire'->'her guns silent', ro.STILL finds nothing in every cured output, applying twice equals applying once (idempotent).",
+  "tests/test_figurative_gaits.py — 'the fire climbs the stair rail'->'the fire spreads...' (no pace appended); 'Watson climbs the stair'->unchanged by figurative_gaits then pace_words appends 'at a normal walking pace'; drop_thing_pace removes a pace glued to 'the curtain'.",
+  "tests/test_arrival_ends.py — an end field ending 'the log house stands twice its size along the left edge' with a prior movement sentence loses the layout sentence; with no prior movement gains 'continues to the last frame of the shot' built from the shot's motion head; cured text passes ro.l21_arrival on a minimal built block.",
+  "tests/test_row_lint_gate.py — row_faults flags STILL/unpaced-gait/slow/negation and passes a clean row; pack_refs.rows_for SystemExits listing every dirty row at once; migrate_row_words dry-run leaves files byte-identical, --write cures the fixture and a second run reports nothing.",
+  "tests/test_cure_dispatch.py — cure_for maps each new G-TAKELINT row text to the right cure name, [row x] rows to row_words, keeps every pre-existing CURES mapping (regression over the current table), and confirms the existing r'NO PACE' pattern catches the G-TAKELINT L8 row form.",
+  "tests/test_llm_field_cure.py — FakeModel/monkeypatched llm.structured returns canned RewrittenField: a good rewrite is accepted and lands in the right layer; a rewrite reintroducing 'held' is rejected by verify_family, re-asked once with the complaint, then left uncured; StructuredOutputException path retries; MAX_LLM_CURES cap stops the 25th call; --no-llm skips the pass entirely. No paid API — the gateway is stubbed at the structured() boundary.",
+  "tests/test_plan_check_rows.py — plan_repair.fault_rows collects the new 4-space G-TAKELINT and ROW TEXT rows and still excludes advisory lines; the check() ValueError message format test pins the parse contract against episode_ref_official."
+ ],
+ "risks": [
+  "Dry/real prompt drift: dry_prompt skips pictures, panels, END cells and anchors, so L11/L13/L15 cannot be judged pre-sign and a picture-dependent fault can still surface at step 06 — G-TAKELINT is necessary, not sufficient; step 06's own check() stays the wall. Mitigate drift with one integration test asserting dry_prompt == card()['prompt'] on a fixture where boards DO exist and from_refs=False.",
+  "tk.takes/take() may require placed keys (t_start, frames) that plan_check.projected rows lack — implementer must read studio/episode_takes.take() and synthesize t_start/frames from cumulative seconds*fps before trusting dry grouping.",
+  "Editing refs.json/props cards after sheets are drawn can lapse the refs pack verdict or take currency (card_pictures/sha reads); the migration must run once pre-ep19 at a clean point, and word cures must never alter wardrobe/scale meaning — the table only touches posture verbs.",
+  "ro.is_person's capitalised-word fallback is the known mis-router for figurative subjects; figurative_gaits therefore swaps only on the noun allowlist and defers the rest to the llm cure, so an aggressive swap can never rewrite a person's walk.",
+  "The check()-message parse contract can silently break if someone rewords the ValueError; the args[1] structured-faults fallback plus the pinning test covers it, but both must land together.",
+  "Cure oscillation across rounds (pace append then thing-pace strip) is bounded by ROUNDS=6 and the 'nothing cured this round' break in plan_repair.main, but ordering figurative_gaits before pace_words within a round is load-bearing — keep the CURES list order test.",
+  "llm cures spend real money in production: guard_spend already walls at $3/episode, but _record_spend context (spend_context) must be active in plan_repair's process or the spend goes unrecorded — wire spend_context around the llm pass."
+ ]
+}

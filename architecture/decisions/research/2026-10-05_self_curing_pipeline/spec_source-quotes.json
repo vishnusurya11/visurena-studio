@@ -1,0 +1,86 @@
+{
+ "area": "AREA 3 — source-span faults (G-SOURCE) + over-wall narration lifts (QUOTE): purely mechanical snap-to-chapter cures",
+ "summary": "The writer paraphrases chapter evidence (ep18 shot 16 scored 0.75/0.78 against the 0.85 SPAN_MATCH wall) and lifts over-wall runs into narration; both were hand-fixed by replacing writer text with the chapter's own words. The scorer that refuses the span — plan_gates.span_match — already locates the best chapter window and merely throws its position away, so the cure is: refactor span_match into best_window(span, chapter) -> (ratio, start_word, n_words), map word indices to char offsets in the chapter string (normalization is 1:1 so offsets survive), expand to complete sentence boundaries, and write that verbatim text back as the span. Below a 0.50 floor (plan_gates' own docstring: a paraphrase of the right sentence reads 0.5-0.7, invention reads lower) the span is DROPPED, which mechanically resurfaces as the existing creative fault \"claim has no chapter span\" and goes to the writer round — no LLM fallback, zero new surfacing code. QUOTE gets the same treatment: lifted_run gains an offset-returning sibling, and a hard narration lift that touches the line's start or end is trimmed at a word boundary to land at QUOTE_WALL (the ep02 precedent: cut Doyle's trailing words to land AT the wall); a mid-line lift is left as creative. Both cures are difflib/regex arithmetic — $0, no API call, idempotent (verbatim spans score ~1.0 and are never touched again) — wired as two new CURES rows plus one HARD_LISTS entry so plan_repair can finally see QUOTE rows.",
+ "gates": [
+  {
+   "id": "G-SOURCE (existing, unchanged wall)",
+   "where": "studio/plan_gates.py — span_faults()/source_faults() (lines ~893-908), printed by scripts/episode/plan_check.py catalog_gates() line ~115-120 under 'MOVES/SOURCE :' with 4-space indent, already collected by plan_repair.fault_rows",
+   "rule": "every span scores span_match >= SPAN_MATCH (0.85) against plan_brief.chapter_text(); only the CURE is new — the gate, wall and row text stay byte-identical so historical plans re-judge identically",
+   "hard": true
+  },
+  {
+   "id": "QUOTE (existing gate, newly repairer-visible)",
+   "where": "scripts/episode/plan_check.py line ~247-248 (spec.quoted_lines over seq_boards.book_words(book)); scripts/episode/plan_repair.py HARD_LISTS gains the exact string \"QUOTE        : [\" (same spelling as the checker's print, same mechanism as the ep16 TAKE LENGTH fix)",
+   "rule": "no narration line carries a lifted run > QUOTE_WALL (8) consecutive book words; dialogue stays advisory and is never cured",
+   "hard": true
+  },
+  {
+   "id": "snap self-check (inside the cure, not a new battery row)",
+   "where": "studio/plan_cures.py snap_span() final guard",
+   "rule": "a snapped replacement must itself score plan_gates.span_match(out, chapter) >= SPAN_MATCH or snap_span returns None and the span is dropped — the cure can never write a span the gate would refuse next round",
+   "hard": true
+  }
+ ],
+ "cures": [
+  {
+   "fault": "G-SOURCE: span is not in the chapter (writer paraphrase, ratio in [0.50, 0.85))",
+   "kind": "mechanical",
+   "how": "studio/plan_gates.py: refactor span_match (line 877) into best_window(span, chapter) -> tuple[float, int, int] = (ratio, start_word_index, n_words) — identical loop, it just keeps the argmax start; span_match becomes `return round(best_window(span, chapter)[0], 2)` so checker and cure share ONE scorer (test_the_cure_measures_like_the_checker invariant). Add _word_offsets(text) -> list[tuple[int,int]]: char (start,end) per word via re.finditer(r\"[a-z0-9']+\", text.replace(\"’\", \"'\").lower()) — both normalizations are 1:1 in char count, so offsets index the original chapter string. Add snap_sentences(chapter, a, b) -> str: expand [a,b) backward to the char after the previous sentence terminator (regex r\"[.!?][\\\"”')’]*\\s\" , or a \\n\\n paragraph break, or text start) and forward through the next terminator inclusive; return the slice with whitespace collapsed via ' '.join(split()). studio/plan_cures.py: SNAP_FLOOR = 0.50 (docstring cites plan_gates SPAN_MATCH docstring: paraphrase of the same sentence reads 0.5-0.7; ep18 shot 16 read 0.75 and 0.78 — snappable); SNAP_WORDS = 40 (a snap longer than 40 words keeps only the single sentence containing the matched window's midpoint, re-snapped). snap_span(span, chapter) -> str|None (<=20 lines): ratio, start, n = plan_gates.best_window(...); if ratio < SNAP_FLOOR: return None; offs = plan_gates._word_offsets(chapter); out = plan_gates.snap_sentences(chapter, offs[start][0], offs[min(start+n, len(offs))-1][1]); apply SNAP_WORDS cap; return out if plan_gates.span_match(out, chapter) >= plan_gates.SPAN_MATCH else None. source_spans(doc, chapter) -> dict (<=15 lines): for each shot, rebuild shot['source'] keeping spans already >= SPAN_MATCH as-is, replacing failing spans with snap_span(span, chapter), dropping spans whose snap is None; dedupe preserving order (the ep18 'writer re-added it' case collapses to one copy). Idempotent: a verbatim span scores ~1.0 and is never touched. CURES row (inserted ABOVE the legal_props row so its bare 'prop ' alternative cannot shadow anything): (re.compile(r\"G-SOURCE shot \\\\d+: span .* is not in the chapter\"), \"source_spans\").",
+   "est_cost_usd": "0.00",
+   "prompt_template": ""
+  },
+  {
+   "fault": "G-SOURCE: span with best match < 0.50 (invention, not paraphrase)",
+   "kind": "mechanical",
+   "how": "snap_span returns None and source_spans DROPS the span. No llm fallback by design: if the shot still makes claims (claims() nonempty), the existing 'G-SOURCE shot N: {claim} has no chapter span' fault (plan_gates.source_faults line ~906) fires next round; it matches no CURES pattern, so plan_repair lists it under 'CREATIVE faults remain -- the writer's, one field at a time' and exits 1 to the writer round. If the shot had no claims, G-COVER's 'no chapter span places it in the chapter' (cover_faults) surfaces it the same way. Zero new surfacing code — the drop IS the escalation.",
+   "est_cost_usd": "0.00",
+   "prompt_template": ""
+  },
+  {
+   "fault": "QUOTE: narration line lifts > QUOTE_WALL consecutive book words",
+   "kind": "mechanical",
+   "how": "studio/episode_spec.py: add lifted_offsets(line, source) -> tuple[int,int,int] (char start, char end, n_words of the longest lifted run in the ORIGINAL line string) — same longest-first scan as lifted_run (line 1238) but tokenizing with re.finditer to keep offsets (note _tokens' em/en-dash -> space normalization is also 1:1 in char count, so offsets survive); lifted_run stays as-is for the checker. studio/plan_cures.py: quote_trim(doc, source) -> dict: for each hard line from episode_spec.quoted_lines([...], source): a, b, n = lifted_offsets(...); if the run reaches the line's end (only whitespace/terminal punctuation after b): truncate the run to its first QUOTE_WALL words at a word boundary and re-attach the line's original terminal punctuation (the ep02 'trim Doyle's trailing words to land at the wall' craft, codified); elif the run starts the line (only whitespace/opening quote before a): drop leading run words down to QUOTE_WALL and capitalize the new first word; else leave the line (mid-line lift = creative, survives to the writer round). Re-measure with lifted_run after each trim; loop per line max 3 times (a second shorter run may remain). Dialogue (kind != narration) is never touched — it is advisory by the gate's own split. plan_repair: HARD_LISTS += (\"QUOTE        : [\",) and CURES row (re.compile(r\"QUOTE\\\\s+: \\\\[\"), \"quote_trim\").",
+   "est_cost_usd": "0.00",
+   "prompt_template": ""
+  },
+  {
+   "fault": "no chapter text on disk (chapter_text returns None) while spans exist",
+   "kind": "mechanical",
+   "how": "plan_repair.apply fetches chapter lazily only when 'source_spans' or 'quote_trim' is in the dispatched names: chapter = plan_brief.chapter_text(book, number). If None, skip both cures (do not add their names to the cured set) so the rows come back uncured and the existing 'no chapter text to find its N span(s) in' fault lists as creative — never a silent pass, matching source_faults' own 'None with spans to check is a refusal, never a pass' contract.",
+   "est_cost_usd": "0.00",
+   "prompt_template": ""
+  }
+ ],
+ "files": [
+  {
+   "path": "D:\\Projects\\KingdomOfViSuReNa\\alpha\\visurena_studio\\studio\\plan_gates.py",
+   "change": "Refactor span_match (line 877) into best_window(span, chapter) -> (ratio, start_word, n_words) keeping the argmax start; span_match delegates to it (return value and rounding unchanged — regression-locked by existing test_plan_gates.py). Add _word_offsets(text) (char spans per word, offset-preserving normalization) and snap_sentences(chapter, a, b) (expand a char range to complete sentences, collapse whitespace). Three functions, each 10-20 lines, one job each."
+  },
+  {
+   "path": "D:\\Projects\\KingdomOfViSuReNa\\alpha\\visurena_studio\\studio\\plan_cures.py",
+   "change": "Add SNAP_FLOOR = 0.50, SNAP_WORDS = 40, snap_span(span, chapter), source_spans(doc, chapter), quote_trim(doc, source). Insert two CURES rows ABOVE the legal_props row: (r\"G-SOURCE shot \\d+: span .* is not in the chapter\", \"source_spans\") and (r\"QUOTE\\s+: \\[\", \"quote_trim\"). Do NOT match 'has no chapter span' or 'no chapter text' — those stay creative."
+  },
+  {
+   "path": "D:\\Projects\\KingdomOfViSuReNa\\alpha\\visurena_studio\\studio\\episode_spec.py",
+   "change": "Add lifted_offsets(line, source) -> (start_char, end_char, n_words) beside lifted_run (line ~1238), sharing the seen-runs set builder; lifted_run itself untouched."
+  },
+  {
+   "path": "D:\\Projects\\KingdomOfViSuReNa\\alpha\\visurena_studio\\scripts\\episode\\plan_repair.py",
+   "change": "HARD_LISTS gains \"QUOTE        : [\" (exact checker spelling from plan_check.py line 248). apply() signature becomes apply(doc, rows, book, number, rate=3.0); inside, when names intersects {\"source_spans\", \"quote_trim\"}: chapter = plan_brief.chapter_text(book, number); dispatch `elif name == \"source_spans\" and chapter: doc = pc.source_spans(doc, chapter)` and `elif name == \"quote_trim\": lazily `import seq_boards` (sibling module, resolvable because the script dir is sys.path[0] at runtime; lazy so the importlib-loaded test module never needs it) then doc = pc.quote_trim(doc, seq_boards.book_words(book)) — the SAME source the checker measures against (plan_check.py line 247), never chapter_text. main() call site passes number. All writes remain through episode_home.write_plan, so the plan.verdict.json sha8 signature lapses automatically — no extra wiring."
+  }
+ ],
+ "tests": [
+  "tests/test_a_paraphrased_span_is_snapped_to_the_chapters_words.py — tiny fake chapter of 3 sentences (middle one modeled on ep18: 'And then followed such a concussion as I had never heard before.'). Asserts: (1) a paraphrase span ('then came such a concussion as I never heard') scores < SPAN_MATCH raw but snap_span returns exactly the chapter's middle sentence, capital-to-full-stop, never mid-word; (2) plan_gates.span_match(snapped, chapter) >= 0.85; (3) an invented span ('the Martian stood over the body') -> snap_span None, and source_spans drops it from shot['source']; (4) idempotence: source_spans over a doc whose spans are already verbatim returns an equal doc; (5) a duplicate paraphrase (writer re-added) collapses to one snapped copy; (6) SNAP_WORDS cap: a window inside a 60-word sentence chain keeps one sentence. Pure functions, no I/O, no API.",
+  "tests/test_an_over_wall_narration_lift_is_trimmed_at_the_wall.py — fake source with a 14-word sentence. Asserts: a narration line ending in that run is trimmed so episode_spec.lifted_run(line, source) <= QUOTE_WALL with terminal punctuation preserved; a line STARTING with the run is head-trimmed and recapitalized; a mid-line run is left byte-identical (creative); a dialogue line over the wall is never touched; quote_trim is idempotent. No API.",
+  "tests/test_the_repairer_dispatches_source_and_quote_rows.py — loads plan_repair via importlib (same pattern as tests/test_the_cure_measures_like_the_checker.py). Asserts: pc.cure_for(\"G-SOURCE shot 16: span 'And then followed such a concussion…' is not in the chapter, measured 0.75 against 0.85\") == \"source_spans\"; cure_for(\"G-SOURCE shot 3: posture 'astride' has no chapter span, measured 0 against 1\") is None (creative, and in particular NOT \"legal_props\"); cure_for of the prop-claim variant \"G-SOURCE shot 4: prop 'copper_pan' has no chapter span, measured 0 against 1\" is None; pr.fault_rows over a canned plan_check stdout containing \"QUOTE        : [(3, 14)]\" collects that row and cure_for maps it to \"quote_trim\"; apply() with chapter=None leaves G-SOURCE rows uncured. Canned stdout string — no subprocess, no API.",
+  "tests/test_plan_gates.py (extend) — best_window returns (ratio, start, n) whose word window reconstructs the matched chapter text, and span_match's value is byte-identical to the pre-refactor ratio on the docstring's calibration cases (one slipped letter ~0.98, paraphrase 0.5-0.7); _word_offsets offsets index the ORIGINAL string correctly across a ’ apostrophe and an em-dash; snap_sentences respects a closing quote after a terminator and a \\n\\n paragraph break. No API."
+ ],
+ "risks": [
+  "Latent mis-dispatch already in the table: legal_props' pattern (plan_cures.py:332) contains the bare alternative r\"prop \" which TODAY matches a 'G-SOURCE shot N: prop 'x' has no chapter span' row and dispatches legal_props (a no-op when the prop is legal — six wasted rounds, then creative). The new rows are inserted above it, but the no-span prop row still falls through to it. Recommend tightening that alternative in the same commit (e.g. require the G-PROP row's own wording, not bare 'prop ') after reading the exact G-PROP fault text; the dispatch test above pins the fixed behavior.",
+  "best_window anchors only on occurrences of the span's first TWO words (plan_gates.py:885): a paraphrase whose opening two words are both the writer's own can miss the true window and read < SNAP_FLOOR, so a curable span gets dropped instead of snapped. Safe direction (drop -> writer round, never a wrong snap), but if it bites in practice the mechanical widening is to also anchor on the span's rarest word — not an LLM call.",
+  "The fault row truncates the span at 60 chars (plan_gates.py:895), so any cure that parses rows is wrong by construction; source_spans must re-measure the doc itself. The design does this; the implementer must not 'optimize' by parsing rows.",
+  "quote_trim rewrites narration TEXT, which is downstream audio: it is only valid before step_04_record. plan_repair runs at the plan stage and the existing rendered-plan protections (test_a_rendered_plan_is_never_rewritten) already block late rewrites; do not wire quote_trim anywhere else.",
+  "Sentence snapping around Doyle's nested quotes: a terminator inside dialogue ('“Get under the water!” he said.') can snap a half-quote; the snap_sentences regex must treat closing-quote characters after .!? as part of the terminator (covered by a dedicated case in the extended test_plan_gates.py).",
+  "A snapped span is chapter-verbatim, so if the same sentence also feeds a narration line the QUOTE gate may newly fire on that line — correct behavior (the span is evidence metadata, the line is prose), but expect one extra repair round when both cures run; ROUNDS=6 absorbs it."
+ ]
+}

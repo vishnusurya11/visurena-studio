@@ -1,0 +1,136 @@
+{
+ "area": "AREA 10: publish automation (youtube.json generation, measured director sign-off, step 13 publish to public Short URL)",
+ "summary": "The root problem: the last mile is hand work — Claude writes youtube.json and review/director_signoff.md by hand, types youtube_upload.py/youtube_privacy.py with --watched/--approved, and drive.py ends at step 12's manifest instead of a public URL. Everything needed is already measured on disk: step_11 (scripts/episode/step_11_qc.py, judge_master/sign_master) fills review/eye_<sha8>.json with answers+evidence, qc_r2v.json carries the coverage numbers, learnings.jsonl carries every ladder terminal with its reason, and publish_lock.py + youtube_upload.refusals are the complete policy chain. The mechanism: (a) scripts/publish/metadata.py builds the title mechanically via yp.series_title + series_of(source/book.json) and spends ONE llm.structured(\"reasoning\", ...) call (guard_spend fires inside _NativeStructuredCaller._parse, llm.py:184) for synopsis+attribution+tags grounded in plan.json lines/shots with prior episodes' youtube.json as few-shot, the AI-disclosure block appended as a code constant; (b) scripts/publish/signoff.py renders director_signoff.md purely from files it reads (eye json, qc json, T*.dq/.content.json, learnings.jsonl, attempts dirs, new review/wardrobe_<sha8>.json from a $0 local-VLM wardrobe check reusing step_11's vlm_reader pattern) and REFUSES when any source is missing or stale, so the sign-off can never claim an unmeasured check; (c) a new scripts/episode/step_13_publish.py calls youtube_upload.main (its existing send= seam) with --watched=<sha8> — the gate text decision: --watched keeps its exact meaning and chain (eye_review.refusals lines 196-208 untouched); the judge-filled eye_<sha8>.json IS the watch under 2026-10-01-no-human-input-at-publish — then flips public via youtube_privacy (public_gates unchanged), polls https://www.youtube.com/shorts/<id> for 200, records everything in uploads.jsonl, and prints the public Short URL as drive.py's last deliverable line. The only new human artifact is a one-time owner-written library/<book>/publish/standing.json that step 13 translates into --approved=publish; absent it, the step parks with an Escalation, and RENDER_HOLD still stops everything.",
+ "gates": [
+  {
+   "id": "G-META",
+   "where": "scripts/publish/metadata.py::check(meta, plan, book_json, priors) — called by generate() after each LLM round and re-checked by step_13_publish.run() before upload; youtube_upload.metadata() (youtube_upload.py:77-86) stays the final consumer and still refuses a missing file or missing \"synthetic\" key",
+   "rule": "HARD. (1) title == yp.series_title(display_title, N, total, plan['title'], series=series) exactly (series_of from scripts/publish/youtube_retitle.py:89 — refuses when source/book.json lacks series/display_title/episodes; never hardcode); (2) description contains AI_DISCLOSURE constant verbatim and attribution_line contains the book title and 'public domain'; (3) every capitalized proper noun in synopsis_paragraphs appears in plan.json (title/setups/shots/lines) or a prior episode's description (grounding — no invented people/places); (4) yp.spec() walls (title 100, description 5000, tags 500 chars) pass; (5) youtube.json carries \"_for\": {\"plan_sha8\": plan_verdict.plan_sha8(plan_path)} and is regenerated when it goes stale. Cure: one re-ask round cap 2 via llm.re_ask quoting the exact failed checks; terminal = mechanical fallback description assembled from the plan's narration lines in order (marked \"_fallback\": true) so the pipeline never blocks on prose",
+   "hard": true
+  },
+  {
+   "id": "G-SIGNOFF-MEASURED",
+   "where": "scripts/publish/signoff.py::write(home, sha8) — its output is validated by the UNCHANGED studio/publish_lock.py::signoff_stops (lines 85-95: sha8 named, SECTIONS ('Watched','Take strips','Coverage','Flags') each >= MIN_SECTION chars)",
+   "rule": "HARD. write() raises SystemExit listing every missing/stale input before writing a byte: review/eye_<sha8>.json must exist for THIS sha8 and clear eye_review.refusals(); qc report must carry qc['sha8'] == yp.sha8(master); every take must have both T*.dq.json and T*.content.json (judged.unjudged_takes(folder, kinds=('dq','content')) empty — same call as youtube_upload.failed_takes line 111); learnings.jsonl must exist. Every sentence in the generated file is a template slot filled from a parsed number or verdict string — the module has no free-text parameters, so an unmeasured claim is unrepresentable. Signed line names the generator and its inputs: 'Signed: judge:signoff@v1 from eye_<sha8>.json, qc_r2v.json, NN dq/content reports, learnings.jsonl, wardrobe_<sha8>.json'",
+   "hard": true
+  },
+  {
+   "id": "G-WARDROBE",
+   "where": "studio/wardrobe_drift.py::judge(reads, rows) — run by signoff.py over the contact frames already cached at review/work/<sha8>/f*.png (eye_review.grab output), written to review/wardrobe_<sha8>.json, surfaced in the sign-off's Flags section and in eye ledger flags",
+   "rule": "ADVISORY (hard=False): a drift row {at, character, expected: [tokens from refs.json row], seen: [VLM tokens], missing: [...]} is a recorded flag, never a stop — ep18 shipped with the narrator's boater flagged and the per-chapter-sheet decision is still the owner's. The VLM (comfy.cached_text, WORKFLOW image_qwen3vl_caption, same pattern as step_11_qc.vlm_reader lines 87-101) is asked only to LIST headwear/outer-garment/colour in a closed vocabulary; the comparison against refs.json row text happens in code (panel_content rule: 'the model is never asked whether the picture is right'). $0, local GPU",
+   "hard": false
+  },
+  {
+   "id": "G-STANDING",
+   "where": "scripts/episode/step_13_publish.py::approved(book) — read before building youtube_upload argv",
+   "rule": "HARD. library/<book>/publish/standing.json must exist with {\"kind\": \"publish\", \"decision\": \"2026-10-01-no-human-input-at-publish\", \"by\": <owner>, \"at\": <date>}; the step then appends --approved=publish to both upload and privacy argv (approval.require/approved_for in studio/approval.py:46-72 untouched, RENDER_HOLD still stops first). Absent or malformed: raise studio.escalate.Escalation('G-STANDING', 'publish/standing.json', 'write the standing publish approval once per book') — the unit parks, nothing uploads. This is the one new owner artifact; written once, it is the owner's standing hand, which the 2026-10-01 ruling already is in prose",
+   "hard": true
+  },
+  {
+   "id": "G-PUBLIC",
+   "where": "existing scripts/publish/youtube_privacy.py::public_gates (line 55) and scripts/publish/youtube_upload.py::refusals/eye_stops/lock_stops — ZERO changes to the policy chain",
+   "rule": "HARD, unchanged: qc sha8 match, no unjudged take, file_refusals (Short length + 1:1), publish_lock.stops (open terminals auto-cleared only via gate_policy state:auto, speaker_check, the now-generated sign-off), eye_review.refusals for --watched. step_13 passes --watched=<yp.sha8(master)> and the existing chain verifies the judge-filled rubric; the gate text printed by step 13: '--watched=<sha8>: the master eye's measured rubric review/eye_<sha8>.json is the watch (judge:master_eye, decision 2026-10-01-no-human-input-at-publish)'",
+   "hard": true
+  },
+  {
+   "id": "G-SHORTS",
+   "where": "scripts/episode/step_13_publish.py::poll_shorts(video_id, http=urllib_get) — after the public flip",
+   "rule": "ADVISORY TERMINAL: GET https://www.youtube.com/shorts/<id> (follow redirects; pass when the final URL still contains '/shorts/' and status==200) every 30 s, cap 600 s. Outcome appended to uploads.jsonl as {\"event\": \"shorts_poll\", \"video_id\", \"status\", \"final_url\", \"at\"}; a non-Short answer (redirect to /watch) or timeout writes a learnings.jsonl row gate=G-SHORTS action=flag terminal=true note=<status> and prints it — the video is already public, so this records truth rather than stopping. drive.py's log then ends with the URL line either way",
+   "hard": false
+  }
+ ],
+ "cures": [
+  {
+   "fault": "youtube.json (title/description/tags/_synthetic_note) hand-written per episode",
+   "kind": "llm",
+   "how": "scripts/publish/metadata.py::generate(book, number): title/privacy/synthetic are MECHANICAL (yp.series_title + series_of(source/book.json); privacy 'private' — the flip makes it public; synthetic: true constant for this pipeline); _synthetic_note is MECHANICAL: library/<book>/publish/pipeline_note.txt (book's model stack, seeded once from the prior episode's note) + f'Cut {sha8}: QC passed, {takes}/{takes} takes, {n} judge-signed terminals auto-cleared.'; ONE llm.structured(tier='reasoning', prompt, ShortMetadata, retries=3) call for synopsis_paragraphs/attribution_line/tags — class ShortMetadata(BaseModel): synopsis_paragraphs: list[str]; attribution_line: str; tags: list[str]. Few-shot = the 2 newest prior episodes/ep*/youtube.json under the SAME library/<book>/ (code tree stays book-neutral); first episode of a book falls back to library/<book>/publish/footer.txt or parks. guard_spend fires automatically inside _NativeStructuredCaller._parse (llm.py:184) because step 13 runs in-process under episode.py's llm.spend_context — metadata MUST be imported and called in-process by step_13, never via ctx.run_script (a subprocess has no _SPEND context and would bypass the $3 wall). Retry: llm.structured's built-in 3 schema re-asks; plus cap-2 grounding re-ask via llm.re_ask(prompt, exc) when G-META checks 2/3 fail; terminal → mechanical fallback description from the plan's narration lines, '_fallback': true",
+   "prompt_template": "You are writing the YouTube description and tags for one episode of a serialized public-domain book adaptation. The ONLY facts you may use are in this brief; name no character, place or event that is not named here.\n\nBOOK: {display_title} by {author}; series label \"{series}\"; this is episode {number} of {total}.\nCHAPTER: \"{chapter_title}\"\n\nTHE EPISODE'S LINES, in order (every word actually heard):\n{lines_block}\n\nTHE EPISODE'S SHOTS (frame + motion, abridged to one line each):\n{shots_block}\n\nPRIOR EPISODES OF THIS SERIES, for voice and format — match their tone, tense, paragraph rhythm and tag style; do not copy their events:\n{few_shot_block}\n\nReturn exactly:\n- synopsis_paragraphs: 2 to 4 short present-tense paragraphs telling what happens in THIS episode using only the lines and shots above; the last paragraph may land on the episode's closing beat and may quote one short line of dialogue from the lines block. No URLs, no hashtags, no channel name, no AI-disclosure text (it is appended separately).\n- attribution_line: one sentence naming the chapter exactly as \"{chapter_title}\", the book, the author, its year if a prior episode's attribution names one, and that it is in the public domain — same shape as the priors.\n- tags: 18 to 24 lowercase search tags, each 30 characters or fewer, no '#': start from the series' recurring tags {series_tags} (the intersection of the priors' tag lists, computed by the caller) and add this episode's own people, places and things from the brief.",
+   "est_cost_usd": "~$0.005 actual on gpt-5.6-luna (≈12k tokens in @ $0.20/M, ≈1.5k out @ $1.20/M); guard_spend's conservative estimate ≈ $0.016 (EXPECTED_OUTPUT_TOKENS=13000); worst case with 2 grounding re-asks ≈ $0.05 — noise under the $3 ceiling"
+  },
+  {
+   "fault": "review/director_signoff.md hand-written (the 'Watched/Take strips/Coverage/Flags' prose)",
+   "kind": "mechanical",
+   "how": "scripts/publish/signoff.py::write(home, sha8): parse review/eye_<sha8>.json (every rubric field → 'field: y/n (evidence numbers)'; master_eye wrote it in step 11), qc_<engine>.json (seconds, planned_seconds, lufs, true_peak, longest_gap_s, missing_cuts, takes → Coverage), review/speaker_check.json (per-speaker worst pair → Coverage), takes/<engine>/T*.dq.json + T*.content.json (per-take score/verdict → Take strips), learnings.jsonl via publish_lock.last_by_gate (every terminal gate + action + note → Take strips and Flags), episode_home.attempts_dir retake counts per take (retake history), review/wardrobe_<sha8>.json (→ Flags). Render with a fixed template whose every slot is a parsed value; include the literal sha8 in the header so publish_lock.signoff_stops (sha8 in text, 4 sections >= 8 chars) passes by construction. Refuse (SystemExit, listing paths) on any missing/stale input — G-SIGNOFF-MEASURED. $0",
+   "prompt_template": "",
+   "est_cost_usd": "$0"
+  },
+  {
+   "fault": "wardrobe drift caught only by Claude's eye on the contact sheet (ep18: the narrator's boater at 0:31/1:29)",
+   "kind": "mechanical",
+   "how": "studio/wardrobe_drift.py: reuse the cached contact frames (eye_review.grab already wrote review/work/<sha8>/f*.png during step 11); for each frame whose face_embed (step_11_qc.py:104-113) finds a face, comfy.cached_text(WORKFLOW='image_qwen3vl_caption', ask=closed-vocabulary list: headwear ∈ {felt hat, boater, cap, bonnet, bare, hood, helmet, none-visible}, outer garment ∈ {coat, jacket, cassock, dress, shirt, waistcoat, cloak}, dominant garment colour — the panel_content.Seen pattern); match the figure to a cast row by the plan's shot-at-time (judges.master_eye.shot_at) and judge IN CODE against that character's refs.json row tokens (memory rule: describe cast from its rows, never typed). Write review/wardrobe_<sha8>.json rows; advisory flags only. Local VLM, cached on frame bytes, $0",
+   "prompt_template": "",
+   "est_cost_usd": "$0 (local ComfyUI)"
+  },
+  {
+   "fault": "steps 08-11 then upload/flip driven by hand; drive.py ends at a manifest, not a URL",
+   "kind": "mechanical",
+   "how": "scripts/episode/step_13_publish.py (STEP_ID='13', NAME='publish', GPU=True for the wardrobe VLM) appended to the episode stage in stages.yaml after the step 12 block (stages.yaml:916-931): in=[cut/master_r2v.mp4, qc_r2v.json, review/eye_*.json, manifest.json, learnings.jsonl], out=[youtube.json, review/director_signoff.md, review/wardrobe_*.json, <book>/uploads.jsonl rows]. run(ctx): (1) engine, master, qc = yp.deliverable(ctx.home, ''); sha8 = yp.sha8(master); (2) metadata.ensure(...) in-process; (3) wardrobe_drift + signoff.write; (4) youtube_upload.main(['youtube_upload.py', codex, str(n), f'--watched={sha8}', '--approved=publish' if standing else ''], send=send) — the existing send= seam at youtube_upload.py:141 is the test injection point; (5) youtube_privacy.main([... 'public', '--approved=publish', '--why=2026-10-01-no-human-input-at-publish'], build_api=build_api) — add the same default-arg seam to youtube_privacy.main (one-line signature change, body moves the googleapiclient import behind it); (6) poll_shorts; (7) print(f'https://www.youtube.com/shorts/{video_id}') as the LAST line so drive.py's log and the ledger end with the deliverable. done(ctx): the newest uploads.jsonl row for upload_key(book, n, sha8-of-current-deliverable) exists with privacy=='public' AND a shorts_poll row for that video_id exists. Already-uploaded same-sha8 re-runs are idempotent via yp.uploaded; a recut (new sha8) is a new upload by design",
+   "prompt_template": "",
+   "est_cost_usd": "$0 beyond the metadata call"
+  }
+ ],
+ "files": [
+  {
+   "path": "D:\\Projects\\KingdomOfViSuReNa\\alpha\\visurena_studio\\scripts\\publish\\metadata.py",
+   "change": "NEW. ShortMetadata pydantic model; AI_DISCLOSURE constant (the exact two-line block from ep17/ep18); series_tags() = intersection of prior episodes' tag lists; priors() globs library/<book>/episodes/ep*/youtube.json excluding the current unit; brief() from episode_home plan + series_of (imported from scripts.publish.youtube_retitle:89); generate() = mechanical title + one llm.structured call + check() + cap-2 re-ask + fallback; ensure(home, book, n) skips when _for.plan_sha8 is current. CLI: metadata.py <codex_id> <n> [--force]. Each function 10-20 lines"
+  },
+  {
+   "path": "D:\\Projects\\KingdomOfViSuReNa\\alpha\\visurena_studio\\scripts\\publish\\signoff.py",
+   "change": "NEW. gather(home, engine, sha8) -> typed Measures (raises SystemExit listing missing inputs); render(measures) -> markdown with publish_lock.SECTIONS headings and the sha8 in the header; write(home, sha8). Reads eye json, qc json, speaker_check.json, T*.dq.json/T*.content.json, learnings.jsonl (publish_lock.last_by_gate), episode_home.attempts_dir, wardrobe_<sha8>.json. No free-text parameter anywhere"
+  },
+  {
+   "path": "D:\\Projects\\KingdomOfViSuReNa\\alpha\\visurena_studio\\studio\\wardrobe_drift.py",
+   "change": "NEW. VOCAB constants; ask() closed-vocabulary prompt; parse(said) -> Seen-style dataclass; expected(row_text) -> token set from a refs.json row; judge(seen, expected) -> drift list in code; read_frames(home, sha8, reader, embed, shot_at) over the cached contact frames; report(home, sha8, rows) writes review/wardrobe_<sha8>.json. reader/embed injected (step_11_qc.vlm_reader / face_embed in production, fakes in tests)"
+  },
+  {
+   "path": "D:\\Projects\\KingdomOfViSuReNa\\alpha\\visurena_studio\\studio\\standing_approval.py",
+   "change": "NEW. path(book) = book/'publish'/'standing.json'; ok(book) -> bool (kind=='publish' and decision=='2026-10-01-no-human-input-at-publish' and by non-empty); escalation(book) -> Escalation naming the file. ~25 lines total"
+  },
+  {
+   "path": "D:\\Projects\\KingdomOfViSuReNa\\alpha\\visurena_studio\\scripts\\episode\\step_13_publish.py",
+   "change": "NEW. Step module per step_cli contract (STEP_ID='13', NAME='publish', GPU=True, done(ctx), run(ctx)) as specified in cure 4; send/build_api/http seams default to the real ones; prints the public Short URL last"
+  },
+  {
+   "path": "D:\\Projects\\KingdomOfViSuReNa\\alpha\\visurena_studio\\scripts\\publish\\youtube_privacy.py",
+   "change": "EDIT (minimal): main(argv) -> main(argv, build_api=None) where build_api defaults to the googleapiclient build closure currently inlined at the bottom of main (~line 121); no gate or flow change. This is the only edit to an existing publish gate file"
+  },
+  {
+   "path": "D:\\Projects\\KingdomOfViSuReNa\\alpha\\visurena_studio\\stages.yaml",
+   "change": "EDIT: append the step 13 block to the episode stage after the step 12 block (after line ~931), with in/out/desc as in cure 4 and a desc noting ESCALATE-on-no-standing-approval"
+  },
+  {
+   "path": "D:\\Projects\\KingdomOfViSuReNa\\alpha\\visurena_studio\\architecture\\index.html",
+   "change": "EDIT same commit (house rule): add step 13 publish to the Current tab's episode step table (CURRENT step table in the page script) and the publish department row; flip the Future slot for publish automation to built"
+  },
+  {
+   "path": "D:\\Projects\\KingdomOfViSuReNa\\alpha\\visurena_studio\\architecture\\decisions\\2026-10-05_self_curing_publish.md",
+   "change": "NEW dated decision file: metadata by one API call, sign-off from measured data only, standing.json as the owner's one-time publish hand, --watched satisfied by the judge-filled eye rubric; plus its tracker in architecture/plan/ and a line in docs/DECISIONS.md and the architecture/README.md index tables"
+  },
+  {
+   "path": "D:\\Projects\\KingdomOfViSuReNa\\alpha\\visurena_studio\\library\\<book>\\publish\\ (data, not code)",
+   "change": "Per-book artifacts the code reads but never ships in the tree: standing.json (OWNER writes once — open owner decision), pipeline_note.txt and footer.txt (seeded once from the book's newest youtube.json by a metadata.py --seed helper)"
+  }
+ ],
+ "tests": [
+  "tests/test_metadata_title_comes_from_the_books_own_words.py — series_of + yp.series_title compose 'H. G. Wells: The War of the Worlds — Ep 18/27 — \"The Fifth Cylinder\"' from a tmp source/book.json + plan; SystemExit when book.json lacks series/display_title/episodes; no book name appears in the code under test",
+  "tests/test_metadata_one_call_through_the_fake_model.py — llm.structured invoked with _agent=FakeCaller returning a canned ShortMetadata; asserts exactly one call, the assembled youtube.json contains AI_DISCLOSURE verbatim, privacy=='private', synthetic==True, _for.plan_sha8 bound, and yp.spec() accepts the result; no network, no key read",
+  "tests/test_metadata_grounding_re_asks_then_falls_back.py — FakeCaller yields an ungrounded noun ('Professor Moriarty') then a grounded answer: asserts the second prompt carries llm.REFUSED and the failed check text, cap 2; a FakeCaller that never grounds yields the mechanical narration-lines fallback with _fallback: true",
+  "tests/test_metadata_few_shot_reads_only_this_books_priors.py — two tmp books; the brief for book A contains only A's prior descriptions/tags; series_tags == intersection of A's priors",
+  "tests/test_signoff_refuses_an_unmeasured_claim.py — tmp home missing eye_<sha8>.json → SystemExit naming it; qc sha8 != master sha8 → SystemExit; an unjudged take (dq report absent) → SystemExit via judged.unjudged_takes",
+  "tests/test_signoff_clears_the_publish_lock_by_construction.py — full fixture home (eye json with y/n+evidence, qc json, dq/content reports, learnings.jsonl with a kept_best terminal, wardrobe json, speaker_check) → write() output passes publish_lock.signoff_stops(home, sha8) == [] and every number printed appears in an input file",
+  "tests/test_signoff_take_strips_carry_terminals_and_retakes.py — learnings terminal note and a 3-attempt take dir appear verbatim in the Take strips section; the wardrobe drift row appears under Flags",
+  "tests/test_wardrobe_drift_is_judged_in_code.py — fake reader returns 'boater' against a refs row saying 'brown felt hat' → one drift row; matching tokens → none; the VLM ask string never contains the word 'wrong' or the expected answer",
+  "tests/test_standing_approval_gates_step_13.py — no standing.json → Escalation('G-STANDING'); wrong decision id → Escalation; valid file → approved() true and the built argv carries --watched=<sha8> and --approved=publish",
+  "tests/test_step_13_publishes_and_polls.py — fake send returns {'id':'vid1','status':{'privacyStatus':'private'}}, fake build_api flips public, fake http returns 303(/watch) then 200(/shorts/) : uploads.jsonl gains upload + privacy + shorts_poll rows, the last printed line is the /shorts/ URL, done() true only after the public row + poll row; re-run with same sha8 uploads nothing (yp.uploaded idempotence)",
+  "tests/test_step_13_runs_metadata_in_process.py — step_13.run with a spy on metadata.ensure asserts it is a direct call (so llm.spend_context/guard_spend apply), never ctx.run_script"
+ ],
+ "risks": [
+  "The /shorts/ 200 poll is a heuristic: YouTube serves 200 behind consent/region interstitials and may lazily classify Shorts for minutes; mitigated by the 600 s cap, final-URL-contains-/shorts/ check, and recording the honest answer as an advisory flag instead of failing a published episode",
+  "An unverified API project forces private on videos.update too: the flip can return 'private' after asking 'public'; youtube_privacy already records what YouTube returned, and step 13 must then end with the youtu.be URL plus a printed NOT-PUBLIC flag rather than claiming a public Short (never claim an unmeasured state)",
+  "standing.json is a new owner artifact — until the owner writes it once per book, every run parks at G-STANDING; this is deliberate (approval stays the owner's hand) but must be surfaced in the drive Telegram message or ep19 stalls silently",
+  "Grounding check (proper nouns ⊂ plan + priors) can false-refuse on legitimate inflections ('Martians' vs 'Martian'); stem matching reduces it, and the mechanical fallback guarantees forward progress at the cost of a plainer description",
+  "metadata called via subprocess would silently bypass guard_spend (fresh process, empty _SPEND) — the in-process rule is enforced only by test_step_13_runs_metadata_in_process; a future refactor to ctx.run_script would reopen the hole",
+  "The wardrobe check inherits every VLM-list failure mode (hat vocabulary mismatch, face-to-character attribution via shot_at on a drifted cut); it is advisory for exactly that reason, and its rows feed the owner's open per-chapter-sheet decision rather than a gate",
+  "youtube_upload.py title wall: yp.spec refuses '<'/'>' and 100 chars — yp.series_title already elides, but a pathologically long display_title+series could still trip G-META; the gate catches it before any network call"
+ ]
+}

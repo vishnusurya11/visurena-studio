@@ -1,0 +1,124 @@
+{
+ "area": "AREA 8: duplicate-person VISION gates (G-TWIN)",
+ "summary": "Duplicate people slip through because every existing counter has a declared escape hatch: panel_dq.verdict skips the \"people\" flag whenever the setup declares a crowd or the shot declares extras (studio/panel_dq.py:271), and panel_content.people_fault under a crowd needs lookalikes>=3 from one weak catch-all question (studio/panel_content.py:164-176). The design closes the hole with one new fault kind, \"twin\" (family G-TWIN): (a) a statistical HARD flag in panel_dq.verdict — at named-cast sizes medium-and-closer, cast-sized faces beyond planned+extras fail regardless of crowd; (b) a dedicated local-VLM structured ask (figures/distinct/twins, strict JSON, Unreadable on malformed) run only on multi-figure panels and on the 3 already-extracted take frames, judged in code in studio/panel_content.py and wired into both content checkers; (c) cures reuse the existing ladders — the panel ladder's seed-redraw rung, then a new isolate-to-1x1-grid action on the second rung (grid_layout already supports tagged 1x1 rows), then keep_best flagged; the take ladder needs zero routing changes because \"twin\" (not in INPUT_BORNE/MOVABLE/LAG) falls through cure_of to one \"seed\" retake, and progressed() plus repeated-evidence send a reproduced twin to the terminal (still/keep_best flagged). All reads are the resident local Qwen3-VL via comfy.cached_text: $0 against the $3 ceiling, ~4-8 GPU-min against the 5h clock inside existing step clocks.",
+ "gates": [
+  {
+   "id": "G-TWIN-DQ",
+   "hard": true,
+   "where": "studio/panel_dq.py::verdict (insert after the existing clone check, line 273; `near`, `planned`, `extras`, `size` already in scope; scripts/episode/panel_check.py::judge already passes size+extras, no caller change)",
+   "rule": "if planned > 0 and size in FACE_IS_THE_PICTURE and len(near) > planned + extras: flags.append('twin'). NO crowd exemption — this is exactly the hole that passed ep18 shot 16 'faces 3/2' (crowd/extras stood the 'people' flag down). False-positive guards are structural: `near` is cast_faces (>= CAST_FACE 0.06 frame height), so wide-shot crowd silhouettes never count; sizes full/wide are excluded entirely (FACE_IS_THE_PICTURE = close, extreme_close, medium_close, medium); planned==0 pure-crowd shots are excluded. The flag makes passed=False, so panel_check exits 1 and takes_r2v refuses via panel_dq.panel_refusal — a hard wall."
+  },
+  {
+   "id": "G-TWIN-PANEL",
+   "hard": true,
+   "where": "studio/panel_content.py (new section: TWIN_ASK, @dataclass Twins, twin_applies, parse_twins, twin_fault) + scripts/episode/panel_content_check.py::row_for (after `got = judge(...)`, line 68; new 10-line helper read_twins(path, seed) mirroring read())",
+   "rule": "twin_applies(planned, size, people_seen) == planned >= 1 and size in TWIN_SIZES=('medium','medium_close','close','extreme_close') and people_seen >= 2 — the ask runs ONLY then (GPU economy + false-positive guard d: wides/full with legitimate repeated crowd silhouettes and planned-0 crowd shots never asked). JSON contract: {\"figures\": int, \"distinct\": int, \"twins\": [\"<short dress phrase> x<count>\", ...]}. parse_twins raises pc.Unreadable (never defaults) when figures/distinct missing, non-int, or distinct > figures. Judged in code: fault when figures >= 2 and distinct < figures; fault text `twin: {twins[0] or 'two figures share one face and dress'} ({figures} figures, {distinct} distinct)` appended to the row's faults -> passed=False -> exit 1. An Unreadable twin ask on these sizes appends 'unread: twin ...' (the face is the picture; a silent skip is a gate that passes everything). Row records twin fields for the audit sheet. VLM call: comfy.cached_text('image_qwen3vl_caption', {image_1: comfy.stage_image(path), prompt: pc.TWIN_ASK, seed: 17, max_new_tokens: 256}, readable=pc.twin_readable), inside the existing comfy.model_kept() block."
+  },
+  {
+   "id": "G-TWIN-TAKE",
+   "hard": true,
+   "where": "scripts/episode/take_content_check.py — read_take (line 41) returns reads AND keeps its frame paths (it already writes work/<stem>_<i>.png; change return to list[tuple[Path, Seen]] or add a sibling twin_scan(work, stem, reads)); judged in judge_take/verdict_for (lines 48-74)",
+   "rule": "For each of the SAMPLES=3 already-extracted frames whose main read saw people >= 2, under the same twin_applies guard (shot.size, planned=len(shot.faces)), run parse_twins on a TWIN_ASK read (seed 23+i, cached). Any frame with figures>=2 and distinct<figures adds `twin: ...` to the take's faults -> T<NN>.content.json passed=False. NOTE for the implementer: the computed task names take_ladder.live_stills, but that maps held-panel stills for the cut, not video frames — the correct, existing mechanism is read_take's frames.frame_times sampling; zero extra frame extraction. ep17 T12 (two identical Mrs. Elphinstones) and ep18 T11/T20 fall to this: the dedicated same-face-AND-same-dress question replaces the one weak 'lookalikes' count that answered 0."
+  },
+  {
+   "id": "G-TWIN-JUDGES",
+   "hard": true,
+   "where": "studio/judges/panel_eye.py (CALIBRATED frozenset line ~60, CONTENT tuple line ~63) + studio/judges/take_eye.py (HARD_CONTENT line ~33, content_faults line ~103)",
+   "rule": "panel_eye: add ('twin','twin') to the CONTENT tuple and 'twin' to CALIBRATED (it has a measured contract, so it refuses rather than flags-as-thin); dq_faults already emits the panel_dq flag name as the kind, so the G-TWIN-DQ flag arrives as kind='twin' for free. take_eye: add 'twin' to HARD_CONTENT; in content_faults change the kind mapping to `'unread' if text.startswith('unread') else 'twin' if text.startswith('twin') else 'content'` so the take ladder and terminal see the kind, with evidence.repeated carried as today. HARD_CONTENT membership makes hard() true, so settle_take may hold a faulted narration take on its passed panel (still)."
+  }
+ ],
+ "cures": [
+  {
+   "fault": "twin on a panel — rung 1: seed-bump redraw",
+   "kind": "mechanical",
+   "how": "No new code. panel_ladder's existing redraw_grid_seed rung already covers it once kind 'twin' exists: cured_by_redraw keeps it (do NOT add 'twin' to REDRAW_CANNOT_CURE, studio/panel_ladder.py:44), Climb.take supersedes the grid and reruns scripts/episode/grids.py with --seed-bump, then rebuild re-cuts panels and re-reads ONLY the touched shots (merge_content_rows). Add CURES['twin'] = 'Each person in the picture appears exactly once; no second copy of any face or dress.' (studio/panel_ladder.py:48-68) so the reprose machinery can lead the cell prose with it.",
+   "prompt_template": "",
+   "est_cost_usd": "$0 (local Qwen-Image; ~1900 s/rung on the episode clock, priced by RUNG_SECONDS as today)"
+  },
+  {
+   "fault": "twin on a panel — rung 2: isolate into its own 1x1 grid",
+   "kind": "mechanical",
+   "how": "New panel_ladder.isolate(self, index: int) on Climb (10-20 lines) + a 3-line dispatch in Climb.take (line 237): when rung.name == 'reprose' and the verdict carries kind=='twin' faults, each twin-faulted shot is isolated instead of only reprosed — (1) rows = grid_layout.read(home); find the row whose shots contain index; if len(row['shots']) == 1 skip (already 1x1 -> the terminal answers); (2) remove index from that row, recompute its shape via grid_layout.shape(len(rest)), append grid_layout.row(setup, 1, 1, [index], tag=f's{index:02d}') — the exact tagged-1x1 form rows_for already emits for faces (studio/grid_layout.py:98), so grids.py/panels.py need nothing new; (3) grid_layout.write(home, rows); (4) supersede the old grid file and self.draw() both new rows (argv() carries setup/cols/rows/tag/--shots); (5) remember_climbed both names so the CAP=2 (gates.yaml EYE_PANELS max_grids) and resumes hold; also lead the shot's frame prose with CURES['twin'] via the existing cure_prose/write_cured path (sha8 re-sign preserved — write_cured re-signs, so the plan battery does not reopen). Non-twin faults on the same rung still reprose as today.",
+   "prompt_template": "",
+   "est_cost_usd": "$0 (two local grid renders, ~2x GRID_SECONDS extra inside the rung's budget)"
+  },
+  {
+   "fault": "twin on a panel — terminal",
+   "kind": "mechanical",
+   "how": "Existing keep_best: Climb.keep_best signs the verdict flagged with the twin fault and its climbed/kept evidence; no change.",
+   "prompt_template": "",
+   "est_cost_usd": "$0"
+  },
+  {
+   "fault": "twin on a take — one batched retake, then keep-best flagged",
+   "kind": "mechanical",
+   "how": "Zero routing changes in studio/take_ladder.py, by construction: kind 'twin' is NOT added to INPUT_BORNE (line 62), MOVABLE, LAG or NEVER_SEED, so cure_of (line 75) falls through to 'seed' — one batched retake round through takes_r2v (--retake --why 'batched_cures: twin'), bounded by ROUNDS_CAP=2, MAX_TAKE_ATTEMPTS=3 and can_afford against the episode clock. If the retake reproduces it, evidence.repeated=True makes cure_of return '' and progressed() blocks a second identical round -> terminal(): a narration shot with this HARD fault is held on its PASSED panel as a still (can_still cap 2, never adjacent), else keep_best flagged high/normal. Add one guard test naming the invariant so a future refactor cannot drop 'twin' into INPUT_BORNE silently.",
+   "prompt_template": "",
+   "est_cost_usd": "$0 (one retake ~COLD_S+TAKE_S=565 s against the 5h clock; no credits)"
+  },
+  {
+   "fault": "the detection ask itself (shared by G-TWIN-PANEL and G-TWIN-TAKE)",
+   "kind": "llm",
+   "how": "Local resident Qwen3-VL through comfy.cached_text(workflow='image_qwen3vl_caption', values={'image_1': comfy.stage_image(path), 'prompt': pc.TWIN_ASK, 'seed': 17 (panels) / 23+i (take frame i), 'max_new_tokens': 256}, readable=pc.twin_readable). No tier from models.yaml, no guard_spend — it is not a paid call; it must stay on comfy's machinery per the five-hour-episode P0 (VL resident, model_kept). Structured output is enforced by parse_twins (strict keys, Unreadable raises, salvage not needed at 256 tokens); retry = the cached_text readable-predicate loop that panel_content_check.read already uses.",
+   "prompt_template": "Look only at the HUMAN FIGURES in this picture. Output strict JSON with these keys and nothing else.\n\"figures\": how many separate human figures you can see, as a number.\n\"distinct\": how many DIFFERENT individual people those figures are, as a number no larger than \"figures\". Two figures are the SAME individual only when they share the same face, the same hair AND the same clothing.\n\"twins\": for each individual who appears more than once, one short phrase naming them by their dress and the count, like \"woman in a grey shawl x2\"; an empty list when every figure is a different person.",
+   "est_cost_usd": "$0 (local; ~10-15 s/ask, asked only on multi-figure panels/frames at medium-and-closer — typically 4-10 panel asks + 6-20 frame asks per episode, inside the existing panel_content/take_content clocks)"
+  }
+ ],
+ "files": [
+  {
+   "path": "D:\\Projects\\KingdomOfViSuReNa\\alpha\\visurena_studio\\studio\\panel_dq.py",
+   "change": "verdict(): insert the G-TWIN-DQ hard flag after the clone check (line 273): `if planned > 0 and size in FACE_IS_THE_PICTURE and len(near) > planned + extras: flags.append('twin')` with a dated docstring note (ep18 shot 16: crowd/extras stood 'people' down at a medium; a cast-sized third face at medium-and-closer is a twin, crowd notwithstanding)."
+  },
+  {
+   "path": "D:\\Projects\\KingdomOfViSuReNa\\alpha\\visurena_studio\\studio\\panel_content.py",
+   "change": "New G-TWIN section: TWIN_SIZES tuple; TWIN_ASK (prompt above); @dataclass(frozen=True) Twins(figures:int, distinct:int, twins:list[str]); TWIN_REQUIRED=('figures','distinct'); parse_twins(said)->Twins reusing _loads, raising Unreadable on missing keys, non-int, or distinct>figures; twin_readable(said)->bool mirroring readable(); twin_applies(planned:int, size:str, people:int)->bool; twin_fault(t:Twins)->str|None returning the 'twin: ...' fault line when figures>=2 and distinct<figures. Each function 10-20 lines, one job."
+  },
+  {
+   "path": "D:\\Projects\\KingdomOfViSuReNa\\alpha\\visurena_studio\\scripts\\episode\\panel_content_check.py",
+   "change": "read_twins(path, seed=17) mirroring read() with pc.TWIN_ASK/pc.twin_readable/256 tokens; row_for(): after judge(), when pc.twin_applies(len(shot.faces or []), shot.size, seen.people), append pc.twin_fault(read_twins(path)) if any, catching pc.Unreadable as an 'unread: twin ...' fault; record figures/distinct/twins on the row. Runs inside the existing comfy.model_kept() batch; partial --only reruns keep working via merge_content_rows unchanged."
+  },
+  {
+   "path": "D:\\Projects\\KingdomOfViSuReNa\\alpha\\visurena_studio\\scripts\\episode\\take_content_check.py",
+   "change": "read_take keeps its frame paths (return list of (path, Seen) or store paths alongside); new twin_faults_for(frames_reads, shot) applying twin_applies per frame (people>=2) and parse_twins on seeds 23+i over the already-extracted work/<stem>_<i>.png files; judge_take appends the resulting 'twin: ...' lines to the verdict row and flips passed. No new frame extraction."
+  },
+  {
+   "path": "D:\\Projects\\KingdomOfViSuReNa\\alpha\\visurena_studio\\studio\\judges\\panel_eye.py",
+   "change": "Add 'twin' to CALIBRATED; add ('twin','twin') to the CONTENT kind table so content_faults classifies the 'twin: ...' row lines; dq_faults needs nothing (it emits flag names as kinds)."
+  },
+  {
+   "path": "D:\\Projects\\KingdomOfViSuReNa\\alpha\\visurena_studio\\studio\\judges\\take_eye.py",
+   "change": "Add 'twin' to HARD_CONTENT; content_faults kind mapping gains the text.startswith('twin') -> 'twin' branch (evidence hard/repeated unchanged)."
+  },
+  {
+   "path": "D:\\Projects\\KingdomOfViSuReNa\\alpha\\visurena_studio\\studio\\panel_ladder.py",
+   "change": "CURES['twin'] phrase; Climb.isolate(index) implementing the 1x1 split via grid_layout.read/shape/row/write + supersede + self.draw + remember_climbed; 3-line dispatch in Climb.take for twin faults on the 'reprose' rung; do NOT touch REDRAW_CANNOT_CURE."
+  },
+  {
+   "path": "D:\\Projects\\KingdomOfViSuReNa\\alpha\\visurena_studio\\studio\\take_ladder.py",
+   "change": "No functional change required (twin routes to 'seed' by fall-through); add a one-line comment at INPUT_BORNE naming G-TWIN as deliberately absent, pinned by test."
+  },
+  {
+   "path": "D:\\Projects\\KingdomOfViSuReNa\\alpha\\visurena_studio\\gates.yaml",
+   "change": "No row change (EYE_PANELS/EYE_TAKES rows already carry the judges); add 'twin' to any documented fault-kind list in comments if one exists beside the EYE rows, naming the family G-TWIN."
+  }
+ ],
+ "tests": [
+  "tests/test_a_second_cast_face_at_a_medium_is_a_twin.py — panel_dq.verdict with planned=2, extras=0, crowd=True, size='medium', three cast-sized faces (0.2,0.25,0.3) -> 'twin' in flags and passed False (the ep18 shot-16 regression); same faces at size='wide' -> no twin flag; planned=0 -> no flag; planned=2 extras=1 with three faces -> no flag (extras honoured). Pure code, no API.",
+  "tests/test_the_twin_reader_answer_is_parsed_or_refused.py — parse_twins on clean JSON, on the workflow's array-wrapped string-of-JSON form, and on prose-wrapped JSON all return Twins; missing 'distinct', non-int figures, and distinct>figures each raise pc.Unreadable; twin_readable mirrors. Canned strings only.",
+  "tests/test_two_identical_figures_fail_the_twin_gate.py — twin_fault(Twins(2,1,['woman in a grey shawl x2'])) returns a line starting 'twin:' naming the phrase and counts (the ep17 Mrs. Elphinstone case); Twins(2,2,[]) -> None; Twins(1,1,[]) -> None.",
+  "tests/test_the_twin_ask_runs_only_on_named_close_shots.py — twin_applies matrix: (planned=1,'medium',people=2) True; ('wide', any) False; ('full') False; ('insert') False; planned=0 False; people=1 False — the false-positive guard (crowd silhouettes on wides never asked).",
+  "tests/test_a_twin_panel_row_fails_the_content_gate.py — panel_content_check.row_for with read() and read_twins() monkeypatched to canned Seen/Twins (FakeModel pattern, no comfy): a 2-figure-1-distinct medium panel yields passed=False with the 'twin:' fault; an Unreadable twin ask yields an 'unread: twin' fault, never a silent pass.",
+  "tests/test_a_twin_take_reads_its_own_frames.py — take_content_check twin path with frame reads injected: frame reads [people=1, people=2-distinct=1, people=1] on a medium_close shot -> T-row passed=False with 'twin:'; all-distinct frames -> passed unchanged; a wide shot with the same reads -> never asked (recorder asserts zero twin calls).",
+  "tests/test_twin_rows_reach_the_judges_by_kind.py — panel_eye.content_kind('twin: woman in a grey shawl x2 (2 figures, 1 distinct)', row) == 'twin' and 'twin' in panel_eye.CALIBRATED; take_eye.content_faults(5, {'faults': ['twin: ...']}) emits kind 'twin' with hard evidence and 'twin' in take_eye.HARD_CONTENT.",
+  "tests/test_a_twin_panel_climbs_seed_then_isolates.py — panel_ladder.Climb with a recording fake ctx (run_script captured, no GPU) over a tmp home with layout.json [{setup:'kitchen',cols:2,rows:2,shots:[14,15,16,17]}]: take() on the reprose rung with a kind='twin' Fault at shot_16 rewrites layout.json to a 3-shot row plus {cols:1,rows:1,shots:[16],tag:'s16'}, supersedes and draws both rows, remembers the climbs; a shot already in a 1x1 row is left alone (terminal's business).",
+  "tests/test_a_twin_take_routes_to_one_seed_retake.py — take_ladder.cure_of([Fault(kind='twin',where='T11')]) == 'seed'; with evidence repeated=True == '' (terminal); 'twin' not in take_ladder.INPUT_BORNE (the pin); terminal() on a narration shot with a twin fault and a passed panel writes a still row, on a dialogue shot returns keep_best flagged high. All injected, no render, no API."
+ ],
+ "risks": [
+  "VLM consistency: Qwen3-VL may answer distinct==figures on genuine twins (missed detection) or undercount distinct on same-era dress (false twin). Mitigations in the design: same-face AND same-dress wording, the medium-and-closer + named-cast guard, and the statistical G-TWIN-DQ flag as an independent second net; calibrate the prompt against the four known cases (ep17 T12 panel, ep18 shot 16, T11, T20 strips) before trusting it, and keep the asked seed fixed so the vlm cache holds.",
+  "False positives on legitimately similar named cast at a medium (e.g. two soldiers in regulation uniform standing together): distinct requires face+hair+clothing ALL equal, but uniformed pairs are the known hazard (the ep14 constable lesson in contradictions()); if calibration shows fires, tighten twin_fault to require the twins[] phrase non-empty as a second signal.",
+  "Cost is time, not money: worst case (every panel and frame multi-figure) adds ~30 asks x ~12 s = 6 min to the 5h clock, and a twin-triggered isolate rung adds ~2 grid renders; both ride existing budget machinery, but RUNG_SECONDS is calibrated without the isolate's second draw — watch one episode's measured rung time and re-price if it overruns (constants outlive their world).",
+  "The isolate rung changes layout.json shape mid-episode: panels.py, grid_room sibling logic and the one-room-per-setup anchor must tolerate a setup whose shots split across an extra tagged row — the tagged-1x1 form is the same one rows_for emits for faces, so the cutting path is exercised, but the implementer must verify grid_room.siblings on a post-isolate layout before shipping.",
+  "take_eye.content_faults currently collapses all content text to kind 'content'; if the startswith('twin') branch is missed, twin faults still fail the take but route as 'content' (INPUT_BORNE -> no retake), silently skipping the one-retake cure — the routing test pins this.",
+  "A twin fault on a panel that G-TWIN-DQ flags AND the VLM confirms produces two faults of one kind at one where; judged_gate.MAX_REPEAT (12) is far off, but keep notes distinct (dq row vs content row) so repeated() never mistakes them for a broken measure."
+ ]
+}

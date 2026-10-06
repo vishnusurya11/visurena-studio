@@ -1,0 +1,150 @@
+{
+ "area": "AREA 4 — machine/creature staging (G-STAGE battery gate, creature-face wall, prop-sheet existence hook)",
+ "summary": "Root problem: the plan can show a machine/vessel/creature by a bare word (\"a Martian wading\", \"tripod\") without the card name in the prose, without the pid in Setup.props, and with a creature row standing in Shot.faces — so the grid stages a humanoid character sheet (or nothing) and Qwen draws a naked humanoid; separately, a staged pid with no refs/props/<pid>/sheet.png is SILENTLY dropped by pack_refs.props_named's `(sheet := prop_sheet(...))` filter, so the machine vanishes from grid and take with no fault anywhere. Mechanism: (1) a hard battery gate G-STAGE in plan_check built from a chapter-filtered vocabulary (prop cards of kind machine/vessel/vehicle via pack_refs.prop_terms + refs.json rows with gender==\"creature\") that refuses any shot/setup text naming a card by alias without card-name tokens + staged pid, and a sibling G-FACE-KIND that refuses a creature id anywhere in Shot.faces/SubShot.faces/Setup.cast; (2) mechanical cures in plan_cures (rename to card name + append first physical clause at first mention, add pid to Setup.props, strip creature sentences from setup text, drop creature faces, copy a verbatim chapter sentence as the G-SOURCE span the new prop claim needs) dispatched by plan_repair with new CURES rows inserted ABOVE the existing `\"prop \"` catch-all (which currently mis-captures these rows into legal_props); one tiny workhorse-tier llm.structured call only when a bare creature word maps to ≥2 candidate cards; (3) the sheet-existence hook lives in step 03 (new substep 03_02, between places --draw and write_cells, and in done()) drawing missing sheets free via build_pack.draw imported directly, with an llm fallback that writes a missing design.sheet_prompt; (4) grids.props_of and takes_r2v gain a SystemExit backstop via new pack_refs.undrawn_named so a named-but-undrawn prop can never again be silently dropped.",
+ "gates": [
+  {
+   "id": "G-STAGE",
+   "hard": true,
+   "where": "studio/plan_gates.py new stage_faults(episode, vocab) (place it directly under close_crowd_faults, line ~456); printed+counted in scripts/episode/plan_check.py main() immediately after the G-CROWD-CLOSE block (currently lines ~225-228) — hoist the `refs = episode_home.read_json(book / 'refs' / 'refs.json')[\"refs\"]` read (currently just above MARKS) up above this block and build `vocab = pack_refs.stage_vocab(book, refs, number)` once",
+   "rule": "Vocabulary: vocab = {\"machines\": {pid: {\"name\": card name, \"terms\": pack_refs.prop_terms(book,pid), \"physical\": profile.physical}}, \"creatures\": {cid: head-noun terms of the refs.json row's name/display}} — machines limited to analysis/props cards whose `kind` ∈ {\"machine\",\"vessel\",\"vehicle\"} AND whose `appears` lists this episode's chapter number (episode number == chapter number per plan_brief.chapter_paragraphs ch_{number:02d}); creatures = refs.json character rows with gender==\"creature\" (e.g. martians -> {martian}). Faults, using the existing pack_refs.names_prop word-boundary test and plan_gates.claim_prose(shot): (a) shot prose names a machine term and pid NOT in episode.setups[shot.setup].props -> fault(\"G-STAGE\", f\"shot {s.index}\", f\"names {pid} by {term!r} and the setup stages no sheet\", term, \"card name + setup props entry\"); (b) machine term named, pid staged, but prose lacks the card-name test plan_gates.staged_props already uses (a pid token >3 letters) -> fault \"...by the bare word {term!r}, not its card name\"; (c) setup.described/crowd/geometry names a machine term without card name+pid -> same fault keyed f\"setup {name}\"; (d) after masking every staged machine card's `name` phrase out of the text (so 'the Martian fighting-machine' never re-fires on 'Martian'), any creature term in shot prose or setup text -> fault \"bare creature word {term!r}; a drawn creature is its machine card\". Always hard — a cured plan correctly stales drawn grids via the existing panels.stale_grids plan_sha path."
+  },
+  {
+   "id": "G-FACE-KIND",
+   "hard": true,
+   "where": "studio/plan_gates.py new creature_face_faults(episode, creature_ids: set[str]), printed+counted in plan_check.main right after G-STAGE",
+   "rule": "No creature id in Shot.faces, SubShot.faces (shot.cuts) or Setup.cast: for each hit, fault(\"G-FACE-KIND\", f\"shot {s.index}\"|f\"setup {name}\", f\"{cid!r} is a creature row staged as a face; its drawn form is a prop card\", cid, \"no creature-kind faces\"). This is distinct from takes_r2v.adopt_names (which refuses a MISSING gender at render time, line ~196); this refuses at the plan, before anything is drawn."
+  },
+  {
+   "id": "G-SHEET-DRAWN",
+   "hard": true,
+   "where": "render-time backstop, two call sites: scripts/episode/grids.py props_of (line 250) and scripts/episode/takes_r2v.py just before the pack_refs.props_named staging at line ~482; both call new studio/pack_refs.py undrawn_named(book, pids, text) -> list[str]",
+   "rule": "undrawn_named returns pids where names_prop(text, prop_terms(book,pid)) is true but prop_sheet(book,pid) is None — the exact set props_named today drops silently. Both call sites raise SystemExit(f\"prop {pid!r} is named by the prose and refs/props/{pid}/sheet.png is not drawn; run step 03\") instead of rendering without the machine. This is the wall behind the 03_02 hook; it should never fire in a driven run."
+  },
+  {
+   "id": "03-02-SHEETS",
+   "hard": true,
+   "where": "scripts/episode/step_03_places.py: new substep in run(ctx) between the places.py --draw line and the `if not rendered(ctx): write_cells(ctx)` line; done(ctx) (line ~82) gains `and not missing_sheets(ctx.book_dir, doc)`",
+   "rule": "plan_props(doc) = sorted({pid for setup in doc['setups'].values() for pid in setup.get('props') or []}); missing_sheets(book, doc) = [pid for pid in plan_props(doc) if pack_refs.prop_sheet(book, pid) is None]. run() draws each missing pid BEFORE cells and long before step 07, so grids/takes always find the sheet. Hook decision: step 03, not a step 07 pre-check — step 03 is the first GPU step after a clean battery, 03_03's cells and the panel gates downstream must see the same staged world, and extending done() makes drive.py re-enter idempotently (five-hour-episode P0: idempotent pictures). Step 07 keeps no hook; its protection is the G-SHEET-DRAWN SystemExit."
+  }
+ ],
+ "cures": [
+  {
+   "fault": "G-STAGE rows (a)(b)(c): bare machine word / card name absent / pid not staged",
+   "kind": "mechanical",
+   "how": "studio/plan_cures.py new stage_machines(doc, vocab) -> dict. For each shot field in (frame, motion, at_rest, end) and setup field in (described, crowd, geometry): for each machine pid whose term matches by names_prop, regex-replace the matched noun phrase `(?:the |a |an )?\\b{term}s?\\b` (first occurrence per field) with the card's `name` from vocab (names already lead with 'the', so strip a preceding article to avoid 'the the'); add pid to doc['setups'][shot['setup']]['props'] (or the faulting setup's own props) if absent, preserving list order. At the FIRST cured mention of a pid in the whole episode only, append ', ' + first clause of the card's `physical` capped at 12 words after the card name (owner rule: described in the shot); every later mention gets the name alone — the full definition still reaches every take via pack_refs.prop_row/props_named and the sheet reaches every grid via props_of, so prose stays short. Dispatch: insert (re.compile(r'G-STAGE'), 'stage_machines') in plan_cures.CURES ABOVE the existing (r'props.*\\.json|names setup .* not defined|prop ', 'legal_props') row — that catch-all currently swallows any row containing 'prop ' and would mis-route these to a no-op. plan_repair.apply() builds vocab = pack_refs.stage_vocab(book, refs_rows, number) once (refs_rows read from book/refs/refs.json) and adds elif branches for every new cure name.",
+   "prompt_template": "",
+   "est_cost_usd": "0"
+  },
+  {
+   "fault": "G-STAGE row (d) in SETUP text: bare creature word in described/crowd/geometry",
+   "kind": "mechanical",
+   "how": "studio/plan_cures.py new strip_creatures(doc, vocab) -> dict: split the field on sentence ends, drop every sentence containing a creature term not inside a staged machine card name (mask card names first, same helper as the gate), rejoin. A creature is never scenery of a place picture (ep17/18 hand fix: people and 'A Martian' removed from setup descriptions). Dispatched by a CURES row (re.compile(r'bare creature word'), 'strip_creatures') matching only setup-keyed rows — make the gate's setup-row text say 'setup' so the pattern r\"G-STAGE setup\" can key it: use (re.compile(r'G-STAGE.*bare creature'), see dispatcher note) with the shot/setup split done inside plan_repair by inspecting the row's 'setup ' vs 'shot ' prefix.",
+   "prompt_template": "",
+   "est_cost_usd": "0"
+  },
+  {
+   "fault": "G-STAGE row (d) in SHOT prose: bare creature word, exactly ONE candidate machine card",
+   "kind": "mechanical",
+   "how": "Inside stage_machines: candidates = machine pids already in that shot's setup.props, else the chapter-filtered vocab machines; when exactly one candidate exists, rename the creature phrase `(?:a |the )?\\b{term}s?\\b` to that card's name and stage the pid exactly as in the machine cure (ep17 shot 14: 'a Martian wading' -> 'the Martian fighting-machine wading', fighting_machine appended to the setup's props).",
+   "prompt_template": "",
+   "est_cost_usd": "0"
+  },
+  {
+   "fault": "G-STAGE row (d) in SHOT prose: bare creature word, >=2 candidate machine cards (or a machine term colliding across two cards)",
+   "kind": "llm",
+   "how": "New studio/stage_pick.py: class MachinePick(BaseModel): pid: str (validator: raise ValueError listing the candidates when pid not among them, so llm.structured's StructuredOutputException re-ask ladder fires); def pick_machine(prose: str, candidates: list[dict], *, _structured=None) -> str calls (_structured or studio.llm.structured)('workhorse', prompt, MachinePick, retries=3) and returns .pid. Every paid path goes through studio/llm.structured -> _NativeStructuredCaller -> guard_spend(model, prompt) against money.episode_ceiling_usd=$3, spend recorded by _record_spend. plan_repair.apply() calls it only for shot-keyed creature rows stage_machines returned as unresolved (stage_machines returns (doc, unresolved: list[tuple[shot_index, term, candidate_pids]])), then re-runs the rename mechanically with the picked pid. ~500 tokens in / ~15 out on gpt-5.6-luna ($0.20/$1.20 per M).",
+   "prompt_template": "A storyboard shot of a silent film of {book_title} reads:\\n\\n  \\\"{shot_prose}\\\"\\n\\nThe bare word {term!r} must be replaced by exactly one drawn card. The candidates, from the book's prop registry:\\n\\n{for each candidate}- pid: {pid}\\n  name: {name}\\n  what it is: {first two sentences of profile.physical}\\n  the book also calls it: {aliases, comma-joined}\\n\\nPick the single pid whose card is the thing this shot is actually showing, judged from the shot's own verbs and scale (a thing that wades, strides or towers is the fighting-machine class; a thing that digs or handles is the handling class; a thing afloat is a vessel). Return only the pid.",
+   "est_cost_usd": "0.0002 per call; typically 0-2 calls/episode"
+  },
+  {
+   "fault": "a staged pid claim added by the cure now needs a chapter span (G-SOURCE: \"prop 'X' has no chapter span\")",
+   "kind": "mechanical",
+   "how": "studio/plan_cures.py new prop_spans(doc, paragraphs, vocab) -> dict: for each shot whose prose passes plan_gates.staged_props for pid but whose source list has no span matching any of prop_terms(pid): candidates = chapter sentences (split paragraphs on sentence ends) containing any term of pid; anchor = plan_gates.span_paragraph of the shot's existing spans (else the nearest neighbour shot's); choose the candidate sentence whose paragraph index is nearest the anchor and append it VERBATIM (trimmed to <=25 words around the term) to shot['source'] — verbatim copy guarantees span_match >= SPAN_MATCH 0.85. Zero candidates -> leave the row uncured (creative path, the writer's). Dispatch: insert (re.compile(r\"prop '.+' has no chapter span\"), 'prop_spans') ABOVE the legal_props catch-all; plan_repair passes paragraphs from plan_brief.chapter_paragraphs(book, number)[1].",
+   "prompt_template": "",
+   "est_cost_usd": "0"
+  },
+  {
+   "fault": "G-FACE-KIND: creature id in faces/cuts/cast",
+   "kind": "mechanical",
+   "how": "studio/plan_cures.py new drop_creature_faces(doc, creature_ids) -> dict: filter creature ids out of every shot['faces'], every cut['faces'] in shot['cuts'], and every setup['cast']; never touches human ids or extras. CURES row (re.compile(r'G-FACE-KIND'), 'drop_creature_faces'). Runs in the same round as stage_machines, so the shot that loses its 'martians' face gains the fighting-machine card name in the same repair pass.",
+   "prompt_template": "",
+   "est_cost_usd": "0"
+  },
+  {
+   "fault": "a setup prop with no refs/props/<pid>/sheet.png (the thunder_child hand-draw)",
+   "kind": "mechanical",
+   "how": "scripts/episode/step_03_places.py new draw_prop_sheets(ctx, doc) (substep 03_02): for pid in missing_sheets(ctx.book_dir, doc): profile = json.loads((book/'analysis'/'props'/f'{pid}.json').read_text())['profile']; jobs = studio.refs_pack.prop_jobs(pid, profile); for job in jobs: scripts.refs.build_pack.draw(book, job) + build_pack.log(book, job, seconds) — direct import, NOT the CLI (build_pack's CLI takes book_id positional while ctx.run_script injects codex_id+episode and the signatures do not line up); free local GPU (image_krea2_cinematic_2x, seed = refs_pack.seed_for(relpath), so a rerun redraws the same picture). ctx.log each drawn path; keep the function 10-20 lines by letting build_pack.draw/log do the work.",
+   "prompt_template": "",
+   "est_cost_usd": "0 (local GPU)"
+  },
+  {
+   "fault": "a card whose profile.design has no sheet_prompt (prop_jobs returns [] and nothing can draw)",
+   "kind": "llm",
+   "how": "studio/stage_pick.py: class SheetPrompt(BaseModel): prompt: str = Field(min_length=40, max_length=600); def write_sheet_prompt(card: dict, example_prompts: list[str], *, _structured=None) -> str via studio.llm.structured('workhorse', prompt, SheetPrompt, retries=3). draw_prop_sheets calls it when prop_jobs returns [], writes the result into analysis/props/<pid>.json at profile.design.sheet_prompt (json round-trip, keep every other key byte-identical), then draws. example_prompts = up to 2 existing sheet_prompts from the same book's props folder (the house form travels by example, the code tree names no book). WotW today: 39/39 cards already carry one, so this path is rare.",
+   "prompt_template": "Write the one-image reference-sheet prompt for a prop card. The card:\\n  id: {pid}\\n  name: {name}\\n  kind: {kind}\\n  physical: {profile.physical}\\n  scale: {profile.scale}\\n\\nTwo sheet prompts from this book's other cards, as the form to match exactly (one object centered on a plain neutral ground, every surface and mechanism stated, no scene, no people, no text):\\n\\n1. {example_1}\\n2. {example_2}\\n\\nReturn the prompt text alone: the object exactly as `physical` states it, its material and color, its one most identifying silhouette feature first, at most 90 words. Never invent a feature `physical` does not give.",
+   "est_cost_usd": "0.0005 per call; 0 calls on a fully-designed book"
+  }
+ ],
+ "files": [
+  {
+   "path": "D:\\Projects\\KingdomOfViSuReNa\\alpha\\visurena_studio\\studio\\pack_refs.py",
+   "change": "Add STAGE_KINDS = (\"machine\", \"vessel\", \"vehicle\"); stage_vocab(book, refs_rows, chapter) -> dict building {machines: {pid: {name, terms, physical}}, creatures: {cid: terms}} — machines from analysis/props/*.json where row['kind'] in STAGE_KINDS and any(a['chapter'] == chapter for a in row['appears']), terms via existing prop_terms (reuse GENERIC filtering); creature_terms(rows) head-nouns of name/display for character rows with gender=='creature'; mask_card_names(text, names) helper; undrawn_named(book, pids, text) -> [pid for pid in pids if names_prop(text, prop_terms(book,pid)) and not prop_sheet(book,pid)]. Each function 10-20 lines."
+  },
+  {
+   "path": "D:\\Projects\\KingdomOfViSuReNa\\alpha\\visurena_studio\\studio\\plan_gates.py",
+   "change": "Add stage_faults(episode, vocab) and creature_face_faults(episode, creature_ids) below close_crowd_faults (~line 456), using the existing fault()/claim_prose()/staged_props() helpers and pack_refs.names_prop/mask_card_names; no book parameter — the vocab is passed in (gate stays pure)."
+  },
+  {
+   "path": "D:\\Projects\\KingdomOfViSuReNa\\alpha\\visurena_studio\\scripts\\episode\\plan_check.py",
+   "change": "In main(): hoist the refs.json read above the gate block; after the G-CROWD-CLOSE print (~line 225-228) add vocab = pack_refs.stage_vocab(book, refs, number); print/count G-STAGE (plan_gates.stage_faults) and G-FACE-KIND (plan_gates.creature_face_faults) as hard, same print style as G-CROWD-CLOSE."
+  },
+  {
+   "path": "D:\\Projects\\KingdomOfViSuReNa\\alpha\\visurena_studio\\studio\\plan_cures.py",
+   "change": "Add stage_machines(doc, vocab) -> (doc, unresolved), strip_creatures(doc, vocab), drop_creature_faces(doc, creature_ids), prop_spans(doc, paragraphs, vocab); insert three CURES rows — (r'G-STAGE', 'stage_machines'), (r'G-FACE-KIND', 'drop_creature_faces'), (r\"prop '.+' has no chapter span\", 'prop_spans') — ABOVE the existing (r'props.*\\.json|names setup .* not defined|prop ', 'legal_props') row, because that 'prop ' catch-all currently captures both new fault families and would route them to the wrong cure."
+  },
+  {
+   "path": "D:\\Projects\\KingdomOfViSuReNa\\alpha\\visurena_studio\\studio\\stage_pick.py",
+   "change": "NEW. Pydantic MachinePick (pid validated against a module-level candidate context or via model_validator fed through a closure — simplest: validate in pick_machine and re-raise as StructuredOutputException-compatible ValueError for the re-ask ladder), SheetPrompt; pick_machine(prose, candidates, *, _structured=None) and write_sheet_prompt(card, example_prompts, *, _structured=None), both defaulting _structured to studio.llm.structured tier 'workhorse' — the _structured kwarg is the FakeModel test seam, mirroring llm.structured's _agent seam."
+  },
+  {
+   "path": "D:\\Projects\\KingdomOfViSuReNa\\alpha\\visurena_studio\\scripts\\episode\\plan_repair.py",
+   "change": "apply(): read refs_rows once, build vocab = pack_refs.stage_vocab(book, refs_rows, number) and paragraphs = plan_brief.chapter_paragraphs(book, number)[1]; add elif branches for stage_machines (then for each unresolved (shot, term, cands): pid = stage_pick.pick_machine(...); rerun the mechanical rename with that pid), strip_creatures, drop_creature_faces, prop_spans. apply's signature grows (book already passed; add number) — main() already has both."
+  },
+  {
+   "path": "D:\\Projects\\KingdomOfViSuReNa\\alpha\\visurena_studio\\scripts\\episode\\grids.py",
+   "change": "props_of (line 250): before returning, bad = pack_refs.undrawn_named(book, list(pids or []), pack_refs.shot_prose(shots)); if bad: raise SystemExit(f\"prop(s) {bad} named by this grid's shots with no drawn sheet; run step 03\"). Ends the silent drop."
+  },
+  {
+   "path": "D:\\Projects\\KingdomOfViSuReNa\\alpha\\visurena_studio\\scripts\\episode\\takes_r2v.py",
+   "change": "At the staging site ~line 482, same undrawn_named check over the take's shot prose and setup props, raising SystemExit before props_named filters the missing sheet away."
+  },
+  {
+   "path": "D:\\Projects\\KingdomOfViSuReNa\\alpha\\visurena_studio\\scripts\\episode\\step_03_places.py",
+   "change": "Add plan_props(doc), missing_sheets(book, doc), draw_prop_sheets(ctx, doc) (03_02, imports scripts.refs.build_pack draw/log + studio.refs_pack.prop_jobs; calls stage_pick.write_sheet_prompt when prop_jobs is empty, writing design.sheet_prompt back into the card json); run(ctx) calls draw_prop_sheets after places.py --draw and before write_cells; done(ctx) adds `and not missing_sheets(ctx.book_dir, doc)` so drive.py re-enters while a sheet is missing."
+  },
+  {
+   "path": "D:\\Projects\\KingdomOfViSuReNa\\alpha\\visurena_studio\\architecture\\index.html",
+   "change": "Per project rules, if the implementer lands 03_02 as a named unit of work: update the Current tab's step 03 entry (CURRENT step table data, not the drawing) and architecture/README.md in the same commit; G-STAGE/G-FACE-KIND are battery gates, not owner gates, and need no org-chart change beyond that."
+  }
+ ],
+ "tests": [
+  "tests/test_a_bare_machine_word_fails_the_stage_gate.py — builds a minimal Episode fixture (derived from episode_spec, per house rule) with shot prose 'the tripod strides over the lane' and an empty setup.props: asserts plan_gates.stage_faults names fighting_machine and the fault row contains 'G-STAGE' and 'shot'; with the pid staged AND 'the Martian fighting-machine' in the prose, asserts clean; vocab built by hand dicts, no disk, no API.",
+  "tests/test_stage_vocab_is_the_chapters_cards_only.py — pack_refs.stage_vocab over a tmp_path book tree with two machine cards (appears ch 14 vs ch 3) and one 'object' card: asserts only the ch-14 machine enters the vocab for chapter 14, the object kind never does, and creature_terms yields {'martians': ['martian']} from a gender=='creature' row.",
+  "tests/test_a_bare_creature_word_is_cured_to_its_machine_card.py — plan_cures.stage_machines on a doc with shot 'a Martian wading up the Thames' whose setup stages exactly fighting_machine: asserts prose becomes 'the Martian fighting-machine wading...', the pid stays staged, the first mention carries the physical clause and a second mention does not, and re-running the gate on the cured doc is clean (masking exempts 'Martian' inside the card name).",
+  "tests/test_an_ambiguous_creature_word_asks_one_pick.py — stage_pick.pick_machine with _structured=fake returning MachinePick(pid='handling_machine'): asserts the returned pid feeds the rename; a fake returning a pid outside candidates asserts the validation refusal path (re-ask contract), zero network, zero spend.",
+  "tests/test_a_creature_row_never_stands_in_faces.py — plan_gates.creature_face_faults over faces, cuts[].faces and setup.cast each holding 'martians': three faults; plan_cures.drop_creature_faces removes all three and leaves human ids untouched.",
+  "tests/test_a_cured_prop_claim_copies_its_chapter_span.py — plan_cures.prop_spans with canned paragraphs containing 'The tripod came striding over the pines.': asserts the appended span is verbatim, plan_gates.span_match(span, chapter) >= 0.85, the span lands on the shot that stages the pid, and zero candidates leaves source untouched.",
+  "tests/test_stage_rows_dispatch_before_the_prop_catchall.py — plan_cures.cure_for('G-STAGE shot 14 names fighting_machine...') == 'stage_machines'; cure_for(\"prop 'fighting_machine' has no chapter span\") == 'prop_spans' (NOT legal_props); cure_for('G-FACE-KIND shot 14 ...') == 'drop_creature_faces'.",
+  "tests/test_a_named_prop_with_no_sheet_refuses_the_grid.py — tmp book tree with a props card but no sheet.png: pack_refs.undrawn_named returns the pid and grids.props_of raises SystemExit naming it; with sheet.png present it stages normally.",
+  "tests/test_step_03_draws_the_missing_prop_sheet.py — step_03_places.missing_sheets over a tmp tree; draw_prop_sheets with build_pack.draw monkeypatched to write a stub png: asserts the sheet lands at refs/props/<pid>/sheet.png, done(ctx) flips false->true, and a card with design.sheet_prompt absent routes through stage_pick.write_sheet_prompt (fake _structured) and persists the prompt into the card json. All tests inject fakes; none calls a paid API or the local GPU."
+ ],
+ "risks": [
+  "Alias head-noun false positives: 'hood' or 'pony' in innocent prose would trigger a rename; mitigated by chapter-filtering vocab on the card's `appears` and by GENERIC head-noun stripping in prop_terms, and a wrong staging is then exposed by G-SOURCE (the new prop claim has no chapter sentence to copy) — but a false hit in the right chapter still renames prose wrongly.",
+  "The cure lengthens prose (card name + one physical clause): L14 LENGTH, the 16-word style caps or G-FIRSTFRAME word economics may fire on the next battery round, and no mechanical cure trims frame text — such a row exits through the existing creative/writer path rather than looping.",
+  "strip_creatures removing a sentence from setup.described can drop it under the ~90-word G-FIRSTFRAME floor; same creative-path exit.",
+  "A cured plan changes plan sha8 and correctly stales drawn grids/panels (panels.stale_grids), costing a free redraw cycle against the 5-hour episode clock; G-STAGE stays hard even on rendered plans by design — budget the redraw.",
+  "Books where the creature IS the walking cast (Frankenstein's creature, a talking animal) must NOT carry gender=='creature' on its refs.json row, or G-FACE-KIND will deface it; the rule keys on the row the book's cast step writes, so document this in the gate docstring (constants outlive their world).",
+  "Term collisions across two same-chapter machine cards route to the llm pick; a wrong pick still stages A drawn machine sheet (bounded harm, caught by the owner-audit judges), and every pick passes guard_spend against the $3 ceiling.",
+  "plan.verdict.json: all plan edits here go through episode_home.write_plan inside plan_repair/step 03's existing paths, lapsing sha8-bound signatures as designed — but the step-03 card-json write (sheet_prompt) edits analysis/, which no signature covers; keep that write append-only to design.sheet_prompt."
+ ]
+}

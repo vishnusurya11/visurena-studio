@@ -1,0 +1,115 @@
+{
+ "area": "AREA 2: camera-move faults (G-MOVES distribution, G-AIM, G-ANCHOR, G-STILL, M2) — self-curing motion heads in the plan battery",
+ "summary": "Root problem: the registered cure for G-MOVES|G-STILL|G-AIM, plan_cures.vary_heads (studio/plan_cures.py:131-158, dispatched at CURES line 332), can only produce two heads — PUSH (\"The camera pushes in toward {aim} across the whole shot\") and LOCKED — so on ep18 it drove push_slow to share 0.30 and locked to 0.26 while distinct moves stayed at 6 < MIN_MOVES 8; and \"M2 shot N:\" / \"G-ANCHOR shot N:\" fault rows match no CURES pattern, so plan_repair returns them as \"creative\" and they became hand edits. The mechanism: a new mechanical module studio/move_rebalance.py renders heads from the full camera catalog (8 legal move templates keyed by shot size, never tilt_down/crane_down/rack_focus), picks per shot the least-used legal move whose aim is a noun provably held by at_rest, with an amount chosen under plan_gates.cap_for and \"across the whole shot\" — and verifies every candidate by replaying the real gate predicates (move_id/still_fault/aimed_at+in_cell/anchored_truck/amount-vs-cap/motion_faults M2, plus prev/next move_id for twice-running) before writing it, which is the G-CROWD-CLOSE \"cure measures like the checker\" pattern. Shots where no mechanical candidate passes go to one targeted workhorse structured-output call (studio/move_llm.py via studio/llm.structured, guard_spend-walled, FakeModel-injectable) with a one-sentence \"The camera ...\" contract validated by pydantic and then re-verified by the same head_ok predicate; a head that still fails after one re-ask is returned uncured to the writer path, never looped. M2 shots get the new head PREPENDED (camera_clause proves they have no camera half), all other shots keep their subject clause and rest clauses exactly as take_ladder.substitute does.",
+ "gates": [
+  {
+   "id": "G-MOVES",
+   "hard": true,
+   "where": "studio/plan_gates.py:moves_faults (lines 700-800: distinct_fault MIN_MOVES=8, share_fault MAX_MOVE_SHARE=0.25, running_faults), printed by scripts/episode/plan_check.py:catalog_gates (line 109)",
+   "rule": "EXISTS, unchanged — stays the authority; the cure must satisfy it, never the reverse"
+  },
+  {
+   "id": "G-AIM / G-ANCHOR",
+   "hard": true,
+   "where": "studio/cell_gates.py:aim_faults (line 71) and anchor_faults (line 199), printed by plan_check.py CELL GATES block (line 228)",
+   "rule": "EXISTS, unchanged — aim named in at_rest; no sideways truck/pan on CLOSE_ENOUGH peopled+anchored shots"
+  },
+  {
+   "id": "G-STILL + M2",
+   "hard": true,
+   "where": "studio/plan_gates.py:still_faults (IGNORED = crane_down/rack_focus/tilt_down) and studio/episode_spec.py:motion_faults line 884 (M2) + HARD_MOTION line 905; enforced again at spend time by scripts/episode/takes_r2v.py:refuse_still_motions (line 808)",
+   "rule": "EXISTS, unchanged"
+  },
+  {
+   "id": "CURE-REPLAY",
+   "hard": false,
+   "where": "NEW predicate studio/move_rebalance.py:head_ok(shot, head, prev_id, next_id, setup) — called inside the cure before any head is written, and by move_llm on every model answer",
+   "rule": "a candidate head is written only if: (1) plan_gates.move_id(probe) not in {prev_id, next_id}; (2) plan_gates.still_fault(probe) is None; (3) every (role, phrase) from cell_gates.aimed_at(head) passes cell_gates.in_cell(phrase, shot); (4) cell_gates.anchored_truck(probe) == \"\"; (5) plan_gates.amount(head) is None or <= plan_gates.cap_for(shot, setup)[0]; (6) \"M2\" not in codes of episode_spec.motion_faults(new_motion). probe is a SimpleNamespace carrying index/size/motion/camera/at_rest/frame/faces/extras/setup — the same attrs the real gates read"
+  },
+  {
+   "id": "CURES-DISPATCH",
+   "hard": true,
+   "where": "studio/plan_cures.py CURES table line 332: replace (re.compile(r\"G-MOVES|G-STILL|G-AIM\"), \"vary_heads\") with (re.compile(r\"G-MOVES|G-STILL|G-AIM|G-ANCHOR|\\bM2 shot \\d+:\"), \"rebalance_heads\")",
+   "rule": "M2 rows print from plan_check.py line 238 as '    M2 shot {i}: {why}', so after fault_rows' strip they start 'M2 shot 12:'; the \\bM2 shot \\d+: anchor cannot collide with M9/M10 rows, which stay uncured (they are subject-clause faults, not camera faults). keep vary_heads as a function (tests may import it) but remove it from CURES"
+  },
+  {
+   "id": "LLM-ESCAPE",
+   "hard": true,
+   "where": "scripts/episode/plan_repair.py:apply (elif chain, lines 88-108) — the rebalance_heads branch returns (doc, unfixed_indices); apply calls studio/move_llm.cure_unfixed(doc, unfixed, book) only when unfixed is non-empty",
+   "rule": "at most 1 call + 1 re-ask per unfixed shot per repair round, bounded by ROUNDS=6 at plan_repair.py line 29; every call passes llm.guard_spend against money.episode_ceiling_usd when run under the runner's spend_context; a head failing head_ok after the re-ask leaves its fault row in `uncured` and exits 1 to the writer path exactly as today — the cure can never ship an unverified head"
+  }
+ ],
+ "cures": [
+  {
+   "fault": "G-MOVES distinct < 8 / top share > 0.25 / same move twice running (ep18 failed twice: 6 distinct, push_slow 0.30, locked 0.26)",
+   "kind": "mechanical",
+   "est_cost_usd": "0",
+   "prompt_template": "",
+   "how": "studio/move_rebalance.py:rebalance(doc, indices) -> (doc, unfixed). (1) build probe shots; ids = plan_gates.move_ids(probes); counts = Counter(ids). (2) rewrite set R = indices from fault rows UNION greedily-chosen carriers of the top-share id until projected share <= 0.25 UNION the later shot of each twice-running pair UNION, while len(set(ids)) < 8, further carriers of the most-common ids — skipping dialogue shots (any line in doc['lines'] with kind=='dialogue' on that shot) except to rewrite them to 'locked' only (camera_catalog: locked carries dialogue best). (3) per shot in R ascending: candidates = LEGAL[shot.size] sorted by (counts[id], catalog order); LEGAL = {wide/full: [pan_to, crane_up, pull_reveal, tilt_up, follow, track_lateral, locked], medium: [push_slow, follow, pull_reveal, tilt_up, pan_to, track_lateral, locked], medium_close: [push_slow, tilt_up, pull_reveal, locked], close: [locked, pull_reveal, push_slow], extreme_close: [locked, pull_reveal], insert: [locked, track_lateral, crane_up, pull_reveal, push_slow]} — tilt_down/crane_down/rack_focus/handheld/orbit never offered (IGNORED set + untested + one-per-episode). (4) aims from cell_aims(shot): split at_rest on [;.,], take episode_spec.head_noun of each clause, FOCUS clause first, drop NOISE words and drop any noun matching a token (>3 letters) of setup['props'] ids not already named by the shot's pre-rewrite frame+motion (keeps G-SOURCE.staged_props from acquiring a new unspanned claim). (5) amount = largest rung of the ordered ladder [hand's breadth 1.0, forearm 2.5, head's height 3.0, short stride 5.0, stride 10.0, two strides 20.0] that is <= plan_gates.cap_for(probe, setup)[0] and <= TRAVEL_PER_SECOND * projected shot seconds. (6) head = HEADS[move].format(aim/a/b/amount); HEADS = {locked: 'The camera holds a locked-off frame', push_slow: 'The camera pushes in slowly toward the {aim}, travelling {amount}, across the whole shot', pull_reveal: 'The camera pulls back from the {aim}, travelling {amount}, across the whole shot', pan_to: 'The camera pans from the {a} to the {b}, travelling {amount}, across the whole shot', tilt_up: 'The camera tilts up from the {a} to the {b}, travelling {amount}, across the whole shot', track_lateral: 'The camera tracks sideways to the right, past the {aim}, travelling {amount}, across the whole shot', follow: 'The camera tracks behind the {aim}, travelling {amount}, across the whole shot', crane_up: 'The camera rises slowly above the {aim}, travelling {amount}, across the whole shot'} — verified against plan_gates.MOVE_VERBS first-match: 'pushes'->push_slow, 'pulls'->pull_reveal, 'pans from A to B'->pan_to (and ', travelling' sits in cell_gates.ENDS' lookahead so {b} is captured cleanly), 'tracks behind'->follow, 'tracks sideways'->track_lateral, 'rises'->crane_up, 'holds' startswith MOVES 'hold' so M2 passes; SAID_AMOUNT in episode_ref_official.py (line ~745) strips ', travelling {amount}' from the take prompt, so H3 sees verb+direction only, per 'H3 obeys direction, not amount'. (7) accept the first (move, aim) where head_ok passes; splice via the take_ladder.substitute shape (take_ladder.py:279-284): new_head + '; ' + camera_clause(old_head)[1] subject half if any + untouched rest clauses. first-wins, counts updated after each accept, pure function of doc -> deterministic."
+  },
+  {
+   "fault": "M2: the head names no camera move (ep18 shot 12) — row currently matches no cure and bounces to the writer",
+   "kind": "mechanical",
+   "est_cost_usd": "0",
+   "prompt_template": "",
+   "how": "same rebalance() path; an M2 shot is detected by ro.camera_clause(plan_gates.head_of(motion))[0] == '' (episode_ref_official.py:785), in which case ALL existing clauses are subject/action clauses and the new head is PREPENDED: new_motion = head + '; ' + old_motion — never replacing clause 0, which on an M2 shot is the first action. The chosen head follows the same LEGAL/aims/amount/head_ok machinery, so the cure simultaneously satisfies M2's own demand ('with a measured amount and across the whole shot', episode_spec.py:884), G-AIM, G-STILL and the running rule. M9/M10 rows are explicitly NOT matched by the dispatcher pattern — they accuse the subject clauses and remain the writer's."
+  },
+  {
+   "fault": "no mechanical candidate passes head_ok (every legal move for the size collides with neighbours, or at_rest yields no clean aim noun)",
+   "kind": "llm",
+   "est_cost_usd": "~$0.0004 per call real (300-900 prompt tokens + ~40 output on gpt-5.6-luna at $0.20/$1.20 per M); guard_spend reserves ~$0.016 per call via EXPECTED_OUTPUT_TOKENS=13000; worst case ~24 shots x 2 asks < $0.04 real per episode against the $3.00 ceiling",
+   "prompt_template": "You rewrite ONE camera-move head for one shot of a storyboard plan. Answer with the head only.\n\nTHE SHOT\nsize: {size}\nframe: {frame}\nat_rest -- the only things that exist in the picture: {at_rest}\naction clauses that stay (do not restate or contradict them): {rest_clauses}\ndialogue on this shot: {yes_no}\n\nTHE RULES -- each is a hard gate; a head that breaks one is refused:\n- ONE sentence, no semicolons. It MUST start \"The camera \".\n- Use exactly one of these moves, in this affirmative, direction-only phrasing: {legal_moves_with_catalog_phrasings}\n- Never use these moves: {banned_moves} -- the render model ignores them, or the neighbouring shots already carry them ({prev_id}, {next_id}).\n- Every noun the move starts on or aims at MUST be a word quoted from at_rest above. A move toward what is not drawn invents it.\n{anchored_line: \"- Never a sideways track or pan: this is a {size} of a person anchored to scenery; push in, rise, or hold.\" -- included only when cell_gates.anchored_truck would fire}\n- Say the travel as \"travelling {amount}\" with {amount} = {max_amount}, and end the sentence with \"across the whole shot\" (a locked-off head needs neither).\n- No stillness words (still, holds still, motionless, frozen), no \"keeps the ...\" clause, no walking-pace words on the camera.",
+   "how": "studio/move_llm.py:fallback_head(shot_doc, setup_doc, counts, prev_id, next_id) -> str | None. Tier: \"workhorse\" (models.yaml line 34, gpt-5.6-luna). Call: llm.structured(\"workhorse\", prompt, MotionHead, retries=3, _agent=None) — the native structured caller (_NativeStructuredCaller, llm.py:166) runs guard_spend before the request and records spend after; _agent is the mandatory test seam. Output contract: class MotionHead(BaseModel): head: str — with a field_validator raising ValueError (which the caller surfaces as StructuredOutputException and llm.re_ask quotes back) unless: head matches ^The camera [a-z], contains no ';', is <= 30 words, and either equals the locked phrasing or contains \"across the whole shot\". After a schema-valid answer, run move_rebalance.head_ok on it; on failure, ONE manual re-ask built with llm.re_ask(prompt, exc) carrying the exact failed predicate names; a second failure returns None and plan_repair leaves the shot's fault row in `uncured` (writer path, exit 1) — bounded, never a loop. ContentFiltered and OverBudget propagate as uncured, never retried."
+  }
+ ],
+ "files": [
+  {
+   "path": "D:\\Projects\\KingdomOfViSuReNa\\alpha\\visurena_studio\\studio\\move_rebalance.py",
+   "change": "NEW (~180 lines, functions of 10-20 lines each): HEADS (8 catalog templates), LEGAL (size -> ordered move ids), AMOUNT_LADDER + amount_for(cap, seconds), cell_aims(shot, setup, pre_text), probe(shot_doc) -> SimpleNamespace, render_head(move, aims, amount), head_ok(shot, head, prev_id, next_id, setup) replaying plan_gates.move_id/still_fault/amount/cap_for + cell_gates.aimed_at/in_cell/anchored_truck + episode_spec.motion_faults M2, splice(motion, head) (prepend on empty camera_clause, else take_ladder.substitute shape), choose(shot, counts, prev_id, next_id, setup) and rebalance(doc, indices) -> (doc, unfixed). Imports plan_gates, cell_gates, episode_spec, episode_ref_official only — no llm import, stays $0 and book-neutral."
+  },
+  {
+   "path": "D:\\Projects\\KingdomOfViSuReNa\\alpha\\visurena_studio\\studio\\move_llm.py",
+   "change": "NEW (~80 lines): MotionHead pydantic model with the strict head validator; PROMPT template above; fallback_head(...) calling llm.structured(\"workhorse\", ...) then move_rebalance.head_ok, one re_ask, None on second failure; cure_unfixed(doc, unfixed, setups) applying accepted heads via move_rebalance.splice and returning the still-unfixed indices."
+  },
+  {
+   "path": "D:\\Projects\\KingdomOfViSuReNa\\alpha\\visurena_studio\\studio\\plan_cures.py",
+   "change": "CURES line 332: (re.compile(r\"G-MOVES|G-STILL|G-AIM\"), \"vary_heads\") becomes (re.compile(r\"G-MOVES|G-STILL|G-AIM|G-ANCHOR|\\bM2 shot \\d+:\"), \"rebalance_heads\"); add thin wrapper def rebalance_heads(doc, indices) delegating to move_rebalance.rebalance (keeps the module's no-llm charter; the wrapper is pure); vary_heads function body kept but no longer dispatched."
+  },
+  {
+   "path": "D:\\Projects\\KingdomOfViSuReNa\\alpha\\visurena_studio\\scripts\\episode\\plan_repair.py",
+   "change": "apply() elif chain (lines 88-108): replace the vary_heads branch with: doc, unfixed = pc.rebalance_heads(doc, shot_indices([r for r in rows if pc.cure_for(r) == \"rebalance_heads\"])); then if unfixed: from studio import move_llm; doc, still = move_llm.cure_unfixed(doc, unfixed, doc.get(\"setups\") or {}); uncured += [r for r in rows if pc.cure_for(r) == \"rebalance_heads\" and row_shot(r) in still]. Plan writes continue through episode_home.write_plan inside main() exactly as today (signature lapse untouched); each round re-runs plan_check (battery_rows), so the authority re-measures every cure."
+  },
+  {
+   "path": "D:\\Projects\\KingdomOfViSuReNa\\alpha\\visurena_studio\\tests\\test_move_rebalance.py",
+   "change": "NEW — see tests"
+  },
+  {
+   "path": "D:\\Projects\\KingdomOfViSuReNa\\alpha\\visurena_studio\\tests\\test_move_llm.py",
+   "change": "NEW — see tests"
+  }
+ ],
+ "tests": [
+  "tests/test_move_rebalance.py::test_rebalance_reaches_the_moves_floor — load tests/fixtures/episodes/moves_orbit.json (the fixture plan_gates' own docstring pins), run rebalance; assert len(set(plan_gates.move_ids(shots))) >= 8, top share <= 0.25, no id twice running: plan_gates.moves_faults(probe_episode) == []",
+  "tests/test_move_rebalance.py::test_m2_head_is_prepended_and_actions_survive — shot whose motion is 'his hand lifts the lid; the lid tips; steam rises' gains a head, all three clauses still present verbatim, and episode_spec.motion_faults(new_motion) carries no M2",
+  "tests/test_move_rebalance.py::test_head_ok_refuses_an_aim_not_in_at_rest — a pan toward 'the heliograph' with an at_rest that lacks it returns False (G-AIM replay, the refusal.txt fixture's exact fault)",
+  "tests/test_move_rebalance.py::test_head_ok_refuses_sideways_on_an_anchored_medium_close — frame 'he leans on the fence', size medium_close, candidate track_lateral -> False; push_slow -> True (G-ANCHOR replay, ep09 T02)",
+  "tests/test_move_rebalance.py::test_ignored_moves_are_never_rendered — HEADS has no tilt_down/crane_down/rack_focus key and no LEGAL row offers them; every HEADS template maps back to its own id through plan_gates.move_id (the regex round-trip lock)",
+  "tests/test_move_rebalance.py::test_amount_respects_size_and_crowd_caps — wide over a 7-figure crowd gets an amount <= CROWD_CAP 5.0; close gets <= 2.5; plan_gates.move_faults on the probe episode is empty",
+  "tests/test_move_rebalance.py::test_dialogue_shot_only_goes_locked — a dialogue-carrying shot in the rewrite set comes back 'The camera holds a locked-off frame' or untouched, never a travel",
+  "tests/test_move_rebalance.py::test_rebalance_is_deterministic — two runs on the same doc produce byte-identical shots",
+  "tests/test_move_rebalance.py::test_aim_never_names_an_unspanned_prop — a setup prop id absent from the shot's pre-rewrite prose is never chosen as an aim (G-SOURCE guard)",
+  "tests/test_move_llm.py::test_fallback_uses_workhorse_and_the_seam — inject _agent fake returning a canned MotionHead; assert the prompt quotes at_rest, the banned ids and the amount line, and no network client is ever constructed (FakeModel only; NO paid API)",
+  "tests/test_move_llm.py::test_contract_refuses_a_bad_head — canned answers 'Camera pushes...', 'The camera pushes; he turns', and a 35-word head each raise StructuredOutputException through the validator and consume a retry",
+  "tests/test_move_llm.py::test_head_failing_head_ok_gets_one_reask_then_uncured — fake returns a G-AIM-violating head twice; fallback_head returns None after exactly 2 calls, and cure_unfixed reports the shot still unfixed",
+  "tests/test_move_llm.py::test_overbudget_and_contentfiltered_leave_the_row_uncured — fake raising llm.OverBudget / llm.ContentFiltered yields None, no retry",
+  "tests/test_plan_cures.py (extend)::test_dispatch_rows — pc.cure_for('G-ANCHOR shot 3: a sideways truck...') == 'rebalance_heads'; pc.cure_for('M2 shot 12: the head names no camera move. Open with one...') == 'rebalance_heads'; pc.cure_for('M9 shot 4: ...') is None (stays the writer's)"
+ ],
+ "risks": [
+  "G-SOURCE coupling: a new head's aim noun can token-match a setup prop id and create a claim needing a chapter span (plan_gates.staged_props reads CLAIM_FIELDS including motion); mitigated in cell_aims by excluding prop-id tokens not already in the shot's pre-rewrite prose — but a false negative here surfaces as a G-SOURCE row next round, which plan_repair cannot cure (correct: it goes to the writer, not silently shipped)",
+  "regex round-trip fragility: head_ok's guarantees hold only while HEADS phrasings and plan_gates.MOVE_VERBS / cell_gates.STARTS+ENDS stay in agreement; the round-trip test (every template -> its own move_id, every aim recoverable by aimed_at) is the lock — any future catalog wording change must keep it green",
+  "plan_repair run standalone from the CLI has no spend_context, so guard_spend is a no-op there (documented llm.py behavior, 'outside an episode: no wall'); under drive.py the runner's context walls it — worst unguarded exposure is ~$0.04/episode on workhorse rates",
+  "distribution feasibility: a plan of mostly close/medium_close shots has only 3-4 legal moves per size, so MIN_MOVES=8 may be unreachable mechanically on a short plan; the llm fallback is bounded by the SAME legality table, so such a plan correctly exits 1 to the writer rather than looping — ROUNDS=6 and the 'nothing cured this round' break at plan_repair.py line 135 already prevent spin",
+  "vary_heads removal from CURES changes historical repair behavior for G-STILL-only rows; any existing test importing vary_heads still passes since the function stays, but a fixture asserting the old PUSH/LOCKED output text must be updated to the new templates",
+  "the G-MOVES gate is HARD only on new-form plans (Episode.new_form, plan_gates line ~704) — on an old-form plan the rows print as advisories, fault_rows still collects nothing for them (advisory lines are filtered at plan_repair.py fault_rows), so the cure never fires on historical plans: correct, but worth a test if old-form books return"
+ ]
+}

@@ -4,6 +4,18 @@ Newest first. Every architectural change gets an entry.
 
 ---
 
+## 2026-10-05 — The pipeline cures itself (owner decision: "i need python scripts instead to do that using the open api call .. budget is $3 for episode")
+
+**Ruling:** every hand fix Claude made on ep17/ep18 becomes code: gates + cures in the plan
+battery (phantom people, clone text, projected silences, take-prompt lint, source spans,
+camera moves, machine staging), a local-VLM duplicate judge (G-TWIN, faces N>M hard),
+orchestration fixes (clean plans re-sign free, retakes re-judged, dead clock goes to
+terminal, comfy transient retry), and publish metadata + sign-off generated from measured
+data. Judgement is an API call through studio/llm behind guard_spend; the $3/episode
+ceiling stands. Proof of done: ep19 via drive.py alone. Decision:
+`architecture/decisions/2026-10-05_self_curing_pipeline.md`; tracker
+`architecture/plan/2026-10-05_self_curing_pipeline.md`.
+
 ## 2026-10-04 — The board, premium (owner decision)
 
 **Ruling (owner, "looks good go"):** the whole board redesigned as one studio tracking tool —

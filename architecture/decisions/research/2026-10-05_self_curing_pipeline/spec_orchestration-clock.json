@@ -1,0 +1,143 @@
+{
+ "area": "AREA 9: ladder/clock/orchestration (step 02 re-sign, retake re-judging, spent-clock terminals, transient ComfyUI retry, bed-span contract+cure, drive cadence docs)",
+ "summary": "Five orchestration leaks let a correct episode stall or overspend: (1) any mechanical plan edit lapses plan.verdict.json and step 02 re-enters the paid writer+critic climb even when the battery is already clean ($1.05 on ep18); (2) retaken T??.mp4 can outlive their .dq.json/.content.json because step_09_shoot.judged() checks existence only; (3) judged_gate.affordable raises a \"run again to resume\" SystemExit that an episode-wide clock can never satisfy (take_ladder.can_afford got the headroom clause in the ep16 fix, judged_gate.affordable did not — and it is the outer check in climbed(), so EYE_TAKES deferred at exactly BATCH's 565 s); (4) a transient ComfyUI execution error (HostBuffer.read_file_slice) becomes a \"lost\" take and a fatal SystemExit with no retry; (5) Episode.beds is an unvalidated list[dict], so a bed naming a cut shot survives until episode_bed.in_cut raises inside assemble. The design is all-mechanical (no new LLM calls, $0 added spend): a sha8 cure-provenance ledger (plan.cures.jsonl) that lets step 02 re-sign a battery-clean plan whose bytes moved only through recorded cures; sha/mtime freshness in step 09's judged(); headroom-then-terminal in judged_gate.affordable (the deferral branch removed, per the five-hour verdict); a one-shot transient-class resubmit in comfy.run and takes_r2v.collect_all, plus sidecar retirement on every new take write; and a beds model_validator mirrored by a clamp_beds cure in the canonical G-CROWD-CLOSE gate+cure pattern — which requires the one-character HARD_LISTS fix (\"CONTRACT :\" -> \"CONTRACT:\") so contract rows reach plan_repair at all.",
+ "gates": [
+  {
+   "id": "G-RESIGN",
+   "where": "scripts/episode/step_02_plan.py :: new resigned(ctx) checked in run() immediately after the `if plan_verdict.current(plan) or grandfathered(ctx): return` block (line 164-165), before `if rendered(ctx)` (line 166)",
+   "rule": "A stale-but-present APPROVE (plan.verdict.json exists, verdict==APPROVE, plan_sha8 mismatch) whose sha moved ONLY through rows recorded in plan.cures.jsonl (plan_provenance.chain(signed_sha8, plan_sha8(plan)) returns the cure names), AND whose battery passes now (ctx.capture_script(PLAN_CHECK) rc==0), is re-signed via plan_verdict.sign(plan, note='re-signed after mechanical cures: <names>', signed_by=<old doc signed_by>, faults=<old doc faults>, flagged=<old flagged>) with zero writer/critic calls. A broken chain with a clean battery still enters judged_gate.clear and costs exactly one critic read (no writer rounds, since the battery passes); a dirty battery takes the existing ladder.",
+   "hard": false
+  },
+  {
+   "id": "G-FRESH-VERDICTS",
+   "where": "scripts/episode/step_09_shoot.py :: judged(takes) (lines 47-50), consumed by done() and therefore by the step runner's skip decision",
+   "rule": "A take counts as judged only when T??.dq.json exists AND its 'take_sha8' equals sha256(T??.mp4)[:8] (mirror take_dq.take_sha8; inline a 4-line sha8 helper in step_09 rather than importing the heavy take_dq module) AND T??.content.json exists with st_mtime >= the mp4's st_mtime (content records carry no sha; take_dq's cache already rewrites dq mtime on every pass, line 542). A retaken take therefore re-opens step 09, whose existing full measured() passes (run() lines 181-182) re-judge exactly the changed takes: take_dq.cached() is sha-bound and skips unchanged bytes; take_content_check always rewrites but comfy.cached_text makes unchanged frames free.",
+   "hard": true
+  },
+  {
+   "id": "G-TERMINAL-ON-SPENT",
+   "where": "studio/judged_gate.py :: affordable(ctx, gate, rung, taken) (lines 65-87), called from climbed() line 117",
+   "rule": "Order: step share pays -> True; ladders pool pays -> draw(), True; ctx.budget.headroom() >= rung.cost_seconds -> learn(action='headroom'), True (shares are an allocation of the ceiling — same clause take_ladder.can_afford line 243 already has); else learn(action='terminal', terminal context) and return False, so climbed() breaks and ended() signs keep-best/still flagged IN THE SAME RUN. The SystemExit('DEFERRED: ... run again to resume') branch is DELETED: with the episode-wide clock charged by Budget.charge(spent_before), idling clocks nothing and no later run can ever pay more than headroom() says now. plan_ladder rungs cost 0.0 and are unaffected; episode_drive.outcome keeps its 'deferred' regex for old logs but no new budget deferral is ever emitted.",
+   "hard": true
+  },
+  {
+   "id": "G-BED",
+   "where": "studio/episode_spec.py :: new @model_validator(mode='after') _beds_point_into_the_cut on Episode, placed after _omit_names_shots (lines 618-625), mirroring _the_answer_is_in_the_plan (lines 605-616)",
+   "rule": "Every beds entry must carry an int 'from_shot' with 0 <= from_shot < len(self.shots), and there must exist a shot index >= from_shot that is not in self.omit (the condition episode_bed.in_cut needs, lines 261-267, so assemble can never be the first to find out); from_shot values must be non-decreasing in list order (the spans() story-order rule, line 285-286). Refusal text begins 'bed span from_shot N' so the cure dispatcher matches it. Enforced everywhere plans are born or written: writer structured output, episode_home.write_plan, episode_home.load_plan, plan_check.contract.",
+   "hard": true
+  },
+  {
+   "id": "G-TRANSIENT-RETRY",
+   "where": "studio/comfy.py :: new TRANSIENT tuple + transient(said)->bool beside UNREACHABLE (~line 92); comfy.run() (lines 365-368); scripts/episode/takes_r2v.py :: collect_all call site (line 1029) and the retake path's equivalent, via a new collect_twice(jobs, tickets, where, on_take, approved)",
+   "rule": "TRANSIENT = ('HostBuffer', 'read_file_slice') — a narrow substring class, one constant, extended only with measured evidence. comfy.run: on RuntimeError where transient(str(err)) or on EngineLost, resubmit the SAME filled graph exactly once, then re-raise. takes_r2v: after collect_all returns (done, lost), the lost whose message is transient (or EngineLost's 'vanished') are resubmitted in ONE second batch (their graphs are still in `jobs`), collected, and merged; only the survivors reach the existing SystemExit 'takes were lost' (lines 1031-1034). One retry, never a loop; a second failure of the same take is a real fault.",
+   "hard": true
+  }
+ ],
+ "cures": [
+  {
+   "fault": "Mechanical plan cure lapsed plan.verdict.json; step 02 relaunched writer+critic on an already-clean plan (~$0.2-0.4/relaunch, 48 calls / $1.05 on ep18)",
+   "kind": "mechanical",
+   "how": "studio/plan_provenance.py (new, ~45 lines, three 10-15 line functions): CURES_FILE='plan.cures.jsonl' beside plan.json; record(plan, before_sha8, cures:list[str]) appends {from_sha8, to_sha8: plan_verdict.plan_sha8(plan), cures, date}; chain(plan_dir, from_sha8, to_sha8)->list[str]|None walks rows in file order requiring each row.from_sha8 == previous row.to_sha8, starting at from_sha8 and ending at to_sha8 (identity chain [] when equal). Writers: scripts/episode/plan_repair.py main() — capture before_sha8 = plan_verdict.plan_sha8(path) before each round's write (line 124), extend apply() to also return the sorted cure names it ran (it already computes `names`, line 76-78), call plan_provenance.record after episode_home.write_plan succeeds (line 131). step_02_plan.resigned(ctx) then re-signs as G-RESIGN states. Savings: ~$1.05/episode of the $3 ceiling; cost $0.",
+   "prompt_template": "",
+   "est_cost_usd": "$0 (saves ~$1.05/episode measured on ep18)"
+  },
+  {
+   "fault": "Retaken takes never re-judged: qc found 'unjudged' T00,T14,T18-T21 (mp4 newer than its verdicts)",
+   "kind": "mechanical",
+   "how": "Two layers. (a) Retirement at the source: scripts/episode/takes_r2v.py collect() (lines 749-762) — after out.write_bytes(video.read_bytes()) (line 758), unlink out.with_suffix('.dq.json') and out.with_suffix('.content.json') via Path.unlink(missing_ok=True) (new 5-line retire_verdicts(out) helper), so no existence check anywhere can mistake a pre-retake verdict for a current one. (b) Freshness at the gate: G-FRESH-VERDICTS in step_09_shoot.judged(); the re-judge itself is the step's existing take_ladder.measured(take_dq)/(take_content_check) full passes, which take_dq's sha cache (cached(), lines 504-512) narrows to exactly the changed indices. $0 — local GPU inside the existing take_dq share.",
+   "prompt_template": "",
+   "est_cost_usd": "$0"
+  },
+  {
+   "fault": "EYE_TAKES 'DEFERRED: needs 565 s, share has 73 s ... run again to resume' on an exhausted episode-wide clock; nothing ever resumed it (565 s = take_ladder.BATCH: COLD_S 300 + TAKE_S 265)",
+   "kind": "mechanical",
+   "how": "G-TERMINAL-ON-SPENT: rewrite judged_gate.affordable (lines 65-87) to share -> pool -> headroom -> terminal(False); delete the SystemExit deferral. climbed() (line 117) then falls through to ended() (lines 129-136): terminal_for/take_ladder.terminal signs keep_best or still, flagged, with the audit row, in the same run — no human, no respawn. Add one Learning(action='headroom') row when headroom pays so the audit sheet shows allocation overdraws. Verify by grep that judged_gate.affordable was the only emitter of 'DEFERRED: ... needs ... s'; episode_drive.outcome's regex (line 27) stays for historical drive logs.",
+   "prompt_template": "",
+   "est_cost_usd": "$0"
+  },
+  {
+   "fault": "Transient ComfyUI execution failure (HostBuffer.read_file_slice) marked takes lost and killed the run via SystemExit",
+   "kind": "mechanical",
+   "how": "G-TRANSIENT-RETRY: comfy.transient() + one resubmit in comfy.run() for the sheet/grid/qc single-job path, and collect_twice() in takes_r2v for the batched path (full run line 1029 and the retake path used by take_ladder.retake via the same main loop). EngineLost (engine restarted mid-job, comfy.py lines 234-238) is in the retriable class by type, not substring. Cost: at most one extra render of the genuinely-failed takes, paid from the takes share under the existing clock.",
+   "prompt_template": "",
+   "est_cost_usd": "$0"
+  },
+  {
+   "fault": "assemble refused on a bed span naming a cut shot (episode_bed.in_cut ValueError, hours after the plan was signed; ep18 hand fix: 'shot 22 cut, and its music bed removed')",
+   "kind": "mechanical",
+   "how": "G-BED validator (refusals surface at authoring/write_plan/plan_check, never first at assemble) + studio/plan_cures.clamp_beds(doc)->dict (12-15 lines): shots=len(doc['shots']), omit=set(doc.get('omit') or []); keep only beds entries where isinstance(from_shot,int) and 0<=from_shot<shots and any cut index >= from_shot; sort survivors by from_shot; write back doc['beds'] (an emptied list is legal — one plain span end to end, episode_bed.spans line 278-279). Dispatcher: add (re.compile(r'bed span from_shot'), 'clamp_beds') to CURES (plan_cures.py line 326-338) and the elif branch in plan_repair.apply (lines 80-101). PREREQUISITE BUG FIX: plan_repair.HARD_LISTS entry 'CONTRACT :' (line 32) never matches plan_check.contract's printed 'CONTRACT:' (plan_check.py line 42) — change it to 'CONTRACT:' or no contract refusal, this one included, ever reaches the repairer.",
+   "prompt_template": "",
+   "est_cost_usd": "$0"
+  }
+ ],
+ "files": [
+  {
+   "path": "D:\\Projects\\KingdomOfViSuReNa\\alpha\\visurena_studio\\studio\\plan_provenance.py",
+   "change": "NEW. CURES_FILE='plan.cures.jsonl'; record(plan, before_sha8, cures) appends one JSON row; chain(plan_dir, from_sha8, to_sha8) returns the concatenated cure names when a contiguous from->to sha8 chain exists in file order, else None. Three functions, each 10-20 lines, pure stdlib."
+  },
+  {
+   "path": "D:\\Projects\\KingdomOfViSuReNa\\alpha\\visurena_studio\\scripts\\episode\\plan_repair.py",
+   "change": "HARD_LISTS: 'CONTRACT :' -> 'CONTRACT:' (line 32). apply() also returns sorted(names) (line 102). main(): before each episode_home.write_plan (line 131 and the round-loop write at 124-131) capture before_sha8=plan_verdict.plan_sha8(path) and call plan_provenance.record(path, before_sha8, names) after a successful write. Dispatcher: new elif for 'clamp_beds'."
+  },
+  {
+   "path": "D:\\Projects\\KingdomOfViSuReNa\\alpha\\visurena_studio\\scripts\\episode\\step_02_plan.py",
+   "change": "New resigned(ctx)->bool (~15 lines + a 6-line sign helper): reads plan_verdict.read(plan); requires stale APPROVE, plan_provenance.chain(signed sha8 -> current sha8) not None, and ctx.capture_script(PLAN_CHECK) rc==0; re-signs via plan_verdict.sign carrying the old signer/faults/flagged and logs the cure names. run(): insert `if resigned(ctx): return` after the current/grandfathered return (line 164-165), before `if rendered(ctx)` (line 166)."
+  },
+  {
+   "path": "D:\\Projects\\KingdomOfViSuReNa\\alpha\\visurena_studio\\studio\\judged_gate.py",
+   "change": "affordable() (lines 65-87): keep share and pool clauses; add `if ctx.budget.headroom() >= rung.cost_seconds: learn(action='headroom'); return True`; replace the ceiling_spent()+SystemExit tail with learn(action='terminal'); return False. Docstring updated to the five-hour verdict: a budget refusal is terminal in the same run, never a deferral."
+  },
+  {
+   "path": "D:\\Projects\\KingdomOfViSuReNa\\alpha\\visurena_studio\\studio\\comfy.py",
+   "change": "New TRANSIENT=('HostBuffer','read_file_slice') and transient(said:str)->bool beside UNREACHABLE (~line 92). run() (lines 365-368): submit+wait once; on RuntimeError with transient(str(err)) or EngineLost, submit the same filled graph once more and wait; then raise. 10-line retried helper so run() stays under 20 lines."
+  },
+  {
+   "path": "D:\\Projects\\KingdomOfViSuReNa\\alpha\\visurena_studio\\scripts\\episode\\takes_r2v.py",
+   "change": "collect() (lines 749-762): after out.write_bytes, retire_verdicts(out) unlinks the stale .dq.json/.content.json sidecars (missing_ok). New collect_twice(jobs, where, on_take, approved): submit_all+collect_all, then one resubmission batch of the lost whose message comfy.transient() matches or was EngineLost's 'vanished', merged; replaces the direct collect_all(submit_all(...)) at line 1029; the remaining lost still raise the existing SystemExit (lines 1031-1034)."
+  },
+  {
+   "path": "D:\\Projects\\KingdomOfViSuReNa\\alpha\\visurena_studio\\scripts\\episode\\step_09_shoot.py",
+   "change": "judged(takes) (lines 47-50) becomes freshness-aware via two 10-line helpers: dq_current(t) (dq exists and its 'take_sha8' == sha256(mp4)[:8], inline sha8 helper — do not import take_dq, its module-level model loads are heavy) and content_current(t) (content exists, st_mtime >= mp4 st_mtime). done() is unchanged in shape and now cannot report done over stale verdicts."
+  },
+  {
+   "path": "D:\\Projects\\KingdomOfViSuReNa\\alpha\\visurena_studio\\studio\\episode_spec.py",
+   "change": "New @model_validator(mode='after') _beds_point_into_the_cut on Episode, after _omit_names_shots (line 625): int from_shot in [0, len(shots)); a cut shot exists at or after from_shot; from_shot non-decreasing. Refusal lines start 'bed span from_shot' to match the cure pattern. No import of episode_bed (avoid a cycle); tone legality stays episode_bed's."
+  },
+  {
+   "path": "D:\\Projects\\KingdomOfViSuReNa\\alpha\\visurena_studio\\studio\\plan_cures.py",
+   "change": "New clamp_beds(doc)->dict (12-15 lines) as specified; CURES gains (re.compile(r'bed span from_shot'), 'clamp_beds') ahead of the generic rows (lines 326-338)."
+  },
+  {
+   "path": "D:\\Projects\\KingdomOfViSuReNa\\alpha\\visurena_studio\\scripts\\episode\\drive.py",
+   "change": "Docstring only (keep behavior as-is, per the task): document the re-check cadence — POLL_S=30 s log-growth polling, episode_drive.SILENCE_S=20 min single silence notify, MAX_RUNS=6 (five resumes, now only plan deferrals since budget deferrals no longer exist), over_budget stop via run_budget.spent_before >= EPISODE_CEILING_SECONDS — and the dirty-tree rule's sibling-session interplay: episode_drive.dirty() refuses any tracked change or untracked file outside library/, so sibling sessions writing book data under library/<book>/ never block a drive, while any code edit does until committed (one episode, one commit, fix #7)."
+  },
+  {
+   "path": "D:\\Projects\\KingdomOfViSuReNa\\alpha\\visurena_studio\\studio\\episode_drive.py",
+   "change": "Comment on outcome() line 27: the budget-deferral regex is retained only for historical drive logs; judged_gate no longer emits 'DEFERRED: ... needs ... s'. No logic change."
+  }
+ ],
+ "tests": [
+  "tests/test_plan_provenance_chain.py — record() two cure rounds in a tmp episode home; chain(signed_sha8, final_sha8) returns both rounds' cure names in order; a gap (hand edit between rounds) returns None; chain(x, x) returns [].",
+  "tests/test_a_mechanically_cured_plan_is_resigned_without_the_critic.py — tmp plan.json + stale APPROVE (old sha8) + a cures.jsonl chain to the current sha8; fake ctx whose capture_script returns (0, ''); monkeypatch agents.episode_writer.write and studio.judges.plan.judge with sentinels that raise if called; step_02_plan.resigned(ctx) returns True and plan_verdict.current(plan) is True, signer/flagged carried from the old verdict.",
+  "tests/test_a_broken_cure_chain_still_meets_the_critic.py — same setup with a sha gap: resigned() returns False and signs nothing (no paid call happens in the test; the climb is not entered).",
+  "tests/test_contract_rows_reach_the_repairer.py — plan_repair.fault_rows over a captured stdout containing 'CONTRACT: beds :: bed span from_shot 22 ...' includes that row (regression for the HARD_LISTS 'CONTRACT :' mismatch).",
+  "tests/test_a_bed_span_past_the_last_shot_is_refused.py — Episode(**doc) with beds=[{'from_shot': len(shots), 'tone': 'plain'}] raises with 'bed span from_shot'; an in-range span on an omitted shot with a later cut shot passes; one with NO cut shot at or after it raises.",
+  "tests/test_clamp_beds_drops_the_dangling_span.py — clamp_beds removes the dangling entry, keeps and sorts in-range spans, tolerates beds=[] and non-int from_shot; the cured doc validates as Episode; cure_for('bed span from_shot 22 ...') == 'clamp_beds'.",
+  "tests/test_a_retaken_take_is_unjudged_until_remeasured.py — tmp takes dir: T03.mp4 bytes changed after T03.dq.json (sha mismatch) -> step_09_shoot.judged() False; content.json older than mp4 -> False; matching sha and fresh content -> True.",
+  "tests/test_collect_retires_stale_verdicts.py — takes_r2v.collect with monkeypatched wait_record/outputs_of returning a fixture mp4: pre-existing T05.dq.json and T05.content.json beside the output are gone after collect; absent sidecars do not raise.",
+  "tests/test_a_spent_ceiling_ends_at_the_terminal_in_the_same_run.py — judged_gate.affordable with a Budget on an injected fake clock: share 73 s, pool 0, headroom 50 < cost 565 -> returns False and raises nothing (pytest.raises(SystemExit) must NOT fire); headroom 600 -> True with a 'headroom' Learning on the fake ctx; share affordable -> True with no learning.",
+  "tests/test_a_transient_engine_failure_is_resubmitted_once.py — comfy.run with monkeypatched load_workflow/submit/wait: first wait raises RuntimeError('LoadVideo: HostBuffer.read_file_slice ...'), second returns paths -> result returned and submit called exactly twice; a non-transient RuntimeError propagates after exactly one submit; EngineLost is retried once then propagates.",
+  "tests/test_lost_takes_with_transient_cause_rerun_once.py — takes_r2v.collect_twice with fake submit_all/collect_all: a transient-lost take is resubmitted once and merged into done; a hard-lost take ('rejected the workflow') is not resubmitted and stays lost; two consecutive transient failures of one take stay lost (no loop).",
+  "ALL tests: FakeModel/monkeypatch only — no Anthropic/OpenAI/Higgsfield call, no ComfyUI socket (urllib is never reached: submit/wait/capture_script are patched), no credit spent; the local-Ollama marker is not needed anywhere in this area."
+ ],
+ "risks": [
+  "G-RESIGN skips the critic on recorded-cure chains: a buggy cure could in principle change meaning while staying battery-clean. Containment: the chain accepts only plan_repair-recorded cure names (template arithmetic by construction), the battery must pass at entry, and the old verdict's faults/flagged are carried, never erased. A hand edit (no recorded row) always breaks the chain and meets the critic.",
+  "Deleting judged_gate's budget deferral changes drive semantics: MAX_RUNS resumes now serve only plan deferrals. Before landing, grep for any other emitter of 'DEFERRED: ... needs ... s' (none found in this read: judged_gate.affordable line 86 is the only one) and keep episode_drive.outcome's regex for old logs.",
+  "plan.cures.jsonl is book data under library/<book>/episodes/epNN/ — consistent with the dirty-tree rule (untracked library/ allowed) and the no-absolute-path rule (rows carry sha8s only); but a crash between write_plan and record() leaves a chain gap, which fails safe (critic runs once).",
+  "The HARD_LISTS fix widens plan_repair's input to ALL contract rows; existing CURES patterns ('shots are numbered', 'names setup .* not defined') were written against gate lines and will now also match contract text — verify each cure is idempotent against the contract phrasing (renumber and legal_props are; test_every_mechanical_fault_has_a_cure_in_code.py should gain the contract-row phrasings).",
+  "content_current uses mtime, which is weaker than sha: a tool that rewrites content.json without re-reading frames would fake freshness. Acceptable because the only writers are take_content_check (always re-reads) and nothing else; the alternative (adding take_sha8 into content.json) is a cheap follow-up if qc ever catches a lie.",
+  "TRANSIENT substring matching is deliberately narrow; a rename of the ComfyUI node error text silently disables the retry (fails safe: behaves as today). Keep the constant single-sourced in comfy.py and extend only from observed drive logs.",
+  "One transient resubmit doubles GPU time for a take whose failure was actually deterministic (e.g., corrupt staged input manifesting as read_file_slice); capped at one round and paid inside the existing takes share, the episode clock still binds.",
+  "step_02 resigned() runs plan_check one extra time on the happy path (a few seconds, free); do not reuse desk.battery() for it — desk.pending ghost semantics (ep15) are tuned for the ladder, and resigned() must read the disk truth only."
+ ]
+}
