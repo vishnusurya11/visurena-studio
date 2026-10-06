@@ -645,27 +645,32 @@ def install(repo: Path, every: int, book: str | None, run: Callable[[str], int] 
     """Register the task: S4U first; refused (0x80070005 needs elevation this
     shell lacks, 2026-10-06), the same task on an Interactive logon."""
     run = run or powershell
-    for logon in ("S4U", "Interactive"):
-        if run(install_command(repo, every, book, logon=logon)) == 0:
-            print(f"task {TASK} registered with a {logon} logon, every {every} min")
+    for logon, startup in (("S4U", True), ("Interactive", False)):
+        if run(install_command(repo, every, book, logon=logon, startup=startup)) == 0:
+            print(f"task {TASK} registered with a {logon} logon, every {every} min"
+                  + ("" if startup else " (AtLogOn only: AtStartup needs elevation)"))
             return 0
     return 1
 
 
-def install_command(repo: Path, every: int, book: str | None = None, logon: str = "S4U") -> str:
+def install_command(repo: Path, every: int, book: str | None = None, logon: str = "S4U",
+                    startup: bool = True) -> str:
     """The Register-ScheduledTask line (ops §2): AtStartup + AtLogOn + every N
-    min, IgnoreNew, no time limit, restart x3, wake, S4U limited.  Pure."""
+    min, IgnoreNew, no time limit, restart x3, wake, S4U limited.  Pure.  A
+    refusal exits 5: a cmdlet error alone leaves PowerShell at 0 (2026-10-06)."""
     work = Path(repo).as_posix()
     arg = "run --no-sync python scripts/episode/autopilot.py run" + (f" --book {book}" if book else "")
+    boot = "(New-ScheduledTaskTrigger -AtStartup), " if startup else ""
     return (f"$a = New-ScheduledTaskAction -Execute 'uv' -Argument '{arg}' -WorkingDirectory '{work}'; "
             f"$rep = New-ScheduledTaskTrigger -Once -At 00:00 -RepetitionInterval "
             f"([System.Xml.XmlConvert]::ToTimeSpan('PT{every}M')); "
-            f"$t = @((New-ScheduledTaskTrigger -AtStartup), (New-ScheduledTaskTrigger -AtLogOn -User $env:USERNAME), $rep); "
+            f"$t = @({boot}(New-ScheduledTaskTrigger -AtLogOn -User $env:USERNAME), $rep); "
             f"$s = New-ScheduledTaskSettingsSet -MultipleInstances IgnoreNew "
             f"-ExecutionTimeLimit ([System.Xml.XmlConvert]::ToTimeSpan('PT0S')) -StartWhenAvailable "
             f"-RestartCount 3 -RestartInterval (New-TimeSpan -Minutes 1) -AllowStartIfOnBatteries -WakeToRun; "
             f"$p = New-ScheduledTaskPrincipal -UserId $env:USERNAME -LogonType {logon} -RunLevel Limited; "
-            f"Register-ScheduledTask -TaskName '{TASK}' -Action $a -Trigger $t -Settings $s -Principal $p -Force | Out-Null; "
+            f"try {{ Register-ScheduledTask -TaskName '{TASK}' -Action $a -Trigger $t -Settings $s -Principal $p "
+            f"-Force -ErrorAction Stop | Out-Null }} catch {{ Write-Error $_; exit 5 }}; "
             f"powercfg /change standby-timeout-ac 0")
 
 
