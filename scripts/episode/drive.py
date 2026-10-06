@@ -56,9 +56,18 @@ def git(*args: str) -> str:
     return subprocess.run(["git", *args], cwd=ROOT, capture_output=True, text=True, check=True).stdout
 
 
+def quiet(env=os.environ) -> bool:
+    """DRIVE_QUIET=1 (autopilot 2026-10-06): the drive prints only; the
+    supervisor owns the owner's channel and says PUBLISHED, PARKED and
+    SERIES_COMPLETE once each, so a run never doubles its lines."""
+    return env.get("DRIVE_QUIET", "").strip().lower() in ("1", "true", "yes")
+
+
 def notify(text: str) -> None:
     """Telegram, through the sibling project's tested script; a failed send is printed, never fatal."""
     print(f"[drive] {text}", flush=True)
+    if quiet():
+        return
     try:
         subprocess.run(["uv", "run", "--no-sync", "python", str(NOTIFY), "text", "--message", text[:3500]],
                        cwd=NOTIFY.parents[1], timeout=120, check=False)
@@ -69,6 +78,16 @@ def notify(text: str) -> None:
 def ledger(home: Path, row: dict) -> None:
     with (home / "drive.jsonl").open("a", encoding="utf-8") as f:
         f.write(json.dumps({"ts": datetime.now(timezone.utc).isoformat(), **row}) + "\n")
+
+
+def run_row(n: int, sha: str, text: str) -> dict:
+    """The `run` ledger row: the outcome word and, when the log ended on a
+    `<Class>: ...` line, the class -- so the supervisor reads a word, never
+    the log's prose (autopilot 2026-10-06; ep19's OverBudget read `failed`)."""
+    row = {"event": "run", "n": n, "sha": sha, "outcome": episode_drive.outcome(text)}
+    if error := episode_drive.error_class(text):
+        row["error"] = error
+    return row
 
 
 def run_once(codex: str, number: int, log: Path, label: str) -> str:
@@ -124,7 +143,7 @@ def main(codex: str, number: int) -> int:
     def run() -> str:
         n = next(runs)
         text = run_once(codex, number, home / f"drive_run{n:02d}.log", label)
-        ledger(home, {"event": "run", "n": n, "sha": sha, "outcome": episode_drive.outcome(text)})
+        ledger(home, run_row(n, sha, text))
         return text
     from studio import run_budget
     code = episode_drive.drive(run, lambda text: notify(f"{label}: {text}"),

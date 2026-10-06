@@ -254,6 +254,9 @@ class Desk:
             if not self.pending:
                 raise                                 # a provider failure, not a refusal
             return
+        except llm.OverBudget as over:
+            self.refused_by_money(over)
+            return
         self.pending = None
         # The re-add killer (2026-10-05): every rung's draft -- improve,
         # fresh_brief, model_tier, resume -- is scrubbed of ghost body-part
@@ -264,6 +267,18 @@ class Desk:
         doc = plan_cures.ghost_limbs(episode.model_dump(), self._names())
         episode_home.write_plan(self.plan, doc)
         mechanical_cures(self.plan, Path(self.ctx.book_dir), self.ctx.number, say=self._say)
+
+    def refused_by_money(self, over: llm.OverBudget) -> None:
+        """The $3 wall refused the writer BEFORE the call was sent: a pending
+        MONEY refusal the ladder ends on at its terminal (keep_best / defer),
+        never a crash.  ep19 (2026-10-06, launch04): OverBudget climbed out of
+        here, the run died on a traceback and the drive read `failed` -- the
+        same word as a bug.  The wall's own line is printed as `<class>: <why>`
+        so the drive ledger carries the class, not the prose."""
+        line = f"{type(over).__module__}.{type(over).__name__}: {over}"
+        self.pending = [f"MONEY: {over}"]
+        self._say(line)
+        print(line, flush=True)
 
     def _say(self, msg: str) -> None:
         """The run's log when the ctx has one, else stdout."""

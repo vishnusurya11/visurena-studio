@@ -19,10 +19,23 @@ SILENCE_S = 20 * 60
 LAST_LINES = 12
 
 
+ERROR_LINE = re.compile(r"^((?:\w+\.)*\w*(?:Error|Exception|OverBudget|Exit)):")
+"""A `<Class>: <why>` line: a traceback's last line, or the wall's own printed one."""
+
+
 def outcome(log: str) -> str:
-    """completed | deferred | refused | failed, from how the run's log ended."""
+    """completed | overbudget | escalated | deferred | refused | failed, from
+    how the run's log ended.  The autopilot (2026-10-06) classifies by this
+    word: ep19's stop at the $3 wall read `failed`, the same as a crash, and
+    the only evidence was prose in the log's tail.  Money and an owner gate
+    are read BEFORE the broad words: a plan deferral the wall caused (the
+    ladder's caught form) is still the wall."""
     if "EPISODE completed" in log:
         return "completed"
+    if "OverBudget" in log:
+        return "overbudget"
+    if re.search(r"^OWNER ", log, re.MULTILINE):
+        return "escalated"
     if re.search(r"DEFERRED: .* needs [\d.]+ s", log):
         # HISTORICAL DRIVE LOGS ONLY: judged_gate no longer emits
         # 'DEFERRED: ... needs ... s' -- a spent clock is terminal in the
@@ -34,6 +47,16 @@ def outcome(log: str) -> str:
     if "REFUSED" in log:
         return "refused"
     return "failed"
+
+
+def error_class(log: str) -> str | None:
+    """The exception class the run ended on -- the LAST `<Class>: ...` line of
+    the log -- so the drive ledger carries a word the supervisor matches, never
+    prose it parses (autopilot 2026-10-06; ep19's `studio.llm.OverBudget`)."""
+    for line in reversed(log.splitlines()):
+        if found := ERROR_LINE.match(line.strip()):
+            return found.group(1)
+    return None
 
 
 def dirty(porcelain: str) -> bool:

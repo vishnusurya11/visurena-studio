@@ -136,17 +136,42 @@ def estimated_cost(model: str, prompt: str) -> float:
             + EXPECTED_OUTPUT_TOKENS * rate.get("output_per_m", 0)) / 1e6
 
 
-def guard_spend(model: str, prompt: str, ceiling: float | None = None) -> None:
+def publish_reserve_usd() -> float:
+    """models.yaml `money.publish_reserve_usd`: the slice of the ceiling the
+    writers may not eat, so step 13's one metadata call survives them (ep19,
+    2026-10-06: the writer spent $3.10 of $3.00 in step 02; a signed plan would
+    still have died at the publish)."""
+    return float((load_models_config().get("money") or {}).get("publish_reserve_usd", 0.10))
+
+
+PUBLISH_STEP = "13"
+RESERVE_TIERS = ("workhorse",)
+"""The callers that may use the reserve: the publish step, and the workhorse
+tier (validators, cures, metadata-class calls); every other tier is a writer."""
+
+
+def effective_cap(tier: str | None, step_id: str | None, cap: float, reserve: float) -> float:
+    """The ceiling THIS call is held to: the whole of it at the publish step
+    or on the workhorse tier; `cap - reserve` for the writers (local,
+    reasoning, canon -- the tiers that ate ep19's wall to the cent)."""
+    if step_id == PUBLISH_STEP or tier in RESERVE_TIERS:
+        return cap
+    return max(0.0, cap - reserve)
+
+
+def guard_spend(model: str, prompt: str, ceiling: float | None = None, tier: str | None = None) -> None:
     """Refuse the call when the episode's recorded spend plus this call would
     cross the ceiling.  Outside an episode (no unit in the context): no wall."""
     if not _SPEND.get("conn") or not _SPEND.get("unit"):
         return
     from studio import spend
-    cap = episode_ceiling_usd() if ceiling is None else ceiling
+    whole = episode_ceiling_usd() if ceiling is None else ceiling
+    cap = effective_cap(tier, _SPEND.get("step_id"), whole, publish_reserve_usd())
+    held = f" (${whole - cap:.2f} reserved for the publish)" if cap < whole else ""
     spent = spend.unit_spent(_SPEND["conn"], _SPEND["codex_id"], _SPEND["unit"])
     if spent + estimated_cost(model, prompt) > cap:
         raise OverBudget(f"episode {_SPEND['unit']} has spent ${spent:.2f} of its ${cap:.2f} "
-                         f"ceiling; this call would cross it, so it was not sent")
+                         f"ceiling{held}; this call would cross it, so it was not sent")
 
 
 _TRANSIENT_BACKOFF = (3, 10)  # seconds between transient-error retries
@@ -167,6 +192,7 @@ class _NativeStructuredCaller:
         self._client = OpenAI(api_key=_api_key(pc), base_url=base_url)
         self._model = resolved["model"]
         self._params = resolved.get("params") or {}
+        self._tier = tier                   # the wall holds the writers to cap - reserve
 
     def __call__(self, prompt: str, structured_output_model=None):
         from openai import ContentFilterFinishReasonError
@@ -181,7 +207,7 @@ class _NativeStructuredCaller:
             raise StructuredOutputException(f"output did not match schema: {exc}") from exc
 
     def _parse(self, prompt: str, structured_output_model=None):
-        guard_spend(self._model, prompt)
+        guard_spend(self._model, prompt, tier=self._tier)
         completion = self._client.chat.completions.parse(
             model=self._model,
             messages=[{"role": "user", "content": prompt}],

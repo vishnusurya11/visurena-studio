@@ -51,3 +51,62 @@ def test_a_plan_deferral_is_not_resumed():
     a plan deferral waits on a plan fix, not on budget, so a rerun repeats it."""
     assert drive.outcome("DEFERRED PLAN | x | battery at plan: CONTRACT : ... -> defer") == "refused"
     assert drive.outcome("RuntimeError: DEFERRED: EYE_TAKES needs 528 s for its rung") == "deferred"
+
+
+# ---- the autopilot's words (decision 2026-10-06): the ep19 tail -------------------------
+
+EP19_TAIL = ('  File "D:\\x\\studio\\llm.py", line 148, in guard_spend\n'
+             '    raise OverBudget(f"episode {_SPEND[\'unit\']} has spent ${spent:.2f} of its ${cap:.2f} "\n'
+             "studio.llm.OverBudget: episode ep19 has spent $3.10 of its $3.00 ceiling; "
+             "this call would cross it, so it was not sent")
+OWNER_LINE = "OWNER G-STANDING | book ep19 | the book has no standing | sign: publish/standing.json"
+
+
+def test_the_money_wall_and_an_owner_gate_are_read_by_name():
+    """ep19 (2026-10-06, launch04): the $3 wall's stop read as `failed`, the
+    same word as a crash, and the only evidence was the traceback's prose."""
+    assert drive.outcome(EP19_TAIL) == "overbudget"
+    assert drive.outcome("step 13\n" + OWNER_LINE) == "escalated"
+    # the caught form (plan_ladder): the wall's own line AND the deferral it caused; money is the cause
+    assert drive.outcome("studio.llm.OverBudget: episode ep19 has spent $3.10\n"
+                         "DEFERRED PLAN | x | MONEY: ... -> defer") == "overbudget"
+    assert drive.outcome("Traceback ... KeyError: 0") == "failed"
+
+
+def test_the_wall_and_an_owner_gate_stop_and_tell_like_a_refusal():
+    for log, word in ((EP19_TAIL, "OverBudget"), (OWNER_LINE, "OWNER G-STANDING")):
+        told = []
+        assert drive.drive(run=lambda: log, notify=told.append, max_runs=5) == 1
+        assert len(told) == 1 and word in told[0]
+
+
+def test_the_error_class_is_read_off_the_last_class_line_never_the_prose():
+    assert drive.error_class(EP19_TAIL) == "studio.llm.OverBudget"
+    assert drive.error_class("Traceback (most recent call last):\n  File x\nKeyError: 0") == "KeyError"
+    assert drive.error_class("x\nSystemExit: REFUSED: qc FAIL in qc_r2v.json") == "SystemExit"
+    assert drive.error_class("ValueError: a\nlater\nRuntimeError: DEFERRED: x") == "RuntimeError"
+    assert drive.error_class("=== EPISODE completed | x ===") is None
+    assert drive.error_class("a note: with a colon\nwarning: skipped") is None
+
+
+def test_the_run_row_carries_the_error_class_only_when_there_is_one():
+    from scripts.episode import drive as launcher
+    row = launcher.run_row(2, "abc123", EP19_TAIL)
+    assert row == {"event": "run", "n": 2, "sha": "abc123", "outcome": "overbudget",
+                   "error": "studio.llm.OverBudget"}
+    assert "error" not in launcher.run_row(1, "abc123", "=== EPISODE completed | x ===")
+
+
+def test_drive_quiet_keeps_telegram_for_the_supervisor(monkeypatch, capsys):
+    """DRIVE_QUIET=1 (autopilot 2026-10-06): the drive prints, the supervisor
+    owns the owner's channel -- PUBLISHED, PARKED, SERIES_COMPLETE, once each."""
+    from scripts.episode import drive as launcher
+    sent = []
+    monkeypatch.setattr(launcher.subprocess, "run", lambda *a, **k: sent.append(a[0]))
+    monkeypatch.setenv("DRIVE_QUIET", "1")
+    launcher.notify("ep20 PUBLISHED")
+    assert sent == [] and "[drive] ep20 PUBLISHED" in capsys.readouterr().out
+    monkeypatch.delenv("DRIVE_QUIET")
+    launcher.notify("ep20 PUBLISHED")
+    assert len(sent) == 1 and "notify_bench.py" in " ".join(map(str, sent[0]))
+    assert launcher.quiet({"DRIVE_QUIET": "1"}) and not launcher.quiet({}) and not launcher.quiet({"DRIVE_QUIET": "0"})

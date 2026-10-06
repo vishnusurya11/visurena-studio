@@ -11,6 +11,7 @@ default_tier: workhorse
 # and is refused BEFORE it is sent if it would cross this (studio/llm.guard_spend).
 money:
   episode_ceiling_usd: 3.00
+  publish_reserve_usd: 0.10   # held back from the writers so step 13's metadata call survives (ep19, 2026-10-06)
 
 # Rates in USD per MILLION tokens. Nothing may be priced from memory: an unlisted model
 # records its tokens and a NULL cost rather than a confident zero, because an unknown
