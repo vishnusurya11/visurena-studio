@@ -15,6 +15,8 @@ from __future__ import annotations
 import re
 from typing import Callable
 
+from pydantic import BaseModel
+
 # ---- the single repairs ----------------------------------------------------------
 
 def renumber(doc: dict) -> dict:
@@ -332,6 +334,7 @@ CURES: list[tuple[re.Pattern, str]] = [
     (re.compile(r"G-MOVES|G-STILL|G-AIM"), "vary_heads"),
     (re.compile(r"props.*\.json|names setup .* not defined|prop "), "legal_props"),
     (re.compile(r"G-CROWD-CLOSE"), "close_crowds"),
+    (re.compile(r"G-PHANTOM"), "strip_phantoms"),
     (re.compile(r"projects to .* an episode is|ONE PER TAKE|TAKE LENGTH|G-SETUP|hole in speech|of the runtime"), "holds"),
     (re.compile(r"median (?:frame-edge|at_rest)"), "edge_cases"),
     (re.compile(r"G-ASPECT|style line is \d+ words|look"), "pin_series"),
@@ -353,3 +356,133 @@ def cure_for(fault_row: str) -> str | None:
         if pattern.search(fault_row):
             return name
     return None
+
+
+# ---- G-PHANTOM: the empty stage ---------------------------------------------------
+
+MAX_SETUPS = 8
+"""The most setups one repair run may pay to rewrite: one llm round per run,
+<=~$0.01 a setup on the workhorse tier, under the $3 episode ceiling."""
+
+
+def split_sentences(text: str) -> list[str]:
+    """The gate's own sentence split (plan_gates.SENTENCE_SPLIT), kept-only."""
+    from studio import plan_gates
+    return [s for s in plan_gates.SENTENCE_SPLIT.split(text or "") if s.strip()]
+
+
+def floor_for(field: str) -> int:
+    """The G-FIRSTFRAME per-setup word floor a cured field must keep -- a
+    conservative per-setup bound that guarantees the plan MEDIAN floor holds."""
+    from studio import plan_gates
+    return plan_gates.DESCRIBED_WORDS if field == "described" else plan_gates.GEOMETRY_WORDS
+
+
+def strip_phantoms(doc: dict, names: dict, place_words: set) -> tuple[dict, list[str]]:
+    """G-PHANTOM's mechanical cure: delete each offending sentence, found with
+    the gate's own `phantom_hits` -- the cure MEASURES LIKE THE CHECKER.  A
+    deletion that would drop the field under its floor is not committed; the
+    setup comes back as residue for the llm cure.  $0."""
+    from studio import plan_gates
+    residue: list[str] = []
+    for name, s in (doc.get("setups") or {}).items():
+        for field in ("described", "geometry"):
+            bad = {sent for sent, _ in plan_gates.phantom_hits(s.get(field) or "", names, place_words)}
+            if not bad:
+                continue
+            kept = " ".join(sent for sent in split_sentences(s.get(field) or "") if sent not in bad)
+            if len(kept.split()) >= floor_for(field):
+                s[field] = kept
+            elif name not in residue:
+                residue.append(name)
+    return doc, residue
+
+
+class SetupRewrite(BaseModel):
+    """One setup's two fields, rewritten people-free (G-PHANTOM's llm cure)."""
+    described: str
+    geometry: str
+
+
+PHANTOM_PROMPT = """You are rewriting ONE setup description for a storyboard pipeline.
+Every sentence below is pasted verbatim into every image prompt of this place, so any person or
+creature it names is DRAWN into every frame of every shot as a phantom extra.
+
+SETUP: {name}
+
+DESCRIBED (current):
+{described}
+
+GEOMETRY (current):
+{geometry}
+
+Rewrite both fields under these rules:
+1. Remove every mention of a person or creature. Banned names and their possessive forms: {banned}.
+   Also banned as bare words: man, men, woman, women, people, person, figure, figures, child,
+   children, boy, girl, crowd, onlooker, bystander.
+   Keep what each such sentence says about the PLACE itself: 'The narrator and the curate approach
+   along the dusted roadway' becomes 'The dusted roadway runs toward the gate, dust lying thick on it.'
+2. Keep every object, surface, distance and frame-edge placement already present. Invent no new objects.
+3. DESCRIBED must name one light source WITH a direction -- a practical (lamp, fire, window, doorway)
+   or sky light plus where it falls from, e.g. 'Grey daylight comes from the LEFT, low from the west'
+   or 'A low fire burns in the hearth, deep shadow beyond it.' A brightness alone ('hard morning
+   sunlight') is refused, and an overhead sun is refused.
+4. DESCRIBED stays at or above {described_floor} words and GEOMETRY at or above {geometry_floor} words;
+   reach the floor by describing the place's fixed things, never by naming people.
+5. Plain declarative present-tense sentences. No camera words, no story events, no sound.
+Return both rewritten fields in full."""
+
+
+def phantom_prompt(name: str, setup: dict, names: dict) -> str:
+    from studio import plan_gates
+    return PHANTOM_PROMPT.format(
+        name=name, described=setup.get("described") or "", geometry=setup.get("geometry") or "",
+        banned=", ".join(sorted(names)), described_floor=plan_gates.DESCRIBED_WORDS,
+        geometry_floor=plan_gates.GEOMETRY_WORDS)
+
+
+def rewrite_faults(got: SetupRewrite, names: dict, place_words: set) -> list[str]:
+    """Why a rewrite is refused IN CODE: the gates' own measures, re-run on the
+    answer -- never the model's own judgement of itself."""
+    from studio import plan_gates
+    out = [f"{field} still names {token!r}" for field in ("described", "geometry")
+           for _, token in plan_gates.phantom_hits(getattr(got, field), names, place_words)]
+    if not has_light_direction(got.described):
+        out.append("described names no light source with a direction")
+    for field in ("described", "geometry"):
+        if len(getattr(got, field).split()) < floor_for(field):
+            out.append(f"{field} is under {floor_for(field)} words")
+    return out
+
+
+def _rewritten(prompt: str, names: dict, place_words: set, caller) -> SetupRewrite | None:
+    """One validated rewrite: a failing answer is re-asked ONCE with its
+    refusal appended; a second failure returns None and the fault row stands
+    (default ESCALATE for anything judgement could not settle)."""
+    from studio import llm
+    got = llm.structured("workhorse", prompt, SetupRewrite, _agent=caller)
+    why = rewrite_faults(got, names, place_words)
+    if not why:
+        return got
+    got = llm.structured("workhorse", llm.re_ask(prompt, RuntimeError("; ".join(why))),
+                         SetupRewrite, _agent=caller)
+    return got if not rewrite_faults(got, names, place_words) else None
+
+
+def rewrite_setups(doc: dict, names: dict, place_words: set, setup_names: list[str],
+                   caller=None) -> tuple[dict, list[str]]:
+    """The workhorse-tier rewrite for setups the strip could not cure: one
+    `studio.llm.structured` call per setup, at most MAX_SETUPS of them.
+    `caller` is the `_agent` test seam; the real caller it defaults to runs
+    `guard_spend` against the episode ceiling before anything is sent."""
+    uncured = list(setup_names[MAX_SETUPS:])
+    for name in setup_names[:MAX_SETUPS]:
+        s = (doc.get("setups") or {}).get(name)
+        if s is None:
+            continue
+        got = _rewritten(phantom_prompt(name, s, names), names, place_words, caller)
+        if got is None:
+            uncured.append(name)
+        else:
+            s["described"], s["geometry"] = got.described, got.geometry
+    return doc, uncured

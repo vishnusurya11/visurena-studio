@@ -60,6 +60,33 @@ def series_pin_values(book) -> dict:
     return {"look": "", "aspect": plan_gates.series_aspect(book)}
 
 
+def phantom_context(book) -> tuple[dict, set]:
+    """(names, place_words) the phantom cures measure with -- the GATE'S own
+    inputs, from the book's refs.json when it exists."""
+    from studio import house_style, plan_gates
+    path = book / "refs" / "refs.json"
+    refs = episode_home.read_json(path).get("refs") or [] if path.exists() else []
+    return plan_gates.person_tokens(refs), house_style.place_words()
+
+
+def rewrite_round(book, path, rows: list[str]) -> bool:
+    """The ONE paid round per repair run: setups whose G-PHANTOM / G-LIGHT rows
+    survived the mechanical table are rewritten through the workhorse tier
+    (guard_spend fires inside the caller), written through the contract."""
+    import re
+    bad = [r for r in rows if re.search(r"G-PHANTOM|G-LIGHT: setup", r)]
+    setups = sorted({m.group(1) for r in bad if (m := re.search(r"setup '([^']+)'", r))})
+    if not setups:
+        return False
+    doc = episode_home.read_json(path)
+    doc, uncured = pc.rewrite_setups(doc, *phantom_context(book), setups)
+    Episode(**doc)
+    episode_home.write_plan(path, doc)
+    print(f"llm round: {len(setups) - len(uncured)} setup(s) rewritten, "
+          f"{len(uncured)} kept their faults for the writer")
+    return True
+
+
 def shot_indices(rows: list[str]) -> list[int]:
     import re
     return sorted({int(m.group(1)) for r in rows for m in [re.search(r"shot (\d+)", r)] if m})
@@ -93,6 +120,8 @@ def apply(doc: dict, rows: list[str], book, rate: float = 3.0) -> tuple[dict, li
             doc = pc.legal_props(doc, legal)
         elif name == "close_crowds":
             doc = pc.close_crowds(doc)
+        elif name == "strip_phantoms":
+            doc, _ = pc.strip_phantoms(doc, *phantom_context(book))
         elif name == "holds":
             doc = pc.holds(doc, rate=rate)
         elif name == "edge_cases":
@@ -133,6 +162,8 @@ def main(book_id: str, number: int, from_aside: bool = False) -> int:
         if (uncured and len(uncured) == len(rows)) or not rows:
             break   # nothing this table cures, or nothing collected: stop looping
     clean, rows = battery_rows(book_id, number)
+    if not clean and rewrite_round(book, path, rows):
+        clean, rows = battery_rows(book_id, number)
     if clean:
         print("BATTERY CLEAN")
         return 0
