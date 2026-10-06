@@ -147,6 +147,27 @@ def pick_rows(doc: dict, unresolved: list, vocab: dict, book) -> dict:
     return doc
 
 
+def cast_rows_text(book) -> str:
+    """Every bound cast row's physical, joined -- L18's own exemption text."""
+    path = book / "refs" / "refs.json"
+    rows = (episode_home.read_json(path).get("refs") or []) if path.exists() else []
+    return " ".join(str(r.get("physical") or "") for r in rows)
+
+
+def cure_row_rows(book, rows: list[str]) -> list[str]:
+    """Every [row <id>]/[card <pid>] fault cured in ITS OWN file via the
+    shared table (studio.row_lint); the rows the table left unchanged come
+    back uncured for the llm pass."""
+    import re
+    from studio import row_lint
+    left = []
+    for row in rows:
+        m = re.search(r"\[(row|card) ([\w-]+)\]", row)
+        if not (m and row_lint.cure_row_file(book, m.group(1), m.group(2))):
+            left.append(row)
+    return left
+
+
 def apply(doc: dict, rows: list[str], book, number: int = 0,
           rate: float = 3.0) -> tuple[dict, list[str]]:
     """Every cured family once per round; the rows nothing cures come back.
@@ -232,6 +253,27 @@ def apply(doc: dict, rows: list[str], book, number: int = 0,
                 doc = plan_llm_cures.one_position(doc, own, names_table)
             else:
                 uncured += own
+        elif name == "stillness_words":
+            doc = pc.stillness_words(doc)
+        elif name == "figurative_gaits":
+            # the swap first, the pace append on the person clauses it spared
+            # in the SAME round -- the order the two cures were designed in
+            doc = pc.pace_words(pc.figurative_gaits(doc))
+        elif name == "drop_thing_pace":
+            doc = pc.drop_thing_pace(doc)
+        elif name == "strip_slow":
+            doc = pc.strip_slow(doc)
+        elif name == "arrival_ends":
+            own = [r for r in rows if pc.cure_for(r) == "arrival_ends"]
+            doc = pc.arrival_ends(doc, shot_indices(own))
+        elif name == "apply_limp":
+            own = [r for r in rows if pc.cure_for(r) == "apply_limp"]
+            doc = pc.apply_limp(doc, shot_indices(own))
+        elif name == "strip_banned_prop":
+            doc = pc.strip_banned_prop(doc, cast_rows_text(book))
+        elif name == "row_words":
+            own = [r for r in rows if pc.cure_for(r) == "row_words"]
+            uncured += cure_row_rows(book, own)
     return doc, uncured
 
 
@@ -325,7 +367,37 @@ def fill_holes(book, number: int, max_inserts: int = 3, _fill=None) -> bool:
     return bool(wrote)
 
 
-def main(book_id: str, number: int, from_aside: bool = False) -> int:
+def l14_need(row: str) -> int:
+    """How many words an L14 shortfall is missing, off the row's own numbers."""
+    import re
+    m = re.search(r"(\d+) words; the (?:floor is|gate is) (\d+)", row)
+    return max(0, int(m.group(2)) - int(m.group(1))) if m else 40
+
+
+def llm_cure_round(book, number: int, rows: list[str]) -> bool:
+    """The ONE guarded llm pass, run only after a round in which the
+    mechanical tables changed nothing: every lint-family row left, one
+    `plan_cures.llm_field_cure` each (L14 shortfalls take the enrich lever),
+    capped at MAX_LLM_CURES; each accepted only through G-CURE-VERIFY.
+    True when the plan or a row file changed."""
+    import re
+    from studio import plan_cures as pc
+    path = episode_home.home(book, number) / "plan.json"
+    doc, cured = episode_home.read_json(path), 0
+    for row in [r for r in rows if re.search(r"\bL\d+ ", r)][:pc.MAX_LLM_CURES]:
+        if "L14 LENGTH" in row and (m := re.search(r"shot (\d+)", row)):
+            doc, did = pc.enrich_at_rest(doc, int(m.group(1)), l14_need(row))
+        else:
+            doc, did = pc.llm_field_cure(book, doc, row)
+        cured += bool(did)
+    if cured:
+        Episode(**doc)
+        episode_home.write_plan(path, doc)
+        print(f"llm cure round: {cured} field(s) rewritten under G-CURE-VERIFY")
+    return bool(cured)
+
+
+def main(book_id: str, number: int, from_aside: bool = False, no_llm: bool = False) -> int:
     book = episode_home.book_dir(book_id)
     home = episode_home.home(book, number)
     path = home / "plan.json"
@@ -357,6 +429,8 @@ def main(book_id: str, number: int, from_aside: bool = False) -> int:
             if (uncured and len(uncured) == len(rows)) or not rows:
                 break   # nothing this table cures, or nothing collected: stop looping
         clean, rows = battery_rows(book_id, number)
+        if not clean and not no_llm and llm_cure_round(book, number, rows):
+            clean, rows = battery_rows(book_id, number)
         if not clean and rewrite_round(book, path, rows):
             clean, rows = battery_rows(book_id, number)
         if not clean and any("G-HOLE" in r or "ONE PER TAKE" in r for r in rows) \
@@ -372,4 +446,5 @@ def main(book_id: str, number: int, from_aside: bool = False) -> int:
 
 
 if __name__ == "__main__":
-    raise SystemExit(main(sys.argv[1], episode_arg(sys.argv), "--from-aside" in sys.argv))
+    raise SystemExit(main(sys.argv[1], episode_arg(sys.argv), "--from-aside" in sys.argv,
+                          "--no-llm" in sys.argv))

@@ -105,14 +105,9 @@ def pace_words(doc: dict) -> dict:
             last = m.end()
         return "".join(out) + text[last:]
 
-    for s in doc.get("shots") or []:
-        for f in ("frame", "at_rest", "end", "motion"):
-            if s.get(f):
-                s[f] = paced(s[f])
-    for st in (doc.get("setups") or {}).values():
-        for f in ("described", "crowd", "geometry"):
-            if st.get(f):
-                st[f] = paced(st[f])
+    for holder, f in _prose_fields(doc):
+        if holder.get(f):
+            holder[f] = paced(holder[f])
     return doc
 
 
@@ -1012,6 +1007,357 @@ def ghost_limbs(doc: dict, names: dict, rewrite=None) -> dict:
     return doc
 
 
+# ---- G-TAKELINT: the take lint's word families, cured at the plan layer -----------
+
+def _prose_fields(doc: dict):
+    """Every (holder, field) prose slot a take prompt is built from: the
+    shots' picture fields, their cuts', and the setups' injected texts."""
+    for s in doc.get("shots") or []:
+        for f in SHOT_FIELDS + ("changed",):
+            yield s, f
+        for cut in s.get("cuts") or []:
+            for f in SHOT_FIELDS:
+                yield cut, f
+    for st in (doc.get("setups") or {}).values():
+        for f in SETUP_FIELDS:
+            yield st, f
+
+
+def stillness_words(doc: dict) -> dict:
+    """L2's plan-layer cure: the shared substitution table (studio.row_lint)
+    over every prose field; `at_rest` alone may absorb motionless/frozen/
+    unmoving as 'at rest' -- anywhere else those words are the llm cure's."""
+    from studio import row_lint
+    for holder, f in _prose_fields(doc):
+        if holder.get(f):
+            holder[f] = row_lint.substituted(holder[f], at_rest=(f == "at_rest"))
+    return doc
+
+
+FIGURATIVE = {"fire", "flame", "flames", "smoke", "fog", "mist", "shadow", "shadows",
+              "light", "town", "road", "ivy", "water", "tide"}
+"""Subject nouns whose 'gait' is figurative and safely swappable.  A non-person
+gait OUTSIDE this list is left for the llm cure: `ro.is_person`'s capitalised
+fallback is the known mis-router, so the swap never guesses."""
+
+GAIT_SWAP = {"climb": "spread", "walk": "drift", "run": "stream", "ride": "roll"}
+
+
+def _swapped_gait(word: str) -> str | None:
+    low = word.lower()
+    for gait, verb in GAIT_SWAP.items():
+        if low in (gait, gait + "s"):
+            return verb + ("s" if low.endswith("s") else "")
+    return None
+
+
+def _figurative(text: str) -> str:
+    """Each gait verb whose clause fails the STRICT person test (ro.PERSON
+    alone, never the capitalised fallback) and whose subject is on the
+    allowlist, swapped for the thing's own motion verb."""
+    from studio import episode_ref_official as ro
+    body = ro.blank_measures(text)
+    out, last = [], 0
+    for m in ro.GAIT.finditer(body):
+        head = ro.clause_head(body, m.start())
+        verb = _swapped_gait(m.group(0))
+        if verb is None or ro.PERSON.search(head) \
+                or not any(w.strip(",.;:").lower() in FIGURATIVE for w in head.split()):
+            continue
+        out.append(text[last:m.start()] + verb)
+        last = m.end()
+    return "".join(out) + text[last:]
+
+
+def figurative_gaits(doc: dict) -> dict:
+    """L8 on a non-person subject: fire spreads, water streams -- a person's
+    walk is never touched, so `pace_words` still handles it the same round."""
+    for holder, f in _prose_fields(doc):
+        if holder.get(f):
+            holder[f] = _figurative(holder[f])
+    return doc
+
+
+def drop_thing_pace(doc: dict) -> dict:
+    """L23: a pace phrase on a clause whose subject cannot walk is deleted --
+    the exact inverse of `pace_words`, and like it idempotent."""
+    from studio import episode_ref_official as ro
+
+    def stripped(text: str) -> str:
+        out, last = [], 0
+        for m in ro.PACE_MARK.finditer(text):
+            if not ro.is_person(ro.clause_head(text, m.start())):
+                out.append(text[last:m.start()].rstrip())
+                last = m.end()
+        return re.sub(r" {2,}", " ", "".join(out) + text[last:])
+
+    for holder, f in _prose_fields(doc):
+        if holder.get(f):
+            holder[f] = stripped(holder[f])
+    return doc
+
+
+SLOW_WORD = re.compile(r",?\s*\bslow(ly)?\b", re.I)
+
+
+def strip_slow(doc: dict) -> dict:
+    """L3: 'slow(ly)' deleted with its comma; the limp carries the slowness
+    (`ro.limp_clause`'s own doctrine)."""
+    for holder, f in _prose_fields(doc):
+        if holder.get(f) and SLOW_WORD.search(holder[f]):
+            out = re.sub(r" {2,}", " ", SLOW_WORD.sub("", holder[f]))
+            holder[f] = re.sub(r"(^|[.;!?]\s*),\s*", r"\1", out).strip()
+    return doc
+
+
+def apply_limp(doc: dict, indices: list[int]) -> dict:
+    """L9: the limp written at the first gait of the flagged shot (`ro.limp`,
+    the function the owner's D12 rule already owns)."""
+    from studio import episode_ref_official as ro
+    by = {s["index"]: s for s in doc.get("shots") or []}
+    for i in indices:
+        s = by.get(i)
+        for f in SHOT_FIELDS if s else ():
+            if s.get(f) and ro.gaits(s[f]) and "limp" not in s[f].lower():
+                s[f] = ro.limp(s[f])
+                break
+    return doc
+
+
+def strip_banned_prop(doc: dict, cast_rows: str = "") -> dict:
+    """L18: a banned-prop word deleted from plan prose when no bound cast row
+    bears it (a row-borne word is the gate's own exemption); residue to llm."""
+    from studio.episode_spec import BANNED_PROPS
+    rows = (cast_rows or "").lower()
+    for holder, f in _prose_fields(doc):
+        text = holder.get(f) or ""
+        cured = text
+        for w in BANNED_PROPS:
+            if w not in rows:
+                cured = re.sub(rf"(?:\b(?:the|a|an|his|her|their)\s+)?\b{re.escape(w)}s?\b\s*",
+                               " ", cured, flags=re.I)
+        if cured != text:
+            holder[f] = re.sub(r" {2,}", " ", cured).replace(" .", ".").replace(" ,", ",").strip()
+    return doc
+
+
+def _continuation(motion: str) -> str:
+    """The legal L21 closing clause, built from the motion's own head;
+    'continues' satisfies ro.MOVER and the L11 comment names it legal."""
+    head = re.sub(r"^The camera\s*", "", (motion or "").partition(";")[0].strip(),
+                  flags=re.I).strip(" .")
+    if not head or "locked" in head.lower():
+        return "The camera's move continues to the last frame of the shot."
+    return f"The {head} continues to the last frame of the shot."
+
+
+def arrival_ends(doc: dict, indices: list[int]) -> dict:
+    """L21's cure: the layout-final sentence of `end` (else `at_rest`) is
+    deleted when an earlier sentence already moves, else replaced with the
+    motion head's own continuation clause."""
+    from studio import episode_ref_official as ro
+    by = {s["index"]: s for s in doc.get("shots") or []}
+    for i in indices:
+        s = by.get(i)
+        if not s:
+            continue
+        field = "end" if s.get("end") else "at_rest"
+        said = ro.sentences(s.get(field) or "")
+        if not said or not ro.LAYOUT.search(said[-1]):
+            continue
+        if any(ro.MOVER.search(x) or ro.ACTION.search(x) for x in said[:-1]):
+            s[field] = " ".join(said[:-1])
+        else:
+            s[field] = " ".join(said[:-1] + [_continuation(s.get("motion") or "")])
+    return doc
+
+
+# ---- G-CURE-VERIFY: the guarded llm field cures -----------------------------------
+
+MAX_LLM_CURES = 24
+"""The most llm field cures one plan_repair run may pay for: ~$0.0004 a call
+on the workhorse tier, <= $0.01 an episode at the cap (guard_spend still walls
+each call at the $3 episode ceiling)."""
+
+BANNED_WORDS = re.compile(r"\b(still|stays?|remains?|motionless|frozen|pauses?|waits?|"
+                          r"unchanged|unmoving|holds?|held|slow|slowly)\b", re.I)
+
+
+class RewrittenField(BaseModel):
+    """One rewritten plan/row/card field, nothing else."""
+    text: str
+
+
+RULE_HELP = {
+    "L1": "state what IS in the frame, never what is not",
+    "L2": "say the body's rest as placement and contact, never a stillness word",
+    "L4": "give the block one body-scale action: a turn, a reach, a step at a normal walking pace",
+    "L8": "any walk, climb or ride by a person ends its clause with 'at a normal walking pace'",
+    "L14": "condense, keep every concrete visual fact",
+    "L19": "split or shorten the sentence under 20 words",
+    "L21": "end on the camera or a moving body, never a layout word",
+    "L22": "remove the named absent person; describe the staged faces only",
+}
+"""One paragraph of canned help per rule family the llm cure may be handed."""
+
+
+def verify_family(rule_id: str, text: str, old: str = "", need: int = 0) -> bool:
+    """G-CURE-VERIFY: the lint family that ordered the rewrite re-passes on
+    the rewritten text, and no banned word or negation was introduced -- the
+    gates' own regexes, never the model's judgement of itself."""
+    from studio import episode_ref_official as ro
+    body = ro.scrub(text).replace("holds a static shot", " ")
+    if BANNED_WORDS.search(body) or ro.NEGATIONS.search(body):
+        return False
+    if rule_id == "L2":
+        return not ro.STILL.search(body)
+    if rule_id == "L8":
+        return not ro.gaits(body) or any(p in body.lower() for p in ro.PACE)
+    if rule_id == "L21":
+        last = (ro.sentences(text) or [""])[-1]
+        return not ro.LAYOUT.search(last) and bool(
+            ro.MOVER.search(last) or ro.ACTION.search(last) or ro.GAIT.search(last))
+    if rule_id == "L14" and need:
+        return len(text.split()) - len(old.split()) >= need
+    return True
+
+
+FIELD_PROMPT = """You are rewriting ONE field of a film-shot plan so it passes a mechanical lint. Change only what the fault requires; keep every concrete visual fact.
+The fault: {fault_row}
+The rule: {rule_help}
+The field ({layer_said}) current text:
+---
+{text}
+---
+Hard constraints:
+- never use: still, stays, remains, motionless, frozen, pauses, waits, unchanged, unmoving, holds, held, slow, slowly
+- no negations (no, not, never, nobody, nothing, without, barely, hardly)
+- any walk, climb or ride by a person ends its clause with 'at a normal walking pace'; a fire, road, town or light never walks or climbs - it spreads, runs or streams
+- the final sentence names the camera or a moving body, never a layout word (edge, corner, twice, taller, smaller, larger, half)
+- keep within {cap} words; invent nothing the plan does not already stage
+Return the rewritten field text only."""
+
+ENRICH_PROMPT = """You are enriching ONE field of a film-shot plan so its built take prompt reaches the length floor.
+Shot {index}'s block is {n} words; the floor is {low} words.
+The field is shots[{index}].at_rest. Current text:
+---
+{at_rest}
+---
+The shot's frame: {frame}
+The setup: {described}
+Add 1-3 sentences of VISIBLE at-rest state already implied by the frame and setup - posture, hands, light on surfaces, placement in the frame. Hard constraints:
+- never use: still, stays, remains, motionless, frozen, pauses, waits, unchanged, unmoving, holds, held, slow, slowly
+- no negations (no, not, never, without, barely, hardly)
+- any walk, climb or ride by a person ends its clause with 'at a normal walking pace'
+- the final sentence names the camera or a moving body, never a layout word (edge, corner, half, taller, smaller, larger)
+- invent no object, person or light source the frame and setup do not name
+Return the full enriched at_rest text."""
+
+
+def _rule_of(row: str) -> str:
+    m = re.search(r"\bL(\d+)\b", row)
+    return f"L{m.group(1)}" if m else ""
+
+
+def _layer_of(row: str) -> tuple[str, str]:
+    """('plan'|'row'|'card', ident) off the fault row's layer tag."""
+    m = re.search(r"\[(row|card) ([\w-]+)\]", row)
+    return (m.group(1), m.group(2)) if m else ("plan", "")
+
+
+def _flagged_words(row: str) -> list[str]:
+    return [w.lower() for w in re.findall(r"'([^']+)'", row)]
+
+
+def _plan_target(doc: dict, row: str) -> tuple[dict, str] | None:
+    """The (shot, field) whose prose carries the fault's flagged word, on the
+    shot the row names; a wordless family defaults to end/at_rest."""
+    m = re.search(r"shot (\d+)", row)
+    shot = next((s for s in doc.get("shots") or []
+                 if m and s.get("index") == int(m.group(1))), None)
+    if shot is None:
+        return None
+    for f in SHOT_FIELDS:
+        text = (shot.get(f) or "").lower()
+        if text and any(re.search(rf"\b{re.escape(w)}\b", text) for w in _flagged_words(row)):
+            return shot, f
+    default = {"L21": "end" if shot.get("end") else "at_rest"}.get(_rule_of(row), "at_rest")
+    return shot, default
+
+
+def _asked(tier: str, prompt: str, rule: str, old: str, need: int, _agent):
+    """One structured rewrite, verified in code; ONE re-ask with the
+    verifier's complaint, then None -- a failed cure never silently ships."""
+    from studio import llm
+    got = llm.structured(tier, prompt, RewrittenField, _agent=_agent)
+    if verify_family(rule, got.text, old, need):
+        return got.text
+    got = llm.structured(tier, llm.re_ask(prompt, RuntimeError(
+        f"the rewrite fails the {rule} lint family or reintroduces a banned word")),
+        RewrittenField, _agent=_agent)
+    return got.text if verify_family(rule, got.text, old, need) else None
+
+
+def _target_text(book, doc: dict, row: str, layer: str, ident: str) -> str | None:
+    if layer == "plan":
+        found = _plan_target(doc, row)
+        return found[0].get(found[1]) if found else None
+    from studio import row_lint
+    return row_lint.read_row_text(book, layer, ident)
+
+
+def _write_target(book, doc: dict, row: str, layer: str, ident: str, text: str) -> dict:
+    if layer == "plan":
+        holder, field = _plan_target(doc, row)
+        holder[field] = text
+        return doc
+    from studio import row_lint
+    row_lint.write_row_text(book, layer, ident, text)
+    return doc
+
+
+def llm_field_cure(book, doc: dict, fault_row: str, tier: str = "workhorse",
+                   _agent=None) -> tuple[dict, bool]:
+    """One guarded workhorse rewrite of the ONE field the fault names, on its
+    own layer (plan field / refs row / props card), accepted only through
+    G-CURE-VERIFY.  `_agent` is the test seam; the real caller runs
+    guard_spend before anything is sent (studio.llm)."""
+    layer, ident = _layer_of(fault_row)
+    rule = _rule_of(fault_row)
+    old = _target_text(book, doc, fault_row, layer, ident)
+    if old is None:
+        return doc, False
+    prompt = FIELD_PROMPT.format(fault_row=fault_row,
+                                 rule_help=RULE_HELP.get(rule, "fix exactly the fault named"),
+                                 layer_said=f"{layer} {ident}".strip(), text=old,
+                                 cap=max(80, len(old.split()) + 40))
+    text = _asked(tier, prompt, rule, old, 0, _agent)
+    if text is None:
+        return doc, False
+    return _write_target(book, doc, fault_row, layer, ident, text), True
+
+
+def enrich_at_rest(doc: dict, index: int, need_words: int, tier: str = "workhorse",
+                   _agent=None) -> tuple[dict, bool]:
+    """L14's plan-side lever: at_rest enriched with visible at-rest state, one
+    structured call, accepted only when the word delta reaches the need and
+    no banned word rode in (G-CURE-VERIFY's L14 arm)."""
+    shot = next((s for s in doc.get("shots") or [] if s.get("index") == index), None)
+    if shot is None:
+        return doc, False
+    setup = (doc.get("setups") or {}).get(shot.get("setup")) or {}
+    old = shot.get("at_rest") or ""
+    prompt = ENRICH_PROMPT.format(index=index, n=len(old.split()),
+                                  low=len(old.split()) + need_words, at_rest=old,
+                                  frame=shot.get("frame") or "",
+                                  described=setup.get("described") or "")
+    text = _asked(tier, prompt, "L14", old, need_words, _agent)
+    if text is None:
+        return doc, False
+    shot["at_rest"] = text
+    return doc, True
+
+
 # ---- the dispatcher ---------------------------------------------------------------
 
 CURES: list[tuple[re.Pattern, str]] = [
@@ -1020,6 +1366,19 @@ CURES: list[tuple[re.Pattern, str]] = [
     (re.compile(r"shots are numbered|lines are numbered|a line's shot never precedes"), "renumber"),
     (re.compile(r"G-LIGHT"), "light_directions"),
     (re.compile(r"G-SIZE"), "head_fractions"),
+    # The G-TAKELINT families, most specific first.  A row tagged [row]/[card]
+    # is cured in ITS OWN file, never the plan, so that route outranks every
+    # word cure; figurative_gaits sits ABOVE the generic NO PACE row so a
+    # thing's gait is swapped before a blind pace append can land on it.
+    (re.compile(r"\[(?:row|card) [\w-]+\]"), "row_words"),
+    (re.compile(r"L2 STILLNESS.*\[plan\]"), "stillness_words"),
+    (re.compile(r"L8 NO PACE.*\[plan\]"), "figurative_gaits"),
+    (re.compile(r"L21 ARRIVAL"), "arrival_ends"),
+    (re.compile(r"L23 PACE ON A THING"), "drop_thing_pace"),
+    (re.compile(r"L3 SLOW"), "strip_slow"),
+    (re.compile(r"L9 NO LIMP"), "apply_limp"),
+    (re.compile(r"L16 DIALOGUE TAIL"), "holds"),
+    (re.compile(r"L18 BANNED PROP"), "strip_banned_prop"),
     (re.compile(r"NO PACE"), "pace_words"),
     (re.compile(r"beat of >= 1\.0 s of silence"), "button_beat"),
     (re.compile(r"G-MOVES|G-STILL|G-AIM|G-ANCHOR|\bM2 shot \d+:"), "rebalance_heads"),
