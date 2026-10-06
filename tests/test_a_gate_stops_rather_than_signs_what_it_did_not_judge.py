@@ -2,10 +2,11 @@
 
 ep12's panel gate signed `keep_best` at attempt 0 because the run's budget was
 already 2993 s overdrawn, and its note was one measure repeating "landmark at
-shot_00" 531 times.  Neither is a verdict: an unaffordable rung DEFERS the run
-(resumable, nothing signed), a judge that repeats one fault past a handful is a
-broken measure, and a pass is written down so the publish lock can tell a gate
-that passed from one that never ran."""
+shot_00" 531 times.  Neither is a verdict: an unaffordable rung is NOT taken --
+the terminal rung answers, flagged, in the same run (five-hour verdict: the
+old deferral could never resume under one episode-wide clock) -- a judge that
+repeats one fault past a handful is a broken measure, and a pass is written
+down so the publish lock can tell a gate that passed from one that never ran."""
 from __future__ import annotations
 
 import pytest
@@ -45,13 +46,25 @@ def clear(ctx, judge, signed):
                              terminal=lambda v: v, policy=AUTO)
 
 
-def test_an_unaffordable_rung_defers_and_signs_nothing(tmp_path):
+def test_an_unaffordable_rung_is_not_taken_and_the_terminal_signs_flagged(tmp_path):
+    """headroom 10 s < the 300 s rung: no rung runs, no deferral is raised --
+    the keep_best terminal answers in the same run, flagged, audited."""
+    import json
     ctx, signed = Ctx(tmp_path, clock=lambda: 17_990.0), []
     ctx.budget.t0 = 0.0
-    with pytest.raises(SystemExit, match="DEFERRED"):
-        clear(ctx, lambda: verdict(False, [Fault(kind="lag", where="T07")]), signed)
-    assert signed == []
-    assert [(l.gate, l.action, l.terminal) for l in ctx.learned] == [("budget", "defer", False)]
+    out = ctx.book_dir / "episodes" / "ep01" / "verdict.json"
+
+    def sign(v):
+        out.parent.mkdir(parents=True, exist_ok=True)
+        out.write_text(json.dumps({"sha8": "deadbeef"}), encoding="utf-8")
+        signed.append(v)
+        return out
+    judged_gate.clear(ctx, "EYE_PANELS", judge=lambda: verdict(False, [Fault(kind="lag", where="T07")]),
+                      sign=sign, ladder=judged_gate.Rungs(LADDER, take=lambda *a: None),
+                      terminal=lambda v: v, policy=AUTO)
+    assert len(signed) == 1 and signed[0].terminal == "keep_best" and not signed[0].passed
+    assert [(l.gate, l.action, l.terminal) for l in ctx.learned] == [
+        ("budget", "terminal", False), ("EYE_PANELS", "keep_best", True)]
 
 
 def test_a_pass_is_learned(tmp_path):

@@ -24,7 +24,11 @@ def outcome(log: str) -> str:
     if "EPISODE completed" in log:
         return "completed"
     if re.search(r"DEFERRED: .* needs [\d.]+ s", log):
-        return "deferred"            # a budget deferral: the next run resumes at its rung
+        # HISTORICAL DRIVE LOGS ONLY: judged_gate no longer emits
+        # 'DEFERRED: ... needs ... s' -- a spent clock is terminal in the
+        # same run (five-hour verdict).  The regex stays so old logs read
+        # as what they were.
+        return "deferred"
     if "DEFERRED" in log:
         return "refused"             # a plan deferral waits on a plan fix (ep14: six reruns, ~2.5 h)
     if "REFUSED" in log:

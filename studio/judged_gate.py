@@ -63,28 +63,28 @@ def step_of(ctx) -> str:
 
 
 def affordable(ctx, gate: str, rung: Rung, taken: int) -> bool:
-    """Whether the budget pays for this rung.  A no DEFERS the run -- a budget
-    learning, then a stop the next run resumes -- and never reaches the
-    terminal: ep12's panels were signed keep_best at attempt 0, unjudged,
-    because the share was already 2993 s overdrawn (root cause A2)."""
+    """Whether the budget pays for this rung: the step's share, else the
+    ladders' pool, else the episode's remaining headroom -- shares are an
+    ALLOCATION of the ceiling (the clause take_ladder.can_afford already
+    had).  A no is TERMINAL IN THE SAME RUN (five-hour verdict): with one
+    episode-wide clock charged by Budget.charge, idling clocks nothing, so
+    no later run can ever pay more than headroom() says now -- the deferral
+    that said 'run again to resume' spun ep16's drive forever at EYE_TAKES'
+    565 s against a 73 s share.  climbed() breaks on the False and ended()
+    signs keep-best/still, flagged, with the audit row."""
     step = step_of(ctx)
     if ctx.budget.can_afford(step, rung.cost_seconds):
         return True
     if ctx.budget.pool_left() >= rung.cost_seconds:     # the ladders' own share pays (finding 55)
         ctx.budget.draw(rung.cost_seconds)
         return True
-    if ctx.budget.ceiling_spent():
-        # THE EPISODE'S WHOLE CEILING IS GONE (five-hour plan fix 1): a
-        # deferral exists so a later run can pay, and with one episode-wide
-        # clock nothing ever pays again -- the terminal answers, flagged.
-        ctx.learn(Learning(step=step, gate="budget", measured=0.0, threshold=rung.cost_seconds,
-                           action="terminal", attempt=taken))
-        return False
-    left = ctx.budget.remaining(step)
-    ctx.learn(Learning(step=step, gate="budget", measured=left, threshold=rung.cost_seconds,
-                       action="defer", attempt=taken))
-    raise SystemExit(f"DEFERRED: {gate} needs {rung.cost_seconds:.0f} s for its '{rung.name}' rung and "
-                     f"the run's {step} share has {left:.0f} s; nothing signed -- run again to resume")
+    if ctx.budget.headroom() >= rung.cost_seconds:      # an allocation overdraw, on the audit sheet
+        ctx.learn(Learning(step=step, gate="budget", measured=ctx.budget.headroom(),
+                           threshold=rung.cost_seconds, action="headroom", attempt=taken))
+        return True
+    ctx.learn(Learning(step=step, gate="budget", measured=ctx.budget.headroom(),
+                       threshold=rung.cost_seconds, action="terminal", attempt=taken))
+    return False
 
 
 def repeated(verdict: Verdict) -> str | None:

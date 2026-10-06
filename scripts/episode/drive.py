@@ -7,6 +7,20 @@ Refuses a dirty tree (the code is frozen for the episode), records the SHA it
 ran in `episodes/epNN/drive.jsonl`, runs `episode.py`, resumes a DEFERRED run,
 and tells the owner on Telegram when the run completes, stops, or goes silent
 for SILENCE_S (studio/episode_drive).  Ten-agent plan fixes #1 and #2.
+
+THE RE-CHECK CADENCE, in numbers: the drive polls the run's log for growth
+every POLL_S (30 s); a log silent for episode_drive.SILENCE_S (20 min) is
+reported to the owner ONCE per silence; MAX_RUNS is 6 -- five resumes, and
+since judged_gate no longer emits budget deferrals (a spent clock is terminal
+in the same run, five-hour verdict) those resumes serve only PLAN deferrals;
+the over-budget stop reads run_budget.spent_before(home) against
+EPISODE_CEILING_SECONDS before launching another run.
+
+THE DIRTY-TREE RULE AND THE SIBLING SESSIONS: episode_drive.dirty() refuses
+any tracked change or any untracked file OUTSIDE library/, so a sibling
+session writing book data under library/<book>/ never blocks a drive, while
+any code edit does until it is committed -- one episode runs on one commit
+(fix #7), and a drive on moved code says so out loud.
 """
 from __future__ import annotations
 

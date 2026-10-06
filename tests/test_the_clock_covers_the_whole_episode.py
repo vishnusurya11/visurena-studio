@@ -59,11 +59,13 @@ def test_a_spent_ceiling_is_terminal_not_deferred():
     assert judged_gate.affordable(rich, "EYE_TAKES", rung, taken=1) is True
 
 
-def test_an_unaffordable_rung_with_ceiling_left_still_defers():
+def test_an_unaffordable_rung_with_ceiling_left_is_still_terminal():
+    """The deferral is gone: a rung even the whole remaining ceiling cannot
+    pay is terminal in the same run, never 'run again to resume'."""
     mid = Ctx(spent=0.0)
     dear = Rung("batched_cures", 10 ** 9)
-    with pytest.raises(SystemExit, match="DEFERRED"):
-        judged_gate.affordable(mid, "EYE_TAKES", dear, taken=1)
+    assert judged_gate.affordable(mid, "EYE_TAKES", dear, taken=1) is False
+    assert mid.learned[-1].action == "terminal"
 
 
 def test_the_driver_never_resumes_a_spent_episode():

@@ -1,10 +1,13 @@
-"""A rung the budget cannot afford is not taken, and nothing is signed: the run
-defers with a `budget` learning (root cause 2026-09-26, A2)."""
+"""A rung the budget cannot afford is not taken; the TERMINAL rung answers in
+the SAME run.  The deferral that once stopped here (root cause 2026-09-26,
+A2) is gone (five-hour verdict): with one episode-wide clock, idling clocks
+nothing, so 'run again to resume' could never resume -- the best take ships
+keep_best, flagged, with its learning and its audit row."""
 from __future__ import annotations
 
 import json
 
-from studio import eye_verdict as ev, judged_gate
+from studio import audit_rows, eye_verdict as ev, judged_gate
 from studio.gate_policy import Policy
 from studio.judges.verdict import Fault, Verdict
 from studio.ladder import Ladder, Rung
@@ -31,10 +34,9 @@ def failing():
                    faults=[Fault(kind="lag", where="T07")])
 
 
-def test_out_of_time_defers_with_no_render_and_no_signature(tmp_path):
-    """Root cause 2026-09-26 (A2): out of time used to sign the terminal rung --
-    ep12's panels were kept at attempt 0 unjudged.  Now the run stops, resumable."""
-    import pytest
+def test_out_of_time_signs_the_terminal_in_the_same_run(tmp_path):
+    """headroom 100 s < the 300 s rung: no render, no deferral -- climbed()
+    breaks, ended() signs keep_best flagged, and the audit row lands."""
     now = [17_900.0]                                    # 100 s left under the 18 000 s ceiling
     ctx = Ctx(tmp_path, clock=lambda: now[0])
     ctx.budget.t0 = 0.0
@@ -42,13 +44,18 @@ def test_out_of_time_defers_with_no_render_and_no_signature(tmp_path):
     room.mkdir(parents=True)
     (room / "T07.mp4").write_bytes(b"take")
     rendered = []
-    with pytest.raises(SystemExit, match="DEFERRED"):
-        judged_gate.clear(
-            ctx, "EYE_TAKES", judge=failing,
-            sign=lambda v: ev.sign_verdict(room, [room / "T07.mp4"], v),
-            ladder=judged_gate.Rungs(Ladder([Rung("seed", 300), Rung("shorter_take", 300)], "keep_best"),
-                                     take=lambda rung, i, v: rendered.append(rung.name)),
-            terminal=lambda v: v, policy=AUTO)
-    assert rendered == [] and not list(room.glob("eye_*"))
-    assert [(l.gate, l.action, l.terminal) for l in ctx.learned] == [("budget", "defer", False)]
+    judged_gate.clear(
+        ctx, "EYE_TAKES", judge=failing,
+        sign=lambda v: ev.sign_verdict(room, [room / "T07.mp4"], v),
+        ladder=judged_gate.Rungs(Ladder([Rung("seed", 300), Rung("shorter_take", 300)], "keep_best"),
+                                 take=lambda rung, i, v: rendered.append(rung.name)),
+        terminal=lambda v: v, policy=AUTO)
+    assert rendered == []                               # nothing was paid for
+    signed, = room.glob("eye_*.json")
+    doc = json.loads(signed.read_text(encoding="utf-8"))
+    assert doc["verdict"] == "flagged" and doc["terminal"] == "keep_best"
+    assert [(l.gate, l.action, l.terminal) for l in ctx.learned] == [
+        ("budget", "terminal", False), ("EYE_TAKES", "keep_best", True)]
     assert ctx.learned[0].threshold == 300
+    rows = audit_rows.load(ctx.book_dir)
+    assert len(rows) == 1 and rows[0].gate == "EYE_TAKES" and rows[0].terminal == "keep_best"
