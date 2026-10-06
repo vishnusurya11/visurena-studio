@@ -59,7 +59,8 @@ def test_no_list_template_polls_on_a_clock(name):
                                         ("/inbox", "pulse:attention")])
 def test_each_live_section_waits_for_its_pulse_key_and_morphs(client, route, key):
     page = main(client.get(route).text)
-    tags = [t for t in re.findall(r"<[a-z]+\b[^>]*>", page) if f'hx-trigger="{key} from:body' in t]
+    want = re.compile(rf'hx-trigger="{re.escape(key)}(\[[^\]]*\])? from:body')   # a focused-form guard may sit between
+    tags = [t for t in re.findall(r"<[a-z]+\b[^>]*>", page) if want.search(t)]
     assert tags and all("morph:" in t for t in tags)
 
 
@@ -67,7 +68,10 @@ def test_each_live_section_waits_for_its_pulse_key_and_morphs(client, route, key
                                         (f"/b/{CODEX}", f"book:{CODEX}"), ("/inbox", "attention")])
 def test_each_live_section_carries_its_fingerprint(app, client, route, key):
     v = viz.fp(request_for(app), key)
-    assert v and re.search(rf'hx-trigger="pulse:{re.escape(key)} from:body"[^>]*data-v="{v}"|data-v="{v}"[^>]*hx-trigger="pulse:{re.escape(key)} from:body"', client.get(route).text)
+    page = client.get(route).text
+    tags = [t for t in re.findall(r"<[a-z]+\b[^>]*>", page)
+            if re.search(rf'hx-trigger="pulse:{re.escape(key)}(\[[^\]]*\])? from:body', t)]
+    assert v and tags and any(f'data-v="{v}"' in t for t in tags)
 
 
 def test_department_rows_carry_stable_ids(client):
