@@ -1601,3 +1601,14 @@ def prop_card_faults(ep, legal: set[str]) -> list[str]:
             if pid not in legal:
                 out.append(f"G-PROPCARD setup {name}: stages prop {pid!r} with no card analysis/props/{pid}.json")
     return out
+
+
+def at_series_rate(doc: dict, book, number: int) -> dict:
+    """The plan doc with `words_per_second` set to the series' measured rate
+    when it carries none (a draft written before the rate was persisted: ep19's
+    aside, 2026-10-06), so the contract projects at the pace the battery and
+    the cures measure by -- an aside cured to 134 s at 2.5 w/s read as 117 s
+    at the default 3.0 and the repair threw the cure away."""
+    if not doc.get("words_per_second"):
+        doc["words_per_second"] = series_rate(book, number)
+    return doc

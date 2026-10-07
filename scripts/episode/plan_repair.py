@@ -453,7 +453,8 @@ def main(book_id: str, number: int, from_aside: bool = False, no_llm: bool = Fal
         aside = home / "plan.deferred.json"
         if not aside.exists():
             raise SystemExit(f"no plan and no aside under {home}")
-        doc = json.load(io.open(aside, encoding="utf-8"))["draft"]
+        from studio import plan_gates
+        doc = plan_gates.at_series_rate(json.load(io.open(aside, encoding="utf-8"))["draft"], book, number)
         Episode(**doc)
         episode_home.write_plan(path, doc)
         print("aside draft restored to plan.json")
@@ -463,8 +464,8 @@ def main(book_id: str, number: int, from_aside: bool = False, no_llm: bool = Fal
             if clean:
                 print(f"BATTERY CLEAN after {round_ - 1} repair round(s)")
                 return 0
-            doc = episode_home.read_json(path)
             from studio import plan_gates, plan_provenance, plan_verdict
+            doc = plan_gates.at_series_rate(episode_home.read_json(path), book, number)
             before_sha8 = plan_verdict.plan_sha8(path)
             doc, uncured, names = apply_each(doc, rows, book, number, rate=plan_gates.series_rate(book, number))
             try:

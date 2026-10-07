@@ -31,7 +31,7 @@ HANDLE, BREATH = 0.25, 0.70
 
 def contract(book: Path, number: int):
     """The plan under the contract, or every distinct refusal printed and None."""
-    doc = episode_home.read_json(episode_home.home(book, number) / "plan.json")
+    doc = plan_gates.at_series_rate(episode_home.read_json(episode_home.home(book, number) / "plan.json"), book, number)
     try:
         return spec.Episode(**doc)
     except Exception as e:  # pydantic's message carries every refusal

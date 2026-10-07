@@ -439,6 +439,13 @@ def holds_and_unsplit(doc: dict, rate: float = 3.0) -> tuple[dict, list[tuple[in
                 s["coda_s"] = round(float(s.get("coda_s") or 0) - cut, 2)
                 over = round(over - cut, 2)
 
+    # 4a. a shot over the take with two or more lines seats a line on a
+    # neighbour with room, else becomes two shots -- BEFORE the shave, so the
+    # beats and codas survive (A31, ep19: the shave below threw 18 s of pauses
+    # off nine shots that were then split anyway)
+    seat_overflow(doc, rate)
+    shots = doc.get("shots") or []
+
     # 4. no single shot past the take budget: the pair growth above may have
     # pushed one over (ep16 shot 16, 8.05 s); shave its own coda then beat.
     # A clamped shot keeps its pair split: the partner's handles alone hold
@@ -453,10 +460,6 @@ def holds_and_unsplit(doc: dict, rate: float = 3.0) -> tuple[dict, list[tuple[in
             if cut > 0:
                 s[key] = round(float(s.get(key) or 0) - cut, 2)
                 over = round(over - cut, 2)
-
-    # 4b. a shot still over the take with two or more lines and nothing left to
-    # shave seats a line on a neighbour (A31, ep19 rung 3: 4 + 14 words, 8.4 s)
-    seat_overflow(doc, rate)
 
     # 5. (was 3b) no projected hole in speech over the wall: closed LAST, by
     # the checker's own placement (G-HOLE's), largest holds first, floors
