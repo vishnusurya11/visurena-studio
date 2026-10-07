@@ -69,6 +69,28 @@ def test_structured_picks_the_sdk_caller_ledgers_at_no_cost_and_never_guards(mon
     assert spend.unit_spent(conn, "2099", "ep19") == 0.0
 
 
+def test_the_ladders_lazy_caller_picks_the_subscription_engine_too(monkeypatch):
+    """ep19 14:21Z, the first live launch on the new path: plan_ladder.Caller
+    built llm._NativeStructuredCaller directly and died on the claude-sdk
+    provider (KeyError 'host').  The lazy caller asks the gateway which engine
+    the tier runs on, the same way structured() does."""
+    from studio import plan_ladder
+    monkeypatch.setattr(llm, "resolve_tier", lambda tier: {
+        "provider": "claude-sdk", "model": "claude-opus-5-5", "params": {}, "structured_output": None,
+        "timeout_s": None, "provider_config": {"billing": "subscription"}})
+    seen = {}
+
+    async def fake_ask(prompt, schema, *, model, effort="medium", transport=None):
+        seen["model"] = model
+        return Answer(title="x", shots=1), {"model_usage": {model: {"input_tokens": 1, "output_tokens": 1}}}
+
+    monkeypatch.setattr(brain, "ask_structured", fake_ask)
+    caller = plan_ladder.Caller("local")
+    got = caller("Plan it.", structured_output_model=Answer)
+    assert isinstance(caller._inner, llm._SdkStructuredCaller)
+    assert got.structured_output == Answer(title="x", shots=1) and seen["model"] == "claude-opus-5-5"
+
+
 def test_every_tier_in_models_yaml_runs_on_the_subscription():
     config = llm.load_models_config()
     for name, tier in config["tiers"].items():

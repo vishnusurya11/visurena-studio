@@ -163,7 +163,7 @@ class Caller:
 
     def __call__(self, prompt: str, structured_output_model=None):
         if self._inner is None:
-            self._inner = llm._NativeStructuredCaller(self.tier)   # the gateway's one-request engine
+            self._inner = llm._caller_for(self.tier)   # the gateway's engine for the tier (SDK or native)
         return self._inner(prompt, structured_output_model)
 
 
