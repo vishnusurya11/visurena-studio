@@ -264,3 +264,23 @@ def test_a_landform_ban_follows_the_readers_own_landform():
     assert banned_subject(low, ("mountain",)) == []
     assert banned_subject(high, ("mountain",)) == ["mountain"]
     assert banned_subject(Seen(landform="flat", subjects=["doll"]), ("doll",)) == ["doll"]
+
+
+def test_a_cliff_read_on_a_pit_shot_is_the_pits_own_wall():
+    """ep19 (2026-10-07): the sand pit's terraced wall read as 'cliff' on four
+    shots across two EYE_PANELS rounds; the ban was written against sea-cliffs
+    behind Woking.  A frame that stages a pit owns its steep wall; a cliff
+    anywhere else is still banned, and so is a mountain in a pit."""
+    from studio.panel_content import faults
+    pit = faults(seen(landform="cliffs", subjects=["a sand cliff", "a cylinder"]),
+                 frame="Wide of the pit from the rim, the cylinder below", planned=0, crowd=False,
+                 flat=False, night=False, banned=("cliff", "mountain"))
+    assert not any("banned" in f for f in pit)
+    lane = faults(seen(landform="cliffs", subjects=["a sand cliff"]),
+                  frame="Wide of the lane at dusk", planned=0, crowd=False,
+                  flat=False, night=False, banned=("cliff",))
+    assert any("banned from this book: cliff" in f for f in lane)
+    mountain = faults(seen(landform="mountains", subjects=["a mountain"]),
+                      frame="Wide of the pit from the rim", planned=0, crowd=False,
+                      flat=False, night=False, banned=("mountain",))
+    assert any("banned from this book: mountain" in f for f in mountain)

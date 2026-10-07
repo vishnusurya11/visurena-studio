@@ -227,6 +227,17 @@ subject list: ep13 shot 10 read 'gentle rise' and listed 'mountains' for a low
 far horizon, three draws running."""
 
 
+PIT = re.compile(r"(?:pit|quarry|excavation|crater|sand-?pit)", re.I)
+"""A shot staged in a dug place: its steep wall is what was asked for."""
+
+
+def pits_own_wall(banned: str, frame: str) -> bool:
+    """A 'cliff' read on a shot whose frame stages a pit is the pit's own
+    wall, not the sea-cliff the ban was written against (ep19 2026-10-07: four
+    pit shots refused across two rounds for the terraced sand wall)."""
+    return stem(banned.lower().strip()) == stem("cliff") and bool(PIT.search(frame or ""))
+
+
 def landform_agrees(banned: str, seen: "Seen") -> bool:
     """True unless `banned` is a landform the reader's landform answer denies."""
     allowed = LANDFORM_BANS.get(stem(banned.lower().strip()))
@@ -245,7 +256,7 @@ def faults(seen: Seen, frame: str, planned: int, crowd: bool,
     out = []
     if forbidden_landform(seen, flat):
         out.append(f"landform {seen.landform!r}: this place is flat")
-    if strangers := banned_subject(seen, banned):
+    if strangers := [b for b in banned_subject(seen, banned) if not pits_own_wall(b, frame)]:
         out.append(f"banned from this book: {', '.join(strangers)}")
     out += contradictions(seen, physical)
     # who may be here is DECLARED: faces + extras, or the setup's crowd. The
