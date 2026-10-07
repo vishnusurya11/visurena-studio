@@ -151,8 +151,9 @@ def test_every_failed_paid_attempt_is_ledgered(tmp_path):
         with pytest.raises(StructuredOutputException):
             llm.structured("workhorse", "write", Answer, retries=2, _agent=Refuser())
     rows = conn.execute("select input_tokens, output_tokens, cost_usd from usage where unit='ep01'").fetchall()
-    assert [tuple(r)[:2] for r in rows] == [(100, 50), (100, 50)] and all(r[2] is not None for r in rows)
-    assert spend.unit_spent(conn, "2099", "ep01") > 0
+    assert [tuple(r)[:2] for r in rows] == [(100, 50), (100, 50)]
+    # a priced tier costs money here; a subscription tier (every tier since 2026-10-07) keeps
+    # the tokens with a NULL cost, so the wall ignores it -- either way the attempt is a row
 
 
 def test_a_model_whose_strict_grammar_was_refused_goes_loose_at_once():

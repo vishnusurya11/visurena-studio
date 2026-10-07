@@ -379,12 +379,51 @@ def _record_spend(tier: str, usage: dict) -> None:
         return
     try:
         from studio import spend
+        model = model_for(tier)
+        if on_subscription(tier):
+            model = f"{model}@subscription"     # unpriced: the tokens are kept, the cost is NULL, the wall ignores it
         spend.record(_SPEND["conn"], _SPEND["codex_id"], _SPEND["stage"],
-                     _SPEND["step_id"] or "", tier, model_for(tier),
+                     _SPEND["step_id"] or "", tier, model,
                      usage.get("input_tokens", 0), usage.get("output_tokens", 0),
                      unit=_SPEND.get("unit"))
     except Exception:                      # never break a call that already succeeded
         pass
+
+
+def on_subscription(tier: str) -> bool:
+    """A tier on the Claude Agent SDK under the owner's login bills nothing
+    (owner, 2026-10-07: "don't use API for money")."""
+    try:
+        return resolve_tier(tier)["provider"] == "claude-sdk"
+    except Exception:
+        return False
+
+
+class _SdkStructuredCaller:
+    """ONE Claude Agent SDK session per structured call, on the subscription: the
+    schema enforced by the SDK, no tools, no key, no wall.  Same call protocol as
+    the native caller, so every fake and every test is unchanged."""
+
+    def __init__(self, tier: str):
+        resolved = resolve_tier(tier)
+        self._model = resolved["model"]
+        self._effort = (resolved.get("params") or {}).get("effort", "medium")
+        self._tier = tier
+
+    def __call__(self, prompt: str, structured_output_model=None):
+        import asyncio
+        from studio import brain
+        parsed, receipt = asyncio.run(brain.ask_structured(prompt, structured_output_model,
+                                                           model=self._model, effort=self._effort))
+        tokens_in = sum(int(u.get("input_tokens", 0)) for u in (receipt.get("model_usage") or {}).values())
+        tokens_out = sum(int(u.get("output_tokens", 0)) for u in (receipt.get("model_usage") or {}).values())
+        return SimpleNamespace(structured_output=parsed, metrics=SimpleNamespace(accumulated_usage={
+            "inputTokens": tokens_in, "outputTokens": tokens_out, "totalTokens": tokens_in + tokens_out}))
+
+
+def _caller_for(tier: str):
+    """The subscription's SDK caller for a claude-sdk tier, the native caller otherwise."""
+    return _SdkStructuredCaller(tier) if on_subscription(tier) else _NativeStructuredCaller(tier)
 
 
 def structured(tier: str, prompt: str, schema, *, retries: int = 3,
@@ -397,7 +436,7 @@ def structured(tier: str, prompt: str, schema, *, retries: int = 3,
     - transient failures (connection errors): up to `transient_retries` with backoff.
     Pass `usage={}` to receive token counts (input/output/total + tier) back.
     `_agent` is the test seam (a fake caller; no test may call a paid API)."""
-    agent = _agent or _NativeStructuredCaller(tier)
+    agent = _agent or _caller_for(tier)
     for attempt in range(transient_retries + 1):
         try:
             local: dict = {} if usage is None else usage

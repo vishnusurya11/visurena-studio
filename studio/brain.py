@@ -27,6 +27,9 @@ from pydantic import BaseModel
 
 from studio import registry, spend
 
+ROOT = Path(__file__).resolve().parents[1]
+"""The repo root: the writer session's cwd."""
+
 TRIAGE_MODEL = "claude-sonnet-5-5"
 FIXER_MODEL = "claude-opus-5-5"
 ORDER_KINDS = frozenset({"redo", "retry", "requeue"})
@@ -282,3 +285,40 @@ def allowed(verdict: Verdict, step_ids: set[str]) -> Verdict:
     if step not in step_ids:
         return _clamped(verdict, f"step {step!r} is not an episode step")
     return verdict
+
+
+# --- the structured writer on the subscription (owner, 2026-10-07) --------------
+# "don't use API for money -- use Claude, like how you used to supervise."  One
+# session per structured call: no tools, the schema enforced by the SDK, nothing
+# billed.  Every LLM tier in models.yaml routes here (studio/llm._SdkStructuredCaller).
+
+WRITER_SYSTEM = ("You are a department of a film studio answering ONE structured brief. "
+                 "Return only the JSON the schema asks for: no prose, no commentary, no questions.")
+
+
+def writer_options(schema_model, *, model: str, effort: str = "medium", turns: int = 3) -> ClaudeAgentOptions:
+    """A pure generation session: no tools, no project settings, the schema as the
+    output format, a small turn cap (a re-prompt on schema mismatch is a turn)."""
+    return ClaudeAgentOptions(
+        cwd=str(ROOT), model=model, effort=effort, permission_mode="dontAsk",
+        allowed_tools=[], disallowed_tools=["Bash", "Edit", "Write", "Read", "Glob", "Grep", "Agent", "WebSearch", "WebFetch"],
+        setting_sources=[], max_turns=turns, system_prompt=WRITER_SYSTEM,
+        output_format={"type": "json_schema", "schema": schema_model.model_json_schema()},
+        env=dict(ENV))
+
+
+async def ask_structured(prompt: str, schema_model, *, model: str, effort: str = "medium", transport=None):
+    """One session, one prompt, one validated instance of `schema_model`; the
+    receipt carries the SDK's usage so the ledger keeps the tokens at no cost."""
+    result = None
+    async with ClaudeSDKClient(options=writer_options(schema_model, model=model, effort=effort),
+                               transport=transport) as client:
+        await client.query(prompt)
+        async for message in client.receive_response():
+            if isinstance(message, RateLimitEvent) and message.rate_limit_info.status == "rejected":
+                raise RateLimited(message.rate_limit_info.resets_at)
+            if isinstance(message, ResultMessage):
+                result = message
+    if result is None or result.is_error or result.subtype != "success" or result.structured_output is None:
+        raise BrainFailed(f"no structured answer: {getattr(result, 'subtype', None)} {getattr(result, 'result', '')!s:.200}")
+    return schema_model.model_validate(result.structured_output), receipt_of(result)
