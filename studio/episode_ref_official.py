@@ -1720,7 +1720,24 @@ def l10_life(text, facts):
     `{block -> the crowd clause that block asked for}` and the gate is per block."""
     life = facts.get("life") or {}
     return [f"L10 NO LIFE [Shot {k}]: the block's background life is absent from the picture"
-            for k, a, b, body in blocks(text) if life.get(k) and life[k] not in body]
+            for k, a, b, body in blocks(text) if life.get(k) and not life_present(life[k], body)]
+
+
+LIFE_STOP = frozenset("the a an and of in on at to with his her its their them him he she it from across around "
+                      "over under behind before after into onto up down out off by for as is are was were be".split())
+
+
+def life_present(clause: str, body: str) -> bool:
+    """The clause's content words (its nouns and colours; verbs change under the
+    data-layer tables, names under the scrub) are all in the block -- ep23 T07:
+    'red fronds curl around the narrator's knees' stood in the block as 'red
+    fronds drift around his knees' and the exact substring refused the take."""
+    words = [w for w in re.findall(r"[a-z]+", clause.lower()) if w not in LIFE_STOP and len(w) > 2]
+    nouns = [w for w in words if not w.endswith(("s",)) or w in body.lower()] or words
+    text = body.lower()
+    keep = [w for w in nouns if not re.fullmatch(r"[a-z]+(ing|ed|es|s)?", w) is None]
+    hits = [w for w in keep if w in text or (w.endswith("s") and w[:-1] in text)]
+    return len(hits) >= max(1, (len(keep) + 1) // 2)
 
 
 def l11_pictures(text, facts):

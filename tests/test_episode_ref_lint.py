@@ -271,3 +271,18 @@ def test_check_raises_on_the_first_fault_and_says_nothing_when_clean():
     with pytest.raises(ValueError, match="L2"):
         ro.check("Static shot; the camera and lens remain still throughout.")
     assert ro.check((FIX / "ref2v_spec_t01.txt").read_text(encoding="utf-8"), T01_FACTS) is None
+
+
+def test_l10_reads_the_life_clause_by_its_content_words_not_as_a_substring():
+    """ep23 T07 (2026-10-07): the builder put the shot's crowd in the block as
+    'red fronds drift around his knees' (names scrubbed, the verb substituted
+    by the data-layer tables) and recorded the raw clause 'red fronds curl
+    around the narrator's knees'; the exact-substring L10 refused the whole
+    take batch for a clause that was there."""
+    from studio import episode_ref_official as ro
+    life = {1: "red fronds curl around the narrator's knees"}
+    present = "[Shot 1] From 00:00 to 00:06. He kneels. At 00:03 red fronds drift around his knees, and the movement continues."
+    absent = "[Shot 1] From 00:00 to 00:06. He kneels at the water and lowers his hands, and the movement continues."
+    assert ro.l10_life(present, {"life": life}) == []
+    assert ro.l10_life(absent, {"life": life}) == [
+        "L10 NO LIFE [Shot 1]: the block's background life is absent from the picture"]
