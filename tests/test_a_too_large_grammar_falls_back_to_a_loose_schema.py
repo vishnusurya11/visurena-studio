@@ -141,3 +141,13 @@ def test_a_tier_marked_loose_never_probes_the_strict_grammar(monkeypatch):
     caller._client = client
     caller("write", structured_output_model=Answer)
     assert [c[0] for c in client.calls] == ["create"]
+
+
+def test_the_loose_call_turns_reasoning_off():
+    """ep21 (2026-10-07): the loose reply came back finish_reason=length,
+    reasoning=yes, content None -- on a plain create the model thinks by default
+    and spent the whole output budget on it.  The strict tool path never did."""
+    client = FakeClient()
+    _caller(client)("write", structured_output_model=Answer)
+    kw = client.calls[1][1]
+    assert kw["extra_body"]["reasoning"] == {"enabled": False}

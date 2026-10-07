@@ -234,8 +234,15 @@ class _NativeStructuredCaller:
         all, and the JSON reply is validated here."""
         asked = [*messages[:-1], {"role": "user", "content": schema_prompt(messages[-1]["content"], model)}]
         completion = self._client.chat.completions.create(
-            model=self._model, messages=asked, max_tokens=LOOSE_MAX_TOKENS, **self._params)
+            model=self._model, messages=asked, max_tokens=LOOSE_MAX_TOKENS,
+            extra_body=LOOSE_EXTRA_BODY, **self._params)
         return completion, model.model_validate_json(json_body(content_of(completion)))
+
+
+LOOSE_EXTRA_BODY = {"reasoning": {"enabled": False}}
+"""No thinking on the loose call: ep21 (2026-10-07) came back finish_reason=length,
+reasoning=yes, content None -- the model spent the whole budget reasoning.  The
+strict tool path never reasoned; the plan is the answer, not a deliberation."""
 
 
 STRICT_REFUSED: set[str] = set()
