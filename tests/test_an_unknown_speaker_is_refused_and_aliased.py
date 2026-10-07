@@ -46,3 +46,23 @@ def test_the_writer_aliases_before_the_contract():
                                {"entity_id": "other", "physical": "z"}]}
     ep = ew.to_episode(ew.Draft.model_validate(doc), brief)
     assert ep.lines[0].speaker == "unnamed_first_person_narrator"
+
+
+def test_a_one_voice_plan_may_end_on_the_leads_line_and_a_two_voice_plan_may_not():
+    """ep23 (2026-10-07): rule 5 ('the button is another voice's line') made the
+    writer invent a second narrator; a chapter where the lead is alone has no
+    other voice, so the rule binds only when the plan has one."""
+    from studio.episode_spec import Episode
+    from tests.test_episode_writer import canned_plan
+    doc = canned_plan()
+    lead = doc["protagonist"]
+    for line in doc["lines"]:
+        line["speaker"] = lead
+        line["kind"] = "narration"
+    Episode.model_validate(doc)                               # one voice: the lead's button stands
+    doc2 = canned_plan()
+    doc2["lines"][-1]["speaker"] = doc2["protagonist"]
+    doc2["lines"][-1]["kind"] = "narration"
+    import pytest
+    with pytest.raises(ValueError, match="rule 5"):
+        Episode.model_validate(doc2)                          # another voice exists: the rule binds

@@ -731,7 +731,11 @@ class Episode(BaseModel):
         button = self.button()
         if self.shot(button.shot).section != "button":
             raise ValueError("the last line plays on the button shot")
-        if button.speaker == self.protagonist:
+        voices = {line.speaker for line in self.lines}
+        if button.speaker == self.protagonist and len(voices) > 1:
+            # One voice has no other to give the button to (ep23, 2026-10-07: the
+            # writer invented a second narrator to satisfy this on a chapter where
+            # the lead is alone, and step 04 died casting a voice for nobody).
             raise ValueError(f"the last line is the protagonist's ({self.protagonist}); "
                              "the button is another voice's line (rule 5)")
         if any(self.lines_of(s.index) for s in self.shots if s.index > button.shot):
