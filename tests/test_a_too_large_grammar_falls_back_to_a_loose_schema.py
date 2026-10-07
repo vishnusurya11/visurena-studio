@@ -127,3 +127,17 @@ def test_a_model_whose_strict_grammar_was_refused_goes_loose_at_once():
     _caller(second)("write", structured_output_model=Answer)
     assert [c[0] for c in second.calls] == ["create"]
     llm.STRICT_REFUSED.discard("m")
+
+
+def test_a_tier_marked_loose_never_probes_the_strict_grammar(monkeypatch):
+    """The memo is per process and every drive run is a new process: without a
+    tier setting each relaunch re-paid the ~25-min probe (ep21, 2026-10-07)."""
+    monkeypatch.setattr(llm, "resolve_tier", lambda tier: {
+        "provider": "openrouter", "model": "m", "params": {}, "structured_output": "loose",
+        "provider_config": {"base_url": "https://x/v1", "api_key_env": "NOPE"}})
+    monkeypatch.setattr(llm, "_api_key", lambda pc: "k")
+    caller = llm._NativeStructuredCaller("local")
+    client = FakeClient()
+    caller._client = client
+    caller("write", structured_output_model=Answer)
+    assert [c[0] for c in client.calls] == ["create"]

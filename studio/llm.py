@@ -56,6 +56,7 @@ def resolve_tier(tier: str) -> dict:
         raise ValueError(f"tier {tier!r} names unknown provider {provider!r}")
     return {"model": entry["model"], "provider": provider,
             "params": entry.get("params") or {},
+            "structured_output": entry.get("structured_output"),
             "provider_config": config["providers"][provider]}
 
 
@@ -194,6 +195,8 @@ class _NativeStructuredCaller:
         self._model = resolved["model"]
         self._params = resolved.get("params") or {}
         self._tier = tier                   # the wall holds the writers to cap - reserve
+        if resolved.get("structured_output") == "loose":
+            STRICT_REFUSED.add(self._model)   # models.yaml says so: never probe the strict grammar
 
     def __call__(self, prompt: str, structured_output_model=None):
         from openai import ContentFilterFinishReasonError
