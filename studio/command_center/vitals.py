@@ -51,6 +51,20 @@ def minutes(secs: float) -> str:
     return f"{secs / 60:.0f}m" if secs >= 60 else f"{secs:.0f}s"
 
 
+FILES_ALIVE_S = 45 * 60
+
+
+def files_alive(home, now: float) -> bool:
+    """The unit's folder or a child dir moved recently: the run writes, so it
+    lives, whether or not its process answers the API (ep23, 2026-10-07)."""
+    from pathlib import Path
+    home = Path(home)
+    if not home.is_dir():
+        return False
+    stamps = [home.stat().st_mtime] + [d.stat().st_mtime for d in home.iterdir() if d.is_dir()]
+    return any(now - s < FILES_ALIVE_S for s in stamps)
+
+
 def vital(state: dict, alive: bool, quiet_s: float | None, budget_s: float, reason: str = "") -> dict:
     """{vital, reason} for the folded state, the process check and the silence."""
     outcome = state.get("outcome")

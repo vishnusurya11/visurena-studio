@@ -59,6 +59,11 @@ def test_the_live_region_holds_no_clock(board):
 
 
 def test_a_dead_run_is_one_still_sentence(board):
+    import os
+    import time
+    old = time.time() - 3 * 86400                      # no process AND still files: truly dead
+    for p in [board["home"]] + [d for d in Path(board["home"]).iterdir() if d.is_dir()]:
+        os.utime(p, (old, old))
     card = _card(_page(board, []))
     assert "data-still" in card and "Run stopped" in card
     assert "· rendering" not in card and 'data-k="sheet"' not in card

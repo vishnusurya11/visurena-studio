@@ -143,7 +143,9 @@ def test_the_unit_row_says_whether_its_lease_lapsed(board_db):
     assert pulse.unit_row(reader(board_db), "episode", CODEX, "ep04")[-1] == 1
 
 
-def test_a_lease_expiry_moves_the_shell_off_the_lapsed_run(board_db):
+def test_a_lease_expiry_moves_the_shell_off_the_lapsed_run(board_db, tmp_path):
+    from command_center_fixtures import age_home
+    age_home(tmp_path)                       # its files stopped moving too: truly dead
     progress = lambda codex, unit: None
     before = pulse.shell_block(reader(board_db), progress)
     a_lease_expiry(board_db)

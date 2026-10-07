@@ -15,7 +15,7 @@ from datetime import datetime, timezone
 from functools import lru_cache
 from pathlib import Path
 
-from studio import db, eta, gate_policy, registry
+from studio import db, episode_home, eta, gate_policy, registry
 from studio.command_center import library_paths, procs, thumbs
 
 MARKS = {"queued": ("circle", "○"), "blocked": ("circle-dashed", "◌"), "running": ("loader", "●"),
@@ -81,11 +81,29 @@ revive just because the book is being worked."""
 CARRIERS = ("drive.py", "autopilot.py", "episode.py")
 
 
+FRESH_FILES_S = 45 * 60
+"""How recently the unit's folder must have moved to vouch for a silent ledger:
+longer than the longest render a healthy step goes quiet for."""
+
+
 def _unit_carried(row: dict, rows: list) -> bool:
     """A process names this unit's number beside its codex."""
-    wanted = unit_tokens(row.get("unit") or "")
-    return bool(wanted) and any((row.get("codex_id") or "") in p.cmdline
-                                and wanted & set(p.cmdline.replace('"', " ").split()) for p in rows)
+    wanted, codex = unit_tokens(row.get("unit") or ""), row.get("codex_id") or ""
+    return bool(wanted) and bool(codex) and any(
+        codex in p.cmdline and wanted & set(p.cmdline.replace('"', " ").split()) for p in rows)
+
+
+def _files_carried(row: dict) -> bool:
+    """The run's own files are still moving (ep23, 2026-10-07: the run's process
+    was invisible to the API): the unit's folder or one of its child dirs has a
+    fresh mtime -- a directory stamps when a file lands in it."""
+    book = library_paths.book_folder(episode_home.LIBRARY, row.get("codex_id") or "")
+    home = book / row["home"] if book and row.get("home") else None
+    if home is None or not home.is_dir():
+        return False
+    now = utc_now().timestamp()
+    stamps = [home.stat().st_mtime] + [d.stat().st_mtime for d in home.iterdir() if d.is_dir()]
+    return any(now - s < FRESH_FILES_S for s in stamps)
 
 
 def _book_carried(row: dict, rows: list) -> bool:
@@ -107,7 +125,7 @@ def carried(row: dict, proc_rows: list | None = None) -> bool:
     for long stretches without a ledger write, so the lease starves although
     the run is healthy)."""
     rows = procs.list_processes() if proc_rows is None else proc_rows
-    return _unit_carried(row, rows) or _book_carried(row, rows)
+    return _unit_carried(row, rows) or _book_carried(row, rows) or _files_carried(row)
 
 
 def lapsed_rows(conn: sqlite3.Connection) -> list[dict]:

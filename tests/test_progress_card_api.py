@@ -72,6 +72,12 @@ def test_progress_validates_and_counts_the_shoot(board):
 
 def test_a_live_drive_is_live_and_no_drive_is_dead(board):
     assert _progress(board, _drive(time.time() - 3600))["vital"] in ("live", "quiet")
+    no_pid = _progress(board, [])
+    assert no_pid["vital"] in ("live", "quiet")        # files still moving: alive (ep23, 2026-10-07)
+    import os
+    old = time.time() - 3 * 86400
+    for p in [board["home"]] + [d for d in Path(board["home"]).iterdir() if d.is_dir()]:
+        os.utime(p, (old, old))
     dead = _progress(board, [])
     assert dead["vital"] == "dead" and dead["vital_reason"] == "no drive process"
 

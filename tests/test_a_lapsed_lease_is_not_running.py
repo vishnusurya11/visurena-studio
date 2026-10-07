@@ -11,7 +11,7 @@ from datetime import datetime, timezone
 import pytest
 from fastapi.testclient import TestClient
 
-from command_center_fixtures import CODEX, make_app
+from command_center_fixtures import CODEX, age_home as _age_home, make_app
 from studio.command_center import procs, views
 
 NOW = datetime(2026, 10, 6, 0, 12, tzinfo=timezone.utc)
@@ -37,9 +37,31 @@ def test_a_lapsed_running_row_shows_stale(monkeypatch):
 def lapsed_client(tmp_path, monkeypatch):
     monkeypatch.setattr(procs, "list_processes", lambda: [])   # no process carries anything
     app = make_app(tmp_path, monkeypatch)
+    _age_home(tmp_path)                                        # and its files stopped moving
     with sqlite3.connect(tmp_path / "t.db") as conn:
         conn.execute("UPDATE work_orders SET lease_until = '2020-01-01T00:00:00Z' WHERE unit = 'ep04'")
     return TestClient(app)
+
+
+@pytest.fixture()
+def fresh_files_client(tmp_path, monkeypatch):
+    """No visible process at all (another session's run, 2026-10-07), but the
+    unit's folder is still being written: the run is alive."""
+    monkeypatch.setattr(procs, "list_processes", lambda: [])
+    app = make_app(tmp_path, monkeypatch)
+    with sqlite3.connect(tmp_path / "t.db") as conn:
+        conn.execute("UPDATE work_orders SET lease_until = '2020-01-01T00:00:00Z' WHERE unit = 'ep04'")
+    return TestClient(app)
+
+
+def test_fresh_files_carry_a_unit_no_process_names(fresh_files_client):
+    shell = fresh_files_client.get("/api/pulse.json").json()["shell"]
+    assert [p["href"].rsplit("/", 1)[-1] for p in shell["pins"]] == ["ep04"]
+
+
+def test_a_row_without_a_codex_is_never_carried():
+    rows = [procs.ProcInfo(1, 1.0, "python.exe anything.py 4")]
+    assert views.carried({"unit": "ep04", "state": "running"}, rows) is False
 
 
 @pytest.fixture()
@@ -77,6 +99,7 @@ def test_a_process_of_another_unit_carries_nothing(tmp_path, monkeypatch):
     monkeypatch.setattr(procs, "list_processes",
                         lambda: [procs.ProcInfo(1, 1.0, f"python.exe scripts/episode/drive.py {CODEX} 23")])
     app = make_app(tmp_path, monkeypatch)
+    _age_home(tmp_path)
     with sqlite3.connect(tmp_path / "t.db") as conn:
         conn.execute("UPDATE work_orders SET lease_until = '2020-01-01T00:00:00Z' WHERE unit = 'ep04'")
     client = TestClient(app)
@@ -142,6 +165,7 @@ def test_a_book_wide_carrier_never_revives_a_long_dead_row(tmp_path, monkeypatch
     """ep18's row died days ago; a live autopilot on the same book must not revive it."""
     monkeypatch.setattr(procs, "list_processes", lambda: [procs.ProcInfo(1, 1.0, AUTOPILOT)])
     app = make_app(tmp_path, monkeypatch)
+    _age_home(tmp_path)
     _lease(tmp_path, "ep04", "2020-01-01T00:00:00Z")
     client = TestClient(app)
     shell = client.get("/api/pulse.json").json()["shell"]

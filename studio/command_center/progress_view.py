@@ -283,7 +283,8 @@ def assemble(library, codex, unit, home, conn, db_rows, derived, now, proc_rows,
     names = lp.registry_names() or {k: v["name"] for k, v in state["steps"].items()}
     hist, frames = history(conn, home.parent.parent, now), lp.take_frames(home)
     rows = procs.list_processes() if proc_rows is None else proc_rows
-    alive = vitals.pid_alive(procs.find_drive(rows, codex, number_of(unit) or -1), state["t0"])
+    alive = (vitals.pid_alive(procs.find_drive(rows, codex, number_of(unit) or -1), state["t0"])
+             or vitals.files_alive(home, now))
     v = _vital(state, derived, frames, hist, alive, now)
     left = step_left(state, hist, home.parent.parent, frames, now)
     tiles = items(state, home, state["step"], v["vital"] in RUNNING, left["r"])

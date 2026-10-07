@@ -39,6 +39,16 @@ def make_library(tmp_path: Path, monkeypatch) -> Path:
     return root
 
 
+def age_home(tmp_path: Path, unit: str = "ep04", days: int = 3) -> None:
+    """The unit's folder stopped moving days ago (a dead run's files)."""
+    import os
+    import time
+    old = time.time() - days * 86400
+    home = tmp_path / "library" / f"{CODEX}_a-book" / "episodes" / unit
+    for p in [home] + list(home.iterdir()):
+        os.utime(p, (old, old))
+
+
 def make_logs(tmp_path: Path) -> Path:
     """A logs root with two runs of the book's episode stage; RUN's is the older."""
     folder = tmp_path / "logs" / CODEX / "episode"
