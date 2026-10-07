@@ -149,9 +149,21 @@ PARTS = len(PART_TABLE)
 PART_FRAME, PART_SHOTS, PART_LINES = (f"--- PART {i + 1} OF {PARTS}: {name} ---" for i, (name, _) in enumerate(PART_TABLE))
 
 
+def _cured(doc):
+    """The free cures a part's raw text gets BEFORE the contract judges it (ep22,
+    2026-10-07): luna wrote 'slowly' in three motions, the shots part was refused
+    three times a rung, and `strip_slow` never got its turn because no draft landed."""
+    if isinstance(doc, dict) and isinstance(doc.get("shots"), list):
+        from studio import plan_cures
+        doc = {**doc, "shots": [plan_cures.strip_slow({"shots": [s]})["shots"][0] if isinstance(s, dict) else s
+                                for s in doc["shots"]]}
+    return doc
+
+
 def _part_model(name: str, fields: tuple[str, ...]):
-    from pydantic import create_model
-    return create_model(name, **{k: (Draft.model_fields[k].annotation, Draft.model_fields[k]) for k in fields})
+    from pydantic import create_model, model_validator
+    return create_model(name, __validators__={"_cure_first": model_validator(mode="before")(classmethod(lambda cls, v: _cured(v)))},
+                        **{k: (Draft.model_fields[k].annotation, Draft.model_fields[k]) for k in fields})
 
 
 PartFrame = _part_model("PartFrame", FRAME_FIELDS)

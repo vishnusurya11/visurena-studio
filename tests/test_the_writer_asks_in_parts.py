@@ -67,3 +67,28 @@ def test_a_fake_that_answers_the_whole_draft_still_serves_each_part():
     validates its own fields out of it (llm._validated takes a superset model)."""
     got = ew.write(BRIEF, _agent=FakeModel(ew.Draft.model_validate(_draft())))
     assert isinstance(got, Episode)
+
+
+def test_a_slow_word_in_a_part_is_stripped_before_the_contract_judges_it():
+    """ep22 (2026-10-07): luna wrote 'slowly' in three motions; the shots part was
+    refused three times a rung by the contract's rule and the draft never landed,
+    so the free `strip_slow` cure (L3) never got its turn.  The cure runs on the
+    part's raw text first; the contract then judges the cured text."""
+    from types import SimpleNamespace
+    doc = _draft()
+    frame = ew.PartFrame.model_validate({k: doc[k] for k in ew.FRAME_FIELDS})
+    lines = ew.PartLines.model_validate({k: doc[k] for k in ew.LINE_FIELDS})
+    slow = {"shots": [dict(s, motion="The camera drifts slowly left.") if i == 0 else s
+                      for i, s in enumerate(doc["shots"])]}
+    calls = []
+
+    class Fake:
+        def __call__(self, prompt, structured_output_model=None):
+            calls.append(structured_output_model.__name__)
+            payload = {ew.PartFrame: frame, ew.PartShots: slow, ew.PartLines: lines}[structured_output_model]
+            return SimpleNamespace(structured_output=payload, metrics=SimpleNamespace(
+                accumulated_usage={"inputTokens": 1, "outputTokens": 1, "totalTokens": 2}))
+
+    got = ew.write(BRIEF, _agent=Fake())
+    assert isinstance(got, Episode) and calls == ["PartFrame", "PartShots", "PartLines"]
+    assert "slowly" not in got.shots[0].motion and "drifts left" in got.shots[0].motion
