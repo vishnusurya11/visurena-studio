@@ -454,11 +454,47 @@ def holds_and_unsplit(doc: dict, rate: float = 3.0) -> tuple[dict, list[tuple[in
                 s[key] = round(float(s.get(key) or 0) - cut, 2)
                 over = round(over - cut, 2)
 
+    # 4b. a shot still over the take with two or more lines and nothing left to
+    # shave seats a line on a neighbour (A31, ep19 rung 3: 4 + 14 words, 8.4 s)
+    seat_overflow(doc, rate)
+
     # 5. (was 3b) no projected hole in speech over the wall: closed LAST, by
     # the checker's own placement (G-HOLE's), largest holds first, floors
     # kept -- button_beat raises a hold, so it must run before the close or
     # it reopens the hole it sits in
     return _close_projected_holes(button_beat(doc), rate), unsplit
+
+
+def seat_overflow(doc: dict, rate: float) -> dict:
+    """A shot past the take budget with two or more lines moves its LAST line
+    to the next shot when that shot has room (the lines cap and its own
+    budget), else its FIRST line to the shot before; a line that fits nowhere
+    stays, and the battery still names the shot.  Line indices are untouched:
+    only `shot` moves, as `dialogue_first` moves it."""
+    from studio.episode_spec import MAX_LINES_PER_SHOT as cap
+    lines = doc.get("lines") or []
+    last = max((s["index"] for s in doc.get("shots") or []), default=-1)
+    for s in doc.get("shots") or []:
+        n = s["index"]
+        own = [l for l in lines if l["shot"] == n]
+        if len(own) < 2 or _shot_secs(doc, rate)[n] <= TAKE_BUDGET_S:
+            continue
+        if not (n < last and _room(doc, rate, n + 1, own[-1], cap) and _move(own[-1], n + 1)):
+            n > 0 and _room(doc, rate, n - 1, own[0], cap) and _move(own[0], n - 1)
+    return doc
+
+
+def _room(doc: dict, rate: float, n: int, line: dict, cap: int) -> bool:
+    """Shot n can take this line: under the lines cap, and still inside a take."""
+    secs = _shot_secs(doc, rate)
+    count = sum(1 for l in doc.get("lines") or [] if l["shot"] == n)
+    extra = len(str(line["text"]).split()) / rate + (BREATH_S if count else 0.0)
+    return count < cap and secs.get(n, 0.0) + extra <= TAKE_BUDGET_S
+
+
+def _move(line: dict, n: int) -> bool:
+    line["shot"] = n
+    return True
 
 
 def trim_measured_holes(doc: dict, placed: dict) -> int:
