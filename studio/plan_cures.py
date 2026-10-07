@@ -1447,7 +1447,8 @@ CURES: list[tuple[re.Pattern, str]] = [
     (re.compile(r"props.*\.json|names setup .* not defined|prop (?!.*no chapter span)"), "legal_props"),
     (re.compile(r"G-CROWD-CLOSE"), "close_crowds"),
     (re.compile(r"G-PHANTOM"), "strip_phantoms"),
-    (re.compile(r"projects to .* an episode is|ONE PER TAKE|TAKE LENGTH|G-SETUP|G-HOLE|hole in speech|of the runtime"), "holds"),
+    (re.compile(r"G-SETUP setup"), "split_setup"),
+    (re.compile(r"projects to .* an episode is|ONE PER TAKE|TAKE LENGTH|G-HOLE|hole in speech|of the runtime"), "holds"),
     (re.compile(r"median (?:frame-edge|at_rest)"), "edge_cases"),
     (re.compile(r"G-ASPECT|style line is \d+ words|look"), "pin_series"),
 ]
@@ -1698,3 +1699,32 @@ def silent_shot(doc: dict) -> dict:
     for k, line in enumerate(kept):
         line["index"] = k
     return {**doc, "lines": kept}
+
+
+def split_setup(doc: dict, rate: float = 3.0) -> dict:
+    """G-SETUP's own advice as a cure (ep23, 2026-10-07: 50.5 s against 50 and
+    nothing to shave): a setup's shots past the cap move, in order, to a copy of
+    it named `<name>_2` (then `_3`), the same picture under a second name."""
+    from studio.episode_spec import BREATH, HANDLE, MAX_SETUP_SECONDS
+    shots, lines = doc.get("shots") or [], doc.get("lines") or []
+    setups = dict(doc.get("setups") or {})
+    carried = {}
+    for line in lines:
+        carried.setdefault(line["shot"], []).append(line)
+    def seconds(s):
+        rows = carried.get(s["index"], [])
+        words = sum(len((l.get("text") or "").split()) for l in rows)
+        return 2 * HANDLE + words / rate + BREATH * max(len(rows) - 1, 0) + float(s.get("beat_s") or 0) + float(s.get("coda_s") or 0)
+    spent, part = {}, {}
+    for s in shots:
+        name = s.get("setup")
+        if name not in setups:
+            continue
+        k = part.get(name, 1)
+        key = name if k == 1 else f"{name}_{k}"
+        if spent.get(key, 0.0) + seconds(s) > MAX_SETUP_SECONDS + 1e-6 and spent.get(key, 0.0) > 0:
+            k += 1; part[name] = k; key = f"{name}_{k}"
+            setups.setdefault(key, dict(setups[name]))
+        spent[key] = spent.get(key, 0.0) + seconds(s)
+        s["setup"] = key
+    return {**doc, "setups": setups, "shots": shots}
