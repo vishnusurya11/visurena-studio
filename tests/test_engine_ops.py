@@ -118,3 +118,16 @@ def test_the_module_stores_no_absolute_path_but_its_one_default():
     """Every other path is built from the one constant at call time."""
     source = Path(eo.__file__).read_text(encoding="utf-8")
     assert source.count("D:/") == 1 and "C:/" not in source and "C:\\" not in source
+
+
+def test_the_run_tree_never_includes_the_autopilot_or_a_shell_that_names_the_episode():
+    """2026-10-07: `kill_run_tree(... 22)` matched the shell running
+    `autopilot.py retry 22 --book 2026...` (it carried the codex, the number and
+    'scripts/episode/') and killed the operator's own command (exit 15)."""
+    from studio.command_center.procs import ProcInfo
+    rows = [ProcInfo(pid=1, cmdline="python scripts/episode/drive.py 20260827135508 22", started=0.0),
+            ProcInfo(pid=2, cmdline="python episode.py 20260827135508 22", started=0.0),
+            ProcInfo(pid=3, cmdline="python scripts/episode/autopilot.py retry 22 --book 20260827135508_x", started=0.0),
+            ProcInfo(pid=4, cmdline="bash -c \"uv run python scripts/episode/autopilot.py park 22 --why x --book 20260827135508\"", started=0.0),
+            ProcInfo(pid=5, cmdline="python scripts/episode/step_09_shoot.py 20260827135508 22", started=0.0)]
+    assert [p.pid for p in engine_ops.run_tree(rows, "20260827135508", 22)] == [1, 2, 5]

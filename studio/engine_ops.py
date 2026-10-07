@@ -80,10 +80,18 @@ def run_tree(rows: Iterable[ProcInfo], codex: str, n: int) -> list[ProcInfo]:
     hits = []
     for p in rows:
         line = _slashed(p.cmdline)
+        if any(mark in line for mark in NEVER_KILL):
+            continue                        # the supervisor or an operator's command, never a run
         if codex in line and any(mark in line for mark in RUN_MARKS) \
                 and wanted & set(line.replace('"', " ").split()):
             hits.append(p)
     return hits
+
+
+NEVER_KILL = ("autopilot.py",)
+"""A command line the kill never touches: 2026-10-07 `kill_run_tree(... 22)`
+matched the shell running `autopilot.py retry 22 --book 2026...` (codex, number
+and 'scripts/episode/' all present) and killed the operator's own command."""
 
 
 def _terminate(pid: int) -> None:
