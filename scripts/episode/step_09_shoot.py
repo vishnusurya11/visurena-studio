@@ -104,7 +104,21 @@ def episode_canvas(ctx) -> tuple[int, int]:
 def done(ctx) -> bool:
     takes = takes_of(ctx.home / TAKES)
     return (bool(takes) and judged(takes) and eye_verdict.passed(ctx.home / TAKES, takes)
-            and not stale_takes(ctx))
+            and not stale_takes(ctx) and not reset_since_verdict(ctx, takes))
+
+
+def reset_since_verdict(ctx, takes: list[Path]) -> bool:
+    """The owner's retry stamped the clock AFTER the verdict was signed: a
+    terminal signed on a spent clock (ep19 2026-10-07 18:19Z: keep_best at
+    attempt 0 over four frozen takes and two hard cuts) is re-judged with the
+    fresh one instead of read as done and sent to publish."""
+    from datetime import datetime
+    from studio import run_budget
+    stamp = run_budget.clock_reset_at(ctx.home)
+    target = eye_verdict.path(ctx.home / TAKES, eye_verdict.fingerprint(takes))
+    if not stamp or not target.exists():
+        return False
+    return datetime.fromtimestamp(target.stat().st_mtime).isoformat(timespec="seconds") < stamp
 
 
 def approved(policy: gate_policy.Policy) -> str:

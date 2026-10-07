@@ -51,3 +51,24 @@ def test_the_autopilots_retry_resets_the_clock(tmp_path, monkeypatch):
     home.mkdir(parents=True)
     cli.retry(root, 19)
     assert (home / run_budget.CLOCK_RESET).exists()
+
+
+def test_a_take_verdict_signed_before_the_reset_is_not_done(tmp_path, monkeypatch):
+    """The verdict was keep_best on a spent clock; the retry's stamp is newer,
+    so step 09 re-enters its ladder instead of reading as done."""
+    import time
+    from types import SimpleNamespace
+    from scripts.episode import step_09_shoot as step
+    from studio import eye_verdict
+    room = tmp_path / "takes" / "r2v"
+    room.mkdir(parents=True)
+    take = room / "T00.mp4"
+    take.write_bytes(b"take")
+    eye_verdict.path(room, eye_verdict.fingerprint([take])).write_text('{"verdict": "flagged"}', encoding="utf-8")
+    ctx = SimpleNamespace(home=tmp_path)
+    monkeypatch.setattr(step, "judged", lambda takes: True)
+    monkeypatch.setattr(step, "stale_takes", lambda ctx: [])
+    assert step.done(ctx) is True
+    time.sleep(1.1)
+    run_budget.reset_clock(tmp_path)
+    assert step.done(ctx) is False
