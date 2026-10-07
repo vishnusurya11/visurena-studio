@@ -204,11 +204,24 @@ def claim_note(claim: Claim, chapter: str | None, shots: set[int]) -> tuple[str,
     return note, evidence
 
 
+def declared_count(plan, claim: Claim) -> bool:
+    """A count of ONE on a shot whose setup stages a crowd is the setup's own
+    declaration (G-CROWD's minimum, written by its cure), not a claim on the
+    chapter (A36, ep19 2026-10-07: 5 of the critic's 21 flags)."""
+    if claim.kind != "count" or re.sub(r"[^a-z0-9]", "", claim.claim.lower()) != "extras1":
+        return False
+    shot = next((s for s in plan.shots if s.index == claim.shot), None)
+    setup = (getattr(plan, "setups", None) or {}).get(getattr(shot, "setup", None)) if shot else None
+    return bool((getattr(setup, "crowd", "") or "").strip())
+
+
 def claim_faults(plan: Episode, readings: list[PlanReading], chapter: str | None) -> list[Fault]:
     shots = {s.index for s in plan.shots}
     spans = {s.index: list(getattr(s, "source", None) or []) for s in plan.shots}
     out = []
     for (shot, _), claim in invented(readings, chapter, shots, spans).items():
+        if declared_count(plan, claim):
+            continue
         note, evidence = claim_note(claim, chapter, shots)
         out.append(Fault(kind="invented", where=where(shot), note=note, evidence=evidence))
     return out

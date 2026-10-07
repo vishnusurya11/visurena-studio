@@ -1093,8 +1093,13 @@ def staged_props(shot, setup) -> list[str]:
 
 
 def claims(shot, setup) -> list[str]:
-    """What this shot asserts about the chapter: a count, a posture, a prop."""
-    out = [f"extras {shot.extras}"] if getattr(shot, "extras", 0) else []
+    """What this shot asserts about the chapter: a count, a posture, a prop.
+    A count of ONE under a setup whose crowd prose stages people is the
+    setup's own declaration (G-CROWD's minimum, written by its cure), not a
+    claim on the chapter (A36, ep19: 5 of the critic's 21 flags)."""
+    extras = getattr(shot, "extras", 0) or 0
+    staged = bool((getattr(setup, "crowd", "") or "").strip())
+    out = [f"extras {extras}"] if extras and not (extras == 1 and staged) else []
     if hit := POSTURE.search(claim_prose(shot)):
         out.append(f"posture {hit.group(0)!r}")
     return out + [f"prop {pid!r}" for pid in staged_props(shot, setup)]
