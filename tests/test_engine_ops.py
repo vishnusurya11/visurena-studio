@@ -130,4 +130,4 @@ def test_the_run_tree_never_includes_the_autopilot_or_a_shell_that_names_the_epi
             ProcInfo(pid=3, cmdline="python scripts/episode/autopilot.py retry 22 --book 20260827135508_x", started=0.0),
             ProcInfo(pid=4, cmdline="bash -c \"uv run python scripts/episode/autopilot.py park 22 --why x --book 20260827135508\"", started=0.0),
             ProcInfo(pid=5, cmdline="python scripts/episode/step_09_shoot.py 20260827135508 22", started=0.0)]
-    assert [p.pid for p in engine_ops.run_tree(rows, "20260827135508", 22)] == [1, 2, 5]
+    assert [p.pid for p in eo.run_tree(rows, "20260827135508", 22)] == [1, 2, 5]
