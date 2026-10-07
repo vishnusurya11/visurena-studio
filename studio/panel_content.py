@@ -227,7 +227,7 @@ subject list: ep13 shot 10 read 'gentle rise' and listed 'mountains' for a low
 far horizon, three draws running."""
 
 
-PIT = re.compile(r"(?:pit|quarry|excavation|crater|sand-?pit)", re.I)
+PIT = re.compile(r"\b(?:pit|quarry|excavation|crater|sand-?pit)\b", re.I)
 """A shot staged in a dug place: its steep wall is what was asked for."""
 
 
