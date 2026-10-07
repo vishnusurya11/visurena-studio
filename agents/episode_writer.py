@@ -49,6 +49,10 @@ class Bed(BaseModel):
     tone: str
 
 
+CODE_SET_FIELDS = frozenset({"words_per_second"})
+"""Contract fields the code sets, never the writer: the Draft mirrors every other one."""
+
+
 class Draft(BaseModel):
     """`Episode` in a strict-schema-safe shape; every field of the contract, no rule of it."""
     number: int = Field(ge=1)
@@ -69,9 +73,14 @@ class Draft(BaseModel):
     """The contract's omitted shots; a writer's first draft omits none."""
 
 
-def to_episode(draft: Draft) -> Episode:
-    """The draft under the contract: named setups keyed by name, beds as rows."""
+def to_episode(draft: Draft, brief: dict | None = None) -> Episode:
+    """The draft under the contract: named setups keyed by name, beds as rows,
+    and the band's spoken rate, so the contract projects at the pace the writer
+    was told (ep22, 2026-10-07: 2.5 in the brief, 3.0 in the contract, 106 s)."""
     doc = draft.model_dump()
+    rate = ((brief or {}).get("band") or {}).get("words_per_second")
+    if rate:
+        doc["words_per_second"] = float(rate)
     setups: dict[str, dict] = {}
     for setup in doc.pop("setups"):
         name = setup.pop("name")
@@ -205,7 +214,7 @@ def write(brief: dict, refusals: list[str] | None = None, usage: dict | None = N
     for _ in range(CONTRACT_RETRIES):
         draft = write_parts(brief, asked, shown, usage, _agent)
         try:
-            return to_episode(draft)
+            return to_episode(draft, brief)
         except ValueError as bad:
             refused, shown = bad, draft.model_dump()
             asked = list(refusals or []) + contract_lines_of(bad)

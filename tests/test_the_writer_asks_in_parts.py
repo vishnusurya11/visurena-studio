@@ -92,3 +92,17 @@ def test_a_slow_word_in_a_part_is_stripped_before_the_contract_judges_it():
     got = ew.write(BRIEF, _agent=Fake())
     assert isinstance(got, Episode) and calls == ["PartFrame", "PartShots", "PartLines"]
     assert "slowly" not in got.shots[0].motion and "drifts left" in got.shots[0].motion
+
+
+def test_the_contract_projects_at_the_rate_the_brief_gave_the_writer():
+    """ep22 (2026-10-07): the brief said 2.5 words/s (A9), the contract still
+    projected at 3.0, and luna's honest 300-word plan 'projects to 106 s' under
+    the 120 s floor.  The draft carries the band's rate into the contract."""
+    from studio import episode_spec
+    doc = _draft()
+    fast = ew.Draft.model_validate(doc)
+    brief = {**BRIEF, "band": {**BRIEF["band"], "words_per_second": 2.5}}
+    ep = ew.to_episode(fast, brief)
+    assert ep.words_per_second == 2.5
+    assert ep.projected_seconds() > ew.to_episode(fast).projected_seconds() * 1.15
+    assert ew.to_episode(fast).words_per_second == episode_spec.WORDS_PER_SECOND

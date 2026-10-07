@@ -88,7 +88,7 @@ def test_the_canned_plan_is_a_valid_episode():
 # ---- the draft: the contract in a shape a strict provider schema accepts -------------
 
 def test_the_draft_has_exactly_the_contract_s_fields():
-    assert set(ew.Draft.model_fields) == set(Episode.model_fields)
+    assert set(ew.Draft.model_fields) == (set(Episode.model_fields) - ew.CODE_SET_FIELDS)
 
 
 def test_the_draft_schema_is_strict_safe_where_the_contract_is_not():

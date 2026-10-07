@@ -466,6 +466,11 @@ class Setup(BaseModel):
 class Episode(BaseModel):
     number: int = Field(ge=1)
     title: str
+    words_per_second: float = Field(default=WORDS_PER_SECOND, gt=0)
+    """The pace the runtime is projected at: the series' MEASURED narrator when
+    the brief knows it (plan_brief.band), else the contract's projection.  The
+    brief and the contract must agree (ep22, 2026-10-07: 2.5 against 3.0 and an
+    honest plan 'projects to 106 s')."""
     question: str = ""
     """The one question this episode answers, in Armstrong's form: "Today, can
     X do Y?"  Answered before the episode ends, or the episode has no reason to
@@ -567,7 +572,7 @@ class Episode(BaseModel):
 
     def shot_seconds(self, shot: Shot) -> float:
         carried = self.lines_of(shot.index)
-        return (2 * HANDLE + sum(line.projected_seconds() for line in carried)
+        return (2 * HANDLE + sum(line.words() / self.words_per_second for line in carried)
                 + BREATH * max(len(carried) - 1, 0) + shot.beat_s + shot.coda_s)
 
     def projected_seconds(self) -> float:
@@ -783,7 +788,7 @@ class Episode(BaseModel):
         seconds = self.projected_seconds()
         if not MIN_SECONDS <= seconds <= MAX_SECONDS:
             raise ValueError(f"projects to {seconds:.0f} s; an episode is {MIN_SECONDS:.0f}-"
-                             f"{MAX_SECONDS:.0f} s (words at {WORDS_PER_SECOND} a second)")
+                             f"{MAX_SECONDS:.0f} s (words at {self.words_per_second:g} a second)")
         elapsed, turn_at = 0.0, 0.0
         for shot in self.shots:
             if shot.section == "turn":
