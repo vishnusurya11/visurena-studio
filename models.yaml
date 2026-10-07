@@ -51,16 +51,18 @@ tiers:
     params:
       reasoning_effort: none
   local:                  # the creative writers: episode_writer, line_filler
-    # OWNER 2026-10-06: "Sonnet 5.5" -- luna failed ep19's plan three rounds running
-    # (12 shots for 121 s, first spoken line at 76 % of a chapter that speaks at 9 %).
-    # The $3/episode wall (money.episode_ceiling_usd) still gates every call.
-    provider: openrouter  # Claude Sonnet 5.5  $2.00 in / $10.00 out  ~$0.23/call
-    model: anthropic/claude-sonnet-5.5
-    # 2026-10-07: the strict grammar of the WHOLE Draft is over the provider's limit, so the writer
-    # asks in parts (agents/episode_writer PARTS), each under it; the loose path stays a fallback.
-    timeout_s: 1200       # one strict part's wall; the SDK's silent 600 s x3 hid a 33-min body call (ep21)
-    # provider: openai    # previous: gpt-5.6-luna, reasoning_effort none, ~$0.03/call
-    # model: gpt-5.6-luna
+    # OWNER 2026-10-06: "Sonnet 5.5" -- then 2026-10-07: every provider behind OpenRouter refuses the
+    # strict grammar of the whole Draft (parts compile, the shots part answered 47k tokens for $0.61),
+    # the loose path cannot answer (reasoning mandatory, budget advisory): $1.09 a draft, two drafts a
+    # wall. The owner's standing rule -- any model, $3 an episode -- puts the writer back on luna;
+    # ep19's luna faults (G-STORY wall, the brief's rate, G-SYNC) are cured in code since.
+    provider: openai
+    model: gpt-5.6-luna   # ~$0.03/call, strict single call, ~2 min
+    params:
+      reasoning_effort: none
+    timeout_s: 1200
+    # provider: openrouter  # Claude Sonnet 5.5  $2.00 in / $10.00 out  ~$0.23/call strict (when it compiles)
+    # model: anthropic/claude-sonnet-5.5
     # ---- STORY-WRITER OPTIONS (2026-10-04, OpenRouter live prices, USD per M tokens) ----
     # Measured writer call: ~51k tokens in, ~13k out (usage table, 400 calls).
     # A healthy plan is ~5-10 calls; ep14-16 looped 120-169 calls ($2.70-4.10) on luna.

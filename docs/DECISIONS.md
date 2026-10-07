@@ -4,6 +4,22 @@ Newest first. Every architectural change gets an entry.
 
 ---
 
+## 2026-10-07 — The episode writer returns to gpt-5.6-luna (the owner's standing rule: any model, $3 an episode)
+
+**Ruling (applied under the owner's 2026-10-06 rule "use whatever models you want but the budget
+is $3 for episode"):** since 2026-10-06 17:27Z every provider behind OpenRouter refuses the strict
+grammar of the whole Draft for anthropic/claude-sonnet-5.5; split into parts it answers, but the
+shots part returned 47k tokens for $0.61 and one draft costs $1.09 — two drafts a wall, where a plan
+takes two to four. The loose path cannot answer (reasoning is mandatory for the model and its budget
+is advisory). Measured on ep20 and ep21 (eight launches, ~$5 of writer calls, no plan signed). The
+`local` tier goes back to gpt-5.6-luna (~$0.03 a call, one strict call, ~2 min). The faults luna
+showed on ep19 — the first-dialogue and narration walls, the brief's rate, G-SYNC seating — are cured
+in code since (2a50fc4, e64a94b). The parts writer, the loose fallback and the ledgering of failed paid
+calls stay, so a future tier change meets a working path. Tracker A17–A19 in
+`architecture/plan/2026-10-06_autopilot_build.md`.
+
+---
+
 ## 2026-10-06 — The autopilot and the brain on a leash (owner decision: "Approve")
 
 **Ruling:** a Python supervisor (`scripts/episode/autopilot.py`, re-armed by Windows Task
