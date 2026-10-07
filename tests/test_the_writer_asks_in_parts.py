@@ -106,3 +106,19 @@ def test_the_contract_projects_at_the_rate_the_brief_gave_the_writer():
     assert ep.words_per_second == 2.5
     assert ep.projected_seconds() > ew.to_episode(fast).projected_seconds() * 1.15
     assert ew.to_episode(fast).words_per_second == episode_spec.WORDS_PER_SECOND
+
+
+def test_the_beat_before_the_button_is_set_before_the_contract_judges_the_draft():
+    """ep22 (2026-10-07): luna's drafts were refused three times a rung for 'the
+    shot before the button names a beat of >= 1.0 s of silence' -- a structural
+    rule with a one-number cure.  `to_episode` applies the free structural cures
+    to the merged draft before the contract judges it."""
+    doc = _draft()
+    button_shot = doc["lines"][-1]["shot"]
+    before = max(s["index"] for s in doc["shots"] if s["index"] < button_shot)
+    for s in doc["shots"]:
+        if s["index"] == before:
+            s["beat_s"] = 0.0
+    draft = ew.Draft.model_validate(doc)
+    got = ew.to_episode(draft)
+    assert got.shot(before).beat_s >= 1.0

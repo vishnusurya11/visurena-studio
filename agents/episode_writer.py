@@ -87,7 +87,18 @@ def to_episode(draft: Draft, brief: dict | None = None) -> Episode:
         if name in setups:
             raise ValueError(f"setup {name!r} is defined twice")
         setups[name] = setup
-    return Episode.model_validate({**doc, "setups": setups})
+    return Episode.model_validate(structural_cures({**doc, "setups": setups}))
+
+
+def structural_cures(doc: dict) -> dict:
+    """The free one-number cures a merged draft gets BEFORE the contract judges it
+    (ep22, 2026-10-07: 'the shot before the button names a beat of >= 1.0 s' refused
+    three drafts a rung while `plan_cures.button_beat` sat unused one step later)."""
+    from studio import plan_cures
+    try:
+        return plan_cures.button_beat(doc)
+    except Exception:                       # a cure never turns a refusal into a crash
+        return doc
 
 
 def load_skill() -> str:
