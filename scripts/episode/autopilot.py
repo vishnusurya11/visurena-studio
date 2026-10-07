@@ -798,6 +798,8 @@ def retry(book: Path, n: int) -> int:
     if len(kept) != len(rows):
         path.write_text("".join(json.dumps(r, ensure_ascii=False) + "\n" for r in kept), encoding="utf-8")
     retire_brain(home_of(book, n))                 # parked or not: a retry is a launch order (ep21)
+    from studio import run_budget
+    run_budget.reset_clock(home_of(book, n))       # and a fresh clock: the earlier attempts' hours are not this one's
     event(book, {"event": "retry", "episode": n})
     return len(rows) - len(kept)
 

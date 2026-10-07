@@ -110,20 +110,52 @@ class Budget:
         self.pool_drawn += seconds
 
 
+CLOCK_RESET = "clock_reset.json"
+"""The owner's `retry` stamps the episode home: timing rows that ended before
+the stamp are an earlier attempt's, not this one's (ep19, 2026-10-07: three
+plan climbs on code faults spent the ceiling before the takes were judged)."""
+
+
+def reset_clock(home, at: str | None = None) -> str:
+    """Stamp the home: the clock starts over at `at` (local ISO, the timing
+    rows' own convention), now by default.  Returns the stamp."""
+    import json
+    from datetime import datetime
+    from pathlib import Path
+    stamp = at or datetime.now().isoformat(timespec="seconds")
+    Path(home).mkdir(parents=True, exist_ok=True)
+    (Path(home) / CLOCK_RESET).write_text(json.dumps({"at": stamp}), encoding="utf-8")
+    return stamp
+
+
+def clock_reset_at(home) -> str:
+    """The stamp, or "" (every row counts)."""
+    import json
+    from pathlib import Path
+    path = Path(home) / CLOCK_RESET
+    try:
+        return str(json.loads(path.read_text(encoding="utf-8")).get("at") or "") if path.exists() else ""
+    except (ValueError, OSError):
+        return ""
+
+
 def spent_before(home) -> float:
-    """Seconds this episode's earlier runs logged (timing.jsonl), 0.0 when
-    there is none yet.  What `Budget.charge` is charged with at context
-    creation, so the ceiling binds across resumes."""
+    """Seconds this episode's earlier runs logged (timing.jsonl) since the
+    last clock reset, 0.0 when there is none yet.  What `Budget.charge` is
+    charged with at context creation, so the ceiling binds across resumes."""
     import json
     from pathlib import Path
     path = Path(home) / "timing.jsonl"
     if not path.exists():
         return 0.0
-    total = 0.0
+    since, total = clock_reset_at(home), 0.0
     for line in path.read_text(encoding="utf-8").splitlines():
         if line.strip():
             try:
-                total += float(json.loads(line).get("seconds") or 0.0)
-            except (ValueError, TypeError):
+                row = json.loads(line)
+                if since and str(row.get("ended") or "") and str(row.get("ended")) < since:
+                    continue
+                total += float(row.get("seconds") or 0.0)
+            except (ValueError, TypeError, AttributeError):
                 continue
     return total
