@@ -1448,6 +1448,7 @@ CURES: list[tuple[re.Pattern, str]] = [
     (re.compile(r"G-CROWD-CLOSE"), "close_crowds"),
     (re.compile(r"G-PHANTOM"), "strip_phantoms"),
     (re.compile(r"G-SETUP setup"), "split_setup"),
+    (re.compile(r"G-SPEAKER line"), "alias_speakers"),
     (re.compile(r"projects to .* an episode is|ONE PER TAKE|TAKE LENGTH|G-HOLE|hole in speech|of the runtime"), "holds"),
     (re.compile(r"median (?:frame-edge|at_rest)"), "edge_cases"),
     (re.compile(r"G-ASPECT|style line is \d+ words|look"), "pin_series"),
@@ -1728,3 +1729,27 @@ def split_setup(doc: dict, rate: float = 3.0) -> dict:
         spent[key] = spent.get(key, 0.0) + seconds(s)
         s["setup"] = key
     return {**doc, "setups": setups, "shots": shots}
+
+
+NARRATOR_LIKE = re.compile(r"^(the_)?(first_person_)?narrator$")
+"""A speaker the writer called the narrator in its own words."""
+
+
+def narrator_id(cast_ids: list[str]) -> str | None:
+    """The cast's one narrator: the id that ENDS in narrator (narrators_brother is
+    not one); None when there is none or more than one."""
+    hits = [c for c in cast_ids if re.search(r"(^|_)narrator$", c)]
+    return hits[0] if len(hits) == 1 else None
+
+
+def alias_speakers(doc: dict, cast_ids: list[str]) -> dict:
+    """G-SPEAKER's free cure (ep23): a narrator-like speaker becomes the cast's one
+    narrator id; any other unknown speaker is left for the writer."""
+    target = narrator_id(cast_ids)
+    if target is None:
+        return doc
+    for line in doc.get("lines") or []:
+        said = re.sub(r"[^a-z0-9]+", "_", str(line.get("speaker", "")).strip().lower()).strip("_")
+        if said not in cast_ids and NARRATOR_LIKE.match(said):
+            line["speaker"] = target
+    return doc

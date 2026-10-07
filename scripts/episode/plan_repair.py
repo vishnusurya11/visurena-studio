@@ -231,6 +231,8 @@ def apply(doc: dict, rows: list[str], book, number: int = 0,
             doc = pc.silent_shot(doc)
         elif name == "split_setup":
             doc = pc.split_setup(doc, rate=rate)
+        elif name == "alias_speakers":
+            doc = pc.alias_speakers(doc, cast_ids_of(book))
         elif name == "strip_phantoms":
             doc, _ = pc.strip_phantoms(doc, *phantom_context(book))
         elif name == "holds":
@@ -415,6 +417,12 @@ def llm_cure_round(book, number: int, rows: list[str]) -> bool:
         episode_home.write_plan(path, doc)
         print(f"llm cure round: {cured} field(s) rewritten under G-CURE-VERIFY")
     return bool(cured)
+
+
+def cast_ids_of(book) -> list[str]:
+    """The cast's entity ids from refs.json (G-SPEAKER's cure needs the one narrator)."""
+    doc = episode_home.read_json(Path(book) / "refs" / "refs.json") or {}
+    return [str(r.get("entity_id")) for r in doc.get("refs") or [] if r.get("entity_id")]
 
 
 def apply_each(doc: dict, rows: list[str], book, number: int = 0, rate: float = 3.0,

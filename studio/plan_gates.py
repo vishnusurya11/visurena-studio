@@ -1576,3 +1576,15 @@ def article_faults(episode) -> list[str]:
 def chapter_faults(episode: Episode, paragraphs: list[str]) -> list[str]:
     """`faults` with every chapter-relative wall read from the chapter's own text."""
     return faults(episode, quote_share(paragraphs), quiet_share(paragraphs), speech_share(paragraphs))
+
+
+# ---- G-SPEAKER: a line's speaker is a cast id (2026-10-07) ----------------------
+# ep23: the writer spoke lines as `narrator` beside the cast's
+# `unnamed_first_person_narrator`; the plan signed, and step 04 died casting a
+# voice for a character that does not exist.
+
+def speaker_faults(episode, cast_ids: list[str]) -> list[str]:
+    """G-SPEAKER, always hard: every line's speaker is one of the cast's ids."""
+    known = ", ".join(cast_ids)
+    return [fault("G-SPEAKER", f"line {line.index}", f"speaker {line.speaker!r} is not in the cast ({known})", 0, 1)
+            for line in episode.lines if line.speaker not in set(cast_ids)]

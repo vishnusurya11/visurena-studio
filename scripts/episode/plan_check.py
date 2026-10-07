@@ -251,6 +251,10 @@ def main(book_id: str, number: int) -> int:
     print("G-ARTICLE    :", len(af) or "clean"); hard += len(af)
     for f in af:
         print("   ", f[:170])
+    sp = plan_gates.speaker_faults(ep, [str(r.get("entity_id")) for r in refs if r.get("entity_id")])
+    print("G-SPEAKER    :", len(sp) or "clean"); hard += len(sp)
+    for f in sp:
+        print("   ", f[:170])
     cc = plan_gates.close_crowd_faults(ep)
     print("G-CROWD-CLOSE:", cc or "clean"); hard += len(cc)
     for f in cc:

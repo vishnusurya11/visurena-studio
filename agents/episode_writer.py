@@ -87,15 +87,18 @@ def to_episode(draft: Draft, brief: dict | None = None) -> Episode:
         if name in setups:
             raise ValueError(f"setup {name!r} is defined twice")
         setups[name] = setup
-    return Episode.model_validate(structural_cures({**doc, "setups": setups}))
+    return Episode.model_validate(structural_cures({**doc, "setups": setups}, brief))
 
 
-def structural_cures(doc: dict) -> dict:
-    """The free one-number cures a merged draft gets BEFORE the contract judges it
-    (ep22, 2026-10-07: 'the shot before the button names a beat of >= 1.0 s' refused
-    three drafts a rung while `plan_cures.button_beat` sat unused one step later)."""
+def structural_cures(doc: dict, brief: dict | None = None) -> dict:
+    """The free cures a merged draft gets BEFORE the contract judges it (ep22:
+    'the shot before the button names a beat of >= 1.0 s' refused three drafts a
+    rung while `plan_cures.button_beat` sat unused; ep23: lines spoken by
+    `narrator` beside the cast's narrator id reached step 04)."""
     from studio import plan_cures
+    cast_ids = [str(r.get("entity_id")) for r in (brief or {}).get("cast") or [] if r.get("entity_id")]
     try:
+        doc = plan_cures.alias_speakers(doc, cast_ids) if cast_ids else doc
         return plan_cures.button_beat(doc)
     except Exception:                       # a cure never turns a refusal into a crash
         return doc
