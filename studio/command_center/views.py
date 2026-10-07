@@ -16,7 +16,7 @@ from functools import lru_cache
 from pathlib import Path
 
 from studio import db, eta, gate_policy, registry
-from studio.command_center import library_paths, thumbs
+from studio.command_center import library_paths, procs, thumbs
 
 MARKS = {"queued": ("circle", "○"), "blocked": ("circle-dashed", "◌"), "running": ("loader", "●"),
          "done": ("check", "✓"), "flagged": ("flag", "⚑"), "deferred": ("corner-up-left", "↩"),
@@ -64,6 +64,55 @@ def lease_lapsed(row: dict, now: datetime) -> bool:
         return datetime.fromisoformat(str(until).replace("Z", "+00:00")) < now
     except ValueError:
         return False
+
+
+def unit_tokens(unit: str) -> set[str]:
+    """The command-line spellings of a unit's number (`ep04` -> 4, 04, ep04); empty when none."""
+    digits = "".join(c for c in (unit or "") if c.isdigit())
+    if not digits or not (unit or "").endswith(digits):
+        return set()
+    return {str(int(digits)), f"{int(digits):02d}", f"ep{int(digits):02d}"}
+
+
+BOOK_CARRY_S = 6 * 3600
+"""A book-wide carrier vouches only for a lease that starved within this window:
+the autopilot names the book, never the unit, so a days-dead row (ep18) must not
+revive just because the book is being worked."""
+CARRIERS = ("drive.py", "autopilot.py", "episode.py")
+
+
+def _unit_carried(row: dict, rows: list) -> bool:
+    """A process names this unit's number beside its codex."""
+    wanted = unit_tokens(row.get("unit") or "")
+    return bool(wanted) and any((row.get("codex_id") or "") in p.cmdline
+                                and wanted & set(p.cmdline.replace('"', " ").split()) for p in rows)
+
+
+def _book_carried(row: dict, rows: list) -> bool:
+    """A carrier runs the whole book and this lease starved recently (ep23's
+    autopilot, 2026-10-07)."""
+    until = row.get("lease_until")
+    try:
+        age = (utc_now() - datetime.fromisoformat(str(until).replace("Z", "+00:00"))).total_seconds()
+    except (TypeError, ValueError):
+        return False
+    codex = row.get("codex_id") or ""
+    return age < BOOK_CARRY_S and bool(codex) and any(
+        codex in p.cmdline and any(c in p.cmdline for c in CARRIERS) for p in rows)
+
+
+def carried(row: dict, proc_rows: list | None = None) -> bool:
+    """A lapsed running row is still alive while a process carries it: by its
+    unit's number, or book-wide for a freshly starved lease (step 09 renders
+    for long stretches without a ledger write, so the lease starves although
+    the run is healthy)."""
+    rows = procs.list_processes() if proc_rows is None else proc_rows
+    return _unit_carried(row, rows) or _book_carried(row, rows)
+
+
+def lapsed_rows(conn: sqlite3.Connection) -> list[dict]:
+    """The running rows whose lease has passed, raw."""
+    return [dict(r) for r in conn.execute(f"SELECT * FROM work_orders WHERE {LAPSED_SQL}")]
 
 
 def display_state(state: str, flags: int = 0) -> str:
@@ -144,7 +193,7 @@ def row_view(row: sqlite3.Row | dict) -> dict:
     age of its last write."""
     r = dict(row)
     r["verdicts"] = json.loads(r["verdicts"]) if r.get("verdicts") else {}
-    lapsed = lease_lapsed(r, utc_now())
+    lapsed = lease_lapsed(r, utc_now()) and not carried(r)
     state = "stale" if lapsed else r["state"]
     r["shown"] = display_state(state, r.get("flags") or 0)
     r["glyph"] = glyph(state, r.get("flags") or 0)
@@ -166,8 +215,9 @@ def book_names(conn: sqlite3.Connection) -> dict[str, str]:
 def floor(conn: sqlite3.Connection) -> dict:
     """On the floor: the running rows (the GPU's first) and the next four of
     the queue, in the order a runner would take them."""
-    running = [row_view(r) for r in conn.execute(
-        f"SELECT * FROM work_orders WHERE {LIVE_SQL} ORDER BY gpu DESC, started_at, id")]
+    running = [v for v in (row_view(r) for r in conn.execute(
+        "SELECT * FROM work_orders WHERE state = 'running' ORDER BY gpu DESC, started_at, id"))
+        if v["shown"] == "running"]
     nxt = [row_view(r) for r in conn.execute("SELECT * FROM v_queue LIMIT 4")]
     return {"running": running, "next": nxt}
 
@@ -188,7 +238,8 @@ def attention(conn: sqlite3.Connection) -> list[dict]:
         " AND s.step_id = w.step_id) AS detail FROM work_orders w"
         f" WHERE w.state IN ('failed', 'deferred', 'escalated', 'stale') OR {LAPSED_SQL.replace('state', 'w.state').replace('lease_until', 'w.lease_until')}"
         " ORDER BY w.updated_at, w.id")
-    return [row_view(r) for r in rows] + flagged_unacknowledged(conn)
+    needs = [v for v in (row_view(r) for r in rows) if v["shown"] != "running"]   # a carried lapse is alive
+    return needs + flagged_unacknowledged(conn)
 
 
 def inbox_count(conn: sqlite3.Connection) -> int:
@@ -267,7 +318,8 @@ def shelf(conn: sqlite3.Connection) -> list[dict]:
         f" COALESCE(SUM({LIVE_SQL.replace('state', 'w.state').replace('lease_until', 'w.lease_until')}), 0) AS running,"
         " COALESCE(SUM(w.state = 'done'), 0) AS done"
         " FROM codex c LEFT JOIN work_orders w ON w.codex_id = c.id GROUP BY c.id ORDER BY c.name, c.id")
-    return [dict(r) for r in rows]
+    extra = Counter(r["codex_id"] for r in lapsed_rows(conn) if carried(r))
+    return [dict(r) | {"running": r["running"] + extra.get(r["codex_id"], 0)} for r in rows]
 
 
 def lanes(conn: sqlite3.Connection) -> list[dict]:

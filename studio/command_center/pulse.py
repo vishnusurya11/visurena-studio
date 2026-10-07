@@ -216,13 +216,22 @@ def dept_dots(conn: sqlite3.Connection) -> dict[str, dict[str, int]]:
             f"SELECT stage, {views.SHOWN_SQL}, COUNT(*) FROM work_orders GROUP BY 1, 2 ORDER BY 1, 2"):
         if stage in out:
             out[stage][shown] = n
+    for row in views.lapsed_rows(conn):                   # a carried lapse counts as running
+        if row["stage"] in out and views.carried(row):
+            d = out[row["stage"]]
+            d["stale"] = d.get("stale", 1) - 1
+            if d["stale"] < 1:
+                d.pop("stale", None)
+            d["running"] = d.get("running", 0) + 1
     return out
 
 
 def running_rows(conn: sqlite3.Connection) -> list[dict]:
-    """The running work orders, the GPU's first, as the views show them."""
-    return [views.row_view(r) for r in conn.execute(
-        f"SELECT * FROM work_orders WHERE {views.LIVE_SQL} ORDER BY gpu DESC, started_at, id")]
+    """The running work orders, the GPU's first, as the views show them; a
+    lapsed lease stays running while a process carries it (views.carried)."""
+    return [v for v in (views.row_view(r) for r in conn.execute(
+        "SELECT * FROM work_orders WHERE state = 'running' ORDER BY gpu DESC, started_at, id"))
+        if v["shown"] == "running"]
 
 
 def pin(row: dict) -> dict:

@@ -35,7 +35,10 @@ def find_drive(rows: list[ProcInfo], codex: str, number: int) -> ProcInfo | None
 
 def list_processes() -> list[ProcInfo]:
     """Every process this user may query, with its command line; cached for a
-    few seconds so a 2 s poll does not walk the table twice."""
+    few seconds so a 2 s poll does not walk the table twice.  A process another
+    session launched can be invisible here (OpenProcess refused, 2026-10-07):
+    liveness falls back to the run's own files (views.carried), never to a
+    spawned query -- the web process spawns nothing."""
     if time.time() - float(_cache["at"]) < CACHE_S:
         return list(_cache["rows"])
     rows = _windows_table() if sys.platform == "win32" else []
