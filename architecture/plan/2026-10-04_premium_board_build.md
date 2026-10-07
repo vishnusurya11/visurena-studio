@@ -24,6 +24,8 @@ row of `architecture/index.html` (Current tab) moves with the shell, home and un
 
 - 2026-10-06 — refresh fix (owner: "it is not refreshing"; five agents + referee): the pulse hears the clock (lapsed-lease count in every fp, same-second writes concatenated) `ae843bf`; a dead run lands in Needs you as stale; pulse.js's loop survives its own patch errors `53c6b8d`; unit keys derived + first-pulse 204s `938344d`; every polled section's key cross-checked (caught the never-refreshing Books page), the Today feed hears events, page-as-partial routes answer 204 `25d0304`. Referee: all sections morph +1.2–2 s after a change, no reload.
 
+- 2026-10-07 — accuracy fix (owner: "this is not accurate", ep23 hidden while rendering): liveness is three signals, not a lease stamp — a visible process naming the unit, a book-wide carrier (drive/autopilot) within a 6 h lease window, or the unit's folder still moving within 45 min (`views.carried`, spawn-free; the ctypes walk cannot see another session's processes and the no-spawn guard rightly refused a CIM fallback). The live card's vital reads the same truth (`vitals.files_alive`). ep18 stays stale, ep19 failed, ep23 running. `032afe7` + `d66f0df`, 1662 green.
+
 ## Rules for every commit
 
 - Test first; a function does one thing in 10–20 lines; every macro has a test; no test touches the
