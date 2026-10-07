@@ -67,10 +67,12 @@ turn, spike, reaction, runout, button, answer.
 
 ## The band
 
-The runtime is projected from the words at `words_per_second`, with handles,
-breaths, beats and codas. The projection must land between `min_seconds` and
-`max_seconds`, and the turn inside `turn_band` of it. No shot may project longer
-than one take: one line, or two short ones, per shot.
+The runtime is projected from the words at `words_per_second` -- THIS narrator's
+measured pace over the earlier episodes, not a guess -- with handles, breaths, beats
+and codas. The projection must land between `min_seconds` and `max_seconds`, and the
+turn inside `turn_band` of it. No shot may project longer than one take
+(`take_seconds`): a shot's lines together carry at most `max_words_per_shot` words.
+Count them. A 23-word shot at 2.5 words a second is 9.2 s and the plan is refused.
 
 ---
 

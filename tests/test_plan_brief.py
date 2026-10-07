@@ -237,3 +237,23 @@ def test_render_leaves_out_the_sections_of_absent_inputs():
     assert plan_brief.SECTIONS["scenes"] in text
     assert plan_brief.SECTIONS["chapter_text"] not in text
     assert plan_brief.SECTIONS["camera_catalog"] not in text
+
+
+def _lines(book, n, rows):
+    path = book / "episodes" / f"ep{n:02d}" / "audio" / "lines" / "lines.json"
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(json.dumps({"lines": rows}), encoding="utf-8")
+
+
+def test_the_band_speaks_at_the_measured_rate_and_says_the_words_a_take_holds(book):
+    """ep20 (2026-10-07): the brief said 3.0 words/s (the contract's projection),
+    the gate measured this narrator at 2.50 -- thirteen 23-word shots projected
+    9.2 s against an 8.0 s take and the plan deferred twice.  The band carries
+    the series' measured rate and the words one take holds at that rate."""
+    from studio import plan_gates
+    _lines(book, 1, [{"text": " ".join(["w"] * 25), "seconds": 10.0}])      # 2.5 words/s
+    b = plan_brief.band(book, 3)
+    assert b["words_per_second"] == plan_gates.series_rate(book, 3) == 2.5
+    assert b["max_words_per_shot"] == 20                                       # 2.5 x 8.0 s
+    assert plan_brief.band()["words_per_second"] == episode_spec.WORDS_PER_SECOND
+    assert plan_brief.build(book, 3)["band"]["words_per_second"] == 2.5

@@ -219,10 +219,24 @@ def dq_rules(book_dir: Path) -> dict | None:
     return _read(path) if path.exists() else None
 
 
-def band() -> dict:
-    """The format band, read off the contract."""
+def spoken_rate(book_dir: Path | None, number: int | None) -> float:
+    """The words a second THIS narrator speaks, measured over the earlier
+    episodes; the contract's projection when nothing is measured yet.  ep20
+    (2026-10-07): the brief said 3.0, the gate measured 2.50, and thirteen
+    23-word shots projected 9.2 s against an 8.0 s take."""
+    if book_dir is None or number is None:
+        return episode_spec.WORDS_PER_SECOND
+    from studio import plan_gates
+    return plan_gates.series_rate(book_dir, number)
+
+
+def band(book_dir: Path | None = None, number: int | None = None) -> dict:
+    """The format band, read off the contract and the series' measured voice."""
+    from studio.episode_takes import BUDGET
+    rate = spoken_rate(book_dir, number)
     return {"min_seconds": episode_spec.MIN_SECONDS, "max_seconds": episode_spec.MAX_SECONDS,
-            "words_per_second": episode_spec.WORDS_PER_SECOND,
+            "words_per_second": rate, "take_seconds": BUDGET,
+            "max_words_per_shot": int(rate * BUDGET),
             "max_words_per_line": episode_spec.MAX_WORDS,
             "max_lines_per_shot": episode_spec.MAX_LINES_PER_SHOT,
             "max_voices": episode_spec.MAX_SPEAKING, "max_setups": episode_spec.MAX_SETUPS,
@@ -238,7 +252,7 @@ def band() -> dict:
 def build(book_dir: Path, number: int, targets: list[str] | None = None) -> dict:
     """The whole brief; an optional input with nothing in it is left out."""
     book_dir = Path(book_dir)
-    found = {"number": number, "band": band(), "scenes": scenes(book_dir, number),
+    found = {"number": number, "band": band(book_dir, number), "scenes": scenes(book_dir, number),
              "chapter_text": chapter_text(book_dir, number),
              "screenplay": screenplay(book_dir, number, targets),
              "cast": cast_rows(book_dir, number), "places": places(book_dir, number),
