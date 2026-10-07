@@ -770,7 +770,9 @@ class Episode(BaseModel):
                 raise ValueError(f"dialogue line {line.index}: shot {shot.index} must show "
                                  f"{line.speaker}'s face at close or medium_close (lips are driven)")
         share = self.dialogue_share()
-        if not DIALOGUE_SHARE[0] <= share <= DIALOGUE_SHARE[1]:
+        if share > DIALOGUE_SHARE[1]:
+            # The floor is the battery's (plan_gates.dial_faults): it follows the
+            # chapter, and a chapter that speaks no line has none (ep22, 2026-10-07).
             raise ValueError(dial_message(share))
         if len({line.speaker for line in self.lines}) > MAX_SPEAKING:
             raise ValueError(f"more than {MAX_SPEAKING} voices")

@@ -425,6 +425,35 @@ def quiet_share(paragraphs: list[str]) -> float | None:
     return round(max(b - a for a, b in zip(marks[::2], marks[1::2])) / len(text), 3)
 
 
+def speech_share(paragraphs: list[str]) -> float | None:
+    """Spoken words over all the chapter's words; None without text."""
+    text = "\n".join(paragraphs)
+    if not text.strip():
+        return None
+    spoken = sum(len(m.group(1).split()) for m in QUOTED.finditer(text) if is_speech(text, m))
+    return round(spoken / max(1, len(text.split())), 3)
+
+
+def dial_floor(speech: float | None) -> float:
+    """The dialogue dial's floor: the contract's, or the chapter's own share when
+    it speaks less (ep22, 2026-10-07: II.v 'The Stillness' speaks no line and the
+    5% floor refused every honest draft)."""
+    from studio.episode_spec import DIALOGUE_SHARE
+    return DIALOGUE_SHARE[0] if speech is None else min(DIALOGUE_SHARE[0], speech)
+
+
+def dial_faults(episode, speech: float | None = None) -> list[str]:
+    """G-DIAL: dialogue under the chapter-aware floor.  The ceiling stays the contract's."""
+    from studio.episode_spec import dial_message
+    words = [(line.kind, len((line.text or "").split())) for line in episode.lines]
+    total = sum(n for _, n in words) or 1
+    share = sum(n for kind, n in words if kind == "dialogue") / total
+    floor = dial_floor(speech)
+    if share < floor - 1e-9:
+        return [f"G-DIAL plan: {dial_message(share)} -- this chapter speaks {floor:.1%}, so that is the floor"]
+    return []
+
+
 def narration_wall(runtime: float, quiet: float | None) -> float:
     """G-STORY's narration-only wall: the fixed wall, stretched to the chapter's
     own quiet (ep19: a chapter that speaks no line cannot be asked to)."""
@@ -1401,13 +1430,16 @@ def sync_faults(episode: Episode) -> list[str]:
     return out
 
 
-def faults(episode: Episode, quote_at: float | None = None, quiet: float | None = None) -> list[str]:
+def faults(episode: Episode, quote_at: float | None = None, quiet: float | None = None,
+           speech: float | None = None) -> list[str]:
     """Every reason this plan should not be drawn, free to compute.  `quote_at`
     is where the chapter first speaks (`quote_share`), `quiet` its longest
-    quote-free stretch (`quiet_share`); None holds every wall."""
+    quote-free stretch (`quiet_share`), `speech` its spoken share (`speech_share`);
+    None holds every wall."""
     from studio import picture_gates  # G-SIZE and the picture advisories (ep10 synthesis C)
     return (firstframe_faults(episode) + variety_faults(episode)
             + move_faults(episode) + rate_faults(episode) + story_faults(episode, quote_at, quiet)
+            + dial_faults(episode, speech)
             + picture_gates.faults(episode) + sync_faults(episode))
 
 
@@ -1542,5 +1574,5 @@ def article_faults(episode) -> list[str]:
 
 
 def chapter_faults(episode: Episode, paragraphs: list[str]) -> list[str]:
-    """`faults` with both chapter-relative walls read from the chapter's own text."""
-    return faults(episode, quote_share(paragraphs), quiet_share(paragraphs))
+    """`faults` with every chapter-relative wall read from the chapter's own text."""
+    return faults(episode, quote_share(paragraphs), quiet_share(paragraphs), speech_share(paragraphs))

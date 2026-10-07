@@ -329,3 +329,20 @@ def test_a_deferred_draft_is_cured_for_free_before_any_paid_round(ctx, monkeypat
     assert gate.commands[0][1].endswith("plan_repair.py") and "--from-aside" in gate.commands[0]
     assert writer.calls == []
     assert _verdict(ctx)["signed_by"] == "judge:plan@1"
+
+
+def test_a_pending_contract_refusal_is_kept_when_the_disk_plan_is_refused_too(ctx, monkeypatch):
+    """ep22 (2026-10-07): the writer's drafts failed the contract three times a
+    rung, the disk plan (the restored aside) failed the battery, and battery()
+    dropped the contract lines -- so no learning, no brain and no next rung ever
+    saw the real blocker.  The ghost rule (ep15) still holds: over a VALID disk
+    plan a pending refusal is discarded."""
+    writer, gate = _wire(ctx, monkeypatch, (1, REFUSED_OUT))
+    episode_home.write_plan(_plan(ctx), canned_plan())
+    desk = step.plan_ladder.Desk(ctx, _plan(ctx), writer=writer)
+    desk.pending = ["CONTRACT : dialogue is 0.8% of the words; the dial is 5%-20%"]
+    got = step.battery(ctx, desk)
+    assert any("G-SCALE shot 4" in r for r in got) and any("CONTRACT : dialogue" in r for r in got)
+    gate.results = [(0, CLEAN_OUT)]
+    desk.pending = ["CONTRACT : ghost"]
+    assert step.battery(ctx, desk) is None

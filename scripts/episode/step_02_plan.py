@@ -134,10 +134,15 @@ def battery(ctx, desk) -> list[str] | None:
     the clean draft under the ghost's note for eleven passes."""
     if desk.pending is not None and not desk.plan.exists():
         return desk.pending
-    desk.pending = None
+    pending, desk.pending = desk.pending, None
     rc, out = ctx.capture_script(PLAN_CHECK)
     if rc == 0:
         return None
+    if pending:
+        # ep22 (2026-10-07): the disk plan is refused AND the writer's draft was
+        # refused by the contract -- both are the truth; dropping the contract
+        # lines hid the real blocker from every rung, the learnings and the brain.
+        return refusal_lines(out) + [line for line in pending if line not in out]
     lines = refusal_lines(out)
     ctx.log("plan_check refused:\n" + "\n".join(lines), step_id=STEP_ID, level="WARNING")
     return lines
