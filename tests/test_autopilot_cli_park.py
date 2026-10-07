@@ -173,3 +173,19 @@ def test_two_parks_in_a_row_pause_the_series_and_tell_once(tmp_path):
     before = len(cli.rows_of(book / "autopilot" / "parked.jsonl"))
     out = cli.tick(book, fx.CODEX, d, 3)
     assert out["episode"]["state"] == "PAUSED" and len(cli.rows_of(book / "autopilot" / "parked.jsonl")) == before
+
+
+def test_retry_of_an_unparked_episode_still_retires_attempts_and_reads_as_a_launch(tmp_path):
+    """ep21 (2026-10-07): `retry 21` on an episode that had failed but not parked
+    returned early ('0 parked rows cleared'); the next tick re-judged the old
+    end row and paid the brain.  A retry is a launch order, parked or not."""
+    cli, book = fx.load(), fx.book(tmp_path)
+    home = book / "episodes" / "ep01"
+    (home / "brain").mkdir(parents=True)
+    (home / "brain" / "attempt_01.json").write_text('{"verdict": "park"}', encoding="utf-8")
+    (home / "drive.jsonl").write_text(
+        '{"ts": "2026-10-06T10:00:00+00:00", "event": "start", "sha": "abc"}\n'
+        '{"ts": "2026-10-06T10:00:31+00:00", "event": "end", "code": 1, "sha": "abc"}\n', encoding="utf-8")
+    assert cli.retry(book, 1) == 0
+    assert cli.brain_attempts_of(home) == [] and _events(cli, book)[-1] == "retry"
+    assert cli.gather(book, fx.CODEX, 1, fx.deps(tmp_path), {}).drive_rows == []

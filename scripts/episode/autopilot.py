@@ -774,10 +774,9 @@ def retry(book: Path, n: int) -> int:
     path = paths_of(book).parked
     rows = rows_of(path)
     kept = [r for r in rows if r.get("episode") != n]
-    if len(kept) == len(rows):
-        return 0
-    path.write_text("".join(json.dumps(r, ensure_ascii=False) + "\n" for r in kept), encoding="utf-8")
-    retire_brain(home_of(book, n))
+    if len(kept) != len(rows):
+        path.write_text("".join(json.dumps(r, ensure_ascii=False) + "\n" for r in kept), encoding="utf-8")
+    retire_brain(home_of(book, n))                 # parked or not: a retry is a launch order (ep21)
     event(book, {"event": "retry", "episode": n})
     return len(rows) - len(kept)
 
