@@ -38,27 +38,38 @@ nobody watched, and hand edits to pipeline state. Sherlock ep04-14 took 1 master
 The rules below are what closes that gap. **The owner's standing order: no input from
 him in production.** The chapter number and its cast are the only inputs.
 
-**Before the run (once, never mid-run).** Repo root, `master`, a CLEAN tree: all code
-committed. `nvidia-smi` and ComfyUI `/queue` idle. Bind the cast:
-`uv run python scripts/episode/step_01_bind.py <book> <n> --cast=a,b,...`
+**The series runs itself (decision 2026-10-06, `architecture/decisions/2026-10-06_autopilot_and_brain.md`).**
+The scheduled task `visurena-autopilot` runs `scripts/episode/autopilot.py run --book <codex>`
+at logon and every 5 minutes. Every 30 s it reads the disk, names ONE state (IDLE, RUNNING,
+PUBLISHED, NEEDS_BRAIN, BRAIN_RUNNING, WAIT_TREE, PARKED, PAUSED, COMPLETE), takes ONE
+action, and writes `library/<book>/autopilot/status.json` + `events.jsonl`. It launches
+`drive.py` for the next chapter, retries what retries, cures through work orders, restarts a
+hung ComfyUI, asks the brain (read-only triage, a JSON verdict) when a stop is not in its
+table, and PARKS with a reason — a row in `parked.jsonl` and one Telegram — never a wait on
+a person. Two consecutive parks pause the series. A commit on master makes the loop exit
+and the scheduler restarts it on the new code; a dirty tree is WAIT_TREE.
 
-**The run.** One launcher, and it is watched:
+**Your job is WATCH + REPORT, never a hand.** You do not launch `drive.py`. You do not run a
+step script. You do not edit anything under `library/`. You read:
 
-    uv run python scripts/episode/drive.py <book> <n>
+    uv run python scripts/episode/autopilot.py status --book <codex>
+    library/<book>/autopilot/{status.json,events.jsonl,parked.jsonl}
+    library/<book>/episodes/epNN/{drive.jsonl,drive_runNN.log,brain/attempt_NN.json}
 
-It refuses a dirty tree, records the SHA in `episodes/epNN/drive.jsonl`, runs
-`episode.py`, resumes a DEFERRED run, and messages the owner on Telegram when the run
-completes, stops, or goes silent 20 minutes. Launch it detached AND put a background
-waiter on `drive.jsonl` in the same turn. Never end a turn with a run nobody watches.
+and when a parked row names a CODE fault, you fix it the way the fixer does: the failing
+test first, the fix, the suite, one commit by explicit path, then
+`autopilot.py retry N --book <codex>` (and `resume` if the series paused). The owner's
+optional acts are `pause`, `resume`, `retry N`, `park N --why`.
 
-| step | stops on (HARD) | what you do, without stopping the runner |
+| step | stops on (HARD) | what the autopilot does |
 |---|---|---|
-| 02 plan | battery: CONTRACT, CELL, G-STILL, G-ORDER, G-COVER, G-SOUND, G-STORY (first-dialogue wall only when the chapter speaks early) | nothing: a rendered plan is judged in report mode, never rewritten |
-| 05 timeline | the MEASURED speech gap over 6.0 s (`studio/speech_gap`) | - |
-| 07-08 board, panels | panel gates; EYE_PANELS climbs only on redraw-curable faults | read the contact sheet while 09 renders |
-| 09 shoot | HARD take rows; EYE_TAKES climbs on hard faults (advisory lag/rotation are points off) | read the take strips |
-| 11 qc | any QC row, incl. the sound band: speech 11 dB over the gaps | - |
-| 12 deliver | the publish lock | watch + listen full size; the sign-off |
+| 02 plan | the battery; a deferral after the free cures and one guarded rewrite | relaunch ×2 (each relaunch cures the aside for $0 first), then brain triage, then PARK |
+| 05 timeline | the MEASURED speech gap over 6.0 s | one bounded auto-trim; rendered → PARK |
+| 07-08 board, panels | panel gates; EYE_PANELS climbs only on redraw-curable faults | the ladder; `redo 08` when takes wait on panels |
+| 09 shoot | HARD take rows; EYE_TAKES climbs on hard faults | the batched ladder; a hung engine is killed and restarted, twice at most |
+| 11 qc | any QC row, incl. the sound band | `redo 10` / `redo 09` by the row's kind, else PARK |
+| 13 publish | the publish lock; the $0.10 reserve keeps the metadata call alive | upload, public flip, `uploads.jsonl` row → PUBLISHED, one Telegram with the URL |
+| money | `$3.00` media wall (`guard_spend`) | `OverBudget` is a ladder terminal; a signed plan relaunches once past step 02, an unsigned one PARKs |
 
 **The non-negotiables.**
 1. **$0**, and no test spends.
@@ -66,9 +77,11 @@ waiter on `drive.jsonl` in the same turn. Never end a turn with a run nobody wat
    writes `plan.json`. After it, only the ladders do. Never hand-edit `plan.json`,
    `heads.json`, `stills.json`, graphs or take files, and never `touch` a timestamp.
    A plan.json the ladders edited carries `PATCHED_BY_HAND = True` in its plan.py.
-3. **One launcher:** `drive.py`. No guard-stops, no scratch drivers, no bare step scripts
-   mid-run. What the runner cannot do is a finding and a fix, then ONE relaunch.
-4. **No code changes on a live episode.** Fix, test, commit, then resume once.
+3. **One launcher:** the autopilot (`scripts/episode/autopilot.py`, the scheduled task);
+   `drive.py` is its child, never yours. No guard-stops, no scratch drivers, no bare step
+   scripts mid-run. What the runner cannot do is a finding and a fix, then `retry N`.
+4. **No code changes on a live episode.** Fix, test, commit (the loop restarts itself on
+   the new code), then `autopilot.py retry N` once; a paused series needs `resume`.
 5. **A terminal is not a pass.** Only the owner waives (`review/waiver.json`).
 6. **Watch and listen before anything leaves the machine**; the lock needs the sign-off.
 7. **Audio first.** Picture cut to the measured voice. Effects duck under every line

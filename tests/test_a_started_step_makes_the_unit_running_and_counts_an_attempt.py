@@ -133,8 +133,10 @@ def test_the_fields_an_event_moves_are_one_function():
     row = {"state": "running", "run_id": "r1", "started_at": "t0", "attempts": 1}
     assert db._order_fields("episode", "02", "started", "r1", "t2", row) == {
         "step_id": "02", "state": "running", "run_id": "r1", "started_at": "t0"}
-    assert db._order_fields("episode", "12", "completed", "r1", "t3", row) == {
-        "step_id": "12", "state": "done", "finished_at": "t3"}
+    from studio import registry
+    last = registry.steps("episode")[-1]["id"]        # F12: never a literal final step
+    assert db._order_fields("episode", last, "completed", "r1", "t3", row) == {
+        "step_id": last, "state": "done", "finished_at": "t3"}
     assert db._order_fields("episode", "05", "skipped", "r1", "t4", row) == {"step_id": "05"}
 
 

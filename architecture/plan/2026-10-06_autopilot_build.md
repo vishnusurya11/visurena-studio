@@ -19,7 +19,7 @@ by hand; commit by explicit path; never touch `studio/command_center/**`.
 - [x] First live turn: tick 1 → ep19 PARKED(over_budget); tick 2 → ep20 launched by the supervisor; the scheduled loop's own ticks ran the brain's first triage turns on the subscription login (25 s, ~$0.28 list-equivalent each, correct diagnosis)
 - [x] `autopilot.py install` → task `visurena-autopilot` registered (Interactive logon, AtLogOn + every 5 min; S4U/AtStartup need elevation)
 - [ ] ep20 published by the loop with zero hands (the proof); then ep21+
-- [ ] SKILL.md "THE RUN" table rewritten: the agent's job is WATCH + report (F5 of the self-curing tracker)
+- [x] SKILL.md "THE RUN" table rewritten: the agent's job is WATCH + report; non-negotiables 3 and 4 name the autopilot (F5 of the self-curing tracker)
 - [ ] `Workflow(fix-parked)` confirmed under the Python SDK on the first fixer turn
 - [ ] Owner-elevated one-time: re-register with AtStartup (survives a reboot without a logon) — optional
 
