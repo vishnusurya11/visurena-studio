@@ -106,13 +106,53 @@ class NoContentClient(FakeClient):
         self.calls.append(("create", kw))
         choice = SimpleNamespace(message=SimpleNamespace(content=None), finish_reason="error",
                                  error={"message": "provider overloaded", "code": 502})
-        return SimpleNamespace(choices=[choice], usage=None)
+        return SimpleNamespace(choices=[choice], usage=SimpleNamespace(prompt_tokens=48000, completion_tokens=32000))
 
 
-def test_a_reply_without_content_is_a_named_provider_failure_not_a_type_error():
-    with pytest.raises(llm.ProviderNoContent) as caught:
+def test_a_reply_without_content_is_a_refusal_that_carries_its_usage():
+    """ep21 (2026-10-07): three reasoning-only replies and three cut-off plans were
+    paid for and never ledgered -- the $3 wall under-counted ~$1.8.  A failed paid
+    call is a StructuredOutputException (re-asked like any refusal) that carries
+    the tokens it cost."""
+    from strands.types.exceptions import StructuredOutputException
+    with pytest.raises(StructuredOutputException) as caught:
         _caller(NoContentClient())("write", structured_output_model=Answer)
     assert "finish_reason=error" in str(caught.value) and "overloaded" in str(caught.value)
+    assert caught.value.usage == {"input_tokens": 48000, "output_tokens": 32000}
+
+
+class CutClient(FakeClient):
+    def create(self, **kw):
+        self.calls.append(("create", kw))
+        return SimpleNamespace(choices=[SimpleNamespace(message=SimpleNamespace(content='{"title": "The Pit", "sho'))],
+                               usage=SimpleNamespace(prompt_tokens=10, completion_tokens=4000))
+
+
+def test_a_cut_off_plan_is_a_refusal_that_carries_its_usage():
+    from strands.types.exceptions import StructuredOutputException
+    with pytest.raises(StructuredOutputException) as caught:
+        _caller(CutClient())("write", structured_output_model=Answer)
+    assert caught.value.usage["output_tokens"] == 4000
+
+
+def test_every_failed_paid_attempt_is_ledgered(tmp_path):
+    from strands.types.exceptions import StructuredOutputException
+    from studio import db, spend
+
+    class Refuser:
+        def __call__(self, prompt, structured_output_model=None):
+            exc = StructuredOutputException("cut off")
+            exc.usage = {"input_tokens": 100, "output_tokens": 50}
+            raise exc
+
+    conn = db.get_connection(tmp_path / "t.db")
+    db.init_db(conn)
+    with llm.spend_context(conn, "2099", "episode", "02", unit="ep01"):
+        with pytest.raises(StructuredOutputException):
+            llm.structured("workhorse", "write", Answer, retries=2, _agent=Refuser())
+    rows = conn.execute("select input_tokens, output_tokens, cost_usd from usage where unit='ep01'").fetchall()
+    assert [tuple(r)[:2] for r in rows] == [(100, 50), (100, 50)] and all(r[2] is not None for r in rows)
+    assert spend.unit_spent(conn, "2099", "ep01") > 0
 
 
 def test_a_model_whose_strict_grammar_was_refused_goes_loose_at_once():

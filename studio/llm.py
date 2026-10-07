@@ -236,7 +236,20 @@ class _NativeStructuredCaller:
         completion = self._client.chat.completions.create(
             model=self._model, messages=asked, max_tokens=LOOSE_MAX_TOKENS,
             extra_body=LOOSE_EXTRA_BODY, **self._params)
-        return completion, model.model_validate_json(json_body(content_of(completion)))
+        try:
+            return completion, model.model_validate_json(json_body(content_of(completion)))
+        except (ProviderNoContent, ValueError) as bad:    # pydantic's ValidationError is a ValueError
+            raise refused_with_usage(bad, completion.usage) from bad
+
+
+def refused_with_usage(bad: Exception, u) -> StructuredOutputException:
+    """A failed PAID call is a refusal the ladder re-asks, and it carries the
+    tokens it cost so the ledger (and the $3 wall) count it: ep21 (2026-10-07)
+    paid ~$1.8 for six replies nobody recorded."""
+    exc = StructuredOutputException(f"{type(bad).__name__}: {str(bad)[:300]}")
+    exc.usage = {"input_tokens": getattr(u, "prompt_tokens", 0) or 0,
+                 "output_tokens": getattr(u, "completion_tokens", 0) or 0}
+    return exc
 
 
 LOOSE_EXTRA_BODY = {"reasoning": {"max_tokens": 2048}}
@@ -413,6 +426,7 @@ def _structured_once(agent, prompt, schema, retries, usage, tier):
                 usage.update(_extract_usage(result), tier=tier)
             return _validated(result.structured_output, schema)
         except StructuredOutputException as exc:
+            _record_spend(tier, getattr(exc, "usage", None))   # a refused reply was still paid for
             last_error, asked = exc, re_ask(prompt, exc)
     raise last_error
 
