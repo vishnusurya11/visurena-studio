@@ -205,7 +205,9 @@ def anchor_faults(episode: Episode) -> list[str]:
 # ---- G-LAID ----------------------------------------------------------------------------
 LAID = re.compile(r"\b(?:lying|lies|lay|laid|sprawled|prone|supine)\b", re.I)
 SEEN_LAID = re.compile(r"\blooking down\b|\bfrom above\b|\boverhead\b|\bstraight down\b"
-                       r"|\blevel with (?:his|her|their) (?:face|head|eyes)\b|\bon the ground\b", re.I)
+                       r"|\blevel with [^,.;]{0,40}?\b(?:face|head|eyes)\b|\bat face height\b|\bon the ground\b", re.I)
+"""'level with <anyone>'s face' and 'at face height' count: ep19 shot 16 said the
+rule's own words with a name ("level with the curate's face") and was refused."""
 
 
 def laid_unseen(s: Shot) -> bool:
