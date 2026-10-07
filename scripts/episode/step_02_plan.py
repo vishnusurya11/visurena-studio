@@ -175,7 +175,19 @@ def clear(ctx, desk) -> Path:
     signed = judged_gate.clear(ctx, GATE, judge=lambda: judge(ctx, desk), sign=desk.sign,
                                ladder=rungs, terminal=desk.terminal, policy=policy)
     ctx.log(f"{GATE}: {signed.name} written", step_id=STEP_ID)
+    retire_aside(ctx, signed)
     return signed
+
+
+def retire_aside(ctx, signed: Path) -> None:
+    """A signature retires the aside: a plan.deferred.json left beside a signed
+    plan is history, and the next launch's cure_aside_first would restore it
+    over the plan (ep19 launch07: a day-old 12-shot aside replaced the signed
+    21-shot plan and the climb ran again)."""
+    aside = ctx.home / plan_ladder.DEFERRED
+    if signed.name != plan_ladder.DEFERRED and aside.exists():
+        aside.unlink()
+        ctx.log("the aside is retired: the plan is signed", step_id=STEP_ID)
 
 
 def deferred_note(aside: Path) -> str:
@@ -211,6 +223,9 @@ def run(ctx) -> None:
     from studio import episode_clock
     with episode_clock.timed(ctx.book_dir, ctx.number, "plan"):
         plan = plan_of(ctx)
+        if not wants_rewrite(ctx) and resigned(ctx):
+            return      # BEFORE the aside is read: ep19 launch07 (2026-10-07 15:10Z) restored
+                        # a day-old aside over a plan whose signature a recorded cure had lapsed
         if not wants_rewrite(ctx):
             cure_aside_first(ctx, plan)
         desk = plan_ladder.Desk(ctx, plan, writer=episode_writer)
