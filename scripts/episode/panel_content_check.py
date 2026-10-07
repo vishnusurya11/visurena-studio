@@ -78,7 +78,7 @@ def physical_of(book: Path, who: list[str]) -> list[str]:
 
 
 def judge(book: Path, shot, setup, seen: pc.Seen) -> list[str]:
-    return pc.faults(seen, frame=f"{shot.frame} {shot.at_rest}", planned=len(shot.faces or []),
+    return pc.faults(seen, frame=pc.stage_text(shot, setup), planned=len(shot.faces or []),
                      crowd=bool((setup.crowd or "").strip()),
                      flat=pc.flat_place(book, setup.location),
                      night=panel_dq.at_night(setup.described), banned=pc.banned_subjects(book),

@@ -231,6 +231,13 @@ PIT = re.compile(r"\b(?:pit|quarry|excavation|crater|sand-?pit)\b", re.I)
 """A shot staged in a dug place: its steep wall is what was asked for."""
 
 
+def stage_text(shot, setup) -> str:
+    """What a content check hands `faults` as the frame: the shot's own prose
+    and the place it stages -- a 'cliff' behind the curate at the slit (ep19
+    T19) is the pit's wall only when the setup says it is a pit."""
+    return f"{getattr(shot, 'frame', '')} {getattr(shot, 'at_rest', '')} {getattr(setup, 'described', '') or ''}"
+
+
 def pits_own_wall(banned: str, frame: str) -> bool:
     """A 'cliff' read on a shot whose frame stages a pit is the pit's own
     wall, not the sea-cliff the ban was written against (ep19 2026-10-07: four
