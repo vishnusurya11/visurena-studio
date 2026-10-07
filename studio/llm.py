@@ -221,21 +221,34 @@ class _NativeStructuredCaller:
         return _result(parsed, completion.usage)
 
     def _parse_loose(self, messages: list[dict], model):
-        """ep20 (2026-10-06): the strict grammar of a big schema is refused by the
-        provider; the same schema sent loose is answered, and we validate it."""
-        completion = self._client.chat.completions.create(
-            model=self._model, messages=messages, response_format=loose_schema(model), **self._params)
-        return completion, model.model_validate_json(completion.choices[0].message.content)
+        """ep20/ep21 (2026-10-06): the strict grammar of a big schema is refused
+        by the provider, and OpenRouter makes ANY json_schema response_format a
+        strict tool -- so the schema goes in the prompt, no response_format at
+        all, and the JSON reply is validated here."""
+        asked = [*messages[:-1], {"role": "user", "content": schema_prompt(messages[-1]["content"], model)}]
+        completion = self._client.chat.completions.create(model=self._model, messages=asked, **self._params)
+        return completion, model.model_validate_json(json_body(completion.choices[0].message.content))
 
 
 def grammar_too_large(error: Exception) -> bool:
     return "compiled grammar is too large" in str(error)
 
 
-def loose_schema(model) -> dict:
-    """The model's JSON schema as a non-strict response_format: no grammar compile."""
-    return {"type": "json_schema",
-            "json_schema": {"name": model.__name__, "strict": False, "schema": model.model_json_schema()}}
+def schema_prompt(prompt: str, model) -> str:
+    """The prompt plus the model's JSON schema and the one rule: answer JSON only."""
+    import json
+    return (f"{prompt}\n\nAnswer with ONE JSON object only, no prose, no code fence, valid against this "
+            f"JSON schema ({model.__name__}):\n{json.dumps(model.model_json_schema())}")
+
+
+def json_body(text: str) -> str:
+    """The JSON object inside a reply that may carry a fence or a preamble."""
+    import re
+    fenced = re.search(r"```(?:json)?\s*(\{.*\})\s*```", text, re.S)
+    if fenced:
+        return fenced.group(1)
+    start = text.find("{")
+    return text[start:text.rfind("}") + 1] if start >= 0 else text
 
 
 def _result(parsed, u) -> SimpleNamespace:

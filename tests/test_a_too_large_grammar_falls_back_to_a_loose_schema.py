@@ -43,7 +43,9 @@ class FakeClient:
 
     def create(self, **kw):
         self.calls.append(("create", kw))
-        content = json.dumps({"title": "The Pit", "shots": 12})
+        if "response_format" in kw:                      # ep21: OpenRouter makes ANY json_schema a strict tool
+            raise _400(self.message)
+        content = "```json\n" + json.dumps({"title": "The Pit", "shots": 12}) + "\n```"
         return SimpleNamespace(choices=[SimpleNamespace(message=SimpleNamespace(content=content))],
                                usage=SimpleNamespace(prompt_tokens=10, completion_tokens=5, total_tokens=15))
 
@@ -59,10 +61,16 @@ def test_too_large_grammar_is_retried_loose_and_validated():
     got = _caller(client)("write", structured_output_model=Answer)
     assert got.structured_output == Answer(title="The Pit", shots=12)
     assert [c[0] for c in client.calls] == ["parse", "create"]
-    fmt = client.calls[1][1]["response_format"]
-    assert fmt["type"] == "json_schema" and fmt["json_schema"]["strict"] is False
-    assert fmt["json_schema"]["schema"]["properties"]["title"]["type"] == "string"
+    kw = client.calls[1][1]
+    assert "response_format" not in kw, "ep21: a json_schema response_format is a strict tool on OpenRouter"
+    prompt = kw["messages"][-1]["content"]
+    assert '"shots"' in prompt and "JSON" in prompt and prompt.startswith("write")
     assert got.metrics.accumulated_usage["inputTokens"] == 10
+
+
+def test_a_fenced_or_prefixed_reply_is_still_json():
+    assert llm.json_body('```json\n{"a": 1}\n```') == '{"a": 1}'
+    assert llm.json_body('Here it is:\n{"a": 1}') == '{"a": 1}'
 
 
 def test_any_other_400_still_raises():
@@ -70,6 +78,6 @@ def test_any_other_400_still_raises():
         _caller(FakeClient("Invalid request: bad field"))("write", structured_output_model=Answer)
 
 
-def test_loose_schema_names_the_model():
-    fmt = llm.loose_schema(Answer)
-    assert fmt["json_schema"]["name"] == "Answer" and "shots" in fmt["json_schema"]["schema"]["properties"]
+def test_the_schema_prompt_carries_the_model_schema():
+    text = llm.schema_prompt("write", Answer)
+    assert text.startswith("write") and '"shots"' in text and "Answer" in text

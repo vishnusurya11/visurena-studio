@@ -327,6 +327,13 @@ def clear_stale_lock(book: Path, codex: str, n: int, deps: Deps, rows: list) -> 
     return True
 
 
+def release_supervisor(deps: Deps) -> None:
+    """Our supervisor.lock goes, so the next instance claims it at once."""
+    lock = deps.root / "supervisor.lock"
+    if read_json(lock, {}).get("pid") == deps.pid:
+        lock.unlink(missing_ok=True)
+
+
 def claim_supervisor(deps: Deps) -> bool:
     """Our pid into supervisor.lock, unless a live other instance holds it."""
     lock = deps.root / "supervisor.lock"
@@ -497,7 +504,24 @@ def park(book: Path, codex: str, n: int, reason: str, evidence: dict, deps: Deps
     append_row(parked, row)
     event(book, {"event": "parked", "episode": n, "reason": reason})
     deps.notify(f"ep{n:02d} PARKED ({scrub(reason)}) on {sha}; the series moves on")
+    brake_two_parks(book, rows_of(parked), deps)
     return {"action": "park", "state": "PARKED"}
+
+
+def brake_two_parks(book: Path, parked: list[dict], deps: Deps) -> bool:
+    """The design's drift brake: two consecutive chapters parked means the fault
+    is the code, not the chapters (ep20, ep21 on one 400, 2026-10-06).  The
+    series pauses itself and says so once; `resume` after the fix lifts it."""
+    last = [r.get("episode") for r in parked[-2:]]
+    if len(last) < 2 or last[1] != last[0] + 1:
+        return False
+    series = paths_of(book).series
+    doc = read_json(series, {}) or {}
+    write_atomic(series, {**doc, "paused": True, "paused_why": f"two parked in a row: ep{last[0]:02d}, ep{last[1]:02d}"})
+    event(book, {"event": "two_parked_in_a_row", "episodes": last})
+    deps.notify(f"two chapters parked in a row (ep{last[0]:02d}, ep{last[1]:02d}): the series is paused until a fix lands; "
+                f"autopilot.py retry N + resume to continue")
+    return True
 
 
 def note_published(book: Path, n: int, uploads: list[dict], deps: Deps) -> dict:
@@ -673,9 +697,11 @@ def run_loop(book: Path, codex: str, deps: Deps, every: float = 30.0, ticks: int
     if not claim_supervisor(deps):
         return 0
     adopt(book, deps)
-    i = 0
+    born, i = deps.git("rev-parse", "HEAD").strip(), 0
     while ticks is None or i < ticks:
         i += 1
+        if code_moved(book, deps, born):
+            return 0                       # the scheduler starts a fresh loop on the new code
         try:
             tick(book, codex, deps, i)
         except Exception as why:                               # noqa: BLE001 -- the supervisor outlives any fault
@@ -683,6 +709,17 @@ def run_loop(book: Path, codex: str, deps: Deps, every: float = 30.0, ticks: int
             event(book, {"event": "tick_error", "error": scrub(repr(why))})
         deps.sleep(every)
     return 0
+
+
+def code_moved(book: Path, deps: Deps, born: str) -> bool:
+    """HEAD is not the commit this loop started on: the first live loop ticked
+    on stale code through four fixes (2026-10-06) and paid the brain for it."""
+    head = deps.git("rev-parse", "HEAD").strip()
+    if head == born:
+        return False
+    event(book, {"event": "code_moved", "from": born[:8], "to": head[:8]})
+    release_supervisor(deps)
+    return True
 
 
 # ---- the scheduler ---------------------------------------------------------------

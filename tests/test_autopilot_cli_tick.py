@@ -115,3 +115,18 @@ def test_a_tick_that_raises_is_an_event_not_a_stop(tmp_path):
     assert cli.run_loop(book, fx.CODEX, d, every=0, ticks=2) == 0
     rows = [r for r in cli.rows_of(book / "autopilot" / "events.jsonl") if r["event"] == "tick_error"]
     assert len(rows) == 2 and str(cli.ROOT) not in rows[0]["error"] and "derive broke" in rows[0]["error"]
+
+
+def test_the_loop_exits_when_head_moves_so_the_scheduler_restarts_it_on_new_code(tmp_path):
+    """2026-10-06: the first live supervisor kept ticking on the code it started
+    with through four fix commits, and paid the brain to re-judge a bug already
+    fixed.  A long-lived loop that sees HEAD move exits 0; the 5-min trigger
+    starts a fresh one on the new code."""
+    cli, book = fx.load(), fx.book(tmp_path)
+    d = fx.deps(tmp_path, "PAUSED", reason="paused")
+    heads = iter(["aaa\n", "aaa\n", "bbb\n", "bbb\n", "bbb\n"])
+    d.git = lambda *a: "" if a[0] == "status" else next(heads)
+    assert cli.run_loop(book, fx.CODEX, d, every=0, ticks=5) == 0
+    events = [r["event"] for r in cli.rows_of(book / "autopilot" / "events.jsonl")]
+    assert events[-1] == "code_moved" and events.count("tick") <= 2 if "tick" in events else True
+    assert cli.read_json(d.root / "heartbeat.json")["tick"] <= 2

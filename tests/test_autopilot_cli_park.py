@@ -18,8 +18,9 @@ def test_parked_row_is_written_once_and_telegram_once(tmp_path):
     for i in (1, 2, 3):
         cli.tick(book, fx.CODEX, d, i)
     rows = cli.rows_of(book / "autopilot" / "parked.jsonl")
-    assert [(r["episode"], r["reason"]) for r in rows] == [(1, "over_budget"), (2, "over_budget"), (3, "over_budget")]
-    assert len(d.calls["notify"]) == 3 and all("PARKED" in t for t in d.calls["notify"])
+    # the drift brake pauses the series after two consecutive parks; ep3 never launches
+    assert [(r["episode"], r["reason"]) for r in rows] == [(1, "over_budget"), (2, "over_budget")]
+    assert [("PARKED" in t) for t in d.calls["notify"]] == [True, True, False]
     assert set(rows[0]) >= {"ts", "episode", "sha", "reason", "evidence"}
 
 
@@ -154,3 +155,21 @@ def test_after_a_retry_the_next_tick_launches_instead_of_judging_the_old_ledger(
     assert cli.retry(book, 1) == 1
     signals = cli.gather(book, fx.CODEX, 1, fx.deps(tmp_path), {})
     assert signals.drive_rows == [] and signals.exit_code is None
+
+
+def test_two_parks_in_a_row_pause_the_series_and_tell_once(tmp_path):
+    """The approved design's drift brake (2026-10-06): ep20 and ep21 parked back
+    to back on one bug and nothing stopped ep22 from following.  Two consecutive
+    parked chapters mean the fault is the code, not the chapters: the series
+    pauses itself, one Telegram, and the next tick is PAUSED, not a launch."""
+    cli, book = fx.load(), fx.book(tmp_path, chapters=4)
+    d = fx.deps(tmp_path, "PARKED", reason="brain: same 400")
+    cli.tick(book, fx.CODEX, d, 1)
+    assert cli.read_json(book / "autopilot" / "series.json").get("paused") is not True
+    cli.tick(book, fx.CODEX, d, 2)
+    assert cli.read_json(book / "autopilot" / "series.json")["paused"] is True
+    assert "two_parked_in_a_row" in _events(cli, book)
+    assert sum("two chapters parked in a row" in t for t in d.calls["notify"]) == 1
+    before = len(cli.rows_of(book / "autopilot" / "parked.jsonl"))
+    out = cli.tick(book, fx.CODEX, d, 3)
+    assert out["episode"]["state"] == "PAUSED" and len(cli.rows_of(book / "autopilot" / "parked.jsonl")) == before
