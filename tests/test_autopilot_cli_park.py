@@ -189,3 +189,25 @@ def test_retry_of_an_unparked_episode_still_retires_attempts_and_reads_as_a_laun
     assert cli.retry(book, 1) == 0
     assert cli.brain_attempts_of(home) == [] and _events(cli, book)[-1] == "retry"
     assert cli.gather(book, fx.CODEX, 1, fx.deps(tmp_path), {}).drive_rows == []
+
+
+def test_a_verdict_older_than_the_last_end_row_is_history(tmp_path):
+    """ep21 (2026-10-07): a retry verdict kept being read as today's after the
+    relaunch it ordered had run and ended; gather() hands derive only a verdict
+    file newer than the drive ledger's last end row."""
+    cli, book = fx.load(), fx.book(tmp_path)
+    home = book / "episodes" / "ep01"
+    (home / "brain").mkdir(parents=True)
+    old = home / "brain" / "attempt_01.json"
+    old.write_text('{"verdict": "retry"}', encoding="utf-8")
+    import os, time
+    stamp = time.time() - 600
+    os.utime(old, (stamp, stamp))
+    (home / "drive.jsonl").write_text(
+        '{"ts": "%s", "event": "start", "sha": "abc"}\n{"ts": "%s", "event": "end", "code": 1, "sha": "abc"}\n'
+        % (cli.utc_now(), cli.utc_now()), encoding="utf-8")
+    s = cli.gather(book, fx.CODEX, 1, fx.deps(tmp_path), {})
+    assert s.brain_verdict is None and s.brain_attempts == 1
+    fresh = home / "brain" / "attempt_02.json"
+    fresh.write_text('{"verdict": "park"}', encoding="utf-8")
+    assert cli.gather(book, fx.CODEX, 1, fx.deps(tmp_path), {}).brain_verdict == {"verdict": "park"}

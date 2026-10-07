@@ -145,7 +145,7 @@ def brain_prompt(core, book: Path, n: int, packet: dict) -> str:
     faults, learnings = brain_evidence(home)
     tail = " | ".join(str(packet.get(k, "")) for k in ("reason", "last_line") if packet.get(k))
     return core.brief(packet.get("home", f"episodes/ep{n:02d}"), tail, faults, learnings,
-                      float(packet.get("media_spent_usd") or 0.0), ["redo", "retry", "requeue"])
+                      float(packet.get("media_spent_usd") or 0.0), allowed_orders())
 
 
 def verdict_doc(verdict: Any, meta: Any) -> dict:
@@ -389,6 +389,26 @@ def signals_of(fields: dict):
         return SimpleNamespace(**fields)
 
 
+def current_verdict(attempts: list[Path], ends: list[dict]) -> dict | None:
+    """The latest brain verdict, only while it is newer than the drive ledger's
+    last end row: once the run it ordered has ended, it is history (ep21)."""
+    if not attempts:
+        return None
+    if ends:
+        last_end = when(ends[-1].get("ts", "")).timestamp()
+        if attempts[-1].stat().st_mtime <= last_end:
+            return None
+    return read_json(attempts[-1])
+
+
+def allowed_orders() -> list[str]:
+    """What the brain may order, with the registry's step ids spelled out (ep21:
+    it ordered `redo plan` and the clamp parked the episode)."""
+    from studio import registry
+    steps = [f"redo {s['id']} ({s.get('name', '')})".rstrip(" ()") for s in registry.steps("episode")]
+    return steps + ["retry", "requeue"]
+
+
 def retried_since(book: Path, n: int, drive_rows: list[dict]) -> bool:
     """A `retry` event for N later than the drive ledger's last `end` row: the
     old failure is history, not today's state (ep20, 2026-10-06)."""
@@ -417,6 +437,7 @@ def gather(book: Path, codex: str, n: int, deps: Deps, series: dict):
         drive_rows = []                      # a retry newer than the last end row: launch again
     ends = [r for r in drive_rows if r.get("event") == "end"]
     attempts = brain_attempts_of(home)
+    verdict = current_verdict(attempts, ends)
     from studio import run_budget
     return signals_of({
         "drive_rows": drive_rows, "exit_code": ends[-1].get("code") if ends else None,
@@ -425,7 +446,7 @@ def gather(book: Path, codex: str, n: int, deps: Deps, series: dict):
         "home_files": sorted(p.name for p in home.iterdir()) if home.exists() else [],
         "log_tail": log_tail_of(home), "porcelain": deps.git("status", "--porcelain"),
         "engine_up": bool(deps.engine.alive(ENGINE_URL)), "clock_spent_s": run_budget.spent_before(home),
-        "brain_attempts": len(attempts), "brain_verdict": read_json(attempts[-1]) if attempts else None,
+        "brain_attempts": len(attempts), "brain_verdict": verdict,
         "paused": bool(series.get("paused")) or paths_of(book).stop.exists(),
         "head_sha": deps.git("rev-parse", "HEAD").strip(), "media_spent_usd": deps.spent_usd(codex, n)})
 

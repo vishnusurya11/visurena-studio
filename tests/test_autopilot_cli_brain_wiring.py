@@ -56,3 +56,11 @@ def test_judge_verdict_still_rejects_a_relaunch_off_head(tmp_path):
     root = book(tmp_path)
     d = deps(tmp_path)
     assert cli.judge_verdict(root, CODEX, 2, {"verdict": "relaunch", "commit": "not-head"}, d)["state"] == "NEEDS_BRAIN"
+
+
+def test_the_brief_names_the_episode_steps_an_order_may_take():
+    """ep21 (2026-10-07): the brain ordered `redo plan`; the clamp parked it because
+    the brief said 'episode step id' without listing one."""
+    cli = load()
+    said = cli.allowed_orders()
+    assert any(o.startswith("redo 02") and "plan" in o for o in said) and "retry" in said

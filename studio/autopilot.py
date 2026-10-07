@@ -251,8 +251,14 @@ def _verdict(s: Signals, n: int) -> Derived:
     """The brain is trusted by its file and git, never its prose: relaunch only
     when the verdict names HEAD and the tree is clean after it."""
     v = s.brain_verdict or {}
-    if v.get("verdict") != "relaunch":
-        return _brain(s, n, f"brain: {v.get('verdict') or 'no verdict'}")
+    said = v.get("verdict")
+    if said in ("retry", "cure"):
+        # ep21 (2026-10-07): a triage answer short of a fix is a launch order; the
+        # in-process tick placed any cure order already.  Re-read, it must not
+        # become another brain turn.
+        return _idle(s, n, f"brain_{said}")
+    if said != "relaunch":
+        return _brain(s, n, f"brain: {said or 'no verdict'}")
     if episode_drive.dirty(s.porcelain):
         return Derived(State.WAIT_TREE, "tree_dirty", None, packet(s, n, "brain_relaunch"))
     if v.get("commit") != s.head_sha:

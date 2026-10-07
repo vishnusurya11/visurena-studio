@@ -224,3 +224,16 @@ def test_a_cure_carries_its_work_order():
     tail = "SystemExit: REFUSED: the takes wait on the panels: eye_01.json older than panel 03"
     got = ap.derive(signals(drive_rows=rows(("start",), ("run", "refused"), ("end", 1)), log_tail=tail), 20)
     assert (got.state, got.reason, got.order) == (State.IDLE, "takes_wait_on_panels", ("redo", "08"))
+
+
+def test_a_retry_or_cure_verdict_is_a_launch_not_another_brain_turn():
+    """ep21 (2026-10-07): the brain answered retry, the in-process tick launched,
+    but the NEXT instance re-read the verdict file and, knowing only relaunch and
+    park, asked the brain again ($0.30) -- which then parked the episode."""
+    for said in ("retry", "cure"):
+        got = ap.derive(signals(brain_verdict={"verdict": said, "order": {"kind": "redo", "step_id": "02"}},
+                             drive_rows=rows(("start",), ("run", "failed"), ("end", 1)), exit_code=1), 21)
+        assert got.state is State.IDLE and got.reason == f"brain_{said}", said
+    dirty = ap.derive(signals(brain_verdict={"verdict": "retry"}, porcelain=" M studio/x.py",
+                           drive_rows=rows(("start",), ("run", "failed"), ("end", 1)), exit_code=1), 21)
+    assert dirty.state is State.WAIT_TREE
