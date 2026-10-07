@@ -210,6 +210,9 @@ class _NativeStructuredCaller:
     def _parse(self, prompt: str, structured_output_model=None):
         guard_spend(self._model, prompt, tier=self._tier)
         messages = [{"role": "user", "content": prompt}]
+        if self._model in STRICT_REFUSED:
+            completion, parsed = self._parse_loose(messages, structured_output_model)
+            return _result(parsed, completion.usage)
         try:
             completion = self._client.chat.completions.parse(
                 model=self._model, messages=messages, response_format=structured_output_model, **self._params)
@@ -217,6 +220,7 @@ class _NativeStructuredCaller:
         except BadRequestError as refused:
             if not grammar_too_large(refused):
                 raise
+            STRICT_REFUSED.add(self._model)
             completion, parsed = self._parse_loose(messages, structured_output_model)
         return _result(parsed, completion.usage)
 
@@ -228,7 +232,30 @@ class _NativeStructuredCaller:
         asked = [*messages[:-1], {"role": "user", "content": schema_prompt(messages[-1]["content"], model)}]
         completion = self._client.chat.completions.create(
             model=self._model, messages=asked, max_tokens=LOOSE_MAX_TOKENS, **self._params)
-        return completion, model.model_validate_json(json_body(completion.choices[0].message.content))
+        return completion, model.model_validate_json(json_body(content_of(completion)))
+
+
+STRICT_REFUSED: set[str] = set()
+"""Models whose strict grammar the provider refused this process: the probe
+cost ep21 ~25 min while OpenRouter cycled three providers before the 400
+(2026-10-07); the next call on that model goes loose at once."""
+
+
+class ProviderNoContent(RuntimeError):
+    """A 200 whose choice carries no text: the provider failed mid-generation
+    (ep21: content None, a TypeError in json_body).  The message names what the
+    choice did carry, so the run log says why."""
+
+
+def content_of(completion) -> str:
+    choice = completion.choices[0]
+    content = getattr(choice.message, "content", None)
+    if content:
+        return content
+    raise ProviderNoContent(
+        f"no content in the reply: finish_reason={getattr(choice, 'finish_reason', None)} "
+        f"error={getattr(choice, 'error', None)!r} refusal={getattr(choice.message, 'refusal', None)!r} "
+        f"reasoning={'yes' if getattr(choice.message, 'reasoning', None) else 'no'}")
 
 
 LOOSE_MAX_TOKENS = 32_000

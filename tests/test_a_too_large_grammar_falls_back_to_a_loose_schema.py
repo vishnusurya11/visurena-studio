@@ -20,6 +20,13 @@ from studio import llm
 TOO_LARGE = "The compiled grammar is too large, which would cause performance issues."
 
 
+@pytest.fixture(autouse=True)
+def _fresh_memo():
+    llm.STRICT_REFUSED.clear()
+    yield
+    llm.STRICT_REFUSED.clear()
+
+
 class Answer(BaseModel):
     title: str
     shots: int
@@ -90,3 +97,33 @@ def test_the_loose_call_asks_for_a_whole_plan_of_output():
     client = FakeClient()
     _caller(client)("write", structured_output_model=Answer)
     assert client.calls[1][1]["max_tokens"] >= llm.LOOSE_MAX_TOKENS >= 16_000
+
+
+class NoContentClient(FakeClient):
+    """ep21 relaunch (2026-10-07): the loose reply came back with content None."""
+
+    def create(self, **kw):
+        self.calls.append(("create", kw))
+        choice = SimpleNamespace(message=SimpleNamespace(content=None), finish_reason="error",
+                                 error={"message": "provider overloaded", "code": 502})
+        return SimpleNamespace(choices=[choice], usage=None)
+
+
+def test_a_reply_without_content_is_a_named_provider_failure_not_a_type_error():
+    with pytest.raises(llm.ProviderNoContent) as caught:
+        _caller(NoContentClient())("write", structured_output_model=Answer)
+    assert "finish_reason=error" in str(caught.value) and "overloaded" in str(caught.value)
+
+
+def test_a_model_whose_strict_grammar_was_refused_goes_loose_at_once():
+    """The strict probe cost ep21 ~25 min while OpenRouter cycled three providers
+    before the 400; once a model has refused the grammar, the next call on it
+    skips the probe."""
+    llm.STRICT_REFUSED.discard("m")
+    first = FakeClient()
+    _caller(first)("write", structured_output_model=Answer)
+    assert [c[0] for c in first.calls] == ["parse", "create"] and "m" in llm.STRICT_REFUSED
+    second = FakeClient()
+    _caller(second)("write", structured_output_model=Answer)
+    assert [c[0] for c in second.calls] == ["create"]
+    llm.STRICT_REFUSED.discard("m")
