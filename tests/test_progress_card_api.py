@@ -89,7 +89,8 @@ def test_the_title_names_the_step_the_count_and_the_unit(board):
 
 def test_the_rail_has_every_step_and_the_running_one(board):
     steps = _progress(board, _drive(time.time() - 3600))["steps"]
-    assert [s["id"] for s in steps] == [f"{i:02d}" for i in range(1, 13)]
+    from studio import registry
+    assert [s["id"] for s in steps] == [step["id"] for step in registry.steps("episode")]   # F12: never a literal
     assert [s["id"] for s in steps if s["state"] == "running"] == ["09"]
     assert {s["state"] for s in steps if s["id"] in ("01", "02")} == {"done"}
 

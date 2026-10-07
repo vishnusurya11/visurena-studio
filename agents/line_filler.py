@@ -14,6 +14,9 @@ from pydantic import BaseModel, model_validator
 
 from studio import episode_spec as spec
 
+TIER = "local"
+"""The writer tier: a micro-line is written by the same voice as the plan."""
+
 PROMPT = """You write one line of first-person narration for a short film of a public-domain novel.
 A {gap_s:.1f} second stretch of picture has no voice over it and needs exactly one sentence.
 
@@ -91,10 +94,10 @@ def fill(shot: dict, source_paragraph: str, prev_text: str, next_text: str,
     quoted, then given up -- default ESCALATE for what judgement cannot settle."""
     from studio import llm
     prompt = prompt_for(shot, source_paragraph, prev_text, next_text, gap_s)
-    got = llm.structured("local", prompt, MicroLine, _agent=_agent)
+    got = llm.structured(TIER, prompt, MicroLine, _agent=_agent)
     bad = refusals(got.text, book_words)
     if not bad:
         return got.text
-    got = llm.structured("local", llm.re_ask(prompt, RuntimeError("; ".join(bad))),
+    got = llm.structured(TIER, llm.re_ask(prompt, RuntimeError("; ".join(bad))),
                          MicroLine, _agent=_agent)
     return got.text if not refusals(got.text, book_words) else None

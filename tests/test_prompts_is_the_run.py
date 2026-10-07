@@ -52,7 +52,7 @@ def test_a_preview_card_carries_the_plans_own_canvas(tmp_path, aspect, size, mon
     # (2026-09-16); this test is about the CANVAS, so those read a stub that is
     # in HOUSE light and passes, rather than being skipped on one entry point.
     monkeypatch.setattr(tr.house_style, "faults", lambda episode: [])
-    monkeypatch.setattr(tr.plan_gates, "faults", lambda episode, quote_at=None: [])
+    monkeypatch.setattr(tr.plan_gates, "faults", lambda episode, quote_at=None, quiet=None: [])
     monkeypatch.setattr(tr.episode_home, "load_plan",
                         lambda b, n: type("E", (), {"aspect": aspect, "where": "", "light": "",
                                                     "long_shots": lambda self: [],
