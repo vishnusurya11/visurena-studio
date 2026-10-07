@@ -259,9 +259,14 @@ def aim_of(motion: str, at_rest: str = "") -> str:
     if found := AIM.search(cam or ""):
         return " ".join(found.group(1).strip(" ,.").split()[:AIM_WORDS])
     # at_rest clauses are SEMICOLON-separated (ep16: a comma split made the
-    # whole paragraph the aim and the motion lint refused the cure, M9)
-    first = re.split(r"[;,.]", at_rest or "")[0].strip(" .")
+    # whole paragraph the aim and the motion lint refused the cure, M9); the
+    # FOCUS tag and the subject's parenthetical are not the aim (ep19: five
+    # shots were sent "pushes in toward THE FOCUS OF THE PICTURE IS")
+    first = re.split(r"[;,.(]", FOCUS_TAG.sub("", at_rest or "", count=1))[0].strip(" .")
     return " ".join(first.split()[:AIM_WORDS]) or "the figure"
+
+
+FOCUS_TAG = re.compile(r"^\s*THE FOCUS OF THE PICTURE IS\s+", re.I)
 
 
 AIM_WORDS = 6
