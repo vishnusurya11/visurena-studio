@@ -1413,6 +1413,7 @@ def enrich_at_rest(doc: dict, index: int, need_words: int, tier: str = "workhors
 CURES: list[tuple[re.Pattern, str]] = [
     (re.compile(r"G-ARTICLE"), "drop_stray_articles"),
     (re.compile(r"G-SYNC line"), "dialogue_first"),
+    (re.compile(r"G-STORY plan: shots carrying no line"), "silent_shot"),
     (re.compile(r"G-GHOST"), "ghost_limbs"),
     (re.compile(r"G-TWICE"), "one_position"),
     (re.compile(r"shots are numbered|lines are numbered|a line's shot never precedes"), "renumber"),
@@ -1667,3 +1668,33 @@ def _seat_dialogue(lines: list[dict], i: int, last: int) -> None:
         a_body, b_body = {k: v for k, v in a.items() if k != "index"}, {k: v for k, v in b.items() if k != "index"}
         a.update(b_body)
         b.update(a_body)
+
+
+def silent_shot(doc: dict) -> dict:
+    """G-STORY's free cure for 'no silent shot' (ep22, 2026-10-07): the shortest
+    single narration line that is not the hook's, the turn's or the button's
+    joins the line before it, and its shot falls silent.  Nothing eligible,
+    nothing changes."""
+    shots, lines = doc.get("shots") or [], doc.get("lines") or []
+    guarded = {s["index"] for s in shots if s.get("section") in ("hook", "turn")}
+    if lines:
+        guarded.add(lines[-1]["shot"])
+    count = {}
+    for line in lines:
+        count[line["shot"]] = count.get(line["shot"], 0) + 1
+    pick = None
+    for i, line in enumerate(lines):
+        if i == 0 or line.get("kind") != "narration" or line["shot"] in guarded or count[line["shot"]] != 1:
+            continue
+        before = lines[i - 1]
+        if before.get("kind") != "narration" or before["shot"] >= line["shot"]:
+            continue
+        if pick is None or len(line["text"].split()) < len(lines[pick]["text"].split()):
+            pick = i
+    if pick is None:
+        return doc
+    lines[pick - 1]["text"] = (lines[pick - 1]["text"].rstrip() + " " + lines[pick]["text"].strip()).strip()
+    kept = [l for i, l in enumerate(lines) if i != pick]
+    for k, line in enumerate(kept):
+        line["index"] = k
+    return {**doc, "lines": kept}

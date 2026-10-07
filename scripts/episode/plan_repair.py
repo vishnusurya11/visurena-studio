@@ -227,6 +227,8 @@ def apply(doc: dict, rows: list[str], book, number: int = 0,
             doc = pc.drop_stray_articles(doc)
         elif name == "dialogue_first":
             doc = pc.dialogue_first(doc)
+        elif name == "silent_shot":
+            doc = pc.silent_shot(doc)
         elif name == "strip_phantoms":
             doc, _ = pc.strip_phantoms(doc, *phantom_context(book))
         elif name == "holds":
