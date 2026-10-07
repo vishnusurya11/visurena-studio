@@ -81,3 +81,12 @@ def test_any_other_400_still_raises():
 def test_the_schema_prompt_carries_the_model_schema():
     text = llm.schema_prompt("write", Answer)
     assert text.startswith("write") and '"shots"' in text and "Answer" in text
+
+
+def test_the_loose_call_asks_for_a_whole_plan_of_output():
+    """ep21 (2026-10-07): without a response_format the provider defaulted
+    max_tokens to ~4k and the 12-16k-token plan came back cut off at column
+    10521 -- 'Invalid JSON: EOF while parsing a list', three paid rounds."""
+    client = FakeClient()
+    _caller(client)("write", structured_output_model=Answer)
+    assert client.calls[1][1]["max_tokens"] >= llm.LOOSE_MAX_TOKENS >= 16_000

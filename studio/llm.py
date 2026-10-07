@@ -226,8 +226,15 @@ class _NativeStructuredCaller:
         strict tool -- so the schema goes in the prompt, no response_format at
         all, and the JSON reply is validated here."""
         asked = [*messages[:-1], {"role": "user", "content": schema_prompt(messages[-1]["content"], model)}]
-        completion = self._client.chat.completions.create(model=self._model, messages=asked, **self._params)
+        completion = self._client.chat.completions.create(
+            model=self._model, messages=asked, max_tokens=LOOSE_MAX_TOKENS, **self._params)
         return completion, model.model_validate_json(json_body(completion.choices[0].message.content))
+
+
+LOOSE_MAX_TOKENS = 32_000
+"""Output room for the loose call: ep21 (2026-10-07) came back cut off at ~4k
+tokens -- a provider default once no response_format carries the plan -- and a
+plan is 12-16k (EXPECTED_OUTPUT_TOKENS)."""
 
 
 def grammar_too_large(error: Exception) -> bool:
