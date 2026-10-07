@@ -201,3 +201,15 @@ def test_a_plan_the_contract_refuses_surfaces_as_a_validation_error():
 
 def test_the_tier_is_the_local_one():
     assert ew.TIER == "local"
+
+
+def test_a_plan_wide_refusal_tells_the_writer_to_change_every_shot():
+    """ep22 (2026-10-07): G-FIRSTFRAME names `plan` (a median over every shot),
+    but the previous-plan section said 'change only the refused rows, keep every
+    other word' -- so four rungs returned the same plan, 34 words a shot against
+    40.  A refusal that names the plan applies to every row, and the prompt says so."""
+    rows_only = ew.previous_section(canned_draft(), ["G-SCALE shot 4: a close with no cell"])
+    assert "only the refused rows" in rows_only and ew.PLAN_WIDE not in rows_only
+    plan_wide = ew.previous_section(canned_draft(), ["G-FIRSTFRAME plan: median at_rest per shot is under the floor, measured 34.0 against 40"])
+    assert ew.PLAN_WIDE in plan_wide and "every shot" in plan_wide
+    assert ew.PLAN_WIDE in ew.prompt_for(BRIEF, ["G-FIRSTFRAME plan: median at_rest per shot is under the floor"], canned_draft())

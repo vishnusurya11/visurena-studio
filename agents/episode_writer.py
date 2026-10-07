@@ -16,6 +16,7 @@ rows -- and `to_episode` folds it into the contract, whose rules then judge it.
 from __future__ import annotations
 
 import json
+import re
 from pathlib import Path
 from typing import Literal
 
@@ -93,19 +94,31 @@ def refused_section(refusals: list[str] | None) -> str:
             f"plan again.\n" + "\n".join(refusals))
 
 
-def previous_section(previous: dict | None) -> str:
+PLAN_WIDE = "A refusal that names `plan` is a MEDIAN over every shot or setup"
+"""ep22 (2026-10-07): G-FIRSTFRAME names the plan, 'keep every other word' kept
+the plan, and four rungs judged the same 34 words a shot against 40."""
+
+
+def plan_wide(refusals: list[str] | None) -> bool:
+    return any(re.search(r"\bplan:", r) for r in refusals or [])
+
+
+def previous_section(previous: dict | None, refusals: list[str] | None = None) -> str:
     """The plan the refusals are about, as JSON, with the one instruction that
-    matters: change what the refusals name and keep the rest."""
+    matters: change what the refusals name and keep the rest -- and when a
+    refusal names the whole plan, change every row it measures."""
     if not previous:
         return ""
+    scope = (f" {PLAN_WIDE}: lengthen or fix EVERY shot's or setup's field it names until the "
+             f"median clears the floor; keep everything else as it is." if plan_wide(refusals) else "")
     return (f"\n\n{PREVIOUS}\n{json.dumps(previous, ensure_ascii=False)}\n"
             "Return this SAME plan with only the refused rows changed; keep every other "
-            "shot, line and word as it is.")
+            f"shot, line and word as it is.{scope}")
 
 
 def prompt_for(brief: dict, refusals: list[str] | None = None, previous: dict | None = None) -> str:
     return (f"{load_skill()}\n\n--- THE BRIEF ---\n{plan_brief.render(brief)}"
-            f"{previous_section(previous)}{refused_section(refusals)}\n\nReturn the plan.")
+            f"{previous_section(previous, refusals)}{refused_section(refusals)}\n\nReturn the plan.")
 
 
 def contract_lines_of(bad: Exception) -> list[str]:
