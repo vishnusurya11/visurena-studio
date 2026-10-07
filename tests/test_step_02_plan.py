@@ -346,3 +346,34 @@ def test_a_pending_contract_refusal_is_kept_when_the_disk_plan_is_refused_too(ct
     gate.results = [(0, CLEAN_OUT)]
     desk.pending = ["CONTRACT : ghost"]
     assert step.battery(ctx, desk) is None
+
+
+def test_a_rung_whose_draft_the_contract_refused_says_so_in_its_learning(ctx, monkeypatch):
+    """ep22 (2026-10-07): three ladders, nine rungs, every learning note the same
+    61 battery lines of the restored disk plan -- while every writer draft was
+    refused by the contract for 'slowly' and nobody could see it.  A rung taken
+    on a contract-refused draft carries the contract's lines in the next verdict."""
+    from pydantic import ValidationError
+    from strands.types.exceptions import StructuredOutputException
+    from studio import learnings as ln
+
+    class Refuser:
+        """The writer whose every draft the contract refuses (a part's rule)."""
+        calls = 0
+
+        def write(self, brief, refusals=None, usage=None, _agent=None, previous=None):
+            Refuser.calls += 1
+            try:
+                Episode.model_validate({**canned_plan(brief["number"]), "shots": []})
+            except ValidationError as bad:
+                raise StructuredOutputException("output did not match schema") from bad
+
+    monkeypatch.setattr(step, "episode_writer", Refuser())
+    monkeypatch.setattr(step.plan_reader, "read", Reader())
+    ctx.capture = Capture((1, REFUSED_OUT))
+    episode_home.write_plan(_plan(ctx), canned_plan())
+    with pytest.raises(Exception):
+        step.run(ctx)
+    notes = [row.note for row in ln.load(ctx.learnings_path)]
+    assert Refuser.calls >= 2 and len(notes) >= 2
+    assert any("CONTRACT" in n for n in notes[1:]), notes
