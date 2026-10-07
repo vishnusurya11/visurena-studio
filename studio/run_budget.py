@@ -139,6 +139,16 @@ def clock_reset_at(home) -> str:
         return ""
 
 
+def clock_reset_epoch(home) -> float:
+    """The stamp as seconds since the epoch (local, as it was written); 0.0 when none."""
+    from datetime import datetime
+    stamp = clock_reset_at(home)
+    try:
+        return datetime.fromisoformat(stamp).timestamp() if stamp else 0.0
+    except ValueError:
+        return 0.0
+
+
 def spent_before(home) -> float:
     """Seconds this episode's earlier runs logged (timing.jsonl) since the
     last clock reset, 0.0 when there is none yet.  What `Budget.charge` is
