@@ -193,3 +193,24 @@ def test_the_loose_call_caps_reasoning_and_leaves_room_for_the_plan():
     kw = client.calls[1][1]
     budget = kw["extra_body"]["reasoning"]["max_tokens"]
     assert 1024 <= budget <= 4096 and kw["max_tokens"] - budget >= 16_000
+
+
+def test_the_writer_client_has_a_visible_timeout_and_no_silent_retries(monkeypatch):
+    """ep21 (2026-10-07): the body call sat 30+ min with one TLS connection open --
+    the SDK's default 600 s timeout retried twice in silence.  The tier names its
+    timeout (`timeout_s`, default 600) and the client never retries on its own:
+    `structured()` owns the transient ladder and a timeout is a loud failure."""
+    seen = {}
+
+    class FakeOpenAI:
+        def __init__(self, **kw):
+            seen.update(kw)
+            self.chat = SimpleNamespace(completions=SimpleNamespace(parse=None, create=None))
+
+    monkeypatch.setattr("openai.OpenAI", FakeOpenAI)
+    monkeypatch.setattr(llm, "resolve_tier", lambda tier: {
+        "provider": "openrouter", "model": "m", "params": {}, "structured_output": None, "timeout_s": 1500,
+        "provider_config": {"base_url": "https://x/v1", "api_key_env": "NOPE"}})
+    monkeypatch.setattr(llm, "_api_key", lambda pc: "k")
+    llm._NativeStructuredCaller("local")
+    assert seen["timeout"] == 1500 and seen["max_retries"] == 0

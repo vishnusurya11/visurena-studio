@@ -57,6 +57,7 @@ def resolve_tier(tier: str) -> dict:
     return {"model": entry["model"], "provider": provider,
             "params": entry.get("params") or {},
             "structured_output": entry.get("structured_output"),
+            "timeout_s": entry.get("timeout_s"),
             "provider_config": config["providers"][provider]}
 
 
@@ -113,6 +114,10 @@ def _extract_usage(result) -> dict:
     return {"input_tokens": raw.get("inputTokens", 0),
             "output_tokens": raw.get("outputTokens", 0),
             "total_tokens": raw.get("totalTokens", 0)}
+
+
+DEFAULT_TIMEOUT_S = 600.0
+"""One request's wall, when the tier names none (the SDK's own default)."""
 
 
 class OverBudget(RuntimeError):
@@ -191,7 +196,10 @@ class _NativeStructuredCaller:
         resolved = resolve_tier(tier)
         pc = resolved["provider_config"]
         base_url = pc.get("base_url") or (pc["host"].rstrip("/") + "/v1")  # ollama compat
-        self._client = OpenAI(api_key=_api_key(pc), base_url=base_url)
+        # ep21 (2026-10-07): the SDK's default is 600 s retried twice in silence; the
+        # tier names its timeout and `structured()` owns every retry.
+        self._client = OpenAI(api_key=_api_key(pc), base_url=base_url,
+                              timeout=float(resolved.get("timeout_s") or DEFAULT_TIMEOUT_S), max_retries=0)
         self._model = resolved["model"]
         self._params = resolved.get("params") or {}
         self._tier = tier                   # the wall holds the writers to cap - reserve

@@ -58,6 +58,7 @@ tiers:
     model: anthropic/claude-sonnet-5.5
     # 2026-10-07: the strict grammar of the WHOLE Draft is over the provider's limit, so the writer
     # asks in parts (agents/episode_writer PARTS), each under it; the loose path stays a fallback.
+    timeout_s: 1200       # one strict part's wall; the SDK's silent 600 s x3 hid a 33-min body call (ep21)
     # provider: openai    # previous: gpt-5.6-luna, reasoning_effort none, ~$0.03/call
     # model: gpt-5.6-luna
     # ---- STORY-WRITER OPTIONS (2026-10-04, OpenRouter live prices, USD per M tokens) ----
