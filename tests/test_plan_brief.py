@@ -257,3 +257,14 @@ def test_the_band_speaks_at_the_measured_rate_and_says_the_words_a_take_holds(bo
     assert b["max_words_per_shot"] == 20                                       # 2.5 x 8.0 s
     assert plan_brief.band()["words_per_second"] == episode_spec.WORDS_PER_SECOND
     assert plan_brief.build(book, 3)["band"]["words_per_second"] == 2.5
+
+
+def test_the_band_names_the_first_frame_floors_the_gate_measures(book):
+    """ep22 (2026-10-07): luna's drafts failed G-FIRSTFRAME four rungs running
+    (median at_rest 34 against 40) and the brief never said 40 -- the same fault
+    as the rate: a number the gate measures that the writer cannot aim at."""
+    from studio import plan_gates
+    floors = plan_brief.band(book, 3)["floors"]
+    assert floors == {"at_rest_words": plan_gates.AT_REST_WORDS, "frame_edge_tokens": plan_gates.EDGE_TOKENS,
+                      "described_words": plan_gates.DESCRIBED_WORDS, "geometry_words": plan_gates.GEOMETRY_WORDS}
+    assert floors["at_rest_words"] == 40

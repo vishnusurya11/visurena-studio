@@ -74,6 +74,12 @@ turn inside `turn_band` of it. No shot may project longer than one take
 (`take_seconds`): a shot's lines together carry at most `max_words_per_shot` words.
 Count them. A 23-word shot at 2.5 words a second is 9.2 s and the plan is refused.
 
+The pictures have floors too (`floors`), measured as plan MEDIANS, and the plan is
+refused under any of them: `at_rest_words` per shot (the sentence the drawer gets),
+`frame_edge_tokens` per `at_rest` (LEFT/RIGHT/TOP/BOTTOM/CENTRE, edge, third, half),
+`described_words` and `geometry_words` per setup. Count those as well; a terse insert
+is fine, a plan written terse everywhere is not.
+
 ---
 
 ## The cast

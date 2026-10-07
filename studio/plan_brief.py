@@ -230,6 +230,14 @@ def spoken_rate(book_dir: Path | None, number: int | None) -> float:
     return plan_gates.series_rate(book_dir, number)
 
 
+def first_frame_floors() -> dict:
+    """The G-FIRSTFRAME medians the gate measures, said to the writer in numbers
+    (ep22, 2026-10-07: four rungs under a floor the brief never named)."""
+    from studio import plan_gates
+    return {"at_rest_words": plan_gates.AT_REST_WORDS, "frame_edge_tokens": plan_gates.EDGE_TOKENS,
+            "described_words": plan_gates.DESCRIBED_WORDS, "geometry_words": plan_gates.GEOMETRY_WORDS}
+
+
 def band(book_dir: Path | None = None, number: int | None = None) -> dict:
     """The format band, read off the contract and the series' measured voice."""
     from studio.episode_takes import BUDGET
@@ -237,6 +245,7 @@ def band(book_dir: Path | None = None, number: int | None = None) -> dict:
     return {"min_seconds": episode_spec.MIN_SECONDS, "max_seconds": episode_spec.MAX_SECONDS,
             "words_per_second": rate, "take_seconds": BUDGET,
             "max_words_per_shot": int(rate * BUDGET),
+            "floors": first_frame_floors(),
             "max_words_per_line": episode_spec.MAX_WORDS,
             "max_lines_per_shot": episode_spec.MAX_LINES_PER_SHOT,
             "max_voices": episode_spec.MAX_SPEAKING, "max_setups": episode_spec.MAX_SETUPS,
