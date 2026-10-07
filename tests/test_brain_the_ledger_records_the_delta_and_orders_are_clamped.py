@@ -1,7 +1,7 @@
-"""The brain's cost is a row in the same usage table as the writer's, stage `brain`,
-unit `epNN` -- and the row is the DELTA of the session's running total, because a
-resumed call's `total_cost_usd` includes the session's earlier spend (CLI >= 2.1.277):
-two resumed turns are two rows that sum to the last total, never to twice it.
+"""The brain's turn is a row in the same usage table as the writer's, stage `brain`,
+unit `epNN`, model `<model>@subscription` with a NULL cost: the owner's login bills
+nothing (2026-10-07), so the SDK's notional `total_cost_usd` is returned for the
+log and never written as a cost the episode's wall would count.
 
 The supervisor trusts the verdict's order only inside the registry: a kind outside
 redo|retry|requeue or a step the episode stage does not have is clamped to `park`
@@ -34,39 +34,36 @@ def _rows(conn) -> list[sqlite3.Row]:
     return conn.execute("SELECT * FROM usage ORDER BY id").fetchall()
 
 
-def test_the_first_turn_records_its_whole_total(conn):
+def test_a_brain_turn_is_ledgered_on_the_subscription_at_no_cost(conn):
+    """Owner, 2026-10-07: nothing is billed -- the brain runs on the same login as
+    the writer.  Its tokens are kept; the SDK's notional total never becomes a
+    cost, so the episode's wall (unit_spent) does not count it (ep19's status
+    read $3.10 'media spent' of which a third was brain triage)."""
     total = brain.ledger(conn, "book", "ep20", "08", "claude-sonnet-5-5", 0.0, _receipt(0.40))
     row = _rows(conn)[0]
-    assert total == 0.40 and row["cost_usd"] == pytest.approx(0.40)
+    assert row["model"] == "claude-sonnet-5-5@subscription" and row["cost_usd"] is None
     assert row["stage"] == "brain" and row["unit"] == "ep20" and row["step_id"] == "08"
     assert row["input_tokens"] == 1000 and row["output_tokens"] == 100
+    assert total == 0.40                      # the session's running total is still returned, for the log
+    assert spend.unit_spent(conn, "book", "ep20") == 0.0
 
 
-def test_two_resumed_turns_are_two_rows_summing_to_the_last_total(conn):
+def test_two_resumed_turns_are_two_rows_and_still_no_cost(conn):
     first = brain.ledger(conn, "book", "ep20", "08", "claude-sonnet-5-5", 0.0, _receipt(0.40))
     last = brain.ledger(conn, "book", "ep20", "08", "claude-sonnet-5-5", first, _receipt(0.65))
-    costs = [r["cost_usd"] for r in _rows(conn)]
-    assert costs == pytest.approx([0.40, 0.25]) and last == 0.65
-    assert spend.unit_spent(conn, "book", "ep20") == pytest.approx(0.65)
+    assert [r["cost_usd"] for r in _rows(conn)] == [None, None] and last == 0.65
 
 
-def test_a_turn_without_a_total_is_priced_from_the_rate_table_not_null(conn):
+def test_a_turn_without_a_total_keeps_the_previous_total(conn):
     receipt = {**_receipt(0.0), "total_cost_usd": None}
-    total = brain.ledger(conn, "book", "ep20", "08", "claude-sonnet-5-5", 0.10, receipt)
-    row = _rows(conn)[0]
-    assert row["cost_usd"] == pytest.approx(spend.cost("claude-sonnet-5-5", 1000, 100))
-    assert row["cost_usd"] is not None and total == 0.10
+    assert brain.ledger(conn, "book", "ep20", "08", "claude-sonnet-5-5", 0.10, receipt) == 0.10
+    assert _rows(conn)[0]["cost_usd"] is None
 
 
-def test_the_brain_models_are_priced_so_a_row_is_never_null():
-    assert spend.rate_for("claude-sonnet-5-5") == {"input_per_m": 2.00, "output_per_m": 10.00}
-    assert spend.rate_for("claude-opus-5-5") == {"input_per_m": 4.00, "output_per_m": 20.00}
-
-
-def test_the_brain_tier_is_registered_for_the_ledgers_model_name():
+def test_the_brain_tier_runs_on_the_subscription_like_every_other():
     import yaml
     tier = yaml.safe_load(open("models.yaml", encoding="utf-8"))["tiers"]["brain"]
-    assert tier["provider"] == "anthropic-sdk" and tier["model"] == "claude-sonnet-5-5"
+    assert tier["provider"] == "claude-sdk" and tier["model"] == "claude-sonnet-5-5"
 
 
 # --- allowed(): the registry clamps the order ------------------------------------

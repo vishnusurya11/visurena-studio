@@ -251,18 +251,15 @@ def _tokens(model_usage: dict) -> tuple[int, int]:
 
 def ledger(conn, codex_id: str, unit: str, step_id: str, model: str, prev_total: float,
            result: dict) -> float:
-    """One usage row per turn, stage `brain`, costed as the DELTA of the session's
-    running total (a resumed call's total includes the session's earlier spend).
-    A turn with no total keeps the rate-table price.  Returns the new total."""
+    """One usage row per turn, stage `brain`, model `<model>@subscription` with a
+    NULL cost: the brain runs on the owner's login like every tier (2026-10-07,
+    nothing billed), so the SDK's notional running total is only RETURNED, for
+    the log, never written as a cost the episode's wall would count."""
     tokens_in, tokens_out = _tokens(result.get("model_usage") or {})
-    spend.record(conn, codex_id, "brain", step_id, "brain", model, tokens_in, tokens_out, unit=unit)
-    total = result.get("total_cost_usd")
-    if total is None:
-        return prev_total
-    delta = round(max(float(total) - prev_total, 0.0), 6)
-    conn.execute("UPDATE usage SET cost_usd = ? WHERE id = (SELECT MAX(id) FROM usage)", (delta,))
+    spend.record(conn, codex_id, "brain", step_id, "brain", f"{model}@subscription", tokens_in, tokens_out, unit=unit)
     conn.commit()
-    return float(total)
+    total = result.get("total_cost_usd")
+    return prev_total if total is None else float(total)
 
 
 def episode_step_ids() -> set[str]:
