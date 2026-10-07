@@ -94,6 +94,14 @@ matched the shell running `autopilot.py retry 22 --book 2026...` (codex, number
 and 'scripts/episode/' all present) and killed the operator's own command."""
 
 
+def drive_alive(rows: Iterable[ProcInfo], codex: str, n: int) -> bool:
+    """This episode's drive.py runs: the supervisor's liveness question, asked
+    of the run tree so its own line never answers it (2026-10-07 14:06: the
+    process table's find_drive grew a book-wide fallback and handed the
+    autopilot its own pid; ep19 read "drive alive" and waited on itself)."""
+    return any("drive.py" in _slashed(p.cmdline) for p in run_tree(rows, codex, n))
+
+
 def _terminate(pid: int) -> None:
     try:
         os.kill(pid, signal.SIGTERM)        # TerminateProcess on Windows

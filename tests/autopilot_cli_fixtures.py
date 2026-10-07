@@ -65,6 +65,10 @@ class FakeEngine:
         self.calls.append("queue")
         return {"queue_running": [[1, self.prompt]] if self.prompt else []}
 
+    def drive_alive(self, rows, codex, n):
+        from studio import engine_ops
+        return engine_ops.drive_alive(rows, codex, n)      # pure; the real rule, counted nowhere
+
     def kill_run_tree(self, rows, codex, n):
         self.calls.append("kill_run_tree")
         return []

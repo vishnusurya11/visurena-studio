@@ -441,7 +441,7 @@ def gather(book: Path, codex: str, n: int, deps: Deps, series: dict):
     from studio import run_budget
     return signals_of({
         "drive_rows": drive_rows, "exit_code": ends[-1].get("code") if ends else None,
-        "lock": read_json(deps.root / "gpu.lock"), "proc_alive": procs.find_drive(rows, codex, n) is not None,
+        "lock": read_json(deps.root / "gpu.lock"), "proc_alive": deps.engine.drive_alive(rows, codex, n),
         "uploads_rows": rows_of(Path(book) / "uploads.jsonl"), "parked_rows": rows_of(paths_of(book).parked),
         "home_files": sorted(p.name for p in home.iterdir()) if home.exists() else [],
         "log_tail": log_tail_of(home), "porcelain": deps.git("status", "--porcelain"),
