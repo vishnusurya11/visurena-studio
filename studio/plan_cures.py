@@ -480,7 +480,44 @@ def seat_overflow(doc: dict, rate: float) -> dict:
         if len(own) < 2 or _shot_secs(doc, rate)[n] <= TAKE_BUDGET_S:
             continue
         if not (n < last and _room(doc, rate, n + 1, own[-1], cap) and _move(own[-1], n + 1)):
-            n > 0 and _room(doc, rate, n - 1, own[0], cap) and _move(own[0], n - 1)
+            if not (n > 0 and _room(doc, rate, n - 1, own[0], cap) and _move(own[0], n - 1)):
+                return seat_overflow(split_shot(doc, n), rate)   # no neighbour has room: two shots
+    return doc
+
+
+UNIQUE_SECTIONS = {"hook": "setup", "turn": "reaction"}
+"""A split of a one-of-a-kind shot: the copy after it takes this section."""
+
+
+def split_shot(doc: dict, n: int) -> dict:
+    """Shot n becomes two: a copy with the same setup, frame, camera, at_rest
+    and end follows it and carries the last line (A31: a two-line shot over
+    the take whose neighbours are full -- ep19 rung 3, 4 + 14 words).  Shots
+    after it, their lines, beds and omit move up one; a hook's or turn's copy
+    takes the next section; a button's copy IS the button and the original
+    becomes the runout, so the shape rule still finds one of each."""
+    shots = doc.get("shots") or []
+    src = next(s for s in shots if s["index"] == n)
+    for s in shots:
+        if s["index"] > n:
+            s["index"] += 1
+    for line in doc.get("lines") or []:
+        if line["shot"] > n:
+            line["shot"] += 1
+    for bed in doc.get("beds") or []:
+        if bed.get("from_shot", -1) > n:
+            bed["from_shot"] += 1
+    doc["omit"] = [i + 1 if i > n else i for i in doc.get("omit") or []]
+    copy = {k: v for k, v in src.items() if k not in ("take", "cuts", "path")}
+    copy.update(index=n + 1, beat_s=0.0, coda_s=src.get("coda_s") or 0.0)
+    src["coda_s"] = 0.0
+    if src.get("section") == "button":
+        src["section"], copy["section"] = "runout", "button"
+    elif src.get("section"):
+        copy["section"] = UNIQUE_SECTIONS.get(src["section"], src["section"])
+    shots.insert(shots.index(src) + 1, copy)
+    own = [l for l in doc.get("lines") or [] if l["shot"] == n]
+    own[-1]["shot"] = n + 1
     return doc
 
 

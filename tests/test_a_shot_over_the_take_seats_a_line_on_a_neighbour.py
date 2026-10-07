@@ -21,7 +21,8 @@ def _doc(lines_by_shot: dict[int, list[str]], n: int = 3) -> dict:
         for text in lines_by_shot.get(shot, []):
             lines.append({"index": k, "shot": shot, "speaker": "lead", "kind": "narration", "text": text})
             k += 1
-    return {"shots": [{"index": i, "beat_s": 0.0, "coda_s": 0.0} for i in range(n)], "lines": lines}
+    return {"shots": [{"index": i, "section": "hook" if i == 0 else "setup", "beat_s": 0.0, "coda_s": 0.0}
+                      for i in range(n)], "lines": lines}
 
 
 def _shots_of(doc: dict) -> list[int]:
@@ -41,14 +42,35 @@ def test_the_first_line_moves_back_when_the_next_shot_is_full():
     out = pc.seat_overflow(doc, RATE)
     assert _shots_of(out)[:2] == [0, 1]                      # W4 went back to shot 0, W14 stays on 1
     assert pc._shot_secs(out, RATE)[1] <= pc.TAKE_BUDGET_S
+    assert max(pc._shot_secs(out, RATE).values()) <= pc.TAKE_BUDGET_S   # shot 2 split, nothing left over
 
 
-def test_a_line_that_fits_nowhere_stays_and_a_one_line_shot_is_left_alone():
-    doc = _doc({0: [W14, W4], 1: [W4, W14], 2: [W14, W4]})
+def test_a_line_that_fits_nowhere_splits_the_shot_and_a_one_line_shot_is_left_alone():
+    """ep19's shape: both neighbours at 7.9 s, nothing to shave anywhere."""
+    doc = _doc({0: [W14], 1: [W4, W14], 2: [W14]})
+    doc["shots"][0].update(beat_s=1.0, coda_s=0.8)           # 7.9 s: no room for 1.6 s + a breath
+    doc["shots"][2].update(beat_s=1.0, coda_s=0.8)
+    doc["beds"] = [{"from_shot": 2, "tone": "grave"}]
+    doc["omit"] = [2]
+    doc["shots"][1].update(section="turn", frame="f", setup="pit", take=2)
     out = pc.seat_overflow(doc, RATE)
-    assert _shots_of(out) == [0, 0, 1, 1, 2, 2]
+    assert [s["index"] for s in out["shots"]] == [0, 1, 2, 3]
+    assert _shots_of(out) == [0, 1, 2, 3]                    # W4 stays on 1, W14 on the new 2, the old 2 is 3
+    assert out["shots"][2]["section"] == "reaction" and out["shots"][2]["setup"] == "pit"
+    assert out["shots"][2].get("take") is None and out["shots"][1]["take"] == 2
+    assert out["beds"] == [{"from_shot": 3, "tone": "grave"}] and out["omit"] == [3]
+    assert max(pc._shot_secs(out, RATE).values()) <= pc.TAKE_BUDGET_S
     one = _doc({1: [" ".join(["y"] * 22)]})
     assert _shots_of(pc.seat_overflow(one, RATE)) == [1]
+
+
+def test_a_button_split_keeps_the_button_on_the_last_line():
+    doc = _doc({0: [W14], 1: [W4, W14]}, n=2)
+    doc["shots"][1]["section"] = "button"
+    doc["shots"][0].update(beat_s=1.0, coda_s=0.8)           # 7.9 s: full
+    out = pc.seat_overflow(doc, RATE)
+    assert [s["section"] for s in out["shots"]] == ["hook", "runout", "button"]
+    assert out["lines"][-1]["shot"] == 2
 
 
 def test_holds_runs_the_seating_so_the_take_length_line_is_cured_for_free():
