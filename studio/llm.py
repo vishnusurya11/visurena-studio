@@ -439,6 +439,8 @@ def _validated(obj, schema):
     if isinstance(obj, schema):
         return obj
     try:
+        if hasattr(obj, "model_dump"):             # another model's instance: its fields (a part of a whole)
+            return schema.model_validate(obj.model_dump())
         return schema.model_validate(obj)
     except Exception as exc:
         raise StructuredOutputException(f"output did not match schema: {exc}") from exc

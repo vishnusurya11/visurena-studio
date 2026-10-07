@@ -173,7 +173,7 @@ def test_refusals_are_quoted_back_verbatim():
 def test_usage_comes_back_with_the_tier():
     usage: dict = {}
     ew.write(BRIEF, usage=usage, _agent=FakeModel(canned_draft()))
-    assert usage["tier"] == ew.TIER == "local" and usage["input_tokens"] == 10
+    assert usage["tier"] == ew.TIER == "local" and usage["input_tokens"] == 10 * ew.PARTS
 
 
 def test_a_structured_output_exception_surfaces():

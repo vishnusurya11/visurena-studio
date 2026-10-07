@@ -115,6 +115,53 @@ def contract_lines_of(bad: Exception) -> list[str]:
     return [f"CONTRACT setups: {bad}"]
 
 
+# THE DRAFT IN TWO PARTS (2026-10-07).  Since 2026-10-06 17:27Z every provider
+# behind OpenRouter refuses the strict grammar of the WHOLE Draft ("compiled
+# grammar is too large"), and the loose path cannot answer (reasoning is
+# mandatory for the model and eats the output budget).  Probed with 20-token
+# calls: the frame (scalars, setups, beds) compiles, the body (shots, lines)
+# compiles, the whole does not.  So one draft is two strict calls, the body
+# reading the frame, merged into the one Draft the contract judges.
+
+FRAME_FIELDS = ("number", "title", "question", "where", "light", "palette", "look", "aspect",
+                "answer", "protagonist", "setups", "beds", "omit")
+BODY_FIELDS = ("shots", "lines")
+PART_FRAME = "--- PART 1 OF 2: THE FRAME ---"
+PART_BODY = "--- PART 2 OF 2: THE BODY ---"
+PARTS = 2
+"""Strict calls per draft; the tests count prompts and tokens by it."""
+
+
+def _part_model(name: str, fields: tuple[str, ...]):
+    from pydantic import create_model
+    return create_model(name, **{k: (Draft.model_fields[k].annotation, Draft.model_fields[k]) for k in fields})
+
+
+PartFrame = _part_model("PartFrame", FRAME_FIELDS)
+PartBody = _part_model("PartBody", BODY_FIELDS)
+
+
+def part_prompt(base: str, heading: str, fields: tuple[str, ...], so_far: dict | None) -> str:
+    """The writer's prompt plus which fields this part returns and what the
+    earlier part already fixed (the body's shots name the frame's setups)."""
+    given = f"\nThe frame, already written -- its setups are the only setups a shot may name:\n" \
+            f"{json.dumps(so_far, ensure_ascii=False)}\n" if so_far else "\n"
+    return f"{base}\n\n{heading}\nReturn ONLY these fields of the plan now: {', '.join(fields)}.{given}"
+
+
+def write_parts(brief: dict, asked, shown, usage: dict | None, _agent) -> Draft:
+    """Two strict calls, the body after the frame; usage is the sum of both."""
+    base, u1, u2 = prompt_for(brief, asked, shown), {}, {}
+    frame = llm.structured(TIER, part_prompt(base, PART_FRAME, FRAME_FIELDS, None), PartFrame, usage=u1, _agent=_agent)
+    body = llm.structured(TIER, part_prompt(base, PART_BODY, BODY_FIELDS, frame.model_dump()), PartBody,
+                          usage=u2, _agent=_agent)
+    if usage is not None:
+        for k in ("input_tokens", "output_tokens", "total_tokens"):
+            usage[k] = usage.get(k, 0) + u1.get(k, 0) + u2.get(k, 0)
+        usage["tier"] = TIER
+    return Draft.model_validate({**frame.model_dump(), **body.model_dump()})
+
+
 def write(brief: dict, refusals: list[str] | None = None, usage: dict | None = None,
           _agent=None, previous: dict | None = None) -> Episode:
     """One plan for one unit: the draft from the model, edited under the contract
@@ -122,7 +169,7 @@ def write(brief: dict, refusals: list[str] | None = None, usage: dict | None = N
     is raised for the ladder."""
     asked, shown = refusals, previous
     for _ in range(CONTRACT_RETRIES):
-        draft = llm.structured(TIER, prompt_for(brief, asked, shown), Draft, usage=usage, _agent=_agent)
+        draft = write_parts(brief, asked, shown, usage, _agent)
         try:
             return to_episode(draft)
         except ValueError as bad:

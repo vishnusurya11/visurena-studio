@@ -56,9 +56,8 @@ tiers:
     # The $3/episode wall (money.episode_ceiling_usd) still gates every call.
     provider: openrouter  # Claude Sonnet 5.5  $2.00 in / $10.00 out  ~$0.23/call
     model: anthropic/claude-sonnet-5.5
-    structured_output: loose  # 2026-10-07: OpenRouter sends any json_schema as a strict tool and the
-                              # provider refuses the grammar ('too large'); the schema goes in the
-                              # prompt and studio/llm validates the JSON. Never probe strict here.
+    # 2026-10-07: the strict grammar of the WHOLE Draft is over the provider's limit, so the writer
+    # asks in parts (agents/episode_writer PARTS), each under it; the loose path stays a fallback.
     # provider: openai    # previous: gpt-5.6-luna, reasoning_effort none, ~$0.03/call
     # model: gpt-5.6-luna
     # ---- STORY-WRITER OPTIONS (2026-10-04, OpenRouter live prices, USD per M tokens) ----

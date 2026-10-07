@@ -20,10 +20,10 @@ from tests.test_episode_writer import BRIEF, FakeModel, canned_draft
 
 def test_a_draft_the_contract_refuses_is_re_asked_with_the_rule_and_the_fix_is_taken():
     broken = {**canned_draft(), "lines": []}
-    fake = FakeModel(broken, canned_draft())
+    fake = FakeModel(*[broken] * ew.PARTS, canned_draft())   # each part of the first draft is the broken one
     episode = ew.write(BRIEF, _agent=fake)
-    assert episode.title == "The Yard" and len(fake.prompts) == 2
-    assert "CONTRACT" in fake.prompts[1] and "no button" in fake.prompts[1]
+    assert episode.title == "The Yard" and len(fake.prompts) == 2 * ew.PARTS
+    assert "CONTRACT" in fake.prompts[ew.PARTS] and "no button" in fake.prompts[ew.PARTS]
 
 
 def test_a_draft_refused_on_every_re_ask_surfaces_the_rule():
@@ -32,7 +32,7 @@ def test_a_draft_refused_on_every_re_ask_surfaces_the_rule():
     fake = FakeModel(broken)
     with pytest.raises(ValidationError, match="no button"):
         ew.write(BRIEF, _agent=fake)
-    assert len(fake.prompts) == ew.CONTRACT_RETRIES
+    assert len(fake.prompts) == ew.CONTRACT_RETRIES * ew.PARTS
 
 
 def test_contract_lines_are_read_out_of_the_gateways_refusal():
