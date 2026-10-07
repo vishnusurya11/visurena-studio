@@ -912,7 +912,7 @@ not built     a worker loop that starts a five-hour GPU job unattended — a que
       U('','Decisions','Every gate retirement with its count','built','docs/DECISIONS.md'),
       U('','Audit sheet','Every flag and a seeded sample per unit; the owner reads it when he likes; findings append to the casebook; no step reads it','built','scripts/audit/sheet.py · library/<book>/audit/')]},
     {n:'Platform',r:'Shared services; no deliverable of its own',st:'partial',kids:[
-      U('','Model gateway','Tiers, not models; a local tier is a yaml edit','built','studio/llm.py · models.yaml'),
+      U('','Model gateway','Tiers, not models; every tier runs on the Claude Agent SDK under the owner\'s subscription (one structured session per call, the schema enforced by the SDK, tokens ledgered at no cost, never a wall); the paid providers remain only as ledger history (owner, 2026-10-07)','built','studio/llm.py · studio/brain.py · models.yaml'),
       U('','GPU lease','One GPU, one stage; reads RENDER_HOLD','partial','studio/comfy.py'),
       U('','Ledger / DB','STAGES from the registry; a unit column','partial','studio/db.py · spend.py'),
       U('','Approval','Per kind, per run','built','studio/approval.py'),

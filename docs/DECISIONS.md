@@ -4,7 +4,20 @@ Newest first. Every architectural change gets an entry.
 
 ---
 
-## 2026-10-07 — The episode writer returns to gpt-5.6-luna (the owner's standing rule: any model, $3 an episode)
+## 2026-10-07 — Every LLM tier runs on the Claude Agent SDK under the owner's subscription (owner: "use Claude, like how you used to supervise"; "don't use API for money, I will remove that completely")
+
+**Ruling:** no paid API call anywhere in the studio. Every tier in `models.yaml` (`local`, `canon`,
+`workhorse`, `reasoning`, `brain`) names provider `claude-sdk`: `llm.structured` runs one structured
+Claude Agent SDK session per call (`studio.brain.ask_structured`, no tools, the schema enforced by the
+SDK's `output_format`), under the subscription the owner already pays for. Usage is ledgered as
+`<model>@subscription` with a NULL cost so the $3 wall ignores it; `guard_spend` is never called on
+that path. The OpenAI / OpenRouter / LM Studio / Ollama providers stay in the yaml only as ledger
+history, and the owner removes their keys. This supersedes the luna entry below (2fc2c29; tracker
+A38–A39).
+
+---
+
+## 2026-10-07 — The episode writer returns to gpt-5.6-luna (superseded the same day by the entry above)
 
 **Ruling (applied under the owner's 2026-10-06 rule "use whatever models you want but the budget
 is $3 for episode"):** since 2026-10-06 17:27Z every provider behind OpenRouter refuses the strict
