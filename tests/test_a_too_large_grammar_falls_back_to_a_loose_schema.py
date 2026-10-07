@@ -143,11 +143,13 @@ def test_a_tier_marked_loose_never_probes_the_strict_grammar(monkeypatch):
     assert [c[0] for c in client.calls] == ["create"]
 
 
-def test_the_loose_call_turns_reasoning_off():
+def test_the_loose_call_caps_reasoning_and_leaves_room_for_the_plan():
     """ep21 (2026-10-07): the loose reply came back finish_reason=length,
-    reasoning=yes, content None -- on a plain create the model thinks by default
-    and spent the whole output budget on it.  The strict tool path never did."""
+    reasoning=yes, content None -- the model spent the whole output budget
+    thinking; and OpenRouter refuses to disable reasoning for it ("mandatory for
+    this endpoint").  So the thought is capped small and the answer gets the rest."""
     client = FakeClient()
     _caller(client)("write", structured_output_model=Answer)
     kw = client.calls[1][1]
-    assert kw["extra_body"]["reasoning"] == {"enabled": False}
+    budget = kw["extra_body"]["reasoning"]["max_tokens"]
+    assert 1024 <= budget <= 4096 and kw["max_tokens"] - budget >= 16_000

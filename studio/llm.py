@@ -239,10 +239,12 @@ class _NativeStructuredCaller:
         return completion, model.model_validate_json(json_body(content_of(completion)))
 
 
-LOOSE_EXTRA_BODY = {"reasoning": {"enabled": False}}
-"""No thinking on the loose call: ep21 (2026-10-07) came back finish_reason=length,
-reasoning=yes, content None -- the model spent the whole budget reasoning.  The
-strict tool path never reasoned; the plan is the answer, not a deliberation."""
+LOOSE_EXTRA_BODY = {"reasoning": {"max_tokens": 2048}}
+"""A small thinking budget on the loose call: ep21 (2026-10-07) came back
+finish_reason=length, reasoning=yes, content None -- the model spent the whole
+output budget reasoning -- and OpenRouter refuses `enabled: false` for this
+model ("Reasoning is mandatory for this endpoint").  2k of thought, the rest of
+LOOSE_MAX_TOKENS for the plan."""
 
 
 STRICT_REFUSED: set[str] = set()
