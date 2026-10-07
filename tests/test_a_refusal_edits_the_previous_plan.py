@@ -21,8 +21,8 @@ def test_the_writer_re_asks_with_its_previous_plan_and_the_rows_to_change():
     broken = {**canned_draft(), "lines": []}
     fake = FakeModel(*[broken] * ew.PARTS, canned_draft())   # each part of the first draft is the broken one
     episode = ew.write(BRIEF, _agent=fake)
-    assert episode.title == "The Yard" and len(fake.prompts) == 2 * ew.PARTS
-    first, second = fake.prompts[0], fake.prompts[ew.PARTS]
+    assert episode.title == "The Yard" and ew.PARTS < len(fake.prompts) <= 2 * ew.PARTS
+    first, second = fake.prompts[0], fake.prompts[-1]
     assert ew.PREVIOUS not in first
     assert ew.PREVIOUS in second and '"title": "The Yard"' in second
     assert "CONTRACT" in second and "no button" in second
@@ -33,7 +33,7 @@ def test_a_plan_refused_on_every_edit_surfaces_the_contract():
     fake = FakeModel({**canned_draft(), "lines": []})
     with pytest.raises(ValidationError, match="no button"):
         ew.write(BRIEF, _agent=fake)
-    assert len(fake.prompts) == ew.CONTRACT_RETRIES * ew.PARTS
+    assert ew.PARTS + ew.CONTRACT_RETRIES - 1 <= len(fake.prompts) <= ew.CONTRACT_RETRIES * ew.PARTS
 
 
 def test_the_gates_refusals_and_the_previous_plan_both_reach_the_prompt():

@@ -52,16 +52,6 @@ def test_usage_sums_every_part():
     assert usage["input_tokens"] == 10 * ew.PARTS and usage["output_tokens"] == 5 * ew.PARTS
 
 
-def test_a_part_that_breaks_the_contract_is_re_asked_with_the_refusal():
-    frame, shots, lines = _parts(_draft())
-    bad = lines.model_copy(deep=True)
-    bad.lines[0].shot = 99                                   # names a shot that does not exist
-    model = FakeModel(frame, shots, bad, frame, shots, lines)
-    got = ew.write(BRIEF, _agent=model)
-    assert isinstance(got, Episode) and len(model.prompts) == 2 * ew.PARTS
-    assert ew.REFUSED in model.prompts[ew.PARTS]
-
-
 def test_a_fake_that_answers_the_whole_draft_still_serves_each_part():
     """Every older writer test's FakeModel returns a whole Draft; each part
     validates its own fields out of it (llm._validated takes a superset model)."""
@@ -122,3 +112,26 @@ def test_the_beat_before_the_button_is_set_before_the_contract_judges_the_draft(
     draft = ew.Draft.model_validate(doc)
     got = ew.to_episode(draft)
     assert got.shot(before).beat_s >= 1.0
+
+
+def test_a_contract_refusal_re_asks_only_the_part_it_names_and_those_after():
+    """ep22 (2026-10-07): 175 luna calls for one plan -- every contract refusal
+    re-asked all three parts.  A refusal naming `lines.N` (or the turn, the
+    button, the dial) re-asks the lines part only; one naming `shots.N` re-asks
+    shots and lines; one naming a setup or a scalar re-asks everything."""
+    assert ew.parts_to_re_ask(["CONTRACT lines.3: a dialogue line needs a readable face"]) == 2
+    assert ew.parts_to_re_ask(["CONTRACT : the turn projects to 49% of the runtime; wanted 50-75 %"]) == 2
+    assert ew.parts_to_re_ask(["CONTRACT shots.10: 'motion' asks for a slow shot"]) == 1
+    assert ew.parts_to_re_ask(["CONTRACT setups: setup 'x' is defined twice"]) == 0
+    assert ew.parts_to_re_ask(["CONTRACT : projects to 106 s; an episode is 120-174 s"]) == 1
+    assert ew.parts_to_re_ask([]) == 0
+
+
+def test_a_lines_refusal_keeps_the_frame_and_the_shots_and_re_asks_the_lines():
+    frame, shots, lines = _parts(_draft())
+    bad = lines.model_copy(deep=True)
+    bad.lines[0].shot = 99
+    model = FakeModel(frame, shots, bad, lines)
+    got = ew.write(BRIEF, _agent=model)
+    assert isinstance(got, Episode) and len(model.prompts) == ew.PARTS + 1
+    assert ew.PART_LINES in model.prompts[-1] and ew.REFUSED in model.prompts[-1]

@@ -200,11 +200,15 @@ def part_prompt(base: str, heading: str, fields: tuple[str, ...], so_far: dict |
     return f"{base}\n\n{heading}\nReturn ONLY these fields of the plan now: {', '.join(fields)}.{given}"
 
 
-def write_parts(brief: dict, asked, shown, usage: dict | None, _agent) -> Draft:
-    """PARTS strict calls in order, each reading the merged earlier parts; usage
-    is the sum of all of them."""
-    base, so_far, spent = prompt_for(brief, asked, shown), {}, []
+def write_parts(brief: dict, asked, shown, usage: dict | None, _agent,
+                keep: dict | None = None, start: int = 0) -> Draft:
+    """PARTS strict calls in order from `start`, each reading the merged earlier
+    parts (`keep` holds the parts a contract refusal did not name); usage is the
+    sum of the calls made."""
+    base, so_far, spent = prompt_for(brief, asked, shown), dict(keep or {}), []
     for i, ((name, fields), model) in enumerate(zip(PART_TABLE, PART_MODELS)):
+        if i < start:
+            continue
         heading, one = f"--- PART {i + 1} OF {PARTS}: {name} ---", {}
         part = llm.structured(TIER, part_prompt(base, heading, fields, so_far or None), model, usage=one, _agent=_agent)
         so_far.update(part.model_dump())
@@ -216,17 +220,44 @@ def write_parts(brief: dict, asked, shown, usage: dict | None, _agent) -> Draft:
     return Draft.model_validate(so_far)
 
 
+_PART_OF_FIELD = {"shots": 1, "lines": 2}
+_LINES_RULES = re.compile(r"\b(turn|button|dialogue|dial|line|lines|narration|voices?)\b", re.I)
+
+
+def parts_to_re_ask(refusals: list[str]) -> int:
+    """The first part a contract refusal re-asks (every later part follows, as
+    they read it): a named field's part, a lines-only rule's lines part, else
+    everything (ep22, 2026-10-07: 175 calls re-asking three parts for one rule)."""
+    if not refusals:
+        return 0
+    first = PARTS
+    for line in refusals:
+        named = re.search(r"CONTRACT (setups|shots|lines)\b", line)
+        if named:
+            first = min(first, _PART_OF_FIELD.get(named.group(1), 0))
+        elif re.search(r"\bprojects to \d+ s\b", line):
+            first = min(first, 1)                       # the runtime is the shots' words and the lines'
+        elif _LINES_RULES.search(line):
+            first = min(first, 2)
+        else:
+            first = 0
+    return first if first < PARTS else 0
+
+
 def write(brief: dict, refusals: list[str] | None = None, usage: dict | None = None,
           _agent=None, previous: dict | None = None) -> Episode:
     """One plan for one unit: the draft from the model, edited under the contract
     up to CONTRACT_RETRIES times with the refused draft shown; the last refusal
     is raised for the ladder."""
-    asked, shown = refusals, previous
+    asked, shown, keep, start = refusals, previous, None, 0
     for _ in range(CONTRACT_RETRIES):
-        draft = write_parts(brief, asked, shown, usage, _agent)
+        draft = write_parts(brief, asked, shown, usage, _agent, keep=keep, start=start)
         try:
             return to_episode(draft, brief)
         except ValueError as bad:
             refused, shown = bad, draft.model_dump()
-            asked = list(refusals or []) + contract_lines_of(bad)
+            lines = contract_lines_of(bad)
+            asked = list(refusals or []) + lines
+            start = parts_to_re_ask(lines)
+            keep = {k: v for (_, fields) in PART_TABLE[:start] for k in fields for v in [shown[k]]}
     raise refused
