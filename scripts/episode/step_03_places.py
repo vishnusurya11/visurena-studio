@@ -101,8 +101,17 @@ def plan_props(doc: dict) -> list[str]:
 
 
 def missing_sheets(book: Path, doc: dict) -> list[str]:
-    """The staged pids whose refs/props/<pid>/sheet.png is not drawn."""
-    return [pid for pid in plan_props(doc) if pack_refs.prop_sheet(book, pid) is None]
+    """The staged pids with a card whose refs/props/<pid>/sheet.png is not drawn."""
+    cardless = set(cardless_props(book, doc))
+    return [pid for pid in plan_props(doc)
+            if pid not in cardless and pack_refs.prop_sheet(book, pid) is None]
+
+
+def cardless_props(book: Path, doc: dict) -> list[str]:
+    """The staged pids with no analysis/props/<pid>.json: scenery nouns the
+    writer listed as props (ep19 'broken_crockery', 15:02Z) -- nothing to draw,
+    the prose already carries them; the plan gate refuses them upstream."""
+    return [pid for pid in plan_props(doc) if not (Path(book) / "analysis" / "props" / f"{pid}.json").exists()]
 
 
 def example_prompts(book: Path, pid: str) -> list[str]:
@@ -144,6 +153,8 @@ def draw_prop_sheets(ctx, doc: dict) -> None:
     import time
     from studio import refs_pack
     pack = importlib.import_module("scripts.refs.build_pack")
+    for pid in cardless_props(ctx.book_dir, doc):
+        ctx.log(f"  03_02: staged prop '{pid}' has no card; left to the prose", step_id=STEP_ID)
     for pid in missing_sheets(ctx.book_dir, doc):
         card = sheet_prompted(ctx.book_dir, pid)
         for job in refs_pack.prop_jobs(pid, card.get("profile") or {}):

@@ -100,3 +100,15 @@ def test_a_card_with_no_sheet_prompt_gets_one_written_and_persisted(tmp_path, mo
     assert card["profile"]["design"]["sheet_prompt"] == said
     assert card["name"] == "the Martian fighting-machine"   # every other key kept
     assert [j.prompt for j in drawn] == [said]
+
+
+def test_a_staged_pid_with_no_card_is_not_a_missing_sheet(tmp_path):
+    """ep19 15:02Z: the signed plan staged 'broken_crockery' (a scenery noun the
+    writer listed as a prop) and step 03 died opening analysis/props/broken_crockery.json.
+    A pid with no card has no sheet to draw: it is left to the prose (one picture
+    per entity) and the plan gate refuses it upstream; step 03 never crashes on it."""
+    book = book_of(tmp_path)
+    doc = {"setups": {"pit": {"described": "The pit.", "props": ["fighting_machine", "broken_crockery"]}}}
+    assert step.plan_props(doc) == ["broken_crockery", "fighting_machine"]
+    assert step.missing_sheets(book, doc) == ["fighting_machine"]
+    assert step.cardless_props(book, doc) == ["broken_crockery"]

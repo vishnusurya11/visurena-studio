@@ -1588,3 +1588,16 @@ def speaker_faults(episode, cast_ids: list[str]) -> list[str]:
     known = ", ".join(cast_ids)
     return [fault("G-SPEAKER", f"line {line.index}", f"speaker {line.speaker!r} is not in the cast ({known})", 0, 1)
             for line in episode.lines if line.speaker not in set(cast_ids)]
+
+
+def prop_card_faults(ep, legal: set[str]) -> list[str]:
+    """G-PROPCARD (hard): a setup may stage only a prop that has a card in
+    analysis/props -- one picture per entity; a scenery noun listed as a prop
+    has no sheet to stage and step 03 died opening its card (ep19
+    'broken_crockery', 2026-10-07).  The line routes to `legal_props`."""
+    out = []
+    for name, setup in (ep.setups or {}).items():
+        for pid in getattr(setup, "props", None) or []:
+            if pid not in legal:
+                out.append(f"G-PROPCARD setup {name}: stages prop {pid!r} with no card analysis/props/{pid}.json")
+    return out

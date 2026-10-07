@@ -264,6 +264,11 @@ def main(book_id: str, number: int) -> int:
     print("G-STAGE      :", len(sf) or "clean"); hard += len(sf)
     for f in sf:
         print("   ", f[:170])
+    cards = {q.stem for q in (book / "analysis" / "props").glob("*.json") if q.stem != "index"}         if (book / "analysis" / "props").exists() else set()
+    pcf = plan_gates.prop_card_faults(ep, cards)
+    print("G-PROPCARD   :", len(pcf) or "clean"); hard += len(pcf)
+    for f in pcf:
+        print("   ", f[:170])
     ff = plan_gates.creature_face_faults(ep, set(vocab["creatures"]))
     print("G-FACE-KIND  :", len(ff) or "clean"); hard += len(ff)
     for f in ff:
