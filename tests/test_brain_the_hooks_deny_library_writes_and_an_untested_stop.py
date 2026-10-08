@@ -122,7 +122,7 @@ def test_the_loop_guard_lets_a_second_stop_through():
 def test_triage_reads_runs_the_suite_and_never_writes():
     opts = brain.triage_options(REPO)
     assert opts.permission_mode == "dontAsk" and opts.setting_sources == ["project"]
-    assert opts.model == "claude-sonnet-5-5" and opts.effort == "medium"
+    assert opts.model == "claude-sonnet-5" and opts.effort == "medium"
     assert opts.max_turns == 15 and opts.max_budget_usd == 1.0
     assert "Bash(uv run --no-sync pytest *)" in opts.allowed_tools
     assert "Bash(uv run --no-sync python scripts/episode/plan_check.py *)" in opts.allowed_tools
@@ -133,7 +133,7 @@ def test_triage_reads_runs_the_suite_and_never_writes():
 
 def test_the_fixer_edits_code_but_never_library_and_commits_without_pushing():
     opts = brain.fixer_options(REPO)
-    assert opts.model == "claude-opus-5-5" and opts.fallback_model == "claude-sonnet-5-5"
+    assert opts.model == "claude-opus-5-5" and opts.fallback_model == "claude-sonnet-5"
     assert opts.effort == "high" and opts.max_turns == 60 and opts.max_budget_usd == 3.0
     assert {"Edit", "Write", "Bash(git add *)", "Bash(git commit *)",
             "Workflow(fix-parked)"} <= set(opts.allowed_tools)

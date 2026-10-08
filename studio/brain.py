@@ -30,7 +30,7 @@ from studio import registry, spend
 ROOT = Path(__file__).resolve().parents[1]
 """The repo root: the writer session's cwd."""
 
-TRIAGE_MODEL = "claude-sonnet-5-5"
+TRIAGE_MODEL = "claude-sonnet-5"
 FIXER_MODEL = "claude-opus-5-5"
 ORDER_KINDS = frozenset({"redo", "retry", "requeue"})
 ENV = {"PYTHONUTF8": "1", "CLAUDE_CODE_MAX_SUBAGENT_SPAWN_DEPTH": "1"}

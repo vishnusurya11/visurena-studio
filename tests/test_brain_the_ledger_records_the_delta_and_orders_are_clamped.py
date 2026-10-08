@@ -63,7 +63,7 @@ def test_a_turn_without_a_total_keeps_the_previous_total(conn):
 def test_the_brain_tier_runs_on_the_subscription_like_every_other():
     import yaml
     tier = yaml.safe_load(open("models.yaml", encoding="utf-8"))["tiers"]["brain"]
-    assert tier["provider"] == "claude-sdk" and tier["model"] == "claude-sonnet-5-5"
+    assert tier["provider"] == "claude-sdk" and tier["model"] == "claude-sonnet-5"
 
 
 # --- allowed(): the registry clamps the order ------------------------------------

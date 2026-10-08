@@ -27,7 +27,7 @@ def test_a_brain_turn_is_a_brain_row_for_the_unit(tmp_path, monkeypatch):
     monkeypatch.setattr(cli, "ledger_conn", lambda: conn)
     doc = cli.run_brain(root, CODEX, 2, {"home": "episodes/ep02"}, root / "episodes" / "ep02" / "brain" / "attempt_01.json")
     row = conn.execute("select stage, unit, model, input_tokens, output_tokens, cost_usd from usage").fetchone()
-    assert tuple(row)[:5] == ("brain", "ep02", "claude-sonnet-5-5@subscription", 32336, 855)
+    assert tuple(row)[:5] == ("brain", "ep02", "claude-sonnet-5@subscription", 32336, 855)
     assert row[5] is None and doc["verdict"] == "park"       # nothing billed (owner, 2026-10-07)
     assert spend.unit_spent(conn, CODEX, "ep02") == 0.0
 

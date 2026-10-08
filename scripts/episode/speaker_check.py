@@ -70,8 +70,10 @@ def main(book_id: str, number: int) -> None:
         lines = [l for l in lines if l[0] not in gone]
         sims = {(a[0], b[0]): voice_ear.similarity(a[1], b[1])
                 for a, b in itertools.combinations(lines, 2)}
-        out = spread(sims, allow={pair: allowance(pair, said) for pair in sims})
-        report[who] = out | {"lines": len(lines)}
+        allow = {pair: allowance(pair, said) for pair in sims}
+        out = spread(sims, allow=allow)
+        under = [list(p) for p, s in sims.items() if s < SAME_SPEAKER_FLOOR - allow[p]]
+        report[who] = out | {"lines": len(lines), "under": under}   # step 04's revoice reads these
         mark = "" if out["ok"] else "SPLIT VOICE"
         worst = f"{out['worst']:.2f}" if out["worst"] is not None else "n/a"
         print(f"{who:<34} lines {len(lines):>2}  worst pair {worst} "

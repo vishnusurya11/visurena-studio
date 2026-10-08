@@ -146,7 +146,9 @@ def _speech_gap(tail: str, home: set[str]) -> tuple[str, str, tuple | None]:
 def _deferred_plan(tail: str, home: set[str]) -> tuple[str, str, tuple | None]:
     """H3 / H5: a CAST BOUND note wants the refs runner; any other plan
     deferral retries (each relaunch runs cure_aside_first for $0)."""
-    refused = re.search(r"CAST BOUND\s*:\s*\[|not bound|unbound", tail)
+    # every refusal shape the battery and the bind step print -- a list, 'not
+    # bound', 'no sheet for' -- and never the clean 'all bound' line (A71)
+    refused = re.search(r"CAST BOUND\s*:\s*(?:\[|no sheet)|not bound|unbound", tail)
     if refused and "all bound" not in tail:
         return ("cure", "cast_unbound", ("refs", "04"))      # a refusal, never the clean 'all bound' line
     return ("retry", "plan_deferred", None)
@@ -162,6 +164,9 @@ TABLE: list[tuple[str, object]] = [
     (r"DEFERRED PLAN \|", _deferred_plan),
     (r"ComfyUI's queue stayed busy", ("cure", "queue_busy", ("comfy_restart", None))),
     (r"REFUSED: the takes wait on the panels", ("cure", "takes_wait_on_panels", ("redo", "08"))),
+    # the upload door's split voice is the record step's (ep21, 2026-10-08: the
+    # brain read it as step 09's terminal and parked the episode)
+    (r"speaker_check: .+ is not one voice", ("cure", "split_voice", ("redo", "04"))),
     (r"REFUSED: qc FAIL", ("brain", "qc_fail", None)),
     (r"REFUSED: qc\.py left no report", ("retry", "qc_no_report", None)),
     (r"speech gap", _speech_gap),

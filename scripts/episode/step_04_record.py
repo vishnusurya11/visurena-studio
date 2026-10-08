@@ -27,11 +27,45 @@ def rendered(plan: dict, rows: list[dict]) -> bool:
     return all(line.get("index") in have for line in plan.get("lines") or [])
 
 
+REVOICED = "speaker_revoiced.json"
+"""review/<this>: the lines said again for a split voice -- once per episode."""
+
+
+def split_lines(report: dict) -> list[int]:
+    """The fewest lines that cover every pair under its floor (greedy: the
+    line in most uncovered pairs first, ties by name).  ep21: ten narrator
+    pairs, three lines."""
+    pairs = [tuple(p) for row in report.values() if isinstance(row, dict) and not row.get("ok", True)
+             for p in row.get("under") or []]
+    chosen: list[str] = []
+    while pairs:
+        counts: dict[str, int] = {}
+        for pair in pairs:
+            for stem in pair:
+                counts[stem] = counts.get(stem, 0) + 1
+        pick = min(counts, key=lambda s: (-counts[s], s))
+        chosen.append(pick)
+        pairs = [p for p in pairs if pick not in p]
+    return sorted(int(s[1:]) for s in chosen)
+
+
+def revoiced(ctx) -> list[int] | None:
+    path = ctx.home / "review" / REVOICED
+    return episode_home.read_json(path) if path.exists() else None
+
+
 def done(ctx) -> bool:
+    """Every line recorded AND the voice check read: a split voice is done
+    only after its lines were said again once (ep21: the split surfaced at
+    the upload door, after every picture -- the report merely existed)."""
     plan, sheet = ctx.home / "plan.json", ctx.home / "audio" / "lines" / "lines.json"
     spread = ctx.home / "review" / "speaker_check.json"
     if not (plan.exists() and sheet.exists() and spread.exists()):
         return False
+    report = episode_home.read_json(spread)
+    unlisted = any(isinstance(r, dict) and not r.get("ok", True) and "under" not in r for r in report.values())
+    if (unlisted or split_lines(report)) and revoiced(ctx) is None:
+        return False            # a split, or a split written before its pairs were kept
     return rendered(episode_home.read_json(plan), episode_home.read_json(sheet))
 
 
@@ -49,6 +83,20 @@ def run(ctx) -> None:
         ctx.run_script("scripts/cast/cast_voices.py", f"--only={','.join(missing)}", gpu=GPU, clock="cast")
     extra = getattr(ctx, "extra", None) or []
     ctx.run_script("scripts/episode/say_lines.py", *extra, gpu=GPU, clock="lines")
+    ctx.run_script("scripts/episode/speaker_check.py", clock="speaker_check")
+    revoice(ctx)
+
+
+def revoice(ctx) -> None:
+    """A split voice: the covering lines said again on a fresh seed, once,
+    and the voice checked again; the upload door judges what remains."""
+    spread = ctx.home / "review" / "speaker_check.json"
+    lines = split_lines(episode_home.read_json(spread)) if spread.exists() else []
+    if not lines or revoiced(ctx) is not None:
+        return
+    ctx.run_script("scripts/episode/say_lines.py", f"--redo={','.join(map(str, lines))}",
+                   gpu=GPU, clock="lines")
+    episode_home.write_json(ctx.home / "review" / REVOICED, lines)
     ctx.run_script("scripts/episode/speaker_check.py", clock="speaker_check")
 
 

@@ -174,7 +174,7 @@ def ledger_brain(core, codex: str, n: int, meta: Any) -> None:
     if conn is None or not isinstance(meta, dict):
         return
     try:
-        core.ledger(conn, codex, f"ep{n:02d}", "triage", getattr(core, "TRIAGE_MODEL", "claude-sonnet-5-5"), 0.0, meta)
+        core.ledger(conn, codex, f"ep{n:02d}", "triage", getattr(core, "TRIAGE_MODEL", "claude-sonnet-5"), 0.0, meta)
     except Exception as why:
         log.warning("brain ledger failed: %s", scrub(repr(why)))
 

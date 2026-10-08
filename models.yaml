@@ -32,18 +32,18 @@ rates:
   openai/gpt-5.6-sol:            {input_per_m: 2.00, output_per_m: 10.00}
   # The brain (decision 2026-10-06): the Claude Agent SDK's own IDs, list prices, so a
   # `stage: brain` row is never NULL whichever auth route the subprocess is on.
-  claude-sonnet-5-5:             {input_per_m: 2.00, output_per_m: 10.00}
+  claude-sonnet-5:               {input_per_m: 2.00, output_per_m: 10.00}
   claude-opus-5-5:               {input_per_m: 4.00, output_per_m: 20.00}
 
 tiers:
   workhorse:              # validators, extraction drafts — cheap and fast
     provider: claude-sdk   # OWNER 2026-10-07: "don't use API for money" -- Claude on the subscription
-    model: claude-sonnet-5-5
+    model: claude-sonnet-5
     params:
       effort: low
   reasoning:              # timeline arbitration, story editing, screenwriting
     provider: claude-sdk   # OWNER 2026-10-07: "don't use API for money" -- Claude on the subscription
-    model: claude-sonnet-5-5
+    model: claude-sonnet-5
     params:
       effort: medium
     # 2026-08-25: pinned to luna for the first screenplay run because terra has NO
@@ -97,7 +97,7 @@ tiers:
     # asked once per book and cached in refs/canon.json.
   brain:                  # the autopilot's Claude Agent SDK rung (studio/brain.py)
     provider: claude-sdk   # OWNER 2026-10-07: "don't use API for money" -- Claude on the subscription
-    model: claude-sonnet-5-5
+    model: claude-sonnet-5
     params:
       effort: medium
     # Used for the ledger's model name only; the SDK subprocess carries its own

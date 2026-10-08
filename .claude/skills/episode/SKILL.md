@@ -447,6 +447,8 @@ GATES.md, all in the commit that fixed the fault. Rules learned on ep19-21:
 - **Where a fault was born decides its cure:** a take content fault on a panel
   that passed content gets one seed retake; on a panel that carries it, the
   board owns it. Count the stills a terminal chose before anything publishes.
+- **A step is done when its check PASSED (or its one cure ran), never when
+  its report exists.** The record step re-says a split voice's lines itself.
 - **A timeline belongs to the plan it was built from**; read it through
   `episode_home.load_placed`, never by existence.
 

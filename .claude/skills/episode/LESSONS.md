@@ -300,3 +300,14 @@ fixes. Each lesson below cost at least one launch. Tracker rows A38-A74 in
   is render-borne: one seed; a reproduced one goes to the terminal as before.
   Six of 32 shots would have shipped as stills; read the terminal's list before
   any publish.
+- **A verdict is read where its cure lives, not at the last door (A76).** ep21's
+  narrator measured as a split voice (ten pairs under their floors, eight calm
+  pairs at 0.67-0.69 against 0.70) at 00:30; step 04 was "done" because the
+  report EXISTED, and the upload door refused it fifteen hours and every
+  picture later. The brain then blamed step 09 and parked. Step 04 now re-says
+  the fewest lines covering every failing pair (greedy cover: l03, l07, l16)
+  once, and the table routes the door's refusal to `redo 04`.
+- **Model ids come from the SDK's list, never by analogy (A76).** models.yaml
+  and the brain asked for "claude-sonnet-5-5"; the CLI printed
+  `unrecognized_model` on every call and the runs went on silently. Sonnet 5 is
+  `claude-sonnet-5`; Opus 5.5 is `claude-opus-5-5`.
