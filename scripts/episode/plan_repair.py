@@ -447,6 +447,19 @@ def apply_each(doc: dict, rows: list[str], book, number: int = 0, rate: float = 
     return doc, uncured, names
 
 
+def restored(doc: dict) -> dict:
+    """The aside's draft under the free pre-contract cures before the contract
+    judges it: ep21 (2026-10-08) deferred on a 17-word style line, the restore
+    validated the raw draft first and refused, and the cure that fixes it in
+    one line never ran -- the climb started over from nothing."""
+    for cure in (pc.trim_style, pc.button_beat):
+        try:
+            doc = cure(doc)
+        except Exception:               # a cure never turns a restore into a crash
+            pass
+    return doc
+
+
 def main(book_id: str, number: int, from_aside: bool = False, no_llm: bool = False) -> int:
     book = episode_home.book_dir(book_id)
     home = episode_home.home(book, number)
@@ -457,6 +470,7 @@ def main(book_id: str, number: int, from_aside: bool = False, no_llm: bool = Fal
             raise SystemExit(f"no plan and no aside under {home}")
         from studio import plan_gates
         doc = plan_gates.at_series_rate(json.load(io.open(aside, encoding="utf-8"))["draft"], book, number)
+        doc = restored(doc)
         Episode(**doc)
         episode_home.write_plan(path, doc)
         print("aside draft restored to plan.json")
