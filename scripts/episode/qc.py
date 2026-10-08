@@ -35,7 +35,7 @@ from studio import episode_sound
 from studio.episode_spec import Episode
 from studio.trailer_assemble import clip_seconds, integrated, true_peak
 
-LUFS_BAND = (-15.5, -12.5)
+from studio.master_loudness import LUFS_BAND  # noqa: E402  -- one band for the wall and the lift
 TP_CEILING = -1.0
 CUT_TOLERANCE = 0.12
 """How far an EDIT-MADE cut may sit from its plan. A cut the model makes inside

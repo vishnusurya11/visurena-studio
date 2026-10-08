@@ -24,6 +24,7 @@ from studio import episode_emotion, episode_sound, finished_file
 from studio.comfy import run
 from studio.episode_spec import Episode
 from studio import trailer_assemble
+from studio import master_loudness
 from studio.trailer_assemble import clip_seconds, concat, extract, integrated, mix_with_lines, true_peak
 
 W, H, FPS = canvas.size("9:16") + (24,)
@@ -904,6 +905,7 @@ def main(book_id: str, number: int, engine: str = "i2v",
     out = tail(mixed, card if card.exists() else book / "title" / "title.mp4",
                finished_file.scratch_for(master, work), work, number)
     out = trim(out, work)
+    out = master_loudness.into_band(out, work, measure=integrated)   # a quiet chapter's beds (ep20)
     # THE MASTER IS A SHORT (hard requirement, owner 2026-09-30): the wall is
     # checked on the finished file, tail card and chip included, before the
     # name goes on it.  ep14 delivered 182.6 s -- picture 177.9 under every
