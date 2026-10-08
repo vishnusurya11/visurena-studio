@@ -58,8 +58,22 @@ def main(book_id: str, number: int) -> None:
         moved += before != after
         print(f"  shot {shot.index:02d}: {before} -> {after}", flush=True)
     Episode(**plan)
-    episode_home.write_json(episode_home.home(book, number) / "plan.json", plan)
+    commit_plan(episode_home.home(book, number) / "plan.json", plan, moved)
     print(f"re-spotted {moved} shots", flush=True)
+
+
+def commit_plan(path, plan: dict, moved: int) -> bool:
+    """The plan written ONLY when a cut moved, and the write recorded as a cure:
+    an unconditional write re-serialised the signed plan on every step 05 run
+    and the signature lapsed by an unrecorded link (ep21, 2026-10-08: the next
+    launch re-planned a signed plan over its voices and timeline)."""
+    if not moved:
+        return False
+    from studio import plan_provenance, plan_verdict
+    before = plan_verdict.plan_sha8(path)
+    episode_home.write_plan(path, plan)
+    plan_provenance.record(path, before, ["respot"])
+    return True
 
 
 if __name__ == "__main__":

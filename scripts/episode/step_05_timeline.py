@@ -92,7 +92,14 @@ def trimmed(ctx, placed: dict) -> int:
     doc = episode_home.read_json(path)
     n = plan_cures.trim_measured_holes(doc, placed)
     if n:
+        from studio import plan_provenance, plan_verdict
+        before = plan_verdict.plan_sha8(path)
         episode_home.write_plan(path, doc)
+        # RECORDED: a trim that the re-run then refuses leaves the signature lapsed
+        # by one link; step 02's resigned() carries it over a recorded chain, and
+        # without the record it re-planned ep21 over its voices and timeline
+        # (2026-10-08 07:40Z, a 31-shot signed plan lost to a fresh draft)
+        plan_provenance.record(path, before, ["trim_measured_holes"])
     return n
 
 
