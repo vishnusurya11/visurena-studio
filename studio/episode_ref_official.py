@@ -2131,6 +2131,34 @@ def prompt_facts(frames, segs, faces, spoken, at, offset, setup, strip, refs, fp
             "life": life, "watson": lead_tag(faces)}
 
 
+BLOCK_HEAD = re.compile(r"(\[Shot \d+\] From \d\d:\d\d to \d\d:\d\d\.)")
+
+
+def once_per_take(dd: str, keep=()) -> str:
+    """A long sentence (L19's LONG_SENTENCE) is said once per take: a later
+    block of the same take drops a sentence an earlier block already carries
+    (ep21 2026-10-08: a packed pair's shared setup line and an identical
+    camera sentence sat in both blocks, and the lint refused four takes at
+    step 06 after the plan had been signed).  Short repeats stay: they are the
+    anchors a block needs."""
+    parts = BLOCK_HEAD.split(dd)
+    if len(parts) < 5:                                   # fewer than two blocks
+        return dd
+    seen: set[str] = set()
+    out = [parts[0]]
+    protected = [k.strip().lower() for k in keep if str(k).strip()]   # the life clauses the builder placed (L10)
+    for head, body in zip(parts[1::2], parts[2::2]):
+        kept = []
+        for said in sentences(body):
+            key = re.sub(r"\d\d:\d\d", "", said)
+            if len(key.split()) >= LONG_SENTENCE and key in seen                     and not any(k in key.lower() for k in protected):
+                continue
+            seen.add(key)
+            kept.append(said)
+        out.append(head + " " + " ".join(kept) if kept else head)
+    return "\n".join(x.strip() for x in out).strip()
+
+
 def six_sections(subs: str, summ: str, ret: str, dd: str, sound: str) -> str:
     """The six sections in ref-en's order, blank-line separated."""
     return "\n\n".join([f"subject_definitions:\n{subs}", f"summary:\n{summ}",
@@ -2174,6 +2202,7 @@ def build(shots: list[Shot], placed: list[dict], lines: list[Line], at: dict, fr
         subs = subs + chr(10) + take_refs.panel_definition(panel_slot)
     dd, life = describe(shots, placed, lines, at, faces, physical, narrator, frames, cells, setup, fps,
                         not (ends or []), cells_staged, bool(panel_slot))
+    dd = once_per_take(dd, keep=(life or {}).values())
     # ONE CHOKE POINT FOR NAMES (ep16, published cut deleted 2026-10-02): the
     # camera and at-rest composers injected raw prose, so "the brother's hand"
     # and "aimed at Miss Elphinstone" rode untagged beside <Subject 1> and H3

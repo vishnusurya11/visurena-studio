@@ -433,5 +433,8 @@ def test_the_lint_facts_ask_for_the_crowd_only_where_the_builder_put_it():
     # for a clause the builder never wrote
     life = {1: "two farm hands in shirtsleeves pitch cut wheat onto a waggon at the fence line"}
     assert ro.l10_life(text, {"life": life}) == []
-    assert ro.l10_life(text, {"life": {2: life[1]}})
-    assert ro.l10_life(text, {"life": {1: life[1] + ", and a dog barks at the gate"}})
+    # L10 reads a clause by its content words (c5ff5b7: the builder scrubs names and
+    # substitutes verbs after the clause is recorded); a clause the block genuinely
+    # lacks is still refused, in the close and for one the builder never wrote
+    assert ro.l10_life(text, {"life": {2: "a brindled dog barks at the iron gate"}})
+    assert ro.l10_life(text, {"life": {1: "a brindled dog barks at the iron gate while a cat sleeps"}})
