@@ -501,15 +501,30 @@ def take_sha8(path: Path) -> str:
     return hashlib.sha256(Path(path).read_bytes()).hexdigest()[:8]
 
 
+MEASURES = ("scripts/episode/take_dq.py", "studio/take_verdict.py", "studio/take_frame.py",
+            "studio/plate_gate.py")
+"""The code a take verdict is measured by: a change here re-measures every take."""
+
+
+def measures_sha8() -> str:
+    """The measuring code's fingerprint (line endings normalised)."""
+    import hashlib
+    body = b"".join((ROOT / rel).read_bytes().replace(b"\r\n", b"\n") for rel in MEASURES)
+    return hashlib.sha256(body).hexdigest()[:8]
+
+
 def cached(take_dir: Path, index: int, kept: Path) -> dict | None:
-    """The verdict already written for exactly these bytes, or None.
-    2026-09-29: 8 full passes decoded every unchanged take (2.1 h on ep14)."""
+    """The verdict already written for exactly these bytes BY this measuring
+    code, or None.  2026-09-29: 8 full passes decoded every unchanged take
+    (2.1 h on ep14).  2026-10-08: the fixed letterbox measure never reached
+    ep21's T27/T30 -- the cache served the old refusals, 'bytes unchanged'."""
     path = Path(take_dir) / f"T{index:02d}.dq.json"
     if not path.exists() or not Path(kept).exists():
         return None
     import json
     report = json.loads(path.read_text(encoding="utf-8"))
-    return report if report.get("take_sha8") == take_sha8(kept) else None
+    same = report.get("take_sha8") == take_sha8(kept) and report.get("measures_sha8") == measures_sha8()
+    return report if same else None
 
 
 def main(book_id: str, number: int, indices: list[int], attempts: bool = False) -> None:
@@ -557,6 +572,7 @@ def main(book_id: str, number: int, indices: list[int], attempts: bool = False) 
         # had put the worktree's absolute path into ~200 take reports.
         report["strip"] = episode_home.relative(book, tv.strip(v, kept, cells, work / f"take_T{index:02d}.png"))
         report["take_sha8"] = take_sha8(kept)
+        report["measures_sha8"] = measures_sha8()
         episode_home.write_json(take_dir / f"T{index:02d}.dq.json", report)
         print(row(index, v, best.name if attempts else "", len(files)), flush=True)
 

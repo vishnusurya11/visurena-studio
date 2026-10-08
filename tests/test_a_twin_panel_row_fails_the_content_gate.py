@@ -75,7 +75,9 @@ def test_a_one_figure_panel_never_asks(tmp_path, monkeypatch):
     monkeypatch.setattr(pcc, "read", lambda path, seed=11: pc.Seen(people=1))
     monkeypatch.setattr(pcc, "read_twins", recorder)
     row = pcc.row_for(book, shot, setup, Path("shot_09.png"))
-    assert asked == [] and row["passed"]
+    # the posture rule (added later) reads the fake's empty posture; this test is
+    # about the twin read alone: never asked, no twin fault
+    assert asked == [] and not [f for f in row["faults"] if "twin" in f]
 
 
 def test_two_distinct_figures_add_no_twin_fault(tmp_path, monkeypatch):

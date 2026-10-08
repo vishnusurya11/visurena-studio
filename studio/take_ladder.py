@@ -75,10 +75,24 @@ MOVABLE = (FROZEN | {"held", "pass-through", "last-vs-panel", "last-vs-cell", "d
 last-vs-panel; even the 'sampling' cures came from the plan edit, not the roll."""
 
 
-def cure_of(faults: list[Fault]) -> str:
+def panel_clean(room: Path, index: int) -> bool:
+    """Did this shot's PANEL pass the content check?  Then a content fault on
+    its take came from the render, not the panel (ep21 T06, T14: clean panels,
+    a second man and a standing man in the takes).  False when unknown."""
+    path = Path(room).parents[1] / "storyboard" / "panel_content.json"
+    if not path.exists():
+        return False
+    rows = json.loads(path.read_text(encoding="utf-8"))
+    return any(r.get("shot") == index and r.get("passed") for r in rows if isinstance(r, dict))
+
+
+def cure_of(faults: list[Fault], panel_clean: bool = False) -> str:
     """One cure for one take, from what its faults measure as curable.
-    '' means no render buys anything: the terminal answers."""
+    '' means no render buys anything: the terminal answers.  A content fault
+    on a take whose panel passed content is render-borne: one seed."""
     kinds = {f.kind for f in faults}
+    if panel_clean and kinds <= {"content", "clones"}:
+        kinds = kinds - {"content", "clones"} | {"render-content"}
     if kinds & MOVABLE:
         return "move_type"
     if kinds & LAG:
@@ -105,7 +119,7 @@ def route(verdict: Verdict, room: Path, try_i: int = 1) -> dict[str, dict[int, l
             continue
         if try_i >= 2 and not progressed(room, i, sorted({f.kind for f in fs})):
             continue
-        if cure := cure_of(fs):
+        if cure := cure_of(fs, panel_clean=panel_clean(room, i)):
             out.setdefault(cure, {})[i] = fs
     return out
 

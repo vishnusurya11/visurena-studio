@@ -443,6 +443,10 @@ GATES.md, all in the commit that fixed the fault. Rules learned on ep19-21:
 - **A HARD take row is believed only after its strip is seen.** The letterbox,
   last-vs-panel and posture rows have each refused correct dark or quiet takes.
 - **After the signature, plan.json changes only through a recorded cure.**
+- **A verdict cache keys on the bytes AND the code that measured them.**
+- **Where a fault was born decides its cure:** a take content fault on a panel
+  that passed content gets one seed retake; on a panel that carries it, the
+  board owns it. Count the stills a terminal chose before anything publishes.
 - **A timeline belongs to the plan it was built from**; read it through
   `episode_home.load_placed`, never by existence.
 

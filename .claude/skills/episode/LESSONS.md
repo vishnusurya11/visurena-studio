@@ -288,3 +288,15 @@ fixes. Each lesson below cost at least one launch. Tracker rows A38-A74 in
   (`scripts/publish/youtube_auth.py`).
 - **Patch text with a backslash goes through the Write tool, never a heredoc**,
   and a commit gates on pytest's exit code, never a pipe (three slips in 24 h).
+- **A cache holds only while its measuring code holds (A75).** The take DQ
+  cache keyed on the take's bytes alone, so the fixed letterbox measure never
+  reached T27/T30 ("cached, bytes unchanged") and both went to the still
+  terminal. `take_dq.measures_sha8` (the measuring modules' source) is part of
+  the key now. Any cache of a verdict keys on the verdict's code too.
+- **A content fault is the panel's only when the panel has it (A75).** Every
+  take content fault was INPUT_BORNE, so ep21's T06 (a second, fair-haired man)
+  and T14 (standing where the shot asks low) went to stills without one
+  retake, though their panels passed content. A content fault on a clean panel
+  is render-borne: one seed; a reproduced one goes to the terminal as before.
+  Six of 32 shots would have shipped as stills; read the terminal's list before
+  any publish.
