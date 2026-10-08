@@ -106,6 +106,24 @@ def test_a_cue_at_the_first_frame_is_judged_by_its_stem(monkeypatch):
     monkeypatch.setattr(es.sfx_cues, "event_db", no_baseline)
     monkeypatch.setattr(es, "stem_heard", lambda sfx, cue: (-18.0, True))
     monkeypatch.setattr(es, "stem_target", lambda sfx, cue: -17.0)
+    monkeypatch.setattr(es, "lifts_of", lambda home: {})
     rows = es.presence(Path("cut/m.mp4"), ep, placed)
     assert rows == [{"shot": 0, "sound": "a distant thud", "at": 0.0, "db": None, "ok": True,
-                     "no_baseline": True, "stem_db": -18.0, "stem_target": -17.0}]
+                     "no_baseline": True, "stem_db": -18.0, "stem_target": -17.0, "stem_base": -17.0}]
+
+
+def test_a_lifted_stem_is_judged_against_the_level_the_plan_asked_for(monkeypatch):
+    """ep20 shot 0: lifted +7.4 dB the stem rose -22.7 -> -19.0 while its sidecar
+    target rose -20 -> -12.6; judged against the base (-20) it is heard."""
+    ep = plan([shot(0, sounds=[Sound(sound="a distant thud", at=0.0)])], {})
+    placed = {"shots": [{"index": 0, "t_start": 0.0, "seconds": 4.0}]}
+
+    def no_baseline(master, start, seconds, **_):
+        raise ValueError("no audio before 0.00s")
+    monkeypatch.setattr(es.sfx_cues, "event_db", no_baseline)
+    monkeypatch.setattr(es, "stem_heard", lambda sfx, cue: (-19.0, False))
+    monkeypatch.setattr(es, "stem_target", lambda sfx, cue: -12.6)
+    monkeypatch.setattr(es, "lifts_of", lambda home: {"0|a distant thud": 7.4})
+    row = es.presence(Path("cut/m.mp4"), ep, placed)[0]
+    assert row["stem_base"] == -20.0 and row["ok"] is True
+    assert es.lift_cures([row], {"0|a distant thud": 7.4}) == {"0|a distant thud": 7.4}   # heard: no more lift

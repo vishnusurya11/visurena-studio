@@ -65,8 +65,8 @@ def lift_cures(rows: list[dict], existing: dict[str, float]) -> dict[str, float]
             continue                 # the next cut places one copy; it is measured then
         if row.get("db") is not None:
             deficit = EVENT_DB - float(row["db"])
-        elif row.get("stem_target") is not None and row.get("stem_db") not in (None, float("-inf")):
-            deficit = float(row["stem_target"]) - float(row["stem_db"])    # judged by its stem (no baseline)
+        elif row.get("stem_base", row.get("stem_target")) is not None and row.get("stem_db") not in (None, float("-inf")):
+            deficit = float(row.get("stem_base", row.get("stem_target"))) - float(row["stem_db"])   # by its stem
         else:
             continue                 # nothing measured to lift by
         out[key] = min(MAX_LIFT_DB, round(out.get(key, 0.0) + deficit + LIFT_MARGIN_DB, 1))
@@ -239,10 +239,18 @@ def presence(master: Path, episode, placed: dict) -> list[dict]:
         except ValueError:
             # no audio before the cue to measure a rise against (ep20 shot 0, a cue
             # at 0.00 s, 2026-10-08): the one presence that needs no baseline is the stem
-            sfx = Path(master).parent.parent / "audio" / "sfx"
+            home = Path(master).parent.parent
+            sfx = home / "audio" / "sfx"
             stem_db, ok = stem_heard(sfx, cue)
+            target = stem_target(sfx, cue)
+            # the sidecar's target rises with the lift; the level the plan asked
+            # for is the target less the lift, and a stem that meets IT is heard
+            # (ep20 shot 0: lifted +7.4, the stem rose to -19.0, the target to -12.6)
+            base = None if target is None else round(target - lifts_of(home).get(lift_key(cue.shot, cue.sound), 0.0), 1)
+            if base is not None and stem_db != float("-inf"):
+                ok = stem_db >= base - STEM_SLACK_DB
             out.append({"shot": cue.shot, "sound": cue.sound, "at": at, "db": None, "ok": ok,
-                        "no_baseline": True, "stem_db": stem_db, "stem_target": stem_target(sfx, cue)})
+                        "no_baseline": True, "stem_db": stem_db, "stem_target": target, "stem_base": base})
             continue
         row = {"shot": cue.shot, "sound": cue.sound, "at": at, "db": got, "ok": got >= EVENT_DB}
         if not row["ok"] and voiced_over(placed.get("lines", []), at, cue.seconds):
