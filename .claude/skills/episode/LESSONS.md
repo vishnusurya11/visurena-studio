@@ -332,3 +332,10 @@ fixes. Each lesson below cost at least one launch. Tracker rows A38-A74 in
   door (A76-A77), a retake that measured half of what it rendered (A78). The
   brain misread three of these stops as gates that gave up. Before trusting a
   park, read the refusing row yourself.
+- **A line moved for lip-sync never lands on the next line (A79).** ep22's QC
+  heard 'Come nearer. Dog. Good dog.': the dialogue 'Good dog!' was laid 1.97 s
+  late to meet its take's soundtrack lag, on top of the next narration line in
+  the same shot. Two voices at once is worse than a late mouth; `line_laid`
+  now stops a moved line a breath before the next. A QC word-error on a line
+  whose own recording reads clean is the mix, not the voice: find what else is
+  sounding in its window before re-saying it.

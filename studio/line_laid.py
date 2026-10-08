@@ -29,7 +29,25 @@ def take_lag(take_dir: Path, shot: int) -> float | None:
     return ((episode_home.read_json(path) or {}).get("audio") or {}).get("mux_lag_s") if path.exists() else None
 
 
+BREATH_S = 0.25
+"""The least silence kept between a moved line and the next one."""
+
+
+def clear_of_next(at: float, line: dict, nxt: dict | None) -> float:
+    """A moved line stops BREATH_S before the next line, never earlier than
+    planned (ep22 20:47Z: 'Good dog!' laid 1.97 s late over the narration)."""
+    if nxt is None:
+        return at
+    latest = float(nxt["at"]) - BREATH_S - float(line.get("seconds", 0.0))
+    return round(max(float(line["at"]), min(at, latest)), 3)
+
+
 def laid_lines(placed: dict, take_dir: Path) -> list[dict]:
     """placed.json's lines, each `at` where the master lays it."""
     ends = {s["index"]: s["t_end"] for s in placed["shots"]}
-    return [{**l, "at": laid_at(l, take_lag(take_dir, l["shot"]), ends[l["shot"]])} for l in placed["lines"]]
+    lines = sorted(placed["lines"], key=lambda l: float(l["at"]))
+    out = []
+    for k, l in enumerate(lines):
+        at = laid_at(l, take_lag(take_dir, l["shot"]), ends[l["shot"]])
+        out.append({**l, "at": clear_of_next(at, l, lines[k + 1] if k + 1 < len(lines) else None)})
+    return out
