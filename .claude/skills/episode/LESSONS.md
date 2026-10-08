@@ -345,3 +345,9 @@ fixes. Each lesson below cost at least one launch. Tracker rows A38-A74 in
   signed on its first climb, the voice held on its first check, every panel
   passed content on the first draw. The fixes of ep19-21 are the reason; the
   remaining time is renders and a full QC per master.
+- **ep23's run, closed (2026-10-08 ~23:05Z, public https://youtu.be/DtC5WU2Gdeg,
+  master_iter1, $0).** Un-parked at 21:32Z with a plan, voices and 19 takes
+  already on disk; launched 21:35Z, public about 1.5 h later with ZERO stops
+  and the first master signed. Two retake rounds cured every picture fault the
+  router could reach. A parked episode keeps its work: resuming one costs only
+  what is missing.
