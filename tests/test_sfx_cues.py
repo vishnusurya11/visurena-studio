@@ -217,9 +217,13 @@ class TestPlaced:
         assert path.name == f"g_fit{shot['seconds']:.2f}s.wav" and cuts[0][3] == pytest.approx(shot["seconds"])
         assert start == pytest.approx(shot["t_start"])
 
-    def test_start_of_still_refuses_an_unfitted_long_cue(self):
-        with pytest.raises(ValueError, match="shot 3"):
-            sfx_cues.start_of(gun(seconds=5.0), {s["index"]: s for s in SHOTS})
+    def test_start_of_clamps_a_long_cue_to_its_shot(self):
+        """QC's presence check (episode_sound) asks start_of on the raw cues too:
+        a long cue starts at its shot and measures the shot's length."""
+        rows = {s["index"]: s for s in SHOTS}
+        assert sfx_cues.start_of(gun(seconds=5.0), rows) == pytest.approx(10.0)
+        assert sfx_cues.fit_seconds(gun(seconds=5.0), rows) == pytest.approx(4.0)
+        assert sfx_cues.fit_seconds(gun(seconds=2.0), rows) == pytest.approx(2.0)
 
     def test_a_cue_on_a_shot_the_cut_does_not_have_is_named(self):
         with pytest.raises(KeyError, match="99"):

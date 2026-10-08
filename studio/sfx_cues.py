@@ -228,15 +228,19 @@ def fitted(cue: Cue, path: Path, shot_seconds: float) -> tuple[Cue, Path]:
 
 
 def start_of(cue: Cue, rows: dict[int, dict]) -> float:
-    """Shot start + offset, pulled back so the cue ends inside its shot."""
+    """Shot start + offset, pulled back so the cue ends inside its shot; a cue
+    longer than its shot starts AT the shot (it is fitted to the shot's length
+    by `fitted` / `fit_seconds`, never refused: ep20 shot 27, 2026-10-08)."""
     if cue.shot not in rows:
         raise KeyError(f"cue on shot {cue.shot}, which the cut does not have")
     row = rows[cue.shot]
     start, end = float(row["t_start"]), float(row["t_start"]) + float(row["seconds"])
-    if cue.seconds > end - start + 1e-6:
-        raise ValueError(f"shot {cue.shot} is {end - start:.2f}s; its cue "
-                         f"'{cue.sound}' is {cue.seconds:.2f}s")
-    return round(min(start + cue.at, end - cue.seconds), 3)
+    return round(min(start + cue.at, end - fit_seconds(cue, rows)), 3)
+
+
+def fit_seconds(cue: Cue, rows: dict[int, dict]) -> float:
+    """The cue's length inside its shot: its own, or the shot's when shorter."""
+    return round(min(cue.seconds, max(float(rows[cue.shot]["seconds"]), 0.1)), 3)
 
 
 # ---------------------------------------------------------------- ambience

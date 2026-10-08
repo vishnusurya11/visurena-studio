@@ -199,11 +199,11 @@ def presence(master: Path, episode, placed: dict) -> list[dict]:
     cue is judged by its stem instead, and the row says so."""
     rows = {int(s["index"]): s for s in placed["shots"]}
     cues = list(cues_of(episode))
-    spans = [(sfx_cues.start_of(c, rows), c.seconds) for c in cues]
+    spans = [(sfx_cues.start_of(c, rows), sfx_cues.fit_seconds(c, rows)) for c in cues]
     out = []
     for i, cue in enumerate(cues):
         at, quiet = spans[i][0], baseline_start(spans, i)
-        got = round(float(sfx_cues.event_db(master, at, cue.seconds, quiet_until=quiet)), 1)
+        got = round(float(sfx_cues.event_db(master, at, spans[i][1], quiet_until=quiet)), 1)
         row = {"shot": cue.shot, "sound": cue.sound, "at": at, "db": got, "ok": got >= EVENT_DB}
         if not row["ok"] and voiced_over(placed.get("lines", []), at, cue.seconds):
             stem_db, ok = stem_heard(Path(master).parent.parent / "audio" / "sfx", cue)
