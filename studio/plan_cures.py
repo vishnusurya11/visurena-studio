@@ -249,11 +249,14 @@ lines.  The cure MEASURES LIKE THE CHECKER or it cures numbers nobody judges
 
 
 def _shot_secs(doc: dict, rate: float) -> dict[int, float]:
+    """Each shot's seconds as the checker places them: the voice for a recorded
+    line, the rate for an unvoiced one (plan_gates.line_seconds)."""
+    from studio.plan_gates import line_seconds
     words, lines = {}, {}
     for line in doc.get("lines") or []:
-        words[line["shot"]] = words.get(line["shot"], 0) + len(str(line["text"]).split())
+        words[line["shot"]] = words.get(line["shot"], 0) + line_seconds(line["text"], rate)
         lines[line["shot"]] = lines.get(line["shot"], 0) + 1
-    return {s["index"]: 2 * HANDLE_S + words.get(s["index"], 0) / rate
+    return {s["index"]: 2 * HANDLE_S + words.get(s["index"], 0)
             + BREATH_S * max(0, lines.get(s["index"], 0) - 1)
             + float(s.get("beat_s") or 0) + float(s.get("coda_s") or 0)
             for s in doc.get("shots") or []}
@@ -1822,9 +1825,10 @@ def split_setup(doc: dict, rate: float = 3.0) -> dict:
     for line in lines:
         carried.setdefault(line["shot"], []).append(line)
     def seconds(s):
+        from studio.plan_gates import line_seconds
         rows = carried.get(s["index"], [])
-        words = sum(len((l.get("text") or "").split()) for l in rows)
-        return 2 * HANDLE + words / rate + BREATH * max(len(rows) - 1, 0) + float(s.get("beat_s") or 0) + float(s.get("coda_s") or 0)
+        spoken = sum(line_seconds(l.get("text") or "", rate) for l in rows)
+        return 2 * HANDLE + spoken + BREATH * max(len(rows) - 1, 0) + float(s.get("beat_s") or 0) + float(s.get("coda_s") or 0)
     spent, part = {}, {}
     for s in shots:
         name = s.get("setup")

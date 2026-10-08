@@ -52,6 +52,21 @@ def ran_downstream(ctx) -> bool:
     return episode_home.has_timeline(ctx.book_dir, ctx.number)
 
 
+def timeline_of_plan(ctx) -> bool:
+    """`ran_downstream` sharpened for the aside's cure: a timeline beside the
+    plan that was built FROM this plan.  A timeline of another plan (ep21,
+    2026-10-08: the aside's own, left by the signed plan step 02 had lost) is
+    no run of the stray draft on disk and must not keep the aside from its
+    cure -- the ladder climbed the stray for an hour instead."""
+    if not ran_downstream(ctx):
+        return False
+    try:        # through THE door: load_placed refuses a timeline of another plan
+        episode_home.load_placed(ctx.book_dir, ctx.number, episode_home.load_plan(ctx.book_dir, ctx.number))
+    except (Exception, SystemExit):     # noqa: BLE001 -- a refused draft, or a stale timeline, ran nowhere
+        return False
+    return True
+
+
 def rendered(ctx) -> bool:
     """Takes on disk: the plan has been spent on.  The battery guards spend
     BEFORE a render; after it the take gates judge the takes, and the writer
@@ -210,7 +225,7 @@ def cure_aside_first(ctx, plan: Path) -> None:
     cures only, $0 -- before any paid round judges the plan on disk (ep19
     launch04: the aside passed every gate, the stale plan.json paid the writer,
     and the episode crossed its $3 wall)."""
-    if not (ctx.home / plan_ladder.DEFERRED).exists() or plan_verdict.current(plan) or ran_downstream(ctx):
+    if not (ctx.home / plan_ladder.DEFERRED).exists() or plan_verdict.current(plan) or timeline_of_plan(ctx):
         return
     if not episode_home.read_json(ctx.home / plan_ladder.DEFERRED).get("draft"):
         ctx.log("the aside holds no draft (the climb never wrote a plan): nothing to cure", step_id=STEP_ID)

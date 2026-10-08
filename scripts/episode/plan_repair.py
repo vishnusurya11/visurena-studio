@@ -432,6 +432,9 @@ def apply_each(doc: dict, rows: list[str], book, number: int = 0, rate: float = 
     """One cure family at a time, each kept only if the contract still holds:
     a cure that breaks it is dropped ALONE and its rows come back uncured
     (ep19: one cure's "slowly" voided the light, crowd and move cures with it)."""
+    from studio import plan_gates
+    if book and number:
+        plan_gates.use_voice(book, number)     # the ladder's free rounds call here directly
     groups: dict = {}
     for row in rows:
         groups.setdefault(pc.cure_for(row) or row, []).append(row)
@@ -461,7 +464,9 @@ def restored(doc: dict) -> dict:
 
 
 def main(book_id: str, number: int, from_aside: bool = False, no_llm: bool = False) -> int:
+    from studio import plan_gates
     book = episode_home.book_dir(book_id)
+    plan_gates.use_voice(book, number)     # the cures measure like the checker: by the voice
     home = episode_home.home(book, number)
     path = home / "plan.json"
     if from_aside or not path.exists():

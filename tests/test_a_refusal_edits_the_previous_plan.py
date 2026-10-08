@@ -92,7 +92,8 @@ def test_a_fresh_brief_starts_from_nothing(tmp_path, monkeypatch):
 
 def test_the_model_tier_rung_is_a_tier_that_reasons():
     params = llm.resolve_tier(plan_ladder.MODEL_TIER_NAME).get("params") or {}
-    assert params.get("reasoning_effort", "none") != "none"
+    # the SDK tiers spell the knob `effort`; the OpenAI-era ones `reasoning_effort`
+    assert (params.get("reasoning_effort") or params.get("effort") or "none") != "none"
     assert plan_ladder.MODEL_TIER_NAME != ew.TIER
 
 

@@ -19,6 +19,7 @@ from __future__ import annotations
 
 import difflib
 import json
+from contextvars import ContextVar
 import math
 import re
 import statistics
@@ -1487,13 +1488,50 @@ def rate_advisory(episode: Episode, rate: float) -> list[str]:
     return []
 
 
+# THE VOICE: the measured seconds of every recorded line, by its text.  A voice
+# is a recording of a text -- the same seconds in whatever shot the text sits --
+# so every projection (the checker's rows, the cures' algebra) reads it for a
+# recorded line and the rate only for a line nobody has voiced yet.  ep21
+# (2026-10-08): the battery judged ONE PER TAKE on the voice (7.88 s, packed)
+# while the holds cure projected the same pair at the rate (8.29 s, clear) and
+# grew nothing; four ladder rounds and a park turned on that 0.4 s.
+VOICE: ContextVar[dict] = ContextVar("voice", default={})
+
+
+def voice_of(book, number: int) -> dict[str, float]:
+    """{text: measured seconds} of every line lines.json heard (a failed take's
+    seconds are no measure); empty when nothing is recorded yet."""
+    from studio import episode_home
+    path = episode_home.lines_dir(Path(book), number) / "lines.json"
+    if not path.exists():
+        return {}
+    doc = json.loads(path.read_text(encoding="utf-8"))
+    rows = doc["lines"] if isinstance(doc, dict) and "lines" in doc else doc
+    return {str(r["text"]).strip(): float(r["seconds"]) for r in rows
+            if isinstance(r, dict) and r.get("seconds") and r.get("passed", True)}
+
+
+def use_voice(book, number: int) -> dict[str, float]:
+    """Read the episode's voice into every projection of this process."""
+    voice = voice_of(book, number)
+    VOICE.set(voice)
+    return voice
+
+
+def line_seconds(text: str, rate: float) -> float:
+    """A recorded line's measured seconds; an unvoiced line's words at the rate."""
+    heard = VOICE.get().get(str(text).strip())
+    return heard if heard is not None else len(str(text).split()) / rate
+
+
 def projected_place(episode: Episode, rate: float) -> dict:
     """The timeline step 05 would write, before any line renders: the REAL
-    placement function (`episode_timeline.place`) fed projected line seconds
-    at the narrator's measured rate -- zero drift from the measured timeline
-    (a hole contains no words, so only the on_frame ceiling separates them)."""
+    placement function (`episode_timeline.place`) fed the voice where a line
+    is recorded and projected seconds at the narrator's measured rate where
+    not -- zero drift from the measured timeline (a hole contains no words,
+    so only the on_frame ceiling separates them)."""
     from studio import episode_timeline
-    return episode_timeline.place(episode, {l.index: l.words() / rate for l in episode.lines})
+    return episode_timeline.place(episode, {l.index: line_seconds(l.text, rate) for l in episode.lines})
 
 
 def hole_faults(episode: Episode, rate: float) -> list[str]:

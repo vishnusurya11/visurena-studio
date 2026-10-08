@@ -68,8 +68,8 @@ def long_shots(episode, rate: float, budget: float = BUDGET) -> list[tuple[int, 
     beat and the coda.  The dry build finds these after the lines render."""
     out = []
     for s in episode.shots:
-        words = [len(l.text.split()) for l in episode.lines if l.shot == s.index]
-        seconds = 2 * HANDLE + sum(words) / rate + BREATH * max(0, len(words) - 1) + s.beat_s + s.coda_s
+        words = [plan_gates.line_seconds(l.text, rate) for l in episode.lines if l.shot == s.index]
+        seconds = 2 * HANDLE + sum(words) + BREATH * max(0, len(words) - 1) + s.beat_s + s.coda_s
         if seconds > budget + 1e-6:
             out.append((s.index, round(seconds, 2)))
     return out
@@ -79,8 +79,8 @@ def projected(episode, rate: float) -> list[dict]:
     """Each shot as the timeline would place it, at the narrator's measured rate."""
     out = []
     for s in episode.shots:
-        words = [len(l.text.split()) for l in episode.lines if l.shot == s.index]
-        seconds = 2 * HANDLE + sum(words) / rate + BREATH * max(0, len(words) - 1) + s.beat_s + s.coda_s
+        words = [plan_gates.line_seconds(l.text, rate) for l in episode.lines if l.shot == s.index]
+        seconds = 2 * HANDLE + sum(words) + BREATH * max(0, len(words) - 1) + s.beat_s + s.coda_s
         out.append({"index": s.index, "seconds": seconds, "setup": s.setup, "cuts": list(getattr(s, "cuts", []))})
     return out
 
@@ -223,6 +223,7 @@ def sheet_text(book_id: str, number: int) -> int:
 
 def main(book_id: str, number: int) -> int:
     book = episode_home.book_dir(book_id)
+    plan_gates.use_voice(book, number)     # every projection below reads the recorded lines
     ep = contract(book, number)
     if ep is None:
         return 1
