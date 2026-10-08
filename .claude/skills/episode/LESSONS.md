@@ -339,3 +339,9 @@ fixes. Each lesson below cost at least one launch. Tracker rows A38-A74 in
   now stops a moved line a breath before the next. A QC word-error on a line
   whose own recording reads clean is the mix, not the voice: find what else is
   sounding in its window before re-saying it.
+- **ep22's run, closed (2026-10-08 21:3xZ, public https://youtu.be/VCvVvCcxlGE,
+  master_iter3, $0).** Launched 17:30Z, public about four hours later; ONE stop
+  (A79, two voices laid over each other) against ep21's twenty-two. The plan
+  signed on its first climb, the voice held on its first check, every panel
+  passed content on the first draw. The fixes of ep19-21 are the reason; the
+  remaining time is renders and a full QC per master.
