@@ -246,6 +246,8 @@ def apply(doc: dict, rows: list[str], book, number: int = 0,
             doc = pc.quote_trim(doc, seq_boards.book_words(book))
         elif name == "pin_series":
             doc = pc.pin_series(doc, **series_pin_values(book))
+        elif name == "trim_style":
+            doc = pc.trim_style(doc)
         elif name == "stage_machines":
             doc, unresolved = pc.stage_machines(doc, vocab)
             if unresolved and llm:

@@ -99,6 +99,7 @@ def structural_cures(doc: dict, brief: dict | None = None) -> dict:
     cast_ids = [str(r.get("entity_id")) for r in (brief or {}).get("cast") or [] if r.get("entity_id")]
     try:
         doc = plan_cures.alias_speakers(doc, cast_ids) if cast_ids else doc
+        doc = plan_cures.trim_style(doc)        # ep21: a 19-word style line cost a writer round
         return plan_cures.button_beat(doc)
     except Exception:                       # a cure never turns a refusal into a crash
         return doc

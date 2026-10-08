@@ -177,6 +177,33 @@ def legal_props(doc: dict, legal: set[str]) -> dict:
     return doc
 
 
+def trim_style(doc: dict) -> dict:
+    """`where` + `light` render a style line under the wall: the last clause of
+    `light`, then of `where`, goes until house_style is satisfied (ep21 rung 1,
+    2026-10-08: a 19-word line against 16 cost a writer round for arithmetic).
+    A field is never cut below two words; what then remains is the writer's."""
+    from studio import house_style
+
+    def shorter(text: str) -> str | None:
+        for sep in (";", ",", " "):
+            head, mark, _ = text.rpartition(sep)
+            if mark and len(head.split()) >= 2:
+                return head.strip(" ,;")
+        return None
+
+    for _ in range(12):
+        if not house_style.style_faults(doc.get("where") or "", doc.get("light") or ""):
+            return doc
+        for key in ("light", "where"):
+            cut = shorter(doc.get(key) or "")
+            if cut is not None:
+                doc[key] = cut
+                break
+        else:
+            return doc
+    return doc
+
+
 def pin_series(doc: dict, *, look: str, aspect: str, light: str | None = None,
                where: str | None = None) -> dict:
     """look/style/aspect (and light/where when given) are the SERIES', never
@@ -1527,6 +1554,7 @@ CURES: list[tuple[re.Pattern, str]] = [
     (re.compile(r"G-SPEAKER line"), "alias_speakers"),
     (re.compile(r"projects to .* an episode is|ONE PER TAKE|TAKE LENGTH|G-HOLE|hole in speech|of the runtime"), "holds"),
     (re.compile(r"median (?:frame-edge|at_rest)"), "edge_cases"),
+    (re.compile(r"\d+-word style line"), "trim_style"),
     (re.compile(r"G-ASPECT|style line is \d+ words|look"), "pin_series"),
 ]
 """Fault-text patterns -> cure names, most specific first.  A row matching
