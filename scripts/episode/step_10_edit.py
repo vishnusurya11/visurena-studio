@@ -54,7 +54,26 @@ def done(ctx) -> bool:
     master = episode_home.master_path(ctx.book_dir, ctx.number, engine)
     if not (title_clip(ctx).exists() and master.exists()):
         return False
+    if refused_cut(ctx, master, engine):
+        return False
     return all(p.stat().st_mtime <= master.stat().st_mtime for p in inputs(ctx))
+
+
+def refused_cut(ctx, master: Path, engine: str) -> bool:
+    """QC refused THESE master bytes on a cut-side row (loudness, true peak):
+    the cut is not done, it is remade (ep20 2026-10-08: a -17.49 LUFS master
+    read as done on the relaunch and QC refused the same bytes again)."""
+    import hashlib
+    import json
+    report = ctx.home / f"qc_{engine}.json"
+    if not report.exists():
+        return False
+    try:
+        doc = json.loads(report.read_text(encoding="utf-8"))
+    except ValueError:
+        return False
+    same = doc.get("sha8") == hashlib.sha256(master.read_bytes()).hexdigest()[:8]
+    return bool(same and not doc.get("passed", True) and not (doc.get("lufs_ok", True) and doc.get("tp_ok", True)))
 
 
 def run(ctx) -> None:

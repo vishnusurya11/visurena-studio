@@ -128,3 +128,27 @@ def test_step_09_reads_the_canvas_off_the_plan(tmp_path):
     assert shoot.episode_canvas(Ctx()) == (768, 768)
     (tmp_path / "plan.json").write_text(json.dumps({"aspect": "9:16"}), encoding="utf-8")
     assert shoot.episode_canvas(Ctx()) == (768, 1344)
+
+
+def test_a_master_qc_refused_on_a_cut_row_is_not_done(tmp_path, monkeypatch):
+    """ep20 (2026-10-08): a -17.49 LUFS master read as done on the relaunch and
+    QC refused the same bytes again.  QC's refusal of THESE bytes on a cut-side
+    row (loudness, true peak) means the cut is remade; a take-side refusal or
+    a report of other bytes leaves the master done."""
+    import hashlib
+    import json
+    ctx = ctx_for(tmp_path)
+    now = time.time()
+    monkeypatch.setattr(edit, "title_clip", lambda c: tmp_path / "title.mp4")
+    touch(tmp_path / "title.mp4", now - 100)
+    master = episode_home.master_path(ctx.book_dir, 12, "r2v")
+    touch(master, now - 10)
+    ctx.extra = ["--engine=r2v"]
+    sha8 = hashlib.sha256(master.read_bytes()).hexdigest()[:8]
+    report = ctx.home / "qc_r2v.json"
+    report.write_text(json.dumps({"sha8": sha8, "passed": False, "lufs_ok": False, "tp_ok": True}), encoding="utf-8")
+    assert edit.done(ctx) is False
+    report.write_text(json.dumps({"sha8": sha8, "passed": False, "lufs_ok": True, "tp_ok": True}), encoding="utf-8")
+    assert edit.done(ctx) is True                 # a take-side refusal is not the cut's
+    report.write_text(json.dumps({"sha8": "deadbeef", "passed": False, "lufs_ok": False, "tp_ok": True}), encoding="utf-8")
+    assert edit.done(ctx) is True                 # other bytes: this master was never judged
