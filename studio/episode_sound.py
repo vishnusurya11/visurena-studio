@@ -52,10 +52,17 @@ def lift_cures(rows: list[dict], existing: dict[str, float]) -> dict[str, float]
     """Each unheard cue's lift: its measured deficit plus the margin, stacked on
     any earlier lift (the recut re-measures) and clamped at MAX_LIFT_DB."""
     out = dict(existing)
+    from collections import Counter
+    copies = Counter(lift_key(r["shot"], r["sound"]) for r in rows or [])
+    for key, n in copies.items():
+        if n > 1:                    # measured as a stack of copies: that lift was never honest
+            out.pop(key, None)
     for row in rows or []:
         if row.get("ok") or row.get("under_line"):
             continue                 # a measure a voice line masks moves 0.0 dB per lifted dB (ep15)
         key = lift_key(row["shot"], row["sound"])
+        if copies[key] > 1:
+            continue                 # the next cut places one copy; it is measured then
         if row.get("db") is not None:
             deficit = EVENT_DB - float(row["db"])
         elif row.get("stem_target") is not None and row.get("stem_db") not in (None, float("-inf")):
@@ -79,14 +86,24 @@ def cure_from_qc(home: Path, engine: str) -> dict[str, float]:
 
 
 def cues_of(episode, lifts: dict[str, float] | None = None) -> list[sfx_cues.Cue]:
-    """Every sound the plan names, as a cue on its shot, lifted where a measured
-    master could not hear it."""
+    """Every sound the plan names, ONCE per shot, as a cue on its shot, lifted
+    where a measured master could not hear it.  ep20 shot 25 (2026-10-08): the
+    writer put five identical gun reports on a 2.5 s shot; they clamped to one
+    instant, QC measured the stack as unheard and the lift drove it to +12 dB
+    on all five -- a cannonade in the gaps that sank speech-over-gap to 6.8."""
     lifted = lifts or {}
-    return [sfx_cues.Cue(shot=s.index, sound=x.sound, at=x.at, seconds=x.seconds,
-                         gain_db=min(MAX_LIFT_DB,
-                                     x.gain_db + lifted.get(lift_key(s.index, x.sound), 0.0)))
-            for s in episode.shots if s.index not in (getattr(episode, "omit", None) or [])
-            for x in (getattr(s, "sounds", None) or [])]
+    out, seen = [], set()
+    for s in episode.shots:
+        if s.index in (getattr(episode, "omit", None) or []):
+            continue
+        for x in (getattr(s, "sounds", None) or []):
+            key = lift_key(s.index, x.sound)
+            if key in seen:
+                continue
+            seen.add(key)
+            out.append(sfx_cues.Cue(shot=s.index, sound=x.sound, at=x.at, seconds=x.seconds,
+                                    gain_db=min(MAX_LIFT_DB, x.gain_db + lifted.get(key, 0.0))))
+    return out
 
 
 def setup_rows(episode, placed: dict) -> dict[str, list[dict]]:

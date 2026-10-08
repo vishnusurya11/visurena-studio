@@ -66,3 +66,20 @@ def test_a_cue_judged_by_its_stem_lifts_by_its_stems_deficit():
     assert es.lift_cures(rows_, {}) == {"0|a thud": 3.7}                 # (−20 − −22.7) + 1.0
     blind = [{"shot": 0, "sound": "a thud", "at": 0.0, "db": None, "ok": False, "no_baseline": True, "stem_db": -22.7}]
     assert es.lift_cures(blind, {}) == {}
+
+
+def test_a_sound_measured_as_a_stack_of_copies_resets_its_lift_and_waits():
+    """ep20 shot 25: five identical gun rows, the lift at the 12 dB cap.  Copies
+    mean the measure was of a stack; the lift is dropped and nothing is lifted
+    this round -- the next cut places one copy and measures it honestly."""
+    stacked = [{"shot": 25, "sound": "a gun", "at": 126.9, "db": 5.5, "ok": False} for _ in range(4)]
+    assert es.lift_cures(stacked, {"25|a gun": 12.0, "3|x": 2.0}) == {"3|x": 2.0}
+
+
+def test_cues_of_places_a_sound_once_per_shot():
+    from types import SimpleNamespace as NS
+    gun = NS(sound="a gun", at=3.0, seconds=1.0, gain_db=-4.0)
+    ep = NS(shots=[NS(index=25, sounds=[gun, NS(sound="a gun", at=4.0, seconds=1.0, gain_db=-4.0),
+                                         NS(sound="a bell", at=0.5, seconds=2.0, gain_db=0.0)])], omit=[])
+    cues = es.cues_of(ep, {})
+    assert [(c.shot, c.sound, c.at) for c in cues] == [(25, "a gun", 3.0), (25, "a bell", 0.5)]
