@@ -316,10 +316,24 @@ def write_lock(path: Path, body: dict) -> bool:
     return True
 
 
+def other_unit_running(deps: Deps, codex: str, n: int, rows: list) -> int | None:
+    """The episode whose drive holds gpu.lock and is alive, when it is not N
+    (2026-10-08: ep19 un-parked under ep20's run, launched beside it, and its
+    bind rewrote the shared refs.json to chapter 19 under ep20's take check)."""
+    body = read_json(deps.root / "gpu.lock", {})
+    other = body.get("episode")
+    if other is None or int(other) == n:
+        return None
+    return int(other) if procs.find_drive(rows, codex, int(other)) is not None else None
+
+
 def clear_stale_lock(book: Path, codex: str, n: int, deps: Deps, rows: list) -> bool:
-    """A gpu.lock whose drive is not in the process table is removed and logged."""
+    """A gpu.lock whose drive is not in the process table is removed and logged;
+    one held by another unit's LIVE drive is not stale (one unit at a time)."""
     lock = deps.root / "gpu.lock"
     if not lock.exists() or procs.find_drive(rows, codex, n) is not None:
+        return False
+    if other_unit_running(deps, codex, n, rows) is not None:
         return False
     body = read_json(lock, {})
     lock.unlink()
@@ -630,6 +644,8 @@ def act_idle(book: Path, codex: str, n: int, derived, signals, deps: Deps) -> di
         return {"action": "restart_engine", "state": "IDLE"}
     if signals.lock and signals.proc_alive:
         return {"action": "wait", "state": "RUNNING"}
+    if (other := other_unit_running(deps, codex, n, deps.procs())) is not None:
+        return {"action": "wait", "state": "IDLE", "other": other, "reason": f"ep{other:02d} runs"}
     return launch(book, codex, n, deps, "relaunch" if signals.drive_rows else "launch")
 
 
