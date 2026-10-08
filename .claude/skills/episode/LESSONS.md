@@ -324,3 +324,11 @@ fixes. Each lesson below cost at least one launch. Tracker rows A38-A74 in
   read 74 % static with a longest still run of 0.46 s. A freeze a viewer sees
   holds; the gate should weigh the longest run, not the share, on an insert.
   Calibrate on the owner-judged episodes before changing it.
+- **ep21's run, closed (2026-10-08 17:25Z, public https://youtu.be/LwGRFTce2jE,
+  master_iter7, $0).** Seven masters; every stop after the plan was a ruler or
+  a reader, not the picture: two rulers on one number (A72), a size word
+  missing (A73), a shadow read as bars (A74), a cache under old code and a
+  content fault blamed on its panel (A75), a voice verdict read only at the
+  door (A76-A77), a retake that measured half of what it rendered (A78). The
+  brain misread three of these stops as gates that gave up. Before trusting a
+  park, read the refusing row yourself.
