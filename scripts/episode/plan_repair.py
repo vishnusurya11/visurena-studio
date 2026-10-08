@@ -469,7 +469,12 @@ def main(book_id: str, number: int, from_aside: bool = False, no_llm: bool = Fal
         if not aside.exists():
             raise SystemExit(f"no plan and no aside under {home}")
         from studio import plan_gates
-        doc = plan_gates.at_series_rate(json.load(io.open(aside, encoding="utf-8"))["draft"], book, number)
+        draft = json.load(io.open(aside, encoding="utf-8")).get("draft")
+        if not draft:
+            # the climb never wrote a plan (every draft refused by the contract):
+            # the aside records the verdict and holds nothing to cure (ep21, 2026-10-08)
+            raise SystemExit(f"the aside under {home} holds no draft; nothing to restore")
+        doc = plan_gates.at_series_rate(draft, book, number)
         doc = restored(doc)
         Episode(**doc)
         episode_home.write_plan(path, doc)

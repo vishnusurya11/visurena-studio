@@ -212,6 +212,9 @@ def cure_aside_first(ctx, plan: Path) -> None:
     and the episode crossed its $3 wall)."""
     if not (ctx.home / plan_ladder.DEFERRED).exists() or plan_verdict.current(plan) or ran_downstream(ctx):
         return
+    if not episode_home.read_json(ctx.home / plan_ladder.DEFERRED).get("draft"):
+        ctx.log("the aside holds no draft (the climb never wrote a plan): nothing to cure", step_id=STEP_ID)
+        return
     rc, out = ctx.capture_script("scripts/episode/plan_repair.py", "--from-aside", "--no-llm")
     ctx.log("aside cured before any paid round:\n" + out[-800:], step_id=STEP_ID,
             level="WARNING" if rc else "INFO")
