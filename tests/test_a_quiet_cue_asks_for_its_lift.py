@@ -55,3 +55,10 @@ def test_cure_from_qc_reads_the_last_measure_and_writes_the_sidecar(tmp_path):
     assert on_disk == lifts and lifts["3|ammunition explosion"] == 4.9
     assert es.lifts_of(home) == on_disk
     assert es.cure_from_qc(tmp_path / "virgin", "r2v") == {}   # no qc yet = no lifts
+
+
+def test_a_cue_judged_by_its_stem_asks_for_no_lift():
+    """ep20 (2026-10-08): the first-frame cue's row carries db None (no baseline,
+    judged by its stem) and lift_cures died on float(None) at the recut."""
+    rows_ = [{"shot": 0, "sound": "a thud", "at": 0.0, "db": None, "ok": False, "no_baseline": True, "stem_db": -22.7}]
+    assert es.lift_cures(rows_, {}) == {}

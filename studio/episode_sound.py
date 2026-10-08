@@ -53,8 +53,9 @@ def lift_cures(rows: list[dict], existing: dict[str, float]) -> dict[str, float]
     any earlier lift (the recut re-measures) and clamped at MAX_LIFT_DB."""
     out = dict(existing)
     for row in rows or []:
-        # a measure a voice line masks moves 0.0 dB per lifted dB (ep15)
-        if not row.get("ok") and not row.get("under_line"):
+        # a measure a voice line masks moves 0.0 dB per lifted dB (ep15); a cue
+        # with no baseline was judged by its stem, nothing in the mix to lift by
+        if not row.get("ok") and not row.get("under_line") and row.get("db") is not None:
             key = lift_key(row["shot"], row["sound"])
             out[key] = min(MAX_LIFT_DB,
                            round(out.get(key, 0.0) + (EVENT_DB - float(row["db"])) + LIFT_MARGIN_DB, 1))
