@@ -306,7 +306,10 @@ fixes. Each lesson below cost at least one launch. Tracker rows A38-A74 in
   report EXISTED, and the upload door refused it fifteen hours and every
   picture later. The brain then blamed step 09 and parked. Step 04 now re-says
   the fewest lines covering every failing pair (greedy cover: l03, l07, l16)
-  once, and the table routes the door's refusal to `redo 04`.
+  once, and the table routes the door's refusal to `redo 04`. Round one cured
+  nine of ten pairs; the tenth (l07, l36) wanted l36, which round one's cover
+  never chose, so the step takes up to two rounds, the second preferring lines
+  not yet said again (A77).
 - **Model ids come from the SDK's list, never by analogy (A76).** models.yaml
   and the brain asked for "claude-sonnet-5-5"; the CLI printed
   `unrecognized_model` on every call and the runs went on silently. Sonnet 5 is

@@ -47,8 +47,12 @@ def test_a_split_voice_is_not_done_until_its_lines_were_said_again(tmp_path):
     split = {"n": {"ok": False, "under": EP21}}
     ctx, _ = _ctx(tmp_path, split)
     assert step.done(ctx) is False
+    ctx, _ = _ctx(tmp_path, split, redone=[[3, 7, 16]])
+    assert step.done(ctx) is False                    # one round taken, a second allowed
+    ctx, _ = _ctx(tmp_path, split, redone=[[3, 7, 16], [36]])
+    assert step.done(ctx) is True                     # two rounds: the door decides
     ctx, _ = _ctx(tmp_path, split, redone=[3, 7, 16])
-    assert step.done(ctx) is True                     # said again once: the door decides
+    assert step.done(ctx) is False                    # the flat file of one round (ep21, 15:33Z)
     ctx, _ = _ctx(tmp_path, {"n": {"ok": True, "under": []}})
     assert step.done(ctx) is True
 
@@ -68,7 +72,18 @@ def test_the_run_says_the_split_lines_again_and_checks_once_more(tmp_path, monke
     assert scripts[0][0] == "say_lines.py"
     assert ("say_lines.py", ("--redo=3,7,16",)) in scripts
     assert scripts[-1][0] == "speaker_check.py"
-    assert json.loads((ctx.home / "review" / step.REVOICED).read_text(encoding="utf-8")) == [3, 7, 16]
+    assert json.loads((ctx.home / "review" / step.REVOICED).read_text(encoding="utf-8"))[0] == [3, 7, 16]
+
+
+def test_a_second_round_says_the_lines_the_first_cover_left(tmp_path, monkeypatch):
+    """ep21 15:33Z: round one said l03, l07, l16; the one pair left was
+    (l07, l36) -- l07 now 0.88 to the voice, l36 a hushed 2.1 s line never
+    said again.  Round two covers what remains, preferring lines not yet said."""
+    ctx, calls = _ctx(tmp_path, {"n": {"ok": False, "under": [["l07", "l36"]]}}, redone=[[3, 7, 16]])
+    monkeypatch.setattr(step, "voiceless", lambda ctx: [])
+    step.run(ctx)
+    assert ("say_lines.py", ("--redo=36",)) in [(s.rsplit("/", 1)[-1], a) for s, a in calls]
+    assert json.loads((ctx.home / "review" / step.REVOICED).read_text(encoding="utf-8")) == [[3, 7, 16], [36]]
 
 
 def test_the_publish_refusal_routes_back_to_the_record_step():
