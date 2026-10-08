@@ -61,8 +61,10 @@ NEGATIVE = ("text, caption, subtitles, watermark, signature, blurry, photographi
             "extra limbs, deformed hands, mountains, cliffs, lettering, letters, words, "
             "panel labels, numbers, beard on the narrator")
 
-SAID = {"wide": "WIDE", "medium": "MEDIUM", "medium_close": "MEDIUM CLOSE",
-        "close": "BIG CLOSE-UP", "insert": "INSERT"}
+SAID = {"wide": "WIDE", "full": "FULL SHOT", "medium": "MEDIUM", "medium_close": "MEDIUM CLOSE",
+        "close": "BIG CLOSE-UP", "extreme_close": "EXTREME CLOSE-UP", "insert": "INSERT"}
+# every size the contract can sign (episode_spec.Size): ep21 launch16 died on
+# KeyError 'full' two grids in, four signed shots sized a word this table lacked
 
 CREATURE = re.compile(r"\b(?:cab horse|horse|pony|mare|dog|cat|cow|ox|donkey|bird)\b", re.I)
 PART = re.compile(r"\b(?:head|face|hand|hands|eye|eyes|hoof|hooves|foot|feet|paw|muzzle|nose|ear|ears)\b", re.I)

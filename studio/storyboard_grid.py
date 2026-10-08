@@ -699,17 +699,24 @@ BODY_WORDS = ("figure", "head", "hands", "feet", "shoulders", "face", "mid-thigh
 PEOPLED_CUT = {
     "wide": "the whole figure stands well inside the panel with open ground below the feet and "
             "sky above the head; the horizon is visible across the panel",
+    "full": "the whole figure stands inside the panel from head to feet, the feet just above "
+            "the bottom edge and a little room above the head; the room behind is close",
     "medium": "the panel cuts the figure at mid-thigh; the head sits in the upper third and the "
               "hands are visible",
     "medium_close": "the panel cuts the figure at the middle of the chest; head and shoulders "
                     "fill the centre and the background is far behind",
     "close": "the panel cuts at the shoulders; the face fills the panel",
+    "extreme_close": "the panel cuts inside the face; the eyes fill the panel edge to edge",
     "insert": "the panel comes in close on one subject, which fills most of the frame",
 }
 
 EMPTY_CUT = {
     "wide": "the camera stands far back across open ground, the horizon running the width of the "
             "panel and a wide sky above it",
+    "full": "the camera stands a few paces off, the main thing of the panel seen whole from top "
+            "to bottom with the floor below it and the wall close behind",
+    "extreme_close": "the camera is pressed against one detail of the main thing of the panel, "
+                     "which fills the frame past its edges",
     "medium": "the camera stands a few paces off, the main thing of the panel filling the middle "
               "band of the frame with ground below it and sky behind",
     "medium_close": "the camera stands close in, the main thing of the panel filling the centre "
