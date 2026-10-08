@@ -105,6 +105,7 @@ def test_a_cue_at_the_first_frame_is_judged_by_its_stem(monkeypatch):
         raise ValueError("no audio before 0.00s to compare the cue against")
     monkeypatch.setattr(es.sfx_cues, "event_db", no_baseline)
     monkeypatch.setattr(es, "stem_heard", lambda sfx, cue: (-18.0, True))
+    monkeypatch.setattr(es, "stem_target", lambda sfx, cue: -17.0)
     rows = es.presence(Path("cut/m.mp4"), ep, placed)
     assert rows == [{"shot": 0, "sound": "a distant thud", "at": 0.0, "db": None, "ok": True,
-                     "no_baseline": True, "stem_db": -18.0}]
+                     "no_baseline": True, "stem_db": -18.0, "stem_target": -17.0}]

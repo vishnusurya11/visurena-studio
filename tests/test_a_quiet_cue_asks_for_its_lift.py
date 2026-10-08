@@ -57,8 +57,12 @@ def test_cure_from_qc_reads_the_last_measure_and_writes_the_sidecar(tmp_path):
     assert es.cure_from_qc(tmp_path / "virgin", "r2v") == {}   # no qc yet = no lifts
 
 
-def test_a_cue_judged_by_its_stem_asks_for_no_lift():
+def test_a_cue_judged_by_its_stem_lifts_by_its_stems_deficit():
     """ep20 (2026-10-08): the first-frame cue's row carries db None (no baseline,
-    judged by its stem) and lift_cures died on float(None) at the recut."""
-    rows_ = [{"shot": 0, "sound": "a thud", "at": 0.0, "db": None, "ok": False, "no_baseline": True, "stem_db": -22.7}]
-    assert es.lift_cures(rows_, {}) == {}
+    judged by its stem); its stem sat 2.7 dB under its own target, so the lift
+    is that deficit plus the margin -- and nothing when no target is known."""
+    rows_ = [{"shot": 0, "sound": "a thud", "at": 0.0, "db": None, "ok": False, "no_baseline": True,
+              "stem_db": -22.7, "stem_target": -20.0}]
+    assert es.lift_cures(rows_, {}) == {"0|a thud": 3.7}                 # (−20 − −22.7) + 1.0
+    blind = [{"shot": 0, "sound": "a thud", "at": 0.0, "db": None, "ok": False, "no_baseline": True, "stem_db": -22.7}]
+    assert es.lift_cures(blind, {}) == {}

@@ -73,7 +73,9 @@ def refused_cut(ctx, master: Path, engine: str) -> bool:
     except ValueError:
         return False
     same = doc.get("sha8") == hashlib.sha256(master.read_bytes()).hexdigest()[:8]
-    return bool(same and not doc.get("passed", True) and not (doc.get("lufs_ok", True) and doc.get("tp_ok", True)))
+    cut_side = (not doc.get("lufs_ok", True) or not doc.get("tp_ok", True)
+                or any(not row.get("ok") for row in doc.get("sound") or []))   # a cue lift is a recut
+    return bool(same and not doc.get("passed", True) and cut_side)
 
 
 def run(ctx) -> None:

@@ -53,12 +53,16 @@ def lift_cures(rows: list[dict], existing: dict[str, float]) -> dict[str, float]
     any earlier lift (the recut re-measures) and clamped at MAX_LIFT_DB."""
     out = dict(existing)
     for row in rows or []:
-        # a measure a voice line masks moves 0.0 dB per lifted dB (ep15); a cue
-        # with no baseline was judged by its stem, nothing in the mix to lift by
-        if not row.get("ok") and not row.get("under_line") and row.get("db") is not None:
-            key = lift_key(row["shot"], row["sound"])
-            out[key] = min(MAX_LIFT_DB,
-                           round(out.get(key, 0.0) + (EVENT_DB - float(row["db"])) + LIFT_MARGIN_DB, 1))
+        if row.get("ok") or row.get("under_line"):
+            continue                 # a measure a voice line masks moves 0.0 dB per lifted dB (ep15)
+        key = lift_key(row["shot"], row["sound"])
+        if row.get("db") is not None:
+            deficit = EVENT_DB - float(row["db"])
+        elif row.get("stem_target") is not None and row.get("stem_db") not in (None, float("-inf")):
+            deficit = float(row["stem_target"]) - float(row["stem_db"])    # judged by its stem (no baseline)
+        else:
+            continue                 # nothing measured to lift by
+        out[key] = min(MAX_LIFT_DB, round(out.get(key, 0.0) + deficit + LIFT_MARGIN_DB, 1))
     return out
 
 
@@ -177,6 +181,15 @@ def voiced_over(lines: list[dict], at: float, seconds: float) -> bool:
     return any(l["at"] < at + seconds and at < l["at"] + l["seconds"] for l in lines)
 
 
+def stem_target(sfx: Path, cue) -> float | None:
+    """The level the cue's stem was rendered to (its sidecar), or None."""
+    side = (Path(sfx) / sfx_cues.file_name(cue)).with_suffix(".json")
+    try:
+        return float(json.loads(side.read_text(encoding="utf-8"))["target"]) if side.exists() else None
+    except (ValueError, KeyError):
+        return None
+
+
 def stem_heard(sfx: Path, cue) -> tuple[float, bool]:
     """The cue's leveled stem against the target its sidecar records: the one
     presence a voice line cannot mask (the stem IS in the mix; the edit gate
@@ -209,9 +222,10 @@ def presence(master: Path, episode, placed: dict) -> list[dict]:
         except ValueError:
             # no audio before the cue to measure a rise against (ep20 shot 0, a cue
             # at 0.00 s, 2026-10-08): the one presence that needs no baseline is the stem
-            stem_db, ok = stem_heard(Path(master).parent.parent / "audio" / "sfx", cue)
+            sfx = Path(master).parent.parent / "audio" / "sfx"
+            stem_db, ok = stem_heard(sfx, cue)
             out.append({"shot": cue.shot, "sound": cue.sound, "at": at, "db": None, "ok": ok,
-                        "no_baseline": True, "stem_db": stem_db})
+                        "no_baseline": True, "stem_db": stem_db, "stem_target": stem_target(sfx, cue)})
             continue
         row = {"shot": cue.shot, "sound": cue.sound, "at": at, "db": got, "ok": got >= EVENT_DB}
         if not row["ok"] and voiced_over(placed.get("lines", []), at, cue.seconds):

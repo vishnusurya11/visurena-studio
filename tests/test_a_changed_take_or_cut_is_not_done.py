@@ -150,5 +150,8 @@ def test_a_master_qc_refused_on_a_cut_row_is_not_done(tmp_path, monkeypatch):
     assert edit.done(ctx) is False
     report.write_text(json.dumps({"sha8": sha8, "passed": False, "lufs_ok": True, "tp_ok": True}), encoding="utf-8")
     assert edit.done(ctx) is True                 # a take-side refusal is not the cut's
+    report.write_text(json.dumps({"sha8": sha8, "passed": False, "lufs_ok": True, "tp_ok": True,
+                                  "sound": [{"shot": 0, "ok": False}]}), encoding="utf-8")
+    assert edit.done(ctx) is False                # an unheard cue is cured at the recut (a lift)
     report.write_text(json.dumps({"sha8": "deadbeef", "passed": False, "lufs_ok": False, "tp_ok": True}), encoding="utf-8")
     assert edit.done(ctx) is True                 # other bytes: this master was never judged
