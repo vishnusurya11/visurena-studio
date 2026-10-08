@@ -178,27 +178,32 @@ def legal_props(doc: dict, legal: set[str]) -> dict:
 
 
 def trim_style(doc: dict) -> dict:
-    """`where` + `light` render a style line under the wall: the last clause of
-    `light`, then of `where`, goes until house_style is satisfied (ep21 rung 1,
+    """`where` + `light` render a style line under the wall (ep21 rung 1,
     2026-10-08: a 19-word line against 16 cost a writer round for arithmetic).
-    A field is never cut below two words; what then remains is the writer's."""
+    What goes, in order: an unprotected clause of `light` (never its first,
+    the direction, nor one that names a black -- the first cut of this cure
+    dropped ', deep shadow' and the contract refused the draft for no black),
+    then the tail words of `where`, then the tail words of `light`'s first
+    clause; a field is never cut below two words."""
     from studio import house_style
 
-    def shorter(text: str) -> str | None:
-        for sep in (";", ",", " "):
-            head, mark, _ = text.rpartition(sep)
-            if mark and len(head.split()) >= 2:
-                return head.strip(" ,;")
-        return None
+    def clauses(text: str) -> list[str]:
+        return [c.strip() for c in re.split(r"[;,]", text or "") if c.strip()]
 
-    for _ in range(12):
-        if not house_style.style_faults(doc.get("where") or "", doc.get("light") or ""):
+    for _ in range(16):
+        where, light = doc.get("where") or "", doc.get("light") or ""
+        if not house_style.style_faults(where, light):
             return doc
-        for key in ("light", "where"):
-            cut = shorter(doc.get(key) or "")
-            if cut is not None:
-                doc[key] = cut
-                break
+        parts = clauses(light)
+        loose = [i for i, c in enumerate(parts) if i > 0 and not house_style.BLACKS.search(c)]
+        if loose:
+            del parts[loose[-1]]
+            doc["light"] = ", ".join(parts)
+        elif len(where.split()) > 2:
+            doc["where"] = " ".join(where.split()[:-1])
+        elif parts and len(parts[0].split()) > 2:
+            parts[0] = " ".join(parts[0].split()[:-1])
+            doc["light"] = ", ".join(parts)
         else:
             return doc
     return doc
