@@ -201,9 +201,30 @@ def render_all(cues: list[Cue], folder: Path, seed: int, run=None,
 # ---------------------------------------------------------------- placing
 
 def placed(rendered: list[tuple[Cue, Path]], shots: list[dict]) -> list[tuple[float, Path]]:
-    """The `(master seconds, file)` pairs `mix` takes, from placed.json rows."""
+    """The `(master seconds, file)` pairs `mix` takes, from placed.json rows.
+    A cue longer than its shot is FITTED to it first (ep20 shot 27, 2026-10-08:
+    a 3.0 s clink on the 2.5 s button refused the whole assemble after four
+    hours of pictures; the cut's shot lengths move under the plan's cue lengths)."""
     rows = {int(s["index"]): s for s in shots}
-    return [(start_of(cue, rows), path) for cue, path in rendered]
+    out = []
+    for cue, path in rendered:
+        if cue.shot not in rows:
+            raise KeyError(f"cue on shot {cue.shot}, which the cut does not have")
+        cue, path = fitted(cue, path, float(rows[cue.shot]["seconds"]))
+        out.append((start_of(cue, rows), path))
+    return out
+
+
+def fitted(cue: Cue, path: Path, shot_seconds: float) -> tuple[Cue, Path]:
+    """The cue and its file, cut to the shot when the shot is shorter: a
+    sibling file `<name>_fitN.NNs.wav` through `level` (no gain, tail faded)."""
+    if cue.seconds <= shot_seconds + 1e-6:
+        return cue, path
+    seconds = round(max(shot_seconds, 0.1), 3)
+    out = Path(path).with_name(f"{Path(path).stem}_fit{seconds:.2f}s{Path(path).suffix}")
+    if not out.exists():
+        level(Path(path), out, 0.0, seconds)
+    return cue.model_copy(update={"seconds": seconds}), out
 
 
 def start_of(cue: Cue, rows: dict[int, dict]) -> float:

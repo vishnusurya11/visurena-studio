@@ -205,9 +205,21 @@ class TestPlaced:
         got = sfx_cues.placed([(gun(at=3.5, seconds=2.0), Path("g.wav"))], SHOTS)
         assert got[0][0] == pytest.approx(12.0)
 
-    def test_a_cue_longer_than_its_shot_is_a_plan_fault(self):
+    def test_a_cue_longer_than_its_shot_is_fitted_to_it(self, monkeypatch):
+        """ep20 shot 27 (2026-10-08): a 3.0 s clink on the 2.5 s button refused
+        the whole assemble; the cut's shot lengths move under the plan's cue
+        lengths, so the cue is cut to the shot (a sibling file through level)."""
+        cuts = []
+        monkeypatch.setattr(sfx_cues, "level", lambda src, out, gain, end=None: cuts.append((src, out, gain, end)) or out)
+        got = sfx_cues.placed([(gun(seconds=5.0), Path("g.wav"))], SHOTS)
+        start, path = got[0]
+        shot = next(s for s in SHOTS if s["index"] == gun().shot)
+        assert path.name == f"g_fit{shot['seconds']:.2f}s.wav" and cuts[0][3] == pytest.approx(shot["seconds"])
+        assert start == pytest.approx(shot["t_start"])
+
+    def test_start_of_still_refuses_an_unfitted_long_cue(self):
         with pytest.raises(ValueError, match="shot 3"):
-            sfx_cues.placed([(gun(seconds=5.0), Path("g.wav"))], SHOTS)
+            sfx_cues.start_of(gun(seconds=5.0), {s["index"]: s for s in SHOTS})
 
     def test_a_cue_on_a_shot_the_cut_does_not_have_is_named(self):
         with pytest.raises(KeyError, match="99"):
