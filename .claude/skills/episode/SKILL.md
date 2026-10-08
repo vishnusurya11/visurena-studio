@@ -429,6 +429,23 @@ never a moving shot's coda.
 Stop a run by killing its process tree by command line, never `uv.exe` alone
 (memory `project_kill_run_tree`).
 
+## After every run: improve this skill (owner, 2026-10-08)
+
+Each episode ends with its lessons written here before the next one starts:
+the measurement in LESSONS.md, the rule in this file, a new gate number in
+GATES.md, all in the commit that fixed the fault. Rules learned on ep19-21:
+
+- **One ruler.** A judge and the cure for its fault measure the same number the
+  same way (`plan_gates.line_seconds`: the voice where a line is recorded). A
+  fault no cure can move is a ruler mismatch until both numbers are printed.
+- **A table keyed by a contract value covers every value** the contract can
+  sign, tested against the Literal (`episode_spec.Size` and the grid's words).
+- **A HARD take row is believed only after its strip is seen.** The letterbox,
+  last-vs-panel and posture rows have each refused correct dark or quiet takes.
+- **After the signature, plan.json changes only through a recorded cure.**
+- **A timeline belongs to the plan it was built from**; read it through
+  `episode_home.load_placed`, never by existence.
+
 ## When a failure sends you back
 
 | you see | go back to |

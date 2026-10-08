@@ -241,3 +241,50 @@ SKILL.md.
   once in `episode_spec` (`SHORT_WALL_S - TAIL_ALLOWANCE_S`), and the upload
   and public-flip doors read the FILE itself (`youtube_publish.file_refusals`:
   length AND 1:1), because `--override` waives `qc.passed` -- 2026-09-30.
+
+## The autopilot under the subscription (ep19-21, 2026-10-07/08)
+
+ep19 and ep20 shipped public at $0 on the Claude Agent SDK; ep21 took a day of
+fixes. Each lesson below cost at least one launch. Tracker rows A38-A74 in
+`architecture/plan/2026-10-06_autopilot_build.md`.
+
+- **The judge and the cure must measure with one ruler (A72).** ep21's battery
+  judged ONE PER TAKE by the recorded voice (shots 0+1 = 7.88 s, packed); the
+  holds cure projected the same pair at the series rate (8.29 s, clear) and grew
+  nothing. Four ladder rounds, a brain park and a retry turned on 0.4 s. Every
+  projection now reads `plan_gates.line_seconds`: the voice for a recorded line,
+  the rate only for an unvoiced one. Before calling a fault "the writer's",
+  compute its number both ways; if they disagree, the fault is the ruler.
+- **A timeline is a run of the plan it was built FROM (A72).** A placed.json
+  from another plan kept the aside from its free cure, and the ladder climbed an
+  unsigned stray for an hour. `step_02.timeline_of_plan` reads through
+  `load_placed`, the one door that knows staleness.
+- **Every downstream rewrite of the plan is recorded (A70).** respot re-wrote
+  plan.json on every run and the hole trim wrote unrecorded; the signature
+  lapsed by links nobody recorded and step 02 RE-PLANNED a signed 31-shot plan
+  over its voices and timeline. Writes after the signature go through
+  `plan_provenance.record`, and respot writes only when a cut moved.
+- **Every value the contract can sign, every consumer can say (A73).** The
+  contract allows seven shot sizes; grids.py's size words and the cut clauses
+  knew five, and the run died two grids in on `KeyError: 'full'`. A table keyed
+  by a contract Literal is tested against `get_args` of that Literal.
+- **A shadow is not a bar (A74).** The letterbox gate refused T27 and T30 HARD:
+  a low-key cellar fades to black at the top and the bottom, rows at level 5-9
+  with a row spread of 3.6-5.3 and no edge. A bar is flat to encoder noise (row
+  spread <= 2.0) or ends at an edge (the picture rises >= 12 levels past it).
+  Look at the strip of every take a HARD row refuses before believing the row.
+- **A deferral's clean lines are not refusals (A71).** The table read
+  `CAST BOUND : all bound` as cast_unbound (the substring) and spent the cure
+  cap on the brain. A classifier matches the refusal's shape, never a word the
+  clean line also holds.
+- **A quiet master is lifted, a refused cut is not done (A61-A65).** -17.5 LUFS
+  reached QC; `master_loudness.into_band` lifts the master into -15.5..-12.5
+  with a limiter, and step 10 is not done while QC refused its master's sha.
+- **A retry starts the clock and the take ladder's rounds over (A55-A57).** A
+  terminal signed on a spent clock was read as done; `reset_since_verdict`
+  re-judges it.
+- **A YouTube refresh token dies every 7 days while the app is in Testing.**
+  The table parks on `invalid_grant` with the mint command
+  (`scripts/publish/youtube_auth.py`).
+- **Patch text with a backslash goes through the Write tool, never a heredoc**,
+  and a commit gates on pytest's exit code, never a pipe (three slips in 24 h).

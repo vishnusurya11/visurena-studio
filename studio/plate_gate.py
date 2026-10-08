@@ -30,8 +30,29 @@ def band_depth(grey: np.ndarray, from_top: bool) -> int:
     return depth
 
 
+BAR_STD = 2.0
+"""A bar's rows are flat to within encoder noise; a shadow's rows are not (ep21:
+the cellar's dark top and bottom read 3.6-5.3)."""
+EDGE_STEP = 12.0
+"""A noisy bar still ends at an edge: the picture past it rises at least this
+far above the bar's level.  A shadow fades in (ep21: 1.5-3.3)."""
+
+
+def is_bar(grey: np.ndarray, from_top: bool, least: int) -> bool:
+    """A band deep enough that is a bar, not a shadow: flat, or ending at an edge."""
+    rows = grey if from_top else grey[::-1]
+    depth = band_depth(grey, from_top)
+    if depth < least:
+        return False
+    band, past = rows[:depth], rows[depth:depth + 4]
+    flat = float(band.std(axis=1).mean()) <= BAR_STD
+    edge = past.size and float(past.mean()) - float(band.mean()) >= EDGE_STEP
+    return bool(flat or edge)
+
+
 def letterboxed(image: Image.Image) -> bool:
-    """True when flat bands at the top AND the bottom each take BAR_MIN of the height."""
+    """True when bars (flat, or ending at an edge) at the top AND the bottom
+    each take BAR_MIN of the height."""
     grey = np.asarray(image.convert("L"), dtype=np.float32)
     least = int(BAR_MIN * grey.shape[0])
-    return band_depth(grey, True) >= least and band_depth(grey, False) >= least
+    return is_bar(grey, True, least) and is_bar(grey, False, least)

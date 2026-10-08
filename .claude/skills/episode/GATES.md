@@ -120,6 +120,7 @@ stored readings raised no new failure.
 |---|---|---|---|
 | `take_dq.py` | `T<NN>.dq.json` | frozen start and share, cut landing, churn, zoom, face at end, look, pulse, lip-sync lag and WER; **held** (a person pinned while the set slides: lock = 1 - face travel / scenery travel, hard at 0.75 over 100 px, only when the plan keeps the subject in place); **jump** (lowest similarity between consecutive frame signatures, hard below 0.50: a switch of picture, whatever the brightness) | HARD rows as marked in the report. held: ep09 T02 1.01 over 1055 px and T10 1.05 fail; eligible passes top out at -0.42 (n=2 fires against 3 passes: thin). jump: T15's two faults 0.08 and 0.16, every accepted ep08/09 take 0.83 or more |
 | `take_content_check.py` | `T<NN>.content.json` | the panel content rules on 3 frames past the head leak, each read alone | HARD |
+| `take_frame.row` (letterbox, in `T<NN>.dq.json`) | — | bars at the top AND bottom, each >= 4 % of the height, each either flat (row spread <= 2.0) or ending at an edge (the picture rises >= 12 levels past it) | HARD. ep14 T26: 54/256 rows of bars. ep21 T27/T30: a dark cellar read 3.6-5.3 spread, 1.5-3.3 step, and is NOT a letterbox (2026-10-08) |
 
 Take currency: a take is kept only when it was rendered from the same prompt
 AND the same staged picture bytes (content-addressed names in its
