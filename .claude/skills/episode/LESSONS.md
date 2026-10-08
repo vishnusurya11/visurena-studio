@@ -314,3 +314,13 @@ fixes. Each lesson below cost at least one launch. Tracker rows A38-A74 in
   and the brain asked for "claude-sonnet-5-5"; the CLI printed
   `unrecognized_model` on every call and the runs went on silently. Sonnet 5 is
   `claude-sonnet-5`; Opus 5.5 is `claude-opus-5-5`.
+- **A round measures every take it touched, not only the one it named (A78).**
+  The master eye retook T01; the renderer also re-rendered a stale T02, and the
+  round measured only T01. T02 reached QC with no verdict, QC failed, and the
+  brain parked the episode as a gate that gave up. `take_ladder.retake` now
+  measures the named takes and every take `judged.unjudged_takes` lists.
+- **A frozen-whole HARD row on a quiet insert is not a freeze (A78, open).**
+  ep21 T02 -- wine spreading from the burst bottle, the camera drifting --
+  read 74 % static with a longest still run of 0.46 s. A freeze a viewer sees
+  holds; the gate should weigh the longest run, not the share, on an insert.
+  Calibrate on the owner-judged episodes before changing it.

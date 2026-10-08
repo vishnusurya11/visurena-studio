@@ -576,8 +576,12 @@ def retake(ctx, indices: list[int], why: str, flag: str, trims: list[int] | None
     avoid cold starts").  The H3 stack stages ~40 GB and evicts the judge's
     weights, so a measure between renders pays a cold load both ways; the
     trimmed takes' re-measures ride the same window, never their own."""
-    names = [str(i) for i in sorted(indices)]
     ctx.run_script(RENDER, "--from-refs", "--no-ends", flag, *retake_args(indices, why), gpu=True, clock="takes")
+    # what the round named AND every take the render left unjudged (ep21 16:20Z:
+    # a retake of T01 also re-rendered a stale T02, and T02 reached QC unjudged)
+    from studio import judged
+    left = {int(n[1:]) for n in judged.unjudged_takes(Path(ctx.home) / TAKES) if re.fullmatch(r"T\d+", n)}
+    names = [str(i) for i in sorted(set(indices) | left)]
     measured(ctx, "scripts/episode/take_dq.py", "take_dq", ".dq.json", *names, "--attempts")
     if trims:
         # no --attempts: a trim renders nothing, so there is nothing to archive
