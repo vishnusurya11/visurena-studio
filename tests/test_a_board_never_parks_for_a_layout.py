@@ -121,3 +121,25 @@ def test_a_board_whose_takes_are_rendered_is_never_redrawn_by_a_code_change(ctx)
     assert step.done(ctx)
     step.run(ctx)
     assert ctx.launched == []
+
+
+def test_a_shot_board_whose_grid_was_superseded_is_done(ctx):
+    """ep20 (2026-10-08): the panel ladder moved grid 3x1_b to superseded/ on a
+    redraw that never landed; with 28 takes rendered, every relaunch re-drew it
+    (a new picture), re-judged the panels and retook shots.  A grid with a
+    superseded version under rendered takes was shot from: the board is done."""
+    rows = grid_layout.layout(PLAN["setups"], PLAN["shots"])
+    for row in rows:
+        path = ctx.home / "storyboard" / "grids" / f"{grid_layout.name_of(4, row)}.png"
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_bytes(b"render")
+    gone = ctx.home / "storyboard" / "grids" / f"{grid_layout.name_of(4, rows[0])}.png"
+    aside = ctx.home / "storyboard" / "superseded" / f"{grid_layout.name_of(4, rows[0])}_v2.png"
+    aside.parent.mkdir(parents=True, exist_ok=True)
+    gone.rename(aside)
+    take = ctx.home / "takes" / "r2v" / "T01.mp4"
+    take.parent.mkdir(parents=True)
+    take.write_bytes(b"take")
+    assert step.done(ctx)
+    aside.unlink()
+    assert not step.done(ctx)                     # no version at all: a grid is genuinely missing

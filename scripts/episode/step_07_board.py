@@ -101,10 +101,21 @@ def rendered(ctx) -> bool:
     return any((ctx.home / "takes" / "r2v").glob("T??.mp4"))
 
 
+def shot_from(ctx, row: dict) -> bool:
+    """The grid, or a superseded version of it: the panel ladder moves a grid
+    aside when it redraws, and a redraw that never landed leaves only the
+    versions (ep20 3x1_b, 2026-10-08: four relaunches each re-drew and
+    re-judged the same grid under 28 rendered takes)."""
+    if grid_path(ctx, row).exists():
+        return True
+    name = grid_layout.name_of(ctx.number, row)
+    return any((ctx.home / "storyboard" / "superseded").glob(f"{name}_v*.png"))
+
+
 def done(ctx) -> bool:
     rows = layout(ctx)
     if rows and rendered(ctx):
-        return all(grid_path(ctx, row).exists() for row in rows)
+        return all(shot_from(ctx, row) for row in rows)
     stale = stale_names(ctx) if rows else set()
     return (bool(rows) and all(current(ctx, row, stale) for row in rows) and not strays(ctx, rows)
             and not any(room_wanted(ctx, rows, row, shots(ctx)) for row in rows))
