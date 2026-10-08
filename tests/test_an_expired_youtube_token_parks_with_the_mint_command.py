@@ -22,3 +22,15 @@ def test_a_refresh_error_parks_and_names_the_mint_command():
 def test_an_ordinary_traceback_still_goes_to_the_brain():
     kind, reason, _ = autopilot.classify("Traceback (most recent call last):\nKeyError: 'host'\n", set())
     assert kind == "brain" and reason.startswith("failed:")
+
+
+
+def test_a_deferral_whose_cast_is_all_bound_is_a_plain_retry():
+    """ep20/ep21 (2026-10-08): 'DEFERRED PLAN | ... CAST BOUND   : all bound ...' was
+    read as cast_unbound (the substring), spent the cure cap and went to the brain."""
+    tail = ("DEFERRED PLAN | book episode/ep21 | battery at plan: CAST BOUND   : all bound; "
+            "battery at plan: ONE PER TAKE : [(0, 1)]\n=== EPISODE deferred ===\n")
+    kind, reason, order = autopilot.classify(tail, set())
+    assert (kind, reason, order) == ("retry", "plan_deferred", None)
+    unbound = "DEFERRED PLAN | book episode/ep21 | battery at plan: CAST BOUND   : ['curate'] not bound\n"
+    assert autopilot.classify(unbound, set())[:2] == ("cure", "cast_unbound")

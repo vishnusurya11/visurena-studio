@@ -146,8 +146,9 @@ def _speech_gap(tail: str, home: set[str]) -> tuple[str, str, tuple | None]:
 def _deferred_plan(tail: str, home: set[str]) -> tuple[str, str, tuple | None]:
     """H3 / H5: a CAST BOUND note wants the refs runner; any other plan
     deferral retries (each relaunch runs cure_aside_first for $0)."""
-    if "CAST BOUND" in tail:
-        return ("cure", "cast_unbound", ("refs", "04"))
+    refused = re.search(r"CAST BOUND\s*:\s*\[|not bound|unbound", tail)
+    if refused and "all bound" not in tail:
+        return ("cure", "cast_unbound", ("refs", "04"))      # a refusal, never the clean 'all bound' line
     return ("retry", "plan_deferred", None)
 
 
