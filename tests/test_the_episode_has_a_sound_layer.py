@@ -93,3 +93,18 @@ def test_a_voice_shouting_is_not_a_sound_effect():
     ep = plan([shot(0, frame="the curate shouts, pointing"), shot(1, frame="a woman screams on the bank")],
               {"meadow": NS(ambience="larks")})
     assert es.sound_faults(ep) == []
+
+
+def test_a_cue_at_the_first_frame_is_judged_by_its_stem(monkeypatch):
+    """ep20 (2026-10-08): a cue at 0.00 s has no audio before it, event_db raised
+    and QC refused the master; the stem is the presence that needs no baseline."""
+    ep = plan([shot(0, sounds=[Sound(sound="a distant thud", at=0.0)])], {})
+    placed = {"shots": [{"index": 0, "t_start": 0.0, "seconds": 4.0}]}
+
+    def no_baseline(master, start, seconds, **_):
+        raise ValueError("no audio before 0.00s to compare the cue against")
+    monkeypatch.setattr(es.sfx_cues, "event_db", no_baseline)
+    monkeypatch.setattr(es, "stem_heard", lambda sfx, cue: (-18.0, True))
+    rows = es.presence(Path("cut/m.mp4"), ep, placed)
+    assert rows == [{"shot": 0, "sound": "a distant thud", "at": 0.0, "db": None, "ok": True,
+                     "no_baseline": True, "stem_db": -18.0}]

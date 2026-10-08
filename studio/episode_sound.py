@@ -203,7 +203,15 @@ def presence(master: Path, episode, placed: dict) -> list[dict]:
     out = []
     for i, cue in enumerate(cues):
         at, quiet = spans[i][0], baseline_start(spans, i)
-        got = round(float(sfx_cues.event_db(master, at, spans[i][1], quiet_until=quiet)), 1)
+        try:
+            got = round(float(sfx_cues.event_db(master, at, spans[i][1], quiet_until=quiet)), 1)
+        except ValueError:
+            # no audio before the cue to measure a rise against (ep20 shot 0, a cue
+            # at 0.00 s, 2026-10-08): the one presence that needs no baseline is the stem
+            stem_db, ok = stem_heard(Path(master).parent.parent / "audio" / "sfx", cue)
+            out.append({"shot": cue.shot, "sound": cue.sound, "at": at, "db": None, "ok": ok,
+                        "no_baseline": True, "stem_db": stem_db})
+            continue
         row = {"shot": cue.shot, "sound": cue.sound, "at": at, "db": got, "ok": got >= EVENT_DB}
         if not row["ok"] and voiced_over(placed.get("lines", []), at, cue.seconds):
             stem_db, ok = stem_heard(Path(master).parent.parent / "audio" / "sfx", cue)
