@@ -567,6 +567,16 @@ def heads_of(home: Path) -> dict[int, float]:
     return edit_gate.heads_in(home)
 
 
+def spoken_heads_dropped(heads: dict[int, float], placed: dict) -> dict[int, float]:
+    """The heads to apply: a dialogue shot's is dropped with a note, never the
+    episode refused (ep24 T02: a stale trim written for a render since replaced)."""
+    spoken = {l["shot"] for l in placed["lines"] if l.get("kind") == "dialogue"}
+    if dropped := sorted(i for i, head in heads.items() if head > 0 and i in spoken):
+        print("  heads: dropped on dialogue shots (lip-sync is anchored at the head): "
+              + ", ".join(f"T{i:02d}" for i in dropped), flush=True)
+    return {i: h for i, h in heads.items() if i not in spoken}
+
+
 def refuse_dialogue_heads(heads: dict[int, float], placed: dict) -> None:
     """A dialogue shot's wav is anchored 0.25 s into its take: a later picture
     start puts the mouth ahead of the sound."""
@@ -644,6 +654,7 @@ def picture(placed: dict, takes: dict[int, Path], work: Path, heads: dict[int, f
     `work/gutter.json` says what was cropped where."""
     segments, guarded, heads, stills = [], {}, heads or {}, stills or {}
     order = segments_of(placed, takes)
+    heads = spoken_heads_dropped(heads, placed)
     refuse_dialogue_heads(heads, placed)
     refuse_short(short_takes([(i, s) for i, s in order if i not in stills],
                              lambda i: clip_seconds(takes[i]) - heads.get(i, 0.0)))

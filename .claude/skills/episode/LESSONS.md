@@ -368,3 +368,10 @@ fixes. Each lesson below cost at least one launch. Tracker rows A38-A74 in
   routed to. And a QC refusal of a NEW master is a retry (the cut lifts a quiet
   cue, the take step measures what is unjudged); only the same bytes refused
   again go to the brain, which had parked every QC refusal as a gate that gave up.
+- **A fix replayed against every guard downstream (A82).** A81's free head cut
+  wrote ep24 T02 a trim; T02 is a DIALOGUE shot and the edit refuses any head on
+  one (its wav is anchored in the take's first frames), so the whole master
+  refused. The trim was also measured on a render the cure round replaced. The
+  ladder never heads a dialogue take, a re-render clears its take's old head,
+  and the edit drops a dialogue head with a note instead of refusing the
+  episode. Before wiring a new cure, grep for the guards that read its output.

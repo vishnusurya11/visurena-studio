@@ -545,9 +545,30 @@ def still_curable(room: Path, verdict: Verdict, since: float = 0.0) -> bool:
 
 def head_cuts(ctx, wanted: dict[int, list[Fault]]) -> None:
     """The leak measured is the head cut: heads.json through take_leak.write_head, no GPU."""
+    spoken = dialogue_shots(ctx.home)
     for index in wanted:
+        if index in spoken:
+            continue        # its wav is anchored in the take's first frames (ep24 T02)
         dq = take_eye.read_json(ctx.home / TAKES / f"T{index:02d}.dq.json") or {}
         take_leak.write_head(ctx.home, index, (dq.get("measures") or {}).get("leak"))
+
+
+def dialogue_shots(home: Path) -> set[int]:
+    """Shots that carry a dialogue line: their heads are never cut."""
+    path = Path(home) / "plan.json"
+    doc = json.loads(path.read_text(encoding="utf-8")) if path.exists() else {}
+    return {l["shot"] for l in doc.get("lines") or [] if l.get("kind") == "dialogue"}
+
+
+def clear_heads(home: Path, indices: list[int]) -> None:
+    """A re-rendered take's old head goes: it was measured on other bytes."""
+    path = Path(home) / "heads.json"
+    if not path.exists():
+        return
+    heads = json.loads(path.read_text(encoding="utf-8"))
+    kept = {k: v for k, v in heads.items() if int(k) not in set(indices)}
+    if kept != heads:
+        path.write_text(json.dumps(kept, indent=2), encoding="utf-8")
 
 
 def measured(ctx, script: str, clock: str, suffix: str, *extra: str) -> None:
@@ -581,6 +602,7 @@ def retake(ctx, indices: list[int], why: str, flag: str, trims: list[int] | None
     weights, so a measure between renders pays a cold load both ways; the
     trimmed takes' re-measures ride the same window, never their own."""
     ctx.run_script(RENDER, "--from-refs", "--no-ends", flag, *retake_args(indices, why), gpu=True, clock="takes")
+    clear_heads(ctx.home, list(indices))
     # what the round named AND every take the render left unjudged (ep21 16:20Z:
     # a retake of T01 also re-rendered a stale T02, and T02 reached QC unjudged)
     from studio import judged
