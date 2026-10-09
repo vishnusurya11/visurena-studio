@@ -398,3 +398,13 @@ fixes. Each lesson below cost at least one launch. Tracker rows A38-A74 in
   reader. And a QC report, like a take's, holds only under the code that measured
   it (`step_11_qc.qc_measures_sha8`): the fixed rule could never reach a recut of
   the same bytes.
+- **ep24's run, closed (2026-10-09 ~04:10Z, public https://youtu.be/oFtyf9Duqpc,
+  master_iter6, $0).** Launched 23:00Z, about five hours to public. Pictures,
+  voices and takes were done in under three; the rest was six stops in the edit
+  and QC, every one a gate and its cure (or two readers of one file) measuring
+  differently: setup words read as posture (A80), a covering leak never cut and a
+  QC refusal sent to the brain (A81), a dialogue take trimmed (A82), an under-line
+  cue never lifted (A83), a transient at the limiter (A84), the heads file read
+  two ways and a stale QC FAIL reused (A85). Before the next episode: replay a
+  fix through every reader of what it writes, and key every cached verdict on
+  its code.
