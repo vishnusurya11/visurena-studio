@@ -23,6 +23,14 @@ def test_an_under_line_row_without_a_stem_measure_is_left_alone():
     assert es.lift_cures([bare], {}) == {}
 
 
+def test_a_stem_pinned_at_the_peak_ceiling_is_heard():
+    """ep24 03:25Z: lifted +4.6, the spade rose only to -22.0 M -- its true peak
+    sat at -3.43 against the -3.0 limiter.  A transient at the ceiling is as loud
+    as a cue may be; asking more of its momentary loudness is the ruler's fault."""
+    assert es.stem_judged(-22.0, target=-15.4, lift=4.6, limited=True) == (-20.0, True)
+    assert es.stem_judged(-22.0, target=-15.4, lift=4.6, limited=False) == (-20.0, False)
+
+
 def test_a_lifted_stem_is_judged_against_the_level_asked_for():
     # lifted +4.6: the sidecar target is now -15.4, the stem measures -19.0
     assert es.stem_judged(-19.0, target=-15.4, lift=4.6) == (-20.0, True)

@@ -386,3 +386,8 @@ fixes. Each lesson below cost at least one launch. Tracker rows A38-A74 in
   A dialogue shot can neither be head-cut nor held as a still; the cure is a
   render that starts on its panel -- measure whether the panel-first prompt or
   a different staged first image stops the leak before the next dialogue insert.
+- **A sound at the limiter is as loud as it may be (A84).** Lifted +4.6 dB, ep24's
+  spade rose only 1.6: a transient bite peaks at the -3 dBTP cue limiter long
+  before its momentary loudness meets the target. QC kept asking for 0.5 dB a
+  limited stem cannot give. A stem pinned within 0.5 dB of the ceiling is heard.
+  Before lifting a cue again, read its true peak.

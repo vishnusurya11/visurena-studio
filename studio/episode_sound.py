@@ -200,12 +200,24 @@ STEM_SLACK_DB = 1.5
 """How far under its commanded level a rendered stem may sit and still count."""
 
 
-def stem_judged(stem_db: float, target: float, lift: float) -> tuple[float, bool]:
+def stem_judged(stem_db: float, target: float, lift: float, limited: bool = False) -> tuple[float, bool]:
     """(the level the plan asked for, heard?): the sidecar's target rises with
     the lift, so a stem is judged against the target LESS its lift (ep20 shot 0,
-    ep24 shot 13)."""
+    ep24 shot 13).  A stem pinned at the true-peak ceiling is as loud as a cue
+    may be and is heard (ep24's spade: -3.43 dBTP, momentary stuck at -22.0)."""
     base = round(target - lift, 1)
-    return base, stem_db >= base - STEM_SLACK_DB
+    return base, limited or stem_db >= base - STEM_SLACK_DB
+
+
+PINNED_SLACK_DB = 0.5
+"""How close to sfx_cues.CUE_TP a stem's true peak sits to count as pinned."""
+
+
+def pinned(sfx: Path, cue) -> bool:
+    """Whether the cue's stem peaks at the limiter's ceiling (it cannot go louder)."""
+    from studio import trailer_assemble
+    wav = Path(sfx) / sfx_cues.file_name(cue)
+    return wav.exists() and float(trailer_assemble.true_peak(wav)) >= sfx_cues.CUE_TP - PINNED_SLACK_DB
 
 
 def voiced_over(lines: list[dict], at: float, seconds: float) -> bool:
@@ -263,7 +275,7 @@ def presence(master: Path, episode, placed: dict) -> list[dict]:
             # (ep20 shot 0: lifted +7.4, the stem rose to -19.0, the target to -12.6)
             base = None if target is None else round(target - lifts_of(home).get(lift_key(cue.shot, cue.sound), 0.0), 1)
             if base is not None and stem_db != float("-inf"):
-                ok = stem_db >= base - STEM_SLACK_DB
+                ok = stem_judged(stem_db, target, target - base, limited=pinned(sfx, cue))[1]
             out.append({"shot": cue.shot, "sound": cue.sound, "at": at, "db": None, "ok": ok,
                         "no_baseline": True, "stem_db": stem_db, "stem_target": target, "stem_base": base})
             continue
@@ -274,7 +286,8 @@ def presence(master: Path, episode, placed: dict) -> list[dict]:
             target = stem_target(home / "audio" / "sfx", cue)
             base = None
             if target is not None and stem_db != float("-inf"):
-                base, ok = stem_judged(stem_db, target, lifts_of(home).get(lift_key(cue.shot, cue.sound), 0.0))
+                base, ok = stem_judged(stem_db, target, lifts_of(home).get(lift_key(cue.shot, cue.sound), 0.0),
+                                       limited=pinned(home / "audio" / "sfx", cue))
             row.update({"under_line": True, "stem_db": stem_db, "ok": ok,
                         "stem_target": target, "stem_base": base})
         out.append(row)
