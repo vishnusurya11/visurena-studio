@@ -250,7 +250,16 @@ def heads_in(home: Path) -> dict[int, float]:
     path = Path(home) / "heads.json"
     if not path.exists():
         return {}
-    return {int(k): float(v) for k, v in json.loads(path.read_text(encoding="utf-8")).items()}
+    heads = {int(k): float(v) for k, v in json.loads(path.read_text(encoding="utf-8")).items()}
+    # A DIALOGUE SHOT IS NEVER HEADED (its wav is anchored in the take's first
+    # frames): dropped HERE, in the one reader, so the cut and this gate agree
+    # (ep24 2026-10-09: the cut dropped T02's head and the gate still expected it)
+    plan = Path(home) / "plan.json"
+    if plan.exists():
+        lines = json.loads(plan.read_text(encoding="utf-8")).get("lines") or []
+        spoken = {l["shot"] for l in lines if l.get("kind") == "dialogue"}
+        heads = {i: h for i, h in heads.items() if i not in spoken}
+    return heads
 
 
 def headed(frames: np.ndarray, head_s: float, fps: int = FPS) -> np.ndarray:

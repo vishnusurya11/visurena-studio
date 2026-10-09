@@ -48,6 +48,19 @@ def engine_flags(extra: list[str]) -> list[str]:
     return [f"--engine={engine_of(extra)}", *[a for a in extra if not a.startswith("--engine=")]]
 
 
+QC_MEASURES = ("scripts/episode/qc.py", "studio/edit_gate.py", "studio/episode_sound.py",
+               "studio/speech_gap.py", "studio/master_loudness.py", "studio/line_laid.py")
+"""The code a QC report is measured by: a change here re-measures the master."""
+
+
+def qc_measures_sha8() -> str:
+    """The QC code's fingerprint (line endings normalised)."""
+    import hashlib
+    root = Path(__file__).resolve().parents[2]
+    body = b"".join((root / rel).read_bytes().replace(b"\r\n", b"\n") for rel in QC_MEASURES)
+    return hashlib.sha256(body).hexdigest()[:8]
+
+
 def pair(home: Path, engine: str) -> tuple[Path, Path]:
     """(master, qc report) for one engine, where qc.py and the publish ladder agree they are."""
     for name, master, qc in yp.MASTERS:
@@ -141,7 +154,9 @@ def qc_report(ctx, extra: list[str]) -> dict:
     master, qc = pair(ctx.home, engine_of(extra))
     if qc.exists() and master.exists():
         report = episode_home.read_json(qc)
-        if report.get("sha8") == yp.sha8(master):
+        # the same bytes AND the same measuring code (ep24 03:45Z: a FAIL by a
+        # rule fixed since was reused on an identical recut, forever)
+        if report.get("sha8") == yp.sha8(master) and report.get("measures_sha8") == qc_measures_sha8():
             if report.get("passed"):
                 ctx.log(f"qc: {qc.name} already measured sha8 {report['sha8']}; reused")
                 return report

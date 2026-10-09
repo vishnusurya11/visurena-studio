@@ -38,7 +38,7 @@ def ctx(tmp_path, monkeypatch):
             master = episode_home.master_path(book, 4, "r2v")
             master.write_bytes(b"the cut")
             episode_home.write_json(book / "episodes" / "ep04" / "qc_r2v.json",
-                                    {"passed": True, "sha8": yp.sha8(master), "seconds": 150.0})
+                                    {"passed": True, "sha8": yp.sha8(master), "seconds": 150.0, "measures_sha8": step_11_qc.qc_measures_sha8()})
         return 0
     context = EpisodeContext(conn, CODEX, book, "episode", unit="ep04", number=4, logs_root=tmp_path / "logs",
                              busy=lambda: False, hold=tmp_path / "RENDER_HOLD", launch=launch)

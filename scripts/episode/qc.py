@@ -317,6 +317,12 @@ def speech_band(master: Path, lines: list[dict], until: float, work: Path) -> fl
     return speech_gap.speech_over_gaps(audio, sr, lines, until)
 
 
+def qc_code_sha8() -> str:
+    """step_11_qc's fingerprint of the QC code, written into every report."""
+    from scripts.episode import step_11_qc
+    return step_11_qc.qc_measures_sha8()
+
+
 def main(book_id: str, number: int, engine: str = "i2v") -> None:
     book = episode_home.book_dir(book_id)
     episode = episode_home.load_plan(book, number)
@@ -336,6 +342,7 @@ def main(book_id: str, number: int, engine: str = "i2v") -> None:
         # report. `youtube_publish.refusals` compares this and cannot be
         # overridden, because it is a fact and not a judgement.
         "sha8": yp.sha8(master),
+        "measures_sha8": qc_code_sha8(),   # step 11 reuses a report only under this code
         "seconds": clip_seconds(master), "planned_seconds": placed["duration_s"],
         "title_card": (book / "title" / f"ep{number:02d}.mp4").exists() or (book / "title" / "title.mp4").exists(),
         "lufs": lufs, "lufs_ok": LUFS_BAND[0] <= lufs <= LUFS_BAND[1],

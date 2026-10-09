@@ -38,7 +38,7 @@ def room(tmp_path: Path, passed: bool, matching: bool) -> Ctx:
     master = tmp_path / "cut" / "master_r2v.mp4"
     master.write_bytes(b"the master bytes")
     sha = yp.sha8(master) if matching else "00000000"
-    (tmp_path / "qc_r2v.json").write_text(json.dumps({"passed": passed, "sha8": sha, "seconds": 160.0}),
+    (tmp_path / "qc_r2v.json").write_text(json.dumps({"passed": passed, "sha8": sha, "seconds": 160.0, "measures_sha8": step11.qc_measures_sha8()}),
                                           encoding="utf-8")
     return Ctx(tmp_path)
 

@@ -391,3 +391,10 @@ fixes. Each lesson below cost at least one launch. Tracker rows A38-A74 in
   before its momentary loudness meets the target. QC kept asking for 0.5 dB a
   limited stem cannot give. A stem pinned within 0.5 dB of the ceiling is heard.
   Before lifting a cue again, read its true peak.
+- **One file, one reader (A85).** heads.json had ONE reader by design
+  (`edit_gate.heads_in`: 'the cut and this gate can never disagree'); A82 dropped
+  dialogue heads in assemble alone, the edit gate still expected T02 trimmed, and
+  QC failed ep24 on a 20-frame offset. A rule about a shared file goes in its one
+  reader. And a QC report, like a take's, holds only under the code that measured
+  it (`step_11_qc.qc_measures_sha8`): the fixed rule could never reach a recut of
+  the same bytes.

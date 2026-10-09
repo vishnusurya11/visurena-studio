@@ -49,6 +49,16 @@ def test_a_rerender_clears_its_takes_old_head(tmp_path):
     assert json.loads((home / "heads.json").read_text(encoding="utf-8")) == {"3": 0.333}
 
 
+def test_the_one_reader_drops_a_dialogue_head_for_the_cut_and_the_gate(tmp_path):
+    """ep24 03:39Z: assemble dropped T02's head, the edit gate (same file, its own
+    read) still expected it -- 20 frames off, edit FAIL.  The drop lives in the
+    ONE reader both use."""
+    from studio import edit_gate
+    home = _home(tmp_path)
+    (home / "heads.json").write_text(json.dumps({"2": 0.333, "3": 0.333}), encoding="utf-8")
+    assert edit_gate.heads_in(home) == {3: 0.333}
+
+
 def test_the_edit_drops_a_dialogue_head_instead_of_refusing():
     placed = {"lines": [{"shot": 12, "kind": "dialogue"}, {"shot": 13, "kind": "narration"}]}
     assert assemble.spoken_heads_dropped({12: 0.5, 13: 0.67}, placed) == {13: 0.67}
