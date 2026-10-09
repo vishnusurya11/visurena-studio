@@ -466,3 +466,10 @@ fixes. Each lesson below cost at least one launch. Tracker rows A38-A74 in
   The steps rose smoothly through the push (median 1.68, top five 4.04-4.17);
   25 earlier stills read 1.02-3.75; another picture reads 32-63. A still's inside
   steps get `edit_gate.STILL_STEP` (twice SAME_FRAME, like STILL_FIRST).
+- **ep26's run, closed (2026-10-09 ~15:25Z, public https://youtu.be/hd7gHnp-wRs,
+  master_iter3, $0).** Launched 08:15Z, about seven hours to public, over the
+  five-hour target: two plan deferrals on gates no plan could pass together
+  (A87), a pair the voice packed after the plan signed (A88-A89), four panel
+  refusals the posture reader invented (A90), a still judged as a take (A91).
+  Every stop was a rule meeting a case its calibration never saw; none was the
+  picture. The pictures and takes took under three hours.
