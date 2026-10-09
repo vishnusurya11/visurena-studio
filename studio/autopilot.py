@@ -163,6 +163,8 @@ TABLE: list[tuple[str, object]] = [
     (r"^OWNER (\S+) \|", ("park", "escalated: {1}", None)),
     (r"DEFERRED PLAN \|", _deferred_plan),
     (r"ComfyUI's queue stayed busy", ("cure", "queue_busy", ("comfy_restart", None))),
+    # a job the engine never finished (ep27 18:18Z: a grid hung an hour, /queue dead)
+    (r"StillRunning: \S+ still running after \d+s", ("cure", "engine_hung", ("comfy_restart", None))),
     (r"REFUSED: the takes wait on the panels", ("cure", "takes_wait_on_panels", ("redo", "08"))),
     # the upload door's split voice is the record step's (ep21, 2026-10-08: the
     # brain read it as step 09's terminal and parked the episode)
