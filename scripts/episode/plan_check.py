@@ -80,11 +80,15 @@ def long_shots(episode, rate: float, budget: float = BUDGET) -> list[tuple[int, 
     return out
 
 
-def projected(episode, rate: float) -> list[dict]:
-    """Each shot as the timeline would place it, at the narrator's measured rate."""
+def projected(episode, rate: float, voice: bool = True) -> list[dict]:
+    """Each shot as the timeline would place it: by the recorded voice where a
+    line has one (the pairs, A72), or -- `voice=False` -- at the rate alone, for
+    the dry take build whose lines are placed at the rate (ep27: one card, two
+    rulers, a line 'crossing' a cut its shot did not have)."""
     out = []
     for s in episode.shots:
-        words = [plan_gates.line_seconds(l.text, rate) for l in episode.lines if l.shot == s.index]
+        words = [plan_gates.line_seconds(l.text, rate) if voice else len(l.text.split()) / rate
+                 for l in episode.lines if l.shot == s.index]
         seconds = 2 * HANDLE + sum(words) + BREATH * max(0, len(words) - 1) + s.beat_s + s.coda_s
         out.append({"index": s.index, "seconds": seconds, "setup": s.setup, "cuts": list(getattr(s, "cuts", []))})
     return out
@@ -105,7 +109,7 @@ def take_lint_gate(book: Path, episode, number: int, rate: float) -> int:
     builder then rewrote.  A dry build the adoptions refuse is itself a row."""
     import takes_r2v
     try:
-        rows = takes_r2v.dry_faults(book, episode, number, projected(episode, rate), rate=rate)
+        rows = takes_r2v.dry_faults(book, episode, number, projected(episode, rate, voice=False), rate=rate)
     except SystemExit as why:
         rows = [f"G-TAKELINT dry build refused: {str(why)[:150]}"]
     print("G-TAKELINT   :", len(rows) or "clean")

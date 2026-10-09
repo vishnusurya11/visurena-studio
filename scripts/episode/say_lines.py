@@ -100,6 +100,21 @@ def episode_voice(book: Path, records: dict, record: dict, similarity=None) -> f
     return round(sum(float(score(mine, other)) for other in others) / len(others), 3)
 
 
+def voice_fit(book: Path, records: dict, index: int, wav: Path, similarity=None) -> float | None:
+    """A try's mean similarity to its speaker's OTHER passed lines in this
+    episode, whatever its reference (keep_best's fit); None when unmeasurable."""
+    if not Path(wav).exists() or index not in records:
+        return None
+    score = similarity or voice_ear.similarity
+    speaker = records[index].get("speaker")
+    others = [book / r["rel_path"] for i, r in records.items()
+              if i != index and r.get("speaker") == speaker and r.get("passed")
+              and (book / r["rel_path"]).exists()]
+    if not others:
+        return None
+    return round(sum(float(score(Path(wav), o)) for o in others) / len(others), 3)
+
+
 def alternate_ok(score: float | None, seconds: float = SIM_MEASURABLE_S) -> bool:
     """An alternate-reference render is the man in the room, or it is not kept.
 
@@ -236,16 +251,23 @@ def lift_ok(book: Path, record: dict, clip: Path) -> bool:
     return record["lift_st"] >= episode_emotion.LIFT_ST
 
 
-def keep_best(new: dict, previous: dict | None, wav: Path) -> dict:
+def keep_best(new: dict, previous: dict | None, wav: Path,
+              fit: tuple[float | None, float | None] | None = None) -> dict:
     """A redo never makes a line worse: the try with the higher similarity
     stays on disk as l{NN}.wav, the other is deleted.  An alternate-reference
     render that is not the man in the room never wins, whatever it scored
-    against the design clip."""
+    against the design clip.  With `fit` (each try's mean similarity to the
+    speaker's other lines in this episode) the closer try wins -- the measure a
+    split voice fails on (ep27 l01: two rounds kept the original by the clip)."""
     prev_wav = wav.with_suffix(".prev.wav")
     if previous is None or not prev_wav.exists():
         return new
-    if alternate_ok(new.get("episode_voice"), float(new.get("seconds") or SIM_MEASURABLE_S)) and \
-            new.get("similarity", 0.0) >= previous.get("similarity", 0.0):
+    if fit and None not in fit and new.get("passed", True):
+        better = fit[0] > fit[1]
+    else:
+        better = alternate_ok(new.get("episode_voice"), float(new.get("seconds") or SIM_MEASURABLE_S)) and \
+            new.get("similarity", 0.0) >= previous.get("similarity", 0.0)
+    if better:
         prev_wav.unlink()
         return new
     wav.unlink(missing_ok=True)
@@ -298,7 +320,9 @@ def main(book_id: str, number: int, redo: list[int] | None = None) -> None:
         for line in todo:  # a redo keeps whichever try scored higher, across every attempt
             if line.index in previous:
                 wav = out_dir / f"l{line.index:02d}.wav"
-                records[line.index] = keep_best(records[line.index], previous.pop(line.index), wav)
+                fit = (voice_fit(book, records, line.index, wav),
+                       voice_fit(book, records, line.index, wav.with_suffix(".prev.wav")))
+                records[line.index] = keep_best(records[line.index], previous.pop(line.index), wav, fit=fit)
                 if line.index in failed and attempt < TRIES - 1:
                     previous[line.index] = dict(records[line.index])
                     wav.replace(wav.with_suffix(".prev.wav"))

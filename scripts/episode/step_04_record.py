@@ -29,7 +29,7 @@ def rendered(plan: dict, rows: list[dict]) -> bool:
 
 REVOICED = "speaker_revoiced.json"
 """review/<this>: the rounds of lines said again for a split voice."""
-REVOICE_ROUNDS = 2
+REVOICE_ROUNDS = 3
 """ep21 (2026-10-08): round one cured nine of ten pairs; the tenth wanted a
 line round one's cover had not chosen."""
 

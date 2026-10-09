@@ -473,3 +473,15 @@ fixes. Each lesson below cost at least one launch. Tracker rows A38-A74 in
   refusals the posture reader invented (A90), a still judged as a take (A91).
   Every stop was a rule meeting a case its calibration never saw; none was the
   picture. The pictures and takes took under three hours.
+- **A redo is chosen by the fault it cures (A92).** ep27's narrator split through
+  one line, 'Yet I write on.' (mean 0.698 to his other lines, the lowest of ~60
+  calm narrator lines over four episodes; length alone explains ~0.78). Two
+  revoice rounds KEPT THE ORIGINAL because keep_best judged each try against the
+  design clip, where the line already scored 0.71. A redo now keeps the try
+  closer to the speaker's other lines in the episode (`say_lines.voice_fit`),
+  and the split-voice cure has a third round.
+- **The dry take build reads one ruler (A93).** After the voice, ep27's battery
+  refused 'stamp 00:06 outside 00:00-00:05' on shots with no cuts: the dry build
+  got voice-length shots and rate-length lines. It projects at the rate
+  throughout (`plan_check.projected(voice=False)`), like TAKE LENGTH. The
+  voice ruler is for the pairs and the holes the cures can move.

@@ -50,7 +50,9 @@ def test_a_split_voice_is_not_done_until_its_lines_were_said_again(tmp_path):
     ctx, _ = _ctx(tmp_path, split, redone=[[3, 7, 16]])
     assert step.done(ctx) is False                    # one round taken, a second allowed
     ctx, _ = _ctx(tmp_path, split, redone=[[3, 7, 16], [36]])
-    assert step.done(ctx) is True                     # two rounds: the door decides
+    assert step.done(ctx) is False                    # two rounds of three (ep27, 2026-10-09)
+    ctx, _ = _ctx(tmp_path, split, redone=[[3, 7, 16], [36], [36]])
+    assert step.done(ctx) is True                     # three rounds: the door decides
     ctx, _ = _ctx(tmp_path, split, redone=[3, 7, 16])
     assert step.done(ctx) is False                    # the flat file of one round (ep21, 15:33Z)
     ctx, _ = _ctx(tmp_path, {"n": {"ok": True, "under": []}})
@@ -83,7 +85,7 @@ def test_a_second_round_says_the_lines_the_first_cover_left(tmp_path, monkeypatc
     monkeypatch.setattr(step, "voiceless", lambda ctx: [])
     step.run(ctx)
     assert ("say_lines.py", ("--redo=36",)) in [(s.rsplit("/", 1)[-1], a) for s, a in calls]
-    assert json.loads((ctx.home / "review" / step.REVOICED).read_text(encoding="utf-8")) == [[3, 7, 16], [36]]
+    assert json.loads((ctx.home / "review" / step.REVOICED).read_text(encoding="utf-8"))[:2] == [[3, 7, 16], [36]]
 
 
 def test_the_publish_refusal_routes_back_to_the_record_step():
