@@ -50,8 +50,11 @@ def test_a_packed_pair_is_unpacked_recorded_retimed_and_resigned(tmp_path, monke
         doc["shots"][0]["coda_s"] = 1.0
         return doc
     monkeypatch.setattr(plan_cures, "holds", grow)
+    ctx.capture_script = lambda script, *a: (calls.append(script.rsplit("/", 1)[-1] + " " + " ".join(a)), (0, ""))[1]
     step.unpack(ctx)
-    assert calls == ["retime", "resign"]
+    # ep26 11:45Z: the hold cure split a shot and left two 'follow' moves running --
+    # the free repair rounds run before the re-sign, then the timeline again
+    assert calls == ["retime", "plan_repair.py --no-llm", "retime", "resign"]
     from studio import plan_provenance
     cures = (episode_home.plan_path(ctx.book_dir, 26).parent / plan_provenance.CURES_FILE).read_text(encoding="utf-8")
     assert '"holds"' in cures

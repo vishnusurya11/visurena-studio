@@ -153,6 +153,10 @@ def unpack(ctx) -> None:
     retime(ctx)
     if again := packed(ctx):
         raise SystemExit(f"REFUSED: the measured timeline still packs {again} after the hold cure")
+    # the hold cure may split a shot (two equal moves running, ep26 11:45Z): the
+    # free repair rounds -- recorded cures, no writer -- then the timeline again
+    ctx.capture_script("scripts/episode/plan_repair.py", "--no-llm")
+    retime(ctx)
     resign(ctx, len(pairs), why="measured-pair unpack")
 
 

@@ -449,3 +449,7 @@ fixes. Each lesson below cost at least one launch. Tracker rows A38-A74 in
   long, no hold shortens speech, and a voice-judged length would have refused the
   re-sign over takes the renderer makes. One ruler means the gate and ITS CURE
   agree, not that every gate reads the voice.
+- **A cure that edits a plan runs the free cures after it (A89).** A88's hold cure
+  split one of ep26's long shots into two with the same camera move, and the
+  re-sign refused it. Any step that rewrites a signed plan runs `plan_repair
+  --no-llm` before it re-signs.
