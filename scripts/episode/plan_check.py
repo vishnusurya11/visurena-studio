@@ -65,10 +65,15 @@ def setup_gate(episode, book: Path, number: int) -> int:
 def long_shots(episode, rate: float, budget: float = BUDGET) -> list[tuple[int, float]]:
     """(shot, projected seconds) for every shot that projects past a take at the
     narrator's measured rate: handles, words, a breath between two lines, the
-    beat and the coda.  The dry build finds these after the lines render."""
+    beat and the coda.  The dry build finds these after the lines render.
+
+    AT THE RATE, never the voice: the renderer judges a take's length so
+    (Episode.long_shots, takes_r2v.refuse_long_shots) and renders the few tenths
+    a voice adds; no hold can shorten speech, so a voice-judged length refused
+    ep26's re-sign over shots it would render (2026-10-09)."""
     out = []
     for s in episode.shots:
-        words = [plan_gates.line_seconds(l.text, rate) for l in episode.lines if l.shot == s.index]
+        words = [len(l.text.split()) / rate for l in episode.lines if l.shot == s.index]
         seconds = 2 * HANDLE + sum(words) + BREATH * max(0, len(words) - 1) + s.beat_s + s.coda_s
         if seconds > budget + 1e-6:
             out.append((s.index, round(seconds, 2)))

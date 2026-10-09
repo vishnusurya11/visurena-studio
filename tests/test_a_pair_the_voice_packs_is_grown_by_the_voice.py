@@ -71,6 +71,24 @@ def test_the_checkers_projection_reads_the_voice_too(voice):
     assert abs(by[0] - (0.5 + 3.87 + 0.48)) < 0.05 and abs(by[1] - (0.5 + 2.5)) < 0.05
 
 
+def test_take_length_is_judged_at_the_rate_like_the_renderer(voice):
+    """ep26 (2026-10-09): the voice made shots 4 and 17 0.2-0.4 s longer than the
+    8.0 s budget; the renderer (takes_r2v.refuse_long_shots, Episode.long_shots)
+    judges at the rate and renders them, and no hold can shorten speech.  The
+    plan's TAKE LENGTH stays with the renderer's ruler; pairs stay with the voice."""
+    import sys
+    sys.path.insert(0, "scripts/episode")
+    import plan_check
+    from types import SimpleNamespace
+    ep = SimpleNamespace(shots=[SimpleNamespace(index=0, beat_s=0.0, coda_s=2.0)],
+                         lines=[SimpleNamespace(shot=0, text=A)])          # 12 words: 4.8 s at 2.49 -> 7.3 s
+    token = plan_gates.VOICE.set({A: 9.0})                                 # recorded far longer
+    try:
+        assert plan_check.long_shots(ep, RATE) == []
+    finally:
+        plan_gates.VOICE.reset(token)
+
+
 def test_voice_of_reads_the_recorded_lines_by_text(tmp_path):
     rows = [{"index": 0, "shot": 0, "text": A, "seconds": 3.87, "passed": True},
             {"index": 1, "shot": 1, "text": B, "seconds": 9.9, "passed": False},

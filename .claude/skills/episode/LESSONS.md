@@ -439,3 +439,13 @@ fixes. Each lesson below cost at least one launch. Tracker rows A38-A74 in
 - **Open: `tests/test_episode_tail.py::test_a_part_the_join_silently_drops_is_refused`
   is red on master before A87** (the title-card join); find the commit that
   broke it.
+- **The plan is signed at the rate; the pictures are built on the voice (A88).**
+  ep26's plan signed with every shot its own take at the series rate; recorded,
+  shots 13 and 14 measured shorter, the packer joined them and step 06 refused
+  the take's short second block. Step 05 now re-judges the pairs on the MEASURED
+  timeline, runs the hold cure by the voice, records it, re-times and re-signs,
+  and is not done while an unrendered timeline packs a pair. TAKE LENGTH went
+  back to the rate (the renderer's own ruler): the voice made shots 4 and 17 0.4 s
+  long, no hold shortens speech, and a voice-judged length would have refused the
+  re-sign over takes the renderer makes. One ruler means the gate and ITS CURE
+  agree, not that every gate reads the voice.

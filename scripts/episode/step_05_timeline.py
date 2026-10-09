@@ -58,7 +58,9 @@ def placed_of(book: Path, number: int) -> dict:
 def done(ctx) -> bool:
     """Fresh AND carrying no hole in speech over the wall (finding 64): a
     resume must not skip past a gap QC would refuse after the render."""
-    return fresh(ctx.book_dir, ctx.number) and speech_gap.refusal(placed_of(ctx.book_dir, ctx.number)) is None
+    if not (fresh(ctx.book_dir, ctx.number) and speech_gap.refusal(placed_of(ctx.book_dir, ctx.number)) is None):
+        return False
+    return rendered(ctx) or not packed(ctx)     # ep26: a fresh timeline packing a pair is not done
 
 
 def rendered(ctx) -> bool:
@@ -103,17 +105,55 @@ def trimmed(ctx, placed: dict) -> int:
     return n
 
 
-def resign(ctx, n: int) -> None:
+def resign(ctx, n: int, why: str = "measured-hole trim") -> None:
     """The free battery, then the plan judge's signature; a refusal is a
     SystemExit back to step 02, where the judge ladder re-signs."""
     from studio import plan_verdict
     rc, out = ctx.capture_script("scripts/episode/plan_check.py")
     if rc:
         rows = "\n".join(l for l in out.splitlines() if l.strip())
-        raise SystemExit(f"REFUSED: the measured-hole trim left battery faults:\n{rows[-1500:]}")
+        raise SystemExit(f"REFUSED: the {why} left battery faults:\n{rows[-1500:]}")
+    what = f"{n} holds shaved" if why == "measured-hole trim" else f"{n} pair(s) unpacked"
     plan_verdict.sign(episode_home.home(ctx.book_dir, ctx.number) / "plan.json",
-                      note=f"step 05 measured-hole trim ({n} holds shaved); battery clean",
+                      note=f"step 05 {why} ({what}); battery clean",
                       signed_by=judge_signer())
+
+
+def packed(ctx) -> list[list[int]]:
+    """Runs of shots the take packer puts in ONE take on the MEASURED timeline."""
+    from studio import episode_takes as tk
+    plan = episode_home.read_json(episode_home.home(ctx.book_dir, ctx.number) / "plan.json")
+    setups = {s["index"]: s.get("setup") for s in plan.get("shots") or []}
+    rows = [dict(s, setup=setups.get(s["index"])) for s in placed_of(ctx.book_dir, ctx.number)["shots"]]
+    return [g for g in tk.groups(rows) if len(g) > 1]
+
+
+def unpacked(ctx) -> int:
+    """The hold cure by the RECORDED voice, written and recorded; 0 = no change."""
+    from studio import plan_cures, plan_gates, plan_provenance, plan_verdict
+    path = episode_home.home(ctx.book_dir, ctx.number) / "plan.json"
+    doc = episode_home.read_json(path)
+    plan_gates.use_voice(ctx.book_dir, ctx.number)
+    cured = plan_cures.holds(episode_home.read_json(path), rate=plan_gates.series_rate(ctx.book_dir, ctx.number))
+    if cured == doc:
+        return 0
+    before = plan_verdict.plan_sha8(path)
+    episode_home.write_plan(path, cured)
+    plan_provenance.record(path, before, ["holds"])
+    return 1
+
+
+def unpack(ctx) -> None:
+    """ep26 (2026-10-09): a pair clean at the RATE packed under the voice and
+    step 06 refused the take.  Unpack it here, re-time, re-sign -- once."""
+    if rendered(ctx) or not (pairs := packed(ctx)):
+        return
+    if not unpacked(ctx):
+        raise SystemExit(f"REFUSED: the measured timeline packs {pairs} into one take and the hold cure moves nothing")
+    retime(ctx)
+    if again := packed(ctx):
+        raise SystemExit(f"REFUSED: the measured timeline still packs {again} after the hold cure")
+    resign(ctx, len(pairs), why="measured-pair unpack")
 
 
 def autotrim(ctx, why: str) -> None:
@@ -133,6 +173,7 @@ def run(ctx) -> None:
     retime(ctx)
     if why := speech_gap.refusal(placed_of(ctx.book_dir, ctx.number)):
         autotrim(ctx, why)
+    unpack(ctx)
 
 
 if __name__ == "__main__":
