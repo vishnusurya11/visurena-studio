@@ -461,3 +461,8 @@ fixes. Each lesson below cost at least one launch. Tracker rows A38-A74 in
   The posture reader has now failed on three episodes running (ep24 setup words,
   ep24 'his face sits', ep26 things): read every posture refusal's own sentence
   before believing it.
+- **A still is judged as a push, not as a take (A91).** QC failed ep26 on T06, a
+  still: one frame step of 4.57 against SAME_FRAME 4.0, the take-vs-take limit.
+  The steps rose smoothly through the push (median 1.68, top five 4.04-4.17);
+  25 earlier stills read 1.02-3.75; another picture reads 32-63. A still's inside
+  steps get `edit_gate.STILL_STEP` (twice SAME_FRAME, like STILL_FIRST).

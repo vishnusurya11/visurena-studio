@@ -294,7 +294,13 @@ def still_match(master: "np.ndarray", start: int, n: int, panel) -> dict:
              for i in range(n - 1) if start + i + 1 < len(master)]
     inside = max(steps) if steps else 0.0
     return {"still": True, "offset": 0, "mean": round(first, 3), "frames_off": [], "held": [],
-            "inside_max": round(inside, 3), "ok": first <= STILL_FIRST and inside <= SAME_FRAME}
+            "inside_max": round(inside, 3), "ok": first <= STILL_FIRST and inside <= STILL_STEP}
+
+
+STILL_STEP = 2 * SAME_FRAME
+"""A pushed still's frame-to-frame step: twice SAME_FRAME, like STILL_FIRST.
+MEASURED: 25 stills ep14-26 read 1.02-3.75; ep26 T06, a detailed panel, rose
+smoothly to 4.17-4.57 at the end of its push; another picture reads 32-63."""
 
 
 def cut_beside_still(master: "np.ndarray", at: int) -> bool:
