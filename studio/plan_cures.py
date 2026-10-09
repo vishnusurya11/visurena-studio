@@ -20,6 +20,34 @@ from pydantic import BaseModel
 
 # ---- the single repairs ----------------------------------------------------------
 
+def merge_silent_tail(doc: dict) -> dict:
+    """G-STORY's wordless-tail cure (ep26, 2026-10-09): the first of two or more
+    wordless shots of ONE setup after the button merges into the next -- both
+    holds kept, one pair of handles gone (2 x HANDLE_S off the tail) -- so the
+    button shot faces a longer neighbour (its ONE PER TAKE pair) and the tail
+    shrinks.  A hold past its cap, a lone wordless shot, or two setups: no-op."""
+    shots, lines = doc.get("shots") or [], doc.get("lines") or []
+    if not lines:
+        return doc
+    button = max(l["shot"] for l in lines)
+    tail = [s for s in shots if s["index"] > button]
+    if len(tail) < 2 or tail[0].get("setup") != tail[1].get("setup"):
+        return doc
+    gone, into = tail[0], tail[1]
+    beat = float(into.get("beat_s") or 0) + float(gone.get("beat_s") or 0)
+    coda = float(into.get("coda_s") or 0) + float(gone.get("coda_s") or 0)
+    move = max(0.0, coda - MAX_CODA_S)                  # a coda past its cap rides as beat
+    beat, coda = round(beat + move, 2), round(coda - move, 2)
+    if beat > MAX_BEAT_S + 1e-6:
+        return doc
+    into["beat_s"], into["coda_s"] = beat, coda
+    for bed in doc.get("beds") or []:
+        if bed.get("from_shot") == gone["index"]:
+            bed["from_shot"] = into["index"]
+    doc["shots"] = [s for s in shots if s is not gone]
+    return renumber(doc)
+
+
 def renumber(doc: dict) -> dict:
     """Shots 0..n-1 in list order; lines' and beds' references remapped."""
     remap = {s["index"]: k for k, s in enumerate(doc.get("shots") or [])}
@@ -1525,6 +1553,7 @@ CURES: list[tuple[re.Pattern, str]] = [
     (re.compile(r"G-ARTICLE"), "drop_stray_articles"),
     (re.compile(r"G-SYNC line"), "dialogue_first"),
     (re.compile(r"G-STORY plan: shots carrying no line"), "silent_shot"),
+    (re.compile(r"wordless tail after the last line"), "merge_silent_tail"),
     (re.compile(r"G-GHOST"), "ghost_limbs"),
     (re.compile(r"G-TWICE"), "one_position"),
     (re.compile(r"shots are numbered|lines are numbered|a line's shot never precedes"), "renumber"),

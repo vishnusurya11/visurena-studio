@@ -426,3 +426,16 @@ fixes. Each lesson below cost at least one launch. Tracker rows A38-A74 in
   shopfronts. `panel_content.lettering_expected` should count a watch or clock
   face, a labelled bottle and a street of shops as places lettering belongs;
   measure on the ep01-25 takes before changing it. keep_best shipped them.
+- **Two gates can forbid every plan (A87).** ep26 deferred twice on G-STORY's
+  wordless tail (6.09 against 6.0) and ONE PER TAKE (24, 25). With one wordless
+  shot after a 2.2 s button line, the pair rule needs 8.3 s and the tail IS that
+  pair less the speech: 6.1 s at least. No hold and no writer edit short of
+  cutting the closing shot could pass both; the writer ran out of rungs. Proof by
+  arithmetic, not feel: the tail limit now never sits below the pair rule's own
+  demand when one wordless shot follows the button (`plan_gates.tail_limit`),
+  ep10's 11.5 s still fails, and two wordless tail shots of one setup merge
+  (`plan_cures.merge_silent_tail`). When a ladder fails on the same two rows
+  every rung, check whether the rows can be satisfied together before cure.
+- **Open: `tests/test_episode_tail.py::test_a_part_the_join_silently_drops_is_refused`
+  is red on master before A87** (the title-card join); find the commit that
+  broke it.

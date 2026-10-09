@@ -870,12 +870,29 @@ def wordless_tail(episode: Episode) -> float:
     return sum(episode.shot_seconds(shot) for shot in after) - spoken
 
 
+PAIR_FLOOR_S = 8.3
+"""What ONE PER TAKE needs of a pair to cut it into two takes (take budget 8.0
+plus the cures' 0.3 margin; plan_cures.TAKE_BUDGET_S)."""
+
+
+def tail_limit(spoken_button: float, wordless_after: int) -> float:
+    """G-STORY's tail limit: WORDLESS_TAIL_S, never lower than the pair rule's own
+    demand when ONE wordless shot follows the button (the tail is that pair less
+    the button's speech; ep26: a 2.2 s line forbade any closing shot)."""
+    if wordless_after != 1:
+        return WORDLESS_TAIL_S
+    return max(WORDLESS_TAIL_S, round(PAIR_FLOOR_S - spoken_button + 0.1, 2))
+
+
 def tail_faults(episode: Episode) -> list[str]:
     got = round(wordless_tail(episode), 2)
-    if got <= WORDLESS_TAIL_S:
+    button = episode.button()
+    spoken = sum(line.projected_seconds() for line in episode.lines_of(button.shot))
+    limit = tail_limit(spoken, sum(1 for s in episode.shots if s.index > button.shot))
+    if got <= limit:
         return []
-    return [fault("G-STORY", f"shots {episode.button().shot}-{episode.shots[-1].index}",
-                  "wordless tail after the last line in projected seconds", got, WORDLESS_TAIL_S)]
+    return [fault("G-STORY", f"shots {button.shot}-{episode.shots[-1].index}",
+                  "wordless tail after the last line in projected seconds", got, limit)]
 
 
 def button_rest_advisories(episode: Episode) -> list[str]:
