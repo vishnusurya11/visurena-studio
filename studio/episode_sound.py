@@ -58,12 +58,19 @@ def lift_cures(rows: list[dict], existing: dict[str, float]) -> dict[str, float]
         if n > 1:                    # measured as a stack of copies: that lift was never honest
             out.pop(key, None)
     for row in rows or []:
-        if row.get("ok") or row.get("under_line"):
-            continue                 # a measure a voice line masks moves 0.0 dB per lifted dB (ep15)
+        if row.get("ok"):
+            continue
         key = lift_key(row["shot"], row["sound"])
         if copies[key] > 1:
             continue                 # the next cut places one copy; it is measured then
-        if row.get("db") is not None:
+        if row.get("under_line"):
+            # the MIX measure a voice masks moves 0.0 dB per lifted dB (ep15); the
+            # STEM moves with the lift -- lift by its deficit (ep24 shot 13's spade)
+            base, stem = row.get("stem_base", row.get("stem_target")), row.get("stem_db")
+            if base is None or stem in (None, float("-inf")):
+                continue
+            deficit = float(base) - float(stem)
+        elif row.get("db") is not None:
             deficit = EVENT_DB - float(row["db"])
         elif row.get("stem_base", row.get("stem_target")) is not None and row.get("stem_db") not in (None, float("-inf")):
             deficit = float(row.get("stem_base", row.get("stem_target"))) - float(row["stem_db"])   # by its stem
@@ -193,6 +200,14 @@ STEM_SLACK_DB = 1.5
 """How far under its commanded level a rendered stem may sit and still count."""
 
 
+def stem_judged(stem_db: float, target: float, lift: float) -> tuple[float, bool]:
+    """(the level the plan asked for, heard?): the sidecar's target rises with
+    the lift, so a stem is judged against the target LESS its lift (ep20 shot 0,
+    ep24 shot 13)."""
+    base = round(target - lift, 1)
+    return base, stem_db >= base - STEM_SLACK_DB
+
+
 def voiced_over(lines: list[dict], at: float, seconds: float) -> bool:
     """Whether a placed voice line sounds anywhere over [at, at+seconds]."""
     return any(l["at"] < at + seconds and at < l["at"] + l["seconds"] for l in lines)
@@ -254,8 +269,14 @@ def presence(master: Path, episode, placed: dict) -> list[dict]:
             continue
         row = {"shot": cue.shot, "sound": cue.sound, "at": at, "db": got, "ok": got >= EVENT_DB}
         if not row["ok"] and voiced_over(placed.get("lines", []), at, cue.seconds):
-            stem_db, ok = stem_heard(Path(master).parent.parent / "audio" / "sfx", cue)
-            row.update({"under_line": True, "stem_db": stem_db, "ok": ok})
+            home = Path(master).parent.parent
+            stem_db, ok = stem_heard(home / "audio" / "sfx", cue)
+            target = stem_target(home / "audio" / "sfx", cue)
+            base = None
+            if target is not None and stem_db != float("-inf"):
+                base, ok = stem_judged(stem_db, target, lifts_of(home).get(lift_key(cue.shot, cue.sound), 0.0))
+            row.update({"under_line": True, "stem_db": stem_db, "ok": ok,
+                        "stem_target": target, "stem_base": base})
         out.append(row)
     return out
 

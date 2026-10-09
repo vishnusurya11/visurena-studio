@@ -375,3 +375,14 @@ fixes. Each lesson below cost at least one launch. Tracker rows A38-A74 in
   ladder never heads a dialogue take, a re-render clears its take's old head,
   and the edit drops a dialogue head with a note instead of refusing the
   episode. Before wiring a new cure, grep for the guards that read its output.
+- **The cure must move what the gate measures (A83).** QC failed ep24 twice on
+  one under-line cue (the spade, stem -23.6 against -20), and the lift skipped
+  every under-line row because the MIX measure a voice masks never moves. The
+  stem does move: an under-line cue is now lifted by its stem's deficit and
+  judged against the level asked for (target less lift), like a cue with no
+  baseline. Same shape as A72 -- a gate and its cure reading different numbers.
+- **Open (A83): ep24 T02, a dialogue take, opens on 2-8 frames of plate on
+  every render** (three renders, kept T02_head at score 0, lip-sync -0.34 s).
+  A dialogue shot can neither be head-cut nor held as a still; the cure is a
+  render that starts on its panel -- measure whether the panel-first prompt or
+  a different staged first image stops the leak before the next dialogue insert.
