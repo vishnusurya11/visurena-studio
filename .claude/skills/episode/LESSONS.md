@@ -415,3 +415,14 @@ fixes. Each lesson below cost at least one launch. Tracker rows A38-A74 in
   creature), but deleting the sentence took the light with it. The free cure now
   drops a cast word that only qualifies a DECLARED prop and keeps the sentence;
   an undeclared machine still loses its sentence.
+- **ep25's run, closed (2026-10-09 ~08:20Z, public https://youtu.be/mT3kdCUX6z0,
+  master_iter1, $0).** Launched 04:15Z, about four hours to public; one plan
+  deferral (A86, cured in code), every panel clean on content on the first draw,
+  the first master signed. The edit and QC fixes of ep24 held: no stop after the
+  takes.
+- **Open (calibration): lettering the shot asks for.** ep25 T03 (an insert of a
+  pocket watch and a labelled champagne bottle) and T04 (an empty shop street)
+  failed 'text or lettering' on every render -- dial numerals, a label,
+  shopfronts. `panel_content.lettering_expected` should count a watch or clock
+  face, a labelled bottle and a street of shops as places lettering belongs;
+  measure on the ep01-25 takes before changing it. keep_best shipped them.
