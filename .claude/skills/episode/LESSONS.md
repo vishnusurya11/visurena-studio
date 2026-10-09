@@ -485,3 +485,11 @@ fixes. Each lesson below cost at least one launch. Tracker rows A38-A74 in
   got voice-length shots and rate-length lines. It projects at the rate
   throughout (`plan_check.projected(voice=False)`), like TAKE LENGTH. The
   voice ruler is for the pairs and the holes the cures can move.
+- **When no render cures a line, change the line's shape, not the gate (A94).**
+  ep27's 'Yet I write on.' (2.46 s) stayed the narrator's outlier through three
+  revoice rounds chosen by voice fit: every render of it sits further from his
+  other lines than the original. It shares shot 1 with the next narration line,
+  so the last cure joins them -- the book's same words, one measurable line --
+  once, recorded (`plan_cures.join_line`, `step_04.join`). The recorder now
+  reuses every recording whose text it already has (`say_lines.rekeyed`), so a
+  join or an insertion re-says one line, not every line after it.

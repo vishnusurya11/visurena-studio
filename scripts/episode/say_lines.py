@@ -275,6 +275,28 @@ def keep_best(new: dict, previous: dict | None, wav: Path,
     return dict(previous, tries=new.get("tries", previous.get("tries", 0)))
 
 
+def rekeyed(records: dict, lines: list, out_dir: Path, book: Path) -> dict:
+    """Every recording whose TEXT (and speaker) a plan line still has, moved to
+    that line's index and file -- a joined or inserted line renumbers the lines
+    after it, and matching by index alone would say them all again (ep27).
+    Moves go through temporary copies so no file overwrites one still needed."""
+    import shutil
+    by_text = {(r.get("text"), r.get("speaker")): r for r in records.values()}
+    staged, out = {}, {}
+    for line in lines:
+        old = by_text.get((line.text, line.speaker))
+        src = book / old["rel_path"] if old else None
+        if old and src.exists():
+            tmp = out_dir / f"rekey_{line.index:02d}.tmp.wav"
+            shutil.copyfile(src, tmp)
+            staged[line.index] = (old, tmp)
+    for index, (old, tmp) in staged.items():
+        wav = out_dir / f"l{index:02d}.wav"
+        tmp.replace(wav)
+        out[index] = dict(old, index=index, rel_path=episode_home.relative(book, wav))
+    return out
+
+
 def prune_stale(records: dict, count: int) -> dict:
     """Records for line indices the plan no longer has are dropped (their wavs
     stay on disk).  ep11 went from 29 lines to 25 and the take builder died on
@@ -288,6 +310,7 @@ def main(book_id: str, number: int, redo: list[int] | None = None) -> None:
     out_dir = episode_home.lines_dir(book, number)
     sheet = out_dir / "lines.json"
     records = {r["index"]: r for r in episode_home.read_json(sheet)} if sheet.exists() else {}
+    records = rekeyed(records, episode.lines, out_dir, book)   # a recording follows its text (ep27)
     records = prune_stale(records, len(episode.lines))
     for line in episode.lines:  # a line whose TEXT changed is a new line (reviewer 5's re-cut)
         have = records.get(line.index)

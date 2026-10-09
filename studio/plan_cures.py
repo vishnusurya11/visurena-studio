@@ -680,6 +680,29 @@ def _remap_answer(doc: dict, p: int) -> dict:
     return doc
 
 
+def join_line(doc: dict, k: int) -> dict:
+    """Line k joins the NEXT line when both are narration by one speaker on one
+    shot: one line of the book's same words, the lines after it renumbered, a
+    'line N' answer moved with them (ep27: 'Yet I write on.' split the voice
+    through three revoice rounds).  Otherwise the doc is returned unchanged."""
+    from studio.episode_spec import ANSWER
+    lines = doc.get("lines") or []
+    if not 0 <= k < len(lines) - 1:
+        return doc
+    a, b = lines[k], lines[k + 1]
+    if (a.get("shot"), a.get("speaker"), a.get("kind")) != (b.get("shot"), b.get("speaker"), b.get("kind")) \
+            or a.get("kind") != "narration":
+        return doc
+    a["text"] = f"{str(a['text']).rstrip()} {str(b['text']).lstrip()}"
+    del lines[k + 1]
+    for i, line in enumerate(lines):
+        line["index"] = i
+    m = ANSWER.match(str(doc.get("answer") or ""))
+    if m and m.group(1) == "line" and int(m.group(2)) > k:
+        doc["answer"] = f"line {int(m.group(2)) - 1}"
+    return doc
+
+
 def insert_line(doc: dict, shot_index: int, text: str, speaker: str) -> dict:
     """Splice one narration micro-line with the EXACT reindex: the new line
     lands after every existing line of its shot (lines are contract-sorted by

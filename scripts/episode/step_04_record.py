@@ -74,7 +74,46 @@ def done(ctx) -> bool:
     unlisted = any(isinstance(r, dict) and not r.get("ok", True) and "under" not in r for r in report.values())
     if (unlisted or split_lines(report)) and len(rounds(ctx)) < REVOICE_ROUNDS:
         return False            # a split, or a split written before its pairs were kept
+    if join_candidate(ctx) is not None:
+        return False            # the rounds are spent and one short line still splits it (ep27)
     return rendered(episode_home.read_json(plan), episode_home.read_json(sheet))
+
+
+JOINED = "speaker_joined.json"
+"""review/<this>: the line joined to its neighbour for a split voice -- once."""
+SHORT_LINE_S = 3.0
+"""A line under this is joinable: the voice measure reads it ~0.08 lower (ep21-27)."""
+
+
+def join_candidate(ctx) -> int | None:
+    """After REVOICE_ROUNDS, the ONE short line every failing pair runs through,
+    if the join has not been tried; else None."""
+    spread, sheet = ctx.home / "review" / "speaker_check.json", ctx.home / "audio" / "lines" / "lines.json"
+    if (ctx.home / "review" / JOINED).exists() or len(rounds(ctx)) < REVOICE_ROUNDS             or not (spread.exists() and sheet.exists()):
+        return None
+    lines = split_lines(episode_home.read_json(spread))
+    secs = {r["index"]: float(r.get("seconds") or 0) for r in episode_home.read_json(sheet)}
+    return lines[0] if len(lines) == 1 and secs.get(lines[0], 99.0) < SHORT_LINE_S else None
+
+
+def join(ctx) -> bool:
+    """The short culprit joins its neighbour on the shot (recorded); the joined
+    line is said, every other recording follows its text; the voice re-checked."""
+    from studio import plan_cures, plan_provenance, plan_verdict
+    if (k := join_candidate(ctx)) is None:
+        return False
+    path = ctx.home / "plan.json"
+    doc = episode_home.read_json(path)
+    joined = plan_cures.join_line(episode_home.read_json(path), k)
+    episode_home.write_json(ctx.home / "review" / JOINED, [k])
+    if joined == doc:
+        return False
+    before = plan_verdict.plan_sha8(path)
+    episode_home.write_plan(path, joined)
+    plan_provenance.record(path, before, ["join_line"])
+    ctx.run_script("scripts/episode/say_lines.py", gpu=GPU, clock="lines")
+    ctx.run_script("scripts/episode/speaker_check.py", clock="speaker_check")
+    return True
 
 
 def voiceless(ctx) -> list[str]:
@@ -108,6 +147,7 @@ def revoice(ctx) -> None:
                        gpu=GPU, clock="lines")
         episode_home.write_json(ctx.home / "review" / REVOICED, taken + [lines])
         ctx.run_script("scripts/episode/speaker_check.py", clock="speaker_check")
+    join(ctx)
 
 
 if __name__ == "__main__":
