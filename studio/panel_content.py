@@ -106,8 +106,14 @@ def of_a_person(word: re.Pattern, clause: str) -> bool:
                for h in word.finditer(clause))
 
 
-PART_SUBJECT = re.compile(r"\b(?:face|head|hand|hands|eye|eyes|arm|arms|shoulder|shoulders|"
-                          r"chin|mouth|hat|beard)\s*$", re.I)
+PART_SUBJECT = re.compile(
+    r"\b(?:face|head|hand|hands|eye|eyes|arm|arms|shoulder|shoulders|chin|mouth|hat|beard|"
+    # a THING never takes a posture (ep26: 'their black shadows lying across the
+    # gravel road', 'the dark dome of St Paul's sits small on the skyline')
+    r"shadows?|light|lamplight|sunlight|moonlight|daylight|glow|smoke|dust|ash|haze|mist|"
+    r"road|roads|street|path|gravel|rubble|debris|glass|water|weed|weeds|leaves|grass|"
+    r"dome|roof|roofs|wall|walls|tower|spire|skyline|city|town|valley|hill|hills|field|fields|"
+    r"sky|clouds?|sun|moon)\b[^,;]*$", re.I)
 """A part of a person is never the one who sits or lies: 'His face sits above it
 in the TOP third' (ep24 shot 14) places a face in the frame."""
 

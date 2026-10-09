@@ -453,3 +453,11 @@ fixes. Each lesson below cost at least one launch. Tracker rows A38-A74 in
   split one of ep26's long shots into two with the same camera move, and the
   re-sign refused it. Any step that rewrites a signed plan runs `plan_repair
   --no-llm` before it re-signs.
+- **A thing never takes a posture (A90).** ep26's panel check refused four
+  correct panels: 'the dark dome of St Paul's sits small on the skyline' (the
+  capital after 'St' read as a person) and 'their black shadows lying across the
+  gravel road' (a participle counted whatever stood before it). Light, shadow,
+  ground, buildings and sky never sit or lie (`panel_content.PART_SUBJECT`).
+  The posture reader has now failed on three episodes running (ep24 setup words,
+  ep24 'his face sits', ep26 things): read every posture refusal's own sentence
+  before believing it.
