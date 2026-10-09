@@ -351,3 +351,12 @@ fixes. Each lesson below cost at least one launch. Tracker rows A38-A74 in
   and the first master signed. Two retake rounds cured every picture fault the
   router could reach. A parked episode keeps its work: resuming one costs only
   what is missing.
+- **A text widened for one check widens every check that reads it (A80).**
+  On 2026-10-07 I handed the panel and take content checks the SETUP's words so
+  the pit-wall exemption could see a pit. The posture reader read them too:
+  ep24's 'the London valley lies black' (and the capital 'London' taken for a
+  person) asked every roof shot's narrator to lie down, and 'His face sits
+  above it in the TOP third' asked a man to sit. Five of seven panel refusals
+  were the reader's. Posture, cast, wear and lettering read the shot's own words
+  (`panel_content.shot_words`); only the pit wall reads past `SETUP_MARK`; a
+  body part is never the one who sits or lies.

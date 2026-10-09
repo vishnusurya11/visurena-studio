@@ -100,8 +100,16 @@ def of_a_person(word: re.Pattern, clause: str) -> bool:
     lies on the counter" asked the standing brother to lie down.  A finite posture
     verb counts when nothing stands before it in its clause or what stands before
     it names a person; a participle counts as it always did."""
-    return any(not FINITE.match(h.group(0)) or LEAD.match(subject(clause[:h.start()]))
-               or PERSON.search(subject(clause[:h.start()])) for h in word.finditer(clause))
+    return any(not PART_SUBJECT.search(subject(clause[:h.start()]))
+               and (not FINITE.match(h.group(0)) or LEAD.match(subject(clause[:h.start()]))
+                    or PERSON.search(subject(clause[:h.start()])))
+               for h in word.finditer(clause))
+
+
+PART_SUBJECT = re.compile(r"\b(?:face|head|hand|hands|eye|eyes|arm|arms|shoulder|shoulders|"
+                          r"chin|mouth|hat|beard)\s*$", re.I)
+"""A part of a person is never the one who sits or lies: 'His face sits above it
+in the TOP third' (ep24 shot 14) places a face in the frame."""
 
 
 def subject(before: str) -> str:
@@ -112,7 +120,7 @@ def subject(before: str) -> str:
 
 def posture_fault(seen: "Seen", prose: str, planned: int) -> str | None:
     """The shot lays, seats or crouches its one person and the picture does not."""
-    wanted = asked_posture(prose)
+    wanted = asked_posture(shot_words(prose))
     if wanted is None or planned != 1 or seen.people > 1:
         return None
     if FAMILY.get(seen.posture) == wanted:
@@ -235,7 +243,20 @@ def stage_text(shot, setup) -> str:
     """What a content check hands `faults` as the frame: the shot's own prose
     and the place it stages -- a 'cliff' behind the curate at the slit (ep19
     T19) is the pit's wall only when the setup says it is a pit."""
-    return f"{getattr(shot, 'frame', '')} {getattr(shot, 'at_rest', '')} {getattr(setup, 'described', '') or ''}"
+    return (f"{getattr(shot, 'frame', '')} {getattr(shot, 'at_rest', '')}"
+            f"{SETUP_MARK}{getattr(setup, 'described', '') or ''}")
+
+
+SETUP_MARK = " ~~setup~~ "
+"""Where the shot's own words end in a staged text.  Only the pit-wall check
+reads past it: ep24's 'the London valley lies black' in the roof setup asked
+every roof shot's narrator to lie down."""
+
+
+def shot_words(frame: str) -> str:
+    """The shot's own words of a staged text: what posture, cast, wear and
+    lettering are judged against."""
+    return (frame or "").split(SETUP_MARK)[0]
 
 
 def pits_own_wall(banned: str, frame: str) -> bool:
@@ -260,10 +281,10 @@ def faults(seen: Seen, frame: str, planned: int, crowd: bool,
     whether a detail belongs, because shot prose is a composition and not an
     inventory, and judging against it failed 27 of 27.
     """
-    out = []
+    out, staged, frame = [], frame, shot_words(frame)
     if forbidden_landform(seen, flat):
         out.append(f"landform {seen.landform!r}: this place is flat")
-    if strangers := [b for b in banned_subject(seen, banned) if not pits_own_wall(b, frame)]:
+    if strangers := [b for b in banned_subject(seen, banned) if not pits_own_wall(b, staged)]:
         out.append(f"banned from this book: {', '.join(strangers)}")
     out += contradictions(seen, physical)
     # who may be here is DECLARED: faces + extras, or the setup's crowd. The
