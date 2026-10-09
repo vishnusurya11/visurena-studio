@@ -408,3 +408,10 @@ fixes. Each lesson below cost at least one launch. Tracker rows A38-A74 in
   two ways and a stale QC FAIL reused (A85). Before the next episode: replay a
   fix through every reader of what it writes, and key every cached verdict on
   its code.
+- **Cure the word, not the sentence (A86).** ep25 deferred on G-PHANTOM: the
+  Regent's Park setup declares `fighting_machine` and its description twice
+  says 'Martian fighting-machine' -- once in the setup's only sunset-light
+  sentence. 'Martian' in a place text is a real risk (every take reads it as the
+  creature), but deleting the sentence took the light with it. The free cure now
+  drops a cast word that only qualifies a DECLARED prop and keeps the sentence;
+  an undeclared machine still loses its sentence.

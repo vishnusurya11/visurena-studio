@@ -1618,6 +1618,19 @@ def floor_for(field: str) -> int:
     return plan_gates.DESCRIBED_WORDS if field == "described" else plan_gates.GEOMETRY_WORDS
 
 
+def unqualified_props(text: str, names: dict, props: list[str]) -> str:
+    """A cast word that only qualifies a DECLARED prop goes, its sentence stays:
+    'the brazen cowled Martian fighting-machine' -> '... cowled fighting-machine'
+    (ep25: deleting the sentence took the setup's only sunset light with it)."""
+    for prop in props:
+        phrase = r"[-\s]".join(re.escape(w) for w in str(prop).split("_") if w)
+        if not phrase:
+            continue
+        for token in names:
+            text = re.sub(rf"\b{re.escape(token)}\s+(?={phrase}\b)", "", text, flags=re.I)
+    return text
+
+
 def strip_phantoms(doc: dict, names: dict, place_words: set) -> tuple[dict, list[str]]:
     """G-PHANTOM's mechanical cure: delete each offending sentence, found with
     the gate's own `phantom_hits` -- the cure MEASURES LIKE THE CHECKER.  A
@@ -1627,6 +1640,7 @@ def strip_phantoms(doc: dict, names: dict, place_words: set) -> tuple[dict, list
     residue: list[str] = []
     for name, s in (doc.get("setups") or {}).items():
         for field in ("described", "geometry"):
+            s[field] = unqualified_props(s.get(field) or "", names, s.get("props") or [])
             bad = {sent for sent, _ in plan_gates.phantom_hits(s.get(field) or "", names, place_words)}
             if not bad:
                 continue
