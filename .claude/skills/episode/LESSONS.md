@@ -360,3 +360,11 @@ fixes. Each lesson below cost at least one launch. Tracker rows A38-A74 in
   were the reader's. Posture, cast, wear and lettering read the shot's own words
   (`panel_content.shot_words`); only the pit wall reads past `SETUP_MARK`; a
   body part is never the one who sits or lies.
+- **A free cure runs beside a paid one, never instead of it (A81).** ep24 T02
+  reached the master at score 0: 8 frames of the place plate before the panel,
+  read as a hard jump. Its leak measure said a head cut covers it, but the
+  router gives a take ONE cure and the move faults claimed it; the re-render
+  leaked again. A covering leak now gets its head cut whatever else the take is
+  routed to. And a QC refusal of a NEW master is a retry (the cut lifts a quiet
+  cue, the take step measures what is unjudged); only the same bytes refused
+  again go to the brain, which had parked every QC refusal as a gate that gave up.

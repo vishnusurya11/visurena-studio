@@ -167,7 +167,12 @@ TABLE: list[tuple[str, object]] = [
     # the upload door's split voice is the record step's (ep21, 2026-10-08: the
     # brain read it as step 09's terminal and parked the episode)
     (r"speaker_check: .+ is not one voice", ("cure", "split_voice", ("redo", "04"))),
-    (r"REFUSED: qc FAIL", ("brain", "qc_fail", None)),
+    # the same bytes refused again: nothing a relaunch changes -- the brain's
+    (r"REFUSED: qc FAIL in \S+ for these exact bytes", ("brain", "qc_fail", None)),
+    # a NEW master refused: the cut and take steps re-run themselves on a refused
+    # master (a quiet cue lifted, an unjudged take measured); retry first (ep21,
+    # ep24: the brain parked these as gates that gave up)
+    (r"REFUSED: qc FAIL", ("retry", "qc_fail", None)),
     (r"REFUSED: qc\.py left no report", ("retry", "qc_no_report", None)),
     (r"speech gap", _speech_gap),
     (r"REFUSED: the plan has no shots", ("park", "no_shots", None)),

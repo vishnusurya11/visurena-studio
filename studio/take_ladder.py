@@ -121,6 +121,10 @@ def route(verdict: Verdict, room: Path, try_i: int = 1) -> dict[str, dict[int, l
             continue
         if cure := cure_of(fs, panel_clean=panel_clean(room, i)):
             out.setdefault(cure, {})[i] = fs
+        if cure != "head_cut" and any(f.kind == "leak" and f.evidence.get("covers") for f in fs):
+            # FREE and independent of the render cure: ep24 T02 shipped at 0 with
+            # 8 frames of plate the move cure re-rendered and never cut
+            out.setdefault("head_cut", {})[i] = [f for f in fs if f.kind == "leak"]
     return out
 
 
