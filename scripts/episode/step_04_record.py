@@ -74,9 +74,37 @@ def done(ctx) -> bool:
     unlisted = any(isinstance(r, dict) and not r.get("ok", True) and "under" not in r for r in report.values())
     if (unlisted or split_lines(report)) and len(rounds(ctx)) < REVOICE_ROUNDS:
         return False            # a split, or a split written before its pairs were kept
+    if qc_misheard(ctx):
+        return False            # QC heard a line wrong and it has not been said again (ep27)
     if join_candidate(ctx) is not None:
         return False            # the rounds are spent and one short line still splits it (ep27)
     return rendered(episode_home.read_json(plan), episode_home.read_json(sheet))
+
+
+QC_RESAID = "qc_resaid.json"
+"""review/<this>: the lines said again because QC heard them wrong -- once each."""
+
+
+def qc_misheard(ctx) -> list[int]:
+    """Lines the last QC report heard wrong that have not been said again."""
+    path = ctx.home / "review" / QC_RESAID
+    said = set(episode_home.read_json(path)) if path.exists() else set()
+    out = []
+    for qc in sorted(ctx.home.glob("qc_*.json")):
+        out += [r["index"] for r in episode_home.read_json(qc).get("lines") or []
+                if not r.get("passed", True) and r["index"] not in said]
+    return sorted(set(out))
+
+
+def resay_misheard(ctx) -> None:
+    """The misheard lines said again, the clearest try kept; recorded once."""
+    if not (lines := qc_misheard(ctx)):
+        return
+    ctx.run_script("scripts/episode/say_lines.py", f"--redo={','.join(map(str, lines))}", "--clear",
+                   gpu=GPU, clock="lines")
+    path = ctx.home / "review" / QC_RESAID
+    done_before = episode_home.read_json(path) if path.exists() else []
+    episode_home.write_json(path, sorted(set(done_before) | set(lines)))
 
 
 JOINED = "speaker_joined.json"
@@ -132,6 +160,7 @@ def run(ctx) -> None:
     ctx.run_script("scripts/episode/say_lines.py", *extra, gpu=GPU, clock="lines")
     ctx.run_script("scripts/episode/speaker_check.py", clock="speaker_check")
     revoice(ctx)
+    resay_misheard(ctx)
 
 
 def revoice(ctx) -> None:

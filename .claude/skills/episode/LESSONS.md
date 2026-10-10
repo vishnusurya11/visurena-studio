@@ -498,3 +498,16 @@ fixes. Each lesson below cost at least one launch. Tracker rows A38-A74 in
   cut refused 'no take for shots [6, 8]' because its take check walked every
   plan shot. The first episode since the rewrite to use `omit`: any check that
   counts plan shots must skip `episode.omit` (`assemble.shots_without_takes`).
+- **A line QC hears wrong goes back to the record step (A98).** ep27's QC heard
+  'Nights bring back the black powder.' as 'Night spring back...' (0.333): the
+  voice ran 'bring' into the 's' before it, and the recording had already passed
+  the ear narrowly as 'Nights spring back'. A recut reuses the audio and a re-say
+  kept by voice fit cannot target clarity. Step 04 now stays open while the last
+  QC report holds a misheard line it has not said again, re-says it once with
+  `--clear` (the try the ear hears most clearly wins), and the chain re-times and
+  re-renders only what moved.
+- **Again: a heredoc ate a backslash (A98).** A `\` continuation inside a python
+  heredoc patch landed as a literal `
+` and the module would not import. The
+  rule stands without exception: replacement text with a backslash goes through
+  Write or Edit.

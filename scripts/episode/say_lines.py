@@ -252,7 +252,7 @@ def lift_ok(book: Path, record: dict, clip: Path) -> bool:
 
 
 def keep_best(new: dict, previous: dict | None, wav: Path,
-              fit: tuple[float | None, float | None] | None = None) -> dict:
+              fit: tuple[float | None, float | None] | None = None, clarity: bool = False) -> dict:
     """A redo never makes a line worse: the try with the higher similarity
     stays on disk as l{NN}.wav, the other is deleted.  An alternate-reference
     render that is not the man in the room never wins, whatever it scored
@@ -262,7 +262,10 @@ def keep_best(new: dict, previous: dict | None, wav: Path,
     prev_wav = wav.with_suffix(".prev.wav")
     if previous is None or not prev_wav.exists():
         return new
-    if fit and None not in fit and new.get("passed", True):
+    if clarity and new.get("passed", True) and new.get("error_rate") is not None:
+        # a line QC heard wrong (ep27 l15): the try the ear hears most clearly wins
+        better = float(new["error_rate"]) < float(previous.get("error_rate", 1.0))
+    elif fit and None not in fit and new.get("passed", True):
         better = fit[0] > fit[1]
     else:
         better = alternate_ok(new.get("episode_voice"), float(new.get("seconds") or SIM_MEASURABLE_S)) and \
@@ -304,7 +307,7 @@ def prune_stale(records: dict, count: int) -> dict:
     return {k: v for k, v in records.items() if 0 <= int(k) < count}
 
 
-def main(book_id: str, number: int, redo: list[int] | None = None) -> None:
+def main(book_id: str, number: int, redo: list[int] | None = None, clarity: bool = False) -> None:
     book = episode_home.book_dir(book_id)
     episode = episode_home.load_plan(book, number)
     out_dir = episode_home.lines_dir(book, number)
@@ -345,7 +348,7 @@ def main(book_id: str, number: int, redo: list[int] | None = None) -> None:
                 wav = out_dir / f"l{line.index:02d}.wav"
                 fit = (voice_fit(book, records, line.index, wav),
                        voice_fit(book, records, line.index, wav.with_suffix(".prev.wav")))
-                records[line.index] = keep_best(records[line.index], previous.pop(line.index), wav, fit=fit)
+                records[line.index] = keep_best(records[line.index], previous.pop(line.index), wav, fit=fit, clarity=clarity)
                 if line.index in failed and attempt < TRIES - 1:
                     previous[line.index] = dict(records[line.index])
                     wav.replace(wav.with_suffix(".prev.wav"))
@@ -367,4 +370,4 @@ def main(book_id: str, number: int, redo: list[int] | None = None) -> None:
 if __name__ == "__main__":
     args = [a for a in sys.argv[1:] if not a.startswith("--")]
     redo = [int(v) for a in sys.argv if a.startswith("--redo=") for v in a.split("=", 1)[1].split(",") if v]
-    main(args[0], episode_arg(sys.argv), redo)
+    main(args[0], episode_arg(sys.argv), redo, clarity="--clear" in sys.argv)
