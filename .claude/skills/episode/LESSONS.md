@@ -511,3 +511,15 @@ fixes. Each lesson below cost at least one launch. Tracker rows A38-A74 in
 ` and the module would not import. The
   rule stands without exception: replacement text with a backslash goes through
   Write or Edit.
+- **ep27's run, closed -- and the book (2026-10-10 23:12Z, public
+  https://youtu.be/Z4VNwQJ_5NI, master_iter2, $0).** The last chapter. Its stops:
+  a narrator split through one short line, cured only by joining it to its
+  neighbour (A92-A94); a dry take build reading two rulers (A93); the GPU falling
+  off the bus (A95, an owner reboot); a locked database (A96); the first `omit`
+  since the rewrite (A97); a line QC heard wrong (A98). With it the autopilot
+  reported COMPLETE: 27 of 27 chapters public, nothing parked.
+- **The book as one video (2026-10-10).** `scripts/publish/book_compilation.py`
+  joins every published master (by ledger sha8) by stream copy -- the masters
+  share 1536x1536, 24 fps, H.264, 48 kHz stereo -- and uploads one regular video
+  whose description OPENS with a chapter per episode from 0:00. It refuses while
+  any chapter is unpublished.
