@@ -60,6 +60,21 @@ def published(book: Path) -> list[tuple[int, str]]:
     public = {r["video_id"] for r in rows if r.get("privacy") == "public" and r.get("video_id")}
     out = {}
     for r in rows:
-        if r.get("video_id") in public and r.get("sha8"):
+        if r.get("video_id") in public and r.get("sha8") and isinstance(r.get("episode"), int):
             out[int(r["episode"])] = r["sha8"]
     return sorted(out.items())
+
+
+def concat_list(paths: list[Path]) -> str:
+    """ffmpeg's concat-demuxer list: one `file '<path>'` per part, in order,
+    a single quote in a path written as '\\'' (the demuxer's own escape)."""
+    lines = []
+    for path in paths:
+        text = Path(path).resolve().as_posix().replace("'", "'\\''")
+        lines.append(f"file '{text}'")
+    return "\n".join(lines) + "\n"
+
+
+def title(series: str, chapters: int) -> str:
+    """`<series> — The Complete Book, All <n> Chapters`, inside YouTube's wall."""
+    return yp.elided(f"{series} — The Complete Book, All {chapters} Chapters", yp.TITLE_MAX)

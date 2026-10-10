@@ -1,0 +1,129 @@
+#!/usr/bin/env python
+"""The whole book as one regular video (owner, 2026-10-10).
+
+    uv run python scripts/publish/book_compilation.py <codex_id> --dry-run
+    uv run python scripts/publish/book_compilation.py <codex_id> --upload
+
+Joins every published episode's master -- the exact bytes the channel carries,
+matched by the ledger's sha8 -- in chapter order, by stream copy (the masters
+share one size, rate and codec; nothing is re-encoded), into
+`library/<book>/compilation/whole_book_iterN.mp4`.  The description OPENS with
+YouTube chapter timestamps, one per episode from 0:00.  `--upload` sends it as a
+regular public video and records it in the book's upload ledger.  Refuses while
+any chapter of the book is unpublished.
+"""
+from __future__ import annotations
+
+import datetime as dt
+import json
+import re
+import subprocess
+import sys
+from pathlib import Path
+
+sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
+
+from studio import book_compilation as bc  # noqa: E402
+from studio import episode_home, youtube, youtube_publish as yp  # noqa: E402
+from studio.trailer_assemble import clip_seconds  # noqa: E402
+
+FOOTER = ("Chapter text: H. G. Wells, The War of the Worlds (1898), in the public domain.\n"
+          "— The Keeper's Lantern —\n"
+          "AI DISCLOSURE: the picture and the voices in this video are generated. The words\n"
+          "are Wells's story, adapted; the performances are synthetic.")
+
+
+def episode_meta(book: Path, n: int) -> dict:
+    return episode_home.read_json(episode_home.home(book, n) / "youtube.json")
+
+
+def chapters_in_book(book: Path) -> int:
+    """The book's chapter count, read off episode 1's title ('Ep 01/27')."""
+    m = re.search(r"Ep \d+/(\d+)", episode_meta(book, 1)["title"])
+    if not m:
+        raise SystemExit("episode 1's title names no chapter count ('Ep NN/TT')")
+    return int(m.group(1))
+
+
+def parts_of(book: Path) -> list[tuple[int, str, Path, float]]:
+    """(episode, chapter title, master, seconds) for every chapter; refuses a gap."""
+    total, pub = chapters_in_book(book), dict(bc.published(book))
+    if missing := [n for n in range(1, total + 1) if n not in pub]:
+        raise SystemExit(f"REFUSED: chapters {missing} are not published yet; the book is {total} chapters")
+    out = []
+    for n in range(1, total + 1):
+        master = bc.uploaded_master(episode_home.home(book, n) / "cut", pub[n])
+        if master is None:
+            raise SystemExit(f"REFUSED: ep{n:02d}'s uploaded master ({pub[n]}) is not on disk")
+        out.append((n, bc.chapter_of(episode_meta(book, n)["title"]), master, clip_seconds(master)))
+    return out
+
+
+def next_iter(folder: Path) -> Path:
+    k = 1
+    while (folder / f"whole_book_iter{k}.mp4").exists():
+        k += 1
+    return folder / f"whole_book_iter{k}.mp4"
+
+
+def join(parts: list, folder: Path) -> Path:
+    """The parts joined by stream copy, checked against the sum of their lengths."""
+    folder.mkdir(parents=True, exist_ok=True)
+    listing = folder / "concat.txt"
+    listing.write_text(bc.concat_list([p[2] for p in parts]), encoding="utf-8")
+    out = next_iter(folder)
+    subprocess.run(["ffmpeg", "-y", "-v", "error", "-f", "concat", "-safe", "0", "-i", str(listing),
+                    "-c", "copy", "-movflags", "+faststart", str(out)], check=True)
+    want, got = sum(p[3] for p in parts), clip_seconds(out)
+    if abs(got - want) > 2.0:
+        raise SystemExit(f"REFUSED: the join is {got:.1f} s against the parts' {want:.1f} s")
+    return out
+
+
+def metadata(book: Path, parts: list) -> dict:
+    first = episode_meta(book, 1)
+    series = first["title"].split(" — Ep")[0]
+    lines = bc.chapter_lines([(n, t, s) for n, t, _, s in parts])
+    intro = (f"The whole of {series.split(': ', 1)[-1]}, all {len(parts)} chapters in order, "
+             f"from the episodes on this channel. Each chapter above is one episode.")
+    return {"title": bc.title(series, len(parts)),
+            "description": bc.description(lines, intro=intro, footer=FOOTER),
+            "tags": first.get("tags", []), "synthetic": True, "chapters": lines}
+
+
+def upload(book: Path, out: Path, meta: dict) -> str:
+    """Sent as a regular public video; recorded; flipped public if it landed private."""
+    from scripts.publish import youtube_privacy, youtube_upload
+    digest = yp.sha8(out)
+    key = f"{book.name}/compilation/{digest}"
+    if done := yp.uploaded(book, key):
+        raise SystemExit(f"REFUSED: this compilation is already uploaded as {done.get('video_id')}")
+    body = yp.spec(meta["title"], meta["description"], meta["tags"], synthetic=meta["synthetic"], privacy="public")
+    got = youtube_upload.send(out, body, youtube.credentials())
+    vid, privacy = got.get("id"), got.get("status", {}).get("privacyStatus")
+    yp.record(book, {"key": key, "episode": "compilation", "video_id": vid, "privacy": privacy,
+                     "title": meta["title"], "sha8": digest, "at": dt.datetime.now(dt.timezone.utc).isoformat()})
+    if privacy != "public":
+        api = youtube_privacy._build_api()
+        youtube_privacy.set_privacy(api, vid, youtube_privacy.live_status(api, vid), "public")
+        yp.record(book, {"key": f"{key}#public", "episode": "compilation", "video_id": vid,
+                         "privacy": "public", "why": "owner 2026-10-10: the whole book as one video"})
+    return vid
+
+
+def main(argv: list[str]) -> None:
+    book = episode_home.book_dir(argv[1])
+    parts = parts_of(book)
+    meta = metadata(book, parts)
+    folder = book / "compilation"
+    out = join(parts, folder)
+    episode_home.write_json(folder / "youtube.json", meta | {"file": episode_home.relative(book, out),
+                                                              "sha8": yp.sha8(out)})
+    print(out.resolve())
+    print(f"{len(parts)} chapters, {clip_seconds(out) / 60:.1f} min\n\n{meta['title']}\n\n{meta['description']}")
+    if "--upload" in argv:
+        print(f"\nhttps://youtu.be/{upload(book, out, meta)}")
+
+
+if __name__ == "__main__":
+    main(sys.argv)

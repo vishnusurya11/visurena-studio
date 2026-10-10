@@ -49,6 +49,20 @@ def test_the_part_is_the_master_the_channel_carries(tmp_path):
     assert bc.uploaded_master(cut, "00000000") is None
 
 
+def test_the_concat_list_names_every_part_in_order(tmp_path):
+    a, b = tmp_path / "ep01" / "master_iter6.mp4", tmp_path / "it's" / "master_r2v.mp4"
+    text = bc.concat_list([a, b])
+    lines = text.strip().splitlines()
+    assert lines[0] == f"file '{a.resolve().as_posix()}'"
+    assert lines[1].endswith("it'\\''s/master_r2v.mp4'")          # a quote in a path is escaped
+
+
+def test_the_title_names_the_book_and_its_chapter_count():
+    title = bc.title("H. G. Wells: The War of the Worlds", 27)
+    assert title == "H. G. Wells: The War of the Worlds — The Complete Book, All 27 Chapters"
+    assert len(title) <= yp.TITLE_MAX
+
+
 def test_the_published_episodes_are_read_off_the_ledger_in_order(tmp_path):
     # the ledger's real shape: the upload row carries the sha8, the public flip only the video id
     rows = [{"episode": 1, "video_id": "a", "sha8": "11111111", "privacy": "private"},
@@ -56,6 +70,8 @@ def test_the_published_episodes_are_read_off_the_ledger_in_order(tmp_path):
             {"episode": 2, "video_id": "b", "sha8": "22222222", "privacy": "private"},
             {"episode": 2, "video_id": "b", "event": "privacy", "privacy": "public"},
             {"episode": 1, "video_id": "a", "privacy": "public", "why": "owner"},
-            {"episode": 3, "video_id": "c", "sha8": "33333333", "privacy": "private"}]
+            {"episode": 3, "video_id": "c", "sha8": "33333333", "privacy": "private"},
+            # the compilation's own row is public with a sha8, and is no episode
+            {"episode": "compilation", "video_id": "z", "sha8": "77777777", "privacy": "public"}]
     (tmp_path / "uploads.jsonl").write_text("\n".join(json.dumps(r) for r in rows), encoding="utf-8")
     assert bc.published(tmp_path) == [(1, "11111111"), (2, "22222222")]
