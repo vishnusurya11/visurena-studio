@@ -859,6 +859,14 @@ def trim(master: Path, work: Path) -> Path:
     return louder      # the caller publishes it; nothing is written in place
 
 
+def shots_without_takes(episode, takes: dict) -> list[int]:
+    """Shots the cut keeps that no take covers; an OMITTED shot needs none
+    (ep27: shots 6 and 8 omitted, unplaced, unrendered -- and refused)."""
+    covered = {i for p in takes.values() for i in (p.shots or [])} | set(takes)
+    omitted = set(getattr(episode, "omit", None) or [])
+    return [s.index for s in episode.shots if s.index not in covered and s.index not in omitted]
+
+
 def main(book_id: str, number: int, engine: str = "i2v",
          bed_engine: str = BED_ENGINE_DEFAULT) -> None:
     """`engine` is the PICTURE engine (i2v/r2v); `bed_engine` is the music model.
@@ -876,9 +884,7 @@ def main(book_id: str, number: int, engine: str = "i2v",
     placed = episode_home.load_placed(book, number, episode)   # refused when stale
     wavs = {r["index"]: book / r["rel_path"]
             for r in episode_home.read_json(episode_home.lines_dir(book, number) / "lines.json")}
-    covered = {i for p in takes.values() for i in (p.shots or [])} | set(takes)
-    missing = [s.index for s in episode.shots if s.index not in covered]
-    if missing:
+    if missing := shots_without_takes(episode, takes):
         raise SystemExit(f"no take for shots {missing}")
 
     episode_home.make_rooms(book, number)   # free; the bed and the mix in front of it are not

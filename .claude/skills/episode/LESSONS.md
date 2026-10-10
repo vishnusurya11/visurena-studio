@@ -493,3 +493,8 @@ fixes. Each lesson below cost at least one launch. Tracker rows A38-A74 in
   once, recorded (`plan_cures.join_line`, `step_04.join`). The recorder now
   reuses every recording whose text it already has (`say_lines.rekeyed`), so a
   join or an insertion re-says one line, not every line after it.
+- **An omitted shot is out of every count (A97).** ep27's plan omits shots 6 and
+  8; the timeline placed neither and the take builder rendered neither, and the
+  cut refused 'no take for shots [6, 8]' because its take check walked every
+  plan shot. The first episode since the rewrite to use `omit`: any check that
+  counts plan shots must skip `episode.omit` (`assemble.shots_without_takes`).
