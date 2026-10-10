@@ -185,6 +185,8 @@ TABLE: list[tuple[str, object]] = [
     (r"left no ledger row", ("retry", "no_ledger_row", None)),
     (r"vanished: the engine restarted|EngineLost|ConnectionError|RemoteDisconnected",
      ("retry", "engine_transient", None)),
+    # another process held the studio database a moment (ep27, 2026-10-10)
+    (r"OperationalError: database is locked", ("retry", "db_locked", None)),
     (r"google\.auth\.exceptions\.RefreshError|invalid_grant",
      ("park", "youtube_token_expired: run `uv run python scripts/publish/youtube_auth.py` (owner consent), then retry", None)),
     (r"DEFERRED", ("brain", "deferred: {line}", None)),
