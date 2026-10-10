@@ -76,5 +76,7 @@ def concat_list(paths: list[Path]) -> str:
 
 
 def title(series: str, chapters: int) -> str:
-    """`<series> — The Complete Book, All <n> Chapters`, inside YouTube's wall."""
-    return yp.elided(f"{series} — The Complete Book, All {chapters} Chapters", yp.TITLE_MAX)
+    """`<series> — Full Adaptation, All <n> Episodes`, inside YouTube's wall.
+    An ADAPTATION, never 'the complete book': the episodes are our abridged
+    screenplay of the novel, not its full text (owner, 2026-10-11)."""
+    return yp.elided(f"{series} — Full Adaptation, All {chapters} Episodes", yp.TITLE_MAX)

@@ -27,7 +27,8 @@ from studio import book_compilation as bc  # noqa: E402
 from studio import episode_home, youtube, youtube_publish as yp  # noqa: E402
 from studio.trailer_assemble import clip_seconds  # noqa: E402
 
-FOOTER = ("Chapter text: H. G. Wells, The War of the Worlds (1898), in the public domain.\n"
+FOOTER = ("Source: H. G. Wells, The War of the Worlds (1898), in the public domain. This is an\n"
+          "adapted, abridged screenplay of the novel, not its complete text.\n"
           "— The Keeper's Lantern —\n"
           "AI DISCLOSURE: the picture and the voices in this video are generated. The words\n"
           "are Wells's story, adapted; the performances are synthetic.")
@@ -84,8 +85,11 @@ def metadata(book: Path, parts: list) -> dict:
     first = episode_meta(book, 1)
     series = first["title"].split(" — Ep")[0]
     lines = bc.chapter_lines([(n, t, s) for n, t, _, s in parts])
-    intro = (f"The whole of {series.split(': ', 1)[-1]}, all {len(parts)} chapters in order, "
-             f"from the episodes on this channel. Each chapter above is one episode.")
+    book = series.split(": ", 1)[-1]
+    intro = (f"{book}, told from beginning to end as one film: our screen adaptation of the novel, "
+             f"in {len(parts)} episodes, each one chapter of the book. The Martian cylinders fall on "
+             f"Surrey, the fighting-machines march on London, and one man survives to tell it. "
+             f"Use the chapters above to jump to any episode.")
     return {"title": bc.title(series, len(parts)),
             "description": bc.description(lines, intro=intro, footer=FOOTER),
             "tags": first.get("tags", []), "synthetic": True, "chapters": lines}
@@ -111,10 +115,28 @@ def upload(book: Path, out: Path, meta: dict) -> str:
     return vid
 
 
+def retitle(api, video_id: str, meta: dict) -> dict:
+    """The live video's title and description replaced; every other snippet field
+    carried over (videos.update REPLACES the part -- a missing categoryId fails)."""
+    from scripts.publish import youtube_retitle
+    snippet = dict(youtube_retitle.fetch(api, video_id), title=meta["title"], description=meta["description"])
+    return youtube_retitle.push(api, video_id, snippet)
+
+
 def main(argv: list[str]) -> None:
     book = episode_home.book_dir(argv[1])
     parts = parts_of(book)
     meta = metadata(book, parts)
+    if retitle_id := next((a.split("=", 1)[1] for a in argv if a.startswith("--retitle=")), ""):
+        from scripts.publish import youtube_privacy
+        retitle(youtube_privacy._build_api(), retitle_id, meta)
+        episode_home.write_json(book / "compilation" / "youtube.json",
+                                episode_home.read_json(book / "compilation" / "youtube.json") | meta)
+        yp.record(book, {"key": f"{book.name}/compilation/{retitle_id}#retitle", "episode": "compilation",
+                         "video_id": retitle_id, "title": meta["title"],
+                         "why": "owner 2026-10-11: an adaptation, not the complete book"})
+        print(f"retitled https://youtu.be/{retitle_id}\n\n{meta['title']}\n\n{meta['description']}")
+        return
     folder = book / "compilation"
     out = join(parts, folder)
     episode_home.write_json(folder / "youtube.json", meta | {"file": episode_home.relative(book, out),

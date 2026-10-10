@@ -57,10 +57,40 @@ def test_the_concat_list_names_every_part_in_order(tmp_path):
     assert lines[1].endswith("it'\\''s/master_r2v.mp4'")          # a quote in a path is escaped
 
 
-def test_the_title_names_the_book_and_its_chapter_count():
+def test_the_title_calls_it_an_adaptation_never_the_complete_book():
+    """Owner 2026-10-11: it is our adapted screenplay, not the complete book."""
     title = bc.title("H. G. Wells: The War of the Worlds", 27)
-    assert title == "H. G. Wells: The War of the Worlds — The Complete Book, All 27 Chapters"
-    assert len(title) <= yp.TITLE_MAX
+    assert title == "H. G. Wells: The War of the Worlds — Full Adaptation, All 27 Episodes"
+    assert "Complete" not in title and len(title) <= yp.TITLE_MAX
+
+
+def test_a_retitle_changes_only_the_title_and_description_of_the_live_video():
+    from scripts.publish import book_compilation as script
+    live = {"title": "old", "description": "old", "categoryId": "1", "tags": ["a"], "defaultLanguage": "en"}
+    sent = {}
+
+    class Api:
+        def videos(self):
+            return self
+
+        def list(self, part, id):
+            return SimpleCall({"items": [{"snippet": dict(live)}]})
+
+        def update(self, part, body):
+            sent.update(body)
+            return SimpleCall(body)
+
+    script.retitle(Api(), "vid", {"title": "New", "description": "Fresh"})
+    assert sent["id"] == "vid"
+    assert sent["snippet"] == dict(live, title="New", description="Fresh")
+
+
+class SimpleCall:
+    def __init__(self, value):
+        self.value = value
+
+    def execute(self):
+        return self.value
 
 
 def test_the_published_episodes_are_read_off_the_ledger_in_order(tmp_path):
