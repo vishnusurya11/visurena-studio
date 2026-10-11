@@ -150,3 +150,11 @@ def test_a_thumbnail_is_set_and_a_refusal_is_returned_not_raised(tmp_path):
             raise RuntimeError("HttpError 403: the channel is not verified")
 
     assert script.set_thumbnail(Refusing(), "vid", jpg).startswith("refused")
+
+
+def test_a_frame_count_decodes_nothing_and_the_measures_decode_on_the_gpu():
+    """Owner 2026-10-11: 'nothing runs in the GPU' while every check decoded on the CPU."""
+    from scripts.publish import book_compilation as script
+    argv = script.count_argv(Path("a.mp4"))
+    assert argv[argv.index("-c") + 1] == "copy"
+    assert script.GPU_DECODE == ["-hwaccel", "cuda"]

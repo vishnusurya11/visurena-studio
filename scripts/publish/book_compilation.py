@@ -42,16 +42,26 @@ def chapters_in_book(book: Path) -> int:
     return int(m.group(1))
 
 
+GPU_DECODE = ["-hwaccel", "cuda"]
+"""The measuring passes decode on the GPU (6.8 s a Short); in software every
+check sat on the CPU with the GPU idle (owner, 2026-10-11)."""
+
+
+def count_argv(video: Path) -> list[str]:
+    """The frame count read off the packets, nothing decoded (215 ms, against ~15 s
+    decoding a 1536 Short) -- packets, not the container's duration, which lies."""
+    return ["ffmpeg", "-v", "quiet", "-stats", "-i", str(video), "-map", "0:v", "-c", "copy", "-f", "null", "-"]
+
+
 def frames(video: Path) -> int:
-    """The picture's frame count, decoded (the container's duration lies)."""
-    seen = subprocess.run(["ffmpeg", "-v", "quiet", "-stats", "-i", str(video), "-map", "0:v",
-                           "-f", "null", "-"], capture_output=True, text=True, errors="replace")
+    """The picture's frame count."""
+    seen = subprocess.run(count_argv(video), capture_output=True, text=True, errors="replace")
     return int(seen.stderr.rsplit("frame=", 1)[1].split()[0])
 
 
 def scene_scores(master: Path) -> dict[int, float]:
     """Every frame's scene-change score, keyed by frame (read at low size)."""
-    seen = subprocess.run(["ffmpeg", "-hide_banner", "-i", str(master), "-an", "-vf",
+    seen = subprocess.run(["ffmpeg", "-hide_banner", *GPU_DECODE, "-i", str(master), "-an", "-vf",
                            "scale=192:-2,select='gte(scene,0)',metadata=print:key=lavfi.scene_score",
                            "-f", "null", "-"], capture_output=True, text=True, errors="replace")
     pairs = re.findall(r"pts_time:([0-9.]+)[^\n]*\n[^\n]*scene_score=([0-9.]+)", seen.stderr)
@@ -60,7 +70,7 @@ def scene_scores(master: Path) -> dict[int, float]:
 
 def black_tail(master: Path) -> float:
     """Where the Short's closing black begins, in seconds."""
-    seen = subprocess.run(["ffmpeg", "-hide_banner", "-i", str(master), "-an", "-vf",
+    seen = subprocess.run(["ffmpeg", "-hide_banner", *GPU_DECODE, "-i", str(master), "-an", "-vf",
                            "scale=192:-2,blackdetect=d=0.05:pix_th=0.10", "-f", "null", "-"],
                           capture_output=True, text=True, errors="replace")
     starts = re.findall(r"black_start:([0-9.]+)", seen.stderr)
