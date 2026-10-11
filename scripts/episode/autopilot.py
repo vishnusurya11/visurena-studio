@@ -132,6 +132,11 @@ def core_next_unit(chapters: list[int], uploads: list[dict], parked: list[dict],
     return importlib.import_module("studio.autopilot").next_unit(chapters, uploads, parked, last)
 
 
+def uploads_of(book: Path) -> list[dict]:
+    """uploads.jsonl's chapter rows; the book video's rows are another unit."""
+    return importlib.import_module("studio.autopilot").episode_rows(rows_of(Path(book) / "uploads.jsonl"))
+
+
 def brain_evidence(home: Path) -> tuple[list[str], list[dict]]:
     """What the brief reads off disk: the aside's fault notes, the last learnings rows."""
     aside = read_json(home / "plan.deferred.json", {}) or {}
@@ -456,7 +461,7 @@ def gather(book: Path, codex: str, n: int, deps: Deps, series: dict):
     return signals_of({
         "drive_rows": drive_rows, "exit_code": ends[-1].get("code") if ends else None,
         "lock": read_json(deps.root / "gpu.lock"), "proc_alive": deps.engine.drive_alive(rows, codex, n),
-        "uploads_rows": rows_of(Path(book) / "uploads.jsonl"), "parked_rows": rows_of(paths_of(book).parked),
+        "uploads_rows": uploads_of(book), "parked_rows": rows_of(paths_of(book).parked),
         "home_files": sorted(p.name for p in home.iterdir()) if home.exists() else [],
         "log_tail": log_tail_of(home), "porcelain": deps.git("status", "--porcelain"),
         "engine_up": bool(deps.engine.alive(ENGINE_URL)), "clock_spent_s": run_budget.spent_before(home),
@@ -681,7 +686,7 @@ def act(book: Path, codex: str, n: int, derived, signals, deps: Deps) -> dict:
 
 def status_doc(book: Path, codex: str, n: int | None, derived, signals, series: dict, done: dict, deps: Deps) -> dict:
     """§5: the series, the episode, the engine and the last events; relative paths only."""
-    uploads, parked = rows_of(Path(book) / "uploads.jsonl"), rows_of(paths_of(book).parked)
+    uploads, parked = uploads_of(book), rows_of(paths_of(book).parked)
     beat = read_json(deps.root / "heartbeat.json", {})
     public = sorted({r["episode"] for r in uploads if r.get("privacy") == "public"})
     return {"ts": utc_now(), "supervisor_pid": deps.pid,
@@ -710,7 +715,7 @@ def episode_doc(n: int | None, derived, signals, done: dict) -> dict:
 def tick(book: Path, codex: str, deps: Deps, tick_no: int = 0) -> dict:
     """One pass: gather -> derive -> ONE action -> status.json + heartbeat."""
     series, p = load_series(book, codex, deps.chapters), paths_of(book)
-    uploads, parked = rows_of(Path(book) / "uploads.jsonl"), rows_of(p.parked)
+    uploads, parked = uploads_of(book), rows_of(p.parked)
     n = deps.next_unit(deps.chapters(book), uploads, parked, series["last"])
     if n is None:
         derived, signals = SimpleNamespace(state="COMPLETE", reason="", order=None, packet={}), SimpleNamespace(engine_up=None)

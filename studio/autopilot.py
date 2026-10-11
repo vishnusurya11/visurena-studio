@@ -230,8 +230,15 @@ def _said(text: str, pattern: str) -> str:
 
 # --- the state machine --------------------------------------------------------
 
+def episode_rows(rows: list[dict]) -> list[dict]:
+    """The rows that name a chapter: a book-level row (book_compilation's
+    episode='compilation') is another unit, and an int() on it stopped every
+    tick from 2026-10-10 23:24Z."""
+    return [r for r in rows if str(r.get("episode", "")).isdigit()]
+
+
 def published(uploads_rows: list[dict], n: int) -> bool:
-    return any(int(r.get("episode", -1)) == n and r.get("privacy") == "public" for r in uploads_rows)
+    return any(int(r["episode"]) == n and r.get("privacy") == "public" for r in episode_rows(uploads_rows))
 
 
 def parked(parked_rows: list[dict], n: int) -> dict | None:
@@ -386,7 +393,7 @@ def stale_lock(lock: dict | None, proc_rows: list[procs.ProcInfo], codex: str, n
 def next_unit(chapters: list[int], uploads_rows: list[dict], parked_rows: list[dict], last: int | None) -> int | None:
     """The lowest chapter with no public upload and no parked row, capped at
     `last` (book.json episodes); None means the series is complete."""
-    done = {int(r["episode"]) for r in uploads_rows if r.get("privacy") == "public"}
+    done = {int(r["episode"]) for r in episode_rows(uploads_rows) if r.get("privacy") == "public"}
     done |= {int(r["episode"]) for r in parked_rows}
     left = [c for c in chapters if c not in done and (last is None or c <= last)]
     return min(left) if left else None
