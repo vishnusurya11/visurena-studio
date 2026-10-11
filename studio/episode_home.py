@@ -98,6 +98,15 @@ def has_timeline(book: Path, number: int) -> bool:
     return (home(book, number) / "placed.json").exists()
 
 
+def shipped_timeline(book: Path, number: int) -> dict | None:
+    """The timeline as it stands on disk, or None: HISTORY, for a report or a
+    compilation that reads a chapter already cut (the book video's cold open).
+    Never fed to a render -- an actor reads it through load_placed, which
+    refuses a stale one (C2_verdict #2)."""
+    path = home(book, number) / "placed.json"
+    return read_json(path) if path.exists() else None
+
+
 def load_placed(book: Path, number: int, episode) -> dict:
     """THE door to placed.json: the timeline, refused when it is not the
     timeline of this plan and this voice.

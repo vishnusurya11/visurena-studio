@@ -191,9 +191,9 @@ def cold_candidates(book: Path, episodes: int) -> list[dict]:
     out = []
     for n in range(1, episodes + 1):
         ep = episode_home.home(book, n)
-        if not (ep / "placed.json").exists() or not chapter_main(book, n).exists() or not square_short(book, n):
+        if not episode_home.has_timeline(book, n) or not chapter_main(book, n).exists() or not square_short(book, n):
             continue
-        for c in bt.candidates(n, episode_home.read_json(ep / "plan.json"), episode_home.read_json(ep / "placed.json")):
+        for c in bt.candidates(n, episode_home.read_json(ep / "plan.json"), episode_home.shipped_timeline(book, n)):
             out.append(c | {"sharp": sharpness(chapter_main(book, n), (c["start_s"] + c["end_s"]) / 2)})
     return out
 
