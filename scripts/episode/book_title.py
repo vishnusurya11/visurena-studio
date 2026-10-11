@@ -349,6 +349,17 @@ def title_contrast(video: Path, spec: bt.BookTitleSpec, scratch: Path) -> float:
     return bt.contrast_ratio(lum(236), lum(values[len(values) // 2]))
 
 
+def read_flags(lines: list[str], read) -> list[str]:
+    """The read-back can only FLAG, so a reader that fails is a flag, not a crash
+    (Qwen3_VQA lost its temp image and killed both uploads, 2026-10-11)."""
+    try:
+        said = read(lines)
+    except Exception as why:
+        return [f"the reader failed ({str(why)[:120]}); the title was not read back"]
+    missing = missing_lines(lines, said)
+    return [f"the reader did not find {missing} on the held frame"] if missing else []
+
+
 def judge(book: Path, spec: bt.BookTitleSpec, out: Path) -> dict:
     """G-BOOKTITLE: refuse what cannot ship, flag what a person should see."""
     ref = book / "compilation" / "chapters" / "ep01_title.mp4"
@@ -362,8 +373,7 @@ def judge(book: Path, spec: bt.BookTitleSpec, out: Path) -> dict:
     if (ratio := title_contrast(out, spec, home(book) / "judge_frame.png")) < CONTRAST_FLOOR:
         refusals.append(f"title contrast {ratio:.1f}:1 under {CONTRAST_FLOOR}:1")
     lines = bt.hero_layout(spec.title, FONT, width=SIDE, height=bt.band_box(SIDE)[3])[0]
-    if missing := missing_lines(lines, reads(home(book) / "judge_frame.png")):
-        flags.append(f"the reader did not find {missing} on the held frame")
+    flags += read_flags(lines, lambda _: reads(home(book) / "judge_frame.png"))
     verdict = {"gate": "G-BOOKTITLE", "file": episode_home.relative(book, out), "refused": refusals,
                "flagged": flags, "contrast": round(ratio, 1), "lufs": round(lufs, 1)}
     (home(book) / "verdict.json").write_text(json.dumps(verdict, indent=2), encoding="utf-8")

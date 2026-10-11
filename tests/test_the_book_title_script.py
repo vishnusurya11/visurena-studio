@@ -65,3 +65,14 @@ def test_the_series_look_is_read_off_episode_one(tmp_path, monkeypatch):
     assert runner.book_look(tmp_path) == "Angular stylised 3D"
     (ep / "plan.json").write_text(json.dumps({"look": ""}), encoding="utf-8")
     assert runner.book_look(tmp_path) == ""                 # photoreal (Scarlet)
+
+
+def test_a_reader_that_fails_is_a_flag_never_a_crash():
+    """2026-10-11: Qwen3_VQA lost its temp image and the whole upload run died at
+    a read that can only flag."""
+    def broken(_):
+        raise RuntimeError("Qwen3_VQA: No such file or directory: temp_image_42.png")
+    flags = runner.read_flags(["A STUDY IN", "SCARLET"], broken)
+    assert len(flags) == 1 and flags[0].startswith("the reader failed")
+    assert runner.read_flags(["A STUDY IN", "SCARLET"], lambda _: "A STUDY IN\nSCARLET") == []
+    assert runner.read_flags(["A STUDY IN"], lambda _: "A STUDY") == ["the reader did not find ['A STUDY IN'] on the held frame"]
