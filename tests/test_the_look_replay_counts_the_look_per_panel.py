@@ -41,3 +41,8 @@ def test_a_strip_sets_the_shipped_panel_beside_the_replayed(tmp_path):
     out = replay.strip(tmp_path / "a.png", tmp_path / "b.png", tmp_path / "s.png")
     assert Image.open(out).size == (100, 50)
     assert replay.bench_dir(tmp_path, 25, "x", out="o").as_posix() == "o/ep25_x"
+
+
+def test_the_tally_counts_unread_panels_apart():
+    good, bad = {"hair_colour": "grey", "facial_hair": "beard"}, {"unread": "x"}
+    assert replay.tally([good, bad, bad], RAGGED)["unread"] == 2

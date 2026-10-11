@@ -33,9 +33,18 @@ ASK = ("This is a character picture of ONE person. Answer each question with ONE
        + "\n".join(f'"{k}": one of {", ".join(v)}.' for k, v in VOCAB.items()))
 
 
+def unwrap(said: str):
+    """The caption workflow's answer: a JSON object, or a LIST whose one element is
+    the object or a STRING of it (Qwen3-VL caption, ep25 replay) -- unwrapped once."""
+    got = pc._loads(said or "")
+    if isinstance(got, list) and got:
+        got = pc._loads(got[0]) if isinstance(got[0], str) else got[0]
+    return got
+
+
 def parse(said: str) -> dict[str, str]:
     """The reader's answer as markers; Unreadable when it holds no answer at all."""
-    got = pc._loads(said or "")
+    got = unwrap(said)
     if not isinstance(got, dict):
         raise pc.Unreadable("the look-state read is not an object")
     out = {k: str(got.get(k, "")).lower().strip() for k in VOCAB}
@@ -45,9 +54,16 @@ def parse(said: str) -> dict[str, str]:
     return out
 
 
+def unread_faults(seen: dict[str, str], want: Markers, where: str) -> list[Fault]:
+    """A HARD marker the look states but the reader did not name refuses: an
+    unread head is not a shown head (a terminal is not a pass)."""
+    return [Fault(kind=f"unread_{key}", where=where, evidence={"want": wanted}, severity="high")
+            for key, wanted in want.model_dump().items() if key in HARD_MARKERS and wanted and not seen.get(key)]
+
+
 def marker_faults(seen: dict[str, str], want: Markers, where: str) -> list[Fault]:
     """One fault per stated marker the picture does not show; HARD on the head."""
-    out = []
+    out = unread_faults(seen, want, where)
     for key, wanted in want.model_dump().items():
         got = seen.get(key, "")
         if wanted and got and lt.family(key, got) != lt.family(key, wanted):
@@ -80,11 +96,11 @@ def identity_fault(margin: float | None, where: str) -> list[Fault]:
 def judge(picture: Path, want: Markers, reader: Callable, where: str = "",
           face_change: bool = False, embed: Callable | None = None, base: Path | None = None,
           others: list[Path] | None = None) -> Verdict:
-    """The verdict on one look picture: HARD head markers refuse; the rest flag."""
+    """The verdict on one look picture: HARD head markers -- wrong OR unread -- refuse; the rest flag."""
     try:
         faults = marker_faults(parse(reader(Path(picture), ASK)), want, where)
     except pc.Unreadable as why:
-        faults = [Fault(kind="unread", where=where, note=str(why), severity="advisory")]
+        faults = [Fault(kind="unread", where=where, note=str(why), severity="high")]
     if face_change and embed is not None and base is not None:
         faults += identity_fault(identity_margin(embed, Path(picture), base, others or []), where)
     hard = any(f.severity == "high" for f in faults)

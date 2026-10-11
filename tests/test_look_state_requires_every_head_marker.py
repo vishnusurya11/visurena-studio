@@ -10,6 +10,8 @@ from studio.continuity_spec import Markers
 from studio.judges import look_state as ls
 
 RAGGED = Markers(headwear="felt_hat", hair_colour="grey", facial_hair="beard", top="shirt", dirt="muddy")
+HEAD = {"headwear": "felt_hat", "hair_colour": "grey", "facial_hair": "beard"}
+"""Every HARD marker read as wanted: an unread head marker refuses (2026-10-11)."""
 
 
 def reader(**said):
@@ -32,23 +34,23 @@ def test_the_sheets_boater_on_a_felt_hat_look_is_hard():
 
 
 def test_a_wrong_top_or_dirt_only_flags():
-    v = ls.judge(Path("x.png"), RAGGED, reader(hair_colour="grey", top="suit_jacket", dirt="clean"))
+    v = ls.judge(Path("x.png"), RAGGED, reader(**HEAD, top="suit_jacket", dirt="clean"))
     assert v.passed and {f.kind for f in v.faults} == {"look_top", "look_dirt"}
 
 
-def test_an_unreadable_answer_flags_and_never_passes_silently():
+def test_an_unreadable_answer_refuses_never_passes_silently():
     v = ls.judge(Path("x.png"), RAGGED, lambda p, q: "I cannot tell")
-    assert v.faults[0].kind == "unread" and v.confidence == 0.0
+    assert not v.passed and v.faults[0].kind == "unread" and v.confidence == 0.0
 
 
 def test_a_look_nearer_a_stranger_than_itself_is_advised():
     vecs = {"look.png": [1.0, 0.0], "base.png": [0.6, 0.8], "other.png": [0.9, 0.1]}
-    v = ls.judge(Path("look.png"), RAGGED, reader(hair_colour="grey"), face_change=True,
+    v = ls.judge(Path("look.png"), RAGGED, reader(**HEAD), face_change=True,
                  embed=lambda p: vecs[Path(p).name], base=Path("base.png"), others=[Path("other.png")])
     assert v.passed and v.faults[0].kind == "look_identity"
 
 
 def test_a_clothes_only_look_skips_identity():
-    v = ls.judge(Path("look.png"), RAGGED, reader(hair_colour="grey"), face_change=False,
+    v = ls.judge(Path("look.png"), RAGGED, reader(**HEAD), face_change=False,
                  embed=lambda p: 1 / 0, base=Path("base.png"))
     assert v.passed

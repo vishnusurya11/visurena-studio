@@ -67,10 +67,12 @@ def shows_look(seen: dict, want) -> bool:
 
 
 def tally(reads: list[dict], want) -> dict:
-    """{'shown': n, 'of': m, 'share': n/m, 'passed': share >= PASS_SHARE}."""
+    """{'shown': n, 'of': m, 'share': n/m, 'passed': share >= PASS_SHARE, 'unread': k} --
+    unread panels count against the share and are named, so a dead reader is seen."""
     shown = sum(shows_look(r, want) for r in reads)
     share = shown / len(reads) if reads else 0.0
-    return {"shown": shown, "of": len(reads), "share": round(share, 2), "passed": share >= PASS_SHARE}
+    return {"shown": shown, "of": len(reads), "share": round(share, 2), "passed": share >= PASS_SHARE,
+            "unread": sum("unread" in r for r in reads)}
 
 
 def staged_looks(book: Path, table, ep, shots) -> dict[str, str]:
