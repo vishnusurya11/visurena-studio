@@ -425,7 +425,11 @@ When the last chapter is public, run
 3. joins main title + (title, main) per chapter by stream copy, stamps shifted by the title (never a 7 s chapter:
    YouTube drops all chapters if one is under 10 s);
 4. uploads it public, sets the 16:9 thumbnail (a 403 is recorded, never fatal), and makes `--replaces` private.
-Look at `title/book/main_title.mp4` and `thumbnail.jpg` before the upload.
+Look at `title/book/main_title.mp4` and `thumbnail.jpg` before the upload. The run
+holds `compilation/.lock`, prints a line per chapter, renders the title's GPU half while
+the CPU cuts, and stops at THE DOOR (`compilation/door.json` + `door_sheet.png`) on a
+title piece longer than its card, a wrong order or a refused G-BOOKTITLE. Every picture
+follows the BOOK's look (photoreal = Krea2, no LoRA, its own refs words).
 
 ## Cut and QC
 

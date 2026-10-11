@@ -13,3 +13,4 @@
 
 ## Log
 - 2026-10-11: owner saw the WotW book video with every card at the chapter's END; asked title first, a book main title unlike the cards, and a poster (thumbnail). Three designers + a judge; C (reliability first) won with B's cold open.
+- [x] Retro (owner 2026-10-11): recorded card layout by sha8, the upload door + contact sheet, the book's look on every picture (main title, thumbnail, chapter-card art), a list-judged doubled-person check, a per-book lock, live logs, a writer fallback, read-back failure = flag, a compile check, GPU decode + packet counts, the GPU half in parallel. WotW/Scarlet not re-made (live: HSn8Gl7mnyA, HOLHQEN0Gic).

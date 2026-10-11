@@ -614,3 +614,27 @@ fixes. Each lesson below cost at least one launch. Tracker rows A38-A74 in
     the upload run. Start long jobs only as tracked background tasks.
   - Keep the GPU fed: the Scarlet title could render while WotW's CPU checks ran.
 
+- **The book-video retro (owner 2026-10-11: "figure out all our issues ... find a way
+  to fix it").** WotW and Scarlet were not re-made (the live videos are HSn8Gl7mnyA,
+  HOLHQEN0Gic). Every fault is now a check:
+  - **The card was guessed wrong four times** (WotW ep06/10/20, Scarlet ep12: seconds
+    of chapter inside the "title"). Assemble now RECORDS each master's card by sha8
+    (`cut/master_layout.json`). Measuring is only for older Shorts, at the change
+    where the card's own length puts it.
+  - **The upload door** (`book_compilation.door`) refuses a title piece longer than its
+    card, a wrong running order, or a refused G-BOOKTITLE. It writes
+    `compilation/door_sheet.png` (each chapter's title, then its last frame).
+  - **The book's look:** Scarlet got WotW's painted LoRA style on its main title,
+    thumbnail AND (latent) chapter-card art. Every picture is routed by the book's
+    look (`plate_request`, `lead_for`). A VLM cannot judge it: it called a photoreal
+    plate a "3D render".
+  - **A person drawn twice is listed, then judged in code,** with a worked example.
+    Yes/no passed two Holmeses, and a bare template was echoed back.
+  - **Run safety:** a per-book lock, a line-buffered log line per chapter, the key-art
+    writer falls back to the logline when the SDK hangs, a read-back failure is a flag
+    not a crash, and every module must compile (heredoc mangling).
+  - **The GPU is fed:** the main title's GPU half runs while the CPU cuts chapters.
+    Frame counts are read off packets (215 ms), and the scene and black passes decode
+    on CUDA.
+  - **Another session shares this checkout:** never stash/checkout/-A, and commit
+    your own paths early.
