@@ -33,8 +33,8 @@ Owner scoping, 2026-10-11:
 ## Status
 - [x] Round 0: look judge fixed (08ebcb0), narrator replay (ep27 PASS 3/3; ep25 FAIL, the look picture was drawn without a beard), BENCH_r2 (no arm passed every hard check; 4-step NOT wired), seam gate (3ea5461), invented-speech check (17eab28)
 - [x] Cycle 1: 10 verdict commits + CK8 adopted for narration; bench 69 min; report CYCLE_1.md
-- [ ] Cycle 2
-- [ ] Cycle 3
+- [x] Cycle 2: CYCLE_2.md, owner sheet ruled
+- [x] Cycle 3: CYCLE_3.md + FINAL.md (21201c6); reserve 4931687 + companion 6f343d3; P90 5.54 h, 0/9 over 6 h; tick_error fixed 50a35c8
 
 ## Log
 - 2026-10-11: plan written; waiting for round 0 to land.
@@ -58,3 +58,48 @@ Owner scoping, 2026-10-11:
   - Owner rulings: a seamed panel falls back to refs-only, ships and is flagged; shipped ep10/T21 and ep26/T25 are left as they are; the Jekyll probe is SKIPPED.
   - The cycle 1 builder is launched.
 - 2026-10-11: cycle 1 built and benched (CYCLE_1.md). Met: seams 0/25 under no-strips, beard 3/3, G-TAIL replay exact, CK8 adopted for narration (-39-45 % sampling). Out: G1. Inconclusive: room tone. Not met: ep25 regrid 2/4 (back views). Projection ~5.7 h.
+- 2026-10-11: cycle 1 done (CYCLE_1.md). Carried to cycle 2:
+  - the LOOK-STATE hat vocabulary;
+  - the regrid bar should exempt back views;
+  - CK for dialogue needs a second seed;
+  - a neutral prompt for the 2x upscale (the cause of the ghost faces);
+  - 1x1 panels framed wider than planned;
+  - 9 of 15 Scarlet heads are empty;
+  - 2 red tests (book_title placed.json lint, ep11 plan regen);
+  - the C1 hypotheses (subject noun first, G2 six calls, 992, the Hope sheet, flashback story time).
+
+  The architecture page needs republishing at the end of cycle 3.
+- 2026-10-11: cycle 2 research done (C2_J, C2_F, C2_B) and skeptic verdict C2_verdict.md: 10 commits and one ~86 min bench, with an owner sheet.
+  - Refuted: the "same faults, skip the climb" memory, because 5 of 10 re-climbs made real progress.
+  - Honest projection: P50 about 4.8 h, P90 about 6.3 h.
+  - Owner rulings pending: P-WORDS, 992, the neutral-tile upscale and the narrator sheet redraw, and whether the 6 h ceiling is P50 or P90.
+  - The cycle 2 builder is launched.
+- 2026-10-11: cycle 2 done (CYCLE_2.md, 9 commits; the QC memo was dropped because its own check showed it would never hit).
+  - Measured:
+    - the ghost faces come from the 2x tile pass;
+    - CK is NO for dialogue;
+    - the framing arms missed the bar;
+    - 992 broke S6's identity.
+  - Projection: P50 5.0 h, P90 6.9 h.
+  - Owner rulings from the sheet:
+    - P-WORDS: no, keep v2;
+    - 992: no, stay at 768;
+    - neutral tile: adopt for NEW draws only;
+    - the 6 h limit applies to EVERY episode (P90).
+  - Cycle 3 targets the P90 tail (plan-ladder loops and relaunches), adopts the neutral tile, and works the carried hypotheses.
+- 2026-10-11: OWNER: "don't ask me for any more details, design it the best way and implement it". From here every ruling is made by us on the evidence and recorded in the cycle report for veto. Spend approval still applies.
+- 2026-10-11: cycle 3 research done (C3_T, C3_R) and verdict C3_verdict.md: 11 commits, a ~55 min bench, and the final 3A/3B measurement. Decisions D1-D12 are made on the owner's behalf and logged for veto:
+  - an honest clock;
+  - a retry never resets the clock;
+  - at the ceiling, render whatever is missing, take the best and flag it, never park;
+  - only a closed SAFETY list stops an episode.
+
+  Projected P90 is about 5.9-6.2 h. The final builder is launched; it writes CYCLE_3.md and FINAL.md.
+- 2026-10-11: helper fixed the autopilot tick crash (50a35c8). Residual report C3_p90_residual.md: ep20 is under 6 h as built, but ep21 lost about 170 min to pre-ceiling faults (most now fixed). DECISION, on the owner's behalf: build the downstream reserve (a retry runs only if spent + its price + the shares of the steps still owed fit under 6 h; a refusal is flagged, never parked) and the signed-verdict-stands companion rule. The run-14 counterfactual is not built.
+- 2026-10-11: cycles complete. The last open item, the content gate inverted on the owner's own fixtures (it refuses good ep05 23/28), is being recalibrated on CPU (C3_content_gate.md). After that the pipeline is clear for the owner's next chapter. Architecture page republish in flight.
+- 2026-10-11: J5 is done (78df605, ab50971): the content gate is calibrated on the owner's episodes, and the architecture page is republished. **THE RETRO IS COMPLETE.** Still open:
+  - `master_eye.content_faults` keeps the old hour and crowd logic;
+  - 4 one-panel J5 residuals;
+  - Jekyll heads are unauthored;
+  - room tone;
+  - framing has no cure.
