@@ -228,9 +228,50 @@ def voice_measure(frames: list, rec: dict, landmarker=None, voice=None) -> dict:
     return {"lag": mouth.lag(mouth.apertures(frames, landmarker), voice)}
 
 
+def tail_measure(video: Path, composite: Path, rec: dict, frames: list, landmarker, heard: str) -> dict:
+    """G-TAIL (C1_verdict #7): a dialogue take's SHIPPED tail -- its sound, the words
+    the ear hears after the line (only when it sounds), and the mouth."""
+    from studio import invented_speech as inv
+
+    if rec.get("lane") != "dialogue" or not Path(composite).exists():
+        return {"tail": None}
+    guide, take = av_sync.load_mono(composite, 24000), av_sync.load_mono(video, 24000)
+    end, ship = inv.speech_end(guide, 24000), float(rec["placed_seconds"])
+    placed_end = ship - rec["line_room"] if rec.get("line_room") is not None else None
+    tail = take[int((end + inv.MARGIN_S) * 24000):int(ship * 24000)]
+    db = round(inv.rms_db(tail), 1) if len(tail) >= int(0.2 * 24000) else None
+    words = inv.extra(inv.words_of(voice_qc_hear(composite)), inv.words_of(heard)) \
+        if db is not None and db > inv.QUIET_DB else []
+    run, rises = tail_mouth(frames, landmarker, end) if db is not None and db > inv.QUIET_DB else (0, 0)
+    state = inv.tail_state(db, words, inv.mouth_speaks(run, rises), inv.asked_mouth(inv.after_line(rec.get("prompt", ""))),
+                           inv.stale(end, placed_end))
+    return {"tail": {"state": state, "ship_db": db, "words": words, "mouth": [run, rises], "line_end_s": round(end, 2)}}
+
+
+def voice_qc_hear(path: Path) -> str:
+    from studio import voice_qc
+    return voice_qc.any_transcriber()(path)
+
+
+def tail_mouth(frames: list, landmarker, line_end: float) -> tuple[int, int]:
+    """(longest open run, rises) of the mouth after the line, at the line's own scale."""
+    import numpy as np
+
+    from studio import invented_speech as inv
+    from studio.measure import mouth
+
+    if landmarker is None or not frames:
+        return 0, 0
+    ap = mouth.apertures(frames, landmarker)
+    cut = int((line_end + inv.MARGIN_S) * mouth.FPS)
+    said = ap[:cut][~np.isnan(ap[:cut])]
+    floor = max(inv.OPEN_FLOOR, inv.OPEN_SHARE * float(np.percentile(said, 90))) if len(said) else inv.OPEN_FLOOR
+    return inv.open_run(mouth.smooth(mouth.fill(ap))[cut:], floor)
+
+
 def judge_rows(m: dict, rec: dict) -> list:
-    """The six rows, in print order, from the measures dict."""
-    from studio import take_leak, take_lock
+    """The judged rows, in print order, from the measures dict."""
+    from studio import invented_speech, take_leak, take_lock
     from studio.measure import cuts, mouth
 
     motions = tv.plan_motions(rec) or [""]
@@ -240,7 +281,8 @@ def judge_rows(m: dict, rec: dict) -> list:
     panel.name = "last-vs-panel"
     return [take_lock.pass_through_row(m.get("pass_through"), motions[0]),
             tz.rotation_row(m.get("rotation"), motions[0]), take_leak.row(m.get("leak")), panel,
-            cuts.row(m.get("cut_vote")), mouth.row(m.get("lag"))]
+            cuts.row(m.get("cut_vote")), mouth.row(m.get("lag"))] + \
+        ([invented_speech.tail_row(m.get("tail"))] if rec.get("lane") == "dialogue" else [])
 
 
 def extend_verdict(v, m: dict, rec: dict):
@@ -467,7 +509,8 @@ def measure_attempt(video: Path, rec: dict, index: int, cells: Path, work: Path,
     frames = take_lock.frames(video, seconds)
     m = (picture_measures(frames, v, rec)
          | staged_measures(video, rec, v, j.get("home", take_dir), seconds, j.get("embed"), j.get("inputs"), source)
-         | voice_measure(frames, rec, j.get("landmarker"), voice_of(composite, rec["lane"] == "dialogue")))
+         | voice_measure(frames, rec, j.get("landmarker"), voice_of(composite, rec["lane"] == "dialogue"))
+         | tail_measure(video, composite, rec, frames, j.get("landmarker"), (audio or {}).get("heard", "")))
     return extend_verdict(v, m, rec), audio, m
 
 
@@ -502,7 +545,7 @@ def take_sha8(path: Path) -> str:
 
 
 MEASURES = ("scripts/episode/take_dq.py", "studio/take_verdict.py", "studio/take_frame.py",
-            "studio/plate_gate.py")
+            "studio/plate_gate.py", "studio/invented_speech.py")
 """The code a take verdict is measured by: a change here re-measures every take."""
 
 

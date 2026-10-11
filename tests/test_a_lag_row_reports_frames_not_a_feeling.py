@@ -85,7 +85,8 @@ def test_the_judged_rows_extend_the_verdict_and_re_sum_its_score():
     dq = take_dq()
     rows = json.loads((FIX / "take_dq_rows.json").read_text(encoding="utf-8"))
     v = dq.extend_verdict(fake_verdict(), rows["measures"], {"lane": "dialogue", "motion": rows["motion"]})
-    assert [g.name for g in v.gates][-6:] == ["pass-through", "rotation", "leak", "last-vs-panel", "cut-vote", "lag"]
+    assert [g.name for g in v.gates][-7:] == ["pass-through", "rotation", "leak", "last-vs-panel", "cut-vote", "lag",
+                                              "tail"]      # G-TAIL on a dialogue take (2026-10-11)
     assert v.passed is False and v.score < 100.0
     assert dq.gate_value(v, "jump") == 0.9 and dq.gate_value(v, "nothing") is None
 

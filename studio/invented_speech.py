@@ -71,3 +71,73 @@ def motion_ratio(during: list[np.ndarray], tail: list[np.ndarray]) -> float:
     """Lower-face motion in the tail as a share of the motion during the line."""
     base = change(during)
     return round(change(tail) / base, 3) if base else 0.0
+
+
+# ---- G-TAIL: the production gate on dialogue takes (C1_verdict #7, 2026-10-11) ----------
+#
+# Replayed over all 204 shipped dialogue takes (C1_A_evidence/shipped_fixed.rows.json):
+# fails exactly wotw ep10/T21 ("Moving!") and ep26/T25 (mouth branch); exempts the
+# prompt-asked mouths; the 5 overwritten early-Scarlet guides read unmeasurable.
+
+ASKED = re.compile(r"\b(?:laugh\w*|call(?:s|ed|ing)?|shout\w*|yell\w*|pant(?:s for|ing|ed)|eat(?:s|ing)?|"
+                   r"drink\w*|bite\w*|chew\w*|gasp\w*|cough\w*|sob\w*|mouth)\b", re.I)
+"""A post-line clause that ASKS the mouth to move: the take obeys it (3/3 measured)."""
+OPEN_FLOOR, OPEN_SHARE = 0.06, 0.3
+"""A mouth is open at max(OPEN_FLOOR, OPEN_SHARE x the line's p90 aperture) (C1_A §1)."""
+OPEN_RUN, RISES = 6, 2
+STALE_S = 1.0
+"""A guide whose speech ends this far from placed.json's line end was overwritten:
+the 5 stale Scarlet guides sit 1.19-3.18 s off, every live guide within 0.68 s."""
+MOUTH_ARMED = True
+"""The mouth branch, armed: 0 false fails over the replay (C1_verdict #7's condition)."""
+
+
+AFTER = re.compile(r"\bAt \d+:\d+, as the line ends,[^.]*\.?", re.I)
+
+
+def after_line(prompt: str) -> str:
+    """The prompt's clauses timed after the line (`episode_ref_official`: 'At 00:03, as the line ends, ...')."""
+    return " ".join(m.group(0).strip() for m in AFTER.finditer(prompt or ""))
+
+
+def asked_mouth(after: str) -> bool:
+    return bool(ASKED.search(after or ""))
+
+
+def stale(guide_end: float | None, placed_end: float | None) -> bool:
+    return guide_end is not None and placed_end is not None and abs(guide_end - placed_end) > STALE_S
+
+
+def open_run(ap: np.ndarray, threshold: float) -> tuple[int, int]:
+    """(longest run of open frames, rises from shut to open) over a tail's apertures."""
+    open_ = np.nan_to_num(np.asarray(ap, dtype=float)) >= threshold
+    longest = run = rises = 0
+    for k, now in enumerate(open_):
+        run = run + 1 if now else 0
+        longest = max(longest, run)
+        rises += int(now and k > 0 and not open_[k - 1])
+    return longest, rises
+
+
+def mouth_speaks(run: int, rises: int) -> bool:
+    return MOUTH_ARMED and run >= OPEN_RUN and rises >= RISES
+
+
+def tail_state(ship_db: float | None, words: list, mouth: bool, asked: bool, stale: bool) -> str:
+    """pass | fail | exempt | unmeasurable for one dialogue take's shipped tail."""
+    if stale:
+        return "unmeasurable"
+    if ship_db is None or ship_db <= QUIET_DB or not (words or mouth):
+        return "pass"
+    return "exempt" if asked else "fail"
+
+
+def tail_row(got: dict | None):
+    """HARD.  Unmeasurable or unmeasured passes (it can tell nothing) with no value."""
+    from studio.take_verdict import Gate
+
+    st = (got or {}).get("state")
+    if st in (None, "unmeasurable"):
+        return Gate("tail", None, True, True, f"cannot tell: {st or 'not measured'}")
+    note = f"{st}: tail {got.get('ship_db')} dB, words {got.get('words') or []}, mouth {got.get('mouth')}"
+    return Gate("tail", got.get("ship_db"), st != "fail", True, note, 0.0 if st != "fail" else 30.0)

@@ -172,7 +172,7 @@ The references sheets and voices live in their own department: `uv run python re
 | 06 | prompts | `uv run python scripts/episode/step_06_prompts.py <book> <n>` | Every take prompt built and linted for $0 with no GPU, BEFORE any grid: length per block, style line, banned props, no last frame, no fragments. |
 | 07 | board | `uv run python scripts/episode/step_07_board.py <book> <n>` | Storyboard grids on the local image model from the plan's prose, up to three references - cast sheets first, the setup's place last. |
 | 08 | panels | `uv run python scripts/episode/step_08_panels.py <book> <n>` | One panel per shot, two machine gates, then `judge:panel_eye`. |
-| 09 | shoot | `uv run python scripts/episode/step_09_shoot.py <book> <n>` | The slow step. |
+| 09 | shoot | `uv run python scripts/episode/step_09_shoot.py <book> <n>` | The slow step. Every dialogue take passes the TAIL gate (G-TAIL, 2026-10-11): a mouth that keeps speaking into the guide's silent tail fails, one reseed, then flagged. |
 | 10 | edit | `uv run python scripts/episode/step_10_edit.py <book> <n>` | Title card, measured bed, cut, mix. |
 | 11 | qc | `uv run python scripts/episode/step_11_qc.py <book> <n>` | Measure the DELIVERED master, never the intention. |
 | 12 | deliver | `uv run python scripts/episode/step_12_deliver.py <book> <n>` | manifest.json beside the master (every gate verdict, every rung, timing totals), the deliverable's full path printed first, notify() through the platform. |

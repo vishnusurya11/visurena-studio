@@ -696,3 +696,12 @@ fixes. Each lesson below cost at least one launch. Tracker rows A38-A74 in
     a short full beard, not stubble. Only the duration wording is rewritten (1 look in
     WotW + Scarlet); Lord Garrick's chin beard with a shaven upper lip, Lavelle's
     imperial and every `stubble` marker keep the book's words. No masked beard inpaint.
+  - **H3 continues the line into a digitally silent guide tail.** Every invented word
+    echoes the line's last word ("Indeed.", "Heed.", "Moving!"). Audio and mouth are
+    one sample: a loud tail means a moving or open mouth, a quiet tail a shut one. 2 of
+    154 shipped dialogue takes speak into silence (wotw ep10/T21, ep26/T25 -- left as
+    shipped, known faults, owner 2026-10-11). G-TAIL now fails them; cure one reseed.
+  - **A guide overwritten in `ComfyUI/input` makes the speech check lie.** 5 early-Scarlet
+    takes staged unhashed `voice_NN.wav` names a later episode overwrote; their guides
+    end 1.2-3.2 s off placed.json and read "invented" falsely. G-TAIL reads such a guide
+    UNMEASURABLE (speech end > 1.0 s off placed.json), never invented.

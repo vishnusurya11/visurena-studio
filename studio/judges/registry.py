@@ -124,7 +124,7 @@ GATE_CLASS = {"frozen-at-start": "frozen_start", "frozen-share": "frozen_share",
               "last-vs-cell": "off_board", "cut": "cut_early", "churn": "blur_warp", "zoom": "over_push",
               "face-at-end": "face_out", "look": "no_black_floor", "post-cut": "cut_early", "pulse": "pulse",
               "lip-sync": "lip_lag", "identity": "identity_drift", "wardrobe": "wardrobe", "jump": "cut_early",
-              "held": "anchored_slide"}
+              "held": "anchored_slide", "tail": "invented_speech"}
 GATE_FIELDS = ("name", "value", "ok", "hard", "note", "penalty")
 
 
