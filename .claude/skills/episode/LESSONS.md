@@ -685,3 +685,14 @@ fixes. Each lesson below cost at least one launch. Tracker rows A38-A74 in
     0/92 seams). A shot still seamed renders refs-only (owner ruling 2026-10-11): a
     staged doubled cell is a duplicate-figure source, so the take gets the sheets,
     the place and the words, ships, and is flagged in the audit sheet.
+  - **Krea2 + Cinematic draws a beard only from a plain "full ... beard" noun** (2/2:
+    captain, Ogilvy). It drops duration, stubble and qualified wording (0/7, including
+    ragged_greyed's "sixteen days of grey-brown beard" on 3/3 draws). The closed
+    `beard` marker now writes the drawn phrase (`looks.drawn_face`), and the grid tags
+    carry it too (ep25: 4/12 one-face tags lacked any beard word).
+  - **LOOK DECISION for the owner to veto (2026-10-11, not ruled):** the narrator's
+    ragged_greyed look is drawn as "a full short grey-brown beard covering the jaw, chin
+    and upper lip, sixteen days grown". Faithful to the book: sixteen days of growth is
+    a short full beard, not stubble. Only the duration wording is rewritten (1 look in
+    WotW + Scarlet); Lord Garrick's chin beard with a shaven upper lip, Lavelle's
+    imperial and every `stubble` marker keep the book's words. No masked beard inpaint.

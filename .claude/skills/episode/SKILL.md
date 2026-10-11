@@ -289,6 +289,10 @@ an edit of an edit, never a composite. One master per place side
 (`refs/places.json`); a state of a place is ONE edit of its master; a view of a
 recurring place is its master or derived from it, never a fresh room from
 words. One sheet per key prop. Closer sizes come from the take's camera.
+**The closed marker writes the drawn facial-hair phrase** (`looks.drawn_face`,
+2026-10-11): under a `beard` marker a duration beard ("sixteen days of grey-brown
+beard", drawn 0/3) is drawn as "a full short grey-brown beard covering the jaw, chin
+and upper lip, sixteen days grown"; a styled beard and `stubble` keep the book's words.
 
 **Look at every picture you draw** before anything is built on it. Put the
 defining state or detail FIRST in its prompt. A detail buried mid-sentence is

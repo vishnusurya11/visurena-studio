@@ -63,10 +63,34 @@ def route_of(look) -> str:
     return ROUTES["face" if look.face_change else "garment"]
 
 
+BEARD = "a full short {colour}beard covering the jaw, chin and upper lip, {grown} grown"
+"""The only beard wording Krea2 + Cinematic draws (C1_L §1a): a plain full-beard
+noun, 2/2 drawn; duration, stubble and qualified wordings 0/7 (ragged_greyed's
+"sixteen days of grey-brown beard" 0/3).  Written from the CLOSED marker."""
+GROWN = re.compile(r"\b((?:\w+|\d+) (?:days?|weeks?|months?))(?:'|\u2019)? (?:growth )?of ((?:[\w-]+ )?)beard\b", re.I)
+"""A duration beard ("sixteen days of grey-brown beard"): the wording the model drops.
+Only this form is rewritten -- a styled or qualified beard (Lord Garrick's chin
+beard with a shaven upper lip, Lavelle's imperial) keeps the book's words."""
+
+
+def drawn_face(look) -> str:
+    """The face layer as drawn: under a `beard` marker a duration beard becomes the
+    drawable full-beard noun, the duration kept as an adjective; any other marker
+    (stubble too -- not ruled, 2026-10-11) leaves the words as they are."""
+    face = look.layers.face
+    if look.markers.facial_hair != "beard":
+        return face
+    return GROWN.sub(lambda m: BEARD.format(colour=m.group(2), grown=m.group(1).lower()), face)
+
+
+def layer_said(look, key: str) -> str:
+    return drawn_face(look) if key == "face" else getattr(look.layers, key)
+
+
 def layers_first(look, lead: str = "") -> str:
     """The look's layers as one sentence list, `lead` (a faulted layer) first."""
     order = ([lead] if lead else []) + [k for k in ORDER if k != lead]
-    said = [getattr(look.layers, k).strip().rstrip(".") for k in order if getattr(look.layers, k).strip()]
+    said = [layer_said(look, k).strip().rstrip(".") for k in order if layer_said(look, k).strip()]
     return ". ".join(s[:1].upper() + s[1:] for s in said) + ("." if said else "")
 
 
