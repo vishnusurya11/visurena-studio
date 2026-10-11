@@ -947,6 +947,16 @@ def retire_verdicts(out: Path) -> None:
     out.with_suffix(".content.json").unlink(missing_ok=True)
 
 
+def phases_of(out: Path, c: dict, record: dict) -> None:
+    """The take's phase row (R2_S #5) into phases.jsonl beside it; a clock that
+    cannot read never costs the take."""
+    from studio import take_phases
+    try:
+        take_phases.record(out, c, record)
+    except Exception as why:
+        print(f"  T{c.get('index', 0):02d} phases unread: {why}", flush=True)
+
+
 def collect(c: dict, prompt_id: str, out: Path) -> dict:
     """Wait for one submitted take and keep its video."""
     began = time.time()
@@ -958,6 +968,7 @@ def collect(c: dict, prompt_id: str, out: Path) -> dict:
     out.parent.mkdir(parents=True, exist_ok=True)
     out.write_bytes(video.read_bytes())
     retire_verdicts(out)
+    phases_of(out, c, record)
     waited = round(time.time() - began, 1)
     return {**c, "measured_seconds": clip_seconds(out),
             "render_s": ran_for(record) if ran_for(record) is not None else waited,

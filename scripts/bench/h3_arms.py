@@ -201,6 +201,12 @@ def ran_for(record: dict) -> float | None:
     return round((t1 - t0) / 1000, 1) if t0 and t1 else None
 
 
+def phases_now(rec: dict) -> dict:
+    """The render's phase row from the log ring, read the moment it is collected."""
+    from studio import take_phases
+    return take_phases.phases(rec, take_phases.ring())
+
+
 def collect_one(job: dict, pid: str, out_dir: Path) -> dict:
     from studio.comfy import outputs_of, wait_record
     rec = wait_record(pid, timeout=3600)
@@ -208,7 +214,7 @@ def collect_one(job: dict, pid: str, out_dir: Path) -> dict:
     dest = out_dir / f"{job['tag']}.mp4"
     shutil.copyfile(video, dest)
     return {"tag": job["tag"], "shot": job["shot"], "arm": job["arm"], "prompt_id": pid,
-            "video": str(dest), "ran_s": ran_for(rec), "size": list(probe_size(dest)),
+            "video": str(dest), "ran_s": ran_for(rec), "size": list(probe_size(dest)), "phases": phases_now(rec),
             "collected": time.strftime("%Y-%m-%dT%H:%M:%S")}
 
 
