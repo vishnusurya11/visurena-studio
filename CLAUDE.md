@@ -39,6 +39,14 @@
 - One checkout, on `master`. Never a worktree, a per-book branch or a copied library.
   The code tree names no book; everything book-specific lives under `library/<book>/`.
 
+## D: is a spinning disk — scan narrow
+- The repo and `library/` live on a 4 TB HDD; C: is the NVMe. Thousands of small reads
+  (a recursive grep, a cache walk) seek the head and starve renders and model loads.
+- Search code with the Grep tool scoped to `studio/ scripts/ tests/ docs/`. Never scan
+  `..`, `library/` or a drive root; name the one episode folder you need.
+- `.claude/hooks/hdd_guard.py` refuses such Bash scans. One heavy read-only analysis at a
+  time, and stop it when you are done — never leave a scan running behind a session.
+
 ## The architecture page is the org chart — keep it true
 The studio is read as a company: code is management (runners, step scripts), agents
 are specialists, `stages.yaml` is the org chart the code runs. The page
