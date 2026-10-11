@@ -83,7 +83,8 @@ def judge(book: Path, shot, setup, seen: pc.Seen) -> list[str]:
                      flat=pc.flat_place(book, setup.location),
                      night=panel_dq.at_night(setup.described), banned=pc.banned_subjects(book),
                      physical=physical_of(book, list(shot.faces or [])),
-                     size=shot.size, extras=getattr(shot, "extras", 0))
+                     size=shot.size, extras=getattr(shot, "extras", 0),
+                     markers=cast_refs.look_markers(book, list(shot.faces or [])))
 
 
 def row_for(book: Path, shot, setup, path: Path) -> dict:
@@ -94,7 +95,8 @@ def row_for(book: Path, shot, setup, path: Path) -> dict:
         return {"shot": shot.index, "passed": False, "faults": [f"unread: {str(why)[:120]}"]}
     twins, fields = twin_check(shot, seen, path)                 # G-TWIN (2026-10-05)
     got = judge(book, shot, setup, seen) + twins
-    return {"shot": shot.index, "passed": not got, "faults": got, "people": seen.people,
+    look = pc.look_advisories(seen, cast_refs.look_markers(book, list(shot.faces or [])))  # G-LOOK-PANEL, advisory
+    return {"shot": shot.index, "passed": not got, "faults": got, "look_advisory": look, "people": seen.people,
             "lookalikes": seen.lookalikes, "hour": seen.hour, "landform": seen.landform,
             "text": seen.text, "subjects": seen.subjects, **fields}
 

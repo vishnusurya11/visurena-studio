@@ -79,14 +79,16 @@ def with_twins(row: dict, twins: list[str]) -> dict:
 
 
 def verdict_for(book: Path, shot, setup, reads: list[pc.Seen]) -> dict:
+    from studio import cast_refs
+    markers = cast_refs.look_markers(book, list(shot.faces or []))
     got = tc.take_faults(
         reads, planned=len(shot.faces or []), crowd=bool((setup.crowd or "").strip()),
         flat=pc.flat_place(book, setup.location), night=panel_dq.at_night(setup.described),
         physical=[pc_row(book, w) for w in (shot.faces or [])],
         frame=pc.stage_text(shot, setup), banned=pc.banned_subjects(book),
-        size=shot.size, extras=getattr(shot, "extras", 0))
+        size=shot.size, extras=getattr(shot, "extras", 0), markers=markers)
     whole = tc.busiest(reads)
-    return {"passed": not got, "faults": got, "people": whole.people,
+    return {"passed": not got, "faults": got, "look_log": tc.look_log(reads, markers), "people": whole.people,
             "lookalikes": whole.lookalikes, "hour": whole.hour, "text": whole.text}
 
 

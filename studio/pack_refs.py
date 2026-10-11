@@ -129,16 +129,20 @@ def wardrobe_state(by_chapter: dict, chapter: int) -> str:
 
 
 def character_row(book: Path, who: str, chapter: int) -> dict:
-    """A refs.json character row built from the dossier: the invariant body, then
-    the chapter's clothes in words (the sheet shows one wardrobe only)."""
+    """A refs.json character row built from the dossier: ONE head (the look's
+    restated hair, beard or hat lead and replace the body's -- retro 2026-10-10),
+    the body, then the chapter's clothes; plus the look id and its markers,
+    which the content gates compare (`studio.look_table`)."""
+    from studio import look_table
     card = json.loads((Path(book) / "analysis" / "characters" / f"{who}.json").read_text(encoding="utf-8"))
     prof = card.get("profile") or {}
-    worn = (prof.get("wardrobe") or {}).get(wardrobe_state(prof.get("wardrobe_by_chapter") or {}, chapter), "")
+    look = wardrobe_state(prof.get("wardrobe_by_chapter") or {}, chapter)
+    worn = ((prof.get("wardrobe") or {}).get(look, "") or "").strip()
     body = (prof.get("physical") or "").strip()
-    physical = f"{body} Wearing: {worn.strip()}" if worn else body
     return {"ref_id": f"char-{who}", "kind": "character", "entity_id": who,
-            "name": card.get("name", who), "physical": physical,
-            "wardrobe": {"indoor": worn.strip(), "outdoor": worn.strip()},
+            "name": card.get("name", who), "physical": look_table.row_text(body, worn),
+            "wardrobe": {"indoor": worn, "outdoor": worn}, "look": look,
+            "markers": look_table.markers_of(body, worn),
             "rel_path": f"refs/characters/{who}/sheet.png"}
 
 

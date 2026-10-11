@@ -199,13 +199,31 @@ BEARD_WORD = re.compile(r"\b(?:beards?|m(?:ou|u)staches?|whiskers|goatees?|stubb
 """A row that asks for facial hair licenses it in the picture."""
 
 
-def contradictions(seen: Seen, physical: str) -> list[str]:
+def marked(markers, key: str) -> list[str] | None:
+    """Each face's look marker for `key`; None when a face states none (or no
+    markers came), and the row's prose decides as before."""
+    values = [(m or {}).get(key, "") for m in markers or []]
+    return values if values and all(values) else None
+
+
+def shaven_by_markers(seen: Seen, faces: list[str]) -> list[str]:
+    """Facial hair seen where every staged look is clean-shaven."""
+    said = " ".join(seen.subjects).lower()
+    hair = [b for b in BEARDS if b in said]
+    return [f"{hair[0]} on a clean-shaven look"] if hair and all(f == "none" for f in faces) else []
+
+
+def contradictions(seen: Seen, physical: str, markers=None) -> list[str]:
     """What the picture shows that the cast row rules out.
 
     MEASURED on ep07: the reader named a moustache on the narrator in six
     panels and his row reads "a lean clean-shaven man of thirty-five".
-    Nothing in this pipeline compared the two.
+    Nothing in this pipeline compared the two.  Since 2026-10-10 the staged
+    LOOK's markers decide when every face has one: a row that said "dark" and
+    "grey" at once let every check pass (retro A §5).
     """
+    if (faces := marked(markers, "facial_hair")) is not None:
+        return shaven_by_markers(seen, faces)
     rows = physical if isinstance(physical, (list, tuple)) else [physical or ""]
     said = " ".join(seen.subjects).lower()
     # PER FACE ROW, never the concatenation: ep14 T19 put George (clean-shaven)
@@ -217,6 +235,32 @@ def contradictions(seen: Seen, physical: str) -> list[str]:
     out = []
     if any(CLEAN.search(r or "") for r in rows) and (hair := [b for b in BEARDS if b in said]):
         out.append(f"{hair[0]} on a clean-shaven character")
+    return out
+
+
+LOOK_KEYS = ("headwear", "facial_hair", "top")
+"""What G-LOOK-PANEL reads off a one-face panel's subject list besides hair."""
+
+
+def seen_marker(key: str, said: str) -> str:
+    from studio import look_table as lt
+    if key == "hair_colour":
+        return lt.seen_hair(said)
+    return lt.first_of({"headwear": lt.HEADWEAR, "facial_hair": lt.FACIAL, "top": lt.TOP}[key], said)
+
+
+def look_advisories(seen: Seen, markers) -> list[str]:
+    """G-LOOK-PANEL, ADVISORY (verdict 2026-10-10): a one-face panel whose listed
+    hat, hair, facial hair or top is not the staged look's.  Never a fault until
+    it is calibrated over every narrator panel of a finished book."""
+    from studio import look_table as lt
+    if len(markers or []) != 1 or not markers[0]:
+        return []
+    said, out = " ".join(seen.subjects).lower(), []
+    for key in ("hair_colour",) + LOOK_KEYS:
+        want, got = markers[0].get(key, ""), seen_marker(key, said)
+        if want and got and lt.family(key, got) != lt.family(key, want):
+            out.append(f"look: {key} reads {got!r}, the staged look is {want!r}")
     return out
 
 
@@ -280,7 +324,7 @@ def landform_agrees(banned: str, seen: "Seen") -> bool:
 
 def faults(seen: Seen, frame: str, planned: int, crowd: bool,
            flat: bool, night: bool, banned=(), physical: str = "",
-           size: str = "", extras: int = 0) -> list[str]:
+           size: str = "", extras: int = 0, markers=None) -> list[str]:
     """Every way this picture disagrees with the shot that asked for it.
 
     `frame` is kept for the caller's own reporting; it is NOT used to decide
@@ -292,7 +336,7 @@ def faults(seen: Seen, frame: str, planned: int, crowd: bool,
         out.append(f"landform {seen.landform!r}: this place is flat")
     if strangers := [b for b in banned_subject(seen, banned) if not pits_own_wall(b, staged)]:
         out.append(f"banned from this book: {', '.join(strangers)}")
-    out += contradictions(seen, physical)
+    out += contradictions(seen, physical, markers)
     # who may be here is DECLARED: faces + extras, or the setup's crowd. The
     # one prose exemption left is an INSERT on something worn -- a collar stud
     # at a throat holds a person by necessity -- and it reads whole words now.

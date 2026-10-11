@@ -59,14 +59,25 @@ def usual_posture(reads: list[Seen]) -> str:
     return max(said, key=lambda p: (said.count(p), -said.index(p))) if said else ""
 
 
-def drifted(seen: Seen, physical) -> list[str]:
+def off_look(seen: Seen, colours: list[str]) -> list[str]:
+    """Hair seen whose family no staged look's hair colour allows."""
+    from studio import look_table as lt
+    allowed = {lt.family("hair_colour", c) for c in colours}
+    said = " ".join(seen.subjects).lower()
+    return [h for h in HAIR if h in said and lt.seen_hair(h) not in allowed]
+
+
+def drifted(seen: Seen, physical, markers=None) -> list[str]:
     """Hair the cast row rules out, seen in the take.
 
     MEASURED on ep07 T26: the take showed grey hair on a woman whose row says
     thick chestnut-auburn. Nothing compared them.  `physical` is one row or
     ONE ROW PER FACE (the 2026-09-30 beard fix made the checkers pass lists;
     ep15 was the first episode through this path and it crashed on .lower()).
-    A hair drifts only when NO staged row allows it."""
+    A hair drifts only when NO staged row allows it.  Since 2026-10-10 the
+    staged looks' hair-colour markers decide when every face states one."""
+    if (colours := pc.marked(markers, "hair_colour")) is not None:
+        return off_look(seen, colours)
     rows = [physical] if isinstance(physical, str) else list(physical or [])
     rows = [r.lower() for r in rows if r]
     if not rows:
@@ -75,15 +86,30 @@ def drifted(seen: Seen, physical) -> list[str]:
     return [h for h in HAIR if h in said and all(h.split()[0] not in r for r in rows)]
 
 
+def look_log(reads: list[Seen], markers) -> list[str]:
+    """G-LOOK-TAKE, LOG ONLY (verdict 2026-10-10: its only cure is a re-render,
+    3/21): the hair family changing across the take's frames, or off the one
+    staged look on two frames or more."""
+    from studio import look_table as lt
+    seen = [h for h in (lt.seen_hair(" ".join(r.subjects)) for r in reads) if h]
+    out = [f"look: hair changes across frames ({' -> '.join(seen)})"] if len(set(seen)) > 1 else []
+    one = (markers or [{}])[0] or {} if len(markers or []) == 1 else {}
+    want = lt.family("hair_colour", one.get("hair_colour", ""))
+    if want and (off := sum(h != want for h in seen)) >= 2:
+        out.append(f"look: hair reads off the staged look ({want}) on {off} frames")
+    return out
+
+
 def take_faults(reads: list[Seen], planned: int, crowd: bool, flat: bool,
                 night: bool, physical: str, frame: str, banned=(),
-                size: str = "", extras: int = 0) -> list[str]:
+                size: str = "", extras: int = 0, markers=None) -> list[str]:
     """Every way this take disagrees with the shot that asked for it -- judged
     by the same rules as its panel: the shot's size and its declared extras."""
     seen = busiest(reads)
     out = faults(seen, frame=frame, planned=planned, crowd=crowd, flat=flat,
-                 night=night, banned=banned, physical=physical, size=size, extras=extras)
-    out += [f"{h} where the row says otherwise" for h in drifted(seen, physical)]
+                 night=night, banned=banned, physical=physical, size=size, extras=extras,
+                 markers=markers)
+    out += [f"{h} where the row says otherwise" for h in drifted(seen, physical, markers)]
     return out
 
 

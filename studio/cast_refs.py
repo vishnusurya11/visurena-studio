@@ -63,6 +63,12 @@ def row(book: Path, who: str) -> dict:
     raise KeyError(f"{who} has no row in refs.json: bind him before you draw him")
 
 
+def look_markers(book: Path, who: list[str]) -> list[dict]:
+    """The bound look markers of everyone a shot casts, one per face ({} for a
+    row with none: the prose rule decides for it -- retro 2026-10-10)."""
+    return [row(book, name).get("markers") or {} for name in who]
+
+
 def physical(row: dict) -> str:
     """The invariant caption: true in every setup, positive, unconditional."""
     return (row.get("physical") or "").strip()
