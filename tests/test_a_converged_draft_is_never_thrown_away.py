@@ -1,10 +1,10 @@
 """ep15 (2026-10-01, eight plan deferrals): the improve rung converged the
-draft to ONE battery fault, then FRESH_BRIEF discarded it and wrote from
+draft to ONE battery fault, then the old fresh_brief rung discarded it and wrote from
 nothing (39-57 faults), MODEL_TIER repeated the cycle, and keep_best deferred
 a 1-fault draft -- eight times, ~3.5 h, all paid calls.  A rung that would
 start over now degrades to one more targeted improve while the draft is
 within CONVERGED faults of passing; only a genuinely bad draft is thrown
-away."""
+away.  Since C2_verdict #3 there is no fresh_brief rung at all."""
 from __future__ import annotations
 
 from studio import plan_ladder
@@ -23,9 +23,7 @@ class Desk(plan_ladder.Desk):
         self.agent, self.best, self.brief = None, None, {"x": 1}
         self.wrote = []
 
-    def brief_(self, fresh: bool = False):
-        if fresh:
-            self.wrote.append("FRESH-BRIEF-BUILT")
+    def brief_(self):
         return self.brief
 
     def escalate(self):
@@ -41,13 +39,10 @@ class Desk(plan_ladder.Desk):
         self.wrote.append("improve" if previous is not None else "fresh")
 
 
-def test_a_near_pass_turns_a_fresh_start_into_one_more_improve():
+def test_a_near_pass_is_edited_by_the_improve_rung():
     desk = Desk()
-    desk.take(Rung(plan_ladder.FRESH_BRIEF, 1.0), 0, verdict(1))
+    desk.take(Rung(plan_ladder.IMPROVE, 1.0), 0, verdict(1))
     assert desk.wrote == ["improve"]          # the converged draft is edited, never discarded
-    desk2 = Desk()
-    desk2.take(Rung(plan_ladder.FRESH_BRIEF, 1.0), 0, verdict(9))
-    assert desk2.wrote == ["FRESH-BRIEF-BUILT", "fresh"]   # a bad draft still starts over
 
 
 def test_the_model_tier_rung_also_edits_a_near_pass():

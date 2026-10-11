@@ -1,5 +1,5 @@
 """The battery passes and the critic keeps finding a fault: after improve x2,
-fresh_brief x1 and model_tier x1 (each EDITS a converged draft, 33f11b4),
+and model_tier x1 (each EDITS a converged draft, 33f11b4),
 the terminal keeps the BEST draft -- the one the critic faulted
 least -- writes it back as plan.json and signs it flagged in the judge's
 name, faults listed, with an audit row.  Never a park."""
@@ -52,8 +52,8 @@ def test_the_best_draft_is_kept_and_signed_flagged(ctx, monkeypatch):
     writer, critic = _run(ctx, monkeypatch)
     # 33f11b4 (ep15): a converged draft (<= CONVERGED faults) is edited by every
     # rung, model_tier too, so a near pass gets its last edit before the terminal
-    assert [t[:7] for t in TITLES[:len(writer.calls)]] == ["Draft A", "Draft B", "Draft C", "Draft D", "Draft E"]
-    assert len(critic.texts) == 5
+    assert [t[:7] for t in TITLES[:len(writer.calls)]] == ["Draft A", "Draft B", "Draft C", "Draft D"]
+    assert len(critic.texts) == 4
     assert json.loads(_plan(ctx).read_text(encoding="utf-8"))["title"] == "Draft B"
     doc = json.loads(plan_verdict.verdict_path(_plan(ctx)).read_text(encoding="utf-8"))
     assert doc["verdict"] == "APPROVE" and doc["flagged"] is True
@@ -68,15 +68,14 @@ def test_the_terminal_leaves_an_audit_row_and_a_terminal_learning(ctx, monkeypat
     assert rows[0].sha8 == plan_verdict.plan_sha8(_plan(ctx))
     assert rows[0].artefact == "episodes/ep03/plan.verdict.json"
     actions = [(row.action, row.terminal) for row in learnings.load(ctx.learnings_path)]
-    assert actions == [("improve", False), ("improve", False), ("fresh_brief", False),
-                       ("model_tier", False), ("keep_best", True)]
+    assert actions == [("improve", False), ("improve", False), ("model_tier", False), ("keep_best", True)]
 
 
-def test_the_writer_saw_the_critics_lines_and_the_fresh_brief_saw_none(ctx, monkeypatch):
+def test_the_writer_saw_the_critics_lines_on_every_rung(ctx, monkeypatch):
     writer, _ = _run(ctx, monkeypatch)
     assert writer.calls[0] is None
     assert all(line.startswith("G-READER ") for line in writer.calls[1])
-    # 33f11b4 (ep15): a CONVERGED draft is edited by every rung, fresh_brief too
+    # 33f11b4 (ep15): a CONVERGED draft is edited by every rung, model_tier too
     assert all(line.startswith("G-READER ") for line in writer.calls[3])
 
 

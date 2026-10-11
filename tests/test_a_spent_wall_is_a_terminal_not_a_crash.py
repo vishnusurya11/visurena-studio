@@ -81,7 +81,7 @@ def test_the_ladder_ends_at_its_terminal_with_a_deferral_on_disk(tmp_path):
     assert signed.name == plan_ladder.DEFERRED and not desk.plan.exists()
     aside = json.loads(signed.read_text(encoding="utf-8"))
     assert aside["verdict"] == "DEFERRED" and aside["passes"] == 1 and aside["draft"]["number"] == 3
-    assert writer.asked == 4                           # improve x2, fresh_brief, model_tier: every rung refused for $0
+    assert writer.asked == 3                           # improve x2, model_tier: every rung refused for $0
     last = ctx.learned[-1]                             # the terminal learning: the policy's rung name, the cause's word in the note
     assert last.terminal and last.action == "keep_best" and last.note.endswith("-> defer")
     assert any("studio.llm.OverBudget" in s for s in ctx.said)

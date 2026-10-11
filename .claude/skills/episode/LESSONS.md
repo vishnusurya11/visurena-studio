@@ -733,3 +733,15 @@ fixes. Each lesson below cost at least one launch. Tracker rows A38-A74 in
       0 stacked (the instrument reads 1.0 + a seam on the shipped panels).
     - **Room tone in the guide tail: inconclusive.** The zero tail invented no word on
       S4 seeds 1/3/4 either (two tails sounded, no word), so the A/B cannot rule.
+- **Cycle 2 of the continuity retro (2026-10-11, `docs/audit/2026-10-10_continuity_retro/C2_verdict.md`).**
+  - **A rung that throws history away rarely wins (commit 3).** Over 40 terminal plan
+    climbs (ep17-27), fresh_brief produced the kept draft once, and that one was an
+    anomaly (ep18 14:21, [3, 3, 1, 58 -> 58]). 547 of 849 rung minutes ran after the
+    kept draft already existed. A rung is kept only while it is the source of kept
+    drafts. The ladder is improve x 2 -> model_tier -> terminal.
+    WATCH (next 3 episodes): log model_tier's input fault count -- it now edits
+    improve2's draft with the whole merged history, where it used to edit fresh_brief's.
+  - **The same faults are not the same outcome (refuted fix, not built).** 5 of 10
+    re-climbs that started on the previous climb's fault count made progress (ep23
+    40->17, ep25 36->13). A memory that skips them parks the series. Remember only
+    "no progress twice" (cycle 3, H1).

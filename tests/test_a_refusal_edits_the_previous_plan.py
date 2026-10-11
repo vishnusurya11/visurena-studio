@@ -76,18 +76,14 @@ def test_an_improve_rung_hands_the_refused_plan_back_to_be_edited(tmp_path):
     assert writer.refusals[0] == ["G-SCALE shot 4: no cell for a close"]
 
 
-def test_a_fresh_brief_starts_from_nothing(tmp_path, monkeypatch):
-    from types import SimpleNamespace
-    monkeypatch.setattr(plan_ladder, "plan_brief", SimpleNamespace(build=lambda b, n, targets=None: {"number": n}))
+def test_no_rung_starts_from_nothing(tmp_path):
+    """C2_verdict #3: the fresh_brief rung is gone; a draft well off the mark is
+    edited with the whole refusal history, by improve and model_tier alike."""
     writer = Recorder()
     desk = _desk(tmp_path, writer)
-    fresh = next(r for r in plan_ladder.ladder().rungs if r.name == plan_ladder.FRESH_BRIEF)
-    # a draft well off the mark starts over; a CONVERGED one (<= 2 faults) is
-    # edited instead, never discarded (ep15, 2026-10-01: eight passes lost)
-    desk.take(fresh, 0, plan_ladder.battery_verdict([f"G-SCALE shot {k}" for k in range(4)]))
-    assert writer.previous == [None] and writer.refusals == [None]
-    desk.take(fresh, 0, plan_ladder.battery_verdict(["G-SCALE shot 4"]))
-    assert writer.previous[-1] is not None            # the near-pass was edited
+    for rung in plan_ladder.ladder().rungs:
+        desk.take(rung, 0, plan_ladder.battery_verdict([f"G-SCALE shot {k}" for k in range(4)]))
+    assert all(p is not None for p in writer.previous) and all(writer.refusals)
 
 
 def test_the_model_tier_rung_is_a_tier_that_reasons():
@@ -152,7 +148,7 @@ def test_nothing_deferred_means_nothing_resumed(tmp_path):
 
 def test_the_best_refused_draft_is_the_one_deferred(tmp_path, monkeypatch):
     """Pass 6 of episode 13: two edits took the draft from 34 battery lines to one,
-    then fresh_brief and model_tier wrote from nothing and the deferral kept the
+    then the old fresh_brief rung and model_tier wrote from nothing and the deferral kept the
     LAST draft.  The desk keeps the draft with the fewest battery lines and
     defers that one, so the next pass resumes from the best."""
     from types import SimpleNamespace
@@ -171,10 +167,10 @@ def test_the_best_refused_draft_is_the_one_deferred(tmp_path, monkeypatch):
     plan.write_text(json.dumps({**canned_plan(3), "title": "Draft 0"}), encoding="utf-8")
     desk = plan_ladder.Desk(SimpleNamespace(book_dir=tmp_path, number=3), plan, writer=Titled())
     rungs = plan_ladder.ladder().rungs
-    lines = [34, 1, 5, 7]                       # Draft 0 -> 34 lines, Draft 1 -> 1, Draft 2 -> 5, Draft 3 -> 7
-    for rung, i, n in [(rungs[0], 0, 34), (rungs[0], 1, 1), (rungs[1], 0, 5), (rungs[2], 0, 7)]:
+    # Draft 0 -> 34 lines, Draft 1 -> 1, Draft 2 -> 5 (improve x2, model_tier)
+    for rung, i, n in [(rungs[0], 0, 34), (rungs[0], 1, 1), (rungs[1], 0, 5)]:
         desk.take(rung, i, plan_ladder.battery_verdict([f"G-X {k}" for k in range(n)]))
-    final = plan_ladder.battery_verdict(["G-X 0", "G-X 1"])      # Draft 4 -> 2 lines
+    final = plan_ladder.battery_verdict(["G-X 0", "G-X 1"])      # Draft 3 -> 2 lines
     verdict = desk.terminal(final)
     aside = desk.sign(verdict)
     doc = json.loads(aside.read_text(encoding="utf-8"))

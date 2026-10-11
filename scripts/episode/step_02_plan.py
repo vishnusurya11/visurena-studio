@@ -11,7 +11,7 @@ registered agent (`agents.episode_writer`); the judge is two-fold: the
 battery (`plan_check`, launched as a script so it reads the draft exactly as
 every later step will) and, once the battery passes, the critic
 (`agents.plan_reader` lists, `studio.judges.plan` judges).  A fault climbs
-`studio.plan_ladder` -- improve x2, fresh_brief x1, model_tier x1 -- under
+`studio.plan_ladder` -- improve x2, model_tier x1 -- under
 `judged_gate.clear`, and ends in one of two terminals that ask nobody: a
 critic fault keeps the best draft and signs it flagged; a battery that never
 passed defers the unit (plan.deferred.json, no signature, an audit row).

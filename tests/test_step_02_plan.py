@@ -1,5 +1,5 @@
 """Step 02 of the episode stage: brief -> write -> plan_check + the critic ->
-the plan ladder (improve x2, fresh_brief, model_tier) -> the PLAN signature
+the plan ladder (improve x2, model_tier) -> the PLAN signature
 in the judge's name, or the draft deferred when the battery never passes.
 
 A fake writer, a fake capture and a fake reader stand in for the agent, the
@@ -179,7 +179,7 @@ def test_a_battery_that_keeps_refusing_defers_the_unit_after_the_whole_ladder(ct
     # 5 battery reads + ONE plan_repair attempt before the deferral surfaces
     # (2026-10-01: the cure table runs on the aside; only when it cannot clean
     # the battery does the unit defer)
-    assert len(writer.calls) == 5 and len(gate.commands) == 6
+    assert len(writer.calls) == 4 and len(gate.commands) == 5   # no fresh_brief rung (C2_verdict #3)
     assert gate.commands[-1][1].endswith("plan_repair.py")
     assert not _plan(ctx).exists(), "a refused draft is not left where the next run would take it as written"
     assert (ctx.home / step.plan_ladder.DEFERRED).exists()

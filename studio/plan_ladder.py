@@ -1,12 +1,17 @@
 """The plan ladder (episode 02_05), and its two terminals by cause.
 
-    improve x2  ->  fresh_brief x1  ->  [battery still refusing] model_tier x1  ->  terminal
+    improve x2  ->  [battery still refusing] model_tier x1  ->  terminal
 
 A rung re-drafts the plan through the writer: `improve` hands back every
 refusal so far (the battery's lines and the critic's, one REFUSED block);
-`fresh_brief` starts over from a freshly gathered brief with no history;
-`model_tier` asks another tier, and only while no draft has yet passed the
-battery.  Every rung costs no GPU second, so the budget never refuses one.
+`model_tier` asks another tier with the same history, and only while no draft
+has yet passed the battery.  Every rung costs no GPU second, so the budget
+never refuses one.
+
+There is no fresh_brief rung (C2_verdict #3, 2026-10-11): over 40 terminal
+climbs (ep17-27) the rung that threw the history away and wrote from a new
+brief produced the kept draft once, an anomaly, while 547 of 849 rung minutes
+ran after the kept draft already existed.
 
 The terminal is by cause.  A critic fault (the battery passed at least
 once): the BEST draft -- the battery-clean one the critic faulted least --
@@ -35,11 +40,11 @@ from studio.judges import plan as plan_judge
 from studio.judges.verdict import Fault, Verdict
 from studio.ladder import Ladder, Rung
 
-IMPROVE, FRESH_BRIEF, MODEL_TIER, DEFER = "improve", "fresh_brief", "model_tier", "defer"
+IMPROVE, MODEL_TIER, DEFER = "improve", "model_tier", "defer"
 CONVERGED = 2
 """A draft within this many battery faults of passing is EDITED by every rung,
-never thrown away (ep15, 2026-10-01: fresh_brief discarded 1-fault drafts
-eight times)."""
+never thrown away (ep15, 2026-10-01: the old fresh_brief rung discarded
+1-fault drafts eight times)."""
 MODEL_TIER_NAME = "canon"
 """The tier the model_tier rung asks: the one that reasons.  The "reasoning"
 tier is the workhorse model with reasoning off (models.yaml, the owner's cost
@@ -106,8 +111,7 @@ def mechanical_cures(plan: Path, book: Path, number: int, say=print) -> None:
 
 
 def ladder(improves: int = 2) -> Ladder:
-    return Ladder([Rung(IMPROVE, 0.0, tries=improves), Rung(FRESH_BRIEF, 0.0), Rung(MODEL_TIER, 0.0)],
-                  "keep_best")
+    return Ladder([Rung(IMPROVE, 0.0, tries=improves), Rung(MODEL_TIER, 0.0)], "keep_best")
 
 
 def battery_verdict(lines: list[str]) -> Verdict:
@@ -212,8 +216,8 @@ class Desk:
                 self._names_cache = {}
         return self._names_cache
 
-    def brief_(self, fresh: bool = False) -> dict:
-        if self.brief is None or fresh:
+    def brief_(self) -> dict:
+        if self.brief is None:
             self.brief = plan_brief.build(self.ctx.book_dir, self.ctx.number)
         return self.brief
 
@@ -259,7 +263,7 @@ class Desk:
             return
         self.pending = None
         # The re-add killer (2026-10-05): every rung's draft -- improve,
-        # fresh_brief, model_tier, resume -- is scrubbed of ghost body-part
+        # model_tier, resume -- is scrubbed of ghost body-part
         # clauses for free BEFORE the battery ever re-judges it.  The scrub
         # stays inside the try-less path: a scrub bug surfaces as write_plan's
         # loud SystemExit, never a silent skip.  Then F11: the rest of the
@@ -287,8 +291,8 @@ class Desk:
     def remember(self, verdict: Verdict) -> None:
         """The draft on disk with its verdict, when the battery let it through;
         else the battery-refused draft with the fewest lines so far (pass 6 of
-        episode 13: two edits took a draft to one line, then fresh_brief and
-        model_tier wrote from nothing and the deferral kept the last)."""
+        episode 13: two edits took a draft to one line, then the old fresh_brief
+        rung and model_tier wrote from nothing and the deferral kept the last)."""
         if not self.plan.exists():
             return
         doc = episode_home.read_json(self.plan)
@@ -301,7 +305,7 @@ class Desk:
         """One rung: remember the draft it faulted, then draft again.  A
         CONVERGED draft (within CONVERGED faults of passing) is EDITED by every
         rung, never discarded: ep15 (2026-10-01) ran eight passes in which
-        improve reached one fault and fresh_brief then wrote from nothing
+        improve reached one fault and the old fresh_brief rung wrote from nothing
         (39-57 faults back), ~3.5 h of paid calls to stand still."""
         self.remember(verdict)
         self.refusals = merged(self.refusals, refusal_lines_of(verdict))
@@ -310,10 +314,6 @@ class Desk:
         near = len(verdict.faults) <= CONVERGED and self.refused_plan() is not None
         if rung.name == IMPROVE or near:
             self.write(self.refusals, previous=self.refused_plan())
-        elif rung.name == FRESH_BRIEF:
-            self.brief_(fresh=True)
-            self.refusals = []
-            self.write(None)
         elif rung.name == MODEL_TIER and not self.drafts:
             self.write(self.refusals, previous=self.refused_plan())
 

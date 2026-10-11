@@ -100,7 +100,7 @@ inputs, so the order is fixed:
 
 ```
 uv run python scripts/refs/cast_rows.py <book> <n> <who[=Display:gender]> ...  # FIRST: takes, grids and content checks read this one bound row
-uv run python scripts/episode/step_02_plan.py <book> <n>          # the writer agent -> plan.json through plan_check + improve loop, then the PLAN signature
+uv run python scripts/episode/step_02_plan.py <book> <n>          # the writer agent -> plan.json through plan_check; improve x 2, then model_tier, then the terminal; then the PLAN signature
 uv run python library/<book>/episodes/epNN/plan.py                 # OR a hand-authored plan beside its plan.json, only through episode_home.write_plan
 uv run python scripts/episode/plan_check.py <book> <n>             # "VERDICT: clean"; CAST BOUND needs every sheet on disk
 #   then sheets, places, lines, respot, timeline (steps 3-7)
