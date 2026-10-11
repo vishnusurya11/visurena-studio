@@ -24,6 +24,7 @@ import re
 import subprocess
 import sys
 from pathlib import Path
+from types import SimpleNamespace
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 
@@ -286,6 +287,9 @@ def verdict(report: dict) -> bool:
             # unmeasured length is not a pass either.
             and not episode_spec.short_refusal(float(report.get("seconds") or 1e9))
             and report.get("longest_gap_s", 0.0) <= MAX_GAP_S
+            # AN UNMEASURED LINE IS NOT A HEARD LINE (C3_verdict #2): a fail-fast
+            # report carries lines: null, and all([]) would have read True.
+            and report.get("lines") is not None and report.get("lines_measured", True)
             and all(row["passed"] for row in report["lines"])
             # AN ABSENT EDIT BLOCK IS NOT A PASS.  `.get("edit", {}).get("ok", True)`
             # made a missing measurement clean twice over.
@@ -323,19 +327,28 @@ def qc_code_sha8() -> str:
     return step_11_qc.qc_measures_sha8()
 
 
-def main(book_id: str, number: int, engine: str = "i2v") -> None:
+def title_card_on_disk(book: Path, number: int) -> bool:
+    return (book / "title" / f"ep{number:02d}.mp4").exists() or (book / "title" / "title.mp4").exists()
+
+
+def load_inputs(book_id: str, number: int, engine: str) -> SimpleNamespace:
+    """What every row reads: the plan, the master, the timeline, the takes, the laid lines."""
     book = episode_home.book_dir(book_id)
     episode = episode_home.load_plan(book, number)
-    master = episode_home.master_path(book, number, engine)
-    work = episode_home.work_dir(book, number, engine)
     placed = episode_home.load_placed(book, number, episode)   # refused when stale
     take_dir = episode_home.takes_dir(book, number, engine)
-    lines = line_laid.laid_lines(placed, take_dir)   # where the master laid each line (ep13 T11)
-    lufs, tp = integrated(master), true_peak(master)
-    seen = seen_cuts(master)
-    records = edit_gate.in_cut(episode_home.read_json(take_dir / "shots.json"), placed)
-    report = {
-        "master": episode_home.relative(book, master),
+    return SimpleNamespace(
+        book=book, number=number, episode=episode, placed=placed, take_dir=take_dir,
+        master=episode_home.master_path(book, number, engine), work=episode_home.work_dir(book, number, engine),
+        lines=line_laid.laid_lines(placed, take_dir),   # where the master laid each line (ep13 T11)
+        records=edit_gate.in_cut(episode_home.read_json(take_dir / "shots.json"), placed))
+
+
+def head_rows(i: SimpleNamespace) -> dict:
+    """The file's own measures: bytes, length, card, loudness, cuts, the gaps."""
+    lufs, tp, master, placed = integrated(i.master), true_peak(i.master), i.master, i.placed
+    return {
+        "master": episode_home.relative(i.book, master),
         # WHICH BYTES THIS REPORT MEASURED.  Without it a report can outlive the
         # cut it describes: ep03's qc measured f5ddd2a3 at 19:49, the master was
         # re-cut as f8bf7814 at 20:02, and the publish ladder read the stale
@@ -344,42 +357,70 @@ def main(book_id: str, number: int, engine: str = "i2v") -> None:
         "sha8": yp.sha8(master),
         "measures_sha8": qc_code_sha8(),   # step 11 reuses a report only under this code
         "seconds": clip_seconds(master), "planned_seconds": placed["duration_s"],
-        "title_card": (book / "title" / f"ep{number:02d}.mp4").exists() or (book / "title" / "title.mp4").exists(),
+        "title_card": title_card_on_disk(i.book, i.number),
         "lufs": lufs, "lufs_ok": LUFS_BAND[0] <= lufs <= LUFS_BAND[1],
         "true_peak": tp, "tp_ok": tp <= TP_CEILING,
-        "planned_cuts": planned_cuts(placed), "seen_cuts": seen,
+        "planned_cuts": planned_cuts(placed), "seen_cuts": seen_cuts(master),
         "missing_cuts": [],          # filled below, once the edit gate has spoken
-        "internal_cuts": internal_cuts(placed, records),
-        "lines": heard_on_master(master, lines, work, voice_qc.any_transcriber()),
-        "speech_over_gap_db": speech_band(master, lines, placed["duration_s"], work),
+        "internal_cuts": internal_cuts(placed, i.records),
+        "speech_over_gap_db": speech_band(master, i.lines, placed["duration_s"], i.work),
         # THE PICTURE'S END, not the last line's START.  With the start, the final
         # `until - end` is negative and the tail is thrown away by `max()`:
         # ep03 reported 2.03 s while a 3.26 s run-out sat at the end of the
         # episode with the bed at -45.6 LUFS.
-        "longest_gap_s": longest_gap(lines, placed["duration_s"]),
-        "speech_s": round(sum(line["seconds"] for line in lines), 1),
+        "longest_gap_s": longest_gap(i.lines, placed["duration_s"]),
+        "speech_s": round(sum(line["seconds"] for line in i.lines), 1),
     }
-    report["edit"] = edit_report(master, placed, records, book, number, work)
+
+
+def edit_rows(i: SimpleNamespace, report: dict) -> dict:
+    """The edit gate, the cuts it proves, the sound cues and the roll-ups."""
+    report["edit"] = edit_report(i.master, i.placed, i.records, i.book, i.number, i.work)
     # AFTER the edit gate, because a cut it PROVED frame-exact is present whatever
     # ffmpeg's scene metric saw.  Episode 5 plays five of its six setups in one
     # room, where a real cut between two corners can score under the threshold.
-    report["internal_cut_rows"] = internal_cut_rows(placed, records, seen)
+    report["internal_cut_rows"] = internal_cut_rows(i.placed, i.records, report["seen_cuts"])
     report["missing_cuts"] = drop_on_grid(
-        missing_cuts(planned_cuts(placed), seen, proven=report["edit"].get("cuts")),
+        missing_cuts(planned_cuts(i.placed), report["seen_cuts"], proven=report["edit"].get("cuts")),
         report["internal_cut_rows"])
-    report["sound"] = episode_sound.presence(master, episode, placed)
-    report["takes"] = takes_rollup(take_dir)
-    report["sheets"] = sheets_rollup(episode_home.boards_dir(book, number), book)
+    report["sound"] = episode_sound.presence(i.master, i.episode, i.placed)
+    report["takes"] = takes_rollup(i.take_dir)
+    report["sheets"] = sheets_rollup(episode_home.boards_dir(i.book, i.number), i.book)
+    return report
+
+
+def with_lines(report: dict, hear) -> dict:
+    """The ear LAST (C3_verdict #2): Whisper reads the lines only on a master
+    whose cheap rows still pass; otherwise lines are null and unmeasured."""
+    if not verdict({**report, "lines": []}):
+        return {**report, "lines": None, "lines_measured": False}
+    return {**report, "lines": hear(), "lines_measured": True}
+
+
+def measure(book_id: str, number: int, engine: str, listen) -> dict:
+    """The whole report: the cheap rows, then (if they pass) every line heard."""
+    i = load_inputs(book_id, number, engine)
+    report = edit_rows(i, head_rows(i))
+    report = with_lines(report, lambda: heard_on_master(i.master, i.lines, i.work, listen))
     report["passed"] = verdict(report)
+    return report
+
+
+def main(book_id: str, number: int, engine: str = "i2v") -> None:
+    report = measure(book_id, number, engine, voice_qc.any_transcriber())
+    book, lufs, tp = episode_home.book_dir(book_id), report["lufs"], report["true_peak"]
+    placed = episode_home.load_placed(book, number, episode_home.load_plan(book, number))
+    lines = line_laid.laid_lines(placed, episode_home.takes_dir(book, number, engine))
     report_path = episode_home.home(book, number) / ("qc.json" if engine == "i2v" else f"qc_{engine}.json")
     episode_home.write_json(report_path, report)
-    said = sum(row["passed"] for row in report["lines"])
+    heard = report["lines"] or []
+    said = f"{sum(row['passed'] for row in heard)}/{len(heard)}" if report["lines_measured"] else "not measured"
     grid = report["internal_cut_rows"]
     late = [r["late_frames"] for r in grid if r["on_grid"]]
     print(f"{report['seconds']:.2f}s | {lufs:.1f} LUFS {tp:.1f} dBTP | "
           f"cuts missing {len(report['missing_cuts'])}/{len(report['planned_cuts'])} "
           f"(inside take-runs: {len(late)}/{len(grid)} on grid, late up to {max(late, default=0)} f) | "
-          f"lines heard {said}/{len(report['lines'])} | speech {report['speech_s']}s, "
+          f"lines heard {said} | speech {report['speech_s']}s, "
           f"longest gap {report['longest_gap_s']}s (wall {MAX_GAP_S}) | {'PASS' if report['passed'] else 'FAIL'}")
     # A gap is not a number, it is a SHOT. ep08 reported 6.81 s and nothing
     # else, so the cure aimed at the neighbours' codas and froze one of them
