@@ -1,0 +1,1064 @@
+{
+ "calibration": {
+  "texture": {
+   "auc": 0.708,
+   "votes": false,
+   "good_median": 5.6958,
+   "bad_median": 4.5474,
+   "n": [
+    12,
+    16
+   ]
+  },
+  "flat": {
+   "auc": 0.693,
+   "votes": false,
+   "good_median": 0.0668,
+   "bad_median": 0.0799,
+   "n": [
+    12,
+    16
+   ]
+  },
+  "face_flat": {
+   "auc": 0.447,
+   "votes": false,
+   "good_median": 0.1471,
+   "bad_median": 0.104,
+   "n": [
+    11,
+    12
+   ]
+  },
+  "banding": {
+   "auc": 0.849,
+   "votes": true,
+   "good_median": 0.2484,
+   "bad_median": 0.2922,
+   "n": [
+    12,
+    16
+   ]
+  },
+  "lap": {
+   "auc": 0.177,
+   "votes": false,
+   "good_median": 95.3095,
+   "bad_median": 167.4356,
+   "n": [
+    12,
+    16
+   ]
+  },
+  "tail": {
+   "auc": 0.385,
+   "votes": false,
+   "good_median": 1.022,
+   "bad_median": 1.06,
+   "n": [
+    12,
+    16
+   ]
+  }
+ },
+ "ep04_split": {
+  "shared_place_pictures": [
+   "wide_establishing_0a441b5d.png",
+   "wide_establishing_9b71d848.png"
+  ],
+  "ep01_03_vs_ep04": {
+   "texture": {
+    "auc": 0.565,
+    "votes": false,
+    "good_median": 4.8228,
+    "bad_median": 4.7581,
+    "n": [
+     34,
+     24
+    ]
+   },
+   "flat": {
+    "auc": 0.545,
+    "votes": false,
+    "good_median": 0.1222,
+    "bad_median": 0.1117,
+    "n": [
+     34,
+     24
+    ]
+   },
+   "face_flat": {
+    "auc": 0.702,
+    "votes": false,
+    "good_median": 0.1204,
+    "bad_median": 0.2286,
+    "n": [
+     23,
+     13
+    ]
+   },
+   "banding": {
+    "auc": 0.696,
+    "votes": false,
+    "good_median": 0.2436,
+    "bad_median": 0.2663,
+    "n": [
+     34,
+     24
+    ]
+   },
+   "lap": {
+    "auc": 0.272,
+    "votes": false,
+    "good_median": 88.2035,
+    "bad_median": 138.1677,
+    "n": [
+     34,
+     24
+    ]
+   },
+   "tail": {
+    "auc": 0.462,
+    "votes": false,
+    "good_median": 1.031,
+    "bad_median": 1.061,
+    "n": [
+     34,
+     24
+    ]
+   }
+  },
+  "ep04_vs_late": {
+   "texture": {
+    "auc": 0.477,
+    "votes": false,
+    "good_median": 4.7581,
+    "bad_median": 4.5474,
+    "n": [
+     24,
+     16
+    ]
+   },
+   "flat": {
+    "auc": 0.349,
+    "votes": false,
+    "good_median": 0.1117,
+    "bad_median": 0.0799,
+    "n": [
+     24,
+     16
+    ]
+   },
+   "face_flat": {
+    "auc": 0.375,
+    "votes": false,
+    "good_median": 0.2286,
+    "bad_median": 0.104,
+    "n": [
+     13,
+     12
+    ]
+   },
+   "banding": {
+    "auc": 0.641,
+    "votes": false,
+    "good_median": 0.2663,
+    "bad_median": 0.2922,
+    "n": [
+     24,
+     16
+    ]
+   },
+   "lap": {
+    "auc": 0.401,
+    "votes": false,
+    "good_median": 138.1677,
+    "bad_median": 167.4356,
+    "n": [
+     24,
+     16
+    ]
+   },
+   "tail": {
+    "auc": 0.497,
+    "votes": false,
+    "good_median": 1.061,
+    "bad_median": 1.06,
+    "n": [
+     24,
+     16
+    ]
+   }
+  }
+ },
+ "per_take": {
+  "early": {
+   "D:\\Projects\\KingdomOfViSuReNa\\alpha\\visurena_studio\\library\\20260827135508_the-war-of-the-worlds\\episodes\\ep01\\takes\\r2v\\T03.mp4": {
+    "texture": 6.0694,
+    "flat": 0.0714,
+    "face_flat": 0.0961,
+    "banding": 0.2867,
+    "lap": 96.0551,
+    "faces": 1.0,
+    "face_h": 0.1967,
+    "tail": 0.944
+   },
+   "D:\\Projects\\KingdomOfViSuReNa\\alpha\\visurena_studio\\library\\20260827135508_the-war-of-the-worlds\\episodes\\ep01\\takes\\r2v\\T18.mp4": {
+    "texture": 5.81,
+    "flat": 0.0893,
+    "face_flat": 0.1964,
+    "banding": 0.2693,
+    "lap": 95.3095,
+    "faces": 1.0,
+    "face_h": 0.2145,
+    "tail": 0.975
+   },
+   "D:\\Projects\\KingdomOfViSuReNa\\alpha\\visurena_studio\\library\\20260827135508_the-war-of-the-worlds\\episodes\\ep01\\takes\\r2v\\T19.mp4": {
+    "texture": 5.1587,
+    "flat": 0.0766,
+    "face_flat": 0.1183,
+    "banding": 0.2314,
+    "lap": 74.9935,
+    "faces": 2.0,
+    "face_h": 0.266,
+    "tail": 1.053
+   },
+   "D:\\Projects\\KingdomOfViSuReNa\\alpha\\visurena_studio\\library\\20260827135508_the-war-of-the-worlds\\episodes\\ep01\\takes\\r2v\\T20.mp4": {
+    "texture": 5.6135,
+    "flat": 0.0594,
+    "face_flat": 0.039,
+    "banding": 0.2488,
+    "lap": 105.047,
+    "faces": 2.0,
+    "face_h": 0.1673,
+    "tail": 1.033
+   },
+   "D:\\Projects\\KingdomOfViSuReNa\\alpha\\visurena_studio\\library\\20260827135508_the-war-of-the-worlds\\episodes\\ep01\\takes\\r2v\\T21.mp4": {
+    "texture": 3.9903,
+    "flat": 0.095,
+    "face_flat": 0.291,
+    "banding": 0.2564,
+    "lap": 53.4964,
+    "faces": 1.0,
+    "face_h": 0.344,
+    "tail": 0.679
+   },
+   "D:\\Projects\\KingdomOfViSuReNa\\alpha\\visurena_studio\\library\\20260827135508_the-war-of-the-worlds\\episodes\\ep01\\takes\\r2v\\T22.mp4": {
+    "texture": 4.6033,
+    "flat": 0.1546,
+    "face_flat": 0.2354,
+    "banding": 0.2484,
+    "lap": 53.6823,
+    "faces": 1.0,
+    "face_h": 0.2538,
+    "tail": 0.88
+   },
+   "D:\\Projects\\KingdomOfViSuReNa\\alpha\\visurena_studio\\library\\20260827135508_the-war-of-the-worlds\\episodes\\ep02\\takes\\r2v\\T00.mp4": {
+    "texture": 5.0907,
+    "flat": 0.0752,
+    "face_flat": 0.175,
+    "banding": 0.2602,
+    "lap": 86.0558,
+    "faces": 0.0,
+    "face_h": 0.0,
+    "tail": 1.106
+   },
+   "D:\\Projects\\KingdomOfViSuReNa\\alpha\\visurena_studio\\library\\20260827135508_the-war-of-the-worlds\\episodes\\ep02\\takes\\r2v\\T01.mp4": {
+    "texture": 5.4788,
+    "flat": 0.0644,
+    "face_flat": 0.1058,
+    "banding": 0.2522,
+    "lap": 113.865,
+    "faces": 2.0,
+    "face_h": 0.2252,
+    "tail": 1.022
+   },
+   "D:\\Projects\\KingdomOfViSuReNa\\alpha\\visurena_studio\\library\\20260827135508_the-war-of-the-worlds\\episodes\\ep02\\takes\\r2v\\T20.mp4": {
+    "texture": 6.7244,
+    "flat": 0.0297,
+    "face_flat": 0.1471,
+    "banding": 0.2317,
+    "lap": 137.9385,
+    "faces": 1.0,
+    "face_h": 0.0445,
+    "tail": 1.678
+   },
+   "D:\\Projects\\KingdomOfViSuReNa\\alpha\\visurena_studio\\library\\20260827135508_the-war-of-the-worlds\\episodes\\ep02\\takes\\r2v\\T21.mp4": {
+    "texture": 5.6958,
+    "flat": 0.0668,
+    "face_flat": null,
+    "banding": 0.2061,
+    "lap": 65.9182,
+    "faces": 0.0,
+    "face_h": 0.0,
+    "tail": 0.554
+   },
+   "D:\\Projects\\KingdomOfViSuReNa\\alpha\\visurena_studio\\library\\20260827135508_the-war-of-the-worlds\\episodes\\ep02\\takes\\r2v\\T22.mp4": {
+    "texture": 6.5125,
+    "flat": 0.0227,
+    "face_flat": 0.0976,
+    "banding": 0.2261,
+    "lap": 82.0469,
+    "faces": 2.0,
+    "face_h": 0.2438,
+    "tail": 1.039
+   },
+   "D:\\Projects\\KingdomOfViSuReNa\\alpha\\visurena_studio\\library\\20260827135508_the-war-of-the-worlds\\episodes\\ep03\\takes\\r2v\\T11.mp4": {
+    "texture": 6.2692,
+    "flat": 0.0596,
+    "face_flat": 0.1637,
+    "banding": 0.2227,
+    "lap": 156.585,
+    "faces": 0.5,
+    "face_h": 0.0156,
+    "tail": 0.833
+   }
+  },
+  "late": {
+   "D:\\Projects\\KingdomOfViSuReNa\\alpha\\visurena_studio\\library\\20260827135508_the-war-of-the-worlds\\episodes\\ep26\\takes\\r2v\\T15.mp4": {
+    "texture": 8.0193,
+    "flat": 0.0798,
+    "face_flat": 0.0,
+    "banding": 0.2465,
+    "lap": 749.2072,
+    "faces": 0.0,
+    "face_h": 0.0,
+    "tail": 0.955
+   },
+   "D:\\Projects\\KingdomOfViSuReNa\\alpha\\visurena_studio\\library\\20260827135508_the-war-of-the-worlds\\episodes\\ep26\\takes\\r2v\\T16.mp4": {
+    "texture": 7.5523,
+    "flat": 0.0995,
+    "face_flat": null,
+    "banding": 0.2459,
+    "lap": 590.0097,
+    "faces": 1.0,
+    "face_h": 0.0321,
+    "tail": 1.097
+   },
+   "D:\\Projects\\KingdomOfViSuReNa\\alpha\\visurena_studio\\library\\20260827135508_the-war-of-the-worlds\\episodes\\ep26\\takes\\r2v\\T17.mp4": {
+    "texture": 5.7564,
+    "flat": 0.0779,
+    "face_flat": null,
+    "banding": 0.2576,
+    "lap": 167.4356,
+    "faces": 0.0,
+    "face_h": 0.0,
+    "tail": 0.638
+   },
+   "D:\\Projects\\KingdomOfViSuReNa\\alpha\\visurena_studio\\library\\20260827135508_the-war-of-the-worlds\\episodes\\ep27\\takes\\r2v\\T00.mp4": {
+    "texture": 4.7724,
+    "flat": 0.062,
+    "face_flat": 0.0682,
+    "banding": 0.2452,
+    "lap": 152.0509,
+    "faces": 1.0,
+    "face_h": 0.1148,
+    "tail": 1.363
+   },
+   "D:\\Projects\\KingdomOfViSuReNa\\alpha\\visurena_studio\\library\\20260827135508_the-war-of-the-worlds\\episodes\\ep27\\takes\\r2v\\T01.mp4": {
+    "texture": 4.5474,
+    "flat": 0.1871,
+    "face_flat": null,
+    "banding": 0.3198,
+    "lap": 407.5945,
+    "faces": 0.0,
+    "face_h": 0.0,
+    "tail": 1.783
+   },
+   "D:\\Projects\\KingdomOfViSuReNa\\alpha\\visurena_studio\\library\\20260827135508_the-war-of-the-worlds\\episodes\\ep27\\takes\\r2v\\T02.mp4": {
+    "texture": 4.3552,
+    "flat": 0.1531,
+    "face_flat": null,
+    "banding": 0.2577,
+    "lap": 271.9604,
+    "faces": 0.0,
+    "face_h": 0.0,
+    "tail": 1.005
+   },
+   "D:\\Projects\\KingdomOfViSuReNa\\alpha\\visurena_studio\\library\\20260827135508_the-war-of-the-worlds\\episodes\\ep27\\takes\\r2v\\T03.mp4": {
+    "texture": 3.6789,
+    "flat": 0.0469,
+    "face_flat": 0.2586,
+    "banding": 0.3916,
+    "lap": 105.8063,
+    "faces": 1.0,
+    "face_h": 0.499,
+    "tail": 0.817
+   },
+   "D:\\Projects\\KingdomOfViSuReNa\\alpha\\visurena_studio\\library\\20260827135508_the-war-of-the-worlds\\episodes\\ep27\\takes\\r2v\\T10.mp4": {
+    "texture": 4.153,
+    "flat": 0.0659,
+    "face_flat": 0.0633,
+    "banding": 0.2711,
+    "lap": 77.4775,
+    "faces": 1.0,
+    "face_h": 0.1652,
+    "tail": 1.194
+   },
+   "D:\\Projects\\KingdomOfViSuReNa\\alpha\\visurena_studio\\library\\20260827135508_the-war-of-the-worlds\\episodes\\ep27\\takes\\r2v\\T11.mp4": {
+    "texture": 5.1844,
+    "flat": 0.0317,
+    "face_flat": 0.104,
+    "banding": 0.2727,
+    "lap": 208.3929,
+    "faces": 1.0,
+    "face_h": 0.1286,
+    "tail": 1.179
+   },
+   "D:\\Projects\\KingdomOfViSuReNa\\alpha\\visurena_studio\\library\\20260827135508_the-war-of-the-worlds\\episodes\\ep27\\takes\\r2v\\T12.mp4": {
+    "texture": 3.5816,
+    "flat": 0.0799,
+    "face_flat": 0.3261,
+    "banding": 0.2968,
+    "lap": 69.512,
+    "faces": 1.0,
+    "face_h": 0.6073,
+    "tail": 1.006
+   },
+   "D:\\Projects\\KingdomOfViSuReNa\\alpha\\visurena_studio\\library\\20260827135508_the-war-of-the-worlds\\episodes\\ep27\\takes\\r2v\\T13.mp4": {
+    "texture": 4.1699,
+    "flat": 0.0458,
+    "face_flat": 0.1739,
+    "banding": 0.2922,
+    "lap": 87.9288,
+    "faces": 1.0,
+    "face_h": 0.4359,
+    "tail": 1.06
+   },
+   "D:\\Projects\\KingdomOfViSuReNa\\alpha\\visurena_studio\\library\\20260827135508_the-war-of-the-worlds\\episodes\\ep27\\takes\\r2v\\T16.mp4": {
+    "texture": 4.0498,
+    "flat": 0.1497,
+    "face_flat": 0.1351,
+    "banding": 0.2985,
+    "lap": 107.2351,
+    "faces": 1.0,
+    "face_h": 0.2166,
+    "tail": 1.08
+   },
+   "D:\\Projects\\KingdomOfViSuReNa\\alpha\\visurena_studio\\library\\20260827135508_the-war-of-the-worlds\\episodes\\ep27\\takes\\r2v\\T22.mp4": {
+    "texture": 3.6917,
+    "flat": 0.1553,
+    "face_flat": 0.0603,
+    "banding": 0.3312,
+    "lap": 119.6743,
+    "faces": 2.0,
+    "face_h": 0.1195,
+    "tail": 0.94
+   },
+   "D:\\Projects\\KingdomOfViSuReNa\\alpha\\visurena_studio\\library\\20260827135508_the-war-of-the-worlds\\episodes\\ep27\\takes\\r2v\\T23.mp4": {
+    "texture": 4.3054,
+    "flat": 0.1369,
+    "face_flat": 0.0482,
+    "banding": 0.3026,
+    "lap": 128.781,
+    "faces": 3.0,
+    "face_h": 0.1317,
+    "tail": 1.22
+   },
+   "D:\\Projects\\KingdomOfViSuReNa\\alpha\\visurena_studio\\library\\20260827135508_the-war-of-the-worlds\\episodes\\ep27\\takes\\r2v\\T24.mp4": {
+    "texture": 6.2212,
+    "flat": 0.0999,
+    "face_flat": 0.1802,
+    "banding": 0.4089,
+    "lap": 169.9874,
+    "faces": 2.0,
+    "face_h": 0.333,
+    "tail": 1.004
+   },
+   "D:\\Projects\\KingdomOfViSuReNa\\alpha\\visurena_studio\\library\\20260827135508_the-war-of-the-worlds\\episodes\\ep27\\takes\\r2v\\T25.mp4": {
+    "texture": 5.3113,
+    "flat": 0.2124,
+    "face_flat": 0.5245,
+    "banding": 0.3061,
+    "lap": 197.112,
+    "faces": 1.0,
+    "face_h": 0.7298,
+    "tail": 0.822
+   }
+  },
+  "ep01_03_shared": {
+   "D:\\Projects\\KingdomOfViSuReNa\\alpha\\visurena_studio\\library\\20260827135508_the-war-of-the-worlds\\episodes\\ep02\\takes\\r2v\\T02.mp4": {
+    "texture": 5.0124,
+    "flat": 0.1944,
+    "face_flat": null,
+    "banding": 0.2581,
+    "lap": 142.7642,
+    "faces": 0.5,
+    "face_h": 0.022,
+    "tail": 1.017
+   },
+   "D:\\Projects\\KingdomOfViSuReNa\\alpha\\visurena_studio\\library\\20260827135508_the-war-of-the-worlds\\episodes\\ep02\\takes\\r2v\\T03.mp4": {
+    "texture": 4.0287,
+    "flat": 0.2687,
+    "face_flat": 0.1008,
+    "banding": 0.2771,
+    "lap": 59.989,
+    "faces": 1.0,
+    "face_h": 0.1615,
+    "tail": 0.675
+   },
+   "D:\\Projects\\KingdomOfViSuReNa\\alpha\\visurena_studio\\library\\20260827135508_the-war-of-the-worlds\\episodes\\ep02\\takes\\r2v\\T04.mp4": {
+    "texture": 5.6677,
+    "flat": 0.0498,
+    "face_flat": 0.0208,
+    "banding": 0.2282,
+    "lap": 195.8625,
+    "faces": 1.5,
+    "face_h": 0.0476,
+    "tail": 1.086
+   },
+   "D:\\Projects\\KingdomOfViSuReNa\\alpha\\visurena_studio\\library\\20260827135508_the-war-of-the-worlds\\episodes\\ep02\\takes\\r2v\\T06.mp4": {
+    "texture": 3.8502,
+    "flat": 0.2576,
+    "face_flat": null,
+    "banding": 0.227,
+    "lap": 55.0306,
+    "faces": 0.0,
+    "face_h": 0.0,
+    "tail": 1.079
+   },
+   "D:\\Projects\\KingdomOfViSuReNa\\alpha\\visurena_studio\\library\\20260827135508_the-war-of-the-worlds\\episodes\\ep02\\takes\\r2v\\T07.mp4": {
+    "texture": 4.5489,
+    "flat": 0.0977,
+    "face_flat": 0.125,
+    "banding": 0.232,
+    "lap": 61.1805,
+    "faces": 0.0,
+    "face_h": 0.0,
+    "tail": 0.821
+   },
+   "D:\\Projects\\KingdomOfViSuReNa\\alpha\\visurena_studio\\library\\20260827135508_the-war-of-the-worlds\\episodes\\ep02\\takes\\r2v\\T08.mp4": {
+    "texture": 4.0448,
+    "flat": 0.1205,
+    "face_flat": null,
+    "banding": 0.2581,
+    "lap": 43.2223,
+    "faces": 0.0,
+    "face_h": 0.0,
+    "tail": 0.805
+   },
+   "D:\\Projects\\KingdomOfViSuReNa\\alpha\\visurena_studio\\library\\20260827135508_the-war-of-the-worlds\\episodes\\ep02\\takes\\r2v\\T09.mp4": {
+    "texture": 4.0961,
+    "flat": 0.1423,
+    "face_flat": 0.2829,
+    "banding": 0.2747,
+    "lap": 65.5715,
+    "faces": 1.0,
+    "face_h": 0.6381,
+    "tail": 1.055
+   },
+   "D:\\Projects\\KingdomOfViSuReNa\\alpha\\visurena_studio\\library\\20260827135508_the-war-of-the-worlds\\episodes\\ep02\\takes\\r2v\\T10.mp4": {
+    "texture": 3.6721,
+    "flat": 0.1752,
+    "face_flat": 0.1204,
+    "banding": 0.2436,
+    "lap": 44.3998,
+    "faces": 0.5,
+    "face_h": 0.0312,
+    "tail": 2.317
+   },
+   "D:\\Projects\\KingdomOfViSuReNa\\alpha\\visurena_studio\\library\\20260827135508_the-war-of-the-worlds\\episodes\\ep02\\takes\\r2v\\T11.mp4": {
+    "texture": 4.2494,
+    "flat": 0.1897,
+    "face_flat": null,
+    "banding": 0.2799,
+    "lap": 103.284,
+    "faces": 0.0,
+    "face_h": 0.0,
+    "tail": 1.058
+   },
+   "D:\\Projects\\KingdomOfViSuReNa\\alpha\\visurena_studio\\library\\20260827135508_the-war-of-the-worlds\\episodes\\ep02\\takes\\r2v\\T12.mp4": {
+    "texture": 5.4042,
+    "flat": 0.1564,
+    "face_flat": 0.0932,
+    "banding": 0.2568,
+    "lap": 95.6496,
+    "faces": 2.0,
+    "face_h": 0.2585,
+    "tail": 0.822
+   },
+   "D:\\Projects\\KingdomOfViSuReNa\\alpha\\visurena_studio\\library\\20260827135508_the-war-of-the-worlds\\episodes\\ep02\\takes\\r2v\\T18.mp4": {
+    "texture": 5.2691,
+    "flat": 0.0796,
+    "face_flat": 0.0698,
+    "banding": 0.2331,
+    "lap": 107.625,
+    "faces": 0.5,
+    "face_h": 0.0345,
+    "tail": 1.209
+   },
+   "D:\\Projects\\KingdomOfViSuReNa\\alpha\\visurena_studio\\library\\20260827135508_the-war-of-the-worlds\\episodes\\ep02\\takes\\r2v\\T19.mp4": {
+    "texture": 3.1124,
+    "flat": 0.2452,
+    "face_flat": null,
+    "banding": 0.2342,
+    "lap": 35.0934,
+    "faces": 0.0,
+    "face_h": 0.0,
+    "tail": 1.057
+   },
+   "D:\\Projects\\KingdomOfViSuReNa\\alpha\\visurena_studio\\library\\20260827135508_the-war-of-the-worlds\\episodes\\ep03\\takes\\r2v\\T00.mp4": {
+    "texture": 4.695,
+    "flat": 0.1958,
+    "face_flat": null,
+    "banding": 0.217,
+    "lap": 113.0763,
+    "faces": 1.5,
+    "face_h": 0.0445,
+    "tail": 0.911
+   },
+   "D:\\Projects\\KingdomOfViSuReNa\\alpha\\visurena_studio\\library\\20260827135508_the-war-of-the-worlds\\episodes\\ep03\\takes\\r2v\\T01.mp4": {
+    "texture": 4.7772,
+    "flat": 0.0318,
+    "face_flat": 0.0794,
+    "banding": 0.956,
+    "lap": 74.3237,
+    "faces": 1.0,
+    "face_h": 0.0758,
+    "tail": 1.114
+   },
+   "D:\\Projects\\KingdomOfViSuReNa\\alpha\\visurena_studio\\library\\20260827135508_the-war-of-the-worlds\\episodes\\ep03\\takes\\r2v\\T02.mp4": {
+    "texture": 4.8699,
+    "flat": 0.152,
+    "face_flat": 0.2115,
+    "banding": 0.2231,
+    "lap": 74.1534,
+    "faces": 0.5,
+    "face_h": 0.0193,
+    "tail": 1.41
+   },
+   "D:\\Projects\\KingdomOfViSuReNa\\alpha\\visurena_studio\\library\\20260827135508_the-war-of-the-worlds\\episodes\\ep03\\takes\\r2v\\T03.mp4": {
+    "texture": 5.3038,
+    "flat": 0.0634,
+    "face_flat": null,
+    "banding": 0.219,
+    "lap": 226.8613,
+    "faces": 0.0,
+    "face_h": 0.0,
+    "tail": 1.279
+   },
+   "D:\\Projects\\KingdomOfViSuReNa\\alpha\\visurena_studio\\library\\20260827135508_the-war-of-the-worlds\\episodes\\ep03\\takes\\r2v\\T04.mp4": {
+    "texture": 5.2212,
+    "flat": 0.0579,
+    "face_flat": 0.1715,
+    "banding": 0.2281,
+    "lap": 88.2035,
+    "faces": 2.0,
+    "face_h": 0.441,
+    "tail": 1.031
+   },
+   "D:\\Projects\\KingdomOfViSuReNa\\alpha\\visurena_studio\\library\\20260827135508_the-war-of-the-worlds\\episodes\\ep03\\takes\\r2v\\T05.mp4": {
+    "texture": 4.9833,
+    "flat": 0.1222,
+    "face_flat": 0.0494,
+    "banding": 0.2226,
+    "lap": 94.9029,
+    "faces": 3.0,
+    "face_h": 0.1111,
+    "tail": 0.825
+   },
+   "D:\\Projects\\KingdomOfViSuReNa\\alpha\\visurena_studio\\library\\20260827135508_the-war-of-the-worlds\\episodes\\ep03\\takes\\r2v\\T06.mp4": {
+    "texture": 5.3645,
+    "flat": 0.1322,
+    "face_flat": null,
+    "banding": 0.2744,
+    "lap": 137.2576,
+    "faces": 0.0,
+    "face_h": 0.0,
+    "tail": 1.28
+   },
+   "D:\\Projects\\KingdomOfViSuReNa\\alpha\\visurena_studio\\library\\20260827135508_the-war-of-the-worlds\\episodes\\ep03\\takes\\r2v\\T07.mp4": {
+    "texture": 4.7452,
+    "flat": 0.0898,
+    "face_flat": 0.0851,
+    "banding": 0.2274,
+    "lap": 73.0532,
+    "faces": 1.0,
+    "face_h": 0.0508,
+    "tail": 1.138
+   },
+   "D:\\Projects\\KingdomOfViSuReNa\\alpha\\visurena_studio\\library\\20260827135508_the-war-of-the-worlds\\episodes\\ep03\\takes\\r2v\\T08.mp4": {
+    "texture": 4.7917,
+    "flat": 0.1263,
+    "face_flat": null,
+    "banding": 0.3016,
+    "lap": 56.3827,
+    "faces": 0.0,
+    "face_h": 0.0,
+    "tail": 0.931
+   },
+   "D:\\Projects\\KingdomOfViSuReNa\\alpha\\visurena_studio\\library\\20260827135508_the-war-of-the-worlds\\episodes\\ep03\\takes\\r2v\\T09.mp4": {
+    "texture": 5.1741,
+    "flat": 0.0862,
+    "face_flat": 0.2049,
+    "banding": 0.2292,
+    "lap": 101.2339,
+    "faces": 1.0,
+    "face_h": 0.3902,
+    "tail": 0.973
+   },
+   "D:\\Projects\\KingdomOfViSuReNa\\alpha\\visurena_studio\\library\\20260827135508_the-war-of-the-worlds\\episodes\\ep03\\takes\\r2v\\T10.mp4": {
+    "texture": 4.5433,
+    "flat": 0.1397,
+    "face_flat": 0.0528,
+    "banding": 0.2368,
+    "lap": 79.7765,
+    "faces": 1.0,
+    "face_h": 0.0789,
+    "tail": 2.89
+   },
+   "D:\\Projects\\KingdomOfViSuReNa\\alpha\\visurena_studio\\library\\20260827135508_the-war-of-the-worlds\\episodes\\ep03\\takes\\r2v\\T12.mp4": {
+    "texture": 5.6842,
+    "flat": 0.111,
+    "face_flat": 0.0909,
+    "banding": 0.2592,
+    "lap": 182.4457,
+    "faces": 2.0,
+    "face_h": 0.058,
+    "tail": 1.128
+   },
+   "D:\\Projects\\KingdomOfViSuReNa\\alpha\\visurena_studio\\library\\20260827135508_the-war-of-the-worlds\\episodes\\ep03\\takes\\r2v\\T13.mp4": {
+    "texture": 4.635,
+    "flat": 0.1864,
+    "face_flat": 0.1597,
+    "banding": 0.2519,
+    "lap": 73.3856,
+    "faces": 1.0,
+    "face_h": 0.3632,
+    "tail": 0.978
+   },
+   "D:\\Projects\\KingdomOfViSuReNa\\alpha\\visurena_studio\\library\\20260827135508_the-war-of-the-worlds\\episodes\\ep03\\takes\\r2v\\T14.mp4": {
+    "texture": 4.4408,
+    "flat": 0.2067,
+    "face_flat": 0.1414,
+    "banding": 0.2198,
+    "lap": 99.7982,
+    "faces": 2.0,
+    "face_h": 0.1102,
+    "tail": 0.632
+   },
+   "D:\\Projects\\KingdomOfViSuReNa\\alpha\\visurena_studio\\library\\20260827135508_the-war-of-the-worlds\\episodes\\ep03\\takes\\r2v\\T15.mp4": {
+    "texture": 4.685,
+    "flat": 0.1025,
+    "face_flat": 0.0055,
+    "banding": 0.262,
+    "lap": 90.0653,
+    "faces": 2.5,
+    "face_h": 0.1786,
+    "tail": 1.051
+   },
+   "D:\\Projects\\KingdomOfViSuReNa\\alpha\\visurena_studio\\library\\20260827135508_the-war-of-the-worlds\\episodes\\ep03\\takes\\r2v\\T16.mp4": {
+    "texture": 4.8228,
+    "flat": 0.0726,
+    "face_flat": 0.1375,
+    "banding": 0.2243,
+    "lap": 67.5326,
+    "faces": 3.0,
+    "face_h": 0.0756,
+    "tail": 1.106
+   },
+   "D:\\Projects\\KingdomOfViSuReNa\\alpha\\visurena_studio\\library\\20260827135508_the-war-of-the-worlds\\episodes\\ep03\\takes\\r2v\\T17.mp4": {
+    "texture": 5.8083,
+    "flat": 0.0452,
+    "face_flat": 0.0832,
+    "banding": 0.2947,
+    "lap": 96.0207,
+    "faces": 1.0,
+    "face_h": 0.3266,
+    "tail": 1.006
+   },
+   "D:\\Projects\\KingdomOfViSuReNa\\alpha\\visurena_studio\\library\\20260827135508_the-war-of-the-worlds\\episodes\\ep03\\takes\\r2v\\T18.mp4": {
+    "texture": 5.3848,
+    "flat": 0.134,
+    "face_flat": 0.2204,
+    "banding": 0.2549,
+    "lap": 85.7116,
+    "faces": 1.0,
+    "face_h": 0.4765,
+    "tail": 1.031
+   },
+   "D:\\Projects\\KingdomOfViSuReNa\\alpha\\visurena_studio\\library\\20260827135508_the-war-of-the-worlds\\episodes\\ep03\\takes\\r2v\\T19.mp4": {
+    "texture": 5.5521,
+    "flat": 0.1145,
+    "face_flat": null,
+    "banding": 0.2486,
+    "lap": 97.5169,
+    "faces": 0.0,
+    "face_h": 0.0,
+    "tail": 0.817
+   },
+   "D:\\Projects\\KingdomOfViSuReNa\\alpha\\visurena_studio\\library\\20260827135508_the-war-of-the-worlds\\episodes\\ep03\\takes\\r2v\\T20.mp4": {
+    "texture": 4.8341,
+    "flat": 0.0654,
+    "face_flat": 0.1696,
+    "banding": 0.2239,
+    "lap": 67.0258,
+    "faces": 2.0,
+    "face_h": 0.3593,
+    "tail": 0.957
+   },
+   "D:\\Projects\\KingdomOfViSuReNa\\alpha\\visurena_studio\\library\\20260827135508_the-war-of-the-worlds\\episodes\\ep03\\takes\\r2v\\T21.mp4": {
+    "texture": 4.3925,
+    "flat": 0.3077,
+    "face_flat": null,
+    "banding": 0.2544,
+    "lap": 47.8789,
+    "faces": 0.5,
+    "face_h": 0.0356,
+    "tail": 0.986
+   },
+   "D:\\Projects\\KingdomOfViSuReNa\\alpha\\visurena_studio\\library\\20260827135508_the-war-of-the-worlds\\episodes\\ep03\\takes\\r2v\\T22.mp4": {
+    "texture": 5.4088,
+    "flat": 0.1117,
+    "face_flat": 0.16,
+    "banding": 0.2635,
+    "lap": 151.4528,
+    "faces": 2.0,
+    "face_h": 0.2436,
+    "tail": 1.003
+   }
+  },
+  "ep04_shared": {
+   "D:\\Projects\\KingdomOfViSuReNa\\alpha\\visurena_studio\\library\\20260827135508_the-war-of-the-worlds\\episodes\\ep04\\takes\\r2v\\T00.mp4": {
+    "texture": 4.4061,
+    "flat": 0.2814,
+    "face_flat": null,
+    "banding": 0.2441,
+    "lap": 162.9523,
+    "faces": 1.0,
+    "face_h": 0.0382,
+    "tail": 0.975
+   },
+   "D:\\Projects\\KingdomOfViSuReNa\\alpha\\visurena_studio\\library\\20260827135508_the-war-of-the-worlds\\episodes\\ep04\\takes\\r2v\\T01.mp4": {
+    "texture": 4.5543,
+    "flat": 0.3891,
+    "face_flat": 0.2286,
+    "banding": 0.3266,
+    "lap": 214.7682,
+    "faces": 2.0,
+    "face_h": 0.0752,
+    "tail": 0.939
+   },
+   "D:\\Projects\\KingdomOfViSuReNa\\alpha\\visurena_studio\\library\\20260827135508_the-war-of-the-worlds\\episodes\\ep04\\takes\\r2v\\T02.mp4": {
+    "texture": 4.8446,
+    "flat": 0.1503,
+    "face_flat": 0.2334,
+    "banding": 0.2821,
+    "lap": 100.4884,
+    "faces": 1.0,
+    "face_h": 0.4287,
+    "tail": 1.061
+   },
+   "D:\\Projects\\KingdomOfViSuReNa\\alpha\\visurena_studio\\library\\20260827135508_the-war-of-the-worlds\\episodes\\ep04\\takes\\r2v\\T03.mp4": {
+    "texture": 4.7581,
+    "flat": 0.0648,
+    "face_flat": null,
+    "banding": 0.2693,
+    "lap": 203.0113,
+    "faces": 0.0,
+    "face_h": 0.0,
+    "tail": 0.956
+   },
+   "D:\\Projects\\KingdomOfViSuReNa\\alpha\\visurena_studio\\library\\20260827135508_the-war-of-the-worlds\\episodes\\ep04\\takes\\r2v\\T04.mp4": {
+    "texture": 2.2054,
+    "flat": 0.6537,
+    "face_flat": 0.0163,
+    "banding": 0.2663,
+    "lap": 86.7604,
+    "faces": 1.0,
+    "face_h": 0.0942,
+    "tail": 1.102
+   },
+   "D:\\Projects\\KingdomOfViSuReNa\\alpha\\visurena_studio\\library\\20260827135508_the-war-of-the-worlds\\episodes\\ep04\\takes\\r2v\\T05.mp4": {
+    "texture": 4.5926,
+    "flat": 0.1117,
+    "face_flat": 0.1926,
+    "banding": 0.2708,
+    "lap": 101.0688,
+    "faces": 0.0,
+    "face_h": 0.0,
+    "tail": 0.899
+   },
+   "D:\\Projects\\KingdomOfViSuReNa\\alpha\\visurena_studio\\library\\20260827135508_the-war-of-the-worlds\\episodes\\ep04\\takes\\r2v\\T06.mp4": {
+    "texture": 5.0121,
+    "flat": 0.0668,
+    "face_flat": 0.0342,
+    "banding": 0.3014,
+    "lap": 138.1677,
+    "faces": 1.0,
+    "face_h": 0.1911,
+    "tail": 0.994
+   },
+   "D:\\Projects\\KingdomOfViSuReNa\\alpha\\visurena_studio\\library\\20260827135508_the-war-of-the-worlds\\episodes\\ep04\\takes\\r2v\\T07.mp4": {
+    "texture": 2.7354,
+    "flat": 0.2014,
+    "face_flat": 0.0,
+    "banding": 0.2416,
+    "lap": 46.8431,
+    "faces": 0.0,
+    "face_h": 0.0,
+    "tail": 1.261
+   },
+   "D:\\Projects\\KingdomOfViSuReNa\\alpha\\visurena_studio\\library\\20260827135508_the-war-of-the-worlds\\episodes\\ep04\\takes\\r2v\\T08.mp4": {
+    "texture": 5.857,
+    "flat": 0.0912,
+    "face_flat": null,
+    "banding": 0.2227,
+    "lap": 280.5002,
+    "faces": 0.0,
+    "face_h": 0.0,
+    "tail": 1.066
+   },
+   "D:\\Projects\\KingdomOfViSuReNa\\alpha\\visurena_studio\\library\\20260827135508_the-war-of-the-worlds\\episodes\\ep04\\takes\\r2v\\T09.mp4": {
+    "texture": 4.0793,
+    "flat": 0.1971,
+    "face_flat": null,
+    "banding": 0.2271,
+    "lap": 116.0988,
+    "faces": 0.0,
+    "face_h": 0.0,
+    "tail": 1.33
+   },
+   "D:\\Projects\\KingdomOfViSuReNa\\alpha\\visurena_studio\\library\\20260827135508_the-war-of-the-worlds\\episodes\\ep04\\takes\\r2v\\T10.mp4": {
+    "texture": 3.8903,
+    "flat": 0.0787,
+    "face_flat": 0.5066,
+    "banding": 0.2263,
+    "lap": 96.0291,
+    "faces": 1.0,
+    "face_h": 0.2073,
+    "tail": 1.095
+   },
+   "D:\\Projects\\KingdomOfViSuReNa\\alpha\\visurena_studio\\library\\20260827135508_the-war-of-the-worlds\\episodes\\ep04\\takes\\r2v\\T11.mp4": {
+    "texture": 5.0953,
+    "flat": 0.0431,
+    "face_flat": null,
+    "banding": 0.3664,
+    "lap": 115.7934,
+    "faces": 0.0,
+    "face_h": 0.0,
+    "tail": 0.943
+   },
+   "D:\\Projects\\KingdomOfViSuReNa\\alpha\\visurena_studio\\library\\20260827135508_the-war-of-the-worlds\\episodes\\ep04\\takes\\r2v\\T12.mp4": {
+    "texture": 3.2469,
+    "flat": 0.2297,
+    "face_flat": null,
+    "banding": 0.2414,
+    "lap": 47.705,
+    "faces": 0.0,
+    "face_h": 0.0,
+    "tail": 0.813
+   },
+   "D:\\Projects\\KingdomOfViSuReNa\\alpha\\visurena_studio\\library\\20260827135508_the-war-of-the-worlds\\episodes\\ep04\\takes\\r2v\\T13.mp4": {
+    "texture": 4.2753,
+    "flat": 0.1479,
+    "face_flat": null,
+    "banding": 0.2642,
+    "lap": 42.3811,
+    "faces": 0.0,
+    "face_h": 0.0,
+    "tail": 1.214
+   },
+   "D:\\Projects\\KingdomOfViSuReNa\\alpha\\visurena_studio\\library\\20260827135508_the-war-of-the-worlds\\episodes\\ep04\\takes\\r2v\\T14.mp4": {
+    "texture": 5.5142,
+    "flat": 0.0505,
+    "face_flat": 0.3709,
+    "banding": 0.2756,
+    "lap": 196.5819,
+    "faces": 1.0,
+    "face_h": 0.0616,
+    "tail": 0.926
+   },
+   "D:\\Projects\\KingdomOfViSuReNa\\alpha\\visurena_studio\\library\\20260827135508_the-war-of-the-worlds\\episodes\\ep04\\takes\\r2v\\T15.mp4": {
+    "texture": 5.0035,
+    "flat": 0.0917,
+    "face_flat": null,
+    "banding": 0.2923,
+    "lap": 138.3752,
+    "faces": 0.0,
+    "face_h": 0.0,
+    "tail": 0.993
+   },
+   "D:\\Projects\\KingdomOfViSuReNa\\alpha\\visurena_studio\\library\\20260827135508_the-war-of-the-worlds\\episodes\\ep04\\takes\\r2v\\T16.mp4": {
+    "texture": 5.0795,
+    "flat": 0.0541,
+    "face_flat": null,
+    "banding": 0.2381,
+    "lap": 182.2625,
+    "faces": 0.0,
+    "face_h": 0.0,
+    "tail": 1.027
+   },
+   "D:\\Projects\\KingdomOfViSuReNa\\alpha\\visurena_studio\\library\\20260827135508_the-war-of-the-worlds\\episodes\\ep04\\takes\\r2v\\T17.mp4": {
+    "texture": 4.9644,
+    "flat": 0.0884,
+    "face_flat": null,
+    "banding": 0.2479,
+    "lap": 168.9171,
+    "faces": 2.0,
+    "face_h": 0.0298,
+    "tail": 1.031
+   },
+   "D:\\Projects\\KingdomOfViSuReNa\\alpha\\visurena_studio\\library\\20260827135508_the-war-of-the-worlds\\episodes\\ep04\\takes\\r2v\\T18.mp4": {
+    "texture": 4.3463,
+    "flat": 0.2873,
+    "face_flat": 0.1078,
+    "banding": 0.2588,
+    "lap": 241.1486,
+    "faces": 1.0,
+    "face_h": 0.1255,
+    "tail": 1.183
+   },
+   "D:\\Projects\\KingdomOfViSuReNa\\alpha\\visurena_studio\\library\\20260827135508_the-war-of-the-worlds\\episodes\\ep04\\takes\\r2v\\T19.mp4": {
+    "texture": 6.5304,
+    "flat": 0.1061,
+    "face_flat": 0.409,
+    "banding": 0.4153,
+    "lap": 321.8901,
+    "faces": 1.0,
+    "face_h": 0.2859,
+    "tail": 1.083
+   },
+   "D:\\Projects\\KingdomOfViSuReNa\\alpha\\visurena_studio\\library\\20260827135508_the-war-of-the-worlds\\episodes\\ep04\\takes\\r2v\\T20.mp4": {
+    "texture": 4.093,
+    "flat": 0.1769,
+    "face_flat": 0.1809,
+    "banding": 0.2745,
+    "lap": 91.9261,
+    "faces": 1.0,
+    "face_h": 0.0506,
+    "tail": 1.141
+   },
+   "D:\\Projects\\KingdomOfViSuReNa\\alpha\\visurena_studio\\library\\20260827135508_the-war-of-the-worlds\\episodes\\ep04\\takes\\r2v\\T21.mp4": {
+    "texture": 2.5784,
+    "flat": 0.5155,
+    "face_flat": 0.477,
+    "banding": 0.2596,
+    "lap": 70.4864,
+    "faces": 1.0,
+    "face_h": 0.1735,
+    "tail": 1.452
+   },
+   "D:\\Projects\\KingdomOfViSuReNa\\alpha\\visurena_studio\\library\\20260827135508_the-war-of-the-worlds\\episodes\\ep04\\takes\\r2v\\T22.mp4": {
+    "texture": 5.2839,
+    "flat": 0.0685,
+    "face_flat": 0.2507,
+    "banding": 0.273,
+    "lap": 113.7826,
+    "faces": 1.0,
+    "face_h": 0.4564,
+    "tail": 1.096
+   },
+   "D:\\Projects\\KingdomOfViSuReNa\\alpha\\visurena_studio\\library\\20260827135508_the-war-of-the-worlds\\episodes\\ep04\\takes\\r2v\\T23.mp4": {
+    "texture": 7.0902,
+    "flat": 0.3108,
+    "face_flat": null,
+    "banding": 0.4273,
+    "lap": 234.3385,
+    "faces": 0.0,
+    "face_h": 0.0,
+    "tail": 0.925
+   }
+  }
+ }
+}

@@ -1,0 +1,311 @@
+{
+ "5": {
+  "inputs": {
+   "clip_name": "qwen3vl_32b_minimax_h3_nvfp4_awq.safetensors",
+   "type": "minimax",
+   "device": "default"
+  },
+  "class_type": "CLIPLoader",
+  "_meta": {
+   "title": "Load CLIP"
+  }
+ },
+ "6": {
+  "inputs": {
+   "vae_name": "minimax_h3_video_vae_fp16.safetensors"
+  },
+  "class_type": "VAELoader",
+  "_meta": {
+   "title": "Load VAE (video)"
+  }
+ },
+ "7": {
+  "inputs": {
+   "vae_name": "minimax_h3_audio_vae_fp32.safetensors"
+  },
+  "class_type": "VAELoader",
+  "_meta": {
+   "title": "Load VAE (audio)"
+  }
+ },
+ "18": {
+  "inputs": {
+   "image": "sheet_4d5059f4.png",
+   "upload": "image"
+  },
+  "class_type": "LoadImage",
+  "_meta": {
+   "title": "ref_image_1 (subject)"
+  }
+ },
+ "19": {
+  "inputs": {
+   "image": "wide_establishing_7972962f.png",
+   "upload": "image"
+  },
+  "class_type": "LoadImage",
+  "_meta": {
+   "title": "ref_image_2 (location/style)"
+  }
+ },
+ "8": {
+  "inputs": {
+   "clip": [
+    "5",
+    0
+   ],
+   "vae": [
+    "6",
+    0
+   ],
+   "audio_vae": [
+    "7",
+    0
+   ],
+   "prompt": "subject_definitions:\n<Subject 1> is the Narrator in <Picture 1>: Long oval face, high forehead, long straight nose, straight dark brows, grey eyes. Fair English skin lightly tanned on face and hands. Dark brown hair cut short at back and sides, parted on the left and combed smooth. Neat close-trimmed dark brown moustache; shaven cheeks and chin. Wearing: Mid-grey herringbone tweed lounge suit: single-breasted jacket, matching waistcoat with a silver watch chain, narrow trousers. White shirt with starched turn-down collar, dark green knitted tie. Brown leather lace-up boots. Small black notebook and pencil in the breast pocket. <Picture 1> defines this man alone; each shot keeps the framing its own words describe.\n<Subject 2> is the location in <Picture 2>: The front of the narrator's red-brick villa at Maybury at eleven on a hot clear summer morning in 1894: a black front door under a small red-tiled porch, a canted bay window with white sashes, a knee-high red-brick wall with a black wrought-iron gate, clipped laurels and a privet hedge, a gravel road climbing to the right, tall beech trees downhill at the left and a green boarded side gate; the sun comes from the LEFT, warm on the brick, and leaves the porch, the laurels and the shade under the beeches black <Picture 2> defines this place alone; each shot keeps the framing its own words describe.\n<Audio 1> is the take's complete audio track and runs silent for its whole length.\n\nsummary:\n[reference generation + audio reuse] One 6.58-second take of 1 shot in <Subject 2>, the front of the narrator's red-brick villa at Maybury at eleven on a hot clear summer morning in 1894: a black front door under a small red-tiled porch. [Shot 1] runs from 00:00 to 00:06. The take carries <Subject 1> through [Shot 1] in that order. <Audio 1> is the complete audio track.\n\nretention_analysis:\n<Subject 1> (the man in [Shot 1]): partially_preserved - the face, hair, build and clothes of <Picture 1> carry into every shot that shows him; <Picture 1> serves as a definition of the man and each shot keeps the framing its own words describe.\n<Subject 2> (the location behind [Shot 1]): partially_preserved - the materials, furniture and light of <Picture 2> carry into every shot behind the people; <Picture 2> serves as a definition of the place and each shot keeps the framing its own words describe.\n<Audio 1>: fully_copy - <Audio 1> is reused 1:1 as the take's complete final audio track.\n\ndetailed_description:\nAngular stylised 3D animation, brush-stroke texture, Surrey, 1894, sun from the left, black shadows.\n[Shot 1] From 00:00 to 00:06. The shot opens on a wide of the narrator's red-brick villa at eleven on a hot bright morning: <Subject 1> in the grey herringbone tweed suit and the straw boater with a black band, his dark moustache neat already walking up the gravel road toward the black iron gate at a normal walking pace, his head bent, his hands behind his back. The camera is on the gravel road at a standing man's eye, far down the hill, a 35mm lens. The sun comes from the LEFT onto the brick. At the first frame the red-brick villa fills the CENTRE of the frame with the black front door under its red-tiled porch. The Narrator walks on the gravel road at the LEFT third toward the iron gate, the height of a finger. The beeches are dark at the LEFT edge, the gravel crosses the BOTTOM and the blue sky runs across the TOP. The shot is inside this place: The front of the narrator's red-brick villa at Maybury at eleven on a hot clear summer morning in 1894: a black front door under a small red-tiled porch, a canted bay window with white sashes, a knee-high red-brick wall with a black wrought-iron gate, clipped laurels and a privet hedge, a gravel road climbing to the right. The camera pans from the tall beeches at the left across to the iron gate as <Subject 1> walks up the gravel to the gate and stops with his hand on it, from 00:00 to 00:03. At 00:03 he turns his head back down the road toward the common, and the turn continues to the last frame of the shot. <Subject 1>'s mouth is closed from 00:00 to 00:05 while he walks up the gravel to the gate. By 00:06 the camera is panning through the last frame, and the action continues with it.\n\noverall_soundscape: The ambience of the front of the narrator's red-brick villa at Maybury at eleven on a hot clear summer morning in 1894: a black front door under a small red-tiled porch runs under the whole take: its own air, the surfaces underfoot and the fabric of the place around it. Cloth, boots and the small sounds of hands on wood, glass and iron carry the physical action throughout.\n\nnon_diegetic_music: N/A",
+   "width": 768,
+   "height": 768,
+   "length": 158,
+   "ref_image_size": "match",
+   "ref_images.ref_image_0": [
+    "18",
+    0
+   ],
+   "ref_images.ref_image_1": [
+    "19",
+    0
+   ]
+  },
+  "class_type": "MiniMaxH3ReferenceToVideo",
+  "_meta": {
+   "title": "MiniMax H3 Reference to Video"
+  }
+ },
+ "9": {
+  "inputs": {
+   "model": [
+    "4",
+    0
+   ],
+   "scheduler": "beta",
+   "steps": 4,
+   "denoise": 1.0
+  },
+  "class_type": "BasicScheduler",
+  "_meta": {
+   "title": "BasicScheduler"
+  }
+ },
+ "10": {
+  "inputs": {
+   "model": [
+    "4",
+    0
+   ],
+   "conditioning": [
+    "21",
+    0
+   ]
+  },
+  "class_type": "BasicGuider",
+  "_meta": {
+   "title": "BasicGuider"
+  }
+ },
+ "11": {
+  "inputs": {
+   "sampler_name": "euler"
+  },
+  "class_type": "KSamplerSelect",
+  "_meta": {
+   "title": "KSamplerSelect"
+  }
+ },
+ "12": {
+  "inputs": {
+   "noise_seed": 84012
+  },
+  "class_type": "RandomNoise",
+  "_meta": {
+   "title": "RandomNoise"
+  }
+ },
+ "13": {
+  "inputs": {
+   "noise": [
+    "12",
+    0
+   ],
+   "guider": [
+    "10",
+    0
+   ],
+   "sampler": [
+    "11",
+    0
+   ],
+   "sigmas": [
+    "9",
+    0
+   ],
+   "latent_image": [
+    "8",
+    1
+   ]
+  },
+  "class_type": "SamplerCustomAdvanced",
+  "_meta": {
+   "title": "SamplerCustomAdvanced"
+  }
+ },
+ "14": {
+  "inputs": {
+   "samples": [
+    "13",
+    0
+   ],
+   "vae": [
+    "6",
+    0
+   ]
+  },
+  "class_type": "VAEDecode",
+  "_meta": {
+   "title": "VAE Decode (video)"
+  }
+ },
+ "15": {
+  "inputs": {
+   "samples": [
+    "13",
+    0
+   ],
+   "vae": [
+    "7",
+    0
+   ]
+  },
+  "class_type": "VAEDecodeAudio",
+  "_meta": {
+   "title": "VAE Decode (audio)"
+  }
+ },
+ "16": {
+  "inputs": {
+   "images": [
+    "14",
+    0
+   ],
+   "audio": [
+    "15",
+    0
+   ],
+   "fps": 24,
+   "bit_depth": 8
+  },
+  "class_type": "CreateVideo",
+  "_meta": {
+   "title": "Create Video"
+  }
+ },
+ "17": {
+  "inputs": {
+   "video": [
+    "16",
+    0
+   ],
+   "filename_prefix": "bench_S2_A3_s2",
+   "format": "mp4",
+   "format.codec": "h264",
+   "format.codec.encoding": "re-encode",
+   "format.codec.encoding.crf": 10.0
+  },
+  "class_type": "SaveVideo",
+  "_meta": {
+   "title": "Save Video"
+  }
+ },
+ "20": {
+  "class_type": "LoadAudio",
+  "inputs": {
+   "audio": "silence_11_3e24c635.wav"
+  },
+  "_meta": {
+   "title": "anchored audio"
+  }
+ },
+ "21": {
+  "class_type": "MiniMaxH3AddGuide",
+  "inputs": {
+   "positive": [
+    "8",
+    0
+   ],
+   "latent": [
+    "8",
+    1
+   ],
+   "audio_vae": [
+    "7",
+    0
+   ],
+   "audio": [
+    "20",
+    0
+   ],
+   "frame_idx": 0
+  },
+  "_meta": {
+   "title": "anchor audio @ 0"
+  }
+ },
+ "1": {
+  "inputs": {
+   "unet_name": "Minimax-h3_Singularity_ref2va_Pruned_v1.3_int8.safetensors",
+   "weight_dtype": "default"
+  },
+  "class_type": "UNETLoader",
+  "_meta": {
+   "title": "Load Diffusion Model"
+  }
+ },
+ "2": {
+  "inputs": {
+   "model": [
+    "1",
+    0
+   ],
+   "lora_name": "minimax_h3\\minimax_h3_ref2v_turbo_4step_v0.1_comfyui_bf16.safetensors",
+   "strength_model": 1.0
+  },
+  "class_type": "LoraLoaderModelOnly",
+  "_meta": {
+   "title": "Turbo LoRA ema_ckpt850 (native loader)"
+  }
+ },
+ "3": {
+  "inputs": {
+   "model": [
+    "2",
+    0
+   ],
+   "sage_attention": "disabled",
+   "allow_compile": false
+  },
+  "class_type": "PathchSageAttentionKJ",
+  "_meta": {
+   "title": "Patch Sage Attention KJ"
+  }
+ },
+ "4": {
+  "class_type": "MiniMaxH3SigmaShift",
+  "inputs": {
+   "model": [
+    "3",
+    0
+   ],
+   "shift_video": 12,
+   "shift_audio": 3.0
+  }
+ }
+}
