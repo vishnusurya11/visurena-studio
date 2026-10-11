@@ -386,3 +386,15 @@ def banner_thumbnail(plate, spec: BookTitleSpec, *, episodes: int, font: Path):
     draw.text((w // 2, h - 12), f"FULL ADAPTATION · {episodes} EPISODES  ·  {spec.author.upper()}", font=small,
               fill=(235, 196, 120), anchor="md")
     return pic
+
+
+def photoreal_lead(refs: dict) -> str:
+    """A photoreal book's own picture lead: its location sheets' opening words up
+    to and including its palette -- what the series was drawn with -- else the
+    generic line."""
+    palette = (refs.get("palette") or "").strip()
+    for row in refs.get("refs") or []:
+        prompt = row.get("prompt") or ""
+        if row.get("kind") == "location" and palette and palette in prompt:
+            return prompt[:prompt.index(palette) + len(palette)].strip() + " "
+    return f"{PHOTOREAL[0].upper()}{PHOTOREAL[1:]}, of "

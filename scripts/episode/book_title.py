@@ -88,6 +88,8 @@ def plate(out: Path, prompt: str, look: str, *, wide: bool, seed: int) -> Path:
     if out.exists():
         return out
     ask = bt.plate_request(look, wide=wide)
+    if not look.strip() and (refs := out.parents[2] / "refs" / "refs.json").exists():
+        ask["lead"] = bt.photoreal_lead(episode_home.read_json(refs))      # the series' own photoreal words
     for k in range(TRIES):
         made = run(ask["workflow"], {"prompt": ask["lead"] + prompt + " No text, no letters, no writing.",
                    **ask["values"], "seed": seed + k, "filename_prefix": "book_title/plate"})[0]

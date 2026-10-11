@@ -245,3 +245,17 @@ def test_the_writer_is_told_the_books_look_never_to_paint_a_photoreal_book():
     assert "painted" not in real.lower() and "photoreal" in real.lower()
     drawn = bt.writer_prompt("The War of the Worlds", "H. G. Wells", "Martians.", look="Angular stylised 3D")
     assert "Angular stylised 3D" in drawn
+
+
+def test_a_photoreal_books_plates_lead_with_its_own_refs_prompt_and_palette():
+    """Owner 2026-10-11: 'look at the Sherlock prompts' -- its sheets were drawn as a
+    'Cinematic live-action photograph ...' with the book's palette, not a generic line."""
+    refs = {"palette": "Muted soot-black, gaslight amber and cold grey; 1881 London.",
+            "refs": [{"kind": "character", "prompt": "a man"},
+                     {"kind": "location", "prompt": "Cinematic live-action photograph, photoreal 35 mm. "
+                                                    "Muted soot-black, gaslight amber and cold grey; 1881 London. "
+                                                    "A cobbled street at night."}]}
+    lead = bt.photoreal_lead(refs)
+    assert lead.startswith("Cinematic live-action photograph, photoreal 35 mm.")
+    assert "1881 London" in lead and "cobbled street" not in lead
+    assert bt.photoreal_lead({"refs": []}).lower().startswith("a photoreal")
