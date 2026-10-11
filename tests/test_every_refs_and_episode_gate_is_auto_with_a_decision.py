@@ -6,7 +6,7 @@ from __future__ import annotations
 from studio import gate_policy
 
 GATES = {"refs": {"LOOK"},
-         "episode": {"PLAN", "LAYOUT", "EYE_PANELS", "EYE_TAKES", "MASTER", "RENDER"}}
+         "episode": {"PLAN", "LAYOUT", "EYE_PANELS", "EYE_TAKES", "MASTER", "RENDER", "LOOK_STATE"}}
 
 
 def test_the_named_gates_are_all_there():

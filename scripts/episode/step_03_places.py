@@ -4,8 +4,15 @@ cells written FROM those pictures.
 
     uv run python scripts/episode/step_03_places.py <codex_id> <n> [--new=<loc>="Its name"]
 
+03_04 (decision 2026-10-10, first, so Krea2 loads once for looks and places)
+wraps scripts/refs/looks.py --draw: this unit's new character LOOKS, each one
+hop from the base sheet, judged by LOOK-STATE; a book without refs/looks.json
+logs `continuity: legacy` and keeps one sheet per character.
 03_01 wraps scripts/refs/places.py --draw (the local image model): every setup
-with a location gets the picture its view names under refs/locations/.
+with a location gets the picture its view names under refs/locations/; a first
+picture of a location is recorded as its master in refs/places.json, and a
+setup's `place_state` is derived from its picture in ONE 2511 edit (03_05);
+the plan then names that variant as the setup's view (re-signed, recorded).
 03_03 cells (owner, 2026-09-28: "fix all that"): the skill's rule -- "write
 cells from the drawn picture, after it exists, never before" -- was inverted by
 the 02 plan -> 03 places order, and ep14's attic cells described a street.  So
@@ -89,7 +96,46 @@ def done(ctx) -> bool:
         return False
     doc = episode_home.read_json(plan)
     return all(p.exists() for p in pictures(ctx.book_dir, doc)) \
-        and not missing_sheets(ctx.book_dir, doc) and cells_done(ctx)
+        and not missing_sheets(ctx.book_dir, doc) and not looks_left(ctx) \
+        and not states_left(ctx.book_dir, doc) and cells_done(ctx)
+
+
+# ---- 03_04 looks and 03_05 place states (decision 2026-10-10) ---------------------
+
+def refs_module(name: str):
+    import importlib
+    return importlib.import_module(f"scripts.refs.{name}")
+
+
+def looks_left(ctx) -> list:
+    """This unit's staged looks with no picture yet; none on a legacy book."""
+    from studio import look_timeline
+    if look_timeline.load(ctx.book_dir) is None:
+        return []
+    return refs_module("looks").missing_looks(ctx.book_dir, episode_home.load_plan(ctx.book_dir, ctx.number))
+
+
+def states_left(book: Path, doc: dict) -> list:
+    """Setups whose place state is not yet derived from their picture."""
+    from types import SimpleNamespace
+    setups = {k: SimpleNamespace(**{"location": "", "view": "", "place_state": "", **v})
+              for k, v in (doc.get("setups") or {}).items()}
+    return refs_module("places").states_due(book, setups)
+
+
+def name_variants(ctx) -> None:
+    """Each derived state named as its setup's view, through write_plan, with a
+    ledger row and the verdict re-signed (a concrete id, never 'derive:', A73)."""
+    from studio import plan_provenance
+    plan = ctx.home / "plan.json"
+    doc, changed = refs_module("places").resolve_states(episode_home.read_json(plan), ctx.book_dir)
+    if not changed:
+        return
+    before, previous = plan_verdict.plan_sha8(plan), plan_verdict.read(plan)
+    episode_home.write_plan(plan, doc)
+    plan_provenance.record(plan, before, ["place_states"])
+    resign(plan, previous)
+    ctx.log(f"  03_05: {', '.join(changed)} now name their state variants", step_id=STEP_ID)
 
 
 # ---- 03_02: every staged prop's sheet exists before anything reads the stage ------
@@ -209,8 +255,15 @@ def write_cells(ctx) -> None:
 
 
 def run(ctx) -> None:
+    from studio import look_timeline
     extra = getattr(ctx, "extra", None) or []
+    if look_timeline.load(ctx.book_dir) is not None:                # 03_04, looks first
+        ctx.run_script("scripts/refs/looks.py", "--draw", gpu=GPU, clock="places")
+    else:
+        ctx.log("  03_04: continuity: legacy (no refs/looks.json) -- one sheet per character", step_id=STEP_ID)
     ctx.run_script("scripts/refs/places.py", "--draw", *extra, gpu=GPU, clock="places")
+    if not rendered(ctx):
+        name_variants(ctx)                                          # 03_05
     doc = episode_home.read_json(ctx.home / "plan.json")
     if missing_sheets(ctx.book_dir, doc):            # 03_02, on the episode's clock
         with episode_clock.timed(ctx.book_dir, ctx.number, "places", note="03_02 prop sheets"):

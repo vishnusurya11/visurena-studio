@@ -115,6 +115,30 @@ is fine, a plan written terse everywhere is not.
   ONE picture of that place for this unit, chosen by the setup. A shot never
   picks its own view. The hour comes from the picture, never from the words.
 - Never rewrite a location row to point at your picture; other units share it.
+
+## Continuity (decision 2026-10-10)
+
+- **Looks.** Each bound cast row carries its chapter's `default_look` and the
+  `looks_allowed` this chapter (with their markers and whether they are drawn).
+  A face wears its default look; where the chapter changes it between scenes
+  (ragged in the opening scene, a borrowed suit after), the setup names it in
+  `looks`: `[{"who": "<entity_id>", "look": "<look id>"}]`, only ids from
+  `looks_allowed`. G-LOOK drops any other pick.
+- **Never write hair, beard or hat words that differ from the look.** The row
+  already carries them, its head first, and the staged picture shows them; a
+  word against the picture loses and confuses the take.
+- **A place is its drawn pictures.** Each place row lists its `members`,
+  `drawn_views`, `master` and `history` (what earlier episodes staged). For a
+  recurring place, `view` is one of its drawn views (empty is the master).
+  Never invent a new view id for a framing, an hour or a state of a place:
+  write the master and say what has CHANGED in `place_state`, as nouns ("the
+  front door forced open, dust on every sill"); step 03 derives it from the
+  master in one edit. A genuinely new part of a place (a room never drawn) may
+  get a new view id; it is drawn once and kept.
+- **Never describe a known room again from scratch.** `described` keeps to what
+  the drawn picture shows; the change goes in `place_state`. G-PLACE rewrites a
+  lookalike location id to its member and a new room under an old id to its
+  master.
 - `described` is the place in one paragraph of nouns in positions. `geometry`
   lays out the establishing WIDE: each relation restated as WHICH FRAME EDGE at
   WHAT APPARENT SIZE with what between. Relational prepositions alone are the

@@ -82,6 +82,37 @@ SKILL.md.
   hussar" binds; "serge hussar jacket" and "a boy of sixteen" do not; "the
   narrator's wife" is the wife, not the narrator (2026-09-23).
 
+- **Words lose to pixels, hardest on the face (WotW retro, 2026-10-10).** The
+  narrator's grey hair and 16-day beard (ch22-27) were said in words beside the
+  clean ep01 sheet: grey hair in 0-1 of ~24 ep26-27 panels, and 4 of 20 ep25
+  panels were the sheet itself, suit, boater and all. Clothes-only changes (ep10
+  soaked, ep13 scalded) mostly survived; face changes did not. A wardrobe
+  promise needs a picture (`8c28bf6`, Scarlet) -- learned, lost on 09-18,
+  relearned. The fix is a LOOK picture staged in grid and take, never more words.
+- **Looks live on a story timeline (owner 2026-10-10).** `refs/looks.json`: one
+  base look per character, every later look ONE hop from the base sheet (an
+  identity edit for clothes, a fresh draw from the base prompt and seed for a
+  face change), never an edit of an edit, never a composite (no head pasted
+  back). Intervals are chapter AND scene: ch26 opens ragged and ends in the
+  borrowed suit. `scripts/refs/looks_table.py` writes it once per book: from the
+  dossier's costume plot when it has one (WotW), else from the script
+  supervisor's `state_changes`, every quote found in its chapter at 0.85 --
+  otherwise the next book gets one look for everyone.
+- **A row never carries two heads.** The body holds no hair, beard or hat; the
+  look's head leads the row. "Dark brown hair ... shaven" beside "ash-grey ...
+  beard" let every gate that read the row allow both, and told H3 both.
+- **Check what a gate compares against before trusting its silence.** The hair
+  and beard checks compared the picture with a self-contradicting row, so they
+  could never fire. They compare the staged look's MARKERS now.
+- **"Clothes of <Picture k>" must be true.** The take's retention line copies
+  the staged picture's clothes; with the clean sheet staged and ragged words,
+  the costume changed mid-take (ep18, ep24, ep25 T0). Stage the look; the step-06
+  lint refuses a person whose picture and words name two looks.
+- **The panel IS the sheet.** Full-figure standing panels copied the staged
+  sheet verbatim (pose, suit, boater). A look picture fixes the costume, not the
+  copying: the panel can become the look picture standing front-on. Phase 2
+  measures it (DINO/SSIM panel vs staged sheet, advisory); look at the board.
+
 ## Places
 
 - **The hour comes from the reference, never the words.** This was measured
@@ -90,6 +121,8 @@ SKILL.md.
   about 55 words in and was not drawn; redrawn with "ON FIRE" first, it was.
 - **One picture per place per episode, chosen by the setup** (owner,
   2026-09-18). Two views of one observatory in one episode became two rooms.
+  Still true; since 2026-10-10 a state of that place is one edit of its master
+  (below).
 - **Never rewrite the book's location rows for one episode.** Doing it for ep09
   moved ep03-ep08's Horsell Common into daylight. `Setup.view` is the choice.
 - **Write cells from the drawn picture.** Cells written before drawing
@@ -98,6 +131,37 @@ SKILL.md.
 - **Say a cell at the size of its shot** (G-SCALE). Wide cells in a close-up
   drew the place without the man; wide cells in a newspaper insert drew the
   whole platform.
+
+- **A view drawn from words is a new room (WotW retro, 2026-10-10).** Since
+  2026-09-22 every new view was a fresh Krea2 draw from that episode's words:
+  17 drawn pictures of the narrator's house, the study six different rooms, the
+  dining room three rooms under two ids. The 09-28 "views are drawn FROM the
+  pinned picture" was ruled and never built. `places.py --new` drew fresh rooms
+  too: a new id, a new row, a new picture. Now a place OWNS its member ids; a
+  member's first picture is its master (`refs/places.json`); a framing or state
+  view of a recurring place is its master, and the state is ONE 2511 edit of it
+  (`place_state`, step 03_05); a view naming a new subject is a new side, drawn
+  once and frozen. G-PLACE rewrites the plan in code; it never loops the writer.
+- **One room under two ids is two rooms.** ep26's `narrators_dining_room` had no
+  picture while ep07/ep11's dining room sat under `narrators_home`; step 03 drew
+  a third. G-PLACE moves a member with nothing drawn onto the sibling view that
+  already shows its room.
+- **The pinned picture holds the state too.** ep26's villa reused the ep01 wide
+  -- intact, sunny, neat -- while the prose asked for a forced door and red weed.
+  The picture won. A state is a derived variant, never a sentence.
+- **A rule written and never built is the commonest failure.** 09-28's derived
+  views, the 09-16 Sage A/B, one-sheet-per-entity on the refs folder: each was
+  text only. Land the code and its test with the rule, or the rule is a wish.
+- **The plan gates, replayed on all 27 WotW plans (CPU, 2026-10-10):** G-LOOK 0
+  rewrites; G-PLACE 0-2 a plan, 8 in all -- ep26 `narrators_dining_room` onto
+  `narrators_home/dining_room_unlit_night`, ep27's fresh `reverse` onto the
+  study master, six state views (`wide_empty`, `wide_restored_epilogue`, ...)
+  onto their masters with the state kept. A first cut that also rewrote views
+  naming a NEW subject (the dining room under the house id, a window view) made
+  up to 5 a plan, all wrong: only a framing/hour/state view of a RECURRING place
+  is its master. G-LOOK-WORDS: 7 advisories, refusing nothing. The GPU replay
+  (look pictures staged in one ep25 and one ep27 grid; the villa and the study
+  reverse as one-hop edits) is prepared and not yet run.
 
 ## Grids and panels
 

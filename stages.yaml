@@ -426,6 +426,15 @@ stages:
             desc: >-
               Code writes and stamps the rows (cast_rows). Every later reader
               refuses a row stamped for another unit.
+          - id: "01_03"
+            name: looks
+            desc: >-
+              The book's look table, refs/looks.json (decision 2026-10-10): each
+              bound character's looks on story time (chapter, scene), every look
+              one hop from the base sheet. From the dossier's costume plot when
+              it has one, else AGENT look_timeline_writer over the script
+              supervisor's state_changes; code keeps a look only when its quote
+              is found in its chapter at 0.85 (scripts/refs/looks_table.py).
 
       - id: "02"
         name: sheets
@@ -609,15 +618,36 @@ stages:
           - refs/locations/*/*.png
           - episodes/{unit}/storyboard/cells_from_picture.json
         desc: >-
-          Each setup's location+view at THIS unit's hour, drawn from its own
-          described words on the local image model. A recurring place is PINNED
-          to its one book picture (owner, 2026-09-17; ruled again 2026-09-28):
-          a per-episode view is that place at this hour, never a fresh room.
+          This unit's character looks and place pictures (decision 2026-10-10):
+          a look and a place state are ONE derivation of their base (the sheet,
+          the place's master) on refs/looks.json and refs/places.json; a
+          recurring place's view is its master or derived from it, never a
+          fresh room from words. A place first seen is drawn once and frozen as
+          its master.
         substeps:
+          - id: "03_04"
+            name: looks
+            desc: >-
+              First, so Krea2 loads once: every look this unit stages that is not
+              drawn, one hop from the base sheet (identity edit for clothes,
+              fresh from the base prompt and seed for a face change, never a
+              pasted head). JUDGE look_state (studio/judges/look_state.py) lists
+              hat, hair colour, facial hair, top, dirt; code judges (the head
+              three hard); redraw seed+1 with the fault first, cap 2, terminal
+              keeps the best flagged. A book without a look table logs
+              continuity: legacy.
           - id: "03_01"
             name: draw
             desc: >-
-              Every setup resolves to a picture on disk (guard test).
+              Every setup resolves to a picture on disk (guard test); a first
+              picture of a location is recorded as its master.
+          - id: "03_05"
+            name: variants
+            desc: >-
+              A setup's place_state is ONE 2511 edit of the picture its view
+              names, recorded one hop from the master; the plan then names the
+              variant as the setup's view (written, recorded, re-signed). A
+              same-place band flags, never refuses, until calibrated.
           - id: "03_02"
             name: look_back
             desc: >-  # MISSING

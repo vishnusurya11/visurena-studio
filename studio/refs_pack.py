@@ -1,9 +1,9 @@
 """Turn a book's character, location and prop designs into reference-image jobs.
 
 The designs live under library/<book>/analysis/{characters,locations,props}/
-as `profile.design`.  Each job is one picture: ONE sheet per character (its
-wardrobe states -- soaked, scalded, grey -- are said in the ref2v take prompt,
-never drawn as extra sheets), ONE wide per location, ONE sheet per prop.  Only the
+as `profile.design`.  Each job is one picture: ONE base sheet per character
+(its later story-time looks are drawn one hop from it at episode step 03,
+decision 2026-10-10 -- never here), ONE wide per location, ONE sheet per prop.  Only the
 props words cannot pin (the Martian machines, the red weed…) are drawn at all;
 the runner is given that short list with --only.
 Paths are relative to the book folder -- never absolute.

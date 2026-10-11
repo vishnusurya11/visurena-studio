@@ -1,6 +1,6 @@
 ---
 name: episode
-description: "Turn one book chapter into a square (1:1) YouTube SHORT episode (delivered master <= 180 s, picture <= 174 s) at $0, entirely local: first-person narration and a few spoken lines laid over pictures cut to the measured voice. Chain: plan (gated) -> per-episode place pictures + one sheet per character -> Qwen3-TTS lines -> timeline -> Qwen-Image storyboard grids cut into panels (two panel gates) -> MiniMax-H3 ref2va takes (take gate + content gate) -> assemble with bed and the pre-baked title card -> QC -> publish public. Use when writing, building, fixing, resuming or reviewing an episode under library/<book>/episodes/."
+description: "Turn one book chapter into a square (1:1) YouTube SHORT episode (delivered master <= 180 s, picture <= 174 s) at $0, entirely local: first-person narration and a few spoken lines laid over pictures cut to the measured voice. Chain: plan (gated) -> per-episode looks (one hop from each base sheet) + place pictures (masters, states one edit of them) -> Qwen3-TTS lines -> timeline -> Qwen-Image storyboard grids cut into panels (two panel gates) -> MiniMax-H3 ref2va takes (take gate + content gate) -> assemble with bed and the pre-baked title card -> QC -> publish public. Use when writing, building, fixing, resuming or reviewing an episode under library/<book>/episodes/."
 ---
 
 # Episode
@@ -166,7 +166,7 @@ The references sheets and voices live in their own department: `uv run python re
 |---|---|---|---|
 | 01 | bind | `uv run python scripts/episode/step_01_bind.py <book> <n>` | This unit's cast. |
 | 02 | plan | `uv run python scripts/episode/step_02_plan.py <book> <n>` | The contract, gated before anything is voiced or drawn. |
-| 03 | places | `uv run python scripts/episode/step_03_places.py <book> <n>` | Each setup's location+view at THIS unit's hour, drawn from its own described words on the local image model. |
+| 03 | places | `uv run python scripts/episode/step_03_places.py <book> <n>` | This unit's character looks and place pictures (decision 2026-10-10): a look and a place state are ONE derivation of their base (the sheet, the place's master) on refs/looks.json and refs/places.json; a recurring place's view is its master or derived from it, never a fresh room from words. |
 | 04 | record | `uv run python scripts/episode/step_04_record.py <book> <n>` | Every line in its character's voice, MEASURED and LISTENED to. |
 | 05 | timeline | `uv run python scripts/episode/step_05_timeline.py <book> <n>` | AUDIO FIRST - the animatic. |
 | 06 | prompts | `uv run python scripts/episode/step_06_prompts.py <book> <n>` | Every take prompt built and linted for $0 with no GPU, BEFORE any grid: length per block, style line, banned props, no last frame, no fragments. |
@@ -198,7 +198,8 @@ See GATES.md "Judges".
 | 1 | Bind this chapter's cast | `uv run python scripts/refs/cast_rows.py <book> <n> <who[=Display:gender]> ...` | stamps `refs.json` with the chapter; must precede the plan; the take, grid and content steps all read this one row |
 | 2 | Plan | a new unit's plan is written by the `episode_writer` agent (step 02) into `library/<book>/episodes/epNN/plan.json`; an existing hand-authored `library/<book>/episodes/epNN/plan.py` regenerates it when run | RULE ONE above |
 | 3 | Sheets and prop sheets | `uv run python scripts/refs/build_pack.py <book> --kind characters --only <a> --only <b>` (repeat the flag; `--kind props` for a key prop) | look at every sheet beside its row; words must match the picture (LESSONS: cast) |
-| 4 | Places at this episode's hour | `uv run python scripts/refs/places.py <book> <n> [--draw] [--new=<loc>="Its name"]` | every setup's `location`+`view` resolves to a drawn picture (guard test); look at each one |
+| 3b | Looks (step 03_04) | once per book `uv run python scripts/refs/looks_table.py <book>` (refs/looks.json); per episode `uv run python scripts/refs/looks.py <book> <n> [--draw]` | LOOK-STATE (`judge:look_state`): hat, hair colour, facial hair HARD on every new look picture; G-LOOK in the plan battery; the step-06 lint refuses a person whose picture and words name two looks |
+| 4 | Places at this episode's hour | `uv run python scripts/refs/places.py <book> <n> [--draw] [--new=<loc>="Its name"]` | every setup's `location`+`view` resolves to a drawn picture (guard test); a first picture is the location's master (refs/places.json); a `place_state` is ONE 2511 edit of it (03_05); G-PLACE in the plan battery; look at each one |
 | 5 | Voices (new speakers only) | `uv run python scripts/cast/cast_voices.py <codex> --only <a>,<b> [--recast]` | pairwise similarity under the wall; at most 4 voices an episode |
 | 6 | Lines | `uv run python scripts/episode/say_lines.py <book> <n> [--redo=i,j]` | every line heard as written (listen gate) |
 | 7 | Timeline | `uv run python scripts/episode/respot.py <book> <n>` then `uv run python scripts/episode/timeline.py <book> <n>` | fingerprinted to the plan AND the measured voice; every reader refuses a stale one |
@@ -280,9 +281,14 @@ motion clause.
 
 ## Pictures
 
-**Sheets.** One sheet per character, one wide per place per episode, and one
-sheet per key prop. Closer sizes and states come from the take's camera and
-words, never from edited pictures.
+**Sheets and looks.** One sheet per character LOOK on the book's look table,
+`refs/looks.json` (owner 2026-10-10: reverses 09-18 for story-time looks): the
+base sheet, and every later look ONE hop from it -- an identity edit for
+clothes, a fresh draw from the base prompt and seed for a face change -- never
+an edit of an edit, never a composite. One master per place side
+(`refs/places.json`); a state of a place is ONE edit of its master; a view of a
+recurring place is its master or derived from it, never a fresh room from
+words. One sheet per key prop. Closer sizes come from the take's camera.
 
 **Look at every picture you draw** before anything is built on it. Put the
 defining state or detail FIRST in its prompt. A detail buried mid-sentence is
@@ -291,7 +297,8 @@ dropped:
 - Snippy was drawn clean-shaven when every text gave him a moustache.
 
 When the words and the picture disagree and the book is silent, make the words
-match the picture.
+match the picture. A look on `refs/looks.json` means the book is NOT silent:
+change the picture (stage the look), never the words.
 
 **Grids.** Qwen-Image-2.1 edit-multi takes 1-3 references:
 - cast sheets first, the identity slots;

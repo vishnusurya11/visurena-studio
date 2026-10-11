@@ -1,6 +1,6 @@
 # 2026-10-10 — Continuity: character looks on a story timeline, places as masters
 
-**Status:** RULED (owner, 2026-10-10). Phase 1 (the minimal slice, 9 commits) BUILDING —
+**Status:** RULED (owner, 2026-10-10). Phase 1 (the minimal slice, 9 commits) BUILT 2026-10-10 —
 tracker [../plan/2026-10-10_continuity_build.md](../plan/2026-10-10_continuity_build.md).
 Phases 2-4 PROPOSED.
 
@@ -94,6 +94,17 @@ the picture for every (setup, person) and every setup's place; nothing is chosen
   B-3 picks; flipping a route is one table row.
 
 ### Acceptance (artefact, not tests) — needs the GPU, prepared, not run here
+
+CPU half, run 2026-10-10 (`uv run python scripts/refs/continuity_replay.py 20260827135508`):
+G-LOOK 0 rewrites; G-PLACE 0-2 a plan over all 27 WotW plans (8 in all, each read:
+ep26 `narrators_dining_room` -> `narrators_home/dining_room_unlit_night`, ep27 `reverse`
+-> the study master, six framing/state views -> their masters with the state kept);
+G-LOOK-WORDS 7 advisories. GPU half, prepared (outputs only under the retro folder):
+
+    uv run python scripts/refs/look_replay.py 20260827135508 25 fulham_road 2 2 --shots=0,2,3,4 --out=docs/audit/2026-10-10_continuity_retro/replay
+    uv run python scripts/refs/look_replay.py 20260827135508 27 study_table 2 2 --shots=2,3,12,13 --out=docs/audit/2026-10-10_continuity_retro/replay
+    uv run python scripts/refs/place_replay.py 20260827135508 --out=docs/audit/2026-10-10_continuity_retro/replay/house
+
 
 A bench replay of one ep25 grid and one ep27 grid with the look pictures: the narrator
 shows grey hair and beard in ≥ 80 % of his panels (VLM list plus a contact sheet looked

@@ -24,6 +24,8 @@ every take from MiniMax-H3. If a step would spend money, stop and say so.
 reference pictures THEMSELVES; everything else is said in words. Never
 generate a "frame zero", never composite a character into a room, never
 derive a location view with Qwen-Image-Edit or any edit model.
+*(Superseded 2026-10-10 for story-time looks and place states: each is ONE edit of
+its base sheet or place master -- SKILL.md "Sheets and looks". The composite ban stands.)*
 
 **One picture per entity** (`studio/refs_pack.py`, `scripts/refs/build_pack.py`):
 

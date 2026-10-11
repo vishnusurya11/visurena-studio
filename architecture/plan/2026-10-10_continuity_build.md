@@ -1,6 +1,6 @@
 # 2026-10-10 — Continuity build (phase 1, the minimal slice)
 
-**Status:** BUILDING — commit 8 of 9. Decision:
+**Status:** BUILT 2026-10-10 (phase 1, 9 of 9); the GPU acceptance replay prepared, NOT run. Decision:
 [../decisions/2026-10-10_continuity_looks_places.md](../decisions/2026-10-10_continuity_looks_places.md).
 Binding verdict: `docs/audit/2026-10-10_continuity_retro/S_skeptic_verdict.md` §6.
 
@@ -12,10 +12,10 @@ Binding verdict: `docs/audit/2026-10-10_continuity_retro/S_skeptic_verdict.md` �
 - [x] 6. `scripts/refs/looks.py` at step 03 + LOOK-STATE
 - [x] 7. Places membership + G-LOOK / G-PLACE with code cures; the brief lists drawn views and history
 - [x] 8. `places.py`: one-hop 2511 state variant of the master; a new side frozen; DINO same-place flag
-- [ ] 9. Step 03 wiring, `stages.yaml`, SKILL/GATES/LESSONS, episode_writer continuity, the *Current* tab
+- [x] 9. Step 03 wiring, `stages.yaml`, SKILL/GATES/LESSONS, episode_writer continuity, the *Current* tab
 
-Not in this build (GPU): the acceptance replay — the command is written in the log when
-commit 6 lands. Republish the claude.ai copy of `architecture/index.html` after commit 9.
+Not in this build (GPU): the acceptance replay — the commands are in the decision file
+(`scripts/refs/look_replay.py`, `scripts/refs/place_replay.py`). Republish the claude.ai copy of `architecture/index.html` after commit 9.
 
 ## Log
 - 2026-10-10: retro (A-G), two plans (P1, P2), skeptic verdict S. Owner rulings: per-state
@@ -28,3 +28,4 @@ commit 6 lands. Republish the claude.ai copy of `architecture/index.html` after 
 - 2026-10-10: commit 6 — scripts/refs/looks.py (step 03_04): only the looks this episode stages are drawn; ROUTES garment->edit (Krea2 identity edit of sheet_front.png, then the one-figure crop), face->fresh (the look's layers first, the body, the base sheet's own form sentence and seed; then the crop) until bench B-3 picks; no head paste. studio/judges/look_state.py: the VLM lists headwear/hair/facial hair/top/dirt, code judges -- the head three HARD, top/dirt advisory, relative identity (cos to base minus nearest stranger) advisory; ladder seed+1 with the faulted layer first, cap 2, terminal keep_best flagged; recorded on looks.json one hop from the base sheet's sha8 + refs/looks.verdict.json. scripts/refs/look_replay.py: the GPU acceptance replay, prepared, NOT run (commands in the decision file).
 - 2026-10-10: commit 7 — studio/continuity_place: a place owns its member ids (a row joins the row its 'X, the house' / 'of the house' container names, 0.85), a member's first picture is its master; G-LOOK (a pick the chapter does not allow -> dropped) and G-PLACE (lookalike id -> the member; a member with nothing drawn whose room a sibling drew -> that view; a framing/state view of a RECURRING place -> its master, the state kept as place_state; a view naming a new subject is a new side) are HARD battery rows on a continuity book, cured by code in plan_repair. The brief lists looks allowed, drawn views (undrawn design ids dropped), master and history. CPU replay over all 27 WotW plans (scripts/refs/continuity_replay.py): G-LOOK 0, G-PLACE 0-2 per plan (8 in all: ep26 narrators_dining_room -> narrators_home/dining_room_unlit_night, ep27 study reverse -> the study master, 6 state views -> master + state), G-LOOK-WORDS 7 advisories.
 - 2026-10-10: commit 8 — places.py: a first picture of a location is recorded as its master in refs/places.json (a new side, drawn once, frozen); a setup's place_state is ONE edit of the picture its view names with the existing image_qwen_image_edit_2511_single_image (Lightning; no workflow edited), recorded as a Variant one hop from its master's sha8; resolve_states names the drawn variant as the setup's view (a concrete id); a DINO same-place band FLAGS (SAME_PLACE_BAND 0.80, UNCALIBRATED: its fit on the 17 house pictures needs the GPU embedder). scripts/refs/place_replay.py: the GPU house replay (ep26 abandoned villa, ep27 study reverse as one-hop edits of their masters, with strips), prepared; look_replay gains --out and per-shot strips.
+- 2026-10-10: commit 9 — step 03 wiring (03_04 looks first on a table book, else 'continuity: legacy'; 03_05 the derived variant named in the plan, recorded and re-signed; done() waits on looks and states), stages.yaml (refs 01_03 looks; episode 03 prose + substeps; SKILL registry table regenerated), gates.yaml LOOK_STATE (auto, decision 2026-10-10-continuity-looks-places), SKILL/GATES/LESSONS/SCARLET_ARCHIVE note, the episode agent and episode_writer continuity rules, the Current tab (twenty agents, the look timeline writer card, 01_03/03_04/03_05 built). Republish the claude.ai copy of the page.

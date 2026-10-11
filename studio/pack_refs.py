@@ -10,7 +10,8 @@ A take with no storyboard cell OPENS AT ITS LOCATION PICTURE'S FRAMING (ep14,
 2026-09-17: a medium handed a room picture started far too wide).  So the view
 is chosen by the shot's size -- a wide gets a wide view, an insert an insert
 view -- and a take is never handed a face alone (ep14: it invented a Gothic
-hall).  Wardrobe states are not drawn: the chapter's state is said in words.
+hall).  Story-time LOOKS are drawn since 2026-10-10 (`look_sheet`, refs/looks.json):
+a look in words lost to the staged sheet on the face (WotW ep22-27).
 """
 from __future__ import annotations
 

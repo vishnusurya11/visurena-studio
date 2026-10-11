@@ -19,5 +19,6 @@ gates:
     EYE_TAKES:   { state: auto, judge: take_eye@1,    decision: 2026-09-24-automate-the-taste-gates, terminal: keep_best, still_max: 2 }
     MASTER:      { state: auto, judge: master_eye@1,  decision: 2026-09-24-automate-the-taste-gates, terminal: flag }
     RENDER:      { state: auto, decision: 2026-09-24-episode-department, ceiling_seconds: 18000 }
+    LOOK_STATE:  { state: auto, judge: look_state@1,  decision: 2026-10-10-continuity-looks-places, terminal: keep_best }   # step 03_04: a drawn look shows its look
 promotion:
   units: 3          # a shadow version is promoted after this many units where its bench is not worse

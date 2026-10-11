@@ -32,6 +32,7 @@ Always:
 - **Never patch `plan.json`.** A plan is written by the writer agent through the gates, or by its `plan.py` beside it under the library; never by hand.
 - **Cast from its rows.** Use `cast_refs.tag` with verbatim fragments of the bound row. Bind this chapter's rows with `cast_rows.py` first.
 - **Places from the plan.** A setup names its `view`, drawn at this episode's hour by `scripts/refs/places.py`. Never rewrite the book's location rows.
+- **Looks and masters (decision 2026-10-10).** A face wears the look its row is stamped with, or the setup's `looks` pick; step 03 draws a missing look one hop from the base sheet (LOOK-STATE judges it) and derives a `place_state` as ONE edit of the place's master. A recurring place's view is its master or a derived variant, never a fresh room from words; G-LOOK and G-PLACE rewrite the plan in code.
 - **Look at every picture you draw.** When the words and the picture disagree and the book is silent, the words follow the picture.
 - **Declare every unnamed person.** A setup's `crowd` or a shot's `extras`. No gate guesses people from prose.
 - **Both panel gates, then both take gates.** A gate that measured nothing has passed nothing.

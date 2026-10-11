@@ -6,6 +6,8 @@ Newest first. Every architectural change gets an entry.
 
 ## 2026-10-10 — Continuity: character looks on a story timeline; a place is its master (owner rulings, retro of WotW)
 
+Decision id: `2026-10-10-continuity-looks-places`
+
 **Ruling:** a character has one picture per story-time LOOK on the book's look table
 (`refs/looks.json`), not one picture for the whole book — this reverses the 2026-09-18
 "one picture per entity" rule for story-time looks only; places and props keep it. A look,

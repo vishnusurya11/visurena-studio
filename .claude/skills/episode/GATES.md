@@ -28,6 +28,9 @@ missing input, or an unread picture.
 | MOTION, MARKS, ACTOR | motion wording; the last clause moves a limb or head; staging marks | HARD |
 | CAST BOUND | a book cast from sheets: every cast member has a row and a sheet on disk | HARD |
 | QUOTE | at most 8 consecutive book words in a line | HARD |
+| G-LOOK (decision 2026-10-10) | a setup's `looks` pick is a look the book's table allows this chapter (`continuity_place.look_gate`); a book without `refs/looks.json`/`places.json` is legacy and not judged | HARD, CODE CURE: the pick is dropped (`plan_repair`), never the writer |
+| G-PLACE (decision 2026-10-10) | a setup's place is a member's master or a drawn view: a lookalike new id (0.85), a member with nothing drawn whose room a sibling drew, a framing/hour/state view of a RECURRING place (`continuity_place.place_gate`) | HARD, CODE CURE: rewritten to the member / its master, the state kept in `place_state` |
+| G-LOOK-WORDS | one-face shot prose naming a hair colour the look contradicts (`scripts/refs/continuity_replay.py`) | ADVISORY: refuses nothing (7 on 27 WotW plans) |
 | ONE PER TAKE / TAKE LENGTH | every shot is its own take, inside the 8 s budget | HARD |
 | TIMELINE | `placed.json` is of this plan AND this voice (`episode_home.load_placed`) | HARD |
 | SHEET TEXT | the Scarlet book's paid-sheet check; skipped for sheet books, and a crash is printed, never counted silently | HARD where it applies |
@@ -91,6 +94,16 @@ faces (`takes_r2v.staging_candidates`). Candidates used to be every row in
 `refs.json`, matched by the last word of a display name. Six published takes
 staged the wrong person that way (ep05 T19, ep06 T08, ep07 T09/T19/T24/T26).
 
+## Looks and place states — step 03 (decision 2026-10-10)
+
+| gate | where | measures | kind |
+|---|---|---|---|
+| LOOK-STATE (`judge:look_state`, gates.yaml `LOOK_STATE`) | 03_04, every new look picture | the VLM LISTS headwear, hair colour, facial hair, top, dirt in a closed vocabulary; code compares the look's markers | HARD on headwear, hair colour, facial hair; ADVISORY on top, dirt; ladder seed+1 with the faulted layer first, cap 2, terminal keep_best flagged |
+| relative identity (inside LOOK-STATE) | face-changing looks | facenet cos(look, base) minus the nearest other cast sheet | ADVISORY until the bench fits it |
+| undrawn look | grids, takes | `pack_refs.look_sheet` | HARD: refuses, never the base sheet |
+| one look per person (step 06) | `takes_r2v.opened` | `continuity.look_faults`: the staged picture and the words name ONE look on the table, the row is stamped with the table's look, the look is drawn | HARD |
+| same-place band | 03_05, every derived state | DINOv3 cosine of the variant to its source, `places.SAME_PLACE_BAND` 0.80 | FLAG, uncalibrated |
+
 ## Cast rows — `cast_refs.chapter_refusal`
 
 `refs.json` holds one chapter's clothes. The take builder, the grids and both
@@ -107,6 +120,13 @@ content checks refuse rows stamped for another chapter. **HARD.**
 `takes_r2v` refuses when either verdict is missing, fails a shot, skipped a
 shot, or is older than a redrawn panel. **HARD.**
 
+G-LOOK-PANEL (2026-10-10): on a one-face panel the content reader's subjects
+are read for hat, hair, facial hair and top against the STAGED look's markers
+(`panel_content.look_advisories`) into `look_advisory` on the row. ADVISORY:
+armed HARD only at recall >= 0.8 and false refusals <= 0.1 over every narrator
+panel of a finished book. A beard on a look whose facial hair is `none` stays
+the HARD contradiction it was, judged by markers now.
+
 The content reader is read STRICTLY (2026-09-23): a reply cut off inside
 `subjects` is salvaged (the judged fields come first) and one cut before
 them still refuses; `"false"` is false; a subjects string is split into
@@ -120,6 +140,7 @@ stored readings raised no new failure.
 |---|---|---|---|
 | `take_dq.py` | `T<NN>.dq.json` | frozen start and share, cut landing, churn, zoom, face at end, look, pulse, lip-sync lag and WER; **held** (a person pinned while the set slides: lock = 1 - face travel / scenery travel, hard at 0.75 over 100 px, only when the plan keeps the subject in place); **jump** (lowest similarity between consecutive frame signatures, hard below 0.50: a switch of picture, whatever the brightness) | HARD rows as marked in the report. held: ep09 T02 1.01 over 1055 px and T10 1.05 fail; eligible passes top out at -0.42 (n=2 fires against 3 passes: thin). jump: T15's two faults 0.08 and 0.16, every accepted ep08/09 take 0.83 or more |
 | `take_content_check.py` | `T<NN>.content.json` | the panel content rules on 3 frames past the head leak, each read alone | HARD |
+| G-LOOK-TAKE (2026-10-10) | `T<NN>.content.json` `look_log` | the hair family changing across the 3 frames, or off the staged look on 2 of them (`take_content.look_log`) | LOG ONLY: its only cure is a re-render (3/21) |
 | `take_frame.row` (letterbox, in `T<NN>.dq.json`) | — | bars at the top AND bottom, each >= 4 % of the height, each either flat (row spread <= 2.0) or ending at an edge (the picture rises >= 12 levels past it) | HARD. ep14 T26: 54/256 rows of bars. ep21 T27/T30: a dark cellar read 3.6-5.3 spread, 1.5-3.3 step, and is NOT a letterbox (2026-10-08) |
 
 Take currency: a take is kept only when it was rendered from the same prompt
@@ -177,6 +198,12 @@ content gate existed, would be refused for unjudged or lettered takes.
 
 ## Known gaps — not measured yet
 
+- **continuity (2026-10-10):** the relative-identity margin, the same-place
+  band and G-LOOK-PANEL are uncalibrated; the GPU acceptance replay (looks
+  staged in one ep25 and one ep27 grid; the villa and the study reverse as
+  one-hop edits, `scripts/refs/look_replay.py`, `place_replay.py`) is not run.
+  Phase 2: "the panel IS the sheet" (panel vs staged sheet), GeomCons on the
+  master's fixed things, the production designer.
 - **framing:** a medium close drawn as a full figure passes (face 0.112
   against published 0.101-0.3). It needs a closed-vocabulary FRAMING answer
   from the content reader, judged against the planned size.
