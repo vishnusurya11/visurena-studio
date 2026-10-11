@@ -86,8 +86,16 @@ def job_from_row(path: str, row: dict) -> refs_pack.Job:
     """A pack row with no design behind it (a place drawn per episode from the
     plan's words): its own workflow and prompt, at the pack's sheet size."""
     kind, entity, name = path.split("/")[1:4]
-    return refs_pack.Job(kind, entity, Path(name).stem, row.get("workflow") or refs_pack.T2I,
+    return refs_pack.Job(kind, entity, Path(name).stem, new_draw_workflow(row.get("workflow")),
                          row["prompt"], *SHEET_SIZE)
+
+
+def new_draw_workflow(recorded: str | None) -> str:
+    """The workflow a NEW draw of a row runs: the old 2x Krea2 name maps to the
+    neutral-tile T2I (C3_verdict P1); the row keeps its recorded name as history."""
+    if not recorded or recorded == refs_pack.OLD_T2I:
+        return refs_pack.T2I
+    return recorded
 
 
 def silhouette_of(book_dir: Path | str, job: refs_pack.Job) -> str:

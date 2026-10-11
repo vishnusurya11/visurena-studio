@@ -870,3 +870,12 @@ fixes. Each lesson below cost at least one launch. Tracker rows A38-A74 in
       so no rung rule could end it by 6 h. A rung now leaves the firsts still owed their shares
       under 6 h (the downstream reserve). Its price: the shares over-price a light episode --
       ep17 (297 min) would have lost 2 panel rungs.
+    - **The neutral tile, benched once, switched once (P1, C3 bench block 2).** New refs draws run
+      `image_krea2_cinematic_2x_neutraltile_visurena`: the 2x tile on style words only at denoise
+      0.15. At 0.2 the style-only tile streaked the narrator's tweed 4.7x today's share; 0.15 is
+      1.5x, 0 ghosts, the best head facenet. Trimming the tile words (c) or adding wardrobe nouns
+      (d) did less. The title plate stays on the old workflow (D7).
+    - **Deterministic, and stable on the seed (C3 bench block 1).** 12 shipped panels re-read at seeds
+      111/211/311 against the cached 11: 2 field flips in 216 (0.9 %), both a people count on one
+      12-figure crowd. The 6-16 % instability is the PIXELS (adjacent frames), not the seed:
+      confirm-before-refuse on the same pixels buys nothing, so it is not built (D6).

@@ -17,7 +17,11 @@ STYLE_LEAD = ("A 3d, clean ultra hd, AAA game quality graphics, computer generat
               "great detail, high contrast, highly accurate character model and texture, "
               "realistic lighting. A heavily angular 3d art style with brush stroke colour "
               "texture. Cinematic film still of ")
-T2I = "image_krea2_cinematic_2x"
+T2I = "image_krea2_cinematic_2x_neutraltile_visurena"
+"""A NEW refs draw (C3_verdict P1, owner ruling 2026-10-11 on the C2 sheet): the 2x tile pass on
+style words only, at denoise 0.15 (the C3 bench arm b) -- the subject prompt on every tile painted
+faces into backdrops and trousers.  Existing sheets and recorded rows keep their workflow name."""
+OLD_T2I = "image_krea2_cinematic_2x"
 # ONE picture per location: its establishing wide.  Views drawn each from
 # words came out as different rooms (ep01's observatory: a slim brass refractor
 # on a tripod in the wide, a massive telescope on a pier in the reverse), and
