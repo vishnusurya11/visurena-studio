@@ -51,6 +51,9 @@ tier is the workhorse model with reasoning off (models.yaml, the owner's cost
 choice), and a rung that changes nothing is no rung."""
 """The tier the model_tier rung writes on; a yaml row, never a model name."""
 DEFERRED = "plan.deferred.json"
+CLIMB = "plan.climb.json"
+"""The climb's checkpoint (C3_verdict #1): best draft, battery-passed drafts,
+merged refusals, rungs done; written every rung, retired by a sign or a defer."""
 BATTERY = "battery"
 """The fault kind plan_check's refusals are carried as; the critic's kinds are its own."""
 MECH_ROUNDS = 2
@@ -112,6 +115,30 @@ def mechanical_cures(plan: Path, book: Path, number: int, say=print) -> None:
 
 def ladder(improves: int = 2) -> Ladder:
     return Ladder([Rung(IMPROVE, 0.0, tries=improves), Rung(MODEL_TIER, 0.0)], "keep_best")
+
+
+def ladder_after(done: int, improves: int = 2) -> Ladder:
+    """The ladder less the `done` rungs a checkpointed climb already took
+    (C3_verdict #1): a resume never re-runs a rung whose draft landed."""
+    full = ladder(improves)
+    left, rungs = max(0, done), []
+    for rung in full.rungs:
+        keep = max(0, rung.tries - left)
+        left = max(0, left - rung.tries)
+        if keep:
+            rungs.append(Rung(rung.name, rung.cost_seconds, tries=keep))
+    return Ladder(rungs, full.terminal)
+
+
+def code_sha8() -> str:
+    """The code a verdict was judged under: HEAD's sha8, '' outside a checkout."""
+    import subprocess
+    try:
+        out = subprocess.run(["git", "rev-parse", "HEAD"], capture_output=True, text=True, check=False,
+                             cwd=Path(__file__).resolve().parents[1])
+    except OSError:
+        return ""
+    return out.stdout.strip()[:8]
 
 
 def battery_verdict(lines: list[str]) -> Verdict:
@@ -201,6 +228,7 @@ class Desk:
     judged: dict[str, Verdict] = field(default_factory=dict)
     agent: object | None = None             # the reasoner, once a rule miss handed it the climb
     best: tuple | None = None               # (doc, n, faults): the battery-refused draft with the fewest lines
+    rungs_done: int = 0                     # rungs whose draft landed (the checkpoint's resume point)
     _names_cache: dict | None = None        # the refs-derived token table the ghost scrub reads
 
     def _names(self) -> dict:
@@ -300,6 +328,61 @@ class Desk:
             self.drafts.append((doc, verdict))
         elif self.best is None or len(verdict.faults) < self.best[1]:
             self.best = (doc, len(verdict.faults), list(verdict.faults))
+        self.checkpoint()
+
+    def climb_path(self) -> Path:
+        return self.plan.with_name(CLIMB)
+
+    def checkpoint(self) -> None:
+        """plan.climb.json, atomically: what a killed climb needs to resume from
+        its best (C3_verdict #1; ep17 restarted at 38 faults over a 1-fault best)."""
+        from studio.autopilot import write_json_atomic
+        best = {"doc": self.best[0], "n": self.best[1],
+                "faults": [f.model_dump() for f in self.best_faults()]} if self.best else None
+        write_json_atomic(self.climb_path(), {
+            "best": best, "drafts": [{"doc": doc, "verdict": v.model_dump() if v else None} for doc, v in self.drafts],
+            "refusals": self.refusals, "rungs_done": self.rungs_done, "escalated": self.agent is not None,
+            "plan_sha8": plan_verdict.plan_sha8(self.plan) if self.plan.exists() else "",
+            "code_sha8": code_sha8()})
+
+    def retire_climb(self) -> None:
+        self.climb_path().unlink(missing_ok=True)
+
+    def restore(self, judge) -> bool:
+        """A checkpointed climb resumes: refusals, rungs done and the tier come
+        back; the DRAFTS come back and are re-judged under today's battery
+        (a critic verdict is reused only on unchanged code), then the best is
+        put on disk.  False when there is no checkpoint."""
+        path = self.climb_path()
+        if not path.exists():
+            return False
+        doc = json.loads(path.read_text(encoding="utf-8"))
+        self.refusals, self.rungs_done = list(doc.get("refusals") or []), int(doc.get("rungs_done") or 0)
+        if doc.get("escalated"):
+            self.escalate()
+        same = bool(doc.get("code_sha8")) and doc.get("code_sha8") == code_sha8()
+        saved = [(d["doc"], d.get("verdict")) for d in doc.get("drafts") or []]
+        saved += [(doc["best"]["doc"], None)] if doc.get("best") else []
+        for draft, verdict in saved:
+            self.rejudge(draft, judge, verdict if same else None)
+        self.land_best()
+        return True
+
+    def rejudge(self, draft: dict, judge, verdict: dict | None) -> None:
+        """One restored draft on disk and judged again; an unchanged-code critic
+        verdict is seeded so the critic is not paid twice for the same bytes."""
+        episode_home.write_plan(self.plan, draft)
+        if verdict is not None:
+            self.judged[plan_verdict.plan_sha8(self.plan)] = Verdict.model_validate(verdict)
+        self.remember(judge())
+
+    def land_best(self) -> None:
+        """The best restored draft back in plan.json: the battery-clean one the
+        critic faulted least, else the battery-refused one with the fewest lines."""
+        if self.drafts:
+            episode_home.write_plan(self.plan, min(self.drafts, key=lambda pair: len(pair[1].faults))[0])
+        elif self.best is not None:
+            episode_home.write_plan(self.plan, self.best[0])
 
     def take(self, rung: Rung, i: int, verdict: Verdict) -> None:
         """One rung: remember the draft it faulted, then draft again.  A
@@ -307,15 +390,16 @@ class Desk:
         rung, never discarded: ep15 (2026-10-01) ran eight passes in which
         improve reached one fault and the old fresh_brief rung wrote from nothing
         (39-57 faults back), ~3.5 h of paid calls to stand still."""
-        self.remember(verdict)
         self.refusals = merged(self.refusals, refusal_lines_of(verdict))
         if is_battery(verdict):
             self.escalate()                       # a rule miss: the reasoner edits from here
+        self.remember(verdict)                    # checkpointed with the merged refusals
         near = len(verdict.faults) <= CONVERGED and self.refused_plan() is not None
         if rung.name == IMPROVE or near:
             self.write(self.refusals, previous=self.refused_plan())
         elif rung.name == MODEL_TIER and not self.drafts:
             self.write(self.refusals, previous=self.refused_plan())
+        self.rungs_done += 1
 
     def terminal(self, verdict: Verdict) -> Verdict:
         """By cause: no draft ever passed the battery -> defer; else the best
@@ -340,7 +424,9 @@ class Desk:
         return self.best[2] if self.best and len(self.best) > 2 else []
 
     def sign(self, verdict: Verdict) -> Path:
-        """A pass or a keep_best is signed in the judge's name; a defer is set aside."""
+        """A pass or a keep_best is signed in the judge's name; a defer is set
+        aside.  Either retires the climb's checkpoint."""
+        self.retire_climb()
         if verdict.terminal == DEFER:
             return defer(self.plan, verdict)
         return plan_verdict.sign(self.plan, verdict.summary(), signed_by=verdict.signer,

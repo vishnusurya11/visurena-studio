@@ -182,11 +182,24 @@ def judge(ctx, desk):
     return critic(ctx, desk)
 
 
+def restore_climb(ctx, desk) -> bool:
+    """A killed climb's checkpoint is restored (C3_verdict #1) unless the plan
+    is signed, ran downstream, or a rewrite was asked: then it is retired."""
+    plan = desk.plan
+    if wants_rewrite(ctx) or plan_verdict.current(plan) or ran_downstream(ctx) or rendered(ctx):
+        desk.retire_climb()
+        return False
+    restored = desk.restore(lambda: judge(ctx, desk))
+    if restored:
+        ctx.log(f"the climb resumes from its checkpoint: {desk.rungs_done} rung(s) done", step_id=STEP_ID)
+    return restored
+
+
 def clear(ctx, desk) -> Path:
     """The judged gate over the plan: pass -> signed; fault -> the ladder; spent -> a terminal."""
     policy = gate_policy.of(ctx.stage, GATE)
     desk.battery_terminal = policy.battery_terminal or plan_ladder.DEFER
-    rungs = judged_gate.Rungs(plan_ladder.ladder(MAX_IMPROVE), take=desk.take)
+    rungs = judged_gate.Rungs(plan_ladder.ladder_after(desk.rungs_done, MAX_IMPROVE), take=desk.take)
     signed = judged_gate.clear(ctx, GATE, judge=lambda: judge(ctx, desk), sign=desk.sign,
                                ladder=rungs, terminal=desk.terminal, policy=policy)
     ctx.log(f"{GATE}: {signed.name} written", step_id=STEP_ID)
@@ -247,10 +260,11 @@ def run(ctx) -> None:
         if not wants_rewrite(ctx):
             cure_aside_first(ctx, plan)
         desk = plan_ladder.Desk(ctx, plan, writer=episode_writer)
+        restored = restore_climb(ctx, desk)
         if wants_rewrite(ctx) and ran_downstream(ctx):
             ctx.log("--rewrite refused: placed.json exists, this plan already ran downstream",
                     step_id=STEP_ID, level="WARNING")
-        elif wants_rewrite(ctx) or not plan.exists():
+        elif not restored and (wants_rewrite(ctx) or not plan.exists()):
             desk.resume() or desk.write(None)
         if plan_verdict.current(plan) or grandfathered(ctx):
             return
