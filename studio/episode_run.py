@@ -15,7 +15,7 @@ from pathlib import Path
 
 from studio import episode_home
 from studio.learnings import Learning, record
-from studio.run_budget import EPISODE_CEILING_SECONDS, EPISODE_SHARES, Budget
+from studio.run_budget import EPISODE_CEILING_SECONDS, EPISODE_SHARES, OWNER_LIMIT_SECONDS, Budget
 from studio.stage_run import StageContext, require_registered
 
 STAGE = "episode"
@@ -28,7 +28,7 @@ def unit_of(number: int) -> str:
 class EpisodeContext(StageContext):
     def __init__(self, *args, ceiling: float = EPISODE_CEILING_SECONDS, **kw):
         super().__init__(*args, **kw)
-        self.budget = Budget(ceiling, EPISODE_SHARES)
+        self.budget = Budget(ceiling, EPISODE_SHARES, limit=OWNER_LIMIT_SECONDS)
         self.rungs_in_step = 0
         self.home: Path | None = None
 

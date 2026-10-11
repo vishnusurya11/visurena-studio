@@ -73,6 +73,11 @@ def affordable(ctx, gate: str, rung: Rung, taken: int) -> bool:
     565 s against a 73 s share.  climbed() breaks on the False and ended()
     signs keep-best/still, flagged, with the audit row."""
     step = step_of(ctx)
+    if not ctx.budget.leaves_reserve(step, rung.cost_seconds):  # the firsts still owed keep their time
+        ctx.budget.reserve_hit = True
+        ctx.learn(Learning(step=step, gate="budget", measured=ctx.budget.owed_after(step),
+                           threshold=rung.cost_seconds, action="reserve", attempt=taken))
+        return False
     if ctx.budget.can_afford(step, rung.cost_seconds):
         return True
     if ctx.budget.pool_left() >= rung.cost_seconds:     # the ladders' own share pays (finding 55)

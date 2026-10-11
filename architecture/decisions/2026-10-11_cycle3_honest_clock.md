@@ -26,3 +26,18 @@ veto. Nothing here spends money.
 - ONE PER TAKE was listed BUILDER in the verdict's draft; no downstream script refuses a packed run (`episode_takes.groups` packs it), so it is JUDGED. G-LIGHT and PLAN GATES were called judgement in the draft; `takes_r2v.opened` repeats both, so they are BUILDER.
 - The heartbeat is a daemon thread inside the runner; a hung (not killed) runner keeps beating. The
   autopilot's engine-hang rescue still owns that case.
+
+## Addendum 2026-10-11: the downstream reserve (decided on the owner's behalf, for veto)
+- **Rule:** the owner's 6 h holds for EVERY episode with zero input. A rescue rung runs only if
+  spent + its price + the as-built shares of the firsts after its step fit under 6 h
+  (`run_budget.OWNER_LIMIT_SECONDS`, `Budget.leaves_reserve`, checked first in
+  `judged_gate.affordable`); a refusal closes the run's rungs (`rungs_closed`) with D3's terminal:
+  a ladder signs its best flagged, the plan follows its BUILDER/JUDGED tags; nothing parks.
+- **Companion:** past the ceiling a verdict on the same bytes stands under moved code (take_dq's
+  report; a passing QC report). A re-judge there is a repeat that can only move a flag.
+- **Why:** the 5 h ceiling bounds rungs, not firsts. ep21 crossed 20 min into round 0 (floor 6.3 h).
+  Replay (scratchpad c3cpu/replay_3a.py): ep19-27 P90 6.45 -> 5.64 h, 1/9 over (ep21 371 min);
+  0/9 with ep21's door refusal cured at step 04 (434213e). Second case (c3cpu/second_case.py):
+  it binds on WotW ep12-15 (all > 6 h); a false cut on ep17 (297 min, 2 panel rungs); Scarlet
+  ep10-14 none (no plan/grid/panel clock; their retakes leave 32 min owed).
+

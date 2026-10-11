@@ -865,3 +865,8 @@ fixes. Each lesson below cost at least one launch. Tracker rows A38-A74 in
       refusal (the boundary stop replaces it).
     - **Never sweep a drive to find a file (skeptic's own slip, 2026-10-11).** The ComfyUI root
       is `studio/comfy.py COMFY_ROOT`; read the constant.
+    - **A ceiling bounds rungs, never firsts (2026-10-11, C3_p90_residual).** ep21 crossed 5 h
+      20 min into step 09's 32-take round 0; the firsts, one QC and publish still owed ~79 min,
+      so no rung rule could end it by 6 h. A rung now leaves the firsts still owed their shares
+      under 6 h (the downstream reserve). Its price: the shares over-price a light episode --
+      ep17 (297 min) would have lost 2 panel rungs.

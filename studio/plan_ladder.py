@@ -432,7 +432,7 @@ class Desk:
 
     def clock_spent(self) -> bool:
         budget = getattr(self.ctx, "budget", None)
-        return bool(budget is not None and budget.ceiling_spent())
+        return bool(budget is not None and budget.rungs_closed())   # the ceiling, or the reserve
 
     def past_ceiling(self, best: Verdict) -> Verdict:
         """At a spent clock (D3): JUDGED-only lines sign keep_best flagged; a

@@ -47,19 +47,50 @@ EPISODE_SHARES: dict[str, float] = {
 retake 10) hold shares of their own.  Unused time rolls forward."""
 
 
+OWNER_LIMIT_SECONDS = 6 * 3600
+"""The owner's rule (2026-10-11): 6 h for EVERY episode, zero input.  The 5 h
+ceiling bounds rungs, never firsts, so a crossing before the firsts are done
+ends late (ep21: 20 min into round 0, 6.3 h floor).  The downstream reserve
+measures each rung against this limit less the firsts still owed."""
+
+
 class Budget:
-    """Wall-clock shares per step, rolling forward, under one ceiling."""
+    """Wall-clock shares per step, rolling forward, under one ceiling; with a
+    `limit`, a rung must also leave the firsts after its step their shares."""
 
     def __init__(self, ceiling_seconds: float, shares: dict[str, float],
-                 clock: Callable[[], float] = time.monotonic):
+                 clock: Callable[[], float] = time.monotonic, limit: float | None = None):
         self.ceiling = ceiling_seconds
         self.shares = shares
         self.clock = clock
+        self.limit = limit
         self.t0 = clock()
         self.step: str | None = None
         self.step_started = self.t0
         self.carry = 0.0          # unused time from earlier steps
         self.pool_drawn = 0.0     # the `ladders` share drawn by rungs
+        self.reserve_hit = False  # a rung was refused to keep the firsts' time
+
+    def owed_after(self, step: str) -> float:
+        """Seconds the firsts after `step` are priced at: the shares of the
+        numbered steps that follow it (the judges' and ladders' pools are not
+        firsts).  0.0 for the last step or a pool."""
+        steps = sorted(s for s in self.shares if s.isdigit())
+        if step not in steps:
+            return 0.0
+        return sum(self.shares[s] for s in steps[steps.index(step) + 1:]) * self.ceiling
+
+    def leaves_reserve(self, step: str, seconds: float) -> bool:
+        """Whether a rung of `seconds` still leaves the firsts owed after `step`
+        their time under the owner's limit.  No limit, or an unpriced rung: yes."""
+        if self.limit is None or seconds <= 0:
+            return True
+        return (self.clock() - self.t0) + seconds + self.owed_after(step) <= self.limit
+
+    def rungs_closed(self) -> bool:
+        """No more rescue rungs this run: the ceiling is spent, or the reserve
+        refused one.  Either way a ladder's terminal is the ceiling's (D3)."""
+        return self.ceiling_spent() or self.reserve_hit
 
     def charge(self, spent: float) -> None:
         """Seconds earlier RUNS of this episode already spent (timing.jsonl):

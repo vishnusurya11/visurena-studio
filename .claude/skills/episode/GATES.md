@@ -349,6 +349,12 @@ Replays: C1 ep25 regrid 2/2 PASS, ep25 round 0 0/1 FAIL, ep27 study_table 3/3 PA
   rungs are terminal and signed flagged; the takes, grids, panels or lines MISSING on disk still
   render (firsts are never refused, only repeats); nothing parks on the clock (D3). A third
   spent-clock stop in a row parks `clock_loop` (a backstop).
+- **The downstream reserve (6 h for EVERY episode, 2026-10-11, for veto):** below the ceiling a
+  rescue rung also runs only while spent + its price + the shares of the firsts still owed after
+  its step fit under 6 h (`Budget.leaves_reserve`; owed after 02 = 203 min, 08 = 137, 09 = 32);
+  a refusal is the ceiling's terminal (`rungs_closed`), never a park; an unpriced rung passes.
+  Past the ceiling a verdict on the SAME bytes stands under moved code: a take's dq report
+  (`take_dq --ceiling-spent`) and a PASSING QC report; a QC fail is measured again.
 - **SAFETY (closed list, `gate_policy.SAFETY`):** a master over the Short length or with no
   title card; a line not heard; an unjudged or stale take; loudness out of band after the
   leveller; a plan BUILDER line; money; publish auth; GPU lost. Only these stop a spent-clock
