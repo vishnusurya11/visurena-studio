@@ -1,11 +1,11 @@
 # 2026-10-10 — Continuity build (phase 1, the minimal slice)
 
-**Status:** BUILDING — commit 1 of 9. Decision:
+**Status:** BUILDING — commit 2 of 9. Decision:
 [../decisions/2026-10-10_continuity_looks_places.md](../decisions/2026-10-10_continuity_looks_places.md).
 Binding verdict: `docs/audit/2026-10-10_continuity_retro/S_skeptic_verdict.md` §6.
 
 - [x] 1. Docs: decision file, this tracker, the DECISIONS line, README rows, the *Future* tab
-- [ ] 2. `studio/continuity_spec.py`: Look, Place, star topology, intervals, closed markers
+- [x] 2. `studio/continuity_spec.py`: Look, Place, star topology, intervals, closed markers
 - [ ] 3. Body/layers split; `character_row` never carries two heads; contradictions/drifted compare markers
 - [ ] 4. Look-timeline producer (agent over `state_changes`, quotes at 0.85) + `looks_from_dossier`
 - [ ] 5. Staging: `look_sheet`, `grids.sheet_of`, `cast_sheet` look rung, `reference_list`; step-06 lint
@@ -21,3 +21,4 @@ commit 6 lands. Republish the claude.ai copy of `architecture/index.html` after 
 - 2026-10-10: retro (A-G), two plans (P1, P2), skeptic verdict S. Owner rulings: per-state
   looks on a story timeline; one-step edits from the base, never chained, never composited;
   ≤ 6 h per episode; no re-render; new workflow files only. Slice started.
+- 2026-10-10: commit 2 — the contract: Look/Span/LookBook (star topology on the base sheet's sha8, closed markers, intervals by chapter and scene, last-start-wins, a look may return), Place/Master/State/Variant/PlaceBook (one place per location, a variant one hop from its master, a derived side never chained); relative paths only.
