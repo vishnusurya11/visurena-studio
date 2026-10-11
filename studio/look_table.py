@@ -174,5 +174,14 @@ def seen_hair(said: str) -> str:
     return ""
 
 
+HEADWEAR_FAMILY = {"felt_hat": "brimmed", "other_hat": "brimmed"}
+"""Hats a reader confuses are one family: it names a battered felt hat
+`other_hat` 7 times in 8 (C2_verdict #4).  Every other marker, bowler included,
+is its own family until real bowler looks have been read (H7)."""
+
+
 def family(key: str, marker: str) -> str:
-    return HAIR_FAMILY.get(marker, marker) if key == "hair_colour" else marker
+    """The family LOOK-STATE and G-LOOK-PANEL compare: hair colour and headwear
+    by family, every other marker as itself."""
+    table = {"hair_colour": HAIR_FAMILY, "headwear": HEADWEAR_FAMILY}.get(key, {})
+    return table.get(marker, marker)

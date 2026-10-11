@@ -103,7 +103,7 @@ staged the wrong person that way (ep05 T19, ep06 T08, ep07 T09/T19/T24/T26).
 
 | gate | where | measures | kind |
 |---|---|---|---|
-| LOOK-STATE (`judge:look_state`, gates.yaml `LOOK_STATE`) | 03_04, every new look picture | the VLM LISTS headwear, hair colour, facial hair, top, dirt in a closed vocabulary; code compares the look's markers | HARD on headwear, hair colour, facial hair -- wrong OR unread (an unparsed answer, or a stated head marker the reader did not name, refuses; 2026-10-11); ADVISORY on top, dirt; ladder seed+1 with the faulted layer first, cap 2, terminal keep_best flagged |
+| LOOK-STATE (`judge:look_state`, gates.yaml `LOOK_STATE`) | 03_04, every new look picture | the VLM LISTS headwear, hair colour, facial hair, top, dirt in a closed vocabulary; code compares the look's markers | HARD on headwear, hair colour, facial hair -- wrong OR unread (an unparsed answer, or a stated head marker the reader did not name, refuses; 2026-10-11); headwear compares by FAMILY in LOOK-STATE and G-LOOK-PANEL alike (`look_table.family`): brimmed = {felt_hat, other_hat}, every other marker, bowler included, is its own family (C2_verdict #4); ADVISORY on top, dirt; ladder seed+1 with the faulted layer first, cap 2, terminal keep_best flagged |
 | relative identity (inside LOOK-STATE) | face-changing looks | facenet cos(look, base) minus the nearest other cast sheet | ADVISORY until the bench fits it |
 | undrawn look | grids, takes | `pack_refs.look_sheet` | HARD: refuses, never the base sheet |
 | one look per person (step 06) | `takes_r2v.opened` | `continuity.look_faults`: the staged picture and the words name ONE look on the table, the row is stamped with the table's look, the look is drawn | HARD |
