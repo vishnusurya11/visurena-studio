@@ -122,7 +122,9 @@ def test_isolate_then_still_stacked_ends_refs_only_flagged_and_audited(tmp_path)
         ctx, "EYE_PANELS", judge=lambda: next(reads),
         sign=lambda v: eye_verdict.sign_verdict(board, sorted(board.glob("shot_*.png")), v),
         ladder=climb.rungs, terminal=climb.keep_best, policy=AUTO)
-    assert [l.action for l in ctx.learned] == ["redraw_grid_seed", "keep_best"]
+    # a rung paid past the step's share writes its own `budget` audit row (since C3_verdict #6
+    # re-priced 08 to its measured 22 min); the ladder's rungs are what this test reads
+    assert [l.action for l in ctx.learned if l.gate != "budget"] == ["redraw_grid_seed", "keep_best"]
     doc = json.loads(signed.read_text(encoding="utf-8"))
     assert doc["verdict"] == "flagged" and doc["faults"][0]["evidence"]["refs_only"] is True
     assert refs_only.read(ctx.home) == {16}
