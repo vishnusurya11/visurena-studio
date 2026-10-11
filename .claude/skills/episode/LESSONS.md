@@ -6,6 +6,23 @@ SKILL.md.
 
 ## Process
 
+- **A unit published outside the runner must settle from its publish record
+  (2026-10-11).** Every WotW and Scarlet episode was on the channel, yet the board
+  showed WotW ep01/02/05 queued (a runner could have rebuilt them), ep18 stale (its
+  run lost the lease after step 11; the upload happened anyway) and Scarlet
+  ep01/02/10-14 blocked on refs/04. Nothing settled a unit whose 13 step outputs and
+  manifest predate the runner, and the backfill skipped them as ambiguous. The tick
+  now settles an episode from youtube.json + an upload row with a video id
+  (`tick.settle_published`), and a row written done carries no `blocked_on`.
+- **The board read flags as open work; they are history (2026-10-11).** `flags`
+  counts audit rows and never goes down, so 13 published WotW episodes sat in Needs
+  you as `flagged` ("27 units, 23 done, 16 need you"), against the 2026-10-01 ruling
+  that judge-signed terminals clear at publish. A flag needs the owner only while the
+  unit is unpublished and unacknowledged (`views.flags_open`, one function for the
+  inbox, the department and the dots). PLAN `APPROVE` with faults is not advisory:
+  every such plan.verdict.json carries `flagged: true` (a kept-best terminal), so
+  its chip stays `⚑n`.
+
 - **A terminal is not a pass (ep12, 2026-09-26).** Every judged gate on ep12
   ended `keep_best` or `flag`, one at attempt 0 with the budget 2993 s overdrawn,
   one repeating a single fault 531 times -- and it was published as "the gates
@@ -802,3 +819,14 @@ fixes. Each lesson below cost at least one launch. Tracker rows A38-A74 in
     - **Prewarm does not survive the queue (block 5).** Three prewarm prompts queued
       before three takes left 11.5-13.7 s of overhead per take (bar 4 s, control
       13.5-16.4 s); frames bit-identical. Only the last prompt's outputs stay cached.
+  - **The cycle-3 build (`docs/audit/2026-10-10_continuity_retro/CYCLE_3.md`, C3_verdict §5).**
+    - **The best draft goes to disk every rung (commit 1).** A killed climb restarted from
+      the last draft 111 times out of 329 rung verdicts when a better one existed (ep17
+      1 -> 38, ep22 35 -> 46, ep26 5 -> 6). plan.climb.json holds the best; restore the
+      draft, re-judge it, never trust an old verdict on moved code.
+    - **A cheap fail before an expensive one (commit 2).** 10/14 QC failures were loudness,
+      cue and edit rows that take seconds (ep27: every cheap row <= 17 s). Whisper runs
+      only on a master that can still pass. An unmeasured line is not a heard line.
+    - **The clock you budget against is not the clock you spend (commit 3).** 398 of
+      3,499 machine-min over ep19-27 sat in killed steps the step clock never logged.
+      Time the process with a heartbeat (studio/run_clock.py), not the step on exit.

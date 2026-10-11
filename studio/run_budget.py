@@ -150,22 +150,10 @@ def clock_reset_epoch(home) -> float:
 
 
 def spent_before(home) -> float:
-    """Seconds this episode's earlier runs logged (timing.jsonl) since the
-    last clock reset, 0.0 when there is none yet.  What `Budget.charge` is
-    charged with at context creation, so the ceiling binds across resumes."""
-    import json
-    from pathlib import Path
-    path = Path(home) / "timing.jsonl"
-    if not path.exists():
-        return 0.0
-    since, total = clock_reset_at(home), 0.0
-    for line in path.read_text(encoding="utf-8").splitlines():
-        if line.strip():
-            try:
-                row = json.loads(line)
-                if since and str(row.get("ended") or "") and str(row.get("ended")) < since:
-                    continue
-                total += float(row.get("seconds") or 0.0)
-            except (ValueError, TypeError, AttributeError):
-                continue
-    return total
+    """Seconds this episode already spent since the last clock reset, 0.0 when
+    none yet: the union of its run spans (studio.run_clock, C3_verdict #3 --
+    a killed run counts to its last beat) plus legacy timing.jsonl rows from
+    before the first run row.  What `Budget.charge` is charged with at
+    context creation, so the ceiling binds across resumes."""
+    from studio import run_clock
+    return run_clock.spent_before(home, None, since=clock_reset_epoch(home))

@@ -30,7 +30,7 @@ import shutil
 import sys
 from pathlib import Path
 
-from studio import db, episode_home, episode_run, llm, queue, step_runner, tick
+from studio import db, episode_home, episode_run, llm, queue, run_clock, step_runner, tick
 from studio.stage_run import ledger_id
 
 STAGE = episode_run.STAGE
@@ -90,8 +90,9 @@ def run_unit(ctx) -> str:
     print(f"=== EPISODE start | {ctx.label} | run {ctx.tracker.run_id} ===")
     db.mark_stage(ctx.conn, ctx.codex_id, STAGE, "running")
     try:
-        # every paid call inside is the unit's, attributed to the step the journal started
-        with llm.spend_context(ctx.conn, ctx.codex_id, STAGE, None, unit=ctx.unit):
+        # every paid call inside is the unit's, attributed to the step the journal started;
+        # the run's span is the clock (C3_verdict #3): a kill counts to its last beat
+        with run_clock.running(ctx.home, ctx.tracker.run_id),                 llm.spend_context(ctx.conn, ctx.codex_id, STAGE, None, unit=ctx.unit):
             outcome = step_runner.run_steps(ctx, step_runner.load_steps(STAGE))
     except Exception:
         db.mark_stage(ctx.conn, ctx.codex_id, STAGE, "failed")

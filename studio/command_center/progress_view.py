@@ -77,10 +77,11 @@ def runner_rows(logs: Path, codex: str, run_id: str | None) -> list[dict]:
 
 
 def work_before(home: Path, t0: float | None) -> float:
-    """Seconds this episode's earlier runs logged in timing.jsonl (local stamps, before t0)."""
-    rows = lp.jsonl_rows(lp.read_tail(home / "timing.jsonl"))
-    return sum(float(r.get("seconds") or 0) for r in rows
-               if t0 is None or (eta.to_epoch(r.get("started")) or 0) < t0)
+    """Seconds this episode spent before t0 on the honest clock (studio.run_clock,
+    C3_verdict #3): the union of its run spans, a killed run to its last beat,
+    plus legacy timing.jsonl rows from before the first run row."""
+    from studio import run_clock
+    return run_clock.spent_before(home, t0)
 
 
 # --- the rail ---
