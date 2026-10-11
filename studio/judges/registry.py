@@ -142,7 +142,8 @@ def take_verdict_judge(row: Row) -> dict:
 # ---- panel judges ---------------------------------------------------------------
 
 PANEL_CLASS = {"people": "extra_people", "clone": "copies", "missing": "missing_people", "blur": "blur_warp",
-               "text": "lettering", "stacked": "stacked_pictures", "tiled": "stacked_pictures"}
+               "text": "lettering", "stacked": "stacked_pictures", "tiled": "stacked_pictures",
+               "seam": "stacked_pictures"}
 
 
 def panel_dq_judge(row: Row) -> dict:
@@ -151,7 +152,7 @@ def panel_dq_judge(row: Row) -> dict:
     r = row.machine.get("panel_dq")
     if not r:
         return refusal(False, [], {"note": "not measured"})
-    flags = [f for f in r.get("flags", []) if f in ("people", "clone", "missing", "stacked")]
+    flags = [f for f in r.get("flags", []) if f in ("people", "clone", "missing", "stacked", "seam")]
     flags += ["blur"] if float(r.get("sharp", 1.0)) < pd.SHARP_FLOOR else []
     flags += ["text"] if float(r.get("ink", 0.0)) > pd.INK else []
     flags += ["tiled"] if float(r.get("tiled", 0.0)) > pd.TILED else []

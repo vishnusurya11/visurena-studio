@@ -53,6 +53,7 @@ CURES = {
     "text": "Every surface in the picture is plain, wordless paint.",
     "lettering": "Every surface in the picture is plain, wordless paint.",
     "stacked": "One single picture fills the whole frame edge to edge.",
+    "seam": "One single picture fills the whole frame edge to edge.",
     "tiled": "One single picture fills the whole frame edge to edge.",
     "blur": "Every edge in the picture is crisp and sharp.",
     "hat": "The hat sits on his head and both his hands are empty.",

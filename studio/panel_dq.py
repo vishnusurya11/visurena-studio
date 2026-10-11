@@ -62,6 +62,12 @@ RE-MEASURED by thirds on 2026-09-24 over 173 published panels: the three
 positives still read 1.000 and the worst clean panel reads 0.023, so the wall
 stands at 0.90 and a gutter a figure stands across now reads through the two
 thirds it runs clean through."""
+SEAM_WHITE, SEAM_SHARE = 250.0, 0.95
+"""An interior SEAM: a row or column at >= SEAM_WHITE luma over >= SEAM_SHARE of
+its length, anywhere in the panel (R2_verdict §0.5, 2026-10-10).  MEASURED on the
+572 WotW h3 panels: 18 in 9 episodes, and the two opened are cells drawn as two
+pictures (ep19 shot 17 the pit twice, ep27 shot 10 the desk twice); 16 of them
+also read `stacked`, and all 18 shipped on the panel ladder's keep_best."""
 GUTTER_PALE, GUTTER_FLAT = 170.0, 8.0
 """A line counts only if it is pale and even. MEASURED 2026-09-23: the ep07
 gutters read mean 193-245, std 1.5-4.6; ep10 shot 1's door jamb 106, 14.7."""
@@ -253,9 +259,21 @@ def _gutter_like(lines):
     return (lines.mean(axis=1) >= GUTTER_PALE) & (lines.std(axis=1) <= GUTTER_FLAT)
 
 
+def seams(frame) -> list[tuple[str, int]]:
+    """('row' | 'col', first index) of every run of paper-white lines in the panel."""
+    a = np.asarray(frame, dtype=np.float32)
+    y = a if a.ndim == 2 else 0.2126 * a[..., 0] + 0.7152 * a[..., 1] + 0.0722 * a[..., 2]
+    out = []
+    for axis, name in ((1, "row"), (0, "col")):
+        hits = np.flatnonzero((y >= SEAM_WHITE).mean(axis=axis) >= SEAM_SHARE)
+        out += [(name, int(i)) for k, i in enumerate(hits) if k == 0 or i - hits[k - 1] > 2]
+    return out
+
+
 def verdict(faces: list[float], planned: int, sharp: float, ink: float,
             tiled: float, crowd: bool = False, size: str = "", extras: int = 0,
-            prose: str = "", stacked: float = 0.0, present: list[float] | None = None) -> dict:
+            prose: str = "", stacked: float = 0.0, present: list[float] | None = None,
+            seam: bool = False) -> dict:
     """Every fault this panel carries, named. An empty list is a clean panel."""
     from studio import people_count
 
@@ -292,6 +310,8 @@ def verdict(faces: list[float], planned: int, sharp: float, ink: float,
         flags.append("text")
     if stacked > STACKED:
         flags.append("stacked")
+    if seam:
+        flags.append("seam")
     if tiled > TILED:
         flags.append("tiled")
     return {"faces": len(faces), "cast_faces": len(near), "planned": planned,

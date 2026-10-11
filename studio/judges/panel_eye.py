@@ -56,7 +56,7 @@ SIZE_ASK = ('Answer with strict JSON and nothing else, two keys. "size": how muc
             'separate pictures are tiled side by side or stacked in this image, 1 when it is one picture.')
 CLOSE = panel_dq.FACE_IS_THE_PICTURE
 """The sizes at which an unread panel is a fault."""
-CALIBRATED = frozenset({"stacked", "tiled", "people", "clone", "clones", "missing", "blur", "text",
+CALIBRATED = frozenset({"stacked", "seam", "tiled", "people", "clone", "clones", "missing", "blur", "text",
                         "lettering", "copy", "repeat", "unread", "banned", "twin"})
 """Fault kinds with a measured margin (decision §1.4); the rest are thin.
 'twin' (G-TWIN, 2026-10-05) has a measured contract -- figures vs distinct,

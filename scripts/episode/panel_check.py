@@ -45,7 +45,13 @@ def controls(book: Path) -> dict[str, float]:
             for hour, name in CONTROLS.items()}
 
 
-def judge(shot, setup, frame: np.ndarray, control: dict[str, float]) -> dict:
+def seam_of(board: Path, index: int, frame: np.ndarray) -> bool:
+    """A paper-white seam in the panel H3 is staged (storyboard/h3/), else in the cell."""
+    staged = Path(board) / "h3" / f"shot_{index:02d}.png"
+    return bool(panel_dq.seams(np.asarray(Image.open(staged).convert("RGB")) if staged.exists() else frame))
+
+
+def judge(shot, setup, frame: np.ndarray, control: dict[str, float], seam: bool = False) -> dict:
     """One panel's verdict, with who may be in it read from the plan."""
     hour = "night" if panel_dq.at_night(setup.described) else "day"
     found = face_end.faces(frame)
@@ -56,7 +62,7 @@ def judge(shot, setup, frame: np.ndarray, control: dict[str, float]) -> dict:
         ink=panel_dq.inkiness(frame), tiled=panel_dq.tiledness(frame),
         crowd=bool((setup.crowd or "").strip()), size=shot.size,
         extras=getattr(shot, "extras", 0), prose=f"{shot.frame} {shot.at_rest}",
-        stacked=panel_dq.stacked(frame))
+        stacked=panel_dq.stacked(frame), seam=seam)
     row["shot"], row["hour"] = shot.index, hour
     return row
 
@@ -72,7 +78,8 @@ def main(book_id: str, number: int) -> int:
         if not path.exists():
             missing.append(shot.index)
             continue
-        row = judge(shot, ep.setups[shot.setup], np.asarray(Image.open(path).convert("RGB")), control)
+        frame = np.asarray(Image.open(path).convert("RGB"))
+        row = judge(shot, ep.setups[shot.setup], frame, control, seam_of(home, shot.index, frame))
         rows.append(row)
         print(f"  {'ok  ' if row['passed'] else 'FAIL'} shot {shot.index:02d}  "
               f"faces {row['cast_faces']}/{row['planned']}  sharp {row['sharp']:.2f} ({row['hour']})  "
