@@ -69,14 +69,20 @@ def black_tail(master: Path) -> float:
     return float(starts[-1])
 
 
+def card_of(book: Path, n: int) -> Path:
+    """The chapter's title card file: its own, else the book's."""
+    card = book / "title" / f"ep{n:02d}.mp4"
+    return card if card.exists() else book / "title" / "title.mp4"
+
+
 def split(book: Path, n: int, master: Path) -> tuple[Path, Path]:
     """The chapter's two videos -- title, main -- cut out of its Short
-    (owner 2026-10-11); the card MEASURED in the Short (last cut before the
-    closing black), each piece's frames checked against its range."""
+    (owner 2026-10-11); the card MEASURED in the Short (the cut where its own
+    length puts it before the closing black), each piece's frames checked."""
     folder = book / "compilation" / "chapters"
     folder.mkdir(parents=True, exist_ok=True)
     black = bc.frame_at(black_tail(master), fps=FPS)
-    start = bc.card_start(scores=scene_scores(master), black_from=black)
+    start = bc.card_start(scores=scene_scores(master), black_from=black, card_frames=frames(card_of(book, n)))
     out = {}
     for name, (a, b) in bc.pieces(main=start, card=black - start).items():
         out[name] = folder / f"ep{n:02d}_{name}.mp4"

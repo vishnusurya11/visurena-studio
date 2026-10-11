@@ -85,15 +85,23 @@ CUT_FLOOR = 0.1
 """A scene change under this is motion, not a cut."""
 
 
-def card_start(*, scores: dict[int, float], black_from: int) -> int:
-    """The card begins at the BIGGEST scene change in the CARD_MAX_FRAMES before
-    the closing black -- measured, because an older Short carries an older card
-    (Scarlet ep01: 90 frames, today's are 107), and no fixed threshold holds
-    (WotW ep01's dark picture into its dark card scored 0.24)."""
-    window = {f: v for f, v in scores.items() if black_from - CARD_MAX_FRAMES <= f < black_from}
-    if not window or max(window.values()) < CUT_FLOOR:
+NEAR = 6
+"""Frames either side of where the card's own length puts its start (the black is
+measured from inside the card's fade-out, ~2 frames early)."""
+
+
+def card_start(*, scores: dict[int, float], black_from: int, card_frames: int) -> int:
+    """The card begins at the change nearest where its length puts it (black -
+    card_frames); with no change there -- an older card than title/epNN.mp4
+    (Scarlet ep01: 90 frames, today's 107) -- at the BIGGEST change before the
+    black.  The biggest alone took a hard cut inside the picture on WotW ep06/10/20
+    and Scarlet ep12; no fixed threshold holds (WotW ep01's dark cut scored 0.24)."""
+    window = {f: v for f, v in scores.items() if black_from - CARD_MAX_FRAMES <= f < black_from and v >= CUT_FLOOR}
+    if not window:
         raise ValueError(f"no cut in the {CARD_MAX_FRAMES} frames before the black at {black_from}")
-    return max(window, key=window.get)
+    expect = black_from - card_frames
+    near = {f: v for f, v in window.items() if abs(f - expect) <= NEAR}
+    return max(near or window, key=(near or window).get)
 
 
 def frame_at(seconds: float, *, fps: int) -> int:

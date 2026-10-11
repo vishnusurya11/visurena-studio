@@ -29,13 +29,13 @@ def test_a_piece_is_cut_by_frame_and_its_sound_by_the_same_seconds():
 def test_the_card_starts_at_the_biggest_change_before_the_black_tail():
     # MEASURED: Scarlet ep01's older 90-frame card (4036: 0.42, an earlier cut 3940: 0.39);
     # WotW ep01's dark picture into the dark card scored only 0.24 -- under any fixed threshold
-    assert bc.card_start(scores={3940: 0.39, 3959: 0.01, 4036: 0.42}, black_from=4126) == 4036
-    assert bc.card_start(scores={3664: 0.08, 3711: 0.24, 502: 0.75}, black_from=3818) == 3711
+    assert bc.card_start(scores={3940: 0.39, 3959: 0.01, 4036: 0.42}, black_from=4126, card_frames=107) == 4036
+    assert bc.card_start(scores={3664: 0.08, 3711: 0.24, 502: 0.75}, black_from=3818, card_frames=107) == 3711
 
 
 def test_a_short_with_no_change_before_its_black_is_refused():
     with pytest.raises(ValueError):
-        bc.card_start(scores={100: 0.9, 4100: 0.02}, black_from=4126)
+        bc.card_start(scores={100: 0.9, 4100: 0.02}, black_from=4126, card_frames=107)
 
 
 def test_a_time_is_a_frame_at_the_books_rate():
@@ -51,3 +51,12 @@ def test_every_piece_is_tagged_bt709_so_the_main_title_joins_it():
     argv = bc.cut_argv(Path("in.mp4"), (0, 10), Path("t.mp4"), fps=24, side=1536)
     for flag, value in (("-color_primaries", "bt709"), ("-color_trc", "iec61966-2-1"), ("-colorspace", "bt709")):
         assert argv[argv.index(flag) + 1] == value
+
+
+def test_the_card_starts_at_the_change_nearest_where_its_length_puts_it():
+    """WotW ep06/10/20 and Scarlet ep12 shipped with seconds of picture inside the
+    'title': a hard cut in the picture outscored the cut into the card."""
+    scores = {3892: 0.55, 3958: 0.21, 4001: 0.02}                      # Scarlet ep12: picture cut, then the card
+    assert bc.card_start(scores=scores, black_from=4065, card_frames=107) == 3958
+    # no change near where today's card would start: an older card (Scarlet ep01) -> the biggest
+    assert bc.card_start(scores={3940: 0.39, 4036: 0.42}, black_from=4126, card_frames=107) == 4036
