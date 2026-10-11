@@ -146,6 +146,16 @@ armed HARD only at recall >= 0.8 and false refusals <= 0.1 over every narrator
 panel of a finished book. A beard on a look whose facial hair is `none` stays
 the HARD contradiction it was, judged by markers now.
 
+J5 (2026-10-11, calibrated on the owner's ep05/07 good and ep08/09 bad,
+`tests/fixtures/content_gate/wotw_owner_fixtures.json`): **'hills' on a flat place
+is ADVISORY** (`landform_advisory` into `look_advisory`; 11/11 refusals on ep05 were
+a far horizon); mountains stay HARD, cliffs stay HARD unless the staged place is a
+pit. The hour is not judged on a setup that asks for the last daylight
+(`judged_at_night`). An over-the-shoulder shot holds one more figure. A plan whose
+shots predate `extras` (field unset) declares a crowd by naming people/crowd/
+figures/others in the shot's words (`crowd_declared`). Open: named walk-ons in a
+legacy plan (ep05 s10/s18/s19), a dusk crowd's silhouettes read as copies (s16).
+
 The content reader is read STRICTLY (2026-09-23): a reply cut off inside
 `subjects` is salvaged (the judged fields come first) and one cut before
 them still refuses; `"false"` is false; a subjects string is split into

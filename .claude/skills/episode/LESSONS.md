@@ -322,6 +322,15 @@ SKILL.md.
   once in `episode_spec` (`SHORT_WALL_S - TAIL_ALLOWANCE_S`), and the upload
   and public-flip doors read the FILE itself (`youtube_publish.file_refusals`:
   length AND 1:1), because `--override` waives `qc.passed` -- 2026-09-30.
+- **Calibrate a content rule on the owner's judged episodes, by eye, per rule.**
+  J5 (2026-10-11): the content gate refused 23/28 of the good ep05 and 0 of the
+  bad ep08/09. By eye 21 of ep05's refusals were the rule, not the picture: a low
+  far horizon read 'hills' (11), a twilight that asks for the last daylight read
+  'day' (4), an over-the-shoulder near shoulder (2), crowds a pre-`extras` plan
+  wrote in prose (5). Fixed those four (ep05 23 -> 6, ep07 5 -> 4, every eye-true
+  fault kept); the rest is logged open. A gate's green on the bad episodes says
+  their faults are not content faults, not that the gate works
+  (`docs/audit/2026-10-10_continuity_retro/C3_content_gate.md`).
 
 ## The autopilot under the subscription (ep19-21, 2026-10-07/08)
 
