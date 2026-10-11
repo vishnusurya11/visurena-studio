@@ -48,7 +48,7 @@ D:\Projects\KingdomOfViSuReNa\alpha\visurena_studio\docs\audit\2026-10-10_contin
 | 8 | e97bc9a | [arch] G-FRAME, a measurement only (advisory) |
 | 9 | bf6b806 | [arch] G-LINEAGE, advisory |
 | 10 | — | **Dropped.** Precondition (d) measured a saving of 0. See below. |
-| bench | (this commit) | Bench evidence, the skill's bench lines, the GATES arm-rule amend, this report |
+| bench | 6b763f6 | Bench evidence, the skill's bench lines, the GATES arm-rule amend, this report |
 | comfy_studio | 1e032e9 | New files only: `image_krea2_cinematic_2x_presave_neutraltile_visurena` (branch `poc/2k-video-pipeline`) |
 | post-bench A | — | **Not built.** CK8 for dialogue failed block 2. |
 | post-bench B | — | **Not built.** Neither framing arm reached median face_h 0.25. |
