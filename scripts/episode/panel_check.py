@@ -64,6 +64,9 @@ def judge(shot, setup, frame: np.ndarray, control: dict[str, float], seam: bool 
         extras=getattr(shot, "extras", 0), prose=f"{shot.frame} {shot.at_rest}",
         stacked=panel_dq.stacked(frame), seam=seam)
     row["shot"], row["hour"] = shot.index, hour
+    # G-FRAME (C2_verdict #8): recorded beside the verdict, never in its flags
+    row |= panel_dq.frame_record(found, len(shot.faces or []), getattr(shot.size, "value", shot.size),
+                                 f"{shot.frame} {shot.at_rest}")
     return row
 
 

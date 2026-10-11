@@ -330,6 +330,8 @@ changes" again, carries the setup's `geometry` and `landmark`, and a tight grid
 gets the place's first clause plus `Setup.light`. `panel_place` reads every
 loose panel against the room and names its mirror — advisory until calibrated
 (`docs/calibration/panel_place.md`). G-SETUP holds a setup to 50 s of picture.
+panel_dq records face_h against the planned size (G-FRAME, advisory, 2026-10-11): a
+tight size is drawn a size wide (MCU median 0.208 against ~0.30 asked).
 
 The layout is ruled by `grid_layout` (by setup and shot size): **a grid is 1 or 4
 cells, never 2 or 3** -- a strip canvas comes back as Qwen's own grid count, seamed

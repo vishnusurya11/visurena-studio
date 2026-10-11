@@ -761,3 +761,7 @@ fixes. Each lesson below cost at least one launch. Tracker rows A38-A74 in
     and NOT fixed: a negated dossier sentence ("does not specify hair, eye colour ...")
     parses as an authored hair layer (Watson's hair marker blank), and "grey eyes under
     a tangle of sandy hair" reads hair `grey` (Wiggins).
+  - **A tight size is drawn a size wide (commit 8).** 84 planned MCU panels over 16
+    episodes (ep12-27) have a median face_h of 0.208, against about 0.30 that the cut
+    words ask for; 78 % are under 0.26. A crop to plan buys the pixels but cuts planned
+    props (coins, bag, newspaper), so it is not a cure. G-FRAME records it, advisory.

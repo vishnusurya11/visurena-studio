@@ -223,6 +223,27 @@ def back_view(prose: str) -> bool:
     return bool(BACK_VIEW.search(prose or ""))
 
 
+FRAME_FLOORS = {"medium_close": 0.22, "close": 0.32}
+"""G-FRAME (C2_verdict #8, ADVISORY): the face height under which a planned size
+reads drawn a size wide.  UNCALIBRATED: 85 shipped WotW MCU panels have a median
+face_h of 0.207, so the MCU floor sits ABOVE today's median and flags more than
+half of them.  Calibrate on the owner-judged episodes before anything goes hard."""
+FRAME_NOTE = "G-FRAME advisory, uncalibrated: the MCU floor 0.22 sits above today's MCU median 0.207"
+
+
+def frame_record(present: list[dict], planned: int, size: str, prose: str) -> dict:
+    """G-FRAME: the tallest present face's height against the planned size, for a
+    faced, non-back panel ({} otherwise).  A measurement, never a flag or a fault."""
+    if planned <= 0 or back_view(prose):
+        return {}
+    heights = sorted((float(f["h"]) for f in present or [] if f.get("score", 0.0) >= PRESENT_SCORE), reverse=True)
+    face_h = heights[0] if heights else None
+    floor = FRAME_FLOORS.get(size)
+    out = {"face_h": face_h, "planned_size": size,
+           "frame_advisory": bool(floor and face_h is not None and face_h < floor)}
+    return out | ({"frame_note": FRAME_NOTE} if out["frame_advisory"] else {})
+
+
 def stacked(frame) -> float:
     """The strongest gutter line in the panel, 5-95%, scored BY THIRDS: a line's
     score is the second-best of its three thirds, so a gutter a figure stands
