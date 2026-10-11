@@ -296,3 +296,6 @@ OVERRIDE, the synthetic declaration; `RENDER_HOLD` is the brake.
 **Arm rule:** a speed arm passes the INVENTED-SPEECH check on S4, D1 and D2 x 2
 seeds, or it is adopted for **narration takes only**. Dialogue stays on the 8-step
 at 12/3 until an arm passes.
+
+**Adopted (2026-10-11 bench):** CK int8 attention on the 8-step BASE for narration takes
+(`takes_r2v.NARRATION_BASE`). Out: G1 (4-step on the authors' grid, lost the S3 frogs).

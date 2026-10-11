@@ -57,6 +57,18 @@ ffmpeg's default CRF 23, 0.9-2.5 Mb/s, banding before any re-encode).  Rollback:
 shift 12/3 per its release post; iteration 3 ran at 6/3, the FL2VA row).  Episode 1's first r2v master was rendered on `r2v_turbo`, whose
 ckpt850 LoRA is FL2VA-lineage: a family mismatch the owner caught
 (2026-09-10 22:30); it showed as camera-scale pumping."""
+NARRATION_BASE = BASE + "_ckattn_comfyorg"
+"""BASE + core ModelAttentionBackend 'comfy kitchen attention' (CK int8 attention), adopted
+for NARRATION takes by the cycle-1 bench (2026-10-11, CYCLE_1.md block 3): the same draw,
+identity within the seed spread, no invented word, sampling 39-45 % faster.  Dialogue
+stays on BASE until D1 and D2 pass a second seed (GATES speed-arm rule).  Rollback: BASE."""
+
+
+def workflow_for(card: dict) -> str:
+    """The graph a take renders on: narration on the CK arm, dialogue on BASE."""
+    return NARRATION_BASE if card.get("lane") == "narration" else BASE
+
+
 REF_IMAGE_SIZE = "match"
 SEED_BASE = 81000
 TIMEOUT = 7200.0
@@ -538,7 +550,7 @@ def card(book: Path, episode: Episode, number: int, take: dict, measured: dict) 
                       refs=len(refs), fps=FPS, props=props, panel=panel is not None, pin=PIN_PANEL,
                       **staged_facts(sizes, FROM_REFS, faces, panel=panel is not None))
     return {"index": first.index, "shots": take["shots"], "section": first.section, "setup": first.setup,
-            "lane": "dialogue" if spoken else "narration", "workflow": BASE + " + anchors",
+            "lane": "dialogue" if spoken else "narration", "workflow": (NARRATION_BASE if not spoken else BASE) + " + anchors",
             "model": "MiniMax-H3 ref2va + Ref2V 8-step LoRA", "mode": mode_said(FROM_REFS),
             "refs": [ref_name(book, p) for p in refs], "faces": faces, "ref_image_size": REF_IMAGE_SIZE,
             "anchors": anchors, "audio": [(p.name, a) for p, a in voice] or "silence",
@@ -881,7 +893,7 @@ def card_pictures(c: dict, book: Path, number: int) -> list[Path]:
 
 def graph_for(c: dict, book: Path, number: int, take_dir: Path, base: str = "") -> dict:
     boards = episode_home.boards_dir(book, number)
-    template, inject = load_workflow(base or BASE)
+    template, inject = load_workflow(base or workflow_for(c))
     values = {"prompt": c["prompt"], "width": W, "height": H, "frames": c["frames"], "steps": STEPS,
               "seed": c["seed"], "ref_image_size": c["ref_image_size"],
               "filename_prefix": f"ep_take_{c['index']:02d}"}

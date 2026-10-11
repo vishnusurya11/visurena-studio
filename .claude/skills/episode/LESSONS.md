@@ -711,3 +711,25 @@ fixes. Each lesson below cost at least one launch. Tracker rows A38-A74 in
     `look_timeline.head_refusal`); existing tables are not re-judged. WotW: 0/47
     refused. Scarlet has no table, but 9/15 of its bound dossiers (Holmes included)
     author no head in `physical` -- a Scarlet table would be refused until they do.
+  - **The cycle-1 GPU bench (69 of 90 min, `docs/audit/2026-10-10_continuity_retro/CYCLE_1.md`).**
+    - **A distilled LoRA is run on its published grid -- and that is still not enough.**
+      The ref2v 4-step is `simple`@12/3 (t 1000/750/500/250); `beta` puts two calls off
+      it. G1 (A3 on the authors' grid) was benched: the S3 frogs at 50 % are smeared on
+      seed 1 and gone on seed 2 (the 8-step keeps five). G1 is OUT; the 4-step stays
+      unwired. Read the authors' graph before ruling a schedule, and then still bench it.
+    - **CK int8 attention on the 8-step BASE is the speed step.** Same draw (PSNR 22.9-33.9
+      vs seed-to-seed 13.1-22.2), identity within -2 sigma_seed (sigma .021; worst S4
+      -.030), no invented word on S4 x 2 seeds, sampling 39-45 % faster, face sheets
+      indistinguishable. Adopted for NARRATION takes (`takes_r2v.NARRATION_BASE`);
+      dialogue waits for D1/D2 on a second seed.
+    - **The beard comes back with the drawable noun:** ragged_greyed fresh draws carry a
+      grey-brown beard on 3/3 (0/3 before), LOOK-STATE reads `beard` on 3/3. LOOK-STATE
+      then refused all three on headwear: it reads a battered brown felt hat as
+      `other_hat` -- a vocabulary fault of the judge, not the picture (cycle 2).
+    - **Ghost faces are the USDU tile pass.** Same prompt and seed: the 1x decode has no
+      face in the trousers, the 2x USDU output paints one on the right thigh. Cause (b);
+      nothing built (n = 1 prompt).
+    - **No strips, no seams:** 13 seamed shots re-laid as 1x1/2x2 and redrawn: 0 seams,
+      0 stacked (the instrument reads 1.0 + a seam on the shipped panels).
+    - **Room tone in the guide tail: inconclusive.** The zero tail invented no word on
+      S4 seeds 1/3/4 either (two tails sounded, no word), so the A/B cannot rule.
