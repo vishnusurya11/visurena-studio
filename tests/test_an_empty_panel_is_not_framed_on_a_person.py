@@ -22,11 +22,17 @@ A panel's framing must be measured against what the panel actually holds.
 """
 from __future__ import annotations
 
+from typing import get_args
+
 import pytest
 
+from studio.episode_spec import Size
 from studio.storyboard_grid import BODY_WORDS, cut_clause
 
-SIZES = ("wide", "medium", "medium_close", "close", "insert")
+# Read from the contract, never a hand list: d8d47ea made `full` and
+# `extreme_close` real sizes, and a hand list both missed them and kept
+# `extreme_close` as this file's example of an unknown size.
+SIZES = get_args(Size)
 
 
 @pytest.mark.parametrize("size", SIZES)
@@ -51,6 +57,13 @@ def test_every_size_says_something_for_an_empty_panel(size):
     assert len(cut_clause(size, peopled=False).split()) >= 8
 
 
+@pytest.mark.parametrize("peopled", (True, False))
+@pytest.mark.parametrize("size", SIZES)
+def test_every_contract_size_has_a_cut_clause(size, peopled):
+    assert cut_clause(size, peopled=peopled).strip()
+
+
 def test_an_unknown_size_is_refused():
+    assert "establishing" not in SIZES
     with pytest.raises(KeyError):
-        cut_clause("extreme_close", peopled=False)
+        cut_clause("establishing", peopled=False)
