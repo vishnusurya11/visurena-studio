@@ -1,0 +1,278 @@
+{
+ "source": "BENCH_r2 measures_r2.json + c1/psnr_pairs.json + speech_tail.json (derived by mk_r2_fixture.py)",
+ "control": "A3",
+ "production": "A0",
+ "asked_mouth": [
+  "D1"
+ ],
+ "shots": {
+  "S2": {
+   "psnr": {
+    "seed2": 17.134242,
+    "B3ck": 24.517591,
+    "B4beta": 18.218146,
+    "B4simple": 19.513132,
+    "A1": 18.313164
+   },
+   "id": {
+    "A3": null,
+    "B3ck": 0.277,
+    "B4beta": null,
+    "B4simple": null,
+    "A1": 0.306,
+    "seed2": null,
+    "A0": 0.613
+   },
+   "banding": {
+    "A3": 0.2352,
+    "B3ck": 0.2413,
+    "B4beta": 0.2222,
+    "B4simple": 0.2229,
+    "A1": 0.2441,
+    "seed2": 0.2411,
+    "A0": 0.2227
+   },
+   "clones": {
+    "A3": 0,
+    "B3ck": 0,
+    "B4beta": 0,
+    "B4simple": 0,
+    "A1": 0,
+    "seed2": 0,
+    "A0": 0
+   },
+   "words": {}
+  },
+  "S3": {
+   "psnr": {
+    "seed2": 20.387608,
+    "B3ck": 28.148419,
+    "B4beta": 23.478482,
+    "B4simple": 23.451618,
+    "A1": 22.135607
+   },
+   "id": {
+    "A3": null,
+    "B3ck": null,
+    "B4beta": null,
+    "B4simple": null,
+    "A1": null,
+    "seed2": null,
+    "A0": null
+   },
+   "banding": {
+    "A3": 0.2806,
+    "B3ck": 0.2834,
+    "B4beta": 0.2779,
+    "B4simple": 0.281,
+    "A1": 0.2814,
+    "seed2": 0.2797,
+    "A0": 0.2836
+   },
+   "clones": {
+    "A3": 0,
+    "B3ck": 0,
+    "B4beta": 0,
+    "B4simple": 0,
+    "A1": 0,
+    "seed2": 0,
+    "A0": 0
+   },
+   "words": {}
+  },
+  "S4": {
+   "psnr": {
+    "seed2": 15.980422,
+    "B3ck": 30.730991,
+    "B4beta": 27.83865,
+    "B4simple": 29.221967,
+    "A1": 26.845463
+   },
+   "id": {
+    "A3": 0.8,
+    "B3ck": 0.79,
+    "B4beta": 0.809,
+    "B4simple": 0.774,
+    "A1": 0.768,
+    "seed2": 0.798,
+    "A0": 0.748
+   },
+   "banding": {
+    "A3": 0.2696,
+    "B3ck": 0.2593,
+    "B4beta": 0.2201,
+    "B4simple": 0.2313,
+    "A1": 0.2225,
+    "seed2": 0.2527,
+    "A0": 0.2157
+   },
+   "clones": {
+    "A3": 0,
+    "B3ck": 0,
+    "B4beta": 0,
+    "B4simple": 0,
+    "A1": 0,
+    "seed2": 0,
+    "A0": 0
+   },
+   "words": {
+    "A3": [],
+    "B3ck": [
+     "indeed"
+    ],
+    "B4beta": [
+     "heed"
+    ],
+    "B4simple": [],
+    "seed2": []
+   }
+  },
+  "S6": {
+   "psnr": {
+    "seed2": 20.128542,
+    "B3ck": 28.287571,
+    "B4beta": 27.575502,
+    "B4simple": 28.642315,
+    "A1": 20.910044
+   },
+   "id": {
+    "A3": 0.762,
+    "B3ck": 0.744,
+    "B4beta": 0.746,
+    "B4simple": 0.74,
+    "A1": 0.73,
+    "seed2": 0.756,
+    "A0": 0.738
+   },
+   "banding": {
+    "A3": 0.419,
+    "B3ck": 0.4252,
+    "B4beta": 0.3687,
+    "B4simple": 0.4178,
+    "A1": 0.4135,
+    "seed2": 0.4455,
+    "A0": 0.3916
+   },
+   "clones": {
+    "A3": 0,
+    "B3ck": 0,
+    "B4beta": 0,
+    "B4simple": 0,
+    "A1": 0,
+    "seed2": 0,
+    "A0": 0
+   },
+   "words": {
+    "A3": [],
+    "B3ck": [],
+    "B4beta": [],
+    "B4simple": [],
+    "seed2": []
+   }
+  },
+  "D1": {
+   "psnr": {
+    "seed2": 15.332415,
+    "B3ck": 30.292312,
+    "B4beta": 23.61783,
+    "B4simple": 24.825974,
+    "A1": 16.029722
+   },
+   "id": {
+    "A3": 0.834,
+    "B3ck": 0.833,
+    "B4beta": 0.819,
+    "B4simple": 0.834,
+    "A1": 0.837,
+    "seed2": 0.849,
+    "A0": 0.845
+   },
+   "banding": {
+    "A3": 0.2791,
+    "B3ck": 0.2835,
+    "B4beta": 0.3276,
+    "B4simple": 0.308,
+    "A1": 0.3032,
+    "seed2": 0.306,
+    "A0": 0.2933
+   },
+   "clones": {
+    "A3": 0,
+    "B3ck": 0,
+    "B4beta": 0,
+    "B4simple": 0,
+    "A1": 2,
+    "seed2": 1,
+    "A0": 1
+   },
+   "words": {
+    "A3": [
+     "hahahahahaha"
+    ],
+    "B3ck": [
+     "ha",
+     "ha",
+     "ha",
+     "ha",
+     "ha"
+    ],
+    "B4beta": [
+     "ha",
+     "ha",
+     "ha",
+     "ha",
+     "ha"
+    ],
+    "B4simple": [
+     "ha",
+     "ha",
+     "ha",
+     "ha",
+     "ha"
+    ]
+   }
+  },
+  "D2": {
+   "psnr": {
+    "seed2": 18.382484,
+    "B3ck": 27.82495,
+    "B4beta": 23.041366,
+    "B4simple": 24.030922,
+    "A1": 17.584297
+   },
+   "id": {
+    "A3": 0.879,
+    "B3ck": 0.857,
+    "B4beta": 0.888,
+    "B4simple": 0.867,
+    "A1": 0.875,
+    "seed2": 0.912,
+    "A0": 0.871
+   },
+   "banding": {
+    "A3": 0.2858,
+    "B3ck": 0.2834,
+    "B4beta": 0.2942,
+    "B4simple": 0.2963,
+    "A1": 0.3179,
+    "seed2": 0.3136,
+    "A0": 0.3061
+   },
+   "clones": {
+    "A3": 0,
+    "B3ck": 0,
+    "B4beta": 0,
+    "B4simple": 0,
+    "A1": 0,
+    "seed2": 0,
+    "A0": 0
+   },
+   "words": {
+    "A3": [],
+    "B3ck": [],
+    "B4beta": [],
+    "B4simple": []
+   }
+  }
+ }
+}

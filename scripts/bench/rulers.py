@@ -127,6 +127,67 @@ def measure(video: Path, detect=None) -> dict:
     return {k: (round(v, 4) if isinstance(v, float) else v) for k, v in out.items()}
 
 
+# ---- arm judgement (C1_verdict #2): the control's own seed spread, not a pixel wall ----
+SAME_DRAW_DB = 3.0      # PSNR(arm, ctl) must clear PSNR(ctl seed 2, ctl) by this to be "the same draw"
+ID_SIGMAS = 2.0         # per-shot identity floor, in seed-spread sigmas
+ID_MEAN_FLOOR = -0.02   # mean identity delta over the dialogue shots
+BAND_MEAN, BAND_SHOT = 0.005, 0.03
+
+
+def same_draw(psnr_arm: float, psnr_seed: float) -> bool:
+    """The arm moved the numerics, not the draw. Never a fault: below it the arm is a new draw."""
+    return psnr_arm - psnr_seed >= SAME_DRAW_DB
+
+
+def sigma_seed(pairs: list[tuple[float, float]]) -> float:
+    """Pooled RMS of (seed 1 - seed 2) over every shot with a seed-2 control."""
+    return float(np.sqrt(np.mean([(a - b) ** 2 for a, b in pairs])))
+
+
+def _id_pairs(shots: dict, control: str) -> list[tuple[float, float]]:
+    return [(r["id"][control], r["id"]["seed2"]) for r in shots.values()
+            if r["id"].get(control) is not None and r["id"].get("seed2") is not None]
+
+
+def identity_faults(arm: str, shots: dict, control: str, dialogue) -> list[str]:
+    """Shots under -2 sigma_seed, plus 'mean' when the dialogue mean drops past -0.02."""
+    floor = -ID_SIGMAS * sigma_seed(_id_pairs(shots, control))
+    deltas = {s: r["id"][arm] - r["id"][control] for s, r in shots.items()
+              if r["id"].get(arm) is not None and r["id"].get(control) is not None}
+    bad = [s for s, d in deltas.items() if d < floor]
+    talk = [deltas[s] for s in dialogue if s in deltas]
+    return bad + (["mean"] if talk and np.mean(talk) < ID_MEAN_FLOOR else [])
+
+
+def banding_faults(arm: str, shots: dict, control: str) -> list[str]:
+    deltas = {s: r["banding"][arm] - r["banding"][control] for s, r in shots.items()
+              if arm in r["banding"] and control in r["banding"]}
+    bad = [s for s, d in deltas.items() if d > BAND_SHOT]
+    return bad + (["mean"] if deltas and np.mean(list(deltas.values())) > BAND_MEAN else [])
+
+
+def clone_faults(arm: str, shots: dict, production: str) -> list[str]:
+    """More clone frames than the production take drew on the same shot."""
+    return [s for s, r in shots.items()
+            if arm in r["clones"] and r["clones"][arm] > r["clones"].get(production, 0)]
+
+
+def speech_faults(arm: str, shots: dict, control: str, asked: set) -> list[str]:
+    """Words in the arm's tail where the control's own tail, same seed, had none; asked mouths exempt."""
+    return [s for s, r in shots.items() if s not in asked
+            and r["words"].get(arm) and not r["words"].get(control)]
+
+
+def judge_arm(arm: str, shots: dict, control: str, production: str, asked: set, dialogue) -> dict:
+    """Rules (a)-(e). (a) only classifies the arm; it never refuses one."""
+    psnr = [(r["psnr"][arm], r["psnr"]["seed2"]) for r in shots.values() if arm in r["psnr"]]
+    return {"same_draw": bool(psnr) and all(same_draw(a, s) for a, s in psnr),
+            "faults": {"identity": identity_faults(arm, shots, control, dialogue),
+                       "banding": banding_faults(arm, shots, control),
+                       "clones": clone_faults(arm, shots, production),
+                       "speech": speech_faults(arm, shots, control, asked)}}
+
+
 def detector():
     from studio.measure.faces import embedder
     return embedder()[0]

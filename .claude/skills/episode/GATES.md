@@ -265,3 +265,17 @@ OVERRIDE, the synthetic declaration; `RENDER_HOLD` is the brake.
   fails its lettering gate blocks that episode's launch.
 - **The working set lives on the NVMe** (`extra_model_paths.yaml`, `nvme_fast` stanza,
   C:\comfy_models). Never delete the `.hdd_bak` originals without a verified load.
+
+## Speed arms — `scripts/bench/rulers.judge_arm` (bench only, C1_verdict 2026-10-11)
+
+| rule | measures | kind |
+|---|---|---|
+| (a) same draw | PSNR(arm, ctl) - PSNR(ctl seed 2, ctl) >= 3 dB on every shot | CLASSIFIES only: under it the arm is a new draw, judged by rulers and eye; no PSNR floor refuses an arm (28 dB refused the shipped 8-step on 6/6) |
+| (b) identity | per shot delta id >= -2 sigma_seed (pooled RMS of seed pairs, recomputed when a seed-2 control lands); dialogue mean >= -0.02 | HARD |
+| (c) banding | mean <= ctl + .005, no shot worse by > .03 | HARD |
+| (d) clones | <= the production take's count on the same shot | HARD |
+| (e) invented speech | tail words where the control's own tail on that seed has none; prompt-asked mouth actions exempt | HARD for dialogue |
+
+**Arm rule:** a speed arm passes the INVENTED-SPEECH check on S4, D1 and D2 x 2
+seeds, or it is adopted for **narration takes only**. Dialogue stays on the 8-step
+at 12/3 until an arm passes.

@@ -660,3 +660,12 @@ fixes. Each lesson below cost at least one launch. Tracker rows A38-A74 in
     into the trouser texture. Its closed vocabulary (hat, hair, beard, top, dirt) has
     no word for it, and it passed those markers. The look picture needs a stray-face
     check (face count on the crop, 1 expected) before it is staged.
+- **Cycle 1 of the continuity retro (2026-10-11, `docs/audit/2026-10-10_continuity_retro/C1_verdict.md`).**
+  - **A pixel wall in a chaotic sampler measures the draw, not the quality.** 28 dB
+    would refuse today's shipped 8-step (A1) on all 6 shots: an int8 rounding error
+    travels through the sampler into a new draw. Judge numerics with a same-draw
+    margin over the seed-to-seed distance (>= 3 dB, it classifies, never refuses),
+    identity against the control's own seed spread (per shot >= -2 sigma_seed,
+    dialogue mean >= -0.02), clones against the production take's own count, and
+    invented speech against the control's own tail on that seed
+    (`scripts/bench/rulers.judge_arm`).
