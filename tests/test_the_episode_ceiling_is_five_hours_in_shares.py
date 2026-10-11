@@ -25,4 +25,6 @@ def test_a_budget_opens_on_the_shares():
     budget = Budget(EPISODE_CEILING_SECONDS, EPISODE_SHARES, clock=lambda: 0.0)
     budget.start("09")
     assert budget.remaining("09") == EPISODE_SHARES["09"] * EPISODE_CEILING_SECONDS
-    assert budget.can_afford("09", 7200)
+    # C3_verdict #6 (2026-10-11): 09 holds 105 of 300 min (P50 118 x CK8 0.83); a longer
+    # round is paid by headroom, never refused as a first (C3_verdict #5)
+    assert budget.can_afford("09", 105 * 60) and not budget.can_afford("09", 7200)

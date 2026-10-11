@@ -119,8 +119,13 @@ def mechanical_cures(plan: Path, book: Path, number: int, say=print) -> None:
         say(f"desk cure pass skipped, the writer's draft kept: {str(why)[:160]}")
 
 
+IMPROVE_S, MODEL_TIER_S = 240.0, 90.0
+"""The plan rungs' measured medians (C3_verdict #6, D10; c3/rungs.json): the
+plan ladder draws on the one clock like every other ladder."""
+
+
 def ladder(improves: int = 2) -> Ladder:
-    return Ladder([Rung(IMPROVE, 0.0, tries=improves), Rung(MODEL_TIER, 0.0)], "keep_best")
+    return Ladder([Rung(IMPROVE, IMPROVE_S, tries=improves), Rung(MODEL_TIER, MODEL_TIER_S)], "keep_best")
 
 
 def ladder_after(done: int, improves: int = 2) -> Ladder:

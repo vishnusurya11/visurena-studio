@@ -26,11 +26,16 @@ EPISODE_CEILING_SECONDS = 5 * 3600
 taste-gates, cost); `RENDER_HOLD` stays the brake."""
 
 EPISODE_SHARES: dict[str, float] = {
-    "01": 3 / 300, "02": 8 / 300, "03": 6 / 300, "04": 6 / 300, "05": 2 / 300,
-    "06": 3 / 300, "07": 4 / 300, "08": 60 / 300, "09": 120 / 300, "10": 8 / 300,
-    "11": 8 / 300, "12": 2 / 300, "13": 5 / 300,
-    "judges": 15 / 300, "ladders": 50 / 300, "slack": 0 / 300,
+    "01": 1 / 300, "02": 70 / 300, "03": 5 / 300, "04": 15 / 300, "05": 1 / 300,
+    "06": 1 / 300, "07": 22 / 300, "08": 22 / 300, "09": 105 / 300, "10": 6 / 300,
+    "11": 20 / 300, "12": 3 / 300, "13": 3 / 300,
+    "judges": 6 / 300, "ladders": 20 / 300, "slack": 0 / 300,
 }
+# RE-PRICED 2026-10-11 (C3_verdict #6, D10) on C3_T §3.3's measured relaunch-free
+# values (stage_p90.json, ep25 the clean run): 02 plan 70 (P50 45-64 after
+# fresh_brief), 07 grids 22, 08 panels 22, 09 takes 105 (P50 118 x CK8's 0.83),
+# 11 QC + master eye 20, the ladders' pool 20.  Below the ceiling nothing changes
+# (headroom pays a rung its share cannot: 1 budget terminal in 9 episodes).
 # 2026-10-06: 13 (publish: upload + the /shorts/ poll, capped 600 s) takes 5 min from
 # 09, whose measured need (ep13: 7176 s) fits 120.
 # RE-PRICED 2026-09-27 from ep13's clock: step 08 spent ~15 min on the content read
