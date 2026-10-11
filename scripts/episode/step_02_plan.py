@@ -200,11 +200,25 @@ def clear(ctx, desk) -> Path:
     policy = gate_policy.of(ctx.stage, GATE)
     desk.battery_terminal = policy.battery_terminal or plan_ladder.DEFER
     rungs = judged_gate.Rungs(plan_ladder.ladder_after(desk.rungs_done, MAX_IMPROVE), take=desk.take)
-    signed = judged_gate.clear(ctx, GATE, judge=lambda: judge(ctx, desk), sign=desk.sign,
-                               ladder=rungs, terminal=desk.terminal, policy=policy)
+    try:
+        signed = judged_gate.clear(ctx, GATE, judge=lambda: judge(ctx, desk), sign=desk.sign,
+                                   ladder=rungs, terminal=desk.terminal, policy=policy)
+    except plan_ladder.BuilderOverClock as why:
+        signed = over_clock(ctx, desk, policy, str(why))
     ctx.log(f"{GATE}: {signed.name} written", step_id=STEP_ID)
     retire_aside(ctx, signed)
     return signed
+
+
+def over_clock(ctx, desk, policy, why: str) -> Path:
+    """The ONE climb past a spent ceiling a BUILDER line buys (C3_verdict #5
+    (iv)): <= 3 rungs; still carrying one, the terminal raises SAFETY."""
+    ctx.log(f"{GATE}: the clock is spent and the best plan carries a builder line ({why[:160]}); "
+            f"one climb past the ceiling", step_id=STEP_ID, level="WARNING")
+    desk.over_clock = True
+    rungs = judged_gate.Rungs(plan_ladder.ladder_over_clock(MAX_IMPROVE), take=desk.take)
+    return judged_gate.clear(ctx, GATE, judge=lambda: judge(ctx, desk), sign=desk.sign,
+                             ladder=rungs, terminal=desk.terminal, policy=policy)
 
 
 def retire_aside(ctx, signed: Path) -> None:

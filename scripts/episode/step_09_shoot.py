@@ -207,13 +207,13 @@ def run(ctx) -> None:
         # zero-cost refusal would park the unit forever (ep15, 2026-10-01).
         ctx.log(f"ceiling leaves {left:.0f} s and the takes want 0 s -- judging only",
                 step_id=STEP_ID, level="WARNING")
-    elif not ok and round_zero(ctx.home / TAKES):
-        ctx.log(f"the takes want {cost:.0f} s and the ceiling leaves {left:.0f} s -- ROUND 0 "
-                f"renders anyway: the terminals need a best take to keep", step_id=STEP_ID,
-                level="WARNING")
     elif not ok:
-        raise SystemExit(f"REFUSED: the takes want {cost:.0f} s and the episode ceiling leaves "
-                         f"{left:.0f} s; a run over the ceiling takes terminal rungs, not renders")
+        # FIRSTS ARE NEVER REFUSED, ONLY REPEATS (C3_verdict #5 (i)): `cost` is
+        # the takes MISSING on disk; they render, the ladder's retakes are
+        # terminal at a spent clock.  Refusing here parked a half-rendered
+        # round 0 forever (step 09 raised with 10 of 24 takes on disk).
+        ctx.log(f"the missing takes want {cost:.0f} s and the ceiling leaves {left:.0f} s -- they "
+                f"render anyway (firsts); every retake is terminal", step_id=STEP_ID, level="WARNING")
     extra = getattr(ctx, "extra", None) or []
     ctx.run_script("scripts/episode/takes_r2v.py", "--from-refs", "--no-ends", flag,
                    *extra, gpu=GPU, clock="takes")

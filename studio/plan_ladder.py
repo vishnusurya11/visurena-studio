@@ -41,6 +41,12 @@ from studio.judges.verdict import Fault, Verdict
 from studio.ladder import Ladder, Rung
 
 IMPROVE, MODEL_TIER, DEFER = "improve", "model_tier", "defer"
+KEEP_BEST = "keep_best"
+
+
+class BuilderOverClock(Exception):
+    """A spent clock's best plan still carries a BUILDER line: climb once more
+    over the clock (C3_verdict #5 (iv)); raised before anything is signed."""
 CONVERGED = 2
 """A draft within this many battery faults of passing is EDITED by every rung,
 never thrown away (ep15, 2026-10-01: the old fresh_brief rung discarded
@@ -128,6 +134,11 @@ def ladder_after(done: int, improves: int = 2) -> Ladder:
         if keep:
             rungs.append(Rung(rung.name, rung.cost_seconds, tries=keep))
     return Ladder(rungs, full.terminal)
+
+
+def ladder_over_clock(improves: int = 2) -> Ladder:
+    """The one climb a BUILDER line buys past the ceiling: <= 3 unpriced rungs."""
+    return Ladder([Rung(IMPROVE, 0.0, tries=improves), Rung(MODEL_TIER, 0.0)], KEEP_BEST)
 
 
 def code_sha8() -> str:
@@ -227,6 +238,7 @@ class Desk:
     drafts: list[tuple[dict, Verdict]] = field(default_factory=list)
     judged: dict[str, Verdict] = field(default_factory=dict)
     agent: object | None = None             # the reasoner, once a rule miss handed it the climb
+    over_clock: bool = False                # the one climb past a spent ceiling is under way
     best: tuple | None = None               # (doc, n, faults): the battery-refused draft with the fewest lines
     rungs_done: int = 0                     # rungs whose draft landed (the checkpoint's resume point)
     _names_cache: dict | None = None        # the refs-derived token table the ghost scrub reads
@@ -405,11 +417,29 @@ class Desk:
         """By cause: no draft ever passed the battery -> defer; else the best
         draft back in plan.json and its verdict, flagged."""
         self.remember(verdict)
+        if not self.drafts and self.clock_spent():
+            return self.past_ceiling(self.best_refused(verdict))
         if not self.drafts:
             return self.best_refused(verdict).model_copy(update={"terminal": self.battery_terminal})
         doc, best = min(self.drafts, key=lambda pair: len(pair[1].faults))
         episode_home.write_plan(self.plan, doc)
         return best.model_copy(update={"terminal": verdict.terminal})
+
+    def clock_spent(self) -> bool:
+        budget = getattr(self.ctx, "budget", None)
+        return bool(budget is not None and budget.ceiling_spent())
+
+    def past_ceiling(self, best: Verdict) -> Verdict:
+        """At a spent clock (D3): JUDGED-only lines sign keep_best flagged; a
+        BUILDER line climbs once more, then stops as a SAFETY refusal."""
+        from studio import plan_tags
+        builder = plan_tags.builder_lines([f.note for f in best.faults])
+        if not builder:
+            return best.model_copy(update={"terminal": KEEP_BEST})
+        if not self.over_clock:
+            raise BuilderOverClock("; ".join(builder)[:300])
+        raise SystemExit("SAFETY: plan_builder: the best plan still carries a line a downstream builder "
+                         "refuses, after one climb past the ceiling:\n  " + "\n  ".join(builder)[:900])
 
     def best_refused(self, verdict: Verdict) -> Verdict:
         """The best battery-refused draft back on disk for the deferral, and the

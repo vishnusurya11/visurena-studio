@@ -833,3 +833,9 @@ fixes. Each lesson below cost at least one launch. Tracker rows A38-A74 in
     - **A reset clock is no clock (commit 4).** 67 retries each opened a fresh 5 h (all 4
       over_budget parks were retried into a new ceiling). A ceiling binds only if nothing
       can zero it: `retry` stamps `attempt_at`, `spent_before` never reads it.
+    - **The clock refuses repeats, never firsts (commit 5).** A spent clock with half the takes
+      on disk refused the other half, and the episode could never finish. Missing work always
+      renders; only rungs stop. Past the ceiling a ladder signs its best flagged; only the
+      closed SAFETY list (gate_policy.SAFETY) stops an episode. A plan line a builder repeats
+      (studio/plan_tags.BUILDER, read from the code -- G-LIGHT and PLAN GATES are BUILDER,
+      ONE PER TAKE is not) cannot ship flagged: it buys one climb, then stops.

@@ -12,9 +12,9 @@ THE RE-CHECK CADENCE, in numbers: the drive polls the run's log for growth
 every POLL_S (30 s); a log silent for episode_drive.SILENCE_S (20 min) is
 reported to the owner ONCE per silence; MAX_RUNS is 6 -- five resumes, and
 since judged_gate no longer emits budget deferrals (a spent clock is terminal
-in the same run, five-hour verdict) those resumes serve only PLAN deferrals;
-the over-budget stop reads run_budget.spent_before(home) against
-EPISODE_CEILING_SECONDS before launching another run.
+in the same run, five-hour verdict) those resumes serve only PLAN deferrals.
+A spent clock no longer stops a resume (C3_verdict #5 (iii)); the `end` row
+records `clock_spent` for the autopilot's clock_loop backstop.
 
 THE DIRTY-TREE RULE AND THE SIBLING SESSIONS: episode_drive.dirty() refuses
 any tracked change or any untracked file OUTSIDE library/, so a sibling
@@ -146,10 +146,9 @@ def main(codex: str, number: int) -> int:
         ledger(home, run_row(n, sha, text))
         return text
     from studio import run_budget
-    code = episode_drive.drive(run, lambda text: notify(f"{label}: {text}"),
-                               over_budget=lambda: run_budget.spent_before(home)
-                               >= run_budget.EPISODE_CEILING_SECONDS)
-    ledger(home, {"event": "end", "code": code, "sha": sha})
+    code = episode_drive.drive(run, lambda text: notify(f"{label}: {text}"))
+    spent = run_budget.spent_before(home) >= run_budget.EPISODE_CEILING_SECONDS
+    ledger(home, {"event": "end", "code": code, "sha": sha, "clock_spent": spent})   # the clock_loop backstop
     return code
 
 

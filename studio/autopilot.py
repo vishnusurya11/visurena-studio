@@ -180,6 +180,8 @@ TABLE: list[tuple[str, object]] = [
     (r"REFUSED: the plan has no shots", ("park", "no_shots", None)),
     (r"REFUSED: no (panels|takes) under", ("retry", "no_render_output", None)),
     (r"INVALID VERDICT", ("park", "invalid_verdict", None)),
+    # the closed SAFETY list stops a spent-clock episode (C3_verdict #5 (v), gate_policy.SAFETY)
+    (r"^(?:SystemExit: |RuntimeError: )?SAFETY: ", ("park", "safety: {line}", None)),
     (r"REFUSED: the takes want .* ceiling leaves", ("retry", "ceiling_refused_render", None)),
     (r"is NOT public", ("retry", "not_public", None)),
     (r"left no ledger row", ("retry", "no_ledger_row", None)),
@@ -321,6 +323,20 @@ def _ended(s: Signals, n: int) -> Derived:
     return _answer(s, n, *classify(s.log_tail, s.home_files))
 
 
+CLOCK_LOOP = 3
+"""Consecutive spent-clock stops (C3_verdict #5 (e)) before the episode parks:
+a backstop against a relaunch loop, not a policy -- a spent clock relaunches."""
+
+
+def clock_loop(s: Signals) -> bool:
+    """The last CLOCK_LOOP drives each ended non-zero on a spent clock, and the
+    tail is no SAFETY stop (that one parks by its own name)."""
+    if s.clock_spent_s < run_budget.EPISODE_CEILING_SECONDS or "SAFETY: " in (s.log_tail or ""):
+        return False
+    ends = [r for r in s.drive_rows if r.get("event") == "end"][-CLOCK_LOOP:]
+    return len(ends) == CLOCK_LOOP and all(r.get("code") not in (0, None) and r.get("clock_spent") for r in ends)
+
+
 def derive(s: Signals, n: int) -> Derived:
     """One episode's state from one tick's signals (ops §3, every row).
     Order: the brakes and the records, the live process, the brain's verdict,
@@ -337,8 +353,8 @@ def derive(s: Signals, n: int) -> Derived:
         return _verdict(s, n)
     if not s.drive_rows:
         return _idle(s, n, "launch")
-    if s.clock_spent_s >= run_budget.EPISODE_CEILING_SECONDS:
-        return Derived(State.PARKED, "clock_spent", None, packet(s, n, "clock_spent"))
+    if clock_loop(s):
+        return Derived(State.PARKED, "clock_loop", None, packet(s, n, "clock_loop"))
     if crashed(s.drive_rows) and s.exit_code is None:
         return _idle(s, n, "relaunch") if crashes(s.drive_rows) < CRASHES_BEFORE_BRAIN else _brain(s, n, "crash_loop")
     return _ended(s, n)

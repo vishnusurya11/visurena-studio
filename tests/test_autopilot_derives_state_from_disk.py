@@ -75,9 +75,10 @@ TABLE = [
                                                  home_files={"plan.json", "plan.deferred.json"},
                                                  log_tail=OVER_BUDGET_TAIL),
      State.PARKED, "over_budget"),
+    # REWRITTEN (C3_verdict #5 (ii), D3): a spent clock never parks; the stop is read like any other
     ("end 1 dead clock", signals(drive_rows=rows(("start",), ("run", "refused"), ("end", 1)),
                                  clock_spent_s=EPISODE_CEILING_SECONDS, log_tail="REFUSED: qc FAIL"),
-     State.PARKED, "clock_spent"),
+     State.IDLE, "qc_fail"),
     ("end 1 other traceback", signals(drive_rows=rows(("start",), ("run", "failed"), ("end", 1)),
                                       log_tail="Traceback (most recent call last):\n  ...\nKeyError: 0"),
      State.NEEDS_BRAIN, "failed: KeyError: 0"),
@@ -164,14 +165,17 @@ def test_over_budget_relaunches_a_signed_plan_once_and_parks_an_unsigned_one():
     assert got.packet["episode"] == "ep19"
 
 
-def test_a_dead_clock_parks_without_a_brain():
-    """A brain cannot buy GPU hours: 18 000 s spent is PARKED, never NEEDS_BRAIN."""
+def test_a_dead_clock_never_parks_on_the_clock():
+    """REWRITTEN (C3_verdict #5 (ii), D3; was test_a_dead_clock_parks_without_a_brain):
+    a spent clock relaunches into terminal mode -- every ladder is terminal, the
+    missing firsts render -- so nothing parks on the clock itself.  A crash
+    relaunches; a stop is read through the hand-back table like any other."""
     for tail in ["Traceback\nKeyError: 0", "DEFERRED PLAN | x | y | aside: a", ""]:
         for drive in [rows(("start",), ("run", "failed"), ("end", 1)), rows(("start",))]:
             got = ap.derive(signals(drive_rows=drive, log_tail=tail, clock_spent_s=EPISODE_CEILING_SECONDS + 1), 20)
-            assert (got.state, got.reason) == (State.PARKED, "clock_spent"), tail
-    got = ap.derive(signals(drive_rows=rows(("start",)), clock_spent_s=EPISODE_CEILING_SECONDS - 1), 20)
-    assert got.state is State.IDLE
+            assert got.reason != "clock_spent", tail
+    got = ap.derive(signals(drive_rows=rows(("start",)), clock_spent_s=EPISODE_CEILING_SECONDS + 1), 20)
+    assert (got.state, got.reason) == (State.IDLE, "relaunch")
 
 
 def test_the_brain_is_trusted_by_its_file_and_git_not_its_prose():

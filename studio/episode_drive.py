@@ -88,11 +88,12 @@ def tail(log: str, n: int = LAST_LINES) -> str:
     return "\n".join(log.strip().splitlines()[-n:])
 
 
-def drive(run: Callable[[], str], notify: Callable[[str], None], max_runs: int = MAX_RUNS,
-          over_budget: Callable[[], bool] = lambda: False) -> int:
+def drive(run: Callable[[], str], notify: Callable[[str], None], max_runs: int = MAX_RUNS) -> int:
     """Run, resume a deferral, stop and tell on anything else; 0 when the
-    episode completes.  A SPENT episode is never auto-resumed (five-hour plan
-    fix 1): ep14's 31 runs each opened a fresh 5 h."""
+    episode completes.  A spent clock no longer stops a resume (C3_verdict #5
+    (iii)): every ladder is terminal through its own `affordable`, missing
+    firsts render, and the one clock is never reset -- so a resume can only
+    finish the episode, never buy hours (ep14's 31 fresh 5 h are gone)."""
     log = ""
     for n in range(1, max_runs + 1):
         log = run()
@@ -102,10 +103,6 @@ def drive(run: Callable[[], str], notify: Callable[[str], None], max_runs: int =
             return 0
         if got != "deferred":
             notify(f"episode {got} on run {n}:\n{tail(log)}")
-            return 1
-        if over_budget():
-            notify(f"episode ceiling spent after run {n}; not resuming -- the next manual run "
-                   f"takes terminals, it does not retake:\n{tail(log)}")
             return 1
     notify(f"episode still deferred after {max_runs} runs:\n{tail(log)}")
     return 1

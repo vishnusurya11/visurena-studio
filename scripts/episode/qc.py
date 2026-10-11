@@ -311,6 +311,30 @@ def verdict(report: dict) -> bool:
             and speech_gap.band_ok(report.get("speech_over_gap_db", speech_gap.SPEECH_OVER_GAP_DB)))
 
 
+def failed_rows(report: dict) -> list[str]:
+    """Every verdict condition the report fails, by name (C3_verdict #5 (v)):
+    at a spent clock the gate_policy.SAFETY names stop the episode and the
+    rest ship flagged.  `line_unheard` is judged only once lines are in."""
+    from studio import episode_spec
+    edit, lines = report.get("edit", {}), report.get("lines")
+    hard = [c for c in report.get("missing_cuts", []) if c not in report.get("internal_cuts", [])]
+    heard = lines is not None and report.get("lines_measured", True) and all(r["passed"] for r in lines)
+    checks = {
+        "loudness": not (report.get("lufs_ok") and report.get("tp_ok")),
+        "missing_cuts": bool(hard),
+        "short_length": bool(episode_spec.short_refusal(float(report.get("seconds") or 1e9))),
+        "gap": report.get("longest_gap_s", 0.0) > MAX_GAP_S,
+        "line_unheard": "lines" in report and not heard,
+        "takes_stale": not edit.get("measured", False) or bool(edit.get("stale_takes")),
+        "edit": bool(edit.get("measured")) and not edit.get("stale_takes") and not edit.get("ok", False),
+        "takes_unjudged": bool(report.get("takes", {}).get("unjudged")),
+        "title_card": report.get("title_card") is not True,
+        "sound": not all(row.get("ok") for row in report.get("sound", [])),
+        "speech_band": not speech_gap.band_ok(report.get("speech_over_gap_db", speech_gap.SPEECH_OVER_GAP_DB)),
+    }
+    return [name for name, failed in checks.items() if failed]
+
+
 def speech_band(master: Path, lines: list[dict], until: float, work: Path) -> float:
     """Speech over the gaps on the master itself, dB (studio/speech_gap)."""
     import soundfile
@@ -389,25 +413,28 @@ def edit_rows(i: SimpleNamespace, report: dict) -> dict:
     return report
 
 
-def with_lines(report: dict, hear) -> dict:
+def with_lines(report: dict, hear, spent: bool = False) -> dict:
     """The ear LAST (C3_verdict #2): Whisper reads the lines only on a master
-    whose cheap rows still pass; otherwise lines are null and unmeasured."""
-    if not verdict({**report, "lines": []}):
+    whose cheap rows still pass -- or, at a spent clock, whose failed rows are
+    all ones that ship flagged (C3_verdict #5 (v)); otherwise lines are null."""
+    from studio import gate_policy
+    failed = failed_rows({k: v for k, v in report.items() if k != "lines"})
+    if failed and not (spent and not set(failed) & set(gate_policy.SAFETY)):
         return {**report, "lines": None, "lines_measured": False}
     return {**report, "lines": hear(), "lines_measured": True}
 
 
-def measure(book_id: str, number: int, engine: str, listen) -> dict:
+def measure(book_id: str, number: int, engine: str, listen, spent: bool = False) -> dict:
     """The whole report: the cheap rows, then (if they pass) every line heard."""
     i = load_inputs(book_id, number, engine)
     report = edit_rows(i, head_rows(i))
-    report = with_lines(report, lambda: heard_on_master(i.master, i.lines, i.work, listen))
+    report = with_lines(report, lambda: heard_on_master(i.master, i.lines, i.work, listen), spent)
     report["passed"] = verdict(report)
     return report
 
 
-def main(book_id: str, number: int, engine: str = "i2v") -> None:
-    report = measure(book_id, number, engine, voice_qc.any_transcriber())
+def main(book_id: str, number: int, engine: str = "i2v", spent: bool = False) -> None:
+    report = measure(book_id, number, engine, voice_qc.any_transcriber(), spent)
     book, lufs, tp = episode_home.book_dir(book_id), report["lufs"], report["true_peak"]
     placed = episode_home.load_placed(book, number, episode_home.load_plan(book, number))
     lines = line_laid.laid_lines(placed, episode_home.takes_dir(book, number, engine))
@@ -450,4 +477,4 @@ def main(book_id: str, number: int, engine: str = "i2v") -> None:
 
 if __name__ == "__main__":
     args = [a for a in sys.argv[1:] if not a.startswith("--")]
-    main(args[0], episode_arg(sys.argv), episode_home.engine_arg(sys.argv))
+    main(args[0], episode_arg(sys.argv), episode_home.engine_arg(sys.argv), "--ceiling-spent" in sys.argv)

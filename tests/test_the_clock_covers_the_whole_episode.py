@@ -68,9 +68,12 @@ def test_an_unaffordable_rung_with_ceiling_left_is_still_terminal():
     assert mid.learned[-1].action == "terminal"
 
 
-def test_the_driver_never_resumes_a_spent_episode():
+def test_the_driver_resumes_whatever_the_clock_and_is_bounded_by_its_runs():
+    """REWRITTEN (C3_verdict #5 (iii); was test_the_driver_never_resumes_a_spent_episode):
+    the clock is never reset any more, so a resume cannot buy hours -- it can
+    only finish terminals.  MAX_RUNS still bounds a deferral loop."""
     ran, said = [], []
     code = episode_drive.drive(lambda: ran.append(1) or "DEFERRED: EYE_TAKES needs 565 s for its rung",
-                               said.append, over_budget=lambda: True)
-    assert len(ran) == 1                   # one run may finish terminals; no resume
-    assert code == 1 and any("ceiling" in s for s in said)
+                               said.append)
+    assert len(ran) == episode_drive.MAX_RUNS
+    assert code == 1 and any("still deferred" in s for s in said)

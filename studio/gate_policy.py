@@ -19,6 +19,14 @@ from pydantic import BaseModel, ConfigDict, ValidationError
 from studio import registry
 
 STATES = ("human", "auto")
+SAFETY = ("short_length", "title_card", "line_unheard", "takes_unjudged", "takes_stale",
+          "loudness", "plan_builder", "money", "publish_auth", "gpu_lost")
+"""C3_verdict #5 (v), D3: the CLOSED list of what stops an episode whose 5 h
+clock is spent.  Past the ceiling every ladder takes its best and signs it
+flagged and missing firsts still render; only these stop the run: a master
+over the Short length or with no title card, a line not heard, an unjudged or
+stale take, loudness out of band after the leveller, a plan BUILDER line,
+the money wall, publish auth, a lost GPU.  Each entry can be vetoed alone."""
 PATH = registry.ROOT / "gates.yaml"
 DECISIONS = registry.ROOT / "docs" / "DECISIONS.md"
 DECISION_ID = re.compile(r"^\d{4}-\d{2}-\d{2}-[a-z0-9]+(?:-[a-z0-9]+)*$")

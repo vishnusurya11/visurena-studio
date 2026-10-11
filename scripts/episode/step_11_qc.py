@@ -24,7 +24,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 
 from scripts.episode import eye_review  # noqa: E402
 from studio import comfy, episode_home, judged_gate, master_ladder, panel_content as pc  # noqa: E402
-from studio import step_cli, youtube_publish as yp  # noqa: E402
+from studio import audit_rows, gate_policy, step_cli, youtube_publish as yp  # noqa: E402
 from studio.judges import master_eye  # noqa: E402
 
 STEP_ID = "11"
@@ -152,6 +152,7 @@ def qc_report(ctx, extra: list[str]) -> dict:
     and a failed report on an unchanged master was thrown away and re-measured
     with no assemble in between.  A recut changes the sha8 and qc runs again."""
     master, qc = pair(ctx.home, engine_of(extra))
+    spent = clock_spent(ctx)
     if qc.exists() and master.exists():
         report = episode_home.read_json(qc)
         # the same bytes AND the same measuring code (ep24 03:45Z: a FAIL by a
@@ -160,17 +161,44 @@ def qc_report(ctx, extra: list[str]) -> dict:
             if report.get("passed"):
                 ctx.log(f"qc: {qc.name} already measured sha8 {report['sha8']}; reused")
                 return report
+            if spent:
+                return past_ceiling(ctx, qc, report)
             raise SystemExit(f"REFUSED: qc FAIL in {qc.name} for these exact bytes; "
                              f"fix the cut before anyone watches it")
-    ctx.run_script("scripts/episode/qc.py", *engine_flags(extra), gpu=GPU, clock="qc")
+    ctx.run_script("scripts/episode/qc.py", *engine_flags(extra), *(["--ceiling-spent"] if spent else []),
+                   gpu=GPU, clock="qc")
     if not qc.exists():
         raise SystemExit(f"REFUSED: qc.py left no report at {qc.name}")
     report = episode_home.read_json(qc)
     if master.exists() and report.get("sha8") != yp.sha8(master):
         raise SystemExit(f"REFUSED: {qc.name} still measures {report.get('sha8')}, not the master's "
                          f"bytes; qc.py did not finish")
+    if not report.get("passed") and spent:
+        return past_ceiling(ctx, qc, report)
     if not report.get("passed"):
         raise SystemExit(f"REFUSED: qc FAIL in {qc.name}; fix the cut before anyone watches it")
+    return report
+
+
+def clock_spent(ctx) -> bool:
+    budget = getattr(ctx, "budget", None)
+    return bool(budget is not None and budget.ceiling_spent())
+
+
+def past_ceiling(ctx, path: Path, report: dict) -> dict:
+    """At a spent clock (C3_verdict #5 (v), D3): a fail on a SAFETY row stops
+    the episode; any other fail ships, the report flagged and one audit row."""
+    from scripts.episode import qc as qc_rows
+    failed = qc_rows.failed_rows(report)
+    if stop := [name for name in failed if name in gate_policy.SAFETY]:
+        raise SystemExit(f"SAFETY: {', '.join(stop)}: {path.name} fails {stop} at a spent clock; "
+                         f"only the closed SAFETY list stops the episode")
+    report = {**report, "passed": True, "ceiling_flagged": failed}
+    episode_home.write_json(path, report)
+    audit_rows.append(ctx.book_dir, {"unit": getattr(ctx, "unit", ""), "gate": "QC", "judge": "qc",
+                                     "sha8": report.get("sha8", ""), "artefact": path.name,
+                                     "faults": [{"kind": name} for name in failed], "terminal": "ceiling"})
+    ctx.log(f"qc: the clock is spent; {path.name} ships flagged on {failed}")
     return report
 
 
