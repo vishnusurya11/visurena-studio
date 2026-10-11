@@ -4,6 +4,23 @@ Newest first. Every architectural change gets an entry.
 
 ---
 
+## 2026-10-10 — Continuity: character looks on a story timeline; a place is its master (owner rulings, retro of WotW)
+
+**Ruling:** a character has one picture per story-time LOOK on the book's look table
+(`refs/looks.json`), not one picture for the whole book — this reverses the 2026-09-18
+"one picture per entity" rule for story-time looks only; places and props keep it. A look,
+and a place's state, may be a ONE-step edit of the base sheet / the place master: never an
+edit of an edit, never a composite (nothing pasted between pictures). A recurring place's
+views are its masters, or one hop from them; a new view is never a fresh room from words.
+Budget ≤ 6 h machine time per 2-3 min episode; no shipped episode is re-rendered; an
+existing ComfyUI workflow is never edited (a new one is `<base>_<source>.json`). Phase 1
+is the skeptic's 9-commit slice; phase 2 arms the judges after the next book's first
+episodes. Decision `architecture/decisions/2026-10-10_continuity_looks_places.md`; tracker
+`architecture/plan/2026-10-10_continuity_build.md`; the debate
+`docs/audit/2026-10-10_continuity_retro/`.
+
+---
+
 ## 2026-10-07 — Every LLM tier runs on the Claude Agent SDK under the owner's subscription (owner: "use Claude, like how you used to supervise"; "don't use API for money, I will remove that completely")
 
 **Ruling:** no paid API call anywhere in the studio. Every tier in `models.yaml` (`local`, `canon`,
