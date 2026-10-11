@@ -1,0 +1,70 @@
+[   0.0 min] bench clock started
+[   0.0 min] b0: queue (0, 0)
+[   3.2 min] b0: ep16 s13 redraw 188.0s -> bit-identical to the shipped grid: True
+[   4.4 min] b1: narr_today image_krea2_cinematic_2x_presave seed 4165438081 in 71s -> ['1x', '2x']
+[   5.3 min] b1: narr_neutral image_krea2_cinematic_2x_presave_neutraltile_visurena seed 4165438081 in 51s -> ['1x', '2x']
+[   6.3 min] b1: ragged_neutral image_krea2_cinematic_2x_presave_neutraltile_visurena seed 4165438081 in 60s -> ['1x', '2x']
+[   7.3 min] b1: fresh_s3_today image_krea2_cinematic_2x_presave seed 4165438084 in 60s -> ['1x', '2x']
+[   8.1 min] b1: fresh_s3_neutral image_krea2_cinematic_2x_presave_neutraltile_visurena seed 4165438084 in 50s -> ['1x', '2x']
+[   9.1 min] b1: fresh_s4_today image_krea2_cinematic_2x_presave seed 4165438085 in 60s -> ['1x', '2x']
+[  10.0 min] b1: fresh_s4_neutral image_krea2_cinematic_2x_presave_neutraltile_visurena seed 4165438085 in 50s -> ['1x', '2x']
+[  10.0 min] b1d: WotW look pictures on disk for a bowler/billycock read: 0 -> skipped (H7 stays open)
+[  10.0 min] b2: guide preconditions {'D1': '', 'D2': '', 'E10': '', 'E15': ''}
+[  10.0 min] b2: queue 7 jobs
+[  21.1 min] b2: collected -> D:\temp\claude\d--Projects-KingdomOfViSuReNa-alpha-visurena-studio\53388bed-712c-4d9b-972d-6c2de9a9f94e\scratchpad\c2b\runs_b2
+[  21.2 min] b3: ep14_grid_attic_room_1x1_s22: no geometry in the shipped words -- arm (b) is the control's words
+[  24.5 min] b3: ep14_s22 (b) 176.4s (c) 20.5s
+[  24.5 min] b3: ep14_grid_attic_room_1x1_s24: no geometry in the shipped words -- arm (b) is the control's words
+[  25.5 min] b3: ep14_s24 (b) 27.5s (c) 30.7s
+[  26.5 min] b3: ep16_s13 (b) 30.8s (c) 30.7s
+[  27.5 min] b3: ep17_s08 (b) 30.8s (c) 30.8s
+[  28.6 min] b3: ep17_s11 (b) 30.9s (c) 30.9s
+[  30.0 min] b3: ep19_s19 (b) 46.1s (c) 41.3s
+[  30.7 min] b3: ep23_s02 (b) 20.6s (c) 20.7s
+[  31.4 min] b3: ep24_s08 (b) 20.7s (c) 20.7s
+[  32.5 min] b3: ep14_s24 (d) 2048 66.0s
+[  33.6 min] b3: ep16_s13 (d) 2048 65.8s
+[  34.7 min] b3: ep17_s11 (d) 2048 65.8s
+[  35.8 min] b3: ep24_s08 (d) 2048 66.0s
+[  36.5 min] b3read: ep14_s22/shipped people 1 subjects ['boy', 'cap', 'jacket', 'vest', 'pants', 'satchel', 'bed', 'curtains']
+[  36.8 min] b3read: ep14_s22/b people 1 subjects ['boy', 'cap', 'jacket', 'vest', 'pants', 'satchel', 'bed', 'curtains']
+[  38.7 min] b3read: ep14_s22/c people 1 subjects ['boy', 'bed', 'bedside table', 'desk', 'lamp', 'trunk', 'books', 'papers']
+[  39.0 min] b3read: ep14_s24/shipped people 1 subjects ['man', 'newspaper', 'handwritten papers', 'lamp', 'bed', 'window', 'curtain', 'wallpaper']
+[  39.3 min] b3read: ep14_s24/b people 1 subjects ['man', 'newspaper', 'handwritten papers', 'lamp', 'bed', 'window', 'curtain', 'wallpaper']
+[  39.6 min] b3read: ep14_s24/c people 1 subjects ['man', 'newspaper', 'hat', 'coat', 'tie', 'bed', 'window', 'curtain']
+[  39.8 min] b3read: ep14_s24/d people 1 subjects ['man', 'bed', 'lamp', 'window', 'clock tower', 'books', 'papers', 'wallpaper']
+[  40.1 min] b3read: ep16_s13/shipped people 1 subjects ['woman', 'hat', 'dress', 'gloves', 'wheelchair', 'houses', 'church', 'trees']
+[  40.4 min] b3read: ep16_s13/b people 1 subjects ['woman', 'hat', 'dress', 'gloves', 'carriage', 'trees', 'houses', 'church']
+[  40.6 min] b3read: ep16_s13/c people 1 subjects ['woman', 'hat', 'dress', 'carriage', 'houses', 'church', 'trees', 'hedge']
+[  40.9 min] b3read: ep16_s13/d people 1 subjects ['woman', 'hat', 'dress', 'gloves', 'carriage', 'church', 'fire', 'smoke']
+[  41.2 min] b3read: ep17_s08/shipped people 1 subjects ['woman', 'hat', 'dress', 'gloves', 'handbag', 'church', 'houses', 'ships']
+[  41.4 min] b3read: ep17_s08/b people 1 subjects ['woman', 'hat', 'dress', 'gloves', 'handbag', 'road', 'houses', 'church']
+[  41.6 min] b3read: ep17_s08/c people 1 subjects ['woman', 'hat', 'dress', 'gloves', 'handbag', 'road', 'houses', 'church']
+[  41.8 min] b3read: ep17_s11/shipped people 1 subjects ['man', 'boat', 'coins', 'hat', 'coat', 'sweater', 'sea', 'ships']
+[  42.1 min] b3read: ep17_s11/b people 1 subjects ['man', 'hat', 'beard', 'sweater', 'coat', 'coins', 'trumpet', 'boat']
+[  42.3 min] b3read: ep17_s11/c people 1 subjects ['old man', 'cap', 'beard', 'red sweater', 'black coat', 'gold coins', 'trumpet', 'boat']
+[  42.6 min] b3read: ep17_s11/d people 1 subjects ['man', 'boat', 'coins', 'oars', 'shore', 'sea', 'ship', 'cliff']
+[  42.8 min] b3read: ep19_s19/shipped people 1 subjects ['man', 'vest', 'shirt', 'bandage', 'green smoke', 'ruins', 'wooden beams', 'rocks']
+[  43.0 min] b3read: ep19_s19/b people 1 subjects ['man', 'barrel', 'green smoke', 'stone wall', 'wooden beams', 'trees', 'sky']
+[  43.3 min] b3read: ep19_s19/c people 1 subjects ['man', 'curly hair', 'blue eyes', 'bandage', 'vest', 'shirt', 'bloodstains', 'wooden structure']
+[  43.5 min] b3read: ep23_s02/shipped people 1 subjects ['man', 'hat', 'beard', 'tie', 'jacket', 'vest', 'red plants', 'ruins']
+[  43.8 min] b3read: ep23_s02/b people 1 subjects ['man', 'hat', 'beard', 'suit', 'vest', 'tie', 'pocket square', 'chain']
+[  44.0 min] b3read: ep23_s02/c people 1 subjects ['man', 'hat', 'beard', 'shirt', 'red plants', 'ruins', 'wall', 'sky']
+[  44.2 min] b3read: ep24_s08/shipped people 1 subjects ['man', 'mustache', 'vest', 'shirt', 'pants', 'boots', 'hawthorn', 'grass']
+[  44.5 min] b3read: ep24_s08/b people 1 subjects ['man', 'mustache', 'vest', 'shirt', 'pants', 'knife', 'hedges', 'grass']
+[  44.7 min] b3read: ep24_s08/c people 1 subjects ['man', 'hedges', 'grass', 'smoke', 'city']
+[  44.8 min] b3read: ep24_s08/d people 1 subjects ['man', 'hedges', 'grass', 'smoke', 'city']
+[  48.2 min] b4: P-WORDS v3 S6 ep27_grid_study_table_2x2 2x2 201.4s
+[  49.2 min] b4: P-WORDS v3 S4 ep24_grid_bower_morning_2x1_b 2x1 61.2s
+[  49.9 min] b4: P-WORDS v3 S3 ep24_grid_common_edge_morning_3x1 3x1 40.5s
+[  50.3 min] b4: P-WORDS v3 D1 ep25_grid_redoubt_pit_1x1_s21 1x1 20.8s
+[  50.6 min] b4: P-WORDS v3 D2 ep27_grid_study_reverse_1x1_s25 1x1 20.7s
+[  52.0 min] b4: P-WORDS v3 N25 ep25_grid_fulham_road_2x2 2x2 81.2s
+[  52.0 min] b4: queue 5 jobs
+[  68.2 min] b4: collected -> D:\temp\claude\d--Projects-KingdomOfViSuReNa-alpha-visurena-studio\53388bed-712c-4d9b-972d-6c2de9a9f94e\scratchpad\c2b\runs_b4
+[  68.2 min] b5: prewarm queued for D1_A1_s2_pw (97d51b2f-861c-42db-997e-7e141b09ec11)
+[  68.2 min] b5: prewarm queued for E10_A1_pw (0fa3e81f-3be4-4823-8c57-f0981b50c2a1)
+[  68.2 min] b5: prewarm queued for E15_A1_pw (502383f8-14d5-47c2-9934-b7eb98a01dcf)
+[  68.2 min] b5: queue 3 jobs
+[  73.9 min] b5: collected -> D:\temp\claude\d--Projects-KingdomOfViSuReNa-alpha-visurena-studio\53388bed-712c-4d9b-972d-6c2de9a9f94e\scratchpad\c2b\runs_b5
+[  75.3 min] post: crop-to-plan reader pass (VL, 3+3 reads) done; GPU work ends

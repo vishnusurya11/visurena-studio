@@ -1,0 +1,227 @@
+{
+ "sigma_seed_8step": 0.0182,
+ "floor": -0.0365,
+ "sigma_pairs": [
+  [
+   0.768,
+   0.776
+  ],
+  [
+   0.73,
+   0.756
+  ],
+  [
+   0.875,
+   0.899
+  ],
+  [
+   0.837,
+   0.841
+  ]
+ ],
+ "rule1": {
+  "same_draw": true,
+  "faults": {
+   "identity": [],
+   "banding": [
+    "mean"
+   ],
+   "clones": [],
+   "speech": []
+  },
+  "identity_deltas": {
+   "D1": -0.031,
+   "D2": 0.0
+  },
+  "identity_faults_by_floor": []
+ },
+ "rule2": {
+  "E10": {
+   "words_A1": [
+    "moving"
+   ],
+   "words_CK8": [
+    "keep",
+    "moving"
+   ],
+   "subset": false,
+   "tail_db_A1": -14.9,
+   "tail_db_CK8": -13.8,
+   "mouth_A1": 0.937,
+   "mouth_CK8": 1.002
+  },
+  "E15": {
+   "words_A1": [],
+   "words_CK8": [],
+   "subset": true,
+   "tail_db_A1": -19.8,
+   "tail_db_CK8": -19.7,
+   "mouth_A1": 0.974,
+   "mouth_CK8": 1.139
+  }
+ },
+ "rule3_lag": {
+  "D1_CK8_s2": [
+   {
+    "measured": true,
+    "lag_frames": 35,
+    "lag_s": 1.458,
+    "corr": 0.304,
+    "readable": 1.0,
+    "fitted_on": "two owner-caught lagging takes against seven passes, unbenched: advisory; the cure is the shorter take"
+   },
+   {
+    "measured": false,
+    "why": "no correlation with the voice (0.28)",
+    "corr": 0.282,
+    "readable": 0.9444444444444444,
+    "fitted_on": "two owner-caught lagging takes against seven passes, unbenched: advisory; the cure is the shorter take"
+   }
+  ],
+  "D2_CK8_s2": [
+   {
+    "measured": false,
+    "why": "no correlation with the voice (0.21)",
+    "corr": 0.208,
+    "readable": 1.0,
+    "fitted_on": "two owner-caught lagging takes against seven passes, unbenched: advisory; the cure is the shorter take"
+   },
+   {
+    "measured": false,
+    "why": "no correlation with the voice (0.23)",
+    "corr": 0.226,
+    "readable": 1.0,
+    "fitted_on": "two owner-caught lagging takes against seven passes, unbenched: advisory; the cure is the shorter take"
+   }
+  ],
+  "E10_CK8": [
+   {
+    "measured": true,
+    "lag_frames": 40,
+    "lag_s": 1.667,
+    "corr": 0.405,
+    "readable": 1.0,
+    "fitted_on": "two owner-caught lagging takes against seven passes, unbenched: advisory; the cure is the shorter take"
+   },
+   {
+    "measured": true,
+    "lag_frames": 40,
+    "lag_s": 1.667,
+    "corr": 0.352,
+    "readable": 1.0,
+    "fitted_on": "two owner-caught lagging takes against seven passes, unbenched: advisory; the cure is the shorter take"
+   }
+  ],
+  "E15_CK8": [
+   {
+    "measured": true,
+    "lag_frames": -1,
+    "lag_s": -0.042,
+    "corr": 0.45,
+    "readable": 0.9430379746835443,
+    "fitted_on": "two owner-caught lagging takes against seven passes, unbenched: advisory; the cure is the shorter take"
+   },
+   {
+    "measured": true,
+    "lag_frames": -1,
+    "lag_s": -0.042,
+    "corr": 0.487,
+    "readable": 0.9430379746835443,
+    "fitted_on": "two owner-caught lagging takes against seven passes, unbenched: advisory; the cure is the shorter take"
+   }
+  ]
+ },
+ "shots": {
+  "D1": {
+   "psnr": {
+    "CK8": 29.82,
+    "seed2": 18.85
+   },
+   "id": {
+    "CK8": 0.81,
+    "A1": 0.841,
+    "seed2": null
+   },
+   "banding": {
+    "CK8": 0.2878,
+    "A1": 0.2797
+   },
+   "clones": {
+    "CK8": 0,
+    "A0": 1
+   },
+   "words": {
+    "CK8": [
+     "ha",
+     "ha",
+     "ha",
+     "ha",
+     "ha"
+    ],
+    "A1": [
+     "ha",
+     "ha",
+     "ha",
+     "ha",
+     "ha"
+    ]
+   },
+   "lag": {
+    "CK8": {
+     "measured": true,
+     "lag_frames": 35,
+     "lag_s": 1.458,
+     "corr": 0.304,
+     "readable": 1.0,
+     "fitted_on": "two owner-caught lagging takes against seven passes, unbenched: advisory; the cure is the shorter take"
+    },
+    "A1": {
+     "measured": false,
+     "why": "no correlation with the voice (0.28)",
+     "corr": 0.282,
+     "readable": 0.9444444444444444,
+     "fitted_on": "two owner-caught lagging takes against seven passes, unbenched: advisory; the cure is the shorter take"
+    }
+   }
+  },
+  "D2": {
+   "psnr": {
+    "CK8": 20.04,
+    "seed2": 13.05
+   },
+   "id": {
+    "CK8": 0.899,
+    "A1": 0.899,
+    "seed2": null
+   },
+   "banding": {
+    "CK8": 0.3282,
+    "A1": 0.3149
+   },
+   "clones": {
+    "CK8": 0,
+    "A0": 0
+   },
+   "words": {
+    "CK8": [],
+    "A1": []
+   },
+   "lag": {
+    "CK8": {
+     "measured": false,
+     "why": "no correlation with the voice (0.21)",
+     "corr": 0.208,
+     "readable": 1.0,
+     "fitted_on": "two owner-caught lagging takes against seven passes, unbenched: advisory; the cure is the shorter take"
+    },
+    "A1": {
+     "measured": false,
+     "why": "no correlation with the voice (0.23)",
+     "corr": 0.226,
+     "readable": 1.0,
+     "fitted_on": "two owner-caught lagging takes against seven passes, unbenched: advisory; the cure is the shorter take"
+    }
+   }
+  }
+ }
+}

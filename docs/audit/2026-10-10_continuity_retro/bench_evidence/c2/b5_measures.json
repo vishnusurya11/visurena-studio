@@ -1,0 +1,50 @@
+{
+ "D1_A1_s2_pw": {
+  "overhead_s": 11.5,
+  "phases": {
+   "prompt_s": 75.1,
+   "encode_s": 4.8,
+   "first_step_gap_s": null,
+   "steps": 8,
+   "sample_s": 45,
+   "s_per_it": 5.74,
+   "decode_save_s": 18.6,
+   "unet_reran": true,
+   "te_reran": false
+  },
+  "control_overhead_s": 16.4,
+  "psnr_vs_b2": 99.0
+ },
+ "E10_A1_pw": {
+  "overhead_s": 13.3,
+  "phases": {
+   "prompt_s": 109.7,
+   "encode_s": null,
+   "first_step_gap_s": null,
+   "steps": 8,
+   "sample_s": 72,
+   "s_per_it": 9.03,
+   "decode_save_s": 24.4,
+   "unet_reran": false,
+   "te_reran": false
+  },
+  "control_overhead_s": 14.1,
+  "psnr_vs_b2": 99.0
+ },
+ "E15_A1_pw": {
+  "overhead_s": 13.7,
+  "phases": {
+   "prompt_s": 139.7,
+   "encode_s": null,
+   "first_step_gap_s": null,
+   "steps": 8,
+   "sample_s": 103,
+   "s_per_it": 12.99,
+   "decode_save_s": 23.0,
+   "unet_reran": false,
+   "te_reran": false
+  },
+  "control_overhead_s": 13.5,
+  "psnr_vs_b2": 99.0
+ }
+}

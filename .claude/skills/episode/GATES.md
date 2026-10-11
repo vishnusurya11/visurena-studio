@@ -297,7 +297,11 @@ OVERRIDE, the synthetic declaration; `RENDER_HOLD` is the brake.
 
 **Arm rule:** a speed arm passes the INVENTED-SPEECH check on S4, D1 and D2 x 2
 seeds, or it is adopted for **narration takes only**. Dialogue stays on the 8-step
-at 12/3 until an arm passes.
+at 12/3 until an arm passes. **Amend (C2_verdict, 2026-10-11):** a speed arm on dialogue
+must also pass on >= 2 shipped takes whose control tail sounds above -45 dB (ep10/T21,
+ep15/T21): its tail words a subset of the control's at the same seed, tail dB within +-6,
+lower-face tail ratio within the control's range, mouth.lag within +-1 frame. CK8 failed
+it on 2026-10-11 (ep10/T21 "keep moving" vs "moving"; ep15/T21 mouth 1.14 vs .94-.97).
 
 **Adopted (2026-10-11 bench):** CK int8 attention on the 8-step BASE for narration takes
 (`takes_r2v.NARRATION_BASE`). Out: G1 (4-step on the authors' grid, lost the S3 frogs).

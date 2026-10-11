@@ -770,3 +770,35 @@ fixes. Each lesson below cost at least one launch. Tracker rows A38-A74 in
     ep07 against ep09-14 0.43-0.46. A separate `_young` row holds about 0.6, same-man
     versions 0.80-0.96. G-LINEAGE writes the audit line; a surname is not an age-up
     marker (`brigham_young` is named "Brigham Young").
+  - **A memo keyed on the master saves nothing when every rerun follows a recut (commit 10,
+    dropped).** QC reran 7x on ep20, ep21 and ep24, but 20 of 21 reruns followed an
+    assemble that wrote new master bytes (timing.jsonl, md5 of master_iterN); the one
+    identical pair (ep20) was already re-measured for a code change. step 11 already
+    reuses a report on identical bytes + identical measuring code. Read where the time
+    went before building the cache.
+  - **The cycle-2 GPU bench (75 of 90 min, `docs/audit/2026-10-10_continuity_retro/CYCLE_2.md`).**
+    - **One prompt per tile paints faces (block 1).** USDU hands every 1024 tile the full
+      subject prompt; a trouser or backdrop tile paints the subject's face. The narrator
+      base sheet replayed from its own embedded graph is BIT-IDENTICAL to the shipped
+      sheet.png (PSNR 99): the 1x decode is clean, the 2x has the backdrop face between
+      figures 1 and 2 -- staged in ep18-27. A style-only tile prompt (`_neutraltile`)
+      removed both ghosts (narrator backdrop, ragged_greyed thigh) and kept trouser
+      sharpness (0.96-1.06 of today's), but its head facenet vs the 1x is 0.001-0.015
+      lower and it adds colour streaks to the tweed. An owner ruling (look), not adopted.
+      A sheet's own PNG carries its graph: replay it from there.
+    - **A test with no case that can fail it proves nothing (block 2).** CK8 for dialogue
+      was judged on two takes whose control tail sounds: on ep10/T21 CK8 says "keep
+      moving" where A1 says "moving"; on ep15/T21 its lower-face tail ratio is 1.14 vs
+      A1 0.94-0.97; banding mean rose (+.008/+.013). Dialogue stays on BASE. The identity
+      sign tally is 4/8 negative: "CK costs ~.01 facenet" is NOT supported.
+    - **Fewer words do not draw a closer face (block 3).** Dropping the geometry clause
+      moved the median MCU face_h .189 -> .196, CLOSE-UP words -> .226 (bar .25), and
+      the close words changed costumes (ep23 suit -> torn shirt, ep14 satchel gone). A
+      2048 canvas drew SMALLER faces (.150-.178 vs .169-.208). Every redraw from the
+      shipped text and staged bytes was bit-identical (ep16 s13, ep14 s22/s24).
+    - **992 changed a look (block 4).** S6 at 992 drew the narrator grey-haired and
+      grey-moustached (identity .489 vs .730 at 768); D1/D2 held (.823/.891). Sampling
+      2.2-2.4x. Owner ruling, on the sheet.
+    - **Prewarm does not survive the queue (block 5).** Three prewarm prompts queued
+      before three takes left 11.5-13.7 s of overhead per take (bar 4 s, control
+      13.5-16.4 s); frames bit-identical. Only the last prompt's outputs stay cached.
