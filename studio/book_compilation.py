@@ -25,12 +25,14 @@ def stamp(seconds: float) -> str:
     return f"{h}:{m:02d}:{sec:02d}" if h else f"{m}:{sec:02d}"
 
 
-def chapter_lines(parts: list[tuple[int, str, float]]) -> list[str]:
-    """`0:00 Ep 1 — Title` per part, each starting where the last one ended."""
+def chapter_lines(parts: list[tuple[int, str, float]], lead_s: float = 0.0) -> list[str]:
+    """`0:00 Ep 1 — Title` per part, each starting where the last one ended.
+    The book's main title (`lead_s`) folds into Ep 1: a 7 s chapter of its own
+    is under YouTube's 10 s floor, and one short chapter drops them all."""
     out, at = [], 0.0
     for number, title, seconds in parts:
         out.append(f"{stamp(at)} Ep {number} — {title}")
-        at += seconds
+        at += seconds + (lead_s if not out[:-1] else 0.0)
     return out
 
 

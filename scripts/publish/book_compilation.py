@@ -2,7 +2,7 @@
 """The whole book as one regular video (owner, 2026-10-10).
 
     uv run python scripts/publish/book_compilation.py <codex_id> --dry-run
-    uv run python scripts/publish/book_compilation.py <codex_id> --upload
+    uv run python scripts/publish/book_compilation.py <codex_id> --upload [--replaces=<old video id>]
 
 Every published episode's Short -- the exact bytes the channel carries, matched
 by the ledger's sha8 -- is cut into its two videos, the title card and the main
@@ -110,27 +110,42 @@ def next_iter(folder: Path) -> Path:
     return folder / f"whole_book_iter{k}.mp4"
 
 
-def join(parts: list, folder: Path) -> Path:
-    """The parts joined by stream copy, checked against the sum of their lengths."""
+def running_order(main_title: Path, parts: list) -> list[Path]:
+    """The book's main title, then every chapter title first (owner 2026-10-11)."""
+    return [main_title] + bc.title_first([tuple(p[2]) for p in parts])
+
+
+def join(order: list[Path], want: float, folder: Path) -> Path:
+    """The pieces joined by stream copy, checked against the sum of their lengths."""
     folder.mkdir(parents=True, exist_ok=True)
     listing = folder / "concat.txt"
-    listing.write_text(bc.concat_list(bc.title_first([tuple(p[2]) for p in parts])), encoding="utf-8")
+    listing.write_text(bc.concat_list(order), encoding="utf-8")
     out = next_iter(folder)
     subprocess.run(["ffmpeg", "-y", "-v", "error", "-f", "concat", "-safe", "0", "-i", str(listing),
                     "-c", "copy", "-movflags", "+faststart", str(out)], check=True)
-    want, got = sum(p[3] for p in parts), clip_seconds(out)
-    if abs(got - want) > 2.0:
+    if abs((got := clip_seconds(out)) - want) > 2.0:
         raise SystemExit(f"REFUSED: the join is {got:.1f} s against the parts' {want:.1f} s")
     return out
 
 
-def metadata(book: Path, parts: list) -> dict:
+def set_thumbnail(api, video_id: str, jpg: Path) -> str:
+    """'set', or 'refused: <why>' -- an unverified channel answers 403 and the
+    video ships anyway; the refusal is recorded, never raised."""
+    from googleapiclient.http import MediaFileUpload
+    try:
+        api.thumbnails().set(videoId=video_id, media_body=MediaFileUpload(str(jpg), mimetype="image/jpeg")).execute()
+        return "set"
+    except Exception as why:
+        return f"refused: {why}"
+
+
+def metadata(book: Path, parts: list, lead_s: float = 0.0) -> dict:
     """Title, description (chapters first) and tags, from the book's own
     source/book.json -- the code names no book."""
     first, source = episode_meta(book, 1), episode_home.read_json(book / "source" / "book.json")
     series = first["title"].split(" — Ep")[0]
     name = source.get("display_title") or source["title"]
-    lines = bc.chapter_lines([(n, t, s) for n, t, _, s in parts])
+    lines = bc.chapter_lines([(n, t, s) for n, t, _, s in parts], lead_s=lead_s)
     text = bc.description(lines, intro=bc.intro(book=name, episodes=len(parts)),
                           footer=bc.footer(author=source["author"], book=name))
     return {"title": bc.title(series, len(parts)), "description": text,
@@ -157,6 +172,23 @@ def upload(book: Path, out: Path, meta: dict) -> str:
     return vid
 
 
+def finish(book: Path, vid: str, thumb: Path, replaces: str) -> None:
+    """The thumbnail set, and the video this one replaces made private (never
+    deleted: private is undone with one call); both recorded."""
+    from scripts.publish import youtube_privacy
+    api = youtube_privacy._build_api()
+    said = set_thumbnail(api, vid, thumb)
+    yp.record(book, {"key": f"{book.name}/compilation/{vid}#thumbnail", "episode": "compilation",
+                     "video_id": vid, "thumbnail": said, "file": episode_home.relative(book, thumb)})
+    print(f"thumbnail: {said}")
+    if replaces:
+        youtube_privacy.set_privacy(api, replaces, youtube_privacy.live_status(api, replaces), "private")
+        yp.record(book, {"key": f"{book.name}/compilation/{replaces}#private", "episode": "compilation",
+                         "video_id": replaces, "privacy": "private", "replaced_by": vid,
+                         "why": "owner 2026-10-11: the book video re-made with the main title, title first"})
+        print(f"retired https://youtu.be/{replaces} (private)")
+
+
 def retitle(api, video_id: str, meta: dict) -> dict:
     """The live video's title and description replaced; every other snippet field
     carried over (videos.update REPLACES the part -- a missing categoryId fails)."""
@@ -166,9 +198,12 @@ def retitle(api, video_id: str, meta: dict) -> dict:
 
 
 def main(argv: list[str]) -> None:
+    from scripts.episode import book_title
     book = episode_home.book_dir(argv[1])
     parts = parts_of(book)
-    meta = metadata(book, parts)
+    main_title, thumb = book_title.ensure(book, len(parts))
+    lead = frames(main_title) / FPS
+    meta = metadata(book, parts, lead_s=lead)
     if retitle_id := next((a.split("=", 1)[1] for a in argv if a.startswith("--retitle=")), ""):
         from scripts.publish import youtube_privacy
         retitle(youtube_privacy._build_api(), retitle_id, meta)
@@ -180,13 +215,16 @@ def main(argv: list[str]) -> None:
         print(f"retitled https://youtu.be/{retitle_id}\n\n{meta['title']}\n\n{meta['description']}")
         return
     folder = book / "compilation"
-    out = join(parts, folder)
+    out = join(running_order(main_title, parts), lead + sum(p[3] for p in parts), folder)
     episode_home.write_json(folder / "youtube.json", meta | {"file": episode_home.relative(book, out),
-                                                              "sha8": yp.sha8(out)})
+                                                              "sha8": yp.sha8(out),
+                                                              "thumbnail": episode_home.relative(book, thumb)})
     print(out.resolve())
     print(f"{len(parts)} chapters, {clip_seconds(out) / 60:.1f} min\n\n{meta['title']}\n\n{meta['description']}")
     if "--upload" in argv:
-        print(f"\nhttps://youtu.be/{upload(book, out, meta)}")
+        vid = upload(book, out, meta)
+        print(f"\nhttps://youtu.be/{vid}")
+        finish(book, vid, thumb, next((a.split("=", 1)[1] for a in argv if a.startswith("--replaces=")), ""))
 
 
 if __name__ == "__main__":

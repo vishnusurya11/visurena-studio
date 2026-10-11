@@ -23,6 +23,9 @@ Always:
   one i2v session outside the episode's clock; step 10 only consumes
   `title/epNN.mp4`. A card that will not pass its lettering gate blocks that
   episode's launch -- fix the card, not the episode.
+- **When the book's last chapter is public, the book video follows** (owner, 2026-10-11):
+  `scripts/publish/book_compilation.py <book> --upload`. It makes the book's main title (type set by code, unlike
+  the chapter cards) and its thumbnail, then joins each chapter TITLE FIRST. The Shorts keep their card at the end.
 - **Rule one.** Bind this chapter's rows (step 01) before the plan. `plan_check` must end "VERDICT: clean" (its CELL GATES refuse a truck across a person anchored to the set, a move aimed at what the cell lacks, a hat worn and held, a landmark the place lacks). The take prompts (step 06) must refuse nothing once lines, timeline and places exist, and BEFORE any grid. Exit 1 is a stop.
 - **The judges are the eye.** Gates once passed one man with two hats, a white gutter, a copied reference, and a person the scenery slid through — all rejected on sight as AI slop; those catches are now measures inside `judge:panel_eye` and `judge:take_eye`, benched against the casebook. Never sign a verdict file by hand; a fault you notice is a casebook note (`scripts/audit/note.py`), and the bench is what changes the judge.
 - **A fault that repeats on a fresh seed is the plan's.** Re-aim the move at what the cell holds; do not re-roll again.

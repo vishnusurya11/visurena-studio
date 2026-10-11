@@ -432,3 +432,5 @@ spend.
 |---|---|
 | Stage tracking: columns on `codex` vs a `codex_stages` table | Owner will decide at build time |
 | Resolving the two database locations | Before P0 lands |
+
+- **2026-10-11 — the book video.** Each chapter is two videos, its title card and its main video; the Short stays main + title; the book video runs the book's own 7 s main title, then each chapter TITLE FIRST. The main title is unlike the chapter cards and its type is set by code, never drawn by a model; a 16:9 thumbnail is set on the book video. Applies to WotW now and every book after. (Owner: "Build it"; decisions/2026-10-11_book_main_title_and_thumbnail.md)

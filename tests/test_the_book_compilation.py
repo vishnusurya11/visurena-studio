@@ -119,3 +119,34 @@ def test_the_intro_counts_the_episodes_and_names_no_other_book():
     text = bc.intro(book="A Study in Scarlet", episodes=14)
     assert text.startswith("A Study in Scarlet, told from beginning to end as one film")
     assert "in 14 episodes" in text and "Martian" not in text
+
+
+def test_the_book_video_opens_on_its_main_title_then_runs_title_first():
+    from scripts.publish import book_compilation as script
+    parts = [(1, "A", [Path("t1"), Path("m1")], 150.0), (2, "B", [Path("t2"), Path("m2")], 160.0)]
+    assert script.running_order(Path("main_title.mp4"), parts) == [
+        Path("main_title.mp4"), Path("t1"), Path("m1"), Path("t2"), Path("m2")]
+
+
+def test_a_thumbnail_is_set_and_a_refusal_is_returned_not_raised(tmp_path):
+    from scripts.publish import book_compilation as script
+    jpg = tmp_path / "t.jpg"
+    jpg.write_bytes(b"\xff\xd8\xff")
+    calls = []
+
+    class Api:
+        def thumbnails(self):
+            return self
+
+        def set(self, videoId, media_body):
+            calls.append(videoId)
+            return SimpleCall({"items": [{"default": {}}]})
+
+    assert script.set_thumbnail(Api(), "vid", jpg) == "set"
+    assert calls == ["vid"]
+
+    class Refusing(Api):
+        def set(self, videoId, media_body):
+            raise RuntimeError("HttpError 403: the channel is not verified")
+
+    assert script.set_thumbnail(Refusing(), "vid", jpg).startswith("refused")

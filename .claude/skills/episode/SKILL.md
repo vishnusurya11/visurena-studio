@@ -405,6 +405,21 @@ every episode, before `youtube_upload.py`:
    naming the cut's sha8. The lock refuses without it.
 4. A run the owner calls a test stays local or private until he says public.
 
+## When the book is done: the book video (owner, 2026-10-11)
+
+When the last chapter is public, run
+`uv run python scripts/publish/book_compilation.py <codex> --upload [--replaces=<old id>]`. It:
+1. cuts every shipped Short into its two videos, title and main, by MEASURING the card (the last cut before the
+   closing black), conformed to the book's square, into `compilation/chapters/`;
+2. makes the book's main title once (`scripts/episode/book_title.py`, under `title/book/`): 7 s in a 2.39 band, a
+   cold open from the book's own faceless wides, black on the sting's hit, PRESENTS, Krea2 key art on H3, the
+   title SET BY CODE in Bebas Neue. No model ever draws a letter in it. G-BOOKTITLE refuses on frames, LUFS,
+   contrast and stream equality, and flags on the read-back;
+3. joins main title + (title, main) per chapter by stream copy, stamps shifted by the title (never a 7 s chapter:
+   YouTube drops all chapters if one is under 10 s);
+4. uploads it public, sets the 16:9 thumbnail (a 403 is recorded, never fatal), and makes `--replaces` private.
+Look at `title/book/main_title.mp4` and `thumbnail.jpg` before the upload.
+
 ## Cut and QC
 
 **Audio first, always.** The picture is cut to the measured voice. Every line
