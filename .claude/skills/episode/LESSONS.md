@@ -853,3 +853,15 @@ fixes. Each lesson below cost at least one launch. Tracker rows A38-A74 in
       and Scarlet's "grey eyes under sandy hair" as grey. The words next to the noun
       decide (before it, or right after: "hair turned ash-grey"); a grey modifier keeps
       grey; sandy is fair, matched last; every colour word has its \b.
+    - **Same pixels, same size (J1; corrects CYCLE_2 carry #9).** The S6 "no-op crop" was a
+      1024 -> 768 resample, and the reader tiles those differently. On truly identical pixels it
+      agreed 2/2 and is deterministic by code (seeded, cached). The real instability is ONE sample
+      on near-identical frames (6-16 % on count fields), frozen by the cache.
+    - **Retired (C3_verdict D11):** H1 (narrow fault-set memory: ep22 61 -> 44 -> 4 and ep21
+      50 -> 13 progressed after >= 3 stalls); H5/H6 (ghosts in takes / a ghost gate: 0/20 at
+      contact-sheet size, and 0/12 at full 768 px on the six plain-wall narrator takes ep20 T20,
+      ep22 T03, ep27 T24, ep18 T13, ep21 T16, ep24 T16 at 50 % and 90 %, read by eye
+      2026-10-11); H8 for WotW (G-LINEAGE stays advisory); the merged LoRA; T #4's moved-SHA
+      refusal (the boundary stop replaces it).
+    - **Never sweep a drive to find a file (skeptic's own slip, 2026-10-11).** The ComfyUI root
+      is `studio/comfy.py COMFY_ROOT`; read the constant.

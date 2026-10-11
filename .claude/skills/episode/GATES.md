@@ -311,3 +311,30 @@ face-visible cast panels -- a plan frame `from behind|seen from behind|back to (
 away` or a wide / extreme_wide / establishing size is exempt; over-the-shoulder is NOT. A
 face-visible panel with no face read is a miss; an empty denominator is unmeasurable, never a pass.
 Replays: C1 ep25 regrid 2/2 PASS, ep25 round 0 0/1 FAIL, ep27 study_table 3/3 PASS.
+
+## The clock, SAFETY and the boundary (C3_verdict, 2026-10-11; decided on the owner's behalf, D1-D12)
+
+- **Clock:** one ceiling per episode, 5 h internal (D5), from the first launch to public: the
+  union of the episode's run spans (`studio/run_clock.py`: a run row, a 60 s heartbeat, a kill
+  counted to its last beat). `retry` stamps `attempt_at` and never resets it (D2). Past it,
+  rungs are terminal and signed flagged; the takes, grids, panels or lines MISSING on disk still
+  render (firsts are never refused, only repeats); nothing parks on the clock (D3). A third
+  spent-clock stop in a row parks `clock_loop` (a backstop).
+- **SAFETY (closed list, `gate_policy.SAFETY`):** a master over the Short length or with no
+  title card; a line not heard; an unjudged or stale take; loudness out of band after the
+  leveller; a plan BUILDER line; money; publish auth; GPU lost. Only these stop a spent-clock
+  episode (`SAFETY: <name>` parks by its name). Sound cues, gaps, cut misses and every taste gate
+  ship flagged (QC: `ceiling_flagged` + an audit row).
+- **Plan battery lines** are tagged BUILDER (a downstream script repeats the refusal --
+  `studio/plan_tags.BUILDER`: CONTRACT, G-LIGHT, PLAN GATES, TAKE LENGTH, TAKE BUILDER,
+  MOTION hard, G-TAKELINT, CAST BOUND, ACTOR) or JUDGED (everything else, ONE PER TAKE
+  included). At a spent clock a JUDGED-only best draft signs keep_best flagged; a BUILDER line
+  buys one climb (<= 3 unpriced rungs), then `SAFETY: plan_builder`. Plan rungs are priced
+  (improve 240 s, model_tier 90 s).
+- **QC order:** the cheap rows first; Whisper only on a master that can still pass (at a spent
+  clock: whose failed rows are all flaggable). An unmeasured line (`lines: null`) is not heard.
+- **Boundary stop:** `autopilot.py pause --at-boundary`; the run stops between steps, rungs,
+  grids or takes and exits `paused_at_boundary` (read as PAUSED, never a stop).
+- **G-FRAME (advisory):** MCU face < 0.15, close < 0.25 of the frame height (D9). Never a wall.
+- **The reader** (`panel_content` / `take_content` / LOOK-STATE): one seeded, cached read. A
+  cached refusal is never re-read; only a redraw escapes it.
