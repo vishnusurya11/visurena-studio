@@ -81,14 +81,19 @@ CARD_MAX_FRAMES = 240
 """No title card runs past 10 s; a cut further back than this is the picture's."""
 
 
-def card_start(*, cuts: list[int], black_from: int) -> int:
-    """The card begins at the last hard cut before the black tail -- MEASURED,
-    because an older Short carries an older card than title/epNN.mp4 (Scarlet
-    ep01: a 90-frame card where today's is 107)."""
-    before = [c for c in cuts if black_from - CARD_MAX_FRAMES <= c < black_from]
-    if not before:
+CUT_FLOOR = 0.1
+"""A scene change under this is motion, not a cut."""
+
+
+def card_start(*, scores: dict[int, float], black_from: int) -> int:
+    """The card begins at the BIGGEST scene change in the CARD_MAX_FRAMES before
+    the closing black -- measured, because an older Short carries an older card
+    (Scarlet ep01: 90 frames, today's are 107), and no fixed threshold holds
+    (WotW ep01's dark picture into its dark card scored 0.24)."""
+    window = {f: v for f, v in scores.items() if black_from - CARD_MAX_FRAMES <= f < black_from}
+    if not window or max(window.values()) < CUT_FLOOR:
         raise ValueError(f"no cut in the {CARD_MAX_FRAMES} frames before the black at {black_from}")
-    return max(before)
+    return max(window, key=window.get)
 
 
 def frame_at(seconds: float, *, fps: int) -> int:
@@ -110,6 +115,7 @@ def cut_argv(src: Path, frames: tuple[int, int], out: Path, *, fps: int, side: i
                    f"scale={side}:{side}:force_original_aspect_ratio=decrease,pad={side}:{side}:-1:-1,setsar=1",
             "-af", f"atrim=start={a / fps:.6f}:end={b / fps:.6f},asetpts=PTS-STARTPTS",
             "-c:v", "libx264", "-preset", "fast", "-crf", "16", "-pix_fmt", "yuv420p",
+            "-color_primaries", "bt709", "-color_trc", "iec61966-2-1", "-colorspace", "bt709",
             "-r", str(fps), "-c:a", "aac", "-b:a", "256k", "-ar", "48000", "-ac", "2", str(out)]
 
 

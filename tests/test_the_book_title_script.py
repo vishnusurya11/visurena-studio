@@ -33,13 +33,15 @@ def test_the_fallback_sting_hits_on_the_cut_to_black():
     assert bt.sting_hit(sound, 48000) == pytest.approx(runner.STING_AT_S, abs=0.05)
 
 
-def test_the_sting_is_trimmed_so_its_hit_lands_on_the_black(tmp_path):
-    import soundfile as sf
-    wav = tmp_path / "s.wav"
-    sf.write(str(wav), runner.synth_sting(), 48000)
-    chain = runner.audio_chain(wav)
-    assert "atrim=start=0.0" in chain or "atrim=start=-0.0" in chain or "adelay=0|0" in chain
+def test_the_laid_sting_is_only_cut_to_length_faded_and_levelled():
+    chain = runner.audio_chain()
+    assert "atrim=end=7.0000" in chain and "afade=t=out" in chain
     assert "loudnorm=I=-16.0" in chain and chain.endswith("[a]")
+
+
+def test_the_level_gain_is_the_distance_to_the_target():
+    assert runner.level_gain(-17.5) == pytest.approx(1.5)
+    assert runner.level_gain(-16.2) == 0.0                     # inside the band: left alone
 
 
 def test_the_hero_prompt_gives_the_video_model_no_words_to_letter():

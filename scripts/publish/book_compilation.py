@@ -49,12 +49,13 @@ def frames(video: Path) -> int:
     return int(seen.stderr.rsplit("frame=", 1)[1].split()[0])
 
 
-def cut_times(master: Path) -> list[float]:
-    """Every hard cut in the Short, in seconds (read at low size; cuts are cuts)."""
+def scene_scores(master: Path) -> dict[int, float]:
+    """Every frame's scene-change score, keyed by frame (read at low size)."""
     seen = subprocess.run(["ffmpeg", "-hide_banner", "-i", str(master), "-an", "-vf",
-                           "scale=192:-2,select='gt(scene,0.3)',showinfo", "-f", "null", "-"],
-                          capture_output=True, text=True, errors="replace")
-    return [float(t) for t in re.findall(r"pts_time:([0-9.]+)", seen.stderr)]
+                           "scale=192:-2,select='gte(scene,0)',metadata=print:key=lavfi.scene_score",
+                           "-f", "null", "-"], capture_output=True, text=True, errors="replace")
+    pairs = re.findall(r"pts_time:([0-9.]+)[^\n]*\n[^\n]*scene_score=([0-9.]+)", seen.stderr)
+    return {bc.frame_at(float(t), fps=FPS): float(v) for t, v in pairs}
 
 
 def black_tail(master: Path) -> float:
@@ -75,7 +76,7 @@ def split(book: Path, n: int, master: Path) -> tuple[Path, Path]:
     folder = book / "compilation" / "chapters"
     folder.mkdir(parents=True, exist_ok=True)
     black = bc.frame_at(black_tail(master), fps=FPS)
-    start = bc.card_start(cuts=[bc.frame_at(t, fps=FPS) for t in cut_times(master)], black_from=black)
+    start = bc.card_start(scores=scene_scores(master), black_from=black)
     out = {}
     for name, (a, b) in bc.pieces(main=start, card=black - start).items():
         out[name] = folder / f"ep{n:02d}_{name}.mp4"

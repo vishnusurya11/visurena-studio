@@ -62,14 +62,17 @@ def spec(book: dict, *, synopsis: str, ask) -> BookTitleSpec:
     return BookTitleSpec(title=name, author=book["author"], hero=art.hero, thumb=art.thumb, sting=art.sting)
 
 
-def fit_lines(text: str, font_path: Path, *, max_w: int, start_px: int, min_px: int) -> tuple[list[str], int]:
-    """The title in capitals on one line, else two, at the largest size that fits."""
+def fit_lines(text: str, font_path: Path, *, max_w: int, start_px: int, min_px: int,
+              tracking: float = 0.0) -> tuple[list[str], int]:
+    """The title in capitals on one line, else two, at the largest size that
+    fits -- at its WIDEST letter spacing (`tracking` em), so it never runs off."""
     from PIL import ImageFont
     words = text.upper().split()
     splits = [[" ".join(words)]] + [[" ".join(words[:k]), " ".join(words[k:])] for k in range(1, len(words))]
     for px in range(start_px, min_px - 1, -4):
         font = ImageFont.truetype(str(font_path), px)
-        fits = [s for s in splits if all(font.getlength(line) <= max_w for line in s)]
+        wide = lambda line: font.getlength(line) + tracking * px * (len(line) - 1)
+        fits = [s for s in splits if all(wide(line) <= max_w for line in s)]
         if fits:
             return min(fits, key=lambda s: (len(s), max(font.getlength(x) for x in s))), px
     raise ValueError(f"{text!r} does not fit {max_w}px even at {min_px}px")
@@ -82,18 +85,36 @@ def glyphs_missing(text: str, font_path: Path) -> list[str]:
     return sorted({c for c in text if not c.isspace() and ord(c) not in cmap})
 
 
+TRACK_FROM, TRACK_TO = 0.4, 0.12
+
+
 def tracking_em(progress: float) -> float:
-    """Letter spacing in em: wide (0.6) closing to set (0.15), easing out."""
+    """Letter spacing in em: wide closing to set, easing out."""
     p = min(max(progress, 0.0), 1.0)
-    return 0.6 - 0.45 * (1 - (1 - p) ** 3)
+    return TRACK_FROM - (TRACK_FROM - TRACK_TO) * (1 - (1 - p) ** 3)
+
+
+def _part(c: dict, episodes: int, n: int) -> int:
+    return (c["episode"] - 1) * n // episodes
+
+
+def shortlist(cands: list[dict], *, episodes: int, n: int, k: int) -> list[dict]:
+    """The `k` sharpest candidates of each n-th of the book: the few a reader scores."""
+    out = []
+    for part in range(n):
+        mine = [c for c in cands if _part(c, episodes, n) == part]
+        out += sorted(mine, key=lambda c: (-c["sharp"], c["episode"], c["start_s"]))[:k]
+    return out
 
 
 def pick_segments(cands: list[dict], *, episodes: int, n: int, clean) -> list[dict]:
-    """One segment per n-th of the book, the sharpest that `clean` passes."""
+    """One segment per n-th of the book: the most cinematic (`drama`, read by
+    the VLM), then the sharpest, that `clean` passes.  The sharpest alone
+    picked a garden gate, a sawmill and a railway (WotW, 2026-10-11)."""
     picks = []
     for part in range(n):
-        mine = [c for c in cands if (c["episode"] - 1) * n // episodes == part]
-        for c in sorted(mine, key=lambda c: (-c["sharp"], c["episode"], c["start_s"])):
+        mine = [c for c in cands if _part(c, episodes, n) == part]
+        for c in sorted(mine, key=lambda c: (-c.get("drama", 0), -c["sharp"], c["episode"], c["start_s"])):
             if clean(c):
                 picks.append(c)
                 break
@@ -115,9 +136,28 @@ def sting_hit(sound: np.ndarray, rate: int) -> float:
     return float(np.argmax(np.diff(rms)) + 1) * hop / rate
 
 
-def sting_shift(*, hit_s: float, at_s: float) -> float:
-    """Seconds to trim off the sting's head (negative: to delay it)."""
-    return hit_s - at_s
+def riser(rate: int, at_s: float, total_s: float):
+    """Filtered noise and a low drone swelling into `at_s`, silent after it."""
+    t = np.arange(int(total_s * rate)) / rate
+    swell = np.clip(t / at_s, 0, 1) ** 3 * (t < at_s)
+    noise = np.convolve(np.random.default_rng(7).standard_normal(t.size), np.ones(8) / 8, mode="same")
+    return (noise * 0.18 + np.sin(2 * np.pi * 55 * t) * 0.25) * swell
+
+
+def align_sting(sound: np.ndarray, rate: int, *, hit_s: float, at_s: float, total_s: float) -> np.ndarray:
+    """The sting laid so its hit lands at `at_s`, a riser under whatever comes
+    before it, `total_s` long, stereo.  ACE-Step's stings open ON the hit
+    (0.68 s, WotW): shifting alone left the cold open silent."""
+    stereo = sound if sound.ndim == 2 else np.stack([sound, sound], axis=1)
+    out = np.zeros((int(total_s * rate), 2))
+    shift = int(round((at_s - hit_s) * rate))
+    src = stereo[max(0, -shift):]
+    dst = max(0, shift)
+    n = min(len(src), len(out) - dst)
+    out[dst:dst + n] = src[:n]
+    lead = riser(rate, at_s, total_s)
+    peak = max(np.abs(out).max(), 1e-9)
+    return out + lead[:, None] * peak * 0.6
 
 
 def contrast_ratio(fg: float, bg: float) -> float:
@@ -146,6 +186,8 @@ def candidates(episode: int, plan: dict, placed: dict) -> list[dict]:
 
 
 PRESENTS = "THE KEEPER'S LANTERN PRESENTS"
+SCRIM = 110
+"""The dark band behind the title; 170 buried the key art (WotW, contrast 14:1)."""
 WHITE = (236, 240, 245)
 """Cold white: the chapter cards are warm ivory serif."""
 
@@ -198,8 +240,8 @@ def _hero_type(img, spec: BookTitleSpec, n: int, font: Path) -> None:
     from PIL import ImageDraw, ImageFont
     w, h = img.size
     t = TIMELINE
-    _scrim(img, int(170 * _ramp(n, t["presents_end"], t["presents_end"] + 12)))
-    lines, px = fit_lines(spec.title, font, max_w=int(w * 0.72), start_px=int(h * 0.30), min_px=12)
+    _scrim(img, int(SCRIM * _ramp(n, t["presents_end"], t["presents_end"] + 12)))
+    lines, px = hero_layout(spec.title, font, width=w, height=h)
     big, draw = ImageFont.truetype(str(font), px), ImageDraw.Draw(img)
     em = tracking_em(_ramp(n, t["presents_end"], t["presents_end"] + 60))
     alpha = int(255 * _ramp(n, t["presents_end"], t["presents_end"] + 24))
@@ -241,6 +283,7 @@ def stream_signature(ffmpeg_info: str) -> tuple[str, ...]:
     for line in ffmpeg_info.splitlines():
         if "Stream #" in line and (": Video:" in line or ": Audio:" in line):
             line = re.sub(r"Stream #\S+ ", "", line.strip())
+            line = line.replace(" [SAR 1:1 DAR 1:1]", "")                  # square pixels, tagged or not
             out.append(re.sub(r",? ?\d+ kb/s|\(default\)", "", line).strip())
     return tuple(out)
 
@@ -258,3 +301,20 @@ def has_lettering(said: str) -> bool:
     if not any(ch.isalnum() for ch in text):
         return False
     return not any(text.startswith(n) for n in NOTHING)
+
+
+DRAMA_ASK = ("Score this frame from 0 to 10 as the opening shot of a movie trailer: spectacle, danger, "
+             "fire, machines, crowds in flight and striking light score high; empty rooms, fences, gates, "
+             "roads and plain landscapes score low. Answer with the number only.")
+
+
+def drama_score(said: str) -> int:
+    """The reader's first number, 0-10; nothing readable is 0."""
+    import re
+    found = re.search(r"\d+", said or "")
+    return min(int(found.group()), 10) if found else 0
+
+
+def hero_layout(title: str, font: Path, *, width: int, height: int) -> tuple[list[str], int]:
+    """The title's lines and size over the hero: what is drawn and what the judge reads."""
+    return fit_lines(title, font, max_w=int(width * 0.9), start_px=int(height * 0.30), min_px=12, tracking=TRACK_FROM)

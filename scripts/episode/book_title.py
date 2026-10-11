@@ -40,7 +40,8 @@ HERO_W, HERO_H = 1024, 416
 TRIES = 3
 STING_AT_S = bt.TIMELINE["cold_end"] / FPS
 LUFS, LUFS_BAND, CONTRAST_FLOOR = -16.0, 1.0, 7.0
-ENCODE = ["-c:v", "libx264", "-preset", "fast", "-crf", "16", "-pix_fmt", "yuv420p", "-r", str(FPS),
+ENCODE = ["-c:v", "libx264", "-preset", "fast", "-crf", "16", "-pix_fmt", "yuv420p",
+          "-color_primaries", "bt709", "-color_trc", "iec61966-2-1", "-colorspace", "bt709", "-r", str(FPS),
           "-c:a", "aac", "-b:a", "256k", "-ar", "48000", "-ac", "2"]
 """The chapter pieces' encode (`book_compilation.cut_argv`): equal, or the
 concat demuxer will not join by stream copy."""
@@ -116,24 +117,24 @@ def hero(book: Path, still: Path) -> Path:
 
 
 def sting(book: Path, spec: bt.BookTitleSpec) -> Path:
-    """ACE-Step's instrumental sting; a synthesised riser + boom if it has no clear hit."""
+    """ACE-Step's instrumental sting laid with its hit on the cut to black and a
+    riser under the cold open; the synthesised one if ACE-Step fails."""
     import soundfile as sf
     from studio.comfy import run
     out = home(book) / "sting.wav"
     if out.exists():
         return out
+    total = bt.TIMELINE["total"] / FPS
     try:
         made = run("audio_acestep15_music", {"tags": spec.sting, "lyrics": "[inst]", "seconds": 10.0,
                    "duration": 10.0, "bpm": 90, "keyscale": "D minor", "seed": 4100, "lm_seed": 4100,
                    "filename_prefix": "book_title/sting"}, timeout=900)[0]
         sound, rate = sf.read(str(made))
-        if 0.8 <= bt.sting_hit(sound, rate) <= 8.0:
-            shutil.copyfile(made, out)
-            return out
-        print("  sting: no clear hit; synthesised", flush=True)
+        laid = bt.align_sting(sound, rate, hit_s=bt.sting_hit(sound, rate), at_s=STING_AT_S, total_s=total)
+        sf.write(str(out), laid, rate)
     except Exception as why:
         print(f"  sting: ACE-Step failed ({why}); synthesised", flush=True)
-    sf.write(str(out), synth_sting(), 48000)
+        sf.write(str(out), synth_sting(), 48000)
     return out
 
 
@@ -179,12 +180,26 @@ def frame_png(video: Path, at_s: float, out: Path) -> Path:
     return out
 
 
+SHORTLIST = 4
+
+
+def check_still(book: Path, c: dict) -> Path:
+    return frame_png(chapter_main(book, c["episode"]), (c["start_s"] + c["end_s"]) / 2,
+                     home(book) / "cold" / f"check_ep{c['episode']:02d}_s{c['shot']:02d}.png")
+
+
+def drama(book: Path, c: dict) -> int:
+    """How cinematic the reader finds the shot's middle frame, 0-10."""
+    from studio.comfy import run_text, stage_image
+    said = run_text("image_qwen3vl_caption", {"prompt": bt.DRAMA_ASK, "image_1": stage_image(check_still(book, c))})
+    print(f"  cold ep{c['episode']:02d} shot {c['shot']}: drama {bt.drama_score(said)}", flush=True)
+    return bt.drama_score(said)
+
+
 def clean(book: Path):
     """A candidate is clean when the reader finds no writing in its middle frame."""
     def check(c: dict) -> bool:
-        still = frame_png(chapter_main(book, c["episode"]), (c["start_s"] + c["end_s"]) / 2,
-                          home(book) / "cold" / f"check_ep{c['episode']:02d}_s{c['shot']:02d}.png")
-        return not bt.has_lettering(reads(still))
+        return not bt.has_lettering(reads(check_still(book, c)))
     return check
 
 
@@ -194,7 +209,10 @@ def cold_open(book: Path, episodes: int) -> list[dict]:
     path = home(book) / "cold" / "picks.json"
     if path.exists():
         return json.loads(path.read_text(encoding="utf-8"))
-    picks = bt.pick_segments(cold_candidates(book, episodes), episodes=episodes, n=len(bt.COLD_FRAMES), clean=clean(book))
+    n = len(bt.COLD_FRAMES)
+    short = bt.shortlist(cold_candidates(book, episodes), episodes=episodes, n=n, k=SHORTLIST)
+    scored = [c | {"drama": drama(book, c)} for c in short]
+    picks = bt.pick_segments(scored, episodes=episodes, n=n, clean=clean(book))
     path.write_text(json.dumps(picks, indent=2), encoding="utf-8")
     return picks
 
@@ -242,14 +260,29 @@ def overlays(book: Path, spec: bt.BookTitleSpec) -> Path:
     return folder
 
 
-def audio_chain(sting_wav: Path) -> str:
-    import soundfile as sf
-    sound, rate = sf.read(str(sting_wav))
-    shift = bt.sting_shift(hit_s=bt.sting_hit(sound, rate), at_s=STING_AT_S)
-    head = f"atrim=start={shift:.3f}," if shift > 0 else f"adelay={int(-shift * 1000)}|{int(-shift * 1000)},"
+def audio_chain() -> str:
+    """The laid sting cut to the title's length, faded out, levelled."""
     total = bt.TIMELINE["total"] / FPS
-    return (f"[2:a]{head}asetpts=PTS-STARTPTS,aresample=48000,apad,atrim=end={total:.4f},"
+    return (f"[2:a]aresample=48000,apad,atrim=end={total:.4f},asetpts=PTS-STARTPTS,"
             f"afade=t=out:st={total - 0.8:.3f}:d=0.8,loudnorm=I={LUFS}:TP=-1.5:LRA=7[a]")
+
+
+def level_gain(measured: float) -> float:
+    """dB to the target; within 0.3 dB is left alone."""
+    gain = LUFS - measured
+    return 0.0 if abs(gain) <= 0.3 else round(gain, 2)
+
+
+def level(out: Path) -> Path:
+    """One measured gain pass: loudnorm on a 7 s sting lands -1.5 dB short."""
+    if not (gain := level_gain(loudness(out))):
+        return out
+    fixed = out.with_name("main_title_levelled.mp4")
+    subprocess.run(["ffmpeg", "-y", "-v", "error", "-i", str(out), "-c:v", "copy",
+                    "-af", f"volume={gain}dB,alimiter=limit=0.84:level=false",
+                    *ENCODE[ENCODE.index("-c:a"):], str(fixed)], check=True)
+    fixed.replace(out)
+    return out
 
 
 def compose(book: Path, band: Path, type_dir: Path, sting_wav: Path) -> Path:
@@ -262,9 +295,9 @@ def compose(book: Path, band: Path, type_dir: Path, sting_wav: Path) -> Path:
              f"fade=t=out:st={total / FPS - 0.8:.3f}:d=0.8,format=yuv420p[v]")
     out = home(book) / "main_title.mp4"
     subprocess.run(["ffmpeg", "-y", "-v", "error", "-i", str(band), "-framerate", str(FPS), "-i", str(type_dir / "%04d.png"),
-                    "-i", str(sting_wav), "-filter_complex", video + ";" + audio_chain(sting_wav),
+                    "-i", str(sting_wav), "-filter_complex", video + ";" + audio_chain(),
                     "-map", "[v]", "-map", "[a]", "-frames:v", str(total), *ENCODE, str(out)], check=True)
-    return out
+    return level(out)
 
 
 def info(video: Path) -> str:
@@ -305,7 +338,7 @@ def judge(book: Path, spec: bt.BookTitleSpec, out: Path) -> dict:
         refusals.append(f"streams differ from {ref.name}: {bt.stream_signature(info(out))} vs {bt.stream_signature(info(ref))}")
     if (ratio := title_contrast(out, spec, home(book) / "judge_frame.png")) < CONTRAST_FLOOR:
         refusals.append(f"title contrast {ratio:.1f}:1 under {CONTRAST_FLOOR}:1")
-    lines = bt.fit_lines(spec.title, FONT, max_w=int(SIDE * 0.72), start_px=int(bt.band_box(SIDE)[3] * 0.30), min_px=12)[0]
+    lines = bt.hero_layout(spec.title, FONT, width=SIDE, height=bt.band_box(SIDE)[3])[0]
     if missing := missing_lines(lines, reads(home(book) / "judge_frame.png")):
         flags.append(f"the reader did not find {missing} on the held frame")
     verdict = {"gate": "G-BOOKTITLE", "file": episode_home.relative(book, out), "refused": refusals,
