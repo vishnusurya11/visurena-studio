@@ -15,7 +15,7 @@ from datetime import datetime, timezone
 from functools import lru_cache
 from pathlib import Path
 
-from studio import db, episode_home, eta, gate_policy, registry
+from studio import backfill, db, episode_home, eta, gate_policy, registry
 from studio.command_center import library_paths, procs, thumbs
 
 MARKS = {"queued": ("circle", "○"), "blocked": ("circle-dashed", "◌"), "running": ("loader", "●"),
@@ -33,6 +33,18 @@ ATTENTION = ("escalated", "failed", "stale", "running", "deferred", "held", "fla
              "queued", "blocked", "done", "skipped")
 LEGEND = [(GLYPHS[s], s) for s in ("queued", "blocked", "running", "done", "flagged", "deferred",
                                    "failed", "escalated", "held", "stale", "skipped")]
+MEANINGS = {"queued": "ready; a runner takes it next",
+            "blocked": "waiting for an earlier department or an input file",
+            "running": "a run is working on it now",
+            "done": "finished (or published); nothing to do",
+            "flagged": "done with judge terminals not yet acknowledged and not published",
+            "deferred": "a step handed it back for the next pass",
+            "failed": "a step crashed; a developer must look",
+            "escalated": "a step asked the owner to decide",
+            "held": "parked by a hold until it is lifted",
+            "stale": "run lost its lease, or the disk no longer matches the row",
+            "skipped": "every output was already on disk"}
+"""Each state in one plain line: the pill's hover title and the department's legend."""
 LOG_LEVELS = frozenset({"WARNING", "ERROR", "CRITICAL"})
 TAIL_BYTES = 64 * 1024
 THUMBS = {"episode": (("panels", "storyboard/shot_*.png"), ("takes", "reports/strip_*.png"),
@@ -133,6 +145,13 @@ def lapsed_rows(conn: sqlite3.Connection) -> list[dict]:
     return [dict(r) for r in conn.execute(f"SELECT * FROM work_orders WHERE {LAPSED_SQL}")]
 
 
+def meaning(state: str, blocked_on: str | None = None) -> str:
+    """The state in one plain line; a blocked row names what it waits on."""
+    if state == "blocked" and blocked_on:
+        return f"blocked: waits on {blocked_on}"
+    return f"{state}: {MEANINGS[state]}" if state in MEANINGS else state
+
+
 def display_state(state: str, flags: int = 0) -> str:
     """What the row shows: `flagged` when a done unit carries judge flags."""
     return "flagged" if state == "done" and flags else state
@@ -205,17 +224,28 @@ def utc_now() -> datetime:
     return datetime.now(timezone.utc)
 
 
-def row_view(row: sqlite3.Row | dict) -> dict:
+def shown_flags(row: dict, conn: sqlite3.Connection | None) -> int:
+    """The flags a row shows: every one without a connection to judge them by;
+    none once they are closed (views.flags_open)."""
+    flags = row.get("flags") or 0
+    if conn is None or not flags:
+        return flags
+    return flags if flags_open(conn, row) else 0
+
+
+def row_view(row: sqlite3.Row | dict, conn: sqlite3.Connection | None = None) -> dict:
     """A work-order row as the templates read it: the columns, the verdicts
     JSON parsed, the shown state, its glyph and colour, the step's name, the
-    age of its last write."""
+    age of its last write.  With the connection, closed flags show `done`."""
     r = dict(row)
+    flags = shown_flags(r, conn)
     r["verdicts"] = json.loads(r["verdicts"]) if r.get("verdicts") else {}
     lapsed = lease_lapsed(r, utc_now()) and not carried(r)
     state = "stale" if lapsed else r["state"]
-    r["shown"] = display_state(state, r.get("flags") or 0)
-    r["glyph"] = glyph(state, r.get("flags") or 0)
+    r["shown"] = display_state(state, flags)
+    r["glyph"] = glyph(state, flags)
     r["css"] = colour_class(r["shown"])
+    r["meaning"] = meaning(r["shown"], r.get("blocked_on"))
     r["step_name"] = step_names(r["stage"]).get(r.get("step_id") or "", "")
     r["elapsed"] = elapsed(r.get("started_at")) if state == "running" else ""
     r["age"] = age(utc_now(), r.get("updated_at"))
@@ -233,16 +263,16 @@ def book_names(conn: sqlite3.Connection) -> dict[str, str]:
 def floor(conn: sqlite3.Connection) -> dict:
     """On the floor: the running rows (the GPU's first) and the next four of
     the queue, in the order a runner would take them."""
-    running = [v for v in (row_view(r) for r in conn.execute(
+    running = [v for v in (row_view(r, conn) for r in conn.execute(
         "SELECT * FROM work_orders WHERE state = 'running' ORDER BY gpu DESC, started_at, id"))
         if v["shown"] == "running"]
-    nxt = [row_view(r) for r in conn.execute("SELECT * FROM v_queue LIMIT 4")]
+    nxt = [row_view(r, conn) for r in conn.execute("SELECT * FROM v_queue LIMIT 4")]
     return {"running": running, "next": nxt}
 
 
 def queue(conn: sqlite3.Connection) -> list[dict]:
     """The whole queue, derived: priority, slate order, unit (v_queue)."""
-    return [row_view(r) for r in conn.execute("SELECT * FROM v_queue")]
+    return [row_view(r, conn) for r in conn.execute("SELECT * FROM v_queue")]
 
 
 def attention(conn: sqlite3.Connection) -> list[dict]:
@@ -256,7 +286,7 @@ def attention(conn: sqlite3.Connection) -> list[dict]:
         " AND s.step_id = w.step_id) AS detail FROM work_orders w"
         f" WHERE w.state IN ('failed', 'deferred', 'escalated', 'stale') OR {LAPSED_SQL.replace('state', 'w.state').replace('lease_until', 'w.lease_until')}"
         " ORDER BY w.updated_at, w.id")
-    needs = [v for v in (row_view(r) for r in rows) if v["shown"] != "running"]   # a carried lapse is alive
+    needs = [v for v in (row_view(r, conn) for r in rows) if v["shown"] != "running"]   # a carried lapse is alive
     return needs + flagged_unacknowledged(conn)
 
 
@@ -266,14 +296,40 @@ def inbox_count(conn: sqlite3.Connection) -> int:
     return len(attention(conn))
 
 
-def flagged_unacknowledged(conn: sqlite3.Connection) -> list[dict]:
-    """The done rows with flags and no acknowledge for their current verdict
-    state, each with its reason and its non-pass gates."""
-    rows = conn.execute("SELECT * FROM work_orders WHERE state = 'done' AND flags > 0"
+def published(conn: sqlite3.Connection, row: dict) -> bool:
+    """The unit is on the channel: a done publish row or its publish record."""
+    book = library_paths.book_folder(episode_home.LIBRARY, row.get("codex_id") or "")
+    return published_source(conn, book, row["codex_id"], row["unit"]) is not None
+
+
+def flags_open(conn: sqlite3.Connection, row: dict) -> bool:
+    """The one Needs-you rule for flags: a done unit's flags need the owner until
+    it is published (ruling 2026-10-01, no human input at publish) or he
+    acknowledges them.  The inbox, the department and the dots all read it."""
+    if row.get("state") != "done" or not row.get("flags"):
+        return False
+    if db.acknowledged(conn, row["codex_id"], row["stage"], row["unit"]):
+        return False
+    return not published(conn, row)
+
+
+def flagged_rows(conn: sqlite3.Connection) -> list[sqlite3.Row]:
+    """Every done row with flags, oldest write first."""
+    return conn.execute("SELECT * FROM work_orders WHERE state = 'done' AND flags > 0"
                         " ORDER BY updated_at, id").fetchall()
-    return [{**row_view(r), "reason": FLAGGED_REASON,
+
+
+def flagged_unacknowledged(conn: sqlite3.Connection) -> list[dict]:
+    """The done rows whose flags are open (flags_open), each with its reason
+    and its non-pass gates."""
+    return [{**row_view(r, conn), "reason": FLAGGED_REASON,
              "gates": non_pass_gates(json.loads(r["verdicts"] or "{}"))}
-            for r in rows if not db.acknowledged(conn, r["codex_id"], r["stage"], r["unit"])]
+            for r in flagged_rows(conn) if flags_open(conn, dict(r))]
+
+
+def closed_flags(conn: sqlite3.Connection) -> list[dict]:
+    """The done rows with flags that no longer need the owner: shown `done`."""
+    return [dict(r) for r in flagged_rows(conn) if not flags_open(conn, dict(r))]
 
 
 def non_pass_gates(verdicts: dict) -> list[str]:
@@ -321,7 +377,7 @@ def recent_orders(conn: sqlite3.Connection, limit: int = 10) -> list[dict]:
 def lane(conn: sqlite3.Connection, stage: str) -> dict:
     """One department's lane: the count, counts by shown state, the glyph
     tally in attention order, and the six rows that matter most."""
-    rows = sorted((row_view(r) for r in db.department_rows(conn, stage)), key=rank)
+    rows = sorted((row_view(r, conn) for r in db.department_rows(conn, stage)), key=rank)
     counts = Counter(r["shown"] for r in rows)
     tally = [(GLYPHS[s], counts[s]) for s in ATTENTION if counts.get(s)]
     return {"stage": stage, "total": len(rows), "counts": dict(counts), "tally": tally,
@@ -540,10 +596,11 @@ def book_groups(rows: list[dict], names: dict[str, str]) -> list[dict]:
     first row needs the most attention leads."""
     groups: dict[str, dict] = {}
     for r in rows:
-        g = groups.setdefault(r["codex_id"], {"codex_id": r["codex_id"], "rows": [], "done": 0,
+        g = groups.setdefault(r["codex_id"], {"codex_id": r["codex_id"], "rows": [], "done": 0, "flagged": 0,
                                                "name": names.get(r["codex_id"], r["codex_id"])})
         g["rows"].append(r)
-        g["done"] += r["shown"] in ("done", "flagged")
+        g["done"] += r["shown"] == "done"
+        g["flagged"] += r["shown"] == "flagged"
     for g in groups.values():
         g["total"] = len(g["rows"])
         g["rank"] = min(rank(r) for r in g["rows"])
@@ -567,7 +624,7 @@ def department(conn: sqlite3.Connection, stage: str, book: str | None = None,
     """The department's table: its rows in attention order, each with its
     verdict strip; filtered by book and shown state when asked.  A stage the
     registry does not know raises ValueError (db.department_rows)."""
-    rows = sorted((row_view(r) for r in db.department_rows(conn, stage)), key=rank)
+    rows = sorted((row_view(r, conn) for r in db.department_rows(conn, stage)), key=rank)
     gates = gate_order(stage)
     names = book_names(conn)
     counts = Counter(r["shown"] for r in rows)
@@ -700,7 +757,7 @@ def unit(conn: sqlite3.Connection, library: Path, codex_id: str, stage: str, uni
     row = db.work_order(conn, codex_id, stage, unit)
     if row is None:
         return None
-    r = row_view(row)
+    r = row_view(row, conn)
     book = library_paths.book_folder(library, codex_id)
     home = book / r["home"] if book else None
     log_name, log = log_tail(Path(logs or Path(library).parent / "logs") / codex_id / stage, r["run_id"])
@@ -718,11 +775,13 @@ def unit(conn: sqlite3.Connection, library: Path, codex_id: str, stage: str, uni
 
 def published_source(conn: sqlite3.Connection, book: Path | None, codex_id: str, unit: str) -> str | None:
     """Where the unit's publication is known from: a done `publish` row, else
-    the unit's youtube.json on disk; None when neither."""
+    its publish record on disk (youtube.json AND an upload row with a video id,
+    backfill.publish_row -- the writer drafts youtube.json before the upload);
+    None when neither."""
     row = db.work_order(conn, codex_id, "publish", unit)
     if row is not None and row["state"] == "done":
         return "row"
-    if book and (Path(book) / "episodes" / unit / "youtube.json").is_file():
+    if book and backfill.publish_row(Path(book), codex_id, unit) is not None:
         return "file"
     return None
 
@@ -733,7 +792,7 @@ def book(conn: sqlite3.Connection, library: Path, codex_id: str) -> dict | None:
     name = book_names(conn).get(codex_id)
     if name is None:
         return None
-    rows = [row_view(r) for r in conn.execute(
+    rows = [row_view(r, conn) for r in conn.execute(
         "SELECT * FROM work_orders WHERE codex_id = ? ORDER BY stage, sequence, unit", (codex_id,))]
     stages = registry.stage_names() + sorted({r["stage"] for r in rows} - set(registry.stage_names()))
     chapters = {r["unit"] for r in rows if r["kind"] != "book"}

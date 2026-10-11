@@ -68,6 +68,14 @@ def test_units_are_grouped_under_their_book_attention_first():
     assert groups[0]["done"] == 1 and groups[0]["total"] == 2
 
 
+def test_a_books_done_count_is_its_done_rows_and_flagged_is_counted_apart():
+    rows = [{"codex_id": "a", "shown": "done", "unit": "ep01", "sequence": 1},
+            {"codex_id": "a", "shown": "flagged", "unit": "ep02", "sequence": 2},
+            {"codex_id": "a", "shown": "queued", "unit": "ep03", "sequence": 3}]
+    (group,) = views.book_groups(rows, {"a": "Alpha"})
+    assert (group["done"], group["flagged"], group["total"]) == (1, 1, 3)
+
+
 def test_gate_labels_drop_the_eye_prefix():
     assert views.gate_label("EYE_PANELS") == "panels" and views.gate_label("PLAN") == "plan"
 

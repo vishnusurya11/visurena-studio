@@ -187,6 +187,9 @@ def test_a_book_is_units_across_stages_down(conn, library):
 
 def test_a_books_published_column_names_its_source(conn, library):
     db.upsert_work_order(conn, CODEX, "publish", "ep04", state="done")
+    assert "ep03" not in views.book(conn, library, CODEX)["published"]     # a drafted youtube.json alone
+    (library / f"{CODEX}_a-book" / "uploads.jsonl").write_text(
+        '{"episode": 3, "video_id": "abc123", "sha8": "0badf00d"}\n', encoding="utf-8")
     published = views.book(conn, library, CODEX)["published"]
     assert published["ep04"] == "row" and published["ep03"] == "file"
     assert "ep05" not in published

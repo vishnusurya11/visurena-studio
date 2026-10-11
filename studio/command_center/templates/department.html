@@ -20,7 +20,7 @@
 <div class="toolbar" role="toolbar" aria-label="Filter">
   <nav class="segmented" aria-label="Filter by state">
     <a href="/d/{{ dept.stage }}{% if book %}?book={{ book }}{% endif %}"{% if not state %} aria-current="true"{% endif %}>All <span class="n">{{ total }}</span></a>
-    {% for mark, word in legend %}{% if dept.counts.get(word) %}<a href="/d/{{ dept.stage }}?state={{ word }}{% if book %}&amp;book={{ book }}{% endif %}"{% if word == state %} aria-current="true"{% endif %}><i class="fdot {{ word }}"></i><span class="cap">{{ word }}</span> <span class="n">{{ dept.counts[word] }}</span></a>{% endif %}{% endfor %}
+    {% for mark, word in legend %}{% if dept.counts.get(word) %}<a href="/d/{{ dept.stage }}?state={{ word }}{% if book %}&amp;book={{ book }}{% endif %}"{% if word == state %} aria-current="true"{% endif %} title="{{ meanings[word] }}"><i class="fdot {{ word }}"></i><span class="cap">{{ word }}</span> <span class="n">{{ dept.counts[word] }}</span></a>{% endif %}{% endfor %}
   </nav>
   <div class="tb-right">
     {% if dept.books | length > 1 or book %}
@@ -34,6 +34,9 @@
     <a class="more" href="/architecture">Org chart{{ icon('chevron-right') }}</a>
   </div>
 </div>
+<details class="statelegend" data-testid="state-legend"><summary>What the states mean</summary>
+  <dl>{% for mark, word in legend %}<div><dt><span class="pill {{ word }}">{{ icon(state_icons[word]) }}{{ word }}</span></dt><dd>{{ meanings[word] }}</dd></div>{% endfor %}</dl>
+</details>
 <section id="rows">
 {% include "_rows.html" %}
 </section>

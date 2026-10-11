@@ -69,7 +69,9 @@ def test_an_unknown_unit_is_a_plain_404(client):
     assert client.get(f"/partials/unit/episode/{CODEX}/ep99/orders").status_code == 404
 
 
-def test_the_book_page_is_units_across_departments_down(client):
+def test_the_book_page_is_units_across_departments_down(client, tmp_path):
+    (tmp_path / "library" / f"{CODEX}_a-book" / "uploads.jsonl").write_text(     # ep03's publish record
+        '{"episode": 3, "video_id": "abc123", "sha8": "0badf00d"}\n', encoding="utf-8")
     page = client.get(f"/b/{CODEX}").text
     assert "A Book" in page and "ep04" in page and "main" in page
     for stage in registry.stage_names():

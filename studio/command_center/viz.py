@@ -318,7 +318,7 @@ def queue_eta(request) -> dict | None:
 def season(request, codex_id: str) -> list[dict]:
     """The book's episodes as wall tiles: unit, shown state, glyph, step, flags, poster."""
     with reading(request) as conn:
-        rows = [views.row_view(r) for r in conn.execute(
+        rows = [views.row_view(r, conn) for r in conn.execute(
             "SELECT * FROM work_orders WHERE codex_id = ? AND stage = 'episode' ORDER BY sequence, unit", (codex_id,))]
     return [{**r, "poster": face(request, r, 320)} for r in rows]
 

@@ -223,13 +223,24 @@ def dept_dots(conn: sqlite3.Connection) -> dict[str, dict[str, int]]:
             if d["stale"] < 1:
                 d.pop("stale", None)
             d["running"] = d.get("running", 0) + 1
+    for row in views.closed_flags(conn):                  # published or acknowledged flags show done
+        if row["stage"] in out:
+            move_dot(out[row["stage"]], "flagged", "done")
     return out
+
+
+def move_dot(counts: dict[str, int], source: str, target: str) -> None:
+    """One row's dot moved from one shown state to another; a zero count is dropped."""
+    counts[source] = counts.get(source, 0) - 1
+    if counts[source] < 1:
+        counts.pop(source, None)
+    counts[target] = counts.get(target, 0) + 1
 
 
 def running_rows(conn: sqlite3.Connection) -> list[dict]:
     """The running work orders, the GPU's first, as the views show them; a
     lapsed lease stays running while a process carries it (views.carried)."""
-    return [v for v in (views.row_view(r) for r in conn.execute(
+    return [v for v in (views.row_view(r, conn) for r in conn.execute(
         "SELECT * FROM work_orders WHERE state = 'running' ORDER BY gpu DESC, started_at, id"))
         if v["shown"] == "running"]
 

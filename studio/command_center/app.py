@@ -85,8 +85,9 @@ def _conn(request: Request) -> Iterator[sqlite3.Connection]:
 
 
 def _shared(request: Request) -> dict:
-    """What every template shares: the legend and its icons, the nav's stages, the write mode."""
-    return {"legend": views.LEGEND, "state_icons": views.ICONS, "stages": registry.stage_names(),
+    """What every template shares: the legend, its icons and meanings, the nav's stages, the write mode."""
+    return {"legend": views.LEGEND, "state_icons": views.ICONS, "meanings": views.MEANINGS,
+            "stages": registry.stage_names(),
             "writable": request.app.state.write_factory is not None, "read_only": READ_ONLY}
 
 
@@ -428,15 +429,16 @@ def _thumb_limiter(app: FastAPI) -> anyio.CapacityLimiter:
 
 @router.get("/thumb/{codex}/{width}/{path:path}")
 async def thumb(request: Request, codex: str, width: int, path: str):
-    """A panel shrunk to 160/320/1024 px WebP from the process LRU, a miss
-    rendered off the loop two at a time; the URL carries the mtime, so the
+    """A panel shrunk to 160/320/1024 px WebP from the process LRU (then the disk
+    cache), a miss rendered off the loop two at a time; the URL carries the mtime, so the
     answer never changes and is cached forever."""
     if width not in thumbs.WIDTHS or PurePosixPath(path).suffix.lower() not in thumbs.IMAGES:
         raise HTTPException(404, "no such thumbnail")
     target = library_paths.resolve_artefact(request.app.state.library, codex, path)
     if target is None:
         raise HTTPException(404, "no such artefact")
-    data = await thumbs.thumb_async(target, path, width, request.app.state.thumbs, _thumb_limiter(request.app))
+    data = await thumbs.thumb_async(target, f"{codex}/{path}", width, request.app.state.thumbs,
+                                    _thumb_limiter(request.app), request.app.state.thumb_dir)
     return Response(data, media_type="image/webp", headers={"Cache-Control": "public,max-age=31536000,immutable"})
 
 
@@ -551,6 +553,12 @@ def _error_shell(request: Request) -> dict | None:
         conn.close()
 
 
+def thumb_dir(library: Path) -> Path:
+    """Where the board keeps its thumbnails across restarts: <repo>/.cache/thumbs
+    beside the library (regenerable; git-ignored)."""
+    return Path(library).parent / ".cache" / "thumbs"
+
+
 def make_app(conn_factory: Callable[[], sqlite3.Connection], library: Path,
              logs: Path | None = None, org_page: Path = ORG_PAGE,
              write_factory: Callable[[], sqlite3.Connection] | None = None) -> FastAPI:
@@ -566,6 +574,7 @@ def make_app(conn_factory: Callable[[], sqlite3.Connection], library: Path,
     app.state.procs = procs.list_processes
     app.state.thumbs = thumbs.Lru()
     app.state.thumb_limiter = None
+    app.state.thumb_dir = thumb_dir(library)
     app.state.boot = time.time()
     app.state.progress = gpu_progress(app)
     app.mount("/static", CachedStatic(directory=str(HERE / "static")), name="static")

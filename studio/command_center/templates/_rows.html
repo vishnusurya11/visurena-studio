@@ -11,7 +11,7 @@
 <section class="panel bookblk" id="bk-{{ g.codex_id }}" aria-labelledby="bk-{{ g.codex_id }}-h">
 <header class="bookhead">
 <h2 id="bk-{{ g.codex_id }}-h"><a href="/b/{{ g.codex_id }}">{{ g.name }}</a></h2>
-<span class="meta"><b>{{ g.total }}</b> units · <b>{{ g.done }}</b> done{% if needs %} · <b class="need">{{ needs }}</b> need you{% endif %}</span>
+<span class="meta"><b>{{ g.total }}</b> units · <b>{{ g.done }}</b> done{% if g.flagged %} · <b>{{ g.flagged }}</b> flagged{% endif %}{% if needs %} · <b class="need">{{ needs }}</b> need you{% endif %}</span>
 <span class="mix" aria-hidden="true">{% for r in g.rows %}<i class="{{ r.css }}"></i>{% endfor %}</span>
 </header>
 <div class="tscroll" data-testid="dept-table"><table class="dgrid dg dept-g">
@@ -25,7 +25,7 @@
 {%- set p = viz.face(request, r, 80) %}
 <tr id="wo-{{ r.codex_id }}-{{ r.unit }}" class="row-{{ r.css }}{% if r.shown in ('escalated', 'failed') %} emph{% endif %}" data-row data-state="{{ r.shown }}">
 <td class="face-td">{% if p %}<img class="face" src="{{ p.thumb }}" alt="" width="36" height="36" loading="lazy">{% endif %}</td>
-<td><span class="pill {{ r.shown }}">{{ icon(state_icons[r.shown]) }}{{ r.shown }}</span></td>
+<td><span class="pill {{ r.shown }}" title="{{ r.meaning }}">{{ icon(state_icons[r.shown]) }}{{ r.shown }}</span></td>
 <td><a class="uid" href="{{ href }}">{{ r.unit }}</a></td>
 <td class="stepcell">
 <span class="sbar" aria-hidden="true" title="step {{ r.step_id or '–' }} of {{ r.bar | length }}">{% for s in r.bar %}<i class="{{ s.css }}{% if s.id == r.step_id and not finished %} cur{% endif %}"></i>{% endfor %}</span>

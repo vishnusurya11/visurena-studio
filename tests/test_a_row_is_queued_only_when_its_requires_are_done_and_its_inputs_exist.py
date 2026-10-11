@@ -101,7 +101,7 @@ def test_promote_never_touches_a_row_in_any_other_state(conn, book, state):
     db.upsert_work_order(conn, CODEX, "episode", "ep04", state=state, blocked_on="as it was")
     _done(conn, "analysis", "book"), _done(conn, "refs", "main"), _inputs(book)
     assert tick.promote(conn, CODEX, "episode", "ep04", book) == state
-    assert _state(conn) == (state, "as it was")
+    assert _state(conn) == (state, None if state == "done" else "as it was")   # a done row waits on nothing
     assert tick.promote(conn, CODEX, "episode", "ep09", book) == ""
 
 

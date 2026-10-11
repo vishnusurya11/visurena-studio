@@ -6,7 +6,11 @@
     materialize  one `blocked` row per (book, department, unit) the slate names,
                  INSERT OR IGNORE, `source='queue'`
     settle       a blocked or queued row whose every declared output is on disk
-                 is `done` (C2's map leaves a skipped unit blocked; this closes it)
+                 is `done` (C2's map leaves a skipped unit blocked; this closes it);
+                 an episode with a publish record (youtube.json + an upload row,
+                 backfill.publish_row) is `done` when its row is blocked, queued,
+                 or running/stale on a lease that ran out (2026-10-11: units
+                 published outside the runner sat queued, blocked or stale)
     promote      blocked -> queued when every `requires` row is done and the first
                  step's `in:` exist; queued -> blocked when they stop; nothing else
     hold         a hold at the unit's scope parks a blocked or queued row as `held`;
@@ -31,7 +35,9 @@ import sqlite3
 from collections import Counter
 from pathlib import Path
 
-from studio import approval, db, episode_home, manifest, registry, timing_sum, verdict_rows, work_orders
+from studio import (approval, backfill, db, episode_home, manifest, registry, timing_sum, verdict_rows,
+                    work_orders)
+from studio.youtube_publish import sha8
 
 LOG = logging.getLogger("studio.tick")
 EPISODE_UNIT = re.compile(r"^ep(\d\d)$")
@@ -42,6 +48,8 @@ project_event reads as `book`."""
 QUEUEABLE = ("blocked", "queued")
 """The two states the tick moves between; every other state belongs to a run,
 a judge, a lease or the owner."""
+PUBLISHED_STAGE = "episode"
+"""The one department whose unit is uploaded: its publish record settles it."""
 
 
 def _now() -> str:
@@ -189,6 +197,52 @@ def settle_from_ledger(conn: sqlite3.Connection, codex_id: str, stage: str, unit
     return True
 
 
+def uploaded_file(book_dir: Path, unit: str, digest: str) -> str | None:
+    """The unit's master the upload's sha8 names, book-relative posix: the
+    newest cut/*.mp4 (then any mp4 under the home) whose bytes hash to it;
+    None when no file on disk does."""
+    home = Path(book_dir) / manifest.home_of(PUBLISHED_STAGE, unit)
+    cuts = sorted((home / "cut").glob("*.mp4"), key=lambda p: p.stat().st_mtime, reverse=True)
+    for path in cuts + sorted(home.glob("*.mp4")):
+        if sha8(path) == digest:
+            return path.relative_to(book_dir).as_posix()
+    return None
+
+
+def lease_ran_out(row) -> bool:
+    """A running row whose lease is past, or the stale row the sweep made of one."""
+    if row["state"] == "stale":
+        return row["blocked_on"] == "lease expired"
+    return row["state"] == "running" and bool(row["lease_until"]) and row["lease_until"] < _now()
+
+
+def settle_published(conn: sqlite3.Connection, codex_id: str, stage: str, unit: str, book_dir: Path) -> bool:
+    """An episode with a publish record is done: a blocked or queued row, or one
+    whose run lost its lease.  The deliverable is the uploaded file (else the
+    youtube.json), the note names the record, `source` is kept."""
+    row = db.work_order(conn, codex_id, stage, unit)
+    if stage != PUBLISHED_STAGE or row is None or not (row["state"] in QUEUEABLE or lease_ran_out(row)):
+        return False
+    record = backfill.publish_row(book_dir, codex_id, unit)
+    if record is None:
+        return False
+    digest = record["unit"].split("@")[0]
+    db.upsert_work_order(conn, codex_id, stage, unit, state="done", blocked_on=None, finished_at=_now(),
+                         deliverable=uploaded_file(book_dir, unit, digest) or record["deliverable"],
+                         step_id=registry.steps(stage)[-1]["id"],
+                         note=f"settled from the publish record: {record['note']}")
+    return True
+
+
+def clear_done_wait(conn: sqlite3.Connection, codex_id: str, stage: str, unit: str) -> bool:
+    """A done row waits on nothing: a blocked_on it still carries is cleared."""
+    row = db.work_order(conn, codex_id, stage, unit)
+    if row is None or row["state"] != "done" or row["blocked_on"] is None:
+        return False
+    db.upsert_work_order(conn, codex_id, stage, unit, blocked_on=None)
+    return True
+
+
 # --- holds on the rows ---
 
 
@@ -267,10 +321,13 @@ def verify(conn: sqlite3.Connection, codex_id: str, stage: str, unit: str, book_
 
 
 def tick_unit(conn: sqlite3.Connection, codex_id: str, stage: str, unit: str, book_dir: Path) -> Counter:
-    """One row through the desk: settle, release, promote, park, cost."""
+    """One row through the desk: settle (disk, publish record, ledger), clear a
+    done row's wait, release, promote, park, cost."""
     before = db.work_order(conn, codex_id, stage, unit)["state"]
     settled = (settle_skipped(conn, codex_id, stage, unit, book_dir)
+               or settle_published(conn, codex_id, stage, unit, book_dir)
                or settle_from_ledger(conn, codex_id, stage, unit))
+    clear_done_wait(conn, codex_id, stage, unit)
     release_held(conn, codex_id, stage, unit)
     promote(conn, codex_id, stage, unit, book_dir)
     state = park_held(conn, codex_id, stage, unit)

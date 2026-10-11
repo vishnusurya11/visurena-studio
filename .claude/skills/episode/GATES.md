@@ -194,8 +194,13 @@ upload and the public flip -- refuse on:
 
 - **an open terminal**: any gate whose last row in `learnings.jsonl` ended
   `keep_best`, `flag` or `still`. ep12 went public with PLAN, EYE_PANELS,
-  EYE_TAKES and MASTER all ended in terminals. Only the OWNER clears one, in
-  `review/waiver.json` (`{"MASTER": "reason"}`); the assistant never writes it.
+  EYE_TAKES and MASTER all ended in terminals. Since the owner's ruling of
+  2026-10-01 ("no human input at publish", `docs/DECISIONS.md`) a terminal on a
+  gates.yaml `auto` gate is cleared by the judge that signed it
+  (`publish_lock.judge_waivers`; the upload ledger records `auto_cleared` with the
+  judge's name). A terminal on a gate the registry does not call `auto` is still
+  the OWNER's to clear, in `review/waiver.json` (`{"GATE": "reason"}`); the
+  assistant never writes that file.
 - **a voice that is not one voice**: `review/speaker_check.json` `ok: false`.
 - **no director's sign-off**: `review/director_signoff.md` naming THIS cut's
   sha8, with four written sections -- `## Watched` (the master full size WITH
@@ -215,6 +220,30 @@ failed, or any take failed or was never judged, as they stand at the flip.
 The human sign-off is waived by the owner's standing instruction; these are
 not. Dry-run on 2026-09-23: ep09 passes; ep05-ep08, public before the
 content gate existed, would be refused for unjudged or lettered takes.
+
+## Board states — what the Command Center shows (`studio/command_center/views.py`)
+
+Each row is one (department, unit) in `work_orders`; the board shows a state, never
+computes one a runner did not write, except the three marked derived.
+
+| shown | means | who moves it |
+|---|---|---|
+| queued | ready: every `requires` row is done and the first step's inputs exist | a runner takes it |
+| blocked | waits on X (`blocked_on`: a required stage/unit like `refs/04`, or `in: <glob>`) | the tick, when X lands |
+| running | a run holds the lease | the run |
+| stale *(derived for a lapsed lease)* | the run lost its lease, or the disk disagrees with the row (`blocked_on` says which) | an order or a new run |
+| flagged *(derived)* | done, with judge flags (audit rows) that are neither acknowledged nor published | the owner's acknowledge, or the upload |
+| done | finished; a published unit with flags shows done (2026-10-01 ruling), its gate chips kept as the audit trail | -- |
+| deferred / failed / escalated / held | a step handed it back / crashed / asked the owner / a hold parks it | a retry, a fix, the owner, a lift |
+
+`flags` on a row counts the unit's audit rows -- history, not open work: it never
+goes down. Needs you and the inbox read `views.flags_open` (done + flags, not
+acknowledged, not published), the department page and the sidebar dots read the same
+function. Published = a done `publish` row, or the publish record on disk: youtube.json
+AND an upload row with a video id (`backfill.publish_row`); youtube.json alone is a
+draft. The tick settles an episode from that record (`tick.settle_published`): a
+queued/blocked row, or one whose lease ran out, becomes `done` with the uploaded file
+(found by the upload's sha8) as its deliverable.
 
 ## Known gaps — not measured yet
 

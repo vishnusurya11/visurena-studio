@@ -261,7 +261,7 @@ def palette(departments: list[dict], books: dict[str, str], units: list[dict], a
 def palette_index(conn: sqlite3.Connection, library: Path, departments: list[dict] | None = None) -> list[dict]:
     """The palette's data on its own (the page embeds it; a refetch on open reads it)."""
     names, attention = views.book_names(conn), views.attention(conn)
-    rows = [views.row_view(r) for r in conn.execute("SELECT * FROM work_orders")]
+    rows = [views.row_view(r, conn) for r in conn.execute("SELECT * FROM work_orders")]
     needs = {(r["codex_id"], r["stage"], r["unit"]) for r in attention}
     flagged = [r for r in attention if r.get("reason") == views.FLAGGED_REASON]
     return palette(departments if departments is not None else department_items(views.lanes(conn)), names,
