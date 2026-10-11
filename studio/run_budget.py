@@ -111,31 +111,33 @@ class Budget:
 
 
 CLOCK_RESET = "clock_reset.json"
-"""The owner's `retry` stamps the episode home: timing rows that ended before
-the stamp are an earlier attempt's, not this one's (ep19, 2026-10-07: three
-plan climbs on code faults spent the ceiling before the takes were judged)."""
+"""The owner's `retry` stamps an ATTEMPT here (C3_verdict #4, D2): for the
+audit and for the ladders' own round counters (a retry's fresh take rounds,
+a keep_best signed before it re-judged).  The ceiling NEVER reads it: 67
+retries each opened a fresh 5 h before (ep19-27), so the 6 h was unmeasurable."""
 
 
-def reset_clock(home, at: str | None = None) -> str:
-    """Stamp the home: the clock starts over at `at` (local ISO, the timing
-    rows' own convention), now by default.  Returns the stamp."""
+def stamp_attempt(home, at: str | None = None) -> str:
+    """Stamp the home with this attempt's start (local ISO, the timing rows'
+    own convention), now by default.  Returns the stamp."""
     import json
     from datetime import datetime
     from pathlib import Path
     stamp = at or datetime.now().isoformat(timespec="seconds")
     Path(home).mkdir(parents=True, exist_ok=True)
-    (Path(home) / CLOCK_RESET).write_text(json.dumps({"at": stamp}), encoding="utf-8")
+    (Path(home) / CLOCK_RESET).write_text(json.dumps({"attempt_at": stamp}), encoding="utf-8")
     return stamp
 
 
 def clock_reset_at(home) -> str:
-    """The stamp, or "" (every row counts)."""
+    """The attempt stamp (a legacy file's `at` too), or ""."""
     import json
     from pathlib import Path
     path = Path(home) / CLOCK_RESET
     try:
-        return str(json.loads(path.read_text(encoding="utf-8")).get("at") or "") if path.exists() else ""
-    except (ValueError, OSError):
+        doc = json.loads(path.read_text(encoding="utf-8")) if path.exists() else {}
+        return str(doc.get("attempt_at") or doc.get("at") or "")
+    except (ValueError, OSError, AttributeError):
         return ""
 
 
@@ -150,10 +152,10 @@ def clock_reset_epoch(home) -> float:
 
 
 def spent_before(home) -> float:
-    """Seconds this episode already spent since the last clock reset, 0.0 when
-    none yet: the union of its run spans (studio.run_clock, C3_verdict #3 --
-    a killed run counts to its last beat) plus legacy timing.jsonl rows from
-    before the first run row.  What `Budget.charge` is charged with at
-    context creation, so the ceiling binds across resumes."""
+    """Seconds this episode already spent, from its first launch, 0.0 when none
+    yet: the union of its run spans (studio.run_clock, C3_verdict #3 -- a
+    killed run counts to its last beat) plus legacy timing.jsonl rows from
+    before the first run row.  No retry resets it (C3_verdict #4).  What
+    `Budget.charge` is charged with at context creation."""
     from studio import run_clock
-    return run_clock.spent_before(home, None, since=clock_reset_epoch(home))
+    return run_clock.spent(home)

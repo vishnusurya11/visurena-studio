@@ -1,7 +1,7 @@
 """Owner, 2026-10-07 19:40Z: 'do the iterations and DQ check and finish it; we
 have the five-hour limit per episode, use it.'  ep19's take ladder went
 keep_best at attempt 0 on the owner's relaunch because ROUNDS_CAP (2) counts
-rounds ACROSS resumes.  A retry stamps the clock (run_budget.reset_clock);
+rounds ACROSS resumes.  A retry stamps the attempt (run_budget.stamp_attempt);
 rounds taken before the stamp are an earlier attempt's.  The per-take attempt
 cap and the progress breaker still bound the work.  $0."""
 from __future__ import annotations
@@ -30,7 +30,7 @@ def test_rounds_before_the_stamp_do_not_count():
 
 def test_the_clock_reset_epoch_reads_the_stamp(tmp_path):
     assert run_budget.clock_reset_epoch(tmp_path) == 0.0
-    run_budget.reset_clock(tmp_path)
+    run_budget.stamp_attempt(tmp_path)
     assert abs(run_budget.clock_reset_epoch(tmp_path) - time.time()) < 5
 
 

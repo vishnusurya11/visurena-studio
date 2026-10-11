@@ -830,3 +830,6 @@ fixes. Each lesson below cost at least one launch. Tracker rows A38-A74 in
     - **The clock you budget against is not the clock you spend (commit 3).** 398 of
       3,499 machine-min over ep19-27 sat in killed steps the step clock never logged.
       Time the process with a heartbeat (studio/run_clock.py), not the step on exit.
+    - **A reset clock is no clock (commit 4).** 67 retries each opened a fresh 5 h (all 4
+      over_budget parks were retried into a new ceiling). A ceiling binds only if nothing
+      can zero it: `retry` stamps `attempt_at`, `spent_before` never reads it.
