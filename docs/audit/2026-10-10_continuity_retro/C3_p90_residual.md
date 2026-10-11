@@ -125,3 +125,52 @@ Note that the P90 statistic can pass 6 h while ep21 itself stays over. The owner
   - the CLI reads uploads through `uploads_of` at gather, status_doc and tick. This also stops `status_doc`'s `sorted()` from mixing `str` and `int`, the TypeError that would have come next.
 - **Tests:** written first (4 failed, then green), in `tests/test_a_book_upload_row_never_stops_the_tick.py`. The autopilot suites are green (125).
 - **On the real WotW file:** `next_unit` now answers None (the series is complete).
+
+## 7. BUILT (2026-10-11, the main session's ruling for the owner, open to veto): the reserve, its companion, and the corrected replay
+
+The ruling: the owner's rule is 6 h for EVERY episode with zero input, so the reserve is built. The run-14 signature counterfactual is **not** built and not modelled.
+
+**Code** (written test-first; see the commits):
+- **The downstream reserve.**
+  - `run_budget.OWNER_LIMIT_SECONDS` (6 h).
+  - `Budget(limit=…)`, with `owed_after(step)`, `leaves_reserve(step, price)` and `rungs_closed()`.
+  - `judged_gate.affordable` checks the reserve first.
+  - `plan_ladder.Desk.clock_spent` reads `rungs_closed()`, so a reserve-refused plan follows its BUILDER/JUDGED tags exactly as at a spent clock.
+  - `EpisodeContext` carries the limit. Trailer and sheet budgets carry none.
+  - The take ladder is not touched: at step 09+ only 32 min is owed, so the 5 h ceiling always binds first.
+- **The companion rule.**
+  - `take_dq.cached(any_code=…)` and `take_dq --ceiling-spent`; step 09 passes the flag when the ceiling is spent.
+  - Step 11 keeps a **passing** QC report on the same master bytes under moved code once the ceiling is spent. A fail is measured again.
+
+**Replay** (`scratchpad\c3cpu\replay_3a.py`, which imports the builder's c3b replay; rung-only accounting):
+
+| scenario | P50 | P90 | over 6 h | changed episodes (min) |
+|---|---|---|---|---|
+| 3A as published | 5.10 h | 6.45 h | 2/9 | ep20 372, ep21 448 |
+| + D3's QC rule (built 97be974, not modelled in 3A) | 5.10 h | 6.05 h | 1/9 | ep20 314, ep21 447 |
+| + the downstream reserve | 5.10 h | 5.90 h | 1/9 | ep21 401 (ep20 313) |
+| + the companion rule | 5.10 h | **5.64 h** | **1/9** | ep19 324, **ep21 371**, ep27 330 |
+| + ep21's upload-door refusal cured at step 04 (434213e, already on master; +3.0 min revoice charged) | 5.10 h | 5.54 h | **0/9** | ep21 341 |
+
+Labels in the replay:
+- **Door crashes stop the episode:** ep19's `invalid_grant` and ep21 run 19's split voice are never treated as a ship.
+- **QC fails that ship flagged** (every failed row is outside SAFETY): ep20, ep24 and ep26.
+- **QC fails that stop** (SAFETY): ep22 and ep27 (a line unheard), and ep21 run 21 (an unjudged take).
+
+**Second case** (`scratchpad\c3cpu\second_case.py`, on the step clock, which is a lower bound):
+- **Scarlet ep10-14: none.** Their plan, grids and panels were never clocked. Their only rungs are step-09 retakes, which leave 32 min owed, and every one fits (clock + price + 32 ≤ 341 < 360).
+- **WotW ep12-15 (pre-autopilot, 489-2045 min, all over 6 h): the reserve binds.**
+
+  | ep | rungs refused | min refused | rungs kept |
+  |---|---|---|---|
+  | 12 | 7 | 79 | 5 |
+  | 13 | 28 | 589 | 46 |
+  | 14 | 23 | 914 | 61 |
+  | 15 | 23 | 85 | 21 |
+
+  The first refusals come early: the plan rungs at clock 152-170.
+- **WotW ep16 and ep18: none.**
+- **A false positive: ep17**, which ended at 297 min, would have lost 2 panel rungs (11 min) at clock 233/241. The shares price the firsts owed after 08 at 137 min, while ep17 needed 56. ep20's two panel rungs are the same kind of cut: ep20 was under 6 h without them.
+- **The rule's price**, then, is panel rescue on light episodes. The lever, if the owner vetoes that price, is a measured `owed_after` (the episode's own projection) in place of the shares.
+
+**What stays open:** ep21 is under 6 h only with the door fix that already landed. Under strict accounting it is 371 min, because the run-19 door stop sends it through two more QC passes. The replay is k-scaled, good to about ±10 min.
