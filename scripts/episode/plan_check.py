@@ -242,8 +242,10 @@ def continuity_gates(book: Path, ep) -> int:
         print("CONTINUITY   : legacy book (no refs/looks.json or places.json)")
         return 0
     from studio import continuity_place as cp, look_timeline
-    found = cp.look_gate(look_timeline.load(book), ep) + \
-        cp.place_gate(book, ep, cp.place_map(book), cp.location_rows(book))
+    table = look_timeline.load(book)
+    found = cp.look_gate(table, ep) + \
+        cp.place_gate(book, ep, cp.place_map(book), cp.location_rows(book)) + \
+        cp.look_word_faults(ep.model_dump(mode="json"), table, ep.number)     # G-LOOK-WORDS, cured in code
     print("G-LOOK/PLACE :", len(found) or "clean")
     for f in found:
         print("   ", f[:170])

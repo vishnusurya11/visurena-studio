@@ -137,6 +137,64 @@ def cure_looks(doc: dict, table, number: int) -> dict:
     return doc
 
 
+# ---- G-LOOK-WORDS on the beard (C1_verdict #6, 2026-10-11) ------------------------
+
+TAG = re.compile(r"\(([^()]*)\)")
+HEAD = re.compile(r"\b(?:face|eyes?|cheek\w*|jaw|brows?|hair|moustache|whiskers?)\b", re.I)
+BEARDED = re.compile(r"\bbeard", re.I)
+TAG_FIELDS = ("frame", "at_rest")
+"""The prose fields a person's head tag rides in (the grid and the take read both)."""
+
+
+def beard_phrase(look) -> str:
+    """The look's own beard words: the face-layer clause that names the beard."""
+    clauses = re.split(r"[;.]", look.layers.face or "")
+    return next((c.strip() for c in clauses if BEARDED.search(c)), "")
+
+
+def bearded_look(table, setup: dict, who: str, number: int):
+    """(look id, look) staged for `who` when its marker is a beard, else None."""
+    card = table.characters.get(who) if table else None
+    if card is None:
+        return None
+    pick = next((p.get("look") for p in setup.get("looks") or [] if p.get("who") == who), "")
+    look_id = pick if pick in card.looks else card.look_id_at(number)
+    look = card.looks.get(look_id)
+    return (look_id, look) if look is not None and look.markers.facial_hair == "beard" else None
+
+
+def bare_head_tags(text: str) -> list[str]:
+    """Head tags (they name a face, eyes, hair ...) that say no beard."""
+    return [t for t in TAG.findall(text or "") if HEAD.search(t) and not BEARDED.search(t)]
+
+
+def one_face_beards(doc: dict, table, number: int):
+    """(shot, who, look id, look) for every one-face shot staging a bearded look."""
+    for shot in doc.get("shots") or []:
+        faces = shot.get("faces") or []
+        found = bearded_look(table, (doc.get("setups") or {}).get(shot.get("setup")) or {}, faces[0], number) \
+            if len(faces) == 1 else None
+        if found:
+            yield shot, faces[0], *found
+
+
+def cure_beard_tags(doc: dict, table, number: int) -> dict:
+    """The deterministic cure: each bare head tag gains the look's beard phrase."""
+    for shot, _who, _look_id, look in one_face_beards(doc, table, number):
+        phrase = beard_phrase(look)
+        for field in TAG_FIELDS:
+            for tag in bare_head_tags(shot.get(field) or "") if phrase else []:
+                shot[field] = shot[field].replace(f"({tag})", f"({tag.rstrip()}, {phrase})")
+    return doc
+
+
+def look_word_faults(doc: dict, table, number: int) -> list[str]:
+    """G-LOOK-WORDS (HARD on the beard): a head tag of a bearded look that says none."""
+    return [f"G-LOOK-WORDS shot {shot['index']}: {who}'s look {look_id!r} has a beard; the head tag ({tag}) says none"
+            for shot, who, look_id, _look in one_face_beards(doc, table, number)
+            for field in TAG_FIELDS for tag in bare_head_tags(shot.get(field) or "")]
+
+
 # ---- G-PLACE -----------------------------------------------------------------------
 
 def lookalike(location: str, rows: list[dict]) -> str:
