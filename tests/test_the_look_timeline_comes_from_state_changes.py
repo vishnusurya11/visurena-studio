@@ -14,7 +14,9 @@ from agents import look_timeline_writer as writer
 from studio import look_timeline as lt
 from tests.test_episode_writer import FakeModel
 
-CARD = {"id": "griffin", "name": "Griffin", "appearances": [1, 2, 3],
+# The keys of a real dossier (analysis/characters/*.json): `appearances` is a COUNT and
+# `first_chapter` the chapter (C2_verdict #6: a list typed here hid a crash).
+CARD = {"id": "griffin", "name": "Griffin", "first_chapter": 1, "appearances": 3,
         "profile": {"physical": "Tall man, thin. Pale fair hair cut short. Clean-shaven.",
                     "physical_evolution": [{"chapter": 3, "change": "His face is bandaged."}]},
         "state_changes": [

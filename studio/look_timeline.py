@@ -43,7 +43,7 @@ def dossier_text(card: dict) -> str:
               for r in appearance_rows(card)]
     evolution = [f"ch{e.get('chapter')}: {e.get('change')}" for e in prof.get("physical_evolution") or []]
     return "\n".join([f"NAME: {card.get('name') or card.get('id')}",
-                      f"FIRST SEEN: chapter {min(card.get('appearances') or [1])}",
+                      f"FIRST SEEN: chapter {card.get('first_chapter') or 1}",   # `appearances` is a count
                       f"BODY: {prof.get('physical') or ''}",
                       "PHYSICAL EVOLUTION:", *evolution, "CONTINUITY LEDGER:", *ledger])
 
@@ -62,17 +62,31 @@ def resolved(row, base) -> Layers:
     return Layers(**{k: getattr(row, k) or getattr(base, k) for k in names})
 
 
-def with_head(layers: Layers, physical: str) -> Layers:
+FALLBACK_LAYERS = ("hair", "face")
+"""The head layers a silent dossier takes from the bound row.  Never the hat: a
+row's `physical` carries ONE chapter's costume ("Wearing: ..."), and taking it
+gave WotW's neighbour his ch-later gardening hat on another look (2026-10-11)."""
+
+
+def body_layer(physical: str, name: str, fallback: str = "") -> str:
+    """One head layer of the body: the dossier's, else the bound row's hair or
+    face (C2_verdict #6: 9 of Scarlet's 15 dossiers name no head; every refs.json
+    row does, and the bound sheet was drawn from those words)."""
+    own = lt.layer_text(physical, "", name)
+    return own or (lt.layer_text(fallback, "", name) if name in FALLBACK_LAYERS else "")
+
+
+def with_head(layers: Layers, physical: str, fallback: str = "") -> Layers:
     """Every look carries a whole head: a hair, face or hat layer the look does
-    not state is the dossier body's own (the body itself keeps none)."""
-    fill = {k: getattr(layers, k) or lt.layer_text(physical, "", k) for k in ("hair", "face", "headwear")}
+    not state is the dossier body's own, else the bound row's (`fallback`)."""
+    fill = {k: getattr(layers, k) or body_layer(physical, k, fallback) for k in ("hair", "face", "headwear")}
     return layers.model_copy(update=fill)
 
 
-def markers_from(layers: Layers, physical: str) -> Markers:
+def markers_from(layers: Layers, physical: str, fallback: str = "") -> Markers:
     """Closed markers from explicit layers; hair and beard fall back to the body."""
-    body_hair = lt.layer_text(physical, "", "hair")
-    body_face = lt.layer_text(physical, "", "face")
+    body_hair = body_layer(physical, "hair", fallback)
+    body_face = body_layer(physical, "face", fallback)
     return Markers(headwear=lt.first_of(lt.HEADWEAR, layers.headwear),
                    hair_colour=lt.first_of(lt.HAIR, layers.hair or body_hair),
                    facial_hair=lt.first_of(lt.FACIAL, layers.face or body_face),
@@ -101,17 +115,18 @@ def kept_rows(draft, chapter_text) -> list:
     return kept
 
 
-def looks_from_draft(draft, card: dict, chapter_text) -> CharacterLooks:
+def looks_from_draft(draft, card: dict, chapter_text, fallback: str = "") -> CharacterLooks:
     """The writer's draft under the contract: quotes verified, layers resolved,
-    markers closed, the body cut free of its head."""
+    markers closed, the body cut free of its head; a silent dossier head is the
+    bound row's (`fallback`)."""
     physical = ((card.get("profile") or {}).get("physical") or "").strip()
     rows = kept_rows(draft, chapter_text)
     base_row = rows[0]
-    base_markers = markers_from(resolved(base_row, base_row), physical)
+    base_markers = markers_from(resolved(base_row, base_row), physical, fallback)
     looks = {}
     for row in rows:
-        layers = with_head(resolved(row, base_row), physical)
-        markers = markers_from(layers, physical)
+        layers = with_head(resolved(row, base_row), physical, fallback)
+        markers = markers_from(layers, physical, fallback)
         looks.setdefault(row.look_id, Look(
             layers=layers, markers=markers, made_by="base" if row is base_row else "fresh",
             source=[Source(chapter=row.quote_chapter or row.start_chapter, quote=row.quote)] if row.quote else [],
@@ -130,18 +145,24 @@ def plot_spans(plot: dict) -> list[tuple[str, int]]:
     return out
 
 
-def dossier_look(physical: str, worn: str, base: Markers | None) -> Look:
+def headed(physical: str, fallback: str) -> str:
+    """The body with the bound row's head layers appended where it names none."""
+    missing = [lt.layer_text(fallback, "", k) for k in FALLBACK_LAYERS if not lt.layer_text(physical, "", k)]
+    return " ".join([physical.strip()] + [m for m in missing if m]).strip()
+
+
+def dossier_look(physical: str, worn: str, base: Markers | None, fallback: str = "") -> Look:
     """One WotW wardrobe entry as a look: its layers, markers and face change."""
     parsed = lt.parse(worn)
     pick = lambda name: lt.render(lt.keep(parsed, lambda layer: layer == name))   # noqa: E731
     layers = with_head(Layers(headwear=pick("headwear"), hair=pick("hair"), face=pick("face"),
-                              top=lt.render(lt.keep(parsed, lambda layer: layer not in lt.HEAD))), physical)
-    markers = Markers(**lt.markers_of(physical, worn))
+                              top=lt.render(lt.keep(parsed, lambda layer: layer not in lt.HEAD))), physical, fallback)
+    markers = Markers(**lt.markers_of(headed(physical, fallback), worn))
     return Look(layers=layers, markers=markers, made_by="base" if base is None else "fresh",
                 face_change=base is not None and face_changed(markers, base))
 
 
-def looks_from_dossier(card: dict) -> CharacterLooks | None:
+def looks_from_dossier(card: dict, fallback: str = "") -> CharacterLooks | None:
     """A dossier's own costume plot as the look table, or None without one."""
     prof = card.get("profile") or {}
     plot, wardrobe = prof.get("wardrobe_by_chapter") or {}, prof.get("wardrobe") or {}
@@ -149,10 +170,10 @@ def looks_from_dossier(card: dict) -> CharacterLooks | None:
     if not spans:
         return None
     physical = (prof.get("physical") or "").strip()
-    base = dossier_look(physical, wardrobe.get(spans[0][0], ""), None)
+    base = dossier_look(physical, wardrobe.get(spans[0][0], ""), None, fallback)
     looks = {spans[0][0]: base}
     for look, _ in spans[1:]:
-        looks.setdefault(look, dossier_look(physical, wardrobe.get(look, ""), base.markers))
+        looks.setdefault(look, dossier_look(physical, wardrobe.get(look, ""), base.markers, fallback))
     timeline = [Span(look=look, start=StoryTime(chapter=chapter)) for look, chapter in spans]
     return CharacterLooks(base=spans[0][0], body=lt.body_of(physical), looks=looks, timeline=timeline)
 
@@ -170,6 +191,21 @@ def look_words(card: CharacterLooks, look_id: str) -> str:
 
 def path_of(book: Path) -> Path:
     return Path(book) / "refs" / "looks.json"
+
+
+def looks_from_cards(row: dict) -> CharacterLooks:
+    """A bound row with no dossier (11 of Scarlet's 26): one look per refs.json
+    card, its words the row's own, the base on the first card.  The cards are
+    states by setting, not by story time, so only the base has a span: a book
+    whose rows change hat by card (Watson's bowler outdoors) would otherwise
+    refuse every outdoor card against one base look."""
+    physical, cards = (row.get("physical") or "").strip(), list((row.get("wardrobe") or {}).items())
+    base = dossier_look(physical, cards[0][1], None)
+    looks = {cards[0][0]: base}
+    for card, worn in cards[1:]:
+        looks.setdefault(card, dossier_look(physical, worn, base.markers))
+    return CharacterLooks(base=cards[0][0], body=lt.body_of(physical), looks=looks,
+                          timeline=[Span(look=cards[0][0], start=StoryTime(chapter=1))])
 
 
 def load(book: Path) -> LookBook | None:

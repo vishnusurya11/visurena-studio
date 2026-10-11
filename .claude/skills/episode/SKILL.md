@@ -293,6 +293,10 @@ words. One sheet per key prop. Closer sizes come from the take's camera.
 2026-10-11): under a `beard` marker a duration beard ("sixteen days of grey-brown
 beard", drawn 0/3) is drawn as "a full short grey-brown beard covering the jaw, chin
 and upper lip, sixteen days grown"; a styled beard and `stubble` keep the book's words.
+**A row with no dossier, or a silent dossier head, takes its head from the bound row's
+`physical`** (C2_verdict #6, `look_timeline.body_layer`): hair and face only, never the
+hat (a row's physical carries one chapter's costume); a row with no dossier is one look
+per refs.json card (`looks_from_cards`).
 
 **Look at every picture you draw** before anything is built on it. Put the
 defining state or detail FIRST in its prompt. A detail buried mid-sentence is

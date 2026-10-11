@@ -753,3 +753,11 @@ fixes. Each lesson below cost at least one launch. Tracker rows A38-A74 in
     word between "felt" and "hat"; "he felt his hat" still does). The READER's free
     "straw hat" still reads `boater` (`READER_HEADWEAR`): it is unmeasured, and as
     the brimmed other_hat it would hide the shipped ep25 straw-on-felt fault.
+  - **A fixture typed by hand drifts from the contract (commit 6).** `appearances` is a
+    count in every real dossier; the test's list hid a crash (`dossier_text`) on the
+    only writer path a new book takes. Fixtures are built from a real dossier's keys.
+    Scarlet replay (scratch only, worst-case headless writer draft): 26/26 rows built,
+    0 refused; Jekyll and Hyde still refused. Two precision faults seen in that replay
+    and NOT fixed: a negated dossier sentence ("does not specify hair, eye colour ...")
+    parses as an authored hair layer (Watson's hair marker blank), and "grey eyes under
+    a tangle of sandy hair" reads hair `grey` (Wiggins).

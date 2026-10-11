@@ -25,14 +25,23 @@ def card_of(book: Path, who: str) -> dict:
     return json.loads((Path(book) / "analysis" / "characters" / f"{who}.json").read_text(encoding="utf-8"))
 
 
+def row_of(book: Path, who: str) -> dict:
+    """The bound refs.json row of `who`, {} when it is not bound."""
+    return next((r for r in rows(book) if r["entity_id"] == who), {})
+
+
 def table_for(book: Path, who: str, _agent=None):
-    """One character's looks: its costume plot, else the writer's verified draft."""
+    """One character's looks: its costume plot, else the writer's verified draft;
+    a silent dossier head is the bound row's; no dossier: the row's own cards."""
     from agents import look_timeline_writer as writer
-    card = card_of(book, who)
-    looks = look_timeline.looks_from_dossier(card)
+    row = row_of(book, who)
+    if not (Path(book) / "analysis" / "characters" / f"{who}.json").exists():
+        return look_timeline.looks_from_cards(row)
+    card, fallback = card_of(book, who), row.get("physical", "")
+    looks = look_timeline.looks_from_dossier(card, fallback=fallback)
     if looks is None:
         draft = writer.write(look_timeline.dossier_text(card), _agent=_agent)
-        looks = look_timeline.looks_from_draft(draft, card, lambda n: plan_brief.chapter_text(book, n))
+        looks = look_timeline.looks_from_draft(draft, card, lambda n: plan_brief.chapter_text(book, n), fallback)
     return looks
 
 
@@ -51,10 +60,16 @@ def build(book: Path, cast: list[str], _agent=None) -> list[str]:
     return written
 
 
+def rows(book: Path) -> list[dict]:
+    """Every character row refs.json binds; none without a refs.json."""
+    path = Path(book) / "refs" / "refs.json"
+    found = (episode_home.read_json(path).get("refs") or []) if path.exists() else []
+    return [r for r in found if r.get("kind", "character") == "character" and r.get("entity_id")]
+
+
 def bound(book: Path) -> list[str]:
     """Every character row refs.json binds."""
-    rows = episode_home.read_json(Path(book) / "refs" / "refs.json").get("refs") or []
-    return [r["entity_id"] for r in rows if r.get("kind", "character") == "character" and r.get("entity_id")]
+    return [r["entity_id"] for r in rows(book)]
 
 
 def main(book_id: str, who: list[str]) -> int:
