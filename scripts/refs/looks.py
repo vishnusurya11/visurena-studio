@@ -205,12 +205,21 @@ def comfy_draws(book: Path) -> dict:
     return {"edit": edit, "fresh": fresh}
 
 
+def where_of(book: Path, path: Path) -> str:
+    """The picture's name for the verdict: book-relative, or its own path when a
+    replay draws outside the book (docs/audit/.../replay)."""
+    try:
+        return episode_home.relative(book, path)
+    except ValueError:
+        return Path(path).resolve().as_posix()
+
+
 def vlm_judge(book: Path):
     """LOOK-STATE with the local vision model as its reader."""
     from studio import look_back
     from studio.judges import look_state
     return lambda path, look: look_state.judge(path, look.markers, look_back.vlm_reader,
-                                               where=episode_home.relative(book, path), face_change=look.face_change)
+                                               where=where_of(book, path), face_change=look.face_change)
 
 
 def main(book_id: str, number: int, drawing: bool) -> int:
