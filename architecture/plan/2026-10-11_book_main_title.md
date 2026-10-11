@@ -8,7 +8,8 @@
 - [x] Footer and intro from `source/book.json`: the code named Wells
 - [x] The main title: `studio/book_title.py` (pure) + `scripts/episode/book_title.py` (render, judge, thumbnail)
 - [x] The book video: main title first, stamps shifted by `lead_s`, thumbnail set, replaced video made private
-- [ ] WotW and Scarlet book videos uploaded
+- [x] WotW and Scarlet book videos uploaded: https://youtu.be/HSn8Gl7mnyA, https://youtu.be/IDtuFR_VAqo (old WotW 7grcwgBJ9S0 private)
+- [x] First-render faults fixed: drama-scored cold open, sting laid on the black, level pass, bt709 tags, biggest-change card finder, list-based doubled-person check, banner-thumbnail fallback, square-only cold open
 
 ## Log
 - 2026-10-11: owner saw the WotW book video with every card at the chapter's END; asked title first, a book main title unlike the cards, and a poster (thumbnail). Three designers + a judge; C (reliability first) won with B's cold open.

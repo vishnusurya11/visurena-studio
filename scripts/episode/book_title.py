@@ -66,9 +66,13 @@ def load_spec(book: Path) -> bt.BookTitleSpec:
     return spec
 
 
-def reads(image: Path) -> str:
+def asks(image: Path, question: str) -> str:
     from studio.comfy import run_text, stage_image
-    return run_text("image_qwen3vl_caption", {"prompt": bt.READ_ASK, "image_1": stage_image(image)})
+    return run_text("image_qwen3vl_caption", {"prompt": question, "image_1": stage_image(image)})
+
+
+def reads(image: Path) -> str:
+    return asks(image, bt.READ_ASK)
 
 
 def plate(out: Path, prompt: str, size: tuple[int, int], seed: int) -> Path:
@@ -81,11 +85,13 @@ def plate(out: Path, prompt: str, size: tuple[int, int], seed: int) -> Path:
         made = run("image_krea2_cinematic_2x", {"prompt": styled(prompt + " No text, no letters, no writing."),
                    "width": size[0], "height": size[1], "seed": seed + k, "filename_prefix": "book_title/plate"})[0]
         said = reads(made)
-        print(f"  plate try {k + 1}: {'lettered: ' + said[:60] if bt.has_lettering(said) else 'clean'}", flush=True)
-        if not bt.has_lettering(said):
+        doubled = bt.doubled(asks(made, bt.PEOPLE_ASK))
+        why = "lettered: " + said[:60] if bt.has_lettering(said) else "a person drawn twice" if doubled else "clean"
+        print(f"  plate try {k + 1}: {why}", flush=True)
+        if why == "clean":
             shutil.copyfile(made, out)
             return out
-    raise SystemExit(f"REFUSED: every key-art plate came back with writing in it ({TRIES} seeds)")
+    raise SystemExit(f"REFUSED: every key-art plate came back lettered or with a person drawn twice ({TRIES} seeds)")
 
 
 def hero_prompt() -> str:
@@ -164,11 +170,19 @@ def chapter_main(book: Path, n: int) -> Path:
     return book / "compilation" / "chapters" / f"ep{n:02d}_main.mp4"
 
 
+def square_short(book: Path, n: int) -> bool:
+    """Whether chapter n's shipped Short is square; a portrait one pads into the band."""
+    from studio import book_compilation as bc
+    sha = dict(bc.published(book)).get(n)
+    master = bc.uploaded_master(episode_home.home(book, n) / "cut", sha) if sha else None
+    return bool(master) and bt.square_source(info(master))
+
+
 def cold_candidates(book: Path, episodes: int) -> list[dict]:
     out = []
     for n in range(1, episodes + 1):
         ep = episode_home.home(book, n)
-        if not (ep / "placed.json").exists() or not chapter_main(book, n).exists():
+        if not (ep / "placed.json").exists() or not chapter_main(book, n).exists() or not square_short(book, n):
             continue
         for c in bt.candidates(n, episode_home.read_json(ep / "plan.json"), episode_home.read_json(ep / "placed.json")):
             out.append(c | {"sharp": sharpness(chapter_main(book, n), (c["start_s"] + c["end_s"]) / 2)})
@@ -348,9 +362,16 @@ def judge(book: Path, spec: bt.BookTitleSpec, out: Path) -> dict:
 
 
 def make_thumbnail(book: Path, spec: bt.BookTitleSpec, episodes: int) -> Path:
+    """The 16:9 plate with the title on its dark left; when no thumbnail plate
+    passes (Scarlet: Holmes drawn twice on three seeds), the vetted hero plate
+    over a title band."""
     from PIL import Image
-    still = plate(home(book) / "thumb_plate.png", spec.thumb, (1280, 720), 7400)
-    pic = bt.thumbnail(Image.open(still), spec, episodes=episodes, font=FONT)
+    try:
+        still = plate(home(book) / "thumb_plate.png", spec.thumb, (1280, 720), 7400)
+        pic = bt.thumbnail(Image.open(still), spec, episodes=episodes, font=FONT)
+    except SystemExit as why:
+        print(f"  thumbnail: {why}; the hero plate over a title band", flush=True)
+        pic = bt.banner_thumbnail(Image.open(home(book) / "plate.png"), spec, episodes=episodes, font=FONT)
     out = home(book) / "thumbnail.jpg"
     for quality in (92, 85, 78, 70):
         pic.save(out, "JPEG", quality=quality)

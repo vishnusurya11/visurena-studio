@@ -318,3 +318,47 @@ def drama_score(said: str) -> int:
 def hero_layout(title: str, font: Path, *, width: int, height: int) -> tuple[list[str], int]:
     """The title's lines and size over the hero: what is drawn and what the judge reads."""
     return fit_lines(title, font, max_w=int(width * 0.9), start_px=int(height * 0.30), min_px=12, tracking=TRACK_FROM)
+
+
+def square_source(ffmpeg_info: str) -> bool:
+    """Whether the video's picture is square (a portrait Short pads into the band)."""
+    import re
+    found = re.search(r"Video:.*?, (\d{2,5})x(\d{2,5})", ffmpeg_info)
+    return bool(found) and found.group(1) == found.group(2)
+
+
+PEOPLE_ASK = ("Describe each person in this image on its own line, naming what they actually wear, in the form "
+              "HAT; CLOTHES; HAIR -- for example: top hat; grey frock coat; white hair. Use 'no hat' when "
+              "bare-headed. If there are no people, answer NONE.")
+"""A worked example: given only 'hat; coat; hair' the reader echoed the template
+for every person, and every plate read as doubled."""
+
+
+def doubled(said: str) -> bool:
+    """Two people listed with the same hat and clothes: one character copied
+    (Scarlet's thumbnail, 2026-10-11: Watson drawn as a second Holmes)."""
+    from studio.series_title import transcription
+    rows = [";".join(p.strip() for p in line.lower().split(";")[:2])
+            for line in transcription(said or "").splitlines() if ";" in line]
+    return len(rows) != len(set(rows))
+
+
+def banner_thumbnail(plate, spec: BookTitleSpec, *, episodes: int, font: Path):
+    """1280x720: the whole wide plate on top, the title in a dark band under it --
+    for when no thumbnail plate passes and the hero plate (already vetted) must serve."""
+    from PIL import Image, ImageDraw, ImageFont
+    w, h = 1280, 720
+    pic = Image.new("RGB", (w, h), (8, 9, 12))
+    top = plate.convert("RGB").resize((w, round(plate.height * w / plate.width)))
+    pic.paste(top, (0, 0))
+    band = top.height
+    fade = Image.linear_gradient("L").resize((w, 60))
+    pic.paste(Image.new("RGB", (w, 60), (8, 9, 12)), (0, band - 60), fade)
+    draw = ImageDraw.Draw(pic)
+    lines, px = fit_lines(spec.title, font, max_w=1180, start_px=min(110, h - band - 40), min_px=30)
+    draw.text((w // 2, band + 8), lines[0] if len(lines) == 1 else " ".join(lines), font=ImageFont.truetype(str(font), px),
+              fill=(255, 255, 255), anchor="ma")
+    small = ImageFont.truetype(str(font), 30)
+    draw.text((w // 2, h - 12), f"FULL ADAPTATION · {episodes} EPISODES  ·  {spec.author.upper()}", font=small,
+              fill=(235, 196, 120), anchor="md")
+    return pic

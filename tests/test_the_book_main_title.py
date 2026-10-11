@@ -203,3 +203,29 @@ def test_the_readers_drama_score_is_its_first_number_capped_at_ten():
 def test_the_hero_title_and_the_judge_read_the_same_layout():
     lines, px = bt.hero_layout("The War of the Worlds", FONT, width=1536, height=642)
     assert lines == ["THE WAR OF", "THE WORLDS"] and px > 100
+
+
+def test_only_a_square_short_feeds_the_cold_open():
+    """Scarlet ep01 is 768x1344: cropped into the band it shows its own side bars."""
+    info = "  Stream #0:0[0x1](und): Video: h264 (High), yuv420p(progressive), {}, 24 fps (default)\n"
+    assert bt.square_source(info.format("1536x1536 [SAR 1:1 DAR 1:1]"))
+    assert not bt.square_source(info.format("768x1344"))
+
+
+def test_two_people_listed_with_the_same_hat_and_coat_are_one_person_drawn_twice():
+    """A yes/no question passed Scarlet's two Holmeses; a list judged in code does not."""
+    said = '["deerstalker; long dark coat; dark hair", "deerstalker; long dark coat; dark hair"]'
+    assert bt.doubled(said)
+    assert not bt.doubled("deerstalker; long dark coat; dark hair\nbowler hat; tweed coat; moustache")
+    assert not bt.doubled("no hat; red dress; long hair")
+
+
+def test_the_fallback_thumbnail_is_the_hero_plate_over_a_title_band():
+    """Scarlet's thumbnail prompt drew Holmes twice on three seeds; the hero plate passed."""
+    from PIL import Image
+    spec = bt.BookTitleSpec(title="A Study in Scarlet", author="Arthur Conan Doyle", hero="h", thumb="t", sting="s")
+    plate = Image.new("RGB", (2560, 1088), (120, 30, 30))
+    thumb = bt.banner_thumbnail(plate, spec, episodes=14, font=FONT)
+    assert thumb.size == (1280, 720)
+    assert thumb.getpixel((640, 100)) == (120, 30, 30)                              # the picture on top
+    assert thumb.crop((0, 560, 1280, 720)).convert("L").getextrema()[1] == 255      # white type in the band

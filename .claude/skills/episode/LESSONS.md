@@ -531,3 +531,22 @@ fixes. Each lesson below cost at least one launch. Tracker rows A38-A74 in
   card's first frame, 3818 the black). They land in `compilation/chapters/` and
   are re-cut only when their frame count is wrong. The first WotW book video
   had the card at each chapter's END; the owner caught it on the channel.
+- **The book's main title, first runs (2026-10-11).** WotW and Scarlet book videos
+  are live (HSn8Gl7mnyA, IDtuFR_VAqo); the old WotW one is private. What the
+  first renders taught:
+  - The sharpest faceless shot is not a trailer shot: the cold open picked a
+    gate, a sawmill and a railway. The VLM now scores drama on a shortlist.
+  - ACE-Step stings open ON their hit (0.68 s): lay the hit on the black and put a
+    riser under the cold open; one loudnorm pass on 7 s lands 1.5 dB short.
+  - No fixed scene threshold finds a card: WotW ep01's dark-to-dark cut scored
+    0.24. The card is the BIGGEST change in the 240 frames before the black.
+  - A yes/no "is anyone drawn twice?" passed two Holmeses. LIST then judge in
+    code, and give the reader a worked example, or it echoes the template.
+  - A thumbnail prompt asking for "both figures" drew Holmes twice on three
+    seeds; the vetted hero plate over a title band is the fallback.
+  - A portrait Short padded into the band shows its bars: cold open from square
+    Shorts only.
+  - Two runs on one folder: a "detached" `&` job survived its shell and raced
+    the upload run. Start long jobs only as tracked background tasks.
+  - Keep the GPU fed: the Scarlet title could render while WotW's CPU checks ran.
+
