@@ -124,7 +124,7 @@ def packed(ctx) -> list[list[int]]:
     from studio import episode_takes as tk
     plan = episode_home.read_json(episode_home.home(ctx.book_dir, ctx.number) / "plan.json")
     setups = {s["index"]: s.get("setup") for s in plan.get("shots") or []}
-    rows = [dict(s, setup=setups.get(s["index"])) for s in placed_of(ctx.book_dir, ctx.number)["shots"]]
+    rows = [dict(s, setup=setups.get(s["index"])) for s in placed_of(ctx.book_dir, ctx.number).get("shots") or []]
     return [g for g in tk.groups(rows) if len(g) > 1]
 
 
