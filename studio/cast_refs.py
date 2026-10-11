@@ -269,6 +269,19 @@ def _words(text: str) -> str:
     return " ".join(re.sub(r"[^a-z0-9'-]+", " ", (text or "").lower()).split())
 
 
+def card_words(book: Path, who: str, look: str | None) -> str:
+    """The dossier card's own chapter words: `profile.physical` plus the
+    chapter look's wardrobe.  A tag may quote these as well as the row: the row
+    drops the body's hair clause when the look restates a head layer (c300c4f),
+    and the ep11 plan quotes the artilleryman's hair (C2_verdict #1)."""
+    path = Path(book) / "analysis" / "characters" / f"{who}.json"
+    if not path.exists():
+        return ""
+    prof = json.loads(path.read_text(encoding="utf-8")).get("profile") or {}
+    worn = (prof.get("wardrobe") or {}).get(look or "", "") or ""
+    return f"{prof.get('physical') or ''} {worn}"
+
+
 def tag(book: Path, who: str, said: str, fragments: list[str], chapter: int | None = None) -> str:
     """A plan's short name for a person: `said`, then fragments QUOTED from the
     person's bound row, as a comma list of the row's own words.
@@ -286,7 +299,8 @@ def tag(book: Path, who: str, said: str, fragments: list[str], chapter: int | No
     else:
         r = row(book, who)
     body = _words(" ".join([r.get("physical", "")] + list((r.get("wardrobe") or {}).values())))
-    if missing := [f for f in fragments if _words(f) not in body]:
+    card = _words(card_words(book, who, r.get("look"))) if chapter is not None else ""
+    if missing := [f for f in fragments if _words(f) not in body and _words(f) not in card]:
         raise ValueError(f"{who}: the row does not say {missing}")
     # CLOSED IN PARENTHESES: an open comma list ran on into the plan's next verb,
     # "long white apron to the shin standing at the side gate" (ep09 T01).

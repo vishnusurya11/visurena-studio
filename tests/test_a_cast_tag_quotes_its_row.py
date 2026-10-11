@@ -54,3 +54,32 @@ def test_a_plan_tags_against_its_own_chapter_whatever_is_bound():
     got = tag(book, "unnamed_first_person_narrator", "the narrator",
               ["Straw boater with a black band"], chapter=9)
     assert "straw boater" in got
+
+
+def card_book(tmp_path, monkeypatch):
+    """A book whose chapter row has lost the body's hair clause (the look
+    restates the head, c300c4f) while the dossier card still says it."""
+    from studio import pack_refs
+    chars = tmp_path / "analysis" / "characters"
+    chars.mkdir(parents=True)
+    (chars / "gunner.json").write_text(json.dumps({"profile": {
+        "physical": "Man of 31. Thick straight black hair falling forward over the brow.",
+        "wardrobe": {"hatless": "Blue tunic blackened with soot."}}}))
+    monkeypatch.setattr(pack_refs, "character_row", lambda book, who, chapter: {
+        "physical": "Man of 31. Hair matted with ash.", "look": "hatless",
+        "wardrobe": {"indoor": "Blue tunic blackened with soot."}})
+    return tmp_path
+
+
+def test_a_fragment_the_card_says_but_the_row_drops_is_quoted(tmp_path, monkeypatch):
+    """C2_verdict #1: the ep11 regen. row_text drops the body's hair when the
+    look restates a head layer; the card's own chapter words still say it."""
+    got = tag(card_book(tmp_path, monkeypatch), "gunner", "the gunner",
+              ["Thick straight black hair falling forward over the brow"], chapter=11)
+    assert got == "the gunner (thick straight black hair falling forward over the brow)"
+
+
+def test_a_fragment_neither_the_row_nor_the_card_says_still_refuses(tmp_path, monkeypatch):
+    with pytest.raises(ValueError, match="the row does not say"):
+        tag(card_book(tmp_path, monkeypatch), "gunner", "the gunner",
+            ["clipped sandy moustache"], chapter=11)
