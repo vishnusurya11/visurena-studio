@@ -64,6 +64,11 @@ covers only timing inputs, so a reworded frame does not stale it.
 
 ## Grids and the panel cut — `grids.py`, `panels.py` (HARD)
 
+- **G-GRID-SHAPE (2026-10-11, C1_verdict #3):** a grid holds 1 or 4 cells, never 2
+  or 3 (`grid_layout.GOOD = (1, 4)`; n shots lay out as [4]*(n//4) + [1]*(n%4)).
+  Strip grids seamed 15/201 panels against 0/198 square-ish (p = 4.7e-5): Qwen
+  draws its own grid count on a 2:1 or 3:1 canvas. ep19-27 replay: +1..7 grid
+  calls per episode (mean +4.4), the same megapixels.
 - **grids:** the chapter stamp; the shot count equals cols x rows; at most 3
   slots. The cast is dressed from the same chapter row as the take
   (`cast_refs.row`); a guard refuses a chapter given as a number.

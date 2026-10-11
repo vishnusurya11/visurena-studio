@@ -72,10 +72,10 @@ def failing(*wheres: str) -> Verdict:
 def test_seed_then_reprose_then_flagged(tmp_path):
     ctx = Ctx(tmp_path)
     board, rows = board_of(ctx)
-    grid = next(r for r in rows if 9 in r["shots"])
+    grid = next(r for r in rows if 11 in r["shots"])          # hearth_night's anchor (its full shot)
     name = grid_layout.name_of(5, grid)
     rebuilt, files_while_climbing = [], []
-    reads = iter([failing("shot_09"), failing("shot_09"), failing("shot_09")])
+    reads = iter([failing("shot_11"), failing("shot_11"), failing("shot_11")])
 
     def rebuild():
         rebuilt.append(len(ctx.launched))
@@ -89,25 +89,26 @@ def test_seed_then_reprose_then_flagged(tmp_path):
 
     argv = grid_layout.argv(grid)
     # one room per setup (2026-09-28): the faulted grid is its setup's anchor, so each rung
-    # redraws it and then its sibling (the 1x1) on the room cut from it
-    sibling = grid_layout.argv(next(r for r in rows if 12 in r["shots"]))
-    assert ctx.launched == [["scripts/episode/grids.py", *argv, "--seed-bump=1"],
-                            ["scripts/episode/grids.py", *sibling, "--seed-bump=1"],
-                            ["scripts/episode/grids.py", *argv, "--seed-bump=2"],
-                            ["scripts/episode/grids.py", *sibling, "--seed-bump=2"]]
-    assert rebuilt == [2, 4] and files_while_climbing == [[], []]
+    # redraws it and then its siblings (no strips: three 1x1s) on the room cut from it
+    kin = [grid_layout.argv(r) for r in rows if r["setup"] == grid["setup"] and r is not grid]
+    assert len(kin) == 3
+    assert ctx.launched == ([["scripts/episode/grids.py", *argv, "--seed-bump=1"]]
+                            + [["scripts/episode/grids.py", *k, "--seed-bump=1"] for k in kin]
+                            + [["scripts/episode/grids.py", *argv, "--seed-bump=2"]]
+                            + [["scripts/episode/grids.py", *k, "--seed-bump=2"] for k in kin])
+    assert rebuilt == [4, 8] and files_while_climbing == [[], []]
     superseded = sorted(p.name for p in (board / "superseded").iterdir() if p.name.startswith(name))
     assert superseded == sorted(f"{name}_v{k}.{ext}" for k in (1, 2) for ext in ("png", "json", "txt"))
     assert (board / "grids" / f"{name}.png").stat().st_size > 0            # the fresh render stands
     assert (board / "anchors" / f"{grid['setup']}.png").exists()           # the room, cut from the anchor
 
     plan = json.loads((ctx.home / "plan.json").read_text(encoding="utf-8"))
-    frame = next(s["frame"] for s in plan["shots"] if s["index"] == 9)
+    frame = next(s["frame"] for s in plan["shots"] if s["index"] == 11)
     assert frame.startswith(panel_ladder.cure("clones", {}))
 
     doc = json.loads(signed.read_text(encoding="utf-8"))
     assert doc["verdict"] == "flagged" and doc["terminal"] == "keep_best"
-    assert doc["signed_by"] == "judge:panel_eye@1" and doc["faults"][0]["where"] == "shot_09"
+    assert doc["signed_by"] == "judge:panel_eye@1" and doc["faults"][0]["where"] == "shot_11"
     assert [(l.action, l.terminal) for l in ctx.learned] == [
         ("redraw_grid_seed", False), ("reprose", False), ("keep_best", True)]
     assert audit_rows.load(ctx.book_dir)[0].gate == "EYE_PANELS"
@@ -117,12 +118,12 @@ def test_a_pass_after_the_seed_rung_never_reproses(tmp_path):
     ctx = Ctx(tmp_path)
     board, rows = board_of(ctx)
     before = (ctx.home / "plan.json").read_text(encoding="utf-8")
-    reads = iter([failing("shot_09"), Verdict(judge="panel_eye", version="1", passed=True, confidence=1.0, reads=25)])
+    reads = iter([failing("shot_11"), Verdict(judge="panel_eye", version="1", passed=True, confidence=1.0, reads=25)])
     signed = judged_gate.clear(
         ctx, "EYE_PANELS", judge=lambda: next(reads),
         sign=lambda v: eye_verdict.sign_verdict(board, sorted(board.glob("shot_*.png")), v),
         ladder=panel_ladder.rungs(ctx, lambda: None, cap=2), terminal=panel_ladder.keep_best, policy=AUTO)
-    assert len(ctx.launched) == 2 and ctx.launched[0][-1] == "--seed-bump=1"   # the anchor, then its sibling
+    assert len(ctx.launched) == 4 and ctx.launched[0][-1] == "--seed-bump=1"   # the anchor, then its 3 siblings
     assert (ctx.home / "plan.json").read_text(encoding="utf-8") == before
     assert json.loads(signed.read_text(encoding="utf-8"))["verdict"] == "pass"
     assert audit_rows.load(ctx.book_dir) == []

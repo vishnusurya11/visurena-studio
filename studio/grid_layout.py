@@ -10,8 +10,12 @@ This rule SUPERSEDES D3 as of 2026-09-24 (decision
 
 - a grid holds at most four cells (MOST, measured; nine until 2026-09-28) and `cols x rows == shots`, because a blank
   cell is a cell the drawer fills with its own invention (`grid_shape`);
-- a count with no square-ish shape splits into the fewest, most balanced
-  pieces: 5 -> 3 + 2, 7 -> 4 + 3, 10 -> 6 + 4, 19 -> 6 + 4 + 9;
+- a grid is 1 or 4 cells, never 2 or 3 (G-GRID-SHAPE, 2026-10-11, C1_verdict #3):
+  n shots split as [4] * (n // 4) + [1] * (n % 4), so 3 -> 1 + 1 + 1, 5 -> 4 + 1,
+  7 -> 4 + 1 + 1 + 1.  MEASURED over 572 WotW panels: strip grids (2x1, 3x1)
+  seamed 15/201, square-ish 0/198 (p = 4.7e-5) -- Qwen draws its own grid count
+  on a strip canvas, and no seed bump cured it.  The room is held by the anchor
+  chain (2026-09-28), not by sharing a strip;
 - a setup that mixes a FACE (close sizes) with a WIDE puts each face in a 1x1
   of its own -- the skill's rule, measured: a mixed 2x2 drew a medium close
   as a full figure, and a 1x1 holds its head count where a 2x2 does not;
@@ -30,8 +34,9 @@ MOST = 4
 sharpness 1.04-1.44 and 0-6 % of panels under 0.5 for 1-4 cells; 0.69 / 17 % at
 6; 0.41 / 88 % at 8 (ep14's attic 4x2 failed blur on five of eight panels, and
 no seed or reprose rung can cure a cell's share of the pixels).  Was nine."""
-GOOD = (1, 2, 3, 4)
-"""Counts that lay out as one grid without a hole or a long strip."""
+GOOD = (1, 4)
+"""Counts that lay out as one grid without a hole or a strip: a 2:1 canvas came back
+as a 2x2 of four copies and a 3:1 as four columns (C1_G §3.2), so 2 and 3 are out."""
 FACES = ("extreme_close", "close", "medium_close")
 WIDES = ("wide", "full")
 FILE = Path("storyboard") / "layout.json"
@@ -50,13 +55,19 @@ def shape(n: int) -> tuple[int, int]:
 
 
 def pieces(n: int) -> list[int]:
-    """The grid sizes n shots split into: the fewest, most balanced GOOD parts."""
-    if n in GOOD:
-        return [n]
-    for small in range(n // 2, 0, -1):
-        if small in GOOD and (n - small) in GOOD:
-            return [n - small, small]
-    return pieces(n - n // 2) + pieces(n // 2)
+    """The grid sizes n shots split into: fours, then ones (never a strip)."""
+    return [MOST] * (n // MOST) + [1] * (n % MOST)
+
+
+def laid(setup: str, shots: list[int], tag: str = "") -> list[dict]:
+    """`shots` laid as pieces: a four keeps `tag`, each shot alone is tagged sNN
+    (the form `rows_for` gives a face), so no two rows of a setup share a name."""
+    out, at = [], 0
+    for n in pieces(len(shots)):
+        part = list(shots[at:at + n])
+        at += n
+        out.append(row(setup, *shape(n), part, tag if n == MOST else f"s{part[0]:02d}"))
+    return out
 
 
 def mixed(shots: list[dict]) -> bool:

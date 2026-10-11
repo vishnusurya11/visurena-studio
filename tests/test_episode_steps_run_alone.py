@@ -165,25 +165,34 @@ def test_prompts_launch_the_lint_then_the_last_frame_check(ctx):
 def test_board_writes_the_layout_by_rule_and_parks_on_nobody(ctx):
     assert not step_07_board.done(ctx)
     step_07_board.run(ctx)
-    assert ctx.launched == [["scripts/episode/grids.py", CODEX, "4", "yard", "2", "1", "--shots=1,2"]]
+    # no strips (G-GRID-SHAPE 2026-10-11): two shots are two tagged 1x1s, never a 2x1
+    assert ctx.launched == [["scripts/episode/grids.py", CODEX, "4", "yard", "1", "1", "a", "--shots=1"],
+                            ["scripts/episode/grids.py", CODEX, "4", "yard", "1", "1", "b", "--shots=2"]]
     assert episode_home.read_json(ctx.home / "storyboard" / "layout.json") == [
-        {"setup": "yard", "cols": 2, "rows": 1, "shots": [1, 2]}]
+        {"setup": "yard", "cols": 1, "rows": 1, "shots": [1], "tag": "a"},
+        {"setup": "yard", "cols": 1, "rows": 1, "shots": [2], "tag": "b"}]
 
 
 def test_board_is_done_when_every_grid_of_the_rule_exists(ctx):
     assert not step_07_board.done(ctx)
-    _png(ctx.home / "storyboard" / "grids" / "ep04_grid_yard_2x1.png")
+    _png(ctx.home / "storyboard" / "grids" / "ep04_grid_yard_1x1_a.png")
+    assert not step_07_board.done(ctx)
+    _png(ctx.home / "storyboard" / "grids" / "ep04_grid_yard_1x1_b.png")
+    assert not step_07_board.done(ctx)          # two grids of one setup: the anchor owes its room
+    _png(ctx.home / "storyboard" / "anchors" / "yard.png")
     assert step_07_board.done(ctx)
 
 
 def test_board_redraws_an_existing_grid_only_when_a_flag_asks(ctx):
-    _png(ctx.home / "storyboard" / "grids" / "ep04_grid_yard_2x1.png")
+    for tag in ("a", "b"):
+        _png(ctx.home / "storyboard" / "grids" / f"ep04_grid_yard_1x1_{tag}.png")
+    _png(ctx.home / "storyboard" / "anchors" / "yard.png")
     step_07_board.run(ctx)
     assert ctx.launched == []
     ctx.extra = ["--seed-bump=1"]
     step_07_board.run(ctx)
-    assert ctx.launched == [["scripts/episode/grids.py", CODEX, "4", "yard", "2", "1", "--shots=1,2",
-                             "--seed-bump=1"]]
+    assert ctx.launched == [["scripts/episode/grids.py", CODEX, "4", "yard", "1", "1", "a", "--shots=1", "--seed-bump=1"],
+                            ["scripts/episode/grids.py", CODEX, "4", "yard", "1", "1", "b", "--shots=2", "--seed-bump=1"]]
 
 
 # ---- 08 panels ----------------------------------------------------------------

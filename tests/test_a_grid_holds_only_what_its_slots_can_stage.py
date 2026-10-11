@@ -19,7 +19,7 @@ def test_a_shot_that_would_overfill_the_slots_opens_a_new_grid():
     needs = {0: {"captain", "ram"}, 1: {"machine"}, 2: {"brother", "ram"},
              3: {"machine", "ram"}, 4: {"machine", "ram"}, 5: {"captain"}}
     rows = grid_layout.layout({"deck": {}}, shots(*["medium"] * 6), needs=needs)
-    assert [r["shots"] for r in rows] == [[0], [1], [2], [3, 4], [5]]
+    assert [r["shots"] for r in rows] == [[0], [1], [2], [3], [4], [5]]   # a run of 2 is two 1x1s, never a strip
 
 
 def test_every_grid_needs_at_most_the_budget():
@@ -36,4 +36,4 @@ def test_shots_that_share_their_sheets_still_share_a_grid():
 
 def test_without_needs_the_layout_is_unchanged():
     plain = grid_layout.layout({"deck": {}}, shots(*["medium"] * 5))
-    assert [r["shots"] for r in plain] == [[0, 1, 2], [3, 4]]
+    assert [r["shots"] for r in plain] == [[0, 1, 2, 3], [4]]

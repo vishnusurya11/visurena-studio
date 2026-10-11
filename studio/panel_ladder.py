@@ -241,13 +241,13 @@ class Climb:
             return False
         number = getattr(self.ctx, "number", 0)
         supersede(self.home / "storyboard", grid_layout.name_of(number, mine))
-        rest = [i for i in mine["shots"] if i != index]
-        mine["cols"], mine["rows"] = grid_layout.shape(len(rest))
-        mine["shots"] = rest
+        # the rest re-laid by the no-strip rule (G-GRID-SHAPE): three left over are three 1x1s
+        rest = grid_layout.laid(mine["setup"], [i for i in mine["shots"] if i != index], mine.get("tag", ""))
         alone = grid_layout.row(mine["setup"], 1, 1, [index], tag=f"s{index:02d}")
-        rows.insert(rows.index(mine) + 1, alone)
+        at = rows.index(mine)
+        rows[at:at + 1] = [*rest, alone]
         grid_layout.write(self.home, rows)
-        for row in (mine, alone):
+        for row in (*rest, alone):
             remember_climbed(self.home, grid_layout.name_of(number, row))
             self.draw(row)
         return True

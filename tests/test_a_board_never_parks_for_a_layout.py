@@ -48,8 +48,8 @@ def test_the_board_writes_the_layout_by_rule_and_draws_every_grid(ctx):
     assert not step.done(ctx)
     step.run(ctx)
     assert ctx.launched == [
-        ["scripts/episode/grids.py", CODEX, "4", "yard", "3", "1", "a", "--shots=1,2,3"],
-        ["scripts/episode/grids.py", CODEX, "4", "yard", "2", "1", "b", "--shots=4,5"],
+        ["scripts/episode/grids.py", CODEX, "4", "yard", "2", "2", "a", "--shots=1,2,3,4"],
+        ["scripts/episode/grids.py", CODEX, "4", "yard", "1", "1", "b", "--shots=5"],
         ["scripts/episode/grids.py", CODEX, "4", "room", "1", "1", "--shots=7"],
         ["scripts/episode/grids.py", CODEX, "4", "room", "1", "1", "s06", "--shots=6"]]
     assert grid_layout.read(ctx.home) == grid_layout.layout(PLAN["setups"], PLAN["shots"])
@@ -102,7 +102,8 @@ def test_the_anchor_grid_is_drawn_first_and_its_room_is_cut_before_the_siblings(
         return 0
     ctx.launch = draw
     step.run(ctx)
-    assert [c[4] for c in ctx.launched] == ["2", "3"]          # the 2x1 (shots 4, 5) before the 3x1
+    # no strips (G-GRID-SHAPE 2026-10-11): 5 shots are a 2x2 (1-4, holding the wide 4) then a 1x1 (5)
+    assert [(c[4], c[5]) for c in ctx.launched] == [("2", "2"), ("1", "1")]
     assert (ctx.home / "storyboard" / "anchors" / "yard.png").exists()
 
 

@@ -79,16 +79,15 @@ def test_the_reprose_rung_isolates_the_twin_shot_into_a_tagged_1x1(tmp_path):
 
     climb.take(Rung("reprose", panel_ladder.RUNG_SECONDS), 0, twin_verdict("shot_16"))
 
-    rest = grid_layout.row("doorway_night", 3, 1, [14, 15, 17])
+    # no strips (G-GRID-SHAPE 2026-10-11): the three left over are three 1x1s, never a 3x1
+    rest = [grid_layout.row("doorway_night", 1, 1, [i], tag=f"s{i}") for i in (14, 15, 17)]
     alone = grid_layout.row("doorway_night", 1, 1, [16], tag="s16")
-    assert grid_layout.read(ctx.home) == [rest, alone]
-    assert ctx.launched == [
-        ["scripts/episode/grids.py", *grid_layout.argv(rest), "--seed-bump=1"],
-        ["scripts/episode/grids.py", *grid_layout.argv(alone), "--seed-bump=1"]]
+    assert grid_layout.read(ctx.home) == [*rest, alone]
+    assert ctx.launched == [["scripts/episode/grids.py", *grid_layout.argv(r), "--seed-bump=1"]
+                            for r in (*rest, alone)]
     superseded = sorted(p.name for p in (board / "superseded").iterdir())
     assert superseded == sorted(f"ep05_grid_doorway_night_2x2_v1.{ext}" for ext in ("png", "json", "txt"))
-    assert set(panel_ladder.load_climbed(ctx.home)) >= {
-        grid_layout.name_of(5, rest), grid_layout.name_of(5, alone)}
+    assert set(panel_ladder.load_climbed(ctx.home)) >= {grid_layout.name_of(5, r) for r in (*rest, alone)}
     assert rebuilt == [[14, 15, 16, 17]]
     frame = next(s["frame"] for s in json.loads((ctx.home / "plan.json").read_text(encoding="utf-8"))["shots"]
                  if s["index"] == 16)

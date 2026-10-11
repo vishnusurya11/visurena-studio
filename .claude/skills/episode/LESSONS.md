@@ -669,3 +669,14 @@ fixes. Each lesson below cost at least one launch. Tracker rows A38-A74 in
     dialogue mean >= -0.02), clones against the production take's own count, and
     invented speech against the control's own tail on that seed
     (`scripts/bench/rulers.judge_arm`).
+  - **Qwen draws its own grid count on a strip.** A 2:1 canvas came back as a 2x2 of
+    four copies (every 2x1 seam a row at 50 %), a 3:1 as four columns (seams at the
+    4-column gutters). 15/201 strip panels seamed against 0/198 square-ish (Fisher
+    p = 4.7e-5). A seed bump never cured it (ep22 .99/.98/.98, ep14 nine redraws).
+    Grids are 1x1 or 2x2 only (G-GRID-SHAPE). Cost on the ep19-27 plans: +1..7 grid
+    calls per episode (mean +4.4) at the same megapixels.
+  - **keep_best keeps the last draw, not the best.** `supersede()` moves every earlier
+    draw to `superseded/`, clean ones included (ep20 copper v1 and v4 read clean,
+    the shipped draw stacked). A best-of-draws restore is NOT built: a redrawn anchor
+    re-cuts the room and its siblings are redrawn to stage the new room (one-room
+    ruling), so an older sibling would stage the old room.

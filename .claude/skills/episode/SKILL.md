@@ -323,7 +323,9 @@ gets the place's first clause plus `Setup.light`. `panel_place` reads every
 loose panel against the room and names its mirror — advisory until calibrated
 (`docs/calibration/panel_place.md`). G-SETUP holds a setup to 50 s of picture.
 
-The layout is ruled by `grid_layout` (by setup and shot size); a close is bound by
+The layout is ruled by `grid_layout` (by setup and shot size): **a grid is 1 or 4
+cells, never 2 or 3** -- a strip canvas comes back as Qwen's own grid count, seamed
+(2026-10-11). A close is bound by
 the items above the chest only (9cb4609: six ep13 closes drew whole seated figures
 when bound to trousers and socks).
 
