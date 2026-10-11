@@ -2,14 +2,15 @@
 """The continuity slice's ACCEPTANCE replay (verdict S §6). GPU, local, $0 -- run
 only in an owner-approved GPU window; it writes nothing a shipped episode reads.
 
-    uv run python scripts/refs/look_replay.py <book_id> <episode> <setup> <cols> <rows> [--shots=1,2]
+    uv run python scripts/refs/look_replay.py <book_id> <episode> <setup> <cols> <rows> [--shots=1,2] [--out=<dir>]
 
 For one shipped grid: draw each staged person's chapter LOOK one hop from the
 base sheet (LOOK-STATE judged, the capped ladder), redraw the grid with the
 look pictures staged and the look's words, cut it into panels, and have the
 local VLM list each panel's hair colour and facial hair -- the same ask for
 the SHIPPED panels of those shots.  Everything lands under
-library/<book>/bench/continuity_2026-10-10/ep<NN>_<setup>/; nothing under
+library/<book>/bench/continuity_2026-10-10/ep<NN>_<setup>/ (or --out=<dir>/ep<NN>_<setup>/),
+with one strip per shot (shipped panel | replayed panel); nothing under
 refs/ or episodes/ is written, and the book gets no refs/looks.json.
 
 Pass: the person shows the look's hair colour AND facial hair in >= 80 % of
@@ -32,8 +33,23 @@ BENCH = Path("bench") / "continuity_2026-10-10"
 PASS_SHARE = 0.8
 
 
-def bench_dir(book: Path, number: int, setup: str) -> Path:
-    return Path(book) / BENCH / f"ep{number:02d}_{setup}"
+def bench_dir(book: Path, number: int, setup: str, out: str = "") -> Path:
+    return (Path(out) if out else Path(book) / BENCH) / f"ep{number:02d}_{setup}"
+
+
+def strip(shipped: Path, replayed: Path, target: Path) -> Path:
+    """Shipped panel | replayed panel, side by side at one height."""
+    from PIL import Image
+    pics = [Image.open(p).convert("RGB") for p in (shipped, replayed) if Path(p).exists()]
+    h = min(p.height for p in pics)
+    pics = [p.resize((max(1, p.width * h // p.height), h)) for p in pics]
+    out = Image.new("RGB", (sum(p.width for p in pics), h))
+    x = 0
+    for p in pics:
+        out.paste(p, (x, 0))
+        x += p.width
+    out.save(target)
+    return target
 
 
 def panel_boxes(width: int, height: int, cols: int, rows: int) -> list[tuple[int, int, int, int]]:
@@ -123,13 +139,14 @@ def cut(grid: Path, cols: int, rows: int, home: Path) -> list[Path]:
     return out
 
 
-def main(book_id: str, number: int, setup: str, cols: int, rows: int, only: list[int] | None) -> int:
+def main(book_id: str, number: int, setup: str, cols: int, rows: int, only: list[int] | None,
+         out: str = "") -> int:
     from scripts.episode import grids
     from scripts.refs.continuity_replay import table_of
     book = episode_home.book_dir(book_id)
     ep = episode_home.load_plan(book, number)
     shots = grids.grid_shots(ep, setup, cols, rows, only)
-    table, home = table_of(book), bench_dir(book, number, setup)
+    table, home = table_of(book), bench_dir(book, number, setup, out)
     home.mkdir(parents=True, exist_ok=True)
     looks = staged_looks(book, table, ep, shots)
     redirect(book, home, table, looks)
@@ -139,6 +156,8 @@ def main(book_id: str, number: int, setup: str, cols: int, rows: int, only: list
     now, then = read_panels(panels), read_panels([p for p in shipped if p.exists()])
     then = iter(then)
     then = [next(then) if p.exists() else {"unread": "no shipped panel"} for p in shipped]
+    for i, s in enumerate(shots):
+        strip(shipped[i], panels[i], home / f"strip_shot{s.index:02d}.png")
     report = {"looks": looks, "look_verdicts": verdicts}
     for who, look in looks.items():
         mine = [i for i, s in enumerate(shots) if who in (s.faces or [])]
@@ -154,4 +173,5 @@ def main(book_id: str, number: int, setup: str, cols: int, rows: int, only: list
 if __name__ == "__main__":
     plain = [a for a in sys.argv[1:] if not a.startswith("--")]
     only = [int(v) for a in sys.argv if a.startswith("--shots=") for v in a.split("=", 1)[1].split(",") if v]
-    raise SystemExit(main(plain[0], episode_arg(sys.argv), plain[2], int(plain[3]), int(plain[4]), only or None))
+    out = next((a.split("=", 1)[1] for a in sys.argv if a.startswith("--out=")), "")
+    raise SystemExit(main(plain[0], episode_arg(sys.argv), plain[2], int(plain[3]), int(plain[4]), only or None, out))

@@ -32,3 +32,12 @@ def test_the_staged_looks_are_the_chapters():
     table = LookBook(characters={"narrator": CharacterLooks.model_validate(fx.CARD)})
     shots = [SimpleNamespace(faces=["narrator", "curate"])]
     assert replay.staged_looks(None, table, SimpleNamespace(number=24), shots) == {"narrator": "ragged"}
+
+
+def test_a_strip_sets_the_shipped_panel_beside_the_replayed(tmp_path):
+    from PIL import Image
+    Image.new("RGB", (100, 100)).save(tmp_path / "a.png")
+    Image.new("RGB", (50, 50)).save(tmp_path / "b.png")
+    out = replay.strip(tmp_path / "a.png", tmp_path / "b.png", tmp_path / "s.png")
+    assert Image.open(out).size == (100, 50)
+    assert replay.bench_dir(tmp_path, 25, "x", out="o").as_posix() == "o/ep25_x"
