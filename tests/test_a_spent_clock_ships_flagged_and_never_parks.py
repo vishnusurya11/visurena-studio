@@ -222,7 +222,8 @@ def _qc_ctx(tmp_path, report: dict, spent: bool):
 
 def test_a_cue_fail_at_a_spent_clock_ships_flagged(tmp_path, monkeypatch):
     rows = []
-    monkeypatch.setattr(step11.audit_rows, "append", lambda book, row: rows.append(row))
+    from studio import audit_rows
+    monkeypatch.setattr(audit_rows, "append", lambda book, row: rows.append(row))
     ctx, path = _qc_ctx(tmp_path, {**GOOD, "sound": [{"ok": False}], "passed": False}, spent=True)
     report = step11.qc_report(ctx, ["--engine=r2v"])
     assert report["passed"] is True and report["ceiling_flagged"] == ["sound"]

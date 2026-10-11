@@ -24,7 +24,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 
 from scripts.episode import eye_review  # noqa: E402
 from studio import comfy, episode_home, judged_gate, master_ladder, panel_content as pc  # noqa: E402
-from studio import audit_rows, gate_policy, step_cli, youtube_publish as yp  # noqa: E402
+from studio import ceiling, gate_policy, step_cli, youtube_publish as yp  # noqa: E402
 from studio.judges import master_eye  # noqa: E402
 
 STEP_ID = "11"
@@ -193,11 +193,7 @@ def past_ceiling(ctx, path: Path, report: dict) -> dict:
     if stop := [name for name in failed if name in gate_policy.SAFETY]:
         raise SystemExit(f"SAFETY: {', '.join(stop)}: {path.name} fails {stop} at a spent clock; "
                          f"only the closed SAFETY list stops the episode")
-    report = {**report, "passed": True, "ceiling_flagged": failed}
-    episode_home.write_json(path, report)
-    audit_rows.append(ctx.book_dir, {"unit": getattr(ctx, "unit", ""), "gate": "QC", "judge": "qc",
-                                     "sha8": report.get("sha8", ""), "artefact": path.name,
-                                     "faults": [{"kind": name} for name in failed], "terminal": "ceiling"})
+    report = ceiling.flag_qc(ctx.book_dir, getattr(ctx, "unit", ""), path, report, failed)
     ctx.log(f"qc: the clock is spent; {path.name} ships flagged on {failed}")
     return report
 

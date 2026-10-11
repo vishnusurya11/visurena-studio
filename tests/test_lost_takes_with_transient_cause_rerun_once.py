@@ -26,7 +26,7 @@ def fake_engine(monkeypatch, outcomes):
         batches.append([c["index"] for c, _ in jobs])
         return [(c, f"p{c['index']}") for c, _ in jobs]
 
-    def collect_all(tickets, where, on_take=None):
+    def collect_all(tickets, where, on_take=None, stop=lambda: False):
         say = next(rounds)
         done = [c for c, _ in tickets if say[c["index"]] == "done"]
         lost = [(c, say[c["index"]]) for c, _ in tickets if say[c["index"]] != "done"]

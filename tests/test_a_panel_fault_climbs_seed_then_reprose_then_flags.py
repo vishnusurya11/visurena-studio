@@ -109,7 +109,7 @@ def test_seed_then_reprose_then_flagged(tmp_path):
     doc = json.loads(signed.read_text(encoding="utf-8"))
     assert doc["verdict"] == "flagged" and doc["terminal"] == "keep_best"
     assert doc["signed_by"] == "judge:panel_eye@1" and doc["faults"][0]["where"] == "shot_11"
-    assert [(l.action, l.terminal) for l in ctx.learned] == [
+    assert [(l.action, l.terminal) for l in ctx.learned if l.gate != "budget"] == [   # C3 #6: a headroom row
         ("redraw_grid_seed", False), ("reprose", False), ("keep_best", True)]
     assert audit_rows.load(ctx.book_dir)[0].gate == "EYE_PANELS"
 

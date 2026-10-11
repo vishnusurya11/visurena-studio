@@ -12,9 +12,12 @@ import pytest
 from studio.run_budget import EPISODE_CEILING_SECONDS, EPISODE_SHARES
 
 
-def test_the_panel_share_covers_its_reads_and_one_rung():
+def test_the_panel_share_covers_its_measured_p50():
+    """REWRITTEN (C3_verdict #6, D10): 08 holds its measured P50 (C3_T §3.3:
+    P50 20, P90 36 min after the VL resident window); a rung past the share is
+    paid by headroom, never refused below the ceiling."""
     minutes = EPISODE_SHARES["08"] * EPISODE_CEILING_SECONDS / 60
-    assert minutes >= 28 + 28
+    assert minutes >= 20
 
 
 def test_the_shares_still_fill_the_ceiling_exactly():
@@ -22,4 +25,6 @@ def test_the_shares_still_fill_the_ceiling_exactly():
 
 
 def test_the_takes_keep_what_they_measured():
-    assert EPISODE_SHARES["09"] * EPISODE_CEILING_SECONDS >= 7176     # ep13's shoot asked 7176 s
+    """REWRITTEN (C3_verdict #6): ep13's 7176 s was before CK8 narration; the
+    measured P50 is 118 min x 0.83 = 98 min, held as 105."""
+    assert EPISODE_SHARES["09"] * EPISODE_CEILING_SECONDS >= 98 * 60

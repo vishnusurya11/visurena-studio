@@ -35,7 +35,7 @@ def test_framing_and_posture_alone_take_no_rung(tmp_path):
     board, _ = board_of(ctx)
     clear(ctx, board, iter([verdict(("framing", "shot_03"), ("posture", "shot_10"))]))
     assert ctx.launched == []
-    assert [(l.action, l.terminal) for l in ctx.learned] == [("keep_best", True)]
+    assert [(l.action, l.terminal) for l in ctx.learned if l.gate != "budget"] == [("keep_best", True)]
 
 
 def call_of(call: list) -> list:
@@ -54,7 +54,7 @@ def test_a_curable_fault_still_climbs_and_only_its_grid_is_redrawn(tmp_path):
     kin = [grid_layout.argv(r) for r in [grid] + grid_room.siblings(rows, grid, shots)]
     assert call_of(ctx.launched[0]) == grid_layout.argv(grid)
     assert all(call_of(call) in kin for call in ctx.launched)
-    assert [l.action for l in ctx.learned] == ["redraw_grid_seed", "reprose", "keep_best"]
+    assert [l.action for l in ctx.learned if l.gate != "budget"] == ["redraw_grid_seed", "reprose", "keep_best"]
 
 
 def test_what_a_redraw_can_cure():

@@ -59,9 +59,11 @@ def ctx(tmp_path):
     return context
 
 
-def test_over_the_ceiling_the_render_is_refused_before_launch(ctx):
-    """With a KEPT take on disk: round 0 is over, so past the ceiling the
-    refusal fires (round 0 itself renders regardless -- ep15 ruling)."""
+def test_over_the_ceiling_the_missing_takes_still_render(ctx, monkeypatch):
+    """REWRITTEN (C3_verdict #5 (i), D3; was ..._the_render_is_refused_before_launch):
+    with a kept take on disk and the ceiling spent, the take still MISSING
+    renders -- firsts are never refused, only repeats; the old refusal parked
+    a half-rendered round 0 forever."""
     now = [17_950.0]
     ctx.budget = Budget(EPISODE_CEILING_SECONDS, EPISODE_SHARES, clock=lambda: now[0])
     ctx.budget.t0 = 0.0
@@ -77,9 +79,10 @@ def test_over_the_ceiling_the_render_is_refused_before_launch(ctx):
         episode_home.write_json(board / name, [{"shot": 1, "passed": True},
                                                {"shot": 2, "passed": True}])
     eye_verdict.sign(board, [board / "shot_01.png", board / "shot_02.png"], "pass", "fine")
-    with pytest.raises(SystemExit, match="ceiling"):
-        step.run(ctx)
-    assert ctx.launched == []
+    monkeypatch.setattr(step.take_ladder, "measured", lambda *a, **k: None)
+    monkeypatch.setattr(step, "judge_takes", lambda ctx, flag: None)     # the take ladder is terminal there
+    step.run(ctx)
+    assert "--approved=render" in ctx.launched[0]
 
 
 def test_under_the_ceiling_the_render_launches_with_the_earned_flag(ctx):
