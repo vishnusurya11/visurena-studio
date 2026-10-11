@@ -932,7 +932,21 @@ def main(book_id: str, number: int, engine: str = "i2v",
     finished_file.publish(out, master)
     keep = next_iteration(home)
     (home / "cut" / f"master_iter{keep}.mp4").write_bytes(master.read_bytes())
+    conformed = work / "title_conformed.mp4"
+    record_layout(home / "cut", master, main=video_frames(mixed),
+                  card=video_frames(conformed) if conformed.exists() else 0)
     print(f"master -> {master}  (kept as master_iter{keep}.mp4)")
+
+
+def record_layout(cut: Path, master: Path, *, main: int, card: int) -> None:
+    """Where this master's card starts, by its sha8 (cut/master_layout.json): the
+    book video splits the Short there instead of guessing it (it guessed wrong
+    on WotW ep06/10/20 and Scarlet ep12, 2026-10-11)."""
+    from studio import book_compilation as bc, youtube_publish as yp
+    path = cut / bc.LAYOUT
+    layout = episode_home.read_json(path) if path.exists() else {}
+    layout[yp.sha8(master)] = {"main": main, "card": card, "chip": edit_gate.END_CHIP_FRAMES}
+    episode_home.write_json(path, layout)
 
 
 def write_cut_manifest(work: Path, records: list[dict], book: Path) -> Path:

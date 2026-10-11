@@ -87,16 +87,26 @@ def card_of(book: Path, n: int) -> Path:
     return card if card.exists() else book / "title" / "title.mp4"
 
 
+def card_range(book: Path, n: int, master: Path) -> tuple[int, int]:
+    """(card start, card frames): as assemble recorded it for these bytes, else
+    measured (an older Short) -- the cut where the card's own length puts it."""
+    path = master.parent / bc.LAYOUT
+    if path.exists() and (known := bc.recorded_split(episode_home.read_json(path), yp.sha8(master))):
+        return known
+    black = bc.frame_at(black_tail(master), fps=FPS)
+    start = bc.card_start(scores=scene_scores(master), black_from=black, card_frames=frames(card_of(book, n)))
+    return start, black - start
+
+
 def split(book: Path, n: int, master: Path) -> tuple[Path, Path]:
     """The chapter's two videos -- title, main -- cut out of its Short
     (owner 2026-10-11); the card MEASURED in the Short (the cut where its own
     length puts it before the closing black), each piece's frames checked."""
     folder = book / "compilation" / "chapters"
     folder.mkdir(parents=True, exist_ok=True)
-    black = bc.frame_at(black_tail(master), fps=FPS)
-    start = bc.card_start(scores=scene_scores(master), black_from=black, card_frames=frames(card_of(book, n)))
+    start, card = card_range(book, n, master)
     out = {}
-    for name, (a, b) in bc.pieces(main=start, card=black - start).items():
+    for name, (a, b) in bc.pieces(main=start, card=card).items():
         out[name] = folder / f"ep{n:02d}_{name}.mp4"
         if not (out[name].exists() and frames(out[name]) == b - a):
             subprocess.run(bc.cut_argv(master, (a, b), out[name], fps=FPS, side=SIDE), check=True)

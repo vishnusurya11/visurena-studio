@@ -193,3 +193,14 @@ def lock_holder(lock: Path, *, alive) -> int | None:
     except (OSError, ValueError):
         return None
     return pid if alive(pid) else None
+
+
+LAYOUT = "master_layout.json"
+"""cut/<this>: {sha8: {main, card, chip}} written by assemble for every master it builds."""
+
+
+def recorded_split(layout: dict, sha8: str) -> tuple[int, int] | None:
+    """(main frames, card frames) assemble recorded for these exact bytes, else None
+    (an older Short: the card is measured)."""
+    row = layout.get(sha8)
+    return (int(row["main"]), int(row["card"])) if row else None

@@ -128,3 +128,24 @@ def test_a_chapter_cards_art_follows_the_books_look_and_redraws_a_doubled_person
     assert [c[0] for c in calls] == ["image_krea2_turbo_t2i", "image_krea2_turbo_t2i"]   # photoreal, redrawn once
     assert calls[0][1]["enable_lora"] is False and calls[1][1]["seed"] == calls[0][1]["seed"] + 1
     assert out.read_bytes() == b"png"
+
+
+def test_a_short_recorded_by_assemble_is_split_where_it_was_built_not_measured():
+    """The card was guessed by measurement and guessed wrong four times; assemble
+    knows where it put the card, so it writes it down by the Short's sha8."""
+    layout = {"ab12cd34": {"main": 3711, "card": 107, "chip": 6}}
+    assert bc.recorded_split(layout, "ab12cd34") == (3711, 107)
+    assert bc.recorded_split(layout, "ffffffff") is None          # a Short assemble did not record
+    assert bc.recorded_split({}, "ab12cd34") is None
+
+
+def test_assemble_records_where_it_put_the_card_by_the_masters_bytes(tmp_path):
+    import importlib.util, sys
+    from studio import youtube_publish as yp
+    loader = importlib.util.spec_from_file_location("asm_retro", ROOT / "scripts" / "episode" / "assemble.py")
+    asm = importlib.util.module_from_spec(loader); sys.modules["asm_retro"] = asm; loader.loader.exec_module(asm)
+    master = tmp_path / "master_r2v.mp4"
+    master.write_bytes(b"short")
+    asm.record_layout(tmp_path, master, main=3711, card=107)
+    layout = __import__("json").loads((tmp_path / bc.LAYOUT).read_text(encoding="utf-8"))
+    assert bc.recorded_split(layout, yp.sha8(master)) == (3711, 107)
