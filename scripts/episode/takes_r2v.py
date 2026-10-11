@@ -49,7 +49,10 @@ import no_last_frame  # noqa: E402  the owner's rule, checked on the built promp
 
 W, H, FPS, STEPS = canvas.size("9:16") + (24, 8)
 """W and H are rebound from the plan in `main`; the plan declares the aspect."""
-BASE = "video_minimax_h3_r2v_turbo_ref8"
+BASE = "video_minimax_h3_r2v_turbo_ref8_crf_visurena"
+"""The same graph saved at CRF 10 (bench phase 0, 2026-10-10: shipped takes were
+ffmpeg's default CRF 23, 0.9-2.5 Mb/s, banding before any re-encode).  Rollback:
+`video_minimax_h3_r2v_turbo_ref8`.  The family note on that base follows."""
 """The ref2va-FAMILY turbo (dedicated lightx2v Ref2V 8-step v1.0 768p LoRA,
 shift 12/3 per its release post; iteration 3 ran at 6/3, the FL2VA row).  Episode 1's first r2v master was rendered on `r2v_turbo`, whose
 ckpt850 LoRA is FL2VA-lineage: a family mismatch the owner caught
