@@ -157,7 +157,13 @@ def qc_report(ctx, extra: list[str]) -> dict:
         report = episode_home.read_json(qc)
         # the same bytes AND the same measuring code (ep24 03:45Z: a FAIL by a
         # rule fixed since was reused on an identical recut, forever)
-        if report.get("sha8") == yp.sha8(master) and report.get("measures_sha8") == qc_measures_sha8():
+        same_code = report.get("measures_sha8") == qc_measures_sha8()
+        if report.get("sha8") == yp.sha8(master) and report.get("passed") and spent and not same_code:
+            # past the ceiling a PASS on these bytes stands under moved code: a
+            # re-measure is a repeat (2026-10-11); a FAIL is measured again below
+            ctx.log(f"qc: {qc.name} passed sha8 {report['sha8']} under older code; it stands (spent clock)")
+            return report
+        if report.get("sha8") == yp.sha8(master) and same_code:
             if report.get("passed"):
                 ctx.log(f"qc: {qc.name} already measured sha8 {report['sha8']}; reused")
                 return report

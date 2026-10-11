@@ -556,21 +556,23 @@ def measures_sha8() -> str:
     return hashlib.sha256(body).hexdigest()[:8]
 
 
-def cached(take_dir: Path, index: int, kept: Path) -> dict | None:
+def cached(take_dir: Path, index: int, kept: Path, any_code: bool = False) -> dict | None:
     """The verdict already written for exactly these bytes BY this measuring
     code, or None.  2026-09-29: 8 full passes decoded every unchanged take
     (2.1 h on ep14).  2026-10-08: the fixed letterbox measure never reached
-    ep21's T27/T30 -- the cache served the old refusals, 'bytes unchanged'."""
+    ep21's T27/T30 -- the cache served the old refusals, 'bytes unchanged'.
+    `any_code` (a spent clock, 2026-10-11): a re-judge is a repeat, so the
+    verdict on these bytes stands under any measuring code."""
     path = Path(take_dir) / f"T{index:02d}.dq.json"
     if not path.exists() or not Path(kept).exists():
         return None
     import json
     report = json.loads(path.read_text(encoding="utf-8"))
-    same = report.get("take_sha8") == take_sha8(kept) and report.get("measures_sha8") == measures_sha8()
-    return report if same else None
+    code = any_code or report.get("measures_sha8") == measures_sha8()
+    return report if report.get("take_sha8") == take_sha8(kept) and code else None
 
 
-def main(book_id: str, number: int, indices: list[int], attempts: bool = False) -> None:
+def main(book_id: str, number: int, indices: list[int], attempts: bool = False, spent: bool = False) -> None:
     book = episode_home.book_dir(book_id)
     home = episode_home.home(book, number)
     episode = episode_home.load_plan(book, number)
@@ -596,7 +598,7 @@ def main(book_id: str, number: int, indices: list[int], attempts: bool = False) 
         rec["line_room"] = line_room(placed, rec)
         rec["daylight"] = daylit(episode, rec)
         rec["head"] = edit_gate.heads_in(home).get(index, 0.0)
-        if not attempts and (hit := cached(take_dir, index, book / rec["rel_path"])) is not None:
+        if not attempts and (hit := cached(take_dir, index, book / rec["rel_path"], any_code=spent)) is not None:
             episode_home.write_json(take_dir / f"T{index:02d}.dq.json", hit)   # a fresh mtime for mtime readers
             print(f"T{index:02d} cached ({hit.get('score', '?')}/100, bytes unchanged)", flush=True)
             continue
@@ -622,4 +624,4 @@ def main(book_id: str, number: int, indices: list[int], attempts: bool = False) 
 
 if __name__ == "__main__":
     main(sys.argv[1], int(sys.argv[2]), [int(a) for a in sys.argv[3:] if a.isdigit()],
-         attempts="--attempts" in sys.argv)
+         attempts="--attempts" in sys.argv, spent="--ceiling-spent" in sys.argv)

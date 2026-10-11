@@ -196,6 +196,13 @@ def round_zero(room: Path) -> bool:
     return not takes_of(room)
 
 
+def dq_flags(ctx) -> list[str]:
+    """`--ceiling-spent` past the 5 h ceiling: a take's verdict on the same bytes
+    stands under moved measuring code (a re-judge is a repeat, 2026-10-11)."""
+    budget = getattr(ctx, "budget", None)
+    return ["--ceiling-spent"] if budget is not None and budget.ceiling_spent() else []
+
+
 def run(ctx) -> None:
     if why := panel_refusals(ctx.home):
         raise SystemExit("REFUSED: the takes wait on the panels: " + "; ".join(why))
@@ -217,7 +224,7 @@ def run(ctx) -> None:
     extra = getattr(ctx, "extra", None) or []
     ctx.run_script("scripts/episode/takes_r2v.py", "--from-refs", "--no-ends", flag,
                    *extra, gpu=GPU, clock="takes")
-    take_ladder.measured(ctx, "scripts/episode/take_dq.py", "take_dq", ".dq.json")
+    take_ladder.measured(ctx, "scripts/episode/take_dq.py", "take_dq", ".dq.json", *dq_flags(ctx))
     take_ladder.measured(ctx, "scripts/episode/take_content_check.py", "take_content", ".content.json")
     ctx.run_script("scripts/episode/take_strip.py", clock="strip")
     if not takes_of(ctx.home / TAKES):
