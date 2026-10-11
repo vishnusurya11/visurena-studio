@@ -75,6 +75,36 @@ def concat_list(paths: list[Path]) -> str:
     return "\n".join(lines) + "\n"
 
 
+def main_frames(*, master_frames: int, card_frames: int, chip_frames: int) -> int:
+    """The Short is main + title card + black chip: the main video is what
+    is left before the card (owner 2026-10-11: two videos per chapter)."""
+    main = master_frames - card_frames - chip_frames
+    if main <= 0:
+        raise ValueError(f"a {master_frames}-frame Short cannot hold a {card_frames}-frame card")
+    return main
+
+
+def pieces(*, main: int, card: int) -> dict[str, tuple[int, int]]:
+    """The two videos of a chapter as frame ranges [start, end) of its Short."""
+    return {"title": (main, main + card), "main": (0, main)}
+
+
+def cut_argv(src: Path, frames: tuple[int, int], out: Path, *, fps: int) -> list[str]:
+    """ffmpeg cutting [start, end) frames out, the sound by the same seconds;
+    one encode for every piece so the book joins by stream copy."""
+    a, b = frames
+    return ["ffmpeg", "-y", "-v", "error", "-i", str(src),
+            "-vf", f"trim=start_frame={a}:end_frame={b},setpts=PTS-STARTPTS",
+            "-af", f"atrim=start={a / fps:.6f}:end={b / fps:.6f},asetpts=PTS-STARTPTS",
+            "-c:v", "libx264", "-preset", "fast", "-crf", "16", "-pix_fmt", "yuv420p",
+            "-r", str(fps), "-c:a", "aac", "-b:a", "256k", "-ar", "48000", "-ac", "2", str(out)]
+
+
+def title_first(chapters: list[tuple[Path, Path]]) -> list[Path]:
+    """The book's running order: each chapter's title, then its main video."""
+    return [p for title_video, main_video in chapters for p in (title_video, main_video)]
+
+
 def title(series: str, chapters: int) -> str:
     """`<series> — Full Adaptation, All <n> Episodes`, inside YouTube's wall.
     An ADAPTATION, never 'the complete book': the episodes are our abridged

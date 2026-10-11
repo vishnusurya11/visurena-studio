@@ -523,3 +523,11 @@ fixes. Each lesson below cost at least one launch. Tracker rows A38-A74 in
   share 1536x1536, 24 fps, H.264, 48 kHz stereo -- and uploads one regular video
   whose description OPENS with a chapter per episode from 0:00. It refuses while
   any chapter is unpublished.
+- **Title first in the book video (owner 2026-10-11).** A chapter is two videos:
+  its title (the animated card) and its main video. The Short stays main + title
+  + black chip. The book video runs TITLE FIRST, then main, per chapter. Both
+  pieces are cut out of the shipped Short by frame: main = Short − card − chip
+  frames, title = the card's range (checked on WotW ep01: frame 3711 is the
+  card's first frame, 3818 the black). They land in `compilation/chapters/` and
+  are re-cut only when their frame count is wrong. The first WotW book video
+  had the card at each chapter's END; the owner caught it on the channel.

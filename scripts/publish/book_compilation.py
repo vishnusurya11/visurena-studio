@@ -4,9 +4,11 @@
     uv run python scripts/publish/book_compilation.py <codex_id> --dry-run
     uv run python scripts/publish/book_compilation.py <codex_id> --upload
 
-Joins every published episode's master -- the exact bytes the channel carries,
-matched by the ledger's sha8 -- in chapter order, by stream copy (the masters
-share one size, rate and codec; nothing is re-encoded), into
+Every published episode's Short -- the exact bytes the channel carries, matched
+by the ledger's sha8 -- is cut into its two videos, the title card and the main
+video (`compilation/chapters/epNN_title.mp4`, `epNN_main.mp4`), and the book is
+joined TITLE FIRST, then main, chapter after chapter (owner 2026-10-11), by
+stream copy (every piece is one encode), into
 `library/<book>/compilation/whole_book_iterN.mp4`.  The description OPENS with
 YouTube chapter timestamps, one per episode from 0:00.  `--upload` sends it as a
 regular public video and records it in the book's upload ledger.  Refuses while
@@ -24,9 +26,10 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 
 from studio import book_compilation as bc  # noqa: E402
-from studio import episode_home, youtube, youtube_publish as yp  # noqa: E402
+from studio import edit_gate, episode_home, youtube, youtube_publish as yp  # noqa: E402
 from studio.trailer_assemble import clip_seconds  # noqa: E402
 
+FPS = 24
 FOOTER = ("Source: H. G. Wells, The War of the Worlds (1898), in the public domain. This is an\n"
           "adapted, abridged screenplay of the novel, not its complete text.\n"
           "— The Keeper's Lantern —\n"
@@ -46,8 +49,38 @@ def chapters_in_book(book: Path) -> int:
     return int(m.group(1))
 
 
-def parts_of(book: Path) -> list[tuple[int, str, Path, float]]:
-    """(episode, chapter title, master, seconds) for every chapter; refuses a gap."""
+def frames(video: Path) -> int:
+    """The picture's frame count, decoded (the container's duration lies)."""
+    seen = subprocess.run(["ffmpeg", "-v", "quiet", "-stats", "-i", str(video), "-map", "0:v",
+                           "-f", "null", "-"], capture_output=True, text=True, errors="replace")
+    return int(seen.stderr.rsplit("frame=", 1)[1].split()[0])
+
+
+def card_of(book: Path, n: int) -> Path:
+    card = book / "title" / f"ep{n:02d}.mp4"
+    return card if card.exists() else book / "title" / "title.mp4"
+
+
+def split(book: Path, n: int, master: Path) -> tuple[Path, Path]:
+    """The chapter's two videos -- title, main -- cut out of its Short
+    (owner 2026-10-11); each piece's frames checked against its range."""
+    folder = book / "compilation" / "chapters"
+    folder.mkdir(parents=True, exist_ok=True)
+    card = frames(card_of(book, n))
+    main = bc.main_frames(master_frames=frames(master), card_frames=card, chip_frames=edit_gate.END_CHIP_FRAMES)
+    out = {}
+    for name, (a, b) in bc.pieces(main=main, card=card).items():
+        out[name] = folder / f"ep{n:02d}_{name}.mp4"
+        if not (out[name].exists() and frames(out[name]) == b - a):
+            subprocess.run(bc.cut_argv(master, (a, b), out[name], fps=FPS), check=True)
+        if (got := frames(out[name])) != b - a:
+            raise SystemExit(f"REFUSED: ep{n:02d} {name} is {got} frames, wanted {b - a}")
+    return out["title"], out["main"]
+
+
+def parts_of(book: Path) -> list[tuple[int, str, list[Path], float]]:
+    """(episode, chapter title, [title, main], seconds) for every chapter --
+    the title FIRST (owner 2026-10-11); refuses a gap."""
     total, pub = chapters_in_book(book), dict(bc.published(book))
     if missing := [n for n in range(1, total + 1) if n not in pub]:
         raise SystemExit(f"REFUSED: chapters {missing} are not published yet; the book is {total} chapters")
@@ -56,7 +89,9 @@ def parts_of(book: Path) -> list[tuple[int, str, Path, float]]:
         master = bc.uploaded_master(episode_home.home(book, n) / "cut", pub[n])
         if master is None:
             raise SystemExit(f"REFUSED: ep{n:02d}'s uploaded master ({pub[n]}) is not on disk")
-        out.append((n, bc.chapter_of(episode_meta(book, n)["title"]), master, clip_seconds(master)))
+        pair = split(book, n, master)
+        out.append((n, bc.chapter_of(episode_meta(book, n)["title"]), list(pair),
+                    sum(frames(p) for p in pair) / FPS))
     return out
 
 
@@ -71,7 +106,7 @@ def join(parts: list, folder: Path) -> Path:
     """The parts joined by stream copy, checked against the sum of their lengths."""
     folder.mkdir(parents=True, exist_ok=True)
     listing = folder / "concat.txt"
-    listing.write_text(bc.concat_list([p[2] for p in parts]), encoding="utf-8")
+    listing.write_text(bc.concat_list(bc.title_first([tuple(p[2]) for p in parts])), encoding="utf-8")
     out = next_iter(folder)
     subprocess.run(["ffmpeg", "-y", "-v", "error", "-f", "concat", "-safe", "0", "-i", str(listing),
                     "-c", "copy", "-movflags", "+faststart", str(out)], check=True)
