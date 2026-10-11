@@ -82,6 +82,12 @@ optional acts are `pause`, `resume`, `retry N`, `park N --why`.
    scripts mid-run. What the runner cannot do is a finding and a fix, then `retry N`.
 4. **No code changes on a live episode.** Fix, test, commit (the loop restarts itself on
    the new code), then `autopilot.py retry N` once; a paused series needs `resume`.
+   **Landing a fix during an episode (C3_verdict #7, 2026-10-11):** `autopilot.py pause
+   --at-boundary --book <codex>`, wait for `paused_at_boundary` in the drive log (one unit:
+   a take ~4 min, a grid ~5 min, a plan rung 4-10 min), commit, `resume`. Never kill a
+   drive: 22 of 23 kills over ep19-27 were this, 527 waste-minutes.
+   **A spent clock ships the episode flagged** (C3_verdict #5): read the audit sheet; never
+   `retry` to buy hours -- a retry no longer resets the clock.
 5. **A terminal is not a pass.** Only the owner waives (`review/waiver.json`).
 6. **Watch and listen before anything leaves the machine**; the lock needs the sign-off.
 7. **Audio first.** Picture cut to the measured voice. Effects duck under every line

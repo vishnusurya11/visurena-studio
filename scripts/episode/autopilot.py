@@ -820,6 +820,19 @@ def retry(book: Path, n: int) -> int:
     return len(rows) - len(kept)
 
 
+def pause_at_boundary(book: Path, codex: str, deps: Deps) -> str:
+    """Pause the series AND ask the running episode (gpu.lock's) to stop at its
+    next boundary (C3_verdict #7): wait for `paused_at_boundary`, then commit."""
+    set_paused(book, codex, True)
+    n = read_json(deps.root / "gpu.lock", {}).get("episode")
+    if not n:
+        return "series paused; no episode is running, nothing to stop"
+    from studio import boundary
+    boundary.request(home_of(book, int(n)), "autopilot pause --at-boundary")
+    event(book, {"event": "pause_at_boundary", "episode": int(n)})
+    return f"series paused; ep{int(n):02d} stops at its next boundary"
+
+
 def retire_brain(home: Path) -> Path | None:
     """A retry starts the brain's count over: the old attempts move aside, so an
     old `park` verdict is never read as today's (ep20, 2026-10-06)."""
@@ -863,6 +876,8 @@ def parser() -> argparse.ArgumentParser:
             s.add_argument("n", type=int)
         if name == "park":
             s.add_argument("--why", required=True)
+        if name == "pause":
+            s.add_argument("--at-boundary", action="store_true")
         if name in ("run", "install"):
             s.add_argument("--every", type=int, default=30 if name == "run" else 5)
     return p
@@ -890,6 +905,8 @@ def dispatch(args: argparse.Namespace, book: Path, codex: str, deps: Deps) -> in
         print(json.dumps(tick(book, codex, deps, 1), indent=1, ensure_ascii=False))
     elif args.cmd == "status":
         print(json.dumps(read_json(paths_of(book).status, {}), indent=1, ensure_ascii=False))
+    elif args.cmd == "pause" and args.at_boundary:
+        print(pause_at_boundary(book, codex, deps))
     elif args.cmd in ("pause", "resume"):
         set_paused(book, codex, args.cmd == "pause")
     elif args.cmd == "retry":

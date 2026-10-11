@@ -20,7 +20,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 
-from studio import episode_home, grid_layout, grid_room, pack_refs, panel_ladder, step_cli  # noqa: E402
+from studio import boundary, episode_home, grid_layout, grid_room, pack_refs, panel_ladder, step_cli  # noqa: E402
 
 STEP_ID = "07"
 NAME = "board"
@@ -137,6 +137,7 @@ def run(ctx) -> None:
     # is drawn, and the siblings re-read as stale once the room exists.
     for row in grid_room.draw_order(rows, cells):
         if not (current(ctx, row, stale) and not extra):
+            boundary.check(ctx.home, f"step 07 before grid {row}")     # C3_verdict #7
             ctx.run_script("scripts/episode/grids.py", *grid_layout.argv(row), *extra, gpu=GPU, clock="grids")
         if room_wanted(ctx, rows, row, cells):
             cut_room(ctx, row, cells)

@@ -839,3 +839,7 @@ fixes. Each lesson below cost at least one launch. Tracker rows A38-A74 in
       closed SAFETY list (gate_policy.SAFETY) stops an episode. A plan line a builder repeats
       (studio/plan_tags.BUILDER, read from the code -- G-LIGHT and PLAN GATES are BUILDER,
       ONE PER TAKE is not) cannot ship flagged: it buys one climb, then stops.
+    - **Stop at a boundary, never mid-step (commit 7).** 22 of 23 killed runs were sessions
+      landing a fix (527 waste-min). `autopilot pause --at-boundary`, wait one unit, then
+      commit. A started step that ends on the flag closes `deferred` (the events table has
+      no 'paused'), never `failed`.

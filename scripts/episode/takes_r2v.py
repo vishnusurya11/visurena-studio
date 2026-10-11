@@ -991,7 +991,35 @@ def collect(c: dict, prompt_id: str, out: Path) -> dict:
             "waited_s": waited}
 
 
-def collect_all(tickets: list[tuple[dict, str]], where, on_take=None) -> tuple[list[dict], list[tuple[dict, str]]]:
+BOUNDARY = "stopped at a boundary: taken off the engine's queue, renders on the resume"
+
+
+def cancel_pending(prompt_ids: list[str]) -> set[str]:
+    """Take the still-PENDING prompts off ComfyUI's queue (a running one is
+    left to finish); the ids actually removed."""
+    from studio import comfy
+    pending = {item[1] for item in comfy._get("/queue").get("queue_pending", [])}
+    removed = [pid for pid in prompt_ids if pid in pending]
+    if removed:
+        comfy._post("/queue", {"delete": removed})
+    return set(removed)
+
+
+def claim_one(c: dict, prompt_id: str, where, on_take, done: list, lost: list) -> None:
+    """One submitted take claimed; an interrupted, errored or timed-out one is lost."""
+    try:
+        record = collect(c, prompt_id, where(c))
+    except Exception as raised:                    # interrupted, errored, timed out
+        lost.append((c, str(raised)))
+        print(f"  T{c['index']:02d} LOST: {raised}", flush=True)
+        return
+    done.append(record)
+    if on_take:
+        on_take(c, record)
+
+
+def collect_all(tickets: list[tuple[dict, str]], where, on_take=None,
+                stop=lambda: False) -> tuple[list[dict], list[tuple[dict, str]]]:
     """Claim every submitted take, and let one take's misfortune cost only itself.
 
     T17 was interrupted at 07:13 on 2026-09-12 and the loop collecting the batch
@@ -999,18 +1027,19 @@ def collect_all(tickets: list[tuple[dict, str]], where, on_take=None) -> tuple[l
     waiting for them -- three takes of GPU time rendered into nothing.  A take
     that is interrupted, errors, or times out is now recorded as lost and the
     queue behind it is still claimed; the lost ones come back named, to be
-    re-rendered."""
-    done, lost = [], []
-    for c, prompt_id in tickets:
-        try:
-            record = collect(c, prompt_id, where(c))
-        except Exception as raised:                    # interrupted, errored, timed out
-            lost.append((c, str(raised)))
-            print(f"  T{c['index']:02d} LOST: {raised}", flush=True)
-            continue
-        done.append(record)
-        if on_take:
-            on_take(c, record)
+    re-rendered.
+
+    `stop` is the boundary flag (C3_verdict #7): once it reads True after a
+    take, the queued takes are taken off the engine, the running one is still
+    claimed, and the cancelled ones come back lost, to render on the resume."""
+    done, lost, queue = [], [], list(tickets)
+    while queue:
+        c, prompt_id = queue.pop(0)
+        claim_one(c, prompt_id, where, on_take, done, lost)
+        if queue and stop():
+            removed = cancel_pending([pid for _, pid in queue])
+            lost += [(c, BOUNDARY) for c, pid in queue if pid in removed]
+            queue = [(c, pid) for c, pid in queue if pid not in removed]
     return done, lost
 
 
@@ -1021,12 +1050,12 @@ def worth_resubmitting(said: str) -> bool:
 
 
 def collect_twice(jobs: list[tuple[dict, dict]], where, on_take=None,
-                  approved: bool = False) -> tuple[list[dict], list[tuple[dict, str]]]:
+                  approved: bool = False, stop=lambda: False) -> tuple[list[dict], list[tuple[dict, str]]]:
     """submit_all + collect_all, then ONE second batch of the transient-lost
     (their graphs are still in `jobs`), merged.  One retry, never a loop: a
     second failure of the same take is a real fault and stays lost."""
-    done, lost = collect_all(submit_all(jobs, approved), where, on_take)
-    again = {c["index"] for c, said in lost if worth_resubmitting(said)}
+    done, lost = collect_all(submit_all(jobs, approved), where, on_take, stop)
+    again = {c["index"] for c, said in lost if worth_resubmitting(said) and not stop()}
     if not again:
         return done, lost
     retry = [(c, g) for c, g in jobs if c["index"] in again]
@@ -1292,7 +1321,10 @@ def main(book_id: str, number: int, retake: list[int] | None = None, approved: b
         print(f"  T{c['index']:02d} shots {c['shots']} {c['frames']:3}f {record['measured_seconds']:.2f}s "
               f"in {record['render_s']:.0f}s", flush=True)
 
-    _, lost = collect_twice(jobs, lambda c: wheres[c["index"]], keep, approved)
+    from studio import boundary
+    home = episode_home.home(book, number)
+    _, lost = collect_twice(jobs, lambda c: wheres[c["index"]], keep, approved,
+                            stop=lambda: boundary.requested(home))
     print(f"{len(records)} takes -> {sheet}", flush=True)
     if lost:
         # named, not swallowed: the run is incomplete and the next command has to know

@@ -15,7 +15,7 @@ from __future__ import annotations
 
 import importlib
 
-from studio import registry, work_orders
+from studio import boundary, registry, work_orders
 from studio.deferral import Deferred
 from studio.escalate import Escalation
 
@@ -59,10 +59,25 @@ def _refuse_held(ctx, step) -> None:
     raise SystemExit(f"HELD: {why}; {ctx.label} stops before step {step.STEP_ID}")
 
 
+def _paused(step, ctx, why: str, started: bool = True) -> str:
+    """The boundary flag ended the unit (C3_verdict #7): paused, never failed.
+    A started step is closed `deferred` (the events table's word for a step
+    that handed the unit back; it has no 'paused'); a step never started
+    writes nothing."""
+    line = boundary.PausedAtBoundary(why).line(ctx.label)
+    if started:
+        ctx.tracker.event(step.STEP_ID, "deferred", detail=line[:200])
+    print(line)
+    return boundary.OUTCOME
+
+
 def _run_one(step, ctx) -> str:
     """One step's body: 'completed', or the word a gate stopped the unit with."""
+    home = getattr(ctx, "home", None)
     try:
         step.run(ctx)
+    except boundary.PausedAtBoundary as stop:
+        return _paused(step, ctx, str(stop))
     except (Escalation, Deferred) as gate:
         word = "escalated" if isinstance(gate, Escalation) else "deferred"
         line = gate.line(ctx.label)
@@ -71,9 +86,13 @@ def _run_one(step, ctx) -> str:
         print(line)
         return word
     except SystemExit as exc:
+        if boundary.requested(home):             # a child script stopped on the flag
+            return _paused(step, ctx, f"step {step.STEP_ID}: {str(exc)[:120]}")
         ctx.tracker.event(step.STEP_ID, "failed", detail=str(exc)[:200])
         raise RuntimeError(str(exc)) from exc
     except Exception as exc:
+        if boundary.requested(home):
+            return _paused(step, ctx, f"step {step.STEP_ID}: {type(exc).__name__}")
         ctx.tracker.event(step.STEP_ID, "failed", detail=f"{type(exc).__name__}: {exc}"[:200])
         raise
     return "completed"
@@ -90,6 +109,8 @@ def run_steps(ctx, steps: list) -> str:
             ctx.tracker.event(step.STEP_ID, "skipped", detail="output exists")
             print(f"--- step {step.STEP_ID} ({step.NAME}) skipped: output exists")
             continue
+        if boundary.requested(getattr(ctx, "home", None)):
+            return _paused(step, ctx, f"before step {step.STEP_ID}", started=False)
         print(f"--- step {step.STEP_ID} ({step.NAME}) | {ctx.label} ---")
         ctx.tracker.event(step.STEP_ID, "started")
         outcome = _run_one(step, ctx)

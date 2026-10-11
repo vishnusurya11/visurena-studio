@@ -20,7 +20,7 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Callable, Iterator
 
-from studio import audit_rows, gate_policy
+from studio import audit_rows, boundary, gate_policy
 from studio.gate_policy import Policy
 from studio.judges.verdict import Verdict
 from studio.ladder import Ladder, Rung
@@ -116,6 +116,7 @@ def climbed(ctx, gate: str, judge: Judge, rungs: Rungs, terminal: str) -> tuple[
     for rung, i in tries(rungs.ladder):
         if verdict.passed or not climbable(rungs, verdict) or not affordable(ctx, gate, rung, len(taken)):
             break
+        boundary.check(getattr(ctx, "home", None), f"{gate} before rung {rung.name} #{i + 1}")
         started = ctx.budget.clock()
         rungs.take(rung, i, verdict)
         taken.append(rung.name)

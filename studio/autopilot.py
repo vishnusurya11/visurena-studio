@@ -100,7 +100,8 @@ def crashes(drive_rows: list[dict]) -> int:
 def stops(drive_rows: list[dict]) -> int:
     """`end` rows with a non-zero code: how many times this episode has
     already stopped and been answered -- the counter every cap reads."""
-    return sum(1 for r in drive_rows if r.get("event") == "end" and r.get("code") not in (0, None))
+    return sum(1 for r in drive_rows if r.get("event") == "end" and r.get("code") not in (0, None)
+               and not r.get("paused_at_boundary"))             # a boundary pause is no stop (C3 #7)
 
 
 def last_row(drive_rows: list[dict], event: str) -> dict | None:
@@ -323,6 +324,13 @@ def _ended(s: Signals, n: int) -> Derived:
     return _answer(s, n, *classify(s.log_tail, s.home_files))
 
 
+def boundary_exit(s: Signals) -> bool:
+    """The last drive stopped at a boundary (C3_verdict #7): a paused series
+    reads PAUSED above; a resumed one relaunches, never counted as a stop."""
+    end = last_row(s.drive_rows, "end")
+    return bool(end and end.get("paused_at_boundary")) and not crashed(s.drive_rows)
+
+
 CLOCK_LOOP = 3
 """Consecutive spent-clock stops (C3_verdict #5 (e)) before the episode parks:
 a backstop against a relaunch loop, not a policy -- a spent clock relaunches."""
@@ -353,6 +361,8 @@ def derive(s: Signals, n: int) -> Derived:
         return _verdict(s, n)
     if not s.drive_rows:
         return _idle(s, n, "launch")
+    if boundary_exit(s):
+        return _idle(s, n, "boundary_resume")
     if clock_loop(s):
         return Derived(State.PARKED, "clock_loop", None, packet(s, n, "clock_loop"))
     if crashed(s.drive_rows) and s.exit_code is None:

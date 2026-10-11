@@ -30,7 +30,7 @@ import shutil
 import sys
 from pathlib import Path
 
-from studio import db, episode_home, episode_run, llm, queue, run_clock, step_runner, tick
+from studio import boundary, db, episode_home, episode_run, llm, queue, run_clock, step_runner, tick
 from studio.stage_run import ledger_id
 
 STAGE = episode_run.STAGE
@@ -88,6 +88,8 @@ def run_unit(ctx) -> str:
     """One unit through every step: 'completed', 'escalated' or 'deferred'; a
     failure raises after the stage is marked failed."""
     print(f"=== EPISODE start | {ctx.label} | run {ctx.tracker.run_id} ===")
+    if boundary.consume(ctx.home):                # the resume takes the flag (C3_verdict #7)
+        print(f"the {boundary.FLAG} flag of the last run is consumed: this run resumes")
     db.mark_stage(ctx.conn, ctx.codex_id, STAGE, "running")
     try:
         # every paid call inside is the unit's, attributed to the step the journal started;

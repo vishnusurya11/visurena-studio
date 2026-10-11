@@ -17,6 +17,8 @@ MAX_RUNS = 6
 SILENCE_S = 20 * 60
 """A log that has not grown in this long is reported once (ep13: 90 min unseen)."""
 LAST_LINES = 12
+PAUSED = 3
+"""drive()'s code for a run that stopped at a boundary (C3_verdict #7)."""
 
 
 ERROR_LINE = re.compile(r"^((?:\w+\.)*\w*(?:Error|Exception|OverBudget|Exit)):")
@@ -32,6 +34,8 @@ def outcome(log: str) -> str:
     ladder's caught form) is still the wall."""
     if "EPISODE completed" in log:
         return "completed"
+    if "EPISODE paused_at_boundary" in log:
+        return "paused"                # C3_verdict #7: a clean stop, never a crash
     if "OverBudget" in log:
         return "overbudget"
     if re.search(r"^OWNER ", log, re.MULTILINE):
@@ -101,6 +105,9 @@ def drive(run: Callable[[], str], notify: Callable[[str], None], max_runs: int =
         if got == "completed":
             notify(f"episode completed after {n} run(s)")
             return 0
+        if got == "paused":
+            notify(f"episode paused at a boundary on run {n}")
+            return PAUSED
         if got != "deferred":
             notify(f"episode {got} on run {n}:\n{tail(log)}")
             return 1

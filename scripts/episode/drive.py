@@ -148,7 +148,8 @@ def main(codex: str, number: int) -> int:
     from studio import run_budget
     code = episode_drive.drive(run, lambda text: notify(f"{label}: {text}"))
     spent = run_budget.spent_before(home) >= run_budget.EPISODE_CEILING_SECONDS
-    ledger(home, {"event": "end", "code": code, "sha": sha, "clock_spent": spent})   # the clock_loop backstop
+    ledger(home, {"event": "end", "code": code, "sha": sha, "clock_spent": spent,   # the clock_loop backstop
+                  "paused_at_boundary": code == episode_drive.PAUSED})
     return code
 
 
