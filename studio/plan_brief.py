@@ -24,7 +24,7 @@ SCENE_FIELDS = ("n", "para_start", "para_end", "type", "location_text", "int_ext
                 "dialogue", "state_changes")
 ELEMENT_FIELDS = ("kind", "text", "character", "parenthetical")
 ROW_FIELDS = ("entity_id", "name", "display", "gender", "pronouns", "physical",
-              "wardrobe", "marks", "aka")
+              "wardrobe", "marks", "aka", "look", "default_look", "looks_allowed")
 
 SECTIONS = {
     "number": "## THE UNIT",
@@ -179,7 +179,21 @@ def cast_rows(book_dir: Path, number: int) -> list[dict]:
     rows = [r for r in doc.get("refs", []) if r.get("kind", "character") == "character"]
     if stamped is not None and int(stamped) != number:
         rows = [_redressed(book_dir, r, number) for r in rows]
-    return [_pick(r, ROW_FIELDS) for r in rows]
+    return [_pick(with_looks(book_dir, r, number), ROW_FIELDS) for r in rows]
+
+
+def with_looks(book_dir: Path, row: dict, number: int) -> dict:
+    """A row of a book with a look table carries the chapter's default look and
+    every look allowed this chapter, drawn or not (decision 2026-10-10)."""
+    from studio import look_timeline
+    table = look_timeline.load(book_dir)
+    card = table.characters.get(row.get("entity_id", "")) if table else None
+    if card is None:
+        return row
+    pics = Path(book_dir) / "refs" / "characters" / row["entity_id"] / "looks"
+    allowed = [{"look": k, "markers": {m: v for m, v in card.looks[k].markers.model_dump().items() if v},
+                "drawn": k == card.base or (pics / f"{k}.png").exists()} for k in card.allowed_in(number)]
+    return {**row, "default_look": card.look_id_at(number), "looks_allowed": allowed}
 
 
 # ---- the places ---------------------------------------------------------------------
@@ -203,7 +217,27 @@ def places(book_dir: Path, number: int) -> list[dict]:
         return []
     rows = [r for r in (_read(p) for p in sorted(folder.glob("*.json"))) if r.get("id")]
     visited = [r for r in rows if _visits(r, number)]
-    return [_place(r) for r in (visited or rows)]
+    return [with_place(book_dir, _place(r), number) for r in (visited or rows)]
+
+
+def with_place(book_dir: Path, row: dict, number: int) -> dict:
+    """In a book under the continuity tables: the row's place, its members, the
+    views actually DRAWN (an undrawn design id tempted the writer into new
+    rooms), its master and what earlier episodes staged (decision 2026-10-10)."""
+    book = Path(book_dir)
+    if not ((book / "refs" / "looks.json").exists() or (book / "refs" / "places.json").exists()):
+        return row
+    from studio import continuity_place as cp
+    places = cp.place_map(book)
+    pid = cp.place_of(places, row["id"])
+    members = places.get(pid, [row["id"]])
+    drawn = cp.drawn_views(book, row["id"])
+    design = dict(row.get("design") or {})
+    if design.get("views"):
+        design["views"] = [v for v in design["views"] if v.get("id") in drawn]
+    return _pick({**row, "design": design, "place": pid, "members": members, "drawn_views": drawn,
+                  "master": cp.master_view(book, row["id"]), "history": cp.history(book, number, members)},
+                 ("id", "name", "aliases", "visual", "design", "place", "members", "drawn_views", "master", "history"))
 
 
 # ---- the rest -----------------------------------------------------------------------

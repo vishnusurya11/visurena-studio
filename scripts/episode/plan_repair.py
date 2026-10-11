@@ -300,6 +300,8 @@ def apply(doc: dict, rows: list[str], book, number: int = 0,
             uncured += cure_row_rows(book, own)
         elif name == "clamp_beds":
             doc = pc.clamp_beds(doc)
+        elif name in ("continuity_looks", "continuity_places"):
+            doc = continuity_cure(doc, name, book, number)
     return doc, uncured, sorted(names)
 
 
@@ -421,6 +423,16 @@ def llm_cure_round(book, number: int, rows: list[str]) -> bool:
         episode_home.write_plan(path, doc)
         print(f"llm cure round: {cured} field(s) rewritten under G-CURE-VERIFY")
     return bool(cured)
+
+
+def continuity_cure(doc: dict, name: str, book, number: int) -> dict:
+    """G-LOOK / G-PLACE's code cures (decision 2026-10-10): a disallowed look
+    pick dropped; a setup rewritten to its place's member and master."""
+    from studio import continuity_place as cp, look_timeline
+    if name == "continuity_looks":
+        table = look_timeline.load(Path(book))
+        return cp.cure_looks(doc, table, number) if table is not None else doc
+    return cp.cure_places(doc, Path(book), cp.place_map(Path(book)), cp.location_rows(Path(book)))
 
 
 def cast_ids_of(book) -> list[str]:

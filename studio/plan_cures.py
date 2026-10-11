@@ -1573,6 +1573,8 @@ def enrich_at_rest(doc: dict, index: int, need_words: int, tier: str = "workhors
 # ---- the dispatcher ---------------------------------------------------------------
 
 CURES: list[tuple[re.Pattern, str]] = [
+    (re.compile(r"G-LOOK setup"), "continuity_looks"),       # decision 2026-10-10: the pick dropped
+    (re.compile(r"G-PLACE setup"), "continuity_places"),     # the member and its master
     (re.compile(r"G-ARTICLE"), "drop_stray_articles"),
     (re.compile(r"G-SYNC line"), "dialogue_first"),
     (re.compile(r"G-STORY plan: shots carrying no line"), "silent_shot"),

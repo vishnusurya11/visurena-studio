@@ -230,6 +230,26 @@ def sheet_text(book_id: str, number: int) -> int:
     return 1
 
 
+def continuity_book(book: Path) -> bool:
+    """A book under the continuity tables (decision 2026-10-10); a legacy book
+    keeps one sheet per character and is not judged on them."""
+    return (book / "refs" / "looks.json").exists() or (book / "refs" / "places.json").exists()
+
+
+def continuity_gates(book: Path, ep) -> int:
+    """G-LOOK and G-PLACE printed; HARD, and both cured by code in plan_repair."""
+    if not continuity_book(book):
+        print("CONTINUITY   : legacy book (no refs/looks.json or places.json)")
+        return 0
+    from studio import continuity_place as cp, look_timeline
+    found = cp.look_gate(look_timeline.load(book), ep) + \
+        cp.place_gate(book, ep, cp.place_map(book), cp.location_rows(book))
+    print("G-LOOK/PLACE :", len(found) or "clean")
+    for f in found:
+        print("   ", f[:170])
+    return len(found)
+
+
 def main(book_id: str, number: int) -> int:
     book = episode_home.book_dir(book_id)
     plan_gates.use_voice(book, number)     # every projection below reads the recorded lines
@@ -279,6 +299,7 @@ def main(book_id: str, number: int) -> int:
     print("G-PROPCARD   :", len(pcf) or "clean"); hard += len(pcf)
     for f in pcf:
         print("   ", f[:170])
+    hard += continuity_gates(book, ep)
     ff = plan_gates.creature_face_faults(ep, set(vocab["creatures"]))
     print("G-FACE-KIND  :", len(ff) or "clean"); hard += len(ff)
     for f in ff:
