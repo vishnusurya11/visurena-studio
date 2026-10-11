@@ -14,12 +14,15 @@ with one strip per shot (shipped panel | replayed panel); nothing under
 refs/ or episodes/ is written, and the book gets no refs/looks.json.
 
 Pass: the person shows the look's hair colour AND facial hair in >= 80 % of
-the replayed panels he is in (WotW ep25/ep27 narrator: 0-1 of ~24 shipped).
+the FACE-VISIBLE replayed panels he is in -- a back view or a wide is not in the
+denominator, an empty denominator is unmeasurable (C2_verdict #7)
+(WotW ep25/ep27 narrator: 0-1 of ~24 shipped).
 Look at the contact sheet as well (`contact.png`): a list is not an eye.
 """
 from __future__ import annotations
 
 import json
+import re
 import shutil
 import sys
 from pathlib import Path
@@ -66,13 +69,29 @@ def shows_look(seen: dict, want) -> bool:
     return hair and face
 
 
-def tally(reads: list[dict], want) -> dict:
+FACE_HIDDEN = re.compile(r"\b(from behind|seen from behind|back to (the )?camera|walking away)\b", re.I)
+FAR_SIZES = {"wide", "extreme_wide", "establishing"}
+"""A cast panel whose plan hides the face (C2_verdict #7).  Over-the-shoulder is
+NOT exempt: it faces one of its two people, and the rule cannot tell which."""
+
+
+def face_visible(shot) -> bool:
+    """Does the plan ask for a face the reader can judge?"""
+    size = getattr(shot.size, "value", shot.size)
+    return size not in FAR_SIZES and not FACE_HIDDEN.search(getattr(shot, "frame", "") or "")
+
+
+def tally(reads: list[dict], want, shots=None) -> dict:
     """{'shown': n, 'of': m, 'share': n/m, 'passed': share >= PASS_SHARE, 'unread': k} --
-    unread panels count against the share and are named, so a dead reader is seen."""
+    unread panels count against the share and are named, so a dead reader is seen.
+    With the panels' shots, only FACE-VISIBLE panels count (a back view or a wide
+    cannot show a beard); none left is unmeasurable, never a pass."""
+    if shots is not None:
+        reads = [r for r, s in zip(reads, shots) if face_visible(s)]
     shown = sum(shows_look(r, want) for r in reads)
     share = shown / len(reads) if reads else 0.0
-    return {"shown": shown, "of": len(reads), "share": round(share, 2), "passed": share >= PASS_SHARE,
-            "unread": sum("unread" in r for r in reads)}
+    return {"shown": shown, "of": len(reads), "share": round(share, 2), "passed": bool(reads) and share >= PASS_SHARE,
+            "unread": sum("unread" in r for r in reads), "unmeasurable": not reads}
 
 
 def staged_looks(book: Path, table, ep, shots) -> dict[str, str]:
@@ -164,8 +183,9 @@ def main(book_id: str, number: int, setup: str, cols: int, rows: int, only: list
     for who, look in looks.items():
         mine = [i for i, s in enumerate(shots) if who in (s.faces or [])]
         want = table.characters[who].looks[look].markers
-        report[who] = {"replayed": tally([now[i] for i in mine], want),
-                       "shipped": tally([then[i] for i in mine], want)}
+        mine_shots = [shots[i] for i in mine]
+        report[who] = {"replayed": tally([now[i] for i in mine], want, mine_shots),
+                       "shipped": tally([then[i] for i in mine], want, mine_shots)}
     (home / "report.json").write_text(json.dumps(report, indent=1), encoding="utf-8")
     print(json.dumps(report, indent=1))
     print(f"report: {home / 'report.json'}")

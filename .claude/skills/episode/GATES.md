@@ -299,3 +299,9 @@ at 12/3 until an arm passes.
 
 **Adopted (2026-10-11 bench):** CK int8 attention on the 8-step BASE for narration takes
 (`takes_r2v.NARRATION_BASE`). Out: G1 (4-step on the authors' grid, lost the S3 frogs).
+
+**Regrid bar (bench, `scripts/refs/look_replay.tally`, C2_verdict #7):** the denominator is
+face-visible cast panels -- a plan frame `from behind|seen from behind|back to (the )camera|walking
+away` or a wide / extreme_wide / establishing size is exempt; over-the-shoulder is NOT. A
+face-visible panel with no face read is a miss; an empty denominator is unmeasurable, never a pass.
+Replays: C1 ep25 regrid 2/2 PASS, ep25 round 0 0/1 FAIL, ep27 study_table 3/3 PASS.
