@@ -155,9 +155,11 @@ def sheet_of(book: Path, who: str, look: str = "") -> Path | None:
     ep16 (2026-10-02): a four-pose turnaround staged whole was drawn as up to
     four people, and the prompt saying 'exactly once' changed nothing; a sheet
     whose poses overlap is not staged at all.  Takes keep the whole sheet.
-    A non-base LOOK stages its own picture, already one figure (2026-10-10)."""
+    A non-base LOOK stages its own picture, already one figure (2026-10-10) -- known
+    by not being the base sheet, never by its folder's name (the replay staged
+    the clean suit when its look lived outside refs/.../looks/)."""
     from studio.sheet_front import front_of
-    if look and (drawn := pack_refs.look_sheet(book, who, look)) is not None and drawn.parent.name == "looks":
+    if look and (drawn := pack_refs.look_sheet(book, who, look)) is not None and drawn != pack_refs.character_sheet(book, who):
         return drawn
     p = Path(book) / "refs" / "characters" / who / "sheet.png"
     return front_of(p) if p.exists() else None
