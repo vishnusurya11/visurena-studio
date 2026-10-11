@@ -7,7 +7,9 @@ Wraps scripts/refs/build_pack.py on the local image model (GPU, $0).  Done when
 every job build_pack would draw already has its picture on disk -- a picture is
 never redrawn.  After drawing, the look-back agent reads each new picture against
 its own prompt's nouns; a miss is a WARNING line, never a refusal (advisory until
-calibrated, decision 2026-09-24 D8).
+calibrated, decision 2026-09-24 D8).  G-LINEAGE (2026-10-11): each new character
+sheet is scored against its row's earlier staged versions (head-crop facenet); a
+pair under 0.60 is a WARNING and an audit line, never a refusal.
 """
 from __future__ import annotations
 
@@ -111,6 +113,31 @@ def advise(ctx, asked: list, look=None) -> list[str]:
     return misses
 
 
+def row_of(book_dir: Path, who: str) -> dict:
+    """The bound refs.json row of `who`, {} when none."""
+    import json
+    path = Path(book_dir) / "refs" / "refs.json"
+    rows = json.loads(path.read_text(encoding="utf-8")).get("refs", []) if path.exists() else []
+    return next((r for r in rows if r.get("entity_id") == who), {})
+
+
+def lineage(ctx, asked: list, vector=None) -> list[str]:
+    """G-LINEAGE (C2_verdict #9, ADVISORY): each newly drawn character sheet against
+    its row's earlier staged versions; a pair under 0.60 is a WARNING and an
+    audit/lineage.jsonl line, never a refusal."""
+    from studio import comfy, lineage as gl
+    bp, out = pack_module(), []
+    for job in [j for j in asked if j.kind == "characters" and (ctx.book_dir / bp.relpath(j)).exists()]:
+        picture = ctx.book_dir / bp.relpath(job)
+        earlier = [p for p in gl.versions(comfy.COMFY_ROOT / "input", job.entity) if p.name != comfy.staged_name(picture)]
+        if earlier:
+            vector = vector or gl.vector_fn()
+            out += gl.check(ctx.book_dir, job.entity, picture, earlier, row_of(ctx.book_dir, job.entity), vector)
+    for line in out:
+        ctx.log(line, step_id=STEP_ID, level="WARNING")
+    return out
+
+
 def scope_flags(ctx) -> list[str]:
     """What build_pack is told to draw: the caller's flags when given, else the
     bound scope spelled out, so the script can never widen to the whole book."""
@@ -127,6 +154,7 @@ def run(ctx) -> None:
         return                                       # nothing bound is missing; no GPU
     ctx.run_script(SCRIPT, *scope_flags(ctx), gpu=GPU)
     advise(ctx, asked, getattr(ctx, "look", None))
+    lineage(ctx, asked)
 
 
 if __name__ == "__main__":

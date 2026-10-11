@@ -765,3 +765,8 @@ fixes. Each lesson below cost at least one launch. Tracker rows A38-A74 in
     episodes (ep12-27) have a median face_h of 0.208, against about 0.30 that the cut
     words ask for; 78 % are under 0.26. A crop to plan buys the pixels but cuts planned
     props (coins, bag, newspaper), so it is not a cure. G-FRAME records it, advisory.
+  - **A same-man redraw on one row is a different man (commit 9).** Brigham Young ep08
+    against ep10 has a head cosine of 0.16-0.23, near the cross-person median; Hope
+    ep07 against ep09-14 0.43-0.46. A separate `_young` row holds about 0.6, same-man
+    versions 0.80-0.96. G-LINEAGE writes the audit line; a surname is not an age-up
+    marker (`brigham_young` is named "Brigham Young").

@@ -12,6 +12,7 @@ neutral tile prompt, 6 h as P50 or P90) are NOT decided here; they wait on `benc
 | slot | before | after | commit |
 |---|---|---|---|
 | episode/02 Plan, `plan_ladder` | improve ×2 → fresh_brief → model_tier → terminal | **improve ×2 → model_tier → terminal.** fresh_brief threw the refusal history away and wrote from a new brief; it produced the kept draft once in 40 terminal climbs (ep17-27), an anomaly | #3 |
+| refs/02 Sheets, `step_02_sheets` | a redrawn sheet was staged with no check that it is the same person | **G-LINEAGE, advisory:** each new character sheet version against every earlier staged version of the row (head-crop facenet); a pair < 0.60 outside an age-up writes `audit/lineage.jsonl` and a WARNING; never a refusal | #9 |
 | episode/08 Panels, `panel_check` | panel_dq.json carried no framing measure | **G-FRAME, advisory:** `face_h` (tallest present face) and `planned_size` on every faced non-back panel; `frame_advisory` when an MCU < 0.22 or a close < 0.32. Uncalibrated (the MCU floor sits above today's 0.208 median); no cure, no wall, no ladder effect | #8 |
 
 ## Why (measured)
@@ -24,6 +25,11 @@ neutral tile prompt, 6 h as P50 or P90) are NOT decided here; they wait on `benc
 
 - G-FRAME replay over the 396 shipped WotW ep12-27 panels reproduces F's per-(size, grid shape) medians
   exactly (every cell within 0.005); MCU 84 panels, median 0.208, 48 flagged; close 23, 8 flagged.
+- G-LINEAGE replay over Scarlet's staged versions (ComfyUI/input, ordered by first shipped take): flags
+  exactly Hope 8826eb07 (0.43-0.46 against three later versions) and Brigham c9192677 (0.16-0.23); notes
+  Ferrier (0.58-0.59) as an age-up (declared in the replay: no row on disk carries the marker); Holmes,
+  Watson, Lucy, Drebber, Lestrade and the rest pass. WotW calibration: 14 narrator look draws against his
+  base sheet, min 0.70, median 0.81, 0 under 0.60 (3 heads unreadable at p > 0.95); one character only.
 
 ## Watch
 - model_tier now edits improve2's draft with the whole merged refusal history. Log its input fault count
