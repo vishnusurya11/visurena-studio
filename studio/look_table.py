@@ -144,8 +144,19 @@ listed "straw hat" still reads `boater`.  The writer's "wide straw hat" is not a
 boater (C2_verdict #5); the reader's straw hat is unmeasured, and reading it as
 the brimmed `other_hat` would hide a straw hat on a felt-hat look (shipped ep25)."""
 HAIR = (("grey", r"gr[ae]y|silver"), ("white", r"white"), ("bald", r"bald"),
-        ("red", r"\bred\b|ginger|auburn|copper"), ("fair", r"fair|blond|flaxen|golden|tow"),
-        ("dark", r"dark|black|raven"), ("brown", r"brown|chestnut"))
+        ("red", r"\bred\b|ginger|auburn|copper"),
+        ("fair", r"\bfair\b|\bblond|flaxen|golden|\btow\b|tow-"),
+        ("dark", r"\bdark\b|dark-|black|raven"), ("brown", r"\bbrown\b|brown-|chestnut"),
+        ("fair", r"\bsandy"))
+"""sandy is fair, LAST: 'sandy mouse-brown' stays brown, 'sandy-ginger' red (C3_verdict #9)."""
+GREY_MOD = re.compile(r"\bgr[ae]ying\b|\b(?:flecked|threaded|shot|streaked|touched|tinged|mixed|going)"
+                      r"\s+(?:with\s+)?(?:gr[ae]y|silver|white)", re.I)
+"""A grey modifier in the hair clause keeps grey (C3_verdict #9): 'brown hair
+flecked with grey', 'auburn hair greying at the temples'."""
+HAIR_NOUN = re.compile(r"\b((?:[a-z]+[- ])?[a-z]+)[- ]haired\b|\b((?:[a-z]+[- ])?[a-z-]+) hair\b"
+                       r"|\bhair\s+(?:(?:turned|gone|grown|going|is|was|now)\s+)?((?:[a-z]+-)?[a-z]+)", re.I)
+"""The words next to the noun: before it ('sandy hair', 'red-haired') or right
+after it ('hair turned ash-grey'); a comma ends the after-side."""
 FACIAL = (("beard", r"beard"), ("moustache", r"m(?:ou|u)stach|whisker"), ("stubble", r"stubble"),
           ("none", r"shaven|beardless"))
 TOP = (("shirtless", r"shirtless|bare to the waist|naked"), ("dress", r"\bdress\b|gown|frock"),
@@ -160,6 +171,18 @@ DIRT = (("bloodied", r"blood"), ("sooted", r"soot|smoke|blackened"),
 TABLES = {"headwear": HEADWEAR, "hair": HAIR, "face": FACIAL}
 
 
+def hair_colour(text: str) -> str:
+    """The hair colour a text names (C3_verdict #9): grey when a grey modifier
+    sits in it; else the colour of the words next to hair/haired; first-of
+    only when the text has no hair noun at all (bald, ringlets, curls)."""
+    if GREY_MOD.search(text or ""):
+        return "grey"
+    found = [m.group(1) or m.group(2) or m.group(3) for m in HAIR_NOUN.finditer(text or "")]
+    if not found and not re.search(r"\bhair(?:ed)?\b", text or "", re.I):
+        return first_of(HAIR, text)
+    return next((c for c in (first_of(HAIR, words) for words in found) if c), "")
+
+
 def first_of(table, text: str) -> str:
     """The first marker of a closed table whose pattern the text matches, or ''."""
     return next((marker for marker, pattern in table if re.search(pattern, text or "", re.I)), "")
@@ -170,7 +193,7 @@ def markers_of(physical: str, worn: str) -> dict[str, str]:
     look's top garment, and the look's dirt."""
     top = render(keep(parse(worn), lambda layer: layer not in HEAD))
     return {"headwear": first_of(HEADWEAR, layer_text(physical, worn, "headwear")),
-            "hair_colour": first_of(HAIR, layer_text(physical, worn, "hair")),
+            "hair_colour": hair_colour(layer_text(physical, worn, "hair")),
             "facial_hair": first_of(FACIAL, layer_text(physical, worn, "face")),
             "top": first_of(TOP, top), "dirt": first_of(DIRT, worn)}
 

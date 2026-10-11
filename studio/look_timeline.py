@@ -88,7 +88,7 @@ def markers_from(layers: Layers, physical: str, fallback: str = "") -> Markers:
     body_hair = body_layer(physical, "hair", fallback)
     body_face = body_layer(physical, "face", fallback)
     return Markers(headwear=lt.first_of(lt.HEADWEAR, layers.headwear),
-                   hair_colour=lt.first_of(lt.HAIR, layers.hair or body_hair),
+                   hair_colour=lt.hair_colour(layers.hair or body_hair),
                    facial_hair=lt.first_of(lt.FACIAL, layers.face or body_face),
                    top=lt.first_of(lt.TOP, layers.top), dirt=lt.first_of(lt.DIRT, layers.dirt))
 

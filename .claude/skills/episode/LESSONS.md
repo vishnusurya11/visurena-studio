@@ -847,3 +847,9 @@ fixes. Each lesson below cost at least one launch. Tracker rows A38-A74 in
       a negation ("gives no height, build, hair ..."); the splitter cut it out as a hair
       clause. Negation scopes its comma list until a ';'. Scarlet's Watson, Hope, Lestrade
       and Gregson now take their bound row's hair; Jekyll's Utterson is honestly refused.
+    - **The colour next to "hair" is the hair's (commit 9).** First-of over the hair layer
+      read Gregg's "Sandy-ginger hair ... bald crown" as bald, the artilleryman's "black
+      hair ..., red cut across the chin" as red (a shipped WotW look table carried it),
+      and Scarlet's "grey eyes under sandy hair" as grey. The words next to the noun
+      decide (before it, or right after: "hair turned ash-grey"); a grey modifier keeps
+      grey; sandy is fair, matched last; every colour word has its \b.
