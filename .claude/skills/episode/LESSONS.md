@@ -680,3 +680,8 @@ fixes. Each lesson below cost at least one launch. Tracker rows A38-A74 in
     the shipped draw stacked). A best-of-draws restore is NOT built: a redrawn anchor
     re-cuts the room and its siblings are redrawn to stage the new room (one-room
     ruling), so an older sibling would stage the old room.
+  - **A seam survives a seed bump; isolate it once, then stage no panel.** The seam
+    rung isolates a seam/stacked shot into its own 1x1 outside the cap (1x1s carried
+    0/92 seams). A shot still seamed renders refs-only (owner ruling 2026-10-11): a
+    staged doubled cell is a duplicate-figure source, so the take gets the sheets,
+    the place and the words, ships, and is flagged in the audit sheet.

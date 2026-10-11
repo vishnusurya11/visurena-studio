@@ -53,7 +53,8 @@ def test_a_seam_fails_the_panel():
 
 def test_the_eye_refuses_a_seam_and_the_ladder_cures_it_as_one_picture():
     assert "seam" in panel_eye.CALIBRATED
-    assert panel_ladder.CURES["seam"] == panel_ladder.CURES["stacked"]
+    # the seam rung (2026-10-11): seam and stacked isolate once, never a reprose phrase
+    assert {"seam", "stacked"} == set(panel_ladder.SEAMED) and not set(panel_ladder.SEAMED) & set(panel_ladder.CURES)
     assert registry.PANEL_CLASS["seam"] == "stacked_pictures"
 
 

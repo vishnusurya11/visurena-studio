@@ -15,6 +15,13 @@
 A framing or posture fault takes no rung (REDRAW_CANNOT_CURE): it goes to
 keep_best, flagged, since no rung ever moved one on ep13.
 
+THE SEAM RUNG (C1_verdict #4, 2026-10-11): a `seam` or `stacked` fault isolates
+its shot into its own 1x1 ONCE, on whichever rung it is read, outside the cap,
+and is never reprosed (the seed bump and the reprose moved nothing on ep22; a
+1x1 carried 0/92 seams).  A shot already alone cannot be isolated again, so the
+rung is finite.  A shot still seamed at the terminal renders refs-only (owner
+ruling 2026-10-11, `studio/refs_only.py`), ships, and is flagged.
+
 At most CAP distinct grids climb per episode (gates.yaml `max_grids`); a
 third faulted grid is kept as drawn and flagged.  Each rung is priced at one
 grid render (GRID_SECONDS, 1.7 GPU min); the judged gate refuses a rung the
@@ -27,7 +34,7 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Callable
 
-from studio import episode_home, grid_layout, grid_room, judged_gate, panel_dq
+from studio import episode_home, grid_layout, grid_room, judged_gate, panel_dq, refs_only
 from studio.judges.verdict import Fault, Verdict
 from studio.ladder import Ladder, Rung
 
@@ -52,8 +59,6 @@ CURES = {
     "missing": "The named subject stands large at the CENTRE of the frame.",
     "text": "Every surface in the picture is plain, wordless paint.",
     "lettering": "Every surface in the picture is plain, wordless paint.",
-    "stacked": "One single picture fills the whole frame edge to edge.",
-    "seam": "One single picture fills the whole frame edge to edge.",
     "tiled": "One single picture fills the whole frame edge to edge.",
     "blur": "Every edge in the picture is crisp and sharp.",
     "hat": "The hat sits on his head and both his hands are empty.",
@@ -71,7 +76,10 @@ CURES = {
     "twin": "Each person in the picture appears exactly once, with a face, hair and dress all his own.",
 }
 """kind -> the affirmative phrase that leads the cell prose (the skill: put the
-defining detail FIRST; a detail buried mid-sentence is dropped)."""
+defining detail FIRST; a detail buried mid-sentence is dropped).  No `seam` or
+`stacked` entry: those take the seam rung, never a reprose."""
+SEAMED = frozenset({"seam", "stacked"})
+"""Fault kinds the seam rung answers (isolate once, outside the cap)."""
 
 
 def cure(kind: str, evidence: dict) -> str:
@@ -187,6 +195,8 @@ class Climb:
     rebuild: Callable[[], None]
     cap: int = CAP
     redrawn: list[str] = field(default_factory=list)
+    drawn: set = field(default_factory=set)
+    """Grids drawn in the rung being taken (a row the seam rung drew is not drawn twice)."""
 
     def grids_of(self, rows: list[dict], shots: list[int]) -> list[dict]:
         """The layout rows holding the faulted shots, in layout order."""
@@ -209,6 +219,7 @@ class Climb:
         return [r for name, r in names.items() if name not in self.redrawn]
 
     def draw(self, row: dict) -> None:
+        self.drawn.add(grid_layout.name_of(self.ctx.number, row))
         bump = supersede(self.home / "storyboard", grid_layout.name_of(self.ctx.number, row))
         self.ctx.run_script("scripts/episode/grids.py", *grid_layout.argv(row), f"--seed-bump={bump}",
                             gpu=True, clock="grids")
@@ -229,12 +240,14 @@ class Climb:
             for r in kin:
                 self.draw(r)
 
-    def isolate(self, index: int) -> bool:
+    def isolate(self, index: int, climbed: bool = True) -> bool:
         """G-TWIN rung 2: shot `index` split into its own tagged 1x1 grid --
         the exact form `rows_for` already emits for faces -- the shared grid
         resized without it, both rows drawn and remembered so the cap and
         resumes hold.  False when the shot already stands alone: a twin that
-        survives its own 1x1 is the terminal's business."""
+        survives its own 1x1 is the terminal's business.  `climbed=False` (the
+        seam rung) leaves the cap's memory alone: the layout on disk already
+        says the shot stands alone, so a resume cannot isolate it twice."""
         rows = grid_layout.read(self.home)
         mine = next((r for r in rows if index in (r.get("shots") or [])), None)
         if mine is None or len(mine["shots"]) <= 1:
@@ -248,9 +261,15 @@ class Climb:
         rows[at:at + 1] = [*rest, alone]
         grid_layout.write(self.home, rows)
         for row in (*rest, alone):
-            remember_climbed(self.home, grid_layout.name_of(number, row))
+            if climbed:
+                remember_climbed(self.home, grid_layout.name_of(number, row))
             self.draw(row)
         return True
+
+    def alone(self, index: int) -> bool:
+        """The shot already stands in a grid of its own (or in none)."""
+        mine = next((r for r in grid_layout.read(self.home) if index in (r.get("shots") or [])), None)
+        return mine is None or len(mine["shots"]) <= 1
 
     def isolated(self, rows: list[dict], verdict: Verdict) -> list[int]:
         """The twin-faulted shots inside the climbing grids, each split to its
@@ -258,6 +277,11 @@ class Climb:
         allowed = {int(i) for r in rows for i in r.get("shots") or []}
         twins = [f for f in verdict.faults if f.kind == "twin"]
         return [i for i in shots_of(twins) if i in allowed and self.isolate(i)]
+
+    def seams_isolated(self, verdict: Verdict) -> list[int]:
+        """The seam rung: every seam/stacked shot not yet alone, isolated once, outside the cap."""
+        hits = [f for f in verdict.faults if f.kind in SEAMED]
+        return [i for i in shots_of(hits) if self.isolate(i, climbed=False)]
 
     def cure_prose(self, rows: list[dict], faults: list[Fault]) -> None:
         plan = self.home / "plan.json"
@@ -274,33 +298,45 @@ class Climb:
         scoped to the redrawn shots.  Only the faults a redraw can cure choose
         the grids; each climb is remembered on disk so the cap survives a
         resume."""
-        faults = cured_by_redraw(verdict)
+        self.drawn = set()
+        self.seams_isolated(verdict)                                   # the seam rung, outside the cap
+        faults = [f for f in cured_by_redraw(verdict) if f.kind not in SEAMED]
         rows = self.climbing(grid_layout.read(self.home), shots_of(faults))
-        if rung.name == "reprose":
+        if rung.name == "reprose" and rows:
             self.cure_prose(rows, faults)
         split = self.isolated(rows, verdict) if rung.name == "reprose" else []   # G-TWIN rung 2
         for row in rows:
-            if set(row.get("shots") or []) & set(split):
-                continue                 # isolate already superseded and drew its two rows
+            if set(row.get("shots") or []) & set(split) or grid_layout.name_of(self.ctx.number, row) in self.drawn:
+                continue                 # isolate already superseded and drew these rows
             remember_climbed(self.home, grid_layout.name_of(getattr(self.ctx, "number", 0), row))
             self.redraw(row)
-        touched = sorted({int(i) for r in rows for i in r.get("shots") or []})
+        touched = sorted({int(i) for r in grid_layout.read(self.home) if grid_layout.name_of(self.ctx.number, r)
+                          in self.drawn for i in r.get("shots") or []})
         try:
             self.rebuild(touched or None)
         except TypeError:           # an older caller's rebuild takes no scope
             self.rebuild()
 
     def keep_best(self, verdict: Verdict) -> Verdict:
-        """The terminal: the panels stand; each fault says whether its grid climbed."""
+        """The terminal: the panels stand; each fault says whether its grid climbed.
+        A shot still seamed renders refs-only (owner ruling 2026-10-11), flagged."""
         rows = grid_layout.read(self.home)
         kept = {int(i) for r in self.kept(rows, shots_of(verdict.faults)) for i in r.get("shots") or []}
-        faults = [f.model_copy(update={"evidence": {**f.evidence, "climbed": not (set(shots_of([f])) & kept)}})
+        seamed = shots_of([f for f in verdict.faults if f.kind in SEAMED])
+        if seamed:
+            refs_only.add(self.home, seamed, "seam/stacked after the seam rung: the panel is not staged")
+        faults = [f.model_copy(update={"evidence": {**f.evidence, "climbed": not (set(shots_of([f])) & kept),
+                                                    **({"refs_only": True} if f.kind in SEAMED else {})}})
                   for f in verdict.faults]
         return verdict.model_copy(update={"faults": faults})
 
     def curable(self, verdict: Verdict) -> bool:
-        """A redraw could move a fault AND the machine gates still fail a panel."""
-        return curable(verdict) and not machine_clean(self.home)
+        """A redraw could move a non-seam fault, or a seamed shot can still be
+        isolated -- AND the machine gates still fail a panel."""
+        others = [f for f in cured_by_redraw(verdict) if f.kind not in SEAMED]
+        seams = shots_of([f for f in verdict.faults if f.kind in SEAMED])
+        movable = bool(others) or any(not self.alone(i) for i in seams)
+        return movable and not machine_clean(self.home)
 
     @property
     def rungs(self) -> judged_gate.Rungs:

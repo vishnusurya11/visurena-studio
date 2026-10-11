@@ -1,6 +1,6 @@
 # 2026-10-11 — Cycle 1: grid shape, the seam rung, the dialogue tail gate
 
-**Status:** RULED (owner, 2026-10-11) and being built by the cycle 1 builder.
+**Status:** RULED (owner, 2026-10-11). BUILT: #3 G-GRID-SHAPE (a51ecef), #4 the seam rung + refs-only fallback. Open: #7 G-TAIL.
 **Debate:** `docs/audit/2026-10-10_continuity_retro/C1_verdict.md`, from the reports
 `C1_G_gates_speed.md` (grid and seam), `C1_A_audio_tail.md` (tail) and `C1_L_looks_replayset.md`.
 

@@ -469,7 +469,11 @@ def storyboard_panel(book: Path, number: int, index: int) -> Path | None:
     Drawn by the Qwen-Image-2.1 pass and cut one-per-take with its gutter shed
     (`studio.storyboard_grid.panel_box`). Absent means the episode was never
     storyboarded, and the take builds exactly as it did before."""
-    path = (episode_home.home(book, number) / "storyboard" / "h3" / f"shot_{index:02d}.png")
+    from studio import refs_only
+    home = episode_home.home(book, number)
+    if index in refs_only.read(home):     # still seamed after its isolate (owner ruling 2026-10-11)
+        return None
+    path = home / "storyboard" / "h3" / f"shot_{index:02d}.png"
     return path if path.exists() else None
 
 

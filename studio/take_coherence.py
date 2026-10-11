@@ -206,9 +206,11 @@ def panel_path(home: Path, shot: int) -> Path:
 
 
 def panels(home: Path, shots: list[int]) -> dict[str, Image.Image]:
-    """The take's shots' panels that are on disk, in shot order."""
-    out = {}
-    for shot in shots:
+    """The take's shots' panels that are on disk, in shot order -- never a
+    refs-only shot's (its seamed panel was not staged, so it is not the board)."""
+    from studio import refs_only
+    out, unstaged = {}, refs_only.read(home)
+    for shot in [s for s in shots if s not in unstaged]:
         p = panel_path(home, shot)
         if p.is_file():
             out[p.name] = fm.load(p)

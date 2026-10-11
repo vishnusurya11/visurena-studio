@@ -55,7 +55,8 @@ def board_of(ctx) -> Path:
 
 def failing() -> Verdict:
     return Verdict(judge="panel_eye", version="1", passed=False, confidence=1.0, reads=3,
-                   faults=[Fault(kind="stacked", where=f"shot_{i:02d}") for i in (1, 2, 3)])
+                   # clones, not stacked: a seam/stacked fault takes the seam rung outside the cap (2026-10-11)
+                   faults=[Fault(kind="clones", where=f"shot_{i:02d}") for i in (1, 2, 3)])
 
 
 def test_only_two_grids_climb_and_the_third_is_flagged(tmp_path, monkeypatch):

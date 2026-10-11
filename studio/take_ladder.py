@@ -421,8 +421,12 @@ def placed_seconds(home: Path, index: int) -> float:
 
 
 def still_for(home: Path, index: int, faults: list[Fault]) -> Path | None:
-    """The passed panel this take would be held on, when one exists."""
+    """The passed panel this take would be held on, when one exists -- never a
+    refs-only shot's seamed panel (owner ruling 2026-10-11)."""
+    from studio import refs_only
     panel = Path(home) / "storyboard" / f"shot_{index:02d}.png"
+    if index in refs_only.read(home):
+        return None
     return panel if panel.exists() and any(hard(f) for f in faults) else None
 
 

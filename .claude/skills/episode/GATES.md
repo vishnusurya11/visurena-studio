@@ -120,11 +120,20 @@ content checks refuse rows stamped for another chapter. **HARD.**
 |---|---|---|---|
 | `panel_check.py` | `storyboard/panel_dq.json` | people against `faces`+`extras` (faces need detector confidence 0.8 or more); missing face at medium or tighter (a back view the plan asks for is exempt); sharpness against the house control for the setup's hour; ink (small bright marks by their rim); tiling | ep06 29/29, ep08 20/20; the only failures are real (ep07 13 stacked, ep09 12 empty). Ink: worst clean panel 0.00417, caption band 0.01009, wall 0.007 |
 | `panel_check.py` stacked | (same file) | the strongest full row or column gutter line at 512 | HARD above 0.90: ep07 S12-S14 read 1.000, every other published panel at most 0.748 (ep09 S07, a chalk cross) |
-| `panel_check.py` seam | (same file) | any full row or column of the STAGED h3 panel at >= 250 luma over >= 95 % of its length, anywhere (not the outer 8 % the take guard searches) | HARD (2026-10-11, R2_verdict §2.1): fires on 18/572 WotW panels in 9 episodes, all 18 read by eye as a cell split into two pictures, 0 false positives (`docs/audit/2026-10-10_continuity_retro/bench_evidence/r2/seam_panels_wotw.jpg`); 16 also read `stacked` and all 18 shipped on the panel ladder's keep_best. Cure: the ladder's grid redraw on a bumped seed (`CURES['seam']`) |
+| `panel_check.py` seam | (same file) | any full row or column of the STAGED h3 panel at >= 250 luma over >= 95 % of its length, anywhere (not the outer 8 % the take guard searches) | HARD (2026-10-11, R2_verdict §2.1): fires on 18/572 WotW panels in 9 episodes, all 18 read by eye as a cell split into two pictures, 0 false positives (`docs/audit/2026-10-10_continuity_retro/bench_evidence/r2/seam_panels_wotw.jpg`); 16 also read `stacked` and all 18 shipped on the panel ladder's keep_best. Cure: **the seam rung** (2026-10-11) -- the seed bump is measured NOT to cure it |
 | `panel_content_check.py` | `storyboard/panel_content.json` | a vision model LISTS people, copies, lettering, hour, landform, the main figure's POSTURE and subjects; code judges (a shot naming one posture family for its one person -- lying, sitting, crouching/kneeling -- fails a picture that shows another; ep10 T18) the list against the plan, the place's `landform` and the book's `dq_rules.json` | ep09 19/23, all four failures real (see `docs/calibration/content_gate.md`) |
 
 `takes_r2v` refuses when either verdict is missing, fails a shot, skipped a
 shot, or is older than a redrawn panel. **HARD.**
+
+**Seam/stacked rung (2026-10-11, C1_verdict #4, `panel_ladder.SEAMED`):** a `seam`
+or `stacked` fault isolates its shot into its own 1x1 ONCE, on whichever rung reads
+it, OUTSIDE the 2-grid cap (`Climb.redrawn` and `ladder.json climbed` untouched),
+and writes no reprose. A shot already alone is not curable. A shot still seamed at
+the terminal is written to `storyboard/refs_only.json` (owner ruling 2026-10-11):
+its take stages no panel (sheets + place + words), ships unattended, the fault is
+signed `refs_only: true` and lands in the audit sheet; the coherence measure and
+the still terminal never read that panel.
 
 G-LOOK-PANEL (2026-10-10): on a one-face panel the content reader's subjects
 are read for hat, hair, facial hair and top against the STAGED look's markers
