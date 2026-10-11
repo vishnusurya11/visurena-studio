@@ -34,8 +34,11 @@ def seen(**kw) -> Seen:
 
 
 # ---- the Surrey hills -----------------------------------------------------
-def test_a_hill_on_a_flat_place_is_a_fault():
-    assert forbidden_landform(seen(landform="hills"), flat=True)
+def test_a_hill_on_a_flat_place_is_an_advisory_since_j5():
+    """J5 (2026-10-11): the owner's good ep05 read 'hills' on 11 panels of flat
+    heath, each a low far horizon by eye. A mountain is still a fault."""
+    assert not forbidden_landform(seen(landform="hills"), flat=True)
+    assert forbidden_landform(seen(landform="mountains"), flat=True)
 
 
 def test_a_hill_where_the_book_has_hills_is_not():

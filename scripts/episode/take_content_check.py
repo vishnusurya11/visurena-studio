@@ -82,8 +82,8 @@ def verdict_for(book: Path, shot, setup, reads: list[pc.Seen]) -> dict:
     from studio import cast_refs
     markers = cast_refs.look_markers(book, list(shot.faces or []), setup)
     got = tc.take_faults(
-        reads, planned=len(shot.faces or []), crowd=bool((setup.crowd or "").strip()),
-        flat=pc.flat_place(book, setup.location), night=panel_dq.at_night(setup.described),
+        reads, planned=len(shot.faces or []), crowd=pc.crowd_declared(shot, setup),
+        flat=pc.flat_place(book, setup.location), night=pc.judged_at_night(setup.described),
         physical=[pc_row(book, w) for w in (shot.faces or [])],
         frame=pc.stage_text(shot, setup), banned=pc.banned_subjects(book),
         size=shot.size, extras=getattr(shot, "extras", 0), markers=markers)

@@ -16,7 +16,8 @@ Promoted from a session driver (audit 2026-09-22, items 2, 4, 7). On the way in:
 - Which places are flat is on each location row (`landform`); the banned
   subjects are the book's (analysis/dq_rules.json). The two runners each kept
   their own lists and had drifted apart.
-- The hour is the setup's (`panel_dq.at_night`).
+- The hour is the setup's (`panel_dq.at_night`), unless it asks for the last
+  daylight (`pc.judged_at_night`, J5 2026-10-11).
 """
 from __future__ import annotations
 
@@ -78,13 +79,12 @@ def physical_of(book: Path, who: list[str]) -> list[str]:
 
 
 def judge(book: Path, shot, setup, seen: pc.Seen) -> list[str]:
-    return pc.faults(seen, frame=pc.stage_text(shot, setup), planned=len(shot.faces or []),
-                     crowd=bool((setup.crowd or "").strip()),
-                     flat=pc.flat_place(book, setup.location),
-                     night=panel_dq.at_night(setup.described), banned=pc.banned_subjects(book),
-                     physical=physical_of(book, list(shot.faces or [])),
-                     size=shot.size, extras=getattr(shot, "extras", 0),
-                     markers=cast_refs.look_markers(book, list(shot.faces or []), setup))
+    """The book's facts looked up, the judging `pc.judge_staged`'s (J5 2026-10-11:
+    the crowd and the hour rules live there, shared with the fixture test)."""
+    return pc.judge_staged(seen, shot, setup, flat=pc.flat_place(book, setup.location),
+                           banned=pc.banned_subjects(book),
+                           physical=physical_of(book, list(shot.faces or [])),
+                           markers=cast_refs.look_markers(book, list(shot.faces or []), setup))
 
 
 def row_for(book: Path, shot, setup, path: Path) -> dict:
@@ -96,6 +96,8 @@ def row_for(book: Path, shot, setup, path: Path) -> dict:
     twins, fields = twin_check(shot, seen, path)                 # G-TWIN (2026-10-05)
     got = judge(book, shot, setup, seen) + twins
     look = pc.look_advisories(seen, cast_refs.look_markers(book, list(shot.faces or []), setup))  # G-LOOK-PANEL, advisory
+    if land := pc.landform_advisory(seen, pc.flat_place(book, setup.location)):   # J5: hills, advisory
+        look = [*look, land]
     return {"shot": shot.index, "passed": not got, "faults": got, "look_advisory": look, "people": seen.people,
             "lookalikes": seen.lookalikes, "hour": seen.hour, "landform": seen.landform,
             "text": seen.text, "subjects": seen.subjects, **fields}

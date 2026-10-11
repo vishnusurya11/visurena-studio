@@ -134,9 +134,23 @@ def posture_fault(seen: "Seen", prose: str, planned: int) -> str | None:
     return f"posture {seen.posture or 'unread'!r}: the shot asks for {wanted}"
 
 
-def forbidden_landform(seen: Seen, flat: bool) -> bool:
-    """Ground that rises where the book's country does not."""
-    return flat and seen.landform in RAISED
+def forbidden_landform(seen: Seen, flat: bool, staged: str = "") -> bool:
+    """Ground that rises where the book's country does not: mountains, or cliffs
+    on a place that is not a pit (its wall is the cliff the reader names).
+
+    HILLS ARE NOT A FAULT HERE (J5, 2026-10-11). On the owner's good ep05 the
+    reader said 'hills' on 11 panels of flat heath, every one a low far horizon
+    by eye; it is `landform_advisory` now."""
+    if not flat or seen.landform not in RAISED or seen.landform == "hills":
+        return False
+    return not (seen.landform == "cliffs" and PIT.search(staged or ""))
+
+
+def landform_advisory(seen: Seen, flat: bool) -> str | None:
+    """The 'hills' read on a flat place, kept visible on the row, never a fault."""
+    if flat and seen.landform == "hills":
+        return "landform 'hills' on a flat place (advisory: a far horizon reads so)"
+    return None
 
 
 def reads_as_night(seen: Seen) -> bool:
@@ -332,7 +346,7 @@ def faults(seen: Seen, frame: str, planned: int, crowd: bool,
     inventory, and judging against it failed 27 of 27.
     """
     out, staged, frame = [], frame, shot_words(frame)
-    if forbidden_landform(seen, flat):
+    if forbidden_landform(seen, flat, staged):
         out.append(f"landform {seen.landform!r}: this place is flat")
     if strangers := [b for b in banned_subject(seen, banned) if not pits_own_wall(b, staged)]:
         out.append(f"banned from this book: {', '.join(strangers)}")
@@ -341,7 +355,7 @@ def faults(seen: Seen, frame: str, planned: int, crowd: bool,
     # one prose exemption left is an INSERT on something worn -- a collar stud
     # at a throat holds a person by necessity -- and it reads whole words now.
     worn = not planned and size == "insert" and worn_by_someone(frame)
-    if people_fault(seen, planned + extras, crowd or worn):
+    if people_fault(seen, planned + extras + shoulder_figure(frame), crowd or worn):
         out.append(f"{seen.people} figure(s) for {planned + extras} declared ({planned} cast + "
                    f"{extras} extras), {seen.lookalikes} of them copies of another")
     if missing_cast(seen, planned, size, frame):
@@ -355,6 +369,49 @@ def faults(seen: Seen, frame: str, planned: int, crowd: bool,
     if night and seen.landform != "indoors" and not reads_as_night(seen):
         out.append(f"the hour reads {seen.hour!r} and the shot is at night")
     return out
+
+
+SHOULDER = re.compile(r"\bover (?:the |his |her )?(?:[\w'-]+ ){0,3}shoulders?\b"
+                      r"|\bpast (?:the |his |her )?(?:near |far )?shoulder", re.I)
+"""An over-the-shoulder shot: the near shoulder is a person (J5: ep05 s07, ep07 s24)."""
+
+
+def shoulder_figure(frame: str) -> int:
+    """One more figure for a shot framed over someone's shoulder, else none."""
+    return 1 if SHOULDER.search(shot_words(frame)) else 0
+
+
+GROUP = re.compile(r"\b(?:people|crowd|figures|others)\b", re.I)
+"""A plan written before the crowd/extras fields said its crowd in prose."""
+
+
+def crowd_declared(shot, setup) -> bool:
+    """The setup's crowd field; or, for a shot whose plan predates `extras`
+    (the field is unset, not 0), a group its own words name (J5: five ep05
+    panels refused for the 'band of people' and the 'wedge of figures' asked)."""
+    if (getattr(setup, "crowd", "") or "").strip():
+        return True
+    if "extras" in getattr(shot, "model_fields_set", {"extras"}):
+        return False
+    return bool(GROUP.search(f"{getattr(shot, 'frame', '')} {getattr(shot, 'at_rest', '')}"))
+
+
+DAYLIGHT = re.compile(r"\b(?:daylight|sunset|sun going down|afterglow)\b", re.I)
+
+
+def judged_at_night(described: str) -> bool:
+    """A night setup, unless it asks for the last of the daylight: a 'day' read
+    there is what it asked (J5: four ep05 dusk panels, every one so)."""
+    from studio.panel_dq import at_night
+    return at_night(described) and not DAYLIGHT.search(described or "")
+
+
+def judge_staged(seen: Seen, shot, setup, flat: bool, banned=(), physical="", markers=None) -> list[str]:
+    """`faults` for one shot on its setup, the book's facts already looked up."""
+    return faults(seen, frame=stage_text(shot, setup), planned=len(shot.faces or []),
+                  crowd=crowd_declared(shot, setup), flat=flat,
+                  night=judged_at_night(getattr(setup, "described", "")), banned=banned,
+                  physical=physical, size=shot.size, extras=getattr(shot, "extras", 0), markers=markers)
 
 
 def missing_cast(seen: "Seen", planned: int, size: str, frame: str) -> bool:
