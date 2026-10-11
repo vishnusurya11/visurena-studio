@@ -37,6 +37,7 @@ CLASSES = (
     "lettering", "stacked_pictures", "posture", "hour", "landform", "blur_warp",
     "orbit_repeat", "same_picture_repeat", "dead_body_moves", "wrong_letters",
     "plan_story", "plan_cast", "mix_levels", "cut_missing", "line_unheard",
+    "invented_speech",
     "unknown",
 )
 """The closed list, taken from what the sources actually name (research memo D
