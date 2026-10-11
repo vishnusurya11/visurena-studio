@@ -36,12 +36,23 @@ OCR_ASK = ("Transcribe every word of lettering in this image exactly as it is sp
 
 
 def base_art(folder: Path) -> Path:
+    """The card's art in the BOOK'S look (a photoreal book on Krea2 with no LoRA, its
+    own refs words), redrawn on the next seed while a person is drawn twice; the
+    last try is kept so a card never blocks.  It was hardwired to WotW's LoRA look."""
+    from studio import book_title as bt
     out = folder / "series_base.png"
-    if not out.exists():
-        motif = (folder / "motif.txt").read_text(encoding="utf-8").strip()
-        made = run("image_krea2_cinematic_2x", {"prompt": styled(motif), "width": 1024,
-                   "height": 1024, "seed": 7100, "filename_prefix": "series_title/base"})[0]
-        shutil.copyfile(made, out)
+    if out.exists():
+        return out
+    book, motif = folder.parent, (folder / "motif.txt").read_text(encoding="utf-8").strip()
+    look = bt.look_of(book)
+    ask = bt.plate_request(look, shape="square")
+    for k in range(TRIES):
+        made = run(ask["workflow"], {"prompt": bt.lead_for(book, look) + motif, **ask["values"],
+                   "seed": 7100 + k, "filename_prefix": "series_title/base"})[0]
+        said = run_text("image_qwen3vl_caption", {"prompt": bt.PEOPLE_ASK, "image_1": stage_image(made)})
+        if not bt.doubled(said):
+            break
+    shutil.copyfile(made, out)
     return out
 
 

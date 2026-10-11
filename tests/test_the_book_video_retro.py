@@ -55,17 +55,16 @@ def test_a_lock_held_by_a_live_process_refuses_a_second_run(tmp_path):
     assert bc.lock_holder(tmp_path / "none", alive=lambda pid: True) is None
 
 
-def test_every_module_still_compiles():
+def test_every_module_still_compiles(tmp_path):
     """A backslash through a heredoc reached disk as a raw newline three times; the
     import failed only when the run reached it."""
     bad = []
     for folder in ("studio", "scripts"):
         for path in (ROOT / folder).rglob("*.py"):
             try:
-                py_compile.compile(str(path), doraise=True, cfile=str(ROOT / ".pytest_compile.pyc"))
+                py_compile.compile(str(path), doraise=True, cfile=str(tmp_path / f"{len(bad)}_{path.stem}.pyc"))
             except py_compile.PyCompileError as why:
                 bad.append(f"{path.relative_to(ROOT)}: {why.msg.splitlines()[-1]}")
-    (ROOT / ".pytest_compile.pyc").unlink(missing_ok=True)
     assert bad == []
 
 
@@ -103,3 +102,29 @@ def test_this_process_is_alive_and_a_made_up_one_is_not():
     import os
     from scripts.publish import book_compilation as script
     assert script.pid_alive(os.getpid()) and not script.pid_alive(4_000_000)
+
+
+def test_a_chapter_cards_art_follows_the_books_look_and_redraws_a_doubled_person(tmp_path, monkeypatch):
+    """series_title.base_art drew every book in WotW's LoRA look -- the fault Scarlet's
+    main title had -- and nothing checked it for a person drawn twice."""
+    import importlib.util, json, sys
+    loader = importlib.util.spec_from_file_location("st_retro", ROOT / "scripts" / "episode" / "series_title.py")
+    st = importlib.util.module_from_spec(loader); sys.modules["st_retro"] = st; loader.loader.exec_module(st)
+    book = tmp_path / "book"
+    (book / "title").mkdir(parents=True)
+    (book / "title" / "motif.txt").write_text("a lamp on a desk", encoding="utf-8")
+    from studio import episode_home
+    monkeypatch.setattr(episode_home, "home", lambda b, n: Path(b) / "episodes" / f"ep{n:02d}")
+    (book / "episodes" / "ep01").mkdir(parents=True)
+    (book / "episodes" / "ep01" / "plan.json").write_text(json.dumps({"look": ""}), encoding="utf-8")
+    calls, reads = [], iter(['["deerstalker; coat; dark hair\ndeerstalker; coat; dark hair"]', "NONE"])
+    def run(name, values, **kw):
+        calls.append((name, values))
+        out = tmp_path / f"made_{len(calls)}.png"; out.write_bytes(b"png"); return [out]
+    monkeypatch.setattr(st, "run", run)
+    monkeypatch.setattr(st, "run_text", lambda name, values, **kw: next(reads))
+    monkeypatch.setattr(st, "stage_image", lambda p: str(p))
+    out = st.base_art(book / "title")
+    assert [c[0] for c in calls] == ["image_krea2_turbo_t2i", "image_krea2_turbo_t2i"]   # photoreal, redrawn once
+    assert calls[0][1]["enable_lora"] is False and calls[1][1]["seed"] == calls[0][1]["seed"] + 1
+    assert out.read_bytes() == b"png"

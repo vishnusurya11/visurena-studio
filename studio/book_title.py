@@ -66,17 +66,35 @@ def writer_prompt(name: str, author: str, synopsis: str, *, look: str) -> str:
             "left. sting: tags for a short instrumental orchestral sting with one big hit, no vocals.")
 
 
-def plate_request(look: str, *, wide: bool) -> dict:
+SHAPES = {"wide": ((1280, 544), "21:9 (Ultrawide)"), "thumb": ((1280, 720), "16:9 (Widescreen)"),
+          "square": ((1024, 1024), "1:1 (Square)")}
+
+
+def plate_request(look: str, *, wide: bool = False, shape: str = "") -> dict:
     """Which local renderer draws the plate, and how: a photoreal book on Krea2
     without the art-style LoRA, a stylised one on the house look (Krea2 + LoRA)."""
+    size, aspect = SHAPES[shape or ("wide" if wide else "thumb")]
     if look.strip():
         from studio.refs_pack import STYLE_LEAD
-        size = (1280, 544) if wide else (1280, 720)
         return {"workflow": "image_krea2_cinematic_2x", "lead": STYLE_LEAD,
                 "values": {"width": size[0], "height": size[1]}}
     return {"workflow": "image_krea2_turbo_t2i", "lead": f"{PHOTOREAL[0].upper()}{PHOTOREAL[1:]}, of ",
-            "values": {"aspect_ratio": "21:9 (Ultrawide)" if wide else "16:9 (Widescreen)",
-                       "megapixels": 2, "enable_lora": False, "refine_prompt": False}}
+            "values": {"aspect_ratio": aspect, "megapixels": 2, "enable_lora": False, "refine_prompt": False}}
+
+
+def look_of(book: Path) -> str:
+    """The series' declared look (episode 1's plan); empty is photoreal live action."""
+    from studio import episode_home
+    path = Path(episode_home.home(book, 1)) / "plan.json"
+    return (episode_home.read_json(path).get("look") or "") if path.exists() else ""
+
+
+def lead_for(book: Path, look: str) -> str:
+    """The words a plate opens with: the house look, or a photoreal book's own refs words."""
+    from studio import episode_home
+    ask = plate_request(look)
+    refs = Path(book) / "refs" / "refs.json"
+    return photoreal_lead(episode_home.read_json(refs)) if not look.strip() and refs.exists() else ask["lead"]
 
 
 def spec(book: dict, *, synopsis: str, ask, look: str = "") -> BookTitleSpec:
@@ -366,7 +384,7 @@ def doubled(said: str) -> bool:
     """Two people listed with the same hat and clothes: one character copied
     (Scarlet's thumbnail, 2026-10-11: Watson drawn as a second Holmes)."""
     from studio.series_title import transcription
-    rows = [";".join(p.strip() for p in line.lower().split(";")[:2])
+    rows = [";".join(p.strip(" \t[]\"',") for p in line.lower().split(";")[:2])   # JSON debris off
             for line in transcription(said or "").splitlines() if ";" in line]
     return len(rows) != len(set(rows))
 
