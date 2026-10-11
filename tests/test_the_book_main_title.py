@@ -229,3 +229,19 @@ def test_the_fallback_thumbnail_is_the_hero_plate_over_a_title_band():
     assert thumb.size == (1280, 720)
     assert thumb.getpixel((640, 100)) == (120, 30, 30)                              # the picture on top
     assert thumb.crop((0, 560, 1280, 720)).convert("L").getextrema()[1] == 255      # white type in the band
+
+
+def test_a_photoreal_book_gets_a_photoreal_plate_and_a_stylised_book_its_own_look():
+    """Owner 2026-10-11: Scarlet's thumbnail came out painted -- WotW's look, not Sherlock's."""
+    real = bt.plate_request("", wide=True)
+    assert real["workflow"] == "image_krea2_turbo_t2i" and real["values"]["aspect_ratio"] == "21:9 (Ultrawide)"
+    assert real["values"]["enable_lora"] is False and "photoreal" in real["lead"].lower()
+    drawn = bt.plate_request("Angular stylised 3D animation, brush-stroke texture", wide=False)
+    assert drawn["workflow"] == "image_krea2_cinematic_2x" and drawn["values"]["width"] == 1280
+
+
+def test_the_writer_is_told_the_books_look_never_to_paint_a_photoreal_book():
+    real = bt.writer_prompt("A Study in Scarlet", "Arthur Conan Doyle", "A murder in Brixton.", look="")
+    assert "painted" not in real.lower() and "photoreal" in real.lower()
+    drawn = bt.writer_prompt("The War of the Worlds", "H. G. Wells", "Martians.", look="Angular stylised 3D")
+    assert "Angular stylised 3D" in drawn

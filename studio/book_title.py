@@ -47,18 +47,42 @@ def band_box(side: int) -> tuple[int, int, int, int]:
     return 0, (side - h) // 2, side, h
 
 
-def writer_prompt(name: str, author: str, synopsis: str) -> str:
+PHOTOREAL = "a photoreal live-action film still, shot on 35 mm film, natural light and real textures"
+
+
+def look_words(look: str) -> str:
+    """The book's own look in words: its declared look, else photoreal live action."""
+    return look.strip() or PHOTOREAL
+
+
+def writer_prompt(name: str, author: str, synopsis: str, *, look: str) -> str:
+    """The key art is asked for in the BOOK'S look: 'painted' drew Scarlet --
+    a photoreal series -- in WotW's brushwork (owner, 2026-10-11)."""
     return (f"Main title for a screen adaptation of {name} by {author}.\n{synopsis}\n\n"
-            "hero: ONE painted key-art picture, the book's most famous image, wide, cinematic, "
-            "with NO text, letters, signs or writing anywhere. thumb: the same image with the "
-            "subject on the right third and dark empty space on the left. sting: tags for a "
-            "short instrumental orchestral sting with one big hit, no vocals.")
+            f"The series looks like this, and every picture must too: {look_words(look)}.\n"
+            "hero: ONE key-art picture in that look, the book's most famous image, wide, cinematic, "
+            "with NO text, letters, signs or writing anywhere. thumb: the same moment in that look, "
+            "showing at most ONE person, the subject on the right third and dark empty space on the "
+            "left. sting: tags for a short instrumental orchestral sting with one big hit, no vocals.")
 
 
-def spec(book: dict, *, synopsis: str, ask) -> BookTitleSpec:
+def plate_request(look: str, *, wide: bool) -> dict:
+    """Which local renderer draws the plate, and how: a photoreal book on Krea2
+    without the art-style LoRA, a stylised one on the house look (Krea2 + LoRA)."""
+    if look.strip():
+        from studio.refs_pack import STYLE_LEAD
+        size = (1280, 544) if wide else (1280, 720)
+        return {"workflow": "image_krea2_cinematic_2x", "lead": STYLE_LEAD,
+                "values": {"width": size[0], "height": size[1]}}
+    return {"workflow": "image_krea2_turbo_t2i", "lead": f"{PHOTOREAL[0].upper()}{PHOTOREAL[1:]}, of ",
+            "values": {"aspect_ratio": "21:9 (Ultrawide)" if wide else "16:9 (Widescreen)",
+                       "megapixels": 2, "enable_lora": False, "refine_prompt": False}}
+
+
+def spec(book: dict, *, synopsis: str, ask, look: str = "") -> BookTitleSpec:
     """The words from the book's own data; only the pictures and sound are written."""
     name = book.get("display_title") or book["title"]
-    art = ask(HERO_TIER, writer_prompt(name, book["author"], synopsis), KeyArt)
+    art = ask(HERO_TIER, writer_prompt(name, book["author"], synopsis, look=look), KeyArt)
     return BookTitleSpec(title=name, author=book["author"], hero=art.hero, thumb=art.thumb, sting=art.sting)
 
 

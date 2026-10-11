@@ -53,3 +53,15 @@ def test_the_encode_is_the_chapter_pieces_encode():
     piece = bc.cut_argv(Path("a.mp4"), (0, 1), Path("b.mp4"), fps=24, side=1536)
     tail = piece[piece.index("-c:v"):-1]
     assert runner.ENCODE == tail
+
+
+def test_the_series_look_is_read_off_episode_one(tmp_path, monkeypatch):
+    import json
+    from studio import episode_home
+    ep = tmp_path / "episodes" / "ep01"
+    ep.mkdir(parents=True)
+    monkeypatch.setattr(episode_home, "home", lambda book, n: Path(book) / "episodes" / f"ep{n:02d}")
+    (ep / "plan.json").write_text(json.dumps({"look": "Angular stylised 3D"}), encoding="utf-8")
+    assert runner.book_look(tmp_path) == "Angular stylised 3D"
+    (ep / "plan.json").write_text(json.dumps({"look": ""}), encoding="utf-8")
+    assert runner.book_look(tmp_path) == ""                 # photoreal (Scarlet)

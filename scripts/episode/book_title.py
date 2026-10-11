@@ -53,13 +53,19 @@ def home(book: Path) -> Path:
     return out
 
 
+def book_look(book: Path) -> str:
+    """The series' declared look (episode 1's plan); empty is photoreal live action."""
+    path = episode_home.home(book, 1) / "plan.json"
+    return (episode_home.read_json(path).get("look") or "") if path.exists() else ""
+
+
 def load_spec(book: Path) -> bt.BookTitleSpec:
     path = home(book) / "spec.json"
     if path.exists():
         return bt.BookTitleSpec.model_validate_json(path.read_text(encoding="utf-8"))
     source = episode_home.read_json(book / "source" / "book.json")
     play = episode_home.read_json(book / "screenplay" / "feature" / "screenplay.json")
-    spec = bt.spec(source, synopsis=play.get("logline", ""), ask=llm.structured)
+    spec = bt.spec(source, synopsis=play.get("logline", ""), ask=llm.structured, look=book_look(book))
     if missing := bt.glyphs_missing(spec.title + spec.author + bt.PRESENTS, FONT):
         raise SystemExit(f"REFUSED: the title font has no glyph for {missing}")
     path.write_text(spec.model_dump_json(indent=2), encoding="utf-8")
@@ -75,15 +81,16 @@ def reads(image: Path) -> str:
     return asks(image, bt.READ_ASK)
 
 
-def plate(out: Path, prompt: str, size: tuple[int, int], seed: int) -> Path:
-    """Krea2 key art with no writing in it, read back; redrawn up to TRIES seeds."""
+def plate(out: Path, prompt: str, look: str, *, wide: bool, seed: int) -> Path:
+    """Key art in the book's own look with no writing and no one drawn twice,
+    read back; redrawn up to TRIES seeds."""
     from studio.comfy import run
-    from studio.refs_pack import styled
     if out.exists():
         return out
+    ask = bt.plate_request(look, wide=wide)
     for k in range(TRIES):
-        made = run("image_krea2_cinematic_2x", {"prompt": styled(prompt + " No text, no letters, no writing."),
-                   "width": size[0], "height": size[1], "seed": seed + k, "filename_prefix": "book_title/plate"})[0]
+        made = run(ask["workflow"], {"prompt": ask["lead"] + prompt + " No text, no letters, no writing.",
+                   **ask["values"], "seed": seed + k, "filename_prefix": "book_title/plate"})[0]
         said = reads(made)
         doubled = bt.doubled(asks(made, bt.PEOPLE_ASK))
         why = "lettered: " + said[:60] if bt.has_lettering(said) else "a person drawn twice" if doubled else "clean"
@@ -367,7 +374,7 @@ def make_thumbnail(book: Path, spec: bt.BookTitleSpec, episodes: int) -> Path:
     over a title band."""
     from PIL import Image
     try:
-        still = plate(home(book) / "thumb_plate.png", spec.thumb, (1280, 720), 7400)
+        still = plate(home(book) / "thumb_plate.png", spec.thumb, book_look(book), wide=False, seed=7400)
         pic = bt.thumbnail(Image.open(still), spec, episodes=episodes, font=FONT)
     except SystemExit as why:
         print(f"  thumbnail: {why}; the hero plate over a title band", flush=True)
@@ -386,7 +393,7 @@ def ensure(book: Path, episodes: int) -> tuple[Path, Path]:
     spec = load_spec(book)
     out = home(book) / "main_title.mp4"
     if not out.exists():
-        still = plate(home(book) / "plate.png", spec.hero, (1280, 544), 7300)
+        still = plate(home(book) / "plate.png", spec.hero, book_look(book), wide=True, seed=7300)
         band = band_pictures(book, cold_open(book, episodes), hero(book, still))
         compose(book, band, overlays(book, spec), sting(book, spec))
     verdict = judge(book, spec, out)
