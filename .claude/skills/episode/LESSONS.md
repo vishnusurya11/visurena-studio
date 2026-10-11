@@ -638,3 +638,25 @@ fixes. Each lesson below cost at least one launch. Tracker rows A38-A74 in
     on CUDA.
   - **Another session shares this checkout:** never stash/checkout/-A, and commit
     your own paths early.
+- **The continuity acceptance replay, re-run (2026-10-11, after c4112e7 and 08ebcb0).**
+  Bar: the look's hair colour AND facial hair on >= 80 % of the replayed panels the
+  person is in.
+  - **ep27 study_table (epilogue_home): 3/3 = 100 % PASS** (shipped 0/3). The ran grid
+    staged `epilogue_home`, and the eye agrees: ash-grey hair, grey moustache, boater,
+    herringbone suit. The shipped panels had dark hair and a brown moustache.
+  - **ep25 fulham_road (ragged_greyed): 0/3 FAIL.** The grid DID stage the look (ran
+    graph: `ragged_greyed_*.png`). It shows a felt hat on 2/3 panels, grey hair on
+    2/3 and the torn shirt on 3/3; shipped had a boater and suit. The miss is the
+    **beard**: the look picture has none. LOOK-STATE refused it on all three draws
+    (facial_hair none vs beard), and the climb ended keep_best flagged. The
+    fault is upstream of the grid: a fresh Krea2 draw drops "sixteen days of beard".
+  - **The judge was blind until 08ebcb0.** The Qwen3-VL caption wraps its JSON as a
+    list holding one string of JSON, so every LOOK-STATE read was 'unread'. The
+    unread verdict was advisory, so the first replay PASSED a look nobody had read,
+    and both arms scored 0/3 on reads that never happened. An unread head now
+    refuses, and the replay counts unread panels apart. A judge that reads nothing
+    must say so loudly.
+  - **LOOK-STATE does not see ghost faces.** ragged_greyed.png has two faces painted
+    into the trouser texture. Its closed vocabulary (hat, hair, beard, top, dirt) has
+    no word for it, and it passed those markers. The look picture needs a stray-face
+    check (face count on the crop, 1 expected) before it is staged.
