@@ -745,3 +745,11 @@ fixes. Each lesson below cost at least one launch. Tracker rows A38-A74 in
     re-climbs that started on the previous climb's fault count made progress (ep23
     40->17, ep25 36->13). A memory that skips them parks the series. Remember only
     "no progress twice" (cycle 3, H1).
+  - **A reader's hat is a family, a writer's hat is a word (commits 4-5).** The VL reads
+    a felt hat as `other_hat` 7/8 times; the judge compares families (brimmed =
+    {felt_hat, other_hat}). The writer's table maps the book's words exactly (top hat,
+    billycock, pork-pie, straw hat): re-deriving the 61 WotW looks moved exactly 8.
+    "felt" is also a verb -- "he felt for his hat" must not read felt_hat (at most one
+    word between "felt" and "hat"; "he felt his hat" still does). The READER's free
+    "straw hat" still reads `boater` (`READER_HEADWEAR`): it is unmeasured, and as
+    the brimmed other_hat it would hide the shipped ep25 straw-on-felt fault.

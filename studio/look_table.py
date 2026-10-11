@@ -123,9 +123,16 @@ def layer_text(physical: str, worn: str, name: str) -> str:
     return render(keep(parse(physical), lambda layer: layer == name))
 
 
-HEADWEAR = (("none", r"hatless|bare-?headed"), ("boater", r"boater|straw hat"), ("bowler", r"bowler|derby"),
-            ("top_hat", r"top-?hat|silk hat"), ("felt_hat", r"felt hat"), ("cap", r"\bcap\b"),
+HEADWEAR = (("none", r"hatless|bare-?headed"), ("boater", r"boater"), ("bowler", r"bowler|derby|billycock"),
+            ("top_hat", r"top[- ]?hat|silk hat|stovepipe"),
+            # "felt" is also a verb: "he felt for his hat" -- one word between at most (C2_verdict #5)
+            ("felt_hat", r"\bfelt hat|\bfelt\s+[\w-]+\s+hat|pork-?pie|slouch hat|wide-?awake"), ("cap", r"\bcap\b"),
             ("bonnet", r"bonnet"), ("helmet", r"helmet"), ("hood", r"\bhood\b"), ("other_hat", r"\bhats?\b"))
+READER_HEADWEAR = HEADWEAR[:1] + (("boater", r"boater|straw hat"),) + HEADWEAR[2:]
+"""The table a READER's free words go through (G-LOOK-PANEL): the writer's, but a
+listed "straw hat" still reads `boater`.  The writer's "wide straw hat" is not a
+boater (C2_verdict #5); the reader's straw hat is unmeasured, and reading it as
+the brimmed `other_hat` would hide a straw hat on a felt-hat look (shipped ep25)."""
 HAIR = (("grey", r"gr[ae]y|silver"), ("white", r"white"), ("bald", r"bald"),
         ("red", r"\bred\b|ginger|auburn|copper"), ("fair", r"fair|blond|flaxen|golden|tow"),
         ("dark", r"dark|black|raven"), ("brown", r"brown|chestnut"))

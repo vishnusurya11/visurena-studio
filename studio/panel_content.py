@@ -246,7 +246,7 @@ def seen_marker(key: str, said: str) -> str:
     from studio import look_table as lt
     if key == "hair_colour":
         return lt.seen_hair(said)
-    return lt.first_of({"headwear": lt.HEADWEAR, "facial_hair": lt.FACIAL, "top": lt.TOP}[key], said)
+    return lt.first_of({"headwear": lt.READER_HEADWEAR, "facial_hair": lt.FACIAL, "top": lt.TOP}[key], said)
 
 
 def look_advisories(seen: Seen, markers) -> list[str]:
