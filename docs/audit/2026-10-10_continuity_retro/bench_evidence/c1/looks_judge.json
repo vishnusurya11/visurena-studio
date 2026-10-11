@@ -1,0 +1,116 @@
+{
+ "fresh_s0.png": {
+  "judge": "look_state",
+  "version": "1",
+  "passed": false,
+  "faults": [
+   {
+    "kind": "look_headwear",
+    "where": "D:/temp/claude/d--Projects-KingdomOfViSuReNa-alpha-visurena-studio/53388bed-712c-4d9b-972d-6c2de9a9f94e/scratchpad/c1b/looks/fresh_s0.png",
+    "evidence": {
+     "want": "felt_hat",
+     "seen": "other_hat"
+    },
+    "severity": "high",
+    "note": ""
+   },
+   {
+    "kind": "look_dirt",
+    "where": "D:/temp/claude/d--Projects-KingdomOfViSuReNa-alpha-visurena-studio/53388bed-712c-4d9b-972d-6c2de9a9f94e/scratchpad/c1b/looks/fresh_s0.png",
+    "evidence": {
+     "want": "muddy",
+     "seen": "dusty"
+    },
+    "severity": "advisory",
+    "note": ""
+   }
+  ],
+  "confidence": 1.0,
+  "reads": 1,
+  "terminal": "",
+  "signed_at": ""
+ },
+ "fresh_s1.png": {
+  "judge": "look_state",
+  "version": "1",
+  "passed": false,
+  "faults": [
+   {
+    "kind": "look_headwear",
+    "where": "D:/temp/claude/d--Projects-KingdomOfViSuReNa-alpha-visurena-studio/53388bed-712c-4d9b-972d-6c2de9a9f94e/scratchpad/c1b/looks/fresh_s1.png",
+    "evidence": {
+     "want": "felt_hat",
+     "seen": "other_hat"
+    },
+    "severity": "high",
+    "note": ""
+   }
+  ],
+  "confidence": 1.0,
+  "reads": 1,
+  "terminal": "",
+  "signed_at": ""
+ },
+ "fresh_s2.png": {
+  "judge": "look_state",
+  "version": "1",
+  "passed": false,
+  "faults": [
+   {
+    "kind": "look_headwear",
+    "where": "D:/temp/claude/d--Projects-KingdomOfViSuReNa-alpha-visurena-studio/53388bed-712c-4d9b-972d-6c2de9a9f94e/scratchpad/c1b/looks/fresh_s2.png",
+    "evidence": {
+     "want": "felt_hat",
+     "seen": "other_hat"
+    },
+    "severity": "high",
+    "note": ""
+   },
+   {
+    "kind": "look_dirt",
+    "where": "D:/temp/claude/d--Projects-KingdomOfViSuReNa-alpha-visurena-studio/53388bed-712c-4d9b-972d-6c2de9a9f94e/scratchpad/c1b/looks/fresh_s2.png",
+    "evidence": {
+     "want": "muddy",
+     "seen": "dusty"
+    },
+    "severity": "advisory",
+    "note": ""
+   }
+  ],
+  "confidence": 1.0,
+  "reads": 1,
+  "terminal": "",
+  "signed_at": ""
+ },
+ "ghost_2x.png": {
+  "judge": "look_state",
+  "version": "1",
+  "passed": false,
+  "faults": [
+   {
+    "kind": "look_headwear",
+    "where": "D:/temp/claude/d--Projects-KingdomOfViSuReNa-alpha-visurena-studio/53388bed-712c-4d9b-972d-6c2de9a9f94e/scratchpad/c1b/looks/ghost_2x.png",
+    "evidence": {
+     "want": "felt_hat",
+     "seen": "other_hat"
+    },
+    "severity": "high",
+    "note": ""
+   },
+   {
+    "kind": "look_facial_hair",
+    "where": "D:/temp/claude/d--Projects-KingdomOfViSuReNa-alpha-visurena-studio/53388bed-712c-4d9b-972d-6c2de9a9f94e/scratchpad/c1b/looks/ghost_2x.png",
+    "evidence": {
+     "want": "beard",
+     "seen": "stubble"
+    },
+    "severity": "high",
+    "note": ""
+   }
+  ],
+  "confidence": 1.0,
+  "reads": 1,
+  "terminal": "",
+  "signed_at": ""
+ }
+}
