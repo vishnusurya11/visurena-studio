@@ -843,3 +843,7 @@ fixes. Each lesson below cost at least one launch. Tracker rows A38-A74 in
       landing a fix (527 waste-min). `autopilot pause --at-boundary`, wait one unit, then
       commit. A started step that ends on the flag closes `deferred` (the events table has
       no 'paused'), never `failed`.
+    - **A dossier says what it doesn't say (commit 8).** 117/281 physicals list "hair" inside
+      a negation ("gives no height, build, hair ..."); the splitter cut it out as a hair
+      clause. Negation scopes its comma list until a ';'. Scarlet's Watson, Hope, Lestrade
+      and Gregson now take their bound row's hair; Jekyll's Utterson is honestly refused.

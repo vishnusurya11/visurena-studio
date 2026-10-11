@@ -49,13 +49,23 @@ def layer_of(clause: str) -> str:
     return next((name for name in ("headwear", "face", "hair") if WORDS[name].search(clause)), "")
 
 
+NEGATION = re.compile(r"\b(?:no|not|never|without)\b", re.I)
+"""A dossier says what it doesn't say (C3_verdict #8): 117 of 281 physicals carry
+"gives no height, build, hair, eye colour ..." -- the splitter cut "hair" out of
+that list and the look table read it as the hair layer."""
+
+
 def sentence_of(text: str) -> Sentence:
-    """One sentence cut into clauses; a clause naming no layer continues the last."""
+    """One sentence cut into clauses; a clause naming no layer continues the
+    last.  A negation scopes its comma list until a ';': the clauses under it
+    name no head layer (they are `rest`)."""
     end = text[-1] if text[-1:] in ".!?" else ""
     bits = SPLIT.split(text[:len(text) - len(end)])
-    out, layer = [], "rest"
+    out, layer, negated = [], "rest", False
     for i in range(0, len(bits), 2):
-        layer = layer_of(bits[i]) or layer
+        negated = (negated and ";" not in bits[i - 1]) if i else False
+        negated = negated or bool(NEGATION.search(bits[i]))
+        layer = "rest" if negated else (layer_of(bits[i]) or layer)
         out.append(Clause(layer, bits[i], bits[i + 1] if i + 1 < len(bits) else ""))
     return Sentence(out, end)
 
