@@ -383,8 +383,10 @@ def judge(book: Path, spec: bt.BookTitleSpec, out: Path) -> dict:
 def make_thumbnail(book: Path, spec: bt.BookTitleSpec, episodes: int) -> Path:
     """The 16:9 plate with the title on its dark left; when no thumbnail plate
     passes (Scarlet: Holmes drawn twice on three seeds), the vetted hero plate
-    over a title band."""
+    over a title band.  Made once: the fallback has no thumb_plate.png to cache by."""
     from PIL import Image
+    if (made := home(book) / "thumbnail.jpg").exists():
+        return made
     try:
         still = plate(home(book) / "thumb_plate.png", spec.thumb, book_look(book), wide=False, seed=7400)
         pic = bt.thumbnail(Image.open(still), spec, episodes=episodes, font=FONT)
@@ -397,6 +399,16 @@ def make_thumbnail(book: Path, spec: bt.BookTitleSpec, episodes: int) -> Path:
         if out.stat().st_size < 2_000_000:
             break
     return out
+
+
+def prepare(book: Path, episodes: int) -> Path:
+    """The GPU half that needs no chapter pieces -- spec, plate, push-in, sting,
+    thumbnail -- so it runs WHILE the CPU cuts the chapters (owner 2026-10-11:
+    'nothing runs in the GPU').  Cached: a second call costs nothing."""
+    spec = load_spec(book)
+    hero(book, plate(home(book) / "plate.png", spec.hero, book_look(book), wide=True, seed=7300))
+    sting(book, spec)
+    return make_thumbnail(book, spec, episodes)
 
 
 def ensure(book: Path, episodes: int) -> tuple[Path, Path]:

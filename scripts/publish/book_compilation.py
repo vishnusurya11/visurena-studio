@@ -16,8 +16,10 @@ any chapter of the book is unpublished.
 """
 from __future__ import annotations
 
+import contextlib
 import datetime as dt
 import json
+import os
 import re
 import subprocess
 import sys
@@ -117,6 +119,7 @@ def parts_of(book: Path) -> list[tuple[int, str, list[Path], float]]:
         pair = split(book, n, master)
         out.append((n, bc.chapter_of(episode_meta(book, n)["title"]), list(pair),
                     sum(frames(p) for p in pair) / FPS))
+        print(f"  ep{n:02d}/{total}: title {frames(pair[0])}f + main {frames(pair[1])}f", flush=True)
     return out
 
 
@@ -214,10 +217,79 @@ def retitle(api, video_id: str, meta: dict) -> dict:
     return youtube_retitle.push(api, video_id, snippet)
 
 
+def pid_alive(pid: int) -> bool:
+    """Whether a Windows process is still running."""
+    import ctypes
+    k32 = ctypes.windll.kernel32
+    handle = k32.OpenProcess(0x1000, False, pid)            # PROCESS_QUERY_LIMITED_INFORMATION
+    if not handle:
+        return False
+    code = ctypes.c_ulong()
+    k32.GetExitCodeProcess(handle, ctypes.byref(code))
+    k32.CloseHandle(handle)
+    return code.value == 259                                # STILL_ACTIVE
+
+
+@contextlib.contextmanager
+def book_lock(book: Path):
+    """One compilation per book at a time: a 'detached' run survived its shell and
+    raced the upload run on the same pieces (2026-10-11)."""
+    lock = book / "compilation" / ".lock"
+    lock.parent.mkdir(parents=True, exist_ok=True)
+    if holder := bc.lock_holder(lock, alive=pid_alive):
+        raise SystemExit(f"REFUSED: process {holder} is already compiling {book.name}")
+    lock.write_text(str(os.getpid()), encoding="utf-8")
+    try:
+        yield
+    finally:
+        lock.unlink(missing_ok=True)
+
+
+def door_sheet(book: Path, parts: list) -> Path:
+    """Every chapter's first title frame and last main frame, side by side: what a
+    person checks the order by at a glance (compilation/door_sheet.png)."""
+    folder = book / "compilation" / "door"
+    folder.mkdir(parents=True, exist_ok=True)
+    for k, (_, _, (title_piece, main_piece), _) in enumerate(parts, start=1):
+        subprocess.run(["ffmpeg", "-y", "-v", "error", "-i", str(title_piece), "-sseof", "-0.5", "-i", str(main_piece),
+                        "-filter_complex", "[0:v]scale=160:160[a];[1:v]scale=160:160[b];[a][b]hstack",
+                        "-frames:v", "1", "-update", "1", str(folder / f"{k:03d}.png")], check=True)
+    out = book / "compilation" / "door_sheet.png"
+    cols = 4
+    subprocess.run(["ffmpeg", "-y", "-v", "error", "-start_number", "1", "-i", str(folder / "%03d.png"),
+                    "-vf", f"tile={cols}x{-(-len(parts) // cols)}:padding=4", "-frames:v", "1", str(out)], check=True)
+    return out
+
+
+def door(book: Path, order: list[Path], parts: list) -> dict:
+    """The upload door: running order, each title piece against its card, the
+    main title's verdict; refuses on any fault, writes compilation/door.json."""
+    verdict_path = book / "title" / "book" / "verdict.json"
+    faults = bc.door_faults(title_frames={p[0]: frames(p[2][0]) for p in parts},
+                            card_frames={p[0]: frames(card_of(book, p[0])) for p in parts},
+                            order_ok=bc.title_first_order(order),
+                            title_verdict=episode_home.read_json(verdict_path) if verdict_path.exists() else {"refused": ["no verdict"]})
+    record = {"faults": faults, "sheet": episode_home.relative(book, door_sheet(book, parts))}
+    episode_home.write_json(book / "compilation" / "door.json", record)
+    if faults:
+        raise SystemExit(f"REFUSED at the door: {faults}")
+    return record
+
+
 def main(argv: list[str]) -> None:
-    from scripts.episode import book_title
+    sys.stdout.reconfigure(line_buffering=True)              # the log is read while it runs
     book = episode_home.book_dir(argv[1])
-    parts = parts_of(book)
+    with book_lock(book):
+        run(book, argv)
+
+
+def run(book: Path, argv: list[str]) -> None:
+    from concurrent.futures import ThreadPoolExecutor
+    from scripts.episode import book_title
+    with ThreadPoolExecutor(1) as gpu:                       # the GPU works while the CPU cuts
+        early = gpu.submit(book_title.prepare, book, chapters_in_book(book))
+        parts = parts_of(book)
+        early.result()
     main_title, thumb = book_title.ensure(book, len(parts))
     lead = frames(main_title) / FPS
     meta = metadata(book, parts, lead_s=lead)
@@ -232,7 +304,9 @@ def main(argv: list[str]) -> None:
         print(f"retitled https://youtu.be/{retitle_id}\n\n{meta['title']}\n\n{meta['description']}")
         return
     folder = book / "compilation"
-    out = join(running_order(main_title, parts), lead + sum(p[3] for p in parts), folder)
+    order = running_order(main_title, parts)
+    print(f"door: {door(book, order, parts)}", flush=True)
+    out = join(order, lead + sum(p[3] for p in parts), folder)
     episode_home.write_json(folder / "youtube.json", meta | {"file": episode_home.relative(book, out),
                                                               "sha8": yp.sha8(out),
                                                               "thumbnail": episode_home.relative(book, thumb)})

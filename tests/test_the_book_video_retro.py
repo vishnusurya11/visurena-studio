@@ -97,3 +97,9 @@ def test_staging_an_image_puts_back_a_missing_comfy_temp_folder(tmp_path, monkey
     img.write_bytes(b"x")
     comfy.stage_image(img)
     assert (tmp_path / "temp").is_dir()
+
+
+def test_this_process_is_alive_and_a_made_up_one_is_not():
+    import os
+    from scripts.publish import book_compilation as script
+    assert script.pid_alive(os.getpid()) and not script.pid_alive(4_000_000)
