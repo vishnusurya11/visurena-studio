@@ -15,10 +15,10 @@ DRAFT = {"looks": [{"look_id": "travel_coat", "start_chapter": 1, "top": "dark o
 def book(tmp_path):
     folder = tmp_path / "analysis" / "characters"
     folder.mkdir(parents=True)
-    (folder / "griffin.json").write_text(json.dumps({"id": "griffin", "profile": {"physical": "Tall man."}}),
+    (folder / "griffin.json").write_text(json.dumps({"id": "griffin", "profile": {"physical": "Tall man. Dark hair cut short."}}),
                                          encoding="utf-8")
     (folder / "narrator.json").write_text(json.dumps({"id": "narrator", "profile": {
-        "physical": "A man.", "wardrobe": {"suit": "A grey suit."}, "wardrobe_by_chapter": {"1": "suit"}}}),
+        "physical": "A man. Fair hair parted on the left.", "wardrobe": {"suit": "A grey suit."}, "wardrobe_by_chapter": {"1": "suit"}}}),
         encoding="utf-8")
     return tmp_path
 

@@ -43,7 +43,10 @@ def build(book: Path, cast: list[str], _agent=None) -> list[str]:
     written = []
     for who in cast:
         if who not in have:
-            look_timeline.write_looks(book, who, table_for(book, who, _agent=_agent))
+            looks = table_for(book, who, _agent=_agent)
+            if why := look_timeline.head_refusal(who, looks):     # C1_verdict #9: never a blank judge
+                raise SystemExit(f"REFUSED: {why}")
+            look_timeline.write_looks(book, who, looks)
             written.append(who)
     return written
 

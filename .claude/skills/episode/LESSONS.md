@@ -705,3 +705,9 @@ fixes. Each lesson below cost at least one launch. Tracker rows A38-A74 in
     takes staged unhashed `voice_NN.wav` names a later episode overwrote; their guides
     end 1.2-3.2 s off placed.json and read "invented" falsely. G-TAIL reads such a guide
     UNMEASURABLE (speech end > 1.0 s off placed.json), never invented.
+  - **A blank head makes a blank judge.** Jekyll's and Hyde's dossiers name no hair,
+    beard, age or hat, so every head marker would be blank and LOOK-STATE would pass
+    anything. A NEW look table now refuses such a character ("head unauthored",
+    `look_timeline.head_refusal`); existing tables are not re-judged. WotW: 0/47
+    refused. Scarlet has no table, but 9/15 of its bound dossiers (Holmes included)
+    author no head in `physical` -- a Scarlet table would be refused until they do.

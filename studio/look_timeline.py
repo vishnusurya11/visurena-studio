@@ -178,6 +178,19 @@ def load(book: Path) -> LookBook | None:
     return LookBook.model_validate_json(path.read_text(encoding="utf-8")) if path.exists() else None
 
 
+HEAD = ("hair", "face", "headwear")
+
+
+def head_refusal(who: str, looks: CharacterLooks) -> str | None:
+    """Why a NEW table may not carry `who`: every look's head layers are empty, so
+    every head marker is blank and LOOK-STATE would pass anything (C1_verdict #9,
+    Jekyll and Hyde).  None when any look authors any head layer."""
+    if any(getattr(look.layers, k).strip() for look in looks.looks.values() for k in HEAD):
+        return None
+    return (f"{who}: head unauthored -- no look names hair, face or headwear, so LOOK-STATE "
+            f"would judge blank markers; author the head in the dossier's physical first")
+
+
 def write_looks(book: Path, who: str, looks: CharacterLooks) -> Path:
     """One character's looks merged into the book's table (others kept)."""
     table = load(book) or LookBook(book=Path(book).name)

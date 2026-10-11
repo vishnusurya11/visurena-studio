@@ -107,6 +107,7 @@ staged the wrong person that way (ep05 T19, ep06 T08, ep07 T09/T19/T24/T26).
 | relative identity (inside LOOK-STATE) | face-changing looks | facenet cos(look, base) minus the nearest other cast sheet | ADVISORY until the bench fits it |
 | undrawn look | grids, takes | `pack_refs.look_sheet` | HARD: refuses, never the base sheet |
 | one look per person (step 06) | `takes_r2v.opened` | `continuity.look_faults`: the staged picture and the words name ONE look on the table, the row is stamped with the table's look, the look is drawn | HARD |
+| head unauthored (2026-10-11, C1_verdict #9) | refs 01_03 `looks_table.build`, `look_timeline.head_refusal` | a NEW table's character none of whose looks names hair, face or headwear | HARD refusal before the write (blank markers make LOOK-STATE pass anything); existing looks.json never re-judged; WotW replay 0/47 |
 | G-LOOK-WORDS (beard, 2026-10-11, C1_verdict #6) | plan battery (`plan_check` continuity), `continuity_place.look_word_faults` | a head tag (a parenthetical naming face/eyes/hair) of a one-face shot whose staged look's marker is `beard` that says no beard | HARD, but CURED IN CODE FIRST (`cure_beard_tags`, plan_repair `continuity_beards`): the look's own beard phrase is appended to the tag, so the writer never loops; ep25 replay: exactly the 4 bare tags cured, 8 untouched |
 | same-place band | 03_05, every derived state | DINOv3 cosine of the variant to its source, `places.SAME_PLACE_BAND` 0.80 | FLAG, uncalibrated |
 
