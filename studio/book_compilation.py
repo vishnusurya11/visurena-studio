@@ -153,3 +153,43 @@ def intro(*, book: str, episodes: int) -> str:
     return (f"{book}, told from beginning to end as one film: our screen adaptation of the novel, "
             f"in {episodes} episodes, each one chapter of the book. "
             "Use the chapters above to jump to any episode.")
+
+
+# ---- the door: nothing uploads that a check can catch (retro, 2026-10-11) ----------
+
+CARD_SLACK = 3
+"""Frames a title piece may run over its card: the black is measured ~2 frames
+inside the card's fade-out."""
+
+
+def door_faults(*, title_frames: dict[int, int], card_frames: dict[int, int], order_ok: bool,
+                title_verdict: dict) -> list[str]:
+    """What stops the book video at the upload door.  A title piece LONGER than its
+    card holds chapter picture (Scarlet ep12: 175 for 107); a shorter one is an
+    older card (Scarlet ep01: 90), not a fault."""
+    faults = [] if order_ok else ["the running order is not main title, then title + main per chapter"]
+    if title_verdict.get("refused"):
+        faults.append(f"G-BOOKTITLE refused: {title_verdict['refused']}")
+    for n in sorted(title_frames):
+        if title_frames[n] > card_frames.get(n, title_frames[n]) + CARD_SLACK:
+            faults.append(f"ep{n:02d}: title piece is {title_frames[n]} frames for a {card_frames[n]}-frame card")
+    return faults
+
+
+def title_first_order(order: list[Path]) -> bool:
+    """The concat list reads main title, then epNN_title, epNN_main, chapter after chapter."""
+    names = [Path(p).name for p in order]
+    if not names or names[0] != "main_title.mp4" or len(names) % 2 == 0:
+        return False
+    pairs = list(zip(names[1::2], names[2::2]))
+    return all(t.endswith("_title.mp4") and m.endswith("_main.mp4") and t[:4] == m[:4] for t, m in pairs)
+
+
+def lock_holder(lock: Path, *, alive) -> int | None:
+    """The live process holding a book's compilation lock, or None (none, or stale).
+    A 'detached' job survived its shell and raced the upload run (2026-10-11)."""
+    try:
+        pid = int(Path(lock).read_text(encoding="utf-8").strip())
+    except (OSError, ValueError):
+        return None
+    return pid if alive(pid) else None

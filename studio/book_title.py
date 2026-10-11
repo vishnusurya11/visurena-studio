@@ -82,7 +82,11 @@ def plate_request(look: str, *, wide: bool) -> dict:
 def spec(book: dict, *, synopsis: str, ask, look: str = "") -> BookTitleSpec:
     """The words from the book's own data; only the pictures and sound are written."""
     name = book.get("display_title") or book["title"]
-    art = ask(HERO_TIER, writer_prompt(name, book["author"], synopsis, look=look), KeyArt)
+    try:
+        art = ask(HERO_TIER, writer_prompt(name, book["author"], synopsis, look=look), KeyArt)
+    except Exception as why:                       # the writer is down: never wait on it
+        print(f"  spec: the writer failed ({str(why)[:100]}); the book's own logline", flush=True)
+        art = fallback_art(name, synopsis)
     return BookTitleSpec(title=name, author=book["author"], hero=art.hero, thumb=art.thumb, sting=art.sting)
 
 
@@ -398,3 +402,14 @@ def photoreal_lead(refs: dict) -> str:
         if row.get("kind") == "location" and palette and palette in prompt:
             return prompt[:prompt.index(palette) + len(palette)].strip() + " "
     return f"{PHOTOREAL[0].upper()}{PHOTOREAL[1:]}, of "
+
+
+def fallback_art(name: str, synopsis: str) -> KeyArt:
+    """The key art from the book's own logline when the writer cannot be reached
+    (the Claude SDK hung at start-up on every call, 2026-10-11)."""
+    moment = synopsis.strip().rstrip(".") or name
+    return KeyArt(hero=f"the defining image of {name}: {moment}. Wide, cinematic, dramatic light, no text.",
+                  thumb=f"one person only, the main character of {name}, on the right third of the frame; "
+                        f"{moment}; the left two-thirds dark and empty. No text.",
+                  sting="instrumental orchestral main-title sting, no vocals, low strings swelling into "
+                        "one deep timpani and brass hit, reverberant decay")

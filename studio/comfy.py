@@ -83,6 +83,9 @@ def stage_image(path: Path) -> str:
         raise FileNotFoundError(f"cannot stage missing image: {path}")
     dest = COMFY_ROOT / "input" / staged_name(path)
     dest.parent.mkdir(parents=True, exist_ok=True)
+    # The Qwen3-VL reader writes its frame into ComfyUI/temp; a second instance
+    # deleted that folder on exit and every read failed (2026-10-11).
+    (COMFY_ROOT / "temp").mkdir(parents=True, exist_ok=True)
     # the name IS the content, so an existing file is already the right bytes
     if not dest.exists():
         shutil.copy2(path, dest)
