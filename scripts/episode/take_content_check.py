@@ -80,7 +80,7 @@ def with_twins(row: dict, twins: list[str]) -> dict:
 
 def verdict_for(book: Path, shot, setup, reads: list[pc.Seen]) -> dict:
     from studio import cast_refs
-    markers = cast_refs.look_markers(book, list(shot.faces or []))
+    markers = cast_refs.look_markers(book, list(shot.faces or []), setup)
     got = tc.take_faults(
         reads, planned=len(shot.faces or []), crowd=bool((setup.crowd or "").strip()),
         flat=pc.flat_place(book, setup.location), night=panel_dq.at_night(setup.described),

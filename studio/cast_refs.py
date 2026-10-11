@@ -63,10 +63,12 @@ def row(book: Path, who: str) -> dict:
     raise KeyError(f"{who} has no row in refs.json: bind him before you draw him")
 
 
-def look_markers(book: Path, who: list[str]) -> list[dict]:
-    """The bound look markers of everyone a shot casts, one per face ({} for a
-    row with none: the prose rule decides for it -- retro 2026-10-10)."""
-    return [row(book, name).get("markers") or {} for name in who]
+def look_markers(book: Path, who: list[str], setup=None) -> list[dict]:
+    """The STAGED look's markers of everyone a shot casts, one per face ({} for
+    a row with none: the prose rule decides for it -- retro 2026-10-10)."""
+    from studio import continuity
+    rows = [row(book, name) for name in who]
+    return [continuity.markers_for(book, name, continuity.look_for(setup, name, r), r) for name, r in zip(who, rows)]
 
 
 def physical(row: dict) -> str:

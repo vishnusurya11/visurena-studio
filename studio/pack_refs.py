@@ -100,6 +100,22 @@ def character_sheet(book: Path, who: str) -> Path | None:
     return path if path.exists() else None
 
 
+def look_sheet(book: Path, who: str, look: str) -> Path | None:
+    """The picture of `who` in `look`: the one sheet for the base look (or a book
+    with no look table), else refs/characters/<who>/looks/<look>.png.  An
+    undrawn look REFUSES -- falling back to the base sheet is how WotW ep22-27
+    staged the clean ep01 suit on a grey, bearded man (decision 2026-10-10)."""
+    from studio import look_timeline
+    table = look_timeline.load(book)
+    card = table.characters.get(who) if table else None
+    if not look or card is None or look == card.base or look not in card.looks:
+        return character_sheet(book, who)
+    path = Path(book) / "refs" / "characters" / who / "looks" / f"{look}.png"
+    if not path.exists():
+        raise SystemExit(f"{who}: the look {look!r} is not drawn (step 03 draws it; never the base in its place)")
+    return path
+
+
 def prop_sheet(book: Path, pid: str) -> Path | None:
     """The prop's one sheet, or None when the pack has not drawn it."""
     path = Path(book) / "refs" / "props" / pid / "sheet.png"
@@ -133,8 +149,11 @@ def character_row(book: Path, who: str, chapter: int) -> dict:
     restated hair, beard or hat lead and replace the body's -- retro 2026-10-10),
     the body, then the chapter's clothes; plus the look id and its markers,
     which the content gates compare (`studio.look_table`)."""
-    from studio import look_table
+    from studio import look_table, look_timeline
     card = json.loads((Path(book) / "analysis" / "characters" / f"{who}.json").read_text(encoding="utf-8"))
+    table = look_timeline.load(book)
+    if table is not None and who in table.characters:
+        return table_row(card, who, table.characters[who], chapter)
     prof = card.get("profile") or {}
     look = wardrobe_state(prof.get("wardrobe_by_chapter") or {}, chapter)
     worn = ((prof.get("wardrobe") or {}).get(look, "") or "").strip()
@@ -144,6 +163,20 @@ def character_row(book: Path, who: str, chapter: int) -> dict:
             "wardrobe": {"indoor": worn, "outdoor": worn}, "look": look,
             "markers": look_table.markers_of(body, worn),
             "rel_path": f"refs/characters/{who}/sheet.png"}
+
+
+def table_row(card: dict, who: str, looks, chapter: int) -> dict:
+    """A character row from the book's look table: the chapter's look in words
+    (its head first), its markers, and its picture."""
+    from studio import look_timeline
+    look = looks.look_id_at(chapter)
+    words = look_timeline.look_words(looks, look)
+    picture = "sheet.png" if look == looks.base else f"looks/{look}.png"
+    return {"ref_id": f"char-{who}", "kind": "character", "entity_id": who,
+            "name": card.get("name", who), "physical": words,
+            "wardrobe": {"indoor": words, "outdoor": words}, "look": look,
+            "markers": looks.looks[look].markers.model_dump(),
+            "rel_path": f"refs/characters/{who}/{picture}"}
 
 
 def props_for(book: Path, pids: list[str]) -> list[tuple[Path, tuple[str, str]]]:

@@ -42,7 +42,7 @@ COLS, ROWS = 3, 3
 CELLS = COLS * ROWS
 
 
-def cast_sheet(book, who: str, setup: str, state: str = ""):
+def cast_sheet(book, who: str, setup: str, state: str = "", look: str = ""):
     """The picture that binds this character HERE: the wardrobe card, else the bust.
 
     Tried in order: the STATE card (`char-<who>_indoor.png`, the contract's own
@@ -70,6 +70,12 @@ def cast_sheet(book, who: str, setup: str, state: str = ""):
     referenced Holmes in a deerstalker and Watson in his bowler while their own
     prose said "bare-headed". The reference and the words have to be one
     statement; that is the whole point of the cast gate."""
+    # THE LOOK (decision 2026-10-10): a non-base look of the book's look table is
+    # its own picture; an undrawn one refuses inside look_sheet, never the base.
+    if look:
+        from studio import pack_refs
+        if (drawn := pack_refs.look_sheet(book, who, look)) is not None and drawn.parent.name == "looks":
+            return drawn
     chars = book / "refs" / "characters"
     for name in (f"char-{who}_{state}.png" if state else "", f"char-{who}_{setup}.png"):
         if name and (chars / name).exists():

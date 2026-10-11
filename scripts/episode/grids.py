@@ -38,7 +38,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 
-from studio import cast_refs, episode_home, grid_room, pack_refs
+from studio import cast_refs, continuity, episode_home, grid_room, pack_refs
 from studio.comfy import load_workflow, stage_image, submit, wait
 from studio.episode_home import episode_arg
 from studio.ref_slots import stage_only
@@ -149,13 +149,16 @@ def wide_for(book: Path, setup) -> Path:
                                    view=getattr(setup, "view", "") or "")
 
 
-def sheet_of(book: Path, who: str) -> Path | None:
+def sheet_of(book: Path, who: str, look: str = "") -> Path | None:
     """The ONE-FIGURE crop of this person's sheet for the drawer, or None (words).
 
     ep16 (2026-10-02): a four-pose turnaround staged whole was drawn as up to
     four people, and the prompt saying 'exactly once' changed nothing; a sheet
-    whose poses overlap is not staged at all.  Takes keep the whole sheet."""
+    whose poses overlap is not staged at all.  Takes keep the whole sheet.
+    A non-base LOOK stages its own picture, already one figure (2026-10-10)."""
     from studio.sheet_front import front_of
+    if look and (drawn := pack_refs.look_sheet(book, who, look)) is not None and drawn.parent.name == "looks":
+        return drawn
     p = Path(book) / "refs" / "characters" / who / "sheet.png"
     return front_of(p) if p.exists() else None
 
@@ -172,7 +175,7 @@ def wide_only(name: str, shots: list) -> bool:
     return bool(mine) and all(str(getattr(s, "size", "")).lower() in WIDE_SIZES for s in mine)
 
 
-def cast_of(book: Path, shots: list, reserve: int = 1) -> tuple[list[dict], dict]:
+def cast_of(book: Path, shots: list, reserve: int = 1, setup=None) -> tuple[list[dict], dict]:
     """Every person the panels name, from the bound rows, and the slots their
     sheets go in -- what is staged and what is said are the same list.
     `reserve` slots are kept for the place and, on a chained grid, the room."""
@@ -185,7 +188,8 @@ def cast_of(book: Path, shots: list, reserve: int = 1) -> tuple[list[dict], dict
         # chapter hard-coded as six, and dressed every ep09 grid from chapter 6
         # (2026-09-23).
         row = cast_refs.row(book, name)
-        sheet, ref = sheet_of(book, name), None
+        look = continuity.look_for(setup, name, row)           # the setup's look (2026-10-10)
+        sheet, ref = sheet_of(book, name, look), None
         if sheet is not None and n < MAX_SLOTS - reserve and not wide_only(name, shots):
             n += 1
             ref = n
@@ -193,7 +197,7 @@ def cast_of(book: Path, shots: list, reserve: int = 1) -> tuple[list[dict], dict
         said = re.sub(r"^(my|the|a|an)\s+", "", row["name"].strip(), flags=re.I).upper()
         people.append({
             "ref": ref, "name": said, "entity": name, "display": row.get("display") or row["name"],
-            "wear": " ".join(row["physical"].split()),
+            "wear": " ".join(continuity.words_for(book, name, look, row).split()),
             "against": (f"{said} is no other person in this storyboard: nobody else wears "
                         f"these clothes and {said} never wears anyone else's")})
     return people, slots
@@ -291,7 +295,7 @@ def prompt_for(book: Path, ep, setup: str, shots: list, cols: int, rows: int,
     owned = [s for s in shots if s.setup == setup] or shots
     plate = room is None or grid_room.stages_plate(shots)
     reserve = int(plate) + int(room is not None)
-    cast, char_slots = cast_of(book, owned, reserve)
+    cast, char_slots = cast_of(book, owned, reserve, ep.setups[setup])
     props, prop_slots = stage_props(props_of(book, ep.setups[setup].props, owned), len(char_slots), reserve)
     nxt, slots, plate_slots = len(char_slots) + len(prop_slots) + 1, {**char_slots, **prop_slots}, []
     if plate:

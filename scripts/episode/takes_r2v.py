@@ -27,7 +27,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 
 from studio.episode_home import episode_arg
-from studio import cast_refs
+from studio import cast_refs, continuity
 from studio import plan_brief
 from studio import panel_dq
 from studio import approval, canvas, episode_board as board, episode_home, episode_ref_official as ro, episode_ref_prompt as rp
@@ -82,10 +82,18 @@ def on_grid(frame: int) -> int:
     return tk.grid_frame(frame)
 
 
-def physicals(book: Path) -> dict[str, str]:
-    return {r["entity_id"]: contract_description(r.get("physical", ""))
+def physicals(book: Path, setup=None) -> dict[str, str]:
+    """Each bound person's words; in a setup, the words of the look it stages
+    (a pick off the row's chapter look says that look -- 2026-10-10)."""
+    return {r["entity_id"]: contract_description(continuity.words_for(
+                book, r["entity_id"], continuity.look_for(setup, r["entity_id"], r), r))
             for r in episode_home.read_json(book / "refs" / "refs.json")["refs"]
             if r.get("kind") == "character"}
+
+
+def looks_of(book: Path, setup, faces: list[str]) -> dict[str, str]:
+    """The look each staged face wears in this setup."""
+    return {who: continuity.look_for(setup, who, cast_refs.row(book, who)) for who in faces}
 
 
 def named_in(shot, cast: list[str]) -> list[str]:
@@ -225,11 +233,12 @@ def one_figure(sheet: Path) -> Path:
 
 def reference_list(book: Path, boards: Path, faces: list[str], setup: str,
                    segs: list[tuple[int, int]], ends: list[tuple[int, int]], strip: Path,
-                   state: str = "", sizes: list[str] | None = None) -> list[Path]:
+                   state: str = "", sizes: list[str] | None = None,
+                   looks: dict[str, str] | None = None) -> list[Path]:
     """The take's picture slots, in the order `graph_for` stages them and therefore in
     the order `episode_ref_official` numbers them (spec 1.1): cast sheets, the plate,
     every pinned cell in first-pin order, the END cells, the strip."""
-    refs = [sq.cast_sheet(book, who, setup, state) for who in faces]
+    refs = [sq.cast_sheet(book, who, setup, state, (looks or {}).get(who, "")) for who in faces]
     if FRONT_SHEETS:
         refs = [one_figure(r) for r in refs]
     # THE PLATE WAS THE EPISODE'S TOP OPEN FAULT.  MEASURED on episode 2: 13 of
@@ -304,7 +313,8 @@ def location_picture(book: Path, boards: Path, setup, name: str, shot=None) -> P
 
 def refs_from_cards(book: Path, boards: Path, faces: list[str], setup: str,
                     state: str = "", sizes: list[str] | None = None,
-                    place: Path | None = None, panel: bool = False) -> list[Path]:
+                    place: Path | None = None, panel: bool = False,
+                    looks: dict[str, str] | None = None) -> list[Path]:
     """FROM_REFS: this take's cast sheets, and its plate where the take is wide
     enough to place one -- or where it has nothing else to stage.
 
@@ -317,7 +327,7 @@ def refs_from_cards(book: Path, boards: Path, faces: list[str], setup: str,
 
     The exception is not a preference: a take with no cast sheet has nothing else
     to stage, and `graph_for` reads `paths[0]` before it counts."""
-    refs = [sq.cast_sheet(book, who, setup, state) for who in faces]
+    refs = [sq.cast_sheet(book, who, setup, state, (looks or {}).get(who, "")) for who in faces]
     if FRONT_SHEETS:
         refs = [one_figure(r) for r in refs]
     # THE PLACE IS ALWAYS STAGED HERE.  `places_the_plate` withholds the room from
@@ -473,7 +483,8 @@ def card(book: Path, episode: Episode, number: int, take: dict, measured: dict) 
         where = location_picture(book, boards, episode.setups[first.setup], first.setup, first)
         faces = people_staged(shots, staging_candidates(episode, shots))
         refs = refs_from_cards(book, boards, faces, first.setup, state, sizes, where,
-                               panel=storyboard_panel(book, number, first.index) is not None)
+                               panel=storyboard_panel(book, number, first.index) is not None,
+                               looks=looks_of(book, episode.setups[first.setup], faces))
         # THE SETUP'S PROP SHEETS, after the place (ep02: the cylinder) -- but
         # only the ones THIS TAKE'S OWN PROSE NAMES.  `Setup.props` is a
         # setup-level field, and staging all of it on every take of the setup
@@ -494,7 +505,8 @@ def card(book: Path, episode: Episode, number: int, take: dict, measured: dict) 
         props = []
         sheet = reference_strip(boards, episode, shots)
         ends = end_cells(sq.cells_in(boards), segs, seg_sizes(shots), seg_motions(shots))
-        refs = reference_list(book, boards, faces, first.setup, segs, ends, sheet, state, sizes)
+        refs = reference_list(book, boards, faces, first.setup, segs, ends, sheet, state, sizes,
+                              looks=looks_of(book, episode.setups[first.setup], faces))
         anchors = cell_anchors(shots, take)
         refuse_missing_cells(sq.cells_in(boards), anchors, first.index)
         refuse_double_pins(anchors, first.index)
@@ -514,7 +526,7 @@ def card(book: Path, episode: Episode, number: int, take: dict, measured: dict) 
     voice = [(book / measured[l.index]["rel_path"], round(measured[l.index]["at"] - take["t_start"], 3))
              for l in spoken]
     setup = episode.setups[first.setup]
-    prompt = ro.build(shots, take["placed"], lines, at, take["frames"], faces, physicals(book),
+    prompt = ro.build(shots, take["placed"], lines, at, take["frames"], faces, physicals(book, setup),
                       setup.described, narrator_of(episode.lines), ends=end_numbers(segs, ends), setup=setup,
                       refs=len(refs), fps=FPS, props=props, panel=panel is not None, pin=PIN_PANEL,
                       **staged_facts(sizes, FROM_REFS, faces, panel=panel is not None))
@@ -733,7 +745,7 @@ def dry_prompt(book: Path, episode: Episode, number: int, take: dict, measured: 
     props = [row for _, row in dry_props(book, episode, shots)] if from_refs else []
     lines = [l for l in episode.lines if l.shot in take["shots"]]
     at = {l.index: (measured[l.index]["at"], measured[l.index]["seconds"]) for l in lines}
-    return ro.build(shots, take["placed"], lines, at, take["frames"], faces, physicals(book),
+    return ro.build(shots, take["placed"], lines, at, take["frames"], faces, physicals(book, setup),
                     setup.described, narrator_of(episode.lines), ends=[], setup=setup,
                     refs=None, fps=FPS, props=props, panel=False,
                     **staged_facts(sizes, from_refs, faces, panel=False))
@@ -1086,6 +1098,10 @@ def opened(book_id: str, number: int):
         raise SystemExit("the plan fails the authoring gates:\n  " + "\n  ".join(thin))
     refuse_long_shots(episode)
     refuse_still_motions(episode)
+    # ONE LOOK PER STAGED PERSON (decision 2026-10-10): picture and words agree,
+    # checked before any grid -- ep18/24/25 T0 changed costume mid-take.
+    if mixed := continuity.look_faults(book, episode):
+        raise SystemExit("the staged looks disagree:\n  " + "\n  ".join(mixed))
     return book, episode
 
 

@@ -380,6 +380,12 @@ class Shot(Framed):
         return self
 
 
+class LookPick(BaseModel):
+    """One person's look in one setup, by its id on refs/looks.json."""
+    who: str
+    look: str
+
+
 class Setup(BaseModel):
     described: str
     cast: list[str] = Field(default_factory=list)
@@ -430,6 +436,15 @@ class Setup(BaseModel):
     crowd murmuring in a street.  Root cause 2026-09-26 (D10): twelve episodes had
     no sound but voice and a violin; `studio/episode_sound.py` lays this under the
     setup's shots and G-SOUND refuses a setup without one."""
+    looks: list[LookPick] = Field(default_factory=list)
+    """A person whose LOOK here is not the chapter's default (decision 2026-10-10):
+    WotW ch26 opens ragged and ends in the borrowed suit.  Empty: every face wears
+    the look its bound row is stamped with.  G-LOOK drops a pick the book's look
+    table does not allow in this chapter."""
+    place_state: str = ""
+    """What has CHANGED about this place now, as nouns ('front door forced open,
+    dust on every sill').  Step 03 derives it from the place's picture in ONE
+    edit and the setup's view becomes that variant; empty is the picture itself."""
     props: list[str] = Field(default_factory=list)
     """Prop plates attached as references (`plate_<name>.png`): the one that
     binds a vehicle across the setups that share it.  The cab was bound by
