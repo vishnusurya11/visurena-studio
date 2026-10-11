@@ -3,8 +3,8 @@
 85 planned medium-close panels over 16 WotW episodes have a median face_h of
 0.207 against about 0.30 the cut words ask for: a tight size is drawn a size
 wide.  panel_dq records the drawn face height against the planned size for every
-faced, non-back panel, and flags an MCU < 0.22 or a close < 0.32.  The floors
-are UNCALIBRATED and the MCU floor sits ABOVE today's median, so the flag can
+faced, non-back panel, and flags an MCU < 0.15 or a close < 0.25 (C3_verdict #10:
+the C2 floors 0.22 / 0.32 flagged 7 of 13 owner-good MCU panels).  The flag can
 never refuse a panel, climb a ladder or reach a terminal."""
 from __future__ import annotations
 
@@ -25,11 +25,12 @@ def face(h: float, score: float = 0.9) -> dict:
 
 
 def test_an_mcu_drawn_wide_is_flagged_and_a_close_at_its_size_is_not():
-    got = panel_dq.frame_record([face(0.18)], planned=1, size="medium_close", prose="")
-    assert got["face_h"] == 0.18 and got["planned_size"] == "medium_close" and got["frame_advisory"]
-    assert "uncalibrated" in got["frame_note"]
-    assert not panel_dq.frame_record([face(0.35)], 1, "close", "")["frame_advisory"]
-    assert panel_dq.frame_record([face(0.30)], 1, "close", "")["frame_advisory"]
+    got = panel_dq.frame_record([face(0.14)], planned=1, size="medium_close", prose="")
+    assert got["face_h"] == 0.14 and got["planned_size"] == "medium_close" and got["frame_advisory"]
+    assert "advisory" in got["frame_note"]
+    assert not panel_dq.frame_record([face(0.18)], 1, "medium_close", "")["frame_advisory"]   # owner-good spread
+    assert not panel_dq.frame_record([face(0.30)], 1, "close", "")["frame_advisory"]
+    assert panel_dq.frame_record([face(0.24)], 1, "close", "")["frame_advisory"]
 
 
 def test_the_tallest_present_face_is_the_measure():
@@ -54,7 +55,7 @@ def test_an_advisory_cannot_fail_a_panel_or_climb_its_ladder(monkeypatch):
     pc = importlib.util.module_from_spec(spec)
     sys.modules["panel_check_gframe"] = pc
     spec.loader.exec_module(pc)
-    monkeypatch.setattr(pc.face_end, "faces", lambda frame: [face(0.15)])
+    monkeypatch.setattr(pc.face_end, "faces", lambda frame: [face(0.12)])
     shot = SimpleNamespace(index=4, faces=["narrator"], size="medium_close", extras=0,
                            frame="Medium close of the narrator", at_rest="")
     setup = SimpleNamespace(described="a study by day", crowd="")

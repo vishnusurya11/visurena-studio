@@ -223,12 +223,14 @@ def back_view(prose: str) -> bool:
     return bool(BACK_VIEW.search(prose or ""))
 
 
-FRAME_FLOORS = {"medium_close": 0.22, "close": 0.32}
-"""G-FRAME (C2_verdict #8, ADVISORY): the face height under which a planned size
-reads drawn a size wide.  UNCALIBRATED: 85 shipped WotW MCU panels have a median
-face_h of 0.207, so the MCU floor sits ABOVE today's median and flags more than
-half of them.  Calibrate on the owner-judged episodes before anything goes hard."""
-FRAME_NOTE = "G-FRAME advisory, uncalibrated: the MCU floor 0.22 sits above today's MCU median 0.207"
+FRAME_FLOORS = {"medium_close": 0.15, "close": 0.25}
+"""G-FRAME (C2_verdict #8, ADVISORY; floors C3_verdict #10, D9): the face height
+under which a planned size reads drawn a size wide.  The C2 floors (MCU 0.22,
+close 0.32) flagged 7 of 13 MCU panels on the owner's GOOD episodes (ep05 2/7,
+ep07 5/6); 0.15 / 0.25 sit under the owner-good spread.  Still advisory: the
+owner's bad episodes were bad for other reasons, so no floor can be validated
+as a wall on this evidence."""
+FRAME_NOTE = "G-FRAME advisory: an MCU face under 0.15 or a close under 0.25 of the frame height"
 
 
 def frame_record(present: list[dict], planned: int, size: str, prose: str) -> dict:
