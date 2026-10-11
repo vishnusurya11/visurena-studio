@@ -19,6 +19,7 @@ from __future__ import annotations
 import json
 import shutil
 import sys
+import tempfile
 import time
 from pathlib import Path
 
@@ -113,6 +114,32 @@ def panel_of(graph: dict) -> str | None:
                  and str(n["inputs"].get("image", "")).startswith("shot_")), None)
 
 
+def guide_tail_of(graph: dict) -> str | None:
+    """Which pad the voice guide ran with: 'roomtone' (the bench arm) or 'zero' (anullsrc)."""
+    audio = input_of(graph, "LoadAudio", "audio")
+    return None if audio is None else ("roomtone" if "_roomtone" in str(audio) else "zero")
+
+
+def comfy_input(name: str) -> Path:
+    from studio.comfy import COMFY_ROOT
+    return COMFY_ROOT / "input" / name
+
+
+def with_guide_tail(graph: dict, tail: str, seed: int, work: Path) -> dict:
+    """The graph with its voice guide's pad as asked: 'zero' leaves it; 'roomtone'
+    stages a copy whose pad is -50 dBFS brown noise (C1_verdict #8)."""
+    if tail == "zero" or input_of(graph, "LoadAudio", "audio") is None:
+        return graph
+    from scripts.bench import guide_tail
+    out = json.loads(json.dumps(graph))
+    key, node = node_of(out, "LoadAudio")
+    name = Path(node["inputs"]["audio"])
+    work.mkdir(parents=True, exist_ok=True)
+    filled = guide_tail.roomtone(comfy_input(name.name), work / f"{name.stem}_roomtone.wav", seed=seed)
+    out[key]["inputs"]["audio"] = stage(str(filled))
+    return out
+
+
 def knobs(graph: dict, sizer=None) -> dict:
     """The settings a result speaks for, read from the graph itself; `sizer(name)`
     adds the staged panel's pixel size."""
@@ -126,7 +153,7 @@ def knobs(graph: dict, sizer=None) -> dict:
          "attention_backend": input_of(graph, "ModelAttentionBackend", "attention"),
          "crf": save.get("format.codec.encoding.crf"), "seed": node_of(graph, "RandomNoise")[1]["inputs"]["noise_seed"],
          "frames": r2v["length"], "width": r2v.get("width"), "height": r2v.get("height"),
-         "ref_image_size": r2v.get("ref_image_size"), "panel": panel_of(graph)}
+         "ref_image_size": r2v.get("ref_image_size"), "panel": panel_of(graph), "guide_tail": guide_tail_of(graph)}
     if sizer and k["panel"]:
         k["panel_px"] = list(sizer(k["panel"]))
     return k
@@ -181,6 +208,8 @@ def build(job: dict) -> dict:
     images = {node: stage(path) for node, path in job.get("stage", {}).items()}
     g = arm_graph(shipped, arm_template(job["arm"]), prefix=f"bench_{job['tag']}", seed=job.get("seed"),
                   canvas=tuple(job["canvas"]) if job.get("canvas") else None, images=images)
+    g = with_guide_tail(g, job.get("guide_tail", "zero"), seed=int(job.get("seed") or 1),
+                        work=Path(job.get("work") or Path(tempfile.gettempdir()) / "bench_guides"))
     k = knobs(g, sizer=staged_px)
     assert_knobs(k, job.get("expect", {}))
     assert_panel_fits(k)
