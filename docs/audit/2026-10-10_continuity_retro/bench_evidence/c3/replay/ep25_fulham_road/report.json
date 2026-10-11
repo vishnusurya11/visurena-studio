@@ -1,0 +1,47 @@
+{
+ "looks": {
+  "unnamed_first_person_narrator": "ragged_greyed"
+ },
+ "look_verdicts": {
+  "unnamed_first_person_narrator/ragged_greyed": {
+   "seed": 4165438081,
+   "judge": "look_state",
+   "version": "1",
+   "passed": true,
+   "faults": [
+    {
+     "kind": "look_dirt",
+     "where": "D:/Projects/KingdomOfViSuReNa/alpha/visurena_studio/docs/audit/2026-10-10_continuity_retro/bench_evidence/c3/replay/ep25_fulham_road/looks/unnamed_first_person_narrator/ragged_greyed.png",
+     "evidence": {
+      "want": "muddy",
+      "seen": "dusty"
+     },
+     "severity": "advisory",
+     "note": ""
+    }
+   ],
+   "confidence": 1.0,
+   "reads": 1,
+   "terminal": "",
+   "signed_at": ""
+  }
+ },
+ "unnamed_first_person_narrator": {
+  "replayed": {
+   "shown": 1,
+   "of": 1,
+   "share": 1.0,
+   "passed": true,
+   "unread": 0,
+   "unmeasurable": false
+  },
+  "shipped": {
+   "shown": 0,
+   "of": 1,
+   "share": 0.0,
+   "passed": false,
+   "unread": 0,
+   "unmeasurable": false
+  }
+ }
+}
