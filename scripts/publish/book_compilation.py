@@ -26,17 +26,10 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 
 from studio import book_compilation as bc  # noqa: E402
-from studio import edit_gate, episode_home, youtube, youtube_publish as yp  # noqa: E402
+from studio import episode_home, youtube, youtube_publish as yp  # noqa: E402
 from studio.trailer_assemble import clip_seconds  # noqa: E402
 
-FPS = 24
-FOOTER = ("Source: H. G. Wells, The War of the Worlds (1898), in the public domain. This is an\n"
-          "adapted, abridged screenplay of the novel, not its complete text.\n"
-          "— The Keeper's Lantern —\n"
-          "AI DISCLOSURE: the picture and the voices in this video are generated. The words\n"
-          "are Wells's story, adapted; the performances are synthetic.")
-
-
+FPS, SIDE = 24, 1536
 def episode_meta(book: Path, n: int) -> dict:
     return episode_home.read_json(episode_home.home(book, n) / "youtube.json")
 
@@ -56,23 +49,38 @@ def frames(video: Path) -> int:
     return int(seen.stderr.rsplit("frame=", 1)[1].split()[0])
 
 
-def card_of(book: Path, n: int) -> Path:
-    card = book / "title" / f"ep{n:02d}.mp4"
-    return card if card.exists() else book / "title" / "title.mp4"
+def cut_times(master: Path) -> list[float]:
+    """Every hard cut in the Short, in seconds (read at low size; cuts are cuts)."""
+    seen = subprocess.run(["ffmpeg", "-hide_banner", "-i", str(master), "-an", "-vf",
+                           "scale=192:-2,select='gt(scene,0.3)',showinfo", "-f", "null", "-"],
+                          capture_output=True, text=True, errors="replace")
+    return [float(t) for t in re.findall(r"pts_time:([0-9.]+)", seen.stderr)]
+
+
+def black_tail(master: Path) -> float:
+    """Where the Short's closing black begins, in seconds."""
+    seen = subprocess.run(["ffmpeg", "-hide_banner", "-i", str(master), "-an", "-vf",
+                           "scale=192:-2,blackdetect=d=0.05:pix_th=0.10", "-f", "null", "-"],
+                          capture_output=True, text=True, errors="replace")
+    starts = re.findall(r"black_start:([0-9.]+)", seen.stderr)
+    if not starts:
+        raise SystemExit(f"REFUSED: {master.name} has no closing black to find its card by")
+    return float(starts[-1])
 
 
 def split(book: Path, n: int, master: Path) -> tuple[Path, Path]:
     """The chapter's two videos -- title, main -- cut out of its Short
-    (owner 2026-10-11); each piece's frames checked against its range."""
+    (owner 2026-10-11); the card MEASURED in the Short (last cut before the
+    closing black), each piece's frames checked against its range."""
     folder = book / "compilation" / "chapters"
     folder.mkdir(parents=True, exist_ok=True)
-    card = frames(card_of(book, n))
-    main = bc.main_frames(master_frames=frames(master), card_frames=card, chip_frames=edit_gate.END_CHIP_FRAMES)
+    black = bc.frame_at(black_tail(master), fps=FPS)
+    start = bc.card_start(cuts=[bc.frame_at(t, fps=FPS) for t in cut_times(master)], black_from=black)
     out = {}
-    for name, (a, b) in bc.pieces(main=main, card=card).items():
+    for name, (a, b) in bc.pieces(main=start, card=black - start).items():
         out[name] = folder / f"ep{n:02d}_{name}.mp4"
         if not (out[name].exists() and frames(out[name]) == b - a):
-            subprocess.run(bc.cut_argv(master, (a, b), out[name], fps=FPS), check=True)
+            subprocess.run(bc.cut_argv(master, (a, b), out[name], fps=FPS, side=SIDE), check=True)
         if (got := frames(out[name])) != b - a:
             raise SystemExit(f"REFUSED: ep{n:02d} {name} is {got} frames, wanted {b - a}")
     return out["title"], out["main"]
@@ -117,16 +125,15 @@ def join(parts: list, folder: Path) -> Path:
 
 
 def metadata(book: Path, parts: list) -> dict:
-    first = episode_meta(book, 1)
+    """Title, description (chapters first) and tags, from the book's own
+    source/book.json -- the code names no book."""
+    first, source = episode_meta(book, 1), episode_home.read_json(book / "source" / "book.json")
     series = first["title"].split(" — Ep")[0]
+    name = source.get("display_title") or source["title"]
     lines = bc.chapter_lines([(n, t, s) for n, t, _, s in parts])
-    book = series.split(": ", 1)[-1]
-    intro = (f"{book}, told from beginning to end as one film: our screen adaptation of the novel, "
-             f"in {len(parts)} episodes, each one chapter of the book. The Martian cylinders fall on "
-             f"Surrey, the fighting-machines march on London, and one man survives to tell it. "
-             f"Use the chapters above to jump to any episode.")
-    return {"title": bc.title(series, len(parts)),
-            "description": bc.description(lines, intro=intro, footer=FOOTER),
+    text = bc.description(lines, intro=bc.intro(book=name, episodes=len(parts)),
+                          footer=bc.footer(author=source["author"], book=name))
+    return {"title": bc.title(series, len(parts)), "description": text,
             "tags": first.get("tags", []), "synthetic": True, "chapters": lines}
 
 

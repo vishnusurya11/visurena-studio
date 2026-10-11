@@ -105,3 +105,17 @@ def test_the_published_episodes_are_read_off_the_ledger_in_order(tmp_path):
             {"episode": "compilation", "video_id": "z", "sha8": "77777777", "privacy": "public"}]
     (tmp_path / "uploads.jsonl").write_text("\n".join(json.dumps(r) for r in rows), encoding="utf-8")
     assert bc.published(tmp_path) == [(1, "11111111"), (2, "22222222")]
+
+
+def test_the_footer_names_the_books_own_author_and_says_adapted():
+    """No book is named in code: Scarlet's video got Wells's footer (2026-10-11)."""
+    text = bc.footer(author="Arthur Conan Doyle", book="A Study in Scarlet")
+    assert text.startswith("Source: Arthur Conan Doyle, A Study in Scarlet, in the public domain.")
+    assert "adapted, abridged screenplay" in text and "AI DISCLOSURE" in text
+    assert "Wells" not in text
+
+
+def test_the_intro_counts_the_episodes_and_names_no_other_book():
+    text = bc.intro(book="A Study in Scarlet", episodes=14)
+    assert text.startswith("A Study in Scarlet, told from beginning to end as one film")
+    assert "in 14 episodes" in text and "Martian" not in text

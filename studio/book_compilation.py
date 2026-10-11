@@ -75,13 +75,23 @@ def concat_list(paths: list[Path]) -> str:
     return "\n".join(lines) + "\n"
 
 
-def main_frames(*, master_frames: int, card_frames: int, chip_frames: int) -> int:
-    """The Short is main + title card + black chip: the main video is what
-    is left before the card (owner 2026-10-11: two videos per chapter)."""
-    main = master_frames - card_frames - chip_frames
-    if main <= 0:
-        raise ValueError(f"a {master_frames}-frame Short cannot hold a {card_frames}-frame card")
-    return main
+CARD_MAX_FRAMES = 240
+"""No title card runs past 10 s; a cut further back than this is the picture's."""
+
+
+def card_start(*, cuts: list[int], black_from: int) -> int:
+    """The card begins at the last hard cut before the black tail -- MEASURED,
+    because an older Short carries an older card than title/epNN.mp4 (Scarlet
+    ep01: a 90-frame card where today's is 107)."""
+    before = [c for c in cuts if black_from - CARD_MAX_FRAMES <= c < black_from]
+    if not before:
+        raise ValueError(f"no cut in the {CARD_MAX_FRAMES} frames before the black at {black_from}")
+    return max(before)
+
+
+def frame_at(seconds: float, *, fps: int) -> int:
+    """A measured time as the index of the frame that starts there."""
+    return round(seconds * fps)
 
 
 def pieces(*, main: int, card: int) -> dict[str, tuple[int, int]]:
@@ -89,12 +99,13 @@ def pieces(*, main: int, card: int) -> dict[str, tuple[int, int]]:
     return {"title": (main, main + card), "main": (0, main)}
 
 
-def cut_argv(src: Path, frames: tuple[int, int], out: Path, *, fps: int) -> list[str]:
+def cut_argv(src: Path, frames: tuple[int, int], out: Path, *, fps: int, side: int) -> list[str]:
     """ffmpeg cutting [start, end) frames out, the sound by the same seconds;
     one encode for every piece so the book joins by stream copy."""
     a, b = frames
     return ["ffmpeg", "-y", "-v", "error", "-i", str(src),
-            "-vf", f"trim=start_frame={a}:end_frame={b},setpts=PTS-STARTPTS",
+            "-vf", f"trim=start_frame={a}:end_frame={b},setpts=PTS-STARTPTS,"
+                   f"scale={side}:{side}:force_original_aspect_ratio=decrease,pad={side}:{side}:-1:-1,setsar=1",
             "-af", f"atrim=start={a / fps:.6f}:end={b / fps:.6f},asetpts=PTS-STARTPTS",
             "-c:v", "libx264", "-preset", "fast", "-crf", "16", "-pix_fmt", "yuv420p",
             "-r", str(fps), "-c:a", "aac", "-b:a", "256k", "-ar", "48000", "-ac", "2", str(out)]
@@ -110,3 +121,19 @@ def title(series: str, chapters: int) -> str:
     An ADAPTATION, never 'the complete book': the episodes are our abridged
     screenplay of the novel, not its full text (owner, 2026-10-11)."""
     return yp.elided(f"{series} — Full Adaptation, All {chapters} Episodes", yp.TITLE_MAX)
+
+
+def footer(*, author: str, book: str) -> str:
+    """The source, the adaptation note and the AI disclosure, for THIS book."""
+    return (f"Source: {author}, {book}, in the public domain. This is an adapted, abridged "
+            "screenplay of the novel, not its complete text.\n"
+            "— The Keeper's Lantern —\n"
+            "AI DISCLOSURE: the picture and the voices in this video are generated. The words "
+            f"are {author}'s story, adapted; the performances are synthetic.")
+
+
+def intro(*, book: str, episodes: int) -> str:
+    """What the video is, in the book's own name; no other book's plot."""
+    return (f"{book}, told from beginning to end as one film: our screen adaptation of the novel, "
+            f"in {episodes} episodes, each one chapter of the book. "
+            "Use the chapters above to jump to any episode.")
