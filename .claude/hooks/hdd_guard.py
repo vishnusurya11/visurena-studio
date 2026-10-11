@@ -8,7 +8,7 @@ import sys
 
 SCANNERS = {"grep", "egrep", "fgrep", "rg", "find", "du", "ls"}
 RECURSIVE = re.compile(r"^-[a-zA-Z]*[rR]")
-WIDE = re.compile(r"^(\.\.(/.*)?|(\./)?library(/.*)?|/[a-z]/?|[A-Za-z]:[\\/]?|/)$")
+WIDE = re.compile(r"^(\.\.(/.*)?|(\./)?library(/[^/]+(/episodes)?)?|/[a-z]/?|[A-Za-z]:[\\/]?|/)$")
 WHY = ("hdd_guard: recursive scans over '..', library/ or a drive root thrash the D: hard disk. "
        "Use the Grep tool scoped to code (studio/ scripts/ tests/ docs/), or name the one "
        "episode folder you need.")

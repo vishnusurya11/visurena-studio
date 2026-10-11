@@ -205,9 +205,17 @@ def _migrate_work_orders(conn: sqlite3.Connection) -> None:
     _add_column(conn, "events", "order_id", "INTEGER")
     _add_column(conn, "usage", "unit", "TEXT")
     _add_column(conn, "usage", "order_id", "INTEGER")
+    _index_events(conn)
     for stage in STAGES:
         conn.execute(f"CREATE VIEW IF NOT EXISTS {stage}_orders AS"
                      f" SELECT * FROM work_orders WHERE stage = '{stage}'")
+
+
+def _index_events(conn: sqlite3.Connection) -> None:
+    """The Command Center's per-pulse reads by stage and by order_id, indexed: unindexed,
+    each read every events row, a 7 MB burst per pulse on the D: disk (2026-10-11)."""
+    conn.execute("CREATE INDEX IF NOT EXISTS ix_events_stage_ts ON events (stage, event_ts)")
+    conn.execute("CREATE INDEX IF NOT EXISTS ix_events_order ON events (order_id)")
 
 
 def init_db(conn: sqlite3.Connection) -> None:
@@ -623,11 +631,18 @@ def _update_work_order(conn: sqlite3.Connection, order_id: int, fields: dict) ->
     return order_id
 
 
+def done_waits_on_nothing(fields: dict) -> dict:
+    """A row written `done` waits on nothing: its blocked_on is cleared whatever
+    the writer passed (2026-10-11: Scarlet ep03-09 were done yet 'waits on refs/04')."""
+    return {**fields, "blocked_on": None} if fields.get("state") == "done" else fields
+
+
 def _write_work_order(conn: sqlite3.Connection, codex_id: str, stage: str, unit: str,
                       row, fields: dict) -> int:
     """INSERT when the (book, department, unit) has no row yet, else UPDATE the
     one it has; the row id either way.  No commit -- add_event and
     upsert_work_order each own their transaction."""
+    fields = done_waits_on_nothing(fields)
     if row is None:
         return _insert_work_order(conn, codex_id, stage, unit, fields)
     return _update_work_order(conn, row["id"], fields)

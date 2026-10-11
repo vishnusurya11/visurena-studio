@@ -33,6 +33,14 @@ def test_a_plain_command_passes():
     assert hdd_guard.refusal("git status --short") is None
 
 
+def test_a_scan_of_one_episode_folder_passes():
+    assert hdd_guard.refusal("find library/20260827135508_x/episodes/ep27 -type f") is None
+
+
+def test_a_scan_of_a_whole_book_is_refused():
+    assert hdd_guard.refusal("grep -rl x library/20260827135508_x/")
+
+
 def test_a_library_read_that_is_not_a_scan_passes():
     assert hdd_guard.refusal("cat library/x/episodes/ep27/plan.json") is None
 

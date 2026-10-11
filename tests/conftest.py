@@ -4,9 +4,23 @@ chapters each (headings), and a license doc after *** END ***. Never the real fi
 
 from __future__ import annotations
 
+import os
+import tempfile
 import zipfile
+from pathlib import Path
 
 import pytest
+
+
+def fast_tempdir() -> str | None:
+    """%LOCALAPPDATA%\\Temp (the NVMe) when it exists, else None: a session that inherited
+    TEMP=D:\\temp wrote every test's tmp_path to the D: hard disk (2026-10-11)."""
+    base = os.environ.get("LOCALAPPDATA")
+    temp = Path(base) / "Temp" if base else None
+    return str(temp) if temp and temp.is_dir() else None
+
+
+tempfile.tempdir = fast_tempdir() or tempfile.tempdir
 
 _CONTAINER = """<?xml version="1.0"?>
 <container version="1.0" xmlns="urn:oasis:names:tc:opendocument:xmlns:container">
