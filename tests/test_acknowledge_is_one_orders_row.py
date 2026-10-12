@@ -84,7 +84,7 @@ def test_a_unit_with_no_row_or_no_flags_is_refused(board, unit, status):
 def test_the_home_strip_offers_acknowledge_on_the_flagged_row_and_counts_it(board):
     client, _ = board
     page = client.get("/").text
-    assert '<h2 id="needs-h">Needs you</h2><span class="count hot" data-needs>3</span>' in page
+    assert '<h2 id="needs-h">Needs you</h2><span class="count hot" data-needs data-n="3">3</span>' in page
     assert "shipped with flags" in page   # the card's words since the PKG-4 port (was "Needs you (3)")
     assert page.count('hx-post="/act/acknowledge"') == 1 and 'name="unit" value="ep03"' in page
 

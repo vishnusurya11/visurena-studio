@@ -39,7 +39,7 @@
   {% for b in rest %}
   <li><a class="bk" href="/b/{{ b.codex_id }}" id="book-{{ b.codex_id }}" title="{{ b.name }} · {{ b.codex_id }}" data-row>
     <span class="cover" aria-hidden="true">{{ viz.initials(b.name) }}</span>
-    <span><span class="bt">{{ b.name }}</span><span class="bm"><b>{{ b.units }}</b> units · <b>{{ b.done }}</b> done{% if b.running %} · <span class="run">{{ b.running }} running</span>{% endif %}</span></span>
+    <span><span class="bt">{{ b.name }}</span><span class="bm"><b>{{ b.units }}</b> unit{{ '' if b.units == 1 else 's' }} · <b>{{ b.done }}</b> done{% if b.running %} · <span class="run">{{ b.running }} running</span>{% endif %}</span></span>
   </a></li>
   {% endfor %}
   </ul>

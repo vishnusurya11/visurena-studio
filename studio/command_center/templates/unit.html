@@ -196,7 +196,7 @@
    </header>
    {% if hl.passes %}
    {% set shown = hl.passes[-14:] %}
-   <div class="passes" data-testid="passes" aria-label="one segment per run">{% if hl.passes | length > 14 %}<span class="pass more muted">+{{ hl.passes | length - 14 }} earlier</span>{% endif %}{% for p in shown %}<span class="pass {{ p.css }}" data-testid="pass" title="{{ p.run_id }} · {{ p.day }} · {{ p.wall }} · {{ p.how }}{% if p.detail %} · {{ p.detail }}{% endif %}"><b>{{ p.at }}</b> {{ p.label }}</span>{% endfor %}</div>
+   <div class="passes" data-testid="passes" aria-label="one segment per run">{% if hl.passes | length > 14 %}<span class="pass more muted">+{{ hl.passes | length - 14 }} earlier</span>{% endif %}{% for p in shown %}<span class="pass {{ p.css }}" data-testid="pass" title="{{ p.run_id }} · {{ p.day }}{% if p.wall %} · {{ p.wall }}{% endif %} · {{ p.how }}{% if p.detail %} · {{ p.detail }}{% endif %}"><b>{{ p.at }}</b> {{ p.label }}</span>{% endfor %}</div>
    {% endif %}
    {% for t in hl.trend if t.series | length > 1 %}
    <div class="trend"><b>{{ t.gate }}</b> <span class="mono">{% for v in t.series[-6:] %}{{ '%g' | format(v) }}{% if not loop.last %} ▸ {% endif %}{% endfor %}</span> {% if t.direction == 'improving' %}<span class="ok">↘ improving</span>{% else %}<span class="warn">→ stuck</span>{% endif %}</div>
@@ -214,7 +214,7 @@
   </section>
 
   <section class="u-sec" id="files" aria-labelledby="files-h">
-   <header><h2 id="files-h">Files</h2><span class="sub">{{ unit.files.n }} files · {{ unit.files.size }} · grouped by kind · click opens the Viewer</span></header>
+   <header><h2 id="files-h">Files</h2><span class="sub">{{ unit.files.n }} file{{ '' if unit.files.n == 1 else 's' }} · {{ unit.files.size }} · grouped by kind · click opens the Viewer</span></header>
    {% if unit.files.groups %}
    <div class="fgroups">{% for g in unit.files.groups %}
     <div class="fgrp"><h3>{{ g.name }}</h3><ul>{% for f in g.rows %}
@@ -264,7 +264,7 @@
     <h4>Gates not passing</h4>
     <ul class="list">{% for g in bad %}<li><span class="gate flag"{% if g.path %} data-view="{{ vrel(g.path) }}" data-set="files" role="button" tabindex="0"{% endif %}>{{ icon('flag') }}{{ g.gate }}</span><span class="r">{{ g.state }}{% if g.faults %} · {{ g.faults }}{% endif %}{% if g.terminal %} · {{ g.terminal }}{% endif %}</span></li>{% else %}<li class="muted">none</li>{% endfor %}</ul>
     <h4>Files</h4>
-    <ul class="list">{% for f in ['plan.json', 'plan.verdict.json', 'learnings.jsonl', 'timing.jsonl'] %}<li><button type="button" class="linkish" data-view="{{ f }}" data-set="files">{{ icon('braces') }}{{ f }}</button></li>{% endfor %}
+    <ul class="list">{% for f in ['plan.json', 'plan.verdict.json', 'learnings.jsonl', 'timing.jsonl'] if f in unit.files.names %}<li><button type="button" class="linkish" data-view="{{ f }}" data-set="files">{{ icon('braces') }}{{ f }}</button></li>{% endfor %}
      {% if unit.log_name %}<li><button type="button" class="linkish" data-view="_logs/{{ unit.log_name }}" data-set="files">{{ icon('scroll-text') }}run log</button></li>{% endif %}</ul>
    </div>
   </aside>

@@ -36,8 +36,9 @@ def test_a_missing_page_is_the_shell_card_with_the_path(client):
 
 
 def test_the_card_links_home_and_the_parent(client):
+    """Board review 2026-10-12 (B05): /d/<stage>/<codex> is no page; up is the department."""
     r = client.get("/d/episode/x/ep99")
-    assert 'href="/"' in r.text and 'href="/d/episode/x"' in r.text
+    assert 'href="/"' in r.text and 'href="/d/episode"' in r.text and 'href="/d/episode/x"' not in r.text
 
 
 def test_the_card_keeps_the_reason(client):

@@ -93,15 +93,15 @@ def span(seconds) -> str:
 
 
 def hhmm(ts) -> str:
-    """`04:02` from an ISO stamp (UTC); '' for junk."""
+    """`04:02` in this machine's local time (the shell's clock) from an ISO stamp; '' for junk."""
     d = up.parse_ts(ts) if ts else None
-    return d.strftime("%H:%M") if d else ""
+    return d.astimezone().strftime("%H:%M") if d else ""
 
 
 def day_hhmm(ts) -> str:
-    """`27 Sep 04:02` from an ISO stamp (UTC)."""
+    """`27 Sep 04:02` in local time from an ISO stamp."""
     d = up.parse_ts(ts) if ts else None
-    return d.strftime("%d %b %H:%M") if d else ""
+    return d.astimezone().strftime("%d %b %H:%M") if d else ""
 
 
 # --- band 1: the head ---
@@ -569,7 +569,7 @@ def unit_files(home: Path | None, logs: list[dict]) -> dict:
     """The Files section: the unit folder's viewable files and the run logs, grouped."""
     files = viewer_model.index_files(home) if home and Path(home).is_dir() else []
     files += [{"rel": x["rel"], "size": x.get("size", 0), "kind": "log"} for x in logs]
-    return {"groups": file_groups(files), "n": len(files),
+    return {"groups": file_groups(files), "n": len(files), "names": [f["rel"] for f in files],
             "size": vm_size(sum(int(f.get("size") or 0) for f in files))}
 
 

@@ -23,7 +23,7 @@ from pathlib import Path, PurePosixPath
 import anyio
 
 from fastapi import APIRouter, Depends, FastAPI, Form, HTTPException, Request
-from fastapi.responses import FileResponse, HTMLResponse, Response
+from fastapi.responses import FileResponse, HTMLResponse, JSONResponse, Response
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 from starlette.exceptions import HTTPException as StarletteHTTPException
@@ -457,7 +457,13 @@ async def thumb(request: Request, codex: str, width: int, path: str):
         raise HTTPException(404, "no such artefact")
     data = await thumbs.thumb_async(target, f"{codex}/{path}", width, request.app.state.thumbs,
                                     _thumb_limiter(request.app), request.app.state.thumb_dir)
-    return Response(data, media_type="image/webp", headers={"Cache-Control": "public,max-age=31536000,immutable"})
+    return Response(data, media_type="image/webp", headers={"Cache-Control": thumb_cache(request)})
+
+
+def thumb_cache(request: Request) -> str:
+    """Forever only when the URL carries the file's version (`?v=`); a bare URL (a refs
+    sheet a prompt names) revalidates, so a redrawn picture is never shown stale (01 S1)."""
+    return "public,max-age=31536000,immutable" if request.query_params.get("v") else "no-cache"
 
 
 # --- the owner's hand: POST /act/*, one work_orders call each ---
@@ -534,10 +540,27 @@ async def _refused(request: Request, exc: actions.Refused):
                                       status_code=exc.status)
 
 
+JSON_PREFIXES = ("/api/", "/json/", "/viewer/", "/log/")
+"""The routes a script reads: a refusal there is JSON with its `detail` (viewer.js reads it)."""
+
+
 async def _not_found(request: Request, exc: StarletteHTTPException):
     """Every refusal is a page in the shell with the reason and the asked path;
-    never a stack, never a 403."""
+    never a stack, never a 403.  A JSON route answers JSON."""
+    if request.url.path.startswith(JSON_PREFIXES):
+        return JSONResponse({"detail": str(exc.detail)}, status_code=exc.status_code)
     return _error_page(request, exc.status_code, str(exc.detail))
+
+
+def error_parent(path: str) -> str | None:
+    """The error card's way up: a page that exists above the asked path, else None
+    (`/d/<stage>/...` goes to the department, `/b/...` to the shelf)."""
+    parts = [p for p in path.split("/") if p]
+    if len(parts) >= 3 and parts[0] == "d" and parts[1] in registry.stage_names():
+        return f"/d/{parts[1]}"
+    if len(parts) == 2 and parts[0] == "d" and parts[1] in registry.stage_names():
+        return None
+    return "/books" if parts[:1] == ["b"] and len(parts) >= 2 else None
 
 
 async def _server_error(request: Request, exc: Exception):
@@ -548,7 +571,7 @@ async def _server_error(request: Request, exc: Exception):
 def _error_page(request: Request, status: int, detail: str) -> HTMLResponse:
     """The error template inside the shell; a bare page when even that cannot render."""
     context = {**_shared(request), "detail": detail, "status": status, "path": request.url.path,
-               "shell": _error_shell(request)}
+               "parent": error_parent(request.url.path), "shell": _error_shell(request)}
     try:
         return templates.TemplateResponse(request, "404.html", context, status_code=status)
     except Exception:

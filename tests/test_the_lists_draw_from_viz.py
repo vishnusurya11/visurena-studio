@@ -32,12 +32,12 @@ def test_gate_chips_keep_only_non_pass_gates_failures_first():
     out = viz.gate_chips(strip)
     assert [c["gate"] for c in out] == ["MASTER", "EYE_PANELS", "EYE_TAKES"]
     assert out[1]["count"] == "99+" and out[1]["label"] == "panels"
-    assert out[1]["title"] == "531 panels faults, flagged"
+    assert out[1]["title"] == "531 faults, flagged"        # the template prefixes `EYE_PANELS:` (B08)
 
 
 def test_a_chip_title_names_one_fault_in_the_singular():
-    assert viz.chip_title("takes", 1, "") == "1 takes fault"
-    assert viz.chip_title("master", 0, "reject") == "master: reject"
+    assert viz.chip_title("takes", 1, "") == "1 fault"
+    assert viz.chip_title("master", 0, "reject") == "reject"
 
 
 # --- the department's state groups ---

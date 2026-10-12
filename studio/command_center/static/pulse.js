@@ -90,6 +90,7 @@
     all('[data-needs]').forEach(function (b) {
       if (b.textContent === String(sh.needs)) return;
       b.textContent = sh.needs; b.dataset.n = sh.needs; wash(b);
+      if (b.classList.contains('count')) b.classList.toggle('hot', sh.needs > 0);
     });
     all('[data-queue]').forEach(function (n) { if (n.textContent !== String(sh.queue)) { n.textContent = sh.queue; wash(n); } });
     all('[data-running]').forEach(function (n) {

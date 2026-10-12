@@ -11,7 +11,7 @@
 <section class="panel bookblk" id="bk-{{ g.codex_id }}" aria-labelledby="bk-{{ g.codex_id }}-h">
 <header class="bookhead">
 <h2 id="bk-{{ g.codex_id }}-h"><a href="/b/{{ g.codex_id }}">{{ g.name }}</a></h2>
-<span class="meta"><b>{{ g.total }}</b> units · <b>{{ g.done }}</b> done{% if g.flagged %} · <b>{{ g.flagged }}</b> flagged{% endif %}{% if needs %} · <b class="need">{{ needs }}</b> need you{% endif %}</span>
+<span class="meta"><b>{{ g.total }}</b> unit{{ '' if g.total == 1 else 's' }} · <b>{{ g.done }}</b> done{% if g.flagged %} · <b>{{ g.flagged }}</b> flagged{% endif %}{% if needs %} · <b class="need">{{ needs }}</b> {{ 'needs' if needs == 1 else 'need' }} you{% endif %}</span>
 <span class="mix" aria-hidden="true">{% for r in g.rows %}<i class="{{ r.css }}"></i>{% endfor %}</span>
 </header>
 <div class="tscroll" data-testid="dept-table"><table class="dgrid dg dept-g">

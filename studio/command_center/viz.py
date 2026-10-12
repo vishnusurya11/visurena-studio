@@ -48,11 +48,12 @@ def cap(n: int, limit: int = CAP) -> str:
 
 
 def chip_title(label: str, faults: int, word: str) -> str:
-    """The plain words behind a chip: `531 panels faults, flagged` / `master: reject`."""
+    """The words behind a chip, after the template's `GATE:` -- `1 fault, flagged` /
+    `531 faults` / `reject`; the label when there is nothing else to say."""
     if faults:
         noun = "fault" if faults == 1 else "faults"
-        return f"{faults} {label} {noun}" + (f", {word}" if word else "")
-    return f"{label}: {word}" if word else label
+        return f"{faults} {noun}" + (f", {word}" if word else "")
+    return word or label
 
 
 def gate_chips(strip: list[dict]) -> list[dict]:

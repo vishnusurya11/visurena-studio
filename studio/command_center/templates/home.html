@@ -39,7 +39,7 @@
 
 <div class="mid">
   <section aria-labelledby="needs-h">
-    <div class="sh"><h2 id="needs-h">Needs you</h2><span class="count hot" data-needs>{{ attention | length }}</span><span class="sub">oldest first</span><span class="spacer"></span><a class="more" href="/inbox">All of it{{ icon('chevron-right') }}</a></div>
+    <div class="sh"><h2 id="needs-h">Needs you</h2><span class="count{% if attention %} hot{% endif %}" data-needs data-n="{{ attention | length }}">{{ attention | length }}</span><span class="sub">oldest first</span><span class="spacer"></span><a class="more" href="/inbox">All of it{{ icon('chevron-right') }}</a></div>
     <div id="attention" hx-get="/partials/attention" hx-trigger="pulse:attention from:body" data-v="{{ viz.fp(request, 'attention') }}" hx-swap="morph:innerHTML">
     {% include "_attention.html" %}
     </div>

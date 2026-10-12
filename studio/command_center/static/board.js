@@ -80,6 +80,7 @@
       .map(function (r) { return { g: 'Recent', ic: 'history', l: r.l, s: r.h, h: r.h }; });
   }
   function remember() {
+    if (document.querySelector('[data-testid=error]')) return;      /* an error page is no place to return to */
     var here = { h: location.pathname, l: document.title.replace(/ · Visurena Studio$/, '') }, list = [];
     try { list = JSON.parse(store('cc-recent') || '[]'); } catch (e) { list = []; }
     list = [here].concat(list.filter(function (r) { return r && r.h !== here.h; })).slice(0, 6);

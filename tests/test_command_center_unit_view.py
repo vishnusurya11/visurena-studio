@@ -27,8 +27,11 @@ def test_read_doc_stays_in_the_book(library):
 
 def test_span_and_clock():
     assert (uv.span(0), uv.span(40), uv.span(1080), uv.span(6120)) == ("", "40s", "18m", "1h42")
-    assert uv.hhmm("2026-09-27T04:02:16.8Z") == "04:02" and uv.hhmm("junk") == ""
-    assert uv.day_hhmm("2026-09-27T04:02:16Z") == "27 Sep 04:02"
+    # board review 2026-10-12 (B03): the page prints the machine's local clock, as the shell does
+    from datetime import datetime, timezone
+    local = datetime(2026, 9, 27, 4, 2, 16, tzinfo=timezone.utc).astimezone()
+    assert uv.hhmm("2026-09-27T04:02:16.8Z") == local.strftime("%H:%M") and uv.hhmm("junk") == ""
+    assert uv.day_hhmm("2026-09-27T04:02:16Z") == local.strftime("%d %b %H:%M")
 
 
 def test_run_short_is_the_runs_clock():

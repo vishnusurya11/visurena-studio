@@ -475,13 +475,20 @@ def lanes(conn: sqlite3.Connection) -> list[dict]:
     return [lane(conn, stage) for stage in registry.stage_names()]
 
 
+def local_day_start(now: datetime | None = None) -> str:
+    """This machine's midnight today as a UTC stamp: the GPU chart's day, one clock."""
+    local = (now or datetime.now().astimezone()).astimezone()
+    midnight = local.replace(hour=0, minute=0, second=0, microsecond=0)
+    return midnight.astimezone(timezone.utc).strftime("%Y-%m-%dT%H:%M:%S")
+
+
 def today(conn: sqlite3.Connection) -> list[dict]:
-    """The steps that ended today (UTC), newest first, thirty at most."""
+    """The steps that ended today (the local day, as the GPU chart counts it), newest first, thirty at most."""
     rows = conn.execute(
         "SELECT s.step_id, s.state, s.attempt, s.ended_at, s.seconds, s.verdict_word, s.terminal,"
         " w.codex_id, w.stage, w.unit FROM work_steps s JOIN work_orders w ON w.id = s.order_id"
-        " WHERE s.ended_at IS NOT NULL AND substr(s.ended_at, 1, 10) = strftime('%Y-%m-%d', 'now')"
-        " ORDER BY s.ended_at DESC, s.step_id DESC LIMIT 30")
+        " WHERE s.ended_at IS NOT NULL AND s.ended_at >= ?"
+        " ORDER BY s.ended_at DESC, s.step_id DESC LIMIT 30", (local_day_start(),))
     out, now = [], utc_now()
     for r in rows:
         d = dict(r)
@@ -701,7 +708,7 @@ def department(conn: sqlite3.Connection, stage: str, book: str | None = None,
     rows = sorted((row_view(r, conn) for r in db.department_rows(conn, stage)), key=rank)
     gates = gate_order(stage)
     names = book_names(conn)
-    counts = Counter(r["shown"] for r in rows)
+    counts = Counter(r["shown"] for r in rows if not book or r["codex_id"] == book)
     kept = [r for r in rows if (not book or r["codex_id"] == book) and (not state or r["shown"] == state)]
     chips, moves = step_states(conn, [r["id"] for r in kept]), last_moves(conn, stage)
     kept = [dress(r, chips[r["id"]], gates, moves.get((r["codex_id"], r["unit"]))) for r in kept]

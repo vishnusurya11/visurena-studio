@@ -6,7 +6,7 @@
 {% block title %}{{ status }} · Visurena Studio{% endblock %}
 {% block body %}
 {% set asked = path or request.url.path %}
-{% set parent = asked.rstrip('/').rsplit('/', 1)[0] %}
+{% set parent = parent if parent is defined else none %}
 <section class="panel errcard" data-testid="error" aria-labelledby="error-h">
   <div class="panel-b">
     <p class="code">{{ status }}</p>

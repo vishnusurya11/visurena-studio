@@ -334,14 +334,22 @@ def _last_in(rows: list[dict], gate: str, start: datetime, end: datetime):
     return hits[-1] if hits else None
 
 
+def trend_word(series: list[float]) -> str:
+    """The last move of a measured series: `improving` (fell), `stuck` (held), `worse`
+    (rose); '' with fewer than two values.  The gates measure faults and overruns: lower is better."""
+    if len(series) < 2:
+        return ""
+    return "improving" if series[-1] < series[-2] else ("stuck" if series[-1] == series[-2] else "worse")
+
+
 def gate_trend(learnings: list[dict], rows: list[dict]) -> list[dict]:
-    """Per gate, its last measured value in each pass; `improving` when the last fell."""
+    """Per gate, its last measured value in each pass; the last move as a word (trend_word)."""
     gates = list(dict.fromkeys(r.get("gate") for r in learnings if r.get("gate") and r.get("measured") is not None))
     out = []
     for gate in gates:
         wins = [(parse_ts(p["started"]), parse_ts(p["ended"])) for p in rows]
         series = [v for a, b in wins if a and b and (v := _last_in(learnings, gate, a, b)) is not None]
-        direction = "" if len(series) < 2 else ("improving" if series[-1] < series[-2] else "stuck")
+        direction = trend_word(series)
         out.append({"gate": gate, "series": [round(v, 2) for v in series], "direction": direction})
     return out
 
