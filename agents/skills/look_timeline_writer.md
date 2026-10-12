@@ -29,5 +29,9 @@ Knowledge, mood, possessions held in the hand and relationships are NOT looks.
   - `dirt`: mud, soot, blood, dust, wet — on what.
   Leave a layer empty when the look does not change it from the base.
 - `look_id`: short snake_case (`day_suit`, `ragged_greyed`).
+- **Becoming another person is not a look.** When the character turns into someone
+  the book names as another character (Jekyll into Hyde: another stature, age, face,
+  hands), that body is the OTHER character's base and looks; this character gets no
+  look for it. Only what changes on this character's own body is a look.
 - At most one look per chapter scene. A book where the appearance never changes has
   exactly one look: the base.

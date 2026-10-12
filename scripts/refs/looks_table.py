@@ -31,6 +31,12 @@ def row_of(book: Path, who: str) -> dict:
 
 
 def table_for(book: Path, who: str, _agent=None):
+    """One character's looks, each span cut to its own story track (a flashback
+    chapter wears its own looks, else the base)."""
+    return look_timeline.per_track(drafted(book, who, _agent=_agent), book)
+
+
+def drafted(book: Path, who: str, _agent=None):
     """One character's looks: its costume plot, else the writer's verified draft;
     a silent dossier head is the bound row's; no dossier: the row's own cards."""
     from agents import look_timeline_writer as writer

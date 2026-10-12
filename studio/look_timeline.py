@@ -189,6 +189,55 @@ def look_words(card: CharacterLooks, look_id: str) -> str:
     return " ".join(p for p in parts if p)
 
 
+def tracks_of(book: Path) -> dict[int, str]:
+    """{chapter: story track} from analysis/timeline.json; {} without one."""
+    path = Path(book) / "analysis" / "timeline.json"
+    tracks = (json.loads(path.read_text(encoding="utf-8")).get("tracks") or {}) if path.exists() else {}
+    return {int(c): name for name, t in tracks.items() for c in (t or {}).get("chapters") or []}
+
+
+def runs(first: int, last: int, keep) -> list[tuple[int, int]]:
+    """The maximal runs of consecutive chapters first..last that `keep` accepts."""
+    out: list[tuple[int, int]] = []
+    for c in (c for c in range(first, last + 1) if keep(c)):
+        if out and out[-1][1] == c - 1:
+            out[-1] = (out[-1][0], c)
+        else:
+            out.append((c, c))
+    return out
+
+
+def span_on_track(span: Span, stop: StoryTime | None, last: int, track_of: dict[int, str]) -> list[Span]:
+    """One span cut to its own track's chapters; `stop` is where it would end (its
+    own until or the next span's start; None runs to the book's last chapter)."""
+    track, end = track_of.get(span.start.chapter), max(stop.chapter if stop else last, span.start.chapter)
+    out = []
+    for a, b in runs(span.start.chapter, end, lambda c: track_of.get(c, track) == track):
+        start = span.start if a == span.start.chapter else StoryTime(chapter=a)
+        out.append(Span(look=span.look, start=start, until=span.until if b == end else StoryTime(chapter=b)))
+    return out
+
+
+def on_track(timeline: list[Span], track_of: dict[int, str]) -> list[Span]:
+    """Every span cut to the chapters of its own story track (Jekyll's ch10
+    confession is a flashback): a chapter on another track wears its own looks,
+    else the base; a look resumes when its track does.  No tracks: unchanged."""
+    if not track_of:
+        return list(timeline)
+    ordered, last = sorted(timeline, key=lambda s: s.start.opens()), max(track_of)
+    out: list[Span] = []
+    for i, span in enumerate(ordered):
+        stop = span.until or (ordered[i + 1].start if i + 1 < len(ordered) else None)
+        out += span_on_track(span, stop, last, track_of)
+    return out
+
+
+def per_track(looks: CharacterLooks, book: Path) -> CharacterLooks:
+    """A character's looks with its timeline cut per story track (`on_track`)."""
+    timeline = on_track(looks.timeline, tracks_of(book))
+    return CharacterLooks.model_validate({**looks.model_dump(), "timeline": [s.model_dump() for s in timeline]})
+
+
 def path_of(book: Path) -> Path:
     return Path(book) / "refs" / "looks.json"
 

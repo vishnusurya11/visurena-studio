@@ -434,7 +434,11 @@ stages:
               one hop from the base sheet. From the dossier's costume plot when
               it has one, else AGENT look_timeline_writer over the script
               supervisor's state_changes; code keeps a look only when its quote
-              is found in its chapter at 0.85 (scripts/refs/looks_table.py).
+              is found in its chapter at 0.85 (scripts/refs/looks_table.py). Each
+              span is cut to its own story track (timeline.json tracks: a
+              flashback chapter wears its own looks, else the base). A head the
+              book never names is authored first in analysis/heads.json with its
+              quotes (scripts/refs/author_heads.py, studio/head_author.py).
 
       - id: "02"
         name: sheets

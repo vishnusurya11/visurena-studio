@@ -29,7 +29,9 @@ WORDS = {
                        r"stubble|goatee|sideburns?|gaunt)\b", re.I),
     "hair": re.compile(r"\b(?:hair|haired|bald\w*|curls?|ringlets|plaits?|forelock)\b", re.I),
 }
-SENTENCE = re.compile(r"(?<=[.!?])\s+")
+SENTENCE = re.compile(r"(?<=[.!?])(?<!\bMr\.)(?<!\bMrs\.)(?<!\bDr\.)(?<!\bSt\.)\s+")
+"""A title's full stop ends no sentence: 'no description of Mr. Enfield's ... hair'
+split after 'Mr.' lost its negation and gave the hair layer a list (2026-10-11)."""
 SPLIT = re.compile(r"(;\s*|,\s+)")
 
 

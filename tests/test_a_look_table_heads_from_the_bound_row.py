@@ -89,13 +89,19 @@ def test_the_wotw_tables_are_byte_identical_with_the_fallback():
         assert look_timeline.looks_from_dossier(card, fallback=row.get("physical", "")).model_dump_json() == plain
 
 
-@pytest.mark.parametrize("who", ["henry_jekyll", "edward_hyde"])
-def test_jekyll_and_hyde_are_still_refused(who, monkeypatch):
-    """Their refs.json rows name no head either: the wall stays where C1 put it."""
+@pytest.mark.parametrize("who, face", [("henry_jekyll", ("grey", "none", "top_hat")),
+                                       ("edward_hyde", ("dark", "moustache", "felt_hat"))])
+def test_jekyll_and_hyde_heads_come_from_their_authored_dossiers(who, face, monkeypatch):
+    """Their refs.json rows name no head: the wall C1 put up held until the heads
+    were authored from quoted text (analysis/heads.json, studio.head_author).  A
+    headless writer draft now takes the dossier's head, and each man has his own."""
     from agents import look_timeline_writer as writer
     book = book_or_skip(JEKYLL)
+    if not (book / "analysis" / "heads.json").exists():
+        pytest.skip("the book's heads are not authored on this disk")
     headless = writer.LookDraft.model_validate({"looks": [{"look_id": "base", "start_chapter": 1, "top": "dark coat",
                                                            "quote": "", "quote_chapter": 1}]})
     monkeypatch.setattr(writer, "write", lambda text, _agent=None: headless)
     looks = looks_table.table_for(book, who)
-    assert "head unauthored" in (look_timeline.head_refusal(who, looks) or "")
+    m = looks.looks["base"].markers
+    assert look_timeline.head_refusal(who, looks) is None and (m.hair_colour, m.facial_hair, m.headwear) == face
