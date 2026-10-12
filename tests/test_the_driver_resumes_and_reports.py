@@ -110,3 +110,11 @@ def test_drive_quiet_keeps_telegram_for_the_supervisor(monkeypatch, capsys):
     launcher.notify("ep20 PUBLISHED")
     assert len(sent) == 1 and "notify_bench.py" in " ".join(map(str, sent[0]))
     assert launcher.quiet({"DRIVE_QUIET": "1"}) and not launcher.quiet({}) and not launcher.quiet({"DRIVE_QUIET": "0"})
+
+
+def test_an_untracked_report_is_not_the_tree():
+    """2026-10-12: a peer's untracked docs/audit folder held the Jekyll series at
+    WAIT_TREE; a report runs no code. Untracked code still blocks."""
+    assert not drive.dirty("?? docs/audit/2026-10-12_board_review/01_bugs.md\n")
+    assert drive.dirty("?? studio/new_module.py\n")
+    assert drive.dirty(" M docs/DECISIONS.md\n")

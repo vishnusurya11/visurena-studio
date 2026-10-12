@@ -64,8 +64,10 @@ def error_class(log: str) -> str | None:
 
 
 def dirty(porcelain: str) -> bool:
-    """A tracked change or an untracked file outside library/ (the books are not the code)."""
-    return any(line.strip() and not re.match(r"^\?\? library/", line) for line in porcelain.splitlines())
+    """A tracked change or an untracked file outside library/ and docs/ (the
+    books and the reports are not the code; a peer's untracked audit folder
+    held the Jekyll series at WAIT_TREE, 2026-10-12)."""
+    return any(line.strip() and not re.match(r"^\?\? (library|docs)/", line) for line in porcelain.splitlines())
 
 
 def first_sha(ledger_text: str) -> str | None:
