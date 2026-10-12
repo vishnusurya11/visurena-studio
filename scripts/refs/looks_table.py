@@ -18,7 +18,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 
-from studio import episode_home, look_timeline, plan_brief  # noqa: E402
+from studio import episode_home, look_timeline, plan_brief, row_lint  # noqa: E402
 
 
 def card_of(book: Path, who: str) -> dict:
@@ -58,9 +58,11 @@ def build(book: Path, cast: list[str], _agent=None) -> list[str]:
     written = []
     for who in cast:
         if who not in have:
-            looks = table_for(book, who, _agent=_agent)
+            looks = look_timeline.cured(table_for(book, who, _agent=_agent))
             if why := look_timeline.head_refusal(who, looks):     # C1_verdict #9: never a blank judge
                 raise SystemExit(f"REFUSED: {why}")
+            if wall := row_lint.text_refusal(look_timeline.text_faults(who, looks)):
+                raise wall                                        # G-ROWTEXT here, not at bind time
             look_timeline.write_looks(book, who, looks)
             written.append(who)
     return written

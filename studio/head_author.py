@@ -117,16 +117,35 @@ def refusals(book: Path, heads: dict, rows: list[dict]) -> list[str]:
     return out + clashes(faces, authored=set(heads))
 
 
+def cured_physical(prof: dict, entry: dict) -> str:
+    """The dossier physical with this head landed, through the row cures: the
+    look table files it verbatim as the row (G-ROWTEXT, Utterson 2026-10-12)."""
+    from studio import row_lint
+    old = (prof.get("head") or {}).get("words", "")
+    return row_lint.cure_row_text(with_head(prof.get("physical") or "", entry["words"], old))
+
+
+def text_faults(physicals: dict[str, str]) -> list[str]:
+    """Every G-ROWTEXT fault the cures left in a physical about to be written."""
+    from studio import row_lint
+    return [f"{who}: G-ROWTEXT {fault}" for who, said in physicals.items()
+            for fault in row_lint.row_faults(said)]
+
+
 def apply(book: Path, rows: list[dict]) -> list[str]:
-    """Every head of heads.json written into its dossier; refuses before writing any."""
+    """Every head of heads.json written into its dossier, its words cured;
+    refuses before writing any."""
+    from studio import row_lint
     heads = json.loads((Path(book) / "analysis" / "heads.json").read_text(encoding="utf-8"))
+    heads = {who: {**e, "words": row_lint.cure_row_text(e["words"])} for who, e in heads.items()}
     if why := refusals(book, heads, rows):
         raise SystemExit("REFUSED:\n  " + "\n  ".join(why))
-    for who, entry in heads.items():
-        path = Path(book) / "analysis" / "characters" / f"{who}.json"
-        card = json.loads(path.read_text(encoding="utf-8"))
-        prof = card.setdefault("profile", {})
-        old = (prof.get("head") or {}).get("words", "")
-        prof["physical"], prof["head"] = with_head(prof.get("physical") or "", entry["words"], old), entry
-        path.write_text(json.dumps(card, indent=2, ensure_ascii=False), encoding="utf-8")
+    paths = {who: Path(book) / "analysis" / "characters" / f"{who}.json" for who in heads}
+    cards = {who: json.loads(p.read_text(encoding="utf-8")) for who, p in paths.items()}
+    physicals = {who: cured_physical(cards[who].get("profile") or {}, e) for who, e in heads.items()}
+    if wall := row_lint.text_refusal(text_faults(physicals)):
+        raise wall
+    for who, card in cards.items():
+        card.setdefault("profile", {}).update(physical=physicals[who], head=heads[who])
+        paths[who].write_text(json.dumps(card, indent=2, ensure_ascii=False), encoding="utf-8")
     return list(heads)

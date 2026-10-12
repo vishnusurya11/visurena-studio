@@ -40,6 +40,25 @@ AT_REST_TABLE: list[tuple[re.Pattern, str]] = [
 field.  Anywhere else these words are the llm cure's."""
 
 
+NEGATION_TABLE: list[tuple[re.Pattern, str]] = [
+    (re.compile(r"\bnever (?:lighted|lit)(?: up)? by (?:a|any) smile\b", re.I), "unsmiling"),
+    (re.compile(r"\bnever (?:smiles|smiling)\b", re.I), "unsmiling"),
+    (re.compile(r"\b(?:with no|without an?) (?:beard|moustache|whiskers)\b", re.I), "clean-shaven"),
+    (re.compile(r"\b(?:with no|without an?) (?:hat|bonnet|cap)\b", re.I), "bareheaded"),
+]
+"""A row negation with an affirmative that draws the same face: MiniMax reads no
+negation (L1), so the writer files the affirmative.  A negation the table misses
+stays and the writer REFUSES it (Utterson's 'never lighted by a smile', 2026-10-12)."""
+
+
+def affirmed(text: str) -> str:
+    """The negation table over one text; idempotent (no affirmative is negated)."""
+    out = text or ""
+    for pattern, said in NEGATION_TABLE:
+        out = pattern.sub(said, out)
+    return out
+
+
 def substituted(text: str, at_rest: bool = False) -> str:
     """The shared table over one text; `at_rest` admits the at-rest swaps."""
     out = text or ""
@@ -49,9 +68,17 @@ def substituted(text: str, at_rest: bool = False) -> str:
 
 
 def cure_row_text(text: str) -> str:
-    """One row text cured: the table, then the pace append on a person's gait
-    (`ro.paced` is idempotent, so so is this)."""
-    return ro.paced(substituted(text))
+    """One row text cured: the stillness table, the negation affirmatives, then
+    the pace append on a person's gait (each idempotent, so so is this)."""
+    return ro.paced(affirmed(substituted(text)))
+
+
+def text_refusal(faults: list[str]) -> SystemExit | None:
+    """The writers' wall: every fault the cures left, as one refusal; None clean."""
+    if not faults:
+        return None
+    return SystemExit("G-ROWTEXT refuses the text before it is written (the take lint would "
+                      "refuse it at bind time; reword it affirmatively):\n  " + "\n  ".join(faults))
 
 
 def row_faults(text: str) -> list[str]:

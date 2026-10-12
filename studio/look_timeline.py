@@ -276,6 +276,23 @@ def head_refusal(who: str, looks: CharacterLooks) -> str | None:
             f"would judge blank markers; author the head in the dossier's physical first")
 
 
+def cured(looks: CharacterLooks) -> CharacterLooks:
+    """The body and every look's layers through the row cures (stillness, negation
+    affirmatives, pace): `look_words` files them VERBATIM as the row's physical."""
+    from studio import row_lint
+    fix = lambda look: look.model_copy(update={"layers": look.layers.model_copy(update={   # noqa: E731
+        k: row_lint.cure_row_text(v) for k, v in look.layers.model_dump().items() if v})})
+    return looks.model_copy(update={"body": row_lint.cure_row_text(looks.body),
+                                    "looks": {k: fix(v) for k, v in looks.looks.items()}})
+
+
+def text_faults(who: str, looks: CharacterLooks) -> list[str]:
+    """Every G-ROWTEXT fault a look of `who` would file as its row, by look id."""
+    from studio import row_lint
+    return [f"{who} [{look}]: {fault}" for look in looks.looks
+            for fault in row_lint.row_faults(look_words(looks, look))]
+
+
 def write_looks(book: Path, who: str, looks: CharacterLooks) -> Path:
     """One character's looks merged into the book's table (others kept)."""
     table = load(book) or LookBook(book=Path(book).name)

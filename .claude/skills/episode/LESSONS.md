@@ -900,3 +900,8 @@ fixes. Each lesson below cost at least one launch. Tracker rows A38-A74 in
       look-test styles; the layout ("the upper storey one flat, blank forehead of discoloured
       plaster, the facade filling the frame edge to edge; one blistered door below") drew a blank
       wall on the first seed of three.
+    - **A row text is linted where it is WRITTEN, by every writer (Jekyll ep01, 2026-10-12).**
+      head_author and looks_table filed Utterson's "never lighted by a smile" and an unpaced
+      "walking through London" unlinted; G-ROWTEXT refused them at bind time, ep01 step 01, ~3 h
+      in. Both writers now cure (stillness table, row_lint.NEGATION_TABLE affirmatives, the pace
+      append) and refuse every leftover fault before writing, so it surfaces in the refs step.
