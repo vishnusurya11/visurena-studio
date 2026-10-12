@@ -273,13 +273,14 @@ def gpu(rows: list[dict], hold: dict | None, progress: Callable[[str, str], dict
             "finish": (p.get("eta") or {}).get("finish") or None, "vital": p.get("vital"), "held": bool(hold)}
 
 
-def shell_block(conn: sqlite3.Connection, progress: Callable[[str, str], dict | None]) -> dict:
+def shell_block(conn: sqlite3.Connection, progress: Callable[[str, str], dict | None],
+                extras: dict | None = None) -> dict:
     """What the shell draws, as numbers: needs you, the queue, the dots, the pins,
-    the GPU card and the studio hold."""
+    the GPU card, the studio hold, the engine and the autopilot lines."""
     rows, hold = running_rows(conn), studio_hold(conn)
     return {"needs": views.inbox_count(conn), "queue": int(conn.execute("SELECT COUNT(*) FROM v_queue").fetchone()[0]),
             "dept_dots": dept_dots(conn), "pins": [pin(r) for r in rows], "gpu": gpu(rows, hold, progress),
-            "hold": hold}
+            "hold": hold, "engine": (extras or {}).get("engine"), "autopilot": (extras or {}).get("autopilot") or []}
 
 
 def shell_fp(block: dict) -> str:
@@ -329,8 +330,8 @@ def feed(conn: sqlite3.Connection, since: int | None) -> list[dict]:
 
 
 def pulse(conn: sqlite3.Connection, now: float, boot: float, since: int | None,
-          progress: Callable[[str, str], dict | None]) -> dict:
+          progress: Callable[[str, str], dict | None], extras: dict | None = None) -> dict:
     """The C1 body."""
-    block = shell_block(conn, progress)
+    block = shell_block(conn, progress, extras)
     return {"boot": boot, "now": now, "fp": {"shell": shell_fp(block), **fingerprints(conn, now)},
             "shell": block, "events": feed(conn, since), "cursor": totals(conn)["event"]}

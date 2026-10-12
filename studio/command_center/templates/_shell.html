@@ -44,12 +44,14 @@
 {%- endmacro %}
 
 {% macro gpu_card(shell) -%}
-{%- set g, h = shell.gpu, shell.hold -%}
-{%- set label = ('Held · finishing its step' if h else 'On the GPU') if g else ('Studio held' if h else 'GPU idle') -%}
-<a class="gpu-card{% if not g %} idle{% endif %}{% if h %} held{% endif %}" href="{{ g.href if g else '/queue' }}" data-testid="gpu-card" data-gpu{% if g and g.progress_url %} data-progress="{{ g.progress_url }}"{% endif %} title="{% if g %}On the GPU: {{ g.unit }} · {{ g.book }} · {{ g.step }}{% else %}{{ label }}{% endif %}">
+{%- set g, h, e = shell.gpu, shell.hold, shell.engine -%}
+{%- set outside = not g and e and e.busy -%}
+{%- set ap = (shell.autopilot or []) | first -%}
+{%- set label = ('Held · finishing its step' if h else 'On the GPU') if g else ('Studio held' if h else ('GPU busy outside the runner' if outside else 'GPU idle')) -%}
+<a class="gpu-card{% if not g and not outside %} idle{% endif %}{% if h %} held{% endif %}" href="{{ g.href if g else '/queue' }}" data-testid="gpu-card" data-gpu{% if g and g.progress_url %} data-progress="{{ g.progress_url }}"{% endif %} title="{% if g %}On the GPU: {{ g.unit }} · {{ g.book }} · {{ g.step }}{% else %}{{ label }}{% endif %}">
   <span class="face" data-gc-face>{% if g and g.face %}<img src="{{ g.face }}" alt="" width="40" height="40">{% else %}{{ icon('pause' if h and not g else 'cpu', 'lg') }}{% endif %}</span>
   <span class="t1"><span class="gc-dot" aria-hidden="true"></span><span data-gc-label>{{ label }}</span><span class="eta" data-gc-eta></span></span>
-  <span class="t2"><b data-gc-unit>{{ g.unit if g else '' }}</b><span data-gc-step>{% if g %}{{ g.step or g.stage }}{% elif h %}nothing starts until you lift{% else %}nothing running{% endif %}</span></span>
+  <span class="t2"><b data-gc-unit>{{ g.unit if g else '' }}</b><span data-gc-step>{% if g %}{{ g.step or g.stage }}{% elif h %}nothing starts until you lift{% elif outside %}{{ e.who or 'a ComfyUI prompt' }}{% elif ap %}autopilot {{ ap.state }}{% if ap.why %}: {{ ap.why }}{% endif %}{% else %}nothing running{% endif %}</span></span>
   <span class="prog" aria-hidden="true"{% if not g %} hidden{% endif %}><i data-prog style="width:0%"></i></span>
 </a>
 {%- endmacro %}

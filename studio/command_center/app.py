@@ -30,7 +30,7 @@ from starlette.exceptions import HTTPException as StarletteHTTPException
 
 from studio import db, registry
 from studio.command_center import actions, library_paths, models, procs, progress_view, pulse, shell, thumbs, unit_view, views
-from studio.command_center import viewer_routes, viz
+from studio.command_center import comfy_tap, viewer_routes, viz
 
 mimetypes.add_type("font/woff2", ".woff2")   # Windows' registry does not know it: the fonts went out as octet-stream
 HERE = Path(__file__).resolve().parent
@@ -106,7 +106,9 @@ def _unchanged(request: Request, conn: sqlite3.Connection, key: str) -> Response
 
 def _page(request: Request, conn: sqlite3.Connection, name: str, **context) -> HTMLResponse:
     """A whole page: the template inside the shell (sidebar, header, palette) drawn for its path."""
-    return _render(request, name, shell=shell.shell(conn, request.app.state.library, request.url.path), **context)
+    extras = request.app.state.extras(views.book_names(conn))
+    return _render(request, name, shell=shell.shell(conn, request.app.state.library, request.url.path, extras),
+                   **context)
 
 
 class CachedStatic(StaticFiles):
@@ -247,7 +249,8 @@ def org_chart(request: Request):
 def floor_partial(request: Request, conn: sqlite3.Connection = Depends(_conn)):
     if same := _unchanged(request, conn, "floor"):
         return same
-    return _render(request, "_floor.html", floor=views.floor(conn), books=views.book_names(conn))
+    names = views.book_names(conn)
+    return _render(request, "_floor.html", floor=views.floor(conn), books=names, extras=request.app.state.extras(names))
 
 
 @router.get("/partials/attention", response_class=HTMLResponse)
@@ -336,7 +339,7 @@ def pulse_json(request: Request, response: Response, since: int | None = None,
     """The heartbeat (C1): the fingerprints, the shell's numbers, the events since the cursor."""
     response.headers["Cache-Control"] = "no-store"
     state = request.app.state
-    return pulse.pulse(conn, time.time(), state.boot, since, state.progress)
+    return pulse.pulse(conn, time.time(), state.boot, since, state.progress, state.extras(views.book_names(conn)))
 
 
 def gpu_progress(app: FastAPI) -> Callable[[str, str], dict | None]:
@@ -346,6 +349,21 @@ def gpu_progress(app: FastAPI) -> Callable[[str, str], dict | None]:
 
     def read(codex: str, unit: str) -> dict | None:
         return cache.get((codex, unit), time.time(), lambda: _read_progress(app, codex, unit))
+    return read
+
+
+AUTOPILOT_TTL_S = 10.0
+
+
+def shell_extras(app: FastAPI) -> Callable[[dict[str, str]], dict]:
+    """What the shell adds beyond the rows: the engine (comfy_tap, never waited on) and
+    the autopilot lines (read again at most every AUTOPILOT_TTL_S)."""
+    cache = pulse.Ttl(AUTOPILOT_TTL_S)
+
+    def read(names: dict[str, str]) -> dict:
+        lines = cache.get("autopilot", time.time(), lambda: views.autopilot_lines(app.state.library, names))
+        return {"engine": comfy_tap.engine_block(app.state.engine.read(), app.state.procs(), names),
+                "autopilot": lines}
     return read
 
 
@@ -577,6 +595,8 @@ def make_app(conn_factory: Callable[[], sqlite3.Connection], library: Path,
     app.state.thumb_dir = thumb_dir(library)
     app.state.boot = time.time()
     app.state.progress = gpu_progress(app)
+    app.state.engine = comfy_tap.Tap()
+    app.state.extras = shell_extras(app)
     app.mount("/static", CachedStatic(directory=str(HERE / "static")), name="static")
     app.include_router(router)
     app.include_router(act)

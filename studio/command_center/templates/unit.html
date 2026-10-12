@@ -27,8 +27,10 @@
    <div class="qcline">
     <span class="file"><b>{{ m.vrel.split('/')[-1] }}</b>{% if m.qc %} · {{ '%.1f' | format(m.qc.seconds or 0) }} s{% if m.qc.planned %} (plan {{ '%.1f' | format(m.qc.planned) }}){% endif %}{% endif %}</span>
     {% if sm and sm.all_ok %}<span class="q ok" title="LUFS, peak, cuts, lines and takes all pass">QC {{ sm.n_ok }}/{{ sm.n }} ✓</span>
+    {% elif sm and finished %}<span class="q" title="{% for f in sm.fails %}{{ f.text }} short of its bar{% if not loop.last %}; {% endif %}{% endfor %}">QC {{ sm.n_ok }} of {{ sm.n }} checks passed</span>
     {% elif sm %}{% for f in sm.fails %}<span class="q bad">✕ {{ f.text }}</span>{% endfor %}<span class="q">QC {{ sm.n_ok }}/{{ sm.n }}</span>
     {% else %}<span class="q">no QC file yet</span>{% endif %}
+    {% if m.live %}<a class="q yt" href="{{ m.live.youtube }}" target="_blank" rel="noopener" data-testid="watch-youtube">Watch on YouTube · {{ m.live.privacy }}</a>{% if not m.live.rel %}<span class="q" title="no file on disk hashes to the upload's {{ m.live.sha8 }}">uploaded cut not on disk</span>{% elif m.qc and not m.qc_is_played %}<span class="q" title="qc_r2v.json measured another master">QC is of another cut</span>{% endif %}{% endif %}
     <span class="q vnew" data-k="vnew" hidden></span>
    </div>
    <div class="player" id="master-player" hx-preserve="true">
@@ -128,7 +130,7 @@
   {% endif %}
 
   <section class="u-sec" id="gates" aria-labelledby="gates-h"><span hidden>VERDICTS</span>
-   <header><h2 id="gates-h">Gates</h2><span class="sub">{{ unit.gates | selectattr('by') | list | length }} signed · {{ unit.gates | selectattr('state', 'in', ['flagged', 'failed', 'deferred']) | list | length }} not passing</span></header>
+   <header><h2 id="gates-h">Gates</h2><span class="sub">{{ unit.gates | selectattr('by') | list | length }} signed · {{ unit.gates | selectattr('state', 'in', ['flagged', 'failed', 'deferred', 'stale']) | list | length }} not passing</span></header>
    <div class="threads">
    {% for g in unit.gates if g.by or g.word %}
     <details class="thread {{ 'flag' if g.state == 'flagged' else 'pass' if g.state == 'passed' else '' }}" id="gate-{{ g.gate }}"{% if g.state != 'passed' and g.kinds %} open{% endif %}>
@@ -243,7 +245,8 @@
     {% else %}<div><dt>Master</dt><dd class="muted">none yet{% if not finished and unit.bar %}<span class="sub">{{ unit.bar[-1].step_id }} {{ unit.bar[-1].name }} not reached</span>{% endif %}</dd></div>{% endif %}
     <div><dt>Attempt</dt><dd class="mono-v">{{ r.attempts }}</dd></div>
     {% if r.gpu_seconds %}<div><dt>GPU</dt><dd class="mono-v">{{ h.gpu_h }}</dd></div>{% endif %}
-    {% if r.cost_usd %}<div><dt>Cost</dt><dd class="mono-v">${{ '%.2f' | format(r.cost_usd) }}</dd></div>{% endif %}
+    {% set sp = unit.spend %}{% if sp and sp.calls %}<div><dt>Cost</dt><dd class="mono-v">{% if sp.unpriced %}≥ {% endif %}${{ '%.2f' | format(sp.priced) }}{% if sp.unpriced %}<span class="sub">+ {{ sp.unpriced }} unpriced call{{ '' if sp.unpriced == 1 else 's' }}</span>{% endif %}</dd></div>{% endif %}
+    {% if unit.book_spend %}<div><dt>Book spend</dt><dd class="mono-v">${{ '%.2f' | format(unit.book_spend.usd) }}<span class="sub">spend.jsonl · {{ unit.book_spend.rows }} paid calls, not split by unit</span></dd></div>{% endif %}
     {% if h.started %}<div><dt>Started</dt><dd>{{ h.started }}</dd></div>{% endif %}
     {% if h.finished %}<div><dt>Finished</dt><dd>{{ h.finished }}</dd></div>{% endif %}
     {% if h.moved %}<div><dt>Moved</dt><dd title="{{ r.updated_at }}">{{ h.moved }}</dd></div>{% endif %}
@@ -253,9 +256,10 @@
     {% if r.blocked_on %}<div><dt>Waiting</dt><dd>{{ r.blocked_on }}</dd></div>{% endif %}
     {% if r.hold_reason %}<div><dt>Held</dt><dd title="{{ r.hold_reason | truncate(300) }}">{{ r.hold_reason | truncate(80) }}</dd></div>{% endif %}
     {% if unit.deliverable %}<div><dt>Deliver</dt><dd><code>{{ unit.deliverable.rel }}</code> {% if unit.deliverable.exists %}<a href="{{ unit.deliverable.url }}" data-view="{{ vrel(unit.deliverable.rel) }}" data-set="files">open</a>{% else %}<span class="muted">missing on disk</span>{% endif %}</dd></div>{% endif %}
-    {% if m and m.published %}<div><dt>Published</dt><dd><a href="/lib/{{ codex }}/{{ m.published }}" data-view="{{ vrel(m.published) }}" data-set="files">youtube.json</a></dd></div>{% endif %}
+    {% if m and m.live %}<div><dt>Published</dt><dd><a href="{{ m.live.youtube }}" target="_blank" rel="noopener">Watch on YouTube</a><span class="sub">{{ m.live.privacy }}{% if m.published %} · <a href="/lib/{{ codex }}/{{ m.published }}" data-view="{{ vrel(m.published) }}" data-set="files">youtube.json</a>{% endif %}</span></dd></div>
+    {% elif m and m.published %}<div><dt>Published</dt><dd><a href="/lib/{{ codex }}/{{ m.published }}" data-view="{{ vrel(m.published) }}" data-set="files">youtube.json</a><span class="sub">drafted, not uploaded</span></dd></div>{% endif %}
    </dl>
-   {% set bad = unit.gates | selectattr('state', 'in', ['flagged', 'failed', 'deferred']) | list %}
+   {% set bad = unit.gates | selectattr('state', 'in', ['flagged', 'failed', 'deferred', 'stale']) | list %}
    <div class="pgroup">
     <h4>Gates not passing</h4>
     <ul class="list">{% for g in bad %}<li><span class="gate flag"{% if g.path %} data-view="{{ vrel(g.path) }}" data-set="files" role="button" tabindex="0"{% endif %}>{{ icon('flag') }}{{ g.gate }}</span><span class="r">{{ g.state }}{% if g.faults %} · {{ g.faults }}{% endif %}{% if g.terminal %} · {{ g.terminal }}{% endif %}</span></li>{% else %}<li class="muted">none</li>{% endfor %}</ul>

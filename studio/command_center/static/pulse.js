@@ -159,7 +159,12 @@
       if (empty) empty.hidden = pins.length > 0;
     });
   }
-  function gpuLabel(g, hold) { return g ? (hold ? 'Held · finishing its step' : 'On the GPU') : (hold ? 'Studio held' : 'GPU idle'); }
+  function gpuLabel(g, hold, e) { return g ? (hold ? 'Held · finishing its step' : 'On the GPU') : (hold ? 'Studio held' : (e && e.busy ? 'GPU busy outside the runner' : 'GPU idle')); }
+  function idleStep(hold, e, ap) {
+    if (hold) return 'nothing starts until you lift';
+    if (e && e.busy) return e.who || 'a ComfyUI prompt';
+    return ap ? 'autopilot ' + ap.state + (ap.why ? ': ' + ap.why : '') : 'nothing running';
+  }
   function patchFace(card, g) {
     var key = g ? g.href : '', face = card.querySelector('[data-gc-face]');
     var drawn = card.__face !== undefined ? card.__face : (card.classList.contains('idle') ? '' : card.getAttribute('href'));
@@ -169,13 +174,13 @@
     face.textContent = '';
     if (img) { var n = img.cloneNode(); n.width = n.height = 40; face.appendChild(n); } else face.appendChild(svgIcon('cpu'));
   }
-  function patchGpu(card, g, hold) {
-    var step = g ? (g.step || '') : (hold ? 'nothing starts until you lift' : 'nothing running');
+  function patchGpu(card, g, hold, e, ap) {
+    var step = g ? (g.step || '') : idleStep(hold, e, ap);
     patchFace(card, g);
-    card.classList.toggle('idle', !g); card.classList.toggle('held', !!hold);
+    card.classList.toggle('idle', !g && !(e && e.busy)); card.classList.toggle('held', !!hold);
     card.setAttribute('href', g ? g.href : '/queue');
-    card.title = g ? 'On the GPU: ' + g.unit + ' · ' + step : gpuLabel(g, hold);
-    text(card, '[data-gc-label]', gpuLabel(g, hold)); text(card, '[data-gc-unit]', g ? g.unit : '');
+    card.title = g ? 'On the GPU: ' + g.unit + ' · ' + step : gpuLabel(g, hold, e);
+    text(card, '[data-gc-label]', gpuLabel(g, hold, e)); text(card, '[data-gc-unit]', g ? g.unit : '');
     text(card, '[data-gc-eta]', g && g.finish ? '~' + g.finish : '');
     if (text(card, '[data-gc-step]', step) && card.__step !== undefined && card.__step !== step) wash(card.querySelector('.t2'));
     card.__step = step;
@@ -216,7 +221,7 @@
     if (typeof sh.needs === 'number') patchCounts(sh);
     if (sh.dept_dots) all('[data-dept]').forEach(function (a) { patchDept(a, sh.dept_dots[a.dataset.dept]); });
     if (sh.pins) patchPins(sh.pins);
-    all('[data-gpu]').forEach(function (c) { patchGpu(c, sh.gpu || null, sh.hold || null); });
+    all('[data-gpu]').forEach(function (c) { patchGpu(c, sh.gpu || null, sh.hold || null, sh.engine || null, (sh.autopilot || [])[0] || null); });
     patchChip(sh.gpu || null); patchHold(sh.hold || null); favicon(sh);
     if (!$('live')) doc.title = liveTitle(sh, S.base);
   }

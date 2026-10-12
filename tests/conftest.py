@@ -157,6 +157,8 @@ def comfy_trap(monkeypatch):
     # A test's `model_kept()` ends with /free: it must never unload the live
     # engine's models under a running render (speed plan #6).
     monkeypatch.setattr(comfy, "free_models", lambda: None)
+    from studio.command_center import comfy_tap        # the board's GPU card reads /queue (2026-10-12)
+    monkeypatch.setattr(comfy_tap, "fetch_queue", trip)
     return real
 
 

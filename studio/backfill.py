@@ -238,22 +238,40 @@ def upload_rows(book_dir: Path, number: int) -> list[dict]:
     return [r for r in rows if r.get("episode") == number]
 
 
-def publish_row(book_dir: Path, codex_id: str, unit: str) -> dict | None:
-    """A `publish` work-order row from the unit's youtube.json and its upload
-    rows: the unit is the uploaded master's sha8 at the platform, the note the
-    video id and the privacy it ended on; None when nothing was uploaded."""
+def deleted_ids(rows: list[dict]) -> set[str]:
+    """The video ids an upload row calls deleted (`event: deleted` or `deleted: true`):
+    a deleted video is no publication (board review 2026-10-12, WotW ep14)."""
+    return {r["video_id"] for r in rows
+            if r.get("video_id") and (r.get("event") == "deleted" or r.get("deleted") is True)}
+
+
+def live_upload(book_dir: Path, unit: str) -> dict | None:
+    """The episode's newest upload that was not deleted: {video_id, sha8, privacy, at};
+    None when the ledger has none (the privacy is the last that video's rows name)."""
     number = number_of(unit)
-    home = manifest.home_of("episode", unit)
     rows = upload_rows(book_dir, number) if number is not None else []
-    uploads = [r for r in rows if r.get("video_id") and r.get("sha8")]
-    if not uploads or not (Path(book_dir) / home / "youtube.json").exists():
+    gone = deleted_ids(rows)
+    uploads = [r for r in rows if r.get("video_id") and r.get("sha8") and r["video_id"] not in gone]
+    if not uploads:
         return None
     latest = uploads[-1]
-    privacy = ([r["privacy"] for r in rows if r.get("privacy")] or ["unknown"])[-1]
-    return {"codex_id": codex_id, "stage": PUBLISH_STAGE, "unit": f"{latest['sha8']}@youtube",
-            "number": number, "kind": "master", "home": f"publish/{latest['sha8']}@youtube",
-            "state": "done", "deliverable": f"{home}/youtube.json", "finished_at": latest.get("at"),
-            "note": f"video {latest['video_id']} {privacy}; from {unit}", "source": SOURCE}
+    privacy = ([r["privacy"] for r in rows if r.get("privacy") and r.get("video_id") == latest["video_id"]]
+               or ["unknown"])[-1]
+    return {"video_id": latest["video_id"], "sha8": latest["sha8"], "privacy": privacy, "at": latest.get("at")}
+
+
+def publish_row(book_dir: Path, codex_id: str, unit: str) -> dict | None:
+    """A `publish` work-order row from the unit's youtube.json and its live upload
+    (live_upload): the unit is the uploaded master's sha8 at the platform, the note
+    the video id and the privacy it ended on; None when nothing was uploaded."""
+    home = manifest.home_of("episode", unit)
+    up = live_upload(book_dir, unit)
+    if up is None or not (Path(book_dir) / home / "youtube.json").exists():
+        return None
+    return {"codex_id": codex_id, "stage": PUBLISH_STAGE, "unit": f"{up['sha8']}@youtube",
+            "number": number_of(unit), "kind": "master", "home": f"publish/{up['sha8']}@youtube",
+            "state": "done", "deliverable": f"{home}/youtube.json", "finished_at": up["at"],
+            "note": f"video {up['video_id']} {up['privacy']}; from {unit}", "source": SOURCE}
 
 
 # --- the plan: what would be written, and why not --------------------------------

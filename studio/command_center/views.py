@@ -169,12 +169,22 @@ def colour_class(state: str) -> str:
     return COLOURS.get(state, "grey")
 
 
+def unit_order(row: dict) -> tuple:
+    """One order for a book's units on every page: the slate sequence, else the
+    unit's number, else the digits of its name, then the name (board review
+    2026-10-12: ep14, sequence NULL, sorted first on the book and last in the department)."""
+    n = row.get("sequence") if row.get("sequence") is not None else row.get("number")
+    if n is None:
+        digits = "".join(c for c in row.get("unit") or "" if c.isdigit())
+        n = int(digits) if digits else 10 ** 9
+    return (n, row.get("unit") or "")
+
+
 def rank(row: dict) -> tuple:
     """Attention order: escalated, failed, stale, running, deferred, held,
-    flagged, queued, blocked, done; then slate order, then the unit's name."""
+    flagged, queued, blocked, done; then the unit order (unit_order)."""
     shown = row.get("shown") or display_state(row["state"], row.get("flags") or 0)
-    return (ATTENTION.index(shown) if shown in ATTENTION else len(ATTENTION),
-            row.get("sequence") if row.get("sequence") is not None else 10 ** 9, row["unit"])
+    return (ATTENTION.index(shown) if shown in ATTENTION else len(ATTENTION), *unit_order(row))
 
 
 # --- rows ---
@@ -187,6 +197,25 @@ def step_names(stage: str) -> dict[str, str]:
         return {e["id"]: e["name"] for e in registry.steps(stage)}
     except ValueError:
         return {}
+
+
+def last_step_id(stage: str) -> str | None:
+    """The department's last registry step; None for a stage the registry does not know."""
+    names = step_names(stage)
+    return list(names)[-1] if names else None
+
+
+def moved_at(row: dict, last_event: str | None) -> str | None:
+    """When the unit last moved: its newest event, else when it finished, else the
+    row's last write (every tick upsert bumps updated_at, board review 2026-10-12)."""
+    return last_event or row.get("finished_at") or row.get("updated_at")
+
+
+def last_moves(conn: sqlite3.Connection, stage: str) -> dict[tuple[str, str], str]:
+    """{(codex_id, unit): newest event_ts} for one department, in one query."""
+    rows = conn.execute("SELECT codex_id, COALESCE(unit, 'book'), MAX(event_ts) FROM events WHERE stage = ?"
+                        " GROUP BY 1, 2", (stage,))
+    return {(c, u): ts for c, u, ts in rows}
 
 
 def elapsed(started_at: str | None) -> str:
@@ -243,9 +272,12 @@ def row_view(row: sqlite3.Row | dict, conn: sqlite3.Connection | None = None) ->
     lapsed = lease_lapsed(r, utc_now()) and not carried(r)
     state = "stale" if lapsed else r["state"]
     r["shown"] = display_state(state, flags)
+    r["flags_open"] = flags if r["shown"] == "flagged" else 0
     r["glyph"] = glyph(state, flags)
     r["css"] = colour_class(r["shown"])
     r["meaning"] = meaning(r["shown"], r.get("blocked_on"))
+    if r["state"] == "done":                     # a finished unit stands at its last step (02 #15)
+        r["step_id"], r["progress"] = last_step_id(r["stage"]) or r.get("step_id"), None
     r["step_name"] = step_names(r["stage"]).get(r.get("step_id") or "", "")
     r["elapsed"] = elapsed(r.get("started_at")) if state == "running" else ""
     r["age"] = age(utc_now(), r.get("updated_at"))
@@ -255,6 +287,46 @@ def row_view(row: sqlite3.Row | dict, conn: sqlite3.Connection | None = None) ->
 def book_names(conn: sqlite3.Connection) -> dict[str, str]:
     """{codex_id: name} for the breadcrumbs."""
     return {r["id"]: r["name"] for r in conn.execute("SELECT id, name FROM codex")}
+
+
+# --- the autopilot (board review 2026-10-12, 03 A22) ---
+
+
+def read_json(path: Path) -> dict:
+    """A small JSON file as a dict; {} when it is missing or not a JSON object."""
+    try:
+        doc = json.loads(Path(path).read_text(encoding="utf-8"))
+    except (OSError, ValueError):
+        return {}
+    return doc if isinstance(doc, dict) else {}
+
+
+def autopilot_state(series: dict, status: dict) -> tuple[str, str]:
+    """(state, why): the supervisor's episode state, and the pause series.json carries
+    -- a complete series whose pause flag was never cleared says both."""
+    state = str((status.get("episode") or {}).get("state") or "").lower() or "unknown"
+    why = str(series.get("paused_why") or "")
+    if not series.get("paused"):
+        return state, ""
+    if state == "complete":
+        return state, f"still paused in series.json ({why})" if why else "still paused in series.json"
+    return "paused", why
+
+
+def autopilot_lines(library: Path, names: dict[str, str]) -> list[dict]:
+    """One line per book with an autopilot/ folder: book, state, why, when it last wrote."""
+    root = Path(library)
+    out = []
+    for folder in sorted(root.iterdir()) if root.is_dir() else []:
+        series = read_json(folder / "autopilot" / "series.json") if folder.is_dir() else {}
+        if not series:
+            continue
+        status = read_json(folder / "autopilot" / "status.json")
+        state, why = autopilot_state(series, status)
+        codex = str(series.get("book") or folder.name[:14])
+        out.append({"codex": codex, "book": names.get(codex, folder.name[15:].replace("-", " ")),
+                    "state": state, "why": why, "age": age(utc_now(), status.get("ts"))})
+    return out
 
 
 # --- the home and the floor ---
@@ -390,7 +462,9 @@ def shelf(conn: sqlite3.Connection) -> list[dict]:
     rows = conn.execute(
         "SELECT c.id AS codex_id, c.name, COUNT(w.id) AS units,"
         f" COALESCE(SUM({LIVE_SQL.replace('state', 'w.state').replace('lease_until', 'w.lease_until')}), 0) AS running,"
-        " COALESCE(SUM(w.state = 'done'), 0) AS done"
+        " COALESCE(SUM(w.state = 'done'), 0) AS done,"
+        " COALESCE(SUM(w.stage = 'episode'), 0) AS episodes,"
+        " COALESCE(SUM(w.stage = 'episode' AND w.state != 'done'), 0) AS open_episodes"
         " FROM codex c LEFT JOIN work_orders w ON w.codex_id = c.id GROUP BY c.id ORDER BY c.name, c.id")
     extra = Counter(r["codex_id"] for r in lapsed_rows(conn) if carried(r))
     return [dict(r) | {"running": r["running"] + extra.get(r["codex_id"], 0)} for r in rows]
@@ -607,12 +681,12 @@ def book_groups(rows: list[dict], names: dict[str, str]) -> list[dict]:
     return sorted(groups.values(), key=lambda g: g["rank"])
 
 
-def dress(row: dict, chips: dict[str, str], gates: list[str]) -> dict:
-    """A shown row with everything the glance needs."""
+def dress(row: dict, chips: dict[str, str], gates: list[str], last_event: str | None = None) -> dict:
+    """A shown row with everything the glance needs; `ago` is when it last moved (moved_at)."""
     row["strip"] = verdict_strip(row["verdicts"], gates)
     row["gate_labels"] = [gate_label(c["gate"]) for c in row["strip"]]
     row["bar"] = step_bar(row, chips)
-    row["ago"], row["gpu_h"] = ago(row.get("updated_at")), gpu_hours(row.get("gpu_seconds"))
+    row["ago"], row["gpu_h"] = ago(moved_at(row, last_event)), gpu_hours(row.get("gpu_seconds"))
     return row
 
 
@@ -629,8 +703,8 @@ def department(conn: sqlite3.Connection, stage: str, book: str | None = None,
     names = book_names(conn)
     counts = Counter(r["shown"] for r in rows)
     kept = [r for r in rows if (not book or r["codex_id"] == book) and (not state or r["shown"] == state)]
-    chips = step_states(conn, [r["id"] for r in kept])
-    kept = [dress(r, chips[r["id"]], gates) for r in kept]
+    chips, moves = step_states(conn, [r["id"] for r in kept]), last_moves(conn, stage)
+    kept = [dress(r, chips[r["id"]], gates, moves.get((r["codex_id"], r["unit"]))) for r in kept]
     return {"stage": stage, "rows": kept, "gates": gates, "counts": dict(counts),
             "gate_labels": [gate_label(g) for g in gates], "groups": book_groups(kept, names),
             "books": {c: names.get(c, c) for c in sorted({r["codex_id"] for r in rows})}}
@@ -767,10 +841,49 @@ def unit(conn: sqlite3.Connection, library: Path, codex_id: str, stage: str, uni
             "thumbnails": thumbnails(home, stage, codex_id) if home else [],
             "learnings": learnings_tail(home), "log_name": log_name, "log": log,
             "timing": timing_rows(home), "running": r["state"] == "running",
-            "book_name": book_names(conn).get(codex_id, codex_id)}
+            "book_name": book_names(conn).get(codex_id, codex_id),
+            "spend": unit_spend(conn, codex_id, stage, unit), "book_spend": book_spend(book)}
 
 
 # --- a book ---
+
+
+def season_rows(conn: sqlite3.Connection, codex_id: str) -> list[dict]:
+    """The book's episodes as the season wall shows them, in unit order."""
+    rows = conn.execute("SELECT * FROM work_orders WHERE codex_id = ? AND stage = 'episode'", (codex_id,))
+    return sorted((row_view(r, conn) for r in rows), key=unit_order)
+
+
+# --- spend (board review 2026-10-12, 02 #14) ---
+
+
+def unit_spend(conn: sqlite3.Connection, codex_id: str, stage: str, unit: str) -> dict:
+    """The unit's paid calls as the page prints them: the priced sum, how many calls
+    carry no price (a subscription), how many in all -- never a confident $0 over
+    an unpriced call, never a hidden priced part."""
+    try:
+        row = conn.execute("SELECT COALESCE(SUM(cost_usd), 0.0), SUM(cost_usd IS NULL), COUNT(*) FROM usage"
+                           " WHERE codex_id = ? AND stage = ? AND COALESCE(unit, 'book') = ?",
+                           (codex_id, stage, unit)).fetchone()
+    except sqlite3.OperationalError:            # a DB from before the usage table
+        return {"priced": 0.0, "unpriced": 0, "calls": 0}
+    return {"priced": round(row[0], 6), "unpriced": int(row[1] or 0), "calls": int(row[2])}
+
+
+_SPEND: dict[tuple, dict | None] = {}
+
+
+def book_spend(book: Path | None) -> dict | None:
+    """The book's own spend ledger (spend.jsonl, paid image calls that never reached
+    `usage`): {usd, rows}; None when the book keeps none.  Read again on a new mtime."""
+    path = Path(book) / "spend.jsonl" if book else None
+    if path is None or not path.is_file():
+        return None
+    key = (str(path), path.stat().st_mtime_ns)
+    if key not in _SPEND:
+        rows = [r for r in parse_jsonl(tail_lines(path, 8 * TAIL_BYTES)) if "usd_estimate" in r]
+        _SPEND[key] = {"usd": round(sum(float(r["usd_estimate"] or 0) for r in rows), 2), "rows": len(rows)}
+    return _SPEND[key]
 
 
 def published_source(conn: sqlite3.Connection, book: Path | None, codex_id: str, unit: str) -> str | None:
@@ -803,5 +916,7 @@ def book(conn: sqlite3.Connection, library: Path, codex_id: str) -> dict | None:
     folder = library_paths.book_folder(library, codex_id)
     published = {u: src for u in units if (src := published_source(conn, folder, codex_id, u))}
     return {"codex_id": codex_id, "name": name, "stages": stages, "units": units, "cells": cells,
+            "rows_n": len(rows),
             "published": published, "gpu_seconds": sum(r["gpu_seconds"] or 0 for r in rows),
+            "spend": book_spend(folder),
             "holds": [h for h in holds(conn) if h["codex_id"] in (None, codex_id)]}

@@ -10,6 +10,7 @@
 stages:
 
   analysis:
+    deliverable: analysis/qc_report.json          # step 06's report; the ledger settles first (decision 2026-10-12)
     steps:
       - id: "01"
         name: ingest
@@ -193,6 +194,7 @@ stages:
   # ---------------------------------------------------------------------------------
 
   screenplay:
+    deliverable: screenplay/feature/qc_report.json  # 05 verify's; only for a book the ledger is silent on
     steps:
       - id: "01"
         name: dossier
@@ -320,6 +322,7 @@ stages:
             desc: Writes <target>/qc_report.json.
 
   trailer:
+    deliverable: trailer/main/TRAILER-*.mp4         # the trailer itself; pre-runner masters count (Jekyll)
     # One unattended run per book, on a TIME ceiling (nothing here spends money:
     # MiniMax Music 3, MiniMax-H3 and Qwen3-TTS all run on the local ComfyUI).
     # Every step: typed input -> typed output -> a gate that can fail -> an

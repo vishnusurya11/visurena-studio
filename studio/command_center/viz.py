@@ -19,7 +19,7 @@ from contextlib import contextmanager
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
-from studio import eta
+from studio import eta, timing_sum
 from studio.command_center import library_paths, views
 
 CAP = 99
@@ -141,14 +141,14 @@ def hours(x: float) -> str:
 
 
 def burn_line(days: list[dict], steps: list[dict]) -> str:
-    """`34 of 75 GPU-h burned · lever: 09 shoot 55 %`; '' when nothing ran."""
+    """`34 of 75 GPU-h burned · most lost: 09 shoot (55 % of its hours failed)`; '' when nothing ran."""
     total = sum(d["ok"] + d["burn"] + d["live"] for d in days)
     if not total:
         return ""
     line = f"{hours(sum(d['burn'] for d in days))} of {hours(total)} GPU-h burned"
     if steps:
         s = steps[0]
-        line += f" · lever: {s['step']} {s.get('name', '')} {s['share']} %".replace("  ", " ")
+        line += f" · most lost: {s['step']} {s.get('name', '')} ({s['share']} % of its hours failed)".replace("  ", " ")
     return line
 
 
@@ -214,16 +214,31 @@ def initials(name: str) -> str:
 # --- posters (the files a tile shows and opens) ---
 
 
+POSTER_GLOBS = (("storyboard/shot_*.png", "middle"), ("storyboard/anchors/*.png", "first"),
+                ("boards/panels/*.png", "middle"), ("boards/ref_take_*.png", "middle"),
+                ("review/contact_*.png", "newest"))
+"""Where a unit's picture is, in order: the storyboard (today's pipeline), then the
+earlier pipelines' board panels and reference takes, then a contact sheet (board
+review 2026-10-12: 18 shipped episodes said "no picture yet")."""
+
+
+def pick(hits: list[Path], how: str) -> Path:
+    """One of a glob's sorted hits: the middle, the first, or the newest by mtime."""
+    if how == "newest":
+        return max(hits, key=lambda p: (p.stat().st_mtime, p.name))
+    return hits[len(hits) // 2] if how == "middle" else hits[0]
+
+
 def poster_file(home: Path) -> Path | None:
-    """The unit's picture: the pipeline's poster, else its middle storyboard panel, else an anchor."""
+    """The unit's picture: the pipeline's poster, else the first POSTER_GLOBS that matches."""
     home = Path(home)
     for name in POSTERS:
         if (home / name).is_file():
             return home / name
-    for pattern in ("storyboard/shot_*.png", "storyboard/anchors/*.png"):
-        hits = sorted(home.glob(pattern)) if home.is_dir() else []
+    for pattern, how in POSTER_GLOBS if home.is_dir() else ():
+        hits = sorted(home.glob(pattern))
         if hits:
-            return hits[len(hits) // 2] if pattern.startswith("storyboard/shot") else hits[0]
+            return pick(hits, how)
     return None
 
 
@@ -278,10 +293,17 @@ def chips(row: dict) -> list[dict]:
     return gate_chips(views.verdict_strip(row.get("verdicts") or {}, views.gate_order(row["stage"])))
 
 
+GPU_STEPS = frozenset(sid for sid, gpu in timing_sum.STAGES.values() if sid and gpu)
+"""The episode steps that hold the GPU, from the clock's own map (timing_sum.STAGES):
+plan (remote LLMs), prompts and deliver are not GPU time (board review 2026-10-12)."""
+
+
 def event_rows(conn: sqlite3.Connection, since: str) -> list:
-    """The episode lane's step events since an ISO stamp, in write order."""
+    """The GPU-holding episode steps' events since an ISO stamp, in write order."""
+    marks = ",".join("?" * len(GPU_STEPS))
     return conn.execute("SELECT event_ts, step_id, event, run_id FROM events WHERE stage = 'episode'"
-                        " AND event_ts >= ? ORDER BY id", (since,)).fetchall()
+                        f" AND step_id IN ({marks}) AND event_ts >= ? ORDER BY id",
+                        (*sorted(GPU_STEPS), since)).fetchall()
 
 
 def live_runs(conn: sqlite3.Connection) -> set[str]:
@@ -318,8 +340,7 @@ def queue_eta(request) -> dict | None:
 def season(request, codex_id: str) -> list[dict]:
     """The book's episodes as wall tiles: unit, shown state, glyph, step, flags, poster."""
     with reading(request) as conn:
-        rows = [views.row_view(r, conn) for r in conn.execute(
-            "SELECT * FROM work_orders WHERE codex_id = ? AND stage = 'episode' ORDER BY sequence, unit", (codex_id,))]
+        rows = views.season_rows(conn, codex_id)
     return [{**r, "poster": face(request, r, 320)} for r in rows]
 
 
@@ -328,15 +349,18 @@ def book_posters(request, codex_id: str, n: int = 8) -> list[dict]:
     with reading(request) as conn:
         rows = [dict(r) for r in conn.execute(
             "SELECT codex_id, unit, home, state, flags FROM work_orders WHERE codex_id = ? AND stage = 'episode'"
-            " ORDER BY updated_at DESC, unit DESC LIMIT ?", (codex_id, n * 2))]
+            " ORDER BY COALESCE(finished_at, started_at, updated_at) DESC, unit DESC LIMIT ?", (codex_id, n * 2))]
     out = [{**r, "poster": face(request, r, 160)} for r in rows]
     return [r for r in out if r["poster"]][:n]
 
 
 def shelf_split(request, shelf: list[dict]) -> tuple[list[tuple[dict, list[dict]]], list[dict]]:
-    """(books making episodes with their mosaic, every other book), each in shelf order."""
+    """(books with episodes, each with its mosaic, every other book), each in shelf order.
+    A book is *making* episodes while one is not done (views.shelf's open_episodes)."""
     making, rest = [], []
     for b in shelf:
-        pics = book_posters(request, b["codex_id"]) if b.get("units") else []
-        (making.append((b, pics)) if pics else rest.append(b))
+        if b.get("episodes"):
+            making.append((b, book_posters(request, b["codex_id"])))
+        else:
+            rest.append(b)
     return making, rest

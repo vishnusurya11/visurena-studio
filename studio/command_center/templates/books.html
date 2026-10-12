@@ -13,17 +13,18 @@
 <div id="shelf-live" data-testid="shelf" hx-get="/books" hx-select="#shelf-live" hx-trigger="pulse:lanes from:body" data-v="{{ viz.fp(request, 'lanes') }}" hx-swap="morph:outerHTML">
 <div class="title-row">
   <h1>Books</h1>
-  <p class="sub"><span><b>{{ shelf | length }}</b> book{{ '' if shelf | length == 1 else 's' }}</span><span><b>{{ making | length }}</b> making episodes</span><span><b>{{ shelf | sum(attribute='running') }}</b> running</span></p>
+  <p class="sub"><span><b>{{ shelf | length }}</b> book{{ '' if shelf | length == 1 else 's' }}</span><span><b>{{ making | selectattr('0.open_episodes') | list | length }}</b> making episodes</span><span><b>{{ shelf | sum(attribute='running') }}</b> running</span></p>
 </div>
 {% if making %}
 <section aria-labelledby="making-h">
-  <div class="sh"><h2 id="making-h">Making episodes</h2><span class="sub">newest pictures first</span></div>
+  <div class="sh"><h2 id="making-h">Episodes</h2><span class="sub">newest pictures first</span></div>
   <div class="making">
   {% for b, pics in making %}
   <article class="panel mk" id="book-{{ b.codex_id }}">
     <div class="mosaic">{% for p in pics %}{% call tile(p.poster, '/d/episode/' ~ b.codex_id ~ '/' ~ p.unit, 'shelf-' ~ b.codex_id, p.unit, 160) %}<span class="eid">{{ p.unit }}</span>{% endcall %}{% endfor %}</div>
     <div class="mk-b">
-      <h2><a href="/b/{{ b.codex_id }}">{{ b.name }}</a></h2>
+      <h2><a href="/b/{{ b.codex_id }}" title="{{ b.codex_id }}">{{ b.name }}</a></h2>
+      <p class="sub">{% if b.open_episodes %}making episodes · {{ b.open_episodes }} not done{% else %}all {{ b.episodes }} episodes done{% endif %}</p>
       <div class="nums"><div><b>{{ b.units }}</b><span>units</span></div><div><b>{{ b.done }}</b><span>done</span></div>{% if b.running %}<div><b>{{ b.running }}</b><span>running</span></div>{% endif %}</div>
     </div>
   </article>
@@ -36,14 +37,14 @@
   {% if rest %}
   <ul class="shelf3">
   {% for b in rest %}
-  <li><a class="bk" href="/b/{{ b.codex_id }}" id="book-{{ b.codex_id }}" data-row>
+  <li><a class="bk" href="/b/{{ b.codex_id }}" id="book-{{ b.codex_id }}" title="{{ b.name }} · {{ b.codex_id }}" data-row>
     <span class="cover" aria-hidden="true">{{ viz.initials(b.name) }}</span>
-    <span><span class="bt">{{ b.name }}</span><span class="bm"><b>{{ b.units }}</b> units · <b>{{ b.done }}</b> done{% if b.running %} · <span class="run">{{ b.running }} running</span>{% endif %}</span><span class="bm mono">{{ b.codex_id }}</span></span>
+    <span><span class="bt">{{ b.name }}</span><span class="bm"><b>{{ b.units }}</b> units · <b>{{ b.done }}</b> done{% if b.running %} · <span class="run">{{ b.running }} running</span>{% endif %}</span></span>
   </a></li>
   {% endfor %}
   </ul>
   {% else %}
-  <p class="panel empty">Every book is making episodes. A new book lands here when its analysis starts.</p>
+  <p class="panel empty">Every book has episodes. A new book lands here when its analysis starts.</p>
   {% endif %}
 </section>
 </div>

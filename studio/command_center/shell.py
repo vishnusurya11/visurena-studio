@@ -268,8 +268,9 @@ def palette_index(conn: sqlite3.Connection, library: Path, departments: list[dic
                    unit_entries(rows, needs, names), action_entries(studio_hold(conn), flagged))
 
 
-def shell(conn: sqlite3.Connection, library: Path, path: str) -> dict:
-    """Everything the shell draws for one page at `path`."""
+def shell(conn: sqlite3.Connection, library: Path, path: str, extras: dict | None = None) -> dict:
+    """Everything the shell draws for one page at `path`; `extras` carries the engine
+    and the autopilot lines (app.shell_extras)."""
     running, names = views.floor(conn)["running"], views.book_names(conn)
     pins = [pin(library, r, names) for r in running]
     departments = department_items(views.lanes(conn))
@@ -279,4 +280,5 @@ def shell(conn: sqlite3.Connection, library: Path, path: str) -> dict:
             "queue": count(conn, "SELECT COUNT(*) FROM v_queue"), "departments": departments,
             "pins": pins, "gpu": gpu(pins, running), "hold": studio_hold(conn), "crumbs": crumbs(path, names),
             "key_rows": key_rows(), "aria": {k["keys"]: aria_keys(k["keys"]) for k in KEYS},
-            "chord": {href: " ".join(keycaps(key_for(href))) for href, *_ in PAGES}, "heartbeat": HEARTBEAT, "palette": palette_index(conn, library, departments)}
+            "chord": {href: " ".join(keycaps(key_for(href))) for href, *_ in PAGES}, "heartbeat": HEARTBEAT, "palette": palette_index(conn, library, departments),
+            "engine": (extras or {}).get("engine"), "autopilot": (extras or {}).get("autopilot") or []}

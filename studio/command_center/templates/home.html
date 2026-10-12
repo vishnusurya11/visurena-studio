@@ -60,7 +60,7 @@
 </section>
 
 <section class="panel sect" id="went" aria-labelledby="went-h">
-  <div class="panel-h"><h2 id="went-h">Where the GPU went</h2><span class="sub">last 7 days · episode step time from events</span></div>
+  <div class="panel-h"><h2 id="went-h">Where the GPU went</h2><span class="sub">last 7 days · wall time of the episode steps that use the GPU</span></div>
   <div class="panel-b went" id="went-b">
     <div class="chart">
       <p class="finding">{% if w.line %}<em>{{ w.line.split(' GPU-h')[0] }}</em> GPU-hours burned on steps that ended failed or deferred{% else %}No episode step ran in the last 7 days{% endif %}</p>
@@ -77,7 +77,7 @@
       {% if w.steps %}
       <ol>{% for s in w.steps %}<li id="burn-{{ s.step }}"><span class="s"><span>{{ s.step }}</span>{{ s.name }}</span><span class="track"><span class="bbar" style="width:{{ (100 * s.total / w.max_step) | round(1) if w.max_step else 0 }}%"><i style="width:{{ s.share }}%"></i></span></span><span class="v"><b>{{ '%.1f' | format(s.burn) }}</b> of {{ '%.1f' | format(s.total) }} h</span></li>{% endfor %}</ol>
       {% set s = w.steps[0] %}
-      <p class="lever"><b>{{ s.step }} {{ s.name }} is the lever:</b> {{ s.share }} % of its hours this week ended failed or deferred.</p>
+      <p class="lever"><b>{{ s.step }} {{ s.name }} loses the most:</b> {{ s.share }} % of its hours this week ended failed or deferred.</p>
       {% else %}<p class="empty flat">No step burned GPU time this week.</p>{% endif %}
     </div>
   </div>

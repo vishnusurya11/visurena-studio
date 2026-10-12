@@ -19,11 +19,12 @@
     <span class="pill">{{ icon('book-open') }}Book</span> <span class="mono muted">{{ book.codex_id }}</span>
     <h1 id="book-h">{{ book.name }}</h1>
     <div class="stats">
-      <div><b>{{ book.units | length }}</b><span>units</span></div>
+      <div title="one per department and unit, as /books counts them"><b>{{ book.rows_n }}</b><span>units</span></div>
       <div><b>{{ book.published | length }}</b><span>published</span></div>
       {% if needs %}<div><b class="need">{{ needs | length }}</b><span>need you</span></div>{% endif %}
       {% if running %}<div><b>{{ running | length }}</b><span>running · {{ running[0].unit }} {{ running[0].step_id }}</span></div>{% endif %}
       {% if book.gpu_seconds %}<div><b>{{ (book.gpu_seconds / 3600) | round(1) }}</b><span>GPU h</span></div>{% endif %}
+      {% if book.spend %}<div title="spend.jsonl: {{ book.spend.rows }} paid calls that never reached the usage ledger"><b>${{ '%.2f' | format(book.spend.usd) }}</b><span>book spend</span></div>{% endif %}
     </div>
     <div class="acts">{{ act.hold('book', book.codex_id) }}<a class="btn sm" href="/d/episode?book={{ book.codex_id }}">{{ icon('clapperboard') }}Episode department</a>
     {% for h in book.holds %}<span class="muted">{{ icon('pause') }} {{ h.scope }} hold: "{{ h.reason }}"</span> {{ act.lift(h.id) }}{% endfor %}</div>
@@ -47,7 +48,7 @@
   <li class="ep" id="ep-{{ book.codex_id }}-{{ e.unit }}" data-state="{{ e.shown }}">
     {% call tile(e.poster, href, 'season', e.unit, 320, '', 'no picture yet') %}<span class="eid">{{ e.unit }}</span>{% if book.published.get(e.unit) %}<span class="pub" title="published ({{ book.published[e.unit] }})">{{ icon('check') }}</span>{% endif %}{% endcall %}
     <div class="row2"><a href="{{ href }}">{{ e.unit }}{% if e.shown == 'running' and e.step_id %} · {{ e.step_id }} {{ e.step_name }}{% endif %}</a><span class="pill {{ e.shown }}">{{ e.shown }}</span></div>
-    {% if e.flags %}<span class="fl" title="{{ e.flags }} judge flags">⚑{{ e.flags }}</span>{% endif %}
+    {% if e.flags_open %}<span class="fl" title="{{ e.flags_open }} judge flags not yet looked at">⚑{{ e.flags_open }}</span>{% endif %}
   </li>
   {% endfor %}
   </ul>

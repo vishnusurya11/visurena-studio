@@ -17,9 +17,10 @@ from collections import Counter
 from datetime import datetime, timezone, tzinfo
 from pathlib import Path
 
-from studio import manifest
+from studio import backfill, manifest, tick, verdict_rows
 from studio.command_center import library_paths, viewer_model, views
 from studio.command_center import unit_parse as up
+from studio.youtube_publish import sha8
 
 PICTURES = {"episode": {"plan": "plan.json", "panels": "storyboard/shot_*.png", "panel_gate": "EYE_PANELS",
                         "dq": "storyboard/panel_dq.json", "takes": "takes/r2v/T*.mp4", "take_gate": "EYE_TAKES",
@@ -50,10 +51,11 @@ def jsonl(path: Path | None, limit_bytes: int = READ_BYTES) -> list[dict]:
 
 
 def unit_events(conn: sqlite3.Connection, codex: str, stage: str, unit: str) -> list[dict]:
-    """The unit's events in the order written -- by unit, not order_id (older rows lack it)."""
+    """The unit's events in the order written -- by unit, not order_id (older rows lack it);
+    a book-level runner writes `unit` NULL, which is the `book` unit (pulse.unit_row's rule)."""
     return [dict(r) for r in conn.execute(
         "SELECT event_ts, step_id, event, run_id, detail FROM events"
-        " WHERE codex_id = ? AND stage = ? AND unit = ? ORDER BY id", (codex, stage, unit))]
+        " WHERE codex_id = ? AND stage = ? AND COALESCE(unit, 'book') = ? ORDER BY id", (codex, stage, unit))]
 
 
 def unit_orders(conn: sqlite3.Connection, codex: str, stage: str, unit: str, n: int = 5) -> list[dict]:
@@ -113,12 +115,13 @@ def lease(row: dict, now: datetime) -> dict:
     return {"state": "ok" if until >= now else "stale", "until": until.strftime("%H:%M")}
 
 
-def head_band(row: dict, plan: dict | None, now: datetime) -> dict:
-    """Who the unit is and where it stands: plan title and question, lease, run, time."""
+def head_band(row: dict, plan: dict | None, now: datetime, last_event: str | None = None) -> dict:
+    """Who the unit is and where it stands: plan title and question, lease, run, time;
+    `moved` is its newest event (views.moved_at), not the tick's last upsert."""
     plan = plan if isinstance(plan, dict) else {}
     return {"title": str(plan.get("title") or ""), "question": up.clip(display_question(plan.get("question"))),
             "lease": lease(row, now), "run_short": _run_short(row),
-            "moved": views.ago(row.get("updated_at")), "gpu_h": views.gpu_hours(row.get("gpu_seconds")),
+            "moved": views.ago(views.moved_at(row, last_event)), "gpu_h": views.gpu_hours(row.get("gpu_seconds")),
             "started": day_hhmm(row.get("started_at")), "finished": day_hhmm(row.get("finished_at"))}
 
 
@@ -140,16 +143,24 @@ def chip_state(chip: dict, row: dict) -> dict:
     return {**chip, "state": state, "glyph": views.glyph(state), "css": views.colour_class(state)} if state else chip
 
 
+def wall_text(t: dict) -> str:
+    """A step's last window as the bar prints it: `1h42`, `1h42…` while open, or no end."""
+    if t.get("died"):
+        return "no end (run died)"
+    return span(t.get("last_wall_s")) + ("…" if t.get("open") else "")
+
+
 def step_band(chips: list[dict], row: dict, events: list[dict], timing: list[dict],
-              now: datetime, tz: tzinfo | None) -> list[dict]:
+              now: datetime, tz: tzinfo | None, live_run: str | None = None) -> list[dict]:
     """One segment per step: its chip, the last window's wall time, the ≈ script
     seconds, and the one-line reason a failed or deferred step left."""
-    times = {t["id"]: t for t in up.step_timing([{"id": c["step_id"]} for c in chips], events, timing, now, tz)}
+    times = {t["id"]: t for t in up.step_timing([{"id": c["step_id"]} for c in chips], events, timing, now, tz,
+                                                live_run)}
     out = []
     for c in (chip_state(c, row) for c in chips):
         t = times.get(c["step_id"], {})
         out.append({**c, "css": views.STEP_CSS.get(c["state"]) or c["css"], "runs": t.get("runs", 0),
-                    "wall": span(t.get("last_wall_s")) + ("…" if t.get("open") else ""),
+                    "wall": wall_text(t),
                     "script": span(t.get("total_s")), "reason": up.clip(c.get("detail")) if c["state"] in
                     ("failed", "deferred", "escalated") else "", "cur": c["step_id"] == row.get("step_id")})
     return out
@@ -187,6 +198,19 @@ def gate_block(chip: dict, doc, step: str) -> dict:
     signed = doc.get("signed_at") or doc.get("reviewed_at") or ""
     return {**chip, "step": step, "kinds": up.fault_kinds(doc), "signed": hhmm(signed),
             "shots": up.shot_faults(doc), "read": bool(doc)}
+
+
+CHEAP_STALE = ("PLAN", "LOOK")
+"""The signatures the page re-checks at render: small files (the plan, the pack).
+The pictures' and masters' hashes read megabytes and are the desk's (tick.verify)."""
+
+
+def moved_gates(book: Path | None, unit_name: str, chips: list[dict]) -> set[str]:
+    """The cheap gates whose signed sha8 no longer names the file on disk (02 #10)."""
+    signed = {c["gate"]: {"sha8": c["sha8"]} for c in chips if c["gate"] in CHEAP_STALE and c.get("sha8")}
+    if not book or not signed:
+        return set()
+    return set(verdict_rows.stale_gates(Path(book), unit_name, signed))
 
 
 def gate_band(library: Path, codex: str, stage: str, chips: list[dict]) -> list[dict]:
@@ -301,20 +325,53 @@ def qc_line(qc: dict) -> dict:
             "heard": f"{sum(1 for l in lines if l.get('passed'))}/{len(lines)}"}
 
 
+_SHA8: dict[tuple, str] = {}
+
+
+def file_sha8(path: Path) -> str:
+    """A file's sha8, memoised on (path, size, mtime_ns): a master is hashed once per process."""
+    st = Path(path).stat()
+    key = (str(path), st.st_size, st.st_mtime_ns)
+    if key not in _SHA8:
+        _SHA8[key] = sha8(Path(path))
+    return _SHA8[key]
+
+
+def published_master(book: Path | None, codex: str, unit_name: str, qc: dict) -> dict | None:
+    """What the channel has: the file whose bytes are the live upload's sha8 (the QC'd
+    master when its own sha8 says so, else hashed), the video link and its privacy;
+    None for a unit with no live upload.  `rel` is None when no file on disk matches."""
+    upload = backfill.live_upload(book, unit_name) if book else None
+    if upload is None:
+        return None
+    rel = qc.get("master") if qc.get("sha8") == upload["sha8"] and qc.get("master") else None
+    rel = rel if rel and (Path(book) / rel).is_file() else tick.uploaded_file(book, unit_name, upload["sha8"], file_sha8)
+    return {"rel": rel, "sha8": upload["sha8"], "privacy": upload["privacy"],
+            "youtube": f"https://youtu.be/{upload['video_id']}"}
+
+
+def master_rel(book: Path | None, qc: dict, thumbs: list[dict], live: dict | None) -> str | None:
+    """The master to play: the published one, else the QC'd one, else the newest iteration."""
+    if live and live["rel"]:
+        return live["rel"]
+    rel = qc.get("master") if qc.get("master") and book and (Path(book) / qc["master"]).is_file() else None
+    return rel or next((t["rel"] for t in thumbs if t["kind"] == "master"), None)
+
+
 def master_band(library: Path, codex: str, stage: str, book: Path | None, home: Path | None,
-                thumbs: list[dict]) -> dict | None:
-    """The master to play (the QC'd one, else the newest iteration), its QC, the iterations."""
+                thumbs: list[dict], unit_name: str = "") -> dict | None:
+    """The master to play (master_rel), its QC, the iterations, and the channel's copy."""
     cfg = PICTURES.get(stage) or {}
     qc = read_doc(library, codex, _rel(book, home, cfg.get("qc", ""))) if cfg else None
     qc = qc if isinstance(qc, dict) else {}
-    rel = qc.get("master") if qc.get("master") and book and (Path(book) / qc["master"]).is_file() else None
-    rel = rel or next((t["rel"] for t in thumbs if t["kind"] == "master"), None)
+    live = published_master(book, codex, unit_name, qc) if cfg and unit_name else None
+    rel = master_rel(book, qc, thumbs, live)
     if not rel:
         return None
     iters = [r for r in book_files(book, home, cfg.get("masters")) if r != rel]
     return {"rel": rel, "url": library_paths.artefact_url(codex, rel), "qc": qc_line(qc) if qc else None,
             "iterations": [{"name": Path(r).stem.removeprefix("master_"), "url": library_paths.artefact_url(codex, r)}
-                           for r in iters],
+                           for r in iters], "live": live, "qc_is_played": rel == qc.get("master"),
             "published": _rel_if(book, home, cfg.get("published", "")) if cfg else None}
 
 
@@ -623,11 +680,13 @@ def bands(conn: sqlite3.Connection, library: Path, logs: Path, base: dict, codex
     plan = read_doc(library, codex, _rel(book, home, (PICTURES.get(stage) or {}).get("plan", "plan.json")))
     plan = plan if isinstance(plan, dict) else {}
     rows = up.passes(events, learnings, base["timing"], r["run_id"] if base["running"] else None, now, tz)
-    gates = [{**g, "state": gate_state(g)} for g in gate_band(library, codex, stage, base["verdicts"])]
-    steps = step_band(base["steps"], r, events, base["timing"], now, tz)
+    moved = moved_gates(book, r["unit"], base["verdicts"])
+    gates = [{**g, "state": "stale" if g["gate"] in moved else gate_state(g)}
+             for g in gate_band(library, codex, stage, base["verdicts"])]
+    steps = step_band(base["steps"], r, events, base["timing"], now, tz, r["run_id"] if base["running"] else None)
     pics = media_band(codex, book, home, r["home"],
                       pictures_band(library, codex, stage, book, home, plan, gates, steps))
-    return {"head": {**head_band(r, plan, now),
+    return {"head": {**head_band(r, plan, now, events[-1]["event_ts"] if events else None),
                      "latest": latest_master(home)}, "bar": steps,
             "health": health_band(rows, learnings, r["shown"] in ("done", "flagged")),
             "gates": gates, "pictures": pics,
@@ -654,7 +713,7 @@ def media_band(codex: str, book: Path | None, home: Path | None, home_rel: str, 
 def screen_band(library: Path, codex: str, stage: str, book: Path | None, home: Path | None,
                 unit_name: str, thumbs: list[dict]) -> dict | None:
     """The master band plus what the screening room draws: poster, QC summary, unit-relative path."""
-    m = master_band(library, codex, stage, book, home, thumbs)
+    m = master_band(library, codex, stage, book, home, thumbs, unit_name)
     if m is None:
         return None
     qc = read_doc(library, codex, _rel(book, home, (PICTURES.get(stage) or {}).get("qc", ""))) if home else None

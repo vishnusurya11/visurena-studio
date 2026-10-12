@@ -40,7 +40,10 @@
 <section class="panel idle-card" aria-label="On the GPU">
   <span class="pill">{{ icon('pause') }}Idle</span>
   <h2>Nothing is running</h2>
-  <p>{% if floor.next %}The GPU waits for a runner; the next unit in line is <a href="/d/{{ floor.next[0].stage }}/{{ floor.next[0].codex_id }}/{{ floor.next[0].unit }}">{{ floor.next[0].stage }} · {{ floor.next[0].unit }}</a>.{% else %}The queue is empty. Queue a unit from its department page to start the GPU.{% endif %}</p>
+  {% set ex = extras if extras is defined and extras else (shell if shell is defined and shell else {}) %}
+  {% if ex.engine and ex.engine.busy %}<p class="engine-line" data-testid="engine-line">{{ icon('cpu') }} The GPU is busy outside the runner: {{ ex.engine.who or 'a ComfyUI prompt' }}{% if ex.engine.pending %} · {{ ex.engine.pending }} waiting{% endif %}.</p>{% endif %}
+  <p>{% if floor.next %}No runner polls the queue: a run starts when one is launched. First in line: <a href="/d/{{ floor.next[0].stage }}/{{ floor.next[0].codex_id }}/{{ floor.next[0].unit }}">{{ floor.next[0].stage }} · {{ floor.next[0].unit }}</a>{% if books is defined and books %} ({{ books.get(floor.next[0].codex_id, floor.next[0].codex_id) }}){% endif %}.{% else %}The queue is empty. Queue a unit from its department page to start the GPU.{% endif %}</p>
+  {% for a in ex.autopilot or [] %}<p class="autopilot-line" data-testid="autopilot-line">Autopilot · {{ a.book }} · <b>{{ a.state }}</b>{% if a.why %}: {{ a.why }}{% endif %}{% if a.age %} · checked {{ a.age }} ago{% endif %}</p>{% endfor %}
 </section>
 {% endif %}
 </div>

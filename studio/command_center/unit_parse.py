@@ -422,16 +422,25 @@ def panel_shot(path, plan: dict) -> dict | None:
 # --- timing per step ---
 
 
-def step_windows(events: list[dict], now: datetime | None = None) -> list[tuple]:
-    """(step_id, start, end, open) per `started` event; it ends at the run's next event, else now."""
+def _window(step_id, start: datetime, nxt: datetime | None, live: bool, now: datetime) -> tuple:
+    """(step_id, start, end, open, died): a closed window ends at the run's next event; an
+    unpaired start is open to now only in the live run, else its run died and it has no end."""
+    if nxt:
+        return (step_id, start, nxt, False, False)
+    return (step_id, start, now, True, False) if live else (step_id, start, start, False, True)
+
+
+def step_windows(events: list[dict], now: datetime | None = None, live_run: str | None = None) -> list[tuple]:
+    """One window per `started` event (see _window); `live_run` is the run working now, if any
+    (board review 2026-10-12: a dead run's start read `352h25…` days later)."""
     now, out = _now(now), []
-    for es in group_by_run(events).values():
+    for rid, es in group_by_run(events).items():
         acted = [e for e in es if e.get("event") != "skipped"]
         for i, e in enumerate(acted):
             start = parse_ts(e.get("event_ts")) if e.get("event") == "started" else None
             if start:
                 nxt = parse_ts(acted[i + 1].get("event_ts")) if i + 1 < len(acted) else None
-                out.append((e.get("step_id"), start, nxt or now, nxt is None))
+                out.append(_window(e.get("step_id"), start, nxt, bool(live_run) and rid == live_run, now))
     return out
 
 
@@ -445,13 +454,15 @@ def window_of(wins: list[tuple], ts: datetime | None, pad: float = 1.0) -> str |
 
 
 def step_timing(steps: list[dict], events: list[dict], timing: list[dict],
-                now: datetime | None = None, tz: tzinfo | None = None) -> list[dict]:
-    """Per registry step: runs = its `started` events, last wall seconds, script seconds ≈."""
-    wins = step_windows(events, now)
-    per: dict = defaultdict(lambda: {"runs": 0, "total_s": 0.0, "last_wall_s": 0.0, "open": False, "scripts": Counter()})
-    for sid, a, b, is_open in wins:
+                now: datetime | None = None, tz: tzinfo | None = None, live_run: str | None = None) -> list[dict]:
+    """Per registry step: runs = its `started` events, last wall seconds, script seconds ≈,
+    and whether its last window is open (the live run) or died without an end."""
+    wins = step_windows(events, now, live_run)
+    per: dict = defaultdict(lambda: {"runs": 0, "total_s": 0.0, "last_wall_s": 0.0, "open": False, "died": False,
+                                     "scripts": Counter()})
+    for sid, a, b, is_open, died in wins:
         p = per[sid]
-        p.update(runs=p["runs"] + 1, last_wall_s=(b - a).total_seconds(), open=is_open)
+        p.update(runs=p["runs"] + 1, last_wall_s=(b - a).total_seconds(), open=is_open, died=died)
     for row in timing:
         sid = window_of(wins, local_to_utc(row.get("started"), tz) if row.get("started") else None)
         if sid:

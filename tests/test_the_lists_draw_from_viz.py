@@ -106,11 +106,26 @@ def test_steps_rank_by_hours_burned_with_their_share():
     assert [(s["step"], s["burn"], s["total"], s["share"]) for s in out] == [("09", 2.0, 3.0, 67), ("02", 1.0, 1.0, 100)]
 
 
-def test_the_burn_line_names_the_lever():
+def test_the_burn_line_names_the_step_that_loses_the_most_in_plain_words():
+    """Board review 2026-10-12 (03 A17): "lever" was jargon."""
     days = [{"ok": 41.0, "burn": 34.0, "live": 0.0}]
     steps = [{"step": "09", "name": "shoot", "burn": 21.0, "total": 38.1, "share": 55}]
-    assert viz.burn_line(days, steps) == "34 of 75 GPU-h burned · lever: 09 shoot 55 %"
+    line = viz.burn_line(days, steps)
+    assert line == "34 of 75 GPU-h burned · most lost: 09 shoot (55 % of its hours failed)"
+    assert "lever" not in line
     assert viz.burn_line([{"ok": 0.0, "burn": 0.0, "live": 0.0}], []) == ""
+
+
+def test_the_gpu_chart_counts_only_the_steps_that_hold_the_gpu(tmp_path):
+    """Board review 2026-10-12 (02 #7): 02 plan (remote LLMs) was named the GPU's lever."""
+    from studio import db
+    conn = db.get_connection(tmp_path / "t.db")
+    db.init_db(conn)
+    db.insert_codex(conn, "A Book", codex_id="20990101000000")
+    for step in ("02", "09"):
+        db.add_event(conn, "20990101000000", "episode", step, "started", run_id="r", unit="ep01")
+    assert {r["step_id"] for r in viz.event_rows(conn, "2000-01-01")} == {"09"}
+    assert "09" in viz.GPU_STEPS and not {"01", "02", "05", "06", "12", "13"} & viz.GPU_STEPS
 
 
 # --- the column chart ---

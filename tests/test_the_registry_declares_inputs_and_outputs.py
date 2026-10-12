@@ -40,10 +40,11 @@ def test_a_book_level_file_is_declared_plain():
     assert "refs/refs.json" in registry.inputs_of("episode", "01", unit="ep04")
 
 
-def test_a_stage_written_before_the_keys_declares_nothing():
+def test_a_stage_written_before_the_keys_declares_only_its_deliverable():
+    """Board review 2026-10-12: analysis, screenplay and trailer name a deliverable."""
     assert registry.inputs_of("analysis", "01") == []
     assert registry.outputs_of("analysis", "06") == []
-    assert registry.deliverable_of("analysis") is None
+    assert registry.deliverable_of("analysis") == "analysis/qc_report.json"
 
 
 def test_an_unknown_step_is_refused_by_name():

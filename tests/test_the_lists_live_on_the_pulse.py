@@ -265,10 +265,12 @@ def test_the_season_is_the_books_episodes_with_posters(app):
     assert ep04["poster"]["rel"].endswith("shot_01.png") and {e["unit"] for e in season} >= {"ep03", "ep05"}
 
 
-def test_the_shelf_splits_books_with_pictures_from_the_rest(app):
-    shelf = [{"codex_id": CODEX, "units": 6}, {"codex_id": "20260901000002", "units": 0}]
+def test_the_shelf_splits_books_with_episodes_from_the_rest(app):
+    """Board review 2026-10-12 (02 #12): a book with episodes leads, pictures or not."""
+    shelf = [{"codex_id": CODEX, "units": 6, "episodes": 5}, {"codex_id": "20260901000002", "units": 2, "episodes": 0}]
     making, rest = viz.shelf_split(request_for(app), shelf)
     assert [b["codex_id"] for b, _ in making] == [CODEX] and [b["codex_id"] for b in rest] == ["20260901000002"]
+    assert making[0][1]                                  # its mosaic
 
 
 def test_the_lane_eta_is_none_or_the_views_answer(app):

@@ -293,10 +293,21 @@ def test_step_timing_groups_by_window():
     timing = [{"stage": "grids", "started": "2026-09-26T21:05:00", "seconds": 300.0},
               {"stage": "panels", "started": "2026-09-26T21:20:00", "seconds": 40.0}]
     got = {s["id"]: s for s in up.step_timing([{"id": "07"}, {"id": "08"}, {"id": "09"}], events, timing,
-                                                now=NOW, tz=PDT)}
+                                                now=NOW, tz=PDT, live_run="r")}
     assert got["07"]["runs"] == 1 and got["07"]["total_s"] == 300.0 and got["07"]["last_wall_s"] == 600.0
     assert got["08"]["scripts"] == {"panels": 1} and got["08"]["open"] is True
     assert got["09"]["runs"] == 0 and got["09"]["total_s"] == 0.0
+
+
+def test_a_dead_runs_unpaired_start_is_not_an_open_window():
+    """Board review 2026-10-12 (02 #8): WotW ep13 showed `02 plan 352h25…` -- a run that
+    died after `started` kept its window open until now.  Only the live run's is open."""
+    events = [{"event_ts": "2026-09-27T04:00:00Z", "step_id": "02", "event": "started", "run_id": "dead", "detail": None},
+              {"event_ts": "2026-09-28T04:00:00Z", "step_id": "02", "event": "skipped", "run_id": "next", "detail": None}]
+    got = up.step_timing([{"id": "02"}], events, [], now=NOW, tz=PDT, live_run=None)[0]
+    assert got["open"] is False and got["died"] is True and got["last_wall_s"] == 0.0
+    live = up.step_timing([{"id": "02"}], events, [], now=NOW, tz=PDT, live_run="dead")[0]
+    assert live["open"] is True and live["died"] is False and live["last_wall_s"] > 0
 
 
 def test_a_row_outside_every_window_is_counted_unplaced():
@@ -334,3 +345,14 @@ def test_dedupe_marks_still_and_gone():
     got = up.dedupe_refusals([a, {"kind": "line"}, b])
     marks = {(i["code"], i["mark"]) for i in got[2]["items"]}
     assert marks == {("G-SIZE", "still ×2"), ("M2", "new")} and got[2]["gone"] == [{"code": "G-AIM", "where": "shot 2"}]
+
+
+def test_the_step_bar_says_a_dead_run_has_no_end():
+    from studio.command_center import unit_view
+    events = [{"event_ts": "2026-09-27T04:00:00Z", "step_id": "02", "event": "started", "run_id": "dead", "detail": None}]
+    chip = {"step_id": "02", "state": "running", "css": "blue", "run_id": "dead", "ended_at": None, "detail": None}
+    row = {"step_id": "02", "state": "done"}
+    seg = unit_view.step_band([chip], row, events, [], NOW, PDT)[0]
+    assert seg["wall"] == "no end (run died)"
+    live = unit_view.step_band([chip], row, events, [], NOW, PDT, live_run="dead")[0]
+    assert live["wall"].endswith("…")

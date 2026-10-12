@@ -35,8 +35,8 @@ import sqlite3
 from collections import Counter
 from pathlib import Path
 
-from studio import (approval, backfill, db, episode_home, manifest, registry, timing_sum, verdict_rows,
-                    work_orders)
+from studio import (approval, backfill, db, episode_home, ledger_settle, manifest, registry, timing_sum,
+                    verdict_rows, work_orders)
 from studio.youtube_publish import sha8
 
 LOG = logging.getLogger("studio.tick")
@@ -197,14 +197,56 @@ def settle_from_ledger(conn: sqlite3.Connection, codex_id: str, stage: str, unit
     return True
 
 
-def uploaded_file(book_dir: Path, unit: str, digest: str) -> str | None:
+def settle_from_events(conn: sqlite3.Connection, codex_id: str, stage: str, unit: str) -> str:
+    """A blocked or queued book-level row is what the events ledger says
+    (ledger_settle.reading): `settled` when it wrote done or failed, `cursor` when
+    it only moved the step, '' when the ledger is silent or the row is not the tick's."""
+    row = db.work_order(conn, codex_id, stage, unit)
+    if row is None or row["state"] not in QUEUEABLE or unit != book_unit(stage):
+        return ""
+    said = ledger_settle.reading(ledger_settle.step_events(conn, codex_id, stage, unit),
+                                 registry.steps(stage)[-1]["id"], stage)
+    if said is None:
+        return ""
+    if said["state"] is None:
+        if row["step_id"] != said["step_id"]:
+            db.upsert_work_order(conn, codex_id, stage, unit, step_id=said["step_id"])
+        return "cursor"
+    db.upsert_work_order(conn, codex_id, stage, unit, state=said["state"], step_id=said["step_id"],
+                         flags=said["flags"], note=said["note"], blocked_on=None,
+                         finished_at=said["finished_at"] or row["finished_at"])
+    return "settled"
+
+
+def published_consumers(book_dir: Path) -> int:
+    """How many of the book's episodes are on the channel (backfill.publish_row)."""
+    return sum(1 for u in episode_units(book_dir) if backfill.publish_row(book_dir, "", u) is not None)
+
+
+def settle_consumed(conn: sqlite3.Connection, codex_id: str, stage: str, unit: str, book_dir: Path) -> bool:
+    """A blocked or queued book-level row the episode requires is done once an
+    episode built on it is published: work from before the runners (Scarlet's
+    legacy refs, consumed by 14 published episodes) was made, whatever its layout."""
+    row = db.work_order(conn, codex_id, stage, unit)
+    wanted = {r.split("/")[0] for r in registry.requires_of(PUBLISHED_STAGE)}
+    if row is None or row["state"] not in QUEUEABLE or unit != book_unit(stage) or stage not in wanted:
+        return False
+    n = published_consumers(book_dir)
+    if not n:
+        return False
+    db.upsert_work_order(conn, codex_id, stage, unit, state="done", blocked_on=None, finished_at=_now(),
+                         note=f"legacy: consumed by {n} published episode{'s' if n != 1 else ''}")
+    return True
+
+
+def uploaded_file(book_dir: Path, unit: str, digest: str, hasher=sha8) -> str | None:
     """The unit's master the upload's sha8 names, book-relative posix: the
     newest cut/*.mp4 (then any mp4 under the home) whose bytes hash to it;
-    None when no file on disk does."""
+    None when no file on disk does.  `hasher` lets the board memoise."""
     home = Path(book_dir) / manifest.home_of(PUBLISHED_STAGE, unit)
     cuts = sorted((home / "cut").glob("*.mp4"), key=lambda p: p.stat().st_mtime, reverse=True)
     for path in cuts + sorted(home.glob("*.mp4")):
-        if sha8(path) == digest:
+        if hasher(path) == digest:
             return path.relative_to(book_dir).as_posix()
     return None
 
@@ -321,12 +363,16 @@ def verify(conn: sqlite3.Connection, codex_id: str, stage: str, unit: str, book_
 
 
 def tick_unit(conn: sqlite3.Connection, codex_id: str, stage: str, unit: str, book_dir: Path) -> Counter:
-    """One row through the desk: settle (disk, publish record, ledger), clear a
-    done row's wait, release, promote, park, cost."""
+    """One row through the desk: settle (the events ledger first; the disk only where
+    the ledger is silent; the publish record; the codex column; consumption), clear
+    a done row's wait, release, promote, park, cost."""
     before = db.work_order(conn, codex_id, stage, unit)["state"]
-    settled = (settle_skipped(conn, codex_id, stage, unit, book_dir)
+    ledger = settle_from_events(conn, codex_id, stage, unit)
+    settled = (ledger == "settled"
+               or (not ledger and settle_skipped(conn, codex_id, stage, unit, book_dir))
                or settle_published(conn, codex_id, stage, unit, book_dir)
-               or settle_from_ledger(conn, codex_id, stage, unit))
+               or settle_from_ledger(conn, codex_id, stage, unit)
+               or (not ledger and settle_consumed(conn, codex_id, stage, unit, book_dir)))
     clear_done_wait(conn, codex_id, stage, unit)
     release_held(conn, codex_id, stage, unit)
     promote(conn, codex_id, stage, unit, book_dir)

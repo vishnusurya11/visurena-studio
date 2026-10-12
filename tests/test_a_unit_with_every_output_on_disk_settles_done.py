@@ -76,9 +76,10 @@ def test_a_row_in_any_other_state_is_not_settled(conn, book, state):
     assert not tick.settle_skipped(conn, CODEX, "refs", "other", book)
 
 
-def test_a_stage_that_declares_no_deliverable_never_settles_from_disk(conn, book):
+def test_a_stage_whose_deliverable_is_not_on_disk_never_settles_from_disk(conn, book):
+    """Every stage declares one since 2026-10-12 (analysis: its qc_report.json)."""
     tick.materialize(conn, CODEX, "analysis", ["book"])
-    assert registry.deliverable_of("analysis") is None
+    assert registry.deliverable_of("analysis") == "analysis/qc_report.json"
     assert not tick.settle_skipped(conn, CODEX, "analysis", "book", book)
     assert _row(conn, "analysis", "book")["state"] == "blocked"
 

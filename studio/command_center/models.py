@@ -154,6 +154,21 @@ class Hold(BaseModel):
     reason: str
 
 
+class Engine(BaseModel):
+    busy: bool                       # ComfyUI runs a prompt (comfy_tap), whoever queued it
+    running: int
+    pending: int
+    who: str = ""                    # `refs/looks_table.py · Jekyll` from the process table
+
+
+class AutopilotLine(BaseModel):
+    codex: str
+    book: str
+    state: str                       # paused, complete, running, parked, ...
+    why: str = ""
+    age: str = ""
+
+
 class Shell(BaseModel):
     needs: int                       # views.inbox_count(): the one "needs you" number
     queue: int
@@ -161,6 +176,8 @@ class Shell(BaseModel):
     pins: list[Pin]
     gpu: Gpu | None = None
     hold: Hold | None = None
+    engine: Engine | None = None     # None while ComfyUI is down (board review 2026-10-12)
+    autopilot: list[AutopilotLine] = []
 
 
 class Event(BaseModel):
