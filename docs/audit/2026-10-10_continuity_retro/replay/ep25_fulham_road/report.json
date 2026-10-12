@@ -1,0 +1,55 @@
+{
+ "looks": {
+  "unnamed_first_person_narrator": "ragged_greyed"
+ },
+ "look_verdicts": {
+  "unnamed_first_person_narrator/ragged_greyed": {
+   "seed": 4165438081,
+   "judge": "look_state",
+   "version": "1",
+   "passed": false,
+   "faults": [
+    {
+     "kind": "look_facial_hair",
+     "where": "D:/Projects/KingdomOfViSuReNa/alpha/visurena_studio/docs/audit/2026-10-10_continuity_retro/replay/ep25_fulham_road/looks/unnamed_first_person_narrator/ragged_greyed.png",
+     "evidence": {
+      "want": "beard",
+      "seen": "none"
+     },
+     "severity": "high",
+     "note": ""
+    },
+    {
+     "kind": "look_dirt",
+     "where": "D:/Projects/KingdomOfViSuReNa/alpha/visurena_studio/docs/audit/2026-10-10_continuity_retro/replay/ep25_fulham_road/looks/unnamed_first_person_narrator/ragged_greyed.png",
+     "evidence": {
+      "want": "muddy",
+      "seen": "dusty"
+     },
+     "severity": "advisory",
+     "note": ""
+    }
+   ],
+   "confidence": 1.0,
+   "reads": 1,
+   "terminal": "keep_best",
+   "signed_at": ""
+  }
+ },
+ "unnamed_first_person_narrator": {
+  "replayed": {
+   "shown": 0,
+   "of": 3,
+   "share": 0.0,
+   "passed": false,
+   "unread": 0
+  },
+  "shipped": {
+   "shown": 0,
+   "of": 3,
+   "share": 0.0,
+   "passed": false,
+   "unread": 0
+  }
+ }
+}

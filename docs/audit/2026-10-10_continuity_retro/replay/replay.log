@@ -1,0 +1,49 @@
+Traceback (most recent call last):
+  File "D:\Projects\KingdomOfViSuReNa\alpha\visurena_studio\scripts\refs\look_replay.py", line 177, in <module>
+    raise SystemExit(main(plain[0], episode_arg(sys.argv), plain[2], int(plain[3]), int(plain[4]), only or None, out))
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\Projects\KingdomOfViSuReNa\alpha\visurena_studio\scripts\refs\look_replay.py", line 153, in main
+    verdicts = draw_looks(book, home, table, looks)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\Projects\KingdomOfViSuReNa\alpha\visurena_studio\scripts\refs\look_replay.py", line 104, in draw_looks
+    seed, verdict = looks_step.climb(book, who, look, card, looks_step.comfy_draws(book),
+                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\Projects\KingdomOfViSuReNa\alpha\visurena_studio\scripts\refs\looks.py", line 151, in climb
+    verdict = judge(path, card.looks[look_id])
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\Projects\KingdomOfViSuReNa\alpha\visurena_studio\scripts\refs\looks.py", line 213, in <lambda>
+    where=episode_home.relative(book, path), face_change=look.face_change)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\Projects\KingdomOfViSuReNa\alpha\visurena_studio\studio\episode_home.py", line 273, in relative
+    return Path(path).resolve().relative_to(Path(book).resolve()).as_posix()
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\vishn\AppData\Roaming\uv\python\cpython-3.12.9-windows-x86_64-none\Lib\pathlib.py", line 682, in relative_to
+    raise ValueError(f"{str(self)!r} is not in the subpath of {str(other)!r}")
+ValueError: 'D:\\Projects\\KingdomOfViSuReNa\\alpha\\visurena_studio\\docs\\audit\\2026-10-10_continuity_retro\\replay\\ep25_fulham_road\\looks\\unnamed_first_person_narrator\\ragged_greyed.png' is not in the subpath of 'D:\\Projects\\KingdomOfViSuReNa\\alpha\\visurena_studio\\library\\20260827135508_the-war-of-the-worlds'
+== ep25 exit 1
+Traceback (most recent call last):
+  File "D:\Projects\KingdomOfViSuReNa\alpha\visurena_studio\scripts\refs\look_replay.py", line 177, in <module>
+    raise SystemExit(main(plain[0], episode_arg(sys.argv), plain[2], int(plain[3]), int(plain[4]), only or None, out))
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\Projects\KingdomOfViSuReNa\alpha\visurena_studio\scripts\refs\look_replay.py", line 153, in main
+    verdicts = draw_looks(book, home, table, looks)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\Projects\KingdomOfViSuReNa\alpha\visurena_studio\scripts\refs\look_replay.py", line 104, in draw_looks
+    seed, verdict = looks_step.climb(book, who, look, card, looks_step.comfy_draws(book),
+                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\Projects\KingdomOfViSuReNa\alpha\visurena_studio\scripts\refs\looks.py", line 151, in climb
+    verdict = judge(path, card.looks[look_id])
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\Projects\KingdomOfViSuReNa\alpha\visurena_studio\scripts\refs\looks.py", line 213, in <lambda>
+    where=episode_home.relative(book, path), face_change=look.face_change)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\Projects\KingdomOfViSuReNa\alpha\visurena_studio\studio\episode_home.py", line 273, in relative
+    return Path(path).resolve().relative_to(Path(book).resolve()).as_posix()
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\vishn\AppData\Roaming\uv\python\cpython-3.12.9-windows-x86_64-none\Lib\pathlib.py", line 682, in relative_to
+    raise ValueError(f"{str(self)!r} is not in the subpath of {str(other)!r}")
+ValueError: 'D:\\Projects\\KingdomOfViSuReNa\\alpha\\visurena_studio\\docs\\audit\\2026-10-10_continuity_retro\\replay\\ep27_study_table\\looks\\unnamed_first_person_narrator\\epilogue_home.png' is not in the subpath of 'D:\\Projects\\KingdomOfViSuReNa\\alpha\\visurena_studio\\library\\20260827135508_the-war-of-the-worlds'
+== ep27 exit 1
+  ep26_villa_abandoned: docs\audit\2026-10-10_continuity_retro\replay\house\ep26_villa_abandoned.png
+  ep27_study_reverse: docs\audit\2026-10-10_continuity_retro\replay\house\ep27_study_reverse.png
+== house exit 0
