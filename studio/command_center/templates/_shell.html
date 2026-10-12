@@ -28,7 +28,7 @@
 <div class="sb-sec" data-testid="{{ testid }}">
   <div class="sb-h">Departments</div>
   {% for d in shell.departments %}
-  <a class="sb-item dept" href="/d/{{ d.stage }}" data-testid="dept-{{ d.stage }}"{{ cur(shell.at == 'd:' ~ d.stage) }} data-dept="{{ d.stage }}" data-total="{{ d.total }}"{% if d.lead %} data-dot="{{ d.lead }}"{% endif %} aria-label="{{ d.label }}" title="{{ d.label }} · {{ d.total }} units">{{ icon(d.icon) }}<span class="lbl">{{ d.stage }}</span><span class="sb-dots" aria-hidden="true">{% for key, n, words in d.dots %}<i class="{{ key }}" title="{{ words }}">{% if key != 'done' %}{{ n }}{% endif %}</i>{% endfor %}</span><span class="n" aria-hidden="true" data-testid="dept-count">{{ d.total }}</span></a>
+  <a class="sb-item dept" href="/d/{{ d.stage }}" data-testid="dept-{{ d.stage }}"{{ cur(shell.at == 'd:' ~ d.stage) }} data-dept="{{ d.stage }}" data-total="{{ d.total }}"{% if d.lead %} data-dot="{{ d.lead }}"{% endif %} aria-label="{{ d.label }}" title="{{ d.label }}{% if d.dots %} · {{ d.total }} units{% endif %}">{{ icon(d.icon) }}<span class="lbl">{{ d.stage }}</span><span class="sb-dots" aria-hidden="true">{% for key, n, words in d.dots %}<i class="{{ key }}" title="{{ words }}">{% if key != 'done' %}{{ n }}{% endif %}</i>{% endfor %}</span><span class="n" aria-hidden="true" data-testid="dept-count">{{ d.total }}</span></a>
   {% endfor %}
 </div>
 {%- endmacro %}

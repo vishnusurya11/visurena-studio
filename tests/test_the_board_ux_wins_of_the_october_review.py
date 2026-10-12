@@ -138,3 +138,12 @@ def test_a20_the_title_reaches_the_rows_the_wall_and_the_palette(board):
 def test_a23_the_architecture_page_is_on_the_studio_palette():
     text = (REPO / "architecture/index.html").read_text(encoding="utf-8")
     assert "#f6f3ec" not in text and "#181613" not in text and "#0f1012" in text
+
+
+# 02 S10: a department's hover title says its unit count once
+
+
+def test_s10_the_sidebar_title_says_the_count_once(board):
+    c, _ = board
+    html = c.get("/").text
+    assert 'title="analysis, 0 units · 0 units"' not in html and 'title="analysis, 0 units"' in html
