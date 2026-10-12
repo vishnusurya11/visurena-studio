@@ -32,5 +32,5 @@ def test_a_new_face_takes_the_display_and_gender_it_is_given(tmp_path):
 def test_a_row_outside_the_cast_is_kept_as_it_was(tmp_path):
     card(tmp_path, "ogilvy", {"2": "dawn"}, {"dawn": "A tweed suit."})
     wife = {"entity_id": "narrators_wife", "kind": "character", "display": "the Wife", "physical": "A woman."}
-    rows = pack_refs.rows_for(tmp_path, 2, ["ogilvy"], [wife])
+    rows = pack_refs.rows_for(tmp_path, 2, ["ogilvy"], [wife], {"ogilvy": ("Ogilvy", "male")})
     assert wife in rows and len(rows) == 2

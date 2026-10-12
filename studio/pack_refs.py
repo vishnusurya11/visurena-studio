@@ -344,19 +344,41 @@ def refuse_dirty_rows(rows: list[dict]) -> None:
                          "scripts/episode/migrate_row_words.py):\n  " + "\n  ".join(found))
 
 
+KEPT = ("display", "gender", "pronouns", "marks", "aka")
+"""Identity fields a rebuild cannot know (the dossier and the look table carry
+none): kept from the old row, never dropped -- Jekyll ep01's eight rows were
+rebuilt bare and died at G-TAKELINT after a two-hour plan (2026-10-12)."""
+
+
+def kept_identity(old: dict, given: tuple[str, str] | None) -> dict:
+    """The old row's identity fields, with `named`'s display/gender over them
+    where it says one (an empty value never erases the old)."""
+    kept = {k: old[k] for k in KEPT if old.get(k)}
+    display, gender = given or ("", "")
+    return {**kept, **({"display": display} if display else {}), **({"gender": gender} if gender else {})}
+
+
+def refuse_genderless(rows: list[dict], cast: list[str]) -> None:
+    """G-ROWGENDER: takes_r2v refuses a character row with no gender; bind
+    refuses it first, every bound one at once, before a plan is written."""
+    bare = [r.get("entity_id") for r in rows if r.get("entity_id") in cast
+            and r.get("gender") not in ("male", "female", "creature")]
+    if bare:
+        raise SystemExit("G-ROWGENDER refuses the cast rows with no gender (bind them as "
+                         "--cast=who=Display:gender):\n  " + "\n  ".join(map(str, bare)))
+
+
 def rows_for(book: Path, chapter: int, cast: list[str], old: list[dict],
              named: dict[str, tuple[str, str]] | None = None) -> list[dict]:
     """refs.json's character rows for one chapter: the cast rebuilt from the
-    dossier in that chapter's clothes, each keeping its display name and gender
-    (or taking the ones `named` gives), and every other row kept as it was.
-    A row text the take lint would refuse never gets filed (G-ROWTEXT)."""
+    dossier in that chapter's clothes, each keeping its identity fields (or
+    taking the display/gender `named` gives), and every other row kept as it
+    was.  A row text the take lint would refuse never gets filed (G-ROWTEXT),
+    nor a bound row with no gender (G-ROWGENDER)."""
     before = {r.get("entity_id"): r for r in old}
-    rows = []
-    for who in cast:
-        row = character_row(book, who, chapter)
-        display, gender = (named or {}).get(who, (before.get(who, {}).get("display"),
-                                                   before.get(who, {}).get("gender")))
-        rows.append({**row, **({"display": display} if display else {}), **({"gender": gender} if gender else {})})
+    rows = [{**character_row(book, who, chapter),
+             **kept_identity(before.get(who, {}), (named or {}).get(who))} for who in cast]
     rows += [r for r in old if r.get("entity_id") not in cast]
     refuse_dirty_rows(rows)
+    refuse_genderless(rows, cast)
     return rows

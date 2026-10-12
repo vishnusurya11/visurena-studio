@@ -51,7 +51,7 @@ def test_rows_for_refuses_every_dirty_row_at_once(tmp_path):
 def test_rows_for_files_a_clean_cast(tmp_path):
     book = tmp_path / "book"
     dossier(book, "finn", "A lean man of thirty.")
-    rows = pack_refs.rows_for(book, 3, ["finn"], [])
+    rows = pack_refs.rows_for(book, 3, ["finn"], [], {"finn": ("Finn", "male")})
     assert rows[0]["entity_id"] == "finn"
 
 

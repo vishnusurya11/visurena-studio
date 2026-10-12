@@ -905,3 +905,8 @@ fixes. Each lesson below cost at least one launch. Tracker rows A38-A74 in
       "walking through London" unlinted; G-ROWTEXT refused them at bind time, ep01 step 01, ~3 h
       in. Both writers now cure (stillness table, row_lint.NEGATION_TABLE affirmatives, the pace
       append) and refuse every leftover fault before writing, so it surfaces in the refs step.
+    - **A bound row without a gender is refused at bind, not at the takes (Jekyll ep01, 2026-10-12).**
+      All eight rows were rebuilt bare (no display, no gender) and the episode wrote a ~2 h plan
+      before takes_r2v refused them at G-TAKELINT. `pack_refs.rows_for` now keeps every identity
+      field of the old row (display, gender, pronouns, marks, aka; an empty `named` value never
+      erases one) and G-ROWGENDER refuses every genderless cast row at once, in step 01.
