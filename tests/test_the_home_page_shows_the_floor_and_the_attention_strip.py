@@ -60,7 +60,7 @@ def test_today_and_the_legend_are_on_the_home_page(client):
 def test_the_queue_page_lists_now_next_and_held(client, route):
     page = client.get(route).text
     assert 'id="now-h"' in page and 'id="queue-h"' in page and 'id="held-h"' in page and "ep06" in page
-    assert "derived" in page
+    assert "in the order a runner takes them" in page                  # plain words (03 A18)
 
 
 def test_the_buttons_post_orders_since_c11(client):

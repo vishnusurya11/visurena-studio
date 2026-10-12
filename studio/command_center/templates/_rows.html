@@ -26,13 +26,13 @@
 <tr id="wo-{{ r.codex_id }}-{{ r.unit }}" class="row-{{ r.css }}{% if r.shown in ('escalated', 'failed') %} emph{% endif %}" data-row data-state="{{ r.shown }}">
 <td class="face-td">{% if p %}<img class="face" src="{{ p.thumb }}" alt="" width="36" height="36" loading="lazy">{% endif %}</td>
 <td><span class="pill {{ r.shown }}" title="{{ r.meaning }}">{{ icon(state_icons[r.shown]) }}{{ r.shown }}</span></td>
-<td><a class="uid" href="{{ href }}">{{ r.unit }}</a></td>
+<td><a class="uid" href="{{ href }}">{{ r.unit }}</a>{% if r.title %}<span class="utitle">{{ r.title }}</span>{% endif %}</td>
 <td class="stepcell">
 <span class="sbar" aria-hidden="true" title="step {{ r.step_id or '–' }} of {{ r.bar | length }}">{% for s in r.bar %}<i class="{{ s.css }}{% if s.id == r.step_id and not finished %} cur{% endif %}"></i>{% endfor %}</span>
 {% if not finished %}<div class="sline">{% if r.step_id %}<b>{{ r.step_id }} {{ r.step_name }}</b>{% endif %}{% if r.progress %} · {{ r.progress }}{% endif %}{% if r.shown == 'running' and r.elapsed %} · {{ r.elapsed }}{% endif %}{% if r.blocked_on %} · waits on {{ r.blocked_on }}{% endif %}{% if r.hold_reason %} · {{ r.hold_reason }}{% endif %}</div>{% endif %}
 </td>
 <td class="gates-td"><span class="gc">{{ chips(viz.gate_chips(r.strip)) }}</span></td>
-<td class="num moved" title="{{ r.updated_at or '' }}">{{ r.age or r.ago or '–' }}</td>
+<td class="num moved" title="{{ r.moved_at or r.updated_at or '' }}">{{ r.age or r.ago or '–' }}</td>
 <td class="num gpu">{{ r.gpu_h }}</td>
 <td class="acts-td">{% if r.state in ('deferred', 'failed', 'queued', 'blocked', 'running') %}<details class="rowmenu"><summary aria-label="Actions for {{ r.unit }}">{{ icon('ellipsis') }}</summary><div class="pop">{% if r.state in ('deferred', 'failed') %}{{ act.order('retry', r.codex_id, r.stage, r.unit, step=(r.step_id ~ ' ' ~ r.step_name) | trim) }}{% elif r.state != 'running' %}{{ act.order('bump', r.codex_id, r.stage, r.unit) }}{% endif %}{% if r.state in ('running', 'queued', 'blocked') %}{{ act.hold('unit', r.codex_id, r.stage, r.unit) }}{% endif %}</div></details>{% endif %}</td>
 </tr>

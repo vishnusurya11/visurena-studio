@@ -316,7 +316,8 @@ def loop_state(rows: list[dict]) -> dict:
     and that reason is not success; the running pass does not count."""
     finished = [p for p in rows if p.get("how") != "running"][-4:]
     common = Counter((p.get("ended_on"), p.get("reason")) for p in finished).most_common(1)
-    if common and common[0][1] >= 3 and common[0][0][1] != "done":
+    ended_well = bool(finished) and finished[-1].get("reason") == "done"     # a loop that ended is history (A1)
+    if common and common[0][1] >= 3 and common[0][0][1] != "done" and not ended_well:
         (step, reason), n = common[0]
         return {"looping": True, "step": step, "reason": reason, "n": n, "of": len(finished)}
     return {"looping": False, "step": "", "reason": "", "n": 0, "of": len(finished)}

@@ -33,17 +33,17 @@ ATTENTION = ("escalated", "failed", "stale", "running", "deferred", "held", "fla
              "queued", "blocked", "done", "skipped")
 LEGEND = [(GLYPHS[s], s) for s in ("queued", "blocked", "running", "done", "flagged", "deferred",
                                    "failed", "escalated", "held", "stale", "skipped")]
-MEANINGS = {"queued": "ready; a runner takes it next",
-            "blocked": "waiting for an earlier department or an input file",
+MEANINGS = {"queued": "ready; starts when a runner is launched (nothing polls the queue)",
+            "blocked": "waiting for an earlier department or a missing file",
             "running": "a run is working on it now",
             "done": "finished (or published); nothing to do",
-            "flagged": "done with judge terminals not yet acknowledged and not published",
-            "deferred": "a step handed it back for the next pass",
+            "flagged": "finished, but a judge found problems you have not looked at yet (not published)",
+            "deferred": "sent back to try again on the next pass",
             "failed": "a step crashed; a developer must look",
-            "escalated": "a step asked the owner to decide",
+            "escalated": "a step is waiting for your decision",
             "held": "parked by a hold until it is lifted",
-            "stale": "run lost its lease, or the disk no longer matches the row",
-            "skipped": "every output was already on disk"}
+            "stale": "the run stopped reporting (it may have crashed), or its files changed since; needs a look",
+            "skipped": "nothing to redo: its output was already there"}
 """Each state in one plain line: the pill's hover title and the department's legend."""
 LOG_LEVELS = frozenset({"WARNING", "ERROR", "CRITICAL"})
 TAIL_BYTES = 64 * 1024
@@ -248,6 +248,11 @@ def age(now: datetime, ts: str | None) -> str:
     return f"{seconds // 3600} h" if seconds < 86400 else f"{seconds // 86400} d"
 
 
+def ago_words(span: str) -> str:
+    """`21 h` as `21 h ago`; `now` and '' stay as they are."""
+    return f"{span} ago" if span and span != "now" else span
+
+
 def utc_now() -> datetime:
     """The clock the ages are read against."""
     return datetime.now(timezone.utc)
@@ -443,7 +448,8 @@ def order_taken(row: sqlite3.Row | dict) -> str:
 def recent_orders(conn: sqlite3.Connection, limit: int = 10) -> list[dict]:
     """The last `limit` orders rows, newest first, each with its target, taker and age."""
     rows, now = conn.execute("SELECT * FROM orders ORDER BY id DESC LIMIT ?", (limit,)), utc_now()
-    return [{**dict(r), "target": order_target(r), "taken": order_taken(r), "age": age(now, r["ts"])} for r in rows]
+    return [{**dict(r), "target": order_target(r), "taken": order_taken(r), "age": age(now, r["ts"]),
+             "ago": ago_words(age(now, r["ts"]))} for r in rows]
 
 
 def lane(conn: sqlite3.Connection, stage: str) -> dict:
@@ -693,7 +699,9 @@ def dress(row: dict, chips: dict[str, str], gates: list[str], last_event: str | 
     row["strip"] = verdict_strip(row["verdicts"], gates)
     row["gate_labels"] = [gate_label(c["gate"]) for c in row["strip"]]
     row["bar"] = step_bar(row, chips)
-    row["ago"], row["gpu_h"] = ago(moved_at(row, last_event)), gpu_hours(row.get("gpu_seconds"))
+    row["moved_at"] = moved_at(row, last_event)
+    row["ago"], row["age"] = ago(row["moved_at"]), age(utc_now(), row["moved_at"])
+    row["gpu_h"] = gpu_hours(row.get("gpu_seconds"))
     return row
 
 
@@ -711,7 +719,7 @@ def department(conn: sqlite3.Connection, stage: str, book: str | None = None,
     counts = Counter(r["shown"] for r in rows if not book or r["codex_id"] == book)
     kept = [r for r in rows if (not book or r["codex_id"] == book) and (not state or r["shown"] == state)]
     chips, moves = step_states(conn, [r["id"] for r in kept]), last_moves(conn, stage)
-    kept = [dress(r, chips[r["id"]], gates, moves.get((r["codex_id"], r["unit"]))) for r in kept]
+    kept = titled([dress(r, chips[r["id"]], gates, moves.get((r["codex_id"], r["unit"]))) for r in kept])
     return {"stage": stage, "rows": kept, "gates": gates, "counts": dict(counts),
             "gate_labels": [gate_label(g) for g in gates], "groups": book_groups(kept, names),
             "books": {c: names.get(c, c) for c in sorted({r["codex_id"] for r in rows})}}
@@ -856,9 +864,33 @@ def unit(conn: sqlite3.Connection, library: Path, codex_id: str, stage: str, uni
 
 
 def season_rows(conn: sqlite3.Connection, codex_id: str) -> list[dict]:
-    """The book's episodes as the season wall shows them, in unit order."""
+    """The book's episodes as the season wall shows them, in unit order, each with its title."""
     rows = conn.execute("SELECT * FROM work_orders WHERE codex_id = ? AND stage = 'episode'", (codex_id,))
-    return sorted((row_view(r, conn) for r in rows), key=unit_order)
+    return titled(sorted((row_view(r, conn) for r in rows), key=unit_order))
+
+
+_TITLES: dict[tuple, str] = {}
+
+
+def unit_title(book: Path | None, row: dict) -> str:
+    """The unit's title from its plan.json (`What Had Happened in Surrey`), read again
+    only when the file's mtime moves; '' when there is none (03 A20)."""
+    plan = Path(book) / row["home"] / "plan.json" if book and row.get("home") else None
+    try:
+        key = (str(plan), plan.stat().st_mtime_ns) if plan else None
+    except OSError:
+        return ""
+    if key and key not in _TITLES:
+        _TITLES[key] = str(read_json(plan).get("title") or "")
+    return _TITLES.get(key, "") if key else ""
+
+
+def titled(rows: list[dict]) -> list[dict]:
+    """Rows with their unit titles (episodes only: a book-level home has no plan)."""
+    for r in rows:
+        book = library_paths.book_folder(episode_home.LIBRARY, r.get("codex_id") or "") if r.get("kind") != "book" else None
+        r["title"] = unit_title(book, r) if book else ""
+    return rows
 
 
 # --- spend (board review 2026-10-12, 02 #14) ---

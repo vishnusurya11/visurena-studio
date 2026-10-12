@@ -47,7 +47,7 @@
     <div class="stamps">
     {% for g in unit.gates %}
      <div class="stamp {{ 'flag' if g.state == 'flagged' else 'pass' if g.state == 'passed' else '' }}"{% if g.path %} data-view="{{ vrel(g.path) }}" data-set="files" role="button" tabindex="0"{% endif %}>
-      <span class="g">{{ g.gate | replace('EYE_', '') | lower | capitalize }}</span>
+      <span class="g">{{ g.gate | replace('EYE_', '') | replace('_', ' ') | lower | capitalize }}</span>
       <span class="w">{{ g.state }}{% if g.faults %} · ⚑ {{ g.faults }}{% endif %}</span>
       {% if g.by %}<span class="by">{{ g.by }}{% if g.signed %} · {{ g.signed }}{% endif %}</span>{% endif %}
      </div>

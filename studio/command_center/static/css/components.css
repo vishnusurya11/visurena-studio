@@ -65,7 +65,7 @@ video{max-width:100%;background:var(--stage);display:block}
 .pill.escalated{color:var(--paper);background:var(--ink);border-color:var(--ink)}
 .pill.done{color:var(--st-done);border-color:color-mix(in srgb,var(--st-done) 45%,transparent)}
 .pill.held{color:var(--st-held);border-style:dashed}
-.pill.stale{color:var(--st-done);border-style:dashed}
+.pill.stale{color:var(--st-failed);border-style:dashed}
 .pill.blocked{border-style:dashed}
 
 /* step bar: 12 segments; colour + pattern.  A running segment is a still colour: the one loop
@@ -256,7 +256,7 @@ body{padding-left:var(--side-w);min-height:100vh;
 .sb-item[aria-current]::before{content:"";position:absolute;left:-10px;top:9px;bottom:9px;width:2px;border-radius:var(--r-1);background:var(--focus)}
 .sb-item .lbl{flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 /* totals are constants: muted, so the dots that move lead (P03.9) */
-.sb-item .n{font:500 var(--t-label)/1 var(--f-mono);color:var(--ink-3);opacity:.8}
+.sb-item .n{font:500 var(--t-label)/1 var(--f-mono);color:var(--ink-3)}
 .sb-item .bdg,.btabs .bdg{font:600 var(--t-micro)/1 var(--f-mono);color:var(--hot-ink);background:var(--hot);border-radius:var(--r-pill);padding:3px 7px}
 .sb-item .bdg:empty,.btabs .bdg:empty,.sb-item .bdg[data-n="0"],.btabs .bdg[data-n="0"]{display:none}
 .sb-dots{display:inline-flex;gap:6px;align-items:center;font:500 var(--t-micro)/1 var(--f-mono);color:var(--ink-3)}
@@ -450,6 +450,7 @@ a.kpi:hover{border-color:var(--rule-2);background:var(--surface-2)}
 .segmented{display:inline-flex;padding:2px;gap:2px;border-radius:var(--r-pic);background:var(--surface-2);border:1px solid var(--rule)}
 .segmented button,.segmented a{all:unset;cursor:pointer;height:26px;padding:0 10px;border-radius:var(--r-ctl);font:500 var(--t-label)/26px var(--f-text);color:var(--ink-3);display:inline-flex;align-items:center;gap:6px}
 .segmented button:hover,.segmented a:hover{color:var(--ink)}
+.segmented button:focus-visible,.segmented a:focus-visible{outline:2px solid var(--focus);outline-offset:2px}
 .segmented [aria-pressed="true"],.segmented [aria-current]{background:var(--overlay);color:var(--ink);box-shadow:var(--e-2)}
 .segmented .n{font:500 var(--t-micro)/1 var(--f-mono);color:var(--ink-3)}
 

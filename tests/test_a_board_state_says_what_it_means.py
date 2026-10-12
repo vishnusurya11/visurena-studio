@@ -18,8 +18,9 @@ def test_a_blocked_row_says_what_it_waits_on():
 
 
 def test_stale_and_flagged_say_what_happened():
-    assert "lease" in views.meaning("stale")
-    assert "acknowledged" in views.meaning("flagged")
+    """Plain words since the board review (2026-10-12, A6): no lease, terminal or row."""
+    assert "stopped reporting" in views.meaning("stale")
+    assert "not looked at" in views.meaning("flagged")
     assert views.meaning("nonsense") == "nonsense"
 
 

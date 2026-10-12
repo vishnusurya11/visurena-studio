@@ -8,41 +8,42 @@
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=IBM+Plex+Sans:ital,wght@0,400;0,500;0,600;1,400&family=IBM+Plex+Mono:wght@400;500&display=swap">
 <style>
 :root{
-  --paper:#f6f3ec; --paper-2:#eee9df; --ink:#1d1a16; --ink-2:#4d473d; --ink-3:#7d7566;
-  --rule:#d6cfc0; --rule-2:#bfb6a3; --line:#9c937f;
-  --code:#e9e4d7; --code-ink:#3b352c;
+  color-scheme:dark;
+  --paper:#0f1012; --paper-2:#18191c; --ink:#ededef; --ink-2:#b4b6bc; --ink-3:#8e9199;
+  --rule:#26282d; --rule-2:#34373d; --line:#4a4d55;
+  --code:#1c1d21; --code-ink:#d6d8dd;
+  --accent:#e0664c; --accent-ink:#0f1012;
+  --think:#9dc0dd; --think-bg:#1b2733;
+  --qc:#e2c979; --qc-bg:#2b2616;
+  --invent:#c8a6e0; --invent-bg:#261d2e;
+  --ok:#8fcf9b; --ok-bg:#1a2b1f;
+  --lead:#ededef; --lead-ink:#0f1012;
+}
+/* the owner's neutral Studio dark is the default (board review 2026-10-12, A23: the warm beige is retired);
+   Graphite light only when asked for */
+:root[data-theme="light"]{
+  color-scheme:light;
+  --paper:#f4f5f7; --paper-2:#eceef1; --ink:#16181d; --ink-2:#454952; --ink-3:#6b707a;
+  --rule:#d9dce1; --rule-2:#c3c7ce; --line:#9aa0a9;
+  --code:#e8eaee; --code-ink:#2c2f36;
   --accent:#a4341f; --accent-ink:#ffffff;
   --think:#2c4f6b; --think-bg:#e3ebf2;
   --qc:#5f4b1c; --qc-bg:#f1e8c9;
   --invent:#6a3b8f; --invent-bg:#ece3f3;
   --ok:#2f6b3a; --ok-bg:#dfeee2;
-  --lead:#1d1a16; --lead-ink:#f6f3ec;
-}
-@media (prefers-color-scheme: dark){
-  :root:not([data-theme="light"]){
-    color-scheme:dark;
-    --paper:#181613; --paper-2:#211e1a; --ink:#ece7dc; --ink-2:#c3bbab; --ink-3:#8f8778;
-    --rule:#3a352d; --rule-2:#4d473d; --line:#6a6254;
-    --code:#2a2621; --code-ink:#d8d1c2;
-    --accent:#e0664c; --accent-ink:#1d1a16;
-    --think:#9dc0dd; --think-bg:#1f2e3b;
-    --qc:#e2c979; --qc-bg:#332b16;
-    --invent:#c8a6e0; --invent-bg:#2c2035;
-    --ok:#8fcf9b; --ok-bg:#1e3323;
-    --lead:#ece7dc; --lead-ink:#181613;
-  }
+  --lead:#16181d; --lead-ink:#f4f5f7;
 }
 :root[data-theme="dark"]{
   color-scheme:dark;
-  --paper:#181613; --paper-2:#211e1a; --ink:#ece7dc; --ink-2:#c3bbab; --ink-3:#8f8778;
-  --rule:#3a352d; --rule-2:#4d473d; --line:#6a6254;
-  --code:#2a2621; --code-ink:#d8d1c2;
-  --accent:#e0664c; --accent-ink:#1d1a16;
-  --think:#9dc0dd; --think-bg:#1f2e3b;
-  --qc:#e2c979; --qc-bg:#332b16;
-  --invent:#c8a6e0; --invent-bg:#2c2035;
-  --ok:#8fcf9b; --ok-bg:#1e3323;
-  --lead:#ece7dc; --lead-ink:#181613;
+  --paper:#0f1012; --paper-2:#18191c; --ink:#ededef; --ink-2:#b4b6bc; --ink-3:#8e9199;
+  --rule:#26282d; --rule-2:#34373d; --line:#4a4d55;
+  --code:#1c1d21; --code-ink:#d6d8dd;
+  --accent:#e0664c; --accent-ink:#0f1012;
+  --think:#9dc0dd; --think-bg:#1b2733;
+  --qc:#e2c979; --qc-bg:#2b2616;
+  --invent:#c8a6e0; --invent-bg:#261d2e;
+  --ok:#8fcf9b; --ok-bg:#1a2b1f;
+  --lead:#ededef; --lead-ink:#0f1012;
 }
 *{box-sizing:border-box}
 body{margin:0;background:var(--paper);color:var(--ink);font-family:"IBM Plex Sans",system-ui,sans-serif;font-size:14px;line-height:1.45}
@@ -264,7 +265,7 @@ pre.ddl{font-family:"IBM Plex Mono",monospace;font-size:11px;line-height:1.4;col
 <div class="wrap">
   <div class="eyebrow">Visurena Studio · book → screenplay → episode</div>
   <h1>The Story Department</h1>
-  <p class="lede">Twenty agents in five departments, read as a company. <b>Code is management</b>: every step script decides the order, hands out briefs, assembles, counts and checks. <b>Agents are specialists</b>: each gets one brief and returns one typed object. Nobody edits a file; nobody reads another agent's answer. The chart below is who reports to whom; the flow after it is one book going through a typical run, from the EPUB to a delivered episode master. Updated 2026-09-24: the reference bible (refs) and the episode line are departments with runners.</p>
+  <p class="lede">Twenty agents in five departments, read as a company. <b>Code is management</b>: every step script decides the order, hands out briefs, assembles, counts and checks. <b>Agents are specialists</b>: each gets one brief and returns one typed object. Nobody edits a file; nobody reads another agent's answer. The chart below is who reports to whom; the flow after it is one book going through a typical run, from the EPUB to a delivered episode master. Updated 2026-10-12: the reference bible (refs) and the episode line are departments with runners.</p>
 
   <div class="legend">
     <span class="k"><span class="swatch lead"></span> leader (code: a runner or step script)</span>

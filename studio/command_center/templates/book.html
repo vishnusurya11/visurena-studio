@@ -48,6 +48,7 @@
   <li class="ep" id="ep-{{ book.codex_id }}-{{ e.unit }}" data-state="{{ e.shown }}">
     {% call tile(e.poster, href, 'season', e.unit, 320, '', 'no picture yet') %}<span class="eid">{{ e.unit }}</span>{% if book.published.get(e.unit) %}<span class="pub" title="published ({{ book.published[e.unit] }})">{{ icon('check') }}</span>{% endif %}{% endcall %}
     <div class="row2"><a href="{{ href }}">{{ e.unit }}{% if e.shown == 'running' and e.step_id %} · {{ e.step_id }} {{ e.step_name }}{% endif %}</a><span class="pill {{ e.shown }}">{{ e.shown }}</span></div>
+    {% if e.title %}<div class="etitle" title="{{ e.title }}">{{ e.title }}</div>{% endif %}
     {% if e.flags_open %}<span class="fl" title="{{ e.flags_open }} judge flags not yet looked at">⚑{{ e.flags_open }}</span>{% endif %}
   </li>
   {% endfor %}

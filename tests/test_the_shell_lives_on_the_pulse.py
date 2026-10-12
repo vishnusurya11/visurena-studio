@@ -109,9 +109,9 @@ def test_aria_keyshortcuts_names_single_keys_and_never_a_chord(keys, aria):
     ("/books", [("Home", "/"), ("Books", None)]),
     ("/architecture", [("Home", "/"), ("Architecture", None)]),
     (f"/b/{CODEX}", [("Home", "/"), ("Books", "/books"), ("A Book", None)]),
-    ("/d/episode", [("Home", "/"), ("episode", None)]),
+    ("/d/episode", [("Home", "/"), ("Episode", None)]),                  # capitalised (03 A15)
     (f"/d/episode/{CODEX}/ep04", [("Home", "/"), ("Books", "/books"), ("A Book", f"/b/{CODEX}"),
-                                  ("episode", f"/d/episode?book={CODEX}"), ("ep04", None)]),
+                                  ("Episode", f"/d/episode?book={CODEX}"), ("ep04", None)]),
 ])
 def test_the_crumbs_start_at_home(path, crumbs):
     assert shell.crumbs(path, {CODEX: "A Book"}) == crumbs

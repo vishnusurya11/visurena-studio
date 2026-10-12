@@ -137,7 +137,9 @@ def _trail(path: str, names: dict[str, str]) -> list[tuple[str, str]]:
     if len(parts) == 4 and parts[0] == "d":
         stage, codex, unit = parts[1:]
         return [("Books", "/books"), (names.get(codex, codex), f"/b/{codex}"),
-                (stage, f"/d/{stage}?book={codex}"), (unit, path)]
+                (stage.capitalize(), f"/d/{stage}?book={codex}"), (unit, path)]
+    if len(parts) == 2 and parts[0] == "d":
+        return [(parts[1].capitalize(), path)]
     return [(parts[-1], path)]
 
 
@@ -232,7 +234,8 @@ def unit_entries(rows: list[dict], needs: set[tuple], names: dict[str, str]) -> 
     rows = sorted(rows, key=lambda r: r.get("updated_at") or "", reverse=True)
     rows.sort(key=lambda r: 0 if r["shown"] == "running" else 1 if (r["codex_id"], r["stage"], r["unit"]) in needs else 2)
     return [{"g": "Units", "ic": views.ICONS.get(r["shown"], "circle"), "st": r["shown"], "gl": r["glyph"],
-             "l": f"{r['unit']} · {r['stage']}", "s": f"{names.get(r['codex_id'], r['codex_id'])} · {r['shown']}",
+             "l": f"{r['unit']} · {r['stage']}",
+             "s": " · ".join(x for x in (names.get(r['codex_id'], r['codex_id']), r.get("title"), r['shown']) if x),
              "h": f"/d/{r['stage']}/{r['codex_id']}/{r['unit']}"} for r in rows]
 
 
@@ -261,7 +264,7 @@ def palette(departments: list[dict], books: dict[str, str], units: list[dict], a
 def palette_index(conn: sqlite3.Connection, library: Path, departments: list[dict] | None = None) -> list[dict]:
     """The palette's data on its own (the page embeds it; a refetch on open reads it)."""
     names, attention = views.book_names(conn), views.attention(conn)
-    rows = [views.row_view(r, conn) for r in conn.execute("SELECT * FROM work_orders")]
+    rows = views.titled([views.row_view(r, conn) for r in conn.execute("SELECT * FROM work_orders")])
     needs = {(r["codex_id"], r["stage"], r["unit"]) for r in attention}
     flagged = [r for r in attention if r.get("reason") == views.FLAGGED_REASON]
     return palette(departments if departments is not None else department_items(views.lanes(conn)), names,

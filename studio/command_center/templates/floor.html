@@ -23,7 +23,7 @@
 </section>
 
 <section class="panel sect" aria-labelledby="queue-h">
-  <div class="panel-h"><h2 id="queue-h">Next</h2><span class="sub">derived: priority, slate order, unit (no scheduler yet)</span></div>
+  <div class="panel-h"><h2 id="queue-h">Next</h2><span class="sub">in the order a runner takes them, when one is launched</span></div>
   <div class="panel-b" id="queue-b" hx-get="/queue" hx-select="#queue-b" hx-target="this" hx-trigger="pulse:floor from:body" data-v="{{ viz.fp(request, 'floor') }}" hx-swap="morph:outerHTML">
   {% if queue %}
   <div class="tscroll"><table class="dgrid dg" data-testid="queue">

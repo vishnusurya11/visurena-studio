@@ -12,17 +12,17 @@
   <span class="u-pills">
     {% if h.lease.state == 'stale' %}<span class="pill stale" title="the lease ran out at {{ h.lease.until }}: the runner may be gone">~ stale lease</span>
     {% else %}<span class="pill {{ r.shown }}" title="{{ r.shown }}">{{ r.glyph }} {{ r.shown }}</span>{% endif %}
-    {% if r.step_id %}<span class="chip2 where"><b>{{ r.step_id }}</b> {{ r.step_name }}{% if r.progress %} · {{ r.progress }}{% endif %}</span>{% endif %}
+    {% if r.step_id and r.shown not in ('done', 'flagged') %}<span class="chip2 where"><b>{{ r.step_id }}</b> {{ r.step_name }}{% if r.progress %} · {{ r.progress }}{% endif %}</span>{% endif %}
   </span>
 </div>
 <nav class="u-sib" aria-label="Sibling units">
   {% if sib.prev %}<a class="btn sm" rel="prev" href="/d/{{ stage }}/{{ codex }}/{{ sib.prev }}" data-key="[" title="previous unit ([)">{{ icon('chevron-left') }}{{ sib.prev }}</a>{% endif %}
   {% if sib.next %}<a class="btn sm" rel="next" href="/d/{{ stage }}/{{ codex }}/{{ sib.next }}" data-key="]" title="next unit (])">{{ sib.next }}{{ icon('chevron-right') }}</a>{% endif %}
-  <a class="btn sm primary" href="#actions">Redo…</a>
+  <a class="btn sm" href="#actions">Redo…</a>
 </nav>
 {% if h.question %}<p class="u-q">“{{ h.question }}”</p>{% endif %}
 <span hidden>STEPS</span>
-<div class="ubar" role="list">
+<div class="ubar" role="list" style="--n:{{ unit.bar | length }}">
   {% for s in unit.bar %}
   <div class="seg {{ s.css }}{% if s.cur %} cur{% endif %}" role="listitem" title="{{ s.step_id }} {{ s.name }} · {{ s.state }}{% if s.attempt %} · attempt {{ s.attempt }}{% endif %}{% if s.runs %} · {{ s.runs }} run{{ '' if s.runs == 1 else 's' }}{% endif %}{% if s.script %} · scripts ≈ {{ s.script }}{% endif %}{% if s.reason %} · {{ s.reason }}{% endif %}">
     <i></i>

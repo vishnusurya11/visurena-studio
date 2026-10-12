@@ -2,12 +2,12 @@
     acknowledge acts at once, any other order waits until a run takes it.  Rows: ord-<id>. -#}
 {% if orders %}
 <div class="tscroll"><table class="dgrid" data-testid="orders">
-<thead><tr><th class="num">#</th><th>when</th><th>order</th><th>target</th><th class="note">note</th><th>taken by</th></tr></thead>
+<thead><tr><th class="num">#</th><th>ago</th><th>order</th><th>target</th><th class="note">note</th><th>status</th></tr></thead>
 <tbody>
 {% for o in orders %}
 <tr id="ord-{{ o.id }}">
   <td class="num">{{ o.id }}</td>
-  <td class="mono" title="{{ o.ts or '' }}">{{ o.age or (o.ts or '')[5:16] }}</td>
+  <td class="mono" title="{{ o.ts or '' }}">{{ o.ago or (o.ts or '')[5:16] }}</td>
   <td>{{ o.kind }}</td>
   <td>{% if o.scope == 'book' %}{{ books.get(o.target, o.target) }}{% else %}{% if o.scope == 'unit' %}<span class="muted">{{ books.get(o.codex_id, o.codex_id) | truncate(18, True, '…') }} ›</span> {% endif %}{{ o.target }}{% endif %}</td>
   <td class="note">{{ o.note or "" }}</td>

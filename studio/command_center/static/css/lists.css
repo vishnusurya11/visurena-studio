@@ -105,6 +105,7 @@
 .nextstrip{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:var(--sp-5)}
 .nx{display:grid;gap:10px;align-content:start;min-width:0;color:var(--ink)}
 .nx .pic{aspect-ratio:16/10}
+.nextstrip .pic:not(:has(img)){aspect-ratio:auto;height:48px}
 .nx .pos{position:absolute;top:var(--sp-3);left:var(--sp-3);z-index:2;width:24px;height:24px;border-radius:var(--r-ctl);display:grid;place-items:center;font:600 var(--t-label)/1 var(--f-mono);background:var(--scrim);color:var(--stage-ink);pointer-events:none}
 .nx .pt{font:500 var(--t-lead)/19px var(--f-text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;text-decoration:none;color:var(--ink)}
 .nx .pt:hover{text-decoration:underline;text-underline-offset:3px}
@@ -335,3 +336,7 @@ details.tbl-d summary{cursor:pointer}
   .mosaic{grid-template-columns:repeat(4,minmax(0,1fr))}
 }
 }
+
+/* unit titles (board review 2026-10-12, A20) */
+.dg .utitle{display:block;font-size:var(--t-label);color:var(--ink-3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:28ch}
+.wall .etitle{font-size:var(--t-label);color:var(--ink-3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
