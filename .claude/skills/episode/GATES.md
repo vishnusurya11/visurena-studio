@@ -383,3 +383,5 @@ Replays: C1 ep25 regrid 2/2 PASS, ep25 round 0 0/1 FAIL, ep27 study_table 3/3 PA
 - **G-FRAME (advisory):** MCU face < 0.15, close < 0.25 of the frame height (D9). Never a wall.
 - **The reader** (`panel_content` / `take_content` / LOOK-STATE): one seeded, cached read. A
   cached refusal is never re-read; only a redraw escapes it.
+- **MASTER-EYE content = the panel gate's J5** (2026-10-11): `master_eye.content_faults` judges each
+  frame by `pc.judge_staged` (last-daylight hour, shoulder +1, legacy crowd in words), never its own copy.

@@ -28,12 +28,13 @@ import re
 from dataclasses import dataclass, field
 from datetime import datetime, timezone
 from pathlib import Path
+from types import SimpleNamespace
 from typing import Callable
 
 import numpy as np
 from PIL import Image
 
-from studio import frame_match as fm, identity_gate, look_gate as lg, panel_content as pc, panel_dq, plan_gates, take_look as tl
+from studio import frame_match as fm, identity_gate, look_gate as lg, panel_content as pc, plan_gates, take_look as tl
 from studio.judges.verdict import Fault, Verdict, confidence
 
 NAME, VERSION = "master_eye", "1"
@@ -252,14 +253,21 @@ def story(turn_shot: dict | None, reads: dict[int, list[Read]]) -> tuple[bool, d
 
 # ---- the short read and the identity pass --------------------------------------------
 
+def plan_shot(shot: dict) -> SimpleNamespace:
+    """A plan.json shot as `pc.judge_staged` reads one: `extras` counts as
+    declared only when the plan wrote it (a legacy plan's crowd is in words)."""
+    return SimpleNamespace(frame=shot.get("frame", ""), at_rest=shot.get("at_rest", ""),
+                           faces=shot.get("faces") or [], size=shot.get("size", ""),
+                           extras=int(shot.get("extras", 0) or 0), model_fields_set=set(shot))
+
+
 def content_faults(read: Read, shot: dict, setup: dict) -> list[str]:
-    """One frame judged as its panel would be: people, copies, lettering, hour, posture."""
+    """One frame judged as its panel would be, by the panel gate's own rules
+    (`pc.judge_staged`, J5 2026-10-11: the hour, the crowd, the shoulder)."""
     if read.seen is None:
         return []
-    return pc.faults(read.seen, frame=f"{shot.get('frame', '')} {shot.get('at_rest', '')}",
-                     planned=len(shot.get("faces") or []), crowd=bool((setup.get("crowd") or "").strip()),
-                     flat=False, night=panel_dq.at_night(setup.get("described", "")),
-                     size=shot.get("size", ""), extras=int(shot.get("extras", 0) or 0))
+    place = SimpleNamespace(described=setup.get("described", "") or "", crowd=setup.get("crowd", "") or "")
+    return pc.judge_staged(read.seen, plan_shot(shot), place, flat=False)
 
 
 def who_is(face: dict, shot: dict) -> str | None:
