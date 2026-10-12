@@ -122,6 +122,19 @@ def fixture_epub(tmp_path):
     return build_fixture_epub(tmp_path / "test.epub")
 
 
+# ---- the money and live-DB trap (board review 2026-10-12) -----------------------
+#
+# A test faked the brain's turn but not its ledger, and wrote 33 rows into the
+# live usage table.  No test may write the live DB, resolve a remote host (every
+# paid API is one) or spawn the claude CLI; tests/guards.py says why on refusal.
+
+@pytest.fixture(autouse=True)
+def paid_and_live_trap(monkeypatch):
+    from tests import guards
+
+    guards.install(monkeypatch)
+
+
 # ---- the ComfyUI trap ----------------------------------------------------------
 #
 # No test may reach ComfyUI (a GPU, a model, a queue).  Every judge and every

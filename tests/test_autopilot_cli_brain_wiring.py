@@ -34,6 +34,7 @@ def test_run_brain_briefs_from_disk_and_maps_the_verdict(tmp_path, monkeypatch):
 
     monkeypatch.setattr(brain, "turn", fake_turn)
     monkeypatch.setattr(brain, "triage_options", lambda repo: None)
+    monkeypatch.setattr(cli, "ledger_conn", lambda: None)   # it wrote the LIVE usage table (2026-10-12)
     packet = {"home": "episodes/ep02", "last_line": "DEFERRED PLAN | x", "media_spent_usd": 3.1}
     doc = cli.run_brain(root, CODEX, 2, packet, home / "brain" / "attempt_01.json")
     assert "G-STORY shots 2-10" in seen["prompt"] and "keep_best" in seen["prompt"] and "$3.10" in seen["prompt"]
