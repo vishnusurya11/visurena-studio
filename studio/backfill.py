@@ -229,13 +229,26 @@ def events_summary(conn: sqlite3.Connection, codex_id: str, stage: str, unit: st
 # --- the publish row (no registry stage yet) --------------------------------------
 
 
+_UPLOADS: dict[tuple, list[dict]] = {}
+
+
+def _parse_uploads(path: Path) -> list[dict]:
+    """Every row of an upload ledger, in the order written."""
+    return [json.loads(line) for line in path.read_text(encoding="utf-8").splitlines() if line.strip()]
+
+
 def upload_rows(book_dir: Path, number: int) -> list[dict]:
-    """The upload ledger's rows for one episode number, in the order written."""
+    """The upload ledger's rows for one episode number, in the order written; the
+    file is parsed again only when its mtime or size moves (board review 2026-10-12)."""
     path = Path(book_dir) / "uploads.jsonl"
-    if not path.exists():
+    try:
+        st = path.stat()
+    except OSError:
         return []
-    rows = [json.loads(line) for line in path.read_text(encoding="utf-8").splitlines() if line.strip()]
-    return [r for r in rows if r.get("episode") == number]
+    key = (str(path), st.st_mtime_ns, st.st_size)
+    if key not in _UPLOADS:
+        _UPLOADS[key] = _parse_uploads(path)
+    return [r for r in _UPLOADS[key] if r.get("episode") == number]
 
 
 def deleted_ids(rows: list[dict]) -> set[str]:

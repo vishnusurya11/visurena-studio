@@ -84,7 +84,7 @@
 
 {% block body %}
 <link rel="stylesheet" href="{{ static_url('css/unit.css') }}">
-{% for n in (unit.siblings or {}).values() if n %}<link rel="prefetch" href="/d/{{ stage }}/{{ codex }}/{{ n }}">{% endfor %}
+{#- no sibling prefetch (04 #4): each one rendered a whole unit and walked its folder on the HDD -#}
 <div class="u-wrap" id="unit" data-codex="{{ codex }}" data-stage="{{ stage }}" data-unit="{{ r.unit }}" data-home="{{ home }}"
   data-panel-step="{{ pics.panel_step }}" data-take-step="{{ pics.take_step }}">
 {% if live %}<div class="u-page">{% include "_unit_live.html" %}</div>{% endif %}

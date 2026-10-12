@@ -65,7 +65,7 @@
   function toggleTheme() { root.dataset.theme = theme() === 'light' ? 'dark' : 'light'; store('cc-theme', root.dataset.theme); orgTheme(); }
 
   /* ---------------------------------------------------------- the palette */
-  var entries = [], loadedAt = Date.now(), shown = [], sel = 0, mode = null;
+  var entries = [], loadedAt = 0, shown = [], sel = 0, mode = null;   /* the page embeds pages, books, departments; units come on open (04 #6) */
   function score(q, text) {          /* subsequence match; lower is better, -1 none */
     if (!q) return 0;
     var t = text.toLowerCase(), i = 0, gaps = 0, last = -1;

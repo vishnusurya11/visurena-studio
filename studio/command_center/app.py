@@ -56,9 +56,15 @@ def readonly_factory(db_path: str | Path) -> Callable[[], sqlite3.Connection]:
         # use it (the route) on two pool threads: it is never shared, so the check is off
         conn = sqlite3.connect(uri, uri=True, timeout=0.25, check_same_thread=False)
         conn.execute("PRAGMA busy_timeout = 250")
+        conn.execute(f"PRAGMA mmap_size = {MMAP_BYTES}")      # 04 #1: a pulse read 2.9 MB through ReadFile
         conn.row_factory = sqlite3.Row
         return conn
     return open_connection
+
+
+MMAP_BYTES = 256 * 1024 * 1024
+"""A read-only connection maps the DB (board review 2026-10-12, 04 #1: a fresh
+connection per request re-read 2.5 MB of pages through ReadFile on every pulse)."""
 
 
 def writable_factory(db_path: str | Path) -> Callable[[], sqlite3.Connection]:
@@ -131,10 +137,11 @@ def _department(conn: sqlite3.Connection, stage: str, book: str | None, state: s
         raise HTTPException(404, f"{stage!r} is not a department") from None
 
 
-def _unit(request: Request, conn: sqlite3.Connection, stage: str, codex: str, unit: str) -> dict:
-    """The unit view with every band of the page, or a 404 when it has no row."""
+def _unit(request: Request, conn: sqlite3.Connection, stage: str, codex: str, unit: str,
+          heavy: bool = True) -> dict:
+    """The unit view with every band of the page (a partial asks heavy=False), or a 404 when it has no row."""
     state = request.app.state
-    found = unit_view.unit(conn, state.library, codex, stage, unit, logs=state.logs)
+    found = unit_view.unit(conn, state.library, codex, stage, unit, logs=state.logs, heavy=heavy)
     if found is None:
         raise HTTPException(404, f"no unit {stage}/{codex}/{unit}")
     return found
@@ -184,9 +191,11 @@ def floor_page(request: Request, conn: sqlite3.Connection = Depends(_conn)):
 @router.get("/d/{stage}", response_class=HTMLResponse)
 def department_page(request: Request, stage: str, book: str | None = None, state: str | None = None,
                     conn: sqlite3.Connection = Depends(_conn)):
-    dept = _department(conn, stage, book, state)
-    if same := _unchanged(request, conn, f"dept:{stage}"):
+    if stage not in registry.stage_names():
+        raise HTTPException(404, f"{stage!r} is not a department")
+    if same := _unchanged(request, conn, f"dept:{stage}"):          # 04 #5: answer before computing
         return same
+    dept = _department(conn, stage, book, state)
     return _page(request, conn, "department.html", dept=dept,
                    book=book, state=state, books=views.book_names(conn))
 
@@ -212,11 +221,13 @@ def _live(request: Request, conn: sqlite3.Connection, stage: str, codex: str, un
 
 @router.get("/b/{codex}", response_class=HTMLResponse)
 def book_page(request: Request, codex: str, conn: sqlite3.Connection = Depends(_conn)):
+    if codex not in views.book_names(conn):
+        raise HTTPException(404, f"no book {codex}")
+    if same := _unchanged(request, conn, f"book:{codex}"):           # 04 #5: answer before computing
+        return same
     found = views.book(conn, request.app.state.library, codex)
     if found is None:
         raise HTTPException(404, f"no book {codex}")
-    if same := _unchanged(request, conn, f"book:{codex}"):
-        return same
     return _page(request, conn, "book.html", book=found, books=views.book_names(conn))
 
 
@@ -296,7 +307,7 @@ def tails_partial(request: Request, stage: str, codex: str, unit: str,
                   conn: sqlite3.Connection = Depends(_conn)):
     if same := _unchanged(request, conn, f"unit:{stage}/{codex}/{unit}"):
         return same
-    return _render(request, "_tails.html", unit=_unit(request, conn, stage, codex, unit),
+    return _render(request, "_tails.html", unit=_unit(request, conn, stage, codex, unit, heavy=False),
                    stage=stage, codex=codex)
 
 
@@ -305,7 +316,7 @@ def unit_head_partial(request: Request, stage: str, codex: str, unit: str,
                       conn: sqlite3.Connection = Depends(_conn)):
     if same := _unchanged(request, conn, f"unit:{stage}/{codex}/{unit}"):
         return same
-    return _render(request, "_unit_head.html", unit=_unit(request, conn, stage, codex, unit),
+    return _render(request, "_unit_head.html", unit=_unit(request, conn, stage, codex, unit, heavy=False),
                    stage=stage, codex=codex)
 
 
@@ -314,7 +325,7 @@ def unit_live_partial(request: Request, codex: str, unit: str, conn: sqlite3.Con
     """The live card alone, for the client to swap in when the run's shape changes."""
     if same := _unchanged(request, conn, f"unit:episode/{codex}/{unit}"):
         return same
-    found = _unit(request, conn, "episode", codex, unit)
+    found = _unit(request, conn, "episode", codex, unit, heavy=False)
     context = _live(request, conn, "episode", codex, unit, found["row"]["shown"] in ("done", "flagged"))
     if context["live"] is None:
         return HTMLResponse("")
@@ -326,7 +337,7 @@ def unit_orders_partial(request: Request, stage: str, codex: str, unit: str,
                         conn: sqlite3.Connection = Depends(_conn)):
     if same := _unchanged(request, conn, f"unit:{stage}/{codex}/{unit}"):
         return same
-    return _render(request, "_unit_orders.html", unit=_unit(request, conn, stage, codex, unit),
+    return _render(request, "_unit_orders.html", unit=_unit(request, conn, stage, codex, unit, heavy=False),
                    stage=stage, codex=codex)
 
 

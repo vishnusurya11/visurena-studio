@@ -19,6 +19,7 @@ import uvicorn
 
 from studio import db
 from studio.command_center import app as cc_app
+from studio.command_center import thumbs
 
 
 def parser() -> argparse.ArgumentParser:
@@ -57,6 +58,7 @@ def main(argv: list[str], serve=uvicorn.run) -> int:
     if args.check:
         print("\n".join(routes(app)))
         return 0
+    thumbs.prune(cc_app.thumb_dir(Path(args.library)))       # keep the cache under its cap (04 #11)
     serve(app, host="127.0.0.1", port=args.port, log_level="warning")
     return 0
 

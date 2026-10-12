@@ -78,6 +78,23 @@ def render(path: Path, width: int) -> bytes:
     return out.getvalue()
 
 
+DISK_CAP_BYTES = 256 * 1024 * 1024
+"""The on-disk thumbnail cache's ceiling (04 #11: a redraw orphans every old thumb)."""
+
+
+def prune(folder: Path, cap_bytes: int = DISK_CAP_BYTES) -> int:
+    """Delete the oldest kept thumbnails until the folder fits under the cap; how many went."""
+    files = sorted(Path(folder).glob("*.webp"), key=lambda p: p.stat().st_mtime) if Path(folder).is_dir() else []
+    total, removed = sum(p.stat().st_size for p in files), 0
+    for p in files:
+        if total <= cap_bytes:
+            break
+        total -= p.stat().st_size
+        p.unlink(missing_ok=True)
+        removed += 1
+    return removed
+
+
 def disk_path(folder: Path, k: tuple) -> Path:
     """Where a key's thumbnail is kept on disk: its hash, as .webp."""
     return Path(folder) / (hashlib.sha1(repr(k).encode()).hexdigest()[:20] + ".webp")

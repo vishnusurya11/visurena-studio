@@ -12,11 +12,30 @@ CODEX = re.compile(r"^\d{14}$")
 SUFFIXES = frozenset({".png", ".jpg", ".jpeg", ".webp", ".mp4", ".wav", ".json", ".jsonl", ".txt", ".md", ".html"})
 
 
+_FOLDERS: dict[tuple, list[Path]] = {}
+
+
+def _scan(library: Path) -> list[Path]:
+    """The library's folders, sorted."""
+    return sorted(p for p in Path(library).iterdir() if p.is_dir())
+
+
+def folders(library: Path) -> list[Path]:
+    """The library's folders, listed again only when the library's mtime moves
+    (board review 2026-10-12, 04 #2: every flag and poster lookup listed it)."""
+    root = Path(library)
+    key = (str(root), root.stat().st_mtime_ns)
+    if key not in _FOLDERS:
+        _FOLDERS.clear()
+        _FOLDERS[key] = _scan(root)
+    return _FOLDERS[key]
+
+
 def book_folder(library: Path, codex_id: str) -> Path | None:
     """The book's folder under the library: the first one named by its id."""
     if not CODEX.match(codex_id or "") or not Path(library).is_dir():
         return None
-    hits = sorted(p for p in Path(library).iterdir() if p.is_dir() and p.name.startswith(codex_id))
+    hits = [p for p in folders(library) if p.name.startswith(codex_id)]
     return hits[0] if hits else None
 
 

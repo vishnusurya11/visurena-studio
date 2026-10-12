@@ -21,7 +21,7 @@ addEventListener('pagereveal',function(e){try{if(e.viewTransition&&navigation.ac
 <script src="{{ static_url('viewer/docview.js') }}" defer></script>
 <script src="{{ static_url('viewer/viewer.js') }}" defer></script>
 <script src="{{ static_url('viewer/prov.js') }}" defer></script>
-<script type="speculationrules">{"prefetch":[{"where":{"or":[{"href_matches":"/d/*"},{"href_matches":"/b/*"},{"href_matches":"/books"},{"href_matches":"/queue"},{"href_matches":"/inbox"}]},"eagerness":"moderate"}]}</script>
+<script type="speculationrules">{"prefetch":[{"where":{"or":[{"href_matches":"/d/*"},{"href_matches":"/b/*"},{"href_matches":"/books"},{"href_matches":"/queue"},{"href_matches":"/inbox"}]},"eagerness":"conservative"}]}</script>
 </head>
 {#- The Viewer reads the page's book, stage and unit from <body data-*>: a unit page fills
     view_codex / view_stage / view_unit; every other page leaves them empty. -#}

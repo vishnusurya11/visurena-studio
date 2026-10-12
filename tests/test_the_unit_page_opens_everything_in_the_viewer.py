@@ -124,7 +124,7 @@ def test_the_files_section_groups_the_folder(page):
 def test_the_sibling_nav_links_the_neighbours(page):
     assert f'rel="prev" href="/d/episode/{CODEX}/ep03" data-key="["' in page
     assert f'rel="next" href="/d/episode/{CODEX}/ep05" data-key="]"' in page
-    assert f'<link rel="prefetch" href="/d/episode/{CODEX}/ep05">' in page
+    assert 'rel="prefetch"' not in page          # 04 #4: a sibling prefetch rendered a whole unit on the HDD
 
 
 # --- 5.8 a new master iteration ---

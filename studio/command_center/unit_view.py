@@ -670,33 +670,53 @@ def raw_band(learnings: list[dict], log: list[dict], timing: list[dict], events:
 # --- the page ---
 
 
-def bands(conn: sqlite3.Connection, library: Path, logs: Path, base: dict, codex: str, stage: str,
-          now: datetime, tz: tzinfo | None) -> dict:
-    """Every band of the unit page from the base view."""
+def band_context(conn: sqlite3.Connection, library: Path, base: dict, codex: str, stage: str,
+                 now: datetime, tz: tzinfo | None) -> dict:
+    """What every band reads: the book and home, the events, learnings, plan, gates and steps."""
     r = base["row"]
     book = library_paths.book_folder(library, codex)
     home = book / r["home"] if book else None
     events, learnings = unit_events(conn, codex, stage, r["unit"]), jsonl(home / "learnings.jsonl" if home else None)
     plan = read_doc(library, codex, _rel(book, home, (PICTURES.get(stage) or {}).get("plan", "plan.json")))
-    plan = plan if isinstance(plan, dict) else {}
-    rows = up.passes(events, learnings, base["timing"], r["run_id"] if base["running"] else None, now, tz)
     moved = moved_gates(book, r["unit"], base["verdicts"])
     gates = [{**g, "state": "stale" if g["gate"] in moved else gate_state(g)}
              for g in gate_band(library, codex, stage, base["verdicts"])]
     steps = step_band(base["steps"], r, events, base["timing"], now, tz, r["run_id"] if base["running"] else None)
-    pics = media_band(codex, book, home, r["home"],
-                      pictures_band(library, codex, stage, book, home, plan, gates, steps))
-    return {"head": {**head_band(r, plan, now, events[-1]["event_ts"] if events else None),
-                     "latest": latest_master(home)}, "bar": steps,
-            "health": health_band(rows, learnings, r["shown"] in ("done", "flagged")),
-            "gates": gates, "pictures": pics,
-            "master": screen_band(library, codex, stage, book, home, r["unit"], base["thumbnails"]),
+    return {"book": book, "home": home, "events": events, "learnings": learnings, "gates": gates, "steps": steps,
+            "plan": plan if isinstance(plan, dict) else {}}
+
+
+def light_bands(conn: sqlite3.Connection, logs: Path, base: dict, codex: str, stage: str, c: dict,
+                now: datetime, tz: tzinfo | None) -> dict:
+    """The bands a partial draws: head, bar, health, gates, orders, siblings, raw."""
+    r, events = base["row"], c["events"]
+    rows = up.passes(events, c["learnings"], base["timing"], r["run_id"] if base["running"] else None, now, tz)
+    return {"head": {**head_band(r, c["plan"], now, events[-1]["event_ts"] if events else None),
+                     "latest": latest_master(c["home"])}, "bar": c["steps"],
+            "health": health_band(rows, c["learnings"], r["shown"] in ("done", "flagged")), "gates": c["gates"],
             "orders": unit_orders(conn, codex, stage, r["unit"]), "hold": unit_hold(conn, codex, stage, r["unit"]),
-            "suggest": suggest(r, gates, stage, r["home"]),
-            "siblings": siblings(conn, codex, stage, r["unit"]),
-            "files": unit_files(home, viewer_model.run_logs(logs, codex, stage, run_ids(events))),
-            "raw": raw_band(learnings, jsonl(log_file(logs, codex, stage, base["log_name"])), base["timing"],
+            "suggest": suggest(r, c["gates"], stage, r["home"]), "siblings": siblings(conn, codex, stage, r["unit"]),
+            "raw": raw_band(c["learnings"], jsonl(log_file(logs, codex, stage, base["log_name"])), base["timing"],
                             events, now, tz)}
+
+
+def heavy_bands(library: Path, logs: Path, base: dict, codex: str, stage: str, c: dict) -> dict:
+    """The bands only the whole page draws: pictures (globs), master (a hash), files (a folder walk)."""
+    r, book, home = base["row"], c["book"], c["home"]
+    pics = media_band(codex, book, home, r["home"],
+                      pictures_band(library, codex, stage, book, home, c["plan"], c["gates"], c["steps"]))
+    return {"pictures": pics,
+            "master": screen_band(library, codex, stage, book, home, r["unit"], base["thumbnails"]),
+            "files": unit_files(home, viewer_model.run_logs(logs, codex, stage, run_ids(c["events"])))}
+
+
+def bands(conn: sqlite3.Connection, library: Path, logs: Path, base: dict, codex: str, stage: str,
+          now: datetime, tz: tzinfo | None, heavy: bool = True) -> dict:
+    """Every band of the unit page from the base view; `heavy=False` leaves out the three
+    no partial draws (board review 2026-10-12, 04 #3: each partial walked the folder)."""
+    c = band_context(conn, library, base, codex, stage, now, tz)
+    out = light_bands(conn, logs, base, codex, stage, c, now, tz)
+    return {**out, **heavy_bands(library, logs, base, codex, stage, c)} if heavy else out
 
 
 def run_ids(events: list[dict]) -> list[str]:
@@ -731,10 +751,11 @@ def master_poster_url(codex: str, book: Path | None, poster: str | None) -> str:
 
 
 def unit(conn: sqlite3.Connection, library: Path, codex: str, stage: str, unit_name: str,
-         logs: Path | None = None, now: datetime | None = None, tz: tzinfo | None = None) -> dict | None:
-    """The unit opened with every band; None when it has no row."""
+         logs: Path | None = None, now: datetime | None = None, tz: tzinfo | None = None,
+         heavy: bool = True) -> dict | None:
+    """The unit opened with every band (the light ones only with heavy=False); None when it has no row."""
     logs = Path(logs or Path(library).parent / "logs")
     base = views.unit(conn, library, codex, stage, unit_name, logs=logs)
     if base is None:
         return None
-    return {**base, **bands(conn, library, logs, base, codex, stage, now or datetime.now(timezone.utc), tz)}
+    return {**base, **bands(conn, library, logs, base, codex, stage, now or datetime.now(timezone.utc), tz, heavy)}

@@ -283,5 +283,5 @@ def shell(conn: sqlite3.Connection, library: Path, path: str, extras: dict | Non
             "queue": count(conn, "SELECT COUNT(*) FROM v_queue"), "departments": departments,
             "pins": pins, "gpu": gpu(pins, running), "hold": studio_hold(conn), "crumbs": crumbs(path, names),
             "key_rows": key_rows(), "aria": {k["keys"]: aria_keys(k["keys"]) for k in KEYS},
-            "chord": {href: " ".join(keycaps(key_for(href))) for href, *_ in PAGES}, "heartbeat": HEARTBEAT, "palette": palette_index(conn, library, departments),
+            "chord": {href: " ".join(keycaps(key_for(href))) for href, *_ in PAGES}, "heartbeat": HEARTBEAT, "palette": palette(departments, names, [], []),
             "engine": (extras or {}).get("engine"), "autopilot": (extras or {}).get("autopilot") or []}

@@ -301,7 +301,7 @@ def test_navigation_prefetches_and_never_prerenders(client):
     rules = re.findall(r'<script type="speculationrules">(.*?)</script>', page, re.S)
     assert len(rules) == 1
     spec = json.loads(rules[0])
-    assert set(spec) == {"prefetch"} and spec["prefetch"][0]["eagerness"] == "moderate"
+    assert set(spec) == {"prefetch"} and spec["prefetch"][0]["eagerness"] == "conservative"   # 04 #4: no hover sweeps
     assert {"/d/*", "/b/*"} <= {m["href_matches"] for m in spec["prefetch"][0]["where"]["or"]}
     assert page.count('rel="preload"') == 2 and 'as="font"' in page
 

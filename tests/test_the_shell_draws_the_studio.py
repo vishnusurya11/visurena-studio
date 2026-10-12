@@ -90,10 +90,12 @@ def test_a_static_url_carries_the_files_mtime():
 
 
 def test_the_palette_indexes_pages_units_books_and_departments(conn):
+    """The page embeds the cheap groups; units and actions come with /api/palette.json on open (04 #6)."""
     sh = shell.shell(conn[0], conn[1], "/")
-    groups = {e["g"] for e in sh["palette"]}
-    assert groups == {"Pages", "Units", "Actions", "Books", "Departments"}
+    assert {e["g"] for e in sh["palette"]} == {"Pages", "Books", "Departments"}
     assert sh["palette"][0]["h"] == "/" and any(e["h"] == "/architecture" for e in sh["palette"])
+    full = {e["g"] for e in shell.palette_index(conn[0], conn[1])}
+    assert full == {"Pages", "Units", "Actions", "Books", "Departments"}
 
 
 # --- the page ---
