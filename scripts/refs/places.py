@@ -256,18 +256,23 @@ def zlib_seed(key: str) -> int:
 
 
 def krea(book: Path):
-    """The house drawer: Krea2 + the Cinematic_Artstyle LoRA, logged to pack.jsonl."""
-    from studio.comfy import run
+    """The drawer in the BOOK's look (studio.book_look; the house Krea2 + LoRA when
+    the book declares none), logged to pack.jsonl."""
+    from studio import book_look, comfy
     from studio.refs_pack import T2I, Job, values_for
 
     def draw(prompt: str, target: Path) -> None:
         job = Job("locations", target.parent.name, target.stem, T2I, prompt, 1536, 1024)
         began = time.time()
-        out = run(job.workflow, values_for(job))[0]
+        v = values_for(job)
+        workflow, values = book_look.t2i(book, prompt, width=1536, height=1024, seed=v["seed"],
+                                         prefix=v["filename_prefix"])
+        out = comfy.run(workflow, values)[0]
         target.parent.mkdir(parents=True, exist_ok=True)
         shutil.copyfile(out, target)
+        (Path(book) / "refs").mkdir(parents=True, exist_ok=True)
         with (Path(book) / "refs" / "pack.jsonl").open("a", encoding="utf-8") as fh:
-            fh.write(json.dumps({"path": episode_home.relative(book, target), "workflow": job.workflow,
+            fh.write(json.dumps({"path": episode_home.relative(book, target), "workflow": workflow,
                                  "prompt": prompt, "seed": values_for(job)["seed"],
                                  "seconds": round(time.time() - began, 1)}, ensure_ascii=False) + "\n")
         print(f"  drew {episode_home.relative(book, target)}", flush=True)

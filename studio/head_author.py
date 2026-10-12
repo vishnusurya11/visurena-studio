@@ -24,9 +24,22 @@ from studio import look_table as lt
 
 SPAN_MATCH = 0.85
 """A source quote must be in its chapter at this ratio (look_timeline.SPAN_MATCH)."""
-SUPERSEDED = re.compile(r"\b(?:hair|face|facial|beard|hats?)\b", re.I)
+SUPERSEDED = re.compile(r"\b(?:hair|face|facial|beard|hats?|cloth\w*|dress|grooming|height|build|features)\b", re.I)
 """A profile sentence that NEGATES one of these ('gives no ... hair, face') is the
 writer's note of a silence the authored head now fills: it is dropped."""
+
+
+DATED = re.compile(r"\b(?:by|in|from|after|since|until)\s+chapter\s+\d+|\bduring\b|\blater\b"
+                   r"|\btransform\w*", re.I)
+"""A physical sentence dated to a chapter ('By chapter 6, he is ... balder') or to
+the story's course ('During the story he becomes ... deathly sick', 'His
+transformations alter ...', 'later') is a STATE: it lives in physical_evolution
+and the ledger, never in the base body (Jekyll's Lanyon was going to be drawn
+bald from it, Jekyll himself sick, 2026-10-12)."""
+
+
+def dated(sentence: str) -> bool:
+    return bool(DATED.search(sentence or ""))
 
 
 def unquoted(sources: list[dict], chapter_text) -> list[str]:
@@ -56,21 +69,32 @@ def face_of(words: str) -> tuple[str, str]:
     return lt.HAIR_FAMILY.get(marker(words, "hair"), ""), marker(words, "face")
 
 
-def clashes(faces: dict[str, tuple[str, str]], authored: set[str]) -> list[str]:
-    """Every pair of characters, one of them authored, sharing one whole face."""
+def clashes(faces: dict[str, tuple[str, ...]], authored: set[str]) -> list[str]:
+    """Every pair of characters, one of them authored, sharing one whole face
+    (a face may lead with its kind: a woman and a man never share one)."""
     names, out = list(faces), []
     for i, a in enumerate(names):
         for b in names[i + 1:]:
             if (a in authored or b in authored) and all(faces[a]) and faces[a] == faces[b]:
-                out.append(f"{a} and {b} share {faces[a][0]} hair, {faces[a][1]}")
+                out.append(f"{a} and {b} share {faces[a][-2]} hair, {faces[a][-1]}")
     return out
 
 
+KINDS = {"female": "woman", "woman": "woman", "girl": "girl", "boy": "boy"}
+"""A head's `kind` (heads.json) or a row's `gender`: faces clash only within one
+kind; everything else is a man (Jekyll's walk-ons, 2026-10-12)."""
+
+
+def kind_of(said: str | None) -> str:
+    return KINDS.get(str(said or "").strip().lower(), "man")
+
+
 def with_head(physical: str, words: str, old: str) -> str:
-    """The physical with its old authored head and its negated-head notes gone, the words appended."""
+    """The physical with its old authored head, its negated-head notes and its
+    chapter-dated states gone, the words appended."""
     text = physical.replace(old, " ") if old else physical
     kept = [s for s in lt.SENTENCE.split(text.strip())
-            if s.strip() and not (lt.NEGATION.search(s) and SUPERSEDED.search(s))]
+            if s.strip() and not (lt.NEGATION.search(s) and SUPERSEDED.search(s)) and not dated(s)]
     return " ".join(kept + [words.strip()]).strip()
 
 
@@ -87,8 +111,9 @@ def refusals(book: Path, heads: dict, rows: list[dict]) -> list[str]:
             out.append(f"{who}: no source quote")
         if gaps := missing_layers(entry["words"]):
             out.append(f"{who}: the words name no {', '.join(gaps)}")
-    faces = {who: face_of(e["words"]) for who, e in heads.items()}
-    faces |= {r["entity_id"]: face_of(r.get("physical", "")) for r in rows if r["entity_id"] not in heads}
+    faces = {who: (kind_of(e.get("kind")), *face_of(e["words"])) for who, e in heads.items()}
+    faces |= {r["entity_id"]: (kind_of(r.get("gender")), *face_of(r.get("physical", "")))
+              for r in rows if r["entity_id"] not in heads}
     return out + clashes(faces, authored=set(heads))
 
 

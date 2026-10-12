@@ -888,3 +888,15 @@ fixes. Each lesson below cost at least one launch. Tracker rows A38-A74 in
       111/211/311 against the cached 11: 2 field flips in 216 (0.9 %), both a people count on one
       12-figure crowd. The 6-16 % instability is the PIXELS (adjacent frames), not the seed:
       confirm-before-refuse on the same pixels buys nothing, so it is not built (D6).
+    - **The refs drawers were the last house look (Jekyll, 2026-10-12).** The 10-11 "book look"
+      fix reached the title plates only: build_pack, looks.py (fresh) and places.py still drew
+      every book in WotW's Krea2 + Cinematic LoRA. A photoreal book would have had painted place
+      masters under photoreal faces. `refs/look.json` + `studio/book_look.t2i` is now the one
+      door. The look test measured style A at 15 s a picture against the house look's 40 s.
+    - **A dated sentence in a dossier body is a state.** Lanyon's physical carried "By chapter 6
+      ... noticeably balder and older"; the look table read it as his base hair, so the ch2 man
+      with "a shock of hair prematurely white" was going to be drawn bald in every episode.
+    - **An absence draws the thing (the door).** "Two storeys, no window" drew windows in 3 of 3
+      look-test styles; the layout ("the upper storey one flat, blank forehead of discoloured
+      plaster, the facade filling the frame edge to edge; one blistered door below") drew a blank
+      wall on the first seed of three.

@@ -20,8 +20,9 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 
+from studio import book_look
 from studio.comfy import run
-from studio.refs_pack import jobs_for, pending, relpath, values_for
+from studio.refs_pack import T2I, Job, jobs_for, pending, relpath, values_for
 
 LIBRARY = Path(__file__).resolve().parents[2] / "library"
 KINDS = ("characters", "props", "locations")
@@ -40,13 +41,37 @@ def profiles(book: Path, kind: str) -> list[tuple[str, dict]]:
     return [(eid, row.get("profile") or {}) for eid, row in rows if eid != "index"]
 
 
+def table_job(book: Path, eid: str) -> list[Job]:
+    """A designless character's base sheet from the look table: its base look
+    drawn the way a fresh look is (head layers first, the body, the form)."""
+    from scripts.refs import looks
+    from studio import look_timeline
+    table = look_timeline.load(book)
+    card = table.characters.get(eid) if table else None
+    if card is None:
+        return []
+    return [Job("characters", eid, "sheet", T2I, looks.fresh_prompt(card, card.base, ""), 1536, 1024)]
+
+
+def jobs_of(book: Path, kind: str, eid: str, prof: dict) -> list[Job]:
+    """The entity's jobs from its design; a character without one, from the look table."""
+    return jobs_for(kind, eid, prof) or (table_job(book, eid) if kind == "characters" else [])
+
+
 def all_jobs(book: Path, kinds, only):
-    jobs = [j for k in kinds for eid, prof in profiles(book, k) for j in jobs_for(k, eid, prof)]
+    jobs = [j for k in kinds for eid, prof in profiles(book, k) for j in jobs_of(book, k, eid, prof)]
     return [j for j in jobs if not only or j.entity in only]
 
 
+def request(book: Path, job) -> tuple[str, dict]:
+    """(workflow, values) in the BOOK's look (studio.book_look), never the house's by default."""
+    v = values_for(job)
+    return book_look.t2i(book, job.prompt, width=job.width, height=job.height, seed=v["seed"],
+                         prefix=v["filename_prefix"])
+
+
 def draw(book: Path, job) -> Path:
-    out = run(job.workflow, values_for(job))[0]
+    out = run(*request(book, job))[0]
     target = book / relpath(job)
     target.parent.mkdir(parents=True, exist_ok=True)
     shutil.copyfile(out, target)
@@ -54,7 +79,7 @@ def draw(book: Path, job) -> Path:
 
 
 def log(book: Path, job, seconds: float) -> None:
-    row = {"path": relpath(job), "workflow": job.workflow, "prompt": job.prompt,
+    row = {"path": relpath(job), "workflow": request(book, job)[0], "prompt": job.prompt,
            "seed": values_for(job)["seed"], "seconds": round(seconds, 1)}
     with (book / "refs" / "pack.jsonl").open("a", encoding="utf-8") as f:
         f.write(json.dumps(row, ensure_ascii=False) + "\n")

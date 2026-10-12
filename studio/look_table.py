@@ -26,7 +26,7 @@ WORDS = {
     "headwear": re.compile(r"\b(?:hats?|hatless|bare-?headed|boater|bowler|derby|cap|bonnet|helmet|"
                            r"hood|turban|deerstalker|top-hat|toque)\b", re.I),
     "face": re.compile(r"\b(?:beard\w*|m(?:ou|u)stach\w*|whiskers?|side-?whiskers|(?:clean-)?shaven|"
-                       r"stubble|goatee|sideburns?|gaunt)\b", re.I),
+                       r"stubble|goatee|sideburns?|gaunt|smooth-cheeked)\b", re.I),
     "hair": re.compile(r"\b(?:hair|haired|bald\w*|curls?|ringlets|plaits?|forelock)\b", re.I),
 }
 SENTENCE = re.compile(r"(?<=[.!?])(?<!\bMr\.)(?<!\bMrs\.)(?<!\bDr\.)(?<!\bSt\.)\s+")
@@ -160,7 +160,7 @@ HAIR_NOUN = re.compile(r"\b((?:[a-z]+[- ])?[a-z]+)[- ]haired\b|\b((?:[a-z]+[- ])
 """The words next to the noun: before it ('sandy hair', 'red-haired') or right
 after it ('hair turned ash-grey'); a comma ends the after-side."""
 FACIAL = (("beard", r"beard"), ("moustache", r"m(?:ou|u)stach|whisker"), ("stubble", r"stubble"),
-          ("none", r"shaven|beardless"))
+          ("none", r"shaven|beardless|smooth-cheeked"))
 TOP = (("shirtless", r"shirtless|bare to the waist|naked"), ("dress", r"\bdress\b|gown|frock"),
        ("uniform", r"uniform|tunic"), ("nightshirt", r"nightshirt|nightgown"),
        ("suit_jacket", r"\bsuit\b|jacket"), ("coat", r"\bcoat\b|overcoat|greatcoat|cape|cloak"),

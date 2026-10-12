@@ -304,6 +304,15 @@ and upper lip, sixteen days grown"; a styled beard and `stubble` keep the book's
 hat (a row's physical carries one chapter's costume); a row with no dossier is one look
 per refs.json card (`looks_from_cards`).
 
+**Every refs picture is drawn in the BOOK's look** (2026-10-12): `library/<book>/refs/look.json`
+declares it once by the owner's ruling (`studio/book_look.py`); the base sheet, a fresh look,
+a place master and the title plates read it. A photoreal book draws on Krea2 turbo with no
+LoRA, led by its declared words; no declaration is the house look. A character with no
+`design.sheet_prompt` gets its base sheet from the look table (`build_pack.table_job`). A
+dossier sentence dated to a chapter ("By chapter 6, ... balder") is a state, never the base
+head (`head_author.dated`). Describe a place by its LAYOUT, never its absences: "no window"
+drew windows on Jekyll's door, "a flat blank plaster upper storey filling the frame" did not.
+
 **Look at every picture you draw** before anything is built on it. Put the
 defining state or detail FIRST in its prompt. A detail buried mid-sentence is
 dropped:

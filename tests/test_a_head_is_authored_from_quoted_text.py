@@ -99,3 +99,16 @@ def test_the_script_authors_against_the_bound_rows(tmp_path, monkeypatch, capsys
     monkeypatch.setattr(author_heads.episode_home, "book_dir", lambda book_id: root)
     assert author_heads.main("jh") == 0
     assert "head: edward_hyde" in capsys.readouterr().out
+
+
+def test_a_woman_and_a_man_never_share_a_face(tmp_path):
+    """Jekyll's walk-ons (2026-10-12): the silvery-haired housekeeper and grey,
+    clean-shaven Jekyll share hair family and 'none', yet no reader confuses them.
+    A head names its `kind` (default man); a row its gender; faces clash within a kind."""
+    keeper = {"kind": "woman", "words": "An old woman. Silvery-grey hair; smooth-cheeked; a black lace cap.",
+              "sources": [{"chapter": 2, "quote": "Hyde was pale and dwarfish"}]}
+    root = book(tmp_path, {"henry_jekyll": JEKYLL, "hyde_housekeeper": keeper})
+    assert head_author.apply(root, rows=[]) == ["henry_jekyll", "hyde_housekeeper"]
+    rows = [{"entity_id": "maid", "gender": "female", "physical": "iron-grey hair, clean-shaven"}]
+    with pytest.raises(SystemExit, match="hyde_housekeeper and maid"):
+        head_author.apply(root, rows=rows)

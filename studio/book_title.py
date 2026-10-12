@@ -91,7 +91,9 @@ def look_of(book: Path) -> str:
 
 def lead_for(book: Path, look: str) -> str:
     """The words a plate opens with: the house look, or a photoreal book's own refs words."""
-    from studio import episode_home
+    from studio import book_look, episode_home
+    if not look.strip() and book_look.photoreal(book) and book_look.declared(book).get("lead"):
+        return book_look.declared(book)["lead"]       # the owner's declared words lead (refs/look.json)
     ask = plate_request(look)
     refs = Path(book) / "refs" / "refs.json"
     return photoreal_lead(episode_home.read_json(refs)) if not look.strip() and refs.exists() else ask["lead"]

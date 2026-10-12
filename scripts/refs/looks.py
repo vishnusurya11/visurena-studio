@@ -213,9 +213,9 @@ def draw_missing(book: Path, episode, draws: dict, judge) -> list[str]:
 
 
 def comfy_draws(book: Path) -> dict:
-    """The house drawers on the local GPU: the identity edit and the Krea2 T2I."""
+    """The drawers on the local GPU: the identity edit and the T2I in the BOOK's look."""
     import shutil
-    from studio import comfy, refs_pack
+    from studio import book_look, comfy
 
     def edit(prompt: str, source: Path, target: Path, seed: int) -> None:
         out = comfy.run("image_krea2_identity_edit", {"source": comfy.stage_image(source),
@@ -223,8 +223,8 @@ def comfy_draws(book: Path) -> dict:
         shutil.copyfile(out, target)
 
     def fresh(prompt: str, target: Path, seed: int) -> None:
-        out = comfy.run(refs_pack.T2I, {"prompt": refs_pack.styled(prompt), "seed": seed,
-                                        "width": 1536, "height": 1024})[0]
+        out = comfy.run(*book_look.t2i(book, prompt, width=1536, height=1024, seed=seed,
+                                       prefix=f"looks/{target.stem}"))[0]
         shutil.copyfile(out, target)
     return {"edit": edit, "fresh": fresh}
 
