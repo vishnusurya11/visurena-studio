@@ -43,6 +43,16 @@ def test_a_locked_exchange_is_not_a_repeated_move():
     assert not [f for f in plan_gates.moves_faults(ep) if "twice running" in f or "share" in f]
 
 
+def test_holding_the_dialogue_never_raises_another_moves_share():
+    """The replay of shipped WotW ep04 (2026-10-13): taking held dialogue shots out
+    of the DENOMINATOR lifted 'high_angle' from 0.25 to 0.32 -- a new refusal.
+    Held dialogue leaves the count, never the shot total."""
+    pan = "The camera pans across to the gate; he walks; the gate swings"
+    ep = _ep([pan, LOCKED, pan, LOCKED, MOVES[1], MOVES[2], MOVES[3], LOCKED, MOVES[4], MOVES[5], MOVES[6], MOVES[7]],
+             dialogue={1, 3, 7})
+    assert not [f for f in plan_gates.moves_faults(ep) if "share" in f]
+
+
 def test_two_locked_narration_shots_running_are_still_refused():
     ep = _ep(MOVES[:4] + [LOCKED, LOCKED] + MOVES[4:], dialogue=set())
     assert [f for f in plan_gates.moves_faults(ep) if "twice running" in f]

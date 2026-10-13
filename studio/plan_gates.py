@@ -1146,12 +1146,15 @@ def talk_faults(episode) -> list[str]:
                   "shoulder, and the actor carries the verb", len(moving), MAX_TALK_TRAVELS) for i in moving]
 
 
-def share_fault(ids: list[str]) -> list[str]:
+def share_fault(ids: list[str], total: int | None = None) -> list[str]:
+    """The top move's share of ALL the shots; `ids` may leave out the held
+    dialogue shots (2026-10-13), never the total they are divided by."""
+    total = len(ids) if total is None else total
     top = max(set(ids), key=ids.count) if ids else ""
-    got = round(ids.count(top) / len(ids), 2) if ids else 0.0
+    got = round(ids.count(top) / total, 2) if ids and total else 0.0
     if got <= MAX_MOVE_SHARE:
         return []
-    return [fault("G-MOVES", "plan", f"{top!r} share of the {len(ids)} shots", got, MAX_MOVE_SHARE)]
+    return [fault("G-MOVES", "plan", f"{top!r} share of the {total} shots", got, MAX_MOVE_SHARE)]
 
 
 def running_faults(shots, ids: list[str], spoken: set[int] = frozenset()) -> list[str]:
@@ -1169,7 +1172,7 @@ def moves_faults(episode) -> list[str]:
     shots, spoken = list(episode.shots), dialogue_shots(episode)
     ids = move_ids(shots)
     shared = [m for s, m in zip(shots, ids) if not (s.index in spoken and m in TALK_MOVES)]
-    return distinct_fault(ids) + share_fault(shared) + running_faults(shots, ids, spoken)
+    return distinct_fault(ids) + share_fault(shared, len(ids)) + running_faults(shots, ids, spoken)
 
 
 # ---- G-STILL: a move the model ignores is refused before it renders ---------------
