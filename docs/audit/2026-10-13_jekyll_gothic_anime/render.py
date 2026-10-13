@@ -128,6 +128,9 @@ SUBJECTS.update({
 HYDE_FIX = {
     "VHD": ("(black wide-brimmed hat:1.4), ", "long cape, tall hat, beanie, knit hat, (cap:1.2), hood, ornament on hat, "),  # "(very short hair:1.3)" here gave pure noise with the Kawajiri LoRA
     "HEL": ("insane grin, (very short hair:1.3), black clothes, ", "brown suit, brown coat, red coat, alucard (hellsing), (cross:1.3), priest, cassock, clergy, alexander anderson, "),
+    # Amano overshoots the brim; Hyde's AMA pick was rendered with "(modest soft felt hat:1.2), " (times.jsonl), which put
+    # caps, helmets and a woman into the trampling, so the trampling uses this line
+    "AMA": ("(male focus:1.2), (black wide-brimmed felt hat:1.2), ", "(huge hat:1.3), oversized hat, cavalier hat, (witch hat:1.4), beanie, helmet, cap, 1woman, "),
     "MON": ("young adult man, (black wide-brimmed hat:1.4), (victorian street:1.3), ", "old, elderly, (middle-aged:1.3), wrinkles, wooden corridor, child, kid, (beanie:1.3), knit hat, pom pom, kasa, "),  # (young man:1.4) made him a child
 }
 # style -> (positive, negative) for every subject: VHD pulls men toward long-haired, feminine D/Leila looks
