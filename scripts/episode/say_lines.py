@@ -223,6 +223,7 @@ def listen_all(records: list[dict], book: Path, listen, among: dict | None = Non
     pay two swaps here instead of twenty-six.  `among` is the whole episode's
     records, which an alternate-reference render is judged against."""
     among = among if among is not None else {r["index"]: r for r in records}
+    listen = voice_qc.with_lexicon(listen, voice_qc.ear_lexicon(book))
     failed = []
     for record in records:
         clip = book / record["rel_path"]

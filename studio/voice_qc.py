@@ -24,6 +24,7 @@ without a GPU: `check(clip, line, transcribe=fake)` is a free, offline test.
 """
 from __future__ import annotations
 
+import json
 import re
 import unicodedata
 from dataclasses import dataclass
@@ -260,6 +261,25 @@ def error_rate(heard: str, intended: str) -> float:
     if not meant:
         return 0.0
     return distance(normalised(heard), meant) / len(meant)
+
+
+def heard_as(heard: str, lexicon: dict[str, str]) -> str:
+    """The transcript with a book's known mishearings read as the names they
+    are (Jekyll ep01 l12: "And Field" for "Enfield"); whole phrases only."""
+    for wrong, right in lexicon.items():
+        heard = re.sub(rf"\b{re.escape(wrong)}\b", right, heard, flags=re.IGNORECASE)
+    return heard
+
+
+def ear_lexicon(book: Path) -> dict[str, str]:
+    """The book's filed mishearings, `cast/ear_lexicon.json`; none when absent."""
+    path = Path(book) / "cast" / "ear_lexicon.json"
+    return json.loads(path.read_text(encoding="utf-8")) if path.exists() else {}
+
+
+def with_lexicon(listen: Callable[[Path], str], lexicon: dict[str, str]) -> Callable[[Path], str]:
+    """An ear that reads the book's names before anything scores it."""
+    return lambda clip: heard_as(listen(clip), lexicon)
 
 
 def seconds_of(clip: Path) -> float:
