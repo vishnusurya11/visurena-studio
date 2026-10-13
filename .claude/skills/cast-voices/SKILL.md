@@ -129,6 +129,8 @@ call — card, portrait, voice, checked.
 | the voice ignores the asked register | check `pitch` actually carries a number; prose alone drifts |
 | everything sounds flat | the sheet is static — apply Gradual Control to pitch, speed, volume |
 | the accent is wrong | name it AND give it a reason in `Background`; an unexplained accent drifts American |
+| `UnifiedVoiceDesignerNode: Worker closed the response stream unexpectedly` | the TTS Audio Suite isolated worker died on import: it inherits ComfyUI's `sys.path`, where `engines/rvc/impl/lib/utils.py` shadows the suite's `utils` package (Jekyll, 2026-10-13). The workers under `custom_nodes/tts_audio_suite/utils/runtimes/workers/` must put the suite root FIRST on `sys.path` (remove, then insert at 0). A worker is spawned fresh per run, so the fix needs no ComfyUI restart; re-check it after any suite update |
+| both candidates of a roll score identically | the render got no seed; every take must pass `seed=voice.seed_for(who, n)` (fixed 2026-10-13) |
 
 ## Never
 

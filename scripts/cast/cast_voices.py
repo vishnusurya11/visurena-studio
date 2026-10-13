@@ -267,13 +267,20 @@ def judge(clip: Path, cast: dict[str, Path]) -> tuple[float, str, float, str]:
     return self_sim, rival, near, design_fault(self_sim, near)
 
 
+def generation(dest: Path) -> int:
+    """How many designs this character has retired: a recast renders the
+    recorded instruction again, so it must draw seeds no earlier cast used."""
+    return len(list(Path(dest).parent.glob(f"{Path(dest).stem}_v*{Path(dest).suffix}")))
+
+
 def one_roll(dest: Path, roll: int, instruct: str, cast: dict[str, Path],
              hertz: int, render) -> list[Pick]:
     """`CANDIDATES` renders of one instruction, each scored by the ear."""
     picks = []
     for take in range(CANDIDATES):
         spare = dest.with_name(f".take{roll}_{take}.wav")
-        render(instruct, spare, seed=voice.seed_for(dest.parent.parent.name, roll * CANDIDATES + take))
+        draw = (generation(dest) * REROLLS + roll) * CANDIDATES + take
+        render(instruct, spare, seed=voice.seed_for(dest.parent.parent.name, draw))
         self_sim, rival, near, fault = judge(spare, cast)
         picks.append(Pick(spare, self_sim, rival, near, fault, hertz))
         print(f"      roll {roll + 1} take {take + 1}/{CANDIDATES} at {hertz} Hz: self {self_sim:.2f}, "

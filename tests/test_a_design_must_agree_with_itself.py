@@ -199,3 +199,16 @@ def test_every_candidate_is_rendered_on_its_own_seed(tmp_path, monkeypatch):
     monkeypatch.setattr(cast_voices, "CANDIDATES", 2)
     cast_voices.audition(tmp_path, "john_ferrier", "pitch: 93 Hz.", {}, hertz=93, render=stage.render)
     assert len(stage.seeds) == 6 and len(set(stage.seeds)) == 6
+
+
+def test_a_recast_draws_seeds_the_last_cast_never_used(tmp_path, monkeypatch):
+    """A recast re-renders the RECORDED instruction; on the same seeds it is the
+    same voice again (Jekyll 2026-10-13: Hyde vs Jekyll 0.69 would recast into
+    itself). Each retired design_vN moves the recast onto fresh seeds."""
+    first, second = Stage([(0.80, 0.30)] * 3), Stage([(0.80, 0.30)] * 3)
+    wire(monkeypatch, first)
+    cast_voices.audition(tmp_path, "edward_hyde", "pitch: 92 Hz.", {}, hertz=92, render=first.render)
+    cast_voices.retire(tmp_path / "cast/edward_hyde/voice/design.wav")
+    wire(monkeypatch, second)
+    cast_voices.audition(tmp_path, "edward_hyde", "pitch: 92 Hz.", {}, hertz=92, render=second.render)
+    assert not set(first.seeds) & set(second.seeds)
