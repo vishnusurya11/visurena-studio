@@ -49,15 +49,33 @@ def runs(filled: np.ndarray, gap: int) -> list[tuple[int, int]]:
     return out
 
 
+SPLIT_SHARE = 0.25
+"""A bridged run wider than this is wider than one standing figure (the one-figure
+first runs of Jekyll and WotW sheets read 0.17-0.21): its narrow backdrop gaps are
+gaps BETWEEN figures, not dips inside one.  Hyde's 2026-10-13 sheet: front and
+three-quarter poses 20 px apart (spread 6.1) bridged into one 0.35-wide run."""
+
+
+def first_of_wide(filled: np.ndarray, start: int, end: int, w: int) -> tuple[int, int]:
+    """The first figure-wide sub-run of a run wider than SPLIT_SHARE, split at
+    every real backdrop gap; the run itself when it holds no gap."""
+    if end - start <= SPLIT_SHARE * w:
+        return start, end
+    inner = [(start + a, start + b) for a, b in runs(filled[start:end], 1) if b - a >= MIN_WIDTH * w]
+    return inner[0] if len(inner) > 1 else (start, end)
+
+
 def first_figure_box(a: np.ndarray) -> tuple[int, int] | None:
     """(left, right) columns of the first figure, margin included; None when
     no single figure can be separated."""
     h, w = a.shape[:2]
     band = a[int(h * BAND[0]):int(h * BAND[1])].astype(float).mean(axis=2)
     spread = np.convolve(band.std(axis=0), np.ones(SMOOTH) / SMOOTH, mode="same")
-    for start, end in runs(spread > GAP_STD, int(GAP_MIN * w)):
+    filled = spread > GAP_STD
+    for start, end in runs(filled, int(GAP_MIN * w)):
         if end - start < MIN_WIDTH * w:
             continue
+        start, end = first_of_wide(filled, start, end, w)
         if end - start > MAX_SHARE * w:
             return None
         pad = int(MARGIN * w)
