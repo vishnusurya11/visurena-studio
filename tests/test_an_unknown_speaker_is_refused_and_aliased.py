@@ -17,10 +17,15 @@ def _ep(*speakers):
     return SimpleNamespace(lines=[SimpleNamespace(index=i, speaker=s, kind="narration", shot=0) for i, s in enumerate(speakers)])
 
 
-def test_a_speaker_outside_the_cast_is_a_fault_and_a_cast_one_is_not():
-    assert plan_gates.speaker_faults(_ep("narrator", "curate"), CAST) == [
-        "G-SPEAKER line 0: speaker 'narrator' is not in the cast (unnamed_first_person_narrator, curate, artilleryman), measured 0 against 1"]
-    assert plan_gates.speaker_faults(_ep("curate", "unnamed_first_person_narrator"), CAST) == []
+NARRATOR = "unnamed_first_person_narrator"
+
+
+def test_a_narration_speaker_outside_the_cast_is_named_against_the_narrator_not_the_cast():
+    """2026-10-13: the refusal no longer prints the cast as a menu for narration."""
+    assert plan_gates.speaker_faults(_ep("narrator", NARRATOR), CAST, NARRATOR) == [
+        "G-SPEAKER line 0: speaker 'narrator' is not the book's narrator ('unnamed_first_person_narrator'), "
+        "measured 0 against 1"]
+    assert plan_gates.speaker_faults(_ep("curate", NARRATOR), CAST, NARRATOR) == []
 
 
 def test_the_cure_aliases_a_narrator_like_id_to_the_one_narrator_in_the_cast():

@@ -252,6 +252,20 @@ def continuity_gates(book: Path, ep) -> int:
     return len(found)
 
 
+def speaker_gate(ep, book: Path, refs: list[dict]) -> int:
+    """G-SPEAKER against the BOOK's narrator (studio.book_narrator), HARD; a
+    character narrating beside him is printed as advice."""
+    from studio import book_narrator
+    who = book_narrator.narrator(book)
+    sp = plan_gates.speaker_faults(ep, [str(r.get("entity_id")) for r in refs if r.get("entity_id")], who)
+    print("G-SPEAKER    :", len(sp) or "clean", f"(narrator {who!r})" if who else "(no narrator)")
+    for f in sp:
+        print("   ", f[:170])
+    for n in plan_gates.speaker_advisories(ep, who) if who else []:
+        print("  advisory:", n[:170])
+    return len(sp)
+
+
 def main(book_id: str, number: int) -> int:
     book = episode_home.book_dir(book_id)
     plan_gates.use_voice(book, number)     # every projection below reads the recorded lines
@@ -283,10 +297,7 @@ def main(book_id: str, number: int) -> int:
     print("G-ARTICLE    :", len(af) or "clean"); hard += len(af)
     for f in af:
         print("   ", f[:170])
-    sp = plan_gates.speaker_faults(ep, [str(r.get("entity_id")) for r in refs if r.get("entity_id")])
-    print("G-SPEAKER    :", len(sp) or "clean"); hard += len(sp)
-    for f in sp:
-        print("   ", f[:170])
+    hard += speaker_gate(ep, book, refs)
     cc = plan_gates.close_crowd_faults(ep)
     print("G-CROWD-CLOSE:", cc or "clean"); hard += len(cc)
     for f in cc:

@@ -222,7 +222,8 @@ def test_build_carries_every_optional_input_when_present(book, monkeypatch):
 
 def test_render_has_a_section_per_present_input_in_a_fixed_order():
     text = plan_brief.render({
-        "number": 3, "band": {"min_seconds": 120.0}, "scenes": [{"n": 1, "summary": "Meet."}],
+        "number": 3, "narrator": {"speaker": "narrator"},
+        "band": {"min_seconds": 120.0}, "scenes": [{"n": 1, "summary": "Meet."}],
         "chapter_text": "Prose.", "screenplay": [{"target": "feature"}],
         "cast": [{"entity_id": "lead"}], "places": [{"id": "yard"}],
         "camera_catalog": "moves", "picture_rules": "no last-frame pin",

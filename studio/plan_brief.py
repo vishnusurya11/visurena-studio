@@ -28,6 +28,7 @@ ROW_FIELDS = ("entity_id", "name", "display", "gender", "pronouns", "physical",
 
 SECTIONS = {
     "number": "## THE UNIT",
+    "narrator": "## THE BOOK'S NARRATOR (decided once for the book; never choose another)",
     "band": "## THE BAND (from the contract)",
     "scenes": "## THE CHAPTER'S SCENES (analysis rows)",
     "chapter_text": "## THE CHAPTER'S TEXT",
@@ -240,6 +241,25 @@ def with_place(book_dir: Path, row: dict, number: int) -> dict:
                  ("id", "name", "aliases", "visual", "design", "place", "members", "drawn_views", "master", "history"))
 
 
+# ---- the narrator --------------------------------------------------------------------
+
+NARRATOR_RULE = ("This speaker SPEAKS EVERY NARRATION LINE. Never give narration to a character. "
+                 "A character who tells his own story in the chapter speaks it as `kind: \"tale\"` "
+                 "in his own voice, over pictures of what he tells.")
+
+
+def narrator_section(book_dir: Path) -> dict | None:
+    """The book's narrator for the writer (studio.book_narrator); None when unset
+    -- step 02 stops before a brief is written then."""
+    from studio import book_narrator
+    found = book_narrator.declared(book_dir)
+    speaker = found.speaker if found else book_narrator.established(book_dir)
+    if not speaker:
+        return None
+    person, on_camera = (found.person, found.on_camera) if found else ("first", True)
+    return {"speaker": speaker, "person": person, "on_camera": on_camera, "rule": NARRATOR_RULE}
+
+
 # ---- the rest -----------------------------------------------------------------------
 
 def camera_catalog(path: Path | None = None) -> str | None:
@@ -295,7 +315,8 @@ def band(book_dir: Path | None = None, number: int | None = None) -> dict:
 def build(book_dir: Path, number: int, targets: list[str] | None = None) -> dict:
     """The whole brief; an optional input with nothing in it is left out."""
     book_dir = Path(book_dir)
-    found = {"number": number, "band": band(book_dir, number), "scenes": scenes(book_dir, number),
+    found = {"number": number, "narrator": narrator_section(book_dir),
+             "band": band(book_dir, number), "scenes": scenes(book_dir, number),
              "chapter_text": chapter_text(book_dir, number),
              "screenplay": screenplay(book_dir, number, targets),
              "cast": cast_rows(book_dir, number), "places": places(book_dir, number),

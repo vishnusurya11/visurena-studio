@@ -262,6 +262,17 @@ def cure_aside_first(ctx, plan: Path) -> None:
             level="WARNING" if rc else "INFO")
 
 
+def narrator_or_stop(ctx) -> str:
+    """The book's narrator, or the STOP before any writer is asked (Jekyll ep01,
+    2026-10-13: an unset narrator let a refusal loop pick a cast member)."""
+    from studio import book_narrator
+    try:
+        return book_narrator.require(ctx.book_dir)
+    except SystemExit as why:
+        ctx.log(str(why), step_id=STEP_ID, level="ERROR")
+        raise
+
+
 def run(ctx) -> None:
     # CLOCKED (five-hour plan fix 6): ep14 spent 3.3 h in this step and
     # timing.jsonl never saw a second of it.
@@ -271,6 +282,7 @@ def run(ctx) -> None:
         if not wants_rewrite(ctx) and resigned(ctx):
             return      # BEFORE the aside is read: ep19 launch07 (2026-10-07 15:10Z) restored
                         # a day-old aside over a plan whose signature a recorded cure had lapsed
+        narrator_or_stop(ctx)
         if not wants_rewrite(ctx):
             cure_aside_first(ctx, plan)
         desk = plan_ladder.Desk(ctx, plan, writer=episode_writer)

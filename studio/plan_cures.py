@@ -1944,14 +1944,15 @@ def narrator_id(cast_ids: list[str]) -> str | None:
     return hits[0] if len(hits) == 1 else None
 
 
-def alias_speakers(doc: dict, cast_ids: list[str]) -> dict:
-    """G-SPEAKER's free cure (ep23): a narrator-like speaker becomes the cast's one
-    narrator id; any other unknown speaker is left for the writer."""
-    target = narrator_id(cast_ids)
+def alias_speakers(doc: dict, cast_ids: list[str], narrator: str = "") -> dict:
+    """G-SPEAKER's free cure (ep23): a narrator-like speaker becomes the BOOK's
+    narrator (refs/narrator.json, 2026-10-13), else the cast's one narrator id;
+    any other unknown speaker is left for the writer."""
+    target = narrator or narrator_id(cast_ids)
     if target is None:
         return doc
     for line in doc.get("lines") or []:
         said = re.sub(r"[^a-z0-9]+", "_", str(line.get("speaker", "")).strip().lower()).strip("_")
-        if said not in cast_ids and NARRATOR_LIKE.match(said):
+        if line.get("speaker") != target and said not in cast_ids and NARRATOR_LIKE.match(said):
             line["speaker"] = target
     return doc

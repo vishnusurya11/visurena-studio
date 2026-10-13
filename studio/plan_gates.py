@@ -1643,11 +1643,59 @@ def chapter_faults(episode: Episode, paragraphs: list[str]) -> list[str]:
 # `unnamed_first_person_narrator`; the plan signed, and step 04 died casting a
 # voice for a character that does not exist.
 
-def speaker_faults(episode, cast_ids: list[str]) -> list[str]:
-    """G-SPEAKER, always hard: every line's speaker is one of the cast's ids."""
-    known = ", ".join(cast_ids)
-    return [fault("G-SPEAKER", f"line {line.index}", f"speaker {line.speaker!r} is not in the cast ({known})", 0, 1)
-            for line in episode.lines if line.speaker not in set(cast_ids)]
+# Jekyll ep01 (2026-10-13): a third-person book had no narrator; this gate
+# refused `narrator` five rounds running and PRINTED THE CAST as its menu, and
+# the writer took `henry_jekyll`.  The narrator is the BOOK's (studio.book_narrator):
+# unset is one plan-wide stop that names nobody, and a narration refusal names
+# the narrator, never the cast.
+
+NARRATOR_UNSET = ("the book has no narrator (refs/narrator.json, decided once before episode 1); "
+                  "the plan stops -- no line may pick one")
+
+
+def speaker_faults(episode, cast_ids: list[str], narrator: str = "") -> list[str]:
+    """G-SPEAKER, always hard: the book has a narrator, and every line's speaker
+    is legal for its kind (`speaker_fault`)."""
+    if not narrator and any(l.kind == "narration" for l in episode.lines):
+        return [fault("G-SPEAKER", "plan", NARRATOR_UNSET, 0, 1)]
+    out = [f for line in episode.lines if (f := speaker_fault(line, set(cast_ids), narrator, cast_ids))]
+    return out + stand_in_faults(episode, narrator)
+
+
+def speaker_fault(line, cast: set[str], narrator: str, cast_ids: list[str]) -> str | None:
+    """Narration is the narrator's (or, legacy, a cast member's); a tale is a cast
+    member's own voice; dialogue is a cast member's.  Only dialogue lists the cast."""
+    who = line.speaker
+    if line.kind == "narration" and who != narrator and who not in cast:
+        return fault("G-SPEAKER", f"line {line.index}", f"speaker {who!r} is not the book's narrator ({narrator!r})", 0, 1)
+    if line.kind == "tale" and (who == narrator or who not in cast):
+        return fault("G-SPEAKER", f"line {line.index}", f"a tale is told by a character of the cast in his own "
+                     f"voice, never by the narrator or {who!r}", 0, 1)
+    if line.kind == "dialogue" and who not in cast:
+        return fault("G-SPEAKER", f"line {line.index}", f"speaker {who!r} is not in the cast ({', '.join(cast_ids)})", 0, 1)
+    return None
+
+
+def stand_ins(episode, narrator: str) -> list:
+    """Narration lines a character speaks in the narrator's place."""
+    return [l for l in episode.lines if l.kind == "narration" and l.speaker != narrator]
+
+
+def stand_in_faults(episode, narrator: str) -> list[str]:
+    """Hard when the narrator narrates NOTHING: a character has replaced him (Jekyll ep01)."""
+    if any(l.kind == "narration" and l.speaker == narrator for l in episode.lines):
+        return []
+    return [fault("G-SPEAKER", f"line {l.index}", f"narration spoken by {l.speaker!r}; the book's narrator is "
+                  f"{narrator!r} -- a character telling his own story is a `tale`", l.speaker, narrator)
+            for l in stand_ins(episode, narrator)]
+
+
+def speaker_advisories(episode, narrator: str) -> list[str]:
+    """A character narrating BESIDE the narrator: advice (WotW ep22/24 shipped so)."""
+    if not any(l.kind == "narration" and l.speaker == narrator for l in episode.lines):
+        return []
+    return [f"G-SPEAKER line {l.index}: narration spoken by {l.speaker!r} beside the narrator "
+            f"(advisory: a character telling his own story is a `tale`)" for l in stand_ins(episode, narrator)]
 
 
 def prop_card_faults(ep, legal: set[str]) -> list[str]:

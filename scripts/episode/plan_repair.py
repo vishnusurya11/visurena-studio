@@ -234,7 +234,8 @@ def apply(doc: dict, rows: list[str], book, number: int = 0,
         elif name == "split_setup":
             doc = pc.split_setup(doc, rate=rate)
         elif name == "alias_speakers":
-            doc = pc.alias_speakers(doc, cast_ids_of(book))
+            from studio import book_narrator
+            doc = pc.alias_speakers(doc, cast_ids_of(book), book_narrator.narrator(book))
         elif name == "strip_phantoms":
             doc, _ = pc.strip_phantoms(doc, *phantom_context(book))
         elif name == "holds":

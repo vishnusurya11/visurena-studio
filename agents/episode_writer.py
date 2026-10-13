@@ -97,8 +97,9 @@ def structural_cures(doc: dict, brief: dict | None = None) -> dict:
     `narrator` beside the cast's narrator id reached step 04)."""
     from studio import plan_cures
     cast_ids = [str(r.get("entity_id")) for r in (brief or {}).get("cast") or [] if r.get("entity_id")]
+    narrator = str(((brief or {}).get("narrator") or {}).get("speaker") or "")
     try:
-        doc = plan_cures.alias_speakers(doc, cast_ids) if cast_ids else doc
+        doc = plan_cures.alias_speakers(doc, cast_ids, narrator) if cast_ids or narrator else doc
         doc = plan_cures.trim_style(doc)        # ep21: a 19-word style line cost a writer round
         return plan_cures.button_beat(doc)
     except Exception:                       # a cure never turns a refusal into a crash

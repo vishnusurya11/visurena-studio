@@ -41,6 +41,8 @@ def ctx(conn, tmp_path, monkeypatch):
     context.home = episode_home.home(book, 3)
     context.home.mkdir(parents=True)
     context.extra = []
+    from studio import book_narrator    # a book's narrator is decided before its first plan (2026-10-13)
+    book_narrator.declare(book, book_narrator.dedicated("calm", "fixture book"))
     monkeypatch.setattr(step.plan_ladder, "plan_brief",
                         SimpleNamespace(build=lambda b, n, targets=None: {"number": n}))
     return context
