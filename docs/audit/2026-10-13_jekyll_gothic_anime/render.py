@@ -126,10 +126,12 @@ SUBJECTS.update({
 })
 # style -> (positive appended to Hyde subjects, negative appended to Hyde subjects); README faults
 HYDE_FIX = {
-    "VHD": ("(very short hair:1.3), (low crown:1.2), ", "long cape, d (vampire hunter d), tall hat, "),
+    "VHD": ("(black wide-brimmed hat:1.4), ", "long cape, tall hat, beanie, knit hat, (cap:1.2), hood, ornament on hat, "),  # "(very short hair:1.3)" here gave pure noise with the Kawajiri LoRA
     "HEL": ("insane grin, (very short hair:1.3), black clothes, ", "brown suit, brown coat, red coat, alucard (hellsing), (cross:1.3), priest, cassock, clergy, alexander anderson, "),
     "MON": ("(young man:1.4), (youthful face:1.2), (victorian street:1.3), ", "old, elderly, (middle-aged:1.3), wooden corridor, "),
 }
+# style -> (positive, negative) for every subject: VHD pulls men toward long-haired, feminine D/Leila looks
+STYLE_ALL = {"VHD": ("(male focus:1.3), masculine, ", "1girl, female, woman, androgynous, (long hair:1.3), off shoulder, bare shoulders, topless, shirtless, sleeveless, bare chest, nipples, ")}
 # style -> tags removed from the shared negative (TRI asks for 3D toon shading, which NEG bans)
 NEG_DROP = {"TRI": ("3d, ",)}
 
@@ -142,7 +144,8 @@ def build(style: str, name: str) -> tuple[str, str]:
     for tag in NEG_DROP.get(style, ()):
         neg = neg.replace(tag, "")
     fix_pos, fix_neg = HYDE_FIX.get(style, ("", "")) if name in ("ex_hyde", "ex_trample") else ("", "")
-    return QUALITY + lead + fix_pos + body, neg + neg_subject + fix_neg + neg_extra
+    all_pos, all_neg = STYLE_ALL.get(style, ("", ""))
+    return QUALITY + lead + all_pos + fix_pos + body, neg + neg_subject + fix_neg + all_neg + neg_extra
 
 
 def render(style: str, name: str, salt: str, base: str) -> None:
