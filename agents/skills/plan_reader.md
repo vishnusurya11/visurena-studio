@@ -51,6 +51,25 @@ One entry PER NUMBERED ROW of the chapter, every row, in order.
 - Both empty means the plan neither shows nor tells it. Say so by leaving
   them empty; do not invent a shot.
 
+## `threat`
+
+The chapter's threat or open question: the danger, the mystery, the thing a
+viewer will wait to see answered.
+
+- `span`: the chapter's own words for it, verbatim; empty when the chapter
+  has none.
+- `shots`: every shot whose picture SHOWS it. `lines`: every line that TELLS it.
+
+## `spike`
+
+The chapter's key physical event: the one act everything else reacts to.
+
+- `span`: the chapter's own words for the act, verbatim; empty when the
+  chapter has none.
+- `shots`: the shots whose picture shows THE ACT ITSELF while it happens -- not
+  what comes before it, not its aftermath.
+- `lines`: the lines whose words tell it.
+
 ## `claims`
 
 Every assertion the plan makes about the chapter that the chapter either

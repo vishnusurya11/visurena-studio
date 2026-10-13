@@ -16,7 +16,12 @@ against the plan and the brief:
   a shot or told by a line;
 - no claim without a span; a claim ANY reading lists without a span is
   invented (the union over readings, for recall), and a span the chapter's
-  text does not contain is invented too.
+  text does not contain is invented too;
+- G-HOOK: the opening shot or line carries the chapter's threat, and G-SPIKE:
+  the chapter's key event is SHOWN by a shot, not only told -- each faulted
+  only when most readings agree (Jekyll ep01 review, 2026-10-13: 15 s of
+  character sketch opened it, and the trampling was told, never shown);
+- a `nonscene` row (a narrator's portrait of habits) may be folded away.
 
 A fault climbs `studio.plan_ladder`; the verdict signs `judge:plan@1`.
 """
@@ -68,11 +73,25 @@ class Claim(BaseModel):
     span: str = ""              # empty: the reader found no chapter words for it
 
 
+class Threat(BaseModel):
+    span: str = ""              # the chapter's words for its danger or open question; "" when none
+    shots: list[int] = Field(default_factory=list)   # shots that SHOW it
+    lines: list[int] = Field(default_factory=list)   # lines that TELL it
+
+
+class Spike(BaseModel):
+    span: str = ""              # the chapter's words for its key physical event; "" when none
+    shots: list[int] = Field(default_factory=list)   # shots that SHOW the act itself, not its aftermath
+    lines: list[int] = Field(default_factory=list)   # lines that TELL it
+
+
 class PlanReading(BaseModel):
     turn: Turn
     answer: Answer
     coverage: list[Coverage] = Field(default_factory=list)
     claims: list[Claim] = Field(default_factory=list)
+    threat: Threat = Field(default_factory=Threat)
+    spike: Spike = Field(default_factory=Spike)
 
 
 # ---- the brief's side -----------------------------------------------------------------
@@ -82,6 +101,13 @@ def rows_of(brief: dict) -> list[str]:
     must show or tell."""
     return [str(scene.get("summary") or "") for scene in (brief.get("scenes") or [])
             if scene.get("summary")]
+
+
+def foldable(brief: dict) -> set[int]:
+    """Row numbers (as `rows_of` numbers them) the plan may fold away: a
+    `nonscene` row is a portrait, not an event (Jekyll ep01 opened on one)."""
+    rows = [scene for scene in (brief.get("scenes") or []) if scene.get("summary")]
+    return {i for i, scene in enumerate(rows) if scene.get("type") == "nonscene"}
 
 
 def where(shot: int) -> str:
@@ -147,13 +173,17 @@ def answer_faults(plan: Episode, reading: PlanReading) -> list[Fault]:
     return []
 
 
-def coverage_faults(plan: Episode, rows: list[str], reading: PlanReading) -> list[Fault]:
-    """Every chapter row shown by a shot or told by a line; a covering shot must exist."""
+def coverage_faults(plan: Episode, rows: list[str], reading: PlanReading,
+                    folded: set[int] = frozenset()) -> list[Fault]:
+    """Every chapter row shown by a shot or told by a line, a foldable row
+    excepted; a covering shot must exist."""
     shots = {s.index for s in plan.shots}
     read = {c.event: c for c in reading.coverage}
     out = []
     for i, row in enumerate(rows):
         cover = read.get(i)
+        if (cover is None or not (cover.shots or cover.lines)) and i in folded:
+            continue
         if cover is None or not (cover.shots or cover.lines):
             out.append(Fault(kind="coverage", where=f"row_{i}", note=f"silently dropped: {row[:80]}"))
         elif ghosts := [n for n in cover.shots if n not in shots]:
@@ -227,6 +257,32 @@ def claim_faults(plan: Episode, readings: list[PlanReading], chapter: str | None
     return out
 
 
+# ---- the hook and the spike (2026-10-13) --------------------------------------------------
+
+def most(readings: list[PlanReading], fails) -> bool:
+    """More than half the readings show the fault."""
+    return sum(1 for r in readings if fails(r)) * 2 > len(readings)
+
+
+def hook_faults(readings: list[PlanReading]) -> list[Fault]:
+    """G-HOOK: a threat was read, and neither shot 0 shows it nor line 0 tells it."""
+    def fails(r): return bool(r.threat.span.strip()) and 0 not in r.threat.shots and 0 not in r.threat.lines
+    if not readings or not most(readings, fails):
+        return []
+    return [Fault(kind="story", where="hook", evidence={"threat": readings[0].threat.model_dump()},
+                  note="G-HOOK: the opening shot and line carry none of the chapter's threat; open on it, "
+                       "never on exposition")]
+
+
+def spike_faults(readings: list[PlanReading]) -> list[Fault]:
+    """G-SPIKE: the chapter's key event was read and no shot shows the act itself."""
+    def fails(r): return bool(r.spike.span.strip()) and not r.spike.shots
+    if not readings or not most(readings, fails):
+        return []
+    return [Fault(kind="story", where="spike", evidence={"spike": readings[0].spike.model_dump()},
+                  note="G-SPIKE: the chapter's key event is told by lines only; show the act itself in a shot")]
+
+
 # ---- the verdict ------------------------------------------------------------------------
 
 def judge(plan: Episode | dict, brief: dict, readings: list[PlanReading], k: int = K) -> Verdict:
@@ -237,7 +293,8 @@ def judge(plan: Episode | dict, brief: dict, readings: list[PlanReading], k: int
         faults = [Fault(kind="unread", where="plan", note="no reading came back")]
     else:
         faults = (turn_faults(plan, readings) + answer_faults(plan, readings[0])
-                  + coverage_faults(plan, rows_of(brief), readings[0])
+                  + coverage_faults(plan, rows_of(brief), readings[0], foldable(brief))
+                  + hook_faults(readings) + spike_faults(readings)
                   + claim_faults(plan, readings, brief.get("chapter_text")))
     reads = max(k, len(readings))
     return Verdict(judge=JUDGE, version=VERSION, passed=not faults, faults=faults,
