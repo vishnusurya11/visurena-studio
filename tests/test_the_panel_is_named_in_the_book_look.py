@@ -45,3 +45,11 @@ def test_the_run_adopts_them_and_resets():
     finally:
         house_style.adopt_panel_look("")
     assert house_style.panel_look() == book_look.PANEL_HOUSE
+
+
+def test_a_drawn_look_names_the_panel_in_its_own_words(tmp_path):
+    (tmp_path / "refs").mkdir()
+    (tmp_path / "refs" / "look.json").write_text(json.dumps({"look": "anime_gothic", "lead": "Anime. "}),
+                                                 encoding="utf-8")
+    said = book_look.panel_look(tmp_path)
+    assert said == "in the book's own anime gothic look" and "still" not in said

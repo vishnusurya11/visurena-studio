@@ -72,7 +72,7 @@ PHOTO_NEGATIVE = ("text, caption, subtitles, watermark, signature, blurry, moder
 def look_for(book: Path) -> dict:
     """The grid prompt's look kwargs: {} keeps the house style (book_look.grid_style)."""
     style = book_look.grid_style(book)
-    return {"style": style, "medium": "film still"} if style else {}
+    return {"style": style, "medium": book_look.grid_medium(book)} if style else {}
 
 
 AIRED_BLUR = "out of focus subject, motion smear"
@@ -82,9 +82,10 @@ against haze and depth, and a fog book's far distance IS soft (Jekyll ep01, LOOK
 
 def negative_for(book: Path) -> str:
     """The grid's negative in the book's look, with the book's own declared words."""
-    if not book_look.photoreal(book):
+    if not book_look.look_name(book):
         return NEGATIVE
-    said = PHOTO_NEGATIVE.replace("blurry", AIRED_BLUR) if book_look.atmosphere(book) else PHOTO_NEGATIVE
+    said = PHOTO_NEGATIVE + (", photographic" if book_look.drawn(book) else "")
+    said = said.replace("blurry", AIRED_BLUR) if book_look.atmosphere(book) else said
     extra = str(book_look.declared(book).get("negative", "") or "").strip().strip(",")
     return f"{said}, {extra}" if extra else said
 

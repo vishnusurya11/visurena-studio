@@ -116,3 +116,33 @@ def test_the_take_run_adopts_the_book_atmosphere(tmp_path, monkeypatch):
     assert "fog, damp haze" in house_style.live()
     takes.adopt_canon(tmp_path / "none", plan)
     assert "fog" not in house_style.live()
+
+
+# ---- any declared look, not photoreal alone (coordinator 2026-10-13: Jekyll may go anime gothic) ----
+
+ANIME_LEAD = "Anime gothic: inked line work, cel shading, muted palette. "
+
+
+def declare_drawn(book: Path, **extra) -> Path:
+    (book / "refs").mkdir(parents=True, exist_ok=True)
+    (book / "refs" / "look.json").write_text(json.dumps(
+        {"look": "anime_gothic", "lead": ANIME_LEAD, "by": "owner", **extra}), encoding="utf-8")
+    return book
+
+
+def test_a_drawn_look_gets_its_own_grid_line_and_atmosphere(tmp_path):
+    said = book_look.grid_style(declare_drawn(tmp_path, atmosphere="fog, damp haze")).format(n=2)
+    assert ANIME_LEAD.strip() in said and "<image2>" in said and "fog, damp haze" in said
+    assert "PHOTOGRAPHIC" not in said and "photoreal" not in said.lower().replace(ANIME_LEAD.lower(), "")
+
+
+def test_a_drawn_look_is_an_illustration_and_bans_the_photograph(tmp_path):
+    book = declare_drawn(tmp_path, atmosphere="fog")
+    assert grids.look_for(book)["medium"] == "illustration"
+    said = grids.negative_for(book)
+    assert "photographic" in said and "narrator" not in said and "blurry" not in said.split(", ")
+
+
+def test_a_drawn_look_names_the_take_line(tmp_path):
+    assert book_look.plan_look(declare_drawn(tmp_path), "Angular stylised 3D animation") == "Anime gothic"
+    assert book_look.plan_look(declare_drawn(tmp_path, take="Gothic anime film"), "x") == "Gothic anime film"

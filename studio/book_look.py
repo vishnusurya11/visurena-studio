@@ -59,13 +59,35 @@ ATMOSPHERE_GRID = " The air is thick with {atmosphere} in every frame, softening
 """The grid's atmosphere sentence: said as what the air holds, never as a blur asked for."""
 
 
+DRAWN_GRID = ("DRAWN IN EXACTLY THE LOOK OF <image{{n}}>, copied from it and not invented: {lead} "
+              "Match the palette, the line work and the light of <image{{n}}> exactly.")
+"""A book that declares a look other than photoreal (an anime gothic, say): its own lead,
+never the house's "angular stylised 3D" words nor the photoreal film-still line."""
+
+
+def look_name(book) -> str:
+    """The declared look's name in words ("anime gothic"); '' for the house."""
+    return str(declared(book).get("look", "") or "").replace("_", " ").strip()
+
+
+def drawn(book) -> bool:
+    """A declared look that is not photoreal."""
+    return bool(look_name(book)) and not photoreal(book)
+
+
 def grid_style(book) -> str:
     """The grid's style template in the book's look; '' keeps the house line."""
-    if not photoreal(book):
+    if not look_name(book):
         return ""
     lead = declared(book).get("lead", "").strip().replace("{", "{{").replace("}", "}}")
     air = atmosphere(book).replace("{", "{{").replace("}", "}}")
-    return PHOTO_GRID.format(lead=lead) + (ATMOSPHERE_GRID.format(atmosphere=air) if air else "")
+    line = (PHOTO_GRID if photoreal(book) else DRAWN_GRID).format(lead=lead)
+    return line + (ATMOSPHERE_GRID.format(atmosphere=air) if air else "")
+
+
+def grid_medium(book) -> str:
+    """What one grid frame is called: a photoreal book's is a film still."""
+    return "film still" if photoreal(book) else "illustration"
 
 
 PANEL_HOUSE = "in the house art style"
@@ -80,14 +102,22 @@ def panel_look_words(photo: bool) -> str:
 
 
 def panel_look(book) -> str:
-    """The panel's medium in this book's look."""
+    """The panel's medium in this book's look: photoreal, a declared drawn look by name, or the house."""
+    if drawn(book):
+        return f"in the book's own {look_name(book)} look"
     return panel_look_words(photoreal(book))
 
 
 def plan_look(book, look: str) -> str:
-    """A plan's `look` words, unless the book declares photoreal: the declaration outranks
-    a writer's look line (a stylised `look` would turn takes, places and plates house)."""
-    return "" if photoreal(book) else look
+    """A plan's `look` words, unless the book declares its look: the declaration outranks
+    a writer's look line (a stylised `look` would turn takes, places and plates house).
+    Photoreal renders as `LIVE`; a drawn look heads the take line with its `take` words,
+    else its own name."""
+    if photoreal(book):
+        return ""
+    if drawn(book):
+        return str(declared(book).get("take", "") or "").strip() or look_name(book).capitalize()
+    return look
 
 
 def aspect_for(width: int, height: int) -> str:
