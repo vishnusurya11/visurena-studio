@@ -51,7 +51,10 @@ PICTURE_RULES = [
     "e.g. 'his head a third of the frame's height' (close: half; medium: a quarter).",
     "The camera head AIMS only at something the same shot's `at_rest` already names "
     "(G-AIM): a move toward what is not drawn invents it.",
-    "No camera move id repeats on two shots running (G-MOVES); vary the catalog.",
+    "No camera move id repeats on two shots running (G-MOVES); vary the catalog. A "
+    "DIALOGUE shot is held locked-off or over the listener's shoulder and the actor "
+    "carries the verb (G-TALK: at most one spoken line's camera travels); an exchange "
+    "held so is one shot/reverse-shot unit, never a repeat.",
     "At least one shot carries no line (a silent shot, G-STORY), and about one insert "
     "shot per five shots (G-VARIETY).",
     "Each setup's `described` runs ~90 words or more (G-FIRSTFRAME: the drawer needs "

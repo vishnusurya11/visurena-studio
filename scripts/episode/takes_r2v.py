@@ -1109,8 +1109,9 @@ def refuse_still_motions(episode) -> None:
     if faults:
         raise SystemExit("\n".join(f"shot {i} {c}: {w}" for i, c, w in faults)
                          + f"\n\n{len(faults)} motion(s) refused. Open every head with a "
-                           "camera move -- `The camera pushes in ... across the whole shot, "
-                           "travelling a forearm; <action>; <action>` -- and give every "
+                           "camera move -- on a spoken line a held frame and the actor's verb, "
+                           "`The camera holds a locked-off frame across the whole shot; he leans in "
+                           "and lifts one hand as he speaks; <action>` -- and give every "
                            "moving object a hand.")
 
 

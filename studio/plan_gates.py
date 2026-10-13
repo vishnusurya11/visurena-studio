@@ -1112,6 +1112,37 @@ def distinct_fault(ids: list[str]) -> list[str]:
     return [fault("G-MOVES", "plan", f"distinct catalog moves over {len(ids)} shots", len(set(ids)), MIN_MOVES)]
 
 
+TALK_MOVES = frozenset({"locked", "over_shoulder", "low_angle", "high_angle"})
+"""A spoken line's camera: held, or over the listener's shoulder (the catalog:
+locked-off is the sharpest move and the best for lips).  Jekyll ep01 pushed in
+on 6 of 8 dialogue shots; the liked WotW ep01-03 pushed on 1, 0 and 0."""
+
+MAX_TALK_TRAVELS = 1
+"""Dialogue shots whose camera travels (a push on the realisation, at most)."""
+
+
+def dialogue_shots(episode) -> set[int]:
+    """The shots carrying a dialogue line; none for a plan read without lines."""
+    return {l.shot for l in getattr(episode, "lines", None) or [] if l.kind == "dialogue"}
+
+
+def talk_unit(shots, ids: list[str], spoken: set[int], k: int) -> bool:
+    """Shot k and the one before it are one shot/reverse-shot exchange."""
+    return (shots[k].index in spoken and shots[k - 1].index in spoken
+            and ids[k] in TALK_MOVES and ids[k - 1] in TALK_MOVES)
+
+
+def talk_faults(episode) -> list[str]:
+    """G-TALK: past MAX_TALK_TRAVELS, every dialogue shot whose camera travels."""
+    spoken = dialogue_shots(episode)
+    moving = [s.index for s in episode.shots
+              if s.index in spoken and move_id(s.motion, getattr(s, "camera", "") or "") not in TALK_MOVES]
+    if len(moving) <= MAX_TALK_TRAVELS:
+        return []
+    return [fault("G-TALK", f"shot {i}", "a spoken line's camera travels; dialogue is locked or over the "
+                  "shoulder, and the actor carries the verb", len(moving), MAX_TALK_TRAVELS) for i in moving]
+
+
 def share_fault(ids: list[str]) -> list[str]:
     top = max(set(ids), key=ids.count) if ids else ""
     got = round(ids.count(top) / len(ids), 2) if ids else 0.0
@@ -1120,16 +1151,22 @@ def share_fault(ids: list[str]) -> list[str]:
     return [fault("G-MOVES", "plan", f"{top!r} share of the {len(ids)} shots", got, MAX_MOVE_SHARE)]
 
 
-def running_faults(shots, ids: list[str]) -> list[str]:
+def running_faults(shots, ids: list[str], spoken: set[int] = frozenset()) -> list[str]:
+    """The same move twice running -- except inside a dialogue exchange held
+    locked or over the shoulder (one shot/reverse-shot unit, 2026-10-13)."""
     return [fault("G-MOVES", f"shot {shot.index}", f"{move!r} follows the same move on shot "
                   f"{shots[k - 1].index} (twice running)", 2, 1)
-            for k, (shot, move) in enumerate(zip(shots, ids)) if k and move == ids[k - 1]]
+            for k, (shot, move) in enumerate(zip(shots, ids))
+            if k and move == ids[k - 1] and not talk_unit(shots, ids, spoken, k)]
 
 
 def moves_faults(episode) -> list[str]:
-    """G-MOVES over a plan (anything with `.shots` carrying `motion` and `camera`)."""
-    ids = move_ids(episode.shots)
-    return distinct_fault(ids) + share_fault(ids) + running_faults(list(episode.shots), ids)
+    """G-MOVES over a plan (anything with `.shots` carrying `motion` and `camera`);
+    a held or over-the-shoulder dialogue shot is outside the share (2026-10-13)."""
+    shots, spoken = list(episode.shots), dialogue_shots(episode)
+    ids = move_ids(shots)
+    shared = [m for s, m in zip(shots, ids) if not (s.index in spoken and m in TALK_MOVES)]
+    return distinct_fault(ids) + share_fault(shared) + running_faults(shots, ids, spoken)
 
 
 # ---- G-STILL: a move the model ignores is refused before it renders ---------------
@@ -1143,14 +1180,15 @@ ANGLES = ("low_angle", "high_angle")
 read 82-100 % static (T14 failed frozen-whole at 100 %)."""
 
 
-def still_fault(shot) -> str | None:
-    """Why this shot's move will render still, or None."""
+def still_fault(shot, dialogue: bool = False) -> str | None:
+    """Why this shot's move will render still, or None.  A held angle on a
+    spoken line is not still: the actor carries the verb (2026-10-13)."""
     verb = move_verb(camera_clause(head_of(shot.motion))[0])
     if verb in IGNORED:
         return fault("G-STILL", f"shot {shot.index}", f"{verb!r} is a move H3 ignores; "
                      f"use {IGNORED[verb]!r}", verb, "an obeyed move")
     angle = move_id(shot.motion, getattr(shot, "camera", "") or "")
-    if verb == "locked" and angle in ANGLES and not getattr(shot, "still", False):
+    if verb == "locked" and angle in ANGLES and not getattr(shot, "still", False) and not dialogue:
         return fault("G-STILL", f"shot {shot.index}", f"{angle!r} held with no move renders still; "
                      "pair the angle with crane_up, push_slow or track_lateral, or declare the shot still",
                      angle, "an angle plus one move")
@@ -1159,7 +1197,8 @@ def still_fault(shot) -> str | None:
 
 def still_faults(episode) -> list[str]:
     """G-STILL over a plan: the moves that render a frozen take (speed plan #8)."""
-    return [f for s in episode.shots if (f := still_fault(s))]
+    spoken = dialogue_shots(episode)
+    return [f for s in episode.shots if (f := still_fault(s, s.index in spoken))]
 
 
 # ---- G-SOURCE: a claim about the chapter carries the chapter's words ------------

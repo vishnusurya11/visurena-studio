@@ -291,8 +291,16 @@ AIM_WORDS = 6
 """A substitute move aims at one short noun phrase, never a sentence."""
 
 
-def substitute_id(kind: str, motion: str) -> str:
-    """The catalog move that replaces this one for this cause, never the same move back."""
+ACTOR_VERB = "the speaker leans toward the listener and lifts one hand as the words come"
+"""What a frozen DIALOGUE take is given instead of a push: the actor's verb
+(Jekyll ep01, 2026-10-13: the ladder pushed in on every frozen exchange)."""
+
+
+def substitute_id(kind: str, motion: str, dialogue: bool = False) -> str:
+    """The catalog move that replaces this one for this cause, never the same
+    move back; a spoken line's camera stays locked -- it never travels."""
+    if dialogue:
+        return "locked"
     table = SUBSTITUTE[CAUSE_OF[kind]]
     move = plan_gates.move_id(motion or "", "")
     new = table.get(move, table["*"])
@@ -301,12 +309,14 @@ def substitute_id(kind: str, motion: str) -> str:
     return "locked" if move != "locked" else "push_slow"
 
 
-def substitute(kind: str, motion: str, at_rest: str = "") -> str:
-    """The motion with its camera head swapped; the subject's own clauses stay."""
+def substitute(kind: str, motion: str, at_rest: str = "", dialogue: bool = False) -> str:
+    """The motion with its camera head swapped; the subject's own clauses stay.
+    A frozen dialogue take keeps a locked head and gains the actor's verb."""
     head, *rest = [c.strip() for c in (motion or "").split(";")]
     _cam, subject = ro.camera_clause(head)
-    new = PHRASING[substitute_id(kind, motion)].format(aim=aim_of(motion, at_rest))
-    return "; ".join([new] + ([subject] if subject else []) + [c for c in rest if c])
+    new = PHRASING[substitute_id(kind, motion, dialogue)].format(aim=aim_of(motion, at_rest))
+    verb = [ACTOR_VERB] if dialogue and ACTOR_VERB not in (motion or "") else []
+    return "; ".join([new] + ([subject] if subject else []) + verb + [c for c in rest if c])
 
 
 def move_type(doc: dict, index: int, faults: list[Fault]) -> dict:
@@ -314,7 +324,8 @@ def move_type(doc: dict, index: int, faults: list[Fault]) -> dict:
     kind = next((f.kind for f in faults if f.kind in CAUSE_OF), None)
     if kind is None:       # nothing a move answers (ep14 T20: letterbox, content) -- the terminal will
         return doc
-    shot["motion"] = substitute(kind, shot["motion"], shot.get("at_rest", ""))
+    spoken = any(l.get("kind") == "dialogue" and l.get("shot") == index for l in doc.get("lines") or [])
+    shot["motion"] = substitute(kind, shot["motion"], shot.get("at_rest", ""), dialogue=spoken)
     return doc
 
 
