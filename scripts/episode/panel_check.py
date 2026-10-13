@@ -39,10 +39,24 @@ CONTROLS = {"day": "wide_establishing.png", "night": "wide_night.png"}
 its hardest edges are under SHARP_FLOOR of the control for its own hour."""
 
 
+def strength(path: Path) -> float:
+    return panel_dq.edge_strength(np.asarray(Image.open(path).convert("RGB")))
+
+
 def controls(book: Path) -> dict[str, float]:
+    """The house wides where the book has them; else the book's OWN place
+    pictures, median per hour (Jekyll ep01 crashed opening WotW's wides)."""
     folder = Path(book) / "refs" / "locations" / CONTROL_PLACE
-    return {hour: panel_dq.edge_strength(np.asarray(Image.open(folder / name).convert("RGB")))
-            for hour, name in CONTROLS.items()}
+    if all((folder / name).exists() for name in CONTROLS.values()):
+        return {hour: strength(folder / name) for hour, name in CONTROLS.items()}
+    return own_controls(sorted((Path(book) / "refs" / "locations").glob("*/*.png")))
+
+
+def own_controls(pictures: list[Path]) -> dict[str, float]:
+    night = [strength(p) for p in pictures if "night" in p.stem]
+    day = [strength(p) for p in pictures if "night" not in p.stem]
+    day_c = float(np.median(day)) if day else float(np.median(night))
+    return {"day": day_c, "night": float(np.median(night)) if night else day_c}
 
 
 def seam_of(board: Path, index: int, frame: np.ndarray) -> bool:
