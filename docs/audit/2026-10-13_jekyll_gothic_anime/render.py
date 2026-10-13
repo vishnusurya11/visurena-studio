@@ -59,7 +59,7 @@ STYLES = {
             "anime screencap, delicate linework, dark fairytale, crimson and black palette, clock motif, ", [], ""),
     "DGM": ("d.gray-man, hoshino katsura (style), gothic, black and white and red, sharp elegant linework, "
             "dark victorian fantasy, dramatic shadows, ", [], ""),
-    "TRI": ("trigun stampede, orange (studio), (3d cel-shaded anime:1.2), cgi anime, toon shading, crisp rim light, bold "
+    "TRI": ("orange (studio), trigun stampede (style), (3d cel-shaded anime:1.1), cgi anime, toon shading, crisp rim light, bold "
             "outlines, cinematic lighting, ", [], "sketch, painterly, "),
 }
 SUBJECTS = {
@@ -131,10 +131,12 @@ HYDE_FIX = {
     # Amano overshoots the brim; Hyde's AMA pick was rendered with "(modest soft felt hat:1.2), " (times.jsonl), which put
     # caps, helmets and a woman into the trampling, so the trampling uses this line
     "AMA": ("(male focus:1.2), (black wide-brimmed felt hat:1.2), ", "(huge hat:1.3), oversized hat, cavalier hat, (witch hat:1.4), beanie, helmet, cap, 1woman, "),
+    "TRI": ("(male focus:1.3), young adult man, (black wide-brimmed hat:1.4), ", "child, kid, (beanie:1.3), knit hat, female, woman, skirt, "),
     "MON": ("young adult man, (black wide-brimmed hat:1.4), (victorian street:1.3), ", "old, elderly, (middle-aged:1.3), wrinkles, wooden corridor, child, kid, (beanie:1.3), knit hat, pom pom, kasa, "),  # (young man:1.4) made him a child
 }
 # style -> (positive, negative) for every subject: VHD pulls men toward long-haired, feminine D/Leila looks
-STYLE_ALL = {"MON": ("(washi paper texture:1.2), muted earthy colours, ", ""),
+STYLE_ALL = {"TRI": ("", "topless, shirtless, bare chest, (text:1.6), (subtitled:1.5), caption, subtitles, english text, title, logo, solo, "),  # TRI printed captions
+             "MON": ("(washi paper texture:1.2), muted earthy colours, ", ""),
              "VHD": ("(male focus:1.3), masculine, ", "1girl, female, woman, androgynous, (long hair:1.3), off shoulder, bare shoulders, topless, shirtless, sleeveless, bare chest, nipples, ")}
 # style -> tags removed from the shared negative (TRI asks for 3D toon shading, which NEG bans)
 NEG_DROP = {"TRI": ("3d, ",)}

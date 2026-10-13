@@ -59,13 +59,13 @@ def style_sheet(style: str) -> Path:
 
 def overview() -> Path:
     """The five styles as rows: Hyde, Jekyll and the ch1 trampling."""
-    cols, left = [PICTURES[0], PICTURES[1], PICTURES[3]], 330
+    cols, left = [PICTURES[0], PICTURES[1], PICTURES[3]], 440
     sheet = Image.new("RGB", (left + 3 * (CELL + PAD), PAD + len(STYLES) * (CELL + CAP + PAD)), BG)
     draw = ImageDraw.Draw(sheet)
     for i, (style, (n, _, name, ref, recipe)) in enumerate(STYLES.items()):
         y = PAD + i * (CELL + CAP + PAD)
         draw.text((PAD + 4, y + 220), f"{n}. {name}", font=font(28), fill=INK)
-        draw.text((PAD + 4, y + 270), ref[:34], font=font(18), fill=ACC)
+        draw.text((PAD + 4, y + 270), ref, font=font(16), fill=ACC)
         draw.text((PAD + 4, y + 300), recipe, font=font(16), fill=DIM)
         for j, (subject, label) in enumerate(cols):
             cell(draw, sheet, style, subject, label, left + j * (CELL + PAD), y)

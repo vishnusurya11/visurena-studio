@@ -88,3 +88,28 @@ Pick 2–3 looks and render Jekyll and the ch1 scene in them (`render.py STYLE j
 - Yoshitaka Amano: https://en.wikipedia.org/wiki/Yoshitaka_Amano
 - D.Gray-man: https://en.wikipedia.org/wiki/D.Gray-man
 - Trigun Stampede: https://en.wikipedia.org/wiki/Trigun_Stampede
+
+## Examples for the shortlist (2026-10-13, second pass)
+
+The owner shortlisted styles 1, 2, 6, 13 and 15 and asked for examples. Each style got the same six pictures, built from `analysis/heads.json`, at the same seeds. A reroll's salt is in its file name (`_sb`, `_sc` and so on).
+1. Hyde, fixed.
+2. Jekyll.
+3. Utterson.
+4. ch1: Hyde strides over the fallen girl.
+5. ch1: Utterson and Enfield pass the door.
+6. ch3: Jekyll and Utterson by the fire.
+
+Every image was looked at. A seed was rerolled for a wrong hat, duplicate or extra people, lettering or a signature, modern road markings, or another show's costume. `picks.json` names the kept file for each picture, `times.jsonl` holds each render's exact prompt, and `make_examples.py` builds the sheets.
+
+- **Sheets:** `examples_2_hellsing.jpg`, `examples_1_bloodlust.jpg`, `examples_6_mononoke.jpg`, `examples_13_amano.jpg`, `examples_15_trigun_stampede.jpg`. Each is 2 × 3.
+- **Overview:** `examples_overview.jpg` has the 5 styles as rows, showing Hyde, Jekyll and the ch1 trampling.
+- **Reproduce:** `uv run python docs/audit/2026-10-13_jekyll_gothic_anime/render.py STYLE [ex_subject ...] [--salt b]`. With no subject it renders all six `ex_*`. Then run `make_examples.py STYLE` or `make_examples.py overview`.
+- **Caveat:** `render.py` holds the final prompt lines. A few picks were rendered before a later fix to the same style, and their exact prompt is the row in `times.jsonl`. They are: MON Jekyll, Utterson and study (before the washi tag), AMA Hyde (with "modest soft felt hat"), and TRI Jekyll, Utterson and door (with the earlier lead).
+
+| # | Style | Fixes that held | Rerolls / faults met | Verdict |
+|---|---|---|---|---|
+| 2 | Hellsing ink-red | Moved "insane grin" from the style lead to Hyde only, because every man was grinning. Dropped "blood-red highlights", which gave red hair. For Hyde: short hair, black clothes, and a negative on the priest cross. | Anderson's priest cross on Hyde. A witch hat and a gun in the trampling. A woman in the door scene. Japanese lettering in the study. | The menace reads best of the five, and Jekyll and Utterson stay human. It is dark and cel, with a red-black palette. |
+| 1 | Bloodlust gothic | `male focus` for every subject, plus a negative on long hair, bare shoulders and topless. Hyde's hat is the weighted wide brim. | Without the fix, every man drifted to D or Leila: long blond hair, women. `(very short hair:1.3)` in the lead gave **pure noise**. `(low crown)` gave caps and beanies. A third man appeared in the door scene. | The most cinematic look, with the strongest lighting and colour. Hyde reads as a D-cousin, wide brim and long coat. |
+| 6 | Mononoke washi | "young adult man" plus the weighted wide brim. | `(young man:1.4)` made Hyde a child in a beanie. A red seal signature appeared in the door scene (seed 1). The hat jumped onto the girl. A witch hat. | Most distinctive and least anime: pale kabuki faces on flat paper greys. The LoRA's washi patterns are faint, so it reads as quiet rather than ornate. |
+| 13 | Amano watercolour | A negative on huge, cavalier and witch hats. For the trampling: `male focus` plus a wide-brimmed felt hat. | The trampling took 13 seeds. Faults met: witch hats, a helmet, a woman as Hyde, the girl wearing his hat, and two signatures. | Art-nouveau frames and an ink wash on the portraits, but the scenes fall back to generic digital paint. Amano's own line is still absent. |
+| 15 | Trigun Stampede 3D cel | Removed `3d` from the shared negative for this style. Lead: `(3d cel-shaded anime:1.1), cgi anime`. Negative: text, subtitles, solo. `male focus` for Hyde. | It now renders as 3D toon. In exchange, "trigun stampede" printed fake captions in every study, and "solo" plus a strong text negative cleared them. Faults met: a shirtless Hyde, a female Utterson and a female Hyde. A modern tie and wristwatch also slip in. | The 3D cel look the owner named, which the first pass missed. It is the least gothic: bright, smooth and Western-CG. |
