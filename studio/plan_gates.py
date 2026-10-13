@@ -793,6 +793,49 @@ def pace_faults(episode) -> list[str]:
     return out
 
 
+# ---- G-ACTION: every shot carries a story action (Jekyll ep01, 2026-10-13) --------
+
+AMBIENT = (r"wind|breeze|draught|gust|leaf|leaves|pigeons?|birds?|sparrows?|gulls?|smoke|shadows?|"
+           r"flames?|glow|light|daylight|lamplight|gaslight|sunlight|moonlight|dust|mist|fog|haze|"
+           r"steam|sky|clouds?|reflections?|rain|drizzle|snow|ripples?|water")
+"""Movers that are weather or air, not story: the subject of a filler clause."""
+AMBIENT_SUBJECT = re.compile(
+    rf"^\W*(?:(?:the|a|an|its|his|her|their|one|some|thin|light|grey|gray|pale|dry|brown|frost|cold|"
+    rf"low|raking|faint|soft|yellow|white|black|blue|chimney|morning|evening|night|winter)\s+|"
+    rf"[\w'-]+'s\s+){{0,4}}({AMBIENT})\b", re.I)
+WIND = re.compile(r"\b(?:wind|breeze|draught|gust)\b", re.I)
+
+MAX_FILLER_SHOTS = 2
+"""Empty shots moved only by weather.  MEASURED with `filler_shot` over every
+shipped plan: WotW ep01-27 0-2 (ep27 2), Scarlet ep01-14 0-1; Jekyll ep01 7 --
+shots 2, 3, 4, 7, 15, 18, 20, exactly the seven the motion review named."""
+
+
+def ambient_clause(clause: str) -> bool:
+    """A clause whose mover is weather: its subject is ambient, or the wind moves it."""
+    return bool(AMBIENT_SUBJECT.search(clause or "") or WIND.search(clause or ""))
+
+
+def filler_shot(shot) -> bool:
+    """No face, no extras, and every action clause after the camera head is weather."""
+    if getattr(shot, "faces", None) or getattr(shot, "extras", 0) \
+            or any(getattr(c, "faces", None) for c in getattr(shot, "cuts", None) or []):
+        return False
+    acts = [c for c in (shot.motion or "").split(";")[1:] if c.strip()]
+    return bool(acts) and all(ambient_clause(c) for c in acts)
+
+
+def action_faults(episode) -> list[str]:
+    """G-ACTION, hard: past MAX_FILLER_SHOTS, every filler shot is named -- give it
+    a person's act, or an event that changes something; weather is not story."""
+    fillers = [s.index for s in episode.shots if filler_shot(s)]
+    if len(fillers) <= MAX_FILLER_SHOTS:
+        return []
+    return [fault("G-ACTION", f"shot {i}", "an empty shot moved only by weather carries no story action; "
+                  "give it a person's act or an event that changes something", len(fillers), MAX_FILLER_SHOTS)
+            for i in fillers]
+
+
 # ---- G-STORY after episode 10: the lead speaks his own words ---------------------
 # docs/analysis/ep10_dq_synthesis.md, section B.  Calibrated on the ep10 fixture
 # (the faults present) against ep05 and ep07 (clean, or the advisories named).

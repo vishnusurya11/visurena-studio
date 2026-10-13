@@ -268,6 +268,16 @@ def pace_gate(ep, book: Path, number: int) -> int:
     return drawn_or_hard("G-PACE", plan_gates.pace_faults(ep), book, number)
 
 
+def action_gate(ep) -> int:
+    """G-ACTION (Jekyll ep01, 2026-10-13), HARD: at most two empty shots moved only
+    by weather; calibrated clean on every shipped WotW and Scarlet plan."""
+    found = plan_gates.action_faults(ep)
+    print("G-ACTION     :", len(found) or "clean")
+    for f in found:
+        print("   ", f[:170])
+    return len(found)
+
+
 def speaker_gate(ep, book: Path, refs: list[dict]) -> int:
     """G-SPEAKER against the BOOK's narrator (studio.book_narrator), HARD; a
     character narrating beside him is printed as advice."""
@@ -304,6 +314,7 @@ def main(book_id: str, number: int) -> int:
         print("   ", f[:170])
     hard += setup_gate(ep, book, number)
     hard += pace_gate(ep, book, number)
+    hard += action_gate(ep)
     asp = plan_gates.aspect_faults(ep, plan_gates.series_aspect(book))
     print("G-ASPECT     :", asp or "clean"); hard += len(asp)
     cf = plan_gates.crowd_faults(ep)
