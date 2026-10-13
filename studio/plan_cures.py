@@ -614,6 +614,26 @@ def trim_measured_holes(doc: dict, placed: dict) -> int:
                for start, end, ids in speech_gap.over_wall(placed, wall))
 
 
+RUNTIME_MARGIN_S = 0.5
+"""How far under MAX_SECONDS the runtime trim aims: the re-time rounds every
+shot end UP to a frame (<= 1/24 s each), so a trim to the wall exactly can
+land a hair over it.  The same margin as speech_gap.HOLE_MARGIN_S."""
+
+
+def trim_measured_runtime(doc: dict, placed: dict) -> int:
+    """Step 05's measured-runtime cure (Jekyll ep01, 174.8 s against 174): the
+    voice ran slower than the rate the plan was signed at, so the MEASURED
+    runtime is over the picture budget.  Shave the overrun plus the margin from
+    every shot's holds, largest first, floors kept; trims only.  0 = inside the
+    budget, or nothing left above a floor: the step refuses."""
+    from studio.episode_spec import MAX_SECONDS
+    over = float(placed.get("duration_s") or 0) - MAX_SECONDS
+    if over <= 0:
+        return 0
+    slots = [(s, key) for s in doc.get("shots") or [] for key in ("coda_s", "beat_s")]
+    return _shave(slots, over + RUNTIME_MARGIN_S, _floors(doc))
+
+
 def insertion_shot(doc: dict, hole: tuple, rate: float) -> int | None:
     """The shot a micro-line should land on: inside the hole, under
     MAX_LINES_PER_SHOT, strictly before the button's shot (no line after the

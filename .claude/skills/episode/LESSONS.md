@@ -601,6 +601,23 @@ fixes. Each lesson below cost at least one launch. Tracker rows A38-A74 in
 ` and the module would not import. The
   rule stands without exception: replacement text with a backslash goes through
   Write or Edit.
+- **A measured overrun is the holds' to give back (A99, Jekyll ep01, 2026-10-13).**
+  A new book has no measured narrator: the plan signed at 148 s at 3.0 words/s,
+  the voice ran at ~2.5 and the timeline measured 174.8 s against 174 -- 0.8 s
+  over, with 10.6 s of holds and a 5 s wordless hole in the runout. Three faults
+  met. (1) No cure answered a measured overrun: `trim_measured_holes` answers a
+  hole over the wall, and the plan's `holds` cure (where 'projects to ... an
+  episode is' routes) only LIFTS the floor. (2) `timeline.py` writes placed.json
+  BEFORE its band check, so the resume found a fresh timeline and SKIPPED step 05
+  into the grids on a 174.8 s picture. (3) The autopilot's brain ordered a full
+  step-02 redo for a sub-second overrun -- a replan and re-record where a free
+  shave sufficed; the redo then did nothing but walk past the skipped step 05.
+  Step 05 now refuses `done` over the budget (`step_05.overrun`) and, on the
+  overrun, shaves holds across every shot to MAX_SECONDS less
+  `plan_cures.RUNTIME_MARGIN_S`, largest first, floors kept, recorded, one
+  re-time, battery, judge re-sign (`trim_measured_runtime`, `fit_runtime`). Read
+  a timeline refusal's numbers before any redo: an overrun smaller than the
+  holds is never the writer's.
 - **ep27's run, closed -- and the book (2026-10-10 23:12Z, public
   https://youtu.be/Z4VNwQJ_5NI, master_iter2, $0).** The last chapter. Its stops:
   a narrator split through one short line, cured only by joining it to its

@@ -60,6 +60,8 @@ def done(ctx) -> bool:
     resume must not skip past a gap QC would refuse after the render."""
     if not (fresh(ctx.book_dir, ctx.number) and speech_gap.refusal(placed_of(ctx.book_dir, ctx.number)) is None):
         return False
+    if overrun(placed_of(ctx.book_dir, ctx.number)):
+        return False                            # Jekyll ep01: timeline.py writes, THEN refuses its band
     return rendered(ctx) or not packed(ctx)     # ep26: a fresh timeline packing a pair is not done
 
 
@@ -74,6 +76,39 @@ def retime(ctx) -> None:
     """respot then timeline: the step's own body, re-usable for the one re-run."""
     ctx.run_script("scripts/episode/respot.py", clock="respot")
     ctx.run_script("scripts/episode/timeline.py", clock="timeline")
+
+
+def overrun(placed: dict) -> bool:
+    """A measured timeline over the picture budget: timeline.py writes
+    placed.json before it refuses the band, so a fresh one can still be over."""
+    from studio.episode_spec import MAX_SECONDS
+    return float(placed.get("duration_s") or 0) > MAX_SECONDS
+
+
+def runtime_trimmed(ctx, placed: dict) -> int:
+    """The measured-runtime trim, written through the contract and recorded;
+    0 = nothing trimmable."""
+    from studio import plan_cures, plan_provenance, plan_verdict
+    path = episode_home.home(ctx.book_dir, ctx.number) / "plan.json"
+    doc = episode_home.read_json(path)
+    if not (n := plan_cures.trim_measured_runtime(doc, placed)):
+        return 0
+    before = plan_verdict.plan_sha8(path)
+    episode_home.write_plan(path, doc)
+    plan_provenance.record(path, before, ["trim_measured_runtime"])
+    return n
+
+
+def fit_runtime(ctx, why: str) -> None:
+    """Jekyll ep01 (2026-10-13): the voice ran slower than the signed rate and
+    the timeline measured 174.8 s against 174.  The overrun is the holds' to
+    give back: ONE trim, ONE re-time (which refuses again if still over), the
+    battery, the plan judge's re-sign.  Rendered takes refuse untrimmed."""
+    placed = placed_of(ctx.book_dir, ctx.number)
+    if rendered(ctx) or not overrun(placed) or not (n := runtime_trimmed(ctx, placed)):
+        raise SystemExit(why)
+    retime(ctx)
+    resign(ctx, n, why="measured-runtime trim")
 
 
 def judge_signer() -> str:
@@ -113,7 +148,7 @@ def resign(ctx, n: int, why: str = "measured-hole trim") -> None:
     if rc:
         rows = "\n".join(l for l in out.splitlines() if l.strip())
         raise SystemExit(f"REFUSED: the {why} left battery faults:\n{rows[-1500:]}")
-    what = f"{n} holds shaved" if why == "measured-hole trim" else f"{n} pair(s) unpacked"
+    what = f"{n} pair(s) unpacked" if why == "measured-pair unpack" else f"{n} holds shaved"
     plan_verdict.sign(episode_home.home(ctx.book_dir, ctx.number) / "plan.json",
                       note=f"step 05 {why} ({what}); battery clean",
                       signed_by=judge_signer())
@@ -174,7 +209,10 @@ def autotrim(ctx, why: str) -> None:
 
 
 def run(ctx) -> None:
-    retime(ctx)
+    try:
+        retime(ctx)
+    except SystemExit as refused:
+        fit_runtime(ctx, str(refused))
     if why := speech_gap.refusal(placed_of(ctx.book_dir, ctx.number)):
         autotrim(ctx, why)
     unpack(ctx)

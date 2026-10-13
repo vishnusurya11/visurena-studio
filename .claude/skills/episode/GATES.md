@@ -59,7 +59,9 @@ staged room's mirror -- ADVISORY, no rung, until calibrated.
 The measured runtime must sit in 120-174 s — the PICTURE's budget, derived in
 `episode_spec` as the 180 s YouTube-Shorts wall less the ~6 s tail (title card
 + chip) that assemble appends after the picture; never restate either number.
-Every line at its shot's start plus the handle (`misaligned`). The fingerprint
+A measured overrun is cured in step 05 before any refusal stands (A99): the
+holds of every shot shaved to the budget less 0.5 s, floors kept, recorded,
+re-timed, re-signed; a timeline over the budget is never `done`. Every line at its shot's start plus the handle (`misaligned`). The fingerprint
 covers only timing inputs, so a reworded frame does not stale it.
 
 ## Grids and the panel cut — `grids.py`, `panels.py` (HARD)
