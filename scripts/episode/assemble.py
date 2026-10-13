@@ -906,8 +906,9 @@ def main(book_id: str, number: int, engine: str = "i2v",
     episode_sound.cure_from_qc(home, engine)
     sound = episode_sound.layer(home, episode, placed)
     said = {r["index"]: r for r in episode_home.read_json(episode_home.lines_dir(book, number) / "lines.json")}
-    offsets = [episode_emotion.offset_of(said.get(line["index"], {}).get("delivery", "calm"))
-               for line in placed["lines"]]
+    offsets = [episode_emotion.offset_of(said.get(line["index"], {}).get("delivery", "calm"),
+                                         line.get("kind") or said.get(line["index"], {}).get("kind", ""))
+               for line in placed["lines"]]   # narration clamped to +-1.5 LU (Jekyll ep01 SOUND R4)
     laid = line_laid.laid_lines(placed, episode_home.takes_dir(book, number, engine))
     # EFFECTS DUCK UNDER THE VOICE like the bed (owner 2026-09-27: "too loud")
     sound = episode_sound.ducked(sound, [(l["at"], l["at"] + l["seconds"]) for l in laid], work)

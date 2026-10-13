@@ -129,5 +129,16 @@ def prosody_ok(register: str, wav: Path, calm_hz: float) -> bool:
     return register not in LIFTED or lift_st(wav, calm_hz) >= LIFT_ST
 
 
-def offset_of(register: str) -> float:
-    return OFFSETS.get(register, 0.0)
+NARRATION_CLAMP_LU = 1.5
+"""The most a NARRATION line's delivery may move its level, either way.
+Jekyll ep01 (SOUND.md R4): hushed -5 / grieving -2 made the narrator wander
+1.8 LU line to line against WotW's 0.6.  The narrator carries intimacy in the
+performance, not the fader; dialogue keeps the full `OFFSETS`."""
+
+
+def offset_of(register: str, kind: str = "dialogue") -> float:
+    """dB on top of the line target for this delivery; narration clamped."""
+    got = OFFSETS.get(register, 0.0)
+    if kind == "narration":
+        return max(-NARRATION_CLAMP_LU, min(NARRATION_CLAMP_LU, got))
+    return got
