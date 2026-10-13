@@ -780,10 +780,50 @@ def held_seconds(shot) -> float:
     return float(get("beat_s", 0.0) or 0.0) + float(get("coda_s", 0.0) or 0.0)
 
 
+LINE_GAP_S = 0.90
+"""The least silence between two consecutive lines (Jekyll ep01 SOUND.md R3:
+median 0.52 s against WotW's 1.03).  Across a cut that is two HANDLEs plus the
+holds of the shot before, so a voiced shot before a voiced shot holds CUT_HOLD_S."""
+CUT_HOLD_S = LINE_GAP_S - 2 * 0.25
+BREATHLESS_SHARE = 0.25
+"""The share of voiced->voiced cuts that may run under the floor (a full take
+has no room for a beat); over it the plan does not breathe."""
+
+
+def breathless_cuts(plan) -> list[int]:
+    """Voiced cut shots followed by a voiced shot whose holds leave the next
+    line under LINE_GAP_S (an Episode or its doc)."""
+    shots = plan["shots"] if isinstance(plan, dict) else plan.shots
+    omit = set((plan.get("omit") if isinstance(plan, dict) else getattr(plan, "omit", None)) or [])
+    lines = plan["lines"] if isinstance(plan, dict) else plan.lines
+    voiced = {(l["shot"] if isinstance(l, dict) else l.shot) for l in lines}
+    index = (lambda s: s["index"]) if isinstance(plan, dict) else (lambda s: s.index)
+    cut = [s for s in shots if index(s) not in omit]
+    return [index(s) for s, n in zip(cut, cut[1:])
+            if index(s) in voiced and index(n) in voiced and held_seconds(s) < CUT_HOLD_S - 1e-6]
+
+
+def voiced_cuts(plan) -> int:
+    """How many cuts go from a spoken shot straight into a spoken shot."""
+    shots = plan["shots"] if isinstance(plan, dict) else plan.shots
+    lines = plan["lines"] if isinstance(plan, dict) else plan.lines
+    voiced = {(l["shot"] if isinstance(l, dict) else l.shot) for l in lines}
+    index = (lambda s: s["index"]) if isinstance(plan, dict) else (lambda s: s.index)
+    omit = set((plan.get("omit") if isinstance(plan, dict) else getattr(plan, "omit", None)) or [])
+    cut = [index(s) for s in shots if index(s) not in omit]
+    return sum(1 for a, b in zip(cut, cut[1:]) if a in voiced and b in voiced)
+
+
 def pace_faults(episode) -> list[str]:
-    """G-PACE: at most MAX_PLAN_WORDS words, at least MIN_PAUSE_S of pauses.
+    """G-PACE: at most MAX_PLAN_WORDS words, at least MIN_PAUSE_S of pauses, and
+    no more than BREATHLESS_SHARE of the spoken cuts under the line-gap floor.
     Over budget, a LINE goes (plan_cures.cut_lines), never a breath."""
     out, said = [], sum(words(l.text) for l in episode.lines)
+    tight, spoken = len(breathless_cuts(episode)), voiced_cuts(episode)
+    if spoken and tight > BREATHLESS_SHARE * spoken:
+        out.append(fault("G-PACE", "plan", f"cuts where the next line comes under the {LINE_GAP_S} s breath "
+                         f"floor -- hold the shot before {CUT_HOLD_S:.2f} s", tight,
+                         int(BREATHLESS_SHARE * spoken)))
     if said > MAX_PLAN_WORDS:
         out.append(fault("G-PACE", "plan", "words spoken over the ceiling -- cut a line, never a breath",
                          said, MAX_PLAN_WORDS))

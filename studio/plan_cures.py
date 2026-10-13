@@ -592,11 +592,26 @@ def breath_room(doc: dict, rate: float, s: dict) -> float:
     return max(0.0, min(room, _headroom(doc, rate, s["index"])))
 
 
+def breathe_cuts(doc: dict, rate: float = 2.45) -> dict:
+    """Every voiced shot cut straight into a voiced shot gets the beat that
+    puts the next line LINE_GAP_S after its last (plan_gates.breathless_cuts),
+    as far as its take and its hole allow (Jekyll ep01: median gap 0.52 s)."""
+    from studio.plan_gates import CUT_HOLD_S, breathless_cuts, held_seconds
+    shots = {s["index"]: s for s in doc.get("shots") or []}
+    for n in breathless_cuts(doc):
+        s = shots[n]
+        need = round(CUT_HOLD_S - held_seconds(s), 2)
+        s["beat_s"] = round(float(s.get("beat_s") or 0) + min(need, breath_room(doc, rate, s)), 2)
+    return doc
+
+
 def breathe(doc: dict, rate: float = 2.45) -> dict:
-    """G-PACE's pause cure: beats grow on voiced shots before the button, in
+    """G-PACE's pause cure: the breathless cuts get their hold first
+    (`breathe_cuts`); then beats grow on voiced shots before the button, in
     BREATHE_ORDER, up to the floor; a plan the breaths push over budget then
     loses a line (cut_lines), never the breath."""
     from studio.plan_gates import MIN_PAUSE_S, planned_pauses
+    doc = breathe_cuts(doc, rate)
     lines = doc.get("lines") or []
     button, voiced = (lines[-1]["shot"] if lines else -1), {l["shot"] for l in lines}
     rank = {name: k for k, name in enumerate(BREATHE_ORDER)}
@@ -1714,7 +1729,7 @@ CURES: list[tuple[re.Pattern, str]] = [
     (re.compile(r"G-SETUP setup"), "split_setup"),
     (re.compile(r"G-SPEAKER line"), "alias_speakers"),
     (re.compile(r"G-PACE plan: words spoken|projects to (?:17[4-9]|1[89]\d|[2-9]\d\d) s; an episode is"), "cut_lines"),
-    (re.compile(r"G-PACE plan: planned pauses"), "breathe"),
+    (re.compile(r"G-PACE plan: planned pauses|G-PACE plan: cuts where the next line"), "breathe"),
     (re.compile(r"projects to .* an episode is|ONE PER TAKE|TAKE LENGTH|G-HOLE|hole in speech|of the runtime"), "holds"),
     (re.compile(r"median (?:frame-edge|at_rest)"), "edge_cases"),
     (re.compile(r"\d+-word style line"), "trim_style"),
