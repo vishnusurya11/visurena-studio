@@ -128,10 +128,11 @@ SUBJECTS.update({
 HYDE_FIX = {
     "VHD": ("(black wide-brimmed hat:1.4), ", "long cape, tall hat, beanie, knit hat, (cap:1.2), hood, ornament on hat, "),  # "(very short hair:1.3)" here gave pure noise with the Kawajiri LoRA
     "HEL": ("insane grin, (very short hair:1.3), black clothes, ", "brown suit, brown coat, red coat, alucard (hellsing), (cross:1.3), priest, cassock, clergy, alexander anderson, "),
-    "MON": ("(young man:1.4), (youthful face:1.2), (victorian street:1.3), ", "old, elderly, (middle-aged:1.3), wooden corridor, "),
+    "MON": ("young adult man, (black wide-brimmed hat:1.4), (victorian street:1.3), ", "old, elderly, (middle-aged:1.3), wrinkles, wooden corridor, child, kid, (beanie:1.3), knit hat, pom pom, kasa, "),  # (young man:1.4) made him a child
 }
 # style -> (positive, negative) for every subject: VHD pulls men toward long-haired, feminine D/Leila looks
-STYLE_ALL = {"VHD": ("(male focus:1.3), masculine, ", "1girl, female, woman, androgynous, (long hair:1.3), off shoulder, bare shoulders, topless, shirtless, sleeveless, bare chest, nipples, ")}
+STYLE_ALL = {"MON": ("(washi paper texture:1.2), muted earthy colours, ", ""),
+             "VHD": ("(male focus:1.3), masculine, ", "1girl, female, woman, androgynous, (long hair:1.3), off shoulder, bare shoulders, topless, shirtless, sleeveless, bare chest, nipples, ")}
 # style -> tags removed from the shared negative (TRI asks for 3D toon shading, which NEG bans)
 NEG_DROP = {"TRI": ("3d, ",)}
 
