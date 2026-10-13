@@ -38,6 +38,28 @@ def photoreal(book) -> bool:
     return declared(book).get("look") == "photoreal"
 
 
+PHOTO_GRID = ("A PHOTOGRAPHIC FILM STILL copied from <image{{n}}> and not invented, in exactly its look: "
+              "{lead} Natural depth of field, real skin and real cloth under real light. Match the "
+              "palette, the grain and the light of <image{{n}}> exactly.")
+"""A photoreal book's storyboard style line, `{n}` the slot it is anchored on.  Jekyll
+ep01 (2026-10-13): the house line ("flat angular stylised 3d CGI ... NO photoreal skin")
+painted a photoreal book's door panels."""
+
+
+def grid_style(book) -> str:
+    """The grid's style template in the book's look; '' keeps the house line."""
+    if not photoreal(book):
+        return ""
+    lead = declared(book).get("lead", "").strip().replace("{", "{{").replace("}", "}}")
+    return PHOTO_GRID.format(lead=lead)
+
+
+def plan_look(book, look: str) -> str:
+    """A plan's `look` words, unless the book declares photoreal: the declaration outranks
+    a writer's look line (a stylised `look` would turn takes, places and plates house)."""
+    return "" if photoreal(book) else look
+
+
 def aspect_for(width: int, height: int) -> str:
     """The selector's choice nearest the asked shape."""
     ratio = width / height

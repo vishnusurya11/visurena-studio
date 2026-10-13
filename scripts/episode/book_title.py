@@ -54,9 +54,12 @@ def home(book: Path) -> Path:
 
 
 def book_look(book: Path) -> str:
-    """The series' declared look (episode 1's plan); empty is photoreal live action."""
+    """The series' declared look (episode 1's plan); empty is photoreal live action,
+    and a book that declares photoreal (refs/look.json) reads no plan look."""
+    from studio import book_look as declared
     path = episode_home.home(book, 1) / "plan.json"
-    return (episode_home.read_json(path).get("look") or "") if path.exists() else ""
+    said = (episode_home.read_json(path).get("look") or "") if path.exists() else ""
+    return declared.plan_look(book, said)
 
 
 def load_spec(book: Path) -> bt.BookTitleSpec:

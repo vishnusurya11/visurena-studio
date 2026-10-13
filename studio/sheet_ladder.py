@@ -28,7 +28,7 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Callable
 
-from studio import refs_pack
+from studio import book_look, refs_pack
 from studio.judges.verdict import Fault, Verdict
 from studio.ladder import Ladder, Rung
 from studio.run_budget import Budget
@@ -154,12 +154,21 @@ def supersede(book_dir: Path | str, path: str, n: int) -> Path:
 
 
 def redraw(book_dir: Path | str, job: refs_pack.Job, prompt: str, seed: int, run: Callable) -> Path:
-    """One picture through the pack's manifest values with these words and this seed."""
-    values = {**refs_pack.values_for(job), "prompt": refs_pack.styled(prompt), "seed": seed}
-    out = run(job.workflow, values)[0]
+    """One picture through the pack's manifest values with these words and this seed,
+    in the BOOK's look (studio.book_look): a photoreal book's redraw is never house."""
+    workflow, values = job.workflow, {**refs_pack.values_for(job), "prompt": refs_pack.styled(prompt), "seed": seed}
+    if book_look.photoreal(book_dir):
+        workflow, values = book_look.t2i(book_dir, prompt, width=job.width, height=job.height, seed=seed,
+                                         prefix=values["filename_prefix"])
+    out = run(workflow, values)[0]
     target = Path(book_dir) / refs_pack.relpath(job)
     shutil.copyfile(out, target)
     return target
+
+
+def workflow_of(book_dir: Path | str, job: refs_pack.Job) -> str:
+    """The workflow `redraw` runs for this job, as the pack row records it."""
+    return book_look.PHOTOREAL_T2I if book_look.photoreal(book_dir) else job.workflow
 
 
 @dataclass
@@ -202,7 +211,7 @@ class SheetLadder:
         prompt, seed = self.words(rung, row, job, faults)
         started = time.monotonic()
         redraw(self.book_dir, job, prompt, seed, self.run or _comfy_run())
-        append_row(self.book_dir, {"path": path, "workflow": job.workflow, "prompt": prompt, "seed": seed,
+        append_row(self.book_dir, {"path": path, "workflow": workflow_of(self.book_dir, job), "prompt": prompt, "seed": seed,
                                    "seconds": round(time.monotonic() - started, 1), "rung": rung.name})
 
     def take(self, rung: Rung, i: int, verdict: Verdict) -> None:

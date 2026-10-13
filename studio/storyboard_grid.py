@@ -320,7 +320,8 @@ in the prompt said the place may not change between panels."""
 
 def grid_prompt_v2(shots: list[dict], cols: int, rows: int, place: tuple[list[int], str],
                    cast: list[dict], style_slot: int, props: list[dict] | None = None, *,
-                   room: int | None = None, geometry: str = "", light: str = "") -> str:
+                   room: int | None = None, geometry: str = "", light: str = "",
+                   style: str = "", medium: str = "illustration") -> str:
     """Layout (one line), the room when the grid is chained, the panels SUBJECT
     FIRST, one binding line per person, the place with its geometry, the style.
     No description is truncated -- the sheet in the slot carries the face and
@@ -332,7 +333,7 @@ def grid_prompt_v2(shots: list[dict], cols: int, rows: int, place: tuple[list[in
     single = len(shots) == 1
     said = _unnamed(shots, cast)
     if single:
-        layout = "One full-frame illustration, edge to edge, with no lettering anywhere."
+        layout = f"One full-frame {medium}, edge to edge, with no lettering anywhere."
         blocks = [_one_picture(_block_v2("", said[0]))]
     else:
         layout = (f"A storyboard of {len(shots)} panels in {cols} columns and {rows} rows, all the "
@@ -357,7 +358,7 @@ def grid_prompt_v2(shots: list[dict], cols: int, rows: int, place: tuple[list[in
     if geometry.strip():
         where += " " + geometry.strip()
     lead = [ROOM_V2.format(n=room)] if room is not None else []
-    parts = [layout] + lead + blocks + binding + [where, STYLE_V2.format(n=style_slot)]
+    parts = [layout] + lead + blocks + binding + [where, (style or STYLE_V2).format(n=style_slot)]
     return "\n\n".join(_one_picture(x) if single else x for x in parts)
 
 

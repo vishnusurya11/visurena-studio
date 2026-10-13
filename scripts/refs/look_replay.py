@@ -133,7 +133,7 @@ def render_grid(book: Path, home: Path, ep, setup: str, shots, cols: int, rows: 
     from studio.comfy import submit, wait
     text, slots = grids.prompt_for(book, ep, setup, shots, cols, rows)
     seed = 40500 + sum(s.index for s in shots)
-    made = wait(submit(grids.graph_for(text, slots, cols, rows, seed, f"bench_look_{setup}")), timeout=3600)
+    made = wait(submit(grids.graph_for(text, slots, cols, rows, seed, f"bench_look_{setup}", grids.negative_for(book))), timeout=3600)
     (home / "prompt.txt").write_text(text, encoding="utf-8")
     return Path(shutil.copyfile(made[0], home / "grid.png"))
 

@@ -76,3 +76,16 @@ def test_a_reader_that_fails_is_a_flag_never_a_crash():
     assert len(flags) == 1 and flags[0].startswith("the reader failed")
     assert runner.read_flags(["A STUDY IN", "SCARLET"], lambda _: "A STUDY IN\nSCARLET") == []
     assert runner.read_flags(["A STUDY IN"], lambda _: "A STUDY") == ["the reader did not find ['A STUDY IN'] on the held frame"]
+
+
+def test_a_photoreal_book_reads_no_plan_look(tmp_path, monkeypatch):
+    import json
+    from studio import episode_home
+    ep = tmp_path / "episodes" / "ep01"
+    ep.mkdir(parents=True)
+    monkeypatch.setattr(episode_home, "home", lambda book, n: Path(book) / "episodes" / f"ep{n:02d}")
+    (ep / "plan.json").write_text(json.dumps({"look": "Angular stylised 3D"}), encoding="utf-8")
+    (tmp_path / "refs").mkdir()
+    (tmp_path / "refs" / "look.json").write_text(json.dumps({"look": "photoreal", "lead": "A film still. "}),
+                                                 encoding="utf-8")
+    assert runner.book_look(tmp_path) == ""                 # refs/look.json outranks the plan (Jekyll)

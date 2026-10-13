@@ -1127,7 +1127,8 @@ def adopt_canon(book: Path, episode: Episode) -> None:
     global W, H
     W, H = canvas.size(episode.aspect)
     house_style.adopt(episode.where, episode.light)
-    house_style.adopt_look(getattr(episode, "look", ""))
+    from studio import book_look                     # refs/look.json outranks the plan's look
+    house_style.adopt_look(book_look.plan_look(book, getattr(episode, "look", "")))
     house_style.adopt_places(place_names(book))
     adopt_names(episode_home.read_json(book / "refs" / "refs.json").get("refs", [])
                 if (book / "refs" / "refs.json").exists() else [])

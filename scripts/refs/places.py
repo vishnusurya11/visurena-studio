@@ -81,6 +81,12 @@ painterly while it drew the cast as stylised 3D figures, and the storyboard take
 its style from the place picture -- people pasted onto paintings from ep09 on."""
 
 
+def look_of(book: Path, look: str) -> str:
+    """The plan's look words, unless the book declares photoreal (studio.book_look)."""
+    from studio import book_look
+    return book_look.plan_look(book, look)
+
+
 def styled(described: str, look: str) -> str:
     """The setup's words, then the book's look when it declares one."""
     return f"{described} {LOOK.format(look=look.strip().rstrip('.'))}" if look.strip() else described
@@ -286,7 +292,7 @@ def main(book_id: str, number: int, drawing: bool, names: dict[str, str]) -> int
     for loc in ensure_rows(book, setups, names, number):
         print(f"  new row: {loc}")
     if drawing:
-        draw_missing(book, setups, krea(book), look=plan.look)
+        draw_missing(book, setups, krea(book), look=look_of(book, plan.look))
         derive_missing(book, setups, qwen_edit(book), number=number)
     rows = status(book, setups)
     for name, loc, view, state in rows:

@@ -927,3 +927,9 @@ fixes. Each lesson below cost at least one launch. Tracker rows A38-A74 in
       before takes_r2v refused them at G-TAKELINT. `pack_refs.rows_for` now keeps every identity
       field of the old row (display, gender, pronouns, marks, aka; an empty `named` value never
       erases one) and G-ROWGENDER refuses every genderless cast row at once, in step 01.
+    - **The grid, the sheet ladder and every plan `look` follow refs/look.json, never the house (Jekyll ep01, 2026-10-13).**
+      grids.py told every book "flat angular stylised 3d CGI ... NO photoreal skin" (and v2's STYLE_V2 the same), with
+      "photographic" and WotW's "beard on the narrator" in the negative: a photoreal book drew painted door panels.
+      `book_look.grid_style` / `grids.negative_for` now give a photoreal book a film-still line in its own lead words
+      (a book's extra negative words go in look.json `negative`); the refs sheet redraw and the plan `look` read by
+      takes, places and title plates obey the declaration too. A book with no declaration keeps every string byte for byte.

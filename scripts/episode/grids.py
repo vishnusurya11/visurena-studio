@@ -38,7 +38,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 
-from studio import cast_refs, continuity, episode_home, grid_room, pack_refs
+from studio import book_look, cast_refs, continuity, episode_home, grid_room, pack_refs
 from studio.comfy import load_workflow, stage_image, submit, wait
 from studio.episode_home import episode_arg
 from studio.ref_slots import stage_only
@@ -60,6 +60,27 @@ NEGATIVE = ("text, caption, subtitles, watermark, signature, blurry, photographi
             "clothing, two men dressed alike, two men in the same hat, duplicated people, "
             "extra limbs, deformed hands, mountains, cliffs, lettering, letters, words, "
             "panel labels, numbers, beard on the narrator")
+"""The HOUSE grid: a book with no refs/look.json keeps both lines byte for byte."""
+
+PHOTO_NEGATIVE = ("text, caption, subtitles, watermark, signature, blurry, modern clothing, two men "
+                  "dressed alike, two men in the same hat, duplicated people, extra limbs, deformed "
+                  "hands, mountains, cliffs, lettering, letters, words, panel labels, numbers")
+"""A photoreal book's negative: no "photographic", and no book's own people (WotW's
+"beard on the narrator").  A book files its own words as `negative` in refs/look.json."""
+
+
+def look_for(book: Path) -> dict:
+    """The grid prompt's look kwargs: {} keeps the house style (book_look.grid_style)."""
+    style = book_look.grid_style(book)
+    return {"style": style, "medium": "film still"} if style else {}
+
+
+def negative_for(book: Path) -> str:
+    """The grid's negative in the book's look, with the book's own declared words."""
+    if not book_look.photoreal(book):
+        return NEGATIVE
+    extra = str(book_look.declared(book).get("negative", "") or "").strip().strip(",")
+    return f"{PHOTO_NEGATIVE}, {extra}" if extra else PHOTO_NEGATIVE
 
 SAID = {"wide": "WIDE", "full": "FULL SHOT", "medium": "MEDIUM", "medium_close": "MEDIUM CLOSE",
         "close": "BIG CLOSE-UP", "extreme_close": "EXTREME CLOSE-UP", "insert": "INSERT"}
@@ -235,9 +256,10 @@ def grid_shots(ep, setup: str, cols: int, rows: int, only: list[int] | None) -> 
 
 
 def _v1(blocks: list, cols: int, rows: int, place: tuple, cast: list, style_slot: int,
-        props: list | None = None, **_) -> str:
+        props: list | None = None, style: str = "", **_) -> str:
     cast = [{**p, "wear": p["wear"][:600]} for p in cast]      # v1's own cut, kept byte for byte
-    text = grid_prompt(blocks, cols, rows, place=place, cast=cast, style=STYLE.format(scene=style_slot))
+    said = style.format(n=style_slot).rstrip(".") if style else STYLE.format(scene=style_slot)
+    text = grid_prompt(blocks, cols, rows, place=place, cast=cast, style=said)
     return text + "\n\n" + no_duplicates([p["name"] for p in cast])
 
 
@@ -314,17 +336,19 @@ def prompt_for(book: Path, ep, setup: str, shots: list, cols: int, rows: int,
     here = ep.setups[shots[0].setup]
     place = (plate_slots, here.described)
     return compose(version, blocks, cols, rows, place, cast, style_slot, props, room=room_slot,
-                   geometry=place_words(here), light=getattr(here, "light", "") or ""), slots
+                   geometry=place_words(here), light=getattr(here, "light", "") or "",
+                   **look_for(book)), slots
 
 
-def graph_for(text: str, slots: dict, cols: int, rows: int, seed: int, name: str) -> dict:
+def graph_for(text: str, slots: dict, cols: int, rows: int, seed: int, name: str,
+              negative: str = NEGATIVE) -> dict:
     template, _ = load_workflow("image_qwen_image_2_1_edit_multi")
     graph = {k: v for k, v in template.items()}
     graph["3"]["inputs"]["clip_name"] = CLIP
     # NOTHING STAGED THAT THE PROMPT DOES NOT NAME: an unused LoadImage holds
     # ComfyUI's example.png -- a doll -- and the encoder reads it.
     stage_only(graph, {node: stage_image(path) for node, path in slots.items()})
-    graph["5"]["inputs"].update(prompt=text, negative_prompt=NEGATIVE, resolution=1024)
+    graph["5"]["inputs"].update(prompt=text, negative_prompt=negative, resolution=1024)
     graph["6"]["inputs"].update(width=1024 * cols, height=1024 * rows)
     graph["7"]["inputs"].update(seed=seed, steps=25, cfg=1.0)
     graph["9"]["inputs"]["filename_prefix"] = name
@@ -358,7 +382,7 @@ def main(book_id: str, number: int, setup: str, cols: int, rows: int, tag: str =
     print(f"{name}: shots {[s.index for s in shots]} | slots {sorted(slots)} | prompt {len(text)} chars",
           flush=True)
     began = time.time()
-    made = wait(submit(graph_for(text, slots, cols, rows, seed, name)), timeout=3600)
+    made = wait(submit(graph_for(text, slots, cols, rows, seed, name, negative_for(book))), timeout=3600)
     grid = file_grid(book, number, name, made, text, {
         "name": name, "episode": number, "setup": setup, "cols": cols, "rows": rows,
         "shots": [s.index for s in shots], "seed": seed, "plan": plan_sha(book, number),
