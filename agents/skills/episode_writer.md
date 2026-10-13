@@ -14,8 +14,34 @@ You answer one question, and only this one:
 Every rule below is a consequence of how the plan is used downstream: the
 lines are recorded and MEASURED, the picture is cut to that measured voice,
 a drawer draws each shot's cell from your words, and a video model animates
-the cell from your camera clause. Nothing you write is read by a person
-first. Write for the instruments.
+the cell from your camera clause. The instruments read every word first, and
+a VIEWER watches the result: write the words for the instruments and the
+story for the viewer.
+
+---
+
+## The viewer
+
+Five rules, each held by a gate. A plan that obeys every instrument and none
+of these is refused.
+
+1. **Hook in the first shot.** The first shot and the first line carry the
+   chapter's threat or open question -- the danger, the mystery -- never a
+   portrait of someone's habits (G-HOOK). A row of description only may be
+   folded into one clause of a later line, or left out.
+2. **The spike is shown.** The chapter's key physical event is a SHOT of the
+   act itself while it happens, with the chapter's own verb in its motion --
+   never only a line about it, never only its aftermath (G-SPIKE). Every
+   other shot carries a story action too: a person's act, or an event that
+   changes something; wind, leaves, birds and smoke are not story (G-ACTION).
+3. **The teller tells his own tale.** When a character tells a story in the
+   chapter, his words are his: `kind: "tale"`, in his voice, the book's words
+   kept, over pictures of what he tells. Never narrate it as "he said that..."
+4. **Hold after every reveal.** Leave the picture room to land: at least 15
+   seconds of beats and codas over the plan, and at most 310 words (G-PACE).
+   Over budget, cut a line -- never a breath.
+5. **Withhold what the chapter withholds.** A name, a face or a fact the
+   chapter keeps back until its end stays back until the same moment.
 
 ---
 
@@ -48,8 +74,16 @@ turn, spike, reaction, runout, button, answer.
 
 ## The voice
 
-- A narrator carries about 90 % of the speech over cutaways; the few dialogue
-  lines are spoken ON CAMERA. `dialogue_share` in the band is the dial.
+- **The narrator is the book's** (THE BOOK'S NARRATOR in the brief): that one
+  speaker says every narration line. Never give narration to a character, and
+  never choose a narrator yourself. When the brief names none, nothing can be
+  written; the run stops before you are asked.
+- Three kinds of line: `narration` (the narrator, over cutaways), `dialogue`
+  (spoken ON CAMERA, lips driven) and `tale` (a character telling his own
+  story in his own voice, over pictures of what he tells -- no lips).
+- The narrator carries most of the speech; the few dialogue lines are spoken
+  ON CAMERA. `dialogue_share` in the band is the dial, and it counts dialogue
+  only: a tale sits outside it.
 - A dialogue line's shot shows the speaker's face at `close` or `medium_close`
   and lists the speaker in `faces`: the lips are driven by the line's own audio.
 - At most `max_words_per_line` words a line, at most `max_lines_per_shot` lines
@@ -58,8 +92,8 @@ turn, spike, reaction, runout, button, answer.
   on; a line's shot never precedes an earlier line's shot. A shot with no line
   names a beat or a coda, or it is a hole.
 - The narration is WRITTEN, never copied: no run of more than eight of the
-  book's own consecutive words in a narration line. A character's dialogue may
-  keep the book's words, trimmed to land inside the word wall.
+  book's own consecutive words in a narration line. A character's dialogue and
+  a tale may keep the book's words, trimmed to land inside the word wall.
 - The narrator acts in his own unit: at least one narration line has the
   narrator as the subject of a verb, when the narrator is in the cast.
 - Vary the line lengths. Lines that all run the same length cut like a metronome.
@@ -68,8 +102,9 @@ turn, spike, reaction, runout, button, answer.
 ## The band
 
 The runtime is projected from the words at `words_per_second` -- THIS narrator's
-measured pace over the earlier episodes, not a guess -- with handles, breaths, beats
-and codas. The projection must land between `min_seconds` and `max_seconds`, and the
+measured pace over the earlier episodes, else the studio's measured pace, never a
+guess -- with handles, breaths, beats and codas. At most 310 words in the whole
+plan and at least 15 s of beats and codas (G-PACE). The projection must land between `min_seconds` and `max_seconds`, and the
 turn inside `turn_band` of it. No shot may project longer than one take
 (`take_seconds`): a shot's lines together carry at most `max_words_per_shot` words.
 Count them. A 23-word shot at 2.5 words a second is 9.2 s and the plan is refused.
@@ -210,7 +245,12 @@ extreme_close, close, medium_close, medium, full, wide.
   something the location picture already contains.
 - **Variety.** Choose moves from the camera catalog: at least eight distinct
   moves in a unit, no move on more than a quarter of the shots, never the same
-  move on two consecutive shots. A pan names where the frame ARRIVES; a track
+  move on two consecutive shots -- except a dialogue exchange.
+- **Dialogue is held.** A shot carrying a dialogue line holds a locked-off frame
+  or sits over the listener's shoulder, and the ACTOR carries the verb (leans,
+  turns, lifts a hand). An exchange held so is one shot/reverse-shot unit,
+  never a repeat. At most one spoken line's camera travels -- a push on the
+  realisation (G-TALK). A pan names where the frame ARRIVES; a track
   names what it passes; a tilt names what it reveals; only an orbit asks its
   subject to stay put. Never "keeps the left third" on a pan or a track.
 - Never truck sideways across a person anchored to scenery (leaning, seated,
@@ -218,7 +258,8 @@ extreme_close, close, medium_close, medium, full, wide.
   fine: say "with him".
 - A locked-off camera is a move when the actor carries the verb.
 - Motivate the move: follow a walk, reveal what the line names, push on the
-  realisation, pull back on the aftermath.
+  realisation, pull back on the aftermath. Never move the camera to make an
+  empty shot look busy: give the shot a story action instead.
 - Sub-shots (`cuts`) are cuts inside a narration shot's audio window, each at
   least 2.5 s after the previous and at least 2.5 s before the shot's end; a
   dialogue shot takes none.
@@ -289,9 +330,14 @@ again — the gates read the plan, never a diff.
    and lacks what the motion brings in.
 6. No negation, no pace word, no banned subject in any drawn field.
 7. Every motion opens with a camera move, has three clauses, ends on something
-   still going; at least eight distinct moves; no move twice in a row.
-8. Dialogue inside the dial, on readable faces; narration written, not lifted;
-   the narrator acts; the line lengths vary.
+   still going; at least eight distinct moves; no move twice in a row outside
+   a held dialogue exchange; dialogue held locked or over the shoulder.
+8. Dialogue inside the dial, on readable faces; narration written, not lifted,
+   and all of it the book's narrator's; a character's own story is a tale; the
+   line lengths vary.
+11. The viewer: the first shot and line carry the threat; the spike is a shot
+    of the act; every shot carries a story action; <= 310 words and >= 15 s of
+    beats and codas; what the chapter withholds stays withheld.
 9. Every shot has a `source` span; the plan reaches the chapter's end and its
    title event; every `!` line is dialogue with a delivery.
 10. Every setup has an `ambience`; every loud event in the prose has its `sounds`.
