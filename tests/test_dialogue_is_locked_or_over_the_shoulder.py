@@ -61,6 +61,13 @@ def test_g_talk_allows_one_travelling_dialogue_shot():
     assert plan_gates.talk_faults(_ep([PUSH, LOCKED, OTS], dialogue={0, 1, 2})) == []
 
 
+def test_a_pan_or_a_tilt_on_a_spoken_line_is_not_a_travel():
+    """WotW ep01, which the owner liked, pans on all four of its dialogue shots:
+    the camera turns where it stands; only a camera that TRAVELS counts."""
+    pan = "The camera pans across to his face; he speaks; his hand lifts"
+    assert plan_gates.talk_faults(_ep([pan, pan, pan, PUSH], dialogue={0, 1, 2, 3})) == []
+
+
 def test_a_frozen_dialogue_take_gives_the_actor_a_verb_never_a_push():
     motion = take_ladder.substitute("frozen-whole", LOCKED, "his face a third of the frame", dialogue=True)
     assert plan_gates.move_id(motion, "") == "locked"

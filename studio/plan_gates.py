@@ -1118,7 +1118,10 @@ locked-off is the sharpest move and the best for lips).  Jekyll ep01 pushed in
 on 6 of 8 dialogue shots; the liked WotW ep01-03 pushed on 1, 0 and 0."""
 
 MAX_TALK_TRAVELS = 1
-"""Dialogue shots whose camera travels (a push on the realisation, at most)."""
+"""Dialogue shots whose camera TRAVELS (TRAVELS: push, pull, track, follow, crane,
+orbit, handheld) -- a push on the realisation, at most.  A pan or a tilt turns
+where it stands and is no travel.  MEASURED on dialogue shots: WotW ep01 0 (it
+pans on all four), ep02 1, ep03 0; Jekyll ep01 7 (six pushes and a follow)."""
 
 
 def dialogue_shots(episode) -> set[int]:
@@ -1136,7 +1139,7 @@ def talk_faults(episode) -> list[str]:
     """G-TALK: past MAX_TALK_TRAVELS, every dialogue shot whose camera travels."""
     spoken = dialogue_shots(episode)
     moving = [s.index for s in episode.shots
-              if s.index in spoken and move_id(s.motion, getattr(s, "camera", "") or "") not in TALK_MOVES]
+              if s.index in spoken and move_id(s.motion, getattr(s, "camera", "") or "") in TRAVELS]
     if len(moving) <= MAX_TALK_TRAVELS:
         return []
     return [fault("G-TALK", f"shot {i}", "a spoken line's camera travels; dialogue is locked or over the "
