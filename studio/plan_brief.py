@@ -279,7 +279,7 @@ def spoken_rate(book_dir: Path | None, number: int | None) -> float:
     (2026-10-07): the brief said 3.0, the gate measured 2.50, and thirteen
     23-word shots projected 9.2 s against an 8.0 s take."""
     if book_dir is None or number is None:
-        return episode_spec.WORDS_PER_SECOND
+        return episode_spec.STUDIO_RATE
     from studio import plan_gates
     return plan_gates.series_rate(book_dir, number)
 

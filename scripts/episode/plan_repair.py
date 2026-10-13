@@ -240,6 +240,10 @@ def apply(doc: dict, rows: list[str], book, number: int = 0,
             doc, _ = pc.strip_phantoms(doc, *phantom_context(book))
         elif name == "holds":
             doc = pc.holds(doc, rate=rate)
+        elif name == "cut_lines":
+            doc = pc.cut_lines(doc, rate=rate)
+        elif name == "breathe":
+            doc = pc.breathe(doc, rate=rate)
         elif name == "edge_cases":
             doc = pc.edge_cases(doc)
         elif name == "source_spans":
@@ -308,13 +312,15 @@ def apply(doc: dict, rows: list[str], book, number: int = 0,
 
 def rate_blocked(doc: dict, rate: float) -> bool:
     """The G-RATE guard on insertion: 14 more words at the measured rate must
-    not push the projection past MAX_SECONDS -- that residual IS creative (the
-    plan must lose picture, the writer's call)."""
+    not push the projection past MAX_SECONDS, nor the plan past G-PACE's word
+    ceiling (2026-10-13) -- that residual IS creative (the plan must lose
+    picture, the writer's call)."""
     from studio.episode_spec import MAX_SECONDS
+    from studio.plan_gates import MAX_PLAN_WORDS
     words = sum(len(str(l.get("text") or "").split()) for l in doc.get("lines") or [])
     rest = sum(float(s.get("beat_s") or 0) + float(s.get("coda_s") or 0) + 0.5
                for s in doc.get("shots") or [])
-    return (words + 14) / rate + rest > MAX_SECONDS
+    return words + 14 > MAX_PLAN_WORDS or (words + 14) / rate + rest > MAX_SECONDS
 
 
 def micro_targets(doc: dict, rate: float) -> list[tuple[int, tuple]]:

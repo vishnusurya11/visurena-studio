@@ -252,6 +252,22 @@ def continuity_gates(book: Path, ep) -> int:
     return len(found)
 
 
+def drawn_or_hard(name: str, found: list[str], book: Path, number: int) -> int:
+    """A story wall raised after the render is advice for the plan that made it
+    (setup_gate's rule); before anything is drawn it is HARD.  Hard count."""
+    advisory = bool(found) and rendered(book, number)
+    print(f"{name:<13}:", ("advisory (rendered plan): " if advisory else "") + (f"{len(found)}" if found else "clean"))
+    for f in found:
+        print("   ", f[:170])
+    return 0 if advisory else len(found)
+
+
+def pace_gate(ep, book: Path, number: int) -> int:
+    """G-PACE (Jekyll ep01, 2026-10-13): <= 310 words, >= 15 s of pauses; hard
+    until something is drawn from the plan."""
+    return drawn_or_hard("G-PACE", plan_gates.pace_faults(ep), book, number)
+
+
 def speaker_gate(ep, book: Path, refs: list[dict]) -> int:
     """G-SPEAKER against the BOOK's narrator (studio.book_narrator), HARD; a
     character narrating beside him is printed as advice."""
@@ -287,6 +303,7 @@ def main(book_id: str, number: int) -> int:
     for f in pg:
         print("   ", f[:170])
     hard += setup_gate(ep, book, number)
+    hard += pace_gate(ep, book, number)
     asp = plan_gates.aspect_faults(ep, plan_gates.series_aspect(book))
     print("G-ASPECT     :", asp or "clean"); hard += len(asp)
     cf = plan_gates.crowd_faults(ep)

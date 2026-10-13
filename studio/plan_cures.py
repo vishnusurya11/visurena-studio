@@ -531,6 +531,84 @@ def holds_and_unsplit(doc: dict, rate: float = 3.0) -> tuple[dict, list[tuple[in
     return _close_projected_holes(button_beat(doc), rate), unsplit
 
 
+# ---- G-PACE: over budget, a line goes -- never a breath (2026-10-13) ------------
+
+KEPT_SECTIONS = ("hook", "turn", "spike", "answer", "button")
+"""Shots whose lines a budget cut never takes: the hook, the act, the answer, the end."""
+
+
+def answer_line(doc: dict) -> int | None:
+    from studio.episode_spec import ANSWER
+    m = ANSWER.match(str(doc.get("answer") or ""))
+    return int(m.group(2)) if m and m.group(1) == "line" else None
+
+
+def cuttable(doc: dict) -> list[dict]:
+    """Narration lines a budget cut may take: never the first or the last line,
+    never the answer, never on a kept section, and only from a shot that keeps
+    another line -- the cut opens no hole."""
+    lines, kept = doc.get("lines") or [], {s["index"] for s in doc.get("shots") or []
+                                            if s.get("section") in KEPT_SECTIONS}
+    count = {n: sum(1 for l in lines if l["shot"] == n) for n in {l["shot"] for l in lines}}
+    return [l for k, l in enumerate(lines) if 0 < k < len(lines) - 1 and l.get("kind") == "narration"
+            and k != answer_line(doc) and l["shot"] not in kept and count[l["shot"]] > 1]
+
+
+def drop_line(doc: dict, k: int) -> dict:
+    """Line k gone, the lines renumbered, a 'line N' answer after it moved down."""
+    del doc["lines"][k]
+    for i, line in enumerate(doc["lines"]):
+        line["index"] = i
+    if (n := answer_line(doc)) is not None and n > k:
+        doc["answer"] = f"line {n - 1}"
+    return doc
+
+
+def over_budget(doc: dict, rate: float) -> bool:
+    """Past the word ceiling, or projecting past the picture budget less the margin."""
+    from studio.episode_spec import MAX_SECONDS
+    from studio.plan_gates import MAX_PLAN_WORDS
+    said = sum(len(str(l.get("text") or "").split()) for l in doc.get("lines") or [])
+    return said > MAX_PLAN_WORDS or sum(_shot_secs(doc, rate).values()) > MAX_SECONDS - RUNTIME_MARGIN_S
+
+
+def cut_lines(doc: dict, rate: float = 2.45) -> dict:
+    """G-PACE's cure: the longest cuttable narration line goes, one at a time,
+    until the plan is inside the budget; every beat and coda stays.  Nothing
+    cuttable left: the rest is the writer's."""
+    while over_budget(doc, rate) and (pick := cuttable(doc)):
+        doc = drop_line(doc, max(pick, key=lambda l: len(str(l["text"]).split()))["index"])
+    return doc
+
+
+BREATHE_ORDER = ("turn", "spike", "answer", "reaction", "payoff", "friction", "transition", "setup", "runout", "hook")
+"""Where a missing pause lands first: after the act, the spike and the answer."""
+
+
+def breath_room(doc: dict, rate: float, s: dict) -> float:
+    """How much beat this shot may still take: its cap, its take, its hole."""
+    secs = _shot_secs(doc, rate)[s["index"]]
+    room = min(MAX_BEAT_S - float(s.get("beat_s") or 0), TAKE_BUDGET_S - secs)
+    return max(0.0, min(room, _headroom(doc, rate, s["index"])))
+
+
+def breathe(doc: dict, rate: float = 2.45) -> dict:
+    """G-PACE's pause cure: beats grow on voiced shots before the button, in
+    BREATHE_ORDER, up to the floor; a plan the breaths push over budget then
+    loses a line (cut_lines), never the breath."""
+    from studio.plan_gates import MIN_PAUSE_S, planned_pauses
+    lines = doc.get("lines") or []
+    button, voiced = (lines[-1]["shot"] if lines else -1), {l["shot"] for l in lines}
+    rank = {name: k for k, name in enumerate(BREATHE_ORDER)}
+    for s in sorted((s for s in doc.get("shots") or [] if s["index"] in voiced and s["index"] < button),
+                    key=lambda s: rank.get(s.get("section"), len(rank))):
+        need = round(MIN_PAUSE_S + 0.2 - planned_pauses(doc), 2)
+        if need <= 0:
+            break
+        s["beat_s"] = round(float(s.get("beat_s") or 0) + min(need, breath_room(doc, rate, s)), 2)
+    return cut_lines(doc, rate)
+
+
 def seat_overflow(doc: dict, rate: float) -> dict:
     """A shot past the take budget with two or more lines moves its LAST line
     to the next shot when that shot has room (the lines cap and its own
@@ -1635,6 +1713,8 @@ CURES: list[tuple[re.Pattern, str]] = [
     (re.compile(r"G-PHANTOM"), "strip_phantoms"),
     (re.compile(r"G-SETUP setup"), "split_setup"),
     (re.compile(r"G-SPEAKER line"), "alias_speakers"),
+    (re.compile(r"G-PACE plan: words spoken|projects to (?:17[4-9]|1[89]\d|[2-9]\d\d) s; an episode is"), "cut_lines"),
+    (re.compile(r"G-PACE plan: planned pauses"), "breathe"),
     (re.compile(r"projects to .* an episode is|ONE PER TAKE|TAKE LENGTH|G-HOLE|hole in speech|of the runtime"), "holds"),
     (re.compile(r"median (?:frame-edge|at_rest)"), "edge_cases"),
     (re.compile(r"\d+-word style line"), "trim_style"),

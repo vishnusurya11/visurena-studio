@@ -57,7 +57,14 @@ def short_refusal(master_seconds: float) -> str:
 WORDS_PER_SECOND = 3.0
 """IndexTTS2 on the cast voices, measured on chapter 1: 33 lines, 147 s of
 speech for ~430 words (2026-09-10).  Used only to PROJECT the runtime before
-the lines exist; the timeline uses the measured files."""
+the lines exist; the timeline uses the measured files.  LEGACY: the default of
+a plan doc written before `words_per_second` was carried; a new plan carries the
+band's rate (STUDIO_RATE or the book's measure), never this guess."""
+STUDIO_RATE = 2.45
+"""The studio's MEASURED narrator pace, the projection of a book that has no
+measure of its own yet (Jekyll ep01, 2026-10-13: the 3.0 above projected 146 s
+and the voice ran 173 s).  Every narrator measured so far: WotW ep01-03 2.43 /
+2.38 / 2.47, WotW ep19-27 2.49-2.50, Jekyll ep01 2.46."""
 MAX_WORDS = 18
 
 

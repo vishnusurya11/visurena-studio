@@ -756,6 +756,43 @@ def story_faults(episode: Episode, quote_at: float | None = None, quiet: float |
     return out + speech_faults(episode) + turn_faults(episode) + tail_faults(episode)
 
 
+# ---- G-PACE: the picture breathes (Jekyll ep01 review, 2026-10-13) ---------------
+
+MAX_PLAN_WORDS = 310
+"""Words a plan speaks, every line.  MEASURED on the episodes the owner liked:
+WotW ep01 298, ep02 266, ep03 307 (122-124 s of speech at ~2.45); Jekyll ep01
+spoke 362 and talked for 147 of its 173.5 s."""
+
+MIN_PAUSE_S = 15.0
+"""Planned pauses: every shot's beat_s + coda_s.  MEASURED: WotW ep01 20.0, ep02
+19.2, ep03 18.0 s; Jekyll ep01 9.4 s -- its picture never held after the
+trampling, the cheque or the name."""
+
+
+def planned_pauses(plan) -> float:
+    """Seconds of beat and coda over the plan (an Episode or its doc)."""
+    shots = plan["shots"] if isinstance(plan, dict) else plan.shots
+    return round(sum(held_seconds(s) for s in shots), 2)
+
+
+def held_seconds(shot) -> float:
+    get = shot.get if isinstance(shot, dict) else (lambda key, default=0.0: getattr(shot, key, default))
+    return float(get("beat_s", 0.0) or 0.0) + float(get("coda_s", 0.0) or 0.0)
+
+
+def pace_faults(episode) -> list[str]:
+    """G-PACE: at most MAX_PLAN_WORDS words, at least MIN_PAUSE_S of pauses.
+    Over budget, a LINE goes (plan_cures.cut_lines), never a breath."""
+    out, said = [], sum(words(l.text) for l in episode.lines)
+    if said > MAX_PLAN_WORDS:
+        out.append(fault("G-PACE", "plan", "words spoken over the ceiling -- cut a line, never a breath",
+                         said, MAX_PLAN_WORDS))
+    if (held := planned_pauses(episode)) < MIN_PAUSE_S:
+        out.append(fault("G-PACE", "plan", "planned pauses (beats + codas) in seconds under the floor -- "
+                         "hold after every reveal", held, MIN_PAUSE_S))
+    return out
+
+
 # ---- G-STORY after episode 10: the lead speaks his own words ---------------------
 # docs/analysis/ep10_dq_synthesis.md, section B.  Calibrated on the ep10 fixture
 # (the faults present) against ep05 and ep07 (clean, or the advisories named).
@@ -1474,11 +1511,13 @@ def faults(episode: Episode, quote_at: float | None = None, quiet: float | None 
 
 def measured_rate(rows: list[dict]) -> float:
     """Words a second the book's narrator actually speaks, from lines.json rows
-    (text + measured seconds); 3.0 -- the contract's projection -- when there
-    are none.  ep11: 2.68, and the placed cut ran 185 s on a 168 s projection."""
+    (text + measured seconds); the studio's measured STUDIO_RATE when there are
+    none -- never the 3.0 guess (Jekyll ep01 projected 146 s and ran 173 s).
+    ep11: 2.68, and the placed cut ran 185 s on a 168 s projection."""
+    from studio.episode_spec import STUDIO_RATE
     words = sum(len(str(r.get("text", "")).split()) for r in rows if r.get("seconds"))
     seconds = sum(float(r["seconds"]) for r in rows if r.get("seconds"))
-    return words / seconds if words and seconds else 3.0
+    return words / seconds if words and seconds else STUDIO_RATE
 
 
 def series_rate(book, number: int) -> float:

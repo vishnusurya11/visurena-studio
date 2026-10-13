@@ -510,7 +510,7 @@ def test_the_plan_is_reprojected_at_the_narrators_measured_rate():
     rows = [{"text": "one two three four five six", "seconds": 2.0, "kind": "narration"},
             {"text": "seven eight nine ten", "seconds": 1.5, "kind": "narration"}]
     assert abs(pg.measured_rate(rows) - 10 / 3.5) < 1e-9
-    assert pg.measured_rate([]) == 3.0
+    assert pg.measured_rate([]) == 2.45            # the studio's measure, never the 3.0 guess (2026-10-13)
     doc = json.loads((Path("tests/fixtures/episodes/ep10_plan.json")).read_text(encoding="utf-8"))
     slow = [a for a in pg.advisories(Episode(**doc), rate=1.5) if a.startswith("G-RATE")]
     assert slow and "over the 174 s picture budget" in slow[0]

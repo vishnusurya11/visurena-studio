@@ -188,7 +188,7 @@ def test_the_band_is_read_from_the_contract():
     band = plan_brief.band()
     assert band["min_seconds"] == episode_spec.MIN_SECONDS
     assert band["max_seconds"] == episode_spec.MAX_SECONDS
-    assert band["words_per_second"] == episode_spec.WORDS_PER_SECOND
+    assert band["words_per_second"] == episode_spec.STUDIO_RATE   # measured, never the 3.0 guess (2026-10-13)
     assert band["max_words_per_line"] == episode_spec.MAX_WORDS
     assert band["max_voices"] == episode_spec.MAX_SPEAKING
     assert band["max_setups"] == episode_spec.MAX_SETUPS
@@ -256,7 +256,7 @@ def test_the_band_speaks_at_the_measured_rate_and_says_the_words_a_take_holds(bo
     b = plan_brief.band(book, 3)
     assert b["words_per_second"] == plan_gates.series_rate(book, 3) == 2.5
     assert b["max_words_per_shot"] == 20                                       # 2.5 x 8.0 s
-    assert plan_brief.band()["words_per_second"] == episode_spec.WORDS_PER_SECOND
+    assert plan_brief.band()["words_per_second"] == episode_spec.STUDIO_RATE
     assert plan_brief.build(book, 3)["band"]["words_per_second"] == 2.5
 
 
