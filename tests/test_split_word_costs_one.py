@@ -52,3 +52,17 @@ def test_letters_apart_counts_single_character_edits():
     assert letters_apart("carriage", "carriage") == 0
     assert letters_apart("locked", "rocked") == 1
     assert letters_apart("abc", "xyz") == 3
+
+
+def test_a_name_heard_as_two_words_costs_one():
+    """MEASURED 2026-10-13, Jekyll ep01 line 12: "Enfield said it was like
+    watching some Juggernaut" came back "And Field said ..." on BOTH tries --
+    the name was said; the ear has no word for it. "and"+"field" is two letters
+    from "enfield", so it cost two and 0.25 failed the 0.2 wall."""
+    assert distance(words("and field said it"), words("enfield said it")) == 1
+    assert error_rate("And Field said it was like watching some juggernaut.",
+                      "Enfield said it was like watching some Juggernaut.") < 0.2
+
+
+def test_short_words_still_get_one_letter_only():
+    assert distance(words("the can dle"), words("the cradle")) == 2

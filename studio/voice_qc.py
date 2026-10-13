@@ -196,6 +196,13 @@ SEAM_FLOOR = 6
 to mean a seam: "a" + "to" is one letter from "at", and is not a split word."""
 
 
+LONG_SEAM_SLACK = 2
+LONG_SEAM_FLOOR = 7
+"""A long word heard as two may differ by two letters: a NAME the ear has no
+word for comes back as the nearest pair ("Enfield" -> "and field", Jekyll ep01
+line 12, both tries). Still one error, never zero."""
+
+
 def letters_apart(said: str, want: str) -> int:
     """Levenshtein distance over CHARACTERS of two single words."""
     row = list(range(len(want) + 1))
@@ -217,8 +224,9 @@ def one_sound(joined: str, want: str) -> bool:
     """
     if joined == want:
         return True
-    return (min(len(joined), len(want)) >= SEAM_FLOOR
-            and letters_apart(joined, want) <= SEAM_SLACK)
+    shorter = min(len(joined), len(want))
+    slack = LONG_SEAM_SLACK if shorter >= LONG_SEAM_FLOOR else SEAM_SLACK
+    return shorter >= SEAM_FLOOR and letters_apart(joined, want) <= slack
 
 
 def distance(said: list[str], meant: list[str]) -> int:
