@@ -105,9 +105,11 @@ class Stage:
         self.scores = list(scores)       # (self_sim, nearest_sim) per render, in order
         self.rendered = []
         self.by_file = {}
+        self.seeds = []
 
-    def render(self, instruct: str, dest: Path) -> Path:
+    def render(self, instruct: str, dest: Path, seed: int = 0) -> Path:
         self_sim, near = self.scores[len(self.rendered)]
+        self.seeds.append(seed)
         sf.write(str(dest), np.zeros(1600, dtype="float32"), 16000)
         self.rendered.append(instruct)
         self.by_file[dest.name] = (self_sim, near)
@@ -185,3 +187,15 @@ def test_the_nudge_keeps_its_first_direction_when_the_rival_changes(tmp_path, mo
     assert [("93 Hz" in s, "101 Hz" in s, "109 Hz" in s) for s in stage.rendered] == \
         [(True, False, False), (False, True, False), (False, False, True)]
     assert got.hertz == 109
+
+
+def test_every_candidate_is_rendered_on_its_own_seed(tmp_path, monkeypatch):
+    """MEASURED 2026-10-13, Jekyll: the designer node takes a seed (since
+    2026-09-20) and the caster never passed one -- both candidates of every
+    roll came back the same voice (Utterson 0.79/0.79, Jekyll 0.77/0.79), so
+    the audition auditioned nothing. Each take is its own draw."""
+    stage = Stage([(0.50, 0.85)] * 6)
+    wire(monkeypatch, stage)
+    monkeypatch.setattr(cast_voices, "CANDIDATES", 2)
+    cast_voices.audition(tmp_path, "john_ferrier", "pitch: 93 Hz.", {}, hertz=93, render=stage.render)
+    assert len(stage.seeds) == 6 and len(set(stage.seeds)) == 6

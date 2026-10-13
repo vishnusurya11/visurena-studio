@@ -29,8 +29,11 @@ APART = voice_ear.SAME_SPEAKER
 CANDIDATES = 2
 """How many voices are auditioned per character before one is cast.
 
-VoiceDesign has no seed: the same instruction rendered twice gives two
-different voices, and nothing in the writing loop knows what is already cast.
+Each candidate is rendered on its own seed (`voice.seed_for(who, n)`): the
+designer node has taken a seed since 2026-09-20, and until 2026-10-13 none was
+passed, so every candidate of a roll was the SAME voice at seed 0 (Jekyll:
+Utterson 0.79/0.79, Jekyll 0.77/0.79). Nothing in the writing loop knows what
+is already cast.
 So describing a voice more distinctly does not make it land more distinctly --
 MEASURED, a cast written with assigned registers, assigned textures and nine
 differing attributes still came back with a MEDIAN pair similarity of 0.73.
@@ -248,10 +251,10 @@ def retire(dest: Path) -> Path | None:
     return old
 
 
-def render_design(instruct: str, dest: Path) -> Path:
-    """One VoiceDesign render of PASSAGE under `instruct`, conformed to `dest`."""
+def render_design(instruct: str, dest: Path, seed: int = 0) -> Path:
+    """One VoiceDesign render of PASSAGE under `instruct` on `seed`, conformed to `dest`."""
     made = voice.comfy.run(voice.DESIGN_WORKFLOW,
-                           {"text": PASSAGE, "instruct": instruct,
+                           {"text": PASSAGE, "instruct": instruct, "seed": seed,
                             "filename_prefix": f"cast_{dest.parent.parent.name}"},
                            timeout=voice.DESIGN_TIMEOUT)
     return voice._render(made[0], dest)
@@ -270,7 +273,7 @@ def one_roll(dest: Path, roll: int, instruct: str, cast: dict[str, Path],
     picks = []
     for take in range(CANDIDATES):
         spare = dest.with_name(f".take{roll}_{take}.wav")
-        render(instruct, spare)
+        render(instruct, spare, seed=voice.seed_for(dest.parent.parent.name, roll * CANDIDATES + take))
         self_sim, rival, near, fault = judge(spare, cast)
         picks.append(Pick(spare, self_sim, rival, near, fault, hertz))
         print(f"      roll {roll + 1} take {take + 1}/{CANDIDATES} at {hertz} Hz: self {self_sim:.2f}, "
