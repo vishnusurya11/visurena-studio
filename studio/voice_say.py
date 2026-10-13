@@ -67,3 +67,24 @@ def say(text: str, timbre: Path, emotion: Path, seed: int, out: Path,
     pad_room(out)
     return VoiceLine(index=index, text=text, speaker=speaker, rel_path=out.name,
                      seconds=clip_seconds(out), seed=seed)
+
+
+SAY_LEXICON = "say_lexicon.json"
+"""`library/<book>/cast/say_lexicon.json`: {written word: how the TTS should be
+told to say it}.  Jekyll ep01: "Enfield" came out "and field" / "Anfield"; the
+ear lexicon (`voice_qc.ear_lexicon`) only forgave it.  This one fixes the mouth."""
+
+
+def say_lexicon(book: Path) -> dict[str, str]:
+    """The book's filed pronunciations; none when absent."""
+    import json
+    path = Path(book) / "cast" / SAY_LEXICON
+    return json.loads(path.read_text(encoding="utf-8")) if path.exists() else {}
+
+
+def respelled(text: str, lexicon: dict[str, str]) -> str:
+    """`text` with every lexicon word (whole word, any case) written as it is said."""
+    import re
+    for word, said in lexicon.items():
+        text = re.sub(rf"\b{re.escape(word)}\b", lambda _m, s=said: s, text, flags=re.IGNORECASE)
+    return text

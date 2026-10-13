@@ -205,14 +205,18 @@ def render(book: Path, episode: Episode, line: Line, out_dir: Path, attempt: int
     # VECTOR on the speaker's own clip -- a designed emotion clip was another
     # voice (ep13: the narrator's shouts at 0.25-0.54 similarity).
     delivery = episode_emotion.delivery_of(line)
+    # THE MOUTH KNOWS THE BOOK'S NAMES (Jekyll ep01 review): the TTS is told how a
+    # filed word is said; the record keeps the book's text, which the ear scores.
+    spoken = voice_say.respelled(line.text, voice_say.say_lexicon(book))
     if ENGINE == "indextts2":
-        said = voice_say.say(line.text, reference, reference, seed, out, index=line.index,
+        said = voice_say.say(spoken, reference, reference, seed, out, index=line.index,
                              speaker=line.speaker, vector=episode_emotion.vector_for(delivery))
     else:
-        said = voice.clone_line(reference, line.text, seed, out, index=line.index, speaker=line.speaker)
+        said = voice.clone_line(reference, spoken, seed, out, index=line.index, speaker=line.speaker)
     return {"index": line.index, "speaker": line.speaker, "kind": line.kind, "shot": line.shot,
-            "text": line.text, "rel_path": episode_home.relative(book, out), "seconds": said.seconds,
-            "seed": said.seed, "tries": attempt + 1, "reference": reference.name, "delivery": delivery}
+            "text": line.text, "said_as": spoken, "rel_path": episode_home.relative(book, out),
+            "seconds": said.seconds, "seed": said.seed, "tries": attempt + 1,
+            "reference": reference.name, "delivery": delivery}
 
 
 def listen_all(records: list[dict], book: Path, listen, among: dict | None = None) -> list[int]:
