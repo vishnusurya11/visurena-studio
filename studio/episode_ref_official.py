@@ -690,7 +690,7 @@ def voice_events(shot_lines: list[Line], at: dict, offset: float, ids: dict, fac
     for line in shot_lines:
         a, dur = at[line.index]
         a -= offset
-        if line.kind == "narration":
+        if line.kind != "dialogue":            # narration and a tale are voice-over
             if mouth:
                 out.append(f"{mouth}'s mouth is closed {during(max(a, t0), min(a + dur, t1))} "
                            f"while {action}.")
@@ -1445,7 +1445,7 @@ def block_parts(k: int, seg: dict, pic: int, ctx: dict) -> list[tuple[str, bool]
                  .replace(" continues to the last frame of the shot", " holds to the last frame")
                  for b in beats]
     out += [(s, True) for s in beats]
-    out += [(voice([l for l in here if l.kind == "narration"]), False)]
+    out += [(voice([l for l in here if l.kind != "dialogue"]), False)]
     return [(text, writable) for text, writable in out if text]
 
 

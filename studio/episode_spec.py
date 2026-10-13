@@ -151,7 +151,11 @@ class Sound(BaseModel):
 
 class Line(BaseModel):
     index: int = Field(ge=0)
-    kind: Literal["dialogue", "narration"]
+    kind: Literal["dialogue", "narration", "tale"]
+    """`dialogue` is spoken ON CAMERA with driven lips; `narration` is the book's
+    narrator over the pictures; `tale` (2026-10-13, Jekyll ep01) is a CHARACTER
+    telling his own story in his own voice, voice-over, over pictures of what he
+    tells -- the book's words kept, outside the dialogue dial and the quote wall."""
     speaker: str
     text: str
     shot: int = Field(ge=0)
@@ -1332,7 +1336,8 @@ def lifted_run(line: str, source: str) -> int:
 
 
 def quoted_lines(lines: list[dict], source: str) -> tuple[list[dict], list[dict]]:
-    """(refuse, advise) -- narration over the wall is hard, dialogue is advisory.
+    """(refuse, advise) -- narration over the wall is hard, dialogue and a tale
+    (a character telling in his own voice, 2026-10-13) are advisory.
 
     THE SPLIT IS THE WHOLE JUDGEMENT.  Narration is Watson's voice-over and
     exists to carry what the picture cannot; a transcribed sentence spends that

@@ -335,7 +335,7 @@ def first_dialogue_at(episode: Episode) -> tuple[float, int]:
     """(seconds, shot) of the first dialogue line; (runtime, -1) if there is none."""
     elapsed = 0.0
     for shot in episode.shots:
-        if any(line.kind == "dialogue" for line in episode.lines_of(shot.index)):
+        if any(line.kind in SPOKEN_BY_CHARACTERS for line in episode.lines_of(shot.index)):
             return elapsed, shot.index
         elapsed += episode.shot_seconds(shot)
     return elapsed, -1
@@ -345,7 +345,7 @@ def narration_runs(episode: Episode) -> list[tuple[float, int, int]]:
     """Every run of consecutive dialogue-free shots as (seconds, first, last)."""
     out, run, start = [], 0.0, 0
     for shot in episode.shots:
-        if any(line.kind == "dialogue" for line in episode.lines_of(shot.index)):
+        if any(line.kind in SPOKEN_BY_CHARACTERS for line in episode.lines_of(shot.index)):
             if run:
                 out.append((run, start, shot.index - 1))
             run, start = 0.0, shot.index + 1
@@ -443,12 +443,18 @@ def dial_floor(speech: float | None) -> float:
     return DIALOGUE_SHARE[0] if speech is None else min(DIALOGUE_SHARE[0], speech)
 
 
+SPOKEN_BY_CHARACTERS = ("dialogue", "tale")
+"""What meets the chapter's speech floor: a character's words, on camera or told
+over the pictures (a tale, 2026-10-13).  The CEILING counts dialogue only: it
+measures lips on camera, which is what it was built for."""
+
+
 def dial_faults(episode, speech: float | None = None) -> list[str]:
-    """G-DIAL: dialogue under the chapter-aware floor.  The ceiling stays the contract's."""
+    """G-DIAL: dialogue and tales under the chapter-aware floor.  The ceiling stays the contract's."""
     from studio.episode_spec import dial_message
     words = [(line.kind, len((line.text or "").split())) for line in episode.lines]
     total = sum(n for _, n in words) or 1
-    share = sum(n for kind, n in words if kind == "dialogue") / total
+    share = sum(n for kind, n in words if kind in SPOKEN_BY_CHARACTERS) / total
     floor = dial_floor(speech)
     if share < floor - 1e-9:
         return [f"G-DIAL plan: {dial_message(share)} -- this chapter speaks {floor:.1%}, so that is the floor"]
