@@ -44,3 +44,18 @@ def test_a_man_is_still_a_man():
 def test_the_dossier_outranks_the_name():
     """A physical description that says 'she' decides it whatever the id says."""
     assert gender_of(card("snippy", "She is a tall woman of fifty.")) == "female"
+
+
+def test_a_gaunt_man_has_no_aunt_in_him():
+    """MEASURED 2026-10-13, casting Jekyll ep01: Utterson's dossier calls him
+    'lean, long, dusty, dreary' and gaunt -- the substring 'aunt' made him a
+    woman at 170 Hz. A word list matches WORDS, never letters inside a word."""
+    assert gender_of(card("Mr. Utterson", "A tall, gaunt lawyer of fifty.")) == "male"
+    assert gender_of(card("Hamish", "a stout man")) == "male"      # 'ham' holds no 'maid'
+    assert gender_of(card("the mermaid keeper", "a sailor")) == "male"
+
+
+def test_a_stated_gender_outranks_every_word():
+    """The refs row and the dossier can SAY the gender; when one does, no word list guesses."""
+    assert gender_of({"name": "the child", "gender": "female", "profile": {"physical": "small, thin"}}) == "female"
+    assert gender_of({"name": "the widow's son", "gender": "male", "profile": {}}) == "male"

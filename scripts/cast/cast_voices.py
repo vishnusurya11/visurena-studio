@@ -131,11 +131,14 @@ allocator places only the extras, around these."""
 
 
 def gender_of(card: dict) -> str:
-    """Male or female, from the dossier if it says and the name if it does not."""
+    """Male or female: the stated gender if the card has one, else the WORDS of
+    the dossier and the name (whole words -- "gaunt" made Utterson a woman by
+    its "aunt", Jekyll 2026-10-13)."""
+    if card.get("gender") in ("male", "female"):
+        return card["gender"]
     text = f"{card.get('name', '')} {(card.get('profile') or {}).get('physical', '')}".lower()
-    if any(word in text for word in (" she ", " her ", "woman", "girl", "daughter")):
-        return "female"
-    return "female" if any(word in text for word in SHE) else "male"
+    words = set(re.findall(r"[a-z]+", text))
+    return "female" if words & ({"she", "her", "woman", "girl", "daughter"} | set(SHE)) else "male"
 
 
 def book_dir(codex_id: str) -> Path:
