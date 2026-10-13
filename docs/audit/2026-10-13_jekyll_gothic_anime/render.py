@@ -20,7 +20,7 @@ WORKFLOW = "image_sdxl_t2i_2lora_hires_visurena"
 BASES = {"noob": "NoobAI-XL-v1.1.safetensors", "wai": "waiIllustriousSDXL_v170.safetensors"}
 QUALITY = "masterpiece, best quality, amazing quality, very aesthetic, absurdres, "
 NEG = ("nsfw, nude, lowres, worst quality, bad quality, bad anatomy, bad hands, extra fingers, text, watermark, "
-       "signature, artist name, logo, letters, speech bubble, sign, signage, road markings, modern, car, chibi, "
+       "signature, artist name, logo, letters, speech bubble, sign, signage, road markings, hazard stripes, yellow lines, modern, car, chibi, "
        "skyscraper, modern city, city lights, "
        "moe, cute, kawaii, big eyes, sparkling eyes, pastel colors, bright colors, 3d, photo, multiple views, ")
 KAWAJIRI = "gothic_anime\\kawajiri_city_trilogy_xl_v1r64.safetensors"
@@ -35,7 +35,7 @@ STYLES = {
             "hard angular faces, heavy black shadows, high contrast chiaroscuro, red and black palette, "
             "airbrushed night background, ", [(KAWAJIRI, 0.9)], ""),
     "HEL": ("hellsing ultimate ova, hirano kouta (style), anime screencap, sharp angular linework, "
-            "jagged black ink shadows, insane grin, red and black palette, blood-red highlights, "
+            "jagged black ink shadows, red and black palette, crimson shadows, "
             "dark gothic atmosphere, ", [], ""),
     "BER": ("kenpuu denki berserk (1997 anime), berserk, miura kentarou, 1990s (style), retro artstyle, "
             "anime screencap, flat cel shading, heavy outlines, muted earthy palette, grim dark fantasy, ", [], ""),
@@ -59,8 +59,8 @@ STYLES = {
             "anime screencap, delicate linework, dark fairytale, crimson and black palette, clock motif, ", [], ""),
     "DGM": ("d.gray-man, hoshino katsura (style), gothic, black and white and red, sharp elegant linework, "
             "dark victorian fantasy, dramatic shadows, ", [], ""),
-    "TRI": ("trigun stampede, orange (studio), 3d cel-shaded anime, toon shading, crisp rim light, bold "
-            "outlines, cinematic lighting, ", [], ""),
+    "TRI": ("trigun stampede, orange (studio), (3d cel-shaded anime:1.2), cgi anime, toon shading, crisp rim light, bold "
+            "outlines, cinematic lighting, ", [], "sketch, painterly, "),
 }
 SUBJECTS = {
     "hyde": ("1boy, solo, mr edward hyde, sinister young man, short, small slight build, narrow shoulders, pale skin, "
@@ -81,13 +81,75 @@ SUBJECTS = {
             "3 a.m., black winter night, thick fog, shuttered shops, wet cobblestones, menace, wide shot",
             "top hat, mustache, crowd, multiple boys, "),
 }
+# Examples pass (owner shortlist 2026-10-13: HEL, VHD, MON, AMA, TRI): six pictures per style from heads.json.
+_HYDE = ("mr edward hyde, sinister young man, 25 years old, young face, small slight build, short, narrow shoulders, "
+         "pale skin, cold sneer, thin lips, (short cropped messy black hair:1.3), (bushy black mutton chops:1.2), "
+         "(long black sideburns:1.2), no mustache, (soft black felt wideawake hat:1.3), low flat crown, wide floppy brim, "
+         "ill-fitting black coat")
+_JEKYLL = ("dr henry jekyll, mature male, 50 years old, tall, large heavy-set build, broad shoulders, handsome, kindly "
+           "face, gentle smile, broad smooth face, (clean-shaven:1.2), thick iron-grey hair, brushed back grey hair, "
+           "black frock coat, waistcoat, white shirt, cravat")
+_UTTERSON = ("mr utterson, lawyer, 40 years old, lean, tall and long, bony, narrow-chested, long gaunt rugged face, dour, "
+             "unsmiling, serious, (clean-shaven:1.2), lank sandy-blond hair to the collar, dusty fair hair, black overcoat")
+_HYDE_NEG = ("(long hair:1.4), medium hair, ponytail, old man, middle-aged, wrinkles, top hat, bowler hat, cap, peaked cap, "
+             "military hat, witch hat, pointy hat, cowboy hat, conical hat, mustache, beard, tall, muscular, cape, "
+             "d (vampire hunter d), ")
+_MANY = "multiple boys, 3boys, crowd, clone, twins, duplicate, "
+SUBJECTS.update({
+    "ex_hyde": ("1boy, solo, " + _HYDE + ", hunched, gnarled hands, cowboy shot, looking at viewer, standing, "
+                "victorian london street, night, thick fog, gas lamp, wet cobblestones",
+                _HYDE_NEG + "shadowed face, blood, gore, weapon, holding, "),
+    "ex_jekyll": ("1boy, solo, " + _JEKYLL + ", (black silk top hat:1.2), respectable victorian gentleman, calm, "
+                  "cowboy shot, looking at viewer, standing, victorian london street, evening, fog, gas lamp, cobblestones",
+                  "young, beard, mustache, facial hair, sideburns, thin, skinny, long hair, bowler hat, wide-brimmed hat, "
+                  "evil, sneer, grin, fangs, red eyes, red hair, "),
+    "ex_utterson": ("1boy, solo, " + _UTTERSON + ", (black bowler hat:1.3), round hard crown, short curled brim, "
+                    "cowboy shot, looking at viewer, standing, victorian london street, day, grey fog, cobblestones",
+                    "top hat, wide-brimmed hat, smile, grin, fangs, red hair, beard, mustache, facial hair, old man, grey hair, fat, black hair, "),
+    "ex_trample": ("1boy, 1girl, " + _HYDE + ", striding over a fallen (little girl:1.3), walking past, his foot over her, "
+                   "female child, 9 years old, small girl lying on the ground, grey pinafore dress, black boots, blonde braids, "
+                   "knitted bonnet, frightened, crying, his long shadow falls over her, lit from below by a gas lamp, "
+                   "deserted street corner, 3 a.m., black winter night, thick fog, shuttered shops, wet cobblestones, "
+                   "menace, full body, wide shot",
+                   _HYDE_NEG + _MANY + "2girls, male child, boy lying, blood, gore, injury, weapon, gun, cane, skull, nsfw, "),
+    "ex_door": ("outdoors, foggy london by-street, daytime, 2boys, two victorian gentlemen in overcoats walking along "
+                "the pavement, from side, full body, wide shot, beside them a (closed old door:1.2) set in a "
+                "(tall blank windowless grimy wall:1.3), blistered peeling discoloured paint on the door, sinister, neglected, "
+                "the lean man with sandy hair wears a (black bowler hat:1.2), the broad man with brown hair wears a "
+                "light-brown top hat, grey fog, cobblestones, muted light",
+                _MANY + "open door, doorway, indoors, interior, hallway, corridor, room, 1girl, woman, female, dress, "
+                "window, windows, barred window, sign, shop sign, (text:1.3), number, (blood:1.3), night, "),
+    "ex_study": ("2boys, two victorian gentlemen sitting in armchairs by a fireplace, talking, warm victorian study, "
+                 "firelight, bookshelves, wood panelling, glasses of wine, warm amber light, interior, "
+                 "left: " + _JEKYLL + ", right: " + _UTTERSON + ", no hats, wide shot",
+                 _MANY + "1girl, woman, hat, top hat, bowler hat, beard, mustache, grin, evil smile, fangs, red hair, window, (text:1.3), "),
+})
+# style -> (positive appended to Hyde subjects, negative appended to Hyde subjects); README faults
+HYDE_FIX = {
+    "VHD": ("(very short hair:1.3), (low crown:1.2), ", "long cape, d (vampire hunter d), tall hat, "),
+    "HEL": ("insane grin, (very short hair:1.3), black clothes, ", "brown suit, brown coat, red coat, alucard (hellsing), (cross:1.3), priest, cassock, clergy, alexander anderson, "),
+    "MON": ("(young man:1.4), (youthful face:1.2), (victorian street:1.3), ", "old, elderly, (middle-aged:1.3), wooden corridor, "),
+}
+# style -> tags removed from the shared negative (TRI asks for 3D toon shading, which NEG bans)
+NEG_DROP = {"TRI": ("3d, ",)}
+
+
+def build(style: str, name: str) -> tuple[str, str]:
+    """The positive and negative prompt for one style x subject, with the style's Hyde fixes."""
+    lead, _, neg_extra = STYLES[style]
+    body, neg_subject = SUBJECTS[name]
+    neg = NEG
+    for tag in NEG_DROP.get(style, ()):
+        neg = neg.replace(tag, "")
+    fix_pos, fix_neg = HYDE_FIX.get(style, ("", "")) if name in ("ex_hyde", "ex_trample") else ("", "")
+    return QUALITY + lead + fix_pos + body, neg + neg_subject + fix_neg + neg_extra
 
 
 def render(style: str, name: str, salt: str, base: str) -> None:
-    lead, loras, neg_extra = STYLES[style]
-    body, neg_subject = SUBJECTS[name]
+    _, loras, _ = STYLES[style]
+    prompt, negative = build(style, name)
     seed = zlib.crc32(f"jekyll_gothic/{name}{salt}".encode())
-    values = {"prompt": QUALITY + lead + body, "negative_prompt": NEG + neg_subject + neg_extra,
+    values = {"prompt": prompt, "negative_prompt": negative,
               "seed": seed, "hires_seed": seed, "hires_denoise": 0.55, "ckpt_name": BASES[base], "filename_prefix": f"jekyll_gothic/{style}_{name}"}
     for i, (lora, weight) in enumerate(loras, start=1):
         values.update({f"lora{i}": lora, f"lora{i}_model": weight, f"lora{i}_clip": weight})
@@ -112,7 +174,7 @@ def main() -> None:
     ap.add_argument("--salt", default="")
     ap.add_argument("--base", choices=sorted(BASES), default="noob")
     args = ap.parse_args()
-    for name in args.subjects or list(SUBJECTS):
+    for name in args.subjects or [s for s in SUBJECTS if s.startswith("ex_")]:
         render(args.style, name, args.salt, args.base)
 
 
