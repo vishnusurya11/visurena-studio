@@ -52,6 +52,28 @@ cannot avoid a voice it has never been told about.
 So the slot is handed to the writer, not chosen by it, and the writer is told
 who already holds which.
 
+**The registers that are decisions are the BOOK's data, never code**
+(`library/<book>/cast/registers.json`, read by `voice_register.registers_of`):
+
+```json
+{"registers": {"narrator": 105, "henry_jekyll": 116, "edward_hyde": 126},
+ "why": {"narrator": "calm low Victorian storyteller"},
+ "apart": [{"pair": ["edward_hyde", "henry_jekyll"], "below": 0.55, "why": "one man, two bodies"}]}
+```
+
+File the narrator and the biggest parts from the dossier's BODY before the
+first cast (a large man of fifty sits ~105-120 Hz); the allocator places only
+the rest. Unfiled, it sorts by weight and takes the extremes first, which put
+Jekyll -- the second-heaviest part -- at the top of the male band (175 Hz,
+rendered ~203; Jekyll ep01, 2026-10-13). `apart` names pairs that must never
+sound alike and the ceiling they stay under; the audition refuses a take over
+it. Scarlet's old in-code `PREFER` table now lives in Scarlet's file.
+
+**A third-person book's narrator is a voice row, `narrator`** (`cast/narrator/`,
+declared in `refs/narrator.json` by the story lane): a calm, low storyteller
+who is no character and never on camera, written to remember rather than
+perform. Never a cast member's dramatic design.
+
 ### 2. Write the instruction from the dossier
 
 `studio/voice_persona.py`. One `VoiceInstruction` per character, in both
@@ -88,10 +110,32 @@ so the VOICE is the only variable. Cached by character — re-running never
 re-invents a voice, because re-designing gives a different person
 (QwenLM/Qwen3-TTS#80).
 
-### 4. Gate on MEASURED similarity, never on text
+### 4. Gate on MEASURED similarity and MEASURED pitch, never on text
 
-`voice.similarity` — resemblyzer GE2E cosine, every pair. **At or above 0.65
-is the same person: recast the lighter part into a free slot and re-render.**
+Every candidate design is gated in `cast_voices.judge` on four numbers:
+
+| gate | line | where |
+|---|---|---|
+| agrees with itself (half vs half, ECAPA) | >= `SELF_FLOOR` 0.65 | `design_fault` |
+| nobody's twin (nearest design, ECAPA) | <= `NEAREST_CEIL` 0.80 | `design_fault` |
+| renders in its asked register (pYIN 55-400 Hz median) | within +-15 % (`voice_pitch.TOLERANCE`) | `voice_pitch.pitch_fault` |
+| a filed `apart` pair | under its `below` | `pair_fault` |
+
+The twin line is **0.80, not 0.65**. 0.65 was the first cast's same-person
+floor on the ear's pair report (`voice_ear.SAME_SPEAKER`); the design gate is
+set above the working cast's median (0.73), and WotW, which the owner liked,
+has 24 of its 28 pairs >= 0.55. A pair count is not a quality measure.
+
+`register_rendered_hz` in voice.json is the MEASURED pitch of the design clip;
+`register_hz` is the ask, `register_asked_hz` the number written into the
+instruction for the kept take. Before 2026-10-13 it recorded the ask: Hyde's
+sheet said 92/92 for a voice that measured 179.
+
+The pick (`best_of`): passing first, then on pitch, then the 5 % band nearest
+the asked register, THEN the lowest collision. Distance alone rewards the
+outlier, and the cheapest way to be unlike everyone is to be high (Jekyll v1
+~134 Hz lost to v2 ~203). A failed roll moves the written register against
+the measured miss, or away from a rival the book filed -- never up by default.
 
 A textual diff is not a gate and never was. Nine-of-twelve attributes differing
 produced voices measuring 0.79 apart. Only the audio settles it.
@@ -104,14 +148,26 @@ gate in this repo measures the SIGNAL; only this one measures the CONTENT, and
 a generative TTS returns confident audio of the wrong words. First run over 30
 clips: **14 failed**, and the owner had caught one by ear.
 
+## Re-describing a voice without a paid write
+
+`cast_voices.recorded_instruction` reads `voice/instruction.json` FIRST (an
+instruction authored by hand, a valid `VoiceInstruction`), then the latest
+retired sheet, then the live one. A recorded instruction is re-aimed at the
+filed register (`retarget` moves every `<old> Hz`). So a recast at a new
+register, or with a new body, costs only the GPU.
+
 ## Where it lands
 
 ```
+library/<book>/cast/registers.json      the book's decided registers + never-alike pairs
+library/<book>/cast/say_lexicon.json    how the TTS is told to say hard names
+library/<book>/cast/ear_lexicon.json    mishearings the ear may forgive
 library/<book>/cast/<character>/
     character.json          the dossier
     portrait.png            the face
     voice/
-        voice.json          instruction, both shapes, register, provenance
+        voice.json          instruction, both shapes, register asked + MEASURED, provenance
+        instruction.json    (optional) a hand-authored instruction, read before any sheet
         design.wav          the voice as cast
         <feeling>.wav       re-performances of that one clip
         voice_qc.json       what the gate heard each take say
@@ -124,7 +180,10 @@ call — card, portrait, voice, checked.
 
 | symptom | do this |
 |---|---|
-| two voices measure ≥ 0.65 | recast the lighter part into a free slot, re-render, re-measure |
+| a design is its nearest neighbour's twin (> 0.80) | recast the lighter part into a free slot, re-render, re-measure |
+| a design renders outside +-15 % of its register | re-roll (the written Hz steers against the miss); if three rolls miss, re-describe it: author `voice/instruction.json` with the body and texture that make that register, no paid write |
+| a filed pair sounds alike (over its `below`) | recast the lighter of the pair with a texture the other does not have |
+| a name is said wrong ("Enfield" -> "and field") | file the respelling in `cast/say_lexicon.json` (the TTS input); `cast/ear_lexicon.json` only forgives the ear |
 | a clip fails the listen gate | re-render with the next seed; three failures means the text is the problem |
 | the voice ignores the asked register | check `pitch` actually carries a number; prose alone drifts |
 | everything sounds flat | the sheet is static — apply Gradual Control to pitch, speed, volume |
