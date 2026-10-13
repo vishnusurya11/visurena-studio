@@ -50,14 +50,17 @@ def with_panel(refs: list, panel, speaking: bool = False) -> list:
     return [r for r in refs if r != panel] + [panel]
 
 
-def panel_definition(slot: int) -> str:
+def panel_definition(slot: int, look: str = "in the house art style") -> str:
     """What the storyboard panel IS, for the prompt's subject_definitions.
 
     Every staged reference must be defined or the L11 PICTURES lint refuses the
     take -- "citing a picture the graph no longer stages is what L11 exists to
-    catch". Staging one without defining it is the same fault reversed."""
+    catch". Staging one without defining it is the same fault reversed.
+
+    `look` is the medium in the BOOK's look (book_look.panel_look): Jekyll ep01's
+    photoreal panels were announced to H3 as "in the house art style"."""
     return (f"<Picture {slot}> is the storyboard frame drawn for this shot: the place, the people "
-            f"in it and the clothes they wear, at this hour of the day, in the house art style.")
+            f"in it and the clothes they wear, at this hour of the day, {look}.")
 
 
 def panel_retention(slot: int) -> str:

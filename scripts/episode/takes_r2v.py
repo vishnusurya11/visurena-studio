@@ -1129,6 +1129,8 @@ def adopt_canon(book: Path, episode: Episode) -> None:
     house_style.adopt(episode.where, episode.light)
     from studio import book_look                     # refs/look.json outranks the plan's look
     house_style.adopt_look(book_look.plan_look(book, getattr(episode, "look", "")))
+    house_style.adopt_atmosphere(book_look.atmosphere(book))       # the book's fog (Jekyll ep01)
+    house_style.adopt_panel_look(book_look.panel_look(book))       # the panel in the book's look
     house_style.adopt_places(place_names(book))
     adopt_names(episode_home.read_json(book / "refs" / "refs.json").get("refs", [])
                 if (book / "refs" / "refs.json").exists() else [])

@@ -46,12 +46,42 @@ ep01 (2026-10-13): the house line ("flat angular stylised 3d CGI ... NO photorea
 painted a photoreal book's door panels."""
 
 
+def atmosphere(book) -> str:
+    """The book's declared ATMOSPHERE ("fog, damp haze"), a clause; '' when none.
+
+    Jekyll ep01 (2026-10-13, LOOK.md cause 2): style A is built on fog and not one
+    of 27 shots had any -- the take line's word wall cut it and nothing else said it.
+    A book files it once in refs/look.json; the grid and the take both read it here."""
+    return str(declared(book).get("atmosphere", "") or "").strip().rstrip(".").strip()
+
+
+ATMOSPHERE_GRID = " The air is thick with {atmosphere} in every frame, softening the far distance."
+"""The grid's atmosphere sentence: said as what the air holds, never as a blur asked for."""
+
+
 def grid_style(book) -> str:
     """The grid's style template in the book's look; '' keeps the house line."""
     if not photoreal(book):
         return ""
     lead = declared(book).get("lead", "").strip().replace("{", "{{").replace("}", "}}")
-    return PHOTO_GRID.format(lead=lead)
+    air = atmosphere(book).replace("{", "{{").replace("}", "}}")
+    return PHOTO_GRID.format(lead=lead) + (ATMOSPHERE_GRID.format(atmosphere=air) if air else "")
+
+
+PANEL_HOUSE = "in the house art style"
+PANEL_PHOTO = "as a photographic frame in the book's own photoreal look"
+"""What a take is told its storyboard panel is drawn as (studio/take_refs.panel_definition).
+Jekyll ep01: every photoreal panel was announced to H3 as "in the house art style".
+Never the word "still": the take lint L2 STILLNESS refuses it (a still is what H3 holds)."""
+
+
+def panel_look_words(photo: bool) -> str:
+    return PANEL_PHOTO if photo else PANEL_HOUSE
+
+
+def panel_look(book) -> str:
+    """The panel's medium in this book's look."""
+    return panel_look_words(photoreal(book))
 
 
 def plan_look(book, look: str) -> str:

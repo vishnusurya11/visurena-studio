@@ -75,12 +75,18 @@ def look_for(book: Path) -> dict:
     return {"style": style, "medium": "film still"} if style else {}
 
 
+AIRED_BLUR = "out of focus subject, motion smear"
+"""What a book with an atmosphere bans instead of "blurry": Qwen reads "blurry"
+against haze and depth, and a fog book's far distance IS soft (Jekyll ep01, LOOK.md)."""
+
+
 def negative_for(book: Path) -> str:
     """The grid's negative in the book's look, with the book's own declared words."""
     if not book_look.photoreal(book):
         return NEGATIVE
+    said = PHOTO_NEGATIVE.replace("blurry", AIRED_BLUR) if book_look.atmosphere(book) else PHOTO_NEGATIVE
     extra = str(book_look.declared(book).get("negative", "") or "").strip().strip(",")
-    return f"{PHOTO_NEGATIVE}, {extra}" if extra else PHOTO_NEGATIVE
+    return f"{said}, {extra}" if extra else said
 
 SAID = {"wide": "WIDE", "full": "FULL SHOT", "medium": "MEDIUM", "medium_close": "MEDIUM CLOSE",
         "close": "BIG CLOSE-UP", "extreme_close": "EXTREME CLOSE-UP", "insert": "INSERT"}

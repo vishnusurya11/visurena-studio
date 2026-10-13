@@ -29,6 +29,7 @@ from __future__ import annotations
 import re
 
 from studio.affirm import negations
+from studio.book_look import PANEL_HOUSE
 
 HOUSE_WHERE = "1881 London"
 HOUSE_LIGHT = "gaslight from one side, deep shadow"
@@ -100,6 +101,8 @@ a colour inventory, whatever the nouns."""
 
 _where, _light = HOUSE_WHERE, HOUSE_LIGHT
 _look = ""
+_atmosphere = ""
+_panel_look = PANEL_HOUSE
 _places: dict[str, str] = {}
 """{location id: its name}, from the book's location rows, set per run: the
 style line names the SETUP's place. It said "Horsell, Surrey" at Woking
@@ -172,8 +175,27 @@ def adopt_look(look: str) -> None:
     _look = _clause(look)
 
 
+def adopt_atmosphere(words: str) -> None:
+    """Declare the book's atmosphere (book_look.atmosphere) for rendered takes; empty
+    puts every line back byte for byte."""
+    global _atmosphere
+    _atmosphere = _clause(words)
+
+
+def adopt_panel_look(words: str) -> None:
+    """Declare what the storyboard panel is drawn as (book_look.panel_look); empty is the house."""
+    global _panel_look
+    _panel_look = _clause(words) or PANEL_HOUSE
+
+
+def panel_look() -> str:
+    return _panel_look
+
+
 def live(setup=None) -> str:
     """The style line for a RENDERED take; with a setup, under ITS light."""
+    if _atmosphere:
+        return _aired(setup)
     line = _live_line(where_for(setup), setup)
     # A place name that pushes the line past its wall gives way to the
     # episode's place: the wall held on ep05-08 and a long name broke it.
@@ -184,6 +206,35 @@ def _live_line(where: str, setup=None) -> str:
     if _look:
         return f"{_look}, {where}, {light_for(setup)}."
     return LIVE.format(where=where, light=light_for(setup))
+
+
+# ---- the book's atmosphere: words reserved before the light gets any ------------
+#
+# Jekyll ep01 (2026-10-13): "Photoreal live-action, The Sunday walks of London, 1886,
+# gas, black shadows, 35 mm film grain" -- the wall took the fog.  With an atmosphere
+# declared the line keeps it whole and the PLACE and the LIGHT give way, in that order
+# of preference: the fullest light that fits, under the setup's place, else the episode's.
+
+def _aired_line(where: str, light: str) -> str:
+    if _look:
+        return f"{_look}, {where}, {_atmosphere}, {light}."
+    return f"Photoreal live-action, {where}, {_atmosphere}, {light}, 35 mm film grain."
+
+
+def compact_lights(light: str) -> list[str]:
+    """The light, then its first clause, then its direction and black alone, then the black."""
+    first = clauses(light)[0].strip() if clauses(light) else light
+    direction, black = direction_of(light), black_of(light)
+    bare = ", ".join(p for p in (direction, black) if p)
+    return list(dict.fromkeys(p for p in (light, first, bare, black) if p))
+
+
+def _aired(setup=None) -> str:
+    """The first line under the wall, fullest light first; the shortest when none fits."""
+    lines = [_aired_line(where, light) for light in compact_lights(light_for(setup))
+             for where in dict.fromkeys((where_for(setup), _where))]
+    return next((l for l in lines if len(l.split()) <= MAX_STYLE_WORDS),
+                min(lines, key=lambda l: len(l.split())))
 
 
 def place_words() -> set[str]:
@@ -340,7 +391,7 @@ def shorter(phrase: str) -> str:
 def fit(source: str, direction: str, black: str, where: str) -> str:
     """The phrase in the words the style wall leaves after the place: the
     source's adjective goes first, then the black's; past that, nothing."""
-    budget = MAX_STYLE_WORDS - FIXED_STYLE_WORDS - len(where.split())
+    budget = MAX_STYLE_WORDS - FIXED_STYLE_WORDS - len(where.split()) - len(_atmosphere.split())
     for src, blk in ((source, black), (shorter(source), black), (shorter(source), shorter(black))):
         said = compose(src, direction, blk)
         if len(said.split()) <= budget:

@@ -2199,7 +2199,7 @@ def build(shots: list[Shot], placed: list[dict], lines: list[Line], at: dict, fr
     panel_slot = refs if panel and refs else None   # staged last, so numbered last
     if panel_slot:
         from studio import take_refs
-        subs = subs + chr(10) + take_refs.panel_definition(panel_slot)
+        subs = subs + chr(10) + take_refs.panel_definition(panel_slot, house_style.panel_look())
     dd, life = describe(shots, placed, lines, at, faces, physical, narrator, frames, cells, setup, fps,
                         not (ends or []), cells_staged, bool(panel_slot))
     dd = once_per_take(dd, keep=(life or {}).values())
