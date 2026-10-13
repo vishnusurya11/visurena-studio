@@ -424,6 +424,9 @@ def gates(v: TakeVerdict, audio: dict | None, line_text: str, unplanned: list[fl
     # word.  ep10: seven of thirty takes ended a size tighter than planned and
     # every row above passed them; the wall and its calibration live in take_zoom.
     out.append(tz.row(v.zoom, motion))
+    # G-MOVE: the planned move against the rendered one, HARD past the walls the
+    # owner-liked WotW ep01-03 set (Jekyll ep01 T14: a tilt rendered as a 4.75x push).
+    out.append(tz.move_row(v.zoom or {}, motion))
     out.extend(picture if picture is not None else unmeasured("face-at-end", "look", "post-cut", "pulse"))
     out.append(lip_gate(v.lane, audio, line_text))
     out.append(identity_gate_row(identity))
@@ -610,8 +613,31 @@ def measure(video: Path, record: dict, cells: Path, seconds: float, attempt: int
     v.gates.append(take_lock.row(take_lock.lock(take_lock.frames(video, seconds)),
                                  (plan_motions(record) or [""])[0]))
     v.gates.append(stillness_row(video, seconds, record))
+    v.gates = board_rows(v.gates, record)
     v.score, v.passed = score(v.gates)
     return v
+
+
+PANEL_ADVISORY = ("cut-landing", "coherence off-board")
+"""On a PANEL board (take_dq.panel_board: the staged storyboard panel, pinned at
+frame 0, is the take's one cell) these two are measured and scored but never
+HARD.  MEASURED 2026-10-13 on WotW ep19 (20 shipped takes) and Jekyll ep01 (27):
+as HARD rows they failed 8 and 11 of ep19's takes -- H3 opens on (and stays on)
+a first-frame panel far less than it held a pinned cell (opening similarity
+-0.18 to 1.00).  `foreign` (0 fires in 47) and `last-vs-cell` (lowest 0.21
+against the 0.20 wall) stay HARD."""
+
+
+def panel_board_rows(rows: list[Gate]) -> list[Gate]:
+    """The rows with PANEL_ADVISORY demoted to scored advisories."""
+    for g in rows:
+        if g.name in PANEL_ADVISORY and g.hard:
+            g.hard, g.note = False, f"{g.note} (panel, advisory)"
+    return rows
+
+
+def board_rows(rows: list[Gate], record: dict) -> list[Gate]:
+    return panel_board_rows(rows) if record.get("board") == "panel" else rows
 
 
 def stillness_row(video: Path, seconds: float, record: dict) -> Gate:

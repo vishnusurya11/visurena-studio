@@ -146,11 +146,12 @@ def test_the_lanes_own_rows_are_untouched_by_a_missing_cell():
 
 
 def test_the_row_order_is_the_same_with_and_without_a_board():
-    """The ladder prints the same sixteen rows either way; four of them say
-    they could not read anything."""
+    """The ladder prints the same seventeen rows either way; four of them say
+    they could not read anything.  `camera-move` joined after `zoom` on
+    2026-10-13 (take_zoom.move_row, Jekyll ep01 T14)."""
     assert [g.name for g in cellless_verdict().gates] == [
         "frozen-at-start", "frozen-share", "foreign", "cut-landing", "drift",
-        "coherence off-board", "last-vs-cell", "cut", "churn", "zoom",
+        "coherence off-board", "last-vs-cell", "cut", "churn", "zoom", "camera-move",
         "face-at-end", "look", "post-cut", "pulse", "lip-sync", "identity"]
 
 
@@ -311,6 +312,6 @@ def test_only_the_rows_that_measured_something_count_as_live():
     live count is what says how many rows the number speaks for."""
     v = cellless_verdict()                                # zoom and the picture rows not fed here
     live, total = dq.live_rows(v.gates)
-    assert total == 16 and live == 4                      # frozen-at-start, frozen-share, cut, churn
-    assert dq.row(14, v).startswith(f"T14 {'PASS' if v.passed else 'FAIL'} {v.score:g}/100 ({live} of 16 rows live)")
+    assert total == 17 and live == 4                      # frozen-at-start, frozen-share, cut, churn
+    assert dq.row(14, v).startswith(f"T14 {'PASS' if v.passed else 'FAIL'} {v.score:g}/100 ({live} of 17 rows live)")
     assert "cut-landing not measured (no cell)" in dq.row(14, v)

@@ -535,6 +535,52 @@ def row(z: dict, planned: str | list[str]):
     return max(rows, key=lambda g: (g.penalty, not g.ok))
 
 
+# ---- G-MOVE: the planned move against the rendered one, HARD ----------------------
+#
+# The zoom row above is never hard, by measurement (ep10's KEEPs pushed 2.1-2.4x).
+# Its blind spot is the move that was NOT a push: Jekyll ep01 T14 planned a tilt and
+# rendered a 4.75x push into a caricature, and `camera_ok` -- a stillness meter --
+# could not say so.  Walls calibrated on the owner-liked WotW ep01-03 (69 takes):
+# tests/test_the_camera_move_binds.py carries the table.
+
+UNPLANNED_WALL = 3.0
+"""A move that plans no scale change: WotW ep01-03 max 2.68x (ep01 T05, a pan)."""
+PUSH_WALL = 3.5
+"""A planned push: WotW ep01-03 max 3.29x (ep02 T16, liked).  A planned pull-back
+has no wall: WotW pulled 5.9x and 9.1x (ep03 T10, ep02 T10) and the owner liked both."""
+
+
+def move_wall(planned: str) -> float | None:
+    """The scale wall for this plan's move; None for a planned pull-back."""
+    if planned_move(planned):
+        return None if planned_direction(planned) < 0 else PUSH_WALL
+    return UNPLANNED_WALL
+
+
+def move_segment(z: dict, planned: str):
+    """(size, wall) of one segment: the scale travelled either way and its plan's wall."""
+    if not z.get("measured", True) or not z.get("ratio"):
+        return None, None
+    return max(z["ratio"], 1.0 / max(z["ratio"], 1e-6)), move_wall(planned)
+
+
+def move_row(z: dict, planned: str | list[str]):
+    """camera-move: HARD when a segment's picture changed scale past its planned
+    move's wall; quiet when the zoom was not measured."""
+    from studio.take_verdict import Gate
+    segs = (z or {}).get("segments") or ([z] if z else [])
+    plans = list(planned) if isinstance(planned, list) else [planned]
+    plans = (plans or [""]) + [(plans or [""])[-1]] * len(segs)
+    read = [(k, *move_segment(s, p)) for k, (s, p) in enumerate(zip(segs, plans))]
+    read = [(k, size, wall) for k, size, wall in read if size is not None]
+    if not read:
+        return Gate("camera-move", None, True, False, "not measured")
+    over = [(k, size, wall) for k, size, wall in read if wall is not None and size >= wall]
+    k, size, wall = over[0] if over else max(read, key=lambda r: r[1])
+    note = (f"s{k + 1} " if len(segs) > 1 else "") + f"{size:.2f}x" + (f" over the {wall:.1f}x wall" if over else "")
+    return Gate("camera-move", round(size, 2), not over, bool(over), note, 30.0 if over else 0.0)
+
+
 
 def planned_roll(motion: str) -> bool:
     """Did the plan ask the camera to turn about its axis?"""

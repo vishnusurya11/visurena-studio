@@ -39,6 +39,7 @@ next `T<NN>_failN.mp4` -- which retires the hand-renaming that left
 """
 from __future__ import annotations
 
+import re
 import subprocess
 import sys
 from pathlib import Path
@@ -62,13 +63,14 @@ SCALE_PER_SECOND = 0.15
 
 DRIFT AND SNAP ARE THE TWO REGIMES OF A CAMERA HOLDING STILL, and 0.15 is the
 line between them.  It was never a question about a camera that MOVES, and every
-shot from episode 6 on has one -- so `camera_ok` below is a stillness meter, not
-a quality signal.  Measured over all 25 of episode 7's first-pass records:
+shot from episode 6 on has one -- so `still_ok` below (named `camera_ok` until
+2026-10-13) is a stillness meter, not a quality signal.  Measured over all 25 of episode 7's first-pass records:
 TRUE on 2 takes (mean 92.95), FALSE on 23 (mean 94.48), and FALSE on all
 nineteen that score 100.00.  The two it calls good are the two least-moving
 takes in the episode and one of them is a hard failure.
 
-So `camera_ok` stays unread, on purpose.  That is not unfinished wiring, and
+So `still_ok` stays unread, on purpose; the planned-vs-rendered verdict is the
+camera-move row (take_zoom.move_row, HARD, calibrated on WotW ep01-03).  That is not unfinished wiring, and
 `tests/test_camera_ok_is_a_stillness_meter.py` holds the measurement and fails
 if the picture ever changes."""
 SCENE_EVENT = 0.15
@@ -123,19 +125,32 @@ def camera_dq(video: Path, seconds: float, cuts: list[float]) -> dict:
                   "-f", "rawvideo", "-pix_fmt", "gray", "-"], capture_output=True).stdout
     frames = np.frombuffer(raw, dtype=np.uint8).reshape(-1, 336, 192)
     imgs = [Image.fromarray(f) for f in frames]
-    scales = [cell_scale.scale_between(imgs[0], im) for im in imgs]
+    # STEP BY STEP, NEVER AGAINST FRAME 0: cell_scale searches 0.80-1.26, and
+    # against frame 0 every push past 1.25x read 1.25 (Jekyll ep01 T13 2.5x, T14 4.75x)
+    steps = [cell_scale.scale_between(imgs[i - 1], imgs[i]) for i in range(1, len(imgs))]
+    scales = compound_curve(steps)
     worst, events = 0.0, []
     for i in range(1, len(imgs)):
         at = i / 4
         if any(abs(at - c) <= 0.25 for c in cuts):
             continue
-        step = abs(scales[i] - scales[i - 1]) * 4          # per second, from a quarter-second step
+        step = abs(steps[i - 1] - 1.0) * 4                 # per second, from a quarter-second step
         worst = max(worst, step)
         sim = fm.similarity(imgs[i - 1], imgs[i])
         if 1 - sim > SCENE_EVENT:
             events.append(round(at, 2))
+    # `still_ok`, once `camera_ok`: a STILLNESS meter (the note on SCALE_PER_SECOND);
+    # the planned-vs-rendered verdict is the camera-move row (take_zoom.move_row)
     return {"scale_curve": [round(s, 2) for s in scales[::4]], "max_scale_per_s": round(worst, 3),
-            "scene_events": events, "camera_ok": worst < SCALE_PER_SECOND and not events}
+            "scene_events": events, "still_ok": worst < SCALE_PER_SECOND and not events}
+
+
+def compound_curve(steps: list[float]) -> list[float]:
+    """The scale against the first frame, as the running product of the steps."""
+    out = [1.0]
+    for s in steps:
+        out.append(out[-1] * s)
+    return out
 
 
 def lag_verdict(lag: float | None, dialogue: bool) -> dict:
@@ -326,6 +341,23 @@ def voice_of(composite: Path, dialogue: bool):
     if not dialogue or not composite.exists():
         return None
     return mouth.voice_envelope(av_sync.load_mono(composite, 24000), 24000)
+
+
+PANEL = re.compile(r"(?:^|/)storyboard/h3/shot_\d+\.png$")
+
+
+def panel_board(rec: dict, book: Path) -> tuple[list, Path] | None:
+    """([[panel, 0]], its folder) for a take that staged its storyboard panel and
+    pinned no cell; None otherwise.
+
+    Jekyll ep01 (2026-10-13): all 27 takes pinned `storyboard/h3/shot_NN.png` as
+    their first frame and every cell row read "not measured (no cell)", because
+    --from-refs records no anchors.  The staged panel IS the board."""
+    if rec.get("anchors"):
+        return None
+    staged = [r for r in rec.get("refs") or [] if PANEL.search(str(r).replace("\\", "/"))]
+    panel = Path(book) / staged[0] if staged else None
+    return ([[panel.name, 0]], panel.parent) if panel is not None and panel.is_file() else None
 
 
 def segment_kinds(episode, anchors: list) -> dict[str, str]:
@@ -589,6 +621,10 @@ def main(book_id: str, number: int, indices: list[int], attempts: bool = False, 
     judges = {"home": home, "embed": embed, "inputs": inputs, "landmarker": landmarker()}
     for index in wanted(records, indices):
         rec = records[index]
+        take_cells = cells
+        if board := panel_board(rec, book):        # the staged panel is the board
+            rec["anchors"], take_cells = board
+            rec["board"] = "panel"
         kinds, line = segment_kinds(episode, rec.get("anchors", [])), line_text(episode, rec)
         rec["motion"], rec["motions"] = planned_motion(episode, rec), planned_motions(episode, rec)
         rec["size"] = planned_size(episode, rec)
@@ -603,7 +639,7 @@ def main(book_id: str, number: int, indices: list[int], attempts: bool = False, 
             print(f"T{index:02d} cached ({hit.get('score', '?')}/100, bytes unchanged)", flush=True)
             continue
         files = episode_home.attempts_of(take_dir, index) if attempts else [book / rec["rel_path"]]
-        judged = {f: measure_attempt(f, rec, index, cells, work, take_dir, kinds, line, k, judges)
+        judged = {f: measure_attempt(f, rec, index, take_cells, work, take_dir, kinds, line, k, judges)
                   for k, f in enumerate(files)}
         verdicts = {f: v for f, (v, _, _) in judged.items()}
         best = (settle(take_dir, index, fitting(verdicts, rec["placed_seconds"], clip_seconds))
@@ -615,7 +651,7 @@ def main(book_id: str, number: int, indices: list[int], attempts: bool = False, 
         report["measures"] = measures
         # RELATIVE, never a drive letter (CLAUDE.md; audit item 15): this line
         # had put the worktree's absolute path into ~200 take reports.
-        report["strip"] = episode_home.relative(book, tv.strip(v, kept, cells, work / f"take_T{index:02d}.png"))
+        report["strip"] = episode_home.relative(book, tv.strip(v, kept, take_cells, work / f"take_T{index:02d}.png"))
         report["take_sha8"] = take_sha8(kept)
         report["measures_sha8"] = measures_sha8()
         episode_home.write_json(take_dir / f"T{index:02d}.dq.json", report)

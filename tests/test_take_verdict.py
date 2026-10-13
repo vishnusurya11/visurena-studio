@@ -191,7 +191,7 @@ def test_segments_fold_end_pins_and_pick_the_end_cell_as_target(tmp_path):
 
 
 ROW_ORDER = ["frozen-at-start", "frozen-share", "foreign", "cut-landing", "drift",
-             "coherence off-board", "last-vs-cell", "cut", "churn", "zoom",
+             "coherence off-board", "last-vs-cell", "cut", "churn", "zoom", "camera-move",
              "face-at-end", "look", "post-cut", "pulse", "lip-sync", "identity"]
 
 
@@ -243,7 +243,7 @@ def test_the_picture_rows_are_wired_by_interface_when_the_modules_exist(monkeypa
     assert seen == {"face": (Path("T01.mp4"), record), "look": 5.0, "edit": (5.3, 5.0)}
     v = tv.TakeVerdict(1, 0, "T01.mp4", 5.0, "narration", [], [seg()])
     v.gates = tv.gates(v, None, "", [], picture=rows)
-    order = ROW_ORDER[:14] + ["letterbox"] + ROW_ORDER[14:]      # the picture rows now end with G-FRAME
+    order = ROW_ORDER[:15] + ["letterbox"] + ROW_ORDER[15:]      # the picture rows end with G-FRAME (camera-move joined before them)
     assert [g.name for g in v.gates] == order and not tv.score(v.gates)[1]
 
 

@@ -130,6 +130,9 @@ def foreign_names(cells: Path, plates: Path, own: set[str]) -> list[str]:
     fault (T01, 40 frames of plate_criterion) the cell-only set could not see."""
     mine = own_family(own)
     seen = sorted(p.name for p in cells.glob("Q??_?*.png"))
+    # A PANEL BOARD (storyboard/h3, take_dq.panel_board): every other shot's panel
+    # is a picture this take must not wander into.  boards/cells holds none.
+    seen += sorted(p.name for p in cells.glob("shot_??.png"))
     seen += sorted(p.name for p in plates.glob("plate_*.png"))
     # A `.before.png` is a cell AS IT WAS BEFORE A REDRAW -- a draft that was never
     # rendered against, so no take can legitimately be drifting onto it.  MEASURED

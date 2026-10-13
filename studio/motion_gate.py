@@ -86,7 +86,10 @@ def segments(anchors: list, total_frames: int) -> list[tuple[str, int, int]]:
 
 
 def shot_of(cell: str) -> int:
-    """Cell name to shot index: Q17_2.png -> 17."""
+    """Cell name to shot index: Q17_2.png -> 17, and a staged panel shot_13.png -> 13
+    (take_dq.panel_board: a --from-refs take is judged against its panel)."""
+    if cell.startswith("shot_"):
+        return int(cell[5:].split(".")[0])
     return int(cell[1:3])
 
 

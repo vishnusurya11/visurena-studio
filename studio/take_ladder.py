@@ -70,7 +70,7 @@ redraw 1/1; look constant across every seed).  They go to the terminal, and
 the BOARD owns the cure."""
 MOVABLE = (FROZEN | {"held", "pass-through", "last-vs-panel", "last-vs-cell", "drift",
                      "jump", "cut", "cut-vote", "cut-landing", "foreign", "churn", "zoom",
-                     "face-at-end", "coherence off-board"})
+                     "face-at-end", "coherence off-board", "camera-move"})
 """Kinds a changed MOVE cures: measured 89-100% on frozen/held, 67% on
 last-vs-panel; even the 'sampling' cures came from the plan edit, not the roll."""
 
@@ -155,7 +155,7 @@ def progressed(room: Path, index: int, kinds_now: list[str]) -> bool:
 CAUSE_OF = {
     "frozen-at-start": "frozen", "frozen-share": "frozen", "frozen-whole": "frozen",
     "pass-through": "anchored", "held": "anchored",
-    "rotation": "rotation", "zoom": "overrun", "face-at-end": "overrun",
+    "rotation": "rotation", "zoom": "overrun", "face-at-end": "overrun", "camera-move": "overrun",
     "coherence off-board": "board", "last-vs-cell": "board", "last-vs-panel": "board", "drift": "board",
     "churn": "board", "jump": "cut", "cut-vote": "cut", "cut": "cut", "cut-landing": "cut", "foreign": "cut",
 }
