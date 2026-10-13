@@ -1,6 +1,6 @@
 ---
 name: episode
-description: "Turn one book chapter into a square (1:1) YouTube SHORT episode (delivered master <= 180 s, picture <= 174 s) at $0, entirely local: first-person narration and a few spoken lines laid over pictures cut to the measured voice. Chain: plan (gated) -> per-episode looks (one hop from each base sheet) + place pictures (masters, states one edit of them) -> Qwen3-TTS lines -> timeline -> Qwen-Image storyboard grids cut into panels (two panel gates) -> MiniMax-H3 ref2va takes (take gate + content gate) -> assemble with bed and the pre-baked title card -> QC -> publish public. Use when writing, building, fixing, resuming or reviewing an episode under library/<book>/episodes/."
+description: "Turn one book chapter into a square (1:1) YouTube SHORT episode (delivered master <= 180 s, picture <= 174 s) at $0, entirely local: the book's narrator, a few spoken lines and the characters' own tales laid over pictures cut to the measured voice. Chain: plan (gated) -> per-episode looks (one hop from each base sheet) + place pictures (masters, states one edit of them) -> Qwen3-TTS lines -> timeline -> Qwen-Image storyboard grids cut into panels (two panel gates) -> MiniMax-H3 ref2va takes (take gate + content gate) -> assemble with bed and the pre-baked title card -> QC -> publish public. Use when writing, building, fixing, resuming or reviewing an episode under library/<book>/episodes/."
 ---
 
 # Episode
@@ -105,6 +105,9 @@ Nothing is rendered until the plan passes both batteries. Each battery needs
 inputs, so the order is fixed:
 
 ```
+# ONCE PER BOOK, before ep01: refs/narrator.json (studio/book_narrator.py). A third-person
+# book takes the dedicated `narrator` voice row (never a cast member); a first-person book
+# declares its "I". Step 02 STOPS without one -- a gate never picks the narrator.
 uv run python scripts/refs/cast_rows.py <book> <n> <who[=Display:gender]> ...  # FIRST: takes, grids and content checks read this one bound row
 uv run python scripts/episode/step_02_plan.py <book> <n>          # the writer agent -> plan.json through plan_check; improve x 2, then model_tier, then the terminal; then the PLAN signature
 uv run python library/<book>/episodes/epNN/plan.py                 # OR a hand-authored plan beside its plan.json, only through episode_home.write_plan
@@ -239,6 +242,26 @@ were patched that way; a strict guard names them.
 lead's). The turn is people acting on each other, so name both of them in one
 motion clause.
 
+**The viewer (2026-10-13, Jekyll ep01).** A plan that obeys every instrument
+and bores a person is refused:
+- the first shot and line carry the chapter's threat, never a portrait of
+  habits (G-HOOK; a `nonscene` row may be folded away);
+- the chapter's key event is a SHOT of the act itself (G-SPIKE), and every
+  shot carries a story action -- weather is not story (G-ACTION, at most 2
+  empty weather shots);
+- a character who tells a story in the chapter tells it himself: `kind:
+  "tale"`, his voice, the book's words, over pictures of what he tells;
+- at most 310 words and at least 15 s of beats and codas (G-PACE); over budget
+  a line is cut, never a breath;
+- a dialogue shot is held locked or over the shoulder, the actor carries the
+  verb; at most one spoken line's camera travels (G-TALK);
+- what the chapter withholds stays withheld.
+
+**The voice.** Every narration line is the book's narrator's
+(`refs/narrator.json`, else the narrator the book's published episodes share).
+The projection rate is the book's measured voice, else the studio's 2.45
+words/s -- never 3.0.
+
 **The cast.**
 - Name people with `cast_refs.tag(BOOK, who, "the narrator", [fragments], chapter=N)`.
   Pass the plan's own chapter: refs.json holds ONE chapter, so without it an
@@ -279,7 +302,8 @@ motion clause.
 - dialect spellings ("cook yer" defeated the listen gate twice);
 - more than 18 words a line;
 - more than 4 voices;
-- dialogue outside 5-20% of the words.
+- dialogue outside 5-20% of the words (a `tale` is outside the ceiling);
+- more than 310 words, or under 15 s of beats and codas.
 
 `plan_check` refuses each of these.
 

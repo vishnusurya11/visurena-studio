@@ -6,6 +6,41 @@ SKILL.md.
 
 ## Process
 
+- **A gate refusal must never choose a story fact (Jekyll ep01, 2026-10-13).** A
+  third-person book had no narrator. G-SPEAKER refused `narrator` five rounds
+  running and printed the cast as its menu; the writer took `henry_jekyll` -- the
+  wrong man, the wrong person, an octave high -- and ep02 inherited him. Nobody
+  decided it. Now the narrator is the BOOK's (`refs/narrator.json`, decided once
+  before ep01; a third-person book takes the dedicated `narrator` voice row), step
+  02 stops when it is unset, and no narration refusal lists the cast.
+- **WotW filled every gap a new book exposed (Jekyll ep01, 2026-10-13).** The
+  owner disliked all of it. The root under most causes: WotW's data and constants
+  stood in where a fresh book had none -- a narrator never chosen, a 3.0 words/s
+  guess (the voice measured 2.46, the plan projected 146 s and ran 173 s), a plan
+  judge that rewards coverage over drama. A new book projects at the studio's
+  measured 2.45. `docs/audit/2026-10-13_jekyll_ep01_review/DIAGNOSIS.md`.
+- **Density, not the narration ratio, was the difference (Jekyll ep01).** 83 %
+  narration matched WotW ep01's 82 %; what differed was 362 words against 266-307
+  and 9.4 s of beats and codas against 18-20 s. G-PACE: <= 310 words, >= 15 s of
+  pauses; over budget a line goes, never a breath.
+- **A told tale lost its words to two good rules (Jekyll ep01).** The chapter is
+  mostly Enfield telling a story; the dialogue dial (5-20 %) and the 8-word
+  quote wall turned it into "Enfield said it was like watching some Juggernaut"
+  in another man's mouth. A `tale` is the teller's own voice-over, the book's
+  words kept, outside both rules.
+- **Every empty shot needs an event (Jekyll ep01).** 7 of 27 shots were wind,
+  leaves, pigeons and smoke (47 s); WotW's faceless shots are the flash, the
+  cylinder, the lid turning. G-ACTION, measured 0-2 on every shipped plan.
+- **Three rules forced a push on every exchange (Jekyll ep01).** No-repeat in
+  G-MOVES, the ladder's frozen -> push, and the take builder's only example. 6 of
+  8 dialogue shots pushed in. A held exchange is one unit now; a frozen dialogue
+  take gets the actor's verb; G-TALK allows one travel (a pan is not a travel:
+  WotW ep01 pans on all four spoken shots and was liked).
+- **Replay the shipped plans before a gate lands (2026-10-13).** Two first drafts
+  of the dialogue rules would have newly refused liked WotW plans: G-TALK counted
+  pans, and the share divided by the shorter list (ep04 high_angle 0.25 -> 0.32).
+  The CPU replay of all 41 shipped WotW and Scarlet plans found both.
+
 - **A unit published outside the runner must settle from its publish record
   (2026-10-11).** Every WotW and Scarlet episode was on the channel, yet the board
   showed WotW ep01/02/05 queued (a runner could have rebuilt them), ep18 stale (its
