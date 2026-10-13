@@ -35,7 +35,13 @@ def book_with_plan(tmp_path) -> Path:
     return book
 
 
-def test_fill_holes_splices_a_canned_line_through_the_contract(tmp_path):
+def test_fill_holes_splices_a_canned_line_through_the_contract(tmp_path, monkeypatch):
+    # the fixture speaks 373 words; G-PACE's 310-word ceiling (2026-10-13) would
+    # rightly block any insertion, and this test is about the splice itself
+    monkeypatch.setattr("studio.plan_gates.MAX_PLAN_WORDS", 1000)
+    # and it was authored at the old 3.0 projection; a voiceless book now projects
+    # at the studio's 2.45, where its 373 words already overrun the budget
+    monkeypatch.setattr("studio.plan_gates.series_rate", lambda book, number: 3.0)
     book = book_with_plan(tmp_path)
     before = episode_home.read_json(episode_home.home(book, 1) / "plan.json")
     assert pr.fill_holes(book, 1, _fill=lambda ground: MICRO) is True
