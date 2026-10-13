@@ -16,7 +16,9 @@ And three of his five lines score HIGHER against Young's design than his own.
 Both faults are visible at cast time and neither was measured there.  So two
 gates: a design must agree with itself (>= SELF_FLOOR) and must not be its
 nearest neighbour's twin (<= NEAREST_CEIL).  A failing design is re-rolled with
-its register nudged AWAY from the rival, up to REROLLS times.
+its register nudged AWAY from the rival, up to REROLLS times (Jekyll ep01
+review, 2026-10-13: only from a rival whose register the book filed -- the old
+default was up, and it walked Jekyll 175 -> 191 Hz).
 """
 from __future__ import annotations
 
@@ -82,12 +84,23 @@ def test_the_boundaries_are_the_documented_ones():
 
 # ---- the nudge: away from the rival, in the register --------------------------
 
+REGISTERS = {"brigham_young": 76, "jefferson_hope": 84, "john_ferrier": 93,
+             "joseph_stangerson": 142, "g_lestrade": 162, "arthur_charpentier": 171}
+"""A Study in Scarlet's filed registers (its cast/registers.json), as the caster reads them."""
+
+
+def twin_of(rival: str, hertz: int) -> "cast_voices.Pick":
+    """An on-pitch take that collided with `rival`."""
+    return cast_voices.Pick(Path("t.wav"), 0.8, rival, 0.85, "twin", hertz, float(hertz), hertz)
+
+
 def test_the_register_is_nudged_away_from_the_rival():
     """Young sits at 76 and Ferrier at 93: Ferrier goes UP.  Charpentier at 171
-    against Lestrade at 162 goes up too; Lestrade against Charpentier goes down."""
-    assert cast_voices.nudge_step("john_ferrier", "brigham_young") > 0
-    assert cast_voices.nudge_step("g_lestrade", "arthur_charpentier") < 0
-    assert cast_voices.nudge_step("john_ferrier", "") > 0
+    against Lestrade at 162 goes up too; Lestrade against Charpentier goes down.
+    With no rival placed by the book, the register does not move (it used to go up)."""
+    assert cast_voices.nudge_step(twin_of("brigham_young", 93), "john_ferrier", REGISTERS) > 0
+    assert cast_voices.nudge_step(twin_of("arthur_charpentier", 162), "g_lestrade", REGISTERS) < 0
+    assert cast_voices.nudge_step(twin_of("", 93), "john_ferrier", REGISTERS) == 0
 
 
 def test_the_nudge_rewrites_every_hertz_in_the_instruction():
@@ -116,8 +129,10 @@ class Stage:
         return dest
 
 
-def wire(monkeypatch, stage: Stage):
+def wire(monkeypatch, stage: Stage, measured: float = 93.0):
+    """Score renders from the stage; the pitch measure reports `measured`."""
     monkeypatch.setattr(cast_voices, "CANDIDATES", 1)
+    monkeypatch.setattr(cast_voices.voice_pitch, "f0_hz", lambda clip: measured)
     monkeypatch.setattr(voice_ear, "self_similarity",
                         lambda clip, device="": stage.by_file[Path(clip).name][0])
     monkeypatch.setattr(voice_ear, "nearest",
@@ -128,17 +143,17 @@ def test_a_failing_design_is_re_rolled_with_the_register_nudged(tmp_path, monkey
     stage = Stage([(0.50, 0.85), (0.60, 0.79), (0.72, 0.70)])
     wire(monkeypatch, stage)
     got = cast_voices.audition(tmp_path, "john_ferrier", "pitch: 93 Hz; low.", {"brigham_young": tmp_path / "y.wav"},
-                               hertz=93, render=stage.render)
+                               hertz=93, render=stage.render, registers=REGISTERS)
     assert len(stage.rendered) == 3
     assert "93 Hz" in stage.rendered[0] and "93 Hz" not in stage.rendered[2]
     assert got.self_similarity == 0.72 and got.nearest == 0.70 and got.fault == ""
     assert got.clip.exists() and got.clip.name == "design.wav"
-    assert got.hertz > 93
+    assert got.hertz > 93 and got.target_hz == 93, "the written register moved, the ask did not"
 
 
 def test_a_passing_design_is_kept_on_the_first_roll(tmp_path, monkeypatch):
     stage = Stage([(0.76, 0.74)])
-    wire(monkeypatch, stage)
+    wire(monkeypatch, stage, measured=131.0)
     got = cast_voices.audition(tmp_path, "john_watson", "pitch: 131 Hz.", {}, hertz=131, render=stage.render)
     assert len(stage.rendered) == 1 and got.fault == "" and got.hertz == 131
 
@@ -180,10 +195,12 @@ def test_the_nudge_keeps_its_first_direction_when_the_rival_changes(tmp_path, mo
     stage = Stage([(0.80, 0.86), (0.67, 0.86), (0.75, 0.70)])
     monkeypatch.setattr(cast_voices, "CANDIDATES", 1)
     rivals = iter(["jefferson_hope", "joseph_stangerson", "brigham_young"])
+    monkeypatch.setattr(cast_voices.voice_pitch, "f0_hz", lambda clip: 93.0)
     monkeypatch.setattr(voice_ear, "self_similarity", lambda clip, device="": stage.by_file[Path(clip).name][0])
     monkeypatch.setattr(voice_ear, "nearest",
                         lambda clip, cast, device="": (next(rivals), stage.by_file[Path(clip).name][1]))
-    got = cast_voices.audition(tmp_path, "john_ferrier", "pitch: 93 Hz.", {}, hertz=93, render=stage.render)
+    got = cast_voices.audition(tmp_path, "john_ferrier", "pitch: 93 Hz.", {}, hertz=93, render=stage.render,
+                               registers=REGISTERS)
     assert [("93 Hz" in s, "101 Hz" in s, "109 Hz" in s) for s in stage.rendered] == \
         [(True, False, False), (False, True, False), (False, False, True)]
     assert got.hertz == 109

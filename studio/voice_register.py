@@ -183,3 +183,39 @@ def too_close(given: dict[str, int], gender_of: dict[str, str],
             if gap < apart:
                 near.append((one, other, gap))
     return sorted(near, key=lambda row: row[2])
+
+
+REGISTERS_FILE = "registers.json"
+"""`library/<book>/cast/registers.json`: the registers that are DECISIONS for
+this book, and the pairs that must never sound alike.
+
+    {"registers": {"narrator": 105, ...},
+     "why": {"narrator": "calm low Victorian storyteller", ...},
+     "apart": [{"pair": ["edward_hyde", "henry_jekyll"], "below": 0.55, "why": "..."}]}
+
+The shape a book's PREFER table used to have in code (Jekyll ep01 review,
+2026-10-13: the Scarlet table fixed Scarlet; every other book got the raw
+allocator, and Jekyll landed at the top of the male band)."""
+
+
+def _filed(book) -> dict:
+    """The book's registers file, or an empty one."""
+    import json
+    from pathlib import Path
+    path = Path(book) / "cast" / REGISTERS_FILE
+    return json.loads(path.read_text(encoding="utf-8")) if path.exists() else {}
+
+
+def registers_of(book) -> dict[str, int]:
+    """The registers this book has decided, by cast id."""
+    return {who: int(hz) for who, hz in (_filed(book).get("registers") or {}).items()}
+
+
+def ceilings_of(book, who: str) -> dict[str, float]:
+    """The similarity ceilings `who` must stay under, by the other member of each pair."""
+    out = {}
+    for row in _filed(book).get("apart") or []:
+        pair = list(row.get("pair") or [])
+        if who in pair and len(pair) == 2:
+            out[pair[1 - pair.index(who)]] = float(row["below"])
+    return out

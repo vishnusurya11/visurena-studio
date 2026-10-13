@@ -16,7 +16,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 
-from studio import cast_home, voice_ear, voice_persona, voice_register  # noqa: E402
+from studio import cast_home, voice_ear, voice_persona, voice_pitch, voice_register  # noqa: E402
 from studio import voice  # noqa: E402
 
 PASSAGE = ("I have looked at this a long while, and I know now what it is. "
@@ -101,36 +101,16 @@ its own line and the persona buries it mid-paragraph.  So both are sent -- the
 persona for the life the voice comes from, the sheet for the register it has
 to hit."""
 
-PREFER = {
-    # men, low to high, placed by who the character IS
-    "brigham_young": 76,          # the deepest voice in the book, ceremonial
-    "jefferson_hope": 84,         # very low, gravelled by weather and years
-    "john_ferrier": 93,           # old, rough, stubborn
-    "sherlock_holmes": 102,       # deep and calm -- NOT Doyle's "high and strident"
-    "enoch_j_drebber": 112,       # thick, unsteady with drink
-    "tobias_gregson": 121,        # full, brisk, official
-    "john_watson": 131,           # warm mid baritone, the reasonable man
-    "joseph_stangerson": 142,     # dry, flat, doctrinal
-    "stamford": 152,              # light, young, chatty
-    "g_lestrade": 162,            # thin, nasal, pushing
-    "arthur_charpentier": 171,    # young and hot, highest male
-    # women
-    "lucy_ferrier": 222,          # young, bright, open
-    "unnamed_servant": 243,       # small, timid
-    "madame_sawyer": 262,         # old, quavering -- and performed
-}
-"""Registers that are already DECISIONS, not the allocator's to make.
+"""Registers that are already DECISIONS live with the book, not here:
+`library/<book>/cast/registers.json` (`voice_register.registers_of`).
 
 Anyone who SPEAKS has a register that belongs to the character, not to a
-spacing algorithm: Holmes is deep and calm because the owner said so, and
-Doyle's own "high and somewhat strident" makes a bad trailer voice.  Sorting
-by weight and taking the extremes first gave Watson the bottom of the band and
-Jefferson Hope the top, which is backwards for both.
-
-These are spread ~9-11 Hz apart on purpose, which is under `voice_register.APART`
--- eleven men do not fit a nine-voice band, so TEXTURE carries what pitch
-cannot, and the measured similarity gate is what actually decides.  The
-allocator places only the extras, around these."""
+spacing algorithm.  Sorting by weight and taking the extremes first gave
+Scarlet's Watson the bottom of the band and Jefferson Hope the top, and gave
+Jekyll -- a large man of fifty -- the top of the male band (175 Hz, rendered
+~203).  A book files its narrator and its biggest parts; the allocator places
+only the rest, around them.  The same file names the pairs that must never
+sound alike, and the ceiling they stay under (`voice_register.ceilings_of`)."""
 
 
 def gender_of(card: dict) -> str:
@@ -200,32 +180,63 @@ def collisions(book: Path, cast: list[str]) -> list[tuple[str, str, float]]:
 
 @dataclass(frozen=True)
 class Pick:
-    """One rendered candidate and what the ear made of it."""
+    """One rendered candidate and what the ear made of it.
+
+    `hertz` is the register WRITTEN into the instruction this take was rendered
+    from (nudged rolls move it); `target_hz` is the register the character was
+    asked to land in; `measured_hz` is what the clip came out at (pYIN)."""
     clip: Path
     self_similarity: float
     rival: str
     nearest: float
     fault: str
     hertz: int
+    measured_hz: float = 0.0
+    target_hz: int = 0
 
 
-def design_fault(self_sim: float, nearest: float) -> str:
-    """Why a design fails at cast time, or "" when it passes both gates."""
+FIT_BAND = 0.05
+"""Picks whose pitch error falls in the same 5 % band fit equally well, and the
+more distinct voice wins between them; a whole band nearer the ask wins first."""
+
+
+def design_fault(self_sim: float, nearest: float, measured: float = 0.0, asked: int = 0) -> str:
+    """Why a design fails at cast time, or "" when it passes every gate: it agrees
+    with itself, it is nobody's twin, and it renders in its asked register."""
     why = []
     if self_sim < SELF_FLOOR:
         why.append(f"does not agree with itself ({self_sim:.3f} < {SELF_FLOOR})")
     if nearest > NEAREST_CEIL:
         why.append(f"is its nearest neighbour's twin ({nearest:.3f} > {NEAREST_CEIL})")
+    if off := voice_pitch.pitch_fault(measured, asked):
+        why.append(off)
     return "; ".join(why)
 
 
-def nudge_step(who: str, rival: str) -> int:
-    """Which way the register moves: AWAY from the rival, up when there is none.
+def off_pitch(pick: Pick) -> bool:
+    """The pick renders outside its asked register."""
+    return bool(voice_pitch.pitch_fault(pick.measured_hz, pick.target_hz))
 
-    Young holds 76 and Ferrier 93 -- Ferrier goes up.  A rival placed higher
-    pushes the voice down.  Direction comes from the assigned registers, not
-    the rendered ones, because the rendered ones are what went wrong."""
-    mine, theirs = PREFER.get(who, 0), PREFER.get(rival, 0)
+
+def fit_band(pick: Pick) -> int:
+    """How many 5 % bands the pick sits from its asked register; 0 when unasked."""
+    if not pick.target_hz:
+        return 0
+    return int(voice_pitch.pitch_error(pick.measured_hz, pick.target_hz) / FIT_BAND)
+
+
+def nudge_step(pick: Pick, who: str, registers: dict[str, int]) -> int:
+    """Which way the written register moves after a failed roll.
+
+    Off pitch: against the measured miss (rendered high, ask lower).  On pitch
+    and a twin of a rival the book placed: away from that rival.  Otherwise it
+    does not move -- the old default was UP, and it walked Jekyll 175 -> 191
+    Hz (Jekyll ep01 review).  Fresh seeds carry the next roll."""
+    if off_pitch(pick):
+        return voice_pitch.steer(pick.measured_hz, pick.target_hz, NUDGE_HZ)
+    mine, theirs = registers.get(who), registers.get(pick.rival)
+    if mine is None or theirs is None or mine == theirs:
+        return 0
     return -NUDGE_HZ if theirs > mine else NUDGE_HZ
 
 
@@ -260,11 +271,23 @@ def render_design(instruct: str, dest: Path, seed: int = 0) -> Path:
     return voice._render(made[0], dest)
 
 
-def judge(clip: Path, cast: dict[str, Path]) -> tuple[float, str, float, str]:
-    """(self-similarity, rival, nearest, fault) for one rendered candidate."""
+def pair_fault(clip: Path, cast: dict[str, Path], ceilings: dict[str, float]) -> str:
+    """Why the take sounds too like a voice the book says it must not, or ""."""
+    why = []
+    for other, ceiling in sorted(ceilings.items()):
+        if other in cast and (score := voice_ear.similarity(clip, cast[other])) >= ceiling:
+            why.append(f"sounds like {other} ({score:.2f} >= {ceiling:.2f})")
+    return "; ".join(why)
+
+
+def judge(clip: Path, cast: dict[str, Path], asked: int = 0,
+          ceilings: dict[str, float] | None = None) -> tuple[float, str, float, float, str]:
+    """(self-similarity, rival, nearest, measured Hz, fault) for one rendered candidate."""
     self_sim = voice_ear.self_similarity(clip)
     rival, near = voice_ear.nearest(clip, cast)
-    return self_sim, rival, near, design_fault(self_sim, near)
+    measured = voice_pitch.f0_hz(clip) if asked else 0.0
+    faults = [design_fault(self_sim, near, measured, asked), pair_fault(clip, cast, ceilings or {})]
+    return self_sim, rival, near, measured, "; ".join(f for f in faults if f)
 
 
 def generation(dest: Path) -> int:
@@ -274,23 +297,27 @@ def generation(dest: Path) -> int:
 
 
 def one_roll(dest: Path, roll: int, instruct: str, cast: dict[str, Path],
-             hertz: int, render) -> list[Pick]:
-    """`CANDIDATES` renders of one instruction, each scored by the ear."""
+             hertz: int, render, target: int = 0, ceilings: dict[str, float] | None = None) -> list[Pick]:
+    """`CANDIDATES` renders of one instruction, each scored by the ear and the pitch."""
     picks = []
     for take in range(CANDIDATES):
         spare = dest.with_name(f".take{roll}_{take}.wav")
         draw = (generation(dest) * REROLLS + roll) * CANDIDATES + take
         render(instruct, spare, seed=voice.seed_for(dest.parent.parent.name, draw))
-        self_sim, rival, near, fault = judge(spare, cast)
-        picks.append(Pick(spare, self_sim, rival, near, fault, hertz))
-        print(f"      roll {roll + 1} take {take + 1}/{CANDIDATES} at {hertz} Hz: self {self_sim:.2f}, "
-              f"nearest {rival or 'nobody'} {near:.2f}{'  ' + fault if fault else ''}", flush=True)
+        self_sim, rival, near, measured, fault = judge(spare, cast, target, ceilings)
+        picks.append(Pick(spare, self_sim, rival, near, fault, hertz, measured, target))
+        print(f"      roll {roll + 1} take {take + 1}/{CANDIDATES} asked {hertz} Hz, measured "
+              f"{measured:.0f}: self {self_sim:.2f}, nearest {rival or 'nobody'} {near:.2f}"
+              f"{'  ' + fault if fault else ''}", flush=True)
     return picks
 
 
 def best_of(picks: list[Pick]) -> Pick:
-    """Passing first; then the lowest collision; then the most self-agreeing."""
-    return min(picks, key=lambda p: (bool(p.fault), p.nearest, -p.self_similarity))
+    """Passing first; then on pitch; then the band nearest the asked register;
+    then the lowest collision; then the most self-agreeing.  Fit before distance:
+    the cheapest way to be unlike everyone is to be high (Jekyll ep01 review)."""
+    return min(picks, key=lambda p: (bool(p.fault), off_pitch(p), fit_band(p),
+                                     p.nearest, -p.self_similarity))
 
 
 def settle(tried: list[Pick], dest: Path) -> Pick:
@@ -305,24 +332,26 @@ def settle(tried: list[Pick], dest: Path) -> Pick:
 
 
 def audition(book: Path, who: str, instruct: str, cast: dict[str, Path],
-             hertz: int = 0, render=None) -> Pick:
+             hertz: int = 0, render=None, registers: dict[str, int] | None = None,
+             ceilings: dict[str, float] | None = None) -> Pick:
     """Render, gate, and re-roll with the register nudged until a design passes.
 
-    A roll that fails both gates is not re-asked with the same words: the
-    register moves `NUDGE_HZ` away from the rival it collided with, because a
-    VoiceDesign has no seed and the only lever the writer holds is the sheet.
-    The direction is fixed by the FIRST rival: MEASURED on the Ferrier recast,
-    roll 2's rival changed and the register walked back to where roll 1 was."""
+    `hertz` is the register the character is asked to land in, and the pitch
+    gate measures every take against it.  A roll that fails is re-asked with
+    the written register moved `NUDGE_HZ` (`nudge_step`): against a measured
+    miss, or away from a rival the book placed.  The direction is fixed by the
+    FIRST roll that gives one: MEASURED on the Ferrier recast, roll 2's rival
+    changed and the register walked back to where roll 1 was."""
     dest = cast_home.clip(book, who)
     dest.parent.mkdir(parents=True, exist_ok=True)
     render = render or render_design
-    step, tried = 0, []
+    target, written, step, tried = hertz, hertz, 0, []
     for roll in range(REROLLS):
-        if roll:
-            instruct, hertz = nudge(instruct, hertz, step), hertz + step
-        picks = one_roll(dest, roll, instruct, cast, hertz, render)
+        if roll and step:
+            instruct, written = nudge(instruct, written, step), written + step
+        picks = one_roll(dest, roll, instruct, cast, written, render, target, ceilings)
         tried += picks
-        step = step or nudge_step(who, best_of(picks).rival)
+        step = step or nudge_step(best_of(picks), who, registers or {})
         if any(not pick.fault for pick in picks):
             break
     return settle(tried, dest)
@@ -335,23 +364,40 @@ def cast_clips(book: Path, exclude: str) -> dict[str, Path]:
 
 
 def sheet_of(who: str, got: voice_persona.VoiceInstruction, pick: Pick) -> dict:
-    """What is recorded beside the audio: the ask, and what the ear measured."""
-    return {"character": who, "register_hz": got.hertz(), "register_rendered_hz": pick.hertz,
+    """What is recorded beside the audio: the ask, the register written into the
+    instruction, and what the clip MEASURED (`register_rendered_hz` used to be
+    the ask after nudges -- Hyde's sheet said 92/92 for a 179 Hz voice)."""
+    asked = pick.target_hz or got.hertz()
+    return {"character": who, "register_hz": asked, "register_asked_hz": pick.hertz,
+            "register_rendered_hz": round(pick.measured_hz, 1),
+            "pitch_measure": f"librosa pYIN {voice_pitch.FMIN:.0f}-{voice_pitch.FMAX:.0f} Hz, "
+                             f"median of voiced frames, on the design clip",
             "instruction": got.model_dump(), "persona": got.persona(), "sheet": got.sheet(),
             "passage": PASSAGE, "clip": pick.clip.name,
             "gates": {"self_similarity": round(pick.self_similarity, 3),
                       "nearest": pick.rival, "nearest_similarity": round(pick.nearest, 3),
+                      "pitch_error": round(voice_pitch.pitch_error(pick.measured_hz, asked), 3),
                       "fault": pick.fault}}
+
+
+AUTHORED = "instruction.json"
+"""A hand-written VoiceInstruction filed beside the voice; read before any sheet."""
 
 
 def recorded_instruction(book: Path, who: str) -> voice_persona.VoiceInstruction | None:
     """The instruction already on file for this character -- the latest retired
     sheet first, then the live one -- or None when nothing was ever written.
+    An instruction AUTHORED by hand (`voice/instruction.json`) outranks both: it
+    is how a voice is re-described without a paid writing call (Jekyll ep01
+    review: the narrator, Hyde and Utterson were re-described that way).
 
     A recast re-renders; it does not re-write.  The words that made Ferrier's
     clip were never the fault (a VoiceDesign has no seed; the RENDER was), and
     writing them again is a paid reasoning call to arrive at the same sheet."""
     room = cast_home.voice_dir(book, who)
+    authored = room / AUTHORED
+    if authored.exists():
+        return voice_persona.VoiceInstruction.model_validate_json(authored.read_text(encoding="utf-8"))
     sheets = sorted(room.glob("voice_v*.json"), key=lambda p: int(p.stem.split("_v")[1]))
     live = room / "voice.json"
     for path in [*reversed(sheets), *([live] if live.exists() else [])]:
@@ -359,6 +405,15 @@ def recorded_instruction(book: Path, who: str) -> voice_persona.VoiceInstruction
         if body:
             return voice_persona.VoiceInstruction.model_validate(body)
     return None
+
+
+def retarget(got: voice_persona.VoiceInstruction, hertz: int) -> voice_persona.VoiceInstruction:
+    """The same instruction aimed at `hertz`: every `<old> Hz` in it moved."""
+    old = got.hertz()
+    if not hertz or hertz == old:
+        return got
+    body = json.loads(nudge(got.model_dump_json(), old, hertz - old))
+    return voice_persona.VoiceInstruction.model_validate(body)
 
 
 def cast_one(book: Path, card: dict, setting: str, era: str, hertz: int,
@@ -369,15 +424,18 @@ def cast_one(book: Path, card: dict, setting: str, era: str, hertz: int,
     who = card["id"]
     cast = cast if cast is not None else cast_clips(book, who)
     dest = cast_home.clip(book, who)
-    got = recorded_instruction(book, who) or \
-        voice_persona.write(card, setting, era, hertz, taken, texture=texture)
+    got = retarget(recorded_instruction(book, who) or
+                   voice_persona.write(card, setting, era, hertz, taken, texture=texture), hertz)
     started = time.time()
     if dest.exists():
         print(f"  {who:32} {got.hertz():4} Hz  already cast; --recast to redesign", flush=True)
         return got
-    pick = audition(book, who, got.instruct(SHAPE), cast, hertz=got.hertz())
+    pick = audition(book, who, got.instruct(SHAPE), cast, hertz=got.hertz(),
+                    registers=voice_register.registers_of(book),
+                    ceilings=voice_register.ceilings_of(book, who))
     cast_home.write_sheet(book, who, sheet_of(who, got, pick))
-    print(f"  {who:32} {pick.hertz:4} Hz  self {pick.self_similarity:.2f}  nearest "
+    print(f"  {who:32} {pick.target_hz:4} Hz asked, {pick.measured_hz:5.1f} measured  "
+          f"self {pick.self_similarity:.2f}  nearest "
           f"{pick.rival or 'nobody'} {pick.nearest:.2f}  {time.time() - started:4.0f}s", flush=True)
     return got
 
@@ -419,7 +477,7 @@ def main() -> None:
             print(f"  NOTE {count} {gender} voices into a band that holds {room} "
                   f"at {voice_register.APART} Hz apart -- pitch alone cannot "
                   f"separate them, so TEXTURE must carry the rest")
-    given = voice_register.assign(cards, gender_of, PREFER)
+    given = voice_register.assign(cards, gender_of, voice_register.registers_of(book))
     for who, hertz in sorted(given.items(), key=lambda kv: kv[1]):
         print(f"  {who:32} {hertz:4} Hz  ({gender_of(next(c for c in cards if c['id'] == who))})")
 

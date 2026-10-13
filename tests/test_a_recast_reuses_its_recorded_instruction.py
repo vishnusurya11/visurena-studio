@@ -58,9 +58,10 @@ def test_cast_one_does_not_write_when_it_can_read(tmp_path, monkeypatch):
     (room / "voice_v1.json").write_text(json.dumps({"instruction": INSTRUCTION}), encoding="utf-8")
     monkeypatch.setattr(cast_voices.voice_persona, "write",
                         lambda *a, **k: (_ for _ in ()).throw(AssertionError("a paid write was made")))
-    picked = cast_voices.Pick(room / "design.wav", 0.7, "brigham_young", 0.7, "", 101)
+    picked = cast_voices.Pick(room / "design.wav", 0.7, "brigham_young", 0.7, "", 101, 96.0, 93)
     monkeypatch.setattr(cast_voices, "audition", lambda *a, **k: picked)
     got = cast_voices.cast_one(tmp_path, {"id": "john_ferrier"}, "Utah", "1860", 93, {})
     assert got.hertz() == 93
     sheet = json.loads((room / "voice.json").read_text(encoding="utf-8"))
-    assert sheet["register_rendered_hz"] == 101 and sheet["gates"]["nearest"] == "brigham_young"
+    assert sheet["register_rendered_hz"] == 96.0 and sheet["gates"]["nearest"] == "brigham_young"
+    assert sheet["register_asked_hz"] == 101 and sheet["register_hz"] == 93
