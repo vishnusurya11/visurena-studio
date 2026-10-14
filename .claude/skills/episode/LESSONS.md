@@ -1040,3 +1040,6 @@ fixes. Each lesson below cost at least one launch. Tracker rows A38-A74 in
       `1` -- say_lines zeroed the prior after the first pass -- so the second try repeated a refused seed and
       `tries` never moved past 2: three brain rounds on a loop that could not change its input.
       `say_lines.attempts_from(tries)` gives every pass of a run new attempt numbers.
+      From the third try the design clip and the speaker's best line take turns as the reference: l15's
+      best-line clones scored 0.42/0.53 where design seeds scored 0.59-0.63; genuine narrator lines cut to
+      3.0 s score 0.69-0.82 against the design, so the 0.65 floor was right and the render wrong.

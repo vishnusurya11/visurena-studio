@@ -185,8 +185,9 @@ def book_best_reference(book: Path, records: dict, speaker: str, exclude: int | 
 
 def line_reference(book: Path, records: dict, line: Line, attempt: int) -> Path:
     """The design clip for the first two tries; from the third, the speaker's own
-    best line anywhere in the book (its text written beside it for the clone)."""
-    best = book_best_reference(book, records, line.speaker, line.index) if attempt >= 2 else None
+    best line anywhere in the book (its text written beside it for the clone), taking turns
+    with the design clip so a resume can try either again (Jekyll l15, 2026-10-14)."""
+    best = book_best_reference(book, records, line.speaker, line.index) if attempt >= 2 and attempt % 2 == 0 else None
     return best if best is not None else reference_for(book, line.speaker)
 
 

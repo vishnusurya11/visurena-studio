@@ -27,3 +27,16 @@ def test_two_resumes_never_share_a_seed():
     third = say.attempts_from(second[-1] + 1)
     seen = first + second + third
     assert len(seen) == len(set(seen))
+
+
+def test_past_the_second_try_the_design_and_the_best_line_take_turns(tmp_path, monkeypatch):
+    """l15's alternate reference (the narrator's best line) scored 0.42 and 0.53 where the
+    design clip scored 0.59-0.63; a resume that only ever cloned the best line could never
+    try the design again.  From the third try the two references alternate."""
+    from types import SimpleNamespace
+    design, best = tmp_path / "design.wav", tmp_path / "best.wav"
+    monkeypatch.setattr(say, "reference_for", lambda book, who: design)
+    monkeypatch.setattr(say, "book_best_reference", lambda book, records, who, index: best)
+    line = SimpleNamespace(speaker="narrator", index=15)
+    got = [say.line_reference(tmp_path, {}, line, a).name for a in range(6)]
+    assert got == ["design.wav", "design.wav", "best.wav", "design.wav", "best.wav", "design.wav"]
