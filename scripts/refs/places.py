@@ -183,10 +183,13 @@ def record_master(book: Path, location: str, view: str) -> None:
     from studio.continuity_spec import Master
     pb = place_book(book)
     place = place_for(pb, location)
-    mid = f"{location}/{view}"
-    if all(m.master_id != mid for m in place.masters):
-        place.masters.append(Master(master_id=mid, location=location, view=view,
-                                    sha8=sha8(picture(book, location, view))))
+    mid, now = f"{location}/{view}", sha8(picture(book, location, view))
+    held = next((m for m in place.masters if m.master_id == mid), None)
+    if held is None:
+        place.masters.append(Master(master_id=mid, location=location, view=view, sha8=now))
+    elif held.sha8 != now:              # a redrawn master (a book's look switched) is its new picture,
+        held.sha8 = now                 # and the states edited from the old one are no longer one hop
+        place.variants = [v for v in place.variants if v.master_id != mid]
     save_places(book, pb)
 
 
@@ -200,6 +203,7 @@ def record_variant(book: Path, location: str, view: str, state: str, variant: st
         place.states.append(State(state_id=slug(state), start=StoryTime(chapter=max(1, number)),
                                   until=StoryTime(chapter=max(1, number)), deltas=[state]))
     master = next(m for m in place.masters if m.master_id == f"{location}/{view}")
+    place.variants = [v for v in place.variants if v.view != variant]     # a re-derived state replaces its row
     place.variants.append(Variant(master_id=master.master_id, state_id=slug(state), view=variant,
                                   parent_sha8=master.sha8, sha8=sha8(picture(book, location, variant))))
     save_places(book, pb)
