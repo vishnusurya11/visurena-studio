@@ -51,11 +51,19 @@ def path(book: Path, number: int) -> Path:
 
 
 def stamp(book: Path, number: int, stage: str, started: float, ended: float,
-          ok: bool = True, note: str = "") -> dict:
-    """Record one stage run. Append-only; a retry is another row."""
+          ok: bool = True, note: str = "", within: str = "", net_of: float = 0.0) -> dict:
+    """Record one stage run. Append-only; a retry is another row.
+
+    `within` names the stage this run happened INSIDE (the master's upscale runs
+    inside assemble, 2026-10-14); the outer row is then stamped `net_of` it, so
+    every reader that sums `seconds` counts that time once."""
     row = {"stage": stage, "started": datetime.fromtimestamp(started).isoformat(timespec="seconds"),
            "ended": datetime.fromtimestamp(ended).isoformat(timespec="seconds"),
-           "seconds": round(ended - started, 1), "ok": ok, "note": note}
+           "seconds": round(ended - started - net_of, 1), "ok": ok, "note": note}
+    if within:
+        row["within"] = within
+    if net_of:
+        row["net_of_s"] = round(net_of, 1)
     p = path(book, number)
     p.parent.mkdir(parents=True, exist_ok=True)
     with p.open("a", encoding="utf-8") as f:
@@ -64,8 +72,9 @@ def stamp(book: Path, number: int, stage: str, started: float, ended: float,
 
 
 @contextmanager
-def timed(book: Path, number: int, stage: str, note: str = ""):
-    """`with timed(book, n, "takes"): ...` -- stamps on exit, failure included."""
+def timed(book: Path, number: int, stage: str, note: str = "", within: str = ""):
+    """`with timed(book, n, "takes"): ...` -- stamps on exit, failure included,
+    net of the rows stamped `within` this stage while it ran."""
     started, ok = time.time(), True
     try:
         yield
@@ -73,7 +82,15 @@ def timed(book: Path, number: int, stage: str, note: str = ""):
         ok = False
         raise
     finally:
-        stamp(book, number, stage, started, time.time(), ok, note)
+        stamp(book, number, stage, started, time.time(), ok, note, within,
+              net_of=nested_seconds(book, number, stage, started))
+
+
+def nested_seconds(book: Path, number: int, stage: str, since: float) -> float:
+    """Seconds of the rows stamped `within` this stage that started at or after `since`."""
+    floor = datetime.fromtimestamp(since).replace(microsecond=0)
+    return sum(float(r.get("seconds") or 0) for r in rows(book, number)
+               if r.get("within") == stage and datetime.fromisoformat(r["started"]) >= floor)
 
 
 def rows(book: Path, number: int) -> list[dict]:
@@ -153,6 +170,11 @@ def _span(row: dict) -> tuple[datetime, datetime]:
     return datetime.fromisoformat(row["started"]), datetime.fromisoformat(row["ended"])
 
 
+def nested(a: dict, b: dict) -> bool:
+    """One row ran inside the other (`within`): a part of a run, not a rival."""
+    return a.get("within") == b.get("stage") or b.get("within") == a.get("stage")
+
+
 def contended(row: dict, others: list[dict]) -> bool:
     """Whether another run in the file overlapped this one's interval. Strict at
     the ends, so a stage that starts the second another ends is clean; a
@@ -161,7 +183,7 @@ def contended(row: dict, others: list[dict]) -> bool:
         return False
     a0, a1 = _span(row)
     for other in others:
-        if other is row or not other.get("seconds"):
+        if other is row or not other.get("seconds") or nested(row, other):
             continue
         b0, b1 = _span(other)
         if a0 < b1 and b0 < a1:

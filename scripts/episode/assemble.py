@@ -24,7 +24,7 @@ from studio import episode_emotion, episode_sound, finished_file
 from studio.comfy import run
 from studio.episode_spec import Episode
 from studio import trailer_assemble
-from studio import master_loudness
+from studio import master_loudness, master_upscale
 from studio.trailer_assemble import clip_seconds, concat, extract, integrated, mix_with_lines, true_peak
 
 W, H, FPS = canvas.size("9:16") + (24,)
@@ -777,7 +777,8 @@ def black_chip(out: Path) -> Path:
     return out
 
 
-def tail(master: Path, title: Path | None, out: Path, work: Path, number: int = 0) -> Path:
+def tail(master: Path, title: Path | None, out: Path, work: Path, number: int = 0, *,
+         upscale: master_upscale.Upscale) -> Path:
     """After the last frame: the book's animated title card if it exists (its
     own sound kept), then black with silence.  No text is burned anywhere.
 
@@ -799,39 +800,19 @@ def tail(master: Path, title: Path | None, out: Path, work: Path, number: int = 
     # `fps=` filter would have dropped.
     # THE ONE ENCODE THAT IS UPLOADED, so it is the one that scales.  Everything
     # upstream -- cells, takes, the joined parts -- stays at H3's 768 fixed
-    # point; only this last pass goes to `canvas.deliver`.  768x768 is 0.59 MP,
-    # under every tier YouTube treats as high definition, and the transcode
-    # spends that tier's bitrate whatever the master cost.  It adds no detail;
-    # it stops the detail already there from being thrown away.  See
-    # `studio/canvas.DELIVER` for the measurement that found it.
+    # point; only this last pass leaves it.  OWNER 2026-10-14: RTX Video Super
+    # Resolution, 4x standard ULTRA to 3072 by default (studio/master_upscale:
+    # the choices, the in-process call, the Lanczos fallback).  The card and the
+    # chip are conformed to the cut's 768 above and ride the same pass, so the
+    # whole master is one size.
     #
-    # `slow` and CRF 14 here rather than `fast` and 17: this runs once per
-    # episode and the file it makes is the deliverable.
-    up_w, up_h = W * canvas.DELIVER, H * canvas.DELIVER
-    # NO VIDEO setpts HERE (ep15, 2026-10-01): under `-fps_mode cfr` the
-    # rebased pts made the encoder drop a still segment's 205 frames in
-    # silence -- the join came up 8.5 s short with every PART decoding whole.
-    # The zero start that setpts was added for (the 0.041 s concat offset,
-    # 2026-09-12) is already held by cfr + the mux flags: measured on the same
-    # listing, first frame at 0.000, 4056 of 4055 frames (one cfr pad).
-    # VFR PASSTHROUGH, not cfr (ep15, 2026-10-01): every part is already a
-    # uniform cfr-24 encode, so the join carries their timestamps verbatim --
-    # measured on the same listing: 4055 of 4055 frames, 24.000 fps, first
-    # frame at 0.000.  cfr re-judging here padded one frame and shifted every
-    # cut against the takes (QC: segments off 21/22, tail 4056/4055).
-    # -itsoffset -1/24 (ep15, 2026-10-01): the first part's one-frame start
-    # offset rides any passthrough (QC: a 0.041 s hole at index 0), and every
-    # setpts variant silently ate a still segment's frames.  A constant demux
-    # shift preserves count and spacing: measured 4055/4055, t0=0.000, 0 holes.
-    subprocess.run(["ffmpeg", "-y", "-v", "error", "-itsoffset", "-0.0416667",
-                    "-f", "concat", "-safe", "0", "-i", str(listing),
-                    "-vf", f"scale={up_w}:{up_h}:flags=lanczos,format=yuv420p",
-                    "-af", "asetpts=PTS-STARTPTS",
-                    "-fps_mode", "vfr", "-muxdelay", "0", "-muxpreload", "0",
-                    "-c:v", "libx264", "-preset", "slow", "-crf", "14",
-                    "-pix_fmt", "yuv420p", "-movflags", "+faststart",
-                    "-c:a", "aac", "-b:a", "256k",
-                    "-ar", "48000", str(out)], check=True)
+    # NO VIDEO setpts (ep15, 2026-10-01): under `-fps_mode cfr` the rebased pts
+    # made the encoder drop a still segment's 205 frames in silence.  The RTX
+    # path decodes with `-fps_mode passthrough` to raw frames and re-times them
+    # at the cut's own rate -- every frame once, first at 0.000; the Lanczos
+    # path keeps the vfr passthrough and the -1/24 `-itsoffset` that ep15
+    # measured at 4055/4055 frames, t0=0.000, 0 holes.
+    master_upscale.master(listing, out, W, H, upscale, FPS)
     # The concat demuxer does not refuse a part whose picture does not match the
     # first one: it drops it and reports success.  That is how a master four
     # frames short shipped without anyone seeing it, so the join counts itself.
@@ -952,8 +933,8 @@ def main(book_id: str, number: int, engine: str = "i2v",
     # ran the deliverable's own path pointed at a headerless stump.  ep05's
     # master was found truncated at 133 MB that way.  See studio/finished_file.
     master = episode_home.master_path(book, number, engine)
-    out = tail(mixed, card if card.exists() else book / "title" / "title.mp4",
-               finished_file.scratch_for(master, work), work, number)
+    out = upscaled_tail(book, number, mixed, card if card.exists() else book / "title" / "title.mp4",
+                        finished_file.scratch_for(master, work), work)
     out = trim(out, work)
     out = master_loudness.into_band(out, work, measure=integrated)   # a quiet chapter's beds (ep20)
     # THE MASTER IS A SHORT (hard requirement, owner 2026-09-30): the wall is
@@ -969,6 +950,17 @@ def main(book_id: str, number: int, engine: str = "i2v",
     record_layout(home / "cut", master, main=video_frames(mixed),
                   card=video_frames(conformed) if conformed.exists() else 0)
     print(f"master -> {master}  (kept as master_iter{keep}.mp4)")
+
+
+def upscaled_tail(book: Path, number: int, mixed: Path, title: Path, out: Path, work: Path) -> Path:
+    """`tail` under the chosen upscale, its own row on the episode clock (owner
+    2026-10-14: the 6 h clock sees it), stamped within assemble so it counts once."""
+    from studio import episode_clock
+    up, why = master_upscale.resolved()
+    master_upscale.say(why)
+    note = f"{up.label()} -> {'x'.join(map(str, master_upscale.size(W, H, up)))}" + (f"; {why}" if why else "")
+    with episode_clock.timed(book, number, "upscale", note=note, within="assemble"):
+        return tail(mixed, title, out, work, number, upscale=up)
 
 
 def record_layout(cut: Path, master: Path, *, main: int, card: int) -> None:

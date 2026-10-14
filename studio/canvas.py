@@ -79,35 +79,25 @@ def size(aspect: str) -> tuple[int, int]:
     return h3.adapt_canvas(*RATIOS[aspect])
 
 
-DELIVER = 2
-"""How much bigger the UPLOAD is than the render, as a whole number.
+DELIVER = 4
+"""How much bigger the UPLOAD is than the render, as a whole number -- the
+default of `studio/master_upscale` (owner 2026-10-14: RTX VSR 4x ULTRA, 3072
+on a square episode; `VISURENA_MASTER_UPSCALE=rtx2x` or `lanczos` is 2x, and a
+machine without the GPU falls back to Lanczos 2x).  Read the delivered size off
+the file, never off this constant, when it matters downstream.
 
-Every episode so far was rendered, cut and uploaded at H3's native 768x768 --
-0.59 megapixels, below every tier YouTube treats as high definition. The upload
-is then transcoded at that tier's bitrate and the detail is thrown away between
-the master and the viewer. The master itself is not the problem: it is CRF 17
-and episode 8's is the highest-bitrate one in the series.
+WHY UPSCALE AT ALL (2026-09, ep08): every episode was rendered, cut and
+uploaded at H3's native 768x768 -- 0.59 MP, below every tier YouTube treats as
+high definition -- and the transcode spent that tier's bitrate whatever the
+master cost.  ep08's deserts had 38 % more fine detail (mean absolute
+Laplacian 6.93 against ep06's 5.03) and lost it.  Lanczos 2x stopped the
+detail from being discarded but added none; RTX VSR ULTRA sharpens line art
+1.9-2.7x on the Laplacian with no ringing (docs/audit/2026-10-14_rtx_vsr_test).
 
-EPISODE 8 IS WHERE IT SHOWED. Measured across the delivered masters -- detail is
-the mean absolute Laplacian, the high-frequency energy a codec must spend bits
-on:
-
-    ep06 interiors   detail 5.03   mean luma  69.0
-    ep07 interiors   detail 5.60   mean luma  55.5
-    ep08 desert      detail 6.93   mean luma 100.9
-
-38 % more fine detail than episode 6 and 46 % brighter. Both punish a thin
-transcode: fine rock smears, and the banding that hides in a dark parlour is
-plain in a pale sky. The first episode that is mostly wide exteriors is the
-first where the upload size hurts.
-
-A WHOLE NUMBER, because 768 to 1080 is a factor of 1.406 and rings on every
-hard edge; 2x resamples cleanly. This adds NO detail -- Lanczos cannot invent
-any. It stops the detail that IS there from being discarded by a tier chosen on
-pixel count, which is a different and more modest claim than "better quality".
+A WHOLE NUMBER: 768 to 1080 is 1.406 and rings on every hard edge.
 
 The render pipeline does not move: cells, takes and cuts stay at H3's fixed
-point. Only the last encode scales."""
+point.  Only the last encode scales."""
 
 
 def deliver(aspect: str) -> tuple[int, int]:

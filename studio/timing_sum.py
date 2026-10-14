@@ -28,7 +28,7 @@ STAGES: dict[str, tuple[str | None, bool]] = {
     "panels": ("08", False), "panel_dq": ("08", False), "panel_content": ("08", True),
     "takes": ("09", True), "take_dq": ("09", True), "take_content": ("09", True),
     "strip": ("09", False),
-    "title": ("10", True), "assemble": ("10", True),
+    "title": ("10", True), "assemble": ("10", True), "upscale": ("10", True),
     "qc": ("11", True), "dossier": ("11", False), "eye_review": ("11", False),
     # names from before refs and publish were departments of their own
     "sheets": (None, True), "publish": (None, False),

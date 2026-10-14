@@ -4,6 +4,7 @@ version = "0.1.0"
 description = "Visurena Studio - AI content studio: books to audiobooks, shorts, songs, novels"
 requires-python = ">=3.12"
 dependencies = [
+    "cupy-cuda12x==14.2.0",
     "fastapi==0.141.1",
     "fonttools==4.63.0",
     "google-api-python-client==2.149.0",
@@ -12,6 +13,7 @@ dependencies = [
     "imageio-ffmpeg==0.6.0",
     "jinja2==3.1.6",
     "matplotlib==3.10.7",
+    "nvidia-vfx==0.2.0.0",
     "openai-whisper==20250625",
     "opencv-python-headless==5.0.0.93",
     "python-multipart==0.0.32",
@@ -65,3 +67,13 @@ packages = ["studio"]
 [tool.uv]
 # facenet-pytorch pins an old torch; the studio runs the torch the music group pins.
 override-dependencies = ["torch==2.14.0", "torchvision==0.29.0", "numpy==2.5.2"]
+
+[[tool.uv.index]]
+# NVIDIA's own index carries nvidia-vfx (RTX Video Super Resolution); explicit,
+# so nothing else resolves from it (owner 2026-10-14, the master's upscale).
+name = "nvidia"
+url = "https://pypi.nvidia.com"
+explicit = true
+
+[tool.uv.sources]
+nvidia-vfx = { index = "nvidia" }

@@ -32,6 +32,9 @@ from studio import episode_home, youtube, youtube_publish as yp  # noqa: E402
 from studio.trailer_assemble import clip_seconds  # noqa: E402
 
 FPS, SIDE = 24, 1536
+"""The book video's square.  A Short's master may be 3072 (RTX VSR 4x, 2026-10-14) or
+1536 (earlier masters, the 2x/Lanczos settings): `cut_argv` conforms every piece to
+SIDE, so a book of mixed masters still joins by stream copy."""
 def episode_meta(book: Path, n: int) -> dict:
     return episode_home.read_json(episode_home.home(book, n) / "youtube.json")
 

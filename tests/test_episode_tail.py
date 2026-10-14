@@ -21,6 +21,9 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
 
 
+from studio.master_upscale import LANCZOS, Upscale  # noqa: E402
+
+
 def _assemble():
     spec = importlib.util.spec_from_file_location("ep_assemble", ROOT / "scripts" / "episode" / "assemble.py")
     module = importlib.util.module_from_spec(spec)
@@ -79,7 +82,7 @@ def test_the_master_starts_at_frame_zero_and_never_stalls(tmp_path):
 
     master = clip(tmp_path / "master.mp4", 1.0)
     card = clip(tmp_path / "card.mp4", 0.5)
-    out = ep.tail(master, card, tmp_path / "out.mp4", tmp_path)
+    out = ep.tail(master, card, tmp_path / "out.mp4", tmp_path, upscale=LANCZOS)
     times = gate.frame_times(out)
     assert times[0] == 0.0
     assert gate.timestamp_holes(times) == []
@@ -89,7 +92,7 @@ def test_the_master_is_every_frame_of_every_part(tmp_path):
     ep = _assemble()
     master = clip(tmp_path / "master.mp4", 1.0)
     card = clip(tmp_path / "card.mp4", 0.5)
-    out = ep.tail(master, card, tmp_path / "out.mp4", tmp_path)
+    out = ep.tail(master, card, tmp_path / "out.mp4", tmp_path, upscale=LANCZOS)
     chip = round(ep.END_CHIP_SECONDS * ep.FPS)
     assert frames(out) == frames(master) + frames(card) + chip
 
@@ -104,8 +107,38 @@ def test_a_part_the_join_silently_drops_is_refused(tmp_path):
     odd = clip(tmp_path / "master.mp4", 1.0, size="256x448")
     card = clip(tmp_path / "card.mp4", 0.5)
     try:
-        ep.tail(odd, card, tmp_path / "out.mp4", tmp_path)
+        ep.tail(odd, card, tmp_path / "out.mp4", tmp_path, upscale=LANCZOS)
     except RuntimeError as raised:
         assert "frames" in str(raised)
     else:
         raise AssertionError("a dropped part was joined without complaint")
+
+
+class Nearest:
+    """The GPU's stand-in for `master_upscale.Rtx`: every pixel repeated, on the CPU."""
+
+    def __init__(self, width, height, up):
+        self.factor = up.factor
+
+    def __call__(self, frame):
+        return frame.repeat(self.factor, axis=0).repeat(self.factor, axis=1)
+
+    def close(self):
+        pass
+
+
+def test_the_rtx_master_keeps_every_frame_from_zero_without_holes(tmp_path, monkeypatch):
+    """OWNER 2026-10-14: the master is RTX VSR 4x.  The streamed path re-times
+    raw frames; it must keep what ep15's vfr passthrough kept -- every frame of
+    every part, first at 0.000, no hole."""
+    ep = _assemble()
+    from studio import edit_gate as gate, master_upscale as mu
+    monkeypatch.setattr(ep, "W", 64)
+    monkeypatch.setattr(ep, "H", 112)
+    monkeypatch.setattr(mu, "Rtx", Nearest)
+    master = clip(tmp_path / "master.mp4", 1.0, size="64x112")
+    card = clip(tmp_path / "card.mp4", 0.5, size="64x112")
+    out = ep.tail(master, card, tmp_path / "out.mp4", tmp_path, upscale=mu.CHOICES["rtx4x"])
+    times = gate.frame_times(out)
+    assert frames(out) == frames(master) + frames(card) + round(ep.END_CHIP_SECONDS * ep.FPS)
+    assert times[0] == 0.0 and gate.timestamp_holes(times) == []

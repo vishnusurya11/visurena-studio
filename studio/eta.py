@@ -28,7 +28,7 @@ ROUND_S = 300.0
 SUB_STEP = {"plan": "02", "places": "03", "sheets": "03", "cast": "03", "lines": "04", "timeline": "05",
             "respot": "05", "prompts": "06", "no_last_frame": "06", "grids": "07", "panels": "08",
             "panel_dq": "08", "panel_content": "08", "panel_eye": "08", "takes": "09", "take_dq": "09",
-            "take_content": "09", "take_eye": "09", "strip": "09", "assemble": "10", "qc": "11",
+            "take_content": "09", "take_eye": "09", "strip": "09", "assemble": "10", "upscale": "10", "qc": "11",
             "master_eye": "11", "dossier": "12"}
 """timing.jsonl's stage names (the `timed` subs) under the episode step that runs them."""
 
