@@ -65,9 +65,18 @@ def test_a_base_sheet_is_its_tags_one_front_figure_portrait(tmp_path):
     assert workflow == RECIPE["workflow"] and (v["width"], v["height"]) == (832, 1216)
     assert v["prompt"] == ("masterpiece, best quality, hellsing ultimate ova, 1boy, solo, insane grin, "
                            "(mutton chops:1.2), full body, front view, simple background")
-    assert v["negative_prompt"] == "lowres, (text:1.5), multiple views, top hat"
+    assert v["negative_prompt"] == "lowres, (text:1.5), top hat, multiple views"
     assert (v["ckpt_name"], v["seed"], v["hires_seed"], v["hires_denoise"]) == (RECIPE["ckpt"], 7, 7, 0.55)
     assert (v["lora1"], v["lora1_model"], v["lora1_clip"]) == ("gothic_anime\\x.safetensors", 0.45, 0.45)
+
+
+def test_the_negative_runs_base_then_entity_then_framing(tmp_path):
+    """The chain test's order (2026-10-13): the same tokens with the framing's weighted colour bans
+    moved ahead of the entity's turned every Hellsing Hyde seed to saturated noise."""
+    _, v = book_look.t2i(declare(tmp_path), "", width=832, height=1216, seed=7, prefix="p",
+                         kind="characters", entity="edward_hyde")
+    neg = v["negative_prompt"]
+    assert neg.index("lowres") < neg.index("top hat") < neg.index("multiple views")
 
 
 def test_a_person_without_tags_is_drawn_from_words_without_the_turnaround(tmp_path):

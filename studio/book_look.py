@@ -179,12 +179,14 @@ def joined(*parts: str) -> str:
 
 def drawn_words(recipe: dict, prompt: str, kind: str, entity: str) -> tuple[str, str]:
     """(positive, negative): the lead, the entity's own tags (else the words without the
-    sheet form), the kind's framing; the negative, the framing's, the entity's."""
+    sheet form), the kind's framing; the negative in the same order -- the base, the entity's,
+    the framing's.  NoobAI is order-sensitive: the framing's weighted colour bans ahead of the
+    entity's turned every Hellsing Hyde seed to noise (chain-test order, 2026-10-13)."""
     frame = (recipe.get("frames") or {}).get(kind) or {}
     own = (recipe.get("entities") or {}).get(entity) or {} if entity else {}
     body = own.get("tags") or UNFORMED.sub("", prompt or "")
     return (joined(recipe.get("lead", ""), body, frame.get("tags", "")),
-            joined(recipe.get("negative", ""), frame.get("negative", ""), own.get("negative", "")))
+            joined(recipe.get("negative", ""), own.get("negative", ""), frame.get("negative", "")))
 
 
 def drawn_t2i(recipe: dict, prompt: str, *, width: int, height: int, seed: int, prefix: str,

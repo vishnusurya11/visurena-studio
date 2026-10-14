@@ -1005,3 +1005,11 @@ fixes. Each lesson below cost at least one launch. Tracker rows A38-A74 in
       plaster wall" in prose drew an archway). "walrus moustache" drew a walrus; "(clean-shaven:1.5)" + a weighted
       beard negative still bearded Jekyll on the pack seed, seed 11 held. A plan whose view names a place STATE
       makes `places.py --draw` draw that state fresh: re-derive it as one edit of its new master.
+    - **A drawn look is its recipe, words AND order (Jekyll HEL style match, 2026-10-13).** The owner rejected
+      the first Hellsing cast as "not the style I asked": look.json had drifted from the chain test's HEL recipe
+      (`light grey background, even soft lighting` framing, a `(dark background), shadowed face, backlighting`
+      negative, `victorian london, 1886` in the lead), which flattened the red-and-black gradients. Restored 1:1,
+      the drawer then drew pure noise on every seed: the same negative tokens with the framing's weighted
+      `(green theme:1.3)` bans ahead of the entity's burn NoobAI. `drawn_words` now joins base, entity, framing
+      (the chain's order); keep colour bans in the framing negative, last. Prove a look change against the
+      target pictures side by side (`style_match.jpg`) before any batch redraw.
