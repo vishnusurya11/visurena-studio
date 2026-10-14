@@ -1050,3 +1050,6 @@ fixes. Each lesson below cost at least one launch. Tracker rows A38-A74 in
       chapter 1 before the table was rebuilt; Enfield's row said `base`, the table `frock_coat_topper`. Step 01
       skipped on its chapter stamp and step 06's G-LOOK asked for "rebind (step 01)" -- a step that called
       itself done. `step_01_bind.done` now also needs every bound row's look to be the table's for the chapter.
+    - **Gaslight does not lie down (Jekyll HEL ep01, 2026-10-14).** "a yellow pool of gaslight lying on them"
+      asked the walking little man to lie, on the panel and again on the take (a retake of a correct take):
+      the thing list matched `light` only as a whole word. Any `*light`, fog, frost, a pool or a puddle is ground.

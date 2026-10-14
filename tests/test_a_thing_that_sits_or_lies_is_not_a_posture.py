@@ -28,3 +28,13 @@ def test_shadows_that_lie_across_a_road_are_not_a_posture():
 def test_a_person_still_sits_and_lies():
     assert asked("Close on the narrator sitting up in the brass bed against the pillow.") == "sitting"
     assert asked("Wide on the yard, the landlord lying at the fence.") == "lying"
+
+
+def test_a_pool_of_gaslight_lying_on_the_flagstones_is_not_a_posture():
+    """Jekyll ep01 shot 3 (2026-10-14): 'a yellow pool of gaslight lying on them' asked the
+    walking little man to lie down, on the panel and again on the take -- `light` matched
+    as a whole word only, never inside 'gaslight', and a pool is ground, not a person."""
+    assert asked("Wide of the lamplit crossroads as the little man stumps along the far pavement",
+                 "THE FOCUS OF THE PICTURE IS the frosted flagstones at the BOTTOM third, a yellow pool "
+                 "of gaslight lying on them. The little man walks at a walking pace.") is None
+    assert asked("Wide of the yard, the firelight lying across the boards.") is None
