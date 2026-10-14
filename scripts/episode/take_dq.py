@@ -589,7 +589,8 @@ def take_sha8(path: Path) -> str:
 
 
 MEASURES = ("scripts/episode/take_dq.py", "studio/take_verdict.py", "studio/take_frame.py",
-            "studio/plate_gate.py", "studio/invented_speech.py", "studio/gait.py")
+            "studio/plate_gate.py", "studio/invented_speech.py", "studio/gait.py",
+            "studio/stillness.py", "studio/identity_gate.py")
 """The code a take verdict is measured by: a change here re-measures every take."""
 
 

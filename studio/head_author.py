@@ -69,15 +69,27 @@ def face_of(words: str) -> tuple[str, str]:
     return lt.HAIR_FAMILY.get(marker(words, "hair"), ""), marker(words, "face")
 
 
-def clashes(faces: dict[str, tuple[str, ...]], authored: set[str]) -> list[str]:
+def clashes(faces: dict[str, tuple[str, ...]], authored: set[str],
+            apart: dict[str, set[str]] | None = None) -> list[str]:
     """Every pair of characters, one of them authored, sharing one whole face
-    (a face may lead with its kind: a woman and a man never share one)."""
-    names, out = list(faces), []
+    (a face may lead with its kind: a woman and a man never share one), unless a
+    head keeps the pair `apart` by an owner-ruled reason."""
+    names, out, apart = list(faces), [], apart or {}
     for i, a in enumerate(names):
         for b in names[i + 1:]:
+            if b in apart.get(a, set()) or a in apart.get(b, set()):
+                continue
             if (a in authored or b in authored) and all(faces[a]) and faces[a] == faces[b]:
                 out.append(f"{a} and {b} share {faces[a][-2]} hair, {faces[a][-1]}")
     return out
+
+
+def apart_of(heads: dict) -> dict[str, set[str]]:
+    """{who: the characters his head is kept apart from}: only a pair with a stated
+    reason (Hyde and Enfield, owner ruling 2026-10-14: one hair family, both
+    clean-shaven, apart by age, stature, cut and hat)."""
+    return {who: {other for other, why in (e.get("apart_from") or {}).items() if str(why).strip()}
+            for who, e in heads.items()}
 
 
 KINDS = {"female": "woman", "woman": "woman", "girl": "girl", "boy": "boy"}
@@ -114,7 +126,7 @@ def refusals(book: Path, heads: dict, rows: list[dict]) -> list[str]:
     faces = {who: (kind_of(e.get("kind")), *face_of(e["words"])) for who, e in heads.items()}
     faces |= {r["entity_id"]: (kind_of(r.get("gender")), *face_of(r.get("physical", "")))
               for r in rows if r["entity_id"] not in heads}
-    return out + clashes(faces, authored=set(heads))
+    return out + clashes(faces, authored=set(heads), apart=apart_of(heads))
 
 
 def cured_physical(prof: dict, entry: dict) -> str:

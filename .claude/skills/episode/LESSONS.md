@@ -1058,6 +1058,8 @@ fixes. Each lesson below cost at least one launch. Tracker rows A38-A74 in
       his hand and turning his head as he names Hyde -- read 76 % static (longest still run 1.08 s) and failed HARD
       three rounds. On a drawn look the row is HARD only when the frame also holds past G-DEAD's 2.5 s
       (`stillness.DRAWN_RUN`); T01 (run 4.33 s) and T19 (2.71 s) still fail. House and photoreal books unchanged.
+      **REVERSED by the owner, 2026-10-14:** the relaxation shipped T01, T02, T19 and T20 as holds he reads as dead.
+      A drawn look is judged by the house stillness rule; its cure is a retake (move type) or the cut, never an exemption.
     - **A title keeps its capital (Jekyll HEL ep01, 2026-10-14).** A move_type cure locked shot 19; its end
       "Mr. Enfield at the CENTRE ..." lent the arrival its noun, `noun_phrase` lowered it to "mr. Enfield", the
       subject swap left "mr. <Subject 1>", the splitter cut the sentence at "mr." and L21 refused the take
@@ -1073,6 +1075,7 @@ fixes. Each lesson below cost at least one launch. Tracker rows A38-A74 in
       T01 then panned, turned, spoke and pointed its cane -- alive by eye -- and still held 4.1 s by whole-frame
       flow four rounds running (edge-masked flow read the same): a cel mouth is too small for the mean. On a
       drawn look a DIALOGUE take that the block-max meter finds alive in every span is not HARD-still.
+      **REVERSED by the owner, 2026-10-14** (with the relaxation above): a speaking drawn take is judged by the house rule too.
     - **Nobody appears from nowhere (Jekyll HEL ep01, owner 2026-10-14).** "The first shot doesn't have the
       actual characters in the scene, so in the second shot the character magically appears." The plan was
       right at shot 0 (faces: the lawyer and Enfield); the GRID was not: `wide_only` (2026-10-02 09:39, ep16's
@@ -1094,3 +1097,28 @@ fixes. Each lesson below cost at least one launch. Tracker rows A38-A74 in
       0.97-1.48 (no frame over 1.56; off by one 1.50-5.20). The master's upscale is now recorded by sha8 in
       `cut/master_layout.json` and sets the cap (`edit_gate.segment_cap`, 2.0 for rtx). A new picture
       process re-asks every threshold calibrated on the old one -- the gate accused correct work.
+    - **A walk is a step paid for in ground (Jekyll HEL ep01, owner 2026-10-14: "the little walk is weird").** T03's
+      Hyde faced the camera square-on while he travelled sideways, legs pattering, torso and hat level as on a rail:
+      3.94 steps/s for 0.027 body heights a step (a human walks 1.6-2.2 steps/s; liked WotW walkers cross 0.052+).
+      Nothing read it: frozen-whole saw a live frame (14 % static), G-MOVE saw the camera obey (1.00x), `held` reads
+      only a subject the plan keeps in place, and every eye reads still frames, which cannot show a gait. G-GAIT
+      (`studio/gait.py`, HARD row `gait`) now counts the step rhythm against the ground crossed whenever the plan
+      asks a subject to walk; its cure is the plan's verb ("in profile, a long stride, feet in the picture"), since
+      "stumps along" minced again. Coverage is thin: 71 of 91 walker takes are unmeasurable (feet out of frame 37,
+      no rhythm 31, depth 3) -- frame a walk with the feet in the picture so the gate can read it.
+    - **A check is cut only for the reserve (Jekyll HEL ep01, owner 2026-10-14: "I think you skipped DQ checks").**
+      Past the 5 h ceiling `--ceiling-spent` served old take and QC verdicts under any measuring code, so a new
+      measure (G-GAIT) would never have read the takes with 51 min left under 6 h. A measuring check now runs while
+      it leaves the downstream reserve under 6 h (`Budget.checks_cut`); only rescue rungs close at the ceiling.
+    - **A held measure must be handed its inputs (Jekyll HEL ep01 v2, owner 2026-10-14).** The take identity row read
+      "not measured" on every take for three weeks: 4c5f14c held the sheets back on a measured reason (3 false fails in
+      34 WotW takes) and nothing ever turned it back on, so the master eye flagged identity drift the take gate had
+      never looked for. The sheets go in again; the row is ADVISORY (`TAKE_IDENTITY_HARD`) because a replay with
+      sheets would refuse 23 of 118 WotW ep19-27 and 37 of 97 Scarlet ep08-14 shipped face takes, and the master eye reads it (`master_eye.take_identity`).
+      A gate held back needs a dated condition to come back, or it is a gate removed.
+    - **The row and the sheet are one man (Jekyll HEL, owner 2026-10-14).** Hyde's row said "thick, bushy black
+      mutton-chop side-whiskers" from "a swart growth of hair" -- which the book gives his HAND -- while his sheet is
+      clean-shaven, and words-drawn wides drew a bearded stranger beside the sheet's Hyde. He is clean-shaven in
+      heads.json, the look table (words, then `looks_table.py --remark`), look.json's drawer tags and the bound row.
+      Black and brown are one hair family, so he and clean-shaven Enfield now share (dark, none): `heads.json`
+      `apart_from` keeps an owner-ruled pair apart only with its stated reason (age, stature, cut, hat).

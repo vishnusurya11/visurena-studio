@@ -275,13 +275,17 @@ def lip_gate(lane: str, audio: dict | None, line_text: str) -> Gate:
 
 
 def identity_gate_row(report: dict | None) -> Gate:
-    """G4.7 -- STRANGER and DRIFT are hard; the gate is quiet when it is not measured."""
+    """G4.7 -- STRANGER and DRIFT are hard when armed, an ADVISORY row (counted,
+    noted, read by the master eye) when not; quiet when it is not measured."""
     report = report or dict(identity_gate.NOT_MEASURED)
     if not report.get("measured"):
         return Gate("identity", None, True, False, "not measured")
-    hard = report.get("hard") or []
-    note = "; ".join(hard) if hard else f"{len(report.get('present', {}))} cast on screen"
-    return Gate("identity", len(hard), not hard, bool(hard), note, 0.0)
+    hard, advisory = report.get("hard") or [], report.get("advisory") or []
+    if hard:
+        return Gate("identity", len(hard), False, True, "; ".join(hard), 0.0)
+    if advisory:
+        return Gate("identity", len(advisory), True, False, "advisory: " + "; ".join(advisory), 0.0)
+    return Gate("identity", 0, True, False, f"{len(report.get('present', {}))} cast on screen", 0.0)
 
 
 def unmeasured(*names: str) -> list[Gate]:
@@ -552,6 +556,20 @@ def segment_rows(anchors: list, cells: Path, seconds: float, sigs: np.ndarray,
     return out
 
 
+TAKE_IDENTITY_HARD = False
+"""Whether the take's identity row refuses.  The sheets go in again (owner ruling
+2026-10-14: the row had been 'not measured' on every take since 4c5f14c held them
+back on 2026-09-25).  HARD only on a replay with no false refusals over shipped
+WotW and Scarlet takes (it refused 23/118 WotW ep19-27 and 37/97 Scarlet ep08-14 face takes) -- see docs/audit/2026-10-14_jekyll_ep01_hel_v2/identity_replay.*;
+until then an ADVISORY row the master eye reads (`master_eye.take_identity`)."""
+
+
+def identity_report(video: Path, starts: list[int], record: dict, book: Path | None, **measure) -> dict:
+    """The identity gate over one take, handed the cast sheets the take itself staged."""
+    return identity_gate.identity_dq(video, starts, record.get("faces", []), record.get("refs", []),
+                                     sheets=sheets_of(record, book), armed=TAKE_IDENTITY_HARD, **measure)
+
+
 def sheets_of(record: dict, book: Path | None) -> dict:
     """{who: sheet} for each cast face the take staged a sheet for (ep12: the
     identity gate was handed none and compared nobody)."""
@@ -594,12 +612,8 @@ def measure(video: Path, record: dict, cells: Path, seconds: float, attempt: int
                     sampled_foreign(per_frame), coherence(video, record, cells, seconds),
                     bytes=video.stat().st_size if video.is_file() else 0)
     starts = identity_gate.sample_starts([s.start_s for s in segs], seconds)
-    # The sheets are ready (`sheets_of`) and NOT handed in yet: measured 2026-09-25
-    # on 34 face takes of ep10-ep12, the armed gate with sheets failed 3 correct
-    # takes (ep11 T11 STRANGER 0.29-0.42, ep12 T02 STRANGER 0.36, ep10 T17 DRIFT
-    # 0.72) and caught no real fault. Hand them in once STRANGER/DRIFT are
-    # recalibrated on stylised, soot-dark and turned faces.
-    identity = identity_gate.identity_dq(video, starts, record.get("faces", []), record.get("refs", []))
+    # The sheets go in (owner ruling 2026-10-14); HARD only per TAKE_IDENTITY_HARD.
+    identity = identity_report(video, starts, record, book)
     v.zoom = zoom_of(video, record, v.coherence)
     v.gates = gates(v, audio, line_text, unplanned_from(rows), identity, plan_motions(record),
                     record.get("size", ""), picture_rows(video, record, seconds))
@@ -612,8 +626,7 @@ def measure(video: Path, record: dict, cells: Path, seconds: float, attempt: int
     # whether what is fixed in the world stayed fixed (take_lock).
     v.gates.append(take_lock.row(take_lock.lock(take_lock.frames(video, seconds)),
                                  (plan_motions(record) or [""])[0]))
-    drawn = {"drawn": True, "speaking": speaking(record, motion["frozen_spans"])} if drawn_book(book) else {}
-    v.gates.append(stillness_row(video, seconds, record, **drawn))
+    v.gates.append(stillness_row(video, seconds, record))
     v.gates = board_rows(v.gates, record)
     v.score, v.passed = score(v.gates)
     return v
@@ -641,26 +654,14 @@ def board_rows(rows: list[Gate], record: dict) -> list[Gate]:
     return panel_board_rows(rows) if record.get("board") == "panel" else rows
 
 
-def drawn_book(book: Path | None) -> bool:
-    """A book whose declared look is drawn (cel): the stillness row reads its held run too."""
-    from studio import book_look
-    return bool(book) and book_look.drawn(book)
-
-
-def speaking(record: dict, frozen_spans) -> bool:
-    """A dialogue take the block-max meter finds alive in every span: its speaker is working."""
-    return record.get("lane") == "dialogue" and not frozen_spans
-
-
-def stillness_row(video: Path, seconds: float, record: dict, drawn: bool = False,
-                  speaking: bool = False) -> Gate:
+def stillness_row(video: Path, seconds: float, record: dict) -> Gate:
     """WHOLE-FRAME stillness, HARD (root cause 2026-09-26, D12): the block-max
     rows above called a frame alive on one moving puff, and every ep12 take
     read 0 % frozen while five were 70-100 % static by optical flow.  A shot
-    the plan declares `still` is exempt.  `video` is already head-trimmed."""
+    the plan declares `still` is exempt.  `video` is already head-trimmed.
+    Every look is judged by this one rule (owner ruling 2026-10-14)."""
     from studio import stillness
-    m = stillness.measure(video, seconds, exempt=bool(record.get("still")),
-                          **({"drawn": True, "speaking": speaking} if drawn else {}))
+    m = stillness.measure(video, seconds, exempt=bool(record.get("still")))
     return Gate(**stillness.gate_args(m))
 
 

@@ -378,7 +378,27 @@ def measures(home: Path, master: Path, plan: dict, placed: dict, *, frames: Fram
             "board": board(last_vs_panel(home, grouped, sigs)),
             "repeats": repeats(near_pairs(representative(grouped, sigs), setups)),
             "story": story(turn, grouped),
+            "take_identity": take_identity(home),
             "reads": reads, "grouped": grouped, "shots": shots}
+
+
+def take_identity(home: Path) -> dict[str, dict]:
+    """Each take's identity row as the take gate wrote it: {"T03": {findings, note}}."""
+    out: dict[str, dict] = {}
+    for path in sorted((Path(home) / "takes" / "r2v").glob("T[0-9][0-9].dq.json")):
+        rows = json.loads(path.read_text(encoding="utf-8")).get("gates") or []
+        row = next((r for r in rows if r.get("name") == "identity"), None)
+        if row is not None:
+            out[path.name[:3]] = {"findings": row.get("value"), "note": row.get("note", "")}
+    return out
+
+
+def take_identity_faults(reads: dict[str, dict]) -> list[Fault]:
+    """A low fault per take whose ADVISORY identity row found a stranger or a drift:
+    the master flags it (never climbs on it -- not in MEASURED)."""
+    return [Fault(kind="take_identity", where=take, severity="low", note=read["note"],
+                  evidence={"findings": read["findings"]})
+            for take, read in reads.items() if read.get("findings")]
 
 
 def field_faults(m: dict) -> list[Fault]:
@@ -402,7 +422,8 @@ def read_faults(m: dict, plan: dict) -> list[Fault]:
 
 def verdict_of(m: dict, plan: dict) -> Verdict:
     reads = m["reads"]
-    faults = field_faults(m) + read_faults(m, plan) + identity(m["grouped"], m["shots"])
+    faults = (field_faults(m) + read_faults(m, plan) + identity(m["grouped"], m["shots"])
+              + take_identity_faults(m.get("take_identity") or {}))
     return Verdict(judge=NAME, version=VERSION, passed=not faults, faults=faults,
                    confidence=confidence(sum(r.seen is not None for r in reads), len(reads)), reads=len(reads))
 

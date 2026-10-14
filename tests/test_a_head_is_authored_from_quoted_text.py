@@ -112,3 +112,19 @@ def test_a_woman_and_a_man_never_share_a_face(tmp_path):
     rows = [{"entity_id": "maid", "gender": "female", "physical": "iron-grey hair, clean-shaven"}]
     with pytest.raises(SystemExit, match="hyde_housekeeper and maid"):
         head_author.apply(root, rows=rows)
+
+
+def test_an_owner_ruled_pair_is_kept_apart_by_its_reason(tmp_path):
+    """Jekyll HEL (owner ruling 2026-10-14): Hyde is clean-shaven -- the book's 'swart
+    growth of hair' is his hand's.  Black and brown are one hair family, so he and
+    Enfield (receding brown, clean-shaven) share (dark, none); they differ by age,
+    stature, cut and hat.  A head may name `apart_from` a character WITH the reason;
+    the pair no longer clashes, and an empty reason keeps the refusal."""
+    hyde = {**HYDE, "words": "Small, pale and dwarfish. Coarse black hair; clean-shaven; a low black felt hat.",
+            "apart_from": {"richard_enfield": "25 and dwarfish, cropped black hair, a wideawake; Enfield 35, receding brown, a top hat"}}
+    rows = [{"entity_id": "richard_enfield", "physical": "Receding brown hair; clean-shaven; a light-brown top hat."}]
+    root = book(tmp_path, {"edward_hyde": hyde})
+    assert head_author.apply(root, rows=rows) == ["edward_hyde"]
+    bare = {**hyde, "apart_from": {"richard_enfield": " "}}
+    with pytest.raises(SystemExit, match="edward_hyde and richard_enfield share dark hair, none"):
+        head_author.apply(book(tmp_path / "b", {"edward_hyde": bare}), rows=rows)

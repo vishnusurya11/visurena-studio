@@ -273,10 +273,11 @@ NOT_MEASURED = {"measured": False, "ok": True, "note": "not measured: face model
 
 
 def identity_dq(video, segments: list, expected: list[str], refs: list[str],
-                sheets: dict | None = None, **measure) -> dict:
+                sheets: dict | None = None, armed: bool = ARMED, **measure) -> dict:
     """The take's identity report, or the honest 'not measured' when the flag is
     off.  `measure` (detect=, embed=, bank=) reaches `observe` untouched.
-    Armed, a hard finding fails the take; disarmed it rides in `flags` and `note`."""
+    Armed, a hard finding fails the take; disarmed it rides in `advisory`, `flags`
+    and `note` (the take gate's caller decides: take_verdict.TAKE_IDENTITY_HARD)."""
     if not enabled():
         return dict(NOT_MEASURED)
     seen = observe(video, segments, sheets or {}, **measure)
@@ -285,9 +286,11 @@ def identity_dq(video, segments: list, expected: list[str], refs: list[str],
     if seen and not any(f.scores for f in seen):
         return dict(NOT_MEASURED, note="not measured: no cast sheets to compare faces with")
     v = judge(seen, expected, refs)
-    hard = v.hard if ARMED else []
-    note = "" if ARMED or not v.hard else "advisory for one episode: " + "; ".join(v.hard)
-    return {"measured": True, "ok": not hard, "note": note, "flags": v.flags, "hard": hard, "present": v.present}
+    hard = v.hard if armed else []
+    advisory = [] if armed else list(v.hard)
+    note = "advisory: " + "; ".join(advisory) if advisory else ""
+    return {"measured": True, "ok": not hard, "note": note, "flags": v.flags, "hard": hard,
+            "advisory": advisory, "present": v.present}
 
 
 def sheet_paths(book: Path, cast: list[str]) -> dict[str, Path]:
