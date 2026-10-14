@@ -50,7 +50,7 @@ def home_with_panels(tmp_path: Path) -> Path:
     shutil.copy(PLAN, home / "plan.json")
     for i in (2, 4):
         Image.new("RGB", (8, 8), (i * 30, 0, 0)).save(home / "storyboard" / f"shot_{i:02d}.png")
-    episode_home.write_json(home / "placed.json", {"shots": [{"index": i, "seconds": 3.0 + i} for i in (2, 4)]})
+    episode_home.write_json(home / "placed.json", {"shots": [{"index": i, "seconds": 0.5 if i == 2 else 3.0 + i} for i in (2, 4)]})
     return home
 
 

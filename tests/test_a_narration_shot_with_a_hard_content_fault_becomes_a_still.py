@@ -26,7 +26,7 @@ def home_with_panels(tmp_path: Path) -> Path:
     shutil.copy(PLAN, home / "plan.json")
     for i in (1, 2, 3):
         Image.new("RGB", (8, 8), (i * 30, 0, 0)).save(home / "storyboard" / f"shot_{i:02d}.png")
-    episode_home.write_json(home / "placed.json", {"shots": [{"index": i, "seconds": 3.0 + i} for i in (1, 2, 3)]})
+    episode_home.write_json(home / "placed.json", {"shots": [{"index": i, "seconds": 0.5 + i} for i in (1, 2, 3)]})
     return home
 
 
@@ -44,7 +44,7 @@ def test_the_content_fault_is_hard_and_the_narration_take_becomes_a_still(tmp_pa
     assert out.faults[0].kind == "content" and out.faults[0].evidence["still"] == "storyboard/shot_02.png"
     stills = take_ladder.load_stills(home)
     assert stills[2]["panel"] == "episodes/ep05/storyboard/shot_02.png"
-    assert stills[2]["seconds"] == 5.0 and "content" in stills[2]["why"]
+    assert stills[2]["seconds"] == 2.5 and "content" in stills[2]["why"]
     assert (home / "takes" / "r2v" / "stills.json").exists()
 
 

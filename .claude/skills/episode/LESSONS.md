@@ -1126,3 +1126,11 @@ fixes. Each lesson below cost at least one launch. Tracker rows A38-A74 in
       0.42-0.63 against 0.65; the keep_best terminal needs 8 tries, but each run gave a line 2, so every run exited
       1 and the brain parked the episode twice (v1 needed 13 relaunches). A record run now takes the rounds the
       least-tried refused line still needs to reach the terminal (`say_lines.rounds_for`).
+    - **The take terminal and G-DEAD must agree (Jekyll HEL ep01 v2, 2026-10-14).** Under the house stillness rule the
+      first batched round re-headed four frozen cel takes with garbled aims ("tracks beside the lawyer across to the
+      door's", "... to the folded", "Mr. Enfield's face,"): the aim took the first preposition's tail, cut it at six
+      words and kept its comma. Two froze again, the identical-signature breaker sent them to the terminal, the
+      terminal held T10 (6.75 s) and T16 (3.9 s) as stills -- and G-DEAD refused the master on all of it, a loop no
+      retry could leave. Now: a from-to move aims at its destination, whole (`take_ladder.destination`); an aim cut
+      on a possessive is read from at_rest; a frozen follow is given a push, never a lock; a frozen-only take gets its
+      second move type past the breaker; and the terminal never holds a panel longer than G-DEAD's 2.5 s.

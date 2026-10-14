@@ -117,8 +117,9 @@ def route(verdict: Verdict, room: Path, try_i: int = 1) -> dict[str, dict[int, l
     for i, fs in sorted(by.items()):
         if attempts_of(room, i) >= MAX_TAKE_ATTEMPTS:
             continue
-        if try_i >= 2 and not progressed(room, i, sorted({f.kind for f in fs})):
-            continue
+        kinds = {f.kind for f in fs}
+        if try_i >= 2 and not progressed(room, i, sorted(kinds)) and not kinds <= FROZEN:
+            continue        # a frozen take gets its second move type: G-DEAD never ships it (2026-10-14)
         if cure := cure_of(fs, panel_clean=panel_clean(room, i)):
             out.setdefault(cure, {})[i] = fs
         if cure != "head_cut" and any(f.kind == "leak" and f.evidence.get("covers") for f in fs):
@@ -161,7 +162,7 @@ CAUSE_OF = {
 }
 SUBSTITUTE = {
     # a still take that froze: give the camera the move; a moving one: follow the actor
-    "frozen": {"locked": "push_slow", "*": "follow"},
+    "frozen": {"locked": "push_slow", "follow": "push_slow", "*": "follow"},
     # a truck on a person leaning on scenery glues him to camera and slides the world: push in or crane
     "anchored": {"track_lateral": "push_slow", "follow": "push_slow", "pan_to": "push_slow", "*": "crane_up"},
     "rotation": {"*": "locked"},
@@ -276,14 +277,31 @@ def aim_of(motion: str, at_rest: str = "") -> str:
     from studio import camera_lint                 # never cut mid-name (Jekyll ep01 "the man about")
     cam, _ = ro.camera_clause(plan_gates.head_of(motion))
     if (found := AIM.search(cam or "")) and not BARE_TITLE.match(found.group(1).strip(" ,.")):
-        aim = camera_lint.repair_aim(camera_lint.OLD_TAIL.sub("", found.group(1).strip(" ,.")))
-        return camera_lint.repair_aim(" ".join(aim.split()[:AIM_WORDS])) or "the figure"
+        aim = destination(camera_lint.OLD_TAIL.sub("", found.group(1)).strip(" ,."))
+        aim = camera_lint.repair_aim(" ".join(aim.split()[:AIM_WORDS])).strip(" ,.")
+        if aim and not POSSESSIVE_END.search(aim):     # "to the door's" names nothing: read at_rest
+            return aim
+        if not at_rest:
+            return aim or "the figure"
     # at_rest clauses are SEMICOLON-separated (ep16: a comma split made the
     # whole paragraph the aim and the motion lint refused the cure, M9); the
     # FOCUS tag and the subject's parenthetical are not the aim (ep19: five
     # shots were sent "pushes in toward THE FOCUS OF THE PICTURE IS")
     first = AIM_STOP.split(FOCUS_TAG.sub("", at_rest or "", count=1))[0].strip(" .")
     return camera_lint.repair_aim(" ".join(first.split()[:AIM_WORDS])) or "the figure"
+
+
+TO = re.compile(r"\b(?:to|toward|towards|onto)\s+", re.I)
+
+
+def destination(aim: str) -> str:
+    """Where a from-to move ENDS: the text after its last `to`/`toward`, cut at its first
+    comma (Jekyll ep01 v2: "the lawyer across to the door's lock" became "... to the door's")."""
+    parts = TO.split(aim or "")
+    return (parts[-1] if len(parts) > 1 and parts[-1].strip() else aim).split(",")[0].strip(" .")
+
+
+POSSESSIVE_END = re.compile(r"['’]s?$")
 
 
 FOCUS_TAG = re.compile(r"^\s*THE FOCUS OF THE PICTURE IS\s+", re.I)
@@ -458,7 +476,11 @@ def settle_take(home: Path, plan, index: int, faults: list[Fault], order: list[i
     boxed = any(f.kind == "letterbox" for f in faults)
     if panel is None or not (boxed or can_still(index, load_stills(home), order, cap)):
         return "high" if panel is not None else "keep_best"
-    write_still(home, index, panel, placed_seconds(home, index), why_of("still", faults))
+    seconds = placed_seconds(home, index)
+    from studio import dead_footage
+    if seconds > dead_footage.STILL_LIMIT_S:        # G-DEAD refuses a still held this long (ep01 v2 T10, T16)
+        return "high"
+    write_still(home, index, panel, seconds, why_of("still", faults))
     return "still"
 
 

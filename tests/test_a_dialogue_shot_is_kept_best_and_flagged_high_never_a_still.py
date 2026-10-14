@@ -23,7 +23,7 @@ def home(tmp_path: Path) -> Path:
     shutil.copy(PLAN, where / "plan.json")
     for i in (DIALOGUE, TURN, BUTTON, NARRATION, 10, 11, 13):
         Image.new("RGB", (8, 8), (i, 0, 0)).save(where / "storyboard" / f"shot_{i:02d}.png")
-    episode_home.write_json(where / "placed.json", {"shots": [{"index": i, "seconds": 4.0} for i in range(30)]})
+    episode_home.write_json(where / "placed.json", {"shots": [{"index": i, "seconds": 2.0} for i in range(30)]})
     return where
 
 

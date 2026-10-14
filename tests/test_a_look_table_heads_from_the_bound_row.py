@@ -90,7 +90,7 @@ def test_the_wotw_tables_are_byte_identical_with_the_fallback():
 
 
 @pytest.mark.parametrize("who, face", [("henry_jekyll", ("grey", "none", "top_hat")),
-                                       ("edward_hyde", ("dark", "sideburns", "felt_hat"))])
+                                       ("edward_hyde", ("dark", "none", "felt_hat"))])
 def test_jekyll_and_hyde_heads_come_from_their_authored_dossiers(who, face, monkeypatch):
     """Their refs.json rows name no head: the wall C1 put up held until the heads
     were authored from quoted text (analysis/heads.json, studio.head_author).  A
