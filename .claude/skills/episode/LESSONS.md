@@ -1063,3 +1063,7 @@ fixes. Each lesson below cost at least one launch. Tracker rows A38-A74 in
       subject swap left "mr. <Subject 1>", the splitter cut the sentence at "mr." and L21 refused the take
       prompt. Honorifics are names to `is_name`, and `sentences` never splits after Mr./Mrs./Dr./St.
       (And again: a regex written through a heredoc put BACKSPACE bytes where `` was meant -- use a file.)
+    - **A dialogue take frozen twice pans (Jekyll HEL ep01, 2026-10-14).** Locked with the actor's verb, T01 and
+      T14 froze again on fresh seeds (92 %/86 % static, held 4.3 s/3.6 s): H3 barely animates a locked cel
+      close. The same fault twice is the plan's; the ladder's next dialogue move is `pan_to` the speaker -- it
+      turns where it stands, so G-TALK holds (WotW ep01 panned all four spoken shots).

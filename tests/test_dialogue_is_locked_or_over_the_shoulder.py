@@ -96,3 +96,15 @@ def test_the_battery_and_the_brief_carry_g_talk(tmp_path):
     from studio import plan_brief
     assert plan_check.talk_gate(_ep([PUSH, PUSH, LOCKED], dialogue={0, 1, 2}), tmp_path, 3) == 2
     assert any("G-TALK" in rule for rule in plan_brief.PICTURE_RULES)
+
+
+def test_a_dialogue_take_frozen_again_with_the_actors_verb_pans():
+    """Jekyll ep01 (HEL, 2026-10-14): T01 and T14 were locked with the actor's verb and
+    froze again (92 % and 86 % static, runs 4.3 s and 3.6 s) -- the same fault on a fresh
+    seed is the plan's.  The next move is a pan to the speaker: it turns where it stands,
+    so G-TALK still holds (WotW ep01 panned all four spoken shots and was liked)."""
+    once = take_ladder.substitute("frozen-whole", LOCKED, "his face a third of the frame", dialogue=True)
+    twice = take_ladder.substitute("frozen-whole", once, "his face a third of the frame", dialogue=True)
+    assert plan_gates.move_id(twice, "") == "pan_to"
+    assert twice.count(take_ladder.ACTOR_VERB) == 1
+    assert plan_gates.talk_faults(_ep([twice, twice, twice], dialogue={0, 1, 2})) == []

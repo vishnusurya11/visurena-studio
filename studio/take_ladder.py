@@ -301,8 +301,8 @@ ACTOR_VERB = "the speaker leans toward the listener and lifts one hand as the wo
 def substitute_id(kind: str, motion: str, dialogue: bool = False) -> str:
     """The catalog move that replaces this one for this cause, never the same
     move back; a spoken line's camera stays locked -- it never travels."""
-    if dialogue:
-        return "locked"
+    if dialogue:      # locked with the actor's verb first; frozen again, a pan (not a travel)
+        return "pan_to" if ACTOR_VERB in (motion or "") else "locked"
     table = SUBSTITUTE[CAUSE_OF[kind]]
     move = plan_gates.move_id(motion or "", "")
     new = table.get(move, table["*"])

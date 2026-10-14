@@ -95,7 +95,7 @@ def test_no_owner_liked_wotw_take_fires():
 
 
 def test_jekyll_t14_fires():
-    home = JEKYLL / "ep01"
+    home = JEKYLL / "superseded" / "ep01_2026-10-13_photoreal"   # the shipped ep01, set aside 2026-10-14
     if not (home / "takes" / "r2v" / "T14.dq.json").exists():
         pytest.skip("Jekyll ep01 records are not on disk")
     assert 14 in fired(home)
