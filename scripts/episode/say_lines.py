@@ -223,10 +223,17 @@ def terminal(record: dict, best: dict | None) -> dict | None:
     return dict(best, passed=True, flagged="keep_best", tries=record["tries"])
 
 
-def attempts_from(tries: int) -> list[int]:
+def attempts_from(tries: int, rounds: int = TRIES) -> list[int]:
     """This run's attempt numbers for a line already tried `tries` times: every one new.
     A resume zeroed the prior after the first pass and re-said a refused seed (l15, 2026-10-14)."""
-    return [tries + a for a in range(TRIES)]
+    return [tries + a for a in range(rounds)]
+
+
+def rounds_for(start: dict[int, int]) -> int:
+    """This run's rounds: as many as the least-tried refused line still needs to reach
+    TERMINAL_TRIES, never fewer than TRIES -- the terminal fires inside one run, not after
+    four runs each parked by the brain (Jekyll ep01 v2 l15, 2026-10-14)."""
+    return max(TRIES, TERMINAL_TRIES - min(start.values(), default=TERMINAL_TRIES))
 
 
 def seed_for(episode: int, line: Line, attempt: int) -> int:
@@ -389,14 +396,15 @@ def main(book_id: str, number: int, redo: list[int] | None = None, clarity: bool
                 wav.replace(wav.with_suffix(".prev.wav"))
     todo = [line for line in episode.lines if not records.get(line.index, {}).get("passed")]
     start = {line.index: records.get(line.index, {}).get("tries", 0) for line in todo}
-    for attempt in range(TRIES):
+    rounds = rounds_for(start)
+    for attempt in range(rounds):
         for line in todo:
             have = records.get(line.index)
             if attempt == 0 and have and "passed" not in have and (out_dir / f"l{line.index:02d}.wav").exists():
                 have["rel_path"] = episode_home.relative(book, out_dir / f"l{line.index:02d}.wav")
                 continue  # rendered but never listened to: reuse the file
             records[line.index] = carried(records.get(line.index, {}), render(     # a redo, a resume: new seeds
-                book, episode, line, out_dir, attempts_from(start[line.index])[attempt], records))
+                book, episode, line, out_dir, attempts_from(start[line.index], rounds)[attempt], records))
             print(f"  said l{line.index:02d} {line.speaker:16} {records[line.index]['seconds']:.2f}s",
                   flush=True)
             episode_home.write_json(sheet, [records[k] for k in sorted(records)])
@@ -408,7 +416,7 @@ def main(book_id: str, number: int, redo: list[int] | None = None, clarity: bool
                 fit = (voice_fit(book, records, line.index, wav),
                        voice_fit(book, records, line.index, wav.with_suffix(".prev.wav")))
                 records[line.index] = keep_best(records[line.index], previous.pop(line.index), wav, fit=fit, clarity=clarity)
-                if line.index in failed and attempt < TRIES - 1:
+                if line.index in failed and attempt < rounds - 1:
                     previous[line.index] = dict(records[line.index])
                     wav.replace(wav.with_suffix(".prev.wav"))
         episode_home.write_json(sheet, [records[k] for k in sorted(records)])
@@ -425,7 +433,7 @@ def main(book_id: str, number: int, redo: list[int] | None = None, clarity: bool
             break
     print(f"{len(records) - len(todo)}/{len(records)} lines said their line -> {sheet}", flush=True)
     if todo:
-        raise SystemExit(f"{len(todo)} line(s) failed the listen gate twice")
+        raise SystemExit(f"{len(todo)} line(s) failed the listen gate {rounds} times")
 
 
 if __name__ == "__main__":

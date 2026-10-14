@@ -1122,3 +1122,7 @@ fixes. Each lesson below cost at least one launch. Tracker rows A38-A74 in
       heads.json, the look table (words, then `looks_table.py --remark`), look.json's drawer tags and the bound row.
       Black and brown are one hair family, so he and clean-shaven Enfield now share (dark, none): `heads.json`
       `apart_from` keeps an owner-ruled pair apart only with its stated reason (age, stature, cut, hat).
+    - **A terminal no run can reach is a park (Jekyll HEL ep01 v2, 2026-10-14).** l15 is heard right and sits at
+      0.42-0.63 against 0.65; the keep_best terminal needs 8 tries, but each run gave a line 2, so every run exited
+      1 and the brain parked the episode twice (v1 needed 13 relaunches). A record run now takes the rounds the
+      least-tried refused line still needs to reach the terminal (`say_lines.rounds_for`).
