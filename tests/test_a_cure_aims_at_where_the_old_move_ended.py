@@ -87,3 +87,17 @@ def test_the_terminal_never_holds_a_panel_g_dead_will_refuse(tmp_path, monkeypat
     assert tl.settle_take(tmp_path, SimpleNamespace(), 10, faults, [9, 10, 11], 2) == "high"
     monkeypatch.setattr(tl, "placed_seconds", lambda home, i: dead_footage.STILL_LIMIT_S)
     assert tl.settle_take(tmp_path, SimpleNamespace(), 10, faults, [9, 10, 11], 2) == "still"
+
+
+def test_a_still_g_dead_would_refuse_is_retired_from_the_cut(tmp_path):
+    """stills.json written before the rule (ep01 v2 T10 6.75 s, T16 3.9 s) must not reach the cut:
+    the cut holds the take instead, and its flag rides on."""
+    import json
+    from studio import take_ladder as tl
+    home = tmp_path / "ep01"
+    room = home / "takes" / "r2v"
+    room.mkdir(parents=True)
+    (room / "stills.json").write_text(json.dumps({"10": {"panel": "p.png", "seconds": 6.75, "decided": 1e10},
+                                                  "12": {"panel": "q.png", "seconds": 2.0, "decided": 1e10}}),
+                                      encoding="utf-8")
+    assert list(tl.live_stills(home)) == [12]
