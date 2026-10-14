@@ -1070,3 +1070,6 @@ fixes. Each lesson below cost at least one launch. Tracker rows A38-A74 in
       The first pan cure wrote "The camera pans across to Mr": `aim_of` cut the at_rest clause on the period
       of "Mr.". The aim now stops at a clause mark or a full stop, never a title's period, and a camera aim
       that is only a title is read again from at_rest.
+      T01 then panned, turned, spoke and pointed its cane -- alive by eye -- and still held 4.1 s by whole-frame
+      flow four rounds running (edge-masked flow read the same): a cel mouth is too small for the mean. On a
+      drawn look a DIALOGUE take that the block-max meter finds alive in every span is not HARD-still.

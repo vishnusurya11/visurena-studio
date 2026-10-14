@@ -612,7 +612,8 @@ def measure(video: Path, record: dict, cells: Path, seconds: float, attempt: int
     # whether what is fixed in the world stayed fixed (take_lock).
     v.gates.append(take_lock.row(take_lock.lock(take_lock.frames(video, seconds)),
                                  (plan_motions(record) or [""])[0]))
-    v.gates.append(stillness_row(video, seconds, record, **({"drawn": True} if drawn_book(book) else {})))
+    drawn = {"drawn": True, "speaking": speaking(record, motion["frozen_spans"])} if drawn_book(book) else {}
+    v.gates.append(stillness_row(video, seconds, record, **drawn))
     v.gates = board_rows(v.gates, record)
     v.score, v.passed = score(v.gates)
     return v
@@ -646,13 +647,20 @@ def drawn_book(book: Path | None) -> bool:
     return bool(book) and book_look.drawn(book)
 
 
-def stillness_row(video: Path, seconds: float, record: dict, drawn: bool = False) -> Gate:
+def speaking(record: dict, frozen_spans) -> bool:
+    """A dialogue take the block-max meter finds alive in every span: its speaker is working."""
+    return record.get("lane") == "dialogue" and not frozen_spans
+
+
+def stillness_row(video: Path, seconds: float, record: dict, drawn: bool = False,
+                  speaking: bool = False) -> Gate:
     """WHOLE-FRAME stillness, HARD (root cause 2026-09-26, D12): the block-max
     rows above called a frame alive on one moving puff, and every ep12 take
     read 0 % frozen while five were 70-100 % static by optical flow.  A shot
     the plan declares `still` is exempt.  `video` is already head-trimmed."""
     from studio import stillness
-    m = stillness.measure(video, seconds, exempt=bool(record.get("still")), **({"drawn": True} if drawn else {}))
+    m = stillness.measure(video, seconds, exempt=bool(record.get("still")),
+                          **({"drawn": True, "speaking": speaking} if drawn else {}))
     return Gate(**stillness.gate_args(m))
 
 

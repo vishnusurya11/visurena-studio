@@ -32,3 +32,21 @@ def test_a_drawn_take_that_holds_is_still():
 
 def test_a_planned_still_stays_exempt():
     assert st.is_still(m(0.92, 4.33), 6.6, exempt=True, drawn=True) is False
+
+
+def test_a_drawn_dialogue_take_that_speaks_is_not_hard_still():
+    """Jekyll ep01 T01 (2026-10-14): Enfield turns, speaks and points his cane over a pan,
+    read by eye as alive, yet whole-frame flow held 4.1 s still four rounds running: on a
+    cel close the working mouth is too small for the mean flow, while the block-max meter
+    saw motion in every span (frozen-share 0 %).  A drawn DIALOGUE take whose block-max
+    meter finds no frozen span is advisory, never HARD; a frozen span keeps it HARD."""
+    assert st.is_still(m(0.82, 4.08), 6.6, drawn=True, speaking=True) is False
+    assert st.is_still(m(0.82, 4.08), 6.6, drawn=True) is True
+    assert st.is_still(m(0.82, 4.08), 6.6, speaking=True) is True        # a house book is unchanged
+
+
+def test_the_take_verdict_names_a_speaking_drawn_take():
+    from studio import take_verdict as tv
+    assert tv.speaking({"lane": "dialogue"}, frozen_spans=[]) is True
+    assert tv.speaking({"lane": "dialogue"}, frozen_spans=[(1.0, 3.0)]) is False
+    assert tv.speaking({"lane": "narration"}, frozen_spans=[]) is False
