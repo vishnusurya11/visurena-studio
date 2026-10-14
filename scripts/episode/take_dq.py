@@ -284,9 +284,19 @@ def tail_mouth(frames: list, landmarker, line_end: float) -> tuple[int, int]:
     return inv.open_run(mouth.smooth(mouth.fill(ap))[cut:], floor)
 
 
+def gait_measure(frames: list, rec: dict, detect) -> dict:
+    """G-GAIT (studio/gait.py): the walker's steps against his ground travel, read
+    only when the plan asks a subject to walk or run (Jekyll HEL ep01 T03)."""
+    from studio import gait
+
+    if not gait.walks(" ; ".join(tv.plan_motions(rec))):
+        return {"gait": None}
+    return {"gait": gait.measure(frames, detect=detect)}
+
+
 def judge_rows(m: dict, rec: dict) -> list:
     """The judged rows, in print order, from the measures dict."""
-    from studio import invented_speech, take_leak, take_lock
+    from studio import gait, invented_speech, take_leak, take_lock
     from studio.measure import cuts, mouth
 
     motions = tv.plan_motions(rec) or [""]
@@ -297,7 +307,8 @@ def judge_rows(m: dict, rec: dict) -> list:
     return [take_lock.pass_through_row(m.get("pass_through"), motions[0]),
             tz.rotation_row(m.get("rotation"), motions[0]), take_leak.row(m.get("leak")), panel,
             cuts.row(m.get("cut_vote")), mouth.row(m.get("lag"))] + \
-        ([invented_speech.tail_row(m.get("tail"))] if rec.get("lane") == "dialogue" else [])
+        ([invented_speech.tail_row(m.get("tail"))] if rec.get("lane") == "dialogue" else []) + \
+        [gait.row(m.get("gait"), " ; ".join(motions))]
 
 
 def extend_verdict(v, m: dict, rec: dict):
@@ -542,7 +553,8 @@ def measure_attempt(video: Path, rec: dict, index: int, cells: Path, work: Path,
     m = (picture_measures(frames, v, rec)
          | staged_measures(video, rec, v, j.get("home", take_dir), seconds, j.get("embed"), j.get("inputs"), source)
          | voice_measure(frames, rec, j.get("landmarker"), voice_of(composite, rec["lane"] == "dialogue"))
-         | tail_measure(video, composite, rec, frames, j.get("landmarker"), (audio or {}).get("heard", "")))
+         | tail_measure(video, composite, rec, frames, j.get("landmarker"), (audio or {}).get("heard", ""))
+         | gait_measure(frames, rec, j.get("person")))
     return extend_verdict(v, m, rec), audio, m
 
 
@@ -577,7 +589,7 @@ def take_sha8(path: Path) -> str:
 
 
 MEASURES = ("scripts/episode/take_dq.py", "studio/take_verdict.py", "studio/take_frame.py",
-            "studio/plate_gate.py", "studio/invented_speech.py")
+            "studio/plate_gate.py", "studio/invented_speech.py", "studio/gait.py")
 """The code a take verdict is measured by: a change here re-measures every take."""
 
 
@@ -618,7 +630,8 @@ def main(book_id: str, number: int, indices: list[int], attempts: bool = False, 
         raise SystemExit(f"episode {number}: no takes to judge under "
                          f"{episode_home.relative(book, take_dir)}")
     embed, inputs = embedder()
-    judges = {"home": home, "embed": embed, "inputs": inputs, "landmarker": landmarker()}
+    from studio import gait
+    judges = {"home": home, "embed": embed, "inputs": inputs, "landmarker": landmarker(), "person": gait.yolo()}
     for index in wanted(records, indices):
         rec = records[index]
         take_cells = cells

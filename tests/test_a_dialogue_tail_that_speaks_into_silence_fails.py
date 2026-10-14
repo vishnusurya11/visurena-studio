@@ -113,7 +113,8 @@ def test_the_take_gate_hears_a_sounding_tail_and_fails_it(tmp_path, monkeypatch)
     got = take_dq.tail_measure(take, guide, rec, [], None, "keep moving moving")["tail"]
     assert got["state"] == "fail" and got["words"] == ["moving"]
     rows = take_dq.judge_rows({"tail": got}, {**rec, "motion": ""})
-    assert [r.name for r in rows][-1] == "tail" and not rows[-1].ok
+    tail = next(r for r in rows if r.name == "tail")      # G-GAIT rides last since 2026-10-14
+    assert [r.name for r in rows][-2:] == ["tail", "gait"] and not tail.ok
 
 
 def test_a_quiet_tail_is_never_sent_to_the_ear(tmp_path, monkeypatch):
