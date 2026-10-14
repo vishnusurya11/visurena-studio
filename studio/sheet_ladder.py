@@ -157,9 +157,9 @@ def redraw(book_dir: Path | str, job: refs_pack.Job, prompt: str, seed: int, run
     """One picture through the pack's manifest values with these words and this seed,
     in the BOOK's look (studio.book_look): a photoreal book's redraw is never house."""
     workflow, values = job.workflow, {**refs_pack.values_for(job), "prompt": refs_pack.styled(prompt), "seed": seed}
-    if book_look.photoreal(book_dir):
+    if book_look.drawer(book_dir):
         workflow, values = book_look.t2i(book_dir, prompt, width=job.width, height=job.height, seed=seed,
-                                         prefix=values["filename_prefix"])
+                                         prefix=values["filename_prefix"], kind=job.kind, entity=entity_of(job))
     out = run(workflow, values)[0]
     target = Path(book_dir) / refs_pack.relpath(job)
     shutil.copyfile(out, target)
@@ -168,7 +168,12 @@ def redraw(book_dir: Path | str, job: refs_pack.Job, prompt: str, seed: int, run
 
 def workflow_of(book_dir: Path | str, job: refs_pack.Job) -> str:
     """The workflow `redraw` runs for this job, as the pack row records it."""
-    return book_look.PHOTOREAL_T2I if book_look.photoreal(book_dir) else job.workflow
+    return book_look.drawer(book_dir) or job.workflow
+
+
+def entity_of(job: refs_pack.Job) -> str:
+    """The key a drawn look files a picture's own tags under: the id for a sheet, else id/view."""
+    return job.entity if job.name == "sheet" else f"{job.entity}/{job.name}"
 
 
 @dataclass

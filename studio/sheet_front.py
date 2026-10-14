@@ -69,6 +69,8 @@ def first_figure_box(a: np.ndarray) -> tuple[int, int] | None:
     """(left, right) columns of the first figure, margin included; None when
     no single figure can be separated."""
     h, w = a.shape[:2]
+    if h > w:
+        return 0, w                     # a portrait sheet is ONE front figure (a drawn look's sheet)
     band = a[int(h * BAND[0]):int(h * BAND[1])].astype(float).mean(axis=2)
     spread = np.convolve(band.std(axis=0), np.ones(SMOOTH) / SMOOTH, mode="same")
     filled = spread > GAP_STD

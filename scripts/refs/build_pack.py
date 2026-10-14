@@ -65,9 +65,10 @@ def all_jobs(book: Path, kinds, only):
 
 def request(book: Path, job) -> tuple[str, dict]:
     """(workflow, values) in the BOOK's look (studio.book_look), never the house's by default."""
+    from studio.sheet_ladder import entity_of
     v = values_for(job)
     return book_look.t2i(book, job.prompt, width=job.width, height=job.height, seed=v["seed"],
-                         prefix=v["filename_prefix"])
+                         prefix=v["filename_prefix"], kind=job.kind, entity=entity_of(job))
 
 
 def draw(book: Path, job) -> Path:

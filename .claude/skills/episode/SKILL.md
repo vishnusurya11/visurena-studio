@@ -333,7 +333,15 @@ per refs.json card (`looks_from_cards`).
 **Every refs picture is drawn in the BOOK's look** (2026-10-12): `library/<book>/refs/look.json`
 declares it once by the owner's ruling (`studio/book_look.py`); the base sheet, a fresh look,
 a place master and the title plates read it. A photoreal book draws on Krea2 turbo with no
-LoRA, led by its declared words; no declaration is the house look. A character with no
+LoRA, led by its declared words; no declaration is the house look. A DRAWN look (2026-10-13,
+anime) files its own drawer under `refs` in look.json -- `workflow`
+(`image_sdxl_t2i_2lora_hires_visurena`), `ckpt`, `loras`, a tag `lead`, a `negative`, `frames`
+per kind (characters / locations) and `entities` (a person's own tags and negative, keyed by id;
+a place's by `<location>/<view>`): a person's base sheet is ONE front figure at 832x1216 (NoobAI
+turnarounds came back as 8 copies), drawn from his tags, else from the look table's words with the
+sheet form cut; `sheet_front` takes a portrait sheet whole; a place is 1216x832 with no plan LOOK
+sentence. A drawn look with no `refs` keeps the house drawer. Tags, not prose, for NoobAI: "side-whiskers"
+drew cat whiskers, `mutton chops` did not. A character with no
 `design.sheet_prompt` gets its base sheet from the look table (`build_pack.table_job`). A
 dossier sentence dated to a chapter ("By chapter 6, ... balder") is a state, never the base
 head (`head_author.dated`). Describe a place by its LAYOUT, never its absences: "no window"

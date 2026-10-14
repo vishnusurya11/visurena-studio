@@ -15,6 +15,7 @@ no declaration (or a malformed one) keeps the house look, as before.
 from __future__ import annotations
 
 import json
+import re
 from pathlib import Path
 
 FILE = "refs/look.json"
@@ -126,8 +127,69 @@ def aspect_for(width: int, height: int) -> str:
     return min(ASPECTS, key=lambda name: abs(ASPECTS[name] - ratio))
 
 
-def t2i(book, prompt: str, *, width: int, height: int, seed: int, prefix: str) -> tuple[str, dict]:
-    """(workflow, inject values) for one text-to-image refs picture in the book's look."""
+def refs_recipe(book) -> dict:
+    """A drawn look's own refs drawer (refs/look.json `refs`: workflow, ckpt, loras, lead,
+    negative, frames, entities); {} for photoreal, the house, or a drawn look that files none.
+    The Jekyll anime chain test (2026-10-13): without it a drawn look fell through to the house."""
+    said = declared(book).get("refs")
+    return said if drawn(book) and isinstance(said, dict) and said.get("workflow") else {}
+
+
+def drawer(book) -> str:
+    """The workflow a book's own refs drawer runs; '' for the house."""
+    if recipe := refs_recipe(book):
+        return str(recipe["workflow"])
+    return PHOTOREAL_T2I if photoreal(book) else ""
+
+
+SDXL = {"characters": (832, 1216), "landscape": (1216, 832), "portrait": (832, 1216), "square": (1024, 1024)}
+"""An SDXL base's native buckets.  A person is ONE front figure, portrait: NoobAI drew a
+four-pose turnaround as 8 copies (chain test, HEL Hyde)."""
+UNFORMED = re.compile(r"\s*Character reference sheet.*$", re.S | re.I)
+"""The house sheet form ("Character reference sheet ...: front, three-quarter, profile, back")."""
+
+
+def sdxl_size(kind: str, width: int, height: int) -> tuple[int, int]:
+    if kind == "characters":
+        return SDXL["characters"]
+    ratio = width / height
+    return SDXL["landscape" if ratio > 1.15 else "portrait" if ratio < 0.87 else "square"]
+
+
+def joined(*parts: str) -> str:
+    return ", ".join(p.strip().strip(",").strip() for p in parts if p and p.strip().strip(","))
+
+
+def drawn_words(recipe: dict, prompt: str, kind: str, entity: str) -> tuple[str, str]:
+    """(positive, negative): the lead, the entity's own tags (else the words without the
+    sheet form), the kind's framing; the negative, the framing's, the entity's."""
+    frame = (recipe.get("frames") or {}).get(kind) or {}
+    own = (recipe.get("entities") or {}).get(entity) or {} if entity else {}
+    body = own.get("tags") or UNFORMED.sub("", prompt or "")
+    return (joined(recipe.get("lead", ""), body, frame.get("tags", "")),
+            joined(recipe.get("negative", ""), frame.get("negative", ""), own.get("negative", "")))
+
+
+def drawn_t2i(recipe: dict, prompt: str, *, width: int, height: int, seed: int, prefix: str,
+              kind: str = "", entity: str = "") -> tuple[str, dict]:
+    """(workflow, inject values) on the drawn look's own SDXL drawer."""
+    positive, negative = drawn_words(recipe, prompt, kind, entity)
+    w, h = sdxl_size(kind, width, height)
+    values = {"prompt": positive, "negative_prompt": negative, "width": w, "height": h, "seed": seed,
+              "hires_seed": seed, "hires_denoise": float(recipe.get("hires_denoise", 0.55)),
+              "ckpt_name": recipe.get("ckpt", ""), "filename_prefix": prefix}
+    for i, (lora, weight) in enumerate(recipe.get("loras") or [], start=1):
+        values.update({f"lora{i}": lora, f"lora{i}_model": weight, f"lora{i}_clip": weight})
+    return str(recipe["workflow"]), values
+
+
+def t2i(book, prompt: str, *, width: int, height: int, seed: int, prefix: str,
+        kind: str = "", entity: str = "") -> tuple[str, dict]:
+    """(workflow, inject values) for one text-to-image refs picture in the book's look.
+    `kind` and `entity` (a character id, or "<location>/<view>") reach a drawn drawer only."""
+    if recipe := refs_recipe(book):
+        return drawn_t2i(recipe, prompt, width=width, height=height, seed=seed, prefix=prefix,
+                         kind=kind, entity=entity)
     if not photoreal(book):
         from studio import refs_pack
         return refs_pack.T2I, {"prompt": refs_pack.styled(prompt), "seed": seed, "width": width,

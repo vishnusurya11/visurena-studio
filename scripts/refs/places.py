@@ -82,9 +82,11 @@ its style from the place picture -- people pasted onto paintings from ep09 on.""
 
 
 def look_of(book: Path, look: str) -> str:
-    """The plan's look words, unless the book declares photoreal (studio.book_look)."""
+    """The plan's look words, unless the book declares photoreal (studio.book_look) or a
+    drawn look with its own drawer, whose lead carries the look (LOOK's "stylised 3D
+    animated film" would fight an anime drawer)."""
     from studio import book_look
-    return book_look.plan_look(book, look)
+    return "" if book_look.refs_recipe(book) else book_look.plan_look(book, look)
 
 
 def styled(described: str, look: str) -> str:
@@ -272,7 +274,8 @@ def krea(book: Path):
         began = time.time()
         v = values_for(job)
         workflow, values = book_look.t2i(book, prompt, width=1536, height=1024, seed=v["seed"],
-                                         prefix=v["filename_prefix"])
+                                         prefix=v["filename_prefix"], kind="locations",
+                                         entity=f"{target.parent.name}/{target.stem}")
         out = comfy.run(workflow, values)[0]
         target.parent.mkdir(parents=True, exist_ok=True)
         shutil.copyfile(out, target)

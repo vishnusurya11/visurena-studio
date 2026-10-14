@@ -991,3 +991,8 @@ fixes. Each lesson below cost at least one launch. Tracker rows A38-A74 in
       ladder repairs its aim, the prompt strips every distance and never adds a second pace.
     - **A crop of "one figure" can hold two** (Hyde's redraw, 2026-10-13): two poses 20 px apart were
       bridged as a dip inside one figure. A bridged run wider than 0.25 of the sheet splits at its gap.
+    - **A drawn look needs its own refs drawer (Jekyll anime chain, 2026-10-13).** `book_look.t2i` and
+      `sheet_ladder.redraw` knew photoreal and the house, so an `anime_gothic` book drew its sheets in WotW's
+      painted Krea2 look. look.json `refs` now names the SDXL drawer, its tags and negatives; a person is ONE
+      portrait front figure (a NoobAI turnaround drew 8 copies) and `sheet_front` takes a portrait sheet whole.
+      Open: the look EDIT route (Krea2 identity edit) is still photoreal; a drawn book's garment looks need a test.

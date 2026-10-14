@@ -224,7 +224,7 @@ def comfy_draws(book: Path) -> dict:
 
     def fresh(prompt: str, target: Path, seed: int) -> None:
         out = comfy.run(*book_look.t2i(book, prompt, width=1536, height=1024, seed=seed,
-                                       prefix=f"looks/{target.stem}"))[0]
+                                       prefix=f"looks/{target.stem}", kind="characters"))[0]
         shutil.copyfile(out, target)
     return {"edit": edit, "fresh": fresh}
 
