@@ -208,6 +208,11 @@ def remember_best(record: dict, wav: Path, best: dict | None, out_dir: Path) -> 
     return {k: v for k, v in record.items() if k != "best_try"}
 
 
+def carried(old: dict, new: dict) -> dict:
+    """A fresh render's record, still carrying the line's best try (ep01 l15 forgot its 0.63)."""
+    return dict(new, best_try=old["best_try"]) if old.get("best_try") else new
+
+
 def terminal(record: dict, best: dict | None) -> dict | None:
     """keep_best flagged: the best try, once the line has had TERMINAL_TRIES and it sits
     within TERMINAL_MARGIN of its floor; None while it may still be cured or must refuse."""
@@ -390,8 +395,8 @@ def main(book_id: str, number: int, redo: list[int] | None = None, clarity: bool
             if attempt == 0 and have and "passed" not in have and (out_dir / f"l{line.index:02d}.wav").exists():
                 have["rel_path"] = episode_home.relative(book, out_dir / f"l{line.index:02d}.wav")
                 continue  # rendered but never listened to: reuse the file
-            records[line.index] = render(book, episode, line, out_dir,     # a redo, a resume: new seeds
-                                         attempts_from(start[line.index])[attempt], records)
+            records[line.index] = carried(records.get(line.index, {}), render(     # a redo, a resume: new seeds
+                book, episode, line, out_dir, attempts_from(start[line.index])[attempt], records))
             print(f"  said l{line.index:02d} {line.speaker:16} {records[line.index]['seconds']:.2f}s",
                   flush=True)
             episode_home.write_json(sheet, [records[k] for k in sorted(records)])

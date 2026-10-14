@@ -56,3 +56,12 @@ def test_a_redo_between_tries_reads_the_parked_previous_file(tmp_path):
     wav.with_suffix(".prev.wav").write_bytes(b"p")
     best = say.remember_best(rec(0.63, 16), wav, None, tmp_path)
     assert best["similarity"] == 0.63 and (tmp_path / "l15.best.wav").read_bytes() == b"p"
+
+
+def test_a_new_render_keeps_the_lines_best_try():
+    """Every render built a fresh record and dropped `best_try`: ep01 l15 reached 8 tries
+    with its best at the LAST try's 0.56, its 0.63 forgotten."""
+    old = dict(rec(0.56, 6), best_try=rec(0.63, 1))
+    new = rec(0.0, 7)
+    assert say.carried(old, new)["best_try"]["similarity"] == 0.63
+    assert "best_try" not in say.carried({}, new)
