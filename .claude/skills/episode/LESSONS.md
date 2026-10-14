@@ -1067,3 +1067,6 @@ fixes. Each lesson below cost at least one launch. Tracker rows A38-A74 in
       T14 froze again on fresh seeds (92 %/86 % static, held 4.3 s/3.6 s): H3 barely animates a locked cel
       close. The same fault twice is the plan's; the ladder's next dialogue move is `pan_to` the speaker -- it
       turns where it stands, so G-TALK holds (WotW ep01 panned all four spoken shots).
+      The first pan cure wrote "The camera pans across to Mr": `aim_of` cut the at_rest clause on the period
+      of "Mr.". The aim now stops at a clause mark or a full stop, never a title's period, and a camera aim
+      that is only a title is read again from at_rest.

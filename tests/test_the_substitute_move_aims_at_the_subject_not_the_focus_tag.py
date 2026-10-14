@@ -26,3 +26,12 @@ def test_the_substitute_never_carries_the_tag():
     out = tl.substitute("frozen-whole", motion, AT_REST)
     assert "FOCUS" not in out and out.startswith("The camera pushes in toward the curate")
     assert out.endswith("; the curate presses his eye to the slit")
+
+
+def test_a_title_does_not_cut_the_aim():
+    """Jekyll ep01 shot 1 (HEL, 2026-10-14): the pan cure wrote "The camera pans across to Mr"
+    -- the at_rest clause was cut at the period of "Mr." -- and a second cure on that motion
+    aimed at the bare title again."""
+    at_rest = "THE FOCUS OF THE PICTURE IS Mr. Enfield's frank, lively face at the CENTRE"
+    assert tl.aim_of("The camera holds a locked-off frame", at_rest) == "Mr. Enfield's frank"
+    assert tl.aim_of("The camera pans across to Mr; he speaks", at_rest) == "Mr. Enfield's frank"
