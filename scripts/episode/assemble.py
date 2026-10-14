@@ -634,32 +634,62 @@ def still_segment(panel: Path, seconds: float, out: Path, width: int, height: in
 
 
 def segment(index: int, seconds: float, takes: dict, stills: dict, heads: dict, work: Path,
-            guarded: dict, ffmpeg=None) -> Path:
+            guarded: dict, ffmpeg=None, slow: float = 1.0) -> Path:
     """One segment of the cut: the still when the shot is held on its panel,
-    else the take trimmed from its head, guarded against the gutter."""
+    else the take trimmed from its head, guarded against the gutter -- played
+    `slow` times slower when it covers a shot G-DEAD cut (studio/dead_footage)."""
     out = work / f"seg{index:02d}.mp4"
     if index in stills:
         return still_segment(stills[index], seconds, out, W, H, FPS, ffmpeg=ffmpeg)
-    crop = guard(takes[index], seconds, work)
+    crop = guard(takes[index], seconds / slow, work)
     if crop:
         guarded[index] = crop
-    return extract(takes[index], heads.get(index, 0.0), seconds, out, W, H, FPS, pre=crop)
+    pre = ",".join(p for p in (crop, f"setpts={slow}*PTS" if slow > 1.0 else "") if p)
+    return extract(takes[index], heads.get(index, 0.0), seconds, out, W, H, FPS, pre=pre)
+
+
+def dialogue_takes(placed: dict, takes: dict) -> set[int]:
+    """The takes whose run of shots carries a spoken line: never cut, never slowed."""
+    spoken = {line.get("shot") for line in placed.get("lines", []) if line.get("kind") == "dialogue"}
+    return {i for i, _ in segments_of(placed, takes)
+            if spoken & set(getattr(takes[i], "shots", None) or [i])}
+
+
+def dead_plan(placed: dict, takes: dict, stills: dict, take_dir: Path, heads: dict) -> dict:
+    """G-DEAD (studio/dead_footage): the free cut that takes every dead shot it can
+    out of the master; what it cannot cure REFUSES the master -- a retake, never a
+    flagged ship (Jekyll ep01 shipped T04, T06, T15 failed and two 6.4 s stills)."""
+    from studio import dead_footage as dead
+    order = segments_of(placed, takes)
+    records = {i: episode_home.read_json(p) for i, _ in order
+               if (p := Path(take_dir) / f"T{i:02d}.dq.json").exists()}
+    states = {i: dead.state_of(i, stills, records.get(i)) for i, _ in order}
+    room = {i: clip_seconds(takes[i]) - heads.get(i, 0.0) for i, _ in order if i not in stills}
+    plan = dead.cut_plan(order, states, room, dialogue_takes(placed, takes))
+    if left := dead.faults(dead.apply(order, plan), states):
+        raise SystemExit("G-DEAD refuses the master:\n  " + "\n  ".join(left)
+                         + "\nno free cut cures these: retake them (the take ladder's move_type)")
+    return plan | {"room": room}
 
 
 def picture(placed: dict, takes: dict[int, Path], work: Path, heads: dict[int, float] | None = None,
-            stills: dict[int, Path] | None = None, ffmpeg=None) -> Path:
+            stills: dict[int, Path] | None = None, ffmpeg=None, plan: dict | None = None) -> Path:
     """Every take trimmed from its first frame (or its written head) to its
     PLACED seconds, guarded against the storyboard gutter, joined in order;
-    a shot in `stills` is its panel held for the same seconds instead.
+    a shot in `stills` is its panel held for the same seconds instead, and a
+    shot `plan` cut (G-DEAD) is covered by its slowed neighbours.
     `work/gutter.json` says what was cropped where."""
+    from studio import dead_footage as dead
     segments, guarded, heads, stills = [], {}, heads or {}, stills or {}
-    order = segments_of(placed, takes)
+    plan = plan or {"cut": [], "seconds": {}, "room": {}}
+    order = dead.apply(segments_of(placed, takes), plan)
     heads = spoken_heads_dropped(heads, placed)
     refuse_dialogue_heads(heads, placed)
-    refuse_short(short_takes([(i, s) for i, s in order if i not in stills],
+    refuse_short(short_takes([(i, s) for i, s in order if i not in stills and i not in plan["seconds"]],
                              lambda i: clip_seconds(takes[i]) - heads.get(i, 0.0)))
     for index, seconds in order:
-        segments.append(segment(index, seconds, takes, stills, heads, work, guarded, ffmpeg))
+        slow = dead.stretch(seconds, plan["room"].get(index, 0.0)) if index in plan["seconds"] else 1.0
+        segments.append(segment(index, seconds, takes, stills, heads, work, guarded, ffmpeg, slow))
     episode_home.write_json(work / "gutter.json", guarded)
     print(f"gutter guard cropped {len(guarded)} takes: {guarded}", flush=True)
     return concat(segments, work / "picture.mp4")
@@ -890,8 +920,10 @@ def main(book_id: str, number: int, engine: str = "i2v",
     episode_home.make_rooms(book, number)   # free; the bed and the mix in front of it are not
     write_cut_manifest(work, episode_home.read_json(
         episode_home.takes_dir(book, number, engine) / "shots.json"), book)
-    cut = picture(placed, takes, work, heads_of(home),
-                  stills_of(episode_home.takes_dir(book, number, engine), book))
+    stills = stills_of(episode_home.takes_dir(book, number, engine), book)
+    plan = dead_plan(placed, takes, stills, episode_home.takes_dir(book, number, engine), heads_of(home))
+    episode_home.write_json(work / "dead_cuts.json", plan)      # what G-DEAD cut, for qc and the audit
+    cut = picture(placed, takes, work, heads_of(home), stills, plan=plan)
     music = quiet_bed(toned_bed(home, number, episode.beds, placed, bed_engine),
                       placed["duration_s"], work / "bed_quiet.wav", normalise=False)
     # audio reviewer, iteration 3: 10 dB in 20 ms on every line pumped; the bed now sits lower

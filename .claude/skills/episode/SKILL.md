@@ -311,6 +311,8 @@ words/s -- never 3.0.
 
 ## Pictures
 
+**The book's look and atmosphere (2026-10-13).** `refs/look.json` declares the look (`photoreal`, or a drawn look such as `anime_gothic` with its own `lead` and optional `take` words) and an `atmosphere` ("fog, damp haze"): the grid line, the grid negative, the panel's name in the take prompt and the H3 style line all read it. The house (no look.json) is unchanged byte for byte.
+
 **Sheets and looks.** One sheet per character LOOK on the book's look table,
 `refs/looks.json` (owner 2026-10-10: reverses 09-18 for story-time looks): the
 base sheet, and every later look ONE hop from it -- an identity edit for
@@ -488,6 +490,8 @@ title piece longer than its card, a wrong order or a refused G-BOOKTITLE. Every 
 follows the BOOK's look (photoreal = Krea2, no LoRA, its own refs words).
 
 ## Cut and QC
+
+**G-DEAD (2026-10-13).** Step 10 never builds a master with a still held past 2.5 s, a take that failed the take gate, or two such shots in a row. It first cuts what it can for free (the dead shot out, live non-dialogue neighbours slowed <= 1.5x to cover it; `work_r2v/dead_cuts.json`); what is left refuses the master and the answer is a retake round (move_type), never a flagged ship. A dialogue take is never cut or slowed.
 
 **Audio first, always.** The picture is cut to the measured voice. Every line
 sits at its shot's start plus the handle, and `episode_timeline.misaligned()`

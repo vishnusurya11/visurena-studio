@@ -968,3 +968,26 @@ fixes. Each lesson below cost at least one launch. Tracker rows A38-A74 in
       `book_look.grid_style` / `grids.negative_for` now give a photoreal book a film-still line in its own lead words
       (a book's extra negative words go in look.json `negative`); the refs sheet redraw and the plan `look` read by
       takes, places and title plates obey the declaration too. A book with no declaration keeps every string byte for byte.
+    - **A book's atmosphere is a constant, not a hope (Jekyll ep01, 2026-10-13).** Style A is fog and
+      0 of 27 shots had any: the H3 style line's 16-word wall cut it ("The Sunday walks of London, 1886,
+      gas") and the photoreal negative banned "blurry". `refs/look.json` `atmosphere` now reaches the
+      grid line and reserves its words in the take line before the place and the light; a fog book bans
+      "out of focus subject, motion smear" instead. Any declared look (photoreal or drawn, e.g. anime
+      gothic) gets its own grid line, medium and panel words; WotW's prompts are byte-identical.
+    - **The take was told its photoreal panel was "the house art style"** (take_refs). The panel is now
+      named in the book's look -- and never with the word "still": L2 STILLNESS refuses it.
+    - **A gate that reads "no cell" on a take that staged its panel is blind, not clean.** All 27 Jekyll
+      takes skipped five rows. The panel is the cell now; on WotW ep19's shipped takes the opening and
+      off-board rows would have failed 8 and 11 of 20, so they score but never fail on a panel board.
+    - **A stillness meter is not a camera verdict.** `camera_ok` was False on 23 of 27 takes and passed
+      all of them; its curve was clamped at 1.25x so 2.5x and 4.75x read the same. The binding row is
+      `camera-move`, walled on the owner-liked WotW ep01-03 (0 of 69 fire), and it catches T14's tilt.
+    - **A terminal still and a failed take do not ship (G-DEAD).** Jekyll ep01 held two 6.4 s panels and
+      shipped T04, T06, T15 failed. Assemble cuts what live neighbours can cover (<= 1.5x slower) and
+      refuses the rest. Static share is NOT a dead-shot test: WotW ep01 opens on two 1.00-static shots.
+    - **An automatic camera rewrite is linted (studio/camera_lint).** "the man about" (a name cut at six
+      words), "from the third" (a layout word as aim), "across the whole" (the old head's tail), a pace
+      said twice, "a few yards" / "for twenty feet": the rebalance cure refuses a garbled candidate, the
+      ladder repairs its aim, the prompt strips every distance and never adds a second pace.
+    - **A crop of "one figure" can hold two** (Hyde's redraw, 2026-10-13): two poses 20 px apart were
+      bridged as a dip inside one figure. A bridged run wider than 0.25 of the sheet splits at its gap.
