@@ -16,6 +16,11 @@ Binding diagnosis: `docs/audit/2026-10-13_jekyll_ep01_review/` (DIAGNOSIS.md, LO
   alone) drives the grid line, its negative, the panel's name and the H3 style line.
 
 ## Held (coordinator, 2026-10-13: the owner may switch Jekyll to anime gothic)
+
+RULED 2026-10-13 (owner): style 2, Hellsing Ultimate gothic anime. Item 6 (the photoreal finish)
+lapses; item 7 is done in the new look -- every base sheet redrawn on the drawn refs drawer
+(`book_look.refs_recipe`), see docs/audit/2026-10-13_jekyll_hellsing_cast/.
+
 - Item 6, the photoreal finish in assemble (grain, sharpen, episode grade): not built.
 - Item 7, Hyde's base sheet: a redraw was drawn through `sheet_ladder` (seed 6603: young, pale,
   black mutton-chops, low soft wideawake; LOOK-STATE pass; G-LINEAGE 0.59 < 0.60, the intended

@@ -999,3 +999,9 @@ fixes. Each lesson below cost at least one launch. Tracker rows A38-A74 in
     - **"In every frame" fogs the fireside (chain test, 2026-10-13).** The grid's atmosphere sentence and the
       H3 line's reserved fog now reach a setup under the sky only (`book_look.under_sky`: `outdoors`, or no room
       word in `described`); an interior is drawn and rendered clear.
+    - **NoobAI draws tags, not prose (Jekyll Hellsing cast, 2026-10-13).** The 12 cast members drawn from the
+      look table's prose came back as women, a horned red demon, a walrus and four copies of Utterson; every one
+      needed its own `entities` tags in look.json (1boy/1girl, age, hair, hat, coat), and the places too (a "blank
+      plaster wall" in prose drew an archway). "walrus moustache" drew a walrus; "(clean-shaven:1.5)" + a weighted
+      beard negative still bearded Jekyll on the pack seed, seed 11 held. A plan whose view names a place STATE
+      makes `places.py --draw` draw that state fresh: re-derive it as one edit of its new master.
