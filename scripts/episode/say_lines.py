@@ -203,7 +203,8 @@ def remember_best(record: dict, wav: Path, best: dict | None, out_dir: Path) -> 
     import shutil
     if not record.get("words_ok") or (best is not None and best.get("similarity", 0.0) >= record.get("similarity", 0.0)):
         return best
-    shutil.copyfile(wav, Path(out_dir) / f"{Path(wav).stem}.best.wav")
+    source = Path(wav) if Path(wav).exists() else Path(wav).with_suffix(".prev.wav")   # a redo parks the kept try
+    shutil.copyfile(source, Path(out_dir) / f"{Path(wav).stem}.best.wav")
     return {k: v for k, v in record.items() if k != "best_try"}
 
 

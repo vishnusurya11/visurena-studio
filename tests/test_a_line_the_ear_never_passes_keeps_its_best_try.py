@@ -47,3 +47,12 @@ def test_no_terminal_before_the_cap_or_far_under_the_floor():
     assert say.terminal(rec(0.50, say.TERMINAL_TRIES - 1), rec(0.61, 4)) is None
     assert say.terminal(rec(0.50, say.TERMINAL_TRIES), rec(0.65 - say.TERMINAL_MARGIN - 0.01, 4)) is None
     assert say.terminal(rec(0.50, say.TERMINAL_TRIES), None) is None
+
+
+def test_a_redo_between_tries_reads_the_parked_previous_file(tmp_path):
+    """A --redo round moves the kept try to l{NN}.prev.wav before its next attempt
+    (ep01 l15's revoice round crashed on the missing l15.wav)."""
+    wav = tmp_path / "l15.wav"
+    wav.with_suffix(".prev.wav").write_bytes(b"p")
+    best = say.remember_best(rec(0.63, 16), wav, None, tmp_path)
+    assert best["similarity"] == 0.63 and (tmp_path / "l15.best.wav").read_bytes() == b"p"
