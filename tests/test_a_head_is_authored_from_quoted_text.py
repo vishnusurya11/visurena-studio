@@ -37,7 +37,7 @@ def test_words_must_name_hair_face_and_hat():
 def test_two_characters_with_one_face_clash():
     faces = {"jekyll": head_author.face_of(JEKYLL["words"]), "hyde": head_author.face_of(HYDE["words"]),
              "enfield": head_author.face_of("receding grey hair, clean-shaven")}
-    assert faces["jekyll"] == ("grey", "none") and faces["hyde"] == ("dark", "moustache")
+    assert faces["jekyll"] == ("grey", "none") and faces["hyde"] == ("dark", "sideburns")   # side-whiskers, never a moustache (2026-10-14)
     assert head_author.clashes(faces, authored={"jekyll", "hyde"}) == ["jekyll and enfield share grey hair, none"]
 
 

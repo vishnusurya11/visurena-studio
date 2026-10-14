@@ -93,6 +93,14 @@ def markers_from(layers: Layers, physical: str, fallback: str = "") -> Markers:
                    top=lt.first_of(lt.TOP, layers.top), dirt=lt.first_of(lt.DIRT, layers.dirt))
 
 
+def remarked(looks: CharacterLooks) -> CharacterLooks:
+    """Every look's markers re-derived from its own layers with today's closed tables;
+    words, pictures, seeds and spans untouched (Hyde's side-whiskers read as a
+    moustache, 2026-10-14)."""
+    fix = lambda look: look.model_copy(update={"markers": markers_from(look.layers, looks.body)})  # noqa: E731
+    return looks.model_copy(update={"looks": {k: fix(v) for k, v in looks.looks.items()}})
+
+
 def face_changed(markers: Markers, base: Markers) -> bool:
     return (markers.hair_colour, markers.facial_hair) != (base.hair_colour, base.facial_hair)
 

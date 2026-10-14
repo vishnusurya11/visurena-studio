@@ -1022,3 +1022,16 @@ fixes. Each lesson below cost at least one launch. Tracker rows A38-A74 in
       `book_look.t2i` into an audit folder; commit the pick with `sheet_ladder.redraw` on the same seed (it
       reproduces the candidate bit for bit). `looks_table.py <book>` alone writes only refs.json's bound rows;
       name the rest.
+    - **Side-whiskers are not a moustache (Jekyll HEL remake, 2026-10-14).** The closed FACIAL table read
+      `whisker` as `moustache`, so looks.json stamped Hyde's "mutton-chop side-whiskers" (and Lanyon's white
+      side-whiskers) a moustache and LOOK-STATE would have refused every Hyde drawn as the book says. The vocabulary
+      gains `sideburns` (side-whiskers, mutton chops, sideburns; an explicit moustache or beard still wins, a bare
+      "whiskers" stays a moustache) and one cheek family with `beard` (a reader calls mutton chops a beard).
+      A table built before a vocabulary change is re-marked from its own words, never re-drafted:
+      `looks_table.py <book> --remark` (0 writer calls, pictures and spans untouched; Hyde x2, Lanyon x1 moved).
+    - **A drawn book's title card is drawn on its drawer (Jekyll HEL remake, 2026-10-14).** `series_title.base_art`
+      knew Krea2 photoreal and the house Krea2 + LoRA, and read the look from ep01's plan: ep01's card stayed
+      photoreal under a Hellsing cast, and with ep01 set aside it would have re-baked photoreal. A book with a
+      `refs` drawer now draws the card art there (`kind: title`, no place framing so the lone figure is not
+      banned; the `title` entity's tags, else motif.txt). The card's motion line stopped quoting WotW (heath,
+      metallic hoot, red light).

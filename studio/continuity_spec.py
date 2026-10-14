@@ -22,7 +22,7 @@ from pydantic import BaseModel, Field, field_validator, model_validator
 HEADWEAR = Literal["", "none", "boater", "felt_hat", "bowler", "top_hat", "cap", "bonnet",
                    "helmet", "hood", "bandage", "other_hat"]
 HAIR_COLOUR = Literal["", "dark", "brown", "fair", "red", "grey", "white", "bald"]
-FACIAL_HAIR = Literal["", "none", "moustache", "beard", "stubble"]
+FACIAL_HAIR = Literal["", "none", "moustache", "beard", "stubble", "sideburns"]
 TOP = Literal["", "suit_jacket", "shirt", "shirtless", "coat", "dress", "uniform",
               "nightshirt", "waistcoat", "other"]
 DIRT = Literal["", "clean", "dusty", "sooted", "muddy", "bloodied", "wet"]

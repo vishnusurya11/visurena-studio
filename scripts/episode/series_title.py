@@ -3,7 +3,7 @@
 
     uv run python scripts/episode/series_title.py <codex_id> <episode>
 
-1. title/series_base.png -- the art, ONCE per book, no text (Krea2 house style),
+1. title/series_base.png -- the art, ONCE per book, no text, in the book's look,
    from the words in title/motif.txt.
 2. title/epNN.png -- Ideogram 4 letters the series, "EPISODE N" and the
    chapter's own name on black, screened over that same picture; Qwen3-VL reads
@@ -44,16 +44,27 @@ def base_art(folder: Path) -> Path:
     if out.exists():
         return out
     book, motif = folder.parent, (folder / "motif.txt").read_text(encoding="utf-8").strip()
-    look = bt.look_of(book)
-    ask = bt.plate_request(look, shape="square")
     for k in range(TRIES):
-        made = run(ask["workflow"], {"prompt": bt.lead_for(book, look) + motif, **ask["values"],
-                   "seed": 7100 + k, "filename_prefix": "series_title/base"})[0]
+        made = run(*base_request(book, motif, 7100 + k))[0]
         said = run_text("image_qwen3vl_caption", {"prompt": bt.PEOPLE_ASK, "image_1": stage_image(made)})
         if not bt.doubled(said):
             break
     shutil.copyfile(made, out)
     return out
+
+
+def base_request(book: Path, motif: str, seed: int) -> tuple[str, dict]:
+    """(workflow, values) for the card's art: a drawn book on its own drawer (the `title`
+    entity's tags, else the motif; Jekyll's card was photoreal under a Hellsing cast,
+    2026-10-14), else the plate's Krea2 route as before."""
+    from studio import book_look, book_title as bt
+    if book_look.refs_recipe(book):
+        return book_look.t2i(book, motif, width=1024, height=1024, seed=seed,
+                             prefix="series_title/base", kind="title", entity="title")
+    look = bt.look_of(book)
+    ask = bt.plate_request(look, shape="square")
+    return ask["workflow"], {"prompt": bt.lead_for(book, look) + motif, **ask["values"],
+                             "seed": seed, "filename_prefix": "series_title/base"}
 
 
 def letter(base: Path, lines: list[str], seed: int) -> Path | None:
@@ -95,10 +106,10 @@ def motion_prompt(lines: list[str]) -> str:
     return ("For the target video, at 0.00 seconds into the target video, <Picture 1> (from "
             "[Shot 1]) is fully referenced.\n\n"
             "integrated_multimodal_description: [Shot 1] Cinematic title card. Begin exactly from "
-            "<Picture 1>. The camera pushes in slowly and steadily for the whole shot. Thin smoke "
-            "drifts across the sky from left to right and the red light pulses once. The lettering "
+            "<Picture 1>. The camera pushes in slowly and steadily for the whole shot. A thin haze "
+            "drifts across the sky from left to right and the lights flicker once. The lettering "
             f"{quoted} stays exactly as drawn, sharp and legible, for every frame.\n\n"
-            "overall_soundscape: A low wind over open heath, one distant deep metallic hoot.\n\n"
+            "overall_soundscape: A low wind, one distant deep bell.\n\n"
             "non_diegetic_music: N/A")
 
 

@@ -159,8 +159,11 @@ HAIR_NOUN = re.compile(r"\b((?:[a-z]+[- ])?[a-z]+)[- ]haired\b|\b((?:[a-z]+[- ])
                        r"|\bhair\s+(?:(?:turned|gone|grown|going|is|was|now)\s+)?((?:[a-z]+-)?[a-z]+)", re.I)
 """The words next to the noun: before it ('sandy hair', 'red-haired') or right
 after it ('hair turned ash-grey'); a comma ends the after-side."""
-FACIAL = (("beard", r"beard"), ("moustache", r"m(?:ou|u)stach|whisker"), ("stubble", r"stubble"),
-          ("none", r"shaven|beardless|smooth-cheeked"))
+FACIAL = (("beard", r"beard"), ("moustache", r"m(?:ou|u)stach"),
+          ("sideburns", r"side-?whisker|mutton[- ]?chop|sideburn"), ("moustache", r"whisker"),
+          ("stubble", r"stubble"), ("none", r"shaven|beardless|smooth-cheeked"))
+"""Side-whiskers and mutton chops are `sideburns`, never a moustache (Hyde, 2026-10-14):
+an explicit moustache or beard wins; a bare "whiskers" stays a moustache."""
 TOP = (("shirtless", r"shirtless|bare to the waist|naked"), ("dress", r"\bdress\b|gown|frock"),
        ("uniform", r"uniform|tunic"), ("nightshirt", r"nightshirt|nightgown"),
        ("suit_jacket", r"\bsuit\b|jacket"), ("coat", r"\bcoat\b|overcoat|greatcoat|cape|cloak"),
@@ -222,8 +225,13 @@ HEADWEAR_FAMILY = {"felt_hat": "brimmed", "other_hat": "brimmed"}
 is its own family until real bowler looks have been read (H7)."""
 
 
+FACIAL_FAMILY = {"sideburns": "beard", "beard": "beard"}
+"""A reader names mutton chops down to the jaw a beard: one family on the cheeks;
+a bare chin on a sideburns look (`none`) still refuses."""
+
+
 def family(key: str, marker: str) -> str:
     """The family LOOK-STATE and G-LOOK-PANEL compare: hair colour and headwear
     by family, every other marker as itself."""
-    table = {"hair_colour": HAIR_FAMILY, "headwear": HEADWEAR_FAMILY}.get(key, {})
+    table = {"hair_colour": HAIR_FAMILY, "headwear": HEADWEAR_FAMILY, "facial_hair": FACIAL_FAMILY}.get(key, {})
     return table.get(marker, marker)

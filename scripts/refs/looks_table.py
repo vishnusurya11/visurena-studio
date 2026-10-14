@@ -2,6 +2,7 @@
 """refs 01_03 -- the book's look table, refs/looks.json, for its bound characters.
 
     uv run python scripts/refs/looks_table.py <book_id> [<who> ...]
+    uv run python scripts/refs/looks_table.py <book_id> --remark   # markers from the table's own words
 
 Each character's looks come from its dossier's own costume plot when it has one
 (`wardrobe_by_chapter`, WotW's format), else from the look-timeline writer over
@@ -80,8 +81,22 @@ def bound(book: Path) -> list[str]:
     return [r["entity_id"] for r in rows(book)]
 
 
+def remark(book: Path) -> list[str]:
+    """Every character's markers re-derived from the table's own words; the ids changed."""
+    table, changed = look_timeline.load(book), []
+    for who, looks in (table.characters.items() if table else []):
+        if (new := look_timeline.remarked(looks)) != looks:
+            look_timeline.write_looks(book, who, new)
+            changed.append(who)
+    return changed
+
+
 def main(book_id: str, who: list[str]) -> int:
     book = episode_home.book_dir(book_id)
+    if "--remark" in who:
+        for name in remark(book):
+            print(f"  remarked: {name}")
+        return 0
     for name in build(book, who or bound(book)):
         print(f"  looks: {name}")
     print(f"  table: {episode_home.relative(book, look_timeline.path_of(book))}")
