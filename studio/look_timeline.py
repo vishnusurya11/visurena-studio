@@ -102,6 +102,18 @@ def span_of(row) -> Span:
     return Span(look=row.look_id, start=StoryTime(chapter=row.start_chapter, scene=row.start_scene), until=until)
 
 
+def unrun(spans: list[Span]) -> list[Span]:
+    """The spans in story order, a closed span that runs into its successor opened (an
+    open span runs until the next starts).  Jekyll's rebuild, 2026-10-13: the writer
+    closed Lanyon's base at ch 6 over his ch 6 sc 3 look and the table refused."""
+    ordered = sorted(spans, key=lambda s: s.start.opens())
+    out = []
+    for a, b in zip(ordered, ordered[1:] + [None]):
+        runs_in = b is not None and a.until is not None and a.until.closes() >= b.start.opens()
+        out.append(a.model_copy(update={"until": None}) if runs_in else a)
+    return out
+
+
 def kept_rows(draft, chapter_text) -> list:
     """The base (earliest) row, then every later row whose quote is found; a
     second row starting at the same story time is dropped."""
@@ -132,7 +144,7 @@ def looks_from_draft(draft, card: dict, chapter_text, fallback: str = "") -> Cha
             source=[Source(chapter=row.quote_chapter or row.start_chapter, quote=row.quote)] if row.quote else [],
             face_change=row is not base_row and face_changed(markers, base_markers)))
     return CharacterLooks(base=base_row.look_id, body=lt.body_of(physical), looks=looks,
-                          timeline=[span_of(r) for r in rows])
+                          timeline=unrun([span_of(r) for r in rows]))
 
 
 def plot_spans(plot: dict) -> list[tuple[str, int]]:
