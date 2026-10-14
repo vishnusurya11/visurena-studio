@@ -1013,3 +1013,12 @@ fixes. Each lesson below cost at least one launch. Tracker rows A38-A74 in
       `(green theme:1.3)` bans ahead of the entity's burn NoobAI. `drawn_words` now joins base, entity, framing
       (the chain's order); keep colour bans in the framing negative, last. Prove a look change against the
       target pictures side by side (`style_match.jpg`) before any batch redraw.
+    - **The red-and-black palette repaints the cast (Jekyll HEL cast v2, 2026-10-14).** Under the HEL lead every
+      brown or dark coat came back red (Enfield, Newcomen, Guest, the cab driver); an entity negative
+      `(red coat:1.4), red clothes ...` plus the colour named in the tags held them. NoobAI drew "custodian
+      helmet" as a knight's helm and a yellow hard hat; describe the shape and ban `visor, knight, closed helmet`.
+      More weights on Hyde's face (`lit face`, `human face`) made him darker; his chain-target words verbatim plus
+      one owner fix and a seed sweep gave the human grin. Pick from 3+ candidates per person, drawn through
+      `book_look.t2i` into an audit folder; commit the pick with `sheet_ladder.redraw` on the same seed (it
+      reproduces the candidate bit for bit). `looks_table.py <book>` alone writes only refs.json's bound rows;
+      name the rest.
