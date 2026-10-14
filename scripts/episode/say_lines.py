@@ -190,6 +190,12 @@ def line_reference(book: Path, records: dict, line: Line, attempt: int) -> Path:
     return best if best is not None else reference_for(book, line.speaker)
 
 
+def attempts_from(tries: int) -> list[int]:
+    """This run's attempt numbers for a line already tried `tries` times: every one new.
+    A resume zeroed the prior after the first pass and re-said a refused seed (l15, 2026-10-14)."""
+    return [tries + a for a in range(TRIES)]
+
+
 def seed_for(episode: int, line: Line, attempt: int) -> int:
     return SEED_BASE + episode * 1000 + line.index * 10 + attempt
 
@@ -335,14 +341,15 @@ def main(book_id: str, number: int, redo: list[int] | None = None, clarity: bool
             if wav.exists():
                 wav.replace(wav.with_suffix(".prev.wav"))
     todo = [line for line in episode.lines if not records.get(line.index, {}).get("passed")]
+    start = {line.index: records.get(line.index, {}).get("tries", 0) for line in todo}
     for attempt in range(TRIES):
         for line in todo:
             have = records.get(line.index)
             if attempt == 0 and have and "passed" not in have and (out_dir / f"l{line.index:02d}.wav").exists():
                 have["rel_path"] = episode_home.relative(book, out_dir / f"l{line.index:02d}.wav")
                 continue  # rendered but never listened to: reuse the file
-            prior = records.get(line.index, {}).get("tries", 0) if attempt == 0 else 0
-            records[line.index] = render(book, episode, line, out_dir, attempt + prior, records)  # a redo gets a new seed
+            records[line.index] = render(book, episode, line, out_dir,     # a redo, a resume: new seeds
+                                         attempts_from(start[line.index])[attempt], records)
             print(f"  said l{line.index:02d} {line.speaker:16} {records[line.index]['seconds']:.2f}s",
                   flush=True)
             episode_home.write_json(sheet, [records[k] for k in sorted(records)])

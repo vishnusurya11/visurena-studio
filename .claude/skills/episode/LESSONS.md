@@ -1035,3 +1035,8 @@ fixes. Each lesson below cost at least one launch. Tracker rows A38-A74 in
       `refs` drawer now draws the card art there (`kind: title`, no place framing so the lone figure is not
       banned; the `title` entity's tags, else motif.txt). The card's motion line stopped quoting WotW (heath,
       metallic hoot, red light).
+    - **A resume must never re-say a refused seed (Jekyll HEL ep01, 2026-10-14).** The narrator's 3.0 s
+      l15 failed the ear (sim 0.59-0.63 against 0.65); every relaunch rendered attempt `tries` and then attempt
+      `1` -- say_lines zeroed the prior after the first pass -- so the second try repeated a refused seed and
+      `tries` never moved past 2: three brain rounds on a loop that could not change its input.
+      `say_lines.attempts_from(tries)` gives every pass of a run new attempt numbers.
