@@ -76,12 +76,29 @@ def drawn(book) -> bool:
     return bool(look_name(book)) and not photoreal(book)
 
 
-def grid_style(book) -> str:
-    """The grid's style template in the book's look; '' keeps the house line."""
+def under_sky(setup) -> bool:
+    """A setup the atmosphere may fill: under the sky (`outdoors`), or described with no
+    room word; no setup is unknown and keeps it.  The chain test's fireside study would
+    have been drawn in fog "in every frame" (2026-10-13)."""
+    if setup is None or getattr(setup, "outdoors", False):
+        return True
+    return not INTERIOR.search(getattr(setup, "described", "") or "")
+
+
+INTERIOR = re.compile(r"\b(?:room|rooms|bar|laboratory|corridor|chamber|cab|interior|hall|ward|study|parlou?r|"
+                      r"cabinet|fireplace|fireside|hearth|office|library|kitchen|cellar|attic|staircase|"
+                      r"inside|indoors)\b", re.I)
+"""A room word: episode_ref_official.INDOORS plus the Victorian rooms it lacks (a study
+by the fire read as a place).  Its own list, so the take prompt's place word is untouched."""
+
+
+def grid_style(book, setup=None) -> str:
+    """The grid's style template in the book's look; '' keeps the house line.  The
+    atmosphere sentence is said only for a setup under the sky (`under_sky`)."""
     if not look_name(book):
         return ""
     lead = declared(book).get("lead", "").strip().replace("{", "{{").replace("}", "}}")
-    air = atmosphere(book).replace("{", "{{").replace("}", "}}")
+    air = atmosphere(book).replace("{", "{{").replace("}", "}}") if under_sky(setup) else ""
     line = (PHOTO_GRID if photoreal(book) else DRAWN_GRID).format(lead=lead)
     return line + (ATMOSPHERE_GRID.format(atmosphere=air) if air else "")
 

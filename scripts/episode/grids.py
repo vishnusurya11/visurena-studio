@@ -69,9 +69,10 @@ PHOTO_NEGATIVE = ("text, caption, subtitles, watermark, signature, blurry, moder
 "beard on the narrator").  A book files its own words as `negative` in refs/look.json."""
 
 
-def look_for(book: Path) -> dict:
-    """The grid prompt's look kwargs: {} keeps the house style (book_look.grid_style)."""
-    style = book_look.grid_style(book)
+def look_for(book: Path, setup=None) -> dict:
+    """The grid prompt's look kwargs: {} keeps the house style (book_look.grid_style);
+    the book's atmosphere only for a setup under the sky."""
+    style = book_look.grid_style(book, setup)
     return {"style": style, "medium": book_look.grid_medium(book)} if style else {}
 
 
@@ -344,7 +345,7 @@ def prompt_for(book: Path, ep, setup: str, shots: list, cols: int, rows: int,
     place = (plate_slots, here.described)
     return compose(version, blocks, cols, rows, place, cast, style_slot, props, room=room_slot,
                    geometry=place_words(here), light=getattr(here, "light", "") or "",
-                   **look_for(book)), slots
+                   **look_for(book, here)), slots
 
 
 def graph_for(text: str, slots: dict, cols: int, rows: int, seed: int, name: str,

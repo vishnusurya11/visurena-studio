@@ -996,3 +996,6 @@ fixes. Each lesson below cost at least one launch. Tracker rows A38-A74 in
       painted Krea2 look. look.json `refs` now names the SDXL drawer, its tags and negatives; a person is ONE
       portrait front figure (a NoobAI turnaround drew 8 copies) and `sheet_front` takes a portrait sheet whole.
       Open: the look EDIT route (Krea2 identity edit) is still photoreal; a drawn book's garment looks need a test.
+    - **"In every frame" fogs the fireside (chain test, 2026-10-13).** The grid's atmosphere sentence and the
+      H3 line's reserved fog now reach a setup under the sky only (`book_look.under_sky`: `outdoors`, or no room
+      word in `described`); an interior is drawn and rendered clear.

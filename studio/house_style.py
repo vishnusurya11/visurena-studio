@@ -194,7 +194,8 @@ def panel_look() -> str:
 
 def live(setup=None) -> str:
     """The style line for a RENDERED take; with a setup, under ITS light."""
-    if _atmosphere:
+    from studio.book_look import under_sky        # fog outdoors only (2026-10-13)
+    if _atmosphere and under_sky(setup):
         return _aired(setup)
     line = _live_line(where_for(setup), setup)
     # A place name that pushes the line past its wall gives way to the
