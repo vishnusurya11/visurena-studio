@@ -36,8 +36,25 @@ def stamped(book: Path, number: int) -> bool:
     return cast_refs.chapter_refusal(book, number) is None
 
 
+def looks_current(book: Path, number: int) -> bool:
+    """Every bound character row wears the look the book's table says for this chapter;
+    no table, or a row with no look, has nothing to disagree with.  A table rebuilt after
+    the bind left Enfield 'base' against 'frock_coat_topper' and G-LOOK asked for a rebind
+    the skipped step could not give (Jekyll ep01, 2026-10-14)."""
+    import json
+    from studio import look_timeline
+    table, path = look_timeline.load(book), Path(book) / "refs" / "refs.json"
+    if table is None or not path.exists():
+        return True
+    rows = json.loads(path.read_text(encoding="utf-8")).get("refs") or []
+    return all(r["entity_id"] not in table.characters or not r.get("look")
+               or r["look"] == table.characters[r["entity_id"]].look_id_at(number)
+               for r in rows if r.get("kind", "character") == "character" and r.get("entity_id"))
+
+
 def done(ctx) -> bool:
-    return not cast_of(getattr(ctx, "extra", None) or []) and stamped(ctx.book_dir, ctx.number)
+    return (not cast_of(getattr(ctx, "extra", None) or []) and stamped(ctx.book_dir, ctx.number)
+            and looks_current(ctx.book_dir, ctx.number))
 
 
 def present_in(book: Path, number: int) -> set[str]:

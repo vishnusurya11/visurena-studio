@@ -1046,3 +1046,7 @@ fixes. Each lesson below cost at least one launch. Tracker rows A38-A74 in
       Ten tries of l15 (every word heard) scored 0.42-0.63 and the step REFUSED; the brain found no order
       and the episode parked. The record step now ends like every taste ladder: after `TERMINAL_TRIES` (8)
       the best try heard right and within `TERMINAL_MARGIN` (0.08) of its floor is kept, flagged keep_best.
+    - **A bind is current only to the look table (Jekyll HEL ep01, 2026-10-14).** refs.json was bound for
+      chapter 1 before the table was rebuilt; Enfield's row said `base`, the table `frock_coat_topper`. Step 01
+      skipped on its chapter stamp and step 06's G-LOOK asked for "rebind (step 01)" -- a step that called
+      itself done. `step_01_bind.done` now also needs every bound row's look to be the table's for the chapter.
