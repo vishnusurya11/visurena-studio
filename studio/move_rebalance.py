@@ -101,7 +101,8 @@ him; it is never a thing to aim at (ep19 shots 0, 1: "pushes in toward the eyes"
 
 NOT_AIMS = {"edge", "edges", "corner", "corners", "height", "frame", "foreground", "background",
             "middle", "distance", "centre", "center", "it", "them", "him", "her", "beyond",
-            "above", "below", "far", "near", "lower", "upper"}
+            "above", "below", "far", "near", "lower", "upper",
+            "third", "thirds", "quarter", "half"}
 """Layout positions and pronouns `head_noun` returns from a placement clause: a
 place in the picture, never a thing ("tilts up from the terrace to the edge")."""
 
@@ -185,6 +186,8 @@ def head_faults(shot, head: str, prev_id: str, next_id: str, setup) -> list[str]
         out.append("M2: the head names no camera move")
     if word := episode_spec.slow_word(head):
         out.append(f"NO-SLOW: the head asks for a slow shot ({word!r})")
+    from studio import camera_lint                 # Jekyll ep01: "pans from the third to the coat"
+    out += [f"CAMERA-LINT: {why}" for why in camera_lint.faults(head)]
     return out
 
 

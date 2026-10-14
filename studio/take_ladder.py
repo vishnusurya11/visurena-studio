@@ -273,15 +273,17 @@ def shot_doc(doc: dict, index: int) -> dict:
 def aim_of(motion: str, at_rest: str = "") -> str:
     """What the substitute move points at: the old camera clause's own aim,
     else the first clause of `at_rest`, else the figure."""
+    from studio import camera_lint                 # never cut mid-name (Jekyll ep01 "the man about")
     cam, _ = ro.camera_clause(plan_gates.head_of(motion))
     if found := AIM.search(cam or ""):
-        return " ".join(found.group(1).strip(" ,.").split()[:AIM_WORDS])
+        aim = camera_lint.repair_aim(camera_lint.OLD_TAIL.sub("", found.group(1).strip(" ,.")))
+        return camera_lint.repair_aim(" ".join(aim.split()[:AIM_WORDS])) or "the figure"
     # at_rest clauses are SEMICOLON-separated (ep16: a comma split made the
     # whole paragraph the aim and the motion lint refused the cure, M9); the
     # FOCUS tag and the subject's parenthetical are not the aim (ep19: five
     # shots were sent "pushes in toward THE FOCUS OF THE PICTURE IS")
     first = re.split(r"[;,.(]", FOCUS_TAG.sub("", at_rest or "", count=1))[0].strip(" .")
-    return " ".join(first.split()[:AIM_WORDS]) or "the figure"
+    return camera_lint.repair_aim(" ".join(first.split()[:AIM_WORDS])) or "the figure"
 
 
 FOCUS_TAG = re.compile(r"^\s*THE FOCUS OF THE PICTURE IS\s+", re.I)

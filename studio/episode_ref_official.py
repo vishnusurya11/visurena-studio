@@ -752,7 +752,8 @@ def without_amount(cam: str) -> str:
     """The camera head without its distance. MEASURED: H3 obeys the direction
     and the verb, and 0 of 16 amounts ("a head's height" on seven ep09 closes
     morphed the face instead of travelling less); "with small amplitude" stays."""
-    return " ".join(SAID_AMOUNT.sub("", cam).split()).strip(" ,")
+    from studio import camera_lint                 # every distance too (Jekyll ep01: "a few yards")
+    return camera_lint.strip_amounts(" ".join(SAID_AMOUNT.sub("", cam).split()).strip(" ,"))
 
 
 def camera_verb(head: str) -> str:
@@ -1091,7 +1092,7 @@ def paced(text: str) -> str:
     label stacked on the verb (base-en §4.3).  The clause must be a PERSON's:
     episode 9 wrote "the low sun lifts along the far peaks at a normal walking
     pace", episode 7 the same onto a curtain and a gas flame."""
-    if not (found := gaits(text)) or any(p in text.lower() for p in PACE):
+    if not (found := gaits(text)) or named_pace(text):
         return text
     m = found[0]
     rate = "at a normal trot" if TROT.match(m.group(0)) else "at a normal walking pace"
@@ -1704,7 +1705,14 @@ def l8_pace(text, facts):
     said = [s if isinstance(s, str) else s.get("text", "") for s in (facts.get("lines") or [])]
     return [f"L8 NO PACE [Shot {k}]: a walk, climb or ride with no pace named"
             for k, a, b, body in blocks(text)
-            if gaits(unquoted(body, said)) and not any(p in body.lower() for p in PACE)]
+            if gaits(unquoted(body, said)) and not named_pace(body)]
+
+
+def named_pace(text: str) -> bool:
+    """A pace is named: one of PACE, or any "at a <good|brisk|steady...> walk" -- the
+    plan's own pace (Jekyll ep01 T11 got "at a good walk at a normal walking pace")."""
+    from studio import camera_lint
+    return any(p in text.lower() for p in PACE) or camera_lint.has_pace(text)
 
 
 def l9_limp(text, facts):
