@@ -158,9 +158,9 @@ def qc_report(ctx, extra: list[str]) -> dict:
         # the same bytes AND the same measuring code (ep24 03:45Z: a FAIL by a
         # rule fixed since was reused on an identical recut, forever)
         same_code = report.get("measures_sha8") == qc_measures_sha8()
-        if report.get("sha8") == yp.sha8(master) and report.get("passed") and spent and not same_code:
-            # past the ceiling a PASS on these bytes stands under moved code: a
-            # re-measure is a repeat (2026-10-11); a FAIL is measured again below
+        if report.get("sha8") == yp.sha8(master) and report.get("passed") and checks_cut(ctx) and not same_code:
+            # a PASS on these bytes stands under moved code only when the re-measure
+            # would eat the reserve (owner 2026-10-14); a FAIL is measured again below
             ctx.log(f"qc: {qc.name} passed sha8 {report['sha8']} under older code; it stands (spent clock)")
             return report
         if report.get("sha8") == yp.sha8(master) and same_code:
@@ -189,6 +189,16 @@ def qc_report(ctx, extra: list[str]) -> dict:
 def clock_spent(ctx) -> bool:
     budget = getattr(ctx, "budget", None)
     return bool(budget is not None and budget.ceiling_spent())
+
+
+QC_PASS_SECONDS = 420.0
+"""A full qc.py re-measure, priced (Jekyll HEL ep01: 403 s)."""
+
+
+def checks_cut(ctx) -> bool:
+    """Whether re-measuring the master would eat the downstream reserve (run_budget.checks_cut)."""
+    budget = getattr(ctx, "budget", None)
+    return bool(budget is not None and budget.checks_cut(STEP_ID, QC_PASS_SECONDS))
 
 
 def past_ceiling(ctx, path: Path, report: dict) -> dict:

@@ -196,11 +196,16 @@ def round_zero(room: Path) -> bool:
     return not takes_of(room)
 
 
+DQ_PASS_SECONDS = 550.0
+"""A full take_dq re-measure, priced (Jekyll HEL ep01: 548 s over 23 takes)."""
+
+
 def dq_flags(ctx) -> list[str]:
-    """`--ceiling-spent` past the 5 h ceiling: a take's verdict on the same bytes
-    stands under moved measuring code (a re-judge is a repeat, 2026-10-11)."""
+    """`--ceiling-spent` only when re-measuring would eat the downstream reserve:
+    then a take's verdict on the same bytes stands under moved measuring code.
+    Past the 5 h ceiling with room under 6 h the checks run (owner 2026-10-14)."""
     budget = getattr(ctx, "budget", None)
-    return ["--ceiling-spent"] if budget is not None and budget.ceiling_spent() else []
+    return ["--ceiling-spent"] if budget is not None and budget.checks_cut(STEP_ID, DQ_PASS_SECONDS) else []
 
 
 def run(ctx) -> None:

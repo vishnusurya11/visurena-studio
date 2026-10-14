@@ -54,6 +54,10 @@ ends late (ep21: 20 min into round 0, 6.3 h floor).  The downstream reserve
 measures each rung against this limit less the firsts still owed."""
 
 
+CHEAP_CHECK_SECONDS = 60.0
+"""A check this cheap always runs, whatever the clock: a minute cannot save an episode."""
+
+
 class Budget:
     """Wall-clock shares per step, rolling forward, under one ceiling; with a
     `limit`, a rung must also leave the firsts after its step their shares."""
@@ -86,6 +90,18 @@ class Budget:
         if self.limit is None or seconds <= 0:
             return True
         return (self.clock() - self.t0) + seconds + self.owed_after(step) <= self.limit
+
+    def checks_cut(self, step: str, seconds: float) -> bool:
+        """Whether a CHECK (a measure or a re-measure, never a re-render) of
+        `seconds` must be cut for time.  A check is cut only when running it
+        would eat the reserve the firsts after `step` need under the owner's
+        limit; a cheap one never is.  The 5 h ceiling closes rungs, not checks
+        (owner 2026-10-14, Jekyll HEL ep01).  With no limit, the ceiling rule."""
+        if seconds <= CHEAP_CHECK_SECONDS:
+            return False
+        if self.limit is None:
+            return self.ceiling_spent()
+        return not self.leaves_reserve(step, seconds)
 
     def rungs_closed(self) -> bool:
         """No more rescue rungs this run: the ceiling is spent, or the reserve
