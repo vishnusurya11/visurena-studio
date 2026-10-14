@@ -24,6 +24,19 @@ SAME_FRAME = 4.0
 SEGMENT_MEAN = 1.0
 """CALIBRATION: a segment that IS its take measured 0.16-0.59 mean; one frame off
 lifts the mean to 1.6-9.7."""
+SEGMENT_MEAN_RTX = 2.0
+"""The cap on a master RTX VSR upscaled (owner 2026-10-14).  MEASURED on Jekyll
+ep01, the same cut both ways: Lanczos 2x segments 0.35-0.55, RTX 4x 0.97-1.48
+(per frame at most 1.56; off by one 1.50-5.20, and offset 0 the best shift on all
+23).  The sharpening is the upscale's job, not a wrong frame; the offset, a frame
+of another picture (SAME_FRAME) and a held run still fail as before."""
+
+
+def segment_cap(upscale: str) -> float:
+    """The segment mean cap for the upscale that made the master ('' = unrecorded)."""
+    return SEGMENT_MEAN_RTX if upscale.startswith("rtx") else SEGMENT_MEAN
+
+
 DUP = 0.6
 """CALIBRATION: |f[k+1]-f[k]| below this and the frame is a repeat -- the encoder
 reproduces an identical frame to within 0.59."""
@@ -102,7 +115,8 @@ def held_runs(master_dups: set[int], take_dups: set[int], least: int = HOLD_FRAM
     return [r for r in runs if len(r) >= least]
 
 
-def segment_match(master: np.ndarray, take: np.ndarray, start: int, n: int) -> dict:
+def segment_match(master: np.ndarray, take: np.ndarray, start: int, n: int,
+                  cap: float = SEGMENT_MEAN) -> dict:
     """Is master[start:start+n] take[0:n]?  Offset, mean, the frames that are another
     picture, and the holds the edit added."""
     per = [frame_diff(master[start + i], take[i]) if start + i < len(master) and i < len(take) else 255.0
@@ -112,7 +126,7 @@ def segment_match(master: np.ndarray, take: np.ndarray, start: int, n: int) -> d
            "frames_off": [i for i, d in enumerate(per) if d > SAME_FRAME],
            "held": held_runs(repeats(master[start:start + n + 1]), repeats(take[:n + 1])),
            "flat": level_shift(per)}
-    close = row["mean"] <= SEGMENT_MEAN or row["flat"]
+    close = row["mean"] <= cap or row["flat"]
     row["ok"] = offset == 0 and close and not row["frames_off"] and not row["held"]
     return row
 
@@ -313,8 +327,9 @@ def cut_beside_still(master: "np.ndarray", at: int) -> bool:
 def edit_integrity(master_path: Path, placed: dict, records: list[dict], book: Path,
                    card: Path | None, manifest: dict | None = None,
                    heads: dict[int, float] | None = None,
-                   stills: dict[int, Path] | None = None) -> dict:
-    """The whole gate: every segment, every cut, every timestamp, the tail, provenance."""
+                   stills: dict[int, Path] | None = None, upscale: str = "") -> dict:
+    """The whole gate: every segment, every cut, every timestamp, the tail, provenance.
+    `upscale` is the master's recorded upscale; it sets the segment cap."""
     master = grey_frames(master_path)
     plan = segment_plan(placed, records)
     heads, stills = heads or {}, stills or {}
@@ -322,7 +337,8 @@ def edit_integrity(master_path: Path, placed: dict, records: list[dict], book: P
              for row in plan if row["take"] not in stills}
     segments = [{**row, **(still_match(master, row["start"], row["n"], stills[row["take"]])
                            if row["take"] in stills else
-                           segment_match(master, takes[row["take"]], row["start"], row["n"]))} for row in plan]
+                           segment_match(master, takes[row["take"]], row["start"], row["n"],
+                                         cap=segment_cap(upscale)))} for row in plan]
     cuts = [{"at": nxt["start"],
              "exact": (cut_beside_still(master, nxt["start"])
                        if prev["take"] in stills or nxt["take"] in stills else

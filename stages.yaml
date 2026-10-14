@@ -879,8 +879,9 @@ stages:
           - title/{unit}.mp4
           - episodes/{unit}/cut/master_r2v.mp4
         desc: >-
-          Title card, measured bed, cut, mix. Picture cut to the measured
-          voice. cut/master_iterN.mp4, never overwriting.
+          Title card, measured bed, cut, mix, the master upscaled once by RTX
+          VSR. Picture cut to the measured voice. cut/master_iterN.mp4, never
+          overwriting.
         substeps:
           - id: "10_01"
             name: title
@@ -904,6 +905,15 @@ stages:
               (Setup.ambience), rendered locally by Stable Audio 3 SFX
               (studio/episode_sound.py); lines offset by their delivery. QC
               fails a planned sound the master does not let you hear.
+          - id: "10_05"
+            name: upscale
+            desc: >-
+              The joined 768 cut (picture, card, chip) through NVIDIA RTX Video
+              Super Resolution in process (studio/master_upscale.py, nvidia-vfx
+              0.2): 4x standard ULTRA -> 3072 by default (owner 2026-10-14);
+              VISURENA_MASTER_UPSCALE=rtx2x gives 1536, lanczos is the fallback
+              when the GPU or nvidia-vfx is missing (printed, and named on the
+              clock). Its own `upscale` row on timing.jsonl, within assemble.
 
       - id: "11"
         name: qc

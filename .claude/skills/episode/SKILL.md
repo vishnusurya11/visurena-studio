@@ -182,7 +182,7 @@ The references sheets and voices live in their own department: `uv run python re
 | 07 | board | `uv run python scripts/episode/step_07_board.py <book> <n>` | Storyboard grids on the local image model from the plan's prose, up to three references - cast sheets first, the setup's place last. |
 | 08 | panels | `uv run python scripts/episode/step_08_panels.py <book> <n>` | One panel per shot, two machine gates, then `judge:panel_eye`. |
 | 09 | shoot | `uv run python scripts/episode/step_09_shoot.py <book> <n>` | The slow step. |
-| 10 | edit | `uv run python scripts/episode/step_10_edit.py <book> <n>` | Title card, measured bed, cut, mix. |
+| 10 | edit | `uv run python scripts/episode/step_10_edit.py <book> <n>` | Title card, measured bed, cut, mix, the master upscaled once by RTX VSR. |
 | 11 | qc | `uv run python scripts/episode/step_11_qc.py <book> <n>` | Measure the DELIVERED master, never the intention. |
 | 12 | deliver | `uv run python scripts/episode/step_12_deliver.py <book> <n>` | manifest.json beside the master (every gate verdict, every rung, timing totals), the deliverable's full path printed first, notify() through the platform. |
 | 13 | publish | `uv run python scripts/episode/step_13_publish.py <book> <n>` | The last mile, unattended (decision 2026-10-05, under the standing hand of 2026-10-01): youtube.json from one guarded structured call, the director's sign-off rendered from measures only, the gated upload, the public flip, the /shorts/ poll -- the public Short URL is the last line printed. |

@@ -933,8 +933,9 @@ def main(book_id: str, number: int, engine: str = "i2v",
     # ran the deliverable's own path pointed at a headerless stump.  ep05's
     # master was found truncated at 133 MB that way.  See studio/finished_file.
     master = episode_home.master_path(book, number, engine)
+    up, why = master_upscale.resolved()
     out = upscaled_tail(book, number, mixed, card if card.exists() else book / "title" / "title.mp4",
-                        finished_file.scratch_for(master, work), work)
+                        finished_file.scratch_for(master, work), work, up, why)
     out = trim(out, work)
     out = master_loudness.into_band(out, work, measure=integrated)   # a quiet chapter's beds (ep20)
     # THE MASTER IS A SHORT (hard requirement, owner 2026-09-30): the wall is
@@ -948,29 +949,32 @@ def main(book_id: str, number: int, engine: str = "i2v",
     (home / "cut" / f"master_iter{keep}.mp4").write_bytes(master.read_bytes())
     conformed = work / "title_conformed.mp4"
     record_layout(home / "cut", master, main=video_frames(mixed),
-                  card=video_frames(conformed) if conformed.exists() else 0)
+                  card=video_frames(conformed) if conformed.exists() else 0,
+                  upscale=master_upscale.name_of(up))
     print(f"master -> {master}  (kept as master_iter{keep}.mp4)")
 
 
-def upscaled_tail(book: Path, number: int, mixed: Path, title: Path, out: Path, work: Path) -> Path:
-    """`tail` under the chosen upscale, its own row on the episode clock (owner
+def upscaled_tail(book: Path, number: int, mixed: Path, title: Path, out: Path, work: Path,
+                  up: master_upscale.Upscale, why: str) -> Path:
+    """`tail` under the settled upscale, its own row on the episode clock (owner
     2026-10-14: the 6 h clock sees it), stamped within assemble so it counts once."""
     from studio import episode_clock
-    up, why = master_upscale.resolved()
     master_upscale.say(why)
     note = f"{up.label()} -> {'x'.join(map(str, master_upscale.size(W, H, up)))}" + (f"; {why}" if why else "")
     with episode_clock.timed(book, number, "upscale", note=note, within="assemble"):
         return tail(mixed, title, out, work, number, upscale=up)
 
 
-def record_layout(cut: Path, master: Path, *, main: int, card: int) -> None:
+def record_layout(cut: Path, master: Path, *, main: int, card: int, upscale: str = "") -> None:
     """Where this master's card starts, by its sha8 (cut/master_layout.json): the
     book video splits the Short there instead of guessing it (it guessed wrong
-    on WotW ep06/10/20 and Scarlet ep12, 2026-10-11)."""
+    on WotW ep06/10/20 and Scarlet ep12, 2026-10-11).  And which upscale made
+    these bytes: QC's segment cap follows it (2026-10-14)."""
     from studio import book_compilation as bc, youtube_publish as yp
     path = cut / bc.LAYOUT
     layout = episode_home.read_json(path) if path.exists() else {}
-    layout[yp.sha8(master)] = {"main": main, "card": card, "chip": edit_gate.END_CHIP_FRAMES}
+    layout[yp.sha8(master)] = {"main": main, "card": card, "chip": edit_gate.END_CHIP_FRAMES,
+                               **({"upscale": upscale} if upscale else {})}
     episode_home.write_json(path, layout)
 
 

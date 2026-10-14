@@ -271,8 +271,17 @@ def edit_report(master: Path, placed: dict, records: list[dict], book: Path, num
     home = episode_home.home(book, number)
     stills = {int(k): book / v["panel"] for k, v in take_ladder.live_stills(home).items()}
     out = edit_gate.edit_integrity(master, placed, records, book, card_path(book, number), cut_json(work),
-                                   heads=edit_gate.heads_in(home), stills=stills)
-    return out | {"measured": True}
+                                   heads=edit_gate.heads_in(home), stills=stills, upscale=upscale_of(master))
+    return out | {"measured": True, "upscale": upscale_of(master)}
+
+
+def upscale_of(master: Path) -> str:
+    """The upscale assemble recorded for THESE bytes (cut/master_layout.json), '' when none."""
+    from studio import book_compilation as bc, youtube_publish as yp
+    path = Path(master).parent / bc.LAYOUT
+    if not path.exists():
+        return ""
+    return (json.loads(path.read_text(encoding="utf-8")).get(yp.sha8(master)) or {}).get("upscale", "")
 
 
 def verdict(report: dict) -> bool:

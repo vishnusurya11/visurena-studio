@@ -1062,7 +1062,7 @@ fixes. Each lesson below cost at least one launch. Tracker rows A38-A74 in
       "Mr. Enfield at the CENTRE ..." lent the arrival its noun, `noun_phrase` lowered it to "mr. Enfield", the
       subject swap left "mr. <Subject 1>", the splitter cut the sentence at "mr." and L21 refused the take
       prompt. Honorifics are names to `is_name`, and `sentences` never splits after Mr./Mrs./Dr./St.
-      (And again: a regex written through a heredoc put BACKSPACE bytes where `` was meant -- use a file.)
+      (And again: a regex written through a heredoc put BACKSPACE bytes where `\b` was meant -- use a file.)
     - **A dialogue take frozen twice pans (Jekyll HEL ep01, 2026-10-14).** Locked with the actor's verb, T01 and
       T14 froze again on fresh seeds (92 %/86 % static, held 4.3 s/3.6 s): H3 barely animates a locked cel
       close. The same fault twice is the plan's; the ladder's next dialogue move is `pan_to` the speaker -- it
@@ -1085,3 +1085,12 @@ fixes. Each lesson below cost at least one launch. Tracker rows A38-A74 in
       picks the closest readable faces (`scene_cast.pick`), and the plan gate G-PRESENT refuses a person first
       seen mid-scene without `enters` (ep01 shots 5, 12, 19). Replay: 199 such appearances over the 42 shipped
       plans, 103 of them after an establishing wide that holds nobody -- the pattern was the house style.
+    - **The master is upscaled by RTX VSR, and QC's segment cap had to learn it (Jekyll HEL ep01, owner
+      2026-10-14).** assemble's Lanczos 2x became NVIDIA RTX Video Super Resolution 4x ULTRA to 3072, in
+      process (`studio/master_upscale.py`; the ComfyUI node holds the clip as float tensors and took 49 s a take).
+      Measured on ep01: the upscale row 252 s against a 38-40 s Lanczos join (+3.6 min), QC 498 s against 403 s,
+      a 1.5 GB master against 210 MB. The first QC FAILED 7/23 segments with every cut, offset and frame right:
+      the segment mean cap (1.0) was fitted on Lanczos masters, and RTX sharpening puts a correct segment at
+      0.97-1.48 (no frame over 1.56; off by one 1.50-5.20). The master's upscale is now recorded by sha8 in
+      `cut/master_layout.json` and sets the cap (`edit_gate.segment_cap`, 2.0 for rtx). A new picture
+      process re-asks every threshold calibrated on the old one -- the gate accused correct work.

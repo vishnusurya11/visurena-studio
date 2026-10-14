@@ -226,6 +226,15 @@ QC fails on any of these:
 A take that failed and spent its retake budget does not fail the master. That
 is the owner's call, and it was measured.
 
+The master's SIZE is whatever step 10's upscale delivered (owner 2026-10-14:
+RTX VSR 4x ULTRA -> 3072; `rtx2x` and the Lanczos fallback -> 1536). Nothing
+downstream assumes one: QC and the judges scale what they read, the card and the
+chip ride the same pass as the cut, `book_compilation` conforms every piece to
+its 1536 square, the upload checks only that it is square. A fallback is not a
+fault, but it is never silent: `UPSCALE FALLBACK:` on stderr and its reason in
+the `upscale` row's note on timing.jsonl.
+
+
 ## Publish — `youtube_upload.py`
 
 **THE PUBLISH LOCK (2026-09-26, `studio/publish_lock.py`).** Both doors -- the
