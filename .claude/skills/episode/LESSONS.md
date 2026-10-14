@@ -1053,3 +1053,8 @@ fixes. Each lesson below cost at least one launch. Tracker rows A38-A74 in
     - **Gaslight does not lie down (Jekyll HEL ep01, 2026-10-14).** "a yellow pool of gaslight lying on them"
       asked the walking little man to lie, on the panel and again on the take (a retake of a correct take):
       the thing list matched `light` only as a whole word. Any `*light`, fog, frost, a pool or a puddle is ground.
+    - **Cel fills read as stillness (Jekyll HEL ep01, 2026-10-14).** frozen-whole's 0.65 share wall was fitted on
+      WotW's painted takes; flat cel shading gives optical flow nothing across its fills, so T14 -- Enfield lifting
+      his hand and turning his head as he names Hyde -- read 76 % static (longest still run 1.08 s) and failed HARD
+      three rounds. On a drawn look the row is HARD only when the frame also holds past G-DEAD's 2.5 s
+      (`stillness.DRAWN_RUN`); T01 (run 4.33 s) and T19 (2.71 s) still fail. House and photoreal books unchanged.

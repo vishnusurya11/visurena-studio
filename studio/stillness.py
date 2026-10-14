@@ -147,9 +147,18 @@ def summarize(parts: dict[str, np.ndarray], fps: float = FPS, static: float = ST
             "mean_subject": round(float(parts["residual"].mean()), 3) if n else 0.0}
 
 
-def is_still(m: dict, seconds: float, exempt: bool = False) -> bool:
-    """HARD: long enough to be seen and static for WALL of it, unless planned still."""
-    return not exempt and seconds >= MIN_SECONDS and m["static_share"] >= WALL
+DRAWN_RUN = 2.5
+"""On a drawn (cel) look the share alone is not a held frame: flat fills give the flow
+nothing to read, so Jekyll ep01 T14 acted and read 76 % static (run 1.08 s).  A drawn
+take must also hold still past G-DEAD's 2.5 s to be HARD (2026-10-14)."""
+
+
+def is_still(m: dict, seconds: float, exempt: bool = False, drawn: bool = False) -> bool:
+    """HARD: long enough to be seen and static for WALL of it, unless planned still;
+    on a drawn look, held still past DRAWN_RUN as well."""
+    if exempt or seconds < MIN_SECONDS or m["static_share"] < WALL:
+        return False
+    return not drawn or m["longest_static_run_s"] >= DRAWN_RUN
 
 
 def is_advisory(m: dict, seconds: float, exempt: bool = False) -> bool:
@@ -157,13 +166,14 @@ def is_advisory(m: dict, seconds: float, exempt: bool = False) -> bool:
     return not exempt and m["static_share"] >= ADVISORY
 
 
-def measure(video, seconds: float | None = None, start: float = 0.0, exempt: bool = False) -> dict:
+def measure(video, seconds: float | None = None, start: float = 0.0, exempt: bool = False,
+            drawn: bool = False) -> dict:
     """The take's stillness over its placed `seconds` from `start` (the head the
     cut skips); `exempt` for a shot the plan declares still."""
     frames = read_frames(Path(video), seconds, start=start)
     m = summarize(global_and_residual(frames))
     placed = round(float(seconds) if seconds else len(frames) / FPS, 2)
-    return m | {"seconds": placed, "exempt": exempt, "still": is_still(m, placed, exempt),
+    return m | {"seconds": placed, "exempt": exempt, "still": is_still(m, placed, exempt, drawn),
                 "advisory": is_advisory(m, placed, exempt)}
 
 
