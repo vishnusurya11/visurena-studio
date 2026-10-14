@@ -230,8 +230,14 @@ def names_of(cast) -> tuple[str, ...]:
     return tuple(sorted({w for who in cast for w in name_of(who).split()}))
 
 
+HONORIFICS = ("Mr", "Mrs", "Dr", "Miss", "Sir", "Inspector", "Lady", "Lord", "St", "Captain", "Colonel")
+"""A title before a name keeps its capital and never ends a sentence (Jekyll ep01 shot 19:
+"with mr. <Subject 1> now in frame" split L21's last sentence off as "<Subject 1> now in frame.")."""
+
+
 def is_name(word: str, names) -> bool:
-    return word.strip(",.;:").removesuffix("'s") in names
+    bare = word.strip(",.;:").removesuffix("'s")
+    return bare in names or bare in HONORIFICS
 
 
 def noun_phrase(frame: str, names=()) -> str:
@@ -1906,7 +1912,7 @@ def l18_banned_prop(text, facts):
 
 # ---- L19-L23  take prompt hygiene (docs/analysis/ep08_ep09_why_worse.md §5) --
 
-SENTENCE = re.compile(r"(?<=[.!?])\s+(?=[A-Z<])")
+SENTENCE = re.compile(r"(?<=[.!?])(?<!\bMr\.)(?<!\bMrs\.)(?<!\bDr\.)(?<!\bSt\.)(?<!\bmr\.)(?<!\bdr\.)\s+(?=[A-Z<])")
 LONG_SENTENCE = 20
 
 

@@ -1058,3 +1058,8 @@ fixes. Each lesson below cost at least one launch. Tracker rows A38-A74 in
       his hand and turning his head as he names Hyde -- read 76 % static (longest still run 1.08 s) and failed HARD
       three rounds. On a drawn look the row is HARD only when the frame also holds past G-DEAD's 2.5 s
       (`stillness.DRAWN_RUN`); T01 (run 4.33 s) and T19 (2.71 s) still fail. House and photoreal books unchanged.
+    - **A title keeps its capital (Jekyll HEL ep01, 2026-10-14).** A move_type cure locked shot 19; its end
+      "Mr. Enfield at the CENTRE ..." lent the arrival its noun, `noun_phrase` lowered it to "mr. Enfield", the
+      subject swap left "mr. <Subject 1>", the splitter cut the sentence at "mr." and L21 refused the take
+      prompt. Honorifics are names to `is_name`, and `sentences` never splits after Mr./Mrs./Dr./St.
+      (And again: a regex written through a heredoc put BACKSPACE bytes where `` was meant -- use a file.)
