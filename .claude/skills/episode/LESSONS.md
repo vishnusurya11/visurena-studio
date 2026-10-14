@@ -1043,3 +1043,6 @@ fixes. Each lesson below cost at least one launch. Tracker rows A38-A74 in
       From the third try the design clip and the speaker's best line take turns as the reference: l15's
       best-line clones scored 0.42/0.53 where design seeds scored 0.59-0.63; genuine narrator lines cut to
       3.0 s score 0.69-0.82 against the design, so the 0.65 floor was right and the render wrong.
+      Ten tries of l15 (every word heard) scored 0.42-0.63 and the step REFUSED; the brain found no order
+      and the episode parked. The record step now ends like every taste ladder: after `TERMINAL_TRIES` (8)
+      the best try heard right and within `TERMINAL_MARGIN` (0.08) of its floor is kept, flagged keep_best.

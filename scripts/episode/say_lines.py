@@ -191,6 +191,32 @@ def line_reference(book: Path, records: dict, line: Line, attempt: int) -> Path:
     return best if best is not None else reference_for(book, line.speaker)
 
 
+TERMINAL_TRIES = 8
+"""After this many tries a line said right keeps its best try, flagged (the step parks on nothing)."""
+TERMINAL_MARGIN = 0.08
+"""How far under its floor a kept best try may sit: the floor is the instrument's, not the ear's
+verdict on a word (Jekyll l15: 10 tries at 0.42-0.63 against 0.65, every word heard)."""
+
+
+def remember_best(record: dict, wav: Path, best: dict | None, out_dir: Path) -> dict | None:
+    """The best failing try whose words were heard right, its file kept as l{NN}.best.wav."""
+    import shutil
+    if not record.get("words_ok") or (best is not None and best.get("similarity", 0.0) >= record.get("similarity", 0.0)):
+        return best
+    shutil.copyfile(wav, Path(out_dir) / f"{Path(wav).stem}.best.wav")
+    return {k: v for k, v in record.items() if k != "best_try"}
+
+
+def terminal(record: dict, best: dict | None) -> dict | None:
+    """keep_best flagged: the best try, once the line has had TERMINAL_TRIES and it sits
+    within TERMINAL_MARGIN of its floor; None while it may still be cured or must refuse."""
+    if record.get("tries", 0) < TERMINAL_TRIES or best is None:
+        return None
+    if best.get("similarity", 0.0) < best.get("floor", 0.0) - TERMINAL_MARGIN:
+        return None
+    return dict(best, passed=True, flagged="keep_best", tries=record["tries"])
+
+
 def attempts_from(tries: int) -> list[int]:
     """This run's attempt numbers for a line already tried `tries` times: every one new.
     A resume zeroed the prior after the first pass and re-said a refused seed (l15, 2026-10-14)."""
@@ -244,7 +270,7 @@ def listen_all(records: list[dict], book: Path, listen, among: dict | None = Non
         room = episode_voice(book, among, record)
         passed = (verdict.passed and similarity >= floor
                   and alternate_ok(room, verdict.seconds) and lift_ok(book, record, clip))
-        record.update(heard=verdict.heard, error_rate=verdict.error_rate, why=verdict.why,
+        record.update(heard=verdict.heard, error_rate=verdict.error_rate, why=verdict.why, words_ok=verdict.passed,
                       similarity=round(float(similarity), 3), floor=floor,
                       episode_voice=room, passed=passed)
         if not passed:
@@ -319,6 +345,20 @@ def prune_stale(records: dict, count: int) -> dict:
     return {k: v for k, v in records.items() if 0 <= int(k) < count}
 
 
+def keep_terminal(records: dict, index: int, out_dir: Path) -> bool:
+    """Remember a failing line's best try; at the terminal put it back on disk, flagged."""
+    import shutil
+    record, wav = records[index], Path(out_dir) / f"l{index:02d}.wav"
+    record["best_try"] = remember_best(record, wav, record.get("best_try"), out_dir)
+    if (kept := terminal(record, record["best_try"])) is None:
+        return False
+    shutil.copyfile(wav.with_suffix(".best.wav"), wav)
+    records[index] = kept
+    print(f"  keep_best l{index:02d} sim {kept['similarity']:.2f}/{kept['floor']:.2f} after "
+          f"{kept['tries']} tries -- flagged", flush=True)
+    return True
+
+
 def main(book_id: str, number: int, redo: list[int] | None = None, clarity: bool = False) -> None:
     book = episode_home.book_dir(book_id)
     episode = episode_home.load_plan(book, number)
@@ -372,6 +412,8 @@ def main(book_id: str, number: int, redo: list[int] | None = None, clarity: bool
             print(f"  {'ok ' if r['passed'] else 'BAD'} l{line.index:02d} wer {r['error_rate']:.2f} "
                   f"sim {r['similarity']:.2f}/{r['floor']:.2f}{room}  {r['why']}  heard: {r['heard'][:50]}",
                   flush=True)
+        failed = [i for i in failed if not keep_terminal(records, i, out_dir)]
+        episode_home.write_json(sheet, [records[k] for k in sorted(records)])
         todo = [line for line in todo if line.index in failed]
         if not todo:
             break
