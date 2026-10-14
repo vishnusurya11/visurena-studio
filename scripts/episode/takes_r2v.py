@@ -179,7 +179,10 @@ def people_staged(shots: list, cast: list[str]) -> list[str]:
         for who in list(getattr(shot, "faces", [])) + shown:
             if who not in seen:
                 seen.append(who)
-    return seen[:MAX_FACES]
+    # OVER THE CEILING (owner 2026-10-14, Jekyll ep01 HEL): the closest readable
+    # faces keep their sheets (`scene_cast.pick`), never simply the first named.
+    from studio import scene_cast
+    return scene_cast.pick(seen, shots, MAX_FACES)
 
 
 def ref_name(book: Path, path: Path) -> str:

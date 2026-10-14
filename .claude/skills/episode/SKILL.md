@@ -275,10 +275,23 @@ words/s -- never 3.0.
   already defines every staged person in full.
 
 **Who is in a shot.**
-- `faces` are the people whose faces must read.
+- `faces` are the people whose faces must read -- and on a wide or full shot,
+  every cast member the picture holds, however small (owner 2026-10-14).
 - A setup's `crowd` declares a crowd.
 - Every other unnamed person is counted in the shot's `extras`.
 - No gate guesses people from the prose any more, so the plan must say.
+
+**Nobody appears from nowhere (G-PRESENT, owner 2026-10-14, Jekyll ep01 HEL).**
+A scene is a run of consecutive shots on one setup. Whoever is in the picture
+anywhere in a scene is in its FIRST shot's picture (in `faces`, or named in its
+frame/at_rest -- an over-the-shoulder holds the shoulder's owner), unless a
+shot marks his arrival in `enters` and its motion shows it ("runs in down the
+cross street"). `exits` marks a leaving the same way. Open a peopled scene on a
+picture that shows its people: never an empty-set wide, a single, or an insert
+when a second person is about to be seen. A later wide that leaves a present
+person out is advised (G-PRESENT-WIDE). Grids and takes stage the sheet of
+everyone a picture holds, at every size; over the ceiling the closest readable
+faces win (`scene_cast.pick`), the rest are drawn from their wardrobe words.
 
 **Places.**
 - A setup names its `location` and the `view` it uses: the picture of that

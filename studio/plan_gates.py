@@ -876,6 +876,62 @@ def action_faults(episode) -> list[str]:
             for i in fillers]
 
 
+# ---- G-PRESENT: nobody appears from nowhere (Jekyll ep01 HEL, 2026-10-14) ----------
+
+def _unshown_moves(s, names: dict[str, str]) -> list[str]:
+    """A marked entrance or exit whose motion does not show the arrival or the leaving."""
+    from studio import scene_cast as sc
+    out = [fault("G-PRESENT", f"shot {s.index}", f"{who} is marked entering and the motion shows no arrival",
+                 who, "an arrival in the motion") for who in getattr(s, "enters", None) or []
+           if not sc.ARRIVAL.search(s.motion or "")]
+    return out + [fault("G-PRESENT", f"shot {s.index}", f"{who} is marked leaving and the motion shows no exit",
+                        who, "a leaving in the motion") for who in getattr(s, "exits", None) or []
+                  if not sc.LEAVING.search(s.motion or "")]
+
+
+def _scene_walk(run: list, names: dict[str, str]):
+    """(shot, who is in its picture, who was present before it) down one scene."""
+    from studio import scene_cast as sc
+    present: list[str] = []
+    for s in run:
+        here, came = sc.in_frame(s, names), list(getattr(s, "enters", None) or [])
+        yield s, here, present, came
+        present = [w for w in dict.fromkeys(present + here + came) if w not in (getattr(s, "exits", None) or [])]
+
+
+def _scene_faults(run: list, names: dict[str, str]) -> list[str]:
+    """One scene: a person first seen after its opener without a marked entrance."""
+    opener = run[0].index
+    return [fault("G-PRESENT", f"shot {s.index}", f"{who} appears mid-scene, absent from the scene's "
+                  f"opener shot {opener}; put him in shot {opener}'s picture or mark his entrance",
+                  who, f"present from shot {opener}")
+            for s, here, before, came in list(_scene_walk(run, names))[1:]
+            for who in here if who not in before + came]
+
+
+def present_faults(episode, names: dict[str, str]) -> list[str]:
+    """G-PRESENT (owner 2026-10-14), hard before anything is drawn: a person in
+    shot N of a continuous scene is in its first shot's picture or marked
+    entering, and a marked entrance or exit is shown by the motion."""
+    from studio import scene_cast as sc
+    out = [f for s in episode.shots for f in _unshown_moves(s, names)]
+    return out + [f for run in sc.scenes(episode.shots) for f in _scene_faults(run, names)]
+
+
+def present_advisories(episode, names: dict[str, str]) -> list[str]:
+    """G-PRESENT-WIDE, ADVISORY: a later wide or full shot of the scene whose picture
+    leaves out someone present.  Not hard: no field says where a wide points, and
+    the replay found wides framed away from the people (Scarlet ep08 shot 14, the
+    sky with the vultures) beside wides that hold them unnamed ("two small
+    figures", shot 13).  Name them, or mark the exit."""
+    from studio import scene_cast as sc
+    return [fault("G-PRESENT-WIDE", f"shot {s.index}", f"a {s.size} shot leaves out {who}, present in "
+                  f"the scene; name him in its picture or mark his exit", who, "every present person")
+            for run in sc.scenes(episode.shots)
+            for k, (s, here, before, _) in enumerate(_scene_walk(run, names))
+            if k and str(s.size) in sc.WHOLE_PLACE for who in before if who not in here]
+
+
 # ---- G-STORY after episode 10: the lead speaks his own words ---------------------
 # docs/analysis/ep10_dq_synthesis.md, section B.  Calibrated on the ep10 fixture
 # (the faults present) against ep05 and ep07 (clean, or the advisories named).

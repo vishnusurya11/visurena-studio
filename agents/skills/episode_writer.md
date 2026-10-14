@@ -129,6 +129,17 @@ is fine, a plan written terse everywhere is not.
   every staged person in full.
 - A person's marks belong to that person alone. A shot that names one person
   may carry only that person's marks.
+- **Nobody appears from nowhere (G-PRESENT).** A scene is a run of consecutive
+  shots on one setup. Everyone who is in the picture anywhere in a scene is in
+  its FIRST shot's picture -- in `faces`, or named in its `frame`/`at_rest`
+  (an over-the-shoulder holds the shoulder's owner). Open a peopled scene on a
+  picture that shows its people, never on an empty-set wide, a single or an
+  insert when another person is about to be seen. On a wide or full shot,
+  `faces` lists every cast member the picture holds, however small. A person
+  who truly arrives mid-scene goes in that shot's `enters` and its `motion`
+  shows him arriving ("the girl runs in down the cross street"); one who
+  leaves goes in `exits` and the motion shows him going. A later wide shows
+  everyone still present.
 - **Declare every unnamed person.** `faces` are the people whose faces must
   read. A setup's `crowd` declares its background life, with a count and an
   activity. Every other unnamed person is counted in the shot's `extras`,
@@ -324,7 +335,9 @@ again — the gates read the plan, never a diff.
 2. The projection lands inside the band; no shot projects longer than a take.
 3. Every person in `faces` and every setup's `cast` is a bound entity id; every
    tag fragment is quoted from its row; every unnamed person is in `extras`
-   or the setup's `crowd`, from the book's count.
+   or the setup's `crowd`, from the book's count. Every person seen in a scene
+   is in its first shot's picture or marked in `enters` with an arrival in the
+   motion (G-PRESENT).
 4. Every setup names one location and one view; at most `max_setups`.
 5. Every tighter shot has its own cell; `at_rest` holds what the camera aims at
    and lacks what the motion brings in.

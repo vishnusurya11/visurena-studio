@@ -194,24 +194,36 @@ def sheet_of(book: Path, who: str, look: str = "") -> Path | None:
     return front_of(p) if p.exists() else None
 
 
-WIDE_SIZES = ("wide", "full")
+def names_of(book: Path) -> dict[str, str]:
+    """{name token: entity id} from the bound rows, for who a picture's words name."""
+    from studio import plan_gates
+    return plan_gates.names_from_refs(cast_refs.load(book).get("refs", []))
 
 
-def wide_only(name: str, shots: list) -> bool:
-    """Is this person only ever WIDE/FULL in this grid?  Then the grid draws them
-    from their wardrobe words, never from the sheet: ep16 shot 19 drew all four
-    turnaround poses as four women, twice -- once with the prompt saying the
-    sheet is one person drawn once.  Words do not beat a staged picture."""
-    mine = [s for s in shots if name in (s.faces or [])]
-    return bool(mine) and all(str(getattr(s, "size", "")).lower() in WIDE_SIZES for s in mine)
+def people_in(book: Path, shots: list) -> list[str]:
+    """Everyone the panels hold, first-appearance order: faces, and whoever the
+    picture words name (`scene_cast.in_frame`) -- an over-the-shoulder holds the
+    shoulder's owner (Jekyll ep01 shots 2 and 10)."""
+    from studio import scene_cast
+    names = names_of(book)
+    return list(dict.fromkeys(w for s in shots for w in scene_cast.in_frame(s, names)))
 
 
 def cast_of(book: Path, shots: list, reserve: int = 1, setup=None) -> tuple[list[dict], dict]:
-    """Every person the panels name, from the bound rows, and the slots their
+    """Every person the panels hold, from the bound rows, and the slots their
     sheets go in -- what is staged and what is said are the same list.
-    `reserve` slots are kept for the place and, on a chained grid, the room."""
-    who = [f for s in shots for f in (s.faces or [])]
-    who = list(dict.fromkeys(who))                      # first-appearance order
+    `reserve` slots are kept for the place and, on a chained grid, the room.
+
+    EVERY SIZE STAGES THE SHEET (owner 2026-10-14, Jekyll ep01 HEL): a wide drew
+    its people from words (`wide_only`, 2026-10-02 09:39) and shot 0 held two
+    strangers before Enfield "appeared" in shot 1.  The four-pose fault that rule
+    answered was fixed at its cause three hours later by the one-figure crop.
+    Over the ceiling the closest readable faces win (`scene_cast.pick`); the
+    rest are drawn from their wardrobe words, as before."""
+    from studio import scene_cast
+    who = people_in(book, shots)
+    chosen = set(scene_cast.pick([w for w in who if sheet_of(book, w, continuity.look_for(
+        setup, w, cast_refs.row(book, w))) is not None], shots, MAX_SLOTS - reserve))
     people, slots, n = [], {}, 0
     for name in who:
         # THE ROW THE TAKE READS: refs.json, stamped with this episode's chapter
@@ -221,7 +233,7 @@ def cast_of(book: Path, shots: list, reserve: int = 1, setup=None) -> tuple[list
         row = cast_refs.row(book, name)
         look = continuity.look_for(setup, name, row)           # the setup's look (2026-10-10)
         sheet, ref = sheet_of(book, name, look), None
-        if sheet is not None and n < MAX_SLOTS - reserve and not wide_only(name, shots):
+        if sheet is not None and name in chosen:
             n += 1
             ref = n
             slots[str(100 + n)] = sheet
@@ -339,7 +351,7 @@ def prompt_for(book: Path, ep, setup: str, shots: list, cols: int, rows: int,
     said_as = {p["entity"]: p["name"] for p in cast}
     blocks = [{"size": SAID[s.size], "body": body_of(s),
                "cut": cut_clause(s.size, peopled=bool(s.faces)),
-               "who": [said_as[f] for f in (s.faces or []) if f in said_as],
+               "who": [said_as[f] for f in people_in(book, [s]) if f in said_as],
                "extras": getattr(s, "extras", 0)} for s in shots]
     here = ep.setups[shots[0].setup]
     place = (plate_slots, here.described)

@@ -1073,3 +1073,15 @@ fixes. Each lesson below cost at least one launch. Tracker rows A38-A74 in
       T01 then panned, turned, spoke and pointed its cane -- alive by eye -- and still held 4.1 s by whole-frame
       flow four rounds running (edge-masked flow read the same): a cel mouth is too small for the mean. On a
       drawn look a DIALOGUE take that the block-max meter finds alive in every span is not HARD-still.
+    - **Nobody appears from nowhere (Jekyll HEL ep01, owner 2026-10-14).** "The first shot doesn't have the
+      actual characters in the scene, so in the second shot the character magically appears." The plan was
+      right at shot 0 (faces: the lawyer and Enfield); the GRID was not: `wide_only` (2026-10-02 09:39, ep16's
+      four-pose turnaround) drew anyone only ever wide from wardrobe words, and shot 0 held a blond man and a
+      man in a brown greatcoat -- neither sheet. Shot 1 staged Enfield's sheet, so he "appeared". The same rule
+      drew shot 7's Hyde bearded from his row's words (the row says mutton-chop whiskers; his sheet is
+      clean-shaven), shots 8-9 chained on that panel as their room, and shot 9 drew both Hydes. The cause of
+      the four-pose fault was fixed three hours after `wide_only` (the one-figure crop, 7ad14e6); the
+      exemption outlived its reason. Grids now stage every held person's crop at every size, the ceiling
+      picks the closest readable faces (`scene_cast.pick`), and the plan gate G-PRESENT refuses a person first
+      seen mid-scene without `enters` (ep01 shots 5, 12, 19). Replay: 199 such appearances over the 42 shipped
+      plans, 103 of them after an establishing wide that holds nobody -- the pattern was the house style.

@@ -76,3 +76,13 @@ def test_an_insert_with_no_face_still_stages_the_room(tmp_path):
     (boards / "plates").mkdir(parents=True)
     assert [p.name for p in takes_r2v.refs_from_cards(book, boards, [], "cell_dawn", "", ["insert"])] == \
         ["plate_cell_dawn.png"]
+
+
+def test_over_the_ceiling_the_take_keeps_the_closest_readable_faces():
+    """Owner 2026-10-14: every visible person's sheet, within the ceiling; past it,
+    the man whose face reads largest keeps his slot, never the first named."""
+    many = ["a", "b", "c", "d", "e"]
+    wide = Shot(0, "wide", many[:4])
+    close = Shot(1, "close", ["e"])
+    got = takes_r2v.people_staged([wide, close], many)
+    assert len(got) == takes_r2v.MAX_FACES and "e" in got

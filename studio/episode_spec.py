@@ -320,6 +320,14 @@ class Shot(Framed):
     """Unnamed people this shot puts in the picture beyond its `faces`: a
     sentry, a man at a counter. A CROWD is the setup's to declare; this is
     the count for everyone else, so no gate has to guess it from prose."""
+    enters: list[str] = Field(default_factory=list)
+    """Who ARRIVES in this shot (owner 2026-10-14, G-PRESENT): a person in the
+    picture of a continuous scene is in its first shot unless his entrance is
+    marked here, and the motion shows him arriving.  Jekyll ep01 shot 5: the girl
+    runs in down the cross street after the wide of the empty crossing."""
+    exits: list[str] = Field(default_factory=list)
+    """Who LEAVES in this shot: after it a wide of the scene no longer shows him,
+    and a return is a new entrance.  The motion shows him going."""
     sounds: list[Sound] = Field(default_factory=list)
     """The sound effects on this shot (root cause 2026-09-26, D10): a gun, a shell
     burst, a splash.  G-SOUND refuses a shot whose prose names a loud event and

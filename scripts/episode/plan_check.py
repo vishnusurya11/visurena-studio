@@ -284,6 +284,17 @@ def action_gate(ep) -> int:
     return len(found)
 
 
+def present_gate(ep, book: Path, number: int, names: dict[str, str]) -> int:
+    """G-PRESENT (Jekyll ep01 HEL, owner 2026-10-14): nobody appears mid-scene
+    without an entrance and a wide shows everyone present; hard until something
+    is drawn from the plan (every shipped plan replays as advice, see GATES)."""
+    from studio import plan_gates as pg
+    hard = drawn_or_hard("G-PRESENT", pg.present_faults(ep, names), book, number)
+    for f in pg.present_advisories(ep, names):
+        print("  advisory:", f[:170])
+    return hard
+
+
 def speaker_gate(ep, book: Path, refs: list[dict]) -> int:
     """G-SPEAKER against the BOOK's narrator (studio.book_narrator), HARD; a
     character narrating beside him is printed as advice."""
@@ -357,6 +368,7 @@ def main(book_id: str, number: int) -> int:
     for f in pf:
         print("   ", f[:170])
     names = plan_gates.names_from_refs(refs)
+    hard += present_gate(ep, book, number, names)
     gg = plan_gates.ghost_limb_faults(ep, names)
     print("G-GHOST      :", len(gg) or "clean"); hard += len(gg)
     for f in gg:
