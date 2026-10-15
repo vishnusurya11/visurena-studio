@@ -19,3 +19,11 @@ def test_the_aim_is_one_clause_of_at_rest():
 
 def test_an_empty_at_rest_aims_at_the_figure():
     assert aim_of("The camera holds a locked-off frame", "") == "the figure"
+
+
+def test_a_possessive_cut_by_its_adjectives_aims_at_the_owner():
+    """Jekyll ep01 v2 T19 (2026-10-15): at_rest "Mr. Enfield's frank, lively face at the
+    CENTRE" was cut at its first comma into "pushes in toward Mr. Enfield's frank"."""
+    from studio import take_ladder
+    at_rest = "THE FOCUS OF THE PICTURE IS Mr. Enfield's frank, lively face at the CENTRE, his head a third."
+    assert take_ladder.aim_of("The camera holds a locked-off frame", at_rest) == "Mr. Enfield"

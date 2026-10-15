@@ -288,7 +288,16 @@ def aim_of(motion: str, at_rest: str = "") -> str:
     # FOCUS tag and the subject's parenthetical are not the aim (ep19: five
     # shots were sent "pushes in toward THE FOCUS OF THE PICTURE IS")
     first = AIM_STOP.split(FOCUS_TAG.sub("", at_rest or "", count=1))[0].strip(" .")
+    if (owner := POSSESSOR.match(first)) and not NOUN_AFTER.search(first[owner.end():]):
+        first = owner.group(1)          # "Mr. Enfield's frank" (cut at "frank, lively face") aims at him
     return camera_lint.repair_aim(" ".join(first.split()[:AIM_WORDS])) or "the figure"
+
+
+POSSESSOR = re.compile(r"^(.+?)['’]s\b")
+NOUN_AFTER = re.compile(r"\b(?:face|head|hand|hands|eyes|back|shoulder|hat|door|lock|step|steps|window|lamp|cane)\b",
+                        re.I)
+"""A possessive whose clause still names its thing keeps it ("the lawyer's hand"); one cut off by
+its adjectives' comma keeps only its owner (Jekyll ep01 v2 T19, 2026-10-15)."""
 
 
 TO = re.compile(r"\b(?:to|toward|towards|onto)\s+", re.I)

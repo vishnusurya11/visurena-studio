@@ -1205,3 +1205,21 @@ fixes. Each lesson below cost at least one launch. Tracker rows A38-A74 in
     - **A girl of about nine was "this woman" to H3 (T05-T07, 2026-10-15).** `age_of` read digits only ("girl of 9"),
       so the row "a small girl of about nine" stated no age and the take prompt said "<Picture 2> defines this woman
       alone" beside a child's sheet. Ages in words, after about/some/maybe, now read (`episode_ref_official.age_of`).
+    - **A re-measure after a code change re-opens a take the cut once passed (T19, 2026-10-15).** iter2 shipped T19's
+      87.6 render, which the attempt-swap fault then destroyed; the take left behind froze (83 % static) on locked,
+      push, follow and pull-back alike, and G-DEAD refused the master (neighbours 8.54 s near-dead + 4.96 s cannot cover
+      7.08 s at 1.5x). plan.py's own words -- "pushes in a hand's breadth toward Mr. Enfield's face, across the whole
+      shot" -- passed on both seeds (95, 100); the ladder's terse "pushes in toward Mr. Enfield" froze. A cure that
+      rewrites the camera clause loses what made the clause move; prefer the shot's authored move on a re-seed.
+      `aim_of` also cut "Mr. Enfield's frank, lively face" into "toward Mr. Enfield's frank" (fixed: a possessive cut
+      by its adjectives aims at its owner).
+    - **A push into a walker turns his walk into a shuffle (T06, 2026-10-15).** The frozen crane (83 % on two seeds,
+      G-STILL had named it) became a push toward the kerb: the girl large, red sleeves, plaits, screaming -- the
+      owner's ask -- but both renders walked the little man on the spot (G-GAIT 0.041 / 0.04 heights a step; by eye
+      ~10 px in two seconds). The crane render that passed 95 was kept and the plan says the crane again
+      (`girl/restore_move.py`); the girl reads as a child in a grey bonnet and dress, smaller, without the red.
+    - **OPEN: an archived attempt can carry another render's graph (2026-10-15).** After two step-09 rounds T06_fail4.mp4
+      (rendered 10:28) sat beside a graph dated 10-14 14:53; `take_dq --attempts` swapped it in WITH that graph, so
+      step 09 reads T06 stale and would re-render it (it did re-render T06/T07 once). Not yet fixed: `displace` /
+      `swap_in` pairing when a round displaces a take whose own graph was already moved. Until fixed, never run step 09
+      after a `--attempts` swap without checking `stale_takes`.
