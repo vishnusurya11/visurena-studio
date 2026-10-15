@@ -623,7 +623,7 @@ def worn_by_someone(frame: str) -> bool:
 PRINTED = re.compile(
     r"\b(?:newspapers?|papers?|pages?|placards?|posters?|signboards?|boards?|signs?|"
     r"timetables?|bookstalls?|letters?|telegrams?|books?|labels?|tickets?|headlines?|"
-    r"maps?|sheets?|notes?|notices?|blackboards?|manuscripts?)\b",
+    r"maps?|sheets?|notes?|notices?|blackboards?|manuscripts?|cheques?)\b",
     re.I)
 """WHOLE WORDS: "boot print" is not a page, and with a boundary "cupboard" is no
 longer a board. Without boundaries "papered wall" was paper."""
