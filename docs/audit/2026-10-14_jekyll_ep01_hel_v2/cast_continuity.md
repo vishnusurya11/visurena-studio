@@ -20,7 +20,7 @@ G-PRESENT was **clean** before anything was drawn:
 | 2 | door_day | medium_close | L,E | L,E | 0 | - | door_day_1x1_s02: L,E | L,E | 1 | 2 |
 | 3 | night_cross_street | full | E,H,G | E,H | 0 | - | night_cross_street_1x1_a: E,H | E,H | 2 | 1 |
 | 4 | night_cross_street | medium | E,H,G | H | 0 | - | night_cross_street_1x1_b: H | H | 1 | 1 |
-| 5 | night_cross_street | medium | E,H,G | G | 0 | G | night_cross_street_1x1_c: G | G | 2 | 1 |
+| 5 | night_cross_street | medium | E,H,G | G | 0 | G | night_cross_street_1x1_c: G | G | 1 | 1 |
 | 6 | night_cross_street | full | E,H,G | H,G,E | 0 | - | night_cross_street_1x1_d: H | H,G,E | 3 | 3 |
 | 7 | night_cross_street | full | E,H,G | E,H,G | 0 | - | night_cross_street_1x1_e: E | E,H,G | 3 | 3 |
 | 8 | night_door | medium | E,H | H,E | 0 | - | night_door_1x1_a: H,E | H,E | 2 | 2 |
@@ -43,12 +43,11 @@ G-PRESENT was **clean** before anything was drawn:
 
 | shot | what | why |
 |---|---|---|
-| 2 | the panel lost Enfield's shoulder (1 person for 2 named) | panel eye keep_best. The take staged both sheets and shows 2 |
+| 2 | the panel lost Enfield's shoulder (1 person for 2 named) on 5 seeds, incl. the 2026-10-15 redraw | an OTS 1x1 does not draw the shoulder (plan-level). The take staged both sheets and shows 2 |
 | 3 | the take shows 1 person; Enfield's shoulder and hat at the left edge leave the frame as the camera pans with Hyde | planned pan with the walker. Enfield stays present in the scene (G-PRESENT holds) |
-| 5 | the panel holds 2 (the girl plus Enfield's foreground shoulder); plan said 1 + 0 extras | scene continuity; panel eye keep_best, flagged |
+| 5 | FIXED 2026-10-15: regridded with the `people` cure; the panel holds the girl alone (1 for 1) | panel DQ still reads 0 faces at full-figure size (allowed, dq_coverage.md) |
 | 6, 7 | the grid staged only H (6) and only E (7) by sheet; the others were drawn from wardrobe words | over the slot ceiling `scene_cast.pick` kept the closest faces. The takes staged all three sheets and show 3 |
 | 22 | the grid staged only L; Enfield drawn from words | slot ceiling. The take staged both and shows both, plus the tramp (extras 1) |
-| 1 | the door behind Enfield reads red with brass fittings, unlike the blistered brown door of shot 0 | a room-chain drift in grid s01; panel_place is advisory |
+| 1 | FIXED 2026-10-15: s01 regridded twice on the room anchor; the door is the blistered brown of shot 0 and the lawyer drawn behind Enfield is gone (1 for 1) | T01 content still reads faint fascia lettering (allowed, dq_coverage.md) |
 
-No person appears from nowhere in the cut. The identity row flags Enfield DRIFT in T01 (0.74), T02 (0.72) and T19 (0.52):
-advisory (`TAKE_IDENTITY_HARD = False`), read by the master eye.
+No person appears from nowhere in the cut. FINAL (2026-10-15, master_iter2 c9265e3b): the identity row flags Enfield DRIFT only on T19 (0.59, the head-shake under the brim, 7 renders; allowed); T01 and T02 read clean.

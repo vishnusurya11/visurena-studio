@@ -1144,3 +1144,24 @@ fixes. Each lesson below cost at least one launch. Tracker rows A38-A74 in
       retry could leave. Now: a from-to move aims at its destination, whole (`take_ladder.destination`); an aim cut
       on a possessive is read from at_rest; a frozen follow is given a push, never a lock; a frozen-only take gets its
       second move type past the breaker; and the terminal never holds a panel longer than G-DEAD's 2.5 s.
+    - **The shorter take is measured against the length it was built for (Jekyll HEL ep01 v2 finish, 2026-10-15).**
+      T14 ("It was a man of the name of Hyde.") failed lip-sync (WER 0.56) and G-TAIL ("of the name of Hyde" at
+      -22.7 dB in the silent tail) on four renders. The router sent it to `timeline_trim`, but `shorten()` compared
+      the timeline (5.04 s) against the FILE (5.88 s = frames_for(placed + HANDLE)), read every take as "the length
+      changed under it", and re-rendered at the same length: four reseeds. Fixed (`take_ladder.built_for`, ce2ddea);
+      the one real shorten (coda 1.5 -> 0.75 s, take 141 -> 124 frames) passed both rows at once: WER 0.11, tail
+      -48.4 dB. The memory held: mux lag and a talking tail follow LENGTH, not seed.
+    - **A cheque is print (2026-10-15).** The book's own prop -- "gold coins and a folded cheque" -- failed content as
+      "text or lettering" and shipped flagged. `panel_content.PRINTED` now names cheques; a wide still refuses (811cabb).
+    - **`take_dq --attempts` swaps an older attempt in and the next render round destroys it.** The kept file keeps
+      its old mtime while T<NN>.graph.json is newer, so `take_currency` reads it "unfinished", and the next
+      `takes_r2v` overwrites it WITHOUT archiving and with `tries` reset (same seed as try 0). Lost on the finish:
+      T22's G-GAIT-cured render (95, re-made with --retake) and T19's 100 and 87.6 (the 87.6 twice, once through step 11 re-running step 09 on the "unfinished" takes). Until fixed: copy the kept T<NN>.mp4 to `attempts/` before any
+      later round, and re-render a lost cure with `--retake` (tries 1 reproduces seed + 101).
+    - **Over-the-shoulder 1x1 grids do not draw the shoulder.** door_day s02 (OTS onto the lawyer) on 5 seeds: the
+      shoulder lost every time and twice the lawyer drawn in Enfield's hat. A shot whose second person is a shoulder
+      is a plan-level fault for Qwen-Image 1x1; write it as a two-shot or put it in a 2x2 with other OTS faces
+      (shots 14 and 19 drew their shoulders in pavement/sunday 2x2 grids).
+    - **Identity DRIFT that follows the action is the plan's.** T19 ("lowers his eyes and shakes his head", push-in)
+      read Enfield 0.52-0.75 on 7 renders; the moving takes all drift (his face goes under the brim), the one
+      locked replan froze (82 %). A take's verb that hides the face cannot pass a first-vs-last identity measure.

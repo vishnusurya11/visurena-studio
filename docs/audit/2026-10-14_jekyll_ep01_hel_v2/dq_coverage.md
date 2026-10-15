@@ -1,66 +1,113 @@
-# Jekyll HEL ep01 v2: DQ coverage, take by take (2026-10-14)
+# Jekyll HEL ep01 v2: DQ coverage, take by take — FINAL (2026-10-15)
 
-Master: `library/20260827135504_the-strange-case-of-dr-jekyll-and-mr-hyde/episodes/ep01/cut/master_iter1.mp4`
-(RTX VSR 4x ULTRA, 3072x3072, 148.08 s, sha8 bb1c6410). QC: **PASS**. The QC line was -14.1 LUFS / -2.0 dBTP,
-cuts 22/22, lines heard 21/21, longest gap 5.43 s against the 6.0 s wall. The master eye read **flag**: story, content
-on shots 10/14/22, and take_identity advisories on T01/T02/T19. v1 was set aside to
-`episodes/superseded/ep01_2026-10-14_hel_v1` (master_iter1 and master_iter2 kept).
+Master: `library/20260827135504_the-strange-case-of-dr-jekyll-and-mr-hyde/episodes/ep01/cut/master_iter2.mp4`
+(RTX VSR 4x, 3072x3072, 147.33 s, sha8 **c9265e3b**). Preview: `cut/master_iter2_preview720.mp4` (720x720, 22.6 MB).
+`master_iter1.mp4` (bb1c6410) is kept. Nothing uploaded; `publish/standing.json` does not exist.
 
-Tables: `audit_tables.py` (this folder) reads them off `takes/r2v/T??.dq.json`, `T??.content.json` and `shots.json`.
+QC on c9265e3b: **PASS** — -14.1 LUFS / -1.8 dBTP, cuts 22/22, segments 23/23, lines heard **21/21**, longest gap
+5.43 s (wall 6.0), takes 23/23 pass, title card present. Master eye: see "Master eye" below.
 
-## The clock
+Tables were read off disk with `audit_tables.py` (this folder) from `takes/r2v/T??.dq.json` and `T??.content.json`.
 
-- Machine clock: 12,099 s, which is **3.36 h** (`autopilot/status.json`, clock_spent_s). It stayed under the 5 h ceiling throughout.
-- Wall time: launch 1:32 pm Seattle; master built 5:45 pm; delivered (manifest) 6:05 pm. That is **4 h 33 min**.
-- What was in the gap between clock and wall:
-  - two record parks (l15) before the fix;
-  - two G-DEAD refusals before the fixes;
-  - about 20 min of WAIT_TREE while a peer session's scheduler work held the tree;
-  - the GPU idle while CPU checks ran between renders (the owner's 4:55 pm finding). The binding owner rule since is renders back to back.
+## The clock (Seattle time)
 
-**No check was cut for time.** The budget never had to refuse a measure: there is no `reserve` or `terminal: budget` row
-in `learnings.jsonl`. Every take was re-measured under the code that judged it: `MEASURES` now covers `stillness.py`
-and `identity_gate.py`.
+| part | wall | machine clock |
+|---|---|---|
+| v2 run, plan through master_iter1 (2026-10-14, 1:32 pm - 6:05 pm) | 4 h 33 min | 12,099 s = **3.36 h** (`autopilot/status.json` `clock_spent_s`) |
+| finishing pass, master_iter1 -> master_iter2 + QC + master eye (2026-10-15, 1:41:35 am - 3:57:14 am) | 2 h 15 min | counted whole, as wall: **2.26 h** |
+| **episode total** | | **5.62 h (20,238 s), under the 6 h budget** |
 
-## Coverage by check
+Finishing-pass breakdown (my logs, `timing.jsonl` rows for the step scripts):
 
-| check | ran on | result | notes |
+| step | minutes | notes |
+|---|---|---|
+| plan cures + timeline | 1 | shorten T14 (ladder's `shorten`), reprose shots 1/4/5, replan_cell shot 19, all through `write_plan` / `write_cured` |
+| grids (Qwen-Image) | 10.2 | door_day s01 x2, s02, night_cross_street b, c |
+| step 08 panels + gates + panel eye | 15.6 | two passes (content 1.8 + eye 7.1 + a first pass refused by a stale boundary flag) |
+| takes (H3 renders) | 38.2 | rounds: 9 + 4 + 3 + 3 takes, plus 2 re-rendered by step 11's step-09 dependency (see faults) |
+| take DQ | ~12 not overlapped | the rest ran on the CPU lane beside the renders (`--cpu-only`) |
+| take content (VLM) | ~9 | |
+| edit: assemble + RTX 4x | 6.4 | 2.0 net + 4.4 RTX |
+| QC | 9.9 | one pass refused on two unjudged takes (T02/T16 content not yet read), then PASS |
+| master eye | 2.3 | read once, no ladder (no clock left for a retake round) |
+| reading, deciding, code fixes | the rest | two test-first fixes landed (below) |
+
+**GPU idle.** ComfyUI history over the whole finishing pass, 1:41-3:57 am: 62.1 min busy, **73.0 min idle** in a
+135.1 min window (to 3:20 am: 51.1 busy, 47.6 idle). Of the idle: 5.4 min before the first grid (reading), 4.4 min the RTX pass (GPU busy outside ComfyUI), and the
+rest the gaps where a decision waited on a check (round 3 content read 3.2 min, round 4 setup 3.5 min, T19/T22 loss
+4.5 min, round 6 checks 6.7 min, assemble/QC 11 + 9.4 min with the GPU on RTX and CPU QC, and the last 14 min of
+audit writing after the master eye). The v2 run's step 09 was
+serial (the two-lane scheduler, ffe11d6, landed after it): `take_schedule_replay.py` projects **24.4 min** of GPU idle
+in it, 5.0 min had it run overlapped.
+
+## Coverage by check (final state)
+
+| check | ran on | result |
+|---|---|---|
+| plan battery | plan after the cures | clean before the cures; the cures are frame-lead phrases and one timing halving, both written through the contract |
+| panel DQ + content | 23/23, re-read after every redraw | DQ fails 4, 5 ("missing": 0 faces detected); content fails 2 ("1 figure for 2 named") — see allowed |
+| panel eye | 2 reads | keep_best, flagged (faults listed under allowed) |
+| take DQ (all HARD rows) | 23/23 + every retake, `--attempts` | **23/23 PASS**, 0 hard rows failed on the takes in the master |
+| frozen-whole (house rule) | 23/23 | PASS on all |
+| G-GAIT | measured T03 0.122, T04 0.050, T06 0.059 heights a step | PASS; T05/T15/T16 feet out of frame, T22 no step rhythm (unmeasured) |
+| lip-sync + G-TAIL | 4/4 dialogue | **all PASS**: T01 WER 0.15, T02 0.00, T14 **0.11** (was 0.56), T17; T14 tail -48.4 dB (was -22.7 with words) |
+| identity (sheets in, advisory) | 22/23 | DRIFT only on T19 (Enfield 0.59) — allowed below |
+| take content (VLM) | 23/23 | PASS 21/23; FAIL T01, T16 (lettering) — allowed below; **T10 now PASS** (cheque) |
+| G-DEAD | master | nothing dead |
+| QC | master c9265e3b | **PASS**, lines 21/21 |
+| master eye | master c9265e3b | **flag** (below) |
+
+## The owner's six flags
+
+| # | flag | what was done | final |
 |---|---|---|---|
-| plan battery (`plan_check`) | final plan | VERDICT: clean | G-PRESENT clean (was 3 appearances in v1). Advisories: G-TWICE (6), G-MOTION walk-in-wide (shots 0, 22) |
-| plan critic (judge:plan) | 3 drafts | keep_best, flagged | turn read on shot 6 (the trampling), marked 13. The writer's improve rung rewrote line 0's hook and shot 7 (family framed out) |
-| panel DQ + panel content | 23/23 | 21/23 clean; shot 2 (Enfield's shoulder lost), shot 5 (Enfield's foreground shoulder counted as an undeclared figure) | |
-| panel eye | 3 reads | keep_best (redraw_grid_seed, reprose) | rungs ran out, not time. Faults: missing on 2 and 4, people on 5, G-FRAME framing advisories |
-| take DQ (all rows) | 23/23 + every retake | see the table | 9-10 HARD rows ran per take |
-| frozen-whole, **house rule** (drawn relaxations removed) | 23/23 | first pass failed T10, T13, T18, T19 | cured by move type: T13 (5 %), T18 (55 %), T19 (26 %); T10 is now 33 % static |
-| **G-GAIT** | 23/23 asked; measured where the plan walks a subject with feet in frame | T03 PASS (4.0 steps/s, **0.122** heights a step; v1 was 0.027), T04 PASS (0.074), T06 PASS (0.059), T22 FAIL then cured (0.003 shuffle -> re-render, now "no step rhythm") | unmeasured: T05 (depth: the girl runs toward the corner), T15/T16 (feet out of frame), T22 retake (no rhythm) |
-| **identity (sheets in, advisory)** | 22/23 measured (T05: not measured) | DRIFT advisories on Enfield in T01 (0.74), T02 (0.72) and T19 (0.52); 0 STRANGER | read by the master eye as `take_identity` (low) |
-| take content (VLM) | 23/23 + retakes | FAIL T10, T14, T16 "text or lettering" | T10's cheque carries writing (the book's own prop). T14/T16 show shop lettering behind |
-| lip-sync / G-TAIL | 4/4 dialogue | T14 FAIL on 4 renders | WER 0.56 and tail words "of the name of Hyde" at -22 dB on every seed: the render says the line late, a voice fault and not the picture |
-| take eye (EYE_TAKES) | 2 batched rounds + 1 retake by the ladder's entry point | keep_best, flagged | see "cured / kept" below |
-| G-DEAD | master | cut [] (nothing dead) | refused twice first (below) |
-| QC | master | PASS | ran in full |
-| master eye | master | flag | story, 3 content, 3 identity advisories |
+| 1 | T14 lip-sync WER 0.56 + G-TAIL on 4 renders | the SHORTER take: coda 1.5 -> 0.75 s by the ladder's own `shorten` (141 -> 124 frames). It had never run: the ladder compared the timeline to the FILE length and read "restore" every time (fixed, ce2ddea) | **CLEARED**: WER 0.11, tail pass -48.4 dB, mux lag -0.010 s, content clean |
+| 2 | shot 1 red door against shot 0's blistered brown | door_day s01 regridded twice on the room anchor (the door master's view); then the `people` cure (the lawyer had been drawn behind Enfield) | **CLEARED**: the door is the blistered brown of shot 0 in panel and take. T01 picked up a new fault — see allowed |
+| 3a | T14, T16 shop lettering | T14 cleared with its new take. T16 reseeded twice more (4 renders): H3 writes "BUDLE..." on the gold shop fascia at the right edge from 2 s on, every seed; the panel itself is clean | T14 **CLEARED**; T16 **ALLOWED, flagged** (below) |
+| 3b | T10 cheque writing | recorded as allowed IN CODE: a cheque is print by what it is (`panel_content.PRINTED`, 811cabb, test-first) | **CLEARED**: T10 content PASS |
+| 4 | Enfield identity drift T01 0.74, T02 0.72, T19 0.52 | T01 regridded + retaken; T02 retaken (seed); T19 retaken 3 more times incl. the ladder's replan_cell (locked) | T01 **CLEARED** (no drift), T02 **CLEARED** (1 cast, no drift); T19 **ALLOWED** (below) |
+| 5 | panel eye keep_best on 2, 4, 5 | 4 and 5 regridded with the ladder's reprose (`framing`, `people`); 2 regridded on a new seed | shot 5's extra figure **CLEARED** (Enfield's shoulder gone); 2/4/5 remaining rows **ALLOWED** (below) |
+| 6 | master eye "story": the turn reads on 6, not 13 | cheap fix inside the takes: T13 retaken; the new take shows the lawyer's hand on Enfield's arm turning him (frames 0.5 / 3 / 6 s). No re-plan: the plan's turn IS shot 13 (the lawyer's choice), shot 6 is the inciting act | **STANDS**: the eye still reads a pre-grip frame of shot 13 (below) |
 
-## Each take: cured or kept
+## Allowed, with the reason (each a measured repeat, not a skipped check)
 
-| take | first pass | cure | final |
-|---|---|---|---|
-| T10 | frozen-whole 81 % HARD | move type (tilt -> track) | 33 % PASS. The content fault (the cheque's lettering) was stilled at 6.75 s, then retired (G-DEAD); the take ships, **flagged content** |
-| T13 | frozen-whole 69 % | move type | 5 % PASS |
-| T14 | lip-sync WER 0.56 + G-TAIL + content | 3 reseeds (2 by the ladder, 1 by its entry point at the coordinator's order) | **keep_best**: the same fault on 4 renders. G-DEAD now reads it as a voice fault, not dead picture |
-| T16 | content (lettering) | reseed | content still FAIL. A 3.9 s still was retired; the take ships, **flagged** |
-| T18 | frozen-whole 96 % | move type | 55 % PASS |
-| T19 | frozen-whole 82 % | move type x2 (the first cure's aim was garbled) | 26 % PASS |
-| T22 | G-GAIT shuffle 0.003 | move type | PASS (unmeasured: no step rhythm) |
-| T01/T02 | identity DRIFT (advisory) | none (advisory) | flagged by the master eye |
+| where | row | reason |
+|---|---|---|
+| T16 | content: lettering | 4 seeds, the same invented fascia lettering ("BUDLE...") at the right edge; the panel (sunday_street 2x2) is clean, so the take invents it. The cure is the board's (a 2x2 redraw of sunday_street with "Every surface ... plain, wordless paint" leading shot 16), which re-renders T13-T16 -- T13 and T14 just passed; no clock for it. |
+| T01 | content: lettering | the regridded T01 passes every DQ row (98.8, WER 0.15, tail pass, door correct) but the reader sees a faint shop fascia at the left from ~4 s. 3 renders. A second cane appears at 6.3 s, past the cut (the shot holds 5.7 s). |
+| T19 | identity DRIFT Enfield 0.59 (advisory) | 7 renders: every moving take drifts 0.52-0.75 because the plan's verb ("lowers his eyes and shakes his head") puts his face under the brim; the one locked replan froze (HARD frozen-whole). The take in the master passes every HARD row (87.6). The cure is the plan's verb, a re-plan. |
+| panel 2 | content: 1 figure for 2 named | over-the-shoulder 1x1: 5 seeds, Enfield's shoulder never drawn (twice the lawyer in Enfield's hat). The TAKE stages both sheets and shows both men (content PASS, identity PASS). The fix is the plan's: a two-shot, or the OTS in a 2x2 (shots 14 and 19 drew their shoulders that way). |
+| panels 4, 5 | DQ: "missing" (0 faces) + framing wide vs medium | the figure is there (Hyde walking, the girl running, full figure with the feet in frame -- what G-GAIT needs and what plan.py's own notes ask for); the face detector reads 0 faces at that size. Framing is in `REDRAW_CANNOT_CURE` (measured ep13). The takes pass content and gait. |
+| T22 | master content "1 figure for 2" at the end (iter1) | the book's button: the two men walk on to the RIGHT and out; the last seconds are the door and the tramp. The take in the master is the G-GAIT-cured render (95). |
 
-## Faults met and fixed this run (test-first, each in its own commit)
+## Faults met and fixed this pass (test-first, own commits)
 
 | commit | fault |
 |---|---|
-| `adf0dc4` | the owner's four rulings: drawn-look stillness relaxations dropped; identity row measured with sheets (advisory); Hyde clean-shaven; G-GAIT in GATES/LESSONS |
-| `e8a0806` | the record step gave a refused line 2 tries a run while keep_best needs 8, so l15 parked the episode twice |
-| `fcf5b21` | the move-type cure's aim was garbled ("tracks beside the lawyer across to the door's"). A frozen follow went to a lock; a frozen take never got its second move type; the terminal stilled panels G-DEAD refuses |
-| `fb20016` | the ladder's live stills kept a still longer than 2.5 s |
-| `ff82e6c` | assemble read stills.json itself and cut the 6.75 s still anyway |
-| `f64d865` | G-DEAD counted a voice-only failure (T14) as dead picture, so the master could never be built |
+| `ce2ddea` | the shorter-take rung read the FILE length (frames_for(placed + HANDLE)) against the timeline, so every shorten was a "restore": T14's mux-lag cure was four same-length reseeds |
+| `811cabb` | a cheque is print: the content gate called the book's own cheque "lettering" |
+
+**Found, not fixed (in LESSONS):** `take_dq --attempts` swaps an older attempt into `T<NN>.mp4` with its old mtime;
+`take_currency` then reads it as an unfinished render and the next `takes_r2v` (or a step 11 that re-runs step 09)
+overwrites it without archiving and with `tries` reset. It destroyed T22's cured render once (re-rendered with
+`--retake`, seed + 101, which reproduced it: 95) and T19's 87.6 twice; the T19 in master_iter2 is that render, but
+the file on disk under `takes/r2v/T19.mp4` is now a later, failed locked render (and T01.mp4 a later 100-score
+render). The master's QC (c9265e3b) was measured against the takes as they stood when it was cut.
+
+## Master eye on c9265e3b (`review/eye_c9265e3b.json`): flag
+
+| fault | was on iter1 | now | why it stands |
+|---|---|---|---|
+| story (turn shot 13: grip/swing/turn not listed) | yes | **stands** | the new T13 shows the grip (take frames 0.5/3/6 s), but the eye reads ONE frame of shot 13 in the master and listed "standing, talking / facing". The cut holds the take's opening, before the hand lands. A timing-word fix in the plan (the grip at the first frame) is a plan edit; not taken. |
+| content shot 16 (lettering) | no (was 14) | stands | T16, 4 seeds, allowed above; shot 14's lettering is gone |
+| content shot 22 (1 figure for 2) | yes | stands | the book's button: the men walk out of frame; allowed above |
+| content shot 10 (cheque) | yes | **cleared** | 811cabb |
+| take_identity T01, T02 | yes | **cleared** | |
+| take_identity T19 | yes | stands (advisory) | 7 renders, allowed above. NB the eye read the T19.dq.json now on disk (a later render, 0.73), not the take in the cut (0.59): the attempt-swap fault |
+| faces: shot 1 face at 0.11 of the frame (wall 0.12) | no | **new** | the regridded panel draws Enfield at mid-thigh so the door shows behind him (flag 2); the face fell 0.01 under the medium-close wall |
+| identity: the girl drifts from her own median (0.595, 2 of 3 reads) | no | **new** | T05 re-rendered on the regridded panel; she runs toward camera and turns (pose) |
+
+No clock is left for another round: render + checks + assemble/RTX + QC + eye is ~35 min against 23 min left under 6 h.
+The next round, in order: T13 cut/timing so the grip is on screen at the eye's frame, T16 by a sunday_street board
+redraw with the wordless-paint lead, shot 1 tighter (or the faces wall read against a mid-thigh medium close), T05
+reseed, and the plan fixes above (shot 2 as a two-shot, shot 19's verb, shot 22's `exits`).

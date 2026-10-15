@@ -476,8 +476,12 @@ panel gates: the takes refuse a verdict older than its panel.
 
 **Every dialogue take passes the TAIL gate** (G-TAIL, 2026-10-11, `take_dq` row `tail`):
 a mouth that keeps speaking into the guide's silent tail -- a tail louder than -45 dB
-with words after the line, or an open, working mouth -- fails; the cure is one reseed,
-then keep_best flagged. Never shorten the shot for it: the voice is the ruler.
+with words after the line, or an open, working mouth -- fails. The cure is a SHORTER TAKE:
+the shot's beat and coda halved (`take_ladder.shorten`, measured against the length the
+take was built for, `built_for`), then one reseed, then keep_best flagged. The line itself
+is never cut: the voice is the ruler. Jekyll ep01 v2 T14 failed WER 0.56 + tail on four
+same-length reseeds and passed both (WER 0.11, tail -48 dB) on its first shorter take
+(coda 1.5 -> 0.75 s).
 
 **Never pin a last frame.** ref2v gives a take its first frame only.
 
