@@ -114,3 +114,19 @@ def test_assemble_reads_the_same_live_stills(tmp_path):
                                                   "12": {"panel": "q.png", "seconds": 2.0, "decided": 1e10}}),
                                       encoding="utf-8")
     assert list(assemble.stills_of(room, tmp_path)) == [12]
+
+
+def test_a_take_failing_only_on_its_voice_is_not_dead_footage():
+    """Jekyll ep01 v2 T14 ("It was a man of the name of Hyde."): four renders, the same lip-sync WER
+    and G-TAIL words, a live picture.  G-TAIL's own terminal is keep_best flagged and a dialogue take
+    is never cut, so G-DEAD (dead PICTURE) counting it 'failed' refused every master.  A take whose
+    only failing HARD rows are its voice (lip-sync, tail, lag) is alive to G-DEAD; any picture row
+    still makes it failed."""
+    from studio import dead_footage as dead
+    voice = {"passed": False, "gates": [{"name": "lip-sync", "ok": False, "hard": True},
+                                        {"name": "tail", "ok": False, "hard": True},
+                                        {"name": "frozen-whole", "value": 0.25, "ok": True, "hard": True}]}
+    assert dead.state_of(14, {}, voice) == "alive"
+    frozen = {"passed": False, "gates": [{"name": "tail", "ok": False, "hard": True},
+                                         {"name": "frozen-whole", "value": 0.9, "ok": False, "hard": True}]}
+    assert dead.state_of(18, {}, frozen) == "failed"

@@ -36,11 +36,21 @@ def static_share(record: dict | None) -> float:
     return float(gate.get("value") or 0.0)
 
 
+VOICE_ROWS = frozenset({"lip-sync", "tail", "lag"})
+"""A take failing only these is a live picture with a voice fault: G-TAIL's own terminal
+(keep_best flagged) answers it, never G-DEAD (Jekyll ep01 v2 T14, 2026-10-14)."""
+
+
+def voice_only(record: dict) -> bool:
+    failing = {g.get("name") for g in record.get("gates", []) if g.get("hard") and not g.get("ok")}
+    return bool(failing) and failing <= VOICE_ROWS
+
+
 def state_of(index: int, stills: dict, record: dict | None) -> str:
     """still | failed | near_dead | alive, for one take of the cut."""
     if index in stills:
         return "still"
-    if record is not None and not record.get("passed", True):
+    if record is not None and not record.get("passed", True) and not voice_only(record):
         return "failed"
     return "near_dead" if static_share(record) >= NEAR_DEAD else "alive"
 
