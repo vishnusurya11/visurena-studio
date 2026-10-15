@@ -354,6 +354,14 @@ def move_type(doc: dict, index: int, faults: list[Fault]) -> dict:
     return doc
 
 
+def built_for(record: dict) -> float:
+    """The length a take was BUILT FOR: its record's placed seconds.  The file
+    is frames_for(placed + HANDLE) long, so its measured seconds always exceed
+    the placed ones and read as "the length changed" (ep01 v2 T14: 5.04 placed,
+    5.88 rendered; four reseeds where the mux-lag cure was a shorter take)."""
+    return float(record.get("placed_seconds") or record.get("measured_seconds") or 0.0)
+
+
 def shorten(doc: dict, index: int, placed_s: float, rendered_s: float) -> tuple[dict, str]:
     """('restore', doc untouched) when the take's length was just changed
     under it -- re-render at the placed length first; ('shorten', doc) with
@@ -525,7 +533,7 @@ def edit_plan(ctx, rung: Rung, wanted: dict[int, list[Fault]], records: dict[int
             doc, action = move_type(doc, index, faults), "move_type"
         elif rung.name == SHORTER_TAKE.name:
             doc, action = shorten(doc, index, placed_seconds(ctx.home, index),
-                                  float(records.get(index, {}).get("measured_seconds") or 0.0))
+                                  built_for(records.get(index, {})))
         elif rung.name == REPLAN_CELL.name:
             doc, action = replan(doc, index, faults), "replan_cell"
     if action and action != "restore":
@@ -689,7 +697,7 @@ def rungs(ctx, plan, flag: str, records: dict[int, dict] | None = None) -> judge
         doc, trims = json.loads(path.read_text(encoding="utf-8")), []
         for index, faults in routed.get("timeline_trim", {}).items():
             doc, action = shorten(doc, index, placed_seconds(ctx.home, index),
-                                  float(records.get(index, {}).get("measured_seconds") or 0.0))
+                                  built_for(records.get(index, {})))
             if action == "restore":                     # length changed under it: render at the placed length
                 renders[index] = faults
             elif action == "shorten":
