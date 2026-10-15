@@ -1,4 +1,123 @@
-# Jekyll HEL ep01 v2: DQ coverage, take by take — FINAL (2026-10-15)
+# Jekyll HEL ep01 v2: DQ coverage, take by take — iter4 (2026-10-15, the girl fix)
+
+Master: `library/20260827135504_the-strange-case-of-dr-jekyll-and-mr-hyde/episodes/ep01/cut/master_iter4.mp4`
+(RTX VSR 4x, 3072x3072, 147.33 s, sha8 **8c21321b**). Preview: `cut/master_iter4_preview720.mp4` (720x720, 21.8 MB).
+`master_iter3.mp4` (84c15a36, the cut before the master eye's T01 retake; preview `master_iter3_preview720.mp4`),
+`master_iter2.mp4` (c9265e3b) and `master_iter1.mp4` (bb1c6410) are kept. Nothing uploaded; `publish/standing.json`
+does not exist.
+
+**Why iter4 and not iter3.** Step 10 cut iter3 with the girl's new takes; step 11's QC passed it and the master eye
+(`judge:master_eye`) climbed its one rung -- `retake_shot` on T01 ("faces at master") -- and recut: iter4. T05, T06,
+T07 and T19 are the same bytes in both; only T01 differs.
+
+QC on 8c21321b: **PASS** — -14.1 LUFS / -1.8 dBTP, cuts 22/22, segments 23/23, lines heard **21/21**, longest gap
+5.43 s (wall 6.0), takes 23/23 pass, title card present. Master eye: **flagged** (terminal after its one retake) --
+faces at master, story at master, content at shot_16 (lettering; shipped so in iter2 too), content at shot_22,
+take identity T19 DRIFT 0.63 (advisory).
+
+## The girl (owner 2026-10-15: "the girl is not accurate in some shots")
+
+| | iter2 | iter4 |
+|---|---|---|
+| sheet | black lace bonnet, blonde bangs, hollow solid-black eyes, black pinafore (`superseded/sheet_2026-10-14_hellsing_v2_lace.png`) | one base sheet redrawn on the HEL drawer (seed 505, 16 candidates over 3 tag rounds): small soft grey woollen bonnet, fair plaits, blue eyes with irises, plain grey pinafore over a dark-red long-sleeved blouse, black boots |
+| words | "small knitted woollen bonnet ... plain grey pinafore" (refs.json, looks.json, look.json, dossier, heads.json) | the same five files say the drawn sheet |
+| SHEET-ROW (new, refs/04) | refuses 3/3: lace for knitted, black for grey, hollow eyes | passes; LOOK verdict signed `judge:look@1` (pack ef9cac00 + the restore row) |
+| T05 (medium, she runs in) | grey knitted bonnet, grey pinafore, red sleeves -- the words | grey bonnet, plaits, grey pinafore, red sleeves -- the sheet; VLM list 3/3 frames match |
+| T06 (full, the trample) | a white-grey heap; the panel drew her TWICE (fallen and running) | one girl (the `twin` reprose + seed bump 1 on the grid), grey bonnet and dress, face down, smaller than the owner wanted; VLM 2/3 frames grey bonnet (1 white), dress grey |
+| T07 (full, Enfield hauls Hyde back) | beige bonnet, grey-brown dress | grey bonnet, grey dress, red sleeves at the cuffs, fair plaits; VLM 3/3 frames grey bonnet + dress |
+| take prompt | "<Picture 2> defines this **woman** alone" | "... this **girl** alone" (`age_of` reads "a girl of about nine") |
+
+Strips: `girl/girl_strip_iter3.jpg` (her sheet_front beside six frames of T05, T06, T07 -- iter4 holds the same takes),
+`girl/girl_strip_before_iter2.jpg` (iter2's takes beside the new sheet), `girl/girl_zoom_T06_T07.jpg`,
+`girl/T06_push_shuffle.jpg` (the push that framed her large and walked Hyde on the spot). Colour list:
+`girl/girl_identity.json`. The take identity row reads "0 cast on screen" on all three: facenet finds no face on a
+small cel child, so the VLM list stands in for it.
+
+**T06 is the compromise.** The crane froze twice (83 % static, G-STILL had named its held high angle); the ladder's
+move_type push toward the kerb framed her large and clear -- red sleeves, plaits, screaming -- but both push renders
+failed G-GAIT (Hyde 4.0 steps/s at 0.041 / 0.04 heights a step, wall 0.045; by eye ~10 px of ground in two
+seconds). `take_dq --attempts` kept the crane render that passed 95; the plan's motion was restored to the crane.
+
+**T19 was re-opened, not by the girl.** iter2's T19 (87.6) was destroyed by the attempt-swap fault after iter2
+shipped; the take left froze (83 %) and G-DEAD refused iter3's first assembly. Locked, push, follow and pull-back all
+froze (83-89 %); plan.py's own "pushes in a hand's breadth toward Mr. Enfield's face, across the whole shot" passed
+on both seeds (95, 100).
+
+## The clock (Seattle time)
+
+| part | wall | machine clock |
+|---|---|---|
+| v2 run + finishing pass (iter1, iter2), as before | | **5.62 h** |
+| girl fix, iter2 -> iter4 (2026-10-15, 8:19 am - 12:25 pm) | 4 h 06 min | counted whole, as wall: **4.1 h** |
+| **episode total** | | **~9.7 h, 3.7 h past the 6 h budget (owner-ordered)** |
+
+Breakdown of the girl pass: sheet candidates 16 draws ~4 min GPU; SHEET-ROW build, tests and three real-reader
+replays (~25 min of VLM reads); two LOOK step-04 ladders that redrew the pick before their faults were found and
+killed (~15 min, both reverted); grids 3 + 4 seed bumps + 1 (~6 min); step 08 (~25 min, content read of all
+panels); renders: T05-T07 x3, early round 2, a step-09 re-render of T06/T07 from a mispaired attempt graph (2),
+T19 x5, T06 x3, the master eye's T01 (1): 16 takes ~38 min; take DQ ran on the CPU lane beside the renders in step
+09, by hand `--cpu-only` after each manual retake; step 10 twice (G-DEAD refused the first) ~8 min; step 11 QC +
+master eye + T01 retake + recut + QC ~35 min. The GPU sat idle while I read strips, diagnosed T19 and T06, and wrote
+the fixes -- this pass was not run under the scheduler's two lanes end to end.
+
+## Takes (iter4)
+
+| take | verdict | attempts | hard rows ran / failed | frozen-whole | gait | identity | content | unmeasured rows |
+|---|---|---|---|---|---|---|---|---|
+| T00 | PASS 95.0 | 1 | 9 / 0 | PASS 1% static, run 0.04s | n/m (n/a by the plan) | PASS 0 cast on screen | PASS | lip-sync, held, pass-through, last-vs-panel, lag, gait |
+| T01 | PASS 100.0 | 5 | 10 / 0 | PASS 10% static, run 0.04s | n/m (n/a by the plan) | PASS 0 cast on screen | PASS | pass-through, last-vs-panel, gait |
+| T02 | PASS 73.9 | 2 | 10 / 0 | PASS 80% static, run 1.21s | n/m (n/a by the plan) | PASS 1 cast on screen | PASS | held, pass-through, last-vs-panel, gait |
+| T03 | PASS 100.0 | 1 | 9 / 0 | PASS 0% static, run 0.0s | PASS 4.0 steps/s, 0.122 heights a step over 0.48 heig | PASS 0 cast on screen | PASS | lip-sync, held, pass-through, last-vs-panel, lag |
+| T04 | PASS 72.5 | 1 | 9 / 0 | PASS 0% static, run 0.0s | PASS 3.9 steps/s, 0.050 heights a step over 0.20 heig | PASS 0 cast on screen | PASS | lip-sync, held, pass-through, last-vs-panel, lag |
+| T05 | PASS 90.0 | 1 | 9 / 0 | PASS 7% static, run 0.04s | PASS 3.0 steps/s, 0.114 heights a step over 0.34 heig | PASS 0 cast on screen | PASS | lip-sync, held, pass-through, last-vs-panel, lag |
+| T06 | PASS 95.0 | 7 | 9 / 0 | PASS 34% static, run 0.75s | PASS 4.0 steps/s, 0.059 heights a step over 0.23 heig | PASS 0 cast on screen | PASS | lip-sync, held, pass-through, last-vs-panel, lag |
+| T07 | PASS 100.0 | 1 | 9 / 0 | PASS 3% static, run 0.04s | n/m (n/a by the plan) | PASS 0 cast on screen | PASS | lip-sync, held, pass-through, last-vs-panel, lag, gait |
+| T08 | PASS 100.0 | 1 | 9 / 0 | PASS 31% static, run 0.67s | n/m (n/a by the plan) | PASS 0 cast on screen | PASS | lip-sync, held, pass-through, last-vs-panel, lag, gait |
+| T09 | PASS 50.0 | 1 | 9 / 0 | PASS 9% static, run 0.08s | n/m (n/a by the plan) | PASS 0 cast on screen | PASS | lip-sync, held, pass-through, last-vs-panel, lag, gait |
+| T10 | PASS 14.7 | 2 | 9 / 0 | PASS 33% static, run 0.96s | n/m (n/a by the plan) | PASS 0 cast on screen | PASS | lip-sync, held, pass-through, last-vs-panel, lag, gait |
+| T11 | PASS 85.0 | 1 | 9 / 0 | PASS 0% static, run 0.04s | n/m (n/a by the plan) | PASS 0 cast on screen | PASS | lip-sync, held, pass-through, last-vs-panel, lag, gait |
+| T12 | PASS 100.0 | 1 | 9 / 0 | PASS 0% static, run 0.0s | n/m (n/a by the plan) | PASS 0 cast on screen | PASS | lip-sync, held, pass-through, last-vs-panel, lag, gait |
+| T13 | PASS 100.0 | 4 | 9 / 0 | PASS 10% static, run 0.67s | n/m (n/a by the plan) | PASS 1 cast on screen | PASS | lip-sync, held, pass-through, last-vs-panel, lag, gait |
+| T14 | PASS 52.2 | 4 | 10 / 0 | PASS 89% static, run 1.58s | n/m (n/a by the plan) | PASS 1 cast on screen | PASS | pass-through, last-vs-panel, gait |
+| T15 | PASS 83.1 | 1 | 9 / 0 | PASS 59% static, run 0.08s | n/m (not measured (unmeasured: feet in frame ) | PASS 0 cast on screen | PASS | lip-sync, held, pass-through, last-vs-panel, lag, gait |
+| T16 | PASS 90.0 | 4 | 9 / 0 | PASS 8% static, run 0.04s | n/m (not measured (unmeasured: feet in frame ) | PASS 0 cast on screen | FAIL text or lettering in the picture | lip-sync, held, pass-through, last-vs-panel, lag, gait |
+| T17 | PASS 55.0 | 1 | 10 / 0 | PASS 0% static, run 0.0s | n/m (n/a by the plan) | PASS 1 cast on screen | PASS | held, pass-through, last-vs-panel, gait |
+| T18 | PASS 59.0 | 2 | 9 / 0 | PASS 55% static, run 1.46s | n/m (n/a by the plan) | PASS 0 cast on screen | PASS | lip-sync, held, pass-through, last-vs-panel, lag, gait |
+| T19 | PASS 100.0 | 1 | 9 / 0 | PASS 31% static, run 1.38s | n/m (n/a by the plan) | PASS advisory: DRIFT richard_enfield: first vs last f | PASS | lip-sync, held, pass-through, last-vs-panel, lag, gait |
+| T20 | PASS 70.0 | 1 | 9 / 0 | PASS 3% static, run 0.04s | n/m (n/a by the plan) | PASS 0 cast on screen | PASS | lip-sync, held, pass-through, last-vs-panel, lag, gait |
+| T21 | PASS 100.0 | 1 | 9 / 0 | PASS 0% static, run 0.0s | n/m (n/a by the plan) | PASS 1 cast on screen | PASS | lip-sync, held, pass-through, last-vs-panel, lag, gait |
+| T22 | PASS 95.0 | 5 | 9 / 0 | PASS 45% static, run 0.71s | n/m (not measured (unmeasured: no step rhythm) | PASS 0 cast on screen | PASS | lip-sync, held, pass-through, last-vs-panel, lag, gait |
+
+| shot | setup | size | present (setup cast) | faces | extras | enters | grid sheets | take sheets | panel people | take people |
+|---|---|---|---|---|---|---|---|---|---|---|
+| 0 | door_day | wide | L,E | L,E | 0 | - | door_day_1x1_a: L,E | L,E | 2 | 2 |
+| 1 | door_day | medium_close | L,E | E | 0 | - | door_day_1x1_s01: E | E | 1 | 1 |
+| 2 | door_day | medium_close | L,E | L,E | 0 | - | door_day_1x1_s02: L,E | L,E | 1 | 2 |
+| 3 | night_cross_street | full | E,H,G | E,H | 0 | - | night_cross_street_1x1_a: E,H | E,H | 2 | 1 |
+| 4 | night_cross_street | medium | E,H,G | H | 0 | - | night_cross_street_1x1_b: H | H | 1 | 1 |
+| 5 | night_cross_street | medium | E,H,G | G | 0 | G | night_cross_street_1x1_c: G | G | 1 | 1 |
+| 6 | night_cross_street | full | E,H,G | H,G,E | 0 | - | night_cross_street_1x1_d: H | H,G,E | 3 | 3 |
+| 7 | night_cross_street | full | E,H,G | E,H,G | 0 | - | night_cross_street_1x1_e: E | E,H,G | 3 | 3 |
+| 8 | night_door | medium | E,H | H,E | 0 | - | night_door_1x1_a: H,E | H,E | 2 | 2 |
+| 9 | night_door | insert | E,H | H | 0 | - | night_door_1x1_b: H | H | 1 | 1 |
+| 10 | night_door | insert | E,H | H,E | 0 | - | night_door_1x1_c: H,E | H,E | 2 | 2 |
+| 11 | pavement_day | medium | L,E | E,L | 0 | - | pavement_day_2x2_a: E,L | E,L | 2 | 2 |
+| 12 | pavement_day | medium | L,E | L,E | 0 | - | pavement_day_2x2_a: E,L | L,E | 2 | 2 |
+| 13 | sunday_street | medium | L,E | L,E | 0 | - | sunday_street_2x2_a: L,E | L,E | 2 | 2 |
+| 14 | sunday_street | medium_close | L,E | E,L | 0 | - | sunday_street_2x2_a: L,E | E,L | 2 | 2 |
+| 15 | sunday_street | medium | L,E | L,E | 0 | - | sunday_street_2x2_a: L,E | L,E | 2 | 2 |
+| 16 | sunday_street | insert | L,E | L | 0 | - | sunday_street_2x2_a: L,E | L | 1 | 1 |
+| 17 | sunday_street | medium_close | L,E | L | 0 | - | sunday_street_1x1_b: L | L | 1 | 1 |
+| 18 | pavement_day | medium | L,E | E,L | 0 | - | pavement_day_2x2_a: E,L | E,L | 2 | 2 |
+| 19 | pavement_day | medium_close | L,E | E,L | 0 | - | pavement_day_2x2_a: E,L | E,L | 2 | 2 |
+| 20 | pavement_day | insert | L,E | L,E | 0 | - | pavement_day_1x1_b: L,E | L,E | 2 | 2 |
+| 21 | pavement_day | medium_close | L,E | L | 0 | - | pavement_day_1x1_c: L | L | 1 | 1 |
+| 22 | door_day | wide | L,E | L,E | 1 | - | door_day_1x1_b: L | L,E | 3 | 3 |
+
+
+---
+
+# (history) Jekyll HEL ep01 v2: DQ coverage, take by take — FINAL (2026-10-15)
 
 Master: `library/20260827135504_the-strange-case-of-dr-jekyll-and-mr-hyde/episodes/ep01/cut/master_iter2.mp4`
 (RTX VSR 4x, 3072x3072, 147.33 s, sha8 **c9265e3b**). Preview: `cut/master_iter2_preview720.mp4` (720x720, 22.6 MB).
