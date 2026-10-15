@@ -1202,3 +1202,6 @@ fixes. Each lesson below cost at least one launch. Tracker rows A38-A74 in
       into one another, she falls on the cobbles, and he walks straight on over her": the panel drew the girl twice,
       fallen AND still running, and both panel gates and the eye passed it (casebook `copies`). Cured with the panel
       ladder's own `twin` reprose (`girl/cure_shot06.py`); a spike shot's first frame is one moment.
+    - **A girl of about nine was "this woman" to H3 (T05-T07, 2026-10-15).** `age_of` read digits only ("girl of 9"),
+      so the row "a small girl of about nine" stated no age and the take prompt said "<Picture 2> defines this woman
+      alone" beside a child's sheet. Ages in words, after about/some/maybe, now read (`episode_ref_official.age_of`).

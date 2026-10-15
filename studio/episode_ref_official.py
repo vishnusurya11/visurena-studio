@@ -79,11 +79,23 @@ STILL_GERUNDS = ("keeping", "holding")
 """A camera that keeps or holds its frame has no move to arrive with."""
 
 
+AGE_WORDS = {w: i for i, w in enumerate(
+    "zero one two three four five six seven eight nine ten eleven twelve thirteen fourteen fifteen "
+    "sixteen seventeen eighteen nineteen twenty".split())}
+AGE_WORDS.update({"thirty": 30, "forty": 40, "fifty": 50, "sixty": 60, "seventy": 70, "eighty": 80})
+AGE = r"(\d{1,2}|" + "|".join(AGE_WORDS) + r")"
+AGE_SAID = re.compile(r"\b(?:boy|girl|man|woman|lad|child) of (?:about |some |maybe |perhaps )?" + AGE + r"\b"
+                      r"|\b" + AGE + r" years? old\b", re.I)
+
+
 def age_of(physical: str) -> int | None:
-    """The age a row states: 'Boy of 13', 'Man of 34', '52 years old'."""
-    m = re.search(r"\b(?:boy|girl|man|woman|lad|child) of (\d{1,2})\b|\b(\d{1,2}) years? old\b",
-                  physical or "", re.I)
-    return int(m.group(1) or m.group(2)) if m else None
+    """The age a row states: 'Boy of 13', 'Man of 34', '52 years old', 'a girl of about nine'
+    (Jekyll ep01 v2: digits only made the girl 'this woman' to H3)."""
+    m = AGE_SAID.search(physical or "")
+    if not m:
+        return None
+    said = (m.group(1) or m.group(2)).lower()
+    return int(said) if said.isdigit() else AGE_WORDS[said]
 """Who is not a person at all (refs.json `gender: "creature"`), set per run.
 WotW ep04: the Martian is a bear-sized bulk that is WHOLLY HEAD, with no arms,
 no legs and no torso, and the whole reveal is that absence -- and the builder
