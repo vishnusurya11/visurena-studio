@@ -119,20 +119,44 @@ def tools_of(ctx) -> dict:
     return {k: given[k] for k in TOOLS if k in given}
 
 
+def fresh_paths(book_dir: Path, paths: list[str]) -> list[str]:
+    """The sheets drawn after the newest shipped master: no episode used them, so no
+    episode vouches for them (Jekyll 2026-10-15: the redrawn cast was read light)."""
+    masters = [m.stat().st_mtime for m in Path(book_dir).glob("episodes/ep*/cut/master*.mp4")]
+    newest = max(masters, default=0.0)
+    return [p for p in paths if (Path(book_dir) / p).stat().st_mtime > newest]
+
+
+def merged(verdicts: list) -> object:
+    """One verdict over the light and the full reads: every fault, both must pass."""
+    first = verdicts[0]
+    return first.model_copy(update={"passed": all(v.passed for v in verdicts),
+                                    "faults": [f for v in verdicts for f in v.faults],
+                                    "confidence": min(v.confidence for v in verdicts),
+                                    "reads": sum(v.reads for v in verdicts)})
+
+
 def judge_of(ctx, paths: list[str]):
     """A judge over the rows as they stand now (a redraw appends a row), the
-    rest of the pack bound; every fault is logged with its evidence."""
+    rest of the pack bound; every fault is logged with its evidence.  On a
+    grandfathered bible only the sheets the shipped episodes used read light."""
     def judge():
         rows = sheet_ladder.pack_rows(ctx.book_dir)
         bound = bound_ids(ctx.book_dir)
         light = grandfathered(ctx)
-        others = [] if light else [p for p in dict.fromkeys(r["path"] for r in rows)
-                                    if p not in paths and context_path(ctx.book_dir, p, bound)]
+        fresh = fresh_paths(ctx.book_dir, paths) if light else list(paths)
+        old = [p for p in paths if p not in fresh]
+        others = [p for p in dict.fromkeys(r["path"] for r in rows)
+                  if p not in paths and context_path(ctx.book_dir, p, bound)]
         if light:
-            ctx.log(f"first verdict: {len(paths)} bound sheet(s) grandfathered -- calibrated rows only",
-                    step_id=STEP_ID)
-        verdict = look.judge(ctx.book_dir, sheet_ladder.latest(rows, paths),
-                             bound=sheet_ladder.latest(rows, others), light=light, **tools_of(ctx))
+            ctx.log(f"first verdict: {len(old)} bound sheet(s) grandfathered -- calibrated rows only; "
+                    f"{len(fresh)} drawn after the newest master read in full", step_id=STEP_ID)
+        verdicts = ([look.judge(ctx.book_dir, sheet_ladder.latest(rows, old), light=True, **tools_of(ctx))]
+                    if old else [])
+        if fresh or not old:
+            verdicts.append(look.judge(ctx.book_dir, sheet_ladder.latest(rows, fresh),
+                                       bound=sheet_ladder.latest(rows, others + old), **tools_of(ctx)))
+        verdict = merged(verdicts)
         for f in verdict.faults:
             ctx.log(f"{GATE}: {f.kind} at {f.where} {f.evidence} {f.note}".strip(), step_id=STEP_ID,
                     level="WARNING" if f.kind in look.HARD else "INFO")

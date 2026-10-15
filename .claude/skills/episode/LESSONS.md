@@ -1172,3 +1172,33 @@ fixes. Each lesson below cost at least one launch. Tracker rows A38-A74 in
       `collect` keeps aside anything still on disk) and carries `tries` forward; a retake round renders only its
       named and missing takes (`wants_render`) -- step 11's retake rung had re-rendered T19/T22 beside shot 13.
       The `--retake` workaround is retired. NB the take_dq.py edit moves `measures_sha8`: one full re-measure.
+    - **A sheet and its row are one girl (Jekyll HEL ep01 v2, owner 2026-10-15: "the girl is not accurate in some
+      shots").** Her row said "a small knitted woollen bonnet ... a plain grey pinafore"; her HEL sheet drew a black lace
+      bonnet, a black pinafore and hollow solid-black eyes. The grids drew her from the words where her sheet was not
+      staged and from the sheet where it was: T05 a grey knitted bonnet and red sleeves, T06 a white-grey heap, T07 a
+      beige bonnet -- three girls for one. LOOK's look-back asks only the prompt's NOUNS (a bonnet, a pinafore: both
+      there), so no gate could see it. SHEET-ROW (`studio/judges/sheet_row.py`, inside LOOK at refs/04) now LISTS the
+      headwear, its colour and material, the garments' colour (whole sheet) and the eyes (whole sheet AND a head crop;
+      `hollow` only when both agree) and code compares them with the look table's base layers: HARD on headwear colour,
+      material, garment colour and eyes; the hat's kind only flags (LOOK-STATE owns it). Replay on the real reader
+      (`docs/audit/2026-10-14_jekyll_ep01_hel_v2/girl/sheet_row_replay*.jsonl`): the lace sheet against its old row
+      fails 3/3 (lace for knitted, black for grey, hollow eyes); the redrawn girl passes; of 7 other bound sheets it
+      refuses Lanyon (row "grey silk top hat", sheet black -- true) and the constable (eyes read hollow on both reads;
+      his row also says a custodian helmet and the sheet wears a peaked cap). Fix those rows or sheets before ch4/ch2.
+      Calibration on the way: whole-sheet eyes read the new girl's blue eyes `hollow` on one load and `irises` on the
+      next, the head crop read Poole's white pupilled eyes hollow -- one read is a coin, two views agreeing is a measure.
+      The girl was redrawn ONE base sheet on the HEL drawer (seed 505, 3 rounds of candidates, the words then made to
+      say the picture: a small soft grey woollen bonnet, fair plaits, blue eyes, a plain grey pinafore over a dark-red
+      long-sleeved blouse, black boots -- dossier, heads.json, looks.json, look.json tags and the bound row).
+    - **The LOOK gate had never read the Jekyll cast (2026-10-15).** With no verdict file and a shipped master the first
+      verdict is "grandfathered" -- lettering and limbs only -- so the HEL cast drawn 10-14, after nothing had shipped on
+      it, was signed light. Now only sheets OLDER than the newest master are grandfathered; a sheet drawn after it is
+      read in full (`step_04_verdict.fresh_paths`). Reading it in full then refused the girl for a missing "light": a
+      drawn look cuts the house sheet form before drawing, so its nouns are no longer asked (`look.asked_words`). And
+      the ladder's redraw_seed REPLACED the owner's pick twice before the fixes landed -- run a dry `look.judge`
+      (`girl/look_dry.py`) before step 04 on a hand-picked sheet. TaskStop on a backgrounded `uv run` leaves its python
+      child running its ladder (memory: kill the run tree by CommandLine).
+    - **Two of one person in one panel is the prose telling a sequence (T06, 2026-10-15).** Shot 6's frame told "run
+      into one another, she falls on the cobbles, and he walks straight on over her": the panel drew the girl twice,
+      fallen AND still running, and both panel gates and the eye passed it (casebook `copies`). Cured with the panel
+      ladder's own `twin` reprose (`girl/cure_shot06.py`); a spike shot's first frame is one moment.

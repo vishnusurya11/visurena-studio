@@ -29,6 +29,7 @@ from pathlib import Path
 from typing import Callable
 
 from studio import book_look, refs_pack
+from studio.judges import sheet_row
 from studio.judges.verdict import Fault, Verdict
 from studio.ladder import Ladder, Rung
 from studio.run_budget import Budget
@@ -44,7 +45,8 @@ SUPERSEDED = "superseded"
 SHEET_SIZE = (1536, 1024)
 """The size every refs_pack job draws at; a row without a job is drawn the same."""
 PACK = "refs/pack.jsonl"
-HARD = frozenset({"must_noun", "lettering", "extra_limb", "lookalike", "identity"})
+HARD = frozenset({"must_noun", "lettering", "extra_limb", "lookalike", "identity"}) | sheet_row.KINDS
+"""What climbs; a SHEET-ROW contradiction too (owner 2026-10-15, the girl's lace bonnet)."""
 BOUND_NOTE = "bound flagged: the take identity judge catches the consequence"
 SENTENCE = re.compile(r"[^.!?]+[.!?]*")
 

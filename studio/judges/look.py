@@ -8,6 +8,8 @@ The rows, per decision 2026-09-24 (judges replace the eye) §2, LOOK:
     extra_limb   DWPose: more wrists or ankles than two per head                       HARD
     lookalike    trait cards fewer than DISTINCT_AT traits apart                       HARD
     identity     facenet sheet-vs-sheet cosine at or above STRANGER                    HARD
+    row_*        sheet_row: a base sheet's headwear, its colour and material, the main
+                 garment's colour or a hollow eye contradicting its row (looks.json)   HARD
     style        DINOv3 cosine to the pack's own place pictures under STYLE_OUTLIER    flag
     voice        the cast voice sheet's nearest rival at or above SAME_SPEAKER         flag
     unread       a read that would not parse, or a card that cannot vouch             flag
@@ -33,12 +35,12 @@ from typing import Callable
 import numpy as np
 
 from studio import cast_home, describe, identity_gate, look_back
-from studio.judges import verdict as jv
+from studio.judges import sheet_row, verdict as jv
 from studio.judges.verdict import Fault, Verdict
 from studio.measure import faces, keypoints as kp, ocr
 
 NAME, VERSION = "look", "1"
-HARD = frozenset({"must_noun", "lettering", "extra_limb"})
+HARD = frozenset({"must_noun", "lettering", "extra_limb"}) | sheet_row.KINDS
 """What refuses a NEW sheet: a must noun the picture does not show (four
 recorded misses; the extractor no longer counts a name or a place as a noun),
 lettering (synthetic negatives; a recognised string), an extra limb (keypoints).
@@ -191,6 +193,15 @@ def voice_fault(book_dir, who: str, where: str) -> Fault | None:
     return None
 
 
+def asked_words(book_dir, prompt: str) -> str:
+    """The words a sheet was DRAWN from: a drawn look cuts the house sheet form before drawing
+    (book_look.UNFORMED), so its nouns are never asked (Jekyll 2026-10-15: 'light')."""
+    from studio import book_look
+    if book_dir is not None and book_look.refs_recipe(Path(book_dir)):
+        return book_look.UNFORMED.sub("", prompt or "")
+    return prompt
+
+
 def read_row(book_dir, row: dict, tools: Tools, must, acc: Reads) -> None:
     """Every row of one judged sheet; a character's face rows only on a character."""
     where, picture = row["path"], picture_of(book_dir, row)
@@ -200,10 +211,11 @@ def read_row(book_dir, row: dict, tools: Tools, must, acc: Reads) -> None:
         # the sheets step is what refuses a BOUND picture that is missing.
         # (No book at all is a stub read: every reader is injected, nothing is opened.)
         return
-    read_nouns(picture, row.get("prompt", ""), tools("reader"), must, acc, where)
+    read_nouns(picture, asked_words(book_dir, row.get("prompt", "")), tools("reader"), must, acc, where)
     read_lettering(picture, tools("ocr"), acc, where)
     if kind_of(where) == CHARACTERS:
         read_card(picture, tools("reader"), acc, where)
+        read_sheet_row(book_dir, picture, tools("reader"), acc, where)
         read_limbs(picture, tools("keypoints"), acc, where)
         vec = tools("embed")(picture)
         if vec is not None:
@@ -214,6 +226,27 @@ def read_row(book_dir, row: dict, tools: Tools, must, acc: Reads) -> None:
     if (style := style_of(picture, tools)) is not None:
         acc.styles[where] = style
 
+
+
+def base_look(book_dir, where: str):
+    """The base look a BASE sheet is drawn from (refs/looks.json), else None: a book with no
+    table, an entity off it, or a picture that is not the entity's base sheet."""
+    from studio import look_timeline
+    if book_dir is None or Path(where).name != "sheet.png":
+        return None
+    table = look_timeline.load(Path(book_dir))
+    card = table.characters.get(entity_of(where)) if table else None
+    return card.looks[card.base] if card else None
+
+
+def read_sheet_row(book_dir, picture: Path, reader, acc: Reads, where: str) -> None:
+    """SHEET-ROW (owner 2026-10-15): the sheet against its own row's words."""
+    if (base := base_look(book_dir, where)) is None:
+        return
+    acc.reads += 1
+    verdict = sheet_row.judge(picture, base.layers, base.markers, reader, where)
+    acc.readable += 0 if any(f.kind == "unread" for f in verdict.faults) else 1
+    acc.faults.extend(verdict.faults)
 
 
 def style_of(picture, tools: Tools):
