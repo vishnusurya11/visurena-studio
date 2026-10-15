@@ -7,8 +7,12 @@ Refuses unless the panels carry all three verdicts (panel_dq.json,
 panel_content.json, a current eye).  The render approval is the RENDER row
 of gates.yaml (auto, decision 2026-09-24-episode-department) and the
 episode's time ceiling: `can_afford` before the render, never a flag typed
-by hand.  Then wraps, in order: scripts/episode/takes_r2v.py --from-refs
---no-ends (the slow one), take_dq.py, take_content_check.py, take_strip.py.
+by hand.  Then two lanes (studio/take_overlap.py, decision
+2026-10-14-gpu-never-waits-for-checks): scripts/episode/takes_r2v.py --from-refs
+--no-ends renders back to back while take_dq.py --cpu-only measures each take
+as it lands, and a dq-borne cure is queued as the early round behind the first
+renders; then the GPU window (take_dq's serial pass, take_content_check.py),
+take_strip.py.
 Then the EYE_TAKES row: `judge:take_eye@1` reads the kept takes and signs
 takes/r2v/eye_<sha8>.json -- pass, or flagged at the take ladder's terminal
 rung (keep_best, or a still from the passed panel); it climbs seed -> move
@@ -52,12 +56,13 @@ def sha8(path: Path) -> str:
 
 
 def dq_current(t: Path) -> bool:
-    """The dq verdict exists and was measured on EXACTLY these bytes."""
+    """The dq verdict exists, was measured on EXACTLY these bytes, and owes no
+    GPU row (a CPU-lane verdict's deferred leak is measured after the renders)."""
     path = t.with_suffix(".dq.json")
     if not path.exists():
         return False
     doc = episode_home.read_json(path)
-    return isinstance(doc, dict) and doc.get("take_sha8") == sha8(t)
+    return isinstance(doc, dict) and not doc.get("deferred") and doc.get("take_sha8") == sha8(t)
 
 
 def content_current(t: Path) -> bool:
@@ -208,6 +213,24 @@ def dq_flags(ctx) -> list[str]:
     return ["--ceiling-spent"] if budget is not None and budget.checks_cut(STEP_ID, DQ_PASS_SECONDS) else []
 
 
+def shoot(ctx, flag: str) -> None:
+    """The two lanes (decision 2026-10-14-gpu-never-waits-for-checks): the
+    renders back to back, each take's CPU check as it lands, a dq-borne cure
+    queued as the early round right behind the first renders."""
+    from studio import take_overlap
+    extra = tuple(getattr(ctx, "extra", None) or [])
+    take_overlap.shoot(ctx, ["--from-refs", "--no-ends", flag], extra=extra, early=True,
+                       check_flags=tuple(dq_flags(ctx)))
+
+
+def gpu_window(ctx) -> None:
+    """Once the lanes are idle: the serial dq pass (cache hits, a dying check's
+    takes, a deferred leak measured with the embedder), then the VL content
+    read in one model load.  Never between renders."""
+    take_ladder.measured(ctx, "scripts/episode/take_dq.py", "take_dq", ".dq.json", *dq_flags(ctx))
+    take_ladder.measured(ctx, "scripts/episode/take_content_check.py", "take_content", ".content.json")
+
+
 def run(ctx) -> None:
     if why := panel_refusals(ctx.home):
         raise SystemExit("REFUSED: the takes wait on the panels: " + "; ".join(why))
@@ -226,11 +249,8 @@ def run(ctx) -> None:
         # round 0 forever (step 09 raised with 10 of 24 takes on disk).
         ctx.log(f"the missing takes want {cost:.0f} s and the ceiling leaves {left:.0f} s -- they "
                 f"render anyway (firsts); every retake is terminal", step_id=STEP_ID, level="WARNING")
-    extra = getattr(ctx, "extra", None) or []
-    ctx.run_script("scripts/episode/takes_r2v.py", "--from-refs", "--no-ends", flag,
-                   *extra, gpu=GPU, clock="takes")
-    take_ladder.measured(ctx, "scripts/episode/take_dq.py", "take_dq", ".dq.json", *dq_flags(ctx))
-    take_ladder.measured(ctx, "scripts/episode/take_content_check.py", "take_content", ".content.json")
+    shoot(ctx, flag)
+    gpu_window(ctx)
     ctx.run_script("scripts/episode/take_strip.py", clock="strip")
     if not takes_of(ctx.home / TAKES):
         raise SystemExit(f"REFUSED: no takes under {TAKES.as_posix()}/ after the render")

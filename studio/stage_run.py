@@ -43,6 +43,17 @@ def launch(cmd: list[str]) -> int:
     return subprocess.run(cmd).returncode
 
 
+class Finished:
+    """A process that already ran to its exit code: what `spawn` hands back
+    when the context's `launch` is injected (a test double never runs a script)."""
+
+    def __init__(self, returncode: int):
+        self.returncode = returncode
+
+    def poll(self) -> int:
+        return self.returncode
+
+
 def capture(cmd: list[str]) -> tuple[int, str]:
     """Run one script to completion with its stdout and stderr caught, for a
     step that READS what the script printed (a gate's refusals)."""
@@ -118,6 +129,13 @@ class StageContext:
         if rc:
             raise SystemExit(f"REFUSED: {script} exit {rc}")
         return rc
+
+    def spawn(self, cmd: list[str]):
+        """Start one script WITHOUT waiting (step 09's two lanes poll it); an
+        injected `launch` runs synchronously and comes back Finished."""
+        if self.launch is launch:
+            return subprocess.Popen(cmd)
+        return Finished(self.launch(cmd))
 
     def capture_script(self, script: str, *extra: str) -> tuple[int, str]:
         """Launch an existing script with the same argv `run_script` builds and

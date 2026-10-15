@@ -6,6 +6,16 @@ SKILL.md.
 
 ## Process
 
+- **The GPU sat at 6 % while the CPU measured the takes (2026-10-14).** Step 09 ran
+  render all -> take_dq all -> content all -> eye -> retake -> again; every stage waited
+  for the one before it, and a cure a CPU row had already proved (four frozen takes, a
+  shuffling walker) waited for the VL read and the eye before anything rendered it. The
+  owner: "it shouldn't wait, the GPU needs running". Two lanes now: renders back to back,
+  each take's CPU check as it lands, a dq-borne cure queued behind the first renders as
+  round 1. Replayed on that episode's own clock: 5455 s -> 4232 s (22 %), GPU idle
+  1464 -> 302 s (`take_schedule_replay.py`). The earlier "keep the GPU fed" memory said the
+  same and the code still serialised: a rule about time lives in the scheduler, not in a note.
+
 - **A gate refusal must never choose a story fact (Jekyll ep01, 2026-10-13).** A
   third-person book had no narrator. G-SPEAKER refused `narrator` five rounds
   running and printed the cast as its menu; the writer took `henry_jekyll` -- the

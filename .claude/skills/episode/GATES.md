@@ -353,9 +353,21 @@ OVERRIDE, the synthetic declaration; `RENDER_HOLD` is the brake.
   driver never auto-resumes past it. ep14 got 31 fresh ceilings.
 - **One episode, one commit.** The driver warns when HEAD moved since the episode
   started (ep14 ran on 23 commits). Fix bugs after the ship, not during it.
-- **All renders first, then the checks** (owner). A retake round renders every take,
-  THEN runs take_dq + take_content in one window; trims re-measure in that same
-  window. The H3 stack evicts the judge, so an interleaved check pays two cold loads.
+- **The GPU never waits on a check** (owner, 2026-10-14; decision
+  `2026-10-14-gpu-never-waits-for-checks`). Step 09 and every ladder round run two lanes
+  (`studio/take_overlap.py`): the GPU renders back to back; the CPU runs `take_dq
+  --cpu-only` on each take the moment it lands (`shots.json` written after its bytes).
+  The CPU lane never touches ComfyUI -- with an embedder installed the leak row is
+  DEFERRED (`deferred: ["leak"]`, never cached, never current) to the GPU window. A cure
+  the dq rows alone order (`move_type`, `seed`) queues behind the first renders as the
+  ladder's ROUND 1 (`ladder.json` `early: true`, recorded at launch, joined by later jobs,
+  cap 2 unchanged; an `EYE_TAKES early_cures` learning). The GPU checks (VL content, a
+  deferred leak) run only when no render is queued AND the CPU lane is idle -- never
+  between renders, one VL load; then the strip, the eye, round 2. The CPU rows are
+  stamped `within: "takes"` so the clock sums the wall once.
+- **Renders before ComfyUI checks** (owner, 2026-09-30) still holds: the H3 stack evicts
+  the judge, so a ComfyUI read between renders pays two cold loads. The CPU checks are
+  not ComfyUI reads.
 - **A book's title cards ALL exist before its first episode** (owner design):
   `scripts/episode/titles_batch.py <book>` bakes every missing card in one i2v
   session; drive.py runs it automatically before any launch, outside the

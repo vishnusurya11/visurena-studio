@@ -641,25 +641,32 @@ def measured(ctx, script: str, clock: str, suffix: str, *extra: str) -> None:
         ctx.log(f"{script}: faults found; the take judge reads them")
 
 
-def retake(ctx, indices: list[int], why: str, flag: str, trims: list[int] | None = None) -> None:
-    """One batched round: ALL renders first, then ONE measure window (owner,
-    2026-09-30: "first run all model executions once then do the dq check to
-    avoid cold starts").  The H3 stack stages ~40 GB and evicts the judge's
-    weights, so a measure between renders pays a cold load both ways; the
-    trimmed takes' re-measures ride the same window, never their own."""
-    ctx.run_script(RENDER, "--from-refs", "--no-ends", flag, *retake_args(indices, why), gpu=True, clock="takes")
-    clear_heads(ctx.home, list(indices))
-    # what the round named AND every take the render left unjudged (ep21 16:20Z:
-    # a retake of T01 also re-rendered a stale T02, and T02 reached QC unjudged)
+def round_takes(room: Path, indices: list[int]) -> list[int]:
+    """What the round named AND every take the render left unjudged (ep21
+    16:20Z: a retake of T01 also re-rendered a stale T02, and T02 reached QC
+    unjudged)."""
     from studio import judged
-    left = {int(n[1:]) for n in judged.unjudged_takes(Path(ctx.home) / TAKES) if re.fullmatch(r"T\d+", n)}
-    names = [str(i) for i in sorted(set(indices) | left)]
-    measured(ctx, "scripts/episode/take_dq.py", "take_dq", ".dq.json", *names, "--attempts")
+    left = {int(n[1:]) for n in judged.unjudged_takes(room) if re.fullmatch(r"T\d+", n)}
+    return sorted(set(indices) | left)
+
+
+def retake(ctx, indices: list[int], why: str, flag: str, trims: list[int] | None = None) -> None:
+    """One batched round: the renders back to back on the GPU, each retake's
+    CPU check beside them as it lands (decision 2026-10-14-gpu-never-waits-
+    for-checks), then ONE GPU window.  The checks run --cpu-only: a ComfyUI job
+    between the renders would evict the H3 stack (owner, 2026-09-30: "first run
+    all model executions once"); the heads go at launch, before any re-measure."""
+    from studio import take_overlap
+    take_overlap.shoot(ctx, ["--from-refs", "--no-ends", flag], retake=(list(indices), why), attempts=True)
+    every = round_takes(Path(ctx.home) / TAKES, indices)
+    if late := [str(i) for i in take_overlap.unmeasured(Path(ctx.home) / TAKES, every)]:
+        measured(ctx, "scripts/episode/take_dq.py", "take_dq", ".dq.json", *late, "--attempts")
     if trims:
         # no --attempts: a trim renders nothing, so there is nothing to archive
         measured(ctx, "scripts/episode/take_dq.py", "take_dq", ".dq.json",
                  *[str(i) for i in sorted(trims)])
-    measured(ctx, "scripts/episode/take_content_check.py", "take_content", ".content.json", *names)
+    measured(ctx, "scripts/episode/take_content_check.py", "take_content", ".content.json",
+             *[str(i) for i in every])
 
 
 def rungs(ctx, plan, flag: str, records: dict[int, dict] | None = None) -> judged_gate.Rungs:

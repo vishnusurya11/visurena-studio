@@ -170,3 +170,28 @@ def real_comfy(comfy_trap, monkeypatch):
 
     for name, fn in comfy_trap.items():
         monkeypatch.setattr(comfy, name, fn)
+
+
+@pytest.fixture(autouse=True)
+def lanes_on_a_bare_double(monkeypatch):
+    """Step 09's two lanes (studio/take_overlap.py) launch processes through
+    `ctx.command`.  The ladder's tests drive a bare context double that only
+    records `run_script` and advances a clock; for such a double the lanes
+    collapse to the one render launch they replace, so those tests keep
+    testing the LADDER.  The lanes themselves are tested with a full double in
+    tests/test_take_lanes_run_side_by_side.py."""
+    from studio import take_ladder, take_overlap
+
+    real = take_overlap.shoot
+
+    def shoot(ctx, base, **kw):
+        if hasattr(ctx, "command"):
+            return real(ctx, base, **kw)
+        indices, why = kw.get("retake") or ((), "")
+        args = [*base, *kw.get("extra", ())] + (take_ladder.retake_args(list(indices), why) if indices else [])
+        if indices:
+            take_ladder.clear_heads(ctx.home, list(indices))
+        ctx.run_script(take_overlap.RENDER, *args, gpu=True, clock="takes")
+        return None
+
+    monkeypatch.setattr(take_overlap, "shoot", shoot)

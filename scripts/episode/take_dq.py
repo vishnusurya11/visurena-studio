@@ -7,7 +7,7 @@ module never imported, so any call was a NameError.  Dead code that cannot run
 is worse than dead code that can -- it reads as a working gate.  Its one useful
 sentence, the FOREIGN_MARGIN calibration, already lives in `studio/cut_landing.py`.
 
-    uv run python scripts/episode/take_dq.py <codex_id> <episode> <take...> [--attempts]
+    uv run python scripts/episode/take_dq.py <codex_id> <episode> <take...> [--attempts] [--cpu-only]
 
 Every attempt on disk is measured the same way and the ladder returns ONE
 number.  HARD: no segment sits frozen more than 1.0 s at its start
@@ -335,6 +335,18 @@ def embedder():
     return take_leak.dino_embed, comfy.COMFY_ROOT / "input"
 
 
+def judge_embedder(cpu_only: bool) -> tuple:
+    """(embed, inputs, deferred rows).  `--cpu-only` is the CPU lane's run
+    WHILE the takes render (decision 2026-10-14-gpu-never-waits-for-checks):
+    an embed job would queue on ComfyUI behind every render and evict the
+    video weights, so the leak is read by the step measure and DEFERRED to
+    the GPU window.  With no embedder installed nothing is deferred."""
+    embed, inputs = embedder()
+    if cpu_only and embed is not None:
+        return None, None, ["leak"]
+    return embed, inputs, []
+
+
 def landmarker():
     """FaceMesh when its model is on disk, else None (the lag row cannot tell)."""
     from studio.measure import mouth
@@ -613,11 +625,14 @@ def cached(take_dir: Path, index: int, kept: Path, any_code: bool = False) -> di
         return None
     import json
     report = json.loads(path.read_text(encoding="utf-8"))
+    if report.get("deferred"):
+        return None                     # a CPU-lane verdict owes its GPU rows
     code = any_code or report.get("measures_sha8") == measures_sha8()
     return report if report.get("take_sha8") == take_sha8(kept) and code else None
 
 
-def main(book_id: str, number: int, indices: list[int], attempts: bool = False, spent: bool = False) -> None:
+def main(book_id: str, number: int, indices: list[int], attempts: bool = False, spent: bool = False,
+         cpu_only: bool = False) -> None:
     book = episode_home.book_dir(book_id)
     home = episode_home.home(book, number)
     episode = episode_home.load_plan(book, number)
@@ -630,7 +645,7 @@ def main(book_id: str, number: int, indices: list[int], attempts: bool = False, 
         # a take gate that measured nothing has passed nothing (audit item 6)
         raise SystemExit(f"episode {number}: no takes to judge under "
                          f"{episode_home.relative(book, take_dir)}")
-    embed, inputs = embedder()
+    embed, inputs, deferred = judge_embedder(cpu_only)
     from studio import gait
     judges = {"home": home, "embed": embed, "inputs": inputs, "landmarker": landmarker(), "person": gait.yolo()}
     for index in wanted(records, indices):
@@ -668,10 +683,13 @@ def main(book_id: str, number: int, indices: list[int], attempts: bool = False, 
         report["strip"] = episode_home.relative(book, tv.strip(v, kept, take_cells, work / f"take_T{index:02d}.png"))
         report["take_sha8"] = take_sha8(kept)
         report["measures_sha8"] = measures_sha8()
+        if deferred:
+            report["deferred"] = deferred
         episode_home.write_json(take_dir / f"T{index:02d}.dq.json", report)
         print(row(index, v, best.name if attempts else "", len(files)), flush=True)
 
 
 if __name__ == "__main__":
     main(sys.argv[1], int(sys.argv[2]), [int(a) for a in sys.argv[3:] if a.isdigit()],
-         attempts="--attempts" in sys.argv, spent="--ceiling-spent" in sys.argv)
+         attempts="--attempts" in sys.argv, spent="--ceiling-spent" in sys.argv,
+         cpu_only="--cpu-only" in sys.argv)

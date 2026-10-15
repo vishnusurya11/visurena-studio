@@ -63,8 +63,11 @@ def take(ctx, passing: bool = True) -> Path:
     t.write_bytes(b"take")
     gates = [{"name": "jump", "value": 0.9, "ok": passing, "hard": True, "note": "0.90", "penalty": 0.0}]
     # judged() is sha-bound now: the dq verdict names the bytes it measured
+    # ...and the measuring code (studio/take_overlap): a current verdict is not measured again
+    from studio import take_overlap
     episode_home.write_json(room / "T01.dq.json", {"file": "T01.mp4", "gates": gates, "attempts": [],
-                                                   "take_sha8": step.sha8(t)})
+                                                   "take_sha8": step.sha8(t),
+                                                   "measures_sha8": take_overlap.measuring_code()})
     episode_home.write_json(room / "T01.content.json", {"passed": True, "faults": []})
     episode_home.write_json(room / "shots.json", [{"index": 1, "shots": [1], "measured_seconds": 4.0, "frames": 101,
                                                    "rel_path": "episodes/ep05/takes/r2v/T01.mp4"}])

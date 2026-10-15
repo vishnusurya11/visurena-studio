@@ -459,7 +459,14 @@ first second that is not the panel. The gates passed ep09 T02 at 92.6 before
 | the same fault on a fresh seed | the PLAN: re-aim the move at what the cell holds (ep09 shots 14, 15, 18 repeated on new seeds) |
 | a person pinned while the set slides | the plan: push in or crane instead of the truck (G-ANCHOR) |
 
-Retakes run in ONE batched round, after the take gates AND `judge:take_eye`:
+**The GPU never waits on a check (owner, 2026-10-14).** Step 09 runs the renders and the CPU
+checks side by side (`studio/take_overlap.py`): never run `take_dq` by hand while a render is
+running unless it is `--cpu-only` (a ComfyUI job between renders evicts the video weights), and
+never wait for the checks before queueing a render. A take the dq rows alone condemn (frozen,
+held, camera-move, gait) is retaken in the round that the first renders' tail runs into.
+`scripts/episode/take_schedule_replay.py <book> <n>` projects any episode's step 09 both ways.
+
+Retakes run in ONE batched round per ladder rung (the early round is round 1, the eye's is round 2):
 `takes_r2v.py <book> <n> --from-refs --approved=render --retake=a,b --why="<gate row or finding>"`.
 `--why` is required; a round of one take is refused unless `--last` declares
 it the last round for this master. The failed take is kept as
