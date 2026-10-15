@@ -14,12 +14,28 @@ record field somebody has to remember to keep up to date.
 from __future__ import annotations
 
 import json
+import os
 from pathlib import Path
 
 RENDER_NODE = "MiniMaxH3ReferenceToVideo"
 UNFINISHED_S = 60.0
 """A graph this much newer than its video belongs to a render that never landed
 (a real render takes minutes after its graph is written)."""
+
+
+def graph_of(take: Path) -> Path:
+    """The graph a take ran with, beside it: `T05.mp4` -> `T05.graph.json`."""
+    return Path(take).with_suffix(".graph.json")
+
+
+def stamp_landed(take: Path) -> None:
+    """A take that became the kept take NOW has landed now.
+
+    Jekyll HEL ep01 v2 (2026-10-15): `take_dq --attempts` renamed an hour-old
+    attempt into T22.mp4; a rename keeps the mtime, the graph beside it was
+    younger than UNFINISHED_S allows, and the kept take read as an interrupted
+    render -- re-rendered over, twice on T19."""
+    os.utime(take)
 
 
 def prompt_of(graph: dict) -> str | None:

@@ -466,9 +466,7 @@ def settle(take_dir: Path, index: int, verdicts: dict) -> Path:
     kept = take_dir / f"T{index:02d}.mp4"
     best = max(verdicts, key=lambda p: tv.rank_key(verdicts[p]))
     if best != kept:
-        if kept.exists():
-            kept.rename(episode_home.next_fail(take_dir, index))
-        best.rename(kept)
+        episode_home.swap_in(take_dir, index, best)
     return best
 
 

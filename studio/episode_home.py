@@ -222,6 +222,43 @@ def next_fail(take_dir: Path, index: int) -> Path:
     return room / f"T{index:02d}_fail{max(used, default=0) + 1}.mp4"
 
 
+def keep_aside(out: Path, index: int) -> Path | None:
+    """The take file alone to the next `T<NN>_failN.mp4`; None when there is none.
+    No take file is ever written over (Jekyll HEL ep01 v2: T19, T22 lost)."""
+    out = Path(out)
+    if not out.exists():
+        return None
+    fail = next_fail(out.parent, index)
+    out.rename(fail)
+    return fail
+
+
+def displace(out: Path, index: int, keep_graph: bool = False) -> Path | None:
+    """A take AND the graph it ran with to the next `T<NN>_failN`, so a roll
+    swapped back in later carries its own record.  `keep_graph` leaves a copy
+    beside `out` for an incoming roll that has none of its own."""
+    import shutil
+    from studio.take_currency import graph_of
+    graph, fail = graph_of(out), keep_aside(out, index)
+    if fail is not None and graph.exists():
+        (shutil.copy2 if keep_graph else Path.replace)(graph, graph_of(fail))
+    return fail
+
+
+def swap_in(take_dir: Path, index: int, best: Path) -> None:
+    """`best` becomes `T<NN>.mp4` with its own graph, stamped landed now: a kept
+    attempt is a FINISHED take.  Jekyll HEL ep01 v2 (2026-10-15): the old mtime
+    under a newer graph read as an interrupted render, re-rendered over."""
+    from studio.take_currency import graph_of, stamp_landed
+    kept = Path(take_dir) / f"T{index:02d}.mp4"
+    own = graph_of(best).exists()
+    displace(kept, index, keep_graph=not own)
+    Path(best).rename(kept)
+    if own:
+        graph_of(best).replace(graph_of(kept))
+    stamp_landed(kept)
+
+
 def work_dir(book: Path, number: int, engine: str = "i2v") -> Path:
     """Scratch for a render: composited guide audio, reference strips."""
     return takes_root(book, number) / "work"

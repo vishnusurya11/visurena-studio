@@ -985,6 +985,7 @@ def collect(c: dict, prompt_id: str, out: Path) -> dict:
     if video is None:
         raise RuntimeError(f"take {c['index']} produced no video: {made}")
     out.parent.mkdir(parents=True, exist_ok=True)
+    episode_home.keep_aside(out, c["index"])       # never written over (Jekyll ep01 v2)
     out.write_bytes(video.read_bytes())
     retire_verdicts(out)
     phases_of(out, c, record)
@@ -1219,6 +1220,31 @@ def mark_retake(c: dict, tries: int, why: str) -> None:
     c["retake_why"] = why
 
 
+STALE_WHY = "not current to its card"
+"""The reason a take re-rendered because its card moved carries into its record."""
+
+
+def wants_render(c: dict, out: Path, records: dict, retake: list[int] | None, current) -> bool:
+    """Whether this card renders in this run.  A RETAKE ROUND renders its named
+    takes and the missing ones, never another kept take: step 11's retake of
+    shot 13 re-rendered T19 and T22 beside it (Jekyll HEL ep01 v2).  A first
+    round renders what is not current to its card (`current`, called lazily)."""
+    if retake:
+        return c["index"] in retake or not out.exists()
+    rec = records.get(c["index"])
+    return not (rec is not None and rec.get("shots") == c["shots"] and current())
+
+
+def make_room(c: dict, out: Path, records: dict, why: str | None) -> None:
+    """Before a render: the take on disk and its graph go to attempts/ (never
+    written over), and a named retake (`why` not None) or a take with a record
+    renders on its NEXT seed -- a stale re-render had reset `tries` and repeated
+    try 0's seed (Jekyll HEL ep01 v2)."""
+    episode_home.displace(out, c["index"])
+    if why is not None or c["index"] in records:
+        mark_retake(c, records.get(c["index"], {}).get("tries", 0) + 1, STALE_WHY if why is None else why)
+
+
 def refuse_stale_cells(boards: Path) -> None:
     """NO CELL FROM AN OLDER NUMBERING.  A cell is named by shot index, so a plan
     that gains or loses a shot re-points every name after it at a different
@@ -1301,19 +1327,15 @@ def main(book_id: str, number: int, retake: list[int] | None = None, approved: b
     jobs, wheres = [], {}
     for c in built:
         out = take_dir / f"T{c['index']:02d}.mp4"
-        if retake and c["index"] in retake:
-            if out.exists():
-                out.rename(episode_home.next_fail(take_dir, c["index"]))
-            mark_retake(c, records.get(c["index"], {}).get("tries", 0) + 1, why)
         # NOT the shot grouping alone.  MEASURED 2026-09-20 on ep05: a reviewer pass
         # rewrote seven shots and the prop filter dropped a dome from the rest, so all
         # 28 prompts changed while the grouping did not -- every take would have been
         # kept, the fix reaching no picture while DQ repeated the old numbers.
-        elif (c["index"] in records and records[c["index"]].get("shots") == c["shots"]
-              and take_currency.is_current(c.get("prompt") or "", out,
-                                           pictures=card_pictures(c, book, number),
-                                           canvas=(W, H))):
+        current = (lambda c=c, out=out: take_currency.is_current(
+            c.get("prompt") or "", out, pictures=card_pictures(c, book, number), canvas=(W, H)))
+        if not wants_render(c, out, records, retake, current):
             continue
+        make_room(c, out, records, why if retake and c["index"] in retake else None)
         graph = graph_for(c, book, number, take_dir)
         episode_home.write_json(out.with_suffix(".graph.json"), graph)  # the exact graph this take ran with
         jobs.append((c, graph))

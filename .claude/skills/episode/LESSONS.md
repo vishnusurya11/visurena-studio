@@ -1165,3 +1165,10 @@ fixes. Each lesson below cost at least one launch. Tracker rows A38-A74 in
     - **Identity DRIFT that follows the action is the plan's.** T19 ("lowers his eyes and shakes his head", push-in)
       read Enfield 0.52-0.75 on 7 renders; the moving takes all drift (his face goes under the brim), the one
       locked replan froze (82 %). A take's verb that hides the face cannot pass a first-vs-last identity measure.
+    - **A kept attempt is a finished take; no take file is written over (fix, 2026-10-15).** The attempt-swap fault
+      above is closed: `episode_home.swap_in` moves each roll WITH its graph (`T<NN>_failN.graph.json`) and stamps
+      the swapped-in take landed now (`take_currency.stamp_landed`), so currency reads it finished and step 09's
+      `done()` no longer calls it stale; `takes_r2v` archives before any render (`make_room` -> `displace`, and
+      `collect` keeps aside anything still on disk) and carries `tries` forward; a retake round renders only its
+      named and missing takes (`wants_render`) -- step 11's retake rung had re-rendered T19/T22 beside shot 13.
+      The `--retake` workaround is retired. NB the take_dq.py edit moves `measures_sha8`: one full re-measure.
