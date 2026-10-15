@@ -101,3 +101,16 @@ def test_a_still_g_dead_would_refuse_is_retired_from_the_cut(tmp_path):
                                                   "12": {"panel": "q.png", "seconds": 2.0, "decided": 1e10}}),
                                       encoding="utf-8")
     assert list(tl.live_stills(home)) == [12]
+
+
+def test_assemble_reads_the_same_live_stills(tmp_path):
+    """assemble kept its own reader of stills.json and cut T10 (6.75 s) as a still after the
+    ladder retired it: G-DEAD refused the master again (ep01 v2, 00:00Z)."""
+    import json
+    from scripts.episode import assemble
+    room = tmp_path / "takes"
+    room.mkdir()
+    (room / "stills.json").write_text(json.dumps({"10": {"panel": "p.png", "seconds": 6.75, "decided": 1e10},
+                                                  "12": {"panel": "q.png", "seconds": 2.0, "decided": 1e10}}),
+                                      encoding="utf-8")
+    assert list(assemble.stills_of(room, tmp_path)) == [12]

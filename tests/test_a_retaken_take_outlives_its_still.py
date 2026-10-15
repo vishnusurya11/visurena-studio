@@ -22,7 +22,7 @@ def test_a_take_rendered_after_its_still_row_drops_the_still(tmp_path):
     room = _room(tmp_path)
     (room / "T07.mp4").write_bytes(b"take")
     episode_home.write_json(room / "stills.json",
-                            {"7": {"panel": "episodes/ep05/storyboard/shot_07.png", "seconds": 3.0,
+                            {"7": {"panel": "episodes/ep05/storyboard/shot_07.png", "seconds": 2.0,
                                    "decided": time.time() - 3600}})
     assert assemble.stills_of(room, tmp_path) == {}
 
@@ -33,7 +33,7 @@ def test_a_take_older_than_its_still_row_keeps_the_still(tmp_path):
     take.write_bytes(b"take")
     os.utime(take, (time.time() - 7200, time.time() - 7200))
     episode_home.write_json(room / "stills.json",
-                            {"7": {"panel": "episodes/ep05/storyboard/shot_07.png", "seconds": 3.0,
+                            {"7": {"panel": "episodes/ep05/storyboard/shot_07.png", "seconds": 2.0,
                                    "decided": time.time() - 3600}})
     assert list(assemble.stills_of(room, tmp_path)) == [7]
 
@@ -41,7 +41,7 @@ def test_a_take_older_than_its_still_row_keeps_the_still(tmp_path):
 def test_a_row_without_a_stamp_is_dated_by_the_file(tmp_path):
     room = _room(tmp_path)
     episode_home.write_json(room / "stills.json",
-                            {"7": {"panel": "episodes/ep05/storyboard/shot_07.png", "seconds": 3.0}})
+                            {"7": {"panel": "episodes/ep05/storyboard/shot_07.png", "seconds": 2.0}})
     past = time.time() - 3600
     os.utime(room / "stills.json", (past, past))
     (room / "T07.mp4").write_bytes(b"take")

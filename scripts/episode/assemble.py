@@ -599,9 +599,11 @@ def stills_of(take_dir: Path, book: Path) -> dict[int, Path]:
     path = Path(take_dir) / "stills.json"
     if not path.exists():
         return {}
+    from studio import dead_footage
     doc = episode_home.read_json(path)
     return {int(k): Path(book) / v["panel"] for k, v in doc.items()
-            if not retaken(Path(take_dir) / f"T{int(k):02d}.mp4", v.get("decided", path.stat().st_mtime))}
+            if float(v.get("seconds") or 0.0) <= dead_footage.STILL_LIMIT_S     # G-DEAD would refuse it
+            and not retaken(Path(take_dir) / f"T{int(k):02d}.mp4", v.get("decided", path.stat().st_mtime))}
 
 
 def retaken(take: Path, decided: float) -> bool:
