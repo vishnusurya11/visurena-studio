@@ -1266,3 +1266,10 @@ fixes. Each lesson below cost at least one launch. Tracker rows A38-A74 in
       that panel with its people taken out, and every setup that shows the door stands on it or one edit of
       it. Derived states are looked at: "knife nicks on the mouldings" drew a lettered lintel, "the brass
       keyhole polished bright" a sunlit new red door; a day setup takes the base itself.
+    - **iter5 run lessons (Jekyll ep01, 2026-10-15).** (1) `step_07_board --seed-bump=N` redraws EVERY grid, not
+      the ones moved aside: three grids meant, seventeen drawn, every take stale (~70 min); redraw one grid with
+      `grids.py <setup> 1 1 <tag> --shots=N --seed-bump=1`. (2) A fresh clock must drop the old timing rows too:
+      `run_clock.spent` sums legacy timing.jsonl rows before the first run row, so the iter5 rungs were closed on
+      iter1-4's 8220 s until the rows were moved aside. (3) An insert whose panel is drawn as the whole man on
+      every seed freezes on every move type (push, track, pan, pull, refs-only); the words follow the picture --
+      T09 passed once it said the man going in at the door.

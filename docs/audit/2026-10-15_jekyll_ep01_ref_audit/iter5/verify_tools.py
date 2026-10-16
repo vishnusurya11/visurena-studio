@@ -44,8 +44,10 @@ def refs() -> None:
 
 
 def frames(take: Path, n: int = 4) -> list[Image.Image]:
-    dur = float(subprocess.run(["ffprobe", "-v", "error", "-show_entries", "format=duration", "-of", "csv=p=0",
-                                str(take)], capture_output=True, text=True).stdout.strip())
+    import cv2
+    cap = cv2.VideoCapture(str(take))
+    dur = cap.get(cv2.CAP_PROP_FRAME_COUNT) / (cap.get(cv2.CAP_PROP_FPS) or 24)
+    cap.release()
     out = []
     for k in range(n):
         t = min(dur - 0.05, dur * k / (n - 1))
