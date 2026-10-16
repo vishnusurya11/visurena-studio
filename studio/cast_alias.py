@@ -19,7 +19,9 @@ import re
 
 SAID = r"(?:\b(?:[Tt]he|[Aa]n?)\s+[\w'-]+(?:\s+[\w'-]+){0,2}|\b(?:Mr|Mrs|Dr|Miss)\.?\s+[A-Z][\w'-]+)"
 TAG = re.compile(rf"(?P<said>{SAID})\s*\((?P<frags>[^()]{{2,300}})\)")
-LABELLED = re.compile(r"(<Subject \d+>|<image\d+>|<Picture \d+>)\s*\([^()]*\)")
+LABELLED = re.compile(r"(<Subject \d+>|<image\d+>)\s*\((?!S\d+\))(?![^()]*\[Shot)[^()]*\)")
+"""A parenthetical after a person's label, never a speaker id "(S1)" nor a retention note
+"(the man in [Shot 1])" -- those are the grammar's own, not a description."""
 
 
 def _words(text: str) -> str:

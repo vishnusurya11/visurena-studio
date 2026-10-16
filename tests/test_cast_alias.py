@@ -66,3 +66,8 @@ def test_strip_labelled_drops_a_parenthetical_after_any_label():
 
 def test_strip_labelled_keeps_a_parenthetical_that_is_not_after_a_label():
     assert ca.strip_labelled("a cheque (folded) and <Subject 1>") == "a cheque (folded) and <Subject 1>"
+
+
+def test_strip_labelled_keeps_the_grammars_own_parentheticals():
+    text = "<Subject 1> (S1), on screen, says: and <Subject 2> (the man in [Shot 1]): kept"
+    assert ca.strip_labelled(text) == text
