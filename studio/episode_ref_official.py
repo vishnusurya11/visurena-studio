@@ -482,8 +482,8 @@ and ep07 ended with the camera moving through the last frame."""
 LEFT_FRAME = re.compile(r"\b(?:ha(?:s|ve) left|leaves?|gone|out of frame|carried out)\b", re.I)
 NP_END = re.compile(r"(?<![\w-])(stands?|fills?|filling|has|have|is|are|sits?|lies?|rests?|holds?|at|in|on|"
                     r"along|with|over|under|from|to|by|inside|seen|lit|drawn)(?![\w-])", re.I)
-FINITE = re.compile(r"\b(?:turns?|opens?|closes?|points?|lifts?|walks?|strikes?|falls?|runs?|keeps?|pushes|"
-                    r"pulls?|takes?|grips?|thrusts?|swings?|reaches)\b", re.I)
+FINITE = re.compile(r"\b(?:turns|opens|closes|points|lifts|walks|strikes|falls|runs|keeps|pushes|"
+                    r"pulls|takes|grips|thrusts|swings|reaches)\b", re.I)
 """A verb inside a cut end noun: "with the knuckly hand turns the key now in frame" (T9)."""
 CLAUSE = re.compile(r",|\band (?=(?:the|a|an|both|his|her|their|its|two|three|four|five|six)\b|[A-Z])")
 """Where a layout's clauses part: a comma, or an `and` that opens a new subject --

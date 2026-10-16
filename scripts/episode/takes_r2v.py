@@ -1208,9 +1208,9 @@ def lint_faults(book: Path, plan: dict, built: list[dict]) -> list[str]:
     return out + [f"plan {f}" for f in prompt_lint.plan_faults(plan, rows)]
 
 
-def lint_wall(book: Path, number: int, built: list[dict]) -> None:
+def lint_wall(book: Path, episode, built: list[dict]) -> None:
     """HARD: a card the prompt lint refuses never reaches the GPU."""
-    plan = episode_home.read_json(episode_home.plan_path(book, number))
+    plan = episode.model_dump(mode="json") if hasattr(episode, "model_dump") else {}
     if faults := lint_faults(book, plan, built):
         raise SystemExit("PROMPT LINT refuses the takes:\n  " + "\n  ".join(faults))
     print(f"PROMPT LINT: clean ({len(built)} take prompts and the plan)", flush=True)
@@ -1221,7 +1221,7 @@ def prompts(book_id: str, number: int) -> None:
     built = cards(book, episode, number)
     out = episode_home.write_json(episode_home.takes_dir(book, number, "r2v") / "prompts.json", built)
     print(f"take cards -> {out}", flush=True)
-    lint_wall(book, number, built)
+    lint_wall(book, episode, built)
 
 
 def retake_list(argv: list[str]) -> list[int]:
@@ -1367,7 +1367,7 @@ def main(book_id: str, number: int, retake: list[int] | None = None, approved: b
             "a last frame reached the take prompts, which warps the render "
             "(docs/calibration/end_frames.md):\n  "
             + "\n  ".join(f"T{i:02d}: {'; '.join(said)}" for i, said in sorted(pinned.items())))
-    lint_wall(book, number, built)
+    lint_wall(book, episode, built)
     # Every graph is built first and the whole run is queued in one go, so the
     # takes execute consecutively and the weights load once (owner, 2026-09-12).
     jobs, wheres = [], {}
