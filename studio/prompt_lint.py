@@ -198,7 +198,7 @@ def p9_end_noun(text: str) -> list[str]:
     """"with the now in frame" and end noun phrases that hold a clause."""
     out = []
     for m in re.finditer(r"\bwith ((?:(?!\bwith\b)[^,.;])*?)\s*now in frame", text):
-        words = m.group(1).lower().split()
+        words = m.group(1).lower().replace("face to face", "face-to-face").split()
         if len(words) <= 1 or finite_in(words):
             out.append(fault("P9", "garbled end noun", m.group(0)))
     return out
@@ -253,12 +253,18 @@ def covered(noun: str, facts: dict) -> bool:
     return noun.lower() in words
 
 
+def aimless(text: str) -> str:
+    """The text without "toward <someone>": a person aimed at off the frame's edge is not
+    in the picture (the take builder aims such a move at the edge, `ro.offscreen`)."""
+    return re.sub(r"(?i)\btoward (?:the |mr\. |mrs\. )?[\w'-]+(?: [\w'-]+)?", " ", text)
+
+
 def p13_people(text: str, facts: dict) -> list[str]:
     """A person in the words who is neither staged, an extra, nor the setup's crowd."""
     staged = set(facts.get("faces") or [])
     out = [fault("P13", "unstaged person", f"'{a}' ({who}) is not staged")
            for who, names in (facts.get("aliases") or {}).items() if who not in staged
-           for a in names if _has(a, text)]
+           for a in names if _has(a, aimless(text))]
     if int(facts.get("extras") or 0) > 0 or (facts.get("crowd") or "").strip():
         return out
     rest = unbound(text, facts)
@@ -405,7 +411,7 @@ def shot_facts(plan: dict, shot: dict, table: dict) -> dict:
 
 def shot_plan_faults(plan: dict, shot: dict, rows: dict, table: dict) -> list[str]:
     """P3, P11, P12, P13, P17 on one plan shot."""
-    out = cure_led(shot.get("frame") or "")
+    out = []      # a cure-led frame is the drawer's; P3 judges the take text (iter5)
     for f in PLAN_FIELDS:
         out += p12_tags(shot.get(f) or "", rows)
     out += p11_dangling(f"{shot.get('motion') or ''} {shot.get('camera') or ''}")

@@ -71,3 +71,22 @@ def test_strip_labelled_keeps_a_parenthetical_that_is_not_after_a_label():
 def test_strip_labelled_keeps_the_grammars_own_parentheticals():
     text = "<Subject 1> (S1), on screen, says: and <Subject 2> (the man in [Shot 1]): kept"
     assert ca.strip_labelled(text) == text
+
+
+def test_retag_keeps_only_the_fragments_the_row_says_now():
+    rows = {"u": "lank grey hair black bowler hat with a pale grey band long black double-breasted overcoat"}
+    text = "the lawyer (black bowler hat, lawyer's dark suit) turns"
+    assert ca.retag(text, rows) == "the lawyer (black bowler hat) turns"
+
+
+def test_retag_drops_the_parenthetical_when_nothing_is_said_any_more():
+    rows = {"u": "lank grey hair black bowler hat", "e": "receding brown hair light-brown top hat"}
+    text = "the lawyer (black bowler hat) and Mr. Enfield (light-brown top hat, fashionable dark frock coat)"
+    assert ca.retag(text, rows) == "the lawyer (black bowler hat) and Mr. Enfield (light-brown top hat)"
+    assert ca.retag("the man (a red parasol) waits", rows) == "the man (a red parasol) waits"
+
+
+def test_retag_leaves_a_tag_whose_every_fragment_is_gone_bare():
+    rows = {"g": "fair hair in two plaits small soft grey woollen bonnet"}
+    assert ca.retag("the girl (fair hair in two plaits, small knitted woollen bonnet)", rows) == \
+        "the girl (fair hair in two plaits)"

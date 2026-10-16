@@ -72,3 +72,17 @@ def bind(text: str, labels: dict[str, str], table: dict[str, list[str]]) -> str:
 def strip_labelled(text: str) -> str:
     """A label is already defined: a parenthetical after one is a second description."""
     return LABELLED.sub(r"\1", text)
+
+
+def retag(text: str, rows: dict[str, str]) -> str:
+    """Each tag kept to the fragments its owner's CURRENT row still says, word for word;
+    a tag whose owner no row claims is left as written. A row rewritten to its sheet
+    (owner 2026-10-15) otherwise never reached a plan.json written before it."""
+    def one(m: re.Match) -> str:
+        frags = [f.strip() for f in m.group("frags").split(",") if f.strip()]
+        who = owner_of(frags, rows)
+        if who is None:
+            return m.group(0)
+        kept = [f for f in frags if _words(f) in _words(rows[who])]
+        return f"{m.group('said')} ({', '.join(kept)})" if kept else m.group("said")
+    return TAG.sub(one, text)

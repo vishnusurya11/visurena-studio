@@ -169,9 +169,12 @@ def test_speaker_ids_count_dialogue_voices_only():
 
 
 def test_a_speaker_is_described_the_first_time_and_only_the_first_time():
+    # a STAGED speaker is defined in subject_definitions and never described again
+    # (owner 2026-10-15, Jekyll ep01 T5); an unstaged one is described here, once
     first = ro.speaker_intro("sherlock_holmes", "S1", PHYS["sherlock_holmes"], set(), ["sherlock_holmes"])
-    assert first == ("<Subject 1> (S1), on screen, a man in his late twenties, with a clipped English "
-                     "voice at an even pace, says:")
+    assert first == "<Subject 1> (S1), on screen, with a clipped English voice at an even pace, says:"
+    unstaged = ro.speaker_intro("sherlock_holmes", "S1", PHYS["sherlock_holmes"], set(), [])
+    assert ", on screen, a man in his late twenties, with a clipped English" in unstaged
     later = ro.speaker_intro("sherlock_holmes", "S1", PHYS["sherlock_holmes"], {"sherlock_holmes"},
                              ["sherlock_holmes"])
     assert later == "<Subject 1> (S1) says:"

@@ -234,6 +234,24 @@ def adopt_names(rows: list[dict]) -> None:
             ro.CREATURES.add(r["entity_id"])
 
 
+def plan_texts(episode) -> list[str]:
+    """Every shot field a tag can sit in, cuts included."""
+    fields = ("frame", "motion", "at_rest", "end", "camera", "changed")
+    shots = list(getattr(episode, "shots", None) or [])
+    framed = shots + [c for s in shots for c in getattr(s, "cuts", [])]
+    return [getattr(f, k, "") or "" for f in framed for k in fields]
+
+
+def adopt_aliases(episode, rows: list[dict]) -> None:
+    """The plan's epithets ("the lawyer") bound to the rows their tags quote (owner
+    2026-10-15: an epithet always binds to its staged Subject)."""
+    from studio import cast_alias
+    words = {r["entity_id"]: " ".join([r.get("physical", "")] + list((r.get("wardrobe") or {}).values()))
+             for r in rows if r.get("kind") == "character"}
+    ro.ALIASES.clear()
+    ro.ALIASES.update(cast_alias.aliases(plan_texts(episode), words))
+
+
 FRONT_SHEETS = os.environ.get("TAKE_FRONT_SHEETS", "1") != "0"
 """Stage the one-figure crop (studio.sheet_front) in place of the whole sheet.
 ep16 attempt 4: clean panels, yet T11 put two copies of Mrs. Elphinstone in
@@ -389,9 +407,14 @@ def staged_facts(sizes: list[str], from_refs: bool, faces: list[str] | None = No
     return {"has_plate": sq.places_the_plate(sizes)}
 
 
-def mode_said(from_refs: bool) -> str:
+def mode_said(from_refs: bool, panel: bool = False) -> str:
     """The card's own account of what was staged.  A record that claims a cell it
-    never staged is the artefact a later reader measures the render against."""
+    never staged is the artefact a later reader measures the render against
+    (Jekyll ep01 iter4: "no storyboard cell" on 23 takes that staged a panel)."""
+    if from_refs and panel:
+        return ("reference-to-video from the references (--from-refs): a cast sheet for every person "
+                "the take shows + this shot's storyboard panel as its first frame (the place); the "
+                "dialogue wavs at their offsets anchored at frame 0")
     if from_refs:
         return ("reference-to-video from the references alone (--from-refs): a cast sheet for every "
                 "face the take shows + the location plate, always; no storyboard cell, nothing "
@@ -554,7 +577,7 @@ def card(book: Path, episode: Episode, number: int, take: dict, measured: dict) 
                       **staged_facts(sizes, FROM_REFS, faces, panel=panel is not None))
     return {"index": first.index, "shots": take["shots"], "section": first.section, "setup": first.setup,
             "lane": "dialogue" if spoken else "narration", "workflow": (NARRATION_BASE if not spoken else BASE) + " + anchors",
-            "model": "MiniMax-H3 ref2va + Ref2V 8-step LoRA", "mode": mode_said(FROM_REFS),
+            "model": "MiniMax-H3 ref2va + Ref2V 8-step LoRA", "mode": mode_said(FROM_REFS, panel is not None),
             "refs": [ref_name(book, p) for p in refs], "faces": faces, "ref_image_size": REF_IMAGE_SIZE,
             "anchors": anchors, "audio": [(p.name, a) for p, a in voice] or "silence",
             "width": W, "height": H, "fps": FPS, "placed_seconds": take["seconds"], "frames": take["frames"],
@@ -769,8 +792,8 @@ def dry_prompt(book: Path, episode: Episode, number: int, take: dict, measured: 
     at = {l.index: (measured[l.index]["at"], measured[l.index]["seconds"]) for l in lines}
     return ro.build(shots, take["placed"], lines, at, take["frames"], faces, physicals(book, setup),
                     setup.described, narrator_of(episode.lines), ends=[], setup=setup,
-                    refs=None, fps=FPS, props=props, panel=False,
-                    **staged_facts(sizes, from_refs, faces, panel=False))
+                    refs=None, fps=FPS, props=props, panel=from_refs,
+                    **staged_facts(sizes, from_refs, faces, panel=from_refs))
 
 
 def parse_faults(err) -> list[str]:
@@ -1137,8 +1160,11 @@ def adopt_canon(book: Path, episode: Episode) -> None:
     house_style.adopt_atmosphere(book_look.atmosphere(book))       # the book's fog (Jekyll ep01)
     house_style.adopt_panel_look(book_look.panel_look(book))       # the panel in the book's look
     house_style.adopt_places(place_names(book))
-    adopt_names(episode_home.read_json(book / "refs" / "refs.json").get("refs", [])
-                if (book / "refs" / "refs.json").exists() else [])
+    rows = (episode_home.read_json(book / "refs" / "refs.json").get("refs", [])
+            if (book / "refs" / "refs.json").exists() else [])
+    adopt_names(rows)
+    adopt_aliases(episode, rows)
+    ro.DRAWN = book_look.drawn(book)                              # a cel take has no lens
 
 
 def opened(book_id: str, number: int):
@@ -1172,11 +1198,30 @@ def opened(book_id: str, number: int):
     return book, episode
 
 
+def lint_faults(book: Path, plan: dict, built: list[dict]) -> list[str]:
+    """The prompt lint (P1-P18, `studio.prompt_lint`) over every built card and the plan:
+    the classes the Jekyll ep01 iter4 audit found, caught before any GPU second."""
+    from studio import prompt_lint
+    out = [f"T{c['index']:02d} {f}" for c in built
+           for f in prompt_lint.take_faults(c.get("prompt") or "", prompt_lint.facts_for(book, c, plan))]
+    rows = {r["entity_id"]: prompt_lint.row_words(r) for r in prompt_lint.characters(book)}
+    return out + [f"plan {f}" for f in prompt_lint.plan_faults(plan, rows)]
+
+
+def lint_wall(book: Path, number: int, built: list[dict]) -> None:
+    """HARD: a card the prompt lint refuses never reaches the GPU."""
+    plan = episode_home.read_json(episode_home.plan_path(book, number))
+    if faults := lint_faults(book, plan, built):
+        raise SystemExit("PROMPT LINT refuses the takes:\n  " + "\n  ".join(faults))
+    print(f"PROMPT LINT: clean ({len(built)} take prompts and the plan)", flush=True)
+
+
 def prompts(book_id: str, number: int) -> None:
     book, episode = opened(book_id, number)
-    out = episode_home.write_json(episode_home.takes_dir(book, number, "r2v") / "prompts.json",
-                                  cards(book, episode, number))
+    built = cards(book, episode, number)
+    out = episode_home.write_json(episode_home.takes_dir(book, number, "r2v") / "prompts.json", built)
     print(f"take cards -> {out}", flush=True)
+    lint_wall(book, number, built)
 
 
 def retake_list(argv: list[str]) -> list[int]:
@@ -1322,6 +1367,7 @@ def main(book_id: str, number: int, retake: list[int] | None = None, approved: b
             "a last frame reached the take prompts, which warps the render "
             "(docs/calibration/end_frames.md):\n  "
             + "\n  ".join(f"T{i:02d}: {'; '.join(said)}" for i, said in sorted(pinned.items())))
+    lint_wall(book, number, built)
     # Every graph is built first and the whole run is queued in one go, so the
     # takes execute consecutively and the weights load once (owner, 2026-09-12).
     jobs, wheres = [], {}

@@ -75,6 +75,13 @@ CREATURES: set[str] = set()
 YOUNG: set[str] = set()
 """Cast under 16, read from their rows' own age (`age_of`): a 13-year-old
 newspaper boy was 'this man' in four rendered prompts (audit, 2026-09-23)."""
+ALIASES: dict[str, list[str]] = {}
+"""{who: the plan's epithets for him} ("the lawyer", "the little man"), set per run from
+the plan's own tags (`studio.cast_alias`).  Owner 2026-10-15: an epithet ALWAYS binds to
+the staged <Subject k>; Jekyll ep01 iter4 left it free in 18 takes beside the label."""
+DRAWN = False
+"""The book is drawn (refs/look.json not photoreal), set per run: a cel take has no lens,
+and "a 50mm lens" was the only photographic word left in 22 of 23 Jekyll HEL takes."""
 STILL_GERUNDS = ("keeping", "holding")
 """A camera that keeps or holds its frame has no move to arrive with."""
 
@@ -306,7 +313,20 @@ def _label(m: re.Match, k: int) -> str:
     return f"<Subject {k}>" if bare else f"{lead}<Subject {k}>"
 
 
+def alias_of(who: str) -> re.Pattern | None:
+    """The plan's epithets for this person as one pattern, or None."""
+    said = sorted(ALIASES.get(who, []), key=len, reverse=True)
+    return re.compile(r"(?i)\b(?:" + "|".join(re.escape(s) for s in said) + r")\b") if said else None
+
+
 def tagged(text: str, faces: list[str]) -> str:
+    """Epithets first (owner 2026-10-15), then names, then one description per person."""
+    from studio import cast_alias
+    text = cast_alias.bind(text, {who: f"<Subject {k}>" for k, who in enumerate(faces, start=1)}, ALIASES)
+    return cast_alias.strip_labelled(_tagged_names(text, faces))
+
+
+def _tagged_names(text: str, faces: list[str]) -> str:
     """People become their `<Subject k>` labels; a person with no sheet staged keeps
     his name -- ref-en §2 lets only a DEFINED label be cited.
 
@@ -329,8 +349,18 @@ def tagged(text: str, faces: list[str]) -> str:
 
 
 def people_in(text: str, cast) -> list[str]:
-    """Whoever a frame text names, in the order the cast gives."""
-    return [w for w in cast if called(w).search(text)]
+    """Whoever a frame text names -- by name or by the plan's epithet -- in the cast's order."""
+    return [w for w in cast if called(w).search(text) or ((a := alias_of(w)) is not None and a.search(text))]
+
+
+def offscreen(text: str, faces: list[str]) -> str:
+    """A motion aimed at a cast member the take does not stage aims at the frame's edge:
+    "his free hand opens toward the lawyer" drew an unstaged lawyer (Jekyll ep01 T01)."""
+    for who, said in ALIASES.items():
+        for phrase in ([] if who in faces else said + [DISPLAY.get(who, "")]):
+            if phrase:
+                text = re.sub(rf"(?i)\btoward {re.escape(phrase)}\b(?!')", "toward the edge of the frame", text)
+    return text
 
 
 INDOORS = ("room", "bar", "laboratory", "corridor", "chamber", "cab", "interior", "hall", "ward")
@@ -450,8 +480,11 @@ of 30 blocks on one: a still composition as the shot's destination, where ep06
 and ep07 ended with the camera moving through the last frame."""
 
 LEFT_FRAME = re.compile(r"\b(?:ha(?:s|ve) left|leaves?|gone|out of frame|carried out)\b", re.I)
-NP_END = re.compile(r"\b(stands?|fills?|filling|has|have|is|are|sits?|lies?|rests?|holds?|at|in|on|along|"
-                    r"with|over|under|from|to|by|inside)\b", re.I)
+NP_END = re.compile(r"(?<![\w-])(stands?|fills?|filling|has|have|is|are|sits?|lies?|rests?|holds?|at|in|on|"
+                    r"along|with|over|under|from|to|by|inside|seen|lit|drawn)(?![\w-])", re.I)
+FINITE = re.compile(r"\b(?:turns?|opens?|closes?|points?|lifts?|walks?|strikes?|falls?|runs?|keeps?|pushes|"
+                    r"pulls?|takes?|grips?|thrusts?|swings?|reaches)\b", re.I)
+"""A verb inside a cut end noun: "with the knuckly hand turns the key now in frame" (T9)."""
 CLAUSE = re.compile(r",|\band (?=(?:the|a|an|both|his|her|their|its|two|three|four|five|six)\b|[A-Z])")
 """Where a layout's clauses part: a comma, or an `and` that opens a new subject --
 "head and shoulders" is one subject, "and the wheat reduced" is the next."""
@@ -471,10 +504,13 @@ def end_noun(end: str, names=()) -> str:
     for clause in CLAUSE.split(text):
         if not clause.strip() or LEFT_FRAME.search(clause):
             continue
-        head = NP_END.split(clause.strip(), maxsplit=1)[0].strip()
+        whole = clause.strip().replace("face to face", "face-to-face")
+        head = NP_END.split(whole, maxsplit=1)[0].strip().replace("face-to-face", "face to face")
         if len(head.split()) > 5 and " of " in head:
             head = head.split(" of ")[0]
-        return noun_phrase(head, names) if head else ""
+        if FINITE.search(head) or head.lower() in ("", "the", "a", "an"):
+            return ""
+        return noun_phrase(head, names)
     return ""
 
 
@@ -682,11 +718,17 @@ def voice_id(lines: list[Line], narrator: str) -> dict[str, str]:
     return {who: f"S{k}" for k, who in enumerate(order, start=1)}
 
 
+AGED = re.compile(r"\b(?:an?|the)\s[^.;]*?\b(?:man|woman|girl|boy|gentleman|lady|lad|child)\b"
+                  r"(?:\s+(?:of\s+(?:about\s+|some\s+)?[\w-]+|in\s+(?:his|her)\s+[\w-]+(?:\s+[\w-]+)?))", re.I)
+
+
 def voice_of(physical: str) -> str:
     """The speaker's identity clause (base-en §4.4 wants character type, age,
-    on-screen, pace).  A `voice` field on the cast sheet would override this."""
-    first = (physical.split(",")[0].strip().rstrip(".") or "a person")
-    return f"{first[0].lower() + first[1:]}, with a clipped English voice at an even pace"
+    on-screen, pace): the row's own type-and-age sentence, never the text before its
+    first comma -- that was "lank," and "A compact," in every Jekyll dialogue take."""
+    m = AGED.search(physical or "")
+    who = m.group(0).strip() if m else "a person"
+    return f"{who[0].lower() + who[1:]}, with a clipped English voice at an even pace"
 
 
 def speaker_intro(who: str, sid: str, physical: str, seen, faces: list[str]) -> str:
@@ -696,6 +738,8 @@ def speaker_intro(who: str, sid: str, physical: str, seen, faces: list[str]) -> 
     tag = subject_of(who, faces) or name_of(who)
     if who in seen:
         return f"{tag} ({sid}) says:"
+    if subject_of(who, faces):       # defined once, in subject_definitions (owner 2026-10-15)
+        return f"{tag} ({sid}), on screen, with a clipped English voice at an even pace, says:"
     return f"{tag} ({sid}), on screen, {voice_of(physical)}, says:"
 
 
@@ -840,8 +884,17 @@ def lower_lead(clause: str) -> str:
     because inventing a rule that lowercases names would cost more than the
     fault it fixes."""
     first = (clause.split(" ", 1)[0] if clause else "").lower().rstrip(",.;")
+    if first.removesuffix("'s") in LEADS and capitals_run(clause):
+        return capitals_run(clause).lower() + clause[len(capitals_run(clause)):]
     # `.rstrip("'s")` would be a CHARACTER SET and would eat the s of `his`.
     return clause[0].lower() + clause[1:] if first.removesuffix("'s") in LEADS else clause
+
+
+def capitals_run(clause: str) -> str:
+    """The run of all-capital words a clause opens with ("THE FOCUS OF THE PICTURE IS"),
+    or ''. Lowering only its first letter wrote "tHE FOCUS" into all 23 Jekyll takes."""
+    m = re.match(r"[A-Z]{2,}\b(?:\s+(?:[A-Z]{2,}|A)\b)*", clause)
+    return m.group(0) if m else ""
 
 
 def camera_sentence(motion: str, t0: int, t1: int, line_end: int | None = None) -> str:
@@ -867,13 +920,20 @@ NOUNS = (("limp", "the step"), ("walk", "the walk"), ("climb", "the climb"), ("s
          ("lean", "the lean"), ("turn", "the turn"), ("lift", "the lift"), ("rais", "the lift"),
          ("reach", "the reach"), ("swing", "the swing"), ("plant", "the step"), ("push", "the push"),
          ("pull", "the pull"), ("drink", "the drink"), ("cross", "the crossing"), ("shrug", "the shrug"),
-         ("roll", "the roll"), ("drop", "the drop"), ("pour", "the pour"), ("open", "the opening"))
+         ("roll", "the roll"), ("drop", "the drop"), ("pour", "the pour"), ("open", "the gesture"))
+VERB_FORM = r"(?<!\bhis )(?<!\bher )(?<!\bthe )(?<!\ba )(?<!\bits ){stem}(?:s|es|ed|d|ing)?\b"
+"""A stem read as a VERB: "his lean hands swing" is no lean (Jekyll ep01 T4, T8, T13)."""
 
 
 def motion_noun(clause: str) -> str:
     """The noun D5 hands to `continues to the last frame of the shot`."""
     low = clause.lower()
-    return next((noun for stem, noun in NOUNS if re.search(rf"\b{stem}", low)), "the movement")
+    return next((noun for stem, noun in NOUNS
+                 if re.search(r"\b" + VERB_FORM.replace("{stem}", stem), low)), "the movement")
+
+
+SPEAKING = re.compile(r",?\s+(?:as|while)\s+(?:he|she|they)\s+(?:speaks?|talks?|says it)\b", re.I)
+""""At 00:05, as the line ends, ... as he speaks": the line has ended (Jekyll ep01 T1/2/14/17)."""
 
 
 def beat_sentences(motion: str, t0: int, t1: int, line_end: int | None = None) -> list[str]:
@@ -891,8 +951,9 @@ def beat_sentences(motion: str, t0: int, t1: int, line_end: int | None = None) -
         if k >= len(marks):                                   # the seconds ran out (3.4)
             out[-1] = out[-1].rstrip(".") + f", then {clause}."
             continue
-        lead = f"At {stamp(marks[k])}, as the line ends," if line_end is not None and k == 0 else f"At {stamp(marks[k])}"
-        out.append(f"{lead} {clause}.")
+        ended = line_end is not None and k == 0
+        lead = f"At {stamp(marks[k])}, as the line ends," if ended else f"At {stamp(marks[k])}"
+        out.append(f"{lead} {SPEAKING.sub('', clause) if ended else clause}.")
     out[-1] = out[-1].rstrip(".") + f", and {motion_noun(rest[-1])} continues to the last frame of the shot."
     return out
 
@@ -1242,10 +1303,24 @@ def mouth_of(seg: dict, faces: list[str], cast) -> str:
     return subject_of(who, faces) if who else ""
 
 
+def cure_pattern(phrase: str) -> str:
+    """A panel cure phrase as a regex; its {asked}/{planned} slots match any words."""
+    return re.sub(r"\\\{\w+\\\}", r"[\\w' -]+?", re.escape(phrase))
+
+
+def without_cures(frame: str) -> str:
+    """The frame without the panel ladder's cure sentences at its head. `reprose` leads
+    the SHARED frame with them for the drawer; to H3 the take wrapped the frame as a noun
+    phrase, "The shot opens on only the named people stand ..." (Jekyll ep01 T1-T6)."""
+    from studio.panel_ladder import CURES
+    lead = "|".join(cure_pattern(c) for c in sorted(set(CURES.values()), key=len, reverse=True))
+    return re.sub(rf"^(?:\s*(?:{lead})\s*)+", "", frame).strip() or frame
+
+
 def framing(k: int, seg: dict, pic: int, faces: list[str], names=()) -> str:
     """D2a / D2b: the first shot BEGINS FROM its picture (ref-en §5.3) and every later
     shot says at what second it cuts (base-en §4.2's `the shot cuts to`)."""
-    phrase = tagged(noun_phrase(seg["frame"], names), faces)
+    phrase = tagged(noun_phrase(without_cures(seg["frame"]), names), faces)
     if pic is None:  # no cell staged: the words carry the framing (ep14 experiment)
         if k == 1:
             text = f"The shot opens on {phrase}."
@@ -1375,6 +1450,22 @@ def light_sentence(light: str) -> str:
     return " ".join(under_cap(clauses, LIGHT_CAP)).strip(" ,;") + "."
 
 
+LENS = re.compile(r",?\s*(?:through\s+)?an?\s+\d{2,3}\s*mm\s+lens\b", re.I)
+
+
+def lensless(position: str) -> str:
+    """A drawn book's camera has no lens; a photoreal book keeps its own words."""
+    return " ".join(LENS.sub("", position).split()).strip(" ,") if DRAWN else position
+
+
+def position_lead(where: str) -> str:
+    """"The camera is Over Enfield's shoulder" -> "is over ...": the plan writes the
+    position as its own sentence (all 23 Jekyll takes); a name keeps its capital."""
+    first = where.split(" ", 1)[0]
+    return where if is_name(first, ()) or first[:1].islower() or re.match(r"[A-Z][a-z]+'s\b", first) \
+        else where[0].lower() + where[1:]
+
+
 def detail(seg: dict, want: int) -> list[str]:
     """D2c / D2d, REQUIRED: where the camera STANDS, the LIGHT, and what is at
     rest in the first frame, all authored per panel by the setup's own author.
@@ -1388,8 +1479,8 @@ def detail(seg: dict, want: int) -> list[str]:
     overflows, the crowd goes first (`life_for`), then at-rest clauses."""
     out = []
     position, light = camera_parts(seg.get("camera", ""))
-    if where := trim(calm(position), CAMERA_CAP):
-        out.append(f"The camera is {where}.")
+    if where := trim(calm(lensless(position)), CAMERA_CAP):
+        out.append(f"The camera is {position_lead(where)}.")
         want -= len(where.split())
     if lit := light_sentence(light):
         out.append(lit)
@@ -1437,6 +1528,24 @@ def place_clause(described: str, words_allowed: int = PLACE_WORDS) -> str:
     return f"The shot is inside this place: {said}." if said else ""
 
 
+PER_ACTION_S = 1.2
+"""The seconds one action clause needs. Jekyll ep01 T12 told three actions in 1.6 s
+("pulls back ... turns from the door ... nods and falls into step")."""
+
+
+def paced_clauses(clauses: list[str], seconds: float) -> list[str]:
+    """The first clauses a segment of `seconds` has time for, one per PER_ACTION_S."""
+    return clauses[:max(1, int(seconds / PER_ACTION_S))]
+
+
+def paced_motion(motion: str, seconds: float) -> str:
+    """A plan motion `head; action; ...` cut to the actions its segment has time for."""
+    parts = [p for p in (motion or "").split(";") if p.strip()]
+    if len(parts) < 3:
+        return motion
+    return ";".join(parts[:1] + paced_clauses(parts[1:], seconds))
+
+
 def block_parts(k: int, seg: dict, pic: int, ctx: dict) -> list[tuple[str, bool]]:
     """One `[Shot k]` block's CORE in the order §2.B emits it: the framing, the camera
     bound to its first action, the spoken line, the beats, then the closed mouth.
@@ -1447,7 +1556,8 @@ def block_parts(k: int, seg: dict, pic: int, ctx: dict) -> list[tuple[str, bool]
     here = lines_under(ctx["lines"], ctx["at"], ctx["offset"], seg["t"], seg["t_to"])
     spoken = [l for l in here if l.kind == "dialogue"]
     end = int(round(sum(ctx["at"][spoken[0].index]) - ctx["offset"])) if spoken else None
-    motion = tagged(limp_clause(seg["motion"]), faces)
+    paced = paced_motion(offscreen(seg["motion"], faces), seg["t_to"] - seg["t"])
+    motion = tagged(limp_clause(paced), faces)
     mouth = mouth_of(seg, faces, ctx["cast"])
     voice = lambda ls: voice_events(ls, ctx["at"], ctx["offset"], ctx["ids"], faces, ctx["physical"],
                                     mouth, mouth_action(motion, mouth), t0, t1, ctx["seen"])
@@ -1544,7 +1654,13 @@ def summary(frames: int, segs: list[dict], cells: dict, described: str, faces: l
              else "<Audio 1> is the complete audio track.")
     return (f"{task_types(cells_staged)} One {frames / fps:.2f}-second "
             f"take of {n} shot{'s' if n > 1 else ''} in {where}. "
-            f"{runs}. The take carries {who} through {shot_list(range(1, n + 1))} in that order. {audio}")
+            f"{runs}. The take carries {who} through {shot_list(range(1, n + 1))} in that order. {audio} "
+            f"{UNLETTERED}")
+
+
+UNLETTERED = "Every sign, plate, cheque and paper in the picture is plain and unlettered."
+"""The take's anti-lettering sentence, affirmative (H3 has no negative input). Jekyll ep01
+iter4 T10 drew "FILED" and "HUB" on the cheque; the grid said it, the take never did."""
 
 
 def soundscape(described: str, crowd: str = "", outdoors: bool = False, life: bool = False) -> str:
@@ -2192,6 +2308,13 @@ def six_sections(subs: str, summ: str, ret: str, dd: str, sound: str) -> str:
                         f"overall_soundscape: {sound}", "non_diegetic_music: N/A"])
 
 
+def describes_panel(panel: bool, refs: int | None) -> bool:
+    """Whether the blocks are written beside a staged panel: a staged one, or a DRY build
+    (refs=None) of a take that will stage one. Jekyll ep01 iter5: once each person was
+    described once, plan_check's dry build judged three panel takes on the bare-refs floor."""
+    return bool(panel and (refs or refs is None))
+
+
 def build(shots: list[Shot], placed: list[dict], lines: list[Line], at: dict, frames: int,
           faces: list[str], physical: dict[str, str], described: str, narrator: str,
           ends: list[int] | None = None, setup: Setup | None = None, refs: int | None = None,
@@ -2227,7 +2350,7 @@ def build(shots: list[Shot], placed: list[dict], lines: list[Line], at: dict, fr
         from studio import take_refs
         subs = subs + chr(10) + take_refs.panel_definition(panel_slot, house_style.panel_look())
     dd, life = describe(shots, placed, lines, at, faces, physical, narrator, frames, cells, setup, fps,
-                        not (ends or []), cells_staged, bool(panel_slot))
+                        not (ends or []), cells_staged, describes_panel(panel, refs))
     dd = once_per_take(dd, keep=(life or {}).values())
     # ONE CHOKE POINT FOR NAMES (ep16, published cut deleted 2026-10-02): the
     # camera and at-rest composers injected raw prose, so "the brother's hand"
@@ -2249,6 +2372,6 @@ def build(shots: list[Shot], placed: list[dict], lines: list[Line], at: dict, fr
     if check_lint:
         facts = prompt_facts(frames, segs, faces, spoken, at, offset, setup, strip, refs, fps,
                              has_plate, life, cells_staged)
-        check(text, {**facts, "panel": bool(panel_slot),
+        check(text, {**facts, "panel": describes_panel(panel, refs),
                      "cast_rows": " ".join(str(v) for v in (physical or {}).values()).lower()})
     return text

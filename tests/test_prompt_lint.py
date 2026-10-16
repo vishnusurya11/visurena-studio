@@ -185,7 +185,7 @@ def test_p11_take_reads_camera_sentences_only():
 # ---- P13 -------------------------------------------------------------------------
 def test_p13_unstaged_person_noun():
     assert pl.p13_people("a ragged tramp strikes a match on the panels", FACTS)
-    assert pl.p13_people("his free hand opens toward the lawyer as he speaks", {**FACTS, "faces": ["richard_enfield"]})
+    assert pl.p13_people("the lawyer watches as he speaks", {**FACTS, "faces": ["richard_enfield"]})
     assert not pl.p13_people("a ragged tramp strikes a match", {**FACTS, "extras": 1})
     assert not pl.p13_people("a ragged tramp strikes a match", {**FACTS, "crowd": "a few tramps"})
 
@@ -261,7 +261,7 @@ def test_take_faults_flags_the_audit_take():
             "<Subject 2>'s face at the CENTRE. At 00:05, as the line ends, his free hand opens toward the lawyer "
             "as he speaks, and the opening continues to the last frame.")
     got = rules(pl.take_faults(prompt(shot), {**FACTS, "faces": ["richard_enfield"], "own": {1: "richard_enfield"}}))
-    assert {"P1", "P2", "P3", "P5", "P8", "P9", "P13", "P15"} <= got
+    assert {"P1", "P2", "P3", "P5", "P8", "P9", "P15"} <= got   # "toward the lawyer" aims off frame (iter5)
 
 
 def test_fault_format():
@@ -293,12 +293,12 @@ def test_p12_current_fragment_clean():
     assert pl.plan_faults(plan_of(frame=frame), ROWS) == []
 
 
-def test_plan_p11_p13_and_p3():
+def test_plan_p11_and_p13():
     got = rules(pl.plan_faults(plan_of(
         frame="Only the named people stand in the picture and everything else is the place. Wide of the street "
               "as a ragged tramp strikes a match",
         motion="The camera tracks beside the gold coins to the folded; the hand pushes"), ROWS))
-    assert {"P3", "P11", "P13"} <= got
+    assert {"P11", "P13"} <= got and "P3" not in got
 
 
 def test_plan_p13_covered_by_extras_or_setup_crowd():
@@ -418,3 +418,24 @@ def test_p18_graph_written_before_its_render_is_not_stale(tmp_path):
     assert pl.file_faults(tmp_path) == []
     write_take(tmp_path, 0, "A", pl.RENDER_CEILING + 60)
     assert pl.file_faults(tmp_path)
+
+
+def test_face_to_face_is_a_phrase_not_a_verb():
+    from studio import prompt_lint as pl
+    assert pl.p9_end_noun("By 00:07 the camera is pushing, with the two men face to face now in frame.") == []
+
+
+def test_a_plan_frame_led_by_a_panel_cure_is_the_drawers_and_not_a_plan_fault():
+    """The panel ladder leads the SHARED frame with its cure for the drawer; the take
+    builder drops it (episode_ref_official.without_cures); P3 judges the TAKE text."""
+    from studio import prompt_lint as pl
+    plan = {"shots": [{"index": 1, "frame": "Only the named people stand in the picture and everything "
+                                             "else is the place. Medium close of Mr. Enfield", "faces": []}],
+            "setups": {}}
+    assert not [f for f in pl.plan_faults(plan, {}) if f.startswith("P3")]
+
+
+def test_a_person_the_motion_aims_toward_is_off_frame_not_staged():
+    from studio import prompt_lint as pl
+    facts = {"faces": ["e"], "aliases": {"u": ["the lawyer"]}, "extras": 0, "crowd": ""}
+    assert pl.p13_people("his free hand opens toward the lawyer as he speaks", facts) == []
