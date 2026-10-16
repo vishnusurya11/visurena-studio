@@ -16,6 +16,8 @@ from __future__ import annotations
 
 import re
 
+from studio import cast_alias
+
 ROWS = ("top", "bottom")
 COLS = ("left", "right")
 COUNTS = {1: "one", 2: "two", 3: "three", 4: "four", 6: "six", 8: "eight",
@@ -172,19 +174,26 @@ STYLE_V2 = ("Drawn in the art style of <image{n}>: angular stylised 3D shapes, v
 that pointing at the slot works and describing the style in words bought
 nothing."""
 
-PANEL_WORD = re.compile(r"\bpanels?\b", re.I)
+GRID_PANEL = re.compile(r"\b(the|this|every|each|a|one|that|any|its own|no other)\s+panel\b(?!s)(?!\s+of\b)", re.I)
+""""panel" where it means the grid's cell: a determiner right before the singular.
+Jekyll ep01 (G1): the blind `\\bpanels?\\b` made the door's panels "a match on the
+picture of the blistered door" and "its picture streaked black" -- a door
+"picture" is how a painting or a placard grows on it.  "its panels", "the panels
+of the door" and "blistered brown panels" are the scene's and stay."""
 
 
 def _one_picture(text: str) -> str:
-    """A single picture never hears "panel": the model obeys the word over the
-    arithmetic (measured on ep05's six 1x1 groups, which came back mosaics)."""
-    return PANEL_WORD.sub("picture", text)
+    """A single picture never hears "panel" or "storyboard" for its own cell: the
+    model obeys the word over the arithmetic (ep05's six 1x1 groups came back
+    mosaics).  A noun of the scene is never touched."""
+    text = GRID_PANEL.sub(lambda m: f"{m.group(1)} picture", text)
+    return re.sub(r"\bstoryboard\b", "picture", text, flags=re.I)
 
 
 def _who_v2(who: list[str], extras: int) -> str:
     """Who is in it: the named, else the declared unnamed, else the place alone."""
     if who:
-        return f"In it: {', '.join(who)}."
+        return f"In it: {'; '.join(who)}."
     if extras:
         return f"In it: {extras} unnamed {'person' if extras == 1 else 'people'}, none of them a named person."
     return "It is a picture of the place alone: ground, growth, sky and built things."
@@ -197,8 +206,35 @@ def worn_items(wear: str, most: int = 5) -> list[str]:
     the wife lost her shawl; cut at the first comma she lost her skirt's green,
     which moved to her blouse)."""
     _, _, clothes = wear.partition("Wearing:")
-    items = [i.strip().rstrip(".") for s in clothes.split(". ") for i in s.split(":", 1)[0].split(",")]
-    return [i for i in items if i][:most]
+    items = [i.strip().rstrip(".") for s in clothes.split(". ") for i in re.split(r"[,;]", s.split(":", 1)[0])]
+    return [i for i in items if i and not PHYSIQUE.search(i)][:most]
+
+
+PHYSIQUE = re.compile(r"\b(?:compact|upright|broad-shouldered|narrow-shouldered|narrow-chested|heavy-set|"
+                      r"heavy jaw|jaw|slight|frame|lean|corded|knuckly|man about town|well-dressed|build|"
+                      r"stature|dwarfish|pallor|physique|hands?|limbs|handsome)\b", re.I)
+"""Body words a look's `top` layer carried as clothes (Jekyll ep01 G5): Enfield
+"wears: ... compact; upright; ... heavy jaw", Hyde "wears: respectable; well-fitting
+clothing on a small; slight; narrow-shouldered frame; lean; corded"."""
+BODY_TAIL = re.compile(r"\s+(?:on|of)\s+(?:a|an|his|her)\b.*$", re.I)
+
+
+def garment(clause: str) -> str:
+    """One `top` clause as clothes alone: a body tail ("on a small, slight frame")
+    cut, then every comma part that names the body dropped."""
+    tail = BODY_TAIL.search(clause)
+    if tail and PHYSIQUE.search(tail.group(0)):
+        clause = clause[:tail.start()]
+    parts = [p.strip() for p in clause.split(",") if p.strip() and not PHYSIQUE.search(p)]
+    return ", ".join(parts).strip().rstrip(".")
+
+
+def clothes_of(layers: dict) -> list[str]:
+    """What a person WEARS, read off the look's layers: headwear, then each `top`
+    clause as a garment.  Never hair, face or build -- the sheet carries those."""
+    head = [(layers.get("headwear") or "").strip().rstrip(".")]
+    tops = [garment(c) for c in re.split(r";\s*", layers.get("top") or "")]
+    return [c for c in head + tops if c]
 
 
 HEADWEAR = re.compile(r"\b(?:hat|boater|cap|bonnet|toque|helmet|bowler|busby)\b", re.I)
@@ -222,15 +258,58 @@ def chest_up(name: str, shots: list[dict]) -> bool:
     return bool(mine) and all("CLOSE" in s["size"] for s in mine)
 
 
-def _binding(p: dict, bare: bool = False, chest: bool = False) -> str:
-    items = [i for i in worn_items(p.get("wear", ""))
-             if not (bare and HEADWEAR.search(i)) and not (chest and BELOW_CHEST.search(i))]
+def hands_only(name: str, shots: list[dict]) -> bool:
+    """Is every picture this person is in an INSERT?  Then only his hands are in
+    it (Jekyll ep01 G6: shots 9 and 10, inserts on a hand, came back full-length)."""
+    mine = [s for s in shots if name in (s.get("who") or [])]
+    return bool(mine) and all(s.get("size") == "INSERT" for s in mine)
+
+
+def noun_of(p: dict) -> str:
+    """man, woman, boy, girl or creature (grids.person_noun); 'person' when unknown."""
+    return p.get("noun") or "person"
+
+
+def slot_phrase(p: dict) -> str:
+    """How a staged person is said: "the girl in <image1>", never "the person"
+    for someone whose row says who she is (Jekyll ep01 G3)."""
+    return f"the {noun_of(p)} in <image{p['ref']}>"
+
+
+def _items(p: dict, bare: bool, chest: bool) -> list[str]:
+    """The clothes a binding lists: the look's (`clothes`) else the row's worn
+    items; a bareheaded panel drops the hat, a chest-up one what is below it."""
+    items = list(p["clothes"]) if p.get("clothes") is not None else worn_items(p.get("wear", ""))
+    if chest:
+        items = [", ".join(x for x in i.split(", ") if not BELOW_CHEST.search(x)) for i in items]
+    return [i for i in items if i and not (bare and HEADWEAR.search(i))]
+
+
+HAND_WEAR = re.compile(r"\b(?:gloves?|mittens?|cuffs?|sleeves?|rings?)\b", re.I)
+
+
+def sleeves_of(items: list[str]) -> list[str]:
+    """What a hands-only insert shows of a person's clothes: the first garment's
+    head (the coat its sleeves belong to) and anything worn on the hand."""
+    parts = [x.strip() for i in items for x in i.split(",") if x.strip()]
+    coat = [parts[0]] if parts and not HAND_WEAR.search(parts[0]) else []
+    return coat + [x for x in parts if HAND_WEAR.search(x)]
+
+
+def _binding(p: dict, bare: bool = False, chest: bool = False, hands: bool = False) -> str:
+    who, ref = slot_phrase(p), p["ref"]
+    if hands:
+        his = "her" if noun_of(p) in ("woman", "girl") else "his"
+        worn = " and ".join(f"{his} {s}" for s in sleeves_of(_items(p, True, False)))
+        return f"Only the hands of {who} are in the picture{', in the sleeves of ' + worn if worn else ''}, as drawn on <image{ref}>."
+    items = _items(p, bare, chest)
     # ep16 shot 19: a wide naming one woman drew all four poses of her
     # turnaround sheet as four women; the sheet is one person, drawn once
-    once = (f" <image{p['ref']}> is a reference sheet of one person seen from several "
-            f"angles; that one person appears exactly once in each picture.")
-    return (f"The person in <image{p['ref']}> wears: {'; '.join(items)}." if items
-            else f"The person in <image{p['ref']}>.") + once
+    one = noun_of(p)
+    once = (f" <image{ref}> is a reference sheet of one {one} seen from several "
+            f"angles; that one {one} appears exactly once in each picture.")
+    head = who[0].upper() + who[1:]
+    return (f"{head} wears: {'; '.join(items)}." if items else f"{head}.") + once
 
 
 UNWRITTEN = "No name, word or label is written anywhere in the picture."
@@ -238,6 +317,24 @@ UNWRITTEN = "No name, word or label is written anywhere in the picture."
 came back as a placard lettered GEORGE NEWSPAPER GEORGE and a paper lettered
 NENSPAPER BOY on the last shot: the drawer letters a capitalised name.  People are
 named by their slot; a person with no sheet by plain lower-case words."""
+
+BLANK = "Every plate, sign and paper in the picture is plain and blank, unlettered."
+"""The affirmative half of UNWRITTEN, said only when the words hold a thing that
+carries lettering (Jekyll ep01 G8: "polished brass plates" on three setups, a
+folded cheque in shot 10)."""
+BAIT = re.compile(r"\b(?:plates?|signs?|signboards?|cheques?|letters?|placards?|notices?|posters?|"
+                  r"bills?|newspapers?)\b", re.I)
+
+
+def plain_plates(text: str) -> str:
+    """'(well-)polished brass plate(s)' -> 'plain (well-)polished brass plate(s)', once;
+    a doubled 'plain plain' (a plan edited by hand) said once."""
+    text = re.sub(r"(?i)(?<![\w-])(?<!plain )((?:well-)?polished brass plate)", r"plain \1", text or "")
+    return re.sub(r"(?i)\b(plain)(?:\s+plain\b)+", r"\1", text)
+
+
+def bait_in(shots: list[dict], described: str) -> bool:
+    return bool(BAIT.search(" ".join([described or ""] + [s.get("body", "") for s in shots])))
 
 
 def called(cast: list[dict]) -> dict[str, str]:
@@ -251,33 +348,78 @@ def called(cast: list[dict]) -> dict[str, str]:
     for p in cast:
         words = re.sub(r"\s+", " ", str(p["name"])).strip().lower()
         if p.get("ref"):
-            out[p["name"]] = f"the person in <image{p['ref']}>"
+            out[p["name"]] = slot_phrase(p)
+            continue
+        if p.get("line"):                  # the look layers, short, naming nobody (Jekyll ep01 G2)
+            out[p["name"]] = p["line"]
             continue
         whole = " ".join(str(p.get("wear", "")).split()).rstrip(". ").lower()
-        out[p["name"]] = f"a {words} ({whole})" if whole else f"a {words}"
+        sep = (": ", "") if p.get("noun") == "creature" else (" (", ")")
+        out[p["name"]] = f"a {words}{sep[0]}{whole}{sep[1]}" if whole else f"a {words}"
     return out
 
 
-def _slotted(body: str, cast: list[dict]) -> str:
-    """A STAGED person's names in the panel prose become their slot phrase.
-
-    ep16 attempt 4: 'the person in <image1>' was defined while the prose also
-    said 'the brother stands beside it', and the drawer drew two brothers --
-    the take prompts' double identity, one module over.  An unstaged person
-    keeps their words (the who-line dresses them)."""
+def _phrases(cast: list[dict]) -> dict[str, dict]:
+    """{phrase lower-cased: person} for every way the plan says someone: epithets,
+    display, name.  A phrase two people share stays with the first."""
+    from studio.scene_cast import COMMON
+    out: dict[str, dict] = {}
     for p in cast:
-        if not p.get("ref"):
-            continue
-        slot = f"the person in <image{p['ref']}>"
-        for phrase in filter(None, (p.get("display"), p.get("name"))):
-            body = re.sub(rf"(?i)\b{re.escape(phrase)}\b", slot, body)
-    return re.sub(r"(?i)\bthe (the person in <image\d+>)", r"\1", body)
+        for said in [*(p.get("aliases") or []), p.get("display") or "", p.get("name") or ""]:
+            if said.strip() and said.strip().lower() not in COMMON:   # "CHILD" is a noun, not a name
+                out.setdefault(said.strip().lower(), p)
+    return out
+
+
+def _said_as(p: dict, phrase: str, aliases: set) -> str:
+    """A matched phrase as the prompt says it: the slot; else an epithet's own
+    words; else a name in plain lower-case words (ep14: the drawer letters a name)."""
+    if p.get("ref"):
+        return slot_phrase(p)
+    epithet = phrase.lower() in aliases and not TITLED.match(phrase)
+    return phrase if epithet or not p.get("plain") else p["plain"]
+
+
+TITLED = re.compile(r"(?i)(?:mr|mrs|dr|miss|sir|lady|lord)\b")
+"""A tag "Mr. Enfield (...)" is a name, not an epithet: said plain when unstaged."""
+
+
+def _slotted(body: str, cast: list[dict]) -> str:
+    """A STAGED person's names AND epithets in the panel prose become their slot
+    phrase, and the description in brackets after them goes: the sheet and its
+    wears line are the one description (owner 2026-10-15; ep16 attempt 4 drew
+    two brothers from 'the person in <image1>' beside 'the brother').  An
+    unstaged person keeps his words without the brackets (the who-line dresses
+    him).  One pass, longest phrase first, so no slot phrase is re-read."""
+    table = _phrases(cast)
+    if not table:
+        return body
+    alts = "|".join(re.escape(s) for s in sorted(table, key=len, reverse=True))
+    said = re.compile(rf"(?i)\b({alts})(?!\w)(?:\s*\([^()]*\))?")
+    epithets = {a.lower() for p in cast for a in p.get("aliases") or []}
+    body = said.sub(lambda m: _said_as(table[m.group(1).lower()], m.group(1), epithets), body)
+    body = cast_alias.strip_labelled(body)
+    body = re.sub(r"(?i)\b(?:the|a|an) (the \w+ in <image\d+>)", r"\1", body)
+    return re.sub(r"(^|[.!?]\s+)the (\w+ in <image\d+>)", r"\1The \2", body)
+
+
+def _who_said(name: str, p: dict | None, say: dict, seen: set, insert: bool) -> str:
+    """One who-line entry: the slot (its hands in an insert), else the words once."""
+    said = say.get(name, name.lower())
+    if p is not None and p.get("ref"):
+        return f"the hands of {said}" if insert else said
+    if p is not None and p.get("line") and name in seen:
+        return f"the same {noun_of(p)} again"
+    seen.add(name)
+    return said
 
 
 def _unnamed(shots: list[dict], cast: list[dict]) -> list[dict]:
-    """The shots with every named person said by slot, in the who-line AND the prose."""
-    say = called(cast)
-    return [{**s, "who": [say.get(n, n.lower()) for n in (s.get("who") or [])],
+    """The shots with every named person said by slot, in the who-line AND the
+    prose; an unstaged person's layers line is said once per prompt."""
+    say, by, seen = called(cast), {p["name"]: p for p in cast}, set()
+    return [{**s, "who": [_who_said(n, by.get(n), say, seen, s.get("size") == "INSERT")
+                          for n in (s.get("who") or [])],
              **({"body": _slotted(s["body"], cast)} if "body" in s else {})} for s in shots]
 
 
@@ -331,6 +473,8 @@ def grid_prompt_v2(shots: list[dict], cols: int, rows: int, place: tuple[list[in
     if len(shots) != len(cells):
         raise ValueError(f"{len(shots)} shots for {len(cells)} cells")
     single = len(shots) == 1
+    shots = [{**s, "body": plain_plates(s["body"])} if "body" in s else s for s in shots]
+    place, geometry = (place[0], plain_plates(place[1])), plain_plates(geometry)
     said = _unnamed(shots, cast)
     if single:
         layout = f"One full-frame {medium}, edge to edge, with no lettering anywhere."
@@ -340,7 +484,7 @@ def grid_prompt_v2(shots: list[dict], cols: int, rows: int, place: tuple[list[in
                   f"same size, thin white gutters between them, no lettering anywhere.")
         blocks = [_block_v2(f"PANEL {i} ({where}), ", s)
                   for i, (where, s) in enumerate(zip(cells, said), start=1)]
-    binding = [_binding(p, bareheaded(p["name"], shots), chest_up(p["name"], shots))
+    binding = [_binding(p, bareheaded(p["name"], shots), chest_up(p["name"], shots), hands_only(p["name"], shots))
                for p in cast if p.get("ref")]
     # A PROP IS AN OBJECT, bound to its sheet: ep10's tripod drawn from words
     # alone would differ in every panel (ep10 prep audit, 2026-09-23).
@@ -349,7 +493,7 @@ def grid_prompt_v2(shots: list[dict], cols: int, rows: int, place: tuple[list[in
     people = [f"<image{p['ref']}>" for p in cast if p.get("ref")]
     if len(people) > 1:
         binding.append(f"The people in {' and '.join(people)} are never dressed alike.")
-    binding.append(UNWRITTEN)
+    binding.append(UNWRITTEN + (" " + BLANK if bait_in(shots, place[1]) else ""))
     slots = list(place[0]) + ([room] if room is not None and room not in place[0] else [])
     refs = " and ".join(f"<image{n}>" for n in slots)
     said = brief_place(place[1], light) if all(s["size"] in TIGHT for s in shots) else place[1]
@@ -734,6 +878,31 @@ def cut_clause(size: str, peopled: bool) -> str:
     return table[size]
 
 
+INSERT_THING = re.compile(r"\b(hands?|fingers|fist|lock|keyhole|key|cheque|coins|letter|glove|cane|"
+                          r"boots?|handle|knocker)\b", re.I)
+OVER_SHOULDER = re.compile(r"\bover\s+(?:the\s+|his\s+|her\s+|[\w.' <>]{1,40}?'s\s+)?(?:near\s+|left\s+|right\s+)?"
+                           r"shoulder\b", re.I)
+OTS_CUT = {
+    "wide": "the far figure stands whole and well inside the panel with open ground below the feet; the near "
+            "shoulder at the edge is cut by the frame",
+    "full": "the far figure stands whole inside the panel from head to feet; the near shoulder at the edge is "
+            "cut by the frame, close to the camera",
+}
+"""Jekyll ep01 G6: shot 3 said "the whole figure stands inside the picture from head to
+feet" while Enfield was only a shoulder in the BOTTOM LEFT corner."""
+
+
+def framing(size: str, peopled: bool, body: str) -> str:
+    """The cut, said against what the cell holds: an insert is filled by its thing
+    (the hands, the lock), never a whole figure (Jekyll ep01 shots 9 and 10 came
+    back full-length); an over-the-shoulder wide or full keeps its near shoulder cut."""
+    if size == "insert" and (thing := INSERT_THING.search(body or "")):
+        return f"the frame is filled by the {thing.group(1).lower()}, close, from edge to edge"
+    if peopled and size in OTS_CUT and OVER_SHOULDER.search(body or ""):
+        return OTS_CUT[size]
+    return cut_clause(size, peopled)
+
+
 COUNTED = re.compile(
     r"\b(two|three|four|five|six|seven|eight|nine|ten)\s+"
     r"((?:\w+\s+){0,2}?)"
@@ -754,6 +923,16 @@ def varied_group(body: str) -> str:
         return ""
     count, _, noun = found.groups()
     who = f"{count} {noun}".lower()
-    return (f"The {who} are {count} different individuals: each one has his or her own face, "
+    their = pronoun_of(noun)
+    return (f"The {who} are {count} different individuals: each one has {their} own face, "
             f"own build, own hair and own hat, each wears the clothes a little differently, "
-            f"and each stands and gestures in a way of their own.")
+            f"and each stands and gestures in a way of {their} own.")
+
+
+def pronoun_of(noun: str) -> str:
+    """'his' for a group of men, 'her' of women, else 'his or her' (Jekyll ep01:
+    "his or her own face" for two men)."""
+    noun = noun.lower()
+    if noun in ("women", "girls"):
+        return "her"
+    return "his or her" if noun in ("people", "figures", "of them") else "his"

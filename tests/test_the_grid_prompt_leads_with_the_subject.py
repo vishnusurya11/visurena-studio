@@ -202,7 +202,7 @@ def test_no_name_is_written_where_the_drawer_can_letter_it():
     capitalised name.  People are named by their slot, never by a word."""
     text = grid_prompt_v2([panel("the boy holds out a paper", ["NARRATOR", "WIFE"])], 1, 1, PLACE, CAST, 3)
     assert "NARRATOR" not in text and "WIFE" not in text
-    assert "In it: the person in <image1>, the person in <image2>." in text
+    assert "In it: the person in <image1>; the person in <image2>." in text   # "; ": a layers line has commas
     assert "No name, word or label is written anywhere" in text
 
 

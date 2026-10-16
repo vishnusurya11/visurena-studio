@@ -8,7 +8,9 @@ classrooms, a mirrored Waterloo, an attic that became a street).  So:
 - the ANCHOR grid of a setup is the grid holding its widest shot, drawn first;
 - its widest cell is cut to storyboard/anchors/<setup>.png -- the ROOM;
 - every other grid of the setup stages the room as a reference ("this exact
-  room, already drawn"), the plate beside it only when the grid holds a wide;
+  room, already drawn") and NOT the plate: the room IS the place, so two people
+  keep their slots (Jekyll ep01 audit 2026-10-15, 01_staged_refs 3.2; grids.py no
+  longer calls `stages_plate`);
 - the grid manifest's `inputs` hash covers the staged bytes, so a redrawn
   anchor makes every sibling stale and they follow it.
 """

@@ -38,11 +38,13 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 
-from studio import book_look, cast_refs, continuity, episode_home, grid_room, pack_refs
+from studio import (book_look, cast_alias, cast_refs, continuity, episode_home, grid_lint, grid_room,  # noqa: F401
+                    look_table, pack_refs)
 from studio.comfy import load_workflow, stage_image, submit, wait
 from studio.episode_home import episode_arg
+from studio.episode_ref_official import age_of
 from studio.ref_slots import stage_only
-from studio.storyboard_grid import (cut_clause, grid_prompt, grid_prompt_v2, no_duplicates,
+from studio.storyboard_grid import (clothes_of, framing, grid_prompt, grid_prompt_v2, no_duplicates,
                                     varied_group, whole_subject)
 
 CLIP = "qwen3vl_8b_fp8_scaled.safetensors"
@@ -82,13 +84,27 @@ against haze and depth, and a fog book's far distance IS soft (Jekyll ep01, LOOK
 
 
 def negative_for(book: Path) -> str:
-    """The grid's negative in the book's look, with the book's own declared words."""
+    """The grid's negative in the book's look, with the book's own declared words.
+    A book that declares its own negative is not banned the house's "mountains,
+    cliffs" (a London book drew none; Jekyll ep01 G7)."""
     if not book_look.look_name(book):
         return NEGATIVE
-    said = PHOTO_NEGATIVE + (", photographic" if book_look.drawn(book) else "")
+    own = declared_negative(book)
+    said = PHOTO_NEGATIVE.replace(", mountains, cliffs", "") if own else PHOTO_NEGATIVE
+    said += ", photographic" if book_look.drawn(book) else ""
     said = said.replace("blurry", AIRED_BLUR) if book_look.atmosphere(book) else said
-    extra = str(book_look.declared(book).get("negative", "") or "").strip().strip(",")
-    return f"{said}, {extra}" if extra else said
+    return ", ".join(dict.fromkeys(f"{said}, {own}".split(", "))) if own else said
+
+
+def declared_negative(book: Path) -> str:
+    """The book's own negative words: a top-level `negative`, and the drawn look's
+    `refs.negative` where the Hellsing look.json keeps it (G7: the grid read only
+    the first and got nothing).  SDXL weights "(x:1.3)" are said as plain "x"."""
+    look = book_look.declared(book)
+    refs = look.get("refs") if isinstance(look.get("refs"), dict) else {}
+    said = [str(look.get("negative", "") or ""), str(refs.get("negative", "") or "")]
+    said = [re.sub(r"\(([^():]+):[\d.]+\)", r"\1", s).strip().strip(",").strip() for s in said]
+    return ", ".join(s for s in said if s)
 
 SAID = {"wide": "WIDE", "full": "FULL SHOT", "medium": "MEDIUM", "medium_close": "MEDIUM CLOSE",
         "close": "BIG CLOSE-UP", "extreme_close": "EXTREME CLOSE-UP", "insert": "INSERT"}
@@ -174,8 +190,13 @@ def wide_for(book: Path, setup) -> Path:
     """This setup's own place picture: the SETUP's view, through the same door
     the take uses, so the panel and the take can never open on different
     pictures of one place."""
-    return pack_refs.location_view(book, getattr(setup, "location", "") or "",
-                                   view=getattr(setup, "view", "") or "")
+    location, view = getattr(setup, "location", "") or "", getattr(setup, "view", "") or ""
+    try:
+        return pack_refs.location_view(book, location, view=view)
+    except SystemExit:
+        if not DRY:
+            raise
+        return Path(book) / "refs" / "locations" / location / f"{view or 'MISSING'}.png"   # --prompts reports it
 
 
 def sheet_of(book: Path, who: str, look: str = "") -> Path | None:
@@ -191,6 +212,9 @@ def sheet_of(book: Path, who: str, look: str = "") -> Path | None:
     if look and (drawn := pack_refs.look_sheet(book, who, look)) is not None and drawn != pack_refs.character_sheet(book, who):
         return drawn
     p = Path(book) / "refs" / "characters" / who / "sheet.png"
+    if DRY:                                  # --prompts writes nothing, a sheet_front.png included
+        front = p.with_name("sheet_front.png")
+        return front if front.exists() else None
     return front_of(p) if p.exists() else None
 
 
@@ -209,7 +233,8 @@ def people_in(book: Path, shots: list) -> list[str]:
     return list(dict.fromkeys(w for s in shots for w in scene_cast.in_frame(s, names)))
 
 
-def cast_of(book: Path, shots: list, reserve: int = 1, setup=None) -> tuple[list[dict], dict]:
+def cast_of(book: Path, shots: list, reserve: int = 1, setup=None,
+            aliases: dict | None = None) -> tuple[list[dict], dict]:
     """Every person the panels hold, from the bound rows, and the slots their
     sheets go in -- what is staged and what is said are the same list.
     `reserve` slots are kept for the place and, on a chained grid, the room.
@@ -224,26 +249,100 @@ def cast_of(book: Path, shots: list, reserve: int = 1, setup=None) -> tuple[list
     who = people_in(book, shots)
     chosen = set(scene_cast.pick([w for w in who if sheet_of(book, w, continuity.look_for(
         setup, w, cast_refs.row(book, w))) is not None], shots, MAX_SLOTS - reserve))
-    people, slots, n = [], {}, 0
+    people, slots, names = [], {}, name_tokens(book)
     for name in who:
-        # THE ROW THE TAKE READS: refs.json, stamped with this episode's chapter
-        # (chapter_refusal checks it). This used to read the dossier with the
-        # chapter hard-coded as six, and dressed every ep09 grid from chapter 6
-        # (2026-09-23).
-        row = cast_refs.row(book, name)
-        look = continuity.look_for(setup, name, row)           # the setup's look (2026-10-10)
-        sheet, ref = sheet_of(book, name, look), None
+        entry, sheet = person(book, name, setup, aliases or {}, names)
         if sheet is not None and name in chosen:
-            n += 1
-            ref = n
-            slots[str(100 + n)] = sheet
-        said = re.sub(r"^(my|the|a|an)\s+", "", row["name"].strip(), flags=re.I).upper()
-        people.append({
-            "ref": ref, "name": said, "entity": name, "display": row.get("display") or row["name"],
-            "wear": " ".join(continuity.words_for(book, name, look, row).split()),
-            "against": (f"{said} is no other person in this storyboard: nobody else wears "
-                        f"these clothes and {said} never wears anyone else's")})
+            entry["ref"] = len(slots) + 1
+            slots[str(100 + entry["ref"])] = sheet
+        people.append(entry)
     return people, slots
+
+
+def person(book: Path, name: str, setup, aliases: dict, names: list[str]) -> tuple[dict, Path | None]:
+    """One person of the grid, unslotted, and the sheet he would be staged by.
+    THE ROW THE TAKE READS: refs.json, stamped with this episode's chapter (ep09
+    was once dressed from a chapter hard-coded as six, 2026-09-23)."""
+    row = cast_refs.row(book, name)
+    look = continuity.look_for(setup, name, row)                # the setup's look (2026-10-10)
+    layers, noun = layers_for(book, name, look, row), person_noun(row)
+    said = re.sub(r"^(my|the|a|an)\s+", "", row["name"].strip(), flags=re.I).upper()
+    return {"ref": None, "name": said, "entity": name, "display": row.get("display") or row["name"],
+            "wear": " ".join(continuity.words_for(book, name, look, row).split()), "noun": noun,
+            "clothes": clothes_for(book, name, layers), "line": layers_line(noun, layers, names),
+            "aliases": aliases.get(name, []), "plain": plain_name(noun, layers),
+            "against": (f"{said} is no other person in this storyboard: nobody else wears "
+                        f"these clothes and {said} never wears anyone else's")}, sheet_of(book, name, look)
+
+
+def plain_name(noun: str, layers: dict) -> str:
+    """How an UNSTAGED person's name is said in the panel prose: 'the man in the
+    light-brown top hat' -- lower-case words the drawer cannot letter (ep14)."""
+    hat = re.split(r"[,;]", layers.get("headwear") or "")[0].strip().rstrip(".")
+    return f"the {noun} in the {hat}" if hat else f"the {noun}"
+
+
+def person_noun(row: dict) -> str:
+    """man, woman, boy, girl or creature from the row's gender and stated age
+    (takes_r2v.adopt_names' rule: under 16 is young); 'person' when unsaid."""
+    gender, age = row.get("gender"), age_of(row.get("physical", ""))
+    if gender == "creature":
+        return "creature"
+    young = age is not None and age < 16
+    if gender == "female":
+        return "girl" if young else "woman"
+    return ("boy" if young else "man") if gender == "male" else "person"
+
+
+def layers_for(book: Path, who: str, look: str, row: dict) -> dict:
+    """The look's layers (refs/looks.json), the base look's when the setup's is
+    not in the table; a book with no table cuts them from the row."""
+    card = continuity.card_of(book, who)
+    if card is not None:
+        return card.looks[look if look in card.looks else card.base].layers.model_dump()
+    body, _, worn = str(row.get("physical", "")).partition("Wearing:")
+    head = {k: look_table.layer_text(body, "", k) for k in ("headwear", "hair", "face")}
+    return {**head, "top": worn.strip()}
+
+
+def clothes_for(book: Path, who: str, layers: dict) -> list[str] | None:
+    """What the binding says he wears: the look table's headwear and top, clothes
+    only (G5); None for a book with no table (the row's worn items, as before)."""
+    return clothes_of(layers) if continuity.card_of(book, who) is not None else None
+
+
+def name_tokens(book: Path) -> list[str]:
+    """The book's name tokens an unstaged person's line may not carry."""
+    from studio import scene_cast
+    return [t for t in names_of(book) if t.lower() not in scene_cast.COMMON]
+
+
+LINE_MOST = 29
+"""An unstaged person's line stays under 30 words (lint P15)."""
+
+
+def _line(noun: str, looks: list[str], wear: list[str]) -> str:
+    said = f"a {noun}" + (f" with {', '.join(looks)}" if looks else "")
+    return (said + (f", wearing {' and '.join(wear)}" if wear else "")).replace(";", ",")
+
+
+def layers_line(noun: str, layers: dict, names: list[str]) -> str:
+    """An UNSTAGED person in a few plain words from his look layers -- hair, face,
+    headwear, top -- never his raw dossier row (Jekyll ep01 G2: "a mr. richard
+    enfield (... the doctor, the child's father, and hyde spend a night ...)").
+    The longest form under 30 words; '' when none is clean."""
+    first = lambda k: re.split(r";", layers.get(k) or "")[0].strip().rstrip(".")  # noqa: E731
+    hair, face = first("hair"), first("face")
+    worn = clothes_of(layers)
+    hat = [worn[0].split(",")[0]] if (layers.get("headwear") or "").strip() and worn else []
+    tops = worn[len(hat):]
+    short = [", ".join(t.split(", ")[:3]) for t in tops]
+    for looks, wear in (([hair, face], hat + tops), ([hair, face], hat + short), ([hair], hat + short),
+                        ([], hat + short[:1])):
+        said = _line(noun, [x for x in looks if x], [x for x in wear if x])
+        if len(said.split()) <= LINE_MOST and said != f"a {noun}":
+            return "" if grid_lint.named_in(said, names) else said
+    return ""
 
 
 def creature_insert(shot) -> tuple[str, str] | None:
@@ -331,33 +430,82 @@ def prompt_version(argv: list[str]) -> str:
 
 def prompt_for(book: Path, ep, setup: str, shots: list, cols: int, rows: int,
                version: str = "v2", room: Path | None = None) -> tuple[str, dict]:
-    """(the grid prompt, {LoadImage node: picture}). Only the shots this grid
-    OWNS put people in the slots; a borrowed shot's cast drew line-ups.  A
-    chained grid stages its setup's ROOM (grid_room) last, the place picture
-    beside it only when the grid holds a wide; the style is anchored on the
-    last picture staged."""
+    """(the grid prompt, {LoadImage node: picture}) -- `built` without its cast."""
+    text, slots, _ = built(book, ep, setup, shots, cols, rows, version, room=room)
+    return text, slots
+
+
+def built(book: Path, ep, setup: str, shots: list, cols: int, rows: int,
+          version: str = "v2", room: Path | None = None) -> tuple[str, dict, list[dict]]:
+    """(the grid prompt, {LoadImage node: picture}, the cast). Only the shots this
+    grid OWNS put people in the slots; a borrowed shot's cast drew line-ups.  A
+    chained grid stages its setup's ROOM (grid_room) last and NOT the place
+    picture: the room IS the place, so two people keep their slots (Jekyll ep01
+    shots 6, 7 and 22 drew two of three people from words); the style is
+    anchored on the last picture staged."""
     owned = [s for s in shots if s.setup == setup] or shots
-    plate = room is None or grid_room.stages_plate(shots)
-    reserve = int(plate) + int(room is not None)
-    cast, char_slots = cast_of(book, owned, reserve, ep.setups[setup])
-    props, prop_slots = stage_props(props_of(book, ep.setups[setup].props, owned), len(char_slots), reserve)
-    nxt, slots, plate_slots = len(char_slots) + len(prop_slots) + 1, {**char_slots, **prop_slots}, []
-    if plate:
-        slots[str(100 + nxt)], plate_slots, nxt = wide_for(book, ep.setups[shots[0].setup]), [nxt], nxt + 1
-    room_slot = nxt if room is not None else None
-    if room is not None:
-        slots[str(100 + nxt)] = Path(room)
-    style_slot = room_slot if room_slot is not None else plate_slots[0]
+    cast, char_slots = cast_of(book, owned, 1, ep.setups[setup], alias_table(book, ep))
+    refuse_unsaid(cast)
+    props, prop_slots = stage_props(props_of(book, ep.setups[setup].props, owned), len(char_slots), 1)
+    slots, place_slots, style_slot, room_slot = place_slots_for(
+        book, ep.setups[shots[0].setup], {**char_slots, **prop_slots}, room)
     said_as = {p["entity"]: p["name"] for p in cast}
     blocks = [{"size": SAID[s.size], "body": body_of(s),
-               "cut": cut_clause(s.size, peopled=bool(s.faces)),
+               "cut": framing(s.size, bool(s.faces), body_of(s)),
                "who": [said_as[f] for f in people_in(book, [s]) if f in said_as],
                "extras": getattr(s, "extras", 0)} for s in shots]
     here = ep.setups[shots[0].setup]
-    place = (plate_slots, here.described)
-    return compose(version, blocks, cols, rows, place, cast, style_slot, props, room=room_slot,
-                   geometry=place_words(here), light=getattr(here, "light", "") or "",
-                   **look_for(book, here)), slots
+    text = compose(version, blocks, cols, rows, (place_slots, here.described), cast, style_slot, props,
+                   room=room_slot, geometry=place_words(here), light=getattr(here, "light", "") or "",
+                   **look_for(book, here))
+    return text, slots, cast
+
+
+def place_slots_for(book: Path, here, slots: dict, room: Path | None) -> tuple[dict, list, int, int | None]:
+    """(every slot, the place picture's slots, the style slot, the room slot): the
+    room after the people when the grid is chained, else the place picture."""
+    nxt, slots = len(slots) + 1, dict(slots)
+    if room is not None:
+        slots[str(100 + nxt)] = Path(room)
+        return slots, [], nxt, nxt
+    slots[str(100 + nxt)] = wide_for(book, here)
+    return slots, [nxt], nxt, None
+
+
+def alias_table(book: Path, ep) -> dict[str, list[str]]:
+    """{who: [epithet, ...]} the plan's own tags say (cast_alias): every shot's
+    picture and motion words, against every bound row and its look layers."""
+    texts = [str(getattr(s, f, "") or "") for s in ep.shots for f in ("frame", "at_rest", "end", "motion")]
+    rows = {}
+    for r in cast_refs.load(book).get("refs", []):
+        if r.get("kind", "character") == "character":
+            card = continuity.card_of(book, r["entity_id"])
+            layers = [v for lk in (card.looks.values() if card else []) for v in lk.layers.model_dump().values()]
+            rows[r["entity_id"]] = " ".join([str(r.get("physical", ""))] + [str(v) for v in
+                                            (r.get("wardrobe") or {}).values()] + layers)
+    return cast_alias.aliases(texts, rows)
+
+
+def refuse_unsaid(cast: list[dict]) -> None:
+    """A named person with neither a sheet slot nor a clean layers line refuses
+    the grid: his raw row is what put the doctor and the child's father in it (G2)."""
+    bad = [p["entity"] for p in cast if not p.get("ref") and not p.get("line") and p.get("noun") != "creature"]
+    if bad:
+        raise SystemExit(f"REFUSED: {bad} would be drawn with no sheet slot and no clean look-layers line "
+                         f"(refs/looks.json layers): fix the layers or free a slot")
+
+
+def staging(book: Path, slots: dict, cast: list[dict]) -> dict:
+    """The manifest's record of what was staged, slot order, and who was words only."""
+    return {"load_images": [episode_home.relative(book, Path(slots[k])) for k in sorted(slots, key=int)],
+            "words_only": [p["entity"] for p in cast if not p.get("ref")]}
+
+
+def lint_wall(text: str, cast: list[dict], names: list[str]) -> None:
+    """A grid whose prompt the lint refuses never reaches the GPU (studio/grid_lint)."""
+    nouns = {p["ref"]: p.get("noun", "") for p in cast if p.get("ref")}
+    if bad := grid_lint.faults(text, nouns, names):
+        raise SystemExit("REFUSED: grid lint: " + " | ".join(bad))
 
 
 def graph_for(text: str, slots: dict, cols: int, rows: int, seed: int, name: str,
@@ -396,7 +544,8 @@ def main(book_id: str, number: int, setup: str, cols: int, rows: int, tag: str =
         raise SystemExit(why)
     shots = grid_shots(ep, setup, cols, rows, only)
     room = room_of(book, number, ep, setup, [s.index for s in shots])
-    text, slots = prompt_for(book, ep, setup, shots, cols, rows, version, room=room)
+    text, slots, cast = built(book, ep, setup, shots, cols, rows, version, room=room)
+    lint_wall(text, cast, name_tokens(book))
     name = grid_name(number, setup, cols, rows, tag)
     seed = 40500 + sum(s.index for s in shots) + seed_bump
     print(f"{name}: shots {[s.index for s in shots]} | slots {sorted(slots)} | prompt {len(text)} chars",
@@ -408,11 +557,54 @@ def main(book_id: str, number: int, setup: str, cols: int, rows: int, tag: str =
         "shots": [s.index for s in shots], "seed": seed, "plan": plan_sha(book, number),
         "drawn_from": shots_sha(ep, [s.index for s in shots]),
         "inputs": inputs_sha(text, slots), "prompt": version,
-        "room": episode_home.relative(book, room) if room else None})
+        "room": episode_home.relative(book, room) if room else None, **staging(book, slots, cast)})
     print(f"{name} in {time.time() - began:.0f}s -> {episode_home.relative(book, grid)}", flush=True)
 
 
+DRY = False
+"""--prompts: build and lint only.  `sheet_of` then never writes a sheet_front.png."""
+
+
+def layout_rows(book: Path, number: int, ep) -> list[dict]:
+    """The episode's grids: storyboard/layout.json, else the rule from the plan."""
+    from studio import grid_layout
+    path = episode_home.home(book, number) / grid_layout.FILE
+    if path.exists():
+        return list(episode_home.read_json(path))
+    shots = [s.model_dump(mode="json") for s in ep.shots]
+    return grid_layout.layout({k: v.model_dump(mode="json") for k, v in ep.setups.items()}, shots)
+
+
+def dry_run(book: Path, number: int, ep, rows: list[dict]) -> int:
+    """Every grid's prompt built and linted, nothing staged or posted: 0 clean, 1 on any fault."""
+    names, bad = name_tokens(book), 0
+    for row in rows:
+        shots = [s for s in ep.shots if s.index in row["shots"]]
+        room = room_of(book, number, ep, row["setup"], row["shots"])
+        text, slots, cast = built(book, ep, row["setup"], shots, row["cols"], row["rows"], room=room)
+        faults = grid_lint.faults(text, {p["ref"]: p.get("noun", "") for p in cast if p.get("ref")}, names)
+        faults += [f"UNDRAWN staged picture not on disk: {episode_home.relative(book, Path(p))}"
+                   for p in slots.values() if not Path(p).exists()]
+        bad += bool(faults)
+        name = grid_name(number, row["setup"], row["cols"], row["rows"], row.get("tag", ""))
+        print(f"===== {name} shots {row['shots']}\n{json.dumps(staging(book, slots, cast))}\n\n{text}\n\n"
+              + ("lint: clean" if not faults else "lint: " + "\n  ".join(["FAULTS"] + faults)), flush=True)
+    print(f"{len(rows)} grids, {bad} with lint faults", flush=True)
+    return 1 if bad else 0
+
+
+def prompts(book_id: str, number: int) -> int:
+    """`grids.py <book> <n> --prompts`: the dry mode on an episode, no GPU."""
+    global DRY
+    DRY = True
+    book = episode_home.book_dir(book_id)
+    ep = episode_home.load_plan(book, number)
+    return dry_run(book, number, ep, layout_rows(book, number, ep))
+
+
 if __name__ == "__main__":
+    if "--prompts" in sys.argv:
+        raise SystemExit(prompts([a for a in sys.argv[1:] if not a.startswith("--")][0], episode_arg(sys.argv)))
     plain = [a for a in sys.argv[1:] if not a.startswith("--")]
     only = [int(v) for a in sys.argv if a.startswith("--shots=") for v in a.split("=", 1)[1].split(",") if v]
     bump = int(next((a.split("=", 1)[1] for a in sys.argv if a.startswith("--seed-bump=")), "0"))

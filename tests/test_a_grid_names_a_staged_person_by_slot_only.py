@@ -19,6 +19,6 @@ def test_staged_names_in_the_body_become_their_slot():
                        "the brother's hand rests on the wheel; Mrs. Elphinstone sits beside her.")}]
     body = _unnamed(shots, cast)[0]["body"]
     assert "brother" not in body.lower() and "Miss Elphinstone" not in body
-    assert body.count("the person in <image1>") == 2 and "the person in <image2>" in body
+    assert body.lower().count("the person in <image1>") == 2   # a body opening on a slot is capitalised (2026-10-15) and "the person in <image2>" in body
     assert "the person in <image1>'s hand" in body
     assert "Mrs. Elphinstone" in body                 # unstaged: keeps her words
