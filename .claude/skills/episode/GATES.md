@@ -206,6 +206,35 @@ stored readings raised no new failure.
 | G-LOOK-TAKE (2026-10-10) | `T<NN>.content.json` `look_log` | the hair family changing across the 3 frames, or off the staged look on 2 of them (`take_content.look_log`) | LOG ONLY: its only cure is a re-render (3/21) |
 | `take_frame.row` (letterbox, in `T<NN>.dq.json`) | — | bars at the top AND bottom, each >= 4 % of the height, each either flat (row spread <= 2.0) or ending at an edge (the picture rises >= 12 levels past it) | HARD. ep14 T26: 54/256 rows of bars. ep21 T27/T30: a dark cellar read 3.6-5.3 spread, 1.5-3.3 step, and is NOT a letterbox (2026-10-08) |
 
+**G-TAKE-INPUTS (2026-10-15, Jekyll ep01 iter4 T06; `studio/take_inputs.py`).** A kept take's graph
+must have staged exactly the pictures its card stages NOW (content-addressed LoadImage names against
+`staged_name` of the current sheets and panel). `take_dq.settle` ranks only attempts made from the
+current inputs (a score never compares across a changed input: iter4 kept a 95 on the superseded lace
+girl over four current 10-40s); when none is current the take fails its HARD `inputs` row and the
+ladder retakes it. A swap writes `{"unknown_provenance": true}` for a roll with no graph of its own,
+never another roll's graph (the open "archived attempt carries another render's graph" bug). HARD
+walls: before assemble builds any cut, QC row `inputs` (count line "inputs: all N takes current"),
+and step 09 prints every kept take's staged names and stops on a stale or superseded one. After any
+sheet, place or panel redraw, every take that stages it is stale: re-render it or the master waits.
+
+**PROMPT LINT (2026-10-15, `studio/prompt_lint.py`, CLI `scripts/episode/prompt_lint.py <book> <n>`).**
+Deterministic, $0, a HARD wall in `takes_r2v --prompts` (step 06) and before every render; grids run
+`studio/grid_lint.py` before any grid is posted. Take rules: P1 case garble ("tHE FOCUS"), P2
+"The camera is On", P3 a panel cure read as a noun phrase, P4 a staged Subject never cited / a staged
+epithet left free, P5 a second description in parentheses, P6 Subject-definition debris (another cast
+name, "described as", "with a long."), P7 a stub speaker clause, P8 "as the line ends ... as he
+speaks", P9 "the lean continues" / garbled end noun, P10 the closed mouth on the listener, P11 a
+dangling aim, P13 an unstaged person, P14 lettering bait with no unlettered sentence, P15 a lens length
+in a drawn book, P17 an over-the-shoulder side against its edge / a vertical pan, P18 one action per
+1.2 s. Plan rules: P11, P12 (every tag fragment is in the current row: `cast_alias.retag`), P13, P17.
+File rules (after a render): the graph's prompt is prompts.json's, the graph not older than its take.
+Grid rules: P14 "picture" for a door's panels, P15 a raw dossier row for an unslotted person, P16 a
+girl/woman "the person in <imageN>", a physique word inside "wears:", a parenthetical after a slot.
+
+**SCENE PALETTE (2026-10-15, advisory, `scripts/episode/scene_palette.py`).** One frame per take; a
+take whose open-blue-sky share (top third) or saturation sits far from its scene's median is named
+(iter4: pavement_day T12 sunny inside an overcast scene). Uncalibrated: refuses nothing.
+
 Take currency: a take is kept only when it was rendered from the same prompt
 AND the same staged picture bytes (content-addressed names in its
 `graph.json`).

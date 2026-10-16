@@ -485,6 +485,19 @@ same-length reseeds and passed both (WER 0.11, tail -48 dB) on its first shorter
 
 **Never pin a last frame.** ref2v gives a take its first frame only.
 
+**A kept take is current to its inputs (G-TAKE-INPUTS, 2026-10-15).** After `take_dq --attempts`,
+step 09 prints each kept take's staged sheet and panel names and STOPS on any name that is not the
+current card's (a `superseded/` hash, a redrawn panel); the ranker never keeps an attempt made from
+older pictures over a current one, and assemble and QC refuse a master holding one. After a sheet,
+place or panel redraw, every take that stages it is re-rendered. A master report quotes QC's
+"inputs: all N takes current".
+
+**The prompt is linted before the GPU (2026-10-15).** `takes_r2v.py --prompts` and every render run
+the PROMPT LINT (GATES.md); a refusal is a builder or plan fix, never a re-roll. A plan epithet ("the
+lawyer") binds to its staged `<Subject k>`; a person is described once, in `subject_definitions`.
+Over-the-shoulder: a camera "behind his RIGHT side" puts his shoulder at the LEFT edge. A hand insert
+names no hat or coat.
+
 ---
 
 ## Before anything leaves the machine (2026-09-26)

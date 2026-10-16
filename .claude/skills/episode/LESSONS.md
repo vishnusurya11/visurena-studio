@@ -1218,8 +1218,51 @@ fixes. Each lesson below cost at least one launch. Tracker rows A38-A74 in
       owner's ask -- but both renders walked the little man on the spot (G-GAIT 0.041 / 0.04 heights a step; by eye
       ~10 px in two seconds). The crane render that passed 95 was kept and the plan says the crane again
       (`girl/restore_move.py`); the girl reads as a child in a grey bonnet and dress, smaller, without the red.
-    - **OPEN: an archived attempt can carry another render's graph (2026-10-15).** After two step-09 rounds T06_fail4.mp4
+    - **CLOSED 2026-10-15 (21f867b, G-TAKE-INPUTS): an archived attempt can carry another render's graph.** A roll now moves only its own graph, or a `{"unknown_provenance": true}` stub. After two step-09 rounds T06_fail4.mp4
       (rendered 10:28) sat beside a graph dated 10-14 14:53; `take_dq --attempts` swapped it in WITH that graph, so
       step 09 reads T06 stale and would re-render it (it did re-render T06/T07 once). Not yet fixed: `displace` /
       `swap_in` pairing when a round displaces a take whose own graph was already moved. Until fixed, never run step 09
       after a `--attempts` swap without checking `stale_takes`.
+    - **A score ranks renders of the same inputs, never across a changed input (Jekyll ep01 iter4, audit
+      2026-10-15 01_staged_refs.md).** iter4 shipped T06 on the superseded lace-bonnet girl: the ranker kept
+      attempt 3 (95, rendered 10-14 on the old sheet and old panel) over four renders on the new sheet
+      (10-40), and swapped it in with a graph 20 h older than its video. Nothing read the graph beside the
+      kept file -- QC was green, the master eye reads pixels. G-TAKE-INPUTS ranks only current attempts and
+      walls assemble, QC and step 09 on the staged names; a master report says "inputs: all N takes current".
+    - **One person told twice is still the ep16 class (iter4 audit 02_prompts.md T4/T5/G4).** The plan's
+      epithets ("the lawyer", "the little man", "the girl") were never bound: 18 of 23 takes never cited a
+      staged Subject, every take carried a parenthetical second description beside "<Subject k> is ...",
+      and the dialogue takes a third ("lank, with a clipped English voice"). The epithet is read off the
+      plan's own tag (`studio/cast_alias`: the row its fragments quote) and binds to its label; a
+      parenthetical after a label is dropped; a staged speaker is never re-described.
+    - **A cure sentence written into a shared field leaks into the other stage (T3).** The panel ladder's
+      reprose leads `frame` with "Only the named people stand in the picture ..." for the drawer; the take
+      wrapped the frame as a noun phrase: "The shot opens on only the named people stand ...". The take
+      builder drops a leading cure (`without_cures`); P3 judges the take text, not the plan.
+    - **A fix in code does not fix the plan field the old code wrote (T11).** `take_ladder.destination`
+      (3ae4584) mends new aims, but plan.json still said "tracks beside the gold coins to the folded" and
+      "across to the door's". Lint what is on disk (P11 runs on the plan), not what the code would write now.
+    - **Rows are not sheets (T21, owner 2026-10-15: the SHEET IS TRUTH).** Utterson's row said sandy-blond
+      and a lawyer's dark suit beside a grey-haired sheet in a long overcoat with white buttons, for 14 takes;
+      Enfield's "dark frock coat" beside a mid-grey coat, cream waistcoat and black gloves for 15; T02 and
+      T19 drew a brown-haired Utterson and T10/T20 a bare-handed Enfield. The rows (look table, heads,
+      dossier, drawer tags) are rewritten to the sheets and rebound; the plan's tags follow through
+      `cast_alias.retag` in its plan.py. A PATCHED_BY_HAND plan.py is a plan no row fix can reach: v3 takes
+      the signed plan.json as its base and fixes by name.
+    - **Small garbles, each a class (T1, T2, T5-T9, T15, T19).** `lower_lead` lowered only the first letter of
+      an all-caps opener ("tHE FOCUS", 23/23 takes); the camera position kept its capital preposition ("is
+      On"); the speaker identity was the row before its first comma ("lank,"); "as the line ends ... as he
+      speaks"; "his lean hands" read as the verb lean; `NP_END`'s `by` split "by-street" ("with the now in
+      frame"); a drawn book carried "a 50mm lens"; three actions in 1.6 s. Each is a P-rule in the lint and
+      a fix in the builder.
+    - **A grid ceiling drew people from words (01_staged_refs 3.2, G2).** A chained wide spent two of three
+      slots on the plate and the room, so shots 6, 7, 22 drew two people each from their raw dossier rows,
+      other people's names inside ("the doctor, the child's father, and hyde"). On a chained grid the room IS
+      the place; an unslotted person is said in his look layers only; each grid records its LoadImage list
+      and `words_only`.
+    - **One door is one picture (03_visual_qa.md fault 1).** The house's door was three doors: the day gable
+      door (a grid's invention), a plank door with an eye (the master and its night state), an arched brick
+      court (a second fresh master). The door the audits liked existed only in a panel, so the master became
+      that panel with its people taken out, and every setup that shows the door stands on it or one edit of
+      it. Derived states are looked at: "knife nicks on the mouldings" drew a lettered lintel, "the brass
+      keyhole polished bright" a sunlit new red door; a day setup takes the base itself.

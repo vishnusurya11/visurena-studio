@@ -43,3 +43,6 @@ Always:
 - **Decide, go, and correct after his feedback.** Do not stop mid-way to ask.
 - **Patches go in files, not heredocs.** A backslash through a heredoc or nested quotes reaches disk mangled.
 - **Never pipe a test run into `tail` before a commit.** Read pytest's exit code.
+- **A master report names its inputs (G-TAKE-INPUTS, 2026-10-15).** Every message that names a master states QC's count line, "inputs: all N takes current" -- every kept take rendered from the sheets and panels on disk now -- never QC PASS alone. Jekyll ep01 iter4 shipped T06 on a superseded sheet beside a green QC. A stale take is a retake, never a cut.
+- **The prompt lint is a wall (2026-10-15).** `takes_r2v.py --prompts` and every render run `studio/prompt_lint` (P1-P18: garbles, uncited Subjects, second descriptions, row debris, stub speakers, dangling aims, unstaged people, lettering bait, over-the-shoulder sides) on the built prompts and the plan; grids run `studio/grid_lint`. After any ladder cure writes plan.json, re-run both.
+- **The sheet is truth (owner, 2026-10-15).** When a drawn sheet and its row disagree, the row (look table, heads, dossier, drawer tags) is rewritten to the sheet and rebound; the plan's tags are re-derived from the rows by its plan.py (`cast_alias.retag`).
