@@ -1273,3 +1273,16 @@ fixes. Each lesson below cost at least one launch. Tracker rows A38-A74 in
       iter1-4's 8220 s until the rows were moved aside. (3) An insert whose panel is drawn as the whole man on
       every seed freezes on every move type (push, track, pan, pull, refs-only); the words follow the picture --
       T09 passed once it said the man going in at the door.
+    - **iter7 run lessons (Jekyll ep01, 2026-10-16).** (1) **The words are an input too**: after a plan cure,
+      `take_dq --attempts` swapped the iter6 T06 render (90, made from the OLD words, the duplicate Enfield the
+      cure was for) back over the cured roll, because G-TAKE-INPUTS read only the staged pictures. An attempt whose
+      recorded prompt is not the card's is no longer current to the ranker (`take_dq.reworded`). (2) **"4 figures
+      for 3" was one person twice**: the crane's last frames re-drew Mr. Enfield where he stood while he also ran
+      on; an unaimed "runs forward from the LEFT edge" became "toward the fallen girl" (G-AIM) and the third seed
+      held one Enfield to the end (seeds 1-2 froze the crane, 67 %/84 %, the old T06 class). (3) **Lettering lives
+      in the panel**: T15's lettered sign was already drawn on the Sunday grid; a take reseed could not remove it,
+      the cell's words (a wall of closed shutters) did. (4) **A dialogue two-shot stays medium_close**: the
+      contract refuses a driven line on a `medium` (lips need the face). (5) **Diff each grid's built prompt against
+      its drawn `.txt`** (`grids.py --prompts`) to name exactly the grids a plan edit makes stale before any redraw.
+      (6) **The anchor grid is not re-cut by `panels.py`**: redrawing the Sunday 2x2 left `anchors/sunday_street.png`
+      and shot 17 on the old room.

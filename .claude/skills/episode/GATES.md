@@ -210,7 +210,9 @@ stored readings raised no new failure.
 must have staged exactly the pictures its card stages NOW (content-addressed LoadImage names against
 `staged_name` of the current sheets and panel). `take_dq.settle` ranks only attempts made from the
 current inputs (a score never compares across a changed input: iter4 kept a 95 on the superseded lace
-girl over four current 10-40s); when none is current the take fails its HARD `inputs` row and the
+girl over four current 10-40s); under `--attempts` the WORDS count too (2026-10-16, iter7 T06,
+`take_dq.reworded`): a roll whose recorded prompt is not the card's is not current, so a plan cure is
+never undone by an older higher score; when none is current the take fails its HARD `inputs` row and the
 ladder retakes it. A swap writes `{"unknown_provenance": true}` for a roll with no graph of its own,
 never another roll's graph (the open "archived attempt carries another render's graph" bug). HARD
 walls: before assemble builds any cut, QC row `inputs` (count line "inputs: all N takes current"),

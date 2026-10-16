@@ -35,12 +35,17 @@ class Inputs:
     missing: list[str] = field(default_factory=list)
     superseded: list[str] = field(default_factory=list)
     unknown_provenance: bool = False
+    reworded: bool = False
+    """Rendered from other words than the card's now (Jekyll ep01 iter7 T06: the ranker kept the iter6
+    render, made before the plan's cure, over the cured one)."""
 
     def said(self) -> str:
-        """`current`, or the reasons: unknown provenance, stale names, missing names."""
+        """`current`, or the reasons: unknown provenance, older words, stale names, missing names."""
         if self.current:
             return "current"
         parts = ["unknown provenance (no graph of its own)"] if self.unknown_provenance else []
+        if self.reworded:
+            parts.append("rendered from older words than the card's")
         if self.stale:
             parts.append("stale " + ", ".join(n + (" (superseded)" if n in self.superseded else "")
                                               for n in self.stale))

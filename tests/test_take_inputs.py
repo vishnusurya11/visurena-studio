@@ -320,3 +320,23 @@ def test_step_09_prints_the_staged_ids_and_stops_on_a_stale_take(tmp_path, capsy
     graph_with(s.take, [staged_name(s.new), staged_name(s.panel)])
     shoot.inputs_wall(ctx)
     assert "inputs: all 1 takes current" in capsys.readouterr().out
+
+
+# ---- the words are an input too (Jekyll ep01 iter7, 2026-10-16) --------------------------------
+
+def test_reworded_marks_an_attempt_rendered_from_other_words_not_current(tmp_path):
+    """iter7 T06: the plan aimed Enfield's run (the duplicate-Enfield cure); the round-1 render
+    carried the new words, and `--attempts` swapped back the iter6 render (90, OLD words, the
+    duplicate) because G-TAKE-INPUTS read only the pictures."""
+    old, new = png(tmp_path / "T06.mp4", b"old words"), png(tmp_path / "attempts" / "T06_fail13.mp4", b"new")
+    put_graph(old.with_suffix(".graph.json"), "Enfield runs forward from the LEFT edge")
+    put_graph(new.with_suffix(".graph.json"), "Enfield runs forward from the LEFT edge toward the fallen girl")
+    now = take_dq.reworded({old: ti.Inputs(True), new: ti.Inputs(True)},
+                           "Enfield runs forward from the LEFT edge toward the fallen girl")
+    assert now[new].current and not now[old].current and now[old].reworded
+    assert "older words" in now[old].said()
+
+
+def test_reworded_with_no_prompt_leaves_the_inputs_alone(tmp_path):
+    a = png(tmp_path / "T06.mp4", b"x")
+    assert take_dq.reworded({a: ti.Inputs(True)}, "")[a].current

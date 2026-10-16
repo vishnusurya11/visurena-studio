@@ -471,6 +471,21 @@ def rankable(verdicts: dict, inputs: dict | None) -> dict:
     return now or verdicts
 
 
+def reworded(inputs: dict, prompt: str) -> dict:
+    """Each attempt's inputs with its WORDS read too: one rendered from another prompt than the
+    card's now is not current, so a score never ranks it over a roll of the cure (iter7 T06)."""
+    if not (prompt or "").strip():
+        return inputs
+    from dataclasses import replace
+    from studio import take_currency
+    out = {}
+    for f, got in inputs.items():
+        said = take_currency.recorded_prompt(f)
+        stale = said is not None and said.strip() != prompt.strip()
+        out[f] = replace(got, current=got.current and not stale, reworded=stale)
+    return out
+
+
 def settle(take_dir: Path, index: int, verdicts: dict, inputs: dict | None = None) -> Path:
     """Keep the best attempt by (passed, score), among the current ones, as
     `T<NN>.mp4`; the file it displaces becomes the next `T<NN>_failN.mp4`.
@@ -705,6 +720,8 @@ def main(book_id: str, number: int, indices: list[int], attempts: bool = False, 
             continue
         files = episode_home.attempts_of(take_dir, index) if attempts else [book / rec["rel_path"]]
         inputs = {f: ti.check(f, pictures) for f in files}       # G-TAKE-INPUTS, before any swap
+        if attempts:
+            inputs = reworded(inputs, rec.get("prompt", ""))     # and its words (iter7 T06)
         judged = {f: measure_attempt(f, rec, index, take_cells, work, take_dir, kinds, line, k, judges)
                   for k, f in enumerate(files)}
         verdicts = {f: with_inputs_row(v, inputs[f]) for f, (v, _, _) in judged.items()}
