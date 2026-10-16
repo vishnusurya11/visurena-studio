@@ -318,6 +318,13 @@ ACTION_VERB = re.compile(
     r"|breaks?|walks?|carries|carried|helps?|conducts?|examines?)\b", re.I)
 
 
+BIOGRAPHY = re.compile(r"\b(?:described as|associated with|access to|residence|presented as|identifies)\b", re.I)
+"""Analysis prose about a person anywhere in the sentence, not only at its head: "A small or little
+man, repeatedly described as shorter than Henry Jekyll" rode into 7 Jekyll ep01 takes (iter4 T10)."""
+DANGLING = re.compile(r"\b(?:a|an|the|to|of|with)$|\bwith a long$", re.I)
+"""A sentence cut off upstream ("narrow-chested, with a long.") in 14 Jekyll ep01 takes."""
+
+
 def is_photographable(sentence: str) -> bool:
     """True when this sentence describes how someone LOOKS.
 
@@ -329,7 +336,7 @@ def is_photographable(sentence: str) -> bool:
     lowered = clean.lower()
     if not clean or any(lowered.startswith(o) for o in META_OPENERS):
         return False
-    if any(word in lowered for word in ABSENCE):
+    if any(word in lowered for word in ABSENCE) or BIOGRAPHY.search(clean) or DANGLING.search(clean):
         return False
     if CAPABILITY.search(clean) or NARRATION.search(clean) or ACTION_VERB.search(clean):
         return False
