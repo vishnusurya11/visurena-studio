@@ -233,29 +233,28 @@ def keep_aside(out: Path, index: int) -> Path | None:
     return fail
 
 
-def displace(out: Path, index: int, keep_graph: bool = False) -> Path | None:
+def displace(out: Path, index: int) -> Path | None:
     """A take AND the graph it ran with to the next `T<NN>_failN`, so a roll
-    swapped back in later carries its own record.  `keep_graph` leaves a copy
-    beside `out` for an incoming roll that has none of its own."""
-    import shutil
-    from studio.take_currency import graph_of
+    swapped back in later carries its own record.  A take with no graph of its
+    own gets the unknown-provenance stub there, never an orphan or a copy of
+    another render's (audit 2026-10-15, 3.3; LESSONS 3ae4584)."""
+    from studio.take_currency import carry_graph, graph_of
     graph, fail = graph_of(out), keep_aside(out, index)
-    if fail is not None and graph.exists():
-        (shutil.copy2 if keep_graph else Path.replace)(graph, graph_of(fail))
+    if fail is not None:
+        carry_graph(graph, graph_of(fail))
     return fail
 
 
 def swap_in(take_dir: Path, index: int, best: Path) -> None:
-    """`best` becomes `T<NN>.mp4` with its own graph, stamped landed now: a kept
-    attempt is a FINISHED take.  Jekyll HEL ep01 v2 (2026-10-15): the old mtime
-    under a newer graph read as an interrupted render, re-rendered over."""
-    from studio.take_currency import graph_of, stamp_landed
+    """`best` becomes `T<NN>.mp4` with its own graph -- or the stub when it has
+    none -- stamped landed now: a kept attempt is a FINISHED take.  Jekyll HEL
+    ep01 v2 (2026-10-15): the old mtime under a newer graph read as an
+    interrupted render, re-rendered over."""
+    from studio.take_currency import carry_graph, graph_of, stamp_landed
     kept = Path(take_dir) / f"T{index:02d}.mp4"
-    own = graph_of(best).exists()
-    displace(kept, index, keep_graph=not own)
+    displace(kept, index)
     Path(best).rename(kept)
-    if own:
-        graph_of(best).replace(graph_of(kept))
+    carry_graph(graph_of(best), graph_of(kept))
     stamp_landed(kept)
 
 

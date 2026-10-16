@@ -49,7 +49,8 @@ def engine_flags(extra: list[str]) -> list[str]:
 
 
 QC_MEASURES = ("scripts/episode/qc.py", "studio/edit_gate.py", "studio/episode_sound.py",
-               "studio/speech_gap.py", "studio/master_loudness.py", "studio/line_laid.py")
+               "studio/speech_gap.py", "studio/master_loudness.py", "studio/line_laid.py",
+               "studio/take_inputs.py")
 """The code a QC report is measured by: a change here re-measures the master."""
 
 

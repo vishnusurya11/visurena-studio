@@ -81,7 +81,8 @@ def test_a_passing_master_is_heard_line_by_line(monkeypatch, tmp_path):
 
 def test_the_report_keys_are_todays_plus_lines_measured(monkeypatch, tmp_path):
     _wire(monkeypatch, tmp_path)
-    assert set(qc.measure("b", 3, "r2v", Ear())) == OLD_KEYS | {"lines_measured"}
+    # `inputs`: G-TAKE-INPUTS (2026-10-15), every take from the pictures on disk now
+    assert set(qc.measure("b", 3, "r2v", Ear())) == OLD_KEYS | {"lines_measured", "inputs"}
 
 
 GOOD = {"title_card": True, "lufs_ok": True, "tp_ok": True, "missing_cuts": [], "lines": [{"passed": True}],

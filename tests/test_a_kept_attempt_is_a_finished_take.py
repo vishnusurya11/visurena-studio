@@ -58,11 +58,21 @@ def jekyll_room(room: Path, own_graph: bool) -> Path:
 # ---- take_dq: the swap ----------------------------------------------------------------
 
 def test_a_swapped_in_attempt_reads_as_a_finished_take(tmp_path):
-    cured = jekyll_room(tmp_path, own_graph=False)
+    cured = jekyll_room(tmp_path, own_graph=True)
     kept = tmp_path / "T22.mp4"
     take_dq.settle(tmp_path, 22, {kept: verdict(False, 40.0), cured: verdict(True, 95.0)})
     assert kept.read_bytes() == b"cured, 95"
     assert tc.is_current("walk on", kept, canvas=(768, 768))
+
+
+def test_a_swapped_in_attempt_with_no_graph_is_unknown_not_current(tmp_path):
+    """G-TAKE-INPUTS (audit 2026-10-15, 3.3): a graphless roll used to be handed
+    the displaced take's graph and read current on another render's record."""
+    cured = jekyll_room(tmp_path, own_graph=False)
+    kept = tmp_path / "T22.mp4"
+    take_dq.settle(tmp_path, 22, {kept: verdict(False, 40.0), cured: verdict(True, 95.0)})
+    assert kept.read_bytes() == b"cured, 95"
+    assert tc.provenance_unknown(kept) and not tc.is_current("walk on", kept, canvas=(768, 768))
 
 
 def test_the_swap_carries_each_render_its_own_graph(tmp_path):
@@ -87,7 +97,7 @@ def test_step_09_does_not_call_a_swapped_take_stale(tmp_path, monkeypatch):
     """Step 09's done() read the swapped take stale, so the next pass re-ran it."""
     home = tmp_path / "ep01"
     room = home / "takes" / "r2v"
-    cured = jekyll_room(room, own_graph=False)
+    cured = jekyll_room(room, own_graph=True)
     episode_home.write_json(room / "prompts.json", [{"index": 22, "prompt": "walk on", "anchors": []}])
     take_dq.settle(room, 22, {room / "T22.mp4": verdict(False, 40.0), cured: verdict(True, 95.0)})
     monkeypatch.setattr(shoot, "card_pictures", lambda c, book, n: [])

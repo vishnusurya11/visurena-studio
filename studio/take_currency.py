@@ -42,7 +42,7 @@ def prompt_of(graph: dict) -> str | None:
     """The prompt the render node was given, or None if the graph has no
     render node (a partial or a differently-built workflow)."""
     for node in graph.values():
-        if node.get("class_type") == RENDER_NODE:
+        if isinstance(node, dict) and node.get("class_type") == RENDER_NODE:
             said = node.get("inputs", {}).get("prompt")
             if isinstance(said, str):
                 return said
@@ -60,30 +60,60 @@ def recorded_prompt(take: Path) -> str | None:
         return None
 
 
-def staged_images(take: Path) -> set[str]:
-    """The picture files this take's graph loaded -- content-addressed names,
-    so they are the record of which bytes it rendered from."""
-    beside = Path(take).with_suffix(".graph.json")
+STUB = {"unknown_provenance": True}
+"""What sits beside a kept take whose roll had no graph of its own (audit
+2026-10-15, 3.3): `swap_in` used to COPY the displaced take's graph there, so a
+record said the roll ran with another render's pictures.  The stub says only
+that nobody knows -- and unknown is never current."""
+
+
+def read_graph(take: Path) -> dict | None:
+    """The graph beside a take as a dict, or None (absent, unreadable, not a dict)."""
+    beside = graph_of(take)
     if not beside.exists():
-        return set()
+        return None
     try:
         graph = json.loads(beside.read_text(encoding="utf-8"))
     except (ValueError, OSError):
-        return set()
-    return {n["inputs"]["image"] for n in graph.values()
+        return None
+    return graph if isinstance(graph, dict) else None
+
+
+def nodes_of(take: Path) -> list[dict]:
+    """The graph's nodes; none for a stub, an absent or an unreadable graph."""
+    return [n for n in (read_graph(take) or {}).values() if isinstance(n, dict)]
+
+
+def write_stub(path: Path) -> None:
+    """The unknown-provenance stub at `path` (over whatever orphan sat there)."""
+    Path(path).write_text(json.dumps(STUB), encoding="utf-8")
+
+
+def carry_graph(own: Path, dest: Path) -> None:
+    """A render's OWN graph to `dest`, or the stub when it has none: a roll only
+    ever carries the record of what it ran with (LESSONS, 3ae4584)."""
+    if Path(own).exists():
+        Path(own).replace(dest)
+    else:
+        write_stub(dest)
+
+
+def provenance_unknown(take: Path) -> bool:
+    """No graph beside the take, or the stub: what it ran with cannot be shown."""
+    graph = read_graph(take)
+    return graph is None or bool(graph.get("unknown_provenance"))
+
+
+def staged_images(take: Path) -> set[str]:
+    """The picture files this take's graph loaded -- content-addressed names,
+    so they are the record of which bytes it rendered from."""
+    return {n["inputs"]["image"] for n in nodes_of(take)
             if n.get("class_type") == "LoadImage" and isinstance(n.get("inputs", {}).get("image"), str)}
 
 
 def recorded_canvas(take: Path) -> tuple[int, int] | None:
     """The width and height this take actually rendered at, off its own graph."""
-    beside = Path(take).with_suffix(".graph.json")
-    if not beside.exists():
-        return None
-    try:
-        graph = json.loads(beside.read_text(encoding="utf-8"))
-    except (ValueError, OSError):
-        return None
-    for node in graph.values():
+    for node in nodes_of(take):
         inputs = node.get("inputs", {})
         if isinstance(inputs.get("width"), int) and isinstance(inputs.get("height"), int):
             return (inputs["width"], inputs["height"])

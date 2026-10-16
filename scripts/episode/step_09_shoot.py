@@ -231,6 +231,22 @@ def gpu_window(ctx) -> None:
     take_ladder.measured(ctx, "scripts/episode/take_content_check.py", "take_content", ".content.json")
 
 
+def inputs_wall(ctx) -> None:
+    """After take_dq --attempts and the ladder: each kept take's staged picture
+    names, then STOP on any take whose graph staged a superseded or redrawn
+    picture (G-TAKE-INPUTS).  Jekyll HEL ep01 iter4: T06 was kept on the lace
+    sheet's 95 and nothing printed which sheet it ran with."""
+    from scripts.episode.assemble import stills_of
+    from studio import take_inputs
+    room = ctx.home / TAKES
+    audited = take_inputs.audit(list(records_of(room).values()), ctx.book_dir, ctx.number,
+                                skip=set(stills_of(room, ctx.book_dir)))
+    for i, v in sorted(audited.items()):
+        print(f"T{i:02d} staged {', '.join(v.staged) or 'nothing'} | {v.said()}", flush=True)
+    print(take_inputs.count_line(audited), flush=True)
+    take_inputs.wall(audited, who="step 09 stops: G-TAKE-INPUTS")
+
+
 def run(ctx) -> None:
     if why := panel_refusals(ctx.home):
         raise SystemExit("REFUSED: the takes wait on the panels: " + "; ".join(why))
@@ -255,6 +271,7 @@ def run(ctx) -> None:
     if not takes_of(ctx.home / TAKES):
         raise SystemExit(f"REFUSED: no takes under {TAKES.as_posix()}/ after the render")
     judge_takes(ctx, flag)
+    inputs_wall(ctx)
 
 
 if __name__ == "__main__":

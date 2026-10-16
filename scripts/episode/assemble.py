@@ -606,6 +606,18 @@ def stills_of(take_dir: Path, book: Path) -> dict[int, Path]:
             and not retaken(Path(take_dir) / f"T{int(k):02d}.mp4", v.get("decided", path.stat().st_mtime))}
 
 
+def refuse_stale_inputs(book: Path, number: int, take_dir: Path) -> None:
+    """G-TAKE-INPUTS, HARD, before any cut is built: every take the master plays
+    was rendered from the sheets and panel on disk NOW (studio/take_inputs).
+    Jekyll HEL ep01 iter4 shipped T06 on the superseded lace-bonnet sheet and a
+    redrawn panel.  A take the cut holds as a still plays no frame of its own."""
+    from studio import take_inputs
+    records = episode_home.read_json(Path(take_dir) / "shots.json")
+    audited = take_inputs.audit(records, book, number, skip=set(stills_of(take_dir, book)))
+    take_inputs.wall(audited)
+    print(take_inputs.count_line(audited), flush=True)
+
+
 def retaken(take: Path, decided: float) -> bool:
     """The take was rendered again after its still was decided, so the still
     answers a take that no longer exists.  ep12: T19 was stilled at 07:09,
@@ -900,6 +912,8 @@ def main(book_id: str, number: int, engine: str = "i2v",
     if missing := shots_without_takes(episode, takes):
         raise SystemExit(f"no take for shots {missing}")
 
+    if engine == "r2v":                     # the r2v cards are what name the pictures
+        refuse_stale_inputs(book, number, episode_home.takes_dir(book, number, engine))
     episode_home.make_rooms(book, number)   # free; the bed and the mix in front of it are not
     write_cut_manifest(work, episode_home.read_json(
         episode_home.takes_dir(book, number, engine) / "shots.json"), book)

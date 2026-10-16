@@ -284,6 +284,24 @@ def upscale_of(master: Path) -> str:
     return (json.loads(path.read_text(encoding="utf-8")).get(yp.sha8(master)) or {}).get("upscale", "")
 
 
+def inputs_rows(i: SimpleNamespace, report: dict) -> dict:
+    """G-TAKE-INPUTS over every take in the cut (studio/take_inputs): its graph
+    staged the sheets and panel on disk now.  The block carries the count line
+    a master report quotes ("inputs: all 23 takes current").  A take the cut
+    holds as a still plays no frame of its own and is not counted."""
+    from scripts.episode.assemble import stills_of
+    from studio import take_inputs
+    skip = set(stills_of(i.take_dir, i.book))
+    report["inputs"] = take_inputs.report(take_inputs.audit(i.records, i.book, i.number, skip))
+    return report
+
+
+def inputs_ok(report: dict) -> bool:
+    """HARD: no take in the master was rendered from a superseded or redrawn
+    picture.  A report written before the row existed carries no block."""
+    return report.get("inputs", {}).get("ok", True) is not False
+
+
 def verdict(report: dict) -> bool:
     """Loudness, the planned cuts, every line heard, and the edit being the takes.
     The take and sheet roll-ups are printed, never failed on."""
@@ -317,7 +335,10 @@ def verdict(report: dict) -> bool:
             and all(row.get("ok") for row in report.get("sound", []))
             # AND NOT TOO LOUD (owner 2026-09-27, ep13 iter8 at 10.9 dB): speech
             # stands over the gaps between lines; legacy reports carry no value.
-            and speech_gap.band_ok(report.get("speech_over_gap_db", speech_gap.SPEECH_OVER_GAP_DB)))
+            and speech_gap.band_ok(report.get("speech_over_gap_db", speech_gap.SPEECH_OVER_GAP_DB))
+            # EVERY TAKE FROM THE PICTURES ON DISK NOW (G-TAKE-INPUTS, 2026-10-15):
+            # Jekyll ep01 iter4 passed QC with T06 on the superseded girl sheet.
+            and inputs_ok(report))
 
 
 def failed_rows(report: dict) -> list[str]:
@@ -340,6 +361,7 @@ def failed_rows(report: dict) -> list[str]:
         "title_card": report.get("title_card") is not True,
         "sound": not all(row.get("ok") for row in report.get("sound", [])),
         "speech_band": not speech_gap.band_ok(report.get("speech_over_gap_db", speech_gap.SPEECH_OVER_GAP_DB)),
+        "inputs": not inputs_ok(report),
     }
     return [name for name, failed in checks.items() if failed]
 
@@ -436,7 +458,7 @@ def with_lines(report: dict, hear, spent: bool = False) -> dict:
 def measure(book_id: str, number: int, engine: str, listen, spent: bool = False) -> dict:
     """The whole report: the cheap rows, then (if they pass) every line heard."""
     i = load_inputs(book_id, number, engine)
-    report = edit_rows(i, head_rows(i))
+    report = inputs_rows(i, edit_rows(i, head_rows(i)))
     report = with_lines(report, lambda: heard_on_master(i.master, i.lines, i.work, listen), spent)
     report["passed"] = verdict(report)
     return report
@@ -477,6 +499,9 @@ def main(book_id: str, number: int, engine: str = "i2v", spent: bool = False) ->
     takes = report["takes"]
     print(f"takes: {takes['pass']}/{takes['of']} pass | fail {takes['fail']} | "
           f"budget spent {takes['budget_spent']} | worst {takes['worst']}")
+    print(report["inputs"]["line"])
+    for take, row in report["inputs"]["stale"].items():
+        print(f"  {take}: stale {row['stale']} superseded {row['superseded']} missing {row['missing']}")
     for sheet in report["sheets"]:
         print(f"sheet {sheet['setup']}: {'PASS' if sheet['passed'] else 'FAIL'} | "
               f"{sheet['sheets']} draw(s), {sheet['strict_draws']} STRICT | alike "

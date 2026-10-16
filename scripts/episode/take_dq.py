@@ -49,7 +49,7 @@ sys.path.insert(0, str(ROOT))
 
 from PIL import Image, ImageDraw
 
-from studio import av_sync, cut_landing as cl, edit_gate, episode_home, episode_seq_board as sq, frame_match as fm, motion_gate, take_coherence as tc, take_verdict as tv, take_zoom as tz
+from studio import av_sync, cut_landing as cl, edit_gate, episode_home, episode_seq_board as sq, frame_match as fm, motion_gate, take_coherence as tc, take_inputs as ti, take_verdict as tv, take_zoom as tz
 from studio.trailer_assemble import clip_seconds
 
 SAMPLES = 8
@@ -460,14 +460,49 @@ def fitting(verdicts: dict, placed: float, seconds_of) -> dict:
     return long or verdicts
 
 
-def settle(take_dir: Path, index: int, verdicts: dict) -> Path:
-    """Keep the best attempt by (passed, score) as `T<NN>.mp4`; the file it displaces
-    becomes the next `T<NN>_failN.mp4`.  Returns the winner's path before the rename."""
+def rankable(verdicts: dict, inputs: dict | None) -> dict:
+    """The attempts a score may compare: only those rendered from the CURRENT
+    pictures, whenever at least one is (G-TAKE-INPUTS).  Jekyll HEL ep01 iter4:
+    a 95 on the superseded lace-bonnet sheet beat four current 10-40s and
+    shipped.  A score never compares across a changed input."""
+    if inputs is None:
+        return verdicts
+    now = {p: v for p, v in verdicts.items() if inputs[p].current}
+    return now or verdicts
+
+
+def settle(take_dir: Path, index: int, verdicts: dict, inputs: dict | None = None) -> Path:
+    """Keep the best attempt by (passed, score), among the current ones, as
+    `T<NN>.mp4`; the file it displaces becomes the next `T<NN>_failN.mp4`.
+    With no current roll nothing is swapped in as if it were good: the kept
+    file stays and fails its `inputs` row, so the ladder retakes it.  Returns
+    the winner's path before the rename."""
     kept = take_dir / f"T{index:02d}.mp4"
-    best = max(verdicts, key=lambda p: tv.rank_key(verdicts[p]))
+    best = max(rankable(verdicts, inputs), key=lambda p: tv.rank_key(verdicts[p]))
+    if inputs is not None and not inputs[best].current and kept in verdicts:
+        return kept
     if best != kept:
         episode_home.swap_in(take_dir, index, best)
     return best
+
+
+def with_inputs_row(v, inputs: ti.Inputs):
+    """The HARD `inputs` row on a verdict, the score re-summed: a stale roll fails."""
+    v.gates.append(ti.row(inputs))
+    v.score, v.passed = tv.score(v.gates)
+    return v
+
+
+def inputs_record(inputs: ti.Inputs) -> dict:
+    """What T<NN>.dq.json says about the kept take's inputs."""
+    from dataclasses import asdict
+    return {"inputs": asdict(inputs), "inputs_stale": not inputs.current}
+
+
+def cache_agrees(hit: dict, now: ti.Inputs) -> bool:
+    """A cached verdict stands only while it knew the take's currency as it is
+    now: a sheet redrawn under unchanged take bytes makes a cached pass stale."""
+    return bool(hit.get("inputs_stale")) == (not now.current)
 
 
 def live_rows(gates: list) -> tuple[int, int]:
@@ -648,6 +683,8 @@ def main(book_id: str, number: int, indices: list[int], attempts: bool = False, 
     judges = {"home": home, "embed": embed, "inputs": inputs, "landmarker": landmarker(), "person": gait.yolo()}
     for index in wanted(records, indices):
         rec = records[index]
+        # THE CURRENT PICTURES, read before panel_board rewrites rec["anchors"]
+        pictures = ti.card_pictures(rec, book, number)
         take_cells = cells
         if board := panel_board(rec, book):        # the staged panel is the board
             rec["anchors"], take_cells = board
@@ -661,21 +698,24 @@ def main(book_id: str, number: int, indices: list[int], attempts: bool = False, 
         rec["line_room"] = line_room(placed, rec)
         rec["daylight"] = daylit(episode, rec)
         rec["head"] = edit_gate.heads_in(home).get(index, 0.0)
-        if not attempts and (hit := cached(take_dir, index, book / rec["rel_path"], any_code=spent)) is not None:
+        if (not attempts and (hit := cached(take_dir, index, book / rec["rel_path"], any_code=spent)) is not None
+                and cache_agrees(hit, ti.check(book / rec["rel_path"], pictures))):
             episode_home.write_json(take_dir / f"T{index:02d}.dq.json", hit)   # a fresh mtime for mtime readers
             print(f"T{index:02d} cached ({hit.get('score', '?')}/100, bytes unchanged)", flush=True)
             continue
         files = episode_home.attempts_of(take_dir, index) if attempts else [book / rec["rel_path"]]
+        inputs = {f: ti.check(f, pictures) for f in files}       # G-TAKE-INPUTS, before any swap
         judged = {f: measure_attempt(f, rec, index, take_cells, work, take_dir, kinds, line, k, judges)
                   for k, f in enumerate(files)}
-        verdicts = {f: v for f, (v, _, _) in judged.items()}
-        best = (settle(take_dir, index, fitting(verdicts, rec["placed_seconds"], clip_seconds))
+        verdicts = {f: with_inputs_row(v, inputs[f]) for f, (v, _, _) in judged.items()}
+        best = (settle(take_dir, index, fitting(verdicts, rec["placed_seconds"], clip_seconds), inputs)
                 if attempts else files[0])
         v, audio, measures = judged[best]
         kept = take_dir / f"T{index:02d}.mp4" if attempts else best
         report = record(v, list(verdicts.values()), prior_record(take_dir, index))
         report["audio"], report["camera"] = audio, camera_dq(kept, v.seconds, [f / 24 for _, f in rec.get("anchors", [])][1:])
         report["measures"] = measures
+        report |= inputs_record(inputs[best])
         # RELATIVE, never a drive letter (CLAUDE.md; audit item 15): this line
         # had put the worktree's absolute path into ~200 take reports.
         report["strip"] = episode_home.relative(book, tv.strip(v, kept, take_cells, work / f"take_T{index:02d}.png"))
