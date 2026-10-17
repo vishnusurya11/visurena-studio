@@ -39,6 +39,14 @@
 - One checkout, on `master`. Never a worktree, a per-book branch or a copied library.
   The code tree names no book; everything book-specific lives under `library/<book>/`.
 
+## What goes in git
+- Git holds only what a fresh clone on a new machine needs to install, test and run, plus
+  the docs and images the README and wiki use. Nothing else.
+- Audits, experiments, debates, replays, screenshots, renders and their logs live on disk
+  under `docs/audit/` (git-ignored), never in git. A test that needs a piece of evidence
+  copies that one file into `tests/fixtures/`; code never reads `docs/audit/`.
+- Media (png, jpg, mp4, wav) is committed only when a README or wiki page shows it.
+
 ## D: is a spinning disk — scan narrow
 - The repo and `library/` live on a 4 TB HDD; C: is the NVMe. Thousands of small reads
   (a recursive grep, a cache walk) seek the head and starve renders and model loads.

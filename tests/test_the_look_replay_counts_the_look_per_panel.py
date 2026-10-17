@@ -93,7 +93,7 @@ def _plan_shots(number: int, ids: list[int]):
 def test_the_c1_ep25_regrid_passes_two_of_two_and_round_0_still_fails():
     import json
     from pathlib import Path
-    evidence = Path(__file__).resolve().parents[1] / "docs/audit/2026-10-10_continuity_retro/bench_evidence/c1"
+    evidence = Path(__file__).resolve().parent / "fixtures/look_replay"
     reads = json.loads((evidence / "regrid_ep25_report.json").read_text(encoding="utf-8"))["reads"]
     shots = _plan_shots(25, [0, 1, 2, 4])
     got = replay.tally([reads[k] for k in ("0", "1", "2", "4")], RAGGED, shots)

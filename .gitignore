@@ -85,3 +85,7 @@ client_secret*.json
 
 # Command Center thumbnails kept across restarts (regenerable).
 .cache/
+
+# Audits, experiments, debates and their media stay on disk, never in git (owner 2026-10-16):
+# git holds only what a fresh clone needs to run, plus the docs and images the README and wiki use.
+docs/audit/
