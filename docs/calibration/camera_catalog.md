@@ -33,6 +33,23 @@ Gates are not quality.
 5. **Motivate the move.** Follow a walk, reveal what the line names, push on
    the realisation, pull back on the aftermath.
 
+**The anime-TV grammar (owner 2026-10-17; `studio/framing_grammar.py`, decision
+`architecture/decisions/2026-10-17_anime_tv_grammar.md`).** On a plan that declares it:
+
+6. **Faces large, sizes by the cut.** At least 55 % of the shots at close or medium close.
+   A cut changes the size; a camera move never does (H3 ignores amounts).
+7. **Mostly locked.** At least half the shots locked off, the actor or the air carrying the
+   verb (a lamp flame, a breath, a hand). Locked shots leave the variety share and the
+   twice-running rule; 8 distinct moves still hold.
+8. **A push is a plan smell.** At most 2 an episode, never with an amount ("a hand's
+   breadth" governed 0 of 16).
+9. **Wides are short**: at most 2, 4 s each (the opener 5 s). Mediums 7 s. Inserts are
+   impacts of 1-3 s; a long line splits across the insert and the reaction.
+10. **A two-person reaction is a locked medium two-shot; the payoff line a locked close;
+    over-the-shoulder stays medium close.**
+11. **Silhouette, Dutch angle and eye close-up are UNSUPPORTED in words**: the staged
+    place picture wins every time (below). They need a panel that draws them.
+
 ## The moves
 
 Status starts at `untested`. Each trial records the take, the measured result
@@ -57,6 +74,14 @@ Status starts at `untested`. Each trial records the take, the measured result
 | handheld | "The camera is handheld, drifting gently with <figure>." | panic, the flight chapters | may churn; keep it for the panic chapters | untested |
 | rack_focus | "Focus shifts from <foreground object> to <figure behind it>." | two planes of meaning | may be ignored entirely | fails (ep02 T17: no focus change; a locked medium-wide) |
 | orbit | "The camera circles slowly around <subject>, keeping <subject> in the centre." | a rare hero beat only: at most one per episode | THIS is what ep01 did 18 times by accident | works (ep01, involuntarily) |
+| locked_two_shot | medium; "The camera holds a locked-off frame on the two men; <A>'s fist twists the collar; <B> turns his head" | a two-person action reaction | a hat brim flipped in the last second (D3) | works (2026-10-16 D3: face 4.9 -> 11.3 %, sharpness 555 -> 1671, identity 0.20 -> 0.53 against full + track; same draw on Spark) |
+| locked_close | close; "The camera holds a locked-off frame on <name>'s face; his eyes lift; his hand comes to rest on his chest" | the payoff line, the emotional peak | -- | works (D5: face 35 -> 40 %, sharpness 3586 -> 4487, identity steady, lips driven) |
+| boots_low | insert; "The camera holds a locked-off frame at cobble height; <boot> strides across <ground> past <object>" | a violent beat as an impact, faces withheld | the voice held it 10.1 s against the grammar's 1-3 s: split the line | works (D2, 1/1: no faces, no clones, longest still 0.12 s) |
+| ambient_ma | wide or medium; "The camera holds a locked-off frame; <at the door a match flares>" | a held beat kept alive by the air | the people were not silhouettes (D6) | works (D6, 1/1: longest still 0.12 s, the flare lands) |
+| ots_close | close over a shoulder | -- | H3 does not open on a close OTS panel and pushes in from wider | fails (D4: frame 0 19.8 dB vs 27-33 for the other reframes, 2 of 2 seeds) -- OTS stays medium close |
+| silhouette_hold | figures as black shapes against a lit window or street, asked in words | -- | the grid copies the staged place picture | unsupported (D1, D6: the men drawn facing camera at ~4 % of frame) |
+| dutch | "the camera is canted at a slant, the street running diagonally" | -- | ignored: the horizon stays level | unsupported (D7: the same draw as D6, level) |
+| eye_ecu | extreme close on the eyes | -- | the grid path redraws the staged room | unsupported (D5 ECU arm: 3 of 3 seeds drew a street wide or a full figure; no take) |
 
 ## Smoothness: blur and warp, measured (ep02, 2026-09-19)
 

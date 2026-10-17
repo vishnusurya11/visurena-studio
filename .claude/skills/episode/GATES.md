@@ -52,6 +52,41 @@ missing input, or an unread picture.
 | STUDIO_RATE | a book with no measured voice projects at 2.45 words/s (`episode_spec.STUDIO_RATE`), never the 3.0 guess; the book's own measure once one episode is voiced | projection |
 | G-HOOK / G-SPIKE (the plan critic) | the critic lists the chapter's `threat` and `spike` with the shots that show and lines that tell each; G-HOOK: neither shot 0 nor line 0 carries the threat; G-SPIKE: the key event is told by lines only. Faulted when most of the k readings agree. A `nonscene` row may be folded away | critic fault -> the ladder |
 
+**2026-10-17 additions: the anime-TV grammar (owner; `studio/grammar_battery.py`, the battery's
+`GRAMMAR` row; decision `architecture/decisions/2026-10-17_anime_tv_grammar.md`).** HARD on a plan
+declaring `grammar: anime_tv` (set by code from the band) until something is drawn from it; advice on
+a legacy plan. Calibrated by replaying 41 plans (`scripts/episode/grammar_replay.py`; WotW ep01-27,
+Scarlet ep01-14, Jekyll ep01): the mechanical walls fire on none of the owner-approved WotW ep01-03 /
+Scarlet ep05, ep07; the grammar-definitional ones fire on almost every legacy plan, and those fires are
+the old grammar the owner replaced. Jekyll ep01 `plan_v3.json`: 0 rows, VERDICT clean.
+
+| gate | measures | replay (plans firing of 41; owner-approved) | kind |
+|---|---|---|---|
+| G-FACES | share of the cut at close / medium close with a face, >= 0.55 | 38; 5 | HARD (grammar) |
+| G-WIDE | <= 2 wides; each <= 4.0 s, the opener 5.0 s, by the voice ruler | 38; 5 | HARD |
+| G-MEDIUM / G-FULL | a medium <= 7.0 s / a full <= 5.0 s | 31; 4 / advisory | HARD / advisory |
+| G-INSERT | an insert 1.0-3.0 s | 39; 5 | HARD |
+| G-PUSH | <= 2 pushes; no AMOUNT on a camera head | 37; 3 | HARD, cured free (`strip_amounts`, `hold_extra_pushes`) |
+| G-LOCKED | >= 0.50 of the cut locked off | 37; 4 | HARD |
+| G-TWO | a reaction with 2+ faces is a locked medium | 7; 0 | HARD |
+| G-PAYOFF | a payoff shot with dialogue is a locked close | 8; 1 | HARD |
+| G-OTS | over-the-shoulder at close / extreme close | 4; 0 | HARD, cured free (`ots_medium_close`) |
+| G-UNSUPPORTED | silhouette, black shapes against, Dutch, canted, tilted horizon; extreme close on a face or eyes | 3; 0 | HARD |
+| G-SHOTS | cut shots <= 30 (`episode_capacity.MAX_SHOTS`) | 1 (WotW ep21, 32 shots, 9.2 h measured); 0 | HARD |
+| G-COLD | line 0 <= 10 words; a sound on shot 0 at <= 0.25 s | 39; 5 | HARD |
+| G-ACT | one act_out; start at 0.35-0.55 of the picture; beat + coda >= 1.2 s; a bed tone change at it or the next shot; before the turn | 40; 5 | HARD |
+| G-CAPTION | a narration line > 0.80 of its words in frame + motion (CAPTION_WALL); a line where the narrator acts is the witness, exempt | 8; 0 (WotW ep03 l15 exempted) | HARD |
+| G-REACT | after each exchange of 2+ speakers, a silent face (or one inner line) | 17; 3 | HARD |
+| G-MA | >= 3 shots holding beat + coda >= 1.2 s | 12; 3 | HARD |
+| G-INNER | an inner line over its speaker's own face; the "owner has not heard it" note | -- | HARD / advisory note |
+| G-TEASE, G-MOTIF | the tease loops to the hook's place and names its image; a grammar plan names its motif | -- | advisory |
+| G-DIAL ceiling (every plan) | dialogue <= the chapter's speech + 0.08, inside 0.20-0.35 (`dial_ceiling`) | never lower than the old 0.20 | HARD |
+
+Also: G-MOVES on a grammar plan leaves locked and over-the-shoulder shots out of the share and the
+twice-running rule; G-VARIETY's closes a person is 12 on a grammar plan; ONE PER TAKE reads
+`episode_takes.budget_for` (a grammar plan never packs); G-SOURCE reads a `tease` shot's spans in the
+NEXT chapter. `plan_check.py <book> <n> --plan=<file>` judges a scratch plan as undrawn.
+
 **2026-09-26 additions, all HARD:** G-COVER (every shot a `source` span; the
 furthest reaches 90 % of the chapter's paragraphs and the title event's last
 paragraph -- ep12 reached 57 of 69), G-SHOUT (a `!` line is dialogue), G-SOUND

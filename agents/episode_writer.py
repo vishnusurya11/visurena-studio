@@ -49,8 +49,9 @@ class Bed(BaseModel):
     tone: str
 
 
-CODE_SET_FIELDS = frozenset({"words_per_second"})
-"""Contract fields the code sets, never the writer: the Draft mirrors every other one."""
+CODE_SET_FIELDS = frozenset({"words_per_second", "grammar"})
+"""Contract fields the code sets, never the writer: the Draft mirrors every other one.
+`grammar` (2026-10-17) comes from the band: a writer free to leave it empty would."""
 
 
 class Draft(BaseModel):
@@ -62,6 +63,8 @@ class Draft(BaseModel):
     light: str = ""
     palette: str = ""
     look: str = ""
+    motif: str = ""
+    tease: str = ""
     aspect: Literal["9:16", "1:1"] = canvas.DEFAULT
     answer: str = ""
     protagonist: str
@@ -78,9 +81,11 @@ def to_episode(draft: Draft, brief: dict | None = None) -> Episode:
     and the band's spoken rate, so the contract projects at the pace the writer
     was told (ep22, 2026-10-07: 2.5 in the brief, 3.0 in the contract, 106 s)."""
     doc = draft.model_dump()
-    rate = ((brief or {}).get("band") or {}).get("words_per_second")
-    if rate:
-        doc["words_per_second"] = float(rate)
+    band = (brief or {}).get("band") or {}
+    if band.get("words_per_second"):
+        doc["words_per_second"] = float(band["words_per_second"])
+    doc["grammar"] = band.get("grammar", "")
+    doc["motif"] = doc.get("motif") or band.get("motif", "")
     setups: dict[str, dict] = {}
     for setup in doc.pop("setups"):
         name = setup.pop("name")
@@ -161,8 +166,8 @@ def contract_lines_of(bad: Exception) -> list[str]:
 # compiles, the whole does not.  So one draft is two strict calls, the body
 # reading the frame, merged into the one Draft the contract judges.
 
-FRAME_FIELDS = ("number", "title", "question", "where", "light", "palette", "look", "aspect",
-                "answer", "protagonist", "setups", "beds", "omit")
+FRAME_FIELDS = ("number", "title", "question", "where", "light", "palette", "look", "motif", "tease",
+                "aspect", "answer", "protagonist", "setups", "beds", "omit")
 SHOT_FIELDS = ("shots",)
 LINE_FIELDS = ("lines",)
 PART_TABLE = (("THE FRAME", FRAME_FIELDS), ("THE SHOTS", SHOT_FIELDS), ("THE LINES", LINE_FIELDS))

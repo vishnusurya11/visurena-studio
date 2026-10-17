@@ -150,9 +150,17 @@ def face_closes(episode: Episode) -> dict[str, int]:
     return out
 
 
+GRAMMAR_FACE_CLOSES = 12
+"""MAX_FACE_CLOSES under the anime-TV grammar (2026-10-17): it asks 55 % of the shots at
+close or medium close, which puts two leads past six each on any 28-30-shot plan
+(16 face shots, the two-shots counted for both).  The six was fitted when closes were
+20-30 % of the shots; repetition is now the cut's size change, not a count."""
+
+
 def face_close_faults(episode: Episode) -> list[str]:
-    return [fault("G-VARIETY", "plan", f"close/medium_close shots on {who!r}", n, MAX_FACE_CLOSES)
-            for who, n in face_closes(episode).items() if n > MAX_FACE_CLOSES]
+    wall = GRAMMAR_FACE_CLOSES if getattr(episode, "grammar", "") else MAX_FACE_CLOSES
+    return [fault("G-VARIETY", "plan", f"close/medium_close shots on {who!r}", n, wall)
+            for who, n in face_closes(episode).items() if n > wall]
 
 
 def wide_share(episode: Episode) -> float:
@@ -449,15 +457,33 @@ over the pictures (a tale, 2026-10-13).  The CEILING counts dialogue only: it
 measures lips on camera, which is what it was built for."""
 
 
+CEILING_OVER_SPEECH = 0.08
+"""How far the dialogue ceiling sits over the chapter's own speech (research 04 P4)."""
+
+
+def dial_ceiling(speech: float | None) -> float:
+    """The dialogue ceiling: the chapter's speech + CEILING_OVER_SPEECH, never under
+    the contract's 20 % and never over its outer wall (2026-10-17)."""
+    from studio.episode_spec import DIALOGUE_CEILING_MAX, DIALOGUE_SHARE
+    if speech is None:
+        return DIALOGUE_SHARE[1]
+    return round(min(DIALOGUE_CEILING_MAX, max(DIALOGUE_SHARE[1], speech + CEILING_OVER_SPEECH)), 2)
+
+
 def dial_faults(episode, speech: float | None = None) -> list[str]:
-    """G-DIAL: dialogue and tales under the chapter-aware floor.  The ceiling stays the contract's."""
+    """G-DIAL: dialogue and tales over the chapter-aware floor; dialogue under the
+    chapter-aware ceiling.  An inner line is neither (a thought, not speech)."""
     from studio.episode_spec import dial_message
     words = [(line.kind, len((line.text or "").split())) for line in episode.lines]
     total = sum(n for _, n in words) or 1
     share = sum(n for kind, n in words if kind in SPOKEN_BY_CHARACTERS) / total
-    floor = dial_floor(speech)
+    spoken = sum(n for kind, n in words if kind == "dialogue") / total
+    floor, ceiling = dial_floor(speech), dial_ceiling(speech)
     if share < floor - 1e-9:
         return [f"G-DIAL plan: {dial_message(share)} -- this chapter speaks {floor:.1%}, so that is the floor"]
+    if spoken > ceiling + 1e-9:
+        return [f"G-DIAL plan: {dial_message(spoken, ceiling)} -- the chapter's ceiling is its speech + "
+                f"{CEILING_OVER_SPEECH:.0%}"]
     return []
 
 
@@ -1262,13 +1288,22 @@ def running_faults(shots, ids: list[str], spoken: set[int] = frozenset()) -> lis
             if k and move == ids[k - 1] and not talk_unit(shots, ids, spoken, k)]
 
 
+HELD = frozenset({"locked", "over_shoulder"})
+"""Under the anime-TV grammar (2026-10-17) a held frame is the intended majority: it
+leaves the share and the twice-running rule.  The owner's complaint (2026-09-19) was
+orbits -- 18 of 23 pans whose subject kept its third; a locked frame is not one."""
+
+
 def moves_faults(episode) -> list[str]:
     """G-MOVES over a plan (anything with `.shots` carrying `motion` and `camera`);
-    a held or over-the-shoulder dialogue shot is outside the share (2026-10-13)."""
+    a held or over-the-shoulder dialogue shot is outside the share (2026-10-13), and
+    on a grammar plan every held shot is (2026-10-17)."""
     shots, spoken = list(episode.shots), dialogue_shots(episode)
     ids = move_ids(shots)
-    shared = [m for s, m in zip(shots, ids) if not (s.index in spoken and m in TALK_MOVES)]
-    return distinct_fault(ids) + share_fault(shared, len(ids)) + running_faults(shots, ids, spoken)
+    held = HELD if getattr(episode, "grammar", "") else frozenset()
+    shared = [m for s, m in zip(shots, ids) if not (s.index in spoken and m in TALK_MOVES) and m not in held]
+    running = [f for f in running_faults(shots, ids, spoken) if not held or not any(f"{m!r} follows" in f for m in held)]
+    return distinct_fault(ids) + share_fault(shared, len(ids)) + running
 
 
 # ---- G-STILL: a move the model ignores is refused before it renders ---------------
@@ -1415,16 +1450,19 @@ def span_faults(shot, chapter: str | None) -> list[str]:
             for span in shot.source if (got := span_match(span, chapter)) < SPAN_MATCH]
 
 
-def source_faults(episode, chapter: str | None) -> list[str]:
+def source_faults(episode, chapter: str | None, after: str | None = None) -> list[str]:
     """G-SOURCE over a plan: every claim has a span, every span is in the chapter.
-    `chapter` None with spans to check is a refusal, never a pass."""
+    `chapter` None with spans to check is a refusal, never a pass.  A `tease` shot
+    (2026-10-17) shows the next chapter: its spans are found in `after`, and with no
+    next chapter to read it is not judged against this one."""
     out = []
     for shot in episode.shots:
         said = claims(shot, episode.setups[shot.setup])
+        teased = getattr(shot, "section", "") == "tease"
         if said and not shot.source:
             out += [fault("G-SOURCE", f"shot {shot.index}", f"{claim} has no chapter span", 0, 1) for claim in said]
-        elif shot.source:
-            out += span_faults(shot, chapter)
+        elif shot.source and not (teased and after is None):
+            out += span_faults(shot, after if teased else chapter)
     return out
 
 
@@ -1897,8 +1935,8 @@ def speaker_fault(line, cast: set[str], narrator: str, cast_ids: list[str]) -> s
     who = line.speaker
     if line.kind == "narration" and who != narrator and who not in cast:
         return fault("G-SPEAKER", f"line {line.index}", f"speaker {who!r} is not the book's narrator ({narrator!r})", 0, 1)
-    if line.kind == "tale" and (who == narrator or who not in cast):
-        return fault("G-SPEAKER", f"line {line.index}", f"a tale is told by a character of the cast in his own "
+    if line.kind in ("tale", "inner") and (who == narrator or who not in cast):
+        return fault("G-SPEAKER", f"line {line.index}", f"a {line.kind} is spoken by a character of the cast in his own "
                      f"voice, never by the narrator or {who!r}", 0, 1)
     if line.kind == "dialogue" and who not in cast:
         return fault("G-SPEAKER", f"line {line.index}", f"speaker {who!r} is not in the cast ({', '.join(cast_ids)})", 0, 1)

@@ -45,6 +45,60 @@ of these is refused.
 
 ---
 
+## The anime-TV grammar (every new plan; `grammar_rules` in the band)
+
+An episode reads as an anime TV episode: held frames with life inside them, cut
+every few seconds between sizes that keep faces big. A CUT changes the size; a
+camera move never does (the model obeys a move's direction and ignores its
+amount). Every number below is in `grammar_rules`; count them.
+
+**Framing.**
+- At least `face_share` of the shots hold a face at close or medium_close
+  (G-FACES). A wide is the world-setter, never where a face reads.
+- At most `max_wides` wides, each `wide_seconds` long at most (the opening wide
+  `opener_wide_seconds`); then cut closer (G-WIDE). A medium holds at most
+  `medium_seconds` (G-MEDIUM); a full shot about five.
+- An insert is an IMPACT -- boots on the cobbles, a hand on the key, the object
+  -- of `insert_seconds` (G-INSERT). A long line never sits on an insert: split
+  it across the insert and the reaction that follows, each shot its own line.
+- The camera is mostly locked off: at least `locked_share` of the shots hold a
+  locked-off frame and the actor or the air carries the verb (a hand lifts, the
+  lamp flame wavers) (G-LOCKED). At most `max_pushes` pushes in the episode
+  (G-PUSH), and NO amount on any camera head -- never "a hand's breadth", "a
+  forearm", "two strides": name the direction and what the move arrives at.
+- A two-person reaction is a locked MEDIUM two-shot, the actor carrying the verb
+  (G-TWO). The payoff line is a locked CLOSE (G-PAYOFF).
+- Over-the-shoulder is medium_close: the near shoulder and the back of the head
+  in the foreground, never a close (G-OTS).
+- A silhouette, a Dutch (canted) angle and an eye close-up are UNSUPPORTED: the
+  drawer and the model ignore them in words. Never ask for them (G-UNSUPPORTED).
+- At most `max_shots` shots: every shot is its own take (G-SHOTS).
+
+**The screenplay.**
+- COLD OPEN: the first line is `cold_open_words` words or fewer and names the
+  event or its victim, never scenery; the first shot carries a `sounds` row at
+  `at` 0.0 (G-COLD).
+- ACT-OUT: exactly one shot with `section: "act_out"` ends part A on the spike or
+  its first consequence, starting inside `act_out_band` of the runtime, before
+  the turn, with `beat_s` + `coda_s` of at least `hold_s` and a bed span changing
+  tone on it or the shot after it (G-ACT).
+- Narration never captions the picture: it bridges time, gives what the frame
+  cannot show, or colours it (G-CAPTION, the wall `caption_wall`). When the
+  chapter's people speak, they speak: the dialogue band in the brief follows the
+  chapter's own speech.
+- After every exchange of two speakers, one SILENT REACTION: the listener's face,
+  no line (or one inner line) (G-REACT).
+- Spend the holds where they land: at least `min_holds` shots with `beat_s` +
+  `coda_s` of `hold_s` or more, after the reveals -- never 0.4 s crumbs on every
+  shot (G-MA).
+- `motif`: the book's recurring image (the band's `motif`, else name it once in
+  the first episode). The hook shows it.
+- Optional TEASE: one last shot, `section: "tease"`, after the button, picture
+  only, `coda_s` 2-4 s, at the hook's place, showing the NEXT chapter's first
+  image; name that image in `tease`.
+
+---
+
 ## The story brick
 
 One unit of story is one event with four parts, in this order:
@@ -68,7 +122,7 @@ frozen; a shot whose value reads the same at its close explains instead of
 tells, and is cut.
 
 Each shot's `section` is one of: hook, setup, friction, payoff, transition,
-turn, spike, reaction, runout, button, answer.
+turn, spike, reaction, runout, button, answer, act_out, tease.
 
 ---
 
@@ -78,12 +132,17 @@ turn, spike, reaction, runout, button, answer.
   speaker says every narration line. Never give narration to a character, and
   never choose a narrator yourself. When the brief names none, nothing can be
   written; the run stops before you are asked.
-- Three kinds of line: `narration` (the narrator, over cutaways), `dialogue`
-  (spoken ON CAMERA, lips driven) and `tale` (a character telling his own
-  story in his own voice, over pictures of what he tells -- no lips).
-- The narrator carries most of the speech; the few dialogue lines are spoken
-  ON CAMERA. `dialogue_share` in the band is the dial, and it counts dialogue
-  only: a tale sits outside it.
+- Four kinds of line: `narration` (the narrator, over cutaways), `dialogue`
+  (spoken ON CAMERA, lips driven), `tale` (a character telling his own
+  story in his own voice, over pictures of what he tells -- no lips) and
+  `inner` (a character THINKING, in his own voice, hushed, at most
+  `inner_max_words` words, on a shot holding his own face -- no lips; use it
+  instead of the narrator describing a reaction, never for a fact the chapter
+  withholds).
+- The narrator carries the bridges; the people speak their own scenes ON
+  CAMERA. `dialogue_share` in the band is THIS chapter's dial (it follows the
+  chapter's own speech), and it counts dialogue only: a tale or an inner line
+  sits outside it.
 - A dialogue line's shot shows the speaker's face at `close` or `medium_close`
   and lists the speaker in `faces`: the lips are driven by the line's own audio.
 - At most `max_words_per_line` words a line, at most `max_lines_per_shot` lines
@@ -234,8 +293,7 @@ extreme_close, close, medium_close, medium, full, wide.
   the place instead.
 - "slow" and every pace word -- slow, slowly, crawl, crawling, creep, creeping,
   gradually, leisurely, languid -- in EVERY field, `crowd` included. Name the
-  AMOUNT (a thumb's width, one whole tread, a hand's breadth) or the gait at a
-  normal pace. A person who crawls in the book "goes on hands and knees".
+  gait at a normal pace, or hold the camera locked. A person who crawls in the book "goes on hands and knees".
   Every first draft since the writer was registered has been refused for this.
 - an absence of any kind in a drawn field. Only `why` may explain an absence.
 - the DQ rules' banned subjects, anywhere.
@@ -245,8 +303,9 @@ extreme_close, close, medium_close, medium, full, wide.
 ## Motion and camera
 
 - `motion` is `camera; action; action` — at least three clauses. The HEAD
-  clause names a camera move with its amount and "across the whole shot"; a
-  move written after a semicolon is deleted by the builder.
+  clause names a camera move -- its direction and what it arrives at, never an
+  amount -- and "across the whole shot"; a move written after a semicolon is
+  deleted by the builder.
 - The last clause is something still going (runs along, comes down, lifts):
   never an end state, never a stillness, never a face part too small to measure.
 - A thing moves because something moves it: a hand, a body, the camera, or a
@@ -314,7 +373,7 @@ effect, and with its shouts read as calm prose. Each is now a refusal.
 
 ## The output contract, in words
 
-One object: `number`, `title`, `question`, `where`, `light`, `aspect`, `answer`,
+One object: `number`, `title`, `question`, `where`, `light`, `motif`, `tease`, `aspect`, `answer`,
 `protagonist` (an entity id), `setups` (a list of setups, each carrying the
 `name` the shots refer to it by; a name is used once), `shots` (numbered 0..n−1
 in cut order, each naming a defined setup), `lines` (numbered 0..n−1 in
@@ -354,6 +413,13 @@ again — the gates read the plan, never a diff.
 9. Every shot has a `source` span; the plan reaches the chapter's end and its
    title event; every `!` line is dialogue with a delivery.
 10. Every setup has an `ambience`; every loud event in the prose has its `sounds`.
+12. The grammar: faces at close/medium_close on `face_share` of the shots; at most
+    `max_wides` short wides; inserts of `insert_seconds`; mostly locked, at most
+    `max_pushes` pushes and no amount words; a two-person reaction a locked medium,
+    the payoff a locked close, over-the-shoulder medium_close; no silhouette, Dutch
+    angle or eye close-up; a cold open of `cold_open_words` words with a sound at
+    0.0; one act_out; a silent reaction after each exchange; `min_holds` holds of
+    `hold_s`; at most `max_shots` shots.
 
 ## Camera moves the model obeys (G-STILL)
 

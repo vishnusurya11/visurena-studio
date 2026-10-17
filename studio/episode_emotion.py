@@ -59,9 +59,12 @@ def vector_for(register: str) -> dict:
 
 
 def delivery_of(line) -> str:
-    """The written delivery, else a shout for a line that ends in '!', else calm."""
+    """The written delivery, else hushed for an inner line (2026-10-17), else a shout
+    for a line that ends in '!', else calm."""
     if getattr(line, "delivery", ""):
         return line.delivery
+    if getattr(line, "kind", "") == "inner":
+        return "hushed"
     return "shouting" if line.text.rstrip(" \"'’”").endswith("!") else voice_bank.TIMBRE
 
 

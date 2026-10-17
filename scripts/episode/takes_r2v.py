@@ -697,7 +697,7 @@ def cards(book: Path, episode: Episode, number: int) -> list[dict]:
     measured = {l["index"]: l for l in placed["lines"]}
     attach_paths(measured, episode_home.read_json(episode_home.lines_dir(book, number) / "lines.json"))
     out, refused = [], []
-    for take in tk.takes(shots):
+    for take in tk.takes(shots, tk.budget_for(episode)):   # a grammar plan never packs
         take["placed"] = shots
         try:
             out.append(named_card(lambda: card(book, episode, number, take, measured), take))
@@ -872,7 +872,7 @@ def dry_faults(book: Path, episode: Episode, number: int, projected_rows: list[d
     rows = dry_placed(projected_rows)
     measured = dry_measured(episode, rows, rate)
     physical, out = physicals(book), []
-    for take in tk.takes(rows):
+    for take in tk.takes(rows, tk.budget_for(episode)):
         take["placed"] = rows
         try:
             dry_prompt(book, episode, number, take, measured, from_refs)

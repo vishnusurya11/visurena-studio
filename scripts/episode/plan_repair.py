@@ -305,6 +305,11 @@ def apply(doc: dict, rows: list[str], book, number: int = 0,
             uncured += cure_row_rows(book, own)
         elif name == "clamp_beds":
             doc = pc.clamp_beds(doc)
+        elif name == "strip_amounts":                  # the anime-TV grammar (2026-10-17)
+            doc = pc.strip_amounts(doc)
+        elif name in ("hold_extra_pushes", "ots_medium_close"):
+            own = [r for r in rows if pc.cure_for(r) == name]
+            doc = getattr(pc, name)(doc, shot_indices(own))
         elif name in ("continuity_looks", "continuity_places", "continuity_beards"):
             doc = continuity_cure(doc, name, book, number)
     return doc, uncured, sorted(names)

@@ -257,6 +257,31 @@ and bores a person is refused:
   verb; at most one spoken line's camera travels (G-TALK);
 - what the chapter withholds stays withheld.
 
+**The anime-TV grammar (owner 2026-10-17, "Go ahead with changes").** Every new plan is
+written under it: `grammar: anime_tv` is set by code from the brief's band, and the
+battery's GRAMMAR row is HARD on it until something is drawn (decision
+`architecture/decisions/2026-10-17_anime_tv_grammar.md`). The frame holds a face large
+enough to read and a CUT changes the size:
+- faces at close / medium close on 55 % of the shots or more (G-FACES); at most 2 wides,
+  4 s each, the opener 5 s (G-WIDE); mediums 7 s (G-MEDIUM); inserts are impacts of
+  1-3 s, a long line split across insert and reaction (G-INSERT);
+- mostly locked (G-LOCKED, 50 %), at most 2 pushes and no amount on a camera head
+  (G-PUSH); a two-person reaction a locked medium two-shot (G-TWO); the payoff line a
+  locked close (G-PAYOFF); over-the-shoulder never tighter than medium close (G-OTS);
+- silhouette, Dutch angle and eye close-up are UNSUPPORTED in words (G-UNSUPPORTED);
+- a cold open of 10 words or fewer with a sound at 0 s (G-COLD); one `act_out` at 35-55 %
+  of the picture, held 1.2 s, the bed turning (G-ACT); narration never captions the frame
+  (G-CAPTION); a silent face after every exchange (G-REACT); 3 holds of 1.2 s or more
+  (G-MA); the dialogue band follows the chapter's own speech (ceiling speech + 8 points,
+  20-35 %);
+- an `inner` line (8 words at most, the speaker's own voice hushed, over his own face,
+  close-mic in assemble) is ADVISORY until the owner has heard it; an optional picture-only
+  `tease` after the button loops to the hook's place; `motif` is the book's recurring image;
+- at most 30 shots (G-SHOTS: `studio/episode_capacity`, 7.65 min a shot, 30 -> 5.9 h);
+  every shot is its own take on a grammar plan.
+A scratch re-plan is judged beside the live one: `plan_check.py <book> <n> --plan=plan_v3.json`.
+The title card stays at the END of the Short (the G2 bumper was not adopted).
+
 **The voice.** Every narration line is the book's narrator's
 (`refs/narrator.json`, else the narrator the book's published episodes share).
 The projection rate is the book's measured voice, else the studio's 2.45
@@ -315,7 +340,8 @@ faces win (`scene_cast.pick`), the rest are drawn from their wardrobe words.
 - dialect spellings ("cook yer" defeated the listen gate twice);
 - more than 18 words a line;
 - more than 4 voices;
-- dialogue outside 5-20% of the words (a `tale` is outside the ceiling);
+- dialogue outside the chapter's band (5-20 %, the ceiling up to the chapter's speech + 8
+  points and never past 35 %; a `tale` or an `inner` line is outside it);
 - more than 310 words, or under 15 s of beats and codas.
 
 `plan_check` refuses each of these.
@@ -439,7 +465,8 @@ camera verb; amounts, angles and negations are ignored.
 - Never truck sideways across a person anchored to the set (G-ANCHOR). A
   walker the camera tracks WITH is fine: say "with him" / "keeping him".
 - The take prompt carries the camera's direction only; the builder drops the
-  travel amount. The plan keeps amounts because G-MOVE measures them.
+  travel amount. A legacy plan kept amounts for G-MOVE; a grammar plan writes none
+  (G-PUSH refuses one; the repair round strips it for $0).
 - Use at least 8 moves an episode, drawn from `docs/calibration/camera_catalog.md`.
 
 **Look at a 5-frame strip of every take before the cut.** Watch for a person

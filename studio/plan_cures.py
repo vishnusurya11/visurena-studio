@@ -1735,8 +1735,47 @@ CURES: list[tuple[re.Pattern, str]] = [
     (re.compile(r"\d+-word style line"), "trim_style"),
     (re.compile(r"G-ASPECT|style line is \d+ words|look"), "pin_series"),
 ]
+CURES[:0] = [   # the anime-TV grammar (2026-10-17), ahead of every older pattern
+    (re.compile(r"G-PUSH shot \d+: the camera head names an amount"), "strip_amounts"),
+    (re.compile(r"G-PUSH shot \d+: a push past"), "hold_extra_pushes"),
+    (re.compile(r"G-OTS shot"), "ots_medium_close"),
+]
 """Fault-text patterns -> cure names, most specific first.  A row matching
 nothing is CREATIVE and goes back to the writer, one field at a time."""
+
+
+# ---- the anime-TV grammar's free cures (2026-10-17) -------------------------------
+
+def strip_amounts(doc: dict) -> dict:
+    """G-PUSH amount: the head's travel amount goes (H3 governed 0 of 16), its move stays."""
+    from studio.episode_ref_official import SAID_AMOUNT
+    for s in doc.get("shots") or []:
+        head, sep, rest = (s.get("motion") or "").partition(";")
+        s["motion"] = SAID_AMOUNT.sub("", head) + sep + rest
+    return doc
+
+
+def hold_extra_pushes(doc: dict, indices: list[int]) -> dict:
+    """G-PUSH past two: the named shots hold a locked-off frame; the actor clauses stay."""
+    for s in doc.get("shots") or []:
+        if s.get("index") in indices:
+            _, sep, rest = (s.get("motion") or "").partition(";")
+            s["motion"] = f"{LOCKED} across the whole shot{sep}{rest}"
+    return doc
+
+
+OTS_CLOSE = re.compile(r"^(?:Extreme close|Close)\b", re.I)
+
+
+def ots_medium_close(doc: dict, indices: list[int]) -> dict:
+    """G-OTS: an over-the-shoulder close becomes a medium close, its head a third (D4)."""
+    for s in doc.get("shots") or []:
+        if s.get("index") in indices:
+            s["size"] = "medium_close"
+            s["frame"] = OTS_CLOSE.sub("Medium close", s.get("frame") or "")
+            s["at_rest"] = re.sub(r"\bhalf (?:of )?the frame's height", "a third of the frame's height",
+                                  s.get("at_rest") or "")
+    return doc
 
 
 def clamp_beds(doc: dict) -> dict:

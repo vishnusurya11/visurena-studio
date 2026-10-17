@@ -1287,6 +1287,39 @@ fixes. Each lesson below cost at least one launch. Tracker rows A38-A74 in
       (6) **The anchor grid is not re-cut by `panels.py`**: redrawing the Sunday 2x2 left `anchors/sunday_street.png`
       and shot 17 on the old room.
 
+## The anime-TV grammar (2026-10-17, owner: "Go ahead with changes")
+
+- **Measured, then written as gates.** The part-2 framing tests (`docs/audit/2026-10-16_model_tests/
+  framing/results.json`) on the shipped graphs and seeds: a two-person reaction as a LOCKED MEDIUM
+  two-shot (D3: face 4.9 -> 11.3 % of frame, sharpness 555 -> 1671, identity 0.20 -> 0.53); the payoff
+  line on a LOCKED CLOSE (D5: 35 -> 40 %); the violent beat as a faceless low INSERT (D2: no clones, no
+  freeze). An over-the-shoulder CLOSE is not taken as frame 0 (D4: 19.8 dB, 2/2 seeds) -- OTS stays
+  medium close. A silhouette, a Dutch angle and an eye close-up asked in WORDS failed every time (D1, D6,
+  D7, the D5 ECU arm): the staged place picture wins. They are refused until a panel route draws them.
+- **Short shots need one take each.** The legacy packer joins same-setup shots under 8 s into one take
+  and ONE PER TAKE refuses it, so the holds cure used to grow beats until a pair cleared 8.3 s -- exactly
+  undoing a 2 s impact insert. A grammar plan never packs (`episode_takes.budget_for`); the builder, its
+  dry build and the battery read the one budget.
+- **More shots cost hours.** Every shot is a take, a grid cell, a panel read and a take check: 7.65 min
+  a shot on the shares the runner runs on, 125 min fixed (`studio/episode_capacity`; 23 shots -> 5.0 h,
+  Jekyll ep01 measured 4.99 h). The cap is 30 (5.9 h). WotW ep21 (32 shots) measured 9.2 h.
+- **A calibration replay reads the mechanics, not the rule.** Over 41 plans the grammar-definitional
+  gates fire on almost every legacy plan -- that is the old grammar the owner replaced. What the replay
+  must find is a MISFIRE: 'at a slant' hit a table surface (Scarlet ep01 s17, dropped), and CAPTION_WALL
+  hit WotW ep03 line 15, the narrator acting ("I ... slid down the hot sand") -- the memoir's witness,
+  which the silent-narrator rule asks for, now exempt. After both: zero fires on the owner-approved set
+  for every mechanical wall.
+- **The dialogue ceiling follows the chapter, like the floor.** Jekyll chapter 1 is 27.9 % speech: its
+  ceiling is 35 %, and the bargain is said by the two men. The contract keeps only the outer 35 %.
+- **The inner voice keeps its speaker's engine.** G1: a hushed Qwen3-TTS VoiceDesign read was another
+  man (ECAPA 0.23/0.67, 'Hide', 'wheel'); the IndexTTS2 clone with the hushed delivery plus G1's
+  close-mic chain in assemble. Advisory until the owner has heard it.
+- **A tease is the next chapter's**: its spans are read in chapter N+1 (G-SOURCE), never refused against N.
+- **The proof**: Jekyll ep01 re-planned (`episodes/ep01/plan_v3.py` -> `plan_v3.json`, beside the live
+  plan): 30 shots, faces at close/medium close 6 -> 17 (0.26 -> 0.57), pushes 6 -> 1, locked 1 -> 20,
+  wides 7.25/7.21 s -> 4.71/3.96 s, inserts 3.9-6.8 s -> 1.7-3.0 s, holds >= 1.2 s 3 -> 12, dialogue
+  13.8 % -> 34.2 %; `plan_check --plan=plan_v3.json`: VERDICT clean.
+
 ## The wide-shot face refine (2026-10-17, owner: "I like face improvements a lot in wide shots, go ahead")
 
 - **The pixels are not there; put them back where they ship.** A wide's face is 25-40 px of 768. RTX VSR, Lanczos,

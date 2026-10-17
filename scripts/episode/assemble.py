@@ -20,7 +20,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 
 from studio.episode_home import episode_arg
 from studio import card_fade, canvas, edit_gate, episode_bed, episode_gutter, episode_home, episode_spec, line_laid
-from studio import episode_emotion, episode_sound, finished_file
+from studio import episode_emotion, episode_sound, finished_file, inner_voice
 from studio.comfy import run
 from studio.episode_spec import Episode
 from studio import trailer_assemble
@@ -933,6 +933,7 @@ def main(book_id: str, number: int, engine: str = "i2v",
     placed = episode_home.load_placed(book, number, episode)   # refused when stale
     wavs = {r["index"]: book / r["rel_path"]
             for r in episode_home.read_json(episode_home.lines_dir(book, number) / "lines.json")}
+    wavs = inner_voice.treat(wavs, placed["lines"], work)   # an inner line, close to the ear (2026-10-17)
     if missing := shots_without_takes(episode, takes):
         raise SystemExit(f"no take for shots {missing}")
 

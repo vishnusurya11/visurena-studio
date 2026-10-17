@@ -295,8 +295,29 @@ def first_frame_floors() -> dict:
             "described_words": plan_gates.DESCRIBED_WORDS, "geometry_words": plan_gates.GEOMETRY_WORDS}
 
 
+def dialogue_band(book_dir: Path | None, number: int | None) -> list[float]:
+    """[floor, ceiling] of dialogue for THIS chapter (plan_gates.dial_floor /
+    dial_ceiling on its own speech); the contract's band when it cannot be read."""
+    from studio import plan_gates
+    paragraphs = chapter_paragraphs(book_dir, number)[1] if book_dir is not None and number else []
+    speech = plan_gates.speech_share(paragraphs) if paragraphs else None
+    return [plan_gates.dial_floor(speech), plan_gates.dial_ceiling(speech)]
+
+
+def book_motif(book_dir: Path | None) -> str:
+    """The book's recurring image: series.json's `motif`, else its first episode's
+    plan's (research 04 P8: every episode repeats the first one's ritual)."""
+    if book_dir is None:
+        return ""
+    for path in (Path(book_dir) / "series.json", Path(book_dir) / "episodes" / "ep01" / "plan.json"):
+        if path.exists() and (found := str(_read(path).get("motif") or "")):
+            return found
+    return ""
+
+
 def band(book_dir: Path | None = None, number: int | None = None) -> dict:
-    """The format band, read off the contract and the series' measured voice."""
+    """The format band, read off the contract, the grammar and the series' measured voice."""
+    from studio import grammar_battery
     from studio.episode_takes import BUDGET
     rate = spoken_rate(book_dir, number)
     return {"min_seconds": episode_spec.MIN_SECONDS, "max_seconds": episode_spec.MAX_SECONDS,
@@ -309,8 +330,10 @@ def band(book_dir: Path | None = None, number: int | None = None) -> dict:
             "max_setup_seconds": episode_spec.MAX_SETUP_SECONDS,
             "bed_tones": list(__import__("studio.episode_bed", fromlist=["TONES"]).TONES),
             "aspect": episode_spec.canvas.DEFAULT if hasattr(episode_spec, "canvas") else "1:1",
-            "dialogue_share": list(episode_spec.DIALOGUE_SHARE),
-            "turn_band": list(episode_spec.TURN_BAND)}
+            "dialogue_share": dialogue_band(book_dir, number),
+            "turn_band": list(episode_spec.TURN_BAND),
+            "grammar": episode_spec.STUDIO_GRAMMAR, "grammar_rules": grammar_battery.band(),
+            "motif": book_motif(book_dir)}
 
 
 # ---- build and render ---------------------------------------------------------------

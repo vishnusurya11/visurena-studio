@@ -41,6 +41,18 @@ composition unaided -- every passing 2-segment take cuts at 68-94 frames
 largest passing take, 7.67 s placed.  Was 12.0."""
 HANDLE = 0.25
 
+ONE_SHOT = 0.0
+"""The packing budget of a plan written under a shot grammar (anime-TV, 2026-10-17):
+no run of shots ever fits it, so every shot is its own take.  The grammar cuts by
+size -- a 2 s impact insert beside a 3 s reaction -- and packing them, or growing
+their holds past 8.3 s so ONE PER TAKE lets them go, would undo the cut."""
+
+
+def budget_for(episode) -> float:
+    """The packing budget for this plan: ONE_SHOT under a grammar, else BUDGET."""
+    return ONE_SHOT if getattr(episode, "grammar", "") else BUDGET
+
+
 SEGMENT_CAP = 2
 """How many segments a take may hold.  A take is ALSO capped by seconds, and
 that cap alone let a 3-segment take through at 11.6 s of a 12 s budget.

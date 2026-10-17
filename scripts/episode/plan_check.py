@@ -17,6 +17,7 @@ from __future__ import annotations
 import re
 import subprocess
 import sys
+from contextvars import ContextVar
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
@@ -27,11 +28,15 @@ from studio import episode_takes as tk
 from studio.episode_takes import BUDGET
 
 HANDLE, BREATH = 0.25, 0.70
+PLAN_FILE: ContextVar[str] = ContextVar("plan_file", default="plan.json")
+"""Which plan file in the episode's home the battery judges.  `--plan=plan_v3.json`
+judges a scratch re-plan beside the live plan (2026-10-17): a scratch plan has
+drawn nothing, so every before-the-draw wall is hard on it."""
 
 
 def contract(book: Path, number: int):
     """The plan under the contract, or every distinct refusal printed and None."""
-    doc = plan_gates.at_series_rate(episode_home.read_json(episode_home.home(book, number) / "plan.json"), book, number)
+    doc = plan_gates.at_series_rate(episode_home.read_json(episode_home.home(book, number) / PLAN_FILE.get()), book, number)
     try:
         return spec.Episode(**doc)
     except Exception as e:  # pydantic's message carries every refusal
@@ -47,7 +52,10 @@ def contract(book: Path, number: int):
 
 def rendered(book: Path, number: int) -> bool:
     """Has anything been drawn or shot from this plan?  Then G-SETUP is advice:
-    a wall raised after the render must not stop the run that made it."""
+    a wall raised after the render must not stop the run that made it.  A scratch
+    plan (`PLAN_FILE`) drew nothing."""
+    if PLAN_FILE.get() != "plan.json":
+        return False
     home = episode_home.home(book, number)
     return (home / "storyboard" / "grids").exists() or (home / "takes").exists()
 
@@ -147,13 +155,13 @@ def row_text_gate(book: Path) -> int:
     return len(found)
 
 
-def catalog_gates(episode, chapter: str | None) -> int:
+def catalog_gates(episode, chapter: str | None, after: str | None = None) -> int:
     """G-MOVES, G-STILL and G-SOURCE, the deterministic plan judges: HARD on a plan of
     the new form (a `source` span on any shot), printed as advisories on an
     older one -- every plan written before the camera catalog fails G-MOVES,
     and reading a historical plan is not endorsing it.  Hard count."""
     found = (plan_gates.moves_faults(episode) + plan_gates.still_faults(episode)
-             + plan_gates.source_faults(episode, chapter))
+             + plan_gates.source_faults(episode, chapter, after))
     hard = episode.new_form()
     said = (len(found) or "clean") if hard else f"{len(found)} advisory (no `source` span on any shot; hard once one is written)"
     print("MOVES/SOURCE :", said)
@@ -295,6 +303,22 @@ def present_gate(ep, book: Path, number: int, names: dict[str, str]) -> int:
     return hard
 
 
+def grammar_gate(ep, book: Path, number: int, rate: float) -> int:
+    """The anime-TV grammar (owner 2026-10-17): framing, screenplay and the shot cap.
+    HARD on a plan declaring `grammar: anime_tv` until something is drawn from it;
+    advice on every older plan.  Hard count."""
+    from studio import grammar_battery
+    found = grammar_battery.faults(ep, rate)
+    hard = bool(getattr(ep, "grammar", "")) and not rendered(book, number)
+    said = (len(found) or "clean") if hard else f"{len(found)} advisory ({'rendered plan' if ep.grammar else 'legacy grammar'})"
+    print("GRAMMAR      :", said)
+    for f in found:
+        print("   " if hard else "  advisory:", f[:170])
+    for n in grammar_battery.advisories(ep, rate):
+        print("  advisory:", n[:170])
+    return len(found) if hard else 0
+
+
 def speaker_gate(ep, book: Path, refs: list[dict]) -> int:
     """G-SPEAKER against the BOOK's narrator (studio.book_narrator), HARD; a
     character narrating beside him is printed as advice."""
@@ -309,7 +333,8 @@ def speaker_gate(ep, book: Path, refs: list[dict]) -> int:
     return len(sp)
 
 
-def main(book_id: str, number: int) -> int:
+def main(book_id: str, number: int, plan: str = "plan.json") -> int:
+    PLAN_FILE.set(plan)
     book = episode_home.book_dir(book_id)
     plan_gates.use_voice(book, number)     # every projection below reads the recorded lines
     ep = contract(book, number)
@@ -333,6 +358,7 @@ def main(book_id: str, number: int) -> int:
     hard += pace_gate(ep, book, number)
     hard += action_gate(ep)
     hard += talk_gate(ep, book, number)
+    hard += grammar_gate(ep, book, number, rate)
     asp = plan_gates.aspect_faults(ep, plan_gates.series_aspect(book))
     print("G-ASPECT     :", asp or "clean"); hard += len(asp)
     cf = plan_gates.crowd_faults(ep)
@@ -384,7 +410,7 @@ def main(book_id: str, number: int) -> int:
     print("G-BED        :", len(bad) or "clean"); hard += len(bad)
     for f in bad + folded:
         print("   " if f in bad else "  advisory:", f[:170])
-    hard += catalog_gates(ep, plan_brief.chapter_text(book, number))
+    hard += catalog_gates(ep, plan_brief.chapter_text(book, number), plan_brief.chapter_text(book, number + 1))
     hard += cover_gates(ep, book, number)
     hard += sound_gates(ep)
     from studio import cell_gates
@@ -409,7 +435,8 @@ def main(book_id: str, number: int) -> int:
     print("CAST BOUND   :", unbound or "all bound"); hard += len(unbound)
     lifted, _ = spec.quoted_lines([l.model_dump() for l in ep.lines], seq_boards.book_words(book))
     print("QUOTE        :", [(l["index"], l["lifted"]) for l in lifted] or "clean"); hard += len(lifted)
-    packed = [tuple(run) for run in tk.groups(measured_or_projected(book, number, ep, rate)) if len(run) > 1]
+    packed = [tuple(run) for run in tk.groups(measured_or_projected(book, number, ep, rate), tk.budget_for(ep))
+              if len(run) > 1]
     print("ONE PER TAKE :", packed or "every shot its own take"); hard += len(packed)
     hf = plan_gates.hole_faults(ep, rate)
     print("G-HOLE       :", len(hf) or "clean"); hard += len(hf)
@@ -431,5 +458,10 @@ def main(book_id: str, number: int) -> int:
     return 1 if hard else 0
 
 
+def plan_arg(argv: list[str]) -> str:
+    """`--plan=<file>`: a scratch plan in the episode's home; plan.json by default."""
+    return next((a.split("=", 1)[1] for a in argv if a.startswith("--plan=")), "plan.json")
+
+
 if __name__ == "__main__":
-    raise SystemExit(main(sys.argv[1], int(sys.argv[2])))
+    raise SystemExit(main(sys.argv[1], int(sys.argv[2]), plan_arg(sys.argv[3:])))

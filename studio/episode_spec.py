@@ -104,15 +104,23 @@ MAX_BEAT = 1.5
 MAX_CODA = 4.0
 """The picture after the button, with no voice."""
 DIALOGUE_SHARE = (0.05, 0.20)
+"""Dialogue words as a share of all words: the 90/10 dial -- the band a chapter
+gets when the battery cannot read how much the chapter itself speaks."""
+DIALOGUE_CEILING_MAX = 0.35
+"""The widest dialogue ceiling ANY chapter may ask (anime-TV grammar, owner
+2026-10-17; research 04 P4).  The chapter's own ceiling follows its speech and
+is the battery's (`plan_gates.dial_ceiling`): Jekyll's chapter 1 is nearly all
+quoted speech, and 20 % forbade its bargain scene in the characters' mouths.
+The contract cannot see the chapter, so it holds only this outer wall."""
 
 
-def dial_message(share: float) -> str:
+def dial_message(share: float, high: float | None = None) -> str:
     """The dialogue dial's refusal, to one decimal: '20%' against a 20% ceiling
-    read as a contradiction (episode 13, 20.4 %)."""
-    low, high = DIALOGUE_SHARE
+    read as a contradiction (episode 13, 20.4 %).  `high` is the ceiling that
+    refused it (the chapter's, or the contract's outer wall)."""
+    low, high = DIALOGUE_SHARE[0], DIALOGUE_SHARE[1] if high is None else high
     edge = f"at most {high:.1%}" if share > high else f"at least {low:.1%}"
     return f"dialogue is {share:.1%} of the words; the dial is {low:.0%}-{high:.0%} ({edge})"
-"""Dialogue words as a share of all words: the 90/10 dial, adjustable."""
 MAX_LINES_PER_SHOT = 2
 MAX_SPEAKING = 4
 """Voices in one episode, the narrator counted.
@@ -141,7 +149,20 @@ ANSWER = re.compile(r"^(shot|line) (\d+)$")
 """The shape of `Episode.answer`: a shot (a picture) or a line (a sentence)."""
 
 Section = Literal["hook", "setup", "friction", "payoff", "transition", "turn",
-                  "spike", "reaction", "runout", "button", "answer"]
+                  "spike", "reaction", "runout", "button", "answer", "act_out", "tease"]
+"""`act_out` (anime-TV grammar, 2026-10-17): the end of part A -- the spike lands, the
+picture holds, the bed changes tone; at most one.  `tease`: one picture-only shot after
+the button showing the next chapter's first image at the hook's place (the loop)."""
+Grammar = Literal["", "anime_tv"]
+"""The shot grammar a plan was written under.  '' is every plan before 2026-10-17;
+`anime_tv` (owner 2026-10-17) holds the plan to the framing and screenplay gates
+(`studio.framing_grammar`, `studio.screenplay_grammar`).  THE FIELD IS THE SWITCH,
+as `source` is for G-MOVES: reading a historical plan is not endorsing it."""
+STUDIO_GRAMMAR: Grammar = "anime_tv"
+"""The grammar every NEW plan is written under (the brief's band carries it)."""
+INNER_MAX_WORDS = 8
+"""An inner line is a thought, not a speech (research 04 P3; G1 voice test 2026-10-16:
+5- and 7-word lines)."""
 Size = Literal["insert", "extreme_close", "close", "medium_close", "medium", "full", "wide"]
 READABLE = {"close", "medium_close"}
 """Where a speaking mouth reads on a phone: a dialogue shot must be one of these."""
@@ -158,11 +179,14 @@ class Sound(BaseModel):
 
 class Line(BaseModel):
     index: int = Field(ge=0)
-    kind: Literal["dialogue", "narration", "tale"]
+    kind: Literal["dialogue", "narration", "tale", "inner"]
     """`dialogue` is spoken ON CAMERA with driven lips; `narration` is the book's
     narrator over the pictures; `tale` (2026-10-13, Jekyll ep01) is a CHARACTER
     telling his own story in his own voice, voice-over, over pictures of what he
-    tells -- the book's words kept, outside the dialogue dial and the quote wall."""
+    tells -- the book's words kept, outside the dialogue dial and the quote wall.
+    `inner` (2026-10-17) is a character THINKING, in his own voice hushed, no lips,
+    over his own face; at most INNER_MAX_WORDS words.  ADVISORY until the owner has
+    heard the treatment (`studio.inner_voice`)."""
     speaker: str
     text: str
     shot: int = Field(ge=0)
@@ -192,6 +216,9 @@ class Line(BaseModel):
     def _short_enough_to_land(self) -> "Line":
         if self.words() > MAX_WORDS:
             raise ValueError(f"line {self.index} is {self.words()} words; the wall is {MAX_WORDS}")
+        if self.kind == "inner" and self.words() > INNER_MAX_WORDS:
+            raise ValueError(f"inner line {self.index} is {self.words()} words; a thought is at most "
+                             f"{INNER_MAX_WORDS}")
         return self
 
 
@@ -546,6 +573,16 @@ class Episode(BaseModel):
     and the seven already built are untouched."""
     look: str = ""
     """The book's own rendered look, when it is not photoreal (`house_style.adopt_look`)."""
+    grammar: Grammar = ""
+    """The shot grammar this plan was written under (see `Grammar`).  Set by CODE
+    from the brief's band, never by the writer: a draft cannot opt out."""
+    motif: str = ""
+    """The book's recurring opening and closing image (research 04 P8, the Mononoke
+    ritual): the book's series.json `motif`, else its first episode's.  Jekyll: the
+    blind door in the by-street.  The hook and the tease return to it."""
+    tease: str = ""
+    """What the optional `tease` shot shows: the NEXT chapter's first image, at the
+    hook's place, picture only (research 04 P7).  Empty when the plan has none."""
     aspect: Literal["9:16", "1:1"] = canvas.DEFAULT
     """The delivery shape, and the ONE place it is declared (`studio/canvas.py`).
 
@@ -779,6 +816,18 @@ class Episode(BaseModel):
         return self
 
     @model_validator(mode="after")
+    def _act_out_and_tease_have_their_places(self) -> "Episode":
+        """At most one act_out; a tease is the one LAST shot, after the button's."""
+        sections = [shot.section for shot in self.shots]
+        if sections.count("act_out") > 1:
+            raise ValueError(f"an episode has at most one act_out; found {sections.count('act_out')}")
+        if sections.count("tease") > 1:
+            raise ValueError(f"an episode has at most one tease; found {sections.count('tease')}")
+        if "tease" in sections and (sections[-1] != "tease" or len(self.shots) - 1 <= self.button().shot):
+            raise ValueError("the tease is the last shot, after the button's shot")
+        return self
+
+    @model_validator(mode="after")
     def _route_never_goes_backwards(self) -> "Episode":
         for name in self.setups:
             last = -1.0
@@ -813,10 +862,11 @@ class Episode(BaseModel):
                 raise ValueError(f"dialogue line {line.index}: shot {shot.index} must show "
                                  f"{line.speaker}'s face at close or medium_close (lips are driven)")
         share = self.dialogue_share()
-        if share > DIALOGUE_SHARE[1]:
-            # The floor is the battery's (plan_gates.dial_faults): it follows the
-            # chapter, and a chapter that speaks no line has none (ep22, 2026-10-07).
-            raise ValueError(dial_message(share))
+        if share > DIALOGUE_CEILING_MAX:
+            # The floor AND the chapter's ceiling are the battery's (plan_gates.dial_faults):
+            # both follow the chapter, and a chapter that speaks no line has no floor
+            # (ep22, 2026-10-07); a talky one may speak more (2026-10-17).
+            raise ValueError(dial_message(share, DIALOGUE_CEILING_MAX))
         if len({line.speaker for line in self.lines}) > MAX_SPEAKING:
             raise ValueError(f"more than {MAX_SPEAKING} voices")
         return self
@@ -952,7 +1002,8 @@ def motion_faults(motion: str) -> list[tuple[str, str]]:
                           f"last frame' sentence. Write `camera; action; action`."))
     if not (first in CAMERA or any(first.startswith(w) for w in MOVES)):
         out.append(("M2", "the head names no camera move. Open with one, before the first "
-                          "semicolon, with a measured amount and `across the whole shot` -- "
+                          "semicolon, naming its direction and `across the whole shot` (never an amount: "
+                          "the model ignores it) -- "
                           "a move written after a semicolon is deleted by the builder."))
     if STILL.search(last):
         out.append(("M4", f"the LAST clause says the picture is still ({last!r}); `calm()` "
