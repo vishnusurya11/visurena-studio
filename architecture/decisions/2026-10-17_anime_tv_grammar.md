@@ -46,7 +46,7 @@ from it; advice on every legacy plan (the G-MOVES / `source` switch precedent).
 | G-PAYOFF | a payoff shot carrying dialogue is a locked CLOSE | D5 |
 | G-OTS | over-the-shoulder never tighter than medium_close | D4: 19.8 dB frame 0, 2 of 2 seeds |
 | G-UNSUPPORTED | silhouette, Dutch / canted, eye close-up asked in words: refused | D1, D6, D7, D5-ECU: 0 of 4; until a panel route exists |
-| G-SHOTS | <= 30 shots | the capacity model below |
+| G-SHOTS | <= 28 shots | the capacity model below |
 | G-COLD | first line <= 10 words; a sound on shot 0 at <= 0.25 s | 04 P1 |
 | G-ACT | one act_out, starting at 35-55 % of the picture, beat + coda >= 1.2 s, a bed tone change on it or the next shot, before the turn | 04 P2 |
 | G-CAPTION | a narration line whose content words its frame + motion already show (> 0.80) -- except the narrator acting (the memoir's witness) | 04 P4; CAPTION_WALL was advisory |
@@ -82,7 +82,8 @@ priced on WotW ep25's 26 shots) split into per-shot steps (grids, panels, takes,
 ladders: 175 of 300 min) and fixed ones (125 min), plus a retake margin from
 03_h3_workflows.md (a render ~110 s, a quarter of the takes retaken twice): 7.65 min a
 shot. 23 shots project 5.0 h (Jekyll ep01's clock: 4.99 h); 28 -> 5.65 h; 30 -> 5.91 h;
-31 -> 6.03 h. **The cap is 30.** Open: the shares that price the reserve do not yet scale
+31 -> 6.03 h. **The cap is 28** (main session, 2026-10-17, for veto: 30 fits with ~5 min to spare and the
+reserve's shares are not yet re-priced; `plan_v3.json` stays a 30-shot proof plan). Open: the shares that price the reserve do not yet scale
 with the shot count (`Budget.owed_after`), so a 30-shot episode's rungs close earlier than
 its firsts need -- re-price after the first grammar episode's measured clock.
 

@@ -23,13 +23,19 @@ def test_23_shots_project_jekyll_ep01s_five_hours():
     assert 4.8 <= cap.projected_hours(23) <= 5.2
 
 
-def test_the_cap_is_the_most_shots_that_fit_six_hours():
-    assert cap.MAX_SHOTS == 30
-    assert cap.projected_hours(cap.MAX_SHOTS) <= 6.0 < cap.projected_hours(cap.MAX_SHOTS + 1)
+def test_thirty_shots_is_the_most_that_fit_six_hours():
+    assert cap.max_shots() == 30
+    assert cap.projected_hours(30) <= 6.0 < cap.projected_hours(31)
+
+
+def test_the_cap_is_28_until_the_retake_shares_are_repriced():
+    """Main session 2026-10-17, for the owner's veto: 30 fits with ~5 min to spare and the
+    shares that price the reserve still assume ~26 shots, so the cap is 28 (5.65 h)."""
+    assert cap.MAX_SHOTS == 28 and cap.projected_hours(28) <= 5.7
 
 
 def test_a_plan_past_the_cap_is_refused_and_one_at_it_is_not():
-    shots = [SimpleNamespace(index=i) for i in range(31)]
+    shots = [SimpleNamespace(index=i) for i in range(29)]
     got = cap.shot_faults(SimpleNamespace(shots=shots, omit=[]))
     assert [g.split(":")[0] for g in got] == ["G-SHOTS plan"]
-    assert cap.shot_faults(SimpleNamespace(shots=shots, omit=[30])) == []
+    assert cap.shot_faults(SimpleNamespace(shots=shots, omit=[28])) == []

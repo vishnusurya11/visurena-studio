@@ -72,7 +72,7 @@ the old grammar the owner replaced. Jekyll ep01 `plan_v3.json`: 0 rows, VERDICT 
 | G-PAYOFF | a payoff shot with dialogue is a locked close | 8; 1 | HARD |
 | G-OTS | over-the-shoulder at close / extreme close | 4; 0 | HARD, cured free (`ots_medium_close`) |
 | G-UNSUPPORTED | silhouette, black shapes against, Dutch, canted, tilted horizon; extreme close on a face or eyes | 3; 0 | HARD |
-| G-SHOTS | cut shots <= 30 (`episode_capacity.MAX_SHOTS`) | 1 (WotW ep21, 32 shots, 9.2 h measured); 0 | HARD |
+| G-SHOTS | cut shots <= 28 (`episode_capacity.MAX_SHOTS`; 30 fit at 5.91 h, capped at 28 / 5.65 h until the retake shares are re-priced) | 1 (WotW ep21, 32 shots, 9.2 h measured); 0 | HARD |
 | G-COLD | line 0 <= 10 words; a sound on shot 0 at <= 0.25 s | 39; 5 | HARD |
 | G-ACT | one act_out; start at 0.35-0.55 of the picture; beat + coda >= 1.2 s; a bed tone change at it or the next shot; before the turn | 40; 5 | HARD |
 | G-CAPTION | a narration line > 0.80 of its words in frame + motion (CAPTION_WALL); a line where the narrator acts is the witness, exempt | 8; 0 (WotW ep03 l15 exempted) | HARD |

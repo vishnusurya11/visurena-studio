@@ -12,7 +12,7 @@ def test_the_band_carries_the_grammar_table():
     band = plan_brief.band()
     for key, value in grammar_battery.band().items():
         assert band["grammar_rules"][key] == value
-    assert band["grammar"] == "anime_tv" and band["grammar_rules"]["max_shots"] == 30
+    assert band["grammar"] == "anime_tv" and band["grammar_rules"]["max_shots"] == 28
 
 
 def _chapter(book, speech_words: int, other_words: int):

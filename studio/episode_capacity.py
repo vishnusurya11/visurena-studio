@@ -49,7 +49,11 @@ def max_shots() -> int:
     return math.floor((OWNER_LIMIT_SECONDS / 60 - fixed_minutes()) / per_shot_minutes())
 
 
-MAX_SHOTS = max_shots()
+MAX_SHOTS = min(max_shots(), 28)
+"""The cap: 28 (5.65 h), not the 30 that fit (5.91 h).  Main session 2026-10-17, for the
+owner's veto: 30 leaves ~5 min of the 6 h, and the shares that price the downstream
+reserve (`Budget.owed_after`) still assume ~26 shots.  Re-price after the first grammar
+episode's measured clock, then revisit."""
 
 
 def shot_faults(episode) -> list[str]:

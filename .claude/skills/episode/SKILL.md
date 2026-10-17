@@ -277,7 +277,8 @@ enough to read and a CUT changes the size:
 - an `inner` line (8 words at most, the speaker's own voice hushed, over his own face,
   close-mic in assemble) is ADVISORY until the owner has heard it; an optional picture-only
   `tease` after the button loops to the hook's place; `motif` is the book's recurring image;
-- at most 30 shots (G-SHOTS: `studio/episode_capacity`, 7.65 min a shot, 30 -> 5.9 h);
+- at most 28 shots (G-SHOTS: `studio/episode_capacity`, 7.65 min a shot, 28 -> 5.65 h; 30 would fit at 5.9 h,
+  capped at 28 until the retake shares are re-priced);
   every shot is its own take on a grammar plan.
 A scratch re-plan is judged beside the live one: `plan_check.py <book> <n> --plan=plan_v3.json`.
 The title card stays at the END of the Short (the G2 bumper was not adopted).
