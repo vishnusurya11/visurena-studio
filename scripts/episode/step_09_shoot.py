@@ -12,7 +12,10 @@ by hand.  Then two lanes (studio/take_overlap.py, decision
 --no-ends renders back to back while take_dq.py --cpu-only measures each take
 as it lands, and a dq-borne cure is queued as the early round behind the first
 renders; then the GPU window (take_dq's serial pass, take_content_check.py),
-take_strip.py.
+take_strip.py.  A take that passes its dq and is wide, full or small-faced is
+owed a FACE REFINE (09_07, owner 2026-10-17): its face crops re-render on the GPU
+lane right behind the renders (studio/take_overlap.Refines), and whatever the
+ladder leaves owed is refined once after it -- the first thing cut for time.
 Then the EYE_TAKES row: `judge:take_eye@1` reads the kept takes and signs
 takes/r2v/eye_<sha8>.json -- pass, or flagged at the take ladder's terminal
 rung (keep_best, or a still from the passed panel); it climbs seed -> move
@@ -39,6 +42,7 @@ TAKES = Path("takes") / "r2v"
 RENDER = "render"
 """The approval kind takes_r2v.py demands on its argv."""
 GATE = "EYE_TAKES"
+REFINE = "scripts/episode/face_refine.py"
 CLONES = take_eye.facenet_clones
 """The judge's clone reader; a test injects its own."""
 
@@ -220,7 +224,7 @@ def shoot(ctx, flag: str) -> None:
     from studio import take_overlap
     extra = tuple(getattr(ctx, "extra", None) or [])
     take_overlap.shoot(ctx, ["--from-refs", "--no-ends", flag], extra=extra, early=True,
-                       check_flags=tuple(dq_flags(ctx)))
+                       check_flags=tuple(dq_flags(ctx)), refine=take_overlap.Refines(ctx))
 
 
 def gpu_window(ctx) -> None:
@@ -245,6 +249,24 @@ def inputs_wall(ctx) -> None:
         print(f"T{i:02d} staged {', '.join(v.staged) or 'nothing'} | {v.said()}", flush=True)
     print(take_inputs.count_line(audited), flush=True)
     take_inputs.wall(audited, who="step 09 stops: G-TAKE-INPUTS")
+
+
+def refine_rest(ctx) -> None:
+    """09_07 after the ladder: every selected take still owed a face refine (a
+    retake, a swapped attempt) in ONE GPU run -- or none, cut first, when the
+    clock's reserve needs the time (logged and recorded in refine.json)."""
+    from scripts.episode import face_refine as cli
+    from studio import face_refine
+    owed = cli.owed(ctx.book_dir, ctx.number)
+    if not owed:
+        return
+    price = sum(owed.values())
+    if face_refine.cut(getattr(ctx, "budget", None), STEP_ID, price):
+        cli.record_cut(ctx.home / TAKES, sorted(owed), price, ctx.book_dir, ctx.number)
+        ctx.log(f"REFINE CUT: the clock's reserve needs {price:.0f} s; takes {sorted(owed)} keep their faces",
+                step_id=STEP_ID, level="WARNING")
+        return
+    ctx.run_script(REFINE, *map(str, sorted(owed)), gpu=True)
 
 
 def run(ctx) -> None:
@@ -272,6 +294,7 @@ def run(ctx) -> None:
         raise SystemExit(f"REFUSED: no takes under {TAKES.as_posix()}/ after the render")
     judge_takes(ctx, flag)
     inputs_wall(ctx)
+    refine_rest(ctx)
 
 
 if __name__ == "__main__":

@@ -701,12 +701,36 @@ def picture(placed: dict, takes: dict[int, Path], work: Path, heads: dict[int, f
     refuse_dialogue_heads(heads, placed)
     refuse_short(short_takes([(i, s) for i, s in order if i not in stills and i not in plan["seconds"]],
                              lambda i: clip_seconds(takes[i]) - heads.get(i, 0.0)))
+    slows = {}
     for index, seconds in order:
-        slow = dead.stretch(seconds, plan["room"].get(index, 0.0)) if index in plan["seconds"] else 1.0
+        slow = slows[index] = dead.stretch(seconds, plan["room"].get(index, 0.0)) if index in plan["seconds"] else 1.0
         segments.append(segment(index, seconds, takes, stills, heads, work, guarded, ffmpeg, slow))
     episode_home.write_json(work / "gutter.json", guarded)
+    episode_home.write_json(work / "layout.json", layout_rows(order, heads, slows, stills))   # the face paste reads it
     print(f"gutter guard cropped {len(guarded)} takes: {guarded}", flush=True)
     return concat(segments, work / "picture.mp4")
+
+
+def layout_rows(order: list[tuple[int, float]], heads: dict, slows: dict, stills: dict) -> list[dict]:
+    """Where every take sits in the cut, in cut order: what the face refine's paste
+    at master scale follows (studio/face_paste.spans_from)."""
+    return [{"index": i, "seconds": s, "head": float(heads.get(i, 0.0)), "slow": float(slows.get(i, 1.0)),
+             "still": i in stills} for i, s in order]
+
+
+def face_paste_wrap(work: Path, take_dir: Path, factor: int):
+    """The kept, current refined face crops as a wrap of the master's upscale, or
+    None when nothing is kept (the unrefined path, untouched)."""
+    from studio import face_paste
+    if not (take_dir / "refine.json").exists() or not (work / "layout.json").exists():
+        return None
+    rows = episode_home.read_json(work / "layout.json")
+    frames = {int(r["index"]): video_frames(work / f"seg{int(r['index']):02d}.mp4") for r in rows}
+    guards = episode_home.read_json(work / "gutter.json") if (work / "gutter.json").exists() else {}
+    spans = face_paste.spans_from(rows, frames, guards, take_dir, sha_of=lambda i: face_paste.sha8(
+        take_dir / f"T{i:02d}.mp4"), fps=FPS)
+    print(f"face refine: {len(spans)} take(s) pasted at master scale", flush=True)
+    return (lambda up: face_paste.Paster(up, spans, W, H, factor)) if spans else None
 
 
 def video_frames(video: Path) -> int:
@@ -792,7 +816,7 @@ def black_chip(out: Path) -> Path:
 
 
 def tail(master: Path, title: Path | None, out: Path, work: Path, number: int = 0, *,
-         upscale: master_upscale.Upscale) -> Path:
+         upscale: master_upscale.Upscale, wrap=None) -> Path:
     """After the last frame: the book's animated title card if it exists (its
     own sound kept), then black with silence.  No text is burned anywhere.
 
@@ -826,7 +850,7 @@ def tail(master: Path, title: Path | None, out: Path, work: Path, number: int = 
     # at the cut's own rate -- every frame once, first at 0.000; the Lanczos
     # path keeps the vfr passthrough and the -1/24 `-itsoffset` that ep15
     # measured at 4055/4055 frames, t0=0.000, 0 holes.
-    master_upscale.master(listing, out, W, H, upscale, FPS)
+    master_upscale.master(listing, out, W, H, upscale, FPS, wrap=wrap)   # wrap: the face refine's paste
     # The concat demuxer does not refuse a part whose picture does not match the
     # first one: it drops it and reports success.  That is how a master four
     # frames short shipped without anyone seeing it, so the join counts itself.
@@ -951,7 +975,8 @@ def main(book_id: str, number: int, engine: str = "i2v",
     master = episode_home.master_path(book, number, engine)
     up, why = master_upscale.resolved()
     out = upscaled_tail(book, number, mixed, card if card.exists() else book / "title" / "title.mp4",
-                        finished_file.scratch_for(master, work), work, up, why)
+                        finished_file.scratch_for(master, work), work, up, why,
+                        wrap=face_paste_wrap(work, episode_home.takes_dir(book, number, engine), up.factor))
     out = trim(out, work)
     out = master_loudness.into_band(out, work, measure=integrated)   # a quiet chapter's beds (ep20)
     # THE MASTER IS A SHORT (hard requirement, owner 2026-09-30): the wall is
@@ -971,14 +996,14 @@ def main(book_id: str, number: int, engine: str = "i2v",
 
 
 def upscaled_tail(book: Path, number: int, mixed: Path, title: Path, out: Path, work: Path,
-                  up: master_upscale.Upscale, why: str) -> Path:
+                  up: master_upscale.Upscale, why: str, wrap=None) -> Path:
     """`tail` under the settled upscale, its own row on the episode clock (owner
     2026-10-14: the 6 h clock sees it), stamped within assemble so it counts once."""
     from studio import episode_clock
     master_upscale.say(why)
     note = f"{up.label()} -> {'x'.join(map(str, master_upscale.size(W, H, up)))}" + (f"; {why}" if why else "")
     with episode_clock.timed(book, number, "upscale", note=note, within="assemble"):
-        return tail(mixed, title, out, work, number, upscale=up)
+        return tail(mixed, title, out, work, number, upscale=up, wrap=wrap)
 
 
 def record_layout(cut: Path, master: Path, *, main: int, card: int, upscale: str = "") -> None:

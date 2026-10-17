@@ -28,8 +28,11 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 
-FIRST, RETAKE, CHECKS = "render", "retake", "gpu_checks"
-RANK = {FIRST: 0, RETAKE: 1, CHECKS: 2}
+FIRST, RETAKE, REFINE, CHECKS = "render", "retake", "refine", "gpu_checks"
+RANK = {FIRST: 0, RETAKE: 1, REFINE: 2, CHECKS: 3}
+"""A REFINE (the wide-shot face refine, owner 2026-10-17) re-renders the face crops
+of a take that PASSED its dq: behind every render and retake, ahead of the GPU checks."""
+JOINS = (RETAKE, REFINE)
 
 
 @dataclass(frozen=True)
@@ -40,15 +43,16 @@ class Job:
 
 
 def joined(a: Job, b: Job) -> Job:
-    """Two retakes as one job: the union of their takes and of their reasons."""
+    """Two retakes (or two refines) as one job: the union of their takes and of their reasons."""
     whys = [w for w in dict.fromkeys(a.why.split("; ") + b.why.split("; ")) if w]
-    return Job(RETAKE, tuple(sorted(set(a.takes) | set(b.takes))), "; ".join(whys))
+    return Job(a.kind, tuple(sorted(set(a.takes) | set(b.takes))), "; ".join(whys))
 
 
 def enqueue(queue: list[Job], job: Job) -> list[Job]:
     """The queue with `job` placed by kind: behind every job of its rank or
-    better, ahead of the rest.  A retake joins a retake already waiting."""
-    if job.kind == RETAKE and (waiting := next((j for j in queue if j.kind == RETAKE), None)):
+    better, ahead of the rest.  A retake joins a retake already waiting, a
+    refine a refine."""
+    if job.kind in JOINS and (waiting := next((j for j in queue if j.kind == job.kind), None)):
         return [joined(waiting, job) if j is waiting else j for j in queue]
     at = next((k for k, j in enumerate(queue) if RANK[j.kind] > RANK[job.kind]), len(queue))
     return queue[:at] + [job] + queue[at:]

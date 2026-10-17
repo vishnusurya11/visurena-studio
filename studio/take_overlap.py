@@ -32,15 +32,33 @@ from pathlib import Path
 from studio import boundary, episode_clock, episode_home, judged_gate, take_ladder
 from studio.judges import take_eye
 from studio.judges.verdict import Fault, Verdict
-from studio.take_schedule import FIRST, RETAKE, Job, enqueue, next_job
+from studio.take_schedule import FIRST, REFINE, RETAKE, Job, enqueue, next_job
 
 TAKES = Path("takes") / "r2v"
 RENDER = "scripts/episode/takes_r2v.py"
 CHECK = "scripts/episode/take_dq.py"
+REFINE_SCRIPT = "scripts/episode/face_refine.py"
 POLL_S = 5.0
 CPU_TRIES = 2
 WAIT_CAP = 7200.0
 RENDER_CURES = ("move_type", "seed")
+
+
+class Refines:
+    """The wide-shot face refine's bookkeeping for the lanes (owner 2026-10-17):
+    which landed takes are owed a refine and at what price, and the record of a
+    clock cut.  Read off the episode's files (scripts/episode/face_refine.py)."""
+
+    def __init__(self, ctx):
+        self.ctx = ctx
+
+    def owed(self, indices: list[int]) -> dict[int, float]:
+        from scripts.episode import face_refine as cli
+        return cli.owed(self.ctx.book_dir, self.ctx.number, list(indices))
+
+    def cut(self, indices: list[int], price: float) -> None:
+        from scripts.episode import face_refine as cli
+        cli.record_cut(Path(self.ctx.home) / TAKES, list(indices), price, self.ctx.book_dir, self.ctx.number)
 
 
 def measuring_code() -> str:
@@ -176,7 +194,7 @@ class Shop:
     def __init__(self, ctx, base: list[str], *, extra: tuple[str, ...] = (), early: bool = False,
                  attempts: bool = False, retake: tuple[list[int], str] | None = None,
                  check_flags: tuple[str, ...] = (), spawn=None, sleep=time.sleep, now=time.time,
-                 code: str | None = None):
+                 code: str | None = None, refine: Refines | None = None):
         self.ctx, self.base, self.extra = ctx, list(base), tuple(extra)
         self.room = Path(ctx.home) / TAKES
         self.early, self.attempts, self.check_flags = early, attempts, tuple(check_flags)
@@ -190,6 +208,7 @@ class Shop:
         self.cures: dict[int, tuple[str, list[Fault]]] = {}
         self.tries: dict[int, int] = {}
         self.failed, self.waited, self.moved = "", 0.0, False
+        self.refine, self.refined = refine, set()
         self.since = since_of(ctx.home)
 
     def run(self) -> None:
@@ -240,9 +259,15 @@ class Shop:
         if self.engine_busy():
             return
         self.queue.remove(job)
-        args = self.first_args() if job.kind == FIRST else self.retake_args(job)
-        self.gpu = Lane(self.spawn(self.ctx.command(RENDER, tuple(args))), job.takes, self.now(), " ".join(args))
-        self.ctx.log(f"GPU lane: {RENDER} {' '.join(args)}")
+        script = REFINE_SCRIPT if job.kind == REFINE else RENDER
+        args = (self.first_args() if job.kind == FIRST else self.refine_args(job) if job.kind == REFINE
+                else self.retake_args(job))
+        self.gpu = Lane(self.spawn(self.ctx.command(script, tuple(args))), job.takes, self.now(), " ".join(args))
+        self.ctx.log(f"GPU lane: {script} {' '.join(args)}")
+
+    def refine_args(self, job: Job) -> list[str]:
+        """The refine's argv: its takes, its clock row stamped within the takes row."""
+        return [*map(str, job.takes), "--within=takes"]
 
     def engine_busy(self) -> bool:
         """Another production holds ComfyUI: the render waits, the CPU lane does not."""
@@ -307,6 +332,8 @@ class Shop:
             self.tries[i] = self.tries.get(i, 0) + 1
         if self.early and done:
             self.order(done)
+        if self.refine is not None and done:
+            self.order_refine(done)
 
     def stamp(self, lane: Lane) -> None:
         if getattr(self.ctx, "number", None) is not None:
@@ -323,6 +350,27 @@ class Shop:
         why = take_ladder.why_of(take_ladder.BATCH.name, [f for _, fs in cures.values() for f in fs])
         self.queue = enqueue(self.queue, Job(RETAKE, tuple(sorted(cures)), why))
         self.ctx.log(f"CPU lane: {why} on {sorted(cures)} -- queued behind the renders")
+
+
+    def order_refine(self, measured: list[int]) -> None:
+        """The face refine of every measured take owed one and not being cured,
+        queued behind the renders -- or cut FIRST when the clock's reserve needs
+        the time (logged, recorded), never a measuring check."""
+        from studio import face_refine
+        curing = {i for j in self.queue if j.kind == RETAKE for i in j.takes} | set(self.cures)
+        passed = [i for i in measured if i not in curing | self.refined and dq_verdict(self.room, [i]).passed]
+        owed = self.refine.owed(passed)
+        if not owed:
+            return
+        self.refined |= set(owed)
+        price = sum(owed.values())
+        budget = getattr(self.ctx, "budget", None)
+        if budget is not None and face_refine.cut(budget, judged_gate.step_of(self.ctx), price):
+            self.refine.cut(sorted(owed), price)
+            self.ctx.log(f"REFINE CUT: the clock's reserve needs {price:.0f} s; takes {sorted(owed)} keep their faces")
+            return
+        self.queue = enqueue(self.queue, Job(REFINE, tuple(sorted(owed)), "face refine"))
+        self.ctx.log(f"CPU lane: face refine owed on {sorted(owed)} ({price:.0f} s) -- queued behind the renders")
 
 
 def unmeasured(room: Path, indices: list[int], code: str | None = None) -> list[int]:

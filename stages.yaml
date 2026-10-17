@@ -866,6 +866,16 @@ stages:
               adjacent) or the best take kept flagged, high on a dialogue, turn or
               button shot. One batched round, --why recorded; the losing attempt kept
               under attempts/; never a dropped shot.
+          - id: "09_07"
+            name: refine
+            desc: >-
+              FACE REFINE (owner 2026-10-17, decision 2026-10-17_face_refine): a wide
+              or full take, or one whose face is under 60 px, that PASSED its dq has
+              each small face tracked, matched to the staged cast and re-rendered
+              through H3 at denoise 0.45 with only that person's sheet
+              (scripts/episode/face_refine.py); gated on identity, seam, flicker
+              and face count, else the unrefined take; takes/r2v/refine.json. A
+              GPU job behind renders and retakes; the first thing cut for time.
 
       - id: "10"
         name: edit
@@ -897,7 +907,9 @@ stages:
             name: cut
             desc: >-
               Takes trimmed to placed.json, lines at their at, mix to the
-              house loudness, captions, end chip.
+              house loudness, captions, end chip. The kept face-refine crops are
+              pasted into the master inside the RTX VSR pass, after the 4x, at
+              master scale (studio/face_paste.py).
           - id: "10_04"
             name: sound
             desc: >-

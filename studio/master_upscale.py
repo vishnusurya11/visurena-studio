@@ -175,14 +175,18 @@ def streamed(listing: Path, out: Path, width: int, height: int, up: Upscale, fps
 
 
 def master(listing: Path, out: Path, width: int, height: int, up: Upscale, fps: int,
-           upscaler: Frame | None = None) -> Path:
-    """The joined cut, upscaled and encoded once.  `upscaler` replaces the GPU in tests."""
+           upscaler: Frame | None = None, wrap: Callable[[Frame], Frame] | None = None) -> Path:
+    """The joined cut, upscaled and encoded once.  `upscaler` replaces the GPU in tests;
+    `wrap` takes each upscaled frame on its way to the encoder (the face refine's
+    paste at master scale, studio/face_paste.Paster)."""
     if up.engine == "lanczos":
+        if wrap is not None:
+            print("FACE REFINE: the lanczos fallback has no frame loop; nothing pasted", file=sys.stderr, flush=True)
         subprocess.run(lanczos_argv(listing, out, width, height, up), check=True)
         return out
     effect = upscaler or Rtx(width, height, up)
     try:
-        streamed(listing, out, width, height, up, fps, effect)
+        streamed(listing, out, width, height, up, fps, wrap(effect) if wrap else effect)
     finally:
         if upscaler is None:
             effect.close()

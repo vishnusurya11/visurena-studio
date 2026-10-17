@@ -79,6 +79,14 @@ def pending(book: Path, number: int, among: list[int] | None = None) -> list[int
     return [i for i in selection(book, number) if (among is None or i in among) and not current(doc, room, i)]
 
 
+def owed(book: Path, number: int, among: list[int] | None = None) -> dict[int, float]:
+    """take -> the GPU seconds its refine is priced at, for every pending take
+    (one face per staged person, over the take's frames)."""
+    cards = {int(c["index"]): c for c in read(room_of(book, number) / "prompts.json", [])}
+    return {i: fr.price(len(cards[i].get("faces") or []), int(cards[i].get("frames") or fr.REF_FRAMES))
+            for i in pending(book, number, among)}
+
+
 def write_entry(room: Path, index: int, entry: dict) -> None:
     doc = read(room / DOC, {})
     doc[f"T{index:02d}"] = entry

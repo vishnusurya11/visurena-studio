@@ -483,6 +483,18 @@ is never cut: the voice is the ruler. Jekyll ep01 v2 T14 failed WER 0.56 + tail 
 same-length reseeds and passed both (WER 0.11, tail -48 dB) on its first shorter take
 (coda 1.5 -> 0.75 s).
 
+**Wide-shot faces are refined (09_07, owner 2026-10-17: "I like face improvements a lot in wide shots, go ahead").**
+A wide or full take, or one whose face-at-end is under 60 render px (never an insert), that PASSED its dq gets every
+small face tracked (`studio/face_track.py`), each track matched to the take's staged cast (facenet + the Lab colour of
+head and hat + the plan's "at the LEFT/CENTRE/RIGHT"), and each crop re-rendered through H3 at denoise 0.45 with ONLY
+that person's sheet (`scripts/episode/face_refine.py`, F2's workflow). The gate keeps a crop only when identity to the
+sheet does not drop, there is no seam or new flicker, and the face count holds; else the unrefined take. Decisions per
+take: `takes/r2v/refine.json` (`refined`, `unrefined`, `no_faces`, `no_cast`, `cut`). Step 09 queues the refine on the
+GPU lane right behind the renders (a REFINE job: after renders and retakes, before the GPU checks) and refines what
+the ladder left owed once at the end. ~110 s per face per take; the FIRST thing cut for time, never a check. Assemble
+pastes the kept crops into the master inside the RTX VSR pass, after the 4x (never into the 768 take: the detail
+averages away). By hand: `uv run python scripts/episode/face_refine.py <book> <n> [take ...]`.
+
 **Never pin a last frame.** ref2v gives a take its first frame only.
 
 **A kept take is current to its inputs (G-TAKE-INPUTS, 2026-10-15).** After `take_dq --attempts`,

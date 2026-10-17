@@ -241,6 +241,16 @@ Take currency: a take is kept only when it was rendered from the same prompt
 AND the same staged picture bytes (content-addressed names in its
 `graph.json`).
 
+**FACE REFINE GATE (2026-10-17, owner approved; `studio/face_refine.decide`, measures `studio/face_gate.py`,
+calibration `docs/calibration/face_refine.md`).** Per refined face crop of a wide/full or small-faced take, at window
+scale and on the 768 crops: identity (facenet cosine to the person's sheet) may not drop by more than 0.05; seam
+(feather-band level difference) <= 18; face-region flicker pasted <= 1.10 x the take's + 0.5; faces counted unchanged
+(one missed detection allowed). A broken wall FALLS BACK to the unrefined take, never a refusal of the episode; every
+decision and its measures in `takes/r2v/refine.json`. Calibrated on F2 (kept by eye: flicker ratio 0.81-0.95) against
+F3 (refused by eye: 1.15-1.32), three takes: thin. A crop is pasted only onto the take bytes it was made from (sha8).
+CLOCK: priced 110 s per face per 192 frames; runs only while `leaves_reserve(step, price + 550 s)`; else `REFINE CUT`
+logged, `status: cut` recorded, the take ships unrefined.
+
 ## QC — `qc.py <book> <n> --engine=r2v`
 
 QC fails on any of these:

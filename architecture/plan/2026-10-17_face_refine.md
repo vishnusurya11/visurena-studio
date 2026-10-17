@@ -1,0 +1,25 @@
+# 2026-10-17 — the wide-shot face refine (step 09_07; paste in 10_05)
+
+Status: **BUILT 2026-10-17** — code, tests, scheduler hook, docs. Proof scope cut by the owner the
+same morning to 2-3 wide takes (side-by-side clips at master scale, no new master).
+Decision: `architecture/decisions/2026-10-17_face_refine.md`. Owner: "I like face improvements a lot
+in wide shots, go ahead".
+
+## Commits
+
+- [x] the parts: `studio/face_refine.py` (selection, price, cut rule, cast, positions, match, prompt,
+      gate), `studio/face_track.py`, `studio/face_gate.py`, `studio/face_paste.py`,
+      `scripts/episode/face_refine.py` (track, match, render via F2's workflow, gate, refine.json)
+- [x] matching on ep01's real takes: stitched tracks, readable faces left alone, Lab colour, loose
+      sheet detector, positions only from "at the SIDE"
+- [x] wiring + docs: `take_schedule.REFINE`, `take_overlap.Refines` + `Shop.order_refine`,
+      `step_09_shoot.refine_rest`, `master_upscale.master(wrap=)`, `assemble` layout.json +
+      `face_paste_wrap`; the F2 manifest in comfy_studio; page, README, stages.yaml, skill, DECISIONS
+- [ ] proof clips: T00, T22 (T06) shipped vs refined at master scale under
+      `docs/audit/2026-10-16_model_tests/faces/step_proof/` (waits on the shared ComfyUI queue)
+
+## Log
+
+- 2026-10-17 09:00-10:30 PDT: built test-first; calibrated the gate on F2/F3
+  (`docs/calibration/face_refine.md`); dry-ran selection/tracking/matching on ep01 (T00 2 faces, T03 none
+  small, T06 2, T07 3, T18 2, T22 2); queued the 11 crop renders on the shared queue behind a 32-take bench.

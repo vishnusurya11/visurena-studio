@@ -1286,3 +1286,20 @@ fixes. Each lesson below cost at least one launch. Tracker rows A38-A74 in
       its drawn `.txt`** (`grids.py --prompts`) to name exactly the grids a plan edit makes stale before any redraw.
       (6) **The anchor grid is not re-cut by `panels.py`**: redrawing the Sunday 2x2 left `anchors/sunday_street.png`
       and shot 17 on the old room.
+
+## The wide-shot face refine (2026-10-17, owner: "I like face improvements a lot in wide shots, go ahead")
+
+- **The pixels are not there; put them back where they ship.** A wide's face is 25-40 px of 768. RTX VSR, Lanczos,
+  more steps and SeedVR2 all failed (F0, F3, F5); only re-rendering the face crop through H3 with the person's sheet
+  drew a face (F2). Pasted into the 768 take the gain averaged away; pasted after the 4x it read. So the paste rides
+  the master's one VSR pass and follows the cut's own geometry (head trim, G-DEAD slow-down, gutter crop).
+- **One track per face, cut at its life.** F2's single largest-face track drifted from Utterson to Enfield on T22.
+  Tracks now end when a face is gone 12 frames, missed stretches up to 48 frames are stitched (Hyde came back as two
+  pieces on T07), and a face already >= 60 px is left alone (T06's girl walking into camera at 148 px).
+- **Who a 30 px face is: hat colour, then position, then facenet.** Hue-only colour put Hyde's face on the child (a
+  black hat has no hue); Lab colour of head and hat read Hyde 0.77 against 0.08. A plan position counts only as "at
+  the LEFT/CENTRE/RIGHT" said of one subject: "the two men walk on to the RIGHT" put Utterson on Enfield (T22).
+- **The gate's separating measure is flicker.** F2 0.81-0.95 of the take's face-region flicker, F3 1.15-1.32; seam did
+  not separate them (F3 barely touches the border). Thin calibration: recalibrate on the first refine.json rows.
+- **The refine is decoration: the first thing the clock cuts.** It runs only while the reserve holds it plus a full
+  measuring pass; a check is never cut for it.
