@@ -87,3 +87,28 @@ def test_colour_histograms_tell_a_black_hat_from_a_brown_one():
 def test_the_head_box_takes_the_hat_above_the_face():
     x1, y1, x2, y2 = ft.head_box((100, 100, 130, 130), 768, 768)
     assert y1 < 100 - 15 and x1 < 100 and x2 > 130 and y2 > 130
+
+
+def test_two_pieces_of_one_face_split_by_a_missed_stretch_are_stitched():
+    a = [(t, box(300, 300)) for t in range(0, 24, 4)]
+    b = [(t, box(312, 302)) for t in range(48, 72, 4)]
+    got = ft.stitch([a, b])
+    assert len(got) == 1 and ft.life(got[0]) == (0, 68)
+
+
+def test_two_faces_seen_at_once_are_never_stitched():
+    a = [(t, box(300, 300)) for t in range(0, 40, 4)]
+    b = [(t, box(320, 300)) for t in range(20, 60, 4)]
+    assert len(ft.stitch([a, b])) == 2
+
+
+def test_pieces_far_apart_stay_apart():
+    a = [(t, box(100, 300)) for t in range(0, 24, 4)]
+    b = [(t, box(600, 300)) for t in range(40, 64, 4)]
+    assert len(ft.stitch([a, b])) == 2
+
+
+def test_a_face_big_enough_to_read_is_left_alone():
+    small = [(t, box(100, 300, 30)) for t in range(0, 24, 4)]
+    big = [(t, box(400, 300, 150)) for t in range(0, 24, 4)]
+    assert ft.small([small, big], 60.0) == [small]

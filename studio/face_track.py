@@ -77,6 +77,37 @@ def life(track: list) -> tuple[int, int]:
     return track[0][0], track[-1][0]
 
 
+STITCH_GAP = 48
+STITCH_FACES = 3.0
+STITCH_FLOOR = 80.0
+
+
+def joins(a: list, b: list) -> bool:
+    """`b` picks up where `a` lost its face: after it, soon, and near where it was."""
+    gap = b[0][0] - a[-1][0]
+    room = max(STITCH_FLOOR, STITCH_FACES * height(a[-1][1]))
+    return 0 < gap <= STITCH_GAP and near(a[-1][1], b[0][1]) <= room
+
+
+def stitch(tracks: list[list]) -> list[list]:
+    """Pieces of one face split by a stretch the detector missed, joined in time
+    order (Jekyll ep01 T07: Hyde came back as two pieces 20 frames apart)."""
+    out: list[list] = []
+    for b in sorted(tracks, key=lambda tr: tr[0][0]):
+        options = [a for a in out if joins(a, b)]
+        if options:
+            a = min(options, key=lambda a: near(a[-1][1], b[0][1]))
+            a.extend(b)
+        else:
+            out.append(list(b))
+    return out
+
+
+def small(tracks: list[list], px: float) -> list[list]:
+    """The tracks whose face is under `px` (median height): a readable face is left alone."""
+    return [tr for tr in tracks if np.median([height(b) for _, b in tr]) < px]
+
+
 def fill(track: list, frames: int, smooth: int = SMOOTH) -> np.ndarray:
     """(frames, 4) boxes: interpolated inside the life, held outside, box-filtered."""
     at = [t for t, _ in track]
@@ -109,18 +140,20 @@ def crop_span(span: tuple[int, int], frames: int) -> tuple[int, int]:
 def head_box(b: Box, width: int, height_: int) -> Box:
     """The face box widened to the head and hat: what tells two people apart at 30 px."""
     h = height(b)
-    x1, x2 = b[0] - 0.5 * h, b[2] + 0.5 * h
-    y1, y2 = b[1] - 1.0 * h, b[3] + 0.3 * h
+    x1, x2 = b[0] - 0.25 * h, b[2] + 0.25 * h
+    y1, y2 = b[1] - 0.8 * h, b[3] + 0.1 * h
     return max(0.0, x1), max(0.0, y1), min(float(width), x2), min(float(height_), y2)
 
 
 def hist_similarity(a: np.ndarray, b: np.ndarray) -> float:
-    """Hue-saturation histogram correlation of two RGB crops, -1..1."""
+    """Lab colour histogram correlation of two RGB crops, -1..1.  Lab, not hue: a
+    black hat has no hue, and Hyde's black wideawake is what tells him from
+    Enfield's light-brown top hat at 30 px (Jekyll ep01 T07: 0.77 against 0.08)."""
     import cv2
     hists = []
     for img in (a, b):
-        hsv = cv2.cvtColor(np.ascontiguousarray(img), cv2.COLOR_RGB2HSV)
-        h = cv2.calcHist([hsv], [0, 1], None, [16, 8], [0, 180, 0, 256])
+        lab = cv2.cvtColor(np.ascontiguousarray(img), cv2.COLOR_RGB2LAB)
+        h = cv2.calcHist([lab], [0, 1, 2], None, [8, 6, 6], [0, 256, 0, 256, 0, 256])
         hists.append(cv2.normalize(h, h).flatten())
     return float(cv2.compareHist(hists[0], hists[1], cv2.HISTCMP_CORREL))
 

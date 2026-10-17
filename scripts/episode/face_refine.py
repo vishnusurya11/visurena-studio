@@ -113,9 +113,10 @@ def read_frames(path: Path) -> list[np.ndarray]:
 
 
 def tracks_of(frames: list[np.ndarray], loose) -> list[list]:
-    """Every face's track over the take (detected every EVERY frames)."""
+    """Every small face's track over the take (detected every EVERY frames), its
+    missed stretches stitched; a face big enough to read is left alone."""
     dets = {t: [tuple(f["box"]) for f in loose(frames[t])] for t in range(0, len(frames), face_track.EVERY)}
-    return face_track.keep(face_track.link(dets))
+    return face_track.small(face_track.keep(face_track.stitch(face_track.link(dets))), fr.SMALL_FACE_PX)
 
 
 def head_of(rgb: np.ndarray, box) -> np.ndarray:
@@ -123,12 +124,12 @@ def head_of(rgb: np.ndarray, box) -> np.ndarray:
     return rgb[y1:max(y2, y1 + 1), x1:max(x2, x1 + 1)]
 
 
-def sheet_face(book: Path, sheet: str, detect, embed):
+def sheet_face(book: Path, sheet: str, detect, embed, loose=None):
     """(face vector, head crop) of the largest face on a sheet; (None, None) unread."""
     from PIL import Image
     from studio.measure import faces
     rgb = np.asarray(Image.open(Path(book) / sheet).convert("RGB"))
-    found = detect(rgb)
+    found = detect(rgb) or (loose(rgb) if loose else [])     # a drawn child's face can need the loose one
     if not found:
         return None, None
     box = faces.largest(found)["box"]
@@ -148,10 +149,10 @@ def identity(track: list, frames, sheet, embed) -> float:
     return 0.5 * float(np.mean(cos)) + 0.5 * float(np.mean(hist))
 
 
-def match(prompt: str, cast: list, tracks: list, frames, book: Path, detect, embed) -> dict:
+def match(prompt: str, cast: list, tracks: list, frames, book: Path, detect, embed, loose=None) -> dict:
     """track number -> the staged Person it is (studio/face_refine.assign)."""
     width, priors = frames[0].shape[1], fr.positions(prompt)
-    sheets = {p.who: sheet_face(book, p.sheet, detect, embed) for p in cast}
+    sheets = {p.who: sheet_face(book, p.sheet, detect, embed, loose) for p in cast}
     scores = {}
     for k, tr in enumerate(tracks):
         x = float(np.mean([face_track.centre(b)[0] for _, b in tr])) / width
@@ -239,7 +240,7 @@ def queue_take(book: Path, number: int, index: int, card: dict, engine, loose, d
         work.status = "no_faces"
         return work
     refs = [str(r) for r in card.get("refs", [])]
-    matched = match(card["prompt"], fr.cast_of(card["prompt"], refs), tracks, work.frames, book, detect, embed)
+    matched = match(card["prompt"], fr.cast_of(card["prompt"], refs), tracks, work.frames, book, detect, embed, loose)
     if not matched:
         work.status = "no_cast"
     for k, person in sorted(matched.items()):
@@ -277,7 +278,7 @@ def sampled(seq: list, n: int = GATE_SAMPLES) -> list:
     return [seq[int(i)] for i in np.linspace(0, len(seq) - 1, min(n, len(seq)))] if seq else []
 
 
-def gate_job(book: Path, work: TakeWork, job: Job, detect, embed) -> dict:
+def gate_job(book: Path, work: TakeWork, job: Job, detect, embed, loose=None) -> dict:
     """The person's measures, the decision and the row refine.json keeps."""
     import cv2
     life, side = face_track.life(job.track), job.windows[0][2]
@@ -286,7 +287,7 @@ def gate_job(book: Path, work: TakeWork, job: Job, detect, embed) -> dict:
     ref_w = face_gate.shrunk(refined, job.start, life, side)
     src768 = [cv2.resize(np.ascontiguousarray(f), (SIDE, SIDE), interpolation=cv2.INTER_LANCZOS4) for f in sampled(src_w)]
     ref768 = sampled([refined[t - job.start] for t in range(life[0], life[1] + 1) if 0 <= t - job.start < len(refined)])
-    vec, _ = sheet_face(book, job.person.sheet, detect, embed)
+    vec, _ = sheet_face(book, job.person.sheet, detect, embed, loose)
     m = face_gate.measure(src_w, ref_w, src768, ref768, vec, detect, embed)
     kept, why = fr.decide(m)
     stem = f"T{work.index:02d}_p{job.k}"
@@ -294,11 +295,11 @@ def gate_job(book: Path, work: TakeWork, job: Job, detect, embed) -> dict:
             "why": why, "measures": m.__dict__, "frames": job.frames}
 
 
-def decide_take(room: Path, book: Path, work: TakeWork, detect, embed, engine, seconds: float) -> dict:
+def decide_take(room: Path, book: Path, work: TakeWork, detect, embed, engine, seconds: float, loose=None) -> dict:
     people = []
     for job in work.jobs:
         collect(room, work, job, engine)
-        people.append(gate_job(book, work, job, detect, embed))
+        people.append(gate_job(book, work, job, detect, embed, loose))
     status = work.status if not people else ("refined" if any(p["kept"] for p in people) else "unrefined")
     entry = {"status": status, "take_sha8": work.sha, "people": people, "decided": stamp(),
              "gpu_s_priced": round(fr.price(len(work.jobs), len(work.frames)), 1), "seconds": round(seconds, 1)}
@@ -345,7 +346,7 @@ def refine(book: Path, number: int, indices: list[int] | None, *, engine=None, d
         queued = [(time.time(), queue_take(book, number, i, cards[i], engine, loose, detect, embed))
                   for i in pending(book, number, indices)]
         for began, work in queued:
-            out[work.index] = decide_take(room, book, work, detect, embed, engine, time.time() - began)
+            out[work.index] = decide_take(room, book, work, detect, embed, engine, time.time() - began, loose)
     return out
 
 

@@ -100,7 +100,7 @@ PROMPT = ("subject_definitions:\n"
           "<Subject 2> is the child in <Picture 2>: Fair hair in two plaits. <Picture 2> defines this girl alone.\n"
           "<Audio 1> is the take's complete audio track.\n\n"
           "detailed_description:\nHand-drawn 2D gothic anime, London, 1885.\n"
-          "[Shot 1] The shot opens. <Subject 1> stands at the LEFT third. <Subject 2> runs in from the RIGHT. "
+          "[Shot 1] The shot opens. <Subject 1> stands at the LEFT third. <Subject 2> waits at the RIGHT edge. <Subject 1> walks on to the RIGHT. "
           "<Subject 1> and <Subject 2> meet at the CENTRE.\n\noverall_soundscape: Open air.")
 
 
@@ -128,6 +128,11 @@ def test_a_pronoun_follows_the_definition():
 
 def test_positions_come_only_from_a_sentence_naming_one_subject():
     assert fr.positions(PROMPT) == {1: 0.2, 2: 0.8}
+
+
+def test_a_direction_of_travel_is_no_position():
+    said = "detailed_description: <Subject 1> walks from LEFT to RIGHT. <Subject 2> runs on to the LEFT."
+    assert fr.positions(said) == {}
 
 
 def test_the_style_line_is_the_takes_own():

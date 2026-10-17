@@ -140,14 +140,19 @@ def pronoun(said: str) -> str:
 SIDES = {"LEFT": 0.2, "CENTRE": 0.5, "CENTER": 0.5, "RIGHT": 0.8}
 
 
+AT_SIDE = re.compile(r"\bat the (LEFT|RIGHT|CENTRE|CENTER)\b")
+
+
 def positions(prompt: str) -> dict[int, float]:
-    """Horizontal priors (share of the width): a side word in a sentence of the
-    shot text that names exactly one subject."""
+    """Horizontal priors (share of the width): "at the LEFT/CENTRE/RIGHT" in a
+    sentence of the shot text that names exactly one subject, its first saying.
+    A direction of travel ("walk on to the RIGHT") is no position: Jekyll ep01
+    T22 put Utterson on Enfield's face that way."""
     text = prompt.split("detailed_description:", 1)[-1]
     out: dict[int, float] = {}
     for sentence in re.split(r"(?<=[.;])\s+", text):
         named = set(re.findall(r"<Subject (\d+)>", sentence))
-        side = next((v for w, v in SIDES.items() if re.search(rf"\b{w}\b", sentence)), None)
+        side = SIDES[found.group(1)] if (found := AT_SIDE.search(sentence)) else None
         if len(named) == 1 and side is not None:
             out.setdefault(int(named.pop()), side)
     return out
