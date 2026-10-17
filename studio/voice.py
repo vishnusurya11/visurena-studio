@@ -35,7 +35,7 @@ embedding is under-supported, not badly cloned.  0.65 keeps 0.13 of margin
 above the worst cross-voice score.  One speaker pair, ten clips: revalidate
 when a third designed voice exists."""
 DESIGN_WORKFLOW = "audio_qwen3tts_design"
-CLONE_WORKFLOW = "audio_qwen3tts_clone"
+CLONE_WORKFLOW = "audio_qwen3tts_clone_ttsaudiosuite"
 MAX_LINE_TOKENS = 512
 """A trailer line is <= 12 words; a runaway generation past this is a hallucination."""
 LINE_LUFS = -20.0
