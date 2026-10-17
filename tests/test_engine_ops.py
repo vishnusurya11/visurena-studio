@@ -81,7 +81,16 @@ def test_the_engine_command_is_the_memory_recipe_under_the_portable_root():
     cmd, cwd = eo.engine_command(Path("E:/portable"))
     assert cwd == Path("E:/portable")
     assert cmd[0].replace("\\", "/") == "E:/portable/python_embeded/python.exe"
-    assert cmd[1:] == ["-s", "ComfyUI/main.py", "--windows-standalone-build", "--reserve-vram", "2"]
+    assert cmd[1:] == ["-s", "ComfyUI/main.py", "--windows-standalone-build",
+                       "--disable-assets", "--reserve-vram", "2"]
+
+
+def test_the_engine_never_runs_the_asset_scan_that_pins_the_hdd():
+    """v0.41's standalone build turns the assets system on, and its background scan
+    stats every file under models/input/output on the D: spinning disk: 100 % busy
+    for minutes after each start (owner, 2026-10-17)."""
+    cmd, _ = eo.engine_command(Path("E:/portable"))
+    assert "--disable-assets" in cmd
 
 
 def test_the_portable_root_is_one_env_var_with_one_default():

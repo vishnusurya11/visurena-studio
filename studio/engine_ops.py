@@ -28,8 +28,12 @@ from studio.comfy import HOST
 ENV_PORTABLE = "COMFY_PORTABLE"
 DEFAULT_PORTABLE = "D:/Projects/KingdomOfViSuReNa/alpha/ComfyUI_windows_portable"
 """The portable ComfyUI's folder on this box; `COMFY_PORTABLE` overrides it."""
-ENGINE_ARGS = ("-s", "ComfyUI/main.py", "--windows-standalone-build", "--reserve-vram", "2")
-"""The launch the owner's hand used on 2026-09-06, verbatim (memory comfy-restart)."""
+ENGINE_ARGS = ("-s", "ComfyUI/main.py", "--windows-standalone-build",
+               "--disable-assets", "--reserve-vram", "2")
+"""The launch the owner's hand used on 2026-09-06 (memory comfy-restart), plus
+`--disable-assets` since v0.41.2: the standalone build switches the assets system on,
+and its background scan stats every file under models/input/output on the D: HDD,
+holding the disk at 100 % for minutes after each start (owner, 2026-10-17)."""
 ENGINE_MARK = "ComfyUI/main.py"
 RUN_MARKS = ("drive.py", "episode.py", "scripts/episode/")
 """A command line running this episode carries one of these and the codex + number."""
