@@ -184,18 +184,25 @@ def nearest(clip: Path, cast: dict[str, Path], device: str = "") -> tuple[str, f
     return max(scored, key=lambda row: row[1])
 
 
+def mono_16k(clip: Path):
+    """The clip as a (1, n) float tensor at 16 kHz.  Read by soundfile: torchaudio
+    2.11's `load` needs torchcodec, which this env does not carry (2026-10-17)."""
+    import soundfile as sf
+    import torch
+    import torchaudio
+
+    samples, rate = sf.read(str(clip), dtype="float32", always_2d=True)
+    wave = torch.from_numpy(samples.mean(axis=1)).unsqueeze(0)
+    return wave if rate == 16000 else torchaudio.functional.resample(wave, rate, 16000)
+
+
 def pitch(clip: Path, device: str = "") -> float:
     """Median F0 in hertz, from torchcrepe rather than autocorrelation."""
     import numpy as np
-    import torch
-    import torchaudio
     import torchcrepe
 
     device = device or best_device()
-    wave, rate = torchaudio.load(str(clip))
-    wave = wave.mean(dim=0, keepdim=True)
-    if rate != 16000:
-        wave = torchaudio.functional.resample(wave, rate, 16000)
+    wave = mono_16k(clip)
     found = torchcrepe.predict(wave.to(device), 16000, hop_length=160,
                                fmin=60.0, fmax=400.0, model="full",
                                device=device, batch_size=512)
