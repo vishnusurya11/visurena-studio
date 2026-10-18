@@ -1,0 +1,92 @@
+{
+  "id": "anime_kaguya_sumie",
+  "name": "Kaguya charcoal and watercolour",
+  "family": "anime",
+  "summary": "Unfinished-looking charcoal and pencil line drawings with pale watercolour washes floating on open white paper, like a moving sketchbook or hand scroll.",
+  "lineage": {
+    "titles": [
+      "The Tale of the Princess Kaguya (2013)",
+      "My Neighbors the Yamadas (1999)"
+    ],
+    "studios": [
+      "Studio Ghibli"
+    ],
+    "directors": [
+      "Isao Takahata"
+    ],
+    "era": "2010s feature film (digital colour imitating paper)"
+  },
+  "traits": {
+    "line": "Rough, broken, variable-pressure charcoal/pencil lines kept from the rough stage without clean-up, grainy and sometimes doubled; long graceful strokes in calm scenes, jagged scribbled slashes in frenzy (Osamu Tanabe's drawings).",
+    "shading": "No cel shadows; form comes from line density and one translucent wash; colour does not always reach the line.",
+    "palette": "Pale, diluted watercolour: celadon, peach, straw yellow, soft pink, sky blue; muted countryside, bolder capital; large areas left paper-white.",
+    "lighting": "Flat, even light; no highlights, rim light or glow; brightness comes from the white paper.",
+    "faces": "Simplified round faces, dot or short-stroke eyes, small mouths, rosy cheek washes; expression carried by line energy.",
+    "backgrounds": "Vignetted: scenery painted only around the action and fading to blank paper at the edges; Kazuo Oga's limpid watercolour washes, sparse detail.",
+    "texture": "Paper white, colour bleed and pooling at wash edges, charcoal grain, stray construction lines left in.",
+    "camera": "Mostly flat lateral staging like an emaki scroll; in the flight sequence the frame collapses into pure charcoal scribble."
+  },
+  "style_words": "Hand-drawn animation in rough charcoal and pencil lines left uncleaned, grainy and broken, with pale diluted watercolour washes bleeding past the line, large areas of blank white paper, edges fading to paper, no shading or highlights, soft celadon, peach and straw tones, as in The Tale of the Princess Kaguya (2013).",
+  "avoid": [
+    "clean closed cel outlines",
+    "full-bleed painted backgrounds filling the frame",
+    "saturated digital colour or gradients",
+    "heavy black sumi brush ink (that is the ink-manga look)",
+    "polished Ghibli-Miyazaki cel finish"
+  ],
+  "confusable_with": [
+    "anime_belladonna_watercolor",
+    "anime_takahata_period_realism",
+    "anime_ghibli_miyazaki"
+  ],
+  "sources": [
+    "https://en.wikipedia.org/wiki/The_Tale_of_the_Princess_Kaguya_(film)",
+    "https://www.bfi.org.uk/news-opinion/sight-sound-magazine/features/slow-draw-takahata-isao-tale-princess-kaguya",
+    "https://characterdesignreferences.com/reviews-1/the-tale-of-princess-kaguya"
+  ],
+  "added": "2026-10-17",
+  "run": "r001",
+  "models": {
+    "krea2": {
+      "style": "Hand-drawn animation, as in The Tale of the Princess Kaguya: rough charcoal and pencil lines left uncleaned, grainy and broken, pale diluted watercolour washes bleeding past the line, soft celadon, peach and straw yellow, large areas of blank white paper, scenery fading to paper at the edges, flat even light.",
+      "recap": "Rendered throughout as hand-drawn animation in rough charcoal lines and pale watercolour washes on white paper.",
+      "notes": "",
+      "captions": {}
+    },
+    "flux3_klein": {
+      "style": "Hand-drawn animation in rough charcoal and pencil: broken, variable-pressure lines kept from the rough stage, grainy and sometimes doubled, stray construction lines left in, one pale translucent watercolour wash per shape bleeding past the line and pooling at its edges, form carried by line density, flat even light from the white paper, simplified round faces with dot eyes and small mouths, scenery painted only around the action and fading to blank paper toward the frame edges.",
+      "recap": "Pale celadon, peach and straw yellow washes tint the sky, the walls and the ground near the figures, soft pink appears only in cheek washes and flame light, the areas toward the frame edges stay blank white paper, and every garment keeps its own stated colour as one diluted wash.",
+      "notes": "",
+      "captions": {}
+    },
+    "qwen_image_2_1": {
+      "style": "The image is a hand-drawn animation frame in rough charcoal and pencil, with broken, variable-pressure lines left uncleaned, grainy and sometimes doubled, forms carried by line density and one translucent watercolour wash that bleeds past the line, colour pooling at wash edges and stray construction lines left in, depicting a scene from a Gothic Victorian novel in a palette of pale diluted celadon, peach, straw yellow, soft pink and sky blue on large areas of blank white paper.",
+      "recap": "The overall composition vignettes its scene so the painted surroundings fade to blank paper at the edges, under flat, even light from the paper white, in a fragile, lyrical mood, keeps to a palette of pale diluted celadon, peach, straw yellow, soft pink and sky blue on large areas of blank white paper, and reads throughout as a hand-drawn animation frame in rough charcoal and pencil, with broken, variable-pressure lines left uncleaned, grainy and sometimes doubled, forms carried by line density and one translucent watercolour wash that bleeds past the line, colour pooling at wash edges and stray construction lines left in.",
+      "notes": "",
+      "captions": {}
+    },
+    "flux3_klein_pup": {
+      "style": "",
+      "recap": "",
+      "notes": "",
+      "captions": {
+        "count": "Hand-drawn animation illustration in the visual language of The Tale of the Princess Kaguya (2013), rendered with rough charcoal and pencil lines left uncleaned, grainy, broken, and irregular, with pale diluted watercolor washes bleeding beyond the contours. A medium full shot at eye level shows Count Dracula as the single figure, centered in a three-quarter view against a plain dark stone wall. He is a tall, gaunt old nobleman with pale skin, a long white moustache, a high hooked nose, arched eyebrows, pointed ears, and sharp white teeth showing at his lip. He is dressed from head to foot in black, wearing a high collar and a long black cloak that falls in a narrow, angular silhouette around his thin body. One pale hand is raised beside his shoulder in a courtly welcoming gesture, palm open and fingers loosely spread, while his other arm rests beneath the cloak. The wall behind him is indicated only by sparse charcoal strokes and a broad, uneven wash of muted charcoal grey, fading into large areas of blank white paper. Soft celadon, peach, and straw watercolor washes drift across the figure and wall, with pale peach touching the face and hand and diluted celadon and straw bleeding into the black clothing. The edges dissolve into untouched paper. No shading, highlights, polished contours, or finished rendering; only dry, broken marks, smudged charcoal, and translucent washes remain.",
+        "castle": "Hand-drawn animation in rough charcoal and pencil lines, left uncleaned, with grainy, broken contours and pale diluted watercolor washes bleeding beyond the marks, in the restrained visual language of The Tale of the Princess Kaguya (2013). An extreme wide establishing view from a low angle sweeps across an enormous dusk sky, with the landscape confined to the lower third and large areas of blank white paper surrounding the scene. In the upper third, Castle Dracula rises as a small, distant silhouette: a vast ruined Gothic castle of black stone, its clustered towers, pointed arches, broken battlements, fractured spires, and collapsed sections drawn in loose charcoal lines. A few narrow windows glow pale peach and straw, the only warm marks in the castle. The castle stands on the edge of a sheer precipice, its cliff dropping into a dark pine forest across the Carpathian mountains. Sparse charcoal pines form an uneven black-green band along the bottom, with pale straw and muted celadon washes bleeding into the forest and fading into untouched paper. The precipice is a jagged charcoal edge with no modeled shading. Above it, a darkening violet sky fills most of the composition, built from broad, diluted washes that spread into the white paper and fade at the outer edges. The violet deepens toward the top and remains nearly blank around the castle, with no clouds rendered as solid forms. No people, figures, lettering, decorative borders, shading, or highlights; only broken charcoal marks, pale celadon, peach, straw, and violet watercolor stains.",
+        "arrival": "Hand-drawn animation in rough charcoal and pencil lines left uncleaned, with grainy, broken contours and pale diluted watercolor washes bleeding beyond the marks, in the restrained visual language of The Tale of the Princess Kaguya (2013). A wide eye-level view at night looks across a dark stone courtyard, with large areas of untouched white paper and the outer edges fading into the paper. At the center, an open doorway glows within a great old wooden door studded with irregular iron nails. The doorway is framed by a tall, weathered stone arch, its masonry suggested by sparse charcoal strokes and diluted celadon washes. Inside the opening, the tall old Count stands in black, his long dark robe reduced to a near-black silhouette, holding an antique silver lamp above shoulder height. Its small flame is drawn in pale peach and straw tones, casting long, angular charcoal shadows across the threshold and courtyard stones. Jonathan Harker, a young English solicitor, stands in the left foreground with his back and shoulder seen from behind. He wears a brown travelling coat and holds a worn leather bag at his side, his head turned toward the doorway. Beside him, a horse-drawn carriage rests in profile, its horse and carriage defined by loose, incomplete pencil lines and a muted straw wash. The carriage faces the illuminated door. Beyond the young man, the Count’s doorway remains the central focus. The surrounding courtyard is dark stone, indicated only by broken charcoal patches and pale celadon washes, while the lamp flame supplies a restrained peach glow around the Count and the inner doorframe. No shading or highlights beyond the diluted watercolor washes; the rest of the paper remains blank and unmarked.",
+        "diary": "Hand-drawn animation in rough charcoal and pencil lines left uncleaned, with grainy, broken contours and pale diluted watercolor washes bleeding beyond the marks, following the restrained, airy visual language of The Tale of the Princess Kaguya (2013). A tight close-up over the left shoulder of Mina Harker, a young Victorian white woman with fair skin and dark hair pinned into a high period updo, seated at a small writing desk in a bedroom at night. Her shoulder and the back of her pinned hair fill the left foreground, while her face turns in three-quarter profile near the center, her eyes lowered toward a leather-bound journal. She wears a high-necked pale blue blouse, indicated by a loose celadon wash. Her right hand holds a slender dip pen against the open journal as she writes. At the right edge, a single candle flame burns in a small holder, its peach-colored wash spreading into the surrounding paper without modeled shading or highlights. The candle and a short trail of wax sit beside the journal. Behind Mina, an open window occupies the right midground, with thin net curtains lifting inward in the night air. A diluted straw-colored wash marks the window frame and the small patch of desk, while the exterior beyond is blank white paper with a few pale blue-grey strokes suggesting darkness. Large areas of untouched white paper surround the scene. The room behind her falls soft and sparse, with only broken charcoal lines indicating the bed and wall. Celadon, peach, and straw washes fade into the paper at the edges, with no shading, highlights, or finished rendering.",
+        "chase": "Hand-drawn animation in rough charcoal and pencil lines left uncleaned, with grainy, broken contours and pale diluted watercolor washes bleeding beyond the marks, in the restrained visual language of The Tale of the Princess Kaguya (2013). A high-angle wide action view tilts the entire composition into a Dutch angle. At sunset on a snowy mountain road, four horsemen gallop diagonally from the lower left toward the upper right, their bodies and horses sweeping across the frame. The first is an old doctor with a long grey beard, wearing a heavy winter coat and a loose medical satchel. Beside him, the second horseman is a tall man carrying a long rifle across his back. The third is a young lord in a broad winter coat, and the fourth is a young solicitor in a long coat with a document case tucked beneath one arm. Their four horsemen are distinguished by heavy, irregular charcoal silhouettes and pale celadon, peach, and straw washes: the doctor wears a straw-toned coat, the tall man a muted peach coat, the young lord a celadon coat, and the young solicitor a pale straw coat. Snow flies upward in broken pencil strokes from the pounding hooves. Ahead of them, a heavy wooden cart rolls along the same diagonal, driven by two men in bulky sheepskin coats holding long reins. The cart carries a large closed wooden box with thick planks and dark cross-bracing. Snow-covered mountain slopes and a low peach sunset wash sit near the upper background, while large areas of blank white paper remain open around the figures. The road edges dissolve into untouched paper, with no shading or highlights, only sparse charcoal marks, broken snow shapes, and translucent watercolor bleeding past the line."
+      }
+    },
+    "flux3_klein_bfl": {
+      "style": "Hand-drawn animation illustration in rough, uncleaned charcoal and pencil lines with pale diluted watercolor washes bleeding past the line, open blank white paper, and celadon, peach and straw tones.",
+      "recap": "Everything is rendered with grainy broken charcoal lines and translucent watercolor washes that fade to bare paper at the edges, typical of hand-drawn sketchbook-style anime.",
+      "notes": "",
+      "captions": {}
+    }
+  },
+  "verdict": {
+    "status": "researched",
+    "best_model": null,
+    "notes": ""
+  }
+}

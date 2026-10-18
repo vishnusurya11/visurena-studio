@@ -1,0 +1,72 @@
+{
+  "id": "anime_frieren_modern_fantasy",
+  "name": "Frieren soft modern fantasy",
+  "family": "anime",
+  "summary": "Clean, gentle 2020s digital fantasy: thin light lines, transparent watercolour-like pastel middle tones and soft sunlit European landscapes.",
+  "lineage": {
+    "titles": [
+      "Frieren: Beyond Journey's End (2023)",
+      "Frieren: Beyond Journey's End season 2 (2026)"
+    ],
+    "studios": [
+      "Madhouse"
+    ],
+    "directors": [
+      "Keiichiro Saito",
+      "Tomoya Kitagawa"
+    ],
+    "era": "2020s TV, digital"
+  },
+  "traits": {
+    "line": "Thin, clean, light lines, often colour-traced rather than pure black; economical character line.",
+    "shading": "Soft single-tone cel shadow with gentle gradient overlay; low contrast; light blush.",
+    "palette": "Middle tones taken from the manga's watercolour covers and Impressionist painting: white, pale green, sky blue, lilac (purple hair as accent), warm gold at sunset; low saturation, high value.",
+    "lighting": "Soft natural daylight and evening glow, gentle bloom; light rather than dramatic shadow; magic as clean light particles.",
+    "faces": "Calm small-featured faces, medium eyes with restrained highlights, elf ears; subdued expressions.",
+    "backgrounds": "Painted European medieval fantasy - meadows, flower fields, stone towns, forests - airy, detailed but soft-edged.",
+    "texture": "Clean digital with slight painterly softness; no grain.",
+    "camera": "Calm wide establishing shots, slow pans, restrained cutting; crisp effects in action bursts."
+  },
+  "style_words": "Gentle modern digital fantasy anime: thin clean colour-traced lines, soft single-tone cel shadow, transparent watercolour-like pastel middle tones of white, pale green, sky blue and lilac, soft natural daylight and warm evening glow with light bloom, airy painted European meadows and stone towns, clean finish, as in Frieren: Beyond Journey's End (2023).",
+  "avoid": [
+    "saturated high-contrast shonen colour",
+    "heavy black outlines",
+    "Shinkai-style hyper-detailed skies and lens flares",
+    "grimdark desaturation",
+    "KyoAni glossy layered eye highlights"
+  ],
+  "confusable_with": [
+    "anime_kyoani_soft",
+    "anime_shinkai_luminous",
+    "anime_mushishi_naturalist"
+  ],
+  "sources": [
+    "https://en.wikipedia.org/wiki/Frieren",
+    "https://animecorner.me/frieren-beyond-journeys-end-season-2-first-teaser-trailer/",
+    "https://anitrendz.com/news/2026/04/12/seiko-yoshioka-frieren-interview"
+  ],
+  "added": "2026-10-17",
+  "run": "r001",
+  "models": {
+    "krea2": {
+      "style": "Gentle modern digital fantasy anime, as in Frieren: Beyond Journey's End: thin clean colour-traced lines, soft single-tone cel shadow, low contrast, transparent watercolour-like middle tones of white, pale green, sky blue and lilac, calm faces with one small eye highlight, soft natural light and evening glow, airy soft-edged backgrounds.",
+      "recap": "Rendered throughout as gentle modern digital fantasy anime in soft low-contrast middle tones.",
+      "notes": ""
+    },
+    "flux3_klein": {
+      "style": "Modern digital fantasy anime illustration: thin, clean, light lines traced in colour, calm small-featured faces with medium eyes and restrained highlights, soft single-tone cel shadow with a gentle gradient overlay, low contrast, transparent watercolour-like middle tones in high light values, soft natural light with a gentle bloom, airy soft-edged painted backgrounds, a clean digital finish with a painterly softness.",
+      "recap": "White, pale green and sky blue fill the sky, the walls and the ground in light values, lilac sits in the shadow fills, warm gold appears only in the light sources and the low sun, and every garment keeps its own stated colour.",
+      "notes": ""
+    },
+    "qwen_image_2_1": {
+      "style": "The image is a gentle modern digital fantasy animation frame, with thin, clean, colour-traced lines, soft single-tone cel shadow with a gentle gradient overlay and light blush, airy soft-edged painted backgrounds and a clean finish with slight painterly softness, depicting a scene from a Gothic Victorian novel in a palette of transparent watercolour-like middle tones of white, pale green, sky blue and lilac, with warm gold evening glow.",
+      "recap": "The overall composition spreads its forms calmly across an airy, low-contrast frame with gentle light bloom, in a quiet, wistful mood, keeps to a palette of transparent watercolour-like middle tones of white, pale green, sky blue and lilac, with warm gold evening glow, and reads throughout as a gentle modern digital fantasy animation frame, with thin, clean, colour-traced lines, soft single-tone cel shadow with a gentle gradient overlay and light blush, airy soft-edged painted backgrounds and a clean finish with slight painterly softness.",
+      "notes": ""
+    }
+  },
+  "verdict": {
+    "status": "researched",
+    "best_model": null,
+    "notes": ""
+  }
+}

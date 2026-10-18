@@ -1,0 +1,77 @@
+{
+  "id": "anime_gundam_real_robot_80s",
+  "name": "80s real-robot mecha",
+  "family": "anime",
+  "summary": "Hand-painted cel space war: utilitarian military machines with panel seams and hatches, late-70s/80s character designs, starfields, beam glows and missile trails.",
+  "lineage": {
+    "titles": [
+      "Mobile Suit Gundam (1979)",
+      "The Super Dimension Fortress Macross (1982)",
+      "Armored Trooper Votoms (1983)",
+      "Mobile Suit Gundam 0083: Stardust Memory (1991)"
+    ],
+    "studios": [
+      "Nippon Sunrise",
+      "Studio Nue",
+      "Tatsunoko Production",
+      "Artland"
+    ],
+    "directors": [
+      "Yoshiyuki Tomino",
+      "Noboru Ishiguro",
+      "Ryosuke Takahashi"
+    ],
+    "era": "1979 to early-1990s TV and OVA cel"
+  },
+  "traits": {
+    "line": "Black cel lines; crisp ruled mechanical outlines with panel seams, vents and hatches (Kunio Okawara, Shoji Kawamori); characters with clumped hair lines.",
+    "shading": "Hard-edged two-tone cel shadows plus a hard highlight tone on metal; airbrushed gradients on canopies, beams and explosions.",
+    "palette": "Military primaries: white/blue/red/yellow hero machine, Zaku greens, greys, olive drab; deep blue-black space; orange-yellow explosions.",
+    "lighting": "Strong single key light with hard cel shadow; beam-saber and thruster glows; silhouettes against explosions.",
+    "faces": "Period designs: medium eyes with small highlights, defined noses, shaggy hair (Yoshikazu Yasuhiko) or glossy idol faces (Haruhiko Mikimoto, Macross).",
+    "backgrounds": "Painted starfields, colony interiors, ship bridges, hangars, desert and forest battlefields.",
+    "texture": "Film grain, cel dust, slight registration wobble, opaque painted cels.",
+    "camera": "Low-angle hero shots of machines, cockpit point of view, swarming missile trails, pans along fleets."
+  },
+  "style_words": "1980s real-robot mecha cel animation: crisp black ruled outlines on utilitarian military machines with panel seams and vents, hard two-tone cel shadows with sharp metal highlights, airbrushed explosions and thruster glow, white, blue, red and olive drab against deep blue-black starfields, film grain and cel dust, as in Mobile Suit Gundam (1979) and Macross (1982).",
+  "avoid": [
+    "glossy modern digital mecha with CG panelling",
+    "super-robot toy proportions and candy colours",
+    "Trigger-style angular exaggeration",
+    "photoreal 3D render"
+  ],
+  "confusable_with": [
+    "anime_80s_ova_citypop",
+    "anime_toei_80s_shonen",
+    "anime_otomo_akira"
+  ],
+  "sources": [
+    "https://en.wikipedia.org/wiki/Mobile_Suit_Gundam",
+    "https://en.wikipedia.org/wiki/Real_robot",
+    "https://en.wikipedia.org/wiki/The_Super_Dimension_Fortress_Macross"
+  ],
+  "added": "2026-10-17",
+  "run": "r001",
+  "models": {
+    "krea2": {
+      "style": "1980s real-robot cel animation, as in Mobile Suit Gundam: crisp black ruled outlines with panel seams and vents on utilitarian military machinery, grounded proportions, hard two-tone cel shadows with sharp metal highlights, airbrushed glows, white, blue, red and olive drab against deep blue-black, opaque painted cels, cel dust.",
+      "recap": "Rendered throughout as 1980s real-robot cel animation with film grain and cel dust.",
+      "notes": ""
+    },
+    "flux3_klein": {
+      "style": "1980s real-robot anime cel animation: crisp black ruled outlines, wood, metal and stone drawn with ruled mechanical precision, figures with clumped hair lines and medium eyes with small highlights, hard-edged two-tone cel shadows with a hard highlight tone on metal, airbrushed gradients only on glows and flames, a strong single key light, opaque painted cels with film grain, cel dust and a slight registration wobble.",
+      "recap": "Olive drab and grey fill the walls and the ground, deep blue-black fills the sky and the shadow fills, orange-yellow appears only in the flames and the light sources, white, blue and red stay as hard highlights on metal, and every garment keeps its own stated colour.",
+      "notes": ""
+    },
+    "qwen_image_2_1": {
+      "style": "The image is an early-1980s TV cel animation frame drawn with an engineer's precision, with crisp black ruled outlines and exact detail on every seam and piece of hardware, flat, unmodulated colour fills and hard-edged shadow shapes in two tones, sharp metal highlights, airbrushed glows, film grain and cel dust, depicting a scene from a Gothic Victorian novel in a palette of military white, blue, red and olive drab against deep blue-black, with orange-yellow glows.",
+      "recap": "The overall composition is cut by a strong single key light into hard shadow, silhouetting forms against the glow, in a sober, martial mood, keeps to a palette of military white, blue, red and olive drab against deep blue-black, with orange-yellow glows, and reads throughout as an early-1980s TV cel animation frame drawn with an engineer's precision, with crisp black ruled outlines and exact detail on every seam and piece of hardware, flat, unmodulated colour fills and hard-edged shadow shapes in two tones, sharp metal highlights, airbrushed glows, film grain and cel dust.",
+      "notes": ""
+    }
+  },
+  "verdict": {
+    "status": "researched",
+    "best_model": null,
+    "notes": ""
+  }
+}

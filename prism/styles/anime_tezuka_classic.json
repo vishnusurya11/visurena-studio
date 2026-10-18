@@ -1,0 +1,72 @@
+{
+  "id": "anime_tezuka_classic",
+  "name": "Tezuka classic",
+  "family": "anime",
+  "summary": "Mid-century Tezuka look: round, bouncy Disney- and Fleischer-influenced characters with big eyes and button noses, simple bold lines, limited animation, black-and-white or flat 1960s colour.",
+  "lineage": {
+    "titles": [
+      "Astro Boy (1963)",
+      "Kimba the White Lion (1965)",
+      "Black Jack (manga, 1973)"
+    ],
+    "studios": [
+      "Mushi Production",
+      "Tezuka Productions"
+    ],
+    "directors": [
+      "Osamu Tezuka"
+    ],
+    "era": "1960s-70s TV and manga"
+  },
+  "traits": {
+    "line": "Bold, smooth, rounded brush-pen line with gentle taper; built from circles and ovals.",
+    "shading": "Flat; grey tones in black-and-white; little or no shadow.",
+    "palette": "Black-and-white grey scale (Astro Boy) or flat 1960s colour: primary red, yellow, blue, jungle green (Kimba).",
+    "lighting": "Flat, even light.",
+    "faces": "Round faces, large round eyes with big pupils and highlights (from Takarazuka, Disney and Betty Boop), button or bulbous noses, rubbery expressions; recurring 'Star System' faces.",
+    "backgrounds": "Simple retro-futurist cityscapes or plain landscapes; sparse.",
+    "texture": "Film grain, limited-animation stillness.",
+    "camera": "Limited animation: held cels, pans, repeated cycles."
+  },
+  "style_words": "Classic 1960s Japanese TV animation after Osamu Tezuka: bold smooth rounded lines with gentle taper, circular Disney- and Fleischer-influenced shapes, flat unshaded fills in black-and-white grey scale or simple primary colours, even flat light, simple retro-futurist backgrounds, film grain, as in Astro Boy (1963) and Kimba the White Lion (1965).",
+  "avoid": [
+    "modern anime faces with detailed hair strands",
+    "gradient shading",
+    "realistic proportions",
+    "pure American rubber-hose cartoon with no Japanese line"
+  ],
+  "confusable_with": [
+    "anime_kids_tv_bright",
+    "anime_classic_shojo_70s",
+    "anime_dezaki_70s",
+    "anime_lupin_tms_retro"
+  ],
+  "sources": [
+    "https://en.wikipedia.org/wiki/Osamu_Tezuka",
+    "https://en.wikipedia.org/wiki/Astro_Boy_(1963_TV_series)"
+  ],
+  "added": "2026-10-17",
+  "run": "r001",
+  "models": {
+    "krea2": {
+      "style": "Classic 1960s Japanese TV animation after Osamu Tezuka: bold smooth rounded Japanese brush-pen lines with gentle taper, figures built from circles and ovals, round faces with large round eyes and button noses, simplified stylised proportions, flat unshaded fills in black-and-white grey scale or simple primary colours, even light, film grain.",
+      "recap": "Rendered throughout as classic 1960s Japanese TV animation with bold rounded lines and flat unshaded fills.",
+      "notes": ""
+    },
+    "flux3_klein": {
+      "style": "Classic 1960s Japanese black-and-white TV animation in the register of Osamu Tezuka: bold, smooth, rounded brush-pen lines with gentle taper, shapes built from circles and ovals, round faces with large round eyes, big pupils and highlights, button noses and rubbery expressions, flat unshaded fills in a grey scale of black, white and three greys, even flat light, simple sparse backgrounds, film grain and held-cel stillness.",
+      "recap": "Every colour in the scene becomes a flat grey value: the sky and the walls are light grey, the ground is middle grey, the shadow fills are dark grey, dark garments are solid black, and pale garments are white or light grey.",
+      "notes": ""
+    },
+    "qwen_image_2_1": {
+      "style": "The image is a classic 1960s Japanese TV animation frame after Osamu Tezuka, with bold, smooth, rounded brush-pen lines with gentle taper, shapes built from circles and ovals, round faces with large round eyes and rubbery expressions, flat unshaded fills, simple sparse backgrounds and film grain, depicting a scene from a Gothic Victorian novel in a palette of flat 1960s primary red, yellow and blue with jungle green.",
+      "recap": "The overall composition keeps its rounded forms simple and readable under flat, even light, held like a limited-animation cel, in a lively, innocent mood, keeps to a palette of flat 1960s primary red, yellow and blue with jungle green, and reads throughout as a classic 1960s Japanese TV animation frame after Osamu Tezuka, with bold, smooth, rounded brush-pen lines with gentle taper, shapes built from circles and ovals, round faces with large round eyes and rubbery expressions, flat unshaded fills, simple sparse backgrounds and film grain.",
+      "notes": ""
+    }
+  },
+  "verdict": {
+    "status": "researched",
+    "best_model": null,
+    "notes": ""
+  }
+}

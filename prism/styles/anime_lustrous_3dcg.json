@@ -1,0 +1,71 @@
+{
+  "id": "anime_lustrous_3dcg",
+  "name": "Cel-shaded 3DCG (Orange)",
+  "family": "anime",
+  "summary": "Fully 3D-modelled characters rendered with toon shading and hand-drawn-looking faces, with crystalline, light-refracting hair and bodies only CG could make.",
+  "lineage": {
+    "titles": [
+      "Land of the Lustrous (2017)",
+      "Beastars (2019)",
+      "Trigun Stampede (2023)"
+    ],
+    "studios": [
+      "Orange"
+    ],
+    "directors": [
+      "Takahiko Kyogoku",
+      "Shinichi Matsumi",
+      "Kenji Muto",
+      "Eiji Inomoto (3D director)"
+    ],
+    "era": "2010s-2020s TV, 3DCG"
+  },
+  "traits": {
+    "line": "Thin computer-generated outlines of even or slightly varied weight, on silhouettes and key creases only.",
+    "shading": "Hard two-tone toon shading on clothes and skin; faces flattened to read as 2D; hair and gem bodies get specular, translucent, refractive shading with internal facets and rainbow dispersion.",
+    "palette": "Clean saturated jewel hues per character (emerald, ruby, diamond white, peridot), black-and-white uniforms, pale seaside environment.",
+    "lighting": "Strong sunlight with bright speculars, glints and caustics through crystal; high clarity.",
+    "faces": "2D-style faces on 3D heads: drawn-looking mouths (a 2D mouth system on 3D faces) and eyes, large eyes, small nose; slim androgynous figures.",
+    "backgrounds": "Painted or CG environments with soft gradients - grass plains, sea, sky - simpler than the characters.",
+    "texture": "Smooth digital, glassy surfaces; no paper grain.",
+    "camera": "Free 3D camera moves (orbits, swoops), variable frame rate, dynamic action angles."
+  },
+  "style_words": "Cel-shaded 3DCG anime: toon-rendered models with thin even outlines and hard two-tone shadows, flat hand-drawn-looking faces, crystalline translucent gem surfaces with faceted refraction, specular glints and rainbow dispersion, clean saturated jewel colours, bright sunlit clarity, smooth digital finish, as in Land of the Lustrous (2017).",
+  "avoid": [
+    "Pixar-style soft 3D with subsurface skin and no outlines",
+    "stiff plasticky CG faces",
+    "painterly paper texture",
+    "opaque 2D hair with no refraction"
+  ],
+  "confusable_with": [
+    "anime_ufotable_digital"
+  ],
+  "sources": [
+    "https://en.wikipedia.org/wiki/Land_of_the_Lustrous",
+    "https://otakumode.com/news/5c45537ca0ef301e3ab626fb"
+  ],
+  "added": "2026-10-17",
+  "run": "r001",
+  "models": {
+    "krea2": {
+      "style": "Cel-shaded 3DCG anime, as in Land of the Lustrous: toon-rendered models with thin even outlines and hard two-tone shadows, expressive flat hand-drawn-looking faces, crystalline translucent hair and surfaces with faceted refraction, specular glints and rainbow dispersion, clean saturated jewel colours, bright sunlit clarity, smooth glassy digital finish.",
+      "recap": "Rendered throughout as cel-shaded 3DCG anime with thin outlines and crystalline refractive highlights.",
+      "notes": ""
+    },
+    "flux3_klein": {
+      "style": "Cel-shaded 3DCG anime in the register of Land of the Lustrous: toon-rendered models with thin, even computer-drawn outlines on silhouettes and key creases, hard two-tone toon shadows on clothes and skin, faces flattened to read as hand-drawn 2D with drawn mouths and large eyes, hair rendered as translucent faceted crystal with internal refraction, specular glints and rainbow dispersion, strong bright specular light, simple soft-gradient backgrounds, a smooth glassy digital finish.",
+      "recap": "Clean saturated emerald, ruby and peridot appear only in the dispersion inside the crystal hair, the glints and the light sources, the sky, the walls and the ground are simple pale gradients, the shadow fills are one hard cool tone, and every garment and head of hair keeps its own stated colour.",
+      "notes": ""
+    },
+    "qwen_image_2_1": {
+      "style": "The image is a cel-shaded 3DCG animation frame in a signature Land of the Lustrous style, with toon-rendered models carrying thin even outlines, hard two-tone toon shadows, flat hand-drawn-looking faces on 3D heads, hair and polished surfaces rendered crystalline and translucent with faceted refraction, specular glints and rainbow dispersion, and a smooth glassy digital finish, depicting a scene from a Gothic Victorian novel in a palette of clean saturated jewel hues of emerald, ruby, peridot and diamond white, with crisp black and white.",
+      "recap": "The overall composition sets its forms in bright, high-clarity light with sharp glints and caustics, in a cool, crystalline mood, keeps to a palette of clean saturated jewel hues of emerald, ruby, peridot and diamond white, with crisp black and white, and reads throughout as a cel-shaded 3DCG animation frame in a signature Land of the Lustrous style, with toon-rendered models carrying thin even outlines, hard two-tone toon shadows, flat hand-drawn-looking faces on 3D heads, hair and polished surfaces rendered crystalline and translucent with faceted refraction, specular glints and rainbow dispersion, and a smooth glassy digital finish.",
+      "notes": ""
+    }
+  },
+  "verdict": {
+    "status": "researched",
+    "best_model": null,
+    "notes": ""
+  }
+}

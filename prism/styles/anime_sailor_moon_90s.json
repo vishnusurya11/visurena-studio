@@ -1,0 +1,70 @@
+{
+  "id": "anime_sailor_moon_90s",
+  "name": "Sailor Moon 90s shoujo",
+  "family": "anime",
+  "summary": "Clean early-90s Toei shoujo cels: long-legged big-eyed figures in candy pastels against starry navy, sparkles, ribbons and flower backdrops.",
+  "lineage": {
+    "titles": [
+      "Sailor Moon (1992)",
+      "Sailor Moon R (1993)",
+      "Sailor Moon S (1994)"
+    ],
+    "studios": [
+      "Toei Animation"
+    ],
+    "directors": [
+      "Junichi Sato",
+      "Kunihiko Ikuhara"
+    ],
+    "era": "early-to-mid-1990s TV cel"
+  },
+  "traits": {
+    "line": "clean thin dark lines; long legs, small hands, simple noses (Kazuko Tadano, later Ikuko Itoh)",
+    "shading": "flat cel colour with a single hard shadow tone; airbrushed glow on transformations",
+    "palette": "candy pastels: pink, sky blue, lavender, mint, lemon; against deep starry navy and magenta night",
+    "lighting": "soft flat daylight; radiant glows, light rays and twinkles in magical scenes",
+    "faces": "large eyes with multiple white highlights, small mouth, tiny nose; Tadano rounder, Itoh more elongated",
+    "backgrounds": "painted Tokyo streets and arcades; abstract star fields, bubbles, ribbons and rose backdrops in transformations",
+    "texture": "cel grain, airbrush, slight video softness",
+    "camera": "reused transformation stock sequences, posed silhouettes against star fields"
+  },
+  "style_words": "Early-1990s Toei shoujo TV cel animation, as in Sailor Moon (1992): clean thin dark lines, flat cel colour with a single hard shadow tone, candy pastel palette of pink, sky blue, lavender and lemon against deep starry navy, airbrushed glows, sparkles, ribbons, bubble and rose backdrops, soft cel grain.",
+  "avoid": [
+    "Sailor Moon Crystal 2014 digital look with thin cold lines and very long faces",
+    "modern moe with gradient eyes and huge heads",
+    "dark gritty palettes",
+    "Western cartoon proportions"
+  ],
+  "confusable_with": [
+    "anime_toei_80s_shonen",
+    "anime_dezaki_70s"
+  ],
+  "sources": [
+    "https://en.wikipedia.org/wiki/Sailor_Moon_(TV_series)",
+    "https://en.wikipedia.org/wiki/Ikuko_Itoh"
+  ],
+  "added": "2026-10-17",
+  "run": "r001",
+  "models": {
+    "krea2": {
+      "style": "Early-1990s TV shoujo cel animation, as in the 1992 Sailor Moon: clean fine dark lines, long legs, rounded faces with large multi-highlight eyes, flat cel colour with one hard shadow tone, candy pink, sky blue, lavender and lemon against deep starry navy, airbrushed glows, sparkles and roses, cel grain.",
+      "recap": "Rendered throughout as early-1990s shoujo TV cel animation with candy pastels and soft cel grain.",
+      "notes": ""
+    },
+    "flux3_klein": {
+      "style": "Early-1990s Toei shojo TV anime cel animation: clean, thin dark lines, long legs, small hands and simple noses, large eyes with multiple white highlights and small mouths, flat cel colour with a single hard shadow tone, airbrushed glows around the light, sparkles, twinkles and drifting bubbles in the air, soft cel grain and slight video softness.",
+      "recap": "Deep starry navy and magenta fill the night sky, candy pink, lavender and mint fill the walls and the ground, sky blue sits in the shadow fills, lemon yellow appears only in the light sources and the sparkles, and every garment keeps its own stated colour.",
+      "notes": ""
+    },
+    "qwen_image_2_1": {
+      "style": "The image is an early-1990s Toei shoujo TV cel animation frame, with clean thin dark lines, long legs and small hands, flat, unmodulated colour fills and hard-edged shadow shapes in a single tone, airbrushed glows, twinkling sparkles and light rays, and soft cel grain, depicting a scene from a Gothic Victorian novel in a palette of candy pastel pink, sky blue, lavender, mint and lemon against deep starry navy and magenta.",
+      "recap": "The overall composition frames its forms with posed silhouettes and glowing ribbon, bubble and rose motifs around the edges, in a sweet, magical mood, keeps to a palette of candy pastel pink, sky blue, lavender, mint and lemon against deep starry navy and magenta, and reads throughout as an early-1990s Toei shoujo TV cel animation frame, with clean thin dark lines, long legs and small hands, flat, unmodulated colour fills and hard-edged shadow shapes in a single tone, airbrushed glows, twinkling sparkles and light rays, and soft cel grain.",
+      "notes": ""
+    }
+  },
+  "verdict": {
+    "status": "researched",
+    "best_model": null,
+    "notes": ""
+  }
+}

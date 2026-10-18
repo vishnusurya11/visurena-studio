@@ -1,0 +1,78 @@
+{
+  "id": "live_photoreal_cinematic",
+  "name": "Photoreal cinematic (Deakins naturalism)",
+  "family": "live_action",
+  "summary": "A clean, wide large-format digital cinema frame lit by one soft motivated source, with deep but detailed shadows, restrained colour and true skin, that reads as an unretouched still from a feature film.",
+  "lineage": {
+    "titles": [
+      "1917 (2019)",
+      "Blade Runner 2049 (2017)",
+      "Sicario (2015)",
+      "No Country for Old Men (2007)",
+      "Skyfall (2012)"
+    ],
+    "studios": [
+      "DreamWorks / Amblin Partners",
+      "Alcon Entertainment / Warner Bros.",
+      "Lionsgate",
+      "Miramax / Paramount Vantage",
+      "Eon / Sony"
+    ],
+    "directors": [
+      "Sam Mendes",
+      "Denis Villeneuve",
+      "Roger Deakins (DP)"
+    ],
+    "era": "2007-2022 digital cinema (ARRI Alexa; Alexa Mini LF large format from 1917)"
+  },
+  "traits": {
+    "line": "none - photographic edges only; outlines come from light falling off, never a drawn contour",
+    "shading": "one soft key from a believable source (window, sky, practical, flare), little or no fill; negative fill lets the shadow side fall 3-4 stops below the key, but shadows keep texture and never crush to flat black; highlights roll off rather than clip",
+    "palette": "restrained and naturalistic; one dominant colour per sequence (overcast grey-green, sodium amber haze, cold cyan night, firelight orange) rather than teal-and-orange everywhere; saturation held below consumer-photo levels",
+    "lighting": "motivated, often top or side light from large soft sources; frequent silhouettes against a bright window, sky or fire; atmospheric haze or dust giving visible depth; colour comes from the source in camera, not a heavy grade",
+    "faces": "real skin with pores, unevenness and sweat, no beauty retouching or smoothing; faces often half in shadow, sometimes left dark when the source is behind them; catchlight only where the motivated source would put one",
+    "backgrounds": "real, weathered, practical sets and landscapes with physical detail; large-format separation - subject sharp, background softly falling away but still legible, not creamy-blurred to nothing",
+    "texture": "very clean, low-noise digital image with fine organic texture; spherical lenses, so round bokeh, minimal flare, no chromatic fringing, no oval anamorphic bokeh or horizontal streaks",
+    "camera": "wide 2.39:1 frame, mostly a single normal focal length (about 35-47mm on large format); eye-level, composed with strong geometry and negative space; locked-off or slow smooth stabilised movement, almost no handheld shake"
+  },
+  "style_words": "Large-format digital cinema frame in the manner of Roger Deakins, 1917 (2019) and Blade Runner 2049 (2017): wide 2.39:1 widescreen, clean spherical lens, one soft motivated light source, deep shadows that keep detail, atmospheric haze, restrained naturalistic colour, real skin texture, fine low-noise grain, photographic realism.",
+  "avoid": [
+    "turns into a glossy CGI or video-game render (plastic surfaces, perfect symmetry, no atmosphere)",
+    "beauty-retouched skin: smoothed pores, airbrushed glow, model-perfect faces",
+    "orange-and-teal blockbuster grade applied to every frame",
+    "HDR look: lifted shadows, haloed edges, everything evenly lit and over-sharpened",
+    "heavy blue anamorphic streak flares and oval bokeh (reads as a different, flashier school)",
+    "creamy over-blurred background that dissolves the location",
+    "fill light on every face so no side of the face falls into shadow"
+  ],
+  "confusable_with": [],
+  "sources": [
+    "https://theasc.com/articles/deakins-blade-runner-2049",
+    "https://theasc.com/?p=28725",
+    "https://ymcinema.com/2019/10/01/1917-the-first-film-that-was-shot-on-the-arri-alexa-mini-lf/"
+  ],
+  "added": "2026-10-17",
+  "run": "r001",
+  "models": {
+    "krea2": {
+      "style": "Large-format digital cinema frame in the manner of Roger Deakins: wide composition, clean spherical lens, one soft motivated light source with the shadow side of each face falling deep while keeping detail, atmospheric haze, restrained naturalistic colour, real unretouched skin with pores, legible softly separated background, fine grain, photographic realism.",
+      "recap": "Shot throughout as a large-format digital cinema frame with one soft motivated light and photographic realism.",
+      "notes": ""
+    },
+    "flux3_klein": {
+      "style": "Large-format digital cinema film still in the register of Roger Deakins: clean spherical-lens photography with round bokeh, one soft motivated light source with little fill, the shadow side of every face three to four stops darker while the shadows keep texture, highlights that roll off, atmospheric haze giving depth, real skin with pores and unevenness, real weathered practical surfaces, restrained naturalistic colour, fine low-noise grain, the background falling away softly and staying legible.",
+      "recap": "Colour comes from the light source in camera: firelight orange only inside flames, lamps, windows and the low sun, cold cyan-grey in the night sky and the shadow fills, weathered grey-green on the walls and the ground, and every garment keeps its own stated colour at restrained saturation.",
+      "notes": ""
+    },
+    "qwen_image_2_1": {
+      "style": "The image is a large-format digital cinema photograph in the manner of Roger Deakins, with a clean spherical lens, one soft motivated light source, deep shadows that keep their detail, atmospheric haze, real skin texture with pores, fine low-noise grain and full photographic realism, depicting a scene from a Gothic Victorian novel in a palette of restrained, naturalistic colour with one dominant tone and saturation held below consumer-photo levels.",
+      "recap": "The overall composition uses strong geometry and negative space, the subject sharp and the background falling softly away but still legible, in a sober, cinematic mood, keeps to a palette of restrained, naturalistic colour with one dominant tone and saturation held below consumer-photo levels, and reads throughout as a large-format digital cinema photograph in the manner of Roger Deakins, with a clean spherical lens, one soft motivated light source, deep shadows that keep their detail, atmospheric haze, real skin texture with pores, fine low-noise grain and full photographic realism.",
+      "notes": ""
+    }
+  },
+  "verdict": {
+    "status": "researched",
+    "best_model": null,
+    "notes": ""
+  }
+}

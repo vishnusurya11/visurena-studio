@@ -1,0 +1,92 @@
+{
+  "id": "live_sin_city_noir",
+  "name": "Sin City graphic noir",
+  "family": "live_action",
+  "summary": "A near-binary black-and-white digital frame where shapes are cut from solid black and blown white like an ink comic panel, with one isolated saturated colour (red, yellow) and nothing else in colour.",
+  "lineage": {
+    "titles": [
+      "Sin City (2005)",
+      "Sin City: A Dame to Kill For (2014)",
+      "The Spirit (2008)"
+    ],
+    "studios": [
+      "Dimension Films",
+      "Troublemaker Studios"
+    ],
+    "directors": [
+      "Robert Rodriguez",
+      "Frank Miller",
+      "Robert Rodriguez (DP)"
+    ],
+    "era": "2005 early digital cinema - Sony HDC-F950 on HDCAM SR, all-greenscreen virtual backlot"
+  },
+  "traits": {
+    "line": "no drawn lines, but edges are hard and graphic: shapes are defined where pure black meets pure white; rims and rain read as thin white strokes on black, like inked highlights",
+    "shading": "extreme contrast, close to two-tone: crushed solid-black shadows with no recoverable detail and blown pure-white highlights; mid-greys are scarce and confined to a narrow band; hard-edged shadows cut across faces",
+    "palette": "monochrome black and white, plus at most one or two isolated saturated spot colours on a single object - primary red (blood, lips, a dress, a sky), sickly mustard yellow (skin), occasional blue or green eyes; everything else stays strictly grey",
+    "lighting": "hard, single-direction sources - streetlamp rim light, backlight through rain or smoke, car headlights; figures frequently silhouetted against a white void; blood or rain may glow white in shadow",
+    "faces": "faces carved by hard light: half black, half white, sometimes only eyes, teeth or a bandage catching light; prosthetic, exaggerated comic-book features; skin rendered as flat white, not as textured tone",
+    "backgrounds": "synthetic virtual-backlot city - rain-slick streets, cars, skylines and interiors simplified to black masses and white edges; often empty white or black voids; deep focus that keeps the graphic layers flat like a panel",
+    "texture": "smooth, slightly synthetic digital-composite surface; no film grain; rain and snow as bright white streaks or particles; edges crisp, slight video-era cleanness",
+    "camera": "1.85:1 frames composed as comic panels: strong diagonals, heavy negative space, extreme low and high angles, figures pushed into corners; mostly static or slow moves"
+  },
+  "style_words": "High-contrast black-and-white digital film frame in the style of Sin City (2005): crushed solid blacks, blown pure whites, almost no grey, hard rim light and silhouettes, white rain streaks, graphic comic-panel shapes, a single isolated spot of saturated red colour, smooth greenscreen-composite surface, no grain.",
+  "avoid": [
+    "colour leaks beyond the one spot colour (skin tones, sepia or blue tint over the whole frame)",
+    "drifts into soft full-range greyscale like a classic 1940s noir or a desaturated photo",
+    "becomes a drawn comic or cel-shaded illustration with inked outlines and halftone dots",
+    "spot colour spreads onto many objects or turns pastel instead of pure saturated red/yellow",
+    "film grain, lens flare or photographic softness that breaks the clean graphic look",
+    "evenly lit mid-tone faces instead of faces carved into black and white"
+  ],
+  "confusable_with": [],
+  "sources": [
+    "https://www.cgw.com/Publications/CGW/2005/Volume-28-Issue-4-April-2005-/The-Devils-in-the-Details.aspx",
+    "https://colorculture.org/sin-city-cinematography-analysis/"
+  ],
+  "added": "2026-10-17",
+  "run": "r001",
+  "models": {
+    "krea2": {
+      "style": "High-contrast black-and-white digital film frame in the style of Sin City: crushed solid blacks and blown pure whites with almost no grey, faces carved half black and half white by hard rim light, silhouettes against white, rain streaks, graphic panel-like shapes, one object in pure saturated red, smooth composite surface.",
+      "recap": "Shot throughout as a high-contrast black-and-white digital film frame with a single spot of saturated red.",
+      "notes": "",
+      "captions": {}
+    },
+    "flux3_klein": {
+      "style": "High-contrast black-and-white digital film still in the register of Sin City: crushed solid black shadows and blown pure white highlights with almost no grey, edges defined where pure black meets pure white, hard single-direction light, rims drawn as thin white strokes on black, faces carved half black and half white by hard light, figures silhouetted against white or black voids, a smooth slightly synthetic greenscreen-composite photographic surface, crisp clean edges in a grain-free image.",
+      "recap": "The frame stays strictly black and white, and a single spot of saturated primary red falls only on the flame, lit window or sun that lights the scene, while every garment, all skin and every other surface stay black, white or grey.",
+      "notes": "",
+      "captions": {}
+    },
+    "qwen_image_2_1": {
+      "style": "The image is a high-contrast black-and-white digital film frame in the style of Sin City, with crushed solid blacks, blown pure whites and almost no grey, hard rim light and silhouettes, edges defined where pure black meets pure white, graphic comic-panel shapes and a smooth, clean greenscreen-composite surface, depicting a scene from a Gothic Victorian novel in a palette of pure black and white with a single isolated spot of saturated red.",
+      "recap": "The overall composition pushes its forms into strong diagonals and heavy negative space, faces and shapes carved half black and half white, in a hard-boiled noir mood, keeps to a palette of pure black and white with a single isolated spot of saturated red, and reads throughout as a high-contrast black-and-white digital film frame in the style of Sin City, with crushed solid blacks, blown pure whites and almost no grey, hard rim light and silhouettes, edges defined where pure black meets pure white, graphic comic-panel shapes and a smooth, clean greenscreen-composite surface.",
+      "notes": "",
+      "captions": {}
+    },
+    "flux3_klein_pup": {
+      "style": "",
+      "recap": "",
+      "notes": "",
+      "captions": {
+        "count": "High-contrast black-and-white digital film frame in the style of Sin City (2005), rendered as a smooth greenscreen-composite graphic with crushed solid blacks, blown pure whites, almost no grey, hard rim lighting, sharp silhouettes, white rain streaks, and angular comic-panel shapes. A medium full shot at eye level centers Count Dracula in a three-quarter view, shown from the high collar to his boots. He is a tall, gaunt old nobleman with pale skin, a long white moustache, a high hooked nose, arched eyebrows, pointed ears, and sharp white teeth showing at his parted lips. He wears a high-collared black coat and a long black cloak from head to foot, the cloak spreading into a severe triangular silhouette behind him. His raised pale hand extends toward the viewer in a courtly welcome, palm open and fingers long and rigid. A single isolated saturated red spot marks the cuff of that raised hand, the only color in the entire frame. Hard white rim light traces his moustache, nose, ear, raised fingers, and cloak edge. Behind him, a plain dark stone wall is reduced to a solid black field with a few blown-white geometric panel borders and thin white rain streaks. The composition contains no grain, texture, scenery, or additional figures.",
+        "castle": "High-contrast black-and-white digital film frame in the style of Sin City (2005), rendered as a smooth greenscreen-composite graphic with crushed solid blacks, blown pure whites, almost no grey, hard rim light, stark silhouettes, white rain streaks, and clean graphic comic-panel shapes without grain. An extreme wide establishing shot from a low angle sweeps across the Carpathian mountains at dusk. The enormous sky fills most of the composition, with a darkening violet sky translated into a near-black field and a broad blown-white band of storm clouds along the upper third. A single isolated saturated red panel of sky glows behind the clouds as a narrow crimson strip, the only colored area in the entire image. Within that upper third, Castle Dracula stands small against the sky: a vast ruined Gothic castle of black stone perched on the edge of a sheer precipice, its jagged towers, pointed arches, broken battlements, collapsed roofs, and skeletal spires reduced to hard black silhouettes edged by pure white rim light. A few narrow windows glow white. Diagonal white rain streaks cut across the castle and the surrounding sky. Below, the precipice forms a sharp black wedge descending into the lower third, where a dense Carpathian pine forest reads as a continuous black mass with thin white highlights tracing the treetops. The castle’s isolated red spot is a single saturated crimson eye-like shape on one ruined tower, while the remaining architecture stays monochrome. The foreground contains only the precipice and forest silhouettes, with no figures, vehicles, or structures interrupting the empty landscape.",
+        "arrival": "High-contrast black-and-white digital film frame in the style of Sin City (2005), rendered as a smooth greenscreen-composite graphic with crushed solid blacks, blown pure whites, almost no grey, hard rim light, sharp silhouettes, white rain streaks, and clean comic-panel shapes without grain. A wide eye-level night view looks from behind Jonathan Harker’s shoulder across a dark stone courtyard. In the lower left foreground, Jonathan Harker, a young English solicitor in his twenties, stands with his back turned, his brown travelling coat translated into a black silhouette edged by a hard white rim light. He wears a long dark coat and holds a rectangular leather bag in one hand. Beside him, a horse-drawn carriage stretches across the lower center, its horse and carriage reduced to angular black silhouettes with white highlights along the harness, wheels, and wet bodywork. At the center, the carriage faces a great old wooden door set into a towering stone wall. The doorway is blown pure white and framed by a graphic black arch, its heavy planks and rows of iron nails rendered as stark white shapes. Inside the open doorway stands the tall old Count in black, his elongated silhouette holding an antique silver lamp above his head. The lamp’s flame is the single isolated spot of saturated red color, surrounded by a white halo. Its hard light throws long, blade-like shadows across the Count’s face, the doorway, and the courtyard stones. White rain cuts diagonally through the opening. Beyond the lamp, the Count’s black cloak forms a severe silhouette. White rain streaks and the lamp’s light create sharp white highlights across the antique silver lamp, while the surrounding architecture remains black. The doorway is the only illuminated area, with the Count’s raised lamp casting long angular shadows across the wet stones.",
+        "diary": "High-contrast black-and-white digital film frame in the style of Sin City (2005), rendered as a smooth greenscreen-composite graphic with crushed solid blacks, blown pure whites, almost no grey, hard rim light, sharp silhouettes, white rain streaks, and angular comic-panel shapes. A tight close-up over Mina Harker’s left shoulder fills the foreground. Mina Harker, a young Victorian white woman with fair skin and dark hair pinned into a high period updo, sits at a small writing desk in a bedroom at night. Her face appears in three-quarter profile near the center, with a hard white rim tracing her cheek, nose, and pinned hair. She wears a high-necked pale blue blouse translated into pure white, its collar and folds sharply cut against black. Her right hand holds a dip pen against an open leather-bound journal resting on the desk, while her left shoulder and the edge of the journal form a dark silhouette across the lower left. At the right edge, a single candle burns in a short holder, its flame rendered as a saturated red teardrop—the only spot of color in the entire frame. White light from the flame cuts across her fingers and the journal’s open pages. Behind the candle, an open window is blown to pure white, with rain streaks crossing the opening and thin net curtains whipping inward in sharp white ribbons. The room behind Mina falls into soft black shapes, with the window frame and curtain edges reduced to graphic silhouettes. The composition uses stark white panel borders and hard-edged shadow masses, with no grain and no tonal texture beyond the clean digital composite.",
+        "chase": "High-contrast black-and-white digital film frame in the style of Sin City (2005), rendered as a smooth greenscreen-composite graphic with crushed solid blacks, blown pure whites, almost no grey, hard rim light, stark silhouettes, white rain streaks, and clean comic-panel shapes without grain. A high-angle wide action view tilts the entire scene into a steep Dutch angle. At sunset on a snowy mountain road, four horsemen gallop diagonally from the lower left toward the upper right, their horses and riders sweeping across the frame in a single graphic panel. The four horsemen wear heavy winter coats. At the front, an old white male doctor with a long grey beard and a white medical coat gallops on a rearing horse, his coat tails whipping behind him. Beside him, a tall white man in a dark winter coat carries a long rifle across his back. The third rider is a young white lord in a fitted black coat with a high collar, and the fourth is a young white male solicitor in a long tailored coat, his face reduced to a pale angular profile. Their horses are distinguished by four stark silhouettes: the first has a white mane and a single saturated red sash, the only spot of color in the image; the second has a heavy fur collar; the third has a long cape; the fourth has a rigid high collar. Ahead of them, a heavy wooden cart races toward the upper right, its large wooden box rising above the bed and filling the center-right. The box is built from broad white planks with black iron bands and a single red latch. Men in bulky sheepskin coats drive the cart, leaning forward as they pull the reins. Snow flies upward in sharp white plumes from the horses’ hooves and cart wheels. Jagged mountain peaks form black silhouettes against a blown-white sunset sky, while hard white rim light traces the riders, horses, cart, and flying snow."
+      }
+    },
+    "flux3_klein_bfl": {
+      "style": "Black and white cinematic photograph, high-contrast chiaroscuro style, with crushed solid blacks, blown pure whites, hard rim light and a single isolated spot color of saturated red on one object.",
+      "recap": "Everything is rendered as a smooth, grain-free digital composite in near-binary black and white, with the one red spot color as the only color in the frame.",
+      "notes": "",
+      "captions": {}
+    }
+  },
+  "verdict": {
+    "status": "researched",
+    "best_model": null,
+    "notes": ""
+  }
+}

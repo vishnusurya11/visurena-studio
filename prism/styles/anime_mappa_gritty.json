@@ -1,0 +1,72 @@
+{
+  "id": "anime_mappa_gritty",
+  "name": "MAPPA gritty realism",
+  "family": "anime",
+  "summary": "Thin precise lines and restrained shading in a muted, film-graded real city, with lens grain and sudden saturated blood red.",
+  "lineage": {
+    "titles": [
+      "Jujutsu Kaisen (2020)",
+      "Chainsaw Man (2022)"
+    ],
+    "studios": [
+      "MAPPA"
+    ],
+    "directors": [
+      "Sunghoo Park",
+      "Shota Goshozono",
+      "Ryu Nakayama"
+    ],
+    "era": "2020s digital TV"
+  },
+  "traits": {
+    "line": "thin, precise, detailed lines; eye detail down to tear ducts and lower lash lines",
+    "shading": "restrained two-tone cel shadow, low contrast between tones, subtle gradient overlays",
+    "palette": "muted, desaturated city tones: concrete grey, olive, dusty blue, nicotine beige; saturated crimson reserved for blood and violence; purple-black cursed energy in Jujutsu Kaisen",
+    "lighting": "naturalistic and motivated: overcast daylight, fluorescent office light, sodium streetlamps; soft contrast like graded live action",
+    "faces": "near-realistic proportions, smaller eyes than typical TV anime, restrained expressions",
+    "backgrounds": "realistic Tokyo streets, alleys, apartments, convenience stores, painted with lived-in dirt and clutter",
+    "texture": "light film grain, mild chromatic aberration, lens blur and depth of field in compositing",
+    "camera": "film-like angles: low static 'tatami' shots, extreme long shots, first-person close-ups"
+  },
+  "style_words": "Modern digital TV anime with grounded cinematic realism, as in Jujutsu Kaisen (2020) and Chainsaw Man (2022): thin precise lines, restrained low-contrast two-tone cel shading, muted desaturated urban palette of concrete grey, olive and dusty blue, naturalistic motivated light, detailed lived-in city backgrounds, light film grain and lens blur, sudden saturated crimson.",
+  "avoid": [
+    "bright glossy shonen colours and big sparkling eyes",
+    "turning into a photograph or live-action still",
+    "over-bloomed ufotable-style effect glow",
+    "flat uniform lighting with no motivated source"
+  ],
+  "confusable_with": [
+    "anime_ufotable_digital",
+    "anime_wit_aot_heavy_line",
+    "anime_kon_psych_realism"
+  ],
+  "sources": [
+    "https://en.wikipedia.org/wiki/Chainsaw_Man_(TV_series)",
+    "https://www.animeherald.com/2023/06/03/how-the-chainsaw-man-anime-adaptation-grounded-itself-in-filmic-realism/",
+    "https://en.wikipedia.org/wiki/Jujutsu_Kaisen_(TV_series)"
+  ],
+  "added": "2026-10-17",
+  "run": "r001",
+  "models": {
+    "krea2": {
+      "style": "Modern digital TV anime with grounded cinematic realism, as in Jujutsu Kaisen: thin precise detailed lines, near-realistic proportions with small eyes, restrained low-contrast two-tone cel shading, muted concrete grey, olive, dusty blue and nicotine beige, light from a visible motivated source, lived-in detail, light film grain, sudden saturated crimson.",
+      "recap": "Rendered throughout as modern digital TV anime with thin precise lines and muted grounded colour.",
+      "notes": ""
+    },
+    "flux3_klein": {
+      "style": "Modern digital TV anime with grounded cinematic realism: thin, precise, detailed lines, eyes drawn down to tear ducts and lower lash lines, near-realistic proportions with smaller eyes and restrained expressions, restrained low-contrast two-tone cel shading with subtle gradient overlays, naturalistic motivated light with soft contrast like graded live action, detailed lived-in painted backgrounds with dirt and wear, light film grain, mild chromatic aberration and lens blur, every form held by the drawn line.",
+      "recap": "Concrete grey, olive and dusty blue fill the sky, the walls and the ground, nicotine beige stays in the lit areas, the shadow fills are a muted darker grey, saturated crimson appears only in the brightest light source, and every garment keeps its own stated colour.",
+      "notes": ""
+    },
+    "qwen_image_2_1": {
+      "style": "The image is a modern digital TV animation frame with grounded cinematic realism, in a signature Jujutsu Kaisen style, with thin, precise, detailed lines, restrained low-contrast two-tone cel shading with subtle gradient overlays, detailed lived-in painted surroundings, light film grain, mild chromatic aberration and lens blur, depicting a scene from a Gothic Victorian novel in a palette of muted desaturated concrete grey, olive, dusty blue and nicotine beige, with sudden saturated crimson.",
+      "recap": "The overall composition frames its forms with film-like angles and naturalistic motivated light, soft in contrast like graded live action, in a grim, grounded mood, keeps to a palette of muted desaturated concrete grey, olive, dusty blue and nicotine beige, with sudden saturated crimson, and reads throughout as a modern digital TV animation frame with grounded cinematic realism, in a signature Jujutsu Kaisen style, with thin, precise, detailed lines, restrained low-contrast two-tone cel shading with subtle gradient overlays, detailed lived-in painted surroundings, light film grain, mild chromatic aberration and lens blur.",
+      "notes": ""
+    }
+  },
+  "verdict": {
+    "status": "researched",
+    "best_model": null,
+    "notes": ""
+  }
+}

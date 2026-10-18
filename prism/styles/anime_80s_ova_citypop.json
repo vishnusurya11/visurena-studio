@@ -1,0 +1,73 @@
+{
+  "id": "anime_80s_ova_citypop",
+  "name": "80s OVA neon city-pop",
+  "family": "anime",
+  "summary": "Late-80s direct-to-video cel: glossy idol-faced heroines, chrome hardsuits and rain-slick neon night cities in magenta, cyan and violet.",
+  "lineage": {
+    "titles": [
+      "Megazone 23 (1985)",
+      "Bubblegum Crisis (1987)"
+    ],
+    "studios": [
+      "Artmic",
+      "AIC",
+      "Artland"
+    ],
+    "directors": [
+      "Katsuhito Akiyama",
+      "Noboru Ishiguro"
+    ],
+    "era": "mid-to-late 1980s OVA cel"
+  },
+  "traits": {
+    "line": "Fine black cel lines; sharp angular hair spikes and shoulder pads; detailed mecha and hardsuit lines (Kenichi Sonoda, Masami Obari).",
+    "shading": "Multi-tone cel shading: hard shadow plus extra highlight tone; airbrushed gradients on chrome armour and skin; star-shaped specular glints.",
+    "palette": "Night palette: magenta, hot pink, cyan, violet, electric blue on navy-black; chrome silver; sodium-orange accents.",
+    "lighting": "Neon backlight, pink and cyan rim light, wet-street reflections, hand-painted lens flares and glows.",
+    "faces": "Glossy 80s idol faces: big eyes with several highlights, voluminous feathered or permed hair, strong lip colour.",
+    "backgrounds": "Painted megacity at night: towers, elevated highways, neon signs, rain (Megatokyo, Blade Runner influence).",
+    "texture": "Film grain, VHS/laserdisc softness, halation around lights, cel dust.",
+    "camera": "Music-video montage: freeze frames, slow pans on posed silhouettes, speed-line action."
+  },
+  "style_words": "Late-1980s OVA cel animation: fine black lines, hard multi-tone cel shadows with airbrushed chrome gradients and star glints, neon magenta, cyan and violet against navy-black night, hand-painted rim light, lens flares and halation, rain-slick reflections, film grain and VHS softness, as in Bubblegum Crisis (1987) and Megazone 23 (1985).",
+  "avoid": [
+    "modern synthwave vector retro with grid sunsets",
+    "clean digital gradients without grain",
+    "1990s pastel magical-girl colour",
+    "Akira-level gritty realism"
+  ],
+  "confusable_with": [
+    "anime_gundam_real_robot_80s",
+    "anime_otomo_akira",
+    "anime_kawajiri_madhouse_90s",
+    "anime_bebop_jazz_noir"
+  ],
+  "sources": [
+    "https://en.wikipedia.org/wiki/Bubblegum_Crisis",
+    "https://www.zimmerit.moe/bubblegum-crisis-toshimichi-suzuki/"
+  ],
+  "added": "2026-10-17",
+  "run": "r001",
+  "models": {
+    "krea2": {
+      "style": "Late-1980s OVA cel animation, as in Bubblegum Crisis: fine black lines, hard multi-tone cel shadows with airbrushed chrome sheen and star-shaped glints, idol-pretty stylised faces, deep neon magenta, cyan and violet against navy-black night, hand-painted rim light, lens flares and halation, rain-slick reflections, film grain and VHS softness.",
+      "recap": "Rendered throughout as late-1980s OVA cel animation with film grain and VHS softness.",
+      "notes": ""
+    },
+    "flux3_klein": {
+      "style": "Late-1980s OVA anime cel animation in the register of Bubblegum Crisis: fine black cel lines with sharp angular hair spikes, hard multi-tone cel shadows with an extra highlight tone, airbrushed chrome gradients on metal and skin, small star-shaped specular glints, hand-painted rim light, painted lens flares and halation around every light, glossy 1980s idol faces with big eyes holding several highlights, painted skies and hand-painted backgrounds, visible film grain, cel dust and VHS-era softness on every edge.",
+      "recap": "Magenta and cyan appear only as rim light on edges and as reflections on wet or polished surfaces, violet and navy-black fill the sky, the walls and the shadow fills, sodium orange stays inside lamp, candle and window light, and every garment keeps its own stated colour.",
+      "notes": ""
+    },
+    "qwen_image_2_1": {
+      "style": "The image is a late-1980s OVA cel animation frame in a signature Bubblegum Crisis style, with fine black cel lines, hard multi-tone cel shadows with an extra highlight tone, airbrushed chrome-like gradients and star-shaped glints, hand-painted rim light, lens flares and halation around lights, film grain and soft VHS haze, depicting a scene from a Gothic Victorian novel in a palette of neon magenta, hot pink, cyan and violet against navy-black night, with chrome silver and sodium-orange accents.",
+      "recap": "The overall composition sets its figures and forms as posed silhouettes edged by glowing pink and cyan rim light, with a glossy nocturnal mood, keeps to a palette of neon magenta, hot pink, cyan and violet against navy-black night, with chrome silver and sodium-orange accents, and reads throughout as a late-1980s OVA cel animation frame in a signature Bubblegum Crisis style, with fine black cel lines, hard multi-tone cel shadows with an extra highlight tone, airbrushed chrome-like gradients and star-shaped glints, hand-painted rim light, lens flares and halation around lights, film grain and soft VHS haze.",
+      "notes": ""
+    }
+  },
+  "verdict": {
+    "status": "researched",
+    "best_model": null,
+    "notes": ""
+  }
+}

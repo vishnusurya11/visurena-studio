@@ -1,0 +1,88 @@
+{
+  "id": "anime_chibi_sd",
+  "name": "Super-deformed chibi",
+  "family": "anime",
+  "summary": "Tiny stubby figures whose heads are a third to a half of their height, simplified rounded shapes, bright flat colour and gag expressions.",
+  "lineage": {
+    "titles": [
+      "SD Gundam World (gashapon, 1985)",
+      "Mobile Suit SD Gundam (1988)"
+    ],
+    "studios": [
+      "Bandai",
+      "Sunrise"
+    ],
+    "directors": [],
+    "era": "1980s onward; a convention used across every era (omake, gag cuts, merchandise)"
+  },
+  "traits": {
+    "line": "Clean, rounded, medium-weight outlines; very few interior lines; no hatching.",
+    "shading": "Flat fills with at most one soft shadow tone; round glossy highlight on hair and eyes.",
+    "palette": "Bright saturated primaries and pastels, high key.",
+    "lighting": "Flat, even, cheerful light; nothing dramatic.",
+    "faces": "Head 1/3 to 1/2 of total height (about 2-3 heads tall), huge eyes set low, tiny or absent nose, small mouth that becomes a big gag shape; signature hair or accessory exaggerated.",
+    "backgrounds": "Simple or absent: flat colour, pattern, sparkles or a few props.",
+    "texture": "Clean digital, no grain.",
+    "camera": "Centred, front-on full-figure poses; gag reaction cuts."
+  },
+  "style_words": "Super-deformed chibi style: two-to-three-heads-tall proportions with oversized round heads and stubby limbs, clean rounded medium outlines, flat bright pastel and primary fills with a single soft shadow tone, glossy round highlights, minimal detail, plain flat or patterned background, clean high-key digital finish, as in SD Gundam (1985).",
+  "avoid": [
+    "normal 6-8 head proportions",
+    "realistic anatomy or detailed hands",
+    "dramatic shadows",
+    "reading 'small' as a toddler or baby instead of a stylised adult"
+  ],
+  "confusable_with": [
+    "anime_kids_tv_bright",
+    "anime_visual_novel_moe"
+  ],
+  "sources": [
+    "https://en.wikipedia.org/wiki/Super_deformed",
+    "https://collectiondx.com/series/mobilesuitsdgundam"
+  ],
+  "added": "2026-10-17",
+  "run": "r001",
+  "models": {
+    "krea2": {
+      "style": "Super-deformed chibi animation, as in SD Gundam: every figure a stylised adult two to three heads tall, oversized round head, stubby limbs, simple rounded hands, clean rounded medium outlines, flat bright pastel and primary fills with one soft shadow tone, glossy round highlights, minimal detail, soft even high-key light.",
+      "recap": "Rendered throughout as super-deformed chibi animation, every figure two to three heads tall.",
+      "notes": "",
+      "captions": {}
+    },
+    "flux3_klein": {
+      "style": "Super-deformed chibi anime illustration: every figure a stylised adult two to three heads tall with an oversized round head, huge low-set eyes, a tiny nose, stubby limbs and simple mitten hands, clean rounded medium-weight outlines with very few interior lines, flat bright fills with a single soft shadow tone, glossy round highlights on hair and eyes, flat even light across the whole frame, plain flat-colour backgrounds with a few simple props, a clean high-key digital finish.",
+      "recap": "Bright pastel pink, sky blue and lemon yellow fill the sky, the walls and the ground, the shadow fills are one pale lavender tone, and every garment keeps its own stated colour as a flat bright fill.",
+      "notes": "",
+      "captions": {}
+    },
+    "qwen_image_2_1": {
+      "style": "The image is a super-deformed chibi anime illustration, with every figure drawn two to three heads tall with an oversized round head, huge low-set eyes and stubby limbs, clean rounded medium-weight outlines with very few interior lines, flat fills with a single soft shadow tone, glossy round highlights and a clean high-key digital finish, depicting a scene from a Gothic Victorian novel in a palette of bright saturated primaries and soft pastels in high key.",
+      "recap": "The overall composition keeps its rounded shapes simple and readable against an uncluttered ground under flat, even, cheerful light, with a playful mood, keeps to a palette of bright saturated primaries and soft pastels in high key, and reads throughout as a super-deformed chibi anime illustration, with every figure drawn two to three heads tall with an oversized round head, huge low-set eyes and stubby limbs, clean rounded medium-weight outlines with very few interior lines, flat fills with a single soft shadow tone, glossy round highlights and a clean high-key digital finish.",
+      "notes": "",
+      "captions": {}
+    },
+    "flux3_klein_pup": {
+      "style": "",
+      "recap": "",
+      "notes": "",
+      "captions": {
+        "count": "Super-deformed chibi digital illustration in the style of SD Gundam (1985), with two-to-three-heads-tall proportions, an oversized round head, stubby limbs, clean rounded medium-weight outlines, flat bright pastel and primary color fills, one soft shadow tone, glossy round highlights, and minimal detail. Count Dracula stands centered in a medium full shot at eye level, shown in a three-quarter view as a single figure with a compact, tall silhouette. He is a gaunt old nobleman with pale skin, an enormous round head, pointed ears, a high hooked nose, arched black eyebrows, and a long white moustache sweeping across his cheeks. His mouth opens in a courtly smile, revealing sharp triangular white teeth. He wears a black high collar, a black capelet, and a long black cloak that falls to his feet in a broad rounded shape. His raised pale hand extends beside his head in a welcoming gesture, palm facing outward with short rounded fingers, while his other arm rests near his body. The cloak has a simple black fill with a single charcoal shadow tone and a few glossy highlights along its curved folds. His short black legs end in rounded black shoes. Behind him, a plain dark stone wall fills the background as a flat charcoal field with a sparse pattern of large rounded stone blocks and no texture beyond the simplified shapes. The high-key finish keeps the pale face, white moustache, and white teeth crisp against the dark wall, with a compact soft shadow directly beneath the cloak.",
+        "castle": "Super-deformed chibi-style digital illustration in the clean high-key finish of SD Gundam (1985), using two-to-three-heads-tall proportions as the design language for an exaggerated castle silhouette with an oversized round head-like mass, clean rounded medium outlines, flat bright pastel and primary fills, and one soft shadow tone. An extreme wide establishing view from a low angle sweeps across a vast dusk landscape. The enormous sky fills the upper two-thirds of the frame, darkening from deep violet at the top to lavender and muted pink near the horizon, with broad flat bands of color and a few rounded cloud shapes. In the upper third, small against the sky, Castle Dracula rises as a compact chibi ruin: a vast black-stone Gothic castle with an oversized rounded silhouette, broken battlements, crooked towers, pointed arches, and a few glowing yellow-orange windows. Its simplified mass is built from chunky black and charcoal shapes with rounded edges, sparse masonry marks, and glossy violet highlights along the upper contours. The castle stands on the narrow edge of a sheer precipice, its cliff forming a tiny dark base with a single soft shadow tone. Below the precipice, the lower third contains a dark Carpathian pine forest rendered as a dense band of rounded black-green treetops, with the cliff dropping into a deep indigo void. The forest forms a compact chibi-like cluster of stubby triangular pines beneath the castle. The composition contains only the ruined castle, precipice, forest, and sky, with no figures or characters.",
+        "arrival": "Super-deformed chibi-style digital illustration in the clean high-key finish of SD Gundam (1985), with two-to-three-heads-tall proportions, oversized round heads, stubby limbs, clean rounded medium outlines, flat bright pastel and primary color fills, one soft shadow tone, and glossy round highlights. A wide eye-level view looks across a dark stone courtyard at night from behind Jonathan Harker’s shoulder. In the left foreground, Jonathan is a young English solicitor with fair skin and short brown hair, wearing a brown travelling coat with a high collar and holding a small brown leather bag in one stubby hand. His oversized head and upper back face the scene, with the coat filling the lower-left corner. Beside him stands a compact dark chestnut horse in a simple black harness, attached to a small horse-drawn carriage with rounded wheels, a pale blue body, and a cream canopy. At the center, the carriage faces a great old wooden door set into a dark stone wall. The open doorway glows around a tall old Count, framed by the bright interior and rendered as a chibi figure with an elongated body, a huge round head, long black hair, and a black cape. He wears a black coat and holds an antique silver lamp above his head; its orange flame shines through the opening and casts long angular shadows across the doorway and courtyard stones. The Count’s raised hand supports the ornate lamp, whose silver body carries glossy highlights. Jonathan and the carriage face the Count directly through the doorway. The door is built from broad dark timber planks studded with large iron nails, with the lamp’s warm light forming a bright amber border around the opening. The remaining courtyard is deep navy and charcoal, with simple blocky stone patterns and a few pale blue night accents.",
+        "diary": "Super-deformed chibi digital illustration in the style of SD Gundam (1985), with two-to-three-heads-tall proportions, an oversized round head, stubby limbs, clean rounded medium outlines, flat bright pastel and primary color fills, one soft shadow tone, glossy circular highlights, and minimal detail. A tight close-up over Mina Harker’s left shoulder shows the young Victorian woman seated at a small writing desk in a bedroom at night. Mina is a white woman in her twenties with fair skin, her face turned in three-quarter profile toward the desk. Her dark brown hair is pinned into a high Victorian updo with a few short curled strands near her temple. She wears a high-necked pale blue blouse with rounded puffed sleeves. Her large round head and compact body fill the center, while her stubby left hand steadies an open brown leather-bound journal and her right hand holds a slender dip pen against the cream pages. At the right edge, a single candle burns in a small brass holder, its bright yellow-orange flame surrounded by a warm peach glow and a glossy highlight. The candle sits beside the journal and is prominent against the composition. Behind Mina, an open window reveals a deep navy night sky. Pale net curtains billow inward through the window, their lower edges curling in the breeze. The desk and Mina’s writing hand remain crisp while the bedroom behind her falls soft into simple pastel shapes: a muted lavender wall, a small patch of blue night, and the window frame. Clean high-key digital finish with bright pastel blue, cream, coral, and yellow accents, rounded forms, and no intricate background texture.",
+        "chase": "Super-deformed chibi-style digital illustration in the clean high-key finish of SD Gundam (1985), with two-to-three-heads-tall proportions, oversized round heads, stubby limbs, clean rounded medium outlines, flat bright pastel and primary-color fills, one soft shadow tone, and glossy round highlights. A high-angle wide action view tilts the entire scene into a Dutch angle at sunset on a snowy mountain road. Four horsemen gallop diagonally from the lower left toward the upper right, sweeping past a heavy wooden cart. At the front, the four horsemen ride compact white and pale blue horses kicking up rounded clouds of snow. The first is an old doctor with fair skin, a large grey beard, round spectacles, and a heavy teal winter coat with a white medical cape; he rides a small horse while holding a wooden staff. Beside him, the second horseman is a tall man with fair skin, a long brown beard, a red winter coat, and a large rifle held upright across his shoulders. The third is a young lord with fair skin, short dark hair, a bright blue crown, and a thick yellow winter coat. The fourth is a young solicitor with fair skin, a curled brown mustache, a burgundy coat, and a rolled parchment tucked beneath one arm. Their four horsemen are distinguished by the oversized coats and accessories: the doctor, the rifleman, the young lord, and the young solicitor. Behind them, the cart is driven by two men in bulky cream sheepskin coats, their stubby hands gripping long wooden reins. The cart has thick dark-brown planks, large red wheels, and a large closed wooden box strapped across its bed, with broad corner braces and a few pale snow patches along the lid. Snow flies upward in curved white streaks from the horses’ hooves and cart wheels. In the background, a flat orange-pink sunset band sits beneath rounded lavender mountains capped with white snow, while the road curves through the tilted landscape."
+      }
+    },
+    "flux3_klein_bfl": {
+      "style": "Super-deformed chibi anime illustration with clean rounded medium-weight outlines, few interior lines, flat bright pastel and primary fills, a single soft shadow tone and round glossy highlights.",
+      "recap": "Everything is rendered with rounded clean outlines, flat high-key fills and a clean grain-free digital finish typical of super-deformed chibi anime.",
+      "notes": "",
+      "captions": {}
+    }
+  },
+  "verdict": {
+    "status": "researched",
+    "best_model": null,
+    "notes": ""
+  }
+}

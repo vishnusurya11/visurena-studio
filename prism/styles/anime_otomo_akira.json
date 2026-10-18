@@ -1,0 +1,89 @@
+{
+  "id": "anime_otomo_akira",
+  "name": "Otomo / Akira",
+  "family": "anime",
+  "summary": "Precise realistic cels lit like a film: ink-black neon night, sculpted rim light, saturated red and cyan, and densely layered hand-painted urban decay.",
+  "lineage": {
+    "titles": [
+      "Akira (1988)"
+    ],
+    "studios": [
+      "Tokyo Movie Shinsha (Akira Committee)"
+    ],
+    "directors": [
+      "Katsuhiro Otomo"
+    ],
+    "era": "late-1980s theatrical"
+  },
+  "traits": {
+    "line": "thin, precise, consistent dark lines; realistic anatomy and mechanical detail",
+    "shading": "hard-edged two- and three-tone cels where each shadow follows a painted light source; strong rim light separating forms from black",
+    "palette": "327 colours, about 50 mixed specially for night scenes; ink-black and deep blue base, saturated red (bike, jacket, title), cyan-green and magenta neon",
+    "lighting": "motivated by neon, streetlamps, headlights and explosions; highlights bloom rather than clip; painted light streaks on wet pavement",
+    "faces": "realistic Japanese faces, small eyes, flat noses, ordinary hair; no big-eyed stylisation",
+    "backgrounds": "densely layered hand-painted debris, pipes, wires and towers; background, midground and foreground all painted",
+    "texture": "35mm film grain and cel depth, crushed dense blacks",
+    "camera": "wide 1.85:1 compositions with deep layered depth, leading lines of roads and beams"
+  },
+  "style_words": "Late-1980s theatrical hand-painted cel animation, as in Akira (1988): thin precise dark lines, hard-edged cel shadows that follow each light source, sculpted rim light, ink-black night with saturated red and cyan-green neon, painted light streaks and blooming highlights, densely layered hand-painted urban decay, crushed blacks, 35mm film grain.",
+  "avoid": [
+    "modern clean digital finish with gradient shading",
+    "big-eyed moe faces",
+    "generic cyberpunk purple-pink synthwave",
+    "flat even lighting without motivated sources"
+  ],
+  "confusable_with": [
+    "anime_oshii_gits",
+    "anime_kon_psych_realism"
+  ],
+  "sources": [
+    "https://www.linearity.io/blog/akira/",
+    "https://colorculture.org/akira-cinematography-analysis/",
+    "https://www.openculture.com/2017/10/the-art-of-hand-drawn-japanese-anime.html"
+  ],
+  "added": "2026-10-17",
+  "run": "r001",
+  "models": {
+    "krea2": {
+      "style": "Late-1980s theatrical hand-painted cel animation, as in Akira: thin precise dark lines, realistic faces with small eyes, hard-edged two- and three-tone cel shadows that follow each light source, sculpted rim light, ink-black and deep blue night with saturated red and cyan-green neon, blooming highlights, crushed blacks, heavy film grain.",
+      "recap": "Rendered throughout as late-1980s theatrical hand-painted cel animation with heavy film grain.",
+      "notes": "",
+      "captions": {}
+    },
+    "flux3_klein": {
+      "style": "Late-1980s theatrical hand-painted anime cel animation in the register of Akira: thin, precise, consistent dark lines, realistic anatomy and mechanical detail, realistic faces with small eyes and flat noses, hard-edged two- and three-tone cel shadows that each follow a painted light source, strong sculpted rim light separating forms from black, blooming highlights, densely layered hand-painted detail in the background, midground and foreground, crushed dense blacks, 35mm film grain.",
+      "recap": "Ink black and deep blue fill the sky, the walls, the ground and the shadow fills, saturated red appears only in the light sources and painted light streaks on the ground, cyan-green and magenta appear only as rim light on edges, and every garment keeps its own stated colour.",
+      "notes": "",
+      "captions": {}
+    },
+    "qwen_image_2_1": {
+      "style": "The image is a late-1980s theatrical hand-painted cel animation frame in a signature Akira style, with thin, precise, consistent dark lines and realistic anatomy, hard-edged two- and three-tone cel shadows that follow each painted light source, sculpted rim light separating forms from black, blooming highlights, crushed blacks and 35mm film grain, depicting a scene from a Gothic Victorian novel in a palette of ink black and deep blue, with saturated red, cyan-green and magenta accents.",
+      "recap": "The overall composition builds deep layered space from foreground to background with strong leading lines and painted light streaks, in a tense, kinetic mood, keeps to a palette of ink black and deep blue, with saturated red, cyan-green and magenta accents, and reads throughout as a late-1980s theatrical hand-painted cel animation frame in a signature Akira style, with thin, precise, consistent dark lines and realistic anatomy, hard-edged two- and three-tone cel shadows that follow each painted light source, sculpted rim light separating forms from black, blooming highlights, crushed blacks and 35mm film grain.",
+      "notes": "",
+      "captions": {}
+    },
+    "flux3_klein_pup": {
+      "style": "",
+      "recap": "",
+      "notes": "",
+      "captions": {
+        "count": "Late-1980s theatrical hand-painted cel animation in the style of Akira (1988), with thin precise dark linework, hard-edged cel shadows following each light source, sculpted rim light, crushed blacks, and visible 35mm film grain. A medium full shot at eye level shows Count Dracula centered in a three-quarter view, his tall, gaunt body filling the middle of the composition from the high collar to the hem of his long cloak. He is an old white nobleman with pale skin, a long white moustache, a high hooked nose, arched eyebrows, pointed ears, and sharp white teeth showing at the corner of his mouth. He wears black from head to foot: a fitted high-collared coat, black gloves, and a long black cloak with angular folds and a ragged lower edge. His raised pale hand extends toward the viewer in a courtly welcome, palm open and fingers curved, while his other arm disappears beneath the cloak. Behind him, a plain dark stone wall is rendered as an ink-black night field with sparse charcoal masonry seams, saturated red neon washing across the left side and cyan-green neon tracing the right edge of his cloak, face, and raised hand. Painted red and cyan-green light streaks bloom around the wall edges, with narrow highlights cutting across the cloak’s silhouette. The hand-painted urban decay remains confined to the wall’s worn, chipped texture and scattered neon reflections, leaving the central background plain and dark.",
+        "castle": "Late-1980s theatrical hand-painted cel animation in the style of Akira (1988), with thin precise dark linework, hard-edged cel shadows following each light source, sculpted rim light, crushed blacks, visible 35mm film grain, and painted light streaks with blooming highlights. An extreme wide establishing shot from a low angle sweeps across an empty Carpathian mountain landscape at dusk. An enormous ink-black and dark violet sky fills most of the frame, rising from deep indigo near the horizon to near-black overhead, with broad hand-painted violet cloud bands and a few cyan-green neon glints caught in the cloud edges. In the upper third, Castle Dracula stands small against the sky: a vast ruined Gothic castle of black stone perched on the edge of a sheer precipice, its jagged silhouette formed by broken battlements, collapsed towers, pointed arches, fractured spires, and a few narrow illuminated windows glowing saturated red and cyan-green. The castle’s outer edges carry a sharp cyan-green rim light while red light catches selected stone ledges and ruined arches. Below it, the precipice drops into a black chasm, with angular rock faces painted in near-black and sparse red highlights. A dark pine forest covers the lower portion of the frame, its dense ranks of pointed treetops forming a jagged silhouette across the Carpathian mountains. Thin cyan-green neon streaks trace the distant ridges and break into painted light trails through the forest haze. The foreground remains dominated by black mountain silhouettes and the precipice, with no figures, roads, vehicles, or structures interrupting the wilderness.",
+        "arrival": "Late-1980s theatrical hand-painted cel animation, as in Akira (1988), with thin precise dark linework, hard-edged cel shadows following each light source, sculpted rim light, crushed blacks, 35mm film grain, and painted light streaks blooming around saturated red and cyan-green neon. A wide eye-level view from behind Jonathan Harker’s shoulder looks across a dark stone courtyard at night. In the lower-left foreground, Jonathan Harker, a young English solicitor in his twenties with fair skin and short brown hair, wears a long brown travelling coat with a high collar and holds a worn leather bag in his right hand. His shoulder and the back of his coat form a dark silhouette along the left edge. Beside him, a black horse in a leather harness stands harnessed to a dark wooden horse-drawn carriage, its wheels and shafts catching narrow cyan-green highlights. The carriage faces the centre of the courtyard. At the centre, a great old wooden door rises from the ground, its warped planks studded with rows of iron nails and framed by cracked stone blocks. The open doorway glows with saturated amber light. Inside stands the tall old Count, an elderly white man with pale skin, a long black beard, and black hair, dressed in a floor-length black coat. He holds an antique silver lamp above shoulder height; its exposed flame burns bright orange and casts long, angular shadows across the Count’s face, the doorway, and the surrounding stones. Red and cyan-green neon reflections trace the lamp’s metalwork and the doorframe. In the doorway, the flame throws elongated shadows across the courtyard paving. Saturated red light streaks run along the door’s inner edges, while cyan-green highlights pick out wet patches and chipped masonry. Beyond the doorway, the courtyard remains ink-black, with leaning walls, broken arches, and dense hand-painted layers of urban decay.",
+        "diary": "Late-1980s theatrical hand-painted cel animation, as in Akira (1988), with thin precise dark outlines, hard-edged cel shadows following each light source, sculpted rim light, crushed blacks, visible 35mm film grain, and saturated red and cyan-green neon accents. A tight close-up over Mina Harker’s left shoulder fills the foreground, showing a young Victorian white woman with fair skin and dark brown hair pinned into an elaborate high updo. She wears a high-necked pale blue blouse with narrow pleats and sits at a small writing desk in a bedroom at night, her face turned in three-quarter profile toward the desk. Her lowered eyes follow the tip of a dip pen held in her right hand as she writes in an open leather-bound journal, its worn brown cover and cream pages catching the candlelight. At the right edge, a single candle burns in a brass holder, its orange flame casting a hard-edged glow across her cheek, nose, fingers, and the journal while a bright cyan-green rim traces the far side of her hair and blouse. The candle flame is surrounded by painted red and amber light streaks and blooming highlights. Behind the journal, an open window cuts into the upper right, revealing an ink-black night sky and a few neon-red and cyan-green reflections from the distant city. Thin net curtains billow inward through the window, their lower edges curling in the draft. Beyond Mina, the room falls soft into densely layered hand-painted urban decay: cracked plaster, a narrow shelf, and the window’s view of crowded rooftops, fire escapes, and neon signs reduced to dark silhouettes and smeared colored light. The desk edge and Mina’s shoulder form a dark foreground silhouette, with the pale blue fabric and journal page carrying the clearest detail.",
+        "chase": "Late-1980s theatrical hand-painted cel animation, as in Akira (1988), with thin precise dark outlines, hard-edged cel shadows following each light source, sculpted rim light, crushed blacks, 35mm film grain, and hand-painted streaks of light blooming around saturated red and cyan-green neon. At sunset on a snowy mountain road, a high-angle wide action shot is tilted into a steep Dutch angle. Four horsemen gallop diagonally from the lower left toward the upper right, their horses and bodies sweeping across the frame amid airborne snow. The last orange-red sunset burns through the narrow gap between jagged mountain peaks, while the surrounding sky is ink-black night edged with red and cyan-green neon reflections from decaying roadside signs, rusted utility poles, and layered urban structures embedded in the distant valley. The four riders wear heavy winter coats. At the front, an old white doctor with fair skin, a long grey beard, and a worn dark red coat gallops on a black horse, a leather medical bag hanging at his hip. Behind him, a tall white man with fair skin and a dark winter coat rides a chestnut horse while carrying a long rifle across his back. The third rider is a young white lord in his twenties with fair skin and shoulder-length dark hair, wearing a deep blue coat with a red cloak and a small crown. The fourth is a young white solicitor in his twenties with fair skin and short brown hair, wearing a charcoal coat over a high-collared white shirt and dark cravat. Snow flies from all four hooves in sharp white arcs. Ahead of them, a heavy wooden cart with iron-rimmed wheels climbs the road, driven by two men in bulky sheepskin coats gripping the reins. The cart carries a large sealed wooden box reinforced with dark iron bands, its lid and planks painted with rough grain and chipped corners. Red neon glints along the cart’s upper edge, cyan-green highlights cut across the box, and painted light streaks trail through the snow."
+      }
+    },
+    "flux3_klein_bfl": {
+      "style": "Late-1980s hand-painted anime cel illustration with thin precise dark lines, hard-edged cel shadows that follow each light source, sculpted rim light, crushed blacks, and saturated red and cyan-green accents.",
+      "recap": "Everything is rendered with precise lines, hard multi-tone cel shadows, blooming highlights and 35mm film grain typical of late-1980s hand-painted theatrical anime.",
+      "notes": "",
+      "captions": {}
+    }
+  },
+  "verdict": {
+    "status": "researched",
+    "best_model": null,
+    "notes": ""
+  }
+}

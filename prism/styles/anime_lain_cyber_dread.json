@@ -1,0 +1,68 @@
+{
+  "id": "anime_lain_cyber_dread",
+  "name": "Lain cyber dread",
+  "family": "anime",
+  "summary": "Late-90s psychological techno-horror: bleached glaring suburban daylight, shadows mottled with red blood-like splotches, humming power lines, CRT glow and on-screen text.",
+  "lineage": {
+    "titles": [
+      "Serial Experiments Lain (1998)"
+    ],
+    "studios": [
+      "Triangle Staff"
+    ],
+    "directors": [
+      "Ryutaro Nakamura"
+    ],
+    "era": "1998 TV (late cel / early digital)"
+  },
+  "traits": {
+    "line": "Crisp, clean, thin outlines (Yoshitoshi ABe designs); economical line.",
+    "shading": "Flat cel with hard shadows; shadows are not plain grey but mottled with red splotches like pools of blood.",
+    "palette": "Limited and bleached: washed whites and pale greys in daylight, deep blacks, CRT green and blue, sickly yellow, blood-red accents.",
+    "lighting": "Glaring overexposed sunlight, very high contrast; dark rooms lit only by monitor glow; flicker.",
+    "faces": "Small pale face, large dark eyes with little highlight, asymmetric forelock with a clip; blank expression.",
+    "backgrounds": "Telephone poles, power lines and transformers against a white sky; empty suburban streets; rooms crowded with cables and computers.",
+    "texture": "Video noise, scanlines, digital glitch overlays, low-resolution CG, on-screen typography.",
+    "camera": "Static long holds, low angles on wires, sudden glitch cuts, typography inserts."
+  },
+  "style_words": "Late-1990s psychological techno-horror TV animation: crisp thin lines, flat hard cel shadows mottled with red blood-like splotches, bleached overexposed white daylight against deep blacks, glowing CRT green and blue, telephone poles and power lines, video noise, scanlines and glitch overlays, as in Serial Experiments Lain (1998).",
+  "avoid": [
+    "warm cosy palette",
+    "glossy neon cyberpunk (80s OVA drift)",
+    "clean digital with no noise",
+    "Ghost in the Shell's detailed tech realism"
+  ],
+  "confusable_with": [
+    "anime_haibane_abe_pastel",
+    "anime_oshii_gits",
+    "anime_gainax_eva_90s"
+  ],
+  "sources": [
+    "https://en.wikipedia.org/wiki/Serial_Experiments_Lain",
+    "https://okazu.yuricon.com/2013/07/24/serial-experiments-lain-anime-disk-1-english/"
+  ],
+  "added": "2026-10-17",
+  "run": "r001",
+  "models": {
+    "krea2": {
+      "style": "Late-1990s psychological techno-horror TV animation, as in Serial Experiments Lain: crisp thin economical lines, flat hard cel shadows mottled with red blood-like splotches, bleached overexposed white light against deep blacks, cold pale greys with glowing CRT green and blue, sparse simple shapes, video noise, scanlines and glitch overlays.",
+      "recap": "Rendered throughout as late-1990s techno-horror TV animation with video noise and scanlines.",
+      "notes": ""
+    },
+    "flux3_klein": {
+      "style": "Late-1990s psychological techno-horror TV anime in the register of Serial Experiments Lain: crisp, clean, thin outlines with economical line, small pale faces with large dark eyes holding little highlight, blank expressions, flat cel fills with hard shadows, every shadow mottled with red splotches like pools of blood, glaring overexposed light with very high contrast, video noise, faint horizontal scanlines and digital glitch bands across the frame.",
+      "recap": "Washed white and pale grey fill the sky, the walls and the ground, deep black fills the shadows under the blood-red mottling, CRT green and blue glow only in the light sources and along lit edges, sickly yellow tints the brightest light, and every garment keeps its own stated colour.",
+      "notes": ""
+    },
+    "qwen_image_2_1": {
+      "style": "The image is a late-1990s psychological techno-horror TV cel animation frame in a signature Serial Experiments Lain style, with crisp, thin, clean outlines, flat, unmodulated colour fills and hard-edged shadow shapes whose shadows are mottled with red, blood-like splotches, video noise, scanlines and digital glitch overlays, depicting a scene from a Gothic Victorian novel in a palette of bleached washed whites and pale greys against deep blacks, with glowing CRT green and blue, sickly yellow and blood-red accents.",
+      "recap": "The overall composition holds its forms in static, high-contrast stillness between glaring overexposed light and deep darkness, in a detached, dreadful mood, keeps to a palette of bleached washed whites and pale greys against deep blacks, with glowing CRT green and blue, sickly yellow and blood-red accents, and reads throughout as a late-1990s psychological techno-horror TV cel animation frame in a signature Serial Experiments Lain style, with crisp, thin, clean outlines, flat, unmodulated colour fills and hard-edged shadow shapes whose shadows are mottled with red, blood-like splotches, video noise, scanlines and digital glitch overlays.",
+      "notes": ""
+    }
+  },
+  "verdict": {
+    "status": "researched",
+    "best_model": null,
+    "notes": ""
+  }
+}

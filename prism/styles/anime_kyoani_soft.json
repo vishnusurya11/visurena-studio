@@ -1,0 +1,72 @@
+{
+  "id": "anime_kyoani_soft",
+  "name": "Kyoto Animation soft",
+  "family": "anime",
+  "summary": "Delicate fine-lined figures with glassy detailed eyes, isolated by shallow focus against soft out-of-focus real-location settings in warm window light.",
+  "lineage": {
+    "titles": [
+      "Hyouka (2012)",
+      "Sound! Euphonium (2015)",
+      "Violet Evergarden (2018)"
+    ],
+    "studios": [
+      "Kyoto Animation"
+    ],
+    "directors": [
+      "Yasuhiro Takemoto",
+      "Taichi Ishidate",
+      "Tatsuya Ishihara"
+    ],
+    "era": "2010s digital TV and theatrical"
+  },
+  "traits": {
+    "line": "very fine tapered lines, frequently coloured (brown, red-brown) instead of black; many thin strand lines in hair",
+    "shading": "crisp two-tone cel shadow plus a third highlight tone; soft gradient overlays on skin and hair added in compositing",
+    "palette": "warm pastels: cream, honey gold, sky blue, soft green; sunset tints outdoors; jewel accents (emerald brooch, deep navy) in Violet Evergarden",
+    "lighting": "sunlight through glass, gently coloured; diffusion glow and mild bloom on highlights; light and shadow used for mood",
+    "faces": "large, many-layered irises with stained-glass highlights, small mouth, soft rounded chin; frequent extreme close-ups of eyes and hands",
+    "backgrounds": "real-location rural or suburban towns, school corridors and club rooms with careful clutter, rendered soft and out of focus",
+    "texture": "clean digital, soft glow filters, round bokeh discs",
+    "camera": "very shallow depth of field isolating one figure, rack focus, POV and static face-to-face framings"
+  },
+  "style_words": "Refined digital anime with a soft photographic finish, as in Hyouka (2012) and Violet Evergarden (2018): delicate fine coloured-brown lines, crisp two-tone cel shading with a soft third highlight tone, warm cream, honey and sky-blue pastels, gently tinted window light, diffusion glow, shallow depth of field with round bokeh, glassy multi-layer eye highlights.",
+  "avoid": [
+    "generic moe with oversized eyes and no detail in the light",
+    "over-glossy plastic skin from too many gradient overlays",
+    "turning into Shinkai skies and lens flares",
+    "deep focus that loses the dreamy out-of-focus background"
+  ],
+  "confusable_with": [
+    "anime_shinkai_luminous",
+    "anime_hosoda_clean"
+  ],
+  "sources": [
+    "https://en.wikipedia.org/wiki/Violet_Evergarden",
+    "https://en.wikipedia.org/wiki/Hyouka",
+    "https://www.kosatenmag.com/home/the-beauty-of-kyoto-animation-hyouka-tsurune-violet-evergarden"
+  ],
+  "added": "2026-10-17",
+  "run": "r001",
+  "models": {
+    "krea2": {
+      "style": "Refined digital anime, as in Violet Evergarden: delicate fine coloured-brown lines, crisp two-tone cel shading with a soft third highlight tone, matte natural skin, warm cream, honey gold and sky-blue pastels, gently tinted window light, diffusion glow, background soft and out of focus with round glowing light discs.",
+      "recap": "Rendered throughout as refined digital anime with fine brown lines and a soft out-of-focus background.",
+      "notes": ""
+    },
+    "flux3_klein": {
+      "style": "Refined digital anime with a soft photographic finish, in the register of Hyouka: delicate fine lines coloured brown instead of black, many thin strand lines in the hair, large many-layered irises with glassy stained-glass highlights, crisp two-tone cel shadow plus a soft third highlight tone, a gentle gradient overlay on skin and hair, diffusion glow and mild bloom on highlights, backgrounds out of focus with round bokeh discs on points of light, detailed light falling across the figures.",
+      "recap": "Cream and honey gold fill the walls and the light sources, sky blue fills the sky, soft green fills the ground, the shadow fills take a gentle tint of the light, deep navy and emerald appear only as small jewel-like accents in the highlights, and every garment keeps its own stated colour.",
+      "notes": ""
+    },
+    "qwen_image_2_1": {
+      "style": "The image is a refined digital animation frame with a soft photographic finish, in a signature Hyouka style, with delicate fine coloured-brown lines, crisp two-tone cel shading with a soft third highlight tone, gentle gradient overlays on skin and hair, diffusion glow, shallow depth of field with round bokeh, and glassy multi-layer eye highlights, depicting a scene from a Gothic Victorian novel in a palette of warm cream, honey gold, sky blue and soft green pastels, with deep navy and emerald jewel accents.",
+      "recap": "The overall composition isolates its focal subject against softly out-of-focus surroundings in gently tinted light, in a tender, luminous mood, keeps to a palette of warm cream, honey gold, sky blue and soft green pastels, with deep navy and emerald jewel accents, and reads throughout as a refined digital animation frame with a soft photographic finish, in a signature Hyouka style, with delicate fine coloured-brown lines, crisp two-tone cel shading with a soft third highlight tone, gentle gradient overlays on skin and hair, diffusion glow, shallow depth of field with round bokeh, and glassy multi-layer eye highlights.",
+      "notes": ""
+    }
+  },
+  "verdict": {
+    "status": "researched",
+    "best_model": null,
+    "notes": ""
+  }
+}

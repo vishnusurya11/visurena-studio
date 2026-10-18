@@ -1,0 +1,70 @@
+{
+  "id": "anime_redline_koike",
+  "name": "Redline / Koike",
+  "family": "anime",
+  "summary": "Hand-drawn thick-outlined sculptural figures and machines with solid flat black shadows, extreme perspective and explosive saturated colour.",
+  "lineage": {
+    "titles": [
+      "Redline (2009)",
+      "Lupin the Third: Jigen's Gravestone (2014)"
+    ],
+    "studios": [
+      "Madhouse",
+      "Telecom Animation Film"
+    ],
+    "directors": [
+      "Takeshi Koike"
+    ],
+    "era": "2000s-2010s theatrical, hand-drawn"
+  },
+  "traits": {
+    "line": "thick graphic outlines, chunky sculptural forms; hand-drawn exaggerated cars",
+    "shading": "solid flat black shadow masses on figures ('BL' full-black shadowing, Koike's stated preference) with no grey midtone; bright highlights set against black",
+    "palette": "explosive saturated colour: hot orange, electric blue, acid green, magenta, chrome",
+    "lighting": "hard light that cuts forms into lit shapes and black shadow; bright close-ups out of black fields",
+    "faces": "solid, sculptural heads with strong jaws; leather jackets, pompadours",
+    "backgrounds": "hand-painted, matched to the cels; dense alien cities and race tracks",
+    "texture": "gritty, hand-drawn texture with grain; no CG",
+    "camera": "extreme perspective and distortion, whip-fast speed, speed lines"
+  },
+  "style_words": "Hand-drawn theatrical animation in Takeshi Koike's manner, as in Redline (2009): thick graphic outlines, chunky sculptural forms, solid flat black shadow masses with no midtone, bright highlights cut out of black, explosive saturated hot orange, electric blue and acid green, extreme perspective distortion, hand-drawn speed lines, gritty grainy texture.",
+  "avoid": [
+    "soft gradient shading or grey midtones",
+    "3DCG-looking vehicles",
+    "thin delicate lines",
+    "clean polished Production I.G realism"
+  ],
+  "confusable_with": [
+    "anime_trigger_angular",
+    "anime_kawajiri_madhouse_90s",
+    "anime_lupin_tms_retro"
+  ],
+  "sources": [
+    "https://en.wikipedia.org/wiki/Redline_(2009_film)",
+    "https://www.zimmerit.moe/takeshi-koike-katsuhito-ishii-talk/"
+  ],
+  "added": "2026-10-17",
+  "run": "r001",
+  "models": {
+    "krea2": {
+      "style": "Hand-drawn theatrical animation, as in Redline: thick graphic outlines, chunky sculptural forms and strong jaws, solid flat black shadow masses cut sharply against lit colour, bright highlights cut out of black, explosive saturated hot orange, electric blue, acid green and magenta, extreme perspective distortion, speed lines, gritty grainy texture.",
+      "recap": "Rendered throughout as hand-drawn theatrical animation with thick graphic outlines and solid black shadow masses.",
+      "notes": ""
+    },
+    "flux3_klein": {
+      "style": "Hand-drawn theatrical anime in the register of Redline: thick graphic outlines on chunky sculptural forms, solid sculptural heads with strong jaws, solid flat black shadow masses meeting the lit colour at a hard edge, bright highlights cut out of the black, hard light that slices every form into lit shapes and black shadow, hand-drawn speed lines, gritty hand-drawn texture with grain, hand-painted backgrounds matched to the figures.",
+      "recap": "Hot orange and electric blue fill the lit areas of the sky, the walls and the ground, acid green and magenta appear only in the light sources and along lit edges, every shadow is solid flat black, and every garment keeps its own stated colour.",
+      "notes": ""
+    },
+    "qwen_image_2_1": {
+      "style": "The image is a hand-drawn theatrical animation frame in Takeshi Koike's manner, with thick graphic outlines and chunky sculptural forms, solid flat black shadow masses cut straight against brightly lit shapes, hand-drawn speed lines and gritty, grainy hand-drawn texture, depicting a scene from a Gothic Victorian novel in a palette of explosive saturated hot orange, electric blue, acid green, magenta and chrome.",
+      "recap": "The overall composition slams its forms into extreme perspective and distortion, bright highlights cut out of black fields, in a loud, high-speed mood, keeps to a palette of explosive saturated hot orange, electric blue, acid green, magenta and chrome, and reads throughout as a hand-drawn theatrical animation frame in Takeshi Koike's manner, with thick graphic outlines and chunky sculptural forms, solid flat black shadow masses cut straight against brightly lit shapes, hand-drawn speed lines and gritty, grainy hand-drawn texture.",
+      "notes": ""
+    }
+  },
+  "verdict": {
+    "status": "researched",
+    "best_model": null,
+    "notes": ""
+  }
+}

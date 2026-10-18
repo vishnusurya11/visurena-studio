@@ -1,0 +1,72 @@
+{
+  "id": "anime_trigger_angular",
+  "name": "Trigger angular",
+  "family": "anime",
+  "summary": "Flat fluorescent colour with almost no gradients, shadows cut into triangles and polygons, angular figures and blocky geometric worlds.",
+  "lineage": {
+    "titles": [
+      "Kill la Kill (2013)",
+      "Promare (2019)",
+      "Cyberpunk: Edgerunners (2022)"
+    ],
+    "studios": [
+      "Trigger",
+      "Sanzigen (3DCG on Promare)"
+    ],
+    "directors": [
+      "Hiroyuki Imaishi"
+    ],
+    "era": "2010s-2020s digital TV and theatrical"
+  },
+  "traits": {
+    "line": "thick angular outlines with sharp corners; scratchy speed and impact lines",
+    "shading": "one hard shadow tone cut in geometric shapes; almost no gradients",
+    "palette": "fluorescent pinks, cyans, lime green and purple (Promare); red, black and white (Kill la Kill); hot neon yellow and cyan (Edgerunners)",
+    "lighting": "graphic, not physical: glows rendered as flat shapes; triangular or square lens flares",
+    "faces": "sharp angular jaws, triangular eyes and teeth, extreme grimaces",
+    "backgrounds": "simplified flat-colour geometric buildings and objects, blocky silhouettes",
+    "texture": "clean flat fills, occasional halftone; 3DCG cel-shaded to match 2D",
+    "camera": "extreme foreshortening and dynamic perspective; giant bold-type text cards"
+  },
+  "style_words": "Flat-coloured 2D anime in the Imaishi Trigger manner, as in Kill la Kill (2013) and Promare (2019): thick angular outlines, single hard shadow tone cut into triangles and polygons, almost no gradients, fluorescent pink, cyan, lime and purple palette, geometric blocky architecture, triangular lens flares, scratchy speed lines, clean flat fills.",
+  "avoid": [
+    "soft gradients and realistic lighting creeping in (Imaishi: 'Reality is not allowed')",
+    "muddy or desaturated colour",
+    "generic rounded shonen with no geometric shape language",
+    "red-and-yellow ordinary fire instead of graphic polygon flame"
+  ],
+  "confusable_with": [
+    "anime_redline_koike",
+    "anime_yuasa_loose"
+  ],
+  "sources": [
+    "https://www.animenewsnetwork.com/interview/2019-12-20/promare-director-hiroyuki-imaishi-and-screenwriter-kazuki-nakashima/.154605",
+    "https://www.onderhond.com/blog/promare-review-hiroyuki-imaishi",
+    "https://en.wikipedia.org/wiki/Promare",
+    "https://en.wikipedia.org/wiki/Kill_la_Kill"
+  ],
+  "added": "2026-10-17",
+  "run": "r001",
+  "models": {
+    "krea2": {
+      "style": "Flat-coloured 2D anime, as in Promare: thick angular outlines with sharp corners, angular jaws and triangular eyes, a single hard shadow tone cut into triangles and polygons, light drawn as flat graphic shapes, vivid fluorescent pink, cyan, lime and purple, blocky geometric architecture, flames as flat polygons, speed lines.",
+      "recap": "Rendered throughout as flat-coloured 2D anime with thick angular outlines and polygon-cut shadows.",
+      "notes": ""
+    },
+    "flux3_klein": {
+      "style": "Flat-coloured 2D anime in the register of Studio Trigger: thick angular outlines with sharp corners, sharp angular jaws and triangular eyes and teeth, a single hard shadow tone cut into triangles and polygons, pure flat fills with hard edges, glows and flames drawn as flat graphic polygon shapes, triangular lens flares, scratchy speed and impact lines, objects and buildings simplified into blocky geometric silhouettes, extreme foreshortening.",
+      "recap": "Fluorescent pink and purple fill the sky and the walls, cyan and lime green fill the ground and the light sources, the shadow fills are flat dark purple polygons, and every garment keeps its own stated colour.",
+      "notes": ""
+    },
+    "qwen_image_2_1": {
+      "style": "The image is a flat-coloured 2D animation frame in a signature Kill la Kill style, with thick angular outlines with sharp corners, a single hard shadow tone cut into triangles and polygons, clean flat fills, glows drawn as flat shapes, triangular lens flares and scratchy speed lines, depicting a scene from a Gothic Victorian novel in a palette of fluorescent pink, cyan, lime green and purple, with red, black and white.",
+      "recap": "The overall composition thrusts its geometric, blocky forms into extreme foreshortening and dynamic perspective, in a loud, explosive mood, keeps to a palette of fluorescent pink, cyan, lime green and purple, with red, black and white, and reads throughout as a flat-coloured 2D animation frame in a signature Kill la Kill style, with thick angular outlines with sharp corners, a single hard shadow tone cut into triangles and polygons, clean flat fills, glows drawn as flat shapes, triangular lens flares and scratchy speed lines.",
+      "notes": ""
+    }
+  },
+  "verdict": {
+    "status": "researched",
+    "best_model": null,
+    "notes": ""
+  }
+}

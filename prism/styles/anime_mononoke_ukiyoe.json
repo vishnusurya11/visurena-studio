@@ -1,0 +1,93 @@
+{
+  "id": "anime_mononoke_ukiyoe",
+  "name": "Mononoke ukiyo-e washi",
+  "family": "anime",
+  "summary": "Flat, pattern-crammed Edo-period screens printed over visible Japanese-paper grain, like an animated ukiyo-e print or picture scroll.",
+  "lineage": {
+    "titles": [
+      "Ayakashi: Samurai Horror Tales - Bakeneko (2006)",
+      "Mononoke (2007)",
+      "Mononoke the Movie: The Phantom in the Rain (2024)"
+    ],
+    "studios": [
+      "Toei Animation",
+      "Twin Engine (films)"
+    ],
+    "directors": [
+      "Kenji Nakamura"
+    ],
+    "era": "2000s TV (Noitamina), revived as 2020s films"
+  },
+  "traits": {
+    "line": "Thin, even, dark outlines of uniform weight on figures and scenery alike, like a woodblock key-block; no sketchy or tapered strokes.",
+    "shading": "Almost none: flat colour fills, at most one hard shadow tone; depth comes from overlapping flat planes, not gradients.",
+    "palette": "Saturated but aged pigments - vermilion, ochre, indigo, verdigris, gold-leaf yellow, pink - on dark or cream grounds; every area filled.",
+    "lighting": "Non-naturalistic: no cast light source; brightness is a design choice; sudden full-screen colour flashes and inversions at climaxes.",
+    "faces": "Kabuki-like stylised faces: painted eye make-up and face markings (the Medicine Seller), narrow eyes, long noses, mask-like stillness.",
+    "backgrounds": "Flat, sharply bounded ukiyo-e backgrounds; repeating ornamental patterns (waves, clouds, florals, geometric kimono motifs) on walls, floors and sky; sliding-door panels opening in layered planes.",
+    "texture": "Visible washi fibre grain over the whole frame (real Japanese paper used as a screen filter), slightly mottled like a print on handmade paper.",
+    "camera": "Planar, theatrical staging; sliding-door wipes; split frames and collage panels; tableau holds; abrupt cut-ins."
+  },
+  "style_words": "Flat ukiyo-e woodblock-print animation on handmade washi paper: thin even dark outlines, unshaded flat fills of vermilion, indigo, ochre and gold, dense repeating kimono patterns covering every plane, crisp flat bounded backgrounds, visible paper-fibre grain over the whole frame, as in Mononoke (2007) and Bakeneko (2006).",
+  "avoid": [
+    "soft gradient cel shading or rim light (generic TV anime)",
+    "photographic depth of field, bloom or lens flare",
+    "clean smooth digital surfaces with no paper grain",
+    "watery sumi-e washes instead of flat woodblock fills",
+    "Gankutsuou-style jewel textures locked inside hair and clothes"
+  ],
+  "confusable_with": [
+    "anime_gankutsuou_textile",
+    "anime_shaft_avantgarde",
+    "anime_kaguya_sumie"
+  ],
+  "sources": [
+    "https://en.wikipedia.org/wiki/Mononoke_(TV_series)",
+    "https://www.nippon.com/en/japan-topics/c030287/"
+  ],
+  "added": "2026-10-17",
+  "run": "r001",
+  "models": {
+    "krea2": {
+      "style": "Flat ukiyo-e woodblock-print animation on handmade washi paper: thin even dark outlines of uniform weight, unshaded opaque flat fills of vermilion, indigo, ochre, verdigris and gold, depth from overlapping flat planes, every plane equally crisp, dense repeating wave, cloud and kimono patterns, paper-fibre grain over the whole frame.",
+      "recap": "Rendered throughout as flat ukiyo-e woodblock-print animation on handmade washi paper.",
+      "notes": "",
+      "captions": {}
+    },
+    "flux3_klein": {
+      "style": "Flat ukiyo-e woodblock-print anime on handmade washi paper: thin, even, dark outlines of uniform weight on figures and scenery alike like a woodblock key block, flat unshaded colour fills with at most one hard shadow tone, depth from overlapping flat planes, dense repeating patterns of waves, clouds and florals on every wall, floor and sky, crisp sharply bounded flat backgrounds, visible washi fibre grain mottling the whole frame.",
+      "recap": "Indigo fills the sky, ochre and gold-leaf yellow fill the walls and the ground, vermilion and verdigris appear only in the repeating patterns and the light sources, the shadow fills are one flat darker tone, and every garment keeps its own stated colour as a single flat fill.",
+      "notes": "",
+      "captions": {}
+    },
+    "qwen_image_2_1": {
+      "style": "The image is a flat ukiyo-e woodblock-print animation frame on handmade washi paper, with thin, even, dark outlines of uniform weight like a key block, flat unshaded colour fills with depth from overlapping planes, dense repeating patterns of waves, clouds and florals, and visible paper-fibre grain over the whole frame, depicting a scene from a Gothic Victorian novel in a palette of saturated aged vermilion, indigo, ochre, verdigris, pink and gold-leaf yellow on dark or cream grounds.",
+      "recap": "The overall composition arranges its forms in planar, theatrical layers with every area filled and sharply bounded, brightness set by design rather than by a cast light, in an eerie, ritual mood, keeps to a palette of saturated aged vermilion, indigo, ochre, verdigris, pink and gold-leaf yellow on dark or cream grounds, and reads throughout as a flat ukiyo-e woodblock-print animation frame on handmade washi paper, with thin, even, dark outlines of uniform weight like a key block, flat unshaded colour fills with depth from overlapping planes, dense repeating patterns of waves, clouds and florals, and visible paper-fibre grain over the whole frame.",
+      "notes": "",
+      "captions": {}
+    },
+    "flux3_klein_pup": {
+      "style": "",
+      "recap": "",
+      "notes": "",
+      "captions": {
+        "count": "Flat ukiyo-e woodblock-print animation on handmade washi paper, with thin, even dark outlines, unshaded flat fills of vermilion, indigo, ochre, and gold, and visible paper-fibre grain across the entire frame, following the graphic style of Mononoke (2007) and Bakeneko (2006). A medium full shot at eye level shows Count Dracula as a single tall, gaunt old nobleman, centered in a three-quarter view. He has pale skin, pointed ears, a high hooked nose, arched eyebrows, and a long white moustache. His mouth opens enough to reveal sharp white teeth, and he faces the viewer with a formal courtly expression. He is dressed from head to foot in black: a high-collared coat, fitted trousers, pointed shoes, and a long black cloak falling in angular folds behind him. Dense repeating gold, vermilion, and ochre patterns cover every black plane of the clothing, including repeating bats, diamonds, and curling cloud motifs. One pale hand is raised beside his shoulder in a courtly welcome, palm turned outward with long fingers spread, while the other arm rests beneath the cloak. Behind him, a plain dark stone wall fills the background as crisp, flat, bounded shapes, its indigo-black surface covered with a dense repeating pattern of angular stone blocks and small ochre-gold seams. Vermilion, indigo, ochre, and gold repeating wave, cloud, and geometric motifs run across the wall without interrupting its dark field. The composition remains flat and shadowless, with no gradients, dimensional modeling, scenery, or additional figures.",
+        "castle": "Flat ukiyo-e woodblock-print animation on handmade washi paper, with thin, even dark outlines, unshaded flat fills of vermilion, indigo, ochre, and gold, crisp bounded shapes, and visible paper-fibre grain across the entire frame, following the graphic language of Mononoke (2007) and Bakeneko (2006). An extreme wide establishing view from a low angle sweeps across the Carpathian mountains at dusk. An enormous darkening violet sky fills the upper two-thirds of the composition, patterned with dense repeating bands of indigo, violet, and muted gold cloud motifs. Near the upper third, Castle Dracula stands small against the vast sky: a vast ruined Gothic castle of black stone, its clustered towers, pointed arches, steep roofs, and broken battlements rising from the edge of a sheer precipice. A few narrow windows glow flat gold, while the remaining masonry is rendered in black and deep indigo with sparse vermilion and ochre accents. The castle walls and every architectural plane are covered in dense repeating Gothic patterns of pointed tracery, thorn-like vines, and angular masonry motifs. Below, the precipice forms a jagged black silhouette edged with ochre and gold, dropping into a dark pine forest. Layered ranks of black and indigo pines cover the lower third, their branches filled with repeating gold and vermilion needle patterns. The forest floor is nearly black, with the cliff face and mountain ridges defined by flat indigo shapes. The landscape contains only castle, precipice, forest, and sky, with no figures or human silhouettes.",
+        "arrival": "Flat ukiyo-e woodblock-print animation on handmade washi paper, with thin, even dark outlines, unshaded flat fills of vermilion, indigo, ochre, and gold, crisp bounded shapes, and dense repeating kimono patterns covering every plane, in the visual language of Mononoke (2007) and Bakeneko (2006). A wide eye-level night scene looks across a dark stone courtyard from behind Jonathan Harker’s shoulder. In the lower left foreground, Jonathan Harker, a young English solicitor with fair skin and short brown hair, wears a brown travelling coat patterned with repeating ochre and gold geometric motifs. He faces away from the viewer, holding a worn brown leather bag in his right hand. Beside him, an indigo horse with a vermilion saddle blanket stands harnessed to a dark wooden horse-drawn carriage, its wheels and carriage body covered in repeating gold and ochre patterns. At the centre, the carriage faces a great old wooden door set into a dark indigo stone courtyard. The open doorway glows gold and vermilion, framed by massive weathered timber planks studded with rows of black iron nails. Inside stands the tall old Count in black, his long robe and high collar filled with dense repeating gold patterns. He holds an antique silver lamp above shoulder height; its small gold flame casts long angular shadows across the doorway and courtyard stones. The Count’s elongated silhouette rises behind the lamp, with his face shown in profile. Repeating indigo and gold flame motifs spread across the lamp’s light. The surrounding stones are rendered as flat indigo shapes patterned with dark repeating wave-like lines, while the Count’s long shadow cuts diagonally across them. Visible paper-fibre grain runs over the entire frame, with uneven deckled texture and tiny flecks embedded in the washi surface.",
+        "diary": "Flat ukiyo-e woodblock-print animation on handmade washi paper, with thin, even dark outlines, unshaded flat fills of vermilion, indigo, ochre, and gold, and dense repeating kimono patterns covering every plane, following the visual language of Mononoke (2007) and Bakeneko (2006). A tight close-up over the left shoulder of Mina Harker, a young Victorian white woman with fair skin and dark hair pinned into a high Victorian updo, seated at a small writing desk in a bedroom at night. Her shoulder and patterned kimono-like sleeve fill the lower-left foreground, while her high-necked pale blue blouse rises above it, covered with repeating indigo and gold floral motifs. Her face appears in three-quarter profile near the center, with a composed expression, dark brows, and eyes lowered toward the page. At the desk, her right hand holds a slender dip pen against an open leather-bound journal, its cover rendered in flat ochre-brown with a repeating gold border. The candle flame burns at the right edge beside the journal, surrounded by a compact vermilion halo and a dense repeating pattern of gold rays. Behind the flame, the single candle stands in a low holder, its wax and base simplified into crisp flat shapes. On the right, an open window reveals a flat indigo night sky and a small gold crescent moon. Vermilion net curtains billow inward through the window, their folds bending in the night air. The room behind Mina falls into soft, simplified patterned shapes: indigo wall panels, a vermilion bedspread, and repeating gold cloud motifs. The entire composition remains crisp and flat, with visible paper-fibre grain across the face, clothing, desk, window, and background.",
+        "chase": "Flat ukiyo-e woodblock-print animation on handmade washi paper, with thin, even dark outlines, unshaded flat fills of vermilion, indigo, ochre, and gold, crisp bounded shapes, dense repeating kimono patterns covering every plane, and visible paper-fibre grain across the entire frame, in the visual language of Mononoke (2007) and Bakeneko (2006). A high-angle wide action view is tilted into a pronounced Dutch angle, showing a snowy mountain road sweeping diagonally from the lower left to the upper right at sunset. Four horsemen gallop together across the center. At the front, an old East Asian doctor with fair skin, a long grey beard, and a heavy indigo winter coat patterned with repeating gold cranes rides a dark horse, his fur-trimmed cloak trailing behind him as he grips a staff. Beside him, a tall East Asian man with fair skin and a black topknot wears a vermilion coat covered in ochre wave motifs and carries a long rifle across his back while galloping. The third rider is a young East Asian lord with fair skin, tied black hair, a gold-trimmed vermilion winter coat, and a repeating cloud pattern, leaning forward on a chestnut horse. The fourth is a young East Asian solicitor with fair skin, short dark hair, an indigo coat patterned with gold scales, and a folded document case tucked beneath his winter cloak. Behind them, the four horsemen are distinguished by heavy winter coats: the doctor, the rifleman, the young lord, and the young solicitor, each mounted among four galloping horses. Their hooves throw angular white and pale-gold snow upward in curling bands. Ahead of them, a heavy wooden cart with thick ochre wheels and dark timber sides races toward the upper right, driven by two men in bulky sheepskin coats. A large closed wooden box with iron corner fittings fills the cart bed. In the background, a vermilion sun rests above layered indigo snowy peaks, while the road and sky are packed with repeating snowflake, cloud, and wave patterns."
+      }
+    },
+    "flux3_klein_bfl": {
+      "style": "Flat ukiyo-e woodblock-print-style anime illustration on handmade washi paper, with thin even dark outlines, unshaded flat fills of vermilion, indigo, ochre and gold, and dense repeating kimono patterns.",
+      "recap": "Everything is rendered with even woodblock key lines, flat unshaded pigment fills and visible washi paper-fiber grain typical of ukiyo-e-styled 2000s anime.",
+      "notes": "",
+      "captions": {}
+    }
+  },
+  "verdict": {
+    "status": "researched",
+    "best_model": null,
+    "notes": ""
+  }
+}

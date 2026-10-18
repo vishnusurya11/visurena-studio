@@ -1,0 +1,75 @@
+{
+  "id": "anime_classic_shojo_70s",
+  "name": "1970s classic shojo",
+  "family": "anime",
+  "summary": "Dreamy 1970s girls'-romance cel look: huge glossy eyes with star highlights, flowing hair, frilly period dress, floating roses and sparkle bursts over pastel or blank backgrounds.",
+  "lineage": {
+    "titles": [
+      "Candy Candy (1976)",
+      "The Rose of Versailles (1979)"
+    ],
+    "studios": [
+      "Toei Animation",
+      "Tokyo Movie Shinsha"
+    ],
+    "directors": [
+      "Hiroshi Shidara",
+      "Tetsuo Imazawa",
+      "Tadao Nagahama",
+      "Osamu Dezaki"
+    ],
+    "era": "1970s TV cel, from 1960s-70s shojo manga"
+  },
+  "traits": {
+    "line": "Fine, light, tapered pen-like lines; long eyelashes drawn stroke by stroke; flowing hair in many thin parallel strands.",
+    "shading": "Flat cel fills with sparse single-tone shadow; romantic moments drop into soft airbrushed or painted stills.",
+    "palette": "Pastel and candy colours: pink, lilac, baby blue, cream, rose red; blonde and auburn hair; white lace.",
+    "lighting": "Diffuse, rosy glow; sparkle halos rather than directional light.",
+    "faces": "Very large tall eyes with several white star or cross highlights and a glossy layered iris; tiny nose, small mouth, slender neck; slender long-limbed figures.",
+    "backgrounds": "Often abstract at emotional beats: floating roses, petals, bubbles, sparkles, light-burst lines or a plain colour field; otherwise soft European period settings.",
+    "texture": "Painted-cel softness, film grain, slight wash bleed on painted stills.",
+    "camera": "Freeze-frame close-ups, slow push-ins on eyes, overlapping montage panels borrowed from manga layout."
+  },
+  "style_words": "1970s shojo cel animation: fine tapered pen lines, flat pastel fills of pink, lilac, cream and baby blue, glossy white star-shaped sparkle highlights, floating roses, petals and light bursts over plain or abstract backgrounds, soft rosy diffuse glow, film grain, as in Candy Candy (1976) and The Rose of Versailles (1979).",
+  "avoid": [
+    "modern digital moe faces with gradient irises",
+    "1990s Sailor Moon bold primaries and angular hair",
+    "thick bold shonen outlines",
+    "realistic proportions"
+  ],
+  "confusable_with": [
+    "anime_dezaki_70s",
+    "anime_sailor_moon_90s",
+    "anime_clamp_shojo",
+    "anime_tezuka_classic"
+  ],
+  "sources": [
+    "https://en.wikipedia.org/wiki/Candy_Candy",
+    "https://en.wikipedia.org/wiki/Sh%C5%8Djo_manga",
+    "https://artsandculture.google.com/story/_gVhpN5-FcNsiA"
+  ],
+  "added": "2026-10-17",
+  "run": "r001",
+  "models": {
+    "krea2": {
+      "style": "1970s shojo cel animation, as in The Rose of Versailles: fine tapered pen lines, slender long-limbed figures with very large tall eyes holding white star-shaped highlights, hair in many thin flowing strands, flat pastel fills of pink, lilac, cream and baby blue, floating roses, rosy diffuse glow, film grain.",
+      "recap": "Rendered throughout as 1970s shojo cel animation with fine tapered pen lines and film grain.",
+      "notes": ""
+    },
+    "flux3_klein": {
+      "style": "1970s shojo anime cel animation in the register of The Rose of Versailles: fine, light, tapered pen-like lines, eyelashes drawn stroke by stroke, hair in many thin parallel strands, very large tall eyes with several white star-shaped highlights and a glossy layered iris, tiny noses and slender long-limbed figures, flat cel fills with sparse single-tone shadow, floating roses, petals and sparkle bursts in the air, a painted-cel softness with film grain and a little wash bleed.",
+      "recap": "Pastel pink, lilac and baby blue fill the sky, the walls and the ground, cream and white stay in the light and the sparkles, rose red appears only in the floating roses, and every garment keeps its own stated colour.",
+      "notes": ""
+    },
+    "qwen_image_2_1": {
+      "style": "The image is a 1970s shojo cel animation frame in a signature Candy Candy style, with fine, light, tapered pen-like lines, eyelashes drawn stroke by stroke, hair in many thin parallel strands, flat cel fills with sparse single-tone shadow, glossy white star-shaped sparkle highlights, painted-cel softness and film grain, depicting a scene from a Gothic Victorian novel in a palette of pastel pink, lilac, baby blue, cream and rose red.",
+      "recap": "The overall composition frames its forms in a diffuse rosy glow with floating roses, petals and light bursts around the edges, in a tender, romantic mood, keeps to a palette of pastel pink, lilac, baby blue, cream and rose red, and reads throughout as a 1970s shojo cel animation frame in a signature Candy Candy style, with fine, light, tapered pen-like lines, eyelashes drawn stroke by stroke, hair in many thin parallel strands, flat cel fills with sparse single-tone shadow, glossy white star-shaped sparkle highlights, painted-cel softness and film grain.",
+      "notes": ""
+    }
+  },
+  "verdict": {
+    "status": "researched",
+    "best_model": null,
+    "notes": ""
+  }
+}

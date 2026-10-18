@@ -541,7 +541,7 @@ pre.ddl{font-family:"IBM Plex Mono",monospace;font-size:11px;line-height:1.4;col
           <ul>
             <li><div class="node lead"><div class="n">Studio office</div><div class="r">Autopilot (head of production) + the brain on a leash, the slate, decisions</div><div class="f">scripts/episode/autopilot.py · studio/brain.py · series.json · DECISIONS.md</div><div class="st built">autopilot built 2026-10-06</div></div>
               <ul>
-                <li><div class="node lead div"><div class="n">Platform</div><div class="r">Shared services. No deliverable of its own.</div><div class="f">llm · GPU lease · ledger · approval · measures · notify · publish clients · R&amp;D ledger · run clock (the process, 60 s beat; 2026-10-11) · visual onsets (studio/sfx_onset, 2026-10-17)</div><div class="st partial">mostly built</div></div></li>
+                <li><div class="node lead div"><div class="n">Platform</div><div class="r">Shared services. No deliverable of its own.</div><div class="f">llm · GPU lease · ledger · approval · measures · notify · publish clients · R&amp;D ledger · run clock (the process, 60 s beat; 2026-10-11) · model store (the episode working set on the C: NVMe, C:\comfy_models, searched first) · visual onsets (studio/sfx_onset, 2026-10-17)</div><div class="st partial">mostly built</div></div></li>
                 <li><div class="node lead div"><div class="n">Pre-production</div><div class="r">Asserts, invents, binds identity</div></div>
                   <ul>
                     <li><div class="node built"><div class="n">Analysis</div><div class="r">12 agents · unit: book</div><div class="f">analysis.py</div><div class="st built">built</div></div></li>
@@ -924,6 +924,7 @@ not built     a worker loop that starts a five-hour GPU job unattended — a que
       U('','Notify','Every department calls it; none copies it','missing','studio/notify.py'),
       U('','Publish clients','One pinned client per platform','partial','studio/youtube.py · higgsfield.py'),
       U('','R&D ledger','Hypothesis, variants, measures, verdict, cost','missing','experiments/<id>/manifest.json'),
+      U('','Model store','The episode working set on the C: NVMe (1.6 GB/s cold read vs 110 MB/s on the D: HDD, measured 2026-10-17), listed first in extra_model_paths.yaml (nvme_fast, is_default); the D: originals are never moved. Still on D: for want of C: room (2026-10-17): Qwen-Image 2.1 grids, Qwen-Edit 2511, Qwen3-TTS, IndexTTS2, the Krea2 identity LoRA','partial','ComfyUI extra_model_paths.yaml · C:\comfy_models'),
       U('','Visual onsets','When a take shows its event: the walker’s stride peaks (heel strikes) and the camera-compensated motion peaks around the people; the sound layer lays each effect on it (2026-10-17)','built','studio/sfx_onset.py')]},
     {n:'Analysis',r:'Pre-production · unit: book · leader analysis.py',st:'built',kids:[
       U('01','Ingest','EPUB → numbered chapters','built','step_01_ingest.py',[A('Book cartographer','real divisions'),A('Ingest validator','was the parse clean?','qc')]),

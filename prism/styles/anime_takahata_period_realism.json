@@ -1,0 +1,71 @@
+{
+  "id": "anime_takahata_period_realism",
+  "name": "Takahata period realism",
+  "family": "anime",
+  "summary": "Restrained, observational Ghibli cel realism: everyday Showa-era Japan in documentary-accurate painted settings, soft brown outlines and muted natural colour.",
+  "lineage": {
+    "titles": [
+      "Grave of the Fireflies (1988)",
+      "Only Yesterday (1991)"
+    ],
+    "studios": [
+      "Studio Ghibli"
+    ],
+    "directors": [
+      "Isao Takahata"
+    ],
+    "era": "late-1980s to early-1990s feature cel"
+  },
+  "traits": {
+    "line": "Brown, not black, outlines that soften the image, black only where needed; careful, even, unflashy line.",
+    "shading": "One soft restrained cel shadow tone; realistic facial muscles and creases on adults (Only Yesterday).",
+    "palette": "Muted natural colour: dusty khaki, sepia, faded green, grey-blue sky; ash and ember red in wartime; flashback scenes paler with faded edges.",
+    "lighting": "Naturalistic and motivated: sun, dusk, firelight, firefly glow points, air-raid orange skies.",
+    "faces": "Grounded simple faces; children with large round eyes; adults with realistic facial muscles and age lines.",
+    "backgrounds": "Location-scouted, near-photographic painted streets, houses and fields (Kobe, Nishinomiya, rural Yamagata); period interiors researched from Ozu films.",
+    "texture": "Painted cels, film grain, opaque poster-paint backgrounds.",
+    "camera": "Calm, eye-level, observational; long takes; flashbacks as soft faded vignettes."
+  },
+  "style_words": "Observational late-1980s feature cel animation: soft brown outlines instead of black, a single restrained cel shadow, muted natural palette of dusty khaki, faded green and grey-blue, naturalistic sun, dusk and ember light, location-accurate painted Showa-era streets and fields, film grain, as in Grave of the Fireflies (1988) and Only Yesterday (1991).",
+  "avoid": [
+    "Miyazaki fantasy brightness",
+    "big glossy moe eyes",
+    "saturated digital colour",
+    "heavy black outlines",
+    "stylised melodramatic lighting"
+  ],
+  "confusable_with": [
+    "anime_ghibli_miyazaki",
+    "anime_hosoda_clean",
+    "anime_kon_psych_realism",
+    "anime_kaguya_sumie"
+  ],
+  "sources": [
+    "https://en.wikipedia.org/wiki/Grave_of_the_Fireflies",
+    "https://en.wikipedia.org/wiki/Only_Yesterday_(1991_film)"
+  ],
+  "added": "2026-10-17",
+  "run": "r001",
+  "models": {
+    "krea2": {
+      "style": "Observational late-1980s feature cel animation, as in Only Yesterday: soft even brown outlines, grounded simple faces with realistic creases on adults, a single restrained cel shadow, muted dusty khaki, sepia, faded green and grey-blue, quiet naturalistic sun, dusk and ember light, location-accurate opaque poster-paint backgrounds, film grain.",
+      "recap": "Rendered throughout as observational late-1980s feature cel animation with soft brown outlines and film grain.",
+      "notes": ""
+    },
+    "flux3_klein": {
+      "style": "Observational late-1980s feature anime cel animation in the register of Only Yesterday: soft brown outlines with black only where needed, careful, even, unflashy line, grounded simple faces with realistic facial muscles and age lines on adults, one soft restrained cel shadow tone, naturalistic motivated light, location-accurate near-photographic painted backgrounds in opaque poster paint, painted cels with film grain.",
+      "recap": "Dusty khaki, sepia and faded green fill the walls and the ground, grey-blue fills the sky, the shadow fills are a muted brown-grey, ember red appears only in flames and the light sources, and every garment keeps its own stated colour.",
+      "notes": ""
+    },
+    "qwen_image_2_1": {
+      "style": "The image is an observational late-1980s feature cel animation frame in a signature Only Yesterday style, with soft brown outlines and careful, even, unflashy line, a single restrained cel shadow, realistic facial creases on adults, near-photographic opaque poster-paint backgrounds and film grain, depicting a scene from a Gothic Victorian novel in a palette of muted natural dusty khaki, sepia, faded green and grey-blue, with ash and ember red.",
+      "recap": "The overall composition observes its forms calmly in a grounded arrangement under naturalistic motivated light, in a quiet, sober mood, keeps to a palette of muted natural dusty khaki, sepia, faded green and grey-blue, with ash and ember red, and reads throughout as an observational late-1980s feature cel animation frame in a signature Only Yesterday style, with soft brown outlines and careful, even, unflashy line, a single restrained cel shadow, realistic facial creases on adults, near-photographic opaque poster-paint backgrounds and film grain.",
+      "notes": ""
+    }
+  },
+  "verdict": {
+    "status": "researched",
+    "best_model": null,
+    "notes": ""
+  }
+}

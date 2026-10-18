@@ -1,0 +1,68 @@
+{
+  "id": "anime_belladonna_watercolor",
+  "name": "Belladonna still watercolours",
+  "family": "anime",
+  "summary": "Early-70s art-house anime told mostly through still watercolour paintings and ink drawings panned by the camera: Art Nouveau curves, white space, bleeding washes, bursts of psychedelic colour.",
+  "lineage": {
+    "titles": [
+      "Belladonna of Sadness (1973)"
+    ],
+    "studios": [
+      "Mushi Production"
+    ],
+    "directors": [
+      "Eiichi Yamamoto"
+    ],
+    "era": "1970s art-house feature"
+  },
+  "traits": {
+    "line": "Swooping Art Nouveau ink lines (after Beardsley, Mucha, Klimt, Schiele), elongated figures, fine pen hair; some sketchy pencil (paintings by Kuni Fukai).",
+    "shading": "Watercolour wash modelling, no cel shading; often bare line on white.",
+    "palette": "Watercolour washes of rose, ochre, violet, gold and blue on white paper; occasional psychedelic bursts of saturated red, magenta and green.",
+    "lighting": "No motivated light; luminosity comes from paper white and wash.",
+    "faces": "Elegant elongated faces with long flowing hair at key moments; lifelike sketched faces; round childlike peasants; tall gothic courtiers.",
+    "backgrounds": "Often absent (white field) or decorative tapestry-like painted medieval scenes.",
+    "texture": "Watercolour bleed and granulation, paper texture, pencil marks, film grain.",
+    "camera": "Slow pans across long still paintings (usually right to left); mouths rarely move."
+  },
+  "style_words": "Still watercolour illustration animation from the early 1970s: swooping Art Nouveau ink lines after Beardsley, Mucha and Klimt, translucent washes of rose, ochre, violet and gold bleeding over large areas of white paper, no cel shading, watercolour granulation and pencil marks, bursts of psychedelic saturated colour, film grain, as in Belladonna of Sadness (1973).",
+  "avoid": [
+    "cel-shaded anime",
+    "busy fully painted backgrounds",
+    "modern digital gloss",
+    "the film's explicit subject matter leaking in through the title"
+  ],
+  "confusable_with": [
+    "anime_kaguya_sumie",
+    "anime_dezaki_70s",
+    "anime_amano_ethereal"
+  ],
+  "sources": [
+    "https://en.wikipedia.org/wiki/Belladonna_of_Sadness",
+    "https://filmcomment.com/blog/belladonna-of-sadness"
+  ],
+  "added": "2026-10-17",
+  "run": "r001",
+  "models": {
+    "krea2": {
+      "style": "Still watercolour illustration animation from the early 1970s: swooping Art Nouveau ink lines, elongated figures, translucent washes of rose, ochre, violet and gold bleeding over large areas of bare white paper, forms modelled only by wash, granulation and pencil marks, sudden bursts of saturated red, magenta and green, film grain.",
+      "recap": "Rendered throughout as early-1970s still watercolour illustration animation on white paper.",
+      "notes": ""
+    },
+    "flux3_klein": {
+      "style": "Still watercolour illustration from early-1970s animation in the register of Aubrey Beardsley: swooping black Art Nouveau ink lines, fine pen strokes in the hair, elongated figures, translucent watercolour washes that model every form, colour bleeding past the lines into large areas of bare white paper, watercolour granulation and paper texture, stray pencil marks, film grain, plain white paper fields and sparse decorative painting around the figures.",
+      "recap": "Rose, ochre and violet washes tint the sky, the walls and the ground, gold appears only in the light and the flames, one burst of saturated magenta and green marks the sky or the wall behind the figures, and every garment keeps its own stated colour as a translucent wash.",
+      "notes": ""
+    },
+    "qwen_image_2_1": {
+      "style": "The image is an early-1970s still watercolour illustration animation frame, with swooping Art Nouveau ink lines in the manner of Beardsley, elongated figures and fine pen hair, forms modelled only by translucent watercolour washes bleeding over large areas of bare white paper, granulation, pencil marks and film grain, depicting a scene from a Gothic Victorian novel in a palette of translucent rose, ochre, violet and gold washes on white paper, with bursts of saturated red, magenta and green.",
+      "recap": "The overall composition floats its elongated forms on generous fields of white paper, its light coming from the paper white and the washes, with a dreamlike, decorative mood, keeps to a palette of translucent rose, ochre, violet and gold washes on white paper, with bursts of saturated red, magenta and green, and reads throughout as an early-1970s still watercolour illustration animation frame, with swooping Art Nouveau ink lines in the manner of Beardsley, elongated figures and fine pen hair, forms modelled only by translucent watercolour washes bleeding over large areas of bare white paper, granulation, pencil marks and film grain.",
+      "notes": ""
+    }
+  },
+  "verdict": {
+    "status": "researched",
+    "best_model": null,
+    "notes": ""
+  }
+}

@@ -1,0 +1,74 @@
+{
+  "id": "anime_jojo_bold_ink",
+  "name": "JoJo bold ink",
+  "family": "anime",
+  "summary": "Heavy-inked muscular figures in theatrical poses, with scene-by-scene recoloured palettes, giant drawn sound-effect glyphs and manga hatching.",
+  "lineage": {
+    "titles": [
+      "JoJo's Bizarre Adventure (2012)",
+      "Stardust Crusaders (2014)",
+      "Diamond Is Unbreakable (2016)",
+      "Golden Wind (2018)"
+    ],
+    "studios": [
+      "David Production"
+    ],
+    "directors": [
+      "Naokatsu Tsuda",
+      "Kenichi Suzuki",
+      "Toshiyuki Kato",
+      "Yasuhiro Kimura",
+      "Hideya Takahashi"
+    ],
+    "era": "2010s digital TV, after Hirohiko Araki's manga (1987-)"
+  },
+  "traits": {
+    "line": "thick black outlines with contour hatching on muscle and cloth; dense drawing in climaxes; drawn motion lines",
+    "shading": "hard-edged manga shading with screentone-like hatching; unsettling faces darkened with tone, only the eyes lit",
+    "palette": "a base scheme plus 'special scene colouring' and 'special cut colouring' that swap skin, hair, uniform and sky colours at emotional peaks into acid pink, green, violet and yellow",
+    "lighting": "theatrical and symbolic rather than physical; inverted-colour and duotone frames",
+    "faces": "chiselled gekiga faces, strong brows, heavy lips with drawn lip lines, intense eyes",
+    "backgrounds": "patterned, stylised settings (Morioh town, Italian streets with decorative patterns); flat graphic colour in fights",
+    "texture": "hand-drawn fog and smoke, screentone, large katakana sound-effect glyphs ('gogogogo', 'menacing') drawn into the frame",
+    "camera": "manga panel compositions, frozen dramatic poses"
+  },
+  "style_words": "Digital TV anime faithful to Hirohiko Araki's manga, as in JoJo's Bizarre Adventure (2012): thick black outlines with contour hatching, hard-edged manga shading and screentone, a base palette that switches scene by scene to acid pink, green, violet and yellow, inverted-colour frames, giant drawn sound-effect glyphs, motion lines, hand-drawn smoke.",
+  "avoid": [
+    "soft rounded generic shonen anatomy",
+    "realistic naturalistic colour held constant",
+    "garbled fake katakana spread everywhere",
+    "glossy 3D shading"
+  ],
+  "confusable_with": [
+    "anime_toei_80s_shonen",
+    "anime_hellsing_gothic"
+  ],
+  "sources": [
+    "https://jojo-portal.com/special/production-note/en/01/",
+    "https://jojowiki.com/Interview:Animation_Series_Production_Note_(March_2021)"
+  ],
+  "added": "2026-10-17",
+  "run": "r001",
+  "models": {
+    "krea2": {
+      "style": "Digital TV anime, as in JoJo's Bizarre Adventure: thick black outlines with contour hatching on muscle and cloth, chiselled faces with heavy brows and lined lips, hard-edged manga shading and screentone, colours swapped into acid pink, green, violet and yellow, inverted duotone areas, theatrical symbolic light, motion lines, hand-drawn smoke.",
+      "recap": "Rendered throughout as digital TV anime with thick hatched black outlines and acid pink, green and violet colour.",
+      "notes": ""
+    },
+    "flux3_klein": {
+      "style": "Digital TV anime in the register of JoJo's Bizarre Adventure: thick black outlines with contour hatching on muscle and cloth, chiselled gekiga faces with strong brows, heavy lips with drawn lip lines and intense eyes, hard-edged manga shading with screentone-like hatching, faces darkened with tone so only the eyes are lit, drawn motion lines, hand-drawn curls of smoke, one large hand-drawn jagged sound-effect shape in a top corner of the frame.",
+      "recap": "Acid pink and violet fill the sky and the walls, acid green and yellow fill the ground and the shadow fills, and every garment keeps its own stated colour against them.",
+      "notes": ""
+    },
+    "qwen_image_2_1": {
+      "style": "The image is a digital TV animation frame in a signature JoJo's Bizarre Adventure style, with thick black outlines and contour hatching on muscle and cloth, hard-edged manga shading with screentone-like hatching, faces darkened with tone and only the eyes lit, chiselled features with strong brows, drawn motion lines and hand-drawn smoke, depicting a scene from a Gothic Victorian novel in a palette of theatrical special-scene colouring of acid pink, green, violet and yellow.",
+      "recap": "The overall composition freezes its forms in dramatic manga-panel poses under symbolic rather than physical light, in a bizarre, intense mood, keeps to a palette of theatrical special-scene colouring of acid pink, green, violet and yellow, and reads throughout as a digital TV animation frame in a signature JoJo's Bizarre Adventure style, with thick black outlines and contour hatching on muscle and cloth, hard-edged manga shading with screentone-like hatching, faces darkened with tone and only the eyes lit, chiselled features with strong brows, drawn motion lines and hand-drawn smoke.",
+      "notes": ""
+    }
+  },
+  "verdict": {
+    "status": "researched",
+    "best_model": null,
+    "notes": ""
+  }
+}

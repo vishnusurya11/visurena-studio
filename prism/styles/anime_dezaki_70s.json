@@ -1,0 +1,74 @@
+{
+  "id": "anime_dezaki_70s",
+  "name": "Dezaki postcard memories",
+  "family": "anime",
+  "summary": "Brushy 1970s TV cels that freeze and dissolve into chalk-pastel painted stills with cross-hatched shadow, under stark spotlight and split screens.",
+  "lineage": {
+    "titles": [
+      "Ashita no Joe (1970)",
+      "Aim for the Ace! (1973)",
+      "The Rose of Versailles (1979)",
+      "Ashita no Joe 2 (1980)",
+      "Golgo 13: The Professional (1983)"
+    ],
+    "studios": [
+      "Mushi Production",
+      "Tokyo Movie Shinsha",
+      "Madhouse"
+    ],
+    "directors": [
+      "Osamu Dezaki"
+    ],
+    "era": "1970s to early-1980s TV and theatrical"
+  },
+  "traits": {
+    "line": "brushy, expressive dark lines of varying weight (Akio Sugino; Shingo Araki and Michi Himeno on Rose of Versailles)",
+    "shading": "flat cel colour in motion; in the freeze frame ('postcard memory' / harmony cel) a repaint with heavy shadow and cross-hatching",
+    "palette": "pastel chalk tones in the postcard stills; warm sepia and dusk orange; muted 1970s cel colours elsewhere",
+    "lighting": "stark spotlight and hard backlight, sun-flare glints, soft-focus sparkle",
+    "faces": "Sugino's long angular boxers; Araki-Himeno elegant faces with large starry eyes and long lashes",
+    "backgrounds": "simple painted backgrounds, sometimes dropped to flat colour or pastel wash behind a freeze",
+    "texture": "chalk-pastel and gouache grain on the stills, 16mm film grain",
+    "camera": "split screens, dutch angles, the same action repeated in quick succession, multiplane depth"
+  },
+  "style_words": "1970s TV cel animation in Osamu Dezaki's manner, as in Ashita no Joe (1970) and The Rose of Versailles (1979): brushy expressive dark lines, flat cel colour, freeze frames that dissolve into chalk-pastel painted stills with cross-hatched shadow, stark spotlight and backlight, sparkle glints, warm sepia and dusk tones, gouache texture, 16mm film grain.",
+  "avoid": [
+    "clean modern digital line with no painterly freeze-frame texture",
+    "soft generic shoujo pastel without the hard cross-hatched shadow",
+    "high frame-rate fluid look; this style holds and freezes",
+    "turning into a full oil painting with no cel origin"
+  ],
+  "confusable_with": [
+    "anime_toei_80s_shonen",
+    "anime_sailor_moon_90s"
+  ],
+  "sources": [
+    "https://en.wikipedia.org/wiki/Osamu_Dezaki",
+    "https://otakuusamagazine.com/?p=204212",
+    "https://en.wikipedia.org/wiki/Shingo_Araki"
+  ],
+  "added": "2026-10-17",
+  "run": "r001",
+  "models": {
+    "krea2": {
+      "style": "1970s TV cel animation in Osamu Dezaki's manner: brushy expressive dark lines of varying weight, flat cel colour, a held freeze frame repainted as a chalk-and-gouache still with hard cross-hatched shadow, stark spotlight and hard backlight, sparkle glints, warm sepia and dusk orange tones, coarse film grain.",
+      "recap": "Rendered throughout as 1970s TV cel animation with brushy dark lines and coarse film grain.",
+      "notes": ""
+    },
+    "flux3_klein": {
+      "style": "1970s TV anime cel animation in the register of Osamu Dezaki: brushy, expressive dark lines of varying weight, flat cel colour, the frame held as a freeze frame repainted as a chalk-pastel still with heavy shadow and cross-hatching, stark spotlight and hard backlight, small sparkle glints on edges, chalk-pastel and gouache grain, 16mm film grain, the cel line still visible under the painted texture.",
+      "recap": "Warm sepia and dusk orange fill the sky, the walls and the ground, pale chalk-pastel tones stay in the lit areas, the shadow fills are dark brown cross-hatched with black, and every garment keeps its own stated colour.",
+      "notes": ""
+    },
+    "qwen_image_2_1": {
+      "style": "The image is a 1970s TV cel animation frame in Osamu Dezaki's manner, with brushy, expressive dark lines of varying weight, held as a freeze-frame still repainted in chalk pastel with heavy cross-hatched shadow, sparkle glints, gouache texture and 16mm film grain, depicting a scene from a Gothic Victorian novel in a palette of warm sepia and dusk orange, with chalky pastel tones and muted cel colours.",
+      "recap": "The overall composition holds its moment frozen under stark spotlight and hard backlight, with sun-flare glints and layered depth, in a dramatic, elegiac mood, keeps to a palette of warm sepia and dusk orange, with chalky pastel tones and muted cel colours, and reads throughout as a 1970s TV cel animation frame in Osamu Dezaki's manner, with brushy, expressive dark lines of varying weight, held as a freeze-frame still repainted in chalk pastel with heavy cross-hatched shadow, sparkle glints, gouache texture and 16mm film grain.",
+      "notes": ""
+    }
+  },
+  "verdict": {
+    "status": "researched",
+    "best_model": null,
+    "notes": ""
+  }
+}

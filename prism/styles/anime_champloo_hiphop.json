@@ -1,0 +1,68 @@
+{
+  "id": "anime_champloo_hiphop",
+  "name": "Samurai Champloo hip-hop Edo",
+  "family": "anime",
+  "summary": "Edo-period Japan remixed as hip-hop: lanky figures in loose energetic line, flat warm colour, graffiti and record-scratch graphics, extremes of light and dark.",
+  "lineage": {
+    "titles": [
+      "Samurai Champloo (2004)"
+    ],
+    "studios": [
+      "Manglobe"
+    ],
+    "directors": [
+      "Shinichiro Watanabe"
+    ],
+    "era": "2004-2005 TV"
+  },
+  "traits": {
+    "line": "Loose, wiry, variable-weight lines with angular breaks (Kazuto Nakazawa); thin limbs and baggy breakdance-inspired clothing folds.",
+    "shading": "Flat colour with one hard shadow; large blocks of darkness.",
+    "palette": "Warm and earthy: ochre, rust, indigo, faded green, sandy roads; red and black graphic accents; deep blue-black nights.",
+    "lighting": "Extremes of light and darkness (art director Takeshi Waki's brief, for scarce Edo lighting): sunlit exteriors against deep-shadow interiors, lantern pools.",
+    "faces": "Long angular faces, small eyes, strong noses, scruffy hair; each character a distinct silhouette.",
+    "backgrounds": "Painted Edo towns, roads, rivers and paddies with anachronistic graffiti tags and modern graphic signage.",
+    "texture": "Light grain, painted backgrounds, graphic overlays, rewind/scratch transitions.",
+    "camera": "DJ-style editing: rewinds, scratches, freeze frames, snap zooms, fast fight cuts."
+  },
+  "style_words": "Early-2000s TV animation remixing Edo Japan with hip-hop graphics: loose wiry variable-weight lines, flat warm ochre, rust and indigo fills with single hard shadows, extreme contrast between sunlit exteriors and deep shadow, painted period towns overlaid with graffiti tags, light grain, as in Samurai Champloo (2004).",
+  "avoid": [
+    "clean glossy modern digital",
+    "Cowboy Bebop's jazz-noir city palette",
+    "moe faces",
+    "a clean samurai period drama with no graphic overlays"
+  ],
+  "confusable_with": [
+    "anime_bebop_jazz_noir",
+    "anime_kawajiri_madhouse_90s",
+    "anime_mononoke_ukiyoe"
+  ],
+  "sources": [
+    "https://en.wikipedia.org/wiki/Samurai_Champloo",
+    "https://en.wikipedia.org/wiki/Kazuto_Nakazawa"
+  ],
+  "added": "2026-10-17",
+  "run": "r001",
+  "models": {
+    "krea2": {
+      "style": "Early-2000s TV animation, as in Samurai Champloo: loose wiry variable-weight lines with angular breaks, long angular faces with small eyes, flat warm ochre, rust and indigo fills with single hard shadows, red and black graphic accents, sunlit areas against deep shadow, painted period settings overlaid with graffiti tags, light grain.",
+      "recap": "Rendered throughout as early-2000s TV animation with loose wiry lines and graffiti overlays.",
+      "notes": ""
+    },
+    "flux3_klein": {
+      "style": "Early-2000s TV anime cel animation in the register of Samurai Champloo: loose, wiry, variable-weight black lines with angular breaks, thin limbs and long angular faces with small eyes, strong noses and scruffy hair, flat colour fills with one hard shadow, large blocks of deep darkness set hard against brightly lit areas, painted backgrounds overlaid with abstract spray-paint graphic shapes, light grain over hand-painted cels.",
+      "recap": "Ochre, rust and faded green fill the walls and the ground, indigo and deep blue-black fill the night sky and the shadow fills, red and black appear only in the spray-paint graphic shapes, and every garment keeps its own stated colour.",
+      "notes": ""
+    },
+    "qwen_image_2_1": {
+      "style": "The image is an early-2000s TV animation frame in a signature Samurai Champloo style, with loose, wiry, variable-weight lines with angular breaks, flat, unmodulated colour fills and hard-edged shadow shapes with large blocks of darkness, painted backgrounds with graphic overlays and light grain, depicting a scene from a Gothic Victorian novel in a palette of warm ochre, rust, indigo and faded green, with red and black graphic accents and deep blue-black shadow.",
+      "recap": "The overall composition plays extreme contrast between brightly lit areas and deep shadow, each form a distinct graphic silhouette, with a loose, rhythmic mood, keeps to a palette of warm ochre, rust, indigo and faded green, with red and black graphic accents and deep blue-black shadow, and reads throughout as an early-2000s TV animation frame in a signature Samurai Champloo style, with loose, wiry, variable-weight lines with angular breaks, flat, unmodulated colour fills and hard-edged shadow shapes with large blocks of darkness, painted backgrounds with graphic overlays and light grain.",
+      "notes": ""
+    }
+  },
+  "verdict": {
+    "status": "researched",
+    "best_model": null,
+    "notes": ""
+  }
+}

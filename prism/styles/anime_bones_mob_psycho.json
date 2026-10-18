@@ -1,0 +1,71 @@
+{
+  "id": "anime_bones_mob_psycho",
+  "name": "Mob Psycho simple-shape sakuga",
+  "family": "anime",
+  "summary": "Deliberately plain, round, simplified characters animated with fluid elastic movement that erupts into psychedelic aura effects and paint-like experimental sequences.",
+  "lineage": {
+    "titles": [
+      "Mob Psycho 100 (2016)",
+      "Mob Psycho 100 II (2019)",
+      "Mob Psycho 100 III (2022)"
+    ],
+    "studios": [
+      "Bones"
+    ],
+    "directors": [
+      "Yuzuru Tachikawa",
+      "Takahiro Hasui"
+    ],
+    "era": "2010s-2020s TV, digital"
+  },
+  "traits": {
+    "line": "Thick, simple, rounded outlines with slight weight variation and almost no interior detail; lines go loose and smeary in action (Yoshimichi Kameda).",
+    "shading": "Mostly flat with one shadow tone; at psychic peaks, glowing gradients, colour inversions and painted textures.",
+    "palette": "Everyday flat colours (black school uniform, beige, sky blue) breaking into saturated rainbow auras, neon pink, cyan and yellow at climaxes.",
+    "lighting": "Flat daily light; aura glows and backlit power bursts at climaxes.",
+    "faces": "Bowl cuts, dot or small oval eyes, tiny mouths, plain egg-shaped heads; exaggerated gag faces.",
+    "backgrounds": "Plain suburban painted backgrounds that turn into abstract swirling paint, crayon texture and colour storms during effects.",
+    "texture": "Clean digital in normal scenes; brushy, paint-on-glass and crayon textures in effects and title sequences.",
+    "camera": "Smears, multiples, rotating perspective, impact frames, elastic distortion."
+  },
+  "style_words": "Simplified-shape TV animation: thick rounded outlines with almost no interior detail, flat everyday colours with one shadow tone, erupting into smeared elastic lines, glowing aura gradients and saturated rainbow neon effects, brushy paint-on-glass and crayon textures at climaxes, clean digital finish otherwise, as in Mob Psycho 100 (2016).",
+  "avoid": [
+    "attractive detailed bishonen designs",
+    "realistic anatomy",
+    "uniformly glossy polished shading",
+    "Trigger-style sharp angular poses"
+  ],
+  "confusable_with": [
+    "anime_yuasa_loose",
+    "anime_trigger_angular",
+    "anime_kids_tv_bright"
+  ],
+  "sources": [
+    "https://en.wikipedia.org/wiki/Mob_Psycho_100",
+    "https://animenewsnetwork.com/feature/2019-09-09/interview-the-staff-of-mob-psycho-100/.150874"
+  ],
+  "added": "2026-10-17",
+  "run": "r001",
+  "models": {
+    "krea2": {
+      "style": "Simplified-shape TV animation, as in Mob Psycho 100: thick rounded outlines with almost no interior detail, plain egg-shaped heads with dot eyes, simple bodies in soft rounded poses, flat everyday colours with one shadow tone, flaring into smeared elastic lines, saturated rainbow aura light and brushy crayon textures.",
+      "recap": "Rendered throughout as simplified-shape TV animation with thick rounded outlines and flat colour.",
+      "notes": ""
+    },
+    "flux3_klein": {
+      "style": "Simplified-shape digital TV anime in the register of Mob Psycho 100: thick, simple, rounded outlines with almost no interior detail, plain egg-shaped heads with small dot or oval eyes and tiny mouths, flat everyday colour fills with one shadow tone, a glowing aura gradient and smeared elastic lines around the central figure or form, brushy paint-on-glass and crayon textures in the light effects, a clean digital finish on the figures.",
+      "recap": "Plain beige and sky blue fill the walls, the ground and the sky, the shadow fills are one flat darker tone, saturated rainbow neon pink, cyan and yellow appear only in the glowing aura and the light sources, and every garment keeps its own stated colour.",
+      "notes": ""
+    },
+    "qwen_image_2_1": {
+      "style": "The image is a simplified-shape digital TV animation frame in a signature Mob Psycho 100 style, with thick rounded outlines of slight weight variation and almost no interior detail, flat everyday colour fills with one hard-edged shadow tone, glowing aura gradients, and brushy paint-on-glass and crayon textures around the glows, depicting a scene from a Gothic Victorian novel in a palette of plain everyday black, beige and sky blue breaking into saturated rainbow neon pink, cyan and yellow.",
+      "recap": "The overall composition keeps its plain shapes simple and readable while bursts of glowing colour swirl behind them, with an elastic, eruptive mood, keeps to a palette of plain everyday black, beige and sky blue breaking into saturated rainbow neon pink, cyan and yellow, and reads throughout as a simplified-shape digital TV animation frame in a signature Mob Psycho 100 style, with thick rounded outlines of slight weight variation and almost no interior detail, flat everyday colour fills with one hard-edged shadow tone, glowing aura gradients, and brushy paint-on-glass and crayon textures around the glows.",
+      "notes": ""
+    }
+  },
+  "verdict": {
+    "status": "researched",
+    "best_model": null,
+    "notes": ""
+  }
+}

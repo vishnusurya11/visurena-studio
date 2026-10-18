@@ -1,0 +1,93 @@
+{
+  "id": "anime_ghibli_miyazaki",
+  "name": "Ghibli / Miyazaki",
+  "family": "anime",
+  "summary": "Hand-drawn cels with fine even outlines and sparing flat shadow, set into lush opaque poster-colour paintings of specific trees, moss, water and towering cumulus.",
+  "lineage": {
+    "titles": [
+      "My Neighbor Totoro (1988)",
+      "Princess Mononoke (1997)",
+      "Spirited Away (2001)"
+    ],
+    "studios": [
+      "Studio Ghibli"
+    ],
+    "directors": [
+      "Hayao Miyazaki"
+    ],
+    "era": "late-1980s to early-2000s theatrical"
+  },
+  "traits": {
+    "line": "thin, uniform-weight dark brown / near-black outlines on figures; no heavy outer contour; painted backgrounds carry no ink line at all",
+    "shading": "flat cel fill plus at most one hard-edged shadow tone, used sparingly; no airbrushed gradients on cels; cheeks marked by a small flat pink patch",
+    "palette": "subdued but beautiful mixed hues ('kirei' colours): olive, blue-green and moss greens, warm earth browns, soft sky blues; warm softened tones rather than harsh primaries",
+    "lighting": "natural daylight and dappled sun painted into the background; dusk lanterns and warm interior glow; no lens flare, bloom or digital glow passes",
+    "faces": "simple rounded faces, dot or short-stroke nose, moderate eyes with one highlight, thick brows; realistic child proportions, deliberately not 'pretty'",
+    "backgrounds": "Kazuo Oga-style Nicker poster colour (opaque gouache) painted large-to-small on a wet base coat; specific species of oak, camphor and weeds; impressionistic with selected fine details; big white cumulus",
+    "texture": "visible flat-brush strokes and soft gradations in the paint, faint paper tooth; painted, never photographic",
+    "camera": "grounded eye-level layouts, deep landscape vistas, gentle pans; almost no simulated lens effects"
+  },
+  "style_words": "Hand-drawn cel animation over opaque gouache poster-colour backgrounds, as in My Neighbor Totoro (1988) and Spirited Away (2001): fine even dark-brown outlines, flat cel colour with one sparing hard shadow tone, subdued warm olive and moss greens, impressionistic brushwork with selectively detailed foliage, soft natural daylight, towering white cumulus, faint paper grain.",
+  "avoid": [
+    "drifts into generic soft watercolour storybook where cels bleed and lose their outline",
+    "modern glossy digital anime with bloom, lens flare and gradient skin",
+    "oversized moe eyes, pointed chins and pastel hair",
+    "rounded 3D-rendered Western feature-animation shading",
+    "backgrounds turning into literal photographs instead of painted gouache"
+  ],
+  "confusable_with": [
+    "anime_lupin_tms_retro",
+    "anime_hosoda_clean",
+    "anime_shinkai_luminous"
+  ],
+  "sources": [
+    "https://en.wikipedia.org/wiki/Spirited_Away",
+    "https://animationobsessive.substack.com/p/what-kazuo-oga-thinks-about-when",
+    "https://animationobsessive.substack.com/p/defining-the-world-of-my-neighbor"
+  ],
+  "added": "2026-10-17",
+  "run": "r001",
+  "models": {
+    "krea2": {
+      "style": "Hand-drawn cel animation over opaque gouache poster-colour backgrounds, as in Spirited Away: fine even dark-brown outlines closing every figure, flat cel colour with one sparing hard shadow tone, simple round faces, subdued warm olive, moss green and earth brown, impressionistic brushwork with selectively detailed foliage, natural light, paper grain.",
+      "recap": "Rendered throughout as hand-drawn cel animation over opaque gouache poster-colour backgrounds.",
+      "notes": "",
+      "captions": {}
+    },
+    "flux3_klein": {
+      "style": "Hand-drawn anime cel animation over opaque gouache backgrounds, in the register of Spirited Away: fine, even, dark-brown outlines on the figures, flat cel colour with one sparing hard-edged shadow tone, simple rounded faces with moderate eyes holding one highlight and a small flat pink patch on each cheek, backgrounds in opaque poster colour with visible flat-brush strokes and no outline, impressionistic brushwork with selected fine detail, light painted into the background, faint paper tooth.",
+      "recap": "Olive, moss and blue-green fill the ground, the foliage and the shadow fills, warm earth brown fills the walls and the stone, soft sky blue with white cumulus fills any open sky, and every garment keeps its own stated colour.",
+      "notes": "",
+      "captions": {}
+    },
+    "qwen_image_2_1": {
+      "style": "The image is a hand-drawn cel animation frame in a signature Spirited Away style, with fine, even dark-brown outlines, flat, unmodulated cel colour with one sparing hard-edged shadow tone, set over opaque gouache poster-colour backgrounds with impressionistic flat-brush strokes, selectively detailed foliage and faint paper grain, depicting a scene from a Gothic Victorian novel in a palette of subdued warm olive, moss and blue-green, warm earth browns and soft sky blue.",
+      "recap": "The overall composition rests its forms in a grounded arrangement within deeply painted surroundings under soft natural light, in a calm, wondering mood, keeps to a palette of subdued warm olive, moss and blue-green, warm earth browns and soft sky blue, and reads throughout as a hand-drawn cel animation frame in a signature Spirited Away style, with fine, even dark-brown outlines, flat, unmodulated cel colour with one sparing hard-edged shadow tone, set over opaque gouache poster-colour backgrounds with impressionistic flat-brush strokes, selectively detailed foliage and faint paper grain.",
+      "notes": "",
+      "captions": {}
+    },
+    "flux3_klein_pup": {
+      "style": "",
+      "recap": "",
+      "notes": "",
+      "captions": {
+        "count": "Hand-drawn cel animation over opaque gouache poster-colour backgrounds, in the style of My Neighbor Totoro (1988) and Spirited Away (2001), with fine, even dark-brown outlines, flat cel colour, one sparing hard shadow tone, subdued warm olive and moss greens, impressionistic brushwork, faint paper grain, and soft natural daylight. A medium full shot at eye level shows Count Dracula as the single figure, centered in a three-quarter view from head to foot. He is a tall, gaunt old nobleman with pale skin, a long white moustache, a high hooked nose, arched eyebrows, pointed ears, and sharp white teeth showing at the corner of his mouth. He wears a high black collar, a fitted black coat, black trousers, and a long black cloak falling to his feet. His raised pale hand extends beside his head in a courtly welcome, palm turned outward with long fingers spread, while his other arm rests beneath the cloak. Behind him, a plain dark stone wall fills the middle background, painted in broad charcoal and muted olive-grey shapes with sparse brush texture. Towering white cumulus clouds rise above the wall across the upper background, their rounded forms outlined in dark brown and shaded with one cool grey tone. Selectively detailed moss-green foliage peeks into the outer corners, while the wall remains uncluttered. The cloak casts a single hard-edged shadow across the lower torso, and the restrained palette keeps Count Dracula prominent against the dark masonry.",
+        "castle": "Hand-drawn cel animation over opaque gouache poster-color backgrounds, with fine, even dark-brown outlines, flat cel colors, one sparing hard shadow tone, impressionistic brushwork, and faint paper grain, following the visual language of My Neighbor Totoro (1988) and Spirited Away (2001). An extreme wide establishing shot from a low angle sweeps across the Carpathian mountains at dusk, with an enormous darkening violet sky filling most of the composition. Towering white cumulus clouds rise through the upper two-thirds, their rounded forms painted in pale lavender-grey and muted cream, with the last soft natural daylight catching their undersides. Near the upper third, Castle Dracula stands small against the sky: a vast ruined Gothic castle of black stone perched on the edge of a sheer precipice, its clustered towers, pointed arches, narrow spires, broken battlements, and jagged collapsed walls defined by restrained dark-brown linework. A few narrow windows glow dull amber. Below, the precipice forms a steep black silhouette descending into a dense dark pine forest, where layered ranks of moss-green and blue-black conifers cover the lower portion of the frame. Sparse olive foliage and a few selectively detailed pine branches cling to the cliff edge. The distant Carpathian ridges recede as broad muted green silhouettes beneath the forest. The castle remains confined to the lower third, dwarfed by the immense violet sky and cumulus clouds, with no figures, animals, or human structures anywhere in the landscape.",
+        "arrival": "Hand-drawn cel animation over opaque gouache poster-colour backgrounds, with fine, even dark-brown outlines, flat cel colour, one sparing hard shadow tone, impressionistic brushwork, and faint paper grain, following the visual language of My Neighbor Totoro (1988) and Spirited Away (2001). A wide eye-level night scene looks across a dark stone courtyard, with the lit doorway framed at the centre. Towering white cumulus clouds rise above the roofline as pale, sculpted silhouettes against a deep blue-black sky, their lower edges tinted muted grey by the courtyard light. In the foreground, Jonathan Harker, a young English solicitor with fair skin and short brown hair, is seen from behind his shoulder. He wears a long brown travelling coat and holds a worn leather bag in his right hand. Beside him on the left stands a dark brown horse harnessed to a black horse-drawn carriage, its wooden body and large spoked wheels catching narrow olive highlights. Jonathan faces the doorway beyond the carriage. At the centre, a great old wooden door fills the opening, its heavy vertical planks darkened by age and studded with rows of iron nails. The open doorway glows amber around a tall old Count in black, his long coat and high collar forming a severe silhouette. He holds up an antique silver lamp with a small flame. The flame casts long, angular shadows across the Count, the doorframe, and the uneven courtyard stones. Moss-green and warm olive brushwork defines ivy, low shrubs, and creeping foliage around the doorway. The lamp’s hard amber light reaches the threshold and throws elongated shadows across the stones, while the surrounding masonry remains in deep blue-black and muted brown.",
+        "diary": "Hand-drawn cel animation over opaque gouache poster-color backgrounds, with fine, even dark-brown outlines, flat cel colors, one sparing hard shadow tone, subdued warm olive and moss greens, impressionistic brushwork, selectively detailed foliage, faint paper grain, and the hand-painted character of My Neighbor Totoro (1988) and Spirited Away (2001). A tight close-up from Mina Harker’s left shoulder looks across a small Victorian writing desk in a bedroom at night. Mina Harker, a young white woman in her twenties with fair skin and dark brown hair pinned into a neat high Victorian updo, sits in three-quarter profile near the center. She wears a high-necked pale blue blouse with narrow cuffs. Her face is turned toward the desk, her eyes lowered in concentration as she writes in an open leather-bound journal with a dark dip pen held in her right hand. The journal’s worn brown cover and cream pages fill the lower foreground, with the handwritten lines too small to read. At the right edge, a single short candle burns in a brass holder, its amber flame casting a compact hard-edged shadow across Mina’s cheek and the desk while illuminating the nearby page. Behind the candle, an open window reveals towering white cumulus clouds against a deep blue night sky, their rounded forms lit by soft natural-looking moonlight. Thin net curtains billow inward through the window, their lower edges curling in the night air. The room behind Mina falls soft into broad moss-green and olive shapes: a rumpled bed, a dark wooden headboard, and a few indistinct leaves from a small potted plant. Soft natural daylight remains confined to the cool blue window light, while the candle supplies the only warm local glow.",
+        "chase": "Hand-drawn cel animation over opaque gouache poster-colour backgrounds, with fine, even dark-brown outlines, flat cel colour, one sparing hard shadow tone, subdued warm olive and moss greens, impressionistic brushwork, selectively detailed foliage, faint paper grain, and soft natural daylight. At sunset on a snowy mountain road, a high-angle wide action view is tilted into a pronounced Dutch angle. Four horsemen gallop diagonally from the lower left toward the upper right, their horses and riders sweeping across the frame amid airborne snow. At the front, an old white doctor with fair skin, a long grey beard, and a heavy brown winter coat rides a dark bay horse, his patched wool cap and leather medical satchel bouncing above the saddle. Behind him, the first horseman wears a bulky charcoal coat and gallops on a black horse. The second is a tall white man with fair skin, a dark beard, and a long rifle held across his back, wearing a deep green winter coat. The third is a young white lord with fair skin and dark hair, dressed in a burgundy heavy coat with a fur collar. The fourth is a young white solicitor with fair skin and neatly combed brown hair, wearing a dark navy winter coat and riding beside the lord. Together they form the four horsemen, each distinguished by a heavy winter coat and a different horse. Ahead of them, a heavy wooden cart with thick runners and large spoked wheels climbs the road, carrying a large closed wooden box bound with rope. Two men in thick sheepskin coats drive the cart, leaning forward as they pull the reins. Hooves and cart wheels throw broad sprays of snow upward. Towering white cumulus clouds rise behind the cart against a muted orange sunset, their lower edges tinted moss green and brown. Snow-covered mountain slopes and sparse olive pines fill the background, with the road cutting sharply across the tilted horizon."
+      }
+    },
+    "flux3_klein_bfl": {
+      "style": "Hand-drawn anime cel illustration over opaque gouache poster-color painting, with fine even dark-brown outlines, flat cel color, one sparing hard shadow tone and subdued olive, moss and earth tones.",
+      "recap": "Everything is rendered with fine even outlines, flat cels and impressionistic gouache brushwork with faint paper grain typical of late-1980s hand-drawn feature anime.",
+      "notes": "",
+      "captions": {}
+    }
+  },
+  "verdict": {
+    "status": "researched",
+    "best_model": null,
+    "notes": ""
+  }
+}

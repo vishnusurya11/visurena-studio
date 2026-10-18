@@ -1,0 +1,72 @@
+{
+  "id": "anime_hosoda_clean",
+  "name": "Hosoda clean flat",
+  "family": "anime",
+  "summary": "Flat unshaded figures with sparse even lines set into lush, near-photoreal painted landscapes under huge white cumulus.",
+  "lineage": {
+    "titles": [
+      "The Girl Who Leapt Through Time (2006)",
+      "Summer Wars (2009)",
+      "Wolf Children (2012)"
+    ],
+    "studios": [
+      "Madhouse",
+      "Studio Chizu"
+    ],
+    "directors": [
+      "Mamoru Hosoda"
+    ],
+    "era": "late-2000s to 2010s theatrical"
+  },
+  "traits": {
+    "line": "thin, even, sparse lines; little interior detail (Yoshiyuki Sadamoto designs on Summer Wars and Wolf Children)",
+    "shading": "none: flat colour on figures with no cel shadow tone ('super-flat, non-shaded')",
+    "palette": "clean bright naturals; deep blue summer sky; rice-paddy greens; snow whites; Summer Wars' digital OZ world in white with saturated accents",
+    "lighting": "bright even daylight; light carried by the background painting, not by shadow on figures",
+    "faces": "simple, sparse features that read as nearly faceless at a distance",
+    "backgrounds": "lush, near-photorealistic painted countryside, old houses, mountains; towering white cumulus",
+    "texture": "clean digital; some CG crowds, waterfalls and plants",
+    "camera": "static wide frontal and lateral compositions; side-tracking runs"
+  },
+  "style_words": "Theatrical anime in Mamoru Hosoda's manner, as in Summer Wars (2009) and Wolf Children (2012): thin even sparse lines, flat colour with no cel shadow tone, clean bright palette, deep blue sky with towering white cumulus, lush near-photorealistic painted landscapes behind flat figures, bright even daylight, clean digital finish.",
+  "avoid": [
+    "adding cel shadows or gradients to figures",
+    "Ghibli-style poster-colour impressionism in place of the crisp near-photoreal backgrounds",
+    "Shinkai lens flares and sunset gradients",
+    "detailed glossy eyes"
+  ],
+  "confusable_with": [
+    "anime_ghibli_miyazaki",
+    "anime_kyoani_soft",
+    "anime_shinkai_luminous"
+  ],
+  "sources": [
+    "https://otakuusamagazine.com/?p=205237",
+    "https://www.animenewsnetwork.com/review/wolf-children",
+    "https://screenanarchy.com/2012/08/review-wolf-children-further-proves-that-mamoru-hosoda-isnt-the-new-hayao-miyazaki-reel-anime-2012.html"
+  ],
+  "added": "2026-10-17",
+  "run": "r001",
+  "models": {
+    "krea2": {
+      "style": "Theatrical anime, as in Wolf Children: thin even sparse lines, figures in pure flat colour with no shading at all, simple sparse faces with small plain eyes, a clean bright natural palette, deep blue sky, crisp, lush, near-real painted landscapes and old houses behind the flat figures, bright even light.",
+      "recap": "Rendered throughout as theatrical anime with flat unshaded figures against crisp painted landscapes.",
+      "notes": ""
+    },
+    "flux3_klein": {
+      "style": "Theatrical anime in the register of Mamoru Hosoda: thin, even, sparse lines with little interior detail, simple sparse facial features, figures painted in flat colour with one fill per surface, light carried by the background painting, lush near-photorealistic painted backgrounds with crisp detail behind the flat figures, a clean digital finish.",
+      "recap": "Deep blue fills the sky, rice-paddy green and snow white fill the ground, clean bright natural tones fill the walls and the stone, towering white cumulus stand in any open sky, and every garment keeps its own stated colour as one flat fill.",
+      "notes": ""
+    },
+    "qwen_image_2_1": {
+      "style": "The image is a theatrical animation frame in Mamoru Hosoda's manner, with thin, even, sparse lines and little interior detail, figures filled with flat, unshaded colour, set against lush, near-photorealistic painted backgrounds, with a clean digital finish, depicting a scene from a Gothic Victorian novel in a palette of clean bright naturals, deep blue sky, fresh greens and snow white.",
+      "recap": "The overall composition sets its flat forms in a calm, static arrangement before richly painted surroundings, the light carried by the background painting, in a clear, open mood, keeps to a palette of clean bright naturals, deep blue sky, fresh greens and snow white, and reads throughout as a theatrical animation frame in Mamoru Hosoda's manner, with thin, even, sparse lines and little interior detail, figures filled with flat, unshaded colour, set against lush, near-photorealistic painted backgrounds, with a clean digital finish.",
+      "notes": ""
+    }
+  },
+  "verdict": {
+    "status": "researched",
+    "best_model": null,
+    "notes": ""
+  }
+}

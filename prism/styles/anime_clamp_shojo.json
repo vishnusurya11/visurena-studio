@@ -1,0 +1,74 @@
+{
+  "id": "anime_clamp_shojo",
+  "name": "CLAMP elongated shojo",
+  "family": "anime",
+  "summary": "Ornate 1990s CLAMP shojo: slender long-limbed figures, flowing hair, lavish costumes, thin curving lines, flowers, feathers and decorative patterns.",
+  "lineage": {
+    "titles": [
+      "Tokyo Babylon (1992)",
+      "Magic Knight Rayearth (1994)",
+      "X (1996)",
+      "Cardcaptor Sakura (1998)"
+    ],
+    "studios": [
+      "Madhouse",
+      "Tokyo Movie Shinsha"
+    ],
+    "directors": [
+      "Rintaro",
+      "Morio Asaka",
+      "Toshihiro Hirano"
+    ],
+    "era": "1990s manga and TV/film"
+  },
+  "traits": {
+    "line": "Thin, delicate, curving lines (curves preferred over straight lines); hair in many fine flowing strands; lace, ribbons, feathers.",
+    "shading": "Soft cel shading with sparkle highlights; screentone-like gradients; dense black inks in the dark titles.",
+    "palette": "Cardcaptor: pastel pink, cream, blossom, lilac. X: deep crimson, black, moonlit blue, white feathers.",
+    "lighting": "Romantic glows; petals and feathers backlit; moonlight.",
+    "faces": "Large almond eyes with layered highlights, pointed chins, slim noses; long necks and legs, small hands.",
+    "backgrounds": "Decorative: flowers (never the same species twice in a chapter), feathers, stars, cards and magic circles; Tokyo landmarks in X.",
+    "texture": "Clean late-cel and early-digital finish; screentone-like patterns.",
+    "camera": "Tall vertical compositions that stress height; swirling fabric."
+  },
+  "style_words": "1990s CLAMP shojo style: thin delicate curving lines, flowing hair in fine strands, elongated slender proportions, ornate costumes with lace, ribbons and feathers, soft cel shading with sparkle highlights, flowers, petals and magic circles as decoration, pastel pink and lilac or crimson, black and moonlit blue, as in Cardcaptor Sakura (1998) and X (1996).",
+  "avoid": [
+    "stocky ordinary proportions",
+    "1970s star-eye shojo",
+    "1990s Sailor Moon round faces",
+    "heavy shonen outlines"
+  ],
+  "confusable_with": [
+    "anime_classic_shojo_70s",
+    "anime_sailor_moon_90s",
+    "anime_amano_ethereal"
+  ],
+  "sources": [
+    "https://www.yokogaomag.com/editorial/clamp-art-style-female-manga-collective",
+    "https://en.wikipedia.org/wiki/Cardcaptor_Sakura"
+  ],
+  "added": "2026-10-17",
+  "run": "r001",
+  "models": {
+    "krea2": {
+      "style": "1990s CLAMP shojo animation: thin delicate curving lines, hair in many fine flowing strands, elongated slender figures with long necks, pointed chins and large almond eyes, ornate lace, ribbons and feathers, soft cel shading with sparkle highlights, flowers, petals and magic circles as decoration, crimson, black and moonlit blue.",
+      "recap": "Rendered throughout as 1990s CLAMP shojo animation with thin delicate curving lines.",
+      "notes": ""
+    },
+    "flux3_klein": {
+      "style": "1990s shojo anime cel illustration in the register of CLAMP: thin, delicate, curving lines, hair in many fine flowing strands, tall elongated slender figures with long necks, long legs and small hands, large almond eyes with layered highlights, pointed chins and slim noses, lace, ribbon and feather trim, soft cel shading with sparkle highlights, dense black ink areas, white feathers and petals drifting through the air, a clean late-cel finish.",
+      "recap": "Moonlit blue fills the sky, the walls and the ground, black fills the shadow fills, deep crimson appears only in the light sources and the drifting petals, white is kept for the feathers and the highlights, and every garment keeps its own stated colour.",
+      "notes": ""
+    },
+    "qwen_image_2_1": {
+      "style": "The image is a 1990s shojo cel animation frame in a signature CLAMP style, with thin, delicate, curving lines, hair in many fine flowing strands, elongated slender proportions with long necks and legs, soft cel shading with sparkle highlights and screentone-like gradients, and a clean late-cel finish, depicting a scene from a Gothic Victorian novel in a palette of deep crimson, black, moonlit blue and white, with soft lilac and blossom-pink accents.",
+      "recap": "The overall composition stresses height and flowing curves, with drifting petals and feathers backlit around the forms, in a romantic, ornate mood, keeps to a palette of deep crimson, black, moonlit blue and white, with soft lilac and blossom-pink accents, and reads throughout as a 1990s shojo cel animation frame in a signature CLAMP style, with thin, delicate, curving lines, hair in many fine flowing strands, elongated slender proportions with long necks and legs, soft cel shading with sparkle highlights and screentone-like gradients, and a clean late-cel finish.",
+      "notes": ""
+    }
+  },
+  "verdict": {
+    "status": "researched",
+    "best_model": null,
+    "notes": ""
+  }
+}

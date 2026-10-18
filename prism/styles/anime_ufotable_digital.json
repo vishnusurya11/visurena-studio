@@ -1,0 +1,72 @@
+{
+  "id": "anime_ufotable_digital",
+  "name": "ufotable digital",
+  "family": "anime",
+  "summary": "Clean two-tone cel figures composited into 3D-laid-out painted sets, with glowing hand-drawn water and fire effects, particles and strong rim light.",
+  "lineage": {
+    "titles": [
+      "Fate/Zero (2011)",
+      "Fate/stay night: Unlimited Blade Works (2014)",
+      "Demon Slayer: Kimetsu no Yaiba (2019)",
+      "Demon Slayer: Mugen Train (2020)"
+    ],
+    "studios": [
+      "ufotable"
+    ],
+    "directors": [
+      "Ei Aoki",
+      "Haruo Sotozaki"
+    ],
+    "era": "2010s-2020s digital TV and theatrical"
+  },
+  "traits": {
+    "line": "clean dark lines of fairly even weight; distinct facial expression lines carried from the manga; effects drawn with flowing tapered contours",
+    "shading": "sharp two-tone cel shadow plus highlight, with compositing gradients and glow laid over",
+    "palette": "deep blue-teal and indigo nights; vivid effect colours (cyan-white water, orange-gold flame, crimson); patterned Taisho-era textiles in flat saturated colour",
+    "lighting": "strong rim light, moonlit edges, effect light spilling on figures, embers and glow; heavy but controlled bloom",
+    "faces": "on-model, sharp eyes with gradient irises and bright catchlights",
+    "backgrounds": "digitally painted, often built on 3D layouts so the camera can travel through forests, trains and corridors",
+    "texture": "smooth digital, floating particles, sparks, motion blur, ukiyo-e-like swirling wave and flame shapes",
+    "camera": "sweeping 3D camera moves circling the action"
+  },
+  "style_words": "Digital anime with heavy in-house compositing, as in Fate/Zero (2011) and Demon Slayer (2019): clean dark lines, sharp two-tone cel shading under glow passes, deep indigo and teal night palettes, hand-drawn ukiyo-e-style water and flame swirls in vivid cyan and orange, floating embers and particles, strong rim light, 3D-laid-out painted backgrounds, smooth digital finish.",
+  "avoid": [
+    "plastic full-CG look where the hand-drawn line disappears",
+    "effects and bloom swamping the whole frame",
+    "generic mobile-game splash art",
+    "flat TV-cel finish with no compositing depth"
+  ],
+  "confusable_with": [
+    "anime_mappa_gritty",
+    "anime_wit_aot_heavy_line"
+  ],
+  "sources": [
+    "https://en.wikipedia.org/wiki/Ufotable",
+    "https://www.animenewsnetwork.com/feature/2019-08-28/interview-demon-slayer-producer-yuma-takahashi/.149177",
+    "https://wrongeverytime.com/2019/05/06/why-it-works-the-digital-arenas-of-demon-slayers-battles/"
+  ],
+  "added": "2026-10-17",
+  "run": "r001",
+  "models": {
+    "krea2": {
+      "style": "Digital anime with heavy in-house compositing, as in Fate/Zero: clean dark hand-drawn lines on every figure, sharp two-tone cel shading under controlled glow kept to the light sources, layered compositing depth, deep indigo and teal night, ukiyo-e-style swirling flame shapes in vivid orange and cyan, floating embers, strong rim light.",
+      "recap": "Rendered throughout as digital anime with clean hand-drawn lines, sharp cel shading and layered compositing glow.",
+      "notes": ""
+    },
+    "flux3_klein": {
+      "style": "Digital anime with heavy compositing: clean dark lines of even weight, on-model faces with sharp eyes, gradient irises and bright catchlights, sharp two-tone cel shadow plus highlight under controlled glow passes, strong rim light along moonlit edges, effect light spilling onto the figures, hand-drawn ukiyo-e-style swirling flame and water shapes around the light sources, floating embers and particles, painted backgrounds laid out in deep 3D space, a smooth digital finish with the hand-drawn line on every figure.",
+      "recap": "Deep indigo and teal fill the sky, the walls and the ground, orange-gold appears only in the flames, the embers and the light sources, cyan-white appears only in the swirling effect shapes and the rim light, and every garment keeps its own stated colour.",
+      "notes": ""
+    },
+    "qwen_image_2_1": {
+      "style": "The image is a digital animation frame with heavy in-house compositing, in a signature Fate/Zero style, with clean dark lines of even weight, sharp two-tone cel shading with a highlight tone under glow passes, hand-drawn ukiyo-e-style swirls of flame and mist, floating embers and particles, strong rim light and a smooth digital finish, depicting a scene from a Gothic Victorian novel in a palette of deep indigo and teal night, with vivid cyan-white and orange-gold effect light and crimson.",
+      "recap": "The overall composition wraps its forms in sweeping depth with controlled bloom and effect light spilling across their edges, in a heightened, dramatic mood, keeps to a palette of deep indigo and teal night, with vivid cyan-white and orange-gold effect light and crimson, and reads throughout as a digital animation frame with heavy in-house compositing, in a signature Fate/Zero style, with clean dark lines of even weight, sharp two-tone cel shading with a highlight tone under glow passes, hand-drawn ukiyo-e-style swirls of flame and mist, floating embers and particles, strong rim light and a smooth digital finish.",
+      "notes": ""
+    }
+  },
+  "verdict": {
+    "status": "researched",
+    "best_model": null,
+    "notes": ""
+  }
+}

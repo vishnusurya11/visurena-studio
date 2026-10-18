@@ -1,0 +1,70 @@
+{
+  "id": "anime_kon_psych_realism",
+  "name": "Kon psychological realism",
+  "family": "anime",
+  "summary": "Ordinary-looking people in plain, cluttered, washed-out everyday rooms that tip into lurid saturated stage light and hard chiaroscuro as reality cracks.",
+  "lineage": {
+    "titles": [
+      "Perfect Blue (1997)",
+      "Millennium Actress (2001)",
+      "Paprika (2006)"
+    ],
+    "studios": [
+      "Madhouse"
+    ],
+    "directors": [
+      "Satoshi Kon"
+    ],
+    "era": "late-1990s to mid-2000s theatrical"
+  },
+  "traits": {
+    "line": "thin clean lines, realistic anatomy; Otomo-influenced draughtsmanship",
+    "shading": "simple two-tone cel shadow; hard directional shadow in breakdown scenes",
+    "palette": "plain washed-out everyday tones early on; shifts to saturated red, purple and cold blue as the story darkens; Paprika adds a carnival of bright parade colour",
+    "lighting": "flat ordinary room light, then harsh artificial stage spots and chiaroscuro",
+    "faces": "realistically proportioned 'regular people' faces, real-world hair colours, features slightly exaggerated toward character; idol prettiness reserved for the pop persona",
+    "backgrounds": "deliberately unromantic, meticulously ordinary: cluttered apartments, fish tanks, posters, train carriages, city streets",
+    "texture": "1990s cel grain (Perfect Blue); clean early digital (Paprika)",
+    "camera": "match cuts between reality and fiction, mirrors and reflections, layout-driven framing"
+  },
+  "style_words": "Late-1990s to 2000s Madhouse realist animation, as in Perfect Blue (1997) and Paprika (2006): thin clean lines, simple two-tone cel shading, plain washed-out everyday palette shifting to lurid saturated red, purple and cold blue, harsh artificial stage light and chiaroscuro, meticulously ordinary cluttered painted interiors, mirror reflections, subtle 1990s cel grain.",
+  "avoid": [
+    "glamorous idealised anime prettiness everywhere",
+    "neon-soaked cyberpunk stylisation",
+    "big-eyed moe faces",
+    "photoreal rendering that loses the drawn line"
+  ],
+  "confusable_with": [
+    "anime_oshii_gits",
+    "anime_otomo_akira",
+    "anime_mappa_gritty"
+  ],
+  "sources": [
+    "https://en.wikipedia.org/wiki/Satoshi_Kon",
+    "https://colorculture.org/perfect-blue-cinematography-analysis/"
+  ],
+  "added": "2026-10-17",
+  "run": "r001",
+  "models": {
+    "krea2": {
+      "style": "Late-1990s realist cel animation, as in Perfect Blue: thin clean lines, realistically proportioned ordinary faces with small eyes, simple two-tone cel shading, plain washed-out everyday palette shifting to lurid red, purple and cold blue, harsh artificial stage light and chiaroscuro, meticulously ordinary detail, mirror reflections, subtle cel grain.",
+      "recap": "Rendered throughout as late-1990s realist cel animation with thin clean lines and subtle cel grain.",
+      "notes": ""
+    },
+    "flux3_klein": {
+      "style": "Late-1990s anime cel animation in the register of Perfect Blue: thin clean lines with realistic anatomy, realistically proportioned ordinary faces with real-world hair colours and features drawn toward character, simple two-tone cel shading with hard directional shadow, harsh artificial spotlight and chiaroscuro, meticulously ordinary painted surfaces with everyday detail, reflections in glass and polished surfaces, subtle 1990s cel grain, the drawn line kept on every form.",
+      "recap": "Plain washed-out everyday tones fill the walls and the ground, lurid saturated red and purple appear only in the light sources and the sky, cold blue fills the shadow fills, and every garment keeps its own stated colour.",
+      "notes": ""
+    },
+    "qwen_image_2_1": {
+      "style": "The image is a late-1990s realist cel animation frame in a signature Perfect Blue style, with thin clean lines and realistic anatomy, simple two-tone cel shading in flat, unmodulated colour fills and hard-edged shadow shapes, meticulously ordinary painted detail, mirror-like reflections and subtle cel grain, depicting a scene from a Gothic Victorian novel in a palette of plain washed-out everyday tones shifting into lurid saturated red, purple and cold blue.",
+      "recap": "The overall composition frames ordinary forms with layout-driven precision under harsh artificial light and chiaroscuro, in an unsettling, psychological mood, keeps to a palette of plain washed-out everyday tones shifting into lurid saturated red, purple and cold blue, and reads throughout as a late-1990s realist cel animation frame in a signature Perfect Blue style, with thin clean lines and realistic anatomy, simple two-tone cel shading in flat, unmodulated colour fills and hard-edged shadow shapes, meticulously ordinary painted detail, mirror-like reflections and subtle cel grain.",
+      "notes": ""
+    }
+  },
+  "verdict": {
+    "status": "researched",
+    "best_model": null,
+    "notes": ""
+  }
+}

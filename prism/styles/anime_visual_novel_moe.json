@@ -1,0 +1,71 @@
+{
+  "id": "anime_visual_novel_moe",
+  "name": "Visual-novel moe CG",
+  "family": "anime",
+  "summary": "A polished still illustration like a galge event CG: huge glossy layered eyes, soft gradient cel shading, pastel palette and dreamy sun-washed backgrounds.",
+  "lineage": {
+    "titles": [
+      "Kanon (1999)",
+      "Air (2000)",
+      "Clannad (2004)"
+    ],
+    "studios": [
+      "Key (Visual Arts)"
+    ],
+    "directors": [
+      "Itaru Hinoue (art)"
+    ],
+    "era": "1999-2010s PC visual novels"
+  },
+  "traits": {
+    "line": "Thin, clean digital lines, often tinted toward the fill colour; fine hair-strand lines.",
+    "shading": "Two- to three-tone cel shading softened by airbrush gradients; glossy hair highlight band; pink blush hatching under the eyes.",
+    "palette": "Pastel, high key: sky blue, cream, pink, pale yellow; sunset orange for emotional scenes.",
+    "lighting": "Soft backlight, glow, bloom, sunbeams, dreamy haze.",
+    "faces": "Very large eyes with layered gradient irises and prominent white highlights, tiny nose and mouth, rounded chin, slightly large head, long hair.",
+    "backgrounds": "Painted or photo-traced nostalgic town and school scenery, slightly blurred behind the figure; snow, summer sky, blossom.",
+    "texture": "Clean digital painting with glow overlays; no grain.",
+    "camera": "Static still-illustration composition; centred figure; event-CG framing."
+  },
+  "style_words": "Japanese visual-novel event CG illustration: thin clean tinted lineart, soft two-tone cel shading blended with airbrush gradients, glossy layered highlights and pink blush hatching, pastel high-key palette of sky blue, cream and pink, dreamy backlight bloom and haze, softly blurred nostalgic painted backgrounds, as in Kanon (1999) and Clannad (2004).",
+  "avoid": [
+    "flat animated-TV cel look",
+    "heavy black outlines",
+    "realistic proportions",
+    "gritty texture",
+    "eroge sexualisation drift"
+  ],
+  "confusable_with": [
+    "anime_kyoani_soft",
+    "anime_chibi_sd",
+    "anime_shinkai_luminous"
+  ],
+  "sources": [
+    "https://animetics.net/2015/06/30/character-redesign-in-adapting-kanon/",
+    "https://en.wikipedia.org/wiki/Visual_novel"
+  ],
+  "added": "2026-10-17",
+  "run": "r001",
+  "models": {
+    "krea2": {
+      "style": "Japanese visual-novel event CG illustration, as in Clannad: thin clean lineart tinted toward the fill colours, soft two-tone shading blended with airbrush gradients, glossy layered highlights, pink blush hatching, very large layered eyes, modest fully clothed figures, pastel high-key sky blue, cream and pink, backlight glow and haze, blurred backgrounds.",
+      "recap": "Rendered throughout as a Japanese visual-novel event CG illustration with soft airbrushed shading.",
+      "notes": ""
+    },
+    "flux3_klein": {
+      "style": "Japanese visual-novel event CG illustration in the register of Clannad: thin clean lineart tinted toward each fill colour, fine hair-strand lines, very large eyes with layered gradient irises and bright white highlights, tiny nose and mouth, rounded chin, figures fully clothed in their stated garments, soft two-tone cel shading blended with airbrush gradients, a glossy highlight band on the hair, pink blush hatching under the eyes, soft backlight with bloom and haze, softly blurred painted backgrounds, a clean digital painting finish.",
+      "recap": "Sky blue and cream fill the sky and the walls, pale yellow and pink fill the ground, sunset orange appears only in the light sources, the shadow fills are a soft lavender tint, and every garment keeps its own stated colour.",
+      "notes": ""
+    },
+    "qwen_image_2_1": {
+      "style": "The image is a Japanese visual-novel event CG illustration in a signature Kanon style, with thin, clean lineart tinted toward the fill colour, fine hair-strand lines, soft two-tone cel shading blended with airbrush gradients, glossy layered highlights, pink blush hatching on the cheeks, dreamy backlight bloom and haze, and softly blurred painted surroundings, depicting a scene from a Gothic Victorian novel in a palette of pastel high-key sky blue, cream, pink and pale yellow, with warm sunset orange.",
+      "recap": "The overall composition presents its focal subject as a still illustrated moment against softly blurred surroundings, in a dreamy, nostalgic mood, keeps to a palette of pastel high-key sky blue, cream, pink and pale yellow, with warm sunset orange, and reads throughout as a Japanese visual-novel event CG illustration in a signature Kanon style, with thin, clean lineart tinted toward the fill colour, fine hair-strand lines, soft two-tone cel shading blended with airbrush gradients, glossy layered highlights, pink blush hatching on the cheeks, dreamy backlight bloom and haze, and softly blurred painted surroundings.",
+      "notes": ""
+    }
+  },
+  "verdict": {
+    "status": "researched",
+    "best_model": null,
+    "notes": ""
+  }
+}

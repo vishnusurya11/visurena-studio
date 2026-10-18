@@ -1,0 +1,74 @@
+{
+  "id": "anime_kawajiri_madhouse_90s",
+  "name": "Kawajiri Madhouse noir",
+  "family": "anime",
+  "summary": "Crisp hard-lined, high-contrast cels with large solid black shadows and long angular faces in dark, filtered night scenes of horror and ninja noir.",
+  "lineage": {
+    "titles": [
+      "Wicked City (1987)",
+      "Demon City Shinjuku (1988)",
+      "Ninja Scroll (1993)",
+      "Vampire Hunter D: Bloodlust (2000)"
+    ],
+    "studios": [
+      "Madhouse"
+    ],
+    "directors": [
+      "Yoshiaki Kawajiri"
+    ],
+    "era": "late-1980s to 1990s theatrical and OVA, extending to 2000"
+  },
+  "traits": {
+    "line": "crisp sharp black lines, angular anatomy, long tapered limbs; heavy contour on musculature",
+    "shading": "hard two-tone cels with large flat black shadow masses, hard rim light on edges; no soft gradients on figures",
+    "palette": "dark night base of indigo, teal and charcoal; ochre and amber lamplight; blood red and sickly green accents; whole scenes tinted by colour filters",
+    "lighting": "high contrast, single strong source, noir side light and backlight, silhouettes against fog or moon",
+    "faces": "long narrow faces, narrow eyes, defined cheekbones and jaw; butch bulky men, elongated sensual women; grotesque organic monsters",
+    "backgrounds": "atmospheric airbrushed and brush-painted scenery: misty forests, rain-wet night streets, smoky interiors",
+    "texture": "35mm film grain, cel dust, optical filters and haze",
+    "camera": "limited animation carried by strong key drawings, dramatic low angles, fast editing"
+  },
+  "style_words": "Hand-painted late-1980s to 1990s Madhouse cel animation, as in Wicked City (1987) and Ninja Scroll (1993): crisp sharp black lines, hard two-tone cel shading with large solid black shadow masses, hard rim light, dark indigo and charcoal night palette with amber, blood-red and sickly green accents, colour-filtered scenes, airbrushed misty backgrounds, 35mm film grain.",
+  "avoid": [
+    "bright modern digital anime with gradients and bloom",
+    "cute rounded faces and big eyes",
+    "daylight pastel palettes",
+    "clean grain-free finish that loses the cel and film texture"
+  ],
+  "confusable_with": [
+    "anime_hellsing_gothic",
+    "anime_amano_ethereal",
+    "anime_redline_koike",
+    "anime_berserk_97"
+  ],
+  "sources": [
+    "https://otakuusamagazine.com/wicked-city-a-look-back/",
+    "https://www.onderhond.com/blog/ninja-scroll-review-yoshiaki-kawajiri",
+    "https://en.wikipedia.org/wiki/Yoshiaki_Kawajiri",
+    "https://en.wikipedia.org/wiki/Vampire_Hunter_D:_Bloodlust"
+  ],
+  "added": "2026-10-17",
+  "run": "r001",
+  "models": {
+    "krea2": {
+      "style": "Hand-painted 1990s cel animation, as in Ninja Scroll: crisp sharp black lines, angular anatomy with long narrow faces, hard two-tone cel shading with large solid black shadow masses, hard rim light, dark indigo, teal and charcoal night with amber, blood-red and sickly green accents, airbrushed misty backgrounds, heavy film grain.",
+      "recap": "Rendered throughout as hand-painted 1990s cel animation with large black shadow masses and heavy film grain.",
+      "notes": ""
+    },
+    "flux3_klein": {
+      "style": "Hand-painted 1990s anime cel animation in the register of Madhouse: crisp, sharp black lines, angular anatomy with long tapered limbs and heavy contour on musculature, long narrow faces with narrow eyes and defined cheekbones, hard two-tone cels with large flat solid black shadow masses, flat shadow fills on the figures, hard rim light along every edge, airbrushed and brush-painted misty backgrounds, a colour filter tinting the whole scene, 35mm film grain, cel dust and optical haze.",
+      "recap": "Indigo, teal and charcoal fill the sky, the walls, the ground and the shadow fills, ochre and amber stay inside lamp, candle and window light, blood red and sickly green appear only as thin rim light on edges, and every garment keeps its own stated colour.",
+      "notes": ""
+    },
+    "qwen_image_2_1": {
+      "style": "The image is a hand-painted 1990s cel animation frame in the Madhouse manner, with crisp, sharp black lines and angular anatomy with long tapered limbs, flat, unmodulated colour fills and hard-edged shadow shapes with large solid black masses, hard rim light on edges, airbrushed misty backgrounds and 35mm film grain, depicting a scene from a Gothic Victorian novel in a palette of dark indigo, teal and charcoal night, with ochre and amber lamplight and blood-red and sickly green accents.",
+      "recap": "The overall composition carves its forms out of darkness with a single strong side or back light, silhouetted against fog and colour-filtered haze, in a menacing noir mood, keeps to a palette of dark indigo, teal and charcoal night, with ochre and amber lamplight and blood-red and sickly green accents, and reads throughout as a hand-painted 1990s cel animation frame in the Madhouse manner, with crisp, sharp black lines and angular anatomy with long tapered limbs, flat, unmodulated colour fills and hard-edged shadow shapes with large solid black masses, hard rim light on edges, airbrushed misty backgrounds and 35mm film grain.",
+      "notes": ""
+    }
+  },
+  "verdict": {
+    "status": "researched",
+    "best_model": null,
+    "notes": ""
+  }
+}

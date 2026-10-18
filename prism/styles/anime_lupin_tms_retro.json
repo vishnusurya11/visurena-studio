@@ -1,0 +1,74 @@
+{
+  "id": "anime_lupin_tms_retro",
+  "name": "Lupin TMS retro",
+  "family": "anime",
+  "summary": "Lively rounded 1970s cels with minimal shadow, lanky rubbery figures and precisely drawn vintage cars and guns, against bright summery painted Europe.",
+  "lineage": {
+    "titles": [
+      "Lupin the 3rd Part I (1971)",
+      "Lupin the 3rd Part II (1977)",
+      "The Castle of Cagliostro (1979)"
+    ],
+    "studios": [
+      "Tokyo Movie Shinsha (TMS)",
+      "A Production"
+    ],
+    "directors": [
+      "Masaaki Osumi",
+      "Hayao Miyazaki",
+      "Isao Takahata"
+    ],
+    "era": "1970s TV and theatrical"
+  },
+  "traits": {
+    "line": "lively, rounded brown-black lines with bouncy energy (Yasuo Otsuka animation)",
+    "shading": "flat cel colour with minimal or no shadow tone",
+    "palette": "bright summery palette; Lupin's green (Part I) or red (Part II) jacket; ivy green, terracotta, stone ochre, lake blue",
+    "lighting": "clear daylight; moonlit castle nights in deep blue",
+    "faces": "lanky long-limbed figures, monkey-like grinning faces, elastic exaggerated expressions",
+    "backgrounds": "detailed hand-painted European towns and castles: stone, ivy, red tile roofs, lakes",
+    "texture": "warm film grain, slightly faded 1970s colour stock",
+    "camera": "chase-driven staging, slapstick timing, careful mechanical detail on Fiat 500s, Citroen 2CVs and Walther pistols"
+  },
+  "style_words": "1970s TMS cel animation, as in Lupin the 3rd Part II (1977) and The Castle of Cagliostro (1979): lively rounded brown-black lines, flat cel colour with minimal shadow, bright summery palette of ivy green, terracotta and lake blue, detailed hand-painted European stone and red-tile backgrounds, precisely drawn vintage machines, warm faded film grain.",
+  "avoid": [
+    "modern Lupin Part 5 digital clean look",
+    "Koike-style heavy black shadow (Jigen's Gravestone) unless intended",
+    "Ghibli-era painterly greens overriding the 1970s cel look",
+    "realistic proportions with no elasticity"
+  ],
+  "confusable_with": [
+    "anime_ghibli_miyazaki",
+    "anime_bebop_jazz_noir",
+    "anime_redline_koike"
+  ],
+  "sources": [
+    "https://en.wikipedia.org/wiki/The_Castle_of_Cagliostro",
+    "https://en.wikipedia.org/wiki/Lupin_the_Third_Part_I",
+    "https://en.wikipedia.org/wiki/Lupin_the_3rd_Part_II"
+  ],
+  "added": "2026-10-17",
+  "run": "r001",
+  "models": {
+    "krea2": {
+      "style": "1970s TV cel animation, as in Lupin the 3rd Part II: lively rounded brown-black lines with bouncy energy, lanky figures with elastic exaggerated expressions, flat cel colour with light minimal shadow, bright summery ivy green, terracotta, stone ochre and lake blue, detailed hand-painted European stone backgrounds, warm faded film grain.",
+      "recap": "Rendered throughout as 1970s TV cel animation with lively brown-black lines and warm faded film grain.",
+      "notes": ""
+    },
+    "flux3_klein": {
+      "style": "1970s TMS anime cel animation: lively, rounded brown-black lines with bouncy energy, lanky long-limbed figures with elastic exaggerated expressions, flat cel colour with minimal shadow, precisely drawn mechanical and wooden detail, detailed hand-painted backgrounds of stone, ivy and tile, warm film grain over slightly faded 1970s colour stock.",
+      "recap": "Ivy green and terracotta fill the walls, the stone and the ground, lake blue and deep night blue fill the sky and the shadow fills, warm stone ochre stays in the lit areas, and every garment keeps its own stated colour.",
+      "notes": ""
+    },
+    "qwen_image_2_1": {
+      "style": "The image is a 1970s cel animation frame in a signature Castle of Cagliostro style, with lively, rounded brown-black lines of bouncy energy, flat cel colour with minimal shadow, detailed hand-painted European backgrounds, precisely drawn machinery and warm, slightly faded film grain, depicting a scene from a Gothic Victorian novel in a palette of bright summery ivy green, terracotta, stone ochre and lake blue, with deep moonlit blue at night.",
+      "recap": "The overall composition stages its lanky, elastic forms in a lively, open arrangement under clear light, in a playful, adventurous mood, keeps to a palette of bright summery ivy green, terracotta, stone ochre and lake blue, with deep moonlit blue at night, and reads throughout as a 1970s cel animation frame in a signature Castle of Cagliostro style, with lively, rounded brown-black lines of bouncy energy, flat cel colour with minimal shadow, detailed hand-painted European backgrounds, precisely drawn machinery and warm, slightly faded film grain.",
+      "notes": ""
+    }
+  },
+  "verdict": {
+    "status": "researched",
+    "best_model": null,
+    "notes": ""
+  }
+}

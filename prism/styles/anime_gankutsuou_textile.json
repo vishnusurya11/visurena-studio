@@ -1,0 +1,67 @@
+{
+  "id": "anime_gankutsuou_textile",
+  "name": "Gankutsuou textile overlays",
+  "family": "anime",
+  "summary": "Shadowless flat characters whose hair and clothes are filled with immobile brocade and wallpaper patterns that stay put as the figure moves, in a jewel-toned digital baroque.",
+  "lineage": {
+    "titles": [
+      "Gankutsuou: The Count of Monte Cristo (2004)"
+    ],
+    "studios": [
+      "Gonzo"
+    ],
+    "directors": [
+      "Mahiro Maeda"
+    ],
+    "era": "2000s TV, digital"
+  },
+  "traits": {
+    "line": "Clean thin outlines that only define shapes; few creases (they would vanish under the textures).",
+    "shading": "No shadows or highlights on characters (Hidenori Matsubara designs); depth comes from stacked layers.",
+    "palette": "Jewel tones and gilt: emerald, violet, crimson, turquoise, gold; bold colour blocks after Klimt.",
+    "lighting": "Little naturalism; glow and colour-block contrast; CG-rendered space vistas.",
+    "faces": "Elegant pale faces left untextured; the Count with blue-green skin.",
+    "backgrounds": "Ornate 19th-century French interiors and futuristic cities, often 3D, layered with patterns and swirling skies.",
+    "texture": "Digital textile, lace, brocade and wallpaper patterns filling hair and clothing, fixed to the screen rather than the body; collage of layers.",
+    "camera": "Theatrical, distant staging (Noh influence); slow movement; layered parallax."
+  },
+  "style_words": "Digital baroque TV animation: thin clean outlines with no shading, hair and clothing filled with flat brocade, lace and wallpaper pattern textures locked to the screen, jewel-toned emerald, violet, crimson, turquoise and gilt colour blocks after Klimt, layered ornate patterned backgrounds, as in Gankutsuou: The Count of Monte Cristo (2004).",
+  "avoid": [
+    "cel shadows and highlights on characters",
+    "patterns that wrap and fold with the cloth like 3D",
+    "plain single-colour costumes",
+    "washi-paper earth tones (Mononoke drift)"
+  ],
+  "confusable_with": [
+    "anime_mononoke_ukiyoe",
+    "anime_shaft_avantgarde"
+  ],
+  "sources": [
+    "https://en.wikipedia.org/wiki/Gankutsuou:_The_Count_of_Monte_Cristo",
+    "https://www.animenewsnetwork.com/review/gankutsuou/dvd-2"
+  ],
+  "added": "2026-10-17",
+  "run": "r001",
+  "models": {
+    "krea2": {
+      "style": "Digital baroque TV animation, as in Gankutsuou: thin clean outlines on completely flat, unlit figures, hair and clothing filled with flat brocade, lace and wallpaper patterns fixed to the screen like a collage, jewel-toned emerald, violet, crimson, turquoise and gilt colour blocks, layered ornate patterned backgrounds and swirling skies.",
+      "recap": "Rendered throughout as digital baroque animation with flat brocade patterns fixed to the screen.",
+      "notes": ""
+    },
+    "flux3_klein": {
+      "style": "Digital baroque TV anime in the register of Gankutsuou: thin clean outlines that only define shapes, flat unshaded figures, every garment and every head of hair filled with flat brocade, lace and wallpaper pattern locked to the screen like a fixed overlay, faces left plain and pale, ornate backgrounds of swirling flat patterns, depth built from stacked flat layers, bold colour blocks after Klimt.",
+      "recap": "Emerald, violet and turquoise patterns fill the sky, the walls and the ground, crimson and gilt gold appear only in the light sources and the pattern borders, and every garment keeps its own stated colour as the base colour of its brocade pattern.",
+      "notes": ""
+    },
+    "qwen_image_2_1": {
+      "style": "The image is a digital baroque TV animation frame in a signature Gankutsuou style, with thin clean outlines that only define shapes, figures filled with flat unshaded colour, pale faces left smooth, hair and clothing filled with flat brocade, lace and wallpaper patterns locked to the screen, and depth built from stacked flat layers, depicting a scene from a Gothic Victorian novel in a palette of jewel-toned emerald, violet, crimson and turquoise colour blocks with gilt gold.",
+      "recap": "The overall composition stacks its patterned flat layers into a theatrical, distant tableau under swirling patterned skies or walls, in an opulent, uncanny mood, keeps to a palette of jewel-toned emerald, violet, crimson and turquoise colour blocks with gilt gold, and reads throughout as a digital baroque TV animation frame in a signature Gankutsuou style, with thin clean outlines that only define shapes, figures filled with flat unshaded colour, pale faces left smooth, hair and clothing filled with flat brocade, lace and wallpaper patterns locked to the screen, and depth built from stacked flat layers.",
+      "notes": ""
+    }
+  },
+  "verdict": {
+    "status": "researched",
+    "best_model": null,
+    "notes": ""
+  }
+}

@@ -1,0 +1,94 @@
+{
+  "id": "anime_shinkai_luminous",
+  "name": "Shinkai luminous",
+  "family": "anime",
+  "summary": "Simple clean cel figures against hyper-detailed photoreal painted cityscapes and skies, drenched in magic-hour light, lens flare, bloom and god rays.",
+  "lineage": {
+    "titles": [
+      "5 Centimeters per Second (2007)",
+      "The Garden of Words (2013)",
+      "Your Name (2016)",
+      "Weathering With You (2019)"
+    ],
+    "studios": [
+      "CoMix Wave Films"
+    ],
+    "directors": [
+      "Makoto Shinkai"
+    ],
+    "era": "2000s-2010s digital theatrical"
+  },
+  "traits": {
+    "line": "thin clean lines on figures, often coloured brown rather than black; backgrounds lineless and photographic in detail",
+    "shading": "crisp two-tone cel shadow with a separate warm rim-light band where the sun hits",
+    "palette": "saturated multi-colour sunset gradients of violet, magenta and deep gold; city scenes in steely blue, concrete grey and screen-glow cyan; countryside in lush green and warm sunlight",
+    "lighting": "magic hour as the default; volumetric god rays through cloud, bloom and diffusion, anamorphic lens flare; highlights roll off softly instead of clipping",
+    "faces": "mainstream anime proportions, large eyes with several reflective highlights; drawn simpler than the backgrounds",
+    "backgrounds": "denser and more detailed than the figures: tangled power lines, train tracks, shrine steps, wet asphalt, real Tokyo locations; vast skies with layered cumulus and contrails",
+    "texture": "clean high-resolution digital, sparkle particles, rain droplets and specular glints on wet surfaces; no grain",
+    "camera": "deep-focus wides with leading lines (rails, cables, paths); large empty-sky negative space; rack focus"
+  },
+  "style_words": "Digital anime with photoreal painted backgrounds and heavy compositing, as in Your Name (2016) and Weathering With You (2019): thin clean brown lines, crisp two-tone cel shading, saturated violet-magenta-gold sunset gradients, volumetric god rays, bloom and anamorphic lens flare, specular glints on wet surfaces, dense high-resolution urban detail, clean grain-free finish.",
+  "avoid": [
+    "over-saturated HDR travel-photo look with no linework left",
+    "backgrounds becoming literal photographs rather than paintings",
+    "lens flare and sparkle everywhere until it reads as noise",
+    "drifting into KyoAni pastel interiors with shallow focus",
+    "generic purple-sky AI wallpaper"
+  ],
+  "confusable_with": [
+    "anime_kyoani_soft",
+    "anime_hosoda_clean",
+    "anime_ghibli_miyazaki"
+  ],
+  "sources": [
+    "https://en.wikipedia.org/wiki/Your_Name",
+    "https://en.wikipedia.org/wiki/Makoto_Shinkai",
+    "https://colorculture.org/your-name-cinematography-analysis/"
+  ],
+  "added": "2026-10-17",
+  "run": "r001",
+  "models": {
+    "krea2": {
+      "style": "Digital anime with richly detailed painted backgrounds and heavy compositing, as in Your Name: thin clean brown lines, crisp two-tone cel shading with a warm rim-light band, violet, magenta and deep gold sky gradients, volumetric god rays, specular glints on wet surfaces, visible drawn linework, deep focus, smooth finish.",
+      "recap": "Rendered throughout as digital anime with richly detailed painted backgrounds and thin clean brown lines.",
+      "notes": "",
+      "captions": {}
+    },
+    "flux3_klein": {
+      "style": "Digital anime with painted backgrounds and heavy compositing, in the register of Your Name: thin clean brown lines on the figures, crisp two-tone cel shading with a separate warm rim-light band where the light hits, lineless painted backgrounds denser and more detailed than the figures, volumetric god rays, bloom and diffusion, one anamorphic lens flare from the main light, specular glints on wet surfaces, highlights that roll off, a clean high-resolution grain-free painted finish.",
+      "recap": "Violet, magenta and deep gold fill the sky as a saturated gradient, steely blue and concrete grey fill the walls and the ground, lush green stays in the foliage, warm gold appears only in the rim-light bands and the light sources, and every garment keeps its own stated colour.",
+      "notes": "",
+      "captions": {}
+    },
+    "qwen_image_2_1": {
+      "style": "The image is a digital animation frame with photoreal painted backgrounds and heavy compositing, in a signature Your Name style, with thin clean brown lines on figures, crisp two-tone cel shading with a warm rim-light band, volumetric god rays, bloom and anamorphic lens flare, specular glints, dense high-resolution painted detail and a clean finish, depicting a scene from a Gothic Victorian novel in a palette of saturated sunset gradients of violet, magenta and deep gold, with steely blue and screen-glow cyan.",
+      "recap": "The overall composition opens deep space with strong leading lines and generous sky or negative space, highlights rolling off softly, in a luminous, yearning mood, keeps to a palette of saturated sunset gradients of violet, magenta and deep gold, with steely blue and screen-glow cyan, and reads throughout as a digital animation frame with photoreal painted backgrounds and heavy compositing, in a signature Your Name style, with thin clean brown lines on figures, crisp two-tone cel shading with a warm rim-light band, volumetric god rays, bloom and anamorphic lens flare, specular glints, dense high-resolution painted detail and a clean finish.",
+      "notes": "",
+      "captions": {}
+    },
+    "flux3_klein_pup": {
+      "style": "",
+      "recap": "",
+      "notes": "",
+      "captions": {
+        "count": "Digital anime illustration with photoreal painted backgrounds and heavy compositing, using the visual language of Your Name (2016) and Weathering With You (2019): thin, clean brown linework, crisp two-tone cel shading, saturated violet, magenta, and gold sunset gradients, volumetric god rays, localized bloom, and a horizontal anamorphic lens flare, with a clean grain-free finish. A medium full shot at eye level shows Count Dracula centered in a three-quarter view, his tall, gaunt body filling most of the vertical composition from head to foot. He is an old white nobleman with pale skin, a long angular face, pointed ears, a high hooked nose, arched dark eyebrows, and a long white moustache. His mouth opens enough to reveal sharp white teeth. He wears a high black collar and a long black cloak from head to foot, the heavy fabric falling in angular folds around his narrow shoulders and slender legs. One pale hand is raised beside his chest in a courtly welcome, palm turned outward with long fingers spread, while the other arm rests beneath the cloak. Behind him, a plain dark stone wall spans the scene, painted with dense masonry detail and illuminated by a concentrated sunset glow. Violet and magenta light spreads across the wall’s upper surface, while a gold sunset band and radiant god rays form a luminous halo behind his head and raised hand. The rays pass through the cloak’s edges, producing warm rim light, bloom, and narrow specular glints across the wet highlights on his raised hand, moustache, and cloak folds. The surrounding wall remains dark and uncluttered, with no figures or objects beyond the centered nobleman.",
+        "castle": "Digital anime illustration with photoreal painted backgrounds and heavy compositing, using thin clean brown linework, crisp two-tone cel shading, and the saturated violet, magenta, and gold palette of a dusk sky. An extreme wide establishing view from a low angle sweeps across the Carpathian Mountains, with the enormous sky filling most of the composition and the landscape compressed into the lower third. In the upper third, Castle Dracula rises as a small, distant silhouette on the edge of a sheer precipice: a vast ruined Gothic castle of black stone, its broken battlements, fractured towers, pointed arches, collapsed roofs, and jagged spires outlined by narrow brown lines. A few narrow windows glow amber-gold through the darkness. The castle’s wet stone surfaces catch sharp violet and gold specular glints along their edges. Below it, the precipice drops into a dark pine forest covering the lower foreground, with dense ranks of black and deep green conifers receding into blue-violet mountain valleys. The cliff face is nearly black, streaked with rainwater and scattered fragments of stone. Behind the castle, a darkening violet sky expands across the frame in broad painted gradients, shifting from saturated magenta and molten gold near the horizon to deep indigo overhead. Long volumetric god rays stream through breaks in the clouds, illuminating the castle rim and the upper edges of the forest. A horizontal anamorphic lens flare crosses the sunset glow, with restrained bloom around the brightest cloud opening and the lit windows. The entire scene remains clean and grain-free, with dense high-resolution urban and architectural detail confined to the castle, while the surrounding mountains and forest retain broad painterly depth. The landscape contains only stone, forest, clouds, and light, with open sky and no figures.",
+        "arrival": "Digital anime illustration with photoreal painted backgrounds and heavy compositing, using thin clean brown linework, crisp two-tone cel shading, and the saturated violet, magenta, and gold palette of a sunset translated into the amber light of an antique lamp against a dark night setting. A wide eye-level view looks from behind Jonathan Harker’s shoulder across a dark stone courtyard. In the left foreground, Jonathan Harker, a young English solicitor in his twenties with fair skin and short brown hair, wears a long brown travelling coat with a high collar and stands with his back turned three-quarters toward the viewer, holding a worn leather travel bag in his right hand. Beside him, a dark chestnut horse in a black leather harness faces a horse-drawn carriage with curved wooden wheels, brass fittings, and a deep burgundy canopy; the carriage rests in the left midground, its wet surfaces catching sharp gold specular glints. At the centre, the carriage and Jonathan face a great old wooden door set into a massive stone arch. The doorway stands open, framed by the brightest light in the composition. Inside, the tall old Count, an elderly white man with pale skin, a long silver beard, and a high black collar, wears a floor-length black coat and holds an antique silver lamp above his head. Its exposed flame glows gold, illuminating his face and casting long, angular shadows across the doorway and courtyard stones. Violet and magenta sunset gradients remain in the lamp’s reflected glow and along the upper edges of the painted sky beyond the arch. The Count’s lamp throws volumetric god rays through the doorway, with bloom around the flame and a horizontal anamorphic lens flare crossing the opening. Beyond the threshold, the Count’s black silhouette and the lamp’s silver body stand against a richly painted interior of dark carved wood. Iron nails studded across the weathered door catch scattered highlights. Wet flagstones fill the foreground, reflecting the doorway, carriage, and Count in broken gold streaks, while the surrounding masonry recedes into deep blue-black shadow. Clean, grain-free finish with dense architectural detail, carved stone joints, iron hinges, carriage hardware, and crisp cel-shaded figures.",
+        "diary": "Digital anime illustration with photoreal painted backgrounds and heavy compositing, using thin clean brown linework, crisp two-tone cel shading, and the saturated violet, magenta, and gold palette of a sunset sky, composed as a tight close-up over Mina Harker’s left shoulder in a Victorian bedroom at night. Mina is a young white woman in her twenties with fair skin and dark brown hair pinned into an elaborate Victorian updo, wearing a high-necked pale blue blouse with narrow pleats and small pearl-like buttons. Her shoulder fills the lower-left foreground while her face turns in three-quarter profile near the center, her dark eyes lowered toward a leather-bound journal as she writes with a black dip pen. The journal lies open on a small dark wooden writing desk, its worn brown cover and cream pages catching the candlelight; her right hand guides the pen across lines of illegible handwriting. At the right edge, a single candle burns in a brass holder, its flame surrounded by a concentrated amber bloom and sharp specular glints on the wax, brass, and wet highlights along the desk’s polished rim. Beyond the candle, an open window reveals a dense painted sunset sky transitioning from saturated violet and magenta to gold, with volumetric god rays crossing the opening and a horizontal anamorphic lens flare. Thin net curtains billow inward through the window, their lower edges curling in the night air. The exterior beyond the glass is a detailed urban panorama of dark rooftops, chimneys, and glowing windows beneath the sunset horizon. The room behind Mina falls soft, with muted painted shapes of a bed, a wooden wardrobe, and a shadowed wall. Candlelight illuminates Mina’s cheek, nose, fingers, and journal while the far side of her face recedes into violet shadow; the finish is clean and grain-free.",
+        "chase": "Digital anime illustration with photoreal painted backgrounds and heavy compositing, using thin clean brown linework, crisp two-tone cel shading, saturated violet, magenta, and gold sunset gradients, volumetric god rays, bloom, and a horizontal anamorphic lens flare. A high-angle wide action view tilts the entire scene into a steep Dutch angle, showing four horsemen galloping diagonally from the lower left toward the upper right along a snowy mountain road. In the foreground, churned snow, hoofprints, and windblown powder sweep across the road. The first rider is an old doctor with fair skin, a long grey beard, and a heavy brown winter coat over a dark medical coat, leaning forward on a black horse as he gallops. Beside him, the second rider is a tall man with fair skin and a dark beard, wearing a long charcoal winter coat and carrying a long rifle across his back. The third rider is a young lord with fair skin and dark hair, dressed in a deep violet fur-trimmed winter coat, riding a chestnut horse. The fourth rider is a young solicitor with fair skin and neatly combed brown hair, wearing a burgundy overcoat with a high collar, riding a dark bay horse. Together they form the four horsemen, their cloaks and hems streaming behind them as they gallop. Ahead of them, a heavy wooden cart with iron-rimmed wheels races toward the upper right, driven by two men in thick sheepskin coats gripping the reins. The cart carries a large sealed wooden box reinforced with dark iron bands, its wet planks catching sharp gold specular glints. Snow bursts upward in a dense plume behind the horses’ hooves. In the background, steep mountain slopes and a dense alpine town of timber houses, stone walls, narrow streets, and clustered rooftops descend into violet shadow. The setting sun burns gold near the horizon, sending magenta and violet rays through the snow and illuminating the cart, riders, and airborne powder with bright rim light."
+      }
+    },
+    "flux3_klein_bfl": {
+      "style": "Heavily composited digital anime illustration with photoreal painted detail, thin clean brown lines, crisp two-tone cel shading, bloom and lens flare on light sources, and violet, magenta and gold gradients.",
+      "recap": "Everything is rendered with thin clean lines, crisp cel shading, specular glints and a clean, high-resolution grain-free finish typical of 2010s photoreal-painted anime films.",
+      "notes": "",
+      "captions": {}
+    }
+  },
+  "verdict": {
+    "status": "researched",
+    "best_model": null,
+    "notes": ""
+  }
+}

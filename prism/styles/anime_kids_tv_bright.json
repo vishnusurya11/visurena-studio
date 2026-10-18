@@ -1,0 +1,70 @@
+{
+  "id": "anime_kids_tv_bright",
+  "name": "Kids TV flat bright",
+  "family": "anime",
+  "summary": "Simple, readable children's TV anime: rounded clean characters, flat bright primary colour with one shadow tone, uncluttered sunny backgrounds.",
+  "lineage": {
+    "titles": [
+      "Pokemon (1997)",
+      "Pokemon the Series: Sun & Moon (2016)"
+    ],
+    "studios": [
+      "OLM"
+    ],
+    "directors": [
+      "Kunihiko Yuyama",
+      "Daiki Tomiyasu"
+    ],
+    "era": "1997-present TV"
+  },
+  "traits": {
+    "line": "Clean, even, medium-thick rounded lines; minimal detail; thinner softer lines in later seasons.",
+    "shading": "Flat fills with a single hard shadow tone; small glossy highlights.",
+    "palette": "Bright saturated primaries - red, yellow, blue, green - with sky-blue skies and grass green; high key.",
+    "lighting": "Bright even daylight; colourful energy-attack glows.",
+    "faces": "Round faces, big simple eyes, readable expressions; round mascot creatures.",
+    "backgrounds": "Simple painted fields, forests and small towns with clean shapes and soft-gradient skies.",
+    "texture": "Clean; early seasons painted cels with film grain (a noise filter was added after the 2002 digital switch).",
+    "camera": "Clear, centred, readable staging."
+  },
+  "style_words": "Children's TV anime: clean even medium-thick rounded lines, flat bright saturated red, yellow, blue and grass-green fills with a single hard shadow tone, small glossy highlights, high-key even daylight, simple uncluttered painted fields and sky-blue skies with soft gradients, clean finish, as in the Pokemon anime (1997).",
+  "avoid": [
+    "dark grading",
+    "complex detail or hatching",
+    "realistic proportions",
+    "moody painterly texture"
+  ],
+  "confusable_with": [
+    "anime_chibi_sd",
+    "anime_toei_80s_shonen",
+    "anime_bones_mob_psycho"
+  ],
+  "sources": [
+    "https://www.animenewsnetwork.com/feature/2016-12-09/why-does-pokemon-look-so-different-now/.109646",
+    "https://en.wikipedia.org/wiki/Pok%C3%A9mon_(TV_series)"
+  ],
+  "added": "2026-10-17",
+  "run": "r001",
+  "models": {
+    "krea2": {
+      "style": "Children's TV anime: clean even medium-thick rounded lines, round faces with big simple eyes, simple shapes with minimal detail, flat bright saturated red, yellow, blue and grass-green fills with a single hard shadow tone, small shiny highlights, high-key even light, simple uncluttered settings, smooth clean finish.",
+      "recap": "Rendered throughout as bright children's TV anime with clean rounded lines and flat saturated fills.",
+      "notes": ""
+    },
+    "flux3_klein": {
+      "style": "Children's TV anime cel animation: clean, even, medium-thick rounded lines with minimal detail, round faces with big simple eyes and readable expressions, simple proportions, flat bright fills with a single hard shadow tone, small glossy highlights, even high-key light across the whole frame, simple uncluttered painted backgrounds with clean shapes and soft-gradient skies, a clean finish.",
+      "recap": "Sky blue fills the sky, grass green fills the ground, the walls take clean light tones, bright red, yellow and blue stay in the light sources and the highlights, the shadow fills are one clean darker tone, and every garment keeps its own stated colour.",
+      "notes": ""
+    },
+    "qwen_image_2_1": {
+      "style": "The image is a children's TV cel animation frame, with clean, even, medium-thick rounded lines and minimal detail, flat, unmodulated colour fills and hard-edged shadow shapes in a single tone, small glossy highlights, simple uncluttered painted backgrounds with soft-gradient skies and a clean finish, depicting a scene from a Gothic Victorian novel in a palette of bright saturated red, yellow, blue and grass green, with sky blue in high key.",
+      "recap": "The overall composition keeps its forms clear and readable under high-key, even light, in a cheerful, friendly mood, keeps to a palette of bright saturated red, yellow, blue and grass green, with sky blue in high key, and reads throughout as a children's TV cel animation frame, with clean, even, medium-thick rounded lines and minimal detail, flat, unmodulated colour fills and hard-edged shadow shapes in a single tone, small glossy highlights, simple uncluttered painted backgrounds with soft-gradient skies and a clean finish.",
+      "notes": ""
+    }
+  },
+  "verdict": {
+    "status": "researched",
+    "best_model": null,
+    "notes": ""
+  }
+}

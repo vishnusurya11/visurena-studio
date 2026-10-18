@@ -1,0 +1,72 @@
+{
+  "id": "anime_amano_ethereal",
+  "name": "Amano ethereal",
+  "family": "anime",
+  "summary": "Fine Art Nouveau linework and pale figures in a near-monochrome world of grey, deep blue and heavy black, with vast desolate negative space.",
+  "lineage": {
+    "titles": [
+      "Angel's Egg (1985)",
+      "Vampire Hunter D (1985)"
+    ],
+    "studios": [
+      "Studio Deen",
+      "Ashi Productions"
+    ],
+    "directors": [
+      "Mamoru Oshii",
+      "Toyoo Ashida"
+    ],
+    "era": "mid-1980s OVA and theatrical, art direction or designs by Yoshitaka Amano"
+  },
+  "traits": {
+    "line": "fine, delicate, flowing lines with Art Nouveau, Gothic and ukiyo-e influences",
+    "shading": "dark heavy black shadow masses; silhouettes; minimal cel tone on pale figures",
+    "palette": "near-monochrome: greys, deep blues, heavy blacks; pale skin and hair as the only points of warmth",
+    "lighting": "dim, low light; barely visible objects in dark scenes; pale glow against black",
+    "faces": "ethereal, ghostly, elongated, pale with fine features and long flowing hair",
+    "backgrounds": "vast desolate Gothic-Victorian cityscapes, ruins, water, ornamented architecture",
+    "texture": "painted stillness, cel grain, soft film",
+    "camera": "very few shots, long holds; planes of static paintings sliding past"
+  },
+  "style_words": "1980s art-directed cel animation after Yoshitaka Amano, as in Angel's Egg (1985): fine delicate Art Nouveau linework, near-monochrome palette of grey, deep blue and heavy black with pale tones as the only warmth, silhouettes, still painted planes, Gothic-Victorian ornament, vast desolate negative space, soft cel and film grain.",
+  "avoid": [
+    "full-colour saturated Amano Final Fantasy watercolour illustration (not animation)",
+    "bright daylight palettes",
+    "busy cluttered frames that lose the negative space",
+    "modern glossy digital finish"
+  ],
+  "confusable_with": [
+    "anime_kawajiri_madhouse_90s",
+    "anime_oshii_gits",
+    "anime_hellsing_gothic"
+  ],
+  "sources": [
+    "https://en.wikipedia.org/wiki/Angel%27s_Egg",
+    "https://en.wikipedia.org/wiki/Vampire_Hunter_D_(1985_film)",
+    "https://www.grimoireofhorror.com/the-yurei/angels-egg-1985-anime-review/"
+  ],
+  "added": "2026-10-17",
+  "run": "r001",
+  "models": {
+    "krea2": {
+      "style": "1980s art-directed cel animation, as in Angel's Egg: fine delicate flowing Art Nouveau linework, near-monochrome grey, deep blue and heavy black with pale skin and hair as the only warmth, dim low light, dark silhouettes, still painted planes, Gothic-Victorian ornament, vast empty negative space, soft cel and film grain.",
+      "recap": "Rendered throughout as 1980s art-directed cel animation in near-monochrome grey, deep blue and black.",
+      "notes": ""
+    },
+    "flux3_klein": {
+      "style": "1980s art-directed anime cel animation in the register of Angel's Egg: fine, delicate, flowing Art Nouveau linework with Gothic ornament, heavy black shadow masses and silhouettes, minimal cel tone on pale figures, ghostly pale faces with fine elongated features, dim low light with a pale glow against black, large empty dark areas of negative space around the figures, still painted planes, matte hand-painted cels with soft cel and film grain.",
+      "recap": "Grey and deep blue fill the sky, the walls, the stone and the ground, heavy black fills every shadow, pale ivory is kept only for skin, hair and the brightest light as the one warm tone, and every garment keeps its own stated colour.",
+      "notes": ""
+    },
+    "qwen_image_2_1": {
+      "style": "The image is a 1980s art-directed cel animation frame in a signature Angel's Egg style, with fine, delicate, flowing Art Nouveau linework, heavy black shadow masses and silhouettes, minimal cel tone on pale figures, still painted planes and soft cel and film grain, depicting a scene from a Gothic Victorian novel in a palette of near-monochrome grey, deep blue and heavy black, with pale skin and hair as the only warmth.",
+      "recap": "The overall composition surrounds its pale forms with wide areas of dark negative space and dim low light, with an ethereal, hushed mood, keeps to a palette of near-monochrome grey, deep blue and heavy black, with pale skin and hair as the only warmth, and reads throughout as a 1980s art-directed cel animation frame in a signature Angel's Egg style, with fine, delicate, flowing Art Nouveau linework, heavy black shadow masses and silhouettes, minimal cel tone on pale figures, still painted planes and soft cel and film grain.",
+      "notes": ""
+    }
+  },
+  "verdict": {
+    "status": "researched",
+    "best_model": null,
+    "notes": ""
+  }
+}

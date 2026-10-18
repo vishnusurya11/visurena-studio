@@ -1,0 +1,93 @@
+{
+  "id": "anime_junji_ito_horror",
+  "name": "Junji Ito ink horror",
+  "family": "anime",
+  "summary": "Stark monochrome horror: fine wavering pen lines, dense parallel hatching, sterile white space, spirals and grotesque body-horror detail.",
+  "lineage": {
+    "titles": [
+      "Uzumaki (manga, 1998)",
+      "Uzumaki (2024)"
+    ],
+    "studios": [
+      "Fugaku",
+      "Akatsuki",
+      "Production I.G USA",
+      "Williams Street"
+    ],
+    "directors": [
+      "Hiroshi Nagahama"
+    ],
+    "era": "1990s horror manga; 2024 TV adaptation"
+  },
+  "traits": {
+    "line": "Fine, thin, slightly wavering pen lines; obsessively repeated contour lines; spirals built from many thin concentric lines.",
+    "shading": "Dense parallel and crosshatching, stippling; solid blacks for hair and voids; no gradient.",
+    "palette": "Pure black and white; greys only from hatching (the anime is fully monochrome).",
+    "lighting": "Flat, sterile, uneasy light; darkness comes from ink density, not a light source.",
+    "faces": "Realistic, stiff faces with wide eyes, small pupils and heavily lined lids; long black hair; grotesque distortion.",
+    "backgrounds": "Plain, realistic small-town Japan (houses, roads, weeds, a lighthouse, a kiln) with spiral motifs in smoke, cloud, weeds and hair.",
+    "texture": "Charcoal-like scratchy roughness in the anime; paper grain; near-rotoscoped realism.",
+    "camera": "Long holds on panel-like compositions, uncomfortable partial close-ups, slow creeping reveals."
+  },
+  "style_words": "Monochrome ink horror: fine wavering black pen lines on stark white, dense parallel hatching and stippling, solid black voids, many concentric repeated contour lines forming spirals, sterile flat light, scratchy charcoal-like grain, no colour or grey wash, plain realistic small-town detail, as in Junji Ito's Uzumaki (1998 manga, 2024 anime).",
+  "avoid": [
+    "any colour or sepia",
+    "bold swelling brush strokes (brush-ink seinen drift)",
+    "cute anime eyes",
+    "red gore",
+    "Western comic noir lighting"
+  ],
+  "confusable_with": [
+    "anime_vagabond_ink_manga"
+  ],
+  "sources": [
+    "https://wrongeverytime.com/2024/10/04/uzumaki-episode-1/",
+    "https://en.wikipedia.org/wiki/Uzumaki",
+    "https://en.wikipedia.org/wiki/Junji_Ito"
+  ],
+  "added": "2026-10-17",
+  "run": "r001",
+  "models": {
+    "krea2": {
+      "style": "Monochrome ink horror art, as in Junji Ito's Uzumaki: fine wavering black pen lines on stark white, dense parallel hatching and stippling, solid black voids, concentric repeated contour lines forming spirals, realistic stiff faces with small pupils, sterile flat even light, scratchy charcoal-like grain, pure black and white.",
+      "recap": "Rendered throughout as monochrome black-and-white ink horror art with dense pen hatching.",
+      "notes": "",
+      "captions": {}
+    },
+    "flux3_klein": {
+      "style": "Monochrome black ink horror illustration in the register of Junji Ito: fine, thin, wavering black pen lines on stark white paper, obsessively repeated contour lines, dense parallel hatching, crosshatching and stippling for every tone, solid black for hair and voids, many thin concentric lines curling into spirals in smoke, cloud and hair, realistic stiff faces with wide eyes, small pupils and heavily lined lids, flat sterile light, scratchy charcoal-like grain and paper grain, black and white only.",
+      "recap": "Every colour in the scene becomes ink: the sky, the walls and the ground are white paper built up with hatching, the shadow fills are solid black, dark garments are solid black with white edge lines, and pale garments stay white with fine hatched folds.",
+      "notes": "",
+      "captions": {}
+    },
+    "qwen_image_2_1": {
+      "style": "The image is a monochrome ink horror animation frame in a signature Uzumaki style, with fine, thin, slightly wavering black pen lines on stark white, dense parallel hatching and stippling, solid black voids, obsessively repeated concentric contour lines, and scratchy charcoal-like grain on paper, depicting a scene from a Gothic Victorian novel in a palette of pure black ink and stark white paper, every grey built from hatching.",
+      "recap": "The overall composition holds its forms stiff and still under flat, sterile light, the darkness built from ink density alone, in an uneasy, creeping mood, keeps to a palette of pure black ink and stark white paper, every grey built from hatching, and reads throughout as a monochrome ink horror animation frame in a signature Uzumaki style, with fine, thin, slightly wavering black pen lines on stark white, dense parallel hatching and stippling, solid black voids, obsessively repeated concentric contour lines, and scratchy charcoal-like grain on paper.",
+      "notes": "",
+      "captions": {}
+    },
+    "flux3_klein_pup": {
+      "style": "",
+      "recap": "",
+      "notes": "",
+      "captions": {
+        "count": "Monochrome ink horror illustration in the style of Junji Ito’s Uzumaki, rendered entirely with fine wavering black pen lines, dense parallel hatching, stippling, solid black voids, and scratchy charcoal-like grain on stark white paper, with sterile flat illumination and no color or grey wash. A medium full shot at eye level shows Count Dracula centered in a three-quarter view, his tall, gaunt body filling the middle of the composition from the high collar to the pointed cloak hem. He is an old white nobleman with pale skin, a long white moustache, a high hooked nose, arched eyebrows, pointed ears, hollow black eye sockets, and sharp white teeth exposed at his lip. He wears a high black collar, a fitted black coat, black gloves, black trousers, and a long black cloak that falls to his feet in angular folds. His raised pale hand extends toward the viewer in a courtly welcome, palm open and fingers long and bent, while his other arm disappears into the cloak. Behind him, a plain dark stone wall forms a solid black void, its masonry suggested only by sparse, wavering outlines of rectangular blocks, dense hatching, and stippled texture. Many concentric repeated contour lines form enormous spirals across the wall around his head and shoulders, with several smaller spirals curling into the masonry. Count Dracula’s cloak edges merge into these repeated black forms. On both sides of the wall, narrow strips of realistic small-town detail remain stark white: crooked rooflines, shuttered windows, a leaning streetlamp, and a few crooked house silhouettes drawn in fine black lines. The repeated spirals dominate the background without obscuring his face or raised hand.",
+        "castle": "Monochrome ink horror illustration in the style of Junji Ito’s Uzumaki, rendered entirely with fine wavering black pen lines, dense parallel hatching, stippling, solid black voids, and scratchy charcoal-like grain on stark white paper, with no color and no grey wash. An extreme wide establishing view from a low angle sweeps across a vast Carpathian mountain landscape at dusk. The enormous sky fills most of the composition, leaving the horizon and castle confined to the upper third. Across the top, a darkening violet sky is translated into monochrome through a vast black void fading into dense stippling and tightly packed hatching, with repeated concentric contour lines curling into enormous spirals that spread across the sky like turbulent currents. Near the upper center, Castle Dracula rises as a small but immense silhouette: a vast ruined Gothic castle of black stone, its jagged towers, pointed arches, narrow spires, broken battlements, collapsed roofs, and fractured walls perched on the edge of a sheer precipice. A few tiny windows glow white against the black masonry. Below the castle, the precipice drops into a solid black void edged by repeated concentric spirals and frantic contour lines. In the upper third, the castle remains small against the sky, with the word \"Castle Dracula\" implied only by its recognizable Gothic mass. Across the lower third, a dark pine forest covers the Carpathian mountains in dense ranks of black triangular trees, each trunk and branch reduced to scratchy ink marks. The cliff face descends into the forest as a narrow black wedge, while the precipice forms a jagged white rim above the void. Sterile flat illumination keeps the paper white and the ink stark, with no people, roads, buildings, or figures anywhere in the landscape.",
+        "arrival": "Monochrome ink horror illustration on stark white paper, rendered with fine wavering black pen lines, dense parallel hatching, stippling, solid black voids, and scratchy charcoal-like grain, with no color or grey wash. A wide eye-level night scene in the style of Junji Ito’s Uzumaki (1998 manga, 2024 anime) shows a plain, realistic small-town stone courtyard. At the center, an open doorway cuts through the dark façade of an old stone house, its interior reduced to a solid black void around a white opening filled by the antique silver lamp’s harsh light. The tall old Count stands inside the doorway, an elderly white man with a gaunt face, long white hair, and a high black collar, wearing a floor-length black coat that merges into the surrounding void. He holds an ornate antique silver lamp above his head; its small flame is drawn in white with a black core, and its light throws long, distorted shadows across the threshold and courtyard stones. Many tightly repeated concentric contour lines coil around the Count and lamp as spirals, forming a vast black vortex-like halo within the doorway. In the foreground, Jonathan Harker, a young white English solicitor in his twenties, stands with his back to the viewer, seen from behind his shoulder. He wears a dark travelling coat with the texture of a brown coat translated into black ink, and holds a worn leather bag in one hand. His head turns toward the doorway, while the coat’s broad back fills the lower left. Beside him, a horse-drawn carriage faces the entrance, its horse harnessed to the carriage and its body partly swallowed by blackness. On the right, Jonathan’s brown travelling coat is represented by a dark long coat with a high collar, and the carriage’s wooden body, wheels, shafts, and horse are defined by dense hatching. The great old wooden door rises behind the Count, its warped planks packed with rows of iron nails. Beyond the doorway, the courtyard walls are built from uneven dark stone blocks, with repeated spirals curling around their edges. The lamp casts elongated black shadows from the carriage, horse, Jonathan, and doorframe across the pale paving stones. The upper background remains stark white, interrupted by black night silhouettes, crooked rooflines, and countless concentric ink contours.",
+        "diary": "Monochrome ink horror illustration on stark white, rendered with fine wavering black pen lines, dense parallel hatching, stippling, solid black voids, and scratchy charcoal-like grain, with no color or grey wash. A tight close-up over the left shoulder of Mina Harker, a young Victorian white woman with fair skin and dark hair pinned into a high bun, seated at a small writing desk in a bedroom at night. Her high-necked blouse is translated into white paper with black contour lines and sparse hatching, preserving the shape of a pale blue Victorian blouse. Her face fills the left-center in three-quarter profile, eyes lowered toward a leather-bound journal as she writes with a dip pen. The journal lies open beneath her hand, its cover and spine defined by black hatching and the word \"Mina Harker\" written in cramped, illegible cursive on the page. Many concentric repeated contour lines rise from the journal into a large spiraling vortex around her hand and shoulder, forming a black ink horror motif of nested coils. At the right edge, a single candle burns in a short holder, its flame surrounded by a solid black void and sharp radiating lines. The candle flame is the only bright white shape against black, while the rest of the scene remains stark monochrome. Behind Mina, the candle casts a hard, sterile flat light across the desk. At the right, an open window reveals a plain small-town night with dark rooftops and a few crooked chimneys; net curtains whip inward in repeated jagged curves. Dense stippling and hatching form the window recess, while the flame and curtain edges are swallowed by solid black. The room behind Mina falls soft into wavering silhouettes, with concentric spirals curling through the window, bedposts, and shadowed wall. The composition follows the claustrophobic, anatomically precise ink-horror language of Junji Ito’s Uzumaki.",
+        "chase": "Monochrome ink horror illustration on stark white paper, rendered with fine wavering black pen lines, dense parallel hatching, stippling, solid black voids, scratchy charcoal-like grain, and no color or grey wash. A high-angle wide action view is tilted into a steep Dutch angle, showing a snowy mountain road at sunset as four horsemen gallop diagonally from the lower left toward the upper right. The low sun sits near the horizon as a black circular void surrounded by tightly repeated concentric contour lines, forming a large spiral behind the riders. Snow-covered mountain slopes rise around the road, their ridges packed with repeated spirals and curling ink lines. Four horsemen lead the charge in heavy winter coats. At the front, an old doctor with a long grey beard and a worn winter coat rides a rearing horse, his dark medical bag hanging at his side. Beside him, a tall man in a long black coat grips a rifle across his body. The third rider is a young lord in a fur-trimmed coat and high collar, and the fourth is a young solicitor in a long coat with a document case strapped behind him. Their faces are gaunt and severe, with hollow eyes and black hatched shadows. The four horsemen are distinguished by their own mounts: the doctor rides a broad-backed horse, the rifleman rides a lean horse, the young lord rides a dark horse, and the young solicitor rides a smaller horse. Together they are grouped as four horsemen galloping in heavy winter coats, their bodies pitched forward and their coats whipping backward. Snow flies upward in jagged black strokes from the hooves. Ahead of them, a heavy wooden cart leans across the road, driven by two men in bulky sheepskin coats gripping long shafts. The cart carries a large sealed wooden box with thick planks, iron-like black bands, and a lid bowed by the pressure of the riders. Concentric repeated contour lines coil around the box and cart wheels like tightening vortices. In the background, a plain realistic small-town detail includes crooked timber houses, steep roofs, a church steeple, and a narrow bell tower, all reduced to stark black silhouettes and dense hatching. The road, horses, cart, and town bend together along the diagonal composition, with solid black voids filling the deepest shadows and white paper remaining exposed across the flying snow."
+      }
+    },
+    "flux3_klein_bfl": {
+      "style": "Black and white horror manga ink illustration with fine, wavering pen lines on stark white, dense parallel hatching and stippling, solid black voids and repeated concentric contour lines.",
+      "recap": "Everything is rendered in pure black ink on white paper with hatching, stippling and scratchy charcoal-like grain typical of 1990s monochrome horror manga.",
+      "notes": "",
+      "captions": {}
+    }
+  },
+  "verdict": {
+    "status": "researched",
+    "best_model": null,
+    "notes": ""
+  }
+}

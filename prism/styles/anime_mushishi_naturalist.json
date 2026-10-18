@@ -1,0 +1,70 @@
+{
+  "id": "anime_mushishi_naturalist",
+  "name": "Mushishi painted nature",
+  "family": "anime",
+  "summary": "Quiet, earthy painted forests, mountains and villages in muted seasonal greens and browns, with plain flat figures and small translucent glowing creatures.",
+  "lineage": {
+    "titles": [
+      "Mushi-Shi (2005)",
+      "Mushi-Shi: Next Passage (2014)"
+    ],
+    "studios": [
+      "Artland"
+    ],
+    "directors": [
+      "Hiroshi Nagahama"
+    ],
+    "era": "2000s TV, revived 2014"
+  },
+  "traits": {
+    "line": "Thin, soft, low-contrast outlines on figures, often dark brown rather than black; foliage built from paint, not line.",
+    "shading": "Figures: one minimal flat cel shadow. Backgrounds: layered opaque painting - base tone, darker hues over it, outlines last.",
+    "palette": "Subdued, earthy, desaturated: moss and cedar green, bark brown, mist grey, straw; black and brown hair, plain clothes; vivid colour reserved for the mushi (pale cyan, gold, white glow).",
+    "lighting": "Natural overcast or dappled sunlight through trees, mist and haze, soft low contrast; mushi give off their own faint glow.",
+    "faces": "Plain, simple, ordinary faces with small eyes and little highlight; the protagonist stands out only by silver hair and green eye.",
+    "backgrounds": "Dense, near-photographic painted Japanese countryside (cedar forest, mountain hamlets, sea villages, terraced fields), changing with the seasons; figures look flatter than the scenery, like walking through a painting.",
+    "texture": "Brush texture in foliage and slight painting grain; no digital gloss.",
+    "camera": "Static wide shots, slow pans across landscape, long contemplative holds."
+  },
+  "style_words": "Quiet naturalist TV anime: densely painted backgrounds of cedar forest, mountain mist and terraced fields in subdued moss green, bark brown and grey, soft overcast or dappled light, thin brown outlines, flat minimal cel shading on figures, small accents of pale luminous cyan glow, faint brush texture, as in Mushi-Shi (2005).",
+  "avoid": [
+    "saturated fantasy colour across the frame",
+    "bloom, lens flare or Shinkai-style glossy skies",
+    "big expressive moe eyes",
+    "warm, clean Ghibli cel brightness",
+    "dark horror grading"
+  ],
+  "confusable_with": [
+    "anime_ghibli_miyazaki",
+    "anime_frieren_modern_fantasy",
+    "anime_haibane_abe_pastel"
+  ],
+  "sources": [
+    "https://en.wikipedia.org/wiki/Mushishi",
+    "https://chaostangent.com/2009/12/anime-of-the-decade-2"
+  ],
+  "added": "2026-10-17",
+  "run": "r001",
+  "models": {
+    "krea2": {
+      "style": "Quiet naturalist TV anime, as in Mushi-Shi: densely painted layered opaque brushwork in subdued moss green, bark brown, mist grey and straw, soft overcast or dappled light with mist and low contrast, thin soft brown outlines, plain faces with small eyes, flat minimal cel shading, pale luminous cyan accents.",
+      "recap": "Rendered throughout as quiet naturalist TV anime with densely painted backgrounds in subdued moss and bark tones.",
+      "notes": ""
+    },
+    "flux3_klein": {
+      "style": "Quiet naturalist TV anime in the register of Mushi-Shi: thin, soft, low-contrast dark-brown outlines on the figures, plain ordinary faces with small eyes and little highlight, one minimal flat cel shadow on the figures, densely painted near-photographic backgrounds in layered opaque paint with foliage and rock built from brush strokes, figures flatter than the scenery, soft low-contrast light through mist and haze, faint brush texture and painting grain, a matte finish.",
+      "recap": "Moss and cedar green, bark brown and straw fill the ground, the foliage and the walls, mist grey fills the sky and the shadow fills, a faint pale cyan glow appears only around the light sources, and every garment keeps its own stated colour.",
+      "notes": ""
+    },
+    "qwen_image_2_1": {
+      "style": "The image is a quiet naturalist TV animation frame in a signature Mushi-Shi style, with thin, soft, low-contrast dark-brown outlines and one minimal flat cel shadow on figures, densely layered opaque painted backgrounds that make the figures look flatter than the scenery, and faint brush texture with slight painting grain, depicting a scene from a Gothic Victorian novel in a palette of subdued earthy moss and cedar green, bark brown, mist grey and straw, with small accents of pale luminous cyan glow.",
+      "recap": "The overall composition settles its forms into a static, contemplative arrangement within soft, low-contrast mist and haze, in a still, mysterious mood, keeps to a palette of subdued earthy moss and cedar green, bark brown, mist grey and straw, with small accents of pale luminous cyan glow, and reads throughout as a quiet naturalist TV animation frame in a signature Mushi-Shi style, with thin, soft, low-contrast dark-brown outlines and one minimal flat cel shadow on figures, densely layered opaque painted backgrounds that make the figures look flatter than the scenery, and faint brush texture with slight painting grain.",
+      "notes": ""
+    }
+  },
+  "verdict": {
+    "status": "researched",
+    "best_model": null,
+    "notes": ""
+  }
+}

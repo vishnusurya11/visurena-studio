@@ -1,0 +1,71 @@
+{
+  "id": "anime_vinland_historical",
+  "name": "Vinland Saga historical realism",
+  "family": "anime",
+  "summary": "Grounded historical seinen TV: thick black outlines, realistic adult anatomy, cold muted northern landscapes of sea, mud, timber and blood under natural overcast light.",
+  "lineage": {
+    "titles": [
+      "Vinland Saga (2019)",
+      "Vinland Saga Season 2 (2023)"
+    ],
+    "studios": [
+      "Wit Studio",
+      "MAPPA"
+    ],
+    "directors": [
+      "Shuhei Yabuta"
+    ],
+    "era": "2019-2023 TV, digital"
+  },
+  "traits": {
+    "line": "Thick black outer contours with thinner interior lines; detailed muscle, cloth folds, beards and armour (Takahiko Abiru designs).",
+    "shading": "Hard two-tone cel shadows deepened by gradient overlays; painted blood and grime.",
+    "palette": "Cold and muted: slate-blue sea, grey sky, peat brown, moss green, bone white; warm firelight accents; season 2 warmer farm greens and wheat gold.",
+    "lighting": "Natural northern overcast, low winter sun, torch and hearth light at night.",
+    "faces": "Realistic proportions and features, small eyes, weathered, scarred, bearded adults.",
+    "backgrounds": "Detailed painted fjords, longhouses, timber halls, battlefields and snow (art director Yusuke Takeda); CG longships.",
+    "texture": "Clean digital with light grime overlays; no paper grain.",
+    "camera": "Wide battle tableaux; CG-assisted dynamic fight camera."
+  },
+  "style_words": "Grounded historical TV animation: thick black outer contours with fine interior detail, hard two-tone cel shadows deepened by gradient overlays, cold muted palette of slate sea blue, overcast grey, peat brown and moss green with warm firelight accents, natural low northern light, detailed painted timber and stone, as in Vinland Saga (2019).",
+  "avoid": [
+    "bright fantasy saturation",
+    "moe faces",
+    "glossy bloom",
+    "ornate fantasy armour",
+    "Attack on Titan's hatched face shadows (Wit house look)"
+  ],
+  "confusable_with": [
+    "anime_wit_aot_heavy_line",
+    "anime_mappa_gritty",
+    "anime_berserk_97"
+  ],
+  "sources": [
+    "https://en.wikipedia.org/wiki/Vinland_Saga_(TV_series)",
+    "https://www.theouterhaven.net/2020/01/vinland-saga-review/"
+  ],
+  "added": "2026-10-17",
+  "run": "r001",
+  "models": {
+    "krea2": {
+      "style": "Grounded historical TV animation, as in Vinland Saga: thick black outer contours with fine interior detail, realistic weathered faces with small eyes, hard two-tone cel shadows in clean shapes deepened by gradient overlays, cold muted slate blue, overcast grey, peat brown and moss green with firelight accents, low northern light.",
+      "recap": "Rendered throughout as grounded historical TV animation in cold muted slate, peat and moss tones.",
+      "notes": ""
+    },
+    "flux3_klein": {
+      "style": "Grounded historical digital TV anime in the register of Vinland Saga: thick black outer contours with thinner interior lines, detailed cloth folds, beards and hair, realistic proportions and weathered adult faces with small eyes, clean hard two-tone cel shadows deepened by gradient overlays, painted grime, plain practical gear, natural low northern light, detailed painted timber and stone backgrounds, a clean digital finish with light grime overlays.",
+      "recap": "Overcast grey and slate blue fill the sky, peat brown and moss green fill the ground and the walls, bone white sits in the highlights, warm firelight orange appears only in flames and the light sources, and every garment keeps its own stated colour.",
+      "notes": ""
+    },
+    "qwen_image_2_1": {
+      "style": "The image is a grounded historical TV animation frame in a signature Vinland Saga style, with thick black outer contours and fine interior detail on cloth folds and hair, hard two-tone cel shadows deepened by gradient overlays, detailed painted timber and stone, and a clean digital finish with light grime overlays, depicting a scene from a Gothic Victorian novel in a palette of cold muted slate blue, overcast grey, peat brown, moss green and bone white, with warm firelight accents.",
+      "recap": "The overall composition sets its forms in weighty, realistic proportion under natural low northern light, in a harsh, sober mood, keeps to a palette of cold muted slate blue, overcast grey, peat brown, moss green and bone white, with warm firelight accents, and reads throughout as a grounded historical TV animation frame in a signature Vinland Saga style, with thick black outer contours and fine interior detail on cloth folds and hair, hard two-tone cel shadows deepened by gradient overlays, detailed painted timber and stone, and a clean digital finish with light grime overlays.",
+      "notes": ""
+    }
+  },
+  "verdict": {
+    "status": "researched",
+    "best_model": null,
+    "notes": ""
+  }
+}

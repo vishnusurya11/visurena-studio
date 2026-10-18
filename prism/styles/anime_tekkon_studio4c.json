@@ -1,0 +1,68 @@
+{
+  "id": "anime_tekkon_studio4c",
+  "name": "Tekkonkinkreet painterly urban",
+  "family": "anime",
+  "summary": "A dense, hand-painted, ramshackle pan-Asian city as the star: wobbly naive line, warped perspective, saturated rust, teal and neon, every surface covered in signs and clutter.",
+  "lineage": {
+    "titles": [
+      "Tekkonkinkreet (2006)"
+    ],
+    "studios": [
+      "Studio 4C"
+    ],
+    "directors": [
+      "Michael Arias"
+    ],
+    "era": "2000s feature (hand-drawn with CG camera)"
+  },
+  "traits": {
+    "line": "Loose, wobbly, slightly naive pen line from Taiyo Matsumoto's manga; uneven weights; doodle-like.",
+    "shading": "Flat fills with minimal shadow on figures; heavy painted modelling in backgrounds.",
+    "palette": "Saturated, warm and dirty: rust orange, teal, mustard, red lanterns, faded posters; neon greens and pinks at night.",
+    "lighting": "Golden late-afternoon haze, neon night glow, warm lantern light.",
+    "faces": "Scrappy, asymmetric, childlike faces with small eyes, big ears and odd proportions.",
+    "backgrounds": "Hyper-dense hand-painted city: tangled wires, signage, laundry, shrines, crumbling Showa facades and Ganesh statues (Tokyo, Hong Kong, Shanghai, Colombo blended); warped wide-angle perspective.",
+    "texture": "Painterly brush texture, grime, opaque poster paint; impressionist watercolour in dream sequences.",
+    "camera": "Swooping CG-assisted camera through painted streets, wide fisheye angles, rooftop flight."
+  },
+  "style_words": "Hand-painted urban animation: loose wobbly naive pen lines with flat minimal shading, set against hyper-dense painted backgrounds of crumbling Showa facades, tangled wires, lanterns and faded signage, warped wide-angle perspective, saturated rust orange, teal and mustard with neon night glow, gritty brush texture, as in Tekkonkinkreet (2006).",
+  "avoid": [
+    "clean photoreal Shinkai city",
+    "pretty bishonen faces",
+    "sterile CG buildings",
+    "Otomo-precise mechanical line"
+  ],
+  "confusable_with": [
+    "anime_yuasa_loose",
+    "anime_otomo_akira",
+    "anime_redline_koike"
+  ],
+  "sources": [
+    "https://en.wikipedia.org/wiki/Tekkonkinkreet",
+    "https://screendaily.com/tekkonkinkreet/4031115.article"
+  ],
+  "added": "2026-10-17",
+  "run": "r001",
+  "models": {
+    "krea2": {
+      "style": "Hand-painted urban animation, as in Tekkonkinkreet: loose wobbly naive pen lines of uneven weight, scrappy asymmetric faces with small eyes and big ears, flat minimal shading on figures, hyper-dense painted backgrounds of crumbling facades, tangled wires and lanterns, warped perspective, rust orange, teal and mustard, gritty brush texture.",
+      "recap": "Rendered throughout as hand-painted urban animation with loose wobbly pen lines and gritty brush texture.",
+      "notes": ""
+    },
+    "flux3_klein": {
+      "style": "Hand-painted urban anime in the register of Tekkonkinkreet: loose, wobbly, naive pen lines of uneven weight, scrappy asymmetric faces with small eyes and big ears, flat fills with minimal shadow on the figures, hyper-dense painted backgrounds with heavy modelling, crumbling surfaces and dense hand-painted clutter, warped wide-angle perspective, painterly brush texture, grime and opaque poster paint.",
+      "recap": "Rust orange, teal and mustard fill the walls, the ground and the sky, red appears only in lamp and flame light, neon green and pink appear only as a night glow around the light sources, the shadow fills are a dirty dark teal, and every garment keeps its own stated colour.",
+      "notes": ""
+    },
+    "qwen_image_2_1": {
+      "style": "The image is a hand-painted animation frame in a signature Tekkonkinkreet style, with loose, wobbly, slightly naive pen lines of uneven weight, flat fills with minimal shadow on figures, heavily painted modelling in the surroundings, warped wide-angle perspective, painterly brush texture, grime and opaque poster paint, depicting a scene from a Gothic Victorian novel in a palette of saturated, warm and dirty rust orange, teal and mustard, with red lantern tones and neon green and pink glow.",
+      "recap": "The overall composition packs its frame with dense painted detail bent by warped wide-angle perspective in golden haze, in a scrappy, vivid mood, keeps to a palette of saturated, warm and dirty rust orange, teal and mustard, with red lantern tones and neon green and pink glow, and reads throughout as a hand-painted animation frame in a signature Tekkonkinkreet style, with loose, wobbly, slightly naive pen lines of uneven weight, flat fills with minimal shadow on figures, heavily painted modelling in the surroundings, warped wide-angle perspective, painterly brush texture, grime and opaque poster paint.",
+      "notes": ""
+    }
+  },
+  "verdict": {
+    "status": "researched",
+    "best_model": null,
+    "notes": ""
+  }
+}

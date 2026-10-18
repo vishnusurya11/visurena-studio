@@ -1,0 +1,74 @@
+{
+  "id": "anime_yuasa_loose",
+  "name": "Yuasa loose",
+  "family": "anime",
+  "summary": "Freehand wobbly lines, flat unshaded colour fields and rubbery warped perspective, mixed with photo and collage elements.",
+  "lineage": {
+    "titles": [
+      "Mind Game (2004)",
+      "The Tatami Galaxy (2010)",
+      "Ping Pong the Animation (2014)",
+      "Devilman Crybaby (2018)"
+    ],
+    "studios": [
+      "Studio 4°C",
+      "Madhouse",
+      "Tatsunoko Production",
+      "Science SARU"
+    ],
+    "directors": [
+      "Masaaki Yuasa"
+    ],
+    "era": "2000s-2010s TV, web and theatrical"
+  },
+  "traits": {
+    "line": "freehand, lopsided, sketchy lines of varying weight; edges left rough",
+    "shading": "none or minimal: flat colour fields, occasional single flat shadow shape",
+    "palette": "bold limited palettes per scene; pale washes with sudden crimson, acid green or hot pink; Devilman Crybaby dark with neon",
+    "lighting": "graphic rather than physical; abstract colour changes signal mood",
+    "faces": "simple elastic faces that twist and change shape for emotion",
+    "backgrounds": "simplified flat shapes, sometimes photographs or collage dropped in",
+    "texture": "mixed media: photo-real faces on drawn bodies, paper collage, rough fills",
+    "camera": "extreme perspective manipulation, fish-eye bends, fast montage, abstract frames"
+  },
+  "style_words": "Freehand experimental animation in Masaaki Yuasa's manner, as in Mind Game (2004) and The Tatami Galaxy (2010): wobbly lopsided lines of varying weight, flat unshaded colour fields, bold limited palettes with sudden crimson, acid green or hot pink, rubbery warped perspective, mixed media with photo and collage fragments, rough unfinished edges.",
+  "avoid": [
+    "clean on-model TV anime polish",
+    "gradient or rendered shading",
+    "realistic proportions held steady",
+    "Trigger hard angular polygon shading in place of loose wobbly line"
+  ],
+  "confusable_with": [
+    "anime_trigger_angular",
+    "anime_shaft_avantgarde"
+  ],
+  "sources": [
+    "https://www.tokyoweekender.com/art_and_culture/design/animation-director-masaaki-yuasa-takes-us-inside-his-flamboyantly-surreal-worlds/",
+    "https://blog.alltheanime.com/mind-game/",
+    "https://en.wikipedia.org/wiki/Devilman_Crybaby"
+  ],
+  "added": "2026-10-17",
+  "run": "r001",
+  "models": {
+    "krea2": {
+      "style": "Freehand experimental animation, as in Mind Game: wobbly lopsided sketchy lines of varying weight with rough edges, simple elastic rubbery figures and faces, flat colour fields with at most one flat shadow shape, bold limited palettes with sudden crimson, acid green or hot pink, warped perspective, photo and collage fragments.",
+      "recap": "Drawn throughout as freehand experimental animation with wobbly lopsided lines and flat colour fields.",
+      "notes": ""
+    },
+    "flux3_klein": {
+      "style": "Freehand experimental anime in the register of Masaaki Yuasa: wobbly, lopsided, sketchy lines of varying weight with rough edges, simple elastic faces twisted by emotion, flat unshaded colour fields with an occasional single flat shadow shape, rubbery warped perspective, simplified flat background shapes with small photo and paper-collage fragments dropped in, rough unfinished fills.",
+      "recap": "Pale washes fill the sky, the walls and the ground, sudden crimson, acid green and hot pink appear only in the light sources and in single flat background shapes, the shadow fills are one flat dark tone, and every garment keeps its own stated colour.",
+      "notes": ""
+    },
+    "qwen_image_2_1": {
+      "style": "The image is a freehand experimental animation frame in Masaaki Yuasa's manner, with wobbly, lopsided, sketchy lines of varying weight and rough unfinished edges, flat unshaded colour fields with an occasional single flat shadow shape, rubbery warped perspective, and mixed-media photo and collage fragments, depicting a scene from a Gothic Victorian novel in a palette of bold limited pale washes with sudden crimson, acid green or hot pink.",
+      "recap": "The overall composition bends its simplified, elastic forms through warped fish-eye perspective, colour shifts carrying the emotion, in a restless, playful mood, keeps to a palette of bold limited pale washes with sudden crimson, acid green or hot pink, and reads throughout as a freehand experimental animation frame in Masaaki Yuasa's manner, with wobbly, lopsided, sketchy lines of varying weight and rough unfinished edges, flat unshaded colour fields with an occasional single flat shadow shape, rubbery warped perspective, and mixed-media photo and collage fragments.",
+      "notes": ""
+    }
+  },
+  "verdict": {
+    "status": "researched",
+    "best_model": null,
+    "notes": ""
+  }
+}

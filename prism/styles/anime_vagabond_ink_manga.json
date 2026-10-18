@@ -1,0 +1,93 @@
+{
+  "id": "anime_vagabond_ink_manga",
+  "name": "Seinen brush-ink manga page",
+  "family": "anime",
+  "summary": "A monochrome printed manga page: black sumi-brush strokes or dense pen crosshatching on white paper, heavy solid blacks, sparse grey tone, no colour at all.",
+  "lineage": {
+    "titles": [
+      "Vagabond (manga, 1998)",
+      "Berserk (manga, 1989)"
+    ],
+    "studios": [
+      "Kodansha (Morning)",
+      "Hakusensha (Young Animal)"
+    ],
+    "directors": [
+      "Takehiko Inoue (artist)",
+      "Kentaro Miura (artist)"
+    ],
+    "era": "1990s-2010s seinen manga (print)"
+  },
+  "traits": {
+    "line": "Two registers in one family: Inoue's fude-brush strokes that swell and taper, with dry-brush breaks and splatter; Miura's fine G-pen line with obsessive minute crosshatching. Pure black on white.",
+    "shading": "Hatching and crosshatching follow the form planes; large solid black masses; dry-brush greys; sparse mechanical screentone in skies.",
+    "palette": "Strictly monochrome: ink black, paper white, tone grey. No colour, no sepia.",
+    "lighting": "Chiaroscuro made with ink: strong side light carved out by solid blacks; highlights are untouched paper.",
+    "faces": "Realistic adult anatomy, small realistic eyes, weathered skin built from hatching; no large anime eyes.",
+    "backgrounds": "Brush-painted landscapes with generous empty white space (Vagabond) or architecture and crowds in dense pen detail (Berserk).",
+    "texture": "Ink bleed into paper, dry-brush scratch, visible pen strokes; reads as a printed page.",
+    "camera": "Manga panel composition with borders and gutters; Inoue avoids speed lines and draws motion through anatomy."
+  },
+  "style_words": "Black-and-white seinen manga ink on white paper: swelling sumi-brush strokes with dry-brush breaks and splatter, fine pen crosshatching that follows form, heavy solid black masses, sparse grey screentone, generous untouched white, ink bleed and paper grain, strictly monochrome, as in Vagabond (1998) and the Berserk manga (1989).",
+  "avoid": [
+    "any colour, sepia or blue-grey tint",
+    "clean digital vector line",
+    "anime cel shading on a monochrome image",
+    "big shiny anime eyes",
+    "Junji Ito's thin wavering line and sterile white (horror drift)"
+  ],
+  "confusable_with": [
+    "anime_junji_ito_horror",
+    "anime_berserk_97",
+    "anime_jojo_bold_ink"
+  ],
+  "sources": [
+    "https://en.wikipedia.org/wiki/Vagabond_(manga)",
+    "https://www.nprillinois.org/generationlisten/2021-05-27/legendary-manga-artist-kentaro-miura-creator-of-berserk-has-died"
+  ],
+  "added": "2026-10-17",
+  "run": "r001",
+  "models": {
+    "krea2": {
+      "style": "Black-and-white seinen manga ink on white paper, as in Vagabond: swelling sumi-brush strokes with dry-brush breaks and splatter, fine pen crosshatching that follows each form, heavy solid black masses, realistic adult faces with small eyes, strong ink chiaroscuro, sparse grey screentone, ink bleed, strictly ink black and untouched paper white.",
+      "recap": "Rendered throughout as strictly black-and-white seinen manga brush ink on white paper.",
+      "notes": "",
+      "captions": {}
+    },
+    "flux3_klein": {
+      "style": "Black-and-white seinen manga ink on white paper in the register of Vagabond: swelling sumi-brush strokes that taper, with dry-brush breaks and ink splatter, fine pen crosshatching that follows the form planes, heavy solid black masses, sparse grey screentone in the sky, generous untouched white paper, realistic adult anatomy with small realistic eyes and skin built from hatching, side light carved out by solid blacks with highlights left as bare paper, ink bleed and paper grain.",
+      "recap": "Every colour in the scene becomes ink: the sky is white paper with grey screentone, the walls and the ground are brush and hatching on white, the shadow fills are solid black, dark garments are solid black, and pale garments stay bare white with hatched folds.",
+      "notes": "",
+      "captions": {}
+    },
+    "qwen_image_2_1": {
+      "style": "The image is a black-and-white seinen manga ink illustration on white paper in a signature Vagabond style, with swelling sumi-brush strokes with dry-brush breaks and splatter, fine pen crosshatching that follows the form, heavy solid black masses, sparse grey screentone, generous untouched white, ink bleed and paper grain, depicting a scene from a Gothic Victorian novel in a palette of strictly ink black, paper white and tone grey.",
+      "recap": "The overall composition carves its forms with strong side light made from solid blacks and untouched white highlights, in a stark, weighty mood, keeps to a palette of strictly ink black, paper white and tone grey, and reads throughout as a black-and-white seinen manga ink illustration on white paper in a signature Vagabond style, with swelling sumi-brush strokes with dry-brush breaks and splatter, fine pen crosshatching that follows the form, heavy solid black masses, sparse grey screentone, generous untouched white, ink bleed and paper grain.",
+      "notes": "",
+      "captions": {}
+    },
+    "flux3_klein_pup": {
+      "style": "",
+      "recap": "",
+      "notes": "",
+      "captions": {
+        "count": "Black-and-white seinen manga illustration in ink on white paper, rendered with the forceful brushwork, dense crosshatching, solid black masses, and restrained screentone of Vagabond (1998) and Berserk manga (1989). A medium full shot at eye level shows Count Dracula as a single tall, gaunt old nobleman, centered in a three-quarter view. He has pale skin, a long white moustache, a high hooked nose, arched eyebrows, pointed ears, and sharp white teeth showing at the corner of his mouth. His black clothing is defined by a high collar, a long black cloak, fitted dark sleeves, and a floor-length black coat, all merging into heavy solid-black masses. From head to foot he is dressed in black, though the raised hand and exposed face remain stark white. One pale hand rises beside his chest in a courtly welcome, palm turned outward with long fingers spread, while the cloak falls behind him in a broad, irregular silhouette. Swelling sumi-brush strokes form the cloak and shoulders, with dry-brush breaks, feathered edges, ink splatter, and visible paper grain. Fine pen crosshatching follows the planes of his face, moustache, collar, and hand. Behind him, a plain dark stone wall fills the middle background as a rough field of solid black and sparse grey screentone, its block joints indicated by a few broken ink lines. Generous untouched white surrounds the figure and cuts through the wall’s outer edges. Strictly monochrome, with no color, lettering, border, or additional figures.",
+        "castle": "Black-and-white seinen manga illustration in ink on white paper, rendered with the forceful hand-inked character of Vagabond (1998) and Berserk manga (1989): swelling sumi-brush strokes, dry-brush breaks, scattered ink splatter, fine pen crosshatching that follows the forms, heavy solid black masses, sparse grey screentone, visible ink bleed, and paper grain. Strictly monochrome, with the darkening violet dusk sky translated into a broad field of untouched white and layered black-grey storm washes. An extreme wide establishing view from a low angle sweeps across an enormous sky, with the vast ruined Gothic Castle Dracula confined to the upper third. The castle rises as a small, jagged silhouette on the edge of a sheer precipice, its black stone towers broken by collapsed roofs, fractured spires, empty arches, and torn battlements. A few narrow windows glow white against the black masonry. Thick brushwork gathers the castle into a dense black mass, while fine crosshatching defines the remaining stone ribs and window recesses. Below it, the precipice drops into a narrow black wedge of rock streaked with dry-brush texture. The Carpathian mountains fill the lower third with a dark pine forest, the trees reduced to sharp black silhouettes and dense crosshatched trunks. Beyond the cliff, the forest becomes a deep black expanse with sparse grey screentone between the pines. The immense sky dominates the composition: broad white paper fades through sweeping black washes into a dark dusk band, with long dry-brush clouds and irregular ink blooms suggesting the last light of a darkening violet sky. Generous untouched white surrounds the cloud forms, while splatters and feathered edges mark the transition from dusk to black. The landscape contains only castle, precipice, forest, mountains, and sky, with no figures or human silhouettes.",
+        "arrival": "Black-and-white seinen manga illustration in ink on white paper, strictly monochrome, with the forceful hand-inked finish of Vagabond (1998) and Berserk manga (1989): swelling sumi-brush strokes, dry-brush breaks, scattered splatter, fine pen crosshatching that follows the forms, heavy solid black masses, sparse grey screentone, visible ink bleed, and generous untouched white paper. A wide eye-level night scene looks from behind Jonathan Harker’s shoulder across a dark stone courtyard. In the lower left foreground, Jonathan Harker, a young English solicitor, stands with his back turned, his shoulder and profile forming a dark silhouette. He wears a long travelling coat rendered in brown in the story but translated into dense black ink, with a broad collar, fitted cuffs, and a leather bag hanging from his right hand. The bag is a dark leather satchel with a curved flap and short strap. His head and coat are defined by jagged white highlights and broken brush edges. Beside him, a horse-drawn carriage rests in the midground, its horse standing in profile with lowered head, taut reins, and a dark harness; the carriage body is a heavy black mass with thin wheel spokes and pale rims. At the centre, the carriage faces a great old wooden door set into rough stone walls. The door is open, its warped planks and rows of iron nails surrounding a tall, brightly lit doorway. Inside stands the tall old Count in black, his long coat merging into a solid black silhouette. He holds an antique silver lamp above shoulder height, its flame enclosed by an ornate metal shade. The lamp casts a white core surrounded by pale grey screentone, throwing long, sharp shadows across the Count, doorway, and uneven courtyard stones. The Count’s elongated shadow cuts diagonally toward the foreground. Broad white highlights and radiating sumi-brush strokes define the lamp’s light, while the surrounding masonry falls into heavy black. The doorway remains framed by untouched white paper around the brightest area, with rough ink washes, dry-brush stone textures, and splattered black marks fading into the night.",
+        "diary": "Black-and-white seinen manga illustration in ink on white paper, strictly monochrome, with the forceful hand-inked finish of Vagabond (1998) and Berserk manga (1989): swelling sumi-brush strokes, dry-brush breaks, scattered splatter, fine pen crosshatching that follows the forms, heavy solid black masses, sparse grey screentone, visible ink bleed, and paper grain, with generous untouched white. A tight close-up over Mina Harker’s left shoulder fills the composition. Mina Harker, a young Victorian woman with fair skin and dark hair pinned into a high, elaborate updo, sits at a small writing desk in a bedroom at night. Her face appears in three-quarter profile near the center, her brow drawn and her eyes lowered toward a leather-bound journal. She wears a high-necked pale blue blouse translated into white paper with a few sparse grey screentone folds and dense black shadows beneath the collar. Her right hand holds a dip pen against the open journal, its nib touching a page covered with loose, illegible handwritten lines. The journal’s worn leather cover and raised spine are indicated by black hatching and a narrow rim. At the right edge, a single candle burns in a short holder, its flame rendered as a sharp white core surrounded by a heavy black brush silhouette and a few radiating ink strokes. The candlelight cuts across Mina’s cheek, nose, and knuckles. Behind the journal, the candle flame sits beside an open window, where thin net curtains whip inward in the night air. The window and bed behind her dissolve into soft black washes and sparse grey screentone. Beyond the window, the night is a solid black field with a few white stars and rough brush marks. Broad untouched paper surrounds the curtain edges, while the foreground shoulder and desk merge into irregular pools of black ink.",
+        "chase": "Black-and-white seinen manga illustration in ink on white paper, rendered with swelling sumi-brush strokes, dry-brush breaks, splatter, fine pen crosshatching that follows the forms, heavy solid black masses, sparse grey screentone, ink bleed, and visible paper grain, in the stark hand-inked tradition of Vagabond (1998) and Berserk manga (1989). A high-angle wide action view tilts the entire composition into a steep Dutch angle. At sunset on a snowy mountain road, four horsemen gallop diagonally from the lower left toward the upper right, their bodies sweeping across the frame in a single surging formation. The leading rider is an old doctor with a long grey beard, wrapped in a heavy winter coat and fur collar, leaning forward in the saddle. Beside him, a tall man in a dark wool coat drives a long rifle across his back. The third rider is a young lord in a broad winter cloak, and the fourth is a young solicitor in a fitted coat with a high collar and dark cravat. Their faces are stern and partly obscured by wind, speed lines, and black shadow. Four horses surge beneath them, hooves throwing jagged fans of snow upward. Behind the riders, four additional horsemen in heavy winter coats are distinguished as the four horsemen: one with a horned helmet, one with a raised sword, one with a staff, and one with a dark cloak, each reduced to forceful silhouettes among the galloping group. Ahead of them, a heavy wooden cart climbs the road, its large wooden box strapped to the bed with thick ropes. Men in bulky sheepskin coats lean over the shafts and drive the cart. The setting sun forms a pale white disk behind the cart and a black horizon band, while the mountain sky is suggested by sparse grey screentone and broad untouched white. Snow-covered peaks rise along the upper background, and the road cuts through the composition as a white ribbon edged with black brushwork. Hooves, cart wheels, and flying snow merge into explosive ink splashes across the lower foreground."
+      }
+    },
+    "flux3_klein_bfl": {
+      "style": "Black and white seinen manga ink illustration on white paper, with swelling sumi-brush strokes, dry-brush breaks, fine pen crosshatching that follows form, heavy solid black masses and sparse grey screentone.",
+      "recap": "Everything is rendered in black ink on white paper with brush strokes, crosshatching, ink bleed and paper grain typical of a printed seinen manga page.",
+      "notes": "",
+      "captions": {}
+    }
+  },
+  "verdict": {
+    "status": "researched",
+    "best_model": null,
+    "notes": ""
+  }
+}

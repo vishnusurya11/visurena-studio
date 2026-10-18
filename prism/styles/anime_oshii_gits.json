@@ -1,0 +1,70 @@
+{
+  "id": "anime_oshii_gits",
+  "name": "Oshii cold realism",
+  "family": "anime",
+  "summary": "Realistic thin-lined cels with pale skin and dark shadow, sunk into cold grey-green-blue painted cities of rain, canals, reflections and haze.",
+  "lineage": {
+    "titles": [
+      "Patlabor: The Movie (1989)",
+      "Patlabor 2: The Movie (1993)",
+      "Ghost in the Shell (1995)"
+    ],
+    "studios": [
+      "Production I.G"
+    ],
+    "directors": [
+      "Mamoru Oshii"
+    ],
+    "era": "late-1980s to mid-1990s theatrical"
+  },
+  "traits": {
+    "line": "thin realistic linework, mature anatomy (Hiroyuki Okiura designs)",
+    "shading": "hard cel shadows integrated with painted light and dark sources rather than pure contrast",
+    "palette": "cold, desaturated grey, blue and green-tinged tones; pale skin against heavy dark shadow; small warm accents",
+    "lighting": "overcast daylight, fluorescent and sodium light, low light; strong reflections on glass and water",
+    "faces": "realistic adult faces, small eyes, little expression, heavy-lidded",
+    "backgrounds": "Hiromasa Ogura watercolour-on-paper and acrylic-on-film paintings; Hong Kong-modelled dense streets, signage, canals, old Tokyo",
+    "texture": "film grain, rain, haze; early digital lens filters for depth-of-field blur and heat distortion",
+    "camera": "long static holds, reflections and distortions, detached observational framing"
+  },
+  "style_words": "1990s theatrical cel animation with early digital compositing, as in Patlabor 2 (1993) and Ghost in the Shell (1995): thin realistic linework, hard cel shadows integrated with painted light, cold desaturated grey, blue and green palette, pale tones against heavy dark shadow, watercolour-and-acrylic painted cityscapes, rain, reflections, haze, soft optical depth blur, film grain.",
+  "avoid": [
+    "neon-saturated cyberpunk colour",
+    "glossy modern digital shading",
+    "big expressive anime eyes",
+    "bright clean sunny palettes"
+  ],
+  "confusable_with": [
+    "anime_otomo_akira",
+    "anime_kon_psych_realism",
+    "anime_amano_ethereal"
+  ],
+  "sources": [
+    "https://en.wikipedia.org/wiki/Ghost_in_the_Shell_(1995_film)",
+    "https://www.onderhond.com/blog/patlabor-2-review-mamoru-oshii"
+  ],
+  "added": "2026-10-17",
+  "run": "r001",
+  "models": {
+    "krea2": {
+      "style": "1990s theatrical cel animation, as in Ghost in the Shell: thin realistic linework, realistic adult faces with small heavy-lidded eyes, hard cel shadows integrated with painted light, cold desaturated grey, blue and green, pale tones against heavy dark shadow, watercolour-and-acrylic painted backgrounds, rain, reflections, haze, optical depth blur, film grain.",
+      "recap": "Rendered throughout as 1990s theatrical cel animation in cold desaturated grey, blue and green.",
+      "notes": ""
+    },
+    "flux3_klein": {
+      "style": "1990s theatrical anime cel animation with early digital compositing, in the register of Ghost in the Shell: thin realistic linework with mature anatomy, realistic adult faces with small heavy-lidded eyes, hard cel shadows integrated with painted light and dark sources, pale figures against heavy dark shadow, backgrounds painted in watercolour on paper and acrylic on film, haze in the air, reflections on glass and wet surfaces, soft optical depth blur in the far planes, film grain.",
+      "recap": "Cold desaturated grey, blue and green-tinged tones fill the sky, the walls, the ground and the shadow fills, small warm accents appear only in the light sources, and every garment keeps its own stated colour.",
+      "notes": ""
+    },
+    "qwen_image_2_1": {
+      "style": "The image is a 1990s theatrical cel animation frame with early digital compositing, in a signature Ghost in the Shell style, with thin realistic linework and mature anatomy, hard cel shadows integrated with painted light, watercolour-and-acrylic painted surroundings, haze, reflections, soft optical depth blur and film grain, depicting a scene from a Gothic Victorian novel in a palette of cold desaturated grey, blue and green-tinged tones, pale tones against heavy dark shadow, with small warm accents.",
+      "recap": "The overall composition observes its forms from a detached, static distance through haze and reflections, in a cool, contemplative mood, keeps to a palette of cold desaturated grey, blue and green-tinged tones, pale tones against heavy dark shadow, with small warm accents, and reads throughout as a 1990s theatrical cel animation frame with early digital compositing, in a signature Ghost in the Shell style, with thin realistic linework and mature anatomy, hard cel shadows integrated with painted light, watercolour-and-acrylic painted surroundings, haze, reflections, soft optical depth blur and film grain.",
+      "notes": ""
+    }
+  },
+  "verdict": {
+    "status": "researched",
+    "best_model": null,
+    "notes": ""
+  }
+}
