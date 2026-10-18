@@ -165,7 +165,9 @@ def climbed(ctx, gate: str, judge: Judge, rungs: Rungs, terminal: str) -> tuple[
     for rung, i in tries(rungs.ladder):
         if verdict.passed or not climbable(rungs, verdict):
             break
-        if capped(ctx, gate, verdict, len(taken)) or not affordable(ctx, gate, rung, len(taken)):
+        if capped(ctx, gate, verdict, len(taken)):
+            return verdict, taken
+        if not affordable(ctx, gate, rung, len(taken)):
             break
         boundary.check(getattr(ctx, "home", None), f"{gate} before rung {rung.name} #{i + 1}")
         started = ctx.budget.clock()
@@ -176,6 +178,8 @@ def climbed(ctx, gate: str, judge: Judge, rungs: Rungs, terminal: str) -> tuple[
                            action=rung.name, attempt=len(taken), note=verdict.summary(),
                            seconds=ctx.budget.clock() - started))
         verdict = valid(judge(), gate)
+    if taken and not verdict.passed:
+        capped(ctx, gate, verdict, len(taken))      # out of rungs AT the cap: the CAP line still said
     return verdict, taken
 
 

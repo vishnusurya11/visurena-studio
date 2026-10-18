@@ -117,3 +117,12 @@ def test_a_step_past_its_wall_says_cap_and_the_run_goes_on(tmp_path, capsys):
     assert step_runner.run_steps(ctx, [late, after]) == "completed"
     assert ran == ["06"]
     assert "CAP step 05: 1/1 rounds, 03:20" in capsys.readouterr().out
+
+
+def test_a_ladder_whose_rungs_end_at_the_cap_still_says_cap(tmp_path):
+    """Jekyll Kawajiri ep01 (2026-10-18): the plan ladder has exactly its three rounds of rungs;
+    it ran out of rungs AT the cap, kept best twice, and the log held no CAP line."""
+    ctx = Ctx(tmp_path)
+    taken, doc = climb(ctx, rungs=2)
+    assert taken == [0, 1] and doc["terminal"] == "keep_best"
+    assert sum(line.startswith("CAP retakes: 2/2 rounds") for line in ctx.said) == 1

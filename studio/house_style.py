@@ -54,7 +54,7 @@ LIVE = "Photoreal live-action, {where}, {light}, 35 mm film grain."
 # ---- the closed vocabulary ----------------------------------------------------
 
 DIRECTIONS = re.compile(
-    r"\bfrom (?:the |one )?(?:left|right|far end|near end|side|behind|ahead|west|east|"
+    r"\bfrom (?:the |one )?(?:upper |lower )?(?:left|right|far end|near end|side|behind|ahead|west|east|"
     r"north|south|windows?|doorway)\b"
     r"|\b(?:low|level|raking|slanting|sidelong|side-?lit)\b"
     r"|\b(?:behind|ahead)\b|\bdown the \w+\b"
@@ -492,16 +492,36 @@ def style_faults(where: str, light: str) -> list[str]:
     return []
 
 
+NIGHT = re.compile(r"\b(?:night|midnight|o'clock of a (?:black )?(?:\w+ )?morning)\b", re.I)
+DAYLIT = re.compile(r"\b(?:daylight|sunlight)\b", re.I)
+"""A night setup lit by daylight (Jekyll Kawajiri ep01, 2026-10-18): the light cure appended
+'Grey daylight through the window' to a street at three in the morning."""
+
+
+def lit_clauses(described: str) -> list[str]:
+    """Comma clauses that light the place: a burning practical, a sky source with a direction,
+    or a burning clause right after its practical's ("gas lamps ..., their flames burning")."""
+    out = []
+    for sentence in re.split(r"[;:.]", described or ""):
+        parts = sentence.split(",")
+        for k, c in enumerate(parts):
+            before = parts[k - 1] if k else ""
+            if (PRACTICALS.search(c) and LIT.search(c)) or (SKY.search(c) and DIRECTIONS.search(c)) \
+                    or (LIT.search(c) and PRACTICALS.search(before)):
+                out.append(c)
+    return out
+
+
 def setup_faults(described: str, outdoors: bool) -> list[str]:
     """A setup names its own light: a practical that is burning, or a sky
     source with a direction, in one clause; and outdoors, never overhead."""
-    clauses = re.split(r"[,;:.]", described or "")
-    lit = [c for c in clauses if (PRACTICALS.search(c) and LIT.search(c))
-           or (SKY.search(c) and DIRECTIONS.search(c))]
     out = []
-    if not lit:
+    if not lit_clauses(described):
         out.append("`described` names no light source with a direction -- ep09's 'hard morning "
                    "sunlight' is a brightness, not a light; say where it comes from")
+    if NIGHT.search(described or "") and (hit := DAYLIT.search(described or "")):
+        out.append(f"{hit.group(0)!r} lights a night setup -- the cure's daylight clause drew a lit "
+                   f"window into a street at three in the morning")
     if outdoors and (hit := NO_SHADOW.search(described or "")):
         out.append(f"{hit.group(0)!r}: an overhead sun throws its shadow under the thing, out "
                    f"of frame -- ep08 drew the flattest sheets in the series under one")

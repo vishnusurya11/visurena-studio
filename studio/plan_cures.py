@@ -78,17 +78,35 @@ def has_light_direction(described: str) -> bool:
         house_style.DIRECTIONS.search(described or ""))
 
 
+DAY_TEMPLATES = ((" Grey daylight through the ", " Lamplight glows through the "),
+                 (" Raking grey daylight from the ", " Raking lamplight glows from the "))
+
+
+def lamplit(described: str) -> str:
+    """This cure's own daylight clauses, relit by lamp in a night setup (idempotent)."""
+    for day, lamp in DAY_TEMPLATES:
+        described = described.replace(day, lamp)
+    return described
+
+
 def light_directions(doc: dict) -> dict:
     """A setup whose `described` names no light source WITH a direction gets a
     terse clause built from its own words (G-LIGHT; the clause stays short so
     the style line keeps its 16-word cap -- ep15's long clauses fed L20)."""
+    from studio import house_style
     for name, s in (doc.get("setups") or {}).items():
         d = s.get("described") or ""
-        if has_light_direction(d):
+        night = bool(house_style.NIGHT.search(d))
+        if night:
+            d = s["described"] = lamplit(d)
+        if has_light_direction(d) or (night and house_style.lit_clauses(d)):
             continue
         found = LIGHT_SOURCES.search(d)
         w = (found.group(1).lower() if found else "daylight")
-        if w in ("glow", "fire", "firelight", "hearth"):
+        if night:
+            clause = (f" Lamplight glows {DIRECTION_FOR[w].format(w=w)}, deep shadow." if w in DIRECTION_FOR
+                      else " Raking lamplight glows from the LEFT, deep shadow.")
+        elif w in ("glow", "fire", "firelight", "hearth"):
             clause = " Low firelight from ahead, deep shadow."
         elif w in DIRECTION_FOR:
             clause = f" Grey daylight {DIRECTION_FOR[w].format(w=w)}, deep shadow."

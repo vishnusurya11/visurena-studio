@@ -1453,3 +1453,16 @@ fixes. Each lesson below cost at least one launch. Tracker rows A38-A74 in
   battery: G-TAKELINT 21 -> clean, two G-AIM rows ('shorter at a walking pace') and a G-PRESENT row gone with it.
 - **Grep the plan for the cure's own phrase after every climb.** A count of the phrase a cure appends, against
   the gaits the judge reads, is a one-line check that no gate made.
+- **The light cure lit a street at three in the morning with daylight.** G-LIGHT split the setup on commas,
+  so "gas lamps stand along each kerb, their flames burning yellow" had the lamp in one clause and the burning
+  in the next, and "from the upper right" was not a direction; `light_directions` took the first source word
+  ("every WINDOW shuttered and dark") and appended "Grey daylight through the window at the LEFT". The Krea2
+  master drew a lit window from it. Now a burning clause after its practical's lights the setup, upper/lower
+  left/right is a direction, daylight in a night setup is a G-LIGHT row, and the cure relights its own clause
+  by lamp. The picture stayed (it is good, and the words now say what it shows).
+- **A ladder that runs out of rungs AT its cap said no CAP line.** The plan ladder is exactly three rungs, its
+  cap three rounds; `judged_gate.climbed` only said CAP when a fourth rung was refused. Both climbs kept best
+  with no CAP in the log. It now says it after the last rung too.
+- **Run nothing heavy beside a Qwen edit.** The place-state edit failed twice on `HostBuffer.read_file_slice`
+  (Windows 1450, MemoryError) with ComfyUI at 33 GB private and 0.8 GB of system commit left while a full
+  pytest and two plan_checks ran beside it. Run the suite while the drive is paused, or before the launch.
