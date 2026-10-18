@@ -301,7 +301,9 @@ QC fails on any of these:
   (`episode_spec.short_refusal` on `seconds`) -- 2026-09-30, ep14 shipped as a
   video at 182.58 s.
 - **a planned sound the master does not let you hear** (`sound`, `episode_sound.presence`,
-  6 dB over the second before it) -- 2026-09-26.
+  6 dB over the second before it) -- 2026-09-26. Since 2026-10-17 QC listens where the
+  placer LAID the cue (`audio/sfx/onsets.json`, `sfx_onset.measured_starts`), not where
+  the plan put it: a cue moved onto its measured moment is heard there.
 
 A take that failed and spent its retake budget does not fail the master. That
 is the owner's call, and it was measured.

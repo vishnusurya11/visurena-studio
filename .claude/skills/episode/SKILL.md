@@ -91,7 +91,10 @@ optional acts are `pause`, `resume`, `retry N`, `park N --why`.
 5. **A terminal is not a pass.** Only the owner waives (`review/waiver.json`).
 6. **Watch and listen before anything leaves the machine**; the lock needs the sign-off.
 7. **Audio first.** Picture cut to the measured voice. Effects duck under every line
-   (6 dB), ambience 3 dB, every cue trimmed 3 dB (`studio/episode_sound`).
+   (6 dB), ambience 3 dB, every cue trimmed 3 dB (`studio/episode_sound`). Every effect
+   lands on its MEASURED moment (`studio/sfx_onset`, 2026-10-17): footsteps one slice per
+   heel strike, a single event on the take's motion peak near its planned time; a voice,
+   crowd or weather keeps the planned time. Read `audio/sfx/onsets.json` for why each cue sits where it does.
 8. **Shots follow the chapter** across scenes (G-ORDER). A flash-forward is omitted
    (`omit` in the plan), never slipped in to pass a gate.
 9. **Deliverable first**; every `master_iterN.mp4` kept.

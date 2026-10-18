@@ -541,7 +541,7 @@ pre.ddl{font-family:"IBM Plex Mono",monospace;font-size:11px;line-height:1.4;col
           <ul>
             <li><div class="node lead"><div class="n">Studio office</div><div class="r">Autopilot (head of production) + the brain on a leash, the slate, decisions</div><div class="f">scripts/episode/autopilot.py · studio/brain.py · series.json · DECISIONS.md</div><div class="st built">autopilot built 2026-10-06</div></div>
               <ul>
-                <li><div class="node lead div"><div class="n">Platform</div><div class="r">Shared services. No deliverable of its own.</div><div class="f">llm · GPU lease · ledger · approval · measures · notify · publish clients · R&amp;D ledger · run clock (the process, 60 s beat; 2026-10-11)</div><div class="st partial">mostly built</div></div></li>
+                <li><div class="node lead div"><div class="n">Platform</div><div class="r">Shared services. No deliverable of its own.</div><div class="f">llm · GPU lease · ledger · approval · measures · notify · publish clients · R&amp;D ledger · run clock (the process, 60 s beat; 2026-10-11) · visual onsets (studio/sfx_onset, 2026-10-17)</div><div class="st partial">mostly built</div></div></li>
                 <li><div class="node lead div"><div class="n">Pre-production</div><div class="r">Asserts, invents, binds identity</div></div>
                   <ul>
                     <li><div class="node built"><div class="n">Analysis</div><div class="r">12 agents · unit: book</div><div class="f">analysis.py</div><div class="st built">built</div></div></li>
@@ -923,7 +923,8 @@ not built     a worker loop that starts a five-hour GPU job unattended — a que
       U('','Gate policy','Who signs each gate: auto with a decision id; shadow = a newer judge version benched beside the current one','built','gates.yaml · studio/gate_policy.py'),
       U('','Notify','Every department calls it; none copies it','missing','studio/notify.py'),
       U('','Publish clients','One pinned client per platform','partial','studio/youtube.py · higgsfield.py'),
-      U('','R&D ledger','Hypothesis, variants, measures, verdict, cost','missing','experiments/<id>/manifest.json')]},
+      U('','R&D ledger','Hypothesis, variants, measures, verdict, cost','missing','experiments/<id>/manifest.json'),
+      U('','Visual onsets','When a take shows its event: the walker’s stride peaks (heel strikes) and the camera-compensated motion peaks around the people; the sound layer lays each effect on it (2026-10-17)','built','studio/sfx_onset.py')]},
     {n:'Analysis',r:'Pre-production · unit: book · leader analysis.py',st:'built',kids:[
       U('01','Ingest','EPUB → numbered chapters','built','step_01_ingest.py',[A('Book cartographer','real divisions'),A('Ingest validator','was the parse clean?','qc')]),
       U('02','Extract','The crew, per chapter','built','step_02_extract.py',[A('Scene breakdown','1st AD: cuts the scenes'),A('Script supervisor','time, continuity'),A('Casting director','who is in scene'),A('Story analyst','what happens'),A('Dialogue editor','who speaks to whom'),A('Extraction auditor','completeness, faithfulness','qc')]),
@@ -1309,7 +1310,7 @@ not built     a worker loop that starts a five-hour GPU job unattended — a que
       {m:'10_01',t:'title: series base once per book; unit lettering read back by OCR',who:'code · local GPU',k:'code',d:1,log:'title card ok (OCR read-back)'},
       {m:'10_02',t:'bed: tone spans → local music; metre measured and ranked',who:'code · local GPU',k:'code',d:1.6,log:'bed: 4 seeds, best fitness 0.81'},
       {m:'10_03',t:'cut: takes trimmed to placed.json; lines at their at (an inner line through the close-mic chain, studio/inner_voice, 2026-10-17); mix; captions',who:'code',k:'code',d:1.2,log:'cut/master_iter1.mp4 · 152.0 s'},
-      {m:'10_04',t:'sound: the plan’s spot effects + a per-setup ambience, Stable Audio 3 SFX (local); lines offset by delivery',who:'code · local GPU',k:'code',d:.8,log:'sound: 9 cues + 5 ambiences laid · shouts +3 dB'},
+      {m:'10_04',t:'sound: the plan’s spot effects ON THE MEASURED MOMENT (studio/sfx_onset, 2026-10-17: footsteps one slice per heel strike, a single event on the take’s motion peak near its planned time, a voice or weather sound at its planned time) + a per-setup ambience, Stable Audio 3 SFX (local); lines offset by delivery',who:'code · local GPU',k:'code',d:.8,log:'sound: 9 cues (6 on measured onsets, 3 planned) + 5 ambiences laid · audio/sfx/onsets.json · shouts +3 dB'},
       {m:'10_05',t:'upscale: the joined 768 cut → RTX VSR 4x ULTRA in process → 3072, x264 CRF 14; own clock row; in the same pass every kept face-refine crop pasted at master scale through the cut’s geometry (2026-10-17)',who:'code · local GPU',k:'code',d:.9,log:'upscale: rtx 4x ULTRA → 3072x3072 · 252 s · <span class="k">edit completed</span>'}]},
     {lane:'E',id:'episode/11',name:'QC',why:'Measure the delivered master, never the intention. The master ensemble answers the five rubric questions from measurements and one 30-frame read; recut twice, one retake; an n is flagged with its evidence, never waived.',subs:[
       {m:'11_01',t:'measure: loudness, every cut (+ scene-change vote), every line heard, every planned sound heard, silent-gap wall, title present',who:'code',k:'code',d:1.2,log:'qc: 23/23 cuts, 14/14 lines heard, -16.1 LUFS, no gap'},

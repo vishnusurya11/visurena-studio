@@ -1336,3 +1336,21 @@ fixes. Each lesson below cost at least one launch. Tracker rows A38-A74 in
   not separate them (F3 barely touches the border). Thin calibration: recalibrate on the first refine.json rows.
 - **The refine is decoration: the first thing the clock cuts.** It runs only while the reserve holds it plus a full
   measuring pass; a check is never cut for it.
+
+## Sound effects on the measured moment (2026-10-17, owner go on the test-bench recommendations)
+
+- **The writer's `at` is a guess; the take knows the frame.** Laid at the plan's time, a boot or a door landed
+  wherever the writer guessed. The 2026-10-16 battery put a Stable Audio 3 cue on a hand-marked visual onset and it
+  landed within 4 ms (T06 stamp) and 41-57 ms (T09 door). `studio/sfx_onset` replaces the hand: the strongest
+  camera-compensated motion peak around the people within 0.75 s of the planned time, and the cue shifted so ITS own
+  first onset hits it.
+- **Footsteps go one by one.** A free-running SA3 footsteps render has its own cadence and drifted 200-280 ms by the
+  third step (T03). The render is cut into its steps and one slice is laid per measured heel strike -- a peak of the
+  walker's box width (T03: -30/-1/+19 ms against the marked strikes).
+- **The walker is the one who crosses the ground, not the biggest box.** A man fixed at the frame edge is the largest
+  person and never steps; the track that travels furthest against the camera's pan is the walker.
+- **H3 repeats a frame every second or third.** The flow between twins is ~0, a dip that would split one motion into
+  two; a 3-frame running max bridges it before peaks are read.
+- **A cue the picture cannot time keeps its planned time and says why** (`onsets.json` `fallback`): a scream, a crowd,
+  the weather, a slowed or still take, or no detector. A missing measurement never moves or drops a sound, and QC
+  listens where the cue was laid.

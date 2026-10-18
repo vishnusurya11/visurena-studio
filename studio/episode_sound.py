@@ -14,7 +14,7 @@ import json
 import re
 from pathlib import Path
 
-from studio import sfx_cues
+from studio import sfx_cues, sfx_onset
 
 SEED = 7300
 EVENT_DB = 6.0
@@ -125,9 +125,11 @@ def setup_rows(episode, placed: dict) -> dict[str, list[dict]]:
 def layer(home: Path, episode, placed: dict, run=None) -> list[tuple[float, Path]]:
     """The effects on their shots, then every setup's ambience under its shots."""
     folder, seed = Path(home) / "audio" / "sfx", SEED + 1000 * episode.number
-    out = sfx_cues.placed(sfx_cues.render_all(cues_of(episode, lifts_of(home)), folder, seed, run,
-                                              where=episode.where),
-                          placed["shots"])
+    # ON THE MEASURED MOMENT (owner go 2026-10-17): each effect is laid where the take shows
+    # its event, footsteps one by one; a sound the picture cannot time keeps its planned time
+    out = sfx_onset.place_all(sfx_cues.render_all(cues_of(episode, lifts_of(home)), folder, seed, run,
+                                                  where=episode.where),
+                              placed["shots"], home, folder)
     for n, (name, rows) in enumerate(setup_rows(episode, placed).items()):
         sound = (getattr(episode.setups.get(name), "ambience", "") or "").strip()
         if sound:
@@ -257,7 +259,9 @@ def presence(master: Path, episode, placed: dict) -> list[dict]:
     cue is judged by its stem instead, and the row says so."""
     rows = {int(s["index"]): s for s in placed["shots"]}
     cues = list(cues_of(episode))
-    spans = [(sfx_cues.start_of(c, rows), sfx_cues.fit_seconds(c, rows)) for c in cues]
+    laid = sfx_onset.measured_starts(Path(master).parent.parent / "audio" / "sfx")
+    spans = [(laid.get(lift_key(c.shot, c.sound), sfx_cues.start_of(c, rows)), sfx_cues.fit_seconds(c, rows))
+             for c in cues]
     out = []
     for i, cue in enumerate(cues):
         at, quiet = spans[i][0], baseline_start(spans, i)
