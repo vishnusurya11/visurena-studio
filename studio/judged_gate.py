@@ -5,7 +5,9 @@
 The policy row must be `auto` (a human gate is `require`'s, not a judge's).
 The judge reads the artefact as it stands: a pass is signed in the judge's
 name; a fault takes the next rung the budget affords (the ladder re-renders,
-the judge reads again, one learning per rung); when rungs or time run out the
+the judge reads again, one learning per rung); when rungs or time run out -- the
+budget, the step's wall, or the gate's row of the cap table (stages.yaml `episode.caps`,
+its per-episode rounds persisted in attempts.json; owner 2026-10-18) -- the
 terminal rung keeps what it keeps and never asks -- the verdict is signed
 `flagged` with its faults listed, a terminal learning is written, and one row
 goes to the book's audit sheet.  No verdict file exists while the ladder
@@ -20,7 +22,7 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Callable, Iterator
 
-from studio import audit_rows, boundary, gate_policy
+from studio import audit_rows, boundary, gate_policy, step_attempts, step_caps
 from studio.gate_policy import Policy
 from studio.judges.verdict import Verdict
 from studio.ladder import Ladder, Rung
@@ -115,16 +117,61 @@ def climbable(rungs: Rungs, verdict: Verdict) -> bool:
     return rungs.curable is None or rungs.curable(verdict)
 
 
+def per_episode(cap, home) -> bool:
+    return cap is not None and cap.per == "episode" and home is not None
+
+
+def row_spent(cap, home, taken: int) -> bool:
+    """The gate's cap-table row is used up: its per-episode rounds or wall, else its rounds this climb."""
+    if cap is None:
+        return False
+    return step_attempts.spent(home, cap) if per_episode(cap, home) else taken >= cap.rounds
+
+
+def say_cap(ctx, gate: str, verdict: Verdict, taken: int) -> str:
+    """`CAP <phase>: r/N rounds, mm:ss, kept best (k advisories)`, printed and logged."""
+    cap, home, wall = step_caps.for_gate(gate), getattr(ctx, "home", None), getattr(ctx, "step_wall", None)
+    name = cap.name if cap else gate
+    rounds = step_attempts.count(home, name) if per_episode(cap, home) else taken
+    secs = wall.elapsed() if wall else (step_attempts.seconds(home, name) if per_episode(cap, home) else 0.0)
+    line = step_caps.cap_line(name, rounds, cap.rounds if cap else taken, secs, len(verdict.faults))
+    print(line, flush=True)
+    if hasattr(ctx, "log"):
+        ctx.log(line, level="WARNING")
+    return line
+
+
+def capped(ctx, gate: str, verdict: Verdict, taken: int) -> bool:
+    """The step's wall or the gate's row closes the climb (owner 2026-10-18): the CAP line is
+    said and the terminal keeps the best.  Never a park, never another round."""
+    wall = getattr(ctx, "step_wall", None)
+    row = row_spent(step_caps.for_gate(gate), getattr(ctx, "home", None), taken)
+    if not (wall is not None and wall.spent()) and not row:
+        return False
+    say_cap(ctx, gate, verdict, taken)
+    return True
+
+
+def spend_round(ctx, gate: str, seconds: float) -> None:
+    """A rung taken spends one per-episode round of the gate's row, with its seconds."""
+    cap, home = step_caps.for_gate(gate), getattr(ctx, "home", None)
+    if per_episode(cap, home):
+        step_attempts.spend(home, cap.name, seconds=max(0.0, seconds))
+
+
 def climbed(ctx, gate: str, judge: Judge, rungs: Rungs, terminal: str) -> tuple[Verdict, list[str]]:
     """The verdict as it stands, then after every rung taken; the rungs taken."""
     verdict, taken = valid(judge(), gate), []
     for rung, i in tries(rungs.ladder):
-        if verdict.passed or not climbable(rungs, verdict) or not affordable(ctx, gate, rung, len(taken)):
+        if verdict.passed or not climbable(rungs, verdict):
+            break
+        if capped(ctx, gate, verdict, len(taken)) or not affordable(ctx, gate, rung, len(taken)):
             break
         boundary.check(getattr(ctx, "home", None), f"{gate} before rung {rung.name} #{i + 1}")
         started = ctx.budget.clock()
         rungs.take(rung, i, verdict)
         taken.append(rung.name)
+        spend_round(ctx, gate, ctx.budget.clock() - started)
         ctx.learn(Learning(step=step_of(ctx), gate=gate, measured=len(verdict.faults),
                            action=rung.name, attempt=len(taken), note=verdict.summary(),
                            seconds=ctx.budget.clock() - started))

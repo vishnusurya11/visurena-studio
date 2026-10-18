@@ -35,7 +35,7 @@ import re
 from pydantic import ValidationError
 from strands.types.exceptions import StructuredOutputException
 
-from studio import episode_home, episode_spec, llm, plan_brief, plan_cures, plan_verdict
+from studio import episode_home, episode_spec, llm, plan_brief, plan_cures, plan_verdict, step_caps
 from studio.judges import plan as plan_judge
 from studio.judges.verdict import Fault, Verdict
 from studio.ladder import Ladder, Rung
@@ -119,10 +119,11 @@ def mechanical_cures(plan: Path, book: Path, number: int, say=print) -> None:
         say(f"desk cure pass skipped, the writer's draft kept: {str(why)[:160]}")
 
 
-CLIMB_WALL_S = 25 * 60
+CLIMB_WALL_S = step_caps.wall_s("plan")
 """The climb's wall (owner 2026-10-18, Jekyll Kawajiri ep01: a 45-min climb on rows no writer moves):
 past it a rung writes nothing and the terminal takes the best draft.  The rungs are three writer
-rounds (improve x2, model_tier x1)."""
+rounds (improve x2, model_tier x1).  The number is the cap table's (stages.yaml `episode.caps.plan`,
+30 min, the owner's approved STEP_CAPS.md); the episode's climbs are counted in step 02."""
 
 IMPROVE_S, MODEL_TIER_S = 240.0, 90.0
 """The plan rungs' measured medians (C3_verdict #6, D10; c3/rungs.json): the
@@ -429,7 +430,7 @@ class Desk:
         if self.wall_spent():                     # the owner's cap: no writer round past the wall
             self.remember(verdict)
             self.rungs_done += 1
-            self._say(f"plan climb: the {CLIMB_WALL_S // 60}-min wall is spent; rung {rung.name} writes nothing")
+            self._say(f"plan climb: the {int(CLIMB_WALL_S // 60)}-min wall is spent; rung {rung.name} writes nothing")
             return
         if is_battery(verdict):
             self.escalate()                       # a rule miss: the reasoner edits from here

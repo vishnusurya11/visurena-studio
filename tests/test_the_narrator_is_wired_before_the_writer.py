@@ -53,4 +53,4 @@ def test_step_02_stops_before_the_writer_when_the_narrator_is_unset(tmp_path):
     with pytest.raises(SystemExit, match="NARRATOR"):
         step_02_plan.narrator_or_stop(ctx)
     src = inspect.getsource(step_02_plan.run)
-    assert src.index("narrator_or_stop(ctx)") < src.index("desk.resume()")
+    assert src.index("narrator_or_stop(ctx)") < src.index("first_draft(ctx, desk)")

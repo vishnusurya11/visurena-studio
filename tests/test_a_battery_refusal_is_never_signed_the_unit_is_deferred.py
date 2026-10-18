@@ -53,15 +53,21 @@ def test_the_critic_is_never_asked_while_the_battery_refuses(ctx, monkeypatch):
 
 
 def test_a_second_pass_counts_and_the_audit_row_names_the_terminal(ctx, monkeypatch):
+    """Climb 1 defers; climb 2 is the last (owner 2026-10-18) and keeps its best, flagged."""
     _wire(ctx, monkeypatch, (1, REFUSED_OUT))
-    for _ in range(2):
-        with pytest.raises(Deferred):
-            step.run(ctx)
+    with pytest.raises(Deferred):
+        step.run(ctx)
     aside = _plan(ctx).with_name(step.plan_ladder.DEFERRED)
-    assert json.loads(aside.read_text(encoding="utf-8"))["passes"] == 2
+    assert json.loads(aside.read_text(encoding="utf-8"))["passes"] == 1
+    try:
+        step.run(ctx)
+    except Deferred:                                    # the one park a tier-1 line buys
+        pass
+    assert plan_verdict.current(_plan(ctx))
     rows = audit_rows.load(ctx.book_dir)
     assert len(rows) == 2 and rows[0].gate == "PLAN" and rows[0].judge == "judge:plan@1"
     assert rows[0].terminal == "defer" and rows[0].artefact == "episodes/ep03/plan.deferred.json"
+    assert rows[1].terminal == "keep_best"
     terminal = [row for row in learnings.load(ctx.learnings_path) if row.terminal]
     assert terminal and terminal[0].gate == "PLAN" and terminal[0].note.endswith("-> defer")
 

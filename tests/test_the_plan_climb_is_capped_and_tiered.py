@@ -2,7 +2,7 @@
 "add the number of loops we can do and what parts to focus on").
 
 The step-02 climb ran 45 min on a draft refused only by rows no writer moves.  Now:
-- at most three writer rungs and CLIMB_WALL_S (25 min) of wall for the climb; past the wall a rung
+- at most three writer rungs and CLIMB_WALL_S (the cap table's 30 min) of wall for the climb; past the wall a rung
   writes nothing and the terminal takes the best draft;
 - tier 1 (a line a downstream builder repeats: contract, cast bound, take length, ...) defers and
   re-authors as before; any other line (tier 2: aim, laid, crowd, react -- one writer round each
@@ -74,9 +74,10 @@ def test_a_rung_past_the_wall_writes_nothing():
     assert desk.wrote == [] and desk.rungs_done == 1
 
 
-def test_the_climb_is_three_writer_rungs_and_a_25_minute_wall():
+def test_the_climb_is_three_writer_rungs_and_the_tables_30_minute_wall():
+    # 25 min landed first (ad170a3); the owner's approved cap table says 30 min per climb
     assert sum(r.tries for r in plan_ladder.ladder(2).rungs) == 3
-    assert plan_ladder.CLIMB_WALL_S == 25 * 60
+    assert plan_ladder.CLIMB_WALL_S == 30 * 60
 
 
 def test_the_insert_count_is_advice_on_a_grammar_plan():

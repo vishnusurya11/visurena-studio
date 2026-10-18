@@ -31,6 +31,8 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 from agents import episode_writer, plan_reader  # noqa: E402
 from studio.deferral import Deferred  # noqa: E402
 from studio import episode_home, gate_policy, judged_gate, plan_ladder, plan_provenance, plan_verdict, step_cli  # noqa: E402
+from studio import plan_tags, step_attempts, step_caps  # noqa: E402
+from studio.ladder import Ladder  # noqa: E402
 from studio.judges import plan as plan_judge  # noqa: E402
 from studio.judges import verdict as jv  # noqa: E402
 
@@ -41,6 +43,11 @@ GATE = "PLAN"
 MAX_IMPROVE = 2
 """Tries of the `improve` rung: rounds in which every refusal so far goes back to the writer."""
 PLAN_CHECK = "scripts/episode/plan_check.py"
+CLIMBS = "plan.climbs"
+"""The episode's climb count in attempts.json (owner 2026-10-18): the cap table's `climbs`.  A
+climb is one pass of the ladder; a deferral's re-author is the next one."""
+PARKED = "plan.parked"
+"""The one park a tier-1 line buys at the last climb, marked so a relaunch goes on."""
 
 
 def plan_of(ctx) -> Path:
@@ -199,7 +206,7 @@ def clear(ctx, desk) -> Path:
     """The judged gate over the plan: pass -> signed; fault -> the ladder; spent -> a terminal."""
     policy = gate_policy.of(ctx.stage, GATE)
     desk.battery_terminal = policy.battery_terminal or plan_ladder.DEFER
-    rungs = judged_gate.Rungs(plan_ladder.ladder_after(desk.rungs_done, MAX_IMPROVE), take=desk.take)
+    rungs = judged_gate.Rungs(climb_ladder(ctx, desk), take=desk.take)
     try:
         signed = judged_gate.clear(ctx, GATE, judge=lambda: judge(ctx, desk), sign=desk.sign,
                                    ladder=rungs, terminal=desk.terminal, policy=policy)
@@ -208,6 +215,73 @@ def clear(ctx, desk) -> Path:
     ctx.log(f"{GATE}: {signed.name} written", step_id=STEP_ID)
     retire_aside(ctx, signed)
     return signed
+
+
+def climb_ladder(ctx, desk) -> Ladder:
+    """One climb of the episode's `climbs` (persisted): the last never defers -- it keeps the
+    best draft, flagged -- and one past it takes no writer round at all (owner 2026-10-18)."""
+    cap, n = step_caps.cap("plan"), climb_number(ctx, desk)
+    if n >= cap.climbs:
+        desk.battery_terminal = plan_ladder.KEEP_BEST
+    if n <= cap.climbs:
+        return plan_ladder.ladder_after(desk.rungs_done, MAX_IMPROVE)
+    ctx.log(f"CAP plan: {cap.climbs}/{cap.climbs} climbs spent, no writer round; the best draft is kept",
+            step_id=STEP_ID, level="WARNING")
+    return Ladder([], plan_ladder.KEEP_BEST)
+
+
+def climb_number(ctx, desk) -> int:
+    """This climb's number: a climb resumed from its checkpoint is the one already counted."""
+    if desk.rungs_done or (ctx.home / plan_ladder.CLIMB).exists():
+        return max(1, step_attempts.count(ctx.home, CLIMBS))
+    return step_attempts.spend(ctx.home, CLIMBS)
+
+
+def climbs_spent(ctx) -> bool:
+    return step_attempts.count(ctx.home, CLIMBS) >= step_caps.cap("plan").climbs
+
+
+def aside_draft(ctx, plan: Path) -> bool:
+    """The deferred draft put back as it is; False when there is none or the contract refuses it."""
+    aside = ctx.home / plan_ladder.DEFERRED
+    draft = episode_home.read_json(aside).get("draft") if aside.exists() else None
+    if not draft:
+        return False
+    try:
+        episode_home.write_plan(plan, draft)
+    except SystemExit:
+        return False
+    return True
+
+
+def first_draft(ctx, desk) -> None:
+    """The draft a climb judges: past the episode's climbs the aside's draft as it is, no
+    writer round; else the aside edited by the reasoner, or a fresh draft."""
+    if climbs_spent(ctx) and aside_draft(ctx, desk.plan):
+        ctx.log("the plan's climbs are spent: the aside's draft is judged as it is", step_id=STEP_ID)
+        return
+    desk.resume() or desk.write(None)
+
+
+def tier_one_left(plan: Path) -> list[str]:
+    """The tier-1 lines (a downstream builder repeats them) on a kept, flagged plan."""
+    doc = plan_verdict.read(plan) or {}
+    if not doc.get("flagged"):
+        return []
+    return plan_tags.builder_lines([str(f.get("note") or "") for f in doc.get("faults") or []])
+
+
+def park_once(ctx, plan: Path) -> None:
+    """At the last climb a kept draft that still carries a tier-1 line parks the unit ONCE,
+    naming the line; the next launch goes on with the signed draft."""
+    if not climbs_spent(ctx) or step_attempts.marked(ctx.home, PARKED):
+        return
+    lines = tier_one_left(plan)
+    if not lines:
+        return
+    step_attempts.mark(ctx.home, PARKED)
+    raise Deferred(GATE, str(plan_verdict.verdict_path(plan).relative_to(ctx.book_dir)).replace("\\", "/"),
+                   "the plan's climbs are spent and a tier-1 line remains: " + "; ".join(lines)[:300])
 
 
 def over_clock(ctx, desk, policy, why: str) -> Path:
@@ -291,7 +365,7 @@ def run(ctx) -> None:
             ctx.log("--rewrite refused: placed.json exists, this plan already ran downstream",
                     step_id=STEP_ID, level="WARNING")
         elif not restored and (wants_rewrite(ctx) or not plan.exists()):
-            desk.resume() or desk.write(None)
+            first_draft(ctx, desk)
         if plan_verdict.current(plan) or grandfathered(ctx):
             return
         if resigned(ctx):
@@ -314,6 +388,7 @@ def run(ctx) -> None:
             signed = clear(ctx, fresh)
     if signed.name == plan_ladder.DEFERRED:
         raise Deferred(GATE, str(signed.relative_to(ctx.book_dir)).replace("\\", "/"), deferred_note(signed))
+    park_once(ctx, plan_of(ctx))
 
 
 if __name__ == "__main__":
