@@ -214,13 +214,14 @@ def carried(old: dict, new: dict) -> dict:
 
 
 def terminal(record: dict, best: dict | None) -> dict | None:
-    """keep_best flagged: the best try, once the line has had TERMINAL_TRIES and it sits
-    within TERMINAL_MARGIN of its floor; None while it may still be cured or must refuse."""
+    """keep_best flagged: the best rightly heard try once the line has had TERMINAL_TRIES;
+    `keep_best_far` when it sits more than TERMINAL_MARGIN under its floor (step caps,
+    2026-10-18: voice is tier 2, it never parks the episode).  None while it may still be
+    cured, or when no try's words were heard right (that still refuses)."""
     if record.get("tries", 0) < TERMINAL_TRIES or best is None:
         return None
-    if best.get("similarity", 0.0) < best.get("floor", 0.0) - TERMINAL_MARGIN:
-        return None
-    return dict(best, passed=True, flagged="keep_best", tries=record["tries"])
+    far = best.get("similarity", 0.0) < best.get("floor", 0.0) - TERMINAL_MARGIN
+    return dict(best, passed=True, flagged="keep_best_far" if far else "keep_best", tries=record["tries"])
 
 
 def attempts_from(tries: int, rounds: int = TRIES) -> list[int]:

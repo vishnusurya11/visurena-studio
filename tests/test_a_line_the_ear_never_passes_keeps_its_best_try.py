@@ -43,10 +43,20 @@ def test_the_terminal_keeps_the_best_try_flagged(tmp_path):
         best, passed=True, flagged="keep_best", tries=say.TERMINAL_TRIES)
 
 
-def test_no_terminal_before_the_cap_or_far_under_the_floor():
+def test_no_terminal_before_the_cap_or_without_a_rightly_heard_try():
     assert say.terminal(rec(0.50, say.TERMINAL_TRIES - 1), rec(0.61, 4)) is None
-    assert say.terminal(rec(0.50, say.TERMINAL_TRIES), rec(0.65 - say.TERMINAL_MARGIN - 0.01, 4)) is None
     assert say.terminal(rec(0.50, say.TERMINAL_TRIES), None) is None
+
+
+def test_a_best_try_far_under_the_floor_is_kept_flagged_far_never_a_park():
+    """Jekyll Kawajiri ep01 l11 (2026-10-18): Enfield's 'Gold and a cheque.' (~2.1 s) was
+    heard word for word and scored 0.24-0.44 against 0.65 on every try; the step exited 1
+    and parked the episode.  Step caps (owner 2026-10-18): voice is tier 2, so at the cap
+    the best rightly heard try is kept and the run goes on -- flagged `keep_best_far` so
+    QC and the owner see a voice the encoder could not confirm."""
+    best = rec(0.44, 6)
+    out = say.terminal(rec(0.30, say.TERMINAL_TRIES), best)
+    assert out["passed"] is True and out["flagged"] == "keep_best_far"
 
 
 def test_a_redo_between_tries_reads_the_parked_previous_file(tmp_path):
