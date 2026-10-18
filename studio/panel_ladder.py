@@ -30,11 +30,12 @@ episode ceiling cannot pay for.
 from __future__ import annotations
 
 import shutil
+import time
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Callable
 
-from studio import episode_home, grid_layout, grid_room, judged_gate, panel_dq, refs_only
+from studio import episode_home, grid_layout, grid_room, judged_gate, panel_dq, refs_only, step_attempts, step_caps
 from studio.judges.verdict import Fault, Verdict
 from studio.ladder import Ladder, Rung
 
@@ -143,6 +144,21 @@ climbed, ACROSS RESUMES.  `Climb.redrawn` was process memory, and ep14 redrew
 waterloo_station 9 times against a cap of 2."""
 
 
+REGRID = "regrid"
+"""The cap-table row (and attempts.json key) of the episode's regrid rounds."""
+
+
+def episode_spent(home: Path) -> bool:
+    """The EPISODE's regrid rounds or wall are used up (attempts.json, across resumes)."""
+    return step_attempts.spent(Path(home), step_caps.cap(REGRID))
+
+
+def cap_line(home: Path, advisories: int) -> str:
+    """`CAP regrid: r/N rounds, mm:ss, kept best (k advisories)`."""
+    return step_caps.cap_line(REGRID, step_attempts.count(home, REGRID), step_caps.rounds(REGRID),
+                              step_attempts.seconds(home, REGRID), advisories)
+
+
 def _ladder_path(home: Path) -> Path:
     return Path(home) / "storyboard" / LADDER_FILE
 
@@ -196,6 +212,16 @@ class Climb:
     cap: int = CAP
     redrawn: list[str] = field(default_factory=list)
     drawn: set = field(default_factory=set)
+    clock: Callable[[], float] = time.time
+    began: float = -1.0
+
+    def over_wall(self) -> bool:
+        """Earlier runs' regrid seconds plus this one's have reached the wall: read between
+        grids, never inside a render."""
+        if self.began < 0:
+            self.began = self.clock()
+        used = step_attempts.seconds(self.home, REGRID) + self.clock() - self.began
+        return used >= step_caps.wall_s(REGRID)
     """Grids drawn in the rung being taken (a row the seam rung drew is not drawn twice)."""
 
     def grids_of(self, rows: list[dict], shots: list[int]) -> list[dict]:
@@ -306,6 +332,9 @@ class Climb:
             self.cure_prose(rows, faults)
         split = self.isolated(rows, verdict) if rung.name == "reprose" else []   # G-TWIN rung 2
         for row in rows:
+            if self.over_wall():
+                print(cap_line(self.home, len(verdict.faults)), flush=True)
+                break                    # the wall: the grids not yet redrawn keep their best
             if set(row.get("shots") or []) & set(split) or grid_layout.name_of(self.ctx.number, row) in self.drawn:
                 continue                 # isolate already superseded and drew these rows
             remember_climbed(self.home, grid_layout.name_of(getattr(self.ctx, "number", 0), row))
@@ -336,7 +365,7 @@ class Climb:
         others = [f for f in cured_by_redraw(verdict) if f.kind not in SEAMED]
         seams = shots_of([f for f in verdict.faults if f.kind in SEAMED])
         movable = bool(others) or any(not self.alone(i) for i in seams)
-        return movable and not machine_clean(self.home)
+        return movable and not machine_clean(self.home) and not episode_spent(self.home)
 
     @property
     def rungs(self) -> judged_gate.Rungs:

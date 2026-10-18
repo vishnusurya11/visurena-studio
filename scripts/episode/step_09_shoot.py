@@ -26,12 +26,13 @@ queue.
 from __future__ import annotations
 
 import sys
+import time
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 
 from scripts.episode.step_08_panels import panel_refusals  # noqa: E402
-from studio import episode_clock, episode_home, eye_verdict, gate_policy, judged_gate, step_cli, take_currency, take_ladder  # noqa: E402
+from studio import episode_clock, episode_home, eye_verdict, gate_policy, judged_gate, step_caps, step_cli, take_currency, take_ladder  # noqa: E402
 from studio.judges import take_eye  # noqa: E402
 from studio.run_budget import EPISODE_CEILING_SECONDS, EPISODE_SHARES, Budget  # noqa: E402
 
@@ -217,6 +218,19 @@ def dq_flags(ctx) -> list[str]:
     return ["--ceiling-spent"] if budget is not None and budget.checks_cut(STEP_ID, DQ_PASS_SECONDS) else []
 
 
+def first_wall_line(seconds: float) -> str:
+    """The CAP line when the first renders ran past the `takes` wall (120 min), else ''."""
+    wall = step_caps.wall_s("takes")
+    return step_caps.cap_line("takes", 1, 1, seconds, 0) + " -- first renders over the wall" if seconds >= wall else ""
+
+
+def say_first_wall(ctx, began: float) -> None:
+    """After the lanes (the safe boundary): say an overrun; the ladder's retakes read the cap table."""
+    if line := first_wall_line(time.time() - began):
+        print(line, flush=True)
+        ctx.log(line, step_id=STEP_ID, level="WARNING")
+
+
 def shoot(ctx, flag: str) -> None:
     """The two lanes (decision 2026-10-14-gpu-never-waits-for-checks): the
     renders back to back, each take's CPU check as it lands, a dq-borne cure
@@ -287,7 +301,9 @@ def run(ctx) -> None:
         # round 0 forever (step 09 raised with 10 of 24 takes on disk).
         ctx.log(f"the missing takes want {cost:.0f} s and the ceiling leaves {left:.0f} s -- they "
                 f"render anyway (firsts); every retake is terminal", step_id=STEP_ID, level="WARNING")
+    began = time.time()
     shoot(ctx, flag)
+    say_first_wall(ctx, began)
     gpu_window(ctx)
     ctx.run_script("scripts/episode/take_strip.py", clock="strip")
     if not takes_of(ctx.home / TAKES):

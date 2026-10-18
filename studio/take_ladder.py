@@ -24,7 +24,7 @@ import re
 import time
 from pathlib import Path
 
-from studio import episode_home, episode_ref_official as ro, judged_gate, plan_gates, take_leak
+from studio import episode_home, episode_ref_official as ro, judged_gate, plan_gates, step_attempts, step_caps, take_leak
 from studio.judges import take_eye
 from studio.judges.verdict import Fault, Verdict
 from studio.ladder import Ladder, Rung
@@ -550,8 +550,10 @@ def edit_plan(ctx, rung: Rung, wanted: dict[int, list[Fault]], records: dict[int
     return action
 
 
-ROUNDS_CAP = 2
-"""Batched retake rounds an episode may take, ACROSS RESUMES.  Five-expert
+ROUNDS_CAP = step_caps.rounds("retakes")
+"""Batched retake rounds an episode may take, ACROSS RESUMES -- the cap table's (stages.yaml
+`episode.caps.retakes`, owner 2026-10-18; judged_gate also counts the EYE_TAKES rungs in
+attempts.json, so a relaunch or a cure reads the same count).  Five-expert
 debate 2026-09-30: with every cure batched into ONE round (the old F1 rule as
 code), two rounds cover a first cure and one re-route; ep14 spent 14 rounds
 and rounds 3-14 all ended with the identical terminal verdict.  A fault still
@@ -595,13 +597,40 @@ def under_cap(room: Path, wanted: dict[int, list[Fault]]) -> dict[int, list[Faul
     return {i: fs for i, fs in wanted.items() if attempts_of(room, i) < MAX_TAKE_ATTEMPTS}
 
 
-def still_curable(room: Path, verdict: Verdict, since: float = 0.0) -> bool:
+RETAKES = "retakes"
+"""The cap-table row (and attempts.json key) of the episode's retake rounds."""
+
+
+def episode_spent(home: Path) -> bool:
+    """The EPISODE's retake rounds or wall are used up -- read from attempts.json, so a retry's
+    `since`, a relaunch, a second drive run and a master-eye redo all read the same count."""
+    return step_attempts.spent(Path(home), step_caps.cap(RETAKES))
+
+
+def cap_line(home: Path, advisories: int) -> str:
+    """`CAP retakes: r/N rounds, mm:ss, kept best (k advisories)`."""
+    return step_caps.cap_line(RETAKES, step_attempts.count(home, RETAKES), step_caps.rounds(RETAKES),
+                              step_attempts.seconds(home, RETAKES), advisories)
+
+
+def refuse_spent(ctx, advisories: int) -> bool:
+    """At the episode's cap the takes stand: the CAP line is said and no batch renders."""
+    if not episode_spent(ctx.home):
+        return False
+    line = cap_line(Path(ctx.home), advisories)
+    print(line, flush=True)
+    if hasattr(ctx, "log"):
+        ctx.log(line, level="WARNING")
+    return True
+
+
+def still_curable(room: Path, verdict: Verdict, since: float = 0.0, home: Path | None = None) -> bool:
     """May the climb take another round?  Not past the cap (rounds since the
     clock reset), and only while the router still has a cure to assign:
     capped takes, unprogressed signatures and input-borne kinds all route to
     nothing, and the terminal (a still or the best take, flagged) answers
     those, not another render."""
-    if rounds_of(room, since) >= ROUNDS_CAP:
+    if rounds_of(room, since) >= ROUNDS_CAP or (home is not None and episode_spent(home)):
         return False
     return bool(route(verdict, room, try_i=rounds_of(room, since) + 1))
 
@@ -717,7 +746,7 @@ def rungs(ctx, plan, flag: str, records: dict[int, dict] | None = None) -> judge
             episode_home.write_plan(path, doc)
         if trims:                                       # free: re-placed now, re-MEASURED after the
             ctx.run_script("scripts/episode/timeline.py", clock="timeline")   # renders (one window)
-        if not renders or rounds_of(room, since) >= ROUNDS_CAP or not can_afford(ctx, rung, len(renders)):
+        if not renders or rounds_of(room, since) >= ROUNDS_CAP or refuse_spent(ctx, len(renders))                 or not can_afford(ctx, rung, len(renders)):
             if trims:                                   # no render round: the trims still re-measure
                 measured(ctx, "scripts/episode/take_dq.py", "take_dq", ".dq.json",
                          *[str(i) for i in sorted(trims)])
@@ -725,4 +754,4 @@ def rungs(ctx, plan, flag: str, records: dict[int, dict] | None = None) -> judge
         why = why_of(rung.name, [f for fs in renders.values() for f in fs])
         count_round(room, why, signatures(verdict))
         retake(ctx, sorted(renders), why, flag, trims=trims)
-    return judged_gate.Rungs(LADDER, take, curable=lambda v: still_curable(room, v, since))
+    return judged_gate.Rungs(LADDER, take, curable=lambda v: still_curable(room, v, since, home=ctx.home))
