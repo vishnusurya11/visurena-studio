@@ -16,10 +16,18 @@ def seconds(placed: dict) -> dict[int, float]:
 
 
 def framing_faults(episode, secs: dict[int, float]) -> list[str]:
-    return (fg.face_faults(episode) + fg.wide_faults(episode, secs) + fg.medium_faults(episode, secs)
-            + fg.insert_faults(episode, secs) + fg.push_faults(episode) + fg.amount_faults(episode)
-            + fg.locked_faults(episode) + fg.ots_faults(episode) + fg.two_shot_faults(episode)
+    """The rows a writer can move.  The voice-measured ones are `voice_advisories`."""
+    return (fg.face_faults(episode) + fg.push_faults(episode) + fg.amount_faults(episode)
+            + fg.ots_faults(episode) + fg.two_shot_faults(episode)
             + fg.payoff_faults(episode) + fg.unsupported_faults(episode))
+
+
+def voice_advisories(episode, secs: dict[int, float]) -> list[str]:
+    """Seconds and shares the RECORDED VOICE sets (G-WIDE, G-MEDIUM, G-INSERT, G-LOCKED):
+    advice, never a refusal -- no writer rewrite moves them, and as walls they kept the
+    Jekyll Kawajiri ep01 plan climb refusing for 30+ min (2026-10-18, cap every loop)."""
+    return (fg.wide_faults(episode, secs) + fg.medium_faults(episode, secs)
+            + fg.insert_faults(episode, secs) + fg.locked_faults(episode))
 
 
 def screenplay_faults(episode, placed: dict) -> list[str]:
@@ -38,7 +46,8 @@ def advisories(episode, rate: float) -> list[str]:
     """What the grammar prints and never counts."""
     placed = plan_gates.projected_place(episode, rate)
     shots = len(fg.cut(episode))
-    return (fg.full_advisories(episode, seconds(placed)) + sg.inner_advisories(episode)
+    return (voice_advisories(episode, seconds(placed))
+            + fg.full_advisories(episode, seconds(placed)) + sg.inner_advisories(episode)
             + sg.tease_advisories(episode) + motif_advisories(episode)
             + [f"G-SHOTS plan: {shots} shots, {episode_capacity.projected_hours(shots):.1f} h projected "
                f"(cap {episode_capacity.MAX_SHOTS})"])

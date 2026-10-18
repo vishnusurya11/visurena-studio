@@ -39,8 +39,25 @@ def test_the_battery_reads_a_real_plan():
     ep = Episode.model_validate({**canned_plan(), "grammar": "anime_tv"})
     rows = grammar_battery.faults(ep, 2.45)
     assert any(r.startswith("G-ACT plan") for r in rows)        # the canned plan has no act-out
-    assert any(r.startswith("G-LOCKED plan") for r in rows)     # it pushes on every shot
     assert any("G-SHOTS plan" in a for a in grammar_battery.advisories(ep, 2.45))
+
+
+VOICE_ROWS = ("G-WIDE", "G-MEDIUM", "G-INSERT", "G-LOCKED")
+
+
+def test_a_voice_measured_row_never_refuses_a_plan():
+    """Jekyll Kawajiri ep01 (2026-10-18): the plan climb refused 69 lines for 30+ min
+    over mediums at 7.04-7.96 s against 7.0, a wide at 4.58 against 4.0 and a locked
+    share of 0.48 against 0.5.  Those seconds are the RECORDED VOICE's: no writer
+    rewrite moves them, so they print as advice and never send the writer back
+    (memory: the voice is the ruler; owner: cap every loop)."""
+    ep = Episode.model_validate({**canned_plan(), "grammar": "anime_tv"})
+    assert not [r for r in grammar_battery.faults(ep, 2.45) if r.startswith(VOICE_ROWS)]
+
+
+def test_the_voice_measured_rows_still_print_as_advice():
+    ep = Episode.model_validate({**canned_plan(), "grammar": "anime_tv"})
+    assert any(a.startswith("G-LOCKED plan") for a in grammar_battery.advisories(ep, 2.45))
 
 
 def test_the_gate_is_hard_on_a_grammar_plan_and_advice_on_a_legacy_one(tmp_path):
