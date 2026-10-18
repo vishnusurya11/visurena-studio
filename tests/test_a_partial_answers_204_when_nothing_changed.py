@@ -37,7 +37,7 @@ def board(tmp_path, monkeypatch):
 def current(app, key: str) -> str:
     conn = app.state.conn_factory()
     try:
-        return pulse.fingerprint(conn, key, NOW)
+        return pulse.fingerprint(conn, key, NOW, app.state.library)   # D4: a unit's fp carries its file stamps
     finally:
         conn.close()
 

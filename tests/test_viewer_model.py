@@ -212,6 +212,23 @@ def test_master_groups_and_master_poster(U):
     assert vm.master_poster(U) is None
 
 
+def test_the_delivered_master_opens_on_its_judged_item(U):
+    # page experts 2026-10-18 (E1): 'Open in the Viewer' sends cut/master_r2v.mp4; it was in no
+    # item, so the Viewer appended a stray 'earlier iteration, no QC or verdict was kept'
+    judged = vm.master_items(U)[0]
+    assert judged["judged"] and "cut/master_r2v.mp4" in judged["aliases"]
+    assert vm.master_items(U)[1]["aliases"] == []
+
+
+def test_a_delivered_master_equal_to_no_iteration_is_its_own_judged_item(U):
+    r2v = next(f for f in U["files"] if f["rel"] == "cut/master_r2v.mp4")
+    lone = dict(r2v, size=r2v["size"] + 1)
+    U2 = {**U, "files": [lone if f is r2v else f for f in U["files"]], "F": {**U["F"], lone["rel"]: lone}}
+    masters = vm.master_items(U2)
+    assert masters[0]["id"] == "cut/master_r2v.mp4" and masters[0]["judged"]
+    assert not any(m["judged"] for m in masters[1:])
+
+
 def test_master_item_says_no_verdict_for_an_old_iteration(U):
     old = vm.master_groups(U)[1]
     assert vm.master_item(U, old, None)["chips"] == [{"t": "no verdict kept", "cls": ""}]

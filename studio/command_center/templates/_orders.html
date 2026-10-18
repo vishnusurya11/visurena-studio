@@ -7,7 +7,7 @@
 {% for o in orders %}
 <tr id="ord-{{ o.id }}">
   <td class="num">{{ o.id }}</td>
-  <td class="mono" title="{{ o.ts or '' }}">{{ o.ago or (o.ts or '')[5:16] }}</td>
+  <td class="mono" title="{{ o.ts or '' }}">{{ o.ago or (o.ts | day_hhmm) }}</td>
   <td>{{ o.kind }}</td>
   <td>{% if o.scope == 'book' %}{{ books.get(o.target, o.target) }}{% else %}{% if o.scope == 'unit' %}<span class="muted">{{ books.get(o.codex_id, o.codex_id) | truncate(18, True, '…') }} ›</span> {% endif %}{{ o.target }}{% endif %}</td>
   <td class="note">{{ o.note or "" }}</td>

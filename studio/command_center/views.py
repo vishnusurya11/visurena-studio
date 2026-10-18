@@ -218,6 +218,15 @@ def last_moves(conn: sqlite3.Connection, stage: str) -> dict[tuple[str, str], st
     return {(c, u): ts for c, u, ts in rows}
 
 
+def run_start(row: dict) -> str | None:
+    """When this run began: the UTC stamp its id ends in (tracking.make_run_id), else the
+    row's first start (page experts 2026-10-18, D2: 'running 148h' for a 26-minute run)."""
+    tail = str(row.get("run_id") or "").rsplit("__", 1)[-1]
+    if len(tail) == 14 and tail.isdigit():
+        return f"{tail[:4]}-{tail[4:6]}-{tail[6:8]}T{tail[8:10]}:{tail[10:12]}:{tail[12:]}Z"
+    return row.get("started_at")
+
+
 def elapsed(started_at: str | None) -> str:
     """`1h42` / `7m` / `12s` since an ISO timestamp; '' without one."""
     if not started_at:
@@ -284,7 +293,8 @@ def row_view(row: sqlite3.Row | dict, conn: sqlite3.Connection | None = None) ->
     if r["state"] == "done":                     # a finished unit stands at its last step (02 #15)
         r["step_id"], r["progress"] = last_step_id(r["stage"]) or r.get("step_id"), None
     r["step_name"] = step_names(r["stage"]).get(r.get("step_id") or "", "")
-    r["elapsed"] = elapsed(r.get("started_at")) if state == "running" else ""
+    r["run_started"] = run_start(r)
+    r["elapsed"] = elapsed(r["run_started"]) if state == "running" else ""
     r["age"] = age(utc_now(), r.get("updated_at"))
     return r
 
@@ -396,17 +406,58 @@ def flagged_rows(conn: sqlite3.Connection) -> list[sqlite3.Row]:
                         " ORDER BY updated_at, id").fetchall()
 
 
+def flag_key(row: dict) -> tuple[str, str, str]:
+    return (row["codex_id"], row["stage"], row["unit"])
+
+
+def acknowledge_notes(conn: sqlite3.Connection) -> dict[tuple, list[str]]:
+    """{(codex, stage, unit): [note]} of every acknowledge order, in one read."""
+    out: dict[tuple, list[str]] = {}
+    for c, s, u, note in conn.execute("SELECT codex_id, stage, unit, note FROM orders"
+                                      " WHERE kind = 'acknowledge' AND scope = 'unit'"):
+        out.setdefault((c, s, u), []).append(note or "")
+    return out
+
+
+def acked(row: dict, notes: dict[tuple, list[str]]) -> bool:
+    """db.acknowledged over pre-read notes: a note carrying the row's CURRENT stamp."""
+    stamp = db.verdict_stamp(row)
+    return any(n == stamp or n.startswith(f"{stamp} — ") for n in notes.get(flag_key(row), []))
+
+
+def shipped(conn: sqlite3.Connection, row: dict, done_publish: set[tuple[str, str]]) -> bool:
+    """views.published over a pre-read set of done publish rows, else the publish record on disk."""
+    if (row["codex_id"], row["unit"]) in done_publish:
+        return True
+    book = library_paths.book_folder(episode_home.LIBRARY, row.get("codex_id") or "")
+    return bool(book) and backfill.publish_row(Path(book), row["codex_id"], row["unit"]) is not None
+
+
+def open_flag_keys(conn: sqlite3.Connection) -> set[tuple[str, str, str]]:
+    """flags_open for every flagged row in three reads (page experts 2026-10-18, D4: it was
+    ~115 statements a pulse and grew with every flagged row)."""
+    rows = [dict(r) for r in flagged_rows(conn)]
+    if not rows:
+        return set()
+    notes = acknowledge_notes(conn)
+    done_publish = {tuple(r) for r in conn.execute("SELECT codex_id, unit FROM work_orders"
+                                                   " WHERE stage = 'publish' AND state = 'done'")}
+    return {flag_key(r) for r in rows if not acked(r, notes) and not shipped(conn, r, done_publish)}
+
+
 def flagged_unacknowledged(conn: sqlite3.Connection) -> list[dict]:
     """The done rows whose flags are open (flags_open), each with its reason
-    and its non-pass gates."""
-    return [{**row_view(r, conn), "reason": FLAGGED_REASON,
+    and its non-pass gates; an open row shows all its flags, so its view needs no conn."""
+    keys = open_flag_keys(conn)
+    return [{**row_view(r), "reason": FLAGGED_REASON,
              "gates": non_pass_gates(json.loads(r["verdicts"] or "{}"))}
-            for r in flagged_rows(conn) if flags_open(conn, dict(r))]
+            for r in flagged_rows(conn) if flag_key(dict(r)) in keys]
 
 
 def closed_flags(conn: sqlite3.Connection) -> list[dict]:
     """The done rows with flags that no longer need the owner: shown `done`."""
-    return [dict(r) for r in flagged_rows(conn) if not flags_open(conn, dict(r))]
+    keys = open_flag_keys(conn)
+    return [dict(r) for r in flagged_rows(conn) if flag_key(dict(r)) not in keys]
 
 
 def non_pass_gates(verdicts: dict) -> list[str]:

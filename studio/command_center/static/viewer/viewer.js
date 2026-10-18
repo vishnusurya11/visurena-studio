@@ -826,7 +826,7 @@ function openUnit(unit, spec) {
   return provider.unit(unit).then(U => {
     const seqs = U.seqs.map(x => Object.assign({}, x, { items: x.items.slice() })), si = Math.max(0, seqs.findIndex(s => s.id === spec.seq));
     const s = seqs[si] || seqs[0];
-    let ii = s.items.findIndex(x => (spec.id && x.id === spec.id) || (spec.shot !== undefined && x.shot === spec.shot) || (spec.rel && x.layers.some(l => l.rel === spec.rel)));
+    let ii = s.items.findIndex(x => (spec.id && x.id === spec.id) || (spec.shot !== undefined && x.shot === spec.shot) || (spec.rel && (x.layers.some(l => l.rel === spec.rel) || (x.aliases || []).includes(spec.rel))));
     if (ii < 0 && spec.rel) {   /* a file that is in no sequence: open it alone, Files-like */
       const one = normItem({ rel: spec.rel, label: spec.rel.split('/').pop(), unit }, unit);
       ii = s.items.length; s.items.push(one);

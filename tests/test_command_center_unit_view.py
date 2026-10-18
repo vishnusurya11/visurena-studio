@@ -35,13 +35,16 @@ def test_span_and_clock():
 
 
 def test_run_short_is_the_runs_clock():
-    assert uv._run_short({"run_id": f"{CODEX}__episode__20260927040215"}) == "04:02"
+    # page experts 2026-10-18 (C1): the id's stamp is UTC; the page prints the local clock
+    want = datetime(2026, 9, 27, 4, 2, 15, tzinfo=timezone.utc).astimezone().strftime("%H:%M")
+    assert uv._run_short({"run_id": f"{CODEX}__episode__20260927040215"}) == want
     assert uv._run_short({"run_id": "r5"}) == "r5" and uv._run_short({}) == ""
 
 
 def test_lease_ok_stale_or_none():
     running = {"state": "running", "lease_until": "2026-09-27T05:30:00Z"}
-    assert uv.lease(running, NOW) == {"state": "ok", "until": "05:30"}
+    want = datetime(2026, 9, 27, 5, 30, tzinfo=timezone.utc).astimezone().strftime("%H:%M")
+    assert uv.lease(running, NOW) == {"state": "ok", "until": want}
     assert uv.lease({**running, "lease_until": "2026-09-27T04:30:00Z"}, NOW)["state"] == "stale"
     assert uv.lease({"state": "done", "lease_until": None}, NOW)["state"] == "none"
 

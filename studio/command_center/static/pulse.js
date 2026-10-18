@@ -102,11 +102,11 @@
   /* --- the Today feed: pulse events land as rows, once each, newest first --- */
   function feedRow(ev) {
     var li = doc.createElement('li'), ic = doc.createElement('span'), s = doc.createElement('span');
-    var b = doc.createElement('b'), t = doc.createElement('time'), d = new Date((ev.ts || 0) * 1000);
+    var b = doc.createElement('b'), t = doc.createElement('time');
     li.id = 'pulse-ev-' + ev.id; li.className = 'fe chg';
     ic.className = 'ic'; b.textContent = ev.unit || ''; s.appendChild(b);
     s.appendChild(doc.createTextNode(' ' + (ev.text || '')));
-    t.textContent = String(d.getHours()).padStart(2, '0') + ':' + String(d.getMinutes()).padStart(2, '0');
+    t.textContent = hhmm(ev.ts);                       /* event_ts is ISO (pulse.events_since) */
     li.appendChild(ic); li.appendChild(s); li.appendChild(t);
     return li;
   }

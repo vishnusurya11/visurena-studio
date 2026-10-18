@@ -20,9 +20,11 @@ import json
 import sqlite3
 from collections.abc import Callable
 from datetime import datetime, timezone
+from functools import lru_cache
+from pathlib import Path
 
 from studio import eta, registry
-from studio.command_center import views
+from studio.command_center import library_paths, views
 
 RECENT_S = 24 * 3600
 """A unit or book written within this window (or running, or held) has its own key."""
@@ -153,10 +155,38 @@ def unit_orders(conn: sqlite3.Connection, stage: str, codex: str, unit: str) -> 
                               " AND codex_id = ? AND unit = ?", (stage, codex, unit)).fetchone())
 
 
-def unit_fp(row: tuple | None, orders: tuple, holds: tuple, now: float) -> str:
-    """A unit's fingerprint: its row, its orders, the holds, its age bucket."""
+def unit_fp(row: tuple | None, orders: tuple, holds: tuple, now: float, files: tuple = ()) -> str:
+    """A unit's fingerprint: its row, its orders, the holds, its age bucket, its file stamps."""
     newest, running = (epoch(row[4]), row[0] == "running") if row else (None, False)
-    return digest(row, orders, holds, bucket(now, newest, running))
+    return digest(row, orders, holds, bucket(now, newest, running), files)
+
+
+def stamp(path: Path) -> tuple:
+    """(mtime_ns, size) of a file, () when it is not there."""
+    try:
+        st = path.stat()
+    except OSError:
+        return ()
+    return (st.st_mtime_ns, st.st_size)
+
+
+@lru_cache(maxsize=256)
+def newest_log(home: str, folder_mtime_ns: int) -> str | None:
+    """The episode's newest drive log, listed again only when the folder changes."""
+    logs = sorted(Path(home).glob("drive_run*.log"), key=lambda p: p.name)
+    return str(logs[-1]) if logs else None
+
+
+def unit_files(library: Path | None, stage: str, codex: str, unit: str) -> tuple:
+    """The stamps of the files an episode unit's bands draw (page experts 2026-10-18, D4):
+    its folder, learnings.jsonl, clock.open.json and its newest drive log; () off the episode stage."""
+    book = library_paths.book_folder(library, codex) if library and stage == "episode" else None
+    home = book / "episodes" / unit if book else None
+    folder = stamp(home) if home else ()
+    if not folder:
+        return ()
+    log = newest_log(str(home), folder[0])
+    return (folder, stamp(home / "learnings.jsonl"), stamp(home / "clock.open.json"), stamp(Path(log)) if log else ())
 
 
 # --- the fingerprints ---
@@ -180,25 +210,27 @@ def scoped_fps(conn: sqlite3.Connection, t: dict, now: float) -> dict[str, str]:
     return out
 
 
-def fingerprints(conn: sqlite3.Connection, now: float) -> dict[str, str]:
+def fingerprints(conn: sqlite3.Connection, now: float, library: Path | None = None) -> dict[str, str]:
     """Every fingerprint but the shell's: the sections, the departments, the
-    recent books and the recent units."""
+    recent books and the recent units (with their file stamps when the library is given)."""
     t = totals(conn)
     out = {**section_fps(t, now), **scoped_fps(conn, t, now)}
     for stage, codex, unit in recent_units(conn, now):
         out[f"unit:{stage}/{codex}/{unit}"] = unit_fp(unit_row(conn, stage, codex, unit),
-                                                      unit_orders(conn, stage, codex, unit), t["holds"], now)
+                                                      unit_orders(conn, stage, codex, unit), t["holds"], now,
+                                                      unit_files(library, stage, codex, unit))
     return out
 
 
-def fingerprint(conn: sqlite3.Connection, key: str, now: float) -> str:
+def fingerprint(conn: sqlite3.Connection, key: str, now: float, library: Path | None = None) -> str:
     """One key's fingerprint, the same as `fingerprints` gives it -- also for a
     unit, a department or a book the map leaves out as not recent."""
     t = totals(conn)
     kind, _, rest = key.partition(":")
     if kind == "unit" and rest.count("/") == 2:
         stage, codex, unit = rest.split("/")
-        return unit_fp(unit_row(conn, stage, codex, unit), unit_orders(conn, stage, codex, unit), t["holds"], now)
+        return unit_fp(unit_row(conn, stage, codex, unit), unit_orders(conn, stage, codex, unit), t["holds"], now,
+                       unit_files(library, stage, codex, unit))
     if kind in ("dept", "book"):
         marks = group_marks(conn, "stage" if kind == "dept" else "codex_id")
         events = event_marks(conn)[0 if kind == "dept" else 1]
@@ -330,8 +362,9 @@ def feed(conn: sqlite3.Connection, since: int | None) -> list[dict]:
 
 
 def pulse(conn: sqlite3.Connection, now: float, boot: float, since: int | None,
-          progress: Callable[[str, str], dict | None], extras: dict | None = None) -> dict:
+          progress: Callable[[str, str], dict | None], extras: dict | None = None,
+          library: Path | None = None) -> dict:
     """The C1 body."""
     block = shell_block(conn, progress, extras)
-    return {"boot": boot, "now": now, "fp": {"shell": shell_fp(block), **fingerprints(conn, now)},
+    return {"boot": boot, "now": now, "fp": {"shell": shell_fp(block), **fingerprints(conn, now, library)},
             "shell": block, "events": feed(conn, since), "cursor": totals(conn)["event"]}

@@ -17,7 +17,7 @@ from collections import Counter
 from datetime import datetime, timezone, tzinfo
 from pathlib import Path
 
-from studio import backfill, manifest, tick, verdict_rows
+from studio import backfill, manifest, run_clock, tick, verdict_rows
 from studio.command_center import library_paths, viewer_model, views
 from studio.command_center import unit_parse as up
 from studio.youtube_publish import sha8
@@ -98,6 +98,12 @@ def hhmm(ts) -> str:
     return d.astimezone().strftime("%H:%M") if d else ""
 
 
+def hhmmss(ts) -> str:
+    """`04:02:16` in local time from an ISO stamp; '' for junk."""
+    d = up.parse_ts(ts) if ts else None
+    return d.astimezone().strftime("%H:%M:%S") if d else ""
+
+
 def day_hhmm(ts) -> str:
     """`27 Sep 04:02` in local time from an ISO stamp."""
     d = up.parse_ts(ts) if ts else None
@@ -107,29 +113,45 @@ def day_hhmm(ts) -> str:
 # --- band 1: the head ---
 
 
-def lease(row: dict, now: datetime) -> dict:
-    """Whether a running row's lease is alive: ok to hh:mm, stale since, or none."""
+BEAT_FRESH_S = 3 * run_clock.BEAT_S
+"""A run whose clock beat inside three beats is alive, whatever its lease says."""
+
+
+def lease(row: dict, now: datetime, beat: float | None = None) -> dict:
+    """Whether a running row's lease is alive: ok to hh:mm, `beating` (lapsed, but the run's
+    clock still beats: page experts 2026-10-18, B1), stale since, or none."""
     until = up.parse_ts(row.get("lease_until")) if row.get("lease_until") else None
     if row["state"] != "running" or until is None:
         return {"state": "none", "until": ""}
-    return {"state": "ok" if until >= now else "stale", "until": until.strftime("%H:%M")}
+    state = "ok" if until >= now else ("beating" if beat and now.timestamp() - beat < BEAT_FRESH_S else "stale")
+    return {"state": state, "until": until.astimezone().strftime("%H:%M")}
 
 
-def head_band(row: dict, plan: dict | None, now: datetime, last_event: str | None = None) -> dict:
+def run_beat(home: Path | None, row: dict) -> float | None:
+    """This run's last clock beat (run_clock's clock.open.json), None for another run's or none."""
+    doc = run_clock.read_open(home) if home else None
+    if not doc or doc.get("run_id") != row.get("run_id"):
+        return None
+    return float(doc["last_beat"]) if doc.get("last_beat") else None
+
+
+def head_band(row: dict, plan: dict | None, now: datetime, last_event: str | None = None,
+              beat: float | None = None) -> dict:
     """Who the unit is and where it stands: plan title and question, lease, run, time;
     `moved` is its newest event (views.moved_at), not the tick's last upsert."""
     plan = plan if isinstance(plan, dict) else {}
     return {"title": str(plan.get("title") or ""), "question": up.clip(display_question(plan.get("question"))),
-            "lease": lease(row, now), "run_short": _run_short(row),
+            "lease": lease(row, now, beat), "run_short": _run_short(row),
             "moved": views.ago(views.moved_at(row, last_event)), "gpu_h": views.gpu_hours(row.get("gpu_seconds")),
             "started": day_hhmm(row.get("started_at")), "finished": day_hhmm(row.get("finished_at"))}
 
 
 def _run_short(row: dict) -> str:
-    """A run id's clock (`04:02`) from its trailing stamp; the full id stays in title=."""
+    """A run id's local clock (`04:02`) from its trailing UTC stamp (tracking.make_run_id);
+    the full id stays in title=."""
     rid = str(row.get("run_id") or "")
-    tail = rid.rsplit("__", 1)[-1]
-    return f"{tail[8:10]}:{tail[10:12]}" if len(tail) == 14 and tail.isdigit() else rid[-8:]
+    stamp = views.run_start({"run_id": rid})
+    return hhmm(stamp) if stamp else rid[-8:]
 
 
 # --- band 2: the step bar ---
@@ -141,6 +163,20 @@ def chip_state(chip: dict, row: dict) -> dict:
         return chip
     state = views.cursor_state(chip["step_id"], row)
     return {**chip, "state": state, "glyph": views.glyph(state), "css": views.colour_class(state)} if state else chip
+
+
+def from_earlier_make(chip: dict, row: dict) -> bool:
+    """A step after the unit's cursor whose row is another run's, on a unit not done: the old
+    make's, not this one's (page experts 2026-10-18, A3: a re-plan left 06-12 ticked)."""
+    return (row.get("state") != "done" and bool(chip.get("run_id")) and bool(row.get("run_id"))
+            and chip["run_id"] != row["run_id"] and chip["step_id"] > str(row.get("step_id") or ""))
+
+
+def as_earlier(chip: dict) -> dict:
+    """The chip greyed: state `earlier`, no reason of its own; what it was stays in `was`."""
+    was = up.clip(chip.get("detail")) if chip["state"] in ("failed", "deferred", "escalated") else ""
+    return {**chip, "state": "earlier", "glyph": "◦", "css": "grey earlier", "detail": None,
+            "was": chip["state"], "was_reason": was}
 
 
 def wall_text(t: dict) -> str:
@@ -158,6 +194,7 @@ def step_band(chips: list[dict], row: dict, events: list[dict], timing: list[dic
                                                 live_run)}
     out = []
     for c in (chip_state(c, row) for c in chips):
+        c = as_earlier(c) if from_earlier_make(c, row) else c
         t = times.get(c["step_id"], {})
         out.append({**c, "css": views.STEP_CSS.get(c["state"]) or c["css"], "runs": t.get("runs", 0),
                     "wall": wall_text(t),
@@ -193,7 +230,11 @@ def gate_steps(stage: str) -> dict[str, str]:
 
 
 def gate_block(chip: dict, doc, step: str) -> dict:
-    """One gate: its chip, its step, and the file's faults grouped by kind."""
+    """One gate: its chip, its step, and the file's faults grouped by kind; a signed gate whose
+    file is gone is the earlier make's (page experts 2026-10-18, A3: four 404 links)."""
+    if chip.get("path") and not isinstance(doc, dict):
+        return {**chip, "step": step, "kinds": [], "signed": "", "shots": {}, "read": False, "state": "earlier",
+                "path": None, "faults": 0, "word": "file gone: signed on an earlier make"}
     doc = doc if isinstance(doc, dict) else {}
     signed = doc.get("signed_at") or doc.get("reviewed_at") or ""
     return {**chip, "step": step, "kinds": up.fault_kinds(doc), "signed": hhmm(signed),
@@ -298,9 +339,12 @@ def with_thumbs(codex: str, book: Path | None, items: list[dict]) -> list[dict]:
 
 
 def take_wait(steps: list[dict]) -> str:
-    """Why there are no takes: the shooting step's own reason, else not reached."""
+    """Why there are no takes: this run's reason, else an earlier run's named as such, else not reached."""
     shoot = next((s for s in steps if s.get("reason")), None)
-    return f"{shoot['step_id']} {shoot['state']}: {shoot['reason']}" if shoot else "not shot yet"
+    if shoot:
+        return f"{shoot['step_id']} {shoot['state']}: {shoot['reason']}"
+    old = next((s for s in steps if s.get("was_reason")), None)
+    return f"an earlier run's {old['step_id']} {old['was']}: {old['was_reason']}" if old else "not shot yet"
 
 
 def _rel(book: Path | None, home: Path | None, name: str) -> str | None:
@@ -655,7 +699,7 @@ def log_band(rows: list[dict]) -> list[dict]:
     for r in out:
         if r["kind"] == "refusal":
             r["items"] = sorted(r["items"], key=lambda i: i.get("mark") != "new")[:FAULT_ITEMS]
-        r["at"] = (r.get("ts") or "")[11:19]
+        r["at"] = hhmmss(r.get("ts"))
     return out[-30:]
 
 
@@ -691,7 +735,8 @@ def light_bands(conn: sqlite3.Connection, logs: Path, base: dict, codex: str, st
     """The bands a partial draws: head, bar, health, gates, orders, siblings, raw."""
     r, events = base["row"], c["events"]
     rows = up.passes(events, c["learnings"], base["timing"], r["run_id"] if base["running"] else None, now, tz)
-    return {"head": {**head_band(r, c["plan"], now, events[-1]["event_ts"] if events else None),
+    return {"head": {**head_band(r, c["plan"], now, events[-1]["event_ts"] if events else None,
+                               run_beat(c["home"], r)),
                      "latest": latest_master(c["home"])}, "bar": c["steps"],
             "health": health_band(rows, c["learnings"], r["shown"] in ("done", "flagged")), "gates": c["gates"],
             "orders": unit_orders(conn, codex, stage, r["unit"]), "hold": unit_hold(conn, codex, stage, r["unit"]),

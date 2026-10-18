@@ -297,7 +297,34 @@ def derive(home: Path, db_rows: list[dict], runner_rows: list[dict], run_id: str
     signals += list(mtimes([log]).values()) if log else []
     return {"events": evs, "run_id": run_id, "signals": sorted(s for s in signals if s is not None),
             "last_words": last_words(text, (mtimes([log]).get(log.stem) if log else None), runner_rows),
-            "refusal": refusal(runner_rows), "drive_ended": drive_ended(ledger), "log_n": n}
+            "refusal": refusal(runner_rows), "why": why_of(runner_rows), "drive_ended": drive_ended(ledger), "log_n": n}
+
+
+def why_of(rows: list[dict]) -> str:
+    """The run's newest warning or refusal, one line (page experts 2026-10-18, B3): why the
+    step is where it is, kept while later info lines scroll past; '' on a quiet run."""
+    for r in reversed(rows):
+        msg = str(r.get("msg") or "").strip()
+        if msg and (str(r.get("level")).upper() in ("WARNING", "ERROR") or "refused" in msg.lower()):
+            return " ".join(" ".join(failing_lines(msg)).split())[:240]
+    return ""
+
+
+GATE_ROW = re.compile(r"^(\S[^:]*?)\s*:\s*(.*)$")
+PASSED = re.compile(r"^(clean|all bound|every shot|not applicable|refused\b)|^$", re.I)
+NOT_A_GATE = ("CONTRACT", "VERDICT")
+
+
+def failing_lines(msg: str) -> list[str]:
+    """A gate report's head and what did not pass: its indented fault lines, else the gate rows
+    whose value is not a pass (plan_check lists ~35 gates, the clean ones too)."""
+    lines = msg.splitlines()
+    detail = [ln.strip() for ln in lines[1:] if ln[:1].isspace() and not PASSED.match(ln.strip())]
+    if detail:
+        return lines[:1] + detail
+    rows = [(m.group(1).strip(), m.group(2).strip(), ln) for ln in lines[1:] if (m := GATE_ROW.match(ln))]
+    return lines[:1] + [ln for name, value, ln in rows
+                        if not PASSED.match(value) and not name.upper().startswith(NOT_A_GATE)]
 
 
 def last_words(text: str, log_t: float | None, rows: list[dict]) -> str:

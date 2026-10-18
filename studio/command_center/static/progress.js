@@ -67,12 +67,20 @@
     lastSign = newest;
     var q = card.querySelector('[data-clock="quiet"]'); if (q) q.dataset.at = newest || '';
   }
-  function valuetext(p) {             /* progress_view.valuetext's words: `take 11 of 26, done around 02:45` */
+  function valuetext(p) {             /* progress_view.valuetext's words: `take 11 of 26, episode done around 02:45` */
     var st = p.now_step, e = p.eta || {};
     if (!st) return 'no run';
     var head = st.kind === 'counted' ? (st.id === '09' ? 'take' : 'panel') + ' ' + st.done + ' of ' + st.total : st.id + ' ' + st.name;
-    var tail = e.long ? 'running long' : (e.finish ? 'done around ' + e.finish : '');
+    var tail = e.finish ? 'episode done around ' + e.finish : '';
     return tail ? head + ', ' + tail : head;
+  }
+  function finishHtml(e) {            /* _live_hero.html's finish line: the EPISODE's, never the step's */
+    if (!e.finish) return '';
+    return 'episode done ~<b>' + e.finish + '</b>' + (e.long ? ' <span class="lv-why">at the earliest</span>' : '') +
+      (e.capped ? ' <span class="lv-why">at the 5 h ceiling</span>' : '');
+  }
+  function stepEnd(st, e) {           /* _live_hero.html's step line */
+    return st.id + ' ' + st.name + ' ' + (e.step_end ? 'ends ~' + e.step_end : (e.long ? 'running long, past every measured full run' : ''));
   }
   function patchHero(p) {
     var st = p.now_step, e = p.eta || {};
@@ -83,10 +91,14 @@
     }
     if (st) text('current', st.current ? '· ' + st.current : '');
     var f = $('finish');
-    if (f && e.finish && !e.long) f.innerHTML = 'done around <b>' + e.finish + '</b>' + (e.capped ? ' <span class="lv-why">at the 5 h ceiling</span>' : '');
-    else if (f && e.long) f.innerHTML = 'running long <span class="lv-why">past every measured run of this step</span>';
-    text('range', (e.range && !e.long ? 'range ' + e.range + ' · ' : '') + (e.n_runs ? e.n_runs + ' runs · ' + e.basis + ' · ' : ''));
+    if (f && e.finish && f.innerHTML !== finishHtml(e)) f.innerHTML = finishHtml(e);
+    if (st) text('stepend', stepEnd(st, e));
+    text('range', (e.range && !e.long ? 'range ' + e.range + ' · ' : '') +
+      (e.finish ? e.steps_left + ' step' + (e.steps_left === 1 ? '' : 's') + ' to run · ' : '') +
+      (e.n_runs ? e.n_runs + ' runs · ' + e.basis + ' · ' : ''));
     if (p.last_words) text('words', p.last_words);
+    text('why', p.why || '');
+    var why = $('why'); if (why && why.parentNode) why.parentNode.hidden = !p.why || p.vital === 'done';
   }
   function patchRail(p) {
     var st = p.now_step;
@@ -99,6 +111,7 @@
         seg.classList.toggle('is-moving', s.state === 'running' && p.vital in RUN);
       }
       if (st && st.id === s.id && st.kind === 'counted' && st.weight_total) seg.style.setProperty('--p', (st.weight_done / st.weight_total).toFixed(4));
+      var win = seg.querySelector('.win'); if (win && s.window && win.textContent !== s.window) win.textContent = s.window;
     });
   }
   function patchSheet(p) {
@@ -147,17 +160,20 @@
   }
 
   /* --- the loop --- */
-  function swap(p, prev) {
+  function swap(p, prev) {           /* every path schedules the next poll: an empty or failed partial froze the card (D1) */
     fetch(card.dataset.partial, { headers: { 'HX-Request': 'true' } }).then(function (r) { return r.text(); }).then(function (html) {
-      if (!html.trim()) return;
-      var box = document.createElement('div'); box.innerHTML = html;
-      var fresh = box.querySelector('#live'); if (!fresh) return;
-      if (window.Idiomorph) { window.Idiomorph.morph(card, fresh); card = document.getElementById('live') || card; }   /* nodes survive: no blank frame */
-      else { card.replaceWith(fresh); card = fresh; }
-      card.dataset.wired = '1';
-      if (p.vital === 'done' && prev !== 'done') { var r = card.querySelector('.lv-rail'); if (r) r.classList.add('sweep'); }
-      wireHover(); wireNotify(); schedule(p);
-    });
+      var box = document.createElement('div'); box.innerHTML = html || '';
+      var fresh = html && html.trim() ? box.querySelector('#live') : null;
+      if (fresh) morph(fresh, p, prev);
+      schedule(p);
+    }, function () { schedule(p); });
+  }
+  function morph(fresh, p, prev) {
+    if (window.Idiomorph) { window.Idiomorph.morph(card, fresh); card = document.getElementById('live') || card; }   /* nodes survive: no blank frame */
+    else { card.replaceWith(fresh); card = fresh; }
+    card.dataset.wired = '1';
+    if (p.vital === 'done' && prev !== 'done') { var r = card.querySelector('.lv-rail'); if (r) r.classList.add('sweep'); }
+    wireHover(); wireNotify();
   }
   function apply(p) {
     var prev = card.dataset.vital;

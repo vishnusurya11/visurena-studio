@@ -22,6 +22,7 @@
   </div>
   {% else %}
   {% include "_live_hero.html" %}
+  <div class="lv-whyline"{% if not p.why or p.vital == 'done' %} hidden{% endif %}><span class="eyebrow">why</span> <span data-k="why">{{ p.why }}</span></div>
   {% if p.vital == 'done' and p.master %}
   <div class="lv-master">
     <video controls playsinline preload="metadata" src="{{ p.master }}"></video>

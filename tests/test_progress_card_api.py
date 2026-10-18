@@ -88,6 +88,14 @@ def test_the_eta_is_a_rounded_finish_with_a_basis(board):
     assert ":" in got["eta"]["finish"] and "–" in got["eta"]["range"]
 
 
+def test_every_step_after_the_running_one_has_a_projection(board):
+    # page experts 2026-10-18 (A2): each later step reads a window or 'kept'; none is silent
+    got = models.Progress.model_validate(_progress(board, _drive(time.time() - 3600)))
+    later = [s for s in got.steps if s.id > "09"]
+    assert later and all(s.will_run is not None and s.window for s in later)
+    assert all(s.will_run is None for s in got.steps if s.id <= "09")
+
+
 def test_the_title_names_the_step_the_count_and_the_unit(board):
     title = _progress(board, _drive(time.time() - 3600))["title"]
     assert title.startswith("● 09 shoot 1/3") and title.endswith("ep04")
@@ -202,7 +210,7 @@ def test_the_shape_changes_with_the_step_and_the_vital_only():
 def test_the_valuetext_says_count_and_finish():
     p = {"now_step": {"id": "09", "name": "shoot", "kind": "counted", "done": 11, "total": 26},
          "eta": {"finish": "02:45"}}
-    assert progress_view.valuetext(p) == "take 11 of 26, done around 02:45"
+    assert progress_view.valuetext(p) == "take 11 of 26, episode done around 02:45"
 
 
 def test_the_card_shows_a_run_not_an_old_completion():

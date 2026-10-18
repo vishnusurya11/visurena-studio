@@ -20,11 +20,14 @@ import math
 import sqlite3
 import statistics
 from datetime import datetime, tzinfo
+from fnmatch import fnmatch
 
 from studio.episode_clock import TAKE_COLD, TAKE_FIXED, TAKE_PER_FRAME
 
 SEED, ALPHA, MEASURED_AFTER = 0.75, 0.3, 3
 ROUND_S = 300.0
+FULL_RUN = 0.25
+"""A pair under this share of its step's p90 is a resume that kept the work (page experts 2026-10-18)."""
 SUB_STEP = {"plan": "02", "places": "03", "sheets": "03", "cast": "03", "lines": "04", "timeline": "05",
             "respot": "05", "prompts": "06", "no_last_frame": "06", "grids": "07", "panels": "08",
             "panel_dq": "08", "panel_content": "08", "panel_eye": "08", "takes": "09", "take_dq": "09",
@@ -127,6 +130,16 @@ def step_history(conn: sqlite3.Connection, stage: str = "episode",
     return out
 
 
+def full_runs(xs, frac: float = FULL_RUN) -> list[float]:
+    """The pairs that did the step's work: at least `frac` x p90 of the history (a resume
+    that found its outputs lands in seconds and drops out); all of xs when none would stay."""
+    xs = list(xs)
+    if len(xs) < 2:
+        return xs
+    floor = frac * band(xs)[2]
+    return [x for x in xs if x >= floor] or xs
+
+
 def sub_norm(files: list[list[dict]], subs) -> float:
     """Σ over `subs` of the median seconds timing.jsonl measured for each."""
     total = 0.0
@@ -217,3 +230,49 @@ def episode_eta(now: float, running_left: float | None, running_sigma: float,
     hi, capped = p50 + sd, p50 + sd > ceiling_at
     return {"finish_at": min(p50, ceiling_at), "lo": max(now, min(p50 - sd, ceiling_at)),
             "hi": min(hi, ceiling_at), "long": False, "capped": capped}
+
+
+# --- the projection: every step's window (page experts 2026-10-18, rules W, D, B) ---
+
+
+def globs_meet(a: str, b: str) -> bool:
+    """Two book-relative paths or globs that can name the same file."""
+    return fnmatch(a, b) or fnmatch(b, a)
+
+
+def will_run(order: list[str], running: str, kept: set[str], ins: dict, outs: dict) -> dict[str, bool]:
+    """{step: runs again} for the steps after `running` (rule W): a step no run ever
+    finished, or one whose inputs meet what a step running in this run writes."""
+    after = order[order.index(running) + 1:] if running in order else list(order)
+    dirty, out = list(outs.get(running, [])), {}
+    for sid in after:
+        out[sid] = sid not in kept or any(globs_meet(i, o) for i in ins.get(sid, []) for o in dirty)
+        if out[sid]:
+            dirty += outs.get(sid, [])
+    return out
+
+
+def _window(sid: str, runs: bool, start: float, p50: float, sd: float) -> dict:
+    """One later step's projected start->end with its band; a kept step has none."""
+    if not runs:
+        return {"id": sid, "will_run": False, "start_at": None, "end_at": None, "lo": None, "hi": None}
+    end = start + p50
+    return {"id": sid, "will_run": True, "start_at": start, "end_at": end, "lo": end - sd, "hi": end + sd}
+
+
+def project(now: float, running_left: float | None, running_sigma: float,
+            later: list[tuple[str, bool, list[float]]], ceiling_at: float) -> dict:
+    """Each later step's window and the episode's finish (rule B): `later` is
+    [(step, will run, full-run history)], chained on p50s with √Σσ² bands; past the
+    running step's p90 (`running_left` None) the finish is a floor, flagged long."""
+    t, var, steps = now + (running_left or 0.0), running_sigma ** 2, []
+    for sid, runs, xs in later:
+        p50 = band(xs)[1] if runs and xs else 0.0
+        var += sigma(xs) ** 2 if runs else 0.0
+        steps.append(_window(sid, runs, t, p50, math.sqrt(var)))
+        t += p50
+    sd = math.sqrt(var)
+    return {"steps": steps, "finish_at": min(t, ceiling_at), "lo": max(now, min(t - sd, ceiling_at)),
+            "hi": min(t + sd, ceiling_at), "capped": t + sd > ceiling_at, "long": running_left is None,
+            "step_end_at": now + running_left if running_left is not None else None,
+            "steps_left": sum(1 for s in steps if s["will_run"])}

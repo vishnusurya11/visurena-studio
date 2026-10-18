@@ -270,12 +270,12 @@ async function main() {
 
   /* 7. events feed the Today log, once each, newest first; pins feed [data-running] */
   pulseOf(Object.assign({}, P1, { cursor: 12, fp: Object.assign({}, FP, { shell: 's3', attention: 'a5', floor: 'f4' }),
-    events: [{ id: 41, ts: 1700000000, href: '/d/episode/C1/ep17', unit: 'ep17', text: '09 shoot completed' },
+    events: [{ id: 41, ts: '2026-10-18T20:20:23Z', href: '/d/episode/C1/ep17', unit: 'ep17', text: '09 shoot completed' },
              { id: 'ord-9', order: 9, text: 'redo taken by run r1' }] }));
   stepPulse(); await drain();
   pulseOf(Object.assign({}, P1, { cursor: 13, fp: Object.assign({}, FP, { shell: 's4', attention: 'a6', floor: 'f5' }),
-    events: [{ id: 44, ts: 1700000600, href: '/d/episode/C1/ep18', unit: 'ep18', text: '02 plan completed' },
-             { id: 41, ts: 1700000000, href: '/d/episode/C1/ep17', unit: 'ep17', text: '09 shoot completed' }] }));
+    events: [{ id: 44, ts: '2026-10-18T20:30:23Z', href: '/d/episode/C1/ep18', unit: 'ep18', text: '02 plan completed' },
+             { id: 41, ts: '2026-10-18T20:20:23Z', href: '/d/episode/C1/ep17', unit: 'ep17', text: '09 shoot completed' }] }));
   stepPulse(); await drain();
   const feRows = feed.querySelectorAll('.fe');
   check('an event lands in the feed once, newest first', feRows.length === 2 &&
@@ -283,6 +283,9 @@ async function main() {
   check('an order receipt stays out of the feed', !feed.querySelector('#pulse-ev-ord-9'),
     feRows.map(r => r.id));
   check('the feed empty-state hides', feedEmpty.hidden === true, feedEmpty.hidden);
+  const feTime = feed.kids[0] && feed.kids[0].kids[2] && feed.kids[0].kids[2].textContent;
+  check('a feed row reads the event ISO stamp as a local HH:MM (the pulse sends event_ts)',
+    /^\d\d:\d\d$/.test(feTime || ''), feTime);
   check('running count follows the pins', runningCount.textContent === '1', runningCount.textContent);
 
   await drain();

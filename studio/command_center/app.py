@@ -37,7 +37,8 @@ HERE = Path(__file__).resolve().parent
 INBOX_TEMPLATE = "inbox.html"
 ORG_PAGE = registry.ROOT / "architecture" / "index.html"
 templates = Jinja2Templates(directory=str(HERE / "templates"))
-templates.env.filters.update(clock=progress_view.clock, span=unit_view.span, mmss=progress_view.mmss)
+templates.env.filters.update(clock=progress_view.clock, span=unit_view.span, mmss=progress_view.mmss,
+                             hhmm=unit_view.hhmm, day_hhmm=unit_view.day_hhmm)
 templates.env.globals.update(trace_points=progress_view.trace_points, static_url=shell.static_url, viz=viz,
                              HOLD_EFFECT=actions.HOLD_EFFECT)
 router = APIRouter()
@@ -105,7 +106,7 @@ def _render(request: Request, name: str, **context) -> HTMLResponse:
 def _unchanged(request: Request, conn: sqlite3.Connection, key: str) -> Response | None:
     """204 when the client's `?v=` is the section's fingerprint now (C2), else None."""
     v = request.query_params.get("v")
-    if v and v == pulse.fingerprint(conn, key, time.time()):
+    if v and v == pulse.fingerprint(conn, key, time.time(), request.app.state.library):
         return Response(status_code=204)
     return None
 
@@ -335,9 +336,13 @@ def unit_live_partial(request: Request, codex: str, unit: str, conn: sqlite3.Con
 @router.get("/partials/unit/{stage}/{codex}/{unit}/orders", response_class=HTMLResponse)
 def unit_orders_partial(request: Request, stage: str, codex: str, unit: str,
                         conn: sqlite3.Connection = Depends(_conn)):
+    """The unit's orders list: one query, no unit build (page experts 2026-10-18, D4)."""
     if same := _unchanged(request, conn, f"unit:{stage}/{codex}/{unit}"):
         return same
-    return _render(request, "_unit_orders.html", unit=_unit(request, conn, stage, codex, unit, heavy=False),
+    if pulse.unit_row(conn, stage, codex, unit) is None:
+        raise HTTPException(404, f"no unit {stage}/{codex}/{unit}")
+    orders = unit_view.unit_orders(conn, codex, stage, unit)
+    return _render(request, "_unit_orders.html", unit={"row": {"unit": unit}, "orders": orders},
                    stage=stage, codex=codex)
 
 
@@ -350,7 +355,8 @@ def pulse_json(request: Request, response: Response, since: int | None = None,
     """The heartbeat (C1): the fingerprints, the shell's numbers, the events since the cursor."""
     response.headers["Cache-Control"] = "no-store"
     state = request.app.state
-    return pulse.pulse(conn, time.time(), state.boot, since, state.progress, state.extras(views.book_names(conn)))
+    return pulse.pulse(conn, time.time(), state.boot, since, state.progress, state.extras(views.book_names(conn)),
+                       state.library)
 
 
 def gpu_progress(app: FastAPI) -> Callable[[str, str], dict | None]:

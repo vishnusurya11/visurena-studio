@@ -129,7 +129,7 @@
   </section>
   {% endif %}
 
-  <section class="u-sec" id="gates" aria-labelledby="gates-h"><span hidden>VERDICTS</span>
+  <section class="u-sec" id="gates" aria-labelledby="gates-h" hx-get="{{ request.url.path }}" hx-select="#gates > *" hx-swap="morph:innerHTML" hx-trigger="{{ pk }} from:body" data-v="{{ vfp }}"><span hidden>VERDICTS</span>
    <header><h2 id="gates-h">Gates</h2><span class="sub">{{ unit.gates | selectattr('by') | list | length }} signed · {{ unit.gates | selectattr('state', 'in', ['flagged', 'failed', 'deferred', 'stale']) | list | length }} not passing</span></header>
    <div class="threads">
    {% for g in unit.gates if g.by or g.word %}
@@ -186,7 +186,7 @@
    </div>
   </section>
 
-  <section class="u-sec" id="runs" aria-labelledby="runs-h">
+  <section class="u-sec" id="runs" aria-labelledby="runs-h" hx-get="{{ request.url.path }}" hx-select="#runs > *" hx-swap="morph:innerHTML" hx-trigger="{{ pk }} from:body" data-v="{{ vfp }}">
    <header><h2 id="runs-h">Runs</h2>
     {% if hl.loop.looping %}<span class="loop">⟳ LOOPING</span><span class="sub">{{ hl.loop.n }} of the last {{ hl.loop.of }} runs ended at {{ hl.loop.step }} {{ hl.loop.reason }}</span>
     {% elif finished %}<span class="okline">✓ finished in {{ hl.n }} run{{ '' if hl.n == 1 else 's' }} · no loop</span>
@@ -199,7 +199,7 @@
    <div class="passes" data-testid="passes" aria-label="one segment per run">{% if hl.passes | length > 14 %}<span class="pass more muted">+{{ hl.passes | length - 14 }} earlier</span>{% endif %}{% for p in shown %}<span class="pass {{ p.css }}" data-testid="pass" title="{{ p.run_id }} · {{ p.day }}{% if p.wall %} · {{ p.wall }}{% endif %} · {{ p.how }}{% if p.detail %} · {{ p.detail }}{% endif %}"><b>{{ p.at }}</b> {{ p.label }}</span>{% endfor %}</div>
    {% endif %}
    {% for t in hl.trend if t.series | length > 1 %}
-   <div class="trend"><b>{{ t.gate }}</b> <span class="mono">{% for v in t.series[-6:] %}{{ '%g' | format(v) }}{% if not loop.last %} ▸ {% endif %}{% endfor %}</span> {% if t.direction == 'improving' %}<span class="ok">↘ improving</span>{% else %}<span class="warn">→ stuck</span>{% endif %}</div>
+   <div class="trend"><b>{{ t.gate }}</b> <span class="mono">{% for v in t.series[-6:] %}{{ '%g' | format(v) }}{% if not loop.last %} ▸ {% endif %}{% endfor %}</span> {% if t.direction == 'improving' %}<span class="ok">↘ improving</span>{% elif t.direction == 'worse' %}<span class="bad">↗ worse</span>{% else %}<span class="warn">→ stuck</span>{% endif %}</div>
    {% endfor %}
    {% if hl.ended and not finished %}<div class="trend muted">ended on {% for e in hl.ended[:5] %}<span>{{ e.step }} {{ e.reason }} ×{{ e.n }}</span>{% if not loop.last %} · {% endif %}{% endfor %}</div>{% endif %}
    {% if hl.passes %}
@@ -235,7 +235,7 @@
 
   </div>
 
-  <aside class="props" id="props" aria-label="Properties">
+  <aside class="props" id="props" aria-label="Properties" hx-get="{{ request.url.path }}" hx-select="#props > *" hx-swap="morph:innerHTML" hx-trigger="{{ pk }} from:body" data-v="{{ vfp }}">
    <nav class="jump" aria-label="Sections"><a href="#shots">Shots</a><a href="#gates">Gates</a><a href="#runs">Runs</a><a href="#files">Files</a><a href="#activity">Activity</a></nav>
    {% set h = unit.head %}
    <dl>
@@ -251,6 +251,7 @@
     {% if h.finished %}<div><dt>Finished</dt><dd>{{ h.finished }}</dd></div>{% endif %}
     {% if h.moved %}<div><dt>Moved</dt><dd title="{{ r.updated_at }}">{{ h.moved }}</dd></div>{% endif %}
     {% if h.lease.state == 'ok' %}<div><dt>Lease</dt><dd class="ok">lease ok to {{ h.lease.until }}</dd></div>
+    {% elif h.lease.state == 'beating' %}<div><dt>Lease</dt><dd class="ok">ran out at {{ h.lease.until }}; the run's clock still beats</dd></div>
     {% elif h.lease.state == 'stale' %}<div><dt>Lease</dt><dd class="bad">ran out at {{ h.lease.until }}</dd></div>{% endif %}
     {% if r.run_id %}<div><dt>Run</dt><dd><code title="{{ r.run_id }}">{{ h.run_short }}</code></dd></div>{% endif %}
     {% if r.blocked_on %}<div><dt>Waiting</dt><dd>{{ r.blocked_on }}</dd></div>{% endif %}

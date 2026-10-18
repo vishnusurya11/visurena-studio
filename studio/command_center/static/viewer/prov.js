@@ -401,7 +401,7 @@ function attemptsSection(c, U, tk, dq) {
   s.appendChild(el('p', 'pv-sub', 'Two honest lists: the files carry no reason and the reasons name no file, so they are not paired.'));
   const a = el('ol', 'pv-list'); fails.forEach(f => { const li = el('li'); const b = el('button', 'pv-link', `${f.rel.split('/').pop()} · rendered ${dhm(f.mtime)}`); b.type = 'button'; b.onclick = () => c.openSeq('takes', x => x.id === `takes/r2v/${tk}.mp4`, 1 + fails.length - +f.rel.match(/fail(\d+)/)[1]); li.appendChild(b); a.appendChild(li); });
   s.appendChild(add(el('div', 'pv-lh'), el('b', '', 'Renders, in order'))); s.appendChild(a);
-  const r = el('ol', 'pv-list'); why.forEach(l => { const frag = ((l.note || '').match(new RegExp(`[^;]*\\b${tk}\\b[^;]*`)) || [''])[0].trim(); r.appendChild(add(el('li'), el('span', 'pv-t', dhm(l.ts)), el('span', '', ` rung ${l.attempt} · ${l.action} · ${frag}`))); });
+  const r = el('ol', 'pv-list'); why.forEach(l => { const frag = ((l.note || '').match(new RegExp(`[^;]*\\b${tk}\\b[^;]*`)) || [''])[0].trim(); r.appendChild(add(el('li'), el('span', 'pv-t', dhm(isoT(l.ts))), el('span', '', ` rung ${l.attempt} · ${l.action} · ${frag}`))); });
   s.appendChild(add(el('div', 'pv-lh'), el('b', '', 'The ladder said, in order'), srcChip(c, 'learnings.jsonl', null, '↗'))); s.appendChild(why.length ? r : empty('no learnings.jsonl row names this take'));
   if (dq && dq.attempts) s.appendChild(el('p', 'pv-sub', `take_dq scored: ${dq.attempts.map(x => `${x.file} ${x.score}`).join(' · ')}`));
   return s;
@@ -460,7 +460,7 @@ async function gridInfo(c, U) {
   return { about, prompt, verdict, raw: rawList(c, [[base + '.txt', null, 'grid prompt', U], [base + '.json', null, 'grid manifest', U], ['storyboard/layout.json', null, '', U], ['timing.jsonl', null, 'grids rows carry the args', U]]) };
 }
 async function masterInfo(c, U) {
-  const it = c.item, about = el('div', 'pv'), judged = /=.*master_r2v/.test(it.sub || '');
+  const it = c.item, about = el('div', 'pv'), judged = it.judged === true;
   about.appendChild(fate(judged ? 'The delivered master: QC and the master judge describe these bytes' : 'An earlier iteration: no QC or verdict was kept for it', judged ? 'ok' : 'run'));
   about.appendChild(kv([['file', it.layers[0].rel], ['iteration', it.sub]]));
   if (judged && U.F.get('review/contact_' + (U.qc && U.qc.sha8) + '.png')) { const b = el('button', 'pv-open', 'Open the master contact sheet'); b.type = 'button'; b.onclick = () => c.openRef(`${U.idx.home}/review/contact_${U.qc.sha8}.png`); about.appendChild(b); }

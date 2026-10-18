@@ -34,8 +34,8 @@ def test_the_step_change_is_announced_before_the_swap():
 
 
 def test_the_swap_morphs_when_idiomorph_is_there():
-    body = fn("swap")
-    assert "Idiomorph.morph" in body and "replaceWith" in body
+    body = fn("morph")                       # page experts 2026-10-18 (D1): swap() schedules, morph() swaps
+    assert "Idiomorph.morph" in body and "replaceWith" in body and "morph(fresh" in fn("swap")
 
 
 def test_a_new_panel_is_decoded_before_it_is_shown():

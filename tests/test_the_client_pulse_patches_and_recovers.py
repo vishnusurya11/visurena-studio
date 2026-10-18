@@ -76,5 +76,10 @@ def test_events_feed_the_today_log_and_the_running_count(report):
            "the feed empty-state hides", "running count follows the pins")
 
 
+def test_a_feed_row_reads_the_iso_stamp_as_local_time(report):
+    # page experts 2026-10-18 (C0): the pulse sends event_ts as ISO; `ts * 1000` printed NaN:NaN
+    passed(report, "a feed row reads the event ISO stamp as a local HH:MM (the pulse sends event_ts)")
+
+
 def test_a_held_studio_reaches_the_bar_the_card_and_the_title(report):
     passed(report, "held bar shows and reads local time", "held card never says idle", "held title")

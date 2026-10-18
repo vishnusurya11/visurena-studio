@@ -383,6 +383,8 @@ def master_groups(U: dict) -> list[dict]:
     r2v = U["F"].get("cut/master_r2v.mp4")
     if r2v and r2v["size"] in seen:
         seen[r2v["size"]]["also"].append("master_r2v")
+    elif r2v:                                   # the delivered bytes equal no iteration: its own item first
+        return [{"f": r2v, "also": ["master_r2v"]}] + list(seen.values())
     return list(seen.values())
 
 
@@ -394,17 +396,26 @@ def master_poster(U: dict) -> str | None:
     return None
 
 
+def name_of(rel: str, also: list[str]) -> str:
+    """`iter3 = master_r2v` for an iteration and what equals it; `master_r2v` for the delivered file alone."""
+    m = re.search(r"iter\d+", rel)
+    return " = ".join([m.group(0)] + also) if m else "master_r2v"
+
+
 def master_item(U: dict, g: dict, poster: str | None) -> dict:
     f, also = g["f"], g["also"]
-    n = re.search(r"iter(\d+)", f["rel"]).group(1)
+    m = re.search(r"iter(\d+)", f["rel"])
+    n = m.group(1) if m else "·"
     judged = "master_r2v" in also
     qc = U.get("qc") if isinstance(U.get("qc"), dict) else {}
     faults = len((U["eyes"]["master"][0] if U["eyes"]["master"] else {}).get("faults") or [])
     chips = [{"t": f"MASTER ⚑ {faults} · {qc.get('sha8', '')}", "cls": "flag" if faults else "ok"}] if judged \
         else [{"t": "no verdict kept", "cls": ""}]
     sub = f"{mmss(qc['seconds'])} · LUFS {qc.get('lufs')}" if judged and qc.get("seconds") else "no QC kept for this iteration"
-    return {"id": f["rel"], "label": f"v{n}", "short": f"v{n}", "judged": judged, "chips": chips, "strip_rel": poster,
-            "sub": f"iter{n}{' = ' + ' = '.join(also) if also else ''} · {size(f['size'])} · {day_clock(f['mtime'])}",
+    return {"id": f["rel"], "label": f"v{n}" if m else "delivered", "short": f"v{n}" if m else "master",
+            "judged": judged, "chips": chips, "strip_rel": poster,
+            "aliases": ["cut/master_r2v.mp4"] if judged else [],   # E1: the unit page opens the delivered name
+            "sub": f"{name_of(f['rel'], also)} · {size(f['size'])} · {day_clock(f['mtime'])}",
             "layers": [{"name": "master", "rel": f["rel"], "poster_rel": poster, "sub": sub}]}
 
 

@@ -208,6 +208,8 @@ class RailStep(BaseModel):
     secs: float | None = None        # this run: done -> measured, running -> elapsed so far
     median_s: float | None = None    # the measured norm the rail's width is proportional to
     retries: int = 0                 # runs of this unit that started the step before this one
+    will_run: bool | None = None     # a later step: runs again in this run (eta.will_run); None = not later
+    window: str = ""                 # a later step: "14:05–14:20" (local) or "kept"
 
 
 class Sampler(BaseModel):
@@ -249,8 +251,10 @@ class Eta(BaseModel):
     finish_at: float | None = None   # epoch, rounded to five minutes
     lo: float | None = None
     hi: float | None = None
-    finish: str = ""                 # "02:45" (local)
+    finish: str = ""                 # "02:45" (local): the EPISODE's finish, never the step's
     range: str = ""                  # "02:30–03:10"
+    step_end: str = ""               # "13:58" (local): the running step's projected end; "" past its p90
+    steps_left: int = 0              # later steps that will run in this run
     basis: str = "estimate"          # norm | measured | estimate
     n_runs: int = 0
     long: bool = False
@@ -280,6 +284,7 @@ class Progress(BaseModel):
     eta: Eta = Eta()
     trace: list[float] = []
     last_words: str = ""
+    why: str = ""                    # the run's newest warning or refusal (legacy_progress.why_of)
     title: str = ""
     master: str | None = None
     qc: dict[str, Any] | None = None

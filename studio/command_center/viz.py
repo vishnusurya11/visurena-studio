@@ -274,7 +274,7 @@ def fp(request, key: str) -> str:
     section's data-v so the first pulse after a page load answers 204."""
     from studio.command_center import pulse
     with reading(request) as conn:
-        return pulse.fingerprint(conn, key, datetime.now(timezone.utc).timestamp())
+        return pulse.fingerprint(conn, key, datetime.now(timezone.utc).timestamp(), request.app.state.library)
 
 
 def face(request, row: dict, px: int = 80) -> dict | None:

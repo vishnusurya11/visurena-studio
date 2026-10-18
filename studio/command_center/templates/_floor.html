@@ -23,7 +23,7 @@
     <div class="stats">
       <span class="now"><b>{{ r.step_id }} {{ r.step_name }}</b>{% if r.progress %} · {{ r.progress }}{% endif %} · attempt {{ r.attempts }}</span>
       {% if r.elapsed %}<span>running <b>{{ r.elapsed }}</b></span>{% endif %}
-      {% if r.started_at %}<span>started <b title="{{ r.started_at }}">{{ r.started_at[11:16] }}</b></span>{% endif %}
+      {% if r.run_started %}<span>started <b title="{{ r.run_started }}">{{ r.run_started | hhmm }}</b></span>{% endif %}
       {% if r.run_id %}<button class="btn ghost sm" type="button" data-copy="{{ r.run_id }}" title="Copy the run id {{ r.run_id }}">{{ icon('copy') }}run id</button>{% endif %}
     </div>
     {% if r.blocked_on or r.hold_reason %}<div class="words"><span class="lbl2">Waiting</span><code>{{ r.blocked_on or r.hold_reason }}</code></div>{% endif %}

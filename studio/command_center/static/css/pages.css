@@ -102,6 +102,9 @@ details.menu .menu-body{position:absolute;right:0;top:calc(100% + 4px);z-index:1
 .ubar .seg.purple i{background:var(--invent)} .ubar .seg.black i{background:var(--ink)}
 .ubar .seg.blue i{background:var(--think)}
 .ubar .seg.cur i{outline:2px solid var(--ink);outline-offset:1px}
+/* a step the old make finished, waiting to run again (page experts 2026-10-18, A3) */
+.ubar .seg.earlier i{background:transparent;outline:1px dashed var(--ctl-line);outline-offset:-1px}
+.ubar .seg.earlier{color:var(--ink-2)}
 .ubar .sid{font-family:var(--f-mono);font-weight:600;white-space:nowrap}
 .ubar .sid .st{min-width:1.3em;text-align:left}
 .ubar small{color:var(--ink-3);font-family:var(--f-mono);font-size:var(--t-micro);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%}
@@ -235,6 +238,9 @@ section.live[data-still] .lv-trace polyline{stroke:var(--line)}
 .lv-finish b{font-family:var(--f-mono);font-weight:500;font-size:var(--t-sub)}
 .lv-why{font-size:var(--t-body);color:var(--ink-2)}
 .lv-range{font-family:var(--f-mono);font-size:var(--t-label);color:var(--ink-2);margin-top:4px}
+.lv-stepend{font-family:var(--f-mono);font-size:var(--t-label);color:var(--ink);margin-top:2px}
+.lv-whyline{margin:0 0 10px;padding:6px 10px;border-left:3px solid var(--qc);background:var(--paper-2);font-size:var(--t-body);color:var(--ink)}
+.lv-whyline[hidden]{display:none}
 .lv-sheet{display:grid;grid-template-columns:repeat(auto-fill,minmax(66px,1fr));gap:5px;margin:0 0 14px;padding:8px;background:var(--paper-2);border:1px solid var(--rule)}
 .lt{position:relative;margin:0;aspect-ratio:1/1;background:var(--code);overflow:hidden;border-radius:var(--r-1);cursor:default}
 .lt img{display:block;width:100%;height:100%;object-fit:cover}
@@ -269,7 +275,8 @@ section.live[data-still] .lv-trace polyline{stroke:var(--line)}
 .lv-rail .lbl sup{font-size:var(--t-micro);font-weight:500;color:var(--ink-2)}
 .lv-rail .st-running .lbl{color:var(--ink)}
 .lv-rail .dur{font-family:var(--f-mono);font-size:var(--t-micro);color:var(--ink-2);white-space:nowrap}
-/* a done step is a plain bar: no name, no time -- only the running and failed steps speak (P03.4) */
+/* a later step's projected window (page experts 2026-10-18, A2): when it runs, or kept */
+.lv-rail .win{font-family:var(--f-mono);font-size:var(--t-micro);color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}/* a done step is a plain bar: no name, no time -- only the running and failed steps speak (P03.4) */
 .lv-rail .seg:is(.st-done,.st-skip) .lbl small,.lv-rail .seg:is(.st-done,.st-skip) .dur{display:none}
 .lv-rail .ck{width:10px;height:10px;flex:none}
 .lv-rail .ck path{fill:none;stroke:var(--ok);stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;stroke-dasharray:24;stroke-dashoffset:0}
