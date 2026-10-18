@@ -309,6 +309,9 @@ def _answer(s: Signals, n: int, kind: str, reason: str, order) -> Derived:
     ledger's stop count, then the brain reads the stop."""
     if kind == "completed":
         return _brain(s, n, "no_upload_row")
+    if kind == "wait" and reason == "tree_dirty" and not episode_drive.dirty(s.porcelain):
+        # the end row is history; the tree is read every tick (2026-10-18: an hour on a clean tree)
+        return _idle(s, n, "tree_clean")
     if kind == "wait":
         return Derived(State.WAIT_TREE if reason == "tree_dirty" else State.PAUSED, reason, None, packet(s, n, reason))
     if kind == "park":

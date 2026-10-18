@@ -299,11 +299,41 @@ def load_series(book: Path, codex: str, chapters: Callable[[Path], list[int]]) -
     return doc
 
 
+def is_paused(book: Path, series: dict | None = None) -> bool:
+    """Paused is series.json `paused` OR the STOP file; either one holds the series."""
+    doc = series if series is not None else read_json(paths_of(book).series, {})
+    return bool(doc.get("paused")) or paths_of(book).stop.exists()
+
+
+def patch_status(book: Path, paused: bool) -> dict:
+    """The status file with the live pause flag laid over it (no tick needed)."""
+    doc = read_json(paths_of(book).status, {})
+    series = doc.setdefault("series", {})
+    series["paused"] = paused
+    if paused:
+        series["state"] = "paused"
+    elif series.get("state") == "paused":
+        series["state"] = "complete" if series.get("next") is None else "running"
+    return doc
+
+
+def status_now(book: Path) -> dict:
+    """What `status` prints: the tick's file, its pause flag read live."""
+    return patch_status(book, is_paused(book))
+
+
 def set_paused(book: Path, codex: str, paused: bool) -> dict:
+    """Pause sets the flag; resume clears the flag, paused_why and the STOP file.
+    status.json is rewritten at once, the next tick launches nothing while paused."""
     doc = load_series(book, codex, lambda b: chapters_of(b))
     doc["paused"] = paused
+    if not paused:
+        doc.pop("paused_why", None)
+        paths_of(book).stop.unlink(missing_ok=True)
     write_atomic(paths_of(book).series, doc)
     event(book, {"event": "pause" if paused else "resume"})
+    if paths_of(book).status.exists():
+        write_atomic(paths_of(book).status, patch_status(book, is_paused(book, doc)))
     return doc
 
 
@@ -466,14 +496,37 @@ def gather(book: Path, codex: str, n: int, deps: Deps, series: dict):
         "log_tail": log_tail_of(home), "porcelain": deps.git("status", "--porcelain"),
         "engine_up": bool(deps.engine.alive(ENGINE_URL)), "clock_spent_s": run_budget.spent_before(home),
         "brain_attempts": len(attempts), "brain_verdict": verdict,
-        "paused": bool(series.get("paused")) or paths_of(book).stop.exists(),
+        "paused": is_paused(book, series),
         "head_sha": deps.git("rev-parse", "HEAD").strip(), "media_spent_usd": deps.spent_usd(codex, n)})
 
 
 # ---- the actions ---------------------------------------------------------------
 
+STEP_IN_TAIL = re.compile(r"step[ _]?(\d{2})", re.IGNORECASE)
+
+
+def relaunch_allowed(step: str) -> int:
+    """Relaunches a step may take: its cap-table rounds, plus the one that started it."""
+    from studio import step_caps
+    return sum(c.rounds for c in step_caps.table().values() if c.step == step) + 1
+
+
+def step_guard(book: Path, n: int, tail: str, deps: Deps) -> str | None:
+    """Count a relaunch against the step the last log names; 'step_cap' once it is past its cap."""
+    found = STEP_IN_TAIL.findall(tail or "")
+    if not found:
+        return None
+    from studio import step_attempts
+    key = f"relaunch.{found[-1]}"
+    taken = step_attempts.spend(home_of(book, n), key)
+    return "step_cap" if taken > relaunch_allowed(found[-1]) else None
+
+
 def launch(book: Path, codex: str, n: int, deps: Deps, why: str) -> dict:
-    """ONE detached drive.py, its stdout to drive_launchNN.log, and the gpu.lock."""
+    """ONE detached drive.py, its stdout to drive_launchNN.log, and the gpu.lock.
+    Never while the series is paused or STOP exists."""
+    if is_paused(book):
+        return {"action": "paused", "state": "PAUSED"}
     home = home_of(book, n)
     home.mkdir(parents=True, exist_ok=True)
     k = len(list(home.glob("drive_launch*.log"))) + 1
@@ -651,6 +704,8 @@ def act_idle(book: Path, codex: str, n: int, derived, signals, deps: Deps) -> di
         return {"action": "wait", "state": "RUNNING"}
     if (other := other_unit_running(deps, codex, n, deps.procs())) is not None:
         return {"action": "wait", "state": "IDLE", "other": other, "reason": f"ep{other:02d} runs"}
+    if signals.drive_rows and step_guard(book, n, signals.log_tail, deps):
+        return park(book, codex, n, "step_cap", {"tail": signals.log_tail[-800:]}, deps)
     return launch(book, codex, n, deps, "relaunch" if signals.drive_rows else "launch")
 
 
@@ -694,7 +749,8 @@ def status_doc(book: Path, codex: str, n: int | None, derived, signals, series: 
             "engine": {"up": getattr(signals, "engine_up", None), "restarts": restarts_of(book, n) if n else 0},
             "series": {"book": codex, "first": series["first"], "last": series["last"], "published": public,
                        "parked": [{"episode": r["episode"], "reason": r["reason"], "ts": r["ts"]} for r in parked],
-                       "next": n, "state": "paused" if done["state"] == "PAUSED" else
+                       "paused": is_paused(book, series), "next": n,
+                       "state": "paused" if done["state"] == "PAUSED" or is_paused(book, series) else
                        ("complete" if n is None else "running")},
             "episode": episode_doc(n, derived, signals, done),
             "last_events": rows_of(paths_of(book).events)[-5:]}
@@ -909,7 +965,7 @@ def dispatch(args: argparse.Namespace, book: Path, codex: str, deps: Deps) -> in
     if args.cmd == "tick":
         print(json.dumps(tick(book, codex, deps, 1), indent=1, ensure_ascii=False))
     elif args.cmd == "status":
-        print(json.dumps(read_json(paths_of(book).status, {}), indent=1, ensure_ascii=False))
+        print(json.dumps(status_now(book), indent=1, ensure_ascii=False))
     elif args.cmd == "pause" and args.at_boundary:
         print(pause_at_boundary(book, codex, deps))
     elif args.cmd in ("pause", "resume"):
