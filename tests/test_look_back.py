@@ -83,9 +83,19 @@ def test_the_agent_returns_the_same_reading_and_a_must_list_widens_the_ask(tmp_p
 def test_an_adjective_series_asks_for_the_noun_it_qualifies():
     """Jekyll Kawajiri LOOK (2026-10-18): 'with lean, corded, knuckly pale hands' asked for 'lean' and
     'with a full, broad, smooth face' for 'full' -- the phrase was cut at the series' first comma."""
-    assert look_back.nouns_of("A pale man with lean, corded, knuckly pale hands.") == ["hands"]
-    assert look_back.nouns_of("A man of fifty with a full, broad, smooth face and white hands.") == ["face", "hands"]
+    assert look_back.nouns_of("A pale man with lean, corded, knuckly pale gloves.") == ["gloves"]
+    assert look_back.nouns_of("A man of fifty with a full, broad, soft hat and white gloves.") == ["hat", "gloves"]
     assert look_back.nouns_of("A man with a hat, coat and gloves.") == ["hat"]
+    assert look_back.nouns_of("A man with a full, broad, smooth face and large, firm, white and comely "
+                              "hands, holding a cane.") == ["cane"]
+
+
+def test_a_persons_own_body_is_never_a_must_noun():
+    """A face, a jaw or a hand is on every figure sheet; the reader lists 'man' and called them
+    absent (Jekyll Kawajiri 2026-10-18, Enfield 'jaw', 'face'; Jekyll 'face').  The face is judged by
+    the identity and SHEET-ROW rows; the must-nouns are the things a person wears and holds."""
+    prompt = "A gentleman with a heavy jaw and a lined face, wearing a top hat with a wide brown hatband."
+    assert look_back.nouns_of(prompt) == ["hat", "hatband"]
 
 
 def test_a_noun_the_reader_does_not_list_but_does_not_call_absent_is_not_missing(tmp_path):

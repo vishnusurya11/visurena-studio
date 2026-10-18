@@ -63,15 +63,46 @@ def bare(part: str) -> list[str]:
     return [w for w in WORD.findall(part.lower()) if w not in ARTICLES]
 
 
-def asked_part(phrase: str) -> str:
-    """The comma part a trigger asks for: the first, unless it and the next are lone words -- an
-    adjective series ("lean, corded, knuckly pale hands", Jekyll Kawajiri 2026-10-18) -- which
-    asks for the first longer part."""
-    parts = [p for p in phrase.split(",") if p.strip()]
-    if len(parts) > 1 and len(bare(parts[0])) == 1 and len(WORD.findall(parts[1].lower())) == 1:
-        longer = [p for p in parts[1:] if len(WORD.findall(p.lower())) > 1]
-        return longer[0] if longer else parts[-1]
-    return parts[0] if parts else ""
+BODY = frozenset({"face", "jaw", "chin", "cheek", "hand", "eye", "lip", "mouth", "nose", "forehead", "brow",
+                  "skin", "shoulder", "neck", "figure", "build", "frame", "body", "limb", "arm", "leg", "finger",
+                  "knuckle", "teeth", "tooth", "feature"})
+"""A person's own body is on every figure sheet and is never a must-noun: the reader lists 'man' and
+called a drawn face and jaw absent (Jekyll Kawajiri 2026-10-18).  The face is the identity and
+SHEET-ROW rows' to judge; the must-nouns are what a person wears and holds."""
+
+
+def lone(text: str) -> bool:
+    return len(WORD.findall(text.lower())) == 1
+
+
+def adjective(conj: str, last: bool, more: bool, after_lone: bool) -> bool:
+    """A conjunct that only qualifies a later noun: a bare lone word before another conjunct
+    ("white and comely hands"), or a lone last word that opens or continues a comma series
+    ("lean, corded, knuckly pale hands"; "a full, broad, smooth face")."""
+    if not last:
+        return lone(conj)
+    return len(bare(conj)) == 1 and more and after_lone
+
+
+def heads_in(phrase: str) -> list[str]:
+    """The head nouns of one trigger phrase: its first comma part, walked on through an adjective
+    series to the noun it qualifies (Jekyll Kawajiri 2026-10-18: 'lean' and 'full' were asked)."""
+    parts, heads, series = [p for p in phrase.split(",") if p.strip()], [], False
+    for i, part in enumerate(parts):
+        conjs, carried = re.split(r"\band\b", part, flags=re.I), False
+        more = i + 1 < len(parts)
+        after_lone = series or (more and lone(parts[i + 1]))
+        for j, conj in enumerate(conjs):
+            if not bare(conj):
+                continue
+            if adjective(conj, j == len(conjs) - 1, more, after_lone):
+                carried = carried or j == len(conjs) - 1
+                continue
+            heads.append(bare(conj)[-1])
+        if not carried:
+            break
+        series = True
+    return heads
 
 
 def phrases(prompt: str) -> list[str]:
@@ -86,13 +117,7 @@ def phrases(prompt: str) -> list[str]:
 
 def phrase_heads(prompt: str) -> list[str]:
     """The head noun of every phrase after a trigger word, conjuncts split on 'and'."""
-    heads = []
-    for phrase in phrases(prompt):
-        for part in re.split(r"\band\b", asked_part(phrase), flags=re.I):
-            words = bare(part)
-            if words:
-                heads.append(words[-1])
-    return heads
+    return [head for phrase in phrases(prompt) for head in heads_in(phrase)]
 
 
 def qualified(word: str, after: str | None) -> str | None:
@@ -125,7 +150,8 @@ def must_present(prompt: str, must) -> list[str]:
 def nouns_of(prompt: str, must=()) -> list[str]:
     """The nouns a picture drawn from this prompt must show, first appearance order."""
     out: list[str] = []
-    for noun in phrase_heads(prompt) + capitalised_nouns(prompt) + must_present(prompt, must):
+    things = [n for n in phrase_heads(prompt) + capitalised_nouns(prompt) if n not in BODY and n[:-1] not in BODY]
+    for noun in things + must_present(prompt, must):
         if noun not in out:
             out.append(noun)
     return out
