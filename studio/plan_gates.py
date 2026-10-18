@@ -123,11 +123,23 @@ def inserts_needed(shots: int) -> int:
     return math.ceil(shots / INSERT_EVERY)
 
 
-def insert_faults(episode: Episode) -> list[str]:
+def insert_count_rows(episode: Episode) -> list[str]:
     got, need = sum(s.size == "insert" for s in episode.shots), inserts_needed(len(episode.shots))
     if got >= need:
         return []
     return [fault("G-VARIETY", "plan", f"insert shots for {len(episode.shots)} shots", got, need)]
+
+
+def insert_faults(episode: Episode) -> list[str]:
+    """The insert count refuses a legacy plan; on a grammar plan it is tier 3, advice (owner
+    2026-10-18: a count is never a writer retry; G-INSERT already shapes the grammar's inserts)."""
+    return [] if getattr(episode, "grammar", "") else insert_count_rows(episode)
+
+
+def insert_advisories(episode: Episode) -> list[str]:
+    if not getattr(episode, "grammar", ""):
+        return []
+    return [f"{row} (advisory: tier 3, a count is never a writer retry)" for row in insert_count_rows(episode)]
 
 
 def mislabelled_two_shot(frame: str, size: str) -> bool:
@@ -1856,7 +1868,7 @@ def advisories(episode: Episode, earlier_lines: list[str] | None = None, rate: f
     if earlier_lines is not None:
         out += name_advisories(episode, earlier_lines)
     from studio import picture_gates
-    out += picture_gates.advisories(episode)
+    out += picture_gates.advisories(episode) + insert_advisories(episode)
     if rate is not None:
         out += rate_advisory(episode, rate)
     return out

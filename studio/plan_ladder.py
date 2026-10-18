@@ -119,6 +119,11 @@ def mechanical_cures(plan: Path, book: Path, number: int, say=print) -> None:
         say(f"desk cure pass skipped, the writer's draft kept: {str(why)[:160]}")
 
 
+CLIMB_WALL_S = 25 * 60
+"""The climb's wall (owner 2026-10-18, Jekyll Kawajiri ep01: a 45-min climb on rows no writer moves):
+past it a rung writes nothing and the terminal takes the best draft.  The rungs are three writer
+rounds (improve x2, model_tier x1)."""
+
 IMPROVE_S, MODEL_TIER_S = 240.0, 90.0
 """The plan rungs' measured medians (C3_verdict #6, D10; c3/rungs.json): the
 plan ladder draws on the one clock like every other ladder."""
@@ -246,7 +251,18 @@ class Desk:
     over_clock: bool = False                # the one climb past a spent ceiling is under way
     best: tuple | None = None               # (doc, n, faults): the battery-refused draft with the fewest lines
     rungs_done: int = 0                     # rungs whose draft landed (the checkpoint's resume point)
+    began: float | None = None              # the climb's start (epoch s), checkpointed: CLIMB_WALL_S runs from it
     _names_cache: dict | None = None        # the refs-derived token table the ghost scrub reads
+
+    def now(self) -> float:
+        import time
+        return time.time()
+
+    def wall_spent(self) -> bool:
+        """The climb has had CLIMB_WALL_S since it began (a climb with no start begins now)."""
+        if getattr(self, "began", None) is None:
+            self.began = self.now()
+        return self.now() - self.began > CLIMB_WALL_S
 
     def _names(self) -> dict:
         """The unique-token table for the ghost scrub, read once from the
@@ -359,6 +375,7 @@ class Desk:
         write_json_atomic(self.climb_path(), {
             "best": best, "drafts": [{"doc": doc, "verdict": v.model_dump() if v else None} for doc, v in self.drafts],
             "refusals": self.refusals, "rungs_done": self.rungs_done, "escalated": self.agent is not None,
+            "began": getattr(self, "began", None),
             "plan_sha8": plan_verdict.plan_sha8(self.plan) if self.plan.exists() else "",
             "code_sha8": code_sha8()})
 
@@ -375,6 +392,7 @@ class Desk:
             return False
         doc = json.loads(path.read_text(encoding="utf-8"))
         self.refusals, self.rungs_done = list(doc.get("refusals") or []), int(doc.get("rungs_done") or 0)
+        self.began = doc.get("began")             # an older checkpoint has none: the wall starts now
         if doc.get("escalated"):
             self.escalate()
         same = bool(doc.get("code_sha8")) and doc.get("code_sha8") == code_sha8()
@@ -408,6 +426,11 @@ class Desk:
         improve reached one fault and the old fresh_brief rung wrote from nothing
         (39-57 faults back), ~3.5 h of paid calls to stand still."""
         self.refusals = merged(self.refusals, refusal_lines_of(verdict))
+        if self.wall_spent():                     # the owner's cap: no writer round past the wall
+            self.remember(verdict)
+            self.rungs_done += 1
+            self._say(f"plan climb: the {CLIMB_WALL_S // 60}-min wall is spent; rung {rung.name} writes nothing")
+            return
         if is_battery(verdict):
             self.escalate()                       # a rule miss: the reasoner edits from here
         self.remember(verdict)                    # checkpointed with the merged refusals
@@ -425,7 +448,10 @@ class Desk:
         if not self.drafts and self.clock_spent():
             return self.past_ceiling(self.best_refused(verdict))
         if not self.drafts:
-            return self.best_refused(verdict).model_copy(update={"terminal": self.battery_terminal})
+            best = self.best_refused(verdict)
+            if self.battery_terminal == DEFER and judged_only(best):
+                return best.model_copy(update={"terminal": KEEP_BEST})   # tier 2 only: kept flagged
+            return best.model_copy(update={"terminal": self.battery_terminal})
         doc, best = min(self.drafts, key=lambda pair: len(pair[1].faults))
         episode_home.write_plan(self.plan, doc)
         return best.model_copy(update={"terminal": verdict.terminal})
@@ -466,6 +492,26 @@ class Desk:
             return defer(self.plan, verdict)
         return plan_verdict.sign(self.plan, verdict.summary(), signed_by=verdict.signer,
                                  faults=[f.model_dump() for f in verdict.faults], flagged=bool(verdict.terminal))
+
+
+def tier_one(verdict: Verdict) -> list[str]:
+    """The TIER-1 lines of a battery verdict (owner 2026-10-18): the ones a downstream builder
+    repeats (`plan_tags.builder_lines`: contract, cast bound, take length, ...).  Only these defer
+    and re-author; tier 2 (aim, laid, crowd, react) ships the best draft flagged after its rounds,
+    tier 3 (voice-measured seconds and shares, counts, tail wording) never refuses."""
+    from studio import plan_tags
+    return plan_tags.builder_lines([f.note for f in verdict.faults]) if is_battery(verdict) else []
+
+
+def judged_only(verdict: Verdict) -> bool:
+    """A battery verdict read as plan_check prints it (its section headers present) that holds no
+    tier-1 line; a refusal with no header to place it keeps the old deferral."""
+    placed = any(SECTION.match(f.note or "") for f in verdict.faults)
+    return is_battery(verdict) and placed and not tier_one(verdict)
+
+
+SECTION = re.compile(r"^[A-Z][A-Z0-9 /&-]*:")
+"""A plan_check section header ('CELL GATES   : 4', 'VERDICT      : REFUSED'), all capitals."""
 
 
 def refusal_lines_of(verdict: Verdict) -> list[str]:
