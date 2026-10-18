@@ -80,6 +80,32 @@ def test_the_agent_returns_the_same_reading_and_a_must_list_widens_the_ask(tmp_p
     assert reading.missing == ["cart", "road"] and reading.text is False
 
 
+def test_an_adjective_series_asks_for_the_noun_it_qualifies():
+    """Jekyll Kawajiri LOOK (2026-10-18): 'with lean, corded, knuckly pale hands' asked for 'lean' and
+    'with a full, broad, smooth face' for 'full' -- the phrase was cut at the series' first comma."""
+    assert look_back.nouns_of("A pale man with lean, corded, knuckly pale hands.") == ["hands"]
+    assert look_back.nouns_of("A man of fifty with a full, broad, smooth face and white hands.") == ["face", "hands"]
+    assert look_back.nouns_of("A man with a hat, coat and gloves.") == ["hat"]
+
+
+def test_a_noun_the_reader_does_not_list_but_does_not_call_absent_is_not_missing(tmp_path):
+    """The question asks the reader which asked nouns are ABSENT; its answer is part of the reading.
+    Utterson's Kawajiri sheet: the band is drawn, the reader listed 'hat' and answered absent: []."""
+    picture = tmp_path / "sheet.png"
+    picture.write_bytes(b"png")
+    said = json.dumps({"seen": ["man", "hat", "coat"], "text": False, "absent": ["cane"]})
+    reading = look_back.read(picture, "A man wearing a hat with a band, holding a cane.", reader=lambda p, q: said)
+    assert reading.missing == ["cane"]
+
+
+def test_an_answer_without_an_absent_list_keeps_the_seen_rule(tmp_path):
+    picture = tmp_path / "sheet.png"
+    picture.write_bytes(b"png")
+    said = json.dumps({"seen": ["man", "hat"], "text": False})
+    reading = look_back.read(picture, "A man wearing a hat with a band.", reader=lambda p, q: said)
+    assert reading.missing == ["band"]
+
+
 def test_the_skill_asks_the_one_question_without_naming_a_book():
     text = agent.load_skill().lower()
     assert "absent" in text and "list" in text

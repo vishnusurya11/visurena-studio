@@ -29,8 +29,9 @@ WORKFLOW = "image_qwen3vl_caption"
 TOKENS = 1024
 SEED = 11
 
-PHRASE = re.compile(r"\b(?:with|holding|wearing|carrying)\s+([^,.;:]+)", re.I)
-"""What follows a trigger word up to the next punctuation: the asked-for thing."""
+TRIGGER = re.compile(r"\b(?:with|holding|wearing|carrying)\s+", re.I)
+"""What follows a trigger word, up to the next trigger or its clause's end, is a phrase; its first
+comma part is the asked-for thing, unless that part opens an adjective series (`asked_part`)."""
 ARTICLES = frozenset({"a", "an", "the", "his", "her", "their", "its", "one", "two", "some"})
 WORD = re.compile(r"[a-z]+")
 CAPITALISED = re.compile(r"^[A-Z][a-z]+$")
@@ -58,12 +59,37 @@ class Unreadable(ValueError):
     """The reader said something this shape cannot hold.  It raises, never defaults."""
 
 
+def bare(part: str) -> list[str]:
+    return [w for w in WORD.findall(part.lower()) if w not in ARTICLES]
+
+
+def asked_part(phrase: str) -> str:
+    """The comma part a trigger asks for: the first, unless it and the next are lone words -- an
+    adjective series ("lean, corded, knuckly pale hands", Jekyll Kawajiri 2026-10-18) -- which
+    asks for the first longer part."""
+    parts = [p for p in phrase.split(",") if p.strip()]
+    if len(parts) > 1 and len(bare(parts[0])) == 1 and len(WORD.findall(parts[1].lower())) == 1:
+        longer = [p for p in parts[1:] if len(WORD.findall(p.lower())) > 1]
+        return longer[0] if longer else parts[-1]
+    return parts[0] if parts else ""
+
+
+def phrases(prompt: str) -> list[str]:
+    """Each trigger's phrase: to the next trigger in its clause, else to the clause's end."""
+    out = []
+    for clause in re.split(r"[.;:]", prompt or ""):
+        found = list(TRIGGER.finditer(clause))
+        out += [clause[m.end():(found[i + 1].start() if i + 1 < len(found) else len(clause))]
+                for i, m in enumerate(found)]
+    return out
+
+
 def phrase_heads(prompt: str) -> list[str]:
     """The head noun of every phrase after a trigger word, conjuncts split on 'and'."""
     heads = []
-    for phrase in PHRASE.findall(prompt or ""):
-        for part in re.split(r"\band\b", phrase, flags=re.I):
-            words = [w for w in WORD.findall(part.lower()) if w not in ARTICLES]
+    for phrase in phrases(prompt):
+        for part in re.split(r"\band\b", asked_part(phrase), flags=re.I):
+            words = bare(part)
             if words:
                 heads.append(words[-1])
     return heads
@@ -147,8 +173,29 @@ def vlm_reader(picture: Path, question_text: str) -> str:
                                      "seed": SEED, "max_new_tokens": TOKENS})
 
 
+def absent_of(said: str) -> set[str] | None:
+    """The stems of what the reader called ABSENT, or None when its answer holds no such list."""
+    try:
+        got = _loads(said)
+        if isinstance(got, list) and got:
+            got = _loads(got[0]) if isinstance(got[0], str) else got[0]
+    except Unreadable:
+        return None
+    named = got.get("absent") if isinstance(got, dict) else None
+    if not isinstance(named, list):
+        return None
+    return {stem(w) for item in named for w in WORD.findall(str(item).lower())}
+
+
 def read(picture: Path, prompt: str, reader: Callable | None = None, must=()) -> LookReading:
-    """One picture read against its prompt; `reader(picture, question) -> str` is injectable."""
+    """One picture read against its prompt; `reader(picture, question) -> str` is injectable.
+    The question asks which nouns are ABSENT, and the answer is read: a noun the reader neither
+    lists nor calls absent is not missing (Jekyll Kawajiri 2026-10-18: Utterson's drawn band,
+    listed as 'hat', absent [])."""
     asked = nouns_of(prompt, must)
-    seen, text = parse((reader or vlm_reader)(Path(picture), question(asked)))
-    return LookReading(seen=seen, missing=diff(seen, asked), text=text)
+    said = (reader or vlm_reader)(Path(picture), question(asked))
+    seen, text = parse(said)
+    missing, absent = diff(seen, asked), absent_of(said)
+    if absent is not None:
+        missing = [noun for noun in missing if stem(noun) in absent]
+    return LookReading(seen=seen, missing=missing, text=text)
