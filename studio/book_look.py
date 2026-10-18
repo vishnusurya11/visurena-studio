@@ -189,9 +189,39 @@ def drawn_words(recipe: dict, prompt: str, kind: str, entity: str) -> tuple[str,
             joined(recipe.get("negative", ""), own.get("negative", ""), frame.get("negative", "")))
 
 
+def sentence(part: str) -> str:
+    """One prose part, closed with a full stop when it has none."""
+    part = re.sub(r"\s+", " ", part or "").strip()
+    return part if not part or part[-1] in ".!?" else part + "."
+
+
+def krea2_words(recipe: dict, prompt: str, kind: str, entity: str) -> str:
+    """A Krea2 drawer's prose (the Prism form): the style lead, the entity's own words (else the
+    words without the house sheet form), the kind's camera, the recap.  cfg 1: no negative."""
+    frame = (recipe.get("frames") or {}).get(kind) or {}
+    own = (recipe.get("entities") or {}).get(entity) or {} if entity else {}
+    body = own.get("tags") or UNFORMED.sub("", prompt or "")
+    return " ".join(s for s in map(sentence, (recipe.get("lead", ""), body, frame.get("tags", ""),
+                                              recipe.get("recap", ""))) if s)
+
+
+def krea2_t2i(recipe: dict, prompt: str, *, width: int, height: int, seed: int, prefix: str,
+              kind: str = "", entity: str = "") -> tuple[str, dict]:
+    """(workflow, inject values) on a drawn look whose drawer is Krea2 (Jekyll Kawajiri POC,
+    2026-10-18): 8 steps, cfg 1, 1 MP, no refiner, no LoRA; a person ONE portrait front figure."""
+    shape = (2, 3) if kind == "characters" else (width, height)
+    return str(recipe["workflow"]), {
+        "prompt": krea2_words(recipe, prompt, kind, entity), "seed": seed, "steps": int(recipe.get("steps", 8)),
+        "cfg": recipe.get("cfg", 1), "aspect_ratio": aspect_for(*shape), "megapixels": recipe.get("megapixels", 1),
+        "refine_prompt": False, "enable_lora": False, "filename_prefix": prefix}
+
+
 def drawn_t2i(recipe: dict, prompt: str, *, width: int, height: int, seed: int, prefix: str,
               kind: str = "", entity: str = "") -> tuple[str, dict]:
-    """(workflow, inject values) on the drawn look's own SDXL drawer."""
+    """(workflow, inject values) on the drawn look's own drawer: Krea2 in prose, else SDXL in tags."""
+    if recipe.get("workflow") == PHOTOREAL_T2I:
+        return krea2_t2i(recipe, prompt, width=width, height=height, seed=seed, prefix=prefix,
+                         kind=kind, entity=entity)
     positive, negative = drawn_words(recipe, prompt, kind, entity)
     w, h = sdxl_size(kind, width, height)
     values = {"prompt": positive, "negative_prompt": negative, "width": w, "height": h, "seed": seed,
