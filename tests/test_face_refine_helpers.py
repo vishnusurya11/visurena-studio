@@ -57,10 +57,12 @@ def test_the_live_engine_stages_submits_and_waits_through_the_client(tmp_path, m
     calls = []
     monkeypatch.setattr(comfy, "stage_image", lambda p: calls.append("stage") or "x.png")
     monkeypatch.setattr(comfy, "submit", lambda g: calls.append("submit") or "id")
-    monkeypatch.setattr(comfy, "wait", lambda pid: calls.append("wait") or [tmp_path / "o.mp4"])
+    record = {"outputs": {"17": {"images": [{"filename": "o.mp4", "subfolder": "", "type": "output"}]}}}
+    monkeypatch.setattr(comfy, "wait_record", lambda pid, poll=5.0: calls.append("wait") or record)
     engine = cli.Comfy()
     assert engine.stage(tmp_path / "s.png") == "x.png" and engine.submit({}) == "id"
-    assert engine.wait("id") == [tmp_path / "o.mp4"] and calls == ["stage", "submit", "wait"]
+    assert engine.wait("id") == {"17": [comfy.COMFY_ROOT / "output" / "o.mp4"]}
+    assert calls == ["stage", "submit", "wait"]
 
 
 def test_the_command_line_takes_the_book_the_episode_the_takes_and_the_clock_row(monkeypatch):

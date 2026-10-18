@@ -525,6 +525,14 @@ GPU lane right behind the renders (a REFINE job: after renders and retakes, befo
 the ladder left owed once at the end. ~110 s per face per take; the FIRST thing cut for time, never a check. Assemble
 pastes the kept crops into the master inside the RTX VSR pass, after the 4x (never into the 768 take: the detail
 averages away). By hand: `uv run python scripts/episode/face_refine.py <book> <n> [take ...]`.
+The render is the SaveVideo node's output, by node id (`fr.saved_node`), never the job's first output: on ComfyUI
+v0.41.2 the LoadVideo echoes its input crop first, and a refined crop equal to its source is refused (2026-10-18).
+
+**G-WARP sends a redrawn face back (2026-10-18, main session, for owner veto).** `take_dq` scores every take that
+stages a face for frame-to-frame face redraw (`studio/warp_gate.py`, CPU lane): FAIL is a hard `warp` row, cured by a
+seed retake (the ladder's rounds cap it at 2), then the F2 face refine takes it even with the warp row failed; a WARN
+or an unreadable face goes straight to F2 whatever the shot size. The cut is unlabelled: read `measures.warp` in the
+dq records after each episode and bring the scores to the owner to label.
 
 **Never pin a last frame.** ref2v gives a take its first frame only.
 

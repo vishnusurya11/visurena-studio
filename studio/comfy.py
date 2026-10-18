@@ -271,6 +271,16 @@ def outputs_of(record: dict) -> list[Path]:
     return found
 
 
+def outputs_by_node(record: dict) -> dict[str, list[Path]]:
+    """node id -> the files that node reported.  On v0.41.2 a LoadVideo echoes its
+    INPUT here (type "input") ahead of the SaveVideo's output, so a caller that
+    wants the render names its save node (Jekyll Kawajiri POC, 2026-10-18)."""
+    out: dict[str, list[Path]] = {}
+    for node, rec in record.get("outputs", {}).items():
+        out[str(node)] = outputs_of({"outputs": {node: rec}})
+    return out
+
+
 def texts_of(record: dict) -> list[str]:
     """Every text a finished job reported (PreviewAny-style `{"text": [...]}`
     entries, e.g. a VLM caption), in node order.  These are not files, so

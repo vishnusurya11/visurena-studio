@@ -62,20 +62,42 @@ def wants(sizes: list[str], px: float | None) -> bool:
     return any(s in REFINE_SIZES for s in sizes) or (px is not None and px < SMALL_FACE_PX)
 
 
-def eligible(card: dict, sizes: list[str], dq: dict | None, height: int) -> bool:
-    """The take shows a planned face, passed its dq, and wants the refine."""
-    if not card.get("faces") or not dq or not dq.get("passed"):
+def warp_state(dq: dict | None) -> str:
+    """G-WARP's state in a dq record (studio/warp_gate.py), '' unmeasured."""
+    return str((((dq or {}).get("measures") or {}).get("warp") or {}).get("state") or "")
+
+
+def passed_but_warp(dq: dict) -> bool:
+    """The dq passed, or its only hard failures are G-WARP's (F2 is the warp's last cure)."""
+    failed = {g.get("name") for g in dq.get("gates", []) if g.get("hard") and not g.get("ok")}
+    return bool(dq.get("passed")) or failed == {"warp"}
+
+
+def warp_routed(dq: dict, taken: int) -> bool:
+    """G-WARP sends this take to F2: a warn, an unreadable face, or a fail past its retakes."""
+    from studio import warp_gate
+    return warp_gate.cure(warp_state(dq), taken) == "refine"
+
+
+def eligible(card: dict, sizes: list[str], dq: dict | None, height: int, taken: int = 0) -> bool:
+    """The take shows a planned face, passed its dq (but for G-WARP), and wants the
+    refine by its size or by G-WARP; `taken` is its retakes so far."""
+    if not card.get("faces") or not dq or not passed_but_warp(dq) or any(s in NEVER for s in sizes):
         return False
-    return wants(sizes, face_px(dq, height))
+    if not dq.get("passed") and not warp_routed(dq, taken):
+        return False
+    return wants(sizes, face_px(dq, height)) or warp_routed(dq, taken)
 
 
-def selected(cards: list[dict], sizes: dict[int, str], dqs: dict[int, dict], height: int) -> list[int]:
+def selected(cards: list[dict], sizes: dict[int, str], dqs: dict[int, dict], height: int,
+             taken: dict[int, int] | None = None) -> list[int]:
     """The take indices the refine works on, in take order."""
     out = []
     for c in cards:
+        i = int(c["index"])
         shot_sizes = [sizes[s] for s in c.get("shots") or [c["index"]] if s in sizes]
-        if eligible(c, shot_sizes, dqs.get(int(c["index"])), height):
-            out.append(int(c["index"]))
+        if eligible(c, shot_sizes, dqs.get(i), height, (taken or {}).get(i, 0)):
+            out.append(i)
     return sorted(out)
 
 
@@ -202,12 +224,28 @@ def crop_prompt(person: Person, style: str, seconds: float) -> str:
 
 # ---- the gate ------------------------------------------------------------------------------
 
+SAME_MAX = 0.5
+"""Mean |refined - source| per pixel under which the refine changed nothing.  The
+collect bug (Kawajiri POC, 2026-10-18) filed the source crop as refined: 0.0; the
+real F2 render of the same crop measured 11.4.  A refine that returns its input
+passes every other wall, so this one is first."""
+
+
+def saved_node(graph: dict) -> str:
+    """The id of the graph's one Save* node: where its render is reported."""
+    found = [k for k, n in graph.items() if str(n.get("class_type", "")).startswith("Save")]
+    if len(found) != 1:
+        raise ValueError(f"expected one Save node, found {found}")
+    return found[0]
+
+
 @dataclass(frozen=True)
 class Measures:
     """One refined crop against the take it came from, at window scale.
-    id_*: facenet cosine to the sheet (None unread); seam: mean level difference
-    in the feather band; flick_*: frame-to-frame difference of the face region;
-    faces_*: faces counted over the sampled frames."""
+    id_*: facenet cosine to the sheet at the crop's face (None unread); seam: mean
+    level difference in the feather band; flick_*: frame-to-frame difference of the
+    face region; faces_*: the most faces any one sampled crop shows (inside the
+    window, overlaps merged); change: mean |refined - source crop| per pixel."""
     id_src: float | None
     id_ref: float | None
     seam: float
@@ -215,19 +253,30 @@ class Measures:
     flick_ref: float
     faces_src: int
     faces_ref: int
+    change: float | None = None
+
+
+def face_refusal(src: int, ref: int) -> str:
+    """A clone (a crop with more faces than the source ever showed, at least the
+    one the track was cut round) or a lost face; '' when the count holds."""
+    if ref > max(src, 1) or (src >= 1 and ref == 0):
+        return f"faces {ref} != {src}"
+    return ""
 
 
 def refusals(m: Measures) -> list[str]:
     """Every wall the refined crop breaks, named with its numbers."""
     out = []
+    if m.change is not None and m.change < SAME_MAX:
+        out.append(f"the refined crop is its source (change {m.change:.2f} < {SAME_MAX})")
     if m.id_src is not None and (m.id_ref is None or m.id_ref < m.id_src - ID_DROP):
         out.append(f"identity {m.id_ref} < {m.id_src} - {ID_DROP}")
     if m.seam > SEAM_MAX:
         out.append(f"seam {m.seam:.1f} > {SEAM_MAX}")
     if m.flick_ref > m.flick_src * FLICKER_RATIO + FLICKER_SLACK:
         out.append(f"flicker {m.flick_ref:.2f} > {m.flick_src:.2f} x {FLICKER_RATIO} + {FLICKER_SLACK}")
-    if m.faces_ref > m.faces_src or m.faces_ref < m.faces_src - 1:
-        out.append(f"faces {m.faces_ref} != {m.faces_src}")
+    if said := face_refusal(m.faces_src, m.faces_ref):
+        out.append(said)
     return out
 
 

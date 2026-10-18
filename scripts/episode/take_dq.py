@@ -294,9 +294,19 @@ def gait_measure(frames: list, rec: dict, detect) -> dict:
     return {"gait": gait.measure(frames, detect=detect)}
 
 
+def warp_measure(video: Path, rec: dict, detect) -> dict:
+    """G-WARP (studio/warp_gate.py): is a planned face redrawn frame to frame?
+    CPU, about 5 s a take; read on every take that stages a face."""
+    from studio import warp_gate
+
+    if not rec.get("faces") or detect is None:
+        return {"warp": None}
+    return {"warp": warp_gate.measure(video, detect)}
+
+
 def judge_rows(m: dict, rec: dict) -> list:
     """The judged rows, in print order, from the measures dict."""
-    from studio import gait, invented_speech, take_leak, take_lock
+    from studio import gait, invented_speech, take_leak, take_lock, warp_gate
     from studio.measure import cuts, mouth
 
     motions = tv.plan_motions(rec) or [""]
@@ -308,7 +318,7 @@ def judge_rows(m: dict, rec: dict) -> list:
             tz.rotation_row(m.get("rotation"), motions[0]), take_leak.row(m.get("leak")), panel,
             cuts.row(m.get("cut_vote")), mouth.row(m.get("lag"))] + \
         ([invented_speech.tail_row(m.get("tail"))] if rec.get("lane") == "dialogue" else []) + \
-        [gait.row(m.get("gait"), " ; ".join(motions))]
+        [warp_gate.row(m.get("warp")), gait.row(m.get("gait"), " ; ".join(motions))]
 
 
 def extend_verdict(v, m: dict, rec: dict):
@@ -614,7 +624,8 @@ def measure_attempt(video: Path, rec: dict, index: int, cells: Path, work: Path,
          | staged_measures(video, rec, v, j.get("home", take_dir), seconds, j.get("embed"), j.get("inputs"), source)
          | voice_measure(frames, rec, j.get("landmarker"), voice_of(composite, rec["lane"] == "dialogue"))
          | tail_measure(video, composite, rec, frames, j.get("landmarker"), (audio or {}).get("heard", ""))
-         | gait_measure(frames, rec, j.get("person")))
+         | gait_measure(frames, rec, j.get("person"))
+         | warp_measure(video, rec, j.get("face")))
     return extend_verdict(v, m, rec), audio, m
 
 
@@ -650,7 +661,7 @@ def take_sha8(path: Path) -> str:
 
 MEASURES = ("scripts/episode/take_dq.py", "studio/take_verdict.py", "studio/take_frame.py",
             "studio/plate_gate.py", "studio/invented_speech.py", "studio/gait.py",
-            "studio/stillness.py", "studio/identity_gate.py")
+            "studio/stillness.py", "studio/identity_gate.py", "studio/warp_gate.py")
 """The code a take verdict is measured by: a change here re-measures every take."""
 
 
@@ -694,8 +705,9 @@ def main(book_id: str, number: int, indices: list[int], attempts: bool = False, 
         raise SystemExit(f"episode {number}: no takes to judge under "
                          f"{episode_home.relative(book, take_dir)}")
     embed, inputs, deferred = judge_embedder(cpu_only)
-    from studio import gait
-    judges = {"home": home, "embed": embed, "inputs": inputs, "landmarker": landmarker(), "person": gait.yolo()}
+    from studio import gait, warp_gate
+    judges = {"home": home, "embed": embed, "inputs": inputs, "landmarker": landmarker(), "person": gait.yolo(),
+              "face": warp_gate.detector()}
     for index in wanted(records, indices):
         rec = records[index]
         # THE CURRENT PICTURES, read before panel_board rewrites rec["anchors"]

@@ -40,6 +40,14 @@ def near(a: Box, b: Box) -> float:
     return float(np.hypot(ax - bx, ay - by))
 
 
+def iou(a: Box, b: Box) -> float:
+    """Intersection over union of two boxes, 0..1."""
+    w = max(0.0, min(a[2], b[2]) - max(a[0], b[0]))
+    h = max(0.0, min(a[3], b[3]) - max(a[1], b[1]))
+    union = (a[2] - a[0]) * (a[3] - a[1]) + (b[2] - b[0]) * (b[3] - b[1]) - w * h
+    return w * h / union if union > 0 else 0.0
+
+
 def reach(b: Box) -> float:
     """How far a face may move between detections and stay the same face."""
     return max(JUMP_FLOOR, JUMP_FACES * height(b))

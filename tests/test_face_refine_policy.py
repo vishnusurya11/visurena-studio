@@ -174,7 +174,7 @@ def test_the_crop_prompt_defines_only_its_one_person():
 # ---- the gate ------------------------------------------------------------------------------
 
 def measures(**kw):
-    base = dict(id_src=0.40, id_ref=0.45, seam=4.0, flick_src=3.0, flick_ref=3.1, faces_src=6, faces_ref=6)
+    base = dict(id_src=0.40, id_ref=0.45, seam=4.0, flick_src=3.0, flick_ref=3.1, faces_src=1, faces_ref=1)
     return fr.Measures(**(base | kw))
 
 
@@ -198,12 +198,12 @@ def test_new_flicker_falls_back():
 
 
 def test_a_changed_face_count_falls_back():
-    assert not fr.decide(measures(faces_ref=7))[0]
-    assert not fr.decide(measures(faces_ref=4))[0]
+    assert not fr.decide(measures(faces_ref=2))[0]
+    assert not fr.decide(measures(faces_ref=0))[0]
 
 
-def test_one_missed_detection_is_not_a_count_change():
-    assert fr.decide(measures(faces_ref=5))[0]
+def test_a_face_read_in_more_frames_is_not_a_count_change():
+    assert fr.decide(measures(faces_src=0, faces_ref=1))[0]
 
 
 def test_an_identity_nobody_could_read_is_not_a_drop():

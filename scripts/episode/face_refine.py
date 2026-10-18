@@ -63,7 +63,9 @@ def selection(book: Path, number: int) -> list[int]:
     cards = read(room / "prompts.json", [])
     sizes = {int(s["index"]): s.get("size", "") for s in read(home / "plan.json", {}).get("shots", [])}
     dqs = {int(c["index"]): read(room / f"T{int(c['index']):02d}.dq.json", None) for c in cards}
-    return fr.selected(cards, sizes, dqs, canvas_height(home))
+    from studio.take_ladder import attempts_of
+    taken = {int(c["index"]): attempts_of(room, int(c["index"])) for c in cards}
+    return fr.selected(cards, sizes, dqs, canvas_height(home), taken)
 
 
 def current(doc: dict, room: Path, index: int) -> bool:
@@ -132,15 +134,30 @@ def head_of(rgb: np.ndarray, box) -> np.ndarray:
     return rgb[y1:max(y2, y1 + 1), x1:max(x2, x1 + 1)]
 
 
+def band_face(rgb: np.ndarray):
+    """The face box inside the figure's head band (studio/judges/sheet_row.head_box):
+    a drawn sheet no detector reads (Kawajiri Hyde, 2026-10-18) still has its head
+    at the top of the figure.  None when the sheet holds no figure."""
+    from studio.judges.sheet_row import head_box
+    band = head_box(rgb)
+    if band is None:
+        return None
+    x1, y1, x2, y2 = band
+    side = min(x2 - x1, y2 - y1)
+    cx = (x1 + x2) / 2
+    return cx - side / 2, y2 - side, cx + side / 2, y2
+
+
 def sheet_face(book: Path, sheet: str, detect, embed, loose=None):
-    """(face vector, head crop) of the largest face on a sheet; (None, None) unread."""
+    """(face vector, head crop) of the largest face on a sheet -- facenet, else the
+    loose detector, else the head band's face; (None, None) unread."""
     from PIL import Image
     from studio.measure import faces
     rgb = np.asarray(Image.open(Path(book) / sheet).convert("RGB"))
     found = detect(rgb) or (loose(rgb) if loose else [])     # a drawn child's face can need the loose one
-    if not found:
+    box = faces.largest(found)["box"] if found else band_face(rgb)
+    if box is None:
         return None, None
-    box = faces.largest(found)["box"]
     return embed(rgb, box), head_of(rgb, box)
 
 
@@ -227,6 +244,8 @@ class Job:
     frames: int
     prompt_id: str = ""
     out: Path | None = None
+    save: str = ""
+    """The graph's SaveVideo node: the only output that is the render."""
 
 
 @dataclass
@@ -268,7 +287,7 @@ def queue_person(room: Path, book: Path, card: dict, work: TakeWork, k: int, per
              "audio": engine.stage(silence(n / 24, out / f"{stem}_guide.wav"))}
     seed = take_seed(room, card, work.index) + person.k
     graph = graph_for(person, card["prompt"], n, seed, names, f"face_refine/{stem}_{work.sha}")
-    job = Job(k, person, track, wins, start, n, engine.submit(graph))
+    job = Job(k, person, track, wins, start, n, engine.submit(graph), save=fr.saved_node(graph))
     episode_home.write_json(out / f"{stem}.json", {"windows": [list(v) for v in wins],
                                                     "life": list(face_track.life(track)), "start": start,
                                                     "frames": n, "who": person.who})
@@ -278,8 +297,13 @@ def queue_person(room: Path, book: Path, card: dict, work: TakeWork, k: int, per
 # ---- collecting and gating ------------------------------------------------------------
 
 def collect(room: Path, work: TakeWork, job: Job, engine) -> None:
-    got = engine.wait(job.prompt_id)
-    job.out = Path(shutil.copy(got[0], room / OUT / f"T{work.index:02d}_p{job.k}.mp4"))
+    """Copy the SaveVideo node's render.  Never the first output: on v0.41.2 the
+    LoadVideo echoes its input crop first, and every refine since daa4aa9 filed
+    the unrefined source as refined (Kawajiri POC, 2026-10-18)."""
+    saved = engine.wait(job.prompt_id).get(job.save) or []
+    if not saved:
+        raise RuntimeError(f"T{work.index:02d} p{job.k}: no output from save node {job.save!r}")
+    job.out = Path(shutil.copy(saved[0], room / OUT / f"T{work.index:02d}_p{job.k}.mp4"))
 
 
 def sampled(seq: list, n: int = GATE_SAMPLES) -> list:
@@ -296,9 +320,10 @@ def gate_job(book: Path, work: TakeWork, job: Job, detect, embed, loose=None) ->
     src768 = [cv2.resize(np.ascontiguousarray(f), (SIDE, SIDE), interpolation=cv2.INTER_LANCZOS4) for f in sampled(src_w)]
     ref768 = sampled([refined[t - job.start] for t in range(life[0], life[1] + 1) if 0 <= t - job.start < len(refined)])
     vec, _ = sheet_face(book, job.person.sheet, detect, embed, loose)
-    m = face_gate.measure(src_w, ref_w, src768, ref768, vec, detect, embed)
-    kept, why = fr.decide(m)
     stem = f"T{work.index:02d}_p{job.k}"
+    moved = face_gate.change(sampled(read_frames(job.out.with_name(f"{stem}_src.mp4"))), sampled(refined))
+    m = face_gate.measure(src_w, ref_w, src768, ref768, vec, detect, embed, moved)
+    kept, why = fr.decide(m)
     return {"who": job.person.who, "crop": f"{OUT}/{stem}.mp4", "track": f"{OUT}/{stem}.json", "kept": kept,
             "why": why, "measures": m.__dict__, "frames": job.frames}
 
@@ -330,9 +355,10 @@ class Comfy:
         from studio import comfy
         return comfy.submit(graph)
 
-    def wait(self, prompt_id: str) -> list[Path]:
+    def wait(self, prompt_id: str) -> dict[str, list[Path]]:
+        """node id -> the files it reported (studio/comfy.outputs_by_node)."""
         from studio import comfy
-        return comfy.wait(prompt_id)
+        return comfy.outputs_by_node(comfy.wait_record(prompt_id, poll=5.0))
 
 
 def detectors():

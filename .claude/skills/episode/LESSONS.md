@@ -1337,6 +1337,23 @@ fixes. Each lesson below cost at least one launch. Tracker rows A38-A74 in
 - **The refine is decoration: the first thing the clock cuts.** It runs only while the reserve holds it plus a full
   measuring pass; a check is never cut for it.
 
+## A refine that returns its input passes every gate (2026-10-18, Jekyll Kawajiri POC)
+
+- **The face refine was a no-op from the day it was wired (daa4aa9).** `collect` copied the job's FIRST output. On
+  ComfyUI v0.41.2 the F2 graph's LoadVideo reports its input crop in the history, ahead of the SaveVideo, so step
+  09_07 filed the unrefined source crop as "refined": 0.0 per pixel from its source, and the gate passed it, being the
+  same video. Every wall compared the crop to itself. The fix takes the SaveVideo node's output by node id, and the
+  first wall now asks whether the refine changed anything at all (>= 0.5 per pixel; the real render read 12.3).
+- **A count summed over frames counts readability, not faces.** "faces 6 != 3" refused the real render: the sharper
+  refined face was detected in all six sampled crops, the soft source face in three. A clone is a FRAME with more faces
+  than the source ever showed; count per crop, inside the window, overlaps merged.
+- **facenet cannot find a drawn face, so identity was never read.** Read it where the track put the face (the box the
+  window was cut round) against the sheet's head band: Hyde 0.32-0.41 against Utterson/Enfield -0.02-0.23 on the same
+  crops. A gate that reads None on the house style is no gate.
+- **Warping is measurable on the CPU before anyone watches.** Face residual beyond what the background and the face's
+  motion explain (G-WARP) flags the 30-40 px face that H3 re-synthesises every frame (POC W f44-93) and passes the close
+  and medium takes; a reseed moves it by up to 1.4, so the seed retake is a real cure, and F2 is the last one.
+
 ## Sound effects on the measured moment (2026-10-17, owner go on the test-bench recommendations)
 
 - **The writer's `at` is a guess; the take knows the frame.** Laid at the plan's time, a boot or a door landed

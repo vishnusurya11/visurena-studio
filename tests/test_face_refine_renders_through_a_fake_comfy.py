@@ -20,9 +20,9 @@ from studio import episode_home, face_refine as fr
 FRAMES = 22   # on H3's grid (22 % 17 == 5)
 
 
-def video(path: Path, colour="gray", frames=FRAMES, size=768, boil=False):
+def video(path: Path, colour="gray", frames=FRAMES, size=768, boil=False, redraw=False):
     src = f"color=c={colour}:s={size}x{size}:r=24:d={frames / 24}"
-    vf = ["-vf", "noise=alls=90:allf=t"] if boil else []
+    vf = ["-vf", "noise=alls=90:allf=t"] if boil else (["-vf", "eq=brightness=0.04"] if redraw else [])
     subprocess.run(["ffmpeg", "-y", "-v", "error", "-f", "lavfi", "-i", src, *vf, "-frames:v", str(frames),
                     "-c:v", "libx264", "-preset", "ultrafast", "-pix_fmt", "yuv420p", str(path)], check=True)
     return path
@@ -61,10 +61,12 @@ def embed(rgb, box):
 
 
 class Engine:
-    """ComfyUI's stand-in: a job 'renders' by handing back its crop (or a boiling one)."""
+    """ComfyUI's stand-in, reporting as v0.41.2 does: the LoadVideo's input crop
+    first (node 30), then the SaveVideo's render (node 17) -- a faithful redraw of
+    the crop, a boiling one, or (echo) the input itself."""
 
-    def __init__(self, tmp_path: Path, boil=False):
-        self.dir, self.boil, self.graphs, self.staged = tmp_path / "out", boil, [], {}
+    def __init__(self, tmp_path: Path, boil=False, echo=False):
+        self.dir, self.boil, self.echo, self.graphs, self.staged = tmp_path / "out", boil, echo, [], {}
         self.dir.mkdir()
 
     def stage(self, path: Path) -> str:
@@ -75,11 +77,12 @@ class Engine:
         self.graphs.append(graph)
         return f"job{len(self.graphs)}"
 
-    def wait(self, job: str) -> list[Path]:
+    def wait(self, job: str) -> dict[str, list[Path]]:
         graph = self.graphs[int(job[3:]) - 1]
         crop = self.staged[graph["30"]["inputs"]["file"]]
         out = self.dir / f"{job}.mp4"
-        return [video(out, boil=True) if self.boil else Path(shutil.copy(crop, out))]
+        render = Path(shutil.copy(crop, out)) if self.echo else video(out, boil=self.boil, redraw=not self.boil)
+        return {"30": [crop], "17": [render]}
 
 
 def run(world: Room, engine: Engine, indices=None):
@@ -143,6 +146,20 @@ def test_a_boiling_refine_falls_back_to_the_unrefined_take(tmp_path):
     entry = json.loads((w.room / "refine.json").read_text())["T00"]
     assert entry["status"] == "unrefined" and not entry["people"][0]["kept"]
     assert "flicker" in entry["people"][0]["why"]
+
+
+def test_a_refine_that_returns_its_input_falls_back(tmp_path):
+    w = Room(tmp_path)
+    run(w, Engine(tmp_path, echo=True))
+    entry = json.loads((w.room / "refine.json").read_text())["T00"]
+    assert entry["status"] == "unrefined" and "its source" in entry["people"][0]["why"]
+
+
+def test_the_input_echo_is_never_filed_as_the_refine(tmp_path):
+    w = Room(tmp_path)
+    run(w, Engine(tmp_path))
+    person = json.loads((w.room / "refine.json").read_text())["T00"]["people"][0]
+    assert person["measures"]["change"] >= fr.SAME_MAX
 
 
 def test_a_take_with_no_face_found_is_recorded_and_not_rendered(tmp_path):

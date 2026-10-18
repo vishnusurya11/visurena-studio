@@ -7,10 +7,12 @@ and fakes in a test.
   meets the take;
 - flicker: the face region's frame-to-frame change, the take's own against the
   pasted result (F2 0.81-0.95 of the take's, F3's boiling noise 1.15-1.32);
-- faces: counted on the 768 crops, unrefined against refined (a clone or a lost
-  face changes it);
-- identity: facenet cosine to the person's sheet, read where the 768 crop makes the
-  face big enough to read.
+- faces: the most faces any one 768 crop shows -- centre inside the window's core,
+  overlapping boxes merged -- unrefined against refined (a clone or a lost face
+  changes it; a sharper face found in more frames does not: Kawajiri POC W);
+- identity: facenet cosine to the person's sheet at the crop's face -- the detected
+  one, else the box the window was cut round, since no detector reads a drawn face;
+- change: the refined crop against the crop it was rendered from (0 = no render).
 """
 from __future__ import annotations
 
@@ -47,16 +49,68 @@ def seam_and_flicker(src: list[np.ndarray], ref: list[np.ndarray]) -> tuple[floa
     return seam, face_paste.region_flicker(src[:n]), face_paste.region_flicker(pasted)
 
 
+EDGE = 0.15
+"""A face whose centre falls in this outer share of the window is a neighbour."""
+OVERLAP = 0.3
+
+
+def inside(b, side: int) -> bool:
+    """The box's centre lies in the window's core, not its outer EDGE band."""
+    cx, cy = (b[0] + b[2]) / 2, (b[1] + b[3]) / 2
+    lo, hi = EDGE * side, (1 - EDGE) * side
+    return lo <= cx <= hi and lo <= cy <= hi
+
+
+def dedupe(found: list[dict]) -> list[dict]:
+    """Overlapping boxes merged into the best-scored one."""
+    from studio.face_track import iou
+    kept: list[dict] = []
+    for f in sorted(found, key=lambda f: -float(f.get("score", 1.0))):
+        if all(iou(f["box"], k["box"]) <= OVERLAP for k in kept):
+            kept.append(f)
+    return kept
+
+
+def count(found: list[dict], side: int) -> int:
+    """Faces in one crop: inside the window, overlaps merged."""
+    return len(dedupe([f for f in found if inside(f["box"], side)]))
+
+
+def window_face(side: int) -> tuple[float, float, float, float]:
+    """The face box the crop window was cut round (studio/face_track.windows)."""
+    from studio.face_track import MARGIN
+    h, cx, cy = side / MARGIN, side / 2, side / 2 + 0.05 * side
+    return cx - h / 2, cy - h / 2, cx + h / 2, cy + h / 2
+
+
+def crop_face(found: list[dict], side: int):
+    """The largest face inside the window, else the box the window was cut round:
+    a drawn face no detector reads is still where the track put it."""
+    core = [f for f in found if inside(f["box"], side)]
+    if not core:
+        return window_face(side)
+    return max(core, key=lambda f: f["box"][3] - f["box"][1])["box"]
+
+
 def read_faces(crops: list[np.ndarray], sheet_vec, detect, embed) -> tuple[int, float | None]:
-    """(faces counted over the crops, mean cosine of each crop's largest face to the sheet)."""
+    """(the most faces any one crop shows, mean cosine of each crop's face to the sheet)."""
     from studio.measure import faces
-    count, cos = 0, []
+    most, cos = 0, []
     for rgb in crops:
         found = detect(rgb)
-        count += len(found)
-        if found and sheet_vec is not None:
-            cos.append(faces.cosine(embed(rgb, faces.largest(found)["box"]), sheet_vec))
-    return count, (float(np.mean(cos)) if cos else None)
+        most = max(most, count(found, rgb.shape[0]))
+        vec = embed(rgb, crop_face(found, rgb.shape[0])) if sheet_vec is not None else None
+        if vec is not None:
+            cos.append(faces.cosine(vec, sheet_vec))
+    return most, (float(np.mean(cos)) if cos else None)
+
+
+def change(src: list[np.ndarray], ref: list[np.ndarray]) -> float:
+    """Mean |refined - source| per pixel over the paired frames: 0 is no render."""
+    n = min(len(src), len(ref))
+    if n == 0:
+        return 0.0
+    return float(np.mean([np.abs(a.astype(np.float32) - b.astype(np.float32)).mean() for a, b in zip(src[:n], ref[:n])]))
 
 
 def faces_and_identity(src768, ref768, sheet_vec, detect, embed):
@@ -66,9 +120,11 @@ def faces_and_identity(src768, ref768, sheet_vec, detect, embed):
     return cs, cr, ids, idr
 
 
-def measure(src_w, ref_w, src768, ref768, sheet_vec, detect, embed) -> face_refine.Measures:
-    """Every measure the decision reads, for one person's refined crop."""
+def measure(src_w, ref_w, src768, ref768, sheet_vec, detect, embed, moved: float | None = None) -> face_refine.Measures:
+    """Every measure the decision reads, for one person's refined crop; `moved` is
+    the refined crop's change from the crop it was rendered from."""
     seam, f_src, f_ref = seam_and_flicker(src_w, ref_w)
     cs, cr, ids, idr = faces_and_identity(src768, ref768, sheet_vec, detect, embed)
     return face_refine.Measures(id_src=ids, id_ref=idr, seam=round(seam, 2), flick_src=round(f_src, 3),
-                                flick_ref=round(f_ref, 3), faces_src=cs, faces_ref=cr)
+                                flick_ref=round(f_ref, 3), faces_src=cs, faces_ref=cr,
+                                change=None if moved is None else round(moved, 2))

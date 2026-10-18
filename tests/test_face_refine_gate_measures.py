@@ -56,12 +56,12 @@ def test_faces_and_identity_are_read_on_the_sampled_crops():
     detect = fake_detect({0: 1, 1: 1})
     embed = lambda rgb, box: np.array([1.0, 0.0]) if rgb[0, 0, 0] == 1 else np.array([0.6, 0.8])
     cs, cr, ids, idr = fg.faces_and_identity(src, ref, np.array([1.0, 0.0]), detect, embed)
-    assert (cs, cr) == (3, 3) and ids == pytest.approx(0.6) and idr == pytest.approx(1.0)
+    assert (cs, cr) == (1, 1) and ids == pytest.approx(0.6) and idr == pytest.approx(1.0)
 
 
-def test_no_face_read_leaves_identity_unread():
+def test_no_sheet_vector_leaves_identity_unread():
     src = [np.zeros((64, 64, 3), np.uint8)]
-    cs, cr, ids, idr = fg.faces_and_identity(src, src, np.array([1.0]), lambda rgb: [], lambda r, b: None)
+    cs, cr, ids, idr = fg.faces_and_identity(src, src, None, lambda rgb: [], lambda r, b: np.array([1.0]))
     assert (cs, cr, ids, idr) == (0, 0, None, None)
 
 
