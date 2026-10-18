@@ -106,3 +106,14 @@ def test_defence_is_defense_and_heard_across_a_seam():
 
 def test_a_fence_is_not_folded():
     assert error_rate("the fense", "the fence") > 0.0
+
+
+def test_a_cheque_is_a_check():
+    """Jekyll Kawajiri ep01 (2026-10-18): "Gold, and a cheque." was said right eight times and
+    heard "Gold and a check." eight times; WER 0.25 refused the record step."""
+    assert error_rate("Gold, and a cheque.", "Gold and a check.") == 0.0
+    assert normalised("the kerb by the gaol") == normalised("the curb by the jail")
+
+
+def test_a_check_is_not_folded_into_another_word():
+    assert error_rate("a cheque", "a chick") > 0.0

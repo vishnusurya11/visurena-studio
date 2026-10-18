@@ -167,8 +167,17 @@ ENCE_STEMS = ("defen", "offen", "preten", "licen")
 -re: a rule would fold `fence`, `hence` and `pence` (ep14 line 24)."""
 
 
+WORD_PAIRS = {"cheque": "check", "cheques": "checks", "kerb": "curb", "kerbs": "curbs",
+              "gaol": "jail", "gaols": "jails", "gaoler": "jailer", "plough": "plow",
+              "ploughed": "plowed", "waggon": "wagon", "waggons": "wagons"}
+"""Whole-word British/American pairs no rule covers (Jekyll Kawajiri ep01: "a cheque" heard
+"a check" eight times, WER 0.25, the record step refused)."""
+
+
 def spelling(word: str) -> str:
     """One canonical spelling for a word two dialects write differently."""
+    if word in WORD_PAIRS:
+        return WORD_PAIRS[word]
     for stem in ENCE_STEMS:
         if word.startswith(stem + "ce"):
             return stem + "se" + word[len(stem) + 2:]
