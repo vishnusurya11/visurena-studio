@@ -1371,3 +1371,25 @@ fixes. Each lesson below cost at least one launch. Tracker rows A38-A74 in
 - **A cue the picture cannot time keeps its planned time and says why** (`onsets.json` `fallback`): a scream, a crowd,
   the weather, a slowed or still take, or no detector. A missing measurement never moves or drops a sound, and QC
   listens where the cue was laid.
+
+## The take model follows the planned size (2026-10-18, main session on measured evidence)
+
+- **The sharper model boils where the face is small.** The owner picked Wuli 8-step HQ int8 (V4) for its faces:
+  about 2x the face Laplacian on T19/T22. On a 4 % face its sharper line work is redrawn every frame: G-WARP
+  T22 excess +2.4/+3.3 against about -0.6 for the base and Spark (WARPING.md), and on the Kawajiri W wide
+  S 4.13 / Se 7.22 against Spark's 2.65 / 3.12 at the same seed. On close and medium it is equal or cleaner
+  (C 0.49 vs 0.98, M 1.46 vs 1.30). So the model is chosen by the plan's size before the render: close..medium
+  on Wuli+Spark, any wide or full segment on the Singularity 8-step with Spark attention.
+- **Spark buys nothing on Wuli.** Spark took -11 % off the Singularity 8-step (bench V2). Wuli+Spark ran
+  T04 89.3 / T22 107.5 / T19 107.8 s warm against Wuli alone 82.8 / 107.2 / 99.5 and the CK base 78.0 / 99.3 /
+  89.9 (Hellsing ep01 cards, 158-192 frames); on the 124-frame Kawajiri cards it was C 70.9 vs Spark 76.4 and
+  W 85.0 vs 77.2. Price a Wuli take at about +12 s over the CK base; the episode still fits (about 5.8 h at 28 shots).
+- **Two models in one round are two cold loads, not one per take.** The run sorts its queue by graph
+  (`takes_r2v.by_model`), Wuli first, so a mixed episode pays one swap per round (owner 2026-09-12: other jobs
+  between takes cost 742-998 s against 407-583 s).
+- **The gates read the same on both models.** Content clean 3/3, 0 clone pairs, G-TAIL pass on the speaking close
+  on both arms; facenet still reads drawn faces as near-strangers (0.53-0.56 on C, both arms), so close identity
+  on a drawn book is the eye's, not the number's.
+- **A proof replay must not render a style the owner retired.** The first replay drew Hellsing ep01 cards; the
+  owner stopped it. Replay the book's CURRENT look (the Kawajiri POC cards) or a neutral control, never the
+  archived episode.

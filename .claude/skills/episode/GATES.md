@@ -484,6 +484,18 @@ it on 2026-10-11 (ep10/T21 "keep moving" vs "moving"; ep15/T21 mouth 1.14 vs .94
 **Adopted (2026-10-11 bench):** CK int8 attention on the 8-step BASE for narration takes
 (`takes_r2v.NARRATION_BASE`). Out: G1 (4-step on the authors' grid, lost the S3 frogs).
 
+**Superseded (2026-10-18, main session on measured evidence; owner 2026-10-17 picked Wuli V4 and
+approved Spark):** the take model is routed by PLANNED SIZE, not by lane (`takes_r2v.workflow_for`).
+Close / medium_close / medium / insert -> `WULI_BASE` (Wuli 8-step HQ int8 + Spark); any wide or
+full segment, or no sizes -> `SPARK_BASE` (the CK 8-step with Spark attention); `ROLLBACK_BASE` is
+the CK 8-step. Proof (`docs/audit/2026-10-18_wuli_spark/`), Kawajiri POC C/M/W at the POC seeds,
+Spark (POC) vs Wuli+Spark: content clean 3/3 both; clone pairs 0 both; G-TAIL on the speaking
+close C pass both (tail -76.9 / -90.8 dB, no words); G-WARP S/Se C 0.98/-0.90 vs 0.49/0.30, M
+1.30/1.64 vs 1.46/1.32, W 2.65/3.12 vs **4.13/7.22**; close identity (facenet on a drawn face,
+advisory) 0.531 vs 0.561; every arm fails only frozen-whole, the POC's locked cards. The dialogue
+arm rule above was NOT re-run on the WotW ep10/T21 / ep15/T21 controls: G-TAIL stays HARD on every
+dialogue take and is the net.
+
 **Regrid bar (bench, `scripts/refs/look_replay.tally`, C2_verdict #7):** the denominator is
 face-visible cast panels -- a plan frame `from behind|seen from behind|back to (the )camera|walking
 away` or a wide / extreme_wide / establishing size is exempt; over-the-shoulder is NOT. A

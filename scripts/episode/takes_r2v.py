@@ -49,24 +49,44 @@ import no_last_frame  # noqa: E402  the owner's rule, checked on the built promp
 
 W, H, FPS, STEPS = canvas.size("9:16") + (24, 8)
 """W and H are rebound from the plan in `main`; the plan declares the aspect."""
-BASE = "video_minimax_h3_r2v_turbo_ref8_crf_visurena"
-"""The same graph saved at CRF 10 (bench phase 0, 2026-10-10: shipped takes were
-ffmpeg's default CRF 23, 0.9-2.5 Mb/s, banding before any re-encode).  Rollback:
-`video_minimax_h3_r2v_turbo_ref8`.  The family note on that base follows."""
-"""The ref2va-FAMILY turbo (dedicated lightx2v Ref2V 8-step v1.0 768p LoRA,
-shift 12/3 per its release post; iteration 3 ran at 6/3, the FL2VA row).  Episode 1's first r2v master was rendered on `r2v_turbo`, whose
-ckpt850 LoRA is FL2VA-lineage: a family mismatch the owner caught
-(2026-09-10 22:30); it showed as camera-scale pumping."""
-NARRATION_BASE = BASE + "_ckattn_comfyorg"
-"""BASE + core ModelAttentionBackend 'comfy kitchen attention' (CK int8 attention), adopted
-for NARRATION takes by the cycle-1 bench (2026-10-11, CYCLE_1.md block 3): the same draw,
-identity within the seed spread, no invented word, sampling 39-45 % faster.  Dialogue
-stays on BASE until D1 and D2 pass a second seed (GATES speed-arm rule).  Rollback: BASE."""
+ROLLBACK_BASE = "video_minimax_h3_r2v_turbo_ref8_crf_visurena_ckattn_comfyorg"
+"""The 8-step every take ran on until 2026-10-18: Singularity ref2va + the ref2va-FAMILY
+turbo LoRA x2 (dedicated lightx2v Ref2V 8-step v1.0 768p, 1.0/0.7, shift 12/3), euler/beta,
+CRF 10, CK int8 attention (cycle-1 bench 2026-10-11).  An FL2VA-lineage LoRA on ref2va pumped
+the camera (owner, 2026-09-10).  Rollback for every take: route both sizes here."""
+SPARK_BASE = "video_minimax_h3_r2v_turbo_ref8_crf_visurena_ckattn_comfyorg_spark_zechengtang"
+"""ROLLBACK_BASE with Spark-H3 SM89 sparse attention (fidelity, top-k 0.2, kitchen dense
+warm-up) in place of CK: the same draw (PSNR 24.7-33.3 dB), identity within noise, -11 %
+warm (2026-10-16 bench V2).  The wide/full model: its warp equals the base's."""
+WULI_BASE = "video_minimax_h3_r2v_wuli8_hqint8_sandpies_spark_zechengtang"
+"""Wuli-Art 8-step F2 hybrid HQ int8 (no turbo LoRA, simple scheduler, shift 12/3) with the
+same Spark attention.  Owner 2026-10-17: "I like the face fix and quality update V4" -- about
+2x face Laplacian, livelier camera.  Its line work BOILS on a small face (WARPING.md 2026-10-18:
+T22 wide warp excess +2.4/+3.3 against about -0.6), equal on close and medium: close sizes only."""
+WULI_SIZES = frozenset({"insert", "extreme_close", "close", "medium_close", "medium"})
+"""The planned sizes a Wuli take may hold; one wide or full segment sends the take to Spark."""
+MODELS = {WULI_BASE: "MiniMax-H3 ref2va, Wuli 8-step HQ int8 + Spark-H3 attention",
+          SPARK_BASE: "MiniMax-H3 ref2va Singularity + Ref2V 8-step LoRA x2 + Spark-H3 attention",
+          ROLLBACK_BASE: "MiniMax-H3 ref2va Singularity + Ref2V 8-step LoRA x2 + CK attention"}
 
 
 def workflow_for(card: dict) -> str:
-    """The graph a take renders on: narration on the CK arm, dialogue on BASE."""
-    return NARRATION_BASE if card.get("lane") == "narration" else BASE
+    """The graph a take renders on, by its planned sizes (main session 2026-10-18):
+    every segment close..medium -> Wuli; any wide/full, or no sizes known -> Spark."""
+    sizes = card.get("sizes") or []
+    return WULI_BASE if sizes and set(sizes) <= WULI_SIZES else SPARK_BASE
+
+
+def card_workflow(card: dict) -> str:
+    """What the card's record says it rendered on."""
+    return workflow_for(card) + " + anchors"
+
+
+def by_model(jobs: list[tuple[dict, dict]]) -> list[tuple[dict, dict]]:
+    """The run's takes grouped by graph, Wuli first, so each model loads once."""
+    order = (WULI_BASE, SPARK_BASE)
+    rank = {name: k for k, name in enumerate(order)}
+    return sorted(jobs, key=lambda job: rank.get(workflow_for(job[0]), len(order)))
 
 
 REF_IMAGE_SIZE = "match"
@@ -575,9 +595,10 @@ def card(book: Path, episode: Episode, number: int, take: dict, measured: dict) 
                       setup.described, narrator_of(episode.lines), ends=end_numbers(segs, ends), setup=setup,
                       refs=len(refs), fps=FPS, props=props, panel=panel is not None, pin=PIN_PANEL,
                       **staged_facts(sizes, FROM_REFS, faces, panel=panel is not None))
+    route = {"sizes": sizes}
     return {"index": first.index, "shots": take["shots"], "section": first.section, "setup": first.setup,
-            "lane": "dialogue" if spoken else "narration", "workflow": (NARRATION_BASE if not spoken else BASE) + " + anchors",
-            "model": "MiniMax-H3 ref2va + Ref2V 8-step LoRA", "mode": mode_said(FROM_REFS, panel is not None),
+            "lane": "dialogue" if spoken else "narration", "sizes": sizes, "workflow": card_workflow(route),
+            "model": MODELS[workflow_for(route)], "mode": mode_said(FROM_REFS, panel is not None),
             "refs": [ref_name(book, p) for p in refs], "faces": faces, "ref_image_size": REF_IMAGE_SIZE,
             "anchors": anchors, "audio": [(p.name, a) for p, a in voice] or "silence",
             "width": W, "height": H, "fps": FPS, "placed_seconds": take["seconds"], "frames": take["frames"],
@@ -1386,6 +1407,7 @@ def main(book_id: str, number: int, retake: list[int] | None = None, approved: b
         episode_home.write_json(out.with_suffix(".graph.json"), graph)  # the exact graph this take ran with
         jobs.append((c, graph))
         wheres[c["index"]] = out
+    jobs = by_model(jobs)      # Wuli's takes, then Spark's: each model loads once (2026-10-18)
     if jobs:
         print(f"  queueing {len(jobs)} takes in one go: "
               f"{', '.join('T%02d' % c['index'] for c, _ in jobs)}", flush=True)

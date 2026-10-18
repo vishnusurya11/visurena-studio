@@ -18,6 +18,7 @@ they are history only.
 
 Always:
 - **$0.** No paid API, and no test that spends.
+- **The take model follows the planned size (2026-10-18).** `takes_r2v.workflow_for`: close / medium_close / medium / insert takes render on Wuli 8-step HQ int8 + Spark-H3 attention (`WULI_BASE`); a take with any wide or full segment on the Singularity 8-step + turbo LoRA x2 with Spark attention (`SPARK_BASE`) -- Wuli's line work boils on a small face. Never hand-pick a graph for a take; the rollback is `ROLLBACK_BASE` for every take.
 - **The book's title cards exist before any episode runs** (owner design,
   2026-09-30). `drive.py` bakes any missing card for the WHOLE book first, in
   one i2v session outside the episode's clock; step 10 only consumes
