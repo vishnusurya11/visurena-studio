@@ -1107,6 +1107,19 @@ fixes. Each lesson below cost at least one launch. Tracker rows A38-A74 in
       0.97-1.48 (no frame over 1.56; off by one 1.50-5.20). The master's upscale is now recorded by sha8 in
       `cut/master_layout.json` and sets the cap (`edit_gate.segment_cap`, 2.0 for rtx). A new picture
       process re-asks every threshold calibrated on the old one -- the gate accused correct work.
+    - **RTX VSR sharpened H3's grain; the master is now av3 (main session 2026-10-18, owner asked for no
+      background jitter and sharp faces).** RTX VSR is stateless and per frame: it takes H3's frame-to-frame
+      grain for detail and sharpens it, 1.85-2.05x the source's flow-compensated background jitter -- the
+      walls and cobbles the owner saw boiling. The bench (docs/audit/2026-10-18_upscale) ranked `hqdn3d=0:0:4:4`
+      at 768 then realesr-animevideov3 x4 first: jitter -51..-58 % against RTX, below the source itself, face
+      p95 Sobel +21..+33 %. Two things the bench did not settle, settled in the build: (1) a temporal denoise
+      over the joined cut would carry a shot's last frame into the next shot's first, so it runs one ffmpeg per
+      shot (`studio/master_av3.Segmented`); on C|M|W the joined stream moved the cut frame 1.3 levels, per shot
+      0, and the master's ghost weight at both cuts is under 0.7 %. (2) Raw yuv420p drops the bt709 tag (0.55
+      mean, 6 max off on take C), so the denoise filters the rgb24 frames the RTX path decoded, through 16-bit
+      4:4:4. The repo venv's torch is CPU-only, so the frame loop runs under ComfyUI's embedded python as a
+      subprocess; the face paste crosses as Paster spans. Measured: 38 ms a frame encode-bound, ~6 s load,
+      ~2.5 min per 150 s episode on an idle 4090. QC's segment cap had to learn av3 too (1.50-1.77, cap 2.0).
     - **A walk is a step paid for in ground (Jekyll HEL ep01, owner 2026-10-14: "the little walk is weird").** T03's
       Hyde faced the camera square-on while he travelled sideways, legs pattering, torso and hat level as on a rail:
       3.94 steps/s for 0.027 body heights a step (a human walks 1.6-2.2 steps/s; liked WotW walkers cross 0.052+).

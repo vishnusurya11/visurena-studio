@@ -12,6 +12,8 @@ sound engineering; it is the trailer's assemble stage under an episode's plan.
 """
 from __future__ import annotations
 
+import functools
+import itertools
 import subprocess
 import sys
 from pathlib import Path
@@ -730,7 +732,27 @@ def face_paste_wrap(work: Path, take_dir: Path, factor: int):
     spans = face_paste.spans_from(rows, frames, guards, take_dir, sha_of=lambda i: face_paste.sha8(
         take_dir / f"T{i:02d}.mp4"), fps=FPS)
     print(f"face refine: {len(spans)} take(s) pasted at master scale", flush=True)
-    return (lambda up: face_paste.Paster(up, spans, W, H, factor)) if spans else None
+    # a partial, not a lambda: the av3 worker (another python) rebuilds it from its spans
+    return functools.partial(face_paste.Paster, spans=spans, width=W, height=H, factor=factor) if spans else None
+
+
+def cut_frames(work: Path, parts: list[Path]) -> list[int]:
+    """Every frame a new shot starts on in the joined master: the takes' joins inside
+    the cut (layout.json, the segments' measured frames), then the card and the chip.
+    av3's temporal denoise starts fresh on each (studio/master_av3)."""
+    sizes = [video_frames(p) for p in parts]
+    return sorted(set(shot_starts(work)) | set(itertools.accumulate(sizes[:-1])))
+
+
+def shot_starts(work: Path) -> list[int]:
+    """The master frames where takes 2..n start, the way the face paste counts them."""
+    if not (work / "layout.json").exists():
+        return []
+    segs = [work / f"seg{int(r['index']):02d}.mp4" for r in episode_home.read_json(work / "layout.json")]
+    if not all(s.exists() for s in segs):
+        print("UPSCALE: a segment is missing; the denoise runs over the takes' joins", file=sys.stderr, flush=True)
+        return []
+    return list(itertools.accumulate(video_frames(s) for s in segs))[:-1]
 
 
 def video_frames(video: Path) -> int:
@@ -850,7 +872,10 @@ def tail(master: Path, title: Path | None, out: Path, work: Path, number: int = 
     # at the cut's own rate -- every frame once, first at 0.000; the Lanczos
     # path keeps the vfr passthrough and the -1/24 `-itsoffset` that ep15
     # measured at 4055/4055 frames, t0=0.000, 0 holes.
-    master_upscale.master(listing, out, W, H, upscale, FPS, wrap=wrap)   # wrap: the face refine's paste
+    # MAIN SESSION 2026-10-18: the default is av3 (hqdn3d per shot + realesr-animevideov3
+    # 4x); its denoise is temporal, so it is told where every shot starts.
+    cuts = cut_frames(work, parts) if upscale.engine == "av3" else []
+    master_upscale.master(listing, out, W, H, upscale, FPS, wrap=wrap, cuts=cuts)   # wrap: the face refine's paste
     # The concat demuxer does not refuse a part whose picture does not match the
     # first one: it drops it and reports success.  That is how a master four
     # frames short shipped without anyone seeing it, so the join counts itself.

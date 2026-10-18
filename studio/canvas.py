@@ -81,9 +81,10 @@ def size(aspect: str) -> tuple[int, int]:
 
 DELIVER = 4
 """How much bigger the UPLOAD is than the render, as a whole number -- the
-default of `studio/master_upscale` (owner 2026-10-14: RTX VSR 4x ULTRA, 3072
-on a square episode; `VISURENA_MASTER_UPSCALE=rtx2x` or `lanczos` is 2x, and a
-machine without the GPU falls back to Lanczos 2x).  Read the delivered size off
+default of `studio/master_upscale` (2026-10-18: `av3`, hqdn3d per shot +
+realesr-animevideov3 4x, 3072 on a square episode; `rtx4x` is 4x too;
+`VISURENA_MASTER_UPSCALE=rtx2x` or `lanczos` is 2x, and a machine without the
+runtime falls back to Lanczos 2x).  Read the delivered size off
 the file, never off this constant, when it matters downstream.
 
 WHY UPSCALE AT ALL (2026-09, ep08): every episode was rendered, cut and

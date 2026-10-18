@@ -185,7 +185,7 @@ The references sheets and voices live in their own department: `uv run python re
 | 07 | board | `uv run python scripts/episode/step_07_board.py <book> <n>` | Storyboard grids on the local image model from the plan's prose, up to three references - cast sheets first, the setup's place last. |
 | 08 | panels | `uv run python scripts/episode/step_08_panels.py <book> <n>` | One panel per shot, two machine gates, then `judge:panel_eye`. |
 | 09 | shoot | `uv run python scripts/episode/step_09_shoot.py <book> <n>` | The slow step. |
-| 10 | edit | `uv run python scripts/episode/step_10_edit.py <book> <n>` | Title card, measured bed, cut, mix, the master upscaled once by RTX VSR. |
+| 10 | edit | `uv run python scripts/episode/step_10_edit.py <book> <n>` | Title card, measured bed, cut, mix, the master upscaled once: hqdn3d per shot + realesr-animevideov3 4x (`av3`, 2026-10-18). |
 | 11 | qc | `uv run python scripts/episode/step_11_qc.py <book> <n>` | Measure the DELIVERED master, never the intention. |
 | 12 | deliver | `uv run python scripts/episode/step_12_deliver.py <book> <n>` | manifest.json beside the master (every gate verdict, every rung, timing totals), the deliverable's full path printed first, notify() through the platform. |
 | 13 | publish | `uv run python scripts/episode/step_13_publish.py <book> <n>` | The last mile, unattended (decision 2026-10-05, under the standing hand of 2026-10-01): youtube.json from one guarded structured call, the director's sign-off rendered from measures only, the gated upload, the public flip, the /shorts/ poll -- the public Short URL is the last line printed. |
@@ -529,8 +529,9 @@ sheet does not drop, there is no seam or new flicker, and the face count holds; 
 take: `takes/r2v/refine.json` (`refined`, `unrefined`, `no_faces`, `no_cast`, `cut`). Step 09 queues the refine on the
 GPU lane right behind the renders (a REFINE job: after renders and retakes, before the GPU checks) and refines what
 the ladder left owed once at the end. ~110 s per face per take; the FIRST thing cut for time, never a check. Assemble
-pastes the kept crops into the master inside the RTX VSR pass, after the 4x (never into the 768 take: the detail
-averages away). By hand: `uv run python scripts/episode/face_refine.py <book> <n> [take ...]`.
+pastes the kept crops into the master inside the master upscale pass, after the 4x (never into the 768 take: the detail
+averages away). On `av3` (the default) the pass runs in the portable python's worker (`studio/master_av3.py`),
+which rebuilds the paste from its spans: the same geometry, the same frame loop. By hand: `uv run python scripts/episode/face_refine.py <book> <n> [take ...]`.
 The render is the SaveVideo node's output, by node id (`fr.saved_node`), never the job's first output: on ComfyUI
 v0.41.2 the LoadVideo echoes its input crop first, and a refined crop equal to its source is refused (2026-10-18).
 

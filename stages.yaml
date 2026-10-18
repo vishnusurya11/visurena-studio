@@ -889,8 +889,8 @@ stages:
           - title/{unit}.mp4
           - episodes/{unit}/cut/master_r2v.mp4
         desc: >-
-          Title card, measured bed, cut, mix, the master upscaled once by RTX
-          VSR. Picture cut to the measured voice. cut/master_iterN.mp4, never
+          Title card, measured bed, cut, mix, the master upscaled once: hqdn3d
+          per shot + realesr-animevideov3 4x (`av3`, 2026-10-18). Picture cut to the measured voice. cut/master_iterN.mp4, never
           overwriting.
         substeps:
           - id: "10_01"

@@ -1,5 +1,6 @@
 """The master's one upscale: RTX Video Super Resolution, in process, on the joined 768 cut.
 
+No longer the default (2026-10-18: av3, tests/test_the_master_is_upscaled_by_av3.py).
 OWNER 2026-10-14: the highest quality that costs under 10 min per episode --
 4x standard ULTRA delivered at 3072 (+3.8 min measured,
 docs/audit/2026-10-14_rtx_vsr_test).  2x ULTRA to 1536 stays selectable;
@@ -16,8 +17,8 @@ import pytest
 from studio import master_upscale as mu
 
 
-def test_the_default_is_rtx_4x_ultra():
-    up = mu.choice({})
+def test_rtx_4x_ultra_is_selectable():
+    up = mu.choice({mu.SETTING: "rtx4x"})
     assert (up.engine, up.factor, up.mode) == ("rtx", 4, "ULTRA")
 
 
@@ -38,12 +39,12 @@ def test_4x_of_the_768_cut_is_3072():
 
 
 def test_a_missing_gpu_falls_back_to_lanczos_and_says_why():
-    up, why = mu.settle(mu.choice({}), missing="nvvfx: no CUDA device")
+    up, why = mu.settle(mu.CHOICES["rtx4x"], missing="nvvfx: no CUDA device")
     assert up == mu.LANCZOS and "no CUDA device" in why and "rtx4x" in why
 
 
 def test_a_ready_gpu_keeps_the_choice():
-    want = mu.choice({})
+    want = mu.CHOICES["rtx4x"]
     assert mu.settle(want, missing="") == (want, "")
 
 
@@ -104,13 +105,13 @@ def test_the_joined_cut_comes_out_4x_with_every_frame_and_its_sound(tmp_path):
     parts = [clip(tmp_path / "a.mp4", 1.0), clip(tmp_path / "b.mp4", 0.5)]
     listing = tmp_path / "l.txt"
     listing.write_text("".join(f"file '{p.as_posix()}'\n" for p in parts), encoding="utf-8")
-    out = mu.master(listing, tmp_path / "o.mp4", 64, 64, mu.choice({}), 24, upscaler=nearest(4))
+    out = mu.master(listing, tmp_path / "o.mp4", 64, 64, mu.CHOICES["rtx4x"], 24, upscaler=nearest(4))
     assert probe(out) == (36, (256, 256), True)
 
 
 @pytest.mark.local
 def test_the_real_effect_upscales_a_frame_4x():
-    up = mu.Rtx(768, 768, mu.choice({}))
+    up = mu.Rtx(768, 768, mu.CHOICES["rtx4x"])
     try:
         out = up(np.full((768, 768, 3), 128, np.uint8))
     finally:
@@ -120,7 +121,7 @@ def test_the_real_effect_upscales_a_frame_4x():
 
 def test_resolved_settles_the_setting_against_this_machine(monkeypatch):
     monkeypatch.setattr(mu, "rtx_missing", lambda: "no CUDA device")
-    assert mu.resolved({})[0] == mu.LANCZOS
+    assert mu.resolved({mu.SETTING: "rtx4x"})[0] == mu.LANCZOS
     monkeypatch.setattr(mu, "rtx_missing", lambda: "")
     assert mu.resolved({mu.SETTING: "rtx2x"}) == (mu.CHOICES["rtx2x"], "")
 

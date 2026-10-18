@@ -33,8 +33,9 @@ of another picture (SAME_FRAME) and a held run still fail as before."""
 
 
 def segment_cap(upscale: str) -> float:
-    """The segment mean cap for the upscale that made the master ('' = unrecorded)."""
-    return SEGMENT_MEAN_RTX if upscale.startswith("rtx") else SEGMENT_MEAN
+    """The segment mean cap for the upscale that made the master ('' = unrecorded).
+    av3 (2026-10-18) sharpens like RTX: 1.50-1.77 on C|M|W against RTX's 1.64-1.69."""
+    return SEGMENT_MEAN_RTX if upscale.startswith("rtx") or upscale == "av3" else SEGMENT_MEAN
 
 
 DUP = 0.6

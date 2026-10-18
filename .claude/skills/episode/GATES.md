@@ -315,8 +315,12 @@ QC fails on any of these:
 A take that failed and spent its retake budget does not fail the master. That
 is the owner's call, and it was measured.
 
-The master's SIZE is whatever step 10's upscale delivered (owner 2026-10-14:
-RTX VSR 4x ULTRA -> 3072; `rtx2x` and the Lanczos fallback -> 1536). Nothing
+The master's SIZE is whatever step 10's upscale delivered (2026-10-18: `av3`,
+hqdn3d per shot + realesr-animevideov3 4x -> 3072; `rtx4x` -> 3072; `rtx2x` and
+the Lanczos fallback -> 1536). av3's denoise is temporal, so it starts fresh on every
+cut assemble knows (the takes' joins from layout.json, the card, the chip): no frame
+blends across a hard cut. QC's segment mean cap is 2.0 for av3 as for rtx (av3 measured
+1.50-1.77 on correct segments, `edit_gate.segment_cap`). Nothing
 downstream assumes one: QC and the judges scale what they read, the card and the
 chip ride the same pass as the cut, `book_compilation` conforms every piece to
 its 1536 square, the upload checks only that it is square. A fallback is not a
