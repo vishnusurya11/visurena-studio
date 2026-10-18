@@ -607,6 +607,15 @@ never a moving shot's coda.
 
 ---
 
+## Step caps (owner, 2026-10-18; table in GATES.md "Step caps")
+
+- Every step logs `STEP <id> start` with a Seattle timestamp when it begins (a killed step
+  leaves no timing row otherwise).
+- At its cap a step logs `CAP <phase>: r/N rounds, mm:ss, kept best (k advisories)` and moves
+  on with its best attempt. Never loop, never defer-and-re-author past the table, never park
+  on style. The plan gets two climbs per episode; tier-1-only faults park once.
+- The 6 h episode clock is the outer wall; the caps only stop a runaway step.
+
 ## Resuming
 
 1. Read `episodes/epNN/drive.jsonl` and the last `drive_runNN.log`, and say back where

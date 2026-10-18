@@ -467,6 +467,47 @@ OVERRIDE, the synthetic declaration; `RENDER_HOLD` is the brake.
 - **The working set lives on the NVMe** (`extra_model_paths.yaml`, `nvme_fast` stanza,
   C:\comfy_models). Never delete the `.hdd_bak` originals without a verified load.
 
+## Step caps (owner approved 2026-10-18; `stages.yaml` `caps:`, audit `docs/audit/2026-10-18_step_caps/STEP_CAPS.md`)
+
+Every step has a round cap and a wall. At the cap the step **keeps its best attempt, logs
+`CAP <phase>: r/N rounds, mm:ss, kept best (k advisories)`, and goes on**. It never defers,
+never re-authors past the table, never parks on style. The 6 h episode clock is the outer
+wall (the walls below sum to more than 6 h; no run hits them all).
+
+| step | phase | rounds | per | wall min | gate |
+|---|---|---|---|---|---|
+| 01 | bind | 1 | pass | 2 | |
+| 02 | plan | 3 | climb (2 climbs per episode) | 30 | PLAN |
+| 03 | places | 3 | draw | 15 | |
+| 04 | voice | 2 | episode | 30 | |
+| 05 | timeline | 1 | pass | 2 | |
+| 06 | prompts | 1 | pass | 2 | |
+| 07 | grids | 1 | grid | 30 | |
+| 08 | panel_checks | 1 | round | 30 | |
+| 08 | regrid | 2 | episode | 20 | EYE_PANELS |
+| 09 | takes | 1 | pass | 120 | |
+| 09 | take_dq | 1 | round | 30 | |
+| 09 | take_content | 1 | round | 20 | |
+| 09 | take_eye | 1 | round | 10 | |
+| 09 | strip | 1 | round | 2 | |
+| 09 | retakes | 2 | episode | 45 | EYE_TAKES |
+| 09 | face_refine | 1 | take | 15 | |
+| 10 | assemble | 1 | pass | 15 | |
+| 10 | upscale | 1 | pass | 15 | |
+| 11 | qc | 1 | episode | 30 | |
+| 11 | master_eye | 1 | episode | 30 | MASTER |
+| 12 | deliver | 1 | pass | 2 | |
+| 13 | publish | 1 | pass | 10 | |
+
+- **The plan: two climbs per episode**, each three writer rounds inside 30 min. A refusal on
+  tier-1 faults only (a line a downstream builder repeats) parks **once**: one tier-1
+  re-author per episode, never a second defer. Tier 2 gets the rounds, then the best draft
+  is signed flagged. Tier 3 (voice-measured grammar rows, the G-VARIETY insert count) is
+  advice and never refuses.
+- Caps are per **episode** where the table says so (voice, regrid, retakes, qc, master_eye),
+  so a relaunch, a resume or a drive restart does not reset them.
+- A step logs `STEP <id> start` (Seattle time) on entry, so a killed step is still visible.
+
 ## Speed arms — `scripts/bench/rulers.judge_arm` (bench only, C1_verdict 2026-10-11)
 
 | rule | measures | kind |

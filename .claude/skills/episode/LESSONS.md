@@ -6,6 +6,17 @@ SKILL.md.
 
 ## Process
 
+- **Uncapped defer-and-re-author is a loop; caps are per EPISODE (2026-10-18).** Jekyll
+  Kawajiri ep01's plan ran about 45 min (13:20-14:05 PDT, 69-79 refusals) on voice-measured
+  grammar rows no writer rewrite can move; a battery that never passed deleted `plan.json`
+  and re-authored. WotW ep15 is the same loop at scale: 24 plan runs, 58 writer rounds,
+  301 min in plan. A per-climb cap (improve x2 + tier x1) did not stop it, because the
+  defer restarted the climb and drive x6, relaunch x2 and brain x3 each reset it. So the
+  caps are counted per episode (plan: 2 climbs, one tier-1 re-author), and a killed step
+  was invisible because `timing.jsonl` writes only on a step's end: a step logs on entry
+  and at its cap. Evidence: `docs/audit/2026-10-18_step_caps/STEP_CAPS.md`. Rule: SKILL.md
+  "Step caps".
+
 - **The GPU sat at 6 % while the CPU measured the takes (2026-10-14).** Step 09 ran
   render all -> take_dq all -> content all -> eye -> retake -> again; every stage waited
   for the one before it, and a cure a CPU row had already proved (four frozen takes, a
