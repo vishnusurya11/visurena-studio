@@ -1,7 +1,7 @@
 """Run a stage's steps over one unit, the way every format line does it.
 
     take the owner's orders (once, before the first step)
-    skip when done  ->  started  ->  run  ->  completed
+    skip when done  ->  started (STEP <id> start, the wall opens)  ->  run  ->  completed
                                  \\->  Escalation  ->  escalated, stop the unit
                                  \\->  Deferred    ->  deferred, stop the unit
                                  \\->  SystemExit / crash  ->  failed, raise
@@ -15,7 +15,7 @@ from __future__ import annotations
 
 import importlib
 
-from studio import boundary, registry, work_orders
+from studio import boundary, registry, step_wall, work_orders
 from studio.deferral import Deferred
 from studio.escalate import Escalation
 
@@ -113,7 +113,9 @@ def run_steps(ctx, steps: list) -> str:
             return _paused(step, ctx, f"before step {step.STEP_ID}", started=False)
         print(f"--- step {step.STEP_ID} ({step.NAME}) | {ctx.label} ---")
         ctx.tracker.event(step.STEP_ID, "started")
+        ctx.step_wall = step_wall.open_wall(ctx, step)     # the cap table's wall (owner 2026-10-18)
         outcome = _run_one(step, ctx)
+        step_wall.close_wall(ctx, ctx.step_wall)
         if outcome != "completed":
             return outcome
         ctx.tracker.event(step.STEP_ID, "completed")

@@ -542,6 +542,44 @@ stages:
     unit: [book, chapter]                         # "ch04" or a range "ch04-05"
     deliverable: episodes/{unit}/manifest.json    # step 12's; step 13 publishes it
     requires: [analysis/06, refs/04]              # reads screenplay/<target> when present
+    # THE CAP TABLE (owner 2026-10-18 approved docs/audit/2026-10-18_step_caps/STEP_CAPS.md,
+    # read by studio/step_caps.py; no cap is a constant in the code).  One row per phase:
+    #   step     the registry step the phase runs inside
+    #   rounds   attempts the phase may take; `per` says over what:
+    #              pass    one pass of the step (no ladder)
+    #              climb   one climb of the ladder (a re-author is another climb)
+    #              episode the whole episode: persisted in episodes/epNN/attempts.json,
+    #                      across drive runs, relaunches and autopilot cures
+    #              round   once per ladder round (a check); take/grid/draw: once per that thing
+    #   wall_min the phase's wall-time cap.  A step's wall is the sum of its rows (a climb row
+    #            counts `climbs` times).  At the cap the ladder takes its terminal: keep the
+    #            best, log `CAP <phase>: r/N rounds, mm:ss, kept best (k advisories)`, go on.
+    #   gate     the judged gate whose rungs the row caps (studio/judged_gate)
+    #   climbs   climbs per episode (the plan's defer-and-re-author), persisted
+    # The 6 h episode clock (studio/run_budget) stays the outer wall.
+    caps:
+      bind:         { step: "01", rounds: 1, per: pass,    wall_min: 2 }
+      plan:         { step: "02", rounds: 3, per: climb,   wall_min: 30, gate: PLAN, climbs: 2 }
+      places:       { step: "03", rounds: 3, per: draw,    wall_min: 15 }
+      voice:        { step: "04", rounds: 2, per: episode, wall_min: 30 }
+      timeline:     { step: "05", rounds: 1, per: pass,    wall_min: 2 }
+      prompts:      { step: "06", rounds: 1, per: pass,    wall_min: 2 }
+      grids:        { step: "07", rounds: 1, per: grid,    wall_min: 30 }
+      panel_checks: { step: "08", rounds: 1, per: round,   wall_min: 30 }
+      regrid:       { step: "08", rounds: 2, per: episode, wall_min: 20, gate: EYE_PANELS }
+      takes:        { step: "09", rounds: 1, per: pass,    wall_min: 120 }
+      take_dq:      { step: "09", rounds: 1, per: round,   wall_min: 30 }
+      take_content: { step: "09", rounds: 1, per: round,   wall_min: 20 }
+      take_eye:     { step: "09", rounds: 1, per: round,   wall_min: 10 }
+      strip:        { step: "09", rounds: 1, per: round,   wall_min: 2 }
+      retakes:      { step: "09", rounds: 2, per: episode, wall_min: 45, gate: EYE_TAKES }
+      face_refine:  { step: "09", rounds: 1, per: take,    wall_min: 15 }
+      assemble:     { step: "10", rounds: 1, per: pass,    wall_min: 15 }
+      upscale:      { step: "10", rounds: 1, per: pass,    wall_min: 15 }
+      qc:           { step: "11", rounds: 1, per: episode, wall_min: 30 }
+      master_eye:   { step: "11", rounds: 1, per: episode, wall_min: 30, gate: MASTER }
+      deliver:      { step: "12", rounds: 1, per: pass,    wall_min: 2 }
+      publish:      { step: "13", rounds: 1, per: pass,    wall_min: 10 }
     steps:
       - id: "01"
         name: bind
