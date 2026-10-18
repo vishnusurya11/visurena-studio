@@ -502,7 +502,7 @@ def gather(book: Path, codex: str, n: int, deps: Deps, series: dict):
 
 # ---- the actions ---------------------------------------------------------------
 
-STEP_IN_TAIL = re.compile(r"step[ _]?(\d{2})", re.IGNORECASE)
+STEP_IN_TAIL = re.compile(r"bstep[ _]?(\d{2})b", re.IGNORECASE)
 
 
 def relaunch_allowed(step: str) -> int:
