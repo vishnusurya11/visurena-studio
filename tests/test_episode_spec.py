@@ -2,7 +2,7 @@
 import pytest
 from pydantic import ValidationError
 
-from studio import episode_timeline as tl
+from studio import episode_timeline as tl, plan_gates
 from studio.episode_spec import Episode, Line, Setup, Shot, SubShot
 
 SETUPS = {"lab": Setup(described="a lab", cast=["a", "b"])}
@@ -116,12 +116,13 @@ def test_the_sync_rule_holds_for_a_placed_timeline_and_catches_a_shifted_line():
 def test_a_frame_that_puts_a_glove_on_anyone_is_refused():
     """Iteration 2 drew Watson's handshake in a tan leather glove because the
     frame text asked for one; the book gives him a bare sunburnt hand."""
-    with pytest.raises(ValidationError, match="glove"):
-        Shot(index=1, section="friction", setup="lab", size="insert", frame="two hands, one in a tan glove",
+    from types import SimpleNamespace as NS
+    a = Shot(index=1, section="friction", setup="lab", size="insert", frame="two hands, one in a tan glove",
              motion="m")
-    with pytest.raises(ValidationError, match="glove"):
-        Shot(index=1, section="friction", setup="lab", size="insert", frame="f", motion="m",
+    b = Shot(index=1, section="friction", setup="lab", size="insert", frame="f", motion="m",
              cuts=[SubShot(at_s=3.0, size="close", frame="a gloved hand", motion="m")])
+    for shot in (a, b):  # the rule moved to plan_gates.banned_prop_faults (needs the cast)
+        assert any("glove" in f for f in plan_gates.banned_prop_faults(NS(shots=[shot]), []))
 
 
 class TestWhatTheStoryboardDraws:

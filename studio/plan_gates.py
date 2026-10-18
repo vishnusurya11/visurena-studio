@@ -28,7 +28,7 @@ from pathlib import Path
 from studio import story_layer
 from studio.episode_ref_official import AMOUNT, camera_clause
 from studio.episode_seq_board import HOLDS, TRAVEL
-from studio.episode_spec import MAX_SETUP_SECONDS, Episode, Line, Setup, Shot
+from studio.episode_spec import BANNED_PROPS, MAX_SETUP_SECONDS, Episode, Line, Setup, Shot
 
 
 def fault(gate: str, where: str, why: str, got, wall) -> str:
@@ -1650,6 +1650,33 @@ def ghost_limb_faults(episode, names: dict[str, str]) -> list[str]:
                                          f"{field} stages {token}'s {part} and {owner} is not in "
                                          f"faces {list(getattr(s, 'faces', []) or [])}",
                                          owner, "a face, or absent"))
+    return out
+
+
+def row_text(refs: list[dict], who: str) -> str:
+    """One entity's whole refs row, lower-cased: what its signed sheet was drawn from."""
+    return " ".join(json.dumps(r, ensure_ascii=False).lower()
+                    for r in refs if r.get("entity_id") == who)
+
+
+def shot_texts(s) -> list[str]:
+    """The frame and motion of a shot and of each of its cuts."""
+    return [f"{x.frame} {x.motion}" for x in [s, *(getattr(s, "cuts", None) or [])]]
+
+
+def banned_prop_faults(episode, refs: list[dict]) -> list[str]:
+    """G-BANNED-PROP, always hard: a banned word (episode_spec.BANNED_PROPS) in a
+    shot's frame or motion, unless a person staged in that shot has a refs row
+    bearing the word -- the signed sheet shows it, so the render copying it is
+    right.  A row-less book keeps the old wall (a tan glove on Watson, 2026-09-11)."""
+    out = []
+    for s in episode.shots:
+        rows = " ".join(row_text(refs, w) for w in getattr(s, "faces", None) or [])
+        for text in shot_texts(s):
+            for w in (w for w in BANNED_PROPS if w in text.lower() and w not in rows):
+                out.append(fault("G-BANNED-PROP", f"shot {s.index}",
+                                 f"'{w}' in the frame text; no staged person's row bears it",
+                                 w, "a face whose row has it, or absent"))
     return out
 
 

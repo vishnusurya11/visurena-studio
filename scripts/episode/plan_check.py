@@ -399,6 +399,10 @@ def main(book_id: str, number: int, plan: str = "plan.json") -> int:
     print("G-GHOST      :", len(gg) or "clean"); hard += len(gg)
     for f in gg:
         print("   ", f[:170])
+    bp = plan_gates.banned_prop_faults(ep, refs)
+    print("G-BANNED-PROP:", len(bp) or "clean"); hard += len(bp)
+    for f in bp:
+        print("   ", f[:170])
     gt = plan_gates.double_position_faults(ep, names)
     # ADVISORY until calibrated (2026-10-06): ten false faults on ep18's delivered
     # plan -- adjectives read as positions; duplicates are caught at the picture (G-TWIN).

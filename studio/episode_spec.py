@@ -407,13 +407,9 @@ class Shot(Framed):
     people and the agents writing the episode, so it is absent from SHEET_TEXT
     and free to explain an absence, which every drawn string is forbidden."""
 
-    @model_validator(mode="after")
-    def _no_banned_props(self) -> "Shot":
-        texts = [self.frame, self.motion] + [c.frame + " " + c.motion for c in self.cuts]
-        for text in texts:
-            if word := banned_prop(text):
-                raise ValueError(f"shot {self.index}: '{word}' in the frame text; the book gives bare hands")
-        return self
+    # Banned props are no longer a field validator: a glove is legal when a person
+    # staged in the shot wears one on their refs row (Jekyll's Enfield, 2026-10-18),
+    # and a validator has no cast.  `plan_gates.banned_prop_faults` holds the rule.
 
     @model_validator(mode="after")
     def _cuts_ascend(self) -> "Shot":
